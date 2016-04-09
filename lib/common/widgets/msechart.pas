@@ -822,6 +822,8 @@ type
    
    property optionschart;
    property colorchart;
+   property facechart;
+   property framechart;
    property xstart;
    property ystart;
    property xrange;

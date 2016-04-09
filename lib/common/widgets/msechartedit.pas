@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2013 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2016 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -203,6 +203,8 @@ type
   published
    property traces;
    property colorchart;
+   property facechart;
+   property framechart;
    property xstart;
    property ystart;
    property xrange;
@@ -225,6 +227,7 @@ type
    property onsetvalue;
    property activetrace;
    property optionsedit;
+   property optionsedit1;
    property snapdist;
    property tracehint_captionx;
    property tracehint_captiony;
@@ -247,6 +250,8 @@ type
   published
    property traces;
    property colorchart;
+   property facechart;
+   property framechart;
    property xstart;
    property ystart;
    property xrange;
@@ -269,6 +274,7 @@ type
    property onsetvalue;
    property activetrace;
    property optionsedit;
+   property optionsedit1;
    property snapdist;
    property tracehint_captionx;
    property tracehint_captiony;
@@ -309,6 +315,8 @@ type
   published
    property traces;
    property colorchart;
+   property facechart;
+   property framechart;
    property xstart;
    property ystart;
    property xrange;
@@ -331,6 +339,7 @@ type
    property onsetvalue;
    property activetrace;
    property optionsedit;
+   property optionsedit1;
    property snapdist;
    property tracehint_captionx;
    property tracehint_captiony;
@@ -351,7 +360,12 @@ type
  ttraces1 = class(ttraces);
  ttrace1 = class(ttrace);
  tdialmarkers1 = class(tdialmarkers);
+ tdialmarker1 = class(tdialmarker);
  tcustomdialcontroller1 = class(tcustomdialcontroller);
+ tchartdialshorz1 = class(tchartdialshorz);
+ tchartdialhorz1 = class(tchartdialhorz);
+ tchartdialsvert1 = class(tchartdialsvert);
+ tchartdialvert1 = class(tchartdialvert);
   
 { tcustomchartedit }
 
@@ -1656,10 +1670,37 @@ begin
 end;
 
 procedure tcustomchartedit.statread;
+var
+ rea1: real;
+ i1,i2: int32;
 begin
  inherited;
  if (oe1_checkvalueafterstatread in foptionsedit1) and hasactivetrace then begin
   checkvalue;
+  if canevent(tmethod(fonsetmarker)) then begin
+   for i1:= 0 to xdials.count-1 do begin
+    with tchartdialhorz1(tchartdialshorz1(xdials).fitems[i1]) do begin
+     for i2:= 0 to markers.count-1 do begin
+      with tdialmarker1(tdialmarkers1(markers).fitems[i2]) do begin
+       rea1:= value;
+       fonsetmarker(self,false,i1,i2,realty(rea1));
+       finfo.value:= rea1;
+      end;
+     end;
+    end;
+   end;
+   for i1:= 0 to ydials.count-1 do begin
+    with tchartdialvert1(tchartdialsvert1(ydials).fitems[i1]) do begin
+     for i2:= 0 to markers.count-1 do begin
+      with tdialmarker1(tdialmarkers1(markers).fitems[i2]) do begin
+       rea1:= value;
+       fonsetmarker(self,true,i1,i2,realty(rea1));
+       finfo.value:= rea1;
+      end;
+     end;
+    end;
+   end;
+  end;
  end;
 end;
 

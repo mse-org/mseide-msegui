@@ -163,7 +163,6 @@ type
  tdialmarker = class(tdialprop,iframe,iface)
   private
    fhintcaption: msestring;
-   finfo: markerinfoty;
    procedure checklayout;
    procedure readvalue(reader: treader);
    procedure setvalue(const avalue: realty);
@@ -178,6 +177,7 @@ type
    procedure setbar_shift(const avalue: integer);
    procedure setbar_color(const avalue: colorty);
   protected
+   finfo: markerinfoty;
    procedure defineproperties(filer: tfiler); override;
    procedure updatemarker;
     //iframe
