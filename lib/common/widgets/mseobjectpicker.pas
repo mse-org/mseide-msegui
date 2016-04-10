@@ -77,6 +77,8 @@ type
    function getpos: pointty;
    function getshiftstate: shiftstatesty;
    function getcurrentobjects: integerarty;
+   function getthumbtrack: boolean;
+   procedure setthumbtrack(const avalue: boolean);
   public
    constructor create(const intf: iobjectpicker; aorigin: originty = org_client);
    destructor destroy; override;
@@ -103,6 +105,7 @@ type
    property currentobjects: integerarty read getcurrentobjects;
              //mouseoverobjects or selectobjects dependent on state
    property options: objectpickeroptionsty read foptions write foptions;
+   property thumbtrack: boolean read getthumbtrack write setthumbtrack;
    property state: objectpickerstatesty read fstate;
    property pickoffset: pointty read fpickoffset;
    property pickpos: pointty read fpickrect.pos;
@@ -657,6 +660,21 @@ begin
    result:= fmouseoverobjects;
   end;
 // end;
+end;
+
+function tobjectpicker.getthumbtrack: boolean;
+begin
+ result:= opo_thumbtrack in foptions;
+end;
+
+procedure tobjectpicker.setthumbtrack(const avalue: boolean);
+begin
+ if avalue then begin
+  include(foptions,opo_thumbtrack);
+ end
+ else begin
+  exclude(foptions,opo_thumbtrack);
+ end;
 end;
 
 function tobjectpicker.hascurrentobjects: boolean;

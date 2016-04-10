@@ -28,7 +28,8 @@ type
                 var avalue: complexarty; var accept: boolean) of object;
  setrealareventty = procedure(const sender: tobject;
                 var avalue: realarty; var accept: boolean) of object;
- charteditoptionty = (ceo_thumbtrack,ceo_noinsert,ceo_nodelete,
+ charteditoptionty = (ceo_thumbtrack,ceo_markerthumbtrack,
+                      ceo_noinsert,ceo_nodelete,
                       ceo_tracehint,ceo_markerhint);
  charteditoptionsty = set of charteditoptionty;
 
@@ -61,6 +62,7 @@ type
    foptions: charteditoptionsty;
    fpickref: pointty;
    fmovestate: charteditmovestatesty;
+   fmarkermovestartpos: int32;
    fontracehint: tracehinteventty;
    fonmarkerhint: markerhinteventty;
    fnodehintindex: integer;
@@ -1144,12 +1146,14 @@ begin
  ma.x:= minint;
  ma.y:= minint;
  if decodemarker(sender.currentobjects,isy,dial1,index1) then begin
+  fobjectpicker.thumbtrack:= ceo_markerthumbtrack in options;
   include(fmovestate,cems_markermoving);
   fmovestate:= fmovestate - [cems_canbottomlimit,cems_cantoplimit];
   with rect1 do begin
    if isy then begin
     with ydials[dial1].markers[index1] do begin
      int3:= pos;
+     fmarkermovestartpos:= int3;
      ma.y:= y-int3;
      mi.y:= y+cy-int3;
      if (dmo_ordered in options) then begin
@@ -1173,6 +1177,7 @@ begin
    else begin //x
     with xdials[dial1].markers[index1] do begin
      int3:= pos;
+     fmarkermovestartpos:= int3;
      ma.x:= x-int3;
      mi.x:= x+cx-int3;
      if (dmo_ordered in options) then begin
@@ -1197,6 +1202,7 @@ begin
  end
  else begin
   exclude(fmovestate,cems_markermoving);
+  fobjectpicker.thumbtrack:= ceo_thumbtrack in options;
   if readonly then begin
    sender.clear;
    exit;
@@ -1327,7 +1333,7 @@ begin
     end
     else begin
      if offs.y <> 0 then begin
-      rea1:= ycharttomarker(marker1.pos+offs.y,dialindex);
+      rea1:= ycharttomarker(fmarkermovestartpos+offs.y,dialindex);
       if canevent(tmethod(fonsetmarker)) then begin
        fonsetmarker(self,true,dialindex,int1,realty(rea1));
       end;
@@ -1353,7 +1359,7 @@ begin
     end
     else begin
      if offs.x <> 0 then begin
-      rea1:= xcharttomarker(marker1.pos + offs.x,dialindex);
+      rea1:= xcharttomarker(fmarkermovestartpos + offs.x,dialindex);
       if canevent(tmethod(fonsetmarker)) then begin
        fonsetmarker(self,false,dialindex,int1,realty(rea1));
       end;
@@ -1412,9 +1418,9 @@ end;
 
 procedure tcustomchartedit.pickthumbtrack(const sender: tobjectpicker);
 begin
- if not (cems_markermoving in fmovestate) then begin
-  dopickmove(sender);
- end;
+// if not (cems_markermoving in fmovestate) then begin
+ dopickmove(sender);
+// end;
 end;
 
 procedure tcustomchartedit.endpickmove(const sender: tobjectpicker);
@@ -1424,11 +1430,13 @@ begin
   addpoint1(sender.mouseeventinfopo^.pos,subpoint(fpickref,sender.pickoffset));
  end;
  exclude(fmovestate,cems_markermoving);
+ fobjectpicker.thumbtrack:= false;
 end;
 
 procedure tcustomchartedit.cancelpickmove(const sender: tobjectpicker);
 begin
  exclude(fmovestate,cems_markermoving);
+ fobjectpicker.thumbtrack:= false;
 end;
 
 procedure tcustomchartedit.drawcrosshaircursor(const canvas: tcanvas; 
@@ -1682,9 +1690,11 @@ begin
     with tchartdialhorz1(tchartdialshorz1(xdials).fitems[i1]) do begin
      for i2:= 0 to markers.count-1 do begin
       with tdialmarker1(tdialmarkers1(markers).fitems[i2]) do begin
-       rea1:= value;
-       fonsetmarker(self,false,i1,i2,realty(rea1));
-       finfo.value:= rea1;
+       if dmo_savevalue in options then begin
+        rea1:= value;
+        fonsetmarker(self,false,i1,i2,realty(rea1));
+        finfo.value:= rea1;
+       end;
       end;
      end;
     end;
@@ -1693,9 +1703,11 @@ begin
     with tchartdialvert1(tchartdialsvert1(ydials).fitems[i1]) do begin
      for i2:= 0 to markers.count-1 do begin
       with tdialmarker1(tdialmarkers1(markers).fitems[i2]) do begin
-       rea1:= value;
-       fonsetmarker(self,true,i1,i2,realty(rea1));
-       finfo.value:= rea1;
+       if dmo_savevalue in options then begin
+        rea1:= value;
+        fonsetmarker(self,true,i1,i2,realty(rea1));
+        finfo.value:= rea1;
+       end;
       end;
      end;
     end;
@@ -1708,14 +1720,15 @@ procedure tcustomchartedit.setoptions(const avalue: charteditoptionsty);
 begin
  if avalue <> foptions then begin
   foptions:= avalue;
-  with fobjectpicker do begin
-   if ceo_thumbtrack in avalue then begin
-    options:= options + [opo_thumbtrack];
-   end
-   else begin
-    options:= options - [opo_thumbtrack];
-   end;
-  end;
+  
+//  with fobjectpicker do begin
+//   if avalue * [ceo_thumbtrack{,ceo_markerthumbtrack}] <> [] then begin
+//    options:= options + [opo_thumbtrack];
+//   end
+//   else begin
+//    options:= options - [opo_thumbtrack];
+//   end;
+//  end;
  end; 
 end;
 
