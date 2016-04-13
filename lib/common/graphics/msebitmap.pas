@@ -1114,7 +1114,12 @@ end;
 function tbitmap.getscanline(index: integer): pointer;
 begin
  checkimage(false);
- result:= @fimage.pixels[checkindex(makepoint(0,index))];
+ if fkind = bmk_gray then begin
+  result:= @pbyte(fimage.pixels)[checkindex(makepoint(0,index))]; //bytes
+ end
+ else begin
+  result:= @fimage.pixels[checkindex(makepoint(0,index))]; 
+ end;
 end;
 
 function tbitmap.getpixel(const index: pointty): colorty;
