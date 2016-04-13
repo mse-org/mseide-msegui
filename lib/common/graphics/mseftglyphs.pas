@@ -45,6 +45,11 @@ type
                              const aframe: framety; //padding
                                 const acolor: colorty = cl_text): boolean;
                          //empty bitmap in case of error, retruns true if ok
+   property height: int32 read fheight;
+   property ascent: int32 read fascent;
+   property descent: int32 read fdescent;
+   property glyphheight: int32 read fglyphheight;
+   property linespacing: int32 read flinespacing;
  end;
 
 implementation
