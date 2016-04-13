@@ -35,14 +35,14 @@ type
                                 const acolor: colorty = cl_text): boolean;
                          //empty bitmap in case of error, retruns true if ok
    function getglyph(const abitmap: tmaskedbitmap; const achar: card32;
-                             const aframe: framety;
+                             const aframe: framety; //padding
                                 const acolor: colorty = cl_text): boolean;
                          //empty bitmap in case of error, retruns true if ok
    function getcell(const abitmap: tmaskedbitmap; const achar: card32;
                                 const acolor: colorty = cl_text): boolean;
                          //empty bitmap in case of error, retruns true if ok
    function getcell(const abitmap: tmaskedbitmap; const achar: card32;
-                             const aframe: framety;
+                             const aframe: framety; //padding
                                 const acolor: colorty = cl_text): boolean;
                          //empty bitmap in case of error, retruns true if ok
  end;
