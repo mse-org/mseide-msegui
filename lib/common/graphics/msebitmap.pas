@@ -796,9 +796,9 @@ begin
  amask:= getmask(maskpos1);
  if sourcebmp <> nil then begin
   bmp:= sourcebmp.fbitmap;
-  if amask = nil then begin
-   amask:= sourcebmp.fbitmap.getmask(maskpos1);
-  end; 
+//  if amask = nil then begin
+//   amask:= sourcebmp.fbitmap.getmask(maskpos1);
+//  end; 
  end
  else begin
   bmp:= self;
@@ -2053,7 +2053,15 @@ begin
   result:= fmask_source.bitmap;
  end
  else begin
-  result:= fmask;
+  if fsource <> nil then begin
+   result:= fsource.bitmap.getmask(apos); //apos not used
+   if result = nil then begin
+    result:= fmask;
+   end;
+  end
+  else begin
+   result:= fmask;
+  end;
  end;
  apos:= fmask_pos;
 end;
