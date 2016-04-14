@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2010 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2016 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -22,6 +22,7 @@ type
   private
    finfo: fileinfoty;                                           
   protected
+   flistonly: boolean;
    procedure updateinfo;
   public
    constructor create(const aowner: tcustomitemlist = nil;
@@ -34,7 +35,8 @@ type
 
  dirlistitemarty = array of tdirlistitem;
  
- dirtreeoptionty = (dto_checkbox);
+ dirtreeoptionty = (dto_casesensitive,dto_showhiddenfiles,
+                                              dto_checksubdir,dto_checkbox);
  dirtreeoptionsty = set of dirtreeoptionty;
  
  tdirtreefo = class(tmseform)
@@ -48,26 +50,39 @@ type
    procedure treeitemoncellevent(const sender: tobject;
                  var info: celleventinfoty); virtual;
   private
-   fshowhiddenfiles: boolean;
-   fcasesensitive: boolean;
+//   fshowhiddenfiles: boolean;
+//   fcasesensitive: boolean;
 //   fpath: filenamety;
    fonpathchanged: notifyeventty;
-   fchecksubdir: boolean;
+//   fchecksubdir: boolean;
    foptions: dirtreeoptionsty;
-   procedure setpath(const Value: filenamety);
+//   fchecksubdir: boolean;
+   procedure setpath(const avalue: filenamety);
    function getpath: filenamety;
    procedure adddir(const aitem: tdirlistitem);
+   function getshowhiddenfiles: boolean;
+   procedure setshowhiddenfiles(const avalue: boolean);
+   function getcasesensitive: boolean;
+   procedure setcasesensitive(const avalue: boolean);
+   function getchecksubdir: boolean;
+   procedure setchecksubdir(const avalue: boolean);
+   procedure setroot(const avalue: filenamety);
+  protected
+   fpath: filenamety;
+   froot: filenamety;
+   procedure updatepath();
   public
    function getcheckednodes(const amode: getnodemodety = 
                                     gno_nochildren): dirlistitemarty;
    function getcheckedfilenames(const amode: getnodemodety = 
                                     gno_nochildren): filenamearty;
-   property casesensitive: boolean read fcasesensitive write fcasesensitive;
-   property showhiddenfiles: boolean read fshowhiddenfiles write fshowhiddenfiles;
-   property checksubdir: boolean read fchecksubdir 
-                               write fchecksubdir;
+   property casesensitive: boolean read getcasesensitive write setcasesensitive;
+   property showhiddenfiles: boolean read getshowhiddenfiles 
+                                                   write setshowhiddenfiles;
+   property checksubdir: boolean read getchecksubdir write setchecksubdir;
    property path: filenamety read getpath write setpath;
-   property options: dirtreeoptionsty read foptions write foptions;
+   property root: filenamety read froot write setroot;
+   property options: dirtreeoptionsty read foptions write foptions default [];
    property onpathchanged: notifyeventty read fonpathchanged write fonpathchanged;
  end;
 {
@@ -81,7 +96,7 @@ type
 implementation
 uses
  msedirtree_mfm,msesysintf,mseeditglob,msefiledialog,msebitmap,mseevent,
- mseguiglob;
+ mseguiglob,classes,mclasses;
 
 { tdirlistitem }
 
@@ -166,13 +181,13 @@ var
 begin
  list:= tcustomfiledatalist.create;
  try
-  if fcasesensitive then begin
+  if casesensitive then begin
    list.options:= [flo_sortname,flo_casesensitive];
   end
   else begin
    list.options:= [flo_sortname];
   end;
-  if fshowhiddenfiles then begin
+  if showhiddenfiles then begin
    exclude:= [];
   end
   else begin
@@ -183,6 +198,57 @@ begin
  finally
   list.free;
  end;
+end;
+
+function tdirtreefo.getshowhiddenfiles: boolean;
+begin
+ result:= dto_showhiddenfiles in foptions;
+end;
+
+procedure tdirtreefo.setshowhiddenfiles(const avalue: boolean);
+begin
+ if avalue then begin
+  include(foptions,dto_showhiddenfiles);
+ end
+ else begin
+  exclude(foptions,dto_showhiddenfiles);
+ end;
+end;
+
+function tdirtreefo.getcasesensitive: boolean;
+begin
+ result:= dto_casesensitive in foptions;
+end;
+
+procedure tdirtreefo.setcasesensitive(const avalue: boolean);
+begin
+ if avalue then begin
+  include(foptions,dto_casesensitive);
+ end
+ else begin
+  exclude(foptions,dto_casesensitive);
+ end;
+end;
+
+function tdirtreefo.getchecksubdir: boolean;
+begin
+ result:= dto_checksubdir in foptions;
+end;
+
+procedure tdirtreefo.setchecksubdir(const avalue: boolean);
+begin
+ if avalue then begin
+  include(foptions,dto_checksubdir);
+ end
+ else begin
+  exclude(foptions,dto_checksubdir);
+ end;
+end;
+
+procedure tdirtreefo.setroot(const avalue: filenamety);
+begin
+ froot:= avalue;
+ updatepath();
 end;
 
 function tdirtreefo.getcheckednodes(const amode: getnodemodety = 
@@ -214,7 +280,7 @@ begin
  end;
 end;
 
-procedure tdirtreefo.setpath(const Value: filenamety);
+procedure tdirtreefo.updatepath();
 var
  ar1: msestringarty;
  int1: integer;
@@ -222,8 +288,9 @@ var
  {$ifdef mswindows}
  uncitem: tdirlistitem;
  {$endif}
-
+ avalue: filenamety;
 begin
+ avalue:= fpath;
  if dto_checkbox in foptions then begin
   treeitem.itemlist.options:= treeitem.itemlist.options + 
                                          [no_checkbox,no_updatechildchecked];
@@ -232,7 +299,7 @@ begin
   treeitem.itemlist.options:= treeitem.itemlist.options - 
                                          [no_checkbox,no_updatechildchecked];
  end;
- ar1:= splitrootpath(value);
+ ar1:= splitrootpath(avalue);
  treeitem.itemlist.clear;
  treeitem.itemlist.count:= 1;
  aitem:= tdirlistitem(treeitem.itemlist[0]);
@@ -267,7 +334,14 @@ begin
   end;
   item1:= aitem;
  end;
- grid.focuscell(makegridcoord(0,treeitem.itemlist.indexof(item1)),fca_setfocusedcell);
+ grid.focuscell(makegridcoord(0,treeitem.itemlist.indexof(item1)),
+                                                       fca_setfocusedcell);
+end;
+
+procedure tdirtreefo.setpath(const avalue: filenamety);
+begin
+ fpath:= avalue;
+ updatepath();
 end;
 
 procedure tdirtreefo.treeitemoncellevent(const sender: tobject;

@@ -200,6 +200,7 @@ const
  defaultoptionswidgetmousewheel = defaultoptionswidget + [ow_mousewheel];
  defaultoptionswidgetnofocus = defaultoptionswidget -
              [ow_mousefocus,ow_tabfocus,ow_arrowfocus];
+ defaultoptionswidgetsubfocus = defaultoptionswidget + [ow_subfocus];
  defaultoptionsskin = [];
  defaultcontainerskinoptions = defaultoptionsskin + 
                                     [osk_container,osk_noclientsize];
@@ -11163,13 +11164,15 @@ begin
  end;
  if bo1 then begin
   if not bo2 and (fparentwidget <> nil) and 
-                                 not fparentwidget.isloading then begin
+              not (csdestroying in fparentwidget.componentstate) and
+                                    not fparentwidget.isloading then begin
    fparentwidget.widgetregionchanged(self);
   end;
   if ownswindow1 then begin
    fwindow.hide(windowevent);
   end;
   if (fwindow <> nil) and (fparentwidget<> nil) and 
+    not (csdestroying in fparentwidget.componentstate) and
                             checkdescendent(fwindow.focusedwidget) then begin
    nextfocus;
    if (fwindow <> nil) and checkdescendent(fwindow.focusedwidget) then begin

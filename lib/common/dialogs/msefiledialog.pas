@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2013 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2016 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -383,13 +383,40 @@ type
                                               write foptions default [];
  end;
 
- tdirtreeview = class(tpublishedwidget)
+ dirtreepatheventty = procedure(const sender: tobject;
+                                          const avalue: msestring) of object;
+
+ tdirtreeview = class(tpublishedwidget,icaptionframe)
+  private
+   fonpathchanged: dirtreepatheventty;
+   fonpathselected: dirtreepatheventty;
+   function getoptions: dirtreeoptionsty;
+   procedure setoptions(const avalue: dirtreeoptionsty);
+   function getpath: filenamety;
+   procedure setpath(const avalue: filenamety);
+   procedure setroot(const avalue: filenamety);
   protected
    fdirview: tdirtreefo;
+   fpath: filenamety;
+   froot: filenamety;
+   procedure dopathchanged(const sender: tobject);
+   procedure dopathselected(const sender: tobject);
+   procedure internalcreateframe; override;
    procedure loaded(); override;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy(); override;
+   property dirview: tdirtreefo read fdirview;
+  published
+   property options: dirtreeoptionsty read getoptions 
+                                              write setoptions default [];   
+   property path: filenamety read getpath write setpath;
+   property root: filenamety read froot write setroot;
+   property onpathchanged: dirtreepatheventty read 
+                               fonpathchanged write fonpathchanged;
+   property onpathselected: dirtreepatheventty read 
+                               fonpathselected write fonpathselected;
+   property optionswidget default defaultoptionswidgetsubfocus;
  end;
  
  tfiledialogfo = class(tmseform)
@@ -2451,16 +2478,19 @@ end;
 
 { tdirtreeview }
 
-procedure tdirtreeview.loaded();
-begin
- inherited;
-end;
-
 constructor tdirtreeview.create(aowner: tcomponent);
 begin
  inherited;
+ createframe();
+ foptionswidget:= defaultoptionswidgetsubfocus;
  fdirview:= tdirtreefo.create(nil,self,false);
- tdirtreefo1(fdirview).setdesignchildwidget();
+ with tdirtreefo1(fdirview) do begin
+  setdesignchildwidget();
+ end;
+ fdirview.onpathchanged:= @dopathchanged;
+ fdirview.treeitem.ondataentered:= @dopathselected;
+ fdirview.grid.frame.framewidth:= 0;
+ fdirview.bounds_cxmin:= 0;
  fdirview.anchors:= [];
  fdirview.visible:= true;
 end;
@@ -2469,6 +2499,72 @@ destructor tdirtreeview.destroy();
 begin
  fdirview.free();
  inherited; //fdirview destroyed by destroy children
+end;
+
+function tdirtreeview.getoptions: dirtreeoptionsty;
+begin
+ result:= fdirview.options;
+end;
+
+procedure tdirtreeview.setoptions(const avalue: dirtreeoptionsty);
+begin
+ fdirview.options:= avalue;
+end;
+
+function tdirtreeview.getpath: filenamety;
+begin
+ if csdesigning in componentstate then begin
+  result:= fpath;
+ end
+ else begin
+  result:= fdirview.path;
+ end;
+end;
+
+procedure tdirtreeview.setpath(const avalue: filenamety);
+begin
+ fpath:= avalue;
+ if componentstate * [csdesigning,csloading] = [] then begin
+  fdirview.path:= avalue;
+ end;
+end;
+
+procedure tdirtreeview.setroot(const avalue: filenamety);
+begin
+ froot:= avalue;
+ if componentstate * [csdesigning,csloading] = [] then begin
+  fdirview.root:= avalue;
+ end;
+end;
+
+procedure tdirtreeview.dopathchanged(const sender: tobject);
+begin
+ if canevent(tmethod(fonpathchanged)) then begin
+  fonpathchanged(self,fdirview.path);
+ end;
+end;
+
+procedure tdirtreeview.dopathselected(const sender: tobject);
+begin
+ if canevent(tmethod(fonpathselected)) then begin
+  fonpathselected(self,fdirview.path);
+ end;
+end;
+
+procedure tdirtreeview.internalcreateframe;
+begin
+ timpressedcaptionframe.create(icaptionframe(self));
+end;
+
+procedure tdirtreeview.loaded();
+begin
+ inherited;
+ if not (csdesigning in componentstate) then begin
+  with tdirtreefo1(fdirview) do begin
+   froot:= self.froot;
+   path:= self.fpath;
+  end;
+ end;
 end;
 
 end.

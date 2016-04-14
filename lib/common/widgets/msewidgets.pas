@@ -175,6 +175,13 @@ type
    property template;
  end;
 
+ timpressedcaptionframe = class(tcaptionframe)
+  public
+   constructor create(const intf: icaptionframe);
+  published
+   property levelo default -2;
+ end;
+ 
 const
  defaultscrollboxscrollbaroptions = [sbo_thumbtrack,sbo_moveauto,sbo_showauto];
  scrollbarframestates: framestatesty = [fs_sbleft,fs_sbtop,fs_sbright,fs_sbbottom];
@@ -5884,6 +5891,15 @@ constructor tsimplewidget.create(aowner: tcomponent);
 begin
  inherited;
  exclude(fwidgetstate,ws_visible);
+end;
+
+{ timpressedcaptionframe }
+
+constructor timpressedcaptionframe.create(const intf: icaptionframe);
+begin
+ inherited;
+ fi.levelo:= -2;
+ internalupdatestate();
 end;
 
 end.
