@@ -8875,8 +8875,12 @@ begin
  end
  else begin
   checkautosize;
-  for int1:= 0 to high(fwidgets) do begin
-   fwidgets[int1].parentclientrectchanged;
+ end;
+ for int1:= 0 to high(fwidgets) do begin
+  with fwidgets[int1] do begin
+   if ([csloading,csdestroying] * componentstate = []) then begin
+    parentclientrectchanged();
+   end;
   end;
  end;
  if ([csloading,csdestroying] * componentstate = []) and 
