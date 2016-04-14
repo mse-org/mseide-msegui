@@ -1563,6 +1563,8 @@ end;
 
    function minclientsize: sizety;
    function isdesignwidget(): boolean; virtual;
+   procedure setdesignchildwidget();
+        //sets ws1_designwidget and removes ws_iswidget for self and children
    procedure designmouseevent(var info: moeventinfoty;
                                              capture: twidget); virtual;
    procedure designkeyevent(const eventkind: eventkindty;
@@ -7253,7 +7255,7 @@ begin
  if (appinst <> nil) then begin
   appinst.widgetdestroyed(self);
  end;
- updateroot;
+// updateroot;
  if fwindow <> nil then begin
   fwindow.widgetdestroyed(self);
  end;
@@ -7265,6 +7267,9 @@ begin
       free;
      end
      else begin
+      fparentwidget:= nil;
+      fwindow:= nil;
+      exclude(fwidgetstate1,ws1_rootvalid);
       setlength(self.fwidgets,high(self.fwidgets));
      end;
     end;
@@ -13926,6 +13931,17 @@ function twidget.isdesignwidget: boolean;
 begin
  result:= (csdesigning in componentstate) or 
                                     (ws1_designwidget in fwidgetstate1);
+end;
+
+procedure twidget.setdesignchildwidget();
+var
+ i1: int32;
+begin
+ include(fwidgetstate1,ws1_designwidget);
+ exclude(fwidgetstate,ws_iswidget);
+ for i1:= 0 to high(fwidgets) do begin
+  fwidgets[i1].setdesignchildwidget();
+ end;
 end;
 
 function twidget.getassistivename: msestring;
