@@ -1,4 +1,4 @@
-unit dbf_prscore;
+unit mdbf_prscore;
 
 {--------------------------------------------------------------
 | TCustomExpressionParser
@@ -29,7 +29,7 @@ uses
   classes,mclasses,
   mdb,
   dbf_prssupp,
-  dbf_prsdef;
+  mdbf_prsdef;
 
 {$define ENG_NUMBERS}
 

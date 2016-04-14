@@ -14,7 +14,7 @@ uses
   dbf_common,
   dbf_dbffile,
   dbf_parser,
-  dbf_prsdef,
+  mdbf_prsdef,
   dbf_cursor,
   dbf_fields,
   dbf_pgfile,

@@ -23,7 +23,7 @@ uses
   dbf_pgcfile,
 {$endif}
   dbf_parser,
-  dbf_prsdef,
+  mdbf_prsdef,
   dbf_cursor,
   dbf_collate,
   dbf_common;
@@ -411,7 +411,7 @@ uses
   dbf_fields,
   dbf_str,
   dbf_prssupp,
-  dbf_prscore,
+  mdbf_prscore,
   dbf_lang;
 
 const

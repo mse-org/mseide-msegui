@@ -12,7 +12,7 @@ uses
   mdb,
   dbf_cursor,
   dbf_idxfile,
-  dbf_prsdef,
+  mdbf_prsdef,
 {$ifndef WINDOWS}
   dbf_wtil,
 {$endif}

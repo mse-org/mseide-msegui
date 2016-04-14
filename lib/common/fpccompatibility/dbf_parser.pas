@@ -16,10 +16,10 @@ uses
   dbf_wtil,
 {$endif}
   mdb,
-  dbf_prscore,
+  mdbf_prscore,
   dbf_common,
   dbf_fields,
-  dbf_prsdef,
+  mdbf_prsdef,
   dbf_prssupp;
 
 type
