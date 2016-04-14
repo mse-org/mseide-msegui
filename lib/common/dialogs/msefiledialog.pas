@@ -19,7 +19,7 @@ uses
  msetypes,msestrings,msesystypes,msesys,msedispwidgets,msedatalist,msestat,
  msestatfile,msebitmap,msedatanodes,msefileutils,msedropdownlist,mseevent,
  msegraphedits,mseeditglob,msesplitter,msemenus,msegridsglob,msegraphics,
- msegraphutils;
+ msegraphutils,msedirtree;
 
 const
  defaultlistviewoptionsfile = defaultlistviewoptions + [lvo_readonly];
@@ -383,6 +383,15 @@ type
                                               write foptions default [];
  end;
 
+ tdirtreeview = class(tpublishedwidget)
+  protected
+   fdirview: tdirtreefo;
+   procedure loaded(); override;
+  public
+   constructor create(aowner: tcomponent); override;
+   destructor destroy(); override;
+ end;
+ 
  tfiledialogfo = class(tmseform)
    cancel: tbutton;
    listview: tfilelistview;
@@ -495,9 +504,12 @@ procedure updatefileinfo(const item: tlistitem; const info: fileinfoty;
 implementation
 uses
  msefiledialog_mfm,sysutils,msebits,mseactions,
- msestringenter,msedirtree,msefiledialogres,msekeyboard,
+ msestringenter,msefiledialogres,msekeyboard,
  msestockobjects,msesysintf,msearrayutils;
 
+type
+ tdirtreefo1 = class(tdirtreefo);
+ 
 procedure getfileicon(const info: fileinfoty; var imagelist: timagelist;
                       out imagenr: integer);
 begin
@@ -2435,6 +2447,28 @@ begin
   fcontroller:= nil;
  end;
  inherited;
+end;
+
+{ tdirtreeview }
+
+procedure tdirtreeview.loaded();
+begin
+ inherited;
+end;
+
+constructor tdirtreeview.create(aowner: tcomponent);
+begin
+ inherited;
+ fdirview:= tdirtreefo.create(nil,self,false);
+ tdirtreefo1(fdirview).setdesignchildwidget();
+ fdirview.anchors:= [];
+ fdirview.visible:= true;
+end;
+
+destructor tdirtreeview.destroy();
+begin
+ fdirview.free();
+ inherited; //fdirview destroyed by destroy children
 end;
 
 end.

@@ -27,7 +27,7 @@ uses
 
 procedure Register;
 begin
- registercomponents('Dialog',[tfilelistview,tfiledialog,
+ registercomponents('Dialog',[tfilelistview,tdirtreeview,tfiledialog,
                      tfilenameedit,tremotefilenameedit,
                      tdirdropdownedit,tcoloredit,
                      tdialogstringedit,tdialogintegeredit,
