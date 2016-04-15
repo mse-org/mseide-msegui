@@ -144,6 +144,7 @@ procedure splitfilepath(const path: filenamety;
                             out directory,filename: filenamety); overload;
 procedure splitfilepath(const path: filenamety; 
                             out directory,filename,fileext: filenamety); overload;
+function splitfilepath(const path: filenamety): filenamearty;
 function splitrootpath(const path: filenamety): filenamearty;
 function mergerootpath(const segments: filenamearty): filenamety;
 
@@ -1608,6 +1609,20 @@ begin
  else begin
   filename:= fstr1;
   fileext:= '';
+ end;
+end;
+
+function splitfilepath(const path: filenamety): filenamearty;
+var
+ str1: filenamety;
+begin
+ str1:= unquotefilename(filepath(path,fk_file,true));
+ result:= nil;
+ if str1 <> '' then begin
+  splitstring(str1,result,msechar(slashchar));
+  if result[0] = '' then begin //root
+   result:= copy(result,1,bigint);
+  end;
  end;
 end;
 
