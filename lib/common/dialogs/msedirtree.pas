@@ -299,30 +299,36 @@ begin
   treeitem.itemlist.options:= treeitem.itemlist.options - 
                                          [no_checkbox,no_updatechildchecked];
  end;
- ar1:= splitrootpath(avalue);
  treeitem.itemlist.clear;
  treeitem.itemlist.count:= 1;
  aitem:= tdirlistitem(treeitem.itemlist[0]);
- {$ifdef mswindows}
- treeitem.itemlist.count:= 2;
- uncitem:= tdirlistitem(treeitem.itemlist[1]);
- initdirfileinfo(uncitem.finfo,'//'); //UNC
- uncitem.updateinfo;
- {$endif}
-
- if (high(ar1) > 0) and (ar1[0] = '') then begin
- {$ifdef mswindows}
-  initdirfileinfo(aitem.finfo,'/');
-  aitem.updateinfo;
-  aitem:= uncitem;
- {$else}
-  initdirfileinfo(aitem.finfo,'//'); //UNC
- {$endif}
-  int1:= 1;
+ int1:= 0;
+ if froot = '' then begin
+  ar1:= splitrootpath(avalue);
+  {$ifdef mswindows}
+  treeitem.itemlist.count:= 2;
+  uncitem:= tdirlistitem(treeitem.itemlist[1]);
+  initdirfileinfo(uncitem.finfo,'//'); //UNC
+  uncitem.updateinfo;
+  {$endif}
+ 
+  if (high(ar1) > 0) and (ar1[0] = '') then begin
+  {$ifdef mswindows}
+   initdirfileinfo(aitem.finfo,'/');
+   aitem.updateinfo;
+   aitem:= uncitem;
+  {$else}
+   initdirfileinfo(aitem.finfo,'//'); //UNC simulation
+  {$endif}
+   int1:= 1;
+  end
+  else begin
+   initdirfileinfo(aitem.finfo,'/');
+  end;
  end
  else begin
-  initdirfileinfo(aitem.finfo,'/');
-  int1:= 0;
+  ar1:= splitfilepath(relativepath(filepath(froot,avalue),froot,fk_file));
+  initdirfileinfo(aitem.finfo,'/'+filepath(froot)); //UNC simulation
  end;
  aitem.updateinfo;
  item1:= aitem;
