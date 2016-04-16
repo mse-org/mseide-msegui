@@ -1764,7 +1764,7 @@ begin
    pos:= translatewidgetpoint(apos,self,form);
 //   pos:= subpoint(apos,form.rootpos);
    if onlywidgets then begin
-    childstate:= [ws_iswidget,ws_isvisible];
+    childstate:= [ws_designing,ws_iswidget,ws_isvisible];
    end
    else begin
     childstate:= [ws_isvisible];

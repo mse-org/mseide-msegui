@@ -307,6 +307,7 @@ type
    procedure setcellsize(const avalue: sizety);
   protected
    fitemlist: titemviewlist;
+   class function classskininfo: skininfoty; override;
    procedure setframeinstance(instance: tcustomframe); override;
    procedure limitcellwidth(var avalue: integer);
 
@@ -2457,6 +2458,12 @@ procedure tcustomlistview.setcellsize(const avalue: sizety);
 begin
  cellwidth:= avalue.cx;
  cellheight:= avalue.cy;
+end;
+
+class function tcustomlistview.classskininfo: skininfoty;
+begin
+ result:= inherited classskininfo;
+ result.objectkind:= sok_dataedit;
 end;
 
 function tcustomlistview.getonselectionchanged: listvieweventty;

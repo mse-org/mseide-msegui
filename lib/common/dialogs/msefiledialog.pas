@@ -407,6 +407,7 @@ type
    procedure doselectionchanged(const sender: tobject; const aitem: tlistitem);
    procedure internalcreateframe; override;
    procedure loaded(); override;
+   class function classskininfo: skininfoty; override;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy(); override;
@@ -2492,9 +2493,7 @@ begin
  createframe();
  foptionswidget:= defaultoptionswidgetsubfocus;
  fdirview:= tdirtreefo.create(nil,self,false);
- with tdirtreefo1(fdirview) do begin
-  setdesignchildwidget();
- end;
+                    //owner must be nil because of streaming
  fdirview.onpathchanged:= @dopathchanged;
  fdirview.onselectionchanged:= @doselectionchanged;
  fdirview.treeitem.ondataentered:= @dopathselected;
@@ -2597,6 +2596,12 @@ begin
    path:= self.fpath;
   end;
  end;
+end;
+
+class function tdirtreeview.classskininfo: skininfoty;
+begin
+ result:= inherited classskininfo;
+ result.objectkind:= sok_dataedit;
 end;
 
 end.

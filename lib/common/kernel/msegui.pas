@@ -140,7 +140,7 @@ type
                   ws_mouseinclient,ws_wantmousebutton,ws_wantmousemove,
                   //valid after call of updatemousestate only
 //                  ws_wantmousewheel,
-                  ws_wantmousefocus,ws_iswidget,
+                  ws_wantmousefocus,ws_iswidget,ws_designing,
                   ws_opaque,ws_nopaint,
                   ws_lclicked,ws_mclicked,ws_rclicked,
                   ws_mousecaptured,ws_clientmousecaptured,
@@ -1564,7 +1564,7 @@ end;
 
    function minclientsize: sizety;
    function isdesignwidget(): boolean; virtual;
-   procedure setdesignchildwidget();
+   procedure setdesignwidget();
         //sets ws1_designwidget and removes ws_iswidget for self and children
    procedure designmouseevent(var info: moeventinfoty;
                                              capture: twidget); virtual;
@@ -1654,6 +1654,8 @@ end;
    procedure dobeginread; override;
    procedure doendread; override;
    procedure loaded; override;
+   procedure setdesigning(value: boolean;
+                               setchildren : boolean = true); override;
 
    procedure updatemousestate(const info: mouseeventinfoty); virtual;
                                    //updates fstate about mouseposition
@@ -7232,6 +7234,11 @@ begin
  if not aiswidget then begin
   exclude(fwidgetstate,ws_iswidget);
  end;
+ if (aowner = nil) and (aparentwidget <> nil) and 
+       (csdesigning in aparentwidget.componentstate) then begin
+                             //for streamed widget
+  setdesignwidget();
+ end;
 end;
 
 constructor twidget.createandinit(const aowner: tcomponent; 
@@ -8484,6 +8491,18 @@ begin
  if ws1_childscaled in fwidgetstate1 then begin
   appinst.postevent(tobjectevent.create(ek_childscaled,ievent(self)),[peo_local]);
  end;
+end;
+
+procedure twidget.setdesigning(value: boolean;
+                               setchildren : boolean = true);
+begin
+ if value then begin
+  include(fwidgetstate,ws_designing); //for widgetatpos condition
+ end
+ else begin
+  exclude(fwidgetstate,ws_designing);
+ end;
+ inherited;
 end;
 
 function twidget.updateopaque(const children: boolean;
@@ -13937,17 +13956,16 @@ end;
 function twidget.isdesignwidget: boolean;
 begin
  result:= (csdesigning in componentstate) or 
-                                    (ws1_designwidget in fwidgetstate1);
+                               (ws1_designwidget in fwidgetstate1);
 end;
 
-procedure twidget.setdesignchildwidget();
+procedure twidget.setdesignwidget();
 var
  i1: int32;
 begin
  include(fwidgetstate1,ws1_designwidget);
- exclude(fwidgetstate,ws_iswidget);
  for i1:= 0 to high(fwidgets) do begin
-  fwidgets[i1].setdesignchildwidget();
+  fwidgets[i1].setdesignwidget();
  end;
 end;
 
