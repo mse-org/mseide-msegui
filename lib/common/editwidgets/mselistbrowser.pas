@@ -144,6 +144,8 @@ type
                                        var item: ttreelistedititem) of object;
  nodenotificationeventty = procedure(const sender: tlistitem;
            var action: nodeactionty) of object;
+ listitemeventty = procedure(const sender: tobject;
+                                       const aitem: tlistitem) of object;
 
  titemviewlist = class;
  
@@ -2691,7 +2693,7 @@ begin
   end;
  end
  else begin
-  if not (ainfo.action in [na_change,na_valuechange]) or 
+  if not (ainfo.action in [na_change,na_valuechange,na_checkedchange]) or 
                                               (nochange = 0) then begin
    if fowner.canevent(tmethod(fonitemnotification)) then begin
     fonitemnotification(sender,ainfo.action);
@@ -2701,8 +2703,9 @@ begin
   if ainfo.action in [na_expand,na_collapse] then begin
    change(sender);
   end;
-  if (nochange = 0) and (ainfo.action = na_valuechange) and 
-            not (ils_updateitemvalues in fitemstate) then begin
+  if (nochange = 0) and 
+             (ainfo.action in [na_valuechange,na_checkedchange]) and 
+                         not (ils_updateitemvalues in fitemstate) then begin
    include(fitemstate,ils_updateitemvalues);
    try
     fintf.updateitemvalues(sender.index,1);
@@ -5053,17 +5056,19 @@ function ttreeitemeditlist.getnodes(const must: nodestatesty;
                    const mustnot: nodestatesty;
                    const amode: getnodemodety = gno_matching): treelistitemarty;
 var
- int1,int2: integer; 
- po1: ptreelistitematy;
+ int2: integer; 
+ po1,pe: ptreelistitem;
 begin
  result:= nil;
  int2:= 0;
  po1:= datapo;
- for int1:= 0 to count - 1 do begin
-  if po1^[int1].parent = nil then begin
-   ttreelistitem1(po1^[int1]).internalgetnodes(result,int2,must,
+ pe:= po1 + count;
+ while po1 < pe do begin
+  if (po1^.parent = nil) or (po1^.parent.owner <> self) then begin
+   ttreelistitem1(po1^).internalgetnodes(result,int2,must,
                                                       mustnot,amode,true);
   end;
+  inc(po1);
  end;
  setlength(result,int2);
 end;
@@ -5082,18 +5087,21 @@ end;
 
 procedure ttreeitemeditlist.updatechildcheckedtree;
 var
- int1: integer;
- po1: ptreelistedititematy;
+ po1,pe: ptreelistedititem;
 begin
  beginupdate;
  try
   po1:= datapo;
-  for int1:= 0 to count - 1 do begin
-   with po1^[int1] do begin
-    if ftreelevel = 0 then begin
-     updatechildcheckedtree;
+  pe:= po1 + count;
+  while po1 < pe do begin
+   if po1^ <> nil then begin
+    with po1^ do begin
+     if ftreelevel = 0 then begin
+      updatechildcheckedtree;
+     end;
     end;
    end;
+   inc(po1);
   end;
  finally
   endupdate;

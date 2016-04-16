@@ -7574,7 +7574,8 @@ begin
           { Subcomponents are streamed the same way as persistents }
           if ObjValue.InheritsFrom(TComponent)
             and ((not (csSubComponent in TComponent(ObjValue).ComponentStyle)) 
-                 or ((TComponent(ObjValue).Owner<>Instance) and (TComponent(ObjValue).Owner<>Nil))) then
+                 or ((TComponent(ObjValue).Owner<>Instance) and 
+                                (TComponent(ObjValue).Owner<>Nil))) then
             begin
             Component := TComponent(ObjValue);
             if (ObjValue <> AncestorObj)

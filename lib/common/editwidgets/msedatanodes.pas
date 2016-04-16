@@ -38,7 +38,8 @@ type
 
  nodestatesty = set of nodestatty;
  nodestate1ty = (ns1_statechanged,ns1_rootchange,ns1_candrag,
-                 ns1_destroying,ns1_updating,ns1_noowner,ns1_captionclipped,
+                 ns1_destroying,ns1_notbyownerdestroying,
+                 ns1_updating,ns1_noowner,ns1_captionclipped,
                  ns1_childchecked,ns1_parentnotchecked,
                  ns1_checkboxclicked,ns1_customsort,
                  ns1_nofreeroot,ns1_top,ns1_fixedcaption,ns1_nodefaultimagelist
@@ -91,7 +92,7 @@ type
  end;
  plistitemlayoutinfoty = ^listitemlayoutinfoty;
 
- nodeactionty = (na_none,na_change,na_valuechange,
+ nodeactionty = (na_none,na_change,na_valuechange,na_checkedchange,
                  na_expand,na_collapse,na_countchange,
                  na_destroying,na_aftersort);
  nodeactioninfoty = record
@@ -167,7 +168,7 @@ type
 
    function empty: boolean; virtual;
    procedure change(); virtual;
-   procedure valuechange(); virtual;
+   procedure valuechange(const delta: nodestatesty); virtual;
    procedure updatecellzone(const pos: pointty; var zone: cellzonety); virtual;
    procedure drawimage(var alayoutinfo: listitemlayoutinfoty;
                                 const acanvas: tcanvas); virtual;
@@ -230,6 +231,8 @@ type
    procedure unsetitem(const aindex: integer);
    procedure internalcheckitems(const checkdelete: checktreelistitemprocty);
    procedure setdestroying;
+   procedure setnotbyownerdestroying; 
+                        //destroyed by parentitem with owner = nil
    function inccount: integer; //returns itemindex
    function getrootexpanded: boolean;
    procedure setrootexpanded(const avalue: boolean);
@@ -669,8 +672,10 @@ destructor tlistitem.destroy;
 begin
  if not (ns1_destroying in fstate1) then begin
   include(fstate1,ns1_destroying);
-  if (fowner <> nil) and not(ils_destroying in fowner.fitemstate) then begin
-   checkaction(na_destroying);
+  if (fowner <> nil) then begin
+   if not(ils_destroying in fowner.fitemstate) then begin
+    checkaction(na_destroying);
+   end;
   end;
  end;
  inherited;
@@ -984,12 +989,17 @@ begin
  end;
 end;
 
-procedure tlistitem.valuechange();
+procedure tlistitem.valuechange(const delta: nodestatesty);
 var
  action: nodeactioninfoty;
 begin
  if fowner <> nil then begin
-  action.action:= na_valuechange;
+  if ns_checked in delta then begin
+   action.action:= na_checkedchange;
+  end
+  else begin
+   action.action:= na_valuechange;
+  end;
   fowner.nodenotification(self,action);
  end;
 end;
@@ -999,7 +1009,7 @@ begin
  fcaption:= avalue;
  change();
  if not (ns1_fixedcaption in fstate1) then begin
-  valuechange();
+  valuechange([]);
  end;
 end;
 
@@ -1010,10 +1020,10 @@ begin
  stat1:= nodestatesty(longword(fstate) xor longword(value));
  fstate := Value;
  if stat1 * invalidatestates <> [] then begin
-  change;
+  change();
  end;
  if stat1 * valuechangestates <> [] then begin
-  valuechange();
+  valuechange(stat1);
  end;
 end;
 
@@ -1325,7 +1335,7 @@ var
 begin
  if index = -1 then begin
   po1:= datapo;
-  for int1:= 0 to count - 1 do begin
+  for int1:= 0 to count-1 do begin
    if po1^ <> nil then begin
     po1^.findex:= int1;
    end;
@@ -1356,14 +1366,14 @@ end;
 procedure tcustomitemlist.objectevent(const sender: tobject;
                                                 const event: objecteventty);
 var
- int1: integer;
- po1: plistitem;
+ po1,pe: plistitem;
 begin
  inherited;
- if event <> oe_connect then begin
+ if (event <> oe_connect) then begin
   normalizering;
   po1:= plistitem(fdatapo);
-  for int1:= 0 to count - 1 do begin
+  pe:= po1 + count;
+  while po1 < pe do begin
    po1^.objectevent(sender,event);
    inc(po1);
   end;
@@ -2275,6 +2285,16 @@ begin
  end;
 end;
 
+procedure ttreelistitem.setnotbyownerdestroying;
+var
+ int1: integer;
+begin
+ fstate1:= fstate1+[ns1_destroying,ns1_notbyownerdestroying];
+ for int1:= 0 to fcount - 1 do begin
+  fitems[int1].setnotbyownerdestroying;
+ end;
+end;
+
 procedure ttreelistitem.clear;
 var
  int1,int2: integer;
@@ -2287,7 +2307,12 @@ begin
   int2:= treeheight;
   adestroying:= ns1_destroying in fstate1;
   if not (ns1_noowner in fstate1) then begin
-   setdestroying;
+   if fowner = nil then begin
+    setnotbyownerdestroying();
+   end
+   else begin
+    setdestroying();
+   end;
   end;
   aitems:= fitems;
   fitems:= nil;
@@ -2297,7 +2322,8 @@ begin
   if not (ns1_noowner in fstate1) then begin
    for int1:= 0 to acount-1 do begin
     with aitems[int1] do begin
-     if not adestroying then begin
+     if not adestroying or 
+          (ns1_notbyownerdestroying in fstate1) and (fowner <> nil) then begin
       setowner(nil);
      end;
      Free;

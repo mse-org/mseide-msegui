@@ -569,7 +569,7 @@ procedure tintegervaluelistedititem.setvalue(const avalue: int32);
 begin
  if fvalue <> avalue then begin
   fvalue:= avalue;
-  valuechange();
+  valuechange([]);
  end;
 end;
 
@@ -617,7 +617,7 @@ procedure tbooleanvaluelistedititem.setvalue(const avalue: boolean);
 begin
  if longbool(fvalue) <> avalue then begin
   longbool(fvalue):= avalue;
-  valuechange();
+  valuechange([]);
  end;
 end;
 
@@ -632,7 +632,7 @@ procedure trealvaluelistedititem.setvalue(const avalue: realty);
 begin
  if fvalue <> avalue then begin
   fvalue:= avalue;
-  valuechange();
+  valuechange([]);
  end;
 end;
 
@@ -714,7 +714,7 @@ procedure tmsestringvaluelistedititem.setvalue(const avalue: msestring);
 begin
  if fvalue <> avalue then begin
   fvalue:= avalue;
-  valuechange();
+  valuechange([]);
  end;
 end;
 

@@ -19,7 +19,7 @@ uses
  msetypes,msestrings,msesystypes,msesys,msedispwidgets,msedatalist,msestat,
  msestatfile,msebitmap,msedatanodes,msefileutils,msedropdownlist,mseevent,
  msegraphedits,mseeditglob,msesplitter,msemenus,msegridsglob,msegraphics,
- msegraphutils,msedirtree;
+ msegraphutils,msedirtree,msewidgetgrid;
 
 const
  defaultlistviewoptionsfile = defaultlistviewoptions + [lvo_readonly];
@@ -390,32 +390,39 @@ type
   private
    fonpathchanged: dirtreepatheventty;
    fonpathselected: dirtreepatheventty;
+   fonselectionchanged: listitemeventty;
    function getoptions: dirtreeoptionsty;
    procedure setoptions(const avalue: dirtreeoptionsty);
    function getpath: filenamety;
    procedure setpath(const avalue: filenamety);
    procedure setroot(const avalue: filenamety);
+   function getgrid: twidgetgrid;
+   procedure setgrid(const avalue: twidgetgrid);
   protected
    fdirview: tdirtreefo;
    fpath: filenamety;
    froot: filenamety;
    procedure dopathchanged(const sender: tobject);
    procedure dopathselected(const sender: tobject);
+   procedure doselectionchanged(const sender: tobject; const aitem: tlistitem);
    procedure internalcreateframe; override;
    procedure loaded(); override;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy(); override;
+   procedure refresh();
    property dirview: tdirtreefo read fdirview;
-  published
-   property options: dirtreeoptionsty read getoptions 
-                                              write setoptions default [];   
    property path: filenamety read getpath write setpath;
    property root: filenamety read froot write setroot;
+  published
+   property options: dirtreeoptionsty read getoptions 
+                                              write setoptions default [];
    property onpathchanged: dirtreepatheventty read 
                                fonpathchanged write fonpathchanged;
    property onpathselected: dirtreepatheventty read 
                                fonpathselected write fonpathselected;
+   property onselectionchanged: listitemeventty read 
+              fonselectionchanged write fonselectionchanged; //for checkboxes
    property optionswidget default defaultoptionswidgetsubfocus;
  end;
  
@@ -536,6 +543,7 @@ uses
 
 type
  tdirtreefo1 = class(tdirtreefo);
+ tcomponent1 = class(tcomponent);
  
 procedure getfileicon(const info: fileinfoty; var imagelist: timagelist;
                       out imagenr: integer);
@@ -2488,6 +2496,7 @@ begin
   setdesignchildwidget();
  end;
  fdirview.onpathchanged:= @dopathchanged;
+ fdirview.onselectionchanged:= @doselectionchanged;
  fdirview.treeitem.ondataentered:= @dopathselected;
  fdirview.grid.frame.framewidth:= 0;
  fdirview.bounds_cxmin:= 0;
@@ -2499,6 +2508,11 @@ destructor tdirtreeview.destroy();
 begin
  fdirview.free();
  inherited; //fdirview destroyed by destroy children
+end;
+
+procedure tdirtreeview.refresh();
+begin
+ tdirtreefo1(fdirview).updatepath();
 end;
 
 function tdirtreeview.getoptions: dirtreeoptionsty;
@@ -2537,6 +2551,16 @@ begin
  end;
 end;
 
+function tdirtreeview.getgrid: twidgetgrid;
+begin
+ result:= fdirview.grid;
+end;
+
+procedure tdirtreeview.setgrid(const avalue: twidgetgrid);
+begin
+ //dummy
+end;
+
 procedure tdirtreeview.dopathchanged(const sender: tobject);
 begin
  if canevent(tmethod(fonpathchanged)) then begin
@@ -2548,6 +2572,14 @@ procedure tdirtreeview.dopathselected(const sender: tobject);
 begin
  if canevent(tmethod(fonpathselected)) then begin
   fonpathselected(self,fdirview.path);
+ end;
+end;
+
+procedure tdirtreeview.doselectionchanged(const sender: tobject;
+               const aitem: tlistitem);
+begin
+ if canevent(tmethod(fonselectionchanged)) then begin
+  fonselectionchanged(self,aitem);
  end;
 end;
 

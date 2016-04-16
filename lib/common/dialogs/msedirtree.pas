@@ -13,14 +13,17 @@ unit msedirtree;
 
 interface
 uses
- mseforms,msewidgetgrid,mselistbrowser,msedatanodes,msefileutils,
- msetypes,msestrings,msegui,mseglob,
- mseclasses,msegrids,msesys,msegridsglob;
+ mseforms,msewidgetgrid,mselistbrowser,msedatanodes,msefileutils,msetypes,
+ msestrings,msegui,mseglob,mseclasses,msegrids,msesys,msegridsglob,
+ mseapplication,msebitmap,msedataedits,mseedit,msegraphics,
+ msegraphutils,mseguiglob,mseificomp,mseificompglob,mseifiglob,msemenus,msestat,
+ msestatfile,msestream,sysutils;
 type
 
  tdirlistitem = class(ttreelistedititem)
   private
    finfo: fileinfoty;                                           
+   froot: filenamety;
   protected
    flistonly: boolean;
    procedure updateinfo;
@@ -57,6 +60,8 @@ type
 //   fchecksubdir: boolean;
    foptions: dirtreeoptionsty;
 //   fchecksubdir: boolean;
+   fonselctionchanged: listitemeventty;
+   fonselectionchanged: listitemeventty;
    procedure setpath(const avalue: filenamety);
    function getpath: filenamety;
    procedure adddir(const aitem: tdirlistitem);
@@ -70,8 +75,10 @@ type
   protected
    fpath: filenamety;
    froot: filenamety;
+   frootitem: tdirlistitem;
    procedure updatepath();
   public
+   destructor destroy(); override;
    function getcheckednodes(const amode: getnodemodety = 
                                     gno_nochildren): dirlistitemarty;
    function getcheckedfilenames(const amode: getnodemodety = 
@@ -83,7 +90,10 @@ type
    property path: filenamety read getpath write setpath;
    property root: filenamety read froot write setroot;
    property options: dirtreeoptionsty read foptions write foptions default [];
-   property onpathchanged: notifyeventty read fonpathchanged write fonpathchanged;
+   property onpathchanged: notifyeventty read fonpathchanged 
+                                                   write fonpathchanged;
+   property onselectionchanged: listitemeventty read fonselctionchanged 
+                                                   write fonselectionchanged;
  end;
 {
  tdiredit = class(tstringedit)
@@ -95,8 +105,8 @@ type
 
 implementation
 uses
- msedirtree_mfm,msesysintf,mseeditglob,msefiledialog,msebitmap,mseevent,
- mseguiglob,classes,mclasses;
+ msedirtree_mfm,msesysintf,mseeditglob,msefiledialog,mseevent,
+ classes,mclasses;
 
 { tdirlistitem }
 
@@ -113,7 +123,12 @@ begin
   result:= fcaption;
  end
  else begin
-  result:= copy(concatstrings(rootcaptions,'/'),2,bigint);
+  if froot = '' then begin
+   result:= copy(concatstrings(rootcaptions,'/'),2,bigint);
+  end
+  else begin
+   result:= filepath(froot,concatstrings(rootcaptions(),'/'),fk_dir);
+  end;
  end;
 end;
 
@@ -131,6 +146,7 @@ var
  item1: tdirlistitem;
 // dirstream: dirstreamty;
  excl: fileattributesty;
+ fna1: filenamety;
 begin
  clear;
  if list <> nil then begin
@@ -144,14 +160,23 @@ begin
   setlength(ar1,list.count);
   for int1:= 0 to list.count - 1 do begin
    item1:= tdirlistitem.create;
+   item1.froot:= froot;
    if checkbox then begin
     item1.fstate:= item1.fstate + [ns_checkbox,ns_showchildchecked];
    end;
    ar1[int1]:= item1;
    item1.finfo:= po1^;
    item1.updateinfo;
-   if checksubdirectories and (item1.finfo.extinfo1.filetype = ft_dir) then begin
-    if dirhasentries(getpath+'/'+item1.finfo.name,[fa_dir],excl) then begin
+   if checksubdirectories and 
+            (item1.finfo.extinfo1.filetype = ft_dir) then begin
+    fna1:= filepath(getpath,item1.finfo.name,fk_file);
+    if {$ifdef mswindows}
+       (treelevel = 0) and (length(fna1) = 4) and (fna1[3] = ':') and
+                                                        (fna1[4] = '/')or 
+        //'/x:/' could be a floppy disk on windows which throws an error
+        //       on query
+       {$endif}
+                dirhasentries(fna1,[fa_dir],excl) then begin
      include(item1.fstate,ns_subitems);
     end
     else begin
@@ -173,6 +198,12 @@ begin
 end;
 
 { tdirtreefo }
+
+destructor tdirtreefo.destroy();
+begin
+ freeandnil(frootitem);
+ inherited;
+end;
 
 procedure tdirtreefo.adddir(const aitem: tdirlistitem);
 var
@@ -289,6 +320,7 @@ var
  uncitem: tdirlistitem;
  {$endif}
  avalue: filenamety;
+ info1: fileinfoty;
 begin
  avalue:= fpath;
  if dto_checkbox in foptions then begin
@@ -300,10 +332,11 @@ begin
                                          [no_checkbox,no_updatechildchecked];
  end;
  treeitem.itemlist.clear;
- treeitem.itemlist.count:= 1;
- aitem:= tdirlistitem(treeitem.itemlist[0]);
  int1:= 0;
  if froot = '' then begin
+  treeitem.itemlist.options:= treeitem.itemlist.options - [no_nofreeitems];
+  treeitem.itemlist.count:= 1;
+  aitem:= tdirlistitem(treeitem.itemlist[0]);
   ar1:= splitrootpath(avalue);
   {$ifdef mswindows}
   treeitem.itemlist.count:= 2;
@@ -325,12 +358,26 @@ begin
   else begin
    initdirfileinfo(aitem.finfo,'/');
   end;
+  aitem.updateinfo;
  end
  else begin
+  frootitem.free();
+  initdirfileinfo(info1,filepath(froot,fk_file));
+  frootitem:= tdirlistitem.create(nil,nil);
+  aitem:= frootitem;
+  initdirfileinfo(aitem.finfo,filepath(froot));
+  aitem.froot:= froot;
+  aitem.updateinfo;
+  aitem.expanded:= true;
+  adddir(aitem);
+  treeitem.itemlist.options:= treeitem.itemlist.options + [no_nofreeitems];
+                                  //destroyed by root node
+  treeitem.itemlist.addchildren(aitem);
   ar1:= splitfilepath(relativepath(filepath(froot,avalue),froot,fk_file));
-  initdirfileinfo(aitem.finfo,'/'+filepath(froot)); //UNC simulation
+  if (ar1 <> nil) and (ar1[0] = '..') then begin
+   int1:= 1; //UNC
+  end;
  end;
- aitem.updateinfo;
  item1:= aitem;
  for int1:= int1 to high(ar1) do begin
   aitem.expanded:= true;
@@ -372,6 +419,7 @@ begin
  if dto_checkbox in foptions then begin
   with tdirlistitem(item) do begin
    fstate:= fstate + [ns_checkbox,ns_showchildchecked];
+   froot:= self.froot;
   end;
  end;
 end;
@@ -388,6 +436,11 @@ var
 begin
  with tdirlistitem(sender) do begin
   case action of
+   na_checkedchange: begin
+    if canevent(tmethod(fonselectionchanged)) then begin
+     fonselectionchanged(self,sender);
+    end;
+   end;
    na_expand: begin
     include(finfo.state,fis_diropen);
     updateinfo;

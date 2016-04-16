@@ -5,6 +5,8 @@ object dirtreefo: tdirtreefo
   bounds_cx = 300
   bounds_cy = 203
   bounds_cxmin = 200
+  container.frame.localprops = []
+  container.frame.localprops1 = []
   container.bounds = (
     0
     0
@@ -19,6 +21,7 @@ object dirtreefo: tdirtreefo
     frame.framewidth = 1
     frame.colorframe = -1610612734
     frame.localprops = [frl_levelo, frl_framewidth, frl_colorframe]
+    frame.localprops1 = []
     bounds_x = 0
     bounds_y = 0
     bounds_cx = 300
@@ -29,6 +32,7 @@ object dirtreefo: tdirtreefo
       item[treeitem]
         width = 297
         options = [co_readonly, co_fill, co_savevalue]
+        options1 = [co1_rowfont, co1_rowcolor, co1_zebracolor, co1_rowcoloractive, co1_rowcolorfocused, co1_rowreadonly, co1_autocolwidth]
         widgetname = 'treeitem'
         dataclass = ttreeitemeditlist
         datalist.imagelist = filedialogres.images
@@ -38,26 +42,27 @@ object dirtreefo: tdirtreefo
         datalist.oncreateitem = treeitemoncreateitem
       end>
     datarowlinewidth = 0
-    datarowheight = 16
-    reffontheight = 14
+    datarowheight = 15
+    reffontheight = 13
     object treeitem: ttreeitemedit
       color = -1879048185
       cursor = cr_arrow
       frame.levelo = 0
       frame.colorclient = -2147483646
       frame.localprops = [frl_levelo, frl_colorclient]
+      frame.localprops1 = []
       taborder = 1
       visible = False
       bounds_x = 0
       bounds_y = 0
       bounds_cx = 297
-      bounds_cy = 16
+      bounds_cy = 15
       optionsedit1 = [oe1_savevalue]
-      optionsedit = [oe_readonly, oe_undoonesc, oe_checkmrcancel, oe_forcereturncheckvalue, oe_locate]
+      optionsedit = [oe_readonly, oe_undoonesc, oe_checkmrcancel, oe_forcereturncheckvalue, oe_hintclippedtext, oe_locate]
       ondataentered = treeitemondataentered
       oncellevent = treeitemoncellevent
       options = [teo_treecolnavig, teo_enteronimageclick]
-      reffontheight = 14
+      reffontheight = 13
     end
   end
 end
