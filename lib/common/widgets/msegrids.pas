@@ -578,6 +578,7 @@ type
    function actualcolor: colorty;
    function actualfont: tfont; virtual;
    function maxwidth: integer;
+   function minmaxwidth(): integer; //bigger of fwidthmin, fmaxwidth
    property colindex: integer read getcolindex;
    function translatetocell(const arow: integer; const apos: pointty): pointty;
    property visible: boolean read getvisible write setvisible;
@@ -4271,6 +4272,16 @@ begin
  result:= fmaxwidth;
 end;
 
+function tcol.minmaxwidth(): integer;
+begin
+ if fmaxwidth > fwidthmin then begin
+  result:= fmaxwidth;
+ end
+ else begin
+  result:= fwidthmin;
+ end;
+end;
+
 procedure tcol.maxwidthinvalid(const aindex: integer);
 begin
  fstate:= fstate - [gps_maxsizevalid,gps_autosizevalid];
@@ -7754,8 +7765,15 @@ begin
    end;
   end;
  end;
- if int2 >= 0 then begin
-  tdatacol(fitems[int2]).fwidth:= 1;
+ if int2 >= 0 then begin //last co_fill
+  with tdatacol(fitems[int2]) do begin
+   if co1_autocolwidth in foptions1 then begin
+    fwidth:= minmaxwidth;
+   end
+   else begin
+    fwidth:= fwidthmin;
+   end;
+  end;
  end;
  ffirstopposite:= 0;
  for int1:= count-1 downto 0 do begin
@@ -9439,7 +9457,13 @@ begin
      fpropcolwidthref:= fpropcolwidthref - width;
     end
     else begin
-     int3:= int3 + widthmin;
+     if co1_autocolwidth in options1 then begin
+      fpropcolwidthref:= fpropcolwidthref - minmaxwidth;
+      int3:= int3 + minmaxwidth;
+     end
+     else begin
+      int3:= int3 + widthmin;
+     end;
     end;
    end;
   end;
