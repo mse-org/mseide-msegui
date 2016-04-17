@@ -4988,7 +4988,9 @@ end;
 }
 procedure tdbdatabutton.modified;
 begin
- fdatalink.modified;
+ if fresetting = 0 then begin
+  fdatalink.modified;
+ end;
  inherited;
 end;
 

@@ -538,13 +538,21 @@ type
    foptions: buttonoptionsty;
    function getcheckedrow: integer;
    procedure setcheckedrow(const avalue: integer);
+   function getcheckedtag: integer;
+   procedure setcheckedtag(const avalue: integer);
   protected
+   fgroup: integer;
    fcheckcaption: boolean;
    fclickedrow: integer;
+   fresetting: integer;
    procedure internalcreateframe; override;
    procedure setoptions(const avalue: buttonoptionsty); virtual;
+   procedure resetradioitems();
    procedure togglevalue(const areadonly: boolean;
                                const down: boolean); virtual; abstract;
+   procedure docheck(); virtual; abstract;
+   procedure douncheck() virtual abstract;
+   function ischecked(): boolean; virtual; abstract;
    procedure togglegridvalue(const index: integer); virtual; abstract;
    procedure resetgridvalue(const index: integer); virtual; abstract;
    procedure checkgridvalue(const index: integer); virtual; abstract;
@@ -557,11 +565,16 @@ type
                        var info: celleventinfoty); override;
    procedure modified; override;
    procedure checkradiorow(aindex: integer);
+   function internalcheckeditem(out single: boolean): ttogglegraphdataedit;
+                                                           //nil if none
    function navigrect: rectty; override;
   public
    constructor create(aowner: tcomponent); override;
+   property group: integer read fgroup write fgroup default 0;
    property checkedrow: integer read getcheckedrow write setcheckedrow; 
           //needs bo_radiotemcol, -1 if none
+   property checkedtag: integer read getcheckedtag write setcheckedtag;
+                             //-1 if none checked
   published
    property options: buttonoptionsty read foptions write setoptions
                default defaultbuttonoptions;
@@ -576,7 +589,6 @@ type
    fvalue: longbool;
    fvaluedefault: longbool;
    fonsetvalue: setbooleaneventty;
-   fgroup: integer;
    procedure setvalue(const Value: boolean); virtual;
    function getglyph: stockglyphty; virtual;
    function getgridvalue(const index: integer): longbool;
@@ -607,6 +619,9 @@ type
    function getdatalistclass: datalistclassty; override;
    procedure togglevalue(const areadonly: boolean;
                                     const down: boolean); override;
+   procedure docheck() override;   //set value to not valuedefault
+   procedure douncheck() override; //set value to valuedefault
+   function ischecked(): boolean; override;
    procedure paintglyph(const canvas: tcanvas;  const acolorglyph: colorty; 
                     const avalue; const arect: rectty); override;
    procedure internalcheckvalue(var avalue; var accept: boolean); override;
@@ -656,7 +671,6 @@ type
    property bounds_cx default defaultboxsize;
    property bounds_cy default defaultboxsize;
    property onsetvalue: setbooleaneventty read fonsetvalue write fonsetvalue;
-   property group: integer read fgroup write fgroup default 0;
 {$ifdef mse_with_ifi}
    property ifilink: tifibooleanlinkcomp read getifilink write setifilink;
 {$endif}
@@ -681,21 +695,16 @@ type
  tcustombooleaneditradio = class(tcustombooleanedit)
   private
    function getglyph: stockglyphty; override;
-   procedure reset;
-   procedure setvalue(const avalue: boolean); override;
-   function getcheckedtag: integer;
-   procedure setcheckedtag(const avalue: integer);
-   procedure setgridvalue(const aindex: integer; const aValue: longbool); override;
-   function internalcheckeditem(out single: boolean): tcustombooleaneditradio; //nil if none
+//   procedure reset;
+   procedure setvalue(const avalue: boolean) override;
+   procedure setgridvalue(const aindex: integer; 
+                                    const aValue: longbool) override;
   protected
-   fresetting: integer;
    procedure togglevalue(const areadonly: boolean;
-                              const down: boolean); override;
+                              const down: boolean) override;
   public
-   procedure togglegridvalue(const index: integer); override;
+   procedure togglegridvalue(const index: integer) override;
    function checkeditem: tcustombooleaneditradio; //nil if none
-   property checkedtag: integer read getcheckedtag write setcheckedtag;
-                             //-1 if none checked
  end;
 
  tbooleaneditradio = class(tcustombooleaneditradio)
@@ -724,7 +733,7 @@ type
    fmax: integer;
 //   fdatalist: tintegerdatalist;
    fonpaintglyph: paintintegerglypheventty;
-   procedure setvalue(const Value: integer);
+   procedure setvalue(const avalue: integer);
    function getgridvalue(const index: integer): integer;
    procedure setgridvalue(const index, Value: integer);
    function getgridvalues: integerarty;
@@ -753,6 +762,9 @@ type
    procedure writestatvalue(const writer: tstatwriter); override;
    procedure togglevalue(const areadonly: boolean;
                                    const down: boolean); override;
+   function ischecked(): boolean; override;
+   procedure docheck() override;   //set value to valuedefault+1
+   procedure douncheck() override; //set value to valuedefault
    procedure doinc(var avalue: integer; const down: boolean);
    procedure paintglyph(const canvas: tcanvas; const acolorglyph: colorty;
                 const avalue; const arect: rectty); override;
@@ -916,7 +928,7 @@ type
    procedure initgridwidget; override;
    procedure initnewcomponent(const ascale: real); override;
    procedure togglegridvalue(const index: integer); override;
-   property optionswidget default defaultoptionswidget - [ow_mousefocus];
+   function checkeditem: tcustomdatabutton; //nil if none
    property valuefaces: tvaluefacearrayprop read fvaluefaces 
                                                      write setvaluefaces;
    property valuecaptions: tmsestringarrayprop read fvaluecaptions
@@ -983,6 +995,7 @@ type
                   //-2 -> not checked
    property min default -1; 
    property max default 0;
+   property optionswidget default defaultoptionswidget - [ow_mousefocus];
   published
    property visible stored false;
    property enabled stored false;
@@ -1024,6 +1037,7 @@ type
    property imagenums;
    property onsetvalue;
    property onpaintglyph;
+   property group;
    property value;
    property valuedefault;
    property min; 
@@ -2467,6 +2481,27 @@ begin
  foptions:= avalue;
 end;
 
+procedure ttogglegraphdataedit.resetradioitems();
+var
+ int1: int32;
+ widget1: twidget;
+begin
+ if fparentwidget <> nil then begin
+  for int1:= 0 to fparentwidget.widgetcount - 1 do begin
+   widget1:= fparentwidget.widgets[int1];
+   if (widget1 is self.classtype) and (widget1 <> self) and
+        (ttogglegraphdataedit(widget1).fgroup = fgroup) then begin
+    inc(fresetting);
+    try
+     ttogglegraphdataedit(widget1).douncheck();
+    finally
+     dec(fresetting);
+    end;
+   end;
+  end;
+ end;
+end;
+
 procedure ttogglegraphdataedit.checkradiorow(aindex: integer);
 var
  datalist1: tdatalist;
@@ -2490,6 +2525,38 @@ begin
    end;
   end;
  end;
+end;
+
+function ttogglegraphdataedit.internalcheckeditem(
+               out single: boolean): ttogglegraphdataedit; //nil if none
+var
+ widget: twidget;
+ int1,int2: integer;
+begin
+ result:= nil;
+ int2:= 0;
+ if fparentwidget <> nil then begin
+  for int1:= 0 to fparentwidget.widgetcount - 1 do begin
+   widget:= fparentwidget.widgets[int1];
+   if (widget is self.classtype{tcustombooleaneditradio}) then begin
+    with ttogglegraphdataedit(widget) do begin
+     if (fgroup = self.fgroup) and ischecked() then begin
+      inc(int2);
+      if result <> nil then begin
+       break;
+      end;
+      result:= ttogglegraphdataedit(widget);
+     end;
+    end;
+   end;
+  end;
+ end
+ else begin
+  if ischecked() then begin
+   result:= self;
+  end;
+ end;
+ single:= int2 <= 1;
 end;
 
 procedure ttogglegraphdataedit.modified;
@@ -2528,6 +2595,44 @@ begin
  end;
 end;
 
+function ttogglegraphdataedit.getcheckedtag: integer;
+var
+ item: ttogglegraphdataedit;
+ bo1: boolean;
+begin
+ item:= internalcheckeditem(bo1);
+ if item <> nil then begin
+  result:= item.Tag;
+ end
+ else begin
+  result:= -1;
+ end;
+end;
+
+procedure ttogglegraphdataedit.setcheckedtag(const avalue: integer);
+var
+ widget: twidget;
+ item: ttogglegraphdataedit;
+ int1: integer;
+ bo1: boolean;
+begin
+ if fparentwidget <> nil then begin
+  for int1:= 0 to fparentwidget.widgetcount - 1 do begin
+   widget:= fparentwidget.widgets[int1];
+   if (widget is self.classtype) and
+        (ttogglegraphdataedit(widget).fgroup = fgroup) and
+         (widget.tag = avalue) then begin
+    ttogglegraphdataedit(widget).docheck();
+    exit;
+   end;
+  end;
+  item:= internalcheckeditem(bo1);
+  if item <> nil then begin
+   item.douncheck();
+  end;
+ end;
+end;
+
 function ttogglegraphdataedit.navigrect: rectty;
 begin
  result:= widgetsizerect;
@@ -2562,6 +2667,21 @@ begin
   fedited:= true;
   docheckvalue(bo1);
  end;
+end;
+
+procedure tcustombooleanedit.docheck();
+begin
+ value:= not valuedefault;
+end;
+
+procedure tcustombooleanedit.douncheck();
+begin
+ value:= valuedefault;
+end;
+
+function tcustombooleanedit.ischecked(): boolean;
+begin
+ result:= fvalue;
 end;
 
 procedure tcustombooleanedit.togglegridvalue(const index: integer);
@@ -2944,7 +3064,7 @@ function tcustombooleaneditradio.getglyph: stockglyphty;
 begin
  result:= stg_checkedradio;
 end;
-
+{
 procedure tcustombooleaneditradio.reset;
 begin
  if value then begin
@@ -2956,20 +3076,11 @@ begin
   end;
  end;
 end;
-
+}
 procedure tcustombooleaneditradio.setvalue(const avalue: boolean);
-var
- widget: twidget;
- int1: integer;
 begin
- if avalue and (fparentwidget <> nil) then begin
-  for int1:= 0 to fparentwidget.widgetcount - 1 do begin
-   widget:= fparentwidget.widgets[int1];
-   if (widget is tcustombooleaneditradio) and (widget <> self) and
-        (tcustombooleaneditradio(widget).fgroup = fgroup) then begin
-    tcustombooleaneditradio(widget).reset;
-   end;
-  end;
+ if avalue then begin
+  resetradioitems();
  end;
  inherited;
 end;
@@ -2992,42 +3103,12 @@ begin
  inherited;
 end;
 
-function tcustombooleaneditradio.internalcheckeditem(
-               out single: boolean): tcustombooleaneditradio; //nil if none
-var
- widget: twidget;
- int1,int2: integer;
-begin
- result:= nil;
- int2:= 0;
- if fparentwidget <> nil then begin
-  for int1:= 0 to fparentwidget.widgetcount - 1 do begin
-   widget:= fparentwidget.widgets[int1];
-   if (widget is tcustombooleaneditradio) and
-        (tcustombooleaneditradio(widget).fgroup = fgroup) and
-         tcustombooleaneditradio(widget).value then begin
-    inc(int2);
-    if result <> nil then begin
-     break;
-    end;
-    result:= tcustombooleaneditradio(widget);
-   end;
-  end;
- end
- else begin
-  if fvalue then begin
-   result:= self;
-  end;
- end;
- single:= int2 <= 1;
-end;
-
 function tcustombooleaneditradio.checkeditem: tcustombooleaneditradio; 
                             //nil if none
 var
  bo1: boolean;
 begin
- result:= internalcheckeditem(bo1);
+ result:= tcustombooleaneditradio(internalcheckeditem(bo1));
 end;
 
 procedure tcustombooleaneditradio.togglevalue(const areadonly: boolean;
@@ -3052,42 +3133,6 @@ begin
  end;
 end;
 
-function tcustombooleaneditradio.getcheckedtag: integer;
-var
- item: tcustombooleaneditradio;
-begin
- item:= checkeditem;
- if item <> nil then begin
-  result:= item.Tag;
- end
- else begin
-  result:= -1;
- end;
-end;
-
-procedure tcustombooleaneditradio.setcheckedtag(const avalue: integer);
-var
- widget: twidget;
- item: tcustombooleaneditradio;
- int1: integer;
-begin
- if fparentwidget <> nil then begin
-  for int1:= 0 to fparentwidget.widgetcount - 1 do begin
-   widget:= fparentwidget.widgets[int1];
-   if (widget is tcustombooleaneditradio) and
-        (tcustombooleaneditradio(widget).fgroup = fgroup) and
-         (widget.tag = avalue) then begin
-    tcustombooleaneditradio(widget).value:= true;
-    exit;
-   end;
-  end;
-  item:= checkeditem;
-  if item <> nil then begin
-   item.value:= false;
-  end;
- end;
-end;
-
 { tcustomintegergraphdataedit }
 
 procedure tcustomintegergraphdataedit.internalcheckvalue(var avalue;
@@ -3104,9 +3149,12 @@ begin
  end;
 end;
 
-procedure tcustomintegergraphdataedit.setvalue(const Value: integer);
+procedure tcustomintegergraphdataedit.setvalue(const avalue: integer);
 begin
- fvalue := Value;
+ if (bo_radioitem in foptions) and (avalue <> fvaluedefault) then begin
+  resetradioitems();
+ end;
+ fvalue := avalue;
  valuechanged;
 end;
 
@@ -3188,6 +3236,21 @@ begin
   doinc(int1,down);
   docheckvalue(int1);
  end;
+end;
+
+function tcustomintegergraphdataedit.ischecked(): boolean;
+begin
+ result:= fvalue <> fvaluedefault;
+end;
+
+procedure tcustomintegergraphdataedit.docheck();
+begin
+ value:= valuedefault+1;
+end;
+
+procedure tcustomintegergraphdataedit.douncheck();
+begin
+ value:= valuedefault;
 end;
 
 procedure tcustomintegergraphdataedit.togglegridvalue(const index: integer);
@@ -3827,6 +3890,13 @@ procedure tcustomdatabutton.togglegridvalue(const index: integer);
 begin
  inherited;
  internalexecute;
+end;
+
+function tcustomdatabutton.checkeditem: tcustomdatabutton;
+var
+ bo1: boolean;
+begin
+ result:= tcustomdatabutton(internalcheckeditem(bo1));
 end;
 
 procedure tcustomdatabutton.setimageoffset(const avalue: integer);
