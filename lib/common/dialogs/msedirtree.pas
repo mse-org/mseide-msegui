@@ -39,7 +39,8 @@ type
  dirlistitemarty = array of tdirlistitem;
  
  dirtreeoptionty = (dto_casesensitive,dto_showhiddenfiles,
-                                              dto_checksubdir,dto_checkbox);
+                    dto_checksubdir,dto_checkbox,
+                    dto_expandonclick,dto_expandondblclick);
  dirtreeoptionsty = set of dirtreeoptionty;
  
  tdirtreefo = class(tmseform)
@@ -398,7 +399,7 @@ begin
 end;
 
 procedure tdirtreefo.treeitemoncellevent(const sender: tobject;
-  var info: celleventinfoty);
+                                               var info: celleventinfoty);
 begin
  case info.eventkind of
   cek_enter: begin
@@ -407,8 +408,20 @@ begin
    end;
   end;
  end;
- if iscellclick(info) and (info.zone = cz_caption) then begin
-  treeitem.checkvalue;
+ if treeitem.item <> nil then begin
+  if (info.zone = cz_caption)  then begin
+   if iscellclick(info) then begin
+    treeitem.checkvalue;
+   end;
+  end;
+  if iscellclick(info,[],[],keyshiftstatesmask) and 
+                      (info.zone in [cz_caption,cz_image]) then begin
+   if (dto_expandonclick in foptions) or 
+       (dto_expandondblclick in foptions) and 
+                (ss_double in info.mouseeventinfopo^.shiftstate) then begin
+    treeitem.item.expanded:= true;
+   end;
+  end;
  end;
 end;
 

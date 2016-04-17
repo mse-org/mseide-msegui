@@ -511,7 +511,7 @@ function filedialog(var afilenames: filenamearty;
            const ongetfileicon: getfileiconeventty = nil;
            const oncheckfile: checkfileeventty = nil
                       ): modalresultty; overload;
-//theadsave
+//threadsafe
 function filedialog(var afilename: filenamety;
            const aoptions: filedialogoptionsty;
            const acaption: msestring;
@@ -529,7 +529,7 @@ function filedialog(var afilename: filenamety;
            const ongetfileicon: getfileiconeventty = nil;
            const oncheckfile: checkfileeventty = nil
            ): modalresultty; overload;
-//theadsave
+//threadsafe
 
 procedure getfileicon(const info: fileinfoty; var imagelist: timagelist;
                             out imagenr: integer);

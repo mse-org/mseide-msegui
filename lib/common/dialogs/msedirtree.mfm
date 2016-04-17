@@ -30,7 +30,8 @@ object dirtreefo: tdirtreefo
     datacols.count = 1
     datacols.items = <    
       item[treeitem]
-        width = 297
+        linewidth = 0
+        width = 298
         options = [co_readonly, co_fill, co_savevalue]
         options1 = [co1_rowfont, co1_rowcolor, co1_zebracolor, co1_rowcoloractive, co1_rowcolorfocused, co1_rowreadonly, co1_autocolwidth]
         widgetname = 'treeitem'
@@ -42,8 +43,8 @@ object dirtreefo: tdirtreefo
         datalist.oncreateitem = treeitemoncreateitem
       end>
     datarowlinewidth = 0
-    datarowheight = 15
-    reffontheight = 13
+    datarowheight = 16
+    reffontheight = 14
     object treeitem: ttreeitemedit
       color = -1879048185
       cursor = cr_arrow
@@ -55,14 +56,14 @@ object dirtreefo: tdirtreefo
       visible = False
       bounds_x = 0
       bounds_y = 0
-      bounds_cx = 297
-      bounds_cy = 15
+      bounds_cx = 298
+      bounds_cy = 16
       optionsedit1 = [oe1_savevalue]
       optionsedit = [oe_readonly, oe_undoonesc, oe_checkmrcancel, oe_forcereturncheckvalue, oe_hintclippedtext, oe_locate]
       ondataentered = treeitemondataentered
       oncellevent = treeitemoncellevent
       options = [teo_treecolnavig, teo_enteronimageclick]
-      reffontheight = 13
+      reffontheight = 14
     end
   end
 end
