@@ -1211,7 +1211,8 @@ type
                    bo_coloractive,
                    bo_ellipsemouse, //mouse area is elliptical
                    bo_nocandefocus,bo_candefocuswindow, //check own window only
-                   bo_radioitem,bo_radioitemcol,
+                   bo_radioitem,  //for tdatabutton
+                   bo_radioitemcol,
                    bo_cantoggle, //for tbooleaneditradio
                    bo_resetcheckedonrowexit,
                                  //used in tdatabutton
