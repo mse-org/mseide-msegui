@@ -23,8 +23,9 @@ type
    fdescent: int32;
    fglyphheight: int32;
    flinespacing: int32;
-   function internalgetglyph(const abitmap: tmaskedbitmap; const achar: card32; 
-                                const aframe: framety; const acolor: colorty; 
+   function internalgetglyph(const abitmap: tmaskedbitmap;
+                       const achar: card32; const arot: real;
+                       const aframe: framety; const acolor: colorty; 
                                                  const acell: boolean): boolean;
   public
    constructor create(const afontfile: filenamety; const afontindex: int32; 
@@ -35,6 +36,11 @@ type
                                 const acolor: colorty = cl_text): boolean;
                          //empty bitmap in case of error, retruns true if ok
    function getglyph(const abitmap: tmaskedbitmap; const achar: card32;
+                             const aframe: framety; //padding
+                                const acolor: colorty = cl_text): boolean;
+                         //empty bitmap in case of error, retruns true if ok
+   function getglyph(const abitmap: tmaskedbitmap; const achar: card32;
+                             const arotation: real; //0.0..1.0 -> 0..360deg CCW
                              const aframe: framety; //padding
                                 const acolor: colorty = cl_text): boolean;
                          //empty bitmap in case of error, retruns true if ok
@@ -92,8 +98,10 @@ begin
 end;
 
 function tftglyphs.internalgetglyph(const abitmap: tmaskedbitmap;
-                             const achar: card32; const aframe: framety;
+               const achar: card32; const arot: real; const aframe: framety;
                          const acolor: colorty; const acell: boolean): boolean;
+const
+ numscale = $10000; //for 16.16 ft number
 var
  so,de: pbyte;
  i1,i2,step: int32;
@@ -101,10 +109,26 @@ var
  sourcesize: sizety;
  destsize: sizety;
  deststart: pointty;
+ mat1: ft_matrix;
+ rea1: real;
+ cos1,sin1: int32;
 begin
  result:= false;
  abitmap.beginupdate();
  abitmap.clear();
+ if arot <> 0 then begin
+  rea1:= 2*pi*arot;
+  cos1:= round(cos(rea1)*numscale);
+  sin1:= round(sin(rea1)*numscale);
+  mat1.xx:= cos1;
+  mat1.xy:= -sin1;
+  mat1.yx:= sin1;
+  mat1.yy:= cos1;
+  ft_set_transform(fftface,@mat1,nil);
+ end
+ else begin
+  ft_set_transform(fftface,nil,nil);
+ end;
  if ft_load_glyph(fftface,ft_get_char_index(fftface,ord(achar)),
                                           ft_load_default) = 0 then begin
   if ft_render_glyph(fftface^.glyph,ft_render_mode_normal) = 0 then begin
@@ -191,27 +215,34 @@ end;
 function tftglyphs.getglyph(const abitmap: tmaskedbitmap; const achar: card32;
                const acolor: colorty = cl_text): boolean;
 begin
- result:= internalgetglyph(abitmap,achar,nullframe,acolor,false);
+ result:= internalgetglyph(abitmap,achar,0.0,nullframe,acolor,false);
 end;
 
 function tftglyphs.getglyph(const abitmap: tmaskedbitmap; const achar: card32;
                const aframe: framety;
                const acolor: colorty = cl_text): boolean;
 begin
- result:= internalgetglyph(abitmap,achar,aframe,acolor,false);
+ result:= internalgetglyph(abitmap,achar,0.0,aframe,acolor,false);
+end;
+
+function tftglyphs.getglyph(const abitmap: tmaskedbitmap; const achar: card32;
+               const arotation: real; const aframe: framety;
+               const acolor: colorty = cl_text): boolean;
+begin
+ result:= internalgetglyph(abitmap,achar,arotation,aframe,acolor,false);
 end;
 
 function tftglyphs.getcell(const abitmap: tmaskedbitmap; const achar: card32;
                const acolor: colorty = cl_text): boolean;
 begin
- result:= internalgetglyph(abitmap,achar,nullframe,acolor,true);
+ result:= internalgetglyph(abitmap,achar,0.0,nullframe,acolor,true);
 end;
 
 function tftglyphs.getcell(const abitmap: tmaskedbitmap; const achar: card32;
                const aframe: framety;
                const acolor: colorty = cl_text): boolean;
 begin
- result:= internalgetglyph(abitmap,achar,aframe,acolor,true);
+ result:= internalgetglyph(abitmap,achar,0.0,aframe,acolor,true);
 end;
 
 end.
