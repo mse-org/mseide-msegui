@@ -47,7 +47,8 @@ type
  textchangeeventty = procedure(const sender: tcustomdataedit;
                                       const atext: msestring) of object;
 
- emptyoptionty = (eo_defaulttext); //use text of tfacecontroller
+ emptyoptionty = (eo_defaulttext,   //use text of tfacecontroller
+                  eo_showfocused);  //show empty_text if focused
  emptyoptionsty = set of emptyoptionty;
 
  tcustomdataedit = class(tcustomedit,igridwidget,istatfile,idragcontroller
@@ -108,6 +109,7 @@ type
    procedure updatedatalist; virtual;
    function geteditstate: dataeditstatesty;
    procedure seteditstate(const avalue: dataeditstatesty);
+   procedure updateemptytext();
    procedure updateedittext(const force: boolean);
    function getgridintf: iwidgetgrid;
    procedure checkgrid;
@@ -1473,6 +1475,7 @@ type
  tcustomwidgetgrid1 = class(tcustomwidgetgrid);
  tdropdowncontroller1 = class(tdropdowncontroller);
  tcustomdropdownlistcontroller1 = class(tcustomdropdownlistcontroller);
+ tinplaceedit1 = class(tinplaceedit);
 // tdatacol1 = class(tdatacol);
 
 function realtytoint(const avalue: realty): integer;
@@ -1733,6 +1736,31 @@ begin
  end;
 end;
 
+procedure tcustomdataedit.updateemptytext();
+begin
+ if des_emptytext in fstate then begin
+  include(tinplaceedit1(feditor).fstate,ies_emptytext);
+  feditor.font:= getfontempty1{fempty_font};
+  if fempty_textcolor <> cl_none then begin
+   feditor.fontcolor:= fempty_textcolor;
+  end;
+  if fempty_textcolorbackground <> cl_none then begin
+   feditor.fontcolorbackground:= fempty_textcolorbackground;
+  end;
+  if fempty_fontstyle <> [] then begin
+   feditor.fontstyle:= fempty_fontstyle;
+  end;
+ end
+ else begin
+  exclude(tinplaceedit1(feditor).fstate,ies_emptytext);
+  feditor.font:= geteditfont;
+  feditor.fontcolor:= cl_none;
+  feditor.fontcolorbackground:= cl_none;
+  feditor.fontstyle:= [];
+ end;
+ updatetextflags();
+end;
+
 procedure tcustomdataedit.updateedittext(const force: boolean);
 var
  mstr1: msestring;
@@ -1743,7 +1771,7 @@ begin
  mstr1:= datatotext(nil^);
  {$ifdef FPC} {$checkpointer default} {$endif}
  if (not(des_isdb in fstate) and (mstr1 = '') or (des_dbnull in fstate)) and 
-                                    not focused then begin
+            (not focused or (eo_showfocused in fempty_options)) then begin
   mstr1:= fempty_text;
   include(fstate,des_emptytext);
  end
@@ -1751,26 +1779,9 @@ begin
   exclude(fstate,des_emptytext);
  end;
  feditor.text:= mstr1;
- if force or ((des_emptytext in fstate) xor (des_emptytext in state1)) then begin
-  if des_emptytext in fstate then begin
-   feditor.font:= getfontempty1{fempty_font};
-   if fempty_textcolor <> cl_none then begin
-    feditor.fontcolor:= fempty_textcolor;
-   end;
-   if fempty_textcolorbackground <> cl_none then begin
-    feditor.fontcolorbackground:= fempty_textcolorbackground;
-   end;
-   if fempty_fontstyle <> [] then begin
-    feditor.fontstyle:= fempty_fontstyle;
-   end;
-  end
-  else begin
-   feditor.font:= geteditfont;
-   feditor.fontcolor:= cl_none;
-   feditor.fontcolorbackground:= cl_none;
-   feditor.fontstyle:= [];
-  end;
-  updatetextflags;
+ if force or ((des_emptytext in fstate) xor 
+                               (des_emptytext in state1)) then begin
+  updateemptytext();
  end;
 end;
 
@@ -2864,8 +2875,14 @@ begin
   end;
   ea_textedited: begin
    include(fstate,des_edited);
-   modified;
+   modified();
    inherited;
+  end;
+  ea_resetemptytext: begin
+   if des_emptytext in fstate then begin
+    exclude(fstate,des_emptytext);
+    updateemptytext();
+   end;
   end;
   ea_textchanged: begin
    dotextchange;

@@ -41,7 +41,8 @@ type
   function getedited: boolean;
  end;
 
- inplaceeditstatety = (ies_focused,ies_poschanging,ies_firstclick,ies_istextedit,
+ inplaceeditstatety = (ies_focused,ies_emptytext,
+                       ies_poschanging,ies_firstclick,ies_istextedit,
                        ies_forcecaret,ies_textrectvalid,ies_touched,
                        ies_cangroupundo,ies_caretposvalid);
  inplaceeditstatesty = set of inplaceeditstatety;
@@ -563,6 +564,7 @@ procedure tinplaceedit.setup(const text: msestring;
               const font: tfont = nil;
               noinvalidate: boolean = false);
 begin
+ exclude(fstate,ies_emptytext);
  finfo.text.text:= text;
  ffiltertext:= '';
  if locating then begin
@@ -662,6 +664,7 @@ var
  posbefore: rectty;
  updatecaretcountref: integer;
  options1: optionseditty;
+ haspasswordchar: boolean;
 
 begin
  if (fupdating > 0) or (ws_destroying in fowner.widgetstate) or
@@ -679,7 +682,8 @@ begin
  actioninfo:= initactioninfo(ea_caretupdating);
  if fowner.active or (ies_forcecaret in fstate) or force then begin
   canvas:= getfontcanvas;
-  if fpasswordchar <> #0 then begin
+  haspasswordchar:= (fpasswordchar <> #0) and not (ies_emptytext in fstate);
+  if haspasswordchar then begin
    wstr1:= finfo.text.text;
    finfo.text.text:= stringfromchar(fpasswordchar,length(wstr1));
   end;
@@ -710,7 +714,7 @@ begin
   fcaretpos.y:= fcaretpos.y + finfo.dest.y - posbefore.y; 
              //add shift
 
-  if fpasswordchar <> #0 then begin
+  if haspasswordchar then begin
    finfo.text.text:= wstr1;
   end;
   with finfo,actioninfo do begin
@@ -1014,7 +1018,7 @@ function tinplaceedit.mousepostotextindex(const apos: pointty): integer;
 var
  mstr1: msestring;
 begin
- if fpasswordchar <> #0 then begin
+ if (fpasswordchar <> #0) and not (ies_emptytext in fstate) then begin
   mstr1:= finfo.text.text;
   finfo.text.text:= stringfromchar(fpasswordchar,length(mstr1));
   postotextindex(getfontcanvas,finfo,apos,result);
@@ -1030,7 +1034,7 @@ var
  mstr1: msestring;
 begin
  ftextrectbefore:= finfo.res;
- if fpasswordchar <> #0 then begin
+ if (fpasswordchar <> #0) and not (ies_emptytext in fstate) then begin
   mstr1:= finfo.text.text;
   finfo.text.text:= stringfromchar(fpasswordchar,length(mstr1));
   result:= textindextopos(getfontcanvas,finfo,aindex);
@@ -1078,6 +1082,9 @@ var
  bo1: boolean;
  ch1: msechar;
 begin
+ if ies_emptytext in fstate then begin
+  exit;
+ end;
  if fcurindex > 0 then begin
   ch1:= finfo.text.text[fcurindex];
  end
@@ -1106,6 +1113,9 @@ var
  bo1: boolean;
  ch1: msechar;
 begin
+ if ies_emptytext in fstate then begin
+  exit;
+ end;
  if fcurindex < length(finfo.text.text) then begin
   ch1:= finfo.text.text[fcurindex+1];
  end
@@ -1597,6 +1607,9 @@ procedure tinplaceedit.inserttext(const text: msestring; nooverwrite: boolean = 
 var
  int1,int2,int3: integer;
 begin
+ if ies_emptytext in fstate then begin
+  finfo.text.text:= '';
+ end;
  if insertstate or nooverwrite then begin
   richinsert(text,finfo.text,fcurindex+1);
  end
@@ -1604,6 +1617,9 @@ begin
   replacetext1(finfo.text.text,fcurindex+1,text);
  end;
  checkmaxlength;
+ if ies_emptytext in fstate then begin
+  notify(ea_resetemptytext); //remove empty_text settings
+ end;
  int3:= getfontcanvas.getfontmetrics('o').width;
  int1:= fcaretpos.x - int3;
  moveindex(fcurindex + length(text),false);
@@ -1632,6 +1648,9 @@ var
  moveindexcountref: integer;
 
 begin
+ if (newindex <> 0) and (ies_emptytext in fstate) then begin
+  exit;
+ end;
  include(fstate,ies_touched);
  inc(fmoveindexcount);
  moveindexcountref:= fmoveindexcount;
@@ -1845,6 +1864,9 @@ end;
 
 procedure tinplaceedit.selectall;
 begin
+ if ies_emptytext in fstate then begin
+  exit;
+ end;
  if checkaction(ea_selectall) then begin
   resetoffset;
   fcurindex:= 0;
@@ -1896,17 +1918,22 @@ begin
   updateselect;
  end
  else begin
-  if (oe_autoselect in opt1) then begin
-   selectall;
+  if ies_emptytext in fstate then begin
+   moveindex(0,false,false);
   end
   else begin
-   if oe_endonenter in opt1 then begin
-    moveindex(bigint,false,false);
+   if (oe_autoselect in opt1) then begin
+    selectall;
    end
    else begin
-    if oe_homeonenter in opt1 then begin
-     moveindex(0,false,false);
+    if oe_endonenter in opt1 then begin
+     moveindex(bigint,false,false);
     end
+    else begin
+     if oe_homeonenter in opt1 then begin
+      moveindex(0,false,false);
+     end
+    end;
    end;
   end;
  end;
@@ -1951,12 +1978,14 @@ end;
 procedure tinplaceedit.dopaint(const canvas: tcanvas);
 var
  str1: msestring;
- co1,co2: rgbtriplety; 
+ co1,co2: rgbtriplety;
+ haspasswordchar: boolean;
 begin
  str1:= '';
  ftextrectbefore:= finfo.res;
  if length(finfo.text.text) > 0 then begin
-  if fpasswordchar <> #0 then begin
+  haspasswordchar:= (fpasswordchar <> #0) and not (ies_emptytext in fstate);
+  if haspasswordchar then begin
    str1:= finfo.text.text;
    finfo.text.text:= stringfromchar(fpasswordchar,length(str1));
   end;
@@ -1987,7 +2016,7 @@ begin
   msedrawtext.drawtext(canvas,finfo);
   setcolormapvalue(cl_selectedtext,co1.red,co1.green,co1.blue);
   setcolormapvalue(cl_selectedtextbackground,co2.red,co2.green,co2.blue);
-  if fpasswordchar <> #0 then begin
+  if haspasswordchar then begin
    finfo.text.text:= str1;
   end;
  end;

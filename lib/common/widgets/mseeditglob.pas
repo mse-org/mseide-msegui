@@ -85,7 +85,8 @@ type
                     des_updatelayout,des_editing);
  dataeditstatesty = set of dataeditstatety;
 
- editactionty = (ea_none,ea_beforechange,ea_textchanged,ea_textedited,ea_undone,
+ editactionty = (ea_none,ea_beforechange,ea_textchanged,ea_resetemptytext,
+                 ea_textedited,ea_undone,
                  ea_textentered,ea_indexmoved,{ea_selectindexmoved,}
                  ea_textsizechanged,
                  ea_delchar,ea_undo,
