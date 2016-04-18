@@ -46,6 +46,7 @@ object dirtreefo: tdirtreefo
     datarowheight = 16
     reffontheight = 14
     object treeitem: ttreeitemedit
+      optionsskin = [osk_framebuttononly]
       color = -1879048185
       cursor = cr_arrow
       frame.levelo = 0
