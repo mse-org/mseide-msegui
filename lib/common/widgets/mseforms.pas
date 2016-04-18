@@ -882,7 +882,7 @@ begin
  ficon.onchange:= {$ifdef FPC}@{$endif}iconchanged;
  fwidgetrect.x:= 100;
  fwidgetrect.y:= 100;
- options:= defaultformoptions;
+ foptions:= defaultformoptions;
  docreate(aowner);
  aftercreate;
  registerhandlers;
