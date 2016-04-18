@@ -1025,7 +1025,12 @@ begin
   finfo.text.text:= mstr1;
  end
  else begin
-  postotextindex(getfontcanvas,finfo,apos,result);
+  if ies_emptytext in fstate then begin
+   result:= 0;
+  end
+  else begin
+   postotextindex(getfontcanvas,finfo,apos,result);
+  end;
  end;
 end;
 
@@ -1041,7 +1046,12 @@ begin
   finfo.text.text:= mstr1;
  end
  else begin
-  result:= textindextopos(getfontcanvas,finfo,aindex);
+  if ies_emptytext in fstate then begin
+   result:= textindextopos(getfontcanvas,finfo,0);
+  end
+  else begin
+   result:= textindextopos(getfontcanvas,finfo,aindex);
+  end;
  end;
  checktextrect;
 end;
