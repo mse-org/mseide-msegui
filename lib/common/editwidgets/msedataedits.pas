@@ -48,7 +48,8 @@ type
                                       const atext: msestring) of object;
 
  emptyoptionty = (eo_defaulttext,   //use text of tfacecontroller
-                  eo_showfocused);  //show empty_text if focused
+                  eo_showfocused,     //show empty_text if focused
+                  eo_nocolorfocused); //do not show empty_color if focused 
  emptyoptionsty = set of emptyoptionty;
 
  tcustomdataedit = class(tcustomedit,igridwidget,istatfile,idragcontroller
@@ -1804,7 +1805,7 @@ begin
  inherited;
  if (fempty_color <> cl_none) and 
          (fstate * [des_emptytext,des_grayed] = [des_emptytext]) and 
-                                                      not focused then begin
+         (not (eo_nocolorfocused in fempty_options) or not focused)then begin
   canvas.fillrect(paintclientrect,fempty_color);
  end;
 end;
