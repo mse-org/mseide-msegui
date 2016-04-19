@@ -87,6 +87,7 @@ type
    fstatpriority: integer;
    fhasbom: boolean;
    foptions: texteditoptionsty;
+   feolstyle: eolstylety;
    procedure setstatfile(const Value: tstatfile);
    function geteditpos: gridcoordty;
    procedure seteditpos1(const value: gridcoordty);
@@ -122,6 +123,7 @@ type
    ffilename: filenamety;
    ffilerights: filerightsty;
    flines: tgridrichstringdatalist;
+   ffoundeolstyle: eolstylety;
    procedure setoptionsedit(const avalue: optionseditty); override;
    procedure setoptionsedit1(const avalue: optionsedit1ty); override;
 
@@ -313,6 +315,11 @@ type
 
    property encoding: charencodingty read fencoding write fencoding 
                                                         default ce_locale;
+   property eolstyle: eolstylety read feolstyle write feolstyle 
+                                                        default eol_unknown;
+           //applied to write stream if stream.eolstyle = ce_unknown
+           //ce_unknown -> use foundeolstyle of last read stream
+           //ce_unknown -> system eol
    property options: texteditoptionsty read foptions write setoptions
                                                                  default [];
    property textflags default defaulttextflags - [tf_noselect];
@@ -481,6 +488,7 @@ end;
 
 constructor tcustomtextedit.create(aowner: tcomponent);
 begin
+ feolstyle:= eol_unknown;
  ffilerights:= defaultfilerights;
  fmousetextpos:= invalidcell;
  fmarginlinecolor:= cl_none;
@@ -946,6 +954,7 @@ begin
  clear;
  try
   flines.loadfromstream(stream);
+  ffoundeolstyle:= stream.foundeolstyle();
   fhasbom:= false;
   if stream.encoding = ce_utf8 then begin
    if (flines.count > 0) then begin
@@ -989,6 +998,14 @@ const
  bom: array[0..2] of byte = ($ef,$bb,$bf);
 begin
  stream.encoding:= fencoding;
+ if stream.eolstyle = eol_unknown then begin
+  if feolstyle = eol_unknown then begin
+   stream.eolstyle:= ffoundeolstyle;
+  end
+  else begin
+   stream.eolstyle:= feolstyle; 
+  end;
+ end;
 // stream.filerights:= ffilerights;
  if (fencoding = ce_utf8) and (fhasbom or (teeo_bom in foptions)) and 
                                      not(teeo_nobom in foptions) then begin
@@ -1062,6 +1079,7 @@ begin
   flines.clear;
 //  fgridintf.getcol.grid.rowcount:= 0;
  end;
+ ffoundeolstyle:= eol_unknown;
  modified:= false;
 end;
 

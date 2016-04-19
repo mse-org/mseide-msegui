@@ -239,7 +239,11 @@ type
  tbufstream = class(tcustombufstream)
   public
  end;
-  
+
+ eolflagty = (eolf_linefeed,eolf_returnlinefeed);
+ eolflagsty = set of eolflagty;
+ eolstylety = (eol_unknown,eol_system,eol_unix,eol_windows);
+ 
  ttextstream = class(tcustombufstream)
   private
    fposvorher: int64;
@@ -253,12 +257,16 @@ type
    fsearchtextupper: string;
    fsearchoptions: searchoptionsty;
    fsearchtextvalid: boolean;
+   feolstyle: eolstylety;
    procedure setsearchtext(const Value: string);
    function getmsesearchtext: msestring;
    procedure setmsesearchtext(const avalue: msestring);
    procedure setsearchoptions(const Value: searchoptionsty);
+   procedure seteolstyle(const avalue: eolstylety);
   protected
    fencoding: charencodingty;
+   feolflags: eolflagsty;
+   feol: string;
    function encode(const value: msestring): string;
    function decode(const value: string): msestring;
   public
@@ -332,7 +340,6 @@ type
    function linecount: integer;
             //zaehlt ab aktueller position anzahl linefeeds bis eof
 
-
    procedure resetsearch;
    function searchnext: boolean; //true wenn gefunden
    property nativesearchtext: string read fsearchtext write setsearchtext;
@@ -351,6 +358,10 @@ type
    property notopen: boolean read getnotopen;
    property encoding: charencodingty read fencoding write fencoding 
                                                          default ce_locale;
+   function foundeolstyle: eolstylety; //found by readln
+   property eolstyle: eolstylety read feolstyle 
+                              write seteolstyle default eol_unknown;
+                                       //for writeln
  end;
 
  ttextdatastream = class(ttextstream)
@@ -561,12 +572,25 @@ const
   {$endif}
  {$endif}
 const
- {$ifdef mswindows}
- eor: array[0..1] of char = (#$0d,#$0a);
- {$else}
- eor: array[0..0] of char = (#$0a);
- {$endif}
+ windowseol = #$0d#$0a;
+ unixeol = #$0a;
 
+{$ifdef mswindows}
+ syseol = windowseol;
+{$else}
+ syseol = unixeol;
+{$endif}
+
+(*
+ windowseol: array[0..1] of char = (#$0d,#$0a);
+ unixeol: array[0..0] of char = (#$0a);
+
+ {$ifdef mswindows}
+ syseol: array[0..1] of char = (#$0d,#$0a);
+ {$else}
+ syseol: array[0..0] of char = (#$0a);
+ {$endif}
+*)
 const
  kryptsignatur = $9617ae3c;
 type
@@ -1757,9 +1781,9 @@ function ttextstream.readstrln(var value: string): boolean;
  end;
 
 var
- int1,int2,int3: integer;
+ {int1,}int2,int3: integer;
  gefunden: boolean;
- po1,po2: pchar;
+ po1,po2,pe: pchar;
 
 begin
  if (tss_eof in fstate) then begin
@@ -1777,8 +1801,14 @@ begin
  repeat
   po1:= nil;
   po2:= bufoffset;
-  for int1:= 0 to bufend-bufoffset-1 do begin
-   if (po2^ = c_return) or (po2^ = c_linefeed) then begin
+  pe:= bufend;
+  while po2 < pe do begin
+   if po2^ = c_linefeed then begin
+    include(feolflags,eolf_linefeed);
+    po1:= po2;
+    break;
+   end;
+   if (po2^ = c_return) then begin
     po1:= po2;
     break;
    end;
@@ -1818,6 +1848,7 @@ begin
    end;
    if bufoffset < bufend then begin
     if bufoffset^ = c_linefeed then begin
+     include(feolflags,eolf_returnlinefeed);
      inc(bufoffset);
      if bufoffset = bufend then begin
       fillbuffer;
@@ -1916,27 +1947,28 @@ end;
 procedure ttextstream.writeln(const values: array of const);
 begin
  write(values);
- write(eor);
+ write(feol);
 end;
 
 procedure ttextstream.writestrln(const value: string);
 begin
- write(value+eor);
+ write(value+feol);
 end;
 
 procedure ttextstream.writeln;
 begin
- write(eor);
+ write(feol);
 end;
 
 procedure ttextstream.writeln(const value: string);
 begin
- write(value+eor);
+ write(value+feol);
 end;
 
 procedure ttextstream.writeln(const value: msestring);
 begin
- write(value+lineend);
+ write(value);
+ write(feol);
 end;
 
 procedure ttextstream.writeln(const value: real);
@@ -2163,6 +2195,17 @@ begin
  end;
 end;
 
+function ttextstream.foundeolstyle: eolstylety;
+begin
+ result:= eol_unknown;
+ if eolf_linefeed in feolflags then begin
+  result:= eol_unix;
+ end;
+ if eolf_returnlinefeed in feolflags then begin
+  result:= eol_windows;
+ end;
+end;
+
 procedure ttextstream.resetsearch;
 begin
  fsearchlinestartpos:= 0;
@@ -2191,6 +2234,21 @@ procedure ttextstream.setsearchoptions(const Value: searchoptionsty);
 begin
  fsearchoptions := Value;
  fsearchtextvalid:= false;
+end;
+
+procedure ttextstream.seteolstyle(const avalue: eolstylety);
+begin
+ case avalue of
+  eol_unix: begin
+   feol:= unixeol;
+  end;
+  eol_windows: begin
+   feol:= windowseol;
+  end;
+  else begin
+   feol:= syseol;
+  end;
+ end;
 end;
 
 function ttextstream.searchnext: boolean;
