@@ -189,32 +189,38 @@ function searchfile(const afilename: filenamety;
               //'**'  -> 1..x directory levels
               //'***' -> 0..x directory levels
 function searchfile(const afilename: filenamety; const adirname: filenamety;
-                      const ainclude: fileattributesty = [fa_all];
-                      const aexclude: fileattributesty = []): filenamety; overload;
+                  const ainclude: fileattributesty = [fa_all];
+                  const aexclude: fileattributesty = []): filenamety; overload;
            //returns directory, '' if none
            //afilename must be simple filename and can have wildchars ('?','*'),
            //adirname can have wildchars ('?','*','**','***')
 
 function searchfiles(const afilename: filenamety;
-                      const adirnames: array of filenamety;
-                      const ainclude: fileattributesty = [fa_all];
-                      const aexclude: fileattributesty = []): filenamearty; overload;
+              const adirnames: array of filenamety;
+              const ainclude: fileattributesty = [fa_all];
+              const aexclude: fileattributesty = [];
+              const aoptions: dirstreamoptionsty = []): filenamearty; overload;
            //returns filepaths
-           //afilename can be path and can have wildchars ('?','*'),
+           //afilename can be path or quoted list of paths 
+           //and can have wildchars ('?','*') example: '"a/*.pas" "b/*.pp"',
            //adirnames can have wildchars ('?','*','**','***')
 function searchfiles(const afilename: filenamety;
-                      const adirname: filenamety;
-                      const ainclude: fileattributesty = [fa_all];
-                      const aexclude: fileattributesty = []): filenamearty; overload;
-           //returns filepaths
-           //afilename must be simple filename and can have wildchars ('?','*'),
-           //adirname can have wildchars ('?','*','**','***')
+               const adirname: filenamety;
+               const ainclude: fileattributesty = [fa_all];
+               const aexclude: fileattributesty = [];
+               const aoptions: dirstreamoptionsty = []): filenamearty; overload;
+         //returns filepaths
+         //afilename must be simple filename or quoted list of simple filenames
+         //and can have wildchars ('?','*') example: '"*.pp" "*.pas"',
+         //adirname can have wildchars ('?','*','**','***')
             
 function searchfilenames(const afilename: filenamety; const adirname: filenamety;
                       const ainclude: fileattributesty = [fa_all];
-                      const aexclude: fileattributesty = []): filenamearty;
+                      const aexclude: fileattributesty = [];
+                      const aoptions: dirstreamoptionsty = []): filenamearty;
            //returns filenames
-           //afilename must be simple filename and can have wildchars ('?','*')
+           //afilename must be simple filename or quoted list of simple filenames
+           //and can have wildchars ('?','*') example: '"*.pp" "*.pas"',
            //empty -> all
            
 function dirhasentries(const adirname: filenamety;
@@ -851,7 +857,8 @@ end;
 
 function searchfiles(const afilename: filenamety; const adirname: filenamety;
                       const ainclude: fileattributesty = [fa_all];
-                      const aexclude: fileattributesty = []): filenamearty;
+                      const aexclude: fileattributesty = [];
+                      const aoptions: dirstreamoptionsty = []): filenamearty;
 var
  ar1{,ar2}: filenamearty;
  int1,int2: integer;
@@ -878,8 +885,8 @@ begin
      end;
      if ar1[int1] = '***' then begin
       deleteitem(ar1,int1);
-      stackarray(searchfiles(afilename,mergerootpath(ar1),ainclude,aexclude),
-                                                                        result);
+      stackarray(searchfiles(afilename,mergerootpath(ar1),
+                                          ainclude,aexclude,aoptions),result);
       insertitem(ar1,int1,'**');
      end;
      mask:= copy(ar1,int1,1);
@@ -896,11 +903,11 @@ begin
       if (fileinfo.name <> dotchar) and (fileinfo.name <> '..') then begin
        ar1[int1]:= fileinfo.name;
        stackarray(searchfiles(afilename,
-                               mergerootpath(ar1),ainclude,aexclude),result);
+                       mergerootpath(ar1),ainclude,aexclude,aoptions),result);
        if recursive then begin
         insertitem(ar1,int1+1,'**');
         stackarray(searchfiles(afilename,
-                               mergerootpath(ar1),ainclude,aexclude),result);
+                       mergerootpath(ar1),ainclude,aexclude,aoptions),result);
         deleteitem(ar1,int1+1);
        end;
       end;
@@ -915,9 +922,11 @@ begin
  else begin
   with dirstream,dirinfo do begin
    dirname:= filepath(adirname,fk_file);
+   options:= aoptions;
    if afilename <> '' then begin
-    setlength(mask,1);
-    mask[0]:= afilename;
+    unquotefilename(afilename,mask);
+//    setlength(mask,1);
+//    mask[0]:= afilename;
    end;
    include:= ainclude;
    exclude:= aexclude;
@@ -944,7 +953,8 @@ end;
 
 function searchfilenames(const afilename: filenamety; const adirname: filenamety;
                       const ainclude: fileattributesty = [fa_all];
-                      const aexclude: fileattributesty = []): filenamearty;
+                      const aexclude: fileattributesty = [];
+                      const aoptions: dirstreamoptionsty = []): filenamearty;
 var
  int2: integer;
  dirstream: dirstreamty;
@@ -954,9 +964,11 @@ begin
  fillchar(dirstream,sizeof(dirstream),0);
  with dirstream,dirinfo do begin
   dirname:= filepath(adirname,fk_file);
+  options:= aoptions;
   if afilename <> '' then begin
-   setlength(mask,1);
-   mask[0]:= afilename;
+   unquotefilename(afilename,mask);
+//   setlength(mask,1);
+//   mask[0]:= afilename;
   end;
   include:= ainclude;
   exclude:= aexclude;
@@ -983,27 +995,35 @@ end;
 function searchfiles(const afilename: filenamety; 
                       const adirnames: array of filenamety;
                       const ainclude: fileattributesty = [fa_all];
-                      const aexclude: fileattributesty = []): filenamearty;
+                      const aexclude: fileattributesty = [];
+                      const aoptions: dirstreamoptionsty = []): filenamearty;
 var
- int1: integer;
+ int1,i2: integer;
  dir1,file1: filenamety;
+ ar1: filenamearty;
 begin
  result:= nil;
  file1:= trim(afilename);
+ unquotefilename(file1,ar1);
  if (file1 <> '') and (high(adirnames) < 0) then begin
-  splitfilepath(afilename,dir1,file1);
-  result:= searchfiles(file1,dir1);
+  for int1:= 0 to high(ar1) do begin
+   splitfilepath(ar1[int1],dir1,file1);
+   stackarray(searchfiles(file1,dir1,ainclude,aexclude,aoptions),result);
+  end;
  end
  else begin
   for int1:= 0 to high(adirnames) do begin
    if afilename = '' then begin
     dir1:= adirnames[int1];
+    stackarray(searchfiles(file1,dir1,ainclude,aexclude,aoptions),result);
    end
    else begin
-    splitfilepath(filepath(adirnames[int1],afilename,fk_file,true),dir1,file1);
-   end;   
-   stackarray(searchfiles(file1,dir1),result);
-  end;
+    for i2:= 0 to high(ar1) do begin
+     splitfilepath(filepath(adirnames[int1],ar1[int1],fk_file,true),dir1,file1);
+     stackarray(searchfiles(file1,dir1,ainclude,aexclude,aoptions),result);
+    end;
+   end;
+  end;   
  end;
 end;
 
