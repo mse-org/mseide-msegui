@@ -1315,6 +1315,20 @@ begin
      edit.encoding:= ce_locale;
     end;
    end;
+   case e.eolstyle of
+    1: begin
+     edit.eolstyle:= eol_system;
+    end;
+    2: begin
+     edit.eolstyle:= eol_unix;
+    end;
+    3: begin
+     edit.eolstyle:= eol_windows;
+    end;
+    else begin
+     edit.eolstyle:= eol_default;
+    end;
+   end;
    grid.wheelscrollheight:= e.scrollheight;
    edit.pairmarkbkgcolor:= e.pairmarkcolor;
    if edit.syntaxpainterhandle >= 0 then begin

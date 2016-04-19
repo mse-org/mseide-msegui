@@ -33,7 +33,7 @@ uses
  msebitmap,msecolordialog,msedrawtext,msewidgets,msepointer,mseguiglob,
  msepipestream,msemenus,sysutils,mseglob,mseedit,msedialog,msescrollbar,
  msememodialog,msecodetemplates,mseifiglob,msestream,msestringcontainer,
- mserttistat,mseificomp,mseificompglob;
+ mserttistat,mseificomp,mseificompglob,msedragglob,mseeditglob;
 
 const
  defaultsourceprintfont = 'Courier';
@@ -196,6 +196,7 @@ type
    feditmarkpairwords: boolean;
    fbackupfilecount: integer;
    fencoding: integer;
+   feolstyle: integer;
    fnoformdesignerdocking: boolean;
    ftrimtrailingwhitespace: boolean;
    fpairmarkcolor: integer;
@@ -255,6 +256,7 @@ type
    property backupfilecount: integer read fbackupfilecount 
                                               write fbackupfilecount;
    property encoding: integer read fencoding write fencoding;
+   property eolstyle: integer read feolstyle write feolstyle;
    property trimtrailingwhitespace: boolean read ftrimtrailingwhitespace
                                                 write ftrimtrailingwhitespace;
    property codetemplatedirs: msestringarty read getcodetemplatedirs write
@@ -546,13 +548,6 @@ type
    ok: tbutton;
    tabwidget: ttabwidget;
    editorpage: ttabpage;
-   tgroupbox1: tgroupbox;
-   showgrid: tbooleanedit;
-   snaptogrid: tbooleanedit;
-   gridsizex: tintegeredit;
-   tintegeredit2: tintegeredit;
-   gridsizey: tintegeredit;
-   moveonfirstclick: tbooleanedit;
    debuggerpage: ttabpage;
    debugcommand: tfilenameedit;
    debugoptions: tmemodialogedit;
@@ -682,25 +677,6 @@ type
    toolmenus: tstringedit;
    toolfiles: tfilenameedit;
    toolparams: tstringedit;
-   tlayouter13: tlayouter;
-   dispgrid: twidgetgrid;
-   fontdisp: ttextedit;
-   tlayouter12: tlayouter;
-   editfontextraspace: tintegeredit;
-   editfontwidth: tintegeredit;
-   editfontheight: tintegeredit;
-   editfontname: tstringedit;
-   tlayouter11: tlayouter;
-   tlayouter10: tlayouter;
-   backupfilecount: tintegeredit;
-   spacetabs: tbooleanedit;
-   tabstops: tintegeredit;
-   blockindent: tintegeredit;
-   autoindent: tbooleanedit;
-   ttabwidget2: ttabwidget;
-   ttabpage13: ttabpage;
-   filefiltergrid: tstringgrid;
-   ttabpage14: ttabpage;
    serverla: tlayouter;
    uploadcommand: tfilenameedit;
    gdbservercommand: tfilenameedit;
@@ -729,11 +705,7 @@ type
    newfisources: tfilenameedit;
    newfifilters: tstringedit;
    newfiexts: tstringedit;
-   tabindent: tbooleanedit;
    fontancestors: tstringedit;
-   editfontcolor: tcoloredit;
-   editbkcolor: tcoloredit;
-   editfontantialiased: tbooleanedit;
    ttabpage17: ttabpage;
    ttabpage18: ttabpage;
    befcommandgrid: twidgetgrid;
@@ -752,9 +724,6 @@ type
    aftmake3on: tbooleanedit;
    aftmake4on: tbooleanedit;
    aftcommand: tmemodialogedit;
-   ttabpage19: ttabpage;
-   twidgetgrid5: twidgetgrid;
-   codetemplatedirs: tfilenameedit;
    nogdbserverexit: tbooleanedit;
    ttabpage20: ttabpage;
    settingseditor: tbooleanedit;
@@ -776,7 +745,6 @@ type
    afterload: tfilenameedit;
    tsplitter10: tsplitter;
    gdbserverstartonce: tbooleanedit;
-   showtabs: tbooleanedit;
    ttabpage21: ttabpage;
    formatmacrogrid: twidgetgrid;
    formatmacronames: tstringedit;
@@ -789,13 +757,9 @@ type
    c: tstringcontainer;
    xtermcommand: tmemodialogedit;
    debugsplitter: tsplitter;
-   tlayouter14: tlayouter;
-   rightmarginon: tbooleanedit;
-   linenumberson: tbooleanedit;
    tspacer4: tspacer;
    stripmessageesc: tbooleanedit;
    raiseonbreak: tbooleanedit;
-   noformdesignerdocking: tbooleanedit;
    runcommand: tfilenameedit;
    sourcebase: tfilenameedit;
    tspacer7: tspacer;
@@ -803,20 +767,62 @@ type
    toolshortcuts: tenumedit;
    toolsc: tstringedit;
    toolscalt: tstringedit;
-   editmarkbrackets: tbooleanedit;
    fpcgdbworkaround: tbooleanedit;
+   ttabwidget3: ttabwidget;
+   ttabpage22: ttabpage;
+   componenthints: tbooleanedit;
+   noformdesignerdocking: tbooleanedit;
+   moveonfirstclick: tbooleanedit;
+   gridsizey: tintegeredit;
+   gridsizex: tintegeredit;
+   tintegeredit2: tintegeredit;
+   snaptogrid: tbooleanedit;
+   showgrid: tbooleanedit;
+   ttabpage23: ttabpage;
+   ttabwidget2: ttabwidget;
+   ttabpage13: ttabpage;
+   filefiltergrid: tstringgrid;
+   ttabpage14: ttabpage;
    twidgetgrid6: twidgetgrid;
    syntaxdeffile: tfilenameedit;
    syntaxdeffilemask: tmemodialogedit;
+   ttabpage19: ttabpage;
+   twidgetgrid5: twidgetgrid;
+   codetemplatedirs: tfilenameedit;
+   tlayouter13: tlayouter;
+   dispgrid: twidgetgrid;
+   fontdisp: ttextedit;
+   tlayouter12: tlayouter;
+   editfontextraspace: tintegeredit;
+   editfontwidth: tintegeredit;
+   editfontheight: tintegeredit;
+   editfontname: tstringedit;
+   editfontcolor: tcoloredit;
+   editbkcolor: tcoloredit;
+   editfontantialiased: tbooleanedit;
+   tlayouter11: tlayouter;
+   tlayouter14: tlayouter;
+   rightmarginon: tbooleanedit;
+   linenumberson: tbooleanedit;
+   editmarkbrackets: tbooleanedit;
    editmarkpairwords: tbooleanedit;
    tlayouter15: tlayouter;
-   trimtrailingwhitespace: tbooleanedit;
-   encoding: tenumedit;
    pairmarkcolor: tcoloredit;
    statementcolor: tcoloredit;
    scrollheight: tintegeredit;
    rightmarginchars: tintegeredit;
-   componenthints: tbooleanedit;
+   tlayouter10: tlayouter;
+   spacetabs: tbooleanedit;
+   blockindent: tintegeredit;
+   autoindent: tbooleanedit;
+   tabindent: tbooleanedit;
+   tabstops: tintegeredit;
+   showtabs: tbooleanedit;
+   tlayouter16: tlayouter;
+   eolstyle: tenumtypeedit;
+   trimtrailingwhitespace: tbooleanedit;
+   encoding: tenumedit;
+   backupfilecount: tintegeredit;
    procedure acttiveselectondataentered(const sender: TObject);
    procedure colonshowhint(const sender: tdatacol; const arow: Integer; 
                       var info: hintinfoty);
@@ -864,6 +870,7 @@ type
    procedure toolsrowdatachanged(const sender: tcustomgrid;
                    const acell: gridcoordty);
    procedure colorhint(const sender: TObject; var info: hintinfoty);
+   procedure initeolstyleexe(const sender: tenumtypeedit);
   private
    procedure activegroupchanged;
  end;
@@ -2794,6 +2801,11 @@ begin
  info.caption:= tcustomedit(sender).text + lineend + info.caption;
 end;
 
+procedure tprojectoptionsfo.initeolstyleexe(const sender: tenumtypeedit);
+begin
+ sender.typeinfopo:= typeinfo(eolstylety);
+end;
+
 { tprojectoptions }
 
 constructor tprojectoptions.create;
@@ -2848,6 +2860,7 @@ begin
  gridsizex:= defaultgridsizex;
  gridsizey:= defaultgridsizey;
  encoding:= 1; //utf8n
+ eolstyle:= 1; //eol_system
  autoindent:= true;
  blockindent:= 1;
  rightmarginon:= true;

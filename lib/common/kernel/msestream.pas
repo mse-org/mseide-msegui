@@ -242,7 +242,7 @@ type
 
  eolflagty = (eolf_linefeed,eolf_returnlinefeed);
  eolflagsty = set of eolflagty;
- eolstylety = (eol_unknown,eol_system,eol_unix,eol_windows);
+ eolstylety = (eol_default,eol_system,eol_unix,eol_windows);
  
  ttextstream = class(tcustombufstream)
   private
@@ -361,8 +361,8 @@ type
                                                          default ce_locale;
    function foundeolstyle: eolstylety; //found by readln
    property eolstyle: eolstylety read feolstyle 
-                              write seteolstyle default eol_unknown;
-                                       //for writeln
+                              write seteolstyle default eol_default;
+                              //for writeln, eol_default -> eol_system
  end;
 
  ttextdatastream = class(ttextstream)
@@ -1754,7 +1754,7 @@ end;
 
 constructor ttextstream.create(ahandle: integer);
 begin
- eolstyle:= eol_unknown;
+ eolstyle:= eol_default;
  inherited;
 end;
 
@@ -2184,7 +2184,7 @@ end;
 
 function ttextstream.foundeolstyle: eolstylety;
 begin
- result:= eol_unknown;
+ result:= eol_default;
  if eolf_linefeed in feolflags then begin
   result:= eol_unix;
  end;

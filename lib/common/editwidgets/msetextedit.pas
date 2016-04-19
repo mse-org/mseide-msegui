@@ -316,10 +316,10 @@ type
    property encoding: charencodingty read fencoding write fencoding 
                                                         default ce_locale;
    property eolstyle: eolstylety read feolstyle write feolstyle 
-                                                        default eol_unknown;
-           //applied to write stream if stream.eolstyle = ce_unknown
-           //ce_unknown -> use foundeolstyle of last read stream
-           //ce_unknown -> system eol
+                                                        default eol_default;
+           //applied to write stream if stream.eolstyle = ce_default
+           //ce_default -> use foundeolstyle of last read stream
+           //ce_default -> system eol
    property options: texteditoptionsty read foptions write setoptions
                                                                  default [];
    property textflags default defaulttextflags - [tf_noselect];
@@ -488,7 +488,7 @@ end;
 
 constructor tcustomtextedit.create(aowner: tcomponent);
 begin
- feolstyle:= eol_unknown;
+ feolstyle:= eol_default;
  ffilerights:= defaultfilerights;
  fmousetextpos:= invalidcell;
  fmarginlinecolor:= cl_none;
@@ -998,8 +998,8 @@ const
  bom: array[0..2] of byte = ($ef,$bb,$bf);
 begin
  stream.encoding:= fencoding;
- if stream.eolstyle = eol_unknown then begin
-  if feolstyle = eol_unknown then begin
+ if stream.eolstyle = eol_default then begin
+  if feolstyle = eol_default then begin
    stream.eolstyle:= ffoundeolstyle;
   end
   else begin
@@ -1079,7 +1079,7 @@ begin
   flines.clear;
 //  fgridintf.getcol.grid.rowcount:= 0;
  end;
- ffoundeolstyle:= eol_unknown;
+ ffoundeolstyle:= eol_default;
  modified:= false;
 end;
 
