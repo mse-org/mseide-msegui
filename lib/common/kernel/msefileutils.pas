@@ -175,12 +175,14 @@ function tosysfilepath(const path: filenamety;
                                 const quoted: boolean = false): filenamety;
 procedure tosysfilepath1(var path: filenamety; const quoted: boolean = false);
 
-function searchfile(const filename: filenamety; dir: boolean = false): filenamety; overload;
+function searchfile(const filename: filenamety; dir: boolean = false; 
+                     const aoptions: dirstreamoptionsty = []): filenamety; overload;
            //returns rootpath if file exists, '' otherwise
 function searchfile(const afilename: filenamety;
                       const adirnames: array of filenamety;
                       const ainclude: fileattributesty = [fa_all];
-                      const aexclude: fileattributesty = []): filenamety; overload;
+                      const aexclude: fileattributesty = [];
+                      const aoptions: dirstreamoptionsty = []): filenamety; overload;
            //returns directory of last occurence in dirs, '' if none
            //afilename can be path and can have wildchars ('?','*'),
            //adirnames can have wildchars ('?','*','**','***')
@@ -190,7 +192,8 @@ function searchfile(const afilename: filenamety;
               //'***' -> 0..x directory levels
 function searchfile(const afilename: filenamety; const adirname: filenamety;
                   const ainclude: fileattributesty = [fa_all];
-                  const aexclude: fileattributesty = []): filenamety; overload;
+                  const aexclude: fileattributesty = [];
+                  const aoptions: dirstreamoptionsty = []): filenamety; overload;
            //returns directory, '' if none
            //afilename must be simple filename and can have wildchars ('?','*'),
            //adirname can have wildchars ('?','*','**','***')
@@ -726,19 +729,21 @@ begin
  result:= issamefilename(filepath(a),filepath(b));
 end;
 
-function searchfile(const filename: filenamety;
-                            dir: boolean = false): filenamety; overload;
+function searchfile(const filename: filenamety;dir: boolean = false;
+         const aoptions: dirstreamoptionsty = []): filenamety; overload;
            //returns rootpath if file exists, '' otherwise
 begin
  result:= filepath(filename);
- if not (dir and finddir(result) or not dir and findfile(result)) then begin
+ if not (dir and finddir(result) or 
+                 not dir and findfile(result)) then begin
   result:= '';
  end;
 end;
 
 function searchfile(const afilename: filenamety; const adirname: filenamety;
                       const ainclude: fileattributesty = [fa_all];
-                      const aexclude: fileattributesty = []): filenamety;
+                      const aexclude: fileattributesty = [];
+                      const aoptions: dirstreamoptionsty = []): filenamety;
 var
  ar1{,ar2}: filenamearty;
  int1: integer;
@@ -764,7 +769,8 @@ begin
      end;
      if ar1[int1] = '***' then begin
       deleteitem(ar1,int1);
-      result:= searchfile(afilename,mergerootpath(ar1),ainclude,aexclude);
+      result:= searchfile(afilename,mergerootpath(ar1),
+                                         ainclude,aexclude,aoptions);
       if result <> '' then begin
        break;
       end;
@@ -783,7 +789,8 @@ begin
      while sys_readdirstream(dirstream,fileinfo) do begin
       if (fileinfo.name <> dotchar) and (fileinfo.name <> '..') then begin
        ar1[int1]:= fileinfo.name;
-       result:= searchfile(afilename,mergerootpath(ar1),ainclude,aexclude);
+       result:= searchfile(afilename,mergerootpath(ar1),ainclude,
+                                                      aexclude,aoptions);
        if result <> '' then begin
         break;
        end;
@@ -827,7 +834,8 @@ end;
 function searchfile(const afilename: filenamety; 
                          const adirnames: array of filenamety;
                          const ainclude: fileattributesty = [fa_all];
-                         const aexclude: fileattributesty = []): filenamety;
+                         const aexclude: fileattributesty = [];
+                         const aoptions: dirstreamoptionsty = []): filenamety;
            //returns directory of last occurence in adirnames, '' if none
 var
  int1: integer;
@@ -837,7 +845,7 @@ begin
  file1:= trim(afilename);
  if (file1 <> '') and (high(adirnames) < 0) then begin
   splitfilepath(afilename,dir1,file1);
-  result:= searchfile(file1,dir1,ainclude,aexclude);
+  result:= searchfile(file1,dir1,ainclude,aexclude,aoptions);
  end
  else begin
   for int1:= high(adirnames) downto 0 do begin
@@ -847,7 +855,7 @@ begin
    else begin
     splitfilepath(filepath(adirnames[int1],afilename,fk_file,true),dir1,file1);
    end;
-   result:= searchfile(file1,dir1,ainclude,aexclude);
+   result:= searchfile(file1,dir1,ainclude,aexclude,aoptions);
    if result <> '' then begin
     break;
    end;
@@ -1053,8 +1061,8 @@ begin
  end;
 end;
 
-function findfile(const filename: filenamety; const dirnames: array of filenamety;
-                        out path: filenamety): boolean;
+function findfile(const filename: filenamety; 
+           const dirnames: array of filenamety; out path: filenamety): boolean;
             //true if found
 //var
 // str1: filenamety;
