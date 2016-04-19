@@ -2879,6 +2879,9 @@ begin
    modified();
    inherited;
   end;
+  ea_undone: begin
+   updateedittext(true); //restore empty_* setings
+  end;
   ea_resetemptytext: begin
    if des_emptytext in fstate then begin
     exclude(fstate,des_emptytext);
