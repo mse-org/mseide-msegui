@@ -267,6 +267,7 @@ type
    fencoding: charencodingty;
    feolflags: eolflagsty;
    feol: string;
+   feolm: msestring;
    function encode(const value: msestring): string;
    function decode(const value: string): msestring;
   public
@@ -1954,8 +1955,7 @@ end;
 
 procedure ttextstream.writeln(const value: msestring);
 begin
- write(value);
- write(feol);
+ write(value+feolm);
 end;
 
 procedure ttextstream.writeln(const value: real);
@@ -2236,6 +2236,7 @@ begin
    feol:= syseol;
   end;
  end;
+ feolm:= msestring(feol);
 end;
 
 function ttextstream.searchnext: boolean;
