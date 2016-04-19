@@ -270,6 +270,7 @@ type
    function encode(const value: msestring): string;
    function decode(const value: string): msestring;
   public
+   constructor create(ahandle: integer); override;
    class function trycreate(out ainstance: ttextstream;
              const afilename: filenamety;
              const aopenmode: fileopenmodety = fm_read;
@@ -1750,27 +1751,13 @@ end;
 
 
 { ttextstream }
-{
-function ttextstream.Seek(const Offset: Int64; Origin: TSeekOrigin): Int64;
+
+constructor ttextstream.create(ahandle: integer);
 begin
- flushbuffer;
- if (origin <> socurrent) or (offset <> 0) then bufoffset:= nil;
- if bufoffset = nil then begin
-  result:= inherited seek(offset,origin);
- end
- else begin
-  result:= inherited seek(offset,origin) + (bufoffset-bufend);
- end;
- exclude(fstate,tss_eof);
+ eolstyle:= eol_unknown;
+ inherited;
 end;
 
-function ttextstream.Read(var Buffer; Count: Integer): Longint;
-begin
- flushbuffer;
- bufoffset:= nil;
- result:= inherited read(buffer,count);
-end;
-}
 function ttextstream.readstrln(var value: string): boolean;
      //true wenn zeile vollstaendig
 
