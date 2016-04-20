@@ -31,6 +31,7 @@ object dirtreefo: tdirtreefo
     datacols.items = <    
       item[treeitem]
         linewidth = 0
+        colorfocused = -1879048185
         width = 298
         options = [co_readonly, co_fill, co_savevalue]
         options1 = [co1_rowfont, co1_rowcolor, co1_zebracolor, co1_rowcoloractive, co1_rowcolorfocused, co1_rowreadonly, co1_autocolwidth]
@@ -47,7 +48,6 @@ object dirtreefo: tdirtreefo
     reffontheight = 14
     object treeitem: ttreeitemedit
       optionsskin = [osk_framebuttononly]
-      color = -1879048185
       cursor = cr_arrow
       frame.levelo = 0
       frame.colorclient = -2147483646
