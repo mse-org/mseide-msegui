@@ -766,7 +766,8 @@ type
    function ischecked(): boolean; override;
    procedure docheck() override;   //set value to valuedefault+1
    procedure douncheck() override; //set value to valuedefault
-   procedure doinc(var avalue: integer; const down: boolean);
+   function doinc(var avalue: integer; const down: boolean): boolean;
+                                       //false if no change
    procedure paintglyph(const canvas: tcanvas; const acolorglyph: colorty;
                 const avalue; const arect: rectty); override;
    procedure datalistdestroyed; override;
@@ -782,9 +783,12 @@ type
    property datalist: tintegerdatalist read getdatalist; 
    property onsetvalue: setintegereventty read fonsetvalue write fonsetvalue;
    property value: integer read fvalue write setvalue default 0;
-   property valuedefault: integer read fvaluedefault write fvaluedefault default 0;
-   property min: integer read fmin write setmin default 0; //checked by togglevalue
-   property max: integer read fmax write setmax default 0; //checked by togglevalue
+   property valuedefault: integer read fvaluedefault 
+                                       write fvaluedefault default 0;
+   property min: integer read fmin write setmin default 0; 
+                                               //checked by togglevalue
+   property max: integer read fmax write setmax default 0; 
+                                               //checked by togglevalue
    property onpaintglyph: paintintegerglypheventty read fonpaintglyph 
                                                          write fonpaintglyph;
   published
@@ -3190,20 +3194,25 @@ begin
  result:= docheckvalue(fvalue);
 end;
 
-procedure tcustomintegergraphdataedit.doinc(var avalue: integer;
-                                                const down: boolean);
+function tcustomintegergraphdataedit.doinc(var avalue: integer;
+                                                const down: boolean): boolean;
 begin
- if down then begin
-  dec(avalue);
-  if avalue < fmin then begin
-   avalue:= fmax;
+ result:= false;
+ if (foptions * [bo_radioitem,bo_radioitemcol] = []) or 
+         (bo_cantoggle in foptions) or (value = fvaluedefault) then begin
+  if down then begin
+   dec(avalue);
+   if avalue < fmin then begin
+    avalue:= fmax;
+   end;
+  end
+  else begin
+   inc(avalue);
+   if avalue > fmax then begin
+    avalue:= fmin;
+   end;
   end;
- end
- else begin
-  inc(avalue);
-  if avalue > fmax then begin
-   avalue:= fmin;
-  end;
+  result:= true;
  end;
 end;
 
@@ -3234,8 +3243,9 @@ var
 begin
  if not areadonly and (fmin <> fmax) then begin
   int1:= fvalue;
-  doinc(int1,down);
-  docheckvalue(int1);
+  if doinc(int1,down) then begin
+   docheckvalue(int1);
+  end;
  end;
 end;
 
@@ -3260,8 +3270,9 @@ var
 begin
  if fmin <> fmax then begin
   int1:= gridvalue[index];
-  doinc(int1,false);
-  gridvalue[index]:= int1;
+  if doinc(int1,false) then begin
+   gridvalue[index]:= int1;
+  end;
  end;
 end;
 
@@ -3275,6 +3286,7 @@ function tcustomintegergraphdataedit.createdatalist(
   const sender: twidgetcol): tdatalist;
 begin
  fdatalist:= tgridintegerdatalist.create(sender);
+ tgridintegerdatalist(fdatalist).notcheckedvalue:= fvaluedefault;
  result:= fdatalist;
 end;
 
@@ -3383,6 +3395,7 @@ begin
  with tgridintegerdatalist(fdatalist) do begin
   min:= self.min;
   max:= self.max;
+  notcheckedvalue:= self.valuedefault;
  end;
 end;
 
