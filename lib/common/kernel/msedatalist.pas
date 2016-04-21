@@ -3159,7 +3159,7 @@ procedure tintegerdatalist.readappendix(const reader; const aname: msestring);
 var
 // po1: plongboolaty;
  po1,pe,pchecked: pinteger;
- int1: integer;
+// int1: integer;
 begin
  with tstatreader(reader) do begin
   fcheckeditem:= readinteger(aname+'_ci',fcheckeditem,-1,count-1);

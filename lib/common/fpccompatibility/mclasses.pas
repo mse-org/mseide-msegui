@@ -12,7 +12,7 @@ unit mclasses;
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
- Modified 2013-2015 by Martin Schreiber
+ Modified 2013-2016 by Martin Schreiber
 
  **********************************************************************}
 {$ifdef FPC}

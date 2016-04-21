@@ -3433,8 +3433,7 @@ begin
   if tpersistent(instance) = nil then begin
    createproc;
   end;
-  if not ((csdesigning in componentstate) and 
-                             (pointer(value) = pointer(1))) then begin
+  if pointer(value) <> pointer(1) then begin
    tpersistent(instance).assign(value);
   end;
  end
@@ -3464,8 +3463,7 @@ begin
   if tpersistent(instance) = nil then begin
    tvirtualpersistent(instance):= aclass.create;
   end;
-  if not (csdesigning in componentstate) and 
-                             (pointer(value) <> pointer(1)) then begin
+  if pointer(value) <> pointer(1) then begin
    tpersistent(instance).assign(value);
   end;
  end
@@ -3590,7 +3588,8 @@ begin
    po1:= dest;
    if po1 <> nil then begin
 {$ifdef debugobjectlink}
-   write('destrev');getdebugtext(self,iobjectlink(source),iobjectlink(dest),valuepo);
+   write('destrev');getdebugtext(self,iobjectlink(source),
+                                                   iobjectlink(dest),valuepo);
 {$endif}
     dest:= nil;
     if odd(ptruint(source)) then begin
@@ -3601,7 +3600,8 @@ begin
     end
     else begin
      {$ifdef FPC}
-     iobjectlink(po1).unlink(iobjectlink(pointer(1)),iobjectlink(source),valuepo);
+     iobjectlink(po1).unlink(iobjectlink(pointer(1)),
+                                                 iobjectlink(source),valuepo);
      {$else}
      po3:= pointer(1);
      iobjectlink(po1).unlink(iobjectlink(po3),iobjectlink(source),valuepo);

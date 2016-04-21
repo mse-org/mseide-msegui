@@ -398,6 +398,26 @@ type
    procedure setroot(const avalue: filenamety);
    function getgrid: twidgetgrid;
    procedure setgrid(const avalue: twidgetgrid);
+   function getoptionstree: treeitemeditoptionsty;
+   procedure setoptionstree(const avalue: treeitemeditoptionsty);
+   function getoptionsedit: optionseditty;
+   procedure setoptionsedit(const avalue: optionseditty);
+   function getcol_color: colorty;
+   procedure setcol_color(const avalue: colorty);
+   function getcol_coloractive: colorty;
+   procedure setcol_coloractive(const avalue: colorty);
+   function getcol_colorfocused: colorty;
+   procedure setcol_colorfocused(const avalue: colorty);
+   function getcell_options: coloptionsty;
+   procedure setcell_options(const avalue: coloptionsty);
+  {
+   function getcell_frame: tcellframe;
+   procedure setcell_frame(const avalue: tcellframe);
+   function getcell_face: tcellface;
+   procedure setcell_face(const avalue: tcellface);
+   function getcell_datalist: ttreeitemeditlist;
+   procedure setcell_datalist(const avalue: ttreeitemeditlist);
+  }
   protected
    fdirview: tdirtreefo;
    fpath: filenamety;
@@ -418,6 +438,23 @@ type
   published
    property options: dirtreeoptionsty read getoptions 
                                               write setoptions default [];
+   property optionstree: treeitemeditoptionsty read getoptionstree 
+      write setoptionstree default [teo_treecolnavig,teo_enteronimageclick];
+   property optionsedit: optionseditty read getoptionsedit write setoptionsedit
+         default [oe_readonly,oe_undoonesc,oe_checkmrcancel,
+                        oe_forcereturncheckvalue,oe_hintclippedtext,oe_locate];
+   property col_color: colorty read getcol_color 
+                                         write setcol_color default cl_default;
+   property col_coloractive: colorty read getcol_coloractive 
+                              write setcol_coloractive default cl_none;
+   property col_colorfocused: colorty read getcol_colorfocused
+                      write setcol_colorfocused default cl_active;
+   property col_options: coloptionsty read getcell_options 
+          write setcell_options default [co_readonly,co_fill,co_savevalue];
+//   property col_frame: tcellframe read getcell_frame write setcell_frame;
+//   property col_face: tcellface read getcell_face write setcell_face;
+//   property col_datalist: ttreeitemeditlist read getcell_datalist 
+//                                                   write setcell_datalist;
    property onpathchanged: dirtreepatheventty read 
                                fonpathchanged write fonpathchanged;
    property onpathselected: dirtreepatheventty read 
@@ -2560,6 +2597,105 @@ begin
  //dummy
 end;
 
+function tdirtreeview.getoptionstree: treeitemeditoptionsty;
+begin
+ result:= fdirview.treeitem.options;
+end;
+
+procedure tdirtreeview.setoptionstree(const avalue: treeitemeditoptionsty);
+begin
+ fdirview.treeitem.options:= avalue;
+end;
+
+function tdirtreeview.getoptionsedit: optionseditty;
+begin
+ result:= fdirview.treeitem.optionsedit;
+end;
+
+procedure tdirtreeview.setoptionsedit(const avalue: optionseditty);
+begin
+ fdirview.treeitem.optionsedit:= avalue;
+end;
+
+function tdirtreeview.getcol_color: colorty;
+begin
+ result:= fdirview.grid.datacols[0].color;
+end;
+
+procedure tdirtreeview.setcol_color(const avalue: colorty);
+begin
+ fdirview.grid.datacols[0].color:= avalue;
+end;
+
+function tdirtreeview.getcol_coloractive: colorty;
+begin
+ result:= fdirview.grid.datacols[0].coloractive;
+end;
+
+procedure tdirtreeview.setcol_coloractive(const avalue: colorty);
+begin
+ fdirview.grid.datacols[0].coloractive:= avalue;
+end;
+
+function tdirtreeview.getcol_colorfocused: colorty;
+begin
+ result:= fdirview.grid.datacols[0].colorfocused;
+end;
+
+procedure tdirtreeview.setcol_colorfocused(const avalue: colorty);
+begin
+ fdirview.grid.datacols[0].colorfocused:= avalue;
+end;
+
+function tdirtreeview.getcell_options: coloptionsty;
+begin
+ result:= fdirview.grid.datacols[0].options;
+end;
+
+procedure tdirtreeview.setcell_options(const avalue: coloptionsty);
+begin
+ fdirview.grid.datacols[0].options:= avalue;
+end;
+{
+function tdirtreeview.getcell_frame: tcellframe;
+begin
+ if csreading in componentstate then begin
+  fdirview.grid.datacols[0].createframe();
+ end;
+ result:= fdirview.grid.datacols[0].frame;
+end;
+
+procedure tdirtreeview.setcell_frame(const avalue: tcellframe);
+begin
+ fdirview.grid.datacols[0].frame:= avalue;
+end;
+
+function tdirtreeview.getcell_face: tcellface;
+begin
+ if csreading in componentstate then begin
+  fdirview.grid.datacols[0].createface();
+ end;
+ result:= fdirview.grid.datacols[0].face;
+end;
+
+procedure tdirtreeview.setcell_face(const avalue: tcellface);
+begin
+ if avalue <> nil then begin
+  fdirview.grid.datacols[0].createface();
+ end;
+ fdirview.grid.datacols[0].face:= avalue;
+end;
+
+function tdirtreeview.getcell_datalist: ttreeitemeditlist;
+begin
+ result:= ttreeitemeditlist(fdirview.grid.datacols[0].datalist);
+end;
+
+procedure tdirtreeview.setcell_datalist(const avalue: ttreeitemeditlist);
+begin
+ fdirview.grid.datacols[0].datalist:= avalue;
+end;
+}
 procedure tdirtreeview.dopathchanged(const sender: tobject);
 begin
  if canevent(tmethod(fonpathchanged)) then begin
