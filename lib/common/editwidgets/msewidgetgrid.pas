@@ -1381,6 +1381,7 @@ var
  bo1,bo2: boolean;
  col1: twidgetcol;
  str1,str2: string;
+ ancestorbefore: tpersistent;
 begin
  inherited;
  filer.defineproperty('widgetname',{$ifdef FPC}@{$endif}readwidgetname,
@@ -1429,9 +1430,14 @@ begin
    else begin
     str2:= str1+'.datalist.';
    end;
+   ancestorbefore:= filer.ancestor;
+   if ancestorbefore <> nil then begin
+    filer.ancestor:= twidgetcol(ancestor).fdata;
+   end;   
    setfproppath(twriter(filer),str2);
    writeproperties(fdata);
    setfproppath(twriter(filer),str1);
+   filer.ancestor:= ancestorbefore;
   end;
  end;
 end;
