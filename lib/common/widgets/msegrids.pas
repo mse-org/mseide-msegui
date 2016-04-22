@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2015 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2016 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -9486,7 +9486,18 @@ var
  int1,int2,int3: integer;
  loopcount{,firsthscrollindex}: integer;
  bo1: boolean;
+ reshowfocusedcell: boolean;
 begin
+ reshowfocusedcell:= false;
+ if focusedcellvalid then begin
+  bo1:= gs_updatelocked in fstate;
+  include(fstate,gs_updatelocked);
+  reshowfocusedcell:= not 
+            rectisequal(clippedcellrect(ffocusedcell,cil_paint),nullrect);
+  if not bo1 then begin
+   exclude(fstate,gs_updatelocked);
+  end;
+ end;
  bo1:= fobjectpicker.removexorpic;
  exclude(fstate,gs_hasactiverowcolor);
  exclude(fstate,gs_needszebraoffset);
@@ -9633,6 +9644,9 @@ begin
 
  if bo1 then begin
   fobjectpicker.paintxorpic;
+ end;
+ if reshowfocusedcell and focusedcellvalid then begin
+  showcell(ffocusedcell);
  end;
 end;
 
