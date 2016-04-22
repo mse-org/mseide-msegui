@@ -40,6 +40,8 @@ type
  
  dirtreeoptionty = (dto_casesensitive,dto_showhiddenfiles,
                     dto_checksubdir,dto_checkbox,
+                    dto_nocollapseclear, //normally collapsed nodes are freed
+                     //if dto_checkbox is not set
                     dto_expandonclick,dto_expandondblclick);
  dirtreeoptionsty = set of dirtreeoptionty;
  
@@ -419,10 +421,14 @@ begin
   end;
   if iscellclick(info,[],[],keyshiftstatesmask) and 
                       (info.zone in [cz_caption,cz_image]) then begin
-   if (dto_expandonclick in foptionsdir) or 
-       (dto_expandondblclick in foptionsdir) and 
-                (ss_double in info.mouseeventinfopo^.shiftstate) then begin
-    treeitem.item.expanded:= true;
+   if (ss_double in info.mouseeventinfopo^.shiftstate) and
+                       (dto_expandondblclick in foptionsdir) then begin
+    treeitem.item.expanded:= not treeitem.item.expanded;
+   end
+   else begin
+    if (dto_expandonclick in foptionsdir) then begin     
+     treeitem.item.expanded:= true;
+    end;
    end;
   end;
  end;
@@ -465,7 +471,8 @@ begin
    na_expand: begin
     include(finfo.state,fis_diropen);
     updateinfo;
-    if (count = 0) or not(dto_checkbox in foptionsdir) then begin
+    if (count = 0) or 
+            (foptionsdir*[dto_checkbox,dto_nocollapseclear] = []) then begin
      adddir(tdirlistitem(sender));
     end;
     if count = 0 then begin
@@ -475,7 +482,7 @@ begin
    end;
    na_collapse: begin
     bo1:= count > 0;
-    if not (dto_checkbox in foptionsdir) then begin
+    if foptionsdir * [dto_checkbox,dto_nocollapseclear] = [] then begin
      clear;
     end;
     if bo1 then begin
