@@ -480,9 +480,10 @@ type
     FCanHandleExcepts: Boolean;
     FOnReadStringProperty:TReadWriteStringPropertyEvent;
     fonseterror: seterroreventty;
-   fonenumerror: enumerroreventty;
+    fonenumerror: enumerroreventty;
     procedure DoFixupReferences;
-    function FindComponentClass(const AClassName: string): TComponentClass;
+    function FindComponentClass(const AClassName: string;
+                                  const aflags: tfilerflags): TComponentClass;
   protected
     FLoaded: TFpList;
     function Error(const Message: string): Boolean; virtual;
@@ -6062,7 +6063,7 @@ begin
           begin
             if Assigned(FOnAncestorNotFound) then
               FOnAncestorNotFound(Self, Name,
-                FindComponentClass(CompClassName), Result);
+                FindComponentClass(CompClassName,flags), Result);
             if not Assigned(Result) then
               raise EReadError.CreateFmt(SAncestorNotFound, [Name]);
           end;
@@ -6073,7 +6074,7 @@ begin
         end else
         begin
           Result := nil;
-          ComponentClass := FindComponentClass(CompClassName);
+          ComponentClass := FindComponentClass(CompClassName,flags);
           if Assigned(FOnCreateComponent) then
             FOnCreateComponent(Self, ComponentClass, Result);
           if not Assigned(Result) then
@@ -6881,7 +6882,8 @@ begin
   end;
 end;
 
-function TReader.FindComponentClass(const AClassName: String): TComponentClass;
+function TReader.FindComponentClass(const AClassName: String;
+                                 const aflags: tfilerflags): TComponentClass;
 
 var
   PersistentClass: TPersistentClass;
@@ -6923,19 +6925,21 @@ var
 
 begin
   Result := nil;
-  UClassName:=UpperCase(AClassName);
-  FindInFieldTable(Root);
-
-  if (Result=nil) and assigned(LookupRoot) and (LookupRoot<>Root) then
-    FindInFieldTable(LookupRoot);
-
-  if (Result=nil) then begin
-    PersistentClass := GetClass(AClassName);
-    if {$ifndef FPC}(persistentclass <> nil) and{$endif}
-             PersistentClass.InheritsFrom(TComponent) then
-      Result := TComponentClass(PersistentClass);
+  if not (csdesigning in root.fcomponentstate) or 
+                                   not (ffinline in aflags) then begin
+   UClassName:=UpperCase(AClassName);
+   FindInFieldTable(Root);
+ 
+   if (Result=nil) and assigned(LookupRoot) and (LookupRoot<>Root) then
+     FindInFieldTable(LookupRoot);
+ 
+   if (Result=nil) then begin
+     PersistentClass := GetClass(AClassName);
+     if {$ifndef FPC}(persistentclass <> nil) and{$endif}
+              PersistentClass.InheritsFrom(TComponent) then
+       Result := TComponentClass(PersistentClass);
+   end;
   end;
-
   if (Result=nil) and assigned(OnFindComponentClass) then
     OnFindComponentClass(Self, AClassName, Result);
 
