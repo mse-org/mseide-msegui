@@ -2553,12 +2553,12 @@ end;
 
 function tdirtreeview.getoptions: dirtreeoptionsty;
 begin
- result:= fdirview.options;
+ result:= fdirview.optionsdir;
 end;
 
 procedure tdirtreeview.setoptions(const avalue: dirtreeoptionsty);
 begin
- fdirview.options:= avalue;
+ fdirview.optionsdir:= avalue;
 end;
 
 function tdirtreeview.getpath: filenamety;

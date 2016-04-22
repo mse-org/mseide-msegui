@@ -59,7 +59,7 @@ type
 //   fpath: filenamety;
    fonpathchanged: notifyeventty;
 //   fchecksubdir: boolean;
-   foptions: dirtreeoptionsty;
+   foptionsdir: dirtreeoptionsty;
 //   fchecksubdir: boolean;
    fonselctionchanged: listitemeventty;
    fonselectionchanged: listitemeventty;
@@ -78,6 +78,7 @@ type
    froot: filenamety;
    frootitem: tdirlistitem;
    procedure updatepath();
+   procedure doondataentered(); virtual;
   public
    destructor destroy(); override;
    function getcheckednodes(const amode: getnodemodety = 
@@ -90,7 +91,8 @@ type
    property checksubdir: boolean read getchecksubdir write setchecksubdir;
    property path: filenamety read getpath write setpath;
    property root: filenamety read froot write setroot;
-   property options: dirtreeoptionsty read foptions write foptions default [];
+   property optionsdir: dirtreeoptionsty read foptionsdir 
+                                          write foptionsdir default [];
    property onpathchanged: notifyeventty read fonpathchanged 
                                                    write fonpathchanged;
    property onselectionchanged: listitemeventty read fonselctionchanged 
@@ -226,7 +228,8 @@ begin
    exclude:= [fa_hidden];
   end;
   list.adddirectory(aitem.getpath,fil_name,nil,[fa_dir],exclude);
-  aitem.setentries(list,checksubdir,showhiddenfiles,dto_checkbox in foptions);
+  aitem.setentries(list,checksubdir,showhiddenfiles,
+                                              dto_checkbox in foptionsdir);
  finally
   list.free;
  end;
@@ -234,46 +237,46 @@ end;
 
 function tdirtreefo.getshowhiddenfiles: boolean;
 begin
- result:= dto_showhiddenfiles in foptions;
+ result:= dto_showhiddenfiles in foptionsdir;
 end;
 
 procedure tdirtreefo.setshowhiddenfiles(const avalue: boolean);
 begin
  if avalue then begin
-  include(foptions,dto_showhiddenfiles);
+  include(foptionsdir,dto_showhiddenfiles);
  end
  else begin
-  exclude(foptions,dto_showhiddenfiles);
+  exclude(foptionsdir,dto_showhiddenfiles);
  end;
 end;
 
 function tdirtreefo.getcasesensitive: boolean;
 begin
- result:= dto_casesensitive in foptions;
+ result:= dto_casesensitive in foptionsdir;
 end;
 
 procedure tdirtreefo.setcasesensitive(const avalue: boolean);
 begin
  if avalue then begin
-  include(foptions,dto_casesensitive);
+  include(foptionsdir,dto_casesensitive);
  end
  else begin
-  exclude(foptions,dto_casesensitive);
+  exclude(foptionsdir,dto_casesensitive);
  end;
 end;
 
 function tdirtreefo.getchecksubdir: boolean;
 begin
- result:= dto_checksubdir in foptions;
+ result:= dto_checksubdir in foptionsdir;
 end;
 
 procedure tdirtreefo.setchecksubdir(const avalue: boolean);
 begin
  if avalue then begin
-  include(foptions,dto_checksubdir);
+  include(foptionsdir,dto_checksubdir);
  end
  else begin
-  exclude(foptions,dto_checksubdir);
+  exclude(foptionsdir,dto_checksubdir);
  end;
 end;
 
@@ -324,7 +327,7 @@ var
  info1: fileinfoty;
 begin
  avalue:= fpath;
- if dto_checkbox in foptions then begin
+ if dto_checkbox in foptionsdir then begin
   treeitem.itemlist.options:= treeitem.itemlist.options + 
                                          [no_checkbox,no_updatechildchecked];
  end
@@ -416,8 +419,8 @@ begin
   end;
   if iscellclick(info,[],[],keyshiftstatesmask) and 
                       (info.zone in [cz_caption,cz_image]) then begin
-   if (dto_expandonclick in foptions) or 
-       (dto_expandondblclick in foptions) and 
+   if (dto_expandonclick in foptionsdir) or 
+       (dto_expandondblclick in foptionsdir) and 
                 (ss_double in info.mouseeventinfopo^.shiftstate) then begin
     treeitem.item.expanded:= true;
    end;
@@ -429,7 +432,7 @@ procedure tdirtreefo.treeitemoncreateitem(const sender: tcustomitemlist;
   var item: ttreelistedititem);
 begin
  item:= tdirlistitem.create(sender);
- if dto_checkbox in foptions then begin
+ if dto_checkbox in foptionsdir then begin
   with tdirlistitem(item) do begin
    fstate:= fstate + [ns_checkbox,ns_showchildchecked];
    froot:= self.froot;
@@ -437,9 +440,14 @@ begin
  end;
 end;
 
-procedure tdirtreefo.treeitemondataentered(const sender: tobject);
+procedure tdirtreefo.doondataentered();
 begin
  window.modalresult:= mr_ok;
+end;
+
+procedure tdirtreefo.treeitemondataentered(const sender: tobject);
+begin
+ doondataentered();
 end;
 
 procedure tdirtreefo.treeitemonitemnotification(const sender: tlistitem;
@@ -457,7 +465,7 @@ begin
    na_expand: begin
     include(finfo.state,fis_diropen);
     updateinfo;
-    if (count = 0) or not(dto_checkbox in foptions) then begin
+    if (count = 0) or not(dto_checkbox in foptionsdir) then begin
      adddir(tdirlistitem(sender));
     end;
     if count = 0 then begin
@@ -467,7 +475,7 @@ begin
    end;
    na_collapse: begin
     bo1:= count > 0;
-    if not (dto_checkbox in foptions) then begin
+    if not (dto_checkbox in foptionsdir) then begin
      clear;
     end;
     if bo1 then begin
