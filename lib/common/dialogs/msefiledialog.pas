@@ -436,6 +436,7 @@ type
    property path: filenamety read getpath write setpath;
    property root: filenamety read froot write setroot;
   published
+   property font: twidgetfont read getfont write setfont stored isfontstored;
    property options: dirtreeoptionsty read getoptions 
                                               write setoptions default [];
    property optionstree: treeitemeditoptionsty read getoptionstree 
