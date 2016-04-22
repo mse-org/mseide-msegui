@@ -20,7 +20,7 @@ uses
   dbf_common,
   dbf_fields,
   mdbf_prsdef,
-  dbf_prssupp;
+  mdbf_prssupp;
 
 type
 

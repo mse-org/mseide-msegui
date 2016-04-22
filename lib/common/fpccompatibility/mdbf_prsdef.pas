@@ -10,7 +10,7 @@ uses
   SysUtils,
   classes,mclasses,
   mdb,
-  dbf_prssupp;
+  mdbf_prssupp;
 
 const
   MaxArg = 6;
