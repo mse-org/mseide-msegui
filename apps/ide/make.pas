@@ -178,7 +178,7 @@ function buildmakecommandline(const atag: integer): msestring;
  end;
  
 var
- int1,int2: integer;
+ int1,int2,step: integer;
  str1,str2,str3: msestring;
  ar1: filenamearty;
 // wstr1: filenamety;
@@ -202,7 +202,18 @@ begin
   if int1 < int2 then begin
    int2:= int1;
   end;
-  for int1:= 0 to int2 do begin
+  if projectoptions.o.noreversepathorder then begin
+   int1:= int2;
+   int2:= -1;
+   step:= -1;
+  end
+  else begin
+   int1:= 0;
+   int2:= int2+1;
+   step:= 1;
+  end;
+  while int1 <> int2 do begin
+//  for int1:= int1 to int2 do begin
    if (atag and unitdirson[int1] <> 0) and
          (unitdirs[int1] <> '') then begin
     str2:= normalizename(unitdirs[int1]);
@@ -219,6 +230,7 @@ begin
      str1:= str1 + ' ' + quotefilename(objpref+str2);
     end;
    end;
+   inc(int1,step);
   end;
   for int1:= 0 to high(makeoptions) do begin
    if (atag and makeoptionson[int1] <> 0) and

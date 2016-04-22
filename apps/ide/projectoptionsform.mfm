@@ -1860,7 +1860,7 @@ object projectoptionsfo: tprojectoptionsfo
               frame.localprops1 = []
               taborder = 2
               bounds_x = 0
-              bounds_y = 73
+              bounds_y = 74
               bounds_cx = 754
               bounds_cy = 37
               anchors = [an_top]
@@ -1951,7 +1951,7 @@ object projectoptionsfo: tprojectoptionsfo
               hint = '"--tty DEVICE" to set target terminal'
               onshowhint = hintexpandedmacros
               bounds_x = 1
-              bounds_y = 110
+              bounds_y = 111
               bounds_cx = 752
               bounds_cy = 37
               anchors = [an_left, an_top, an_right]
@@ -1964,7 +1964,7 @@ object projectoptionsfo: tprojectoptionsfo
               frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive]
               taborder = 5
               bounds_x = 0
-              bounds_y = 187
+              bounds_y = 188
               bounds_cx = 754
               bounds_cy = 37
               anchors = [an_top]
@@ -2107,7 +2107,7 @@ object projectoptionsfo: tprojectoptionsfo
               frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive]
               taborder = 6
               bounds_x = 0
-              bounds_y = 220
+              bounds_y = 224
               bounds_cx = 754
               bounds_cy = 37
               anchors = [an_top]
@@ -2340,7 +2340,7 @@ object projectoptionsfo: tprojectoptionsfo
               frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive]
               taborder = 4
               bounds_x = 0
-              bounds_y = 150
+              bounds_y = 151
               bounds_cx = 593
               bounds_cy = 37
               optionsscale = [osc_expandx, osc_shrinkx, osc_expandy, osc_shrinky]
@@ -3495,9 +3495,9 @@ object projectoptionsfo: tprojectoptionsfo
                 0
               )
               bounds_x = 0
-              bounds_y = 47
+              bounds_y = 46
               bounds_cx = 754
-              bounds_cy = 266
+              bounds_cy = 267
               bounds_cymin = 40
               anchors = [an_top, an_bottom]
               optionsgrid = [og_keyrowmoving, og_rowinserting, og_rowdeleting, og_selectedrowsdeleting, og_focuscellonenter, og_autofirstrow, og_autoappend, og_wrapcol, og_autopopup]
@@ -3782,87 +3782,115 @@ object projectoptionsfo: tprojectoptionsfo
                 reffontheight = 14
               end
             end
-            object unitpref: tstringedit
-              frame.caption = 'Unit pref.(-Fu)'
-              frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive]
-              frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive]
-              frame.outerframe = (
-                0
-                17
-                5
-                0
-              )
-              taborder = 1
-              onshowhint = hintexpandedmacros
-              bounds_x = 1
-              bounds_y = 5
-              bounds_cx = 89
-              bounds_cy = 37
-              reffontheight = 14
-            end
-            object incpref: tstringedit
-              frame.caption = 'Inc pref.(-Fi)'
-              frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive]
-              frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive]
-              frame.outerframe = (
-                0
-                17
-                0
-                0
-              )
-              taborder = 2
-              onshowhint = hintexpandedmacros
-              bounds_x = 89
-              bounds_y = 5
-              bounds_cx = 84
-              bounds_cy = 37
-              reffontheight = 14
-            end
-            object libpref: tstringedit
-              frame.caption = 'Lib pref.(-Fl)'
-              frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive]
-              frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive]
-              frame.outerframe = (
-                0
-                17
-                0
-                0
-              )
-              taborder = 3
-              onshowhint = hintexpandedmacros
-              bounds_x = 177
-              bounds_y = 5
-              bounds_cx = 84
-              bounds_cy = 37
-              reffontheight = 14
-            end
-            object objpref: tstringedit
-              frame.caption = 'Obj pref. (-Fo)'
-              frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive]
-              frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive]
-              frame.outerframe = (
-                0
-                17
-                4
-                0
-              )
-              taborder = 4
-              onshowhint = hintexpandedmacros
-              bounds_x = 265
-              bounds_y = 5
-              bounds_cx = 88
-              bounds_cy = 37
-              reffontheight = 14
-            end
             object tspacer1: tspacer
               color = -2147483645
-              taborder = 5
+              taborder = 1
               bounds_x = 287
-              bounds_y = 42
+              bounds_y = 41
               bounds_cx = 50
               bounds_cy = 5
-              linktop = objpref
+              linktop = tlayouter17
               linkbottom = unitdirgrid
+            end
+            object tlayouter17: tlayouter
+              optionswidget = [ow_tabfocus, ow_parenttabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_destroywidgets]
+              taborder = 2
+              bounds_x = 0
+              bounds_y = 4
+              bounds_cx = 754
+              bounds_cy = 37
+              anchors = [an_top]
+              optionsscale = [osc_expandy, osc_shrinky, osc_expandshrinkx, osc_expandshrinky]
+              optionslayout = [lao_aligny]
+              align_glue = wam_start
+              object objpref: tstringedit
+                frame.caption = 'Obj pref. (-Fo)'
+                frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive]
+                frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive]
+                frame.outerframe = (
+                  0
+                  17
+                  4
+                  0
+                )
+                onshowhint = hintexpandedmacros
+                bounds_x = 272
+                bounds_y = 0
+                bounds_cx = 88
+                bounds_cy = 37
+                reffontheight = 14
+              end
+              object libpref: tstringedit
+                frame.caption = 'Lib pref.(-Fl)'
+                frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive]
+                frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive]
+                frame.outerframe = (
+                  0
+                  17
+                  0
+                  0
+                )
+                taborder = 1
+                onshowhint = hintexpandedmacros
+                bounds_x = 184
+                bounds_y = 0
+                bounds_cx = 84
+                bounds_cy = 37
+                reffontheight = 14
+              end
+              object incpref: tstringedit
+                frame.caption = 'Inc pref.(-Fi)'
+                frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive]
+                frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive]
+                frame.outerframe = (
+                  0
+                  17
+                  0
+                  0
+                )
+                taborder = 2
+                onshowhint = hintexpandedmacros
+                bounds_x = 96
+                bounds_y = 0
+                bounds_cx = 84
+                bounds_cy = 37
+                reffontheight = 14
+              end
+              object unitpref: tstringedit
+                frame.caption = 'Unit pref.(-Fu)'
+                frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive]
+                frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive]
+                frame.outerframe = (
+                  0
+                  17
+                  5
+                  0
+                )
+                taborder = 3
+                onshowhint = hintexpandedmacros
+                bounds_x = 8
+                bounds_y = 0
+                bounds_cx = 89
+                bounds_cy = 37
+                reffontheight = 14
+              end
+              object noreversepathorder: tbooleanedit
+                frame.caption = 'Reverse directory order'
+                frame.localprops = []
+                frame.localprops1 = []
+                frame.outerframe = (
+                  0
+                  1
+                  150
+                  2
+                )
+                taborder = 4
+                bounds_x = 431
+                bounds_y = 20
+                bounds_cx = 163
+                bounds_cy = 16
+                options = [bo_executeonclick, bo_executeonkey, bo_executeonshortcut, bo_executedefaultonenterkey, bo_reversed]
+              end
             end
           end
           object ttabpage18: ttabpage
