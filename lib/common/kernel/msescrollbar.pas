@@ -35,7 +35,8 @@ const
 //                                         (sbbu_down,sbbu_move,sbbu_up);
 
 type
- scrollbaroptionty = (sbo_thumbtrack,sbo_moveauto,sbo_showauto,sbo_show,
+ scrollbaroptionty = (sbo_thumbtrack,sbo_clicktovalue,
+                      sbo_moveauto,sbo_showauto,sbo_show,
                       sbo_opposite,sbo_valuekeys,sbo_noarrowkeys,sbo_nopagekeys,
                       sbo_noreflectedclick{,
                       sbo_flat,sbo_noanim});
@@ -992,6 +993,9 @@ procedure tcustomscrollbar.mouseevent(var info: mouseeventinfoty);
   fclickedarea:= scrollbarareaty(-1);
  end;
 
+var
+ isclicktovalue: boolean;
+
  procedure mousemove(ar1: scrollbarareaty);
  var
   ar2: scrollbarareaty;
@@ -1000,13 +1004,15 @@ procedure tcustomscrollbar.mouseevent(var info: mouseeventinfoty);
    application.widgetcursorshape:= cr_arrow;
   end;
   if clickedareaisvalid then begin
-   if (ar1 <> fclickedarea) and (fclickedarea <> sbbu_move) then begin
+   if (ar1 <> fclickedarea) and (fclickedarea <> sbbu_move) and 
+        ((frepeater = nil) or 
+                      not (fclickedarea in[sba_start,sba_end])) then begin
     releasebutton(false);
     fclickedarea:= scrollbarareaty(scrollbarclicked);
    end;
    if (fclickedarea = sbbu_move) then begin
     ar1:= sbbu_move;{scrollbarareaty(-1);}
-    if info.eventkind = ek_mousemove then begin
+    if (info.eventkind = ek_mousemove) or isclicktovalue then begin
      thumbtrack(info.pos);
      if sbo_thumbtrack in foptions then begin
       fintf.scrollevent(self,sbe_thumbtrack);
@@ -1066,6 +1072,13 @@ begin
     if (info.button = mb_left) and 
      (not(sbo_noreflectedclick in foptions) or 
                           not (es_reflected in info.eventstate)) then begin
+
+     isclicktovalue:= (ar1 in [sba_start,sba_end,sbbu_move]) and 
+                    ((info.shiftstate * keyshiftstatesmask = [ss_ctrl]) or 
+                    (sbo_clicktovalue in foptions));
+     if isclicktovalue then begin
+      ar1:= sbbu_move;
+     end;
      fclickedarea:= ar1;
      if clickedareaisvalid then begin
       include(fdrawinfo.areas[fclickedarea].state,shs_clicked);
@@ -1084,16 +1097,36 @@ begin
      else begin
       if fclickedarea = sbbu_move then begin
        fpickpos:= info.pos;
-       with fdrawinfo.areas[sbbu_move].ca.dim do begin
-        case fdirection of
-         gd_right: fpickoffset:= x - info.pos.x - 
-                               fdrawinfo.areas[sba_start].ca.dim.x;
-         gd_up: fpickoffset:= fdrawinfo.areas[sba_start].ca.dim.cy + info.pos.y;
-         gd_left: fpickoffset:= fdrawinfo.areas[sba_start].ca.dim.cx + 
-                                                         info.pos.x;
-         gd_down: fpickoffset:= y - info.pos.y - 
-                                        fdrawinfo.areas[sba_start].ca.dim.y;
+       if isclicktovalue then begin
+        with fdrawinfo.areas[sbbu_move].ca.dim do begin
+         case fdirection of
+          gd_right: fpickoffset:=-fdrawinfo.areas[sba_start].ca.dim.x - 
+                                                                    cx div 2;
+          gd_up: fpickoffset:= fdrawinfo.areas[sba_start].ca.dim.cy + y +
+                                                                    cy div 2;
+          gd_left: fpickoffset:= fdrawinfo.areas[sba_start].ca.dim.cx + x +
+                                                                    cx div 2;
+          gd_down: fpickoffset:= -fdrawinfo.areas[sba_start].ca.dim.y - 
+                                                                    cy div 2 ;
+         end;
         end;
+       end
+       else begin
+        with fdrawinfo.areas[sbbu_move].ca.dim do begin
+         case fdirection of
+          gd_right: fpickoffset:= x - info.pos.x - 
+                                fdrawinfo.areas[sba_start].ca.dim.x;
+          gd_up: fpickoffset:= fdrawinfo.areas[sba_start].ca.dim.cy +
+                                                               info.pos.y;
+          gd_left: fpickoffset:= fdrawinfo.areas[sba_start].ca.dim.cx + 
+                                                               info.pos.x;
+          gd_down: fpickoffset:= y - info.pos.y - 
+                                         fdrawinfo.areas[sba_start].ca.dim.y;
+         end;
+        end;
+       end;
+       if isclicktovalue then begin
+        mousemove(ar1);
        end;
       end;
      end;
