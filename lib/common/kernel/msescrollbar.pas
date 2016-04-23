@@ -1146,7 +1146,7 @@ procedure tcustomscrollbar.mousewheelevent(var info: mousewheeleventinfoty;
 begin
  with info do begin
   include(eventstate,es_processed);
-  if (wheel = mw_down) xor (fdirection in [gd_left,gd_down]) then begin
+  if (wheel = mw_down) xor (fdirection in [gd_right,gd_down]) then begin
    if (fstepctrlfact <> 0) or (fstepshiftfact <> 0) then begin
     wheeldown(shiftstate);
    end
