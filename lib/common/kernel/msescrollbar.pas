@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2015 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2016 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -102,6 +102,8 @@ type
 //   fframeendbutton1: tframe;
 //   fframeendbutton2: tframe;
    fface: tface;
+   fface1: tface;
+   fface2: tface;
    fondimchanged: proceventty;
    fbuttonendlength: integer;
    fpaintedbutton: scrollbarareaty;
@@ -157,6 +159,10 @@ type
    procedure writewheelsensitivity(writer: twriter);
    function getdisabled: boolean;
    procedure setdisabled(const avalue: boolean);
+   function getface1: tface;
+   procedure setface1(const avalue: tface);
+   function getface2: tface;
+   procedure setface2(const avalue: tface);
   protected
    fstate: scrollbarstatesty;
    fintf: iscrollbar;
@@ -201,12 +207,16 @@ type
    constructor create(intf: iscrollbar; org: originty = org_client;
               ondimchanged: proceventty = nil); reintroduce; virtual;
    destructor destroy; override;
+
    procedure createface();
+   procedure createface1();
+   procedure createface2();
    procedure createfacebutton;
    procedure createfaceendbutton;
    procedure createframebutton;
    procedure createframeendbutton1;
    procedure createframeendbutton2;
+
    procedure checktemplate(const sender: tobject);
    procedure paint(const canvas: tcanvas;
                                 const acolor: colorty = cl_none); virtual;
@@ -265,6 +275,8 @@ type
                          write setbuttonendlength default 0;
                      //0 -> square, -1 -> no endbuttons
    property face: tface read getface write setface;
+   property face1: tface read getface1 write setface1;
+   property face2: tface read getface2 write setface2;
    property facebutton: tface read getfacebutton write setfacebutton;
    property faceendbutton: tface read getfaceendbutton write setfaceendbutton;
    property framebutton: tframe read getframebutton write setframebutton;
@@ -308,6 +320,8 @@ type
    property buttonminlength;
    property buttonendlength;
    property face;
+   property face1;
+   property face2;
    property facebutton;
    property faceendbutton;
    property framebutton;
@@ -342,6 +356,8 @@ type
    property buttonminlength;
    property buttonendlength;
    property face;
+   property face1;
+   property face2;
    property facebutton;
    property faceendbutton;
    property framebutton;
@@ -759,17 +775,16 @@ var
  col1: colorty;
  statebefore: shapestatesty;
 begin
-// statebefore:= []; //compiler warning
  with canvas,self.fdrawinfo do begin
-  save;
-//  fdrawinfo.areas[sbbu_down].face:= ffaceendbutton;
-//  fdrawinfo.areas[sbbu_move].face:= ffacebutton;
-//  fdrawinfo.areas[sbbu_up].face:= ffaceendbutton;
-//  fdrawinfo.areas[sbbu_down].frame:= fframeendbutton1;
-//  fdrawinfo.areas[sbbu_move].frame:= fframebutton;
-//  fdrawinfo.areas[sbbu_up].frame:= fframeendbutton2;
+  save();
   if fface <> nil then begin
    fface.paint(canvas,fdrawinfo.scrollrect);
+  end;
+  if fface1 <> nil then begin
+   fface1.paint(canvas,areas[sba_start].ca.dim);
+  end;
+  if fface2 <> nil then begin
+   fface2.paint(canvas,areas[sba_end].ca.dim);
   end;
   if acolor = cl_none then begin
    col1:= fcolor;
@@ -778,28 +793,8 @@ begin
    col1:= acolor;
   end;
   col1:= fintf.translatecolor(col1);
-//  color:= col1;
   fpaintedbutton:= firstbutton;
   while fpaintedbutton <= lastbutton do begin
-   {
-   case fpaintedbutton of
-    sbbu_down: begin
-     if fframeendbutton1 <> nil then begin
-      fframeendbutton1.paintbackground(canvas,buttonareas[bbu_down],false);
-     end;
-    end;
-    sbbu_move: begin
-     if fframebutton <> nil then begin
-      fframebutton.paintbackground(canvas,buttonareas[bbu_move],false);
-     end;
-    end;
-    sbbu_up: begin
-     if fframeendbutton2 <> nil then begin
-      fframeendbutton2.paintbackground(canvas,buttonareas[bbu_up],false);
-     end;
-    end;
-   end;
-  }
    if acolor <> cl_none then begin
     with areas[fpaintedbutton] do begin
      statebefore:= state;
@@ -811,53 +806,38 @@ begin
    if acolor <> cl_none then begin
     areas[fpaintedbutton].state:= statebefore;
    end;
-  {
-   case fpaintedbutton of
-    sbbu_down: begin
-     if fframeendbutton1 <> nil then begin
-      fframeendbutton1.paintoverlay(canvas,buttonareas[bbu_down]);
-     end;
-    end;
-    sbbu_move: begin
-     if fframebutton <> nil then begin
-      fframebutton.paintoverlay(canvas,buttonareas[bbu_move]);
-     end;
-    end;
-    sbbu_up: begin
-     if fframeendbutton2 <> nil then begin
-      fframeendbutton2.paintoverlay(canvas,buttonareas[bbu_up]);
-     end;
-    end;
-   end;
-   }
    inc(fpaintedbutton);
   end;
   if fface = nil then begin
    colorbackground:= col1;
    brush:= stockobjects.bitmaps[stb_dens50];
-   if fclickedarea = sba_start then begin
-    color:= cl_black;
-   end
-   else begin
-    color:= fcolorpattern;
+   if fface1 = nil then begin
+    if fclickedarea = sba_start then begin
+     color:= cl_black;
+    end
+    else begin
+     color:= fcolorpattern;
+    end;
+    if fcolorpattern <> cl_none then begin
+     fillrect(areas[sba_start].ca.dim,cl_brushcanvas);
+    end
+    else begin
+     fillrect(areas[sba_start].ca.dim,col1);
+    end;
    end;
-   if fcolorpattern <> cl_none then begin
-    fillrect(areas[sba_start].ca.dim,cl_brushcanvas);
-   end
-   else begin
-    fillrect(areas[sba_start].ca.dim,col1);
-   end;
-   if fclickedarea = sba_end then begin
-    color:= cl_black;
-   end
-   else begin
-    color:= fcolorpattern;
-   end;
-   if fcolorpattern <> cl_none then begin
-    fillrect(areas[sba_end].ca.dim,cl_brushcanvas);
-   end
-   else begin
-    fillrect(areas[sba_end].ca.dim,col1);
+   if fface2 = nil then begin
+    if fclickedarea = sba_end then begin
+     color:= cl_black;
+    end
+    else begin
+     color:= fcolorpattern;
+    end;
+    if fcolorpattern <> cl_none then begin
+     fillrect(areas[sba_end].ca.dim,cl_brushcanvas);
+    end
+    else begin
+     fillrect(areas[sba_end].ca.dim,col1);
+    end;
    end;
   end;
   restore;
@@ -1391,7 +1371,9 @@ destructor tcustomscrollbar.destroy;
 begin
  freeandnil(frepeater);
  inherited;
- fface.Free;
+ fface.free();
+ fface1.free();
+ fface2.free();
  fdrawinfo.areas[sbbu_move].face.free;
  fdrawinfo.areas[sbbu_up].face.free;
  fdrawinfo.areas[sbbu_down].frame.free;
@@ -1480,6 +1462,20 @@ begin
  end;
 end;
 
+procedure tcustomscrollbar.createface1();
+begin
+ if fface1 = nil then begin
+  fface1:= tface.create(iface(self));
+ end;
+end;
+
+procedure tcustomscrollbar.createface2();
+begin
+ if fface2 = nil then begin
+  fface2:= tface.create(iface(self));
+ end;
+end;
+
 function tcustomscrollbar.getface: tface;
 begin
  fintf.getwidget.getoptionalobject(fface,
@@ -1493,6 +1489,34 @@ begin
                                {$ifdef FPC}@{$endif}createface);
  invalidate;
 // fface.assign(avalue);
+end;
+
+function tcustomscrollbar.getface1: tface;
+begin
+ fintf.getwidget.getoptionalobject(fface1,
+                               {$ifdef FPC}@{$endif}createface1);
+ result:= fface1;
+end;
+
+procedure tcustomscrollbar.setface1(const avalue: tface);
+begin
+ fintf.getwidget.setoptionalobject(avalue,fface1,
+                               {$ifdef FPC}@{$endif}createface1);
+ invalidate;
+end;
+
+function tcustomscrollbar.getface2: tface;
+begin
+ fintf.getwidget.getoptionalobject(fface2,
+                               {$ifdef FPC}@{$endif}createface2);
+ result:= fface2;
+end;
+
+procedure tcustomscrollbar.setface2(const avalue: tface);
+begin
+ fintf.getwidget.setoptionalobject(avalue,fface2,
+                               {$ifdef FPC}@{$endif}createface2);
+ invalidate;
 end;
 
 function tcustomscrollbar.getfacebutton: tface;
