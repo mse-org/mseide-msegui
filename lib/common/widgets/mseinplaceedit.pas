@@ -564,7 +564,7 @@ procedure tinplaceedit.setup(const text: msestring;
               const font: tfont = nil;
               noinvalidate: boolean = false);
 begin
- exclude(fstate,ies_emptytext);
+// exclude(fstate,ies_emptytext);
  finfo.text.text:= text;
  ffiltertext:= '';
  if locating then begin
