@@ -442,7 +442,7 @@ type
    fuid: integer;
    fforcezorder: longbool;
    ftoolshortcuts: integerarty;
-   fnoreversepathorder: boolean;
+   freversepathorder: boolean;
    procedure setforcezorder(const avalue: longbool);
   protected
    function gett: tobject; override;
@@ -463,8 +463,8 @@ type
    property colorwarning: colorty read fcolorwarning write fcolorwarning;
    property colornote: colorty read fcolornote write fcolornote;
 
-   property noreversepathorder: boolean read fnoreversepathorder 
-                                                  write fnoreversepathorder;
+   property reversepathorder: boolean read freversepathorder 
+                                                  write freversepathorder;
 
    property usercolors: colorarty read fusercolors write fusercolors;
    property usercolorcomment: msestringarty read fusercolorcomment 
@@ -828,7 +828,7 @@ type
    libpref: tstringedit;
    incpref: tstringedit;
    unitpref: tstringedit;
-   noreversepathorder: tbooleanedit;
+   reversepathorder: tbooleanedit;
    procedure acttiveselectondataentered(const sender: TObject);
    procedure colonshowhint(const sender: tdatacol; const arow: Integer; 
                       var info: hintinfoty);

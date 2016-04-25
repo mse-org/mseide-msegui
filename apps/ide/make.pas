@@ -202,7 +202,7 @@ begin
   if int1 < int2 then begin
    int2:= int1;
   end;
-  if projectoptions.o.noreversepathorder then begin
+  if not projectoptions.o.reversepathorder then begin
    int1:= int2;
    int2:= -1;
    step:= -1;

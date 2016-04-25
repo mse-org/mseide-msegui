@@ -2107,7 +2107,7 @@ object projectoptionsfo: tprojectoptionsfo
               frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive]
               taborder = 6
               bounds_x = 0
-              bounds_y = 224
+              bounds_y = 225
               bounds_cx = 754
               bounds_cy = 37
               anchors = [an_top]
@@ -3874,7 +3874,7 @@ object projectoptionsfo: tprojectoptionsfo
                 bounds_cy = 37
                 reffontheight = 14
               end
-              object noreversepathorder: tbooleanedit
+              object reversepathorder: tbooleanedit
                 frame.caption = 'Reverse directory order'
                 frame.localprops = []
                 frame.localprops1 = []
@@ -3889,7 +3889,6 @@ object projectoptionsfo: tprojectoptionsfo
                 bounds_y = 20
                 bounds_cx = 163
                 bounds_cy = 16
-                options = [bo_executeonclick, bo_executeonkey, bo_executeonshortcut, bo_executedefaultonenterkey, bo_reversed]
               end
             end
           end
