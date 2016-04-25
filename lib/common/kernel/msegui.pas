@@ -18253,13 +18253,16 @@ label
  endlab;
 begin
  result:= 0;
- if (tws_windowvisible in twindow(l).fstate) then begin
-  if not (tws_windowvisible in twindow(r).fstate) then begin
+ if (tws_windowvisible in twindow(l).fstate) and 
+                    (twindow(l).syscontainer = sywi_none) then begin
+  if not (tws_windowvisible in twindow(r).fstate) or
+                       (twindow(r).syscontainer <> sywi_none) then begin
    inc(result,invisibleweight);
   end
  end
  else begin
-  if (tws_windowvisible in twindow(r).fstate) then begin
+  if (tws_windowvisible in twindow(r).fstate) and 
+                    (twindow(r).syscontainer = sywi_none)then begin
    dec(result,invisibleweight);
   end
   else begin
@@ -19051,8 +19054,10 @@ end;
 
 function cmpwindowvisibility(const l,r): integer;
 begin
- if tws_windowvisible in twindow(l).fstate then begin
-  if tws_windowvisible in twindow(r).fstate then begin
+ if (tws_windowvisible in twindow(l).fstate) and 
+                 (twindow(l).syscontainer = sywi_none) then begin
+  if (tws_windowvisible in twindow(r).fstate) and
+                 (twindow(r).syscontainer = sywi_none) then begin
    result:= 0;
   end
   else begin
@@ -19060,7 +19065,8 @@ begin
   end;
  end
  else begin
-  if tws_windowvisible in twindow(r).fstate then begin
+  if (tws_windowvisible in twindow(r).fstate) and 
+                    (twindow(r).syscontainer = sywi_none) then begin
    result:= -1;
   end
   else begin
@@ -19069,7 +19075,8 @@ begin
  end;
 end;
 
-procedure tguiapplication.sortzorder(); //top is last, invisibles first
+procedure tguiapplication.sortzorder(); 
+                  //top is last, invisibles and sycontainer windows first
 var
  ar1: winidarty;
  ar2,ar3: integerarty;
