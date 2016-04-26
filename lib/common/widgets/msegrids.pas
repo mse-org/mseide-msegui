@@ -1987,6 +1987,7 @@ type
    procedure internalselectionchanged;
    procedure setoptionsgrid(const avalue: optionsgridty); virtual;
    function updatesortcol(const avalue: integer): integer; virtual;
+                              //used in dbgrid switching index
    function getsortdescend(const acol: integer): boolean;
    procedure checkrowreadonlystate; virtual;
    procedure checkneedsrowheight;

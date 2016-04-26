@@ -523,6 +523,8 @@ type
    procedure dobeforedropdown; virtual;
    procedure doafterclosedropdown; virtual;
    function getvalueempty: integer; virtual;
+   procedure dostatread(const reader: tstatreader); override;
+   procedure dostatwrite(const writer: tstatwriter); override;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -544,7 +546,8 @@ type
                         out awidget: twidget); virtual; abstract;
    function getdropdowntext(const awidget: twidget): msestring; virtual; abstract;
   public
-   property dropdown: tdropdownwidgetcontroller read getdropdown write setdropdown;
+   property dropdown: tdropdownwidgetcontroller read getdropdown 
+                                                        write setdropdown;
  end;
 
  tdropdownwidgetedit = class(tcustomdropdownwidgetedit)
@@ -580,8 +583,6 @@ type
     //iifidatalink
    function getifilinkkind: ptypeinfo; override;
   {$endif}
-   procedure dostatread(const reader: tstatreader); override;
-   procedure dostatwrite(const writer: tstatwriter); override;
     //idropdownlist
    function getdropdownitems: tdropdowndatacols; virtual;
    function createdropdowncontroller: tcustomdropdowncontroller; override;
@@ -3848,6 +3849,18 @@ begin
  result:= -1;
 end;
 
+procedure tcustomdropdownedit.dostatread(const reader: tstatreader);
+begin
+ inherited;
+ fdropdown.dostatread(reader);
+end;
+
+procedure tcustomdropdownedit.dostatwrite(const writer: tstatwriter);
+begin
+ inherited;
+ fdropdown.dostatwrite(writer);
+end;
+
 {$ifdef mse_with_ifi}
 function tcustomdropdownedit.getifidatalinkintf: iifidatalink;
 begin
@@ -3969,18 +3982,6 @@ begin
 end;
 
 {$endif}
-
-procedure tcustomdropdownlistedit.dostatread(const reader: tstatreader);
-begin
- inherited;
- tdropdownlistcontroller(fdropdown).dostatread(reader);
-end;
-
-procedure tcustomdropdownlistedit.dostatwrite(const writer: tstatwriter);
-begin
- inherited;
- tdropdownlistcontroller(fdropdown).dostatwrite(writer);
-end;
 
 function tcustomdropdownlistedit.geteditframe: framety;
 begin

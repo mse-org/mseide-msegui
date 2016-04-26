@@ -2429,7 +2429,7 @@ end;
 { tdirdropdownedit }
 
 procedure tdirdropdownedit.createdropdownwidget(const atext: msestring;
-                    out awidget: twidget);
+                                                        out awidget: twidget);
 begin
  awidget:= tdirtreefo.create(nil);
  with tdirtreefo(awidget) do begin
@@ -2438,6 +2438,9 @@ begin
   path:= atext;
   onpathchanged:= {$ifdef FPC}@{$endif}pathchanged;
   text:= path;
+  if deo_colsizing in fdropdown.options then begin
+   optionssizing:= [osi_right];
+  end;
  end;
  feditor.sellength:= 0;
 end;

@@ -18,9 +18,9 @@ unit mseforms;
 interface
 uses
  msewidgets,msemenus,msegraphics,mseapplication,msegui,msegraphutils,mseevent,
- msetypes,msestrings,mseglob,mseguiglob,mseguiintf,msedragglob,
+ msetypes,msestrings,mseglob,mseguiglob,mseguiintf,msedragglob,msepointer,
  msemenuwidgets,msestat,msestatfile,mseclasses,classes,mclasses,msedock,
- msesimplewidgets,msebitmap,typinfo,msesplitter
+ msesimplewidgets,msebitmap,typinfo,msesplitter,mseobjectpicker
  {$ifdef mse_with_ifi},mseifiglob,mseificompglob,mseificomp{$endif};
 
 {$if defined(FPC) and (fpc_fullversion >= 020403)}
@@ -94,8 +94,11 @@ type
 
  formstatety = (fos_statreading);
  formstatesty = set of formstatety;
-                              
- tcustommseform = class(tcustomeventwidget,istatfile,idockcontroller
+ optionsizingty = (osi_left,osi_top,osi_right,osi_bottom);
+ optionssizingty = set of optionsizingty;
+                               
+ tcustommseform = class(tcustomeventwidget,istatfile,idockcontroller,
+                              iobjectpicker
                                  {$ifdef mse_with_ifi},iififormlink{$endif})
   private
    foncreate: notifyeventty;
@@ -135,6 +138,8 @@ type
    fonsyswindowevent: syseventeventty;
    factivatortarget: tactivator;
    fstatpriority: integer;
+   fobjectpicker: tobjectpicker;
+   foptionssizing: optionssizingty;
 {$ifdef mse_with_ifi}
    fifilink: tififormlinkcomp;
    function getifilinkkind: ptypeinfo;
@@ -146,6 +151,7 @@ type
    procedure updatemainmenutemplates;
    procedure setoptions(const Value: formoptionsty);
    procedure setoptionswindow(const Value: windowoptionsty);
+   procedure setoptionssizing(const avalue: optionssizingty);
    procedure setstatfile(const avalue: tstatfile);
    procedure setscrollbox(const avalue: tformscrollbox);
    function getonafterpaint: painteventty;
@@ -165,6 +171,8 @@ type
    fformstate: formstatesty;
    fscrollbox: tformscrollbox; //needed to distinguish between scrolled and
                                //unscrolled  (mainmenu...) widgets
+   fpickedges: optionssizingty;
+   fpickedgesrect: rectty;
    function internalgeticon(): tmaskedbitmap; virtual;
    procedure iconchanged(const sender: tobject);
    procedure aftercreate; virtual;
@@ -233,6 +241,21 @@ type
 
    procedure updatelayout(const sender: twidget); virtual; 
                                //called from scrollbox.dolayout
+   procedure mousepreview(const sender: twidget;
+                                         var info: mouseeventinfoty); override;
+
+    //iobjectpicker
+   function getcursorshape(const sender: tobjectpicker;
+                                var ashape: cursorshapety): boolean;
+                                      //true if found
+   procedure getpickobjects(const sender: tobjectpicker;
+                                        var aobjects: integerarty);
+   procedure beginpickmove(const sender: tobjectpicker);
+   procedure pickthumbtrack(const sender: tobjectpicker);
+   procedure endpickmove(const sender: tobjectpicker);
+   procedure cancelpickmove(const sender: tobjectpicker);
+   procedure paintxorpic(const sender: tobjectpicker; const acanvas: tcanvas);
+
    //iificommand
    {$ifdef mse_with_ifi}
    procedure executeificommand(var acommand: ificommandcodety); override;
@@ -261,6 +284,8 @@ type
    property optionswidget default defaultformwidgetoptions;
    property optionswindow: windowoptionsty read foptionswindow 
                                           write setoptionswindow default [];
+   property optionssizing: optionssizingty read foptionssizing 
+                                          write setoptionssizing default [];
    property mainmenu: tmainmenu read fmainmenu write setmainmenu;
    property font: twidgetfont read getfont write setfont stored isfontstored;
    property fontempty: twidgetfontempty read getfontempty 
@@ -413,6 +438,11 @@ type
   public
    constructor create(aowner: tcomponent; load: boolean); override;
  end;
+ 
+ tsizingform = class(tmseform)
+ end;
+ 
+ sizingformclassty = class of tsizingform;
 
  tmainform = class(tmseform)
   protected
@@ -608,6 +638,8 @@ type
  
 function createmseform(const aclass: tclass; 
                    const aclassname: pshortstring): tmsecomponent;
+function createsizingform(const aclass: tclass; 
+                   const aclassname: pshortstring): tmsecomponent;
 function createmainform(const aclass: tclass; 
                    const aclassname: pshortstring): tmsecomponent;
 function createsubform(const aclass: tclass; 
@@ -640,6 +672,14 @@ function createmseform(const aclass: tclass;
 
 begin
  result:= custommseformclassty(aclass).create(nil,false);
+ tmsecomponent1(result).factualclassname:= aclassname;
+end;
+
+function createsizingform(const aclass: tclass; 
+                    const aclassname: pshortstring): tmsecomponent;
+
+begin
+ result:= sizingformclassty(aclass).create(nil,false);
  tmsecomponent1(result).factualclassname:= aclassname;
 end;
 
@@ -920,6 +960,7 @@ begin
  ficon.free;
  fscrollbox.free;
  fmainmenuwidget.free;
+ fobjectpicker.free;
  statfile:= nil; //unlink client connection
  inherited; //csdesigningflag is removed
  if not bo1 and candestroyevent(tmethod(fondestroyed)) then begin
@@ -2001,6 +2042,139 @@ begin
  //dummy
 end;
 
+procedure tcustommseform.setoptionssizing(const avalue: optionssizingty);
+begin
+ foptionssizing:= avalue;
+ if avalue = [] then begin
+  freeandnil(fobjectpicker);
+ end
+ else begin
+  if fobjectpicker = nil then begin
+   fobjectpicker:= tobjectpicker.create(iobjectpicker(self),org_widget);
+   fobjectpicker.thumbtrack:= true;
+  end;
+ end;
+end;
+
+procedure tcustommseform.mousepreview(const sender: twidget;
+                                                  var info: mouseeventinfoty);
+begin
+ if (fobjectpicker <> nil) then begin
+  translatewidgetpoint1(info.pos,sender,self);
+  fobjectpicker.mouseevent(info);
+  translatewidgetpoint1(info.pos,self,sender);
+  if not (es_processed in info.eventstate) then begin
+   inherited;
+  end;
+ end
+ else begin
+  inherited;
+ end;
+end;
+
+const
+ shapes: array[0..15] of cursorshapety = (
+ cr_default,   //        ,       ,         ,          
+ cr_sizehor,   //osi_left,       ,         ,          
+ cr_sizever,   //        ,osi_top,         ,          
+ cr_topleftcorner, //osi_left,osi_top,         ,          
+ cr_sizehor,   //        ,       ,osi_right,          
+ cr_default,   //osi_left,       ,osi_right,          
+ cr_toprightcorner, //        ,osi_top,osi_right,          
+ cr_default,   //osi_left,osi_top,osi_right,          
+ cr_sizever,   //        ,       ,         ,osi_bottom
+ cr_bottomleftcorner, //osi_left,       ,         ,osi_bottom
+ cr_default,   //        ,osi_top,         ,osi_bottom
+ cr_default,   //osi_left,osi_top,         ,osi_bottom
+ cr_bottomrightcorner,   //        ,       ,osi_right,osi_bottom
+ cr_default,   //osi_left,       ,osi_right,osi_bottom
+ cr_default,   //        ,osi_top,osi_right,osi_bottom
+ cr_default    //osi_left,osi_top,osi_right,osi_bottom
+ );
+ 
+function tcustommseform.getcursorshape(const sender: tobjectpicker;
+               var ashape: cursorshapety): boolean;
+const
+ sitol = 2*sizingtol;
+var
+ pt1: pointty;
+begin
+ result:= false;
+ fpickedges:= [];
+ pt1:= sender.pickpos;
+ if (sender.shiftstate * keyshiftstatesmask = []) and 
+                         pointinrect(pt1,mr(nullpoint,size)) then begin
+  if pt1.x < sitol then begin
+   include(fpickedges,osi_left);
+  end;
+  if pt1.y < sitol then begin
+   include(fpickedges,osi_top);
+  end;
+  if pt1.x >= fwidgetrect.cx-sitol then begin
+   include(fpickedges,osi_right);
+  end;
+  if pt1.y >= fwidgetrect.cy-sitol then begin
+   include(fpickedges,osi_bottom);
+  end;
+  fpickedges:= fpickedges * foptionssizing;
+  result:= fpickedges <> [];
+  if result then begin
+   ashape:= shapes[int32(fpickedges)];
+  end;
+ end;
+end;
+
+procedure tcustommseform.getpickobjects(const sender: tobjectpicker;
+               var aobjects: integerarty);
+begin
+ if fpickedges <> [] then begin
+  setlength(aobjects,1);
+ end;
+end;
+
+procedure tcustommseform.beginpickmove(const sender: tobjectpicker);
+begin
+ fpickedgesrect:= fwidgetrect;
+ //dummy
+end;
+
+procedure tcustommseform.pickthumbtrack(const sender: tobjectpicker);
+var
+ rect1: rectty;
+begin
+ rect1:= fpickedgesrect;
+ if osi_left in fpickedges then begin
+  rect1.x:= rect1.x + sender.pickoffset.x;
+  rect1.cx:= rect1.cx - sender.pickoffset.x;
+ end;
+ if osi_top in fpickedges then begin
+  rect1.y:= rect1.y + sender.pickoffset.y;
+  rect1.cy:= rect1.cy - sender.pickoffset.y;
+ end;
+ if osi_right in fpickedges then begin
+  rect1.cx:= rect1.cx + sender.pickoffset.x;
+ end;
+ if osi_top in fpickedges then begin
+  rect1.cy:= rect1.cy + sender.pickoffset.y;
+ end;
+ widgetrect:= rect1;
+end;
+
+procedure tcustommseform.endpickmove(const sender: tobjectpicker);
+begin
+ //dummy
+end;
+
+procedure tcustommseform.cancelpickmove(const sender: tobjectpicker);
+begin
+ widgetrect:= fpickedgesrect;
+end;
+
+procedure tcustommseform.paintxorpic(const sender: tobjectpicker;
+               const acanvas: tcanvas);
+begin
+end;
+
 procedure tcustommseform.readonchildscaled(reader: treader);
 begin
  onlayout:= notifyeventty(readmethod(reader));
@@ -2471,6 +2645,7 @@ begin
  inherited;
  getcompchildren(proc,root);
 end;
+
 
 end.
 

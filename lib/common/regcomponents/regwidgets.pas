@@ -153,6 +153,9 @@ const
  mseformintf: designmoduleintfty = 
   (createfunc: {$ifdef FPC}@{$endif}createmseform;
      initnewcomponent: nil; getscale: nil; sourcetoform: nil);
+ sizingformintf: designmoduleintfty = 
+  (createfunc: {$ifdef FPC}@{$endif}createsizingform;
+     initnewcomponent: nil; getscale: nil; sourcetoform: nil);
  mainformintf: designmoduleintfty = 
   (createfunc: {$ifdef FPC}@{$endif}createmainform;
      initnewcomponent: nil; getscale: nil; sourcetoform: nil);
@@ -172,6 +175,7 @@ const
 procedure Register;
 begin
  registerclass(tmseform);
+ registerclass(tsizingform);
  registerclass(tdockform);
  registerclass(tsubform);
  registerclass(tdockpanelform);
@@ -261,6 +265,7 @@ begin
                     'msegui','msegraphutils','mseclasses']);
                     
  registerdesignmoduleclass(tmseform,@mseformintf);
+ registerdesignmoduleclass(tsizingform,@sizingformintf);
  registerdesignmoduleclass(tmainform,@mainformintf);
  registerdesignmoduleclass(tdockform,@mseformintf);
  registerdesignmoduleclass(tdockpanelform,@dockpanelformintf);

@@ -45,7 +45,7 @@ type
                     dto_expandonclick,dto_expandondblclick);
  dirtreeoptionsty = set of dirtreeoptionty;
  
- tdirtreefo = class(tmseform)
+ tdirtreefo = class(tsizingform)
    grid: twidgetgrid;
    treeitem: ttreeitemedit;
    procedure treeitemoncreateitem(const sender: tcustomitemlist;

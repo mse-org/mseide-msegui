@@ -438,6 +438,8 @@ type
   public
    constructor create(const intf: idropdown); reintroduce;
    destructor destroy; override;
+   procedure dostatread(const reader: tstatreader); virtual;
+   procedure dostatwrite(const writer: tstatwriter); virtual;
    procedure dropdown; virtual;
    procedure canceldropdown;
    procedure dropdownactivated;
@@ -468,6 +470,7 @@ type
    fbounds_cy: integer;
    fbounds_cx: integer;
    fdropdownwidget: twidget;
+   fdropdownwidth: int32;
    procedure internaldropdown; override;
    procedure updatedropdownbounds(var arect: rectty); override;
    procedure receiveevent(const event: tobjectevent); override;
@@ -475,6 +478,9 @@ type
   public
    constructor create(const intf: idropdownwidget);
    procedure editnotification(var info: editnotificationinfoty); override;
+   procedure dostatread(const reader: tstatreader); override;
+   procedure dostatwrite(const writer: tstatwriter); override;
+   property dropdownwidget: twidget read fdropdownwidget;
   published
    property bounds_cx: integer read fbounds_cx write fbounds_cx default 0;
                    //0 -> ownerwidget.bounds_cx
@@ -544,8 +550,8 @@ type
   public
    constructor create(const intf: idropdownlist);
    destructor destroy; override;
-   procedure dostatread(const reader: tstatreader);
-   procedure dostatwrite(const writer: tstatwriter);
+   procedure dostatread(const reader: tstatreader); override;
+   procedure dostatwrite(const writer: tstatwriter); override;
    function valuelist: tmsestringdatalist;
    property cols: tdropdowncols read fcols write setcols;
    property valuecol: integer read fvaluecol write setvaluecol default 0;
@@ -1319,6 +1325,16 @@ begin
  inherited;
 end;
 
+procedure tcustomdropdowncontroller.dostatread(const reader: tstatreader);
+begin
+ //dummy
+end;
+
+procedure tcustomdropdowncontroller.dostatwrite(const writer: tstatwriter);
+begin
+ //dummy
+end;
+
 function tcustomdropdowncontroller.getbuttonframeclass: 
                                                   dropdownbuttonframeclassty;
 begin
@@ -1621,6 +1637,9 @@ begin
   try
    idropdownwidget(fintf).createdropdownwidget(fintf.geteditor.text,widget1);
    setlinkedvar(widget1,tmsecomponent(fdropdownwidget));
+   if (deo_colsizing in options) and (fdropdownwidth > 0) then begin
+    bounds_cx:= fdropdownwidth;
+   end;
   except
    if widget1 <> nil then begin
     widget1.release;
@@ -1686,6 +1705,9 @@ begin
    end;
 //   setlinkedvar(nil,tmsecomponent(fdropdownwidget));
 //   freeandnil(fdropdownwidget);
+   if deo_colsizing in foptions then begin
+    fdropdownwidth:= fdropdownwidget.width;
+   end;
    fdropdownwidget.Free;
    fdropdownwidget:= nil;
   end;
@@ -1705,6 +1727,20 @@ begin
     end;
    end;
   end;
+ end;
+end;
+
+procedure tdropdownwidgetcontroller.dostatread(const reader: tstatreader);
+begin
+ if deo_savestate in foptions then begin
+  fdropdownwidth:= reader.readinteger('dropdownwidth',0);
+ end;
+end;
+
+procedure tdropdownwidgetcontroller.dostatwrite(const writer: tstatwriter);
+begin
+ if deo_savestate in foptions then begin
+  writer.writeinteger('dropdownwidth',fdropdownwidth);
  end;
 end;
 

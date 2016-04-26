@@ -1750,9 +1750,11 @@ end;
    procedure reflectmouseevent(var info: mouseeventinfoty);
                                   //posts mousevent to window under mouse
    procedure mouseevent(var info: mouseeventinfoty); virtual;
-   procedure clientmouseevent(var info: mouseeventinfoty); virtual;
+   procedure mousepreview(const sender: twidget;
+                              var info: mouseeventinfoty); virtual;
    procedure childmouseevent(const sender: twidget;
                               var info: mouseeventinfoty); virtual;
+   procedure clientmouseevent(var info: mouseeventinfoty); virtual;
    procedure mousewheelevent(var info: mousewheeleventinfoty); virtual;
 
    procedure dokeydown1(var info: keyeventinfoty); 
@@ -10354,6 +10356,27 @@ begin
  end;
 end;
 
+procedure twidget.mousepreview(const sender: twidget;
+               var info: mouseeventinfoty);
+begin
+ if not (es_processed in info.eventstate) then begin
+  if (fparentwidget <> nil) and (self <> window.fmodalwidget) then begin
+   fparentwidget.mousepreview(sender,info);
+  end;
+ end;
+end;
+
+procedure twidget.childmouseevent(const sender: twidget;
+                    var info: mouseeventinfoty);
+begin
+ if not (es_processed in info.eventstate) then begin
+  if (fparentwidget <> nil) and (self <> window.fmodalwidget) then begin
+   fparentwidget.childmouseevent(sender,info);
+  end;
+ end;
+end;
+
+
 procedure twidget.domousewheelevent(var info: mousewheeleventinfoty);
 begin
  //dummy
@@ -10397,16 +10420,6 @@ end;
 procedure twidget.clientmouseevent(var info: mouseeventinfoty);
 begin
  //dummy
-end;
-
-procedure twidget.childmouseevent(const sender: twidget;
-                    var info: mouseeventinfoty);
-begin
- if not (es_processed in info.eventstate) then begin
-  if (fparentwidget <> nil) and (self <> window.fmodalwidget) then begin
-   fparentwidget.childmouseevent(sender,info);
-  end;
- end;
 end;
 
 function twidget.getclientpos: pointty;
@@ -15106,68 +15119,74 @@ begin
    end;
   end;
   mousecapturewidgetbefore:= appinst.fmousecapturewidget;
-  if (info.mouse.eventkind = ek_buttonpress) and 
-         (tws_buttonendmodal in fstate) and (fmodalwidget = capture) then begin
-   endmodal;
-  end
-  else begin
-   self1:= nil;
-   setlinkedvar(self,self1); //for destroy check
-   try
-    with capture do begin
+  self1:= nil;
+  setlinkedvar(self,self1); //for destroy check
+  try
+   with capture do begin
 //     absposbefore:= info.mouse.pos;
-     subpoint1(info.mouse.pos,rootpos);
-     posbefore:= info.mouse.pos;
-     appinst.fmousewidgetpos:= posbefore;
-     appinst.fdelayedmouseshift:= nullpoint;
-     if info.mouse.eventkind = ek_mousewheel then begin
-      mousewheelevent(info.wheel);
-     end
-     else begin
+    subpoint1(info.mouse.pos,rootpos);
+    posbefore:= info.mouse.pos;
+    appinst.fmousewidgetpos:= posbefore;
+    appinst.fdelayedmouseshift:= nullpoint;
+    if info.mouse.eventkind = ek_mousewheel then begin
+     mousewheelevent(info.wheel);
+    end
+    else begin
+     mousepreview(capture,info.mouse);
+     if self1 = nil then begin
+      exit;
+     end;
+     if not (es_processed in info.mouse.eventstate) then begin
+      if (info.mouse.eventkind = ek_buttonpress) and 
+             (tws_buttonendmodal in fstate) and 
+                              (fmodalwidget = capture) then begin
+       endmodal;
+       exit;
+      end;
       mouseevent(info.mouse);
       if self1 = nil then begin
        exit;
       end;
-      if (info.mouse.eventkind = ek_buttonpress) and ispopup and
-       (ow_mousefocus in self.fownerwidget.foptionswidget) then begin
-       activate; //possibly not done by windowmanager
-      end;
      end;
-     if self1 = nil then begin
-      exit;
+     if (info.mouse.eventkind = ek_buttonpress) and ispopup and
+      (ow_mousefocus in self.fownerwidget.foptionswidget) then begin
+      activate; //possibly not done by windowmanager
      end;
-     posbefore:= subpoint(info.mouse.pos,posbefore);
-     addpoint1(posbefore,appinst.fdelayedmouseshift);
-     if (posbefore.x <> 0) or (posbefore.y <> 0) then begin
-      gui_flushgdi;
-      with appinst do begin
-       getevents;
-       po1:= peventaty(eventlist.datapo);
-       for int1:= 0 to eventlist.count -1 do begin
-        if (po1^[int1] <> nil) and (po1^[int1].kind = ek_mousemove) then begin
-         freeandnil(po1^[int1]); //remove invalid events
-        end;
+    end;
+    if self1 = nil then begin
+     exit;
+    end;
+    posbefore:= subpoint(info.mouse.pos,posbefore);
+    addpoint1(posbefore,appinst.fdelayedmouseshift);
+    if (posbefore.x <> 0) or (posbefore.y <> 0) then begin
+     gui_flushgdi;
+     with appinst do begin
+      getevents;
+      po1:= peventaty(eventlist.datapo);
+      for int1:= 0 to eventlist.count -1 do begin
+       if (po1^[int1] <> nil) and (po1^[int1].kind = ek_mousemove) then begin
+        freeandnil(po1^[int1]); //remove invalid events
        end;
-       mouse.move(posbefore);
       end;
+      mouse.move(posbefore);
      end;
     end;
-    with info.mouse do begin
-     if (eventkind = ek_buttonrelease) and 
-       (appinst.fmousecapturewidget = nil) and 
-                      (mousecapturewidgetbefore <> nil) then begin
-      exclude(eventstate,es_processed);
-      eventkind:= ek_mousemove;
-      pos:= translatewidgetpoint(application.mouse.pos,nil,fownerwidget);
+   end;
+   with info.mouse do begin
+    if (eventkind = ek_buttonrelease) and 
+      (appinst.fmousecapturewidget = nil) and 
+                     (mousecapturewidgetbefore <> nil) then begin
+     exclude(eventstate,es_processed);
+     eventkind:= ek_mousemove;
+     pos:= translatewidgetpoint(application.mouse.pos,nil,fownerwidget);
 //      pos:= addpoint(absposbefore,posbefore);
-      dispatchmouseevent(info,nil);  //immediate mouseenter
-      eventkind:= ek_buttonrelease;
-     end;
+     dispatchmouseevent(info,nil);  //immediate mouseenter
+     eventkind:= ek_buttonrelease;
     end;
-   finally
-    if self1 <> nil then begin
-     setlinkedvar(nil,self1);
-    end;
+   end;
+  finally
+   if self1 <> nil then begin
+    setlinkedvar(nil,self1);
    end;
   end;
  end;
