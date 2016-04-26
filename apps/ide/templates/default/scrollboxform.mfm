@@ -1,0 +1,7 @@
+object ${%FORMNAME%}: t${%FORMNAME%}
+  bounds_x = 100
+  bounds_y = 100
+  bounds_cx = 100
+  bounds_cy = 100
+  moduleclassname = 'tscrollboxform'
+end
