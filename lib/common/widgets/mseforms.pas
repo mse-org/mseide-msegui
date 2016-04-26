@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2015 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2016 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -439,15 +439,6 @@ type
    constructor create(aowner: tcomponent; load: boolean); override;
  end;
  
- tsizingform = class(tmseform)
-  protected
-   class function getmoduleclassname: string; override;
-   class function hasresource: boolean; override;
-  public
- end;
-   
- sizingformclassty = class of tsizingform;
-
  tmainform = class(tmseform)
   protected
    class function getmoduleclassname: string; override;
@@ -648,8 +639,6 @@ function createsubform(const aclass: tclass;
                    const aclassname: pshortstring): tmsecomponent;
 function createscrollboxform(const aclass: tclass; 
                    const aclassname: pshortstring): tmsecomponent;
-function createsizingform(const aclass: tclass; 
-                   const aclassname: pshortstring): tmsecomponent;
 function simulatemodalresult(const awidget: twidget;
                               const amodres: modalresultty): boolean;
 
@@ -676,14 +665,6 @@ function createmseform(const aclass: tclass;
 
 begin
  result:= custommseformclassty(aclass).create(nil,false);
- tmsecomponent1(result).factualclassname:= aclassname;
-end;
-
-function createsizingform(const aclass: tclass; 
-                    const aclassname: pshortstring): tmsecomponent;
-
-begin
- result:= sizingformclassty(aclass).create(nil,false);
  tmsecomponent1(result).factualclassname:= aclassname;
 end;
 
@@ -2648,18 +2629,6 @@ procedure tscrollboxform.getchildren(proc: tgetchildproc; root: tcomponent);
 begin
  inherited;
  getcompchildren(proc,root);
-end;
-
-{ tsizingform }
-
-class function tsizingform.getmoduleclassname: string;
-begin
- result:= 'tsizingform';
-end;
-
-class function tsizingform.hasresource: boolean;
-begin
- result:= self <> tsizingform;
 end;
 
 end.

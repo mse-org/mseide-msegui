@@ -109,7 +109,8 @@ type
   ac_objectinspector,             //79 Object Inspector
   ac_storecomponent,              //80 Store Component
   ac_attachingprocess,            //81 Attaching Process
-  ac_loading                      //82 Loading
+  ac_loading,                     //82 Loading
+  ac_sizingform                   //83 Sizing Form
  );
 
 type

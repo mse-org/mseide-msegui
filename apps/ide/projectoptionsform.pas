@@ -1540,11 +1540,11 @@ begin
   newfiexts[2]:= '';
   newfisources[2]:= '';
   
-  setlength(fnewfonames,11);
-  setlength(fnewfonamebases,11);
-  setlength(fnewinheritedforms,11);
-  setlength(fnewfosources,11);
-  setlength(fnewfoforms,11);
+  setlength(fnewfonames,12);
+  setlength(fnewfonamebases,12);
+  setlength(fnewinheritedforms,12);
+  setlength(fnewfosources,12);
+  setlength(fnewfoforms,12);
 
   newfonames[0]:= actionsmo.c[ord(ac_mainform)];
   newfonamebases[0]:= 'form';
@@ -1564,53 +1564,59 @@ begin
   newfosources[2]:= '${TEMPLATEDIR}default/dockingform.pas';
   newfoforms[2]:= '${TEMPLATEDIR}default/dockingform.mfm';
  
-  newfonames[3]:= actionsmo.c[ord(ac_datamodule)];
-  newfonamebases[3]:= 'module';
+  newfonames[3]:= actionsmo.c[ord(ac_sizingform)];
+  newfonamebases[3]:= 'form';
   newinheritedforms[3]:= false;
-  newfosources[3]:= '${TEMPLATEDIR}default/datamodule.pas';
-  newfoforms[3]:= '${TEMPLATEDIR}default/datamodule.mfm';
+  newfosources[3]:= '${TEMPLATEDIR}default/sizingform.pas';
+  newfoforms[3]:= '${TEMPLATEDIR}default/sizingform.mfm';
  
-  newfonames[4]:= actionsmo.c[ord(ac_subform)];
-  newfonamebases[4]:= 'form';
+  newfonames[4]:= actionsmo.c[ord(ac_datamodule)];
+  newfonamebases[4]:= 'module';
   newinheritedforms[4]:= false;
-  newfosources[4]:= '${TEMPLATEDIR}default/subform.pas';
-  newfoforms[4]:= '${TEMPLATEDIR}default/subform.mfm';
-
-  newfonames[5]:= actionsmo.c[ord(ac_scrollboxform)];
+  newfosources[4]:= '${TEMPLATEDIR}default/datamodule.pas';
+  newfoforms[4]:= '${TEMPLATEDIR}default/datamodule.mfm';
+ 
+  newfonames[5]:= actionsmo.c[ord(ac_subform)];
   newfonamebases[5]:= 'form';
   newinheritedforms[5]:= false;
-  newfosources[5]:= '${TEMPLATEDIR}default/scrollboxform.pas';
-  newfoforms[5]:= '${TEMPLATEDIR}default/scrollboxform.mfm';
+  newfosources[5]:= '${TEMPLATEDIR}default/subform.pas';
+  newfoforms[5]:= '${TEMPLATEDIR}default/subform.mfm';
 
-  newfonames[6]:= actionsmo.c[ord(ac_tabform)];
+  newfonames[6]:= actionsmo.c[ord(ac_scrollboxform)];
   newfonamebases[6]:= 'form';
   newinheritedforms[6]:= false;
-  newfosources[6]:= '${TEMPLATEDIR}default/tabform.pas';
-  newfoforms[6]:= '${TEMPLATEDIR}default/tabform.mfm';
- 
-  newfonames[7]:= actionsmo.c[ord(ac_dockpanel)];
+  newfosources[6]:= '${TEMPLATEDIR}default/scrollboxform.pas';
+  newfoforms[6]:= '${TEMPLATEDIR}default/scrollboxform.mfm';
+
+  newfonames[7]:= actionsmo.c[ord(ac_tabform)];
   newfonamebases[7]:= 'form';
   newinheritedforms[7]:= false;
-  newfosources[7]:= '${TEMPLATEDIR}default/dockpanelform.pas';
-  newfoforms[7]:= '${TEMPLATEDIR}default/dockpanelform.mfm';
-
-  newfonames[8]:= actionsmo.c[ord(ac_report)];
-  newfonamebases[8]:= 'report';
-  newinheritedforms[8]:= false;
-  newfosources[8]:= '${TEMPLATEDIR}default/report.pas';
-  newfoforms[8]:= '${TEMPLATEDIR}default/report.mfm';
+  newfosources[7]:= '${TEMPLATEDIR}default/tabform.pas';
+  newfoforms[7]:= '${TEMPLATEDIR}default/tabform.mfm';
  
-  newfonames[9]:= actionsmo.c[ord(ac_scriptform)];
-  newfonamebases[9]:= 'script';
-  newinheritedforms[9]:= false;
-  newfosources[9]:= '${TEMPLATEDIR}default/pascform.pas';
-  newfoforms[9]:= '${TEMPLATEDIR}default/pascform.mfm';
+  newfonames[8]:= actionsmo.c[ord(ac_dockpanel)];
+  newfonamebases[8]:= 'form';
+  newinheritedforms[8]:= false;
+  newfosources[8]:= '${TEMPLATEDIR}default/dockpanelform.pas';
+  newfoforms[8]:= '${TEMPLATEDIR}default/dockpanelform.mfm';
 
-  newfonames[10]:= actionsmo.c[ord(ac_inheritedform)];
-  newfonamebases[10]:= 'form';
-  newinheritedforms[10]:= true;
-  newfosources[10]:= '${TEMPLATEDIR}default/inheritedform.pas';
-  newfoforms[10]:= '${TEMPLATEDIR}default/inheritedform.mfm';
+  newfonames[9]:= actionsmo.c[ord(ac_report)];
+  newfonamebases[9]:= 'report';
+  newinheritedforms[9]:= false;
+  newfosources[9]:= '${TEMPLATEDIR}default/report.pas';
+  newfoforms[9]:= '${TEMPLATEDIR}default/report.mfm';
+ 
+  newfonames[10]:= actionsmo.c[ord(ac_scriptform)];
+  newfonamebases[10]:= 'script';
+  newinheritedforms[10]:= false;
+  newfosources[10]:= '${TEMPLATEDIR}default/pascform.pas';
+  newfoforms[10]:= '${TEMPLATEDIR}default/pascform.mfm';
+
+  newfonames[11]:= actionsmo.c[ord(ac_inheritedform)];
+  newfonamebases[11]:= 'form';
+  newinheritedforms[11]:= true;
+  newfosources[11]:= '${TEMPLATEDIR}default/inheritedform.pas';
+  newfoforms[11]:= '${TEMPLATEDIR}default/inheritedform.mfm';
  
  end;
  with projectoptions,e,t do begin

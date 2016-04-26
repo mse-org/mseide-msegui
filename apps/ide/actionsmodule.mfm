@@ -2380,6 +2380,7 @@ object actionsmo: tactionsmo
       'Store Component'
       'Attaching Process'
       'Loading'
+      'Sizing Form'
     )
     left = 288
     top = 392

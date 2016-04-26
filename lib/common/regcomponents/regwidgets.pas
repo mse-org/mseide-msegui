@@ -47,7 +47,7 @@ uses
  msesplitter,msedock,mseforms,mseclasses,typinfo,msearrayprops,msewidgets,
  msegui,formdesigner,msedial,msemenuwidgets,msewindowwidget,msechart,
  msepolygon,msepickwidget,msetraywidget,msedockpanelform,msechartedit,mseedit,
- msebarcode,msedatalist,mseact,mseformatstr
+ msebarcode,msedatalist,mseact,mseformatstr,msesizingform
  {$ifndef mse_no_opengl}
 //  {$ifdef FPC}
      ,mseopenglwidget

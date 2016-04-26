@@ -15,7 +15,7 @@ interface
 uses
  mseforms,msewidgetgrid,mselistbrowser,msedatanodes,msefileutils,msetypes,
  msestrings,msegui,mseglob,mseclasses,msegrids,msesys,msegridsglob,
- mseapplication,msebitmap,msedataedits,mseedit,msegraphics,
+ mseapplication,msebitmap,msedataedits,mseedit,msegraphics,msesizingform,
  msegraphutils,mseguiglob,mseificomp,mseificompglob,mseifiglob,msemenus,msestat,
  msestatfile,msestream,sysutils;
 type

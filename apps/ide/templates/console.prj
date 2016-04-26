@@ -70,39 +70,55 @@ newfisources=3
  ${TEMPLATEDIR}default/program.pas
  ${TEMPLATEDIR}default/unit.pas
  
-newfonames=8
+newfonames=12
  Mainform
  Simple Form
  Docking Form
+ Sizing Form
  Datamodule
  Subform
+ Scrollboxform
+ Tabform
+ Dockpanel
  Report
  Scriptform
  Inherited Form
-newfonamebases=8
+newfonamebases=12
+ form
  form
  form
  form
  module
  form
+ form
+ form
+ form
  report
  script
  form
-newfosources=8
+newfosources=12
  ${TEMPLATEDIR}default/mainform.pas
  ${TEMPLATEDIR}default/simpleform.pas
  ${TEMPLATEDIR}default/dockingform.pas
+ ${TEMPLATEDIR}default/sizingform.pas
  ${TEMPLATEDIR}default/datamodule.pas
  ${TEMPLATEDIR}default/subform.pas
+ ${TEMPLATEDIR}default/scrollboxform.pas
+ ${TEMPLATEDIR}default/tabform.pas
+ ${TEMPLATEDIR}default/dockpanelform.pas
  ${TEMPLATEDIR}default/report.pas
  ${TEMPLATEDIR}default/pascform.pas
  ${TEMPLATEDIR}default/inheritedform.pas
-newfoforms=8
+newfoforms=12
  ${TEMPLATEDIR}default/mainform.mfm
  ${TEMPLATEDIR}default/simpleform.mfm
  ${TEMPLATEDIR}default/dockingform.mfm
+ ${TEMPLATEDIR}default/sizingform.mfm
  ${TEMPLATEDIR}default/datamodule.mfm
  ${TEMPLATEDIR}default/subform.mfm
+ ${TEMPLATEDIR}default/scrollboxform.mfm
+ ${TEMPLATEDIR}default/tabform.mfm
+ ${TEMPLATEDIR}default/dockpanelform.mfm
  ${TEMPLATEDIR}default/report.mfm
  ${TEMPLATEDIR}default/pascform.mfm
  ${TEMPLATEDIR}default/inheritedform.mfm
