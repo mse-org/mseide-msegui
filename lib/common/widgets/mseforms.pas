@@ -440,8 +440,12 @@ type
  end;
  
  tsizingform = class(tmseform)
+  protected
+   class function getmoduleclassname: string; override;
+   class function hasresource: boolean; override;
+  public
  end;
- 
+   
  sizingformclassty = class of tsizingform;
 
  tmainform = class(tmseform)
@@ -635,16 +639,16 @@ type
  end;
  
  scrollboxformclassty = class of tscrollboxform;
- 
+
 function createmseform(const aclass: tclass; 
-                   const aclassname: pshortstring): tmsecomponent;
-function createsizingform(const aclass: tclass; 
                    const aclassname: pshortstring): tmsecomponent;
 function createmainform(const aclass: tclass; 
                    const aclassname: pshortstring): tmsecomponent;
 function createsubform(const aclass: tclass; 
                    const aclassname: pshortstring): tmsecomponent;
 function createscrollboxform(const aclass: tclass; 
+                   const aclassname: pshortstring): tmsecomponent;
+function createsizingform(const aclass: tclass; 
                    const aclassname: pshortstring): tmsecomponent;
 function simulatemodalresult(const awidget: twidget;
                               const amodres: modalresultty): boolean;
@@ -2646,6 +2650,17 @@ begin
  getcompchildren(proc,root);
 end;
 
+{ tsizingform }
+
+class function tsizingform.getmoduleclassname: string;
+begin
+ result:= 'tsizingform';
+end;
+
+class function tsizingform.hasresource: boolean;
+begin
+ result:= self <> tsizingform;
+end;
 
 end.
 

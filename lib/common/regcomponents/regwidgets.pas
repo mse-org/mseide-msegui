@@ -175,10 +175,12 @@ const
 procedure Register;
 begin
  registerclass(tmseform);
- registerclass(tsizingform);
  registerclass(tdockform);
  registerclass(tsubform);
  registerclass(tdockpanelform);
+ registerclass(tscrollboxform);
+ registerclass(tsizingform);
+ 
  registercomponents('Widget',[
   tlabel,ticon,
   tstringdisp,trichstringdisp,tintegerdisp,tint64disp,trealdisp,tdatetimedisp,
