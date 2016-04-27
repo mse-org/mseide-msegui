@@ -1045,7 +1045,8 @@ type
                    //cl_none -> no no glyph
  end;
 
- datacolheaderoptionty = (dco_colsort,dco_hintclippedtext);
+ datacolheaderoptionty = (dco_colsort,dco_wholecellsortclick,
+                          dco_nodisabledsortindicator,dco_hintclippedtext);
  datacolheaderoptionsty = set of datacolheaderoptionty;
 
  tdatacolheader = class(tcolheader)
@@ -4643,26 +4644,31 @@ begin
   rect1:= adest;
   al1:= [al_right,al_ycentered];
   with tdatacol(fgrid.fdatacols.fitems[index]) do begin
-   if not (fgrid.hassort) or
-     (co_nosort in options) or 
-     (fgrid.datacols.sortcol >= 0) and (fgrid.datacols.sortcol <> index) or 
-     (fgrid.datacols.sortcol < 0) and 
-                           (og_nodefaultsort in fgrid.foptionsgrid) then begin
-    include(al1,al_grayed);
-   end;
    if co_sortdescend in options then begin
     int1:= ord(stg_arrowupsmall);
    end
    else begin
     int1:= ord(stg_arrowdownsmall);
    end;
+   if not (fgrid.hassort) or
+     (co_nosort in options) or 
+     (fgrid.datacols.sortcol >= 0) and (fgrid.datacols.sortcol <> index) or 
+     (fgrid.datacols.sortcol < 0) and 
+                           (og_nodefaultsort in fgrid.foptionsgrid) then begin
+    if dco_nodisabledsortindicator in self.foptions then begin
+     int1:= -1;
+    end;
+    include(al1,al_grayed);
+   end;
   end;
   int2:= (15-sortglyphwidth) div 2;
   inc(rect1.cx,int2);
   stockobjects.glyphs.paint(acanvas,int1,rect1,al1,finfo.colorglyph);
   int2:= sortglyphwidth+int2;
-  with rect1 do begin
-   acanvas.subcliprect(mr(x+cx-int2,y,int2,cy));
+  if int1 >= 0 then begin
+   with rect1 do begin
+    acanvas.subcliprect(mr(x+cx-int2,y,int2,cy));
+   end;
   end;
   dec(rect1.cx,int2);
   inherited drawcell(acanvas,rect1);
@@ -5316,40 +5322,47 @@ begin
 end;
 
 procedure tfixrow.buttoncellevent(var info: celleventinfoty);
+var
+ opt1: datacolheaderoptionsty;
 begin
- if (info.cell.col >= 0) and (info.cell.col < fcaptions.count) and
-          (dco_colsort in fcaptions[info.cell.col].options) and 
-          iscellclick(info,[ccr_nokeyreturn]{,[ss_ctrl]}) then begin
-  with fcellinfo.grid.datacols[info.cell.col] do begin
-   if (info.mouseeventinfopo^.pos.x > 
-           fwidth - 15) and    //button click of merged cells not supported
-       not (co_nosort in foptions) then begin
-    if (fcellinfo.grid.datacols.sortcol = info.cell.col) and 
-                                           fcellinfo.grid.hassort then begin
-     if ss_ctrl in info.mouseeventinfopo^.shiftstate then begin
-      if fcellinfo.grid.datacols.sortcoldefault >= 0 then begin
-       fcellinfo.grid.datacols.sortcol:= fcellinfo.grid.datacols.sortcoldefault;
+ if (info.cell.col >= 0) and (info.cell.col < fcaptions.count) then begin
+  opt1:= fcaptions[info.cell.col].options;
+  if (dco_colsort in opt1) and 
+           iscellclick(info,[ccr_nokeyreturn]{,[ss_ctrl]}) then begin
+   with fcellinfo.grid.datacols[info.cell.col] do begin
+    if ((opt1 * [dco_wholecellsortclick,dco_nodisabledsortindicator] <> []) and
+                                           (info.mouseeventinfopo^.pos.x > 0) or 
+                         (info.mouseeventinfopo^.pos.x > fwidth - 15)) and    
+                  //button click of merged cells not supported
+                                       not (co_nosort in foptions) then begin
+     if (fcellinfo.grid.datacols.sortcol = info.cell.col) and 
+                                            fcellinfo.grid.hassort then begin
+      if ss_ctrl in info.mouseeventinfopo^.shiftstate then begin
+       if fcellinfo.grid.datacols.sortcoldefault >= 0 then begin
+        fcellinfo.grid.datacols.sortcol:= 
+                                       fcellinfo.grid.datacols.sortcoldefault;
+       end
+       else begin
+        fcellinfo.grid.sorted:= false;
+        fcellinfo.grid.fdatacols.fsortcol:= -1;
+       end;
       end
       else begin
-       fcellinfo.grid.sorted:= false;
-       fcellinfo.grid.fdatacols.fsortcol:= -1;
+       if co_sortdescend in foptions then begin
+        options:= foptions - [co_sortdescend];
+       end
+       else begin
+        options:= foptions + [co_sortdescend];
+       end;
+       fcellinfo.grid.datacols.sortcol:= fcellinfo.grid.datacols.sortcol;
+                                 //call updatesortcol
       end;
      end
      else begin
-      if co_sortdescend in foptions then begin
-       options:= foptions - [co_sortdescend];
-      end
-      else begin
-       options:= foptions + [co_sortdescend];
+      fcellinfo.grid.datacols.sortcol:= info.cell.col;
+      if fcellinfo.grid.datacols.sortcol = info.cell.col then begin
+       fcellinfo.grid.sorted:= true;
       end;
-      fcellinfo.grid.datacols.sortcol:= fcellinfo.grid.datacols.sortcol;
-                                //call updatesortcol
-     end;
-    end
-    else begin
-     fcellinfo.grid.datacols.sortcol:= info.cell.col;
-     if fcellinfo.grid.datacols.sortcol = info.cell.col then begin
-      fcellinfo.grid.sorted:= true;
      end;
     end;
    end;
