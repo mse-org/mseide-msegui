@@ -3,5 +3,5 @@ object ${%FORMNAME%}: t${%FORMNAME%}
   bounds_y = 100
   bounds_cx = 445
   bounds_cy = 354
-  moduleclassname = 'sizingform'
+  moduleclassname = 'tsizingform'
 end

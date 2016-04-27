@@ -66,6 +66,12 @@ end;
 
 { tsizingform }
 
+destructor tsizingform.destroy();
+begin
+ fobjectpicker.free;
+ inherited;
+end;
+
 class function tsizingform.getmoduleclassname: string;
 begin
  result:= 'tsizingform';
@@ -208,12 +214,6 @@ procedure tsizingform.paintxorpic(const sender: tobjectpicker;
                const acanvas: tcanvas);
 begin
  //dummy
-end;
-
-destructor tsizingform.destroy();
-begin
- fobjectpicker.free;
- inherited;
 end;
 
 end.

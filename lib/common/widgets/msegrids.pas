@@ -99,13 +99,14 @@ type
                  og_autofirstrow,og_autoappend,og_appendempty,og_noinsertempty,
                  og_savestate,og_nosaveremoveappendedrow,
                  og_sorted,og_nodefaultsort,og_noreorderrow,
+                 og_customsort, //externally sorted data by onsortchanged
                  og_folded,og_colmerged,og_rowheight,
                  og_colchangeontabkey,og_colchangeonreturnkey,
                  og_wraprow,og_wrapcol,
                  og_visiblerowpagestep,
                  og_autopopup,
-                 og_mousescrollcol,
-                 og_noresetselect //deprecated -> og1_noresetselect
+                 og_mousescrollcol{,
+                 og_noresetselect //deprecated -> og1_noresetselect}
                  );
  optionsgridty = set of optiongridty;
  optiongrid1ty = (og1_norowdeletequery,og1_swaprowinsertappend,//for Ctrl+Insert
@@ -115,8 +116,8 @@ type
 
 const
  rowstateoptions = [og_colmerged,og_rowheight]; //variable rowstate size
- deprecatedoptionsgrid = [og_noresetselect];
- invisibleoptionsgrid = [ord(og_noresetselect)];
+// deprecatedoptionsgrid = [og_noresetselect];
+ invisibleoptionsgrid = [{ord(og_noresetselect)}];
  newcomponentoptionsgridadd = [og_rowinserting,og_rowdeleting,
                                       og_autofirstrow,og_autoappend];
  
@@ -232,7 +233,8 @@ type
  gridstatesty = set of gridstatety;
  gridstate1ty = (gs1_showcellinvalid,gs1_sortvalid,gs1_rowsortinvalid,
                  gs1_sortmoving,gs1_sortchangelock,gs1_rowinserted,
-                 gs1_gridsorted,gs1_dbsorted,gs1_rowdeleting,
+                 gs1_gridsorted,gs1_dbsorted,gs1_customsort,
+                 gs1_rowdeleting,
                  gs1_focuscellonenterlock,gs1_mousecaptureendlock,
                  gs1_forcenullcheck,
                  gs1_cellsizesyncing,gs1_userinput,gs1_autoappendlock);
@@ -8500,7 +8502,7 @@ begin
    sortcol:= reader.readinteger('sortcol',sortcol,-1,count-1);
   end;
   if not (gs_isdb in fgrid.fstate) then begin
-   int2:= 0;
+   int2:= -1;
    if (og_savestate in fgrid.foptionsgrid) and
      (fgrid.foptionsgrid * [og_folded,og_colmerged,og_rowheight] <> []) and
         hasdatastat and reader.candata then begin
@@ -8514,17 +8516,19 @@ begin
      end;
     end;
    end;
-   frowstate.count:= int2;
-   for int1:= 0 to count - 1 do begin
-    with cols[int1] do begin
-     if (fdata <> nil) then begin
-      fdata.count:= int2;
+   if int2 >= 0 then begin
+    frowstate.count:= int2;
+    for int1:= 0 to count - 1 do begin
+     with cols[int1] do begin
+      if (fdata <> nil) then begin
+       fdata.count:= int2;
+      end;
      end;
     end;
-   end;
-   fgrid.rowcount:= int2;
-   if frowstate.folded then begin
-    frowstate.recalchidden;
+    fgrid.rowcount:= int2;
+    if frowstate.folded then begin
+     frowstate.recalchidden;
+    end;
    end;
   end;
  finally
@@ -14583,30 +14587,42 @@ var
  optionsbefore: optionsgridty;
 begin
  if foptionsgrid <> avalue then begin
+{
   if (csreading in componentstate) then begin
    if (og_noresetselect in avalue) then begin
     include(foptionsgrid1,og1_noresetselect);
    end;
   end;
-   
+}   
   optionsbefore:= foptionsgrid;
-  foptionsgrid:= avalue-deprecatedoptionsgrid;
-  if (longword(avalue) xor longword(optionsbefore)) and longword(mask1) <> 0 then begin
+  foptionsgrid:= avalue;
+//  foptionsgrid:= optionsgridty(
+//                           setsinglebit(card32(avalue),card32(foptionsgrid),
+//                                         card32([og_customsorted,og_sorted])));
+//  foptionsgrid:= avalue-deprecatedoptionsgrid;
+  if (longword(avalue) xor longword(optionsbefore)) 
+                                          and longword(mask1) <> 0 then begin
    fdatacols.frowstate.free;
    fdatacols.frowstate:= trowstatelist.create(self);
    fdatacols.frowstate.count:= rowcount;
   end;
   fdatacols.frowstate.folded:= og_folded in avalue;
   layoutchanged;
-  if og_sorted in avalue then begin
+  if og_sorted in foptionsgrid then begin
    include(fstate1,gs1_gridsorted);
   end
   else begin
    exclude(fstate1,gs1_gridsorted);
   end;
-  if (og_sorted in avalue) and not(og_sorted in optionsbefore) then begin
+  if og_customsort in foptionsgrid then begin
+   include(fstate1,gs1_customsort);
+  end
+  else begin
+   exclude(fstate1,gs1_customsort);
+  end;
+  if (og_sorted in foptionsgrid) and not(og_sorted in optionsbefore) then begin
    exclude(fstate1,gs1_sortvalid);
-   checksort;
+   checksort();
   end;
  end;
 end;
@@ -15308,7 +15324,7 @@ begin
   if assigned(fonsortchanged) then begin
    fonsortchanged(self);
   end;
-  if hascolumnsort then begin
+  if hascolumnsort and not (gs1_customsort in fstate1) then begin
    if not all and (gs1_sortvalid in fstate1) and 
            (ffocusedcell.row >= 0) then begin
     reorderrow;
