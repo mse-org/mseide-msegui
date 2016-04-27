@@ -1,11 +1,13 @@
 MSEide+MSEgui breaking changes version history
+2016-27-04
+ ondrawcelleventty cellinfo parameter var instead of const.
 
 Version 4.2
 2016-02-24
 2015-12-23
- Endpoints of visible tframe.frameimage edges are always painted independed of 
-  the hiddenedges state of neighbors. Copy the middle image to the end images
-  in order to restore the old appearence.
+ Endpoints of visible tframe.frameimage edges are always painted independently
+  of the hiddenedges state of neighbors. Copy the middle image to the end images
+  in order to restore the old appearance.
 2015-11-23
  twidget.findwidget() -> findchild().
   twidget.findtagwidget() -> findtagchild().
