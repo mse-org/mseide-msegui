@@ -7703,7 +7703,7 @@ begin
      end;
     end;
    end;   
-   tdatacols1(fgrid.datacols).maxwidthinvalid(-1);
+   tdatacols1(fgrid.datacols).invalidatemaxsize(-1);
   end;
  end;
  if row < 0 then begin

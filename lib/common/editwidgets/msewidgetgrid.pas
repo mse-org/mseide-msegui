@@ -119,6 +119,7 @@ type
    fwidgetname: string;
    ffixrowwidgets: widgetarty;
    ffixrowwidgetnames: stringarty;
+   fondrawcell: drawcelleventty;
    procedure updatewidgetrect(const updatedata: boolean = false);
    procedure readwidgetname(reader: treader);
    procedure writewidgetname(writer: twriter);
@@ -199,6 +200,7 @@ type
    property grid: tcustomwidgetgrid read getgrid;
   published
    property datalist stored false; //stored by defineproperties
+   property ondrawcell: drawcelleventty read fondrawcell write fondrawcell;
  end;
  widgetcolarty = array of twidgetcol;
  twidgetfixrow = class(tfixrow)
@@ -1724,6 +1726,9 @@ begin
     end;
     fintf.drawcell(canvas);
    end;
+  end;
+  if fcellinfo.grid.canevent(tmethod(fondrawcell)) then begin
+   fondrawcell(self,canvas,cellinfoty(canvas.drawinfopo^));
   end;
  end;
 end;

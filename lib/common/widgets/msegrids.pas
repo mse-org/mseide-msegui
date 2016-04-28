@@ -533,7 +533,6 @@ type
    procedure updatelayout; override;
    procedure rearange(const list: integerarty); virtual; abstract;
 
-   procedure maxwidthinvalid(const aindex: integer); virtual;
    procedure checkmaxwidth;
    function checkactivecolor(const aindex: integer): boolean;
          //true if coloractive and fontactivenum active
@@ -574,6 +573,8 @@ type
    destructor destroy; override;
    procedure invalidate;
    procedure invalidatecell(const arow: integer);
+   procedure invalidatemaxsize(const arow: integer = -1); virtual;
+                                   //-1 -> all
    function rowcolor(const aindex: integer): colorty;
    function rowfont(const aindex: integer): tfont;
    procedure changed; override;
@@ -1275,7 +1276,6 @@ type
    procedure updaterowheight(const arow: integer; var arowheight: integer);
    function totwidth: integer;
    procedure rowcountchanged(const newcount: integer); virtual;
-   procedure maxwidthinvalid(const aindex: integer);
    procedure updatelayout; override;
    procedure countchanged; override;
    procedure moverow(const curindex,newindex: integer;
@@ -1291,6 +1291,7 @@ type
   public
    constructor create(aowner: tcustomgrid; aclasstype: gridpropclassty);
    destructor destroy; override;
+   procedure invalidatemaxsize(const arow: integer = -1);
    procedure createfontselect();
    procedure move(const curindex,newindex: integer); override;
    function mergedwidth(const acol: integer; const amerged: longword): integer;
@@ -4287,7 +4288,7 @@ begin
  end;
 end;
 
-procedure tcol.maxwidthinvalid(const aindex: integer);
+procedure tcol.invalidatemaxsize(const arow: integer = -1);
 begin
  fstate:= fstate - [gps_maxsizevalid,gps_autosizevalid];
 end;
@@ -5859,7 +5860,7 @@ begin
   end;
  end;
  inherited;
- maxwidthinvalid(-1);
+ invalidatemaxsize(-1);
 end;
 
 procedure tdatacol.docellfocuschanged(enter: boolean;
@@ -6226,6 +6227,7 @@ procedure tdatacol.afterrowcountupdate;
 begin
  //dummy
 end;
+
 procedure tdatacol.datachange(const arow: integer);
 begin
  if (datalist = nil) and not (gps_noinvalidate in fstate) and 
@@ -6279,7 +6281,7 @@ begin
  if not (co_nosort in foptions) then begin
   fcellinfo.grid.sortinvalid(index,aindex);
  end;
- maxwidthinvalid(aindex);
+ invalidatemaxsize(aindex);
  if not (gps_changelock in fstate) and 
                    fcellinfo.grid.canevent(tmethod(fonchange)) then begin
   fonchange(self,aindex);
@@ -7718,12 +7720,12 @@ begin
  inherited;
 end;
 
-procedure tcols.maxwidthinvalid(const aindex: integer);
+procedure tcols.invalidatemaxsize(const arow: integer = -1);
 var
  int1: integer;
 begin
  for int1:= 0 to high(fitems) do begin
-  tcol(fitems[int1]).maxwidthinvalid(aindex);
+  tcol(fitems[int1]).invalidatemaxsize(arow);
  end;
 end;
 
