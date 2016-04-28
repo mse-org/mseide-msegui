@@ -2344,8 +2344,13 @@ begin
       xfillrectangle(appdisp,spd,bitmapgc,x1,y1,cx,cy);
       xfreegc(appdisp,bitmapgc);
      end;
+     xrenderfreepicture(appdisp,spic);
+     xrenderfreepicture(appdisp,dpic);
      checkddevcopy();
 endlab2:
+     if maskpic <> 0 then begin
+      xrenderfreepicture(appdisp,maskpic);
+     end;
      if bitmapgc2 <> nil then begin 
       xfreegc(appdisp,bitmapgc2);
      end;
