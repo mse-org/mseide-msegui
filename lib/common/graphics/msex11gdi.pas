@@ -915,7 +915,7 @@ begin
 end;
 
 function createcolorpi(const acolor: txrendercolor;
-                              const aformat: pxrenderpictformat): tpicture;
+       const aformat: pxrenderpictformat): tpicture;
 var
  attributes: txrenderpictureattributes;
 // col: txrendercolor;
@@ -2292,8 +2292,16 @@ begin
       x1:= x;
       y1:= y;
      end;
-     spic:= xrendercreatepicture(appdisp,spd,bitmaprenderpictformat,
+     if maskpic <> 0 then begin   
+//      sattributes.alpha_map:= maskpic;
+//      spic:= xrendercreatepicture(appdisp,spd,bitmaprenderpictformat,
+//                      sourceformats or cpalphamap,@sattributes);
+      spic:= maskpic; //don't use source bitmap, use foreground color only
+     end
+     else begin
+      spic:= xrendercreatepicture(appdisp,spd,bitmaprenderpictformat,
                       sourceformats,@sattributes);
+     end;
      format1:= screenrenderpictformat;
      dx:= destrect^.x;
      dy:= destrect^.y;
@@ -2322,7 +2330,7 @@ begin
                            dx,dy,destrect^.cx,destrect^.cy);
      end;
      xrenderfreepicture(appdisp,cpic);
-     if df_opaque in gc.drawingflags then begin
+     if (df_opaque in gc.drawingflags) and (maskpic = 0) then begin
       if bitmap <> 0 then begin
        xvalues.xfunction:= gxorinverted;
        xchangegc(appdisp,bitmapgc2,gcfunction,@xvalues);
@@ -2344,7 +2352,9 @@ begin
       xfillrectangle(appdisp,spd,bitmapgc,x1,y1,cx,cy);
       xfreegc(appdisp,bitmapgc);
      end;
-     xrenderfreepicture(appdisp,spic);
+     if spic <> maskpic then begin
+      xrenderfreepicture(appdisp,spic);
+     end;
      xrenderfreepicture(appdisp,dpic);
      checkddevcopy();
 endlab2:
