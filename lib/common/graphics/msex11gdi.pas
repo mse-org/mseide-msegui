@@ -2163,6 +2163,8 @@ var
 
 var
  opapic,masksourcepic: tpicture;
+ destcopygc: tgc;
+ dpic2: tpicture;
 
 label
  endlab,endlab2;
@@ -2292,25 +2294,34 @@ begin
       x1:= x;
       y1:= y;
      end;
-     if maskpic <> 0 then begin   
+//     if maskpic <> 0 then begin   
 //      sattributes.alpha_map:= maskpic;
 //      spic:= xrendercreatepicture(appdisp,spd,bitmaprenderpictformat,
 //                      sourceformats or cpalphamap,@sattributes);
-      spic:= maskpic; //don't use source bitmap, use foreground color only
-     end
-     else begin
+//      spic:= maskpic; //don't use source bitmap, use foreground color only
+//     end
+//     else begin
       spic:= xrendercreatepicture(appdisp,spd,bitmaprenderpictformat,
                       sourceformats,@sattributes);
-     end;
+//     end;
      format1:= screenrenderpictformat;
      dx:= destrect^.x;
      dy:= destrect^.y;
      ddev:= paintdevice;
-     if dkind = bmk_gray then begin
+     if (dkind = bmk_gray) or (maskpic <> 0) then begin
       dx:= 0;
       dy:= 0;
       ddev:= gui_createpixmap(destrect^.size,0,bmk_rgb);
-      graytorgb(paintdevice,destrect^,ddev,nullpoint,nil);
+      if dkind = bmk_gray then begin
+       graytorgb(paintdevice,destrect^,ddev,nullpoint,nil);
+      end
+      else begin
+       destcopygc:= xcreategc(appdisp,ddev,0,nil);
+       with destrect^ do begin
+        xcopyarea(paintdevice,ddev,destcopygc,x,y,cx,cy,0,0);
+       end;
+       xdestroygc(destcopygc);
+      end;
      end;
      dpic:= xrendercreatepicture(appdisp,ddev,format1,
                       destformats,@dattributes);
@@ -2330,7 +2341,7 @@ begin
                            dx,dy,destrect^.cx,destrect^.cy);
      end;
      xrenderfreepicture(appdisp,cpic);
-     if (df_opaque in gc.drawingflags) and (maskpic = 0) then begin
+     if (df_opaque in gc.drawingflags) {and (maskpic = 0)} then begin
       if bitmap <> 0 then begin
        xvalues.xfunction:= gxorinverted;
        xchangegc(appdisp,bitmapgc2,gcfunction,@xvalues);
@@ -2352,9 +2363,21 @@ begin
       xfillrectangle(appdisp,spd,bitmapgc,x1,y1,cx,cy);
       xfreegc(appdisp,bitmapgc);
      end;
-     if spic <> maskpic then begin
-      xrenderfreepicture(appdisp,spic);
-     end;
+     xrenderfreepicture(appdisp,spic);
+     if maskpic <> 0 then begin
+      dpic2:= xrendercreatepicture(appdisp,paintdevice,format1,
+                                          destformats,@dattributes);
+      with destrect^ do begin
+       xrendercomposite(appdisp,pictop,dpic,maskpix,dpic,0,0,x,y,cx,cy);
+      end;
+      xrenderfreepicture(appdisp,dpic2);
+      xfreepixmap(appdist,ddev);
+      xrenderfreepicture(appdisp,dpic);
+     end
+     else begin
+//     if spic <> maskpic then begin
+//      xrenderfreepicture(appdisp,spic);
+//     end;
      xrenderfreepicture(appdisp,dpic);
      checkddevcopy();
 endlab2:
