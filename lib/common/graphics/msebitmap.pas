@@ -957,7 +957,7 @@ begin
   rgb:= colortopixel(normalizeinitcolor(acolor));
   case fkind of
    bmk_mono: begin
-    if odd(rgb) then begin
+    if odd(rgb xor colortopixel(cl_0)) then begin
      by1:= $ff;
     end
     else begin
