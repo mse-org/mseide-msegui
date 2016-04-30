@@ -3054,6 +3054,7 @@ begin
   dest.clear;
  end
  else begin
+  dest.beginupdate();
   rect1.pos:= indextoorg(index);
   rect1.size:= size;
   dest.clear;
@@ -3072,6 +3073,7 @@ begin
     dest.mask.init(dest.fmaskcolorforeground);
    end;
   end;
+  dest.endupdate();
  end;
 end;
 
