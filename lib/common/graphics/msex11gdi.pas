@@ -576,6 +576,14 @@ begin
  end;
 end;
 
+function creategc(const device: paintdevicety): tgc;
+var
+ xvalues: xgcvalues;
+begin
+ xvalues.graphics_exposures:= 0;
+ result:= xcreategc(appdisp,device,gcgraphicsexposures,@xvalues);
+end;
+
 //function x11creategc(paintdevice: paintdevicety; const akind: gckindty;
 //     var gc: gcty; const aprintername: msestring): guierrorty;
 procedure gdi_creategc(var drawinfo: drawinfoty); //gdifunc
@@ -587,13 +595,14 @@ begin
   if paintdevice = 0 then begin
    paintdevice:= gui_getrootwindow();
   end;
-  gcpo^.handle:= ptruint(xcreategc(appdisp,paintdevice,0,nil));
+  gcpo^.handle:= ptruint(creategc(paintdevice)
+                             {xcreategc(appdisp,paintdevice,0,nil)});
   if gcpo^.handle = 0 then begin
    error:= gde_creategc;
   end
   else begin
-   xsetgraphicsexposures(appdisp,tgc(gcpo^.handle),
-                             {$ifdef xboolean}false{$else}0{$endif});
+//   xsetgraphicsexposures(appdisp,tgc(gcpo^.handle),
+//                             {$ifdef xboolean}false{$else}0{$endif});
    with x11gcty(gcpo^.platformdata) do begin
     //nothing to do, gc is nulled
    end;
@@ -959,6 +968,11 @@ end;
 function creategraycolorpicture(const acolor: colorty): tpicture;
 begin
  result:= createcolorpic(graytorendercolor(acolor));
+end;
+
+function createalphacolorpicture(const acolor: colorty): tpicture;
+begin
+ result:= createcolorpic(alphatorendercolor(acolor));
 end;
 {
 function creategraypicture(const acolor: colorty): tpicture;
@@ -1987,7 +2001,7 @@ begin
      gc1:= tgc(gc^.handle);
     end
     else begin
-     gc1:= xcreategc(appdisp,ddev,0,nil);
+     gc1:= creategc(ddev);
     end;     
     xputimage(appdisp,ddev,gc1,dimage,0,0,dpos.x,dpos.y,cx,cy);
     if gc = nil then begin
@@ -2063,7 +2077,7 @@ begin
      gc1:= tgc(gc^.handle);
     end
     else begin
-     gc1:= xcreategc(appdisp,ddev,0,nil);
+     gc1:= creategc(ddev);
     end;
     xputimage(appdisp,ddev,gc1,dimage,0,0,dpos.x,dpos.y,cx,cy);
     if gc = nil then begin
@@ -2163,13 +2177,16 @@ var
 
 var
  opapic,masksourcepic: tpicture;
-
+ destcopygc: tgc;
+ dpic2: tpicture;
+ ddev2: paintdevicety;
 label
  endlab,endlab2;
 begin
 {$ifdef mse_debuggdisync}
  checkgdilock;
 {$endif} 
+ xvalues.graphics_exposures:= {$ifdef xboolean}false{$else}0{$endif};
  with drawinfo,copyarea,sourcerect^,gc,x11gcty(platformdata).d do begin
   dkind:= kind;
   skind:= tcanvas1(source).fdrawinfo.gc.kind;
@@ -2210,7 +2227,8 @@ begin
       bitmap:= gui_createpixmap(size,0,mask.kind);
       if bitmap <> 0 then begin
        xvalues.foreground:= 0;
-       bitmapgc2:= xcreategc(appdisp,bitmap,gcforeground,@xvalues);
+       bitmapgc2:= xcreategc(appdisp,bitmap,
+                           gcforeground or gcgraphicsexposures,@xvalues);
        if bitmapgc2 <> nil then begin
         xfillrectangle(appdisp,bitmap,bitmapgc2,0,0,cx,cy);
         xfreegc(appdisp,bitmapgc2);
@@ -2261,7 +2279,7 @@ begin
      if (mask <> nil) and (mask.kind = bmk_mono) then begin
       bitmap:= gui_createpixmap(size,0,bmk_mono);
       if bitmap <> 0 then begin
-       bitmapgc2:= xcreategc(appdisp,bitmap,0,@xvalues);
+       bitmapgc2:= xcreategc(appdisp,bitmap,gcgraphicsexposures,@xvalues);
        if bitmapgc2 <> nil then begin
         xcopyarea(appdisp,tcanvas1(source).fdrawinfo.paintdevice,
                           bitmap,bitmapgc2,x,y,cx,cy,0,0);
@@ -2292,25 +2310,38 @@ begin
       x1:= x;
       y1:= y;
      end;
-     if maskpic <> 0 then begin   
-//      sattributes.alpha_map:= maskpic;
-//      spic:= xrendercreatepicture(appdisp,spd,bitmaprenderpictformat,
-//                      sourceformats or cpalphamap,@sattributes);
-      spic:= maskpic; //don't use source bitmap, use foreground color only
-     end
-     else begin
-      spic:= xrendercreatepicture(appdisp,spd,bitmaprenderpictformat,
+     spic:= xrendercreatepicture(appdisp,spd,bitmaprenderpictformat,
                       sourceformats,@sattributes);
-     end;
      format1:= screenrenderpictformat;
      dx:= destrect^.x;
      dy:= destrect^.y;
      ddev:= paintdevice;
-     if dkind = bmk_gray then begin
+     if (maskpic <> 0) or (dkind = bmk_gray) then begin 
+              //bmk_gray is alpha only -> needs rgb copy
       dx:= 0;
       dy:= 0;
       ddev:= gui_createpixmap(destrect^.size,0,bmk_rgb);
-      graytorgb(paintdevice,destrect^,ddev,nullpoint,nil);
+      if dkind = bmk_gray then begin
+       graytorgb(paintdevice,destrect^,ddev,nullpoint,nil);
+       if maskpic <> 0 then begin //get original copy
+        ddev2:= gui_createpixmap(destrect^.size,0,bmk_rgb);
+        destcopygc:= xcreategc(appdisp,ddev,gcgraphicsexposures,
+                                                       @xvalues);
+        with destrect^ do begin
+         xcopyarea(appdisp,ddev,ddev2,destcopygc,0,0,cx,cy,0,0);
+        end;
+        xfreegc(appdisp,destcopygc);
+       end;
+      end
+      else begin
+       destcopygc:= xcreategc(appdisp,ddev,gcgraphicsexposures,
+                                                      @xvalues);
+       with destrect^ do begin
+        xcopyarea(appdisp,paintdevice,ddev,destcopygc,x,y,cx,cy,0,0);
+       end;
+       xfreegc(appdisp,destcopygc);
+       ddev2:= paintdevice; //use original destination
+      end;
      end;
      dpic:= xrendercreatepicture(appdisp,ddev,format1,
                       destformats,@dattributes);
@@ -2330,7 +2361,7 @@ begin
                            dx,dy,destrect^.cx,destrect^.cy);
      end;
      xrenderfreepicture(appdisp,cpic);
-     if (df_opaque in gc.drawingflags) and (maskpic = 0) then begin
+     if df_opaque in gc.drawingflags then begin
       if bitmap <> 0 then begin
        xvalues.xfunction:= gxorinverted;
        xchangegc(appdisp,bitmapgc2,gcfunction,@xvalues);
@@ -2338,7 +2369,8 @@ begin
       end;
       xvalues.xfunction:= gxxor;
       xvalues.foreground:= $ffffffff;
-      bitmapgc:= xcreategc(appdisp,spd,gcforeground or gcfunction,@xvalues);
+      bitmapgc:= xcreategc(appdisp,spd,
+                  gcforeground or gcfunction or gcgraphicsexposures,@xvalues);
       xfillrectangle(appdisp,spd,bitmapgc,x1,y1,cx,cy);
       if dkind = bmk_gray then begin
        cpic:= creategraycolorpicture(acolorbackground);
@@ -2352,11 +2384,24 @@ begin
       xfillrectangle(appdisp,spd,bitmapgc,x1,y1,cx,cy);
       xfreegc(appdisp,bitmapgc);
      end;
-     if spic <> maskpic then begin
-      xrenderfreepicture(appdisp,spic);
+     xrenderfreepicture(appdisp,spic);
+     if maskpic <> 0 then begin
+      dpic2:= xrendercreatepicture(appdisp,ddev2,format1,
+                                          destformats,@dattributes);
+      with destrect^ do begin
+       xrendercomposite(appdisp,pictop,dpic,maskpic,dpic2,0,0,ax,ay,x,y,cx,cy);
+      end;
+      xrenderfreepicture(appdisp,dpic2);
+      xfreepixmap(appdisp,ddev);      
+      if dkind = bmk_gray then begin
+       ddev:= ddev2;
+      end
+      else begin
+       ddev:= paintdevice; //no checkddevcopy()
+      end;
      end;
      xrenderfreepicture(appdisp,dpic);
-     checkddevcopy();
+     checkddevcopy(); //possibly rgb -> gray conversion
 endlab2:
      if maskpic <> 0 then begin
       xrenderfreepicture(appdisp,maskpic);
@@ -2425,7 +2470,8 @@ endlab2:
     amask:= tsimplebitmap1(mask).handle;
     if gcclipregion <> 0 then begin
      pixmap2:= gui_createpixmap(size,0,bmk_mono);
-     maskgc.handle:= ptruint(xcreategc(appdisp,pixmap2,0,@xvalues));
+     maskgc.handle:= ptruint(xcreategc(appdisp,pixmap2,gcgraphicsexposures,
+                                                                     @xvalues));
      xfillrectangle(appdisp,pixmap2,tgc(maskgc.handle),0,0,cx,cy);
      maskgc.cliporigin:= subpoint(cliporigin,destrect^.pos);
      setregion(maskgc,region(gcclipregion));
@@ -2451,7 +2497,6 @@ endlab2:
                    tgc(gc.handle),x,y,cx,cy,destrect^.x,destrect^.y);
    end
    else begin
-    xvalues.graphics_exposures:= {$ifdef xboolean}false{$else}0{$endif};
     if (skind = bmk_gray) and (dkind = bmk_rgb) then begin
      graytorgb(tcanvas1(source).fdrawinfo.paintdevice,sourcerect^,
                paintdevice,destrect^.pos,@gc);
@@ -2510,7 +2555,7 @@ endlab2:
       else begin
               //convert from monochrome
 //       stipplemask:= true;
-       pixmapgc:= xcreategc(appdisp,paintdevice,0,nil);
+       pixmapgc:= xcreategc(appdisp,paintdevice,gcgraphicsexposures,@xvalues);
        if pixmapgc <> nil then begin
         xcopygc(appdisp,tgc(gc.handle),gcfunction or gcplanemask or
            gcsubwindowmode or gcgraphicsexposures or gcclipxorigin or
