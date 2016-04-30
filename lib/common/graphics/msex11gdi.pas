@@ -2314,13 +2314,16 @@ begin
       ddev:= gui_createpixmap(destrect^.size,0,bmk_rgb);
       if dkind = bmk_gray then begin
        graytorgb(paintdevice,destrect^,ddev,nullpoint,nil);
+       format1:= alpharenderpictformat;
       end
       else begin
        destcopygc:= xcreategc(appdisp,ddev,0,nil);
+       xsetgraphicsexposures(appdisp,destcopygc,
+                             {$ifdef xboolean}false{$else}0{$endif});
        with destrect^ do begin
-        xcopyarea(paintdevice,ddev,destcopygc,x,y,cx,cy,0,0);
+        xcopyarea(appdisp,paintdevice,ddev,destcopygc,x,y,cx,cy,0,0);
        end;
-       xdestroygc(destcopygc);
+       xfreegc(appdisp,destcopygc);
       end;
      end;
      dpic:= xrendercreatepicture(appdisp,ddev,format1,
@@ -2368,18 +2371,19 @@ begin
       dpic2:= xrendercreatepicture(appdisp,paintdevice,format1,
                                           destformats,@dattributes);
       with destrect^ do begin
-       xrendercomposite(appdisp,pictop,dpic,maskpix,dpic,0,0,x,y,cx,cy);
+       xrendercomposite(appdisp,pictop,dpic,maskpic,dpic2,0,0,ax,ay,x,y,cx,cy);
       end;
       xrenderfreepicture(appdisp,dpic2);
-      xfreepixmap(appdist,ddev);
+      xfreepixmap(appdisp,ddev);
       xrenderfreepicture(appdisp,dpic);
      end
      else begin
 //     if spic <> maskpic then begin
 //      xrenderfreepicture(appdisp,spic);
 //     end;
-     xrenderfreepicture(appdisp,dpic);
-     checkddevcopy();
+      xrenderfreepicture(appdisp,dpic);
+      checkddevcopy();
+     end;
 endlab2:
      if maskpic <> 0 then begin
       xrenderfreepicture(appdisp,maskpic);
