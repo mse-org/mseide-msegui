@@ -1783,7 +1783,8 @@ var
  pd,pde: prgbtriplety;
  ar1: longwordarty;
  {$ifdef cpu64}
- ar2: qwordarty;
+// ar2: qwordarty;
+ ar2: array of culong;
  {$endif}
  int1: integer;
  bmask,lwo1: longword;
