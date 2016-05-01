@@ -131,6 +131,7 @@ const
                        wo_tooltip,wo_combo,wo_noframe,wo_overrideredirect];
 type
  windowposty = (wp_normal,wp_screencentered,wp_screencenteredvirt,
+                wp_transientforcentered,wp_mainwindowcentered,
                 wp_minimized,wp_maximized,wp_default,
                 wp_fullscreen,wp_fullscreenvirt);
  windowsizety = (wsi_normal,wsi_minimized,wsi_maximized,

@@ -15911,8 +15911,9 @@ begin
     result:= wp_fullscreenvirt;
    end;
    else begin //wsi_normal
-    if fwindowpos in 
-           [wp_minimized,wp_screencentered]+windowmaximizedstates then begin
+    if fwindowpos in [wp_minimized,wp_screencentered,
+                         wp_transientforcentered,wp_mainwindowcentered] + 
+                                           windowmaximizedstates then begin
      result:= wp_normal;
     end
     else begin
@@ -15934,25 +15935,38 @@ begin
  if wpo1 <> value then begin
   bo1:= (tws_windowvisible in fstate) {or (wpo1 = wp_minimized)};
   window1:= nil;
-  if value in [wp_screencentered] then begin
-   window1:= transientfor;
+  if value in [wp_screencentered,
+                     wp_transientforcentered,wp_mainwindowcentered] then begin
+   window1:= nil;
+   if value = wp_mainwindowcentered then begin
+    window1:= application.mainwindow;
+   end;
    if window1 = nil then begin
-    window1:= appinst.activewindow;
+    window1:= transientfor;
     if window1 = nil then begin
-     window1:= self;
+     window1:= appinst.activewindow;
+     if window1 = nil then begin
+      window1:= self;
+     end;
     end;
    end;
   end;
   case value of
-   wp_screencentered,wp_screencenteredvirt: begin
-    checkwindowid;
+   wp_screencentered,wp_screencenteredvirt,
+                   wp_transientforcentered,wp_mainwindowcentered: begin
+    checkwindowid();
     rect1:= fnormalwindowrect;
     gui_setwindowstate(winid,wsi_normal,bo1);
-    if value = wp_screencenteredvirt then begin
-     rect2:= appinst.screenrect(nil);
-    end
-    else begin
-     rect2:= appinst.workarea(window1);
+    case value of
+     wp_screencenteredvirt: begin
+      rect2:= appinst.screenrect(nil);
+     end;
+     wp_screencentered: begin
+      rect2:= appinst.workarea(window1);
+     end;
+     else begin
+      rect2:= window1.fownerwidget.widgetrect;
+     end;
     end;
     with fownerwidget do begin
      rect1.x:= rect2.x + (rect2.cx - rect1.cx) div 2;

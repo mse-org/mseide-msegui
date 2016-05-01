@@ -31,6 +31,7 @@ type
  formoptionty = (fo_main,fo_terminateonclose,fo_freeonclose,
                fo_windowclosecancel,
                fo_defaultpos,fo_screencentered,fo_screencenteredvirt,
+               fo_transientforcentered,fo_mainwindowcentered,
                fo_modal,fo_createmodal,
                fo_minimized,fo_maximized,fo_fullscreen,fo_fullscreenvirt,
                fo_closeonesc,fo_cancelonesc,fo_closeonenter,fo_closeonf10,
@@ -1375,9 +1376,12 @@ end;
 procedure tcustommseform.setoptions(const Value: formoptionsty);
 {$ifndef FPC}
 const
- mask1: formoptionsty = [fo_screencentered,fo_screencenteredvirt,fo_defaultpos];
+ mask1: formoptionsty = [fo_screencentered,fo_screencenteredvirt,
+                         fo_transientforcentered,fo_mainwindowcentered,
+                         fo_defaultpos];
  mask2: formoptionsty = [fo_closeonesc,fo_cancelonesc];
- mask3: formoptionsty = [fo_maximized,fo_minimized,fo_fullscreen,fo_fullscreenvirt];
+ mask3: formoptionsty = [fo_maximized,fo_minimized,fo_fullscreen,
+                         fo_fullscreenvirt];
  mask4: formoptionsty = [fo_modal,fo_createmodal];
 {$endif}
 //var
@@ -1386,7 +1390,8 @@ begin
  if foptions <> value then begin
  {$ifdef FPC}
   foptions:= formoptionsty(setsinglebit(longword(value),longword(foptions),
-   [longword([fo_screencentered,fo_screencenteredvirt,fo_defaultpos]),
+   [longword([fo_screencentered,fo_screencenteredvirt,
+              fo_transientforcentered,fo_mainwindowcentered,fo_defaultpos]),
     longword([fo_closeonesc,fo_cancelonesc]),
     longword([fo_maximized,fo_minimized,fo_fullscreen,fo_fullscreenvirt]),
     longword([fo_modal,fo_createmodal])
@@ -1446,8 +1451,18 @@ begin
       fwindow.windowpos:= wp_screencentered;
      end
      else begin
-      if fo_defaultpos in foptions then begin
-       fwindow.windowpos:= wp_default;
+      if fo_transientforcentered in foptions then begin
+       fwindow.windowpos:= wp_transientforcentered;
+      end
+      else begin
+       if fo_mainwindowcentered in foptions then begin
+        fwindow.windowpos:= wp_mainwindowcentered;
+       end
+       else begin
+        if fo_defaultpos in foptions then begin
+         fwindow.windowpos:= wp_default;
+        end;
+       end;
       end;
      end;
     end;
