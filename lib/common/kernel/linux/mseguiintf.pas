@@ -1831,7 +1831,11 @@ begin
   end;
   if ima.pixels <> nil then begin
    npixels:= ima.size.cx*ima.size.cy;
-   setlength(ar1,2+npixels);
+   int1:= 2 + npixels;
+   if maskima.pixels <> nil then begin
+    int1:= int1 + npixels;
+   end;
+   setlength(ar1,int1);
    ar1[0]:= ima.size.cx;
    ar1[1]:= ima.size.cy;
    pd:= @ar1[2];
