@@ -210,7 +210,6 @@ type
    procedure setedpos(const Value: gridcoordty; const select: boolean;
                      const donotify: boolean;
                      const ashowcell: cellpositionty);
-   procedure normalizeselectedrows(var start,stop: integer);
    procedure internalclearselection;
     //iassistiveclient
    function getassistivetext(): msestring; override;
@@ -258,6 +257,7 @@ type
    function hasselection: boolean; override;
    function selectedtext: msestring;
    function selectedrichtext: richstringty;
+   procedure getselectedrows(out start,stop: integer);
 
    property optionsedit default defaulttexteditoptions;
    procedure setfontstyle(const start,stop: gridcoordty;
@@ -2069,7 +2069,7 @@ begin
  editpos:= makegridcoord(avalue,row);
 end;
 
-procedure tcustomtextedit.normalizeselectedrows(var start,stop: integer);
+procedure tcustomtextedit.getselectedrows(out start,stop: integer);
 var
  int1: integer;
 begin

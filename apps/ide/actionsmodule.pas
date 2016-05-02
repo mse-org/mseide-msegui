@@ -220,6 +220,8 @@ type
    tool7: taction;
    tool8: taction;
    tool9: taction;
+   comment: taction;
+   uncomment: taction;
    procedure findinfileonexecute(const sender: tobject);
 
    //file
@@ -240,7 +242,7 @@ type
    procedure cutactonexecute(const sender: tobject);
 
    procedure indentonexecute(const sender: TObject);
-   procedure unindentonexecute(const sender: TObject);
+   procedure unidentonexecute(const sender: TObject);
    procedure lowercaseexecute(const sender: TObject);
    procedure uppercaseexecute(const sender: TObject);
    procedure enableonselect(const sender: tcustomaction);
@@ -292,6 +294,10 @@ type
    procedure findcompexe(const sender: TObject);
    procedure findcompallexe(const sender: TObject);
    procedure forcezorderexe(const sender: TObject);
+   procedure commentonexecute(const sender: TObject);
+   procedure uncommentonexecute(const sender: TObject);
+   procedure enablecomment(const sender: tcustomaction);
+   procedure enableuncomment(const sender: tcustomaction);
   private
    function filterfindcomp(const acomponent: tcomponent): boolean;
   public
@@ -502,7 +508,7 @@ begin
                                             projectoptions.e.tabindent);
 end;
 
-procedure tactionsmo.unindentonexecute(const sender: TObject);
+procedure tactionsmo.unidentonexecute(const sender: TObject);
 begin
  sourcefo.activepage.edit.unindent(projectoptions.e.blockindent);
 end;
@@ -521,6 +527,28 @@ procedure tactionsmo.enableonselect(const sender: tcustomaction);
 begin
  sender.enabled:= (sourcefo.activepage <> nil) and 
                                       sourcefo.activepage.edit.hasselection;
+end;
+
+procedure tactionsmo.enablecomment(const sender: tcustomaction);
+begin
+ enableonselect(sender);
+ sender.enabled:= sender.enabled and  sourcefo.activepage.cancomment();
+end;
+
+procedure tactionsmo.enableuncomment(const sender: tcustomaction);
+begin
+ enableonselect(sender);
+ sender.enabled:= sender.enabled and  sourcefo.activepage.canuncomment();
+end;
+
+procedure tactionsmo.commentonexecute(const sender: TObject);
+begin
+ sourcefo.activepage.commentselection();
+end;
+
+procedure tactionsmo.uncommentonexecute(const sender: TObject);
+begin
+ sourcefo.activepage.uncommentselection();
 end;
 
 procedure tactionsmo.lineactonexecute(const sender: TObject);

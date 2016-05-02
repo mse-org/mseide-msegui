@@ -1,6 +1,6 @@
 object actionsmo: tactionsmo
-  bounds_cx = 542
-  bounds_cy = 439
+  bounds_cx = 543
+  bounds_cy = 435
   left = 7
   top = 160
   moduleclassname = 'tmsedatamodule'
@@ -1270,8 +1270,8 @@ object actionsmo: tactionsmo
     )
   end
   object unindent: taction
-    caption = 'U&nindent'
-    onexecute = unindentonexecute
+    caption = '&Unindent'
+    onexecute = unidentonexecute
     left = 280
     top = 136
     sc = (
@@ -1355,21 +1355,21 @@ object actionsmo: tactionsmo
     top = 152
   end
   object lowercase: taction
-    caption = 'Lowercase'
+    caption = '&Lowercase'
     onexecute = lowercaseexecute
     onupdate = enableonselect
     left = 360
     top = 120
   end
   object uppercase: taction
-    caption = 'Uppercase'
+    caption = '&Uppercase'
     onexecute = uppercaseexecute
     onupdate = enableonselect
     left = 360
     top = 136
   end
   object shortcuts: tshortcutcontroller
-    actions.count = 94
+    actions.count = 96
     actions.items = <    
       item
         dispname = 'File'
@@ -1477,20 +1477,29 @@ object actionsmo: tactionsmo
         )
       end    
       item
-        action = copylatexact
-        dispname = 'Copy LaTeX'
-        sc = (
-          2
-          16459
-          76
-        )
-      end    
-      item
         action = unindent
         dispname = 'Unindent'
         sc = (
           1
           16469
+        )
+      end    
+      item
+        action = comment
+        dispname = 'Comment Selection'
+        sc = (
+          2
+          16459
+          67
+        )
+      end    
+      item
+        action = uncomment
+        dispname = 'Uncomment Selection'
+        sc = (
+          2
+          16459
+          85
         )
       end    
       item
@@ -1500,6 +1509,15 @@ object actionsmo: tactionsmo
       item
         action = uppercase
         dispname = 'Uppercase'
+      end    
+      item
+        action = copylatexact
+        dispname = 'Copy LaTeX'
+        sc = (
+          2
+          16459
+          76
+        )
       end    
       item
         action = sourcefo.completeclassact
@@ -2011,7 +2029,7 @@ object actionsmo: tactionsmo
     options = [ao_globalshortcut]
     onexecute = helpex
     left = 280
-    top = 360
+    top = 400
     sc = (
       1
       304
@@ -2027,7 +2045,7 @@ object actionsmo: tactionsmo
     caption = 'Bookmark &0'
     onexecute = setbmexec
     left = 280
-    top = 168
+    top = 208
     sc = (
       1
       24624
@@ -2037,7 +2055,7 @@ object actionsmo: tactionsmo
     caption = 'Bookmark &0'
     onexecute = findbmexec
     left = 360
-    top = 168
+    top = 208
     sc = (
       1
       16432
@@ -2048,7 +2066,7 @@ object actionsmo: tactionsmo
     tagaction = 1
     onexecute = findbmexec
     left = 360
-    top = 184
+    top = 224
     sc = (
       1
       16433
@@ -2059,7 +2077,7 @@ object actionsmo: tactionsmo
     tagaction = 1
     onexecute = setbmexec
     left = 280
-    top = 184
+    top = 224
     sc = (
       1
       24625
@@ -2070,7 +2088,7 @@ object actionsmo: tactionsmo
     tagaction = 2
     onexecute = findbmexec
     left = 360
-    top = 200
+    top = 240
     sc = (
       1
       16434
@@ -2081,7 +2099,7 @@ object actionsmo: tactionsmo
     tagaction = 2
     onexecute = setbmexec
     left = 280
-    top = 200
+    top = 240
     sc = (
       1
       24626
@@ -2092,7 +2110,7 @@ object actionsmo: tactionsmo
     tagaction = 3
     onexecute = findbmexec
     left = 360
-    top = 216
+    top = 256
     sc = (
       1
       16435
@@ -2103,7 +2121,7 @@ object actionsmo: tactionsmo
     tagaction = 3
     onexecute = setbmexec
     left = 280
-    top = 216
+    top = 256
     sc = (
       1
       24627
@@ -2114,7 +2132,7 @@ object actionsmo: tactionsmo
     tagaction = 4
     onexecute = findbmexec
     left = 360
-    top = 232
+    top = 272
     sc = (
       1
       16436
@@ -2125,7 +2143,7 @@ object actionsmo: tactionsmo
     tagaction = 4
     onexecute = setbmexec
     left = 280
-    top = 232
+    top = 272
     sc = (
       1
       24628
@@ -2136,7 +2154,7 @@ object actionsmo: tactionsmo
     tagaction = 5
     onexecute = findbmexec
     left = 360
-    top = 248
+    top = 288
     sc = (
       1
       16437
@@ -2147,7 +2165,7 @@ object actionsmo: tactionsmo
     tagaction = 5
     onexecute = setbmexec
     left = 280
-    top = 248
+    top = 288
     sc = (
       1
       24629
@@ -2158,7 +2176,7 @@ object actionsmo: tactionsmo
     tagaction = 6
     onexecute = findbmexec
     left = 360
-    top = 264
+    top = 304
     sc = (
       1
       16438
@@ -2170,7 +2188,7 @@ object actionsmo: tactionsmo
     tagaction = 6
     onexecute = setbmexec
     left = 280
-    top = 264
+    top = 304
     sc = (
       1
       24630
@@ -2181,7 +2199,7 @@ object actionsmo: tactionsmo
     tagaction = 7
     onexecute = findbmexec
     left = 360
-    top = 280
+    top = 320
     sc = (
       1
       16439
@@ -2192,7 +2210,7 @@ object actionsmo: tactionsmo
     tagaction = 7
     onexecute = setbmexec
     left = 280
-    top = 280
+    top = 320
     sc = (
       1
       24631
@@ -2203,7 +2221,7 @@ object actionsmo: tactionsmo
     tagaction = 8
     onexecute = findbmexec
     left = 360
-    top = 296
+    top = 336
     sc = (
       1
       16440
@@ -2214,7 +2232,7 @@ object actionsmo: tactionsmo
     tagaction = 8
     onexecute = setbmexec
     left = 280
-    top = 296
+    top = 336
     sc = (
       1
       24632
@@ -2225,7 +2243,7 @@ object actionsmo: tactionsmo
     tagaction = 9
     onexecute = findbmexec
     left = 360
-    top = 312
+    top = 352
     sc = (
       1
       16441
@@ -2236,7 +2254,7 @@ object actionsmo: tactionsmo
     tagaction = 9
     onexecute = setbmexec
     left = 280
-    top = 312
+    top = 352
     sc = (
       1
       24633
@@ -2247,7 +2265,7 @@ object actionsmo: tactionsmo
     tagaction = -1
     onexecute = setbmexec
     left = 280
-    top = 328
+    top = 368
   end
   object instemplate: taction
     onexecute = instemplateactonexecute
@@ -2382,8 +2400,8 @@ object actionsmo: tactionsmo
       'Loading'
       'Sizing Form'
     )
-    left = 288
-    top = 392
+    left = 392
+    top = 400
   end
   object copylatexact: taction
     caption = 'Copy &LaTeX'
@@ -2456,5 +2474,29 @@ object actionsmo: tactionsmo
   object tool9: taction
     left = 472
     top = 152
+  end
+  object comment: taction
+    caption = '&Comment'
+    onexecute = commentonexecute
+    onupdate = enablecomment
+    left = 280
+    top = 152
+    sc = (
+      2
+      16459
+      67
+    )
+  end
+  object uncomment: taction
+    caption = 'Unc&omment'
+    onexecute = uncommentonexecute
+    onupdate = enableuncomment
+    left = 280
+    top = 168
+    sc = (
+      2
+      16459
+      85
+    )
   end
 end

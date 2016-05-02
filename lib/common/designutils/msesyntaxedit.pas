@@ -436,7 +436,7 @@ var
 begin
  selstart:= selectstart;
  selend:= selectend;
- normalizeselectedrows(int1,int2);
+ getselectedrows(int1,int2);
  ch1:= ' ';
  if atabs then begin
   ch1:= c_tab;
@@ -475,7 +475,7 @@ var
 begin
  selstart:= selectstart;
  selend:= selectend;
- normalizeselectedrows(int1,int2);
+ getselectedrows(int1,int2);
  pos1:= makegridcoord(0,int1);
  pos2.row:= int1;
  po1:= datalist.datapo;

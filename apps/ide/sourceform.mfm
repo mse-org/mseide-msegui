@@ -301,7 +301,7 @@ object sourcefo: tsourcefo
   end
   object formpopup: tpopupmenu
     onupdate = popupmonupdate
-    menu.submenu.count = 33
+    menu.submenu.count = 30
     menu.submenu.items = <    
       item
         action = actionsmo.selecteditpage
@@ -365,16 +365,28 @@ object sourcefo: tsourcefo
         options = [mao_separator, mao_shortcutcaption]
       end    
       item
-        action = actionsmo.indent
-      end    
-      item
-        action = actionsmo.unindent
-      end    
-      item
-        action = actionsmo.lowercase
-      end    
-      item
-        action = actionsmo.uppercase
+        submenu.count = 6
+        submenu.items = <        
+          item
+            action = actionsmo.indent
+          end        
+          item
+            action = actionsmo.unindent
+          end        
+          item
+            action = actionsmo.comment
+          end        
+          item
+            action = actionsmo.uncomment
+          end        
+          item
+            action = actionsmo.lowercase
+          end        
+          item
+            action = actionsmo.uppercase
+          end>
+        caption = '&Modify Selection'
+        state = [as_localcaption]
       end    
       item
         options = [mao_separator, mao_shortcutcaption]
