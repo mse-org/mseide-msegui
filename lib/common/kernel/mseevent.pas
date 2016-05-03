@@ -136,10 +136,10 @@ type
 
  texecuteevent = class(tmseevent)
   protected
-   procedure execute; virtual; abstract;
+   procedure execute(); virtual; abstract;
   public
-   constructor create;
-   procedure deliver; virtual;
+   constructor create();
+   procedure deliver(); virtual;
  end;
  
  teventqueue = class(tobjectqueue)
@@ -305,7 +305,7 @@ end;
 
 procedure texecuteevent.deliver;
 begin
- execute;
+ execute();
 end;
 
 { teventqueue }

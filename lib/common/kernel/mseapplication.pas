@@ -336,13 +336,24 @@ type
    procedure relockall(count: integer);
    procedure lockifnotmainthread;
    procedure unlockifnotmainthread;
-   function synchronize(const proc: proceventty;
-                       const quiet: boolean = false): boolean; overload;
+
+   function synchronize(const proc: proceventty; const quiet: boolean = false; 
+                const aoptions: posteventoptionsty = []): boolean;
    function synchronize(const proc: synchronizeeventty; const data: pointer;
-                       const quiet: boolean = false): boolean; overload;
+                        const quiet: boolean = false;
+                        const aoptions: posteventoptionsty = []): boolean;
    function synchronize(const proc: synchronizeprocty; const data: pointer;
-                       const quiet: boolean = false): boolean; overload;
-     //true if not aborted, quiet -> show no exceptions
+                        const quiet: boolean = false;
+                        const aoptions: posteventoptionsty = []): boolean;
+    //true if not aborted, quiet -> show no exceptions
+
+   procedure queueasynccall(const proc: proceventty;
+                       const aoptions: posteventoptionsty = []);
+   procedure queueasynccall(const proc: synchronizeeventty; const data: pointer;
+                       const aoptions: posteventoptionsty = []);
+   procedure queueasynccall(const proc: synchronizeprocty; const data: pointer;
+                       const aoptions: posteventoptionsty = []);
+
    procedure releaseobject(const aobject: tobject);
    function ismainthread: boolean;
    function islockthread: boolean;
@@ -412,6 +423,39 @@ uses
 
 type
  tobjectevent1 = class(tobjectevent);
+
+ tasyncqueueevent = class(texecuteevent)
+ end;
+
+ tappasyncevent = class(tasyncqueueevent)
+  private
+   fproc: proceventty; 
+  protected
+   procedure execute(); override;
+  public
+   constructor create(const aproc: proceventty);
+ end;
+ 
+ tappasyncdataevent = class(tasyncqueueevent)
+  private
+   fproc: synchronizeeventty; 
+   fdata: pointer;
+  protected
+   procedure execute(); override;
+  public
+   constructor create(const aproc: synchronizeeventty; const adata: pointer);
+ end;
+
+ tappasyncprocevent = class(tasyncqueueevent)
+  private
+   fproc: synchronizeprocty; 
+   fdata: pointer;
+  protected
+   procedure execute(); override;
+  public
+   constructor create(const aproc: synchronizeprocty; const adata: pointer);
+ end;
+
  tappsynchronizeevent = class(tsynchronizeevent)
   private
    fproc: proceventty; 
@@ -442,7 +486,7 @@ type
    constructor create(const aproc: synchronizeprocty; const adata: pointer;
                               const aquiet: boolean);
  end;
-
+ 
  treleaseevent = class(tobjectevent)
   private 
    fobject: tobject;
@@ -1313,42 +1357,63 @@ begin
 end;
 
 function tcustomapplication.synchronize(const proc: proceventty;
-                                     const quiet: boolean = false): boolean;
+                                      const quiet: boolean = false;
+                          const aoptions: posteventoptionsty = []): boolean;
 var
  event: tappsynchronizeevent;
 begin
  event:= tappsynchronizeevent.create(proc,quiet);
  try
-  result:= synchronizeevent(event);
+  result:= synchronizeevent(event,aoptions);
  finally
   event.free;
  end;
 end;
 
 function tcustomapplication.synchronize(const proc: synchronizeeventty;
-                   const data: pointer; const quiet: boolean = false): boolean;
+                   const data: pointer; const quiet: boolean = false;
+                   const aoptions: posteventoptionsty = []): boolean;
 var
  event: tappsynchronizedataevent;
 begin
  event:= tappsynchronizedataevent.create(proc,data,quiet);
  try
-  result:= synchronizeevent(event);
+  result:= synchronizeevent(event,aoptions);
  finally
   event.free;
  end;
 end;
 
 function tcustomapplication.synchronize(const proc: synchronizeprocty;
-                   const data: pointer; const quiet: boolean = false): boolean;
+                   const data: pointer; const quiet: boolean = false;
+                   const aoptions: posteventoptionsty = []): boolean;
 var
  event: tappsynchronizeprocevent;
 begin
  event:= tappsynchronizeprocevent.create(proc,data,quiet);
  try
-  result:= synchronizeevent(event);
+  result:= synchronizeevent(event,aoptions);
  finally
   event.free;
  end;
+end;
+
+procedure tcustomapplication.queueasynccall(const proc: proceventty;
+                                    const aoptions: posteventoptionsty = []);
+begin
+ postevent(tappasyncevent.create(proc),aoptions)
+end;
+
+procedure tcustomapplication.queueasynccall(const proc: synchronizeeventty;
+               const data: pointer; const aoptions: posteventoptionsty = []);
+begin
+ postevent(tappasyncdataevent.create(proc,data),aoptions);
+end;
+
+procedure tcustomapplication.queueasynccall(const proc: synchronizeprocty;
+               const data: pointer; const aoptions: posteventoptionsty = []);
+begin
+ postevent(tappasyncprocevent.create(proc,data),aoptions);
 end;
 
 function tcustomapplication.ismainthread: boolean;
@@ -1893,6 +1958,49 @@ end;
 function tactivatorcontroller.getinstance: tobject;
 begin
  result:= fowner;
+end;
+
+{ tappasyncevent }
+
+constructor tappasyncevent.create(const aproc: proceventty);
+begin
+ fproc:= aproc;
+ inherited create();
+end;
+
+procedure tappasyncevent.execute();
+begin
+ fproc();
+end;
+
+{ tappasyncdataevent }
+
+constructor tappasyncdataevent.create(const aproc: synchronizeeventty;
+               const adata: pointer);
+begin
+ fproc:= aproc;
+ fdata:= adata;
+ inherited create();
+end;
+
+procedure tappasyncdataevent.execute();
+begin
+ fproc(fdata);
+end;
+
+{ tappasyncprocevent }
+
+constructor tappasyncprocevent.create(const aproc: synchronizeprocty;
+               const adata: pointer);
+begin
+ fproc:= aproc;
+ fdata:= adata;
+ inherited create();
+end;
+
+procedure tappasyncprocevent.execute();
+begin
+ fproc(fdata);
 end;
 
 { tappsynchronizeevent }

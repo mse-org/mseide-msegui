@@ -15,7 +15,7 @@ unit msethread;
 interface
 uses
  {$ifdef FPC}{$ifdef UNIX}cthreads,{$endif}classes{$else}Classes{$endif},
- {mseclasses,}mselist,mseevent,msesystypes,msesys,msetypes,sysutils;
+ mseclasses,mselist,mseevent,msesystypes,msesys,msetypes,sysutils;
 
 {$ifndef FPC}
 const
@@ -129,7 +129,8 @@ type
    property exceptionmessage: string read fexceptionmessage;
  end;
 
-function synchronizeevent(const aevent: tsynchronizeevent): boolean;
+function synchronizeevent(const aevent: tsynchronizeevent;
+                             const aoptions: posteventoptionsty = []): boolean;
           //true if not aborted, does not free aevent
 
 implementation
@@ -137,7 +138,8 @@ implementation
 uses
  msesysintf1,msesysintf,mseapplication;
  
-function synchronizeevent(const aevent: tsynchronizeevent): boolean;
+function synchronizeevent(const aevent: tsynchronizeevent;
+                             const aoptions: posteventoptionsty = []): boolean;
           //true if not aborted, does not free aevent
 var
  int1: integer;
@@ -158,7 +160,7 @@ begin
    result:= false;
    int1:= application.unlockall;
    try
-    application.postevent(aevent);
+    application.postevent(aevent,aoptions);
     result:= aevent.waitfor and aevent.success;
      //wait until main eventloop calls tevent.free1
    finally
@@ -214,9 +216,7 @@ end;
 
 procedure tsynchronizeevent.internalfree1;
 begin
-// if application.terminated then begin
-  sys_sempost(fsem); //no inherited, don't free in main eventloop
-// end;    
+ sys_sempost(fsem); //no inherited, don't free in main eventloop
 end;
 
 { tmsethread }
