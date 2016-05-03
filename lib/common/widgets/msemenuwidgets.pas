@@ -694,8 +694,8 @@ begin
   for int1:= 0 to count - 1 do begin
    with cells[int1],buttoninfo,ca do begin
     dimouter:= inflaterect(dim,frame2);
-    imagedisttop:= imageditop;
-    imagedistbottom:= imagedibottom;
+    imagedist1:= imageditop;
+    imagedist2:= imagedibottom;
    end;
   end;
  end;

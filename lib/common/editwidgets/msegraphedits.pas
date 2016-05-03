@@ -846,6 +846,8 @@ type
    function isimagenrdisabledstored: Boolean;
    procedure setimageoffsetdisabled(const avalue: integer);
    procedure setimagedist(const avalue: integer);
+   procedure setimagedist1(const avalue: integer);
+   procedure setimagedist2(const avalue: integer);
    procedure setshortcut(const avalue: shortcutty);
    function isshortcutstored: boolean;
    function getshortcut: shortcutty;
@@ -960,6 +962,10 @@ type
                       //-1 = none, -2 = grayed, -3 = imageoffsetdisabled
    property imagedist: integer read finfo.ca.imagedist 
                                                write setimagedist default 0;
+   property imagedist1: integer read finfo.ca.imagedist1
+                                               write setimagedist1 default 0;
+   property imagedist2: integer read finfo.ca.imagedist2
+                                            write setimagedist2 default 0;
    property colorglyph: colorty read factioninfo.colorglyph write setcolorglyph
                       stored iscolorglyphstored default cl_default;
    property shortcut: shortcutty read getshortcut write setshortcut
@@ -1027,6 +1033,8 @@ type
    property imagenr;
    property imagenrdisabled;
    property imagedist;
+   property imagedist1;
+   property imagedist2;
    property colorglyph;
    property options;
    property focusrectdist;
@@ -1071,6 +1079,8 @@ type
    property captiondist;
    property options;
    property imagedist;
+   property imagedist1;
+   property imagedist2;
    property focusrectdist;
    property onupdate;
    property onexecute;
@@ -4009,6 +4019,24 @@ procedure tcustomdatabutton.setimagedist(const avalue: integer);
 begin
  if avalue <> finfo.ca.imagedist then begin
   finfo.ca.imagedist:= avalue;
+  formatchanged;
+  checkautosize;
+ end;
+end;
+
+procedure tcustomdatabutton.setimagedist1(const avalue: integer);
+begin
+ if avalue <> finfo.ca.imagedist1 then begin
+  finfo.ca.imagedist1:= avalue;
+  formatchanged;
+  checkautosize;
+ end;
+end;
+
+procedure tcustomdatabutton.setimagedist2(const avalue: integer);
+begin
+ if avalue <> finfo.ca.imagedist2 then begin
+  finfo.ca.imagedist2:= avalue;
   formatchanged;
   checkautosize;
  end;

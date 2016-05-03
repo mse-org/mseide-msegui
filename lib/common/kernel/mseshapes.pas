@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2015 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2016 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -42,8 +42,8 @@ type
   colorglyph: colorty;
   imagelist: timagelist;
   imagedist: integer;
-  imagedisttop: integer;
-  imagedistbottom: integer;
+  imagedist1: integer; //left or top
+  imagedist2: integer; //right or bottom
   captionclipped: boolean;
  end;
  
@@ -984,47 +984,117 @@ begin
  result:= arect;
  with info do begin
   case imagepos of
-   ip_left,ip_leftcenter: begin
+   ip_left,ip_leftcenter,ip_lefttop,ip_leftbottom: begin
     pos:= ip_left;
    end;
-   ip_right,ip_rightcenter: begin
+   ip_right,ip_rightcenter,ip_righttop,ip_rightbottom: begin
     pos:= ip_right;
    end;
-   ip_bottom,ip_bottomcenter: begin
+   ip_bottom,ip_bottomcenter,ip_bottomleft,ip_bottomright: begin
     pos:= ip_bottom;
    end;
-   ip_top,ip_topcenter: begin
+   ip_top,ip_topcenter,ip_topleft,ip_topright: begin
     pos:= ip_top;
    end
    else begin
     pos:= ip_center;
    end;
   end;
-  if not (pos in [ip_top,ip_bottom]) then begin
-   inc(result.y,imagedisttop + 
-    (result.cy - imagedisttop - imagedistbottom - imagelist.height) div 2);
+
+//  if not (pos in [ip_top,ip_bottom]) then begin
+  if pos in vertimagepos then begin   
+   inc(result.x,imagedist1 + 
+    (result.cx - imagedist1 - imagedist2 - imagelist.width) div 2);
+   result.cx:= imagelist.width;
+  end
+  else begin
+   inc(result.y,imagedist1 + 
+    (result.cy - imagedist1 - imagedist2 - imagelist.height) div 2);
    result.cy:= imagelist.height;
   end;
+
   case pos of
    ip_right: begin
-    aalign:= [al_right{,al_ycentered}];
+    aalign:= [al_right];
+    case imagepos of
+     ip_righttop: begin
+      result.y:= arect.y + imagedist1;
+     end;
+     ip_rightbottom: begin
+      result.y:= arect.cy - imagedist2 - imagelist.height;
+     end;
+    end;
     dec(result.cx,imagedist);
    end;
    ip_left: begin
-    aalign:= [{al_ycentered}];
+    aalign:= [];
+    case imagepos of
+     ip_lefttop: begin
+      result.y:= arect.y + imagedist1;
+     end;
+     ip_leftbottom: begin
+      result.y:= arect.cy - imagedist2 - imagelist.height;
+     end;
+    end;
     inc(result.x,imagedist);
     dec(result.cx,imagedist);
    end;
    ip_bottom: begin
-    aalign:= [al_xcentered,al_bottom];
+    aalign:= [al_bottom];
+    case imagepos of
+     ip_bottomleft: begin
+      result.x:= arect.x + imagedist1;
+     end;
+     ip_bottomright: begin
+      result.x:= arect.cx - imagedist2 - imagelist.width;
+     end;
+    end;
+    dec(result.cy,imagedist);
+{
+    case imagepos of
+     ip_bottomleft: begin
+      aalign:= [al_bottom];
+     end;
+     ip_bottomright: begin
+      aalign:= [al_bottom,al_right];
+     end;
+     else begin
+      aalign:= [al_xcentered,al_bottom];
+     end;
+    end;
     dec(result.cy,imagedist+imagedistbottom);
+}
    end;
    ip_top: begin
-    aalign:= [al_xcentered];
+    aalign:= [];
+    case imagepos of
+     ip_topleft: begin
+      result.x:= arect.x + imagedist1;
+     end;
+     ip_topright: begin
+      result.x:= arect.cx - imagedist2 - imagelist.width;
+     end;
+    end;
+    inc(result.y,imagedist);
+    dec(result.cy,imagedist);
+{
+    case imagepos of
+     ip_topleft: begin
+      aalign:= [];
+     end;
+     ip_topright: begin
+      aalign:= [al_right];
+     end;
+     else begin
+      aalign:= [al_xcentered];
+     end;
+    end;
     inc(result.y,imagedist+imagedistbottom);
+    dec(result.cy,imagedist+imagedistbottom);
+}
    end;
    else begin
-    aalign:= [al_xcentered{,al_ycentered}];
+    aalign:= [al_xcentered,al_ycentered];
    end;
   end;
   int1:= imagelist.width + imagedist;
@@ -1111,7 +1181,7 @@ begin
   if ca.caption.text <> '' then begin
    rect1:= arect;
    case pos of
-    ip_left,ip_leftcenter: begin
+    ip_left,ip_leftcenter,ip_lefttop,ip_leftbottom: begin
 //     textflags:= [tf_ycentered,tf_clipi];
      inc(rect1.x,ca.captiondist);
      dec(rect1.cx,ca.captiondist);
@@ -1120,16 +1190,16 @@ begin
       tab1[0].pos:= info.tabpos / defaultppmm;
      end;
     end;
-    ip_right,ip_rightcenter: begin
+    ip_right,ip_rightcenter,ip_righttop,ip_rightbottom: begin
 //     textflags:= [tf_ycentered,tf_right,tf_clipi];
      dec(rect1.cx,ca.captiondist);
     end;
-    ip_top,ip_topcenter: begin
+    ip_top,ip_topcenter,ip_topleft,ip_topright: begin
 //     textflags:= [tf_xcentered,tf_clipi];
      inc(rect1.y,ca.captiondist);
      dec(rect1.cy,ca.captiondist);
     end;
-    ip_bottom,ip_bottomcenter: begin
+    ip_bottom,ip_bottomcenter,ip_bottomleft,ip_bottomright: begin
 //     textflags:= [tf_xcentered,tf_bottom,tf_clipi];
      dec(rect1.cy,ca.captiondist);
     end;

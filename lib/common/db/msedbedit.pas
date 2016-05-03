@@ -858,6 +858,8 @@ type
    property imagenr;
    property imagenrdisabled;
    property imagedist;
+   property imagedist1;
+   property imagedist2;
    property colorglyph;
    property options;
    property focusrectdist;
