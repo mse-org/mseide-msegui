@@ -2410,6 +2410,7 @@ end;
 procedure tcustomcaptionframe.setcaptionpos(const avalue: captionposty);
 begin
  if (fcaptionpos <> avalue) then begin
+ {
   case avalue of
    cp_leftcenter: fcaptionpos:= cp_left;
    cp_rightcenter: fcaptionpos:= cp_right;
@@ -2417,6 +2418,8 @@ begin
    cp_bottomcenter: fcaptionpos:= cp_bottom;
    else fcaptionpos:= avalue;
   end;
+ }
+  fcaptionpos:= avalue;
   internalupdatestate;
  end;
 end;

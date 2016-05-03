@@ -402,8 +402,8 @@ begin
     frame1:= fi.ba.innerframe;
     extrasp:= fextraspace;
     imagedi:= fimagedist;
-    imageditop:= fimagedisttop;
-    imagedibottom:= fimagedistbottom;
+    imageditop:= fimagedist1;
+    imagedibottom:= fimagedist2;
     noanim1:= fso_noanim in optionsskin;
     nomouseanim1:= fso_nomouseanim in optionsskin;
     noclickanim1:= fso_noclickanim in optionsskin;

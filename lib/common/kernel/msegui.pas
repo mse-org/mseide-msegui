@@ -863,8 +863,8 @@ type
    procedure setframewidth(const Value: integer);
    procedure setextraspace(const avalue: integer);
    procedure setimagedist(const avalue: integer);
-   procedure setimagedisttop(const avalue: integer);
-   procedure setimagedistbottom(const avalue: integer);
+   procedure setimagedist1(const avalue: integer);
+   procedure setimagedist2(const avalue: integer);
    procedure setleveli(const Value: integer);
    procedure setlevelo(const Value: integer);
 
@@ -906,12 +906,14 @@ type
    procedure setfocusrectdist(const avalue: integer);
    procedure fontchanged(const sender: tobject);
    procedure readdummy(reader: treader);
+   procedure readimagedisttop(reader: treader);
+   procedure readimagedistbottom(reader: treader);
   protected
    fi: frameinfoty;
    fextraspace: integer;
    fimagedist: integer;
-   fimagedisttop: integer;
-   fimagedistbottom: integer;
+   fimagedist1: integer;
+   fimagedist2: integer;
    procedure doassignto(dest: tpersistent); override;
    function getinfosize: integer; override;
    function getinfoad: pointer; override;
@@ -1049,10 +1051,10 @@ type
                         write setextraspace default 0;
    property imagedist: integer read fimagedist
                         write setimagedist default 0;
-   property imagedisttop: integer read fimagedisttop
-                        write setimagedisttop default 0;
-   property imagedistbottom: integer read fimagedistbottom
-                        write setimagedistbottom default 0;
+   property imagedist1: integer read fimagedist1
+                        write setimagedist1 default 0;
+   property imagedist2: integer read fimagedist2
+                        write setimagedist2 default 0;
    property colorclient: colorty read fi.ba.colorclient write setcolorclient 
                                             default cl_transparent;
    property colordkshadow: colorty 
@@ -5740,15 +5742,15 @@ begin
  changed;
 end;
 
-procedure tframetemplate.setimagedisttop(const avalue: integer);
+procedure tframetemplate.setimagedist1(const avalue: integer);
 begin
- fimagedisttop := avalue;
+ fimagedist1 := avalue;
  changed;
 end;
 
-procedure tframetemplate.setimagedistbottom(const avalue: integer);
+procedure tframetemplate.setimagedist2(const avalue: integer);
 begin
- fimagedistbottom := avalue;
+ fimagedist2 := avalue;
  changed;
 end;
 
@@ -6010,9 +6012,21 @@ begin
  reader.readinteger();
 end;
 
+procedure tframetemplate.readimagedisttop(reader: treader);
+begin
+ fimagedist1:= reader.readinteger();
+end;
+
+procedure tframetemplate.readimagedistbottom(reader: treader);
+begin
+ fimagedist2:= reader.readinteger();
+end;
+
 procedure tframetemplate.defineproperties(filer: tfiler);
 begin
  inherited;
+ filer.defineproperty('imagedisttop',@readimagedisttop,nil,false);
+ filer.defineproperty('imagedistbottom',@readimagedistbottom,nil,false);
  filer.defineproperty('frameimage_offsetactivemouse',@readdummy,nil,false);
  filer.defineproperty('frameimage_offsetactiveclicked',@readdummy,nil,false);
  filer.defineproperty('frameface_offsetactivemouse',@readdummy,nil,false);

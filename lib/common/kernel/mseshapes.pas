@@ -984,16 +984,16 @@ begin
  result:= arect;
  with info do begin
   case imagepos of
-   ip_left,ip_leftcenter,ip_lefttop,ip_leftbottom: begin
+   ip_left,{ip_leftcenter,}ip_lefttop,ip_leftbottom: begin
     pos:= ip_left;
    end;
-   ip_right,ip_rightcenter,ip_righttop,ip_rightbottom: begin
+   ip_right,{ip_rightcenter,}ip_righttop,ip_rightbottom: begin
     pos:= ip_right;
    end;
-   ip_bottom,ip_bottomcenter,ip_bottomleft,ip_bottomright: begin
+   ip_bottom,{ip_bottomcenter,}ip_bottomleft,ip_bottomright: begin
     pos:= ip_bottom;
    end;
-   ip_top,ip_topcenter,ip_topleft,ip_topright: begin
+   ip_top,{ip_topcenter,}ip_topleft,ip_topright: begin
     pos:= ip_top;
    end
    else begin
@@ -1181,7 +1181,7 @@ begin
   if ca.caption.text <> '' then begin
    rect1:= arect;
    case pos of
-    ip_left,ip_leftcenter,ip_lefttop,ip_leftbottom: begin
+    ip_left,{ip_leftcenter,}ip_lefttop,ip_leftbottom: begin
 //     textflags:= [tf_ycentered,tf_clipi];
      inc(rect1.x,ca.captiondist);
      dec(rect1.cx,ca.captiondist);
@@ -1190,16 +1190,16 @@ begin
       tab1[0].pos:= info.tabpos / defaultppmm;
      end;
     end;
-    ip_right,ip_rightcenter,ip_righttop,ip_rightbottom: begin
+    ip_right,{ip_rightcenter,}ip_righttop,ip_rightbottom: begin
 //     textflags:= [tf_ycentered,tf_right,tf_clipi];
      dec(rect1.cx,ca.captiondist);
     end;
-    ip_top,ip_topcenter,ip_topleft,ip_topright: begin
+    ip_top,{ip_topcenter,}ip_topleft,ip_topright: begin
 //     textflags:= [tf_xcentered,tf_clipi];
      inc(rect1.y,ca.captiondist);
      dec(rect1.cy,ca.captiondist);
     end;
-    ip_bottom,ip_bottomcenter,ip_bottomleft,ip_bottomright: begin
+    ip_bottom,{ip_bottomcenter,}ip_bottomleft,ip_bottomright: begin
 //     textflags:= [tf_xcentered,tf_bottom,tf_clipi];
      dec(rect1.cy,ca.captiondist);
     end;
@@ -1275,18 +1275,18 @@ begin
    end;
   end;
   case imagepos of
-   ip_left,ip_leftcenter: begin
+   ip_left{,ip_leftcenter}: begin
     inc(rect2.x,captiondist);
     dec(rect2.cx,captiondist);
    end;
-   ip_right,ip_rightcenter: begin
+   ip_right{,ip_rightcenter}: begin
     dec(rect2.cx,captiondist);
    end;
-   ip_top,ip_topcenter: begin
+   ip_top{,ip_topcenter}: begin
     inc(rect2.y,captiondist);
     dec(rect2.cy,captiondist);
    end;
-   ip_bottom,ip_bottomcenter: begin
+   ip_bottom{,ip_bottomcenter}: begin
     dec(rect2.cy,captiondist);
    end;
   end;

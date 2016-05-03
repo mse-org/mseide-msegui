@@ -602,7 +602,7 @@ uses
  msestockobjects,{$ifdef FPCc}rtlconst{$else}rtlconsts{$endif},
            sysutils,msebits,msesysintf;
 const
- imageextendcaptionpos = [cp_right,cp_righttop,cp_rightcenter,cp_rightbottom];
+ imageextendcaptionpos = [cp_right,cp_righttop{,cp_rightcenter},cp_rightbottom];
 
 function copylistitems(const asource: listitemarty): listitemarty;
 var
