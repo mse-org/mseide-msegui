@@ -1434,36 +1434,32 @@ begin
     if int1 > asize.cx then begin
      asize.cx:= int1;
     end;
-    if imagepos <> ip_center then begin
-     asize.cy:= asize.cy + height;
+    int1:= height + finfo.ca.imagedist;
+    if imagepos = ip_centervert then begin
+     int1:= int1 + finfo.ca.imagedist;
+     if int1 > asize.cx then begin
+      asize.cy:= int1;
+     end;
     end
     else begin
-     if height > asize.cy then begin
-      asize.cy:= height;
-     end;
+     asize.cy:= asize.cy + int1;
     end;
-    inc(asize.cy,finfo.ca.imagedist);
-{
-    if width > asize.cx then begin
-     asize.cx:= width;
-    end;
-    inc(asize.cy,finfo.ca.imagedist+height);
-}
    end
    else begin
     int1:= height  + finfo.ca.imagedist1 + finfo.ca.imagedist2;
     if int1 > asize.cy then begin
      asize.cy:= int1;
     end;
-    if imagepos <> ip_center then begin
-     asize.cx:= asize.cx + width;
+    int1:= width + finfo.ca.imagedist;
+    if imagepos = ip_center then begin
+     int1:= int1 + finfo.ca.imagedist;
+     if int1 > asize.cx then begin
+      asize.cx:= int1;
+     end;
     end
     else begin
-     if width > asize.cx then begin
-      asize.cx:= width;
-     end;
+     asize.cx:= asize.cx + int1;
     end;
-    inc(asize.cx,finfo.ca.imagedist);
    end;
   end;
  end;

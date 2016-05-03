@@ -32,15 +32,16 @@ const
  rightcaptionpos = [cp_rightbottom,cp_right,{cp_rightcenter,}cp_righttop];
  bottomcaptionpos = [cp_bottomleft,cp_bottom,{cp_bottomcenter,}cp_bottomright];
 type
- imageposty = (ip_center,ip_rightbottom,ip_right,{ip_rightcenter,}ip_righttop,
+ imageposty = (ip_center,ip_centervert, //ip_center -> ip_centerhorz
+                 ip_rightbottom,ip_right,{ip_rightcenter,}ip_righttop,
                  ip_topright,ip_top,{ip_topcenter,}ip_topleft,
                  ip_lefttop,ip_left,{ip_leftcenter,}ip_leftbottom,
                  ip_bottomleft,ip_bottom,{ip_bottomcenter,}ip_bottomright
                  );
 const
- horzimagepos = [ip_rightbottom,ip_right,{ip_rightcenter,}ip_righttop,
+ horzimagepos = [ip_center,ip_rightbottom,ip_right,{ip_rightcenter,}ip_righttop,
                  ip_lefttop,ip_left,{ip_leftcenter,}ip_leftbottom];
- vertimagepos = [ip_topright,ip_top,{ip_topcenter,}ip_topleft,
+ vertimagepos = [ip_centervert,ip_topright,ip_top,{ip_topcenter,}ip_topleft,
                  ip_bottomleft,ip_bottom,{ip_bottomcenter,}ip_bottomright];
 type                 
  mousebuttonty = (mb_none,mb_left,mb_right,mb_middle);
@@ -174,8 +175,10 @@ const
 
 const
  captiontoimagepos: array[captionposty] of imageposty = (
-               //cp_center,cp_rightbottom,cp_right,cp_rightcenter,cp_righttop,
-                 ip_center,ip_lefttop,    ip_left, {ip_leftcenter,} ip_leftbottom,
+               //cp_center,cp_rightbottom,cp_right,
+                 ip_center,ip_lefttop,    ip_left, 
+               //{cp_rightcenter,}cp_righttop,
+                 {ip_leftcenter,} ip_leftbottom,
                //cp_topright,  cp_top,   cp_topcenter,   cp_topleft,
                  ip_bottomleft,ip_bottom,{ip_bottomcenter,}ip_bottomright,
                //cp_lefttop,    cp_left, cp_leftcenter, cp_leftbottom,
@@ -184,8 +187,10 @@ const
                  ip_topright,  ip_top,   {ip_topcenter,}   ip_topleft
                  );
  imagetocaptionpos: array[imageposty] of captionposty = (
-               //ip_center,ip_rightbottom,ip_right,ip_rightcenter,ip_righttop,
-                 cp_center,cp_lefttop,    cp_left, {cp_leftcenter,} cp_leftbottom,
+               //ip_center,ip_centervert,ip_rightbottom,ip_right,
+                 cp_center,cp_center,    cp_lefttop,    cp_left, 
+               //{ip_rightcenter,}ip_righttop,
+                 {cp_leftcenter,} cp_leftbottom,
                //ip_topright,  ip_top,   ip_topcenter,   ip_topleft,
                  cp_bottomleft,cp_bottom,{cp_bottomcenter,}cp_bottomright,
                //ip_lefttop,    ip_left, {ip_leftcenter,} ip_leftbottom,
@@ -216,8 +221,8 @@ const
  );
 
  swapimagepos: array[imageposty] of imageposty =
- (//ip_center,ip_rightbottom,ip_right,ip_rightcenter,ip_righttop,
-    ip_center,ip_leftbottom,ip_left,{ip_leftcenter,}ip_lefttop,
+ (//ip_center,ip_centervert,ip_rightbottom,ip_right,ip_rightcenter,ip_righttop,
+    ip_centervert,ip_center,ip_leftbottom,ip_left,{ip_leftcenter,}ip_lefttop,
   //ip_topright,   ip_top,   ip_topcenter,ip_topleft,
     ip_bottomright,ip_bottom,{ip_bottomcenter,}ip_bottomleft,
   //ip_lefttop, ip_left, ip_leftcenter,ip_leftbottom,
@@ -226,8 +231,8 @@ const
     ip_topleft,ip_top,{ip_topcenter,}ip_topright
  );
  simpleimagepos: array[imageposty] of imageposty =
- (//ip_center,ip_rightbottom,ip_right,ip_rightcenter,ip_righttop,
-    ip_center,ip_right,      ip_right,{ip_right,}ip_right,
+ (//ip_center,ip_centervert,ip_rightbottom,ip_right,ip_rightcenter,ip_righttop,
+    ip_center,ip_centervert, ip_right,      ip_right,{ip_right,}ip_right,
   //ip_topright,ip_top,ip_topcenter,ip_topleft,
     ip_top,     ip_top,{ip_top,}      ip_top,
   //ip_lefttop,ip_left,ip_leftcenter,ip_leftbottom,

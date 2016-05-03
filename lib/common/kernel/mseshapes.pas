@@ -983,6 +983,8 @@ var
 begin
  result:= arect;
  with info do begin
+  pos:= simpleimagepos[imagepos];
+ (*
   case imagepos of
    ip_left,{ip_leftcenter,}ip_lefttop,ip_leftbottom: begin
     pos:= ip_left;
@@ -1000,9 +1002,9 @@ begin
     pos:= ip_center;
    end;
   end;
-
+*)
 //  if not (pos in [ip_top,ip_bottom]) then begin
-  if pos in vertimagepos then begin   
+  if pos in (vertimagepos) then begin   
    inc(result.x,imagedist1 + 
     (result.cx - imagedist1 - imagedist2 - imagelist.width) div 2);
    result.cx:= imagelist.width;
@@ -1093,8 +1095,13 @@ begin
     dec(result.cy,imagedist+imagedistbottom);
 }
    end;
-   else begin
+   ip_center: begin
     aalign:= [al_xcentered,al_ycentered];
+    inc(result.x,imagedist);
+   end;
+   ip_centervert: begin
+    aalign:= [al_xcentered,al_ycentered];
+    inc(result.y,imagedist);
    end;
   end;
   int1:= imagelist.width + imagedist;
