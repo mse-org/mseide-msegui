@@ -1081,14 +1081,27 @@ begin
    if pos in (vertimagepos) then begin
     rect1.cy:= rect1.cy - captiondist;
     rect2:= textrect(canvas,caption,rect1,textflags,font);
-    i1:= rect1.cy - rect2.y;
+    i1:= rect1.cy - rect2.cy;
     if i1 > 0 then begin
      if tf_ycentered in textflags then begin
-      arect.y:= arect.y + i1 div 2;
+      i1:= i1 div 2;
+      if pos in bottomimagepos then begin
+       result.y:= result.y - i1;
+      end
+      else begin
+       result.y:= result.y + i1;
+      end;
      end
      else begin
       if tf_bottom in textflags then begin
-       result.y:= result.y + i1;
+       if not (pos in bottomimagepos) then begin
+        result.y:= result.y + i1 - imagedist;
+       end;
+      end
+      else begin
+       if pos in bottomimagepos then begin
+        result.y:= result.y - i1 + imagedist;
+       end;
       end;
      end;
     end;
@@ -1110,12 +1123,12 @@ begin
      else begin
       if tf_right in textflags then begin
        if not (pos in rightimagepos) then begin
-        result.x:= result.x + i1;
+        result.x:= result.x + i1 - imagedist;
        end;
       end
       else begin
        if pos in rightimagepos then begin
-        result.x:= result.x - i1;
+        result.x:= result.x - i1 + imagedist;
        end;
       end;
      end;
@@ -1195,15 +1208,15 @@ begin
      end
      else begin
       inc(rect1.x,ca.captiondist);
+      dec(rect1.cx,ca.captiondist);
      end;
-     dec(rect1.cx,ca.captiondist);
      if countchars(ca.caption.text,msechar(c_tab)) = 1 then begin
       tab1:= buttontab;
       tab1[0].pos:= info.tabpos / defaultppmm;
      end;
     end;
     ip_right,ip_righttop,ip_rightbottom: begin
-     if not (tf_right in textflags) then begin
+     if textflags * [tf_right,tf_xcentered] = [] then begin
       inc(rect1.x,ca.captiondist);
      end;
      dec(rect1.cx,ca.captiondist);
@@ -1214,11 +1227,11 @@ begin
      end
      else begin
       inc(rect1.y,ca.captiondist);
+      dec(rect1.cy,ca.captiondist);
      end;
-     dec(rect1.cy,ca.captiondist);
     end;
     ip_bottom,ip_bottomleft,ip_bottomright: begin
-     if not (tf_bottom in textflags) then begin
+     if textflags * [tf_bottom,tf_ycentered] = [] then begin
       inc(rect1.y,ca.captiondist);
      end;
      dec(rect1.cy,ca.captiondist);
