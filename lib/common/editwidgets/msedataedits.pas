@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2015 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2016 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -19,7 +19,7 @@ unit msedataedits;
 interface
 uses
  classes,mclasses,msegui,mseinplaceedit,mseeditglob,msegraphics,mseedit,
- msetypes,msestrings,msedatalist,mseglob,mseguiglob,msedragglob,
+ msetypes,msestrings,msedatalist,mseglob,mseguiglob,msedragglob,msetimer,
  mseevent,msegraphutils,msedrawtext,msestat,msestatfile,mseclasses,
  msearrayprops,msegrids,msewidgetgrid,msedropdownlist,msedrag,mseforms,
  mseformatstr,typinfo,msemenus,msebitmap,mseassistiveclient,
@@ -46,6 +46,8 @@ type
                            var atext: msestring; var accept: boolean) of object;
  textchangeeventty = procedure(const sender: tcustomdataedit;
                                       const atext: msestring) of object;
+ textediteventty = procedure(const sender: tcustomdataedit;
+                                      var atext: msestring) of object;
 
  emptyoptionty = (eo_defaulttext,   //use text of tfacecontroller
                   eo_showfocused,     //show empty_text if focused
@@ -72,6 +74,8 @@ type
    fempty_color: colorty;
    fempty_options: emptyoptionsty;
    fstatpriority: integer;
+   fontexteditdelayed: textediteventty;
+   ftexteditdelayus: int32;
    procedure emptychanged;
    
    procedure setstatfile(const Value: tstatfile);
@@ -85,6 +89,7 @@ type
    procedure setgridrow(const avalue: integer);
    function getdisptext: msestring;
   protected
+   ftimer: tsimpletimer;
    fstate: dataeditstatesty;
    fgridintf: iwidgetgrid;
    fgriddatalink: pointer;
@@ -134,6 +139,8 @@ type
    function internaldatatotext(const data): msestring; virtual; abstract;
    procedure valuetotext;
    procedure setenabled(const avalue: boolean); override;
+   procedure dotextedited(); override;
+   procedure dotexteditdelayed(const sender: tobject);
    procedure updatetextflags; override;
    procedure dodefocus; override;
    procedure dofocus; override;
@@ -248,6 +255,7 @@ type
    procedure setedited(const avalue: boolean); virtual;
   public
    constructor create(aowner: tcomponent); override;
+   destructor destroy(); override;
    
    procedure initnewwidget(const ascale: real); override;
    procedure initgridwidget; virtual;
@@ -293,12 +301,19 @@ type
                                    write setempty_textcolor default cl_none;
    property empty_textcolorbackground: colorty read fempty_textcolorbackground
                           write setempty_textcolorbackground default cl_none;
-   property oncheckvalue: checkvalueeventty read foncheckvalue write foncheckvalue;
-   property ondataentered: notifyeventty read fondataentered write fondataentered;
+   property oncheckvalue: checkvalueeventty read foncheckvalue 
+                                                      write foncheckvalue;
+   property ondataentered: notifyeventty read fondataentered 
+                                                      write fondataentered;
    property ongettext: gettexteventty read fongettext write fongettext;
    property onsettext: settexteventty read fonsettext write fonsettext;
    property ontextchange: textchangeeventty read fontextchange 
                                                      write fontextchange;
+   property texteditdelayus: int32 read ftexteditdelayus
+                                      write ftexteditdelayus default -1;
+                                               //-1 -> no delay
+   property ontexteditdelayed: textediteventty read fontexteditdelayed
+                                                     write fontexteditdelayed;
  end;
 
  dataediteventty = procedure(const sender: tcustomdataedit) of object;
@@ -326,6 +341,8 @@ type
    property cursorreadonly;
    property onchange;
    property ontextchange;
+   property texteditdelayus;
+   property ontexteditdelayed;
    property onkeydown;
    property onkeyup;
    property onmouseevent;
@@ -1515,6 +1532,13 @@ begin
  fempty_textcolor:= cl_none;
  fempty_textcolorbackground:= cl_none;
  fempty_color:= cl_none;
+ ftexteditdelayus:= -1;
+ inherited;
+end;
+
+destructor tcustomdataedit.destroy();
+begin
+ freeandnil(ftimer);
  inherited;
 end;
 {
@@ -1526,6 +1550,9 @@ end;
 }
 function tcustomdataedit.checkvalue(const quiet: boolean = false): boolean;
 begin
+ if ftimer <> nil then begin
+  ftimer.fire();
+ end;
  result:= true;
  if not ((oe_checkmrcancel in foptionsedit) and
              (window.modalresult = mr_cancel)) and (fvaluechecking = 0) then begin
@@ -2599,6 +2626,37 @@ begin
  inherited;
  if (fgridintf <> nil) and not (csloading in componentstate) then begin
   fgridintf.getcol.enabled:= avalue;
+ end;
+end;
+
+procedure tcustomdataedit.dotextedited();
+begin
+ inherited;
+ if canevent(tmethod(fontexteditdelayed)) then begin
+  if ftimer <> nil then begin
+   ftimer.restart();
+  end
+  else begin
+   if ftexteditdelayus < 0 then begin
+    dotexteditdelayed(nil);
+   end
+   else begin
+    ftimer:= tsimpletimer.create(ftexteditdelayus,
+                                    @dotexteditdelayed,true,[to_single]);
+   end;
+  end;
+ end;
+end;
+
+procedure tcustomdataedit.dotexteditdelayed(const sender: tobject);
+var
+ mstr1: msestring;
+begin
+ if canevent(tmethod(fontexteditdelayed)) then begin
+  mstr1:= text;
+  fontexteditdelayed(self,mstr1);
+  text:= mstr1;
+  freeandnil(ftimer);
  end;
 end;
 

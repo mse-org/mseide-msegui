@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2015 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2016 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -525,7 +525,9 @@ end;
 
 procedure tsimpletimer.fire;
 begin
- dotimer;
+ if assigned(fontimer) then begin //do not clear fenabled
+  fontimer(self);
+ end;
 end;
 
 procedure tsimpletimer.restart;
