@@ -2250,11 +2250,12 @@ type
    procedure invalidatecell(const cell: gridcoordty);
    procedure invalidatefocusedcell;
    procedure invalidaterow(const arow: integer);
+
    function selectcell(const cell: gridcoordty; 
                           const amode: cellselectmodety;
                           const checkmultiselect: boolean = false): boolean; 
                           //true if accepted
-   function getselectedrange: gridrectty;
+   function getselectedrange: gridrectty; //selected by focuscell()
 //   function getselectedrows: integerarty;
         //moved to tdatacols.selectedrows
 
@@ -11197,8 +11198,8 @@ begin
 end;
 
 function tcustomgrid.selectcell(const cell: gridcoordty;
-                                const amode: cellselectmodety;
-                                const checkmultiselect: boolean = false): boolean;
+                             const amode: cellselectmodety;
+                             const checkmultiselect: boolean = false): boolean;
  //calls onselectcell
 var
  info: celleventinfoty;

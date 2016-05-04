@@ -29,7 +29,8 @@ const
 type
  buttonedgety =  (bedg_none,bedg_right,bedg_top,bedg_left,bedg_bottom);
 
- tagmouseprocty = procedure (const tag: integer; const info: mouseeventinfoty) of object;
+ tagmouseprocty = procedure (const tag: integer; 
+                                     const info: mouseeventinfoty) of object;
 
  captioninfoty = record
   dim: rectty;
@@ -975,35 +976,16 @@ begin
  end;
 end;
 
-function adjustimagerect(const info: captioninfoty; var arect: rectty;
-                              out aalign: alignmentsty): rectty;
+function adjustimagerect(const canvas: tcanvas; const info: captioninfoty;
+                         var arect: rectty; out aalign: alignmentsty): rectty;
 var
  pos: imageposty;
- int1,int2: integer; 
+ i1,i2: integer;
+ rect1,rect2: rectty;
 begin
  result:= arect;
  with info do begin
   pos:= simpleimagepos[imagepos];
- (*
-  case imagepos of
-   ip_left,{ip_leftcenter,}ip_lefttop,ip_leftbottom: begin
-    pos:= ip_left;
-   end;
-   ip_right,{ip_rightcenter,}ip_righttop,ip_rightbottom: begin
-    pos:= ip_right;
-   end;
-   ip_bottom,{ip_bottomcenter,}ip_bottomleft,ip_bottomright: begin
-    pos:= ip_bottom;
-   end;
-   ip_top,{ip_topcenter,}ip_topleft,ip_topright: begin
-    pos:= ip_top;
-   end
-   else begin
-    pos:= ip_center;
-   end;
-  end;
-*)
-//  if not (pos in [ip_top,ip_bottom]) then begin
   if pos in (vertimagepos) then begin   
    inc(result.x,imagedist1 + 
     (result.cx - imagedist1 - imagedist2 - imagelist.width) div 2);
@@ -1052,20 +1034,6 @@ begin
      end;
     end;
     dec(result.cy,imagedist);
-{
-    case imagepos of
-     ip_bottomleft: begin
-      aalign:= [al_bottom];
-     end;
-     ip_bottomright: begin
-      aalign:= [al_bottom,al_right];
-     end;
-     else begin
-      aalign:= [al_xcentered,al_bottom];
-     end;
-    end;
-    dec(result.cy,imagedist+imagedistbottom);
-}
    end;
    ip_top: begin
     aalign:= [];
@@ -1079,21 +1047,6 @@ begin
     end;
     inc(result.y,imagedist);
     dec(result.cy,imagedist);
-{
-    case imagepos of
-     ip_topleft: begin
-      aalign:= [];
-     end;
-     ip_topright: begin
-      aalign:= [al_right];
-     end;
-     else begin
-      aalign:= [al_xcentered];
-     end;
-    end;
-    inc(result.y,imagedist+imagedistbottom);
-    dec(result.cy,imagedist+imagedistbottom);
-}
    end;
    ip_center: begin
     aalign:= [al_xcentered,al_ycentered];
@@ -1104,22 +1057,69 @@ begin
     inc(result.y,imagedist);
    end;
   end;
-  int1:= imagelist.width + imagedist;
-  int2:= imagelist.height + imagedist;
+  i1:= imagelist.width + imagedist;
+  i2:= imagelist.height + imagedist;
   case pos of
    ip_right: begin
-    dec(arect.cx,int1);
+    dec(arect.cx,i1);
    end;
    ip_left: begin
-    inc(arect.x,int1);
-    dec(arect.cx,int1);
+    inc(arect.x,i1);
+    dec(arect.cx,i1);
    end;
    ip_top: begin
-    inc(arect.y,int2);
-    dec(arect.cy,int2);
+    inc(arect.y,i2);
+    dec(arect.cy,i2);
    end;
    ip_bottom: begin
-    dec(arect.cy,int2);
+    dec(arect.cy,i2);
+   end;
+  end;
+  if (tf_glueimage in info.textflags) and 
+                          not (pos in [ip_center,ip_centervert]) then begin
+   rect1:= arect;
+   if pos in (vertimagepos) then begin
+    rect1.cy:= rect1.cy - captiondist;
+    rect2:= textrect(canvas,caption,rect1,textflags,font);
+    i1:= rect1.cy - rect2.y;
+    if i1 > 0 then begin
+     if tf_ycentered in textflags then begin
+      arect.y:= arect.y + i1 div 2;
+     end
+     else begin
+      if tf_bottom in textflags then begin
+       result.y:= result.y + i1;
+      end;
+     end;
+    end;
+   end
+   else begin
+    rect1.cx:= rect1.cx - captiondist;
+    rect2:= textrect(canvas,caption,rect1,textflags,font);
+    i1:= rect1.cx - rect2.cx;
+    if i1 > 0 then begin
+     if tf_xcentered in textflags then begin
+      i1:= i1 div 2;
+      if pos in rightimagepos then begin
+       result.x:= result.x - i1;
+      end
+      else begin
+       result.x:= result.x + i1;
+      end;
+     end
+     else begin
+      if tf_right in textflags then begin
+       if not (pos in rightimagepos) then begin
+        result.x:= result.x + i1;
+       end;
+      end
+      else begin
+       if pos in rightimagepos then begin
+        result.x:= result.x - i1;
+       end;
+      end;
+     end;
+    end;
    end;
   end;
  end;
@@ -1140,7 +1140,7 @@ begin
    reg1:= canvas.copyclipregion;
    canvas.intersectcliprect(arect);
    result:= true;
-   rect1:= adjustimagerect(info.ca,arect,align1);
+   rect1:= adjustimagerect(canvas,info.ca,arect,align1);
    if shs_disabled in state then begin
     int1:= imagenrdisabled;
     if int1 = -2 then begin
@@ -1187,51 +1187,43 @@ begin
   tab1:= nil;
   if ca.caption.text <> '' then begin
    rect1:= arect;
+   textflags:= ca.textflags + [tf_clipi];
    case pos of
-    ip_left,{ip_leftcenter,}ip_lefttop,ip_leftbottom: begin
-//     textflags:= [tf_ycentered,tf_clipi];
-     inc(rect1.x,ca.captiondist);
+    ip_left,ip_lefttop,ip_leftbottom: begin
+     if tf_right in textflags then begin
+      dec(rect1.x,ca.captiondist);
+     end
+     else begin
+      inc(rect1.x,ca.captiondist);
+     end;
      dec(rect1.cx,ca.captiondist);
      if countchars(ca.caption.text,msechar(c_tab)) = 1 then begin
       tab1:= buttontab;
       tab1[0].pos:= info.tabpos / defaultppmm;
      end;
     end;
-    ip_right,{ip_rightcenter,}ip_righttop,ip_rightbottom: begin
-//     textflags:= [tf_ycentered,tf_right,tf_clipi];
+    ip_right,ip_righttop,ip_rightbottom: begin
+     if not (tf_right in textflags) then begin
+      inc(rect1.x,ca.captiondist);
+     end;
      dec(rect1.cx,ca.captiondist);
     end;
-    ip_top,{ip_topcenter,}ip_topleft,ip_topright: begin
-//     textflags:= [tf_xcentered,tf_clipi];
-     inc(rect1.y,ca.captiondist);
+    ip_top,ip_topleft,ip_topright: begin
+     if tf_bottom in textflags then begin
+      dec(rect1.y,ca.captiondist);
+     end
+     else begin
+      inc(rect1.y,ca.captiondist);
+     end;
      dec(rect1.cy,ca.captiondist);
     end;
-    ip_bottom,{ip_bottomcenter,}ip_bottomleft,ip_bottomright: begin
-//     textflags:= [tf_xcentered,tf_bottom,tf_clipi];
+    ip_bottom,ip_bottomleft,ip_bottomright: begin
+     if not (tf_bottom in textflags) then begin
+      inc(rect1.y,ca.captiondist);
+     end;
      dec(rect1.cy,ca.captiondist);
     end;
-//    else begin
-//     textflags:= [tf_ycentered,tf_xcentered,tf_clipi];
-//    end;
    end;
-{
-   if pos in [ip_leftcenter,ip_rightcenter] then begin
-    include(textflags,tf_xcentered);
-    exclude(textflags,tf_right);
-   end
-   else begin
-    if pos in [ip_bottomcenter,ip_topcenter] then begin
-     include(textflags,tf_ycentered);
-     exclude(textflags,tf_bottom);
-    end;
-   end;
-}
-//   if tf_forcealignment in ca.textflags then begin
-    textflags:= ca.textflags + [tf_clipi];
-//   end
-//   else begin
-//    textflags:= textflags + (ca.textflags - textalignments);
-//   end;
    if shs_disabled in state then begin
     include(textflags,tf_grayed);
    end;
@@ -1276,7 +1268,7 @@ begin
  with ainfo do begin
   rect2:= ainfo.dim;
   if ainfo.imagelist <> nil then begin
-   rect1:= adjustimagerect(ainfo,rect2,align1);
+   rect1:= adjustimagerect(acanvas,ainfo,rect2,align1);
    if colorglyph <> cl_none then begin
     imagelist.paint(acanvas,imagenr,rect1,align1,colorglyph);
    end;

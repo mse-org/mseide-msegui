@@ -32,7 +32,7 @@ type
                tf_grayed,tf_wordbreak,tf_softhyphen,
                tf_noselect,tf_underlineselect,
                tf_ellipseleft,{tf_ellipsemid,}tf_ellipseright,
-               tf_tabtospace,tf_showtabs,
+               tf_tabtospace,tf_showtabs,tf_glueimage, //used in button captions
                tf_force);
  textflagsty = set of textflagty;
 const

@@ -43,6 +43,8 @@ const
                  ip_lefttop,ip_left,{ip_leftcenter,}ip_leftbottom];
  vertimagepos = [ip_centervert,ip_topright,ip_top,{ip_topcenter,}ip_topleft,
                  ip_bottomleft,ip_bottom,{ip_bottomcenter,}ip_bottomright];
+ rightimagepos = [ip_rightbottom,ip_right,ip_righttop];
+ bottomimagepos = [ip_bottomleft,ip_bottom,ip_bottomright];
 type                 
  mousebuttonty = (mb_none,mb_left,mb_right,mb_middle);
  mousewheelty = (mw_none,mw_up,mw_down);
