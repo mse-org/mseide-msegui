@@ -3061,7 +3061,6 @@ begin
   dest.size:= size;
   dest.copyarea(fbitmap,rect1,nullpoint,rop_copy,masked and not dest.masked);
   if masked and dest.masked then begin
-   dest.colormask:= dest.colormask or colormask;
    dest.mask.copyarea(fbitmap.fmask,rect1,nullpoint,rop_copy,false,
                dest.fmaskcolorforeground,dest.fmaskcolorbackground);
   end;
@@ -3228,8 +3227,10 @@ begin
   beginupdate;
   try
    bmp1:= tmaskedbitmap.create(kind);
+   bmp1.maskkind:= fbitmap.maskkind;
    bmp1.masked:= masked;
    bmp2:= tmaskedbitmap.create(kind);
+   bmp2.maskkind:= fbitmap.maskkind;
    bmp2.masked:= masked;
    try
     getimage(fromindex,bmp1);
