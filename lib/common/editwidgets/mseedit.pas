@@ -1956,6 +1956,7 @@ begin
  inherited;
  case info.action of
   ea_textentered: begin
+   ftimer.fireandstop;
    initfocus;
   end;
  end;
