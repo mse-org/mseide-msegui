@@ -11232,6 +11232,17 @@ begin
    end;
    try
     if bo1 then begin
+     if fdatacols.foptions * 
+               [co_multiselect,co_rowselect] = [co_rowselect] then begin
+      if fdatacols.fselectedrow >= 0 then begin
+       fdatacols.rowselected[fdatacols.fselectedrow]:= false;
+      end
+      else begin
+       if fdatacols.fselectedrow = -2 then begin
+        fdatacols.rowselected[invalidaxis]:= false;
+       end;
+      end;
+     end;       
      for int1:= 0 to fdatacols.count - 1 do begin
       with tdatacol(fdatacols.fitems[int1]) do begin
        if not (co_multiselect in foptions) then begin
@@ -11240,8 +11251,10 @@ begin
       end;
      end;
     end;
-    if (cell.col >= 0) and (co_rowselect in fdatacols[cell.col].foptions) then begin
-     fdatacols.selected[makegridcoord(invalidaxis,cell.row)]:= info.selected;
+    if (cell.col >= 0) and 
+               (co_rowselect in fdatacols[cell.col].foptions) then begin
+//     fdatacols.selected[makegridcoord(invalidaxis,cell.row)]:= info.selected;
+     fdatacols.rowselected[cell.row]:= info.selected;
     end
     else begin
      fdatacols.selected[cell]:= info.selected;
