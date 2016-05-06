@@ -1798,7 +1798,9 @@ begin
   if value <> '' then begin
    exclude(fstate,des_emptytext);
   end;
-  updateedittext(true);
+  if not (des_dropdowntextsetting in fstate) then begin
+   updateedittext(true);
+  end;
  end;
 end;
 

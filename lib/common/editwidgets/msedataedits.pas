@@ -1476,6 +1476,7 @@ end;
 
 constructor tcustomdataedit.create(aowner: tcomponent);
 begin
+ include(fstate,des_isdataedit);
  inherited;
 end;
 {
@@ -1842,7 +1843,15 @@ begin
   feditor.undo;
  end
  else begin
-  text:= avalue;
+  bo1:= des_dropdowntextsetting in fstate;
+  include(fstate,des_dropdowntextsetting);
+  try
+   text:= avalue;
+  finally
+   if not bo1 then begin
+    exclude(fstate,des_dropdowntextsetting);
+   end;
+  end;
   if docheckvalue then begin
    result:= checkvalue;
    if not result then begin

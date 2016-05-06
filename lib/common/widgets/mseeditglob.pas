@@ -78,11 +78,11 @@ type
  optionsedit1ty = set of optionedit1ty;
 
  dataeditstatety = (des_edited,des_emptytext,des_grayed,
-                    des_isdb,des_dbnull,des_dbnullcheck,
+                    des_isdataedit,des_isdb,des_dbnull,des_dbnullcheck,
                     des_actualcursor,des_updating,des_valueread,
                     des_statreading,
                     des_disabled, //for tdatabutton
-                    des_updatelayout,des_editing);
+                    des_updatelayout,des_editing,des_dropdowntextsetting);
  dataeditstatesty = set of dataeditstatety;
 
  editactionty = (ea_none,ea_beforechange,ea_textchanged,ea_resetemptytext,
