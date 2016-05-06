@@ -6018,7 +6018,7 @@ var
  mstr1: msestring;
  bo1: boolean;
 begin
- mstr1:= feditor.text;
+ mstr1:= text;
  checktext(mstr1,accept);
  if not accept then begin
   result:= emptydatetime; //compiler warning
