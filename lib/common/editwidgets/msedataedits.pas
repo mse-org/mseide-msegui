@@ -2947,7 +2947,7 @@ end;
 
 function tcustomstringedit.getvaluetext: msestring;
 begin
- result:= feditor.text;
+ result:= text;
 end;
 
 procedure tcustomstringedit.updatedisptext(var avalue: msestring);
