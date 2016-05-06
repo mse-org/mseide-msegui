@@ -4083,7 +4083,7 @@ begin
  end
  else begin
   try
-   mstr1:= feditor.text;
+   mstr1:= text;
    checktext(mstr1,accept);
    if not accept then begin
     exit;
@@ -5395,7 +5395,7 @@ var
 begin
  try
   if focused then begin
-   mstr1:= feditor.text;
+   mstr1:= text;
   end
   else begin
    mstr1:= realtytostrrange(fvalue,fformatedit,fvaluerange,fvaluestart)
