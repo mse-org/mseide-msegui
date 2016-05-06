@@ -1064,7 +1064,6 @@ begin
   clearundo;
  end;
  internaldeleteselection(true); //every time called for ttextedit
- include(fstate,ies_edited);
 end;
 
 procedure tinplaceedit.clearundo;
@@ -1122,6 +1121,7 @@ begin
   richdelete(finfo.text,fcurindex,1);
   fcurindex:= fcurindex - 1;
  end;
+ fstate:= fstate + [ies_touched,ies_edited];
  internalupdatecaret(true);
  invalidatetext(true,bo1);
  notify(ea_indexmoved);
@@ -1150,6 +1150,7 @@ begin
  else begin
   richdelete(finfo.text,fcurindex+1,1);
  end;
+ fstate:= fstate + [ies_touched,ies_edited];
  invalidatetext(true,bo1);
 // if not bo1 then begin
   internalupdatecaret;
@@ -1867,6 +1868,7 @@ begin
    if asellength > 0 then begin
     internaldelete(aselstart,asellength,fcurindex,true);
    end;
+   include(fstate,ies_edited);
    moveindex(fselstart,false);
    sellength:= 0;
    invalidatetext(textinput,nofullinvalidateneeded);

@@ -578,6 +578,8 @@ type
    procedure dotextedited; override;
    procedure editnotification(var info: editnotificationinfoty); override;
    procedure loaded() override;
+   procedure dofocus() override;
+   procedure dodefocus() override;
 
     //istatfile
    procedure dostatread(const reader: tstatreader); virtual;
@@ -2196,6 +2198,28 @@ procedure tedit.loaded();
 begin
  inherited;
  updateedittext(false);
+end;
+
+procedure tedit.dofocus();
+begin
+ updateedittext(false);
+ inherited;
+end;
+
+procedure tedit.dodefocus();
+var
+ info1: editnotificationinfoty;
+begin
+ with tinplaceedit1(feditor) do begin
+  if ies_edited in fstate then begin
+   info1:= initactioninfo(ea_textentered);
+   editnotification(info1);
+  end
+  else begin
+   updateedittext(false);
+  end;
+ end;
+ inherited;
 end;
 
 procedure tedit.setstatfile(const avalue: tstatfile);
