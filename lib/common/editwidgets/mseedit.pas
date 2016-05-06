@@ -37,6 +37,7 @@ const
  defaulttextflagsactive = [tf_ycentered];
  defaulttextflagsnoycentered = defaulttextflags - [tf_ycentered];
  defaulttextflagsactivenoycentered = defaulttextflagsactive - [tf_ycentered];
+ defaulttextflagsempty = [tf_ycentered,tf_xcentered];
 
 type
 
@@ -387,6 +388,11 @@ type
  texteditedeventty = procedure(const sender: tcustomedit;
                                       var atext: msestring) of object;
  
+ emptyoptionty = (eo_defaulttext,   //use text of tfacecontroller
+                  eo_showfocused,     //show empty_text if focused
+                  eo_nocolorfocused); //do not show empty_color if focused 
+ emptyoptionsty = set of emptyoptionty;
+
  tcustomedit = class(tpublishedwidget,iedit)
   private
    fonchange: notifyeventty;
@@ -395,6 +401,13 @@ type
    fonpastefromclipboard: updatestringeventty;
    fcursorreadonly: cursorshapety;
    fonpaintimage: painteventty;
+   fempty_text: msestring;
+   fempty_textflags: textflagsty;
+   fempty_textcolor: colorty;
+   fempty_textcolorbackground: colorty;
+   fempty_fontstyle: fontstylesty;
+   fempty_color: colorty;
+   fempty_options: emptyoptionsty;
    function getmaxlength: integer;
    function getpasswordchar: msechar;
    procedure setpasswordchar(const Value: msechar);
@@ -407,15 +420,25 @@ type
    procedure setcaretwidth(const Value: integer);   
    procedure setcursorreadonly(const avalue: cursorshapety);
    function getoptionsedit1: optionsedit1ty;
+   procedure setempty_text(const avalue: msestring);
+   procedure setempty_textflags(const avalue: textflagsty);
+   procedure setempty_textcolor(const avalue: colorty);
+   procedure setempty_textcolorbackground(const avalue: colorty);
+   procedure setempty_fontstyle(const avalue: fontstylesty);
+   procedure setempty_color(const avalue: colorty);
   protected
    ftextflags: textflagsty;
    ftextflagsactive: textflagsty;
    feditor: tinplaceedit;
    foptionsedit: optionseditty;
+   fstate: dataeditstatesty;
    function getreadonly: boolean; virtual;
    procedure setreadonly(const avalue: boolean); virtual;
    procedure setmaxlength(const avalue: integer);
    procedure updatetextflags; virtual;
+   function getedittext: msestring; virtual;
+   procedure updateedittext(const force: boolean);
+   procedure updateemptytext();
    procedure updateflagtext(var avalue: msestring);
    function geteditor: tinplaceedit;
    function geteditfont: tfont; virtual;
@@ -443,6 +466,7 @@ type
    procedure dofocus; override;
    procedure dodefocus; override;
    procedure dopaintforeground(const canvas: tcanvas); override;
+   procedure dopaintbackground(const canvas: tcanvas); override;
    procedure paintimage(const canvas: tcanvas); virtual;
    function needsfocuspaint: boolean; override;
 //   procedure doafterpaint(const canvas: tcanvas); override;
@@ -451,8 +475,10 @@ type
    procedure showhint(const aid: int32; var info: hintinfoty); override;
 
    procedure dochange; virtual;
+   procedure formatchanged; virtual;
    procedure internaltextedited(const aevent: texteditedeventty);
    procedure dotextedited; virtual;
+   procedure emptychanged;
    procedure readpwchar(reader: treader);
    procedure writepwchar(writer: twriter);
    procedure defineproperties(filer: tfiler); override;
@@ -505,6 +531,23 @@ type
    property font: twidgetfont read getfont write setfont stored isfontstored;
    property caretwidth: integer read getcaretwidth write setcaretwidth 
                                                     default defaultcaretwidth;
+
+   property empty_options: emptyoptionsty read fempty_options 
+                                           write fempty_options default [];
+   property empty_color: colorty read fempty_color write setempty_color 
+                                           default cl_none;
+   property empty_font: twidgetfontempty read getfontempty write setfontempty 
+                                                  stored isfontemptystored;
+   property empty_fontstyle: fontstylesty read fempty_fontstyle 
+                    write setempty_fontstyle default [];
+   property empty_textflags: textflagsty read fempty_textflags 
+                    write setempty_textflags default defaulttextflagsempty;
+   property empty_text: msestring read fempty_text write setempty_text;
+   property empty_textcolor: colorty read fempty_textcolor 
+                                   write setempty_textcolor default cl_none;
+   property empty_textcolorbackground: colorty read fempty_textcolorbackground
+                          write setempty_textcolorbackground default cl_none;
+
    property onchange: notifyeventty read fonchange write fonchange;
    property ontextedited: texteditedeventty read fontextedited 
                                                            write fontextedited;
@@ -534,6 +577,7 @@ type
   protected
    procedure dotextedited; override;
    procedure editnotification(var info: editnotificationinfoty); override;
+   procedure loaded() override;
 
     //istatfile
    procedure dostatread(const reader: tstatreader); virtual;
@@ -559,6 +603,16 @@ type
    property textflags;
    property textflagsactive;
    property passwordchar;
+
+   property empty_options;
+   property empty_color;
+   property empty_font;
+   property empty_fontstyle;
+   property empty_textflags;
+   property empty_text;
+   property empty_textcolor;
+   property empty_textcolorbackground;
+   
    property maxlength;
    property caretwidth;
    property cursorreadonly;
@@ -1303,6 +1357,10 @@ begin
  foptionswidget1:= defaulteditwidgetoptions1;
  ftextflags:= defaulttextflags;
  ftextflagsactive:= defaulttextflagsactive;
+ fempty_textflags:= defaulttextflagsempty;
+ fempty_textcolor:= cl_none;
+ fempty_textcolorbackground:= cl_none;
+ fempty_color:= cl_none;
  updatetextflags;
 end;
 
@@ -1384,6 +1442,16 @@ begin
  feditor.dopaint(canvas);
 end;
 
+procedure tcustomedit.dopaintbackground(const canvas: tcanvas);
+begin
+ inherited;
+ if (fempty_color <> cl_none) and 
+         (fstate * [des_emptytext,des_grayed] = [des_emptytext]) and 
+         (not (eo_nocolorfocused in fempty_options) or not focused)then begin
+  canvas.fillrect(paintclientrect,fempty_color);
+ end;
+end;
+
 function tcustomedit.needsfocuspaint: boolean;
 begin
  result:= inherited needsfocuspaint or 
@@ -1408,6 +1476,12 @@ begin
   end;
   ea_textedited,ea_undone: begin
    dotextedited;
+  end;
+  ea_resetemptytext: begin
+   if des_emptytext in fstate then begin
+    exclude(fstate,des_emptytext);
+    updateemptytext();
+   end;
   end;
  end;
 end;
@@ -1496,6 +1570,52 @@ end;
 function tcustomedit.getoptionsedit1: optionsedit1ty;
 begin
  result:= feditor.optionsedit1;
+end;
+
+procedure tcustomedit.setempty_text(const avalue: msestring);
+begin
+ fempty_text:= avalue;
+ formatchanged;
+end;
+
+procedure tcustomedit.setempty_textflags(const avalue: textflagsty);
+begin
+ if avalue <> fempty_textflags then begin
+  fempty_textflags:= checktextflags(fempty_textflags,avalue);
+  emptychanged;
+ end;
+end;
+
+procedure tcustomedit.setempty_textcolor(const avalue: colorty);
+begin
+ if avalue <> fempty_textcolor then begin
+  fempty_textcolor:= avalue;
+  emptychanged;
+ end;
+end;
+
+procedure tcustomedit.setempty_textcolorbackground(const avalue: colorty);
+begin
+ if avalue <> fempty_textcolorbackground then begin
+  fempty_textcolorbackground:= avalue;
+  emptychanged;
+ end;
+end;
+
+procedure tcustomedit.setempty_fontstyle(const avalue: fontstylesty);
+begin
+ if avalue <> fempty_fontstyle then begin
+  fempty_fontstyle:= avalue;
+  emptychanged;
+ end;
+end;
+
+procedure tcustomedit.setempty_color(const avalue: colorty);
+begin
+ if avalue <> fempty_color then begin
+  fempty_color:= avalue;
+  invalidate;
+ end;
 end;
 
 procedure tcustomedit.setoptionsedit1(const avalue: optionsedit1ty);
@@ -1658,7 +1778,12 @@ end;
 
 function tcustomedit.gettext: msestring;
 begin
- result:= feditor.text;
+ if des_emptytext in fstate then begin
+  result:= '';
+ end
+ else begin
+  result:= feditor.text;
+ end;
 end;
 
 function tcustomedit.getoldtext: msestring;
@@ -1669,10 +1794,66 @@ end;
 procedure tcustomedit.settext(const Value: msestring);
 begin
  feditor.text:= value;
+ if not (csloading in componentstate) then begin
+  if value <> '' then begin
+   exclude(fstate,des_emptytext);
+  end;
+  updateedittext(true);
+ end;
 end;
 
-procedure tcustomedit.updatetextflags;
+function tcustomedit.getedittext: msestring;
 begin
+ result:= text;
+end;
+
+procedure tcustomedit.updateemptytext();
+begin
+ if des_emptytext in fstate then begin
+  include(tinplaceedit1(feditor).fstate,ies_emptytext);
+  feditor.font:= getfontempty1{fempty_font};
+  if fempty_textcolor <> cl_none then begin
+   feditor.fontcolor:= fempty_textcolor;
+  end;
+  if fempty_textcolorbackground <> cl_none then begin
+   feditor.fontcolorbackground:= fempty_textcolorbackground;
+  end;
+  if fempty_fontstyle <> [] then begin
+   feditor.fontstyle:= fempty_fontstyle;
+  end;
+ end
+ else begin
+  exclude(tinplaceedit1(feditor).fstate,ies_emptytext);
+  feditor.font:= geteditfont;
+  feditor.fontcolor:= cl_none;
+  feditor.fontcolorbackground:= cl_none;
+  feditor.fontstyle:= [];
+ end;
+ updatetextflags();
+end;
+
+procedure tcustomedit.updateedittext(const force: boolean);
+var
+ mstr1: msestring;
+ state1: dataeditstatesty;
+begin
+ state1:= fstate;
+ mstr1:= getedittext();
+ if (not(des_isdb in fstate) and (mstr1 = '') or (des_dbnull in fstate)) and 
+            (not focused or (eo_showfocused in fempty_options)) then begin
+  mstr1:= fempty_text;
+  include(fstate,des_emptytext);
+ end
+ else begin
+  exclude(fstate,des_emptytext);
+ end;
+ feditor.text:= mstr1;
+ if force or ((des_emptytext in fstate) xor 
+                               (des_emptytext in state1)) then begin
+  updateemptytext();
+ end;
+
+{
  if not (csloading in componentstate) then begin
   if isenabled or (oe_nogray in foptionsedit) then begin
    feditor.textflags:= ftextflags;
@@ -1681,6 +1862,31 @@ begin
   else begin
    feditor.textflags:= ftextflags + [tf_grayed];
    feditor.textflagsactive:= ftextflagsactive + [tf_grayed];
+  end;
+ end;
+}
+end;
+
+procedure tcustomedit.updatetextflags;
+var
+ aflags: textflagsty;
+begin
+ if not (csloading in componentstate) then begin
+  if (des_emptytext in fstate) and (fempty_text <> '') then begin
+   aflags:= fempty_textflags;
+  end
+  else begin
+   aflags:= textflags;
+  end;
+  if isenabled or (oe_nogray in foptionsedit) then begin
+   exclude(fstate,des_grayed);
+   feditor.textflags:= aflags;
+   feditor.textflagsactive:= textflagsactive;
+  end
+  else begin
+   include(fstate,des_grayed);
+   feditor.textflags:= aflags + [tf_grayed];
+   feditor.textflagsactive:= textflagsactive + [tf_grayed];
   end;
  end;
 end;
@@ -1727,6 +1933,13 @@ begin
  end;
 end;
 
+procedure tcustomedit.formatchanged();
+begin
+ if not (csloading in componentstate) then begin
+  invalidate;
+ end;
+end;
+
 procedure tcustomedit.internaltextedited(const aevent: texteditedeventty);
 var
  mstr1: msestring;
@@ -1744,6 +1957,13 @@ end;
 procedure tcustomedit.dotextedited;
 begin
  internaltextedited(fontextedited);
+end;
+
+procedure tcustomedit.emptychanged;
+begin
+ if not (csloading in componentstate) then begin
+  updateedittext(true);
+ end;
 end;
 
 procedure tcustomedit.initnewcomponent(const ascale: real);
@@ -1952,14 +2172,28 @@ begin
 end;
 
 procedure tedit.editnotification(var info: editnotificationinfoty);
+var
+ mstr1: msestring;
 begin
  inherited;
  case info.action of
   ea_textentered: begin
+   mstr1:= text;
+   updateflagtext(mstr1);
+   text:= mstr1;
    ftimer.fireandstop;
    initfocus;
   end;
+  ea_undone: begin
+   updateedittext(false);
+  end;
  end;
+end;
+
+procedure tedit.loaded();
+begin
+ inherited;
+ updateedittext(false);
 end;
 
 procedure tedit.setstatfile(const avalue: tstatfile);

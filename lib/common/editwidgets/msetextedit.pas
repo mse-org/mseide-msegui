@@ -116,7 +116,7 @@ type
    procedure setcol(const avalue: integer);
    procedure setoptions(const avalue: texteditoptionsty);
   protected
-   fstate: texteditstatesty;
+   ftextstate: texteditstatesty;
    fgridintf: iwidgetgrid;
    fupdating: integer;
    fnotificationchangelock: integer;
@@ -1062,9 +1062,9 @@ begin
   flines.endupdate;
  end;
  feditor.endupdate;
- if not feditor.updating and (tes_xposinvalid in fstate) then begin
+ if not feditor.updating and (tes_xposinvalid in ftextstate) then begin
   fxpos:= feditor.caretpos.x;
-  exclude(fstate,tes_xposinvalid);
+  exclude(ftextstate,tes_xposinvalid);
  end;
 end;
 
@@ -1468,11 +1468,11 @@ begin
     old2.col:= bigint;
    end;
   end;
-  if tes_selectinvalid in fstate then begin
+  if tes_selectinvalid in ftextstate then begin
    astart:= new1;
    astop:= new2;
    updatestyle(true);
-   exclude(fstate,tes_selectinvalid);
+   exclude(ftextstate,tes_selectinvalid);
   end
   else begin
    if checkoverlap(old1,old2,new1,new2) then begin
@@ -1596,7 +1596,7 @@ begin
      updateindex(eas_shift in state);
     end;
     ea_textsizechanged: begin
-     if not (tes_cellentering in fstate) then begin
+     if not (tes_cellentering in ftextstate) then begin
       with fgridintf.getcol do begin
        if info.sizebefore.cy <> info.newsize.cy then begin
         autocellheightchanged(grid.row);
@@ -1872,8 +1872,8 @@ begin
    end;
    case eventkind of
     cek_enter: begin
-     bo1:= tes_cellentering in fstate;
-     include(fstate,tes_cellentering);
+     bo1:= tes_cellentering in ftextstate;
+     include(ftextstate,tes_cellentering);
      try
       with fgridintf.getcol.grid do begin
        if fselectstart.row >= rowcount then begin
@@ -1894,7 +1894,7 @@ begin
         int2:= fxpos;
         moveindex(int1,
               selectaction in [fca_focusinshift,fca_focusinrepeater],true{false});
-        exclude(self.fstate,tes_xposinvalid);
+        exclude(self.ftextstate,tes_xposinvalid);
         fxpos:= int2; //restore
        end;
       end;
@@ -1903,7 +1903,7 @@ begin
       end;
      finally
       if not bo1 then begin
-       exclude(fstate,tes_cellentering);
+       exclude(ftextstate,tes_cellentering);
       end;
      end;
     end;
@@ -2023,7 +2023,7 @@ begin
  feditor.moveindex(value.col,select,donotify);
  if donotify then begin
   if feditor.updating then begin
-   include(fstate,tes_xposinvalid);;
+   include(ftextstate,tes_xposinvalid);;
   end
   else begin
    fxpos:= feditor.caretpos.x;
@@ -2626,7 +2626,7 @@ end;
 procedure tundotextedit.setselectstart(const selectstartpos: gridcoordty);
 begin
  internalclearselection;
- include(fstate,tes_selectinvalid);
+ include(ftextstate,tes_selectinvalid);
  fselectstart:= selectstartpos;
 end;
 

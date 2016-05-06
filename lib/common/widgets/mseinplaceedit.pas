@@ -44,6 +44,7 @@ type
  inplaceeditstatety = (ies_focused,ies_emptytext,
                        ies_poschanging,ies_firstclick,ies_istextedit,
                        ies_forcecaret,ies_textrectvalid,ies_touched,
+                       ies_edited,
                        ies_cangroupundo,ies_caretposvalid);
  inplaceeditstatesty = set of inplaceeditstatety;
 
@@ -984,7 +985,8 @@ end;
 
 function tinplaceedit.canundo: boolean;
 begin
- result:= (fbackup <> finfo.text.text) or fintf.getedited;
+ result:= (ies_edited in fstate) or not (ies_emptytext in fstate) and 
+                               (fbackup <> finfo.text.text) or fintf.getedited;
 end;
 
 function tinplaceedit.cancopy: boolean;
@@ -1062,11 +1064,18 @@ begin
   clearundo;
  end;
  internaldeleteselection(true); //every time called for ttextedit
+ include(fstate,ies_edited);
 end;
 
 procedure tinplaceedit.clearundo;
 begin
- fbackup:= finfo.text.text;
+ if ies_emptytext in fstate then begin
+  fbackup:= '';
+ end
+ else begin
+  fbackup:= finfo.text.text;
+ end;
+ exclude(fstate,ies_edited);
  foldtext:= fbackup;
  curindexbackup:= fcurindex;
  selstartbackup:= fselstart;
@@ -1082,7 +1091,7 @@ begin
   updateselect;
   curindex:= curindexbackup;
   invalidatetext(false,false);
-  exclude(fstate,ies_touched);
+  fstate:= fstate - [ies_touched,ies_edited];
   notify(ea_undone);
  end;
 end;
@@ -1894,7 +1903,7 @@ end;
 
 procedure tinplaceedit.clearselection;
 begin
- include(fstate,ies_touched);
+ fstate:= fstate + [ies_touched,ies_edited];
  if fsellength > 0 then begin
   fsellength:= 0;
   updateselect;
