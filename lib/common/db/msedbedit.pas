@@ -6397,6 +6397,10 @@ constructor tdropdownlistdatalink.create(const aowner: tcustomgrid;
                const aintf: igriddatalink; const adatalink: tdropdowndatalink);
 begin
  with adatalink do begin
+  self.fdataintf:= fdataintf;
+  self.ftextindex:= ftextindex;
+  self.fkeyindex:= fkeyindex;
+ {
   if (ftextindex >= 0) and (fkeyindex >= 0) then begin
    self.fdataintf:= fdataintf;
    self.ftextindex:= ftextindex;
@@ -6406,6 +6410,7 @@ begin
    fkeyindex:= -1;
    ftextindex:= -1;
   end;
+ }
  end;
  inherited create(aowner,aintf);
 end;
