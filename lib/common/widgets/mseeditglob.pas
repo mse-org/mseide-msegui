@@ -82,7 +82,7 @@ type
                     des_actualcursor,des_updating,des_valueread,
                     des_statreading,
                     des_disabled, //for tdatabutton
-                    des_updatelayout,des_editing,des_dropdowntextsetting);
+                    des_updatelayout,des_editing{,des_dropdowntextsetting});
  dataeditstatesty = set of dataeditstatety;
 
  editactionty = (ea_none,ea_beforechange,ea_textchanged,ea_resetemptytext,

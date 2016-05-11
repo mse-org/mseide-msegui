@@ -1843,15 +1843,7 @@ begin
   feditor.undo;
  end
  else begin
-  bo1:= des_dropdowntextsetting in fstate;
-  include(fstate,des_dropdowntextsetting);
-  try
-   text:= avalue;
-  finally
-   if not bo1 then begin
-    exclude(fstate,des_dropdowntextsetting);
-   end;
-  end;
+  setcurrenttext(text);
   if docheckvalue then begin
    result:= checkvalue;
    if not result then begin

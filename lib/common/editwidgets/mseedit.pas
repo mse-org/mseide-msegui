@@ -413,7 +413,7 @@ type
    procedure setpasswordchar(const Value: msechar);
    function gettext: msestring;
    function getoldtext: msestring;
-   procedure settext(const Value: msestring);
+   procedure settext(const avalue: msestring);
    procedure settextflags(const value: textflagsty);
    procedure settextflagsactive(const value: textflagsty);
    function getcaretwidth: integer;
@@ -432,6 +432,7 @@ type
    feditor: tinplaceedit;
    foptionsedit: optionseditty;
    fstate: dataeditstatesty;
+   procedure setcurrenttext(const avalue: msestring);
    function getreadonly: boolean; virtual;
    procedure setreadonly(const avalue: boolean); virtual;
    procedure setmaxlength(const avalue: integer);
@@ -1793,16 +1794,22 @@ begin
  result:= feditor.oldtext;
 end;
 
-procedure tcustomedit.settext(const Value: msestring);
+procedure tcustomedit.settext(const avalue: msestring);
 begin
- feditor.text:= value;
+ feditor.text:= avalue;
  if not (csloading in componentstate) then begin
-  if value <> '' then begin
+  if avalue <> '' then begin
    exclude(fstate,des_emptytext);
   end;
-  if not (des_dropdowntextsetting in fstate) then begin
-   updateedittext(true);
-  end;
+  updateedittext(true);
+ end;
+end;
+
+procedure tcustomedit.setcurrenttext(const avalue: msestring);
+begin
+ feditor.text:= avalue;
+ if avalue <> '' then begin
+  exclude(fstate,des_emptytext);
  end;
 end;
 

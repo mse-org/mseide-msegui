@@ -222,6 +222,7 @@ type
  tcustomrealedit1 = class(tcustomrealedit);
  tcustomdatetimeedit1 = class(tcustomdatetimeedit);
  tcustomintegeredit1 = class(tcustomintegeredit);
+ tcustomstringedit1 = class(tcustomstringedit);
  
 { tdialogform }
 
@@ -373,8 +374,8 @@ end;
 
 procedure tstringdialogcontroller.setexecresult(var avalue: msestring);
 begin
- with tcustomstringedit(fowner) do begin
-  text:= avalue;
+ with tcustomstringedit1(fowner) do begin
+  setcurrenttext(avalue);
  end;
 end;
 
