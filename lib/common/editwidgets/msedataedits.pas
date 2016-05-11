@@ -1843,7 +1843,7 @@ begin
   feditor.undo;
  end
  else begin
-  setcurrenttext(text);
+  setcurrenttext(avalue);
   if docheckvalue then begin
    result:= checkvalue;
    if not result then begin
