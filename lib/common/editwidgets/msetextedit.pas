@@ -283,9 +283,10 @@ type
               selectfound: boolean = false;
               const ashowcell: cellpositionty = cep_nearest): boolean;
 
-   function gettext(const start, stop: gridcoordty): msestring; overload;
-   function gettext: msestring; overload;
-   procedure settext(const atext: msestring);
+   function gettext(const start, stop: gridcoordty): msestring
+                                                 overload reintroduce;
+   function gettext: msestring overload reintroduce;
+   procedure settext(const atext: msestring) reintroduce;
    function getrichtext(const start, stop: gridcoordty): richstringty;
    
    function linecount: integer;

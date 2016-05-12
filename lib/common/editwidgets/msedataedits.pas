@@ -103,6 +103,7 @@ type
    procedure valuechanged; virtual;
    procedure dotextchange; virtual;
    procedure modified; virtual; //for dbedits
+   function gettext: msestring override;
    function getedittext(): msestring override;
    procedure checktext(var atext: msestring; var accept: boolean);
    procedure texttovalue(var accept: boolean;
@@ -225,7 +226,7 @@ type
    function getedited: boolean; override;
    procedure setedited(const avalue: boolean); virtual;
   public
-   constructor create(aowner: tcomponent); override;
+//   constructor create(aowner: tcomponent); override;
    
    procedure initnewwidget(const ascale: real); override;
    procedure initgridwidget; virtual;
@@ -1473,12 +1474,13 @@ begin
 end;
 }
 { tcustomdataedit }
-
+{
 constructor tcustomdataedit.create(aowner: tcomponent);
 begin
  include(fstate,des_isdataedit);
  inherited;
 end;
+}
 {
 destructor tcustomdataedit.destroy;
 begin
@@ -1701,6 +1703,14 @@ begin
 end;
 }
 
+function tcustomdataedit.gettext: msestring;
+begin
+ result:= inherited gettext();
+ if des_emptytext in fstate then begin
+  result:= '';
+ end;
+end;
+
 function tcustomdataedit.getedittext(): msestring;
 begin
  result:= datatotext(nil^);
@@ -1843,7 +1853,7 @@ begin
   feditor.undo;
  end
  else begin
-  setcurrenttext(avalue);
+  text:= avalue; //setcurrenttext(avalue);
   if docheckvalue then begin
    result:= checkvalue;
    if not result then begin

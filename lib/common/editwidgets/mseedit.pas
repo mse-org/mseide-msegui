@@ -411,9 +411,7 @@ type
    function getmaxlength: integer;
    function getpasswordchar: msechar;
    procedure setpasswordchar(const Value: msechar);
-   function gettext: msestring;
    function getoldtext: msestring;
-   procedure settext(const avalue: msestring);
    procedure settextflags(const value: textflagsty);
    procedure settextflagsactive(const value: textflagsty);
    function getcaretwidth: integer;
@@ -432,7 +430,9 @@ type
    feditor: tinplaceedit;
    foptionsedit: optionseditty;
    fstate: dataeditstatesty;
-   procedure setcurrenttext(const avalue: msestring);
+   function gettext: msestring virtual;
+   procedure settext(const avalue: msestring) virtual;
+//   procedure setcurrenttext(const avalue: msestring);
    function getreadonly: boolean; virtual;
    procedure setreadonly(const avalue: boolean); virtual;
    procedure setmaxlength(const avalue: integer);
@@ -576,6 +576,8 @@ type
    procedure setdelay(const avalue: integer);
    procedure setstatfile(const avalue: tstatfile);
   protected
+   function gettext: msestring override;
+   procedure settext(const avalue: msestring) override;
    procedure dotextedited; override;
    procedure editnotification(var info: editnotificationinfoty); override;
    procedure loaded() override;
@@ -1781,12 +1783,7 @@ end;
 
 function tcustomedit.gettext: msestring;
 begin
- if des_emptytext in fstate then begin
-  result:= '';
- end
- else begin
-  result:= feditor.text;
- end;
+ result:= feditor.text;
 end;
 
 function tcustomedit.getoldtext: msestring;
@@ -1797,14 +1794,8 @@ end;
 procedure tcustomedit.settext(const avalue: msestring);
 begin
  feditor.text:= avalue;
- if not (csloading in componentstate) then begin
-  if avalue <> '' then begin
-   exclude(fstate,des_emptytext);
-  end;
-  updateedittext(true);
- end;
 end;
-
+{
 procedure tcustomedit.setcurrenttext(const avalue: msestring);
 begin
  feditor.text:= avalue;
@@ -1812,7 +1803,7 @@ begin
   exclude(fstate,des_emptytext);
  end;
 end;
-
+}
 function tcustomedit.getedittext: msestring;
 begin
  result:= text;
@@ -2232,6 +2223,25 @@ end;
 procedure tedit.setstatfile(const avalue: tstatfile);
 begin
  setstatfilevar(istatfile(self),avalue,fstatfile);
+end;
+
+function tedit.gettext: msestring;
+begin
+ result:= inherited gettext();
+ if des_emptytext in fstate then begin
+  result:= '';
+ end;
+end;
+
+procedure tedit.settext(const avalue: msestring);
+begin
+ inherited;
+ if not (csloading in componentstate) then begin
+  if avalue <> '' then begin
+   exclude(fstate,des_emptytext);
+  end;
+  updateedittext(true);
+ end;
 end;
 
 procedure tedit.dostatwrite(const writer: tstatwriter);

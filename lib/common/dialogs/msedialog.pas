@@ -375,7 +375,7 @@ end;
 procedure tstringdialogcontroller.setexecresult(var avalue: msestring);
 begin
  with tcustomstringedit1(fowner) do begin
-  setcurrenttext(avalue);
+  text:= avalue; //setcurrenttext(avalue);
  end;
 end;
 
