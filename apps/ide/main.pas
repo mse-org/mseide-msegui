@@ -2948,6 +2948,9 @@ begin
   if not (sg_debugger in disabled) then begin
    addobjectinfoitem(aobjects,d);
   end;
+  if not (sg_macros in disabled) then begin
+   addobjectinfoitem(aobjects,m);
+  end;
  end;
 end;
 

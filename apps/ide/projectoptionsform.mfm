@@ -6115,7 +6115,7 @@ object projectoptionsfo: tprojectoptionsfo
           anchors = [an_top]
           optionsscale = [osc_expandy, osc_shrinky]
           optionslayout = [lao_placex, lao_aligny]
-          align_glue = wam_center
+          align_glue = wam_start
           place_mindist = 5
           place_maxdist = 5
           place_options = [plo_endmargin]
@@ -6123,7 +6123,7 @@ object projectoptionsfo: tprojectoptionsfo
             optionswidget1 = [ow1_fontlineheight, ow1_autoscale]
             taborder = 2
             bounds_x = 700
-            bounds_y = 4
+            bounds_y = 5
             bounds_cx = 49
             bounds_cy = 21
             anchors = [an_top, an_right]
@@ -6136,7 +6136,7 @@ object projectoptionsfo: tprojectoptionsfo
             optionswidget1 = [ow1_fontlineheight, ow1_autoscale]
             taborder = 1
             bounds_x = 646
-            bounds_y = 4
+            bounds_y = 5
             bounds_cx = 49
             bounds_cy = 21
             anchors = [an_top, an_right]
@@ -6167,7 +6167,7 @@ object projectoptionsfo: tprojectoptionsfo
             )
             onshowhint = hintexpandedmacros
             bounds_x = 5
-            bounds_y = 4
+            bounds_y = 5
             bounds_cx = 636
             anchors = [an_left, an_top, an_right]
             ondataentered = settingsdataent
@@ -6231,10 +6231,27 @@ object projectoptionsfo: tprojectoptionsfo
             144
             2
           )
+          taborder = 7
+          bounds_x = 15
+          bounds_y = 196
+          bounds_cx = 158
+          bounds_cy = 16
+        end
+        object settingsmacros: tbooleanedit
+          optionsskin = [osk_nolayoutcx, osk_nolayoutcy]
+          frame.caption = 'Load/save macro settings'
+          frame.localprops = []
+          frame.localprops1 = []
+          frame.outerframe = (
+            0
+            1
+            164
+            2
+          )
           taborder = 6
           bounds_x = 15
           bounds_y = 172
-          bounds_cx = 158
+          bounds_cx = 178
           bounds_cy = 16
         end
       end

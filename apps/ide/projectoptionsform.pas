@@ -1,4 +1,4 @@
-{ MSEide Copyright (c) 1999-2015 by Martin Schreiber
+{ MSEide Copyright (c) 1999-2016 by Martin Schreiber
    
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -43,7 +43,7 @@ const
  defaultxtermcommand = 'xterm -S${PTSN}/${PTSH}';
  
 type
- settinggroupty = (sg_editor,sg_debugger);
+ settinggroupty = (sg_editor,sg_debugger,sg_macros);
  settinggroupsty = set of settinggroupty;
  
  findinfoty = record
@@ -405,6 +405,7 @@ type
    fsettingsfile: filenamety;
    fsettingseditor: boolean;
    fsettingsdebugger: boolean;
+   fsettingsmacros: boolean;
    fsettingsstorage: boolean;
    fsettingsprojecttree: boolean;
    fsettingsautoload: boolean;
@@ -417,12 +418,7 @@ type
    fmakeoptionson: integerarty;
    faftcommandon: integerarty;
    funitdirson: integerarty;
-   fmacroon: integerarty;
-   fmacronames: msestringarty;
-   fmacrovalues: msestringarty;
-   fmacrogroup: integer;
-   fgroupcomments: msestringarty;
- 
+
    ftoolsave: longboolarty;
    ftoolhide: longboolarty;
    ftoolparse: longboolarty;
@@ -477,6 +473,8 @@ type
    property settingseditor: boolean read fsettingseditor write fsettingseditor;
    property settingsdebugger: boolean read fsettingsdebugger 
                                                write fsettingsdebugger;
+   property settingsmacros: boolean read fsettingsmacros 
+                                               write fsettingsmacros;
    property settingsstorage: boolean read fsettingsstorage 
                                                write fsettingsstorage;
    property settingsprojecttree: boolean read fsettingsprojecttree 
@@ -494,12 +492,6 @@ type
    property makeoptionson: integerarty read fmakeoptionson write fmakeoptionson;
    property aftcommandon: integerarty read faftcommandon write faftcommandon;
    property unitdirson: integerarty read funitdirson write funitdirson;
-
-   property macroon: integerarty read fmacroon write fmacroon;
-   property macronames: msestringarty read fmacronames write fmacronames;
-   property macrovalues: msestringarty read fmacrovalues write fmacrovalues;
-   property macrogroup: integer read fmacrogroup write fmacrogroup;
-   property groupcomments: msestringarty read fgroupcomments write fgroupcomments;
 
    property toolsave: longboolarty read ftoolsave write ftoolsave;
    property toolhide: longboolarty read ftoolhide write ftoolhide;
@@ -523,6 +515,22 @@ type
                                               write fnewinheritedforms;
    property uid: integer read fuid write fuid;   
  end;
+ 
+ tmacrooptions = class(toptions)
+  private
+   fmacroon: integerarty;
+   fmacronames: msestringarty;
+   fmacrovalues: msestringarty;
+   fmacrogroup: integer;
+   fgroupcomments: msestringarty;
+  published
+   property macroon: integerarty read fmacroon write fmacroon;
+   property macronames: msestringarty read fmacronames write fmacronames;
+   property macrovalues: msestringarty read fmacrovalues write fmacrovalues;
+   property macrogroup: integer read fmacrogroup write fmacrogroup;
+   property groupcomments: msestringarty read fgroupcomments
+                                                     write fgroupcomments;
+ end;
 {$M-}
  
  projectoptionsty = record
@@ -530,6 +538,7 @@ type
   o: tprojectoptions;
   e: teditoptions;
   d: tdebugoptions;
+  m: tmacrooptions;
   modified: boolean;
   savechecked: boolean;
   ignoreexceptionclasses: stringarty;
@@ -829,6 +838,7 @@ type
    incpref: tstringedit;
    unitpref: tstringedit;
    reversepathorder: tbooleanedit;
+   settingsmacros: tbooleanedit;
    procedure acttiveselectondataentered(const sender: TObject);
    procedure colonshowhint(const sender: tdatacol; const arow: Integer; 
                       var info: hintinfoty);
@@ -1198,7 +1208,7 @@ var
  mask: integer;
  
 begin
- with projectoptions.o do begin
+ with projectoptions.m do begin
   result:= tmacrolist.create([mao_caseinsensitive]);
   result.add(getsettingsmacros);
   result.add(getcommandlinemacros);
@@ -1450,12 +1460,14 @@ begin
  projectoptions.o.free;
  projectoptions.e.free;
  projectoptions.d.free;
+ projectoptions.m.free;
  codetemplates.clear;
  finalize(projectoptions);
  fillchar(projectoptions,sizeof(projectoptions),0);
- projectoptions.o:= tprojectoptions.create;
- projectoptions.e:= teditoptions.create;
- projectoptions.d:= tdebugoptions.create;
+ projectoptions.o:= tprojectoptions.create();
+ projectoptions.e:= teditoptions.create();
+ projectoptions.d:= tdebugoptions.create();
+ projectoptions.m:= tmacrooptions.create();
  with projectoptions,o,t do begin
   if expand then begin
    deletememorystatstream(findinfiledialogstatname);
@@ -1838,7 +1850,7 @@ begin
   if not iswriter then begin
    if guitemplatesmo.sysenv.getintegervalue(int1,
                                              ord(env_vargroup),1,6) then begin
-    o.macrogroup:= int1-1;
+    m.macrogroup:= int1-1;
    end;
    expandprojectmacros;
    projecttree.updatelist;
@@ -1980,21 +1992,21 @@ begin
    fo.dobjon.gridupdatetagvalue(int2,o.unitdirson[int1]);
    dec(int2);
   end;
-  fo.activemacroselect[o.macrogroup]:= true;
+  fo.activemacroselect[m.macrogroup]:= true;
   fo.activegroupchanged;
-  setlength(o.fgroupcomments,6);
-  fo.groupcomment.gridvalues:= o.groupcomments;
+  setlength(m.fgroupcomments,6);
+  fo.groupcomment.gridvalues:= m.groupcomments;
 
   for int1:= 0 to fo.macrogrid.rowhigh do begin
-   if int1 > high(o.macroon) then begin
+   if int1 > high(m.macroon) then begin
     break;
    end;
-   fo.e0.gridupdatetagvalue(int1,o.macroon[int1]);
-   fo.e1.gridupdatetagvalue(int1,o.macroon[int1]);
-   fo.e2.gridupdatetagvalue(int1,o.macroon[int1]);
-   fo.e3.gridupdatetagvalue(int1,o.macroon[int1]);
-   fo.e4.gridupdatetagvalue(int1,o.macroon[int1]);
-   fo.e5.gridupdatetagvalue(int1,o.macroon[int1]);
+   fo.e0.gridupdatetagvalue(int1,m.macroon[int1]);
+   fo.e1.gridupdatetagvalue(int1,m.macroon[int1]);
+   fo.e2.gridupdatetagvalue(int1,m.macroon[int1]);
+   fo.e3.gridupdatetagvalue(int1,m.macroon[int1]);
+   fo.e4.gridupdatetagvalue(int1,m.macroon[int1]);
+   fo.e5.gridupdatetagvalue(int1,m.macroon[int1]);
   end;
 
   fo.sourcedirs.gridvalues:= reversearray(d.t.sourcedirs);
@@ -2013,7 +2025,7 @@ procedure storemacros(fo: tprojectoptionsfo);
 var
  int1: integer;
 begin
- with projectoptions,o do begin
+ with projectoptions,m do begin
   macronames:= fo.macronames.gridvalues;
   macrovalues:= fo.macrovalues.gridvalues;
   setlength(fmacroon,fo.macrogrid.rowcount);
@@ -2197,7 +2209,7 @@ begin
    macrogrid.datacols[int1].color:= cl_default;
   end;
  end;
- projectoptions.o.macrogroup:= int2;
+ projectoptions.m.macrogroup:= int2;
 end;
 
 procedure tprojectoptionsfo.acttiveselectondataentered(const sender: TObject);
@@ -2209,7 +2221,7 @@ begin
  end;
  tbooleaneditradio(sender).value:= true;
  activegroupchanged;
- projectoptions.o.macrogroup:= selectactivegroupgrid.row;
+ projectoptions.m.macrogroup:= selectactivegroupgrid.row;
 end;
 
 procedure tprojectoptionsfo.colonshowhint(const sender: tdatacol; 
@@ -2508,6 +2520,7 @@ type
   settingsfile: filenamety;
   settingseditor: boolean;
   settingsdebugger: boolean;
+  settingsmacros: boolean;
   settingsstorage: boolean;
   settingsprojecttree: boolean;
   settingsautoload: boolean;
@@ -2525,6 +2538,7 @@ begin
    settingsfile:= fo.settingsfile.value;
    settingseditor:= fo.settingseditor.value;
    settingsdebugger:= fo.settingsdebugger.value;
+   settingsmacros:= fo.settingsmacros.value;
    settingsstorage:= fo.settingsstorage.value;
    settingsprojecttree:= fo.settingsprojecttree.value;
    settingsautoload:= fo.settingsautoload.value; 
@@ -2534,6 +2548,7 @@ begin
    settingsfile:= projectoptions.o.settingsfile;
    settingseditor:= projectoptions.o.settingseditor;
    settingsdebugger:= projectoptions.o.settingsdebugger;
+   settingsmacros:= projectoptions.o.settingsmacros;
    settingsstorage:= projectoptions.o.settingsstorage;
    settingsprojecttree:= projectoptions.o.settingsprojecttree;
    settingsautoload:= projectoptions.o.settingsautoload; 
@@ -2552,6 +2567,7 @@ begin
     fo.settingsfile.value:= settingsfile;
     fo.settingseditor.value:= settingseditor; 
     fo.settingsdebugger.value:= settingsdebugger; 
+    fo.settingsmacros.value:= settingsmacros; 
     fo.settingsstorage.value:= settingsstorage; 
     fo.settingsprojecttree.value:= settingsprojecttree; 
     fo.settingsautoload.value:= settingsautoload; 
@@ -2565,6 +2581,7 @@ begin
     projectoptions.o.settingsfile:= settingsfile;
     projectoptions.o.settingseditor:= settingseditor; 
     projectoptions.o.settingsdebugger:= settingsdebugger; 
+    projectoptions.o.settingsmacros:= settingsmacros; 
     projectoptions.o.settingsstorage:= settingsstorage; 
     projectoptions.o.settingsprojecttree:= settingsprojecttree; 
     projectoptions.o.settingsautoload:= settingsautoload; 
@@ -2612,6 +2629,9 @@ begin
   end;
   if not o.settingsdebugger then begin
    include(result,sg_debugger);
+  end;
+  if not o.settingsmacros then begin
+   include(result,sg_macros);
   end;
  end;
 end;
@@ -2716,6 +2736,7 @@ begin
      o.settingsfile:= '';
      o.settingseditor:= false; 
      o.settingsdebugger:= false; 
+     o.settingsmacros:= false; 
      o.settingsstorage:= false; 
      o.settingsprojecttree:= false; 
      o.settingsautoload:= false; 
@@ -2973,8 +2994,9 @@ end;
 initialization
  codetemplates:= tcodetemplates.create;
 finalization
- projectoptions.o.free;
- projectoptions.e.free;
- projectoptions.d.free;
+ projectoptions.o.free();
+ projectoptions.e.free();
+ projectoptions.d.free();
+ projectoptions.m.free();
  freeandnil(codetemplates);
 end.
