@@ -6233,7 +6233,7 @@ object projectoptionsfo: tprojectoptionsfo
           )
           taborder = 7
           bounds_x = 15
-          bounds_y = 196
+          bounds_y = 268
           bounds_cx = 158
           bounds_cy = 16
         end
@@ -6252,6 +6252,23 @@ object projectoptionsfo: tprojectoptionsfo
           bounds_x = 15
           bounds_y = 172
           bounds_cx = 178
+          bounds_cy = 16
+        end
+        object settingstools: tbooleanedit
+          optionsskin = [osk_nolayoutcx, osk_nolayoutcy]
+          frame.caption = 'Load/save tools settings'
+          frame.localprops = []
+          frame.localprops1 = []
+          frame.outerframe = (
+            0
+            1
+            156
+            2
+          )
+          taborder = 8
+          bounds_x = 15
+          bounds_y = 196
+          bounds_cx = 170
           bounds_cy = 16
         end
       end

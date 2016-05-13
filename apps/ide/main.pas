@@ -2855,7 +2855,7 @@ var
  propit: tpropertyitem;
  opt1: execoptionsty; 
 begin
- with tmenuitem(sender),projectoptions,o,texp do begin
+ with tmenuitem(sender),projectoptions,t,texp do begin
   str1:= tosysfilepath(toolfiles[index]);
   if str1 <> '' then begin
    if (index <= high(toolfiles)) and (toolparams[index] <> '') then begin
@@ -2950,6 +2950,9 @@ begin
   end;
   if not (sg_macros in disabled) then begin
    addobjectinfoitem(aobjects,m);
+  end;
+  if not (sg_tools in disabled) then begin
+   addobjectinfoitem(aobjects,t);
   end;
  end;
 end;

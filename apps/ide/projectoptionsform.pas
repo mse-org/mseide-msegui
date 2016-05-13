@@ -43,7 +43,7 @@ const
  defaultxtermcommand = 'xterm -S${PTSN}/${PTSH}';
  
 type
- settinggroupty = (sg_editor,sg_debugger,sg_macros);
+ settinggroupty = (sg_editor,sg_debugger,sg_macros,sg_tools);
  settinggroupsty = set of settinggroupty;
  
  findinfoty = record
@@ -82,9 +82,6 @@ type
    fbefcommand: msestringarty;
    faftcommand: msestringarty;
    fmakeoptions: msestringarty;
-   ftoolmenus: msestringarty;
-   ftoolfiles: msestringarty;
-   ftoolparams: msestringarty;
    ffontnames: msestringarty;
    fscriptbeforecopy: msestring;
    fscriptaftercopy: msestring;
@@ -120,10 +117,6 @@ type
 
    property codetemplatedirs: msestringarty read fcodetemplatedirs
                                                      write fcodetemplatedirs;
-
-   property toolmenus: msestringarty read ftoolmenus write ftoolmenus;
-   property toolfiles: msestringarty read ftoolfiles write ftoolfiles;
-   property toolparams: msestringarty read ftoolparams write ftoolparams;
     
    property fontnames: msestringarty read ffontnames write ffontnames;
    property scriptbeforecopy: msestring read fscriptbeforecopy
@@ -164,6 +157,41 @@ type
    property filemasks: msestringarty read ffilemasks write ffilemasks;
  end;
 
+ ttexttoolsoptions = class(toptions)
+  private
+   ftoolmenus: msestringarty;
+   ftoolfiles: msestringarty;
+   ftoolparams: msestringarty;
+  published
+   property toolmenus: msestringarty read ftoolmenus write ftoolmenus;
+   property toolfiles: msestringarty read ftoolfiles write ftoolfiles;
+   property toolparams: msestringarty read ftoolparams write ftoolparams;
+ end;
+
+ ttoolsoptions = class(toptions)
+  private
+   ft: ttexttoolsoptions;
+   ftexp: ttexttoolsoptions;
+   ftoolsave: longboolarty;
+   ftoolhide: longboolarty;
+   ftoolparse: longboolarty;
+   ftoolmessages: longboolarty;
+   ftoolshortcuts: integerarty;
+  protected
+   function gett: tobject; override;
+   function gettexp: tobject; override;
+  public
+   constructor create;
+   property texp: ttexttoolsoptions read ftexp;
+  published
+   property t: ttexttoolsoptions read ft;
+   property toolsave: longboolarty read ftoolsave write ftoolsave;
+   property toolhide: longboolarty read ftoolhide write ftoolhide;
+   property toolparse: longboolarty read ftoolparse write ftoolparse;
+   property toolmessages: longboolarty read ftoolmessages write ftoolmessages;
+   property toolshortcuts: integerarty read ftoolshortcuts write ftoolshortcuts;
+ end;
+ 
  teditoptions = class(toptions)
   private
    ft: ttexteditoptions;
@@ -406,6 +434,7 @@ type
    fsettingseditor: boolean;
    fsettingsdebugger: boolean;
    fsettingsmacros: boolean;
+   fsettingstools: boolean;
    fsettingsstorage: boolean;
    fsettingsprojecttree: boolean;
    fsettingsautoload: boolean;
@@ -419,10 +448,6 @@ type
    faftcommandon: integerarty;
    funitdirson: integerarty;
 
-   ftoolsave: longboolarty;
-   ftoolhide: longboolarty;
-   ftoolparse: longboolarty;
-   ftoolmessages: longboolarty;
    ffontalias: msestringarty;
    ffontancestors: msestringarty;
    ffontheights: integerarty;
@@ -437,7 +462,6 @@ type
    fcolornote: colorty;
    fuid: integer;
    fforcezorder: longbool;
-   ftoolshortcuts: integerarty;
    freversepathorder: boolean;
    procedure setforcezorder(const avalue: longbool);
   protected
@@ -475,6 +499,8 @@ type
                                                write fsettingsdebugger;
    property settingsmacros: boolean read fsettingsmacros 
                                                write fsettingsmacros;
+   property settingstools: boolean read fsettingstools 
+                                               write fsettingstools;
    property settingsstorage: boolean read fsettingsstorage 
                                                write fsettingsstorage;
    property settingsprojecttree: boolean read fsettingsprojecttree 
@@ -492,12 +518,6 @@ type
    property makeoptionson: integerarty read fmakeoptionson write fmakeoptionson;
    property aftcommandon: integerarty read faftcommandon write faftcommandon;
    property unitdirson: integerarty read funitdirson write funitdirson;
-
-   property toolsave: longboolarty read ftoolsave write ftoolsave;
-   property toolhide: longboolarty read ftoolhide write ftoolhide;
-   property toolparse: longboolarty read ftoolparse write ftoolparse;
-   property toolmessages: longboolarty read ftoolmessages write ftoolmessages;
-   property toolshortcuts: integerarty read ftoolshortcuts write ftoolshortcuts;
 
    property fontalias: msestringarty read ffontalias write ffontalias;
    property fontancestors: msestringarty read ffontancestors 
@@ -539,6 +559,7 @@ type
   e: teditoptions;
   d: tdebugoptions;
   m: tmacrooptions;
+  t: ttoolsoptions;
   modified: boolean;
   savechecked: boolean;
   ignoreexceptionclasses: stringarty;
@@ -839,6 +860,7 @@ type
    unitpref: tstringedit;
    reversepathorder: tbooleanedit;
    settingsmacros: tbooleanedit;
+   settingstools: tbooleanedit;
    procedure acttiveselectondataentered(const sender: TObject);
    procedure colonshowhint(const sender: tdatacol; const arow: Integer; 
                       var info: hintinfoty);
@@ -1265,6 +1287,7 @@ begin
   o.expandmacros(li);
   e.expandmacros(li);
   d.expandmacros(li);
+  t.expandmacros(li);
   with o,texp do begin
    if initfontaliascount = 0 then begin
     initfontaliascount:= fontaliascount;
@@ -1368,35 +1391,37 @@ begin
    end;
    with mainfo.mainmenu1.menu.submenu do begin
     item1:= itembyname('tools');
-    if toolmenus <> nil then begin
-     if item1 = nil then begin
-      item1:= tmenuitem.create;
-      item1.name:= 'tools';
-      item1.caption:= actionsmo.c[ord(ac_tools)];
-      insert(itemindexbyname('settings'),item1);
-     end;
-     with item1.submenu do begin
-      clear;
-      for int1:= 0 to high(toolmenus) do begin
-       if (int1 > high(toolfiles)) or (int1 > high(toolparams)) then begin
-        break;
-       end;
-       int2:= insert(bigint,[toolmenus[int1]],
-                  [[mao_asyncexecute,mao_shortcutcaption]],
-                               [],[{$ifdef FPC}@{$endif}mainfo.runtool]);
-       if (int1 <= high(toolshortcuts)) and 
-           actionsmo.gettoolshortcutaction(toolshortcuts[int1],act1) then begin
-        with items[int2] do begin
-         shortcuts:= act1.shortcuts;
-         shortcuts1:= act1.shortcuts1;
+    with projectoptions.t,texp do begin
+     if toolmenus <> nil then begin
+      if item1 = nil then begin
+       item1:= tmenuitem.create;
+       item1.name:= 'tools';
+       item1.caption:= actionsmo.c[ord(ac_tools)];
+       insert(itemindexbyname('settings'),item1);
+      end;
+      with item1.submenu do begin
+       clear;
+       for int1:= 0 to high(toolmenus) do begin
+        if (int1 > high(toolfiles)) or (int1 > high(toolparams)) then begin
+         break;
+        end;
+        int2:= insert(bigint,[toolmenus[int1]],
+                   [[mao_asyncexecute,mao_shortcutcaption]],
+                                [],[{$ifdef FPC}@{$endif}mainfo.runtool]);
+        if (int1 <= high(toolshortcuts)) and 
+            actionsmo.gettoolshortcutaction(toolshortcuts[int1],act1) then begin
+         with items[int2] do begin
+          shortcuts:= act1.shortcuts;
+          shortcuts1:= act1.shortcuts1;
+         end;
         end;
        end;
       end;
-     end;
-    end
-    else begin
-     if item1 <> nil then begin
-      delete(item1.index);
+     end
+     else begin
+      if item1 <> nil then begin
+       delete(item1.index);
+      end;
      end;
     end;
    end;
@@ -1461,6 +1486,7 @@ begin
  projectoptions.e.free;
  projectoptions.d.free;
  projectoptions.m.free;
+ projectoptions.t.free;
  codetemplates.clear;
  finalize(projectoptions);
  fillchar(projectoptions,sizeof(projectoptions),0);
@@ -1468,6 +1494,7 @@ begin
  projectoptions.e:= teditoptions.create();
  projectoptions.d:= tdebugoptions.create();
  projectoptions.m:= tmacrooptions.create();
+ projectoptions.t:= ttoolsoptions.create();
  with projectoptions,o,t do begin
   if expand then begin
    deletememorystatstream(findinfiledialogstatname);
@@ -1720,7 +1747,9 @@ begin
   end
   else begin
    mainfo.statoptions.readstat(tstatreader(statfiler));
-   setlength(ftoolmessages,length(ftoolsave));
+   with projectoptions.t do begin
+    setlength(ftoolmessages,length(ftoolsave));
+   end;
    with tstatreader(statfiler) do begin
     readrecordarray('sigsettings',{$ifdef FPC}@{$endif}setsignalinfocount,
              {$ifdef FPC}@{$endif}storesignalinforec);
@@ -1888,10 +1917,10 @@ var
  int1,int2: integer;
 begin
  with projectoptions do begin
-  int1:= length(o.toolshortcuts);
-  setlength(o.ftoolshortcuts,length(o.t.toolmenus));
-  for int2:= int1 to high(o.toolshortcuts) do begin
-   o.toolshortcuts[int2]:= -1; //init for backward compatibility
+  int1:= length(t.toolshortcuts);
+  setlength(t.ftoolshortcuts,length(t.t.toolmenus));
+  for int2:= int1 to high(t.toolshortcuts) do begin
+   t.toolshortcuts[int2]:= -1; //init for backward compatibility
   end;
  end;
  {$ifdef mse_with_ifi}
@@ -2521,6 +2550,7 @@ type
   settingseditor: boolean;
   settingsdebugger: boolean;
   settingsmacros: boolean;
+  settingstools: boolean;
   settingsstorage: boolean;
   settingsprojecttree: boolean;
   settingsautoload: boolean;
@@ -2539,6 +2569,7 @@ begin
    settingseditor:= fo.settingseditor.value;
    settingsdebugger:= fo.settingsdebugger.value;
    settingsmacros:= fo.settingsmacros.value;
+   settingstools:= fo.settingstools.value;
    settingsstorage:= fo.settingsstorage.value;
    settingsprojecttree:= fo.settingsprojecttree.value;
    settingsautoload:= fo.settingsautoload.value; 
@@ -2549,6 +2580,7 @@ begin
    settingseditor:= projectoptions.o.settingseditor;
    settingsdebugger:= projectoptions.o.settingsdebugger;
    settingsmacros:= projectoptions.o.settingsmacros;
+   settingstools:= projectoptions.o.settingstools;
    settingsstorage:= projectoptions.o.settingsstorage;
    settingsprojecttree:= projectoptions.o.settingsprojecttree;
    settingsautoload:= projectoptions.o.settingsautoload; 
@@ -2568,6 +2600,7 @@ begin
     fo.settingseditor.value:= settingseditor; 
     fo.settingsdebugger.value:= settingsdebugger; 
     fo.settingsmacros.value:= settingsmacros; 
+    fo.settingstools.value:= settingstools; 
     fo.settingsstorage.value:= settingsstorage; 
     fo.settingsprojecttree.value:= settingsprojecttree; 
     fo.settingsautoload.value:= settingsautoload; 
@@ -2582,6 +2615,7 @@ begin
     projectoptions.o.settingseditor:= settingseditor; 
     projectoptions.o.settingsdebugger:= settingsdebugger; 
     projectoptions.o.settingsmacros:= settingsmacros; 
+    projectoptions.o.settingstools:= settingstools; 
     projectoptions.o.settingsstorage:= settingsstorage; 
     projectoptions.o.settingsprojecttree:= settingsprojecttree; 
     projectoptions.o.settingsautoload:= settingsautoload; 
@@ -2632,6 +2666,9 @@ begin
   end;
   if not o.settingsmacros then begin
    include(result,sg_macros);
+  end;
+  if not o.settingstools then begin
+   include(result,sg_tools);
   end;
  end;
 end;
@@ -2737,6 +2774,7 @@ begin
      o.settingseditor:= false; 
      o.settingsdebugger:= false; 
      o.settingsmacros:= false; 
+     o.settingstools:= false; 
      o.settingsstorage:= false; 
      o.settingsprojecttree:= false; 
      o.settingsautoload:= false; 
@@ -2991,6 +3029,25 @@ begin
  fxtermcommand:= defaultxtermcommand;
 end;
 
+{ ttoolsoptions }
+
+constructor ttoolsoptions.create;
+begin
+ ft:= ttexttoolsoptions.create();
+ ftexp:= ttexttoolsoptions.create();
+ inherited;
+end;
+
+function ttoolsoptions.gett: tobject;
+begin
+ result:= ft;
+end;
+
+function ttoolsoptions.gettexp: tobject;
+begin
+ result:= ftexp;
+end;
+
 initialization
  codetemplates:= tcodetemplates.create;
 finalization
@@ -2998,5 +3055,6 @@ finalization
  projectoptions.e.free();
  projectoptions.d.free();
  projectoptions.m.free();
+ projectoptions.t.free();
  freeandnil(codetemplates);
 end.
