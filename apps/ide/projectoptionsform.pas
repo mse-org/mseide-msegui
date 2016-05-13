@@ -441,10 +441,12 @@ type
    fmodulenames: msestringarty;
    fmoduletypes: msestringarty;
    fmodulefiles: filenamearty;
+   fmacrogroup: integer;
   published
    property modulenames: msestringarty read fmodulenames write fmodulenames;
    property moduletypes: msestringarty read fmoduletypes write fmoduletypes;
    property modulefiles: filenamearty read fmodulefiles write fmodulefiles;
+   property macrogroup: integer read fmacrogroup write fmacrogroup;
  end;
     
  tprojectoptions = class(toptions)
@@ -568,13 +570,11 @@ type
    fmacroon: integerarty;
    fmacronames: msestringarty;
    fmacrovalues: msestringarty;
-   fmacrogroup: integer;
    fgroupcomments: msestringarty;
   published
    property macroon: integerarty read fmacroon write fmacroon;
    property macronames: msestringarty read fmacronames write fmacronames;
    property macrovalues: msestringarty read fmacrovalues write fmacrovalues;
-   property macrogroup: integer read fmacrogroup write fmacrogroup;
    property groupcomments: msestringarty read fgroupcomments
                                                      write fgroupcomments;
  end;
@@ -1265,7 +1265,7 @@ begin
   result.add(getsettingsmacros);
   result.add(getcommandlinemacros);
   result.add(getprojectmacros);
-  mask:= bits[macrogroup];
+  mask:= bits[projectoptions.s.macrogroup];
   setlength(fmacrovalues,length(macronames));
   setlength(ar1,length(macronames)); //max
   int2:= 0;
@@ -1846,6 +1846,7 @@ var
  int1,int2,int3: integer;
  modulenames1: msestringarty;
  moduletypes1: msestringarty;
+ 
  modulefiles1: filenamearty;
 // moduledock1: msestringarty;
 begin
@@ -1920,7 +1921,7 @@ begin
   if not iswriter then begin
    if guitemplatesmo.sysenv.getintegervalue(int1,
                                              ord(env_vargroup),1,6) then begin
-    m.macrogroup:= int1-1;
+    s.macrogroup:= int1-1;
    end;
    expandprojectmacros;
    projecttree.updatelist;
@@ -2062,7 +2063,7 @@ begin
    fo.dobjon.gridupdatetagvalue(int2,o.unitdirson[int1]);
    dec(int2);
   end;
-  fo.activemacroselect[m.macrogroup]:= true;
+  fo.activemacroselect[s.macrogroup]:= true;
   fo.activegroupchanged;
   setlength(m.fgroupcomments,6);
   fo.groupcomment.gridvalues:= m.groupcomments;
@@ -2279,7 +2280,7 @@ begin
    macrogrid.datacols[int1].color:= cl_default;
   end;
  end;
- projectoptions.m.macrogroup:= int2;
+ projectoptions.s.macrogroup:= int2;
 end;
 
 procedure tprojectoptionsfo.acttiveselectondataentered(const sender: TObject);
@@ -2291,7 +2292,7 @@ begin
  end;
  tbooleaneditradio(sender).value:= true;
  activegroupchanged;
- projectoptions.m.macrogroup:= selectactivegroupgrid.row;
+ projectoptions.s.macrogroup:= selectactivegroupgrid.row;
 end;
 
 procedure tprojectoptionsfo.colonshowhint(const sender: tdatacol; 

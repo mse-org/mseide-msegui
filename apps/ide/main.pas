@@ -2955,7 +2955,7 @@ begin
    addobjectinfoitem(aobjects,t);
   end;
   if not (sg_templates in disabled) then begin
-   addobjectinfoitem(aobjects,t);
+   addobjectinfoitem(aobjects,p);
   end;
   if not (sg_state in disabled) then begin
    addobjectinfoitem(aobjects,s);
