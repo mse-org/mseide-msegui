@@ -43,7 +43,8 @@ const
  defaultxtermcommand = 'xterm -S${PTSN}/${PTSH}';
  
 type
- settinggroupty = (sg_editor,sg_debugger,sg_macros,sg_tools);
+ settinggroupty = (sg_editor,sg_debugger,sg_templates,sg_macros,sg_tools,
+                   sg_state);
  settinggroupsty = set of settinggroupty;
  
  findinfoty = record
@@ -83,18 +84,6 @@ type
    faftcommand: msestringarty;
    fmakeoptions: msestringarty;
    ffontnames: msestringarty;
-   fscriptbeforecopy: msestring;
-   fscriptaftercopy: msestring;
-   fnewprojectfiles: filenamearty;
-   fnewprojectfilesdest: filenamearty;
-   fnewfinames: msestringarty;
-   fnewfifilters: msestringarty;
-   fnewfiexts: msestringarty;
-   fnewfisources: filenamearty;
-   fnewfonames: msestringarty;
-   fnewfonamebases: msestringarty;
-   fnewfosources: msestringarty;
-   fnewfoforms: msestringarty;
   public
    fcodetemplatedirs: msestringarty;
   published
@@ -119,26 +108,6 @@ type
                                                      write fcodetemplatedirs;
     
    property fontnames: msestringarty read ffontnames write ffontnames;
-   property scriptbeforecopy: msestring read fscriptbeforecopy
-                                               write fscriptbeforecopy;
-   property scriptaftercopy: msestring read fscriptaftercopy 
-                                           write fscriptaftercopy;
-   property newprojectfiles: filenamearty read fnewprojectfiles
-                                               write fnewprojectfiles;
-   property newprojectfilesdest: filenamearty read fnewprojectfilesdest
-                                                  write fnewprojectfilesdest;
-   property newfinames: msestringarty read fnewfinames write fnewfinames;
-   property newfifilters: msestringarty read fnewfifilters
-                                              write fnewfifilters;
-   property newfiexts: msestringarty read fnewfiexts write fnewfiexts;
-   property newfisources: filenamearty read fnewfisources write fnewfisources;
-  
-   property newfonames: msestringarty read fnewfonames write fnewfonames;
-   property newfonamebases: msestringarty read fnewfonamebases
-                                                   write fnewfonamebases;
-   property newfosources: msestringarty read fnewfosources 
-                                        write fnewfosources;
-   property newfoforms: msestringarty read fnewfoforms write fnewfoforms;
  end;
 
  ttexteditoptions = class(toptions)
@@ -190,6 +159,57 @@ type
    property toolparse: longboolarty read ftoolparse write ftoolparse;
    property toolmessages: longboolarty read ftoolmessages write ftoolmessages;
    property toolshortcuts: integerarty read ftoolshortcuts write ftoolshortcuts;
+ end;
+
+ ttexttemplatesoptions = class(toptions)
+  private
+   fscriptbeforecopy: msestring;
+   fscriptaftercopy: msestring;
+   fnewprojectfiles: filenamearty;
+   fnewprojectfilesdest: filenamearty;
+   fnewfinames: msestringarty;
+   fnewfifilters: msestringarty;
+   fnewfiexts: msestringarty;
+   fnewfisources: filenamearty;
+   fnewfonames: msestringarty;
+   fnewfonamebases: msestringarty;
+   fnewfosources: msestringarty;
+   fnewfoforms: msestringarty;
+  published
+   property scriptbeforecopy: msestring read fscriptbeforecopy
+                                               write fscriptbeforecopy;
+   property scriptaftercopy: msestring read fscriptaftercopy 
+                                           write fscriptaftercopy;
+   property newprojectfiles: filenamearty read fnewprojectfiles
+                                               write fnewprojectfiles;
+   property newprojectfilesdest: filenamearty read fnewprojectfilesdest
+                                                  write fnewprojectfilesdest;
+   property newfinames: msestringarty read fnewfinames write fnewfinames;
+   property newfifilters: msestringarty read fnewfifilters
+                                              write fnewfifilters;
+   property newfiexts: msestringarty read fnewfiexts write fnewfiexts;
+   property newfisources: filenamearty read fnewfisources write fnewfisources;
+  
+   property newfonames: msestringarty read fnewfonames write fnewfonames;
+   property newfonamebases: msestringarty read fnewfonamebases
+                                                   write fnewfonamebases;
+   property newfosources: msestringarty read fnewfosources 
+                                        write fnewfosources;
+   property newfoforms: msestringarty read fnewfoforms write fnewfoforms;
+ end;
+ 
+ ttemplatesoptions = class(toptions)
+  private
+   ft: ttexttemplatesoptions;
+   ftexp: ttexttemplatesoptions;
+  protected
+   function gett: tobject; override;
+   function gettexp: tobject; override;
+  public
+   constructor create;
+   property texp: ttexttemplatesoptions read ftexp;
+  published
+   property t: ttexttemplatesoptions read ft;
  end;
  
  teditoptions = class(toptions)
@@ -415,7 +435,18 @@ type
    property fpcgdbworkaround: boolean read ffpcgdbworkaround 
                                                    write ffpcgdbworkaround;
  end;
-   
+
+ tprojectstate = class(toptions)
+  private
+   fmodulenames: msestringarty;
+   fmoduletypes: msestringarty;
+   fmodulefiles: filenamearty;
+  published
+   property modulenames: msestringarty read fmodulenames write fmodulenames;
+   property moduletypes: msestringarty read fmoduletypes write fmoduletypes;
+   property modulefiles: filenamearty read fmodulefiles write fmodulefiles;
+ end;
+    
  tprojectoptions = class(toptions)
   private
    ft: ttextprojectoptions;
@@ -434,14 +465,12 @@ type
    fsettingseditor: boolean;
    fsettingsdebugger: boolean;
    fsettingsmacros: boolean;
+   fsettingstemplates: boolean;
    fsettingstools: boolean;
    fsettingsstorage: boolean;
    fsettingsprojecttree: boolean;
    fsettingsautoload: boolean;
    fsettingsautosave: boolean;
-   fmodulenames: msestringarty;
-   fmoduletypes: msestringarty;
-   fmodulefiles: filenamearty;
 //   fmoduleoptions: integerarty;
    fbefcommandon: integerarty;
    fmakeoptionson: integerarty;
@@ -499,6 +528,8 @@ type
                                                write fsettingsdebugger;
    property settingsmacros: boolean read fsettingsmacros 
                                                write fsettingsmacros;
+   property settingstemplates: boolean read fsettingstemplates 
+                                               write fsettingstemplates;
    property settingstools: boolean read fsettingstools 
                                                write fsettingstools;
    property settingsstorage: boolean read fsettingsstorage 
@@ -510,10 +541,6 @@ type
    property settingsautosave: boolean read fsettingsautosave
                                           write fsettingsautosave;
   
-   property modulenames: msestringarty read fmodulenames write fmodulenames;
-   property moduletypes: msestringarty read fmoduletypes write fmoduletypes;
-   property modulefiles: filenamearty read fmodulefiles write fmodulefiles;
-
    property befcommandon: integerarty read fbefcommandon write fbefcommandon;
    property makeoptionson: integerarty read fmakeoptionson write fmakeoptionson;
    property aftcommandon: integerarty read faftcommandon write faftcommandon;
@@ -559,7 +586,9 @@ type
   e: teditoptions;
   d: tdebugoptions;
   m: tmacrooptions;
+  p: ttemplatesoptions;
   t: ttoolsoptions;
+  s: tprojectstate;
   modified: boolean;
   savechecked: boolean;
   ignoreexceptionclasses: stringarty;
@@ -861,6 +890,7 @@ type
    reversepathorder: tbooleanedit;
    settingsmacros: tbooleanedit;
    settingstools: tbooleanedit;
+   settingstemplates: tbooleanedit;
    procedure acttiveselectondataentered(const sender: TObject);
    procedure colonshowhint(const sender: tdatacol; const arow: Integer; 
                       var info: hintinfoty);
@@ -1288,6 +1318,7 @@ begin
   e.expandmacros(li);
   d.expandmacros(li);
   t.expandmacros(li);
+  p.expandmacros(li);
   with o,texp do begin
    if initfontaliascount = 0 then begin
     initfontaliascount:= fontaliascount;
@@ -1354,39 +1385,41 @@ begin
    end;
    item1:= mainfo.mainmenu1.menu.itembynames(['file','new']);
    item1.submenu.count:= 1;
-   item1.submenu.count:= length(newfinames)+1;
-   for int1:= 0 to high(newfinames) do begin
-    with item1.submenu[int1+1] do begin
-     caption:= newfinames[int1];
-     tag:= int1;
-     onexecute:= {$ifdef FPC}@{$endif}mainfo.newfileonexecute;
-    end;
-   end;
-
-   item1:= mainfo.mainmenu1.menu.itembynames(['file','new','form']);
-   item1.submenu.count:= 0;
-   item1.submenu.count:= length(newfonames)+1;
-   int2:= 0;
-   for int1:= 0 to high(newfonames) do begin
-    if not newinheritedforms[int1] then begin
-     with item1.submenu[int2] do begin
-      caption:= newfonames[int1];
+   with p.texp do begin
+    item1.submenu.count:= length(newfinames)+1;
+    for int1:= 0 to high(newfinames) do begin
+     with item1.submenu[int1+1] do begin
+      caption:= newfinames[int1];
       tag:= int1;
-      onexecute:= {$ifdef FPC}@{$endif}mainfo.newformonexecute;
+      onexecute:= {$ifdef FPC}@{$endif}mainfo.newfileonexecute;
      end;
-     inc(int2);
     end;
-   end;
-   item1.submenu[int2].options:= [mao_separator];
-   inc(int2);
-   for int1:= 0 to high(newfonames) do begin
-    if newinheritedforms[int1] then begin
-     with item1.submenu[int2] do begin
-      caption:= newfonames[int1];
-      tag:= int1;
-      onexecute:= {$ifdef FPC}@{$endif}mainfo.newformonexecute;
+ 
+    item1:= mainfo.mainmenu1.menu.itembynames(['file','new','form']);
+    item1.submenu.count:= 0;
+    item1.submenu.count:= length(newfonames)+1;
+    int2:= 0;
+    for int1:= 0 to high(newfonames) do begin
+     if not newinheritedforms[int1] then begin
+      with item1.submenu[int2] do begin
+       caption:= newfonames[int1];
+       tag:= int1;
+       onexecute:= {$ifdef FPC}@{$endif}mainfo.newformonexecute;
+      end;
+      inc(int2);
      end;
-     inc(int2);
+    end;
+    item1.submenu[int2].options:= [mao_separator];
+    inc(int2);
+    for int1:= 0 to high(newfonames) do begin
+     if newinheritedforms[int1] then begin
+      with item1.submenu[int2] do begin
+       caption:= newfonames[int1];
+       tag:= int1;
+       onexecute:= {$ifdef FPC}@{$endif}mainfo.newformonexecute;
+      end;
+      inc(int2);
+     end;
     end;
    end;
    with mainfo.mainmenu1.menu.submenu do begin
@@ -1487,6 +1520,8 @@ begin
  projectoptions.d.free;
  projectoptions.m.free;
  projectoptions.t.free;
+ projectoptions.p.free;
+ projectoptions.s.free;
  codetemplates.clear;
  finalize(projectoptions);
  fillchar(projectoptions,sizeof(projectoptions),0);
@@ -1495,6 +1530,8 @@ begin
  projectoptions.d:= tdebugoptions.create();
  projectoptions.m:= tmacrooptions.create();
  projectoptions.t:= ttoolsoptions.create();
+ projectoptions.p:= ttemplatesoptions.create();
+ projectoptions.s:= tprojectstate.create();
  with projectoptions,o,t do begin
   if expand then begin
    deletememorystatstream(findinfiledialogstatname);
@@ -1559,103 +1596,105 @@ begin
   objpref:= '-Fo';
   targpref:= '-o';
   makecommand:= '${COMPILER}';
-  setlength(fnewfinames,3);
-  setlength(fnewfifilters,3);
-  setlength(fnewfiexts,3);
-  setlength(fnewfisources,3);
+  with p.t do begin
+   setlength(fnewfinames,3);
+   setlength(fnewfifilters,3);
+   setlength(fnewfiexts,3);
+   setlength(fnewfisources,3);
+   
+   newfinames[0]:= actionsmo.c[ord(ac_program)];
+   newfifilters[0]:= '"*.pas" "*.pp"';
+   newfiexts[0]:= 'pas';
+   newfisources[0]:= '${TEMPLATEDIR}default/program.pas';
+ 
+   newfinames[1]:= actionsmo.c[ord(ac_unit)];
+   newfifilters[1]:= '"*.pas" "*.pp"';
+   newfiexts[1]:= 'pas';
+   newfisources[1]:= '${TEMPLATEDIR}default/unit.pas';
+ 
+   newfinames[2]:= actionsmo.c[ord(ac_textfile)];
+   newfifilters[2]:= '';
+   newfiexts[2]:= '';
+   newfisources[2]:= '';
+   
+   setlength(fnewfonames,12);
+   setlength(fnewfonamebases,12);
+   setlength(fnewinheritedforms,12);
+   setlength(fnewfosources,12);
+   setlength(fnewfoforms,12);
+ 
+   newfonames[0]:= actionsmo.c[ord(ac_mainform)];
+   newfonamebases[0]:= 'form';
+   newinheritedforms[0]:= false;
+   newfosources[0]:= '${TEMPLATEDIR}default/mainform.pas';
+   newfoforms[0]:= '${TEMPLATEDIR}default/mainform.mfm';
   
-  newfinames[0]:= actionsmo.c[ord(ac_program)];
-  newfifilters[0]:= '"*.pas" "*.pp"';
-  newfiexts[0]:= 'pas';
-  newfisources[0]:= '${TEMPLATEDIR}default/program.pas';
-
-  newfinames[1]:= actionsmo.c[ord(ac_unit)];
-  newfifilters[1]:= '"*.pas" "*.pp"';
-  newfiexts[1]:= 'pas';
-  newfisources[1]:= '${TEMPLATEDIR}default/unit.pas';
-
-  newfinames[2]:= actionsmo.c[ord(ac_textfile)];
-  newfifilters[2]:= '';
-  newfiexts[2]:= '';
-  newfisources[2]:= '';
+   newfonames[1]:= actionsmo.c[ord(ac_simpleform)];
+   newfonamebases[1]:= 'form';
+   newinheritedforms[1]:= false;
+   newfosources[1]:= '${TEMPLATEDIR}default/simpleform.pas';
+   newfoforms[1]:= '${TEMPLATEDIR}default/simpleform.mfm';
   
-  setlength(fnewfonames,12);
-  setlength(fnewfonamebases,12);
-  setlength(fnewinheritedforms,12);
-  setlength(fnewfosources,12);
-  setlength(fnewfoforms,12);
-
-  newfonames[0]:= actionsmo.c[ord(ac_mainform)];
-  newfonamebases[0]:= 'form';
-  newinheritedforms[0]:= false;
-  newfosources[0]:= '${TEMPLATEDIR}default/mainform.pas';
-  newfoforms[0]:= '${TEMPLATEDIR}default/mainform.mfm';
+   newfonames[2]:= actionsmo.c[ord(ac_dockingform)];
+   newfonamebases[2]:= 'form';
+   newinheritedforms[2]:= false;
+   newfosources[2]:= '${TEMPLATEDIR}default/dockingform.pas';
+   newfoforms[2]:= '${TEMPLATEDIR}default/dockingform.mfm';
+  
+   newfonames[3]:= actionsmo.c[ord(ac_sizingform)];
+   newfonamebases[3]:= 'form';
+   newinheritedforms[3]:= false;
+   newfosources[3]:= '${TEMPLATEDIR}default/sizingform.pas';
+   newfoforms[3]:= '${TEMPLATEDIR}default/sizingform.mfm';
+  
+   newfonames[4]:= actionsmo.c[ord(ac_datamodule)];
+   newfonamebases[4]:= 'module';
+   newinheritedforms[4]:= false;
+   newfosources[4]:= '${TEMPLATEDIR}default/datamodule.pas';
+   newfoforms[4]:= '${TEMPLATEDIR}default/datamodule.mfm';
+  
+   newfonames[5]:= actionsmo.c[ord(ac_subform)];
+   newfonamebases[5]:= 'form';
+   newinheritedforms[5]:= false;
+   newfosources[5]:= '${TEMPLATEDIR}default/subform.pas';
+   newfoforms[5]:= '${TEMPLATEDIR}default/subform.mfm';
  
-  newfonames[1]:= actionsmo.c[ord(ac_simpleform)];
-  newfonamebases[1]:= 'form';
-  newinheritedforms[1]:= false;
-  newfosources[1]:= '${TEMPLATEDIR}default/simpleform.pas';
-  newfoforms[1]:= '${TEMPLATEDIR}default/simpleform.mfm';
+   newfonames[6]:= actionsmo.c[ord(ac_scrollboxform)];
+   newfonamebases[6]:= 'form';
+   newinheritedforms[6]:= false;
+   newfosources[6]:= '${TEMPLATEDIR}default/scrollboxform.pas';
+   newfoforms[6]:= '${TEMPLATEDIR}default/scrollboxform.mfm';
  
-  newfonames[2]:= actionsmo.c[ord(ac_dockingform)];
-  newfonamebases[2]:= 'form';
-  newinheritedforms[2]:= false;
-  newfosources[2]:= '${TEMPLATEDIR}default/dockingform.pas';
-  newfoforms[2]:= '${TEMPLATEDIR}default/dockingform.mfm';
+   newfonames[7]:= actionsmo.c[ord(ac_tabform)];
+   newfonamebases[7]:= 'form';
+   newinheritedforms[7]:= false;
+   newfosources[7]:= '${TEMPLATEDIR}default/tabform.pas';
+   newfoforms[7]:= '${TEMPLATEDIR}default/tabform.mfm';
+  
+   newfonames[8]:= actionsmo.c[ord(ac_dockpanel)];
+   newfonamebases[8]:= 'form';
+   newinheritedforms[8]:= false;
+   newfosources[8]:= '${TEMPLATEDIR}default/dockpanelform.pas';
+   newfoforms[8]:= '${TEMPLATEDIR}default/dockpanelform.mfm';
  
-  newfonames[3]:= actionsmo.c[ord(ac_sizingform)];
-  newfonamebases[3]:= 'form';
-  newinheritedforms[3]:= false;
-  newfosources[3]:= '${TEMPLATEDIR}default/sizingform.pas';
-  newfoforms[3]:= '${TEMPLATEDIR}default/sizingform.mfm';
+   newfonames[9]:= actionsmo.c[ord(ac_report)];
+   newfonamebases[9]:= 'report';
+   newinheritedforms[9]:= false;
+   newfosources[9]:= '${TEMPLATEDIR}default/report.pas';
+   newfoforms[9]:= '${TEMPLATEDIR}default/report.mfm';
+  
+   newfonames[10]:= actionsmo.c[ord(ac_scriptform)];
+   newfonamebases[10]:= 'script';
+   newinheritedforms[10]:= false;
+   newfosources[10]:= '${TEMPLATEDIR}default/pascform.pas';
+   newfoforms[10]:= '${TEMPLATEDIR}default/pascform.mfm';
  
-  newfonames[4]:= actionsmo.c[ord(ac_datamodule)];
-  newfonamebases[4]:= 'module';
-  newinheritedforms[4]:= false;
-  newfosources[4]:= '${TEMPLATEDIR}default/datamodule.pas';
-  newfoforms[4]:= '${TEMPLATEDIR}default/datamodule.mfm';
- 
-  newfonames[5]:= actionsmo.c[ord(ac_subform)];
-  newfonamebases[5]:= 'form';
-  newinheritedforms[5]:= false;
-  newfosources[5]:= '${TEMPLATEDIR}default/subform.pas';
-  newfoforms[5]:= '${TEMPLATEDIR}default/subform.mfm';
-
-  newfonames[6]:= actionsmo.c[ord(ac_scrollboxform)];
-  newfonamebases[6]:= 'form';
-  newinheritedforms[6]:= false;
-  newfosources[6]:= '${TEMPLATEDIR}default/scrollboxform.pas';
-  newfoforms[6]:= '${TEMPLATEDIR}default/scrollboxform.mfm';
-
-  newfonames[7]:= actionsmo.c[ord(ac_tabform)];
-  newfonamebases[7]:= 'form';
-  newinheritedforms[7]:= false;
-  newfosources[7]:= '${TEMPLATEDIR}default/tabform.pas';
-  newfoforms[7]:= '${TEMPLATEDIR}default/tabform.mfm';
- 
-  newfonames[8]:= actionsmo.c[ord(ac_dockpanel)];
-  newfonamebases[8]:= 'form';
-  newinheritedforms[8]:= false;
-  newfosources[8]:= '${TEMPLATEDIR}default/dockpanelform.pas';
-  newfoforms[8]:= '${TEMPLATEDIR}default/dockpanelform.mfm';
-
-  newfonames[9]:= actionsmo.c[ord(ac_report)];
-  newfonamebases[9]:= 'report';
-  newinheritedforms[9]:= false;
-  newfosources[9]:= '${TEMPLATEDIR}default/report.pas';
-  newfoforms[9]:= '${TEMPLATEDIR}default/report.mfm';
- 
-  newfonames[10]:= actionsmo.c[ord(ac_scriptform)];
-  newfonamebases[10]:= 'script';
-  newinheritedforms[10]:= false;
-  newfosources[10]:= '${TEMPLATEDIR}default/pascform.pas';
-  newfoforms[10]:= '${TEMPLATEDIR}default/pascform.mfm';
-
-  newfonames[11]:= actionsmo.c[ord(ac_inheritedform)];
-  newfonamebases[11]:= 'form';
-  newinheritedforms[11]:= true;
-  newfosources[11]:= '${TEMPLATEDIR}default/inheritedform.pas';
-  newfoforms[11]:= '${TEMPLATEDIR}default/inheritedform.mfm';
+   newfonames[11]:= actionsmo.c[ord(ac_inheritedform)];
+   newfonamebases[11]:= 'form';
+   newinheritedforms[11]:= true;
+   newfosources[11]:= '${TEMPLATEDIR}default/inheritedform.pas';
+   newfoforms[11]:= '${TEMPLATEDIR}default/inheritedform.mfm';
+  end;
  
  end;
  with projectoptions,e,t do begin
@@ -1756,42 +1795,44 @@ begin
    end;
   end;
   updatevalue('defaultmake',defaultmake,1,maxdefaultmake+1);
-  if not iswriter then begin
-   int1:= length(newfinames);
-   if int1 > length(newfifilters) then begin
-    int1:= length(newfifilters);
+  with p.t do begin
+   if not iswriter then begin
+    int1:= length(newfinames);
+    if int1 > length(newfifilters) then begin
+     int1:= length(newfifilters);
+    end;
+    if int1 > length(newfiexts) then begin
+     int1:= length(newfiexts);
+    end;
+    if int1 > length(newfisources) then begin
+     int1:= length(newfisources);
+    end;
+    setlength(fnewfinames,int1);
+    setlength(fnewfifilters,int1);
+    setlength(fnewfiexts,int1);
+    setlength(fnewfisources,int1);
    end;
-   if int1 > length(newfiexts) then begin
-    int1:= length(newfiexts);
+     
+   if not iswriter then begin
+    int1:= length(newfonames);
+    if int1 > length(newfonamebases) then begin
+     int1:= length(newfonamebases);
+    end;
+    if int1 > length(newinheritedforms) then begin
+     int1:= length(newinheritedforms);
+    end;
+    if int1 > length(newfosources) then begin
+     int1:= length(newfosources);
+    end;
+    if int1 > length(newfoforms) then begin
+     int1:= length(newfoforms);
+    end;
+    setlength(fnewfonames,int1);
+    setlength(fnewfonamebases,int1);
+    setlength(fnewinheritedforms,int1);
+    setlength(fnewfosources,int1);
+    setlength(fnewfoforms,int1);
    end;
-   if int1 > length(newfisources) then begin
-    int1:= length(newfisources);
-   end;
-   setlength(fnewfinames,int1);
-   setlength(fnewfifilters,int1);
-   setlength(fnewfiexts,int1);
-   setlength(fnewfisources,int1);
-  end;
-    
-  if not iswriter then begin
-   int1:= length(newfonames);
-   if int1 > length(newfonamebases) then begin
-    int1:= length(newfonamebases);
-   end;
-   if int1 > length(newinheritedforms) then begin
-    int1:= length(newinheritedforms);
-   end;
-   if int1 > length(newfosources) then begin
-    int1:= length(newfosources);
-   end;
-   if int1 > length(newfoforms) then begin
-    int1:= length(newfoforms);
-   end;
-   setlength(fnewfonames,int1);
-   setlength(fnewfonamebases,int1);
-   setlength(fnewinheritedforms,int1);
-   setlength(fnewfosources,int1);
-   setlength(fnewfoforms,int1);
   end;
  end;
 end;
@@ -1825,9 +1866,9 @@ begin
       modulefiles1[int1]:= filename;
      end;
     end;
-    o.modulenames:= modulenames1;
-    o.moduletypes:= moduletypes1;
-    o.modulefiles:= modulefiles1;
+    s.modulenames:= modulenames1;
+    s.moduletypes:= moduletypes1;
+    s.modulefiles:= modulefiles1;
    end;
   end;
   registeredcomponents.updatestat(statfiler);
@@ -2550,6 +2591,7 @@ type
   settingseditor: boolean;
   settingsdebugger: boolean;
   settingsmacros: boolean;
+  settingstemplates: boolean;
   settingstools: boolean;
   settingsstorage: boolean;
   settingsprojecttree: boolean;
@@ -2569,6 +2611,7 @@ begin
    settingseditor:= fo.settingseditor.value;
    settingsdebugger:= fo.settingsdebugger.value;
    settingsmacros:= fo.settingsmacros.value;
+   settingstemplates:= fo.settingstemplates.value;
    settingstools:= fo.settingstools.value;
    settingsstorage:= fo.settingsstorage.value;
    settingsprojecttree:= fo.settingsprojecttree.value;
@@ -2580,6 +2623,7 @@ begin
    settingseditor:= projectoptions.o.settingseditor;
    settingsdebugger:= projectoptions.o.settingsdebugger;
    settingsmacros:= projectoptions.o.settingsmacros;
+   settingstemplates:= projectoptions.o.settingstemplates;
    settingstools:= projectoptions.o.settingstools;
    settingsstorage:= projectoptions.o.settingsstorage;
    settingsprojecttree:= projectoptions.o.settingsprojecttree;
@@ -2600,6 +2644,7 @@ begin
     fo.settingseditor.value:= settingseditor; 
     fo.settingsdebugger.value:= settingsdebugger; 
     fo.settingsmacros.value:= settingsmacros; 
+    fo.settingstemplates.value:= settingstemplates; 
     fo.settingstools.value:= settingstools; 
     fo.settingsstorage.value:= settingsstorage; 
     fo.settingsprojecttree.value:= settingsprojecttree; 
@@ -2615,6 +2660,7 @@ begin
     projectoptions.o.settingseditor:= settingseditor; 
     projectoptions.o.settingsdebugger:= settingsdebugger; 
     projectoptions.o.settingsmacros:= settingsmacros; 
+    projectoptions.o.settingstemplates:= settingstemplates; 
     projectoptions.o.settingstools:= settingstools; 
     projectoptions.o.settingsstorage:= settingsstorage; 
     projectoptions.o.settingsprojecttree:= settingsprojecttree; 
@@ -2656,7 +2702,7 @@ end;
 
 function getdisabledoptions: settinggroupsty;
 begin
- result:= [];
+ result:= [sg_state];
  with projectoptions do begin
   if not o.settingseditor then begin
    include(result,sg_editor);
@@ -2666,6 +2712,9 @@ begin
   end;
   if not o.settingsmacros then begin
    include(result,sg_macros);
+  end;
+  if not o.settingstemplates then begin
+   include(result,sg_templates);
   end;
   if not o.settingstools then begin
    include(result,sg_tools);
@@ -2774,6 +2823,7 @@ begin
      o.settingseditor:= false; 
      o.settingsdebugger:= false; 
      o.settingsmacros:= false; 
+     o.settingstemplates:= false; 
      o.settingstools:= false; 
      o.settingsstorage:= false; 
      o.settingsprojecttree:= false; 
@@ -3048,6 +3098,25 @@ begin
  result:= ftexp;
 end;
 
+{ ttemplatesoptions }
+
+constructor ttemplatesoptions.create;
+begin
+ ft:= ttexttemplatesoptions.create();
+ ftexp:= ttexttemplatesoptions.create();
+ inherited;
+end;
+
+function ttemplatesoptions.gett: tobject;
+begin
+ result:= ft;
+end;
+
+function ttemplatesoptions.gettexp: tobject;
+begin
+ result:= ftexp;
+end;
+
 initialization
  codetemplates:= tcodetemplates.create;
 finalization
@@ -3056,5 +3125,7 @@ finalization
  projectoptions.d.free();
  projectoptions.m.free();
  projectoptions.t.free();
+ projectoptions.p.free();
+ projectoptions.s.free();
  freeandnil(codetemplates);
 end.

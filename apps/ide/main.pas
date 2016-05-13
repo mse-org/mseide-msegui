@@ -492,7 +492,7 @@ begin
   setlength(wstr2,int1-1); //main name only
  end;
  with projectoptions do begin
-  bo1:= dofind(o.modulenames,o.modulefiles);
+  bo1:= dofind(s.modulenames,s.modulefiles);
  end;
  if not bo1 and 
            projecttree.units.findformbyname(ansistring(wstr2),mstr1) then begin
@@ -570,10 +570,10 @@ begin
   with projectoptions do begin
    po1:= nil;
    wstr2:= msestring(struppercase(atypename));
-   for int1:= 0 to high(o.moduletypes) do begin
-    if o.moduletypes[int1] = wstr2 then begin
-     if int1 <= high(o.modulefiles) then begin
-      checkmodule(o.modulefiles[int1]);
+   for int1:= 0 to high(s.moduletypes) do begin
+    if s.moduletypes[int1] = wstr2 then begin
+     if int1 <= high(s.modulefiles) then begin
+      checkmodule(s.modulefiles[int1]);
      end;
      break;
     end;
@@ -1958,7 +1958,7 @@ var
 begin
  str1:= '';
  int1:= tmenuitem(sender).tag;
- with projectoptions.o.texp do begin
+ with projectoptions.p.texp do begin
   if newfisources[int1] = '' then begin
    sourcefo.newpage;
   end
@@ -2001,7 +2001,7 @@ begin
  if filedialog(str1,[fdo_save,fdo_checkexist],c[ord(newform)],
                                              [c[ord(pascalfiles)]],
                               ['"*.pas" "*.pp"'],'pas') = mr_ok then begin
-  with projectoptions.o.texp do begin
+  with projectoptions.p.texp do begin
    str4:= newfonamebases[tmenuitem(sender).tag];
    str2:= newfosources[tmenuitem(sender).tag];
    str3:= newfoforms[tmenuitem(sender).tag];
@@ -2338,7 +2338,7 @@ begin
      projectfilename:= aname;
      projectdir:= curdir;
      expandprojectmacros;
-     with texp do begin  
+     with p.texp do begin  
       setlength(copiedfiles,length(newprojectfiles));
       macrolist:= tmacrolist.create([mao_curlybraceonly]);
       try
@@ -2953,6 +2953,12 @@ begin
   end;
   if not (sg_tools in disabled) then begin
    addobjectinfoitem(aobjects,t);
+  end;
+  if not (sg_templates in disabled) then begin
+   addobjectinfoitem(aobjects,t);
+  end;
+  if not (sg_state in disabled) then begin
+   addobjectinfoitem(aobjects,s);
   end;
  end;
 end;
