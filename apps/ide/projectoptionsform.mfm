@@ -3801,8 +3801,10 @@ object projectoptionsfo: tprojectoptionsfo
               bounds_cy = 37
               anchors = [an_top]
               optionsscale = [osc_expandy, osc_shrinky, osc_expandshrinkx, osc_expandshrinky]
-              optionslayout = [lao_aligny]
+              optionslayout = [lao_placex, lao_aligny]
               align_glue = wam_start
+              place_mindist = 4
+              place_maxdist = 4
               object objpref: tstringedit
                 frame.caption = 'Obj pref. (-Fo)'
                 frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive]
@@ -3814,7 +3816,7 @@ object projectoptionsfo: tprojectoptionsfo
                   0
                 )
                 onshowhint = hintexpandedmacros
-                bounds_x = 272
+                bounds_x = 269
                 bounds_y = 0
                 bounds_cx = 88
                 bounds_cy = 37
@@ -3832,7 +3834,7 @@ object projectoptionsfo: tprojectoptionsfo
                 )
                 taborder = 1
                 onshowhint = hintexpandedmacros
-                bounds_x = 184
+                bounds_x = 181
                 bounds_y = 0
                 bounds_cx = 84
                 bounds_cy = 37
@@ -3850,7 +3852,7 @@ object projectoptionsfo: tprojectoptionsfo
                 )
                 taborder = 2
                 onshowhint = hintexpandedmacros
-                bounds_x = 96
+                bounds_x = 93
                 bounds_y = 0
                 bounds_cx = 84
                 bounds_cy = 37
@@ -3868,7 +3870,7 @@ object projectoptionsfo: tprojectoptionsfo
                 )
                 taborder = 3
                 onshowhint = hintexpandedmacros
-                bounds_x = 8
+                bounds_x = 0
                 bounds_y = 0
                 bounds_cx = 89
                 bounds_cy = 37
@@ -3885,10 +3887,17 @@ object projectoptionsfo: tprojectoptionsfo
                   2
                 )
                 taborder = 4
-                bounds_x = 431
+                bounds_x = 391
                 bounds_y = 20
                 bounds_cx = 163
                 bounds_cy = 16
+              end
+              object tsimplewidget1: tsimplewidget
+                taborder = 5
+                bounds_x = 361
+                bounds_y = 22
+                bounds_cx = 26
+                bounds_cy = 10
               end
             end
           end

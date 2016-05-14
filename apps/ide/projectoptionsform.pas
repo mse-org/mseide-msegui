@@ -910,6 +910,7 @@ type
    settingsmacros: tbooleanedit;
    settingstools: tbooleanedit;
    settingstemplates: tbooleanedit;
+   tsimplewidget1: tsimplewidget;
    procedure acttiveselectondataentered(const sender: TObject);
    procedure colonshowhint(const sender: tdatacol; const arow: Integer; 
                       var info: hintinfoty);
