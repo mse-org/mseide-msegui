@@ -2861,7 +2861,7 @@ begin
      o.settingsautoload:= false; 
      o.settingsautosave:= false; 
     end;
-    updateprojectsettings(stat1,getdisabledoptions());
+    updateprojectsettings(stat1,disabled);
    finally
     disabled:= [];
     stat1.free;
