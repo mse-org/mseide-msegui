@@ -6071,9 +6071,9 @@ object projectoptionsfo: tprojectoptionsfo
             162
             2
           )
-          taborder = 4
+          taborder = 3
           bounds_x = 15
-          bounds_y = 124
+          bounds_y = 100
           bounds_cx = 176
           bounds_cy = 16
         end
@@ -6206,9 +6206,9 @@ object projectoptionsfo: tprojectoptionsfo
             186
             2
           )
-          taborder = 5
+          taborder = 4
           bounds_x = 15
-          bounds_y = 148
+          bounds_y = 124
           bounds_cx = 200
           bounds_cy = 16
         end
@@ -6223,9 +6223,9 @@ object projectoptionsfo: tprojectoptionsfo
             174
             2
           )
-          taborder = 3
+          taborder = 8
           bounds_x = 15
-          bounds_y = 100
+          bounds_y = 220
           bounds_cx = 188
           bounds_cy = 16
         end
@@ -6240,7 +6240,7 @@ object projectoptionsfo: tprojectoptionsfo
             144
             2
           )
-          taborder = 7
+          taborder = 9
           bounds_x = 15
           bounds_y = 244
           bounds_cx = 158
@@ -6257,9 +6257,9 @@ object projectoptionsfo: tprojectoptionsfo
             164
             2
           )
-          taborder = 6
+          taborder = 5
           bounds_x = 15
-          bounds_y = 172
+          bounds_y = 148
           bounds_cx = 178
           bounds_cy = 16
         end
@@ -6274,9 +6274,9 @@ object projectoptionsfo: tprojectoptionsfo
             156
             2
           )
-          taborder = 8
+          taborder = 7
           bounds_x = 15
-          bounds_y = 220
+          bounds_y = 196
           bounds_cx = 170
           bounds_cy = 16
         end
@@ -6291,9 +6291,9 @@ object projectoptionsfo: tprojectoptionsfo
             188
             2
           )
-          taborder = 9
+          taborder = 6
           bounds_x = 15
-          bounds_y = 196
+          bounds_y = 172
           bounds_cx = 202
           bounds_cy = 16
         end
