@@ -1,4 +1,4 @@
-{ MSEide Copyright (c) 1999-2015 by Martin Schreiber
+{ MSEide Copyright (c) 1999-2016 by Martin Schreiber
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -237,6 +237,14 @@ begin
  registerpropertyeditor(typeinfo(twidget),tspacer,'linkbottom',
                                  tsisterwidgetpropertyeditor);
 
+ registerpropertyeditor(typeinfo(twidget),tlayouter,'linkleft',
+                                 tsisterwidgetpropertyeditor);
+ registerpropertyeditor(typeinfo(twidget),tlayouter,'linktop',
+                                 tsisterwidgetpropertyeditor);
+ registerpropertyeditor(typeinfo(twidget),tlayouter,'linkright',
+                                 tsisterwidgetpropertyeditor);
+ registerpropertyeditor(typeinfo(twidget),tlayouter,'linkbottom',
+                                 tsisterwidgetpropertyeditor);
  registerpropertyeditor(typeinfo(twidget),tlayouter,'align_leader',
                                  tchildwidgetpropertyeditor);
 

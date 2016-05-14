@@ -329,6 +329,8 @@ type
    function childrenbottom: integer;
    function childrenwidth: integer;
    function childrenheight: integer;
+   function childrenminwidth: integer;
+   function childrenminheight: integer;
    procedure scalesizerefchanged;
    procedure updatescalesizeref;
    procedure delayedupdatelayout();
@@ -1404,6 +1406,44 @@ begin
  end;
 end;
 
+function tcustomlayouter.childrenminwidth: integer;
+var
+ int1: integer;
+begin
+ result:= 0;
+ for int1:= 0 to high(fwidgets) do begin
+  with twidget1(fwidgets[int1]) do begin
+   if (not(plo_noinvisible in fplace_options) or isvisible) then begin
+    if anchors * [an_left,an_right] = [an_left,an_right] then begin
+     result:= result + minscrollsize.cx;
+    end
+    else begin
+     result:= result + fwidgetrect.cx;
+    end;
+   end;
+  end;
+ end;
+end;
+
+function tcustomlayouter.childrenminheight: integer;
+var
+ int1: integer;
+begin
+ result:= 0;
+ for int1:= 0 to high(fwidgets) do begin
+  with twidget1(fwidgets[int1]) do begin
+   if (not(plo_noinvisible in fplace_options) or isvisible) then begin
+    if anchors * [an_top,an_bottom] = [an_top,an_bottom] then begin
+     result:= result + minscrollsize.cy;
+    end
+    else begin
+     result:= result + fwidgetrect.cy;
+    end;
+   end;
+  end;
+ end;
+end;
+
 function tcustomlayouter.childrenleft: integer;
 var
  int1: integer;
@@ -1793,13 +1833,15 @@ var
 begin
  result:= inherited calcminscrollsize;
  if lao_placex in foptionslayout then begin
-  result.cx:= childrenwidth + high(fwidgets) * fplace_mindist + innerframewidth.cx;
+  result.cx:= childrenminwidth + 
+                       high(fwidgets) * fplace_mindist + innerframewidth.cx;
   if plo_propmargin in fplace_options then begin
    result.cx:= result.cx + 2 * fplace_mindist;
   end;
  end;
  if lao_placey in foptionslayout then begin
-  result.cy:= childrenheight + high(fwidgets) * fplace_mindist + innerframewidth.cy;
+  result.cy:= childrenminheight + 
+                       high(fwidgets) * fplace_mindist + innerframewidth.cy;
   if plo_propmargin in fplace_options then begin
    result.cy:= result.cy + 2 * fplace_mindist;
   end;

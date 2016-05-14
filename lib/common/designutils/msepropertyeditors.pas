@@ -456,6 +456,14 @@ type
   public
 //   function getvalues: msestringarty; override;
  end;
+
+ tnochildrenwidgetpropertyeditor = class(tcomponentpropertyeditor)
+  protected
+   function filtercomponent(const acomponent: tcomponent): boolean; override;
+   function getdefaultstate: propertystatesty; override;
+  public
+//   function getvalues: msestringarty; override;
+ end;
   
  tchildwidgetpropertyeditor = class(tcomponentpropertyeditor)
   protected
@@ -3105,6 +3113,20 @@ begin
 end;
 
 function tsisterwidgetpropertyeditor.getdefaultstate: propertystatesty;
+begin
+ result:= inherited getdefaultstate + [ps_sortlist];
+end;
+
+{ tnochildrenwidgetpropertyeditor }
+
+function tnochildrenwidgetpropertyeditor.filtercomponent(
+              const acomponent: tcomponent): boolean;
+begin
+ result:= (twidget(acomponent).window = twidget(fcomponent).window) and
+  not twidget(fcomponent).checkdescendent(twidget(acomponent));
+end;
+
+function tnochildrenwidgetpropertyeditor.getdefaultstate: propertystatesty;
 begin
  result:= inherited getdefaultstate + [ps_sortlist];
 end;
