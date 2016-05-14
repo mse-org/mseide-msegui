@@ -67,65 +67,6 @@ type
  end;
  sigsetinfoarty = array of sigsetinfoty;
 
- ttextprojectoptions = class(toptions)
-  private
-   fmainfile: filenamety;
-   ftargetfile: filenamety;
-   fmessageoutputfile: filenamety;
-   fmakecommand: filenamety;
-   fmakedir: filenamety;
-   funitdirs: msestringarty;
-   funitpref: msestring;
-   fincpref: msestring;
-   flibpref: msestring;
-   fobjpref: msestring;
-   ftargpref: msestring;
-   fbefcommand: msestringarty;
-   faftcommand: msestringarty;
-   fmakeoptions: msestringarty;
-   ffontnames: msestringarty;
-  public
-   fcodetemplatedirs: msestringarty;
-  published
-   property mainfile: filenamety read fmainfile write fmainfile;
-   property targetfile: filenamety read ftargetfile write ftargetfile;
-   property messageoutputfile: filenamety read fmessageoutputfile
-                                               write fmessageoutputfile;
-   property makecommand: filenamety read fmakecommand write fmakecommand;
-   property makedir: filenamety read fmakedir write fmakedir;
-   property unitdirs: msestringarty read funitdirs write funitdirs;
-   property unitpref: msestring read funitpref write funitpref;
-   property incpref: msestring read fincpref write fincpref;
-   property libpref: msestring read flibpref write flibpref;
-   property objpref: msestring read fobjpref write fobjpref;
-   property targpref: msestring read ftargpref write ftargpref;
-  
-   property befcommand: msestringarty read fbefcommand write fbefcommand;
-   property aftcommand: msestringarty read faftcommand write faftcommand;
-   property makeoptions: msestringarty read fmakeoptions write fmakeoptions;
-
-   property codetemplatedirs: msestringarty read fcodetemplatedirs
-                                                     write fcodetemplatedirs;
-    
-   property fontnames: msestringarty read ffontnames write ffontnames;
- end;
-
- ttexteditoptions = class(toptions)
-  private
-   fsourcefilemasks: msestringarty;
-   fsyntaxdeffiles: msestringarty;
-   ffilemasknames: msestringarty;
-   ffilemasks: msestringarty;
-  published
-   property sourcefilemasks: msestringarty read fsourcefilemasks 
-                                                write fsourcefilemasks;
-   property syntaxdeffiles: msestringarty read fsyntaxdeffiles 
-                                                write fsyntaxdeffiles;
-   property filemasknames: msestringarty read ffilemasknames 
-                                                  write ffilemasknames;
-   property filemasks: msestringarty read ffilemasks write ffilemasks;
- end;
-
  ttexttoolsoptions = class(toptions)
   private
    ftoolmenus: msestringarty;
@@ -202,6 +143,9 @@ type
   private
    ft: ttexttemplatesoptions;
    ftexp: ttexttemplatesoptions;
+   fexpandprojectfilemacros: longboolarty;
+   floadprojectfile: longboolarty;
+   fnewinheritedforms: longboolarty;
   protected
    function gett: tobject; override;
    function gettexp: tobject; override;
@@ -210,8 +154,30 @@ type
    property texp: ttexttemplatesoptions read ftexp;
   published
    property t: ttexttemplatesoptions read ft;
+   property expandprojectfilemacros: longboolarty read fexpandprojectfilemacros
+                                               write fexpandprojectfilemacros;
+   property loadprojectfile: longboolarty read floadprojectfile 
+                                                 write floadprojectfile;
+   property newinheritedforms: longboolarty read fnewinheritedforms
+                                              write fnewinheritedforms;
  end;
  
+ ttexteditoptions = class(toptions)
+  private
+   fsourcefilemasks: msestringarty;
+   fsyntaxdeffiles: msestringarty;
+   ffilemasknames: msestringarty;
+   ffilemasks: msestringarty;
+  published
+   property sourcefilemasks: msestringarty read fsourcefilemasks 
+                                                write fsourcefilemasks;
+   property syntaxdeffiles: msestringarty read fsyntaxdeffiles 
+                                                write fsyntaxdeffiles;
+   property filemasknames: msestringarty read ffilemasknames 
+                                                  write ffilemasknames;
+   property filemasks: msestringarty read ffilemasks write ffilemasks;
+ end;
+
  teditoptions = class(toptions)
   private
    ft: ttexteditoptions;
@@ -436,30 +402,120 @@ type
                                                    write ffpcgdbworkaround;
  end;
 
+ tmacrooptions = class(toptions)
+  private
+   fmacroon: integerarty;
+   fmacronames: msestringarty;
+   fmacrovalues: msestringarty;
+   fgroupcomments: msestringarty;
+  published
+   property macroon: integerarty read fmacroon write fmacroon;
+   property macronames: msestringarty read fmacronames write fmacronames;
+   property macrovalues: msestringarty read fmacrovalues write fmacrovalues;
+   property groupcomments: msestringarty read fgroupcomments
+                                                     write fgroupcomments;
+ end;
+
+ ttextprojectstate = class(toptions)
+  private
+   fmessageoutputfile: filenamety;
+  published
+   property messageoutputfile: filenamety read fmessageoutputfile
+                                               write fmessageoutputfile;
+ end;
+ 
  tprojectstate = class(toptions)
   private
+   ft: ttextprojectstate;
+   ftexp: ttextprojectstate;
+   
    fmodulenames: msestringarty;
    fmoduletypes: msestringarty;
    fmodulefiles: filenamearty;
    fmacrogroup: integer;
+
+   fforcezorder: longbool;
+   fstripmessageesc: boolean;
+   fcopymessages: boolean;
+   fcheckmethods: boolean;
+   fclosemessages: boolean;
+   fcolorerror: colorty;
+   fcolorwarning: colorty;
+   fcolornote: colorty;
+   procedure setforcezorder(const avalue: longbool);
+  protected
+   function gett: tobject; override;
+   function gettexp: tobject; override;
+  public
+   constructor create();
+   property texp: ttextprojectstate read ftexp;
   published
+   property t: ttextprojectstate read ft;
    property modulenames: msestringarty read fmodulenames write fmodulenames;
    property moduletypes: msestringarty read fmoduletypes write fmoduletypes;
    property modulefiles: filenamearty read fmodulefiles write fmodulefiles;
    property macrogroup: integer read fmacrogroup write fmacrogroup;
+
+   property forcezorder: longbool read fforcezorder write setforcezorder;
+   property stripmessageesc: boolean read fstripmessageesc 
+                                             write fstripmessageesc;
+   property copymessages: boolean read fcopymessages write fcopymessages;
+   property closemessages: boolean read fclosemessages write fclosemessages;
+   property checkmethods: boolean read fcheckmethods write fcheckmethods;
+   property colorerror: colorty read fcolorerror write fcolorerror;
+   property colorwarning: colorty read fcolorwarning write fcolorwarning;
+   property colornote: colorty read fcolornote write fcolornote;
+
  end;
     
+ ttextprojectoptions = class(toptions)
+  private
+   fmainfile: filenamety;
+   ftargetfile: filenamety;
+   fmakecommand: filenamety;
+   fmakedir: filenamety;
+   funitdirs: msestringarty;
+   funitpref: msestring;
+   fincpref: msestring;
+   flibpref: msestring;
+   fobjpref: msestring;
+   ftargpref: msestring;
+   fbefcommand: msestringarty;
+   faftcommand: msestringarty;
+   fmakeoptions: msestringarty;
+   ffontnames: msestringarty;
+  public
+   fcodetemplatedirs: msestringarty;
+  published
+   property mainfile: filenamety read fmainfile write fmainfile;
+   property targetfile: filenamety read ftargetfile write ftargetfile;
+   property makecommand: filenamety read fmakecommand write fmakecommand;
+   property makedir: filenamety read fmakedir write fmakedir;
+   property unitdirs: msestringarty read funitdirs write funitdirs;
+   property unitpref: msestring read funitpref write funitpref;
+   property incpref: msestring read fincpref write fincpref;
+   property libpref: msestring read flibpref write flibpref;
+   property objpref: msestring read fobjpref write fobjpref;
+   property targpref: msestring read ftargpref write ftargpref;
+  
+   property befcommand: msestringarty read fbefcommand write fbefcommand;
+   property aftcommand: msestringarty read faftcommand write faftcommand;
+   property makeoptions: msestringarty read fmakeoptions write fmakeoptions;
+
+   property codetemplatedirs: msestringarty read fcodetemplatedirs
+                                                     write fcodetemplatedirs;
+    
+   property fontnames: msestringarty read ffontnames write ffontnames;
+ end;
+
  tprojectoptions = class(toptions)
   private
    ft: ttextprojectoptions;
    ftexp: ttextprojectoptions;
    
-   fstripmessageesc: boolean;
-   fcopymessages: boolean;
-   fcheckmethods: boolean;
-   fclosemessages: boolean;
    fusercolors: colorarty;
    fusercolorcomment: msestringarty;
+
    fformatmacronames: msestringarty;
    fformatmacrovalues: msestringarty;
    
@@ -485,16 +541,8 @@ type
    ffontwidths: integerarty;
    ffontoptions: msestringarty;
    ffontxscales: realarty;
-   fexpandprojectfilemacros: longboolarty;
-   floadprojectfile: longboolarty;
-   fnewinheritedforms: longboolarty;
-   fcolorerror: colorty;
-   fcolorwarning: colorty;
-   fcolornote: colorty;
    fuid: integer;
-   fforcezorder: longbool;
    freversepathorder: boolean;
-   procedure setforcezorder(const avalue: longbool);
   protected
    function gett: tobject; override;
    function gettexp: tobject; override;
@@ -503,16 +551,6 @@ type
    property texp: ttextprojectoptions read ftexp;
   published
    property t: ttextprojectoptions read ft;
-
-   property forcezorder: longbool read fforcezorder write setforcezorder;
-   property stripmessageesc: boolean read fstripmessageesc 
-                                             write fstripmessageesc;
-   property copymessages: boolean read fcopymessages write fcopymessages;
-   property closemessages: boolean read fclosemessages write fclosemessages;
-   property checkmethods: boolean read fcheckmethods write fcheckmethods;
-   property colorerror: colorty read fcolorerror write fcolorerror;
-   property colorwarning: colorty read fcolorwarning write fcolorwarning;
-   property colornote: colorty read fcolornote write fcolornote;
 
    property reversepathorder: boolean read freversepathorder 
                                                   write freversepathorder;
@@ -556,28 +594,9 @@ type
    property fontoptions: msestringarty read ffontoptions write ffontoptions;
    property fontxscales: realarty read ffontxscales write ffontxscales;
 
-   property expandprojectfilemacros: longboolarty read fexpandprojectfilemacros
-                                               write fexpandprojectfilemacros;
-   property loadprojectfile: longboolarty read floadprojectfile 
-                                                 write floadprojectfile;
-   property newinheritedforms: longboolarty read fnewinheritedforms
-                                              write fnewinheritedforms;
-   property uid: integer read fuid write fuid;   
+   property uid: integer read fuid write fuid;   //for insert UID
  end;
  
- tmacrooptions = class(toptions)
-  private
-   fmacroon: integerarty;
-   fmacronames: msestringarty;
-   fmacrovalues: msestringarty;
-   fgroupcomments: msestringarty;
-  published
-   property macroon: integerarty read fmacroon write fmacroon;
-   property macronames: msestringarty read fmacronames write fmacronames;
-   property macrovalues: msestringarty read fmacrovalues write fmacrovalues;
-   property groupcomments: msestringarty read fgroupcomments
-                                                     write fgroupcomments;
- end;
 {$M-}
  
  projectoptionsty = record
@@ -1319,6 +1338,7 @@ begin
   d.expandmacros(li);
   t.expandmacros(li);
   p.expandmacros(li);
+  s.expandmacros(li);
   with o,texp do begin
    if initfontaliascount = 0 then begin
     initfontaliascount:= fontaliascount;
@@ -1400,7 +1420,7 @@ begin
     item1.submenu.count:= length(newfonames)+1;
     int2:= 0;
     for int1:= 0 to high(newfonames) do begin
-     if not newinheritedforms[int1] then begin
+     if not p.newinheritedforms[int1] then begin
       with item1.submenu[int2] do begin
        caption:= newfonames[int1];
        tag:= int1;
@@ -1412,7 +1432,7 @@ begin
     item1.submenu[int2].options:= [mao_separator];
     inc(int2);
     for int1:= 0 to high(newfonames) do begin
-     if newinheritedforms[int1] then begin
+     if p.newinheritedforms[int1] then begin
       with item1.submenu[int2] do begin
        caption:= newfonames[int1];
        tag:= int1;
@@ -1596,7 +1616,7 @@ begin
   objpref:= '-Fo';
   targpref:= '-o';
   makecommand:= '${COMPILER}';
-  with p.t do begin
+  with p,t do begin
    setlength(fnewfinames,3);
    setlength(fnewfifilters,3);
    setlength(fnewfiexts,3);
@@ -1619,7 +1639,7 @@ begin
    
    setlength(fnewfonames,12);
    setlength(fnewfonamebases,12);
-   setlength(fnewinheritedforms,12);
+   setlength(p.fnewinheritedforms,12);
    setlength(fnewfosources,12);
    setlength(fnewfoforms,12);
  
@@ -1771,7 +1791,8 @@ begin
  end;
 end;
 
-procedure updateprojectsettings(const statfiler: tstatfiler);
+procedure updateprojectsettings(const statfiler: tstatfiler;
+                                    const disabledoptions: settinggroupsty);
 var
  int1: integer;
 begin
@@ -1779,23 +1800,31 @@ begin
   
   if iswriter then begin
    mainfo.statoptions.writestat(tstatwriter(statfiler));
-   with tstatwriter(statfiler) do begin
-    writerecordarray('sigsettings',length(sigsettings),
-                     {$ifdef FPC}@{$endif}getsignalinforec);
-   end;
   end
   else begin
    mainfo.statoptions.readstat(tstatreader(statfiler));
    with projectoptions.t do begin
     setlength(ftoolmessages,length(ftoolsave));
    end;
-   with tstatreader(statfiler) do begin
-    readrecordarray('sigsettings',{$ifdef FPC}@{$endif}setsignalinfocount,
-             {$ifdef FPC}@{$endif}storesignalinforec);
+  end;
+  if not (sg_debugger in disabledoptions) then begin
+   if iswriter then begin
+    with tstatwriter(statfiler) do begin
+     writerecordarray('sigsettings',length(sigsettings),
+                      {$ifdef FPC}@{$endif}getsignalinforec);
+    end;
+   end
+   else begin
+    with tstatreader(statfiler) do begin
+     readrecordarray('sigsettings',{$ifdef FPC}@{$endif}setsignalinfocount,
+              {$ifdef FPC}@{$endif}storesignalinforec);
+    end;
    end;
   end;
-  updatevalue('defaultmake',defaultmake,1,maxdefaultmake+1);
-  with p.t do begin
+  if not (sg_state in disabledoptions) then begin
+   updatevalue('defaultmake',defaultmake,1,maxdefaultmake+1);
+  end;
+  with p,t do begin
    if not iswriter then begin
     int1:= length(newfinames);
     if int1 > length(newfifilters) then begin
@@ -1839,6 +1868,28 @@ end;
 
 procedure doloadexe(const sender: tprojectoptionsfo); forward;
 procedure dosaveexe(const sender: tprojectoptionsfo); forward;
+
+function getdisabledoptions: settinggroupsty;
+begin
+ result:= [sg_state];
+ with projectoptions do begin
+  if not o.settingseditor then begin
+   include(result,sg_editor);
+  end;
+  if not o.settingsdebugger then begin
+   include(result,sg_debugger);
+  end;
+  if not o.settingsmacros then begin
+   include(result,sg_macros);
+  end;
+  if not o.settingstemplates then begin
+   include(result,sg_templates);
+  end;
+  if not o.settingstools then begin
+   include(result,sg_tools);
+  end;
+ end;
+end;
 
 procedure updateprojectoptions(const statfiler: tstatfiler;
                   const afilename: filenamety);
@@ -1906,7 +1957,7 @@ begin
   updatememorystatstream('ififieldeditor',ififieldeditorstatname);
 {$endif}{$endif}
 
-  updateprojectsettings(statfiler);
+  updateprojectsettings(statfiler,[]);
   breakpointsfo.updatestat(statfiler);
   panelform.updatestat(statfiler); //uses section breakpoints!
   
@@ -2418,12 +2469,12 @@ begin
                     defaultmake,makegroupbox],0);
  aligny(wam_center,[mainfile,targetfile,targpref]);
  aligny(wam_center,[makecommand,makedir,messageoutputfile]);
- int1:= aligny(wam_center,[colorerror,colorwarning,colornote,copymessages]);
- with stripmessageesc do begin
+ int1:= aligny(wam_center,[colorerror,colorwarning,colornote,stripmessageesc]);
+ with copymessages do begin
   bounds_y:= int1 - bounds_cy - 2;
  end;
- with copymessages do begin
-  pos:= makepoint(stripmessageesc.bounds_x,int1);
+ with stripmessageesc do begin
+  pos:= makepoint(copymessages.bounds_x,int1);
  end;
  
  placexorder(defaultmake.bounds_x,[10-defaultmake.frame.outerframe.right,10],
@@ -2680,7 +2731,7 @@ begin
  write1:= tstatwriter.create(astream,ce_utf8);
  try
   write1.setsection('projectoptions');
-  updateprojectsettings(write1); //save projectoptions state
+  updateprojectsettings(write1,[]); //save projectoptions state
  finally
   write1.free;
  end;
@@ -2694,32 +2745,10 @@ begin
  read1:= tstatreader.create(astream,ce_utf8);
  try
   read1.setsection('projectoptions');
-  updateprojectsettings(read1); //restore projectoptions state
+  updateprojectsettings(read1,[]); //restore projectoptions state
  finally
   read1.free;
   astream.free;
- end;
-end;
-
-function getdisabledoptions: settinggroupsty;
-begin
- result:= [sg_state];
- with projectoptions do begin
-  if not o.settingseditor then begin
-   include(result,sg_editor);
-  end;
-  if not o.settingsdebugger then begin
-   include(result,sg_debugger);
-  end;
-  if not o.settingsmacros then begin
-   include(result,sg_macros);
-  end;
-  if not o.settingstemplates then begin
-   include(result,sg_templates);
-  end;
-  if not o.settingstools then begin
-   include(result,sg_tools);
-  end;
  end;
 end;
 
@@ -2759,7 +2788,7 @@ begin
      projecttree.updatestat(read1);
      projecttree.updatelist;
     end;
-    updateprojectsettings(read1);
+    updateprojectsettings(read1,[]);
    finally
     read1.free;
    end;
@@ -2831,7 +2860,7 @@ begin
      o.settingsautoload:= false; 
      o.settingsautosave:= false; 
     end;
-    updateprojectsettings(stat1);
+    updateprojectsettings(stat1,getdisabledoptions());
    finally
     disabled:= [];
     stat1.free;
@@ -2934,13 +2963,7 @@ constructor tprojectoptions.create;
 begin
  ft:= ttextprojectoptions.create;
  ftexp:= ttextprojectoptions.create;
- 
- closemessages:= true;
- checkmethods:= true;
- fcolorerror:= cl_ltyellow;
- fcolorwarning:= cl_ltred;
- fcolornote:= cl_ltgreen;
- inherited;
+  inherited;
 end;
 {
 destructor tprojectoptions.destroy;
@@ -2958,12 +2981,6 @@ end;
 function tprojectoptions.gettexp: tobject;
 begin
  result:= ftexp;
-end;
-
-procedure tprojectoptions.setforcezorder(const avalue: longbool);
-begin
- fforcezorder:= avalue;
- application.forcezorder:= avalue;
 end;
 
 { ttextprojectoptions }
@@ -3114,6 +3131,36 @@ begin
 end;
 
 function ttemplatesoptions.gettexp: tobject;
+begin
+ result:= ftexp;
+end;
+
+{ tprojectstate }
+
+constructor tprojectstate.create();
+begin
+ ft:= ttextprojectstate.create();
+ ftexp:= ttextprojectstate.create();
+ closemessages:= true;
+ checkmethods:= true;
+ fcolorerror:= cl_ltyellow;
+ fcolorwarning:= cl_ltred;
+ fcolornote:= cl_ltgreen;
+ inherited;
+end;
+
+procedure tprojectstate.setforcezorder(const avalue: longbool);
+begin
+ fforcezorder:= avalue;
+ application.forcezorder:= avalue;
+end;
+
+function tprojectstate.gett: tobject;
+begin
+ result:= ft;
+end;
+
+function tprojectstate.gettexp: tobject;
 begin
  result:= ftexp;
 end;

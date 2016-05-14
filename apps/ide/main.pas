@@ -1290,7 +1290,7 @@ begin
       else begin
        setstattext(c[ord(downloadfinished)],mtk_finished);
        downloaded;
-       if projectoptions.o.closemessages then begin
+       if projectoptions.s.closemessages then begin
         messagefo.hide;
        end;
       end;
@@ -1984,7 +1984,7 @@ var
  
 begin
 // if formkindty(tmenuitem(sender).tag) = fok_inherited then begin
- if projectoptions.o.newinheritedforms[tmenuitem(sender).tag] then begin
+ if projectoptions.p.newinheritedforms[tmenuitem(sender).tag] then begin
   po1:= selectinheritedmodule(nil,c[ord(selectancestor)]);
   if po1 = nil then begin
    exit;
@@ -2366,8 +2366,8 @@ begin
          end;
          copiedfiles[i1]:= dest;
          if newprojectfiles[i1] <> '' then begin
-          if (i1 <= high(expandprojectfilemacros)) and 
-                             expandprojectfilemacros[i1] then begin
+          if (i1 <= high(p.expandprojectfilemacros)) and 
+                             p.expandprojectfilemacros[i1] then begin
            copynewfile(source,dest,false,false,['%PROJECTNAME%','%PROJECTDIR%'],
                                        [mstr1,curdir]);
           end
@@ -2391,10 +2391,10 @@ begin
      saveproject(aname);
      bo1:= true;
      for i1:= 0 to high(copiedfiles) do begin
-      if i1 > high(loadprojectfile) then begin
+      if i1 > high(p.loadprojectfile) then begin
        break;
       end;
-      if loadprojectfile[i1] then begin
+      if p.loadprojectfile[i1] then begin
        if checkfileext(copiedfiles[i1],[formfileext])then begin
         openformfile(copiedfiles[i1],true,false,false,true,false);
        end
@@ -2701,7 +2701,7 @@ begin
   fcurrent:= true;
   fnoremakecheck:= false;
   messagefo.messages.lastrow;
-  if projectoptions.o.closemessages then begin
+  if projectoptions.s.closemessages then begin
    messagefo.hide;
   end;
   if fstartcommand <> sc_none then begin
@@ -3038,7 +3038,7 @@ end;
 
 procedure tmainfo.statafterread(const sender: TObject);
 begin
- actionsmo.forcezorderact.checked:= projectoptions.o.forcezorder;
+ actionsmo.forcezorderact.checked:= projectoptions.s.forcezorder;
 end;
 
 procedure tmainfo.basedockpaintexe(const sender: twidget;

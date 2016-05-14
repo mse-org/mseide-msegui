@@ -97,7 +97,7 @@ var
 begin
  with messages do begin
   opt1:= [aco_processeditchars];
-  if projectoptions.o.stripmessageesc then begin
+  if projectoptions.s.stripmessageesc then begin
    include(opt1,aco_stripescsequence);
   end;
   int1:= datacols[0].readpipe(atext,opt1,120);
@@ -132,7 +132,7 @@ end;
 
 procedure tmessagefo.updateprojectoptions;
 begin
- with messages,projectoptions.o do begin
+ with messages,projectoptions.s do begin
   rowcolors[0]:= colorerror;
   rowcolors[1]:= colorwarning;
   rowcolors[2]:= colornote;

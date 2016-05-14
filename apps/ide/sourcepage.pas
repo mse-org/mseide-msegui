@@ -504,8 +504,8 @@ end;
 function tsourcepage.canchangenotify(const info: filechangeinfoty): boolean;
 begin
  result:= (info.changed - [fc_force,fc_accesstime] <> []) or checkfilechanged();
- with projectoptions,o.texp do begin
-  if result and making and o.copymessages and
+ with projectoptions,s.texp do begin
+  if result and making and s.copymessages and
           (filepath = msefileutils.filepath(messageoutputfile)) then begin
    result:= false;
   end;

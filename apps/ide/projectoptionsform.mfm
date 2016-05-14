@@ -2794,7 +2794,7 @@ object projectoptionsfo: tprojectoptionsfo
         onlayout = makepageonchildscaled
         object tspacer2: tspacer
           color = -2147483645
-          taborder = 17
+          taborder = 18
           bounds_x = 341
           bounds_y = 108
           bounds_cx = 10
@@ -2815,7 +2815,7 @@ object projectoptionsfo: tprojectoptionsfo
             14
             0
           )
-          taborder = 10
+          taborder = 11
           bounds_x = 1
           bounds_y = 123
           bounds_cx = 110
@@ -2944,7 +2944,7 @@ object projectoptionsfo: tprojectoptionsfo
           optionswidget1 = [ow1_autowidth, ow1_autoheight]
           optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
           color = -2147483645
-          taborder = 11
+          taborder = 12
           bounds_x = 109
           bounds_y = 140
           bounds_cx = 134
@@ -2997,7 +2997,7 @@ object projectoptionsfo: tprojectoptionsfo
           )
           taborder = 9
           bounds_x = 351
-          bounds_y = 115
+          bounds_y = 99
           bounds_cx = 153
           bounds_cy = 16
           onchange = copymessagechanged
@@ -3012,7 +3012,7 @@ object projectoptionsfo: tprojectoptionsfo
             233
             2
           )
-          taborder = 13
+          taborder = 14
           hint = 'Close messages window after compile.'
           bounds_x = 257
           bounds_y = 151
@@ -3030,7 +3030,7 @@ object projectoptionsfo: tprojectoptionsfo
             149
             2
           )
-          taborder = 12
+          taborder = 13
           bounds_x = 257
           bounds_y = 135
           bounds_cx = 162
@@ -3045,7 +3045,7 @@ object projectoptionsfo: tprojectoptionsfo
           bounds_cx = 754
           bounds_cy = 332
           anchors = [an_top, an_bottom]
-          taborder = 14
+          taborder = 15
           activepageindex = 1
           tab_frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_optionsskin]
           tab_frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive]
@@ -4152,7 +4152,7 @@ object projectoptionsfo: tprojectoptionsfo
         end
         object tsplitter1: tsplitter
           color = -1879048189
-          taborder = 15
+          taborder = 16
           visible = False
           bounds_x = 247
           bounds_y = 61
@@ -4164,7 +4164,7 @@ object projectoptionsfo: tprojectoptionsfo
         end
         object tsplitter2: tsplitter
           color = -1879048189
-          taborder = 16
+          taborder = 17
           visible = False
           bounds_x = 247
           bounds_y = 20
@@ -4176,7 +4176,7 @@ object projectoptionsfo: tprojectoptionsfo
         end
         object tsplitter4: tsplitter
           color = -1879048189
-          taborder = 18
+          taborder = 19
           visible = False
           bounds_x = 455
           bounds_y = 20
@@ -4188,7 +4188,7 @@ object projectoptionsfo: tprojectoptionsfo
         end
         object tsplitter5: tsplitter
           color = -1879048189
-          taborder = 19
+          taborder = 20
           visible = False
           bounds_x = 455
           bounds_y = 60
@@ -4220,7 +4220,7 @@ object projectoptionsfo: tprojectoptionsfo
           reffontheight = 14
         end
         object tspacer5: tspacer
-          taborder = 20
+          taborder = 21
           bounds_x = 109
           bounds_y = 109
           bounds_cx = 8
@@ -4250,7 +4250,7 @@ object projectoptionsfo: tprojectoptionsfo
           reffontheight = 14
         end
         object tspacer6: tspacer
-          taborder = 21
+          taborder = 22
           bounds_x = 225
           bounds_y = 109
           bounds_cx = 8
@@ -4281,7 +4281,7 @@ object projectoptionsfo: tprojectoptionsfo
         end
         object tspacer4: tspacer
           color = -2147483645
-          taborder = 22
+          taborder = 23
           bounds_x = 341
           bounds_y = 92
           bounds_cx = 10
@@ -4299,9 +4299,9 @@ object projectoptionsfo: tprojectoptionsfo
             133
             2
           )
-          taborder = 23
+          taborder = 10
           bounds_x = 351
-          bounds_y = 99
+          bounds_y = 115
           bounds_cx = 146
           bounds_cy = 16
           onchange = copymessagechanged

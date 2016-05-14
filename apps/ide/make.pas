@@ -148,7 +148,7 @@ begin
  designnotifications.beforemake(idesigner(designer),atag,bo1);
  if not bo1 then begin
   maker:= tmaker.Create(atag);
-  if projectoptions.o.closemessages then begin
+  if projectoptions.s.closemessages then begin
    messagefo.messages.show;
   end;
  end;
@@ -246,7 +246,7 @@ end;
 procedure dodownload;
 begin
  killload;
- if projectoptions.o.closemessages then begin
+ if projectoptions.s.closemessages then begin
   messagefo.messages.show;
  end;
  loader:= tloader.create(nil);
@@ -274,8 +274,8 @@ constructor tprogrunner.create(const aowner: tcomponent;
                               const clearscreen,setmakedir: boolean);
 begin
  inherited create(aowner);
- with projectoptions,o.texp do begin
-  if o.copymessages and (messageoutputfile <> '') and not fnofilecopy then begin
+ with projectoptions,s.texp do begin
+  if s.copymessages and (messageoutputfile <> '') and not fnofilecopy then begin
    fmessagefile:= ttextstream.create(messageoutputfile,fm_create);
   end;
   messagepipe:= tpipereader.create;
