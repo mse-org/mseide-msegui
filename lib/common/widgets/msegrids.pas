@@ -6038,14 +6038,14 @@ begin
         fselectedrow:= -2;
        end;
       end;
-      selected:= selected and not ca1;
+      selected:= selected and not (ca1 or wholerowselectedmask);
       exclude(fstate,gps_selected);
       invalidatecell(invalidaxis);
       doselectionchanged();
       exit;
      end
      else begin
-      selected:= selected and not (bits[ident] {or wholerowselectedmask});
+      selected:= selected and not (bits[ident] or wholerowselectedmask);
      end;
     end;
     if ca1 <> selected then begin
