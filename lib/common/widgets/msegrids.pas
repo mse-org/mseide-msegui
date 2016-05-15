@@ -1276,13 +1276,14 @@ type
    procedure paint(var info: colpaintinfoty; const scrollables: boolean = true);
    procedure updaterowheight(const arow: integer; var arowheight: integer);
    function totwidth: integer;
-   procedure rowcountchanged(const newcount: integer); virtual;
+   procedure rowcountchanged(const countbefore: int32;
+                                         const newcount: int32); virtual;
    procedure updatelayout; override;
    procedure countchanged; override;
    procedure moverow(const curindex,newindex: integer;
                 const acount: integer = 1); virtual;
-   procedure insertrow(const index: integer; const acount: integer = 1); virtual;
-   procedure deleterow(const index: integer; const acount: integer = 1); virtual;
+   procedure insertrow(const index: integer; const acount: integer = 1) virtual;
+   procedure deleterow(const index: integer; const acount: integer = 1) virtual;
    procedure rearange(const list: integerarty); virtual;
    procedure resetpropwidth;
    property options: coloptionsty read foptions
@@ -1504,15 +1505,19 @@ type
    procedure rearange(const list: integerarty); override;
    procedure setcount1(acount: integer; doinit: boolean); override;
    procedure setrowcountmax(const value: integer);
-   procedure rowcountchanged(const newcount: integer); override;
+   procedure rowcountchanged(const countbefore: int32;
+                                         const newcount: int32); override;
    procedure createitem(const index: integer; var item: tpersistent); override;
    procedure updatelayout; override;
    function colatpos(const x: integer;
                  const getscrollable: boolean = true): integer;
                 //0..count-1, invalidaxis if invalid
-   procedure moverow(const fromindex,toindex: integer; const acount: integer = 1); override;
-   procedure insertrow(const index: integer; const acount: integer = 1); override;
-   procedure deleterow(const index: integer; const acount: integer = 1); override;
+   procedure moverow(const fromindex,toindex: integer;
+                                          const acount: integer = 1); override;
+   procedure insertrow(const index: integer;
+                                          const acount: integer = 1); override;
+   procedure deleterow(const index: integer;
+                                         const acount: integer = 1); override;
    procedure changeselectedrange(const start,oldend,newend: gridcoordty;
              calldoselectcell: boolean); virtual;
    procedure beginselect;
@@ -1542,7 +1547,8 @@ type
                    //invalidaxis if none
    property lastvisiblecol: integer read flastvisiblecol;
    function rowempty(const arow: integer): boolean;
-   property cols[const index: integer]: tdatacol read getcols write setcols; default;
+   property cols[const index: integer]: tdatacol read getcols
+                                                      write setcols; default;
    function colbyname(const aname: string): tdatacol;
                   //name is case sensitive
    function datalistbyname(const aname: string): tdatalist; //can be nil
@@ -7494,7 +7500,8 @@ begin
  inherited;
 end;
 
-procedure tcols.rowcountchanged(const newcount: integer);
+procedure tcols.rowcountchanged(const countbefore: int32;
+                                              const newcount: integer);
 var
  int1: integer;
 begin
@@ -7837,17 +7844,24 @@ begin
  end;
 end;
 
-procedure tdatacols.rowcountchanged(const newcount: integer);
+procedure tdatacols.rowcountchanged(const countbefore: int32;
+                                            const newcount: int32);
 var
  int1: integer;
 begin
  if fselectedrow >= newcount then begin
   fselectedrow:= -1;
  end;
+ if (newcount < countbefore) and (fselectedrow = -2) then begin
+  fselectedrowcount:= length(getselectedrows);
+ end;
  for int1:= 0 to count - 1 do begin
   with tdatacol(items[int1]) do begin
    if fselectedrow >= newcount then begin
     fselectedrow:= -1;
+   end;
+   if (newcount < countbefore) and (fselectedrow = -2) then begin
+    fselectedrowcount:= length(getselectedcells);
    end;
   end;
  end;
@@ -10436,8 +10450,8 @@ begin
   exclude(fstate,gs_cellclicked);
  end;
  layoutchanged;
- ffixcols.rowcountchanged(newcount);
- fdatacols.rowcountchanged(newcount);
+ ffixcols.rowcountchanged(countbefore,newcount);
+ fdatacols.rowcountchanged(countbefore,newcount);
  if canevent(tmethod(fonrowcountchanged)) then begin
   fonrowcountchanged(self);
  end;
@@ -10465,7 +10479,8 @@ procedure tcustomgrid.invalidatecell(const cell: gridcoordty);
 begin
  internalupdatelayout;
  if (cell.row < 0) or 
-      (cell.row >= ffirstvisiblerow) and (cell.row <= flastvisiblerow) then begin
+                (cell.row >= ffirstvisiblerow) and 
+                                (cell.row <= flastvisiblerow) then begin
   invalidaterect(cellrect(cell));
  end;
 end;
