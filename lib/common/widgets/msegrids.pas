@@ -6000,7 +6000,7 @@ end;
 
 procedure tdatacol.setselected(const row: integer; value: boolean);
 var
- po1: prowstatety;
+ po1,po2,pe: prowstatety;
  ca1: longword;
  int1,int2: integer;
 begin
@@ -6015,7 +6015,38 @@ begin
      selected:= selected or bits[ident];
     end
     else begin
-     selected:= selected and not (bits[ident] {or wholerowselectedmask});
+     if gps_selected in fstate then begin
+      ca1:= bits[ident];
+      with fcellinfo.grid.fdatacols.frowstate do begin
+       int1:= fsize;
+       po2:= datapo;
+       pe:= pointer(po2) + count * int1;
+       while po2 < pe do begin
+        po2^.selected:= po2^.selected or ca1;
+        inc(pointer(po2),int1);
+       end;
+      end;
+      fselectedrowcount:= fcellinfo.grid.rowcount-1;
+      case fselectedrowcount of
+       0: begin
+        fselectedrow:= -1;
+       end;
+       1: begin
+        fselectedrow:= 0;
+       end;
+       else begin
+        fselectedrow:= -2;
+       end;
+      end;
+      selected:= selected and not ca1;
+      exclude(fstate,gps_selected);
+      invalidatecell(invalidaxis);
+      doselectionchanged();
+      exit;
+     end
+     else begin
+      selected:= selected and not (bits[ident] {or wholerowselectedmask});
+     end;
     end;
     if ca1 <> selected then begin
      if value then begin
