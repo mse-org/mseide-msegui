@@ -626,6 +626,7 @@ type
    foncellevent: celleventty;
    fonshowhint: showcolhinteventty;
    fselectedrow: integer; //-1 none, -2 more than one
+   fselectedrowcount: int32;
    fonselectionchanged: datacoleventty;
    fselectlock: integer;
    procedure internaldoentercell(const cellbefore: gridcoordty;
@@ -1467,6 +1468,7 @@ type
  tdatacols = class(tcols)
   private
    fselectedrow: integer; //-1 none, -2 more than one
+   fselectedrowcount: int32;
    fsortcol: integer;
    fsortcoldefault: integer;
    fnewrowcol: integer;
@@ -6009,6 +6011,7 @@ begin
     end;
     if ca1 <> selected then begin
      if value then begin
+      inc(fselectedrowcount);
       if fselectedrow = -1 then begin
        fselectedrow:= row;
       end
@@ -6017,7 +6020,8 @@ begin
       end;
      end
      else begin
-      if fselectedrow = row then begin
+      dec(fselectedrowcount);
+      if (fselectedrow = row) or (fselectedrowcount = 0) then begin
        fselectedrow:= -1;
       end;
      end;
@@ -6033,6 +6037,7 @@ begin
    if value then begin
     if not (gps_selected in fstate) then begin
      include(fstate,gps_selected);
+     fselectedrowcount:= fcellinfo.grid.rowcount;
      fselectedrow:= -2;
      changed;
      doselectionchanged;
@@ -6057,6 +6062,7 @@ begin
       end;
       changed;
      end;
+     fselectedrowcount:= 0;
      fselectedrow:= -1;
      doselectionchanged;
     end;
@@ -8091,6 +8097,7 @@ begin
      po1:= frowstate.getitempo(cell.row);
      if ca1 <> po1^.selected then begin
       if value then begin
+       inc(fselectedrowcount);
        if fselectedrow = -1 then begin
         fselectedrow:= cell.row;
        end
@@ -8099,7 +8106,8 @@ begin
        end;
       end
       else begin
-       if fselectedrow = cell.row then begin
+       dec(fselectedrowcount);
+       if (fselectedrow = cell.row) or (fselectedrowcount = 0) then begin
         fselectedrow:= -1;
        end;
       end;
@@ -8119,6 +8127,7 @@ begin
        end;
        inc(pchar(po1),rowstatesize);
       end;
+      fselectedrowcount:= fgrid.rowcount;
       fselectedrow:= -2;
      end
      else begin
@@ -8138,6 +8147,7 @@ begin
          inc(pchar(po1),rowstatesize);
         end;
        end;
+       fselectedrowcount:= 0;
        fselectedrow:= -1;
       end;
      end;
