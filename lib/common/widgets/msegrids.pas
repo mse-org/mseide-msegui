@@ -717,7 +717,8 @@ type
              //row < 0 -> whole col
    property selectedcells: integerarty read getselectedcells 
                                                 write setselectedcells;
-   function selectedcellcount: integer;
+//   function selectedcellcount: integer;
+   property selectedcellcount: int32 read fselectedrowcount;
    property cellorigin: pointty read getcellorigin;    //org = grid.paintpos
    property visible: boolean read getvisible write setvisible;
    property enabled: boolean read getenabled write setenabled;
@@ -1556,6 +1557,7 @@ type
    
    procedure clearselection;
    function hasselection: boolean;
+   property selectedrowcount: int32 read fselectedrowcount;
    function selectedcellcount: integer;
    function hascolselection: boolean;
    property selectedcells: gridcoordarty read getselectedcells 
@@ -6181,7 +6183,7 @@ begin
   end;
  end;
 end;
-
+(*
 function tdatacol.selectedcellcount: integer;
 var
  int1{,int2}: integer;
@@ -6195,7 +6197,7 @@ begin
   end;
  end;
 end;
-
+*)
 procedure tdatacol.clearselection;
 begin
  setselected(-1,false);
@@ -8324,10 +8326,16 @@ end;
 
 function tdatacols.selectedcellcount: integer;
 var
- int1,int2: integer;
- bo1: boolean;
+ {int1,}int2: integer;
+// bo1: boolean;
 begin
  result:= 0;
+ for int2:= 0 to count - 1 do begin
+  with tdatacol(fitems[int2]) do begin
+   result:= result + selectedcellcount;
+  end;
+ end;
+{
  if hasselection then begin
   bo1:= hascolselection;
   for int1:= 0 to frowstate.count - 1 do begin
@@ -8340,6 +8348,7 @@ begin
    end;
   end;
  end;
+}
 end;
 
 function tdatacols.hascolselection: boolean;
