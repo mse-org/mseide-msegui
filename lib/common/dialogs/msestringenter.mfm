@@ -53,6 +53,7 @@ object stringenterfo: tstringenterfo
     object cancel: tbutton
       optionswidget1 = [ow1_fontglyphheight, ow1_autoscale, ow1_autowidth, ow1_autosizeanright]
       optionswidget = [ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
+      taborder = 2
       bounds_x = 331
       bounds_y = 0
       bounds_cx = 52
@@ -81,7 +82,6 @@ object stringenterfo: tstringenterfo
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
       frame.localprops = []
       frame.localprops1 = []
-      taborder = 2
       bounds_x = 0
       bounds_y = 0
       bounds_cx = 265
