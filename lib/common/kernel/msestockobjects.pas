@@ -158,6 +158,7 @@ type
    function getmseicon: tmaskedbitmap;
    function getcaptions(index: stockcaptionty): msestring;
    function gettextgenerator(index: textgeneratorty): textgeneratorfuncty;
+   procedure setmseicon(const avalue: tmaskedbitmap);
   public
    constructor create;
    destructor destroy; override;
@@ -175,7 +176,7 @@ type
    property textgenerators[index: textgeneratorty]: textgeneratorfuncty 
                                                        read gettextgenerator;
    property glyphs: timagelist read getglyphs;
-   property mseicon: tmaskedbitmap read getmseicon;
+   property mseicon: tmaskedbitmap read getmseicon write setmseicon;
  end;
 
 type
@@ -478,6 +479,11 @@ end;
 function tstockobjects.getmseicon: tmaskedbitmap;
 begin
  result:= stockdata.mseicon.bitmap;
+end;
+
+procedure tstockobjects.setmseicon(const avalue: tmaskedbitmap);
+begin
+ stockdata.mseicon.bitmap.assign(avalue);
 end;
 
 function tstockobjects.getmodalresulttext(index: modalresultty): msestring;
