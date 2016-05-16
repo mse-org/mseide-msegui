@@ -9,7 +9,7 @@
 }
 unit msemenuwidgets;
 
-{$ifdef FPC}{$mode objfpc}{$h+}{$endif}
+{$ifdef FPC}{$mode objfpc}{$h+}{$goto on}{$endif}
 
 interface
 uses
@@ -326,7 +326,7 @@ var
  textwidth: integer;
  tabpos1: integer;
  ashortcutwidth,shortcutwidth: integer;
- item1: tmenuitem1;
+ item1,item2: tmenuitem1;
  hassubmenu: boolean;
  hascheckbox: boolean;
  shift,regioncount: integer;
@@ -352,6 +352,10 @@ var
  checkboxwidth: integer;
  checkboxheight: integer;
  size1: sizety;
+ hasnormalitem: boolean;
+ 
+label
+ suppressed;
  
 begin
  ar1:= nil; //compiler warning
@@ -437,12 +441,14 @@ begin
   hascheckbox:= false;
   parentcolor:= actualcolor;
   parentcoloractive:= actualcoloractive;
+  hasnormalitem:= false; //for separator check
   for int1:= 0 to count - 1 do begin
    item1:= tmenuitem1(fsubmenu[int1]);
    with cells[int1] do begin
     fontinactive:= item1.font;
     fontactive:= item1.fontactive;
     with buttoninfo,ca do begin
+     actionstatestoshapestates(item1.finfo,state);
      captiondist:= defaultshapecaptiondist;
      textflags:= [tf_ycentered];
      imagedist:= imagedi;
@@ -463,6 +469,7 @@ begin
      else begin
       tabpos:= 0;
      end;
+     exclude(state,shs_suppressed);
      if mlo_horz in layout.options then begin
       include(state,shs_horz);
      end
@@ -497,13 +504,10 @@ begin
      colorglyph:= item1.actualcolorglyph();
                                    //finfo.colorglyph; //layout.colorglyph;
      colorglyphactive:= item1.actualcolorglyphactive();
-//     if colorglyphactive = cl_default then begin
-//      colorglyphactive:= colorglyph;
-//     end;
      caption:= item1.finfo.caption1;
      imagenr:= item1.finfo.imagenr;
      imagenrdisabled:= item1.finfo.imagenrdisabled;
-     actionstatestoshapestates(item1.finfo,state);
+//     actionstatestoshapestates(item1.finfo,state);
      if (item1.color = cl_default) or (item1.color = cl_parent) then begin
       color:= parentcolor;
      end
@@ -531,8 +535,34 @@ begin
      updatebit(longword(state),ord(shs_nomouseanimation),nomouseanim1);
      updatebit(longword(state),ord(shs_noclickanimation),noclickanim1);
      updatebit(longword(state),ord(shs_nofocusanimation),nofocusanim1);
-    
+
      if not (shs_invisible in state) then begin
+      if shs_separator in state then begin
+       if shs_optional in state then begin
+        include(state,shs_suppressed);
+        if hasnormalitem then begin
+         for int2:= int1+1 to count - 1 do begin
+          item2:= tmenuitem1(fsubmenu[int2]);
+          if item2.options * [mao_separator,mao_optional] = 
+                                                 [mao_separator] then begin
+           break;
+          end;
+          if not (mao_separator in item2.options) and 
+                                not (as_invisible in item2.state) then begin
+           exclude(state,shs_suppressed);
+           break;
+          end;
+         end;
+        end;
+       end;
+       hasnormalitem:= false;
+      end
+      else begin
+       hasnormalitem:= true;
+      end;
+      if shs_suppressed in state then begin
+       goto suppressed;
+      end; 
       hassubmenu:= hassubmenu or (shs_menuarrow in state);
       if [shs_checkbox,shs_radiobutton] * state <> [] then begin
        hascheckbox:= true;
@@ -594,6 +624,7 @@ begin
      else begin
       dim:= nullrect;
      end;
+suppressed:
     end;  //with cells[int1].buttoninfo
    end;   //with cells[int1]
   end;
@@ -620,7 +651,7 @@ begin
     sizemax1:= 0;
     for int1:= 0 to count - 1 do begin
      with cells[int1].buttoninfo,ca do begin
-      if not (shs_invisible in state) then begin
+      if state * [shs_invisible,shs_suppressed] = [] then begin
        if commonwidth then begin
         dim.x:= ax;
         if not (shs_separator in state) then begin
@@ -710,7 +741,8 @@ begin
    result:= -2;
    for int1:= 0 to high(cells) do begin
     with cells[int1].buttoninfo do begin
-     if (state * [shs_disabled,shs_invisible,shs_separator] = []) and
+     if (state * 
+           [shs_disabled,shs_invisible,shs_suppressed,shs_separator] = []) and
                 pointinrect(pos,ca.dim) then begin
       result:= int1;
       break;
@@ -745,63 +777,65 @@ begin
   end; 
   for int1:= 0 to high(cells) do begin
    with cells[int1],buttoninfo do begin
-    colorglyphbefore:= ca.colorglyph;
-    checkboxframe:= checkboxframetemplate;
-    if int1 = activeitem then begin
-     ca.colorglyph:= colorglyphactive;
-     if itemframetemplateactive <> nil then begin
-      itemframetemplateactive.paintbackground(canvas,ca.dim,
-         combineframestateflags(shs_disabled in state,false,false,
-                                               shs_clicked in state,false));
-      if ca.colorglyph = cl_default then begin
-       ca.colorglyph:= itemframetemplateactive.colorglyph;
-      end;
-     end;
-     face:= itemfaceactive;
-     ca.font:= fontactive;
-     state:= state + [shs_focused,shs_active,shs_focusanimation];
-     deflaterect1(ca.dim,frameactivediff);
-     drawmenubutton(canvas,buttoninfo,po2);
-     if itemframetemplateactive <> nil then begin
-      itemframetemplateactive.paintoverlay(canvas,ca.dim,
-            combineframestateflags(false,true,true,shs_clicked in state,false));
-     end;
-     inflaterect1(ca.dim,frameactivediff);
-    end
-    else begin
-     if (shs_separator in state) and (separatorframetemplate <> nil) then begin
-      separatorframetemplate.paintbackgroundframe(canvas,ca.dim);
-      if not (fso_flat in separatorframetemplate.optionsskin) then begin
-       draw3dframe(canvas,
-         inflaterect(deflaterect(ca.dim,separatorframetemplate.innerframe),1),
-                                              -1,defaultframecolors.edges,[]);
-      end;
-      separatorframetemplate.paintoverlayframe(canvas,ca.dim);
-     end
-     else begin
-      if itemframetemplate <> nil then begin
-       itemframetemplate.paintbackground(canvas,ca.dim,
-                combineframestateflags(shs_disabled in state,false,false,
-                                               shs_clicked in state,false));
+    if state * [shs_invisible,shs_suppressed] = [] then begin
+     colorglyphbefore:= ca.colorglyph;
+     checkboxframe:= checkboxframetemplate;
+     if int1 = activeitem then begin
+      ca.colorglyph:= colorglyphactive;
+      if itemframetemplateactive <> nil then begin
+       itemframetemplateactive.paintbackground(canvas,ca.dim,
+          combineframestateflags(shs_disabled in state,false,false,
+                                                shs_clicked in state,false));
        if ca.colorglyph = cl_default then begin
-        ca.colorglyph:= itemframetemplate.colorglyph;
+        ca.colorglyph:= itemframetemplateactive.colorglyph;
        end;
       end;
-      face:= itemface;
-      ca.font:= fontinactive;
-      state:= state - [shs_focused,shs_active,shs_focusanimation];
-      if ca.colorglyph = cl_default then begin
-       ca.colorglyph:= cl_glyph;
+      face:= itemfaceactive;
+      ca.font:= fontactive;
+      state:= state + [shs_focused,shs_active,shs_focusanimation];
+      deflaterect1(ca.dim,frameactivediff);
+      drawmenubutton(canvas,buttoninfo,po2);
+      if itemframetemplateactive <> nil then begin
+       itemframetemplateactive.paintoverlay(canvas,ca.dim,
+             combineframestateflags(false,true,true,shs_clicked in state,false));
       end;
-      drawmenubutton(canvas,buttoninfo,po1);
-      if itemframetemplate <> nil then begin
-           itemframetemplate.paintoverlay(canvas,ca.dim,
-                  combineframestateflags(shs_disabled in state,false,false,
-                  shs_clicked in state,false));
+      inflaterect1(ca.dim,frameactivediff);
+     end
+     else begin
+      if (shs_separator in state) and (separatorframetemplate <> nil) then begin
+       separatorframetemplate.paintbackgroundframe(canvas,ca.dim);
+       if not (fso_flat in separatorframetemplate.optionsskin) then begin
+        draw3dframe(canvas,
+          inflaterect(deflaterect(ca.dim,separatorframetemplate.innerframe),1),
+                                               -1,defaultframecolors.edges,[]);
+       end;
+       separatorframetemplate.paintoverlayframe(canvas,ca.dim);
+      end
+      else begin
+       if itemframetemplate <> nil then begin
+        itemframetemplate.paintbackground(canvas,ca.dim,
+                 combineframestateflags(shs_disabled in state,false,false,
+                                                shs_clicked in state,false));
+        if ca.colorglyph = cl_default then begin
+         ca.colorglyph:= itemframetemplate.colorglyph;
+        end;
+       end;
+       face:= itemface;
+       ca.font:= fontinactive;
+       state:= state - [shs_focused,shs_active,shs_focusanimation];
+       if ca.colorglyph = cl_default then begin
+        ca.colorglyph:= cl_glyph;
+       end;
+       drawmenubutton(canvas,buttoninfo,po1);
+       if itemframetemplate <> nil then begin
+            itemframetemplate.paintoverlay(canvas,ca.dim,
+                   combineframestateflags(shs_disabled in state,false,false,
+                   shs_clicked in state,false));
+       end;
       end;
      end;
-    end;
-    ca.colorglyph:= colorglyphbefore;
+     ca.colorglyph:= colorglyphbefore;
+    end; //visible
    end;
   end;
  end;
@@ -860,7 +894,7 @@ function checkshortcut(const layout: menulayoutinfoty; var info: keyeventinfoty;
   int1:= actualindex;
   repeat
    with layout.cells[actualindex].buttoninfo do begin
-    if (state * [shs_disabled,shs_invisible] = []) and
+    if (state * [shs_disabled,shs_invisible,shs_suppressed] = []) and
             msegui.checkshortcut(info,ca.caption,false) then begin
      result:= actualindex;
      include(info.eventstate,es_processed);
