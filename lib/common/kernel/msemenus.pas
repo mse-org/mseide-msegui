@@ -22,7 +22,9 @@ uses
  mseassistiveclient{$ifdef mse_with_ifi},mseificompglob{$endif};
 
 type
- menuoptionty = (mo_noinsert,mo_stopinsert,mo_insertfirst,mo_noseparator,
+ menuoptionty = (mo_noinsert,mo_stopinsert,mo_insertfirst,
+                 mo_noseparator,
+                 mo_forceseparator, //do not set mao_optional
                  mo_singleregion,mo_shortcutright,mo_commonwidth,
                  mo_activate,{mo_noanim,}mo_mainarrow,mo_updateonidle);
  menuoptionsty = set of menuoptionty;
@@ -53,20 +55,25 @@ type
    function hasvisibleitem: boolean;
    procedure sort;
    procedure assign(source: tpersistent); override;
-   function insert(const index: integer; const aitem: tmenuitem): integer; overload;
+   function insert(const index: integer; 
+                                const aitem: tmenuitem): integer overload;
       //aitem is owned, returns index of new item
                             //if index > count -> index:= count
-   function insert(const index: integer; const aitems: tmenuitems): integer; overload;
+   function insert(const index: integer; 
+                              const aitems: tmenuitems): integer overload;
       //items are copied, returns index of first new item
                             //if index > count -> index:= count
    function insert(const index: integer; const captions: array of msestring;
                             //if index > count -> index:= count
                  const options: array of menuactionoptionsty;
                  const states: array of actionstatesty;
-                 const onexecutes: array of notifyeventty): integer; overload;
+                 const onexecutes: array of notifyeventty): integer overload;
                         //returns index of first new item
-   procedure insertseparator(const index: integer);
-   property items[index: integer]: tmenuitem read getmenuitems write setmenuitems; default;
+   procedure insertseparator(const index: integer;
+                                      const aoptional: boolean = false);
+                            //if index > count -> index:= count
+   property items[index: integer]: tmenuitem read getmenuitems 
+                                             write setmenuitems; default;
    function itembyname(const name: ansistring): tmenuitem;
    function itemindexbyname(const name: ansistring): integer;
  end;
@@ -414,12 +421,13 @@ type
                  const aoptions: array of menuactionoptionsty;
                  const states: array of actionstatesty;
                  const onexecutes: array of notifyeventty;
-                 const aseparator: boolean = true): integer; overload;
+                 const aseparator: boolean = true;
+                 const optionalseparator: boolean = true): integer; overload;
                             //returs index of first added item
    class function additems(var amenu: tpopupmenu; const atransientfor: twidget;
                  var mouseinfo: mouseeventinfoty; const items: tmenuitems;
-                 aseparator: boolean = true;
-                 const first: boolean = false): integer; overload;
+                 const aseparator: boolean = true; const first: boolean = false;
+                 const optionalseparator: boolean = true): integer; overload;
                             //returs index of first added item
    class function additems(var amenu: tpopupmenu; const atransientfor: twidget;
                  var mouseinfo: mouseeventinfoty; const items: tcustommenu{;
@@ -1933,12 +1941,18 @@ begin
  end;
 end;
 
-procedure tmenuitems.insertseparator(const index: integer);
+procedure tmenuitems.insertseparator(const index: integer;
+                                          const aoptional: boolean = false);
 var
  item1: tmenuitem;
+ opt1: menuactionoptionsty;
 begin
  item1:= tmenuitem.create;
- item1.options:= item1.options + [mao_separator];
+ opt1:= [mao_separator];
+ if aoptional then begin
+  opt1:= [mao_separator,mao_optional];
+ end;
+ item1.options:= item1.options + opt1;
  insert(index,item1);
 end;
 
@@ -2138,38 +2152,40 @@ class function tpopupmenu.additems(var amenu: tpopupmenu;
                  const aoptions: array of menuactionoptionsty;
                  const states: array of actionstatesty;
                  const onexecutes: array of notifyeventty;
-                 const aseparator: boolean = true): integer;
+                 const aseparator: boolean = true;
+                 const optionalseparator: boolean = true): integer;
 begin
  if amenu = nil then begin
   amenu:= tpopupmenu.createtransient(atransientfor,@mouseinfo);
  end;
- if aseparator and amenu.menu.hasvisibleitem then begin
-  amenu.menu.submenu.insertseparator(bigint);
+ if aseparator{ and amenu.menu.hasvisibleitem} then begin
+  amenu.menu.submenu.insertseparator(bigint,optionalseparator);
  end;
  result:= amenu.menu.submenu.insert(bigint,captions,aoptions,states,onexecutes);
 end;
 
 class function tpopupmenu.additems(var amenu: tpopupmenu; const atransientfor: twidget;
                  var mouseinfo: mouseeventinfoty; const items: tmenuitems;
-                 aseparator: boolean = true;
-                 const first: boolean = false): integer;
+                 const aseparator: boolean = true;
+                 const first: boolean = false;
+                 const optionalseparator: boolean = true): integer;
 begin
  if amenu = nil then begin
   amenu:= tpopupmenu.createtransient(atransientfor,@mouseinfo);
  end;
  result:= -1; //compiler warning
  if items <> nil then begin
-  aseparator:= aseparator and items.hasvisibleitem and
-                                                amenu.menu.hasvisibleitem;
+//  aseparator:= aseparator and items.hasvisibleitem and
+//                                                amenu.menu.hasvisibleitem;
   if first then begin
    result:= amenu.menu.submenu.insert(0,items);
    if aseparator then begin
-    amenu.menu.submenu.insertseparator(items.count);
+    amenu.menu.submenu.insertseparator(items.count,optionalseparator);
    end;
   end
   else begin
    if aseparator then begin
-    amenu.menu.submenu.insertseparator(bigint);
+    amenu.menu.submenu.insertseparator(bigint,optionalseparator);
    end;
    result:= amenu.menu.submenu.insert(bigint,items);
   end;
@@ -2198,7 +2214,8 @@ begin
   items1:= items.fmenu.fsubmenu;
  end;
  result:= additems(amenu,atransientfor,mouseinfo,items1,
-     not (mo_noseparator in items.foptions),mo_insertfirst in items.foptions);
+     not (mo_noseparator in items.foptions),mo_insertfirst in items.foptions,
+     not (mo_forceseparator in items.foptions));
  if bo1 then begin
   amenu.fmenu.enabled:= items.fmenu.enabled;
   amenu.foptions:= items.foptions;
