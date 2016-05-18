@@ -2096,6 +2096,7 @@ end;
    property frameheight: integer read getframeheight write setframeheight;
    function frameinnerrect: rectty;          //origin = pos
 
+   function widgetscreenrect: rectty;        //screen origin
    function widgetclientrect: rectty;        //origin = clientrect.pos
 
    function paintrect: rectty;               //origin = pos
@@ -2706,6 +2707,10 @@ end;
    property hintwidgetclass: widgetclassty read fhintwidgetclass 
                                                     write fhintwidgetclass;
    procedure inithintinfo(var info: hintinfoty; const ahintedwidget: twidget);
+                                   //hint at mousepos
+   procedure initwidgethintinfo(var info: hintinfoty;
+                                       const ahintedwidget: twidget);
+                                   //hint at widgetrect
    procedure showhint(const sender: twidget; const hint: msestring;
          const aposrect: rectty; const aplacement: captionposty = cp_bottomleft;
               const ashowtime: integer = defaulthintshowtime; //0 -> inifinite,
@@ -10615,6 +10620,12 @@ begin
  else begin
   result.pos:= nullpoint;
  end;
+end;
+
+function twidget.widgetscreenrect: rectty;        //screen origin
+begin
+ result.size:= fwidgetrect.size;
+ result.pos:= screenpos;
 end;
 
 function twidget.clientwidgetpos: pointty;
@@ -19258,8 +19269,18 @@ begin
  end;
 end;
 
+procedure tguiapplication.initwidgethintinfo(var info: hintinfoty;
+                                                 const ahintedwidget: twidget);
+begin
+ inithintinfo(info,ahintedwidget);
+ if ahintedwidget <> nil then begin
+  info.posrect:= ahintedwidget.widgetrect;
+  translatewidgetpoint1(info.posrect.pos,ahintedwidget.parentwidget,nil);
+ end;
+end;
+
 procedure tguiapplication.showhint(const sender: twidget; const hint: msestring;
-              const aposrect: rectty; const aplacement: captionposty = cp_bottomleft;
+         const aposrect: rectty; const aplacement: captionposty = cp_bottomleft;
               const ashowtime: integer = defaulthintshowtime; //0 -> inifinite,
                  // -1 defaultshowtime if ow_timedhint in sender.optionswidget
               const aflags: hintflagsty = defaulthintflags

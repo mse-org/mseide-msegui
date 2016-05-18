@@ -105,7 +105,7 @@ type
    procedure release1(const acancelmodal: boolean); virtual;
   public
    constructor create(instance: ppopupmenuwidget;
-       const amenu: tmenuitem; const transientfor: twindow;
+       const amenu: tmenuitem; const atransientfor: twindow;
        const aowner: tcomponent = nil; const menucomp: tcustommenu = nil); overload;
    destructor destroy; override;
    procedure menuchanged(const sender: tmenuitem);
@@ -923,7 +923,7 @@ end;
 { tpopupmenuwidget }
 
 constructor tpopupmenuwidget.create(instance: ppopupmenuwidget; const amenu: tmenuitem;
-         const transientfor: twindow;
+         const atransientfor: twindow;
          const aowner: tcomponent = nil; const menucomp: tcustommenu = nil);
 begin
  fclickeditem:= -1;
@@ -934,15 +934,15 @@ begin
   instance^:= self;
  end;
  initlayoutinfo(self,flayout,amenu,[]{,cl_black});
- inherited create(aowner,transientfor);
+ inherited create(aowner,atransientfor);
  optionswidget:= defaultpopupmenuwidgetoptions;
  internalcreateframe;
  if menucomp <> nil then begin
   assigntemplate(menucomp.template);
  end
  else begin
-  if (transientfor <> nil) and (transientfor.owner is tpopupmenuwidget) then begin
-   assigntemplate(tpopupmenuwidget(transientfor.owner).ftemplates);
+  if (atransientfor <> nil) and (atransientfor.owner is tpopupmenuwidget) then begin
+   assigntemplate(tpopupmenuwidget(atransientfor.owner).ftemplates);
   end;
  end;
  application.registeronapplicationactivechanged(

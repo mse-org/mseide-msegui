@@ -1157,7 +1157,9 @@ type
            const transientfor: pwindow;
            const windowevent,transientforshow: boolean): modalresultty; override;
   public
-   constructor create(aowner: tcomponent; transientfor: twindow); reintroduce; overload;
+   constructor create(aowner: tcomponent;
+                             transientfor: twindow); reintroduce; overload;
+   property transientfor: twindow read ftransientfor;
  end;
 
  const
@@ -1166,7 +1168,7 @@ type
 type
  tcustomhintwidget = class(tpopupwidget)
   public
-   constructor create(const aowner: tcomponent; const transientfor: twindow;
+   constructor create(const aowner: tcomponent; const atransientfor: twindow;
              var info: hintinfoty; const sender: tobject); virtual; reintroduce;
   published
    property optionswidget default defaultoptionshintwidget;
@@ -1179,7 +1181,7 @@ type
   protected
    procedure dopaintforeground(const canvas: tcanvas); override;
   public
-   constructor create(const aowner: tcomponent; const transientfor: twindow;
+   constructor create(const aowner: tcomponent; const atransientfor: twindow;
                      var info: hintinfoty; const sender: tobject); override;
  end;
 
@@ -5742,14 +5744,14 @@ end;
 { tcustomhintwidget }
 
 constructor tcustomhintwidget.create(const aowner: tcomponent; 
-                 const transientfor: twindow;
+                 const atransientfor: twindow;
                  var info: hintinfoty; const sender: tobject);
 var
  rect1,rect2: rectty;
 begin
- inherited create(aowner,transientfor);
+ inherited create(aowner,atransientfor);
  foptionswidget:= defaultoptionshintwidget;
- if transientfor = nil then begin
+ if atransientfor = nil then begin
   include(foptionswidget,ow_ultratop);
  end;
  internalcreateframe;
@@ -5759,20 +5761,20 @@ begin
  fframe.framei_right:= 1;
  fframe.framei_bottom:= 1;
  color:= cl_infobackground;
- rect2:= deflaterect(application.workarea(transientfor),fframe.innerframe);
+ rect2:= deflaterect(application.workarea(atransientfor),fframe.innerframe);
  rect1:= textrect(getcanvas,info.caption,rect2,[tf_wordbreak],
                                             stockobjects.fonts[stf_hint]);
  addsize1(rect1.size,fframe.innerframedim);
 // inc(rect1.cx,fframe.innerframedim.cx);
 // inc(rect1.cy,fframe.innerframedim.cy);
- widgetrect:= placepopuprect(transientfor,info.posrect,info.placement,
+ widgetrect:= placepopuprect(atransientfor,info.posrect,info.placement,
                                                                  rect1.size);
 end;
 
 { thintwidget}
 
 constructor thintwidget.create(const aowner: tcomponent;
-               const transientfor: twindow; var info: hintinfoty;
+               const atransientfor: twindow; var info: hintinfoty;
                const sender: tobject);
 begin
  fcaption:= info.caption;
