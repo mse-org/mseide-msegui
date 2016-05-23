@@ -11072,7 +11072,8 @@ begin
        end
        else begin
         application.widgetcursorshape:= cr_default;
-        if (eventkind = ek_mousepark) and (cellkind = ck_fixrow) and 
+        if (eventkind = ek_mousepark) and 
+                             (cellkind in [ck_fixrow,ck_fixcolrow]) and 
                ((fmousecell.row <> fmouseparkcell.row) or 
                 (fmousecell.col <> fmouseparkcell.col)) then begin
          fmouseparkcell:= fmousecell;
