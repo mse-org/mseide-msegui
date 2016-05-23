@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2012 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2016 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -41,6 +41,7 @@ type
 //   procedure writesize(writer: twriter);
    fonidle: idleeventty;
    factivatortarget: tactivator;
+   fonapplicationevent: applicationeventeventty;
    procedure readsize(reader: treader);
    {
    procedure readsize_x(reader: treader);
@@ -58,6 +59,7 @@ type
    procedure setsize(const avalue: sizety);
    procedure setoptions(const avalue: datamoduleoptionsty);
    procedure setactivatortarget(const avalue: tactivator);
+   procedure setonapplicationeventty(const avalue: applicationeventeventty);
   protected
    procedure boundschanged;
    procedure doterminated(const sender: tobject);
@@ -76,6 +78,8 @@ type
    procedure doeventloopstart; virtual;
    procedure doidle(var again: boolean); virtual;
    procedure receiveevent(const event: tobjectevent); override;
+   procedure doapplicationevent(var aevent: tmseevent; 
+                                       var handled: boolean) virtual;
   public
    constructor create(aowner: tcomponent); overload; override;
    constructor create(aowner: tcomponent; load: boolean); reintroduce; overload;
@@ -112,6 +116,8 @@ type
    property onterminated: notifyeventty read fonterminated 
                  write fonterminated;
    property onidle: idleeventty read fonidle write fonidle;
+   property onapplicationevent: applicationeventeventty
+                       read fonapplicationevent write setonapplicationeventty;
  end;
  datamoduleclassty = class of tmsedatamodule;
  msedatamodulearty = array of tmsedatamodule;
@@ -167,6 +173,10 @@ begin
  application.unregisteronterminated({$ifdef FPC}@{$endif}doterminated);
  application.unregisteronterminate({$ifdef FPC}@{$endif}doterminatequery);
  application.unregisteronidle({$ifdef FPC}@{$endif}doidle);
+ if not (csdesigning in componentstate) and 
+                                 assigned(fonapplicationevent) then begin
+  application.unregisterapplicationeventhandler(@doapplicationevent);
+ end;
  bo1:= csdesigning in componentstate;
  inherited; //csdesigningflag is removed
  if not bo1 and candestroyevent(tmethod(fondestroyed)) then begin
@@ -370,6 +380,14 @@ begin
  end;
 end;
 
+procedure tmsedatamodule.doapplicationevent(var aevent: tmseevent;
+               var handled: boolean);
+begin
+ if assigned(fonapplicationevent) then begin
+  fonapplicationevent(self,aevent,handled);
+ end;
+end;
+
 procedure tmsedatamodule.doterminated(const sender: tobject);
 begin
  if canevent(tmethod(fonterminated)) then begin
@@ -470,6 +488,24 @@ end;
 procedure tmsedatamodule.setactivatortarget(const avalue: tactivator);
 begin
  setlinkedvar(avalue,tmsecomponent(factivatortarget));
+end;
+
+procedure tmsedatamodule.setonapplicationeventty(
+              const avalue: applicationeventeventty);
+begin
+ if not (csdesigning in componentstate) then begin
+  if assigned(avalue) then begin
+   if not assigned(fonapplicationevent) then begin
+    application.registerapplicationeventhandler(@doapplicationevent);
+   end;
+  end
+  else begin
+   if assigned(fonapplicationevent) then begin
+    application.unregisterapplicationeventhandler(@doapplicationevent);
+   end;
+  end;
+ end;
+ fonapplicationevent:= avalue;
 end;
 
 end.

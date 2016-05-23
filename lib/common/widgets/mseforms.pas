@@ -92,8 +92,6 @@ type
 
  syseventeventty = procedure(const sender: tcustommseform;
                     var aevent: syseventty; var handled: boolean) of object;
- applicationeventeventty = procedure(const sender: tcustommseform;
-                    var aevent: tmseevent; var handled: boolean) of object;
 
  formstatety = (fos_statreading);
  formstatesty = set of formstatety;
@@ -163,9 +161,9 @@ type
    procedure seticon(const avalue: tmaskedbitmap);
    procedure registerhandlers;
    procedure unregisterhandlers;
-   procedure setsyseventty(const avalue: syseventeventty);
-   procedure setsyswindoweventty(const avalue: syseventeventty);
-   procedure setapplicationeventty(const avalue: applicationeventeventty);
+   procedure setonsysevent(const avalue: syseventeventty);
+   procedure setonsyswindowevent(const avalue: syseventeventty);
+   procedure setonapplicationevent(const avalue: applicationeventeventty);
    procedure readonchildscaled(reader: treader);
    procedure setactivatortarget(const avalue: tactivator);
   protected
@@ -337,11 +335,11 @@ type
    property onfontheightdelta: fontheightdeltaeventty read fonfontheightdelta
                      write fonfontheightdelta;
    property onlayout: notifyeventty read getonlayout write setonlayout;
-   property onsysevent: syseventeventty read fonsysevent write setsyseventty;
+   property onsysevent: syseventeventty read fonsysevent write setonsysevent;
    property onsyswindowevent: syseventeventty read fonsyswindowevent 
-                                         write setsyswindoweventty;
+                                         write setonsyswindowevent;
    property onapplicationevent: applicationeventeventty
-                          read fonapplicationevent write setapplicationeventty;
+                         read fonapplicationevent write setonapplicationevent;
   published
    property container: tformscrollbox read fscrollbox write setscrollbox;
 {$ifdef mse_with_ifi}
@@ -1989,7 +1987,7 @@ begin
  end;
 end;
 
-procedure tcustommseform.setsyseventty(const avalue: syseventeventty);
+procedure tcustommseform.setonsysevent(const avalue: syseventeventty);
 begin
  if not (csdesigning in componentstate) then begin
   if assigned(avalue) then begin
@@ -2006,7 +2004,7 @@ begin
  fonsysevent:= avalue;
 end;
 
-procedure tcustommseform.setsyswindoweventty(const avalue: syseventeventty);
+procedure tcustommseform.setonsyswindowevent(const avalue: syseventeventty);
 begin
  if not (csdesigning in componentstate) then begin
   if assigned(avalue) then begin
@@ -2023,7 +2021,7 @@ begin
  fonsyswindowevent:= avalue;
 end;
 
-procedure tcustommseform.setapplicationeventty(
+procedure tcustommseform.setonapplicationevent(
                                 const avalue: applicationeventeventty);
 begin
  if not (csdesigning in componentstate) then begin

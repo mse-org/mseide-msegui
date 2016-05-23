@@ -54,7 +54,7 @@ type
 
  actcomponentstatety = (acs_releasing,acs_dooncreatecalled);
  actcomponentstatesty = set of actcomponentstatety;
-  
+
  tactcomponent = class(tmsecomponent,iactivatorclient)
   private
    factivator: tactivator;
@@ -82,6 +82,9 @@ type
  end;
  pactcomponent = ^tactcomponent;
 
+ applicationeventeventty = procedure(const sender: tactcomponent;
+                    var aevent: tmseevent; var handled: boolean) of object;
+ 
  activatoraborteventty = procedure(const sender: tactivator;
                           var aaction: activatorabortactionty) of object;
  tactivator = class(tactcomponent)
