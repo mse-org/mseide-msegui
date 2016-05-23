@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2015 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2016 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -219,6 +219,14 @@ type
    procedure finalizeitem(var item: pointer); override;
  end;
 
+ applicationeventhandlereventty = procedure(var aevent: tmseevent;
+                                               var handled: boolean) of object;
+
+ tonapplicationeventlist = class(tmethodlist)
+  public
+   procedure doevent(var aevent: tmseevent; var handled: boolean);
+ end;
+
  applicationoptionty = (apo_terminateonexception,apo_noautodestroymodules);
  applicationoptionsty = set of applicationoptionty;
  
@@ -252,6 +260,7 @@ type
    fonterminatedlist: tnotifylist;
    fonterminatequerylist: tonterminatequerylist;
    fonidlelist: tonidlelist;
+   fonapplicationeventlist: tonapplicationeventlist;
    ftimertriggercount: integer;
    procedure receiveevent(const event: tobjectevent); override;
    procedure flusheventbuffer;
@@ -317,6 +326,11 @@ type
    procedure unregisteronterminate(const method: terminatequeryeventty);
    procedure registeronidle(const method: idleeventty);
    procedure unregisteronidle(const method: idleeventty);
+   procedure registerapplicationeventhandler(
+                                 const method: applicationeventhandlereventty);
+   procedure unregisterapplicationeventhandler(
+                                 const method: applicationeventhandlereventty);
+
    procedure settimer(const us: integer); virtual;
 
    function islockedthread: boolean; //true if calling thread holds the lock
@@ -1139,6 +1153,18 @@ begin
  end;
 end;
 
+{ tonapplicationeventlist }
+
+procedure tonapplicationeventlist.doevent(var aevent: tmseevent;
+               var handled: boolean);
+begin
+ factitem:= 0;
+ while (factitem < fcount) and not handled do begin
+  applicationeventhandlereventty(getitempo(factitem)^)(aevent,handled);
+  inc(factitem);
+ end;
+end;
+
 { tcustomapplication }
 
 {$ifdef mse_debugmutex}
@@ -1179,6 +1205,7 @@ begin
  sys_mutexcreate(fmutex);
  sys_mutexcreate(feventlock);
  classes.wakemainthread:= {$ifdef FPC}@{$endif}dowakeup;
+ fonapplicationeventlist:= tonapplicationeventlist.create;
  lock;
  initialize;
 end;
@@ -1193,6 +1220,7 @@ begin
  feventlist.free;
  sys_mutexdestroy(fmutex);
  sys_mutexdestroy(feventlock);
+ fonapplicationeventlist.free;
 end;
 
 procedure tcustomapplication.registeronterminated(const method: notifyeventty);
@@ -1223,6 +1251,18 @@ end;
 procedure tcustomapplication.unregisteronidle(const method: idleeventty);
 begin
  fonidlelist.remove(tmethod(method));
+end;
+
+procedure tcustomapplication.registerapplicationeventhandler(
+              const method: applicationeventhandlereventty);
+begin
+ fonapplicationeventlist.add(tmethod(method)); 
+end;
+
+procedure tcustomapplication.unregisterapplicationeventhandler(
+              const method: applicationeventhandlereventty);
+begin
+ fonapplicationeventlist.remove(tmethod(method)); 
 end;
 
 function tcustomapplication.dolock: boolean;

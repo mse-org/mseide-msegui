@@ -53,6 +53,7 @@ type
                  es_local,es_broadcast,es_modal,es_drag,es_objectpicking,
                  es_reflected,es_nofocus,es_designcall);
  eventstatesty = set of eventstatety;
+ 
  tmseevent = class(tnullinterfacedobject)
   private
   protected

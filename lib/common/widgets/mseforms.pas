@@ -92,6 +92,8 @@ type
 
  syseventeventty = procedure(const sender: tcustommseform;
                     var aevent: syseventty; var handled: boolean) of object;
+ applicationeventeventty = procedure(const sender: tcustommseform;
+                    var aevent: tmseevent; var handled: boolean) of object;
 
  formstatety = (fos_statreading);
  formstatesty = set of formstatety;
@@ -136,6 +138,7 @@ type
    ficonchanging: integer;
    fonsysevent: syseventeventty;
    fonsyswindowevent: syseventeventty;
+   fonapplicationevent: applicationeventeventty;
    factivatortarget: tactivator;
    fstatpriority: integer;
 {$ifdef mse_with_ifi}
@@ -162,6 +165,7 @@ type
    procedure unregisterhandlers;
    procedure setsyseventty(const avalue: syseventeventty);
    procedure setsyswindoweventty(const avalue: syseventeventty);
+   procedure setapplicationeventty(const avalue: applicationeventeventty);
    procedure readonchildscaled(reader: treader);
    procedure setactivatortarget(const avalue: tactivator);
   protected
@@ -203,10 +207,14 @@ type
    procedure doapplicationactivechanged(const avalue: boolean); virtual;
    procedure dosysevent(const awindow: winidty; var aevent: syseventty;
                             var handled: boolean); virtual;
-   procedure objectevent(const sender: tobject; const event: objecteventty); override;
+   procedure doapplicationevent(var aevent: tmseevent; 
+                                       var handled: boolean) virtual;
+   procedure objectevent(const sender: tobject; 
+                                       const event: objecteventty); override;
    procedure receiveevent(const event: tobjectevent); override;
    procedure dokeydown(var info: keyeventinfoty); override;
-   procedure doshortcut(var info: keyeventinfoty; const sender: twidget); override;
+   procedure doshortcut(var info: keyeventinfoty;
+                                       const sender: twidget); override;
    procedure windowcreated; override;
    procedure dofontheightdelta(var delta: integer); override;
    procedure widgetregionchanged(const sender: twidget); override;
@@ -298,14 +306,19 @@ type
    property onterminated: notifyeventty read fonterminated 
                  write fonterminated;
 
-   property onbeforepaint: painteventty read getonbeforepaint write setonbeforepaint;
+   property onbeforepaint: painteventty read getonbeforepaint
+                                                        write setonbeforepaint;
    property onpaint: painteventty read getonpaint write setonpaint;
-   property onafterpaint: painteventty read getonafterpaint write setonafterpaint;
+   property onafterpaint: painteventty read getonafterpaint 
+                                                          write setonafterpaint;
 
-   property onstatupdate: statupdateeventty read fonstatupdate write fonstatupdate;
+   property onstatupdate: statupdateeventty read fonstatupdate 
+                                                           write fonstatupdate;
    property onstatread: statreadeventty read fonstatread write fonstatread;
-   property onstatbeforeread: notifyeventty read fonstatbeforeread write fonstatbeforeread;
-   property onstatafterread: notifyeventty read fonstatafterread write fonstatafterread;
+   property onstatbeforeread: notifyeventty read fonstatbeforeread 
+                                                       write fonstatbeforeread;
+   property onstatafterread: notifyeventty read fonstatafterread 
+                                                       write fonstatafterread;
    property onstatwrite: statwriteeventty read fonstatwrite write fonstatwrite;
    property onstatbeforewrite: notifyeventty read fonstatbeforewrite 
                                                write fonstatbeforewrite;
@@ -316,9 +329,10 @@ type
                      read fonwidgetactivechanged write fonwidgetactivechanged;
    property onwindowactivechanged: windowchangeeventty 
                       read fonwindowactivechanged write fonwindowactivechanged;
-   property onwindowdestroyed: windoweventty read fonwindowdestroyed write fonwindowdestroyed;
+   property onwindowdestroyed: windoweventty read fonwindowdestroyed 
+                                                      write fonwindowdestroyed;
    property onapplicationactivechanged: booleaneventty 
-                   read fonapplicationactivechanged write fonapplicationactivechanged;
+            read fonapplicationactivechanged write fonapplicationactivechanged;
 
    property onfontheightdelta: fontheightdeltaeventty read fonfontheightdelta
                      write fonfontheightdelta;
@@ -326,6 +340,8 @@ type
    property onsysevent: syseventeventty read fonsysevent write setsyseventty;
    property onsyswindowevent: syseventeventty read fonsyswindowevent 
                                          write setsyswindoweventty;
+   property onapplicationevent: applicationeventeventty
+                          read fonapplicationevent write setapplicationeventty;
   published
    property container: tformscrollbox read fscrollbox write setscrollbox;
 {$ifdef mse_with_ifi}
@@ -408,6 +424,7 @@ type
    
    property onsysevent;
    property onsyswindowevent;
+   property onapplicationevent;
  end;
 
  tmseform = class(tmseformwidget)
@@ -963,6 +980,10 @@ begin
  if not (csdesigning in componentstate) and 
             (assigned(fonsysevent) or assigned(fonsyswindowevent)) then begin
   application.unregistersyseventhandler({$ifdef FPC}@{$endif}dosysevent);
+ end;
+ if not (csdesigning in componentstate) and 
+                                 assigned(fonapplicationevent) then begin
+  application.unregisterapplicationeventhandler(@doapplicationevent);
  end;
 end;
 
@@ -2002,6 +2023,24 @@ begin
  fonsyswindowevent:= avalue;
 end;
 
+procedure tcustommseform.setapplicationeventty(
+                                const avalue: applicationeventeventty);
+begin
+ if not (csdesigning in componentstate) then begin
+  if assigned(avalue) then begin
+   if not assigned(fonapplicationevent) then begin
+    application.registerapplicationeventhandler(@doapplicationevent);
+   end;
+  end
+  else begin
+   if assigned(fonapplicationevent) then begin
+    application.unregisterapplicationeventhandler(@doapplicationevent);
+   end;
+  end;
+ end;
+ fonapplicationevent:= avalue;
+end;
+
 procedure tcustommseform.dosysevent(const awindow: winidty;
                var aevent: syseventty; var handled: boolean);
 begin
@@ -2011,6 +2050,14 @@ begin
  if assigned(fonsyswindowevent) and not handled and 
          (awindow <> 0) and (twindow1(window).fwindow.id = awindow) then begin
   fonsyswindowevent(self,aevent,handled);
+ end;
+end;
+
+procedure tcustommseform.doapplicationevent(var aevent: tmseevent;
+               var handled: boolean);
+begin
+ if assigned(fonapplicationevent) then begin
+  fonapplicationevent(self,aevent,handled);
  end;
 end;
 

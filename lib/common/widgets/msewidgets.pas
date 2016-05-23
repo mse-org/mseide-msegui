@@ -1359,7 +1359,7 @@ function pastefromclipboard(out value: msestring;
             //false if empty
 function placepopuprect(const awindow: twindow; const adest: rectty; //screenorig
                  const placement: captionposty; const asize: sizety): rectty;
- //placement actually only cp_bottomleft and cp_center
+ //placement currently only cp_bottomleft and cp_center
  //todo
 function placepopuprect(const awidget: twidget;
            const adest: rectty; //widgetorig

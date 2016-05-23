@@ -107,6 +107,7 @@ end;
 procedure tnoguiapplication.doeventloop(const once: boolean);
 var
  event1: tmseevent;
+ bo1: boolean;
 begin
 // lock;
 // try
@@ -124,20 +125,24 @@ begin
    end;
    event1:= nextevent;
    try
-    case event1.kind of
-     ek_timer: begin
-      tick(self);
-     end;
-     ek_terminate: begin
-      terminated:= true;
-     end;
-     ek_asyncexec: begin
-      texecuteevent(event1).deliver;
-     end;
-     else begin
-      if event1 is tobjectevent then begin
-       with tobjectevent(event1) do begin
-        deliver;
+    bo1:= false;
+    fonapplicationeventlist.doevent(event1,bo1);
+    if not bo1 then begin
+     case event1.kind of
+      ek_timer: begin
+       tick(self);
+      end;
+      ek_terminate: begin
+       terminated:= true;
+      end;
+      ek_asyncexec: begin
+       texecuteevent(event1).deliver;
+      end;
+      else begin
+       if event1 is tobjectevent then begin
+        with tobjectevent(event1) do begin
+         deliver;
+        end;
        end;
       end;
      end;
