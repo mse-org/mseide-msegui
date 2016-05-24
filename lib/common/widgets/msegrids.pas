@@ -464,6 +464,7 @@ type
   cols: tcols;
   colrange: cellaxisrangety;
   fix: boolean;
+  calcautocellsize: boolean;
  end;
  rowspaintinfoty = record
   rowinfo: rowpaintinfoty;
@@ -522,7 +523,7 @@ type
    function getenabled: boolean;
    procedure setenabled(const avalue: boolean);
    function checkautocolwidth: boolean; //true if width changed
-   procedure updatecolwidth(const acol,acount: integer; var acolwidth: integer);
+   procedure updatecolwidth(const arow,acount: integer; var acolwidth: integer);
    procedure createfontselect;
    function getselected(const row: integer): boolean; virtual;
    procedure updatewidth(var avalue: integer); virtual;
@@ -985,6 +986,7 @@ type
    fgrid: tcustomgrid;
    fframe: tfixcellframe;
    fface: tfixcellface;
+   fautocellsize: sizety;
    procedure defineproperties(filer: tfiler); override;
    procedure changed;
    procedure fontchanged(const sender: tobject);
@@ -1050,7 +1052,8 @@ type
  end;
 
  datacolheaderoptionty = (dco_colsort,dco_wholecellsortclick,
-                          dco_nodisabledsortindicator,dco_hintclippedtext);
+                          dco_nodisabledsortindicator,dco_hintclippedtext,
+                          dco_autowidth);
  datacolheaderoptionsty = set of datacolheaderoptionty;
 
  tdatacolheader = class(tcolheader)
@@ -1134,12 +1137,14 @@ type
    ftextinfo: drawtextinfoty;
    procedure datacolscountchanged(const acount: integer);
    procedure fixcolscountchanged(const acount: integer);
-   procedure cellchanged(const col: integer); virtual;
+   procedure invalidatemaxsize(const acol: int32);
+   procedure cellchanged(const acol: integer); virtual;
    procedure changed; override;
    procedure updatelayout; override;
    procedure updatemergedcells;
    function step(getscrollable: boolean = true): integer; override;
    procedure paint(const info: rowpaintinfoty); virtual;
+   procedure updateautocellsize();
    procedure drawcell(const canvas: tcanvas);{ virtual;}
    procedure movecol(const curindex,newindex: integer; const aisfix: boolean);
    procedure reorderdatacols(const neworder: integerarty);
@@ -4249,10 +4254,10 @@ begin
  end; 
 end;
 
-procedure tcol.updatecolwidth(const acol,acount: integer; 
+procedure tcol.updatecolwidth(const arow,acount: integer;
                                             var acolwidth: integer);
 var
- int1,int2: integer;
+ i1,i2: integer;
  info: colpaintinfoty;
 begin
  fillchar(info,sizeof(info),0);
@@ -4261,16 +4266,32 @@ begin
   autocellsize.cx:= acolwidth;
   autocellsize.cy:= fcellinfo.grid.datarowheight;
   canvas:= fcellinfo.grid.getcanvas;  
-  allocuninitedarray(acount,sizeof(rows[0]),rows);
-  int2:= acol;
-  startrow:= acol;
-  endrow:= acol + acount - 1;
-  for int1:= acol to endrow do begin
-   rows[int1]:= int2;
-   inc(int2);
+  allocuninitedarray(acount,sizeof(rows[0]),rows); //including invisible rows
+  i2:= arow;
+  startrow:= arow;
+  endrow:= arow + acount - 1;
+  for i1:= arow to endrow do begin
+   rows[i1]:= i2;
+   inc(i2);
   end;
   paint(info);
   acolwidth:= autocellsize.cx;
+ end;
+ if index >= 0 then begin
+  for i1:= 0 to grid.ffixrows.count - 1 do begin
+   with tfixrow(grid.ffixrows.fitems[i1]) do begin
+    if fcaptions.count > self.index then begin
+     with tdatacolheader(fcaptions[self.index]) do begin
+      if dco_autowidth in options then begin
+       updateautocellsize();
+       if acolwidth < fautocellsize.cx then begin
+        acolwidth:= fautocellsize.cx;
+       end;
+      end;
+     end;
+    end;
+   end;
+  end;
  end;
 end;
 
@@ -4391,11 +4412,23 @@ begin
 end;
 
 procedure tcolheader.drawcell(const acanvas: tcanvas; const adest: rectty);
+var
+ si1: sizety;
 begin
  with finfo do begin
   font:= getfont;
   dim:= adest;
-  drawcaption(acanvas,finfo);
+  with cellinfoty(acanvas.drawinfopo^) do begin
+   if calcautocellsize then begin
+    si1:= calccaptionsize(acanvas,finfo);
+    fautocellsize:= rect.size;
+    fautocellsize.cx:= fautocellsize.cx + si1.cx - adest.cx;
+    fautocellsize.cy:= fautocellsize.cy + si1.cy - adest.cy;
+   end
+   else begin
+    drawcaption(acanvas,finfo);
+   end;
+  end;
  end;
 end;
 
@@ -4644,7 +4677,10 @@ end;
 
 procedure tdatacolheader.setoptions(const avalue: datacolheaderoptionsty);
 begin
- foptions:= avalue;
+ if foptions <> avalue then begin
+  foptions:= avalue;
+  changed();
+ end;
 end;
 
 procedure tdatacolheader.drawcell(const acanvas: tcanvas; const adest: rectty);
@@ -4676,7 +4712,9 @@ begin
   end;
   int2:= (15-sortglyphwidth) div 2;
   inc(rect1.cx,int2);
-  stockobjects.glyphs.paint(acanvas,int1,rect1,al1,finfo.colorglyph);
+  if not cellinfoty(acanvas.drawinfopo^).calcautocellsize then begin
+   stockobjects.glyphs.paint(acanvas,int1,rect1,al1,finfo.colorglyph);
+  end;
   int2:= sortglyphwidth+int2;
   if int1 >= 0 then begin
    with rect1 do begin
@@ -5005,8 +5043,6 @@ begin
 end;
 
 procedure tfixrow.drawcell(const canvas: tcanvas);
-label
- endlab;
 var
  int1,linewidthbefore: integer;
  frame1: tcustomframe;
@@ -5016,6 +5052,8 @@ var
  sizebefore: sizety;
  linemerged: boolean;
 
+label
+ endlab,endlab2;
 begin
  with cellinfoty(canvas.drawinfopo^) do begin
   if cell.col >= 0 then begin
@@ -5060,17 +5098,27 @@ begin
   ftextinfo.clip:= fcellinfo.rect;
   canvas.save;
   canvas.intersectcliprect(makerect(nullpoint,fcellrect.size));
-  drawcellbackground(canvas,frame1,face1);
+  if not calcautocellsize then begin
+   drawcellbackground(canvas,frame1,face1);
+  end;
   if (int1 >= 0) and (int1 < headers1.count) then begin
    tcolheader(headers1.fitems[int1]).drawcell(canvas,ftextinfo.dest);
   end
   else begin
    if (fnumstep <> 0) and (cell.col >= 0) then begin
     ftextinfo.text.text:= inttostrmse(fnumstart+fnumstep*cell.col);
-    drawtext(canvas,ftextinfo);
+    if calcautocellsize then begin
+     textrect(canvas,ftextinfo);
+    end
+    else begin
+     drawtext(canvas,ftextinfo);
+    end;
    end;
   end;
   canvas.restore;
+  if calcautocellsize then begin
+   goto endlab2;
+  end;
   drawcelloverlay(canvas,frame1);
   canvas.remove(makepoint(0,pt1.y));
 endlab:
@@ -5087,6 +5135,7 @@ endlab:
    canvas.linewidth:= linewidthbefore;
   end;
   canvas.remove(makepoint(pt1.x,0));
+endlab2:
   fcellrect.size:= sizebefore;
  end;
 end;
@@ -5167,9 +5216,10 @@ var
  end;
 
 begin
- if not (co_invisible in foptions) or 
+ if (not (co_invisible in foptions) or info.calcautocellsize) or 
                      (csdesigning in fcellinfo.grid.ComponentState) then begin
   with info do begin
+   fcellinfo.calcautocellsize:= calcautocellsize;
    if ffont = nil then begin
     ftextinfo.font:= fcellinfo.grid.getfont;
    end
@@ -5199,6 +5249,27 @@ begin
    canvas.linewidth:= linewidthbefore; //???
    canvas.origin:= pt1;
   end;
+ end;
+end;
+
+procedure tfixrow.updateautocellsize();
+var
+ info: rowpaintinfoty;
+begin
+ if not (gps_autosizevalid in fstate) then begin
+  include(fstate,gps_autosizevalid);
+  info.calcautocellsize:= true;
+  info.canvas:= fcellinfo.grid.getcanvas;
+  info.cols:= fcellinfo.grid.fdatacols;
+  info.fix:= false;
+  info.colrange.range1.startindex:= 0;
+  info.colrange.range1.endindex:= info.cols.count-1;
+  info.colrange.range2.startindex:= 0;
+  info.colrange.range2.endindex:= -1;
+  info.colrange.scrollables:= false;
+  paint(info);
+  info.colrange.scrollables:= true;
+  paint(info);
  end;
 end;
 
@@ -5237,6 +5308,7 @@ end;
 procedure tfixrow.changed;
 begin
  inherited;
+ exclude(fstate,gps_autosizevalid);
  if fcellinfo.grid.caninvalidate then begin
   fcellinfo.grid.invalidaterect(
           fcellinfo.grid.cellrect(makegridcoord(invalidaxis,getrowindex)));
@@ -5283,7 +5355,8 @@ begin
  end;
 end;
 
-procedure tfixrow.captionchanged(const sender: tarrayprop; const aindex: integer);
+procedure tfixrow.captionchanged(const sender: tarrayprop;
+                                                   const aindex: integer);
 begin
  if aindex < 0 then begin
   changed;
@@ -5298,10 +5371,24 @@ begin
  end;
 end;
 
-procedure tfixrow.cellchanged(const col: integer);
+procedure tfixrow.invalidatemaxsize(const acol: int32);
+begin
+ if acol >= 0 then begin
+  fstate:= fstate - [gps_autosizevalid,gps_maxsizevalid];
+  if (acol < fcaptions.count) and (acol < grid.fdatacols.count){ and
+    (dco_autowidth in tdatacolheader(fcaptions.fitems[acol]).options)} then begin
+   with tdatacol(grid.fdatacols.fitems[acol]) do begin
+    invalidatemaxsize();
+   end;
+  end;
+ end;
+end;
+
+procedure tfixrow.cellchanged(const acol: integer);
 begin
  if not (csloading in fcellinfo.grid.componentstate) then begin
-  fcellinfo.grid.invalidatecell(makegridcoord(col,getrowindex));
+  invalidatemaxsize(acol);
+  fcellinfo.grid.invalidatecell(makegridcoord(acol,getrowindex));
  end;
 end;
 
@@ -9163,6 +9250,7 @@ var
 
 begin
  with info,rowinfo do begin
+  calcautocellsize:= false;
   if (info.rowinfo.cols.count > 0) and //fpc bug 4130
 //  if (cols.count > 0) and
   (rowrange.range1.endindex >= rowrange.range1.startindex) or

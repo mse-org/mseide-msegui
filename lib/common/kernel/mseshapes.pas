@@ -125,6 +125,8 @@ procedure checkbuttonhint(const awidget: twidget; info: mouseeventinfoty;
 
 procedure drawcaption(const acanvas: tcanvas; var ainfo: captioninfoty);
 procedure initcaptioninfo(var ainfo: captioninfoty);
+function calccaptionsize(const acanvas: tcanvas;
+                                        const ainfo: captioninfoty): sizety;
 
 //var
 // animatemouseenter: boolean = true;
@@ -1310,6 +1312,60 @@ begin
   drawtext(acanvas,info1);
   captionclipped:= (info1.res.cx > rect2.cx) or (info1.res.cy > rect2.cy);
   //drawtext(acanvas,caption,rect2,textflags,font);
+ end;
+end;
+
+function calccaptionsize(const acanvas: tcanvas;
+                                        const ainfo: captioninfoty): sizety;
+var
+ int1: integer;
+ vertdist: boolean;
+begin
+ with ainfo do begin
+  result:= textrect(acanvas,caption,textflags,font).size;
+  vertdist:= imagepos in vertimagepos;
+  if vertdist then begin
+   inc(result.cy,captiondist);
+  end
+  else begin  
+   inc(result.cx,captiondist);
+  end;
+  if imagelist <> nil then begin
+   with imagelist do begin
+    if vertdist then begin
+     int1:= width  + imagedist1 + imagedist2;
+     if int1 > result.cx then begin
+      result.cx:= int1;
+     end;
+     int1:= height + imagedist;
+     if imagepos = ip_centervert then begin
+      int1:= int1 + imagedist;
+      if int1 > result.cx then begin
+       result.cy:= int1;
+      end;
+     end
+     else begin
+      result.cy:= result.cy + int1;
+     end;
+    end
+    else begin
+     int1:= height  + imagedist1 + imagedist2;
+     if int1 > result.cy then begin
+      result.cy:= int1;
+     end;
+     int1:= width + imagedist;
+     if imagepos = ip_center then begin
+      int1:= int1 + imagedist;
+      if int1 > result.cx then begin
+       result.cx:= int1;
+      end;
+     end
+     else begin
+      result.cx:= result.cx + int1;
+     end;
+    end;
+   end;
+  end;
  end;
 end;
 

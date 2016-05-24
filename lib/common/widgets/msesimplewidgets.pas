@@ -1415,54 +1415,8 @@ begin
 end;
 
 procedure tcustombutton.getautopaintsize(var asize: sizety);
-var
- int1: integer;
- vertdist: boolean;
 begin
- asize:= textrect(getcanvas,finfo.ca.caption,finfo.ca.textflags,font).size;
- vertdist:= imagepos in vertimagepos;
- if vertdist then begin
-  inc(asize.cy,finfo.ca.captiondist);
- end
- else begin  
-  inc(asize.cx,finfo.ca.captiondist);
- end;
- if imagelist <> nil then begin
-  with imagelist do begin
-   if vertdist then begin
-    int1:= width  + finfo.ca.imagedist1 + finfo.ca.imagedist2;
-    if int1 > asize.cx then begin
-     asize.cx:= int1;
-    end;
-    int1:= height + finfo.ca.imagedist;
-    if imagepos = ip_centervert then begin
-     int1:= int1 + finfo.ca.imagedist;
-     if int1 > asize.cx then begin
-      asize.cy:= int1;
-     end;
-    end
-    else begin
-     asize.cy:= asize.cy + int1;
-    end;
-   end
-   else begin
-    int1:= height  + finfo.ca.imagedist1 + finfo.ca.imagedist2;
-    if int1 > asize.cy then begin
-     asize.cy:= int1;
-    end;
-    int1:= width + finfo.ca.imagedist;
-    if imagepos = ip_center then begin
-     int1:= int1 + finfo.ca.imagedist;
-     if int1 > asize.cx then begin
-      asize.cx:= int1;
-     end;
-    end
-    else begin
-     asize.cx:= asize.cx + int1;
-    end;
-   end;
-  end;
- end;
+ asize:= calccaptionsize(getcanvas,finfo.ca);
  inc(asize.cx,8+fautosize_cx);
  inc(asize.cy,6+fautosize_cy);
  if not (shs_noinnerrect in finfo.state) then begin
