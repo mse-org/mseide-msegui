@@ -4422,8 +4422,8 @@ begin
    if calcautocellsize then begin
     si1:= calccaptionsize(acanvas,finfo);
     fautocellsize:= rect.size;
-    fautocellsize.cx:= fautocellsize.cx + si1.cx - adest.cx;
-    fautocellsize.cy:= fautocellsize.cy + si1.cy - adest.cy;
+    fautocellsize.cx:= fautocellsize.cx + si1.cx - adest.cx - fmergedcx;
+    fautocellsize.cy:= fautocellsize.cy + si1.cy - adest.cy - fmergedcy;
    end
    else begin
     drawcaption(acanvas,finfo);
@@ -4768,6 +4768,7 @@ var
  lastmergedrow: integer;
  bo1: boolean;
  cell1: gridcoordty;
+ mergedcxbefore: int32;
 begin
  int2:= count;
  for int1:= 0 to count - 1 do begin
@@ -4791,6 +4792,7 @@ begin
    cell1.col:= int1;
   end;
   with tcolheader(fitems[int1]) do begin
+   mergedcxbefore:= fmergedcx;
    lastmergedcol:= int1 + fmergecols;
    if lastmergedcol >= count then begin
     lastmergedcol:= count - 1;
@@ -4824,6 +4826,11 @@ begin
     fmergedcx:= 0;
     fmergedx:= 0;
    end;
+   if not ffixcol and (mergedcxbefore <> fmergedcx) and 
+          (dco_autowidth in tdatacolheader(fitems[int1]).options) then begin
+    tfixrow(fgridprop).invalidatemaxsize(int1);
+   end;
+
    lastmergedrow:= fgridprop.index + fmergerows;
    if lastmergedrow >= fgrid.fixrows.count then begin
     lastmergedrow:= fgrid.fixrows.count-1;
