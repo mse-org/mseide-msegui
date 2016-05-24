@@ -58,7 +58,8 @@ type
  coloption1ty = (co1_rowfont,co1_rowcolor,co1_zebracolor,
                  co1_rowcoloractive,co1_rowcolorfocused,co1_rowreadonly,
 //                 co1_active, //not used
-                 co1_autorowheight,co1_autocolwidth,co1_noautocolwidth);
+                 co1_autorowheight,co1_autocolwidth,co1_noautocolwidth,
+                 co1_autoheaderwidth);
  coloptions1ty = set of coloption1ty;
 
 const
@@ -177,7 +178,7 @@ const
                               co_nohscroll{,co_rowcoloractive}];
  layoutchangedcoloptions1: coloptions1ty = 
          [co1_rowcoloractive,co1_rowcolorfocused,
-          co1_autorowheight,co1_autocolwidth];
+          co1_autorowheight,co1_autocolwidth,co1_autoheaderwidth];
  notfixcoloptions = [co_fixwidth,co_fixpos,co_fill,co_proportional,co_nohscroll,
                      co_rowdatachange];
  defaultoptionsgrid = [og_autopopup,og_colchangeontabkey,og_focuscellonenter,
@@ -1053,7 +1054,7 @@ type
 
  datacolheaderoptionty = (dco_colsort,dco_wholecellsortclick,
                           dco_nodisabledsortindicator,dco_hintclippedtext,
-                          dco_autowidth);
+                          dco_noautowidth);
  datacolheaderoptionsty = set of datacolheaderoptionty;
 
  tdatacolheader = class(tcolheader)
@@ -4056,6 +4057,7 @@ begin
  end;
  if opt1 * layoutchangedcoloptions1 <> [] then begin
   invalidatelayout;
+  invalidatemaxsize();
  end;
 end;
 
@@ -4277,12 +4279,12 @@ begin
   paint(info);
   acolwidth:= autocellsize.cx;
  end;
- if index >= 0 then begin
+ if (index >= 0) and (co1_autoheaderwidth in foptions1) then begin
   for i1:= 0 to grid.ffixrows.count - 1 do begin
    with tfixrow(grid.ffixrows.fitems[i1]) do begin
     if fcaptions.count > self.index then begin
      with tdatacolheader(fcaptions[self.index]) do begin
-      if dco_autowidth in options then begin
+      if not (dco_noautowidth in options) then begin
        updateautocellsize();
        if acolwidth < fautocellsize.cx then begin
         acolwidth:= fautocellsize.cx;
@@ -4827,7 +4829,9 @@ begin
     fmergedx:= 0;
    end;
    if not ffixcol and (mergedcxbefore <> fmergedcx) and 
-          (dco_autowidth in tdatacolheader(fitems[int1]).options) then begin
+          not (dco_noautowidth in tdatacolheader(fitems[int1]).options) and
+        (int1 < cols.count) and 
+          (co1_autoheaderwidth in tcol(cols.fitems[int1]).options1) then begin
     tfixrow(fgridprop).invalidatemaxsize(int1);
    end;
 
