@@ -8765,7 +8765,7 @@ begin
     if not (ow1_noparentwidthextend in foptionswidget1) then begin
      anch:= fanchors * [an_left,an_right];
      if anch = [an_right] then begin
-      int2:= fparentclientsize.cx - x + indent.left + clientorig.x;
+      int2:= fparentclientsize.cx - x + indent.left - clientorig.x;
      end
      else begin
       if anch = [] then begin
@@ -8788,7 +8788,7 @@ begin
     if not (ow1_noparentheightextend in foptionswidget1) then begin
      anch:= fanchors * [an_top,an_bottom];
      if anch = [an_bottom] then begin
-      int2:= fparentclientsize.cy - y + indent.top + clientorig.y;
+      int2:= fparentclientsize.cy - y + indent.top - clientorig.y;
      end
      else begin
       if anch = [] then begin
