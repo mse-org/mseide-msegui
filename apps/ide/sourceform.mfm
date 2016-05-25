@@ -118,7 +118,8 @@ object sourcefo: tsourcefo
     object tstockglyphbutton1: tstockglyphbutton
       optionswidget = [ow_destroywidgets, ow_disabledhint, ow_timedhint]
       taborder = 2
-      hint = 'Step back in code navigation (Ctrl+LeftClick).'
+      hint = 'Step back in code navigation'
+      onshowhint = stephintev
       bounds_x = 383
       bounds_y = 0
       bounds_cx = 20
@@ -133,7 +134,8 @@ object sourcefo: tsourcefo
     object tstockglyphbutton2: tstockglyphbutton
       optionswidget = [ow_destroywidgets, ow_disabledhint, ow_timedhint]
       taborder = 1
-      hint = 'Step forward in code navigation.'
+      hint = 'Step forward in code navigation'
+      onshowhint = stephintev
       bounds_x = 403
       bounds_y = 0
       bounds_cx = 20
