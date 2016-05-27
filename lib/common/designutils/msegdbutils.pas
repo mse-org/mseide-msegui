@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2015 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2016 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -571,6 +571,8 @@ type
                                          out aresult: msestring): gdbresultty;
    function writepascalvariable(varname: string; const value: string;
                 var aresult: string): gdbresultty;
+   function executecommand(const acommand: string;
+                                    out aresult: string): gdbresultty;
    function evaluateexpression(expression: string;
                                            out aresult: string): gdbresultty;
    function symboltype(symbol: string;
@@ -3470,6 +3472,23 @@ begin
  end;
 end;
 }
+function tgdbmi.executecommand(const acommand: string;
+               out aresult: string): gdbresultty;
+begin
+ result:= clicommand(acommand);
+ case result of
+  gdb_ok: begin
+   aresult:= fclivalues;
+  end;
+  gdb_message: begin
+   aresult:= errormessage;
+  end;
+  else begin
+   aresult:= gdberrortexts[result];
+  end;
+ end; 
+end;
+
 function tgdbmi.evaluateexpression(expression: string;
                                         out aresult: string): gdbresultty;
 begin

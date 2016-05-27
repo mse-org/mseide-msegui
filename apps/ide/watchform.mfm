@@ -88,6 +88,7 @@ object watchfo: twatchfo
           end        
           item
             caption = 'Expression'
+            hint = 'Expressions starting with # are treated as gdb commands'
           end        
           item
             caption = 'Result'
