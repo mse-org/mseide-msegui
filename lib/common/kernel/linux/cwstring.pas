@@ -18,6 +18,9 @@
 {$if fpc_fullversion >= 30000}
  {$define fpcv3}
 {$endif}
+{$if fpc_fullversion >= 30001}
+ {$define hascompareoptions}
+{$endif}
 unit cwstring;
 {$ifndef FPC}
 interface          //dummy
@@ -345,48 +348,6 @@ begin
   inc(pd);
  end;
 end;
- 
-function CompareWideString(const s1, s2 : WideString): PtrInt;
-var                   //no surrogate pair handling, no decomposition handling
- w1,w2: array[0..1] of ucs4char;
- int1: integer;
- max: integer;
- pa,pb,pe: pmsechar;
-begin
- result:= 0;
- if pointer(s1) <> pointer(s2) then begin
-  if s1 = '' then begin
-   result:= -1;
-  end
-  else begin
-   if s2 = '' then begin
-    result:= 1;
-   end
-   else begin
-    pa:= pointer(s1);
-    pb:= pointer(s2);
-    max:= length(s1);
-    int1:= length(s2);
-    if max > int1 then begin
-     max:= int1;
-    end;
-    pe:= pa + max;
-    while pa <= pe do begin //including terminating #0
-     if pa^ <> pb^ then begin
-      w1[0]:= ord(pa^);
-      w1[1]:= 0;
-      w2[0]:= ord(pb^);
-      w2[1]:= 0;
-      result:= wcscoll(pwchar_t(@w1),pwchar_t(@w2));
-      break;
-     end;
-     inc(pa);
-     inc(pb);
-    end;
-   end;
-  end;
- end;
-end;
 
 function CompareTextWideString(const s1, s2 : WideString): PtrInt;
 var                   //no surrogate pair handling, no decomposition handling
@@ -423,6 +384,55 @@ begin
        result:= wcscoll(pwchar_t(@w1),pwchar_t(@w2));
        break;
       end;
+     end;
+     inc(pa);
+     inc(pb);
+    end;
+   end;
+  end;
+ end;
+end;
+
+function CompareWideString(const s1, s2 : WideString
+          {$ifdef hascompareoptions};Options : TCompareOptions{$endif}): PtrInt;
+var                   //no surrogate pair handling, no decomposition handling
+ w1,w2: array[0..1] of ucs4char;
+ int1: integer;
+ max: integer;
+ pa,pb,pe: pmsechar;
+begin
+{$ifdef hascompareoptions}
+ if (coignorecase in options) then begin
+  result:= comparetextwidestring(s1,s2);
+  exit;
+ end;
+{$endif}
+ result:= 0;
+ if pointer(s1) <> pointer(s2) then begin
+  if s1 = '' then begin
+   result:= -1;
+  end
+  else begin
+   if s2 = '' then begin
+    result:= 1;
+   end
+   else begin
+    pa:= pointer(s1);
+    pb:= pointer(s2);
+    max:= length(s1);
+    int1:= length(s2);
+    if max > int1 then begin
+     max:= int1;
+    end;
+    pe:= pa + max;
+    while pa <= pe do begin //including terminating #0
+     if pa^ <> pb^ then begin
+      w1[0]:= ord(pa^);
+      w1[1]:= 0;
+      w2[0]:= ord(pb^);
+      w2[1]:= 0;
+      result:= wcscoll(pwchar_t(@w1),pwchar_t(@w2));
+      break;
      end;
      inc(pa);
      inc(pb);
@@ -529,7 +539,9 @@ begin
   LowerWideStringProc:= @LowerWideString;
 
   CompareWideStringProc:= @CompareWideString;
+ {$ifndef hascompareoptions}
   CompareTextWideStringProc:= @CompareTextWideString;
+ {$endif}
 {$ifdef unicodeversion}
   Unicode2AnsiMoveProc:= @Wide2AnsiMove;
   Ansi2UnicodeMoveProc:= @Ansi2WideMove;
@@ -538,7 +550,9 @@ begin
   LowerUnicodeStringProc:= @LowerWideString;
 
   CompareUnicodeStringProc:= @CompareWideString;
+ {$ifndef hascompareoptions}
   CompareTextUnicodeStringProc:= @CompareTextWideString;
+ {$endif}
 {$endif}
   {
   CharLengthPCharProc
