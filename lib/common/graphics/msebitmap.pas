@@ -392,6 +392,7 @@ type
    fonchange: notifyeventty;
 //   fkind: bitmapkindty;
    findexlookup: msestring;
+   fcornermask: msestring;
    procedure setsize(const avalue: sizety);
 //   function getmonochrome: boolean;
 //   procedure setmonochrome(const Value: boolean);
@@ -418,6 +419,7 @@ type
    function getoptions: bitmapoptionsty;
    procedure setoptions(const avalue: bitmapoptionsty);
    procedure setindexlookup(const avalue: msestring);
+   procedure setcornermask(const avalue: msestring);
   protected
    function indextoorg(index: integer): pointty;
    procedure change;
@@ -508,7 +510,10 @@ type
    property count: integer read fcount write setcount default 0;
                  //last!
    property indexlookup: msestring read findexlookup write setindexlookup;
-                    //array of int16
+        //array of int16
+   property cornermask: msestring read fcornermask write setcornermask;
+        //array of int16, used in tframe for clipping corners of client area
+        //cornermask[n] = number of clipped pixels from edge of row n.
    property onchange: notifyeventty read fonchange write fonchange;
  end;
 
@@ -3390,6 +3395,12 @@ end;
 procedure timagelist.setindexlookup(const avalue: msestring);
 begin
  findexlookup:= avalue;
+ change;
+end;
+
+procedure timagelist.setcornermask(const avalue: msestring);
+begin
+ fcornermask:= avalue;
  change;
 end;
 

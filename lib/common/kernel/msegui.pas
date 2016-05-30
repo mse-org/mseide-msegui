@@ -4344,11 +4344,64 @@ end;
 procedure tcustomframe.paintbackground(const canvas: tcanvas;
                             const arect: rectty; const clipandmove: boolean);
 var
- rect1{,rect2}: rectty;
+ rect1,rect2: rectty;
 // faceoffs: integer;
 // reg1: regionty;
+ po1,ps,pe: pint16;
+ i1: int32;
 begin
  rect1:= deflaterect(arect,fpaintframe);
+ if clipandmove and (fi.frameimage_list <> nil) and 
+                         (fi.frameimage_list.cornermask <> '') then begin
+  po1:= pointer(fi.frameimage_list.cornermask);
+  pe:= po1 + length(msestring(pointer(po1)));
+  rect2.cy:= 1;
+  if fi.hiddenedges * [edg_top,edg_left] = [] then begin
+   rect2.pos:= arect.pos;
+   ps:= po1;
+   while ps < pe do begin
+    rect2.cx:= ps^;
+    canvas.subcliprect(rect2);
+    inc(rect2.y);
+    inc(ps);
+   end;
+  end;
+  if fi.hiddenedges * [edg_left,edg_bottom] = [] then begin
+   rect2.x:= arect.x;
+   rect2.y:= arect.y + arect.cy - 1;
+   ps:= po1;
+   while ps < pe do begin
+    rect2.cx:= ps^;
+    canvas.subcliprect(rect2);
+    dec(rect2.y);
+    inc(ps);
+   end;
+  end;
+  if fi.hiddenedges * [edg_bottom,edg_right] = [] then begin
+   rect2.y:= arect.y + arect.cy - 1;
+   ps:= po1;
+   i1:= arect.x + arect.cx;
+   while ps < pe do begin
+    rect2.cx:= ps^;
+    rect2.x:= i1 - ps^;
+    canvas.subcliprect(rect2);
+    dec(rect2.y);
+    inc(ps);
+   end;
+  end;
+  if fi.hiddenedges * [edg_right,edg_top] = [] then begin
+   rect2.y:= arect.y;
+   ps:= po1;
+   i1:= arect.x + arect.cx;
+   while ps < pe do begin
+    rect2.cx:= ps^;
+    rect2.x:= i1 - ps^;
+    canvas.subcliprect(rect2);
+    inc(rect2.y);
+    inc(ps);
+   end;
+  end;
+ end;
  if fi.colorclient <> cl_transparent then begin
   canvas.fillrect(rect1,fi.colorclient);
  end;
