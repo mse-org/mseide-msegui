@@ -5132,6 +5132,15 @@ begin
   if not (frl_colorframeactive in flocalprops) then begin
    colorframeactive:= ainfo.ba.colorframeactive;
   end;
+  if not (frl1_colorframedisabled in flocalprops1) then begin
+   colorframedisabled:= ainfo.ba.colorframedisabled;
+  end;
+  if not (frl1_colorframemouse in flocalprops1) then begin
+   colorframemouse:= ainfo.ba.colorframemouse;
+  end;
+  if not (frl1_colorframeclicked in flocalprops1) then begin
+   colorframeclicked:= ainfo.ba.colorframeclicked;
+  end;
   with framecolors.edges do begin
    if not (frl_colordkshadow in flocalprops) then begin
     shadow.effectcolor:= ainfo.ba.framecolors.edges.shadow.effectcolor;
