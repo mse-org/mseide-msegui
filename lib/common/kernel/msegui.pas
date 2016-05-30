@@ -984,7 +984,7 @@ type
    property colorframedisabled: colorty read fi.ba.colorframedisabled 
                      write setcolorframedisabled default cl_default;
    property colorframemouse: colorty read fi.ba.colorframemouse 
-                     write setcolorframeactive default cl_default;
+                     write setcolorframemouse default cl_default;
    property colorframeclicked: colorty read fi.ba.colorframeclicked 
                      write setcolorframeclicked default cl_default;
    property colorglyph: colorty read fi.ba.colorglyph
