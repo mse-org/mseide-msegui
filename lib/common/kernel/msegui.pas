@@ -4132,11 +4132,20 @@ end;
 
 procedure tcustomframe.updatemousestate(const sender: twidget;
                  const info: mouseeventinfoty);
+
+ function mouseinclient(): boolean;
+ begin
+  result:= pointinrect(info.pos,fpaintrect);
+  if result and (fi.frameimage_list <> nil) then begin
+//   if info
+  end;
+ end; //mouseinclient
+ 
 begin
  checkstate;
  with sender do begin
   if not (ow_mousetransparent in foptionswidget) then begin
-   if pointinrect(info.pos,fpaintrect) then begin
+   if mouseinclient() then begin
     fwidgetstate:= fwidgetstate + [ws_mouseinclient,ws_wantmousemove,
                                        ws_wantmousebutton,ws_wantmousefocus];
    end
@@ -4323,7 +4332,7 @@ end;
 procedure tcustomframe.paintbackground(const canvas: tcanvas;
                             const arect: rectty; const clipandmove: boolean);
 var
- rect1,rect2: rectty;
+ rect1,rect2,rect3: rectty;
  po1,ps,pe: pint16;
  i1: int32;
 begin
@@ -4335,8 +4344,9 @@ begin
    po1:= pointer(fi.frameimage_list.cornermask);
    pe:= po1 + length(msestring(pointer(po1)));
    rect2.cy:= 1;
+   rect3:= deflaterect(arect,fouterframe);
    if fi.hiddenedges * [edg_top,edg_left] = [] then begin
-    rect2.pos:= arect.pos;
+    rect2.pos:= rect3.pos;
     ps:= po1;
     while ps < pe do begin
      rect2.cx:= ps^;
@@ -4346,8 +4356,8 @@ begin
     end;
    end;
    if fi.hiddenedges * [edg_left,edg_bottom] = [] then begin
-    rect2.x:= arect.x;
-    rect2.y:= arect.y + arect.cy - 1;
+    rect2.x:= rect3.x;
+    rect2.y:= rect3.y + rect3.cy - 1;
     ps:= po1;
     while ps < pe do begin
      rect2.cx:= ps^;
@@ -4357,7 +4367,7 @@ begin
     end;
    end;
    if fi.hiddenedges * [edg_bottom,edg_right] = [] then begin
-    rect2.y:= arect.y + arect.cy - 1;
+    rect2.y:= rect3.y + rect3.cy - 1;
     ps:= po1;
     i1:= arect.x + arect.cx;
     while ps < pe do begin
@@ -4369,9 +4379,9 @@ begin
     end;
    end;
    if fi.hiddenedges * [edg_right,edg_top] = [] then begin
-    rect2.y:= arect.y;
+    rect2.y:= rect3.y;
     ps:= po1;
-    i1:= arect.x + arect.cx;
+    i1:= rect3.x + rect3.cx;
     while ps < pe do begin
      rect2.cx:= ps^;
      rect2.x:= i1 - ps^;

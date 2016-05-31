@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2015 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2016 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -421,6 +421,7 @@ type
    procedure setindexlookup(const avalue: msestring);
    procedure setcornermask(const avalue: msestring);
   protected
+   fcornermaskmaxwidth: int32; //biggest value of cornermask
    function indextoorg(index: integer): pointty;
    procedure change;
    procedure defineproperties(filer: tfiler); override;
@@ -3399,8 +3400,19 @@ begin
 end;
 
 procedure timagelist.setcornermask(const avalue: msestring);
+var
+ po1,pe: pint16;
 begin
  fcornermask:= avalue;
+ fcornermaskmaxwidth:= 0;
+ po1:= pointer(avalue);
+ pe:= po1 + length(avalue);
+ while po1 < pe do begin
+  if po1^ < fcornermaskmaxwidth then begin
+   fcornermaskmaxwidth := po1^;
+  end;
+  inc(po1);
+ end;
  change;
 end;
 

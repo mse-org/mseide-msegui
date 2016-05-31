@@ -13,7 +13,7 @@ object msecornermaskeditorfo: tmsecornermaskeditorfo
   )
   options = [fo_freeonclose, fo_createmodal, fo_autoreadstat, fo_autowritestat, fo_savepos, fo_savezorder, fo_savestate]
   statfile = statfile1
-  caption = 'Indexlookup Editor'
+  caption = 'Cornermask Editor'
   oncreate = createexe
   onclosequery = closequexe
   moduleclassname = 'tmseform'
