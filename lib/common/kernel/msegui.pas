@@ -614,8 +614,7 @@ type
    procedure checkminclientsize(var asize: sizety); virtual;
    procedure paintframeface(const canvas: tcanvas; const arect: rectty);
    class procedure drawframe(const canvas: tcanvas; const rect2: rectty; 
-           const afi: baseframeinfoty; const astate: framestateflagsty
-           {const disabled,active,clicked,mouse: boolean});
+           const afi: baseframeinfoty; const astate: framestateflagsty);
     //iassistiveclient
    function getassistivecaption(): msestring; virtual;
   public
@@ -743,16 +742,6 @@ type
                     read fi.frameimage_offsets.focused
                     write setframeimage_offsetfocused
                     stored isframeimage_offsetfocusedstored default 0;
-{
-   property frameimage_offsetactivemouse: imagenrty
-                    read fi.frameimage_offsets.activemouse
-                    write setframeimage_offsetactivemouse
-                    stored isframeimage_offsetactivemousestored default 0;
-   property frameimage_offsetactiveclicked: imagenrty
-                    read fi.frameimage_offsets.activeclicked
-                    write setframeimage_offsetactiveclicked
-                    stored isframeimage_offsetactiveclickedstored default 0;
-}
    property frameface_list: tfacelist read fi.frameface_list 
                     write setframeface_list stored isframeface_liststored;
    property frameface_offset: facenrty read fi.frameface_offsets.offset
@@ -783,16 +772,6 @@ type
                     read fi.frameface_offsets.focused
                     write setframeface_offsetfocused
                     stored isframeface_offsetfocusedstored default 0;
-{
-   property frameface_offsetactivemouse: facenrty 
-                    read fi.frameface_offsets.activemouse
-                    write setframeface_offsetactivemouse
-                    stored isframeface_offsetactivemousestored default 0;
-   property frameface_offsetactiveclicked: facenrty 
-                    read fi.frameface_offsets.activeclicked
-                    write setframeface_offsetactiveclicked
-                    stored isframeface_offsetactiveclickedstored default 0;
-}
    property optionsskin: frameskinoptionsty read fi.optionsskin 
                     write setoptionsskin stored isoptionsskinstored default [];
    property focusrectdist: int32 read fi.focusrectdist 
@@ -4345,60 +4324,61 @@ procedure tcustomframe.paintbackground(const canvas: tcanvas;
                             const arect: rectty; const clipandmove: boolean);
 var
  rect1,rect2: rectty;
-// faceoffs: integer;
-// reg1: regionty;
  po1,ps,pe: pint16;
  i1: int32;
 begin
  rect1:= deflaterect(arect,fpaintframe);
- if clipandmove and (fi.frameimage_list <> nil) and 
+ if clipandmove then begin
+  canvas.intersectcliprect(rect1);
+  if (fi.frameimage_list <> nil) and 
                          (fi.frameimage_list.cornermask <> '') then begin
-  po1:= pointer(fi.frameimage_list.cornermask);
-  pe:= po1 + length(msestring(pointer(po1)));
-  rect2.cy:= 1;
-  if fi.hiddenedges * [edg_top,edg_left] = [] then begin
-   rect2.pos:= arect.pos;
-   ps:= po1;
-   while ps < pe do begin
-    rect2.cx:= ps^;
-    canvas.subcliprect(rect2);
-    inc(rect2.y);
-    inc(ps);
+   po1:= pointer(fi.frameimage_list.cornermask);
+   pe:= po1 + length(msestring(pointer(po1)));
+   rect2.cy:= 1;
+   if fi.hiddenedges * [edg_top,edg_left] = [] then begin
+    rect2.pos:= arect.pos;
+    ps:= po1;
+    while ps < pe do begin
+     rect2.cx:= ps^;
+     canvas.subcliprect(rect2);
+     inc(rect2.y);
+     inc(ps);
+    end;
    end;
-  end;
-  if fi.hiddenedges * [edg_left,edg_bottom] = [] then begin
-   rect2.x:= arect.x;
-   rect2.y:= arect.y + arect.cy - 1;
-   ps:= po1;
-   while ps < pe do begin
-    rect2.cx:= ps^;
-    canvas.subcliprect(rect2);
-    dec(rect2.y);
-    inc(ps);
+   if fi.hiddenedges * [edg_left,edg_bottom] = [] then begin
+    rect2.x:= arect.x;
+    rect2.y:= arect.y + arect.cy - 1;
+    ps:= po1;
+    while ps < pe do begin
+     rect2.cx:= ps^;
+     canvas.subcliprect(rect2);
+     dec(rect2.y);
+     inc(ps);
+    end;
    end;
-  end;
-  if fi.hiddenedges * [edg_bottom,edg_right] = [] then begin
-   rect2.y:= arect.y + arect.cy - 1;
-   ps:= po1;
-   i1:= arect.x + arect.cx;
-   while ps < pe do begin
-    rect2.cx:= ps^;
-    rect2.x:= i1 - ps^;
-    canvas.subcliprect(rect2);
-    dec(rect2.y);
-    inc(ps);
+   if fi.hiddenedges * [edg_bottom,edg_right] = [] then begin
+    rect2.y:= arect.y + arect.cy - 1;
+    ps:= po1;
+    i1:= arect.x + arect.cx;
+    while ps < pe do begin
+     rect2.cx:= ps^;
+     rect2.x:= i1 - ps^;
+     canvas.subcliprect(rect2);
+     dec(rect2.y);
+     inc(ps);
+    end;
    end;
-  end;
-  if fi.hiddenedges * [edg_right,edg_top] = [] then begin
-   rect2.y:= arect.y;
-   ps:= po1;
-   i1:= arect.x + arect.cx;
-   while ps < pe do begin
-    rect2.cx:= ps^;
-    rect2.x:= i1 - ps^;
-    canvas.subcliprect(rect2);
-    inc(rect2.y);
-    inc(ps);
+   if fi.hiddenedges * [edg_right,edg_top] = [] then begin
+    rect2.y:= arect.y;
+    ps:= po1;
+    i1:= arect.x + arect.cx;
+    while ps < pe do begin
+     rect2.cx:= ps^;
+     rect2.x:= i1 - ps^;
+     canvas.subcliprect(rect2);
+     inc(rect2.y);
+     inc(ps);
+    end;
    end;
   end;
  end;
@@ -4408,22 +4388,7 @@ begin
  if not (fso_faceoverlay in optionsskin) then begin
   paintframeface(canvas,rect1);
  end;
-(*
- if fi.frameface_list <> nil then begin
-  faceoffs:= fi.frameface_list.lookup(
-           calcframestateoffs(fintf.getframestateflags,
-                                  frameoffsetsty(fi.frameface_offsets)));
-  if (faceoffs >= 0){ and (faceoffs < fi.frameface_list.list.count)} then begin
-   with fi.frameface_list.list[faceoffs] do begin
-    if not (fao_overlay in options) then begin
-     paintframeface(canvas,mr(addpoint(rect1.pos,fclientrect.pos).);
-    end;
-   end;
-  end;
- end;
-*)
  if clipandmove then begin
-  canvas.intersectcliprect(rect1);
   canvas.move(addpoint(fpaintrect.pos,fclientrect.pos));
   canvas.brushorigin:= nullpoint;
  end;
