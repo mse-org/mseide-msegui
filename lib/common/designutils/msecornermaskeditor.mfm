@@ -1,0 +1,129 @@
+object msecornermaskeditorfo: tmsecornermaskeditorfo
+  bounds_x = 337
+  bounds_y = 266
+  bounds_cx = 383
+  bounds_cy = 334
+  container.frame.localprops = []
+  container.frame.localprops1 = []
+  container.bounds = (
+    0
+    0
+    383
+    334
+  )
+  options = [fo_freeonclose, fo_createmodal, fo_autoreadstat, fo_autowritestat, fo_savepos, fo_savezorder, fo_savestate]
+  statfile = statfile1
+  caption = 'Indexlookup Editor'
+  oncreate = createexe
+  onclosequery = closequexe
+  moduleclassname = 'tmseform'
+  object tsplitter1: tsplitter
+    optionswidget = [ow_tabfocus, ow_parenttabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_destroywidgets]
+    color = -2147483645
+    bounds_x = 258
+    bounds_y = 293
+    bounds_cx = 123
+    bounds_cy = 32
+    anchors = [an_right, an_bottom]
+    optionsscale = [osc_expandx, osc_shrinkx, osc_expandy, osc_shrinky]
+    linktop = grid
+    grip = stb_none
+    object tbutton2: tbutton
+      optionswidget1 = [ow1_fontglyphheight, ow1_autoscale, ow1_autowidth]
+      taborder = 1
+      bounds_x = 58
+      bounds_y = 10
+      bounds_cx = 52
+      bounds_cy = 22
+      bounds_cxmin = 50
+      anchors = [an_top, an_right]
+      state = [as_localcaption]
+      caption = '&Cancel'
+      modalresult = mr_cancel
+      reffontheight = 14
+    end
+    object tbutton1: tbutton
+      optionswidget1 = [ow1_fontglyphheight, ow1_autoscale, ow1_autowidth]
+      bounds_x = 0
+      bounds_y = 10
+      bounds_cx = 50
+      bounds_cy = 22
+      bounds_cxmin = 50
+      anchors = [an_top, an_right]
+      state = [as_default, as_localdefault, as_localcaption]
+      caption = '&OK'
+      modalresult = mr_ok
+      reffontheight = 14
+    end
+    object tspacer2: tspacer
+      taborder = 2
+      bounds_x = 50
+      bounds_y = 10
+      bounds_cx = 8
+      bounds_cy = 20
+      linkleft = tbutton1
+      linkright = tbutton2
+      options = [spao_glueright]
+    end
+  end
+  object grid: twidgetgrid
+    frame.localprops = []
+    frame.localprops1 = []
+    taborder = 1
+    bounds_x = 0
+    bounds_y = 0
+    bounds_cx = 383
+    bounds_cy = 293
+    anchors = [an_top]
+    optionsgrid = [og_rowmoving, og_keyrowmoving, og_rowinserting, og_rowdeleting, og_selectedrowsdeleting, og_focuscellonenter, og_autofirstrow, og_autoappend, og_colchangeontabkey, og_wrapcol, og_autopopup, og_mousescrollcol]
+    fixcols.count = 1
+    fixcols.items = <    
+      item
+        numstep = 1
+      end>
+    fixrows.count = 1
+    fixrows.items = <    
+      item
+        height = 16
+        captions.count = 1
+        captions.items = <        
+          item
+            caption = 'Width'
+          end>
+        captionsfix.count = 1
+        captionsfix.items = <        
+          item
+            caption = 'Row'
+          end>
+      end>
+    datacols.count = 1
+    datacols.options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savevalue, co_savestate, co_mousescrollrow]
+    datacols.items = <    
+      item[maskwidthed]
+        width = 77
+        options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savevalue, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow, co_rowdatachange]
+        name = 'index'
+        widgetname = 'maskwidthed'
+        dataclass = tgridintegerdatalist
+      end>
+    datarowheight = 16
+    reffontheight = 14
+    object maskwidthed: tintegeredit
+      optionsskin = [osk_framebuttononly]
+      taborder = 1
+      visible = False
+      bounds_x = 0
+      bounds_y = 0
+      bounds_cx = 77
+      bounds_cy = 16
+      max = 524287
+      reffontheight = 14
+    end
+  end
+  object statfile1: tstatfile
+    filename = 'cornermask.sta'
+    options = [sfo_memory]
+    left = 80
+    top = 112
+  end
+end

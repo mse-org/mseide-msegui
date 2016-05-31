@@ -26,7 +26,7 @@ implementation
 
 uses
  classes,mclasses,msethreadcomp,msebitmap,msetimer,msestatfile,mseact,
- mseactions,mseshapes,msewidgets,mseindexlookupeditor,
+ mseactions,mseshapes,msewidgets,mseindexlookupeditor,msecornermaskeditor,
  msedesignintf,msemenus,msegui,msepipestream,sysutils,
  msegraphutils,regkernel_bmp,msegraphics,msestrings,msepostscriptprinter,
  mseprinter,msetypes,msedatalist,msedatamodules,mseclasses,formdesigner,
@@ -168,6 +168,13 @@ type
    function getvalue: msestring; override;
    procedure edit(); override;
  end;
+
+ tcornermaskeditor = class(tmsestringpropertyeditor)
+  public
+   procedure setvalue(const value: msestring); override;
+   function getvalue: msestring; override;
+   procedure edit(); override;
+ end;
     
 const   
  datamoduleintf: designmoduleintfty = 
@@ -229,6 +236,8 @@ begin
  registerpropertyeditor(typeinfo(trealarrayprop),tfacetemplate,'fade_opapos',
                                     tfacetemplatefadeopaposeditor);
  
+ registerpropertyeditor(typeinfo(msestring),timagelist,'cornermask',
+                                                       tcornermaskeditor);
  registerpropertyeditor(typeinfo(msestring),timagelist,'indexlookup',
                                                        tindexlookupeditor);
  registerpropertyeditor(typeinfo(msestring),tfacelist,'indexlookup',
@@ -744,6 +753,42 @@ begin
   pointer(facelist):= fcomponent;
  end;
  if editlookupindex(mstr1,imagelist,facelist) then begin
+  setmsestringvalue(mstr1,true);
+ end;
+end;
+
+{ tcornermaskeditor }
+
+procedure tcornermaskeditor.setvalue(const value: msestring);
+begin
+ if (value = '') and 
+      askyesno('Do you want to delete the corner mask?') then begin
+  inherited setvalue('');
+ end
+ else begin
+  inherited setvalue(getmsestringvalue(0));
+ end;
+end;
+
+function tcornermaskeditor.getvalue: msestring;
+var
+ mstr1: msestring;
+begin
+ mstr1:= getmsestringvalue(0,true);
+ if mstr1 = '' then begin
+  result:= '<empty>';
+ end
+ else begin
+  result:= '<'+inttostrmse(length(mstr1))+'>';
+ end;
+end;
+
+procedure tcornermaskeditor.edit();
+var
+ mstr1: msestring;
+begin
+ mstr1:= getmsestringvalue(0,true);
+ if editcornermask(mstr1) then begin
   setmsestringvalue(mstr1,true);
  end;
 end;
