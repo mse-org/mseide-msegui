@@ -4573,8 +4573,8 @@ var
  end;
 
 begin
- if (asourcerect.cx = 0) or (asourcerect.cy = 0) or 
-    (adestrect.cx = 0) or (adestrect.cy = 0) then begin //no div 0
+ if (asourcerect.cx <= 0) or (asourcerect.cy <= 0) or 
+    (adestrect.cx <= 0) or (adestrect.cy <= 0) then begin //no div 0
   exit;
  end;
  checkgcstate([]);  //gc must be valid
