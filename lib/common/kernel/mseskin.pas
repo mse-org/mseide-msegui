@@ -145,7 +145,7 @@ type
   svwidget: widgetskininfoty;
   svcolor: widgetcolorinfoty;
  end;
- dataeditskininfoty = record
+ editskininfoty = record
   svwidget: widgetskininfoty;
   svempty_text: msestring;
   svempty_textflags: textflagsty;
@@ -154,8 +154,14 @@ type
   svempty_fontstyle: fontstylesty;
   svempty_color: colorty;
  end;
- booleaneditskininfoty = record
+ dataeditskininfoty = record
+  svedit: editskininfoty;
+ end;
+ graphdataeditskininfoty = record
   svwidget: widgetskininfoty;
+ end;
+ booleaneditskininfoty = record
+  svgraphdataedit: graphdataeditskininfoty;
   svoptionsadd: buttonoptionsty;
   svoptionsremove: buttonoptionsty;
  end;
@@ -401,10 +407,12 @@ type
                                const ainfo: gridpropskininfoty);
    procedure setgridskin(const instance: tcustomgrid;
                                             const ainfo: gridskininfoty);
+   procedure seteditskin(const instance: tcustomedit;
+                                            const ainfo: editskininfoty);
    procedure setdataeditskin(const instance: tdataedit;
                                             const ainfo: dataeditskininfoty);
    procedure setgraphdataeditskin(const instance: tgraphdataedit;
-                                            const ainfo: dataeditskininfoty);
+                                         const ainfo: graphdataeditskininfoty);
    procedure setwidgetfont(const instance: twidget; const afont: tfont);
    procedure setwidgetcolor(const instance: twidget; const acolor: colorty);
    function setwidgetcolorcaptionframe(
@@ -433,8 +441,8 @@ type
    procedure handletabbar(const ainfo: skininfoty); virtual;
    procedure handletabpage(const ainfo: skininfoty); virtual;
    procedure handletoolbar(const ainfo: skininfoty); virtual;
-   procedure handleedit(const ainfo: skininfoty); virtual;
    procedure handledispwidget(const ainfo: skininfoty); virtual;
+   procedure handleedit(const ainfo: skininfoty); virtual;
    procedure handledataedit(const ainfo: skininfoty); virtual;
    procedure handlebooleanedit(const ainfo: skininfoty); virtual;
    procedure handlemainmenu(const ainfo: skininfoty); virtual;
@@ -500,6 +508,7 @@ type
    fpopupmenu: menuskininfoty;
    fmainmenu: mainmenuskininfoty;
    fdispwidget: dispwidgetskininfoty;
+   fedit: editskininfoty;
    fdataedit: dataeditskininfoty;
    fbooleanedit: booleaneditskininfoty;
    
@@ -557,6 +566,9 @@ type
 
    procedure setdispwidget_face(const avalue: tfacecomp);
    procedure setdispwidget_frame(const avalue: tframecomp);
+
+   procedure setedit_face(const avalue: tfacecomp);
+   procedure setedit_frame(const avalue: tframecomp);
 
    procedure setdataedit_face(const avalue: tfacecomp);
    procedure setdataedit_frame(const avalue: tframecomp);
@@ -652,8 +664,8 @@ type
    procedure handletabbar(const ainfo: skininfoty); override;
    procedure handletabpage(const ainfo: skininfoty); override;
    procedure handletoolbar(const ainfo: skininfoty); override;
-   procedure handleedit(const ainfo: skininfoty); override;
    procedure handledispwidget(const ainfo: skininfoty); override;
+   procedure handleedit(const ainfo: skininfoty); override;
    procedure handledataedit(const ainfo: skininfoty); override;
    procedure handlebooleanedit(const ainfo: skininfoty); override;
    procedure handlemainmenu(const ainfo: skininfoty); override;
@@ -722,30 +734,55 @@ type
                                             write setdispwidget_face;
    property dispwidget_frame: tframecomp read fdispwidget.svwidget.svframe 
                                             write setdispwidget_frame;
-   property dataedit_face: tfacecomp 
-                      read fdataedit.svwidget.svface write setdataedit_face;
-   property dataedit_frame: tframecomp read fdataedit.svwidget.svframe 
+
+   property dataedit_face: tfacecomp read fdataedit.svedit.svwidget.svface
+                                                 write setdataedit_face;
+   property dataedit_frame: tframecomp read fdataedit.svedit.svwidget.svframe 
                                                     write setdataedit_frame;
-   property dataedit_empty_text: msestring read fdataedit.svempty_text 
-                                        write fdataedit.svempty_text;
-   property dataedit_empty_color: colorty read fdataedit.svempty_color
-                        write fdataedit.svempty_color default cl_default;
+   property dataedit_empty_text: msestring read fdataedit.svedit.svempty_text 
+                                           write fdataedit.svedit.svempty_text;
+   property dataedit_empty_color: colorty read fdataedit.svedit.svempty_color
+                       write fdataedit.svedit.svempty_color default cl_default;
    property dataedit_empty_fontstyle: fontstylesty 
-                        read fdataedit.svempty_fontstyle 
-                    write fdataedit.svempty_fontstyle default [];
+                        read fdataedit.svedit.svempty_fontstyle 
+                          write fdataedit.svedit.svempty_fontstyle default [];
    property dataedit_empty_textflags: textflagsty 
-                  read fdataedit.svempty_textflags 
-                    write fdataedit.svempty_textflags default [];
-   property dataedit_empty_textcolor: colorty read fdataedit.svempty_textcolor 
-                         write fdataedit.svempty_textcolor default cl_default;
+                  read fdataedit.svedit.svempty_textflags 
+                           write fdataedit.svedit.svempty_textflags default [];
+   property dataedit_empty_textcolor: colorty 
+                          read fdataedit.svedit.svempty_textcolor 
+                   write fdataedit.svedit.svempty_textcolor default cl_default;
    property dataedit_empty_textcolorbackground: colorty 
-                     read fdataedit.svempty_textcolorbackground 
-             write fdataedit.svempty_textcolorbackground default cl_default;
+                     read fdataedit.svedit.svempty_textcolorbackground 
+        write fdataedit.svedit.svempty_textcolorbackground default cl_default;
+
+   property edit_face: tfacecomp read fedit.svwidget.svface
+                                                 write setedit_face;
+   property edit_frame: tframecomp read fedit.svwidget.svframe 
+                                                    write setedit_frame;
+   property edit_empty_text: msestring read fedit.svempty_text 
+                                           write fedit.svempty_text;
+   property edit_empty_color: colorty read fedit.svempty_color
+                       write fedit.svempty_color default cl_default;
+   property edit_empty_fontstyle: fontstylesty 
+                        read fedit.svempty_fontstyle 
+                          write fedit.svempty_fontstyle default [];
+   property edit_empty_textflags: textflagsty 
+                  read fedit.svempty_textflags 
+                           write fedit.svempty_textflags default [];
+   property edit_empty_textcolor: colorty 
+                          read fedit.svempty_textcolor 
+                   write fedit.svempty_textcolor default cl_default;
+   property edit_empty_textcolorbackground: colorty 
+                     read fedit.svempty_textcolorbackground 
+        write fedit.svempty_textcolorbackground default cl_default;
                         
-   property booleanedit_face: tfacecomp read fbooleanedit.svwidget.svface 
+   property booleanedit_face: tfacecomp 
+             read fbooleanedit.svgraphdataedit.svwidget.svface 
                                                    write setbooleanedit_face;
-   property booleanedit_frame: tframecomp read fbooleanedit.svwidget.svframe 
-                        write setbooleanedit_frame;
+   property booleanedit_frame: tframecomp 
+                read fbooleanedit.svgraphdataedit.svwidget.svframe 
+                                                write setbooleanedit_frame;
    property booleanedit_optionsadd: buttonoptionsty 
                         read fbooleanedit.svoptionsadd 
                                 write fbooleanedit.svoptionsadd default[];
@@ -1527,11 +1564,11 @@ begin
     sok_widget: begin
      handlewidget(ainfo);
     end;
-    sok_edit: begin
-     handleedit(ainfo);
-    end;
     sok_dispwidget: begin
      handledispwidget(ainfo);
+    end;
+    sok_edit: begin
+     handleedit(ainfo);
     end;
     sok_dataedit: begin
      handledataedit(ainfo);
@@ -1781,8 +1818,8 @@ begin
  end;
 end;
 
-procedure tcustomskincontroller.setdataeditskin(const instance: tdataedit;
-                                            const ainfo: dataeditskininfoty);
+procedure tcustomskincontroller.seteditskin(const instance: tcustomedit;
+                                            const ainfo: editskininfoty);
 begin
  setwidgetskin(instance,ainfo.svwidget);
  with instance do begin
@@ -1813,8 +1850,14 @@ begin
  end;
 end;
 
+procedure tcustomskincontroller.setdataeditskin(const instance: tdataedit;
+                                            const ainfo: dataeditskininfoty);
+begin
+ seteditskin(instance,ainfo.svedit);
+end;
+
 procedure tcustomskincontroller.setgraphdataeditskin(
-           const instance: tgraphdataedit; const ainfo: dataeditskininfoty);
+          const instance: tgraphdataedit; const ainfo: graphdataeditskininfoty);
 begin
  setwidgetskin(instance,ainfo.svwidget);
 // setwidgetface(instance,ainfo.face);
@@ -2386,9 +2429,13 @@ begin
  fdispwidget.svcolor.svcolor:= cl_default;
  fdispwidget.svcolor.svcolorcaptionframe:= cl_default;
  
- fdataedit.svempty_color:= cl_default;
- fdataedit.svempty_textcolor:= cl_default;
- fdataedit.svempty_textcolorbackground:= cl_default;
+ fedit.svempty_color:= cl_default;
+ fedit.svempty_textcolor:= cl_default;
+ fedit.svempty_textcolorbackground:= cl_default;
+
+ fdataedit.svedit.svempty_color:= cl_default;
+ fdataedit.svedit.svempty_textcolor:= cl_default;
+ fdataedit.svedit.svempty_textcolorbackground:= cl_default;
 
  fbutton.svcolor:= cl_default;
  fdatabutton.svcolor:= cl_default;
@@ -2438,24 +2485,36 @@ begin
  setlinkedvar(avalue,tmsecomponent(fdispwidget.svwidget.svframe));
 end;
 
+procedure tskincontroller.setedit_face(const avalue: tfacecomp);
+begin
+ setlinkedvar(avalue,tmsecomponent(fedit.svwidget.svface));
+end;
+
+procedure tskincontroller.setedit_frame(const avalue: tframecomp);
+begin
+ setlinkedvar(avalue,tmsecomponent(fedit.svwidget.svframe));
+end;
+
 procedure tskincontroller.setdataedit_face(const avalue: tfacecomp);
 begin
- setlinkedvar(avalue,tmsecomponent(fdataedit.svwidget.svface));
+ setlinkedvar(avalue,tmsecomponent(fdataedit.svedit.svwidget.svface));
 end;
 
 procedure tskincontroller.setdataedit_frame(const avalue: tframecomp);
 begin
- setlinkedvar(avalue,tmsecomponent(fdataedit.svwidget.svframe));
+ setlinkedvar(avalue,tmsecomponent(fdataedit.svedit.svwidget.svframe));
 end;
 
 procedure tskincontroller.setbooleanedit_face(const avalue: tfacecomp);
 begin
- setlinkedvar(avalue,tmsecomponent(fbooleanedit.svwidget.svface));
+ setlinkedvar(avalue,tmsecomponent(
+                                fbooleanedit.svgraphdataedit.svwidget.svface));
 end;
 
 procedure tskincontroller.setbooleanedit_frame(const avalue: tframecomp);
 begin
- setlinkedvar(avalue,tmsecomponent(fbooleanedit.svwidget.svframe));
+ setlinkedvar(avalue,tmsecomponent(
+                               fbooleanedit.svgraphdataedit.svwidget.svframe));
 end;
 
 procedure tskincontroller.setcontainer_face(const avalue: tfacecomp);
@@ -3281,15 +3340,16 @@ begin
  end;
 end;
 
-procedure tskincontroller.handleedit(const ainfo: skininfoty);
-begin
- handlewidget(ainfo);
-end;
-
 procedure tskincontroller.handledispwidget(const ainfo: skininfoty);
 begin
  handlewidget(ainfo,@fdispwidget.svcolor);
  setwidgetskin(twidget(ainfo.instance),fdispwidget.svwidget);
+end;
+
+procedure tskincontroller.handleedit(const ainfo: skininfoty);
+begin
+ handlewidget(ainfo);
+ seteditskin(tcustomedit(ainfo.instance),fedit);
 end;
 
 procedure tskincontroller.handledataedit(const ainfo: skininfoty);
@@ -3301,7 +3361,7 @@ end;
 procedure tskincontroller.handlebooleanedit(const ainfo: skininfoty);
 begin
  handlewidget(ainfo);
- setwidgetskin(twidget(ainfo.instance),fbooleanedit.svwidget);
+ setwidgetskin(twidget(ainfo.instance),fbooleanedit.svgraphdataedit.svwidget);
  with tcustombooleanedit(ainfo.instance) do begin
   if not (osk_nooptions in optionsskin) then begin
    if fbooleanedit.svoptionsadd <> [] then begin
