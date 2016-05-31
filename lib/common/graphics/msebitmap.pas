@@ -3408,7 +3408,7 @@ begin
  po1:= pointer(avalue);
  pe:= po1 + length(avalue);
  while po1 < pe do begin
-  if po1^ < fcornermaskmaxwidth then begin
+  if po1^ > fcornermaskmaxwidth then begin
    fcornermaskmaxwidth := po1^;
   end;
   inc(po1);

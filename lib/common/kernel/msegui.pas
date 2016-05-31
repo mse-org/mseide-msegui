@@ -3068,6 +3068,7 @@ type
  tcaret1 = class(tcaret);
  tobjectevent1 = class(tobjectevent);
  tsysmimedragobject1 = class(tsysmimedragobject);
+ timagelist1 = class(timagelist);
 
 const
  cancelwaittag = 823757;
@@ -4134,10 +4135,45 @@ procedure tcustomframe.updatemousestate(const sender: twidget;
                  const info: mouseeventinfoty);
 
  function mouseinclient(): boolean;
+ var
+  rect1: rectty;
+  po1: pint16;
  begin
   result:= pointinrect(info.pos,fpaintrect);
-  if result and (fi.frameimage_list <> nil) then begin
-//   if info
+  if result and (fi.frameimage_list <> nil) and 
+                   (fi.frameimage_list.cornermask <> '') then begin
+   rect1:= deflaterect(mr(nullpoint,fintf.getwidgetrect.size),fouterframe);
+   with timagelist1(fi.frameimage_list) do begin
+    po1:= pointer(cornermask);
+    if (info.pos.x < fcornermaskmaxwidth) and 
+                    (info.pos.y < rect1.y + length(cornermask)) then begin
+                           //topleft
+     result:= info.pos.x >= rect1.x + po1[info.pos.y-rect1.y];
+    end
+    else begin
+     if (info.pos.x < fcornermaskmaxwidth) and 
+             (info.pos.y >= rect1.y + rect1.cy - length(cornermask)) then begin
+                           //bottomleft
+      result:= info.pos.x >= rect1.x + po1[rect1.y + rect1.cy - info.pos.y -1];
+     end
+     else begin
+      if (info.pos.x >= rect1.x + rect1.cx - fcornermaskmaxwidth) and 
+           (info.pos.y >= rect1.y + rect1.cy - length(cornermask)) then begin
+                           //bottomright
+       result:= info.pos.x < rect1.x + rect1.cx - 
+                                     po1[rect1.y + rect1.cy - info.pos.y -1];
+      end
+      else begin
+       if (info.pos.x >= rect1.x + rect1.cx - fcornermaskmaxwidth) and 
+                         (info.pos.y < rect1.y + length(cornermask)) then begin
+                           //topright
+        result:= info.pos.x < rect1.x + rect1.cx - 
+                                     po1[info.pos.y-rect1.y];
+       end;
+      end;
+     end;
+    end;
+   end;
   end;
  end; //mouseinclient
  
