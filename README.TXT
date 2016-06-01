@@ -330,7 +330,7 @@ For Raspberry Pi:
 
 - On the i386-linux host install the scp program
 - download and extract 
-  http://sourceforge.net/projects/mseide-msegui/files/fpcrossarm/crossfpc-i386_linux-eabihf_3_0_1.tar.gz
+  http://sourceforge.net/projects/mseide-msegui/files/fpcrossarm/crossfpc-i386_linux-eabihf_3_0_1a.tar.gz
   to <your crossfpc directory>.
 
 - Start MSEide, in 'Settings'-'Configure MSEide'-'Global Macros' add:
