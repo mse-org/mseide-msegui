@@ -526,7 +526,9 @@ type
    fsettingstemplates: boolean;
    fsettingstools: boolean;
    fsettingsstorage: boolean;
+   fsettingscomponentstore: boolean;
    fsettingsprojecttree: boolean;
+   fsettingslayout: boolean;
    fsettingsautoload: boolean;
    fsettingsautosave: boolean;
 //   fmoduleoptions: integerarty;
@@ -574,8 +576,12 @@ type
                                                write fsettingstools;
    property settingsstorage: boolean read fsettingsstorage 
                                                write fsettingsstorage;
+   property settingscomponentstore: boolean read fsettingscomponentstore 
+                                               write fsettingscomponentstore;
    property settingsprojecttree: boolean read fsettingsprojecttree 
                                                write fsettingsprojecttree;
+   property settingslayout: boolean read fsettingslayout 
+                                               write fsettingslayout;
    property settingsautoload: boolean read fsettingsautoload
                                           write fsettingsautoload;
    property settingsautosave: boolean read fsettingsautosave
@@ -911,6 +917,8 @@ type
    settingstools: tbooleanedit;
    settingstemplates: tbooleanedit;
    tsimplewidget1: tsimplewidget;
+   settingscomponentstore: tbooleanedit;
+   settingslayout: tbooleanedit;
    procedure acttiveselectondataentered(const sender: TObject);
    procedure colonshowhint(const sender: tdatacol; const arow: Integer; 
                       var info: hintinfoty);
@@ -2647,7 +2655,9 @@ type
   settingstemplates: boolean;
   settingstools: boolean;
   settingsstorage: boolean;
+  settingscomponentstore: boolean;
   settingsprojecttree: boolean;
+  settingslayout: boolean;
   settingsautoload: boolean;
   settingsautosave: boolean;
   projectfilename: filenamety;
@@ -2667,7 +2677,9 @@ begin
    settingstemplates:= fo.settingstemplates.value;
    settingstools:= fo.settingstools.value;
    settingsstorage:= fo.settingsstorage.value;
+   settingscomponentstore:= fo.settingscomponentstore.value;
    settingsprojecttree:= fo.settingsprojecttree.value;
+   settingslayout:= fo.settingslayout.value;
    settingsautoload:= fo.settingsautoload.value; 
    settingsautosave:= fo.settingsautosave.value; 
   end
@@ -2679,7 +2691,9 @@ begin
    settingstemplates:= projectoptions.o.settingstemplates;
    settingstools:= projectoptions.o.settingstools;
    settingsstorage:= projectoptions.o.settingsstorage;
+   settingscomponentstore:= projectoptions.o.settingscomponentstore;
    settingsprojecttree:= projectoptions.o.settingsprojecttree;
+   settingslayout:= projectoptions.o.settingslayout;
    settingsautoload:= projectoptions.o.settingsautoload; 
    settingsautosave:= projectoptions.o.settingsautosave; 
   end;
@@ -2700,7 +2714,9 @@ begin
     fo.settingstemplates.value:= settingstemplates; 
     fo.settingstools.value:= settingstools; 
     fo.settingsstorage.value:= settingsstorage; 
+    fo.settingscomponentstore.value:= settingscomponentstore; 
     fo.settingsprojecttree.value:= settingsprojecttree; 
+    fo.settingslayout.value:= settingslayout; 
     fo.settingsautoload.value:= settingsautoload; 
     fo.settingsautosave.value:= settingsautosave; 
    end;
@@ -2716,7 +2732,9 @@ begin
     projectoptions.o.settingstemplates:= settingstemplates; 
     projectoptions.o.settingstools:= settingstools; 
     projectoptions.o.settingsstorage:= settingsstorage; 
+    projectoptions.o.settingscomponentstore:= settingscomponentstore; 
     projectoptions.o.settingsprojecttree:= settingsprojecttree; 
+    projectoptions.o.settingslayout:= settingslayout;
     projectoptions.o.settingsautoload:= settingsautoload; 
     projectoptions.o.settingsautosave:= settingsautosave; 
    end;
@@ -2784,6 +2802,12 @@ begin
   try
    read1:= tstatreader.create(fname1,ce_utf8);
    try
+    if projectoptions.o.settingscomponentstore then begin
+     componentstorefo.updatestat(read1);
+    end;
+    if projectoptions.o.settingslayout then begin
+     mainfo.loadwindowlayout(read1);
+    end;
     read1.setsection('projectoptions');
     if projectoptions.o.settingsprojecttree then begin
      projecttree.updatestat(read1);
@@ -2845,6 +2869,12 @@ begin
      formtoprojectoptions(sender);
     end;
     disabled:= getdisabledoptions;
+    if o.settingscomponentstore then begin
+     componentstorefo.updatestat(stat1);
+    end;
+    if o.settingslayout then begin
+     mainfo.savewindowlayout(stat1);
+    end;
     stat1.setsection('projectoptions');
     if o.settingsprojecttree then begin
      projecttree.updatestat(stat1);
@@ -2857,7 +2887,9 @@ begin
      o.settingstemplates:= false; 
      o.settingstools:= false; 
      o.settingsstorage:= false; 
+     o.settingscomponentstore:= false; 
      o.settingsprojecttree:= false; 
+     o.settingslayout:= false; 
      o.settingsautoload:= false; 
      o.settingsautosave:= false; 
     end;

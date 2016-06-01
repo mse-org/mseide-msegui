@@ -6240,9 +6240,9 @@ object projectoptionsfo: tprojectoptionsfo
             144
             2
           )
-          taborder = 9
+          taborder = 10
           bounds_x = 15
-          bounds_y = 244
+          bounds_y = 268
           bounds_cx = 158
           bounds_cy = 16
         end
@@ -6295,6 +6295,40 @@ object projectoptionsfo: tprojectoptionsfo
           bounds_x = 15
           bounds_y = 172
           bounds_cx = 202
+          bounds_cy = 16
+        end
+        object settingscomponentstore: tbooleanedit
+          optionsskin = [osk_nolayoutcx, osk_nolayoutcy]
+          frame.caption = 'Load/save component store'
+          frame.localprops = []
+          frame.localprops1 = []
+          frame.outerframe = (
+            0
+            1
+            178
+            2
+          )
+          taborder = 9
+          bounds_x = 15
+          bounds_y = 244
+          bounds_cx = 192
+          bounds_cy = 16
+        end
+        object settingslayout: tbooleanedit
+          optionsskin = [osk_nolayoutcx, osk_nolayoutcy]
+          frame.caption = 'Load/save layout'
+          frame.localprops = []
+          frame.localprops1 = []
+          frame.outerframe = (
+            0
+            1
+            108
+            2
+          )
+          taborder = 11
+          bounds_x = 15
+          bounds_y = 292
+          bounds_cx = 122
           bounds_cy = 16
         end
       end

@@ -19,8 +19,6 @@ order16=0
 order17=0
 order18=0
 [projectoptions]
-projectdir=/home/mse/packs/standard/git/mseide-msegui/apps/ide/templates
-projectfilename=/home/mse/packs/standard/git/mseide-msegui/apps/ide/templates/default.prj
 mainfile=${PROJECTNAME}.pas
 targetfile=${PROJECTNAME}${EXEEXT}
 messageoutputfile=
@@ -411,9 +409,6 @@ files=
  (
  a=0,4132,6,Text Files
  )
-[componentstore]
-storedir=/home/mse/packs/standard/git/mseide-msegui/apps/ide/compstore/
-filename=
 [components]
 [selecteditpage]
 colwidth=100
@@ -826,26 +821,20 @@ windowlayout=530
  width3=185
  sortdescend3=0
  [componentstorefo.storefiledialog]
- filenames=1
-  /home/mse/packs/standard/git/mseide-msegui/apps/ide/compstore/
  filecolwidth=0
  x=0
  y=0
  cx=0
  cy=0
- lastdir=/home/mse/packs/standard/git/mseide-msegui/apps/ide/compstore/
  filehistory=0
  filefilterindex=0
  filefilter=
  [componentstorefo.groupfiledialog]
- filenames=1
-  /home/mse/packs/standard/git/mseide-msegui/apps/ide/compstore/
  filecolwidth=0
  x=0
  y=0
  cx=0
  cy=0
- lastdir=/home/mse/packs/standard/git/mseide-msegui/apps/ide/compstore/
  filehistory=0
  filefilterindex=0
  filefilter=

@@ -311,7 +311,9 @@ type
                              const ascopy: boolean = false): boolean;
    procedure saveproject(aname: filenamety; const ascopy: boolean = false);
    procedure savewindowlayout(const astream: ttextstream);
+   procedure savewindowlayout(const awriter: tstatwriter);
    procedure loadwindowlayout(const astream: ttextstream);
+   procedure loadwindowlayout(const areader: tstatreader);
 
    procedure sourcechanged(const sender: tsourcepage);
    function opensource(const filekind: filekindty; const addtoproject: boolean;
@@ -2963,23 +2965,47 @@ begin
  end;
 end;
 
+procedure tmainfo.savewindowlayout(const awriter: tstatwriter);
+begin
+ awriter.setsection('breakpoints');
+ beginpanelplacement();
+ try
+  panelform.updatestat(awriter);
+  awriter.setsection('layout');
+  mainfo.projectstatfile.updatestat('windowlayout',awriter);
+ finally
+  endpanelplacement();
+ end;
+end;
+
 procedure tmainfo.savewindowlayout(const astream: ttextstream);
 var
  statwriter: tstatwriter;
 begin
  statwriter:= tstatwriter.create(astream,ce_utf8);
  try
-  statwriter.setsection('breakpoints');
-  beginpanelplacement();
-  try
-   panelform.updatestat(statwriter);
-   statwriter.setsection('layout');
-   mainfo.projectstatfile.updatestat('windowlayout',statwriter);
-  finally
-   endpanelplacement();
-  end;
+  savewindowlayout(statwriter);
  finally
   statwriter.free;
+ end;
+end;
+
+procedure tmainfo.loadwindowlayout(const areader: tstatreader);
+begin
+ beginpanelplacement();
+ try
+  areader.setsection('breakpoints');
+  panelform.updatestat(areader);
+  areader.setsection('layout');
+  projectstatfile.options:= projectstatfile.options + 
+                                          [sfo_nodata,sfo_nooptions];
+  flayoutloading:= true;
+  projectstatfile.readstat('windowlayout',areader);
+ finally
+  flayoutloading:= false;
+  projectstatfile.options:= projectstatfile.options -
+                                          [sfo_nodata,sfo_nooptions];
+  endpanelplacement();
  end;
 end;
 
@@ -2989,20 +3015,9 @@ var
 begin
  statreader:= tstatreader.create(astream,ce_utf8);
  try
-  beginpanelplacement();
-  statreader.setsection('breakpoints');
-  panelform.updatestat(statreader);
-  statreader.setsection('layout');
-  projectstatfile.options:= projectstatfile.options + 
-                                          [sfo_nodata,sfo_nooptions];
-  flayoutloading:= true;
-  projectstatfile.readstat('windowlayout',statreader);
+  loadwindowlayout(statreader);
  finally
-  flayoutloading:= false;
-  projectstatfile.options:= projectstatfile.options -
-                                          [sfo_nodata,sfo_nooptions];
   statreader.free;
-  endpanelplacement();
  end;
 end;
 

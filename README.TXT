@@ -356,7 +356,8 @@ REMOTEUSER      pi
   <your crossfpc directory>/eabihf/lib
 
 Press F9 and hope the best. ;-)
-
+If there is a debugger timout at startup enlarge the 
+'Project'-'Options'-'Target'-'Wait before connect' value.
 
 Have a lot of fun!
 
