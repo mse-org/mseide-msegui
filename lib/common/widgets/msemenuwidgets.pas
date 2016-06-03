@@ -42,6 +42,9 @@ type
   options: menulayoutoptionsty;
   sizerect: rectty;
   frameactivediff: framety;
+  imagedistactivediff: int32;
+  imagedist1activediff: int32;
+  imagedist2activediff: int32;
   cells: menucellinfoarty;
 //  colorglyph: colorty;
   itemframetemplate: tframetemplate;
@@ -276,6 +279,8 @@ begin
 end;
 
 procedure movemenulayout(var layout: menulayoutinfoty; const dist: pointty);
+//todo: optimize multiple call by loaded()
+
 var
  int1: integer;
 begin
@@ -373,11 +378,16 @@ begin
    checkboxwidth:= checkboxwidth + size1.cx;
    checkboxheight:= checkboxheight + size1.cy;
   end;
+  imagedistactivediff:= 0;
+  imagedist1activediff:= 0;
+  imagedist2activediff:= 0;
   if itemframetemplateactive <> nil then begin
-   frame2:= itemframetemplateactive.paintframe;
-//   with tframetemplate1(itemframetemplateactive) do begin
-//    framehalfwidth:= (abs(levelo) + abs(leveli) + framewidth);
-//   end;
+   with tframetemplate1(itemframetemplateactive) do begin
+    frame2:= paintframe;
+    imagedistactivediff:= imagedist;
+    imagedist1activediff:= imagedist1;
+    imagedist2activediff:= imagedist2;
+   end;
   end
   else begin
    frame2:= nullframe;
@@ -385,6 +395,9 @@ begin
   frameactivediff:= frame2;
   if itemframetemplate <> nil then begin
    with tframetemplate1(itemframetemplate) do begin
+    imagedistactivediff:= imagedistactivediff - imagedist;
+    imagedist1activediff:= imagedist1activediff - imagedist1;
+    imagedist2activediff:= imagedist2activediff - imagedist2;
     frame1:= paintframe;
     subframe1(frameactivediff,frame1);
     if frame1.left > frame2.left then begin
@@ -794,12 +807,18 @@ begin
       ca.font:= fontactive;
       state:= state + [shs_focused,shs_active,shs_focusanimation];
       deflaterect1(ca.dim,frameactivediff);
+      ca.imagedist:= ca.imagedist + imagedistactivediff;
+      ca.imagedist1:= ca.imagedist1 + imagedist1activediff;
+      ca.imagedist2:= ca.imagedist2 + imagedist2activediff;
       drawmenubutton(canvas,buttoninfo,po2);
       if itemframetemplateactive <> nil then begin
        itemframetemplateactive.paintoverlay(canvas,ca.dim,
              combineframestateflags(false,true,true,shs_clicked in state,false));
       end;
       inflaterect1(ca.dim,frameactivediff);
+      ca.imagedist:= ca.imagedist - imagedistactivediff;
+      ca.imagedist1:= ca.imagedist1 - imagedist1activediff;
+      ca.imagedist2:= ca.imagedist2 - imagedist2activediff;
      end
      else begin
       if (shs_separator in state) and (separatorframetemplate <> nil) then begin
