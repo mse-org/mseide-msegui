@@ -4,6 +4,8 @@ object colordialogfo: tcolordialogfo
   bounds_y = 234
   bounds_cx = 338
   bounds_cy = 298
+  container.frame.localprops = []
+  container.frame.localprops1 = []
   container.onlayout = layoutexe
   container.bounds = (
     0
@@ -46,7 +48,6 @@ object colordialogfo: tcolordialogfo
         )
         fade_direction = gd_down
         localprops = [fal_fadirection]
-        dummy = 0
       end>
     caption = 'Color &Picker'
     onexecute = colorpickexe
@@ -61,6 +62,7 @@ object colordialogfo: tcolordialogfo
     frame.caption = 'new'
     frame.captionpos = cp_bottom
     frame.localprops = [frl_colorframe, frl_colorclient]
+    frame.localprops1 = []
     frame.outerframe = (
       0
       0
@@ -83,6 +85,7 @@ object colordialogfo: tcolordialogfo
     frame.caption = 'old'
     frame.captionpos = cp_bottom
     frame.localprops = [frl_colorframe, frl_colorclient]
+    frame.localprops1 = []
     frame.outerframe = (
       0
       0
@@ -97,6 +100,7 @@ object colordialogfo: tcolordialogfo
     anchors = [an_left, an_top, an_bottom]
   end
   object tlayouter1: tlayouter
+    optionswidget = [ow_tabfocus, ow_parenttabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_destroywidgets]
     taborder = 1
     bounds_x = 112
     bounds_y = 219
@@ -111,7 +115,8 @@ object colordialogfo: tcolordialogfo
       color = -2147483645
       frame.caption = '&blue'
       frame.captionpos = cp_top
-      frame.dummy = 0
+      frame.localprops = []
+      frame.localprops1 = []
       frame.outerframe = (
         0
         17
@@ -132,7 +137,8 @@ object colordialogfo: tcolordialogfo
       color = -2147483645
       frame.caption = '&green'
       frame.captionpos = cp_top
-      frame.dummy = 0
+      frame.localprops = []
+      frame.localprops1 = []
       frame.outerframe = (
         1
         17
@@ -153,7 +159,8 @@ object colordialogfo: tcolordialogfo
       color = -2147483645
       frame.caption = '&red'
       frame.captionpos = cp_top
-      frame.dummy = 0
+      frame.localprops = []
+      frame.localprops1 = []
       frame.outerframe = (
         0
         17
@@ -174,7 +181,8 @@ object colordialogfo: tcolordialogfo
       color = -2147483645
       frame.caption = '&BRI'
       frame.captionpos = cp_top
-      frame.dummy = 0
+      frame.localprops = []
+      frame.localprops1 = []
       frame.outerframe = (
         0
         17
@@ -195,7 +203,8 @@ object colordialogfo: tcolordialogfo
       color = -2147483645
       frame.caption = '&SAT'
       frame.captionpos = cp_top
-      frame.dummy = 0
+      frame.localprops = []
+      frame.localprops1 = []
       frame.outerframe = (
         0
         17
@@ -216,7 +225,8 @@ object colordialogfo: tcolordialogfo
       color = -2147483645
       frame.caption = '&HUE'
       frame.captionpos = cp_top
-      frame.dummy = 0
+      frame.localprops = []
+      frame.localprops1 = []
       frame.outerframe = (
         0
         17
@@ -234,6 +244,7 @@ object colordialogfo: tcolordialogfo
     end
   end
   object tlayouter2: tlayouter
+    optionswidget = [ow_tabfocus, ow_parenttabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_destroywidgets]
     bounds_x = 11
     bounds_y = 256
     bounds_cx = 324
@@ -241,11 +252,11 @@ object colordialogfo: tcolordialogfo
     anchors = [an_left, an_bottom]
     optionsscale = [osc_expandx, osc_shrinkx, osc_expandy, osc_shrinky, osc_expandshrinkx, osc_expandshrinky]
     font.name = 'stf_default'
-    font.dummy = 0
-    linktop = tlayouter1
-    options = [spao_gluebottom]
+    font.localprops = []
     optionslayout = [lao_aligny]
     align_glue = wam_start
+    linktop = tlayouter1
+    options = [spao_gluebottom]
     object cancel: tbutton
       optionswidget1 = [ow1_fontglyphheight, ow1_autoscale, ow1_autowidth]
       color = -2147483645
@@ -275,6 +286,8 @@ object colordialogfo: tcolordialogfo
     object colored: tcoloredit
       frame.caption = 'Color'
       frame.captionpos = cp_top
+      frame.localprops = []
+      frame.localprops1 = []
       frame.buttonellipse.width = -1
       frame.buttonellipse.imagenr = 17
       frame.outerframe = (
@@ -289,6 +302,7 @@ object colordialogfo: tcolordialogfo
       bounds_cx = 108
       bounds_cy = 37
       optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_focusrectonreadonly, oe_hintclippedtext]
+      onchange = colorchangeev
       ondataentered = coloreddataentered
       dropdown.options = [deo_autodropdown, deo_keydropdown, deo_cliphint]
       reffontheight = 14
@@ -296,7 +310,8 @@ object colordialogfo: tcolordialogfo
     object rgbed: tintegeredit
       frame.caption = 'RGB'
       frame.captionpos = cp_top
-      frame.dummy = 0
+      frame.localprops = []
+      frame.localprops1 = []
       frame.outerframe = (
         0
         17
@@ -314,6 +329,7 @@ object colordialogfo: tcolordialogfo
     end
   end
   object tlayouter3: tlayouter
+    optionswidget = [ow_tabfocus, ow_parenttabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_destroywidgets]
     taborder = 2
     bounds_x = 112
     bounds_y = 0
@@ -326,7 +342,7 @@ object colordialogfo: tcolordialogfo
       frame.levelo = -1
       frame.colorclient = -2147483647
       frame.localprops = [frl_levelo, frl_fileft, frl_fitop, frl_firight, frl_fibottom, frl_colorclient]
-      frame.dummy = 0
+      frame.localprops1 = []
       taborder = 5
       bounds_x = 196
       bounds_y = 3
@@ -335,8 +351,6 @@ object colordialogfo: tcolordialogfo
       anchors = [an_left, an_top, an_bottom]
       ondataentered = componentsdataentered
       value = 0
-      scrollbar.color = -2147483645
-      scrollbar.colorpattern = -2147483642
       scrollbar.face.image.transparentcolor = -2147483648
       scrollbar.face.fade_pos.count = 2
       scrollbar.face.fade_pos.items = (
@@ -350,7 +364,8 @@ object colordialogfo: tcolordialogfo
       )
       scrollbar.face.fade_direction = gd_up
       scrollbar.face.localprops = [fal_fadirection, fal_faopacity]
-      scrollbar.face.dummy = 0
+      scrollbar.color = -2147483645
+      scrollbar.colorpattern = -2147483642
       onsetvalue = blueonsetvalue
       direction = gd_up
     end
@@ -359,7 +374,7 @@ object colordialogfo: tcolordialogfo
       frame.levelo = -1
       frame.colorclient = -2147483647
       frame.localprops = [frl_levelo, frl_fileft, frl_fitop, frl_firight, frl_fibottom, frl_colorclient]
-      frame.dummy = 0
+      frame.localprops1 = []
       taborder = 4
       bounds_x = 160
       bounds_y = 3
@@ -368,8 +383,6 @@ object colordialogfo: tcolordialogfo
       anchors = [an_left, an_top, an_bottom]
       ondataentered = componentsdataentered
       value = 0
-      scrollbar.color = -2147483645
-      scrollbar.colorpattern = -2147483642
       scrollbar.face.image.transparentcolor = -2147483648
       scrollbar.face.fade_pos.count = 2
       scrollbar.face.fade_pos.items = (
@@ -383,7 +396,8 @@ object colordialogfo: tcolordialogfo
       )
       scrollbar.face.fade_direction = gd_up
       scrollbar.face.localprops = [fal_fadirection, fal_faopacity]
-      scrollbar.face.dummy = 0
+      scrollbar.color = -2147483645
+      scrollbar.colorpattern = -2147483642
       onsetvalue = greenonsetvalue
       direction = gd_up
     end
@@ -392,7 +406,7 @@ object colordialogfo: tcolordialogfo
       frame.levelo = -1
       frame.colorclient = -2147483647
       frame.localprops = [frl_levelo, frl_fileft, frl_fitop, frl_firight, frl_fibottom, frl_colorclient]
-      frame.dummy = 0
+      frame.localprops1 = []
       taborder = 3
       bounds_x = 124
       bounds_y = 3
@@ -401,8 +415,6 @@ object colordialogfo: tcolordialogfo
       anchors = [an_left, an_top, an_bottom]
       ondataentered = componentsdataentered
       value = 0
-      scrollbar.color = -2147483645
-      scrollbar.colorpattern = -2147483642
       scrollbar.face.image.transparentcolor = -2147483648
       scrollbar.face.fade_pos.count = 2
       scrollbar.face.fade_pos.items = (
@@ -416,7 +428,8 @@ object colordialogfo: tcolordialogfo
       )
       scrollbar.face.fade_direction = gd_up
       scrollbar.face.localprops = [fal_fadirection, fal_faopacity]
-      scrollbar.face.dummy = 0
+      scrollbar.color = -2147483645
+      scrollbar.colorpattern = -2147483642
       onsetvalue = redonsetvalue
       direction = gd_up
     end
@@ -425,7 +438,7 @@ object colordialogfo: tcolordialogfo
       frame.levelo = -1
       frame.colorclient = -2147483647
       frame.localprops = [frl_levelo, frl_fileft, frl_fitop, frl_firight, frl_fibottom, frl_colorclient]
-      frame.dummy = 0
+      frame.localprops1 = []
       taborder = 2
       bounds_x = 83
       bounds_y = 3
@@ -434,8 +447,6 @@ object colordialogfo: tcolordialogfo
       anchors = [an_left, an_top, an_bottom]
       ondataentered = componentsdataentered
       value = 0
-      scrollbar.color = -2147483645
-      scrollbar.colorpattern = -2147483642
       scrollbar.face.image.transparentcolor = -2147483648
       scrollbar.face.fade_pos.count = 2
       scrollbar.face.fade_pos.items = (
@@ -449,7 +460,8 @@ object colordialogfo: tcolordialogfo
       )
       scrollbar.face.fade_direction = gd_up
       scrollbar.face.localprops = [fal_fadirection, fal_faopacity]
-      scrollbar.face.dummy = 0
+      scrollbar.color = -2147483645
+      scrollbar.colorpattern = -2147483642
       onsetvalue = brightonsetvalue
       direction = gd_up
     end
@@ -458,7 +470,7 @@ object colordialogfo: tcolordialogfo
       frame.levelo = -1
       frame.colorclient = -2147483647
       frame.localprops = [frl_levelo, frl_fileft, frl_fitop, frl_firight, frl_fibottom, frl_colorclient]
-      frame.dummy = 0
+      frame.localprops1 = []
       taborder = 1
       bounds_x = 48
       bounds_y = 3
@@ -467,8 +479,6 @@ object colordialogfo: tcolordialogfo
       anchors = [an_left, an_top, an_bottom]
       ondataentered = componentsdataentered
       value = 0
-      scrollbar.color = -2147483645
-      scrollbar.colorpattern = -2147483642
       scrollbar.face.image.transparentcolor = -2147483648
       scrollbar.face.fade_pos.count = 2
       scrollbar.face.fade_pos.items = (
@@ -482,7 +492,8 @@ object colordialogfo: tcolordialogfo
       )
       scrollbar.face.fade_direction = gd_up
       scrollbar.face.localprops = [fal_fadirection, fal_faopacity]
-      scrollbar.face.dummy = 0
+      scrollbar.color = -2147483645
+      scrollbar.colorpattern = -2147483642
       onsetvalue = satonsetvalue
       direction = gd_up
     end
@@ -491,7 +502,7 @@ object colordialogfo: tcolordialogfo
       frame.levelo = -1
       frame.colorclient = -2147483647
       frame.localprops = [frl_levelo, frl_fileft, frl_fitop, frl_firight, frl_fibottom, frl_colorclient]
-      frame.dummy = 0
+      frame.localprops1 = []
       bounds_x = 12
       bounds_y = 3
       bounds_cx = 15
@@ -499,8 +510,6 @@ object colordialogfo: tcolordialogfo
       anchors = [an_left, an_top, an_bottom]
       ondataentered = componentsdataentered
       value = 0
-      scrollbar.color = -2147483645
-      scrollbar.colorpattern = -2147483642
       scrollbar.face.image.transparentcolor = -2147483648
       scrollbar.face.fade_pos.count = 7
       scrollbar.face.fade_pos.items = (
@@ -524,7 +533,8 @@ object colordialogfo: tcolordialogfo
       )
       scrollbar.face.fade_direction = gd_up
       scrollbar.face.localprops = [fal_fadirection, fal_faopacity]
-      scrollbar.face.dummy = 0
+      scrollbar.color = -2147483645
+      scrollbar.colorpattern = -2147483642
       onsetvalue = hueonsetvalue
       direction = gd_up
     end
@@ -534,7 +544,7 @@ object colordialogfo: tcolordialogfo
     optionsskin = [osk_noskin]
     color = -2147483645
     frame.localprops = [frl_levelo, frl_leveli]
-    frame.dummy = 0
+    frame.localprops1 = []
     taborder = 3
     bounds_x = 3
     bounds_y = 3

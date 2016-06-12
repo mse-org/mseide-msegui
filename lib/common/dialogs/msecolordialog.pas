@@ -23,7 +23,9 @@ const
  colordialogstatname = 'colordialog.sta';
  
 type
- 
+
+ coloreventty = procedure(const sender: tobject; 
+                                            const avalue: colorty) of object;
  setcoloreventty = procedure(const sender: tobject; var avalue: colorty;
                           var accept: boolean) of object;               
 
@@ -41,6 +43,7 @@ type
                           
  tcustomcoloredit = class(tcustomenumedit)
   private
+   foncolorchange: coloreventty;
    function getvalue: colorty;
    procedure setvalue(avalue: colorty);
    function getvaluedefault: colorty;
@@ -66,17 +69,21 @@ type
    function geteditframe: framety; override;
    procedure buttonaction(var action: buttonactionty;
                     const buttonindex: integer); override;
-   procedure dochange; override;
+   procedure dochange(); override;
+   procedure docolorchange(const sender: tobject; const acolor: colorty);
   public
    constructor create(aowner: tcomponent); override;
    property value: colorty read getvalue write setvalue default cl_none;
    property valuedefault: colorty read getvaluedefault
                      write setvaluedefault default cl_none;
-   property onsetvalue: setcoloreventty read getonsetvalue write setonsetvalue;
    property frame: tellipsedropdownbuttonframe read getframe write setframe;
    property gridvalue[const index: integer]: colorty
         read getgridvalue write setgridvalue; default;
    property gridvalues: colorarty read getgridvalues write setgridvalues;
+   property onsetvalue: setcoloreventty read getonsetvalue write setonsetvalue;
+   property oncolorchange: coloreventty read foncolorchange 
+                                                    write foncolorchange; 
+                      //sender is tcolordialogfo or tcustomcoloredit
  end;
 
  tcoloredit = class(tcustomcoloredit)
@@ -88,6 +95,7 @@ type
 {$endif}
    property dropdown;
    property onsetvalue;
+   property oncolorchange;
    property frame;
  end;
   
@@ -139,14 +147,20 @@ type
    procedure mouseeventexe(const sender: twidget; var ainfo: mouseeventinfoty);
    procedure shortcutexe(const sender: twidget; var ainfo: keyeventinfoty;
                                                        const origin: twidget);
+   procedure colorchangeev(const sender: TObject);
   private
    fupdating: boolean;
+   foncolorchange: coloreventty;
    procedure updatecomponents;
   protected
    fcolorpicking: boolean;
    fcolorbefore: colorty;
    procedure begincolorpick();
    procedure endcolorpick();
+   procedure dochange();
+  published
+   property oncolorchange: coloreventty read foncolorchange 
+                                                  write foncolorchange;
  end;
 
  tcolordropdowncontroller = class(tnocolsdropdownlistcontroller)
@@ -160,7 +174,8 @@ type
    property options default defaultautodropdownoptions;
  end;
  
-function colordialog(var acolor: colorty): modalresultty;
+function colordialog(var acolor: colorty;
+                      const aoncolorchange: coloreventty = nil): modalresultty;
 //threadsafe
 procedure paintcolorimage(const sender: twidget; const canvas: tcanvas;
                                                     const acolor: colorty);
@@ -184,7 +199,8 @@ type
                 const acontroller: tcustomdropdownlistcontroller); override;
  end;
  
-function colordialog(var acolor: colorty): modalresultty;
+function colordialog(var acolor: colorty;
+                      const aoncolorchange: coloreventty = nil): modalresultty;
 var
  fo: tcolordialogfo;
  col1: rgbtriplety;
@@ -192,6 +208,7 @@ begin
  application.lock;
  try
   fo:= tcolordialogfo.create(nil);
+  fo.oncolorchange:= aoncolorchange;
   try
    try
     col1:= colortorgb(acolor);
@@ -208,7 +225,11 @@ begin
    result:= fo.show(true);
    if result = mr_ok then begin
     acolor:= fo.colored.value;
-//    acolor:= rgbtocolor(fo.red.value,fo.green.value,fo.blue.value);
+   end
+   else begin
+    if fo.canevent(tmethod(aoncolorchange)) then begin
+     aoncolorchange(fo,acolor);
+    end;
    end;
   finally
    fo.free;
@@ -362,7 +383,7 @@ begin
    ba_click: begin
     if focused then begin
      co1:= value;
-     if colordialog(co1) = mr_ok then begin
+     if colordialog(co1,foncolorchange) = mr_ok then begin
       tcolordropdowncontroller(fdropdown).resetselection; 
       text:= msestring(colortostring(co1));
       checkvalue;  
@@ -537,10 +558,19 @@ begin
  paintcolorimage(self,canvas,co1);
 end;
 
-procedure tcustomcoloredit.dochange;
+procedure tcustomcoloredit.dochange();
 begin
  inherited;
- invalidate;
+ invalidate();
+ docolorchange(self,value);
+end;
+
+procedure tcustomcoloredit.docolorchange(const sender: tobject;
+                                                      const acolor: colorty);
+begin
+ if canevent(tmethod(foncolorchange)) then begin
+  foncolorchange(sender,acolor);
+ end;
 end;
 
 procedure tcustomcoloredit.setvaluedata(const source);
@@ -824,6 +854,13 @@ begin
  colorpibu.font:= nil;
 end;
 
+procedure tcolordialogfo.dochange();
+begin
+ if canevent(tmethod(foncolorchange)) then begin
+  foncolorchange(self,colored.value);
+ end;
+end;
+
 procedure tcolordialogfo.mouseeventexe(const sender: twidget;
                var ainfo: mouseeventinfoty);
 var
@@ -861,6 +898,11 @@ begin
   end;
   include(ainfo.eventstate,es_processed);
  end;
+end;
+
+procedure tcolordialogfo.colorchangeev(const sender: TObject);
+begin
+ dochange();
 end;
 
 end.
