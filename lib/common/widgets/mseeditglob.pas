@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2012 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2016 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -73,8 +73,10 @@ type
                   oe1_readonlydialog,
                   oe1_savevalue,oe1_savestate,oe1_saveoptions,
                   oe1_checkvalueafterstatread,
-                  oe1_nocellpaint); //draw widget image instead of cell image
-                                    //for titemedit value edits
+                  oe1_nocellpaint, //draw widget image instead of cell image
+                                   //for titemedit value edits
+                  oe1_thumbtrack   //for tcoloredit
+                 );
  optionsedit1ty = set of optionedit1ty;
 
  dataeditstatety = (des_edited,des_emptytext,des_grayed,

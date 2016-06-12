@@ -67,6 +67,7 @@ type
    procedure texttovalue(var accept: boolean; const quiet: boolean); override;
    procedure paintimage(const canvas: tcanvas); override;
    function geteditframe: framety; override;
+   procedure colorenter(const acolor: colorty);
    procedure buttonaction(var action: buttonactionty;
                     const buttonindex: integer); override;
    procedure dochange(); override;
@@ -185,7 +186,7 @@ procedure paintcolorrect(const canvas: tcanvas; const arect: rectty;
 implementation
 uses
  msecolordialog_mfm,msestockobjects,mseformatstr,sysutils,msepointer,
- msekeyboard,mseguiintf;
+ msekeyboard,mseguiintf,mseeditglob;
 type
  twidget1 = class(twidget);
  
@@ -368,6 +369,13 @@ begin
  end;
 end;
 
+procedure tcustomcoloredit.colorenter(const acolor: colorty);
+begin
+ tcolordropdowncontroller(fdropdown).resetselection; 
+ text:= msestring(colortostring(acolor));
+ checkvalue();
+end;
+
 procedure tcustomcoloredit.buttonaction(var action: buttonactionty;
             const buttonindex: integer);
 var
@@ -383,10 +391,8 @@ begin
    ba_click: begin
     if focused then begin
      co1:= value;
-     if colordialog(co1,foncolorchange) = mr_ok then begin
-      tcolordropdowncontroller(fdropdown).resetselection; 
-      text:= msestring(colortostring(co1));
-      checkvalue;  
+     if colordialog(co1,@docolorchange) = mr_ok then begin
+      colorenter(co1);
      end;
     end;
    end;
@@ -437,21 +443,7 @@ begin
  end;
  inherited valuedefault:= avalue;
 end;
-{
-function tcustomcoloredit.getbuttonellipse: tdropdownbutton;
-begin
- with tdropdownbuttonframe(fframe) do begin
-  result:= tdropdownbutton(buttons[0]);
- end;
-end;
 
-procedure tcustomcoloredit.setbuttonellipse(const avalue: tdropdownbutton);
-begin
- with tdropdownbuttonframe(fframe) do begin
-  tdropdownbutton(buttons[0]).assign(avalue);
- end;
-end;
-}
 function tcustomcoloredit.getonsetvalue: setcoloreventty;
 begin
  result:= setcoloreventty(inherited onsetvalue);
@@ -501,6 +493,70 @@ begin
  result.bottom:= 0;
 end;
 
+procedure tcustomcoloredit.paintimage(const canvas: tcanvas);
+var
+ co1: colorty;
+begin
+ if canvas.drawinfopo <> nil then begin
+  with cellinfoty(canvas.drawinfopo^) do begin
+   co1:= pcolorty(datapo)^;
+  end;
+ end
+ else begin
+  co1:= value;
+ end;
+ paintcolorimage(self,canvas,co1);
+end;
+
+procedure tcustomcoloredit.dochange();
+begin
+ inherited;
+ invalidate();
+ if not (des_updating in fstate) then begin
+  if canevent(tmethod(foncolorchange)) then begin
+   include(fstate,des_updating);
+   try
+    foncolorchange(self,value);
+   finally
+    exclude(fstate,des_updating);
+   end;
+  end;
+ end;
+end;
+
+procedure tcustomcoloredit.docolorchange(const sender: tobject;
+                                                      const acolor: colorty);
+begin //callback from colordialog
+ if not (des_updating in fstate) then begin
+  include(fstate,des_updating);
+  try
+   if oe1_thumbtrack in optionsedit1 then begin
+    colorenter(acolor);
+    if canevent(tmethod(foncolorchange)) then begin
+     foncolorchange(sender,value);
+    end;
+   end
+   else begin
+    if canevent(tmethod(foncolorchange)) then begin
+     foncolorchange(sender,acolor);
+    end;
+   end;
+  finally
+   exclude(fstate,des_updating);
+  end;
+ end;
+end;
+
+procedure tcustomcoloredit.setvaluedata(const source);
+begin
+ value:= colorty(source);
+end;
+
+procedure tcustomcoloredit.getvaluedata(out dest);
+begin
+ colorty(dest):= value;
+end;
+
 procedure paintcolorrect(const canvas: tcanvas; const arect: rectty;
                                    const acolor: colorty);
 var
@@ -541,46 +597,6 @@ begin
   canvas.drawrect(rect1,co1);
   }
  end;
-end;
-
-procedure tcustomcoloredit.paintimage(const canvas: tcanvas);
-var
- co1: colorty;
-begin
- if canvas.drawinfopo <> nil then begin
-  with cellinfoty(canvas.drawinfopo^) do begin
-   co1:= pcolorty(datapo)^;
-  end;
- end
- else begin
-  co1:= value;
- end;
- paintcolorimage(self,canvas,co1);
-end;
-
-procedure tcustomcoloredit.dochange();
-begin
- inherited;
- invalidate();
- docolorchange(self,value);
-end;
-
-procedure tcustomcoloredit.docolorchange(const sender: tobject;
-                                                      const acolor: colorty);
-begin
- if canevent(tmethod(foncolorchange)) then begin
-  foncolorchange(sender,acolor);
- end;
-end;
-
-procedure tcustomcoloredit.setvaluedata(const source);
-begin
- value:= colorty(source);
-end;
-
-procedure tcustomcoloredit.getvaluedata(out dest);
-begin
- colorty(dest):= value;
 end;
 
 { tcolordialogfo }
