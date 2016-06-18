@@ -303,7 +303,7 @@ object sourcefo: tsourcefo
   end
   object formpopup: tpopupmenu
     onupdate = popupmonupdate
-    menu.submenu.count = 30
+    menu.submenu.count = 29
     menu.submenu.items = <    
       item
         action = actionsmo.selecteditpage
@@ -367,7 +367,7 @@ object sourcefo: tsourcefo
         options = [mao_separator, mao_shortcutcaption]
       end    
       item
-        submenu.count = 6
+        submenu.count = 7
         submenu.items = <        
           item
             action = actionsmo.indent
@@ -386,8 +386,15 @@ object sourcefo: tsourcefo
           end        
           item
             action = actionsmo.uppercase
+          end        
+          item
+            caption = 'Convert to &Pascal string'
+            name = 'convpas'
+            state = [as_localcaption, as_localonexecute]
+            onexecute = convpasex
           end>
         caption = '&Modify Selection'
+        name = 'modifyselection'
         state = [as_localcaption]
       end    
       item
@@ -508,12 +515,6 @@ object sourcefo: tsourcefo
         caption = 'Insert Template'
         name = 'instempl'
         state = [as_localcaption]
-      end    
-      item
-        caption = 'Convert to Pascal string'
-        name = 'convpas'
-        state = [as_localcaption, as_localonexecute]
-        onexecute = convpasex
       end    
       item
         action = completeclassact

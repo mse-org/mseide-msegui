@@ -33,8 +33,8 @@ const
   'A&lle',       //mr_all
   'N&ein alle',  //mr_noall
   '&Ignorieren',  //mr_ignore
-  #220'bers&pringen',    //mr_skip
-  '&Alles '#252'berspringen' //mr_skipall
+  #0220'bers&pringen',    //mr_skip
+  '&Alles '#0252'berspringen' //mr_skipall
   );
 
  de_modalresulttextnoshortcut: defaultmodalresulttextty =
@@ -53,28 +53,28 @@ const
   'Alle',       //mr_all
   'Nein alle',  //mr_noall
   'Ignorieren',  //mr_ignore
-  #220'berspringen',    //mr_skip
-  'Alles '#252'berspringen' //mr_skipall
+  #0220'berspringen',    //mr_skip
+  'Alles '#0252'berspringen' //mr_skipall
   );
 
  de_stockcaption: stockcaptionaty = (
   '',                        //sc_none
-  'ist ung'#252'ltig',       //sc_is_invalid
+  'ist ung'#0252'ltig',       //sc_is_invalid
   'Format Fehler',           //sc_Format_error
-  'Wert wird ben'#246'tigt', //sc_Value_is_required
+  'Wert wird ben'#0246'tigt', //sc_Value_is_required
   'Fehler',                  //sc_Error
   'Min',                     //sc_Min
   'Max',                     //sc_Max
   'Bereichs Fehler',         //sc_Range_error  
 
-  '&R'#252'ckg'#228'ngig',   //sc_Undohk  ///              ///
+  '&R'#0252'ckg'#0228'ngig',   //sc_Undohk  ///              ///
   '&Redo',                   //sc_Redohk   //               //
   '&Kopieren',               //sc_Copyhk   // hotkeys       //
   '&Ausschneiden',           //sc_Cuthk    //               //
-  '&Einf'#252'gen',          //sc_Pastehk ///               // hotkeys
-  'Zeile e&inf'#252'gen',    //sc_insert_rowhk ///          //
-  'Zeile a&nf'#252'gen',     //sc_append_rowhk  // hotkeys  //
-  'Zeile &l'#246'schen',     //sc_delete_rowhk ///         ///
+  '&Einf'#0252'gen',          //sc_Pastehk ///               // hotkeys
+  'Zeile e&inf'#0252'gen',    //sc_insert_rowhk ///          //
+  'Zeile a&nf'#0252'gen',     //sc_append_rowhk  // hotkeys  //
+  'Zeile &l'#0246'schen',     //sc_delete_rowhk ///         ///
 
   '&Dir',                 //sc_Dirhk               /// 
   '&Home',                //sc_homehk               //
@@ -84,14 +84,14 @@ const
   '&Verst.Dat.anzeigen',  //sc_Show_hidden_fileshk  //
   '&Filter',              //sc_Filterhk            ///   
   'Speichern',            //sc_save 
-  #214'ffnen',            //sc_open
+  #0214'ffnen',            //sc_open
   'Name',                 //sc_name
   'Verzeichnis erstellen',//sc_create_new_directory
   'Zurück',               //sc_back
-  'Forw'#228'rts',        //sc_forward
-  'Aufw'#228'rts',        //sc_up
+  'Forw'#0228'rts',        //sc_forward
+  'Aufw'#0228'rts',        //sc_up
   'Datei',                //sc_file
-  'existiert, wollen Sie '#252'berschreiben?', //sc_exists_overwrite
+  'existiert, wollen Sie '#0252'berschreiben?', //sc_exists_overwrite
   'wurde geändert, wollen Sie speichern?',     //sc_is_modified_save
   'WARNUNG',                                   //sc_warningupper
   'FEHLER',                                    //sc_errorupper
@@ -100,9 +100,9 @@ const
   'existiert nicht',                           //sc_does_not_exist
   'PASSWORT',                 //sc_passwordupper
   'Ppassworteingabe',         //sc_enterpassword
-  'Ung'#252'ltiges Passwort!',//sc_invalidpassword
+  'Ung'#0252'ltiges Passwort!',//sc_invalidpassword
   'Verzeichnis kann nicht gelesen werden',     //sc_can_not_read_directory
-  'Grafik Format nicht unterst'#252'tzt', //sc_graphic_not_supported
+  'Grafik Format nicht unterst'#0252'tzt', //sc_graphic_not_supported
   'Grafik Format Fehler', //sc_graphic_format_error
   'MS Bitmap',            //sc_MS_Icon
   'MS Icon',              //sc_MS_Icon
@@ -113,16 +113,16 @@ const
   'TARGA Bild',           //sc_TARGA_image
   'TIFF Bild',            //sc_TIFF_image
   'Alle',                 //sc_All
-  'Best'#228'tigung',     //sc_Confirmation
-  'Datensatz l'#246'schen?', //sc_Delete_record_question
+  'Best'#0228'tigung',     //sc_Confirmation
+  'Datensatz l'#0246'schen?', //sc_Delete_record_question
   'Datensatz kopieren?',     //sc_Copy_record_question
   'Seite schliessen',        //sc_close_page
   'Erster',                  //sc_first
   'Vorheriger',              //sc_prior
-  'N'#228'chster',           //sc_next
+  'N'#0228'chster',           //sc_next
   'Letzter',                 //sc_last
-  'Anf'#252'gen',            //sc_append
-  'L'#246'schen',            //sc_delete
+  'Anf'#0252'gen',            //sc_append
+  'L'#0246'schen',            //sc_delete
   'Bearbeiten',              //sc_edit
   'Eintragen',               //sc_post
   'Verwerfen',               //sc_cancel
@@ -130,35 +130,35 @@ const
   'Filter bearbeiten',        //sc_filter_filter
   'Filter Minimum bearbeiten',//sc_edit_filter_min
   'Filter Maximum bearbeiten',//sc_filter_edit_max
-  'Filter r'#252'ckstellen',  //sc_reset_filter
+  'Filter r'#0252'ckstellen',  //sc_reset_filter
   'Filter ein',               //sc_filter_on
   'Suchen',                   //sc_search
   'Automatisch bearbeiten',   //sc_auto_edit
   'Datensatz kopieren',       //sc_copy_record
   'Dialog',                   //sc_dialog
-  'Einf'#252'gen',            //sc_insert
+  'Einf'#0252'gen',            //sc_insert
   'Kopieren',                 //sc_copy
-  'Einf'#252'gen',            //sc_paste
-  'Zeile einf'#252'gen',      //sc_row_insert
-  'Zeile anf'#252'gen',       //sc_row_append
-  'Zeile l'#246'schen',       //sc_row_delete
-  'R'#252'ckg'#228'ngig',     //sc_undo
+  'Einf'#0252'gen',            //sc_paste
+  'Zeile einf'#0252'gen',      //sc_row_insert
+  'Zeile anf'#0252'gen',       //sc_row_append
+  'Zeile l'#0246'schen',       //sc_row_delete
+  'R'#0252'ckg'#0228'ngig',     //sc_undo
   'Wiederherstellen',         //sc_redo
   'Ausschneiden',             //sc_cut
   'Alles markieren',          //sc_select_all
   'Filter aus',               //sc_filter_off
   'Hochformat',               //sc_portrait print orientation
   'Querformat',               //sc_landscape print orientation
-  'Zeile l'#246'schen?',      //sc_Delete_row_question
-  'gew'#228'hlte Zeilen',      //sc_selected_rows
+  'Zeile l'#0246'schen?',      //sc_Delete_row_question
+  'gew'#0228'hlte Zeilen',      //sc_selected_rows
   'Nur Einzeleintrag erlaubt', //sc_Single_item_only 
   'Zellen kopieren',           //sc_Copy_Cells
-  'Zellen einf'#252'gen',      //sc_Paste_Cells
+  'Zellen einf'#0252'gen',      //sc_Paste_Cells
   'Schliessen',                //sc_close
   'Maximieren',                //sc_maximize
   'Normalisieren',             //sc_normalize
   'Minimieren',                //sc_minimize
-  'Feste Gr'#246'sse',         //sc_fix_size
+  'Feste Gr'#0246'sse',         //sc_fix_size
   'Lösen',                     //sc_float
   'Im Fordergrund',            //sc_stay_on_top
   'Im Hintergrund',            //sc_stay_in_background
@@ -170,11 +170,11 @@ function delete_n_selected_rows(const params: array of const): msestring;
 begin
  with params[0] do begin
   if vinteger = 1 then begin
-   result:= 'Gew'#228'hlte Zeile l'#246'schen?';
+   result:= 'Gew'#0228'hlte Zeile l'#0246'schen?';
   end
   else begin
    result:= inttostrmse(vinteger)+
-     widestring(' gew'#228'hlte Zeilen l'#246'schen?');
+     widestring(' gew'#0228'hlte Zeilen l'#0246'schen?');
   end;
  end;    
 end;

@@ -1270,7 +1270,7 @@ object actionsmo: tactionsmo
     )
   end
   object unindent: taction
-    caption = '&Unindent'
+    caption = 'U&nindent'
     onexecute = unidentonexecute
     left = 280
     top = 136

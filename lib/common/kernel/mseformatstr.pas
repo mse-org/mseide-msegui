@@ -1521,7 +1521,7 @@ begin
     end;
     po1^:= '#';
     inc(po1);
-    str1:= inttostr(int2);
+    str1:= '$'+hextostr(card32(int2),4);
     move(pchar(pointer(str1))^,po1^,length(str1));
     inc(po1,length(str1));
    end;

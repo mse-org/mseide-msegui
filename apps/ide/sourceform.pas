@@ -1360,8 +1360,8 @@ begin
         (activepage <> nil) and (popuprow >= 0);
  sender.menu.itembyname('insgui').enabled:= (activepage <> nil);
  sender.menu.itembyname('insuid').enabled:= (activepage <> nil);
- sender.menu.itembyname('convpas').enabled:= (activepage <> nil) and 
-                                                  activepage.edit.hasselection;
+ sender.menu.itembynames(['modifyselection','convpas']).enabled:=
+                      (activepage <> nil) and activepage.edit.hasselection;
  sender.menu.itembyname('addwatch').enabled:= (activepage <> nil) and  
             (sender.mouseinfopo <> nil) and
               (getpascalvarname(activepage.edit,

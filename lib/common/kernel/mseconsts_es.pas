@@ -11,6 +11,7 @@
     
 } 
 unit mseconsts_es;
+{$codepage utf8}
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 uses
@@ -31,7 +32,7 @@ const
   '&Cancelar',   //mr_cancel
   '&Abortar',    //mr_abort
   '&OK',         //mr_ok
-  '&S'#237,      //mr_yes
+  '&S'#0237,      //mr_yes
   '&No',         //mr_no
   '&Todo',       //mr_all
   'N&o todo',    //mr_noall
@@ -51,7 +52,7 @@ const
   'Cancelar',   //mr_cancel
   'Abortar',    //mr_abort
   'OK',         //mr_ok
-  'S'#237,      //mr_yes
+  'S'#0237,      //mr_yes
   'No',         //mr_no
   'Todo',       //mr_all
   'No todo',    //mr_noall
@@ -62,12 +63,12 @@ const
 
  es_stockcaption: stockcaptionaty = (
   '',                           //sc_none
-  'es inv'#225'lido',           //sc_is_invalid
+  'es inv'#0225'lido',           //sc_is_invalid
   'Error de formato',           //sc_Format_error
   'Debe introducir un valor',   //sc_Value_is_required
   'Error',                      //sc_Error
-  'M'#237'n.',                  //sc_Min
-  'M'#225'x.',                  //sc_Max
+  'M'#0237'n.',                  //sc_Min
+  'M'#0225'x.',                  //sc_Max
   'Error de rango',             //sc_Range_error  
 
   '&Deshacer',                  //sc_Undo   ///              ///
@@ -76,7 +77,7 @@ const
   'C&ortar',                    //sc_Cut    //               //
   '&Pegar',                     //sc_Paste ///               // hotkeys
   '&Insertar fila',             //sc_insert_row ///          //
-  '&A'#241'adir fila',          //sc_append_row  // hotkeys  //
+  '&A'#0241'adir fila',          //sc_append_row  // hotkeys  //
   '&Borrar fila',               //sc_delete_row ///         ///
 
   '&Carpetas',                    //sc_Dir               /// 
@@ -90,23 +91,23 @@ const
   'Abrir',                        //sc_open
   'Nombre',                       //sc_name1
   'Crear una carpeta nueva',               //sc_create_new_directory
-  'Atr'#225's',                   //sc_back
+  'Atr'#0225's',                   //sc_back
   'Adelante',                     //sc_forward
   'Arriba',                       //sc_up
   'Archivo',                               //sc_file
-  'existe, '#191'quiere sobreescribirlo?', //sc_exists_overwrite
-  'ha sido modificado. '#191'Guardar?',    //sc_is_modified_save
+  'existe, '#0191'quiere sobreescribirlo?', //sc_exists_overwrite
+  'ha sido modificado. '#0191'Guardar?',    //sc_is_modified_save
   'ADVERTENCIA',                       //sc_warningupper
   'ERROR',                             //sc_errorupper
-  'Excepci'#243'n',                    //sc_exception
+  'Excepci'#0243'n',                    //sc_exception
   'Sistema',                           //sc_system
   'no existe',                         //sc_does_not_exist
-  'CONTRASE'#209'A',                   //sc_passwordupper
-  'Introduzca contrase'#241'a',        //sc_enterpassword
-  #161'contrase'#241'a incorrecta!',   //sc_invalidpassword
+  'CONTRASE'#0209'A',                   //sc_passwordupper
+  'Introduzca contrase'#0241'a',        //sc_enterpassword
+  #0161'contrase'#0241'a incorrecta!',   //sc_invalidpassword
   'No puedo leer la carpeta',          //sc_can_not_read_directory
-  'Formato gr'#225'fico no soportado', //sc_graphic_not_supported
-  'Error de formato gr'#225'fico',     //sc_graphic_format_error
+  'Formato gr'#0225'fico no soportado', //sc_graphic_not_supported
+  'Error de formato gr'#0225'fico',     //sc_graphic_format_error
   'Bitmap MS',                         //sc_MS_Icon
   'Icono MS',                          //sc_MS_Icon
   'Imagen JPEG',                       //sc_JPEG_Image 
@@ -117,33 +118,33 @@ const
   'Imagen TIFF',                       //sc_TIFF_image
   'Todo',                              //sc_All
   'Confirme',                          //sc_Confirmation
-  #191'Borrar el registro?',           //sc_Delete_record_question
-  #191'Copiar el registro?',           //sc_Copy_record_question
-  'Cerrar p'#225'gina',                //sc_close_page
+  #0191'Borrar el registro?',           //sc_Delete_record_question
+  #0191'Copiar el registro?',           //sc_Copy_record_question
+  'Cerrar p'#0225'gina',                //sc_close_page
   'Primero',                           //sc_first
   'Anterior',                          //sc_prior
   'Siguiente',                         //sc_next
-  #218'ltimo',                         //sc_last
-  'A'#241'adir',                       //sc_append
+  #0218'ltimo',                         //sc_last
+  'A'#0241'adir',                       //sc_append
   'Borrar',                            //sc_delete
   'Editar',                            //sc_edit
   'Guardar',                           //sc_post
   'Cancelar',                          //sc_cancel
   'Refrescar',                         //sc_refresh
-  'Filtro edici'#243'n',               //sc_filter_filter
-  'Filtro edici'#243'n m'#237'nimo',   //sc_edit_filter_min
-  'Filtro edici'#243'n m'#225'ximo',   //sc_filter_edit_max
+  'Filtro edici'#0243'n',               //sc_filter_filter
+  'Filtro edici'#0243'n m'#0237'nimo',   //sc_edit_filter_min
+  'Filtro edici'#0243'n m'#0225'ximo',   //sc_filter_edit_max
   'Reiniciar filtro',                  //sc_reset_filter
   'Filtro activo',                     //sc_filter_on
   'Buscar',                            //sc_search
-  'Edici'#243'n autom'#225'tica',      //sc_autoedit
+  'Edici'#0243'n autom'#0225'tica',      //sc_autoedit
   'Copiar registro',                   //sc_copy_record
-  'Di'#225'logo',                      //sc_dialog
+  'Di'#0225'logo',                      //sc_dialog
   'Insertar',                          //sc_insert
   'Copiar',                            //sc_copy
   'Pegar',                             //sc_paste
   'Insertar fila',                     //sc_row_insert
-  'A'#241'adir fila',                  //sc_row_append
+  'A'#0241'adir fila',                  //sc_row_append
   'Borrar fila',                       //sc_row_delete
   'Deshacer',                          //sc_undo
   'Rehacer',                           //sc_redo
@@ -152,7 +153,7 @@ const
   'Filtro apagado',                    //sc_filter_off
   'Vertical',                          //sc_portrait print orientation
   'Apaisado',                          //sc_landscape print orientation
-  #191'Borrar fila?',                  //sc_Delete_row_question
+  #0191'Borrar fila?',                  //sc_Delete_row_question
   'filas seleccionadas?',              //sc_selected_rows
   'un elemento solamente',             //sc_Single_item_only 
   'Copiar Celdas',                     //sc_Copy_Cells
@@ -161,7 +162,7 @@ const
   'Maximizar',            //sc_maximize
   'Restaurar',            //sc_normalize
   'Minimizar',            //sc_minimize
-  'Ajustar tama'#241'o',  //sc_fix_size
+  'Ajustar tama'#0241'o',  //sc_fix_size
   'Flotar',               //sc_float
   'Permanecer en el primer plano',     //sc_stay_on_top
   'Permanecer en el fondo',            //sc_stay_in_background
@@ -173,10 +174,10 @@ function delete_n_selected_rows(const params: array of const): msestring;
 begin
  with params[0] do begin
   if vinteger = 1 then begin
-   result:= #191'Borrar la fila seleccionada?'
+   result:= #0191'Borrar la fila seleccionada?'
   end
   else begin
-   result:= #191'Borrar '+inttostrmse(vinteger)+' filas seleccionadas?';
+   result:= #0191'Borrar '+inttostrmse(vinteger)+' filas seleccionadas?';
   end;
  end;
 end;
