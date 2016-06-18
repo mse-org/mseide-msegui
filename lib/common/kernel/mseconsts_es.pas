@@ -11,7 +11,6 @@
     
 } 
 unit mseconsts_es;
-{$codepage utf8}
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 uses
