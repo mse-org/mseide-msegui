@@ -33,9 +33,12 @@ type
  menulayoutoptionty = (mlo_horz,mlo_keymode,mlo_main,mlo_childreninactive); 
                                //used for popup close by second click
  menulayoutoptionsty = set of menulayoutoptionty;
+ menulayoutstatety = (mls_valid,mls_updating);
+ menulayoutstatesty = set of menulayoutstatety;
 
  menulayoutinfoty = record
   menu: tmenuitem;
+  state: menulayoutstatesty;
   activeitem: integer;
   popupdirection: graphicdirectionty;
   mousepos: pointty;
@@ -78,10 +81,12 @@ type
   protected
    flayout: menulayoutinfoty;
    flocalframeandface: boolean;
+   procedure clientrectchanged; override;
    procedure objectevent(const sender: tobject; 
                         const event: objecteventty); override;
    function transientforwindoworwindow: twindow;
    function translatetoscreen(const value: pointty): pointty; virtual;
+   procedure invalidatelayout();
    procedure updatelayout; virtual;
    procedure nextpopupshowing; virtual;
    function isinpopuparea(const apos: pointty): boolean; virtual;
@@ -108,9 +113,11 @@ type
    procedure release1(const acancelmodal: boolean); virtual;
   public
    constructor create(instance: ppopupmenuwidget;
-       const amenu: tmenuitem; const atransientfor: twindow;
-       const aowner: tcomponent = nil; const menucomp: tcustommenu = nil); overload;
+              const amenu: tmenuitem; const atransientfor: twindow;
+                          const aowner: tcomponent = nil;
+                                  const menucomp: tcustommenu = nil); overload;
    destructor destroy; override;
+   procedure paint(const canvas: tcanvas); override;
    procedure menuchanged(const sender: tmenuitem);
    procedure release(const nomodaldefer: boolean=false); override;
    procedure updatetemplates;
@@ -134,7 +141,7 @@ type
 //   fstackedoverbefore: twindow;
    fstackedunderbefore: twindow;
    fstate: mainmenuwidgetstatesty;
-   flayoutcalcing: integer;
+//   flayoutcalcing: integer;
    procedure internalsetactiveitem(const Value: integer;
                          const aclicked: boolean; const force: boolean;
                          const nochildreninactive: boolean); override;
@@ -144,14 +151,15 @@ type
    procedure restorefocus;
    function checkprevpopuparea(const apos: pointty): boolean; override;
    procedure nextpopupshowing; override;
-   procedure clientrectchanged; override;
    procedure getautopaintsize(var asize: sizety); override;
    procedure updatelayout; override;
    procedure updatepos; override;
    function isinpopuparea(const apos: pointty): boolean; override;
-   procedure doshortcut(var info: keyeventinfoty; const sender: twidget); override;
+   procedure doshortcut(var info: keyeventinfoty;
+                                             const sender: twidget); override;
    procedure childdeactivated(const sender: tpopupmenuwidget); override;
-   procedure activatemenu(const keymode,aclicked,nokeymodereset: boolean); override;
+   procedure activatemenu(
+               const keymode,aclicked,nokeymodereset: boolean); override;
    procedure deactivatemenu; override;
    procedure selectmenu(const keymode: boolean); override;
    procedure internalcreateframe; override;
@@ -1066,7 +1074,7 @@ begin
   else begin
    flayout.checkboxframetemplate:= nil;
   end;
-  updatelayout;
+  invalidatelayout();
  end;
 end;
 
@@ -1166,15 +1174,32 @@ begin
  setwidgetrect(rect1);
 end;
 
-procedure tpopupmenuwidget.updatelayout;
+procedure tpopupmenuwidget.updatelayout();
 begin
- flayout.popupdirection:= gd_right;
- calcmenulayout(flayout,getcanvas,
-//          application.screenrect(transientforwindoworwindow).cy -
-          application.workarea(transientforwindoworwindow).cy -
-          innerclientframewidth.cy);
- movemenulayout(flayout,innerclientrect.pos);            
- updatepos;
+ if flayout.state * [mls_valid,mls_updating] = [] then begin
+  include(flayout.state,mls_updating);
+  try
+   flayout.popupdirection:= gd_right;
+   calcmenulayout(flayout,getcanvas,
+  //          application.screenrect(transientforwindoworwindow).cy -
+            application.workarea(transientforwindoworwindow).cy -
+            innerclientframewidth.cy);
+   movemenulayout(flayout,innerclientrect.pos);            
+   updatepos();
+   invalidate();
+   include(flayout.state,mls_valid);
+  finally
+   exclude(flayout.state,mls_updating);
+  end;
+ end;
+end;
+
+procedure tpopupmenuwidget.invalidatelayout();
+begin
+ if not (csloading in componentstate)  then begin
+  exclude(flayout.state,mls_valid);
+  invalidate();
+ end;
 end;
 
 procedure tpopupmenuwidget.nextpopupshowing;
@@ -1192,7 +1217,7 @@ begin
  flayout.menu.onchange:= {$ifdef FPC}@{$endif}menuchanged;
  fposrect:= aposrect;
  fposition:= aposition;
- updatelayout;
+ updatelayout();
  if fprevpopup <> nil then begin
   frefpos:= fprevpopup.screenpos;
   fprevpopup.window.registermovenotification(ievent(self));
@@ -1222,7 +1247,7 @@ end;
 
 procedure tpopupmenuwidget.menuchanged(const sender: tmenuitem);
 begin
- updatelayout;
+ invalidatelayout();
 end;
 
 procedure tpopupmenuwidget.dopaintforeground(const canvas: tcanvas);
@@ -1589,6 +1614,14 @@ begin
  flayout.mousepos:= application.mouse.pos;
 end;
 
+procedure tpopupmenuwidget.paint(const canvas: tcanvas);
+begin
+ if not (mls_valid in flayout.state) then begin
+  updatelayout();
+ end;
+ inherited;
+end;
+
 procedure tpopupmenuwidget.dokeydown(var info: keyeventinfoty);
 
  procedure checkshortcut(widget: tpopupmenuwidget);
@@ -1740,6 +1773,15 @@ begin
  widget1.release1(cancelmodal);
 end;
 
+procedure tpopupmenuwidget.clientrectchanged;
+begin
+ inherited;
+ if not (mls_updating in flayout.state) then begin
+  invalidatelayout();
+  updatelayout();
+ end;
+end;
+
 procedure tpopupmenuwidget.objectevent(const sender: tobject;
   const event: objecteventty);
 var
@@ -1758,16 +1800,16 @@ begin
                           (sender = ftemplates.itemframe) or 
                           (sender = ftemplates.itemface)) then begin
    updatetemplates; //refresh
-   if not (csloading in componentstate) then begin
-    updatelayout;
-   end;
+//   if not (csloading in componentstate) then begin
+//    invalidatelayout();
+//   end;
   end;
  end;
 end;
 
 procedure tpopupmenuwidget.fontchanged;
 begin
- updatelayout;
+ invalidatelayout();
  if fparentwidget <> nil then begin
   fparentwidget.dolayout(self);
  end;
@@ -1842,7 +1884,7 @@ end;
 procedure tcustommainmenuwidget.loaded;
 begin
  inherited;
- updatelayout;
+// updatelayoutx();
 end;
 
 procedure tcustommainmenuwidget.updatepos;
@@ -1855,13 +1897,13 @@ begin
  asize:= addsize(flayout.sizerect.size,innerframewidth);
 end;
 
-procedure tcustommainmenuwidget.updatelayout;
+procedure tcustommainmenuwidget.updatelayout();
 var
  rect1: rectty;
  size1: sizety;
 begin
- if flayoutcalcing = 0 then begin
-  inc(flayoutcalcing);
+ if flayout.state * [mls_valid,mls_updating] = [] then begin
+  include(flayout.state,mls_updating);
   try
    size1:= innerclientrect.size;
    if ow1_autowidth in foptionswidget1 then begin
@@ -1891,16 +1933,12 @@ begin
     end;
    end;
    widgetrect:= rect1;
+   include(flayout.state,mls_valid);
+   invalidate();
   finally
-   dec(flayoutcalcing);
+   exclude(flayout.state,mls_updating);
   end;
  end;
-end;
-
-procedure tcustommainmenuwidget.clientrectchanged;
-begin
- inherited;
- updatelayout;
 end;
 
 procedure tcustommainmenuwidget.nextpopupshowing;
@@ -2111,8 +2149,9 @@ begin
  setlockedparentwidget(aparent);
  flayout.options:= [mlo_horz,mlo_main,mlo_childreninactive];
  flayout.popupdirection:= gd_down;
- if not (csloading in aparent.ComponentState) and not (csloading in componentstate) then begin
-  updatelayout;
+ if not (csloading in aparent.ComponentState) and 
+                             not (csloading in componentstate) then begin
+//  updatelayout();
   visible:= true;
  end;
 end;
@@ -2146,7 +2185,7 @@ begin
  flayout.options:= [mlo_horz,mlo_main,mlo_childreninactive];
  flayout.popupdirection:= gd_down;
  if not (csloading in componentstate) then begin
-  updatelayout;
+//  updatelayout;
  end;
  visible:= true;
 end;
@@ -2189,7 +2228,7 @@ begin
    include(flayout.options,mlo_horz);     
   end;
   if not (csloading in componentstate) then begin
-   updatelayout;
+//   invalidatelayout();
   end;
  end;
 end;
@@ -2201,7 +2240,7 @@ begin
  if (event = oe_changed) and (sender = fmenucomp) and
                                   not (csloading in componentstate) then begin
   assigntemplate(fmenucomp.template);
-  invalidate;                            
+//  invalidatelayout();                            
  end; 
 end;
 

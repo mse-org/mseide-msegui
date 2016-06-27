@@ -652,6 +652,7 @@ type
  twindow1 = class(twindow);
  tcustomframe1 = class(tcustomframe);
  treader1 = class(treader);
+ tframemenuwidget1 = class(tframemenuwidget);
 
 
 function createmseform(const aclass: tclass; 
@@ -1040,7 +1041,9 @@ begin
  end;
  inherited;
  if fmainmenuwidget <> nil then begin
-  fmainmenuwidget.loaded;
+  fmainmenuwidget.visible:= true;
+//  fmainmenuwidget.loaded;
+//  include(tframemenuwidget1(fmainmenuwidget).fwidgetstate,ws_visible);
  end;
  updateoptions;
  updatemainmenutemplates;
