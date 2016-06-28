@@ -230,9 +230,10 @@ function dirhasentries(const adirname: filenamety;
                          const ainclude: fileattributesty = [fa_all];
                          const aexclude: fileattributesty = []): boolean;
 
-function findfile(const filename: filenamety;
+function findfile(filename: filenamety; //no const bcause of var path param
                              const dirnames: array of filenamety;
-                             out path: filenamety): boolean; overload;
+                             var path: filenamety): boolean; overload;
+                               //no out because of caller sid finalization
             //true if found
 function findfile(const filename: filenamety; const dirnames:
                          array of filenamety): boolean; overload;
@@ -1061,8 +1062,8 @@ begin
  end;
 end;
 
-function findfile(const filename: filenamety; 
-           const dirnames: array of filenamety; out path: filenamety): boolean;
+function findfile(filename: filenamety;
+           const dirnames: array of filenamety; var path: filenamety): boolean;
             //true if found
 //var
 // str1: filenamety;
