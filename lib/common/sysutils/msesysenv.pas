@@ -164,6 +164,7 @@ type
 //   procedure readhelps(reader: treader);
 //   procedure writehelps(writer: twriter);
    procedure setoptions(const avalue: sysenvoptionsty);
+   function getdefcount: int32;
   protected
    procedure loaded; override;
    procedure defineproperties(filer: tfiler); override;
@@ -208,6 +209,7 @@ type
                                    searchinvars: array of integer): filenamety;
                  //bringt letztes filevorkommen
    property defs: sysenvdefarty read fdefs write setdefs;
+   property defcount: int32 read getdefcount;
   published
    property options: sysenvoptionsty read foptions write setoptions 
                                          default defaultsysenvmanageroptions;
@@ -803,7 +805,8 @@ var
    with argumentdef do begin
     result:= kind in typen;
     if result then begin
-     result:= (msecomparestrlen(aname,name) = 0) or checkanames;
+//     result:= (msecomparestrlen(aname,name) = 0) or checkanames;
+     result:= (msecomparestrlen(name,aname) = 0) or checkanames;
     end;
    end;
   end;
@@ -834,13 +837,13 @@ var
 
  procedure findswitch(str1: msestring);
  var
-  int1: integer;
+  pardefindex1: integer;
 
   procedure setoptargument;
   var
    needed: boolean;
   begin
-   needed:= not (arf_argopt in arguments[int1].flags);
+   needed:= not (arf_argopt in arguments[pardefindex1].flags);
    inc(index);
    if index < length(strar1) then begin
     if isparameter(strar1[index]) then begin
@@ -849,11 +852,11 @@ var
       errorme(ern_missedargument,strar1[index]);
      end
      else begin
-      errorme(setdef(int1,nil,[arf_envdefined]),strar1[index]);
+      errorme(setdef(pardefindex1,nil,[arf_envdefined]),strar1[index]);
      end;
     end
     else begin
-     errorme(setdef(int1,strar1[index],[arf_envdefined]),strar1[index]);
+     errorme(setdef(pardefindex1,strar1[index],[arf_envdefined]),strar1[index]);
     end;
    end
    else begin
@@ -862,24 +865,24 @@ var
      errorme(ern_missedargument,strar1[index]);
     end
     else begin
-     errorme(setdef(int1,nil,[arf_envdefined]),strar1[index]);
+     errorme(setdef(pardefindex1,nil,[arf_envdefined]),strar1[index]);
     end;
    end;
   end;
 
   procedure checkarguments;
   begin
-   case arguments[int1].kind of
+   case arguments[pardefindex1].kind of
     ak_pararg: begin
      if length(str1) > 0 then begin
-      errorme(setdef(int1,str1,[arf_envdefined]),str1)
+      errorme(setdef(pardefindex1,str1,[arf_envdefined]),str1)
      end
      else begin
       setoptargument;
      end;
     end;
     ak_par: begin
-     errorme(setdef(int1,nil,[arf_envdefined]),str1);
+     errorme(setdef(pardefindex1,nil,[arf_envdefined]),str1);
      if length(str1) > 0 then begin
       findswitch(str1);
      end;
@@ -895,10 +898,10 @@ var
    if isparameter(str1) then begin //langer parameter
     setlength(strar2,2);
     splitstring(str1,strar2,'=');
-    int1:= finddef(at_pars,strar2[0]);
-    if int1 >= 0 then begin
-     with fenvvars[int1] do begin
-      case arguments[int1].kind of
+    pardefindex1:= finddef(at_pars,strar2[0]);
+    if pardefindex1 >= 0 then begin
+     with fenvvars[pardefindex1] do begin
+      case arguments[pardefindex1].kind of
        ak_par: begin
         if length(strar2) > 1 then begin
          errorme(ern_invalidargument,strar1[index]);
@@ -909,7 +912,7 @@ var
        end;
        ak_pararg: begin
         if length(strar2) > 1 then begin
-         errorme(setdef(int1,strar2[1],[arf_envdefined]),strar1[index]);
+         errorme(setdef(pardefindex1,strar2[1],[arf_envdefined]),strar1[index]);
         end
         else begin
          setoptargument;
@@ -919,29 +922,29 @@ var
      end;
     end
     else begin
-     if int1 = -1 then begin
+     if pardefindex1 = -1 then begin
       errorme(ern_invalidparameter,strar1[index]);
      end;
     end;
    end
    else begin
-    int1:= finddef(at_pars,str1);
-    if int1 < 0 then begin
-     int1:= finddef(at_pars,str1[1]);
-     if int1 >= 0 then begin
+    pardefindex1:= finddef(at_pars,str1);
+    if pardefindex1 < 0 then begin
+     pardefindex1:= finddef(at_pars,str1[1]);
+     if pardefindex1 >= 0 then begin
       str1:= copy(str1,2,maxint);
-      if int1 >= 0 then begin
+      if pardefindex1 >= 0 then begin
        checkarguments;
       end;
      end
      else begin
-      if int1 = -1 then begin
+      if pardefindex1 = -1 then begin
        errorme(ern_invalidparameter,strar1[index]);
       end;
      end;
     end
     else begin
-     str1:= copy(str1,length(arguments[int1].name)+1,maxint);
+     str1:= copy(str1,length(arguments[pardefindex1].name)+1,maxint);
      checkarguments;
     end;
    end;
@@ -1252,6 +1255,11 @@ begin
                          (seo_appterminateonexception in avalue) then begin
   application.options:= application.options + [apo_terminateonexception];
  end;
+end;
+
+function tsysenvmanager.getdefcount: int32;
+begin
+ result:= length(fdefs);
 end;
 
 function tsysenvmanager.getstatpriority: integer;
