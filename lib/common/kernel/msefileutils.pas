@@ -233,8 +233,12 @@ function dirhasentries(const adirname: filenamety;
 function findfile(filename: filenamety; //no const bcause of var path param
                              const dirnames: array of filenamety;
                              var path: filenamety): boolean; overload;
-                               //no out because of caller sid finalization
-            //true if found
+                               //no out because of caller side finalization
+                               //true if found, path not touched if not found
+function findfile(filename: filenamety; //no const bcause of var path param
+                             var path: filenamety): boolean; overload;
+                               //no out because of caller side finalization
+                               //true if found, path not touched if not found
 function findfile(const filename: filenamety; const dirnames:
                          array of filenamety): boolean; overload;
 function findfile(const filename: filenamety): boolean; overload;
@@ -1064,13 +1068,30 @@ end;
 
 function findfile(filename: filenamety;
            const dirnames: array of filenamety; var path: filenamety): boolean;
-            //true if found
-//var
-// str1: filenamety;
+                               //true if found, path not touched if not found
+var
+ fna1: filenamety;
 begin
- path:= searchfile(filename,dirnames);
- if path <> '' then begin
-  path:= path + msefileutils.filename(filename);
+ fna1:= searchfile(filename,dirnames);
+ if fna1 <> '' then begin
+  path:= fna1 + msefileutils.filename(filename);
+  result:= true;
+ end
+ else begin
+  result:= false;
+ end;
+end;
+
+function findfile(filename: filenamety; //no const bcause of var path param
+                             var path: filenamety): boolean;
+                               //no out because of caller side finalization
+                               //true if found, path not touched if not found
+var
+ fna1: filenamety;
+begin
+ fna1:= searchfile(filename);
+ if fna1 <> '' then begin
+  path:= fna1 + msefileutils.filename(filename);
   result:= true;
  end
  else begin
