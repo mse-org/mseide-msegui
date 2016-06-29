@@ -1625,6 +1625,15 @@ end;
 
 procedure tcustomscrollbar.checktemplate(const sender: tobject);
 begin
+ if fface <> nil then begin
+  fface.checktemplate(sender);
+ end;
+ if fface1 <> nil then begin
+  fface1.checktemplate(sender);
+ end;
+ if fface2 <> nil then begin
+  fface2.checktemplate(sender);
+ end;
  if fdrawinfo.areas[sbbu_move].face <> nil then begin
   fdrawinfo.areas[sbbu_move].face.checktemplate(sender);
  end;
