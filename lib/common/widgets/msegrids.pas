@@ -190,10 +190,10 @@ const
  defaultcoltextflags = [tf_ycentered,tf_noselect];
  defaultactivecoltextflags = defaultcoltextflags - [tf_noselect];
  defaultgridlinewidth = 1;
- defaultdatalinecolor = cl_dkgray;
- defaultfixlinecolor = cl_black;
+ defaultdatalinecolor = cl_gridline{cl_dkgray};
+ defaultfixlinecolor = cl_gridlinefix{cl_black};
 
- defaultselectedcellcolor = cl_active;
+ defaultselectedcellcolor = cl_gridselect{cl_active};
  defaultdatacoloptions = [{co_selectedcolor,}co_savestate,co_savevalue,
                           {co_rowfont,co_rowcolor,co_zebracolor,}co_mousescrollrow];
  defaultdatacoloptions1 = [co1_rowfont,co1_rowcolor,co1_zebracolor,
@@ -2404,7 +2404,7 @@ type
 //   property gridframewidth: integer read fgridframewidth 
 //                        write setgridframewidth default 0;
    property gridframecolor: colorty read fgridframecolor 
-                        write setgridframecolor default cl_black;
+                        write setgridframecolor default cl_gridframe;
 
                       //rowproperties index = -1 -> focused row
    property rowcolors: tcolorarrayprop read frowcolors write setrowcolors;
@@ -9437,7 +9437,7 @@ begin
  fdatarowheightmin:= 1;
  fdatarowheightmax:= maxint;
 
- fgridframecolor:= cl_black;
+ fgridframecolor:= cl_gridframe;
 
  fdatacols:= createdatacols;
  ffixcols:= createfixcols;

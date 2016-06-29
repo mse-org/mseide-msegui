@@ -95,7 +95,14 @@ const
  cl_zebra =                  cl_mapped + 18;
  cl_grayed =                 cl_mapped + 19;
  cl_grayedshadow =           cl_mapped + 20;
- cl_lastmapped =             cl_mapped + 21;
+ 
+ cl_gridactive =             cl_mapped + 21;
+ cl_gridfocus =              cl_mapped + 22;
+ cl_gridselect =             cl_mapped + 23;
+ cl_gridline =               cl_mapped + 24;
+ cl_gridlinefix =            cl_mapped + 25;
+ cl_gridframe =              cl_mapped + 26;
+ cl_lastmapped =             cl_mapped + 27;
 
  cl_0 =                      cl_namedrgb + 0; //select colorbackground for monochrome bitmaps
  cl_1 =                      cl_namedrgb + 1; //select colorforeground
@@ -213,7 +220,14 @@ const
     (name: 'cl_emptytextbackground';  rgb:   (blue: $00; green: $00; red: $ff; res: $00)), //17
     (name: 'cl_zebra';  rgb:                 (blue: $ff; green: $ff; red: $e0; res: $00)), //18
     (name: 'cl_grayed'; rgb:                 (blue: $80; green: $80; red: $80; res: $00)), //19
-    (name: 'cl_grayedshadow'; rgb:           (blue: $ff; green: $ff; red: $ff; res: $00))  //20
+    (name: 'cl_grayedshadow'; rgb:           (blue: $ff; green: $ff; red: $ff; res: $00)), //20
+
+    (name: 'cl_gridactive';  rgb:            (blue: $e0; green: $e0; red: $e0; res: $00)), //21
+    (name: 'cl_gridfocus';  rgb:             (blue: $e0; green: $e0; red: $e0; res: $00)), //22
+    (name: 'cl_gridselect';  rgb:            (blue: $e0; green: $e0; red: $e0; res: $00)), //23
+    (name: 'cl_gridline';  rgb:              (blue: $80; green: $80; red: $80; res: $00)), //24
+    (name: 'cl_gridlinefix'; rgb:            (blue: $00; green: $00; red: $00; res: $00)), //25
+    (name: 'cl_gridframe'; rgb:              (blue: $00; green: $00; red: $00; res: $00))  //26
    );
 
  defaultnamedrgb: array[0..namedrgbcolorcount-1]
