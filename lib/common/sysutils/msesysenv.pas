@@ -67,7 +67,8 @@ type
                    seo_haltonerror,seo_exceptiononerror,seo_exitoninfo,
                    seo_noerrormess,
                    seo_tooutput, //info -> outputpipe
-                   seo_toerror   //errormeldung -> errorpipe
+                   seo_toerror,  //errormeldung -> errorpipe
+                   seo_noautoinit //no call of init in loaded()
                    );
  sysenvoptionsty = set of sysenvoptionty;
 
@@ -177,7 +178,13 @@ type
    function getstatpriority: integer;
   public
    constructor create(aowner: tcomponent); override;
-   procedure init(const arguments: array of argumentdefty);
+   procedure init(const arguments: array of argumentdefty;
+                                           const values: msestringarty);
+   procedure init(const arguments: array of argumentdefty); 
+                                           //use commandline values
+   procedure init(const values: msestringarty); //use defs
+   procedure init(); //use defs and commandline values
+
    procedure processinfo(index: integer; value: string);
    procedure errormessage(const mess: msestring);
    procedure printmessage(value: msestring);
@@ -774,7 +781,8 @@ begin
  result:= setdef(index,strar1,adefined);
 end;
 
-procedure tsysenvmanager.init(const arguments: array of argumentdefty);
+procedure tsysenvmanager.init(const arguments: array of argumentdefty;
+                                                const values: msestringarty);
 
 var
  index: integer;
@@ -799,14 +807,15 @@ var
       inc(po1);
      end;
     end;
-   end;
+   end; //checkanames
 
   begin //checkname
    with argumentdef do begin
     result:= kind in typen;
     if result then begin
 //     result:= (msecomparestrlen(aname,name) = 0) or checkanames;
-     result:= (msecomparestrlen(name,aname) = 0) or checkanames;
+     result:= (aname = '') or (msecomparestrlen(name,aname) = 0) or 
+                                                            checkanames();
     end;
    end;
   end;
@@ -973,8 +982,8 @@ begin            //init
    values[0]:= arguments[int1].initvalue;
   end;
  end;
- strar1:= getcommandlinearguments;
- index:= 1;
+ strar1:= values;
+ index:= 0;
  while index < length(strar1) do begin
   str1:= strar1[index];
   if isparameter(str1) then begin
@@ -1024,10 +1033,33 @@ begin            //init
     {$endif};
    end;
    if (arf_mandatory in flags) and not defined[int1] then begin
-    errorme(ern_mandatoryparameter,'-'+name);
+    str1:= '';
+    if not (kind in [ak_arg]) then begin
+     str1:= '-';
+    end;
+    errorme(ern_mandatoryparameter,str1+name);
    end;
   end;
  end;
+end;
+
+procedure tsysenvmanager.init(const arguments: array of argumentdefty);
+begin
+ init(arguments,copy(getcommandlinearguments(),1,bigint));
+end;
+
+procedure tsysenvmanager.init(const values: msestringarty); //use defs
+var
+ ar1: argumentdefarty;
+ ar2: msestringararty;
+begin
+ defstoarguments(fdefs,ar1,ar2);
+ init(ar1,values);
+end;
+
+procedure tsysenvmanager.init(); //use defs and commandline values
+begin
+ init(copy(getcommandlinearguments(),1,bigint));
 end;
 
 procedure tsysenvmanager.processinfo(index: integer; value: string);
@@ -1041,14 +1073,16 @@ procedure tsysenvmanager.setoninit(const Value: sysenvmanagereventty);
 begin
  foninit := Value;
  if not (csloading in componentstate) then begin
-  doinit;
+  doinit();
  end;
 end;
 
 procedure tsysenvmanager.loaded;
 begin
  inherited;
- doinit;
+ if not (seo_noautoinit in foptions) then begin
+  doinit();
+ end;
 end;
 
 procedure readdefdata(const reader: treader; var data);
