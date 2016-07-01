@@ -152,7 +152,7 @@ type
    procedure setvalue(index: integer; const Value: msestring);
    procedure setvalues(index: integer; const Value: msestringarty);
    function setdef(index: integer; avalue: msestringarty;
-             adefined: argumentflagsty): sysenverrornrty; overload;
+                       adefined: argumentflagsty): sysenverrornrty; overload;
    function setdef(index: integer; avalue: msestring;
              adefined: argumentflagsty): sysenverrornrty; overload;
    function getintegervalue1(index: integer): integer;
@@ -942,9 +942,7 @@ var
      pardefindex1:= finddef(at_pars,str1[1]);
      if pardefindex1 >= 0 then begin
       str1:= copy(str1,2,maxint);
-      if pardefindex1 >= 0 then begin
-       checkarguments;
-      end;
+      checkarguments;
      end
      else begin
       if pardefindex1 = -1 then begin
@@ -964,7 +962,7 @@ var
  end;
 
 var
- int1: integer;
+ i1: integer;
  str1: msestring;
 // {$ifdef UNIX}
 // po1: pchar;
@@ -974,12 +972,12 @@ begin            //init
   exit;
  end;
  setlength(fenvvars,high(arguments)+1);
- for int1:= 0 to high(fenvvars) do begin
-  with fenvvars[int1] do begin
-   flags:= arguments[int1].flags;
-   name:= arguments[int1].name;
+ for i1:= 0 to high(fenvvars) do begin
+  with fenvvars[i1] do begin
+   flags:= arguments[i1].flags;
+   name:= arguments[i1].name;
    setlength(values,1);
-   values[0]:= arguments[int1].initvalue;
+   values[0]:= arguments[i1].initvalue;
   end;
  end;
  strar1:= values;
@@ -991,9 +989,9 @@ begin            //init
    findswitch(str1);
   end
   else begin
-   int1:= finddef([ak_arg],'');
-   if int1 >= 0 then begin
-    errorme(setdef(int1,str1,[arf_envdefined]),str1);
+   i1:= finddef([ak_arg],'');
+   if i1 >= 0 then begin
+    errorme(setdef(i1,str1,[arf_envdefined]),str1);
    end
    else begin
     errorme(ern_invalidargument,str1);
@@ -1001,16 +999,16 @@ begin            //init
   end;
   inc(index);
  end;
- for int1:= 0 to high(arguments) do begin
-  if (arf_help in arguments[int1].flags) and 
-        (fenvvars[int1].flags * arf_defined <> []) then begin
+ for i1:= 0 to high(arguments) do begin
+  if (arf_help in arguments[i1].flags) and 
+        (fenvvars[i1].flags * arf_defined <> []) then begin
    printhelp;
    application.terminated:= true;
    exit;
   end;
  end;
- for int1:= 0 to high(arguments) do begin
-  with arguments[int1] do begin
+ for i1:= 0 to high(arguments) do begin
+  with arguments[i1] do begin
    if kind = ak_envvar then begin
     {$ifdef mswindows}
     str1:=
@@ -1028,11 +1026,11 @@ begin            //init
     end;
 }
     if sys_getenv(name,str1) then begin
-     errorme(setdef(int1,str1,[arf_envdefined]),name);
+     errorme(setdef(i1,str1,[arf_envdefined]),name);
     end;
     {$endif};
    end;
-   if (arf_mandatory in flags) and not defined[int1] then begin
+   if (arf_mandatory in flags) and not defined[i1] then begin
     str1:= '';
     if not (kind in [ak_arg]) then begin
      str1:= '-';
