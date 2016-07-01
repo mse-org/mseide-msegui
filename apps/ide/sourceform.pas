@@ -1154,7 +1154,7 @@ end;
 
 function tsourcefo.closepage(const aname: filenamety): boolean;
 begin
- result:= closepage(findsourcepage(aname));
+ result:= closepage(findsourcepage(aname,true,true));
 end;
 
 function tsourcefo.closeactivepage: boolean;
