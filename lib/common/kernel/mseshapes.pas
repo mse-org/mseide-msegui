@@ -23,7 +23,7 @@ const
  menucheckboxheight = 13;
  defaultshapecaptiondist = 2;
  defaultshapefocusrectdist = 1;
- defaultcaptiontextflags = [tf_xcentered,tf_ycentered];
+ defaultcaptiontextflags = [tf_left,tf_xcentered,tf_ycentered];
 
 // styleactionstates: actionstatesty = [as_shortcutcaption,as_radiobutton];
 type
