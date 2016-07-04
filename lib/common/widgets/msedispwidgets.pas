@@ -495,7 +495,7 @@ end;
 procedure tdispwidget.settextflags(const value: textflagsty);
 begin
  if ftextflags <> value then begin
-  ftextflags:= value;
+  ftextflags:= checktextflags(ftextflags,value);
   updatetextflags;
   invalidatetext;
  end;

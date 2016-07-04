@@ -1368,9 +1368,9 @@ begin
    ' 1 index '+       //llx,lly,urx
    psrealtostr(foriginy-(rect1.y)*fgcscale)+' '; //llx,lly,urx,ury
  end;
- int1:= {$ifdef FPC}longword{$else}longword{$endif}(flags*mask1) or
-        ({$ifdef FPC}longword{$else}longword{$endif}(flags*mask2) shr 1); 
-        //remove tf_xjustify
+ int1:= (longword(flags*mask1) shr 1) or
+        (longword(flags*mask2) shr 3); 
+        //remove tf_left, tf_xjustify and tf_top
  str1:= str1+alignmentsubs[tftopa[int1]];
 {
  if fs_underline in font.style then begin

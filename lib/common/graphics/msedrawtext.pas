@@ -24,9 +24,14 @@ const
  textellipse = msestring('...');
 
 type
- textflagty = (tf_xcentered,tf_right,tf_xjustify,tf_ycentered,tf_bottom, 
+ textflagty = (tf_left,tf_xcentered,tf_right,tf_xjustify,
+               tf_top,tf_ycentered,tf_bottom,
+                //order fix, used in msepostscriptprinter
+                  //tf_left and tf_right can be combined with tf_xcentered,
+                  //tf_top and tf_bottom can be combined with tf_ycentered
+                  //for limitting centering to avalable space
+
                tf_rotate90,tf_rotate180,
-                 //order fix, used in msepostscriptprinter
 //               tf_forcealignment, //do not use default alignment for buttons
                tf_clipi,tf_clipo,
                tf_grayed,tf_wordbreak,tf_softhyphen,
@@ -37,7 +42,8 @@ type
  textflagsty = set of textflagty;
 const
  ellipsemask: textflagsty = [tf_ellipseleft,{tf_ellipsemid,}tf_ellipseright];
- textalignments = [tf_xcentered,tf_right,tf_xjustify,tf_ycentered,tf_bottom];
+ textalignments = [tf_left,tf_xcentered,tf_right,tf_xjustify,
+                   tf_top,tf_ycentered,tf_bottom];
  
 type
 
@@ -208,8 +214,10 @@ type
 
 function checktextflags(old,new: textflagsty): textflagsty;
 const
- xmask: textflagsty = [tf_xcentered,tf_right];
- ymask: textflagsty = [tf_ycentered,tf_bottom];
+// xmask: textflagsty = [tf_xcentered,tf_right];
+ xmask: textflagsty = [tf_left,tf_right];
+// ymask: textflagsty = [tf_ycentered,tf_bottom];
+ ymask: textflagsty = [tf_top,tf_bottom];
 begin
  result:= new;
  result:= textflagsty(setsinglebit({$ifdef FPC}longword{$else}longword{$endif}(result),
@@ -634,7 +642,14 @@ begin
    res.y:= info.dest.y;
    if tf_ycentered in flags then begin
     if info.dest.cy < height then begin
-     res.y:= res.y + (info.dest.cy - height -1) div 2;
+     if tf_bottom in flags then begin
+      res.y:= res.y + info.dest.cy - height;
+     end
+     else begin
+      if not (tf_top in flags) then begin
+       res.y:= res.y + (info.dest.cy - height -1) div 2;
+      end;
+     end;
     end
     else begin
      res.y:= res.y + (info.dest.cy - height) div 2;
@@ -680,7 +695,14 @@ begin
      end;
      if tf_xcentered in flags then begin
       if info.dest.cx < liwidth then begin
-       listartx:= listartx + (info.dest.cx - liwidth - 1) div 2;
+       if tf_right in flags then begin
+        listartx:= listartx + info.dest.cx - liwidth;
+       end
+       else begin
+        if not (tf_left in flags) then begin
+         listartx:= listartx + (info.dest.cx - liwidth - 1) div 2;
+        end;
+       end;
       end
       else begin
        listartx:= listartx + (info.dest.cx - liwidth) div 2;

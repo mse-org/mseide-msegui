@@ -1048,7 +1048,7 @@ var
  ar1: richstringarty;
  int1,int2,int3,int4,int5,int6: integer;
  rea1: real;
- flags1,flags2: textflagsty;
+ curflags,flags1,flags2: textflagsty;
  rstr1: richstringty;
  layoutinfo: layoutinfoty;
  rect1,rect2: rectty;
@@ -1091,6 +1091,12 @@ begin
   backup:= text.text;
   try
    with layoutinfo do begin
+    curflags:= flags;
+    if (tf_ycentered in curflags) and (curflags*[tf_top,tf_bottom] <> []) and
+             (not xyswapped and (info.res.cy > dest.cy) or 
+                   xyswapped and (info.res.cx > dest.cx))then begin
+     exclude(curflags,tf_ycentered);
+    end;
     if tf_softhyphen in flags then begin
      for int1:= 0 to high(lineinfos) do begin
       with lineinfos[int1] do begin
@@ -1205,7 +1211,12 @@ begin
     end
     else begin //single line
      if countchars(text.text,c_tab) = 0 then begin
-      dotextout(text,dest,flags,0,acolorshadow);
+      if (tf_xcentered in curflags) and (curflags*[tf_left,tf_right] <> []) and
+               (not xyswapped and (info.res.cx > dest.cx) or 
+                     xyswapped and (info.res.cy > dest.cy))then begin
+       exclude(curflags,tf_xcentered);
+      end;
+      dotextout(text,dest,curflags,0,acolorshadow);
      end
      else begin
       if tabulators = nil then begin
@@ -1217,20 +1228,20 @@ begin
       if tab1.count = 0 then begin
        if tab1.defaultdist = 0 then begin      //has no tabs
         replacechar(text.text,c_tab,' ');
-        dotextout(text,dest,flags,0,acolorshadow);
+        dotextout(text,dest,curflags,0,acolorshadow);
        end
        else begin
         ar1:= splitrichstring(text,c_tab);
-        dotextout(ar1[0],dest,flags,0,acolorshadow);
+        dotextout(ar1[0],dest,curflags,0,acolorshadow);
         rea1:= tab1.defaultdist*mmtoprintscale;
         for int1:= 1 to high(ar1) do begin     
-         dotextout(ar1[int1],dest,flags,rea1,acolorshadow);
+         dotextout(ar1[int1],dest,curflags,rea1,acolorshadow);
         end;
        end;
       end
       else begin
        ar1:= splitrichstring(text,c_tab);
-       dotextout(ar1[0],dest,flags,0,acolorshadow);
+       dotextout(ar1[0],dest,curflags,0,acolorshadow);
        for int1:= 1 to high(ar1) do begin     
         if int1 > tab1.count then begin
          rstr1.text:= ' ';
@@ -1240,11 +1251,11 @@ begin
           rstr1:= richconcat(rstr1,' ');
           rstr1:= richconcat(rstr1,ar1[int2]);
          end;
-         dotextout(rstr1,dest,flags-[tf_right,tf_xcentered],-1,acolorshadow); 
+         dotextout(rstr1,dest,curflags-[tf_right,tf_xcentered],-1,acolorshadow); 
                         //print rest of string
          break;
         end;
-        flags1:= flags - [tf_xcentered,tf_right];
+        flags1:= curflags - [tf_xcentered,tf_right];
         with tab1[int1-1] do begin
          case kind of
           tak_right,tak_decimal: flags1:= flags1 + [tf_right];
