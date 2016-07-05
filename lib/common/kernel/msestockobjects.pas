@@ -22,8 +22,9 @@ const
 
 type
 
- stockbitmapty = (stb_none,stb_dens0,stb_dens10,stb_dens25,stb_dens50,stb_dens75,
-                                                          stb_dens90,stb_dens100,
+ stockbitmapty = (stb_default,stb_none,
+                  stb_dens0,stb_dens10,stb_dens25,
+                                stb_dens50,stb_dens75,stb_dens90,stb_dens100,
                   stb_block2,stb_block3,stb_block4,
                   stb_hatchup3,stb_hatchup4,stb_hatchup5,
                   stb_hatchdown3,stb_hatchdown4,stb_hatchdown5,
@@ -353,7 +354,7 @@ begin
   {$ifdef mswindows}
   if iswin98 then begin
    case index of             //must be >= 8*8 for win98
-    stb_none: fbitmaps[index].loaddata(makesize(8,8),@b_none_98);
+    stb_default,stb_none: fbitmaps[index].loaddata(makesize(8,8),@b_none_98);
     stb_dens0: fbitmaps[index].loaddata(makesize(8,8),@b_0_98);
     stb_dens10: fbitmaps[index].loaddata(makesize(12,8),@b_10_98);
     stb_dens25: fbitmaps[index].loaddata(makesize(8,8),@b_25_98);
@@ -378,7 +379,7 @@ begin
   end
   else begin
    case index of
-    stb_none: fbitmaps[index].loaddata(makesize(1,1),@b_none);
+    stb_default,stb_none: fbitmaps[index].loaddata(makesize(1,1),@b_none);
     stb_dens0: fbitmaps[index].loaddata(makesize(1,1),@b_0);
     stb_dens10: fbitmaps[index].loaddata(makesize(6,4),@b_10);
     stb_dens25: fbitmaps[index].loaddata(makesize(4,2),@b_25);
@@ -403,7 +404,7 @@ begin
   end;
   {$else}
   case index of
-   stb_none: fbitmaps[index].loaddata(makesize(1,1),@b_none);
+   stb_default,stb_none: fbitmaps[index].loaddata(makesize(1,1),@b_none);
    stb_dens0: fbitmaps[index].loaddata(makesize(1,1),@b_0);
    stb_dens10: fbitmaps[index].loaddata(makesize(6,4),@b_10);
    stb_dens25: fbitmaps[index].loaddata(makesize(4,2),@b_25);

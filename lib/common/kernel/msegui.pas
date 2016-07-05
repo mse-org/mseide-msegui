@@ -1913,7 +1913,7 @@ end;
 
    function parentcolor: colorty;
    function actualcolor: colorty; virtual;
-   function actualopaquecolor: colorty;
+   function actualopaquecolor: colorty; virtual;
    function backgroundcolor: colorty;
    function translatecolor(const acolor: colorty): colorty;
 
