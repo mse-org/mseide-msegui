@@ -12,7 +12,7 @@ unit mseskin;
 interface
 uses
  classes,mclasses,mseclasses,msegui,msescrollbar,mseedit,
- msegraphics,msegraphutils,msebitmap,
+ msegraphics,msegraphutils,msebitmap,msestockobjects,
  msetabs,msetoolbar,msedataedits,msemenus,msearrayprops,msegraphedits,
  msesimplewidgets,
  msegrids,msewidgets,msetypes,mseglob,msestrings,msedrawtext,mseguiglob;
@@ -168,6 +168,13 @@ type
   svoptionsadd: buttonoptionsty;
   svoptionsremove: buttonoptionsty;
  end;
+ splitterskininfoty = record
+  svwidget: widgetskininfoty;
+  svcolor: widgetcolorinfoty;
+  svcolorgrip: colorty;
+  svgrip: stockbitmapty;
+ end;
+
  
  tskincolor = class(tvirtualpersistent)
   private
@@ -444,6 +451,7 @@ type
    procedure handletabbar(const ainfo: skininfoty); virtual;
    procedure handletabpage(const ainfo: skininfoty); virtual;
    procedure handletoolbar(const ainfo: skininfoty); virtual;
+   procedure handlesplitter(const ainfo: skininfoty); virtual;
    procedure handledispwidget(const ainfo: skininfoty); virtual;
    procedure handleedit(const ainfo: skininfoty); virtual;
    procedure handledataedit(const ainfo: skininfoty); virtual;
@@ -514,6 +522,7 @@ type
    fedit: editskininfoty;
    fdataedit: dataeditskininfoty;
    fbooleanedit: booleaneditskininfoty;
+   fsplitter: splitterskininfoty;
    
    procedure setsb_vert_face(const avalue: tfacecomp);
    procedure setsb_vert_face1(const avalue: tfacecomp);
@@ -578,6 +587,9 @@ type
 
    procedure setstepbutton_face(const avalue: tfacecomp);
    procedure setstepbutton_frame(const avalue: tframecomp);
+
+   procedure setsplitter_face(const avalue: tfacecomp);
+   procedure setsplitter_frame(const avalue: tframecomp);
 
    procedure setdispwidget_face(const avalue: tfacecomp);
    procedure setdispwidget_frame(const avalue: tframecomp);
@@ -679,6 +691,7 @@ type
    procedure handletabbar(const ainfo: skininfoty); override;
    procedure handletabpage(const ainfo: skininfoty); override;
    procedure handletoolbar(const ainfo: skininfoty); override;
+   procedure handlesplitter(const ainfo: skininfoty); override;
    procedure handledispwidget(const ainfo: skininfoty); override;
    procedure handleedit(const ainfo: skininfoty); override;
    procedure handledataedit(const ainfo: skininfoty); override;
@@ -752,11 +765,27 @@ type
                  write fwidgetcolor.svcolorcaptionframe default cl_default;
                         //overrides widget_color for widgets with frame caption
 
+   property splitter_color: colorty read fsplitter.svcolor.svcolor
+                         write fsplitter.svcolor.svcolor default cl_default;
+   property splitter_colorcaptionframe: colorty 
+                         read fsplitter.svcolor.svcolorcaptionframe 
+              write fsplitter.svcolor.svcolorcaptionframe default cl_default;
+                        //overrides widget_color for widgets with frame caption
+   property splitter_colorgrip: colorty read fsplitter.svcolorgrip
+                         write fsplitter.svcolorgrip default cl_default;
+   property splitter_grip: stockbitmapty read fsplitter.svgrip
+                         write fsplitter.svgrip default stb_default;
+   property splitter_face: tfacecomp read fsplitter.svwidget.svface
+                                            write setsplitter_face;
+   property splitter_frame: tframecomp read fsplitter.svwidget.svframe 
+                                            write setsplitter_frame;
+
    property dispwidget_color: colorty read fdispwidget.svcolor.svcolor
                          write fdispwidget.svcolor.svcolor default cl_default;
    property dispwidget_colorcaptionframe: colorty 
                          read fdispwidget.svcolor.svcolorcaptionframe 
               write fdispwidget.svcolor.svcolorcaptionframe default cl_default;
+                        //overrides widget_color for widgets with frame caption
    property dispwidget_face: tfacecomp read fdispwidget.svwidget.svface
                                             write setdispwidget_face;
    property dispwidget_frame: tframecomp read fdispwidget.svwidget.svframe 
@@ -1313,7 +1342,7 @@ procedure setskinhandler(const avalue: tskinhandler);
 
 implementation
 uses
- msetabsglob,sysutils,mseapplication,msearrayutils,msestockobjects,msefont;
+ msetabsglob,sysutils,mseapplication,msearrayutils,msefont,msesplitter;
  
 type
  twidget1 = class(twidget);
@@ -1608,6 +1637,9 @@ begin
    case ainfo.objectkind of 
     sok_widget: begin
      handlewidget(ainfo);
+    end;
+    sok_splitter: begin
+     handlesplitter(ainfo);
     end;
     sok_dispwidget: begin
      handledispwidget(ainfo);
@@ -2344,6 +2376,11 @@ begin
  //dummy
 end;
 
+procedure tcustomskincontroller.handlesplitter(const ainfo: skininfoty);
+begin
+ //dummy
+end;
+
 procedure tcustomskincontroller.updateorder;
 begin
  updateclientorder(fextendernames,pointerarty(fextenders),
@@ -2483,6 +2520,11 @@ begin
  fsb_vert.svcolorpattern:= cl_default;
  fsb_vert.svcolorglyph:= cl_default;
 
+ fsplitter.svcolor.svcolor:= cl_default;
+ fsplitter.svcolor.svcolorcaptionframe:= cl_default;
+ fsplitter.svcolorgrip:= cl_default;
+ fsplitter.svgrip:= stb_default;
+
  fdispwidget.svcolor.svcolor:= cl_default;
  fdispwidget.svcolor.svcolorcaptionframe:= cl_default;
  
@@ -2530,6 +2572,16 @@ destructor tskincontroller.destroy;
 begin
  inherited;
  fbutton.svfont.free;
+end;
+
+procedure tskincontroller.setsplitter_face(const avalue: tfacecomp);
+begin
+ setlinkedvar(avalue,tmsecomponent(fsplitter.svwidget.svface));
+end;
+
+procedure tskincontroller.setsplitter_frame(const avalue: tframecomp);
+begin
+ setlinkedvar(avalue,tmsecomponent(fsplitter.svwidget.svframe));
 end;
 
 procedure tskincontroller.setdispwidget_face(const avalue: tfacecomp);
@@ -3453,6 +3505,20 @@ begin
     createframesepvert();
     setframetemplate(ftoolbar_horz.svbuttonframesepvert,framesepvert);
    end;
+  end;
+ end;
+end;
+
+procedure tskincontroller.handlesplitter(const ainfo: skininfoty);
+begin
+ handlewidget(ainfo,@fsplitter.svcolor);
+ setwidgetskin(twidget(ainfo.instance),fsplitter.svwidget);
+ with fsplitter,tcustomsplitter(ainfo.instance) do begin
+  if (svcolorgrip <> cl_default) and (colorgrip = cl_default) then begin
+   colorgrip:= svcolorgrip;
+  end;
+  if (svgrip <> stb_default) and (grip = stb_default) then begin
+   grip:= svgrip;
   end;
  end;
 end;

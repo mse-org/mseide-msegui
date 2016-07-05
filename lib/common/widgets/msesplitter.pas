@@ -98,6 +98,8 @@ type
                       out offset,clippedoffset: pointty; out newsize: sizety);
    procedure setpropoffset(const aoffset: pointty; const asize: sizety);
 //   function getminshrinkpos: pointty; override;
+   function actualcolor: colorty; override;
+   function actualopaquecolor: colorty; override;
    procedure mouseevent(var info: mouseeventinfoty); override;
    procedure poschanged1;
    procedure poschanged; override;
@@ -130,6 +132,7 @@ type
    procedure endpickmove(const sender: tobjectpicker);
    procedure cancelpickmove(const sender: tobjectpicker);
    procedure paintxorpic(const sender: tobjectpicker; const canvas: tcanvas);
+   class function classskininfo: skininfoty; override;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -153,11 +156,10 @@ type
    property dist_bottom: integer read fdist_bottom 
                                     write setdist_bottom default 0;
 
-   property color default defaultsplittercolor;
-   property grip: stockbitmapty read fgrip write setgrip 
-                                               default defaultsplittergrip;
+//   property color default defaultsplittercolor;
+   property grip: stockbitmapty read fgrip write setgrip default stb_default;
    property colorgrip: colorty read fcolorgrip write setcolorgrip 
-                                               default defaultsplittercolorgrip;
+                                                        default cl_default;
    property statfile: tstatfile read fstatfile write setstatfile;
    property statvarname: msestring read getstatvarname write fstatvarname;
    property statpriority: integer read fstatpriority 
@@ -182,7 +184,7 @@ type
    property dist_right;
    property dist_bottom;
 
-//   property color;
+   property color;
    property grip;
    property colorgrip;
    property statfile;
@@ -412,15 +414,15 @@ constructor tcustomsplitter.create(aowner: tcomponent);
 begin
 // include(fwidgetstate1,ws1_tryshrink);
  foptions:= defaultsplitteroptions;
- fcolorgrip:= defaultsplittercolorgrip;
- fgrip:= defaultsplittergrip;
+ fcolorgrip:= cl_default;
+ fgrip:= stb_default;
  frefrect.x:= -bigint;
  frefrect.y:= -bigint;
  frefrect.cx:= -bigint;
  frefrect.cy:= -bigint;
  include(fwidgetstate1,ws1_framemouse);
  inherited;
- color:= defaultsplittercolor;
+// color:= defaultsplittercolor;
  optionswidget:= defaultoptionswidgetnofocus;
  fobjectpicker:= tobjectpicker.create(iobjectpicker(self),org_widget);
 end;
@@ -562,6 +564,12 @@ begin
  end;
  canvas.drawxorframe(makerect(clippoint(sender.pickoffset),fwidgetrect.size),-4,
             stockobjects.bitmaps[stb_dens25]);
+end;
+
+class function tcustomsplitter.classskininfo: skininfoty;
+begin
+ result:= inherited classskininfo;
+ result.objectkind:= sok_splitter;
 end;
 
 procedure tcustomsplitter.updatelinkedwidgets(const delta: pointty);
@@ -881,6 +889,26 @@ begin
  end;
 end;
 
+function tcustomsplitter.actualcolor: colorty;
+begin
+ if fcolor = cl_default then begin
+  result:= defaultsplittercolor;
+ end
+ else begin
+  result:= inherited actualcolor();
+ end;
+end;
+
+function tcustomsplitter.actualopaquecolor: colorty;
+begin
+ if fcolor = cl_default then begin
+  result:= defaultsplittercolor;
+ end
+ else begin
+  result:= inherited actualopaquecolor();
+ end;
+end;
+
 procedure tcustomsplitter.doasyncevent(var atag: integer);
 var
  pt1,pt2: pointty;
@@ -998,8 +1026,18 @@ begin
  inherited;
  if fgrip <> stb_none then begin
   with acanvas do begin
-   brush:= stockobjects.bitmaps[fgrip];
-   color:= fcolorgrip;
+   if fgrip = stb_default then begin
+    brush:= stockobjects.bitmaps[defaultsplittergrip];
+   end
+   else begin
+    brush:= stockobjects.bitmaps[fgrip];
+   end;
+   if fcolorgrip = cl_default then begin
+    color:= defaultsplittercolorgrip;
+   end
+   else begin
+    color:= fcolorgrip;
+   end;
    fillrect(innerclientrect,cl_brushcanvas);
   end;
  end;
