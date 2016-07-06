@@ -98,8 +98,6 @@ type
                       out offset,clippedoffset: pointty; out newsize: sizety);
    procedure setpropoffset(const aoffset: pointty; const asize: sizety);
 //   function getminshrinkpos: pointty; override;
-   function actualcolor: colorty; override;
-   function actualopaquecolor: colorty; override;
    procedure mouseevent(var info: mouseeventinfoty); override;
    procedure poschanged1;
    procedure poschanged; override;
@@ -136,6 +134,9 @@ type
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
+   function actualcolor: colorty; override;
+   function actualopaquecolor: colorty; override;
+
    procedure move(const dist: pointty);
 
    property options: splitteroptionsty read foptions write setoptions 

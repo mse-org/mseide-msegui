@@ -1042,8 +1042,17 @@ begin            //init
 end;
 
 procedure tsysenvmanager.init(const arguments: array of argumentdefty);
+var
+ ar1: msestringarty;
 begin
- init(arguments,copy(getcommandlinearguments(),1,bigint));
+ ar1:= getcommandlinearguments();
+ if high(ar1) > 0 then begin 
+            //FPC 2.6.4 throws an exception in copy() if out of range
+  init(arguments,copy(ar1,1,bigint));
+ end
+ else begin
+  init(arguments,nil);
+ end;
 end;
 
 procedure tsysenvmanager.init(const values: msestringarty); //use defs
