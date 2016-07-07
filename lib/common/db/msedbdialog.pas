@@ -132,6 +132,7 @@ type
    destructor destroy; override;
   published
    property datalink: teditwidgetdatalink read fdatalink write setdatalink;
+   property options;
    property dropdown;
    property onsetvalue;
    property frame;

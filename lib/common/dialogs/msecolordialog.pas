@@ -40,10 +40,17 @@ type
    property buttonellipse: tdropdownbutton read getbuttonellipse 
                                                     write setbuttonellipse;
  end;
-                          
+
+ colordialogoptionty = (cdo_rgbtext);
+ colordialogoptionsty = set of colordialogoptionty;
+ 
+ coloreditoptionty = (ceo_rgbtext);
+ coloreditoptionsty = set of coloreditoptionty;
+                           
  tcustomcoloredit = class(tcustomenumedit)
   private
    foncolorchange: coloreventty;
+   foptions: coloreditoptionsty;
    function getvalue: colorty;
    procedure setvalue(avalue: colorty);
    function getvaluedefault: colorty;
@@ -57,6 +64,7 @@ type
    procedure setgridvalue(const index: integer; const avalue: colorty);
    function getgridvalues: colorarty;
    procedure setgridvalues(const avalue: colorarty);
+   procedure setoptions(const avalue: coloreditoptionsty);
   protected
    procedure setvaluedata(const source); override;
    procedure getvaluedata(out dest); override;
@@ -77,6 +85,8 @@ type
    property value: colorty read getvalue write setvalue default cl_none;
    property valuedefault: colorty read getvaluedefault
                      write setvaluedefault default cl_none;
+   property options: coloreditoptionsty read foptions 
+                                            write setoptions default [];
    property frame: tellipsedropdownbuttonframe read getframe write setframe;
    property gridvalue[const index: integer]: colorty
         read getgridvalue write setgridvalue; default;
@@ -91,6 +101,7 @@ type
   published
    property value;
    property valuedefault;
+   property options;
 {$ifdef mse_with_ifi}
    property ifilink;
 {$endif}
@@ -176,7 +187,8 @@ type
  end;
  
 function colordialog(var acolor: colorty;
-                      const aoncolorchange: coloreventty = nil): modalresultty;
+                      const aoncolorchange: coloreventty = nil;
+                     const aoptions: colordialogoptionsty = []): modalresultty;
 //threadsafe
 procedure paintcolorimage(const sender: twidget; const canvas: tcanvas;
                                                     const acolor: colorty);
@@ -201,7 +213,8 @@ type
  end;
  
 function colordialog(var acolor: colorty;
-                      const aoncolorchange: coloreventty = nil): modalresultty;
+                      const aoncolorchange: coloreventty = nil;
+                      const aoptions: colordialogoptionsty = []): modalresultty;
 var
  fo: tcolordialogfo;
  col1: rgbtriplety;
@@ -210,6 +223,7 @@ begin
  try
   fo:= tcolordialogfo.create(nil);
   fo.oncolorchange:= aoncolorchange;
+  fo.colored.options:= coloreditoptionsty(aoptions);
   try
    try
     col1:= colortorgb(acolor);
@@ -391,7 +405,8 @@ begin
    ba_click: begin
     if focused then begin
      co1:= value;
-     if colordialog(co1,@docolorchange) = mr_ok then begin
+     if colordialog(co1,
+              @docolorchange,colordialogoptionsty(options)) = mr_ok then begin
       colorenter(co1);
      end;
     end;
@@ -402,7 +417,12 @@ end;
 
 function tcustomcoloredit.internaldatatotext1(const avalue: integer): msestring;
 begin
- result:= msestring(colortostring(avalue));
+ if ceo_rgbtext in foptions then begin
+  result:= msestring(colortostring(colorty(colortorgb(avalue))));
+ end
+ else begin
+  result:= msestring(colortostring(avalue));
+ end;
 end;
 
 function tcustomcoloredit.internaldatatotext(const data): msestring;
@@ -483,6 +503,14 @@ end;
 procedure tcustomcoloredit.setgridvalues(const avalue: colorarty);
 begin
  inherited gridvalues:= integerarty(avalue);
+end;
+
+procedure tcustomcoloredit.setoptions(const avalue: coloreditoptionsty);
+begin
+ if avalue <> foptions then begin
+  foptions:= avalue;
+  formatchanged();
+ end;
 end;
 
 function tcustomcoloredit.geteditframe: framety;
