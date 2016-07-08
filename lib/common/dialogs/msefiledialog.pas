@@ -1538,11 +1538,12 @@ end;
 
 procedure tfiledialogfo.foonchildscaled(const sender: TObject);
 begin
-// syncmaxautosize([up,createdir]);
  placeyorder(2,[2],[dir,listview,filename,filter],2);
  aligny(wam_center,[dir,back,forward,home,up,createdir]);
  aligny(wam_center,[filename,showhidden]);
- aligny(wam_center,[filter,ok,cancel]);
+ if ok.height <= filter.height then begin
+  aligny(wam_center,[filter,ok,cancel]);
+ end;
  syncpaintwidth([filename,filter],namecont.bounds_cx);
  listview.synctofontheight;
 end;
