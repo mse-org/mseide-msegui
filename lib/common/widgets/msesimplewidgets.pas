@@ -1422,6 +1422,16 @@ begin
  asize:= calccaptionsize(getcanvas,finfo.ca);
  inc(asize.cx,8+fautosize_cx);
  inc(asize.cy,6+fautosize_cy);
+ if (fframe <> nil) then begin
+  if fso_flat in fframe.optionsskin then begin
+   dec(asize.cx,2);
+   dec(asize.cy,2);
+  end;
+  if fso_noanim in fframe.optionsskin then begin
+   dec(asize.cx,2);
+   dec(asize.cy,2);
+  end;
+ end;
  if not (shs_noinnerrect in finfo.state) then begin
   innertopaintsize(asize);
  end;
