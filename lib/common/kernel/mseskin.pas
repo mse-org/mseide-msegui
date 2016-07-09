@@ -1776,12 +1776,13 @@ begin
    end;
    col1:= frame.colorclient;
    size1:= clientsize;
+   addsize1(size1,aframe.template.clientsizeextend);
    with tframe1(frame).fpaintframedelta do begin
     size1.cx:= size1.cx + left + right;
     size1.cy:= size1.cy + top + bottom;
    end;
    frame1:= innerclientframe;
-   frame.template:= aframe;
+   fframe.template:= aframe;
    opt1:= aframe.template.optionsskincontroller;
    if not (fsco_colorclient in opt1) then begin
 //    tframe1(frame).fi.colorclient:= col1; //restore
@@ -1805,7 +1806,8 @@ begin
     size1.cx:= size1.cx - left - right;
     size1.cy:= size1.cy - top - bottom;
    end;
-   if not (osk_noclientsize in optionsskin) then begin
+   if not (osk_noclientsize in optionsskin) and 
+                         not (fsco_noclientsize in opt1) then begin
     clientsize:= size1;      //same clientsize as before
    end;
   end;

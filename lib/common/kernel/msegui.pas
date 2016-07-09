@@ -65,8 +65,11 @@ type
  frameskincontrolleroptionty =
                      (fsco_colorclient,  //set colorclient in skincontroller
                       fsco_frameileftsize,fsco_frameirightsize,
-                      fsco_frameitopsize,fsco_frameibottomsize); 
-                                        //adjust clientsize in skincontroller
+                      fsco_frameitopsize,fsco_frameibottomsize,
+                          //adjust clientsize in skincontroller by
+                          //framei values
+                      fsco_noclientsize); 
+                          //do not restore clientsize after frame size changes
  frameskincontrolleroptionsty = set of frameskincontrolleroptionty;
   
  optionwidgetty = (ow_background,ow_top,ow_ultratop,
@@ -849,6 +852,7 @@ type
  tframetemplate = class(tpersistenttemplate,iimagelistinfo)
   private
    foptionsskincontroller: frameskincontrolleroptionsty;
+   fclientsizeextend: sizety;
    procedure setcolorclient(const Value: colorty);
    procedure setcolorframe(const Value: colorty);
    procedure setcolorframeactive(const avalue: colorty);
@@ -951,6 +955,8 @@ type
    function innerframedim: sizety;
    procedure createfont;
    property framei: framety read fi.ba.innerframe;
+   property clientsizeextend: sizety read fclientsizeextend 
+                                                write fclientsizeextend;
   published
    property levelo: integer read fi.ba.levelo write setlevelo default 0;
    property leveli: integer read fi.ba.leveli write setleveli default 0;
@@ -1096,6 +1102,10 @@ type
    property optionsskincontroller: frameskincontrolleroptionsty 
                       read foptionsskincontroller
                       write foptionsskincontroller default [];
+   property clientsizeextend_cx: int32 read fclientsizeextend.cx 
+                                               write fclientsizeextend.cx;
+   property clientsizeextend_cy: int32 read fclientsizeextend.cy
+                                               write fclientsizeextend.cy;
  end;
 
  tframecomp = class(ttemplatecontainer)
