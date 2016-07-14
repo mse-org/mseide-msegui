@@ -22,6 +22,8 @@ const
  defaultpagesizeconst = 0.1;
  defaultpagesize: real = defaultpagesizeconst;
  defaultbuttonminlength = 11;//8;
+ defaultscrollbarcolorpattern = cl_scrollbarpattern;
+ defaultscrollbarcolorpatternclicked = cl_scrollbarpatternclicked;
  repeatdelaytime = 500000; //0.5s
  repeatrepeattime = 100000; //0.1 s
 
@@ -85,6 +87,7 @@ type
    fdirection: graphicdirectionty;
    fcolor: colorty;
    fcolorpattern: colorty;
+   fcolorpatternclicked: colorty;
    fvalue: real;
    fbuttonlength: integer;
    fpagesize: real;
@@ -134,6 +137,7 @@ type
    procedure dodimchanged;
    function clickedareaisvalid: boolean;
    procedure setcolorpattern(const avalue: colorty);
+   procedure setcolorpatternclicked(const avalue: colorty);
    function getface(): tface;
    procedure setface(const avalue: tface);
    function getfacebutton: tface;
@@ -201,6 +205,8 @@ type
    function dostepup(const ashiftstate: shiftstatesty): boolean;
    function dostepdown(const ashiftstate: shiftstatesty): boolean;
    procedure defineproperties(filer: tfiler); override;
+   function actualcolorpattern: colorty;
+   function actualcolorpatternclicked: colorty;
 //   function getbuttonarea(const apos: pointty): buttonareaty; //-1 -> none
   public
    tag: integer;
@@ -286,7 +292,10 @@ type
                                  write setframeendbutton2;
    property color: colorty read fcolor write setcolor default cl_default;
    property colorpattern: colorty read fcolorpattern 
-                   write setcolorpattern default cl_white;
+                   write setcolorpattern default cl_default;
+                   //cl_none -> no pattern
+   property colorpatternclicked: colorty read fcolorpatternclicked
+                   write setcolorpatternclicked default cl_default;
                    //cl_none -> no pattern
    property colorglyph: colorty read fdrawinfo.areas[sbbu_down].ca.colorglyph
                    write setcolorglyph default cl_glyph;
@@ -401,7 +410,8 @@ begin
  fintf:= intf;
  forg:= org;
  fcolor:= cl_default;
- fcolorpattern:= cl_white;
+ fcolorpattern:= cl_default;
+ fcolorpatternclicked:= cl_default;
  fdrawinfo.areas[sbbu_down].ca.colorglyph:= cl_glyph;
  fdrawinfo.areas[sbbu_up].ca.colorglyph:= cl_glyph;
  fclickedarea:= scrollbarareaty(-1);
@@ -769,6 +779,14 @@ begin
  end;
 end;
 
+procedure tcustomscrollbar.setcolorpatternclicked(const avalue: colorty);
+begin
+ if fcolorpatternclicked <> avalue then begin
+  fcolorpatternclicked := avalue;
+  invalidate;
+ end;
+end;
+
 procedure tcustomscrollbar.paint(const canvas: tcanvas; 
                                            const acolor: colorty = cl_none);
 var
@@ -813,12 +831,12 @@ begin
    brush:= stockobjects.bitmaps[stb_dens50];
    if fface1 = nil then begin
     if fclickedarea = sba_start then begin
-     color:= cl_black;
+     color:= actualcolorpatternclicked();
     end
     else begin
-     color:= fcolorpattern;
+     color:= actualcolorpattern();
     end;
-    if fcolorpattern <> cl_none then begin
+    if color <> cl_none then begin
      fillrect(areas[sba_start].ca.dim,cl_brushcanvas);
     end
     else begin
@@ -827,12 +845,12 @@ begin
    end;
    if fface2 = nil then begin
     if fclickedarea = sba_end then begin
-     color:= cl_black;
+     color:= actualcolorpatternclicked();
     end
     else begin
-     color:= fcolorpattern;
+     color:= actualcolorpattern();
     end;
-    if fcolorpattern <> cl_none then begin
+    if color <> cl_none then begin
      fillrect(areas[sba_end].ca.dim,cl_brushcanvas);
     end
     else begin
@@ -1799,6 +1817,22 @@ begin
                       (filer.ancestor = nil) and (fwheelsensitivity <> 1) or
    (filer.ancestor <> nil) and 
       (tcustomscrollbar(filer.ancestor).fwheelsensitivity <> fwheelsensitivity));
+end;
+
+function tcustomscrollbar.actualcolorpattern: colorty;
+begin
+ result:= fcolorpattern;
+ if result = cl_default then begin
+  result:= cl_scrollbarpattern;
+ end;
+end;
+
+function tcustomscrollbar.actualcolorpatternclicked: colorty;
+begin
+ result:= fcolorpatternclicked;
+ if result = cl_default then begin
+  result:= cl_scrollbarpatternclicked;
+ end;
 end;
 {
 function tcustomscrollbar.getbuttonarea(const apos: pointty): buttonareaty;

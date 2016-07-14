@@ -20,6 +20,7 @@ uses
 type
  scrollbarskininfoty = record
   svcolorpattern: colorty;
+  svcolorpatternclicked: colorty;
   svcolorglyph: colorty;
   svface: tfacecomp;
   svface1: tfacecomp;
@@ -708,6 +709,9 @@ type
    property sb_horz_colorpattern: colorty 
                       read fsb_horz.svcolorpattern 
                     write fsb_horz.svcolorpattern default cl_default;
+   property sb_horz_colorpatternclicked: colorty 
+                      read fsb_horz.svcolorpatternclicked
+                    write fsb_horz.svcolorpatternclicked default cl_default;
    property sb_horz_colorglyph: colorty 
                         read fsb_horz.svcolorglyph 
                       write fsb_horz.svcolorglyph default cl_default;
@@ -731,6 +735,9 @@ type
    property sb_vert_colorpattern: colorty 
                       read fsb_vert.svcolorpattern 
                     write fsb_vert.svcolorpattern default cl_default;
+   property sb_vert_colorpatternclicked: colorty 
+                      read fsb_vert.svcolorpatternclicked
+                    write fsb_vert.svcolorpatternclicked default cl_default;
    property sb_vert_colorglyph: colorty 
                         read fsb_vert.svcolorglyph 
                       write fsb_vert.svcolorglyph default cl_default;
@@ -2028,8 +2035,12 @@ procedure tcustomskincontroller.setscrollbarskin(const instance: tcustomscrollba
                const ainfo: scrollbarskininfoty);
 begin
  with instance,ainfo do begin
-  if svcolorpattern <> cl_default then begin
+  if (svcolorpattern <> cl_default) and (colorpattern = cl_default) then begin
    colorpattern:= svcolorpattern;
+  end;
+  if (svcolorpatternclicked <> cl_default) and 
+                         (colorpatternclicked = cl_default) then begin
+   colorpatternclicked:= svcolorpatternclicked;
   end;
   if svcolorglyph <> cl_default then begin
    colorglyph:= svcolorglyph;
@@ -2518,8 +2529,10 @@ begin
  fstepbutton.svcolor:= cl_default;
 
  fsb_horz.svcolorpattern:= cl_default;
+ fsb_horz.svcolorpatternclicked:= cl_default;
  fsb_horz.svcolorglyph:= cl_default;
  fsb_vert.svcolorpattern:= cl_default;
+ fsb_vert.svcolorpatternclicked:= cl_default;
  fsb_vert.svcolorglyph:= cl_default;
 
  fsplitter.svcolor.svcolor:= cl_default;
@@ -2542,8 +2555,10 @@ begin
  fdatabutton.svcolor:= cl_default;
  fslider.svcolor:= cl_default;
  fslider.svsb_horz.svcolorpattern:= cl_default;
+ fslider.svsb_horz.svcolorpatternclicked:= cl_default;
  fslider.svsb_horz.svcolorglyph:= cl_default;
  fslider.svsb_vert.svcolorpattern:= cl_default;
+ fslider.svsb_vert.svcolorpatternclicked:= cl_default;
  fslider.svsb_vert.svcolorglyph:= cl_default;
  fframebutton.svcolor:= cl_default;
  fframebutton.svcolorglyph:= cl_default;
