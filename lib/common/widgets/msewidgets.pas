@@ -5127,9 +5127,9 @@ begin
              (eventstate * [es_processed,es_child] = []) and
              (button = mb_right) then begin
    dummy:= nil;
-   po1:= info.pos;
+   po1:= pos;
    dopopup(dummy,info);
-   info.pos:= po1; //no mousemove by change of popup pos
+   pos:= po1; //no mousemove by change of popup pos
   end;
  end;
 end;
