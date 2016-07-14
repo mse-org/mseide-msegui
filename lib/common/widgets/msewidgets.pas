@@ -5125,11 +5125,11 @@ begin
   if (eventkind = ek_buttonrelease) and (ws_rclicked in fwidgetstate) and
              not (csdesigning in componentstate) and
              (eventstate * [es_processed,es_child] = []) and
-             (button = mb_right) and (ws_rclicked in fwidgetstate) then begin
+             (button = mb_right) then begin
    dummy:= nil;
    po1:= info.pos;
    dopopup(dummy,info);
-   info.pos:= po1; //no mousemove by chage of popup pos
+   info.pos:= po1; //no mousemove by change of popup pos
   end;
  end;
 end;
