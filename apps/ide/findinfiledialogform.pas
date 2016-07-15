@@ -44,6 +44,7 @@ type
    cancel: tbutton;
    subdirs: tbooleanedit;
    inprojectdir: tbooleaneditradio;
+   incurrentfile: tbooleaneditradio;
    procedure dironbeforeexecute(const sender: tfiledialogcontroller;
                    var dialogkind: filedialogkindty; var aresult: modalresultty);
    procedure dirshowhint(const sender: TObject; var info: hintinfoty);
@@ -57,6 +58,9 @@ type
                    var accept: Boolean);
    procedure dirsetvalue(const sender: TObject; var avalue: msestring;
                    var accept: Boolean);
+   procedure cereateev(const sender: TObject);
+   procedure currentsetval(const sender: TObject; var avalue: Boolean;
+                   var accept: Boolean);
   private
    procedure valuestoinfo(out info: findinfileinfoty);
    procedure infotovalues(const info: findinfileinfoty);
@@ -67,7 +71,8 @@ function findinfiledialogexecute(var info: findinfileinfoty;
 
 implementation
 uses
- msebits,findinfiledialogform_mfm,projectoptionsform,main,msefileutils;
+ msebits,findinfiledialogform_mfm,projectoptionsform,main,msefileutils,
+ sourceform;
 
 function findinfiledialogexecute(var info: findinfileinfoty;
                                          const useinfo: boolean): boolean;
@@ -97,25 +102,7 @@ begin
  sender.filterlist.asarrayb:= mask.dropdown.valuelist.asarray;
  sender.filter:= mask.value;
 end;
-{
-procedure tfindinfiledialogfo.infotovalues(const info: findinfileinfoty);
-begin
- with info.findinfo do begin
-  findtext.value:= text;
-  findtext.dropdown.valuelist.asarray:= history;
-  casesensitive.value:= not (so_caseinsensitive in options);
-  wholeword.value:= so_wholeword in options;
- end;
- with info do begin
-  indirectories.checkedtag:= ord(filesource);
-  dir.value:= directory;
-  dir.controller.history:= directoryhistory;
-  mask.value:= filemask;
-  mask.dropdown.valuelist.asarray:= filemaskhistory;
-  subdirs.value:= fifo_subdirs in options;
- end;
-end;
-}
+
 procedure tfindinfiledialogfo.valuestoinfo(out info: findinfileinfoty);
 begin
 {$warnings off}
@@ -136,7 +123,12 @@ begin
     source:= fs_indirectories;
    end
    else begin
-    source:= fs_inprojectdir;
+    if incurrentfile.value then begin
+     source:= fs_incurrentfile;
+    end
+    else begin
+     source:= fs_inprojectdir;
+    end;
    end;
   end;
  end;
@@ -164,6 +156,9 @@ begin
    fs_inprojectdir: begin
     inprojectdir.value:= true;
    end;
+   fs_incurrentfile: begin
+    incurrentfile.value:= true;
+   end;
   end;
  end;
 end;
@@ -190,7 +185,7 @@ begin
   subdirs.enabled:= true;
  end
  else begin
-  if inopenfiles.value then begin
+  if inopenfiles.value or incurrentfile.value then begin
    dir.enabled:= false;
    mask.enabled:= false;
    subdirs.enabled:= false;
@@ -208,6 +203,7 @@ procedure tfindinfiledialogfo.dirsetval(const sender: TObject;
 begin
  if avalue then begin
   inopenfiles.value:= false;
+  incurrentfile.value:= false;
  end;
 end;
 
@@ -220,11 +216,28 @@ begin
  end;
 end;
 
+procedure tfindinfiledialogfo.currentsetval(const sender: TObject;
+               var avalue: Boolean; var accept: Boolean);
+begin
+ if avalue then begin
+  inprojectdir.value:= false;
+  indirectories.value:= false;
+ end;
+end;
+
+
 procedure tfindinfiledialogfo.dirsetvalue(const sender: TObject;
                var avalue: msestring; var accept: Boolean);
 begin
  if avalue = '' then begin
   avalue:= filedir(mainfo.projectname);
+ end;
+end;
+
+procedure tfindinfiledialogfo.cereateev(const sender: TObject);
+begin
+ if sourcefo.activepage = nil then begin
+  incurrentfile.enabled:= false;
  end;
 end;
 

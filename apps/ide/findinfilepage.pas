@@ -253,8 +253,11 @@ var
  mstr1: filenamety;
   
 begin
- if finfo.source = fs_inopenfiles then begin
+ if finfo.source in [fs_inopenfiles,fs_incurrentfile] then begin
   int1:= 0;
+  if finfo.source = fs_incurrentfile then begin
+   int1:= sourcefo.activepage.tabindex;
+  end;
   with sender,tfindinfilepagefo(datapo),finfo do begin
    while not terminated do begin
     bo1:= false;
@@ -285,6 +288,9 @@ begin
      if not bo1 then begin
       application.unlock;
      end;
+    end;
+    if finfo.source = fs_incurrentfile then begin
+     break;
     end;
     inc(int1);
    end;
