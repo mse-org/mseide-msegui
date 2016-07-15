@@ -987,7 +987,9 @@ TStringsEnumerator = class
     function Seek(const Offset: Int64; Origin: TSeekOrigin): Int64; override;
     procedure SaveToStream(Stream: TStream);
     procedure SaveToFile(const FileName: string);
-    property Memory: Pointer read FMemory;
+    property memory: Pointer read FMemory;
+    property position1: ptrint read fposition;
+    property size1: ptrint read fsize;
   end;
 
   TMemoryStream = class(TCustomMemoryStream)
@@ -996,7 +998,6 @@ TStringsEnumerator = class
     procedure SetCapacity(NewCapacity: PtrInt);
   protected
     function Realloc(var NewCapacity: PtrInt): Pointer; virtual;
-    property Capacity: PtrInt read FCapacity write SetCapacity;
   public
     destructor Destroy; override;
     procedure Clear;
@@ -1004,6 +1005,7 @@ TStringsEnumerator = class
     procedure LoadFromFile(const FileName: string);
     procedure SetSize({$ifdef CPU64}const{$endif CPU64} NewSize: PtrInt); override;
     function Write(const Buffer; Count: LongInt): LongInt; override;
+    property Capacity: PtrInt read FCapacity write SetCapacity;
   end;
 
   TStringStream = class(TStream)

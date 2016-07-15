@@ -5073,9 +5073,20 @@ procedure tpoorstringdatalist.savetostream(const stream: ttextstream);
 var
  int1: integer;
  po1: pmsestring;
+ si1: int64;
 begin
  if fcount > 0 then begin
   po1:= datapo;
+  if stream.ismemorystream then begin
+   si1:= 0;
+   for int1:= count - 2 downto 0 do begin
+    si1:= si1 + length(po1^);
+    inc(pchar(po1),fsize);
+   end;
+   stream.capacity:= stream.capacity + si1 + count*2;
+                                               //space for return-linefeed
+   po1:= datapo;
+  end;
   for int1:= count - 2 downto 0 do begin
    stream.writeln(po1^);
    inc(pchar(po1),fsize);

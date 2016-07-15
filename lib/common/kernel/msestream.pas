@@ -23,8 +23,8 @@ unit msestream;
 // {$WARN SYMBOL_PLATFORM off}
 interface
 uses 
- classes,mclasses,sysutils,msestrings,msetypes,msethread,msesystypes,msesys,msereal,
- mseevent,mseclasses,mseglob{,mseformatstr};
+ classes,mclasses,sysutils,msestrings,msetypes,msethread,msesystypes,msesys,
+ msereal,mseevent,mseclasses,mseglob{,mseformatstr};
 
 const
  defaultfilerights = [s_irusr,s_iwusr,s_irgrp,s_iwgrp,s_iroth,s_iwoth];
@@ -117,13 +117,16 @@ type
    fcryptohandler: tcustomcryptohandler;
    fendhandler: tcustomcryptohandler;
    fendindex: integer;
+   fismemorystream: boolean;
 //   function getmemory: pointer;
    procedure checkmemorystream;
    procedure setcryptohandler(const avalue: tcustomcryptohandler);
    function getfilerights: filerightsty;
    procedure setfilerights(const avalue: filerightsty);
+   function getcapacity: ptrint;
   protected
    fmemorystream: tmemorystream;
+   procedure setcapacity(const avalue: ptrint); virtual;
    procedure sethandle(value: integer); virtual;
    procedure closehandle(const ahandle: integer); virtual;
    constructor internalcreate(const afilename: filenamety; 
@@ -175,7 +178,10 @@ type
    procedure flush; virtual;
 
    procedure setsize(const newsize: int64); override;
-   procedure clear; virtual;        //only for memorystream
+   property ismemorystream: boolean read fismemorystream;
+   procedure clear; virtual;         //only for memorystream
+   property capacity: ptrint read getcapacity write setcapacity;
+                                     //only for memorystream
 //   property memory: pointer read getmemory;     //only for memorystream
    property filerights: filerightsty read getfilerights write setfilerights;
    property cryptohandler: tcustomcryptohandler read fcryptohandler 
@@ -210,11 +216,14 @@ type
    fbuffer: pchar;
    bufoffset, bufend: pchar;
    fstate: textstreamstatesty;
+//   procedure setcapacity(const avalue: ptrint); override;
    function getnotopen: boolean;
    procedure setbuflen(const Value: integer); virtual;
    function geteof: boolean;
    function readbytes(var buf): integer; virtual;
               //reads max. buflen bytes
+   procedure fillbuffer();
+   procedure checkbuffer();
    procedure internalwritebuffer(const buffer; count: longint);
   public
    constructor create(ahandle: integer); override;
@@ -1011,6 +1020,7 @@ begin
  if fmemorystream = nil then begin
   fmemorystream:= tmemorystream.create;
  end;
+ fismemorystream:= true;
  create(invalidfilehandle);
 end;
 
@@ -1347,6 +1357,7 @@ begin
   inherited;
  end;
 end;
+
 {
 function tmsefilestream.getmemory: pointer;
 begin
@@ -1462,6 +1473,18 @@ begin
  end;
 end;
 
+function tmsefilestream.getcapacity: ptrint;
+begin
+ checkmemorystream();
+ result:= fmemorystream.capacity;
+end;
+
+procedure tmsefilestream.setcapacity(const avalue: ptrint);
+begin
+ checkmemorystream();
+ fmemorystream.capacity:= avalue;
+end;
+
 { tresourcefilestream}
 
 procedure TresourcefileStream.WriteResourceHeader(resourcetyp: word;
@@ -1509,12 +1532,36 @@ begin
  end;
 end;
 
+procedure tcustombufstream.fillbuffer();
+begin
+ if ismemorystream then begin
+  bufoffset:= bufend;
+ end
+ else begin
+  bufend:= fbuffer + readbytes(fbuffer^);
+  bufoffset:= fbuffer;
+ end;
+end;
+
+procedure tcustombufstream.checkbuffer();
+begin
+ if ismemorystream then begin
+  bufoffset:= fmemorystream.memory + fmemorystream.position1;
+  bufend:= fmemorystream.memory + fmemorystream.size1;
+ end
+ else begin
+  if bufoffset = nil then begin  //buffer ungueltig
+   fillbuffer();
+  end;
+ end;
+end;
+
 procedure tcustombufstream.internalwritebuffer(const buffer; count: longint);
 var
  int1: integer;
 begin
  int1:= inherited write(buffer,count);
- if (int1 >= 0) and (fcachedposition >= 0) then begin
+ if not ismemorystream and (int1 >= 0) and (fcachedposition >= 0) then begin
   fcachedposition:= fcachedposition + int1;
  end;
  if int1 <> count then begin
@@ -1524,44 +1571,49 @@ end;
 
 function tcustombufstream.write(const buffer; count: longint): integer;
 begin
- if fusewritebuffer then begin
-  result:= count;
-  if fwriting and (bufoffset <> nil) then begin
-   if buflen - (bufoffset - fbuffer) < count then begin
-    flushbuffer;
-   end;
-  end;
-  if (bufoffset = nil) then begin
-   if (buflen > count) then begin
-    move(buffer,fbuffer^,count);
-    bufoffset:= fbuffer+count;
-    fwriting:= true;
-   end
-   else begin
-    result:= inherited write(buffer,count);
-    if (result >= 0) and (fcachedposition >= 0) then begin
-     fcachedposition:= fcachedposition + result;
-    end;
-   end;
-  end
-  else begin
-   if buflen - (bufoffset - fbuffer) >= count then begin
-    move(buffer,bufoffset^,count);
-    bufoffset:= bufoffset+count;
-    fwriting:= true;
-   end
-   else begin
-    result:= inherited write(buffer,count);
-    if (result >= 0) and (fcachedposition >= 0) then begin
-     fcachedposition:= fcachedposition + result;
-    end;
-   end;
-  end
+ if ismemorystream then begin
+  result:= inherited write(buffer,count);
  end
  else begin
-  result:= inherited write(buffer,count);
-  if (result >= 0) and (fcachedposition >= 0) then begin
-   fcachedposition:= fcachedposition + result;
+  if fusewritebuffer then begin
+   result:= count;
+   if fwriting and (bufoffset <> nil) then begin
+    if buflen - (bufoffset - fbuffer) < count then begin
+     flushbuffer;
+    end;
+   end;
+   if (bufoffset = nil) then begin
+    if (buflen > count) then begin
+     move(buffer,fbuffer^,count);
+     bufoffset:= fbuffer+count;
+     fwriting:= true;
+    end
+    else begin
+     result:= inherited write(buffer,count);
+     if (result >= 0) and (fcachedposition >= 0) then begin
+      fcachedposition:= fcachedposition + result;
+     end;
+    end;
+   end
+   else begin
+    if buflen - (bufoffset - fbuffer) >= count then begin
+     move(buffer,bufoffset^,count);
+     bufoffset:= bufoffset+count;
+     fwriting:= true;
+    end
+    else begin
+     result:= inherited write(buffer,count);
+     if (result >= 0) and (fcachedposition >= 0) then begin
+      fcachedposition:= fcachedposition + result;
+     end;
+    end;
+   end
+  end
+  else begin
+   result:= inherited write(buffer,count);
+   if (result >= 0) and (fcachedposition >= 0) then begin
+    fcachedposition:= fcachedposition + result;
+   end;
   end;
  end;
 end;
@@ -1576,7 +1628,7 @@ end;
 
 procedure tcustombufstream.setbuflen(const Value: integer);
 begin
- if fbuflen <> value then begin
+ if (fbuflen <> value) and not ismemorystream then begin
   flushbuffer;
   fbuflen:= value;
   if fbuflen < minbuflen then begin
@@ -1593,7 +1645,7 @@ begin
  result:= inherited read(buf,fbuflen);
  if result > 0 then begin
   exclude(fstate,tss_eof);
-  if fcachedposition >= 0 then begin
+  if not ismemorystream and (fcachedposition >= 0) then begin
    fcachedposition:= fcachedposition + result;
   end;
  end;
@@ -1611,51 +1663,62 @@ end;
 
 procedure tcustombufstream.setusewritebuffer(const avalue: boolean);
 begin
- flushbuffer;
- fusewritebuffer:= avalue;
+ if not ismemorystream then begin
+  flushbuffer;
+  fusewritebuffer:= avalue;
+ end;
 end;
 
 function tcustombufstream.Seek(const Offset: Int64; Origin: TSeekOrigin): Int64;
 begin
- if (origin = sobeginning) and (bufoffset <> nil) and 
-                                          (fcryptohandler = nil) then begin
-//  result:= inherited seek(0,socurrent);
-  result:= fcachedposition;
-  if result >= 0 then begin
-   result:= seek(offset-result+(bufend-bufoffset),socurrent);
+ if ismemorystream then begin
+  result:= inherited seek(offset,origin);
+  if (origin <> socurrent) or (offset <> 0) then begin
+   exclude(fstate,tss_eof);
   end;
  end
  else begin
-  if (origin = socurrent) and (offset = 0) then begin
+  if (origin = sobeginning) and (bufoffset <> nil) and 
+                                           (fcryptohandler = nil) then begin
+ //  result:= inherited seek(0,socurrent);
    result:= fcachedposition;
-//   result:= inherited seek(offset,origin);
-   if (bufoffset <> nil) and (result >= 0) then begin
-    result:= result + (bufoffset-bufend);
+   if result >= 0 then begin
+    result:= seek(offset-result+(bufend-bufoffset),socurrent);
    end;
   end
   else begin
-   flushbuffer;
-   if (origin = socurrent) and (bufoffset <> nil) then begin
-    if (offset < fbuffer - bufoffset) or (offset >= bufend-bufoffset) then begin
-     result:= inherited seek(offset-(bufend-bufoffset),origin);
-     fcachedposition:= result;
-     bufoffset:= nil;
-    end
-    else begin
-     bufoffset:= bufoffset + offset;
-     result:= inherited seek(0,socurrent);
-     fcachedposition:= result;
-     if result >= 0 then begin
-      result:= result + (bufoffset-bufend);
-     end;
+   if (origin = socurrent) and (offset = 0) then begin
+    result:= fcachedposition;
+ //   result:= inherited seek(offset,origin);
+    if (bufoffset <> nil) and (result >= 0) then begin
+     result:= result + (bufoffset-bufend);
     end;
    end
    else begin
-    result:= inherited seek(offset,origin);
-    fcachedposition:= result;
-    bufoffset:= nil;
+    flushbuffer;
+    if (origin = socurrent) and (bufoffset <> nil) then begin
+     if (offset < fbuffer - bufoffset) or 
+                                       (offset >= bufend-bufoffset) then begin
+      result:= inherited seek(offset-(bufend-bufoffset),origin);
+      fcachedposition:= result;
+      bufoffset:= nil;
+     end
+     else begin
+      bufoffset:= bufoffset + offset;
+      result:= inherited seek(0,socurrent);
+      fcachedposition:= result;
+      if result >= 0 then begin
+       result:= result + (bufoffset-bufend);
+      end;
+     end;
+    end
+    else begin
+     result:= inherited seek(offset,origin);
+     fcachedposition:= result;
+     bufoffset:= nil;
+    end;
+    exclude(fstate,tss_eof);
    end;
-   exclude(fstate,tss_eof);
   end;
  end;
 end;
@@ -1667,52 +1730,55 @@ end;
 
 function tcustombufstream.Read(var Buffer; Count: Longint): Longint;
 
- procedure fillbuffer;
- begin
-  bufend:= fbuffer + readbytes(fbuffer^);
-  bufoffset:= fbuffer;
- end;
- 
 //var
 // int1: integer;
 label
  endlab;
 begin
- flushbuffer;
- if bufoffset = nil then begin
-  if count >= buflen then begin
-   result:= inherited read(buffer,count);
-   if result > 0 then begin
-    exclude(fstate,tss_eof);
-    if fcachedposition >= 0 then begin
-     fcachedposition:= fcachedposition + result;
+ if ismemorystream then begin
+  result:= inherited read(buffer,count);
+  if result > 0 then begin
+   exclude(fstate,tss_eof);
+  end;
+  goto endlab;
+ end
+ else begin
+  flushbuffer;
+  if bufoffset = nil then begin
+   if count >= buflen then begin
+    result:= inherited read(buffer,count);
+    if result > 0 then begin
+     exclude(fstate,tss_eof);
+     if fcachedposition >= 0 then begin
+      fcachedposition:= fcachedposition + result;
+     end;
+    end;
+    goto endlab;
+   end
+   else begin
+    fillbuffer;
+    if bufend = fbuffer then begin
+     result:= 0;
+     goto endlab;
     end;
    end;
-   goto endlab;
-  end
-  else begin
-   fillbuffer;
-   if bufend = fbuffer then begin
-    result:= 0;
-    goto endlab;
+  end;
+  result:= bufend-bufoffset;
+  if result > count then begin
+   result:= count;
+  end;
+  move(bufoffset^,buffer,result);
+  inc(bufoffset,result);
+  if result < count then begin
+   bufoffset:= nil;
+   if not eof then begin
+    result:= result + read((pchar(@buffer)+result)^,count-result);
    end;
+  end; 
+ endlab:
+  if result < count then begin
+   include(fstate,tss_eof);
   end;
- end;
- result:= bufend-bufoffset;
- if result > count then begin
-  result:= count;
- end;
- move(bufoffset^,buffer,result);
- inc(bufoffset,result);
- if result < count then begin
-  bufoffset:= nil;
-  if not eof then begin
-   result:= result + read((pchar(@buffer)+result)^,count-result);
-  end;
- end; 
-endlab:
- if result < count then begin
-  include(fstate,tss_eof);
  end;
 end;
 
@@ -1728,7 +1794,8 @@ function tcustombufstream.getbufpo: pchar;
 var
  int1: integer;
 begin
- if (bufoffset = nil) or (bufoffset = bufend) then begin
+ if not ismemorystream and 
+            ((bufoffset = nil) or (bufoffset = bufend)) then begin
   int1:= readbytes(fbuffer^);
   if int1 > 0 then begin
    bufend:= fbuffer + int1;
@@ -1740,11 +1807,13 @@ end;
 
 procedure tcustombufstream.setsize(const newsize: int64);
 begin
- flushbuffer;
- if fcachedposition > newsize then begin
-  fcachedposition:= newsize;
+ if not ismemorystream then begin
+  flushbuffer;
+  if fcachedposition > newsize then begin
+   fcachedposition:= newsize;
+  end;
+  bufoffset:= nil;
  end;
- bufoffset:= nil;
  inherited;
 end;
 
@@ -1762,12 +1831,6 @@ end;
 function ttextstream.readstrln(var value: string): boolean;
      //true wenn zeile vollstaendig
 
- procedure fillbuffer;
- begin
-  bufend:= fbuffer + readbytes(fbuffer^);
-  bufoffset:= fbuffer;
- end;
-
 var
  {int1,}int2,int3: integer;
  gefunden: boolean;
@@ -1782,9 +1845,7 @@ begin
  if @value <> nil then begin
   setlength(value,0);
  end;
- if bufoffset = nil then begin  //buffer ungueltig
-  fillbuffer;
- end;
+ checkbuffer();
  fposvorher:= position{ + (bufend - bufoffset)};
  repeat
   po1:= nil;
@@ -1845,7 +1906,9 @@ begin
    end;
   end;
  end;
-
+ if ismemorystream then begin
+  fmemorystream.position:= bufoffset-fmemorystream.memory;
+ end;
  result:= gefunden;
  updatebit({$ifdef FPC}longword{$else}byte{$endif}(fstate),
                                                 ord(tss_eof),not result);
@@ -1940,7 +2003,8 @@ end;
 
 procedure ttextstream.writestrln(const value: string);
 begin
- write(value+feol);
+ write(value);
+ write(feol);
 end;
 
 procedure ttextstream.writeln;
@@ -1950,12 +2014,14 @@ end;
 
 procedure ttextstream.writeln(const value: string);
 begin
- write(value+feol);
+ write(value);
+ write(feol);
 end;
 
 procedure ttextstream.writeln(const value: msestring);
 begin
- write(value+feolm);
+ write(value);
+ write(feolm);
 end;
 
 procedure ttextstream.writeln(const value: real);
