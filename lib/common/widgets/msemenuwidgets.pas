@@ -111,6 +111,7 @@ type
    function trycancelmodal(const newactive: twindow): boolean; override;
    
    procedure release1(const acancelmodal: boolean); virtual;
+   class function classskininfo(): skininfoty; override;
   public
    constructor create(instance: ppopupmenuwidget;
               const amenu: tmenuitem; const atransientfor: twindow;
@@ -1871,6 +1872,12 @@ procedure tpopupmenuwidget.release1(const acancelmodal: boolean);
 begin
  visible:= false;
  release;
+end;
+
+class function tpopupmenuwidget.classskininfo(): skininfoty;
+begin
+ result:= inherited classskininfo();
+ result.objectkind:= sok_mainmenuwidget;
 end;
 
 { tcustommainmenuwidget }

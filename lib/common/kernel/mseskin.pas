@@ -145,6 +145,10 @@ type
   svmain: menuskininfoty;
   svpopup: menuskininfoty;
  end;
+ mainmenuwidgetskininfoty = record
+  svwidget: widgetskininfoty;
+  svmenu: mainmenuskininfoty;
+ end;
  dispwidgetskininfoty = record
   svwidget: widgetskininfoty;
   svcolor: widgetcolorinfoty;
@@ -459,6 +463,7 @@ type
    procedure handlebooleanedit(const ainfo: skininfoty); virtual;
    procedure handlemainmenu(const ainfo: skininfoty); virtual;
    procedure handlepopupmenu(const ainfo: skininfoty); virtual;
+   procedure handlemainmenuwidget(const ainfo: skininfoty); virtual;
    procedure handlegrid(const ainfo: skininfoty); virtual;
    procedure updateskin1(const ainfo: skininfoty; const remove: boolean);
   public
@@ -519,6 +524,7 @@ type
    ftoolbar_vert: toolbarskininfoty;
    fpopupmenu: menuskininfoty;
    fmainmenu: mainmenuskininfoty;
+   fmainmenuwidget: mainmenuwidgetskininfoty;
    fdispwidget: dispwidgetskininfoty;
    fedit: editskininfoty;
    fdataedit: dataeditskininfoty;
@@ -681,6 +687,27 @@ type
    procedure setmainmenu_popupfontactive(const avalue: tfontcomp);
    procedure setmainmenu_popupseparatorframe(const avalue: tframecomp);
    procedure setmainmenu_popupcheckboxframe(const avalue: tframecomp);
+
+   procedure setmainmenuwidget_face(const avalue: tfacecomp);
+   procedure setmainmenuwidget_frame(const avalue: tframecomp);
+   procedure setmainmenuwidget_itemface(const avalue: tfacecomp);
+   procedure setmainmenuwidget_itemframe(const avalue: tframecomp);
+   procedure setmainmenuwidget_itemfaceactive(const avalue: tfacecomp);
+   procedure setmainmenuwidget_itemframeactive(const avalue: tframecomp);
+   procedure setmainmenuwidget_font(const avalue: tfontcomp);
+   procedure setmainmenuwidget_fontactive(const avalue: tfontcomp);
+   procedure setmainmenuwidget_separatorframe(const avalue: tframecomp);
+   procedure setmainmenuwidget_checkboxframe(const avalue: tframecomp);
+   procedure setmainmenuwidget_popupface(const avalue: tfacecomp);
+   procedure setmainmenuwidget_popupframe(const avalue: tframecomp);
+   procedure setmainmenuwidget_popupitemface(const avalue: tfacecomp);
+   procedure setmainmenuwidget_popupitemframe(const avalue: tframecomp);
+   procedure setmainmenuwidget_popupitemfaceactive(const avalue: tfacecomp);
+   procedure setmainmenuwidget_popupitemframeactive(const avalue: tframecomp);
+   procedure setmainmenuwidget_popupfont(const avalue: tfontcomp);
+   procedure setmainmenuwidget_popupfontactive(const avalue: tfontcomp);
+   procedure setmainmenuwidget_popupseparatorframe(const avalue: tframecomp);
+   procedure setmainmenuwidget_popupcheckboxframe(const avalue: tframecomp);
   protected
    procedure handlewidget(const askin: skininfoty;
                            const acolor: pwidgetcolorinfoty = nil); override;
@@ -699,6 +726,7 @@ type
    procedure handlebooleanedit(const ainfo: skininfoty); override;
    procedure handlemainmenu(const ainfo: skininfoty); override;
    procedure handlepopupmenu(const ainfo: skininfoty); override;
+   procedure handlemainmenuwidget(const ainfo: skininfoty); override;
    procedure handlegrid(const ainfo: skininfoty); override;
   public
    constructor create(aowner: tcomponent); override;
@@ -1321,6 +1349,59 @@ type
    property mainmenu_popupcheckboxframe: tframecomp 
                                  read fmainmenu.svpopup.svcheckboxframe 
                                  write setmainmenu_popupcheckboxframe;
+
+   property mainmenuwidget_face: tfacecomp read fmainmenuwidget.svwidget.svface
+                                            write setmainmenuwidget_face;
+   property mainmenuwidget_frame: tframecomp 
+                         read fmainmenuwidget.svwidget.svframe 
+                                            write setmainmenuwidget_frame;
+   property mainmenuwidget_itemface: tfacecomp read fmainmenuwidget.svmenu.svmain.svitemface 
+                                 write setmainmenuwidget_itemface;
+   property mainmenuwidget_itemframe: tframecomp read fmainmenuwidget.svmenu.svmain.svitemframe 
+                                 write setmainmenuwidget_itemframe;
+   property mainmenuwidget_itemfaceactive: tfacecomp 
+                                 read fmainmenuwidget.svmenu.svmain.svitemfaceactive
+                                 write setmainmenuwidget_itemfaceactive;
+   property mainmenuwidget_itemframeactive: tframecomp 
+                                 read fmainmenuwidget.svmenu.svmain.svitemframeactive 
+                                 write setmainmenuwidget_itemframeactive;
+   property mainmenuwidget_font: tfontcomp read fmainmenuwidget.svmenu.svmain.svfont 
+                                 write setmainmenuwidget_font;
+   property mainmenuwidget_fontactive: tfontcomp read fmainmenuwidget.svmenu.svmain.svfontactive
+                                 write setmainmenuwidget_fontactive;                         
+   property mainmenuwidget_separatorframe: tframecomp 
+                                 read fmainmenuwidget.svmenu.svmain.svseparatorframe 
+                                 write setmainmenuwidget_separatorframe;
+   property mainmenuwidget_checkboxframe: tframecomp 
+                                 read fmainmenuwidget.svmenu.svmain.svcheckboxframe 
+                                 write setmainmenuwidget_checkboxframe;
+
+   property mainmenuwidget_popupface: tfacecomp read fmainmenuwidget.svmenu.svpopup.svface 
+                                 write setmainmenuwidget_popupface;
+   property mainmenuwidget_popupframe: tframecomp read fmainmenuwidget.svmenu.svpopup.svframe 
+                                 write setmainmenuwidget_popupframe;
+   property mainmenuwidget_popupitemface: tfacecomp read fmainmenuwidget.svmenu.svpopup.svitemface 
+                                 write setmainmenuwidget_popupitemface;
+   property mainmenuwidget_popupitemframe: tframecomp 
+                                 read fmainmenuwidget.svmenu.svpopup.svitemframe 
+                                 write setmainmenuwidget_popupitemframe;
+   property mainmenuwidget_popupitemfaceactive: tfacecomp 
+                                 read fmainmenuwidget.svmenu.svpopup.svitemfaceactive
+                                 write setmainmenuwidget_popupitemfaceactive;
+   property mainmenuwidget_popupitemframeactive: tframecomp 
+                                 read fmainmenuwidget.svmenu.svpopup.svitemframeactive 
+                                 write setmainmenuwidget_popupitemframeactive;
+   property mainmenuwidget_popupfont: tfontcomp read fmainmenuwidget.svmenu.svpopup.svfont 
+                                 write setmainmenuwidget_popupfont;
+   property mainmenuwidget_popupfontactive: tfontcomp 
+                                 read fmainmenuwidget.svmenu.svpopup.svfontactive
+                                 write setmainmenuwidget_popupfontactive;
+   property mainmenuwidget_popupseparatorframe: tframecomp 
+                                 read fmainmenuwidget.svmenu.svpopup.svseparatorframe 
+                                 write setmainmenuwidget_popupseparatorframe;
+   property mainmenuwidget_popupcheckboxframe: tframecomp 
+                                 read fmainmenuwidget.svmenu.svpopup.svcheckboxframe 
+                                 write setmainmenuwidget_popupcheckboxframe;
  end;
 
  skincontrollerarty = array of tcustomskincontroller;
@@ -1349,7 +1430,8 @@ procedure setskinhandler(const avalue: tskinhandler);
 
 implementation
 uses
- msetabsglob,sysutils,mseapplication,msearrayutils,msefont,msesplitter;
+ msetabsglob,sysutils,mseapplication,msearrayutils,msefont,msesplitter,
+ msemenuwidgets;
  
 type
  twidget1 = class(twidget);
@@ -1641,7 +1723,7 @@ begin
      goto endlab;
     end;
    end;
-   case ainfo.objectkind of 
+   case ainfo.objectkind of  //todo: use table
     sok_widget: begin
      handlewidget(ainfo);
     end;
@@ -1686,6 +1768,9 @@ begin
     end;
     sok_popupmenu: begin
      handlepopupmenu(ainfo);
+    end;
+    sok_mainmenuwidget: begin
+     handlemainmenuwidget(ainfo);
     end;
     sok_grid: begin
      handlegrid(ainfo);
@@ -2375,6 +2460,11 @@ begin
 end;
 
 procedure tcustomskincontroller.handlepopupmenu(const ainfo: skininfoty);
+begin
+ //dummy
+end;
+
+procedure tcustomskincontroller.handlemainmenuwidget(const ainfo: skininfoty);
 begin
  //dummy
 end;
@@ -3252,16 +3342,120 @@ begin
  setlinkedvar(avalue,tmsecomponent(fmainmenu.svpopup.svfontactive));
 end;
 
-procedure tskincontroller.setmainmenu_popupseparatorframe(
-              const avalue: tframecomp);
+procedure tskincontroller.setmainmenu_popupseparatorframe(const avalue: tframecomp);
 begin
  setlinkedvar(avalue,tmsecomponent(fmainmenu.svpopup.svseparatorframe));
 end;
 
-procedure tskincontroller.setmainmenu_popupcheckboxframe(
-              const avalue: tframecomp);
+procedure tskincontroller.setmainmenu_popupcheckboxframe(const avalue: tframecomp);
 begin
  setlinkedvar(avalue,tmsecomponent(fmainmenu.svpopup.svcheckboxframe));
+end;
+
+procedure tskincontroller.setmainmenuwidget_face(const avalue: tfacecomp);
+begin
+ setlinkedvar(avalue,tmsecomponent(fmainmenuwidget.svwidget.svface));
+end;
+
+procedure tskincontroller.setmainmenuwidget_frame(const avalue: tframecomp);
+begin
+ setlinkedvar(avalue,tmsecomponent(fmainmenuwidget.svwidget.svframe));
+end;
+
+procedure tskincontroller.setmainmenuwidget_itemface(const avalue: tfacecomp);
+begin
+ setlinkedvar(avalue,tmsecomponent(fmainmenuwidget.svmenu.svmain.svitemface));
+end;
+
+procedure tskincontroller.setmainmenuwidget_itemframe(const avalue: tframecomp);
+begin
+ setlinkedvar(avalue,tmsecomponent(fmainmenuwidget.svmenu.svmain.svitemframe));
+end;
+
+procedure tskincontroller.setmainmenuwidget_itemfaceactive(const avalue: tfacecomp);
+begin
+ setlinkedvar(avalue,tmsecomponent(fmainmenuwidget.svmenu.svmain.svitemfaceactive));
+end;
+
+procedure tskincontroller.setmainmenuwidget_itemframeactive(const avalue: tframecomp);
+begin
+ setlinkedvar(avalue,tmsecomponent(fmainmenuwidget.svmenu.svmain.svitemframeactive));
+end;
+
+procedure tskincontroller.setmainmenuwidget_font(const avalue: tfontcomp);
+begin
+ setlinkedvar(avalue,tmsecomponent(fmainmenuwidget.svmenu.svmain.svfont));
+end;
+
+procedure tskincontroller.setmainmenuwidget_fontactive(const avalue: tfontcomp);
+begin
+ setlinkedvar(avalue,tmsecomponent(fmainmenuwidget.svmenu.svmain.svfontactive));
+end;
+
+procedure tskincontroller.setmainmenuwidget_separatorframe(const avalue: tframecomp);
+begin
+ setlinkedvar(avalue,tmsecomponent(fmainmenuwidget.svmenu.svmain.svseparatorframe));
+end;
+
+procedure tskincontroller.setmainmenuwidget_checkboxframe(const avalue: tframecomp);
+begin
+ setlinkedvar(avalue,tmsecomponent(fmainmenuwidget.svmenu.svmain.svcheckboxframe));
+end;
+
+procedure tskincontroller.setmainmenuwidget_popupface(const avalue: tfacecomp);
+begin
+ setlinkedvar(avalue,tmsecomponent(fmainmenuwidget.svmenu.svpopup.svface));
+end;
+
+procedure tskincontroller.setmainmenuwidget_popupframe(const avalue: tframecomp);
+begin
+ setlinkedvar(avalue,tmsecomponent(fmainmenuwidget.svmenu.svpopup.svframe));
+end;
+
+procedure tskincontroller.setmainmenuwidget_popupitemface(const avalue: tfacecomp);
+begin
+ setlinkedvar(avalue,tmsecomponent(fmainmenuwidget.svmenu.svpopup.svitemface));
+end;
+
+procedure tskincontroller.setmainmenuwidget_popupitemframe(const avalue: tframecomp);
+begin
+ setlinkedvar(avalue,tmsecomponent(fmainmenuwidget.svmenu.svpopup.svitemframe));
+end;
+
+procedure tskincontroller.setmainmenuwidget_popupitemfaceactive(const avalue: tfacecomp);
+begin
+ setlinkedvar(avalue,tmsecomponent(fmainmenuwidget.svmenu.svpopup.svitemfaceactive));
+end;
+
+procedure tskincontroller.setmainmenuwidget_popupitemframeactive(const avalue: tframecomp);
+begin
+ setlinkedvar(avalue,tmsecomponent(fmainmenuwidget.svmenu.svpopup.svitemframeactive));
+end;
+
+procedure tskincontroller.setmainmenuwidget_popupfont(const avalue: tfontcomp);
+begin
+ setlinkedvar(avalue,tmsecomponent(fmainmenuwidget.svmenu.svpopup.svfont));
+end;
+
+procedure tskincontroller.setmainmenuwidget_popupfontactive(
+                                                     const avalue: tfontcomp);
+begin
+ setlinkedvar(avalue,tmsecomponent(
+                                fmainmenuwidget.svmenu.svpopup.svfontactive));
+end;
+
+procedure tskincontroller.setmainmenuwidget_popupseparatorframe(
+                                                const avalue: tframecomp);
+begin
+ setlinkedvar(avalue,tmsecomponent(
+                              fmainmenuwidget.svmenu.svpopup.svseparatorframe));
+end;
+
+procedure tskincontroller.setmainmenuwidget_popupcheckboxframe(
+                                             const avalue: tframecomp);
+begin
+ setlinkedvar(avalue,tmsecomponent(
+                            fmainmenuwidget.svmenu.svpopup.svcheckboxframe));
 end;
 
 procedure tskincontroller.handlewidget(const askin: skininfoty;
@@ -3583,6 +3777,13 @@ end;
 procedure tskincontroller.handlepopupmenu(const ainfo: skininfoty);
 begin
  setpopupmenuskin(tpopupmenu(ainfo.instance),fpopupmenu);
+end;
+
+procedure tskincontroller.handlemainmenuwidget(const ainfo: skininfoty);
+begin
+ handlewidget(ainfo);
+ setwidgetskin(twidget(ainfo.instance),fmainmenuwidget.svwidget);
+ setmainmenuskin(tmainmenuwidget(ainfo.instance).menu,fmainmenuwidget.svmenu);
 end;
 
 procedure tskincontroller.handlegrid(const ainfo: skininfoty);

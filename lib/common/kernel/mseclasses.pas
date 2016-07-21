@@ -440,7 +440,7 @@ type
                      sok_splitter,sok_dispwidget,
                      sok_edit,sok_dataedit,sok_booleanedit,
                      sok_grid,
-                     sok_mainmenu,sok_popupmenu,
+                     sok_mainmenu,sok_popupmenu,sok_mainmenuwidget,
                      sok_user); 
 
  skininfoty = record

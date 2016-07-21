@@ -168,7 +168,7 @@ type
 
    function empty: boolean; virtual;
    procedure change(); virtual;
-   procedure valuechange(const delta: nodestatesty); virtual;
+   procedure valuechange(const delta: nodestatesty = []); virtual;
    procedure updatecellzone(const pos: pointty; var zone: cellzonety); virtual;
    procedure drawimage(var alayoutinfo: listitemlayoutinfoty;
                                 const acanvas: tcanvas); virtual;
@@ -989,7 +989,7 @@ begin
  end;
 end;
 
-procedure tlistitem.valuechange(const delta: nodestatesty);
+procedure tlistitem.valuechange(const delta: nodestatesty = []);
 var
  action: nodeactioninfoty;
 begin
