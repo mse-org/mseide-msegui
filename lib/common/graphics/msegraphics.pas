@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2015 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2016 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -4644,6 +4644,9 @@ begin
     end
     else begin
      if al_xcentered in aalignment then begin
+      if int1 < 0 then begin
+       dec(int1);
+      end;
       drect.x:= drect.x + int1 div 2;
      end;
     end;
@@ -4656,6 +4659,9 @@ begin
     end
     else begin
      if al_ycentered in aalignment then begin
+      if int1 < 0 then begin
+       dec(int1);
+      end;
       drect.y:= drect.y + int1 div 2;
      end;
     end;

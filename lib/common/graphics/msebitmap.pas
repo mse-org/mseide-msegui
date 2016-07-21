@@ -1312,8 +1312,12 @@ begin
  if al_fit in alignment then begin
   exit;
  end;
+ int1:= 0;
  if al_xcentered in alignment then begin
-  newdest.x:= dest.x + (dest.cx - source.cx) div 2
+  if dest.cx < source.cx then begin
+   int1:= -1;
+  end;
+  newdest.x:= dest.x + (dest.cx - source.cx + int1) div 2
  end
  else begin
   if al_right in alignment then begin
@@ -1321,7 +1325,10 @@ begin
   end;
  end;
  if al_ycentered in alignment then begin
-  newdest.y:= dest.y + (dest.cy - source.cy) div 2
+  if dest.cy < source.cy then begin
+   int1:= -1;
+  end;
+  newdest.y:= dest.y + (dest.cy - source.cy + int1) div 2
  end
  else begin
   if al_bottom in alignment then begin

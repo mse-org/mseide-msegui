@@ -988,14 +988,22 @@ begin
  result:= arect;
  with info do begin
   pos:= simpleimagepos[imagepos];
-  if pos in (vertimagepos) then begin   
-   inc(result.x,imagedist1 + 
-    (result.cx - imagedist1 - imagedist2 - imagelist.width) div 2);
+  if pos in (vertimagepos) then begin
+   if result.cx < imagelist.width then begin
+    i1:= result.cx - imagelist.width;
+    if i1 < 0 then begin
+     dec(i1);
+    end;
+   end;
+   inc(result.x,imagedist1 + (i1 - imagedist1 - imagedist2) div 2);
    result.cx:= imagelist.width;
   end
   else begin
-   inc(result.y,imagedist1 + 
-    (result.cy - imagedist1 - imagedist2 - imagelist.height) div 2);
+   i1:= result.cy - imagelist.height;
+   if i1 < 0 then begin
+    dec(i1);
+   end;
+   inc(result.y,imagedist1 + (i1 - imagedist1 - imagedist2) div 2);
    result.cy:= imagelist.height;
   end;
 
