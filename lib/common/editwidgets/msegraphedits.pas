@@ -918,7 +918,7 @@ type
    procedure dokeyup(var info: keyeventinfoty); override;
    procedure doshortcut(var info: keyeventinfoty; const sender: twidget); override;
    procedure clientrectchanged; override;
-   function getframestateflags: framestateflagsty; override;
+//   function getframestateflags: framestateflagsty; override;
    procedure paintglyph(const canvas: tcanvas; const acolorglyph: colorty;
                   const avalue; const arect: rectty); override;
    procedure internalcreateframe; override;
@@ -3527,6 +3527,9 @@ procedure tcustomdatabutton.clientrectchanged;
 begin
  inherited;
  frameskinoptionstoshapestate(fframe,finfo);
+ if (fframe = nil) and (fgridintf <> nil) then begin
+  exclude(finfo.state,shs_showdefaultrect);
+ end;
  if shs_flat in finfo.state then begin
   exclude(fwidgetstate1,ws1_nodesignframe);
  end
@@ -3540,7 +3543,7 @@ begin
   finfo.ca.dim:= innerclientrect;
  end;
 end;
-
+{
 function tcustomdatabutton.getframestateflags: framestateflagsty;
 begin
  with finfo do begin
@@ -3550,6 +3553,7 @@ begin
               shs_mouse in state,shs_clicked in state);
  end;
 end;
+}
 {
 function tcustomdatabutton.getframeclicked: boolean;
 begin
