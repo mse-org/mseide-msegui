@@ -308,11 +308,15 @@ type
  pgraphicdirectionty = ^graphicdirectionty;
  graphicdirectionsty = set of graphicdirectionty;
  pgraphicdirectionsty = ^graphicdirectionsty;
-
+                 //0       1            2        3      4            5
  alignmentty = (al_left,al_xcentered,al_right,al_top,al_ycentered,al_bottom,
+                 //6
                 al_grayed,
+                 //7           8           9      10 
                 al_stretchx,al_stretchy,al_fit,al_tiled,
+                 //11
                 al_nomaskscale,
+                 //12        13    14
                 al_intpol,al_or,al_and);
  alignmentsty = set of alignmentty;
 

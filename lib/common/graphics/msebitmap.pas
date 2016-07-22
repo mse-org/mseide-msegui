@@ -51,8 +51,10 @@ type
    procedure setalignment(const Value: alignmentsty);
    procedure setopacity(avalue: colorty);
    procedure updatealignment(const dest,source: rectty;
-               const alignment: alignmentsty; out newdest,newsource: rectty;
+               var alignment: alignmentsty; out newdest,newsource: rectty;
                out tileorigin: pointty);
+      //expand copy areas in order to avoid missing pixels by position rounding
+
    procedure setcolorbackground(const Value: colorty);
    procedure setcolorforeground(const Value: colorty);
    procedure readtransparency(reader: treader);
@@ -90,7 +92,7 @@ type
              const bottomup: boolean = false); virtual; //calls change
    function hasimage: boolean;
    procedure paint(const acanvas: tcanvas; const dest: rectty;
-                   const asource: rectty; const aalignment: alignmentsty = [];
+                   const asource: rectty; aalignment: alignmentsty = [];
                          const acolorforeground: colorty = cl_default;
                          const acolorbackground: colorty = cl_default;
                       //used for monochrome bitmaps,
@@ -772,7 +774,7 @@ begin
 end;
 }
 procedure tbitmap.paint(const acanvas: tcanvas; const dest: rectty;
-                  const asource: rectty; const aalignment: alignmentsty = [];
+                  const asource: rectty; aalignment: alignmentsty = [];
                          const acolorforeground: colorty = cl_default;
                          const acolorbackground: colorty = cl_default;
                          const aopacity: colorty = cl_default);
@@ -1302,8 +1304,9 @@ begin
 end;
 
 procedure tbitmap.updatealignment(const dest,source: rectty;
-            const alignment: alignmentsty; out newdest,newsource: rectty;
+            var alignment: alignmentsty; out newdest,newsource: rectty;
             out tileorigin: pointty);
+     //expand copy areas in order to avoid missing pixels by position rounding
 var
  int1: integer;
 begin
@@ -1335,6 +1338,7 @@ begin
    newdest.y:= dest.y + dest.cy - source.cy;
   end;
  end;
+ alignment:= alignment - [al_right,al_bottom,al_xcentered,al_ycentered];
  tileorigin:= newdest.pos;
  if al_tiled in alignment then begin
   newdest:= dest;
