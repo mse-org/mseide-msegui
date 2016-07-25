@@ -1016,7 +1016,7 @@ begin            //init
            //!!!!  delphi bug flicken(info in qc)!!
     if str1 <> '' then begin
 //     errorme(setdef(int1,str1,true),name);
-     errorme(setdef(int1,str1,[arf_envdefined]),name);
+     errorme(setdef(i1,str1,[arf_envdefined]),name);
     end;
     {$else}
 {
