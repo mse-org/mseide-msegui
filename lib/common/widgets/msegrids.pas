@@ -48,7 +48,7 @@ type
 //                co_rowfont,co_rowcolor,co_zebracolor, //deprecated -> co1_
 //                co_rowcoloractive,                    //deprecated -> co1_
 
-                co_nosort,co_sortdescend,co_norearange,
+                co_nosort,co_sortdescend,co_sortcaseinsensitive,co_norearange,
                 co_cancopy,co_canpaste,co_mousescrollrow,co_rowdatachange
                 );
  coloptionsty = set of coloptionty;
@@ -687,6 +687,8 @@ type
    procedure deleterow(const aindex: integer; const count: integer = 1); override;
    procedure rearange(const list: integerarty); override;
    function sortcompare(const index1,index2: integer): integer; virtual;
+   function sortcomparecaseinsensitive(
+                         const index1,index2: integer): integer; virtual;
    function isempty(const aindex: integer): boolean; virtual;
    procedure docellevent(var info: celleventinfoty); virtual;
    function getcursor(const arow: integer; const actcellzone: cellzonety; 
@@ -6533,7 +6535,7 @@ begin
          {$ifdef FPC}longword{$else}longword{$endif}(foptions),
          {$ifdef FPC}longword{$else}longword{$endif}(mask))));
  if coloptionsty(longword(optionsbefore) xor longword(foptions)) * 
-          [co_nosort,co_sortdescend] <> [] then begin
+          [co_nosort,co_sortdescend,co_sortcaseinsensitive] <> [] then begin
   fcellinfo.grid.sortinvalid(index,-1);
   fcellinfo.grid.checksort;
  end;
@@ -6579,6 +6581,18 @@ begin
  if fdata <> nil then begin
   with tdatalist1(fdata) do begin
    result:= tdatalist1(fdata).compare((fdatapo+index1*fsize)^,
+                                (fdatapo+index2*fsize)^);
+  end;
+ end;
+end;
+
+function tdatacol.sortcomparecaseinsensitive(
+                                  const index1,index2: integer): integer;
+begin
+ result:= 0;
+ if fdata <> nil then begin
+  with tdatalist1(fdata) do begin
+   result:= tdatalist1(fdata).comparecaseinsensitive((fdatapo+index1*fsize)^,
                                 (fdatapo+index2*fsize)^);
   end;
  end;
@@ -8615,7 +8629,12 @@ begin
   for int1:= 0 to count-1 do begin
    with tdatacol(fitems[int1]) do begin
     if not(co_nosort in foptions) then begin
-     result:= sortcompare(l,r);
+     if co_sortcaseinsensitive in foptions then begin
+      result:= sortcomparecaseinsensitive(l,r);
+     end
+     else begin
+      result:= sortcompare(l,r);
+     end;
      if result <> 0 then begin
       if co_sortdescend in foptions then begin
        result:= - result;

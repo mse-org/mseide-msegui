@@ -167,6 +167,7 @@ type
    function internaladddata(const quelle; docopy: boolean): integer;
    function adddata(const quelle): integer;
    function compare(const l,r): integer; virtual;
+   function comparecaseinsensitive(const l,r): integer; virtual;
    function getdefault: pointer; virtual; //nil fuer null
    procedure normalizering; //macht ringpointer = null
    procedure blockcopymovedata(fromindex,toindex: integer;
@@ -271,11 +272,14 @@ type
 
    function sort(const comparefunc: sortcomparemethodty; 
                          out arangelist: integerarty;
-                         const dorearange: boolean): boolean; overload;
+                         const dorearange: boolean): boolean;
    function sort(out arangelist: integerarty;
-                       const dorearange: boolean): boolean; overload;
-   function sort(const compareproc: sortcomparemethodty): boolean; overload;
-   function sort: boolean; overload; //true if changed
+                       const dorearange: boolean): boolean;
+   function sort(const compareproc: sortcomparemethodty): boolean;
+   function sort: boolean; //true if changed
+   function sortcaseinsensitive: boolean; //true if changed
+   function sortcaseinsensitive(out arangelist: integerarty;
+                       const dorearange: boolean): boolean;
    
    procedure clean(const start,stop: integer); virtual;
    procedure clearmemberitem(const subitem: integer; 
@@ -650,6 +654,7 @@ type
    procedure beforecopy(var data); override;
    procedure assignto(dest: tpersistent); override;
    function compare(const l,r): integer; override;
+   function comparecaseinsensitive(const l,r): integer; override;
    procedure setstatdata(const index: integer; const value: msestring); override;
    function getstatdata(const index: integer): msestring; override;
    function textlength: integer;
@@ -755,6 +760,7 @@ type
   private
   protected
    function compare(const l,r): integer; override;
+   function comparecaseinsensitive(const l,r): integer; override;
   public
    class function datatype: listdatatypety; override;
    function add(const value: msestring): integer; override;
@@ -778,6 +784,7 @@ type
    procedure readitem(const reader: treader; var value); override;
    procedure writeitem(const writer: twriter; var value); override;
    function compare(const l,r): integer; override;
+   function comparecaseinsensitive(const l,r): integer; override;
    procedure freedata(var data); override; //gibt daten frei
 {$ifdef msestringsarenotrefcounted}
    procedure aftercopy(var data); override;
@@ -830,6 +837,7 @@ type
    procedure readitem(const reader: treader; var value); override;
    procedure writeitem(const writer: twriter; var value); override;
    function compare(const l,r): integer; override;
+   function comparecaseinsensitive(const l,r): integer; override;
 //   procedure freedata(var data); override;
 //   procedure copyinstance(var data); override;
    procedure setstatdata(const index: integer; const value: msestring); override;
@@ -1512,6 +1520,13 @@ begin
  result:= sort({$ifdef FPC}@{$endif}compare,arangelist,dorearange);
 end;
 
+function tdatalist.sortcaseinsensitive(out arangelist: integerarty; 
+                                       const dorearange: boolean): boolean;
+begin
+ result:= sort({$ifdef FPC}@{$endif}comparecaseinsensitive,
+                                                 arangelist,dorearange);
+end;
+
 function tdatalist.sort(const compareproc: sortcomparemethodty): boolean;
 var
  ar1: integerarty;
@@ -1522,6 +1537,11 @@ end;
 function tdatalist.sort: boolean;
 begin
  result:= sort({$ifdef FPC}@{$endif}compare);
+end;
+
+function tdatalist.sortcaseinsensitive: boolean;
+begin
+ result:= sort({$ifdef FPC}@{$endif}comparecaseinsensitive);
 end;
 
 procedure tdatalist.checkindexrange(const aindex: integer;
@@ -2691,6 +2711,11 @@ end;
 function tdatalist.compare(const l,r): integer;
 begin
  result:= 0;
+end;
+
+function tdatalist.comparecaseinsensitive(const l,r): integer;
+begin
+ result:= compare(l,r);
 end;
 
 procedure tdatalist.setmaxcount(const Value: integer);
@@ -4436,83 +4461,20 @@ function tansistringdatalist.compare(const l,r): integer;
 begin
  result:= comparestr(ansistring(l),ansistring(r));
 end;
-//{$define fpcbug4519read}
-(*
-{$ifdef FPC} {$define fpcbug4519} {$endif}
 
-{$ifdef fpcbug4519}
-type
- tbynaryobjectwriter1 = class(tbinaryobjectwriter);
- treader1 = class(treader);
- 
-procedure writestring4519(const writer: twriter; const avalue: string);
+function tansistringdatalist.comparecaseinsensitive(const l,r): integer;
 begin
- if avalue = '' then begin
-  tbynaryobjectwriter1(writer.driver).writeinteger(0);
- end
- else begin
-  writer.writestring(avalue);
- end;
+ result:= comparetext(ansistring(l),ansistring(r));
 end;
-
-procedure writewidestring4519(const writer: twriter; const avalue: msestring);
-begin
- if avalue = '' then begin
-  tbynaryobjectwriter1(writer.driver).writeinteger(0);
- end
- else begin
-  writer.writewidestring(avalue);
- end;
-end;
-
-{$endif}
-*)
-
-{$ifdef fpcbug4519read}
-function readstring4519(const reader: treader): string;
-begin
- if reader.nextvalue = vaint8 then begin
-  reader.readinteger;
-  result:= '';
- end
- else begin
-  result:= reader.readstring;
- end;
-end;
-
-function readwidestring4519(const reader: treader): msestring;
-begin
- if reader.nextvalue = vaint8 then begin
-  reader.readinteger;
-  result:= '';
- end
- else begin
-  result:= treader_readmsestring(reader);
-// {$ifdef mse_unicodestring}
-//  result:= reader.readunicodestring;
-// {$else}
-//  result:= reader.readwidestring;
-// {$endif}
- end;
-end;
-{$endif}
 
 procedure tansistringdatalist.readitem(const reader: treader; var value);
 begin
- {$ifdef fpcbug4519read}
- string(value):= ReadString4519(reader);
- {$else}
  string(value):= reader.ReadString;
- {$endif}
 end;
 
 procedure tansistringdatalist.writeitem(const writer: twriter; var value);
 begin
-// {$ifdef fpcbug4519}
-// WriteString4519(writer,string(value));
-// {$else}
  writer.WriteString(string(value));
-// {$endif}
 end;
 
 procedure tansistringdatalist.fill(acount: integer;
@@ -5397,6 +5359,11 @@ begin
  result:= msecomparestr(msestring(l),msestring(r));
 end;
 
+function tmsestringdatalist.comparecaseinsensitive(const l,r): integer;
+begin
+ result:= msecomparetext(msestring(l),msestring(r));
+end;
+
 procedure tmsestringdatalist.fill(acount: integer; const defaultvalue: msestring);
 begin
  internalfill(count,defaultvalue);
@@ -5501,6 +5468,12 @@ function tdoublemsestringdatalist.compare(const l,r): integer;
 begin
  result:= msecomparestr(doublemsestringty(l).a,doublemsestringty(r).a);
 end;
+
+function tdoublemsestringdatalist.comparecaseinsensitive(const l,r): integer;
+begin
+ result:= msecomparetext(doublemsestringty(l).a,doublemsestringty(r).a);
+end;
+
 {
 procedure tdoublemsestringdatalist.assign(source: tpersistent);
 var
@@ -5816,6 +5789,12 @@ function tmsestringintdatalist.compare(const l,r): integer;
 begin
  result:= msecomparestr(msestringintty(l).mstr,msestringintty(r).mstr);
 end;
+
+function tmsestringintdatalist.comparecaseinsensitive(const l,r): integer;
+begin
+ result:= msecomparetext(msestringintty(l).mstr,msestringintty(r).mstr);
+end;
+
 {
 procedure tmsestringintdatalist.assign(source: tpersistent);
 begin
