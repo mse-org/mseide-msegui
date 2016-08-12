@@ -20,7 +20,8 @@ type
               fplo_autorefresh,fplo_refreshifactiveonly,
               fplo_refreshifchangedonly,fplo_checkbrowsemodeonrefresh,
               fplo_restorerecno,
-              fplo_syncmasterpost,fplo_syncmastercheckbrowsemode,
+              fplo_syncmasterpost,fplo_syncmastercancel,
+              fplo_syncmastercheckbrowsemode,
               fplo_syncmasteredit,
               fplo_syncmasterinsert,
               fplo_syncmasterdelete,
@@ -1084,7 +1085,8 @@ begin
    inc(frefreshlock);
    try
     posted1:= false;
-    if foptions * [fplo_syncmasteredit,fplo_syncmasterinsert] <> [] then begin
+    if foptions * [fplo_syncmasteredit,fplo_syncmasterinsert,
+                               fplo_syncmastercancel] <> [] then begin
      if mseclasses.getcorbainterface(dataset,
                      typeinfo(igetdscontroller),intf) and
                                         intf.getcontroller.canceling then begin
@@ -1601,7 +1603,8 @@ begin
       end;
      end;
     end;
-    if (fplo_syncslavepost in foptions) and (dataset.state <> dsbrowse) then begin
+    if (fplo_syncslavepost in foptions) and 
+                      (dataset.state <> dsbrowse) and not canceling then begin
      sourceds.post;
      updatedata;
     end;
