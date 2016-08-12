@@ -9169,6 +9169,7 @@ begin
    if int1 >= 0 then begin
     fdatasources.move(int1,0);
    end;
+   sortdatasources();
   end;
  end;
 end;

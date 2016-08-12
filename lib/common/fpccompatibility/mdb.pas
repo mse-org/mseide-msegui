@@ -1567,6 +1567,7 @@ type
     procedure OpenCursorcomplete; virtual;
     procedure RefreshInternalCalcFields(Buffer: TRecordBuffer); virtual;
     procedure RestoreState(const Value: TDataSetState);
+    procedure sortdatasources();
     Procedure SetActive (Value : Boolean); virtual;
     procedure SetBookmarkStr(const Value: TBookmarkStr); virtual;
     procedure SetBufListSize(Value: Longint); virtual;
@@ -1875,6 +1876,7 @@ type
 //    fonexit: datasourcelinkobjecteventty;
    fonifistatechanged: ifistatechangedeventty;
    freadonly: boolean;
+   fpriority: int32;
    fonenabledchange: tnotifyevent;
     procedure DistributeEvent(Event: TDataEvent; Info: Ptrint);
     procedure RegisterDataLink(DataLink: TDataLink);
@@ -1908,6 +1910,8 @@ type
     property DataSet: TDataSet read FDataSet write SetDataSet;
     property Enabled: Boolean read FEnabled write SetEnabled default True;
     property readonly: boolean read freadonly write setreadonly default false;
+    property priority: int32 read fpriority write fpriority default 0;
+                         //highest priority handled first by dataset
     property OnStateChange: TNotifyEvent read FOnStateChange 
                                                       write FOnStateChange;
     property onenabledchange: tnotifyevent read fonenabledchange 
@@ -2233,7 +2237,7 @@ uses
 resourcestring
  sassigndate = 'Can not assign a date value to field "%s"';
  sassigntime = 'Can not assign a time value to field "%s"';
- 
+
 { ---------------------------------------------------------------------
     Auxiliary functions
   ---------------------------------------------------------------------}
@@ -2919,7 +2923,6 @@ begin
     deDataSetScroll : HandleScrollOrChange;
     deLayoutChange  : FEnableControlsEvent:=deLayoutChange;    
   end;
-
   if not ControlsDisabled and (FState <> dsBlockRead) then begin
     for i := 0 to FDataSources.Count - 1 do
       TDataSource(FDataSources[i]).ProcessEvent(Event, Info);
@@ -3739,18 +3742,29 @@ begin
   FIsUniDirectional := Value;
 end;
 
+function compdatasource(item1, item2: pointer): integer;
+begin
+ result:= tdatasource(item2).priority - tdatasource(item1).priority;
+ if result = 0 then begin
+  result:= item2 - item1; //stable sort
+ end;
+end;
+
+procedure tdataset.sortdatasources();
+begin
+ fdatasources.sort(@compdatasource);
+end;
+
 Procedure TDataset.SetActive (Value : Boolean);
 
 begin
-  if value and (Fstate = dsInactive) then
-    begin
-    if csLoading in ComponentState then
-      begin
+  if value and (Fstate = dsInactive) then begin
+    if csLoading in ComponentState then begin
       FOpenAfterRead := true;
       exit;
-      end
-    else
-      begin
+    end
+    else begin
+      sortdatasources();
       DoBeforeOpen;
       FEnableControlsEvent:=deLayoutChange;
       FInternalCalcFields:=False;
@@ -3759,8 +3773,8 @@ begin
         OpenCursor(False);
       finally
         if FState <> dsOpening then OpenCursorComplete;
-        end;
       end;
+    end;
     FModified:=False;
     end
   else if not value and (Fstate <> dsinactive) then
@@ -4774,6 +4788,9 @@ Procedure TDataset.RegisterDataSource(ADatasource : TDataSource);
 
 begin
   FDatasources.Add(ADataSource);
+  if fstate <> dsinactive then begin
+   sortdatasources();
+  end;
   RecalcBufListSize;
 end;
 

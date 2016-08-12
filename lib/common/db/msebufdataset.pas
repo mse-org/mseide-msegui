@@ -9023,7 +9023,7 @@ begin
   with flookupfieldinfos[-1-afield.fieldno] do begin
    with tmsebufdataset(afield.lookupdataset) do begin
     if active then begin
-     if indexlocal[indexnum].find(keyfieldar,bm1) then begin
+     if indexlocal[indexnum].find(keyfieldar,bm1,false,false,true) then begin
       if lookupvaluefield.fieldno > 0 then begin
        getvalue(lookupvaluefield,bm1,adata);
       end
