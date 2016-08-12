@@ -1422,6 +1422,9 @@ type
   end;
 {------------------------------------------------------------------------------}
 
+ datasetinternalstatety = (dsis_checkingbrowsemode);
+ datasetinternalstatesty = set of datasetinternalstatety;
+ 
   TDataSet = class(TComponent)
   Private
     Procedure DoInsertAppend(DoAppend : Boolean);
@@ -1495,6 +1498,7 @@ type
     FRecordCount: Longint;
     FIsUniDirectional: Boolean;
     FState : TDataSetState;
+    finternalstate: datasetinternalstatesty;
     FInternalOpenComplete: Boolean;
     Function GetActive : boolean;
     procedure RecalcBufListSize;
@@ -4156,15 +4160,22 @@ end;
 Procedure TDataset.CheckBrowseMode;
 
 begin
-  CheckActive;
-  DataEvent(deCheckBrowseMode,0);
-  Case State of
-    dsedit,dsinsert: begin
-      UpdateRecord;
-      If Modified then Post else Cancel;
-    end;
-    dsSetKey: Post;
+ if not (dsis_checkingbrowsemode in finternalstate) then begin
+  include(finternalstate,dsis_checkingbrowsemode);
+  try
+   CheckActive;
+   DataEvent(deCheckBrowseMode,0);
+   Case State of
+     dsedit,dsinsert: begin
+       UpdateRecord;
+       If Modified then Post else Cancel;
+     end;
+     dsSetKey: Post;
+   end;
+  finally
+   exclude(finternalstate,dsis_checkingbrowsemode);
   end;
+ end;
 end;
 
 Procedure TDataset.ClearFields;

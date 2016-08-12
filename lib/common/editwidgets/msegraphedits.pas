@@ -2509,11 +2509,13 @@ begin
    widget1:= fparentwidget.widgets[int1];
    if (widget1 is self.classtype) and (widget1 <> self) and
         (ttogglegraphdataedit(widget1).fgroup = fgroup) then begin
-    inc(fresetting);
-    try
-     ttogglegraphdataedit(widget1).douncheck();
-    finally
-     dec(fresetting);
+    with ttogglegraphdataedit(widget1) do begin
+     inc(fresetting);
+     try
+      douncheck();
+     finally
+      dec(fresetting);
+     end;
     end;
    end;
   end;

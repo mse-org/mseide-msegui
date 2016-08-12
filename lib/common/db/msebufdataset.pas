@@ -6831,7 +6831,7 @@ begin
   try   
    if afield.lookupdataset.active and 
       tmsebufdataset(afield.lookupdataset).indexlocal[indexnum].find(
-                                                    keyfieldar,bm1) then begin
+                                    keyfieldar,bm1,false,false,true) then begin
     if lookupvaluefield.fieldno > 0 then begin
      getvalue(lookupvaluefield,bm1,flookupresult);     
      result:= flookupresult.po;
@@ -8402,11 +8402,7 @@ var
  bm1: bookmarkdataty;
 begin
  result:= '';
-{$ifdef FPC}
- if indexlocal[indexnum].find([akey],[aisnull],bm1) then begin
-{$else}
- if indexlocal[indexnum].findval([akey],[aisnull],bm1) then begin
-{$endif}
+ if indexlocal[indexnum].find([akey],[aisnull],bm1,false,false,true) then begin
   result:= currentbmasmsestring[valuefield,bm1];
  end;
 end;
@@ -8417,11 +8413,7 @@ var
  bm1: bookmarkdataty;
 begin
  result:= '';
-{$ifdef FPC}
- if indexlocal[indexnum].find([akey],[aisnull],bm1) then begin
-{$else}
- if indexlocal[indexnum].findval([akey],[aisnull],bm1) then begin
-{$endif}
+ if indexlocal[indexnum].find([akey],[aisnull],bm1,false,false,true) then begin
   result:= currentbmasmsestring[valuefield,bm1];
  end;
 end;
@@ -8432,11 +8424,7 @@ var
  bm1: bookmarkdataty;
 begin
  result:= '';
-{$ifdef FPC}
- if indexlocal[indexnum].find([akey],[aisnull],bm1) then begin
-{$else}
- if indexlocal[indexnum].findval([akey],[aisnull],bm1) then begin
-{$endif}
+ if indexlocal[indexnum].find([akey],[aisnull],bm1,false,false,true) then begin
   result:= currentbmasmsestring[valuefield,bm1];
  end;
 end;
@@ -8447,11 +8435,7 @@ var
  bm1: bookmarkdataty;
 begin
  arecord:= -1;
-{$ifdef FPC}
  result:= indexlocal[indexnum].find([searchtext],[false],bm1,false,true);
-{$else}
- result:= indexlocal[indexnum].findval([searchtext],[false],bm1,false,true);
-{$endif}
  if result then begin
   arecord:= bm1.recno;
  end;
@@ -8559,7 +8543,9 @@ begin
      with flookupfieldinfos[-1-field1.fieldno] do begin
       if indexnum >= 0 then begin
        with tmsebufdataset(field1.lookupdataset) do begin
-        if active and indexlocal[indexnum].find(keyfieldar,bm1) then begin
+        if active and 
+           indexlocal[indexnum].find(keyfieldar,bm1,false,false,true) then begin
+                                               //no checkbrowsemode
          currentbmassign(lookupvaluefield,field1,bm1); 
         end
         else begin
