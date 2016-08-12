@@ -7770,122 +7770,124 @@ end;
 function tdscontroller.execoperation(const akind: opkindty;
                           const aafterop: afterdbopeventty): boolean;
 var
- bo1,bo2,bo3: boolean;
+ bo1,bo2{,bo3}: boolean;
  int1: integer;
 begin
- bo3:= dscs_posting1 in fstate;
- include(fstate,dscs_posting1);
- try
-  case akind of
-   opk_post: begin
-    if checkcanevent(tdataset(fowner),tmethod(self.fonbeforepost)) then begin
-     fonbeforepost(tdataset(fowner));
-    end;
-   end;
-   opk_delete: begin
-    if checkcanevent(tdataset(fowner),tmethod(self.fonbeforedelete)) then begin
-     fonbeforedelete(tdataset(fowner));
-    end;
-   end;
-  end;
+// bo3:= dscs_posting1 in fstate;
+ if not (dscs_posting1 in fstate) then begin
+  include(fstate,dscs_posting1);
   try
    case akind of
     opk_post: begin
-     bo1:= dso_postsavepoint in foptions;
+     if checkcanevent(tdataset(fowner),tmethod(self.fonbeforepost)) then begin
+      fonbeforepost(tdataset(fowner));
+     end;
     end;
     opk_delete: begin
-     bo1:= dso_deletesavepoint in foptions;
-    end;
-    else begin
-     bo1:= false;
+     if checkcanevent(tdataset(fowner),tmethod(self.fonbeforedelete)) then begin
+      fonbeforedelete(tdataset(fowner));
+     end;
     end;
    end;
    try
-    if bo1 then begin
-     int1:= savepointbegin;
+    case akind of
+     opk_post: begin
+      bo1:= dso_postsavepoint in foptions;
+     end;
+     opk_delete: begin
+      bo1:= dso_deletesavepoint in foptions;
+     end;
+     else begin
+      bo1:= false;
+     end;
     end;
-    result:= true;
-    include(fstate,dscs_posting);
-    try    
+    try
+     if bo1 then begin
+      int1:= savepointbegin;
+     end;
+     result:= true;
+     include(fstate,dscs_posting);
+     try    
+      try
+       case akind of
+        opk_post: begin
+         idscontroller(fintf).inheritedpost();
+        end;
+        opk_delete: begin
+         idscontroller(fintf).inheriteddelete();
+        end;
+        opk_insert: begin
+         idscontroller(fintf).inheritedinsert();
+        end;
+       end;
+      except
+       on epostcancel do begin
+        if bo1 then begin
+         bo1:= false;
+         savepointrollback(int1);
+        end;     
+        result:= false;
+        tdataset(fowner).cancel;
+       end
+       else begin
+        if bo1 then begin
+         bo1:= false;
+         savepointrollback(int1);
+        end;     
+        raise;
+       end;
+      end;      
+     finally
+      exclude(fstate,dscs_posting);
+     end;
+     bo2:= result;
      try
-      case akind of
-       opk_post: begin
-        idscontroller(fintf).inheritedpost();
-       end;
-       opk_delete: begin
-        idscontroller(fintf).inheriteddelete();
-       end;
-       opk_insert: begin
-        idscontroller(fintf).inheritedinsert();
+      if result and assigned(aafterop) then begin
+       aafterop(tdataset(fowner),result);
+      end;
+      if result then begin
+       if akind = opk_post then begin
+        tdataset1(fowner).dataevent(tdataevent(de_afterpost),0);
        end;
       end;
-     except
-      on epostcancel do begin
-       if bo1 then begin
-        bo1:= false;
-        savepointrollback(int1);
-       end;     
-       result:= false;
-       tdataset(fowner).cancel;
+     finally
+      if bo2 then begin
+       self.modified;
+      end;
+     end;
+     if bo1 then begin
+      bo1:= false;
+      if result then begin
+       savepointrelease;
       end
       else begin
-       if bo1 then begin
-        bo1:= false;
-        savepointrollback(int1);
-       end;     
-       raise;
+       savepointrollback(int1);
       end;
-     end;      
-    finally
-     exclude(fstate,dscs_posting);
-    end;
-    bo2:= result;
-    try
-     if result and assigned(aafterop) then begin
-      aafterop(tdataset(fowner),result);
-     end;
-     if result then begin
-      if akind = opk_post then begin
-       tdataset1(fowner).dataevent(tdataevent(de_afterpost),0);
-      end;
-     end;
-    finally
-     if bo2 then begin
-      self.modified;
-     end;
-    end;
-    if bo1 then begin
-     bo1:= false;
-     if result then begin
-      savepointrelease;
-     end
-     else begin
+     end;     
+    except
+     if bo1 then begin
       savepointrollback(int1);
+     end;     
+     raise;
+    end;
+   finally
+    case akind of
+     opk_post: begin
+      if checkcanevent(tdataset(fowner),tmethod(self.fonafterpost)) then begin
+       fonafterpost(tdataset(fowner),result);
+      end;
      end;
-    end;     
-   except
-    if bo1 then begin
-     savepointrollback(int1);
-    end;     
-    raise;
+     opk_delete: begin
+      if checkcanevent(tdataset(fowner),tmethod(self.fonafterdelete)) then begin
+       fonafterdelete(tdataset(fowner),result);
+      end;
+     end;
+    end;    
    end;
   finally
-   case akind of
-    opk_post: begin
-     if checkcanevent(tdataset(fowner),tmethod(self.fonafterpost)) then begin
-      fonafterpost(tdataset(fowner),result);
-     end;
-    end;
-    opk_delete: begin
-     if checkcanevent(tdataset(fowner),tmethod(self.fonafterdelete)) then begin
-      fonafterdelete(tdataset(fowner),result);
-     end;
-    end;
-   end;    
-  end;
- finally
-  if not bo3 then begin
+//   if not bo3 then begin
    exclude(fstate,dscs_posting1);
+//   end;
   end;
  end;
 end;

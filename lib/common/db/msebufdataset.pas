@@ -8601,14 +8601,18 @@ end;
 
 procedure tmsebufdataset.post;
 begin
+{
  if (bs1_posting in fbstate1) and (state in [dsedit,dsinsert]) then begin
   databaseerror('Recursive post.',self);
  end;
- include(fbstate1,bs1_posting);
- try
-  inherited;
- finally
-  exclude(fbstate1,bs1_posting);
+}
+ if not (bs1_posting in fbstate1) then begin
+  include(fbstate1,bs1_posting);
+  try
+   inherited;
+  finally
+   exclude(fbstate1,bs1_posting);
+  end;
  end;
 end;
 
