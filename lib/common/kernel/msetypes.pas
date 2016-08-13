@@ -179,6 +179,11 @@ const
  minint = low(integer);
  bigint = maxint div 2;
  nullmethod: tmethod = (code: nil; data: nil);
+{$ifdef cpu64}
+ pointeralignmask = $ffffffffffffffff - $7;
+{$else}
+ pointeralignmask = $ffffffff - $3;
+{$endif}
 
 type
  halfinteger = -bigint..bigint;
