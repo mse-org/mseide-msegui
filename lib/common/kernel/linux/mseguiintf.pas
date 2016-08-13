@@ -715,7 +715,7 @@ type
        //not needed below
        net_wm_window_type,
        net_wm_state_fullscreen,
-       net_wm_state_skip_taskbar,
+       net_wm_state_skip_taskbar,net_wm_state_demands_attention,
        net_restack_window,net_close_window,net_active_window,
        //not supports checked below
        net_wm_pid,net_wm_desktop,
@@ -754,7 +754,7 @@ const
        //not needed below
        '_NET_WM_WINDOW_TYPE',
        '_NET_WM_STATE_FULLSCREEN',
-       '_NET_WM_STATE_SKIP_TASKBAR',
+       '_NET_WM_STATE_SKIP_TASKBAR','_NET_WM_STATE_DEMANDS_ATTENTION',
        '_NET_RESTACK_WINDOW','_NET_CLOSE_WINDOW','_NET_ACTIVE_WINDOW',
        '_NET_WM_PID','_NET_WM_DESKTOP',
 
@@ -3103,6 +3103,7 @@ begin
   sendnetrootcardinalmessage(netatoms[net_active_window],id,
                                            [1,lasteventtime,lastfocuswindow]);
  end;
+ setnetatomarrayitem(id,net_wm_state,net_wm_state_demands_attention);
  xsetinputfocus(appdisp,id,reverttoparent,currenttime);
  xsync(appdisp,0);
 // xflush(appdisp);

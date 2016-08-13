@@ -153,6 +153,7 @@ end;
 procedure tselecteditpagefo.formonchildscaled(const sender: TObject);
 begin
  placeyorder(0,[1],[list,pathdisp],1);
+ openfilebutton.height:= pathdisp.height;
  aligny(wam_center,[pathdisp,openfilebutton]);
  list.synctofontheight;
 end;
