@@ -1243,7 +1243,7 @@ end;
 
 procedure tcustomaction.execute;
 begin
- if (componentstate*[csloading,csdesigning] = []) and 
+ if (componentstate*[csloading,csdesigning,csdestroying] = []) and 
                            doactionexecute(self,finfo) then begin
   changed;
  end;
