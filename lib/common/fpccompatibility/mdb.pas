@@ -2233,7 +2233,7 @@ function SkipComments(var p: PChar; EscapeSlash, EscapeRepeat : Boolean) : boole
 implementation
 
 uses
- {$ifdef FPC}dbconst{$else}dbconst_del{$endif},typinfo;
+ {$ifdef FPC}dbconst{$else}dbconst_del{$endif},typinfo,msearrayutils;
 resourcestring
  sassigndate = 'Can not assign a date value to field "%s"';
  sassigntime = 'Can not assign a time value to field "%s"';
@@ -3745,14 +3745,12 @@ end;
 function compdatasource(item1, item2: pointer): integer;
 begin
  result:= tdatasource(item2).priority - tdatasource(item1).priority;
- if result = 0 then begin
-  result:= item2 - item1; //stable sort
- end;
 end;
 
 procedure tdataset.sortdatasources();
 begin
- fdatasources.sort(@compdatasource);
+ quicksortpointer(fdatasources.list^,fdatasources.count,@compdatasource);
+                        //position stable sort
 end;
 
 Procedure TDataset.SetActive (Value : Boolean);
