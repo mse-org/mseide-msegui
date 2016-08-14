@@ -3103,7 +3103,7 @@ begin
   sendnetrootcardinalmessage(netatoms[net_active_window],id,
                                            [1,lasteventtime,lastfocuswindow]);
  end;
- setnetatomarrayitem(id,net_wm_state,net_wm_state_demands_attention);
+// setnetatomarrayitem(id,net_wm_state,net_wm_state_demands_attention);
  xsetinputfocus(appdisp,id,reverttoparent,currenttime);
  xsync(appdisp,0);
 // xflush(appdisp);
