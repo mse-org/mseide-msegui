@@ -350,6 +350,8 @@ type
    procedure getpaintframe(var aframe: framety); override;
    function getbuttonclass: framebuttonclassty; virtual;
    procedure updatestate; override;
+   procedure internalpaintoverlay(const canvas: tcanvas; 
+                                           const arect: rectty) override;
   public
    constructor create(const intf: icaptionframe; const buttonintf: ibutton);
                                                    reintroduce; virtual;
@@ -359,7 +361,6 @@ type
    procedure updatemousestate(const sender: twidget;
                                  const info: mouseeventinfoty); override;
    procedure updatewidgetstate; override;
-   procedure paintoverlay(const canvas: tcanvas; const arect: rectty); override;
    procedure mouseevent(var info: mouseeventinfoty);
    procedure initgridframe; override;
    property buttons: tframebuttons read fbuttons write setbuttons;
@@ -1250,8 +1251,8 @@ begin
  end;
 end;
 
-procedure tcustombuttonsframe.paintoverlay(const canvas: tcanvas;
-                                                     const arect: rectty);
+procedure tcustombuttonsframe.internalpaintoverlay(const canvas: tcanvas;
+                                                        const arect: rectty);
 var
  int1: integer;
  color1,color2: colorty;

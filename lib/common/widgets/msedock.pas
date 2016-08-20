@@ -557,6 +557,8 @@ type
    procedure endpickmove(const sender: tobjectpicker);
    procedure cancelpickmove(const sender: tobjectpicker);
    procedure paintxorpic(const sender: tobjectpicker; const canvas: tcanvas);
+   procedure internalpaintoverlay(const canvas: tcanvas;
+                                        const arect: rectty) override;
    
   public
    constructor create(const intf: icaptionframe;
@@ -566,7 +568,6 @@ type
    procedure updatemousestate(const sender: twidget;
                                   const info: mouseeventinfoty); override;
    procedure mouseevent(var info: mouseeventinfoty);
-   procedure paintoverlay(const canvas: tcanvas; const arect: rectty); override;
    property buttonrects[const index:  dockbuttonrectty]: rectty 
                                                     read getbuttonrects;
                                                                 //client origin
@@ -4464,7 +4465,8 @@ begin
  end;  
 end;
 
-procedure tgripframe.paintoverlay(const canvas: tcanvas; const arect: rectty);
+procedure tgripframe.internalpaintoverlay(const canvas: tcanvas;
+                                                      const arect: rectty);
 
 var
 // brushbefore: tsimplebitmap;

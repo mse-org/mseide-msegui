@@ -523,12 +523,6 @@ type
    function isframeimage_offsetactivestored: boolean;
    procedure setframeimage_offsetfocused(const avalue: imagenrty);
    function isframeimage_offsetfocusedstored: boolean;
-{
-   procedure setframeimage_offsetactivemouse(const avalue: imagenrty);
-   function isframeimage_offsetactivemousestored: boolean;
-   procedure setframeimage_offsetactiveclicked(const avalue: imagenrty);
-   function isframeimage_offsetactiveclickedstored: boolean;
-}
    procedure setframeface_list(const avalue: tfacelist);
    function isframeface_liststored: boolean;
    procedure setframeface_offset(const avalue: facenrty);
@@ -545,12 +539,6 @@ type
    function isframeface_offsetactivestored: boolean;
    procedure setframeface_offsetfocused(const avalue: facenrty);
    function isframeface_offsetfocusedstored: boolean;
-{
-   procedure setframeface_offsetactivemouse(const avalue: facenrty);
-   function isframeface_offsetactivemousestored: boolean;
-   procedure setframeface_offsetactiveclicked(const avalue: facenrty);
-   function isframeface_offsetactiveclickedstored: boolean;
-}
    procedure setoptionsskin(const avalue: frameskinoptionsty);
    function isoptionsskinstored: boolean;
    
@@ -620,6 +608,10 @@ type
            const afi: baseframeinfoty; const astate: framestateflagsty);
     //iassistiveclient
    function getassistivecaption(): msestring; virtual;
+   procedure internalpaintbackground(const canvas: tcanvas;
+             const arect: rectty; const clipandmove: boolean) virtual;
+   procedure internalpaintoverlay(const canvas: tcanvas;
+                                             const arect: rectty) virtual;
   public
    constructor create(const intf: iframe); reintroduce;
    destructor destroy; override;
@@ -631,8 +623,8 @@ type
    procedure showhint(const aid: int32; var info: hintinfoty); virtual;
    
    procedure paintbackground(const canvas: tcanvas;
-             const arect: rectty; const clipandmove: boolean); virtual;
-   procedure paintoverlay(const canvas: tcanvas; const arect: rectty); virtual;
+             const arect: rectty; const clipandmove: boolean);
+   procedure paintoverlay(const canvas: tcanvas; const arect: rectty);
 
    function outerframedim: sizety; //widgetsize - framesize
    function frameframedim: sizety; //widgetsize - (paintsize + paintframe)
@@ -816,10 +808,7 @@ type
    property frameimage_offsetclicked;
    property frameimage_offsetactive;
    property frameimage_offsetfocused;
-{
-   property frameimage_offsetactivemouse;
-   property frameimage_offsetactiveclicked;
-}
+
    property frameface_list;
    property frameface_offset;
    property frameface_offset1;
@@ -828,10 +817,7 @@ type
    property frameface_offsetclicked;
    property frameface_offsetactive;
    property frameface_offsetfocused;
-{
-   property frameface_offsetactivemouse;
-   property frameface_offsetactiveclicked;
-}
+
    property optionsskin;
 
    property focusrectdist;
@@ -848,11 +834,48 @@ type
    property localprops1; //before template
    property template;
  end;
+ 
+ tframetemplate = class;
+ 
+ beforeframepaintbackgroundeventty = procedure (const sender: tcustomframe;
+            const canvas: tcanvas; const arect: rectty; 
+                  const clipandmove: boolean; var handled: boolean) of object;
+ afterframepaintbackgroundeventty = procedure (const sender: tcustomframe;
+            const canvas: tcanvas; const arect: rectty; 
+                                      const clipandmove: boolean) of object;
+ beforeframepaintoverlayeventty = procedure (const sender: tcustomframe; 
+              const canvas: tcanvas; const arect: rectty; 
+                                           var handled: boolean) of object;
+ afterframepaintoverlayeventty = procedure (const sender: tcustomframe; 
+                         const canvas: tcanvas; const arect: rectty) of object;
 
+ beforeframetemplatepaintbackgroundeventty = 
+          procedure (const sender: tframetemplate; const canvas: tcanvas; 
+                   const arect: rectty; const astate: framestateflagsty;
+                                             var handled: boolean) of object;
+ afterframetemplatepaintbackgroundeventty = 
+          procedure (const sender: tframetemplate; const canvas: tcanvas;
+              const arect: rectty; const astate: framestateflagsty) of object;
+ beforeframetemplatepaintoverlayeventty = 
+          procedure (const sender: tframetemplate; const canvas: tcanvas;
+               const arect: rectty; const astate: framestateflagsty;
+                                                var handled: boolean) of object;
+ afterframetemplatepaintoverlayeventty = 
+          procedure (const sender: tframetemplate; const canvas: tcanvas; 
+               const arect: rectty; const astate: framestateflagsty) of object;
+                               
  tframetemplate = class(tpersistenttemplate,iimagelistinfo)
   private
    foptionsskincontroller: frameskincontrolleroptionsty;
    fclientsizeextend: sizety;
+   fonbeforepaintbackground: beforeframepaintbackgroundeventty;
+   fonafterpaintbackground: afterframepaintbackgroundeventty;
+   fonbeforepaintoverlay: beforeframepaintoverlayeventty;
+   fonafterpaintoverlay: afterframepaintoverlayeventty;
+   fonbeforetemplatepaintbackground: beforeframetemplatepaintbackgroundeventty;
+   fonaftertemplatepaintbackground: afterframetemplatepaintbackgroundeventty;
+   fonbeforetemplatepaintoverlay: beforeframetemplatepaintoverlayeventty;
+   fonaftertemplatepaintoverlay: afterframetemplatepaintoverlayeventty;
    procedure setcolorclient(const Value: colorty);
    procedure setcolorframe(const Value: colorty);
    procedure setcolorframeactive(const avalue: colorty);
@@ -895,10 +918,7 @@ type
    procedure setframeimage_offsetclicked(const avalue: imagenrty);
    procedure setframeimage_offsetactive(const avalue: imagenrty);
    procedure setframeimage_offsetfocused(const avalue: imagenrty);
-{
-   procedure setframeimage_offsetactivemouse(const avalue: imagenrty);
-   procedure setframeimage_offsetactiveclicked(const avalue: imagenrty);
-}
+
    procedure setframeface_list(const avalue: tfacelist);
    procedure setframeface_offset(const avalue: facenrty);
    procedure setframeface_offset1(const avalue: facenrty);
@@ -907,10 +927,7 @@ type
    procedure setframeface_offsetclicked(const avalue: facenrty);
    procedure setframeface_offsetactive(const avalue: facenrty);
    procedure setframeface_offsetfocused(const avalue: facenrty);
-{
-   procedure setframeface_offsetactivemouse(const avalue: facenrty);
-   procedure setframeface_offsetactiveclicked(const avalue: facenrty);
-}
+
    procedure setoptionsskin(const avalue: frameskinoptionsty);
    function getfont: toptionalfont;
    procedure setfont(const avalue: toptionalfont);
@@ -1020,14 +1037,6 @@ type
    property frameimage_offsetfocused: imagenrty 
                      read fi.ba.frameimage_offsets.focused
                      write setframeimage_offsetfocused default 0;
-{
-   property frameimage_offsetactivemouse: imagenrty
-                     read fi.ba.frameimage_offsets.activemouse
-                     write setframeimage_offsetactivemouse default 0;
-   property frameimage_offsetactiveclicked: imagenrty
-                     read fi.ba.frameimage_offsets.activeclicked
-                     write setframeimage_offsetactiveclicked default 0;
-}
    property frameface_list: tfacelist read fi.ba.frameface_list
                      write setframeface_list;
    property frameface_offset: facenrty 
@@ -1051,14 +1060,7 @@ type
    property frameface_offsetfocused: facenrty
                      read fi.ba.frameface_offsets.focused
                      write setframeface_offsetfocused default 0;
-{
-   property frameface_offsetactivemouse: facenrty
-                     read fi.ba.frameface_offsets.activemouse
-                     write setframeface_offsetactivemouse default 0;
-   property frameface_offsetactiveclicked: facenrty
-                     read fi.ba.frameface_offsets.activeclicked
-                     write setframeface_offsetactiveclicked default 0;
-}
+
         //for tcaptionframe
    property font: toptionalfont read getfont write setfont stored isfontstored;
              //used in tmenu.itemframetemplate, itemframtemplateactive,
@@ -1103,9 +1105,34 @@ type
                       read foptionsskincontroller
                       write foptionsskincontroller default [];
    property clientsizeextend_cx: int32 read fclientsizeextend.cx 
-                                               write fclientsizeextend.cx;
+                                  write fclientsizeextend.cx default 0;
    property clientsizeextend_cy: int32 read fclientsizeextend.cy
-                                               write fclientsizeextend.cy;
+                                  write fclientsizeextend.cy default 0;
+   property onbeforepaintbackground: beforeframepaintbackgroundeventty 
+               read fonbeforepaintbackground write fonbeforepaintbackground;
+   property onafterpaintbackground: afterframepaintbackgroundeventty
+               read fonafterpaintbackground write fonafterpaintbackground;
+   property onbeforepaintoverlay: beforeframepaintoverlayeventty
+               read fonbeforepaintoverlay write fonbeforepaintoverlay;
+   property onafterpaintoverlay: afterframepaintoverlayeventty
+               read fonafterpaintoverlay write fonafterpaintoverlay;
+
+   property onbeforetemplatepaintbackground:
+                                   beforeframetemplatepaintbackgroundeventty 
+               read fonbeforetemplatepaintbackground 
+                                   write fonbeforetemplatepaintbackground;
+   property onaftertemplatepaintbackground: 
+                                   afterframetemplatepaintbackgroundeventty
+               read fonaftertemplatepaintbackground 
+                                  write fonaftertemplatepaintbackground;
+   property onbeforetemplatepaintoverlay: 
+                                    beforeframetemplatepaintoverlayeventty
+               read fonbeforetemplatepaintoverlay 
+                                        write fonbeforetemplatepaintoverlay;
+   property onaftertemplatepaintoverlay: afterframetemplatepaintoverlayeventty
+               read fonaftertemplatepaintoverlay 
+                                         write fonaftertemplatepaintoverlay;
+
  end;
 
  tframecomp = class(ttemplatecontainer)
@@ -1181,6 +1208,7 @@ type
   fade_opacolor: tfadeopacolorarrayprop;
  end;
 
+ 
  tfacecomp = class;
  tcustomface = class(toptionalpersistent)
   private
@@ -1230,6 +1258,7 @@ type
    procedure internalcreate; override;
    procedure doalphablend(const canvas: tcanvas);
    procedure defineproperties(filer: tfiler); override;
+   procedure internalpaint(const canvas: tcanvas; const arect: rectty); virtual;
   public
    constructor create; overload; override;
    constructor create(const owner: twidget); reintroduce; overload;
@@ -1238,7 +1267,7 @@ type
    destructor destroy; override;
    procedure checktemplate(const sender: tobject);
    procedure assign(source: tpersistent); override;
-   procedure paint(const canvas: tcanvas; const arect: rectty); virtual;
+   procedure paint(const canvas: tcanvas; const arect: rectty);
    property options: faceoptionsty read fi.options write setoptions
                    stored isoptionsstored default [];
    property framei_left: integer read fi.framei.left write setframei_left
@@ -1340,11 +1369,19 @@ type
    property list: tfacearrayprop read flist write setlist;
    property indexlookup: msestring read findexlookup write setindexlookup;
                     //array of int16
-end;
+ end;
  
+ beforefacepainteventty = procedure (const sender: tcustomface;
+            const canvas: tcanvas; const arect: rectty;
+                                              var handled: boolean) of object;
+ afterfacepainteventty = procedure (const sender: tcustomface;
+            const canvas: tcanvas; const arect: rectty) of object;
+
  tfacetemplate = class(tpersistenttemplate)
   private
    fi: faceinfoty;
+   fonbeforepaint: beforefacepainteventty;
+   fonafterpaint: afterfacepainteventty;
    procedure setoptions(const avalue: faceoptionsty);
    procedure setframei_left(const avalue: integer);
    procedure setframei_top(const avalue: integer);
@@ -1404,6 +1441,10 @@ end;
     //5 = right, 6 = topright, 7 = top
    property frameimage_offset: integer read fi.frameimage_offset
                      write setframeimage_offset default 0;
+   property onbeforepaint: beforefacepainteventty read fonbeforepaint 
+                                                       write fonbeforepaint;
+   property onafterpaint: afterfacepainteventty read fonafterpaint 
+                                                       write fonafterpaint;
  end;
 
  tfacecomp = class(ttemplatecontainer)
@@ -4375,7 +4416,7 @@ begin
  end;
 end;
 
-procedure tcustomframe.paintbackground(const canvas: tcanvas;
+procedure tcustomframe.internalpaintbackground(const canvas: tcanvas;
                             const arect: rectty; const clipandmove: boolean);
 var
  rect1,rect2,rect3: rectty;
@@ -4450,6 +4491,35 @@ begin
  end;
 end;
 
+procedure tcustomframe.paintbackground(const canvas: tcanvas;
+                            const arect: rectty; const clipandmove: boolean);
+var
+ bo1: boolean;
+begin
+ if (ftemplate <> nil) then begin
+  if assigned(tframetemplate(ftemplate.ftemplate).
+                                       fonbeforepaintbackground) then begin
+   bo1:= false;
+   tframetemplate(ftemplate.ftemplate).fonbeforepaintbackground(
+                                            self,canvas,arect,clipandmove,bo1);
+   if not bo1 then begin
+    internalpaintbackground(canvas,arect,clipandmove);
+   end;
+  end
+  else begin
+   internalpaintbackground(canvas,arect,clipandmove);
+  end;
+  if assigned(tframetemplate(ftemplate.ftemplate).
+                                       fonafterpaintbackground) then begin
+   tframetemplate(ftemplate.ftemplate).fonafterpaintbackground(
+                                           self,canvas,arect,clipandmove);
+  end;
+ end
+ else begin
+  internalpaintbackground(canvas,arect,clipandmove);
+ end;
+end;
+
 class procedure tcustomframe.drawframe(const canvas: tcanvas; 
                          const rect2: rectty; const afi: baseframeinfoty; 
                          const astate: framestateflagsty);
@@ -4508,7 +4578,8 @@ begin
  result:= '';
 end;
 
-procedure tcustomframe.paintoverlay(const canvas: tcanvas; const arect: rectty);
+procedure tcustomframe.internalpaintoverlay(const canvas: tcanvas;
+                                                     const arect: rectty);
 begin
  if fso_faceoverlay in optionsskin then begin
   paintframeface(canvas,deflaterect(arect,fpaintframe));
@@ -4516,33 +4587,44 @@ begin
  drawframe(canvas,deflaterect(arect,fouterframe),fi,fintf.getframestateflags);
 end;
 
-procedure tcustomframe.dopaintfocusrect(const canvas: tcanvas; const rect: rectty);
+procedure tcustomframe.paintoverlay(const canvas: tcanvas;
+                                                     const arect: rectty);
+var
+ bo1: boolean;
+begin
+ if (ftemplate <> nil) then begin
+  if assigned(tframetemplate(ftemplate.ftemplate).
+                                       fonbeforepaintoverlay) then begin
+   bo1:= false;
+   tframetemplate(ftemplate.ftemplate).fonbeforepaintoverlay(
+                                                       self,canvas,arect,bo1);
+   if not bo1 then begin
+    internalpaintoverlay(canvas,arect);
+   end;
+  end
+  else begin
+   internalpaintoverlay(canvas,arect);
+  end;
+  if assigned(tframetemplate(ftemplate.ftemplate).
+                                       fonafterpaintoverlay) then begin
+   tframetemplate(ftemplate.ftemplate).fonafterpaintoverlay(self,canvas,arect);
+  end;
+ end
+ else begin
+  internalpaintoverlay(canvas,arect);
+ end;
+end;
+
+procedure tcustomframe.dopaintfocusrect(const canvas: tcanvas;
+                                                    const rect: rectty);
 var
  rect1: rectty;
 begin
-// if fs_paintrectfocus in fstate then begin
-  rect1:= deflaterect(rect,fpaintframe);
-  inflaterect1(rect1,-fi.focusrectdist);
-  drawfocusrect(canvas,rect1);
-// end;
+ rect1:= deflaterect(rect,fpaintframe);
+ inflaterect1(rect1,-fi.focusrectdist);
+ drawfocusrect(canvas,rect1);
 end;
-(*
-procedure tcustomframe.paint(const canvas: tcanvas; const rect: rectty);
-begin
- dopaintframe(canvas,rect);
- dopaintbackground(canvas,rect);
- {
- canvas.intersectcliprect(deflaterect(rect,fpaintframe));
- canvas.move(addpoint(fpaintrect.pos,fclientrect.pos));
- }
-end;
-*)
-{
-procedure tcustomframe.afterpaint(const canvas: tcanvas);
-begin
- //dummy
-end;
-}
+
 function tcustomframe.checkshortcut(var info: keyeventinfoty): boolean;
 begin
  result:= false;
@@ -6205,16 +6287,52 @@ end;
 
 procedure tframetemplate.paintbackground(const acanvas: tcanvas;
             const arect: rectty; const astate: framestateflagsty = []);
+var
+ bo1: boolean;
 begin
- paintbackgroundframe(acanvas,
+ if assigned(fonbeforetemplatepaintbackground) then begin
+  bo1:= false;
+  fonbeforetemplatepaintbackground(self,acanvas,arect,astate,bo1);
+  if bo1 then begin
+   paintbackgroundframe(acanvas,
           inflaterect(arect,tcustomframe.calcpaintframe(fi.ba)),astate);
+  end;
+  if assigned(fonaftertemplatepaintbackground) then begin
+   fonaftertemplatepaintbackground(self,acanvas,arect,astate);
+  end;
+ end
+ else begin
+  paintbackgroundframe(acanvas,
+          inflaterect(arect,tcustomframe.calcpaintframe(fi.ba)),astate);
+  if assigned(fonaftertemplatepaintbackground) then begin
+   fonaftertemplatepaintbackground(self,acanvas,arect,astate);
+  end;
+ end;
 end;
 
 procedure tframetemplate.paintoverlay(const acanvas: tcanvas;
                 const arect: rectty; const astate: framestateflagsty = []);
+var
+ bo1: boolean;
 begin
- paintoverlayframe(acanvas,
-         inflaterect(arect,tcustomframe.calcpaintframe(fi.ba)),astate);
+ if assigned(fonbeforetemplatepaintoverlay) then begin
+  bo1:= false;
+  fonbeforetemplatepaintoverlay(self,acanvas,arect,astate,bo1);
+  if bo1 then begin
+   paintoverlayframe(acanvas,
+          inflaterect(arect,tcustomframe.calcpaintframe(fi.ba)),astate);
+  end;
+  if assigned(fonaftertemplatepaintoverlay) then begin
+   fonaftertemplatepaintoverlay(self,acanvas,arect,astate);
+  end;
+ end
+ else begin
+  paintoverlayframe(acanvas,
+          inflaterect(arect,tcustomframe.calcpaintframe(fi.ba)),astate);
+  if assigned(fonaftertemplatepaintoverlay) then begin
+   fonaftertemplatepaintoverlay(self,acanvas,arect,astate);
+  end;
+ end;
 end;
 
 procedure tframetemplate.copyinfo(const source: tpersistenttemplate);
@@ -6550,7 +6668,7 @@ begin
  end;
 end;
 
-procedure tcustomface.paint(const canvas: tcanvas; const arect: rectty);
+procedure tcustomface.internalpaint(const canvas: tcanvas; const arect: rectty);
 
 var
  rect,rect1: rectty;
@@ -6858,6 +6976,30 @@ begin
    paintimage(falphabuffer.mask.canvas);
    falphabuffer.mask.canvas.origin:= nullpoint;
   end;
+ end;
+end;
+
+procedure tcustomface.paint(const canvas: tcanvas; const arect: rectty);
+var
+ bo1: boolean;
+begin
+ if ftemplate <> nil then begin
+  if assigned(tfacetemplate(ftemplate.template).fonbeforepaint) then begin
+   bo1:= false;
+   tfacetemplate(ftemplate.template).fonbeforepaint(self,canvas,arect,bo1);
+   if not bo1 then begin
+    internalpaint(canvas,arect);
+   end;
+   if assigned(tfacetemplate(ftemplate.template).fonafterpaint) then begin
+    tfacetemplate(ftemplate.template).fonafterpaint(self,canvas,arect);
+   end;
+  end
+  else begin
+   internalpaint(canvas,arect);
+  end;
+ end
+ else begin
+  internalpaint(canvas,arect);
  end;
 end;
 

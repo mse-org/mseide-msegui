@@ -83,13 +83,15 @@ type
    function needsfocuspaint: boolean; override;
    procedure updatemousestate(const sender: twidget;
                                const info: mouseeventinfoty); override;
+   procedure internalpaintoverlay(const canvas: tcanvas;
+                                          const arect: rectty) override;
+
     //iassistiveclient
    function getassistivecaption(): msestring; override;
    
   public
    constructor create(const intf: icaptionframe);
    destructor destroy; override;
-   procedure paintoverlay(const canvas: tcanvas; const arect: rectty); override;
    procedure scale(const ascale: real); override;
    procedure createfont;
    function pointincaption(const point: pointty): boolean; override;
@@ -247,12 +249,13 @@ type
    procedure activechanged; override;
    procedure updatemousestate(const sender: twidget; 
                               const info: mouseeventinfoty); override;
+   procedure internalpaintoverlay(const canvas: tcanvas;
+                                         const arect: rectty) override;
  public
    constructor create(const intf: iscrollframe; const scrollintf: iscrollbar);
    destructor destroy; override;
    procedure checktemplate(const sender: tobject); override;
                  //true if match
-   procedure paintoverlay(const canvas: tcanvas; const arect: rectty); override;
    procedure mouseevent(var info: mouseeventinfoty); virtual;
    procedure domousewheelevent(var info: mousewheeleventinfoty;
                                    const pagingreversed: boolean); virtual;
@@ -617,6 +620,8 @@ type
                const org: originty = org_client; const noclip: boolean = false);
    function getwidget: twidget;
    function getframestateflags: framestateflagsty; virtual;
+   procedure internalpaintoverlay(const canvas: tcanvas;
+                                           const arect: rectty) override;
   public
    constructor create(const intf: icaptionframe; const stepintf: istepbar);
    destructor destroy; override;
@@ -627,7 +632,6 @@ type
                                    const info: mouseeventinfoty); override;
    procedure mouseevent(var info: mouseeventinfoty); virtual;
    procedure domousewheelevent(var info: mousewheeleventinfoty); virtual;
-   procedure paintoverlay(const canvas: tcanvas; const arect: rectty); override;
    procedure checktemplate(const sender: tobject); override;
    procedure updatebuttonstate(const first,delta,count: integer);
    function canstep: boolean;
@@ -1091,8 +1095,8 @@ type
                      var delta: integer) of object;
 
  tscrollface = class(tface)
+   procedure internalpaint(const canvas: tcanvas; const rect: rectty); override;
   public
-   procedure paint(const canvas: tcanvas; const rect: rectty); override;
  end;
 
  tscrollingwidgetnwr = class;
@@ -2459,8 +2463,8 @@ begin
  end;
 end;
 
-procedure tcustomcaptionframe.paintoverlay(const canvas: tcanvas;
-                                                   const arect: rectty);
+procedure tcustomcaptionframe.internalpaintoverlay(const canvas: tcanvas;
+                                                          const arect: rectty);
 var
  reg1: regionty;
  flagsbefore: textflagsty;
@@ -3234,8 +3238,8 @@ begin
  end;
 end;
 
-procedure tcustomscrollframe.paintoverlay(const canvas: tcanvas;
-                                 const arect: rectty);
+procedure tcustomscrollframe.internalpaintoverlay(const canvas: tcanvas;
+                                                         const arect: rectty);
 begin
  inherited;
  if fs_sbverton in fstate then begin
@@ -3580,7 +3584,7 @@ begin
  end;
 end;
 
-procedure tcustomstepframe.paintoverlay(const canvas: tcanvas; 
+procedure tcustomstepframe.internalpaintoverlay(const canvas: tcanvas; 
                                                          const arect: rectty);
 var
  int1: integer;
@@ -5490,9 +5494,9 @@ end;
 
 { tscrollface }
 
-procedure tscrollface.paint(const canvas: tcanvas; const rect: rectty);
+procedure tscrollface.internalpaint(const canvas: tcanvas; const rect: rectty);
 begin
- inherited paint(canvas,fintf.getclientrect);
+ inherited internalpaint(canvas,fintf.getclientrect);
 end;
 
 { tscrollingwidgetnwr }
