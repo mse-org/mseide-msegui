@@ -1422,7 +1422,7 @@ type
   end;
 {------------------------------------------------------------------------------}
 
- datasetinternalstatety = (dsis_checkingbrowsemode);
+ datasetinternalstatety = (dsis_checkingbrowsemode,dsis_refreshing);
  datasetinternalstatesty = set of datasetinternalstatety;
  
   TDataSet = class(TComponent)
@@ -1698,6 +1698,7 @@ type
     procedure Post; virtual;
     procedure Prior;
     procedure Refresh;
+    function refreshing: boolean;
     procedure Resync(Mode: TResyncMode); virtual;
     procedure SetFields(const Values: array of const);
     function  Translate(Src, Dest: PChar; ToOem: Boolean): Integer; virtual;
@@ -2945,7 +2946,8 @@ end;
 Procedure TDataset.DoAfterClose;
 
 begin
- If assigned(FAfterClose) and not (csDestroying in ComponentState) then
+ If assigned(FAfterClose) and not (csDestroying in ComponentState) and
+                              not (dsis_refreshing in finternalstate) then
    FAfterClose(Self);
 end;
 
@@ -2973,7 +2975,7 @@ end;
 Procedure TDataset.DoAfterOpen;
 
 begin
- If assigned(FAfterOpen) then
+ If assigned(FAfterOpen) and not (dsis_refreshing in finternalstate) then
    FAfterOpen(Self);
 end;
 
@@ -3008,7 +3010,8 @@ end;
 Procedure TDataset.DoBeforeClose;
 
 begin
- If assigned(FBeforeClose) and not (csDestroying in ComponentState) then
+ If assigned(FBeforeClose) and not (csDestroying in ComponentState) and 
+                                  not (dsis_refreshing in finternalstate) then
    FBeforeClose(Self);
 end;
 
@@ -3036,7 +3039,7 @@ end;
 Procedure TDataset.DoBeforeOpen;
 
 begin
- If assigned(FBeforeOpen) then
+ If assigned(FBeforeOpen) and not (dsis_refreshing in finternalstate) then
    FBeforeOpen(Self);
 end;
 
@@ -4774,12 +4777,22 @@ begin
   CheckbrowseMode;
   DoBeforeRefresh;
   UpdateCursorPos;
-  InternalRefresh;
+  include(finternalstate,dsis_refreshing);
+  try
+   InternalRefresh;
+  finally
+   exclude(finternalstate,dsis_refreshing);
+  end;
 { SetCurrentRecord is called by UpdateCursorPos already, so as long as
   InternalRefresh doesn't do strange things this should be ok. }
 //  SetCurrentRecord(FActiverecord);
   Resync([]);
   DoAfterRefresh;
+end;
+
+function TDataSet.refreshing: boolean;
+begin
+ result:= dsis_refreshing in finternalstate;
 end;
 
 Procedure TDataset.RegisterDataSource(ADatasource : TDataSource);

@@ -846,7 +846,7 @@ begin
  if connected then begin
   CheckInactive;
  end;
- if IsPrepared and not (bs_refreshing in fbstate) then begin
+ if IsPrepared and not refreshing() then begin
   with tcustomsqlconnection(Database) do begin
    UnPrepareStatement(FCursor);
   end;
@@ -855,7 +855,7 @@ end;
 
 procedure TSQLQuery.FreeFldBuffers;
 begin
- if not (bs_refreshing in fbstate) and assigned(FCursor) then begin
+ if not refreshing() and assigned(FCursor) then begin
   tcustomsqlconnection(database).FreeFldBuffers(FCursor);
  end;
 end;
@@ -929,7 +929,7 @@ end;
 
 procedure tsqlquery.freequery;
 begin
- if not (bs_refreshing in fbstate) then begin
+ if not refreshing() then begin
   if ({not }IsPrepared) and (assigned(database)) and (assigned(FCursor)) then begin
         tcustomsqlconnection(database).UnPrepareStatement(FCursor);
   end;
@@ -946,7 +946,7 @@ begin
    fcursor.close;
   end;
   freequery;
-  if not (bs_refreshing in fbstate) then begin
+  if not refreshing() then begin
    database.deallocatecursorhandle(fcursor);
   end;
   exclude(fbstate,bs_connected);
@@ -964,7 +964,7 @@ begin
  try
   disconnect{(true)};
  finally
-  if not (bs_refreshing in fbstate) then begin
+  if not refreshing() then begin
    freemodifyqueries;
    fprimarykeyfield:= nil;
    if DefaultFields then begin
@@ -1246,7 +1246,7 @@ begin
    if FCursor.FStatementType in datareturningtypes then begin
     indexfields:= nil;
     if FUpdateable then begin
-     if FusePrimaryKeyAsKey and not (bs_refreshing in fbstate) then begin
+     if FusePrimaryKeyAsKey and not refreshing() then begin
       UpdateIndexDefs;  //must be before execute because 
                         //of MS SQL ODBC one statement per connection limitation
       for tel := 0 to indexdefs.count-1 do  begin
@@ -1265,11 +1265,11 @@ begin
 //      fbeforeexecute.execute(database,tsqltransaction(transaction));
      end;
      Execute;
-     if FCursor.FInitFieldDef and not (bs_refreshing in fbstate) then begin
+     if FCursor.FInitFieldDef and not refreshing() then begin
       InternalInitFieldDefs;
      end;
     end;
-    if not (bs_refreshing in fbstate) then begin
+    if not refreshing() then begin
      if DefaultFields and aexecute then begin
       CreateFields;
      end;
@@ -1342,7 +1342,7 @@ var
  int1: integer;
 begin
  int1:= recno;
- include(fbstate,bs_refreshing);
+// include(fbstate,bs_refreshing);
  try
   active:= false;
   active:= true;
@@ -1350,10 +1350,13 @@ begin
    setrecno1(int1,true);
   end;
  finally
-  exclude(fbstate,bs_refreshing);
+//  exclude(fbstate,bs_refreshing);
   if not active then begin
-   freefieldbuffers;
-   freequery;
+   exclude(finternalstate,dsis_refreshing);
+   freefieldbuffers();
+   freequery();
+//   dobeforeclose(); not possible because not active
+   doafterclose();
   end;
  end;
 end;

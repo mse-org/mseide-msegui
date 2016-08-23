@@ -513,7 +513,7 @@ type
                       bs_editing,bs_append,bs_internalcalc,bs_startedit,
                       bs_utf8,
                       bs_hasfilter,bs_visiblerecordcountvalid,
-                      bs_refreshing,bs_restorerecno,bs_idle,
+                      {bs_refreshing,}bs_restorerecno,bs_idle,
                       bs_noautoapply,
                       bs_refreshinsert,bs_refreshupdate,
                       bs_refreshinsertindex,bs_refreshupdateindex,
@@ -1080,7 +1080,7 @@ type
    function streamloading: boolean;
 
     //imasterlink
-   function refreshing: boolean;
+//   function refreshing: boolean;
 
    function refreshrecord(const akeyfield: array of tfield;
               const keyindex: integer = 0;
@@ -5288,12 +5288,12 @@ begin
   end;  
  end;
 end;
-
+{
 function tmsebufdataset.refreshing: boolean;
 begin
  result:= bs_refreshing in fbstate;
 end;
-
+}
 function tmsebufdataset.isutf8: boolean;
 begin
  result:= false; //default
