@@ -1157,6 +1157,9 @@ end;
 
 destructor tformdesignerfo.destroy;
 begin
+ if fwindow <> nil then begin
+  fwindow.unregisteronscroll(@widgetscrolled);
+ end;
  designer.modules.designformdestroyed(self);
  fmodule.free();
  designnotifications.unregisternotification(idesignnotification(self));
