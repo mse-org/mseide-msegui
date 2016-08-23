@@ -2946,8 +2946,7 @@ end;
 Procedure TDataset.DoAfterClose;
 
 begin
- If assigned(FAfterClose) and not (csDestroying in ComponentState) and
-                              not (dsis_refreshing in finternalstate) then
+ If assigned(FAfterClose) and not (csDestroying in ComponentState) then
    FAfterClose(Self);
 end;
 
@@ -2975,7 +2974,7 @@ end;
 Procedure TDataset.DoAfterOpen;
 
 begin
- If assigned(FAfterOpen) and not (dsis_refreshing in finternalstate) then
+ If assigned(FAfterOpen) then
    FAfterOpen(Self);
 end;
 
@@ -3010,8 +3009,7 @@ end;
 Procedure TDataset.DoBeforeClose;
 
 begin
- If assigned(FBeforeClose) and not (csDestroying in ComponentState) and 
-                                  not (dsis_refreshing in finternalstate) then
+ If assigned(FBeforeClose) and not (csDestroying in ComponentState) then
    FBeforeClose(Self);
 end;
 
@@ -3039,7 +3037,7 @@ end;
 Procedure TDataset.DoBeforeOpen;
 
 begin
- If assigned(FBeforeOpen) and not (dsis_refreshing in finternalstate) then
+ If assigned(FBeforeOpen) then
    FBeforeOpen(Self);
 end;
 
@@ -4774,20 +4772,20 @@ end;
 Procedure TDataset.Refresh;
 
 begin
+ include(finternalstate,dsis_refreshing);
+ try
   CheckbrowseMode;
   DoBeforeRefresh;
   UpdateCursorPos;
-  include(finternalstate,dsis_refreshing);
-  try
-   InternalRefresh;
-  finally
-   exclude(finternalstate,dsis_refreshing);
-  end;
+  InternalRefresh;
 { SetCurrentRecord is called by UpdateCursorPos already, so as long as
   InternalRefresh doesn't do strange things this should be ok. }
 //  SetCurrentRecord(FActiverecord);
   Resync([]);
   DoAfterRefresh;
+ finally
+  exclude(finternalstate,dsis_refreshing);
+ end;
 end;
 
 function TDataSet.refreshing: boolean;

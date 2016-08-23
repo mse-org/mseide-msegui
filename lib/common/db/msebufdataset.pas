@@ -513,7 +513,7 @@ type
                       bs_editing,bs_append,bs_internalcalc,bs_startedit,
                       bs_utf8,
                       bs_hasfilter,bs_visiblerecordcountvalid,
-                      {bs_refreshing,}bs_restorerecno,bs_idle,
+                      bs_refreshing,bs_restorerecno,bs_idle,
                       bs_noautoapply,
                       bs_refreshinsert,bs_refreshupdate,
                       bs_refreshinsertindex,bs_refreshupdateindex,
