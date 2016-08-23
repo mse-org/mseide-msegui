@@ -81,6 +81,7 @@ type
                                               const rect: rectty); override;
    function checkshortcut(var info: keyeventinfoty): boolean; override;
    function needsfocuspaint: boolean; override;
+   function haspaintrectfocus(): boolean; override; //checks caption
    procedure updatemousestate(const sender: twidget;
                                const info: mouseeventinfoty); override;
    procedure internalpaintoverlay(const canvas: tcanvas;
@@ -2452,14 +2453,19 @@ begin
  exclude(fstate,fs_rectsvalid);
 end;
 
+function tcustomcaptionframe.haspaintrectfocus(): boolean;
+begin
+ result:= inherited haspaintrectfocus() or (finfo.text.text = '');
+end;
+
 procedure tcustomcaptionframe.dopaintfocusrect(const canvas: tcanvas;
                             const rect: rectty);
 begin
- if (fs_captionfocus in fstate) and (finfo.text.text <> '') then begin
-  drawfocusrect(canvas,inflaterect(finfo.dest,captionmargin));
+ if haspaintrectfocus then begin
+  inherited;
  end
  else begin
-  inherited;
+  drawfocusrect(canvas,inflaterect(finfo.dest,captionmargin));
  end;
 end;
 

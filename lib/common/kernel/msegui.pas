@@ -600,6 +600,7 @@ type
    procedure enabledchanged(); virtual;
    procedure focusedchanged; virtual;
    function needsfocuspaint: boolean; virtual;
+   function haspaintrectfocus(): boolean virtual;
    function ishintarea(const apos: pointty; var aid: int32): boolean; virtual;
    procedure checkminscrollsize(var asize: sizety); virtual;
    procedure checkminclientsize(var asize: sizety); virtual;
@@ -1667,6 +1668,8 @@ type
 
    function isgroupleader: boolean; virtual;
    function needsfocuspaint: boolean; virtual;
+   function needsfocuspaintstate(): boolean; //checks ws_focused, ws_active
+   function getnoscroll(): boolean; virtual;
    function getenabled: boolean;
    procedure setenabled(const Value: boolean); virtual;
    function getvisible: boolean;
@@ -4326,6 +4329,11 @@ end;
 function tcustomframe.needsfocuspaint: boolean;
 begin
  result:= fs_drawfocusrect in fstate;
+end;
+
+function tcustomframe.haspaintrectfocus(): boolean;
+begin
+ result:= not (fs_captionfocus in fstate);
 end;
 
 function tcustomframe.ishintarea(const apos: pointty; var aid: int32): boolean;
@@ -9486,9 +9494,15 @@ begin
  result:= false;
 end;
 
-function twidget.needsfocuspaint: boolean;
+function twidget.needsfocuspaint(): boolean;
 begin
  result:= (fframe <> nil) and fframe.needsfocuspaint;
+end;
+
+function twidget.needsfocuspaintstate(): boolean;
+begin
+ result:= needsfocuspaint() and (fwidgetstate * [ws_focused,ws_active] =
+                                                       [ws_focused,ws_active]);
 end;
 
 function twidget.getshowhint: boolean;
@@ -9517,8 +9531,7 @@ end;
 
 procedure twidget.doafterpaint(const canvas: tcanvas);
 begin
- if needsfocuspaint and (fwidgetstate * [ws_focused,ws_active] =
-                [ws_focused,ws_active]) then begin
+ if needsfocuspaintstate() then begin
   if fframe <> nil then begin
    fframe.dopaintfocusrect(canvas,makerect(nullpoint,fwidgetrect.size));
   end
@@ -12777,6 +12790,11 @@ begin
  end;
 end;
 
+function twidget.getnoscroll(): boolean;
+begin
+ result:= ow_noscroll in foptionswidget;
+end;
+
 procedure twidget.scrollrect(const dist: pointty; const rect: rectty;
                 scrollcaret: boolean);
            //origin = paintrect.pos
@@ -12803,7 +12821,7 @@ begin
    inc(rect1.x,fframe.fpaintrect.x);
    inc(rect1.y,fframe.fpaintrect.y); //widget origin
   end;
-  if (ow_noscroll in foptionswidget) or{and not}
+  if getnoscroll() or{and not}
      (csdesigning in componentstate) or //restore grid
      (tws_painting in fwindow.fstate) or
      (abs(dist.x) >= rect.cx) or (abs(dist.y) > rect1.cy) then begin

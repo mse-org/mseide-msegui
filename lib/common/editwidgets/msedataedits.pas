@@ -400,6 +400,7 @@ type
    procedure mouseevent(var info: mouseeventinfoty); override;
    procedure domousewheelevent(var info: mousewheeleventinfoty); override;
    procedure dokeydown(var info: keyeventinfoty); override;
+   function getnoscroll(): boolean override;
     //iscrollbar
    procedure scrollevent(sender: tcustomscrollbar; event: scrolleventty);
   public
@@ -3416,6 +3417,13 @@ begin
    inherited;
   end;
  end;
+end;
+
+function tcustommemoedit.getnoscroll(): boolean;
+begin
+ result:= inherited getnoscroll() or needsfocuspaintstate() and 
+                             (tcustomframe1(fframe).haspaintrectfocus());
+                         //do not scroll focusrect
 end;
 
 procedure tcustommemoedit.setupeditor;
