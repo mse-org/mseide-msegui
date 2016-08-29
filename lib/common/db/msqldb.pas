@@ -632,12 +632,12 @@ type
    function getactive: boolean; override;
    procedure setactive(avalue: boolean); override;
    procedure dosqlchange(const sender: tobject); override;
-   function isprepared: boolean;
-   procedure prepare; virtual;
    procedure checkautocommit; virtual;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
+   function isprepared: boolean;
+   procedure prepare; virtual;
    procedure unprepare; virtual;
    procedure execute; overload; override;
    procedure execute(const aparams: array of variant); overload;

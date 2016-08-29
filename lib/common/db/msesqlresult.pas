@@ -333,10 +333,7 @@ type
    procedure loaded; override;
    procedure freefldbuffers;
 //   function isprepared: boolean;
-   procedure open;
-   procedure close;
    procedure doclear(const isclose: boolean);
-   procedure prepare; override;
    procedure checkautocommit; override;
 //   procedure execute;
     //itransactionclient
@@ -363,7 +360,10 @@ type
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
 //   function isutf8: boolean;
+   procedure prepare; override;
    procedure unprepare; override;
+   procedure open;
+   procedure close;
    procedure clear; //frees buffers, does not unprepare
    procedure refresh;
    procedure next;
