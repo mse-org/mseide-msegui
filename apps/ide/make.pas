@@ -183,7 +183,7 @@ var
  ar1: filenamearty;
 // wstr1: filenamety;
 begin
- with projectoptions,o,texp do begin
+ with projectoptions,k,texp do begin
   if makecommand = '' then begin
    result:= '';
    exit;
@@ -202,7 +202,7 @@ begin
   if int1 < int2 then begin
    int2:= int1;
   end;
-  if not projectoptions.o.reversepathorder then begin
+  if not projectoptions.k.reversepathorder then begin
    int1:= int2;
    int2:= -1;
    step:= -1;
@@ -318,7 +318,7 @@ begin
  fmessagefinished:= false;
  ffinished:= false;
  procid:= invalidprochandle;
- with projectoptions,o.texp do begin
+ with projectoptions,k.texp do begin
   if fsetmakedir and (makedir <> '') then begin
    wdbefore:= setcurrentdirmse(makedir);
   end;
@@ -430,12 +430,12 @@ end;
 function tmaker.getcommandline: msestring;
 begin
  result:= '';
- with projectoptions,o do begin
+ with projectoptions,k do begin
   if fstep = maks_before then begin
    while fscriptnum <= high(befcommandon) do begin
     if (befcommandon[fscriptnum] and fmaketag <> 0) and 
                            (fscriptnum <= high(texp.befcommand)) then begin
-     result:= o.texp.befcommand[fscriptnum];
+     result:= k.texp.befcommand[fscriptnum];
      break;
     end;
     inc(fscriptnum);
@@ -457,8 +457,8 @@ begin
   if fstep = maks_after then begin
    while fscriptnum <= high(aftcommandon) do begin
     if (aftcommandon[fscriptnum] and fmaketag <> 0) and 
-                           (fscriptnum <= high(o.texp.aftcommand)) then begin
-     result:= o.texp.aftcommand[fscriptnum];
+                           (fscriptnum <= high(k.texp.aftcommand)) then begin
+     result:= k.texp.aftcommand[fscriptnum];
      break;
     end;
     inc(fscriptnum);

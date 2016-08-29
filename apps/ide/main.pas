@@ -684,7 +684,7 @@ begin
   if result <> mr_cancel then begin
    result:= componentstorefo.saveall(false);
    if result <> mr_cancel then begin
-    with projectoptions,o,texp do begin
+    with projectoptions,s,texp do begin
      if modified and not savechecked then begin
       result:= showmessage(c[ord(project)]+' '+fprojectname+' '+
          c[ord(ismodified)],c[ord(confirmation)],
@@ -2304,7 +2304,7 @@ begin
             'pas') = mr_ok then begin
     setcurrentdirmse(filedir(aname));
     with projectoptions do begin
-     with o.t do begin
+     with k.t do begin
       mainfile:= filename(aname);
       aname:= removefileext(mainfile);
       targetfile:= aname+'${EXEEXT}'
@@ -2336,7 +2336,7 @@ begin
    end;
    if not fromprogram then begin
     mstr1:= removefileext(filename(aname));
-    with projectoptions,o do begin
+    with projectoptions,s do begin
      projectfilename:= aname;
      projectdir:= curdir;
      expandprojectmacros;
@@ -2410,7 +2410,7 @@ begin
    end
    else begin
     saveproject(aname);
-    sourcefo.openfile(projectoptions.o.texp.mainfile,true);
+    sourcefo.openfile(projectoptions.k.texp.mainfile,true);
    end;
   end
   else begin
@@ -2943,21 +2943,40 @@ procedure tmainfo.getstatobjs(const sender: TObject;
                var aobjects: objectinfoarty);
 begin
  with projectoptions do begin
-  addobjectinfoitem(aobjects,o);
+{
+  if not (sg_options in disabled) then begin
+   addobjectinfoitem(aobjects,o);
+  end;
+}
   if not (sg_editor in disabled) then begin
    addobjectinfoitem(aobjects,e);
   end;
   if not (sg_debugger in disabled) then begin
    addobjectinfoitem(aobjects,d);
   end;
+  if not (sg_make in disabled) then begin
+   addobjectinfoitem(aobjects,k);
+  end;
   if not (sg_macros in disabled) then begin
    addobjectinfoitem(aobjects,m);
+  end;
+  if not (sg_fontalias in disabled) then begin
+   addobjectinfoitem(aobjects,a);
+  end;
+  if not (sg_usercolors in disabled) then begin
+   addobjectinfoitem(aobjects,u);
+  end;
+  if not (sg_formatmacros in disabled) then begin
+   addobjectinfoitem(aobjects,f);
+  end;
+  if not (sg_templates in disabled) then begin
+   addobjectinfoitem(aobjects,p);
   end;
   if not (sg_tools in disabled) then begin
    addobjectinfoitem(aobjects,t);
   end;
-  if not (sg_templates in disabled) then begin
-   addobjectinfoitem(aobjects,p);
+  if not (sg_storage in disabled) then begin
+   addobjectinfoitem(aobjects,r);
   end;
   if not (sg_state in disabled) then begin
    addobjectinfoitem(aobjects,s);
@@ -2966,15 +2985,21 @@ begin
 end;
 
 procedure tmainfo.savewindowlayout(const awriter: tstatwriter);
+var
+ opt1: statfileoptionsty;
 begin
+ opt1:= projectstatfile.options;
+ projectstatfile.options:= mainfo.projectstatfile.options + 
+                                        [sfo_nodata,sfo_nooptions];
  awriter.setsection('breakpoints');
  beginpanelplacement();
  try
   panelform.updatestat(awriter);
   awriter.setsection('layout');
-  mainfo.projectstatfile.updatestat('windowlayout',awriter);
+  projectstatfile.updatestat('windowlayout',awriter);
  finally
   endpanelplacement();
+  mainfo.projectstatfile.options:= opt1;
  end;
 end;
 

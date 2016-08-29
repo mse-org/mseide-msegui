@@ -39,7 +39,7 @@ type
   procedure statreadvalue(const aname: msestring; const reader: tstatreader);
   procedure statwritevalue(const aname: msestring; const writer: tstatwriter);
  end;
- statfileroptionty = (sfro_nodata,sfro_nostate,sfro_nooptions);
+ statfileroptionty = (sfro_nodata,sfro_nooptions,sfro_nostate);
  statfileroptionsty = set of statfileroptionty;
  
  tstatfiler = class

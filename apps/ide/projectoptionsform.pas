@@ -43,7 +43,9 @@ const
  defaultxtermcommand = 'xterm -S${PTSN}/${PTSH}';
  
 type
- settinggroupty = (sg_editor,sg_debugger,sg_templates,sg_macros,sg_tools,
+ settinggroupty = (sg_editor,sg_debugger,sg_make,sg_templates,
+                   sg_macros,sg_fontalias,sg_usercolors,
+                   sg_formatmacros,sg_tools,sg_storage,
                    sg_state);
  settinggroupsty = set of settinggroupty;
  
@@ -168,6 +170,8 @@ type
    fsyntaxdeffiles: msestringarty;
    ffilemasknames: msestringarty;
    ffilemasks: msestringarty;
+  public
+   fcodetemplatedirs: msestringarty;
   published
    property sourcefilemasks: msestringarty read fsourcefilemasks 
                                                 write fsourcefilemasks;
@@ -176,6 +180,8 @@ type
    property filemasknames: msestringarty read ffilemasknames 
                                                   write ffilemasknames;
    property filemasks: msestringarty read ffilemasks write ffilemasks;
+   property codetemplatedirs: msestringarty read fcodetemplatedirs write
+                                                            fcodetemplatedirs;
  end;
 
  teditoptions = class(toptions)
@@ -218,8 +224,8 @@ type
    function limitgridsize(const avalue: integer): integer;
    procedure setgridsizex(const avalue: integer);
    procedure setgridsizey(const avalue: integer);
-   function getcodetemplatedirs: msestringarty;
-   procedure setcodetemplatedirs(const avalue: msestringarty);
+//   function getcodetemplatedirs: msestringarty;
+//   procedure setcodetemplatedirs(const avalue: msestringarty);
   protected
    function gett: tobject; override;
    function gettexp: tobject; override;
@@ -273,8 +279,8 @@ type
    property eolstyle: integer read feolstyle write feolstyle;
    property trimtrailingwhitespace: boolean read ftrimtrailingwhitespace
                                                 write ftrimtrailingwhitespace;
-   property codetemplatedirs: msestringarty read getcodetemplatedirs write
-                  setcodetemplatedirs;
+//   property codetemplatedirs: msestringarty read getcodetemplatedirs write
+//                  setcodetemplatedirs;
  end;
 
  ttextdebugoptions = class(toptions)
@@ -442,6 +448,8 @@ type
    fcolorerror: colorty;
    fcolorwarning: colorty;
    fcolornote: colorty;
+//   fsettingsautoload: boolean;
+//   fsettingsautosave: boolean;
    procedure setforcezorder(const avalue: longbool);
   protected
    function gett: tobject; override;
@@ -465,10 +473,150 @@ type
    property colorerror: colorty read fcolorerror write fcolorerror;
    property colorwarning: colorty read fcolorwarning write fcolorwarning;
    property colornote: colorty read fcolornote write fcolornote;
-
+{
+   property settingsautoload: boolean read fsettingsautoload
+                                          write fsettingsautoload;
+   property settingsautosave: boolean read fsettingsautosave
+                                          write fsettingsautosave;
+}
  end;
     
- ttextprojectoptions = class(toptions)
+ ttextfontaliasoptions = class(toptions)
+  private
+   ffontalias: msestringarty;
+   ffontnames: msestringarty;
+   ffontancestors: msestringarty;
+   ffontoptions: msestringarty;
+  published
+   property fontalias: msestringarty read ffontalias write ffontalias;
+   property fontnames: msestringarty read ffontnames write ffontnames;
+   property fontancestors: msestringarty read ffontancestors 
+                                         write ffontancestors;
+   property fontoptions: msestringarty read ffontoptions write ffontoptions;
+ end;
+
+ tfontaliasoptions = class(toptions)
+  private
+   ft: ttextfontaliasoptions;
+   ftexp: ttextfontaliasoptions;
+   ffontheights: integerarty;
+   ffontwidths: integerarty;
+   ffontxscales: realarty;
+  protected
+   function gett: tobject; override;
+   function gettexp: tobject; override;
+  public
+   constructor create();
+   property texp: ttextfontaliasoptions read ftexp;
+  published
+   property t: ttextfontaliasoptions read ft;
+   property fontheights: integerarty read ffontheights write ffontheights;
+   property fontwidths: integerarty read ffontwidths write ffontwidths;
+   property fontxscales: realarty read ffontxscales write ffontxscales;
+
+ end;
+
+ ttextusercoloroptions = class(toptions)
+ end;
+
+ tusercoloroptions = class(toptions)
+  private
+   ft: ttextusercoloroptions;
+   ftexp: ttextusercoloroptions;
+   fusercolors: colorarty;
+   fusercolorcomment: msestringarty;
+  protected
+   function gett: tobject; override;
+   function gettexp: tobject; override;
+  public
+   constructor create();
+   property texp: ttextusercoloroptions read ftexp;
+  published
+   property t: ttextusercoloroptions read ft;
+   property usercolors: colorarty read fusercolors write fusercolors;
+   property usercolorcomment: msestringarty read fusercolorcomment 
+                                                 write fusercolorcomment;
+ end;
+
+ ttextformatmacrooptions = class(toptions)
+  private
+   fformatmacronames: msestringarty;
+   fformatmacrovalues: msestringarty;
+  published
+   property formatmacronames: msestringarty read fformatmacronames 
+                                                       write fformatmacronames;
+   property formatmacrovalues: msestringarty read fformatmacrovalues
+                                                   write fformatmacrovalues;
+ end;
+ 
+ tformatmacrooptions = class(toptions)
+  private
+   ft: ttextformatmacrooptions;
+   ftexp: ttextformatmacrooptions;
+  protected
+   function gett: tobject; override;
+   function gettexp: tobject; override;
+  public
+   constructor create();
+   property texp: ttextformatmacrooptions read ftexp;
+  published
+   property t: ttextformatmacrooptions read ft;
+ end;
+
+ tstorageoptions = class(toptions)
+  private
+   fsettingsfile: filenamety;
+   fsettingseditor: boolean;
+   fsettingsdebugger: boolean;
+   fsettingsmake: boolean;
+   fsettingsmacros: boolean;
+   fsettingsfontalias: boolean;
+   fsettingsusercolors: boolean;
+   fsettingsformatmacros: boolean;
+   fsettingstemplates: boolean;
+   fsettingstools: boolean;
+   fsettingsstorage: boolean;
+   fsettingscomponentstore: boolean;
+   fsettingsprojecttree: boolean;
+   fsettingslayout: boolean;
+   fsettingsautoload: boolean;
+   fsettingsautosave: boolean;
+  public
+   constructor create();
+  published
+   property settingsfile: filenamety read fsettingsfile write fsettingsfile;
+   property settingsautoload: boolean read fsettingsautoload
+                                          write fsettingsautoload;
+   property settingsautosave: boolean read fsettingsautosave
+                                          write fsettingsautosave;
+   property settingseditor: boolean read fsettingseditor write fsettingseditor;
+   property settingsdebugger: boolean read fsettingsdebugger 
+                                               write fsettingsdebugger;
+   property settingsmake: boolean read fsettingsmake 
+                                               write fsettingsmake;
+   property settingsmacros: boolean read fsettingsmacros 
+                                               write fsettingsmacros;
+   property settingsfontalias: boolean read fsettingsfontalias 
+                                               write fsettingsfontalias;
+   property settingsusercolors: boolean read fsettingsusercolors 
+                                               write fsettingsusercolors;
+   property settingsformatmacros: boolean read fsettingsformatmacros 
+                                               write fsettingsformatmacros;
+   property settingstemplates: boolean read fsettingstemplates 
+                                               write fsettingstemplates;
+   property settingstools: boolean read fsettingstools 
+                                               write fsettingstools;
+   property settingsstorage: boolean read fsettingsstorage 
+                                               write fsettingsstorage;
+   property settingscomponentstore: boolean read fsettingscomponentstore 
+                                               write fsettingscomponentstore;
+   property settingsprojecttree: boolean read fsettingsprojecttree 
+                                               write fsettingsprojecttree;
+   property settingslayout: boolean read fsettingslayout 
+                                               write fsettingslayout;
+ end;
+ 
+ ttextmakeoptions = class(toptions)
   private
    fmainfile: filenamety;
    ftargetfile: filenamety;
@@ -483,9 +631,9 @@ type
    fbefcommand: msestringarty;
    faftcommand: msestringarty;
    fmakeoptions: msestringarty;
-   ffontnames: msestringarty;
+//   ffontnames: msestringarty;
   public
-   fcodetemplatedirs: msestringarty;
+//   fcodetemplatedirs: msestringarty;
   published
    property mainfile: filenamety read fmainfile write fmainfile;
    property targetfile: filenamety read ftargetfile write ftargetfile;
@@ -502,27 +650,29 @@ type
    property aftcommand: msestringarty read faftcommand write faftcommand;
    property makeoptions: msestringarty read fmakeoptions write fmakeoptions;
 
-   property codetemplatedirs: msestringarty read fcodetemplatedirs
-                                                     write fcodetemplatedirs;
-    
-   property fontnames: msestringarty read ffontnames write ffontnames;
+//   property codetemplatedirs: msestringarty read fcodetemplatedirs
+//                                                     write fcodetemplatedirs;
  end;
 
- tprojectoptions = class(toptions)
+ tmakeoptions = class(toptions)
   private
-   ft: ttextprojectoptions;
-   ftexp: ttextprojectoptions;
+   ft: ttextmakeoptions;
+   ftexp: ttextmakeoptions;
    
-   fusercolors: colorarty;
-   fusercolorcomment: msestringarty;
+//   fusercolors: colorarty;
+//   fusercolorcomment: msestringarty;
 
-   fformatmacronames: msestringarty;
-   fformatmacrovalues: msestringarty;
-   
+//   fformatmacronames: msestringarty;
+//   fformatmacrovalues: msestringarty;
+{   
    fsettingsfile: filenamety;
    fsettingseditor: boolean;
    fsettingsdebugger: boolean;
+   fsettingsmake: boolean;
    fsettingsmacros: boolean;
+   fsettingsfontalias: boolean;
+   fsettingsusercolors: boolean;
+   fsettingsformatmacros: boolean;
    fsettingstemplates: boolean;
    fsettingstools: boolean;
    fsettingsstorage: boolean;
@@ -531,18 +681,20 @@ type
    fsettingslayout: boolean;
    fsettingsautoload: boolean;
    fsettingsautosave: boolean;
+}
 //   fmoduleoptions: integerarty;
    fbefcommandon: integerarty;
    fmakeoptionson: integerarty;
    faftcommandon: integerarty;
    funitdirson: integerarty;
-
+{
    ffontalias: msestringarty;
    ffontancestors: msestringarty;
    ffontheights: integerarty;
    ffontwidths: integerarty;
    ffontoptions: msestringarty;
    ffontxscales: realarty;
+ }  
    fuid: integer;
    freversepathorder: boolean;
   protected
@@ -550,69 +702,53 @@ type
    function gettexp: tobject; override;
   public
    constructor create;
-   property texp: ttextprojectoptions read ftexp;
+   property texp: ttextmakeoptions read ftexp;
   published
-   property t: ttextprojectoptions read ft;
+   property t: ttextmakeoptions read ft;
 
    property reversepathorder: boolean read freversepathorder 
                                                   write freversepathorder;
 
-   property usercolors: colorarty read fusercolors write fusercolors;
-   property usercolorcomment: msestringarty read fusercolorcomment 
-                                                 write fusercolorcomment;
-   property formatmacronames: msestringarty read fformatmacronames 
-                                                       write fformatmacronames;
-   property formatmacrovalues: msestringarty read fformatmacrovalues
-                                                   write fformatmacrovalues;
-   property settingsfile: filenamety read fsettingsfile write fsettingsfile;
-   property settingseditor: boolean read fsettingseditor write fsettingseditor;
-   property settingsdebugger: boolean read fsettingsdebugger 
-                                               write fsettingsdebugger;
-   property settingsmacros: boolean read fsettingsmacros 
-                                               write fsettingsmacros;
-   property settingstemplates: boolean read fsettingstemplates 
-                                               write fsettingstemplates;
-   property settingstools: boolean read fsettingstools 
-                                               write fsettingstools;
-   property settingsstorage: boolean read fsettingsstorage 
-                                               write fsettingsstorage;
-   property settingscomponentstore: boolean read fsettingscomponentstore 
-                                               write fsettingscomponentstore;
-   property settingsprojecttree: boolean read fsettingsprojecttree 
-                                               write fsettingsprojecttree;
-   property settingslayout: boolean read fsettingslayout 
-                                               write fsettingslayout;
-   property settingsautoload: boolean read fsettingsautoload
-                                          write fsettingsautoload;
-   property settingsautosave: boolean read fsettingsautosave
-                                          write fsettingsautosave;
-  
    property befcommandon: integerarty read fbefcommandon write fbefcommandon;
    property makeoptionson: integerarty read fmakeoptionson write fmakeoptionson;
    property aftcommandon: integerarty read faftcommandon write faftcommandon;
    property unitdirson: integerarty read funitdirson write funitdirson;
 
-   property fontalias: msestringarty read ffontalias write ffontalias;
-   property fontancestors: msestringarty read ffontancestors 
-                                         write ffontancestors;
-   property fontheights: integerarty read ffontheights write ffontheights;
-   property fontwidths: integerarty read ffontwidths write ffontwidths;
-   property fontoptions: msestringarty read ffontoptions write ffontoptions;
-   property fontxscales: realarty read ffontxscales write ffontxscales;
-
    property uid: integer read fuid write fuid;   //for insert UID
  end;
+{
+ ttextprojectoptions = class(toptions)
+ end;
  
+ tprojectoptions = class(toptions)
+  private
+   ft: ttextprojectoptions;
+   ftexp: ttextprojectoptions;
+  protected
+   function gett: tobject; override;
+   function gettexp: tobject; override;
+  public
+   constructor create();
+   property texp: ttextprojectoptions read ftexp;
+  published
+   property t: ttextprojectoptions read ft;
+ end;
+}
 {$M-}
  
  projectoptionsty = record
   disabled: settinggroupsty;
-  o: tprojectoptions;
+//  o: tprojectoptions;
   e: teditoptions;
   d: tdebugoptions;
+  k: tmakeoptions;
   m: tmacrooptions;
+  a: tfontaliasoptions;
+  u: tusercoloroptions;
+  f: tformatmacrooptions;
   p: ttemplatesoptions;
   t: ttoolsoptions;
+  r: tstorageoptions;
   s: tprojectstate;
   modified: boolean;
   savechecked: boolean;
@@ -919,6 +1055,11 @@ type
    tsimplewidget1: tsimplewidget;
    settingscomponentstore: tbooleanedit;
    settingslayout: tbooleanedit;
+   tlabel1: tlabel;
+   settingsmake: tbooleanedit;
+   settingsusercolors: tbooleanedit;
+   settingsformatmacros: tbooleanedit;
+   settingsfontalias: tbooleanedit;
    procedure acttiveselectondataentered(const sender: TObject);
    procedure colonshowhint(const sender: tdatacol; const arow: Integer; 
                       var info: hintinfoty);
@@ -1139,7 +1280,7 @@ function objpath(const aname: filenamety): filenamety;
 begin
  result:= '';
  if aname <> '' then begin
-  result:= filepath(projectoptions.o.texp.makedir,aname);
+  result:= filepath(projectoptions.k.texp.makedir,aname);
  end;
 end;
 
@@ -1161,7 +1302,7 @@ var
  int1,int2: integer;
 begin
  setlength(result,6);
- with projectoptions,o do begin
+ with projectoptions,k do begin
   with result[0] do begin
    name:= 'PROJECTNAME';
    value:= removefileext(filename(projectfilename))
@@ -1229,7 +1370,7 @@ begin
    result:= objpath(debugtarget);
   end
   else begin
-   result:= objpath(o.texp.targetfile);
+   result:= objpath(k.texp.targetfile);
   end;
  end;
 end;
@@ -1342,13 +1483,19 @@ var
 begin
  li:= getmacros;
  with projectoptions do begin
-  o.expandmacros(li);
+//  o.expandmacros(li);
   e.expandmacros(li);
   d.expandmacros(li);
-  t.expandmacros(li);
+  m.expandmacros(li);
+  k.expandmacros(li);
+  a.expandmacros(li);
+  u.expandmacros(li);
+  f.expandmacros(li);
   p.expandmacros(li);
+  t.expandmacros(li);
+  r.expandmacros(li);
   s.expandmacros(li);
-  with o,texp do begin
+  with a,texp do begin
    if initfontaliascount = 0 then begin
     initfontaliascount:= fontaliascount;
    end;
@@ -1389,6 +1536,8 @@ begin
     sourceupdater.maxlinelength:= e.rightmarginchars;
    end;
    fontaliasnames:= fontalias;
+  end;
+  with s,texp do begin
    with sourcefo.syntaxpainter do begin
     bo1:= not cmparray(defdefs.asarraya,e.texp.sourcefilemasks) or
        not cmparray(defdefs.asarrayb,e.texp.syntaxdeffiles);
@@ -1498,20 +1647,20 @@ begin
    end;
   end;
   for int1:= 0 to usercolorcount - 1 do begin
-   if int1 > high(o.usercolors) then begin
+   if int1 > high(u.usercolors) then begin
     break;
    end;
-   setcolormapvalue(cl_user + longword(int1),o.usercolors[int1]);
+   setcolormapvalue(cl_user + longword(int1),u.usercolors[int1]);
   end;
   clearformatmacros;
-  for int1:= 0 to high(o.formatmacronames) do begin
-   if int1 > high(o.formatmacrovalues) then begin
+  for int1:= 0 to high(f.texp.formatmacronames) do begin
+   if int1 > high(f.texp.formatmacrovalues) then begin
     break;
    end;
-   formatmacros.add(o.formatmacronames[int1],o.formatmacrovalues[int1],[]);
+   formatmacros.add(f.texp.formatmacronames[int1],f.texp.formatmacrovalues[int1],[]);
   end;
   
-  codetemplates.scan(o.texp.codetemplatedirs);
+  codetemplates.scan(e.texp.codetemplatedirs);
  end;
  li.free;
  mainfo.updatesigsettings;
@@ -1536,6 +1685,38 @@ begin
  setlength(result,int2);
 end;
 
+procedure freeoptions();
+begin
+// projectoptions.o.free();
+ projectoptions.e.free();
+ projectoptions.d.free();
+ projectoptions.k.free();
+ projectoptions.m.free();
+ projectoptions.a.free();
+ projectoptions.u.free();
+ projectoptions.f.free();
+ projectoptions.t.free();
+ projectoptions.r.free();
+ projectoptions.p.free();
+ projectoptions.s.free();
+end;
+
+procedure createoptions();
+begin
+// projectoptions.o:= tprojectoptions.create();
+ projectoptions.e:= teditoptions.create();
+ projectoptions.d:= tdebugoptions.create();
+ projectoptions.k:= tmakeoptions.create();
+ projectoptions.m:= tmacrooptions.create();
+ projectoptions.a:= tfontaliasoptions.create();
+ projectoptions.u:= tusercoloroptions.create();
+ projectoptions.f:= tformatmacrooptions.create();
+ projectoptions.t:= ttoolsoptions.create();
+ projectoptions.r:= tstorageoptions.create();
+ projectoptions.p:= ttemplatesoptions.create();
+ projectoptions.s:= tprojectstate.create();
+end;
+
 procedure initpr(const expand: boolean);
 const 
  alloptionson = 1+2+4+8+16+32;
@@ -1544,24 +1725,12 @@ const
 var
  int1: integer;
 begin
- projectoptions.o.free;
- projectoptions.e.free;
- projectoptions.d.free;
- projectoptions.m.free;
- projectoptions.t.free;
- projectoptions.p.free;
- projectoptions.s.free;
- codetemplates.clear;
+ freeoptions();
+ codetemplates.clear();
  finalize(projectoptions);
  fillchar(projectoptions,sizeof(projectoptions),0);
- projectoptions.o:= tprojectoptions.create();
- projectoptions.e:= teditoptions.create();
- projectoptions.d:= tdebugoptions.create();
- projectoptions.m:= tmacrooptions.create();
- projectoptions.t:= ttoolsoptions.create();
- projectoptions.p:= ttemplatesoptions.create();
- projectoptions.s:= tprojectstate.create();
- with projectoptions,o,t do begin
+ createoptions();
+ with projectoptions,k,t do begin
   if expand then begin
    deletememorystatstream(findinfiledialogstatname);
    deletememorystatstream(finddialogstatname);
@@ -1805,7 +1974,7 @@ procedure updateprojectsettings(const statfiler: tstatfiler;
 var
  int1: integer;
 begin
- with statfiler,projectoptions,o,t do begin
+ with statfiler,projectoptions,s,t do begin
   
   if iswriter then begin
    mainfo.statoptions.writestat(tstatwriter(statfiler));
@@ -1882,20 +2051,35 @@ function getdisabledoptions: settinggroupsty;
 begin
  result:= [sg_state];
  with projectoptions do begin
-  if not o.settingseditor then begin
+  if not r.settingseditor then begin
    include(result,sg_editor);
   end;
-  if not o.settingsdebugger then begin
+  if not r.settingsdebugger then begin
    include(result,sg_debugger);
   end;
-  if not o.settingsmacros then begin
+  if not r.settingsmake then begin
+   include(result,sg_make);
+  end;
+  if not r.settingsmacros then begin
    include(result,sg_macros);
   end;
-  if not o.settingstemplates then begin
+  if not r.settingsfontalias then begin
+   include(result,sg_fontalias);
+  end;
+  if not r.settingsusercolors then begin
+   include(result,sg_usercolors);
+  end;
+  if not r.settingsformatmacros then begin
+   include(result,sg_formatmacros);
+  end;
+  if not r.settingstemplates then begin
    include(result,sg_templates);
   end;
-  if not o.settingstools then begin
+  if not r.settingstools then begin
    include(result,sg_tools);
+  end;
+  if not r.settingsstorage then begin
+   include(result,sg_storage);
   end;
  end;
 end;
@@ -2002,12 +2186,12 @@ begin
   savechecked:= false;
 
   if iswriter then begin
-   if o.settingsautosave then begin
+   if r.settingsautosave then begin
     dosaveexe(nil);
    end;
   end
   else begin
-   if o.settingsautoload then begin
+   if r.settingsautoload then begin
     doloadexe(nil);
    end;
   end;
@@ -2070,57 +2254,57 @@ begin
   fo.fontondataentered(nil);
   fo.defaultmake.value:= lowestbit(defaultmake);
   for int1:= 0 to fo.makeoptionsgrid.rowhigh do begin
-   if int1 > high(o.makeoptionson) then begin
+   if int1 > high(k.makeoptionson) then begin
     break;
    end;
-   fo.makeon.gridupdatetagvalue(int1,o.makeoptionson[int1]);
-   fo.buildon.gridupdatetagvalue(int1,o.makeoptionson[int1]);
-   fo.make1on.gridupdatetagvalue(int1,o.makeoptionson[int1]);
-   fo.make2on.gridupdatetagvalue(int1,o.makeoptionson[int1]);
-   fo.make3on.gridupdatetagvalue(int1,o.makeoptionson[int1]);
-   fo.make4on.gridupdatetagvalue(int1,o.makeoptionson[int1]);
+   fo.makeon.gridupdatetagvalue(int1,k.makeoptionson[int1]);
+   fo.buildon.gridupdatetagvalue(int1,k.makeoptionson[int1]);
+   fo.make1on.gridupdatetagvalue(int1,k.makeoptionson[int1]);
+   fo.make2on.gridupdatetagvalue(int1,k.makeoptionson[int1]);
+   fo.make3on.gridupdatetagvalue(int1,k.makeoptionson[int1]);
+   fo.make4on.gridupdatetagvalue(int1,k.makeoptionson[int1]);
   end;
 
   for int1:= 0 to fo.befcommandgrid.rowhigh do begin
-   if int1 > high(o.befcommandon) then begin
+   if int1 > high(k.befcommandon) then begin
     break;
    end;
-   fo.befmakeon.gridupdatetagvalue(int1,o.befcommandon[int1]);
-   fo.befbuildon.gridupdatetagvalue(int1,o.befcommandon[int1]);
-   fo.befmake1on.gridupdatetagvalue(int1,o.befcommandon[int1]);
-   fo.befmake2on.gridupdatetagvalue(int1,o.befcommandon[int1]);
-   fo.befmake3on.gridupdatetagvalue(int1,o.befcommandon[int1]);
-   fo.befmake4on.gridupdatetagvalue(int1,o.befcommandon[int1]);
+   fo.befmakeon.gridupdatetagvalue(int1,k.befcommandon[int1]);
+   fo.befbuildon.gridupdatetagvalue(int1,k.befcommandon[int1]);
+   fo.befmake1on.gridupdatetagvalue(int1,k.befcommandon[int1]);
+   fo.befmake2on.gridupdatetagvalue(int1,k.befcommandon[int1]);
+   fo.befmake3on.gridupdatetagvalue(int1,k.befcommandon[int1]);
+   fo.befmake4on.gridupdatetagvalue(int1,k.befcommandon[int1]);
   end;
 
   for int1:= 0 to fo.aftcommandgrid.rowhigh do begin
-   if int1 > high(o.aftcommandon) then begin
+   if int1 > high(k.aftcommandon) then begin
     break;
    end;
-   fo.aftmakeon.gridupdatetagvalue(int1,o.aftcommandon[int1]);
-   fo.aftbuildon.gridupdatetagvalue(int1,o.aftcommandon[int1]);
-   fo.aftmake1on.gridupdatetagvalue(int1,o.aftcommandon[int1]);
-   fo.aftmake2on.gridupdatetagvalue(int1,o.aftcommandon[int1]);
-   fo.aftmake3on.gridupdatetagvalue(int1,o.aftcommandon[int1]);
-   fo.aftmake4on.gridupdatetagvalue(int1,o.aftcommandon[int1]);
+   fo.aftmakeon.gridupdatetagvalue(int1,k.aftcommandon[int1]);
+   fo.aftbuildon.gridupdatetagvalue(int1,k.aftcommandon[int1]);
+   fo.aftmake1on.gridupdatetagvalue(int1,k.aftcommandon[int1]);
+   fo.aftmake2on.gridupdatetagvalue(int1,k.aftcommandon[int1]);
+   fo.aftmake3on.gridupdatetagvalue(int1,k.aftcommandon[int1]);
+   fo.aftmake4on.gridupdatetagvalue(int1,k.aftcommandon[int1]);
   end;
 
-  fo.unitdirs.gridvalues:= reversearray(o.t.unitdirs);
-  int2:= high(o.t.unitdirs);
+  fo.unitdirs.gridvalues:= reversearray(k.t.unitdirs);
+  int2:= high(k.t.unitdirs);
   for int1:= 0 to int2 do begin
-   if int1 > high(o.unitdirson) then begin
+   if int1 > high(k.unitdirson) then begin
     break;
    end;
-   fo.dmakeon.gridupdatetagvalue(int2,o.unitdirson[int1]);
-   fo.dbuildon.gridupdatetagvalue(int2,o.unitdirson[int1]);
-   fo.dmake1on.gridupdatetagvalue(int2,o.unitdirson[int1]);
-   fo.dmake2on.gridupdatetagvalue(int2,o.unitdirson[int1]);
-   fo.dmake3on.gridupdatetagvalue(int2,o.unitdirson[int1]);
-   fo.dmake4on.gridupdatetagvalue(int2,o.unitdirson[int1]);
-   fo.duniton.gridupdatetagvalue(int2,o.unitdirson[int1]);
-   fo.dincludeon.gridupdatetagvalue(int2,o.unitdirson[int1]);
-   fo.dlibon.gridupdatetagvalue(int2,o.unitdirson[int1]);
-   fo.dobjon.gridupdatetagvalue(int2,o.unitdirson[int1]);
+   fo.dmakeon.gridupdatetagvalue(int2,k.unitdirson[int1]);
+   fo.dbuildon.gridupdatetagvalue(int2,k.unitdirson[int1]);
+   fo.dmake1on.gridupdatetagvalue(int2,k.unitdirson[int1]);
+   fo.dmake2on.gridupdatetagvalue(int2,k.unitdirson[int1]);
+   fo.dmake3on.gridupdatetagvalue(int2,k.unitdirson[int1]);
+   fo.dmake4on.gridupdatetagvalue(int2,k.unitdirson[int1]);
+   fo.duniton.gridupdatetagvalue(int2,k.unitdirson[int1]);
+   fo.dincludeon.gridupdatetagvalue(int2,k.unitdirson[int1]);
+   fo.dlibon.gridupdatetagvalue(int2,k.unitdirson[int1]);
+   fo.dobjon.gridupdatetagvalue(int2,k.unitdirson[int1]);
    dec(int2);
   end;
   fo.activemacroselect[s.macrogroup]:= true;
@@ -2189,40 +2373,40 @@ begin
    end;
   end;
   
-  for int1:= high(o.fontxscales) downto 0 do begin
-   if o.fontxscales[int1] = emptyreal then begin
-    o.fontxscales[int1]:= 1.0;
+  for int1:= high(a.fontxscales) downto 0 do begin
+   if a.fontxscales[int1] = emptyreal then begin
+    a.fontxscales[int1]:= 1.0;
    end;   
   end;
 
   defaultmake:= 1 shl fo.defaultmake.value;
-  setlength(o.fmakeoptionson,fo.makeoptionsgrid.rowcount);
-  for int1:= 0 to high(o.fmakeoptionson) do begin
-   o.fmakeoptionson[int1]:=
+  setlength(k.fmakeoptionson,fo.makeoptionsgrid.rowcount);
+  for int1:= 0 to high(k.fmakeoptionson) do begin
+   k.fmakeoptionson[int1]:=
       fo.makeon.gridvaluetag(int1,0) or fo.buildon.gridvaluetag(int1,0) or
       fo.make1on.gridvaluetag(int1,0) or fo.make2on.gridvaluetag(int1,0) or
       fo.make3on.gridvaluetag(int1,0) or fo.make4on.gridvaluetag(int1,0);
   end;
 
-  setlength(o.fbefcommandon,fo.befcommandgrid.rowcount);
-  for int1:= 0 to high(o.fbefcommandon) do begin
-   o.fbefcommandon[int1]:=
+  setlength(k.fbefcommandon,fo.befcommandgrid.rowcount);
+  for int1:= 0 to high(k.fbefcommandon) do begin
+   k.fbefcommandon[int1]:=
       fo.befmakeon.gridvaluetag(int1,0) or fo.befbuildon.gridvaluetag(int1,0) or
       fo.befmake1on.gridvaluetag(int1,0) or fo.befmake2on.gridvaluetag(int1,0) or
       fo.befmake3on.gridvaluetag(int1,0) or fo.befmake4on.gridvaluetag(int1,0);
   end;
-  setlength(o.faftcommandon,fo.aftcommandgrid.rowcount);
-  for int1:= 0 to high(o.faftcommandon) do begin
-   o.faftcommandon[int1]:=
+  setlength(k.faftcommandon,fo.aftcommandgrid.rowcount);
+  for int1:= 0 to high(k.faftcommandon) do begin
+   k.faftcommandon[int1]:=
       fo.aftmakeon.gridvaluetag(int1,0) or fo.aftbuildon.gridvaluetag(int1,0) or
       fo.aftmake1on.gridvaluetag(int1,0) or fo.aftmake2on.gridvaluetag(int1,0) or
       fo.aftmake3on.gridvaluetag(int1,0) or fo.aftmake4on.gridvaluetag(int1,0);
   end;
 
-  o.t.unitdirs:= reversearray(fo.unitdirs.gridvalues);
-  setlength(o.funitdirson,length(o.t.unitdirs));
-  for int1:= 0 to high(o.funitdirson) do begin
-   o.funitdirson[high(o.funitdirson)-int1]:=
+  k.t.unitdirs:= reversearray(fo.unitdirs.gridvalues);
+  setlength(k.funitdirson,length(k.t.unitdirs));
+  for int1:= 0 to high(k.funitdirson) do begin
+   k.funitdirson[high(k.funitdirson)-int1]:=
       fo.dmakeon.gridvaluetag(int1,0) or fo.dbuildon.gridvaluetag(int1,0) or
       fo.dmake1on.gridvaluetag(int1,0) or fo.dmake2on.gridvaluetag(int1,0) or
       fo.dmake3on.gridvaluetag(int1,0) or fo.dmake4on.gridvaluetag(int1,0) or
@@ -2651,20 +2835,24 @@ type
   settingsfile: filenamety;
   settingseditor: boolean;
   settingsdebugger: boolean;
+  settingsmake: boolean;
   settingsmacros: boolean;
+  settingsfontalias: boolean;
+  settingsusercolors: boolean;
+  settingsformatmacros: boolean;
   settingstemplates: boolean;
   settingstools: boolean;
   settingsstorage: boolean;
   settingscomponentstore: boolean;
   settingsprojecttree: boolean;
   settingslayout: boolean;
-  settingsautoload: boolean;
-  settingsautosave: boolean;
+//  settingsautoload: boolean;
+//  settingsautosave: boolean;
   projectfilename: filenamety;
   projectdir: filenamety;
  end;
 
-procedure savevalues(fo: tprojectoptionsfo; out buffer: valuebufferty);
+procedure savesettingsvalues(fo: tprojectoptionsfo; out buffer: valuebufferty);
 begin
  with buffer do begin
   projectfilename:= projectoptions.projectfilename;
@@ -2673,34 +2861,43 @@ begin
    settingsfile:= fo.settingsfile.value;
    settingseditor:= fo.settingseditor.value;
    settingsdebugger:= fo.settingsdebugger.value;
+   settingsmake:= fo.settingsmake.value;
    settingsmacros:= fo.settingsmacros.value;
+   settingsfontalias:= fo.settingsfontalias.value;
+   settingsusercolors:= fo.settingsusercolors.value;
+   settingsformatmacros:= fo.settingsformatmacros.value;
    settingstemplates:= fo.settingstemplates.value;
    settingstools:= fo.settingstools.value;
    settingsstorage:= fo.settingsstorage.value;
    settingscomponentstore:= fo.settingscomponentstore.value;
    settingsprojecttree:= fo.settingsprojecttree.value;
    settingslayout:= fo.settingslayout.value;
-   settingsautoload:= fo.settingsautoload.value; 
-   settingsautosave:= fo.settingsautosave.value; 
+//   settingsautoload:= fo.settingsautoload.value; 
+//   settingsautosave:= fo.settingsautosave.value; 
   end
   else begin
-   settingsfile:= projectoptions.o.settingsfile;
-   settingseditor:= projectoptions.o.settingseditor;
-   settingsdebugger:= projectoptions.o.settingsdebugger;
-   settingsmacros:= projectoptions.o.settingsmacros;
-   settingstemplates:= projectoptions.o.settingstemplates;
-   settingstools:= projectoptions.o.settingstools;
-   settingsstorage:= projectoptions.o.settingsstorage;
-   settingscomponentstore:= projectoptions.o.settingscomponentstore;
-   settingsprojecttree:= projectoptions.o.settingsprojecttree;
-   settingslayout:= projectoptions.o.settingslayout;
-   settingsautoload:= projectoptions.o.settingsautoload; 
-   settingsautosave:= projectoptions.o.settingsautosave; 
+   settingsfile:= projectoptions.r.settingsfile;
+   settingseditor:= projectoptions.r.settingseditor;
+   settingsdebugger:= projectoptions.r.settingsdebugger;
+   settingsmake:= projectoptions.r.settingsmake;
+   settingsmacros:= projectoptions.r.settingsmacros;
+   settingsfontalias:= projectoptions.r.settingsfontalias;
+   settingsusercolors:= projectoptions.r.settingsusercolors;
+   settingsformatmacros:= projectoptions.r.settingsformatmacros;
+   settingstemplates:= projectoptions.r.settingstemplates;
+   settingstools:= projectoptions.r.settingstools;
+   settingsstorage:= projectoptions.r.settingsstorage;
+   settingscomponentstore:= projectoptions.r.settingscomponentstore;
+   settingsprojecttree:= projectoptions.r.settingsprojecttree;
+   settingslayout:= projectoptions.r.settingslayout;
+//   settingsautoload:= projectoptions.r.settingsautoload; 
+//   settingsautosave:= projectoptions.r.settingsautosave; 
   end;
  end;
 end;
 
-procedure restorevalues(fo: tprojectoptionsfo; const buffer: valuebufferty);
+procedure restoresettingsvalues(fo: tprojectoptionsfo;
+                                               const buffer: valuebufferty);
 begin
  with buffer do begin
   projectoptions.projectfilename:= projectfilename;
@@ -2710,33 +2907,41 @@ begin
     fo.settingsfile.value:= settingsfile;
     fo.settingseditor.value:= settingseditor; 
     fo.settingsdebugger.value:= settingsdebugger; 
+    fo.settingsmake.value:= settingsmake; 
     fo.settingsmacros.value:= settingsmacros; 
+    fo.settingsfontalias.value:= settingsfontalias; 
+    fo.settingsusercolors.value:= settingsusercolors; 
+    fo.settingsformatmacros.value:= settingsformatmacros; 
     fo.settingstemplates.value:= settingstemplates; 
     fo.settingstools.value:= settingstools; 
     fo.settingsstorage.value:= settingsstorage; 
     fo.settingscomponentstore.value:= settingscomponentstore; 
     fo.settingsprojecttree.value:= settingsprojecttree; 
     fo.settingslayout.value:= settingslayout; 
-    fo.settingsautoload.value:= settingsautoload; 
-    fo.settingsautosave.value:= settingsautosave; 
+//    fo.settingsautoload.value:= settingsautoload; 
+//    fo.settingsautosave.value:= settingsautosave; 
    end;
    fo.fontondataentered(nil);
    fo.settingsdataent(nil);
   end
   else begin
    if not settingsstorage then begin
-    projectoptions.o.settingsfile:= settingsfile;
-    projectoptions.o.settingseditor:= settingseditor; 
-    projectoptions.o.settingsdebugger:= settingsdebugger; 
-    projectoptions.o.settingsmacros:= settingsmacros; 
-    projectoptions.o.settingstemplates:= settingstemplates; 
-    projectoptions.o.settingstools:= settingstools; 
-    projectoptions.o.settingsstorage:= settingsstorage; 
-    projectoptions.o.settingscomponentstore:= settingscomponentstore; 
-    projectoptions.o.settingsprojecttree:= settingsprojecttree; 
-    projectoptions.o.settingslayout:= settingslayout;
-    projectoptions.o.settingsautoload:= settingsautoload; 
-    projectoptions.o.settingsautosave:= settingsautosave; 
+    projectoptions.r.settingsfile:= settingsfile;
+    projectoptions.r.settingseditor:= settingseditor; 
+    projectoptions.r.settingsdebugger:= settingsdebugger; 
+    projectoptions.r.settingsmake:= settingsmake; 
+    projectoptions.r.settingsmacros:= settingsmacros; 
+    projectoptions.r.settingsfontalias:= settingsfontalias; 
+    projectoptions.r.settingsusercolors:= settingsusercolors; 
+    projectoptions.r.settingsformatmacros:= settingsformatmacros; 
+    projectoptions.r.settingstemplates:= settingstemplates; 
+    projectoptions.r.settingstools:= settingstools; 
+    projectoptions.r.settingsstorage:= settingsstorage; 
+    projectoptions.r.settingscomponentstore:= settingscomponentstore; 
+    projectoptions.r.settingsprojecttree:= settingsprojecttree; 
+    projectoptions.r.settingslayout:= settingslayout;
+//    projectoptions.r.settingsautoload:= settingsautoload; 
+//    projectoptions.r.settingsautosave:= settingsautosave; 
    end;
   end;
  end;
@@ -2789,27 +2994,27 @@ begin
   end;
  end
  else begin
-  fname1:= projectoptions.o.settingsfile;
+  fname1:= projectoptions.r.settingsfile;
   expandprmacros1(fname1);
  end;
  if fname1 <> '' then begin
-  savevalues(sender,buffer);
+  savesettingsvalues(sender,buffer);
   savestat(stream1);
-  if sender <> nil then begin
+  if sender <> nil then begin //manual
    formtoprojectoptions(sender);
   end;
   projectoptions.disabled:= getdisabledoptions;
   try
    read1:= tstatreader.create(fname1,ce_utf8);
    try
-    if projectoptions.o.settingscomponentstore then begin
+    if projectoptions.r.settingscomponentstore then begin
      componentstorefo.updatestat(read1);
     end;
-    if projectoptions.o.settingslayout then begin
+    if projectoptions.r.settingslayout then begin
      mainfo.loadwindowlayout(read1);
     end;
     read1.setsection('projectoptions');
-    if projectoptions.o.settingsprojecttree then begin
+    if projectoptions.r.settingsprojecttree then begin
      projecttree.updatestat(read1);
      projecttree.updatelist;
     end;
@@ -2820,12 +3025,12 @@ begin
    if sender <> nil then begin
     projectoptionstoform(sender);
    end;
-   restorevalues(sender,buffer);
+   restoresettingsvalues(sender,buffer);
   except
    application.handleexception;
   end;
   projectoptions.disabled:= [];
-  if sender <> nil then begin
+  if sender <> nil then begin //manual
    restorestat(stream1);
   end
   else begin
@@ -2846,7 +3051,7 @@ var
  stream1: ttextstream;
  fname1: filenamety;
 begin
- if sender <> nil then begin
+ if sender <> nil then begin //manual save
   storemacros(sender);
   fname1:= sender.settingsfile.value;
   expandprmacros1(fname1);
@@ -2857,7 +3062,7 @@ begin
   end;
  end
  else begin
-  fname1:= projectoptions.o.settingsfile;
+  fname1:= projectoptions.r.settingsfile;
   expandprmacros1(fname1);
  end;
  if fname1 <> '' then begin
@@ -2869,29 +3074,33 @@ begin
      formtoprojectoptions(sender);
     end;
     disabled:= getdisabledoptions;
-    if o.settingscomponentstore then begin
+    if r.settingscomponentstore then begin
      componentstorefo.updatestat(stat1);
     end;
-    if o.settingslayout then begin
+    if r.settingslayout then begin
      mainfo.savewindowlayout(stat1);
     end;
     stat1.setsection('projectoptions');
-    if o.settingsprojecttree then begin
+    if r.settingsprojecttree then begin
      projecttree.updatestat(stat1);
     end;
-    if not o.settingsstorage then begin
-     o.settingsfile:= '';
-     o.settingseditor:= false; 
-     o.settingsdebugger:= false; 
-     o.settingsmacros:= false; 
-     o.settingstemplates:= false; 
-     o.settingstools:= false; 
-     o.settingsstorage:= false; 
-     o.settingscomponentstore:= false; 
-     o.settingsprojecttree:= false; 
-     o.settingslayout:= false; 
-     o.settingsautoload:= false; 
-     o.settingsautosave:= false; 
+    if not r.settingsstorage then begin
+     r.settingsfile:= '';
+     r.settingseditor:= false; 
+     r.settingsdebugger:= false; 
+     r.settingsmake:= false; 
+     r.settingsmacros:= false; 
+     r.settingsfontalias:= false; 
+     r.settingsusercolors:= false; 
+     r.settingsformatmacros:= false; 
+     r.settingstemplates:= false; 
+     r.settingstools:= false; 
+     r.settingsstorage:= false; 
+     r.settingscomponentstore:= false; 
+     r.settingsprojecttree:= false; 
+     r.settingslayout:= false; 
+//     r.settingsautoload:= false; 
+//     r.settingsautosave:= false; 
     end;
     updateprojectsettings(stat1,disabled);
    finally
@@ -2989,23 +3198,16 @@ procedure tprojectoptionsfo.initeolstyleexe(const sender: tenumtypeedit);
 begin
  sender.typeinfopo:= typeinfo(eolstylety);
 end;
-
+(*
 { tprojectoptions }
 
 constructor tprojectoptions.create;
 begin
  ft:= ttextprojectoptions.create;
  ftexp:= ttextprojectoptions.create;
-  inherited;
-end;
-{
-destructor tprojectoptions.destroy;
-begin
- ft.free;
- ftexp.free;
  inherited;
 end;
-}
+
 function tprojectoptions.gett: tobject;
 begin
  result:= ft;
@@ -3015,8 +3217,8 @@ function tprojectoptions.gettexp: tobject;
 begin
  result:= ftexp;
 end;
-
-{ ttextprojectoptions }
+*)
+{ teditoptions }
 
 constructor teditoptions.create;
 var
@@ -3050,7 +3252,7 @@ begin
  backupfilecount:= 2;
  setlength(ar1,1);
  ar1[0]:= '${TEMPLATEDIR}';
- codetemplatedirs:= ar1;
+ ft.codetemplatedirs:= ar1;
  inherited;
 end;
 
@@ -3074,17 +3276,17 @@ procedure teditoptions.setgridsizey(const avalue: integer);
 begin
  fgridsizey:= limitgridsize(avalue);
 end;
-
+{
 function teditoptions.getcodetemplatedirs: msestringarty;
 begin
- result:= projectoptions.o.t.codetemplatedirs;
+ result:= projectoptions.k.t.codetemplatedirs;
 end;
 
 procedure teditoptions.setcodetemplatedirs(const avalue: msestringarty);
 begin
- projectoptions.o.t.codetemplatedirs:= avalue;
+ projectoptions.k.t.codetemplatedirs:= avalue;
 end;
-
+}
 function teditoptions.gett: tobject;
 begin
  result:= ft;
@@ -3128,6 +3330,25 @@ end;
 constructor ttextdebugoptions.create;
 begin
  fxtermcommand:= defaultxtermcommand;
+end;
+
+{ tmakeoptions }
+
+constructor tmakeoptions.create;
+begin
+ ft:= ttextmakeoptions.create;
+ ftexp:= ttextmakeoptions.create;
+ inherited;
+end;
+
+function tmakeoptions.gett: tobject;
+begin
+ result:= ft;
+end;
+
+function tmakeoptions.gettexp: tobject;
+begin
+ result:= ftexp;
 end;
 
 { ttoolsoptions }
@@ -3198,15 +3419,89 @@ begin
  result:= ftexp;
 end;
 
+{ tfontaliasoptions }
+
+constructor tfontaliasoptions.create();
+begin
+ ft:= ttextfontaliasoptions.create();
+ ftexp:= ttextfontaliasoptions.create();
+ inherited;
+end;
+
+function tfontaliasoptions.gett: tobject;
+begin
+ result:= ft;
+end;
+
+function tfontaliasoptions.gettexp: tobject;
+begin
+ result:= ftexp;
+end;
+
+{ tusercoloroptions }
+
+constructor tusercoloroptions.create();
+begin
+ ft:= ttextusercoloroptions.create();
+ ftexp:= ttextusercoloroptions.create();
+ inherited;
+end;
+
+function tusercoloroptions.gett: tobject;
+begin
+ result:= ft;
+end;
+
+function tusercoloroptions.gettexp: tobject;
+begin
+ result:= ftexp;
+end;
+
+{ tformatmacrooptions }
+
+constructor tformatmacrooptions.create();
+begin
+ ft:= ttextformatmacrooptions.create();
+ ftexp:= ttextformatmacrooptions.create();
+ inherited;
+end;
+
+function tformatmacrooptions.gett: tobject;
+begin
+ result:= ft;
+end;
+
+function tformatmacrooptions.gettexp: tobject;
+begin
+ result:= ftexp;
+end;
+
+{ ttextfontaliasoptions }
+
+{ tstorageoptions }
+
+constructor tstorageoptions.create();
+begin
+ fsettingsmake:= true;
+ inherited;
+end;
+
 initialization
  codetemplates:= tcodetemplates.create;
 finalization
+ freeoptions();
+{
  projectoptions.o.free();
  projectoptions.e.free();
  projectoptions.d.free();
  projectoptions.m.free();
- projectoptions.t.free();
+ projectoptions.a.free();
+ projectoptions.u.free();
+ projectoptions.f.free();
  projectoptions.p.free();
+ projectoptions.t.free();
+ projectoptions.r.free();
  projectoptions.s.free();
+}
  freeandnil(codetemplates);
 end.

@@ -1456,7 +1456,7 @@ var
  str1: string[4];
  str2: string;
 begin
- id1:= projectoptions.o.uid;
+ id1:= projectoptions.k.uid;
  if integerenter(id1,minint,maxint,'ID','Enter ID') = mr_ok then begin
   for int1:= 0 to 3 do begin
    str1[int1+1]:= char(bitreverse[byte(
@@ -1480,7 +1480,7 @@ begin
   with activepage.edit do begin
    inserttext(editpos,'['''+msestring(str2)+''']{'+inttostrmse(id1)+'}');
   end;
-  projectoptions.o.uid:= id1+1;
+  projectoptions.k.uid:= id1+1;
  end;
 end;
 

@@ -795,7 +795,7 @@ end;
 
 procedure tactionsmo.projectsourceexe(const sender: TObject);
 begin
- sourcefo.openfile(projectoptions.o.texp.mainfile,true);
+ sourcefo.openfile(projectoptions.k.texp.mainfile,true);
 end;
 
 procedure tactionsmo.projectsaveexe(const sender: TObject);
@@ -871,7 +871,7 @@ end;
 
 procedure tactionsmo.forcezorderexe(const sender: TObject);
 begin
- if projectoptions.o <> nil then begin
+ if projectoptions.s <> nil then begin
   projectoptions.s.forcezorder:= taction(sender).checked;
   projectoptionsmodified();
  end;

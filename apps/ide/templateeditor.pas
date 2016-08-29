@@ -74,7 +74,7 @@ var
  dir1: filenamety;
 begin
  if savefiledialog.controller.lastdir = '' then begin
-  if findfile('',projectoptions.o.texp.codetemplatedirs,dir1) or 
+  if findfile('',projectoptions.e.texp.codetemplatedirs,dir1) or 
      findfile('',[expandprmacros('${TEMPLATEDIR}')],dir1) then begin
    savefiledialog.controller.lastdir:= dir1;
   end;
@@ -169,9 +169,9 @@ begin
     if sys_openfile(pa1,fm_create,[],[],int1) = sye_ok then begin
      sys_closefile(int1);
      if not findfile(filename(pa1),
-                             projectoptions.o.texp.codetemplatedirs) then begin
+                             projectoptions.e.texp.codetemplatedirs) then begin
       deletefile(pa1);
-      additem(projectoptions.o.t.fcodetemplatedirs,dir1);
+      additem(projectoptions.e.t.fcodetemplatedirs,dir1);
       expandprojectmacros;
       projectoptionsmodified;
       showmessage('"'+dir1+'" '+c[ord(hasbeenaddedto)]);
