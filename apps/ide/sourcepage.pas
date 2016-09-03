@@ -1077,10 +1077,14 @@ begin
 end;
 
 procedure tsourcepage.doline;
+var
+ int1: int32;
 begin
  if integerenter(fgotoline,1,grid.rowcount,
       sourcefo.c[ord(gotoline)],sourcefo.c[ord(findline)]) = mr_ok then begin
+  int1:= grid.rowwindowpos;
   grid.row:= fgotoline-1;
+  grid.rowwindowpos:= int1;
  end;
 end;
 
