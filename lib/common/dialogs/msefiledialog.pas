@@ -192,6 +192,8 @@ type
    function execute(var avalue: filenamety; const  dialogkind: filedialogkindty;
                            const acaption: msestring; 
                             aoptions: filedialogoptionsty): boolean; overload;
+   function canoverwrite(): boolean; 
+                         //true if current filename is allowed to write
    procedure clear;
    procedure componentevent(const event: tcomponentevent);
    property history: msestringarty read fhistory write fhistory;
@@ -1917,6 +1919,16 @@ begin
  end
  else begin
   filename:= wstr1;
+ end;
+end;
+
+function tfiledialogcontroller.canoverwrite(): boolean;
+begin
+ with stockobjects do begin
+  result:= not findfile(filename) or 
+       askok(captions[sc_file]+' "'+filename+
+            '" '+ captions[sc_exists_overwrite],
+            captions[sc_warningupper]);
  end;
 end;
 
