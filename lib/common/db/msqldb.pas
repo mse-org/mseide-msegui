@@ -2945,7 +2945,12 @@ begin
  fsender:= sender;
  ferror:= aerror;
  ferrormessage:= aerrormessage;
- inherited create(asender.name+': '+amessage);
+ if asender <> nil then begin
+  inherited create(asender.name+': '+amessage);
+ end
+ else begin
+  inherited create(amessage);
+ end;
 end;
 
 { tsqlmacroitem }
