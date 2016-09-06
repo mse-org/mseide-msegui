@@ -320,6 +320,8 @@ type
                 al_intpol,al_or,al_and);
  alignmentsty = set of alignmentty;
 
+ edgety = (edg_right,edg_top,edg_left,edg_bottom);
+ edgesty = set of edgety;
  
  fontstylety = (fs_bold,fs_italic,
                 fs_underline,fs_strikeout,fs_selected,fs_blank,
@@ -598,10 +600,14 @@ procedure centerrect(apos: pointty; asize: integer; out rect: rectty);
 function excenterrect(const arect: rectty): rectty;
 function recenterrect(const arect: rectty): rectty;
 
-function inflaterect(const rect: rectty; value: integer): rectty; overload;
-function inflaterect(const rect: rectty; const frame: framety): rectty; overload;
-procedure inflaterect1(var rect: rectty; value: integer); overload;
-procedure inflaterect1(var rect: rectty; const frame: framety); overload;
+function inflaterect(const rect: rectty; value: integer): rectty;
+function inflaterect(const rect: rectty; const value: int32;
+                                     const disablededges: edgesty): rectty;
+function inflaterect(const rect: rectty; const frame: framety): rectty;
+procedure inflaterect1(var rect: rectty; value: integer);
+procedure inflaterect1(var rect: rectty; const value: int32;
+                                                const disablededges: edgesty);
+procedure inflaterect1(var rect: rectty; const frame: framety);
 function deflaterect(const rect: rectty; const frame: framety): rectty;
 procedure deflaterect1(var rect: rectty; const frame: framety);
 procedure normalizerect1(var arect: rectty);
@@ -1563,6 +1569,27 @@ begin
  end;
 end;
 
+function inflaterect(const rect: rectty; const value: int32;
+                                     const disablededges: edgesty): rectty;
+begin
+ result:= rect;
+ with result do begin
+  if not (edg_left in disablededges) then begin
+   dec(x,value);
+   inc(cx,value);
+  end;
+  if not (edg_top in disablededges) then begin
+   dec(y,value);   inc(cy,value);
+  end;
+  if not (edg_right in disablededges) then begin
+   inc(cx,value);
+  end;
+  if not (edg_bottom in disablededges) then begin
+   inc(cy,value);
+  end;
+ end;
+end;
+
 function inflaterect(const rect: rectty; const frame: framety): rectty;
 begin
  result.x:= rect.x - frame.left;
@@ -1580,6 +1607,27 @@ begin
   inc(cx,value);
   inc(cy,value);
   inc(cy,value);
+ end;
+end;
+
+procedure inflaterect1(var rect: rectty; const value: int32;
+                                                const disablededges: edgesty);
+begin
+ with rect do begin
+  if not (edg_left in disablededges) then begin
+   dec(x,value);
+   inc(cx,value);
+  end;
+  if not (edg_top in disablededges) then begin
+   dec(y,value);
+   inc(cy,value);
+  end;
+  if not (edg_right in disablededges) then begin
+   inc(cx,value);
+  end;
+  if not (edg_bottom in disablededges) then begin
+   inc(cy,value);
+  end;
  end;
 end;
 

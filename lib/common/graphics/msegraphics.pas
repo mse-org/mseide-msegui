@@ -811,9 +811,6 @@ type
   stack: canvasvaluesarty;
  end;
 
- edgety = (edg_right,edg_top,edg_left,edg_bottom);
- edgesty = set of edgety;
- 
  edgecolorinfoty = record
   color,effectcolor: colorty;
   effectwidth: integer;

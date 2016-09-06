@@ -893,7 +893,7 @@ function drawbuttonframe(const canvas: tcanvas; const info: shapeinfoty;
 var
  level: integer;
  col1: colorty;
-// rect1: rectty;
+ rect1: rectty;
 begin
  result:= false;
  with canvas,info do begin
@@ -929,8 +929,8 @@ begin
     canvas.drawframe(clientrect,-1,cl_black);
     inflaterect1(clientrect,-1);
    end;
+   rect1:= clientrect;
    if (clientrect.cx > 0) and (clientrect.cy > 0) then begin
-    result:= true;
     col1:= color;
     if shs_active in state then begin
      col1:= coloractive;
@@ -942,39 +942,10 @@ begin
      face.paint(canvas,clientrect);
     end;
    end;
-  {
-   if (hiddenedge <> bedg_none) and not (shs_flat in state) then begin
-    rect1:= clientrect;
-    with rect1 do begin
-     case hiddenedge of
-      bedg_left: begin
-       x:= x - 1;
-       cx:= cx + 1
-      end;
-      bedg_top: begin
-       y:= y - 1;
-       cy:= cy + 1;
-      end;
-      bedg_right: begin
-       cx:= cx + 1;
-      end;
-      bedg_bottom: begin
-       cy:= cy + 1;
-      end;
-     end;
-    end;
-    draw3dframe(canvas,rect1,level,defaultframecolors.edges,[]);
-   end
-   else begin
-   }
-    draw3dframe(canvas,clientrect,level,defaultframecolors.edges,hiddenedges);
- //   draw3dframe(canvas,clientrect,level,defaultframecolors.edges,[]);
-   {
-   end;
-   inflaterect1(clientrect,-abs(level));
-   }
+   draw3dframe(canvas,rect1,level,defaultframecolors.edges,hiddenedges);
   end;
-  result:=(clientrect.cx > 0) and (clientrect.cy > 0);
+  inflaterect1(clientrect,-abs(level),hiddenedges);
+  result:= (clientrect.cx > 0) and (clientrect.cy > 0);
  end;
 end;
 
