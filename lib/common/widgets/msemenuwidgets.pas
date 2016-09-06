@@ -1197,9 +1197,13 @@ end;
 
 procedure tpopupmenuwidget.invalidatelayout();
 begin
- if not (csloading in componentstate)  then begin
+ if (componentstate * [csloading,csdestroying] = []) then begin
   exclude(flayout.state,mls_valid);
   invalidate();
+  if (flayout.menu <> nil) and (flayout.menu.submenu.count > 0) and 
+          ((fwidgetrect.cx <= 0) or (fwidgetrect.cy <= 0)) then begin
+   updatelayout(); //there will be no paint event
+  end;
  end;
 end;
 
