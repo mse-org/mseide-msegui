@@ -57,16 +57,24 @@ type
    procedure iniapi();
    procedure finiapi();
    function getpb(): ixpbbuilder;
+   procedure clearstatus();
    procedure checkstatus(const aerrormessage: msestring);
    procedure dointernalconnect; override;
    procedure dointernaldisconnect; override;
 
    function allocatetransactionhandle : tsqlhandle; override;
    function gettransactionhandle(trans : tsqlhandle): pointer; override;
+
    function startdbtransaction(const trans : tsqlhandle;
                       const aparams : tstringlist) : boolean; override;
+   function commit(trans : tsqlhandle) : boolean; override;
+   function rollback(trans : tsqlhandle) : boolean; override;
+   procedure internalcommitretaining(trans : tsqlhandle); override;
+   procedure internalrollbackretaining(trans : tsqlhandle); override;
+
    function allocatecursorhandle(const aowner: icursorclient;
                       const aname: ansistring): tsqlcursor; override;
+   procedure deallocatecursorhandle(var cursor : tsqlcursor); override;
    procedure preparestatement(const cursor: tsqlcursor; 
                  const atransaction : tsqltransaction;
                  const asql: msestring; const aparams : tmseparams); override;
@@ -146,6 +154,11 @@ begin
  end;
 end;
 
+procedure tfirebirdconnection.clearstatus();
+begin
+ fapi.status.init();
+end;
+
 procedure tfirebirdconnection.checkstatus(const aerrormessage: msestring);
 begin
  if fapi.status.getstate() and istatus.state_errors <> 0 then begin
@@ -193,6 +206,7 @@ begin
    databasename1:= databasename;
   end;
   fattachment:= nil;
+  clearstatus();
   fattachment:= fapi.provider.attachdatabase(fapi.status,
                       pchar(databasename1),pb.getbufferlength(fapi.status),
                                               pb.getbuffer(fapi.status));
@@ -275,7 +289,6 @@ label
  next;
 begin
  result := false;
- tr:= trans as tfbtrans;
  if aparams.count > 0 then begin
   pb:= getpb();
   for i1:= 0 to aparams.count - 1 do begin
@@ -313,18 +326,69 @@ next:
   pblen:= 0;
   pbbuffer:= nil;
  end;
- tr.ftrans:= fattachment.starttransaction(fapi.status,pblen,pbbuffer);
- if pb <> nil then begin
-  pb.dispose();
+ with tfbtrans(trans) do begin
+  fowner.clearstatus();
+  ftrans:= fattachment.starttransaction(fapi.status,pblen,pbbuffer);
+  if pb <> nil then begin
+   pb.dispose();
+  end;
+  checkstatus('startdbtransaction');
+  ftrans.addref();
  end;
- checkstatus('startdbtransaction');
- tr.ftrans.addref();
+ result:= true;
+end;
+
+function tfirebirdconnection.commit(trans: tsqlhandle): boolean;
+begin
+ with tfbtrans(trans) do begin
+  fowner.clearstatus();
+  ftrans.commit(fowner.fapi.status);
+  fowner.checkstatus('commit');
+  ftrans.release();
+  ftrans:= nil;
+  result:= true;
+ end;
+end;
+
+function tfirebirdconnection.rollback(trans: tsqlhandle): boolean;
+begin
+ with tfbtrans(trans) do begin
+  fowner.clearstatus();
+  ftrans.rollback(fowner.fapi.status);
+  fowner.checkstatus('rollback');
+  ftrans.release();
+  ftrans:= nil;
+  result:= true;
+ end;
+end;
+
+procedure tfirebirdconnection.internalcommitretaining(trans: tsqlhandle);
+begin
+ with tfbtrans(trans) do begin
+  fowner.clearstatus();
+  ftrans.commitretaining(fowner.fapi.status);
+  fowner.checkstatus('commitretaining');
+ end;
+end;
+
+procedure tfirebirdconnection.internalrollbackretaining(trans: tsqlhandle);
+begin
+ with tfbtrans(trans) do begin
+  fowner.clearstatus();
+  ftrans.rollbackretaining(fowner.fapi.status);
+  fowner.checkstatus('rollbackretaining');
+ end;
 end;
 
 function tfirebirdconnection.allocatecursorhandle(const aowner: icursorclient;
                const aname: ansistring): tsqlcursor;
 begin
  result:= tfbcursor.create(aowner,self);
+end;
+
+procedure tfirebirdconnection.deallocatecursorhandle(var cursor: tsqlcursor);
+begin
+ freeandnil(cursor);
 end;
 
 procedure tfirebirdconnection.preparestatement(const cursor: tsqlcursor;
@@ -342,6 +406,7 @@ begin
    str1:= todbstring(asql);
   end;
   with tfbtrans(atransaction.trans) do begin
+   fowner.clearstatus();
    fstatement:= fowner.fattachment.prepare(fowner.fapi.status,ftrans,length(str1),
             pointer(str1),fowner.dialect,istatement.prepare_prefetch_metadata);
    fowner.checkstatus('preparestatement');
