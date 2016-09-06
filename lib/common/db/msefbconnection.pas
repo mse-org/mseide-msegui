@@ -23,22 +23,27 @@ type
  
  tfbtrans = class(tsqlhandle)
   protected
-   fowner: tfirebirdconnection;
-   ftrans: itransaction;
+   fconnection: tfirebirdconnection;
+   ftransaction: itransaction;
   public
-   constructor create(const aowner: tfirebirdconnection);
+   constructor create(const aconnection: tfirebirdconnection);
    destructor destroy(); override;
  end;
 
+ cursorstatety = (cs_hasstatement);
+ cursorstatesty = set of cursorstatety;
+ 
  tfbcursor = class(tsqlcursor)
   protected
    fconnection: tfirebirdconnection;
    fparambinding: tparambinding;
    fstatement: istatement;
+   fcursorstate: cursorstatesty;
   public
    constructor create(const aowner: icursorclient;
                                        const aconnection: tfirebirdconnection);
    destructor destroy(); override;
+   procedure close() override;
  end;
   
  fbapity = record
@@ -78,6 +83,10 @@ type
    procedure preparestatement(const cursor: tsqlcursor; 
                  const atransaction : tsqltransaction;
                  const asql: msestring; const aparams : tmseparams); override;
+   procedure unpreparestatement(cursor : tsqlcursor); override;
+   procedure internalexecute(const cursor: tsqlcursor;
+             const atransaction: tsqltransaction; const aparams : tmseparams;
+             const autf8: boolean); override;
   public
    constructor create(aowner: tcomponent); override;
   published
@@ -238,7 +247,7 @@ end;
 
 function tfirebirdconnection.gettransactionhandle(trans: tsqlhandle): pointer;
 begin
- result:= tfbtrans(trans).ftrans;
+ result:= tfbtrans(trans).ftransaction;
 end;
 
 function tfirebirdconnection.startdbtransaction(const trans: tsqlhandle;
@@ -327,13 +336,13 @@ next:
   pbbuffer:= nil;
  end;
  with tfbtrans(trans) do begin
-  fowner.clearstatus();
-  ftrans:= fattachment.starttransaction(fapi.status,pblen,pbbuffer);
+  clearstatus();
+  ftransaction:= fattachment.starttransaction(fapi.status,pblen,pbbuffer);
   if pb <> nil then begin
    pb.dispose();
   end;
   checkstatus('startdbtransaction');
-  ftrans.addref();
+  ftransaction.addref();
  end;
  result:= true;
 end;
@@ -341,11 +350,11 @@ end;
 function tfirebirdconnection.commit(trans: tsqlhandle): boolean;
 begin
  with tfbtrans(trans) do begin
-  fowner.clearstatus();
-  ftrans.commit(fowner.fapi.status);
-  fowner.checkstatus('commit');
-  ftrans.release();
-  ftrans:= nil;
+  clearstatus();
+  ftransaction.commit(fconnection.fapi.status);
+  checkstatus('commit');
+  ftransaction.release();
+  ftransaction:= nil;
   result:= true;
  end;
 end;
@@ -353,11 +362,11 @@ end;
 function tfirebirdconnection.rollback(trans: tsqlhandle): boolean;
 begin
  with tfbtrans(trans) do begin
-  fowner.clearstatus();
-  ftrans.rollback(fowner.fapi.status);
-  fowner.checkstatus('rollback');
-  ftrans.release();
-  ftrans:= nil;
+  clearstatus();
+  ftransaction.rollback(fconnection.fapi.status);
+  checkstatus('rollback');
+  ftransaction.release();
+  ftransaction:= nil;
   result:= true;
  end;
 end;
@@ -365,18 +374,18 @@ end;
 procedure tfirebirdconnection.internalcommitretaining(trans: tsqlhandle);
 begin
  with tfbtrans(trans) do begin
-  fowner.clearstatus();
-  ftrans.commitretaining(fowner.fapi.status);
-  fowner.checkstatus('commitretaining');
+  clearstatus();
+  ftransaction.commitretaining(fapi.status);
+  checkstatus('commitretaining');
  end;
 end;
 
 procedure tfirebirdconnection.internalrollbackretaining(trans: tsqlhandle);
 begin
  with tfbtrans(trans) do begin
-  fowner.clearstatus();
-  ftrans.rollbackretaining(fowner.fapi.status);
-  fowner.checkstatus('rollbackretaining');
+  clearstatus();
+  ftransaction.rollbackretaining(fapi.status);
+  checkstatus('rollbackretaining');
  end;
 end;
 
@@ -406,27 +415,55 @@ begin
    str1:= todbstring(asql);
   end;
   with tfbtrans(atransaction.trans) do begin
-   fowner.clearstatus();
-   fstatement:= fowner.fattachment.prepare(fowner.fapi.status,ftrans,length(str1),
-            pointer(str1),fowner.dialect,istatement.prepare_prefetch_metadata);
-   fowner.checkstatus('preparestatement');
+   clearstatus();
+   fstatement:= fattachment.prepare(fapi.status,ftransaction,length(str1),
+            pointer(str1),dialect,istatement.prepare_prefetch_metadata);
+   checkstatus('preparestatement');
    fstatement.addref();
+   include(fcursorstate,cs_hasstatement);
   end;
+ end;
+end;
+
+procedure tfirebirdconnection.unpreparestatement(cursor: tsqlcursor);
+begin
+ with tfbcursor(cursor) do begin
+  if cs_hasstatement in fcursorstate then begin
+   fconnection.clearstatus();
+   fstatement.free(fconnection.fapi.status);
+   fconnection.checkstatus('cursor close');
+   fstatement:= nil;
+   exclude(fcursorstate,cs_hasstatement);
+  end;
+ end;
+end;
+
+procedure tfirebirdconnection.internalexecute(const cursor: tsqlcursor;
+               const atransaction: tsqltransaction; const aparams: tmseparams;
+               const autf8: boolean);
+begin
+ if assigned(aparams) and (aparams.count > 0) then begin
+//  setparameters(cursor, aparams);
+ end;
+ with tfbcursor(cursor),tfbtrans(atransaction.trans) do begin
+  clearstatus();
+  fstatement.execute(fapi.status,ftransaction,nil,nil,nil,nil);
+  checkstatus('execute');
  end;
 end;
 
 { tfbtrans }
 
-constructor tfbtrans.create(const aowner: tfirebirdconnection);
+constructor tfbtrans.create(const aconnection: tfirebirdconnection);
 begin
- fowner:= aowner;
+ fconnection:= aconnection;
 end;
 
 destructor tfbtrans.destroy();
 begin
  inherited;
- if ftrans <> nil then begin
-  ftrans.release();
+ if ftransaction <> nil then begin
+  ftransaction.release();
  end;
 end;
 
@@ -437,6 +474,12 @@ constructor tfbcursor.create(const aowner: icursorclient;
 begin
  fconnection:= aconnection;
  inherited create(aowner,fconnection.name);
+end;
+
+procedure tfbcursor.close();
+begin
+ inherited;
+ fconnection.unpreparestatement(self);
 end;
 
 destructor tfbcursor.destroy();
