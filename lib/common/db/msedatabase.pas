@@ -91,7 +91,7 @@ type
     fwritedatasets: itransactionclientarty;
     fwritedatasetsactive: booleanarty;
     Procedure SetDatabase (Value : tmdatabase); virtual;
-    procedure CloseTrans;
+    procedure CloseTrans; virtual;
     procedure openTrans;
     Procedure CheckDatabase;
     Procedure CheckActive;

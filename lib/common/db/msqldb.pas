@@ -433,6 +433,7 @@ type
     procedure setpendingaction(const avalue: tcommitrollbackaction);
    protected
     fsavepointlevel: integer;
+    procedure CloseTrans; override;
     function GetHandle : Pointer; virtual;
     Procedure SetDatabase (Value : tmdatabase); override;
     procedure disconnect(const sender: itransactionclient; 
@@ -2381,6 +2382,12 @@ begin
  if not (avalue in [cacommitretaining,carollbackretaining]) then begin
   fpendingrefresh:= false;
  end;
+end;
+
+procedure TSQLTransaction.CloseTrans;
+begin
+ inherited;
+ freeandnil(ftrans);
 end;
 
 procedure TSQLTransaction.savepointevent(const akind: savepointeventkindty;
