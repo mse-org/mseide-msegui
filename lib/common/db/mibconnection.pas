@@ -201,7 +201,7 @@ type
                     const FieldDefs : TfieldDefs); override;
    function Fetch(cursor : TSQLCursor) : boolean; override;
    function loadfield(const cursor: tsqlcursor;
-               const datatype: tfieldtype; const fieldnum: integer; //null based
+               const datatype: tfieldtype; const fieldnum: integer; //zero based
      const buffer: pointer; var bufsize: integer;
                                 const aisutf8: boolean): boolean; override;
           //if bufsize < 0 -> buffer was to small, should be -bufsize

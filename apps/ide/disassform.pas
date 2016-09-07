@@ -305,18 +305,20 @@ var
 begin
  if (info.cell.col = 1) and iscellclick(info,[ccr_dblclick]) then begin
   int1:= info.cell.row;
-  while (int1 >= 0) and (grid[2][int1] = '') do begin
-   dec(int1);
-  end;
-  if int1 < 0 then begin
-   int1:= info.cell.row;
-   while (int1 < grid.rowcount) and (grid[2][int1] = '') do begin
-    inc(int1);
+  if int1 >= 0 then begin
+   while (int1 >= 0) and (grid[2][int1] = '') do begin
+    dec(int1);
    end;
-  end;
-  if (int1 >= 0) and (int1 < grid.rowcount) then begin
-   sourcefo.showsourceline(grid[2][int1],strtoint64(
-                   ansistring(grid[3][int1])),0,true);
+   if int1 < 0 then begin
+    int1:= info.cell.row;
+    while (int1 < grid.rowcount) and (grid[2][int1] = '') do begin
+     inc(int1);
+    end;
+   end;
+   if (int1 >= 0) and (int1 < grid.rowcount) then begin
+    sourcefo.showsourceline(grid[2][int1],strtoint64(
+                    ansistring(grid[3][int1])),0,true);
+   end;
   end;
  end;
 end;

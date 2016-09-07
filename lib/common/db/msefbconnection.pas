@@ -19,29 +19,49 @@ const
 
 type
 
- tfirebirdconnection = class;
+ tfbconnection = class;
  
  tfbtrans = class(tsqlhandle)
   protected
-   fconnection: tfirebirdconnection;
+   fconnection: tfbconnection;
    ftransaction: itransaction;
   public
-   constructor create(const aconnection: tfirebirdconnection);
+   constructor create(const aconnection: tfbconnection);
    destructor destroy(); override;
  end;
 
  cursorstatety = (cs_hasstatement);
  cursorstatesty = set of cursorstatety;
+
+ pfbfieldinfoty = ^fbfieldinfoty;
+ fetchfuncty = procedure(const info: pfbfieldinfoty; const dest: pointer);
+
+ fbfieldinfoty = record
+  buffer: pointer;
+  name: string;
+  _type: card32;
+  offset: card32;
+  nulloffset: int32; //-1 = none
+  fetchfunc: fetchfuncty;
+  datatype: tfieldtype;
+  size: int32;
+  precision: int32;
+ end;
  
+ fbfieldinfoarty = array of fbfieldinfoty;
+  
  tfbcursor = class(tsqlcursor)
   protected
-   fconnection: tfirebirdconnection;
+   fconnection: tfbconnection;
    fparambinding: tparambinding;
    fstatement: istatement;
+   fresultset: iresultset;
    fcursorstate: cursorstatesty;
+   ffieldinfos: fbfieldinfoarty;
+   frowbuffer: string;
   public
    constructor create(const aowner: icursorclient;
-                                       const aconnection: tfirebirdconnection);
+                                       const aconnection: tfbconnection);
    destructor destroy(); override;
    procedure close() override;
  end;
@@ -53,7 +73,7 @@ type
   util: iutil;
  end;
  
- tfirebirdconnection = class(tcustomsqlconnection)
+ tfbconnection = class(tcustomsqlconnection)
   private
    fdialect: integer;
   protected
@@ -62,31 +82,41 @@ type
    procedure iniapi();
    procedure finiapi();
    function getpb(): ixpbbuilder;
-   procedure clearstatus();
+   procedure clearstatus(); inline;
+   function statusok(): boolean; inline;
    procedure checkstatus(const aerrormessage: msestring);
-   procedure dointernalconnect; override;
-   procedure dointernaldisconnect; override;
+   procedure dointernalconnect override;
+   procedure dointernaldisconnect override;
 
-   function allocatetransactionhandle : tsqlhandle; override;
-   function gettransactionhandle(trans : tsqlhandle): pointer; override;
+   function allocatetransactionhandle : tsqlhandle override;
+   function gettransactionhandle(trans : tsqlhandle): pointer override;
 
    function startdbtransaction(const trans : tsqlhandle;
-                      const aparams : tstringlist) : boolean; override;
-   function commit(trans : tsqlhandle) : boolean; override;
-   function rollback(trans : tsqlhandle) : boolean; override;
-   procedure internalcommitretaining(trans : tsqlhandle); override;
-   procedure internalrollbackretaining(trans : tsqlhandle); override;
+                      const aparams : tstringlist) : boolean override;
+   function commit(trans : tsqlhandle) : boolean override;
+   function rollback(trans : tsqlhandle) : boolean override;
+   procedure internalcommitretaining(trans : tsqlhandle) override;
+   procedure internalrollbackretaining(trans : tsqlhandle) override;
 
    function allocatecursorhandle(const aowner: icursorclient;
-                      const aname: ansistring): tsqlcursor; override;
-   procedure deallocatecursorhandle(var cursor : tsqlcursor); override;
+                      const aname: ansistring): tsqlcursor override;
+   procedure deallocatecursorhandle(var cursor : tsqlcursor) override;
    procedure preparestatement(const cursor: tsqlcursor; 
                  const atransaction : tsqltransaction;
-                 const asql: msestring; const aparams : tmseparams); override;
-   procedure unpreparestatement(cursor : tsqlcursor); override;
+                 const asql: msestring; const aparams : tmseparams) override;
+   procedure unpreparestatement(cursor : tsqlcursor) override;
+   procedure cursorclose(const cursor: tfbcursor);
    procedure internalexecute(const cursor: tsqlcursor;
              const atransaction: tsqltransaction; const aparams : tmseparams;
-             const autf8: boolean); override;
+                                                const autf8: boolean) override;
+   procedure addfielddefs(const cursor: tsqlcursor;
+                                      const fielddefs : tfielddefs) override;
+   function fetch(cursor : tsqlcursor) : boolean; override;
+   function loadfield(const cursor: tsqlcursor;
+               const datatype: tfieldtype; const fieldnum: integer; //zero based
+     const buffer: pointer; var bufsize: integer;
+                                const aisutf8: boolean): boolean; override;
+          //if bufsize < 0 -> buffer was to small, should be -bufsize
   public
    constructor create(aowner: tcomponent); override;
   published
@@ -101,15 +131,17 @@ type
  
  efberror = class(econnectionerror)
   public
-   constructor create(const asender: tfirebirdconnection;
+   constructor create(const asender: tfbconnection;
                  const astatus: istatus; const aerrormessage: msestring);
  end;
 
 implementation
+var testvar: int32;
+var testvar1: boolean; testvar3: pointer;
  
 { efberror }
 
-constructor efberror.create(const asender: tfirebirdconnection;
+constructor efberror.create(const asender: tfbconnection;
                const astatus: istatus; const aerrormessage: msestring);
 var
  str1: string;
@@ -123,15 +155,15 @@ begin
  inherited create(asender,ansistring(msg1),msg1,0);
 end;
 
-{ tfirebirdconnection }
+{ tfbconnection }
 
-constructor tfirebirdconnection.create(aowner: tcomponent);
+constructor tfbconnection.create(aowner: tcomponent);
 begin
  fdialect:= sql_dialect_v6;
  inherited;
 end;
 
-procedure tfirebirdconnection.iniapi();
+procedure tfbconnection.iniapi();
 begin
  initializefirebird([],true);
  with fapi do begin
@@ -150,7 +182,7 @@ begin
  end;
 end;
 
-procedure tfirebirdconnection.finiapi();
+procedure tfbconnection.finiapi();
 begin
  with fapi do begin
   util:= nil;
@@ -163,24 +195,29 @@ begin
  end;
 end;
 
-procedure tfirebirdconnection.clearstatus();
+procedure tfbconnection.clearstatus(); inline;
 begin
  fapi.status.init();
 end;
 
-procedure tfirebirdconnection.checkstatus(const aerrormessage: msestring);
+function tfbconnection.statusok(): boolean; inline;
+begin
+ result:= fapi.status.getstate() and istatus.state_errors = 0
+end;
+
+procedure tfbconnection.checkstatus(const aerrormessage: msestring);
 begin
  if fapi.status.getstate() and istatus.state_errors <> 0 then begin
   raise efberror.create(self,fapi.status,aerrormessage);
  end;
 end;
 
-function tfirebirdconnection.getpb(): ixpbbuilder;
+function tfbconnection.getpb(): ixpbbuilder;
 begin
  result:= fapi.util.getxpbbuilder(fapi.status,ixpbbuilder.DPB,nil,0);
 end;
 
-procedure tfirebirdconnection.dointernalconnect();
+procedure tfbconnection.dointernalconnect();
 const
  utf8name = 'UTF8';
 var
@@ -230,7 +267,7 @@ begin
 // feventcontroller.connect;
 end;
 
-procedure tfirebirdconnection.dointernaldisconnect;
+procedure tfbconnection.dointernaldisconnect;
 begin
  inherited;
  if fattachment <> nil then begin
@@ -240,17 +277,17 @@ begin
  end;
 end;
 
-function tfirebirdconnection.allocatetransactionhandle: tsqlhandle;
+function tfbconnection.allocatetransactionhandle: tsqlhandle;
 begin
  result:= tfbtrans.create(self);
 end;
 
-function tfirebirdconnection.gettransactionhandle(trans: tsqlhandle): pointer;
+function tfbconnection.gettransactionhandle(trans: tsqlhandle): pointer;
 begin
  result:= tfbtrans(trans).ftransaction;
 end;
 
-function tfirebirdconnection.startdbtransaction(const trans: tsqlhandle;
+function tfbconnection.startdbtransaction(const trans: tsqlhandle;
                const aparams: tstringlist): boolean;
                
  procedure paramerror(const s: string);
@@ -342,36 +379,33 @@ next:
    pb.dispose();
   end;
   checkstatus('startdbtransaction');
-  ftransaction.addref();
  end;
  result:= true;
 end;
 
-function tfirebirdconnection.commit(trans: tsqlhandle): boolean;
+function tfbconnection.commit(trans: tsqlhandle): boolean;
 begin
  with tfbtrans(trans) do begin
   clearstatus();
   ftransaction.commit(fconnection.fapi.status);
   checkstatus('commit');
-  ftransaction.release();
   ftransaction:= nil;
   result:= true;
  end;
 end;
 
-function tfirebirdconnection.rollback(trans: tsqlhandle): boolean;
+function tfbconnection.rollback(trans: tsqlhandle): boolean;
 begin
  with tfbtrans(trans) do begin
   clearstatus();
   ftransaction.rollback(fconnection.fapi.status);
   checkstatus('rollback');
-  ftransaction.release();
   ftransaction:= nil;
   result:= true;
  end;
 end;
 
-procedure tfirebirdconnection.internalcommitretaining(trans: tsqlhandle);
+procedure tfbconnection.internalcommitretaining(trans: tsqlhandle);
 begin
  with tfbtrans(trans) do begin
   clearstatus();
@@ -380,7 +414,7 @@ begin
  end;
 end;
 
-procedure tfirebirdconnection.internalrollbackretaining(trans: tsqlhandle);
+procedure tfbconnection.internalrollbackretaining(trans: tsqlhandle);
 begin
  with tfbtrans(trans) do begin
   clearstatus();
@@ -389,18 +423,18 @@ begin
  end;
 end;
 
-function tfirebirdconnection.allocatecursorhandle(const aowner: icursorclient;
+function tfbconnection.allocatecursorhandle(const aowner: icursorclient;
                const aname: ansistring): tsqlcursor;
 begin
  result:= tfbcursor.create(aowner,self);
 end;
 
-procedure tfirebirdconnection.deallocatecursorhandle(var cursor: tsqlcursor);
+procedure tfbconnection.deallocatecursorhandle(var cursor: tsqlcursor);
 begin
  freeandnil(cursor);
 end;
 
-procedure tfirebirdconnection.preparestatement(const cursor: tsqlcursor;
+procedure tfbconnection.preparestatement(const cursor: tsqlcursor;
                const atransaction: tsqltransaction; const asql: msestring;
                const aparams: tmseparams);
 var
@@ -419,42 +453,166 @@ begin
    fstatement:= fattachment.prepare(fapi.status,ftransaction,length(str1),
             pointer(str1),dialect,istatement.prepare_prefetch_metadata);
    checkstatus('preparestatement');
-   fstatement.addref();
    include(fcursorstate,cs_hasstatement);
   end;
  end;
 end;
 
-procedure tfirebirdconnection.unpreparestatement(cursor: tsqlcursor);
+procedure tfbconnection.unpreparestatement(cursor: tsqlcursor);
 begin
  with tfbcursor(cursor) do begin
   if cs_hasstatement in fcursorstate then begin
-   fconnection.clearstatus();
-   fstatement.free(fconnection.fapi.status);
-   fconnection.checkstatus('cursor close');
+   cursorclose(tfbcursor(cursor));
+   clearstatus();
+   fstatement.free(fapi.status);
+   if not statusok then begin
+    fstatement.release();
+   end;
    fstatement:= nil;
    exclude(fcursorstate,cs_hasstatement);
   end;
  end;
 end;
 
-procedure tfirebirdconnection.internalexecute(const cursor: tsqlcursor;
+procedure tfbconnection.cursorclose(const cursor: tfbcursor);
+begin
+ with cursor do begin
+  frowbuffer:= '';
+  ffieldinfos:= nil;
+  if fresultset <> nil then begin
+   clearstatus();
+   fresultset.close(fapi.status);
+   if not statusok() then begin
+    fresultset.release();
+   end;
+   fresultset:= nil;
+  end;
+ end;
+end;
+var testvar4: tfbcursor;
+
+procedure fetchint32(const ainfo: pfbfieldinfoty; const dest: pointer);
+begin
+ pint32(dest)^:= pint32(ainfo^.buffer + ainfo^.offset)^;
+end;
+
+procedure fetchint64(const ainfo: pfbfieldinfoty; const dest: pointer);
+begin
+ pint64(dest)^:= pint64(ainfo^.buffer + ainfo^.offset)^;
+end;
+
+procedure tfbconnection.internalexecute(const cursor: tsqlcursor;
                const atransaction: tsqltransaction; const aparams: tmseparams;
                const autf8: boolean);
+var
+ metadata: imessagemetadata;
+ i1: int32;
 begin
  if assigned(aparams) and (aparams.count > 0) then begin
 //  setparameters(cursor, aparams);
  end;
+testvar4:= tfbcursor(cursor);
  with tfbcursor(cursor),tfbtrans(atransaction.trans) do begin
   clearstatus();
-  fstatement.execute(fapi.status,ftransaction,nil,nil,nil,nil);
+//  fstatement.execute(fapi.status,ftransaction,nil,nil,nil,nil);
+  fresultset:= fstatement.opencursor(fapi.status,ftransaction,nil,nil,nil,0);
+  if fresultset <> nil then begin
+   metadata:= fresultset.getmetadata(fapi.status);
+   if metadata <> nil then begin
+    setlength(frowbuffer,metadata.getmessagelength(fapi.status));
+    i1:= metadata.getcount(fapi.status);
+    if statusok() then begin
+     setlength(ffieldinfos,i1);
+     for i1:= 0 to i1-1 do begin
+      with ffieldinfos[i1] do begin
+       buffer:= pointer(frowbuffer);
+       name:= metadata.getalias(fapi.status,i1);
+       offset:= metadata.getoffset(fapi.status,i1);
+       _type:= metadata.gettype(fapi.status,i1);
+       if metadata.isnullable(fapi.status,i1) then begin
+        nulloffset:= metadata.getnulloffset(fapi.status,i1);
+       end
+       else begin
+        nulloffset:= -1;
+       end;
+       size:= 0;
+       precision:= 0;
+       case _type of
+        SQL_LONG: begin
+         datatype:= ftinteger;
+         fetchfunc:= @fetchint32;
+        end;
+        SQL_INT64: begin
+         datatype:= ftlargeint;
+         fetchfunc:= @fetchint64;
+        end;
+        else begin
+         datatype:= ftunknown;
+         fetchfunc:= nil;
+        end;
+       end;
+      end;
+     end;
+    end;
+    metadata.release();
+   end;
+  end;
   checkstatus('execute');
+ end;
+end;
+
+procedure tfbconnection.addfielddefs(const cursor: tsqlcursor;
+               const fielddefs: tfielddefs);
+var
+ i1: int32;
+ fd: tfielddef;
+begin
+ with tfbcursor(cursor) do begin
+  fielddefs.clear();
+  for i1:= 0 to high(ffieldinfos) do begin
+   with ffieldinfos[i1] do begin
+    if datatype <> ftunknown then begin
+     with tfielddef.create(fielddefs,name,datatype,size,false,i1+1) do begin
+     end;
+    end;
+   end;
+  end;
+ end;
+end;
+
+function tfbconnection.fetch(cursor: tsqlcursor): boolean;
+begin
+ with tfbcursor(cursor) do begin
+  clearstatus();
+  result:= fresultset.fetchnext(fapi.status,pointer(frowbuffer)) = 
+                                                         istatus.RESULT_OK;
+  checkstatus('fetch');
+ end;
+end;
+
+function tfbconnection.loadfield(const cursor: tsqlcursor;
+               const datatype: tfieldtype; const fieldnum: integer;
+               const buffer: pointer; var bufsize: integer;
+               const aisutf8: boolean): boolean;
+var
+ po1: pfbfieldinfoty;
+begin
+ with tfbcursor(cursor) do begin
+  po1:= @ffieldinfos[fieldnum];
+  if (po1^.nulloffset >= 0) and 
+              (pisc_short(po1^.buffer + po1^.nulloffset)^ <> 0) then begin
+   result:= false;
+  end
+  else begin
+   po1^.fetchfunc(po1,buffer);
+   result:= true;
+  end;
  end;
 end;
 
 { tfbtrans }
 
-constructor tfbtrans.create(const aconnection: tfirebirdconnection);
+constructor tfbtrans.create(const aconnection: tfbconnection);
 begin
  fconnection:= aconnection;
 end;
@@ -470,24 +628,27 @@ end;
 { tfbcursor }
 
 constructor tfbcursor.create(const aowner: icursorclient;
-               const aconnection: tfirebirdconnection);
+               const aconnection: tfbconnection);
 begin
  fconnection:= aconnection;
  inherited create(aowner,fconnection.name);
 end;
 
-procedure tfbcursor.close();
-begin
- inherited;
- fconnection.unpreparestatement(self);
-end;
-
 destructor tfbcursor.destroy();
 begin
  inherited;
+ if fresultset <> nil then begin
+  close(); //first, close needs valid statment
+ end;
  if fstatement <> nil then begin
   fstatement.release();
  end;
+end;
+
+procedure tfbcursor.close();
+begin
+ inherited;
+ fconnection.cursorclose(self);
 end;
 
 end.
