@@ -46,6 +46,7 @@ type
   datatype: tfieldtype;
   size: int32;
   precision: int32;
+  buffersizead: pint32; //temp
  end;
  
  fbfieldinfoarty = array of fbfieldinfoty;
@@ -491,6 +492,11 @@ begin
 end;
 var testvar4: tfbcursor;
 
+procedure fetchint16(const ainfo: pfbfieldinfoty; const dest: pointer);
+begin
+ pint32(dest)^:= pint16(ainfo^.buffer + ainfo^.offset)^;
+end;
+
 procedure fetchint32(const ainfo: pfbfieldinfoty; const dest: pointer);
 begin
  pint32(dest)^:= pint32(ainfo^.buffer + ainfo^.offset)^;
@@ -501,12 +507,28 @@ begin
  pint64(dest)^:= pint64(ainfo^.buffer + ainfo^.offset)^;
 end;
 
+procedure fetchvarchar(const ainfo: pfbfieldinfoty; const dest: pointer);
+var
+ i1: int32;
+ po1: pvary;
+begin
+ po1:= ainfo^.buffer + ainfo^.offset;
+ i1:= po1^.vary_length;
+ if i1 > ainfo^.buffersizead^ then begin
+  ainfo^.buffersizead^:= -i1;
+ end
+ else begin
+  ainfo^.buffersizead^:= i1;
+  move(po1^.vary_string,dest^,i1);
+ end;
+end;
+
 procedure tfbconnection.internalexecute(const cursor: tsqlcursor;
                const atransaction: tsqltransaction; const aparams: tmseparams;
                const autf8: boolean);
 var
  metadata: imessagemetadata;
- i1: int32;
+ i1,i2,i3: int32;
 begin
  if assigned(aparams) and (aparams.count > 0) then begin
 //  setparameters(cursor, aparams);
@@ -538,6 +560,28 @@ testvar4:= tfbcursor(cursor);
        size:= 0;
        precision:= 0;
        case _type of
+{
+ SQL_TEXT =          452;
+ SQL_VARYING =       448;
+ SQL_SHORT =         500;
+ SQL_LONG =          496;
+ SQL_FLOAT =         482;
+ SQL_DOUBLE =        480;
+ SQL_D_FLOAT =       530;
+ SQL_TIMESTAMP =     510;
+ SQL_BLOB =          520;
+ SQL_ARRAY =         540;
+ SQL_QUAD =          550;
+ SQL_TYPE_TIME =     560;
+ SQL_TYPE_DATE =     570;
+ SQL_INT64 =         580;
+ SQL_BOOLEAN =     32764;
+ SQL_NULL =        32766;
+ }
+        SQL_SHORT: begin
+         datatype:= ftsmallint;
+         fetchfunc:= @fetchint16;
+        end;
         SQL_LONG: begin
          datatype:= ftinteger;
          fetchfunc:= @fetchint32;
@@ -545,6 +589,30 @@ testvar4:= tfbcursor(cursor);
         SQL_INT64: begin
          datatype:= ftlargeint;
          fetchfunc:= @fetchint64;
+        end;
+        SQL_VARYING: begin
+         datatype:= ftstring;
+         fetchfunc:= @fetchvarchar;
+         size:= metadata.getlength(fapi.status,i1);
+         i2:= metadata.getcharset(fapi.status,i1);
+         case i2 of
+        //  0,1,2,10,11,12,13,14,19,21,22,39,
+        //  45,46,47,50,51,52,53,54,55,58: begin
+        //   int1:= 1;
+          5,6,8,44,56,57,64: begin
+           i3:= 2;
+          end;
+          3: begin
+           i3:= 3;
+          end;
+          4,59: begin
+           i3:= 4;
+          end;
+          else begin
+           i3:= 1;
+          end;
+         end;
+         size:= size div i3;
         end;
         else begin
          datatype:= ftunknown;
@@ -600,10 +668,12 @@ begin
  with tfbcursor(cursor) do begin
   po1:= @ffieldinfos[fieldnum];
   if (po1^.nulloffset >= 0) and 
-              (pisc_short(po1^.buffer + po1^.nulloffset)^ <> 0) then begin
+              (pisc_short(po1^.buffer + po1^.nulloffset)^ <> 0) or 
+                                            (po1^.fetchfunc = nil) then begin
    result:= false;
   end
   else begin
+   po1^.buffersizead:= @bufsize;
    po1^.fetchfunc(po1,buffer);
    result:= true;
   end;

@@ -42,7 +42,16 @@ const
  SQL_NULL =        32766;
 
 type
- pisc_short = ^cshort;
+ ISC_USHORT	= cushort;
+ ISC_SHORT = cshort;
+ pISC_SHORT = ^ISC_SHORT;
+
+ vary = packed record
+  vary_length: ISC_USHORT;
+  vary_string: record
+  end;
+ end;
+ pvary = ^vary;
  
 procedure initializefirebird(const sonames: array of filenamety;
                                           const onlyonce: boolean = false);
