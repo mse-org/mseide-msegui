@@ -102,6 +102,7 @@ type
    function allocatecursorhandle(const aowner: icursorclient;
                       const aname: ansistring): tsqlcursor override;
    procedure deallocatecursorhandle(var cursor : tsqlcursor) override;
+   procedure freefldbuffers(cursor : tsqlcursor); override;
    procedure preparestatement(const cursor: tsqlcursor; 
                  const atransaction : tsqltransaction;
                  const asql: msestring; const aparams : tmseparams) override;
@@ -137,6 +138,9 @@ type
  end;
 
 implementation
+uses
+ dbconst;
+ 
 var testvar: int32;
 var testvar1: boolean; testvar3: pointer;
  
@@ -435,6 +439,13 @@ begin
  freeandnil(cursor);
 end;
 
+procedure tfbconnection.freefldbuffers(cursor: tsqlcursor);
+begin
+ with tfbcursor(cursor) do begin
+  frowbuffer:= '';
+ end;
+end;
+
 procedure tfbconnection.preparestatement(const cursor: tsqlcursor;
                const atransaction: tsqltransaction; const asql: msestring;
                const aparams: tmseparams);
@@ -447,6 +458,7 @@ begin
                             fparambinding));
   end
   else begin
+   fparambinding:= nil;
    str1:= todbstring(asql);
   end;
   with tfbtrans(atransaction.trans) do begin
@@ -463,6 +475,7 @@ procedure tfbconnection.unpreparestatement(cursor: tsqlcursor);
 begin
  with tfbcursor(cursor) do begin
   if cs_hasstatement in fcursorstate then begin
+   fparambinding:= nil;
    cursorclose(tfbcursor(cursor));
    clearstatus();
    fstatement.free(fapi.status);
@@ -491,6 +504,11 @@ begin
  end;
 end;
 var testvar4: tfbcursor;
+
+procedure fetchboolean(const ainfo: pfbfieldinfoty; const dest: pointer);
+begin
+ pwordbool(dest)^:= pcard8(ainfo^.buffer + ainfo^.offset)^ <> 0;
+end;
 
 procedure fetchint16(const ainfo: pfbfieldinfoty; const dest: pointer);
 begin
@@ -528,104 +546,209 @@ procedure tfbconnection.internalexecute(const cursor: tsqlcursor;
                const autf8: boolean);
 var
  metadata: imessagemetadata;
+ parambuffer: pointer;
  i1,i2,i3: int32;
+ builder: imetadatabuilder;
+ sqltype,sqllen: card32;
+ sqltypes: card32arty;
+ data: stringarty;
+ po1: pointer;
+ bo1: boolean;
 begin
- if assigned(aparams) and (aparams.count > 0) then begin
-//  setparameters(cursor, aparams);
- end;
-testvar4:= tfbcursor(cursor);
- with tfbcursor(cursor),tfbtrans(atransaction.trans) do begin
-  clearstatus();
-//  fstatement.execute(fapi.status,ftransaction,nil,nil,nil,nil);
-  fresultset:= fstatement.opencursor(fapi.status,ftransaction,nil,nil,nil,0);
-  if fresultset <> nil then begin
-   metadata:= fresultset.getmetadata(fapi.status);
-   if metadata <> nil then begin
-    setlength(frowbuffer,metadata.getmessagelength(fapi.status));
-    i1:= metadata.getcount(fapi.status);
-    if statusok() then begin
-     setlength(ffieldinfos,i1);
-     for i1:= 0 to i1-1 do begin
-      with ffieldinfos[i1] do begin
-       buffer:= pointer(frowbuffer);
-       name:= metadata.getalias(fapi.status,i1);
-       offset:= metadata.getoffset(fapi.status,i1);
-       _type:= metadata.gettype(fapi.status,i1);
-       if metadata.isnullable(fapi.status,i1) then begin
-        nulloffset:= metadata.getnulloffset(fapi.status,i1);
-       end
-       else begin
-        nulloffset:= -1;
+ with tfbcursor(cursor) do begin
+  if assigned(aparams) and (aparams.count > 0) then begin
+   i1:= high(fparambinding);
+   if i1 >= 0 then begin         
+             //todo: optimise, use own functions instead of fb-interface
+    builder:= fapi.master.getmetadatabuilder(fapi.status,i1+1);
+    setlength(sqltypes,i1+1);
+    setlength(data,i1+1);
+    for i1:= 0 to i1 do begin
+     sqltype:= 0;
+     sqllen:= 0;
+     with aparams[fparambinding[i1]] do begin
+      case datatype of
+       ftunknown: begin
+        if isnull then begin
+         sqltype:= SQL_NULL;
+         sqllen:= 2; 
+           //dummy size necessary because of finished check in imetabuilder
+        end;
        end;
-       size:= 0;
-       precision:= 0;
-       case _type of
-{
- SQL_TEXT =          452;
- SQL_VARYING =       448;
- SQL_SHORT =         500;
- SQL_LONG =          496;
- SQL_FLOAT =         482;
- SQL_DOUBLE =        480;
- SQL_D_FLOAT =       530;
- SQL_TIMESTAMP =     510;
- SQL_BLOB =          520;
- SQL_ARRAY =         540;
- SQL_QUAD =          550;
- SQL_TYPE_TIME =     560;
- SQL_TYPE_DATE =     570;
- SQL_INT64 =         580;
- SQL_BOOLEAN =     32764;
- SQL_NULL =        32766;
- }
-        SQL_SHORT: begin
-         datatype:= ftsmallint;
-         fetchfunc:= @fetchint16;
-        end;
-        SQL_LONG: begin
-         datatype:= ftinteger;
-         fetchfunc:= @fetchint32;
-        end;
-        SQL_INT64: begin
-         datatype:= ftlargeint;
-         fetchfunc:= @fetchint64;
-        end;
-        SQL_VARYING: begin
-         datatype:= ftstring;
-         fetchfunc:= @fetchvarchar;
-         size:= metadata.getlength(fapi.status,i1);
-         i2:= metadata.getcharset(fapi.status,i1);
-         case i2 of
-        //  0,1,2,10,11,12,13,14,19,21,22,39,
-        //  45,46,47,50,51,52,53,54,55,58: begin
-        //   int1:= 1;
-          5,6,8,44,56,57,64: begin
-           i3:= 2;
+       ftboolean: begin
+        sqltype:= SQL_BOOLEAN+1;
+       end;
+       ftinteger,ftsmallint,ftword: begin
+        sqltype:= SQL_LONG+1;
+       end;
+       ftlargeint: begin
+        sqltype:= SQL_INT64+1;
+       end;
+       ftstring: begin
+        sqltype:= SQL_TEXT+1;
+        data[i1]:= aparams.asdbstring(fparambinding[i1]);
+        sqllen:= length(data[i1]);
+       end;
+      end;
+      if sqltype = 0 then begin
+       builder.release();
+       databaseerrorfmt(sunsupportedparameter,[fieldtypenames[datatype]],self);
+      end;
+      sqltypes[i1]:= sqltype;
+      builder.settype(fapi.status,i1,sqltype);
+      if sqllen <> 0 then begin
+       builder.setlength(fapi.status,i1,sqllen);
+      end;
+     end;
+    end;
+clearstatus;
+    metadata:= builder.getmetadata(fapi.status);
+checkstatus('');
+    parambuffer:= getmem(metadata.getmessagelength(fapi.status));
+    builder.release();
+    for i1:= 0 to high(sqltypes) do begin
+     if sqltypes[i1] <> SQL_NULL then begin
+      po1:= parambuffer + metadata.getoffset(fapi.status,i1);
+      with aparams[i1] do begin
+       bo1:= isnull;
+       if sqltypes[i1] <> SQL_NULL then begin
+        pisc_short(parambuffer + metadata.getnulloffset(fapi.status,i1))^:= 
+                                                                    card8(bo1);
+        if not bo1 then begin
+         case sqltypes[i1] of
+          SQL_BOOLEAN+1: begin
+           pcard8(po1)^:= card8(asboolean);
           end;
-          3: begin
-           i3:= 3;
+          SQL_LONG+1: begin
+           pint32(po1)^:= asinteger;
           end;
-          4,59: begin
-           i3:= 4;
+          SQL_INT64+1: begin
+           pint32(po1)^:= aslargeint;
+          end;
+          SQL_TEXT+1: begin
+           move(pointer(data[i1])^,po1^,length(data[i1]));
           end;
           else begin
-           i3:= 1;
+           raise exception.create('Internal error 20160908A');
           end;
          end;
-         size:= size div i3;
-        end;
-        else begin
-         datatype:= ftunknown;
-         fetchfunc:= nil;
         end;
        end;
       end;
      end;
     end;
+   end;
+  end
+  else begin
+   metadata:= nil;
+   parambuffer:= nil;
+  end;
+ testvar4:= tfbcursor(cursor);
+  with tfbtrans(atransaction.trans) do begin
+   clearstatus();
+ //  fstatement.execute(fapi.status,ftransaction,nil,nil,nil,nil);
+   fresultset:= fstatement.opencursor(
+                  fapi.status,ftransaction,metadata,parambuffer,nil,0);
+   if parambuffer <> nil then begin
+    freemem(parambuffer);
+   end;
+   if metadata <> nil then begin
     metadata.release();
    end;
+   if fresultset <> nil then begin
+    metadata:= fresultset.getmetadata(fapi.status);
+    if metadata <> nil then begin
+     setlength(frowbuffer,metadata.getmessagelength(fapi.status));
+     i1:= metadata.getcount(fapi.status);
+     if statusok() then begin
+      setlength(ffieldinfos,i1);
+      for i1:= 0 to i1-1 do begin
+       with ffieldinfos[i1] do begin
+        buffer:= pointer(frowbuffer);
+        name:= metadata.getalias(fapi.status,i1);
+        offset:= metadata.getoffset(fapi.status,i1);
+        _type:= metadata.gettype(fapi.status,i1);
+        if metadata.isnullable(fapi.status,i1) then begin
+         nulloffset:= metadata.getnulloffset(fapi.status,i1);
+        end
+        else begin
+         nulloffset:= -1;
+        end;
+        size:= 0;
+        precision:= 0;
+        case _type of
+ {
+  SQL_TEXT =          452;
+  SQL_VARYING =       448;
+  SQL_SHORT =         500;
+  SQL_LONG =          496;
+  SQL_FLOAT =         482;
+  SQL_DOUBLE =        480;
+  SQL_D_FLOAT =       530;
+  SQL_TIMESTAMP =     510;
+  SQL_BLOB =          520;
+  SQL_ARRAY =         540;
+  SQL_QUAD =          550;
+  SQL_TYPE_TIME =     560;
+  SQL_TYPE_DATE =     570;
+  SQL_INT64 =         580;
+  SQL_BOOLEAN =     32764;
+  SQL_NULL =        32766;
+  }
+         SQL_BOOLEAN: begin
+          datatype:= ftboolean;
+          fetchfunc:= @fetchboolean;
+          testvar:= metadata.getlength(fapi.status,i1);
+         end;
+         SQL_SHORT: begin
+          datatype:= ftsmallint;
+          fetchfunc:= @fetchint16;
+         end;
+         SQL_LONG: begin
+          datatype:= ftinteger;
+          fetchfunc:= @fetchint32;
+         end;
+         SQL_INT64: begin
+          datatype:= ftlargeint;
+          fetchfunc:= @fetchint64;
+         end;
+         SQL_VARYING: begin
+          datatype:= ftstring;
+          fetchfunc:= @fetchvarchar;
+          size:= metadata.getlength(fapi.status,i1);
+          i2:= metadata.getcharset(fapi.status,i1);
+          case i2 of
+         //  0,1,2,10,11,12,13,14,19,21,22,39,
+         //  45,46,47,50,51,52,53,54,55,58: begin
+         //   int1:= 1;
+           5,6,8,44,56,57,64: begin
+            i3:= 2;
+           end;
+           3: begin
+            i3:= 3;
+           end;
+           4,59: begin
+            i3:= 4;
+           end;
+           else begin
+            i3:= 1;
+           end;
+          end;
+          size:= size div i3;
+         end;
+         else begin
+          datatype:= ftunknown;
+          fetchfunc:= nil;
+         end;
+        end;
+       end;
+      end;
+     end;
+     metadata.release();
+    end;
+   end;
+   checkstatus('execute');
   end;
-  checkstatus('execute');
  end;
 end;
 
