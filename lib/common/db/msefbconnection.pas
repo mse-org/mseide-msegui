@@ -139,7 +139,7 @@ type
 
 implementation
 uses
- dbconst;
+ dbconst,msefbinterface;
  
 var testvar: int32;
 var testvar1: boolean; testvar3: pointer;
@@ -546,114 +546,30 @@ procedure tfbconnection.internalexecute(const cursor: tsqlcursor;
                const autf8: boolean);
 var
  metadata: imessagemetadata;
+// msemetadata: imessagemetadata;
+ paramdata: tparamdata; //inherits from imessagemetadata
  parambuffer: pointer;
  i1,i2,i3: int32;
  builder: imetadatabuilder;
- sqltype,sqllen: card32;
- sqltypes: card32arty;
- data: stringarty;
- po1: pointer;
- bo1: boolean;
 begin
  with tfbcursor(cursor) do begin
-  if assigned(aparams) and (aparams.count > 0) then begin
-   i1:= high(fparambinding);
-   if i1 >= 0 then begin         
-             //todo: optimise, use own functions instead of fb-interface
-    builder:= fapi.master.getmetadatabuilder(fapi.status,i1+1);
-    setlength(sqltypes,i1+1);
-    setlength(data,i1+1);
-    for i1:= 0 to i1 do begin
-     sqltype:= 0;
-     sqllen:= 0;
-     with aparams[fparambinding[i1]] do begin
-      case datatype of
-       ftunknown: begin
-        if isnull then begin
-         sqltype:= SQL_NULL;
-         sqllen:= 2; 
-           //dummy size necessary because of finished check in imetabuilder
-        end;
-       end;
-       ftboolean: begin
-        sqltype:= SQL_BOOLEAN+1;
-       end;
-       ftinteger,ftsmallint,ftword: begin
-        sqltype:= SQL_LONG+1;
-       end;
-       ftlargeint: begin
-        sqltype:= SQL_INT64+1;
-       end;
-       ftstring: begin
-        sqltype:= SQL_TEXT+1;
-        data[i1]:= aparams.asdbstring(fparambinding[i1]);
-        sqllen:= length(data[i1]);
-       end;
-      end;
-      if sqltype = 0 then begin
-       builder.release();
-       databaseerrorfmt(sunsupportedparameter,[fieldtypenames[datatype]],self);
-      end;
-      sqltypes[i1]:= sqltype;
-      builder.settype(fapi.status,i1,sqltype);
-      if sqllen <> 0 then begin
-       builder.setlength(fapi.status,i1,sqllen);
-      end;
-     end;
-    end;
-clearstatus;
-    metadata:= builder.getmetadata(fapi.status);
-checkstatus('');
-    parambuffer:= getmem(metadata.getmessagelength(fapi.status));
-    builder.release();
-    for i1:= 0 to high(sqltypes) do begin
-     if sqltypes[i1] <> SQL_NULL then begin
-      po1:= parambuffer + metadata.getoffset(fapi.status,i1);
-      with aparams[i1] do begin
-       bo1:= isnull;
-       if sqltypes[i1] <> SQL_NULL then begin
-        pisc_short(parambuffer + metadata.getnulloffset(fapi.status,i1))^:= 
-                                                                    card8(bo1);
-        if not bo1 then begin
-         case sqltypes[i1] of
-          SQL_BOOLEAN+1: begin
-           pcard8(po1)^:= card8(asboolean);
-          end;
-          SQL_LONG+1: begin
-           pint32(po1)^:= asinteger;
-          end;
-          SQL_INT64+1: begin
-           pint32(po1)^:= aslargeint;
-          end;
-          SQL_TEXT+1: begin
-           move(pointer(data[i1])^,po1^,length(data[i1]));
-          end;
-          else begin
-           raise exception.create('Internal error 20160908A');
-          end;
-         end;
-        end;
-       end;
-      end;
-     end;
-    end;
-   end;
+  if assigned(aparams) and (aparams.count > 0) and 
+                                           (fparambinding <> nil) then begin
+   paramdata:= tparamdata.create(tfbcursor(cursor),aparams);
+   parambuffer:= paramdata.parambuffer;
   end
   else begin
-   metadata:= nil;
+   paramdata:= nil;
    parambuffer:= nil;
   end;
  testvar4:= tfbcursor(cursor);
   with tfbtrans(atransaction.trans) do begin
    clearstatus();
  //  fstatement.execute(fapi.status,ftransaction,nil,nil,nil,nil);
-   fresultset:= fstatement.opencursor(
-                  fapi.status,ftransaction,metadata,parambuffer,nil,0);
-   if parambuffer <> nil then begin
-    freemem(parambuffer);
-   end;
-   if metadata <> nil then begin
-    metadata.release();
+   fresultset:= fstatement.opencursor(fapi.status,ftransaction,
+                                     paramdata,parambuffer,nil,0);
+   if paramdata <> nil then begin
+    paramdata.release();
    end;
    if fresultset <> nil then begin
     metadata:= fresultset.getmetadata(fapi.status);
