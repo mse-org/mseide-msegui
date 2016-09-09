@@ -230,7 +230,7 @@ function clientminorversion: integer;
 implementation
 
 uses
- strutils,msesysintf1,msebits,msefloattostr,msedatabase,msesqlresult
+ strutils,msesysintf1,msebits,msefloattostr,msedatabase,msesqlresult,msefbutils
  {$ifndef FPC},classes_del{$ifdef mswindows},windows{$endif}{$endif};
 
 function clientversion: string;
@@ -1438,63 +1438,12 @@ begin
   result := s;
 end;
 
-
 procedure tibconnection.updateindexdefs(var indexdefs : tindexdefs;
                                const atablename : string);
-var 
- res: tsqlresult;
- str1: ansistring;
 begin
- if not assigned(Transaction) then begin
-  DatabaseError(SErrConnTransactionnSet);
- end;
- res:= tsqlresult.Create(nil);
- try
-  with res do begin
-   database:= self;
-   sql.text:= 'select '+
-              'ind.rdb$index_name, '+
-              'ind.rdb$relation_name, '+
-              'ind.rdb$unique_flag, '+
-              'ind_seg.rdb$field_name, '+
-              'rel_con.rdb$constraint_type '+
-            'from '+
-              'rdb$index_segments ind_seg, '+
-              'rdb$indices ind '+
-             'left outer join '+
-              'rdb$relation_constraints rel_con '+
-             'on '+
-              'rel_con.rdb$index_name = ind.rdb$index_name '+
-            'where '+
-              '(ind_seg.rdb$index_name = ind.rdb$index_name) and '+
-              '(ind.rdb$relation_name=''' +  
-                        msestring(uppercase(atablename)) +''') '+
-            'order by '+
-              'ind.rdb$index_name;';
-   active:= true;
-   while not eof do begin
-    with indexdefs.AddIndexDef do begin
-     str1:= cols[0].asstring;
-     name:= trim(str1);
-     fields:= trim(res.cols[3].asstring);
-     if cols[4].asstring = 'PRIMARY KEY' then begin
-      options:= options + [ixPrimary];
-     end;
-     if cols[2].asinteger = 1 then begin
-      options:= options + [ixUnique];
-     end;
-     next;
-     while  not eof and (str1 = cols[0].asstring) do begin
-      fields:= fields + ';' + trim(cols[3].asstring);
-      next;
-     end;
-    end;
-   end;
-  end;
- finally
-  res.free;
- end;
+ fbupdateindexdefs(self,indexdefs,atablename);
 end;
+
 
 procedure TIBConnection.SetFloat(CurrBuff: pointer; Dbl: Double; Size: integer);
 

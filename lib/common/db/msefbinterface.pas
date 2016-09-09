@@ -113,7 +113,7 @@ begin
       ftlargeint: begin
        sqltype:= SQL_INT64+1;
        sqllen:= 8;
-       align1:= 3;
+       align1:= 7;
       end;
       ftstring,ftwidestring: begin
        sqltype:= SQL_TEXT+1;
@@ -158,7 +158,7 @@ begin
           pint32(po1)^:= asinteger;
          end;
          SQL_INT64+1: begin
-          pint32(po1)^:= aslargeint;
+          pint64(po1)^:= aslargeint;
          end;
          SQL_TEXT+1: begin
           move(pointer(data[i1])^,po1^,length(data[i1]));

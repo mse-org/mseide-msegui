@@ -141,7 +141,7 @@ type
 
 implementation
 uses
- dbconst,msefbinterface;
+ dbconst,msefbinterface,msefbutils;
  
 var testvar: int32;
 var testvar1: boolean; testvar3: pointer;
@@ -527,6 +527,22 @@ begin
  pint64(dest)^:= pint64(ainfo^.buffer + ainfo^.offset)^;
 end;
 
+procedure fetchtext(const ainfo: pfbfieldinfoty; const dest: pointer);
+var
+ i1: int32;
+ po1: pchar;
+begin
+ po1:= ainfo^.buffer + ainfo^.offset;
+ i1:= ainfo^.size;
+ if i1 > ainfo^.buffersizead^ then begin
+  ainfo^.buffersizead^:= -i1;
+ end
+ else begin
+  ainfo^.buffersizead^:= i1;
+  move(po1^,dest^,i1);
+ end;
+end;
+
 procedure fetchvarchar(const ainfo: pfbfieldinfoty; const dest: pointer);
 var
  i1: int32;
@@ -630,10 +646,15 @@ begin
           datatype:= ftlargeint;
           fetchfunc:= @fetchint64;
          end;
-         SQL_VARYING: begin
-          datatype:= ftstring;
-          fetchfunc:= @fetchvarchar;
+         SQL_TEXT,SQL_VARYING: begin
           size:= metadata.getlength(fapi.status,i1);
+          datatype:= ftstring;
+          if _type = SQL_TEXT then begin
+           fetchfunc:= @fetchtext;
+          end
+          else begin
+           fetchfunc:= @fetchvarchar;
+          end;
           i2:= metadata.getcharset(fapi.status,i1);
           case i2 of
          //  0,1,2,10,11,12,13,14,19,21,22,39,
@@ -692,6 +713,7 @@ end;
 procedure tfbconnection.updateindexdefs(var indexdefs: tindexdefs;
                const atablename: string);
 begin
+ fbupdateindexdefs(self,indexdefs,atablename);
 end;
 
 function tfbconnection.fetch(cursor: tsqlcursor): boolean;
@@ -719,8 +741,10 @@ begin
    result:= false;
   end
   else begin
-   po1^.buffersizead:= @bufsize;
-   po1^.fetchfunc(po1,buffer);
+   if buffer <> nil then begin //else null check;
+    po1^.buffersizead:= @bufsize;
+    po1^.fetchfunc(po1,buffer);
+   end;
    result:= true;
   end;
  end;
