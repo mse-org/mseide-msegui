@@ -113,6 +113,8 @@ type
                                                 const autf8: boolean) override;
    procedure addfielddefs(const cursor: tsqlcursor;
                                       const fielddefs : tfielddefs) override;
+   procedure updateindexdefs(var indexdefs : tindexdefs;
+                                          const atablename : string); override;
    function fetch(cursor : tsqlcursor) : boolean; override;
    function loadfield(const cursor: tsqlcursor;
                const datatype: tfieldtype; const fieldnum: integer; //zero based
@@ -685,6 +687,11 @@ begin
    end;
   end;
  end;
+end;
+
+procedure tfbconnection.updateindexdefs(var indexdefs: tindexdefs;
+               const atablename: string);
+begin
 end;
 
 function tfbconnection.fetch(cursor: tsqlcursor): boolean;
