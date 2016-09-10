@@ -74,9 +74,7 @@ var
  i1: int32;
  data: stringarty;
  sqltype,sqllen: card32;
- data1: stringarty;
  po1: pointer;
- bo1: boolean;
  totsize1: int32;
 // len1: int32;
  align1: int32;

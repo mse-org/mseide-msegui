@@ -103,30 +103,14 @@ type
    procedure internalcommitretaining(trans : tsqlhandle) override;
    procedure internalrollbackretaining(trans : tsqlhandle) override;
 
-   function allocatecursorhandle(const aowner: icursorclient;
-                      const aname: ansistring): tsqlcursor override;
-   procedure deallocatecursorhandle(var cursor : tsqlcursor) override;
-   procedure freefldbuffers(cursor : tsqlcursor); override;
-   procedure preparestatement(const cursor: tsqlcursor; 
-                 const atransaction : tsqltransaction;
-                 const asql: msestring; const aparams : tmseparams) override;
-   procedure unpreparestatement(cursor : tsqlcursor) override;
    procedure cursorclose(const cursor: tfbcursor);
    procedure internalexecute(const cursor: tsqlcursor;
              const atransaction: tsqltransaction; const aparams : tmseparams;
                                                 const autf8: boolean) override;
-   procedure addfielddefs(const cursor: tsqlcursor;
-                                      const fielddefs : tfielddefs) override;
    procedure updateindexdefs(var indexdefs : tindexdefs;
-                                          const atablename : string); override;
+                                          const atablename : string) override;
    function getschemainfosql(schematype : tschematype;
-                schemaobjectname, schemapattern : msestring) : msestring;
-   function fetch(cursor : tsqlcursor) : boolean; override;
-   function loadfield(const cursor: tsqlcursor;
-               const datatype: tfieldtype; const fieldnum: integer; //zero based
-     const buffer: pointer; var bufsize: integer;
-                                const aisutf8: boolean): boolean; override;
-          //if bufsize < 0 -> buffer was to small, should be -bufsize
+              schemaobjectname, schemapattern : msestring) : msestring override;
 
    function createblobstream(const field: tfield; const mode: tblobstreammode;
                           const acursor: tsqlcursor): tstream; override;
@@ -143,6 +127,22 @@ type
    function blobscached: boolean;
   public
    constructor create(aowner: tcomponent); override;
+   function allocatecursorhandle(const aowner: icursorclient;
+                      const aname: ansistring): tsqlcursor override;
+   procedure deallocatecursorhandle(var cursor : tsqlcursor) override;
+   procedure freefldbuffers(cursor : tsqlcursor); override;
+   procedure preparestatement(const cursor: tsqlcursor; 
+                 const atransaction : tsqltransaction;
+                 const asql: msestring; const aparams : tmseparams) override;
+   procedure unpreparestatement(cursor : tsqlcursor) override;
+   procedure addfielddefs(const cursor: tsqlcursor;
+                                      const fielddefs : tfielddefs) override;
+   function fetch(cursor : tsqlcursor) : boolean; override;
+   function loadfield(const cursor: tsqlcursor;
+               const datatype: tfieldtype; const fieldnum: integer; //zero based
+     const buffer: pointer; var bufsize: integer;
+                                const aisutf8: boolean): boolean; override;
+          //if bufsize < 0 -> buffer was to small, should be -bufsize
   published
    property dialect: integer read fdialect write fdialect 
                                         default sql_dialect_v6;
@@ -165,8 +165,6 @@ uses
 
 const
  textblobtypes = [ftmemo,ftwidememo]; 
-var testvar: int32;
-var testvar1: boolean; testvar3: pointer;
  
 { efberror }
 
@@ -354,7 +352,6 @@ const
    (id: isc_tpb_no_auto_undo; name: 'isc_tpb_no_auto_undo')
   );
 var
- tr: tfbtrans;
  pb: ixpbbuilder;
  pbbuffer: pointer;
  pblen: int32;
@@ -527,7 +524,6 @@ begin
   end;
  end;
 end;
-var testvar4: tfbcursor;
 
 procedure fetchboolean(const ainfo: pfbfieldinfoty; const dest: pointer);
 begin
@@ -596,7 +592,6 @@ var
  paramdata: tparamdata; //inherits from imessagemetadata
  parambuffer: pointer;
  i1,i2,i3: int32;
- builder: imetadatabuilder;
 begin
  with tfbcursor(cursor) do begin
   if assigned(aparams) and (aparams.count > 0) and 
@@ -608,7 +603,6 @@ begin
    paramdata:= nil;
    parambuffer:= nil;
   end;
- testvar4:= tfbcursor(cursor);
   with tfbtrans(atransaction.trans) do begin
    clearstatus();
  //  fstatement.execute(fapi.status,ftransaction,nil,nil,nil,nil);
@@ -660,7 +654,6 @@ begin
          SQL_BOOLEAN: begin
           datatype:= ftboolean;
           fetchfunc:= @fetchboolean;
-          testvar:= metadata.getlength(fapi.status,i1);
          end;
          SQL_SHORT: begin
           datatype:= ftsmallint;
@@ -733,7 +726,6 @@ procedure tfbconnection.addfielddefs(const cursor: tsqlcursor;
                const fielddefs: tfielddefs);
 var
  i1: int32;
- fd: tfielddef;
 begin
  with tfbcursor(cursor) do begin
   fielddefs.clear();
@@ -794,12 +786,13 @@ begin
  end;
 end;
 
-function tfbconnection.getblobstream(const acursor: tsqlcursor;
-               const blobid: isc_quad;
-               const forstring: boolean = false): tmemorystream;
 const
  infotags: array[0..1] of byte = 
                      (isc_info_blob_max_segment,isc_info_blob_total_length);
+
+function tfbconnection.getblobstream(const acursor: tsqlcursor;
+               const blobid: isc_quad;
+               const forstring: boolean = false): tmemorystream;
 var
  blob: iblob;
  buffer: array[0..63] of byte;
@@ -838,7 +831,8 @@ begin
     end;
    end;
   end;
-  if (maxsegment < 0) or (totallength < 0) then begin
+  if (maxsegment < 0) or (totallength < 0) or 
+                     (maxsegment = 0) and (totallength <> 0)then begin
    databaseerror('Invalid blob info result',self);
   end;
   if forstring then begin
@@ -850,11 +844,16 @@ begin
   result.size:= totallength;
   po1:= result.memory;
   repeat
-   i2:= blob.getsegment(fapi.status,totallength,po1,@i1);
+   i3:= totallength;
+   if i3 > maxsegment then begin
+    i3:= maxsegment;
+   end;
+   i2:= blob.getsegment(fapi.status,i3,po1,@i1);
    checkstatus('read blob');
    po1:= po1 + i1;
    totallength:= totallength - i1;
-  until i2 <> istatus.RESULT_SEGMENT;
+  until (totallength <= 0) or
+          not ((i2 = istatus.RESULT_OK) or (i2 = istatus.RESULT_SEGMENT));
  finally
   blob.release();
  end;
@@ -933,18 +932,38 @@ procedure tfbconnection.writeblobdata(const atransaction: tsqltransaction;
                const tablename: string; const acursor: tsqlcursor;
                const adata: pointer; const alength: integer;
                const afield: tfield; const aparam: tparam; out newid: string);
+const
+ maxsegment = $ffff;
 var
  blob: iblob;
  id: isc_quad;
+ po1: pcard8;
+ i1: int32;
 begin
  clearstatus();
  blob:= fattachment.createblob(fapi.status,
                   tfbtrans(atransaction.trans).ftransaction,@id,0,nil);
  checkstatus('createblob');
- blob.putsegment(fapi.status,alength,adata);
- blob.close(fapi.status);
- blob.release();
+ i1:= alength;
+ po1:= adata;
+ try
+  while i1 > 0 do begin
+   if i1 > maxsegment then begin
+    blob.putsegment(fapi.status,maxsegment,po1);
+   end
+   else begin
+    blob.putsegment(fapi.status,i1,po1);
+   end;
+   inc(po1,maxsegment);
+   dec(i1,maxsegment);
+   checkstatus('put segment');
+  end;
+  blob.close(fapi.status);
+ finally
+  blob.release();
+ end;
  checkstatus('writeblobdata');
+
  if aparam <> nil then begin
   aparam.aslargeint:= int64(id);
   if afield.datatype in textblobtypes then begin
