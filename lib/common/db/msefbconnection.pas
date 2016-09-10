@@ -74,9 +74,13 @@ type
   util: iutil;
  end;
  
- tfbconnection = class(tcustomsqlconnection)
+ tfbconnection = class(tcustomsqlconnection,iblobconnection)
   private
    fdialect: integer;
+   function getblobstream(const acursor: tsqlcursor; const blobid: isc_quad;
+                      const forstring: boolean = false): tmemorystream;
+   function getblobstring(const acursor: tsqlcursor;
+                                      const blobid: isc_quad): string;
   protected
    fapi: fbapity;
    fattachment: iattachment;
@@ -115,12 +119,28 @@ type
                                       const fielddefs : tfielddefs) override;
    procedure updateindexdefs(var indexdefs : tindexdefs;
                                           const atablename : string); override;
+   function getschemainfosql(schematype : tschematype;
+                schemaobjectname, schemapattern : msestring) : msestring;
    function fetch(cursor : tsqlcursor) : boolean; override;
    function loadfield(const cursor: tsqlcursor;
                const datatype: tfieldtype; const fieldnum: integer; //zero based
      const buffer: pointer; var bufsize: integer;
                                 const aisutf8: boolean): boolean; override;
           //if bufsize < 0 -> buffer was to small, should be -bufsize
+
+   function createblobstream(const field: tfield; const mode: tblobstreammode;
+                          const acursor: tsqlcursor): tstream; override;
+   function getblobdatasize: integer; override;
+
+    //iblobconnection
+   procedure writeblobdata(const atransaction: tsqltransaction;
+              const tablename: string; const acursor: tsqlcursor;
+              const adata: pointer; const alength: integer;
+              const afield: tfield; const aparam: tparam; out newid: string);
+                                                 overload;
+   procedure setupblobdata(const afield: tfield; const acursor: tsqlcursor;
+                              const aparam: tparam);
+   function blobscached: boolean;
   public
    constructor create(aowner: tcomponent); override;
   published
@@ -141,8 +161,10 @@ type
 
 implementation
 uses
- dbconst,msefbinterface,msefbutils;
- 
+ dbconst,msefbinterface,msefbutils,msesqldb,msebufdataset;
+
+const
+ textblobtypes = [ftmemo,ftwidememo]; 
 var testvar: int32;
 var testvar1: boolean; testvar3: pointer;
  
@@ -559,6 +581,12 @@ begin
  end;
 end;
 
+procedure fetchblobid(const ainfo: pfbfieldinfoty; const dest: pointer);
+begin
+ pisc_quad(dest)^:= pisc_quad(ainfo^.buffer + ainfo^.offset)^;
+             //todo: wantblobfetch
+end;
+
 procedure tfbconnection.internalexecute(const cursor: tsqlcursor;
                const atransaction: tsqltransaction; const aparams: tmseparams;
                const autf8: boolean);
@@ -675,6 +703,16 @@ begin
           end;
           size:= size div i3;
          end;
+         SQL_BLOB: begin
+          size:= 8;
+          fetchfunc:= @fetchblobid; //todo: wantblobfetch
+          if metadata.getsubtype(fapi.status,i1) = isc_blob_text then begin
+           datatype:= ftmemo;
+          end
+          else begin
+           datatype:= ftblob;
+          end;
+         end;
          else begin
           datatype:= ftunknown;
           fetchfunc:= nil;
@@ -716,6 +754,12 @@ begin
  fbupdateindexdefs(self,indexdefs,atablename);
 end;
 
+function tfbconnection.getschemainfosql(schematype : tschematype;
+                schemaobjectname, schemapattern : msestring) : msestring;
+begin
+ result:= fbgetschemainfosql(self,schematype,schemaobjectname,schemapattern);
+end;
+
 function tfbconnection.fetch(cursor: tsqlcursor): boolean;
 begin
  with tfbcursor(cursor) do begin
@@ -748,6 +792,227 @@ begin
    result:= true;
   end;
  end;
+end;
+
+function tfbconnection.getblobstream(const acursor: tsqlcursor;
+               const blobid: isc_quad;
+               const forstring: boolean = false): tmemorystream;
+const
+ infotags: array[0..1] of byte = 
+                     (isc_info_blob_max_segment,isc_info_blob_total_length);
+var
+ blob: iblob;
+ buffer: array[0..63] of byte;
+ maxsegment,totallength: int32;
+ i1,i2,i3: int32;
+ po1,pe: pcard8;
+ by1: byte;
+begin
+ clearstatus();
+ blob:= fattachment.openblob(fapi.status,itransaction(acursor.ftrans),
+                                                                 @blobid,0,nil);
+ checkstatus('open blob');
+ try
+  blob.getinfo(fapi.status,length(infotags),@infotags,sizeof(buffer),@buffer);
+  checkstatus('get blob info');
+  po1:= @buffer;
+  pe:= po1 + sizeof(buffer);
+  maxsegment:= -1;
+  totallength:= -1;
+  while (po1 < pe) and (po1^ <> isc_info_end) do begin
+   by1:= po1^;
+   inc(po1);
+   i2:= gds__vax_integer(po1,2);
+   inc(po1,2);
+   i3:= gds__vax_integer(po1,i2);
+   inc(po1,i2);
+   case by1 of
+    isc_info_blob_max_segment: begin
+     maxsegment:= i3;
+    end;
+    isc_info_blob_total_length: begin
+     totallength:= i3;
+    end;
+    else begin
+     break;
+    end;
+   end;
+  end;
+  if (maxsegment < 0) or (totallength < 0) then begin
+   databaseerror('Invalid blob info result',self);
+  end;
+  if forstring then begin
+   result:= tmemorystringstream.create;
+  end
+  else begin
+   result:= tmemorystream.create;
+  end;
+  result.size:= totallength;
+  po1:= result.memory;
+  repeat
+   i2:= blob.getsegment(fapi.status,totallength,po1,@i1);
+   checkstatus('read blob');
+   po1:= po1 + i1;
+   totallength:= totallength - i1;
+  until i2 <> istatus.RESULT_SEGMENT;
+ finally
+  blob.release();
+ end;
+end;
+(*
+const
+  isc_segstr_eof = 335544367;
+var
+ blobHandle : Isc_blob_Handle;
+ blobSegment : pointer;
+ blobSegLen : word;
+ maxBlobSize : longInt; 
+begin
+ blobseglen:= 0;
+ blobHandle:= FB_API_NULLHANDLE;
+ if isc_open_blob(@FStatus, @FSQLDatabaseHandle, @acursor.ftrans,
+                        @blobHandle, @blobId) <> 0 then begin
+  CheckError('TIBConnection.CreateBlobStream', FStatus);
+ end;
+ maxBlobSize:= getMaxBlobSize(blobHandle);
+ blobSegment:= AllocMem(maxBlobSize);
+ if forstring then begin
+  result:= tmemorystringstream.create;
+ end
+ else begin
+  result:= tmemorystream.create;
+ end;
+ while isc_get_segment(@FStatus,@blobHandle,@blobSegLen,maxBlobSize,
+                                                    blobSegment) = 0 do begin
+  result.writeBuffer(blobSegment^,blobSegLen);
+ end;
+ freemem(blobSegment);
+ result.seek(0,soFromBeginning);
+ if FStatus[1] = isc_segstr_eof then begin
+  if isc_close_blob(@FStatus, @blobHandle) <> 0 then begin
+   CheckError('TIBConnection.CreateBlobStream isc_close_blob', FStatus);
+  end;
+ end
+ else begin
+  CheckError('TIBConnection.CreateBlobStream isc_get_segment', FStatus);
+ end;
+end;
+*)
+
+function tfbconnection.getblobstring(const acursor: tsqlcursor;
+               const blobid: isc_quad): string;
+begin
+ tmemorystringstream(getblobstream(acursor,blobid,true)).destroyasstring(result);
+end;
+
+function tfbconnection.createblobstream(const field: tfield;
+               const mode: tblobstreammode; const acursor: tsqlcursor): tstream;
+var
+  blobId : ISC_QUAD;
+begin
+ result := nil;
+ if mode = bmRead then begin
+  if not field.getData(@blobId) then begin
+   exit;
+  end;
+  result:= getblobstream(acursor,blobid);
+ end
+ else begin
+  if (mode = bmwrite) and (field.dataset is tmsesqlquery) then begin
+   result:= tmsebufdataset(field.dataset).createblobbuffer(field);
+  end;
+ end;
+end;
+
+function tfbconnection.getblobdatasize: integer;
+begin
+ result:= 8;
+end;
+
+procedure tfbconnection.writeblobdata(const atransaction: tsqltransaction;
+               const tablename: string; const acursor: tsqlcursor;
+               const adata: pointer; const alength: integer;
+               const afield: tfield; const aparam: tparam; out newid: string);
+var
+ blob: iblob;
+ id: isc_quad;
+begin
+ clearstatus();
+ blob:= fattachment.createblob(fapi.status,
+                  tfbtrans(atransaction.trans).ftransaction,@id,0,nil);
+ checkstatus('createblob');
+ blob.putsegment(fapi.status,alength,adata);
+ blob.close(fapi.status);
+ blob.release();
+ checkstatus('writeblobdata');
+ if aparam <> nil then begin
+  aparam.aslargeint:= int64(id);
+  if afield.datatype in textblobtypes then begin
+   aparam.blobkind:= bk_text;
+  end
+  else begin
+   aparam.blobkind:= bk_binary;
+  end;
+ end
+ else begin
+  setlength(newid,sizeof(isc_quad));
+  pisc_quad(pointer(newid))^:= id;
+ end;
+{
+ blobhandle:= FB_API_NULLHANDLE;
+ fillchar(blobid,sizeof(blobid),0);
+ check(isc_create_blob2(@fstatus,@fsqldatabasehandle,@atransactionhandle,
+                      @blobhandle,@blobid,0,nil));
+ try
+  int1:= getmaxblobsize(blobhandle);
+  if (int1 <= 0) or (int1 > defsegsize) then begin
+   step:= defsegsize;
+  end
+  else begin
+   step:= int1;
+  end;
+  po1:= adata;
+  int1:= alength;
+  while int1 > 0 do begin
+   if int1 < step then begin
+    step:= int1;
+   end;
+   check(isc_put_segment(@fstatus,@blobhandle,step,po1));
+   dec(int1,step);
+   inc(pchar(po1),step);
+  end;
+  if aparam = nil then begin
+   setlength(newid,sizeof(blobid));
+   move(blobid,newid[1],sizeof(blobid));
+  end
+  else begin
+   aparam.aslargeint:= int64(blobid);
+   newid:= ''; //id no more usable
+  end;
+ finally
+  isc_close_blob(@fstatus,@blobhandle);
+ end;
+}
+end;
+
+procedure tfbconnection.setupblobdata(const afield: tfield;
+               const acursor: tsqlcursor; const aparam: tparam);
+var
+ blobid: isc_quad;
+begin
+ afield.getdata(@blobid);
+ aparam.aslargeint:= int64(blobid);
+ if afield.datatype in textblobtypes then begin
+  aparam.blobkind:= bk_text;
+ end
+ else begin
+  aparam.blobkind:= bk_binary;
+ end;
+end;
+
+function tfbconnection.blobscached: boolean;
+begin
+ result:= false;
 end;
 
 { tfbtrans }

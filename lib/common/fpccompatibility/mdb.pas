@@ -1186,7 +1186,7 @@ type
   TParamTypes = set of TParamType;
 
   TParamStyle = (psInterbase,psPostgreSQL,psSimulated);
-
+  blobkindty = (bk_none,bk_binary,bk_text);
   TParams = class;
 
   TParam = class(TCollectionItem)
@@ -1199,6 +1199,7 @@ type
     FDataType: TFieldType;
     FParamType: TParamType;
     FSize: Integer;
+   fblobkind: blobkindty;
     Function GetDataSet: TDataSet;
     Function IsParamStored: Boolean;
   protected
@@ -1282,6 +1283,9 @@ type
     property asmsestring: msestring read getasunicodestring 
                                                   write setasunicodestring;
     property asid: int64 read getasid write setasid; //-1 -> null
+    property blobkind: blobkindty read fblobkind 
+                                           write fblobkind default bk_none;
+                                  //for blobid
   published
     Property DataType : TFieldType read FDataType write SetDataType;
     Property Name : string read FName write FName;

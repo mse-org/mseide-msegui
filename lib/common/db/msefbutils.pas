@@ -16,6 +16,10 @@ uses
 procedure fbupdateindexdefs(const sender: tcustomsqlconnection;
                             var indexdefs : tindexdefs;
                                const atablename : string);
+function fbgetschemainfosql(const sender: tcustomsqlconnection;
+                schematype: tschematype;
+                schemaobjectname,schemapattern: msestring): msestring;
+
 implementation
 uses
  msesqlresult,dbconst,sysutils;
@@ -77,6 +81,84 @@ begin
   finally
    res.free;
   end;
+ end;
+end;
+
+function fbgetschemainfosql(const sender: tcustomsqlconnection;
+                schematype: tschematype;
+                schemaobjectname,schemapattern: msestring): msestring;
+var 
+ s : msestring;
+
+begin
+ with sender do begin
+  s:= '';
+  case SchemaType of
+    stTables     : s := 'select '+
+                          'rdb$relation_id          as recno, '+
+                          '''' + msestring(DatabaseName) +
+                           ''' as catalog_name, '+
+                          '''''                     as schema_name, '+
+                          'rdb$relation_name        as table_name, '+
+                          '0                        as table_type '+
+                        'from '+
+                          'rdb$relations '+
+                        'where '+
+                          '(rdb$system_flag = 0 or rdb$system_flag is null) ' + // and rdb$view_blr is null
+                        'order by rdb$relation_name';
+
+    stSysTables  : s := 'select '+
+                          'rdb$relation_id          as recno, '+
+                          '''' + msestring(DatabaseName) + 
+                          ''' as catalog_name, '+
+                          '''''                     as schema_name, '+
+                          'rdb$relation_name        as table_name, '+
+                          '0                        as table_type '+
+                        'from '+
+                          'rdb$relations '+
+                        'where '+
+                          '(rdb$system_flag > 0) ' + // and rdb$view_blr is null
+                        'order by rdb$relation_name';
+
+    stProcedures : s := 'select '+
+                           'rdb$procedure_id        as recno, '+
+                          '''' + msestring(DatabaseName) +
+                          ''' as catalog_name, '+
+                          '''''                     as schema_name, '+
+                          'rdb$procedure_name       as proc_name, '+
+                          '0                        as proc_type, '+
+                          'rdb$procedure_inputs     as in_params, '+
+                          'rdb$procedure_outputs    as out_params '+
+                        'from '+
+                          'rdb$procedures '+
+                        'WHERE '+
+                          '(rdb$system_flag = 0 or rdb$system_flag is null)';
+    stColumns    : s := 'select '+
+                           'rdb$field_id            as recno, '+
+                          '''' + msestring(DatabaseName) +
+                          ''' as catalog_name, '+
+                          '''''                     as schema_name, '+
+                          'rdb$relation_name        as table_name, '+
+                          'rdb$field_name           as column_name, '+
+                          'rdb$field_position       as column_position, '+
+                          '0                        as column_type, '+
+                          '0                        as column_datatype, '+
+                          '''''                     as column_typename, '+
+                          '0                        as column_subtype, '+
+                          '0                        as column_precision, '+
+                          '0                        as column_scale, '+
+                          '0                        as column_length, '+
+                          '0                        as column_nullable '+
+                        'from '+
+                          'rdb$relation_fields '+
+                        'WHERE '+
+                        '(rdb$system_flag = 0 or rdb$system_flag is null) and'+
+      ' (rdb$relation_name = ''' + Uppercase(SchemaObjectName) + ''') ' +
+                        'order by rdb$field_name';
+  else
+    DatabaseError(SMetadataUnavailable)
+  end; {case}
+  result := s;
  end;
 end;
 

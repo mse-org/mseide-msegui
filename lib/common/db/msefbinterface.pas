@@ -64,6 +64,7 @@ uses
  
 type
  tfbcursor1 = class(tfbcursor);
+ tfbconnection1 = class(tfbconnection);
  
 { tparamdata }
 
@@ -79,6 +80,8 @@ var
  totsize1: int32;
 // len1: int32;
  align1: int32;
+ str1,str2: string;
+ 
 begin
  inherited create();
  addref();
@@ -88,7 +91,7 @@ begin
 //  len1:= 0;
   if fcount > 0 then begin
    setlength(fitems,fcount);
-   setlength(data,fcount); //buffer for null pointers
+   setlength(data,fcount); //string buffer
    for i1:= 0 to fcount-1 do begin
     sqltype:= 0;
     sqllen:= 0;
@@ -113,7 +116,19 @@ begin
       ftlargeint: begin
        sqltype:= SQL_INT64+1;
        sqllen:= 8;
-       align1:= 7;
+       case blobkind of
+        bk_binary: begin
+         subtype:= isc_blob_untyped;
+         align1:= 3; //sizeof(SLONG), SLONG always 32 bit
+        end;
+        bk_text: begin
+         subtype:= isc_blob_text;
+         align1:= 3; //sizeof(SLONG), SLONG always 32 bit
+        end;
+        else begin
+         align1:= 7;
+        end;
+       end;
       end;
       ftstring,ftwidestring: begin
        sqltype:= SQL_TEXT+1;
@@ -121,6 +136,14 @@ begin
         data[i1]:= params.asdbstring(fparambinding[i1]);
         sqllen:= length(data[i1]);
        end;
+      end;
+      ftblob: begin
+       sqltype:= SQL_BLOB+1;
+       subtype:= isc_blob_untyped;
+      end;
+      ftmemo,ftwidememo: begin
+       sqltype:= SQL_BLOB+1;
+       subtype:= isc_blob_text;
       end;
      end;
      if sqltype = 0 then begin
@@ -158,10 +181,27 @@ begin
           pint32(po1)^:= asinteger;
          end;
          SQL_INT64+1: begin
-          pint64(po1)^:= aslargeint;
+          if blobkind <> bk_none then begin
+           _type:= SQL_BLOB+1;
+           pisc_quad(po1)^:= ISC_QUAD(aslargeint);
+          end
+          else begin
+           pint64(po1)^:= aslargeint;
+          end;         
          end;
          SQL_TEXT+1: begin
           move(pointer(data[i1])^,po1^,length(data[i1]));
+         end;
+         SQL_BLOB+1: begin
+          if subtype = isc_blob_text then begin
+           str1:= params.asdbstring(i1);
+          end
+          else begin
+           str1:= asstring;
+          end;
+          tfbconnection1(fconnection).writeblobdata(cursor.ftrans,'',nil,
+                                      pointer(str1),length(str1),nil,nil,str2);
+          pisc_quad(po1)^:= pisc_quad(pointer(str2))^;
          end;
          else begin
           raise exception.create('Internal error 20160908A');

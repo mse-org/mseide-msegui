@@ -117,11 +117,35 @@ static const USHORT type_lengths[DTYPE_TYPE_MAX] =
 };
 *)
 
+//****************************/
+//* Common, structural codes */
+//****************************/
+
+ isc_info_end =            1;
+ isc_info_truncated =      2;
+ isc_info_error =          3;
+ isc_info_data_not_ready = 4;
+ isc_info_length =       126;
+ isc_info_flag_end =     127;
+
+//**************************/
+//* Blob information items */
+//**************************/
+
+ isc_info_blob_num_segments = 4;
+ isc_info_blob_max_segment =  5;
+ isc_info_blob_total_length = 6;
+ isc_info_blob_type =         7;
+
 type
- ISC_USHORT	= cushort;
+ SSHORT = cshort;
+ SLONG = int32;
+ ISC_USHORT = cushort;
  ISC_SHORT = cshort;
  pISC_SHORT = ^ISC_SHORT;
-
+ ISC_LONG = SLONG;
+ pISC_QUAD = ^ISC_QUAD;
+ 
  vary = packed record
   vary_length: ISC_USHORT;
   vary_string: record
@@ -139,6 +163,8 @@ function formatstatus(status: istatus): string;
 
 var
  fb_get_master_interface: function: IMaster
+                               {$ifdef wincall}stdcall{$else}cdecl{$endif};
+ gds__vax_integer: function (ptr: pbyte; length: SSHORT): ISC_LONG;
                                {$ifdef wincall}stdcall{$else}cdecl{$endif};
 implementation
 uses
@@ -163,8 +189,9 @@ procedure initializefirebird(const sonames: array of filenamety; //[] = default
                                          const onlyonce: boolean = false);
                                      
 const
- funcs: array[0..0] of funcinfoty = (
-  (n: 'fb_get_master_interface'; d: @fb_get_master_interface)
+ funcs: array[0..1] of funcinfoty = (
+  (n: 'fb_get_master_interface'; d: @fb_get_master_interface),
+  (n: 'gds__vax_integer'; d: @gds__vax_integer)
  );
  errormessage = 'Can not load Firebird library. ';
 
