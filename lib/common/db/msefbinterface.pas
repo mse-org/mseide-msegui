@@ -76,7 +76,6 @@ var
  sqltype,sqllen: card32;
  po1: pointer;
  totsize1: int32;
-// len1: int32;
  align1: int32;
  str1,str2: string;
  
@@ -86,7 +85,6 @@ begin
  with tfbcursor1(cursor) do begin
   fcount:= length(fparambinding);
   totsize1:= 0;
-//  len1:= 0;
   if fcount > 0 then begin
    setlength(fitems,fcount);
    setlength(data,fcount); //string buffer
@@ -128,30 +126,39 @@ begin
         end;
        end;
       end;
-      ftstring,ftwidestring: begin
+      ftstring,ftwidestring,ftmemo,ftwidememo: begin
        sqltype:= SQL_TEXT+1;
        if not isnull then begin
         data[i1]:= params.asdbstring(fparambinding[i1]);
         sqllen:= length(data[i1]);
        end;
       end;
-      ftblob: begin
+      ftblob,ftgraphic: begin
+       sqltype:= SQL_TEXT+1;
+       if not isnull then begin
+        data[i1]:= asstring;
+        sqllen:= length(data[i1]);
+       end;
+       {
+       sqllen:= 8;                
+       align1:= 3; //sizeof(SLONG), SLONG always 32 bit
        sqltype:= SQL_BLOB+1;
        subtype:= isc_blob_untyped;
+       }
       end;
-      ftmemo,ftwidememo: begin
+      {
+      ftmemo,ftwidememo: begin //null
+       sqllen:= 8;                
+       align1:= 3; //sizeof(SLONG), SLONG always 32 bit
        sqltype:= SQL_BLOB+1;
        subtype:= isc_blob_text;
       end;
+      }
      end;
      if sqltype = 0 then begin
       databaseerrorfmt(sunsupportedparameter,[fieldtypenames[datatype]],
                                                                  fconnection);
      end;
-//     len1:= len1 + sqllen;
-//     if _isnull then begin
-//      sqllen:= 0;
-//     end;
      _type:= sqltype;
      _length:= sqllen;
      totsize1:= (totsize1 + align1) and not align1;
@@ -170,7 +177,12 @@ begin
       po1:= fparambuffer + offset;
       with params[i1] do begin
        pisc_short(fparambuffer+nulloffset)^:= card8(_isnull);
-       if not _isnull then begin
+       if _isnull then begin
+        if blobkind <> bk_none then begin
+         _type:= SQL_BLOB+1;
+        end;
+       end
+       else begin
         case _type of
          SQL_BOOLEAN+1: begin
           pcard8(po1)^:= card8(asboolean);

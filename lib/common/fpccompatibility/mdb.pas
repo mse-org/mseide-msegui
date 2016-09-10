@@ -10969,6 +10969,7 @@ end;
 Procedure TParam.Clear;
 begin
   FValue:=UnAssigned;
+  fblobkind:= bk_none;
 end;
 
 Procedure TParam.GetData(Buffer: Pointer);

@@ -977,41 +977,6 @@ begin
   setlength(newid,sizeof(isc_quad));
   pisc_quad(pointer(newid))^:= id;
  end;
-{
- blobhandle:= FB_API_NULLHANDLE;
- fillchar(blobid,sizeof(blobid),0);
- check(isc_create_blob2(@fstatus,@fsqldatabasehandle,@atransactionhandle,
-                      @blobhandle,@blobid,0,nil));
- try
-  int1:= getmaxblobsize(blobhandle);
-  if (int1 <= 0) or (int1 > defsegsize) then begin
-   step:= defsegsize;
-  end
-  else begin
-   step:= int1;
-  end;
-  po1:= adata;
-  int1:= alength;
-  while int1 > 0 do begin
-   if int1 < step then begin
-    step:= int1;
-   end;
-   check(isc_put_segment(@fstatus,@blobhandle,step,po1));
-   dec(int1,step);
-   inc(pchar(po1),step);
-  end;
-  if aparam = nil then begin
-   setlength(newid,sizeof(blobid));
-   move(blobid,newid[1],sizeof(blobid));
-  end
-  else begin
-   aparam.aslargeint:= int64(blobid);
-   newid:= ''; //id no more usable
-  end;
- finally
-  isc_close_blob(@fstatus,@blobhandle);
- end;
-}
 end;
 
 procedure tfbconnection.setupblobdata(const afield: tfield;
