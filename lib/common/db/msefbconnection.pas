@@ -164,7 +164,7 @@ type
 
 implementation
 uses
- dbconst,msefbinterface,msefbutils,msesqldb,msebufdataset;
+ dbconst,msefbinterface,msefbutils,msesqldb,msebufdataset,msedate;
 
 const
  textblobtypes = [ftmemo,ftwidememo]; 
@@ -548,6 +548,43 @@ begin
  pint64(dest)^:= pint64(ainfo^.buffer + ainfo^.offset)^;
 end;
 
+procedure fetchfloat(const ainfo: pfbfieldinfoty; const dest: pointer);
+begin
+ pdouble(dest)^:= psingle(ainfo^.buffer + ainfo^.offset)^;
+end;
+
+procedure fetchdouble(const ainfo: pfbfieldinfoty; const dest: pointer);
+begin
+ pdouble(dest)^:= pdouble(ainfo^.buffer + ainfo^.offset)^;
+end;
+
+procedure fetchtime(const ainfo: pfbfieldinfoty; const dest: pointer);
+begin
+ pdatetime(dest)^:= pisc_time(ainfo^.buffer + ainfo^.offset)^ /
+                                  (3600*24*ISC_TIME_SECONDS_PRECISION);
+end;
+
+procedure fetchdate(const ainfo: pfbfieldinfoty; const dest: pointer);
+begin
+ pdatetime(dest)^:= pisc_date(ainfo^.buffer + ainfo^.offset)^ + fbdatetimeoffset;
+end;
+
+procedure fetchtimestamp(const ainfo: pfbfieldinfoty; const dest: pointer);
+var
+ ti,da: double;
+ po1: pisc_timestamp;
+begin
+ po1:= ainfo^.buffer + ainfo^.offset;
+ da:= po1^.timestamp_date + fbdatetimeoffset;
+ ti:= po1^.timestamp_time / (3600*24*ISC_TIME_SECONDS_PRECISION);
+ if da < 0 then begin 
+  pdatetime(dest)^:= da - ti;
+ end
+ else begin
+  pdatetime(dest)^:= da + ti;
+ end;
+end;
+
 procedure fetchtext(const ainfo: pfbfieldinfoty; const dest: pointer);
 var
  i1: int32;
@@ -673,9 +710,29 @@ begin
           datatype:= ftinteger;
           fetchfunc:= @fetchint32;
          end;
-         SQL_INT64: begin
+         SQL_INT64,SQL_QUAD: begin
           datatype:= ftlargeint;
           fetchfunc:= @fetchint64;
+         end;
+         SQL_FLOAT: begin
+          datatype:= ftfloat;
+          fetchfunc:= @fetchfloat;
+         end;
+         SQL_DOUBLE,SQL_D_FLOAT: begin
+          datatype:= ftfloat;
+          fetchfunc:= @fetchdouble;
+         end;
+         SQL_TIMESTAMP: begin
+          datatype:= ftdatetime;
+          fetchfunc:= @fetchtimestamp;
+         end;
+         SQL_TYPE_DATE: begin
+          datatype:= ftdate;
+          fetchfunc:= @fetchdate;
+         end;
+         SQL_TYPE_TIME: begin
+          datatype:= fttime;
+          fetchfunc:= @fetchtime;
          end;
          SQL_TEXT,SQL_VARYING: begin
           size:= metadata.getlength(fapi.status,i1);

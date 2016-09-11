@@ -12,7 +12,7 @@ unit msefirebird;
 
 interface
 uses
- firebird,msestrings,msectypes;
+ firebird,msestrings,msectypes,msetypes;
 
 const
 {$ifdef mswindows}
@@ -40,6 +40,11 @@ const
  SQL_INT64 =         580;
  SQL_BOOLEAN =     32764;
  SQL_NULL =        32766;
+ 
+ FB_DOUBLE_ALIGN = 4; //check!
+ ISC_TIME_SECONDS_PRECISION = 10000;
+ GDS_EPOCH_START = 40617;
+ fbdatetimeoffset = -15018; //fpdate -> tdatetime;
 (*
 #define dtype_unknown	0
 #define dtype_text		1
@@ -138,6 +143,7 @@ static const USHORT type_lengths[DTYPE_TYPE_MAX] =
  isc_info_blob_type =         7;
 
 type
+ {$packrecords c}
  SSHORT = cshort;
  SLONG = int32;
  ISC_USHORT = cushort;
@@ -146,7 +152,18 @@ type
  ISC_LONG = SLONG;
  pISC_QUAD = ^ISC_QUAD;
  
- vary = packed record
+ ISC_DATE = int32;
+ pISC_DATE = ^ISC_DATE;
+ ISC_TIME = card32;
+ pISC_TIME = ^ISC_TIME;
+ 
+ ISC_TIMESTAMP = record
+  timestamp_date: ISC_DATE;
+  timestamp_time: ISC_TIME;
+ end;
+ pISC_TIMESTAMP = ^ISC_TIMESTAMP;
+ 
+ vary = record
   vary_length: ISC_USHORT;
   vary_string: record
   end;
@@ -168,7 +185,7 @@ var
                                {$ifdef wincall}stdcall{$else}cdecl{$endif};
 implementation
 uses
- msedynload,msetypes;
+ msedynload;
 var 
  libinfo: dynlibinfoty;
  master: imaster;

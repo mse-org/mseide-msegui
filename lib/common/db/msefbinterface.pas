@@ -60,7 +60,7 @@ type
 
 implementation
 uses
- msefirebird,dbconst,sysutils;
+ msefirebird,dbconst,sysutils,msedate;
  
 type
  tfbcursor1 = class(tfbcursor);
@@ -78,6 +78,7 @@ var
  totsize1: int32;
  align1: int32;
  str1,str2: string;
+ dt1: tdatetime;
  
 begin
  inherited create();
@@ -125,6 +126,16 @@ begin
          align1:= 7;
         end;
        end;
+      end;
+      ftfloat: begin
+       sqltype:= SQL_DOUBLE+1;
+       sqllen:= sizeof(double);
+       align1:= FB_DOUBLE_ALIGN-1;
+      end;
+      fttime,ftdate,ftdatetime: begin
+       sqltype:= SQL_TIMESTAMP+1;
+       sqllen:= sizeof(ISC_TIMESTAMP);
+       align1:= sizeof(ISC_DATE)-1;
       end;
       ftstring,ftwidestring,ftmemo,ftwidememo: begin
        sqltype:= SQL_TEXT+1;
@@ -198,6 +209,16 @@ begin
           else begin
            pint64(po1)^:= aslargeint;
           end;         
+         end;
+         SQL_DOUBLE+1: begin
+          pdouble(po1)^:= asfloat;
+         end;
+         SQL_TIMESTAMP+1: begin
+          dt1:= asdatetime;
+          pisc_timestamp(po1)^.timestamp_date:= trunc(dt1) - fbdatetimeoffset;
+          dt1:= abs(frac(dt1));
+          pisc_timestamp(po1)^.timestamp_time:= 
+                    round(dt1*3600*24*ISC_TIME_SECONDS_PRECISION);
          end;
          SQL_TEXT+1: begin
           move(pointer(data[i1])^,po1^,length(data[i1]));
