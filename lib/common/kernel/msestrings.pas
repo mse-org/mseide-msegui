@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2015 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2016 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -22,6 +22,9 @@ unit msestrings;
  {$endif}
  {$ifdef mse_fpc_2_3}
   {$define mse_unicodestring}
+ {$endif}
+ {$if fpc_fullversion >= 030000}
+  {$define hascodepage}
  {$endif}
 {$endif}
 
@@ -180,11 +183,19 @@ type
  
  lstringarty = array of lstringty;
  lmsestringarty = array of lmsestringty;
- 
+
  stringheaderty = packed record
+{$ifdef hascodepage}
+  CodePage: TSystemCodePage;
+  ElementSize: Word;
+ {$ifdef CPU64}    { align fields  }
+  Dummy: DWord;
+ {$endif CPU64}
+{$endif}
   ref: sizeint;
   len: sizeint;
  end;
+
  pstringheaderty = ^stringheaderty;
 
 const
@@ -193,8 +204,16 @@ const
 
 type
  tmemorystringstream = class(tmemorystream) 
-        //has room for stringheader, do not change size!
-  public
+        //has room for stringheader
+ protected
+  procedure SetCapacity(NewCapacity: PtrInt) override;
+  function getcapacity: ptrint override;
+  function Seek(const Offset: Int64; Origin: TSeekOrigin): Int64; override;
+  function getmemory: pointer; override;
+  Function GetSize : Int64; Override;
+  function GetPosition: Int64; Override;
+  procedure SetSize({$ifdef CPU64}const{$endif CPU64} NewSize: PtrInt); override;
+ public
    constructor create;
    procedure destroyasstring(out data: string);
    //calls destroy, not possible to use as destructor in FPC
@@ -5787,32 +5806,91 @@ end;
 
 
 { tmemorystringstream }
-
+const
+ stringheadersize = sizeof(stringheaderty);
+ 
 constructor tmemorystringstream.create;
-var
- header: stringheaderty;
+//var
+// header: stringheaderty;
 begin
  inherited;
- fillchar(header,sizeof(header),0);
- writebuffer(header,sizeof(header));
+ setcapacity(0);
+ fposition:= stringheadersize;
+// fillchar(header,sizeof(header),0);
+// writebuffer(header,sizeof(header));
+end;
+
+procedure tmemorystringstream.SetCapacity(NewCapacity: PtrInt);
+begin
+ inherited setcapacity(newcapacity + stringheadersize);
+end;
+
+function tmemorystringstream.getcapacity: ptrint;
+begin
+ result:= inherited getcapacity - stringheadersize;
+end;
+
+function tmemorystringstream.Seek(const Offset: Int64;
+               Origin: TSeekOrigin): Int64;
+begin
+  Case Word(Origin) of
+    soFromBeginning : FPosition:=Offset+stringheadersize;
+    soFromEnd       : FPosition:=FSize+Offset;
+    soFromCurrent   : FPosition:=FPosition+Offset;
+  end;
+  Result:=FPosition;
+  {$IFDEF DEBUG}
+  if Result < stringheadersize then
+    raise Exception.Create('TCustomMemoryStream');
+  {$ENDIF}
+end;
+
+function tmemorystringstream.getmemory: pointer;
+begin
+ result:= fmemory + stringheadersize;
+end;
+
+function tmemorystringstream.GetSize: Int64;
+begin
+ result:= fsize - stringheadersize;
+end;
+
+function tmemorystringstream.GetPosition: Int64;
+begin
+ result:= fposition - stringheadersize;
+end;
+
+procedure tmemorystringstream.SetSize(
+                     {$ifdef CPU64}const{$endif CPU64} NewSize: PtrInt);
+begin
+ inherited setsize(newsize + stringheadersize);
 end;
 
 procedure tmemorystringstream.destroyasstring(out data: string);
 var
  ch1: char;
 begin
- with pstringheaderty(memory)^ do begin
-  ref:= 1;
-  len:= size - sizeof(stringheaderty);
- end;
- ch1:= #0;
- position:= size;
- writebuffer(ch1,sizeof(ch1));
  data:= ''; //decref
- pointer(data):= pointer(ptruint(memory) + sizeof(stringheaderty));
- setpointer(nil,0);
-// destroy;            //destroy does not free memory???
- free;
+ if size > 0 then begin
+  with pstringheaderty(fmemory)^ do begin
+ {$ifdef hascodepage}
+   codepage:= cp_acp;
+   elementsize:= 1;
+  {$ifdef cpu64}
+   dummy:= 0;
+  {$endif}
+ {$endif}
+   ref:= 1;
+   len:= size;
+  end;
+  ch1:= #0;
+  position:= size;
+  writebuffer(ch1,sizeof(ch1));
+  pointer(data):= memory; //pointer(ptruint(memory) + sizeof(stringheaderty));
+  setpointer(nil,0);
+ end;
+ // destroy;            //destroy does not free memory???
+ free();
 end;
 
 end.
