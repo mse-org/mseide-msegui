@@ -95,6 +95,7 @@ begin
     align1:= 0;
     with params[fparambinding[i1]],fitems[i1] do begin
      _isnull:= isnull;
+     scale:= 0;
      case datatype of
       ftunknown: begin
        if isnull then begin
@@ -110,9 +111,12 @@ begin
        sqllen:= 4;
        align1:= 3;
       end;
-      ftlargeint: begin
+      ftlargeint,ftbcd: begin
        sqltype:= SQL_INT64+1;
        sqllen:= 8;
+       if datatype = ftbcd then begin
+        scale:= -4;
+       end;
        case blobkind of
         bk_binary: begin
          subtype:= isc_blob_untyped;
@@ -207,7 +211,12 @@ begin
            pisc_quad(po1)^:= ISC_QUAD(aslargeint);
           end
           else begin
-           pint64(po1)^:= aslargeint;
+           if scale = -4 then begin
+            pcurrency(po1)^:= ascurrency;
+           end
+           else begin
+            pint64(po1)^:= aslargeint;
+           end;
           end;         
          end;
          SQL_DOUBLE+1: begin

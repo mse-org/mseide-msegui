@@ -611,7 +611,7 @@ begin
     TrType:= ftDate{Time};
    end;
    SQL_TYPE_TIME: begin
-    TrType:= ftDateTime;
+    TrType:= ftTime;//ftDateTime;
    end;
    SQL_TIMESTAMP: begin
     TrType := ftDateTime;

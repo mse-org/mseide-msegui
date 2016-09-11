@@ -42,13 +42,14 @@ type
   buffer: pointer;
   name: string;
   _type: card32;
+  scale: int32;
   offset: card32;
   nulloffset: int32; //-1 = none
   fetchfunc: fetchfuncty;
   _cursor: tfbcursor;
   datatype: tfieldtype;
   size: int32;
-  precision: int32;
+//  precision: int32;
   buffersizead: pint32; //temp
  end;
  
@@ -164,7 +165,8 @@ type
 
 implementation
 uses
- dbconst,msefbinterface,msefbutils,msesqldb,msebufdataset,msedate;
+ dbconst,msefbinterface,msefbutils,msesqldb,msebufdataset,msedate,msefloattostr,
+ msebits;
 
 const
  textblobtypes = [ftmemo,ftwidememo]; 
@@ -548,6 +550,38 @@ begin
  pint64(dest)^:= pint64(ainfo^.buffer + ainfo^.offset)^;
 end;
 
+procedure fetchbcd1(const ainfo: pfbfieldinfoty; const dest: pointer);
+begin
+ pcurrency(dest)^:= pcurrency(ainfo^.buffer + ainfo^.offset)^ * 1000;
+end;
+
+procedure fetchbcd2(const ainfo: pfbfieldinfoty; const dest: pointer);
+begin
+ pcurrency(dest)^:= pcurrency(ainfo^.buffer + ainfo^.offset)^ * 100;
+end;
+
+procedure fetchbcd3(const ainfo: pfbfieldinfoty; const dest: pointer);
+begin
+ pcurrency(dest)^:= pcurrency(ainfo^.buffer + ainfo^.offset)^ * 10;
+end;
+
+procedure fetchbcd4(const ainfo: pfbfieldinfoty; const dest: pointer);
+begin
+ pcurrency(dest)^:= pcurrency(ainfo^.buffer + ainfo^.offset)^;
+end;
+
+procedure fetchbcdtofloat(const ainfo: pfbfieldinfoty; const dest: pointer);
+begin
+ pdouble(dest)^:= pint64(ainfo^.buffer + ainfo^.offset)^ * 
+                                          intexp10(ainfo^.scale);
+end;
+
+procedure fetchbcd(const ainfo: pfbfieldinfoty; const dest: pointer);
+begin
+ pint64(dest)^:= scaleexp10(pint64(ainfo^.buffer + ainfo^.offset)^,
+                                                           4+ainfo^.scale);
+end;
+
 procedure fetchfloat(const ainfo: pfbfieldinfoty; const dest: pointer);
 begin
  pdouble(dest)^:= psingle(ainfo^.buffer + ainfo^.offset)^;
@@ -630,7 +664,7 @@ begin
            ainfo^._cursor.fconnection.getblobstring(
                                     ainfo^._cursor,pisc_quad(dest)^));
 end;
-
+var testvar4: tfbcursor;
 procedure tfbconnection.internalexecute(const cursor: tsqlcursor;
                const atransaction: tsqltransaction; const aparams: tmseparams;
                const autf8: boolean);
@@ -640,6 +674,7 @@ var
  parambuffer: pointer;
  i1,i2,i3: int32;
 begin
+testvar4:= tfbcursor(cursor);
  with tfbcursor(cursor) do begin
   if assigned(aparams) and (aparams.count > 0) and 
                                            (fparambinding <> nil) then begin
@@ -671,6 +706,7 @@ begin
         name:= metadata.getalias(fapi.status,i1);
         offset:= metadata.getoffset(fapi.status,i1);
         _type:= metadata.gettype(fapi.status,i1);
+        scale:= metadata.getscale(fapi.status,i1);
         if metadata.isnullable(fapi.status,i1) then begin
          nulloffset:= metadata.getnulloffset(fapi.status,i1);
         end
@@ -678,7 +714,8 @@ begin
          nulloffset:= -1;
         end;
         size:= 0;
-        precision:= 0;
+//        scale:= 0;
+//        precision:= 0;
         case _type of
  {
   SQL_TEXT =          452;
@@ -711,8 +748,36 @@ begin
           fetchfunc:= @fetchint32;
          end;
          SQL_INT64,SQL_QUAD: begin
-          datatype:= ftlargeint;
-          fetchfunc:= @fetchint64;
+          if (scale <> 0) then begin
+           datatype:= ftbcd;
+           case scale of
+            -1: begin
+             fetchfunc:= @fetchbcd1;
+            end;
+            -2: begin
+             fetchfunc:= @fetchbcd2;
+            end;
+            -3: begin
+             fetchfunc:= @fetchbcd3;
+            end;
+            -4: begin
+             fetchfunc:= @fetchbcd4;
+            end;
+            else begin
+             if (dbo_bcdtofloatif in controller.options) then begin
+              datatype:= ftfloat;
+              fetchfunc:= @fetchbcdtofloat;
+             end
+             else begin
+              fetchfunc:= @fetchbcd;
+             end;
+            end;
+           end;
+          end
+          else begin
+           datatype:= ftlargeint;
+           fetchfunc:= @fetchint64;
+          end;
          end;
          SQL_FLOAT: begin
           datatype:= ftfloat;
