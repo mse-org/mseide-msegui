@@ -975,9 +975,9 @@ TStringsEnumerator = class
 
   TCustomMemoryStream = class(TStream)
   private
+  protected
     FMemory: Pointer;
     FSize, FPosition: PtrInt;
-  protected
     Function GetSize : Int64; Override;
     function GetPosition: Int64; Override;
     procedure SetPointer(Ptr: Pointer; ASize: PtrInt);
@@ -987,7 +987,7 @@ TStringsEnumerator = class
     function Seek(const Offset: Int64; Origin: TSeekOrigin): Int64; override;
     procedure SaveToStream(Stream: TStream);
     procedure SaveToFile(const FileName: string);
-    property memory: Pointer read FMemory;
+    property memory: Pointer read getmemory;
     property position1: ptrint read fposition;
     property size1: ptrint read fsize;
   end;
@@ -995,8 +995,9 @@ TStringsEnumerator = class
   TMemoryStream = class(TCustomMemoryStream)
   private
     FCapacity: PtrInt;
-    procedure SetCapacity(NewCapacity: PtrInt);
   protected
+    procedure SetCapacity(NewCapacity: PtrInt) virtual;
+    function getcapacity: ptrint virtual;
     function Realloc(var NewCapacity: PtrInt): Pointer; virtual;
   public
     destructor Destroy; override;
@@ -1005,7 +1006,7 @@ TStringsEnumerator = class
     procedure LoadFromFile(const FileName: string);
     procedure SetSize({$ifdef CPU64}const{$endif CPU64} NewSize: PtrInt); override;
     function Write(const Buffer; Count: LongInt): LongInt; override;
-    property Capacity: PtrInt read FCapacity write SetCapacity;
+    property Capacity: PtrInt read getcapacity write SetCapacity;
   end;
 
   TStringStream = class(TStream)
@@ -4095,7 +4096,46 @@ begin
   FCapacity:=NewCapacity;
 end;
 
+function TMemoryStream.getcapacity: ptrint;
+begin
+ result:= fcapacity;
+end;
 
+function tmemorystream.Realloc(var NewCapacity: PtrInt): Pointer;
+var
+ i1: ptrint;
+begin
+ If NewCapacity < 0 Then begin
+  NewCapacity:=0
+ end
+ else begin
+  if newcapacity > fcapacity then begin
+   if newcapacity > tmsgrow then begin
+               // if growing, grow at least a quarter
+    i1:= (int64(5)*int64(FCapacity)) div int64(4);
+    if NewCapacity < i1 then begin
+     NewCapacity:= i1; // round off to block size.
+    end;
+    NewCapacity := (NewCapacity + (TMSGrow-1)) and not (TMSGROW-1);
+   end
+   else begin
+    newcapacity:= newcapacity * 2 + 32;
+   end;
+  end;
+ end;
+ // Only now check !
+ If NewCapacity = FCapacity then begin
+  Result:= FMemory
+ end
+ else begin
+  Result:= Reallocmem(FMemory,Newcapacity);
+  If (Result = Nil) and (Newcapacity > 0) then begin
+   Raise EStreamError.Create(SMemoryStreamError);
+  end;
+ end;
+end;
+
+(*
 function TMemoryStream.Realloc(var NewCapacity: PtrInt): Pointer;
 
 begin
@@ -4124,7 +4164,7 @@ begin
         Raise EStreamError.Create(SMemoryStreamError);
     end;
 end;
-
+*)
 
 destructor TMemoryStream.Destroy;
 
