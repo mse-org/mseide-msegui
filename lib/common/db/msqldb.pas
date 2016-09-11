@@ -2512,7 +2512,7 @@ end;
 
 function TSQLCursor.wantblobfetch: boolean;
 begin
- result:= (fowner <> nil) and fowner.blobsarefetched;
+ result:= (fowner <> nil) and fowner.blobsarefetched();
 end;
 
 function TSQLCursor.stringmemo: boolean;

@@ -36,6 +36,8 @@ type
  pfbfieldinfoty = ^fbfieldinfoty;
  fetchfuncty = procedure(const info: pfbfieldinfoty; const dest: pointer);
 
+ tfbcursor = class;
+ 
  fbfieldinfoty = record
   buffer: pointer;
   name: string;
@@ -43,6 +45,7 @@ type
   offset: card32;
   nulloffset: int32; //-1 = none
   fetchfunc: fetchfuncty;
+  _cursor: tfbcursor;
   datatype: tfieldtype;
   size: int32;
   precision: int32;
@@ -583,12 +586,19 @@ begin
              //todo: wantblobfetch
 end;
 
+procedure fetchblobidanddata(const ainfo: pfbfieldinfoty; const dest: pointer);
+begin
+ pisc_quad(dest)^:= pisc_quad(ainfo^.buffer + ainfo^.offset)^;
+ ainfo^._cursor.addblobcache(pint64(dest)^,
+           ainfo^._cursor.fconnection.getblobstring(
+                                    ainfo^._cursor,pisc_quad(dest)^));
+end;
+
 procedure tfbconnection.internalexecute(const cursor: tsqlcursor;
                const atransaction: tsqltransaction; const aparams: tmseparams;
                const autf8: boolean);
 var
  metadata: imessagemetadata;
-// msemetadata: imessagemetadata;
  paramdata: tparamdata; //inherits from imessagemetadata
  parambuffer: pointer;
  i1,i2,i3: int32;
@@ -698,7 +708,13 @@ begin
          end;
          SQL_BLOB: begin
           size:= 8;
-          fetchfunc:= @fetchblobid; //todo: wantblobfetch
+          if wantblobfetch then begin
+           fetchfunc:= @fetchblobidanddata;
+           _cursor:= tfbcursor(cursor);
+          end
+          else begin
+           fetchfunc:= @fetchblobid;
+          end;
           if metadata.getsubtype(fapi.status,i1) = isc_blob_text then begin
            datatype:= ftmemo;
           end
@@ -858,45 +874,6 @@ begin
   blob.release();
  end;
 end;
-(*
-const
-  isc_segstr_eof = 335544367;
-var
- blobHandle : Isc_blob_Handle;
- blobSegment : pointer;
- blobSegLen : word;
- maxBlobSize : longInt; 
-begin
- blobseglen:= 0;
- blobHandle:= FB_API_NULLHANDLE;
- if isc_open_blob(@FStatus, @FSQLDatabaseHandle, @acursor.ftrans,
-                        @blobHandle, @blobId) <> 0 then begin
-  CheckError('TIBConnection.CreateBlobStream', FStatus);
- end;
- maxBlobSize:= getMaxBlobSize(blobHandle);
- blobSegment:= AllocMem(maxBlobSize);
- if forstring then begin
-  result:= tmemorystringstream.create;
- end
- else begin
-  result:= tmemorystream.create;
- end;
- while isc_get_segment(@FStatus,@blobHandle,@blobSegLen,maxBlobSize,
-                                                    blobSegment) = 0 do begin
-  result.writeBuffer(blobSegment^,blobSegLen);
- end;
- freemem(blobSegment);
- result.seek(0,soFromBeginning);
- if FStatus[1] = isc_segstr_eof then begin
-  if isc_close_blob(@FStatus, @blobHandle) <> 0 then begin
-   CheckError('TIBConnection.CreateBlobStream isc_close_blob', FStatus);
-  end;
- end
- else begin
-  CheckError('TIBConnection.CreateBlobStream isc_get_segment', FStatus);
- end;
-end;
-*)
 
 function tfbconnection.getblobstring(const acursor: tsqlcursor;
                const blobid: isc_quad): string;

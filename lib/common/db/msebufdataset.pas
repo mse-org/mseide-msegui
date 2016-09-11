@@ -4652,7 +4652,7 @@ end;
 
 function tmsebufdataset.blobsarefetched: boolean;
 begin
- result:= bs_blobsfetched in fbstate;
+ result:= (bs_blobsfetched in fbstate) or (dso_cacheblobs in getdsoptions);
 end;
 
 function tmsebufdataset.getblobcache: blobcacheinfoarty;
@@ -4696,7 +4696,7 @@ begin
  fblobcount:= 0;
  ffreedblobs:= nil;
  ffreedblobcount:= 0;
- exclude(fbstate,bs_blobssorted);
+ fbstate:= fbstate - [bs_blobssorted,bs_blobsfetched];
 end;
 
 procedure tmsebufdataset.fetchblobs;
