@@ -2735,7 +2735,7 @@ begin
 //   bu1:= bu1 - editnavigbuttons;
 //  end;
   if not canupdate then begin
-   exclude(bu1,dbnb_edit);
+   bu1:= bu1 - [dbnb_edit,dbnb_autoedit];
   end;
   if dno_append in options1 then begin
    if not canappend then begin
