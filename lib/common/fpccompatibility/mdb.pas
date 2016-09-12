@@ -10486,6 +10486,7 @@ begin
     Size:=0;
     Precision:=0;
     NumericScale:=0;
+    blobkind:= bk_none;
     end
   else
     begin
@@ -10501,6 +10502,7 @@ begin
     Size:=Param.Size;
     Precision:=Param.Precision;
     NumericScale:=Param.NumericScale;
+    blobkind:=Param.blobkind;
     end;
 end;
 
