@@ -651,6 +651,23 @@ begin
  end;
 end;
 
+procedure fetchvarbytes(const ainfo: pfbfieldinfoty; const dest: pointer);
+var
+ i1: int32;
+ po1: pvary;
+begin
+ po1:= ainfo^.buffer + ainfo^.offset;
+ i1:= po1^.vary_length + sizeof(card16);
+ if i1 > ainfo^.buffersizead^ then begin
+  ainfo^.buffersizead^:= -i1;
+ end
+ else begin
+  ainfo^.buffersizead^:= i1;
+  pcard16(dest)^:= po1^.vary_length;
+  move(po1^.vary_string,(dest+sizeof(card16))^,po1^.vary_length);
+ end;
+end;
+
 procedure fetchblobid(const ainfo: pfbfieldinfoty; const dest: pointer);
 begin
  pisc_quad(dest)^:= pisc_quad(ainfo^.buffer + ainfo^.offset)^;
@@ -802,13 +819,27 @@ testvar4:= tfbcursor(cursor);
          SQL_TEXT,SQL_VARYING: begin
           size:= metadata.getlength(fapi.status,i1);
           datatype:= ftstring;
+          i2:= metadata.getcharset(fapi.status,i1);
           if _type = SQL_TEXT then begin
            fetchfunc:= @fetchtext;
+           if i2 = cs_binary then begin
+            if size = 16 then begin
+             datatype:= ftguid;
+            end
+            else begin
+             datatype:= ftbytes;
+            end;
+           end;
           end
           else begin
-           fetchfunc:= @fetchvarchar;
+           if i2 = cs_binary then begin
+            datatype:= ftvarbytes;
+            fetchfunc:= @fetchvarbytes;
+           end
+           else begin
+            fetchfunc:= @fetchvarchar;
+           end;
           end;
-          i2:= metadata.getcharset(fapi.status,i1);
           case i2 of
          //  0,1,2,10,11,12,13,14,19,21,22,39,
          //  45,46,47,50,51,52,53,54,55,58: begin
@@ -844,6 +875,11 @@ testvar4:= tfbcursor(cursor);
            datatype:= ftblob;
           end;
          end;
+         SQL_ARRAY: begin       //todo: support slice access
+          size:= 8;
+          datatype:= ftlargeint;
+          fetchfunc:= @fetchint64;
+         end;
          else begin
           datatype:= ftunknown;
           fetchfunc:= nil;
@@ -869,9 +905,7 @@ begin
   fielddefs.clear();
   for i1:= 0 to high(ffieldinfos) do begin
    with ffieldinfos[i1] do begin
-    if datatype <> ftunknown then begin
-     with tfielddef.create(fielddefs,name,datatype,size,false,i1+1) do begin
-     end;
+    with tfielddef.create(fielddefs,name,datatype,size,false,i1+1) do begin
     end;
    end;
   end;

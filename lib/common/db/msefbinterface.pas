@@ -21,6 +21,7 @@ type
   _type: card32;
   subtype: int32;
   scale: int32;
+  charset: card32;
   _length: card32;
   offset: card32;
   nulloffset: card32;
@@ -148,10 +149,17 @@ begin
         sqllen:= length(data[i1]);
        end;
       end;
-      ftblob,ftgraphic: begin
+      ftblob,ftgraphic,ftbytes,ftvarbytes,ftguid: begin
        sqltype:= SQL_TEXT+1;
+       charset:= cs_binary;
        if not isnull then begin
-        data[i1]:= asstring;
+        if datatype = ftguid then begin
+         setlength(data[i1],sizeof(tguid));
+         pguid(pointer(data[i1]))^:= dbstringtoguid(asstring);
+        end
+        else begin
+         data[i1]:= asstring;
+        end;
         sqllen:= length(data[i1]);
        end;
        {
@@ -340,7 +348,7 @@ end;
 function tparamdata.getCharSet(status: IStatus;
                index: Cardinal): Cardinal;
 begin
- result:= 0;
+ result:= fitems[index].charset;
 end;
 
 function tparamdata.getOffset(status: IStatus;
