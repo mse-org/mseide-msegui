@@ -2109,7 +2109,7 @@ end;
 
 function tsqlquery.blobscached: boolean;
 begin
- result:= (fblobintf <> nil) and fblobintf.blobscached;
+ result:= (fblobintf <> nil) and fblobintf.blobscachedx;
 end;
 
 procedure TSQLQuery.setconnected(const avalue: boolean);

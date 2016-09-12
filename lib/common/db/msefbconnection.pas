@@ -108,9 +108,14 @@ type
    procedure internalrollbackretaining(trans : tsqlhandle) override;
 
    procedure cursorclose(const cursor: tfbcursor);
+   procedure updateresultmetadata(const acursor: tfbcursor);
    procedure internalexecute(const cursor: tsqlcursor;
              const atransaction: tsqltransaction; const aparams : tmseparams;
                                                 const autf8: boolean) override;
+   procedure internalexecuteunprepared(const cursor: tsqlcursor;
+               const atransaction: tsqltransaction;
+               const asql: string; const origsql: msestring;
+                                    const aparams: tmseparams) override;
    procedure updateindexdefs(var indexdefs : tindexdefs;
                                           const atablename : string) override;
    function getschemainfosql(schematype : tschematype;
@@ -119,6 +124,8 @@ type
    function createblobstream(const field: tfield; const mode: tblobstreammode;
                           const acursor: tsqlcursor): tstream; override;
    function getblobdatasize: integer; override;
+   function getfeatures(): databasefeaturesty override;
+
 
     //iblobconnection
    procedure writeblobdata(const atransaction: tsqltransaction;
@@ -128,7 +135,6 @@ type
                                                  overload;
    procedure setupblobdata(const afield: tfield; const acursor: tsqlcursor;
                               const aparam: tparam);
-   function blobscached: boolean;
   public
    constructor create(aowner: tcomponent); override;
    function allocatecursorhandle(const aowner: icursorclient;
@@ -681,15 +687,203 @@ begin
            ainfo^._cursor.fconnection.getblobstring(
                                     ainfo^._cursor,pisc_quad(dest)^));
 end;
-var testvar4: tfbcursor;
-procedure tfbconnection.internalexecute(const cursor: tsqlcursor;
-               const atransaction: tsqltransaction; const aparams: tmseparams;
-               const autf8: boolean);
+
+procedure tfbconnection.updateresultmetadata(const acursor: tfbcursor);
 var
  metadata: imessagemetadata;
+ i1,i2,i3: int32;
+
+begin
+ with acursor do begin
+  metadata:= fresultset.getmetadata(fapi.status);
+  if metadata <> nil then begin
+   setlength(frowbuffer,metadata.getmessagelength(fapi.status));
+   i1:= metadata.getcount(fapi.status);
+   if statusok() then begin
+    setlength(ffieldinfos,i1);
+    for i1:= 0 to i1-1 do begin
+     with ffieldinfos[i1] do begin
+      buffer:= pointer(frowbuffer);
+      name:= metadata.getalias(fapi.status,i1);
+      offset:= metadata.getoffset(fapi.status,i1);
+      _type:= metadata.gettype(fapi.status,i1);
+      scale:= metadata.getscale(fapi.status,i1);
+      if metadata.isnullable(fapi.status,i1) then begin
+       nulloffset:= metadata.getnulloffset(fapi.status,i1);
+      end
+      else begin
+       nulloffset:= -1;
+      end;
+      size:= 0;
+//        scale:= 0;
+//        precision:= 0;
+      case _type of
+{
+SQL_TEXT =          452;
+SQL_VARYING =       448;
+SQL_SHORT =         500;
+SQL_LONG =          496;
+SQL_FLOAT =         482;
+SQL_DOUBLE =        480;
+SQL_D_FLOAT =       530;
+SQL_TIMESTAMP =     510;
+SQL_BLOB =          520;
+SQL_ARRAY =         540;
+SQL_QUAD =          550;
+SQL_TYPE_TIME =     560;
+SQL_TYPE_DATE =     570;
+SQL_INT64 =         580;
+SQL_BOOLEAN =     32764;
+SQL_NULL =        32766;
+}
+       SQL_BOOLEAN: begin
+        datatype:= ftboolean;
+        fetchfunc:= @fetchboolean;
+       end;
+       SQL_SHORT: begin
+        datatype:= ftsmallint;
+        fetchfunc:= @fetchint16;
+       end;
+       SQL_LONG: begin
+        datatype:= ftinteger;
+        fetchfunc:= @fetchint32;
+       end;
+       SQL_INT64,SQL_QUAD: begin
+        if (scale <> 0) then begin
+         datatype:= ftbcd;
+         case scale of
+          -1: begin
+           fetchfunc:= @fetchbcd1;
+          end;
+          -2: begin
+           fetchfunc:= @fetchbcd2;
+          end;
+          -3: begin
+           fetchfunc:= @fetchbcd3;
+          end;
+          -4: begin
+           fetchfunc:= @fetchbcd4;
+          end;
+          else begin
+           if (dbo_bcdtofloatif in controller.options) then begin
+            datatype:= ftfloat;
+            fetchfunc:= @fetchbcdtofloat;
+           end
+           else begin
+            fetchfunc:= @fetchbcd;
+           end;
+          end;
+         end;
+        end
+        else begin
+         datatype:= ftlargeint;
+         fetchfunc:= @fetchint64;
+        end;
+       end;
+       SQL_FLOAT: begin
+        datatype:= ftfloat;
+        fetchfunc:= @fetchfloat;
+       end;
+       SQL_DOUBLE,SQL_D_FLOAT: begin
+        datatype:= ftfloat;
+        fetchfunc:= @fetchdouble;
+       end;
+       SQL_TIMESTAMP: begin
+        datatype:= ftdatetime;
+        fetchfunc:= @fetchtimestamp;
+       end;
+       SQL_TYPE_DATE: begin
+        datatype:= ftdate;
+        fetchfunc:= @fetchdate;
+       end;
+       SQL_TYPE_TIME: begin
+        datatype:= fttime;
+        fetchfunc:= @fetchtime;
+       end;
+       SQL_TEXT,SQL_VARYING: begin
+        size:= metadata.getlength(fapi.status,i1);
+        datatype:= ftstring;
+        i2:= metadata.getcharset(fapi.status,i1);
+        if _type = SQL_TEXT then begin
+         fetchfunc:= @fetchtext;
+         if i2 = cs_binary then begin
+          if size = 16 then begin
+           datatype:= ftguid;
+          end
+          else begin
+           datatype:= ftbytes;
+          end;
+         end;
+        end
+        else begin
+         if i2 = cs_binary then begin
+          datatype:= ftvarbytes;
+          fetchfunc:= @fetchvarbytes;
+         end
+         else begin
+          fetchfunc:= @fetchvarchar;
+         end;
+        end;
+        case i2 of
+       //  0,1,2,10,11,12,13,14,19,21,22,39,
+       //  45,46,47,50,51,52,53,54,55,58: begin
+       //   int1:= 1;
+         5,6,8,44,56,57,64: begin
+          i3:= 2;
+         end;
+         3: begin
+          i3:= 3;
+         end;
+         4,59: begin
+          i3:= 4;
+         end;
+         else begin
+          i3:= 1;
+         end;
+        end;
+        size:= size div i3;
+       end;
+       SQL_BLOB: begin
+        size:= 8;
+        if wantblobfetch then begin
+         fetchfunc:= @fetchblobidanddata;
+         _cursor:= acursor;
+        end
+        else begin
+         fetchfunc:= @fetchblobid;
+        end;
+        if metadata.getsubtype(fapi.status,i1) = isc_blob_text then begin
+         datatype:= ftmemo;
+        end
+        else begin
+         datatype:= ftblob;
+        end;
+       end;
+       SQL_ARRAY: begin       //todo: support slice access
+        size:= 8;
+        datatype:= ftlargeint;
+        fetchfunc:= @fetchint64;
+       end;
+       else begin
+        datatype:= ftunknown;
+        fetchfunc:= nil;
+       end;
+      end;
+     end;
+    end;
+   end;
+   metadata.release();
+  end;
+ end;
+end;
+
+var testvar4: tfbcursor;
+procedure tfbconnection.internalexecute(const cursor: tsqlcursor;
+              const atransaction: tsqltransaction; const aparams: tmseparams;
+              const autf8: boolean);
+var
  paramdata: tparamdata; //inherits from imessagemetadata
  parambuffer: pointer;
- i1,i2,i3: int32;
 begin
 testvar4:= tfbcursor(cursor);
  with tfbcursor(cursor) do begin
@@ -711,187 +905,46 @@ testvar4:= tfbcursor(cursor);
     paramdata.release();
    end;
    if fresultset <> nil then begin
-    metadata:= fresultset.getmetadata(fapi.status);
-    if metadata <> nil then begin
-     setlength(frowbuffer,metadata.getmessagelength(fapi.status));
-     i1:= metadata.getcount(fapi.status);
-     if statusok() then begin
-      setlength(ffieldinfos,i1);
-      for i1:= 0 to i1-1 do begin
-       with ffieldinfos[i1] do begin
-        buffer:= pointer(frowbuffer);
-        name:= metadata.getalias(fapi.status,i1);
-        offset:= metadata.getoffset(fapi.status,i1);
-        _type:= metadata.gettype(fapi.status,i1);
-        scale:= metadata.getscale(fapi.status,i1);
-        if metadata.isnullable(fapi.status,i1) then begin
-         nulloffset:= metadata.getnulloffset(fapi.status,i1);
-        end
-        else begin
-         nulloffset:= -1;
-        end;
-        size:= 0;
-//        scale:= 0;
-//        precision:= 0;
-        case _type of
- {
-  SQL_TEXT =          452;
-  SQL_VARYING =       448;
-  SQL_SHORT =         500;
-  SQL_LONG =          496;
-  SQL_FLOAT =         482;
-  SQL_DOUBLE =        480;
-  SQL_D_FLOAT =       530;
-  SQL_TIMESTAMP =     510;
-  SQL_BLOB =          520;
-  SQL_ARRAY =         540;
-  SQL_QUAD =          550;
-  SQL_TYPE_TIME =     560;
-  SQL_TYPE_DATE =     570;
-  SQL_INT64 =         580;
-  SQL_BOOLEAN =     32764;
-  SQL_NULL =        32766;
-  }
-         SQL_BOOLEAN: begin
-          datatype:= ftboolean;
-          fetchfunc:= @fetchboolean;
-         end;
-         SQL_SHORT: begin
-          datatype:= ftsmallint;
-          fetchfunc:= @fetchint16;
-         end;
-         SQL_LONG: begin
-          datatype:= ftinteger;
-          fetchfunc:= @fetchint32;
-         end;
-         SQL_INT64,SQL_QUAD: begin
-          if (scale <> 0) then begin
-           datatype:= ftbcd;
-           case scale of
-            -1: begin
-             fetchfunc:= @fetchbcd1;
-            end;
-            -2: begin
-             fetchfunc:= @fetchbcd2;
-            end;
-            -3: begin
-             fetchfunc:= @fetchbcd3;
-            end;
-            -4: begin
-             fetchfunc:= @fetchbcd4;
-            end;
-            else begin
-             if (dbo_bcdtofloatif in controller.options) then begin
-              datatype:= ftfloat;
-              fetchfunc:= @fetchbcdtofloat;
-             end
-             else begin
-              fetchfunc:= @fetchbcd;
-             end;
-            end;
-           end;
-          end
-          else begin
-           datatype:= ftlargeint;
-           fetchfunc:= @fetchint64;
-          end;
-         end;
-         SQL_FLOAT: begin
-          datatype:= ftfloat;
-          fetchfunc:= @fetchfloat;
-         end;
-         SQL_DOUBLE,SQL_D_FLOAT: begin
-          datatype:= ftfloat;
-          fetchfunc:= @fetchdouble;
-         end;
-         SQL_TIMESTAMP: begin
-          datatype:= ftdatetime;
-          fetchfunc:= @fetchtimestamp;
-         end;
-         SQL_TYPE_DATE: begin
-          datatype:= ftdate;
-          fetchfunc:= @fetchdate;
-         end;
-         SQL_TYPE_TIME: begin
-          datatype:= fttime;
-          fetchfunc:= @fetchtime;
-         end;
-         SQL_TEXT,SQL_VARYING: begin
-          size:= metadata.getlength(fapi.status,i1);
-          datatype:= ftstring;
-          i2:= metadata.getcharset(fapi.status,i1);
-          if _type = SQL_TEXT then begin
-           fetchfunc:= @fetchtext;
-           if i2 = cs_binary then begin
-            if size = 16 then begin
-             datatype:= ftguid;
-            end
-            else begin
-             datatype:= ftbytes;
-            end;
-           end;
-          end
-          else begin
-           if i2 = cs_binary then begin
-            datatype:= ftvarbytes;
-            fetchfunc:= @fetchvarbytes;
-           end
-           else begin
-            fetchfunc:= @fetchvarchar;
-           end;
-          end;
-          case i2 of
-         //  0,1,2,10,11,12,13,14,19,21,22,39,
-         //  45,46,47,50,51,52,53,54,55,58: begin
-         //   int1:= 1;
-           5,6,8,44,56,57,64: begin
-            i3:= 2;
-           end;
-           3: begin
-            i3:= 3;
-           end;
-           4,59: begin
-            i3:= 4;
-           end;
-           else begin
-            i3:= 1;
-           end;
-          end;
-          size:= size div i3;
-         end;
-         SQL_BLOB: begin
-          size:= 8;
-          if wantblobfetch then begin
-           fetchfunc:= @fetchblobidanddata;
-           _cursor:= tfbcursor(cursor);
-          end
-          else begin
-           fetchfunc:= @fetchblobid;
-          end;
-          if metadata.getsubtype(fapi.status,i1) = isc_blob_text then begin
-           datatype:= ftmemo;
-          end
-          else begin
-           datatype:= ftblob;
-          end;
-         end;
-         SQL_ARRAY: begin       //todo: support slice access
-          size:= 8;
-          datatype:= ftlargeint;
-          fetchfunc:= @fetchint64;
-         end;
-         else begin
-          datatype:= ftunknown;
-          fetchfunc:= nil;
-         end;
-        end;
-       end;
-      end;
-     end;
-     metadata.release();
-    end;
+    updateresultmetadata(tfbcursor(cursor));
    end;
    checkstatus('execute');
+  end;
+ end;
+end;
+
+procedure tfbconnection.internalexecuteunprepared(const cursor: tsqlcursor;
+               const atransaction: tsqltransaction; const asql: string;
+                      const origsql: msestring; const aparams: tmseparams);
+var
+ paramdata: tparamdata; //inherits from imessagemetadata
+ parambuffer: pointer;
+ str1: string;
+begin
+ with tfbcursor(cursor) do begin
+  if assigned(aparams) and (aparams.count > 0) then begin
+   str1:= todbstring(aparams.parsesql(origsql,false,false,false,psinterbase,
+                            fparambinding));
+   paramdata:= tparamdata.create(tfbcursor(cursor),aparams);
+   parambuffer:= paramdata.parambuffer;
+  end
+  else begin
+   fparambinding:= nil;
+   str1:= asql;
+   paramdata:= nil;
+   parambuffer:= nil;
+  end;
+  with tfbtrans(atransaction.trans) do begin
+   clearstatus();
+ //  fstatement.execute(fapi.status,ftransaction,nil,nil,nil,nil);
+   fresultset:= fattachment.opencursor(fapi.status,ftransaction,length(str1),
+                          pchar(str1),dialect,paramdata,parambuffer,nil,nil,0);
+   if paramdata <> nil then begin
+    paramdata.release();
+   end;
+   if fresultset <> nil then begin
+    updateresultmetadata(tfbcursor(cursor));
+   end;
+   checkstatus('executeunprepared');
   end;
  end;
 end;
@@ -1061,6 +1114,11 @@ begin
  result:= 8;
 end;
 
+function tfbconnection.getfeatures(): databasefeaturesty;
+begin
+ result:= inherited getfeatures + [dbf_params];
+end;
+
 procedure tfbconnection.writeblobdata(const atransaction: tsqltransaction;
                const tablename: string; const acursor: tsqlcursor;
                const adata: pointer; const alength: integer;
@@ -1125,11 +1183,6 @@ begin
  else begin
   aparam.blobkind:= bk_binary;
  end;
-end;
-
-function tfbconnection.blobscached: boolean;
-begin
- result:= false;
 end;
 
 { tfbtrans }

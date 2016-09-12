@@ -201,6 +201,9 @@ type
    property options: databaseoptionsty read foptions write setoptions default [];
  end;
 
+ databasefeaturety = (dbf_params,dbf_blobscached);
+ databasefeaturesty = set of databasefeaturety;
+ 
  tmsesqlscript = class;
  tcustomsqlconnection = class(TmDatabase,idbcontroller,iactivatorclient)
   private
@@ -252,7 +255,8 @@ type
                const aparams : tmseparams; const autf8: boolean); virtual; abstract;
     procedure internalexecuteunprepared(const cursor: tsqlcursor;
                const atransaction: tsqltransaction;
-               const asql: string); virtual;
+               const asql: string; const origsql: msestring;
+               const aparams: tmseparams); virtual;
 
     procedure Execute(const cursor: TSQLCursor; const atransaction: tsqltransaction;
                const AParams : TmseParams; const autf8: boolean);
@@ -298,8 +302,10 @@ type
    function readsequence(const sequencename: string): msestring; virtual;
    function sequencecurrvalue(const sequencename: string): msestring; virtual;
    function writesequence(const sequencename: string;
-                    const avalue: largeint): msestring; virtual;                    
-  public
+                    const avalue: largeint): msestring; virtual;
+   function getfeatures(): databasefeaturesty virtual;
+   function blobscachedx: boolean;
+ public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
    procedure updateutf8(var autf8: boolean); virtual;
@@ -674,7 +680,7 @@ type
               //returns blobid or data in param
   procedure setupblobdata(const afield: tfield; const acursor: tsqlcursor;
                               const aparam: tparam);
-  function blobscached: boolean;
+  function blobscachedx: boolean;
  end;
  
  isqlclient = interface(idatabaseclient)
@@ -1135,6 +1141,16 @@ begin
  result:= ''; //dummy
 end;
 
+function tcustomsqlconnection.getfeatures(): databasefeaturesty;
+begin
+ result:= [];
+end;
+
+function tcustomsqlconnection.blobscachedx: boolean;
+begin
+ result:= dbf_blobscached in getfeatures;
+end;
+
 procedure tcustomsqlconnection.updateutf8(var autf8: boolean);
 begin
  if dbo_utf8 in fcontroller.options then begin
@@ -1443,9 +1459,10 @@ begin
  end;
 end;
 
-procedure tcustomsqlconnection.internalexecuteunprepared(const cursor: tsqlcursor;
-               const atransaction: tsqltransaction;
-               const asql: string);
+procedure tcustomsqlconnection.internalexecuteunprepared(
+            const cursor: tsqlcursor; const atransaction: tsqltransaction;
+                     const asql: string; const origsql: msestring; 
+                                                    const aparams: tmseparams);
 begin
  raise edatabaseerror.create(name+': executeunprepared not supported.');
 end;
@@ -1457,25 +1474,34 @@ procedure tcustomsqlconnection.Executeunprepared(const cursor: TSQLCursor;
 var
  mstr1: msestring;
  str1: ansistring;
+ par1: tmseparams;
 begin
  if aparams <> nil then begin
   aparams.updatevalues;
  end;
  beforeaction;
  try
+  par1:= nil;
   if (aparams <> nil) and (aparams.count > 0) then begin
-   mstr1:= aparams.expandvalues(asql);
+   if dbf_params in getfeatures then begin
+    par1:= aparams; //asql used directly
+   end
+   else begin
+    mstr1:= aparams.expandvalues(asql);
+   end;
   end
   else begin
    mstr1:= asql;
   end;
-  if autf8 then begin
-   str1:= stringtoutf8ansi(mstr1);
-  end
-  else begin
-   str1:= ansistring(mstr1);
+  if mstr1 <> '' then begin
+   if autf8 then begin
+    str1:= stringtoutf8ansi(mstr1);
+   end
+   else begin
+    str1:= ansistring(mstr1);
+   end;
   end;
-  internalexecuteunprepared(cursor,atransaction,str1);
+  internalexecuteunprepared(cursor,atransaction,str1,asql,par1);
  finally
   afteraction;
  end;
