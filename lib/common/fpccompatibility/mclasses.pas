@@ -4112,7 +4112,7 @@ begin
   if newcapacity > fcapacity then begin
    if newcapacity > tmsgrow then begin
                // if growing, grow at least a quarter
-    i1:= (int64(5)*int64(FCapacity)) div int64(4);
+    i1:= FCapacity + fcapacity div 4;
     if NewCapacity < i1 then begin
      NewCapacity:= i1; // round off to block size.
     end;
