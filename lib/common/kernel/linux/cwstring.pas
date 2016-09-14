@@ -56,10 +56,10 @@ Uses
   {msedatalist,}msesysintf1,msesysintf,msestrings;
 
 Const
-{$ifndef useiconv}
-    libiconvname='c';  // is in libc under Linux.
+{$ifdef useiconv}
+ libiconvname='iconv';
 {$else}
-    libiconvname='iconv';
+ libiconvname='c';  // is in libc under Linux.
 {$endif}
 
 {$if defined(darwin) or defined(freebsd) and not defined(freebsd5)}
