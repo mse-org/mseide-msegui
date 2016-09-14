@@ -41,12 +41,11 @@ implementation
 {$ifdef FPC}{$linklib c}{$endif}
 
 {$ifndef linux}  // Linux (and maybe glibc platforms in general), have iconv in glibc.
-{$ifndef FreeBSD5}
- {$linklib iconv}
- {$define useiconv}
-{$endif}
+ {$ifndef FreeBSD5}
+  {$linklib iconv}
+  {$define useiconv}
+ {$endif}
 {$endif linux}
-
 Uses
 //  BaseUnix,
   msectypes,{$ifndef FPC}msetypes,{$endif}
@@ -61,6 +60,12 @@ Const
     libiconvname='c';  // is in libc under Linux.
 {$else}
     libiconvname='iconv';
+{$endif}
+
+{$if defined(darwin) or defined(freebsd) and not defined(freebsd5)}
+ prefix = 'lib';
+{$else}
+ prefix = '';
 {$endif}
 
 { Case-mapping "arrays" }
@@ -114,16 +119,15 @@ type
   iconv_t = pointer;
   nl_item = cint;
 
-function nl_langinfo(__item:nl_item):pchar;cdecl;external libiconvname name 'nl_langinfo';
-{$ifndef Darwin}
-function iconv_open(__tocode:pchar; __fromcode:pchar):iconv_t;cdecl;external libiconvname name 'iconv_open';
-function iconv(__cd:iconv_t; __inbuf:ppchar; __inbytesleft:psize_t; __outbuf:ppchar; __outbytesleft:psize_t):size_t;cdecl;external libiconvname name 'iconv';
-function iconv_close(__cd:iconv_t):cint;cdecl;external libiconvname name 'iconv_close';
-{$else}
-function iconv_open(__tocode:pchar; __fromcode:pchar):iconv_t;cdecl;external libiconvname name 'libiconv_open';
-function iconv(__cd:iconv_t; __inbuf:ppchar; __inbytesleft:psize_t; __outbuf:ppchar; __outbytesleft:psize_t):size_t;cdecl;external libiconvname name 'libiconv';
-function iconv_close(__cd:iconv_t):cint;cdecl;external libiconvname name 'libiconv_close';
-{$endif}
+function nl_langinfo(__item:nl_item):pchar cdecl 
+                                external libiconvname name 'nl_langinfo';
+function iconv_open(__tocode: pchar; __fromcode: pchar): iconv_t cdecl
+                                external libiconvname name prefix+'iconv_open';
+function iconv(__cd: iconv_t; __inbuf: ppchar; __inbytesleft: psize_t;
+              __outbuf: ppchar; __outbytesleft: psize_t): size_t cdecl
+                                external libiconvname name prefix+'iconv';
+function iconv_close(__cd: iconv_t): cint cdecl
+                                external libiconvname name prefix+'iconv_close';
 
 var
 //  iconv_ansi2ucs4,
