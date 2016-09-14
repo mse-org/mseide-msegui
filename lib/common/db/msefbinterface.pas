@@ -14,7 +14,7 @@ unit msefbinterface;
 {$ifdef FPC}{$mode delphi}{$h+}{$endif}
 interface
 uses
- firebird,msetypes,msefbconnection,mdb,msedb;
+ firebird,msetypes,msefbconnection,mdb,msedb,msestrings;
 type
 
  paraminfoty = record
@@ -59,6 +59,14 @@ type
    property parambuffer: pointer read fparambuffer;
  end;
 
+ tversioncallback = class(iversioncallbackimpl)
+  private
+   ftext: string;
+  public
+   procedure callback(status: IStatus; atext: PAnsiChar); override;
+   property text: string read ftext;
+ end;
+ 
 implementation
 uses
  msefirebird,dbconst,sysutils,msedate;
@@ -371,6 +379,13 @@ end;
 function tparamdata.getMessageLength(status: IStatus): Cardinal;
 begin
  result:= fmessagelength;
+end;
+
+{ tversioncallback }
+
+procedure tversioncallback.callback(status: IStatus; atext: PAnsiChar);
+begin
+ ftext:= ftext+atext+lineend;
 end;
 
 end.

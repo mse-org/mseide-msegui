@@ -207,8 +207,9 @@ type
    function fetchblob(const cursor: tsqlcursor;
                               const fieldnum: integer): ansistring; override;
                               //zero based
-    property lasterrormessage: msestring read flasterrormessage;
-    property lastsqlcode: int32 read flastsqlcode;
+   function version: msestring;
+   property lasterrormessage: msestring read flasterrormessage;
+   property lastsqlcode: int32 read flastsqlcode;
   published
    property dialect: integer read fdialect write fdialect 
                                         default sql_dialect_v6;
@@ -1221,6 +1222,24 @@ begin
  else begin
   result:= getblobstring(cursor,blobid);
  end;
+end;
+
+function tfbconnection.version: msestring;
+var
+ versioncallback: tversioncallback;
+begin
+ checkconnected();
+ versioncallback:= tversioncallback.create;
+ clearstatus();
+ fapi.util.getfbversion(fapi.status,fattachment,versioncallback);
+ if isutf8 then begin
+  result:= utf8tostring(versioncallback.text);
+ end
+ else begin
+  result:= msestring(versioncallback.text);
+ end;
+ versioncallback.destroy();
+ checkstatus('get version');
 end;
 
 const
