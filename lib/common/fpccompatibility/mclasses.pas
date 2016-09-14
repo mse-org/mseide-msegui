@@ -101,6 +101,8 @@ type
 
   TGetChildProc = procedure (Child: TComponent) of object;
 
+  TComponentClass = class of TComponent;
+
   tcomponent = class(tpersistent{,IUnknown,IInterfaceComponentReference})
   private
     FOwner: tcomponent;
@@ -183,6 +185,9 @@ type
     procedure Destroying;
     function ExecuteAction(Action: TBasicAction): Boolean; dynamic;
     function FindComponent(const AName: string): tcomponent;
+    function findtagcomponent(const atag: int32;
+                                const aclass: tcomponentclass): tcomponent;
+              //returns first matching desecendent
     procedure FreeNotification(AComponent: tcomponent);
     procedure RemoveFreeNotification(AComponent: tcomponent);
     procedure FreeOnRelease;
@@ -212,8 +217,6 @@ type
     property Tag: PtrInt read FTag write FTag default 0;
   end;
   pcomponent = ^tcomponent;
-
-  TComponentClass = class of TComponent;
 
   tcollection = class;
   
@@ -1941,6 +1944,30 @@ begin
       end;
 end;
 
+function tcomponent.findtagcomponent(const atag: int32;
+                              const aclass: tcomponentclass): tcomponent;
+var
+ i1: integer;
+ comp1: tcomponent;
+begin
+ result:= nil;
+ for i1:= 0 to componentcount - 1 do begin
+  comp1:= components[i1];
+  if (comp1.tag = atag) and 
+         ((aclass = nil) or (comp1 is aclass)) then begin
+   result:= comp1;
+   exit;
+  end;
+ end;
+ if result = nil then begin
+  for i1:= 0 to componentcount - 1 do begin
+   result:= components[i1].findtagcomponent(atag,aclass);
+   if result <> nil then begin
+    exit;
+   end;
+  end;
+ end;
+end;
 
 Procedure TComponent.FreeNotification(AComponent: TComponent);
 

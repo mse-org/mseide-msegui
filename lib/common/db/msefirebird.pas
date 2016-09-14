@@ -204,7 +204,7 @@ var
                            count: USHORT; names: array of const):ISC_LONG
                             {$ifdef cvcall}cdecl{$else}error{$endif}; {varargs;}
 *)
- gds__event_counts: procedure (result_vector: pULONG; legth: SSHORT;
+ isc_event_counts: procedure (result_vector: pULONG; legth: SSHORT;
                      before: pbyte; after: pbyte)
                                   {$ifdef wincall}stdcall{$else}cdecl{$endif};
 
@@ -235,7 +235,7 @@ const
   (n: 'fb_get_master_interface'; d: @fb_get_master_interface),
   (n: 'gds__vax_integer'; d: @gds__vax_integer),
 //  (n: 'gds__event_block'; d: @gds__event_block),
-  (n: 'gds__event_counts'; d: @gds__event_counts),
+  (n: 'isc_event_counts'; d: @isc_event_counts),
   (n: 'gds__alloc'; d: @gds__alloc),
   (n: 'gds__free'; d: @gds__free)
  );
