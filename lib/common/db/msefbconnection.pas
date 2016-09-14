@@ -82,9 +82,6 @@ type
   event: tdbevent;
   name: string;
   length: integer;
-//  eventbuffer: pchar;
-//  resultbuffer: pchar;
-//  id: isc_long;
   count: integer;
  end;
  pfbeventinfoty = ^fbeventinfoty;
@@ -112,6 +109,8 @@ type
                                          idbevent,idbeventcontroller)
   private
    fdialect: integer;
+   flasterrormessage: msestring;
+   flastsqlcode: int32;
    function getblobstream(const acursor: tsqlcursor; const blobid: isc_quad;
                       const forstring: boolean = false): tmemorystream;
    function getblobstring(const acursor: tsqlcursor;
@@ -128,7 +127,6 @@ type
    feventlength: int32;
    feventbuffer,fresultbuffer: pbyte;
    feventcountbuffer: array of ULONG;
-//   fmutex: mutexty;
    procedure iniapi();
    procedure finiapi();
    function getpb(): ixpbbuilder;
@@ -179,11 +177,10 @@ type
    procedure setupblobdata(const afield: tfield; const acursor: tsqlcursor;
                               const aparam: tparam);
     //idbevent
-          //idbevent
    procedure listen(const sender: tdbevent);
    procedure unlisten(const sender: tdbevent);
    procedure fire(const sender: tdbevent);
-          //idbeventcontroller
+    //idbeventcontroller
    function getdbevent(var aname: string; var aid: int64): boolean;
           //false if none
    procedure dolisten(const sender: tdbevent);
@@ -207,6 +204,11 @@ type
      const buffer: pointer; var bufsize: integer;
                                 const aisutf8: boolean): boolean; override;
           //if bufsize < 0 -> buffer was to small, should be -bufsize
+   function fetchblob(const cursor: tsqlcursor;
+                              const fieldnum: integer): ansistring; override;
+                              //zero based
+    property lasterrormessage: msestring read flasterrormessage;
+    property lastsqlcode: int32 read flastsqlcode;
   published
    property dialect: integer read fdialect write fdialect 
                                         default sql_dialect_v6;
@@ -341,13 +343,24 @@ constructor efberror.create(const asender: tfbconnection;
 var
  str1: string;
  msg1: msestring;
+ po1: nativeintptr;
+ err1: integer;
 begin
  str1:= formatstatus(astatus); 
  msg1:= aerrormessage;
  if str1 <> '' then begin
   msg1:= msg1 + lineend + msestring(str1);
  end;
- inherited create(asender,ansistring(msg1),msg1,0);
+ po1:= astatus.geterrors;
+ err1:= 0;
+ if po1 <> nil then begin
+  err1:= gds__sqlcode(po1);
+ end;
+ if asender <> nil then begin
+  asender.flasterrormessage:= msg1;
+  asender.flastsqlcode:= err1;
+ end;
+ inherited create(asender,ansistring(msg1),msg1,err1);
 end;
 
 { tfbconnection }
@@ -1192,6 +1205,21 @@ begin
    end;
    result:= true;
   end;
+ end;
+end;
+
+function tfbconnection.fetchblob(const cursor: tsqlcursor;
+               const fieldnum: integer): ansistring;
+var
+ blobId : ISC_QUAD;
+ int1: integer;
+begin
+ int1:= sizeof(blobid);
+ if not loadfield(cursor,ftblob,fieldnum,@blobid,int1,false) then begin
+  result:= '';
+ end
+ else begin
+  result:= getblobstring(cursor,blobid);
  end;
 end;
 

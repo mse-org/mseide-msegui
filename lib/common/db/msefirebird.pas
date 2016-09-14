@@ -173,6 +173,8 @@ type
   timestamp_time: ISC_TIME;
  end;
  pISC_TIMESTAMP = ^ISC_TIMESTAMP;
+ ISC_STATUS = ptrint;
+ pISC_STATUS = ^ISC_STATUS;
  
  vary = record
   vary_length: ISC_USHORT;
@@ -207,6 +209,8 @@ var
  isc_event_counts: procedure (result_vector: pULONG; legth: SSHORT;
                      before: pbyte; after: pbyte)
                                   {$ifdef wincall}stdcall{$else}cdecl{$endif};
+ gds__sqlcode: function(status_vector: pISC_STATUS): SLONG
+                                  {$ifdef wincall}stdcall{$else}cdecl{$endif};
 
 implementation
 uses
@@ -231,13 +235,14 @@ procedure initializefirebird(const sonames: array of filenamety; //[] = default
                                          const onlyonce: boolean = false);
                                      
 const
- funcs: array[0..4] of funcinfoty = (
+ funcs: array[0..5] of funcinfoty = (
   (n: 'fb_get_master_interface'; d: @fb_get_master_interface),
   (n: 'gds__vax_integer'; d: @gds__vax_integer),
 //  (n: 'gds__event_block'; d: @gds__event_block),
   (n: 'isc_event_counts'; d: @isc_event_counts),
   (n: 'gds__alloc'; d: @gds__alloc),
-  (n: 'gds__free'; d: @gds__free)
+  (n: 'gds__free'; d: @gds__free),
+  (n: 'gds__sqlcode'; d: @gds__sqlcode)
  );
  errormessage = 'Can not load Firebird library. ';
 
