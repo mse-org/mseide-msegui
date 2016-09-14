@@ -13,7 +13,7 @@ unit msefirebird;
 interface
 uses
  firebird,msestrings,msectypes,msetypes;
-
+{$define cvcall}
 const
 {$ifdef mswindows}
  {$define wincall}
@@ -51,6 +51,8 @@ const
  ISC_TIME_SECONDS_PRECISION = 10000;
  GDS_EPOCH_START = 40617;
  fbdatetimeoffset = -15018; //fpdate -> tdatetime;
+ EPB_version1 = 1;
+ 
 (*
 #define dtype_unknown	0
 #define dtype_text		1
@@ -151,7 +153,10 @@ static const USHORT type_lengths[DTYPE_TYPE_MAX] =
 type
  {$packrecords c}
  SSHORT = cshort;
+ USHORT = cushort;
  SLONG = int32;
+ ULONG = card32;
+ pULONG = ^ULONG;
  ISC_USHORT = cushort;
  ISC_SHORT = cshort;
  pISC_SHORT = ^ISC_SHORT;
@@ -183,12 +188,26 @@ procedure releasefirebird();
 
 function formatstatus(status: istatus): string;
 //function getstatus(): istatus;
-
+function event_block(out eventbuffer: pbyte; out resultbuffer: pbyte;
+                                         const names: array of string): int32;
 var
  fb_get_master_interface: function: IMaster
                                {$ifdef wincall}stdcall{$else}cdecl{$endif};
+ gds__alloc: function (size_request: SLONG): pointer
+                               {$ifdef wincall}stdcall{$else}cdecl{$endif};
+ gds__free: function(blk: pointer): ULONG;
+                               {$ifdef wincall}stdcall{$else}cdecl{$endif};
  gds__vax_integer: function (ptr: pbyte; length: SSHORT): ISC_LONG;
                                {$ifdef wincall}stdcall{$else}cdecl{$endif};
+(*
+ gds__event_block: function (event_buffer: ppbyte; result_buffer: ppbyte;
+                           count: USHORT; names: array of const):ISC_LONG
+                            {$ifdef cvcall}cdecl{$else}error{$endif}; {varargs;}
+*)
+ gds__event_counts: procedure (result_vector: pULONG; legth: SSHORT;
+                     before: pbyte; after: pbyte)
+                                  {$ifdef wincall}stdcall{$else}cdecl{$endif};
+
 implementation
 uses
  msedynload;
@@ -212,9 +231,13 @@ procedure initializefirebird(const sonames: array of filenamety; //[] = default
                                          const onlyonce: boolean = false);
                                      
 const
- funcs: array[0..1] of funcinfoty = (
+ funcs: array[0..4] of funcinfoty = (
   (n: 'fb_get_master_interface'; d: @fb_get_master_interface),
-  (n: 'gds__vax_integer'; d: @gds__vax_integer)
+  (n: 'gds__vax_integer'; d: @gds__vax_integer),
+//  (n: 'gds__event_block'; d: @gds__event_block),
+  (n: 'gds__event_counts'; d: @gds__event_counts),
+  (n: 'gds__alloc'; d: @gds__alloc),
+  (n: 'gds__free'; d: @gds__free)
  );
  errormessage = 'Can not load Firebird library. ';
 
@@ -227,6 +250,38 @@ end;
 procedure releasefirebird();
 begin
  releasedynlib(libinfo,@releasefb);
+end;
+
+function event_block(out eventbuffer: pbyte; out resultbuffer: pbyte;
+                                        const names: array of string): int32;
+var
+ i1,i2: int32;
+ po1: pointer;
+begin
+ i2:= 1;
+ for i1:= 0 to high(names) do begin
+  i2:= i2 + length(names[i1]) + 5;
+ end;
+ result:= i2;
+ po1:= gds__alloc(i2);
+ eventbuffer:= po1;
+ resultbuffer:= gds__alloc(i2);
+ pbyte(po1)^:= EPB_version1;
+ inc(po1);
+ for i1:= 0 to high(names) do begin
+  pbyte(po1)^:= length(names[i1]);
+  inc(po1);
+  move(pointer(names[i1])^,po1^,length(names[i1]));
+  inc(po1,length(names[i1]));
+  pbyte(po1)^:= 0;
+  inc(po1);
+  pbyte(po1)^:= 0;
+  inc(po1);
+  pbyte(po1)^:= 0;
+  inc(po1);
+  pbyte(po1)^:= 0;
+  inc(po1);
+ end;
 end;
 
 function formatstatus(status: istatus): string;

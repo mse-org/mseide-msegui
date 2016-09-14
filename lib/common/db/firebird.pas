@@ -6858,20 +6858,20 @@ end;
 
 procedure IReferenceCountedImpl_addRefDispatcher(this: IReferenceCounted); cdecl;
 begin
-	try
+	//try
 		IReferenceCountedImpl(this).addRef();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function IReferenceCountedImpl_releaseDispatcher(this: IReferenceCounted): Integer; cdecl;
 begin
-	try
+	//try
 		Result := IReferenceCountedImpl(this).release();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 var
@@ -6884,11 +6884,11 @@ end;
 
 procedure IDisposableImpl_disposeDispatcher(this: IDisposable); cdecl;
 begin
-	try
+	//try
 		IDisposableImpl(this).dispose();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 var
@@ -6901,92 +6901,92 @@ end;
 
 procedure IStatusImpl_disposeDispatcher(this: IStatus); cdecl;
 begin
-	try
+	//try
 		IStatusImpl(this).dispose();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 procedure IStatusImpl_initDispatcher(this: IStatus); cdecl;
 begin
-	try
+	//try
 		IStatusImpl(this).init();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function IStatusImpl_getStateDispatcher(this: IStatus): Cardinal; cdecl;
 begin
-	try
+	//try
 		Result := IStatusImpl(this).getState();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 procedure IStatusImpl_setErrors2Dispatcher(this: IStatus; length: Cardinal; value: NativeIntPtr); cdecl;
 begin
-	try
+	//try
 		IStatusImpl(this).setErrors2(length, value);
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 procedure IStatusImpl_setWarnings2Dispatcher(this: IStatus; length: Cardinal; value: NativeIntPtr); cdecl;
 begin
-	try
+	//try
 		IStatusImpl(this).setWarnings2(length, value);
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 procedure IStatusImpl_setErrorsDispatcher(this: IStatus; value: NativeIntPtr); cdecl;
 begin
-	try
+	//try
 		IStatusImpl(this).setErrors(value);
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 procedure IStatusImpl_setWarningsDispatcher(this: IStatus; value: NativeIntPtr); cdecl;
 begin
-	try
+	//try
 		IStatusImpl(this).setWarnings(value);
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function IStatusImpl_getErrorsDispatcher(this: IStatus): NativeIntPtr; cdecl;
 begin
-	try
+	//try
 		Result := IStatusImpl(this).getErrors();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function IStatusImpl_getWarningsDispatcher(this: IStatus): NativeIntPtr; cdecl;
 begin
-	try
+	//try
 		Result := IStatusImpl(this).getWarnings();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function IStatusImpl_cloneDispatcher(this: IStatus): IStatus; cdecl;
 begin
-	try
+	//try
 		Result := IStatusImpl(this).clone();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 var
@@ -6999,110 +6999,110 @@ end;
 
 function IMasterImpl_getStatusDispatcher(this: IMaster): IStatus; cdecl;
 begin
-	try
+	//try
 		Result := IMasterImpl(this).getStatus();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function IMasterImpl_getDispatcherDispatcher(this: IMaster): IProvider; cdecl;
 begin
-	try
+	//try
 		Result := IMasterImpl(this).getDispatcher();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function IMasterImpl_getPluginManagerDispatcher(this: IMaster): IPluginManager; cdecl;
 begin
-	try
+	//try
 		Result := IMasterImpl(this).getPluginManager();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function IMasterImpl_getTimerControlDispatcher(this: IMaster): ITimerControl; cdecl;
 begin
-	try
+	//try
 		Result := IMasterImpl(this).getTimerControl();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function IMasterImpl_getDtcDispatcher(this: IMaster): IDtc; cdecl;
 begin
-	try
+	//try
 		Result := IMasterImpl(this).getDtc();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function IMasterImpl_registerAttachmentDispatcher(this: IMaster; provider: IProvider; attachment: IAttachment): IAttachment; cdecl;
 begin
-	try
+	//try
 		Result := IMasterImpl(this).registerAttachment(provider, attachment);
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function IMasterImpl_registerTransactionDispatcher(this: IMaster; attachment: IAttachment; transaction: ITransaction): ITransaction; cdecl;
 begin
-	try
+	//try
 		Result := IMasterImpl(this).registerTransaction(attachment, transaction);
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function IMasterImpl_getMetadataBuilderDispatcher(this: IMaster; status: IStatus; fieldCount: Cardinal): IMetadataBuilder; cdecl;
 begin
-	try
+	//try
 		Result := IMasterImpl(this).getMetadataBuilder(status, fieldCount);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 function IMasterImpl_serverModeDispatcher(this: IMaster; mode: Integer): Integer; cdecl;
 begin
-	try
+	//try
 		Result := IMasterImpl(this).serverMode(mode);
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function IMasterImpl_getUtilInterfaceDispatcher(this: IMaster): IUtil; cdecl;
 begin
-	try
+	//try
 		Result := IMasterImpl(this).getUtilInterface();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function IMasterImpl_getConfigManagerDispatcher(this: IMaster): IConfigManager; cdecl;
 begin
-	try
+	//try
 		Result := IMasterImpl(this).getConfigManager();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function IMasterImpl_getProcessExitingDispatcher(this: IMaster): Boolean; cdecl;
 begin
-	try
+	//try
 		Result := IMasterImpl(this).getProcessExiting();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 var
@@ -7115,38 +7115,38 @@ end;
 
 procedure IPluginBaseImpl_addRefDispatcher(this: IPluginBase); cdecl;
 begin
-	try
+	//try
 		IPluginBaseImpl(this).addRef();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function IPluginBaseImpl_releaseDispatcher(this: IPluginBase): Integer; cdecl;
 begin
-	try
+	//try
 		Result := IPluginBaseImpl(this).release();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 procedure IPluginBaseImpl_setOwnerDispatcher(this: IPluginBase; r: IReferenceCounted); cdecl;
 begin
-	try
+	//try
 		IPluginBaseImpl(this).setOwner(r);
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function IPluginBaseImpl_getOwnerDispatcher(this: IPluginBase): IReferenceCounted; cdecl;
 begin
-	try
+	//try
 		Result := IPluginBaseImpl(this).getOwner();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 var
@@ -7159,65 +7159,65 @@ end;
 
 procedure IPluginSetImpl_addRefDispatcher(this: IPluginSet); cdecl;
 begin
-	try
+	//try
 		IPluginSetImpl(this).addRef();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function IPluginSetImpl_releaseDispatcher(this: IPluginSet): Integer; cdecl;
 begin
-	try
+	//try
 		Result := IPluginSetImpl(this).release();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function IPluginSetImpl_getNameDispatcher(this: IPluginSet): PAnsiChar; cdecl;
 begin
-	try
+	//try
 		Result := IPluginSetImpl(this).getName();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function IPluginSetImpl_getModuleNameDispatcher(this: IPluginSet): PAnsiChar; cdecl;
 begin
-	try
+	//try
 		Result := IPluginSetImpl(this).getModuleName();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function IPluginSetImpl_getPluginDispatcher(this: IPluginSet; status: IStatus): IPluginBase; cdecl;
 begin
-	try
+	//try
 		Result := IPluginSetImpl(this).getPlugin(status);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 procedure IPluginSetImpl_nextDispatcher(this: IPluginSet; status: IStatus); cdecl;
 begin
-	try
+	//try
 		IPluginSetImpl(this).next(status);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 procedure IPluginSetImpl_set_Dispatcher(this: IPluginSet; status: IStatus; s: PAnsiChar); cdecl;
 begin
-	try
+	//try
 		IPluginSetImpl(this).set_(status, s);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 var
@@ -7230,65 +7230,65 @@ end;
 
 procedure IConfigEntryImpl_addRefDispatcher(this: IConfigEntry); cdecl;
 begin
-	try
+	//try
 		IConfigEntryImpl(this).addRef();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function IConfigEntryImpl_releaseDispatcher(this: IConfigEntry): Integer; cdecl;
 begin
-	try
+	//try
 		Result := IConfigEntryImpl(this).release();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function IConfigEntryImpl_getNameDispatcher(this: IConfigEntry): PAnsiChar; cdecl;
 begin
-	try
+	//try
 		Result := IConfigEntryImpl(this).getName();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function IConfigEntryImpl_getValueDispatcher(this: IConfigEntry): PAnsiChar; cdecl;
 begin
-	try
+	//try
 		Result := IConfigEntryImpl(this).getValue();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function IConfigEntryImpl_getIntValueDispatcher(this: IConfigEntry): Int64; cdecl;
 begin
-	try
+	//try
 		Result := IConfigEntryImpl(this).getIntValue();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function IConfigEntryImpl_getBoolValueDispatcher(this: IConfigEntry): Boolean; cdecl;
 begin
-	try
+	//try
 		Result := IConfigEntryImpl(this).getBoolValue();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function IConfigEntryImpl_getSubConfigDispatcher(this: IConfigEntry; status: IStatus): IConfig; cdecl;
 begin
-	try
+	//try
 		Result := IConfigEntryImpl(this).getSubConfig(status);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 var
@@ -7301,47 +7301,47 @@ end;
 
 procedure IConfigImpl_addRefDispatcher(this: IConfig); cdecl;
 begin
-	try
+	//try
 		IConfigImpl(this).addRef();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function IConfigImpl_releaseDispatcher(this: IConfig): Integer; cdecl;
 begin
-	try
+	//try
 		Result := IConfigImpl(this).release();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function IConfigImpl_findDispatcher(this: IConfig; status: IStatus; name: PAnsiChar): IConfigEntry; cdecl;
 begin
-	try
+	//try
 		Result := IConfigImpl(this).find(status, name);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 function IConfigImpl_findValueDispatcher(this: IConfig; status: IStatus; name: PAnsiChar; value: PAnsiChar): IConfigEntry; cdecl;
 begin
-	try
+	//try
 		Result := IConfigImpl(this).findValue(status, name, value);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 function IConfigImpl_findPosDispatcher(this: IConfig; status: IStatus; name: PAnsiChar; pos: Cardinal): IConfigEntry; cdecl;
 begin
-	try
+	//try
 		Result := IConfigImpl(this).findPos(status, name, pos);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 var
@@ -7354,56 +7354,56 @@ end;
 
 procedure IFirebirdConfImpl_addRefDispatcher(this: IFirebirdConf); cdecl;
 begin
-	try
+	//try
 		IFirebirdConfImpl(this).addRef();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function IFirebirdConfImpl_releaseDispatcher(this: IFirebirdConf): Integer; cdecl;
 begin
-	try
+	//try
 		Result := IFirebirdConfImpl(this).release();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function IFirebirdConfImpl_getKeyDispatcher(this: IFirebirdConf; name: PAnsiChar): Cardinal; cdecl;
 begin
-	try
+	//try
 		Result := IFirebirdConfImpl(this).getKey(name);
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function IFirebirdConfImpl_asIntegerDispatcher(this: IFirebirdConf; key: Cardinal): Int64; cdecl;
 begin
-	try
+	//try
 		Result := IFirebirdConfImpl(this).asInteger(key);
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function IFirebirdConfImpl_asStringDispatcher(this: IFirebirdConf; key: Cardinal): PAnsiChar; cdecl;
 begin
-	try
+	//try
 		Result := IFirebirdConfImpl(this).asString(key);
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function IFirebirdConfImpl_asBooleanDispatcher(this: IFirebirdConf; key: Cardinal): Boolean; cdecl;
 begin
-	try
+	//try
 		Result := IFirebirdConfImpl(this).asBoolean(key);
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 var
@@ -7416,56 +7416,56 @@ end;
 
 procedure IPluginConfigImpl_addRefDispatcher(this: IPluginConfig); cdecl;
 begin
-	try
+	//try
 		IPluginConfigImpl(this).addRef();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function IPluginConfigImpl_releaseDispatcher(this: IPluginConfig): Integer; cdecl;
 begin
-	try
+	//try
 		Result := IPluginConfigImpl(this).release();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function IPluginConfigImpl_getConfigFileNameDispatcher(this: IPluginConfig): PAnsiChar; cdecl;
 begin
-	try
+	//try
 		Result := IPluginConfigImpl(this).getConfigFileName();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function IPluginConfigImpl_getDefaultConfigDispatcher(this: IPluginConfig; status: IStatus): IConfig; cdecl;
 begin
-	try
+	//try
 		Result := IPluginConfigImpl(this).getDefaultConfig(status);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 function IPluginConfigImpl_getFirebirdConfDispatcher(this: IPluginConfig; status: IStatus): IFirebirdConf; cdecl;
 begin
-	try
+	//try
 		Result := IPluginConfigImpl(this).getFirebirdConf(status);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 procedure IPluginConfigImpl_setReleaseDelayDispatcher(this: IPluginConfig; status: IStatus; microSeconds: QWord); cdecl;
 begin
-	try
+	//try
 		IPluginConfigImpl(this).setReleaseDelay(status, microSeconds);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 var
@@ -7478,11 +7478,11 @@ end;
 
 function IPluginFactoryImpl_createPluginDispatcher(this: IPluginFactory; status: IStatus; factoryParameter: IPluginConfig): IPluginBase; cdecl;
 begin
-	try
+	//try
 		Result := IPluginFactoryImpl(this).createPlugin(status, factoryParameter);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 var
@@ -7495,11 +7495,11 @@ end;
 
 procedure IPluginModuleImpl_doCleanDispatcher(this: IPluginModule); cdecl;
 begin
-	try
+	//try
 		IPluginModuleImpl(this).doClean();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 var
@@ -7512,56 +7512,56 @@ end;
 
 procedure IPluginManagerImpl_registerPluginFactoryDispatcher(this: IPluginManager; pluginType: Cardinal; defaultName: PAnsiChar; factory: IPluginFactory); cdecl;
 begin
-	try
+	//try
 		IPluginManagerImpl(this).registerPluginFactory(pluginType, defaultName, factory);
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 procedure IPluginManagerImpl_registerModuleDispatcher(this: IPluginManager; cleanup: IPluginModule); cdecl;
 begin
-	try
+	//try
 		IPluginManagerImpl(this).registerModule(cleanup);
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 procedure IPluginManagerImpl_unregisterModuleDispatcher(this: IPluginManager; cleanup: IPluginModule); cdecl;
 begin
-	try
+	//try
 		IPluginManagerImpl(this).unregisterModule(cleanup);
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function IPluginManagerImpl_getPluginsDispatcher(this: IPluginManager; status: IStatus; pluginType: Cardinal; namesList: PAnsiChar; firebirdConf: IFirebirdConf): IPluginSet; cdecl;
 begin
-	try
+	//try
 		Result := IPluginManagerImpl(this).getPlugins(status, pluginType, namesList, firebirdConf);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 function IPluginManagerImpl_getConfigDispatcher(this: IPluginManager; status: IStatus; filename: PAnsiChar): IConfig; cdecl;
 begin
-	try
+	//try
 		Result := IPluginManagerImpl(this).getConfig(status, filename);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 procedure IPluginManagerImpl_releasePluginDispatcher(this: IPluginManager; plugin: IPluginBase); cdecl;
 begin
-	try
+	//try
 		IPluginManagerImpl(this).releasePlugin(plugin);
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 var
@@ -7574,38 +7574,38 @@ end;
 
 procedure ICryptKeyImpl_setSymmetricDispatcher(this: ICryptKey; status: IStatus; type_: PAnsiChar; keyLength: Cardinal; key: Pointer); cdecl;
 begin
-	try
+	//try
 		ICryptKeyImpl(this).setSymmetric(status, type_, keyLength, key);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 procedure ICryptKeyImpl_setAsymmetricDispatcher(this: ICryptKey; status: IStatus; type_: PAnsiChar; encryptKeyLength: Cardinal; encryptKey: Pointer; decryptKeyLength: Cardinal; decryptKey: Pointer); cdecl;
 begin
-	try
+	//try
 		ICryptKeyImpl(this).setAsymmetric(status, type_, encryptKeyLength, encryptKey, decryptKeyLength, decryptKey);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 function ICryptKeyImpl_getEncryptKeyDispatcher(this: ICryptKey; length: CardinalPtr): Pointer; cdecl;
 begin
-	try
+	//try
 		Result := ICryptKeyImpl(this).getEncryptKey(length);
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function ICryptKeyImpl_getDecryptKeyDispatcher(this: ICryptKey; length: CardinalPtr): Pointer; cdecl;
 begin
-	try
+	//try
 		Result := ICryptKeyImpl(this).getDecryptKey(length);
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 var
@@ -7618,56 +7618,56 @@ end;
 
 function IConfigManagerImpl_getDirectoryDispatcher(this: IConfigManager; code: Cardinal): PAnsiChar; cdecl;
 begin
-	try
+	//try
 		Result := IConfigManagerImpl(this).getDirectory(code);
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function IConfigManagerImpl_getFirebirdConfDispatcher(this: IConfigManager): IFirebirdConf; cdecl;
 begin
-	try
+	//try
 		Result := IConfigManagerImpl(this).getFirebirdConf();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function IConfigManagerImpl_getDatabaseConfDispatcher(this: IConfigManager; dbName: PAnsiChar): IFirebirdConf; cdecl;
 begin
-	try
+	//try
 		Result := IConfigManagerImpl(this).getDatabaseConf(dbName);
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function IConfigManagerImpl_getPluginConfigDispatcher(this: IConfigManager; configuredPlugin: PAnsiChar): IConfig; cdecl;
 begin
-	try
+	//try
 		Result := IConfigManagerImpl(this).getPluginConfig(configuredPlugin);
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function IConfigManagerImpl_getInstallDirectoryDispatcher(this: IConfigManager): PAnsiChar; cdecl;
 begin
-	try
+	//try
 		Result := IConfigManagerImpl(this).getInstallDirectory();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function IConfigManagerImpl_getRootDirectoryDispatcher(this: IConfigManager): PAnsiChar; cdecl;
 begin
-	try
+	//try
 		Result := IConfigManagerImpl(this).getRootDirectory();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 var
@@ -7680,29 +7680,29 @@ end;
 
 procedure IEventCallbackImpl_addRefDispatcher(this: IEventCallback); cdecl;
 begin
-	try
+	//try
 		IEventCallbackImpl(this).addRef();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function IEventCallbackImpl_releaseDispatcher(this: IEventCallback): Integer; cdecl;
 begin
-	try
+	//try
 		Result := IEventCallbackImpl(this).release();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 procedure IEventCallbackImpl_eventCallbackFunctionDispatcher(this: IEventCallback; length: Cardinal; events: BytePtr); cdecl;
 begin
-	try
+	//try
 		IEventCallbackImpl(this).eventCallbackFunction(length, events);
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 var
@@ -7715,74 +7715,74 @@ end;
 
 procedure IBlobImpl_addRefDispatcher(this: IBlob); cdecl;
 begin
-	try
+	//try
 		IBlobImpl(this).addRef();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function IBlobImpl_releaseDispatcher(this: IBlob): Integer; cdecl;
 begin
-	try
+	//try
 		Result := IBlobImpl(this).release();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 procedure IBlobImpl_getInfoDispatcher(this: IBlob; status: IStatus; itemsLength: Cardinal; items: BytePtr; bufferLength: Cardinal; buffer: BytePtr); cdecl;
 begin
-	try
+	//try
 		IBlobImpl(this).getInfo(status, itemsLength, items, bufferLength, buffer);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 function IBlobImpl_getSegmentDispatcher(this: IBlob; status: IStatus; bufferLength: Cardinal; buffer: Pointer; segmentLength: CardinalPtr): Integer; cdecl;
 begin
-	try
+	//try
 		Result := IBlobImpl(this).getSegment(status, bufferLength, buffer, segmentLength);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 procedure IBlobImpl_putSegmentDispatcher(this: IBlob; status: IStatus; length: Cardinal; buffer: Pointer); cdecl;
 begin
-	try
+	//try
 		IBlobImpl(this).putSegment(status, length, buffer);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 procedure IBlobImpl_cancelDispatcher(this: IBlob; status: IStatus); cdecl;
 begin
-	try
+	//try
 		IBlobImpl(this).cancel(status);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 procedure IBlobImpl_closeDispatcher(this: IBlob; status: IStatus); cdecl;
 begin
-	try
+	//try
 		IBlobImpl(this).close(status);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 function IBlobImpl_seekDispatcher(this: IBlob; status: IStatus; mode: Integer; offset: Integer): Integer; cdecl;
 begin
-	try
+	//try
 		Result := IBlobImpl(this).seek(status, mode, offset);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 var
@@ -7795,110 +7795,110 @@ end;
 
 procedure ITransactionImpl_addRefDispatcher(this: ITransaction); cdecl;
 begin
-	try
+	//try
 		ITransactionImpl(this).addRef();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function ITransactionImpl_releaseDispatcher(this: ITransaction): Integer; cdecl;
 begin
-	try
+	//try
 		Result := ITransactionImpl(this).release();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 procedure ITransactionImpl_getInfoDispatcher(this: ITransaction; status: IStatus; itemsLength: Cardinal; items: BytePtr; bufferLength: Cardinal; buffer: BytePtr); cdecl;
 begin
-	try
+	//try
 		ITransactionImpl(this).getInfo(status, itemsLength, items, bufferLength, buffer);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 procedure ITransactionImpl_prepareDispatcher(this: ITransaction; status: IStatus; msgLength: Cardinal; message: BytePtr); cdecl;
 begin
-	try
+	//try
 		ITransactionImpl(this).prepare(status, msgLength, message);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 procedure ITransactionImpl_commitDispatcher(this: ITransaction; status: IStatus); cdecl;
 begin
-	try
+	//try
 		ITransactionImpl(this).commit(status);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 procedure ITransactionImpl_commitRetainingDispatcher(this: ITransaction; status: IStatus); cdecl;
 begin
-	try
+	//try
 		ITransactionImpl(this).commitRetaining(status);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 procedure ITransactionImpl_rollbackDispatcher(this: ITransaction; status: IStatus); cdecl;
 begin
-	try
+	//try
 		ITransactionImpl(this).rollback(status);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 procedure ITransactionImpl_rollbackRetainingDispatcher(this: ITransaction; status: IStatus); cdecl;
 begin
-	try
+	//try
 		ITransactionImpl(this).rollbackRetaining(status);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 procedure ITransactionImpl_disconnectDispatcher(this: ITransaction; status: IStatus); cdecl;
 begin
-	try
+	//try
 		ITransactionImpl(this).disconnect(status);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 function ITransactionImpl_joinDispatcher(this: ITransaction; status: IStatus; transaction: ITransaction): ITransaction; cdecl;
 begin
-	try
+	//try
 		Result := ITransactionImpl(this).join(status, transaction);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 function ITransactionImpl_validateDispatcher(this: ITransaction; status: IStatus; attachment: IAttachment): ITransaction; cdecl;
 begin
-	try
+	//try
 		Result := ITransactionImpl(this).validate(status, attachment);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 function ITransactionImpl_enterDtcDispatcher(this: ITransaction; status: IStatus): ITransaction; cdecl;
 begin
-	try
+	//try
 		Result := ITransactionImpl(this).enterDtc(status);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 var
@@ -7911,155 +7911,155 @@ end;
 
 procedure IMessageMetadataImpl_addRefDispatcher(this: IMessageMetadata); cdecl;
 begin
-	try
+	//try
 		IMessageMetadataImpl(this).addRef();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function IMessageMetadataImpl_releaseDispatcher(this: IMessageMetadata): Integer; cdecl;
 begin
-	try
+	//try
 		Result := IMessageMetadataImpl(this).release();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function IMessageMetadataImpl_getCountDispatcher(this: IMessageMetadata; status: IStatus): Cardinal; cdecl;
 begin
-	try
+	//try
 		Result := IMessageMetadataImpl(this).getCount(status);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 function IMessageMetadataImpl_getFieldDispatcher(this: IMessageMetadata; status: IStatus; index: Cardinal): PAnsiChar; cdecl;
 begin
-	try
+	//try
 		Result := IMessageMetadataImpl(this).getField(status, index);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 function IMessageMetadataImpl_getRelationDispatcher(this: IMessageMetadata; status: IStatus; index: Cardinal): PAnsiChar; cdecl;
 begin
-	try
+	//try
 		Result := IMessageMetadataImpl(this).getRelation(status, index);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 function IMessageMetadataImpl_getOwnerDispatcher(this: IMessageMetadata; status: IStatus; index: Cardinal): PAnsiChar; cdecl;
 begin
-	try
+	//try
 		Result := IMessageMetadataImpl(this).getOwner(status, index);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 function IMessageMetadataImpl_getAliasDispatcher(this: IMessageMetadata; status: IStatus; index: Cardinal): PAnsiChar; cdecl;
 begin
-	try
+	//try
 		Result := IMessageMetadataImpl(this).getAlias(status, index);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 function IMessageMetadataImpl_getTypeDispatcher(this: IMessageMetadata; status: IStatus; index: Cardinal): Cardinal; cdecl;
 begin
-	try
+	//try
 		Result := IMessageMetadataImpl(this).getType(status, index);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 function IMessageMetadataImpl_isNullableDispatcher(this: IMessageMetadata; status: IStatus; index: Cardinal): Boolean; cdecl;
 begin
-	try
+	//try
 		Result := IMessageMetadataImpl(this).isNullable(status, index);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 function IMessageMetadataImpl_getSubTypeDispatcher(this: IMessageMetadata; status: IStatus; index: Cardinal): Integer; cdecl;
 begin
-	try
+	//try
 		Result := IMessageMetadataImpl(this).getSubType(status, index);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 function IMessageMetadataImpl_getLengthDispatcher(this: IMessageMetadata; status: IStatus; index: Cardinal): Cardinal; cdecl;
 begin
-	try
+	//try
 		Result := IMessageMetadataImpl(this).getLength(status, index);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 function IMessageMetadataImpl_getScaleDispatcher(this: IMessageMetadata; status: IStatus; index: Cardinal): Integer; cdecl;
 begin
-	try
+	//try
 		Result := IMessageMetadataImpl(this).getScale(status, index);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 function IMessageMetadataImpl_getCharSetDispatcher(this: IMessageMetadata; status: IStatus; index: Cardinal): Cardinal; cdecl;
 begin
-	try
+	//try
 		Result := IMessageMetadataImpl(this).getCharSet(status, index);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 function IMessageMetadataImpl_getOffsetDispatcher(this: IMessageMetadata; status: IStatus; index: Cardinal): Cardinal; cdecl;
 begin
-	try
+	//try
 		Result := IMessageMetadataImpl(this).getOffset(status, index);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 function IMessageMetadataImpl_getNullOffsetDispatcher(this: IMessageMetadata; status: IStatus; index: Cardinal): Cardinal; cdecl;
 begin
-	try
+	//try
 		Result := IMessageMetadataImpl(this).getNullOffset(status, index);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 function IMessageMetadataImpl_getBuilderDispatcher(this: IMessageMetadata; status: IStatus): IMetadataBuilder; cdecl;
 begin
-	try
+	//try
 		Result := IMessageMetadataImpl(this).getBuilder(status);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 function IMessageMetadataImpl_getMessageLengthDispatcher(this: IMessageMetadata; status: IStatus): Cardinal; cdecl;
 begin
-	try
+	//try
 		Result := IMessageMetadataImpl(this).getMessageLength(status);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 var
@@ -8072,110 +8072,110 @@ end;
 
 procedure IMetadataBuilderImpl_addRefDispatcher(this: IMetadataBuilder); cdecl;
 begin
-	try
+	//try
 		IMetadataBuilderImpl(this).addRef();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function IMetadataBuilderImpl_releaseDispatcher(this: IMetadataBuilder): Integer; cdecl;
 begin
-	try
+	//try
 		Result := IMetadataBuilderImpl(this).release();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 procedure IMetadataBuilderImpl_setTypeDispatcher(this: IMetadataBuilder; status: IStatus; index: Cardinal; type_: Cardinal); cdecl;
 begin
-	try
+	//try
 		IMetadataBuilderImpl(this).setType(status, index, type_);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 procedure IMetadataBuilderImpl_setSubTypeDispatcher(this: IMetadataBuilder; status: IStatus; index: Cardinal; subType: Integer); cdecl;
 begin
-	try
+	//try
 		IMetadataBuilderImpl(this).setSubType(status, index, subType);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 procedure IMetadataBuilderImpl_setLengthDispatcher(this: IMetadataBuilder; status: IStatus; index: Cardinal; length: Cardinal); cdecl;
 begin
-	try
+	//try
 		IMetadataBuilderImpl(this).setLength(status, index, length);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 procedure IMetadataBuilderImpl_setCharSetDispatcher(this: IMetadataBuilder; status: IStatus; index: Cardinal; charSet: Cardinal); cdecl;
 begin
-	try
+	//try
 		IMetadataBuilderImpl(this).setCharSet(status, index, charSet);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 procedure IMetadataBuilderImpl_setScaleDispatcher(this: IMetadataBuilder; status: IStatus; index: Cardinal; scale: Cardinal); cdecl;
 begin
-	try
+	//try
 		IMetadataBuilderImpl(this).setScale(status, index, scale);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 procedure IMetadataBuilderImpl_truncateDispatcher(this: IMetadataBuilder; status: IStatus; count: Cardinal); cdecl;
 begin
-	try
+	//try
 		IMetadataBuilderImpl(this).truncate(status, count);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 procedure IMetadataBuilderImpl_moveNameToIndexDispatcher(this: IMetadataBuilder; status: IStatus; name: PAnsiChar; index: Cardinal); cdecl;
 begin
-	try
+	//try
 		IMetadataBuilderImpl(this).moveNameToIndex(status, name, index);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 procedure IMetadataBuilderImpl_removeDispatcher(this: IMetadataBuilder; status: IStatus; index: Cardinal); cdecl;
 begin
-	try
+	//try
 		IMetadataBuilderImpl(this).remove(status, index);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 function IMetadataBuilderImpl_addFieldDispatcher(this: IMetadataBuilder; status: IStatus): Cardinal; cdecl;
 begin
-	try
+	//try
 		Result := IMetadataBuilderImpl(this).addField(status);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 function IMetadataBuilderImpl_getMetadataDispatcher(this: IMetadataBuilder; status: IStatus): IMessageMetadata; cdecl;
 begin
-	try
+	//try
 		Result := IMetadataBuilderImpl(this).getMetadata(status);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 var
@@ -8188,119 +8188,119 @@ end;
 
 procedure IResultSetImpl_addRefDispatcher(this: IResultSet); cdecl;
 begin
-	try
+	//try
 		IResultSetImpl(this).addRef();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function IResultSetImpl_releaseDispatcher(this: IResultSet): Integer; cdecl;
 begin
-	try
+	//try
 		Result := IResultSetImpl(this).release();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function IResultSetImpl_fetchNextDispatcher(this: IResultSet; status: IStatus; message: Pointer): Integer; cdecl;
 begin
-	try
+	//try
 		Result := IResultSetImpl(this).fetchNext(status, message);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 function IResultSetImpl_fetchPriorDispatcher(this: IResultSet; status: IStatus; message: Pointer): Integer; cdecl;
 begin
-	try
+	//try
 		Result := IResultSetImpl(this).fetchPrior(status, message);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 function IResultSetImpl_fetchFirstDispatcher(this: IResultSet; status: IStatus; message: Pointer): Integer; cdecl;
 begin
-	try
+	//try
 		Result := IResultSetImpl(this).fetchFirst(status, message);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 function IResultSetImpl_fetchLastDispatcher(this: IResultSet; status: IStatus; message: Pointer): Integer; cdecl;
 begin
-	try
+	//try
 		Result := IResultSetImpl(this).fetchLast(status, message);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 function IResultSetImpl_fetchAbsoluteDispatcher(this: IResultSet; status: IStatus; position: Integer; message: Pointer): Integer; cdecl;
 begin
-	try
+	//try
 		Result := IResultSetImpl(this).fetchAbsolute(status, position, message);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 function IResultSetImpl_fetchRelativeDispatcher(this: IResultSet; status: IStatus; offset: Integer; message: Pointer): Integer; cdecl;
 begin
-	try
+	//try
 		Result := IResultSetImpl(this).fetchRelative(status, offset, message);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 function IResultSetImpl_isEofDispatcher(this: IResultSet; status: IStatus): Boolean; cdecl;
 begin
-	try
+	//try
 		Result := IResultSetImpl(this).isEof(status);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 function IResultSetImpl_isBofDispatcher(this: IResultSet; status: IStatus): Boolean; cdecl;
 begin
-	try
+	//try
 		Result := IResultSetImpl(this).isBof(status);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 function IResultSetImpl_getMetadataDispatcher(this: IResultSet; status: IStatus): IMessageMetadata; cdecl;
 begin
-	try
+	//try
 		Result := IResultSetImpl(this).getMetadata(status);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 procedure IResultSetImpl_closeDispatcher(this: IResultSet; status: IStatus); cdecl;
 begin
-	try
+	//try
 		IResultSetImpl(this).close(status);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 procedure IResultSetImpl_setDelayedOutputFormatDispatcher(this: IResultSet; status: IStatus; format: IMessageMetadata); cdecl;
 begin
-	try
+	//try
 		IResultSetImpl(this).setDelayedOutputFormat(status, format);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 var
@@ -8313,119 +8313,119 @@ end;
 
 procedure IStatementImpl_addRefDispatcher(this: IStatement); cdecl;
 begin
-	try
+	//try
 		IStatementImpl(this).addRef();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function IStatementImpl_releaseDispatcher(this: IStatement): Integer; cdecl;
 begin
-	try
+	//try
 		Result := IStatementImpl(this).release();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 procedure IStatementImpl_getInfoDispatcher(this: IStatement; status: IStatus; itemsLength: Cardinal; items: BytePtr; bufferLength: Cardinal; buffer: BytePtr); cdecl;
 begin
-	try
+	//try
 		IStatementImpl(this).getInfo(status, itemsLength, items, bufferLength, buffer);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 function IStatementImpl_getTypeDispatcher(this: IStatement; status: IStatus): Cardinal; cdecl;
 begin
-	try
+	//try
 		Result := IStatementImpl(this).getType(status);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 function IStatementImpl_getPlanDispatcher(this: IStatement; status: IStatus; detailed: Boolean): PAnsiChar; cdecl;
 begin
-	try
+	//try
 		Result := IStatementImpl(this).getPlan(status, detailed);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 function IStatementImpl_getAffectedRecordsDispatcher(this: IStatement; status: IStatus): QWord; cdecl;
 begin
-	try
+	//try
 		Result := IStatementImpl(this).getAffectedRecords(status);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 function IStatementImpl_getInputMetadataDispatcher(this: IStatement; status: IStatus): IMessageMetadata; cdecl;
 begin
-	try
+	//try
 		Result := IStatementImpl(this).getInputMetadata(status);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 function IStatementImpl_getOutputMetadataDispatcher(this: IStatement; status: IStatus): IMessageMetadata; cdecl;
 begin
-	try
+	//try
 		Result := IStatementImpl(this).getOutputMetadata(status);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 function IStatementImpl_executeDispatcher(this: IStatement; status: IStatus; transaction: ITransaction; inMetadata: IMessageMetadata; inBuffer: Pointer; outMetadata: IMessageMetadata; outBuffer: Pointer): ITransaction; cdecl;
 begin
-	try
+	//try
 		Result := IStatementImpl(this).execute(status, transaction, inMetadata, inBuffer, outMetadata, outBuffer);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 function IStatementImpl_openCursorDispatcher(this: IStatement; status: IStatus; transaction: ITransaction; inMetadata: IMessageMetadata; inBuffer: Pointer; outMetadata: IMessageMetadata; flags: Cardinal): IResultSet; cdecl;
 begin
-	try
+	//try
 		Result := IStatementImpl(this).openCursor(status, transaction, inMetadata, inBuffer, outMetadata, flags);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 procedure IStatementImpl_setCursorNameDispatcher(this: IStatement; status: IStatus; name: PAnsiChar); cdecl;
 begin
-	try
+	//try
 		IStatementImpl(this).setCursorName(status, name);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 procedure IStatementImpl_freeDispatcher(this: IStatement; status: IStatus); cdecl;
 begin
-	try
+	//try
 		IStatementImpl(this).free(status);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 function IStatementImpl_getFlagsDispatcher(this: IStatement; status: IStatus): Cardinal; cdecl;
 begin
-	try
+	//try
 		Result := IStatementImpl(this).getFlags(status);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 var
@@ -8438,83 +8438,83 @@ end;
 
 procedure IRequestImpl_addRefDispatcher(this: IRequest); cdecl;
 begin
-	try
+	//try
 		IRequestImpl(this).addRef();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function IRequestImpl_releaseDispatcher(this: IRequest): Integer; cdecl;
 begin
-	try
+	//try
 		Result := IRequestImpl(this).release();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 procedure IRequestImpl_receiveDispatcher(this: IRequest; status: IStatus; level: Integer; msgType: Cardinal; length: Cardinal; message: BytePtr); cdecl;
 begin
-	try
+	//try
 		IRequestImpl(this).receive(status, level, msgType, length, message);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 procedure IRequestImpl_sendDispatcher(this: IRequest; status: IStatus; level: Integer; msgType: Cardinal; length: Cardinal; message: BytePtr); cdecl;
 begin
-	try
+	//try
 		IRequestImpl(this).send(status, level, msgType, length, message);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 procedure IRequestImpl_getInfoDispatcher(this: IRequest; status: IStatus; level: Integer; itemsLength: Cardinal; items: BytePtr; bufferLength: Cardinal; buffer: BytePtr); cdecl;
 begin
-	try
+	//try
 		IRequestImpl(this).getInfo(status, level, itemsLength, items, bufferLength, buffer);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 procedure IRequestImpl_startDispatcher(this: IRequest; status: IStatus; tra: ITransaction; level: Integer); cdecl;
 begin
-	try
+	//try
 		IRequestImpl(this).start(status, tra, level);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 procedure IRequestImpl_startAndSendDispatcher(this: IRequest; status: IStatus; tra: ITransaction; level: Integer; msgType: Cardinal; length: Cardinal; message: BytePtr); cdecl;
 begin
-	try
+	//try
 		IRequestImpl(this).startAndSend(status, tra, level, msgType, length, message);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 procedure IRequestImpl_unwindDispatcher(this: IRequest; status: IStatus; level: Integer); cdecl;
 begin
-	try
+	//try
 		IRequestImpl(this).unwind(status, level);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 procedure IRequestImpl_freeDispatcher(this: IRequest; status: IStatus); cdecl;
 begin
-	try
+	//try
 		IRequestImpl(this).free(status);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 var
@@ -8527,29 +8527,29 @@ end;
 
 procedure IEventsImpl_addRefDispatcher(this: IEvents); cdecl;
 begin
-	try
+	//try
 		IEventsImpl(this).addRef();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function IEventsImpl_releaseDispatcher(this: IEvents): Integer; cdecl;
 begin
-	try
+	//try
 		Result := IEventsImpl(this).release();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 procedure IEventsImpl_cancelDispatcher(this: IEvents; status: IStatus); cdecl;
 begin
-	try
+	//try
 		IEventsImpl(this).cancel(status);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 var
@@ -8562,182 +8562,182 @@ end;
 
 procedure IAttachmentImpl_addRefDispatcher(this: IAttachment); cdecl;
 begin
-	try
+	//try
 		IAttachmentImpl(this).addRef();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function IAttachmentImpl_releaseDispatcher(this: IAttachment): Integer; cdecl;
 begin
-	try
+	//try
 		Result := IAttachmentImpl(this).release();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 procedure IAttachmentImpl_getInfoDispatcher(this: IAttachment; status: IStatus; itemsLength: Cardinal; items: BytePtr; bufferLength: Cardinal; buffer: BytePtr); cdecl;
 begin
-	try
+	//try
 		IAttachmentImpl(this).getInfo(status, itemsLength, items, bufferLength, buffer);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 function IAttachmentImpl_startTransactionDispatcher(this: IAttachment; status: IStatus; tpbLength: Cardinal; tpb: BytePtr): ITransaction; cdecl;
 begin
-	try
+	//try
 		Result := IAttachmentImpl(this).startTransaction(status, tpbLength, tpb);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 function IAttachmentImpl_reconnectTransactionDispatcher(this: IAttachment; status: IStatus; length: Cardinal; id: BytePtr): ITransaction; cdecl;
 begin
-	try
+	//try
 		Result := IAttachmentImpl(this).reconnectTransaction(status, length, id);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 function IAttachmentImpl_compileRequestDispatcher(this: IAttachment; status: IStatus; blrLength: Cardinal; blr: BytePtr): IRequest; cdecl;
 begin
-	try
+	//try
 		Result := IAttachmentImpl(this).compileRequest(status, blrLength, blr);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 procedure IAttachmentImpl_transactRequestDispatcher(this: IAttachment; status: IStatus; transaction: ITransaction; blrLength: Cardinal; blr: BytePtr; inMsgLength: Cardinal; inMsg: BytePtr; outMsgLength: Cardinal; outMsg: BytePtr); cdecl;
 begin
-	try
+	//try
 		IAttachmentImpl(this).transactRequest(status, transaction, blrLength, blr, inMsgLength, inMsg, outMsgLength, outMsg);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 function IAttachmentImpl_createBlobDispatcher(this: IAttachment; status: IStatus; transaction: ITransaction; id: ISC_QUADPtr; bpbLength: Cardinal; bpb: BytePtr): IBlob; cdecl;
 begin
-	try
+	//try
 		Result := IAttachmentImpl(this).createBlob(status, transaction, id, bpbLength, bpb);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 function IAttachmentImpl_openBlobDispatcher(this: IAttachment; status: IStatus; transaction: ITransaction; id: ISC_QUADPtr; bpbLength: Cardinal; bpb: BytePtr): IBlob; cdecl;
 begin
-	try
+	//try
 		Result := IAttachmentImpl(this).openBlob(status, transaction, id, bpbLength, bpb);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 function IAttachmentImpl_getSliceDispatcher(this: IAttachment; status: IStatus; transaction: ITransaction; id: ISC_QUADPtr; sdlLength: Cardinal; sdl: BytePtr; paramLength: Cardinal; param: BytePtr; sliceLength: Integer; slice: BytePtr): Integer; cdecl;
 begin
-	try
+	//try
 		Result := IAttachmentImpl(this).getSlice(status, transaction, id, sdlLength, sdl, paramLength, param, sliceLength, slice);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 procedure IAttachmentImpl_putSliceDispatcher(this: IAttachment; status: IStatus; transaction: ITransaction; id: ISC_QUADPtr; sdlLength: Cardinal; sdl: BytePtr; paramLength: Cardinal; param: BytePtr; sliceLength: Integer; slice: BytePtr); cdecl;
 begin
-	try
+	//try
 		IAttachmentImpl(this).putSlice(status, transaction, id, sdlLength, sdl, paramLength, param, sliceLength, slice);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 procedure IAttachmentImpl_executeDynDispatcher(this: IAttachment; status: IStatus; transaction: ITransaction; length: Cardinal; dyn: BytePtr); cdecl;
 begin
-	try
+	//try
 		IAttachmentImpl(this).executeDyn(status, transaction, length, dyn);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 function IAttachmentImpl_prepareDispatcher(this: IAttachment; status: IStatus; tra: ITransaction; stmtLength: Cardinal; sqlStmt: PAnsiChar; dialect: Cardinal; flags: Cardinal): IStatement; cdecl;
 begin
-	try
+	//try
 		Result := IAttachmentImpl(this).prepare(status, tra, stmtLength, sqlStmt, dialect, flags);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 function IAttachmentImpl_executeDispatcher(this: IAttachment; status: IStatus; transaction: ITransaction; stmtLength: Cardinal; sqlStmt: PAnsiChar; dialect: Cardinal; inMetadata: IMessageMetadata; inBuffer: Pointer; outMetadata: IMessageMetadata; outBuffer: Pointer): ITransaction; cdecl;
 begin
-	try
+	//try
 		Result := IAttachmentImpl(this).execute(status, transaction, stmtLength, sqlStmt, dialect, inMetadata, inBuffer, outMetadata, outBuffer);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 function IAttachmentImpl_openCursorDispatcher(this: IAttachment; status: IStatus; transaction: ITransaction; stmtLength: Cardinal; sqlStmt: PAnsiChar; dialect: Cardinal; inMetadata: IMessageMetadata; inBuffer: Pointer; outMetadata: IMessageMetadata; cursorName: PAnsiChar; cursorFlags: Cardinal): IResultSet; cdecl;
 begin
-	try
+	//try
 		Result := IAttachmentImpl(this).openCursor(status, transaction, stmtLength, sqlStmt, dialect, inMetadata, inBuffer, outMetadata, cursorName, cursorFlags);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 function IAttachmentImpl_queEventsDispatcher(this: IAttachment; status: IStatus; callback: IEventCallback; length: Cardinal; events: BytePtr): IEvents; cdecl;
 begin
-	try
+	//try
 		Result := IAttachmentImpl(this).queEvents(status, callback, length, events);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 procedure IAttachmentImpl_cancelOperationDispatcher(this: IAttachment; status: IStatus; option: Integer); cdecl;
 begin
-	try
+	//try
 		IAttachmentImpl(this).cancelOperation(status, option);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 procedure IAttachmentImpl_pingDispatcher(this: IAttachment; status: IStatus); cdecl;
 begin
-	try
+	//try
 		IAttachmentImpl(this).ping(status);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 procedure IAttachmentImpl_detachDispatcher(this: IAttachment; status: IStatus); cdecl;
 begin
-	try
+	//try
 		IAttachmentImpl(this).detach(status);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 procedure IAttachmentImpl_dropDatabaseDispatcher(this: IAttachment; status: IStatus); cdecl;
 begin
-	try
+	//try
 		IAttachmentImpl(this).dropDatabase(status);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 var
@@ -8750,47 +8750,47 @@ end;
 
 procedure IServiceImpl_addRefDispatcher(this: IService); cdecl;
 begin
-	try
+	//try
 		IServiceImpl(this).addRef();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function IServiceImpl_releaseDispatcher(this: IService): Integer; cdecl;
 begin
-	try
+	//try
 		Result := IServiceImpl(this).release();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 procedure IServiceImpl_detachDispatcher(this: IService; status: IStatus); cdecl;
 begin
-	try
+	//try
 		IServiceImpl(this).detach(status);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 procedure IServiceImpl_queryDispatcher(this: IService; status: IStatus; sendLength: Cardinal; sendItems: BytePtr; receiveLength: Cardinal; receiveItems: BytePtr; bufferLength: Cardinal; buffer: BytePtr); cdecl;
 begin
-	try
+	//try
 		IServiceImpl(this).query(status, sendLength, sendItems, receiveLength, receiveItems, bufferLength, buffer);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 procedure IServiceImpl_startDispatcher(this: IService; status: IStatus; spbLength: Cardinal; spb: BytePtr); cdecl;
 begin
-	try
+	//try
 		IServiceImpl(this).start(status, spbLength, spb);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 var
@@ -8803,83 +8803,83 @@ end;
 
 procedure IProviderImpl_addRefDispatcher(this: IProvider); cdecl;
 begin
-	try
+	//try
 		IProviderImpl(this).addRef();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function IProviderImpl_releaseDispatcher(this: IProvider): Integer; cdecl;
 begin
-	try
+	//try
 		Result := IProviderImpl(this).release();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 procedure IProviderImpl_setOwnerDispatcher(this: IProvider; r: IReferenceCounted); cdecl;
 begin
-	try
+	//try
 		IProviderImpl(this).setOwner(r);
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function IProviderImpl_getOwnerDispatcher(this: IProvider): IReferenceCounted; cdecl;
 begin
-	try
+	//try
 		Result := IProviderImpl(this).getOwner();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function IProviderImpl_attachDatabaseDispatcher(this: IProvider; status: IStatus; fileName: PAnsiChar; dpbLength: Cardinal; dpb: BytePtr): IAttachment; cdecl;
 begin
-	try
+	//try
 		Result := IProviderImpl(this).attachDatabase(status, fileName, dpbLength, dpb);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 function IProviderImpl_createDatabaseDispatcher(this: IProvider; status: IStatus; fileName: PAnsiChar; dpbLength: Cardinal; dpb: BytePtr): IAttachment; cdecl;
 begin
-	try
+	//try
 		Result := IProviderImpl(this).createDatabase(status, fileName, dpbLength, dpb);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 function IProviderImpl_attachServiceManagerDispatcher(this: IProvider; status: IStatus; service: PAnsiChar; spbLength: Cardinal; spb: BytePtr): IService; cdecl;
 begin
-	try
+	//try
 		Result := IProviderImpl(this).attachServiceManager(status, service, spbLength, spb);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 procedure IProviderImpl_shutdownDispatcher(this: IProvider; status: IStatus; timeout: Cardinal; reason: Integer); cdecl;
 begin
-	try
+	//try
 		IProviderImpl(this).shutdown(status, timeout, reason);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 procedure IProviderImpl_setDbCryptCallbackDispatcher(this: IProvider; status: IStatus; cryptCallback: ICryptKeyCallback); cdecl;
 begin
-	try
+	//try
 		IProviderImpl(this).setDbCryptCallback(status, cryptCallback);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 var
@@ -8892,38 +8892,38 @@ end;
 
 procedure IDtcStartImpl_disposeDispatcher(this: IDtcStart); cdecl;
 begin
-	try
+	//try
 		IDtcStartImpl(this).dispose();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 procedure IDtcStartImpl_addAttachmentDispatcher(this: IDtcStart; status: IStatus; att: IAttachment); cdecl;
 begin
-	try
+	//try
 		IDtcStartImpl(this).addAttachment(status, att);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 procedure IDtcStartImpl_addWithTpbDispatcher(this: IDtcStart; status: IStatus; att: IAttachment; length: Cardinal; tpb: BytePtr); cdecl;
 begin
-	try
+	//try
 		IDtcStartImpl(this).addWithTpb(status, att, length, tpb);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 function IDtcStartImpl_startDispatcher(this: IDtcStart; status: IStatus): ITransaction; cdecl;
 begin
-	try
+	//try
 		Result := IDtcStartImpl(this).start(status);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 var
@@ -8936,20 +8936,20 @@ end;
 
 function IDtcImpl_joinDispatcher(this: IDtc; status: IStatus; one: ITransaction; two: ITransaction): ITransaction; cdecl;
 begin
-	try
+	//try
 		Result := IDtcImpl(this).join(status, one, two);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 function IDtcImpl_startBuilderDispatcher(this: IDtc; status: IStatus): IDtcStart; cdecl;
 begin
-	try
+	//try
 		Result := IDtcImpl(this).startBuilder(status);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 var
@@ -8962,38 +8962,38 @@ end;
 
 procedure IAuthImpl_addRefDispatcher(this: IAuth); cdecl;
 begin
-	try
+	//try
 		IAuthImpl(this).addRef();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function IAuthImpl_releaseDispatcher(this: IAuth): Integer; cdecl;
 begin
-	try
+	//try
 		Result := IAuthImpl(this).release();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 procedure IAuthImpl_setOwnerDispatcher(this: IAuth; r: IReferenceCounted); cdecl;
 begin
-	try
+	//try
 		IAuthImpl(this).setOwner(r);
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function IAuthImpl_getOwnerDispatcher(this: IAuth): IReferenceCounted; cdecl;
 begin
-	try
+	//try
 		Result := IAuthImpl(this).getOwner();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 var
@@ -9006,38 +9006,38 @@ end;
 
 procedure IWriterImpl_resetDispatcher(this: IWriter); cdecl;
 begin
-	try
+	//try
 		IWriterImpl(this).reset();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 procedure IWriterImpl_addDispatcher(this: IWriter; status: IStatus; name: PAnsiChar); cdecl;
 begin
-	try
+	//try
 		IWriterImpl(this).add(status, name);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 procedure IWriterImpl_setTypeDispatcher(this: IWriter; status: IStatus; value: PAnsiChar); cdecl;
 begin
-	try
+	//try
 		IWriterImpl(this).setType(status, value);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 procedure IWriterImpl_setDbDispatcher(this: IWriter; status: IStatus; value: PAnsiChar); cdecl;
 begin
-	try
+	//try
 		IWriterImpl(this).setDb(status, value);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 var
@@ -9050,38 +9050,38 @@ end;
 
 function IServerBlockImpl_getLoginDispatcher(this: IServerBlock): PAnsiChar; cdecl;
 begin
-	try
+	//try
 		Result := IServerBlockImpl(this).getLogin();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function IServerBlockImpl_getDataDispatcher(this: IServerBlock; length: CardinalPtr): BytePtr; cdecl;
 begin
-	try
+	//try
 		Result := IServerBlockImpl(this).getData(length);
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 procedure IServerBlockImpl_putDataDispatcher(this: IServerBlock; status: IStatus; length: Cardinal; data: Pointer); cdecl;
 begin
-	try
+	//try
 		IServerBlockImpl(this).putData(status, length, data);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 function IServerBlockImpl_newKeyDispatcher(this: IServerBlock; status: IStatus): ICryptKey; cdecl;
 begin
-	try
+	//try
 		Result := IServerBlockImpl(this).newKey(status);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 var
@@ -9094,65 +9094,65 @@ end;
 
 procedure IClientBlockImpl_addRefDispatcher(this: IClientBlock); cdecl;
 begin
-	try
+	//try
 		IClientBlockImpl(this).addRef();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function IClientBlockImpl_releaseDispatcher(this: IClientBlock): Integer; cdecl;
 begin
-	try
+	//try
 		Result := IClientBlockImpl(this).release();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function IClientBlockImpl_getLoginDispatcher(this: IClientBlock): PAnsiChar; cdecl;
 begin
-	try
+	//try
 		Result := IClientBlockImpl(this).getLogin();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function IClientBlockImpl_getPasswordDispatcher(this: IClientBlock): PAnsiChar; cdecl;
 begin
-	try
+	//try
 		Result := IClientBlockImpl(this).getPassword();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function IClientBlockImpl_getDataDispatcher(this: IClientBlock; length: CardinalPtr): BytePtr; cdecl;
 begin
-	try
+	//try
 		Result := IClientBlockImpl(this).getData(length);
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 procedure IClientBlockImpl_putDataDispatcher(this: IClientBlock; status: IStatus; length: Cardinal; data: Pointer); cdecl;
 begin
-	try
+	//try
 		IClientBlockImpl(this).putData(status, length, data);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 function IClientBlockImpl_newKeyDispatcher(this: IClientBlock; status: IStatus): ICryptKey; cdecl;
 begin
-	try
+	//try
 		Result := IClientBlockImpl(this).newKey(status);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 var
@@ -9165,47 +9165,47 @@ end;
 
 procedure IServerImpl_addRefDispatcher(this: IServer); cdecl;
 begin
-	try
+	//try
 		IServerImpl(this).addRef();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function IServerImpl_releaseDispatcher(this: IServer): Integer; cdecl;
 begin
-	try
+	//try
 		Result := IServerImpl(this).release();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 procedure IServerImpl_setOwnerDispatcher(this: IServer; r: IReferenceCounted); cdecl;
 begin
-	try
+	//try
 		IServerImpl(this).setOwner(r);
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function IServerImpl_getOwnerDispatcher(this: IServer): IReferenceCounted; cdecl;
 begin
-	try
+	//try
 		Result := IServerImpl(this).getOwner();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function IServerImpl_authenticateDispatcher(this: IServer; status: IStatus; sBlock: IServerBlock; writerInterface: IWriter): Integer; cdecl;
 begin
-	try
+	//try
 		Result := IServerImpl(this).authenticate(status, sBlock, writerInterface);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 var
@@ -9218,47 +9218,47 @@ end;
 
 procedure IClientImpl_addRefDispatcher(this: IClient); cdecl;
 begin
-	try
+	//try
 		IClientImpl(this).addRef();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function IClientImpl_releaseDispatcher(this: IClient): Integer; cdecl;
 begin
-	try
+	//try
 		Result := IClientImpl(this).release();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 procedure IClientImpl_setOwnerDispatcher(this: IClient; r: IReferenceCounted); cdecl;
 begin
-	try
+	//try
 		IClientImpl(this).setOwner(r);
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function IClientImpl_getOwnerDispatcher(this: IClient): IReferenceCounted; cdecl;
 begin
-	try
+	//try
 		Result := IClientImpl(this).getOwner();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function IClientImpl_authenticateDispatcher(this: IClient; status: IStatus; cBlock: IClientBlock): Integer; cdecl;
 begin
-	try
+	//try
 		Result := IClientImpl(this).authenticate(status, cBlock);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 var
@@ -9271,29 +9271,29 @@ end;
 
 function IUserFieldImpl_enteredDispatcher(this: IUserField): Integer; cdecl;
 begin
-	try
+	//try
 		Result := IUserFieldImpl(this).entered();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function IUserFieldImpl_specifiedDispatcher(this: IUserField): Integer; cdecl;
 begin
-	try
+	//try
 		Result := IUserFieldImpl(this).specified();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 procedure IUserFieldImpl_setEnteredDispatcher(this: IUserField; status: IStatus; newValue: Integer); cdecl;
 begin
-	try
+	//try
 		IUserFieldImpl(this).setEntered(status, newValue);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 var
@@ -9306,47 +9306,47 @@ end;
 
 function ICharUserFieldImpl_enteredDispatcher(this: ICharUserField): Integer; cdecl;
 begin
-	try
+	//try
 		Result := ICharUserFieldImpl(this).entered();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function ICharUserFieldImpl_specifiedDispatcher(this: ICharUserField): Integer; cdecl;
 begin
-	try
+	//try
 		Result := ICharUserFieldImpl(this).specified();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 procedure ICharUserFieldImpl_setEnteredDispatcher(this: ICharUserField; status: IStatus; newValue: Integer); cdecl;
 begin
-	try
+	//try
 		ICharUserFieldImpl(this).setEntered(status, newValue);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 function ICharUserFieldImpl_getDispatcher(this: ICharUserField): PAnsiChar; cdecl;
 begin
-	try
+	//try
 		Result := ICharUserFieldImpl(this).get();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 procedure ICharUserFieldImpl_set_Dispatcher(this: ICharUserField; status: IStatus; newValue: PAnsiChar); cdecl;
 begin
-	try
+	//try
 		ICharUserFieldImpl(this).set_(status, newValue);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 var
@@ -9359,47 +9359,47 @@ end;
 
 function IIntUserFieldImpl_enteredDispatcher(this: IIntUserField): Integer; cdecl;
 begin
-	try
+	//try
 		Result := IIntUserFieldImpl(this).entered();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function IIntUserFieldImpl_specifiedDispatcher(this: IIntUserField): Integer; cdecl;
 begin
-	try
+	//try
 		Result := IIntUserFieldImpl(this).specified();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 procedure IIntUserFieldImpl_setEnteredDispatcher(this: IIntUserField; status: IStatus; newValue: Integer); cdecl;
 begin
-	try
+	//try
 		IIntUserFieldImpl(this).setEntered(status, newValue);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 function IIntUserFieldImpl_getDispatcher(this: IIntUserField): Integer; cdecl;
 begin
-	try
+	//try
 		Result := IIntUserFieldImpl(this).get();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 procedure IIntUserFieldImpl_set_Dispatcher(this: IIntUserField; status: IStatus; newValue: Integer); cdecl;
 begin
-	try
+	//try
 		IIntUserFieldImpl(this).set_(status, newValue);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 var
@@ -9412,101 +9412,101 @@ end;
 
 function IUserImpl_operationDispatcher(this: IUser): Cardinal; cdecl;
 begin
-	try
+	//try
 		Result := IUserImpl(this).operation();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function IUserImpl_userNameDispatcher(this: IUser): ICharUserField; cdecl;
 begin
-	try
+	//try
 		Result := IUserImpl(this).userName();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function IUserImpl_passwordDispatcher(this: IUser): ICharUserField; cdecl;
 begin
-	try
+	//try
 		Result := IUserImpl(this).password();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function IUserImpl_firstNameDispatcher(this: IUser): ICharUserField; cdecl;
 begin
-	try
+	//try
 		Result := IUserImpl(this).firstName();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function IUserImpl_lastNameDispatcher(this: IUser): ICharUserField; cdecl;
 begin
-	try
+	//try
 		Result := IUserImpl(this).lastName();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function IUserImpl_middleNameDispatcher(this: IUser): ICharUserField; cdecl;
 begin
-	try
+	//try
 		Result := IUserImpl(this).middleName();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function IUserImpl_commentDispatcher(this: IUser): ICharUserField; cdecl;
 begin
-	try
+	//try
 		Result := IUserImpl(this).comment();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function IUserImpl_attributesDispatcher(this: IUser): ICharUserField; cdecl;
 begin
-	try
+	//try
 		Result := IUserImpl(this).attributes();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function IUserImpl_activeDispatcher(this: IUser): IIntUserField; cdecl;
 begin
-	try
+	//try
 		Result := IUserImpl(this).active();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function IUserImpl_adminDispatcher(this: IUser): IIntUserField; cdecl;
 begin
-	try
+	//try
 		Result := IUserImpl(this).admin();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 procedure IUserImpl_clearDispatcher(this: IUser; status: IStatus); cdecl;
 begin
-	try
+	//try
 		IUserImpl(this).clear(status);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 var
@@ -9519,11 +9519,11 @@ end;
 
 procedure IListUsersImpl_listDispatcher(this: IListUsers; status: IStatus; user: IUser); cdecl;
 begin
-	try
+	//try
 		IListUsersImpl(this).list(status, user);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 var
@@ -9536,47 +9536,47 @@ end;
 
 function ILogonInfoImpl_nameDispatcher(this: ILogonInfo): PAnsiChar; cdecl;
 begin
-	try
+	//try
 		Result := ILogonInfoImpl(this).name();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function ILogonInfoImpl_roleDispatcher(this: ILogonInfo): PAnsiChar; cdecl;
 begin
-	try
+	//try
 		Result := ILogonInfoImpl(this).role();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function ILogonInfoImpl_networkProtocolDispatcher(this: ILogonInfo): PAnsiChar; cdecl;
 begin
-	try
+	//try
 		Result := ILogonInfoImpl(this).networkProtocol();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function ILogonInfoImpl_remoteAddressDispatcher(this: ILogonInfo): PAnsiChar; cdecl;
 begin
-	try
+	//try
 		Result := ILogonInfoImpl(this).remoteAddress();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function ILogonInfoImpl_authBlockDispatcher(this: ILogonInfo; length: CardinalPtr): BytePtr; cdecl;
 begin
-	try
+	//try
 		Result := ILogonInfoImpl(this).authBlock(length);
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 var
@@ -9589,74 +9589,74 @@ end;
 
 procedure IManagementImpl_addRefDispatcher(this: IManagement); cdecl;
 begin
-	try
+	//try
 		IManagementImpl(this).addRef();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function IManagementImpl_releaseDispatcher(this: IManagement): Integer; cdecl;
 begin
-	try
+	//try
 		Result := IManagementImpl(this).release();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 procedure IManagementImpl_setOwnerDispatcher(this: IManagement; r: IReferenceCounted); cdecl;
 begin
-	try
+	//try
 		IManagementImpl(this).setOwner(r);
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function IManagementImpl_getOwnerDispatcher(this: IManagement): IReferenceCounted; cdecl;
 begin
-	try
+	//try
 		Result := IManagementImpl(this).getOwner();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 procedure IManagementImpl_startDispatcher(this: IManagement; status: IStatus; logonInfo: ILogonInfo); cdecl;
 begin
-	try
+	//try
 		IManagementImpl(this).start(status, logonInfo);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 function IManagementImpl_executeDispatcher(this: IManagement; status: IStatus; user: IUser; callback: IListUsers): Integer; cdecl;
 begin
-	try
+	//try
 		Result := IManagementImpl(this).execute(status, user, callback);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 procedure IManagementImpl_commitDispatcher(this: IManagement; status: IStatus); cdecl;
 begin
-	try
+	//try
 		IManagementImpl(this).commit(status);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 procedure IManagementImpl_rollbackDispatcher(this: IManagement; status: IStatus); cdecl;
 begin
-	try
+	//try
 		IManagementImpl(this).rollback(status);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 var
@@ -9669,74 +9669,74 @@ end;
 
 procedure IWireCryptPluginImpl_addRefDispatcher(this: IWireCryptPlugin); cdecl;
 begin
-	try
+	//try
 		IWireCryptPluginImpl(this).addRef();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function IWireCryptPluginImpl_releaseDispatcher(this: IWireCryptPlugin): Integer; cdecl;
 begin
-	try
+	//try
 		Result := IWireCryptPluginImpl(this).release();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 procedure IWireCryptPluginImpl_setOwnerDispatcher(this: IWireCryptPlugin; r: IReferenceCounted); cdecl;
 begin
-	try
+	//try
 		IWireCryptPluginImpl(this).setOwner(r);
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function IWireCryptPluginImpl_getOwnerDispatcher(this: IWireCryptPlugin): IReferenceCounted; cdecl;
 begin
-	try
+	//try
 		Result := IWireCryptPluginImpl(this).getOwner();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function IWireCryptPluginImpl_getKnownTypesDispatcher(this: IWireCryptPlugin; status: IStatus): PAnsiChar; cdecl;
 begin
-	try
+	//try
 		Result := IWireCryptPluginImpl(this).getKnownTypes(status);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 procedure IWireCryptPluginImpl_setKeyDispatcher(this: IWireCryptPlugin; status: IStatus; key: ICryptKey); cdecl;
 begin
-	try
+	//try
 		IWireCryptPluginImpl(this).setKey(status, key);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 procedure IWireCryptPluginImpl_encryptDispatcher(this: IWireCryptPlugin; status: IStatus; length: Cardinal; from: Pointer; to_: Pointer); cdecl;
 begin
-	try
+	//try
 		IWireCryptPluginImpl(this).encrypt(status, length, from, to_);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 procedure IWireCryptPluginImpl_decryptDispatcher(this: IWireCryptPlugin; status: IStatus; length: Cardinal; from: Pointer; to_: Pointer); cdecl;
 begin
-	try
+	//try
 		IWireCryptPluginImpl(this).decrypt(status, length, from, to_);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 var
@@ -9749,11 +9749,11 @@ end;
 
 function ICryptKeyCallbackImpl_callbackDispatcher(this: ICryptKeyCallback; dataLength: Cardinal; data: Pointer; bufferLength: Cardinal; buffer: Pointer): Cardinal; cdecl;
 begin
-	try
+	//try
 		Result := ICryptKeyCallbackImpl(this).callback(dataLength, data, bufferLength, buffer);
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 var
@@ -9766,56 +9766,56 @@ end;
 
 procedure IKeyHolderPluginImpl_addRefDispatcher(this: IKeyHolderPlugin); cdecl;
 begin
-	try
+	//try
 		IKeyHolderPluginImpl(this).addRef();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function IKeyHolderPluginImpl_releaseDispatcher(this: IKeyHolderPlugin): Integer; cdecl;
 begin
-	try
+	//try
 		Result := IKeyHolderPluginImpl(this).release();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 procedure IKeyHolderPluginImpl_setOwnerDispatcher(this: IKeyHolderPlugin; r: IReferenceCounted); cdecl;
 begin
-	try
+	//try
 		IKeyHolderPluginImpl(this).setOwner(r);
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function IKeyHolderPluginImpl_getOwnerDispatcher(this: IKeyHolderPlugin): IReferenceCounted; cdecl;
 begin
-	try
+	//try
 		Result := IKeyHolderPluginImpl(this).getOwner();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function IKeyHolderPluginImpl_keyCallbackDispatcher(this: IKeyHolderPlugin; status: IStatus; callback: ICryptKeyCallback): Integer; cdecl;
 begin
-	try
+	//try
 		Result := IKeyHolderPluginImpl(this).keyCallback(status, callback);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 function IKeyHolderPluginImpl_keyHandleDispatcher(this: IKeyHolderPlugin; status: IStatus; keyName: PAnsiChar): ICryptKeyCallback; cdecl;
 begin
-	try
+	//try
 		Result := IKeyHolderPluginImpl(this).keyHandle(status, keyName);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 var
@@ -9828,65 +9828,65 @@ end;
 
 procedure IDbCryptPluginImpl_addRefDispatcher(this: IDbCryptPlugin); cdecl;
 begin
-	try
+	//try
 		IDbCryptPluginImpl(this).addRef();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function IDbCryptPluginImpl_releaseDispatcher(this: IDbCryptPlugin): Integer; cdecl;
 begin
-	try
+	//try
 		Result := IDbCryptPluginImpl(this).release();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 procedure IDbCryptPluginImpl_setOwnerDispatcher(this: IDbCryptPlugin; r: IReferenceCounted); cdecl;
 begin
-	try
+	//try
 		IDbCryptPluginImpl(this).setOwner(r);
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function IDbCryptPluginImpl_getOwnerDispatcher(this: IDbCryptPlugin): IReferenceCounted; cdecl;
 begin
-	try
+	//try
 		Result := IDbCryptPluginImpl(this).getOwner();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 procedure IDbCryptPluginImpl_setKeyDispatcher(this: IDbCryptPlugin; status: IStatus; length: Cardinal; sources: IKeyHolderPluginPtr; keyName: PAnsiChar); cdecl;
 begin
-	try
+	//try
 		IDbCryptPluginImpl(this).setKey(status, length, sources, keyName);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 procedure IDbCryptPluginImpl_encryptDispatcher(this: IDbCryptPlugin; status: IStatus; length: Cardinal; from: Pointer; to_: Pointer); cdecl;
 begin
-	try
+	//try
 		IDbCryptPluginImpl(this).encrypt(status, length, from, to_);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 procedure IDbCryptPluginImpl_decryptDispatcher(this: IDbCryptPlugin; status: IStatus; length: Cardinal; from: Pointer; to_: Pointer); cdecl;
 begin
-	try
+	//try
 		IDbCryptPluginImpl(this).decrypt(status, length, from, to_);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 var
@@ -9899,92 +9899,92 @@ end;
 
 function IExternalContextImpl_getMasterDispatcher(this: IExternalContext): IMaster; cdecl;
 begin
-	try
+	//try
 		Result := IExternalContextImpl(this).getMaster();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function IExternalContextImpl_getEngineDispatcher(this: IExternalContext; status: IStatus): IExternalEngine; cdecl;
 begin
-	try
+	//try
 		Result := IExternalContextImpl(this).getEngine(status);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 function IExternalContextImpl_getAttachmentDispatcher(this: IExternalContext; status: IStatus): IAttachment; cdecl;
 begin
-	try
+	//try
 		Result := IExternalContextImpl(this).getAttachment(status);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 function IExternalContextImpl_getTransactionDispatcher(this: IExternalContext; status: IStatus): ITransaction; cdecl;
 begin
-	try
+	//try
 		Result := IExternalContextImpl(this).getTransaction(status);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 function IExternalContextImpl_getUserNameDispatcher(this: IExternalContext): PAnsiChar; cdecl;
 begin
-	try
+	//try
 		Result := IExternalContextImpl(this).getUserName();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function IExternalContextImpl_getDatabaseNameDispatcher(this: IExternalContext): PAnsiChar; cdecl;
 begin
-	try
+	//try
 		Result := IExternalContextImpl(this).getDatabaseName();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function IExternalContextImpl_getClientCharSetDispatcher(this: IExternalContext): PAnsiChar; cdecl;
 begin
-	try
+	//try
 		Result := IExternalContextImpl(this).getClientCharSet();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function IExternalContextImpl_obtainInfoCodeDispatcher(this: IExternalContext): Integer; cdecl;
 begin
-	try
+	//try
 		Result := IExternalContextImpl(this).obtainInfoCode();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function IExternalContextImpl_getInfoDispatcher(this: IExternalContext; code: Integer): Pointer; cdecl;
 begin
-	try
+	//try
 		Result := IExternalContextImpl(this).getInfo(code);
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function IExternalContextImpl_setInfoDispatcher(this: IExternalContext; code: Integer; value: Pointer): Pointer; cdecl;
 begin
-	try
+	//try
 		Result := IExternalContextImpl(this).setInfo(code, value);
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 var
@@ -9997,20 +9997,20 @@ end;
 
 procedure IExternalResultSetImpl_disposeDispatcher(this: IExternalResultSet); cdecl;
 begin
-	try
+	//try
 		IExternalResultSetImpl(this).dispose();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function IExternalResultSetImpl_fetchDispatcher(this: IExternalResultSet; status: IStatus): Boolean; cdecl;
 begin
-	try
+	//try
 		Result := IExternalResultSetImpl(this).fetch(status);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 var
@@ -10023,29 +10023,29 @@ end;
 
 procedure IExternalFunctionImpl_disposeDispatcher(this: IExternalFunction); cdecl;
 begin
-	try
+	//try
 		IExternalFunctionImpl(this).dispose();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 procedure IExternalFunctionImpl_getCharSetDispatcher(this: IExternalFunction; status: IStatus; context: IExternalContext; name: PAnsiChar; nameSize: Cardinal); cdecl;
 begin
-	try
+	//try
 		IExternalFunctionImpl(this).getCharSet(status, context, name, nameSize);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 procedure IExternalFunctionImpl_executeDispatcher(this: IExternalFunction; status: IStatus; context: IExternalContext; inMsg: Pointer; outMsg: Pointer); cdecl;
 begin
-	try
+	//try
 		IExternalFunctionImpl(this).execute(status, context, inMsg, outMsg);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 var
@@ -10058,29 +10058,29 @@ end;
 
 procedure IExternalProcedureImpl_disposeDispatcher(this: IExternalProcedure); cdecl;
 begin
-	try
+	//try
 		IExternalProcedureImpl(this).dispose();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 procedure IExternalProcedureImpl_getCharSetDispatcher(this: IExternalProcedure; status: IStatus; context: IExternalContext; name: PAnsiChar; nameSize: Cardinal); cdecl;
 begin
-	try
+	//try
 		IExternalProcedureImpl(this).getCharSet(status, context, name, nameSize);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 function IExternalProcedureImpl_openDispatcher(this: IExternalProcedure; status: IStatus; context: IExternalContext; inMsg: Pointer; outMsg: Pointer): IExternalResultSet; cdecl;
 begin
-	try
+	//try
 		Result := IExternalProcedureImpl(this).open(status, context, inMsg, outMsg);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 var
@@ -10093,29 +10093,29 @@ end;
 
 procedure IExternalTriggerImpl_disposeDispatcher(this: IExternalTrigger); cdecl;
 begin
-	try
+	//try
 		IExternalTriggerImpl(this).dispose();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 procedure IExternalTriggerImpl_getCharSetDispatcher(this: IExternalTrigger; status: IStatus; context: IExternalContext; name: PAnsiChar; nameSize: Cardinal); cdecl;
 begin
-	try
+	//try
 		IExternalTriggerImpl(this).getCharSet(status, context, name, nameSize);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 procedure IExternalTriggerImpl_executeDispatcher(this: IExternalTrigger; status: IStatus; context: IExternalContext; action: Cardinal; oldMsg: Pointer; newMsg: Pointer); cdecl;
 begin
-	try
+	//try
 		IExternalTriggerImpl(this).execute(status, context, action, oldMsg, newMsg);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 var
@@ -10128,83 +10128,83 @@ end;
 
 function IRoutineMetadataImpl_getPackageDispatcher(this: IRoutineMetadata; status: IStatus): PAnsiChar; cdecl;
 begin
-	try
+	//try
 		Result := IRoutineMetadataImpl(this).getPackage(status);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 function IRoutineMetadataImpl_getNameDispatcher(this: IRoutineMetadata; status: IStatus): PAnsiChar; cdecl;
 begin
-	try
+	//try
 		Result := IRoutineMetadataImpl(this).getName(status);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 function IRoutineMetadataImpl_getEntryPointDispatcher(this: IRoutineMetadata; status: IStatus): PAnsiChar; cdecl;
 begin
-	try
+	//try
 		Result := IRoutineMetadataImpl(this).getEntryPoint(status);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 function IRoutineMetadataImpl_getBodyDispatcher(this: IRoutineMetadata; status: IStatus): PAnsiChar; cdecl;
 begin
-	try
+	//try
 		Result := IRoutineMetadataImpl(this).getBody(status);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 function IRoutineMetadataImpl_getInputMetadataDispatcher(this: IRoutineMetadata; status: IStatus): IMessageMetadata; cdecl;
 begin
-	try
+	//try
 		Result := IRoutineMetadataImpl(this).getInputMetadata(status);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 function IRoutineMetadataImpl_getOutputMetadataDispatcher(this: IRoutineMetadata; status: IStatus): IMessageMetadata; cdecl;
 begin
-	try
+	//try
 		Result := IRoutineMetadataImpl(this).getOutputMetadata(status);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 function IRoutineMetadataImpl_getTriggerMetadataDispatcher(this: IRoutineMetadata; status: IStatus): IMessageMetadata; cdecl;
 begin
-	try
+	//try
 		Result := IRoutineMetadataImpl(this).getTriggerMetadata(status);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 function IRoutineMetadataImpl_getTriggerTableDispatcher(this: IRoutineMetadata; status: IStatus): PAnsiChar; cdecl;
 begin
-	try
+	//try
 		Result := IRoutineMetadataImpl(this).getTriggerTable(status);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 function IRoutineMetadataImpl_getTriggerTypeDispatcher(this: IRoutineMetadata; status: IStatus): Cardinal; cdecl;
 begin
-	try
+	//try
 		Result := IRoutineMetadataImpl(this).getTriggerType(status);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 var
@@ -10217,92 +10217,92 @@ end;
 
 procedure IExternalEngineImpl_addRefDispatcher(this: IExternalEngine); cdecl;
 begin
-	try
+	//try
 		IExternalEngineImpl(this).addRef();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function IExternalEngineImpl_releaseDispatcher(this: IExternalEngine): Integer; cdecl;
 begin
-	try
+	//try
 		Result := IExternalEngineImpl(this).release();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 procedure IExternalEngineImpl_setOwnerDispatcher(this: IExternalEngine; r: IReferenceCounted); cdecl;
 begin
-	try
+	//try
 		IExternalEngineImpl(this).setOwner(r);
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function IExternalEngineImpl_getOwnerDispatcher(this: IExternalEngine): IReferenceCounted; cdecl;
 begin
-	try
+	//try
 		Result := IExternalEngineImpl(this).getOwner();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 procedure IExternalEngineImpl_openDispatcher(this: IExternalEngine; status: IStatus; context: IExternalContext; charSet: PAnsiChar; charSetSize: Cardinal); cdecl;
 begin
-	try
+	//try
 		IExternalEngineImpl(this).open(status, context, charSet, charSetSize);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 procedure IExternalEngineImpl_openAttachmentDispatcher(this: IExternalEngine; status: IStatus; context: IExternalContext); cdecl;
 begin
-	try
+	//try
 		IExternalEngineImpl(this).openAttachment(status, context);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 procedure IExternalEngineImpl_closeAttachmentDispatcher(this: IExternalEngine; status: IStatus; context: IExternalContext); cdecl;
 begin
-	try
+	//try
 		IExternalEngineImpl(this).closeAttachment(status, context);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 function IExternalEngineImpl_makeFunctionDispatcher(this: IExternalEngine; status: IStatus; context: IExternalContext; metadata: IRoutineMetadata; inBuilder: IMetadataBuilder; outBuilder: IMetadataBuilder): IExternalFunction; cdecl;
 begin
-	try
+	//try
 		Result := IExternalEngineImpl(this).makeFunction(status, context, metadata, inBuilder, outBuilder);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 function IExternalEngineImpl_makeProcedureDispatcher(this: IExternalEngine; status: IStatus; context: IExternalContext; metadata: IRoutineMetadata; inBuilder: IMetadataBuilder; outBuilder: IMetadataBuilder): IExternalProcedure; cdecl;
 begin
-	try
+	//try
 		Result := IExternalEngineImpl(this).makeProcedure(status, context, metadata, inBuilder, outBuilder);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 function IExternalEngineImpl_makeTriggerDispatcher(this: IExternalEngine; status: IStatus; context: IExternalContext; metadata: IRoutineMetadata; fieldsBuilder: IMetadataBuilder): IExternalTrigger; cdecl;
 begin
-	try
+	//try
 		Result := IExternalEngineImpl(this).makeTrigger(status, context, metadata, fieldsBuilder);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 var
@@ -10315,29 +10315,29 @@ end;
 
 procedure ITimerImpl_addRefDispatcher(this: ITimer); cdecl;
 begin
-	try
+	//try
 		ITimerImpl(this).addRef();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function ITimerImpl_releaseDispatcher(this: ITimer): Integer; cdecl;
 begin
-	try
+	//try
 		Result := ITimerImpl(this).release();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 procedure ITimerImpl_handlerDispatcher(this: ITimer); cdecl;
 begin
-	try
+	//try
 		ITimerImpl(this).handler();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 var
@@ -10350,20 +10350,20 @@ end;
 
 procedure ITimerControlImpl_startDispatcher(this: ITimerControl; status: IStatus; timer: ITimer; microSeconds: QWord); cdecl;
 begin
-	try
+	//try
 		ITimerControlImpl(this).start(status, timer, microSeconds);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 procedure ITimerControlImpl_stopDispatcher(this: ITimerControl; status: IStatus; timer: ITimer); cdecl;
 begin
-	try
+	//try
 		ITimerControlImpl(this).stop(status, timer);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 var
@@ -10376,11 +10376,11 @@ end;
 
 procedure IVersionCallbackImpl_callbackDispatcher(this: IVersionCallback; status: IStatus; text: PAnsiChar); cdecl;
 begin
-	try
+	//try
 		IVersionCallbackImpl(this).callback(status, text);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 var
@@ -10393,119 +10393,119 @@ end;
 
 procedure IUtilImpl_getFbVersionDispatcher(this: IUtil; status: IStatus; att: IAttachment; callback: IVersionCallback); cdecl;
 begin
-	try
+	//try
 		IUtilImpl(this).getFbVersion(status, att, callback);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 procedure IUtilImpl_loadBlobDispatcher(this: IUtil; status: IStatus; blobId: ISC_QUADPtr; att: IAttachment; tra: ITransaction; file_: PAnsiChar; txt: Boolean); cdecl;
 begin
-	try
+	//try
 		IUtilImpl(this).loadBlob(status, blobId, att, tra, file_, txt);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 procedure IUtilImpl_dumpBlobDispatcher(this: IUtil; status: IStatus; blobId: ISC_QUADPtr; att: IAttachment; tra: ITransaction; file_: PAnsiChar; txt: Boolean); cdecl;
 begin
-	try
+	//try
 		IUtilImpl(this).dumpBlob(status, blobId, att, tra, file_, txt);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 procedure IUtilImpl_getPerfCountersDispatcher(this: IUtil; status: IStatus; att: IAttachment; countersSet: PAnsiChar; counters: Int64Ptr); cdecl;
 begin
-	try
+	//try
 		IUtilImpl(this).getPerfCounters(status, att, countersSet, counters);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 function IUtilImpl_executeCreateDatabaseDispatcher(this: IUtil; status: IStatus; stmtLength: Cardinal; creatDBstatement: PAnsiChar; dialect: Cardinal; stmtIsCreateDb: BooleanPtr): IAttachment; cdecl;
 begin
-	try
+	//try
 		Result := IUtilImpl(this).executeCreateDatabase(status, stmtLength, creatDBstatement, dialect, stmtIsCreateDb);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 procedure IUtilImpl_decodeDateDispatcher(this: IUtil; date: ISC_DATE; year: CardinalPtr; month: CardinalPtr; day: CardinalPtr); cdecl;
 begin
-	try
+	//try
 		IUtilImpl(this).decodeDate(date, year, month, day);
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 procedure IUtilImpl_decodeTimeDispatcher(this: IUtil; time: ISC_TIME; hours: CardinalPtr; minutes: CardinalPtr; seconds: CardinalPtr; fractions: CardinalPtr); cdecl;
 begin
-	try
+	//try
 		IUtilImpl(this).decodeTime(time, hours, minutes, seconds, fractions);
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function IUtilImpl_encodeDateDispatcher(this: IUtil; year: Cardinal; month: Cardinal; day: Cardinal): ISC_DATE; cdecl;
 begin
-	try
+	//try
 		Result := IUtilImpl(this).encodeDate(year, month, day);
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function IUtilImpl_encodeTimeDispatcher(this: IUtil; hours: Cardinal; minutes: Cardinal; seconds: Cardinal; fractions: Cardinal): ISC_TIME; cdecl;
 begin
-	try
+	//try
 		Result := IUtilImpl(this).encodeTime(hours, minutes, seconds, fractions);
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function IUtilImpl_formatStatusDispatcher(this: IUtil; buffer: PAnsiChar; bufferSize: Cardinal; status: IStatus): Cardinal; cdecl;
 begin
-	try
+	//try
 		Result := IUtilImpl(this).formatStatus(buffer, bufferSize, status);
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function IUtilImpl_getClientVersionDispatcher(this: IUtil): Cardinal; cdecl;
 begin
-	try
+	//try
 		Result := IUtilImpl(this).getClientVersion();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function IUtilImpl_getXpbBuilderDispatcher(this: IUtil; status: IStatus; kind: Cardinal; buf: BytePtr; len: Cardinal): IXpbBuilder; cdecl;
 begin
-	try
+	//try
 		Result := IUtilImpl(this).getXpbBuilder(status, kind, buf, len);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 function IUtilImpl_setOffsetsDispatcher(this: IUtil; status: IStatus; metadata: IMessageMetadata; callback: IOffsetsCallback): Cardinal; cdecl;
 begin
-	try
+	//try
 		Result := IUtilImpl(this).setOffsets(status, metadata, callback);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 var
@@ -10518,11 +10518,11 @@ end;
 
 procedure IOffsetsCallbackImpl_setOffsetDispatcher(this: IOffsetsCallback; status: IStatus; index: Cardinal; offset: Cardinal; nullOffset: Cardinal); cdecl;
 begin
-	try
+	//try
 		IOffsetsCallbackImpl(this).setOffset(status, index, offset, nullOffset);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 var
@@ -10535,191 +10535,191 @@ end;
 
 procedure IXpbBuilderImpl_disposeDispatcher(this: IXpbBuilder); cdecl;
 begin
-	try
+	//try
 		IXpbBuilderImpl(this).dispose();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 procedure IXpbBuilderImpl_clearDispatcher(this: IXpbBuilder; status: IStatus); cdecl;
 begin
-	try
+	//try
 		IXpbBuilderImpl(this).clear(status);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 procedure IXpbBuilderImpl_removeCurrentDispatcher(this: IXpbBuilder; status: IStatus); cdecl;
 begin
-	try
+	//try
 		IXpbBuilderImpl(this).removeCurrent(status);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 procedure IXpbBuilderImpl_insertIntDispatcher(this: IXpbBuilder; status: IStatus; tag: Byte; value: Integer); cdecl;
 begin
-	try
+	//try
 		IXpbBuilderImpl(this).insertInt(status, tag, value);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 procedure IXpbBuilderImpl_insertBigIntDispatcher(this: IXpbBuilder; status: IStatus; tag: Byte; value: Int64); cdecl;
 begin
-	try
+	//try
 		IXpbBuilderImpl(this).insertBigInt(status, tag, value);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 procedure IXpbBuilderImpl_insertBytesDispatcher(this: IXpbBuilder; status: IStatus; tag: Byte; bytes: Pointer; length: Cardinal); cdecl;
 begin
-	try
+	//try
 		IXpbBuilderImpl(this).insertBytes(status, tag, bytes, length);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 procedure IXpbBuilderImpl_insertStringDispatcher(this: IXpbBuilder; status: IStatus; tag: Byte; str: PAnsiChar); cdecl;
 begin
-	try
+	//try
 		IXpbBuilderImpl(this).insertString(status, tag, str);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 procedure IXpbBuilderImpl_insertTagDispatcher(this: IXpbBuilder; status: IStatus; tag: Byte); cdecl;
 begin
-	try
+	//try
 		IXpbBuilderImpl(this).insertTag(status, tag);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 function IXpbBuilderImpl_isEofDispatcher(this: IXpbBuilder; status: IStatus): Boolean; cdecl;
 begin
-	try
+	//try
 		Result := IXpbBuilderImpl(this).isEof(status);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 procedure IXpbBuilderImpl_moveNextDispatcher(this: IXpbBuilder; status: IStatus); cdecl;
 begin
-	try
+	//try
 		IXpbBuilderImpl(this).moveNext(status);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 procedure IXpbBuilderImpl_rewindDispatcher(this: IXpbBuilder; status: IStatus); cdecl;
 begin
-	try
+	//try
 		IXpbBuilderImpl(this).rewind(status);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 function IXpbBuilderImpl_findFirstDispatcher(this: IXpbBuilder; status: IStatus; tag: Byte): Boolean; cdecl;
 begin
-	try
+	//try
 		Result := IXpbBuilderImpl(this).findFirst(status, tag);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 function IXpbBuilderImpl_findNextDispatcher(this: IXpbBuilder; status: IStatus): Boolean; cdecl;
 begin
-	try
+	//try
 		Result := IXpbBuilderImpl(this).findNext(status);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 function IXpbBuilderImpl_getTagDispatcher(this: IXpbBuilder; status: IStatus): Byte; cdecl;
 begin
-	try
+	//try
 		Result := IXpbBuilderImpl(this).getTag(status);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 function IXpbBuilderImpl_getLengthDispatcher(this: IXpbBuilder; status: IStatus): Cardinal; cdecl;
 begin
-	try
+	//try
 		Result := IXpbBuilderImpl(this).getLength(status);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 function IXpbBuilderImpl_getIntDispatcher(this: IXpbBuilder; status: IStatus): Integer; cdecl;
 begin
-	try
+	//try
 		Result := IXpbBuilderImpl(this).getInt(status);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 function IXpbBuilderImpl_getBigIntDispatcher(this: IXpbBuilder; status: IStatus): Int64; cdecl;
 begin
-	try
+	//try
 		Result := IXpbBuilderImpl(this).getBigInt(status);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 function IXpbBuilderImpl_getStringDispatcher(this: IXpbBuilder; status: IStatus): PAnsiChar; cdecl;
 begin
-	try
+	//try
 		Result := IXpbBuilderImpl(this).getString(status);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 function IXpbBuilderImpl_getBytesDispatcher(this: IXpbBuilder; status: IStatus): BytePtr; cdecl;
 begin
-	try
+	//try
 		Result := IXpbBuilderImpl(this).getBytes(status);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 function IXpbBuilderImpl_getBufferLengthDispatcher(this: IXpbBuilder; status: IStatus): Cardinal; cdecl;
 begin
-	try
+	//try
 		Result := IXpbBuilderImpl(this).getBufferLength(status);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 function IXpbBuilderImpl_getBufferDispatcher(this: IXpbBuilder; status: IStatus): BytePtr; cdecl;
 begin
-	try
+	//try
 		Result := IXpbBuilderImpl(this).getBuffer(status);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 var
@@ -10732,83 +10732,83 @@ end;
 
 function ITraceConnectionImpl_getKindDispatcher(this: ITraceConnection): Cardinal; cdecl;
 begin
-	try
+	//try
 		Result := ITraceConnectionImpl(this).getKind();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function ITraceConnectionImpl_getProcessIDDispatcher(this: ITraceConnection): Integer; cdecl;
 begin
-	try
+	//try
 		Result := ITraceConnectionImpl(this).getProcessID();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function ITraceConnectionImpl_getUserNameDispatcher(this: ITraceConnection): PAnsiChar; cdecl;
 begin
-	try
+	//try
 		Result := ITraceConnectionImpl(this).getUserName();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function ITraceConnectionImpl_getRoleNameDispatcher(this: ITraceConnection): PAnsiChar; cdecl;
 begin
-	try
+	//try
 		Result := ITraceConnectionImpl(this).getRoleName();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function ITraceConnectionImpl_getCharSetDispatcher(this: ITraceConnection): PAnsiChar; cdecl;
 begin
-	try
+	//try
 		Result := ITraceConnectionImpl(this).getCharSet();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function ITraceConnectionImpl_getRemoteProtocolDispatcher(this: ITraceConnection): PAnsiChar; cdecl;
 begin
-	try
+	//try
 		Result := ITraceConnectionImpl(this).getRemoteProtocol();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function ITraceConnectionImpl_getRemoteAddressDispatcher(this: ITraceConnection): PAnsiChar; cdecl;
 begin
-	try
+	//try
 		Result := ITraceConnectionImpl(this).getRemoteAddress();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function ITraceConnectionImpl_getRemoteProcessIDDispatcher(this: ITraceConnection): Integer; cdecl;
 begin
-	try
+	//try
 		Result := ITraceConnectionImpl(this).getRemoteProcessID();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function ITraceConnectionImpl_getRemoteProcessNameDispatcher(this: ITraceConnection): PAnsiChar; cdecl;
 begin
-	try
+	//try
 		Result := ITraceConnectionImpl(this).getRemoteProcessName();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 var
@@ -10821,101 +10821,101 @@ end;
 
 function ITraceDatabaseConnectionImpl_getKindDispatcher(this: ITraceDatabaseConnection): Cardinal; cdecl;
 begin
-	try
+	//try
 		Result := ITraceDatabaseConnectionImpl(this).getKind();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function ITraceDatabaseConnectionImpl_getProcessIDDispatcher(this: ITraceDatabaseConnection): Integer; cdecl;
 begin
-	try
+	//try
 		Result := ITraceDatabaseConnectionImpl(this).getProcessID();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function ITraceDatabaseConnectionImpl_getUserNameDispatcher(this: ITraceDatabaseConnection): PAnsiChar; cdecl;
 begin
-	try
+	//try
 		Result := ITraceDatabaseConnectionImpl(this).getUserName();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function ITraceDatabaseConnectionImpl_getRoleNameDispatcher(this: ITraceDatabaseConnection): PAnsiChar; cdecl;
 begin
-	try
+	//try
 		Result := ITraceDatabaseConnectionImpl(this).getRoleName();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function ITraceDatabaseConnectionImpl_getCharSetDispatcher(this: ITraceDatabaseConnection): PAnsiChar; cdecl;
 begin
-	try
+	//try
 		Result := ITraceDatabaseConnectionImpl(this).getCharSet();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function ITraceDatabaseConnectionImpl_getRemoteProtocolDispatcher(this: ITraceDatabaseConnection): PAnsiChar; cdecl;
 begin
-	try
+	//try
 		Result := ITraceDatabaseConnectionImpl(this).getRemoteProtocol();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function ITraceDatabaseConnectionImpl_getRemoteAddressDispatcher(this: ITraceDatabaseConnection): PAnsiChar; cdecl;
 begin
-	try
+	//try
 		Result := ITraceDatabaseConnectionImpl(this).getRemoteAddress();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function ITraceDatabaseConnectionImpl_getRemoteProcessIDDispatcher(this: ITraceDatabaseConnection): Integer; cdecl;
 begin
-	try
+	//try
 		Result := ITraceDatabaseConnectionImpl(this).getRemoteProcessID();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function ITraceDatabaseConnectionImpl_getRemoteProcessNameDispatcher(this: ITraceDatabaseConnection): PAnsiChar; cdecl;
 begin
-	try
+	//try
 		Result := ITraceDatabaseConnectionImpl(this).getRemoteProcessName();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function ITraceDatabaseConnectionImpl_getConnectionIDDispatcher(this: ITraceDatabaseConnection): Int64; cdecl;
 begin
-	try
+	//try
 		Result := ITraceDatabaseConnectionImpl(this).getConnectionID();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function ITraceDatabaseConnectionImpl_getDatabaseNameDispatcher(this: ITraceDatabaseConnection): PAnsiChar; cdecl;
 begin
-	try
+	//try
 		Result := ITraceDatabaseConnectionImpl(this).getDatabaseName();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 var
@@ -10928,47 +10928,47 @@ end;
 
 function ITraceTransactionImpl_getTransactionIDDispatcher(this: ITraceTransaction): Int64; cdecl;
 begin
-	try
+	//try
 		Result := ITraceTransactionImpl(this).getTransactionID();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function ITraceTransactionImpl_getReadOnlyDispatcher(this: ITraceTransaction): Boolean; cdecl;
 begin
-	try
+	//try
 		Result := ITraceTransactionImpl(this).getReadOnly();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function ITraceTransactionImpl_getWaitDispatcher(this: ITraceTransaction): Integer; cdecl;
 begin
-	try
+	//try
 		Result := ITraceTransactionImpl(this).getWait();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function ITraceTransactionImpl_getIsolationDispatcher(this: ITraceTransaction): Cardinal; cdecl;
 begin
-	try
+	//try
 		Result := ITraceTransactionImpl(this).getIsolation();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function ITraceTransactionImpl_getPerfDispatcher(this: ITraceTransaction): PerformanceInfoPtr; cdecl;
 begin
-	try
+	//try
 		Result := ITraceTransactionImpl(this).getPerf();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 var
@@ -10981,20 +10981,20 @@ end;
 
 function ITraceParamsImpl_getCountDispatcher(this: ITraceParams): Cardinal; cdecl;
 begin
-	try
+	//try
 		Result := ITraceParamsImpl(this).getCount();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function ITraceParamsImpl_getParamDispatcher(this: ITraceParams; idx: Cardinal): dscPtr; cdecl;
 begin
-	try
+	//try
 		Result := ITraceParamsImpl(this).getParam(idx);
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 var
@@ -11007,20 +11007,20 @@ end;
 
 function ITraceStatementImpl_getStmtIDDispatcher(this: ITraceStatement): Int64; cdecl;
 begin
-	try
+	//try
 		Result := ITraceStatementImpl(this).getStmtID();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function ITraceStatementImpl_getPerfDispatcher(this: ITraceStatement): PerformanceInfoPtr; cdecl;
 begin
-	try
+	//try
 		Result := ITraceStatementImpl(this).getPerf();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 var
@@ -11033,65 +11033,65 @@ end;
 
 function ITraceSQLStatementImpl_getStmtIDDispatcher(this: ITraceSQLStatement): Int64; cdecl;
 begin
-	try
+	//try
 		Result := ITraceSQLStatementImpl(this).getStmtID();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function ITraceSQLStatementImpl_getPerfDispatcher(this: ITraceSQLStatement): PerformanceInfoPtr; cdecl;
 begin
-	try
+	//try
 		Result := ITraceSQLStatementImpl(this).getPerf();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function ITraceSQLStatementImpl_getTextDispatcher(this: ITraceSQLStatement): PAnsiChar; cdecl;
 begin
-	try
+	//try
 		Result := ITraceSQLStatementImpl(this).getText();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function ITraceSQLStatementImpl_getPlanDispatcher(this: ITraceSQLStatement): PAnsiChar; cdecl;
 begin
-	try
+	//try
 		Result := ITraceSQLStatementImpl(this).getPlan();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function ITraceSQLStatementImpl_getInputsDispatcher(this: ITraceSQLStatement): ITraceParams; cdecl;
 begin
-	try
+	//try
 		Result := ITraceSQLStatementImpl(this).getInputs();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function ITraceSQLStatementImpl_getTextUTF8Dispatcher(this: ITraceSQLStatement): PAnsiChar; cdecl;
 begin
-	try
+	//try
 		Result := ITraceSQLStatementImpl(this).getTextUTF8();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function ITraceSQLStatementImpl_getExplainedPlanDispatcher(this: ITraceSQLStatement): PAnsiChar; cdecl;
 begin
-	try
+	//try
 		Result := ITraceSQLStatementImpl(this).getExplainedPlan();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 var
@@ -11104,47 +11104,47 @@ end;
 
 function ITraceBLRStatementImpl_getStmtIDDispatcher(this: ITraceBLRStatement): Int64; cdecl;
 begin
-	try
+	//try
 		Result := ITraceBLRStatementImpl(this).getStmtID();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function ITraceBLRStatementImpl_getPerfDispatcher(this: ITraceBLRStatement): PerformanceInfoPtr; cdecl;
 begin
-	try
+	//try
 		Result := ITraceBLRStatementImpl(this).getPerf();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function ITraceBLRStatementImpl_getDataDispatcher(this: ITraceBLRStatement): BytePtr; cdecl;
 begin
-	try
+	//try
 		Result := ITraceBLRStatementImpl(this).getData();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function ITraceBLRStatementImpl_getDataLengthDispatcher(this: ITraceBLRStatement): Cardinal; cdecl;
 begin
-	try
+	//try
 		Result := ITraceBLRStatementImpl(this).getDataLength();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function ITraceBLRStatementImpl_getTextDispatcher(this: ITraceBLRStatement): PAnsiChar; cdecl;
 begin
-	try
+	//try
 		Result := ITraceBLRStatementImpl(this).getText();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 var
@@ -11157,29 +11157,29 @@ end;
 
 function ITraceDYNRequestImpl_getDataDispatcher(this: ITraceDYNRequest): BytePtr; cdecl;
 begin
-	try
+	//try
 		Result := ITraceDYNRequestImpl(this).getData();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function ITraceDYNRequestImpl_getDataLengthDispatcher(this: ITraceDYNRequest): Cardinal; cdecl;
 begin
-	try
+	//try
 		Result := ITraceDYNRequestImpl(this).getDataLength();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function ITraceDYNRequestImpl_getTextDispatcher(this: ITraceDYNRequest): PAnsiChar; cdecl;
 begin
-	try
+	//try
 		Result := ITraceDYNRequestImpl(this).getText();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 var
@@ -11192,29 +11192,29 @@ end;
 
 function ITraceContextVariableImpl_getNameSpaceDispatcher(this: ITraceContextVariable): PAnsiChar; cdecl;
 begin
-	try
+	//try
 		Result := ITraceContextVariableImpl(this).getNameSpace();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function ITraceContextVariableImpl_getVarNameDispatcher(this: ITraceContextVariable): PAnsiChar; cdecl;
 begin
-	try
+	//try
 		Result := ITraceContextVariableImpl(this).getVarName();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function ITraceContextVariableImpl_getVarValueDispatcher(this: ITraceContextVariable): PAnsiChar; cdecl;
 begin
-	try
+	//try
 		Result := ITraceContextVariableImpl(this).getVarValue();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 var
@@ -11227,29 +11227,29 @@ end;
 
 function ITraceProcedureImpl_getProcNameDispatcher(this: ITraceProcedure): PAnsiChar; cdecl;
 begin
-	try
+	//try
 		Result := ITraceProcedureImpl(this).getProcName();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function ITraceProcedureImpl_getInputsDispatcher(this: ITraceProcedure): ITraceParams; cdecl;
 begin
-	try
+	//try
 		Result := ITraceProcedureImpl(this).getInputs();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function ITraceProcedureImpl_getPerfDispatcher(this: ITraceProcedure): PerformanceInfoPtr; cdecl;
 begin
-	try
+	//try
 		Result := ITraceProcedureImpl(this).getPerf();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 var
@@ -11262,38 +11262,38 @@ end;
 
 function ITraceFunctionImpl_getFuncNameDispatcher(this: ITraceFunction): PAnsiChar; cdecl;
 begin
-	try
+	//try
 		Result := ITraceFunctionImpl(this).getFuncName();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function ITraceFunctionImpl_getInputsDispatcher(this: ITraceFunction): ITraceParams; cdecl;
 begin
-	try
+	//try
 		Result := ITraceFunctionImpl(this).getInputs();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function ITraceFunctionImpl_getResultDispatcher(this: ITraceFunction): ITraceParams; cdecl;
 begin
-	try
+	//try
 		Result := ITraceFunctionImpl(this).getResult();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function ITraceFunctionImpl_getPerfDispatcher(this: ITraceFunction): PerformanceInfoPtr; cdecl;
 begin
-	try
+	//try
 		Result := ITraceFunctionImpl(this).getPerf();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 var
@@ -11306,47 +11306,47 @@ end;
 
 function ITraceTriggerImpl_getTriggerNameDispatcher(this: ITraceTrigger): PAnsiChar; cdecl;
 begin
-	try
+	//try
 		Result := ITraceTriggerImpl(this).getTriggerName();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function ITraceTriggerImpl_getRelationNameDispatcher(this: ITraceTrigger): PAnsiChar; cdecl;
 begin
-	try
+	//try
 		Result := ITraceTriggerImpl(this).getRelationName();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function ITraceTriggerImpl_getActionDispatcher(this: ITraceTrigger): Integer; cdecl;
 begin
-	try
+	//try
 		Result := ITraceTriggerImpl(this).getAction();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function ITraceTriggerImpl_getWhichDispatcher(this: ITraceTrigger): Integer; cdecl;
 begin
-	try
+	//try
 		Result := ITraceTriggerImpl(this).getWhich();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function ITraceTriggerImpl_getPerfDispatcher(this: ITraceTrigger): PerformanceInfoPtr; cdecl;
 begin
-	try
+	//try
 		Result := ITraceTriggerImpl(this).getPerf();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 var
@@ -11359,110 +11359,110 @@ end;
 
 function ITraceServiceConnectionImpl_getKindDispatcher(this: ITraceServiceConnection): Cardinal; cdecl;
 begin
-	try
+	//try
 		Result := ITraceServiceConnectionImpl(this).getKind();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function ITraceServiceConnectionImpl_getProcessIDDispatcher(this: ITraceServiceConnection): Integer; cdecl;
 begin
-	try
+	//try
 		Result := ITraceServiceConnectionImpl(this).getProcessID();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function ITraceServiceConnectionImpl_getUserNameDispatcher(this: ITraceServiceConnection): PAnsiChar; cdecl;
 begin
-	try
+	//try
 		Result := ITraceServiceConnectionImpl(this).getUserName();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function ITraceServiceConnectionImpl_getRoleNameDispatcher(this: ITraceServiceConnection): PAnsiChar; cdecl;
 begin
-	try
+	//try
 		Result := ITraceServiceConnectionImpl(this).getRoleName();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function ITraceServiceConnectionImpl_getCharSetDispatcher(this: ITraceServiceConnection): PAnsiChar; cdecl;
 begin
-	try
+	//try
 		Result := ITraceServiceConnectionImpl(this).getCharSet();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function ITraceServiceConnectionImpl_getRemoteProtocolDispatcher(this: ITraceServiceConnection): PAnsiChar; cdecl;
 begin
-	try
+	//try
 		Result := ITraceServiceConnectionImpl(this).getRemoteProtocol();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function ITraceServiceConnectionImpl_getRemoteAddressDispatcher(this: ITraceServiceConnection): PAnsiChar; cdecl;
 begin
-	try
+	//try
 		Result := ITraceServiceConnectionImpl(this).getRemoteAddress();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function ITraceServiceConnectionImpl_getRemoteProcessIDDispatcher(this: ITraceServiceConnection): Integer; cdecl;
 begin
-	try
+	//try
 		Result := ITraceServiceConnectionImpl(this).getRemoteProcessID();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function ITraceServiceConnectionImpl_getRemoteProcessNameDispatcher(this: ITraceServiceConnection): PAnsiChar; cdecl;
 begin
-	try
+	//try
 		Result := ITraceServiceConnectionImpl(this).getRemoteProcessName();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function ITraceServiceConnectionImpl_getServiceIDDispatcher(this: ITraceServiceConnection): Pointer; cdecl;
 begin
-	try
+	//try
 		Result := ITraceServiceConnectionImpl(this).getServiceID();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function ITraceServiceConnectionImpl_getServiceMgrDispatcher(this: ITraceServiceConnection): PAnsiChar; cdecl;
 begin
-	try
+	//try
 		Result := ITraceServiceConnectionImpl(this).getServiceMgr();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function ITraceServiceConnectionImpl_getServiceNameDispatcher(this: ITraceServiceConnection): PAnsiChar; cdecl;
 begin
-	try
+	//try
 		Result := ITraceServiceConnectionImpl(this).getServiceName();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 var
@@ -11475,38 +11475,38 @@ end;
 
 function ITraceStatusVectorImpl_hasErrorDispatcher(this: ITraceStatusVector): Boolean; cdecl;
 begin
-	try
+	//try
 		Result := ITraceStatusVectorImpl(this).hasError();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function ITraceStatusVectorImpl_hasWarningDispatcher(this: ITraceStatusVector): Boolean; cdecl;
 begin
-	try
+	//try
 		Result := ITraceStatusVectorImpl(this).hasWarning();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function ITraceStatusVectorImpl_getStatusDispatcher(this: ITraceStatusVector): IStatus; cdecl;
 begin
-	try
+	//try
 		Result := ITraceStatusVectorImpl(this).getStatus();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function ITraceStatusVectorImpl_getTextDispatcher(this: ITraceStatusVector): PAnsiChar; cdecl;
 begin
-	try
+	//try
 		Result := ITraceStatusVectorImpl(this).getText();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 var
@@ -11519,47 +11519,47 @@ end;
 
 function ITraceSweepInfoImpl_getOITDispatcher(this: ITraceSweepInfo): Int64; cdecl;
 begin
-	try
+	//try
 		Result := ITraceSweepInfoImpl(this).getOIT();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function ITraceSweepInfoImpl_getOSTDispatcher(this: ITraceSweepInfo): Int64; cdecl;
 begin
-	try
+	//try
 		Result := ITraceSweepInfoImpl(this).getOST();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function ITraceSweepInfoImpl_getOATDispatcher(this: ITraceSweepInfo): Int64; cdecl;
 begin
-	try
+	//try
 		Result := ITraceSweepInfoImpl(this).getOAT();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function ITraceSweepInfoImpl_getNextDispatcher(this: ITraceSweepInfo): Int64; cdecl;
 begin
-	try
+	//try
 		Result := ITraceSweepInfoImpl(this).getNext();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function ITraceSweepInfoImpl_getPerfDispatcher(this: ITraceSweepInfo): PerformanceInfoPtr; cdecl;
 begin
-	try
+	//try
 		Result := ITraceSweepInfoImpl(this).getPerf();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 var
@@ -11572,29 +11572,29 @@ end;
 
 procedure ITraceLogWriterImpl_addRefDispatcher(this: ITraceLogWriter); cdecl;
 begin
-	try
+	//try
 		ITraceLogWriterImpl(this).addRef();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function ITraceLogWriterImpl_releaseDispatcher(this: ITraceLogWriter): Integer; cdecl;
 begin
-	try
+	//try
 		Result := ITraceLogWriterImpl(this).release();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function ITraceLogWriterImpl_writeDispatcher(this: ITraceLogWriter; buf: Pointer; size: Cardinal): Cardinal; cdecl;
 begin
-	try
+	//try
 		Result := ITraceLogWriterImpl(this).write(buf, size);
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 var
@@ -11607,65 +11607,65 @@ end;
 
 function ITraceInitInfoImpl_getConfigTextDispatcher(this: ITraceInitInfo): PAnsiChar; cdecl;
 begin
-	try
+	//try
 		Result := ITraceInitInfoImpl(this).getConfigText();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function ITraceInitInfoImpl_getTraceSessionIDDispatcher(this: ITraceInitInfo): Integer; cdecl;
 begin
-	try
+	//try
 		Result := ITraceInitInfoImpl(this).getTraceSessionID();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function ITraceInitInfoImpl_getTraceSessionNameDispatcher(this: ITraceInitInfo): PAnsiChar; cdecl;
 begin
-	try
+	//try
 		Result := ITraceInitInfoImpl(this).getTraceSessionName();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function ITraceInitInfoImpl_getFirebirdRootDirectoryDispatcher(this: ITraceInitInfo): PAnsiChar; cdecl;
 begin
-	try
+	//try
 		Result := ITraceInitInfoImpl(this).getFirebirdRootDirectory();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function ITraceInitInfoImpl_getDatabaseNameDispatcher(this: ITraceInitInfo): PAnsiChar; cdecl;
 begin
-	try
+	//try
 		Result := ITraceInitInfoImpl(this).getDatabaseName();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function ITraceInitInfoImpl_getConnectionDispatcher(this: ITraceInitInfo): ITraceDatabaseConnection; cdecl;
 begin
-	try
+	//try
 		Result := ITraceInitInfoImpl(this).getConnection();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function ITraceInitInfoImpl_getLogWriterDispatcher(this: ITraceInitInfo): ITraceLogWriter; cdecl;
 begin
-	try
+	//try
 		Result := ITraceInitInfoImpl(this).getLogWriter();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 var
@@ -11678,209 +11678,209 @@ end;
 
 procedure ITracePluginImpl_addRefDispatcher(this: ITracePlugin); cdecl;
 begin
-	try
+	//try
 		ITracePluginImpl(this).addRef();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function ITracePluginImpl_releaseDispatcher(this: ITracePlugin): Integer; cdecl;
 begin
-	try
+	//try
 		Result := ITracePluginImpl(this).release();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function ITracePluginImpl_trace_get_errorDispatcher(this: ITracePlugin): PAnsiChar; cdecl;
 begin
-	try
+	//try
 		Result := ITracePluginImpl(this).trace_get_error();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function ITracePluginImpl_trace_attachDispatcher(this: ITracePlugin; connection: ITraceDatabaseConnection; create_db: Boolean; att_result: Cardinal): Boolean; cdecl;
 begin
-	try
+	//try
 		Result := ITracePluginImpl(this).trace_attach(connection, create_db, att_result);
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function ITracePluginImpl_trace_detachDispatcher(this: ITracePlugin; connection: ITraceDatabaseConnection; drop_db: Boolean): Boolean; cdecl;
 begin
-	try
+	//try
 		Result := ITracePluginImpl(this).trace_detach(connection, drop_db);
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function ITracePluginImpl_trace_transaction_startDispatcher(this: ITracePlugin; connection: ITraceDatabaseConnection; transaction: ITraceTransaction; tpb_length: Cardinal; tpb: BytePtr; tra_result: Cardinal): Boolean; cdecl;
 begin
-	try
+	//try
 		Result := ITracePluginImpl(this).trace_transaction_start(connection, transaction, tpb_length, tpb, tra_result);
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function ITracePluginImpl_trace_transaction_endDispatcher(this: ITracePlugin; connection: ITraceDatabaseConnection; transaction: ITraceTransaction; commit: Boolean; retain_context: Boolean; tra_result: Cardinal): Boolean; cdecl;
 begin
-	try
+	//try
 		Result := ITracePluginImpl(this).trace_transaction_end(connection, transaction, commit, retain_context, tra_result);
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function ITracePluginImpl_trace_proc_executeDispatcher(this: ITracePlugin; connection: ITraceDatabaseConnection; transaction: ITraceTransaction; procedure_: ITraceProcedure; started: Boolean; proc_result: Cardinal): Boolean; cdecl;
 begin
-	try
+	//try
 		Result := ITracePluginImpl(this).trace_proc_execute(connection, transaction, procedure_, started, proc_result);
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function ITracePluginImpl_trace_trigger_executeDispatcher(this: ITracePlugin; connection: ITraceDatabaseConnection; transaction: ITraceTransaction; trigger: ITraceTrigger; started: Boolean; trig_result: Cardinal): Boolean; cdecl;
 begin
-	try
+	//try
 		Result := ITracePluginImpl(this).trace_trigger_execute(connection, transaction, trigger, started, trig_result);
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function ITracePluginImpl_trace_set_contextDispatcher(this: ITracePlugin; connection: ITraceDatabaseConnection; transaction: ITraceTransaction; variable: ITraceContextVariable): Boolean; cdecl;
 begin
-	try
+	//try
 		Result := ITracePluginImpl(this).trace_set_context(connection, transaction, variable);
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function ITracePluginImpl_trace_dsql_prepareDispatcher(this: ITracePlugin; connection: ITraceDatabaseConnection; transaction: ITraceTransaction; statement: ITraceSQLStatement; time_millis: Int64; req_result: Cardinal): Boolean; cdecl;
 begin
-	try
+	//try
 		Result := ITracePluginImpl(this).trace_dsql_prepare(connection, transaction, statement, time_millis, req_result);
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function ITracePluginImpl_trace_dsql_freeDispatcher(this: ITracePlugin; connection: ITraceDatabaseConnection; statement: ITraceSQLStatement; option: Cardinal): Boolean; cdecl;
 begin
-	try
+	//try
 		Result := ITracePluginImpl(this).trace_dsql_free(connection, statement, option);
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function ITracePluginImpl_trace_dsql_executeDispatcher(this: ITracePlugin; connection: ITraceDatabaseConnection; transaction: ITraceTransaction; statement: ITraceSQLStatement; started: Boolean; req_result: Cardinal): Boolean; cdecl;
 begin
-	try
+	//try
 		Result := ITracePluginImpl(this).trace_dsql_execute(connection, transaction, statement, started, req_result);
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function ITracePluginImpl_trace_blr_compileDispatcher(this: ITracePlugin; connection: ITraceDatabaseConnection; transaction: ITraceTransaction; statement: ITraceBLRStatement; time_millis: Int64; req_result: Cardinal): Boolean; cdecl;
 begin
-	try
+	//try
 		Result := ITracePluginImpl(this).trace_blr_compile(connection, transaction, statement, time_millis, req_result);
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function ITracePluginImpl_trace_blr_executeDispatcher(this: ITracePlugin; connection: ITraceDatabaseConnection; transaction: ITraceTransaction; statement: ITraceBLRStatement; req_result: Cardinal): Boolean; cdecl;
 begin
-	try
+	//try
 		Result := ITracePluginImpl(this).trace_blr_execute(connection, transaction, statement, req_result);
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function ITracePluginImpl_trace_dyn_executeDispatcher(this: ITracePlugin; connection: ITraceDatabaseConnection; transaction: ITraceTransaction; request: ITraceDYNRequest; time_millis: Int64; req_result: Cardinal): Boolean; cdecl;
 begin
-	try
+	//try
 		Result := ITracePluginImpl(this).trace_dyn_execute(connection, transaction, request, time_millis, req_result);
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function ITracePluginImpl_trace_service_attachDispatcher(this: ITracePlugin; service: ITraceServiceConnection; att_result: Cardinal): Boolean; cdecl;
 begin
-	try
+	//try
 		Result := ITracePluginImpl(this).trace_service_attach(service, att_result);
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function ITracePluginImpl_trace_service_startDispatcher(this: ITracePlugin; service: ITraceServiceConnection; switches_length: Cardinal; switches: PAnsiChar; start_result: Cardinal): Boolean; cdecl;
 begin
-	try
+	//try
 		Result := ITracePluginImpl(this).trace_service_start(service, switches_length, switches, start_result);
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function ITracePluginImpl_trace_service_queryDispatcher(this: ITracePlugin; service: ITraceServiceConnection; send_item_length: Cardinal; send_items: BytePtr; recv_item_length: Cardinal; recv_items: BytePtr; query_result: Cardinal): Boolean; cdecl;
 begin
-	try
+	//try
 		Result := ITracePluginImpl(this).trace_service_query(service, send_item_length, send_items, recv_item_length, recv_items, query_result);
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function ITracePluginImpl_trace_service_detachDispatcher(this: ITracePlugin; service: ITraceServiceConnection; detach_result: Cardinal): Boolean; cdecl;
 begin
-	try
+	//try
 		Result := ITracePluginImpl(this).trace_service_detach(service, detach_result);
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function ITracePluginImpl_trace_event_errorDispatcher(this: ITracePlugin; connection: ITraceConnection; status: ITraceStatusVector; function_: PAnsiChar): Boolean; cdecl;
 begin
-	try
+	//try
 		Result := ITracePluginImpl(this).trace_event_error(connection, status, function_);
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function ITracePluginImpl_trace_event_sweepDispatcher(this: ITracePlugin; connection: ITraceDatabaseConnection; sweep: ITraceSweepInfo; sweep_state: Cardinal): Boolean; cdecl;
 begin
-	try
+	//try
 		Result := ITracePluginImpl(this).trace_event_sweep(connection, sweep, sweep_state);
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function ITracePluginImpl_trace_func_executeDispatcher(this: ITracePlugin; connection: ITraceDatabaseConnection; transaction: ITraceTransaction; function_: ITraceFunction; started: Boolean; func_result: Cardinal): Boolean; cdecl;
 begin
-	try
+	//try
 		Result := ITracePluginImpl(this).trace_func_execute(connection, transaction, function_, started, func_result);
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 var
@@ -11893,56 +11893,56 @@ end;
 
 procedure ITraceFactoryImpl_addRefDispatcher(this: ITraceFactory); cdecl;
 begin
-	try
+	//try
 		ITraceFactoryImpl(this).addRef();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function ITraceFactoryImpl_releaseDispatcher(this: ITraceFactory): Integer; cdecl;
 begin
-	try
+	//try
 		Result := ITraceFactoryImpl(this).release();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 procedure ITraceFactoryImpl_setOwnerDispatcher(this: ITraceFactory; r: IReferenceCounted); cdecl;
 begin
-	try
+	//try
 		ITraceFactoryImpl(this).setOwner(r);
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function ITraceFactoryImpl_getOwnerDispatcher(this: ITraceFactory): IReferenceCounted; cdecl;
 begin
-	try
+	//try
 		Result := ITraceFactoryImpl(this).getOwner();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function ITraceFactoryImpl_trace_needsDispatcher(this: ITraceFactory): QWord; cdecl;
 begin
-	try
+	//try
 		Result := ITraceFactoryImpl(this).trace_needs();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 function ITraceFactoryImpl_trace_createDispatcher(this: ITraceFactory; status: IStatus; init_info: ITraceInitInfo): ITracePlugin; cdecl;
 begin
-	try
+	//try
 		Result := ITraceFactoryImpl(this).trace_create(status, init_info);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 var
@@ -11955,29 +11955,29 @@ end;
 
 procedure IUdrFunctionFactoryImpl_disposeDispatcher(this: IUdrFunctionFactory); cdecl;
 begin
-	try
+	//try
 		IUdrFunctionFactoryImpl(this).dispose();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 procedure IUdrFunctionFactoryImpl_setupDispatcher(this: IUdrFunctionFactory; status: IStatus; context: IExternalContext; metadata: IRoutineMetadata; inBuilder: IMetadataBuilder; outBuilder: IMetadataBuilder); cdecl;
 begin
-	try
+	//try
 		IUdrFunctionFactoryImpl(this).setup(status, context, metadata, inBuilder, outBuilder);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 function IUdrFunctionFactoryImpl_newItemDispatcher(this: IUdrFunctionFactory; status: IStatus; context: IExternalContext; metadata: IRoutineMetadata): IExternalFunction; cdecl;
 begin
-	try
+	//try
 		Result := IUdrFunctionFactoryImpl(this).newItem(status, context, metadata);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 var
@@ -11990,29 +11990,29 @@ end;
 
 procedure IUdrProcedureFactoryImpl_disposeDispatcher(this: IUdrProcedureFactory); cdecl;
 begin
-	try
+	//try
 		IUdrProcedureFactoryImpl(this).dispose();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 procedure IUdrProcedureFactoryImpl_setupDispatcher(this: IUdrProcedureFactory; status: IStatus; context: IExternalContext; metadata: IRoutineMetadata; inBuilder: IMetadataBuilder; outBuilder: IMetadataBuilder); cdecl;
 begin
-	try
+	//try
 		IUdrProcedureFactoryImpl(this).setup(status, context, metadata, inBuilder, outBuilder);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 function IUdrProcedureFactoryImpl_newItemDispatcher(this: IUdrProcedureFactory; status: IStatus; context: IExternalContext; metadata: IRoutineMetadata): IExternalProcedure; cdecl;
 begin
-	try
+	//try
 		Result := IUdrProcedureFactoryImpl(this).newItem(status, context, metadata);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 var
@@ -12025,29 +12025,29 @@ end;
 
 procedure IUdrTriggerFactoryImpl_disposeDispatcher(this: IUdrTriggerFactory); cdecl;
 begin
-	try
+	//try
 		IUdrTriggerFactoryImpl(this).dispose();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 procedure IUdrTriggerFactoryImpl_setupDispatcher(this: IUdrTriggerFactory; status: IStatus; context: IExternalContext; metadata: IRoutineMetadata; fieldsBuilder: IMetadataBuilder); cdecl;
 begin
-	try
+	//try
 		IUdrTriggerFactoryImpl(this).setup(status, context, metadata, fieldsBuilder);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 function IUdrTriggerFactoryImpl_newItemDispatcher(this: IUdrTriggerFactory; status: IStatus; context: IExternalContext; metadata: IRoutineMetadata): IExternalTrigger; cdecl;
 begin
-	try
+	//try
 		Result := IUdrTriggerFactoryImpl(this).newItem(status, context, metadata);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 var
@@ -12060,38 +12060,38 @@ end;
 
 function IUdrPluginImpl_getMasterDispatcher(this: IUdrPlugin): IMaster; cdecl;
 begin
-	try
+	//try
 		Result := IUdrPluginImpl(this).getMaster();
-	except
-		on e: Exception do FbException.catchException(nil, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(nil, e);
+	//end
 end;
 
 procedure IUdrPluginImpl_registerFunctionDispatcher(this: IUdrPlugin; status: IStatus; name: PAnsiChar; factory: IUdrFunctionFactory); cdecl;
 begin
-	try
+	//try
 		IUdrPluginImpl(this).registerFunction(status, name, factory);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 procedure IUdrPluginImpl_registerProcedureDispatcher(this: IUdrPlugin; status: IStatus; name: PAnsiChar; factory: IUdrProcedureFactory); cdecl;
 begin
-	try
+	//try
 		IUdrPluginImpl(this).registerProcedure(status, name, factory);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 procedure IUdrPluginImpl_registerTriggerDispatcher(this: IUdrPlugin; status: IStatus; name: PAnsiChar; factory: IUdrTriggerFactory); cdecl;
 begin
-	try
+	//try
 		IUdrPluginImpl(this).registerTrigger(status, name, factory);
-	except
-		on e: Exception do FbException.catchException(status, e);
-	end
+	//except
+		//on e: Exception do FbException.catchException(status, e);
+	//end
 end;
 
 var

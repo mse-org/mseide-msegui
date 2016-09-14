@@ -106,8 +106,8 @@ type
    procedure internalExecute(const cursor: TSQLCursor; const atransaction: tsqltransaction;
                      const AParams : TmseParams; const autf8: boolean); override;
    procedure internalexecuteunprepared(const cursor: tsqlcursor;
-               const atransaction: tsqltransaction;
-               const asql: string); override;
+               const atransaction: tsqltransaction; const asql: string;
+               const origsql: msestring; const aparams: tmseparams); override;
    function GetTransactionHandle(trans : TSQLHandle): pointer; override;
    function RollBack(trans : TSQLHandle) : boolean; override;
    function Commit(trans : TSQLHandle) : boolean; override;
@@ -135,7 +135,8 @@ type
              out newid: string);
    procedure setupblobdata(const afield: tfield; const acursor: tsqlcursor;
                                    const aparam: tparam);
-   function blobscached: boolean;
+   function getfeatures(): databasefeaturesty override;
+//   function blobscached: boolean;
 
           //idbevent
    procedure listen(const sender: tdbevent);
@@ -864,8 +865,8 @@ begin
 end;
 
 procedure tpqconnection.internalexecuteunprepared(const cursor: tsqlcursor;
-               const atransaction: tsqltransaction;
-               const asql: string);
+               const atransaction: tsqltransaction; const asql: string;
+                const origsql: msestring; const aparams: tmseparams);
 begin
  with TPQCursor(cursor) do begin
   tr := TPQTrans(cursor.ftrans);
@@ -1476,16 +1477,21 @@ begin
  acursor.blobfieldtoparam(afield,aparam,false);
 end;
 
+function TPQConnection.getfeatures(): databasefeaturesty;
+begin
+ result:= inherited getfeatures() + [dbf_blobscached];
+end;
+
 function TPQConnection.getblobdatasize: integer;
 begin
  result:= sizeof(integer);
 end;
-
+{
 function TPQConnection.blobscached: boolean;
 begin
  result:= true;
 end;
-
+}
 procedure TPQConnection.dolisten(const sender: tdbevent);
 begin
  dopqexec('LISTEN '+sender.eventname+';');

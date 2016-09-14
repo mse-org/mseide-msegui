@@ -104,8 +104,8 @@ type
              const ATransaction:TSQLTransaction; const AParams:TmseParams;
              const autf8: boolean); override;
     procedure internalexecuteunprepared(const cursor: tsqlcursor;
-               const atransaction: tsqltransaction;
-               const asql: string); override;
+               const atransaction: tsqltransaction; const asql: string;
+               const origsql: msestring; const aparams: tmseparams); override;
 
 
     function CreateBlobStream(const Field: TField; const Mode: TBlobStreamMode;
@@ -120,6 +120,7 @@ type
     // Internal utility functions
     function CreateConnectionString:string;
     function getblobdatasize: integer; override;
+    function getfeatures(): databasefeaturesty override;
 
           //iblobconnection
    procedure writeblobdata(const atransaction: tsqltransaction;
@@ -129,7 +130,7 @@ type
              out newid: string);
    procedure setupblobdata(const afield: tfield; const acursor: tsqlcursor;
                                    const aparam: tparam);
-   function blobscached: boolean;
+//   function blobscached: boolean;
   public
    function AllocateCursorHandle(const aowner: icursorclient;
                            const aname: ansistring): TSQLCursor; override;
@@ -483,11 +484,16 @@ begin
  result:= sizeof(integer);
 end;
 
+function TODBCConnection.getfeatures(): databasefeaturesty;
+begin
+ result:= inherited getfeatures() + [dbf_blobscached];
+end;
+{
 function TODBCConnection.blobscached: boolean;
 begin
  result:= true;
 end;
-
+}
 procedure TODBCConnection.SetParameters(ODBCCursor: TODBCCursor; AParams: TmseParams);
 
  procedure bindnum(i: integer; valuetype: SQLSMALLINT; parametertype: SQLSMALLINT;
@@ -957,8 +963,8 @@ begin
 end;
 
 procedure todbcconnection.internalexecuteunprepared(const cursor: tsqlcursor;
-               const atransaction: tsqltransaction;
-               const asql: string);
+               const atransaction: tsqltransaction; const asql: string;
+               const origsql: msestring; const aparams: tmseparams);
 var
   ODBCCursor:TODBCCursor;
   Res: SQLRETURN;

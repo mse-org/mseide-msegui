@@ -12,7 +12,7 @@ unit msefbconnection;
 interface
 uses
  classes,mclasses,firebird,msqldb,msestrings,msetypes,mdb,msedb,msedatabase,
- sysutils,msefirebird;
+ sysutils,msefirebird,msedbevents,msesystypes;
  
 const
  SQL_DIALECT_V6 = 3;
@@ -78,7 +78,34 @@ type
   util: iutil;
  end;
  
- tfbconnection = class(tcustomsqlconnection,iblobconnection)
+ fbeventinfoty = record
+  event: tdbevent;
+  name: string;
+  length: integer;
+//  eventbuffer: pchar;
+//  resultbuffer: pchar;
+//  id: isc_long;
+  count: integer;
+ end;
+ pfbeventinfoty = ^fbeventinfoty;
+
+ tfbeventcallback = class(ieventcallbackimpl)
+  private
+   frefcount: int32;
+  protected
+   fowner: tfbconnection;
+   fmutex: mutexty;
+  public
+   constructor create(const aowner: tfbconnection);
+   destructor destroy(); override;
+   procedure addRef() override;
+   function release(): Integer override;
+   procedure eventCallbackFunction(length: Cardinal; events: BytePtr) override;
+   procedure unlockandrelease();
+ end;
+ 
+ tfbconnection = class(tcustomsqlconnection,iblobconnection,
+                                         idbevent,idbeventcontroller)
   private
    fdialect: integer;
    function getblobstream(const acursor: tsqlcursor; const blobid: isc_quad;
@@ -88,6 +115,15 @@ type
   protected
    fapi: fbapity;
    fattachment: iattachment;
+   feventcallback: tfbeventcallback;
+   feventcontroller: tdbeventcontroller;
+   feventitems: array of fbeventinfoty;
+   fevents: ievents;
+   flistencount: int32;
+   feventcount: int32;
+   feventlength: int32;
+   feventbuffer,fresultbuffer: pbyte;
+//   fmutex: mutexty;
    procedure iniapi();
    procedure finiapi();
    function getpb(): ixpbbuilder;
@@ -125,6 +161,8 @@ type
                           const acursor: tsqlcursor): tstream; override;
    function getblobdatasize: integer; override;
    function getfeatures(): databasefeaturesty override;
+   
+   procedure updateevents(const aerrormessage: msestring);
 
 
     //iblobconnection
@@ -135,8 +173,19 @@ type
                                                  overload;
    procedure setupblobdata(const afield: tfield; const acursor: tsqlcursor;
                               const aparam: tparam);
+    //idbevent
+          //idbevent
+   procedure listen(const sender: tdbevent);
+   procedure unlisten(const sender: tdbevent);
+   procedure fire(const sender: tdbevent);
+          //idbeventcontroller
+   function getdbevent(var aname: string; var aid: int64): boolean;
+          //false if none
+   procedure dolisten(const sender: tdbevent);
+   procedure dounlisten(const sender: tdbevent);
   public
    constructor create(aowner: tcomponent); override;
+   destructor destroy(); override;
    function allocatecursorhandle(const aowner: icursorclient;
                       const aname: ansistring): tsqlcursor override;
    procedure deallocatecursorhandle(var cursor : tsqlcursor) override;
@@ -172,11 +221,81 @@ type
 implementation
 uses
  dbconst,msefbinterface,msefbutils,msesqldb,msebufdataset,msedate,msefloattostr,
- msebits;
+ msebits,msesysintf1,msearrayutils;
 
 const
  textblobtypes = [ftmemo,ftwidememo]; 
  
+{ tfbeventcallback }
+
+constructor tfbeventcallback.create(const aowner: tfbconnection);
+begin
+ fowner:= aowner;
+ sys_mutexcreate(fmutex);
+ inherited create();
+end;
+
+destructor tfbeventcallback.destroy();
+begin
+ inherited;
+ sys_mutexdestroy(fmutex);
+end;
+
+procedure tfbeventcallback.addRef();
+begin
+ sys_mutexlock(fmutex);
+ inc(frefcount);
+ sys_mutexunlock(fmutex);
+end;
+
+function tfbeventcallback.release(): Integer;
+begin
+ sys_mutexlock(fmutex);
+ dec(frefcount);
+ result:= frefcount;
+ if frefcount = 0 then begin
+  destroy();
+  exit;
+ end;
+ sys_mutexunlock(fmutex);
+end;
+
+procedure tfbeventcallback.eventCallbackFunction(length: Cardinal;
+               events: BytePtr);
+//var
+ 
+begin
+ sys_mutexlock(fmutex);
+ if frefcount > 1 then begin //owner alive
+  with fowner do begin
+   inc(feventcount);
+   feventcontroller.eventinterval:= -1; //restart timer
+  end;
+ end;
+ sys_mutexunlock(fmutex);
+{
+ with pfbeventbufferty(adata)^,tibconnection(event.database) do begin
+   sys_mutexlock(fmutex);
+   inc(count);
+   inc(feventcount);
+   move(aupdated^,resultbuffer^,alength);
+   feventcontroller.eventinterval:= -1; //restart timer
+   sys_mutexunlock(fmutex);
+ end;
+}
+end;
+
+procedure tfbeventcallback.unlockandrelease();
+var
+ i1: int32;
+begin
+ i1:= frefcount;
+ release();
+ if i1 <> 1 then begin //destroyed otherwise
+  sys_mutexunlock(fmutex);
+ end;
+end;
+
 { efberror }
 
 constructor efberror.create(const asender: tfbconnection;
@@ -198,7 +317,20 @@ end;
 constructor tfbconnection.create(aowner: tcomponent);
 begin
  fdialect:= sql_dialect_v6;
+// feventcallback:= tfbeventcallback.create();
+// sys_mutexcreate(fmutex);
+ feventcontroller:= tdbeventcontroller.create(idbeventcontroller(self));
+ feventcontroller.eventinterval:= -1; //event driven
  inherited;
+ FConnOptions := FConnOptions + [sco_SupportParams];
+end;
+
+destructor tfbconnection.destroy();
+begin
+ inherited;
+ feventcontroller.free;
+// feventcallback.free();
+// sys_mutexdestroy(fmutex);
 end;
 
 procedure tfbconnection.iniapi();
@@ -262,6 +394,7 @@ var
  pb: ixpbbuilder;
  databasename1 : string;
 begin
+ flistencount:= 0;
  iniapi();
  try 
   inherited dointernalconnect;
@@ -302,7 +435,7 @@ begin
 //  releasefirebird;
   raise;
  end;
-// feventcontroller.connect;
+ feventcontroller.connect();
 end;
 
 procedure tfbconnection.dointernaldisconnect;
@@ -313,6 +446,7 @@ begin
   fattachment.release();
   fattachment:= nil;
  end;
+ feventcontroller.disconnect();
 end;
 
 function tfbconnection.allocatetransactionhandle: tsqlhandle;
@@ -1183,6 +1317,159 @@ begin
  else begin
   aparam.blobkind:= bk_binary;
  end;
+end;
+
+procedure tfbconnection.listen(const sender: tdbevent);
+begin
+ feventcontroller.register(sender);
+ if connected then begin
+  dolisten(sender);
+ end;
+end;
+
+procedure tfbconnection.unlisten(const sender: tdbevent);
+begin
+ if connected then begin
+  dounlisten(sender);
+ end;
+ feventcontroller.unregister(sender);
+end;
+
+procedure tfbconnection.fire(const sender: tdbevent);
+var
+ trans: tmsesqltransaction;
+begin
+ trans:= tmsesqltransaction.create(nil);
+ try
+  trans.database:= self;
+  executedirect('execute block as begin post_event '+
+                       encodesqlstring(msestring(sender.eventname))+'; end',
+                                                         trans,nil,isutf8,true);
+  trans.commit();
+ finally
+  trans.destroy();
+ end;
+end;
+
+function tfbconnection.getdbevent(var aname: string; var aid: int64): boolean;
+var
+ int1: integer;
+// status: statusvectorty; 
+begin
+ result:= false;
+ if feventcount > 0 then begin
+//  sys_mutexlock(fmutex);
+  dec(feventcount);
+(*
+  for int1:= 0 to high(feventbuffers) do begin
+   if feventbuffers[int1] <> nil then begin
+    with feventbuffers[int1]^ do begin
+     if count <> 0 then begin
+{
+      isc_event_counts(@status,length,eventbuffer,resultbuffer);
+      isc_que_events(@status,@fsqldatabasehandle,@id,length,
+         eventbuffer,isc_callback(@eventcallback),feventbuffers[int1]);
+      if count < 0 then begin     //first dummy
+       count:= 0;
+      end
+      else begin
+       dec(count);
+       aname:= event.eventname;
+       aid:= id;
+       result:= true;
+      end;
+}
+      break;
+     end;
+    end;
+   end;
+  end;
+  sys_mutexunlock(fmutex);
+*)
+ end;
+end;
+
+procedure tfbconnection.updateevents(const aerrormessage: msestring);
+                  //mutex must be locked
+var
+ i1,i2,i3: integer;
+ ar1: array of string;
+begin
+ if fevents <> nil then begin
+  fevents.cancel(fapi.status);
+  fevents.release();
+  fevents:= nil;
+ end;
+ if feventcallback <> nil then begin
+  feventcallback.unlockandrelease();
+  feventcallback:= nil;
+ end;
+ 
+ if feventbuffer <> nil then begin
+  freemem(feventbuffer);
+  feventbuffer:= nil;
+ end;
+ if fresultbuffer <> nil then begin
+  freemem(fresultbuffer);
+  fresultbuffer:= nil;
+ end;
+ setlength(ar1,length(feventitems));
+ for i1:= 0 to high(feventitems) do begin
+  ar1[i1]:= feventitems[i1].name;
+ end;
+ if feventitems <> nil then begin
+  feventcallback:= tfbeventcallback.create(self);
+  feventcallback.addref();
+  sys_mutexlock(feventcallback.fmutex);
+  feventlength:= event_block(feventbuffer,fresultbuffer,ar1);
+
+  clearstatus();
+  fevents:= fattachment.queevents(
+                        fapi.status,feventcallback,feventlength,feventbuffer);
+  if fevents = nil then begin
+   feventcallback.unlockandrelease();
+   feventcallback:= nil;
+   gds__free(feventbuffer);
+   feventbuffer:= nil;
+   gds__free(fresultbuffer);
+   fresultbuffer:= nil;
+   setlength(feventitems,high(feventitems));
+  end;
+  checkstatus(aerrormessage);
+ end;
+ sys_mutexunlock(feventcallback.fmutex);
+end;
+
+procedure tfbconnection.dolisten(const sender: tdbevent);
+begin
+ if feventcallback <> nil then begin
+  sys_mutexlock(feventcallback.fmutex);
+ end;
+ setlength(feventitems,high(feventitems)+2);
+ with feventitems[high(feventitems)] do begin
+  count:= -2; //remove dummy call
+  event:= sender;
+  name:= sender.eventname;
+ end;
+ updateevents('dolisten');
+end;
+
+procedure tfbconnection.dounlisten(const sender: tdbevent);
+var
+ i1: integer;
+ po1: pfbeventinfoty;
+begin
+ if feventcallback <> nil then begin
+  sys_mutexlock(feventcallback.fmutex);
+ end;
+ for i1:= 0 to high(feventitems) do begin
+  po1:= @feventitems[i1];
+  if po1^.event = sender then begin
+   finalize(po1^);
+   deleteitem(feventitems,typeinfo(feventitems),i1);
+  end;
+ end;
+ updateevents('dounlisten');
 end;
 
 { tfbtrans }

@@ -304,7 +304,7 @@ type
    function writesequence(const sequencename: string;
                     const avalue: largeint): msestring; virtual;
    function getfeatures(): databasefeaturesty virtual;
-   function blobscachedx: boolean;
+   function blobscached: boolean;
  public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -680,7 +680,7 @@ type
               //returns blobid or data in param
   procedure setupblobdata(const afield: tfield; const acursor: tsqlcursor;
                               const aparam: tparam);
-  function blobscachedx: boolean;
+  function blobscached: boolean;
  end;
  
  isqlclient = interface(idatabaseclient)
@@ -1146,7 +1146,7 @@ begin
  result:= [];
 end;
 
-function tcustomsqlconnection.blobscachedx: boolean;
+function tcustomsqlconnection.blobscached: boolean;
 begin
  result:= dbf_blobscached in getfeatures;
 end;

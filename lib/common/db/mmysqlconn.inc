@@ -150,6 +150,7 @@ Type
    function CreateBlobStream(const Field: TField; const Mode: TBlobStreamMode;
                          const acursor: tsqlcursor): TStream; override;
    function getblobdatasize: integer; override;
+   function getfeatures(): databasefeaturesty override;
           //iblobconnection
    procedure writeblobdata(const atransaction: tsqltransaction;
              const tablename: string; const acursor: tsqlcursor;
@@ -158,7 +159,7 @@ Type
              out newid: string);
    procedure setupblobdata(const afield: tfield; const acursor: tsqlcursor;
                                    const aparam: tparam);
-   function blobscached: boolean;
+//   function blobscached: boolean;
    function identquotechar: msestring; override;
    
   Public
@@ -1033,6 +1034,11 @@ begin
  result:= sizeof(integer);
 end;
 
+function TConnectionName.getfeatures(): databasefeaturesty;
+begin
+ result:= inherited getfeatures() + [dbf_blobscached];
+end;
+
 procedure TConnectionName.writeblobdata(const atransaction: tsqltransaction;
                const tablename: string; const acursor: tsqlcursor;
                const adata: pointer; const alength: integer;
@@ -1059,12 +1065,12 @@ procedure TConnectionName.setupblobdata(const afield: tfield;
 begin
  acursor.blobfieldtoparam(afield,aparam,false);
 end;
-
+{
 function TConnectionName.blobscached: boolean;
 begin
  result:= true;
 end;
-
+}
 function TConnectionName.getprimarykeyfield(const atablename: string;
                         const acursor: tsqlcursor): string;
 begin

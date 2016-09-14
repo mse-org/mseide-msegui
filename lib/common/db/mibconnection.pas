@@ -176,7 +176,7 @@ type
                                                  overload;
    procedure setupblobdata(const afield: tfield; const acursor: tsqlcursor;
                               const aparam: tparam);
-   function blobscached: boolean;
+//   function blobscached: boolean;
           //idbevent
    procedure listen(const sender: tdbevent);
    procedure unlisten(const sender: tdbevent);
@@ -1621,12 +1621,12 @@ begin
  end;
 {$endif}
 end;
-
+{
 function TIBConnection.blobscached: boolean;
 begin
  result:= false;
 end;
-
+}
 procedure TIBConnection.listen(const sender: tdbevent);
 begin
  feventcontroller.register(sender);
