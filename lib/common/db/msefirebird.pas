@@ -195,6 +195,10 @@ function event_block(out eventbuffer: pbyte; out resultbuffer: pbyte;
 var
  fb_get_master_interface: function: IMaster
                                {$ifdef wincall}stdcall{$else}cdecl{$endif};
+ isc_get_client_major_version: function(): cint
+                               {$ifdef wincall}stdcall{$else}cdecl{$endif};
+ isc_get_client_minor_version: function(): cint
+                               {$ifdef wincall}stdcall{$else}cdecl{$endif};
  gds__alloc: function (size_request: SLONG): pointer
                                {$ifdef wincall}stdcall{$else}cdecl{$endif};
  gds__free: function(blk: pointer): ULONG;
@@ -235,8 +239,10 @@ procedure initializefirebird(const sonames: array of filenamety; //[] = default
                                          const onlyonce: boolean = false);
                                      
 const
- funcs: array[0..5] of funcinfoty = (
+ funcs: array[0..7] of funcinfoty = (
   (n: 'fb_get_master_interface'; d: @fb_get_master_interface),
+  (n: 'isc_get_client_major_version'; d: @isc_get_client_major_version),
+  (n: 'isc_get_client_minor_version'; d: @isc_get_client_minor_version),
   (n: 'gds__vax_integer'; d: @gds__vax_integer),
 //  (n: 'gds__event_block'; d: @gds__event_block),
   (n: 'isc_event_counts'; d: @isc_event_counts),
