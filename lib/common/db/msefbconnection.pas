@@ -61,6 +61,8 @@ type
    fparambinding: tparambinding;
    fstatement: istatement;
    fresultset: iresultset;
+   ffirstfetch: boolean; //set after open if there is at least one record
+   fempty: boolean;
    fcursorstate: cursorstatesty;
    ffieldinfos: fbfieldinfoarty;
    frowbuffer: string;
@@ -893,6 +895,14 @@ var
 
 begin
  with acursor do begin
+  if fresultset.iseof(fapi.status) then begin
+   fempty:= true;
+   ffirstfetch:= false;
+  end
+  else begin
+   fempty:= false;
+   ffirstfetch:= true;
+  end;
   metadata:= fresultset.getmetadata(fapi.status);
   if metadata <> nil then begin
    setlength(frowbuffer,metadata.getmessagelength(fapi.status));
@@ -1176,12 +1186,25 @@ begin
 end;
 
 function tfbconnection.fetch(cursor: tsqlcursor): boolean;
+var
+ i1: int32;
 begin
  with tfbcursor(cursor) do begin
-  clearstatus();
-  result:= fresultset.fetchnext(fapi.status,pointer(frowbuffer)) = 
-                                                         istatus.RESULT_OK;
-  checkstatus('fetch');
+  if fempty then begin
+   result:= false;
+  end
+  else begin
+   clearstatus();
+   i1:= fresultset.fetchnext(fapi.status,pointer(frowbuffer));
+   if (i1 = istatus.RESULT_ERROR) and ffirstfetch then begin
+    result:= true; //probably no select statement
+   end
+   else begin
+    result:= i1 = istatus.RESULT_OK;
+    checkstatus('fetch');
+   end;
+  end;
+  ffirstfetch:= false;
  end;
 end;
 
@@ -1503,7 +1526,7 @@ end;
 procedure tfbconnection.updateevents(const aerrormessage: msestring);
                   //mutex must be locked
 var
- i1,i2,i3: integer;
+ i1: integer;
  ar1: array of string;
 begin
  if feventcallback <> nil then begin
