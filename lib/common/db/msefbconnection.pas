@@ -23,6 +23,9 @@ const
 type
  pimessagemetadata = ^imessagemetadata;
 
+ fbconnectionoptionty = (fbo_sqlinfo);
+ fbconnectionoptionsty = set of fbconnectionoptionty;
+ 
  tfbconnection = class;
  
  tfbtrans = class(tsqlhandle)
@@ -65,6 +68,7 @@ type
    fparambinding: tparambinding;
    fstatement: istatement;
    fstatementflags: card32;
+   fempty: boolean;
    ffirstfetch: boolean; //set for execute() if there is outputdata
    fresultset: iresultset;
    fcursorstate: cursorstatesty;
@@ -117,6 +121,7 @@ type
    fdialect: integer;
    flasterrormessage: msestring;
    flastsqlcode: int32;
+   foptions: fbconnectionoptionsty;
    function getblobstream(const acursor: tsqlcursor; const blobid: isc_quad;
                       const forstring: boolean = false): tmemorystream;
    function getblobstring(const acursor: tsqlcursor;
@@ -220,8 +225,8 @@ type
   published
    property dialect: integer read fdialect write fdialect 
                                         default sql_dialect_v6;
-//   property options: ibconnectionoptionsty read foptions 
-//                                           write foptions default [];
+   property options: fbconnectionoptionsty read foptions 
+                                           write foptions default [];
    property DatabaseName;
 //   property KeepConnection;
 //   property Params;
@@ -905,10 +910,14 @@ var
 begin
  with acursor do begin
   ffirstfetch:= false;
+  fempty:= false;
   if fresultset = nil then begin //execute()
    metadata:= fstatement.getoutputmetadata(fapi.status);
    if metadata <> nil then begin
     ffirstfetch:= true;
+   end
+   else begin
+    fempty:= true;
    end;
   end
   else begin                     //openCursor()
@@ -1103,7 +1112,7 @@ SQL_NULL =        32766;
   end;
  end;
 end;
-
+var testvar: tfbcursor;
 procedure tfbconnection.internalexecute(const cursor: tsqlcursor;
               const atransaction: tsqltransaction; const aparams: tmseparams;
               const autf8: boolean);
@@ -1111,8 +1120,20 @@ var
  paramdata: tparamdata; //inherits from imessagemetadata
  parambuffer: pointer;
  outdata1: imessagemetadata;
+ buf1: array[0..127] of byte;
+ by1: byte;
+ i1,i2,i3: int32;
+ datasize: int32;
+ selectcount: int32;
+ updatecount: int32;
+ deletecount: int32;
+ insertcount: int32;
+ 
 begin
+testvar:= tfbcursor(cursor);
  with tfbcursor(cursor) do begin
+  frowsaffected:= -1;
+  frowsreturned:= -1;
   if assigned(aparams) and (aparams.count > 0) and 
                                            (fparambinding <> nil) then begin
    paramdata:= tparamdata.create(tfbcursor(cursor),aparams);
@@ -1138,6 +1159,73 @@ begin
    end;
    if fresultset <> nil then begin
     updateresultmetadata(tfbcursor(cursor),nil);
+    if fbo_sqlinfo in foptions then begin
+     if fetch(cursor) then begin //fetch necessary for valid sqlinfo
+      ffirstfetch:= true;
+     end
+     else begin
+      fempty:= true;
+     end;
+    end;
+   end;
+   if fbo_sqlinfo in foptions then begin
+    by1:= isc_info_sql_records;
+    fstatement.getinfo(fapi.status,1,@by1,sizeof(buf1),@buf1);
+    if statusok() then begin
+     if buf1[0] = isc_info_sql_records then begin
+      i2:= gds__vax_integer(@buf1[1],2)+3; //record size
+      if i2 <= sizeof(buf1) then begin
+       selectcount:= -1;
+       updatecount:= -1;
+       deletecount:= -1;
+       insertcount:= -1;
+       i1:= 3;
+       while true do begin
+        by1:= buf1[i1];
+        if (by1 in [isc_info_end,isc_info_truncated]) or 
+                                          (i1 >= i2-1) then begin
+         break;
+        end;
+        datasize:= gds__vax_integer(@buf1[i1+1],2);
+        inc(i1,3);
+        if i1 + datasize > i2 then begin
+         break;
+        end;
+        i3:= gds__vax_integer(@buf1[i1],datasize);
+        case by1 of
+         isc_info_req_select_count: begin
+          selectcount:= i3;
+         end;
+         isc_info_req_update_count: begin
+          updatecount:= i3;
+         end;
+         isc_info_req_delete_count: begin
+          deletecount:= i3;
+         end;
+         isc_info_req_insert_count: begin
+          insertcount:= i3;
+         end;
+        end;
+        inc(i1,datasize);
+       end;
+       if selectcount >= 0 then begin
+        frowsreturned:= selectcount;
+       end;
+       if updatecount > 0 then begin
+//        frowsreturned:= 0;
+        frowsaffected:= updatecount;
+       end;
+       if deletecount > 0 then begin
+//        frowsreturned:= 0;
+        frowsaffected:= deletecount;
+       end;
+       if insertcount > 0 then begin
+//        frowsreturned:= 0;
+        frowsaffected:= insertcount;
+       end;
+      end;
+     end;
+    end;
    end;
    checkstatus('execute');
   end;
@@ -1154,6 +1242,8 @@ var
  str1: string;
 begin
  with tfbcursor(cursor) do begin
+  frowsaffected:= -1;
+  frowsreturned:= -1;
   if assigned(aparams) and (aparams.count > 0) then begin
    str1:= todbstring(aparams.parsesql(origsql,false,false,false,psinterbase,
                             fparambinding));
@@ -1221,11 +1311,13 @@ begin
    ffirstfetch:= false;
   end
   else begin
-   if fresultset <> nil then begin
-    clearstatus();
-    i1:= fresultset.fetchnext(fapi.status,pointer(frowbuffer));
-    result:= i1 = istatus.RESULT_OK;
-    checkstatus('fetch');
+   if not fempty then begin
+    if fresultset <> nil then begin
+     clearstatus();
+     i1:= fresultset.fetchnext(fapi.status,pointer(frowbuffer));
+     result:= i1 = istatus.RESULT_OK;
+     checkstatus('fetch');
+    end;
    end;
   end;
  end;
