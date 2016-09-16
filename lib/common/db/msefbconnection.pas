@@ -735,7 +735,9 @@ begin
    clearstatus();
    fstatement:= fattachment.prepare(fapi.status,ftransaction,length(str1),
             pointer(str1),dialect,istatement.prepare_prefetch_metadata);
-   fstatementflags:= fstatement.getflags(fapi.status);
+   if fstatement <> nil then begin
+    fstatementflags:= fstatement.getflags(fapi.status);
+   end;
    checkstatus('preparestatement');
    include(fcursorstate,cs_hasstatement);
   end;
