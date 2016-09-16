@@ -555,6 +555,7 @@ type
  tvalueedits = class(townedpersistentarrayprop)
   public
    constructor create(const aowner: titemedit); reintroduce;
+   class function getitemclasstype: persistentclassty; override;
   published
  end;
  
@@ -2832,6 +2833,11 @@ end;
 constructor tvalueedits.create(const aowner: titemedit);
 begin
  inherited create(aowner,tvalueedititem);
+end;
+
+class function tvalueedits.getitemclasstype: persistentclassty;
+begin
+ result:= tvalueedititem;
 end;
 
 { titemedit }

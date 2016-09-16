@@ -14,7 +14,8 @@ uses
  classes,mclasses,mdb,msewidgetgrid,msedataedits,mseeditglob,msestrings,
  msedatalist,
  msedbedit,msedb,msegui,msegrids,msedbdispwidgets,mselookupbuffer,mseclasses,
- mseformatstr,msetypes,mseglob,msemenus,mseguiglob,msebufdataset;
+ mseformatstr,msetypes,mseglob,msemenus,mseguiglob,msebufdataset,
+ msegraphics;
 
 const
  defaultlookupoptionsedit = defaultoptionsedit + [oe_readonly];

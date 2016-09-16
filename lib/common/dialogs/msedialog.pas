@@ -16,7 +16,7 @@ interface
 uses
  mseclasses,msegui,mseglob,mseguiglob,
  mseforms,msedataedits,mseedit,classes,mclasses,mseevent,
- msemenus,msestrings,mseeditglob,msetypes;
+ msemenus,msestrings,mseeditglob,msetypes,msegraphics;
 
 type
  tdialogform = class(tmseform)

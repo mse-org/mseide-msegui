@@ -18,8 +18,8 @@ uses
 
 procedure dumpunitgr;
 const
- systypes: array[0..7] of string = ('Boolean','Integer','AnsiString',
-             'Pointer','LongInt','LongWord','Variant','Int64');
+ systypes: array[0..8] of string = ('Boolean','Integer','AnsiString',
+             'Pointer','LongInt','LongWord','Variant','Int64','QWord');
 type
  unitnamety = record
   name: string;
@@ -160,13 +160,25 @@ var
     else begin
      if po2^.kind = tkclass then begin
       class1:= gettypedata(po2)^.classtype;
-      if isnotparsed(class1) then begin
-       po3:= class1.classinfo;
-       dumpclass(po3);
-       if class1.inheritsfrom(tpersistentarrayprop) then begin
-        class1:= persistentarraypropclassty(class1).getitemclasstype;
+      if class1 = nil then begin
+       writeln(unitn,'.',classn,'.',propna,
+                            ' "',typena+' '+po2^.name+'" typedata nil.');
+      end
+      else begin
+       if isnotparsed(class1) then begin
         po3:= class1.classinfo;
         dumpclass(po3);
+        if class1.inheritsfrom(tpersistentarrayprop) then begin
+         class1:= persistentarraypropclassty(class1).getitemclasstype;
+         if class1 = nil then begin
+          writeln(unitn,'.',classn,'.',propna,
+                               ' "',typena+' '+po3^.name+'" itemclasstype nil.');
+         end
+         else begin
+          po3:= class1.classinfo;
+          dumpclass(po3);
+         end;
+        end;
        end;
       end;
      end;

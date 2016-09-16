@@ -12,7 +12,7 @@ unit mseifidbgui;
 interface
 uses
  classes,mclasses,mdb,mseifigui,mseifids,mseifi,msedatalist,msegui,msemenus,
- msegrids,mseguiglob,msetypes,mseapplication;
+ msegrids,mseguiglob,msetypes,mseapplication,msegraphics;
 type
  tdbrxwidgetgrid = class;
 

@@ -16,7 +16,7 @@ uses
  msegrids,classes,mclasses,msestream,mseclasses,msepipestream,mseevent,
  mseinplaceedit,
  msetextedit,msestrings,msesys,mseeditglob,msemenus,msegui,mseguiglob,
- mseprocess,msegridsglob,mseedit,mseglob,msewidgetgrid;
+ mseprocess,msegridsglob,mseedit,mseglob,msewidgetgrid,msegraphics;
 type
  sendtexteventty = procedure(const sender: tobject; 
                        var atext: msestring; var donotsend: boolean) of object;

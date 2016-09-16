@@ -263,7 +263,7 @@ type
  tskinfontaliass = class(townedpersistentarrayprop)   
   public
    constructor create(const aowner: tcustomskincontroller); reintroduce;
-//   class function getitemclasstype: persistentclassty; override;
+   class function getitemclasstype: persistentclassty; override;
    procedure setfontalias;
  end;
 
@@ -1571,12 +1571,12 @@ constructor tskinfontaliass.create(const aowner: tcustomskincontroller);
 begin
  inherited create(aowner,tskinfontalias);
 end;
-{
+
 class function tskinfontaliass.getitemclasstype: persistentclassty;
 begin
  result:= tskinfontalias;
 end;
-}
+
 procedure tskinfontaliass.setfontalias;
 var
  int1: integer;

@@ -80,6 +80,7 @@ type
    procedure setrowcount(const avalue: integer);
   public
    constructor create(const aowner: tcustomdropdownlistcontroller); reintroduce;
+   class function getitemclasstype: persistentclassty; override;
    procedure beginupdate;
    procedure endupdate;
    procedure clear;
@@ -791,6 +792,11 @@ constructor tdropdowndatacols.create(
 begin
  inherited create(aowner,nil);
  count:= 1;
+end;
+
+class function tdropdowndatacols.getitemclasstype: persistentclassty;
+begin
+ result:= tdropdowndata;
 end;
 
 procedure tdropdowndatacols.createitem(const index: integer;

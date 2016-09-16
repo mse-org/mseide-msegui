@@ -157,7 +157,7 @@ uses
  msesysutils;
 type
  twindow1 = class(twindow);
-  
+
 { tcustomwindowwidget }
 
 constructor tcustomwindowwidget.create(aowner: tcomponent);

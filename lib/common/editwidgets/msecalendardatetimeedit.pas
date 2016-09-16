@@ -19,7 +19,8 @@ interface
 uses
  classes,mclasses,msedataedits,msepopupcalendar,msedropdownlist,msetypes,
  msegraphutils,
- mseguiglob,mseinplaceedit,mseedit,msestrings,msegui,mseevent,msemenus,mseeditglob;
+ mseguiglob,mseinplaceedit,mseedit,msestrings,msegui,mseevent,msemenus,
+ mseeditglob,msegraphics;
  
 type
  tcustomcalendardatetimeedit = class(tcustomdatetimeedit,idropdowncalendar)

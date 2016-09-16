@@ -76,7 +76,7 @@ object sourcepage: tsourcepage
     onrowsinserted = gridonrowsinserted
     onrowsdeleted = gridonrowsdeleted
     oncellevent = gridoncellevent
-    reffontheight = 14
+    reffontheight = 16
     object edit: tsyntaxedit
       optionsskin = [osk_framebuttononly]
       taborder = 1
@@ -142,14 +142,13 @@ object sourcepage: tsourcepage
     frame.localprops1 = []
     taborder = 2
     bounds_x = 0
-    bounds_y = 209
+    bounds_y = 207
     bounds_cx = 68
-    bounds_cy = 18
     anchors = [an_left, an_bottom]
     optionsedit = [oe_readonly, oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_focusrectonreadonly, oe_hintclippedtext]
     textflags = [tf_xcentered, tf_ycentered]
     textflagsactive = [tf_xcentered, tf_ycentered]
-    reffontheight = 14
+    reffontheight = 16
   end
   object pathdisp: tstringedit
     optionsskin = [osk_framebuttononly]
@@ -160,12 +159,11 @@ object sourcepage: tsourcepage
     frame.localprops1 = []
     taborder = 1
     bounds_x = 68
-    bounds_y = 209
+    bounds_y = 207
     bounds_cx = 243
-    bounds_cy = 18
     anchors = [an_left, an_right, an_bottom]
     optionsedit = [oe_readonly, oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_caretonreadonly, oe_focusrectonreadonly, oe_hintclippedtext]
     textflags = [tf_ycentered, tf_ellipseleft]
-    reffontheight = 14
+    reffontheight = 16
   end
 end

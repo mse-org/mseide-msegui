@@ -18,7 +18,7 @@ uses
  msewidgetgrid,
  msedatalist,mseeditglob,msegrids,msetypes,msedb,msemenus,mseedit,
  msedataedits,mseevent,msestrings,msecolordialog,msegraphutils,msedialog,
- mseglob;
+ mseglob,msegraphics;
  
 type
  tdbfilenameedit = class(tcustomfilenameedit,idbeditfieldlink,ireccontrol)
