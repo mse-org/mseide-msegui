@@ -1112,7 +1112,7 @@ SQL_NULL =        32766;
   end;
  end;
 end;
-var testvar: tfbcursor;
+
 procedure tfbconnection.internalexecute(const cursor: tsqlcursor;
               const atransaction: tsqltransaction; const aparams: tmseparams;
               const autf8: boolean);
@@ -1130,7 +1130,6 @@ var
  insertcount: int32;
  
 begin
-testvar:= tfbcursor(cursor);
  with tfbcursor(cursor) do begin
   frowsaffected:= -1;
   frowsreturned:= -1;

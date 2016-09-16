@@ -1,4 +1,4 @@
-{ MSEide Copyright (c) 1999-2014 by Martin Schreiber
+{ MSEide Copyright (c) 1999-2016 by Martin Schreiber
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -150,7 +150,7 @@ type
 implementation
 uses
  {$ifdef FPC}dbconst{$else} dbconst_del,classes_del{$endif},mdb,
- mseibconnection,msefbservice,
+ mseibconnection,msefbconnection,msefbservice,
  msepqconnection,mseodbcconn,{sqldb,}
  mselookupbuffer,mselocaldataset,
  msearrayutils,msedbfieldeditor,sysutils,msetexteditor,
@@ -346,7 +346,7 @@ type
 procedure Register;
 begin
  registercomponents('DB',[     
-      tmseibconnection,tfbservice,
+      tmseibconnection,tfbservice,tfbconnection,
       tmsepqconnection,tsqlite3connection,tmseodbcconnection,
       tmsemysqlconnection,
       
