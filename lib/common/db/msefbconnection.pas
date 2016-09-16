@@ -7,6 +7,9 @@
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 }
+//
+// todo: prepare-less execute and openCursor (needs FB-optimisation)
+//
 unit msefbconnection;
 {$ifdef FPC}{$mode objfpc}{$h+}{$goto on}{$endif}
 interface
@@ -18,6 +21,7 @@ const
  SQL_DIALECT_V6 = 3;
 
 type
+ pimessagemetadata = ^imessagemetadata;
 
  tfbconnection = class;
  
@@ -60,9 +64,9 @@ type
    fconnection: tfbconnection;
    fparambinding: tparambinding;
    fstatement: istatement;
+   fstatementflags: card32;
+   ffirstfetch: boolean; //set for execute() if there is outputdata
    fresultset: iresultset;
-   ffirstfetch: boolean; //set after open if there is at least one record
-   fempty: boolean;
    fcursorstate: cursorstatesty;
    ffieldinfos: fbfieldinfoarty;
    frowbuffer: string;
@@ -106,7 +110,7 @@ type
    procedure destroylocked();
    procedure queueevents(const first: boolean); //must be locked
  end;
- 
+
  tfbconnection = class(tcustomsqlconnection,iblobconnection,
                                          idbevent,idbeventcontroller)
   private
@@ -149,7 +153,8 @@ type
    procedure internalrollbackretaining(trans : tsqlhandle) override;
 
    procedure cursorclose(const cursor: tfbcursor);
-   procedure updateresultmetadata(const acursor: tfbcursor);
+   procedure updateresultmetadata(const acursor: tfbcursor;
+                            const outmetadata: pimessagemetadata);
    procedure internalexecute(const cursor: tsqlcursor;
              const atransaction: tsqltransaction; const aparams : tmseparams;
                                                 const autf8: boolean) override;
@@ -376,7 +381,9 @@ begin
  feventcontroller:= tdbeventcontroller.create(idbeventcontroller(self));
  feventcontroller.eventinterval:= -1; //event driven
  inherited;
- FConnOptions := FConnOptions + [sco_SupportParams];
+ FConnOptions := FConnOptions + [sco_SupportParams,sco_nounprepared];
+    //unprepared not yet possible because FB3 provides 
+    //no output messagemetadata for execute()
 end;
 
 destructor tfbconnection.destroy();
@@ -697,6 +704,7 @@ begin
    clearstatus();
    fstatement:= fattachment.prepare(fapi.status,ftransaction,length(str1),
             pointer(str1),dialect,istatement.prepare_prefetch_metadata);
+   fstatementflags:= fstatement.getflags(fapi.status);
    checkstatus('preparestatement');
    include(fcursorstate,cs_hasstatement);
   end;
@@ -888,25 +896,36 @@ begin
                                     ainfo^._cursor,pisc_quad(dest)^));
 end;
 
-procedure tfbconnection.updateresultmetadata(const acursor: tfbcursor);
+procedure tfbconnection.updateresultmetadata(const acursor: tfbcursor;
+                                       const outmetadata: pimessagemetadata);
 var
  metadata: imessagemetadata;
  i1,i2,i3: int32;
 
 begin
  with acursor do begin
-  if fresultset.iseof(fapi.status) then begin
-   fempty:= true;
-   ffirstfetch:= false;
+  ffirstfetch:= false;
+  if fresultset = nil then begin //execute()
+   metadata:= fstatement.getoutputmetadata(fapi.status);
+   if metadata <> nil then begin
+    ffirstfetch:= true;
+   end;
   end
-  else begin
-   fempty:= false;
-   ffirstfetch:= true;
+  else begin                     //openCursor()
+   metadata:= fresultset.getmetadata(fapi.status);
   end;
-  metadata:= fresultset.getmetadata(fapi.status);
+  if outmetadata <> nil then begin
+   outmetadata^:= metadata;
+   if metadata <> nil then begin
+    metadata.addref();
+   end;
+  end;
   if metadata <> nil then begin
-   setlength(frowbuffer,metadata.getmessagelength(fapi.status));
    i1:= metadata.getcount(fapi.status);
+   if (i1 = 0) and (fresultset = nil) then begin
+    ffirstfetch:= false; //there is no outputdata
+   end;
+   setlength(frowbuffer,metadata.getmessagelength(fapi.status));
    if statusok() then begin
     setlength(ffieldinfos,i1);
     for i1:= 0 to i1-1 do begin
@@ -1085,15 +1104,14 @@ SQL_NULL =        32766;
  end;
 end;
 
-var testvar4: tfbcursor;
 procedure tfbconnection.internalexecute(const cursor: tsqlcursor;
               const atransaction: tsqltransaction; const aparams: tmseparams;
               const autf8: boolean);
 var
  paramdata: tparamdata; //inherits from imessagemetadata
  parambuffer: pointer;
+ outdata1: imessagemetadata;
 begin
-testvar4:= tfbcursor(cursor);
  with tfbcursor(cursor) do begin
   if assigned(aparams) and (aparams.count > 0) and 
                                            (fparambinding <> nil) then begin
@@ -1106,14 +1124,20 @@ testvar4:= tfbcursor(cursor);
   end;
   with tfbtrans(atransaction.trans) do begin
    clearstatus();
- //  fstatement.execute(fapi.status,ftransaction,nil,nil,nil,nil);
-   fresultset:= fstatement.opencursor(fapi.status,ftransaction,
+   if fstatementflags and istatement.FLAG_HAS_CURSOR <> 0 then begin
+    fresultset:= fstatement.opencursor(fapi.status,ftransaction,
                                      paramdata,parambuffer,nil,0);
+   end
+   else begin
+    updateresultmetadata(tfbcursor(cursor),@outdata1);
+    fstatement.execute(fapi.status,ftransaction,paramdata,parambuffer,
+                                                outdata1,pointer(frowbuffer));
+   end;
    if paramdata <> nil then begin
     paramdata.release();
    end;
    if fresultset <> nil then begin
-    updateresultmetadata(tfbcursor(cursor));
+    updateresultmetadata(tfbcursor(cursor),nil);
    end;
    checkstatus('execute');
   end;
@@ -1123,6 +1147,7 @@ end;
 procedure tfbconnection.internalexecuteunprepared(const cursor: tsqlcursor;
                const atransaction: tsqltransaction; const asql: string;
                       const origsql: msestring; const aparams: tmseparams);
+     //not used
 var
  paramdata: tparamdata; //inherits from imessagemetadata
  parambuffer: pointer;
@@ -1150,7 +1175,7 @@ begin
     paramdata.release();
    end;
    if fresultset <> nil then begin
-    updateresultmetadata(tfbcursor(cursor));
+    updateresultmetadata(tfbcursor(cursor),nil);
    end;
    checkstatus('executeunprepared');
   end;
@@ -1189,22 +1214,20 @@ function tfbconnection.fetch(cursor: tsqlcursor): boolean;
 var
  i1: int32;
 begin
+ result:= false;
  with tfbcursor(cursor) do begin
-  if fempty then begin
-   result:= false;
+  if ffirstfetch then begin
+   result:= true; //output data from exec()
+   ffirstfetch:= false;
   end
   else begin
-   clearstatus();
-   i1:= fresultset.fetchnext(fapi.status,pointer(frowbuffer));
-   if (i1 = istatus.RESULT_ERROR) and ffirstfetch then begin
-    result:= true; //probably no select statement
-   end
-   else begin
+   if fresultset <> nil then begin
+    clearstatus();
+    i1:= fresultset.fetchnext(fapi.status,pointer(frowbuffer));
     result:= i1 = istatus.RESULT_OK;
     checkstatus('fetch');
    end;
   end;
-  ffirstfetch:= false;
  end;
 end;
 
