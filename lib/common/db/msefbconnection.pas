@@ -200,6 +200,7 @@ type
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy(); override;
+   procedure createdatabase(const asql: ansistring);
    function allocatecursorhandle(const aowner: icursorclient;
                       const aname: ansistring): tsqlcursor override;
    procedure deallocatecursorhandle(var cursor : tsqlcursor) override;
@@ -397,6 +398,31 @@ begin
  feventcontroller.free;
 // feventcallback.free();
 // sys_mutexdestroy(fmutex);
+end;
+
+procedure tfbconnection.createdatabase(const asql: ansistring);
+var
+ inited1: boolean;
+ bo1: boolean;
+ attachment1: iattachment;
+begin
+ inited1:= fapi.master = nil;
+ if inited1 then begin
+  iniapi;
+ end;
+ try
+  clearstatus();
+  attachment1:= fapi.util.executecreatedatabase(fapi.status,length(asql),
+                                                    pchar(asql),fdialect,@bo1);
+  if attachment1 <> nil then begin
+   attachment1.release();
+  end;
+  checkstatus('createdatabase');
+ finally
+  if inited1 then begin
+   finiapi;
+  end;
+ end;
 end;
 
 procedure tfbconnection.iniapi();
