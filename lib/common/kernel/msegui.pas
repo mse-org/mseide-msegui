@@ -183,7 +183,8 @@ type
                  fs_disabled,fs_creating,fs_stateupdating,
                  fs_cancaptionsyncx,fs_cancaptionsyncy,
                  fs_drawfocusrect,fs_paintrectfocus,
-                 fs_captionfocus,fs_captionhint,fs_rectsvalid,
+                 fs_captionfocus,fs_captionhint,
+                 fs_rectsvalid,fs_widgetregionchanging,
                  fs_widgetactive,fs_paintposinited,fs_needsmouseinvalidate,
                  fs_canclientextendx,fs_canclientextendy);
  framestatesty = set of framestatety;
@@ -4751,15 +4752,21 @@ var
 begin
  include(fstate,fs_rectsvalid);   //avoid recursion
  updaterects;
- if not (csreading in fintf.getcomponentstate) and
-         not (fs_nowidget in fstate) then begin
-  po1:= subpoint(fpaintrect.pos,fpaintposbefore);
-  fintf.scrollwidgets(po1);
+ if not (fs_widgetregionchanging in fstate) then begin
+  if not (csreading in fintf.getcomponentstate) and
+          not (fs_nowidget in fstate) then begin
+   po1:= subpoint(fpaintrect.pos,fpaintposbefore);
+   fintf.scrollwidgets(po1);
+  end;
+  fpaintposbefore:= fpaintrect.pos;
+  updateclientrect;
+  include(fstate,fs_rectsvalid);
+  fintf.clientrectchanged;
+ end
+ else begin
+  updateclientrect();
+  include(fstate,fs_rectsvalid);
  end;
- fpaintposbefore:= fpaintrect.pos;
- updateclientrect;
- include(fstate,fs_rectsvalid);
- fintf.clientrectchanged;
 end;
 
 procedure tcustomframe.internalupdatestate();
@@ -8430,11 +8437,26 @@ procedure twidget.internalsetwidgetrect(value: rectty;
                                                   const windowevent: boolean);
 
  procedure checkwidgetregionchanged(var achanged: boolean);
+ var
+  bo1: boolean;
  begin
   if achanged then begin
    achanged:= false;
    if (fparentwidget <> nil) then begin
-    fparentwidget.widgetregionchanged(self); //new position
+    if fframe <> nil then begin
+     exclude(fframe.fstate,fs_rectsvalid);
+     bo1:= fs_widgetregionchanging in fframe.fstate;
+     include(fframe.fstate,fs_widgetregionchanging);
+    end;
+    try
+     fparentwidget.widgetregionchanged(self); //new position
+    finally
+     if fframe <> nil then begin
+      if not bo1 then begin
+       exclude(fframe.fstate,fs_widgetregionchanging);
+      end;
+     end;
+    end;
    end;
   end;
  end; //checkwidgetregionchanged
