@@ -228,8 +228,22 @@ type
    property options: fbconnectionoptionsty read foptions 
                                            write foptions default [];
    property DatabaseName;
-//   property KeepConnection;
-//   property Params;
+   property Password;
+   property Transaction;
+   property transactionwrite;
+   property UserName;
+   property CharSet;
+   property HostName;
+   property controller;
+
+   property Connected;
+//    Property Role;
+//    property DatabaseName;
+//    property KeepConnection;
+//    property LoginPrompt;
+//    property Params;
+    property afterconnect;
+    property beforedisconnect;
  end;
  
  efberror = class(econnectionerror)
