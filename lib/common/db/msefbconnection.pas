@@ -91,7 +91,6 @@ type
  fbeventinfoty = record
   event: tdbevent;
   name: string;
-  length: integer;
   count: integer;
  end;
  pfbeventinfoty = ^fbeventinfoty;
@@ -136,7 +135,7 @@ type
    flistencount: int32;
    feventcount: int32;
    feventlength: int32;
-   feventbuffer,fresultbuffer: pbyte;
+   feventbuffer: pbyte;
    feventcountbuffer: array of ULONG;
    procedure iniapi();
    procedure finiapi();
@@ -342,7 +341,6 @@ begin
  ffirst:= ffirst or first;
  with fowner do begin
   if fevents <> nil then begin
-   self.freleased:= true;
    fevents.release();
   end;
   fevents:= fattachment.queevents(
@@ -537,10 +535,6 @@ begin
   fattachment.detach(fapi.status);
   fattachment.release();
   fattachment:= nil;
- end;
- if feventcallback <> nil then begin
-  sys_mutexlock(feventcallback.fmutex);
-  feventcallback.destroylocked();
  end;
  clearevents();
  feventcontroller.disconnect();
@@ -1648,19 +1642,16 @@ end;
 
 procedure tfbconnection.clearevents();
 begin
+ if feventcallback <> nil then begin
+  sys_mutexlock(feventcallback.fmutex);
+  feventcallback.destroylocked();
+ end;
  if fevents <> nil then begin
   fevents.cancel(fapi.status);
   fevents.release();
   fevents:= nil;
  end;
- if feventbuffer <> nil then begin
-  gds__free(feventbuffer);
-  feventbuffer:= nil;
- end;
- if fresultbuffer <> nil then begin
-  gds__free(fresultbuffer);
-  fresultbuffer:= nil;
- end;
+ freeeventblock(feventbuffer);
  feventitems:= nil;
  feventcountbuffer:= nil;
 end;
@@ -1683,11 +1674,12 @@ begin
   feventcallback:= tfbeventcallback.create(self);
   feventcallback.addref();
   sys_mutexlock(feventcallback.fmutex);
-  feventlength:= event_block(feventbuffer,fresultbuffer,ar1);
+  freeeventblock(feventbuffer);
+  feventlength:= event_block(feventbuffer,ar1);
 
   clearstatus();
   feventcallback.queueevents(true);
-  if fevents = nil then begin
+  if fevents = nil then begin //error in queueevents
    feventcallback.destroylocked();
    clearevents();
   end;
@@ -1727,8 +1719,12 @@ begin
  for i1:= 0 to high(feventitems) do begin
   po1:= @feventitems[i1];
   if po1^.event = sender then begin
+   with feventitems[high(feventitems)] do begin
+    stringaddref(name);  //compensate decref by setlength in deleteitem()
+   end;
    finalize(po1^);
    deleteitem(feventitems,typeinfo(feventitems),i1);
+   break;
   end;
  end;
  updateevents('dounlisten');

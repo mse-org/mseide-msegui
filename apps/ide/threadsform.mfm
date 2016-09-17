@@ -102,7 +102,7 @@ object threadsfo: tthreadsfo
   onshow = threadsfoonshow
   moduleclassname = 'tdockform'
   object grid: tstringgrid
-    optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_focusbackonesc, ow_destroywidgets]
+    optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_focusbackonesc, ow_mousewheel, ow_destroywidgets]
     frame.localprops = []
     frame.localprops1 = []
     popupmenu = tpopupmenu1
@@ -149,7 +149,7 @@ object threadsfo: tthreadsfo
     fixrows.count = 1
     fixrows.items = <    
       item
-        height = 16
+        height = 15
         captions.count = 3
         captions.items = <        
           item
@@ -163,9 +163,9 @@ object threadsfo: tthreadsfo
             textflags = [tf_ycentered]
           end>
       end>
-    datarowheight = 16
+    datarowheight = 15
     oncellevent = gridoncellevent
-    reffontheight = 14
+    reffontheight = 13
   end
   object tpopupmenu1: tpopupmenu
     menu.submenu.count = 1

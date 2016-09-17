@@ -98,7 +98,7 @@ object watchpointsfo: twatchpointsfo
     bounds_cx = 473
     bounds_cy = 210
     anchors = [an_top, an_bottom]
-    optionsgrid = [og_colsizing, og_rowmoving, og_rowinserting, og_rowdeleting, og_focuscellonenter, og_autofirstrow, og_autoappend, og_colchangeontabkey, og_wrapcol, og_autopopup]
+    optionsgrid = [og_colsizing, og_rowmoving, og_rowinserting, og_rowdeleting, og_focuscellonenter, og_autofirstrow, og_autoappend, og_colchangeontabkey, og_wrapcol, og_autopopup, og_mousescrollcol]
     fixcols.count = 1
     fixcols.items = <    
       item
@@ -109,7 +109,7 @@ object watchpointsfo: twatchpointsfo
     fixrows.count = 1
     fixrows.items = <    
       item
-        height = 16
+        height = 15
         captions.count = 7
         captions.items = <        
           item
@@ -178,10 +178,10 @@ object watchpointsfo: twatchpointsfo
         widgetname = 'wptcondition'
         dataclass = tgridmsestringdatalist
       end>
-    datarowheight = 16
+    datarowheight = 15
     statfile = mainfo.projectstatfile
     onrowsdeleting = deleterow
-    reffontheight = 14
+    reffontheight = 13
     object wpton: tbooleanedit
       optionsskin = [osk_framebuttononly]
       frame.levelo = 0
@@ -192,7 +192,7 @@ object watchpointsfo: twatchpointsfo
       bounds_x = 0
       bounds_y = 0
       bounds_cx = 16
-      bounds_cy = 16
+      bounds_cy = 15
       optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_autoselect, oe_autoselectonfirstclick]
       optionsedit1 = [oe1_autopopupmenu, oe1_keyexecute, oe1_savestate]
       visible = False
@@ -211,7 +211,7 @@ object watchpointsfo: twatchpointsfo
       bounds_x = 17
       bounds_y = 0
       bounds_cx = 33
-      bounds_cy = 16
+      bounds_cy = 15
       optionsedit1 = [oe1_savevalue]
       textflags = [tf_xcentered, tf_ycentered, tf_noselect]
       ondataentered = wptondataentered
@@ -228,7 +228,7 @@ object watchpointsfo: twatchpointsfo
       valuedefault = 0
       min = 0
       max = 2
-      reffontheight = 14
+      reffontheight = 13
     end
     object wptexpression: tstringedit
       optionswidget1 = [ow1_fontglyphheight]
@@ -243,10 +243,10 @@ object watchpointsfo: twatchpointsfo
       bounds_x = 51
       bounds_y = 0
       bounds_cx = 149
-      bounds_cy = 16
+      bounds_cy = 15
       optionsedit1 = [oe1_savevalue]
       ondataentered = wptondataentered
-      reffontheight = 14
+      reffontheight = 13
     end
     object wptno: tintegeredit
       optionswidget1 = [ow1_fontglyphheight]
@@ -261,10 +261,10 @@ object watchpointsfo: twatchpointsfo
       bounds_x = 201
       bounds_y = 0
       bounds_cx = 9
-      bounds_cy = 16
+      bounds_cy = 15
       optionsedit1 = []
       optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_autoselect, oe_autoselectonfirstclick]
-      reffontheight = 14
+      reffontheight = 13
     end
     object wptcount: tintegeredit
       optionswidget1 = [ow1_fontglyphheight]
@@ -279,10 +279,10 @@ object watchpointsfo: twatchpointsfo
       bounds_x = 211
       bounds_y = 0
       bounds_cx = 34
-      bounds_cy = 16
+      bounds_cy = 15
       optionsedit1 = []
       optionsedit = [oe_readonly, oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_autoselect, oe_autoselectonfirstclick]
-      reffontheight = 14
+      reffontheight = 13
     end
     object wptignore: tintegeredit
       optionswidget1 = [ow1_fontglyphheight]
@@ -297,11 +297,11 @@ object watchpointsfo: twatchpointsfo
       bounds_x = 246
       bounds_y = 0
       bounds_cx = 38
-      bounds_cy = 16
+      bounds_cy = 15
       optionsedit1 = [oe1_savevalue]
       optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_forcereturncheckvalue, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick]
       ondataentered = wptondataentered
-      reffontheight = 14
+      reffontheight = 13
     end
     object wptcondition: tstringedit
       optionswidget1 = [ow1_fontglyphheight]
@@ -316,10 +316,10 @@ object watchpointsfo: twatchpointsfo
       bounds_x = 285
       bounds_y = 0
       bounds_cx = 162
-      bounds_cy = 16
+      bounds_cy = 15
       optionsedit1 = [oe1_savevalue]
       ondataentered = wptondataentered
-      reffontheight = 14
+      reffontheight = 13
     end
   end
   object gripopup: tpopupmenu

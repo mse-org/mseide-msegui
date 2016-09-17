@@ -256,8 +256,10 @@ procedure releasefirebird();
 
 function formatstatus(status: istatus): string;
 //function getstatus(): istatus;
-function event_block(out eventbuffer: pbyte; out resultbuffer: pbyte;
+function event_block(out eventbuffer: pbyte;
                                          const names: array of string): int32;
+procedure freeeventblock(var eventbuffer: pbyte);
+
 var
  fb_get_master_interface: function: IMaster
                                {$ifdef wincall}stdcall{$else}cdecl{$endif};
@@ -284,7 +286,7 @@ var
 
 implementation
 uses
- msedynload;
+ msedynload,sysutils;
 var 
  libinfo: dynlibinfoty;
  master: imaster;
@@ -329,36 +331,54 @@ begin
  releasedynlib(libinfo,@releasefb);
 end;
 
-function event_block(out eventbuffer: pbyte; out resultbuffer: pbyte;
+function event_block(out eventbuffer: pbyte;
                                         const names: array of string): int32;
 var
- i1,i2: int32;
- po1: pointer;
+ i1,i2,i3: int32;
+ po1: pbyte;
 begin
  i2:= 1;
  for i1:= 0 to high(names) do begin
-  i2:= i2 + length(names[i1]) + 5;
+  i3:= length(names[i1]);
+  if i3 > 255 then begin
+   raise exception.create('event_block: name too long');
+  end;
+  i2:= i2 + i3 + 5;
  end;
  result:= i2;
  po1:= gds__alloc(i2);
  eventbuffer:= po1;
- resultbuffer:= gds__alloc(i2);
- pbyte(po1)^:= EPB_version1;
+ po1^:= EPB_version1;
  inc(po1);
  for i1:= 0 to high(names) do begin
-  pbyte(po1)^:= length(names[i1]);
+  i3:= length(names[i1]);
+  po1^:= i3;
   inc(po1);
-  move(pointer(names[i1])^,po1^,length(names[i1]));
-  inc(po1,length(names[i1]));
-  pbyte(po1)^:= 0;
+  move(pointer(names[i1])^,po1^,i3);
+  inc(po1,i3);
+  po1^:= 0;
   inc(po1);
-  pbyte(po1)^:= 0;
+  po1^:= 0;
   inc(po1);
-  pbyte(po1)^:= 0;
+  po1^:= 0;
   inc(po1);
-  pbyte(po1)^:= 0;
+  po1^:= 0;
   inc(po1);
  end;
+end;
+
+procedure freeeventblock(var eventbuffer{,resultbuffer}: pbyte);
+begin
+ if eventbuffer <> nil then begin
+  gds__free(eventbuffer);
+  eventbuffer:= nil;
+ end;
+{
+ if resultbuffer <> nil then begin
+  gds__free(resultbuffer);
+  resultbuffer:= nil;
+ end;
+}
 end;
 
 function formatstatus(status: istatus): string;
