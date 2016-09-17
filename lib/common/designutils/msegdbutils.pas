@@ -4451,7 +4451,7 @@ begin
   if (pos('type = ^',str1) = 1) and
                 (symboltype(varname+'^' ,str3) = gdb_ok) then begin
    if pos('type = array of ',str3) = 1 then begin //dwarf dynarray
-    str1:= 'type = ^(array [0..-1] of '+copy(trim(str1),9,bigint)+')'+lineend;
+    str1:= 'type = ^(array [0..-1] of '+copy(trim(str3),17,bigint)+')'+lineend;
    end;
   end;
   if result = gdb_ok then begin
