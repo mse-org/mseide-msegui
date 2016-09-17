@@ -890,6 +890,25 @@ begin
  end;
 end;
 
+procedure fetchguid(const ainfo: pfbfieldinfoty; const dest: pointer);
+var
+ i1: int32;
+ po1: pguid;
+begin
+ po1:= ainfo^.buffer + ainfo^.offset;
+ pguid(dest)^:= po1^;
+ {
+ i1:= sizeof(tguid);
+ if i1 > ainfo^.buffersizead^ then begin
+  ainfo^.buffersizead^:= -i1;
+ end
+ else begin
+  ainfo^.buffersizead^:= i1;
+  move(po1^,dest^,i1);
+ end;
+ }
+end;
+
 procedure fetchvarchar(const ainfo: pfbfieldinfoty; const dest: pointer);
 var
  i1: int32;
@@ -987,27 +1006,7 @@ begin
        nulloffset:= -1;
       end;
       size:= 0;
-//        scale:= 0;
-//        precision:= 0;
       case _type of
-{
-SQL_TEXT =          452;
-SQL_VARYING =       448;
-SQL_SHORT =         500;
-SQL_LONG =          496;
-SQL_FLOAT =         482;
-SQL_DOUBLE =        480;
-SQL_D_FLOAT =       530;
-SQL_TIMESTAMP =     510;
-SQL_BLOB =          520;
-SQL_ARRAY =         540;
-SQL_QUAD =          550;
-SQL_TYPE_TIME =     560;
-SQL_TYPE_DATE =     570;
-SQL_INT64 =         580;
-SQL_BOOLEAN =     32764;
-SQL_NULL =        32766;
-}
        SQL_BOOLEAN: begin
         datatype:= ftboolean;
         fetchfunc:= @fetchboolean;
@@ -1081,6 +1080,8 @@ SQL_NULL =        32766;
          if i2 = cs_binary then begin
           if size = 16 then begin
            datatype:= ftguid;
+           fetchfunc:= @fetchguid;
+           size:= 0;
           end
           else begin
            datatype:= ftbytes;

@@ -204,8 +204,8 @@ type
   Published
     property Attributes: TFieldAttributes read FAttributes write SetAttributes default [];
     property DataType: TFieldType read FDataType write SetDataType;
-    property Precision: Longint read FPrecision write SetPrecision;
-    property Size: Integer read FSize write SetSize;
+    property Precision: Longint read FPrecision write SetPrecision default -1;
+    property Size: Integer read FSize write SetSize default 0;
   end;
 
 { TFieldDefs }
