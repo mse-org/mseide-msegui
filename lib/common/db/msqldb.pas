@@ -30,7 +30,10 @@ uses
 type
  TSchemaType = (stNoSchema,stTables,stSysTables,stProcedures,stColumns,
                     stProcedureParams,stIndexes,stPackages);
- sqlconnoptionty = (sco_supportparams,sco_emulateretaining,sco_nounprepared);
+ sqlconnoptionty = (sco_supportparams,sco_forceparams,
+                    sco_emulateretaining,sco_nounprepared,
+                    sco_blobscached);
+// dbf_params,dbf_blobscached
  sqlconnoptionsty = set of sqlconnoptionty;
 
 // TSQLQuery = class;
@@ -201,8 +204,8 @@ type
    property options: databaseoptionsty read foptions write setoptions default [];
  end;
 
- databasefeaturety = (dbf_params,dbf_blobscached);
- databasefeaturesty = set of databasefeaturety;
+// databasefeaturety = (dbf_params,dbf_blobscached);
+// databasefeaturesty = set of databasefeaturety;
  
  tmsesqlscript = class;
  tcustomsqlconnection = class(TmDatabase,idbcontroller,iactivatorclient)
@@ -303,7 +306,7 @@ type
    function sequencecurrvalue(const sequencename: string): msestring; virtual;
    function writesequence(const sequencename: string;
                     const avalue: largeint): msestring; virtual;
-   function getfeatures(): databasefeaturesty virtual;
+//   function getfeatures(): databasefeaturesty virtual;
    function blobscached: boolean;
  public
    constructor create(aowner: tcomponent); override;
@@ -1140,15 +1143,16 @@ function tcustomsqlconnection.writesequence(const sequencename: string;
 begin
  result:= ''; //dummy
 end;
-
+{
 function tcustomsqlconnection.getfeatures(): databasefeaturesty;
 begin
  result:= [];
 end;
-
+}
 function tcustomsqlconnection.blobscached: boolean;
 begin
- result:= dbf_blobscached in getfeatures;
+ result:= sco_blobscached in fconnoptions;
+// result:= dbf_blobscached in getfeatures;
 end;
 
 procedure tcustomsqlconnection.updateutf8(var autf8: boolean);
@@ -1483,7 +1487,8 @@ begin
  try
   par1:= nil;
   if (aparams <> nil) and (aparams.count > 0) then begin
-   if dbf_params in getfeatures then begin
+//   if dbf_params in getfeatures then begin
+   if sco_forceparams in fconnoptions then begin
     par1:= aparams; //asql used directly
    end
    else begin

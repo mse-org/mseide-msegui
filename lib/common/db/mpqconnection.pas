@@ -135,7 +135,7 @@ type
              out newid: string);
    procedure setupblobdata(const afield: tfield; const acursor: tsqlcursor;
                                    const aparam: tparam);
-   function getfeatures(): databasefeaturesty override;
+//   function getfeatures(): databasefeaturesty override;
 //   function blobscached: boolean;
 
           //idbevent
@@ -271,7 +271,8 @@ constructor tpqconnection.create(aowner: tcomponent);
 begin
  feventcontroller:= tdbeventcontroller.create(idbeventcontroller(self));
  inherited;
- fconnoptions:= fconnoptions + [sco_supportparams,sco_emulateretaining];
+ fconnoptions:= fconnoptions + [sco_supportparams,sco_emulateretaining,
+                                                              sco_blobscached];
 end;
 
 destructor TPQConnection.destroy;
@@ -1476,12 +1477,12 @@ procedure TPQConnection.setupblobdata(const afield: tfield;
 begin
  acursor.blobfieldtoparam(afield,aparam,false);
 end;
-
+{
 function TPQConnection.getfeatures(): databasefeaturesty;
 begin
  result:= inherited getfeatures() + [dbf_blobscached];
 end;
-
+}
 function TPQConnection.getblobdatasize: integer;
 begin
  result:= sizeof(integer);

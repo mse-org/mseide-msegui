@@ -120,7 +120,7 @@ type
     // Internal utility functions
     function CreateConnectionString:string;
     function getblobdatasize: integer; override;
-    function getfeatures(): databasefeaturesty override;
+//    function getfeatures(): databasefeaturesty override;
 
           //iblobconnection
    procedure writeblobdata(const atransaction: tsqltransaction;
@@ -132,6 +132,7 @@ type
                                    const aparam: tparam);
 //   function blobscached: boolean;
   public
+   constructor create(aowner: tcomponent); override;
    function AllocateCursorHandle(const aowner: icursorclient;
                            const aname: ansistring): TSQLCursor; override;
    procedure DeAllocateCursorHandle(var cursor:TSQLCursor); override;
@@ -308,6 +309,15 @@ begin
   end;
 end;
 
+{ todbcconnection }
+
+constructor TODBCConnection.create(aowner: tcomponent);
+begin
+ inherited;
+ fconnoptions:= fconnoptions + [sco_supportparams,sco_emulateretaining,
+                                                           sco_blobscached];
+end;
+
 procedure todbcconnection.ODBCCheckResult(
                            LastReturnCode:SQLRETURN; HandleType:SQLSMALLINT;
                            AHandle: SQLHANDLE; ErrorMsg: string);
@@ -400,7 +410,6 @@ begin
  end;
 end;
 
-{ TODBCConnection }
 
 // Creates a connection string using the current value of the fields
 function TODBCConnection.CreateConnectionString: string;
@@ -483,11 +492,12 @@ function TODBCConnection.getblobdatasize: integer;
 begin
  result:= sizeof(integer);
 end;
-
+{
 function TODBCConnection.getfeatures(): databasefeaturesty;
 begin
  result:= inherited getfeatures() + [dbf_blobscached];
 end;
+}
 {
 function TODBCConnection.blobscached: boolean;
 begin

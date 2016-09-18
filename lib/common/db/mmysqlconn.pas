@@ -170,7 +170,7 @@ Type
    function CreateBlobStream(const Field: TField; const Mode: TBlobStreamMode;
                          const acursor: tsqlcursor): TStream; override;
    function getblobdatasize: integer; override;
-   function getfeatures(): databasefeaturesty override;
+//   function getfeatures(): databasefeaturesty override;
           //iblobconnection
    procedure writeblobdata(const atransaction: tsqltransaction;
              const tablename: string; const acursor: tsqlcursor;
@@ -579,7 +579,8 @@ end;
 constructor tmysqlconnection.create(aowner: tcomponent);
 begin
  inherited;
- fconnoptions:= fconnoptions + [sco_supportparams,sco_emulateretaining];
+ fconnoptions:= fconnoptions + [sco_supportparams,sco_emulateretaining,
+                                                           sco_blobscached];
 end;
 
 Procedure tmysqlconnection.checkerror(const Msg: String; const aconn: pmysql);
@@ -1832,12 +1833,12 @@ function tmysqlconnection.getblobdatasize: integer;
 begin
  result:= sizeof(integer);
 end;
-
+{
 function tmysqlconnection.getfeatures(): databasefeaturesty;
 begin
  result:= inherited getfeatures() + [dbf_blobscached];
 end;
-
+}
 procedure tmysqlconnection.writeblobdata(const atransaction: tsqltransaction;
                const tablename: string; const acursor: tsqlcursor;
                const adata: pointer; const alength: integer;

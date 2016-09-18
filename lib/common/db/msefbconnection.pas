@@ -162,10 +162,12 @@ type
    procedure internalexecute(const cursor: tsqlcursor;
              const atransaction: tsqltransaction; const aparams : tmseparams;
                                                 const autf8: boolean) override;
+{ not ready, needs FB3 improvement
    procedure internalexecuteunprepared(const cursor: tsqlcursor;
                const atransaction: tsqltransaction;
                const asql: string; const origsql: msestring;
                                     const aparams: tmseparams) override;
+}
    procedure updateindexdefs(var indexdefs : tindexdefs;
                                           const atablename : string) override;
    function getschemainfosql(schematype : tschematype;
@@ -174,7 +176,7 @@ type
    function createblobstream(const field: tfield; const mode: tblobstreammode;
                           const acursor: tsqlcursor): tstream; override;
    function getblobdatasize: integer; override;
-   function getfeatures(): databasefeaturesty override;
+//   function getfeatures(): databasefeaturesty override;
    
    procedure updateevents(const aerrormessage: msestring);
    procedure clearevents();
@@ -399,7 +401,8 @@ begin
  feventcontroller:= tdbeventcontroller.create(idbeventcontroller(self));
  feventcontroller.eventinterval:= -1; //event driven
  inherited;
- FConnOptions := FConnOptions + [sco_SupportParams,sco_nounprepared];
+ FConnOptions := FConnOptions + [sco_SupportParams,sco_forceparams,
+                                                       sco_nounprepared];
     //unprepared not yet possible because FB3 provides 
     //no output messagemetadata for execute()
 end;
@@ -742,7 +745,9 @@ begin
   with tfbtrans(atransaction.trans) do begin
    clearstatus();
    fstatement:= fattachment.prepare(fapi.status,ftransaction,length(str1),
-            pointer(str1),dialect,istatement.prepare_prefetch_metadata);
+            pointer(str1),dialect,
+                        IStatement.PREPARE_PREFETCH_FLAGS or 
+                        IStatement.PREPARE_PREFETCH_OUTPUT_PARAMETERS);
    if fstatement <> nil then begin
     fstatementflags:= fstatement.getflags(fapi.status);
    end;
@@ -1257,6 +1262,8 @@ begin
  end;
 end;
 
+(* not ready, needs FB3 improvement
+
 procedure tfbconnection.internalexecuteunprepared(const cursor: tsqlcursor;
                const atransaction: tsqltransaction; const asql: string;
                       const origsql: msestring; const aparams: tmseparams);
@@ -1294,8 +1301,10 @@ begin
    end;
    checkstatus('executeunprepared');
   end;
+ todo: rowsreturned, rowsaffected
  end;
 end;
+*)
 
 procedure tfbconnection.addfielddefs(const cursor: tsqlcursor;
                const fielddefs: tfielddefs);
@@ -1507,12 +1516,12 @@ function tfbconnection.getblobdatasize: integer;
 begin
  result:= 8;
 end;
-
+{
 function tfbconnection.getfeatures(): databasefeaturesty;
 begin
  result:= inherited getfeatures + [dbf_params];
 end;
-
+}
 procedure tfbconnection.writeblobdata(const atransaction: tsqltransaction;
                const tablename: string; const acursor: tsqlcursor;
                const adata: pointer; const alength: integer;
