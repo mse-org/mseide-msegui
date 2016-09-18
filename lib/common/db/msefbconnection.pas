@@ -300,7 +300,9 @@ var
  i1,i2,i3: int32;
 begin
  sys_mutexlock(fmutex);
- if not freleased and (fowner <> nil) then begin //owner alive
+ if not freleased and (fowner <> nil) and //owner alive
+                                            (length > 0) then begin 
+                                              //no call from queevents()
   with fowner do begin
    i3:= feventcount;
    isc_event_counts(pointer(feventcountbuffer),length,feventbuffer,events);
@@ -323,7 +325,7 @@ begin
    feventcontroller.eventinterval:= -1; //restart timer
   end;
  end;
- freleased:= false;
+// freleased:= false;
  sys_mutexunlock(fmutex);
 end;
 
@@ -394,8 +396,6 @@ end;
 constructor tfbconnection.create(aowner: tcomponent);
 begin
  fdialect:= sql_dialect_v6;
-// feventcallback:= tfbeventcallback.create();
-// sys_mutexcreate(fmutex);
  feventcontroller:= tdbeventcontroller.create(idbeventcontroller(self));
  feventcontroller.eventinterval:= -1; //event driven
  inherited;
@@ -892,21 +892,10 @@ end;
 
 procedure fetchguid(const ainfo: pfbfieldinfoty; const dest: pointer);
 var
- i1: int32;
  po1: pguid;
 begin
  po1:= ainfo^.buffer + ainfo^.offset;
  pguid(dest)^:= po1^;
- {
- i1:= sizeof(tguid);
- if i1 > ainfo^.buffersizead^ then begin
-  ainfo^.buffersizead^:= -i1;
- end
- else begin
-  ainfo^.buffersizead^:= i1;
-  move(po1^,dest^,i1);
- end;
- }
 end;
 
 procedure fetchvarchar(const ainfo: pfbfieldinfoty; const dest: pointer);
