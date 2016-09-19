@@ -92,6 +92,7 @@ type
   event: tdbevent;
   name: string;
   count: integer;
+  countbefore: card32;
  end;
  pfbeventinfoty = ^fbeventinfoty;
 
@@ -101,7 +102,7 @@ type
   protected
    fowner: tfbconnection;
    fmutex: mutexty;
-   ffirst: boolean; //flag for dummy call
+//   ffirst: boolean; //flag for dummy call
    ffired: boolean;
    freleased: boolean;
   public
@@ -111,6 +112,7 @@ type
    function release(): Integer override;
    procedure eventCallbackFunction(length: Cardinal; events: BytePtr) override;
    procedure destroylocked();
+   procedure storestate(); //copy current event counts to feventitems
    procedure queueevents(const first: boolean); //must be locked
  end;
 
@@ -176,7 +178,6 @@ type
    function createblobstream(const field: tfield; const mode: tblobstreammode;
                           const acursor: tsqlcursor): tstream; override;
    function getblobdatasize: integer; override;
-//   function getfeatures(): databasefeaturesty override;
    
    procedure updateevents(const aerrormessage: msestring);
    procedure clearevents();
@@ -310,24 +311,22 @@ begin
    isc_event_counts(pointer(feventcountbuffer),length,feventbuffer,events);
    for i1:= 0 to high(feventcountbuffer) do begin
     i2:= feventcountbuffer[i1];
-    i3:= i3 + i2;
-    if not ffirst then begin
-     with feventitems[i1] do begin
+    with feventitems[i1] do begin
+     if count < 0 then begin //first
+      count:= 0;
+      i2:= 0;
+     end
+     else begin
       count:= count + i2;
      end;
     end;
+    i3:= i3 + i2;
    end;
-   if feventcount <> i3 then begin
-    ffired:= true;
-   end;
-   if not ffirst then begin
-    feventcount:= i3;
-   end;
-   ffirst:= false;
+   feventcount:= i3;
    feventcontroller.eventinterval:= -1; //restart timer
   end;
+  ffired:= true;
  end;
-// freleased:= false;
  sys_mutexunlock(fmutex);
 end;
 
@@ -353,16 +352,59 @@ begin
  end;
 end;
 
+type
+ countbufferty = array[0..3] of byte;
+ 
+procedure tfbeventcallback.storestate();
+                           //copy current event counts to feventitems
+var
+ i1: int32;
+ po1: pbyte;
+ bu1: countbufferty;
+begin
+ po1:= fowner.feventbuffer + 1; //first name
+ for i1:= 0 to high(fowner.feventitems) do begin
+  po1:= po1 + po1^ + 1; //name length
+  bu1[0]:= po1^;
+  inc(po1);
+  bu1[1]:= po1^;
+  inc(po1);
+  bu1[2]:= po1^;
+  inc(po1);
+  bu1[3]:= po1^;
+  inc(po1);
+  fowner.feventitems[i1].countbefore:= card32(bu1); //endianess?
+ end;
+end;
+
 procedure tfbeventcallback.queueevents(const first: boolean);
+var
+ i1: int32;
+ po1: pbyte;
+ bu1: countbufferty;
 begin
  ffired:= false;
- ffirst:= ffirst or first;
  with fowner do begin
   if fevents <> nil then begin
    fevents.release();
   end;
   fevents:= fattachment.queevents(
                         fapi.status,feventcallback,feventlength,feventbuffer);
+  if first then begin //restore count values
+   po1:= fowner.feventbuffer + 1; //first name
+   for i1:= 0 to high(fowner.feventitems) do begin
+    bu1:= countbufferty(fowner.feventitems[i1].countbefore); //endianess?
+    po1:= po1 + po1^ + 1; //name length
+    po1^:= bu1[0];
+    inc(po1);
+    po1^:= bu1[1];
+    inc(po1);
+    po1^:= bu1[2];
+    inc(po1);
+    po1^:= bu1[3];
+    inc(po1);
+   end;
+  end;
  end;
 end;
 
@@ -411,8 +453,6 @@ destructor tfbconnection.destroy();
 begin
  inherited;
  feventcontroller.free;
-// feventcallback.free();
-// sys_mutexdestroy(fmutex);
 end;
 
 procedure tfbconnection.createdatabase(const asql: ansistring);
@@ -555,13 +595,6 @@ begin
  end;
  clearevents();
  feventcontroller.disconnect();
-{
- if feventcallback <> nil then begin
-  sys_mutexlock(feventcallback.fmutex);
-  feventcallback.destroylocked();
- end;
- clearevents();
-}
 end;
 
 function tfbconnection.allocatetransactionhandle: tsqlhandle;
@@ -582,6 +615,7 @@ function tfbconnection.startdbtransaction(const trans: tsqlhandle;
   raise econnectionerror.create(self,
                            'Invalid transaction parameter "'+s+'"','',0);
  end; //paramerror
+
 type
  paraminfoty = record
   id: int32;
@@ -1516,12 +1550,7 @@ function tfbconnection.getblobdatasize: integer;
 begin
  result:= 8;
 end;
-{
-function tfbconnection.getfeatures(): databasefeaturesty;
-begin
- result:= inherited getfeatures + [dbf_params];
-end;
-}
+
 procedure tfbconnection.writeblobdata(const atransaction: tsqltransaction;
                const tablename: string; const acursor: tsqlcursor;
                const adata: pointer; const alength: integer;
@@ -1670,7 +1699,7 @@ begin
 end;
 
 procedure tfbconnection.updateevents(const aerrormessage: msestring);
-                  //mutex must be locked
+                  //mutex must be locked, event leaks possible
 var
  i1: integer;
  ar1: array of string;
@@ -1711,10 +1740,11 @@ procedure tfbconnection.dolisten(const sender: tdbevent);
 begin
  if feventcallback <> nil then begin
   sys_mutexlock(feventcallback.fmutex);
+  feventcallback.storestate(); //copy current event counts to feventitems
  end;
  setlength(feventitems,high(feventitems)+2);
  with feventitems[high(feventitems)] do begin
-  count:= 0;
+  count:= -1; //first
   event:= sender;
   name:= sender.eventname;
  end;
@@ -1728,6 +1758,7 @@ var
 begin
  if feventcallback <> nil then begin
   sys_mutexlock(feventcallback.fmutex);
+  feventcallback.storestate(); //copy current event counts to feventitems
  end;
  for i1:= 0 to high(feventitems) do begin
   po1:= @feventitems[i1];
