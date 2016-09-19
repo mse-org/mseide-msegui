@@ -1763,10 +1763,12 @@ begin
  for i1:= 0 to high(feventitems) do begin
   po1:= @feventitems[i1];
   if po1^.event = sender then begin
-   with feventitems[high(feventitems)] do begin
-    stringaddref(name);  //compensate decref by setlength in deleteitem()
+   if i1 <> high(feventitems) then begin
+    with feventitems[high(feventitems)] do begin
+     stringaddref(name);  //compensate decref by setlength in deleteitem()
+    end;
+    finalize(po1^);
    end;
-   finalize(po1^);
    deleteitem(feventitems,typeinfo(feventitems),i1);
    break;
   end;
