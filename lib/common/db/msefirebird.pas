@@ -255,7 +255,6 @@ procedure initializefirebird(const sonames: array of filenamety;
 procedure releasefirebird();
 
 function formatstatus(status: istatus): string;
-//function getstatus(): istatus;
 function event_block(out eventbuffer: pbyte;
                                          const names: array of string): int32;
 procedure freeeventblock(var eventbuffer: pbyte);
@@ -367,18 +366,12 @@ begin
  end;
 end;
 
-procedure freeeventblock(var eventbuffer{,resultbuffer}: pbyte);
+procedure freeeventblock(var eventbuffer: pbyte);
 begin
  if eventbuffer <> nil then begin
   gds__free(eventbuffer);
   eventbuffer:= nil;
  end;
-{
- if resultbuffer <> nil then begin
-  gds__free(resultbuffer);
-  resultbuffer:= nil;
- end;
-}
 end;
 
 function formatstatus(status: istatus): string;
@@ -395,12 +388,7 @@ begin
  end;
  setlength(result,ca1);
 end;
-{
-function getstatus(): istatus;
-begin
- result:= master.getstatus();
-end;
-}
+
 initialization
  initializelibinfo(libinfo);
 finalization

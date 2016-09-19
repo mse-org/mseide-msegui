@@ -3735,8 +3735,10 @@ begin
  info.valuepo:= valuepo;
  removelink(info,ptrint(source) = 1);
  if not odd(ptruint(source)) then begin //full link
+  inc(fnopack);
   dest.unlink(iobjectlink(pchar(dest)+1),source,valuepo);
                        //remove backlink
+  dec(fnopack);
  end;
  dopack;
 end;
