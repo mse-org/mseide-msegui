@@ -170,21 +170,7 @@ begin
         end;
         sqllen:= length(data[i1]);
        end;
-       {
-       sqllen:= 8;                
-       align1:= 3; //sizeof(SLONG), SLONG always 32 bit
-       sqltype:= SQL_BLOB+1;
-       subtype:= isc_blob_untyped;
-       }
       end;
-      {
-      ftmemo,ftwidememo: begin //null
-       sqllen:= 8;                
-       align1:= 3; //sizeof(SLONG), SLONG always 32 bit
-       sqltype:= SQL_BLOB+1;
-       subtype:= isc_blob_text;
-      end;
-      }
      end;
      if sqltype = 0 then begin
       databaseerrorfmt(sunsupportedparameter,[fieldtypenames[datatype]],
