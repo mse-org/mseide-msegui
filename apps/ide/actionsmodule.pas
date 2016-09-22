@@ -222,6 +222,7 @@ type
    tool9: taction;
    comment: taction;
    uncomment: taction;
+   copyword: taction;
    procedure findinfileonexecute(const sender: tobject);
 
    //file
@@ -298,6 +299,7 @@ type
    procedure uncommentonexecute(const sender: TObject);
    procedure enablecomment(const sender: tcustomaction);
    procedure enableuncomment(const sender: tcustomaction);
+   procedure selectwordactiononexecute(const sender: TObject);
   private
    function filterfindcomp(const acomponent: tcomponent): boolean;
   public
@@ -465,6 +467,11 @@ end;
 procedure tactionsmo.deleteactonexecute(const sender: tobject);
 begin
  sourcefo.activepage.edit.deleteselection;
+end;
+
+procedure tactionsmo.selectwordactiononexecute(const sender: TObject);
+begin
+ sourcefo.activepage.copywordatcursor();
 end;
 
 procedure tactionsmo.selecteditpageonexecute(const sender: TObject);

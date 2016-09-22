@@ -124,6 +124,7 @@ type
    function checksave(noconfirm,multiple: boolean): modalresultty;
    function modified: boolean;
    function source: trichstringdatalist;
+   procedure copywordatcursor();
    procedure doline;
    procedure dofind;
    procedure repeatfind;
@@ -176,6 +177,7 @@ uses
 
 const
  pascaldelims = msestring(' :;+-*/(){},=<>' + c_linefeed + c_return + c_tab);
+ selectdelims = pascaldelims+'.[]';
  nodelimstrings: array[0..0] of msestring = ('->'); //for c
  bmbitshift = 4;
  bmbitmask = integer($3ff0);
@@ -1198,7 +1200,7 @@ begin
                             makegridcoord(bigint,edit.row),true);
       end
       else begin
-       edit.selectword(info.pos,pascaldelims+'.[]');
+       edit.selectword(info.pos,selectdelims);
       end;
       copytoclipboard(edit.selectedtext,cbb_primary);
       include(info.mouseeventinfopo^.eventstate,es_processed);
@@ -1597,6 +1599,12 @@ end;
 function tsourcepage.source: trichstringdatalist;
 begin
  result:= edit.datalist;
+end;
+
+procedure tsourcepage.copywordatcursor();
+begin
+ edit.selectword(edit.editpos,selectdelims);
+ edit.copyselection();
 end;
 
 procedure tsourcepage.doundo;

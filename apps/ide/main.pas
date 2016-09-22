@@ -1505,6 +1505,7 @@ begin
     togglebkptenable.enabled:= togglebkpt.enabled;
 //    find.enabled:= true;
     replace.enabled:= true;
+    copyword.enabled:= true;
 //    actionsmo.repeatfind.enabled:= find.enabled and 
 //           (projectoptions.findreplaceinfo.find.text <> '');
    end;
@@ -1550,6 +1551,7 @@ begin
 //   find.enabled:= false;
 //   actionsmo.repeatfind.enabled:= false;
    replace.enabled:= false;
+   copyword.enabled:= false;
   end;
   if (factivedesignmodule <> nil) then begin
    save.enabled:= factivedesignmodule^.modified;

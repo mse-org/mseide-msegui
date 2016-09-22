@@ -572,6 +572,9 @@ var
  pos1: gridcoordty;
 begin
  pos1:= wordatpos(apos,str1,delimchars,[]);
+ if str1 = '' then begin
+  pos1:= wordatpos(apos,str1,delimchars,[],true);
+ end;
  if str1 <> '' then begin
   setselection(pos1,makegridcoord(pos1.col+length(str1),pos1.row),true);
  end;

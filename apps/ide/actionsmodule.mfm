@@ -1253,7 +1253,7 @@ object actionsmo: tactionsmo
     options = [ao_globalshortcut]
     onexecute = selecteditpageonexecute
     left = 280
-    top = 104
+    top = 120
     sc = (
       1
       16453
@@ -1263,7 +1263,7 @@ object actionsmo: tactionsmo
     caption = '&Indent'
     onexecute = indentonexecute
     left = 280
-    top = 120
+    top = 136
     sc = (
       1
       16457
@@ -1273,7 +1273,7 @@ object actionsmo: tactionsmo
     caption = 'U&nindent'
     onexecute = unidentonexecute
     left = 280
-    top = 136
+    top = 152
     sc = (
       1
       16469
@@ -1359,17 +1359,17 @@ object actionsmo: tactionsmo
     onexecute = lowercaseexecute
     onupdate = enableonselect
     left = 360
-    top = 120
+    top = 136
   end
   object uppercase: taction
     caption = '&Uppercase'
     onexecute = uppercaseexecute
     onupdate = enableonselect
     left = 360
-    top = 136
+    top = 152
   end
   object shortcuts: tshortcutcontroller
-    actions.count = 96
+    actions.count = 97
     actions.items = <    
       item
         dispname = 'File'
@@ -1466,6 +1466,14 @@ object actionsmo: tactionsmo
         sc = (
           1
           16453
+        )
+      end    
+      item
+        action = copyword
+        dispname = 'Copy Word at Cursor'
+        sc = (
+          1
+          24663
         )
       end    
       item
@@ -2480,7 +2488,7 @@ object actionsmo: tactionsmo
     onexecute = commentonexecute
     onupdate = enablecomment
     left = 280
-    top = 152
+    top = 168
     sc = (
       2
       16459
@@ -2492,11 +2500,18 @@ object actionsmo: tactionsmo
     onexecute = uncommentonexecute
     onupdate = enableuncomment
     left = 280
-    top = 168
+    top = 184
     sc = (
       2
       16459
       85
     )
+  end
+  object copyword: taction
+    caption = 'Copy Word at Cursor'
+    options = [ao_globalshortcut]
+    onexecute = selectwordactiononexecute
+    left = 280
+    top = 100
   end
 end
