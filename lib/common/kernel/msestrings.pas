@@ -205,18 +205,18 @@ const
 type
  tmemorystringstream = class(tmemorystream) 
         //has room for stringheader
- protected
-  procedure SetCapacity(NewCapacity: PtrInt) override;
-  function getcapacity: ptrint override;
-  function Seek(const Offset: Int64; Origin: TSeekOrigin): Int64; override;
-  function getmemory: pointer; override;
-  Function GetSize : Int64; Override;
-  function GetPosition: Int64; Override;
-  procedure SetSize({$ifdef CPU64}const{$endif CPU64} NewSize: PtrInt); override;
- public
+  protected
+   procedure SetCapacity(NewCapacity: PtrInt) override;
+   function getcapacity: ptrint override;
+   function getmemory: pointer; override;
+   Function GetSize : Int64; Override;
+   function GetPosition: Int64; Override;
+  public
    constructor create;
+   procedure SetSize({$ifdef CPU64}const{$endif CPU64} NewSize: PtrInt); override;
+   function Seek(const Offset: Int64; Origin: TSeekOrigin): Int64; override;
    procedure destroyasstring(out data: string);
-   //calls destroy, not possible to use as destructor in FPC
+    //calls destroy, not possible to use as destructor in FPC
  end;
  
  searchoptionty = (so_caseinsensitive,so_wholeword,so_wordstart);
