@@ -291,6 +291,11 @@ end;
 }
 procedure tlocaldataset.inheritedinternalclose;
 begin
+ if not (bs_refreshing in fbstate) then begin
+  if DefaultFields then begin
+   DestroyFields;
+  end;
+ end;
  inherited internalclose;
 end;
 
