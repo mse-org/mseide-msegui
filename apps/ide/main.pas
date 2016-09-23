@@ -1766,8 +1766,8 @@ end;
 
 procedure tmainfo.viewcomponentpaletteonexecute(const sender: TObject);
 begin
- componentpalettefo.window.bringtofront;
  componentpalettefo.show;
+ componentpalettefo.window.bringtofront;
 end;
 
 procedure tmainfo.viewcomponentstoreonexecute(const sender: TObject);
@@ -1777,8 +1777,8 @@ end;
 
 procedure tmainfo.viewdebuggertoolbaronexecute(const sender: TObject);
 begin
- debuggerfo.window.bringtofront;
  debuggerfo.show;
+ debuggerfo.window.bringtofront;
 end;
 
 procedure tmainfo.mainonloaded(const sender: tobject);

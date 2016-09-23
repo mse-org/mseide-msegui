@@ -132,7 +132,7 @@ type
    fifilink: tifiactionlinkcomp;
   public
     //iifiexeclink
-   procedure execute;
+   procedure execute(const force: boolean = false);
   published
    property ifilink: tifiactionlinkcomp read fifilink write setifilink;
    property onexecute: notifyeventty read fonexecute write fonexecute;
@@ -333,7 +333,7 @@ begin
  mseificomp.setifilinkcomp(iifiexeclink(self),avalue,tifilinkcomp(fifilink));
 end;
 
-procedure tifiactionendpoint.execute;
+procedure tifiactionendpoint.execute(const force: boolean = false);
 begin
  if canevent(tmethod(fonexecute)) then begin
   fonexecute(self);

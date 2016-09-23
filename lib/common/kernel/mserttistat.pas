@@ -44,6 +44,12 @@ type
    procedure dostatwrite(const writer: tstatwriter); virtual;
   public
    destructor destroy; override;
+  {$ifdef mse_with_ifi}
+   procedure storevalues(const asource: tmsecomponent;
+                               const prefix: string = '') virtual;
+   procedure loadvalues(const adest: tmsecomponent;
+                               const prefix: string = '') virtual;
+  {$endif}
    procedure expandmacros(const amacrolist: tmacrolist); overload;
    procedure expandmacros(const macros: macroinfoarty;
                       const options: macrooptionsty = 
@@ -1186,6 +1192,20 @@ begin
  gettexp.free;
  inherited;
 end;
+
+{$ifdef mse_with_ifi}
+procedure toptions.storevalues(const asource: tmsecomponent;
+               const prefix: string = '');
+begin
+ valuestoobject(asource,self,prefix);
+end;
+
+procedure toptions.loadvalues(const adest: tmsecomponent;
+               const prefix: string = '');
+begin
+ objecttovalues(self,adest,prefix);
+end;
+{$endif}
 
 procedure toptions.dostatread(const reader: tstatreader);
 begin

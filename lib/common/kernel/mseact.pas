@@ -212,7 +212,7 @@ type
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
    procedure doupdate;
-   procedure execute;
+   procedure execute(const force: boolean = false);
    procedure updateinfo(const sender: iactionlink);
    property caption: captionty read getcaption write setcaption;
    property state: actionstatesty read getstate write setstate default [];
@@ -330,13 +330,15 @@ procedure actionendload(const sender: iactionlink);
 function doactionexecute(const sender: tobject; var info: actioninfoty;
                                const nocheckbox: boolean = false;
                                const nocandefocus: boolean = false;
-                               const beforeexecute: proceventty = nil): boolean;
+                               const beforeexecute: proceventty = nil;
+                               const force: boolean = false): boolean;
           //true if local checked changed
 function doactionexecute1(const sender: tobject; var info: actioninfoty;
                          out changed: boolean;
                          const nocheckbox: boolean = false;
                          const nocandefocus: boolean = false;
-                         const beforeexecute: proceventty = nil): boolean;
+                         const beforeexecute: proceventty = nil;
+                         const force: boolean = false): boolean;
           //true if not canceled
 
 procedure initactioninfo(var info: actioninfoty;
@@ -374,7 +376,8 @@ function doactionexecute1(const sender: tobject; var info: actioninfoty;
                          out changed: boolean;
                          const nocheckbox: boolean = false;
                          const nocandefocus: boolean = false;
-                         const beforeexecute: proceventty = nil): boolean;
+                         const beforeexecute: proceventty = nil;
+                         const force: boolean = false): boolean;
           //true if not canceled
 var
  bo1: boolean;
@@ -382,7 +385,7 @@ begin
  result:= false;
  changed:= false;
  with info do begin
-  if not (as_disabled in state) then begin
+  if not (as_disabled in state) or force then begin
    if not nocandefocus and 
      ((action = nil) or not(ao_nocandefocus in action.options)) then begin
     if not application.candefocus then begin
@@ -443,10 +446,12 @@ end;
 function doactionexecute(const sender: tobject; var info: actioninfoty;
                          const nocheckbox: boolean = false;
                          const nocandefocus: boolean = false;
-                         const beforeexecute: proceventty = nil): boolean;
+                         const beforeexecute: proceventty = nil;
+                         const force: boolean = false): boolean;
       //true if local checked changed
 begin
- doactionexecute1(sender,info,result,nocheckbox,nocandefocus,beforeexecute);
+ doactionexecute1(sender,info,result,nocheckbox,nocandefocus,beforeexecute,
+                                                                        force);
 end;
 
 procedure actionstatestoshapestates(const source: actioninfoty; var dest: shapestatesty);
@@ -1241,10 +1246,10 @@ begin
  doupdate;
 end;
 
-procedure tcustomaction.execute;
+procedure tcustomaction.execute(const force: boolean = false);
 begin
  if (componentstate*[csloading,csdesigning,csdestroying] = []) and 
-                           doactionexecute(self,finfo) then begin
+                  doactionexecute(self,finfo,false,false,nil,force) then begin
   changed;
  end;
 end;

@@ -5177,6 +5177,7 @@ end;
 Constructor TFieldDef.Create(ACollection : TCollection);
 
 begin
+  FPrecision:=-1;
   Inherited create(ACollection);
   FFieldNo:=Index+1;
 end;
