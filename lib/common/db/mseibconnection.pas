@@ -23,7 +23,7 @@ type
    procedure setconnected(const avalue: boolean); reintroduce;
   protected
    procedure loaded; override;
-   //idbcontroller
+    //idbcontroller
    function readsequence(const sequencename: string): msestring; override;
    function sequencecurrvalue(const sequencename: string): msestring; override;
    function writesequence(const sequencename: string;

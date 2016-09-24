@@ -8,7 +8,8 @@
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 }
 //
-// todo: prepare-less execute and openCursor (needs FB-optimisation)
+// todo: - prepare-less execute and openCursor (needs FB-optimisation)
+//       - move dbcontroller interface to tcustomsqlconnection
 //
 unit msefbconnection;
 {$ifdef FPC}{$mode objfpc}{$h+}{$goto on}{$endif}
@@ -102,7 +103,6 @@ type
   protected
    fowner: tfbconnection;
    fmutex: mutexty;
-//   ffirst: boolean; //flag for dummy call
    ffired: boolean;
    freleased: boolean;
   public
@@ -127,6 +127,10 @@ type
                       const forstring: boolean = false): tmemorystream;
    function getblobstring(const acursor: tsqlcursor;
                                       const blobid: isc_quad): string;
+   function getdatabasename: filenamety;
+   procedure setdatabasename(const avalue: filenamety);
+   function getconnected: boolean; reintroduce;
+   procedure setconnected(const avalue: boolean); reintroduce;
   protected
    fapi: fbapity;
    fattachment: iattachment;
@@ -181,7 +185,12 @@ type
    
    procedure updateevents(const aerrormessage: msestring);
    procedure clearevents();
-
+   procedure loaded() override;
+    //idbcontroller
+   function readsequence(const sequencename: string): msestring override;
+   function sequencecurrvalue(const sequencename: string): msestring override;
+   function writesequence(const sequencename: string;
+                    const avalue: largeint): msestring override;
     //iblobconnection
    procedure writeblobdata(const atransaction: tsqltransaction;
               const tablename: string; const acursor: tsqlcursor;
@@ -199,6 +208,7 @@ type
           //false if none
    procedure dolisten(const sender: tdbevent);
    procedure dounlisten(const sender: tdbevent);
+    //idbcontroller
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy(); override;
@@ -230,7 +240,7 @@ type
                                         default sql_dialect_v6;
    property options: fbconnectionoptionsty read foptions 
                                            write foptions default [];
-   property DatabaseName;
+//   property DatabaseName;
    property Password;
    property Transaction;
    property transactionwrite;
@@ -238,8 +248,10 @@ type
    property CharSet;
    property HostName;
    property controller;
+   property DatabaseName: filenamety read getdatabasename write setdatabasename;
+   property Connected: boolean read getconnected write setconnected default false;
 
-   property Connected;
+//   property Connected;
 //    Property Role;
 //    property DatabaseName;
 //    property KeepConnection;
@@ -258,7 +270,7 @@ type
 implementation
 uses
  dbconst,msefbinterface,msefbutils,msesqldb,msebufdataset,msedate,msefloattostr,
- msebits,msesysintf1,msearrayutils;
+ msebits,msesysintf1,msearrayutils,mseformatstr;
 
 const
  textblobtypes = [ftmemo,ftwidememo]; 
@@ -564,10 +576,10 @@ begin
    end;
   end;
   if hostname <> '' then begin
-   databasename1:= hostname+':'+databasename;
+   databasename1:= hostname+':'+todbstring(databasename);
   end
   else begin
-   databasename1:= databasename;
+   databasename1:= todbstring(databasename);
   end;
   fattachment:= nil;
   clearstatus();
@@ -1527,6 +1539,28 @@ begin
  tmemorystringstream(getblobstream(acursor,blobid,true)).destroyasstring(result);
 end;
 
+function tfbconnection.getdatabasename: filenamety;
+begin
+ result:= fcontroller.getdatabasename;
+end;
+
+procedure tfbconnection.setdatabasename(const avalue: filenamety);
+begin
+ fcontroller.setdatabasename(avalue);
+end;
+
+function tfbconnection.getconnected: boolean;
+begin
+ result:= inherited connected;
+end;
+
+procedure tfbconnection.setconnected(const avalue: boolean);
+begin
+ if fcontroller.setactive(avalue) then begin
+  inherited connected:= avalue;
+ end;
+end;
+
 function tfbconnection.createblobstream(const field: tfield;
                const mode: tblobstreammode; const acursor: tsqlcursor): tstream;
 var
@@ -1696,6 +1730,31 @@ begin
  freeeventblock(feventbuffer);
  feventitems:= nil;
  feventcountbuffer:= nil;
+end;
+
+procedure tfbconnection.loaded();
+begin
+ inherited;
+ fcontroller.loaded;
+end;
+
+function tfbconnection.readsequence(const sequencename: string): msestring;
+begin
+ result:= 'select gen_id('+msestring(sequencename)+
+                                   ',1) as res from RDB$DATABASE;';
+end;
+
+function tfbconnection.sequencecurrvalue(const sequencename: string): msestring;
+begin
+ result:= 'select gen_id('+msestring(sequencename)+
+                                    ',0) as res from RDB$DATABASE;';
+end;
+
+function tfbconnection.writesequence(const sequencename: string;
+               const avalue: largeint): msestring;
+begin
+ result:= 'set generator '+msestring(sequencename)+
+                                    ' to '+inttostrmse(avalue)+';';
 end;
 
 procedure tfbconnection.updateevents(const aerrormessage: msestring);
