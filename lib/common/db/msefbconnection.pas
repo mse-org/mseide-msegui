@@ -795,6 +795,7 @@ begin
    end;
    checkstatus('preparestatement');
    include(fcursorstate,cs_hasstatement);
+   cursor.fprepared:= true;
   end;
  end;
 end;

@@ -192,7 +192,7 @@ begin
     with fitems[i1] do begin
      if _type <> SQL_NULL then begin
       po1:= fparambuffer + offset;
-      with params[i1] do begin
+      with params[fparambinding[i1]] do begin
        pisc_short(fparambuffer+nulloffset)^:= card8(_isnull);
        if _isnull then begin
         if blobkind <> bk_none then begin
