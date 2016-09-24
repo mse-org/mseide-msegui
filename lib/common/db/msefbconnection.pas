@@ -116,6 +116,7 @@ type
    procedure queueevents(const first: boolean); //must be locked
  end;
 
+ paramblockkindty = (pbk_database,pbk_transaction);
  tfbconnection = class(tcustomsqlconnection,iblobconnection,
                                          idbevent,idbeventcontroller)
   private
@@ -145,7 +146,7 @@ type
    feventcountbuffer: array of ULONG;
    procedure iniapi();
    procedure finiapi();
-   function getpb(): ixpbbuilder;
+   function getpb(const akind: paramblockkindty): ixpbbuilder;
    procedure clearstatus(); inline;
    function statusok(): boolean; inline;
    procedure checkstatus(const aerrormessage: msestring);
@@ -534,9 +535,18 @@ begin
  end;
 end;
 
-function tfbconnection.getpb(): ixpbbuilder;
+function tfbconnection.getpb(const akind: paramblockkindty): ixpbbuilder;
+var
+ kind1: card32;
 begin
- result:= fapi.util.getxpbbuilder(fapi.status,ixpbbuilder.DPB,nil,0);
+ case akind of
+  pbk_database: kind1:= ixpbbuilder.DPB;
+  pbk_transaction: kind1:= ixpbbuilder.TPB;
+  else begin
+   raise exception.create('Internalerror 20160924A');
+  end;
+ end;
+ result:= fapi.util.getxpbbuilder(fapi.status,kind1,nil,0);
 end;
 
 procedure tfbconnection.dointernalconnect();
@@ -551,7 +561,7 @@ begin
  iniapi();
  try 
   inherited dointernalconnect;
-  pb:= getpb();
+  pb:= getpb(pbk_database);
   getcredentials(u,p);
   if u <> '' then begin
    pb.insertstring(fapi.status,isc_dpb_user_name,pointer(username));
@@ -664,7 +674,7 @@ label
 begin
  result := false;
  if aparams.count > 0 then begin
-  pb:= getpb();
+  pb:= getpb(pbk_transaction);
   for i1:= 0 to aparams.count - 1 do begin
    s1:= trim(aparams[i1]);
    for i2:= 0 to high(paramconsts) do begin
