@@ -1209,7 +1209,9 @@ begin
  end
  else begin
   ausername:= username;
+  uniquestring(ausername);
   apassword:= password;
+  uniquestring(apassword);
  end;
 end;
 
