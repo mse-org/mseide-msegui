@@ -431,7 +431,7 @@ begin
      onbeforeconnect(self);
     end;
     try
-     dointernalconnect;
+     dointernalconnect();
      doafterinternalconnect;
      if assigned(onafterconnect) then begin
        onafterconnect(self);

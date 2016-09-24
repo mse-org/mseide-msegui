@@ -180,6 +180,7 @@ type
 //    property LoginPrompt;
     property Params;
 //    property OnLogin;
+    property ongetcredentials;
     property eventinterval: integer read geteventinterval 
                      write seteventinterval default defaultdbeventinterval;
   end;
@@ -397,14 +398,18 @@ begin
 end;
 
 function tpqconnection.constructconnectstring: ansistring;
+var
+ u,p: string;
 begin
  result:= '';
- if (UserName <> '') then begin
-  result := result + ' user=''' + UserName + '''';
+ getcredentials(u,p);
+ if (U <> '') then begin
+  result := result + ' user=''' + U + '''';
  end;
- if (Password <> '') then begin
-  result:= result + ' password=''' + Password + '''';
+ if (P <> '') then begin
+  result:= result + ' password=''' + P + '''';
  end;
+ freecredentials(u,p);
  if (HostName <> '') then begin
   result:= result + ' host=''' + HostName + '''';
  end;

@@ -220,6 +220,7 @@ type
     property DatabaseName;
     property KeepConnection;
     property Params;
+    property ongetcredentials;
   end;
 
 function clientversion: string;
@@ -468,6 +469,7 @@ const
 var
   DPB           : string;
   ADatabaseName : String;
+  u,p: string;
 begin
 {$IfDef LinkDynamically}
  useembeddedfirebird:= ibo_embedded in foptions;
@@ -475,14 +477,15 @@ begin
  try 
 {$EndIf}
   inherited dointernalconnect;
-
+  getcredentials(u,p);
   DPB := chr(isc_dpb_version1);
-  if (UserName <> '') then
+  if (u <> '') then
   begin
-    DPB := DPB + chr(isc_dpb_user_name) + chr(Length(UserName)) + UserName;
-    if (Password <> '') then
-      DPB := DPB + chr(isc_dpb_password) + chr(Length(Password)) + Password;
+    DPB := DPB + chr(isc_dpb_user_name) + chr(Length(u)) + u;
+    if (p <> '') then
+      DPB := DPB + chr(isc_dpb_password) + chr(Length(p)) + p;
   end;
+  freecredentials(u,p);
   if (Role <> '') then
      DPB := DPB + chr(isc_dpb_sql_role_name) + chr(Length(Role)) + Role;
   if Length(CharSet) > 0 then begin
@@ -499,7 +502,9 @@ begin
     else ADatabaseName := DatabaseName;
   if isc_attach_database(@FStatus, Length(ADatabaseName), @ADatabaseName[1],
                            @FSQLDatabaseHandle,Length(DPB), @DPB[1]) <> 0 then
+    stringsafefree(dpb,false);
     CheckError('DoInternalConnect', FStatus);
+  stringsafefree(dpb,false);
   SetDBDialect;
 {$IfDef LinkDynamically}
  except

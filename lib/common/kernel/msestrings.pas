@@ -481,6 +481,8 @@ function stripescapesequences(avalue: msestring): msestring;
 
 procedure stringaddref(var str: ansistring); overload;
 procedure stringaddref(var str: msestring); overload;
+procedure stringsafefree(var str: string; const onlyifunique: boolean);
+procedure stringsafefree(var str: msestring; const onlyifunique: boolean);
 
 procedure reallocstring(var value: ansistring); overload;
                 //macht datenkopie ohne free
@@ -1398,6 +1400,32 @@ begin
   reallocstring(str); //delphi and FPC 2.2
                       //widestrings are not refcounted on win32
 {$endif}
+ end;
+end;
+
+procedure stringsafefree(var str: string; const onlyifunique: boolean);
+var
+ po1: psizeint;
+begin
+ if pointer(str) <> nil then begin
+  po1:= pointer(str)-2*sizeof(sizeint);
+  if (po1^ >= 0) and (not onlyifunique or (po1^ = 1)) then begin
+   fillchar(pointer(str)^,length(str)*sizeof(str[1]),0);
+   str:= '';
+  end;
+ end;
+end;
+
+procedure stringsafefree(var str: msestring; const onlyifunique: boolean);
+var
+ po1: psizeint;
+begin
+ if pointer(str) <> nil then begin
+  po1:= pointer(str)-2*sizeof(sizeint);
+  if (po1^ >= 0) and (not onlyifunique or (po1^ = 1)) then begin
+   fillchar(pointer(str)^,length(str)*sizeof(str[1]),0);
+   str:= '';
+  end;
  end;
 end;
 

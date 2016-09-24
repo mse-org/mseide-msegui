@@ -226,6 +226,7 @@ Type
     property KeepConnection;
 //    property LoginPrompt;
     property Params;
+    property ongetcredentials;
 //    property OnLogin;
   end;
 
@@ -733,9 +734,14 @@ Var
 
 begin
  H:= HostName;
- U:= UserName;
- P:= Password;
- ConnectMySQL(aconn,pchar(H),pchar(U),pchar(P));
+ getcredentials(u,p);
+// U:= UserName;
+// P:= Password;
+ try
+  ConnectMySQL(aconn,pchar(H),pchar(U),pchar(P));
+ finally
+  freecredentials(u,p);
+ end;
  if mysql_select_db(aconn,pchar(DatabaseName)) <> 0 then begin
    checkerror(SErrDatabaseSelectFailed,aconn);
  end;

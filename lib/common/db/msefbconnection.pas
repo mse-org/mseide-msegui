@@ -240,25 +240,18 @@ type
                                         default sql_dialect_v6;
    property options: fbconnectionoptionsty read foptions 
                                            write foptions default [];
-//   property DatabaseName;
-   property Password;
    property Transaction;
    property transactionwrite;
-   property UserName;
    property CharSet;
    property HostName;
    property controller;
    property DatabaseName: filenamety read getdatabasename write setdatabasename;
    property Connected: boolean read getconnected write setconnected default false;
-
-//   property Connected;
-//    Property Role;
-//    property DatabaseName;
-//    property KeepConnection;
-//    property LoginPrompt;
-//    property Params;
-    property afterconnect;
-    property beforedisconnect;
+   property Password;
+   property UserName;
+   property ongetcredentials;
+   property afterconnect;
+   property beforedisconnect;
  end;
  
  efberror = class(econnectionerror)
@@ -552,18 +545,21 @@ const
 var
  pb: ixpbbuilder;
  databasename1 : string;
+ u,p: string;
 begin
  flistencount:= 0;
  iniapi();
  try 
   inherited dointernalconnect;
   pb:= getpb();
-  if username <> '' then begin
+  getcredentials(u,p);
+  if u <> '' then begin
    pb.insertstring(fapi.status,isc_dpb_user_name,pointer(username));
   end;
-  if password <> '' then begin
+  if p <> '' then begin
    pb.insertstring(fapi.status,isc_dpb_password,pointer(password));
   end;
+  freecredentials(u,p); //fill with #0 before release
 //  if role <> '' then begin
 //   dpb.insertstring(fapi.status,isc_dpb_role_name,pointer(role));
 //  end;

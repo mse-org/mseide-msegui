@@ -168,6 +168,7 @@ type
 //    property LoginPrompt;  // if true, ODBC drivers might prompt for more details that are not in the connection string
     property Params;       // will be added to connection string
 //    property OnLogin;
+    property ongetcredentials;
   end;
 
   EODBCException = class(Exception)
@@ -437,14 +438,17 @@ var
   i: Integer;
   Param: string;
   EqualSignPos:integer;
+  u,p: string;
 begin
   Result:='';
+  getcredentials(u,p);
   if charset <> '' then begin
    result:= result + 'CHARSET='+charset+';';
   end;
   if DatabaseName<>'' then Result:=Result + 'DSN='+EscapeParamValue(DatabaseName)+';';
   if Driver      <>'' then Result:=Result + 'DRIVER='+EscapeParamValue(Driver)+';';
-  if UserName    <>'' then Result:=Result + 'UID='+EscapeParamValue(UserName)+';PWD='+EscapeParamValue(Password)+';';
+  if U    <>'' then Result:=Result + 'UID='+EscapeParamValue(U)+';PWD='+EscapeParamValue(P)+';';
+  freecredentials(u,p);
   if FileDSN     <>'' then Result:=Result + 'FILEDSN='+EscapeParamValue(FileDSN)+'';
   for i:=0 to Params.Count-1 do
   begin
@@ -802,10 +806,12 @@ begin
     'Could not connect with connection string "%s".',[ConnectionString]
    );
   except
+   stringsafefree(connectionstring,false);
    SQLFreeHandle(SQL_HANDLE_DBC, FDBCHandle);
    fdbchandle:= nil;
    raise;
   end;
+  stringsafefree(connectionstring,false);
 
 // commented out as the OutConnectionString is not used further at the moment
 //  if ActualLength<BufferLength-1 then

@@ -204,9 +204,9 @@ type
    property options: databaseoptionsty read foptions write setoptions default [];
  end;
 
-// databasefeaturety = (dbf_params,dbf_blobscached);
-// databasefeaturesty = set of databasefeaturety;
- 
+ getcredentialseventty = procedure(const sender: tcustomsqlconnection;
+                            var ausername: msestring; var apassword: msestring) 
+                                                                     of object;
  tmsesqlscript = class;
  tcustomsqlconnection = class(TmDatabase,idbcontroller,iactivatorclient)
   private
@@ -222,6 +222,7 @@ type
 //   fdatasets1: datasetarty;
 //   frecnos: integerarty;
    ftransactionwrite: tsqltransaction;
+   fongetcredentials: getcredentialseventty;
    procedure setcontroller(const avalue: tdbcontroller);
    procedure settransaction(const avalue : tsqltransaction);
    procedure settransactionwrite(const avalue: tsqltransaction);
@@ -242,6 +243,9 @@ type
    procedure notification(acomponent: tcomponent; operation: toperation); override;
    
     function StrToStatementType(s : msestring) : TStatementType; virtual;
+    procedure getcredentials(var ausername: string; var apassword: string);
+    procedure freecredentials(var ausername: string; var apassword: string);
+                    //fill with #0 before free
     procedure DoInternalConnect; override;
     procedure doafterinternalconnect; override;
     procedure dobeforeinternaldisconnect; override;
@@ -314,6 +318,7 @@ type
    procedure updateutf8(var autf8: boolean); virtual;
    function isutf8: boolean;
    function todbstring(const avalue: msestring): string;
+   function tomsestring(const avalue: string): msestring;
    procedure FreeFldBuffers(cursor : TSQLCursor); virtual; abstract;
    Function AllocateCursorHandle(const aowner: icursorclient; 
                const aname: ansistring): TSQLCursor; virtual; abstract;
@@ -381,6 +386,8 @@ type
    property afterconnect: tmsesqlscript read fafterconnect write setafteconnect;
    property beforedisconnect: tmsesqlscript read fbeforedisconnect write setbeforedisconnect;
    property controller: tdbcontroller read fcontroller write setcontroller;
+   property ongetcredentials: getcredentialseventty read fongetcredentials 
+                                                        write fongetcredentials;
   end;
 
  tsqlconnection = class(tcustomsqlconnection)
@@ -399,6 +406,7 @@ type
     property KeepConnection;
 //    property LoginPrompt;
     property Params;
+    property ongetcredentials;
     property afterconnect;
     property beforedisconnect;
 //    property OnLogin;
@@ -1185,6 +1193,33 @@ begin
     end;
 end;
 
+procedure tcustomsqlconnection.getcredentials(var ausername: string;
+               var apassword: string);
+var
+ u,p: msestring;
+begin
+ if assigned(fongetcredentials) then begin
+  u:= tomsestring(username);
+  p:= '';
+  fongetcredentials(self,u,p);
+  ausername:= todbstring(u);
+  apassword:= todbstring(p);
+  stringsafefree(u,true);
+  stringsafefree(p,true);
+ end
+ else begin
+  ausername:= username;
+  apassword:= password;
+ end;
+end;
+
+procedure tcustomsqlconnection.freecredentials(var ausername: string;
+               var apassword: string);
+begin
+ stringsafefree(ausername,false);
+ stringsafefree(apassword,false);
+end;
+
 procedure tcustomsqlconnection.settransaction(const avalue : tsqltransaction);
 begin
  if ftransaction <> avalue then begin
@@ -1875,6 +1910,16 @@ begin
  end
  else begin
   result:= ansistring(avalue);
+ end;
+end;
+
+function tcustomsqlconnection.tomsestring(const avalue: string): msestring;
+begin
+ if isutf8 then begin
+  result:= utf8tostring(avalue);
+ end
+ else begin
+  result:= msestring(avalue);
  end;
 end;
 
