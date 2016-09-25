@@ -3521,7 +3521,7 @@ begin
     removehint();
    end;
   end;
-  if (info.mouse.eventkind = ek_mousepark) and 
+  if (info.mouse.eventkind = ek_mousepark) and application.active and
             projectoptions.e.componenthints and (fhintedcomp = nil) then begin
    bo1:= getcompatpos(mousepos1,fhintedcomp);
    if (fhintedcomp <> nil) then begin
