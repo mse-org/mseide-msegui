@@ -626,6 +626,7 @@ begin
       end;
      end;
     end;
+    paramerror(aparams[i1]);
    end;
 next:
   end;
