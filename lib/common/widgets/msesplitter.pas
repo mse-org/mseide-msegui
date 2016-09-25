@@ -2067,8 +2067,10 @@ begin
    exclude(fstate,las_scalesizerefvalid);
    fplace_options:= avalue;
    scalebasechanged(nil);
+  end
+  else begin
+   fplace_options:= avalue;
   end;
-  fplace_options:= avalue;
   updatelayout();
  end;
 end;
