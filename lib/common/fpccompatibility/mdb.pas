@@ -1240,6 +1240,8 @@ type
     procedure SetAsWideString(const aValue: WideString);
     function getasunicodestring: unicodestring;
     procedure setasunicodestring(const avalue: unicodestring);
+   function getasnullmsestring: msestring;
+   procedure setasnullmsestring(const avalue: msestring);
    function getasid: int64;
    procedure setasid(const avalue: int64);
   public
@@ -1282,6 +1284,9 @@ type
                                                        write setasunicodestring;
     property asmsestring: msestring read getasunicodestring 
                                                   write setasunicodestring;
+    property asnullmsestring: msestring read getasnullmsestring 
+                                                  write setasnullmsestring;
+                                                     //'' -> null
     property asid: int64 read getasid write setasid; //-1 -> null
     property blobkind: blobkindty read fblobkind 
                                            write fblobkind default bk_none;
@@ -10474,6 +10479,26 @@ end;
 Function TParam.IsParamStored: Boolean;
 begin
   Result:=Bound;
+end;
+
+function TParam.getasnullmsestring: msestring;
+begin
+ if isnull then begin
+  result:= '';
+ end
+ else begin
+  result:= getasunicodestring();
+ end;
+end;
+
+procedure TParam.setasnullmsestring(const avalue: msestring);
+begin
+ if avalue = '' then begin
+  clear;
+ end
+ else begin
+  setasunicodestring(avalue);
+ end;
 end;
 
 Procedure TParam.AssignParam(Param: TParam);

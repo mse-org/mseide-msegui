@@ -193,7 +193,7 @@ type
    FTransactions : TList;
    FDirectory : String;
    FKeepConnection : Boolean;
-   FParams : TStrings;
+   FParams : TStringlist;
    FSQLBased : Boolean;
    fonbeforeconnect: databaseeventty;
    fonconnecterror: databaseerroreventty;
@@ -209,7 +209,7 @@ type
    procedure UnRegisterTransaction(TA : tmdbtransaction);
    procedure RemoveDataSets;
    procedure RemoveTransactions;
-   procedure setparams(const avalue: tstrings);
+   procedure setparams(const avalue: tstringlist);
   protected
    FConnected : Boolean;
    FOpenAfterRead : boolean;
@@ -244,7 +244,7 @@ type
    property DatabaseName: string read FDatabaseName write FDatabaseName;
    property KeepConnection: Boolean read FKeepConnection 
                               write FKeepConnection default false;
-   property Params : TStrings read FParams Write setparams;
+   property Params : TStringlist read FParams Write setparams;
    property onbeforeconnect: databaseeventty read fonbeforeconnect
                                    write fonbeforeconnect;  
    property onafterconnect: databaseeventty read fonafterconnect 
@@ -698,7 +698,7 @@ begin
     DatabaseErrorFmt(SNoTransactionRegistered,[TA.Name]);
 end;
 
-procedure tmdatabase.setparams(const avalue: tstrings);
+procedure tmdatabase.setparams(const avalue: tstringlist);
 begin
  fparams.assign(avalue);
 end;

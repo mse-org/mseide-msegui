@@ -117,6 +117,14 @@ type
  end;
 
  paramblockkindty = (pbk_database,pbk_transaction);
+ paramblockvaluekindty = (pbvk_none,pbvk_int,pbvk_str);
+ paraminfoty = record
+  id: int32;
+  name: string;
+  valuekind: paramblockvaluekindty;
+ end;
+ pparaminfoty = ^paraminfoty;
+ 
  tfbconnection = class(tcustomsqlconnection,iblobconnection,
                                          idbevent,idbeventcontroller)
   private
@@ -147,6 +155,10 @@ type
    procedure iniapi();
    procedure finiapi();
    function getpb(const akind: paramblockkindty): ixpbbuilder;
+   function buildpb(const akind: paramblockkindty;
+                        const ainfo: pparaminfoty; const acount: int32;
+                                   const aparams: tstringlist;
+                                   const force: boolean): ixpbbuilder;
    procedure clearstatus(); inline;
    function statusok(): boolean; inline;
    procedure checkstatus(const aerrormessage: msestring);
@@ -549,9 +561,87 @@ begin
  result:= fapi.util.getxpbbuilder(fapi.status,kind1,nil,0);
 end;
 
+const
+ paramblockkindnames: array[paramblockkindty] of string = (
+// pbk_database,pbk_transaction
+       'database',  'transaction');
+       
+function tfbconnection.buildpb(const akind: paramblockkindty;
+               const ainfo: pparaminfoty; const acount: int32;
+               const aparams: tstringlist; const force: boolean): ixpbbuilder;
+
+ procedure paramerror(const s: string);
+ begin
+  raise econnectionerror.create(self,
+                           'Invalid '+paramblockkindnames[akind]+
+                                                 ' parameter "'+s+'"','',0);
+ end; //paramerror
+
+var
+ i1,i2,i3: int32;
+ s1,s2: string;
+ po1: pchar;
+label
+ next;
+
+begin
+ result:= nil; 
+ if (aparams.count > 0) or force then begin
+  result:= getpb(akind);
+  for i1:= 0 to aparams.count - 1 do begin
+   s1:= aparams[i1];
+   if s1 <> '' then begin
+    po1:= strscan(pointer(s1),'=');
+    if po1 <> nil then begin
+     s2:= copy(s1,po1-pchar(pointer(s1))+2,bigint);
+     s1:= psubstr(pointer(s1),po1);
+    end;
+    s1:= trim(s1);
+    for i2:= 0 to acount-1 do begin
+     with ainfo[i2] do begin
+      if s1 = name then begin
+       if po1 <> nil then begin
+        case valuekind of
+         pbvk_int: begin
+          if trystrtoint(trim(s2),i3) then begin
+           result.insertint(fapi.status,id,i3);
+           goto next;
+          end
+          else begin
+           paramerror(aparams[i1]);
+          end;
+         end;
+         pbvk_str: begin
+          result.insertstring(fapi.status,id,pchar(unquotestring(s2,'"')));
+          goto next;
+         end;
+         else begin
+          paramerror(aparams[i1]);
+         end;
+        end;
+       end;
+       result.inserttag(fapi.status,id);
+       goto next;
+      end;
+     end;
+    end;
+   end;
+next:
+  end;
+ end;
+end;
+
 procedure tfbconnection.dointernalconnect();
 const
  utf8name = 'UTF8';
+ paramconsts: array[0..2] of paraminfoty =
+  ((id: isc_dpb_user_name; name: 'isc_dpb_user_name';
+                    valuekind: pbvk_str),
+   (id: isc_dpb_password; name: 'isc_dpb_password';
+                    valuekind: pbvk_str),
+   (id: isc_dpb_lc_ctype; name: 'isc_dpb_lc_ctype';
+                    valuekind: pbvk_str)
+  );
 var
  pb: ixpbbuilder;
  databasename1 : string;
@@ -561,7 +651,7 @@ begin
  iniapi();
  try 
   inherited dointernalconnect;
-  pb:= getpb(pbk_database);
+  pb:= buildpb(pbk_database,@paramconsts,length(paramconsts),params,true);
   getcredentials(u,p);
   if u <> '' then begin
    pb.insertstring(fapi.status,isc_dpb_user_name,pointer(username));
@@ -628,85 +718,64 @@ end;
 function tfbconnection.startdbtransaction(const trans: tsqlhandle;
                const aparams: tstringlist): boolean;
                
- procedure paramerror(const s: string);
- begin
-  raise econnectionerror.create(self,
-                           'Invalid transaction parameter "'+s+'"','',0);
- end; //paramerror
-
-type
- paraminfoty = record
-  id: int32;
-  name: string;
- end;
- 
 const
- paramconsts: array[0..19] of paraminfoty =
-  ((id: isc_tpb_write; name: 'isc_tpb_write'),
-   (id: isc_tpb_read; name: 'isc_tpb_read'),
-   (id: isc_tpb_consistency; name: 'isc_tpb_consistency'),
-   (id: isc_tpb_concurrency; name: 'isc_tpb_concurrency'),
-   (id: isc_tpb_read_committed; name: 'isc_tpb_read_committed'),
-   (id: isc_tpb_rec_version; name: 'isc_tpb_rec_version'),
-   (id: isc_tpb_no_rec_version; name: 'isc_tpb_no_rec_version'),
-   (id: isc_tpb_wait; name: 'isc_tpb_wait'),
-   (id: isc_tpb_nowait; name: 'isc_tpb_nowait'),
-   (id: isc_tpb_shared; name: 'isc_tpb_shared'),
-   (id: isc_tpb_protected; name: 'isc_tpb_protected'),
-   (id: isc_tpb_exclusive; name: 'isc_tpb_exclusive'),
-   (id: isc_tpb_lock_read; name: 'isc_tpb_lock_read'),
-   (id: isc_tpb_lock_write; name: 'isc_tpb_lock_write'),
-   (id: isc_tpb_verb_time; name: 'isc_tpb_verb_time'),
-   (id: isc_tpb_commit_time; name: 'isc_tpb_commit_time'),
-   (id: isc_tpb_ignore_limbo; name: 'isc_tpb_ignore_limbo'),
-   (id: isc_tpb_autocommit; name: 'isc_tpb_autocommit'),
-   (id: isc_tpb_restart_requests; name: 'isc_tpb_restart_requests'),
-   (id: isc_tpb_no_auto_undo; name: 'isc_tpb_no_auto_undo')
+ paramconsts: array[0..20] of paraminfoty =
+  ((id: isc_tpb_write; name: 'isc_tpb_write';
+                    valuekind: pbvk_none),
+   (id: isc_tpb_read; name: 'isc_tpb_read';
+                    valuekind: pbvk_none),
+   (id: isc_tpb_consistency; name: 'isc_tpb_consistency';
+                    valuekind: pbvk_none),
+   (id: isc_tpb_concurrency; name: 'isc_tpb_concurrency';
+                    valuekind: pbvk_none),
+   (id: isc_tpb_read_committed; name: 'isc_tpb_read_committed';
+                    valuekind: pbvk_none),
+   (id: isc_tpb_rec_version; name: 'isc_tpb_rec_version';
+                    valuekind: pbvk_none),
+   (id: isc_tpb_no_rec_version; name: 'isc_tpb_no_rec_version';
+                    valuekind: pbvk_none),
+   (id: isc_tpb_wait; name: 'isc_tpb_wait';
+                    valuekind: pbvk_none),
+   (id: isc_tpb_nowait; name: 'isc_tpb_nowait';
+                    valuekind: pbvk_none),
+   (id: isc_tpb_shared; name: 'isc_tpb_shared';
+                    valuekind: pbvk_none),
+   (id: isc_tpb_protected; name: 'isc_tpb_protected';
+                    valuekind: pbvk_none),
+   (id: isc_tpb_exclusive; name: 'isc_tpb_exclusive';
+                    valuekind: pbvk_none),
+   (id: isc_tpb_lock_read; name: 'isc_tpb_lock_read';
+                    valuekind: pbvk_none),
+   (id: isc_tpb_lock_write; name: 'isc_tpb_lock_write';
+                    valuekind: pbvk_none),
+   (id: isc_tpb_verb_time; name: 'isc_tpb_verb_time';
+                    valuekind: pbvk_none),
+   (id: isc_tpb_commit_time; name: 'isc_tpb_commit_time';
+                    valuekind: pbvk_none),
+   (id: isc_tpb_ignore_limbo; name: 'isc_tpb_ignore_limbo';
+                    valuekind: pbvk_none),
+   (id: isc_tpb_autocommit; name: 'isc_tpb_autocommit';
+                    valuekind: pbvk_none),
+   (id: isc_tpb_restart_requests; name: 'isc_tpb_restart_requests';
+                    valuekind: pbvk_none),
+   (id: isc_tpb_no_auto_undo; name: 'isc_tpb_no_auto_undo';
+                    valuekind: pbvk_none),
+   (id: isc_tpb_lock_timeout; name: 'isc_tpb_lock_timeout';
+                    valuekind: pbvk_int)
   );
 var
  pb: ixpbbuilder;
  pbbuffer: pointer;
  pblen: int32;
- i1,i2,i3: int32;
- s1,s2: string;
-label
- next;
 begin
  result := false;
- if aparams.count > 0 then begin
-  pb:= getpb(pbk_transaction);
-  for i1:= 0 to aparams.count - 1 do begin
-   s1:= trim(aparams[i1]);
-   for i2:= 0 to high(paramconsts) do begin
-    with paramconsts[i2] do begin
-     if s1 = name then begin
-      pb.inserttag(fapi.status,id);
-      goto next;
-     end;
-    end;
-   end;
-  if pos('isc_tpb_lock_timeout',s1) = 1 then begin
-   i3:= length('isc_tpb_lock_timeout');
-     if length(s1) > i3 then begin
-      s2:= trim(copy(s1,i3+1,bigint));
-      if trystrtoint(s2,i3) then begin
-       pb.insertint(fapi.status,isc_tpb_lock_timeout,i3);
-      end
-      else begin
-       paramerror(s1);
-      end;
-     end
-     else begin
-      paramerror(s1);
-     end;
-    end;
-next:
-  end;
+ pb:= buildpb(pbk_transaction,@paramconsts,length(paramconsts),aparams,false);
+
+ if pb <> nil then begin
   pblen:= pb.getbufferlength(fapi.status);
   pbbuffer:= pb.getbuffer(fapi.status);
  end
  else begin
-  pb:= nil;
   pblen:= 0;
   pbbuffer:= nil;
  end;
