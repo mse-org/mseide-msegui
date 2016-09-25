@@ -2065,10 +2065,11 @@ begin
         ((plo_noinvisible in avalue) xor 
          (plo_noinvisible in fplace_options))) then begin
    exclude(fstate,las_scalesizerefvalid);
+   fplace_options:= avalue;
    scalebasechanged(nil);
   end;
   fplace_options:= avalue;
-  updatelayout;
+  updatelayout();
  end;
 end;
 
