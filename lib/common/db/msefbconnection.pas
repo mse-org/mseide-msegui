@@ -262,6 +262,7 @@ type
    property Connected: boolean read getconnected write setconnected default false;
    property Password;
    property UserName;
+   property Role;
    property ongetcredentials;
    property afterconnect;
    property beforedisconnect;
@@ -634,12 +635,14 @@ end;
 procedure tfbconnection.dointernalconnect();
 const
  utf8name = 'UTF8';
- paramconsts: array[0..2] of paraminfoty =
+ paramconsts: array[0..3] of paraminfoty =
   ((id: isc_dpb_user_name; name: 'isc_dpb_user_name';
                     valuekind: pbvk_str),
    (id: isc_dpb_password; name: 'isc_dpb_password';
                     valuekind: pbvk_str),
    (id: isc_dpb_lc_ctype; name: 'isc_dpb_lc_ctype';
+                    valuekind: pbvk_str),
+   (id: isc_dpb_sql_role_name; name: 'isc_dpb_sql_role_name';
                     valuekind: pbvk_str)
   );
 var
@@ -660,9 +663,9 @@ begin
    pb.insertstring(fapi.status,isc_dpb_password,pointer(password));
   end;
   freecredentials(u,p); //fill with #0 before release
-//  if role <> '' then begin
-//   dpb.insertstring(fapi.status,isc_dpb_role_name,pointer(role));
-//  end;
+  if role <> '' then begin
+   pb.insertstring(fapi.status,isc_dpb_sql_role_name,pointer(role));
+  end;
   if charset <> '' then begin
    pb.insertstring(fapi.status,isc_dpb_lc_ctype,pointer(charset));
   end
