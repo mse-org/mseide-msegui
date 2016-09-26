@@ -469,7 +469,9 @@ const
 var
   DPB           : string;
   ADatabaseName : String;
-  u,p: string;
+  u,p: msestring;
+  u1,p1: string;
+  s1: string;
 begin
 {$IfDef LinkDynamically}
  useembeddedfirebird:= ibo_embedded in foptions;
@@ -478,18 +480,25 @@ begin
 {$EndIf}
   inherited dointernalconnect;
   getcredentials(u,p);
-  DPB := chr(isc_dpb_version1);
-  if (u <> '') then
-  begin
-    DPB := DPB + chr(isc_dpb_user_name) + chr(Length(u)) + u;
-    if (p <> '') then
-      DPB := DPB + chr(isc_dpb_password) + chr(Length(p)) + p;
+  DPB:= chr(isc_dpb_version1);
+  if (u <> '') then begin
+   u1:= ansistring(u);
+   DPB := DPB + chr(isc_dpb_user_name) + chr(Length(u1)) + u1;
+   stringsafefree(u1,false);
+   if (p <> '') then begin
+    p1:= ansistring(p);
+    DPB := DPB + chr(isc_dpb_password) + chr(Length(p1)) + p1;
+    stringsafefree(p1,false);
+   end;
   end;
   freecredentials(u,p);
-  if (Role <> '') then
-     DPB := DPB + chr(isc_dpb_sql_role_name) + chr(Length(Role)) + Role;
+  if (Role <> '') then begin
+   s1:= ansistring(role);
+   DPB := DPB + chr(isc_dpb_sql_role_name) + chr(Length(s1)) + s1;
+  end;
   if Length(CharSet) > 0 then begin
-    DPB := DPB + Chr(isc_dpb_lc_ctype) + Chr(Length(CharSet)) + CharSet;
+   s1:= ansistring(charset);
+   DPB := DPB + Chr(isc_dpb_lc_ctype) + Chr(Length(s1)) + s1;
   end
   else begin
    if dbo_utf8 in fcontroller.options then begin
@@ -498,8 +507,9 @@ begin
   end;
 
   FSQLDatabaseHandle := nil;
-  if HostName <> '' then ADatabaseName := HostName+':'+DatabaseName
-    else ADatabaseName := DatabaseName;
+  if HostName <> '' then ADatabaseName := ansistring(HostName)+':'+
+                                                ansistring(DatabaseName)
+    else ADatabaseName := ansistring(DatabaseName);
   if isc_attach_database(@FStatus, Length(ADatabaseName), @ADatabaseName[1],
                            @FSQLDatabaseHandle,Length(DPB), @DPB[1]) <> 0 then
     stringsafefree(dpb,false);

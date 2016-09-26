@@ -648,27 +648,34 @@ const
   );
 var
  pb: ixpbbuilder;
- databasename1 : string;
- u,p: string;
+ databasename1: msestring;
+ u,p: msestring;
+ u1,p1: string;
 begin
  flistencount:= 0;
  iniapi();
  try 
   inherited dointernalconnect;
   pb:= buildpb(pbk_database,@paramconsts,length(paramconsts),params,true);
+  pb.inserttag(fapi.status,isc_dpb_utf8_filename);
   getcredentials(u,p);
   if u <> '' then begin
-   pb.insertstring(fapi.status,isc_dpb_user_name,pointer(username));
+   u1:= stringtoutf8(u);
+   pb.insertstring(fapi.status,isc_dpb_user_name,pointer(u1));
+   stringsafefree(u1,false);
   end;
   if p <> '' then begin
-   pb.insertstring(fapi.status,isc_dpb_password,pointer(password));
+   p1:= stringtoutf8(p);
+   pb.insertstring(fapi.status,isc_dpb_password,pointer(p1));
+   stringsafefree(p1,false);
   end;
   freecredentials(u,p); //fill with #0 before release
   if role <> '' then begin
-   pb.insertstring(fapi.status,isc_dpb_sql_role_name,pointer(role));
+   pb.insertstring(fapi.status,isc_dpb_sql_role_name,
+                                            pointer(stringtoutf8(role)));
   end;
   if charset <> '' then begin
-   pb.insertstring(fapi.status,isc_dpb_lc_ctype,pointer(charset));
+   pb.insertstring(fapi.status,isc_dpb_lc_ctype,pointer(stringtoutf8(charset)));
   end
   else begin
    if dbo_utf8 in fcontroller.options then begin
@@ -676,16 +683,16 @@ begin
    end;
   end;
   if hostname <> '' then begin
-   databasename1:= hostname+':'+todbstring(databasename);
+   databasename1:= msestring(hostname)+':'+ databasename;
   end
   else begin
-   databasename1:= todbstring(databasename);
+   databasename1:= databasename;
   end;
   fattachment:= nil;
   clearstatus();
   fattachment:= fapi.provider.attachdatabase(fapi.status,
-                      pchar(databasename1),pb.getbufferlength(fapi.status),
-                                              pb.getbuffer(fapi.status));
+                  pchar(stringtoutf8(databasename1)),
+                    pb.getbufferlength(fapi.status),pb.getbuffer(fapi.status));
   pb.dispose();
   checkstatus('dointernalconnect');
   fattachment.addref();

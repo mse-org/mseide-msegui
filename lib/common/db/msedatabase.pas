@@ -187,7 +187,7 @@ type
  // tmdatabaseClass = Class Of tmdatabase;
   tmdatabase = class(TCustomConnection)
   private
-   FDataBaseName : String;
+   FDataBaseName : mseString;
 //    FDataSets : TList;
    fdatasets: idatabaseclientarty;
    FTransactions : TList;
@@ -241,7 +241,7 @@ type
    property datasets: idatabaseclientarty read fdatasets;
   published
    property Connected: Boolean read FConnected write SetConnected default false;
-   property DatabaseName: string read FDatabaseName write FDatabaseName;
+   property DatabaseName: msestring read FDatabaseName write FDatabaseName;
    property KeepConnection: Boolean read FKeepConnection 
                               write FKeepConnection default false;
    property Params : TStringlist read FParams Write setparams;

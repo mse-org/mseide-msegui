@@ -730,16 +730,22 @@ end;
 
 procedure tmysqlconnection.openconnection(var aconn: pmysql);
 Var
-  H,U,P : String;
+  H: string;
+  u,p: msestring;
+  u1,p1: string;
 
 begin
- H:= HostName;
+ H:= ansistring(HostName);
  getcredentials(u,p);
+ u1:= ansistring(u);
+ p1:= ansistring(p);
 // U:= UserName;
 // P:= Password;
  try
-  ConnectMySQL(aconn,pchar(H),pchar(U),pchar(P));
+  ConnectMySQL(aconn,pchar(H),pchar(U1),pchar(P1));
  finally
+  stringsafefree(u1,false);
+  stringsafefree(p1,false);
   freecredentials(u,p);
  end;
  if mysql_select_db(aconn,pchar(DatabaseName)) <> 0 then begin

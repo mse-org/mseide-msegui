@@ -358,9 +358,9 @@ Var
   H,U,P : String;
 
 begin
-  H:=HostName;
-  U:=UserName;
-  P:=Password;
+  H:= ansistring(HostName);
+  U:= ansistring(UserName);
+  P:= ansistring(Password);
   ConnectMySQL(FMySQL,pchar(H),pchar(U),pchar(P));
   FServerInfo := strpas(mysql_get_server_info(FMYSQL));
   FHostInfo := strpas(mysql_get_host_info(FMYSQL));

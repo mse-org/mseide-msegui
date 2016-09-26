@@ -210,12 +210,12 @@ type
  tmsesqlscript = class;
  tcustomsqlconnection = class(TmDatabase,idbcontroller,iactivatorclient)
   private
-    FPassword            : ansistring;
+    FPassword            : msestring;
     FTransaction         : TSQLTransaction;
-    FUserName            : ansistring;
-    FHostName            : string;
-    FCharSet             : string;
-    FRole                : String;
+    FUserName            : msestring;
+    FHostName            : msestring;
+    FCharSet             : msestring;
+    FRole                : mseString;
 
    fafterconnect: tmsesqlscript;
    fbeforedisconnect: tmsesqlscript;
@@ -243,8 +243,8 @@ type
    procedure notification(acomponent: tcomponent; operation: toperation); override;
    
     function StrToStatementType(s : msestring) : TStatementType; virtual;
-    procedure getcredentials(var ausername: string; var apassword: string);
-    procedure freecredentials(var ausername: string; var apassword: string);
+    procedure getcredentials(var ausername: msestring; var apassword: msestring);
+    procedure freecredentials(var ausername: msestring; var apassword: msestring);
                     //fill with #0 before free
     procedure DoInternalConnect; override;
     procedure doafterinternalconnect; override;
@@ -373,16 +373,16 @@ type
    function fieldtooldsql(const afield: tfield): msestring;
    function paramtosql(const aparam: tparam): msestring;
    
-   property Password : ansistring read FPassword write FPassword;
+   property Password : msestring read FPassword write FPassword;
    property Transaction : TSQLTransaction read FTransaction write SetTransaction;
    property transactionwrite : tsqltransaction read ftransactionwrite 
                                                   write settransactionwrite;
-   property UserName : ansistring read FUserName write FUserName;
-   property CharSet : string read FCharSet write FCharSet;
-   property HostName : string Read FHostName Write FHostName;
+   property UserName : msestring read FUserName write FUserName;
+   property CharSet : msestring read FCharSet write FCharSet;
+   property HostName : msestring Read FHostName Write FHostName;
 
    property Connected: boolean read getconnected write setconnected default false;
-   Property Role :  String read FRole write FRole;
+   Property Role :  msestring read FRole write FRole;
    property afterconnect: tmsesqlscript read fafterconnect write setafteconnect;
    property beforedisconnect: tmsesqlscript read fbeforedisconnect write setbeforedisconnect;
    property controller: tdbcontroller read fcontroller write setcontroller;
@@ -1083,12 +1083,12 @@ begin
  if (str1 <> '') and (str1[1] = '''') and 
                     (str1[length(str1)] = '''') then begin
   fdatabasename:= str1;
-  tmdatabase(fowner).databasename:= ansistring(copy(str1,2,length(str1)-2));
+  tmdatabase(fowner).databasename:= copy(str1,2,length(str1)-2);
  end
  else begin
   fdatabasename:= tomsefilepath(str1);
   tmdatabase(fowner).databasename:= 
-                   ansistring(tosysfilepath(filepath(str1,fk_default,true)));
+                   tosysfilepath(filepath(str1,fk_default,true));
  end;
 end;
 
@@ -1193,30 +1193,24 @@ begin
     end;
 end;
 
-procedure tcustomsqlconnection.getcredentials(var ausername: string;
-               var apassword: string);
-var
- u,p: msestring;
+procedure tcustomsqlconnection.getcredentials(var ausername: msestring;
+               var apassword: msestring);
 begin
  if assigned(fongetcredentials) then begin
-  u:= tomsestring(username);
-  p:= '';
-  fongetcredentials(self,u,p);
-  ausername:= todbstring(u);
-  apassword:= todbstring(p);
-  stringsafefree(u,true);
-  stringsafefree(p,true);
+  ausername:= username;
+  apassword:= '';
+  fongetcredentials(self,ausername,apassword);
  end
  else begin
   ausername:= username;
-  uniquestring(ausername);
   apassword:= password;
-  uniquestring(apassword);
  end;
+ uniquestring(ausername);
+ uniquestring(apassword);
 end;
 
-procedure tcustomsqlconnection.freecredentials(var ausername: string;
-               var apassword: string);
+procedure tcustomsqlconnection.freecredentials(var ausername: msestring;
+               var apassword: msestring);
 begin
  stringsafefree(ausername,false);
  stringsafefree(apassword,false);

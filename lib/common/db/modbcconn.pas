@@ -438,16 +438,25 @@ var
   i: Integer;
   Param: string;
   EqualSignPos:integer;
-  u,p: string;
+  u,p: msestring;
+  u1,p1: string;
 begin
   Result:='';
   getcredentials(u,p);
   if charset <> '' then begin
-   result:= result + 'CHARSET='+charset+';';
+   result:= result + 'CHARSET='+ ansistring(charset)+';';
   end;
-  if DatabaseName<>'' then Result:=Result + 'DSN='+EscapeParamValue(DatabaseName)+';';
+  if DatabaseName<>'' then Result:=Result + 'DSN='+
+                       EscapeParamValue(ansistring(DatabaseName))+';';
   if Driver      <>'' then Result:=Result + 'DRIVER='+EscapeParamValue(Driver)+';';
-  if U    <>'' then Result:=Result + 'UID='+EscapeParamValue(U)+';PWD='+EscapeParamValue(P)+';';
+  if U    <>'' then begin
+   u1:= ansistring(u);
+   p1:= ansistring(p);
+   Result:=Result + 'UID='+EscapeParamValue(U1)+';PWD='+
+                                          EscapeParamValue(P1)+';';
+   stringsafefree(u1,false);
+   stringsafefree(p1,false);
+  end;
   freecredentials(u,p);
   if FileDSN     <>'' then Result:=Result + 'FILEDSN='+EscapeParamValue(FileDSN)+'';
   for i:=0 to Params.Count-1 do

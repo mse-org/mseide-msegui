@@ -399,22 +399,27 @@ end;
 
 function tpqconnection.constructconnectstring: ansistring;
 var
- u,p: string;
+ u,p: msestring;          //how to define encoding of connectionstring?
+ u1,p1: string;
 begin
  result:= '';
- getcredentials(u,p);
+ getcredentials(u,p);          
  if (U <> '') then begin
-  result := result + ' user=''' + U + '''';
+  u1:= ansistring(u);
+  result := result + ' user=''' + U1 + '''';
+  stringsafefree(u1,false);
  end;
  if (P <> '') then begin
-  result:= result + ' password=''' + P + '''';
+  p1:= ansistring(p);
+  result:= result + ' password=''' + P1 + '''';
+  stringsafefree(p1,false);
  end;
  freecredentials(u,p);
  if (HostName <> '') then begin
-  result:= result + ' host=''' + HostName + '''';
+  result:= result + ' host=''' + ansistring(HostName) + '''';
  end;
  if (DatabaseName <> '') then begin
-  result:= result + ' dbname=''' + DatabaseName + '''';
+  result:= result + ' dbname=''' + ansistring(DatabaseName) + '''';
  end
  else begin
   result:= result + ' dbname=''' + 'postgres' + '''';

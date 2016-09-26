@@ -1,6 +1,7 @@
 MSEide+MSEgui breaking changes version history
-Version 4.4
-2016-08-08
+2016-09-26
+ TCustomSQLConnection DatabaseName, Password, UserName, HostName, Charset and
+ Role properties ansistring -> msestring.
 2016-27-04
  ondrawcelleventty cellinfo parameter var instead of const.
 
