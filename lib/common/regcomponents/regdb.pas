@@ -342,6 +342,13 @@ type
    function getinvisibleitems: tintegerset; override;
   public
  end;
+ 
+ tsqlresconncolnamepropertyeditor = class(tstringpropertyeditor)
+  protected
+   function getdefaultstate: propertystatesty; override;
+  public
+   function getvalues: msestringarty; override;
+ end;
 
 procedure Register;
 begin
@@ -516,7 +523,9 @@ begin
  registerpropertyeditor(typeinfo(boolean),tdataset,'Active',
                                          tdatasetactivepropertyeditor);                              
  registerpropertyeditor(typeinfo(boolean),tsqlresult,'active',
-                                         tdatasetactivepropertyeditor);                              
+                                         tdatasetactivepropertyeditor);
+ registerpropertyeditor(typeinfo(string),tsqlresultconnector,'colname',
+                                            tsqlresconncolnamepropertyeditor);
  registerpropertyeditor(typeinfo(tfielddef),nil,'',tfielddefpropertyeditor);
  registerpropertyeditor(typeinfo(tparam),nil,'',tdbparampropertyeditor);
  registerpropertyeditor(typeinfo(tmseparam),nil,'',tmseparampropertyeditor);
@@ -1721,6 +1730,35 @@ begin
  result:= inherited getvalue();
  if inst.fieldname <> '' then begin
   result:= '<'+msestring(inst.fieldname)+'>'+result;
+ end;
+end;
+
+{ tsqlresconncolnamepropertyeditor }
+
+function tsqlresconncolnamepropertyeditor.getdefaultstate: propertystatesty;
+begin
+ result:= inherited getdefaultstate;
+ with tsqlresultconnector(fcomponent) do begin
+  if source <> nil then begin
+   result:= result + [ps_valuelist,ps_sortlist];
+  end;
+ end;
+end;
+
+function tsqlresconncolnamepropertyeditor.getvalues: msestringarty;
+var
+ i1: int32;
+begin
+ result:= nil;
+ with tsqlresultconnector(fcomponent) do begin
+  if source <> nil then begin
+   with source do begin
+    setlength(result,fielddefs.count);
+    for i1:= 0 to high(result) do begin
+     result[i1]:= msestring(fielddefs[i1].name);
+    end;
+   end;
+  end;
  end;
 end;
 
