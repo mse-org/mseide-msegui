@@ -265,6 +265,7 @@ const
 
 type  
  placeoptionty = (plo_noinvisible,plo_scalesize,
+                  plo_scalefullref, //use whole innerclientrect as size reference
                   plo_endmargin,plo_propmargin,plo_syncmaxautosize,
                   plo_synccaptiondistx,plo_synccaptiondisty,
                   plo_syncpaintwidth,plo_syncpaintheight);
@@ -1824,42 +1825,44 @@ var
 begin
  if plo_scalesize in fplace_options then begin
   if foptionslayout * [lao_placex,lao_placey] <> [] then begin
-   sum:= nullsize;
-   bo1:= not (plo_noinvisible in fplace_options);
-   for int1:= 0 to high(fwidgets) do begin
-    with widgets[int1] do begin
-     if (bo1 or visible) then begin
-      if osk_nopropwidth in optionsskin then begin 
-       addsize1(sum,size);
+   fscalesizeref:= innerclientsize;
+   if not (plo_scalefullref in fplace_options) then begin
+    sum:= nullsize;
+    bo1:= not (plo_noinvisible in fplace_options);
+    for int1:= 0 to high(fwidgets) do begin
+     with widgets[int1] do begin
+      if (bo1 or visible) then begin
+       if osk_nopropwidth in optionsskin then begin 
+        addsize1(sum,size);
+       end
+       else begin
+        addsize1(sum,framedim);
+       end;
       end
       else begin
-       addsize1(sum,framedim);
       end;
-     end
-     else begin
      end;
     end;
-   end;
-   if bo1 then begin
-    int3:= length(fwidgets);
-   end
-   else begin
-    int3:= 0;
-    for int1:= 0 to high(fwidgets) do begin
-     if fwidgets[int1].visible then begin
-      inc(int3);
+    if bo1 then begin
+     int3:= length(fwidgets);
+    end
+    else begin
+     int3:= 0;
+     for int1:= 0 to high(fwidgets) do begin
+      if fwidgets[int1].visible then begin
+       inc(int3);
+      end;
      end;
     end;
-   end;
-   if not (plo_propmargin in fplace_options) then begin
-    dec(int3);
-   end;
-   fscalesizeref:= innerclientsize;
-   subsize1(fscalesizeref,sum);
-   if int3 > 0 then begin
-    int3:= int3 * fplace_mindist;
-    fscalesizeref.cx:= fscalesizeref.cx - int3;
-    fscalesizeref.cy:= fscalesizeref.cy - int3;
+    if not (plo_propmargin in fplace_options) then begin
+     dec(int3);
+    end;
+    subsize1(fscalesizeref,sum);
+    if int3 > 0 then begin
+     int3:= int3 * fplace_mindist;
+     fscalesizeref.cx:= fscalesizeref.cx - int3;
+     fscalesizeref.cy:= fscalesizeref.cy - int3;
+    end;
    end;
   end;
  end;
@@ -2058,18 +2061,17 @@ begin
 end;
 
 procedure tcustomlayouter.setplace_options(const avalue: placeoptionsty);
+var
+ diff1: placeoptionsty;
 begin
- if fplace_options <> avalue then begin
-  if (plo_scalesize in avalue) and 
-       (not (plo_scalesize in fplace_options) or 
-        ((plo_noinvisible in avalue) xor 
-         (plo_noinvisible in fplace_options))) then begin
+ diff1:= fplace_options >< avalue;
+ if diff1 <> [] then begin
+  fplace_options:= avalue;
+  if diff1 * [plo_scalesize,plo_scalefullref,plo_noinvisible] <> [] then begin
    exclude(fstate,las_scalesizerefvalid);
-   fplace_options:= avalue;
-   scalebasechanged(nil);
-  end
-  else begin
-   fplace_options:= avalue;
+   if plo_scalesize in fplace_options then begin
+    scalebasechanged(nil);
+   end;
   end;
   updatelayout();
  end;
