@@ -1643,6 +1643,7 @@ var
  int1,int2,int3,int4: integer;
  ar1: widgetarty;
  size1: sizety;
+ outerwidth1: int32;
  
 begin
  if (componentstate * [csloading,csdestroying] = []) and 
@@ -1670,7 +1671,13 @@ begin
        with fwidgetinfos[int1] do begin
         if not (osk_nopropwidth in widget.optionsskin) and 
                                       (refscalesize.cx <> 0) then begin
-         widget.clientwidth:= (scalesize.cx * size1.cx) div refscalesize.cx;
+         outerwidth1:= 0;
+         if twidget1(widget).fframe <> nil then begin
+          outerwidth1:= twidget1(widget).fframe.outerframecx;
+         end;
+         widget.width:= ((scalesize.cx-outerwidth1) * size1.cx) div
+                                             refscalesize.cx + outerwidth1;
+//         widget.clientwidth:= (scalesize.cx * size1.cx) div refscalesize.cx;
         end;
        end;
       end;
@@ -1680,7 +1687,13 @@ begin
        with fwidgetinfos[int1] do begin
         if not (osk_nopropheight in widget.optionsskin) and 
                                       (refscalesize.cy <> 0) then begin
-         widget.clientheight:= (scalesize.cy * size1.cy) div refscalesize.cy;
+         outerwidth1:= 0;
+         if twidget1(widget).fframe <> nil then begin
+          outerwidth1:= twidget1(widget).fframe.outerframecy;
+         end;
+         widget.height:= ((scalesize.cy-outerwidth1) * size1.cy) div
+                                             refscalesize.cy + outerwidth1;
+//         widget.clientheight:= (scalesize.cy * size1.cy) div refscalesize.cy;
         end;
        end;
       end;
@@ -2211,7 +2224,8 @@ begin
    widget:= awidget;
   end;
   if not (csloading in componentstate) then begin
-   size1:= widget.clientsize;
+//   size1:= widget.clientsize;
+   size1:= widget.size;
    if (flayoutupdating = 0) then begin
          //synchronize ref values with changed widget values
     size2:= self.scalesizeref;
@@ -2288,7 +2302,8 @@ begin
   size1:= scalesizeref;
   for int1:= high(fwidgetinfos) downto 0 do begin
    with fwidgetinfos[int1] do begin
-    scalesize:= widget.clientsize;
+//    scalesize:= widget.clientsize;
+    scalesize:= widget.size;
     actscalesize:= scalesize;
     refscalesize:= size1;
    end;

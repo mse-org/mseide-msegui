@@ -629,9 +629,17 @@ type
    procedure paintoverlay(const canvas: tcanvas; const arect: rectty);
 
    function outerframedim: sizety; //widgetsize - framesize
+   function outerframecx: int32;
+   function outerframecy: int32;
    function frameframedim: sizety; //widgetsize - (paintsize + paintframe)
+   function frameframecx: int32;
+   function frameframecy: int32;
    function paintframedim: sizety; //widgetsize - paintsize
+   function paintframecx: int32;
+   function paintframecy: int32;
    function innerframedim: sizety; //widgetsize - innersize
+   function innerframecx: int32;
+   function innerframecy: int32;
    function outerframe: framety;
    function paintframe: framety;     
    function innerframe: framety;     
@@ -5448,34 +5456,82 @@ end;
 
 function tcustomframe.outerframedim: sizety;
 begin
- checkstate;
+ checkstate();
  result.cx:= fouterframe.left + fouterframe.right;
  result.cy:= fouterframe.top + fouterframe.bottom;
 end;
 
+function tcustomframe.outerframecx: int32;
+begin
+ checkstate();
+ result:= fouterframe.left + fouterframe.right;
+end;
+
+function tcustomframe.outerframecy: int32;
+begin
+ checkstate();
+ result:= fouterframe.top + fouterframe.bottom;
+end;
+
 function tcustomframe.frameframedim: sizety;
 begin
- checkstate;
+ checkstate();
  result.cx:= fouterframe.left + fwidth.left + fwidth.right + fouterframe.right;
  result.cy:= fouterframe.top + fwidth.top + fwidth.bottom + fouterframe.bottom;
 end;
 
+function tcustomframe.frameframecx: int32;
+begin
+ checkstate();
+ result:= fouterframe.left + fwidth.left + fwidth.right + fouterframe.right;
+end;
+
+function tcustomframe.frameframecy: int32;
+begin
+ checkstate();
+ result:= fouterframe.top + fwidth.top + fwidth.bottom + fouterframe.bottom;
+end;
+
 function tcustomframe.paintframedim: sizety;
 begin
- checkstate;
+ checkstate();
  result.cx:= fpaintframe.left + fpaintframe.right;
  result.cy:= fpaintframe.top + fpaintframe.bottom;
 end;
 
+function tcustomframe.paintframecx: int32;
+begin
+ checkstate();
+ result:= fpaintframe.left + fpaintframe.right;
+end;
+
+function tcustomframe.paintframecy: int32;
+begin
+ checkstate();
+ result:= fpaintframe.top + fpaintframe.bottom;
+end;
+
 function tcustomframe.innerframedim: sizety;
 begin
- checkstate;
+ checkstate();
  result.cx:= finnerframe.left + finnerframe.right;
  result.cy:= finnerframe.top + finnerframe.bottom;
 // result.cx:= fouterframe.left + fpaintframe.left + fi.innerframe.left +
 //       fpaintframe.right + fouterframe.right + fi.innerframe.right;
 // result.cy:= fouterframe.top + fpaintframe.top + fi.innerframe.top +
 //       fpaintframe.bottom + fouterframe.bottom + fi.innerframe.bottom;
+end;
+
+function tcustomframe.innerframecx: int32;
+begin
+ checkstate();
+ result:= finnerframe.left + finnerframe.right;
+end;
+
+function tcustomframe.innerframecy: int32;
+begin
+ checkstate();
+ result:= finnerframe.top + finnerframe.bottom;
 end;
 
 function tcustomframe.outerframe: framety;
