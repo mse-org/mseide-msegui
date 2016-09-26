@@ -4244,7 +4244,10 @@ begin
                break;
               end;
              end;
-             if bo1 then begin
+             if not bo1 then begin
+              continue;
+             end
+             else begin
               indexnum:= int3;
               lookuprecursion:= 0;
               basedatatype:= getbasetype(lookupvaluefield);
