@@ -160,7 +160,8 @@ type
                    ws1_scaling,ws1_autoscaling,ws1_autosizing,
                    ws1_painting,ws1_updateopaque,
                    ws1_widgetregionvalid,ws1_rootvalid,
-                   ws1_anchorsizing,ws1_anchorsetting,ws1_parentclientsizeinited,
+                   ws1_anchorsizing,ws1_anchorsetting,ws1_layoutplacing,
+                   ws1_parentclientsizeinited,
                    ws1_parentupdating, //set while setparentwidget
                    ws1_isstreamed,     //used by ttabwidget
                    ws1_scaled,         //used in tcustomscalingwidget
@@ -599,12 +600,13 @@ type
    function needsmouseenterinvalidate: boolean;
    procedure activechanged; virtual;
    procedure enabledchanged(); virtual;
-   procedure focusedchanged; virtual;
-   function needsfocuspaint: boolean; virtual;
+   procedure focusedchanged virtual;
+   function needsfocuspaint: boolean virtual;
    function haspaintrectfocus(): boolean virtual;
-   function ishintarea(const apos: pointty; var aid: int32): boolean; virtual;
-   procedure checkminscrollsize(var asize: sizety); virtual;
-   procedure checkminclientsize(var asize: sizety); virtual;
+   function ishintarea(const apos: pointty; var aid: int32): boolean virtual;
+   procedure checkminscrollsize(var asize: sizety) virtual;
+   procedure checkminclientsize(var asize: sizety) virtual;
+   procedure checkminshrinksize(var asize: sizety) virtual;
    procedure paintframeface(const canvas: tcanvas; const arect: rectty);
    class procedure drawframe(const canvas: tcanvas; const rect2: rectty; 
            const afi: baseframeinfoty; const astate: framestateflagsty);
@@ -5957,6 +5959,11 @@ begin
  end;
 end;
 
+procedure tcustomframe.checkminshrinksize(var asize: sizety);
+begin
+ //dummy
+end;
+
 function tcustomframe.isoptional: boolean;
 begin
  result:= not fintf.getstaticframe;
@@ -7881,6 +7888,7 @@ var
  size1: sizety;
  widget1: twidget;
  ar1: integerarty;
+ bo1: boolean;
 begin
  if (high(awidgets) >= 0) then begin
   widget1:= awidgets[0].fparentwidget;
@@ -7913,17 +7921,25 @@ begin
    size1.cy:= 0;
    for int1:= 0 to high(awidgets) do begin
     with awidgets[int1] do begin
-     bounds_x:= ar1[int1] + int4;
-     if anchors * [an_left,an_right] = [an_left,an_right] then begin
-      int3:= bounds_cx;      
-      size1.cx:= bounds_cx - int2;
-      if fframe <> nil then begin
-       fframe.checkwidgetsize(size1);
+     bo1:= ws1_layoutplacing in fwidgetstate1;
+     try
+      include(fwidgetstate1,ws1_layoutplacing);
+      bounds_x:= ar1[int1] + int4;
+      if anchors * [an_left,an_right] = [an_left,an_right] then begin
+       int3:= bounds_cx;      
+       size1.cx:= bounds_cx - int2;
+       if fframe <> nil then begin
+        fframe.checkwidgetsize(size1);
+       end;
+       bounds_cx:= size1.cx;
+       int3:= bounds_cx - int3; //delta
+       int2:= int2 + int3;
+       int4:= int4 + int3;
       end;
-      bounds_cx:= size1.cx;
-      int3:= bounds_cx - int3; //delta
-      int2:= int2 + int3;
-      int4:= int4 + int3;
+     finally
+      if not bo1 then begin
+       exclude(fwidgetstate1,ws1_layoutplacing);
+      end;
      end;
     end;
    end;
@@ -7940,6 +7956,7 @@ var
  size1: sizety;
  widget1: twidget;
  ar1: integerarty;
+ bo1: boolean;
 begin
  if (high(awidgets) >= 0) then begin
   widget1:= awidgets[0].fparentwidget;
@@ -7972,17 +7989,25 @@ begin
    size1.cx:= 0;
    for int1:= 0 to high(awidgets) do begin
     with awidgets[int1] do begin
-     bounds_y:= ar1[int1] + int4;
-     if anchors * [an_top,an_bottom] = [an_top,an_bottom] then begin
-      int3:= bounds_cy;
-      size1.cy:= bounds_cy - int2;
-      if fframe <> nil then begin
-       fframe.checkwidgetsize(size1);
+     bo1:= ws1_layoutplacing in fwidgetstate1;
+     try
+      include(fwidgetstate1,ws1_layoutplacing);
+      bounds_y:= ar1[int1] + int4;
+      if anchors * [an_top,an_bottom] = [an_top,an_bottom] then begin
+       int3:= bounds_cy;
+       size1.cy:= bounds_cy - int2;
+       if fframe <> nil then begin
+        fframe.checkwidgetsize(size1);
+       end;
+       bounds_cy:= size1.cy;
+       int3:= bounds_cy - int3; //delta
+       int2:= int2 + int3;
+       int4:= int4 + int3;
       end;
-      bounds_cy:= size1.cy;
-      int3:= bounds_cy - int3; //delta
-      int2:= int2 + int3;
-      int4:= int4 + int3;
+     finally
+      if not bo1 then begin
+       exclude(fwidgetstate1,ws1_layoutplacing);
+      end;
      end;
     end;
    end;
@@ -8487,6 +8512,9 @@ end;
 function twidget.getminshrinksize: sizety;
 begin
  result:= fminsize;
+ if fframe <> nil then begin
+  fframe.checkminshrinksize(result);
+ end;
 end;
 
 procedure twidget.internalsetwidgetrect(value: rectty; 

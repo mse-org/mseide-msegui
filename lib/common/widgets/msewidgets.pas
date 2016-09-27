@@ -75,6 +75,8 @@ type
 
    procedure updatetextflags;
    procedure updaterects; override;
+   procedure dominsize(var asize: sizety);
+   procedure checkminshrinksize(var asize: sizety) override;
    procedure defineproperties(filer: tfiler); override;
    procedure setdisabled(const value: boolean); override;
    procedure dopaintfocusrect(const canvas: tcanvas;
@@ -2717,56 +2719,98 @@ begin
  end;
 
  if not isnullframe(fra1) then begin
-  subpoint1(finfo.dest.pos,pointty(fra1.topleft));
-  if fupdating < 16 then begin
-   inc(fupdating);
-   try
-    rect1:= icaptionframe(fintf).getwidgetrect;
-    rect2:= deflaterect(rect1,fra1);
-    if cfo_fixleft in foptions then begin
-     rect2.x:= rect1.x;
-     if cfo_fixright in foptions then begin
-      rect2.cx:= rect1.cx;
+  widget1:= twidget1(icaptionframe(fintf).getwidget);
+  if widget1.fwidgetstate1 * 
+                        [ws1_anchorsizing,ws1_layoutplacing] = [] then begin
+   subpoint1(finfo.dest.pos,pointty(fra1.topleft));
+   if fupdating < 16 then begin
+    inc(fupdating);
+    try
+     rect1:= icaptionframe(fintf).getwidgetrect;
+     rect2:= deflaterect(rect1,fra1);
+     if cfo_fixleft in foptions then begin
+      rect2.x:= rect1.x;
+      if cfo_fixright in foptions then begin
+       rect2.cx:= rect1.cx;
+      end;
+     end
+     else begin
+      if cfo_fixright in foptions then begin
+       rect2.x:= rect1.x+rect1.cx-rect2.cx;
+      end;
      end;
-    end
-    else begin
-     if cfo_fixright in foptions then begin
-      rect2.x:= rect1.x+rect1.cx-rect2.cx;
+     if cfo_fixtop in foptions then begin
+      rect2.y:= rect1.y;
+      if cfo_fixbottom in foptions then begin
+       rect2.cy:= rect1.cy;
+      end;
+     end
+     else begin
+      if cfo_fixbottom in foptions then begin
+       rect2.y:= rect1.y+rect1.cy-rect2.cy;
+      end;
      end;
+     if (fupdating = 1) and 
+           rectisequal(icaptionframe(fintf).getwidgetrect,rect2) then begin
+      if widget1.fparentwidget <> nil then begin
+       twidget1(widget1.fparentwidget).childautosizechanged(widget1);
+      end; //activate tlayouter
+     end
+     else begin
+      icaptionframe(fintf).setwidgetrect(rect2);
+     end;
+    finally
+     dec(fupdating);
     end;
-    if cfo_fixtop in foptions then begin
-     rect2.y:= rect1.y;
-     if cfo_fixbottom in foptions then begin
-      rect2.cy:= rect1.cy;
-     end;
-    end
-    else begin
-     if cfo_fixbottom in foptions then begin
-      rect2.y:= rect1.y+rect1.cy-rect2.cy;
-     end;
-    end;
-    if (fupdating = 1) and 
-          rectisequal(icaptionframe(fintf).getwidgetrect,rect2) then begin
-     widget1:= twidget1(icaptionframe(fintf).getwidget);
-     if widget1.fparentwidget <> nil then begin
-      twidget1(widget1.fparentwidget).childautosizechanged(widget1);
-     end; //activate tlayouter
-    end
-    else begin
-     icaptionframe(fintf).setwidgetrect(rect2);
-    end;
-   finally
-    dec(fupdating);
    end;
   end;
  end;
  inherited;
 end;
 
+procedure tcustomcaptionframe.dominsize(var asize: sizety);
+var
+ si1: sizety;
+begin
+ if finfo.text.text <> '' then begin
+  checkstate();
+  si1.cx:= finfo.dest.size.cx + captionmargin;
+  si1.cy:= finfo.dest.size.cy + captionmargin;
+  case captionpos of
+   cp_center,cp_righttop,cp_right,cp_rightbottom: begin
+    si1.cx:= si1.cx + abs(fcaptiondist);
+    si1.cy:= si1.cy + abs(fcaptionoffset);
+   end;
+   else begin
+    si1.cy:= si1.cy + abs(fcaptiondist);
+    si1.cx:= si1.cx + abs(fcaptionoffset);
+   end;
+  end;
+  si1.cx:= si1.cx + fpaintframe.left + fpaintframe.right -
+                                   (fouterframe.left + fouterframe.right);
+  si1.cy:= si1.cy + fpaintframe.top + fpaintframe.bottom -
+                                   (fouterframe.top + fouterframe.bottom);
+  if asize.cx < si1.cx then begin
+   asize.cx:= si1.cx;
+  end;
+  if asize.cy < si1.cy then begin
+   asize.cy:= si1.cy;
+  end;
+ end;
+end;
+
+procedure tcustomcaptionframe.checkminshrinksize(var asize: sizety);
+begin
+ inherited;
+ dominsize(asize);
+end;
+
 procedure tcustomcaptionframe.checkwidgetsize(var asize: sizety);
 var
  size1: sizety;
-begin
+begin        //for autosize
+ dominsize(asize);
+(*
  if finfo.text.text <> '' then begin
   checkstate;
   size1:= finfo.dest.size;
@@ -2795,6 +2839,7 @@ begin
    asize.cy:= size1.cy;
   end;
  end;
+*)
 end;
 
 procedure tcustomcaptionframe.setcaptiondist(const Value: integer);
