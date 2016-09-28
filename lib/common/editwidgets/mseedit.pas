@@ -223,7 +223,8 @@ type
  buttoneventty = procedure(const sender: tobject; var action: buttonactionty;
                        const buttonindex: integer) of object;
  framebuttonoptionty = 
-       (fbo_left,fbo_invisible,fbo_inactiveinvisible,fbo_disabled,
+       (fbo_left,fbo_invisible,fbo_inactiveinvisible,
+        fbo_disabled,fbo_enabled, //overrides frame readonly state
         fbo_flat,fbo_noanim,fbo_nomouseanim,fbo_noclickanim,fbo_nofocusanim);
  framebuttonoptionsty = set of framebuttonoptionty;
 
@@ -275,6 +276,7 @@ type
    fframerect: rectty;
    finfo: shapeinfoty;
    fframe: tframe;
+   freadonly: boolean; //for checkreadonlystate of tbuttonframe
    procedure mouseevent(var info: mouseeventinfoty;
                  const intf: iframe; const buttonintf: ibutton;
                  const index: integer);
@@ -735,7 +737,8 @@ var
 begin
  statebefore:= finfo.state;
  optionsbefore:= foptions;
- foptions:= Value;
+ card32(foptions):= setsinglebit(card32(Value),card32(foptions),
+                          card32([fbo_disabled,fbo_enabled]));;
  optionstostate();
  if (statebefore <> finfo.state) or 
        ((optionsbefore >< foptions) * 
@@ -922,7 +925,8 @@ procedure tframebutton.updatewidgetstate(const awidget: twidget);
 // invisiblebefore: boolean;
 begin
 // invisiblebefore:= ss_invisible in finfo.state;
- updatewidgetshapestate(finfo,awidget,fbo_disabled in foptions,
+ updatewidgetshapestate(finfo,awidget,(fbo_disabled in foptions) or 
+           freadonly and not (fbo_enabled in foptions),
                                  {fbo_invisible in foptions,}fframe);
  if (fbo_inactiveinvisible in foptions) and 
   (awidget.componentstate * [csdesigning,csdestroying] = []) then begin

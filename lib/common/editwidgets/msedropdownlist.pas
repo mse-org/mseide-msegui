@@ -359,7 +359,8 @@ type
    freadonly: boolean;
    procedure setreadonly(const Value: boolean);
   protected
-   function getbuttonclass: framebuttonclassty; override;
+   procedure updatestate() override;
+   function getbuttonclass: framebuttonclassty override;
    function getbutton: tdropdownbutton;
    procedure setbutton(const avalue: tdropdownbutton);
   public
@@ -634,6 +635,7 @@ type
  tcustombuttonframe1 = class(tcustombuttonframe);
  tstringcol1 = class(tstringcol);
  tframebutton1 = class(tframebutton);
+ tframebuttons1 = class(tframebuttons);
  
  timagefixcol = class(tdropdownfixcol)
   private
@@ -1272,14 +1274,10 @@ begin
 end;
 
 procedure tcustomdropdownbuttonframe.setreadonly(const Value: boolean);
-var
- int1: integer;
 begin
  if (freadonly <> value) then begin
   freadonly:= Value;
-  for int1:= 0 to buttons.count - 1 do begin
-   buttons[int1].enabled:= not value;
-  end;
+  updatestate();
  end;
 {
  if (freadonly <> value) and (factivebutton < buttons.count) then begin
@@ -1287,6 +1285,16 @@ begin
   buttons[factivebutton].enabled:= not value;
  end;
 }
+end;
+
+procedure tcustomdropdownbuttonframe.updatestate();
+var
+ i1: integer;
+begin
+ for i1:= 0 to buttons.count - 1 do begin
+  tframebutton1(tframebuttons1(buttons).fitems[i1]).freadonly:= freadonly;
+ end;
+ inherited;
 end;
 
 function tcustomdropdownbuttonframe.getbuttonclass: framebuttonclassty;
@@ -1355,7 +1363,7 @@ begin
  if twidget1(widget).fframe = nil then begin
   getbuttonframeclass.create(iscrollframe(widget),ibutton(self));
  end;
- updatereadonlystate;
+ updatereadonlystate();
 end;
 
 procedure tcustomdropdowncontroller.setoptions(
