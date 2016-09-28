@@ -140,7 +140,7 @@ begin
    tdataicon,tdataimage,
    tslider,tprogressbar,
    tfoldedit,
-   titemedit,tdropdownitemedit,tmbdropdownitemedit,ttreeitemedit,
+   titemedit,tdropdownitemedit,{tmbdropdownitemedit,}ttreeitemedit,
    trecordfieldedit,
    thexstringedit,tpointeredit,
    tdropdownlistedit,thistoryedit,

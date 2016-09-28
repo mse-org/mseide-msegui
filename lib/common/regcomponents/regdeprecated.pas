@@ -21,7 +21,7 @@ interface
 implementation
 {$ifndef mse_no_db}{$ifdef FPC}{$define hasdb}{$endif}{$endif}
 uses
- regdeprecated_bmp,msedesignintf
+ regdeprecated_bmp,msedesignintf,mselistbrowser
     {$ifdef hasdb}
      ,msemysql40conn,msemysql41conn,msemysql50conn,
      msedbf,msesdfdata,msememds
@@ -29,7 +29,7 @@ uses
 
 procedure Register;
 begin
- registercomponents('Depr',[
+ registercomponents('Depr',[tmbdropdownitemedit, //redundant
    {$ifdef hasdb}
     tmsemysql40connection,tmsemysql41connection,tmsemysql50connection,
       tmsedbf,tmsefixedformatdataset,tmsesdfdataset,tmsememdataset
