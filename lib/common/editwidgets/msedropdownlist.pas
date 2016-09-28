@@ -1623,7 +1623,7 @@ end;
 
 function tdropdowncontroller.getbuttonframeclass: dropdownbuttonframeclassty;
 begin
- result:= tdropdownbuttonframe;
+ result:= tdropdownmultibuttonframe;
 end;
 
 { tdropdownwidgetcontroller }
@@ -2264,7 +2264,7 @@ end;
 
 function tnocolsdropdownlistcontroller.getbuttonframeclass: dropdownbuttonframeclassty;
 begin
- result:= tdropdownbuttonframe;
+ result:= tdropdownmultibuttonframe;
 end;
 
 { tdropdownlistcontroller }

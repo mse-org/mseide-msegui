@@ -29,7 +29,7 @@ type
  setcoloreventty = procedure(const sender: tobject; var avalue: colorty;
                           var accept: boolean) of object;               
 
- tellipsedropdownbuttonframe = class(tdropdownbuttonframe)
+ tellipsedropdownbuttonframe = class(tdropdownmultibuttonframe)
   private
    function getbuttonellipse: tdropdownbutton;
    procedure setbuttonellipse(const avalue: tdropdownbutton);

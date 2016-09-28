@@ -473,8 +473,8 @@ type
   private
    fonbeforedropdown: notifyeventty;
    fonafterclosedropdown: notifyeventty;
-   function getframe: tdropdownbuttonframe;
-   procedure setframe(const avalue: tdropdownbuttonframe);
+   function getframe: tdropdownmultibuttonframe;
+   procedure setframe(const avalue: tdropdownmultibuttonframe);
   protected
    fdropdown: tcustomdropdowncontroller;
    function createdropdowncontroller: tcustomdropdowncontroller; virtual;
@@ -499,7 +499,7 @@ type
    property onafterclosedropdown: notifyeventty read fonafterclosedropdown
                    write fonafterclosedropdown;
   published
-   property frame: tdropdownbuttonframe read getframe write setframe;
+   property frame: tdropdownmultibuttonframe read getframe write setframe;
  end;
 
  tcustomdropdownwidgetedit = class(tcustomdropdownedit,idropdownwidget)
@@ -3690,12 +3690,12 @@ begin
  result:= fframe.cellframe;
 end;
 }
-function tcustomdropdownedit.getframe: tdropdownbuttonframe;
+function tcustomdropdownedit.getframe: tdropdownmultibuttonframe;
 begin
- result:= tdropdownbuttonframe(inherited getframe);
+ result:= tdropdownmultibuttonframe(inherited getframe);
 end;
 
-procedure tcustomdropdownedit.setframe(const avalue: tdropdownbuttonframe);
+procedure tcustomdropdownedit.setframe(const avalue: tdropdownmultibuttonframe);
 begin
  inherited setframe(avalue);
 end;
@@ -3750,14 +3750,14 @@ end;
 {
 function tcustomdropdownedit.getbutton: tdropdownbutton;
 begin
- with tdropdownbuttonframe(fframe) do begin
+ with tdropdownmultibuttonframe(fframe) do begin
   result:= tdropdownbutton(buttons[activebutton]);
  end;
 end;
 
 procedure tcustomdropdownedit.setbutton(const avalue: tdropdownbutton);
 begin
- with tdropdownbuttonframe(fframe) do begin
+ with tdropdownmultibuttonframe(fframe) do begin
   tdropdownbutton(buttons[activebutton]).assign(avalue);
  end;
 end;

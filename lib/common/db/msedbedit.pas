@@ -6885,7 +6885,7 @@ end;
 
 function tcustomdbdropdownlistcontroller.getbuttonframeclass: dropdownbuttonframeclassty;
 begin
- result:= tdropdownbuttonframe;
+ result:= tdropdownmultibuttonframe;
 end;
 
 procedure tcustomdbdropdownlistcontroller.valuecolchanged;
@@ -10460,12 +10460,14 @@ begin
  //dummy
 end;
 
-function texterndatadropdownlistcontroller.getbuttonframeclass: dropdownbuttonframeclassty;
+function texterndatadropdownlistcontroller.getbuttonframeclass:
+                                                 dropdownbuttonframeclassty;
 begin
- result:= tdropdownbuttonframe;
+ result:= tdropdownmultibuttonframe;
 end;
 
-function texterndatadropdownlistcontroller.getdropdowncolsclass: dropdowncolsclassty;
+function texterndatadropdownlistcontroller.getdropdowncolsclass:
+                                                       dropdowncolsclassty;
 begin
  result:= tlbdropdowncols;
 end;

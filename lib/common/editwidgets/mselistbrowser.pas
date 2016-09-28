@@ -748,8 +748,8 @@ type
    procedure setdropdown(const Value: tcustomdropdownlistcontroller);
   protected
    procedure doupdatecelllayout; override;
-   function getframe: tdropdownbuttonframe;
-   procedure setframe(const avalue: tdropdownbuttonframe);
+   function getframe: tdropdownmultibuttonframe;
+   procedure setframe(const avalue: tdropdownmultibuttonframe);
    function getdropdowncontrollerclass: dropdownlistcontrollerclassty; virtual;
     //idropdown
    procedure dobeforedropdown; virtual;
@@ -761,7 +761,7 @@ type
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
   published
-   property frame: tdropdownbuttonframe read getframe write setframe;
+   property frame: tdropdownmultibuttonframe read getframe write setframe;
    property dropdown: tcustomdropdownlistcontroller read fdropdown 
                                                     write setdropdown;
    property onbeforedropdown: notifyeventty read fonbeforedropdown 
@@ -770,7 +770,8 @@ type
                   write fonafterclosedropdown;
  end;
 
- tmbdropdownitemedit = class(tdropdownitemedit)
+ tmbdropdownitemedit = class(tdropdownitemedit)     
+                //redundant, all dropdowns are multibutton
   private
   protected
    function getframe: tdropdownmultibuttonframe;
@@ -4086,26 +4087,26 @@ begin
  fdropdown.createframe;
 end;
 }
-function tdropdownitemedit.getframe: tdropdownbuttonframe;
+function tdropdownitemedit.getframe: tdropdownmultibuttonframe;
 begin
- result:= tdropdownbuttonframe(pointer(inherited getframe));
+ result:= tdropdownmultibuttonframe(pointer(inherited getframe));
 end;
 
-procedure tdropdownitemedit.setframe(const avalue: tdropdownbuttonframe);
+procedure tdropdownitemedit.setframe(const avalue: tdropdownmultibuttonframe);
 begin
  inherited setframe(tbuttonsframe(pointer(avalue)));
 end;
 {
 function tdropdownitemedit.getbutton: tdropdownbutton;
 begin
- with tdropdownbuttonframe(fframe) do begin
+ with tdropdownmultibuttonframe(fframe) do begin
   result:= tdropdownbutton(buttons[activebutton]);
  end;
 end;
 
 procedure tdropdownitemedit.setbutton(const avalue: tdropdownbutton);
 begin
- with tdropdownbuttonframe(fframe) do begin
+ with tdropdownmultibuttonframe(fframe) do begin
   tdropdownbutton(buttons[activebutton]).assign(avalue);
  end;
 end;
