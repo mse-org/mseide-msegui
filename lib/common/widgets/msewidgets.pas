@@ -2771,25 +2771,40 @@ end;
 procedure tcustomcaptionframe.dominsize(var asize: sizety);
 var
  si1: sizety;
+ framesi1: sizety;
 begin
+ framesi1.cx:= fpaintframe.left + fpaintframe.right -
+                                   (fouterframe.left + fouterframe.right);
+ framesi1.cy:= fpaintframe.top + fpaintframe.bottom -
+                                   (fouterframe.top + fouterframe.bottom);
+ if asize.cx < framesi1.cx then begin
+  asize.cx:= framesi1.cx;
+ end;
+ if asize.cy < framesi1.cy then begin
+  asize.cy:= framesi1.cy;
+ end;
  if finfo.text.text <> '' then begin
   checkstate();
-  si1.cx:= finfo.dest.size.cx + captionmargin;
-  si1.cy:= finfo.dest.size.cy + captionmargin;
+  si1.cx:= finfo.dest.size.cx + 2*captionmargin;
+  si1.cy:= finfo.dest.size.cy + 2*captionmargin;
   case captionpos of
-   cp_center,cp_righttop,cp_right,cp_rightbottom: begin
+   cp_center: begin
     si1.cx:= si1.cx + abs(fcaptiondist);
     si1.cy:= si1.cy + abs(fcaptionoffset);
    end;
+   cp_righttop,cp_right,cp_rightbottom,cp_lefttop,cp_left,cp_leftbottom: begin
+    si1.cx:= framesi1.cx + si1.cx + abs(fcaptiondist);
+    if fcaptionoffset > 0 then begin
+     si1.cy:= si1.cy + fcaptionoffset;
+    end;
+   end
    else begin
-    si1.cy:= si1.cy + abs(fcaptiondist);
-    si1.cx:= si1.cx + abs(fcaptionoffset);
+    si1.cy:= framesi1.cy + si1.cy + abs(fcaptiondist);
+    if fcaptionoffset > 0 then begin
+     si1.cx:= si1.cx + fcaptionoffset;
+    end;
    end;
   end;
-  si1.cx:= si1.cx + fpaintframe.left + fpaintframe.right -
-                                   (fouterframe.left + fouterframe.right);
-  si1.cy:= si1.cy + fpaintframe.top + fpaintframe.bottom -
-                                   (fouterframe.top + fouterframe.bottom);
   if asize.cx < si1.cx then begin
    asize.cx:= si1.cx;
   end;
@@ -2806,40 +2821,8 @@ begin
 end;
 
 procedure tcustomcaptionframe.checkwidgetsize(var asize: sizety);
-var
- size1: sizety;
 begin        //for autosize
  dominsize(asize);
-(*
- if finfo.text.text <> '' then begin
-  checkstate;
-  size1:= finfo.dest.size;
-  size1.cx:= size1.cx + 2*captionmargin;
-  size1.cy:= size1.cy + 2*captionmargin;
-  case fcaptionpos of
-   cp_lefttop,cp_left,cp_leftbottom,
-   cp_righttop,cp_right,cp_rightbottom: begin
-    if fcaptiondist > 0 then begin
-     size1.cx:= size1.cx + fcaptiondist;
-    end;
-    size1.cy:= size1.cy + abs(fcaptionoffset);
-   end;
-   cp_topleft,cp_top,cp_topright,
-   cp_bottomleft,cp_bottom,cp_bottomright: begin
-    if fcaptiondist > 0 then begin
-     size1.cy:= size1.cy + fcaptiondist;
-    end;
-    size1.cx:= size1.cx + abs(fcaptionoffset);
-   end;
-  end;
-  if asize.cx < size1.cx then begin
-   asize.cx:= size1.cx;
-  end;
-  if asize.cy < size1.cy then begin
-   asize.cy:= size1.cy;
-  end;
- end;
-*)
 end;
 
 procedure tcustomcaptionframe.setcaptiondist(const Value: integer);
