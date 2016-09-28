@@ -1450,26 +1450,140 @@ end;
 
 function tcustomlayouter.childrenminwidth: integer;
 var
- int1: integer;
+ i1,i2,i3,i5: int32;
+ variable,space,fix: int32;
 begin
- result:= 0;
- for int1:= 0 to high(fwidgetinfos) do begin
-  with fwidgetinfos[int1],widget do begin
+ variable:= 0;
+ space:= innerframewidth.cx;
+ i1:= high(fwidgets);
+ if i1 > 0 then begin
+  space:= space + fplace_mindist * i1;
+  if plo_propmargin in fplace_options then begin
+   space:= space + 2 * fplace_mindist;
+  end;
+ end; 
+ fix:= space;
+ for i1:= 0 to high(fwidgetinfos) do begin
+  with fwidgetinfos[i1],widget do begin
    if not (plo_noinvisible in fplace_options) or isvisible then begin
-    if (anchors * [an_left,an_right] = [an_left,an_right]) or 
-                   (plo_scalesize in fplace_options) and 
-                           not(osk_nopropwidth in optionsskin) then begin
-//     result:= result + minscrollsize.cx;
-     result:= result + curminsize.cx;
+    if (anchors * [an_left,an_right] = [an_left,an_right]) then begin
+     fix:= fix + minscrollsize.cx;
     end
     else begin
-     result:= result + bounds_cx;
+     if (plo_scalesize in fplace_options) and 
+                           not (osk_nopropwidth in optionsskin) then begin
+      variable:= variable + bounds_cx;
+     end
+     else begin
+      fix:= fix + bounds_cx;
+     end;
     end;
    end;
   end;
  end;
+ if plo_scalesize in fplace_options then begin
+           //(x-extension)*(1/ref)*variable + fix = x
+           //x = (fix*ref - extension*variable) / (ref - variable)
+
+  result:= 0;
+  i1:= fix*scalesizeref.cx - fscalesizeextension.cx*variable;
+  i2:= scalesizeref.cx - variable;
+  if i2 <> 0 then begin
+   result:= (i1 + i2 div 2) div i2; //with rounding
+  end;
+  i3:= 0;
+  for i1:= 0 to high(fwidgetinfos) do begin
+   with fwidgetinfos[i1],widget do begin
+    if (not (plo_noinvisible in fplace_options) or isvisible) then begin
+     if not (osk_nopropwidth in optionsskin) then begin
+      if scalesize.cx > 0 then begin
+       i5:= curminsize.cx * refscalesize.cx div scalesize.cx;
+       if i3 < i5 then begin
+        i3:= i5;
+       end;
+      end;
+     end;
+    end;
+   end;
+  end;
+  i3:= i3 + fscalesizeextension.cx; //add not scaling values
+  if result < i3 then begin
+   result:= i3;
+  end;
+ end
+ else begin
+  result:= variable + fix;
+ end;
 end;
 
+function tcustomlayouter.childrenminheight: integer;
+var
+ i1,i2,i3,i5: int32;
+ variable,space,fix: int32;
+begin
+ variable:= 0;
+ space:= innerframewidth.cy;
+ i1:= high(fwidgets);
+ if i1 > 0 then begin
+  space:= space + fplace_mindist * i1;
+  if plo_propmargin in fplace_options then begin
+   space:= space + 2 * fplace_mindist;
+  end;
+ end; 
+ fix:= space;
+ for i1:= 0 to high(fwidgetinfos) do begin
+  with fwidgetinfos[i1],widget do begin
+   if not (plo_noinvisible in fplace_options) or isvisible then begin
+    if (anchors * [an_top,an_bottom] = [an_top,an_bottom]) then begin
+     fix:= fix + minscrollsize.cy;
+    end
+    else begin
+     if (plo_scalesize in fplace_options) and 
+                           not (osk_nopropwidth in optionsskin) then begin
+      variable:= variable + bounds_cy;
+     end
+     else begin
+      fix:= fix + bounds_cy;
+     end;
+    end;
+   end;
+  end;
+ end;
+ if plo_scalesize in fplace_options then begin
+           //(y-extension)*(1/ref)*variable + fix = y
+           //y = (fix*ref - extension*variable) / (ref - variable)
+
+  result:= 0;
+  i1:= fix*scalesizeref.cy - fscalesizeextension.cy*variable;
+  i2:= scalesizeref.cy - variable;
+  if i2 <> 0 then begin
+   result:= (i1 + i2 div 2) div i2; //with rounding
+  end;
+  i3:= 0;
+  for i1:= 0 to high(fwidgetinfos) do begin
+   with fwidgetinfos[i1],widget do begin
+    if (not (plo_noinvisible in fplace_options) or isvisible) then begin
+     if not (osk_nopropwidth in optionsskin) then begin
+      if scalesize.cy > 0 then begin
+       i5:= curminsize.cy * refscalesize.cy div scalesize.cy;
+       if i3 < i5 then begin
+        i3:= i5;
+       end;
+      end;
+     end;
+    end;
+   end;
+  end;
+  i3:= i3 + fscalesizeextension.cy; //add not scaling values
+  if result < i3 then begin
+   result:= i3;
+  end;
+ end
+ else begin
+  result:= variable + fix;
+ end;
+end;
+(*
 function tcustomlayouter.childrenminheight: integer;
 var
  int1: integer;
@@ -1491,7 +1605,7 @@ begin
   end;
  end;
 end;
-
+*)
 function tcustomlayouter.childrenleft: integer;
 var
  int1: integer;
@@ -1917,7 +2031,8 @@ begin
      fscalesizeref.cy:= fscalesizeref.cy - int3;
     end;
    end;
-   fscalesizeextension:= sum;
+   fscalesizeextension.cx:= fwidgetrect.cx - fscalesizeref.cx;
+   fscalesizeextension.cy:= fwidgetrect.cy - fscalesizeref.cy;
   end;
  end;
  include(fstate,las_scalesizerefvalid);
@@ -1926,74 +2041,13 @@ end;
 function tcustomlayouter.calcminscrollsize: sizety;
 var
  int1,int2,int3,int4: integer;
- i1,i2,i3,i5: int32;
 begin
  result:= inherited calcminscrollsize;
  if lao_placex in foptionslayout then begin
   result.cx:= childrenminwidth;
-  i1:= high(fwidgets) * fplace_mindist + innerframewidth.cx;
-  if plo_propmargin in fplace_options then begin
-   i1:= i1 + 2 * fplace_mindist;
-  end;
-  result.cx:= result.cx + i1;
-  if plo_scalesize in fplace_options then begin
-   i3:= 0;
-   for i2:= 0 to high(fwidgetinfos) do begin
-    with fwidgetinfos[i2],widget do begin
-     if (not (plo_noinvisible in fplace_options) or isvisible) then begin
-      if not (osk_nopropwidth in optionsskin) then begin
-       if scalesize.cx > 0 then begin
-        i5:= curminsize.cx * refscalesize.cx div scalesize.cx;
-        if i3 < i5 then begin
-         i3:= i5;
-        end;
-       end;
-      end;
-     end;
-    end;
-   end;
-   i3:= i3 + fscalesizeextension.cx; //add not scaling values
-   if result.cx < i3 then begin
-    result.cx:= i3;
-   end;
-  end;
  end;
  if lao_placey in foptionslayout then begin
   result.cy:= childrenminheight;
-  i1:= high(fwidgets) * fplace_mindist + innerframewidth.cy;
-  if plo_propmargin in fplace_options then begin
-   i1:= i1 + 2 * fplace_mindist;
-  end;
-  result.cy:= result.cy + i1;
-  if plo_scalesize in fplace_options then begin
-   i3:= 0;
-   for i2:= 0 to high(fwidgetinfos) do begin
-    with fwidgetinfos[i2],widget do begin
-     if (not (plo_noinvisible in fplace_options) or isvisible) then begin
-      if not (osk_nopropwidth in optionsskin) then begin
-       if scalesize.cy > 0 then begin
-        i5:= curminsize.cy * refscalesize.cy div scalesize.cy;
-        if i3 < i5 then begin
-         i3:= i5;
-        end;
-       end;
-      end;
-     end;
-    end;
-   end;
-   i3:= i3 + fscalesizeextension.cy; //add not scaling values
-   if result.cy < i3 then begin
-    result.cy:= i3;
-   end;
-  end;
-{
-
-  result.cy:= childrenminheight + 
-                       high(fwidgets) * fplace_mindist + innerframewidth.cy;
-  if plo_propmargin in fplace_options then begin
-   result.cy:= result.cy + 2 * fplace_mindist;
-  end;
-}
  end;
  if (high(fwidgets) >= 0) and (align_glue <> wam_none) and 
                                      (align_mode <> wam_none)then begin
