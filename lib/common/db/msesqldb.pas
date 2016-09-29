@@ -1008,22 +1008,27 @@ begin
       bo2:= bo2 or (var1 <> param.value);
       if (frefreshlock = 0) and (fplo_autorefresh in foptions) and 
                                               (destdataset <> nil) and bo2 and
-         (destdataset.active or 
+         (fdestdataset.active or 
                    not (fplo_refreshifactiveonly in foptions)) and
-         not((destdataset.state = dsinsert) and (dataset.state = dsinsert) and
-                      (fplo_syncmasterinsert in foptions))and
-                  (destdataset.state in [dsbrowse,dsedit,dsinsert]) then begin
-       if fplo_checkbrowsemodeonrefresh in foptions then begin
-        fdestdataset.checkbrowsemode;
+         not((fdestdataset.state = dsinsert) and (dataset.state = dsinsert) and
+                      (fplo_syncmasterinsert in foptions)){and
+                  (destdataset.state in [dsbrowse,dsedit,dsinsert])} then begin
+       if fdestdataset.active then begin
+        if fplo_checkbrowsemodeonrefresh in foptions then begin
+         fdestdataset.checkbrowsemode;
+        end
+        else begin
+         fdestdataset.cancel;
+        end;
+        if fdestcontroller <> nil then begin
+         fdestcontroller.refresh(fplo_restorerecno in foptions,truedelayus);
+        end
+        else begin
+         fdestdataset.refresh;
+        end;
        end
        else begin
-        fdestdataset.cancel;
-       end;
-       if fdestcontroller <> nil then begin
-        fdestcontroller.refresh(fplo_restorerecno in foptions,truedelayus);
-       end
-       else begin
-        fdestdataset.refresh;
+        fdestdataset.active:= true;
        end;
       end;
      end;
