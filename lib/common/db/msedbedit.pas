@@ -66,6 +66,7 @@ type
                         dno_norefreshrecno,
                         dno_dialogifinactive,dno_nodialogifempty,
                         dno_nodialogifnoeditmode,dno_nodialogifreadonly,
+                        dno_nonavig, //disable navigation buttons
                         dno_customdialogupdate,
                         dno_postbeforedialog,dno_postoncanclose);
  dbnavigatoroptionsty = set of dbnavigatoroptionty;
@@ -178,6 +179,8 @@ type
    procedure setbuttonwidth(const avalue: integer);
    function getbuttonheight: integer;
    procedure setbuttonheight(const avalue: integer);
+   function getnonavig: boolean;
+   procedure setnonavig(const avalue: boolean);
   protected
    procedure inithints;
    procedure doexecute(const sender: tobject);
@@ -199,6 +202,7 @@ type
    destructor destroy; override; 
    function canclose(const newfocus: twidget = nil): boolean; override;
    procedure edit();
+   property nonavig: boolean read getnonavig write setnonavig;
   published
    property statfile;
    property datasource: tdatasource read getdatasource write setdatasource;
@@ -2761,6 +2765,11 @@ begin
   end;
   bo1:= datasource.dataset.filtered;
  end;
+ if dno_nonavig in options1 then begin
+  bu1:= bu1 - ([dbnb_first,dbnb_prior,dbnb_next,dbnb_last,
+                dbnb_insert,dbnb_delete,dbnb_filteronoff,dbnb_copyrecord]+
+                filterdbnavigbuttons);
+ end;
  fintf.setactivebuttons(bu1,bo1);
 end;
  
@@ -3153,11 +3162,17 @@ begin
 end;
 
 procedure tdbnavigator.setoptions(const avalue: dbnavigatoroptionsty);
+var
+ diff: dbnavigatoroptionsty;
 begin
- if avalue <> foptions then begin
+ diff:= avalue >< foptions;
+ if diff <> [] then begin
   foptions:= avalue;
   if not (csloading in componentstate) then begin
    inithints;
+   if dno_nonavig in diff then begin
+    fdatalink.updatebuttonstate()
+   end;
   end;
  end;
 end;
@@ -3251,6 +3266,21 @@ end;
 procedure tdbnavigator.setbuttonheight(const avalue: integer);
 begin
  flayout.buttons.height:= avalue;
+end;
+
+function tdbnavigator.getnonavig: boolean;
+begin
+ result:= dno_nonavig in foptions;
+end;
+
+procedure tdbnavigator.setnonavig(const avalue: boolean);
+begin
+ if avalue then begin
+  options:= options + [dno_nonavig];
+ end
+ else begin
+  options:= options - [dno_nonavig];
+ end;
 end;
 
 { tcustomeditwidgetdatalink }
