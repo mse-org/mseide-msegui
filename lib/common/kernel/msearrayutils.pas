@@ -1706,7 +1706,7 @@ begin
  repeat
   poi := l;
   poj := r;
-  pop := pointer(((ptruint(l) + ptruint(r)) div 2) and pointeralignmask);
+  pop := pointer((ptruint(l) div 2 + ptruint(r) div 2) and pointeralignmask);
                                                             //pivot element
   repeat
    while true do begin
