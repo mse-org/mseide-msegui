@@ -587,6 +587,7 @@ type
                        bdo_cancelupdateondeleteerror,
                        bdo_editonapplyerror,
                        bdo_restoreupdateonsavepointrollback,
+                       bdo_rollbackonupdateerror,
                        bdo_noapply,bdo_autoapply,
                        bdo_autocommitret,bdo_autocommit,
                        bdo_refreshafterapply,bdo_recnoapplyrefresh,
@@ -8738,8 +8739,8 @@ procedure tmsebufdataset.savepointevent(const sender: tmdbtransaction;
                const akind: savepointeventkindty; const alevel: integer);
 begin
  if (bs1_restoreupdate in fbstate1) and active and 
-               ((sender = ftransactionwrite) or 
-                  (ftransactionwrite = nil) and (sender = ftransaction)) then begin
+          ((sender = ftransactionwrite) or 
+              (ftransactionwrite = nil) and (sender = ftransaction)) then begin
   case akind of
    spek_begin: begin
     if fsavepointlevel < 0 then begin

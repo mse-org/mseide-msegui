@@ -650,6 +650,11 @@ begin
   end;
  except
   include(fmstate,sqs_updateerror);
+  if bdo_rollbackonupdateerror in foptions then begin
+   if writetransaction <> nil then begin
+    writetransaction.rollback();
+   end;
+  end;
   raise;
  end;
 end;
