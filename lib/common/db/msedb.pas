@@ -1331,8 +1331,8 @@ type
   procedure clearfilter;
   procedure begindisplaydata;
   procedure enddisplaydata;
-  procedure doidleapplyupdates;
-  procedure dscontrolleroptionschanged(const aoptions: datasetoptionsty);
+//  procedure doidleapplyupdates;
+//  procedure dscontrolleroptionschanged(const aoptions: datasetoptionsty);
   function getrestorerecno: boolean;
   procedure setrestorerecno(const avalue: boolean);
   property restorerecno: boolean read getrestorerecno write setrestorerecno;
@@ -1379,7 +1379,7 @@ type
    finsertbm: bookmarkty;
    flinkedfields: fieldlinkarty;
    fstate: dscontrollerstatesty;
-   fdelayedapplycount: integer;
+//   fdelayedapplycount: integer;
    fbmbackup: bookmarkty;
    fupdatecount: integer;
    fstatebefore: tdatasetstate;
@@ -1400,9 +1400,9 @@ type
    procedure setrecnozerobased(const avalue: integer);
    function getrecno: integer;
    procedure setrecno(const avalue: integer);
-   procedure registeronidle;
-   procedure unregisteronidle;
-   procedure setdelayedapplycount(const avalue: integer);
+//   procedure registeronidle;
+//   procedure unregisteronidle;
+//   procedure setdelayedapplycount(const avalue: integer);
    function getnoedit: boolean;
    procedure setnoedit(const avalue: boolean);
    procedure nosavepoint;
@@ -1416,12 +1416,13 @@ type
    procedure setnoupdate(const avalue: boolean);
    function getnodelete: boolean;
    procedure setnodelete(const avalue: boolean);
+   procedure readdelayedapplycount(reader: treader);
   protected
    foptions: datasetoptionsty;
    procedure setoptions(const avalue: datasetoptionsty); virtual;
    procedure setowneractive(const avalue: boolean); override;
    procedure fielddestroyed(const sender: ifieldcomponent);
-   procedure doonidle(var again: boolean);
+//   procedure doonidle(var again: boolean);
    procedure dorefresh(const sender: tobject);
    function savepointbegin: integer; virtual;
    procedure savepointrollback(const aindex: integer = -1); virtual;
@@ -1429,7 +1430,7 @@ type
    procedure savepointrelease; virtual;
    function execoperation(const akind: opkindty;
                               const aafterop: afterdbopeventty): boolean;
-      
+   procedure defineproperties(filer: tfiler) override;      
   public
    constructor create(const aowner: tdataset; const aintf: idscontroller;
                       const arecnooffset: integer = -1;
@@ -1524,8 +1525,8 @@ type
    property fields: tpersistentfields read ffields write setfields;
    property options: datasetoptionsty read foptions write setoptions 
                    default defaultdscontrolleroptions;
-   property delayedapplycount: integer read fdelayedapplycount 
-                                       write setdelayedapplycount default 0;
+//   property delayedapplycount: integer read fdelayedapplycount 
+//                                       write setdelayedapplycount default 0;
                //0 -> no autoapply
    property onstatechanged: datasetstatechangedeventty read fonstatechanged 
                                                 write fonstatechanged;
@@ -7098,7 +7099,7 @@ var
  int1: integer;
  field1: tfield;
 begin
- unregisteronidle;
+// unregisteronidle;
  tdataset(fowner).active:= false; //avoid later calls from fowner
  for int1:= 0 to high(flinkedfields) do begin
   flinkedfields[int1].setdsintf(nil);
@@ -7597,16 +7598,19 @@ begin
   end;
   updatelinkedfields; //second check
  end;
+{
  if fdelayedapplycount > 0 then begin
   registeronidle;
  end;
+}
 end;
-
+{
 procedure tdscontroller.doonidle(var again: boolean);
 begin
  idscontroller(fintf).doidleapplyupdates;
 end;
-
+}
+(*
 procedure tdscontroller.registeronidle;
 begin
  if not(dscs_onidleregistered in fstate) then begin
@@ -7622,13 +7626,13 @@ begin
   exclude(fstate,dscs_onidleregistered);
  end;
 end;
-
+*)
 procedure tdscontroller.internalclose;
 var
  int1: integer;
  field1: tfield;
 begin
- unregisteronidle;
+// unregisteronidle;
  idscontroller(fintf).inheritedinternalclose;
  with tdataset(fowner) do begin
   for int1:= 0 to fields.count - 1 do begin
@@ -7923,6 +7927,22 @@ begin
  end;
 end;
 
+procedure tdscontroller.readdelayedapplycount(reader: treader);
+var
+ i1: int32;
+begin
+ i1:= reader.readinteger();
+ if fowner is tmsebufdataset then begin
+  tmsebufdataset(fowner).delayedapplycount:= i1;
+ end;
+end;
+
+procedure tdscontroller.defineproperties(filer: tfiler);
+begin
+ inherited;
+ filer.defineproperty('delayedapplycount',@readdelayedapplycount,nil,false);
+end;
+
 function tdscontroller.post(const aafterpost: afterdbopeventty = nil): boolean;
 begin
  with tdataset(fowner) do begin
@@ -8051,9 +8071,11 @@ begin
   end;
   tdataset1(fowner).dataevent(dedisabledstatechange,0);
  end;
+{
  if optionsbefore <> foptions then begin
   idscontroller(fintf).dscontrolleroptionschanged(foptions);
  end;
+}
 end;
 
 function tdscontroller.isutf8: boolean;
@@ -8120,7 +8142,7 @@ begin
   setlength(result,int2);
  end;
 end;
-
+{
 procedure tdscontroller.setdelayedapplycount(const avalue: integer);
 begin
  if fdelayedapplycount <> avalue then begin
@@ -8142,7 +8164,7 @@ begin
   end;
  end;   
 end;
-
+}
 function tdscontroller.getnoedit: boolean;
 begin
  result:= dso_noedit in foptions;

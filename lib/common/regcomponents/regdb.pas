@@ -1693,7 +1693,7 @@ end;
 
 function tdatasetoptionspropertyeditor.getinvisibleitems: tintegerset;
 begin
- result:= tintegerset(longword([dso_refreshwaitcursor]+deprecatedbdsoptions));
+ result:= tintegerset(card32([dso_refreshwaitcursor]+deprecatedbdsoptions));
 end;
 
 { tdatalinkpropertyeditor }

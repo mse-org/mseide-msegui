@@ -134,7 +134,7 @@ type
    procedure inheritedinternaldelete; virtual;
    procedure inheritedinternalopen;
    procedure inheritedinternalclose;
-   procedure doidleapplyupdates;
+   procedure doidleapplyupdates() override;
 
 //   function wantblobfetch: boolean; override;
 //   function getdsoptions: datasetoptionsty; override;
@@ -162,6 +162,7 @@ type
    procedure applyupdate; overload; override;
   published
    property FieldDefs;
+   property delayedapplycount;
    property options default defaultsqlbdsoptions;
    property controller: tdscontroller read fcontroller write setcontroller;
    property Active: boolean read getactive write setactive1 default false;
@@ -758,7 +759,7 @@ var
  bo1: boolean;
 begin
  if not (bs_idle in fbstate) and (changecount > 0) and 
-           (changecount >= fcontroller.delayedapplycount) then begin
+           (changecount >= delayedapplycount) then begin
   application.beginwait;
   include(fbstate,bs_idle);
   bo1:= false;
@@ -778,7 +779,7 @@ end;
 
 procedure tmsesqlquery.checkpendingupdates;
 begin
- if (state <> dsinactive) and (fcontroller.delayedapplycount > 0) and 
+ if (state <> dsinactive) and (delayedapplycount > 0) and 
                                   (changecount > 0) then begin
 //  (dso_applyonidle in fcontroller.options) and (changecount > 0) then begin
   applyupdates;

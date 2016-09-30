@@ -54,7 +54,7 @@ type
    function getfiltereditkind: filtereditkindty;
    procedure beginfilteredit(const akind: filtereditkindty);
    procedure endfilteredit;
-   procedure doidleapplyupdates;
+//   procedure doidleapplyupdates;
   protected
    procedure setoptions(const avalue: bufdatasetoptionsty) override;
    procedure setactive (const value : boolean); reintroduce;
@@ -342,12 +342,12 @@ procedure tlocaldataset.endfilteredit;
 begin
  //dummy
 end;
-
+{
 procedure tlocaldataset.doidleapplyupdates;
 begin
  //dummy
 end;
-
+}
 procedure tlocaldataset.setoptions(const avalue: bufdatasetoptionsty);
 begin
  inherited setoptions(avalue + [bdo_local]);

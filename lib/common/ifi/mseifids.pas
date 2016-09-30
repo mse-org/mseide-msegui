@@ -239,7 +239,7 @@ type
    procedure beginfilteredit(const akind: filtereditkindty);
    procedure endfilteredit;
    procedure clearfilter;
-   procedure doidleapplyupdates;
+//   procedure doidleapplyupdates;
    
    procedure setificountroller(const avalue: tifidscontroller);
    function getifistate: ifidsstatesty;
@@ -248,7 +248,7 @@ type
   protected
    ffielddefsequence: sequencety;
    procedure checkrecno(const avalue: integer);
-   procedure dscontrolleroptionschanged(const aoptions: datasetoptionsty);
+//   procedure dscontrolleroptionschanged(const aoptions: datasetoptionsty);
 
    //iifidscontroller
    function updatesortfield(const afield: tfield;
@@ -2670,11 +2670,12 @@ function tifidataset.getfielddefs: tfielddefs;
 begin
  result:= fielddefs;
 end;
-
+{
 procedure tifidataset.doidleapplyupdates;
 begin
  //dummy
 end;
+}
 {
 function tifidataset.getbindings: integerarty;
 begin
@@ -2712,12 +2713,12 @@ function tifidataset.getcanmodify: boolean;
 begin
  result:= fcontroller.getcanmodify and inherited getcanmodify;
 end;
-
+{
 procedure tifidataset.dscontrolleroptionschanged(const aoptions: datasetoptionsty);
 begin
  //dummy
 end;
-
+}
 function tifidataset.getrestorerecno: boolean;
 begin
  result:= false;

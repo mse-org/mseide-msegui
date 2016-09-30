@@ -524,7 +524,8 @@ type
 
  bufdatasetstate1ty = (bs1_needsresync,
      bs1_lookupnotifying,bs1_lookupnotifypending,bs1_posting,bs1_recordupdating,
-                          bs1_deferdeleterecupdatebuffer,bs1_restoreupdate);
+                          bs1_deferdeleterecupdatebuffer,bs1_restoreupdate,
+                          bs1_onidleregistered);
  bufdatasetstates1ty = set of bufdatasetstate1ty;
  
  internalcalcfieldseventty = procedure(const sender: tmsebufdataset;
@@ -677,6 +678,7 @@ type
    
    fobjectlinker: tobjectlinker;   
    fcryptohandler: tcustomcryptohandler;
+   fdelayedapplycount: integer;
    procedure calcrecordsize;
    function loadbuffer(var buffer: recheaderty): tgetresult;
    function getfieldsize(const datatype: tfieldtype; const varsize: integer;
@@ -825,6 +827,10 @@ type
    procedure setrecnozerobased(const avalue: int32);
    procedure readstreamingversion(reader: treader);
    procedure writestreamingversion(writer: twriter);
+   procedure setdelayedapplycount(const avalue: integer);
+   procedure registeronidle;
+   procedure unregisteronidle;
+   procedure doonidle(var again: boolean);
   protected
    foldopts: bufdatasetoptionsty; //transferred from tdatasetcontroller
    fcontroller: tdscontroller;
@@ -850,6 +856,7 @@ type
    flastcurrentindex: integer;
    fsavepointlevel: integer;
 
+   procedure doidleapplyupdates() virtual;
    procedure setoptions(const avalue: bufdatasetoptionsty) virtual;
    function getdefaultoptions: bufdatasetoptionsty virtual;
    procedure openlocal;
@@ -932,7 +939,7 @@ type
                                    const ainfo: blobstreaminfoty);
    function getblobrecpo: precheaderty;
 
-   procedure dscontrolleroptionschanged(const aoptions: datasetoptionsty); virtual;
+//   procedure dscontrolleroptionschanged(const aoptions: datasetoptionsty); virtual;
    procedure savepointevent(const sender: tmdbtransaction;
                   const akind: savepointeventkindty; const alevel: integer); override;
    procedure packrecupdatebuffer;
@@ -1322,8 +1329,9 @@ type
    function sumfieldcurrency(const afield: tfield): currency;
    function sumfieldinteger(const afield: tfield): integer;
    function sumfieldint64(const afield: tfield): int64;
-
-   
+   property delayedapplycount: integer read fdelayedapplycount 
+                                       write setdelayedapplycount default 0;
+               //0 -> no autoapply
   published
    property options: bufdatasetoptionsty read foptions 
                                             write setoptions default [];
@@ -1989,6 +1997,7 @@ destructor tmsebufdataset.destroy;
 var
  int1: integer;
 begin
+ unregisteronidle();
  inherited destroy;
  for int1:= high(flookupclients) downto 0 do begin
   removeitem(pointerarty(flookupclients[int1].flookupmasters),pointer(self));
@@ -2398,6 +2407,9 @@ begin
  else begin
   dointernalopen;
  end;
+ if fdelayedapplycount > 0 then begin
+  registeronidle;
+ end;
 end;
 
 procedure tmsebufdataset.openlocal;
@@ -2437,6 +2449,7 @@ var
  kind1: filtereditkindty;
  po1: precupdatebufferty;
 begin
+ unregisteronidle();
  exclude(fbstate,bs_opening);
  for int1:= 0 to high(fupdatebuffer) do begin
   po1:= @fupdatebuffer[int1];
@@ -5733,6 +5746,54 @@ begin
  writer.writeinteger(1);
 end;
 
+procedure tmsebufdataset.setdelayedapplycount(const avalue: integer);
+begin
+ if fdelayedapplycount <> avalue then begin
+  if active and not (csloading in componentstate) then begin
+   if fdelayedapplycount > 0 then begin
+    fdelayedapplycount:= 1;
+    doidleapplyupdates; //apply pending updates.
+   end;
+   fdelayedapplycount:= avalue;
+   if avalue > 0 then begin
+    registeronidle;
+   end
+   else begin
+    unregisteronidle;
+   end;
+  end
+  else begin
+   fdelayedapplycount:= avalue;
+  end;
+ end;   
+end;
+
+procedure tmsebufdataset.registeronidle;
+begin
+ if not(bs1_onidleregistered in fbstate1) then begin
+  application.registeronidle({$ifdef FPC}@{$endif}doonidle);
+  include(fbstate1,bs1_onidleregistered);
+ end;
+end;
+
+procedure tmsebufdataset.unregisteronidle;
+begin
+ if bs1_onidleregistered in fbstate1 then begin
+  application.unregisteronidle({$ifdef FPC}@{$endif}doonidle);
+  exclude(fbstate1,bs1_onidleregistered);
+ end;
+end;
+
+procedure tmsebufdataset.doidleapplyupdates();
+begin
+ //dummy
+end;
+
+procedure tmsebufdataset.doonidle(var again: boolean);
+begin
+ doidleapplyupdates();
+end;
+
 procedure tmsebufdataset.defineproperties(filer: tfiler);
 begin
  inherited;
@@ -8730,11 +8791,11 @@ begin
   end;
  end;
 end;
-
+{
 procedure tmsebufdataset.dscontrolleroptionschanged(const aoptions: datasetoptionsty);
 begin
 end;
-
+}
 procedure tmsebufdataset.savepointevent(const sender: tmdbtransaction;
                const akind: savepointeventkindty; const alevel: integer);
 begin
