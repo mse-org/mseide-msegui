@@ -1692,17 +1692,8 @@ end;
 { tdatasetoptionspropertyeditor }
 
 function tdatasetoptionspropertyeditor.getinvisibleitems: tintegerset;
-{$ifndef FPC}
-const
- mask1: datasetoptionsty = [dso_refreshwaitcursor]+deprecatedbdsoptions;
-{$endif}
 begin
- result:= tintegerset(
-     {$ifdef FPC}
-        longword([dso_refreshwaitcursor])
-     {$else}
-        mask1
-     {$endif});
+ result:= tintegerset(longword([dso_refreshwaitcursor]+deprecatedbdsoptions));
 end;
 
 { tdatalinkpropertyeditor }
