@@ -260,7 +260,8 @@ end;
 
 procedure tlocaldataset.inheritedinternalopen;
 begin
- inherited internalopen;
+ openlocal();
+// inherited internalopen;
 end;
 
 procedure tlocaldataset.internalopen;
