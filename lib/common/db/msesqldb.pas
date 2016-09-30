@@ -1119,7 +1119,8 @@ begin
      end
      else begin
       if (destdataset.state = dsinsert) and 
-                           (fplo_syncmasterpost in foptions) then begin
+                           (fplo_syncmasterpost in foptions) and 
+                           (dataset.state in [dsedit,dsinsert]) then begin
        dataset.updaterecord;
        if dataset.modified then begin
         posted1:= true;
