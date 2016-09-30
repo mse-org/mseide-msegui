@@ -2101,6 +2101,7 @@ end;
 function tcustomedit.gettextcliprect(): rectty;
 begin
  result:= clippedpaintrect();
+ subpoint1(result.pos,paintpos);
 end;
 
 procedure tcustomedit.showhint(const aid: int32; var info: hintinfoty);
