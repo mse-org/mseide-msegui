@@ -41,6 +41,7 @@ type
    function getnumboolean: boolean;
    function getfloatdate: boolean;
    function getint64currency: boolean;
+   function getsavepointoptions(): savepointoptionsty;
    function getfiltereditkind: filtereditkindty;
    procedure beginfilteredit(const akind: filtereditkindty);
    procedure endfilteredit;
@@ -289,6 +290,11 @@ end;
 function tmsedbf.getint64currency: boolean;
 begin
  result:= false;
+end;
+
+function tmsedbf.getsavepointoptions(): savepointoptionsty;
+begin
+ result:= [];
 end;
 
 function tmsedbf.getfiltereditkind: filtereditkindty;

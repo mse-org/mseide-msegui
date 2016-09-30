@@ -34,6 +34,7 @@ type
    function getnumboolean: boolean;
    function getfloatdate: boolean;
    function getint64currency: boolean;
+   function getsavepointoptions(): savepointoptionsty;
    function getfiltereditkind: filtereditkindty;
    procedure beginfilteredit(const akind: filtereditkindty);
    procedure endfilteredit;
@@ -108,6 +109,7 @@ type
    function getnumboolean: boolean;
    function getfloatdate: boolean;
    function getint64currency: boolean;
+   function getsavepointoptions(): savepointoptionsty;
    function getfiltereditkind: filtereditkindty;
    procedure beginfilteredit(const akind: filtereditkindty);
    procedure endfilteredit;
@@ -181,6 +183,7 @@ type
    function getnumboolean: boolean;
    function getfloatdate: boolean;
    function getint64currency: boolean;
+   function getsavepointoptions(): savepointoptionsty;
    function getfiltereditkind: filtereditkindty;
    procedure beginfilteredit(const akind: filtereditkindty);
    procedure endfilteredit;
@@ -252,6 +255,7 @@ type
    function getnumboolean: boolean;
    function getfloatdate: boolean;
    function getint64currency: boolean;
+   function getsavepointoptions(): savepointoptionsty;
    function getfiltereditkind: filtereditkindty;
    procedure beginfilteredit(const akind: filtereditkindty);
    procedure endfilteredit;
@@ -483,6 +487,11 @@ end;
 function tmsezreadonlyquery.getint64currency: boolean;
 begin
  result:= false;
+end;
+
+function tmsezreadonlyquery.getsavepointoptions(): savepointoptionsty;
+begin
+ result:= [];
 end;
 
 function tmsezreadonlyquery.getfiltereditkind: filtereditkindty;
@@ -754,6 +763,11 @@ begin
  result:= false;
 end;
 
+function tmsezquery.getsavepointoptions(): savepointoptionsty;
+begin
+ result:= [];
+end;
+
 function tmsezquery.getfiltereditkind: filtereditkindty;
 begin
  result:= fek_filter;
@@ -1018,6 +1032,11 @@ begin
  result:= false;
 end;
 
+function tmseztable.getsavepointoptions(): savepointoptionsty;
+begin
+ result:= [];
+end;
+
 function tmseztable.getfiltereditkind: filtereditkindty;
 begin
  result:= fek_filter;
@@ -1275,6 +1294,11 @@ end;
 function tmsezstoredproc.getint64currency: boolean;
 begin
  result:= false;
+end;
+
+function tmsezstoredproc.getsavepointoptions(): savepointoptionsty;
+begin
+ result:= [];
 end;
 
 function tmsezstoredproc.getfiltereditkind: filtereditkindty;

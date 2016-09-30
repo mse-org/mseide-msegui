@@ -1,4 +1,7 @@
 MSEide+MSEgui breaking changes version history
+2016-09-30
+ Options belonging to bufdataset descendants only moved from
+ tdscontroller.options to tmsebufdataset.options.
 2016-09-26
  TCustomSQLConnection DatabaseName, Password, UserName, HostName, Charset and
  Role properties ansistring -> msestring.

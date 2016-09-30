@@ -14,11 +14,12 @@ uses
  classes,mclasses,mdb,msestrings,msebufdataset,msedb,mseapplication,msetypes;
 
 const
- defaultlocaldsoptions = defaultdscontrolleroptions + [dso_local,dso_utf8]; 
+ defaultlocaldsoptions = defaultdscontrolleroptions + [dso_utf8]; 
+ defaultlocalbdsoptions = defaultbufdatasetoptions + [bdo_local];
 type
  tlocaldscontroller = class(tdscontroller)
   protected
-   procedure setoptions(const avalue: datasetoptionsty); override;   
+//   procedure setoptions(const avalue: datasetoptionsty); override;   
   public
    constructor create(const aowner: tdataset; const aintf: idscontroller;
                       const arecnooffset: integer = 0;
@@ -55,6 +56,7 @@ type
    procedure endfilteredit;
    procedure doidleapplyupdates;
   protected
+   procedure setoptions(const avalue: bufdatasetoptionsty) override;
    procedure setactive (const value : boolean); reintroduce;
    function getactive: boolean;
    procedure loaded; override;
@@ -99,6 +101,7 @@ type
    procedure post; override;
    function moveby(const distance: integer): integer;
   published
+   property options default defaultlocalbdsoptions;
    property controller: tdscontroller read fcontroller write setcontroller;
    property Active: boolean read getactive write setactive default false;
    property FieldDefs;
@@ -138,17 +141,18 @@ begin
  inherited;
  foptions:= defaultlocaldsoptions;
 end;
-
+{
 procedure tlocaldscontroller.setoptions(const avalue: datasetoptionsty);
 begin
  inherited setoptions(avalue + [dso_local]);
 end;
-
+}
 { tlocaldataset }
 
 constructor tlocaldataset.create(aowner: tcomponent);
 begin
  inherited;
+ foptions:= defaultlocalbdsoptions;
  fcontroller:= tlocaldscontroller.create(self,idscontroller(self),-1,false);
 end;
 
@@ -342,6 +346,11 @@ end;
 procedure tlocaldataset.doidleapplyupdates;
 begin
  //dummy
+end;
+
+procedure tlocaldataset.setoptions(const avalue: bufdatasetoptionsty);
+begin
+ inherited setoptions(avalue + [bdo_local]);
 end;
 
 function tlocaldataset.getcanmodify: boolean;

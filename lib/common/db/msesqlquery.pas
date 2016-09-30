@@ -727,7 +727,7 @@ begin
  else begin
   fsqlprepbuf:= fsqlbuf;
  end;
- if not (dso_noprepare in getdsoptions) then begin
+ if not (bdo_noprepare in foptions) then begin
   tcustomsqlconnection(database).preparestatement(fcursor,
                              tsqltransaction(transaction),fsqlprepbuf,fparams);
  end;
@@ -813,7 +813,7 @@ begin
   else begin
    fsqlprepbuf:= fsqlbuf;
   end;
-  if not (dso_noprepare in getdsoptions) then begin
+  if not (bdo_noprepare in foptions) then begin
    Db.PrepareStatement(Fcursor,sqltr,fsqlprepBuf,FParams);
   end;
 //  ftablename:= '';
@@ -886,7 +886,7 @@ begin
  bo1:= isutf8;
  updateparams(fparams,bo1);
  fcursor.ftrans:= tsqltransaction(ftransaction).handle;
- if dso_noprepare in getdsoptions then begin
+ if bdo_noprepare in foptions then begin
   tcustomsqlconnection1(fdatabase).executeunprepared(fcursor,
                tsqltransaction(ftransaction),fParams,fsqlprepbuf,bo1);
  end
@@ -1360,12 +1360,10 @@ end;
 
 procedure tsqlquery.refreshtransaction;
 var
- opt1: datasetoptionsty;
  bo1: boolean;
 begin
- opt1:= getdsoptions;
- if not (dso_notransactionrefresh in opt1) then begin
-  if dso_recnotransactionrefresh in opt1 then begin
+ if not (bdo_notransactionrefresh in foptions) then begin
+  if bdo_recnotransactionrefresh in foptions then begin
    bo1:= bs_restorerecno in fbstate;
    include(fbstate,bs_restorerecno);
    try
@@ -1384,7 +1382,7 @@ end;
  
 procedure tsqlquery.internalrefresh;
 begin
- if dso_refreshtransaction in getdsoptions then begin
+ if bdo_refreshtransaction in foptions then begin
   if transaction.savepointlevel < 0 then begin
    transaction.refresh;
   end
@@ -1916,7 +1914,7 @@ begin
   if (fcursor <> nil) and 
                      (FCursor.FStatementType in datareturningtypes) then begin
    Result:= Active and 
-        (FUpdateable or (dso_noapply in fcontroller.options)) and (not FReadOnly)
+        (FUpdateable or (bdo_noapply in foptions)) and (not FReadOnly)
   end
   else begin
    Result:= False;

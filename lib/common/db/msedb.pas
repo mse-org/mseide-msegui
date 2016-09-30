@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 2004-2014 by Martin Schreiber
+{ MSEgui Copyright (c) 2004-2016 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -1261,7 +1261,7 @@ type
                          dso_waitcursor,
                          dso_initinternalcalc,
 
-                            //flags below probably will be moved to 
+                            //flags below have been moved to 
                             //tsqlquery.options
                          dso_postsavepoint,dso_deletesavepoint,
                          dso_cancelupdateonerror,dso_cancelupdatesonerror,
@@ -1271,13 +1271,14 @@ type
                          dso_noapply,dso_autoapply,
                          dso_autocommitret,dso_autocommit,
                          dso_refreshafterapply,dso_recnoapplyrefresh,
-                         dso_refreshtransaction,dso_refreshwaitcursor,
+                         dso_refreshtransaction,
                          dso_notransactionrefresh,dso_recnotransactionrefresh,
                          dso_noprepare,
                          dso_cacheblobs,
                          dso_offline, //disconnect database after open
                          dso_local,   //do not connect database on open
                         
+                         dso_refreshwaitcursor, //deprecated
                          dso_noedit,dso_noinsert,dso_noappend,dso_noupdate,
                          dso_nodelete,
                          dso_canceloncheckbrowsemode
@@ -1287,7 +1288,27 @@ type
                          dso_syncmasterdelete,dso_delayeddetailpost,
                          dso_inserttoupdate,dso_syncinsertfields}); 
  datasetoptionsty = set of datasetoptionty;
-
+const
+ deprecatedbdsoptions = [
+                         dso_postsavepoint,dso_deletesavepoint,
+                         dso_cancelupdateonerror,dso_cancelupdatesonerror,
+                         dso_cancelupdateondeleteerror,
+                         dso_editonapplyerror,
+                         dso_restoreupdateonsavepointrollback,
+                         dso_noapply,dso_autoapply,
+                         dso_autocommitret,dso_autocommit,
+                         dso_refreshafterapply,dso_recnoapplyrefresh,
+                         dso_refreshtransaction,
+                         dso_notransactionrefresh,dso_recnotransactionrefresh,
+                         dso_noprepare,
+                         dso_cacheblobs,
+                         dso_offline, //disconnect database after open
+                         dso_local   //do not connect database on open
+                         ];
+type
+ savepointoptionty = (spo_postsavepoint,spo_deletesavepoint);
+ savepointoptionsty = set of savepointoptionty;
+ 
  idscontroller = interface(iactivatorclient)
   procedure inheriteddataevent(const event: tdataevent; const info: ptrint);
   procedure inheritedcancel;
@@ -1318,6 +1339,7 @@ type
                           //for refresh
   function islastrecord: boolean;
   function updatesortfield(const afield: tfield; const adescend: boolean): boolean;
+  function getsavepointoptions(): savepointoptionsty;
  end;
 
  igetdscontroller = interface(inullinterface)[miid_igetdscontroller]
@@ -1829,7 +1851,7 @@ function opentodynarrayft(const items: array of tfieldtype): fieldtypearty;
 implementation
 uses
  rtlconsts,msefileutils,typinfo,{$ifdef FPC}dbconst{$else}dbconst_del{$endif},
- msearrayutils,mseformatstr,msebits,msefloattostr,
+ msearrayutils,mseformatstr,msebits,msefloattostr,msebufdataset,
  msereal,variants,msedate,msesys,sysconst
  {,msedbgraphics}{$ifdef unix},cwstring{$endif};
 const
@@ -1859,6 +1881,7 @@ type
  tcollection1 = class(tcollection);
  tparam1 = class(tparam);
  tdatasource1 = class(tdatasource);
+ tmsebufdataset1 = class(tmsebufdataset);
 
 function dbtrystringtoguid(const value: string; out guid: tguid): boolean;
 var
@@ -7052,7 +7075,8 @@ end;
 
 { tdscontroller }
 
-constructor tdscontroller.create(const aowner: tdataset; const aintf: idscontroller;
+constructor tdscontroller.create(const aowner: tdataset;
+                                   const aintf: idscontroller;
                                    const arecnooffset: integer = -1;
                                    const acancelresync: boolean = true);
 begin
@@ -7062,6 +7086,11 @@ begin
  fcancelresync:= acancelresync;
  foptions:= defaultdscontrolleroptions;
  inherited create(aowner,aintf);
+ if aowner is tmsebufdataset then begin
+  with tmsebufdataset1(aowner) do begin
+   foldopts:= getdefaultoptions * oldbdsoptions;
+  end;
+ end;
 end;
 
 destructor tdscontroller.destroy;
@@ -7542,12 +7571,12 @@ begin
    application.beginwait;
   end;
   try
-   if dso_local in foptions then begin
-    idscontroller(fintf).openlocal;
-   end
-   else begin
+//   if dso_local in foptions then begin
+//    idscontroller(fintf).openlocal;
+//   end
+//   else begin
     idscontroller(fintf).inheritedinternalopen;
-   end;
+//   end;
   finally
    if bo1 then begin
     application.endwait;
@@ -7772,6 +7801,7 @@ function tdscontroller.execoperation(const akind: opkindty;
 var
  bo1,bo2{,bo3}: boolean;
  int1: integer;
+ savepointoptions: savepointoptionsty;
 begin
 // bo3:= dscs_posting1 in fstate;
  if not (dscs_posting1 in fstate) then begin
@@ -7790,12 +7820,13 @@ begin
     end;
    end;
    try
+    savepointoptions:= idscontroller(fintf).getsavepointoptions;
     case akind of
      opk_post: begin
-      bo1:= dso_postsavepoint in foptions;
+      bo1:= spo_postsavepoint in savepointoptions;
      end;
      opk_delete: begin
-      bo1:= dso_deletesavepoint in foptions;
+      bo1:= spo_deletesavepoint in savepointoptions;
      end;
      else begin
       bo1:= false;
@@ -7963,13 +7994,45 @@ const
 {$endif}
 var
  opt,options1,optionsbefore: datasetoptionsty;
+ bdopt: bufdatasetoptionsty;
 begin
+ if (csreading in fowner.componentstate) and 
+                                      (fowner is tmsebufdataset) then begin
+  with tmsebufdataset1(fowner) do begin
+   if card32(foldopts) <> card32($ffffffff) then begin //old streaming version
+    bdopt:= [];
+    if dso_postsavepoint in avalue then include(bdopt,bdo_postsavepoint);
+    if dso_postsavepoint in avalue then include(bdopt,bdo_postsavepoint);
+    if dso_deletesavepoint in avalue then include(bdopt,bdo_deletesavepoint);
+    if dso_cancelupdateonerror in avalue then include(bdopt,bdo_cancelupdateonerror);
+    if dso_cancelupdatesonerror in avalue then include(bdopt,bdo_cancelupdatesonerror);
+    if dso_cancelupdateondeleteerror in avalue then include(bdopt,bdo_cancelupdateondeleteerror);
+    if dso_editonapplyerror in avalue then include(bdopt,bdo_editonapplyerror);
+    if dso_restoreupdateonsavepointrollback in avalue then include(bdopt,bdo_restoreupdateonsavepointrollback);
+    if dso_noapply in avalue then include(bdopt,bdo_noapply);
+    if dso_autoapply in avalue then include(bdopt,bdo_autoapply);
+    if dso_autocommitret in avalue then include(bdopt,bdo_autocommitret);
+    if dso_autocommit in avalue then include(bdopt,bdo_autocommit);
+    if dso_refreshafterapply in avalue then include(bdopt,bdo_refreshafterapply);
+    if dso_recnoapplyrefresh in avalue then include(bdopt,bdo_recnoapplyrefresh);
+    if dso_refreshtransaction in avalue then include(bdopt,bdo_refreshtransaction);
+    if dso_notransactionrefresh in avalue then include(bdopt,bdo_notransactionrefresh);
+    if dso_recnotransactionrefresh in avalue then include(bdopt,bdo_recnotransactionrefresh);
+    if dso_noprepare in avalue then include(bdopt,bdo_noprepare);
+    if dso_cacheblobs in avalue then include(bdopt,bdo_cacheblobs);
+    if dso_offline in avalue then include(bdopt,bdo_offline);
+    if dso_local in avalue then include(bdopt,bdo_local);
+    foldopts:= bdopt;
+   end;
+  end;
+ end;
  optionsbefore:= foptions;
- opt:= avalue - [dso_refreshwaitcursor];
+ opt:= avalue - [dso_refreshwaitcursor]-deprecatedbdsoptions;
  if dso_refreshwaitcursor in avalue then begin
   include(opt,dso_waitcursor);
  end;
  options1:= datasetoptionsty(longword(foptions) xor longword(opt));
+(*
 {$ifdef FPC}
  foptions:= datasetoptionsty(setsinglebit(longword(opt),longword(foptions),
                  [longword([dso_autocommitret,dso_autocommit]),
@@ -7979,6 +8042,7 @@ begin
  foptions:= datasetoptionsty(setsinglebitar32(longword(opt),longword(foptions),
                                           [longword(mask1),longword(mask2)]));
 {$endif}
+*)
  if [dso_noedit,dso_noinsert,dso_noappend,dso_noupdate,dso_nodelete] *
                                                     options1 <> [] then begin
   if ([dso_noedit,dso_noupdate] * opt <> []) and 

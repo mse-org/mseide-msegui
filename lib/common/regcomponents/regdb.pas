@@ -1694,7 +1694,7 @@ end;
 function tdatasetoptionspropertyeditor.getinvisibleitems: tintegerset;
 {$ifndef FPC}
 const
- mask1: datasetoptionsty = [dso_refreshwaitcursor];
+ mask1: datasetoptionsty = [dso_refreshwaitcursor]+deprecatedbdsoptions;
 {$endif}
 begin
  result:= tintegerset(

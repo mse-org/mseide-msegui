@@ -581,7 +581,42 @@ type
  filterediteventty = procedure(const sender: tmsebufdataset;
                              const akind: filtereditkindty) of object;
  bufdatasetarty = array of tmsebufdataset;
- 
+
+ bufdatasetoptionty = (bdo_postsavepoint,bdo_deletesavepoint,
+                       bdo_cancelupdateonerror,bdo_cancelupdatesonerror,
+                       bdo_cancelupdateondeleteerror,
+                       bdo_editonapplyerror,
+                       bdo_restoreupdateonsavepointrollback,
+                       bdo_noapply,bdo_autoapply,
+                       bdo_autocommitret,bdo_autocommit,
+                       bdo_refreshafterapply,bdo_recnoapplyrefresh,
+                       bdo_refreshtransaction,
+                       bdo_notransactionrefresh,bdo_recnotransactionrefresh,
+                       bdo_noprepare,
+                       bdo_cacheblobs,
+                       bdo_offline, //disconnect database after open
+                       bdo_local    //do not connect database on open
+                       );   
+ bufdatasetoptionsty = set of bufdatasetoptionty;
+const
+ defaultbufdatasetoptions = [];
+ oldbdsoptions = [
+                         bdo_postsavepoint,bdo_deletesavepoint,
+                         bdo_cancelupdateonerror,bdo_cancelupdatesonerror,
+                         bdo_cancelupdateondeleteerror,
+                         bdo_editonapplyerror,
+                         bdo_restoreupdateonsavepointrollback,
+                         bdo_noapply,bdo_autoapply,
+                         bdo_autocommitret,bdo_autocommit,
+                         bdo_refreshafterapply,bdo_recnoapplyrefresh,
+                         bdo_refreshtransaction,
+                         bdo_notransactionrefresh,bdo_recnotransactionrefresh,
+                         bdo_noprepare,
+                         bdo_cacheblobs,
+                         bdo_offline, //disconnect database after open
+                         bdo_local   //do not connect database on open
+                         ];
+type 
  tmsebufdataset = class(tmdbdataset,iblobchache,idatasetsum,imasterlink,
                         idbdata,iobjectlink)
   private
@@ -781,15 +816,18 @@ type
    function getchangerecords: recupdateinfoarty;
    function getapplyerrorrecords: recupdateinfoarty;
    function getcurrentbmasvariant(const afield: tfield;
-                                                           const abm: bookmarkdataty): variant;
+                                      const abm: bookmarkdataty): variant;
    procedure setcurrentbmasvariant(const afield: tfield;
-                                                           const abm: bookmarkdataty;
-                   const avalue: variant);
+                       const abm: bookmarkdataty; const avalue: variant);
    procedure setcryptohandler(const avalue: tcustomcryptohandler);
    function getrecnozerobased: int32;
    procedure setrecnozerobased(const avalue: int32);
+   procedure readstreamingversion(reader: treader);
+   procedure writestreamingversion(writer: twriter);
   protected
+   foldopts: bufdatasetoptionsty; //transferred from tdatasetcontroller
    fcontroller: tdscontroller;
+   foptions: bufdatasetoptionsty;
    fbrecordcount: integer;
    ffieldinfos: fieldinfoarty;
    ffieldorder: integerarty;
@@ -811,6 +849,8 @@ type
    flastcurrentindex: integer;
    fsavepointlevel: integer;
 
+   procedure setoptions(const avalue: bufdatasetoptionsty) virtual;
+   function getdefaultoptions: bufdatasetoptionsty virtual;
    procedure openlocal;
    procedure fixupcurrentset; virtual;
    procedure currentcheckbrowsemode;
@@ -880,7 +920,7 @@ type
    procedure FreeFieldBuffers; override;
    procedure cancelrecupdate(var arec: recupdatebufferty);
    procedure setdatastringvalue(const afield: tfield; const avalue: string);
-   function getdsoptions: datasetoptionsty; virtual;
+//   function getdsoptions: datasetoptionsty; virtual;
    procedure resetblobcache;
    procedure sortblobcache;   
    procedure fetchblobs;
@@ -935,7 +975,9 @@ type
    procedure setactive(value: boolean); override;
 
    procedure CalculateFields(Buffer: PChar); override;
-   procedure loaded; override;                              
+   procedure loaded override;                              
+   procedure defineproperties(filer: tfiler) override;
+   procedure readstate(reader: treader) override;
    procedure OpenCursor(InfoQuery: Boolean); override;
    procedure internalopen; override;
    procedure internalclose; override;
@@ -995,6 +1037,7 @@ type
     //idscontroller
    procedure begindisplaydata;
    procedure enddisplaydata;
+   function getsavepointoptions(): savepointoptionsty;
     //idbdata
    function getindex(const afield: tfield): integer; //-1 if none
    function gettextindex(const afield: tfield;
@@ -1281,6 +1324,8 @@ type
 
    
   published
+   property options: bufdatasetoptionsty read foptions 
+                                            write setoptions default [];
    property logfilename: filenamety read flogfilename write flogfilename;
    property cryptohandler: tcustomcryptohandler read fcryptohandler
                                                   write setcryptohandler;
@@ -1316,7 +1361,7 @@ procedure alignfieldpos(var avalue: integer);
 implementation
 uses
  rtlconsts,{$ifdef FPC}dbconst{$else}dbconst_del,classes_del{$endif},sysutils,
- mseformatstr,msereal,msesys,msefileutils,mseapplication,msesysutils;
+ mseformatstr,msereal,msesys,msefileutils,mseapplication,msesysutils,msebits;
  
 type
  tmsestringfield1 = class(tmsestringfield); 
@@ -1931,6 +1976,7 @@ end;
 
 constructor tmsebufdataset.Create(AOwner : TComponent);
 begin
+ foptions:= getdefaultoptions();
  frecno:= -1;
  findexlocal:= tlocalindexes.create(self);
  packetrecords:= defaultpacketrecords;
@@ -2309,7 +2355,7 @@ begin
   end;
  end;
  include(fbstate,bs_opening);
- if dso_cacheblobs in getdsoptions then begin
+ if bdo_cacheblobs in foptions then begin
   include(fbstate,bs_blobsfetched);
  end
  else begin 
@@ -3364,7 +3410,7 @@ begin
  po1:= fcurrentbuf;
  recnobefore:= frecno;
  deleterecord(frecno);
- if not (dso_noapply in fcontroller.options) then begin
+ if not (bdo_noapply in foptions) then begin
   if not getrecordupdatebuffer then begin
    getnewupdatebuffer;
    with fupdatebuffer[fcurrentupdatebuffer] do begin
@@ -3960,7 +4006,7 @@ begin
    fcurrentbuf:= intallocrecord;
   end;
   newupdatebuffer:= false;
-  canapply:= not (dso_noapply in fcontroller.options);
+  canapply:= not (bdo_noapply in foptions);
   if canapply then begin
    newupdatebuffer:= not getrecordupdatebuffer;
    if newupdatebuffer then begin
@@ -4377,6 +4423,31 @@ begin
  setrecno1(avalue + 1,false);
 end;
 
+procedure tmsebufdataset.setoptions(const avalue: bufdatasetoptionsty);
+begin
+ if avalue <> foptions then begin
+  if bdo_restoreupdateonsavepointrollback in avalue then begin
+   include(fbstate1,bs1_restoreupdate);
+  end
+  else begin
+   if (bs1_restoreupdate in fbstate1) and active and 
+                           not (csloading in componentstate) then begin
+    postrecupdatebuffer;
+   end;
+   exclude(fbstate1,bs1_restoreupdate);
+  end;
+  foptions:= bufdatasetoptionsty(setsinglebit(card32(avalue),card32(foptions),
+                 [card32([bdo_autocommitret,bdo_autocommit]),
+                  card32([bdo_editonapplyerror,bdo_cancelupdatesonerror,
+                     bdo_cancelupdateonerror,bdo_cancelupdateondeleteerror])]));
+ end;
+end;
+
+function tmsebufdataset.getdefaultoptions: bufdatasetoptionsty;
+begin
+ result:= defaultbufdatasetoptions;
+end;
+
 function tmsebufdataset.getrecno: longint;
 begin
  result:= getrecnozerobased + 1;
@@ -4655,7 +4726,7 @@ end;
 
 function tmsebufdataset.blobsarefetched: boolean;
 begin
- result:= (bs_blobsfetched in fbstate) or (dso_cacheblobs in getdsoptions);
+ result:= (bs_blobsfetched in fbstate) or (bdo_cacheblobs in foptions);
 end;
 
 function tmsebufdataset.getblobcache: blobcacheinfoarty;
@@ -5650,6 +5721,34 @@ begin
  checkfilterstate;
 end;
 
+procedure tmsebufdataset.readstreamingversion(reader: treader);
+begin
+ reader.readinteger();
+ card32(foldopts):= $ffffffff; //none
+end;
+
+procedure tmsebufdataset.writestreamingversion(writer: twriter);
+begin
+ writer.writeinteger(1);
+end;
+
+procedure tmsebufdataset.defineproperties(filer: tfiler);
+begin
+ inherited;
+ filer.defineproperty('streamingversion',@readstreamingversion,
+                                             @writestreamingversion,true);
+end;
+
+procedure tmsebufdataset.readstate(reader: treader);
+begin
+ inherited;
+ if card32(foldopts) <> $ffffffff then begin
+  options:= (options - 
+             (bufdatasetoptionsty(not(card32(foldopts)))*oldbdsoptions)
+            ) + (foldopts * oldbdsoptions)
+ end;
+end;
+
 procedure tmsebufdataset.dofilterrecord(var acceptable: boolean);
 begin
  if checkcanevent(self,tmethod(onfilterrecord)) then begin
@@ -6553,11 +6652,12 @@ begin
  result:= false;
 end;
 }
+{
 function tmsebufdataset.getdsoptions: datasetoptionsty;
 begin
  result:= [];
 end;
-
+}
 procedure tmsebufdataset.checkconnected;
 begin
  if not (bs_connected in fbstate) then begin
@@ -8579,6 +8679,17 @@ begin
  exclude(fbstate,bs_displaydata);
 end;
 
+function tmsebufdataset.getsavepointoptions(): savepointoptionsty;
+begin
+ result:= [];
+ if bdo_postsavepoint in foptions then begin
+  include(result,spo_postsavepoint);
+ end;
+ if bdo_deletesavepoint in foptions then begin
+  include(result,spo_deletesavepoint);
+ end;
+end;
+
 function tmsebufdataset.getdata(const afields: array of tfield): variantararty;
 var
  ar1: fieldarty;
@@ -8621,15 +8732,6 @@ end;
 
 procedure tmsebufdataset.dscontrolleroptionschanged(const aoptions: datasetoptionsty);
 begin
- if dso_restoreupdateonsavepointrollback in aoptions then begin
-  include(fbstate1,bs1_restoreupdate);
- end
- else begin
-  if (bs1_restoreupdate in fbstate1) and active then begin
-   postrecupdatebuffer;
-  end;
-  exclude(fbstate1,bs1_restoreupdate);
- end;
 end;
 
 procedure tmsebufdataset.savepointevent(const sender: tmdbtransaction;

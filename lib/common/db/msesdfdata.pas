@@ -38,6 +38,7 @@ type
    function getnumboolean: boolean;
    function getfloatdate: boolean;
    function getint64currency: boolean;
+   function getsavepointoptions(): savepointoptionsty;
    function getfiltereditkind: filtereditkindty;
    procedure beginfilteredit(const akind: filtereditkindty);
    procedure endfilteredit;
@@ -114,6 +115,7 @@ type
    function getnumboolean: boolean;
    function getfloatdate: boolean;
    function getint64currency: boolean;
+   function getsavepointoptions(): savepointoptionsty;
    function getfiltereditkind: filtereditkindty;
    procedure beginfilteredit(const akind: filtereditkindty);
    procedure endfilteredit;
@@ -364,6 +366,11 @@ end;
 function tmsefixedformatdataset.getint64currency: boolean;
 begin
  result:= false;
+end;
+
+function tmsefixedformatdataset.getsavepointoptions(): savepointoptionsty;
+begin
+ result:= [];
 end;
 
 function tmsefixedformatdataset.getfiltereditkind: filtereditkindty;
@@ -636,6 +643,11 @@ end;
 function tmsesdfdataset.getint64currency: boolean;
 begin
  result:= false;
+end;
+
+function tmsesdfdataset.getsavepointoptions(): savepointoptionsty;
+begin
+ result:= [];
 end;
 
 function tmsesdfdataset.getfiltereditkind: filtereditkindty;

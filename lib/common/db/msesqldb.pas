@@ -35,8 +35,9 @@ type
 const
  defaultfieldparamlinkoptions = [fplo_autorefresh,fplo_refreshifchangedonly];
 
- defaultsqlcontrolleroptions = defaultdscontrolleroptions +
-                         [dso_autoapply,dso_autocommitret];
+ defaultsqlcontrolleroptions = defaultdscontrolleroptions;
+ defaultsqlbdsoptions = defaultbufdatasetoptions +
+                                            [bdo_autoapply,bdo_autocommitret];
 type
  tmsesqltransaction = class(tsqltransaction,iactivatorclient)
   private
@@ -98,6 +99,7 @@ type
 //   procedure setstatementtype(const avalue: TStatementType);
    procedure checkcanupdate;
   protected
+   function getdefaultoptions(): bufdatasetoptionsty override;
    procedure dobeforeapplyupdate; override;
    procedure checkpendingupdates; override;
    procedure setactive(avalue: boolean); override;
@@ -135,7 +137,7 @@ type
    procedure doidleapplyupdates;
 
 //   function wantblobfetch: boolean; override;
-   function getdsoptions: datasetoptionsty; override;
+//   function getdsoptions: datasetoptionsty; override;
    procedure afterpost(const sender: tdataset; var ok: boolean);
 //   function cantransactionrefresh: boolean; override;
 //,   function refreshtransdatasets: boolean; override;
@@ -160,6 +162,7 @@ type
    procedure applyupdate; overload; override;
   published
    property FieldDefs;
+   property options default defaultsqlbdsoptions;
    property controller: tdscontroller read fcontroller write setcontroller;
    property Active: boolean read getactive write setactive1 default false;
    property onapplyrecupdate: applyrecupdateeventty read fonapplyrecupdate
@@ -534,7 +537,12 @@ end;
 
 procedure tmsesqlquery.inheritedinternalopen;
 begin
- inherited internalopen;
+ if bdo_local in foptions then begin
+  openlocal();
+ end
+ else begin
+  inherited internalopen;
+ end;
 end;
 
 procedure tmsesqlquery.internalopen;
@@ -560,8 +568,8 @@ begin
   end;
  end;
  fcontroller.internalopen;
- if not streamloading and not (dso_local in fcontroller.options) then begin
-  connected:= not (dso_offline in fcontroller.options);
+ if not streamloading and not (bdo_local in foptions) then begin
+  connected:= not (bdo_offline in foptions);
  end;
 end;
 
@@ -648,7 +656,7 @@ end;
 
 procedure tmsesqlquery.afterpost(const sender: tdataset; var ok: boolean);
 begin
- if (dso_autoapply in fcontroller.options) and 
+ if (bdo_autoapply in foptions) and 
                        not(bs_noautoapply in fbstate) then begin
   try
    applyupdate;
@@ -679,25 +687,25 @@ begin
  if writetransaction <> nil then begin //can be nil in local mode
   if (ftransopenref = writetransaction.opencount) then begin
    if (writetransaction.savepointlevel < 0) then begin
-    if dso_autocommitret in fcontroller.options then begin
+    if bdo_autocommitret in foptions then begin
      writetransaction.commitretaining;
     end;
-    if dso_autocommit in fcontroller.options then begin
+    if bdo_autocommit in foptions then begin
      writetransaction.commit;
     end;
    end
    else begin
-    if dso_autocommitret in fcontroller.options then begin
+    if bdo_autocommitret in foptions then begin
      writetransaction.pendingaction:= cacommitretaining;
     end;
-    if dso_autocommit in fcontroller.options then begin
+    if bdo_autocommit in foptions then begin
      writetransaction.pendingaction:= cacommit;
     end;
    end;
   end;
  end;
- if dso_refreshafterapply in fcontroller.options then begin
-  fcontroller.refresh(dso_recnoapplyrefresh in fcontroller.options);
+ if bdo_refreshafterapply in foptions then begin
+  fcontroller.refresh(bdo_recnoapplyrefresh in foptions);
  end;
 end;
 
@@ -718,6 +726,11 @@ begin
  end;
 end;
 
+function tmsesqlquery.getdefaultoptions(): bufdatasetoptionsty;
+begin
+ result:= defaultsqlbdsoptions;
+end;
+
 procedure tmsesqlquery.applyupdates(const maxerrors: integer;
                 const cancelonerror: boolean;
                 const cancelondeleteerror: boolean = false;
@@ -729,7 +742,7 @@ begin
   inherited;
  finally
   if (sqs_updateerror in fmstate) and 
-              (dso_cancelupdatesonerror in fcontroller.options) then begin
+              (bdo_cancelupdatesonerror in foptions) then begin
    cancelupdates;
   end;
  end;
@@ -777,19 +790,19 @@ end;
 
 procedure tmsesqlquery.applyupdates(const maxerrors: integer = 0);
 begin
- applyupdates(maxerrors,fcontroller.options *
-      [dso_cancelupdateonerror,dso_cancelupdatesonerror] <> [],
-      dso_cancelupdateondeleteerror in fcontroller.options,
-      dso_editonapplyerror in fcontroller.options);
+ applyupdates(maxerrors,foptions *
+      [bdo_cancelupdateonerror,bdo_cancelupdatesonerror] <> [],
+      bdo_cancelupdateondeleteerror in foptions,
+      bdo_editonapplyerror in foptions);
 end;
 
 procedure tmsesqlquery.applyupdate;
 begin
  checkcanupdate;
- inherited applyupdate(fcontroller.options *
-      [dso_cancelupdateonerror,dso_cancelupdatesonerror] <> [],
-      dso_cancelupdateondeleteerror in fcontroller.options,
-      dso_editonapplyerror in fcontroller.options);
+ inherited applyupdate(foptions *
+      [bdo_cancelupdateonerror,bdo_cancelupdatesonerror] <> [],
+      bdo_cancelupdateondeleteerror in foptions,
+      bdo_editonapplyerror in foptions);
 end;
 
 function tmsesqlquery.getfieldclass(fieldtype: tfieldtype): tfieldclass;
@@ -856,7 +869,7 @@ end;
 procedure tmsesqlquery.DoAfterDelete;
 begin
  inherited;
- if (dso_autoapply in fcontroller.options) and 
+ if (bdo_autoapply in foptions) and 
                    not(bs_noautoapply in fbstate) then begin
   applyupdates;
  end;
@@ -881,12 +894,12 @@ function tmsesqlquery.isutf8: boolean;
 begin
  result:= fcontroller.isutf8;
 end;
-
+{
 function tmsesqlquery.getdsoptions: datasetoptionsty;
 begin
  result:= fcontroller.options;
 end;
-
+}
 {
 function tmsesqlquery.wantblobfetch: boolean;
 begin
@@ -907,7 +920,7 @@ end;
 
 function tmsesqlquery.islocal: boolean;
 begin
- result:= (dso_local in fcontroller.options) and not connected;
+ result:= (bdo_local in foptions) and not connected;
 end;
 
 procedure tmsesqlquery.inheritedinternalclose;

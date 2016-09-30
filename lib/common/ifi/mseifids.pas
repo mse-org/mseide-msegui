@@ -222,6 +222,7 @@ type
    function getnumboolean: boolean;
    function getfloatdate: boolean;
    function getint64currency: boolean;
+   function getsavepointoptions(): savepointoptionsty;
 
    function  intallocrecord: pintrecordty;    
    procedure finalizestrings(var header: recheaderty);
@@ -2298,6 +2299,11 @@ end;
 function tifidataset.getint64currency: boolean;
 begin
  result:= false;
+end;
+
+function tifidataset.getsavepointoptions(): savepointoptionsty;
+begin
+ result:= [];
 end;
 {
 procedure tifidataset.setchannel(const avalue: tcustomiochannel);
