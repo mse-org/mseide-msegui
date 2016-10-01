@@ -2197,6 +2197,7 @@ type
    flookupbuffer: tcustomlookupbuffer;
    ffieldno: integer;
    fsortfieldno: integer;
+   funsorted: boolean;
   protected
    function getrowtext(const arow: integer): msestring; override;
   public
@@ -2262,7 +2263,7 @@ type
    ffieldno: lookupbufferfieldnoty;
    procedure setfieldno(const avalue: lookupbufferfieldnoty);
   protected
-  //ilookupbufferfieldinfo
+    //ilookupbufferfieldinfo
    function getlbdatakind(const apropname: string): lbdatakindty;
    function getlookupbuffer: tcustomlookupbuffer;
   published
@@ -2280,7 +2281,7 @@ type
    property items[const index: integer]: tlbdropdowncol read getitems; default;
  end;
 
- optionlbty = (olb_copyitems);
+ optionlbty = (olb_copyitems,olb_unsorted);
  optionslbty = set of optionlbty;
                                    
  texterndatadropdownlistcontroller = class(tcustomdropdownlistcontroller)
@@ -11412,8 +11413,13 @@ var
 begin
  int1:= tlbdropdownlist(fcellinfo.grid).getrecno(arow);
  if int1 >= 0 then begin
-  result:= flookupbuffer.textvaluephys(ffieldno,
+  if funsorted then begin
+   result:= flookupbuffer.textvaluephys(ffieldno,int1);
+  end
+  else begin
+   result:= flookupbuffer.textvaluephys(ffieldno,
           flookupbuffer.textindex(fsortfieldno,int1,true));
+  end;
  end
  else begin
   result:= '';
@@ -11937,6 +11943,8 @@ begin
    flookupbuffer:= lookupbuffer1;
    fsortfieldno:= tcustomlbdropdownlistcontroller(fcontroller).fsortfieldno;
    ffieldno:= tlbdropdowncol(acols[int1]).ffieldno;
+   funsorted:= olb_unsorted in 
+                           tlbdropdownlistcontroller(fcontroller).foptionslb;
   end;
  end;
 end;
@@ -11955,17 +11963,9 @@ begin
     result:= (int1 < flookupbuffer.count) and 
             (msepartialcomparetext(filter,
              flookupbuffer.textvaluelog(ffieldno,int1,true)) = 0);
-   {
-    result:= (int1 < flookupbuffer.count) and 
-            (msecomparetextlen(filter,
-             flookupbuffer.textvaluelog(ffieldno,int1,true)) = 0);
-    if not result then begin
-     inc(int1);
-    end;
-    result:= (int1 < flookupbuffer.count) and 
-          (msecomparetextlen(filter,
-            flookupbuffer.textvaluelog(ffieldno,int1,true)) = 0);
-   }
+   end;
+   if funsorted then begin
+    int1:= flookupbuffer.textindex(ffieldno,int1,true); //get phys recno
    end;
   end;
  end;
@@ -12032,7 +12032,12 @@ begin
   if assigned(fonfilter) then begin
    int3:= 0;
    for int1:= 0 to high(fedrecnums) do begin
-    int4:= flookupbuffer.textindex(sortfieldno,int1,true);
+    if olb_unsorted in foptionslb then begin
+     int4:= int1;
+    end
+    else begin
+     int4:= flookupbuffer.textindex(sortfieldno,int1,true);
+    end;
     bo1:= true;
     fonfilter(flookupbuffer,int4,bo1);
     if bo1 then begin
@@ -12043,7 +12048,15 @@ begin
    setlength(fedrecnums,int3);
   end
   else begin
-   fedrecnums:= flookupbuffer.textindexar(sortfieldno,true);
+   if olb_unsorted in foptionslb then begin
+    setlength(fedrecnums,flookupbuffer.count);
+    for int1:= 0 to high(fedrecnums) do begin
+     fedrecnums[int1]:= int1;
+    end;
+   end
+   else begin
+    fedrecnums:= flookupbuffer.textindexar(sortfieldno,true);
+   end;
   end;
   for int1:= 0 to fcols.count - 1 do begin
    with cols[int1] do begin
@@ -12066,7 +12079,12 @@ function  tcustomlbdropdownlistcontroller.createdropdownlist: tdropdownlist;
 begin
  if olb_copyitems in foptionslb then begin
   reloadlist;
-  result:= tcopydropdownlist.create(self,fcols,nil);
+  if olb_unsorted in foptionslb then begin
+   result:= tdropdownlist.create(self,fcols,nil); //normal locate
+  end
+  else begin
+   result:= tcopydropdownlist.create(self,fcols,nil);
+  end;
  end
  else begin
   result:= tlbdropdownlist.create(self,fcols);
@@ -12098,7 +12116,9 @@ begin
   end
   else begin
    int1:= tlbdropdownlist(fdropdownlist).getrecno(index);
-   int1:= flookupbuffer.textindex(cols[0].fieldno,int1,true)
+   if not (olb_unsorted in foptionslb) then begin
+    int1:= flookupbuffer.textindex(cols[0].fieldno,int1,true)
+   end;
   end;
   tdropdowncols1(fcols).fitemindex:= int1;
  end;
