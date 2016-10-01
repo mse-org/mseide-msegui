@@ -919,7 +919,7 @@ type
    scriptbeforecopy: tfilenameedit;
    scriptaftercopy: tfilenameedit;
    newinheritedforms: tbooleanedit;
-   newformnamebases: tstringedit;
+   newfonamebases: tstringedit;
    twidgetgrid1: twidgetgrid;
    newfinames: tstringedit;
    newfisources: tfilenameedit;

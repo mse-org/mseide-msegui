@@ -649,6 +649,17 @@ object projectoptionsfo: tprojectoptionsfo
                   frame.localprops1 = []
                   frame.button.color = -2147483646
                   frame.button.options = [fbo_inactiveinvisible]
+                  frame.buttons.count = 2
+                  frame.buttons.items = <                  
+                    item
+                      color = -2147483646
+                      options = [fbo_inactiveinvisible]
+                    end                  
+                    item
+                      color = -2147483646
+                      imagenr = 17
+                      options = [fbo_inactiveinvisible]
+                    end>
                   frame.buttonellipse.color = -2147483646
                   frame.buttonellipse.imagenr = 17
                   frame.buttonellipse.options = [fbo_inactiveinvisible]
@@ -675,6 +686,17 @@ object projectoptionsfo: tprojectoptionsfo
                   frame.localprops1 = []
                   frame.button.color = -2147483646
                   frame.button.options = [fbo_inactiveinvisible]
+                  frame.buttons.count = 2
+                  frame.buttons.items = <                  
+                    item
+                      color = -2147483646
+                      options = [fbo_inactiveinvisible]
+                    end                  
+                    item
+                      color = -2147483646
+                      imagenr = 17
+                      options = [fbo_inactiveinvisible]
+                    end>
                   frame.buttonellipse.color = -2147483646
                   frame.buttonellipse.imagenr = 17
                   frame.buttonellipse.options = [fbo_inactiveinvisible]
@@ -821,6 +843,17 @@ object projectoptionsfo: tprojectoptionsfo
                     frame.localprops1 = []
                     frame.button.color = -2147483646
                     frame.button.options = [fbo_inactiveinvisible]
+                    frame.buttons.count = 2
+                    frame.buttons.items = <                    
+                      item
+                        color = -2147483646
+                        options = [fbo_inactiveinvisible]
+                      end                    
+                      item
+                        color = -2147483646
+                        imagenr = 17
+                        options = [fbo_inactiveinvisible]
+                      end>
                     frame.buttonellipse.color = -2147483646
                     frame.buttonellipse.imagenr = 17
                     frame.buttonellipse.options = [fbo_inactiveinvisible]
@@ -847,6 +880,17 @@ object projectoptionsfo: tprojectoptionsfo
                     frame.localprops1 = []
                     frame.button.color = -2147483646
                     frame.button.options = [fbo_inactiveinvisible]
+                    frame.buttons.count = 2
+                    frame.buttons.items = <                    
+                      item
+                        color = -2147483646
+                        options = [fbo_inactiveinvisible]
+                      end                    
+                      item
+                        color = -2147483646
+                        imagenr = 17
+                        options = [fbo_inactiveinvisible]
+                      end>
                     frame.buttonellipse.color = -2147483646
                     frame.buttonellipse.imagenr = 17
                     frame.buttonellipse.options = [fbo_inactiveinvisible]
@@ -1047,6 +1091,10 @@ object projectoptionsfo: tprojectoptionsfo
                   frame.caption = 'Eolstyle'
                   frame.localprops = []
                   frame.localprops1 = []
+                  frame.buttons.count = 1
+                  frame.buttons.items = <                  
+                    item
+                    end>
                   frame.outerframe = (
                     0
                     17
@@ -1089,6 +1137,11 @@ object projectoptionsfo: tprojectoptionsfo
                   frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive]
                   frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive]
                   frame.button.color = -2147483646
+                  frame.buttons.count = 1
+                  frame.buttons.items = <                  
+                    item
+                      color = -2147483646
+                    end>
                   frame.outerframe = (
                     0
                     17
@@ -1731,6 +1784,11 @@ object projectoptionsfo: tprojectoptionsfo
                 frame.localprops = [frl_levelo, frl_colorclient]
                 frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive]
                 frame.button.color = -1879048187
+                frame.buttons.count = 1
+                frame.buttons.items = <                
+                  item
+                    color = -1879048187
+                  end>
                 taborder = 5
                 visible = False
                 bounds_x = 168
@@ -1864,7 +1922,7 @@ object projectoptionsfo: tprojectoptionsfo
               frame.localprops1 = []
               taborder = 2
               bounds_x = 0
-              bounds_y = 76
+              bounds_y = 74
               bounds_cx = 754
               bounds_cy = 37
               anchors = [an_top]
@@ -1955,7 +2013,7 @@ object projectoptionsfo: tprojectoptionsfo
               hint = '"--tty DEVICE" to set target terminal'
               onshowhint = hintexpandedmacros
               bounds_x = 1
-              bounds_y = 113
+              bounds_y = 111
               bounds_cx = 752
               bounds_cy = 37
               anchors = [an_left, an_top, an_right]
@@ -1968,7 +2026,7 @@ object projectoptionsfo: tprojectoptionsfo
               frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive]
               taborder = 5
               bounds_x = 0
-              bounds_y = 190
+              bounds_y = 188
               bounds_cx = 754
               bounds_cy = 37
               anchors = [an_top]
@@ -2111,7 +2169,7 @@ object projectoptionsfo: tprojectoptionsfo
               frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive]
               taborder = 6
               bounds_x = 0
-              bounds_y = 233
+              bounds_y = 227
               bounds_cx = 754
               bounds_cy = 37
               anchors = [an_top]
@@ -2344,7 +2402,7 @@ object projectoptionsfo: tprojectoptionsfo
               frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive]
               taborder = 4
               bounds_x = 0
-              bounds_y = 153
+              bounds_y = 151
               bounds_cx = 593
               bounds_cy = 37
               optionsscale = [osc_expandx, osc_shrinkx, osc_expandy, osc_shrinky]
@@ -2361,6 +2419,11 @@ object projectoptionsfo: tprojectoptionsfo
                 frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive]
                 frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive]
                 frame.button.color = -2147483646
+                frame.buttons.count = 1
+                frame.buttons.items = <                
+                  item
+                    color = -2147483646
+                  end>
                 frame.outerframe = (
                   0
                   17
@@ -2813,6 +2876,11 @@ object projectoptionsfo: tprojectoptionsfo
           frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive]
           frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive]
           frame.button.color = -2147483646
+          frame.buttons.count = 1
+          frame.buttons.items = <          
+            item
+              color = -2147483646
+            end>
           frame.outerframe = (
             0
             17
@@ -4216,6 +4284,15 @@ object projectoptionsfo: tprojectoptionsfo
           frame.localprops = []
           frame.localprops1 = []
           frame.button.options = [fbo_inactiveinvisible]
+          frame.buttons.count = 2
+          frame.buttons.items = <          
+            item
+              options = [fbo_inactiveinvisible]
+            end          
+            item
+              imagenr = 17
+              options = [fbo_inactiveinvisible]
+            end>
           frame.buttonellipse.imagenr = 17
           frame.buttonellipse.options = [fbo_inactiveinvisible]
           frame.outerframe = (
@@ -4246,6 +4323,15 @@ object projectoptionsfo: tprojectoptionsfo
           frame.localprops = []
           frame.localprops1 = []
           frame.button.options = [fbo_inactiveinvisible]
+          frame.buttons.count = 2
+          frame.buttons.items = <          
+            item
+              options = [fbo_inactiveinvisible]
+            end          
+            item
+              imagenr = 17
+              options = [fbo_inactiveinvisible]
+            end>
           frame.buttonellipse.imagenr = 17
           frame.buttonellipse.options = [fbo_inactiveinvisible]
           frame.outerframe = (
@@ -4276,6 +4362,15 @@ object projectoptionsfo: tprojectoptionsfo
           frame.localprops = []
           frame.localprops1 = []
           frame.button.options = [fbo_inactiveinvisible]
+          frame.buttons.count = 2
+          frame.buttons.items = <          
+            item
+              options = [fbo_inactiveinvisible]
+            end          
+            item
+              imagenr = 17
+              options = [fbo_inactiveinvisible]
+            end>
           frame.buttonellipse.imagenr = 17
           frame.buttonellipse.options = [fbo_inactiveinvisible]
           frame.outerframe = (
@@ -4976,6 +5071,15 @@ object projectoptionsfo: tprojectoptionsfo
             frame.localprops = [frl_levelo, frl_colorclient]
             frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive]
             frame.button.color = -1879048187
+            frame.buttons.count = 2
+            frame.buttons.items = <            
+              item
+                color = -1879048187
+              end            
+              item
+                color = -1879048187
+                imagenr = 17
+              end>
             frame.buttonellipse.color = -1879048187
             frame.buttonellipse.imagenr = 17
             taborder = 2
@@ -5550,11 +5654,11 @@ object projectoptionsfo: tprojectoptionsfo
                   widgetname = 'newinheritedforms'
                   dataclass = tgridintegerdatalist
                 end              
-                item[newformnamebases]
+                item[newfonamebases]
                   width = 73
                   options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
                   onshowhint = colonshowhint
-                  widgetname = 'newformnamebases'
+                  widgetname = 'newfonamebases'
                   dataclass = tgridmsestringdatalist
                 end              
                 item[newfosources]
@@ -5597,7 +5701,7 @@ object projectoptionsfo: tprojectoptionsfo
                 optionsedit1 = [oe1_autopopupmenu, oe1_keyexecute, oe1_savestate]
                 visible = False
               end
-              object newformnamebases: tstringedit
+              object newfonamebases: tstringedit
                 optionswidget1 = [ow1_fontglyphheight]
                 optionsskin = [osk_framebuttononly]
                 taborder = 3
@@ -5918,6 +6022,11 @@ object projectoptionsfo: tprojectoptionsfo
             frame.localprops = [frl_levelo, frl_leveli, frl_colorclient]
             frame.localprops1 = []
             frame.button.color = -1879048187
+            frame.buttons.count = 1
+            frame.buttons.items = <            
+              item
+                color = -1879048187
+              end>
             taborder = 6
             visible = False
             bounds_x = 154
