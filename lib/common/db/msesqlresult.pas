@@ -458,6 +458,7 @@ type
    procedure setfieldcountfloat(const avalue: integer); override;
    procedure objectevent(const sender: tobject;
                        const event: objecteventty); override;
+   procedure doloadbuffer; override;
   public 
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -465,7 +466,6 @@ type
    function fieldnamesfloat: stringarty; override;
    function fieldnamesinteger: stringarty; override;
    function fieldnamesint64: stringarty; override;
-   procedure loadbuffer; override;
    procedure clearbuffer; override;
   published
    property source: tsqlresult read fsource write setsource;
@@ -474,7 +474,6 @@ type
    property int64cols: tdbcolnamearrayprop read fint64cols write setint64cols;
    property floatcols: tdbcolnamearrayprop read ffloatcols write setfloatcols;
    property optionsdb: lbsqoptionsty read foptionsdb write foptionsdb default [];
-   property onchange;
  end;
 
 //empty variant returned for null fields
@@ -2082,7 +2081,7 @@ begin
  readonlyprop;
 end;
 
-procedure tsqllookupbuffer.loadbuffer;
+procedure tsqllookupbuffer.doloadbuffer;
 var
  int1,int3,int4: integer;
  textf: dbcolarty;
