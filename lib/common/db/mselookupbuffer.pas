@@ -240,6 +240,14 @@ type
                               const adefault: realty = emptyreal): realty; overload;
                            
    function count: integer; virtual;
+   procedure addrow(const integervalues: array of integer;
+                    const textvalues: array of msestring;
+                    const floatvalues: array of realty;
+                    const int64values: array of int64);
+   procedure addrows(const integervalues: array of integerarty;
+                    const textvalues: array of msestringarty;
+                    const floatvalues: array of realarty;
+                    const int64values: array of int64arty);
    
    function fieldnamestext: stringarty; virtual;
    function fieldnamesfloat: stringarty; virtual;
@@ -267,6 +275,7 @@ type
 
  tlookupbuffer = class(tcustomlookupbuffer)
   public
+{
    procedure addrow(const integervalues: array of integer;
                     const textvalues: array of msestring;
                     const floatvalues: array of realty;
@@ -275,6 +284,7 @@ type
                     const textvalues: array of msestringarty;
                     const floatvalues: array of realarty;
                     const int64values: array of int64arty);
+}
   published
    property fieldcounttext;
    property fieldcountinteger;
@@ -1008,7 +1018,7 @@ begin
    end;
   end;
   fcount:= avalue;
-  exclude(fstate,lbs_buffervalid);
+//  exclude(fstate,lbs_buffervalid);
  end;
 end;
 
@@ -1218,8 +1228,107 @@ begin
  result:= nil;
 end;
 
-{ tlookupbuffer }
+procedure tcustomlookupbuffer.addrow(const integervalues: array of integer;
+              const textvalues: array of msestring;
+              const floatvalues: array of realty;
+              const int64values: array of int64);
+var
+ int1: integer;
+begin
+ setcount(fcount + 1);
+ for int1:= 0 to high(integervalues) do begin
+  if int1 > high(fintegerdata) then begin
+   break;
+  end;
+  fintegerdata[int1].data[fcount-1]:= integervalues[int1];
+ end;
+ for int1:= 0 to high(textvalues) do begin
+  if int1 > high(ftextdata) then begin
+   break;
+  end;
+  ftextdata[int1].data[fcount-1]:= textvalues[int1];
+ end;
+ for int1:= 0 to high(floatvalues) do begin
+  if int1 > high(ffloatdata) then begin
+   break;
+  end;
+  ffloatdata[int1].data[fcount-1]:= floatvalues[int1];
+ end;
+ for int1:= 0 to high(int64values) do begin
+  if int1 > high(fint64data) then begin
+   break;
+  end;
+  fint64data[int1].data[fcount-1]:= int64values[int1];
+ end;
+ changed;
+end;
 
+procedure tcustomlookupbuffer.addrows(const integervalues: array of integerarty;
+              const textvalues: array of msestringarty;
+              const floatvalues: array of realarty;
+              const int64values: array of int64arty);
+var
+ int1,int2,int3,countbefore: integer;
+begin
+ int2:= bigint;
+ for int1:= 0 to high(integervalues) do begin
+  if high(integervalues[int1]) < int2 then begin
+   int2:= high(integervalues[int1]);
+  end;
+ end;
+ for int1:= 0 to high(textvalues) do begin
+  if high(textvalues[int1]) < int2 then begin
+   int2:= high(textvalues[int1]);
+  end;
+ end;
+ for int1:= 0 to high(floatvalues) do begin
+  if high(floatvalues[int1]) < int2 then begin
+   int2:= high(floatvalues[int1]);
+  end;
+ end;
+ for int1:= 0 to high(int64values) do begin
+  if high(int64values[int1]) < int2 then begin
+   int2:= high(int64values[int1]);
+  end;
+ end;
+ countbefore:= fcount;
+ setcount(fcount+int2+1);
+ for int1:= 0 to high(integervalues) do begin
+  if int1 > high(fintegerdata) then begin
+   break;
+  end;
+  for int3:= 0 to int2 do begin
+   fintegerdata[int1].data[int3+countbefore]:= integervalues[int1][int3];
+  end;
+ end;
+ for int1:= 0 to high(textvalues) do begin
+  if int1 > high(ftextdata) then begin
+   break;
+  end;
+  for int3:= 0 to int2 do begin
+   ftextdata[int1].data[int3+countbefore]:= textvalues[int1][int3];
+  end;
+ end;
+ for int1:= 0 to high(floatvalues) do begin
+  if int1 > high(ffloatdata) then begin
+   break;
+  end;
+  for int3:= 0 to int2 do begin
+   ffloatdata[int1].data[int3+countbefore]:= floatvalues[int1][int3];
+  end;
+ end;
+ for int1:= 0 to high(int64values) do begin
+  if int1 > high(fint64data) then begin
+   break;
+  end;
+  for int3:= 0 to int2 do begin
+   fint64data[int1].data[int3+countbefore]:= int64values[int1][int3];
+  end;
+ end;
+end;
+
+{ tlookupbuffer }
+{
 procedure tlookupbuffer.addrow(const integervalues: array of integer;
               const textvalues: array of msestring;
               const floatvalues: array of realty;
@@ -1318,7 +1427,7 @@ begin
   end;
  end;
 end;
-
+}
 { tdatalokupbuffer }
 
 procedure tdatalookupbuffer.loaded;
