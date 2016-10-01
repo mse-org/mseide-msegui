@@ -459,12 +459,18 @@ end;
 
 procedure tcustomlookupbuffer.loadbuffer;
 begin
- if canevent(tmethod(fbeforeload)) then begin
-  fbeforeload(self);
- end;
- doloadbuffer();
- if canevent(tmethod(fafterload)) then begin
-  fafterload(self);
+ beginupdate();
+ try
+  clearbuffer();
+  if canevent(tmethod(fbeforeload)) then begin
+   fbeforeload(self);
+  end;
+  doloadbuffer();
+  if canevent(tmethod(fafterload)) then begin
+   fafterload(self);
+  end;
+ finally
+  endupdate();
  end;
 end;
 
@@ -1703,9 +1709,11 @@ var
  statebefore: tdatasetstate;
  eofbefore: boolean;
 begin
+{
  beginupdate;
  try
   clearbuffer;
+}
   datas:= fdatalink.dataset;
   if (datas <> nil) and 
        (datas.active or 
@@ -1733,8 +1741,8 @@ begin
         ismsestringfield[int1]:= textf[int1] is tmsestringfield;
        end;
        datas.first;
-       int3:= 0;
-       int1:= 0;
+       int3:= fcount;
+       int1:= fcount;
        try
         while not datas.eof do begin
          if int3 <= int1 then begin
@@ -1836,9 +1844,11 @@ begin
    end;
   end;
   include(fstate,lbs_buffervalid);
+{
  finally
   endupdate;
  end;
+}
 end;
 
 { tlookupbuffermemodatalink }
@@ -1875,9 +1885,11 @@ var
  int1,int2: integer;
  utf8: boolean;
 begin
+{
  beginupdate;
  try
   clearbuffer;
+}
   if fdatalink.active then begin
    utf8:= fdatalink.utf8;
    getfields(integerf,textf,realf,int64f);
@@ -1939,11 +1951,13 @@ begin
    end;
    setcount(int2+1);
   end;
- finally
   include(fstate,lbs_buffervalid);
+{
+ finally
 //  fbuffervalid:= true;
   endupdate;
  end;
+}
 end;
 
 end.

@@ -2092,9 +2092,11 @@ var
  bo1: boolean;
 begin
  application.beginwait;
+{
  beginupdate;
+}
  try
-  clearbuffer;
+//  clearbuffer;
   with fsource do begin
    if (fsource <> nil) and (active or (olbsq_closesqlresult in foptionsdb) and
                (lbs_sourceclosed in fstate) and
@@ -2128,8 +2130,8 @@ begin
        ar1[int1]:= ffloatcols[int1];
       end;
       realf:= cols.colsbyname(ar1);
-      int3:= 0;
-      int1:= 0;
+      int3:= fcount;
+      int1:= fcount;
       try
        while not fsource.eof do begin
         if int3 <= int1 then begin
@@ -2210,7 +2212,7 @@ begin
   include(fstate,lbs_buffervalid);
  finally
   application.endwait;
-  endupdate;
+//  endupdate;
  end;
 end;
 
