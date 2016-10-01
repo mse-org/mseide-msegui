@@ -8013,7 +8013,7 @@ const
                       dso_cancelupdateonerror,dso_cancelupdateondeleteerror];
 {$endif}
 var
- opt,options1,optionsbefore: datasetoptionsty;
+ opt,options1{,optionsbefore}: datasetoptionsty;
  bdopt: bufdatasetoptionsty;
 begin
  if (csreading in fowner.componentstate) and 
@@ -8046,7 +8046,7 @@ begin
    end;
   end;
  end;
- optionsbefore:= foptions;
+// optionsbefore:= foptions;
  opt:= avalue - [dso_refreshwaitcursor]-deprecatedbdsoptions;
  if dso_refreshwaitcursor in avalue then begin
   include(opt,dso_waitcursor);
@@ -8249,35 +8249,38 @@ procedure tdscontroller.dorefresh(const sender: tobject);
 var
  bo1,bo2: boolean;
 begin
- bo2:= dso_waitcursor in foptions;
- if bo2 then begin
-  application.beginwait;
- end;
- try
-  if not tdataset(fowner).active then begin
-   tdataset(fowner).open;
-  end
-  else begin
-   if dscs_restorerecno in fstate then begin
-    exclude(fstate,dscs_restorerecno);
-    bo1:= idscontroller(fintf).restorerecno;
-    idscontroller(fintf).restorerecno:= true;
-    try
-     tdataset(fowner).refresh;
-    finally
-     if not bo1 then begin
-      idscontroller(fintf).restorerecno:= false;
-     end;
-    end;
+ if (sender = nil) or //not delayed
+            (tdataset(fowner).state = dsbrowse) then begin
+  bo2:= dso_waitcursor in foptions;
+  if bo2 then begin
+   application.beginwait;
+  end;
+  try
+   if not tdataset(fowner).active then begin
+    tdataset(fowner).open;
    end
    else begin
-    tdataset(fowner).refresh;
+    if dscs_restorerecno in fstate then begin
+     exclude(fstate,dscs_restorerecno);
+     bo1:= idscontroller(fintf).restorerecno;
+     idscontroller(fintf).restorerecno:= true;
+     try
+      tdataset(fowner).refresh;
+     finally
+      if not bo1 then begin
+       idscontroller(fintf).restorerecno:= false;
+      end;
+     end;
+    end
+    else begin
+     tdataset(fowner).refresh;
+    end;
    end;
+  finally
+   if bo2 then begin
+    application.endwait;
+   end; 
   end;
- finally
-  if bo2 then begin
-   application.endwait;
-  end; 
  end;
 end;
 
