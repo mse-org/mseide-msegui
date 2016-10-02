@@ -2990,15 +2990,22 @@ end;
 procedure tdbnavigator.inithints;
 var
  int1: integer;
+ sc1: int32;
 begin
  for int1:= 0 to ord(high(dbnavigbuttonty)) do begin
   with buttons[int1] do begin
 //   hint:= stockobjects.captions[stockcaptionty(int1+ord(sc_first))];
    hint:= stockobjects.captions[dbnavighints[dbnavigbuttonty(int1)]];
-   if (dno_shortcuthint in foptions) and 
-             (fshortcuts[dbnavigbuttonty(int1)] <> 0) then begin
-    hint:= hint + ' (' + 
-                  encodeshortcutname(fshortcuts[dbnavigbuttonty(int1)])+')';
+   if (dno_shortcuthint in foptions) then begin
+    if dbnavigbuttonty(int1) = dbnb_dialog then begin
+     sc1:= shortcut;
+    end
+    else begin
+     sc1:= fshortcuts[dbnavigbuttonty(int1)];
+    end;
+    if sc1 <> 0 then begin
+     hint:= hint + ' (' + encodeshortcutname(sc1)+')';
+    end;
    end;
   end;
  end;
