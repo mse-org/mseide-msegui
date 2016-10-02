@@ -9144,6 +9144,9 @@ begin
   end;
   fconnector:= avalue;
   if fconnector <> nil then begin
+   if fconnector.fparam <> nil then begin
+    fconnector.fparam.fconnector:= nil;
+   end;
    fconnector.fparam:= self;
   end;
  end;
