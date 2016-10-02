@@ -1725,7 +1725,7 @@ end;
 procedure tsqldscontroller.savepointrollback(const alevel: integer = -1);
 begin
  with tmsesqlquery(fowner) do begin
-  if writetransaction <> nil then begin
+  if (writetransaction <> nil) and writetransaction.active then begin
    writetransaction.savepointrollback(alevel);
   end;
  end;
@@ -1734,7 +1734,7 @@ end;
 procedure tsqldscontroller.savepointrelease;
 begin
  with tmsesqlquery(fowner) do begin
-  if writetransaction <> nil then begin
+  if (writetransaction <> nil) and writetransaction.active then begin
    writetransaction.savepointrelease;
   end;
  end;
