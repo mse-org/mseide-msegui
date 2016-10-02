@@ -67,6 +67,7 @@ type
                         dno_dialogifinactive,dno_nodialogifempty,
                         dno_nodialogifnoeditmode,dno_nodialogifreadonly,
                         dno_nonavig, //disable navigation buttons
+                        dno_noinsert,dno_nodelete,dno_noedit, //disable buttons
                         dno_customdialogupdate,
                         dno_postbeforedialog,dno_postoncanclose);
  dbnavigatoroptionsty = set of dbnavigatoroptionty;
@@ -180,8 +181,8 @@ type
    procedure setbuttonwidth(const avalue: integer);
    function getbuttonheight: integer;
    procedure setbuttonheight(const avalue: integer);
-   function getnonavig: boolean;
-   procedure setnonavig(const avalue: boolean);
+//   function getnonavig: boolean;
+//   procedure setnonavig(const avalue: boolean);
   protected
    procedure inithints;
    procedure doexecute(const sender: tobject);
@@ -203,7 +204,7 @@ type
    destructor destroy; override; 
    function canclose(const newfocus: twidget = nil): boolean; override;
    procedure edit();
-   property nonavig: boolean read getnonavig write setnonavig;
+//   property nonavig: boolean read getnonavig write setnonavig;
   published
    property statfile;
    property datasource: tdatasource read getdatasource write setdatasource;
@@ -2769,8 +2770,17 @@ begin
  end;
  if dno_nonavig in options1 then begin
   bu1:= bu1 - ([dbnb_first,dbnb_prior,dbnb_next,dbnb_last,
-                dbnb_insert,dbnb_delete,dbnb_filteronoff,dbnb_copyrecord]+
+                {dbnb_insert,dbnb_delete,}dbnb_filteronoff,dbnb_copyrecord]+
                 filterdbnavigbuttons);
+ end;
+ if dno_nodelete in options1 then begin
+  bu1:= bu1 - [dbnb_delete];
+ end;
+ if dno_noinsert in options1 then begin
+  bu1:= bu1 - [dbnb_insert];
+ end;
+ if dno_noedit in options1 then begin
+  bu1:= bu1 - [dbnb_edit];
  end;
  fintf.setactivebuttons(bu1,bo1);
 end;
@@ -3276,7 +3286,7 @@ procedure tdbnavigator.setbuttonheight(const avalue: integer);
 begin
  flayout.buttons.height:= avalue;
 end;
-
+{
 function tdbnavigator.getnonavig: boolean;
 begin
  result:= dno_nonavig in foptions;
@@ -3291,7 +3301,7 @@ begin
   options:= options - [dno_nonavig];
  end;
 end;
-
+}
 { tcustomeditwidgetdatalink }
 
 constructor tcustomeditwidgetdatalink.create(const intf: idbeditfieldlink);
@@ -3462,8 +3472,9 @@ begin
  setediting(inherited editing and canmodify);
  fintf.updatereadonlystate;
  if editing then begin
-  if (fnavigator <> nil) and (oed_syncedittonavigator in foptions) then begin
-   fnavigator.edit;
+  if (fnavigator <> nil) and (oed_syncedittonavigator in foptions) and
+                                           (dataset.state = dsedit) then begin
+   fnavigator.edit();
   end;
   if assigned(fonbeginedit) and 
          fintf.getwidget.canevent(tmethod(fonbeginedit)) then begin
