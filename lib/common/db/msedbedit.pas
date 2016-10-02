@@ -88,7 +88,7 @@ type
 const
  defaultgriddatalinkoptions = [gdo_propscrollbar,gdo_thumbtrack,
                                                     gdo_selectautopost];
- defaulteditwidgetdatalinkoptions = [oed_syncedittonavigator];
+ defaulteditwidgetdatalinkoptions = [{oed_syncedittonavigator}];
  defaultdbnavigatoroptions = [dno_confirmdelete,dno_confirmcopy,dno_append,
                                                              dno_shortcuthint];
  designdbnavigbuttons = [dbnb_first,dbnb_prior,dbnb_next,dbnb_last];
