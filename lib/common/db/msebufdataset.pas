@@ -589,7 +589,7 @@ type
                        bdo_editonapplyerror,
                        bdo_restoreupdateonsavepointrollback,
                        bdo_rollbackonupdateerror,
-                       bdo_noapply,bdo_autoapply,bdo_autoapplyhandleexception,
+                       bdo_noapply,bdo_autoapply,bdo_autoapplyexceptions,
                        bdo_autocommitret,bdo_autocommit,
                        bdo_refreshafterapply,bdo_recnoapplyrefresh,
                        bdo_refreshtransaction,

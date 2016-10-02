@@ -665,7 +665,7 @@ procedure tmsesqlquery.afterpost(const sender: tdataset; var ok: boolean);
 begin
  if (bdo_autoapply in foptions) and 
                        not(bs_noautoapply in fbstate) then begin
-  if not (bdo_autoapplyhandleexception in foptions) then begin
+  if bdo_autoapplyexceptions in foptions then begin
    applyupdate();
   end
   else begin
