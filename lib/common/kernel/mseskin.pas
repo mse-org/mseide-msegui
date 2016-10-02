@@ -55,9 +55,10 @@ type
 //  face: tfacecomp;
 //  frame: tframecomp;
   svbuttonface: tfacecomp;
+  svbuttonfacechecked: tfacecomp;
   svbuttonframe: tframecomp;
-  svbuttonframesephorz: tframecomp;
-  svbuttonframesepvert: tframecomp;
+  svbuttonframechecked: tframecomp;
+  svbuttonframesep: tframecomp;
  end;
  gridpropskininfoty = record
   svface: tfacecomp;
@@ -645,15 +646,17 @@ type
    procedure settoolbar_horz_face(const avalue: tfacecomp);
    procedure settoolbar_horz_frame(const avalue: tframecomp);
    procedure settoolbar_horz_buttonface(const avalue: tfacecomp);
+   procedure settoolbar_horz_buttonfacechecked(const avalue: tfacecomp);
    procedure settoolbar_horz_buttonframe(const avalue: tframecomp);
-   procedure settoolbar_horz_buttonframesephorz(const avalue: tframecomp);
-   procedure settoolbar_horz_buttonframesepvert(const avalue: tframecomp);
+   procedure settoolbar_horz_buttonframechecked(const avalue: tframecomp);
+   procedure settoolbar_horz_buttonframesep(const avalue: tframecomp);
    procedure settoolbar_vert_face(const avalue: tfacecomp);
    procedure settoolbar_vert_frame(const avalue: tframecomp);
    procedure settoolbar_vert_buttonface(const avalue: tfacecomp);
+   procedure settoolbar_vert_buttonfacechecked(const avalue: tfacecomp);
    procedure settoolbar_vert_buttonframe(const avalue: tframecomp);
-   procedure settoolbar_vert_buttonframesephorz(const avalue: tframecomp);
-   procedure settoolbar_vert_buttonframesepvert(const avalue: tframecomp);
+   procedure settoolbar_vert_buttonframechecked(const avalue: tframecomp);
+   procedure settoolbar_vert_buttonframesep(const avalue: tframecomp);
 
    
    procedure setpopupmenu_face(const avalue: tfacecomp);
@@ -1239,12 +1242,9 @@ type
    property toolbar_horz_buttonframe: tframecomp 
                         read ftoolbar_horz.svbuttonframe
                             write settoolbar_horz_buttonframe;
-   property toolbar_horz_buttonframesephorz: tframecomp 
-                        read ftoolbar_horz.svbuttonframesephorz
-                            write settoolbar_horz_buttonframesephorz;
-   property toolbar_horz_buttonframesepvert: tframecomp 
-                        read ftoolbar_vert.svbuttonframesepvert
-                            write settoolbar_horz_buttonframesepvert;
+   property toolbar_horz_buttonframesep: tframecomp 
+                        read ftoolbar_horz.svbuttonframesep
+                            write settoolbar_horz_buttonframesep;
    property toolbar_vert_face: tfacecomp read ftoolbar_vert.svwidget.svface 
                             write settoolbar_vert_face;
    property toolbar_vert_frame: tframecomp read ftoolbar_vert.svwidget.svframe
@@ -1254,12 +1254,9 @@ type
    property toolbar_vert_buttonframe: tframecomp 
                         read ftoolbar_vert.svbuttonframe
                             write settoolbar_vert_buttonframe;
-   property toolbar_vert_buttonframesephorz: tframecomp 
-                        read ftoolbar_vert.svbuttonframesephorz
-                            write settoolbar_vert_buttonframesephorz;
-   property toolbar_vert_buttonframesepvert: tframecomp 
-                        read ftoolbar_vert.svbuttonframesepvert
-                            write settoolbar_vert_buttonframesepvert;
+   property toolbar_vert_buttonframesep: tframecomp 
+                        read ftoolbar_vert.svbuttonframesep
+                            write settoolbar_vert_buttonframesep;
 
    property tabpage_face: tfacecomp read ftabpage.svwidget.svface 
                                                 write settabpage_face;
@@ -3152,21 +3149,27 @@ begin
  setlinkedvar(avalue,tmsecomponent(ftoolbar_horz.svbuttonface));
 end;
 
+procedure tskincontroller.settoolbar_horz_buttonfacechecked(
+              const avalue: tfacecomp);
+begin
+ setlinkedvar(avalue,tmsecomponent(ftoolbar_horz.svbuttonfacechecked));
+end;
+
 procedure tskincontroller.settoolbar_horz_buttonframe(const avalue: tframecomp);
 begin
  setlinkedvar(avalue,tmsecomponent(ftoolbar_horz.svbuttonframe));
 end;
 
-procedure tskincontroller.settoolbar_horz_buttonframesephorz(
-                                                    const avalue: tframecomp);
+procedure tskincontroller.settoolbar_horz_buttonframechecked(
+              const avalue: tframecomp);
 begin
- setlinkedvar(avalue,tmsecomponent(ftoolbar_horz.svbuttonframesephorz));
+ setlinkedvar(avalue,tmsecomponent(ftoolbar_horz.svbuttonframechecked));
 end;
 
-procedure tskincontroller.settoolbar_horz_buttonframesepvert(
+procedure tskincontroller.settoolbar_horz_buttonframesep(
                                                     const avalue: tframecomp);
 begin
- setlinkedvar(avalue,tmsecomponent(ftoolbar_horz.svbuttonframesepvert));
+ setlinkedvar(avalue,tmsecomponent(ftoolbar_horz.svbuttonframesep));
 end;
 
 procedure tskincontroller.settoolbar_vert_face(const avalue: tfacecomp);
@@ -3184,21 +3187,27 @@ begin
  setlinkedvar(avalue,tmsecomponent(ftoolbar_vert.svbuttonface));
 end;
 
+procedure tskincontroller.settoolbar_vert_buttonfacechecked(
+              const avalue: tfacecomp);
+begin
+ setlinkedvar(avalue,tmsecomponent(ftoolbar_vert.svbuttonfacechecked));
+end;
+
 procedure tskincontroller.settoolbar_vert_buttonframe(const avalue: tframecomp);
 begin
  setlinkedvar(avalue,tmsecomponent(ftoolbar_vert.svbuttonframe));
 end;
 
-procedure tskincontroller.settoolbar_vert_buttonframesephorz(
-                                                    const avalue: tframecomp);
+procedure tskincontroller.settoolbar_vert_buttonframechecked(
+              const avalue: tframecomp);
 begin
- setlinkedvar(avalue,tmsecomponent(ftoolbar_vert.svbuttonframesephorz));
+ setlinkedvar(avalue,tmsecomponent(ftoolbar_vert.svbuttonframechecked));
 end;
 
-procedure tskincontroller.settoolbar_vert_buttonframesepvert(
+procedure tskincontroller.settoolbar_vert_buttonframesep(
                                                     const avalue: tframecomp);
 begin
- setlinkedvar(avalue,tmsecomponent(ftoolbar_vert.svbuttonframesepvert));
+ setlinkedvar(avalue,tmsecomponent(ftoolbar_vert.svbuttonframesep));
 end;
 
 procedure tskincontroller.setpopupmenu_face(const avalue: tfacecomp);
@@ -3662,6 +3671,18 @@ var
 begin
  handlewidget(ainfo);
  tb1:= tcustomtoolbar(ainfo.instance);
+ if ftoolbar_horz.svbuttonframesep <> nil then begin
+  with tb1.buttons do begin
+   createframesephorz();
+   setframetemplate(ftoolbar_horz.svbuttonframesep,framesephorz);
+  end;
+ end;
+ if ftoolbar_vert.svbuttonframesep <> nil then begin
+  with tb1.buttons do begin
+   createframesepvert();
+   setframetemplate(ftoolbar_vert.svbuttonframesep,framesepvert);
+  end;
+ end;
  if tb1.width >= tb1.height then begin
   setwidgetskin(tb1,ftoolbar_horz.svwidget);
   setstepbuttonskin(tb1.frame,fstepbutton);
@@ -3671,22 +3692,22 @@ begin
     setfacetemplate(ftoolbar_horz.svbuttonface,face);
    end;
   end;
+  if ftoolbar_horz.svbuttonfacechecked <> nil then begin
+   with tb1.buttons do begin
+    createfacechecked();
+    setfacetemplate(ftoolbar_horz.svbuttonfacechecked,facechecked);
+   end;
+  end;
   if ftoolbar_horz.svbuttonframe <> nil then begin
    with tb1.buttons do begin
     createframe();
     setframetemplate(ftoolbar_horz.svbuttonframe,frame);
    end;
   end;
-  if ftoolbar_horz.svbuttonframesephorz <> nil then begin
+  if ftoolbar_horz.svbuttonframechecked <> nil then begin
    with tb1.buttons do begin
-    createframesephorz();
-    setframetemplate(ftoolbar_horz.svbuttonframesephorz,framesephorz);
-   end;
-  end;
-  if ftoolbar_horz.svbuttonframesepvert <> nil then begin
-   with tb1.buttons do begin
-    createframesepvert();
-    setframetemplate(ftoolbar_horz.svbuttonframesepvert,framesepvert);
+    createframechecked();
+    setframetemplate(ftoolbar_horz.svbuttonframechecked,framechecked);
    end;
   end;
  end
@@ -3699,22 +3720,22 @@ begin
     setfacetemplate(ftoolbar_vert.svbuttonface,face);
    end;
   end;
-  if ftoolbar_horz.svbuttonframe <> nil then begin
+  if ftoolbar_vert.svbuttonfacechecked <> nil then begin
+   with tb1.buttons do begin
+    createfacechecked();
+    setfacetemplate(ftoolbar_vert.svbuttonfacechecked,facechecked);
+   end;
+  end;
+  if ftoolbar_vert.svbuttonframe <> nil then begin
    with tb1.buttons do begin
     createframe();
-    setframetemplate(ftoolbar_horz.svbuttonframe,frame);
+    setframetemplate(ftoolbar_vert.svbuttonframe,frame);
    end;
   end;
-  if ftoolbar_horz.svbuttonframesephorz <> nil then begin
+  if ftoolbar_vert.svbuttonframechecked <> nil then begin
    with tb1.buttons do begin
-    createframesephorz();
-    setframetemplate(ftoolbar_horz.svbuttonframesephorz,framesephorz);
-   end;
-  end;
-  if ftoolbar_horz.svbuttonframesepvert <> nil then begin
-   with tb1.buttons do begin
-    createframesepvert();
-    setframetemplate(ftoolbar_horz.svbuttonframesepvert,framesepvert);
+    createframechecked();
+    setframetemplate(ftoolbar_vert.svbuttonframechecked,framechecked);
    end;
   end;
  end;

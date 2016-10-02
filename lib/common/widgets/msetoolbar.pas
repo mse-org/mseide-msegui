@@ -220,7 +220,9 @@ type
    fcolorglyph: colorty;
    fcolor: colorty;
    fface: tface;
+   ffacechecked: tface;
    fframe: ttoolbuttonframe;
+   fframechecked: ttoolbuttonframe;
    fframesephorz: ttoolseparatorframe;
    fframesepvert: ttoolseparatorframe;
    procedure setitems(const index: integer; const Value: tcustomtoolbutton);
@@ -232,8 +234,12 @@ type
    procedure setcolor(const avalue: colorty);
    function getface: tface;
    procedure setface(const avalue: tface);
+   function getfacechecked: tface;
+   procedure setfacechecked(const avalue: tface);
    function getframe: tframe;
    procedure setframe(const avalue: tframe);
+   function getframechecked: tframe;
+   procedure setframechecked(const avalue: tframe);
    function getframesephorz: tframe;
    procedure setframesephorz(const avalue: tframe);
    function getframesepvert: tframe;
@@ -249,7 +255,9 @@ type
    destructor destroy(); override;
    class function getitemclasstype(): persistentclassty; override;
    procedure createface();
+   procedure createfacechecked();
    procedure createframe();
+   procedure createframechecked();
    procedure createframesephorz();
    procedure createframesepvert();
    procedure doupdate();
@@ -266,7 +274,9 @@ type
                                        write setcolorglyph default cl_glyph;
    property color: colorty read fcolor write setcolor default cl_transparent;
    property face: tface read getface write setface;
+   property facechecked: tface read getfacechecked write setfacechecked;
    property frame: tframe read getframe write setframe;
+   property framechecked: tframe read getframechecked write setframechecked;
    property framesephorz: tframe read getframesephorz 
                                               write setframesephorz;
    property framesepvert: tframe read getframesepvert 
@@ -418,7 +428,12 @@ begin
    po1:= @cells[int1];
    with po1^ do begin
     if testintersectrect(rect1,ca.dim) then begin
-     face:= buttons.fface;
+     if shs_checked in state then begin
+      face:= buttons.ffacechecked;
+     end
+     else begin
+      face:= buttons.fface;
+     end;
      if shs_separator in state then begin
       if vert then begin
        frame:= buttons.framesepvert;
@@ -428,7 +443,12 @@ begin
       end;
      end
      else begin
-      frame:= buttons.frame;
+      if shs_checked in state then begin
+       frame:= buttons.framechecked;
+      end
+      else begin
+       frame:= buttons.frame;
+      end;
      end;
      drawtoolbutton(canvas,po1^);
     end;
@@ -817,7 +837,9 @@ destructor tcustomtoolbuttons.destroy;
 begin
  inherited;
  fface.free;
+ ffacechecked.free;
  fframe.free();
+ fframechecked.free();
  fframesephorz.free();
  fframesepvert.free();
 end;
@@ -970,17 +992,35 @@ begin
  end;
 end;
 
+procedure tcustomtoolbuttons.createfacechecked();
+begin
+ if ffacechecked = nil then begin
+  ffacechecked:= tface.create(iface(tcustomtoolbar(fowner)));
+ end;
+end;
+
 function tcustomtoolbuttons.getface: tface;
 begin
- tcustomtoolbar(fowner).getoptionalobject(fface,
-                               {$ifdef FPC}@{$endif}createface);
+ tcustomtoolbar(fowner).getoptionalobject(fface,@createface);
  result:= fface;
 end;
 
 procedure tcustomtoolbuttons.setface(const avalue: tface);
 begin
- tcustomtoolbar(fowner).setoptionalobject(avalue,fface,
-                               {$ifdef FPC}@{$endif}createface);
+ tcustomtoolbar(fowner).setoptionalobject(avalue,fface,@createface);
+ tcustomtoolbar(fowner).invalidate;
+end;
+
+function tcustomtoolbuttons.getfacechecked: tface;
+begin
+ tcustomtoolbar(fowner).getoptionalobject(ffacechecked,@createfacechecked);
+ result:= ffacechecked;
+end;
+
+procedure tcustomtoolbuttons.setfacechecked(const avalue: tface);
+begin
+ tcustomtoolbar(fowner).setoptionalobject(avalue,ffacechecked,
+                                                        @createfacechecked);
  tcustomtoolbar(fowner).invalidate;
 end;
 
@@ -993,6 +1033,19 @@ end;
 procedure tcustomtoolbuttons.setframe(const avalue: tframe);
 begin
  tcustomtoolbar(fowner).setoptionalobject(avalue,fframe,@createframe);
+ tcustomtoolbar(fowner).clientrectchanged();
+end;
+
+function tcustomtoolbuttons.getframechecked: tframe;
+begin
+ tcustomtoolbar(fowner).getoptionalobject(fframe,@createframechecked);
+ result:= fframechecked;
+end;
+
+procedure tcustomtoolbuttons.setframechecked(const avalue: tframe);
+begin
+ tcustomtoolbar(fowner).setoptionalobject(avalue,fframechecked,
+                                                     @createframechecked);
  tcustomtoolbar(fowner).clientrectchanged();
 end;
 
@@ -1028,6 +1081,13 @@ procedure tcustomtoolbuttons.createframe();
 begin
  if fframe = nil then begin
   fframe:= ttoolbuttonframe.create(iframe(tcustomtoolbar(fowner)));
+ end;
+end;
+
+procedure tcustomtoolbuttons.createframechecked();
+begin
+ if fframechecked = nil then begin
+  fframechecked:= ttoolbuttonframe.create(iframe(tcustomtoolbar(fowner)));
  end;
 end;
 
