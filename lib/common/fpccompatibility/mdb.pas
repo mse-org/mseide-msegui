@@ -347,6 +347,7 @@ type
    procedure readvisible(reader: treader);
    procedure readreadonly(reader: treader);
    procedure setoptionsfield(const avalue: optionsfieldty);
+   function getbuffervalue: variant;
   protected
     FValidating : Boolean;
     FValueBuffer : Pointer;
@@ -472,6 +473,8 @@ type
     property Text: string read GetEditText write SetEditText;
     property ValidChars : TFieldChars read FValidChars write FValidChars;
     property Value: variant read GetAsVariant write SetAsVariant;
+    property buffervalue: variant read getbuffervalue;
+             //returns current value in editbuffer, can be used in OnValidate
     property OldValue: variant read GetOldValue;
     property LookupList: TLookupList read GetLookupList;
 {$push}{$warnings off}
@@ -6209,6 +6212,19 @@ begin
  foptionsfield:= avalue;
  if optcha <> [] then begin
   PropertyChanged(True);
+ end;
+end;
+
+function TField.getbuffervalue: variant;
+var
+ bo1: boolean;
+begin
+ bo1:= fvalidating;
+ try
+  fvalidating:= false;
+  result:= getasvariant();
+ finally
+  fvalidating:= bo1;
  end;
 end;
 

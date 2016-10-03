@@ -166,7 +166,7 @@ type
    ffieldtypes: fieldtypesty;
    fgetdatasource: getdatasourcefuncty;
   protected
-   //idbeditinfo
+    //idbeditinfo
    function getdataset(const aindex: integer): tdataset;
    procedure getfieldtypes(out apropertynames: stringarty;
                           out afieldtypes: fieldtypesarty);
@@ -9123,6 +9123,7 @@ begin
 end;
 
 { tmseparam }
+
 constructor tmseparam.Create(ACollection: TCollection);
 begin
  fdatalink:= tfielddatalink.create;
