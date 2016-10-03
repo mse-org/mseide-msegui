@@ -855,6 +855,7 @@ type
 //   flastcurrentrec: pintrecordty;
    flastcurrentindex: integer;
    fsavepointlevel: integer;
+   fappliedcount: card32;
 
    procedure doidleapplyupdates() virtual;
    procedure setoptions(const avalue: bufdatasetoptionsty) virtual;
@@ -1220,6 +1221,8 @@ type
    property changerecords: recupdateinfoarty read getchangerecords;
    property applyerrorcount: integer read getapplyerrorcount;
    property applyerrorrecords: recupdateinfoarty read getapplyerrorrecords;
+   property appliedcount: card32 read fappliedcount;
+                  //total successfully applied records since last open
    
    procedure applyupdates(const maxerrors: integer = 0); overload; virtual;
    procedure applyupdates(const maxerrors: integer;
@@ -2511,6 +2514,7 @@ end;
 
 procedure tmsebufdataset.internalclose;
 begin
+ fappliedcount:= 0;
  dointernalclose;
 end;
 
@@ -3658,6 +3662,7 @@ begin
      try
       if by1 then begin
        ApplyRecUpdate(info.UpdateKind);
+       inc(fappliedcount);
       end;
      except
       on E: EDatabaseError do begin
