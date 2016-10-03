@@ -152,8 +152,10 @@ type
                                      const aisnull: array of boolean);
    function moveby(const distance: integer): integer;
    procedure cancel; override;
-   procedure post; override;
-   procedure delete; override;
+   function post1(): boolean; //true if OK
+   procedure post override;
+   function delete1(): boolean; //true if ok
+   procedure delete override;
 //   procedure insert; override;
    procedure applyupdates(const maxerrors: integer; 
                 const cancelonerror: boolean;
@@ -679,15 +681,26 @@ begin
  end;
 end;
 
+function tmsesqlquery.post1(): boolean;
+begin
+ result:= fcontroller.post(@afterpost);
+end;
+
 procedure tmsesqlquery.post;
 begin
- fcontroller.post(@afterpost);
+ post1();
+end;
+
+function tmsesqlquery.delete1(): boolean;
+begin
+ result:= fcontroller.delete();
 end;
 
 procedure tmsesqlquery.delete;
 begin
- fcontroller.delete();
+ delete1();
 end;
+
 {
 procedure tmsesqlquery.insert;
 begin
