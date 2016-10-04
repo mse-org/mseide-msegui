@@ -430,6 +430,7 @@ begin
       tdbbarcode
       ]);
  registercomponenttabhints(['DBf'],['Datafield and data display components']);
+ registerunitgroup(['msesqldb'],['msebufdataset']);
 
  registerpropertyeditor(typeinfo(tdatalink),nil,'',tdatalinkpropertyeditor);
  registerpropertyeditor(typeinfo(tfielddatalink),nil,'',
