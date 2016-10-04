@@ -1979,7 +1979,9 @@ end;
 procedure tcustomdataedit.valuechanged;
 begin
  if not (csloading in componentstate) then begin
-  exclude(fstate,des_dbnull);
+  if not (ws_loadedproc in fwidgetstate) then begin
+   exclude(fstate,des_dbnull);
+  end;
   if (fgridintf <> nil) and not (csdesigning in componentstate) then begin
    valuetogrid(fgridintf.getrow);
   end;

@@ -157,6 +157,7 @@ type
    procedure updateoptions; virtual;
    procedure loaded; override;
    procedure internalcreateframe; override;
+   procedure enabledchanged() override;
    procedure setenabled(const avalue: boolean); override;
    procedure dofocus; override;
 
@@ -1637,6 +1638,12 @@ end;
 procedure tgraphdataedit.internalcreateframe;
 begin
  tgrapheditframe.create(iscrollframe(self));
+end;
+
+procedure tgraphdataedit.enabledchanged();
+begin
+ inherited;
+ invalidate();
 end;
 
 procedure tgraphdataedit.setcolorglyph(const Value: colorty);
