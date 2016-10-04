@@ -932,6 +932,7 @@ type
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
+   procedure execute();
    procedure initnewwidget(const ascale: real); override;
    procedure doupdate;
    procedure synctofontheight; override;
@@ -3496,6 +3497,13 @@ begin
  fvaluecaptions.free;
  fimagenums.free;
  inherited;
+end;
+
+procedure tcustomdatabutton.execute();
+begin
+ if not (shs_disabled in finfo.state) then begin
+  internalexecute;
+ end;
 end;
 
 class function tcustomdatabutton.classskininfo: skininfoty;
