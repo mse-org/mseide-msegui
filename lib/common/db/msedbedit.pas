@@ -72,7 +72,7 @@ type
                         dno_postbeforedialog,dno_postoncanclose);
  dbnavigatoroptionsty = set of dbnavigatoroptionty;
  optioneditdbty = (oed_autoedit,oed_noautoedit,oed_autopost,
-                   oed_syncedittonavigator,
+                   oed_syncedittonavigator,oed_focusoninsert,
                    oed_nofilteredit,oed_nofilterminedit,
                    oed_nofiltermaxedit,oed_nofindedit,
                    oed_nonullset, //use TField.DefaultExpression for textedit
@@ -3463,10 +3463,13 @@ begin
 end;
 
 procedure tcustomeditwidgetdatalink.editingchanged;
+var
+ widget1: twidget;
 begin
  inherited;
+ widget1:= fintf.getwidget;
  if not editing and assigned(fonendedit) and 
-         fintf.getwidget.canevent(tmethod(fonendedit)) then begin
+         widget1.canevent(tmethod(fonendedit)) then begin
   fonendedit(self);
  end;
  setediting(inherited editing and canmodify);
@@ -3475,6 +3478,9 @@ begin
   if (fnavigator <> nil) and (oed_syncedittonavigator in foptions) and
                                            (dataset.state = dsedit) then begin
    fnavigator.edit();
+  end;
+  if (oed_focusoninsert in foptions) and (dataset.state = dsinsert) then begin 
+   fintf.seteditfocus();
   end;
   if assigned(fonbeginedit) and 
          fintf.getwidget.canevent(tmethod(fonbeginedit)) then begin

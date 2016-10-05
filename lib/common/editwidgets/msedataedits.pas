@@ -145,7 +145,6 @@ type
    function locatecurrentindex: integer; override; //index of current row
    procedure locatesetcurrentindex(const aindex: integer); override;
    function getkeystring(const aindex: integer): msestring; override; //locate text
-                   
     //igridwidget
    procedure setfirstclick(var ainfo: mouseeventinfoty); virtual;
    function createdatalist(const sender: twidgetcol): tdatalist; 
