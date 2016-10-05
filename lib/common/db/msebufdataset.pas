@@ -594,6 +594,7 @@ type
                        bdo_refreshafterapply,bdo_recnoapplyrefresh,
                        bdo_refreshtransaction,
                        bdo_notransactionrefresh,bdo_recnotransactionrefresh,
+                       bdo_checkbrowsemodebylookupchange,
                        bdo_noprepare,
                        bdo_cacheblobs,
                        bdo_offline, //disconnect database after open
@@ -5423,8 +5424,9 @@ begin
     end; 
    end;
   end;
-  if state in [dsedit,dsinsert,dsbrowse] then begin 
-            //stop recursion triggered by dscalcfields
+  if (state in [dsbrowse]) or (state in [dsedit,dsinsert]) and 
+               (bdo_checkbrowsemodebylookupchange in foptions) then begin
+                   //stop recursion triggered by dscalcfields
    if bo1 then begin
     if state = dsinsert then begin
      checkbrowsemode;
