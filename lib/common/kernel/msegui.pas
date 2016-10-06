@@ -2097,18 +2097,31 @@ type
    //true if eventtype = et_butonrelease, button is mb_left,
    // clicked and pos in clientrect or in frame.caption if caption = true,
    // origin = pos
-   function isclick(const info: mouseeventinfoty): boolean;
+   function iswidgetdblclick(const info: mouseeventinfoty; 
+                                    const caption: boolean = false): boolean;
    //true if eventtype = et_butonrelease, button is mb_left,
+   // clicked and pos in clientrect or in frame.caption if caption = true,
+   // and timedlay to last buttonpress is short
+   // origin = pos
+   function iswidgetdblclicked(const info: mouseeventinfoty;
+                                    const caption: boolean = false): boolean;
+   //true if eventkind = ek_buttonrelease, button is mb_left,
+   // and pos in clientrect or in frame.caption if caption = true
+   // and timedelay to last buttonrelease is short
+   // origin = pos
+   function isclick(const info: mouseeventinfoty): boolean;
+   //true if eventkind = ek_buttonrelease, button is mb_left,
    // clicked and pos in clientrect
    function isdblclick(const info: mouseeventinfoty): boolean;
-   //true if eventtype = et_butonpress, button is mb_left, pos in clientrect
-   // and timedlay to last buttonpress is short
+   //true if eventtype = ek_buttonpress, button is mb_left, pos in clientrect
+   // and timedelay to last buttonpress is short
+   // origin = paintrect.pos
    function isdblclicked(const info: mouseeventinfoty): boolean;
-   //true if eventtype in [et_buttonpress,et_butonrelease], button is mb_left,
-   // and timedlay to last same buttonevent is short
+   //true if eventkind in [ek_buttonpress,ek_buttonrelease], button is mb_left,
+   // and timedelay to last same buttonevent is short
    function isleftbuttondown(const info: mouseeventinfoty): boolean; overload;
-   //true if eventtype = et_butonpress, button is mb_left, pos in clientrect
-   //origin = paintrect.pos
+   //true if eventkind = ek_buttonpress, button is mb_left, pos in clientrect
+   // origin = paintrect.pos
    function isleftbuttondown(const info: mouseeventinfoty;
                       const akeyshiftstate: shiftstatesty): boolean; overload;
 
@@ -12272,8 +12285,9 @@ end;
 
 function twidget.iswidgetclick(const info: mouseeventinfoty;
                      const caption: boolean = false): boolean;
-   //true if eventtype = et_butonrelease, button is mb_left, clicked and pos in clientrect
-   //or in frame.caption if caption = true
+   //true if eventtype = et_butonrelease, button is mb_left,
+   // clicked and pos in clientrect or in frame.caption if caption = true,
+   // origin = pos
 begin
  with info do begin
   result:= (button = mb_left) and (ws_lclicked in fwidgetstate) and
@@ -12283,8 +12297,42 @@ begin
  end;
 end;
 
+function twidget.iswidgetdblclick(const info: mouseeventinfoty;
+               const caption: boolean = false): boolean;
+   //true if eventtype = et_butonrelease, button is mb_left,
+   // clicked and pos in clientrect or in frame.caption if caption = true,
+   // and timedlay to last buttonpress is short
+   // origin = pos
+begin
+ with info do begin
+  result:= (button = mb_left) and 
+       (eventkind = ek_buttonpress) and (ss_double in shiftstate) and 
+        (appinst.fbuttonpresswidgetbefore = self) and
+      (pointinrect(pos,paintrect) or
+           caption and (fframe <> nil) and fframe.pointincaption(info.pos))
+ end;
+end;
+
+function twidget.iswidgetdblclicked(const info: mouseeventinfoty;
+               const caption: boolean = false): boolean;
+   //true if eventkind = ek_buttonrelease, button is mb_left,
+   // and pos in clientrect or in frame.caption if caption = true
+   // and timedelay to last buttonrelease is short
+   // origin = pos
+begin
+ with info do begin
+  result:= (button = mb_left) and (ss_double in shiftstate) and 
+    ({(eventkind = ek_buttonpress) and (appinst.fbuttonpresswidgetbefore = self) or}
+    (eventkind = ek_buttonrelease) and 
+                 (appinst.fbuttonreleasewidgetbefore = self)) and
+           (pointinrect(pos,paintrect) or
+           caption and (fframe <> nil) and fframe.pointincaption(info.pos));
+ end;
+end;
+
 function twidget.isclick(const info: mouseeventinfoty): boolean;
-   //true if eventtype = et_butonrelease, button is mb_left, clicked and pos in clientrect
+   //true if eventkind = ek_buttonrelease, button is mb_left,
+   // clicked and pos in clientrect
 begin
  with info do begin
   result:= (ws_lclicked in fwidgetstate) and (eventkind = ek_buttonrelease) and
@@ -12293,8 +12341,9 @@ begin
 end;
 
 function twidget.isdblclick(const info: mouseeventinfoty): boolean;
-   //true if eventtype = et_butonpress, button is mb_left, pos in clientrect
-   // and timedlay to last buttonpress is short
+   //true if eventtype = ek_buttonpress, button is mb_left, pos in clientrect
+   // and timedelay to last buttonpress is short
+   // origin = paintrect.pos
 begin
  with info do begin
   result:= (button = mb_left) and pointinrect(pos,clientrect) and
@@ -12304,8 +12353,8 @@ begin
 end;
 
 function twidget.isdblclicked(const info: mouseeventinfoty): boolean;
-   //true if eventtype in [et_buttonpress,et_butonrelease], button is mb_left,
-   // and timedlay to last same buttonevent is short
+   //true if eventkind in [ek_buttonpress,ek_buttonrelease], button is mb_left,
+   // and timedelay to last same buttonevent is short
 begin
  with info do begin
   result:= (button = mb_left) and (ss_double in shiftstate) and 

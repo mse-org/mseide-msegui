@@ -225,6 +225,7 @@ type
  framebuttonoptionty = 
        (fbo_left,fbo_invisible,fbo_inactiveinvisible,
         fbo_disabled,fbo_enabled, //overrides frame readonly state
+        fbo_executeonclientdblclick,
         fbo_flat,fbo_noanim,fbo_nomouseanim,fbo_noclickanim,fbo_nofocusanim);
  framebuttonoptionsty = set of framebuttonoptionty;
 
@@ -818,10 +819,22 @@ end;
 
 procedure tframebutton.mouseevent(var info: mouseeventinfoty;
      const intf: iframe; const buttonintf: ibutton; const index: integer);
+
+ procedure doexec();
+ begin
+  if faction <> nil then begin
+   faction.execute();
+  end;
+  if assigned(fonexecute) then begin
+   fonexecute(self);
+  end;
+ end; //doexe
+
 var
- bo1: boolean;
+ bo1,bo2: boolean;
  action1: buttonactionty;
 begin
+ bo2:= false;
  with finfo do begin
   bo1:= shs_clicked in state;
   if updatemouseshapestate(finfo,info,nil,nil) then begin
@@ -843,12 +856,16 @@ begin
    action1:= ba_click;
    buttonintf.buttonaction(action1,index);
    if action1 = ba_click then begin
-    if faction <> nil then begin
-     faction.execute();
-    end;
-    if assigned(fonexecute) then begin
-     fonexecute(self);
-    end;
+    doexec();
+    bo2:= true;
+   end;
+  end;
+ end;
+ if (fbo_executeonclientdblclick in foptions) and not bo2 and
+                (finfo.state * [shs_disabled,shs_invisible] = []) then begin
+  with getwidget() do begin
+   if iswidgetdblclicked(info) then begin
+    doexec();
    end;
   end;
  end;
