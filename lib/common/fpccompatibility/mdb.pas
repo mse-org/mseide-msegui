@@ -4350,6 +4350,9 @@ Procedure TDataset.DoInsertAppend(DoAppend : Boolean);
 
 begin
   CheckBrowseMode;
+  if fstate <> dsbrowse then begin
+   exit; //posting canceled
+  end;
   If Not CanModify then
     DatabaseError(SDatasetReadOnly,Self);
   DoBeforeInsert;
@@ -4480,6 +4483,9 @@ Procedure TDataset.First;
 
 begin
   CheckBrowseMode;
+  if fstate <> dsbrowse then begin
+   exit; //posting canceled
+  end;
   DoBeforeScroll;
   if not FIsUniDirectional then
     ClearBuffers
@@ -4608,6 +4614,9 @@ Procedure TDataset.Last;
 begin
   CheckBiDirectional;
   CheckBrowseMode;
+  if fstate <> dsbrowse then begin
+   exit; //posting canceled
+  end;
   DoBeforeScroll;
   ClearBuffers;
   try
