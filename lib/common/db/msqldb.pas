@@ -414,8 +414,9 @@ type
  
   TCommitRollbackAction = (caNone, caCommit, caCommitRetaining, caRollback,
     caRollbackRetaining);
-  transactionoptionty = (tao_fake,tao_fakeretaining,tao_catcherror,
-                                                        tao_refreshdatasets);
+  transactionoptionty = (tao_fake,tao_fakeretaining,
+                         tao_catcherror,tao_rollbackonerror,
+                         tao_refreshdatasets);
   transactionoptionsty = set of transactionoptionty;
   sqltransactioneventty = procedure(const sender: tsqltransaction) of object;
   commiterroreventty = procedure(const sender: tsqltransaction;
@@ -460,7 +461,9 @@ type
     procedure dobeforestop;
     procedure doafterstop;
     procedure checkpendingaction;
-    procedure savepointevent(const akind: savepointeventkindty; const alevel: integer);
+    procedure savepointevent(const akind: savepointeventkindty;
+                                                 const alevel: integer);
+    procedure execerror();
    public
     constructor Create(AOwner : TComponent); override;
     destructor Destroy; override;
@@ -1333,11 +1336,16 @@ begin
     params1.isutf8:= aisutf8;
    end;
    try
-    if noprepare then begin
-     executeunprepared(cursor,atransaction,params1,asql,aisutf8);
-    end
-    else begin
-     execute(cursor,atransaction,params1,aisutf8);
+    try
+     if noprepare then begin
+      executeunprepared(cursor,atransaction,params1,asql,aisutf8);
+     end
+     else begin
+      execute(cursor,atransaction,params1,aisutf8);
+     end;
+    except
+     atransaction.execerror();
+     raise;
     end;
     result:= cursor.frowsaffected;
    finally
@@ -1480,7 +1488,8 @@ begin
   Result := nil;
 end;
 
-procedure tcustomsqlconnection.Execute(const cursor: TSQLCursor; const atransaction: tsqltransaction;
+procedure tcustomsqlconnection.Execute(const cursor: TSQLCursor;
+               const atransaction: tsqltransaction;
                const AParams : TmseParams; const autf8: boolean);
 begin
  if aparams <> nil then begin
@@ -1488,7 +1497,12 @@ begin
  end;
  beforeaction;
  try
-  internalexecute(cursor,atransaction,aparams,autf8);
+  try
+   internalexecute(cursor,atransaction,aparams,autf8);
+  except
+   atransaction.execerror();
+   raise;
+  end;
  finally
   afteraction;
  end;
@@ -1537,7 +1551,12 @@ begin
     str1:= ansistring(mstr1);
    end;
   end;
-  internalexecuteunprepared(cursor,atransaction,str1,asql,par1);
+  try
+   internalexecuteunprepared(cursor,atransaction,str1,asql,par1);
+  except
+   atransaction.execerror();
+   raise;
+  end;
  finally
   afteraction;
  end;
@@ -2176,7 +2195,14 @@ begin
       exit;
      end
      else begin
-      dofinish;
+      if tao_rollbackonerror in foptions then begin
+       try
+        rollback();
+       except //no secondary exceptions
+       end;
+       raise;
+      end;
+      dofinish();
       raise;
      end;
     end;
@@ -2492,6 +2518,16 @@ begin
    fwritedatasets[int1].savepointevent(self,akind,alevel);
   end;
   dec(int1);
+ end;
+end;
+
+procedure TSQLTransaction.execerror();
+begin
+ if (tao_rollbackonerror in foptions) and active then begin
+  try
+   rollback();
+  except //no secondary exceptions
+  end; 
  end;
 end;
 
