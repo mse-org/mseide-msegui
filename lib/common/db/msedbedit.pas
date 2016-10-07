@@ -2770,7 +2770,7 @@ begin
  end;
  if dno_nonavig in options1 then begin
   bu1:= bu1 - ([dbnb_first,dbnb_prior,dbnb_next,dbnb_last,
-                {dbnb_insert,dbnb_delete,}dbnb_filteronoff,dbnb_copyrecord]+
+                dbnb_insert,dbnb_delete,dbnb_filteronoff,dbnb_copyrecord]+
                 filterdbnavigbuttons);
  end;
  if dno_nodelete in options1 then begin
