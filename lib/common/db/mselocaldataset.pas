@@ -15,7 +15,7 @@ uses
 
 const
  defaultlocaldsoptions = defaultdscontrolleroptions + [dso_utf8]; 
- defaultlocalbdsoptions = defaultbufdatasetoptions + [bdo_local];
+ defaultlocalbdsoptions = defaultbufdatasetoptions + [bdo_local,bdo_noapply];
 type
  tlocaldscontroller = class(tdscontroller)
   protected
