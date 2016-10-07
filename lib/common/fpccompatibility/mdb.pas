@@ -4703,7 +4703,11 @@ Var
 
 begin
   CheckBrowseMode;
-  Result:=0; TheResult:=0;
+  Result:=0;
+  if fstate <> dsbrowse then begin
+   exit; //posting canceled
+  end;
+  TheResult:=0;
   DoBeforeScroll;
   If (Distance = 0) or
      ((Distance>0) and FEOF) or
