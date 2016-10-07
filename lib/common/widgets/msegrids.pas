@@ -10220,7 +10220,10 @@ begin
    if og_rowsizing in foptionsgrid then begin
     datarowheight:= reader.readinteger('rowheight',datarowheight);
    end;
-   focuscell(po1);
+   if ((po1.col < 0) or (po1.col < fdatacols.count)) and
+      ((po1.row < 0) or (po1.row < frowcount)) then begin
+    focuscell(po1);
+   end;
   end;
  finally
   endupdate;

@@ -33,7 +33,7 @@ function str_trim(const sender: tmacrolist;
 begin
  result:= '';
  if params <> nil then begin
-  result:= trim(params[0]);
+  result:= trim(sender.expandmacros(params[0]));
  end;
 end;
 
@@ -42,7 +42,7 @@ function str_trimleft(const sender: tmacrolist;
 begin
  result:= '';
  if params <> nil then begin
-  result:= trimleft(params[0]);
+  result:= trimleft(sender.expandmacros(params[0]));
  end;
 end;
 
@@ -51,17 +51,35 @@ function str_trimright(const sender: tmacrolist;
 begin
  result:= '';
  if params <> nil then begin
-  result:= trimright(params[0]);
+  result:= trimright(sender.expandmacros(params[0]));
+ end;
+end;
+
+function str_coalesce(const sender: tmacrolist; 
+                           const params: msestringarty): msestring;
+var
+ i1: int32;
+begin
+ result:= '';
+ if params <> nil then begin
+  for i1:= 0 to high(params) do begin
+   result:= sender.expandmacros(params[i1]);
+   if result <> '' then begin
+    break;
+   end;
+  end;
  end;
 end;
 
 const
- strmacroconst: array[0..2] of macroinfoty = (
+ strmacroconst: array[0..3] of macroinfoty = (
   (name: 'STR_TRIM'; value: ''; handler: macrohandlerty(@str_trim);
                      expandlevel: 0),
   (name: 'STR_TRIMLEFT'; value: ''; handler: macrohandlerty(@str_trimleft);
                      expandlevel: 0),
   (name: 'STR_TRIMRIGHT'; value: ''; handler: macrohandlerty(@str_trimright);
+                     expandlevel: 0),
+  (name: 'STR_COALESCE'; value: ''; handler: macrohandlerty(@str_coalesce);
                      expandlevel: 0)
  );
 

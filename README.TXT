@@ -164,6 +164,11 @@ STR_TRIMLEFT
 STR_TRIMRIGHT
  Trim whitespace from the end of text.
 
+STR_COALESCE
+ Return first not empty value. Format is
+ ${STR_COALESCE(text[,text...])} or
+ ${STR_COALESCE("text"[,"text"...])}
+
 MSEide file macros
 ******************
 Macro format is ${FILE_*(fileparameter)} or ${FILE_*("fileparameter")}.
