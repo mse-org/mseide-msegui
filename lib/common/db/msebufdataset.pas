@@ -483,7 +483,7 @@ type
                                                         write fonindexchanged;
  end;
 
- recupdateflagty = (ruf_applied,ruf_error);
+ recupdateflagty = (ruf_applied,ruf_error,ruf_append);
  recupdateflagsty = set of recupdateflagty;
 
  recupdateinfoty = record
@@ -3775,7 +3775,12 @@ begin
         edit;
        end
        else begin
-        insert;
+        if ruf_append in info.flags then begin
+         append();
+        end
+        else begin
+         insert();
+        end;
        end;
        finalizevalues(pdsrecordty(activebuffer)^.header);
        finalizecalcvalues(pdsrecordty(activebuffer)^.header);
@@ -4061,6 +4066,12 @@ begin
      end
      else begin
       info.updatekind := ukinsert;
+      if frecno = frecordcount-1 then begin
+       include(info.flags,ruf_append);
+      end
+      else begin
+       exclude(info.flags,ruf_append);
+      end;
      end;
     end;
    end;
