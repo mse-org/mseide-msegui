@@ -6951,7 +6951,7 @@ end;
 }
 procedure tmsebufdataset.fixupcurrentset;
 begin
- if not (bs_recapplying in fbstate) then begin
+ if not (bs_recapplying in fbstate) and (fdisablecontrolscount <= 0) then begin
   if factindexpo^.ind = nil then begin
    bookmark:= bookmark; //possibly invalid recno
   end
