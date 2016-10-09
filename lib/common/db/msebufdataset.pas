@@ -153,17 +153,17 @@ const
      
 // structure of internal recordbuffer:
 //                 +---------<frecordsize>---------+
-// intrecheaderty, |recheaderty,fielddata          |
+// intrecheaderty, |recheaderty,nullflags,fielddata|
 //                 |moved to tdataset buffer header|
 //                 |fieldoffsets are in ffieldinfos[].offset
 //                 |                               |
 // structure of dataset recordbuffer:
-//                 +----------------------<fcalcrecordsize>----------+
-//                 +---------<frecordsize>---------+                 |
-// dsrecheaderty,  |recheaderty,fielddata          |calcfields       |
-//                 |moved to internal buffer header|                 | 
-//                 |<-field offsets are in ffieldinfos[].offset      |
-//                 |<-calcfield offsets are in fcalcfieldbufpositions|
+//                 +----------------------<fcalcrecordsize>-------------+
+//                 +---------<frecordsize>---------+                    |
+// dsrecheaderty,  |recheaderty,nullflags,fielddata|nullflags,calcfields|
+//                 |moved to internal buffer header|                    | 
+//                 |<-field offsets are in ffieldinfos[].offset         |
+//                 |<-calcfield offsets are in fcalcfieldbufpositions   |
 
 type
  indexty = record
@@ -312,6 +312,8 @@ type
   canpartialstring: boolean;
  end;
  indexfieldinfoarty = array of indexfieldinfoty;
+ indexcomparefuncty = function (l,r: pintrecordty; const alastindex: integer;
+                            const apartialstring: boolean): integer of object;
 
  tlocalindex = class(townedpersistent)
   private
@@ -327,8 +329,15 @@ type
    function dolookupcompare(const l,r: pintrecordty;
                              const ainfo: indexfieldinfoty;
                              const apartialstring: boolean): integer;
+   function dolookupcomparea(const lvalue: pointer; r: pintrecordty;
+                             const ainfo: indexfieldinfoty;
+                             const apartialstring: boolean): integer;
+                     //lvalue is compare value, r can be lookup
    function compare1(l,r: pintrecordty; const alastindex: integer;
                     const apartialstring: boolean): integer;
+   function compare1a(l,r: pintrecordty; const alastindex: integer;
+             const apartialstring: boolean): integer;
+                     //l is compare value record, r can be lookup
    function compare2(l,r: pintrecordty): integer;
  {$ifndef FPC}
    function compare3(l,r: pointer): integer;
@@ -339,7 +348,8 @@ type
    function getactive: boolean;
    procedure setactive(const avalue: boolean);
    procedure bindfields;
-   function findboundary(const arecord: pintrecordty;
+   function findboundary(const comparefunc: indexcomparefuncty;
+                 const arecord: pintrecordty;
                  const alastindex: integer; const abigger: boolean): integer;
                           //returns index of next bigger or lower
    function findrecord(const arecord: pintrecordty): integer;
@@ -3963,9 +3973,9 @@ begin
        ar1[int1]:= frecno + 1; //for fast find of bufpo
       end
       else begin
-       ar1[int1]:= findboundary(oldbuffer,lastind,true); //old boundary
+       ar1[int1]:= findboundary(@compare1,oldbuffer,lastind,true); //old boundary
       end;
-      ar3[int1]:= findboundary(newbuffer,lastind,true); //new boundary
+      ar3[int1]:= findboundary(@compare1,newbuffer,lastind,true); //new boundary
      end;
     end;
    end;
@@ -4979,7 +4989,7 @@ begin
   for int1:= 1 to high(findexes) do begin
    if findexes[int1].ind <> nil then begin
     with findexlocal[int1-1] do begin
-     int2:= findboundary(arecord,high(findexfieldinfos),true);
+     int2:= findboundary(@compare1,arecord,high(findexfieldinfos),true);
     end;
     with findexes[int1] do begin
      if int2 < fbrecordcount then begin
@@ -9277,6 +9287,50 @@ begin
  end;
 end;
 
+function tlocalindex.dolookupcomparea(const lvalue: pointer; r: pintrecordty;
+       const ainfo: indexfieldinfoty; const apartialstring: boolean): integer;
+                     //l is compare value, r can be lookup
+var
+ {ldata,}rdata: lookupdataty;
+  
+begin
+ result:= 0;
+ with tmsebufdataset(ainfo.fieldinstance.lookupdataset) do begin
+  if active then begin
+   try
+//    lookup1(ainfo.fieldinstance,l,ldata);
+    lookup1(ainfo.fieldinstance,r,rdata);
+   finally
+    tmsebufdataset(self.fowner).flookuppo:= nil;
+   end;
+   if lvalue = nil then begin
+    if rdata.po = nil then begin
+     exit;
+    end
+    else begin
+     dec(result);
+    end;
+   end
+   else begin
+    if rdata.po = nil then begin
+     inc(result);
+    end
+    else begin
+     result:= ainfo.comparefunc(lvalue^,rdata.po^);
+     if (result <> 0) and apartialstring then begin
+      if ainfo.caseinsensitive then begin
+       result:=  msepartialcomparetext(pmsestring(lvalue)^,rdata.mstr);
+      end
+      else begin
+       result:=  msepartialcomparestr(pmsestring(lvalue)^,rdata.mstr);
+      end;
+     end;
+    end;
+   end;    
+  end;
+ end;
+end;
+
 function tlocalindex.compare1(l,r: pintrecordty; const alastindex: integer;
              const apartialstring: boolean): integer;
 var
@@ -9288,6 +9342,72 @@ begin
    if islookup then begin
     result:= dolookupcompare(l,r,findexfieldinfos[int1],
               apartialstring and canpartialstring and (int1 = alastindex));
+    if desc then begin
+     result:= -result;
+    end;
+    if result <> 0 then begin
+     break;
+    end;
+   end
+   else begin
+    if not getfieldflag(@l^.header.fielddata.nullmask,fieldindex) then begin
+     if not getfieldflag(@r^.header.fielddata.nullmask,fieldindex) then begin
+      continue;
+     end
+     else begin
+      dec(result);
+     end;
+    end
+    else begin
+     if not getfieldflag(@r^.header.fielddata.nullmask,fieldindex) then begin
+      inc(result);
+     end
+     else begin    
+      result:= comparefunc((pchar(l)+recoffset)^,(pchar(r)+recoffset)^);
+     end;
+    end;
+    if (result <> 0) then begin
+     if apartialstring and canpartialstring and (int1 = alastindex) then begin
+      if caseinsensitive then begin
+       result:=  msepartialcomparetext(pmsestring(pointer(pchar(l)+recoffset))^,
+                 pmsestring(pointer(pchar(r)+recoffset))^);
+      end
+      else begin
+       result:=  msepartialcomparestr(pmsestring(pointer(pchar(l)+recoffset))^,
+                 pmsestring(pointer(pchar(r)+recoffset))^);
+      end;
+     end;
+     if desc then begin
+      result:= -result;
+     end;
+     break;
+    end;
+   end;
+  end;
+ end;
+ if lio_desc in foptions then begin
+  result:= -result;
+ end;
+end;
+
+function tlocalindex.compare1a(l,r: pintrecordty; const alastindex: integer;
+             const apartialstring: boolean): integer;
+                     //l is compare value, r can be lookup
+var
+ int1: integer;
+ po1: pointer;
+begin
+ result:= 0;
+ for int1:= 0 to alastindex do begin
+  with findexfieldinfos[int1] do begin
+   if islookup then begin
+    po1:= nil;
+    if getfieldflag(pointer(l)+tmsebufdataset(fowner).frecordsize,
+                                                   -2-fieldindex) then begin
+     po1:= pointer(l) + recoffset;
+    end;
+    result:= dolookupcomparea(po1,r,findexfieldinfos[int1],
+               apartialstring and canpartialstring and (int1 = alastindex));
     if desc then begin
      result:= -result;
     end;
@@ -9430,93 +9550,6 @@ begin
   l:= i;
  until i >= r;
 end;
-{
-procedure tlocalindex.mergesort(var adata: pointerarty);
-        //todo: optimize
-var
- ar1: pointerarty;
- step: integer;
- acount: integer;
- l,r,d: ppointer;
- stopl,stopr,stops: ppointer;
- source,dest: ppointer;
-label
- endstep;
-begin
- acount:= tmsebufdataset(fowner).fbrecordcount;
- allocuninitedarray(length(adata),sizeof(pointer),ar1);
- source:= pointer(adata);
- dest:= pointer(ar1);
- step:= 1;
- while step < acount do begin
-  d:= dest;
-  l:= source;
-  r:= @ppointeraty(source)^[step];
-  stopl:= r;
-  stopr:= @ppointeraty(r)^[step];
-  stops:= @ppointeraty(source)^[acount];
-  if pchar(stopr) > pchar(stops) then begin
-   stopr:= stops;
-  end;
-  while true do begin //runs
-   while true do begin //steps
-    while compare2(l^,r^) <= 0 do begin //merge from left
-     d^:= l^;
-     inc(l);
-     inc(d);
-     if l = stopl then begin
-      while r <> stopr do begin
-       d^:= r^;   //copy rest
-       inc(d);
-       inc(r);
-      end;
-      goto endstep;
-     end;
-    end;
-    while compare2(l^,r^) > 0 do begin //merge from right;
-     d^:= r^;
-     inc(r);
-     inc(d);
-     if r = stopr then begin
-      while l <> stopl do begin
-       d^:= l^;   //copy rest
-       inc(d);
-       inc(l);
-      end;
-      goto endstep;
-     end; 
-    end;
-   end;
-endstep:
-   if stopr = stops then begin
-    break;  //run finished
-   end;
-   l:= stopr; //next step
-   r:= @ppointerarty(l)^[step];
-   if pchar(r) >= pchar(stops) then begin
-    r:= pointer(pchar(stops)-sizeof(pointer));
-   end;
-   if r = l then begin
-    d^:= l^;
-    break;
-   end;
-   stopl:= r;
-   stopr:= @ppointerarty(r)^[step];
-   if pchar(stopr) > pchar(stops) then begin
-    stopr:= stops;
-   end;
-  end;
-  d:= source;     //swap buffer
-  source:= dest;
-  dest:= d;
-  step:= step*2;
- end;
-
- if source <> pointer(adata) then begin
-  adata:= ar1;
- end;
-end;
-}
 
 procedure tlocalindex.sort(var adata: pointerarty);
 {$ifdef mse_debugdataset}
@@ -9548,8 +9581,9 @@ begin
 {$endif}
 end;
 
-function tlocalindex.findboundary(const arecord: pintrecordty;
-                       const alastindex: integer; const abigger: boolean): integer;
+function tlocalindex.findboundary(const comparefunc: indexcomparefuncty;
+                    const arecord: pintrecordty;
+                    const alastindex: integer; const abigger: boolean): integer;
                           //returns index of next bigger
 var
  int1: integer;
@@ -9567,7 +9601,7 @@ begin
     if abigger then begin
      while lo <= up do begin
       pivot:= (up + lo) div 2;
-      int1:= compare1(arecord,ind[pivot],alastindex,false);
+      int1:= comparefunc(arecord,ind[pivot],alastindex,false);
       if int1 >= 0 then begin //pivot <= rev
        lo:= pivot + 1;
       end
@@ -9583,7 +9617,7 @@ begin
     else begin
      while lo <= up do begin
       pivot:= (up + lo + 1) div 2;
-      int1:= compare1(arecord,ind[pivot],alastindex,false);
+      int1:= comparefunc(arecord,ind[pivot],alastindex,false);
       if int1 <= 0 then begin //pivot >= rev
        up:= pivot - 1;
       end
@@ -9607,7 +9641,7 @@ var
  po1: ppointeraty;
 begin
  result:= -1;
- int1:= findboundary(arecord,high(findexfieldinfos),true) - 1;
+ int1:= findboundary(@compare1,arecord,high(findexfieldinfos),true) - 1;
  with tmsebufdataset(fowner) do begin
   po1:= pointer(findexes[findexlocal.indexof(self) + 1].ind);
  end;
@@ -9729,6 +9763,7 @@ var
  po2: pointer;
  bo1: boolean;
  lastind: integer;
+ calcfieldpo: pointer;
 label
  endlab;
 begin
@@ -9749,7 +9784,9 @@ begin
     ' actual vtype: '+ inttostrmse(avalues[int1].vtype));
   end;
  end;
- po1:= tmsebufdataset(fowner).intallocrecord;
+// po1:= tmsebufdataset(fowner).intallocrecord;
+ po1:= allocmem(tmsebufdataset(fowner).fcalcrecordsize+intheadersize);
+ calcfieldpo:= pointer(po1) + tmsebufdataset(fowner).frecordsize;
  try
   for int1:= lastind downto 0 do begin
    with findexfieldinfos[int1],avalues[int1] do begin
@@ -9790,12 +9827,27 @@ begin
     if int1 <= high(aisnull) then begin
      bo1:= bo1 or aisnull[int1];
     end;
-    if not bo1 then begin
-     setfieldflag(@po1^.header.fielddata.nullmask,fieldindex);
-    end; 
+    if fieldindex < 0 then begin //calcfields
+     if not bo1 then begin
+      setfieldflag(calcfieldpo,-2-fieldindex);
+     end
+     else begin
+      clearfieldflag(calcfieldpo,-2-fieldindex);
+                         //buffer is not initialised
+     end;
+    end
+    else begin
+     if not bo1 then begin
+      setfieldflag(@po1^.header.fielddata.nullmask,fieldindex);
+     end
+     else begin
+      clearfieldflag(@po1^.header.fielddata.nullmask,fieldindex);
+                         //buffer is not initialised
+     end;
+    end;
    end;
   end;
-  int1:= findboundary(po1,lastind,abigger);
+  int1:= findboundary(@compare1a,po1,lastind,abigger);
   result:= false;
   abookmark.recordpo:= nil;
   abookmark.recno:= -1;
@@ -9805,7 +9857,7 @@ begin
      if int1 < 0 then begin
       goto endlab;
      end;
-     if (int1 > 0) and (compare1(po1,ind[int1-1],lastind,false) = 0) then begin
+     if (int1 > 0) and (compare1a(po1,ind[int1-1],lastind,false) = 0) then begin
       result:= true;
       dec(int1);
      end;
@@ -9813,14 +9865,14 @@ begin
     else begin
      if int1 >= fbrecordcount - 1 then begin
       if partialstring and (int1 > 0) and (int1 = fbrecordcount - 1) then begin
-       result:= compare1(po1,ind[int1],lastind,true) = 0;
+       result:= compare1a(po1,ind[int1],lastind,true) = 0;
       end;
       if not result then begin
        goto endlab;
       end;
      end;     
      if not result then begin
-      if compare1(po1,ind[int1+1],lastind,false) = 0 then begin
+      if compare1a(po1,ind[int1+1],lastind,false) = 0 then begin
        result:= true;
        inc(int1);
       end;
@@ -9830,18 +9882,18 @@ begin
      if not result then begin
       if partialstring then begin
        if int1 >= 0 then begin
-        result:= compare1(po1,ind[int1],lastind,true) = 0;
+        result:= compare1a(po1,ind[int1],lastind,true) = 0;
        end;
        if not result then begin
         inc(int1);
         if (int1 >= fbrecordcount) or 
-                       (compare1(po1,ind[int1],lastind,true) <> 0) then begin
+                       (compare1a(po1,ind[int1],lastind,true) <> 0) then begin
          dec(int1,2);         //for reversed order
          if (int1 < 0) or 
-                       (compare1(po1,ind[int1],lastind,true) <> 0) then begin
+                       (compare1a(po1,ind[int1],lastind,true) <> 0) then begin
           dec(int1);
           if (int1 < 0) or 
-                       (compare1(po1,ind[int1],lastind,true) <> 0) then begin
+                       (compare1a(po1,ind[int1],lastind,true) <> 0) then begin
            inc(int1,2);
           end
           else begin
