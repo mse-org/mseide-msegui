@@ -157,6 +157,7 @@ type
                  );
  widgetstatesty = set of widgetstatety;
  widgetstate1ty = (ws1_childscaled,ws1_childrectchanged,
+                   ws1_widgetrectsetting,
                    ws1_scaling,ws1_autoscaling,ws1_autosizing,
                    ws1_painting,ws1_updateopaque,
                    ws1_widgetregionvalid,ws1_rootvalid,
@@ -8757,8 +8758,18 @@ begin
 end;
 
 procedure twidget.setwidgetrect(const Value: rectty);
+var
+ bo1: boolean;
 begin
- internalsetwidgetrect(value,false);
+ bo1:= ws1_widgetrectsetting in fwidgetstate1;
+ include(fwidgetstate1,ws1_widgetrectsetting);
+ try
+  internalsetwidgetrect(value,false);
+ finally
+  if not bo1 then begin
+   exclude(fwidgetstate1,ws1_widgetrectsetting);
+  end;
+ end;
 end;
 
 function twidget.getwidgetrect: rectty;
@@ -18381,7 +18392,8 @@ begin       //eventloop
           getevents;
           po1:= pointer(eventlist.datapo);
           for int1:= 0 to eventlist.count - 1 do begin
-           if po1^ <> nil then begin   //use last configure event for the window
+           if po1^ <> nil then begin  
+                           //use last configure event for the window
             with twindowrectevent(po1^) do begin
              if (kind = ek_configure) and (fwinid = id1) then begin
               event.free;

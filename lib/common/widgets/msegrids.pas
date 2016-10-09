@@ -2124,6 +2124,7 @@ type
    procedure dopaintforeground(const acanvas: tcanvas); override;
    procedure dobeforepaint(const canvas: tcanvas); override;
    procedure doafterpaint(const canvas: tcanvas); override;
+   function getnoscroll(): boolean override;
    procedure drawfocusedcell(const acanvas: tcanvas); virtual;
    procedure drawcellbackground(const acanvas: tcanvas);
    procedure drawcelloverlay(const acanvas: tcanvas);
@@ -14181,6 +14182,11 @@ procedure tcustomgrid.doafterpaint(const canvas: tcanvas);
 begin
  inherited;
  fobjectpicker.doafterpaint(canvas);
+end;
+
+function tcustomgrid.getnoscroll(): boolean;
+begin
+ result:= inherited getnoscroll() or (ws1_widgetrectsetting in fwidgetstate1);
 end;
 
 procedure tcustomgrid.repeatproc(const sender: tobject);
