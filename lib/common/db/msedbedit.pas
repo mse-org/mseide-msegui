@@ -7729,19 +7729,26 @@ procedure tgriddatalink.doupdaterowdata(const row: integer);
 var
  int1,int2: integer;
  dataset1: tdataset;
+ buffercount1: int32;
 begin
  if (fgrid.componentstate * [csloading,csdesigning,csdestroying] = []) and 
                  (row < fgrid.rowcount) then begin
   dataset1:= dataset;
   if dataset1 <> nil then begin
+   buffercount1:= buffercount;
    if gdls_hasrowstatefield in fstate then begin
     if row >= 0 then begin
-     fieldtorowstate(row);
+     if row < buffercount1 then begin
+      fieldtorowstate(row);
+     end;
     end
     else begin
      int2:= activerecord;
      try
       for int1:= 0 to fgrid.rowhigh do begin
+       if int1 >= buffercount1 then begin
+        break; //buffer invalid
+       end;
        activerecord:= int1;
        fieldtorowstate(int1);
       end;
@@ -7758,6 +7765,9 @@ begin
      int2:= activerecord;
      try
       for int1:= 0 to fgrid.rowhigh do begin
+       if int1 >= buffercount1 then begin
+        break; //buffer invalid
+       end;
        activerecord:= int1;
        fonupdaterowdata(fgrid,int1,dataset1);
       end;
