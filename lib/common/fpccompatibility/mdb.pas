@@ -348,6 +348,8 @@ type
    procedure readreadonly(reader: treader);
    procedure setoptionsfield(const avalue: optionsfieldty);
    function getbuffervalue: variant;
+   function getasid: int64;
+   procedure setasid(const avalue: int64);
   protected
     FValidating : Boolean;
     FValueBuffer : Pointer;
@@ -443,6 +445,7 @@ type
     property asguid: tguid read getasguid write setasguid;
     property AsLongint: Longint read GetAsLongint write SetAsLongint;
     property AsLargeInt: LargeInt read GetAsLargeInt write SetAsLargeInt;
+    property asid: int64 read getasid write setasid; //-1 -> NULL
     property AsInteger: Integer read GetAsInteger write SetAsInteger;
     property AsString: string read GetAsString write SetAsString;
     property AsWideString: WideString read GetAsWideString 
@@ -6238,6 +6241,26 @@ begin
   result:= getasvariant();
  finally
   fvalidating:= bo1;
+ end;
+end;
+
+function tfield.getasid: int64;
+begin
+ if isnull then begin
+  result:= -1;
+ end
+ else begin
+  result:= aslargeint;
+ end;
+end;
+
+procedure tfield.setasid(const avalue: int64);
+begin
+ if avalue = -1 then begin
+  clear;
+ end
+ else begin
+  aslargeint:= avalue;
  end;
 end;
 

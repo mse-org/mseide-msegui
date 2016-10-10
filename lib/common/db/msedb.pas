@@ -394,8 +394,6 @@ type
 //   function getproviderflags1: providerflags1ty;
 //   function getlookupinfo: plookupfieldinfoty;
 
-   function getasid: integer;
-   procedure setasid(const avalue: integer);
   protected
    procedure readlookup(reader: treader);
          //workaround for breaking fix of FPC Mantis 12809
@@ -417,7 +415,7 @@ type
    function asoldid: integer;
    function sum: integer;
 //   property asmsestring: msestring read getasmsestring write setasmsestring;
-   property asid: integer read getasid write setasid; //-1 -> NULL
+//   property asid: integer read getasid write setasid; //-1 -> NULL
    property asenum: integer read getaslongint write setasenum;
    property tagpo: pointer read ftagpo write ftagpo;
   published
@@ -464,7 +462,7 @@ type
    function asoldid: int64;
    function sum: int64;
 //   property asmsestring: msestring read getasmsestring write setasmsestring;
-   property asid: int64 read getasid write setasid; //-1 -> NULL
+//   property asid: int64 read getasid write setasid; //-1 -> NULL
    property Value: Largeint read GetAsLargeint write SetAsLargeint;
    property tagpo: pointer read ftagpo write ftagpo;
   published
@@ -4229,6 +4227,7 @@ begin
  result:= fproviderflags1;
 end;
 }
+{
 function tmselongintfield.getasid: integer;
 begin
  if isnull then begin
@@ -4248,7 +4247,7 @@ begin
   asinteger:= avalue;
  end;
 end;
-
+}
 procedure tmselongintfield.change;
 begin
  if not (fis_changing in fstate) then begin
