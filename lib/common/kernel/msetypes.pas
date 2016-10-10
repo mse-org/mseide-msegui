@@ -169,6 +169,8 @@ const
  emptyreal = -1/0;
 {$else}
  emptyreal = real(-1/0);
+ emptydouble = double(-1/0);
+ emptyfloat64 = float64(-1/0);
 {$endif}
  emptydatetime = emptyreal;
 
