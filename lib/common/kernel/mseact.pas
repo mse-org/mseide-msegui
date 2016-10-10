@@ -192,7 +192,9 @@ type
    procedure registeronshortcut(const avalue: boolean); virtual;
    procedure loaded; override;
    procedure changed;
-   procedure objectevent(const sender: tobject; const event: objecteventty); override;
+   procedure objectevent(const sender: tobject;
+                                   const event: objecteventty); override;
+   procedure receiveevent(const event: tobjectevent) override;
    procedure doidle(var again: boolean);
    procedure doasyncevent(var atag: integer); override;
    procedure eventfired(const sender: tobject; const ainfo: actioninfoty);
@@ -213,6 +215,7 @@ type
    destructor destroy; override;
    procedure doupdate;
    procedure execute(const force: boolean = false);
+   procedure asyncexecute();
    procedure updateinfo(const sender: iactionlink);
    property caption: captionty read getcaption write setcaption;
    property state: actionstatesty read getstate write setstate default [];
@@ -1251,6 +1254,21 @@ begin
  if (componentstate*[csloading,csdesigning,csdestroying] = []) and 
                   doactionexecute(self,finfo,false,false,nil,force) then begin
   changed;
+ end;
+end;
+
+procedure tcustomaction.asyncexecute();
+begin
+ application.postevent(tobjectevent.create(ek_execute,self));
+end;
+
+procedure tcustomaction.receiveevent(const event: tobjectevent);
+begin
+ inherited;
+ case event.kind of
+  ek_execute: begin
+   execute();
+  end;
  end;
 end;
 
