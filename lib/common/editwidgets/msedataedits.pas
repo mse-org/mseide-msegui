@@ -1766,7 +1766,9 @@ begin
   if fgridintf <> nil then begin
    fgridintf.changed;
   end;
-  updateedittext(false);
+  if not (des_edited in fstate) then begin
+   updateedittext(false); //do not touch pending modifications
+  end;
   inherited;
  end;
 end;
