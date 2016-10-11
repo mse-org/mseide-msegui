@@ -4053,7 +4053,7 @@ begin
  pchar(pchar(pointer(result))+1)^:= charhexlower[avalue and $f];
 end;
 
-function valtohex(const avalue: word): string; overload;
+function valtohex(const avalue: word): string;
 begin
  setlength(result,4);
  pchar(pointer(result))^:= charhexlower[avalue shr 12];
@@ -4062,7 +4062,7 @@ begin
  pchar(pchar(pointer(result))+3)^:= charhexlower[avalue and $f];
 end;
 
-function valtohex(const avalue: longword): string; overload;
+function valtohex(const avalue: longword): string;
 begin
  setlength(result,8);
  pchar(pointer(result))^:= charhexlower[avalue shr 28];
@@ -4075,7 +4075,7 @@ begin
  pchar(pchar(pointer(result))+7)^:= charhexlower[avalue and $f];
 end;
 
-function valtohex(const avalue: qword): string; overload;
+function valtohex(const avalue: qword): string;
 begin
  result:= valtohex(avalue shr 32)+valtohex(avalue);
 end;
