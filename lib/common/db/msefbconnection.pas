@@ -1225,7 +1225,7 @@ begin
          end;
         end;
         case i2 of
-         5,6,8,44,56,57,64: begin
+         5,6,{8,}44,56,57{,64}: begin
           i3:= 2;
          end;
          3: begin
