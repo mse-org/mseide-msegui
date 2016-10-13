@@ -22,7 +22,7 @@ uses
  mseevent,mseglob,mseguiglob,msestat,msestatfile,
  mseinplaceedit,msegrids,msetypes,mseshapes,msewidgets,
  msedrawtext,classes,mclasses,msereal,mseclasses,msearrayprops,
- msebitmap,msemenus,msetimer,mseactions,
+ msebitmap,msemenus,msetimer,mseactions,msekeyboard,
  msesimplewidgets,msepointer,msestrings,msescrollbar
          {$ifdef mse_with_ifi},mseifiglob{$endif};
 
@@ -237,6 +237,7 @@ type
    foptions: framebuttonoptionsty;
    fonexecute: notifyeventty;
    faction: taction;
+   fshortcut: shortcutty;
    procedure setbuttonwidth(const Value: integer);
    procedure setoptions(const Value: framebuttonoptionsty);
    procedure optionstostate();
@@ -278,6 +279,7 @@ type
    finfo: shapeinfoty;
    fframe: tframe;
    freadonly: boolean; //for checkreadonlystate of tbuttonframe
+   procedure doexec();
    procedure mouseevent(var info: mouseeventinfoty;
                  const intf: iframe; const buttonintf: ibutton;
                  const index: integer);
@@ -307,6 +309,8 @@ type
                                  write setimagenrdisabled default -2; //grayed
    property options: framebuttonoptionsty read foptions write setoptions
                                             default [];
+   property shortcut: shortcutty read fshortcut write fshortcut
+                                                    default ord(key_none) ;
    property action: taction read faction write setaction;
    property onexecute: notifyeventty read fonexecute write fonexecute;
                                 //executed after action execute
@@ -338,6 +342,7 @@ type
    class function getitemclasstype: persistentclassty; override;
    procedure updatewidgetstate;
    function wantmouseevent(const apos: pointty): boolean;
+   procedure dokeydown(var info: keyeventinfoty);
   public
    property items[const index: integer]: tframebutton read getitems1; default;
    procedure checktemplate(const sender: tobject);
@@ -355,6 +360,7 @@ type
    procedure updatestate; override;
    procedure internalpaintoverlay(const canvas: tcanvas; 
                                            const arect: rectty) override;
+   procedure dokeydown(var info: keyeventinfoty) override;
   public
    constructor create(const intf: icaptionframe; const buttonintf: ibutton);
                                                    reintroduce; virtual;
@@ -645,7 +651,7 @@ type
 
 implementation
 uses
- sysutils,msekeyboard,msebits,msedataedits,msestockobjects,mseact,
+ sysutils,msebits,msedataedits,msestockobjects,mseact,
  mseassistiveserver,mseassistiveclient;
 
 type
@@ -696,6 +702,7 @@ begin
  finfo.ca.colorglyph:= cl_default;
  finfo.ca.imagenr:= -1;
  finfo.imagenrdisabled:= -2;
+ fshortcut:= ord(key_none);
  include(finfo.state,shs_widgetorg);
  inherited;
 end;
@@ -817,18 +824,18 @@ begin
  end;
 end;
 
+procedure tframebutton.doexec();
+begin
+ if faction <> nil then begin
+  faction.execute();
+ end;
+ if assigned(fonexecute) then begin
+  fonexecute(self);
+ end;
+end; //doexe
+
 procedure tframebutton.mouseevent(var info: mouseeventinfoty;
      const intf: iframe; const buttonintf: ibutton; const index: integer);
-
- procedure doexec();
- begin
-  if faction <> nil then begin
-   faction.execute();
-  end;
-  if assigned(fonexecute) then begin
-   fonexecute(self);
-  end;
- end; //doexe
 
 var
  bo1,bo2: boolean;
@@ -1136,6 +1143,22 @@ begin
  end;
 end;
 
+procedure tframebuttons.dokeydown(var info: keyeventinfoty);
+var
+ i1: int32;
+begin
+ for i1:= 0 to high(fitems) do begin
+  with tframebutton(fitems[i1]) do begin
+   if (finfo.state * [shs_disabled,shs_invisible] = []) and 
+               checkshortcutcode(fshortcut,info) then begin
+    include(info.eventstate,es_processed);
+    doexec();
+    break;
+   end;
+  end;
+ end;
+end;
+
 procedure tframebuttons.checktemplate(const sender: tobject);
 var
  int1: integer;
@@ -1307,6 +1330,16 @@ begin
   end;
  end;
  inherited;
+end;
+
+procedure tcustombuttonsframe.dokeydown(var info: keyeventinfoty);
+begin
+ if not (es_processed in info.eventstate) then begin
+  fbuttons.dokeydown(info);
+  if not (es_processed in info.eventstate) then begin
+   inherited;
+  end;
+ end;
 end;
 
 procedure tcustombuttonsframe.setbuttons(const Value: tframebuttons);
