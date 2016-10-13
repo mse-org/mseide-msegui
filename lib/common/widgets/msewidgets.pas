@@ -81,7 +81,7 @@ type
    procedure setdisabled(const value: boolean); override;
    procedure dopaintfocusrect(const canvas: tcanvas;
                                               const rect: rectty); override;
-   function checkshortcut(var info: keyeventinfoty): boolean; override;
+   function checkfocusshortcut(var info: keyeventinfoty): boolean; override;
    function needsfocuspaint: boolean; override;
    function haspaintrectfocus(): boolean; override; //checks caption
    procedure updatemousestate(const sender: twidget;
@@ -3052,7 +3052,8 @@ begin
  end;
 end;
 
-function tcustomcaptionframe.checkshortcut(var info: keyeventinfoty): boolean;
+function tcustomcaptionframe.checkfocusshortcut(
+                                      var info: keyeventinfoty): boolean;
 begin
  result:= msegui.checkshortcut(info,finfo.text,true);
 end;

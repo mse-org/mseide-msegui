@@ -586,7 +586,7 @@ type
    procedure getpaintframe(var frame: framety); virtual;
         //additional space, (scrollbars,mainmenu...)
    procedure dokeydown(var info: keyeventinfoty); virtual;
-   function checkshortcut(var info: keyeventinfoty): boolean; virtual;
+   function checkfocusshortcut(var info: keyeventinfoty): boolean; virtual;
    procedure parentfontchanged; virtual;
    procedure dopaintfocusrect(const canvas: tcanvas;
                                                  const rect: rectty); virtual;
@@ -4658,7 +4658,7 @@ begin
  drawfocusrect(canvas,rect1);
 end;
 
-function tcustomframe.checkshortcut(var info: keyeventinfoty): boolean;
+function tcustomframe.checkfocusshortcut(var info: keyeventinfoty): boolean;
 begin
  result:= false;
 end;
@@ -12473,7 +12473,7 @@ end;
 function twidget.checkfocusshortcut(var info: keyeventinfoty): boolean;
 begin
  if (fframe <> nil) then begin
-  result:= fframe.checkshortcut(info) and canfocus;
+  result:= fframe.checkfocusshortcut(info) and canfocus;
  end
  else begin
   result:= false;
