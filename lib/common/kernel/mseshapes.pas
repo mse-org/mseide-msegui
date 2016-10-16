@@ -401,7 +401,8 @@ begin
       if button = mb_left then begin
        updateshapemoveclick(infoarpo,false);
        exclude(state,shs_moveclick);
-       if not (shs_disabled in state) then begin
+       if not (shs_disabled in state) or 
+         (widget <> nil) and (csdesigning in widget.componentstate) then begin
         if state * [shs_clicked,shs_checkbox,shs_radiobutton] = 
                                       [shs_clicked,shs_checkbox] then begin
          setchecked(info,not (shs_checked in state),widget);

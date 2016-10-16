@@ -2169,7 +2169,7 @@ object projectoptionsfo: tprojectoptionsfo
               frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive]
               taborder = 6
               bounds_x = 0
-              bounds_y = 227
+              bounds_y = 225
               bounds_cx = 754
               bounds_cy = 37
               anchors = [an_top]
@@ -3075,20 +3075,19 @@ object projectoptionsfo: tprojectoptionsfo
           onchange = copymessagechanged
         end
         object closemessages: tbooleanedit
-          frame.caption = 'Close message window after compile'
+          frame.caption = 'Close messages window after compile'
           frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive]
           frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive]
           frame.outerframe = (
             0
             1
-            233
+            240
             2
           )
           taborder = 14
-          hint = 'Close messages window after compile.'
           bounds_x = 257
           bounds_y = 151
-          bounds_cx = 246
+          bounds_cx = 253
           bounds_cy = 16
           value = True
         end
