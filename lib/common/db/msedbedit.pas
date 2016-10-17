@@ -1966,6 +1966,7 @@ type
    property ondataentered;
    property oncopytoclipboard;
    property onpastefromclipboard;
+   property ondrawcell;
   end;
 
  tdbstringcols = class(tstringcols)

@@ -786,6 +786,7 @@ type
    fvaluetrue: msestring;
    fvaluefalse: msestring;
    fcolorglyph: colorty;
+   fondrawcell: drawcelleventty;
    procedure settextflags(const avalue: textflagsty);
    function getdatalist: tstringcoldatalist;
    procedure setdatalist(const value: tstringcoldatalist);
@@ -874,6 +875,7 @@ type
    property onpastefromclipboard: updatestringeventty read fonpastefromclipboard 
                   write fonpastefromclipboard;       
                                   //sender is tcustomstringcol
+   property ondrawcell: drawcelleventty read fondrawcell write fondrawcell;
  end;
 
  tstringcol = class(tcustomstringcol)
@@ -894,6 +896,7 @@ type
    property ondataentered;
    property oncopytoclipboard;
    property onpastefromclipboard;
+   property ondrawcell;
  end;
  
  stringcolclassty = class of tcustomstringcol;
@@ -6842,7 +6845,7 @@ end;
 procedure tdrawcol.drawcell(const canvas: tcanvas);
 begin
  inherited;
- if fcellinfo.grid.canevent(tmethod(fondrawcell)) then begin
+ if assigned(fondrawcell) then begin
   fondrawcell(self,canvas,cellinfoty(canvas.drawinfopo^));
  end;
 end;
@@ -7119,6 +7122,9 @@ begin
     end;
    end;
   end;
+ end;
+ if assigned(fondrawcell) then begin
+  fondrawcell(self,canvas,cellinfoty(canvas.drawinfopo^));
  end;
 end;
 

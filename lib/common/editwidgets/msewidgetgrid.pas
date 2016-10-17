@@ -1727,7 +1727,7 @@ begin
     fintf.drawcell(canvas);
    end;
   end;
-  if fcellinfo.grid.canevent(tmethod(fondrawcell)) then begin
+  if assigned(fondrawcell) then begin
    fondrawcell(self,canvas,cellinfoty(canvas.drawinfopo^));
   end;
  end;
