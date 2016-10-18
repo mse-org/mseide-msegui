@@ -9918,6 +9918,10 @@ begin
     if (ws_visible in fwidgetstate) and
             (componentstate * [csloading,csinline,csdestroying] = []) then begin
      fwindow.show(false);
+     if not (ws_loadedproc in fwidgetstate) then begin
+      include(fwidgetstate1,ws1_rootvalid);
+      doshow();
+     end;
     end;
    end;
   end;
@@ -11760,8 +11764,9 @@ begin
   visiblechanged;
   for int1:= 0 to widgetcount - 1 do begin
    with widgets[int1] do begin
-    if fwidgetstate * [ws_visible,ws_showproc] = [ws_visible] then begin
-     doshow;
+    if not (csloading in componentstate) and //doshow from loaded pending
+           (fwidgetstate * [ws_visible,ws_showproc] = [ws_visible]) then begin
+     doshow();
     end;
    end;
   end;

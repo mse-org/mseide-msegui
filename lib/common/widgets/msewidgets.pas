@@ -5442,10 +5442,11 @@ end;
 
 procedure tactionwidget.doshow;
 begin
- inherited;
+// inherited;
  if canevent(tmethod(fonshow)) then begin
   fonshow(self);
  end;
+ inherited;
 // include(fwidgetstate,ws_showed);
 // exclude(fwidgetstate,ws_hidden);
 end;
