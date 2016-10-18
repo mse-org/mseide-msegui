@@ -1873,6 +1873,10 @@ begin
   else begin
    if not canceled then begin
     bo1:= true;
+    if des_emptytext in fstate then begin
+     exclude(fstate,des_emptytext);
+     updateemptytext();
+    end;
     texttovalue(bo1,true);
    end;
   end;
