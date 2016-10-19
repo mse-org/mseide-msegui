@@ -150,6 +150,7 @@ type
    function canvalueedit: boolean; virtual;
    function getvalueitem: tlistitem; virtual;
    procedure setvalueitem(const avalue: tlistitem); virtual;
+   function getownerintf: iitemlist inline;
   public
    tag: integer;
    tagpointer: pointer;
@@ -1984,6 +1985,11 @@ end;
 procedure tlistitem.setvalueitem(const avalue: tlistitem);
 begin
  //dummy
+end;
+
+function tlistitem.getownerintf: iitemlist inline;
+begin
+ result:= fowner.fintf;
 end;
 
 { ttreelistitem }
