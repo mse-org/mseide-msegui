@@ -235,11 +235,11 @@ function printableascii(const source: string): string; overload;
 function printableascii(const source: msestring): msestring; overload;
                 //removes all nonprintablechars and ' '
                 
-function replacechar(const source: string; a,b: char): string; overload;
-function replacechar(const source: msestring; a,b: msechar): msestring; overload;
-procedure replacechar1(var dest: string; a,b: char); overload;
-procedure replacechar1(var dest: msestring; a,b: msechar); overload;
-  //replaces a by b
+function replacechar(const source: string; old,new: char): string; overload;
+function replacechar(const source: msestring; old,new: msechar): msestring; overload;
+procedure replacechar1(var dest: string; old,new: char); overload;
+procedure replacechar1(var dest: msestring; old,new: msechar); overload;
+  //replaces old by new
 function stringfromchar(achar: char; count : integer): string; overload;
 function stringfromchar(achar: msechar; count : integer): msestring; overload;
 
@@ -2338,11 +2338,11 @@ begin
  dest:= removechar(dest,a);
 end;
 
-function replacechar(const source: string; a,b: char): string;
+function replacechar(const source: string; old,new: char): string;
   //replaces a by b
 begin
  result:= source;
- replacechar1(result,a,b);
+ replacechar1(result,old,new);
 end;
 {
 procedure replacechar1(var dest: string; a,b: char);
@@ -2358,7 +2358,7 @@ begin
  end;
 end;
 }
-procedure replacechar1(var dest: string; a,b: char);
+procedure replacechar1(var dest: string; old,new: char);
   //replaces a by b
 var
  pd,pe: pchar;
@@ -2367,18 +2367,18 @@ begin
  pd:= pointer(dest);
  pe:= pd + length(dest);
  while pd < pe do begin
-  if pd^ = a then begin
-   pd^:= b;
+  if pd^ = old then begin
+   pd^:= new;
   end;
   inc(pd);
  end;
 end;
 
-function replacechar(const source: msestring; a,b: msechar): msestring;
+function replacechar(const source: msestring; old,new: msechar): msestring;
   //replaces a by b
 begin
  result:= source;
- replacechar1(result,a,b);
+ replacechar1(result,old,new);
 end;
 {
 procedure replacechar1(var dest: msestring; a,b: msechar);
@@ -2395,7 +2395,7 @@ begin
 end;
 }
 
-procedure replacechar1(var dest: msestring; a,b: msechar);
+procedure replacechar1(var dest: msestring; old,new: msechar);
   //replaces a by b
 var
  pd,pe: pmsechar;
@@ -2404,8 +2404,8 @@ begin
  pd:= pointer(dest);
  pe:= pd + length(dest);
  while pd < pe do begin
-  if pd^ = a then begin
-   pd^:= b;
+  if pd^ = old then begin
+   pd^:= new;
   end;
   inc(pd);
  end;
