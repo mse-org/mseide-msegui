@@ -512,6 +512,7 @@ type
    function getselectedindexes: integerarty;
    function getcheckeditems: listitemarty;
    function getcheckedindexes: integerarty;
+   property itemlistintf: iitemlist read fintf;
    property items[const index: integer]: tlistitem read getitems1 write setitems;
                     default;
    property imnr_base: integer read fimnr_base write setimnr_base default 0;
