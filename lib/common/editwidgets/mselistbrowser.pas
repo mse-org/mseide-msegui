@@ -465,6 +465,7 @@ type
                                       var ainfo: nodeactioninfoty); override;
    function compare(const l,r): integer; override;
    class function defaultitemclass(): listedititemclassty; virtual;
+   procedure itemclasschanged();
   public
    constructor create; overload; override;
    constructor create(const intf: iitemlist;
@@ -991,9 +992,10 @@ type
    function locatecount: integer; override;        //number of locate values
    function locatecurrentindex: integer; override; //index of current row
    procedure locatesetcurrentindex(const aindex: integer); override;
-   function getkeystring(const aindex: integer): msestring; override; //locate text
+   function getkeystring(const aindex: integer): msestring; override; 
+                                                   //locate text
    procedure doupdatelayout(const nocolinvalidate: boolean); override;
-   function getitemclass: listitemclassty; override;
+//   function getitemclass: listitemclassty; override;
    procedure dokeydown(var info: keyeventinfoty); override;
    procedure docellevent(const ownedcol: boolean; 
                                        var info: celleventinfoty); override;
@@ -2579,6 +2581,11 @@ begin
  result:= tlistedititem;
 end;
 
+procedure tcustomitemeditlist.itemclasschanged();
+begin
+ fowner.updatelayout();
+end;
+
 procedure tcustomitemeditlist.setcolorglyph(const Value: colorty);
 begin
  if fcolorglyph <> value then begin
@@ -2768,6 +2775,7 @@ end;
 procedure titemeditlist.setitemclass(const avalue: listedititemclassty);
 begin
  fitemclass:= avalue;
+ itemclasschanged();
 end;
 
 function titemeditlist.getoncreateitem: createlistitemeventty;
@@ -3394,7 +3402,8 @@ end;
 
 function titemedit.getitemclass: listitemclassty;
 begin
- result:= tlistitem;
+// result:= tlistitem;
+ result:= listitemclassty(fitemlist.fitemclass);
 end;
 
 procedure titemedit.setupeditor;
@@ -5440,6 +5449,7 @@ end;
 procedure ttreeitemeditlist.setitemclass(const avalue: treelistedititemclassty);
 begin
  fitemclass:= avalue;
+ itemclasschanged();
 end;
 
 function ttreeitemeditlist.getexpandedstate: expandedinfoarty;
@@ -5673,12 +5683,12 @@ begin
   result:= zone1 = cz_caption;
  end;
 end;
-
+{
 function ttreeitemedit.getitemclass: listitemclassty;
 begin
  result:= ttreelistedititem;
 end;
-
+}
 (*
 function ttreeitemedit.getkeystring1(const aindex: integer): msestring;
 begin
