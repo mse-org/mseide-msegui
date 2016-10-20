@@ -72,6 +72,18 @@ const
 
 type
  getnodemodety = (gno_matching,gno_allchildren,gno_nochildren);
+
+ extrainfoty = record
+  image: sizety; //first because of backward compatibility of extendimageeventty
+ end;
+
+ variablelistiteminfoty = record
+  extra: extrainfoty;
+  imageextend: sizety;
+  treelevelshift: integer;
+  rowindex: integer;
+ end;
+
  listitemlayoutinfoty = record
   cellsize: sizety;
   minsize: sizety;
@@ -84,11 +96,7 @@ type
   checkboxrect: rectty;
   checkboxinnerrect: rectty;
   colorline: colorty;
-  imageextend: sizety; //variable
-  imageextra: sizety;  //variable
-  treelevelshift: integer; //variable
-  rowindex: integer; //variable
-//  islast: boolean; //variable
+  variable: variablelistiteminfoty; //variable
  end;
  plistitemlayoutinfoty = ^listitemlayoutinfoty;
 
@@ -790,7 +798,7 @@ var
 begin
  aimagelist:= imagelist;
  with fowner,alayoutinfo do begin
-  imageextend:= nullsize;
+  variable.imageextend:= nullsize;
   if acanvas <> nil then begin
    if (no_checkbox in foptions) and (ns_checkbox in self.fstate) then begin
     glyphno:= stg_checkbox;
@@ -813,14 +821,15 @@ begin
   end;
   if aimagelist <> nil then begin
    if fowner.captionpos in imageextendcaptionpos then begin 
-    imageextend.cx:= aimagelist.size.cx+imageextra.cx-imagerect.cx;
+    variable.imageextend.cx:= aimagelist.size.cx + variable.extra.image.cx - 
+                                                                  imagerect.cx;
    end;
    if acanvas <> nil then begin
     int1:= getactimagenr;
     if (int1 >= 0) and (int1 < aimagelist.count) then begin
       //todo: check imagepos and the like
      with imagerect do begin
-      aimagelist.paint(acanvas,int1,mr(x,y,cx+imageextend.cx,cy),
+      aimagelist.paint(acanvas,int1,mr(x,y,cx+variable.imageextend.cx,cy),
                                        imagealignment,fintf.getcolorglyph);
      end;
     end;
@@ -828,7 +837,7 @@ begin
   end
   else begin
    if fowner.captionpos in imageextendcaptionpos then begin 
-    imageextend.cx:= imageextra.cx-imagerect.cx;
+    variable.imageextend.cx:= variable.extra.image.cx - imagerect.cx;
    end;
   end;
  end;
@@ -841,12 +850,12 @@ var
 begin
 //toto: check captionpos and the like
  with alayoutinfo do begin
-  ainfo.dest.cx:= ainfo.dest.cx - treelevelshift;
-  ainfo.clip.cx:= ainfo.clip.cx - treelevelshift;
+  ainfo.dest.cx:= ainfo.dest.cx - variable.treelevelshift;
+  ainfo.clip.cx:= ainfo.clip.cx - variable.treelevelshift;
 //  if fimagelist <> nil then begin
-  if (imageextend.cx <> 0) and 
+  if (variable.imageextend.cx <> 0) and 
             (fowner.captionpos in imageextendcaptionpos) then begin
-   int1:= imageextend.cx;
+   int1:= variable.imageextend.cx;
    with ainfo.dest do begin
     x:= x+int1;
     cx:= cx-int1;
@@ -2902,7 +2911,7 @@ var
  cellheight{,boxy}: integer;
 
 begin
- alayoutinfo.treelevelshift:= levelshift;
+ alayoutinfo.variable.treelevelshift:= levelshift;
  if acanvas <> nil then begin
   if (fcount = 0) and not (ns_subitems in fstate) then begin
    if (ns_drawemptybox in fstate) or (no_drawemptybox in fowner.foptions) then begin
@@ -2922,7 +2931,7 @@ begin
   end;
   setlength(lines,ftreelevel+2); //last line can be doubled + horz. line
   with fowner,alayoutinfo do begin
-   acanvas.move(makepoint(treelevelshift,0));
+   acanvas.move(makepoint(variable.treelevelshift,0));
    cellheight:= cellsize.cy;
    seg.a.x:= (expandboxrect.x + expandboxrect.cx) div 2;
    seg.a.y:= 0;
@@ -2934,7 +2943,7 @@ begin
    if (fowner <> nil) and fowner.frearanged then begin
     po1:= ptreelistitem(fowner.datapo);
     poend:= @ppointeraty(po1)[fowner.count-1];
-    po1:= @ppointeraty(po1)[rowindex + 1];
+    po1:= @ppointeraty(po1)[variable.rowindex + 1];
    end;
    bo1:= (fparent = nil) or isnotlast(self); 
            //bo1 not used if parent = nil
@@ -3017,8 +3026,8 @@ begin
      text.text:= editor.text;
     end;
     flags:= textflags;
-    inc(dest.x,treelevelshift);
-    inc(clip.x,treelevelshift);
+    inc(dest.x,variable.treelevelshift);
+    inc(clip.x,variable.treelevelshift);
     {
     int1:= levelshift;
     inc(dest.x,int1);

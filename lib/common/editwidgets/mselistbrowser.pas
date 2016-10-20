@@ -566,8 +566,8 @@ type
                   const aitem: tlistitem; var canedit: boolean) of object;
 
  extendimageeventty = procedure(const sender: twidget;
-                           const cellinfopo: pcellinfoty; //nil for non cell call
-                    var aextend: sizety) of object;
+                        const cellinfopo: pcellinfoty; //nil for non cell call
+                                   var ainfo: extrainfoty) of object;
  titemedit = class(tdataedit,iitemlist,ibutton)
   private
    fitemlist: tcustomitemeditlist;
@@ -612,7 +612,7 @@ type
    
    function valuecanedit: boolean;
    procedure doextendimage(const cellinfopo: pcellinfoty; 
-                                        var aextend: sizety); virtual;
+                                        var ainfo: extrainfoty); virtual;
    procedure getautopaintsize(var asize: sizety); override;
    procedure getautocellsize(const acanvas: tcanvas;
                                       var asize: sizety); override;
@@ -3182,8 +3182,8 @@ var
  fra1,fra2: framety;
 begin
  with cellinfoty(canvas.drawinfopo^) do begin
-  doextendimage(canvas.drawinfopo,flayoutinfocell.imageextra);
-  flayoutinfocell.rowindex:= cell.row;
+  doextendimage(canvas.drawinfopo,flayoutinfocell.variable.extra);
+  flayoutinfocell.variable.rowindex:= cell.row;
   flayoutinfocell.textflags:= textflags;
   if finddataedits(tlistitem(datapo^),infos1) then begin
    databefore:= datapo;
@@ -3420,7 +3420,7 @@ begin
   else begin
    bo1:= des_updatelayout in fstate;
    include(fstate,des_updatelayout);
-   doextendimage(nil,flayoutinfofocused.imageextra);
+   doextendimage(nil,flayoutinfofocused.variable.extra);
    fvalue.setupeditor(feditor,geteditfont,true);
    if not bo1 then begin
     exclude(fstate,des_updatelayout);
@@ -3432,13 +3432,13 @@ end;
 procedure titemedit.dopaintforeground(const acanvas: tcanvas);
 begin
  if fvalue <> nil then begin
-  doextendimage(acanvas.drawinfopo,flayoutinfofocused.imageextra);
+  doextendimage(acanvas.drawinfopo,flayoutinfofocused.variable.extra);
  end;
  inherited;
  if fvalue <> nil then begin
   if fgridintf <> nil then begin
    acanvas.rootbrushorigin:= fgridintf.getbrushorigin;
-   flayoutinfofocused.rowindex:= fgridintf.grid.row;
+   flayoutinfofocused.variable.rowindex:= fgridintf.grid.row;
   end;
   with tlistitem1(fvalue) do begin
    drawimage(flayoutinfofocused,acanvas);
@@ -3783,11 +3783,11 @@ begin
 end;
 
 procedure titemedit.doextendimage(const cellinfopo: pcellinfoty; 
-                                                     var aextend: sizety); 
+                                               var ainfo: extrainfoty); 
 begin
  if canevent(tmethod(fonextendimage)) then begin
-  aextend:= nullsize;
-  fonextendimage(self,cellinfopo,aextend);
+  fillchar(ainfo,sizeof(ainfo),#0);
+  fonextendimage(self,cellinfopo,ainfo);
  end;
 end;                                                                      
 
@@ -3799,8 +3799,9 @@ begin
   fvalue.drawimage(flayoutinfofocused,nil);
  end;
  with flayoutinfofocused do begin
-  asize.cx:= asize.cx + imagerect.cx + imageextend.cx + {imageextra.cx +}
-                     treelevelshift; //???
+  asize.cx:= asize.cx + imagerect.cx + variable.imageextend.cx +
+                   {imageextra.cx +}
+                     variable.treelevelshift; //???
   if asize.cy < minsize.cy then begin
    asize.cy:= minsize.cy;
   end;
