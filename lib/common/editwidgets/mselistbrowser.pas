@@ -1051,6 +1051,7 @@ type
 constructor titemviewlist.create(const alistview: tcustomlistview);
 begin
  flistview:= alistview;
+ flayoutinfo.widget:= alistview;
  inherited create(iitemlist(self));
 end;
 
@@ -2860,6 +2861,7 @@ begin
  if fitemlist = nil then begin
   fitemlist:=  titemeditlist.create(iitemlist(self),self);
  end;
+ flayoutinfofocused.widget:= self;
  inherited;
  textflags:= defaultitemedittextflags;
  textflagsactive:= defaultitemedittextflagsactive;

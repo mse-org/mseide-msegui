@@ -14,7 +14,7 @@ unit msedatanodes;
 interface
 uses
  classes,mclasses,msegraphutils,msedrawtext,msegraphics,msedatalist,mseglob,
- mseguiglob,
+ mseguiglob,msegui,
  msebitmap,mseclasses,mseevent,msegrids,msetypes,msestrings,mseinplaceedit,
  msestat,msegridsglob,mselist,msearrayutils,msearrayprops;
 
@@ -85,6 +85,7 @@ type
  end;
 
  listitemlayoutinfoty = record
+  widget: twidget; //titemedit or tcustomlistview
   cellsize: sizety;
   minsize: sizety;
   captionrect: rectty;
