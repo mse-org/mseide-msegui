@@ -61,17 +61,6 @@ type
  tsqlstringlist = class(tmacrostringlist)
  end;
    
-// updatesqloptionty = (uso_refresh);
-// updatesqloptionsty = set of updatesqloptionty;
-          //moved to field providerflags pf1_refresh 
-{
- tupdatesqlstringlist = class(tsqlstringlist)
-  private
-//   foptions: updatesqloptionsty;
-  published
-//   property options: updatesqloptionsty read foptions write foptions default [];
- end;
-}  
   TSQLHandle = Class(TObject)
   end;
   
