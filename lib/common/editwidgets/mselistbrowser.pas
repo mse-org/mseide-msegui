@@ -85,7 +85,8 @@ type
   protected
    fformat: formatinfoarty;
   public
-   procedure updatecaption(var alayoutinfo: listitemlayoutinfoty;
+   procedure updatecaption(const acanvas: tcanvas;
+                     var alayoutinfo: listitemlayoutinfoty;
                                         var ainfo: drawtextinfoty); override;
    property richcaption: richstringty read getrichcaption write setrichcaption;
    property captionformat: formatinfoarty read fformat write setcaptionformat;
@@ -3804,7 +3805,7 @@ begin
    calcautocellsize:= true;
    fillchar(extra,sizeof(extra),#0);
   end;
-  fvalue.drawimage(flayoutinfofocused,nil);
+  fvalue.drawimage(flayoutinfofocused,editor.getfontcanvas());
  end;
  with flayoutinfofocused do begin
   asize.cx:= asize.cx + imagerect.cx + variable.imageextend.cx +
@@ -6424,7 +6425,7 @@ begin
  caption:= avalue.text;
 end;
 
-procedure trichlistedititem.updatecaption(
+procedure trichlistedititem.updatecaption(const acanvas: tcanvas;
              var alayoutinfo: listitemlayoutinfoty; var ainfo: drawtextinfoty);
 begin
  inherited;

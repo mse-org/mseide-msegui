@@ -185,8 +185,9 @@ type
    procedure drawimage(var alayoutinfo: listitemlayoutinfoty;
                                 const acanvas: tcanvas); virtual;
                                 //acanvas can be nil for layout update
-   procedure updatecaption(var alayoutinfo: listitemlayoutinfoty;
-                                var ainfo: drawtextinfoty); virtual;
+   procedure updatecaption(const acanvas: tcanvas;
+                         var alayoutinfo: listitemlayoutinfoty;
+                                     var ainfo: drawtextinfoty); virtual;
    procedure drawcell(const acanvas: tcanvas); virtual;
    procedure mouseevent(var info: mouseeventinfoty); virtual;
    property index: integer read findex;
@@ -848,7 +849,8 @@ begin
  end;
 end;
 
-procedure tlistitem.updatecaption(var alayoutinfo: listitemlayoutinfoty;
+procedure tlistitem.updatecaption(const acanvas: tcanvas;
+                                  var alayoutinfo: listitemlayoutinfoty;
                                              var ainfo: drawtextinfoty);
 var
  int1: integer;
@@ -904,7 +906,7 @@ begin
   info.flags:= textflags {- [tf_clipo]};
   info.font:= nil;
   info.tabulators:= nil;
-  updatecaption(layoutinfopo^,info);
+  updatecaption(acanvas,layoutinfopo^,info);
   if po1^.calcautocellsize then begin
    textrect(acanvas,info);
    size1.cx:= po1^.rect.cx + info.res.cx - info.dest.cx;
@@ -980,7 +982,8 @@ var
  po1: plistitemlayoutinfoty;
 begin
  po1:= fowner.fintf.getlayoutinfo(nil);
- drawimage(po1^,nil); //calc image extend
+ po1^.variable.calcautocellsize:= true;
+ drawimage(po1^,editor.getfontcanvas()); //calc image extend
  with po1^ do begin
   info1.font:= font;
   with info1 do begin
@@ -999,7 +1002,7 @@ begin
    end;
    flags:= textflags;
    
-   updatecaption(po1^,info1);
+   updatecaption(editor.getfontcanvas(),po1^,info1);
    editor.setup(text.text,editor.curindex,false,dest,clip,text.format,nil,font);
   end;
  end;
@@ -3029,7 +3032,8 @@ var
 begin
  if fowner <> nil then begin
   po1:= fowner.fintf.getlayoutinfo(nil);
-  drawimage(po1^,nil); //calc image extend
+  po1^.variable.calcautocellsize:= true;
+  drawimage(po1^,editor.getfontcanvas()); //calc image extend
   with po1^ do begin
    info1.font:= font;
    with info1 do begin
@@ -3056,7 +3060,7 @@ begin
     inc(clip.x,int1);
     dec(clip.cx,int1);
     }
-    updatecaption(po1^,info1);
+    updatecaption(editor.getfontcanvas,po1^,info1);
     editor.setup(text.text,editor.curindex,false,dest,clip,nil,nil,font);
    end;
   end;
