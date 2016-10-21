@@ -1,4 +1,8 @@
 MSEide+MSEgui breaking changes version history
+**********************************************
+
+2016-10-21
+ tlistitem.drawimage() parameter order changed.
 2016-10-02
  teditwidgetdatalink.options oed_syncedittonavigator default off.
 2016-09-30

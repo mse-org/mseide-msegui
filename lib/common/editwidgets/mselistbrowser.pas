@@ -1872,7 +1872,7 @@ begin
   item1:= tlistitem1(focuseditem);
   if item1 <> nil then begin
    fitemlist.flayoutinfo.variable.calcautocellsize:= false;
-   item1.drawimage(fitemlist.flayoutinfo,acanvas);
+   item1.drawimage(acanvas,fitemlist.flayoutinfo);
    if assigned(fitemlist.fonpaintitem) then begin
     fitemlist.fonpaintitem(fitemlist,acanvas,tlistedititem(pointer(item1)));
    end;
@@ -3446,7 +3446,7 @@ begin
   end;
   with tlistitem1(fvalue) do begin
    flayoutinfofocused.variable.calcautocellsize:= false;
-   drawimage(flayoutinfofocused,acanvas);
+   drawimage(acanvas,flayoutinfofocused);
    if feditor.lasttextclipped then begin
     include(fstate1,ns1_captionclipped);
    end
@@ -3805,7 +3805,7 @@ begin
    calcautocellsize:= true;
    fillchar(extra,sizeof(extra),#0);
   end;
-  fvalue.drawimage(flayoutinfofocused,editor.getfontcanvas());
+  fvalue.drawimage(editor.getfontcanvas(),flayoutinfofocused);
  end;
  with flayoutinfofocused do begin
   asize.cx:= asize.cx + imagerect.cx + variable.imageextend.cx +

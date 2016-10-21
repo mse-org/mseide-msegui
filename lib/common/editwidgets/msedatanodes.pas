@@ -182,9 +182,8 @@ type
    procedure change(); virtual;
    procedure valuechange(const delta: nodestatesty = []); virtual;
    procedure updatecellzone(const pos: pointty; var zone: cellzonety); virtual;
-   procedure drawimage(var alayoutinfo: listitemlayoutinfoty;
-                                const acanvas: tcanvas); virtual;
-                                //acanvas can be nil for layout update
+   procedure drawimage(const acanvas: tcanvas;
+                           var alayoutinfo: listitemlayoutinfoty) virtual;
    procedure updatecaption(const acanvas: tcanvas;
                          var alayoutinfo: listitemlayoutinfoty;
                                      var ainfo: drawtextinfoty); virtual;
@@ -343,8 +342,8 @@ type
 
    procedure updatecellzone(const pos: pointty; var zone: cellzonety); override;
    procedure mouseevent(var info: mouseeventinfoty); override;
-   procedure drawimage(var alayoutinfo: listitemlayoutinfoty;
-                                   const acanvas: tcanvas); override;
+   procedure drawimage(const acanvas: tcanvas;
+                      var alayoutinfo: listitemlayoutinfoty) override;
    procedure addchildren(const aitem: ttreelistitem);
                    //transfers children
    function add(const aitem: ttreelistitem): integer; overload; 
@@ -793,8 +792,8 @@ begin
  end;
 end;
 
-procedure tlistitem.drawimage(var alayoutinfo: listitemlayoutinfoty;
-                                                   const acanvas: tcanvas);
+procedure tlistitem.drawimage(const acanvas: tcanvas;
+                                      var alayoutinfo: listitemlayoutinfoty);
 var
  int1: integer;
  aimagelist: timagelist;
@@ -889,7 +888,7 @@ begin
  layoutinfopo:= fowner.fintf.getlayoutinfo(po1);
  layoutinfopo^.variable.calcautocellsize:= po1^.calcautocellsize;
 // if not po1^.calcautocellsize then begin
-  drawimage(layoutinfopo^,acanvas); //ttreelistitem shifts origin
+  drawimage(acanvas,layoutinfopo^); //ttreelistitem shifts origin
 // end
 // else begin
 //  drawimage(layoutinfopo^,nil);
@@ -983,7 +982,7 @@ var
 begin
  po1:= fowner.fintf.getlayoutinfo(nil);
  po1^.variable.calcautocellsize:= true;
- drawimage(po1^,editor.getfontcanvas()); //calc image extend
+ drawimage(editor.getfontcanvas(),po1^); //calc image extend
  with po1^ do begin
   info1.font:= font;
   with info1 do begin
@@ -2894,8 +2893,8 @@ begin
  end;
 end;
 
-procedure ttreelistitem.drawimage(var alayoutinfo: listitemlayoutinfoty;
-                                                       const acanvas: tcanvas);
+procedure ttreelistitem.drawimage(const acanvas: tcanvas;
+                                     var alayoutinfo: listitemlayoutinfoty);
 var
  po1,poend: ptreelistitem;
  
@@ -3033,7 +3032,7 @@ begin
  if fowner <> nil then begin
   po1:= fowner.fintf.getlayoutinfo(nil);
   po1^.variable.calcautocellsize:= true;
-  drawimage(po1^,editor.getfontcanvas()); //calc image extend
+  drawimage(editor.getfontcanvas(),po1^); //calc image extend
   with po1^ do begin
    info1.font:= font;
    with info1 do begin
