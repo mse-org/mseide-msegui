@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2014 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2016 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -11,7 +11,8 @@ unit msemacros;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 uses
- msestrings,mselist,msearrayutils,msetypes,msestat;
+ msestrings,mselist,msearrayutils,msetypes,msestat,msedatalist,mclasses,
+ mseclasses,msearrayprops;
  
 type
  tmacrolist = class;
@@ -86,7 +87,77 @@ type
    property predefined: macroinfoarty read fpredefined write fpredefined;
                             //appended by setasarray procedures
  end;
+
+ tmacroproperty = class;
+ tmacrostringlist = class(tmsestringdatalist)
+  private
+   fmacros: tmacroproperty;
+   function gettext: msestring;
+   procedure settext(const avalue: msestring);
+   procedure readstrings(reader: treader);
+//   procedure writestrings(writer: twriter);
+   procedure setmacros(const avalue: tmacroproperty);
+  protected
+   procedure defineproperties(filer: tfiler); override;
+  public
+   constructor create; override;
+   destructor destroy; override;
+   procedure assign(source: tpersistent); override;
+   property text: msestring read gettext write settext;
+  published
+   property macros: tmacroproperty read fmacros write setmacros;
+ end;
+
+ tstringlistmacroitem = class;
  
+ tstringlistmacro = class(tmacrostringlist)
+  private
+   fowner: tmacrostringlist;
+  protected
+   procedure dochange; override;
+  public
+   constructor create(const aowner: tmacrostringlist); reintroduce;
+ end;
+ 
+ tstringlistmacroitem = class(townedpersistent)
+  private
+   fname: msestring;
+   fvalue: tstringlistmacro;
+   factive: boolean;
+   procedure setvalue(const avalue: tstringlistmacro);
+   procedure setactive(const avalue: boolean);
+  protected
+  public
+   constructor create(aowner: tobject); override;
+   destructor destroy; override;
+   procedure assign(source: tpersistent); override;
+  published
+   property name: msestring read fname write fname;
+   property value: tstringlistmacro read fvalue write setvalue;
+   property active: boolean read factive write setactive default true;
+ end;
+  
+ tmacroproperty = class(townedpersistentarrayprop)
+  private
+   foptions: macrooptionsty;
+   function getitems(const aindex: integer): tstringlistmacroitem;
+   procedure setitems(const aindex: integer; 
+                                  const avalue: tstringlistmacroitem);
+  protected
+   procedure dochange(const aindex: integer); override;
+  public
+   constructor create(const aowner: tmacrostringlist); reintroduce;
+   property items[const aindex: integer]: tstringlistmacroitem read getitems 
+                     write setitems; default;
+   function itembyname(const aname: msestring): tstringlistmacroitem;
+   function itembynames(const anames: array of msestring): tstringlistmacroitem;
+   class function getitemclasstype: persistentclassty; override;
+               //used in dumpunitgroups
+  published
+   property options: macrooptionsty read foptions write foptions 
+                                           default [mao_caseinsensitive];
+ end;
+
 //function expandmacros(const value: msestring; const macros:macroinfoarty;
 //              const caseinsensitive: boolean = true): msestring; overload;
 function initmacros(const amacros: array of macroinfoty): macroinfoarty;
@@ -109,7 +180,7 @@ function expandmacros2(const value: msestring;
 
 implementation
 uses
- msestream;
+ msestream,sysutils;
 
 function initmacros(const amacros: array of macroinfoty): macroinfoarty;
 var
@@ -731,6 +802,250 @@ end;
 procedure tmacrolist.setpredefined(const avalue: array of macroinfoarty);
 begin
  fpredefined:= initmacros(avalue);
+end;
+
+{ tmacrostringlist }
+
+constructor tmacrostringlist.create;
+begin
+ fmacros:= tmacroproperty.create(self);
+ inherited;
+end;
+
+destructor tmacrostringlist.destroy;
+begin
+ inherited;
+ fmacros.free;
+end;
+
+function tmacrostringlist.gettext: msestring;
+var
+ int1,int2: integer;
+ po1: pmsestring;
+ po2: pmsechar;
+ mstr1: msestring;
+ ar1: macroinfoarty;
+// po3: pdoublemsestringty;
+begin
+ result:= '';
+ if count > 0 then begin
+  normalizering;
+  int2:= 0;
+  po1:= pointer(fdatapo);
+  for int1:= 0 to count - 1 do begin
+   inc(int2,length(pmsestringaty(po1)^[int1]));
+  end;
+  mstr1:= lineend;
+  setlength(result,int2+(count-1)*length(mstr1));
+  if result <> '' then begin
+   int2:= 0;
+   po2:= pmsechar(result);
+   for int1:= 0 to count - 2 do begin
+    move(po1^[1],po2^,length(po1^)*sizeof(msechar));
+    inc(po2,length(po1^));
+    move(mstr1[1],po2^,length(mstr1)*sizeof(msechar));
+    inc(po2,length(mstr1));
+    inc(po1);
+   end;
+   move(po1^[1],po2^,length(po1^)*sizeof(msechar)); //last line
+  end;
+  if fmacros.count <> 0 then begin
+   setlength(ar1,fmacros.count);
+//   po3:= fmacros.datapo;
+   for int1:= 0 to high(ar1) do begin
+    with fmacros[int1] do begin
+     ar1[int1].name:= name;
+     if active then begin
+      ar1[int1].value:= value.text;
+     end
+     else begin
+      ar1[int1].value:= '';
+     end;
+//     value:= po3^.b;
+//     name:= po3^.a;
+//     value:= po3^.b;
+    end;
+//    inc(po3);
+   end;    
+   result:= expandmacros(result,ar1,fmacros.foptions);
+  end;
+ end;
+end;
+
+procedure tmacrostringlist.settext(const avalue: msestring);
+begin
+ asarray:= breaklines(avalue);
+end;
+
+procedure tmacrostringlist.readstrings(reader: treader);
+var
+ ar1: stringarty;
+ int1: integer;
+ bo1: boolean;
+begin
+ reader.readlistbegin;
+ while not reader.endoflist do begin
+  additem(ar1,reader.readstring);
+ end;
+ reader.readlistend;
+ bo1:= true;
+ for int1:= 0 to high(ar1) do begin
+  if not checkutf8(ar1[int1]) then begin
+   bo1:= false;
+   break;
+  end;
+ end;
+ clear;
+ if bo1 then begin
+  for int1:= 0 to high(ar1) do begin
+   add(utf8tostringansi(ar1[int1]));
+  end;
+ end
+ else begin
+  for int1:= 0 to high(ar1) do begin
+   add(msestring(ar1[int1]));
+  end;
+ end;
+end;
+
+procedure tmacrostringlist.defineproperties(filer: tfiler);
+begin
+ inherited;
+ filer.defineproperty('Strings',{$ifdef FPC}@{$endif}readstrings,
+                                                nil{@writestrings},false);
+end;
+
+procedure tmacrostringlist.setmacros(const avalue: tmacroproperty);
+begin
+ fmacros.assign(avalue);
+end;
+
+procedure tmacrostringlist.assign(source: tpersistent);
+begin
+ beginupdate;
+ try
+  inherited;
+  if source is tmacrostringlist then begin
+   fmacros.assign(tmacrostringlist(source).macros);
+  end;
+ finally
+  endupdate;
+ end;
+end;
+
+{ tmacroproperty }
+
+constructor tmacroproperty.create(const aowner: tmacrostringlist);
+begin
+ fowner:= aowner;
+ foptions:= [mao_caseinsensitive];
+ inherited create(aowner,tstringlistmacroitem);
+end;
+
+procedure tmacroproperty.dochange(const aindex: integer);
+begin
+ inherited;
+ tmacrostringlist(fowner).dochange;
+end;
+
+function tmacroproperty.getitems(const aindex: integer): tstringlistmacroitem;
+begin
+ result:= tstringlistmacroitem(inherited getitems(aindex));
+end;
+
+procedure tmacroproperty.setitems(const aindex: integer;
+               const avalue: tstringlistmacroitem);
+begin
+ inherited;
+end;
+
+class function tmacroproperty.getitemclasstype: persistentclassty;
+begin
+ result:= tstringlistmacroitem;
+end;
+
+function tmacroproperty.itembyname(
+                          const aname: msestring): tstringlistmacroitem;
+var
+ int1: integer;
+begin
+ result:= nil;
+ for int1:= 0 to high(fitems) do begin
+  if tstringlistmacroitem(fitems[int1]).name = aname then begin
+   result:= tstringlistmacroitem(fitems[int1]);
+   break;
+  end;
+ end;
+ if result = nil then begin
+  raise exception.create('Macro "'+ansistring(aname)+'" not found.');
+ end;
+end;
+
+function tmacroproperty.itembynames(
+                  const anames: array of msestring): tstringlistmacroitem;
+var
+ int1: integer;
+begin
+ result:= nil;
+ if length(anames) > 0 then begin
+  result:= itembyname(anames[0]);
+  for int1:= 1 to high(anames) do begin
+   result:= result.value.macros.itembyname(anames[int1]);
+  end;
+ end;
+end;
+
+{ tstringlistmacro }
+
+constructor tstringlistmacro.create(const aowner: tmacrostringlist);
+begin
+ fowner:= aowner;
+ inherited create;
+end;
+
+procedure tstringlistmacro.dochange;
+begin
+ inherited;
+ fowner.dochange;
+end;
+
+{ tstringlistmacroitem }
+
+constructor tstringlistmacroitem.create(aowner: tobject);
+begin
+ factive:= true;
+ fvalue:= tstringlistmacro.create(tmacrostringlist(aowner));
+ inherited;
+end;
+
+destructor tstringlistmacroitem.destroy;
+begin
+ fvalue.free;
+ inherited;
+end;
+
+procedure tstringlistmacroitem.setvalue(const avalue: tstringlistmacro);
+begin
+ fvalue.assign(avalue);
+end;
+
+procedure tstringlistmacroitem.setactive(const avalue: boolean);
+begin
+ if factive <> avalue then begin
+  factive:= avalue;
+  tmacrostringlist(fowner).dochange;
+ end;
+end;
+
+procedure tstringlistmacroitem.assign(source: tpersistent);
+begin
+ if source is tstringlistmacroitem then begin
+  with tstringlistmacroitem(source) do begin
+   self.name:= name;
+   self.value:= value;
+   self.active:= active;
+  end;
+ end;
 end;
 
 end.
