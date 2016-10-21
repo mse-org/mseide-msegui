@@ -32,7 +32,22 @@ type
    property script: tpythonstringlist read fscript write setscript;
  end;
  
+ tpythonscript = class;
+ 
  tpythonscripts = class(townedpersistentarrayprop)
+  private
+   function getitems(const aindex: integer): tpythonstringlistitem;
+   procedure setitems(const aindex: integer; 
+                                  const avalue: tpythonstringlistitem);
+  protected
+  public
+   constructor create(const aowner: tpythonscript); reintroduce;
+   property items[const aindex: integer]: tpythonstringlistitem read getitems 
+                     write setitems; default;
+   function itembyname(const aname: msestring): tpythonstringlistitem;
+   class function getitemclasstype: persistentclassty; override;
+               //used in dumpunitgroups
+  published
  end;
  
  tpythonscript = class(tmseprocess)
@@ -47,12 +62,14 @@ type
  end;
  
 implementation
-
+uses
+ sysutils;
+ 
 { tpythonscript }
 
 constructor tpythonscript.create(aowner: tcomponent);
 begin
- fscripts:= tpythonscripts.create(self,tpythonstringlistitem);
+ fscripts:= tpythonscripts.create(self);
  inherited;
 end;
 
@@ -94,6 +111,47 @@ end;
 procedure tpythonstringlistitem.setscript(const avalue: tpythonstringlist);
 begin
  fscript.assign(avalue);
+end;
+
+{ tpythonscripts }
+
+constructor tpythonscripts.create(const aowner: tpythonscript);
+begin
+ fowner:= aowner;
+ inherited create(aowner,tpythonstringlistitem);
+end;
+
+function tpythonscripts.getitems(const aindex: integer): tpythonstringlistitem;
+begin
+ result:= tpythonstringlistitem(inherited getitems(aindex));
+end;
+
+procedure tpythonscripts.setitems(const aindex: integer;
+               const avalue: tpythonstringlistitem);
+begin
+ inherited;
+end;
+
+function tpythonscripts.itembyname(
+              const aname: msestring): tpythonstringlistitem;
+var
+ int1: integer;
+begin
+ result:= nil;
+ for int1:= 0 to high(fitems) do begin
+  if tpythonstringlistitem(fitems[int1]).name = aname then begin
+   result:= tpythonstringlistitem(fitems[int1]);
+   break;
+  end;
+ end;
+ if result = nil then begin
+  raise exception.create('Script "'+ansistring(aname)+'" not found.');
+ end;
+end;
+
+class function tpythonscripts.getitemclasstype: persistentclassty;
+begin
+ result:= tpythonstringlistitem;
 end;
 
 end.
