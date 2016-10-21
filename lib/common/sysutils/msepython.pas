@@ -13,6 +13,8 @@ interface
 uses
  mseprocess,mclasses,msearrayprops,msemacros,mseclasses,msestrings;
 
+const
+ defaultpythonprocoptions = defaultprocessoptions + [pro_input];
 type
  tpythonstringlist = class(tmacrostringlist)
  end;
@@ -27,6 +29,8 @@ type
    constructor create(aowner: tobject); override;
    destructor destroy; override;
    procedure assign(source: tpersistent); override;
+   function execute(const atimeoutus: integer = -1): int32; //-1 -> infinite
+                     //returns exitcode, -1 for timeout
   published
    property name: msestring read fname write fname;
    property script: tpythonstringlist read fscript write setscript;
@@ -50,7 +54,7 @@ type
   published
  end;
  
- tpythonscript = class(tmseprocess)
+ tpythonscript = class(tcustommseprocess)
   private
    fscripts: tpythonscripts;
    procedure setscripts(const avalue: tpythonscripts);
@@ -59,6 +63,22 @@ type
    destructor destroy(); override;
   published
    property scripts: tpythonscripts read fscripts write setscripts;
+   property filename;
+   property parameter;
+   property workingdirectory;
+   property params;
+   property envvars;
+//   property active;
+   property options default defaultpythonprocoptions;
+   property pipewaitus;
+   property statfile;
+   property statvarname;
+   property statpriority;
+   property input;
+   property output;
+   property erroroutput;
+   property onprocfinished;
+   property oncheckabort;
  end;
  
 implementation
@@ -71,6 +91,8 @@ constructor tpythonscript.create(aowner: tcomponent);
 begin
  fscripts:= tpythonscripts.create(self);
  inherited;
+ filename:= 'python';
+ options:= defaultpythonprocoptions;
 end;
 
 destructor tpythonscript.destroy();
@@ -104,6 +126,58 @@ begin
   with tpythonstringlistitem(source) do begin
    self.name:= name;
    self.script:= script;
+  end;
+ end;
+end;
+
+function tpythonstringlistitem.execute(const atimeoutus: integer = -1): int32;
+var
+// po1,pe: pmsestring;
+// bo1: boolean;
+ s1: string;
+begin
+ with tpythonscript(fowner) do begin
+ {
+  bo1:= false;
+  po1:= params.datapo;
+  pe:= po1 + params.count;
+  while po1 < pe do begin
+   if po1^ = '-' then begin
+    bo1:= true;
+    break;
+   end;
+   inc(po1);
+  end;
+  if not bo1 then begin
+   params.add('-');
+  end;
+  }
+  params.add('-c');
+  params.add(fscript.text);
+  try
+   active:= true;
+  finally
+//   if not bo1 then begin
+   params.count:= params.count - 2;
+//   end;
+  end;
+//  input.pipewriter.write(fscript.text);
+//  input.pipewriter.close();
+  if atimeoutus < 0 then begin
+   result:= waitforprocess();
+  end
+  else begin
+   if atimeoutus > 0 then begin
+    if not waitforprocess(atimeoutus) then begin
+     result:= -1;
+    end
+    else begin
+     result:= exitcode;
+    end;
+   end
+   else begin
+    result:= exitcode;
+   end;
   end;
  end;
 end;

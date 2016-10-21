@@ -30,7 +30,7 @@ uses
  msedesignintf,msemenus,msegui,msepipestream,sysutils,
  msegraphutils,regkernel_bmp,msegraphics,msestrings,msepostscriptprinter,
  mseprinter,msetypes,msedatalist,msedatamodules,mseclasses,formdesigner,
- mseapplication,mseglob,mseguiglob,mseskin,msedesigner,
+ mseapplication,mseglob,mseguiglob,mseskin,msedesigner,msemacros,
  mseguithreadcomp,mseprocmonitorcomp,msefadepropedit,
  msearrayprops,msesumlist,mserttistat,msestockobjects,regglob,msearrayutils,
  msecryptohandler,msestringcontainer,mseformatstr;
@@ -175,7 +175,13 @@ type
    function getvalue: msestring; override;
    procedure edit(); override;
  end;
-    
+
+ tmacroseditor = class(tpersistentarraypropertyeditor)
+  protected
+   function itemgetvalue(const sender: tarrayelementeditor): msestring
+                                                                  override;
+ end;
+
 const   
  datamoduleintf: designmoduleintfty = 
   (createfunc: {$ifdef FPC}@{$endif}createmsedatamodule;
@@ -288,6 +294,8 @@ begin
                          tskincontrollerextenderspropertyeditor);
  registerpropertyeditor(typeinfo(stockglyphty),nil,'',
                                       tstockglypheditor);
+ registerpropertyeditor(typeinfo(tmacroproperty),nil,'',
+                                    tmacroseditor);
  registerunitgroup(['msestatfile'],['msestat']);
  
  registerdesignmoduleclass(tmsedatamodule,@datamoduleintf);
@@ -790,6 +798,17 @@ begin
  mstr1:= getmsestringvalue(0,true);
  if editcornermask(mstr1) then begin
   setmsestringvalue(mstr1,true);
+ end;
+end;
+
+{ tmacroseditor }
+
+function tmacroseditor.itemgetvalue(
+                     const sender: tarrayelementeditor): msestring;
+begin
+ with tstringlistmacroitem(
+              tarrayelementeditor1(sender).getpointervalue) do begin
+  result:= '<'+name+'>';
  end;
 end;
 

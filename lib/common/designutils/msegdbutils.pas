@@ -270,7 +270,7 @@ type
    fgdbfrom{,fgdberror}: tpipereader;
    {$ifdef UNIX}
    ftargetterminal: tpseudoterminal;
-   ftargetconsole: tmseprocess;
+   ftargetconsole: tcustommseprocess;
    {$endif}
    fgdb: integer; //processhandle
    fstate: gdbstatesty;
@@ -842,7 +842,7 @@ begin
  {$ifdef UNIX}
  ftargetterminal:= tpseudoterminal.create;
  ftargetterminal.input.oninputavailable:= {$ifdef FPC}@{$endif}targetfrom;
- ftargetconsole:= tmseprocess.create(nil);
+ ftargetconsole:= tcustommseprocess.create(nil);
  ftargetconsole.options:= [pro_output,pro_errorouttoout];
 // ftargetconsole.filename:= 'xterm';
  ftargetconsole.output.oninputavailable:= {$ifdef FPC}@{$endif}xtermfrom;

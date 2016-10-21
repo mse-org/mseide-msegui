@@ -140,12 +140,6 @@ type
    function getvalue: msestring; override;
  end;
 }
- tsqlmacroseditor = class(tpersistentarraypropertyeditor)
-  protected
-//   function geteditorclass: propertyeditorclassty; override;
-   function itemgetvalue(const sender: tarrayelementeditor): msestring; 
-                                                                  override;
- end;
 
 implementation
 uses
@@ -543,8 +537,6 @@ begin
                      tlbdropdowncolseditor);
  registerpropertyeditor(typeinfo(tdbdropdowncols),nil,'',
                      tdbdropdowncolseditor);
- registerpropertyeditor(typeinfo(tmacroproperty),nil,'',
-                                    tsqlmacroseditor);
 end;
 
 
@@ -1633,17 +1625,6 @@ begin
  end;
 end;
 }
-{ tsqlmacroseditor }
-
-function tsqlmacroseditor.itemgetvalue(
-                     const sender: tarrayelementeditor): msestring;
-begin
- with tstringlistmacroitem(
-              tarrayelementeditor1(sender).getpointervalue) do begin
-  result:= '<'+name+'>';
- end;
-end;
-
 {
 function tsqlmacroseditor.geteditorclass: propertyeditorclassty;
 begin

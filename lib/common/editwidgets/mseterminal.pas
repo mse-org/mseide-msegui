@@ -67,7 +67,7 @@ type
    function getprompt: msestring;
    procedure setprompt(const avalue: msestring);
   protected
-   fprocess: tmseprocess;
+   fprocess: tcustommseprocess;
    procedure setreadonly1(const avalue: boolean);
    procedure igridwidget.setreadonly = setreadonly1;
    procedure setreadonly(const avalue: boolean); override;
@@ -171,7 +171,7 @@ begin
 // fhistoryindex:= -1;
  inherited;
  optionsedit:= defaultterminaleditoptions;
- fprocess:= tmseprocess.create(nil);
+ fprocess:= tcustommseprocess.create(nil);
  with fprocess do begin
   output.oninputavailable:= {$ifdef FPC}@{$endif}doinputavailable;
   output.onpipebroken:= {$ifdef FPC}@{$endif}dopipebroken;

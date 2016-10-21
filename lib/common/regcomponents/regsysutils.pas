@@ -23,9 +23,11 @@ interface
 implementation
 uses
  msedesignintf,msesysenv,msefilechange,regsysutils_bmp,mseprocess,
- msecomponenteditors,
+ msecomponenteditors,msepython,msestrings,
  sysutils,mclasses,msesysenvmanagereditor,mseglob,msepropertyeditors;
 type
+ tarrayelementeditor1 = class(tarrayelementeditor);
+ 
  tsysenvmanagereditor = class(tcomponenteditor)
   public
    constructor create(const adesigner: idesigner;
@@ -38,12 +40,21 @@ type
    function getinvisibleitems: tintegerset; override;
  end;
 
+ tpythonscriptseditor = class(tpersistentarraypropertyeditor)
+  protected
+   function itemgetvalue(const sender: tarrayelementeditor): msestring
+                                                                  override;
+ end;
+    
 procedure Register;
 begin
- registercomponents('NoGui',[tsysenvmanager,tfilechangenotifyer,tmseprocess]);
+ registercomponents('NoGui',[tsysenvmanager,tfilechangenotifyer,tmseprocess,
+                             tpythonscript]);
  registercomponenteditor(tsysenvmanager,tsysenvmanagereditor);
  registerpropertyeditor(typeinfo(processoptionsty),nil,'',
                                            tprocessoptionseditor);
+ registerpropertyeditor(typeinfo(tpythonscripts),nil,'',
+                                    tpythonscriptseditor);
 end;
 
 { tsysenvmanagereditor }
@@ -67,6 +78,17 @@ end;
 function tprocessoptionseditor.getinvisibleitems: tintegerset;
 begin
  result:= [ord(pro_nopipeterminate)];
+end;
+
+{ tpythonscriptseditor }
+
+function tpythonscriptseditor.itemgetvalue(
+              const sender: tarrayelementeditor): msestring;
+begin
+ with tpythonstringlistitem(
+              tarrayelementeditor1(sender).getpointervalue) do begin
+  result:= '<'+name+'>';
+ end;
 end;
 
 initialization
