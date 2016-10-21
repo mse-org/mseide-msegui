@@ -75,6 +75,7 @@ type
 
  extrainfoty = record
   image: sizety; //first because of backward compatibility of extendimageeventty
+  caption: sizety;
  end;
 
  variablelistiteminfoty = record
@@ -82,6 +83,7 @@ type
   imageextend: sizety;
   treelevelshift: integer;
   rowindex: integer;
+  calcautocellsize: boolean;
  end;
 
  listitemlayoutinfoty = record
@@ -796,11 +798,13 @@ var
  int1: integer;
  aimagelist: timagelist;
  glyphno: stockglyphty;
+ nopaint: boolean;
 begin
  aimagelist:= imagelist;
+ nopaint:= (acanvas = nil) or alayoutinfo.variable.calcautocellsize;
  with fowner,alayoutinfo do begin
   variable.imageextend:= nullsize;
-  if acanvas <> nil then begin
+  if not nopaint then begin //acanvas <> nil then begin
    if (no_checkbox in foptions) and (ns_checkbox in self.fstate) then begin
     glyphno:= stg_checkbox;
     if ns_checked in self.fstate then begin
@@ -825,7 +829,7 @@ begin
     variable.imageextend.cx:= aimagelist.size.cx + variable.extra.image.cx - 
                                                                   imagerect.cx;
    end;
-   if acanvas <> nil then begin
+   if not nopaint then begin //acanvas <> nil then begin
     int1:= getactimagenr;
     if (int1 >= 0) and (int1 < aimagelist.count) then begin
       //todo: check imagepos and the like
@@ -881,17 +885,23 @@ begin
 // pt1:= acanvas.origin;
  po1:=  pcellinfoty(acanvas.drawinfopo);
  layoutinfopo:= fowner.fintf.getlayoutinfo(po1);
- if not po1^.calcautocellsize then begin
+ layoutinfopo^.variable.calcautocellsize:= po1^.calcautocellsize;
+// if not po1^.calcautocellsize then begin
   drawimage(layoutinfopo^,acanvas); //ttreelistitem shifts origin
- end
- else begin
-  drawimage(layoutinfopo^,nil);
- end;
+// end
+// else begin
+//  drawimage(layoutinfopo^,nil);
+// end;
  with layoutinfopo^ do begin
   info.text.text:= fcaption;
   info.text.format:= nil;
   info.dest:= captioninnerrect;
-  info.flags:= textflags - [tf_clipo];
+  inc(info.dest.cx,variable.extra.caption.cx);
+  inc(info.dest.cy,variable.extra.caption.cy);
+  info.clip:= captionrect;
+  inc(info.clip.cx,variable.extra.caption.cx);
+  inc(info.clip.cy,variable.extra.caption.cy);
+  info.flags:= textflags {- [tf_clipo]};
   info.font:= nil;
   info.tabulators:= nil;
   updatecaption(layoutinfopo^,info);
@@ -976,7 +986,11 @@ begin
   with info1 do begin
    tabulators:= nil;
    dest:= captioninnerrect;
+   inc(dest.cx,variable.extra.caption.cx);
+   inc(dest.cy,variable.extra.caption.cy);
    clip:= captionrect;
+   inc(clip.cx,variable.extra.caption.cx);
+   inc(clip.cy,variable.extra.caption.cy);
    if not notext then begin
     text.text:= fcaption;
    end
@@ -2910,10 +2924,12 @@ var
  seg: segmentty;
  lines: segmentarty;
  cellheight{,boxy}: integer;
+ nopaint: boolean;
 
 begin
+ nopaint:= (acanvas = nil) or alayoutinfo.variable.calcautocellsize;
  alayoutinfo.variable.treelevelshift:= levelshift;
- if acanvas <> nil then begin
+ if not nopaint then begin //acanvas <> nil then begin
   if (fcount = 0) and not (ns_subitems in fstate) then begin
    if (ns_drawemptybox in fstate) or (no_drawemptybox in fowner.foptions) then begin
     boxno:= integer(stg_box);
@@ -3019,7 +3035,11 @@ begin
    with info1 do begin
     tabulators:= nil;
     dest:= captioninnerrect;
+    inc(dest.cx,variable.extra.caption.cx);
+    inc(dest.cy,variable.extra.caption.cy);
     clip:= captionrect;
+    inc(clip.cx,variable.extra.caption.cx);
+    inc(clip.cy,variable.extra.caption.cy);
     if not notext then begin
      text.text:= fcaption;
     end

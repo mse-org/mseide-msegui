@@ -1870,6 +1870,7 @@ begin
   drawcellbackground(acanvas);
   item1:= tlistitem1(focuseditem);
   if item1 <> nil then begin
+   fitemlist.flayoutinfo.variable.calcautocellsize:= false;
    item1.drawimage(fitemlist.flayoutinfo,acanvas);
    if assigned(fitemlist.fonpaintitem) then begin
     fitemlist.fonpaintitem(fitemlist,acanvas,tlistedititem(pointer(item1)));
@@ -3443,6 +3444,7 @@ begin
    flayoutinfofocused.variable.rowindex:= fgridintf.grid.row;
   end;
   with tlistitem1(fvalue) do begin
+   flayoutinfofocused.variable.calcautocellsize:= false;
    drawimage(flayoutinfofocused,acanvas);
    if feditor.lasttextclipped then begin
     include(fstate1,ns1_captionclipped);
@@ -3787,8 +3789,8 @@ end;
 procedure titemedit.doextendimage(const cellinfopo: pcellinfoty; 
                                                var ainfo: extrainfoty); 
 begin
+ fillchar(ainfo,sizeof(ainfo),#0);
  if canevent(tmethod(fonextendimage)) then begin
-  fillchar(ainfo,sizeof(ainfo),#0);
   fonextendimage(self,cellinfopo,ainfo);
  end;
 end;                                                                      
@@ -3798,6 +3800,10 @@ procedure titemedit.getautopaintsize(var asize: sizety);
 begin
  inherited;
  if (fvalue <> nil) and (fvalue.owner <> nil) then begin
+  with flayoutinfofocused.variable do begin
+   calcautocellsize:= true;
+   fillchar(extra,sizeof(extra),#0);
+  end;
   fvalue.drawimage(flayoutinfofocused,nil);
  end;
  with flayoutinfofocused do begin
