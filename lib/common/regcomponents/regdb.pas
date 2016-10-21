@@ -155,7 +155,7 @@ uses
  mselookupbuffer,mselocaldataset,
  msearrayutils,msedbfieldeditor,sysutils,msetexteditor,
  msedbdispwidgets,msedbgraphics,regdb_bmp,msedbdialog,msegrids,
- msedbcalendardatetimeedit,
+ msedbcalendardatetimeedit,msemacros,
  regwidgets,msebufdataset,msedbevents,msesqlite3conn,msqldb,msemysqlconn,
  msedblookup;
 
@@ -1638,7 +1638,8 @@ end;
 function tsqlmacroseditor.itemgetvalue(
                      const sender: tarrayelementeditor): msestring;
 begin
- with tsqlmacroitem(tarrayelementeditor1(sender).getpointervalue) do begin
+ with tstringlistmacroitem(
+              tarrayelementeditor1(sender).getpointervalue) do begin
   result:= '<'+name+'>';
  end;
 end;
