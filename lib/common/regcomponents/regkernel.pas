@@ -296,6 +296,7 @@ begin
                                       tstockglypheditor);
  registerpropertyeditor(typeinfo(tmacroproperty),nil,'',
                                     tmacroseditor);
+
  registerunitgroup(['msestatfile'],['msestat']);
  
  registerdesignmoduleclass(tmsedatamodule,@datamoduleintf);
