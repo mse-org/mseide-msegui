@@ -58,6 +58,8 @@ type
   private
    fscripts: tpythonscripts;
    procedure setscripts(const avalue: tpythonscripts);
+  protected
+   procedure setoptions(const avalue: processoptionsty) override;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy(); override;
@@ -106,6 +108,16 @@ begin
  fscripts.assign(avalue);
 end;
 
+procedure tpythonscript.setoptions(const avalue: processoptionsty);
+begin
+ inherited;
+ if not (pro_input in foptions) then begin
+  inherited setoptions(foptions + [pro_noshell]);
+     //bash -c only supports a single commandstring -> 
+     //python -c can not be used with bash and paramlist
+ end;
+end;
+
 { tpythonstringlistitem }
 
 constructor tpythonstringlistitem.create(aowner: tobject);
@@ -135,8 +147,6 @@ begin
  with tpythonscript(fowner) do begin
   active:= false;
   if not (pro_input in options) then begin
-   options:= options + [pro_noshell]; 
-              //bash -c only supports a single commandstring
    params.add('-c');
    params.add(fscript.text);
    try

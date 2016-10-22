@@ -61,7 +61,6 @@ type
    factive: boolean;
    fprochandle: prochandlety;
    flastprochandle: prochandlety;
-   foptions: processoptionsty;
    fonprocfinished: notifyeventty;
    flistenid: ptruint;
    fexitcode: integer;
@@ -81,12 +80,13 @@ type
    function getcommandline: msestring;
    procedure setcommandline(const avalue: msestring);
    procedure procend;
-   procedure setoptions(const avalue: processoptionsty);
    procedure setinput(const avalue: tpipewriterpers);
    procedure setparams(const avalue: tmsestringdatalist);
    procedure setenvvars(const avalue: tmsestringdatalist);
   protected
+   foptions: processoptionsty;
    fstate: processstatesty;
+   procedure setoptions(const avalue: processoptionsty) virtual;
    procedure setactive(const avalue: boolean); override;
    procedure loaded; override;
    procedure listen;
