@@ -143,16 +143,39 @@ begin
 end;
 
 function tpythonstringlistitem.execute(const atimeoutus: integer = -1): int32;
+var
+ i1,i2: int32;
 begin
  with tpythonscript(fowner) do begin
   active:= false;
   if not (pro_input in options) then begin
-   params.add('-c');
-   params.add(fscript.text);
+   i2:= -1;
+   for i1:= 0 to params.count-1 do begin
+    if params[i1] = '-' then begin
+     i2:= i1;
+     break;
+    end;
+   end;
+   i1:= i2;
+   if i1 < 0 then begin
+    params.insert(0,'-c');
+    params.insert(1,fscript.text);
+    i1:= 0;
+    i2:= 2;
+   end
+   else begin
+    params[i1]:= '-c';
+    inc(i1);
+    params.insert(i1,fscript.text);
+    i2:= 1;
+   end;
    try
     active:= true;
    finally
-    params.count:= params.count - 2;
+    if i2 = 1 then begin
+     params[i1-1]:= '-';
+    end;
+    params.deleteitems(i1,i2);
    end;
   end
   else begin
