@@ -2018,6 +2018,7 @@ begin
  str1:= '';
  ftextrectbefore:= finfo.res;
  if length(finfo.text.text) > 0 then begin
+  canvas.save();
   haspasswordchar:= (fpasswordchar <> #0) and not (ies_emptytext in fstate);
   if haspasswordchar then begin
    str1:= finfo.text.text;
@@ -2053,6 +2054,7 @@ begin
   if haspasswordchar then begin
    finfo.text.text:= str1;
   end;
+  canvas.restore();
  end;
  checktextrect;
 end;
