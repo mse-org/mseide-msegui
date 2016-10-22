@@ -131,38 +131,25 @@ begin
 end;
 
 function tpythonstringlistitem.execute(const atimeoutus: integer = -1): int32;
-var
-// po1,pe: pmsestring;
-// bo1: boolean;
- s1: string;
 begin
  with tpythonscript(fowner) do begin
- {
-  bo1:= false;
-  po1:= params.datapo;
-  pe:= po1 + params.count;
-  while po1 < pe do begin
-   if po1^ = '-' then begin
-    bo1:= true;
-    break;
+  active:= false;
+  if not (pro_input in options) then begin
+   options:= options + [pro_noshell]; 
+              //bash -c only supports a single commandstring
+   params.add('-c');
+   params.add(fscript.text);
+   try
+    active:= true;
+   finally
+    params.count:= params.count - 2;
    end;
-   inc(po1);
-  end;
-  if not bo1 then begin
-   params.add('-');
-  end;
-  }
-  params.add('-c');
-  params.add(fscript.text);
-  try
+  end
+  else begin
    active:= true;
-  finally
-//   if not bo1 then begin
-   params.count:= params.count - 2;
-//   end;
+   input.pipewriter.write(fscript.text);
+   input.pipewriter.close();
   end;
-//  input.pipewriter.write(fscript.text);
-//  input.pipewriter.close();
   if atimeoutus < 0 then begin
    result:= waitforprocess();
   end
