@@ -3113,6 +3113,9 @@ begin
        dec(int1);
       end;
       int3:= intmust - int1 + int2 - 1;
+      if thousandsep <> #0 then begin
+       int3:= int3 + (int1 + int2 - 1) div 4;
+      end;
       if int3 > 0 then begin
        insert(copy(msenullen,1,int3),mstr1,int2); //insert zeros
        inc(int1,int3);
