@@ -40,18 +40,23 @@ type
  
  tpythonscripts = class(townedpersistentarrayprop)
   private
+   fdummylist: tmacrostringlist;
    function getitems(const aindex: integer): tpythonstringlistitem;
    procedure setitems(const aindex: integer; 
                                   const avalue: tpythonstringlistitem);
+   procedure setmacros(const avalue: tmacroproperty);
+   function getmacros: tmacroproperty;
   protected
   public
    constructor create(const aowner: tpythonscript); reintroduce;
+   destructor destroy(); override;
    property items[const aindex: integer]: tpythonstringlistitem read getitems 
                      write setitems; default;
    function itembyname(const aname: msestring): tpythonstringlistitem;
    class function getitemclasstype: persistentclassty; override;
                //used in dumpunitgroups
   published
+   property macros: tmacroproperty read getmacros write setmacros;
  end;
  
  tpythonscript = class(tcustommseprocess)
@@ -145,9 +150,11 @@ end;
 function tpythonstringlistitem.execute(const atimeoutus: integer = -1): int32;
 var
  i1,i2: int32;
+ ms1: msestring;
 begin
  with tpythonscript(fowner) do begin
   active:= false;
+  ms1:= fscripts.fdummylist.expandmacros(fscript.text);
   if not (pro_input in options) then begin
    i2:= -1;
    for i1:= 0 to params.count-1 do begin
@@ -159,14 +166,14 @@ begin
    i1:= i2;
    if i1 < 0 then begin
     params.insert(0,'-c');
-    params.insert(1,fscript.text);
+    params.insert(1,ms1);
     i1:= 0;
     i2:= 2;
    end
    else begin
     params[i1]:= '-c';
     inc(i1);
-    params.insert(i1,fscript.text);
+    params.insert(i1,ms1);
     i2:= 1;
    end;
    try
@@ -180,7 +187,7 @@ begin
   end
   else begin
    active:= true;
-   input.pipewriter.write(fscript.text);
+   input.pipewriter.write(ms1);
    input.pipewriter.close();
   end;
   if atimeoutus < 0 then begin
@@ -212,7 +219,14 @@ end;
 constructor tpythonscripts.create(const aowner: tpythonscript);
 begin
  fowner:= aowner;
+ fdummylist:= tmacrostringlist.create();
  inherited create(aowner,tpythonstringlistitem);
+end;
+
+destructor tpythonscripts.destroy();
+begin
+ inherited;
+ fdummylist.free();
 end;
 
 function tpythonscripts.getitems(const aindex: integer): tpythonstringlistitem;
@@ -224,6 +238,16 @@ procedure tpythonscripts.setitems(const aindex: integer;
                const avalue: tpythonstringlistitem);
 begin
  inherited;
+end;
+
+procedure tpythonscripts.setmacros(const avalue: tmacroproperty);
+begin
+ fdummylist.macros:= avalue;
+end;
+
+function tpythonscripts.getmacros: tmacroproperty;
+begin
+ result:= fdummylist.macros;
 end;
 
 function tpythonscripts.itembyname(

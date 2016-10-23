@@ -103,6 +103,7 @@ type
    constructor create; override;
    destructor destroy; override;
    procedure assign(source: tpersistent); override;
+   function expandmacros(atext: msestring): msestring;
    property text: msestring read gettext write settext;
   published
    property macros: tmacroproperty read fmacros write setmacros;
@@ -818,13 +819,40 @@ begin
  fmacros.free;
 end;
 
+function tmacrostringlist.expandmacros(atext: msestring): msestring;
+var
+ ar1: macroinfoarty;
+ int1: int32;
+begin
+ result:= atext;
+  if fmacros.count <> 0 then begin
+   setlength(ar1,fmacros.count);
+//   po3:= fmacros.datapo;
+   for int1:= 0 to high(ar1) do begin
+    with fmacros[int1] do begin
+     ar1[int1].name:= name;
+     if active then begin
+      ar1[int1].value:= value.text;
+     end
+     else begin
+      ar1[int1].value:= '';
+     end;
+//     value:= po3^.b;
+//     name:= po3^.a;
+//     value:= po3^.b;
+    end;
+//    inc(po3);
+   end;    
+   result:= msemacros.expandmacros(result,ar1,fmacros.foptions);
+  end;
+end;
+
 function tmacrostringlist.gettext: msestring;
 var
  int1,int2: integer;
  po1: pmsestring;
  po2: pmsechar;
  mstr1: msestring;
- ar1: macroinfoarty;
 // po3: pdoublemsestringty;
 begin
  result:= '';
@@ -849,26 +877,7 @@ begin
    end;
    move(po1^[1],po2^,length(po1^)*sizeof(msechar)); //last line
   end;
-  if fmacros.count <> 0 then begin
-   setlength(ar1,fmacros.count);
-//   po3:= fmacros.datapo;
-   for int1:= 0 to high(ar1) do begin
-    with fmacros[int1] do begin
-     ar1[int1].name:= name;
-     if active then begin
-      ar1[int1].value:= value.text;
-     end
-     else begin
-      ar1[int1].value:= '';
-     end;
-//     value:= po3^.b;
-//     name:= po3^.a;
-//     value:= po3^.b;
-    end;
-//    inc(po3);
-   end;    
-   result:= expandmacros(result,ar1,fmacros.foptions);
-  end;
+  result:= expandmacros(result);
  end;
 end;
 
