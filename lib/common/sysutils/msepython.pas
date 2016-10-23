@@ -70,7 +70,7 @@ type
    property workingdirectory;
    property params;
    property envvars;
-//   property active;
+   property active;
    property options default defaultpythonprocoptions;
    property pipewaitus;
    property statfile;
