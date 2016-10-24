@@ -1,0 +1,45 @@
+# Python syntax definition
+#
+styles
+ default ''
+ words 'b'
+ comment 'i' cl_dkblue
+ option 'b' cl_dkblue
+ string '' cl_dkblue
+ 
+keyworddefs python
+ 'False' 'class' 'finally' 'is' 'return'
+ 'None' 'continue' 'for' 'lambda' 'try'
+ 'True' 'def' 'from' 'nonlocal' 'while'
+ 'and' 'del' 'global' 'not' 'with'
+ 'as' 'elif' 'if' 'or' 'yield'
+ 'assert' 'else' 'import' 'pass'
+ 'break' 'except' 'in' 'raise'
+
+scope comment1 comment
+ endtokens
+  ''
+scope string1 string
+ endtokens
+  '''' ''
+scope string2 string
+ endtokens
+  '"' ''
+scope string3 string
+ endtokens
+  ''''''''
+scope string4 string
+ endtokens
+  '"""'
+  
+scope main
+
+ keywords words
+  python
+ calltokens
+  '#' comment1
+  '''''''' string3
+  '''' string1
+  '"""' string4
+  '"' string2
+
