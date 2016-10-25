@@ -58,8 +58,10 @@ type
    constructor create(const aoptions: macrooptionsty);
    constructor create(const aoptions: macrooptionsty;
                              const apredefined: array of macroinfoty);
-   function find(const aname: msestring; out item: pmacroinfoty): boolean;
+   function find(const aname: msestring;
+                            out item: pmacroinfoty): boolean;
                 //true if found;
+   function itembyname(const aname: msestring): pmacroinfoty;
    function itempo(const index: integer): pmacroinfoty;
    procedure add(const avalue: tmacrolist); overload;
    procedure add(const avalue: macroinfoty); overload;
@@ -436,6 +438,13 @@ begin
  end
  else begin
   item:= nil;
+ end;
+end;
+
+function tmacrolist.itembyname(const aname: msestring): pmacroinfoty;
+begin
+ if not find(aname,result) then begin
+  raise exception.create(ansistring('Macroitem "'+aname+'" not found'));
  end;
 end;
 
