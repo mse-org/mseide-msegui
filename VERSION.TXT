@@ -1,6 +1,5 @@
 MSEide+MSEgui breaking changes version history
 **********************************************
-
 2016-10-21
  tlistitem.drawimage() parameter order changed.
 2016-10-02
@@ -9,6 +8,9 @@ MSEide+MSEgui breaking changes version history
  Options belonging to bufdataset descendants only moved from
  tdscontroller.options to tmsebufdataset.options.
  "delayedapplycount" tdscontroller -> tmsebufdataset.
+2016-09-28
+ Frame buttons options fbo_disabled overrides readonly state of widget.
+ fbo_disabled in existing widgets must be reset at design time once.
 2016-09-26
  TCustomSQLConnection DatabaseName, Password, UserName, HostName, Charset and
  Role properties ansistring -> msestring.
