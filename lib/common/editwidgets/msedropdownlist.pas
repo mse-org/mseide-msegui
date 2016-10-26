@@ -465,9 +465,11 @@ type
   published
    property options;
  end;
-
+ dropdownwidgeteventty = procedure(const sender: twidget;
+                                    const dropdown: twidget) of object;
  tdropdownwidgetcontroller = class(tdropdowncontroller)
   private
+   fondropdown: dropdownwidgeteventty;
   protected
    fbounds_cy: integer;
    fbounds_cx: integer;
@@ -488,12 +490,16 @@ type
                    //0 -> ownerwidget.bounds_cx
    property bounds_cy: integer read fbounds_cy write fbounds_cy default 0;
                    //0 -> dropdownwidget.bounds_cy
-
+   property ondropdown: dropdownwidgeteventty read fondropdown 
+                                                      write fondropdown;
  end;
 
+ dropdownlisteventty = procedure(const sender: twidget;
+                             const dropdown: tdropdownlist) of object;
  tcustomdropdownlistcontroller = class(tcustomdropdowncontroller,
                                                       idropdownlistcontroller)
   private
+   fondropdown: dropdownlisteventty;
    procedure setcols(const Value: tdropdowncols);
    function getitemindex: integer;
    procedure setitemindex(const Value: integer);
@@ -583,6 +589,8 @@ type
                                          write setimageframe_right default 0;
    property imageframe_bottom: integer read fimageframe.bottom 
                                          write setimageframe_bottom default 0;
+   property ondropdown: dropdownlisteventty read fondropdown 
+                                                      write fondropdown;
  end;
 
  tnocolsdropdownlistcontroller = class(tcustomdropdownlistcontroller)
@@ -600,6 +608,7 @@ type
    property buttonlength;
    property buttonminlength;
    property buttonendlength;
+   property ondropdown;
  end;
 
  tdropdownlistcontroller = class(tnocolsdropdownlistcontroller)
@@ -1687,17 +1696,6 @@ begin
  inherited;
  if event.kind = ek_dropdown then begin
   if fdropdownwidget <> nil then begin
-  {
-   if fbounds_cx > 0 then begin
-    fdropdownwidget.bounds_cx:= fbounds_cx;
-   end
-   else begin
-    fdropdownwidget.bounds_cx:= fintf.getwidget.framesize.cx;
-   end;
-   if fbounds_cy > 0 then begin
-    fdropdownwidget.bounds_cy:= fbounds_cy;
-   end;
-   }
    updatedropdownpos(fdropdownwidget.widgetrect);
    fdropdownwidget.window.winid; //update window.options
    if fdropdownwidget.window.ispopup then begin
@@ -1708,6 +1706,9 @@ begin
     fintf.geteditor.forcecaret:= true;
    end;
    try
+    if assigned(fondropdown) then begin
+     fondropdown(fintf.getwidget,fdropdownwidget);
+    end;
     if fdropdownwidget.show(true,fintf.getwidget.window) = mr_ok then begin
      fintf.geteditor.forcecaret:= false;
      setdropdowntext(idropdownwidget(fintf).getdropdowntext(fdropdownwidget),
@@ -1717,8 +1718,6 @@ begin
     fintf.geteditor.forcecaret:= false;
     doafterclosedropdown;
    end;
-//   setlinkedvar(nil,tmsecomponent(fdropdownwidget));
-//   freeandnil(fdropdownwidget);
    if deo_colsizing in foptions then begin
     fdropdownwidth:= fdropdownwidget.width;
    end;
@@ -1955,6 +1954,9 @@ begin
        int2:= -1;
       end;
       fselectkey:= key_none;
+      if assigned(fondropdown) then begin
+       fondropdown(widget1,fdropdownlist);
+      end;
       show(int1,self.fdropdownrowcount,int2,str1);
       fintf.geteditor.forcecaret:= false;
       include(self.fstate,dcs_itemselecting);
@@ -2728,8 +2730,13 @@ end;
 
 function tdropdownlist.getkeystring(const aindex: integer): msestring;
 begin
- with tstringcol(fdatacols[0]) do begin
-  result:= items[aindex];
+ if folded and rowhidden[aindex] then begin
+  result:= '';
+ end
+ else begin
+  with tstringcol(fdatacols[0]) do begin
+   result:= items[aindex];
+  end;
  end;
 end;
 

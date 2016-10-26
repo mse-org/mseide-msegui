@@ -6940,7 +6940,8 @@ begin
  fcols.assign(avalue);
 end;
 
-function tcustomdbdropdownlistcontroller.getbuttonframeclass: dropdownbuttonframeclassty;
+function tcustomdbdropdownlistcontroller.getbuttonframeclass():
+                                              dropdownbuttonframeclassty;
 begin
  result:= tdropdownmultibuttonframe;
 end;
