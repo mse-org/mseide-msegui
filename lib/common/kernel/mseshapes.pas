@@ -205,7 +205,8 @@ begin
   end;
   exit;
  end;
- if (info.eventkind in [ek_mousemove,ek_mousepark]) then begin
+ if (info.eventkind in [ek_mousemove,ek_mousepark]) and 
+                     not (csdesigning in awidget.componentstate) then begin
   if (int1 >= 0) then begin
    if (int1 <> hintedbutton) and (-(int1+3) <> hintedbutton) then begin
     if twidget1(awidget).getshowhint and ((info.eventkind = ek_mousepark) or 
