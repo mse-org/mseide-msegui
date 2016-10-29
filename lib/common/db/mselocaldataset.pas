@@ -51,9 +51,9 @@ type
    function getnumboolean: boolean;
    function getfloatdate: boolean;
    function getint64currency: boolean;
-   function getfiltereditkind: filtereditkindty;
-   procedure beginfilteredit(const akind: filtereditkindty);
-   procedure endfilteredit;
+//   function getfiltereditkind: filtereditkindty;
+//   procedure beginfilteredit(const akind: filtereditkindty);
+//   procedure endfilteredit;
 //   procedure doidleapplyupdates;
   protected
    procedure setoptions(const avalue: bufdatasetoptionsty) override;
@@ -328,12 +328,13 @@ function tlocaldataset.getint64currency: boolean;
 begin
  result:= true;
 end;
-
+{
 function tlocaldataset.getfiltereditkind: filtereditkindty;
 begin
  result:= fek_filter;
 end;
-
+}
+{
 procedure tlocaldataset.beginfilteredit(const akind: filtereditkindty);
 begin
  //dummy
@@ -343,6 +344,7 @@ procedure tlocaldataset.endfilteredit;
 begin
  //dummy
 end;
+}
 {
 procedure tlocaldataset.doidleapplyupdates;
 begin

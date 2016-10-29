@@ -109,6 +109,8 @@ type
  idbnaviglink = interface(inullinterface)
   procedure setactivebuttons(const abuttons: dbnavigbuttonsty;
                const afiltered: boolean);
+  procedure setcheckedbuttons(const abuttons: dbnavigbuttonsty;
+                                                 const achecked: boolean);
   function getwidget: twidget;
   function getnavigoptions: dbnavigatoroptionsty;
   procedure dodialogexecute;
@@ -197,6 +199,8 @@ type
     //idbnaviglink
    procedure setactivebuttons(const abuttons: dbnavigbuttonsty;
                              const afiltered: boolean);
+   procedure setcheckedbuttons(const abuttons: dbnavigbuttonsty;
+                                                  const achecked: boolean);
    function getnavigoptions: dbnavigatoroptionsty;
    procedure dodialogexecute;
   public
@@ -2725,6 +2729,7 @@ begin
      fek_filtermax: bu1:= [dbnb_filtermax];
      fek_find: bu1:= [dbnb_find];
     end;
+    fintf.setcheckedbuttons(bu1,true);
     bu1:= bu1+[dbnb_filterclear];
    end;
    dsedit,dsinsert: begin
@@ -2735,6 +2740,8 @@ begin
     end;
    end;
    else begin
+    fintf.setcheckedbuttons(
+                  [dbnb_filter,dbnb_filtermin,dbnb_filtermax,dbnb_find],false);
     bu1:= bu1 + [dbnb_refresh,dbnb_insert,dbnb_delete,dbnb_edit,
                  dbnb_filteronoff,dbnb_copyrecord];
    end;
@@ -2981,11 +2988,23 @@ begin
   end;
  end;
  with buttons[ord(dbnb_autoedit)] do begin
- // imagenr:= ord(stg_triabig);
   options:= options + [mao_checkbox];
  end;
-// buttons[ord(dbnb_dialog)].imagenr:= ord(stg_ellipsesmall);
-// buttons[ord(dbnb_copyrecord)].imagenr:= ord(stg_doublesquare);
+ with buttons[ord(dbnb_filter)] do begin
+  options:= options + [mao_checkbox];
+ end;
+ with buttons[ord(dbnb_filtermin)] do begin
+  options:= options + [mao_checkbox];
+ end;
+ with buttons[ord(dbnb_filtermax)] do begin
+  options:= options + [mao_checkbox];
+ end;
+ with buttons[ord(dbnb_find)] do begin
+  options:= options + [mao_checkbox];
+ end;
+ with buttons[ord(dbnb_filteronoff)] do begin
+  options:= options + [mao_checkbox];
+ end;
   
  fdatalink:= tnavigdatalink.Create(idbnaviglink(self));
  visiblebuttons:= defaultvisibledbnavigbuttons;
@@ -3053,6 +3072,8 @@ begin
  beginupdate;
  try
   with buttons[ord(dbnb_filteronoff)] do begin
+   checked:= afiltered;
+  {
    if afiltered then begin
     imagenr:= ord(stg_dbfilteroff);
     hint:= stockobjects.captions[sc_filter_off];
@@ -3066,6 +3087,7 @@ begin
     hint:= hint + ' (' + 
                   encodeshortcutname(fshortcuts[dbnb_filteronoff])+')';
    end;
+  }
   end;
   for bu1:= low(dbnavigbuttonty) to high(dbnavigbuttonty) do begin
    if (bu1 <> dbnb_dialog) or not (dno_customdialogupdate in foptions) then begin
@@ -3085,6 +3107,31 @@ begin
  end;
  if application.mousewidget = self then begin
   asyncevent(0);
+ end;
+end;
+
+procedure tdbnavigator.setcheckedbuttons(const abuttons: dbnavigbuttonsty;
+               const achecked: boolean);
+var
+ bu1: dbnavigbuttonty;
+begin
+ beginupdate;
+ try
+  for bu1:= low(dbnavigbuttonty) to high(dbnavigbuttonty) do begin
+   if bu1 in abuttons then begin
+    with buttons[ord(bu1)] do begin
+     if achecked then begin
+      state:= state + [as_checked];
+     end
+     else begin
+      state:= state - [as_checked];
+     end;
+    end;
+   end;
+  end;
+  dialogbutton.doupdate;
+ finally
+  endupdate;
  end;
 end;
 
