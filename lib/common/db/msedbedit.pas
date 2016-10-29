@@ -52,7 +52,7 @@ const
           [dbnb_first,dbnb_prior,dbnb_next,dbnb_last,dbnb_insert,
            dbnb_delete,dbnb_edit,dbnb_post,dbnb_cancel,dbnb_refresh];
  filterdbnavigbuttons = [dbnb_filter,dbnb_filtermin,dbnb_filtermax,
-                         dbnb_filterclear,dbnb_find];
+                         dbnb_filterclear,dbnb_find,dbnb_filteronoff];
  defaultdbnavigatorheight = 24;
  defaultdbnavigatorwidth = (ord(dbnb_refresh))*defaultdbnavigatorheight;
 
