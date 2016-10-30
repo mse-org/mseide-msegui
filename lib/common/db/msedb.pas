@@ -8046,11 +8046,13 @@ begin
   end;
  end;
 // optionsbefore:= foptions;
- opt:= avalue - [dso_refreshwaitcursor]-deprecatedbdsoptions;
+ opt:= avalue;
  if dso_refreshwaitcursor in avalue then begin
   include(opt,dso_waitcursor);
  end;
+ opt:= opt - [dso_refreshwaitcursor]-deprecatedbdsoptions;
  options1:= datasetoptionsty(longword(foptions) xor longword(opt));
+ foptions:= opt;
 (*
 {$ifdef FPC}
  foptions:= datasetoptionsty(setsinglebit(longword(opt),longword(foptions),
