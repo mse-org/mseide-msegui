@@ -8715,15 +8715,16 @@ end;
 procedure tgriddatalink.beforefocuscell(const cell: gridcoordty;
                              const selectaction: focuscellactionty);
 begin
- if (selectaction = fca_entergrid) and canautoinsert then begin
+ if (selectaction = fca_entergrid) and canautoinsert and 
+                                        not fautoinserting then begin
   fautoinserting:= true;
   try
    dataset.insert;
+   fgrid.focuscell(fgrid.focusedcell,selectaction); 
+                              //focus col if necessary
   finally
    fautoinserting:= false;
   end;
-  fgrid.focuscell(fgrid.focusedcell,selectaction); 
-                              //focus col if necessary
  end;
 end;
 
