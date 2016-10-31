@@ -153,6 +153,7 @@ type
               const tabulators: tcustomtabulators = nil;
               const font: tfont = nil; noinvalidate: boolean = false);
    procedure updatepos(const atextrect,aclientrect: rectty);
+   procedure movepos(const adist: pointty); //shifts textrects
    procedure setscrollvalue(const avalue: real; const horz: boolean);
    property font: tfont read ffont write setfont;
    property fontstyle: fontstylesty read ffontstyle write ffontstyle default [];
@@ -613,6 +614,15 @@ begin
  ftextrect := atextrect;
  finfo.dest:= atextrect;
  finfo.clip:= aclientrect;
+ invalidatetext(false,false);
+ internalupdatecaret;
+end;
+
+procedure tinplaceedit.movepos(const adist: pointty);
+begin
+ addpoint1(ftextrect.pos,adist);
+ addpoint1(finfo.dest.pos,adist);
+ addpoint1(finfo.clip.pos,adist);
  invalidatetext(false,false);
  internalupdatecaret;
 end;

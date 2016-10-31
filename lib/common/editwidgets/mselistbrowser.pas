@@ -1978,23 +1978,32 @@ end;
 procedure tcustomlistview.setupeditor(const newcell: gridcoordty;
                                                     posonly: boolean);
 var
- po1: pointty;
- rect1,rect2: rectty;
+ pt1: pointty;
+// rect1,rect2: rectty;
  int1: integer;
 begin
- po1:= cellrect(newcell,cil_paint).pos;
- rect1:= moverect(fitemlist.flayoutinfo.captionrect,po1);
- rect2:= moverect(fitemlist.flayoutinfo.captioninnerrect,po1);
+// rect1:= moverect(fitemlist.flayoutinfo.captionrect,po1);
+// rect2:= moverect(fitemlist.flayoutinfo.captioninnerrect,po1);
  int1:= celltoindex(newcell,false);
  if int1 >= 0 then begin
-  if posonly then begin
-   feditor.updatepos(rect2,rect1);
-  end
-  else begin
-   feditor.setup(fitemlist[int1].caption,0,false,rect2,rect1,nil,nil,getfont);
-   feditor.textflags:= fitemlist.flayoutinfo.textflags + [tf_clipo];
-   feditor.textflagsactive:= feditor.textflags;
+//  if posonly then begin
+//   feditor.updatepos(rect2,rect1);
+//  end
+//  else begin
+//   feditor.setup(fitemlist[int1].caption,0,false,rect2,rect1,nil,nil,getfont);
+
+  pt1:= cellrect(newcell,cil_paint).pos;
+  with fitemlist[int1] do begin
+   if not posonly then begin
+    feditor.textflags:= fitemlist.flayoutinfo.textflags + [tf_clipo];
+    feditor.textflagsactive:= feditor.textflags;
+    feditor.text:= caption;
+   end;
+   setupeditor(feditor,getfont,true);
+   feditor.movepos(pt1);
   end;
+
+//  end;
  end;
 end;
 
