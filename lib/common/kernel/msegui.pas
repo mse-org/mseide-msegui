@@ -15411,7 +15411,9 @@ begin
  fmodalresult:= mr_none;
  with appinst do begin
   deactivatehint;
-  if (fmousecapturewidget <> nil) then begin
+  if (fmousecapturewidget <> nil) and 
+                not ((showinfo <> nil) and
+                         (fmousecapturewidget = showinfo^.widget)) then begin
    fmousecapturewidget.releasemouse;
    releasemouse;
   end;
