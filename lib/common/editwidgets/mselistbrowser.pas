@@ -284,7 +284,7 @@ type
    function getkeystring(const index: integer): msestring;
    function getfocusedindex: integer;
    procedure setfocusedindex(const avalue: integer);
-   procedure setupeditor(const newcell: gridcoordty; posonly: boolean);
+   procedure setupeditor(const newcell: gridcoordty{; posonly: boolean});
    function getdatacollinecolor: colorty;
    function getdatacollinewidth: integer;
    procedure setdatacollinecolor(const Value: colorty);
@@ -1828,7 +1828,7 @@ begin
   if (cell1.col <> ffocusedcell.col) or (cell1.row <> ffocusedcell.row) then begin
    focuscell(cell1);
   end;
-  setupeditor(ffocusedcell,true);
+  setupeditor(ffocusedcell{,true});
  end;
 end;
 
@@ -1975,8 +1975,8 @@ begin
  end;
 end;
 
-procedure tcustomlistview.setupeditor(const newcell: gridcoordty;
-                                                    posonly: boolean);
+procedure tcustomlistview.setupeditor(const newcell: gridcoordty{;
+                                                    posonly: boolean});
 var
  pt1: pointty;
 // rect1,rect2: rectty;
@@ -1994,11 +1994,11 @@ begin
 
   pt1:= cellrect(newcell,cil_paint).pos;
   with fitemlist[int1] do begin
-   if not posonly then begin
+//   if not posonly then begin
     feditor.textflags:= fitemlist.flayoutinfo.textflags + [tf_clipo];
     feditor.textflagsactive:= feditor.textflags;
     feditor.text:= caption;
-   end;
+//   end;
    setupeditor(feditor,getfont,true);
    feditor.movepos(pt1);
   end;
@@ -2021,7 +2021,7 @@ begin
       focuscell(indextocell(fitemlist.count - 1),info.selectaction);
       exit;
      end;
-     setupeditor(newcell,false);
+     setupeditor(newcell{,false});
     end;
     cek_exit: begin
      editing:= false;
