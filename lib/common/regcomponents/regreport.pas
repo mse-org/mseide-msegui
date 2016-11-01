@@ -21,7 +21,7 @@ interface
 implementation
 uses
  classes,mclasses,msereport,msedesignintf,formdesigner,reportdesigner,
- msepropertyeditors,mseformatstr,
+ msepropertyeditors,mseformatstr,mserepps,
  sysutils,msestrings,regreport_bmp,regdb,mselookupbuffer;
 const
  reportintf: designmoduleintfty = 
@@ -49,7 +49,7 @@ begin
                     trepvaluedisp,treppagenumdisp,trepprintdatedisp,
                     {trepstringdisplb,trepintegerdisplb,treprealdisplb,
                     trepdatetimedisplb,}
-                    trepspacer]); 
+                    trepspacer,treppsdisp]); 
  registercomponenttabhints(['Rep'],['Report components']);
 
  registerdesignmoduleclass(treport,@reportintf,treportdesignerfo);

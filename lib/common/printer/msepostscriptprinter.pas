@@ -179,7 +179,11 @@ type
    function rectsizestring(const asize: sizety): string;
    function sizestring(const asize: sizety): string;
    function rectstring(const arect: rectty): string;
-   procedure pscommand(const atext: string); // writes atext to postscript stream
+   procedure pscommandbegin();
+   procedure pscommandwrite(const atext: string);
+   procedure pscommandend();
+   procedure pscommand(const atext: string); 
+                    // writes atext to postscript stream
   published
    property pslevel: pslevelty read fpslevel write fpslevel default psl_3;
    property imagecachesize: integer read fimagecachesize write setimagecachesize 
@@ -2331,13 +2335,28 @@ begin
  checkscale;
 end;
 
-procedure tpostscriptcanvas.pscommand(const atext: string);
+procedure tpostscriptcanvas.pscommandbegin();
 begin
  fdrawinfo.acolorforeground:= color;
  fdrawinfo.acolorbackground:= colorbackground;
  checkgcstate(changedmask);
+end;
+
+procedure tpostscriptcanvas.pscommandwrite(const atext: string);
+begin
  streamwrite(atext);
+end;
+
+procedure tpostscriptcanvas.pscommandend();
+begin
  initgcvalues;
+end;
+
+procedure tpostscriptcanvas.pscommand(const atext: string);
+begin
+ pscommandbegin();
+ pscommandwrite(atext);
+ pscommandend()
 end;
 
 procedure tpostscriptcanvas.freeimagecache(const index: integer);
