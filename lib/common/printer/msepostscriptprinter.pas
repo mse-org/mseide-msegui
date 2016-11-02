@@ -196,6 +196,10 @@ type
 function psrealtostr(const avalue: real): string;
 procedure pstranslate(var mat: psmatrixty; const dist: pspointty);
 procedure psretranslate(var mat: psmatrixty; const dist: pspointty);
+procedure psscale(var mat: psmatrixty; const scale: pspointty);
+procedure psscale(var mat: psmatrixty; const scale: flo64);
+procedure psscalex(var mat: psmatrixty; const scale: flo64);
+procedure psscaley(var mat: psmatrixty; const scale: flo64);
 procedure psrotate(var mat: psmatrixty; const angle: real); //radiant
 function pstransform(const mat: psmatrixty;
               const apoint: pspointty): pspointty; overload;
@@ -204,6 +208,7 @@ function pstransform(const mat: psmatrixty;
 function psdist(const source,dest: pspointty): pspointty; overload;
 //function psdist(const source,dest: pointty): pspointty; overload;
 function pspoint(const apoint: pointty): pspointty;
+procedure psnormalizerect(var ll,ur: pspointty);
  
 implementation
 uses
@@ -225,6 +230,40 @@ procedure psretranslate(var mat: psmatrixty; const dist: pspointty);
 begin
  mat[2,0]:= mat[2,0] - dist.x;
  mat[2,1]:= mat[2,1] - dist.y;
+end;
+
+procedure psscalex(var mat: psmatrixty; const scale: flo64);
+begin
+ mat[0,0]:= mat[0,0] * scale;
+ mat[1,0]:= mat[1,0] * scale;
+ mat[2,0]:= mat[2,0] * scale;
+end;
+
+procedure psscaley(var mat: psmatrixty; const scale: flo64);
+begin
+ mat[0,1]:= mat[0,1] * scale;
+ mat[1,1]:= mat[1,1] * scale;
+ mat[2,1]:= mat[2,1] * scale;
+end;
+
+procedure psscale(var mat: psmatrixty; const scale: pspointty);
+begin
+ mat[0,0]:= mat[0,0] * scale.x;
+ mat[1,0]:= mat[1,0] * scale.x;
+ mat[2,0]:= mat[2,0] * scale.x;
+ mat[0,1]:= mat[0,1] * scale.y;
+ mat[1,1]:= mat[1,1] * scale.y;
+ mat[2,1]:= mat[2,1] * scale.y;
+end;
+
+procedure psscale(var mat: psmatrixty; const scale: flo64);
+begin
+ mat[0,0]:= mat[0,0] * scale;
+ mat[1,0]:= mat[1,0] * scale;
+ mat[2,0]:= mat[2,0] * scale;
+ mat[0,1]:= mat[0,1] * scale;
+ mat[1,1]:= mat[1,1] * scale;
+ mat[2,1]:= mat[2,1] * scale;
 end;
 
 procedure psrotate(var mat: psmatrixty; const angle: real); //radiant
@@ -276,6 +315,22 @@ function pspoint(const apoint: pointty): pspointty;
 begin
  result.x:= apoint.x;
  result.y:= apoint.y;
+end;
+
+procedure psnormalizerect(var ll,ur: pspointty);
+var
+ f1: flo64;
+begin
+ if ll.x > ur.x then begin
+  f1:= ll.x;
+  ll.x:= ur.x;
+  ur.x:= f1;
+ end;
+ if ll.y > ur.y then begin
+  f1:= ll.y;
+  ll.y:= ur.y;
+  ur.y:= f1;
+ end;
 end;
 
 const
@@ -725,7 +780,7 @@ end;
 procedure tpostscriptcanvas.checkscale;
 begin
  if fstarted then begin
-  streamwrite('initmatrix ');
+//  streamwrite('initmatrix ');
   if printorientation = pao_landscape then begin
    streamwrite(' 90 rotate');
   end;
