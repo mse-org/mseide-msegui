@@ -2309,20 +2309,6 @@ endlab:
  end;
 end;
 
-procedure tpostscriptcanvas.endpage;
-var
- int1: integer;
-begin
- inherited;
- if active then begin
-  for int1:= 0 to high(fimagecache) do begin
-   freeimagecache(int1);
-  end;
-  streamwrite('showpage'+nl);
-  inc(fps_pagenumber);
- end;
-end;
-
 procedure tpostscriptcanvas.beginpage;
 var
  str1: string;
@@ -2332,9 +2318,25 @@ begin
   str1:= ' '+inttostr(fps_pagenumber+1);
   streamwrite('%%Page:'+str1+str1+nl+
               '%%PageOrientation: '+pageorientations[printorientation]+nl);
+  streamwriteln('gsave');
   checkscale;
  end;
  inherited;
+end;
+
+procedure tpostscriptcanvas.endpage;
+var
+ int1: integer;
+begin
+ inherited;
+ if active then begin
+  for int1:= 0 to high(fimagecache) do begin
+   freeimagecache(int1);
+  end;
+  streamwriteln('grestore');
+  streamwrite('showpage'+nl);
+  inc(fps_pagenumber);
+ end;
 end;
 
 function tpostscriptcanvas.registermap(const acodepage: integer): string;
