@@ -85,7 +85,8 @@ type
    fps_pagenumber: integer;
    fmapnames: array[0..255] of string;
    factfont,factcodepage: integer;
-   fstarted: boolean;
+//   fstarted: boolean;
+   flandscape: boolean;
    fpslevel: pslevelty;
    fimagecache: imagecachearty;
    fcacheorder: integerarty;
@@ -95,6 +96,7 @@ type
    procedure setimagecachesize(const avalue: integer);
    procedure setimagecachemaxitemsize(const avalue: integer);
   protected
+   fhaspage: boolean;
    procedure gcdestroyed(const sender: tcanvas); override;
    procedure freeimagecache(const index: integer);
    procedure touchimagecache(const index: integer);
@@ -114,6 +116,7 @@ type
    procedure initgcstate; override;
    procedure initgcvalues; override;
    procedure finalizegcstate; override;
+   procedure checkgcstate(state: canvasstatesty) override;
    procedure checkscale;
    function encodefontname(const namenum,codepage: integer): string;
    function checkfont(const afont: fontnumty; const acodepage: integer): integer;
@@ -779,12 +782,23 @@ end;
 
 procedure tpostscriptcanvas.checkscale;
 begin
- if fstarted then begin
-//  streamwrite('initmatrix ');
+ if fhaspage then begin
+  if (printorientation = pao_landscape) xor flandscape then begin
+   if flandscape then begin
+    streamwriteln('-90 rotate');
+   end
+   else begin
+    streamwriteln('90 rotate');
+   end;
+   flandscape:= not flandscape;
+  end;
+{
+  streamwrite('initmatrix ');
   if printorientation = pao_landscape then begin
    streamwrite(' 90 rotate');
   end;
   streamwriteln('');
+}
  end;
 end;
 
@@ -820,8 +834,9 @@ begin
 '%%EndProlog'+nl,true);
  end;
  fpreamble:= '';
- fstarted:= true;
- beginpage;
+ fhaspage:= false;
+// fstarted:= true;
+// beginpage;
 end;
 
 procedure tpostscriptcanvas.initgcvalues;
@@ -836,7 +851,16 @@ begin
   streamwrite(
 '%%EndProlog'+nl,true);
  end;
- fstarted:= false;
+ fhaspage:= false;
+// fstarted:= false;
+ inherited;
+end;
+
+procedure tpostscriptcanvas.checkgcstate(state: canvasstatesty);
+begin
+ if (state - [cs_gc] <> []) and not fhaspage then begin
+  beginpage();
+ end;
  inherited;
 end;
 
@@ -2319,6 +2343,8 @@ begin
   streamwrite('%%Page:'+str1+str1+nl+
               '%%PageOrientation: '+pageorientations[printorientation]+nl);
   streamwriteln('gsave');
+  flandscape:= false;
+  fhaspage:= true;
   checkscale;
  end;
  inherited;
@@ -2335,6 +2361,7 @@ begin
   end;
   streamwriteln('grestore');
   streamwrite('showpage'+nl);
+  fhaspage:= false;
   inc(fps_pagenumber);
  end;
 end;
