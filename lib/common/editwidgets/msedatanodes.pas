@@ -236,7 +236,6 @@ type
  ttreelistitem = class(tlistitem)
   private
    function getexpanded: boolean;
-   procedure setexpanded(const Value: boolean);
    function getitems(const aindex: integer): ttreelistitem;
    procedure dosetitems(const aindex: integer; const value: ttreelistitem);
    procedure setitems(const aindex: integer; const value: ttreelistitem);
@@ -254,8 +253,9 @@ type
    fitems: treelistitemarty;
    fcount: integer;
    ftreelevel: integer;
-   procedure statechanged;
-   procedure aftermove;
+   procedure setexpanded(const Value: boolean) virtual;
+   procedure statechanged virtual;
+   procedure aftermove virtual;
    procedure checksort; virtual;
    procedure setcaption(const avalue: msestring); override;
    procedure setowner(const aowner: tcustomitemlist); override;
