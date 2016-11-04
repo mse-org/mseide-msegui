@@ -1974,7 +1974,7 @@ end;
 procedure tcustomedit.settextflagsactive(const value: textflagsty);
 begin
  if ftextflagsactive <> value then begin
-  ftextflagsactive:= checktextflags(ftextflagsactive,value) - ellipsemask;
+  ftextflagsactive:= checktextflags(ftextflagsactive,value) {- ellipsemask};
   updatetextflags;
  end;
 end;
