@@ -2045,6 +2045,13 @@ type
    function widgetcount: integer;
    function parentwidgetindex: integer; 
                             //index in parentwidget.widgets, -1 if none
+   function indexofwidget(const awidget: twidget): integer;
+   function checkdescendent(awidget: twidget): boolean;
+                    //true if widget is descendent or self
+   function checkancestor(awidget: twidget): boolean;
+                    //true if widget is ancestor or self
+   function containswidget(awidget: twidget): boolean;
+
    property widgets[const index: integer]: twidget read getwidgets;
    function widgetatpos(var info: widgetatposinfoty): twidget; overload;
    function widgetatpos(const pos: pointty): twidget; overload;
@@ -2082,11 +2089,6 @@ type
    function enteredchild(): twidget;
 
    function mouseeventwidget(const info: mouseeventinfoty): twidget;
-   function checkdescendent(awidget: twidget): boolean;
-                    //true if widget is descendent or self
-   function checkancestor(awidget: twidget): boolean;
-                    //true if widget is ancestor or self
-   function containswidget(awidget: twidget): boolean;
 
    procedure insertwidget(const awidget: twidget); overload;
    procedure insertwidget(const awidget: twidget; 
@@ -2261,8 +2263,6 @@ type
    function activefocused(): boolean;
    function focused: boolean;
    function clicked: boolean;
-
-   function indexofwidget(const awidget: twidget): integer;
 
    procedure changedirection(const avalue: graphicdirectionty;
                                         var dest: graphicdirectionty); virtual;
@@ -2737,6 +2737,7 @@ type
    function getforcezorder: boolean;
    procedure setforcezorder(const avalue: boolean);
   protected  
+   flastshowmenuwidget: twidget;
    foptionsgui: guiappoptionsty;
    fgdilockcount: int32;
    procedure sysevent(const awindow: winidty; var aevent: syseventty;
@@ -2851,6 +2852,7 @@ type
    function unreleasedactivewindow: twindow;
    function activewidget: twidget;
    function activerootwidget: twidget;
+   property lastshowmenuwidget: twidget read flastshowmenuwidget;
    
    function windowatpos(const pos: pointty): twindow;
    function findwidget(const namepath: string; out awidget: twidget): boolean;
@@ -19105,6 +19107,9 @@ begin
  end;
  if fhintedwidget = widget then begin
   fhintedwidget:= nil;
+ end;
+ if flastshowmenuwidget = widget then begin
+  flastshowmenuwidget:= nil;
  end;
  if fclientmousewidget = widget then begin
   fclientmousewidget:= nil;

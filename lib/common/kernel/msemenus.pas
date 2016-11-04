@@ -338,6 +338,7 @@ type
   protected
    ftransientfor: twidget;
    fmouseinfopo: pmouseeventinfoty;
+   procedure settransientfor(const awidget: twidget);
    procedure doidle(var again: boolean);
    procedure readstate(reader: treader); override;
    procedure loaded; override;
@@ -534,7 +535,10 @@ implementation
 uses
  sysutils,msestockobjects,rtlconsts,msebits,msemenuwidgets,msedatalist,
  mseactions,msestreaming,msearrayutils,msesysutils;
-
+type
+ tapplication1 = class(tguiapplication)
+ end;
+ 
 procedure freetransientmenu(var amenu: tcustommenu); 
 begin
  if (amenu <> nil) and amenu.ftransient then begin
@@ -566,7 +570,7 @@ constructor tcustommenu.createtransient(const atransientfor: twidget;
 begin
  create(nil);
  ftransient:= true;
- ftransientfor:= atransientfor;
+ settransientfor(atransientfor);
  fmouseinfopo:= amouseinfopo;
  updateskin;
 end;
@@ -745,6 +749,12 @@ begin
   setlinkedvar(avalue,tmsecomponent(ftemplate.checkboxframe));
   sendchangeevent;
  end;
+end;
+
+procedure tcustommenu.settransientfor(const awidget: twidget);
+begin
+ ftransientfor:= awidget;
+ tapplication1(application).flastshowmenuwidget:= awidget;
 end;
 
 procedure tcustommenu.templateevent(const sender: tobject; 
@@ -2105,20 +2115,20 @@ end;
 function tpopupmenu.show(const atransientfor: twidget;
          const pos: graphicdirectionty): tmenuitem;
 begin
- ftransientfor:= atransientfor;
+ settransientfor(atransientfor);
  try
   doupdate;
   result:= showpopupmenu(fmenu,ftransientfor,pos,self);
   checkexec;
  finally
-  ftransientfor:= nil;
+  settransientfor(nil);
  end;
 end;
 
 function tpopupmenu.show(const atransientfor: twidget;
        var mouseinfo: mouseeventinfoty): tmenuitem;
 begin
- ftransientfor:= atransientfor;
+ settransientfor(atransientfor);
  fmouseinfopo:= @mouseinfo;
  try
   doupdate;
@@ -2126,7 +2136,7 @@ begin
   include(mouseinfo.eventstate,es_processed);
   checkexec;
  finally
-  ftransientfor:= nil;
+  settransientfor(nil);
   fmouseinfopo:= nil;
  end;
 end;
@@ -2134,13 +2144,13 @@ end;
 function tpopupmenu.show(const atransientfor: twidget;
                                     const pos: pointty): tmenuitem;
 begin
- ftransientfor:= atransientfor;
+ settransientfor(atransientfor);
  try
   doupdate;
   result:= showpopupmenu(fmenu,ftransientfor,pos,self);
   checkexec;
  finally
-  ftransientfor:= nil;
+  settransientfor(nil);
  end;
 end;
 
@@ -2202,11 +2212,11 @@ var
 begin
  items.fmouseinfopo:= @mouseinfo;
  widget1:= items.ftransientfor;
- items.ftransientfor:= atransientfor;
+ items.settransientfor(atransientfor);
  try
   items.doupdate;
  finally
-  items.ftransientfor:= widget1;
+  items.settransientfor(widget1);
  end;
  bo1:= (amenu = nil) or amenu.ftransient;
  items1:= nil;
