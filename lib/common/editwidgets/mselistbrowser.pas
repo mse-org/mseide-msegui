@@ -17,7 +17,7 @@ unit mselistbrowser;
 interface
 uses
  mseglob,classes,mclasses,msegrids,msedatanodes,msedatalist,msedragglob,
- msegraphics,msegraphutils,msetypes,msestrings,msemenus,
+ msegraphics,msegraphutils,msetypes,msestrings,msemenus,msestockobjects,
  msebitmap,mseclasses,mseguiglob,msedrawtext,msefileutils,msedataedits,
  mseeditglob,msewidgetgrid,msewidgets,mseedit,mseevent,msegui,msedropdownlist,
  msesys,msedrag,msestat,mseinplaceedit,msepointer,msegridsglob,
@@ -152,7 +152,12 @@ type
  
  paintlistitemeventty = procedure(const sender: titemviewlist;
                  const canvas: tcanvas; const item: tlistedititem) of object;
- 
+
+const
+ defaultboxids: treeitemboxidarty = (
+  //tib_none,  tib_empty,   tib_expand,        tib_expanded
+        -1,ord(stg_box),ord(stg_boxexpand),ord(stg_boxexpanded));
+type
  titemviewlist = class(tcustomitemlist,iitemlist)
   private
    flistview: tcustomlistview;
@@ -833,6 +838,7 @@ type
    frootnode: ttreelistedititem;
    finsertparent: ttreelistedititem;
    finsertparentindex: integer;
+//   foptionsdraw: itemdrawoptionsty;
    procedure setoncreateitem(const value: createtreelistitemeventty);
    function getoncreateitem: createtreelistitemeventty;
    procedure setcolorline(const value: colorty);
@@ -847,7 +853,15 @@ type
    function getonstatwriteitem: statwritetreeitemeventty;
    procedure setonstatwriteitem(const avalue: statwritetreeitemeventty);
    procedure setrootnode(const avalue: ttreelistedititem);
+   function getboxglyph_empty: stockglyphty;
+   procedure setboxglyph_empty(const avalue: stockglyphty);
+   function getboxglyph_expand: stockglyphty;
+   procedure setboxglyph_expand(const avalue: stockglyphty);
+   function getboxglyph_expanded: stockglyphty;
+   procedure setboxglyph_expanded(const avalue: stockglyphty);
+//   procedure setoptionsdraw(const avalue: itemdrawoptionsty);
   protected
+   fboxids: treeitemboxidarty;
    procedure freedata(var data); override;
    procedure docreateobject(var instance: tobject); override;
    procedure createitem(out item: tlistitem); override;
@@ -941,7 +955,17 @@ type
    property fonts;
    property options;
    property onitemnotification;
-   property colorline: colorty read fcolorline write setcolorline default cl_dkgray;
+//   property optionsdraw: itemdrawoptionsty read foptionsdraw 
+//                                           write setoptionsdraw default [];
+   property colorline: colorty read fcolorline write setcolorline 
+                                                        default cl_dkgray;
+   property boxglyph_empty: stockglyphty read getboxglyph_empty 
+                               write setboxglyph_empty default stg_box;
+   property boxglyph_expand: stockglyphty read getboxglyph_expand 
+                               write setboxglyph_expand default stg_boxexpand;
+   property boxglyph_expanded: stockglyphty read getboxglyph_expanded 
+                             write setboxglyph_expanded default stg_boxexpanded;
+
    property oncreateitem: createtreelistitemeventty read getoncreateitem
                       write setoncreateitem;
    property onstatwriteitem: statwritetreeitemeventty read getonstatwriteitem
@@ -1052,7 +1076,10 @@ type
 constructor titemviewlist.create(const alistview: tcustomlistview);
 begin
  flistview:= alistview;
- flayoutinfo.widget:= alistview;
+ with flayoutinfo do begin
+  widget:= alistview;
+  boxids:= defaultboxids;
+ end;
  inherited create(iitemlist(self));
 end;
 
@@ -4368,6 +4395,7 @@ end;
 constructor ttreeitemeditlist.create;
 begin
  fcolorline:= cl_dkgray;
+ fboxids:= defaultboxids;
  inherited;
  fitemclass:= ttreelistedititem;
 end;
@@ -4378,11 +4406,66 @@ begin
 // inherited;
  inherited create(intf,aowner);
 end;
-
+{
+procedure ttreeitemeditlist.setoptionsdraw(const avalue: itemdrawoptionsty);
+begin
+ if foptionsdraw <> avalue then begin
+  foptionsdraw:= avalue;
+  if fowner <> nil then begin
+   fowner.itemchanged(-1);
+  end;
+ end;
+end;
+}
 procedure ttreeitemeditlist.setcolorline(const value: colorty);
 begin
  if fcolorline <> value then begin
   fcolorline:= value;
+  if fowner <> nil then begin
+   fowner.itemchanged(-1);
+  end;
+ end;
+end;
+
+function ttreeitemeditlist.getboxglyph_empty: stockglyphty;
+begin
+ result:= stockglyphty(fboxids[tib_empty]);
+end;
+
+procedure ttreeitemeditlist.setboxglyph_empty(const avalue: stockglyphty);
+begin
+ if stockglyphty(fboxids[tib_empty]) <> avalue then begin
+  stockglyphty(fboxids[tib_empty]):= avalue;
+  if fowner <> nil then begin
+   fowner.itemchanged(-1);
+  end;
+ end;
+end;
+
+function ttreeitemeditlist.getboxglyph_expand: stockglyphty;
+begin
+ result:= stockglyphty(fboxids[tib_expand]);
+end;
+
+procedure ttreeitemeditlist.setboxglyph_expand(const avalue: stockglyphty);
+begin
+ if stockglyphty(fboxids[tib_expand]) <> avalue then begin
+  stockglyphty(fboxids[tib_expand]):= avalue;
+  if fowner <> nil then begin
+   fowner.itemchanged(-1);
+  end;
+ end;
+end;
+
+function ttreeitemeditlist.getboxglyph_expanded: stockglyphty;
+begin
+ result:= stockglyphty(fboxids[tib_expanded]);
+end;
+
+procedure ttreeitemeditlist.setboxglyph_expanded(const avalue: stockglyphty);
+begin
+ if stockglyphty(fboxids[tib_expanded]) <> avalue then begin
+  stockglyphty(fboxids[tib_expanded]):= avalue;
   if fowner <> nil then begin
    fowner.itemchanged(-1);
   end;
@@ -5842,7 +5925,9 @@ end;
 procedure ttreeitemedit.doupdatelayout(const nocolinvalidate: boolean);
 begin
  inherited;
+// flayoutinfofocused.drawoptions:= ttreeitemeditlist(fitemlist).foptionsdraw;
  flayoutinfofocused.colorline:= ttreeitemeditlist(fitemlist).fcolorline;
+ flayoutinfofocused.boxids:= ttreeitemeditlist(fitemlist).fboxids;
 end;
 
 {

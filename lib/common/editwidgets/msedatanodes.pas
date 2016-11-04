@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2015 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2016 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -14,7 +14,7 @@ unit msedatanodes;
 interface
 uses
  classes,mclasses,msegraphutils,msedrawtext,msegraphics,msedatalist,mseglob,
- mseguiglob,msegui,
+ mseguiglob,msegui,msestockobjects,
  msebitmap,mseclasses,mseevent,msegrids,msetypes,msestrings,mseinplaceedit,
  msestat,msegridsglob,mselist,msearrayutils,msearrayprops;
 
@@ -48,7 +48,7 @@ type
                 );
  nodestates1ty = set of nodestate1ty;
  
- nodeoptionty = (no_drawemptybox,no_checkbox,
+ nodeoptionty = (no_drawemptybox,no_solidline,no_checkbox,
                  no_updatechildchecked, 
                          //track ns1_childchecked state, slow!
                  no_updateparentnotchecked, 
@@ -59,6 +59,11 @@ type
                                         //on statread type value
                  );
  nodeoptionsty = set of nodeoptionty;
+
+ treeitemboxty = (tib_none,tib_empty,tib_expand,tib_expanded);
+ itemdrawoptionty = (ido_solidline);
+ itemdrawoptionsty = set of itemdrawoptionty;
+ treeitemboxidarty = array[treeitemboxty] of int32;
 
 const
  invalidatestates = [ns_expanded,ns_selected,ns_checked,
@@ -99,6 +104,8 @@ type
   checkboxrect: rectty;
   checkboxinnerrect: rectty;
   colorline: colorty;
+  boxids: treeitemboxidarty;
+//  drawoptions: itemdrawoptionsty;
   variable: variablelistiteminfoty; //variable
  end;
  plistitemlayoutinfoty = ^listitemlayoutinfoty;
@@ -233,6 +240,13 @@ type
  tlistitemcomparefuncty = function (const r: tlistitem;
                            const acasesensitive: boolean): integer of object;
 
+{
+ treeitemdrawinfoty = record
+  boxkind: treeitemboxty; //set by caller
+  boximageid: int32;
+  flags: treeitemdrawingflagsty;
+ end;
+}
  ttreelistitem = class(tlistitem)
   private
    function getexpanded: boolean;
@@ -283,6 +297,7 @@ type
    function comparecaseinsens(const l: ttreelistitem;
                                        const r: ttreelistitem): integer;
    procedure doupdateparentnotcheckedstate(const aset: boolean);
+//   procedure updatedrawinfo(var ainfo: treeitemdrawinfoty) virtual;
   public
    constructor create(const aowner: tcustomitemlist = nil;
               const aparent: ttreelistitem = nil); reintroduce; virtual;
@@ -608,11 +623,11 @@ type
  ptreenode = ^ttreenode;
 
  function copylistitems(const asource: listitemarty): listitemarty;
- 
+
 implementation
 
 uses
- msestockobjects,{$ifdef FPCc}rtlconst{$else}rtlconsts{$endif},
+ {$ifdef FPCc}rtlconst{$else}rtlconsts{$endif},
            sysutils,msebits,msesysintf;
 const
  imageextendcaptionpos = [cp_right,cp_righttop{,cp_rightcenter},cp_rightbottom];
@@ -2892,7 +2907,12 @@ begin
   end;
  end;
 end;
-
+{
+procedure ttreelistitem.updatedrawinfo(var ainfo: treeitemdrawinfoty);
+begin
+ //dummy
+end;
+}
 procedure ttreelistitem.drawimage(const acanvas: tcanvas;
                                      var alayoutinfo: listitemlayoutinfoty);
 var
@@ -2916,7 +2936,7 @@ var
  end;
  
 var
- boxno: integer;
+ box: treeitemboxty;
  int1: integer;
  bo1: boolean;
  {$ifdef mswindows}
@@ -2927,27 +2947,37 @@ var
  lines: segmentarty;
  cellheight{,boxy}: integer;
  nopaint: boolean;
-
+// drawinfo: treeitemdrawinfoty;
+ 
 begin
  nopaint:= (acanvas = nil) or alayoutinfo.variable.calcautocellsize;
  alayoutinfo.variable.treelevelshift:= levelshift;
  if not nopaint then begin //acanvas <> nil then begin
   if (fcount = 0) and not (ns_subitems in fstate) then begin
-   if (ns_drawemptybox in fstate) or (no_drawemptybox in fowner.foptions) then begin
-    boxno:= integer(stg_box);
+   if (ns_drawemptybox in fstate) or 
+                       (no_drawemptybox in fowner.foptions) then begin
+    box:= tib_empty;
    end
    else begin
-    boxno:= -1;
+    box:= tib_none;
    end;
   end
   else begin
    if ns_expanded in fstate then begin
-    boxno:= integer(stg_boxexpanded);
+    box:= tib_expanded;//integer(stg_boxexpanded);
    end
    else begin
-    boxno:= integer(stg_boxexpand);
+    box:= tib_expand;//integer(stg_boxexpand);
    end;
   end;
+ {
+  with drawinfo do begin
+   boxkind:= box;
+   boximageid:= treeitemboxids[box];
+   flags:= treeitemdrawingflags;
+  end;
+  updatedrawinfo(drawinfo);
+ }
   setlength(lines,ftreelevel+2); //last line can be doubled + horz. line
   with fowner,alayoutinfo do begin
    acanvas.move(makepoint(variable.treelevelshift,0));
@@ -2978,7 +3008,7 @@ begin
    if int1 > 0 then begin
     if bo1 then begin
 //    if fparentindex <> fparent.fcount - 1 then begin
-     if boxno >= 0 then begin
+     if box <> tib_none then begin
       lines[0].b.y:= expandboxrect.y-1; //top of splited vert.
       lines[int1]:= lines[0];
       with lines[int1] do begin
@@ -2989,7 +3019,7 @@ begin
      end;
     end 
     else begin //last vert.
-     if boxno >= 0 then begin
+     if box <> tib_none then begin
       lines[0].b.y:= expandboxrect.y-1; //to top of box
      end
      else begin
@@ -2997,7 +3027,7 @@ begin
      end;
     end;
     with lines[int1] do begin
-     if boxno >= 0 then begin
+     if box <> tib_none then begin
       dec(int1);
      end
      else begin
@@ -3011,10 +3041,15 @@ begin
      end;
     end;
     setlength(lines,int1+1);
-    drawdottedlinesegments(acanvas,lines,colorline);
+    if no_solidline in options then begin
+     acanvas.drawlinesegments(lines,colorline);
+    end
+    else begin
+     drawdottedlinesegments(acanvas,lines,colorline);
+    end;
    end;
-   if boxno >= 0 then begin
-    stockobjects.glyphs.paint(acanvas,boxno,expandboxrect,
+   if box <> tib_none then begin
+    stockobjects.glyphs.paint(acanvas,boxids[box],expandboxrect,
                    [al_xcentered,al_ycentered],fintf.getcolorglyph);
    end;
   end;
