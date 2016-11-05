@@ -1627,11 +1627,14 @@ end;
 procedure tcustomedit.setoptionsedit(const avalue: optionseditty);
 var
  opt1: optionsedit1ty;
+ opt: optionseditty;
 begin
  if foptionsedit <> avalue then begin
   opt1:= feditor.optionsedit1;
-  transferoptionsedit(self,avalue,foptionsedit,opt1);
+  transferoptionsedit(self,avalue,opt,opt1);
   feditor.optionsedit1:= opt1;
+  foptionsedit:= optionseditty(setsinglebit(card32(opt),card32(foptionsedit),
+                                 card32([oe_homeonenter,oe_endonenter])));
   updatereadonlystate;
  end;
 end;
