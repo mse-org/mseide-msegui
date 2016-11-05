@@ -72,7 +72,7 @@ type
                           //do not restore clientsize after frame size changes
  frameskincontrolleroptionsty = set of frameskincontrolleroptionty;
   
- optionwidgetty = (ow_background,ow_top,ow_ultratop,
+ optionwidgetty = (ow_background,ow_top,ow_ultratop,ow_transientformain,
                    ow_noautosizing, //don't use, moved to optionswidget1
                    ow_mousefocus,ow_tabfocus,
                    ow_parenttabfocus,ow_arrowfocus,
@@ -9001,7 +9001,7 @@ begin
   parentchanged; 
   visiblepropchanged;
   if ownswindow1 and (ws_visible in fwidgetstate) and
-                          (componentstate * [csloading,csinline] = []) then begin
+                      (componentstate * [csloading,csinline] = []) then begin
    fwindow.show(false);
   end;
   if showing then begin
@@ -9012,7 +9012,8 @@ begin
  end;
  updateskin;
  if ws1_childscaled in fwidgetstate1 then begin
-  appinst.postevent(tobjectevent.create(ek_childscaled,ievent(self)),[peo_local]);
+  appinst.postevent(tobjectevent.create(ek_childscaled,ievent(self)),
+                                                               [peo_local]);
  end;
 end;
 
@@ -15251,6 +15252,12 @@ var
  {bo1,}bo2: boolean;
  mydesktop: integer;
 begin
+ if (ow_transientformain in fownerwidget.foptionswidget) and
+       (ftransientfor = nil) and (application.mainwindow <> nil) and
+       (application.mainwindow <> self) then begin
+  checkwindowid();
+  settransientfor(application.mainwindow,false);
+ end;
  if windowevent then begin
   {$ifdef mse_debugconfigure}
    debugwindow('*show windowevent ',fwindow.id);
