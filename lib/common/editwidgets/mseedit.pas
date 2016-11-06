@@ -1618,12 +1618,6 @@ begin
  end;
 end;
 
-{
-function tcustomedit.getoptionsdb: optionseditdbty;
-begin
- result:= foptionsdb;
-end;
-}
 procedure tcustomedit.setoptionsedit(const avalue: optionseditty);
 var
  opt1: optionsedit1ty;

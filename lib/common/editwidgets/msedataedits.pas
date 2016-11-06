@@ -225,7 +225,6 @@ type
    function getedited: boolean; override;
    procedure setedited(const avalue: boolean); virtual;
   public
-//   constructor create(aowner: tcomponent); override;
    
    procedure initnewwidget(const ascale: real); override;
    procedure initgridwidget; virtual;
