@@ -108,7 +108,8 @@ type
                        fdo_save,
                        fdo_dispname,fdo_dispnoext,fdo_sysfilename,fdo_params,
                        fdo_directory,fdo_file,
-                       fdo_absolute,fdo_relative,fdo_quotesingle,
+                       fdo_absolute,fdo_relative,fdo_lastdirrelative,
+                       fdo_quotesingle,
                        fdo_link, //links lastdir of controllers with same group
                        fdo_checkexist,fdo_acceptempty,fdo_single,
                        fdo_chdir,fdo_savelastdir,
@@ -2007,10 +2008,19 @@ begin
    akind:= fk_file;
   end;
  end;
- if fdo_relative in foptions then begin
-  flastdir:= getcurrentdirmse;
-  for int1:= 0 to high(ffilenames) do begin
-   ffilenames[int1]:= relativepath(filenames[int1],'',akind);
+ if [fdo_relative,fdo_lastdirrelative] * foptions <> [] then begin
+  if fdo_relative in foptions then begin
+   flastdir:= getcurrentdirmse;
+   for int1:= 0 to high(ffilenames) do begin
+    ffilenames[int1]:= relativepath(filenames[int1],flastdir,akind);
+   end;
+  end
+  else begin
+   for int1:= 0 to high(ffilenames) do begin
+    if isrootpath(filenames[int1]) then begin
+     ffilenames[int1]:= relativepath(filenames[int1],flastdir,akind);
+    end;
+   end;
   end;
  end
  else begin
@@ -2059,11 +2069,17 @@ begin
 end;
 
 procedure tfiledialogcontroller.setoptions(Value: filedialogoptionsty);
+(*
 const
  mask1: filedialogoptionsty = [fdo_absolute,fdo_relative];
 // mask2: filedialogoptionsty = [fdo_directory,fdo_file];
  mask3: filedialogoptionsty = [fdo_filtercasesensitive,fdo_filtercaseinsensitive];
+*)
 begin
+ value:= filedialogoptionsty(setsinglebit(card32(value),card32(foptions),
+           [card32([fdo_absolute,fdo_relative,fdo_lastdirrelative]),
+            card32([fdo_filtercasesensitive,fdo_filtercaseinsensitive])]));
+ (*
  {$ifdef FPC}longword{$else}longword{$endif}(value):=
       setsinglebit({$ifdef FPC}longword{$else}longword{$endif}(value),
       {$ifdef FPC}longword{$else}longword{$endif}(foptions),
@@ -2076,6 +2092,7 @@ begin
       setsinglebit({$ifdef FPC}longword{$else}longword{$endif}(value),
       {$ifdef FPC}longword{$else}longword{$endif}(foptions),
       {$ifdef FPC}longword{$else}longword{$endif}(mask3));
+ *)
  if foptions <> value then begin
   foptions:= Value;
   if not (fdo_params in foptions) then begin

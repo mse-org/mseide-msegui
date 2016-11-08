@@ -1981,7 +1981,7 @@ begin
    end;
   end;
  end;
- clearundo;
+ clearundo();
  exclude(fstate,ies_touched);
  updatecaret();
 end;
