@@ -33,7 +33,7 @@ uses
  msebitmap,msecolordialog,msedrawtext,msewidgets,msepointer,mseguiglob,
  msepipestream,msemenus,sysutils,mseglob,mseedit,msedialog,msescrollbar,
  msememodialog,msecodetemplates,mseifiglob,msestream,msestringcontainer,
- mserttistat,mseificomp,mseificompglob,msedragglob,mseeditglob;
+ mserttistat,mseificomp,mseificompglob,msedragglob,mseeditglob,mseact;
 
 const
  defaultsourceprintfont = 'Courier';
@@ -683,6 +683,7 @@ type
    fsettingsautosave: boolean;
 }
 //   fmoduleoptions: integerarty;
+   fmakeoptpurpose: msestringarty;
    fbefcommandon: integerarty;
    fmakeoptionson: integerarty;
    faftcommandon: integerarty;
@@ -709,6 +710,8 @@ type
    property reversepathorder: boolean read freversepathorder 
                                                   write freversepathorder;
 
+   property makeoptpurpose: msestringarty read fmakeoptpurpose 
+                                                    write fmakeoptpurpose;
    property befcommandon: integerarty read fbefcommandon write fbefcommandon;
    property makeoptionson: integerarty read fmakeoptionson write fmakeoptionson;
    property aftcommandon: integerarty read faftcommandon write faftcommandon;
@@ -1060,6 +1063,7 @@ type
    settingsusercolors: tbooleanedit;
    settingsformatmacros: tbooleanedit;
    settingsfontalias: tbooleanedit;
+   makeoptpurpose: tstringedit;
    procedure acttiveselectondataentered(const sender: TObject);
    procedure colonshowhint(const sender: tdatacol; const arow: Integer; 
                       var info: hintinfoty);
@@ -1144,7 +1148,7 @@ var
 
 implementation
 uses
- projectoptionsform_mfm,breakpointsform,sourceform,mseact,msereal,
+ projectoptionsform_mfm,breakpointsform,sourceform,msereal,
  objectinspector,msebits,msefileutils,msedesignintf,guitemplates,
  watchform,stackform,main,projecttreeform,findinfileform,
  selecteditpageform,programparametersform,sourceupdate,mseimagelisteditor,
