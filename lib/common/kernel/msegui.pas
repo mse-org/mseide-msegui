@@ -1542,6 +1542,7 @@ type
    fminsize,fmaxsize: sizety;
    fminclientsize: sizety;
    fminscrollsize: sizety;
+   fminshrinksize: sizety;
    ffocusedchild,ffocusedchildbefore: twidget;
    ffontheight: integer;
    fsetwidgetrectcount: integer; //for recursive setpos
@@ -1644,6 +1645,7 @@ type
    fhint: msestring;
    fdefaultfocuschild: twidget;
 
+   procedure checksizes();
    function minclientsize: sizety;
    function isdesignwidget(): boolean; virtual;
    procedure setdesignwidget();
@@ -1888,7 +1890,8 @@ type
    function calcminscrollsize: sizety; virtual;
    function minscrollsize: sizety; //uses cache
    function getminshrinkpos: pointty; virtual;
-   function getminshrinksize: sizety; virtual;
+   function calcminshrinksize: sizety; virtual;
+   function minshrinksize: sizety; //uses cache
    function getcontainer: twidget; virtual;
    function getchildwidgets(const index: integer): twidget; virtual;
 
@@ -8501,36 +8504,53 @@ begin
  end;
 end;
 
-function twidget.minclientsize: sizety;
+procedure twidget.checksizes();
 begin
  if not (ws_minclientsizevalid in fwidgetstate) then begin
-  fminscrollsize:= calcminscrollsize;
+  include(fwidgetstate,ws_minclientsizevalid); //avoid recursion
+
+  fminscrollsize:= calcminscrollsize; //first
+  if fframe <> nil then begin
+   fframe.checkminscrollsize(fminscrollsize);
+  end;
   fminclientsize:= fminscrollsize;
+  fminshrinksize:= calcminshrinksize();
   if fframe <> nil then begin
    fframe.checkminclientsize(fminclientsize);
+   fframe.checkminshrinksize(fminshrinksize);
   end
   else begin
    fminclientsize:= fwidgetrect.size;
   end;
-  include(fwidgetstate,ws_minclientsizevalid);
  end;
+end;
+
+function twidget.minclientsize: sizety;
+begin
+ checksizes();
  result:= fminclientsize;
+end;
+
+function twidget.minshrinksize: sizety;
+begin
+ checksizes();
+ result:= fminshrinksize;
 end;
 
 function twidget.minscrollsize: sizety;
 begin
- if not (ws_minclientsizevalid in fwidgetstate) then begin
-  minclientsize;
- end;
+ checksizes();
  result:= fminscrollsize;
 end;
 
-function twidget.getminshrinksize: sizety;
+function twidget.calcminshrinksize: sizety;
 begin
  result:= fminsize;
+{
  if fframe <> nil then begin
   fframe.checkminshrinksize(result);
  end;
+}
 end;
 
 procedure twidget.internalsetwidgetrect(value: rectty; 
@@ -9266,7 +9286,7 @@ begin
    if visible and not(ws1_nominsize in fwidgetstate1) or 
                                   (csdesigning in componentstate) then begin
     pt1:= getminshrinkpos;
-    minsi:= getminshrinksize;
+    minsi:= minshrinksize;
     if not (ow1_noparentwidthextend in foptionswidget1) then begin
      anch:= fanchors * [an_left,an_right];
      if anch = [an_right] then begin
@@ -9315,9 +9335,11 @@ begin
    end;
   end;
  end;
+{
  if fframe <> nil then begin
   fframe.checkminscrollsize(result);
  end;
+}
 end;
 
 procedure twidget.childclientrectchanged(const sender: twidget);

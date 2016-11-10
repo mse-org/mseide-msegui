@@ -598,7 +598,7 @@ type
    procedure sizechanged; override;
    procedure loaded; override;
    procedure visiblepropchanged; override;
-   function getminshrinksize: sizety; override;
+   function calcminshrinksize: sizety; override;
    procedure defineproperties(filer: tfiler); override;
   public
    constructor create(aowner: tcomponent); override;
@@ -2298,12 +2298,12 @@ begin
  end;
 end;
 
-function tcustomscalingwidget.getminshrinksize: sizety;
+function tcustomscalingwidget.calcminshrinksize: sizety;
 var
  size1: sizety;
  box,boy: boolean;
 begin
- result:= inherited getminshrinksize;
+ result:= inherited calcminshrinksize;
  box:= (fanchors * [an_left,an_right] = [an_left,an_right]) and 
             (osc_expandshrinkx in foptionsscale) or 
                                             (osc_expandx in foptionsscale);

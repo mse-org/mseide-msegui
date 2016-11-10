@@ -1467,7 +1467,7 @@ begin
   with fwidgetinfos[i1],widget do begin
    if not (plo_noinvisible in fplace_options) or isvisible then begin
     if (anchors * [an_left,an_right] = [an_left,an_right]) then begin
-     fix:= fix + minscrollsize.cx;
+     fix:= fix + minshrinksize.cx;//minscrollsize.cx;
     end
     else begin
      if (plo_scalesize in fplace_options) and 
@@ -1535,7 +1535,7 @@ begin
   with fwidgetinfos[i1],widget do begin
    if not (plo_noinvisible in fplace_options) or isvisible then begin
     if (anchors * [an_top,an_bottom] = [an_top,an_bottom]) then begin
-     fix:= fix + minscrollsize.cy;
+     fix:= fix + minshrinksize.cy; //minscrollsize.cy;
     end
     else begin
      if (plo_scalesize in fplace_options) and 
@@ -1836,7 +1836,7 @@ begin
            include(fwidgetstate1,ws1_layoutplacing);
            i1:= ((scalesize.cy{-outerwidth1}) * size1.cy) div
                                               refscalesize.cy {+ outerwidth1};
-           i2:= getminshrinksize().cy;
+           i2:= minshrinksize().cy;
            if i1 < i2 then begin
             i1:= i2;
            end;
@@ -2374,7 +2374,7 @@ begin
   if not (csloading in componentstate) then begin
 //   size1:= widget.clientsize;
    with twidget1(widget) do begin
-    curminsize:= getminshrinksize();
+    curminsize:= minshrinksize();
 //    if fframe <> nil then begin
 //     subsize1(curminsize,fframe.outerframedim);
 //    end;
