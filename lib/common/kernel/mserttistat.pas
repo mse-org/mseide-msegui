@@ -763,6 +763,7 @@ var
  po2: ptypeinfo;
  po3: ptypedata;
  int1: integer;
+ i2: int32;
  intf1: iifidatalink;
  obj1: tobject;
  list1: tdatalist;
@@ -866,37 +867,46 @@ begin
          po2:= gettypedata(proptype^)^.eltype2^;
         {$endif}
          po3:= gettypedata(po2);
-         case po2^.kind of
-          tkinteger: begin
-           if list1 is tintegerdatalist then begin
-            tintegerdatalist(list1).asarray:= getintegerar(source.obj,po1);
+         list1.beginupdate();
+         try
+          i2:= list1.count;
+          case po2^.kind of
+           tkinteger: begin
+            if list1 is tintegerdatalist then begin
+             tintegerdatalist(list1).asarray:= getintegerar(source.obj,po1);
+            end;
+           end;
+           tkint64: begin
+            if list1 is tint64datalist then begin
+             tint64datalist(list1).asarray:= getint64ar(source.obj,po1);
+            end;
+           end;
+           tkfloat: begin
+            if (po3^.floattype = ftdouble) and (list1 is trealdatalist) then begin
+             trealdatalist(list1).asarray:=  getrealar(source.obj,po1);
+            end;
+           end;
+           {$ifdef FPC}tkustring{$else}tkwstring{$endif}: begin
+            if list1 is tpoorstringdatalist then begin
+             tpoorstringdatalist(list1).asarray:= getmsestringar(source.obj,po1);
+            end;
+           end;
+           {$ifdef FPC}tkastring{$else}tklstring{$endif}: begin
+            if list1 is tansistringdatalist then begin
+             tansistringdatalist(list1).asarray:= getstringar(source.obj,po1);
+            end;
+           end;
+           {$ifdef FPC}tkbool{$else}tkenumeration{$endif}: begin
+            if list1 is tintegerdatalist then begin
+             tintegerdatalist(list1).asbooleanarray:= getbooleanar(source.obj,po1);
+            end;
            end;
           end;
-          tkint64: begin
-           if list1 is tint64datalist then begin
-            tint64datalist(list1).asarray:= getint64ar(source.obj,po1);
-           end;
+          if (i2 > list1.count) and list1.facultative then begin
+           list1.count:= i2;
           end;
-          tkfloat: begin
-           if (po3^.floattype = ftdouble) and (list1 is trealdatalist) then begin
-            trealdatalist(list1).asarray:=  getrealar(source.obj,po1);
-           end;
-          end;
-          {$ifdef FPC}tkustring{$else}tkwstring{$endif}: begin
-           if list1 is tpoorstringdatalist then begin
-            tpoorstringdatalist(list1).asarray:= getmsestringar(source.obj,po1);
-           end;
-          end;
-          {$ifdef FPC}tkastring{$else}tklstring{$endif}: begin
-           if list1 is tansistringdatalist then begin
-            tansistringdatalist(list1).asarray:= getstringar(source.obj,po1);
-           end;
-          end;
-          {$ifdef FPC}tkbool{$else}tkenumeration{$endif}: begin
-           if list1 is tintegerdatalist then begin
-            tintegerdatalist(list1).asbooleanarray:= getbooleanar(source.obj,po1);
-           end;
-          end;
+         finally
+          list1.endupdate();
          end;
         end;
        end;

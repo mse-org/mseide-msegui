@@ -433,6 +433,8 @@ type
   public
    constructor create(owner: twidgetcol); reintroduce;
    function empty(const index: integer): boolean; override;   //true wenn leer
+  published
+   property facultative;
  end;
  
  tgridansistringdatalist = class(tansistringdatalist)
@@ -442,6 +444,8 @@ type
    function getdefault: pointer; override;
   public
    constructor create(owner: twidgetcol); reintroduce;
+  published
+   property facultative;
  end;
 
  tgridpointerdatalist = class(tpointerdatalist)
@@ -451,6 +455,8 @@ type
    function getdefault: pointer; override;
   public
    constructor create(owner: twidgetcol); reintroduce;
+  published
+   property facultative;
  end;
 
  tgridintegerdatalist = class(tintegerdatalist)
@@ -460,6 +466,8 @@ type
    function getdefault: pointer; override;
   public
    constructor create(owner: twidgetcol); reintroduce;
+  published
+   property facultative;
  end;
 
  tgridint64datalist = class(tint64datalist)
@@ -469,6 +477,8 @@ type
    function getdefault: pointer; override;
   public
    constructor create(owner: twidgetcol); reintroduce;
+  published
+   property facultative;
  end;
 
  tgridenumdatalist = class(tenumdatalist)
@@ -478,6 +488,8 @@ type
    function getdefaultenum: integer;
   public
    constructor create(owner: twidgetcol); reintroduce;
+  published
+   property facultative;
  end;
 
  tgridenum64datalist = class(tenum64datalist)
@@ -487,6 +499,8 @@ type
    function getdefaultenum: int64;
   public
    constructor create(owner: twidgetcol); reintroduce;
+  published
+   property facultative;
  end;
 
  tgridrealdatalist = class(trealdatalist)
@@ -498,6 +512,8 @@ type
    constructor create(owner: twidgetcol); reintroduce;
    function empty(const index: integer): boolean; override;   //true wenn leer
    procedure updateeditoptions(const aoptions: optionseditty);
+  published
+   property facultative;
  end;
 
 type

@@ -59,7 +59,8 @@ type
                  co1_rowcoloractive,co1_rowcolorfocused,co1_rowreadonly,
 //                 co1_active, //not used
                  co1_autorowheight,co1_autocolwidth,co1_noautocolwidth,
-                 co1_autoheaderwidth);
+                 co1_autoheaderwidth
+                );
  coloptions1ty = set of coloption1ty;
 
 const
@@ -773,6 +774,8 @@ type
    function getparagraph(const index: integer;
                                const aseparator: msestring = ''): msestring;   
    property noparagraph[index: integer]: boolean read getnoparagraphs;
+  published
+   property facultative;
  end;
  
  tcustomstringcol = class(tdatacol)

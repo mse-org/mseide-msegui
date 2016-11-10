@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2013 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2016 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -77,7 +77,8 @@ type
                     dls_forcenew, //used in tundolist
                     dls_remote,   //used in ificomp datalist
                     dls_remotelock,
-                    dls_rowdeleting //used in treeitemeditlist
+                    dls_rowdeleting, //used in treeitemeditlist
+                    dls_facultative
                     );
  dataliststatesty = set of dataliststatety;
 
@@ -102,6 +103,8 @@ type
    procedure internalcleardata(const index: integer);
    procedure remoteitemchange(const alink: pointer);
    procedure setcheckeditem(const avalue: integer);
+   function getfacultative: boolean;
+   procedure setfacultative(const avalue: boolean);
   protected
    fdeleting: integer;
    fdatapo: pchar;
@@ -298,6 +301,9 @@ type
    property sorted: boolean read getsorted write setsorted;
    property checkeditem: integer read fcheckeditem write setcheckeditem; 
                            //-1 if none
+   property facultative: boolean read getfacultative 
+                                    write setfacultative default false;
+                           //used by objecttovalues()
  end;
  
  pdatalist = ^tdatalist;
@@ -2948,6 +2954,21 @@ begin
  end
  else begin
   fcheckeditem:= avalue;
+ end;
+end;
+
+function tdatalist.getfacultative: boolean;
+begin
+ result:= dls_facultative in fstate;
+end;
+
+procedure tdatalist.setfacultative(const avalue: boolean);
+begin
+ if avalue then begin
+  fstate:= fstate+[dls_facultative,dls_propertystreaming];
+ end
+ else begin
+  exclude(fstate,dls_facultative);
  end;
 end;
 
