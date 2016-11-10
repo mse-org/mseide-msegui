@@ -1810,6 +1810,7 @@ begin
            end;
 //           i1:= i1 + outerwidth1;
            widget.width:= i1;
+           actscalesize.cx:= widget.width;
 //         widget.clientwidth:= (scalesize.cx * size1.cx) div refscalesize.cx;
           finally
            if not bo1 then begin
@@ -1841,6 +1842,7 @@ begin
             i1:= i2;
            end;
            widget.height:= i1;
+           actscalesize.cy:= widget.height;
  //         widget.clientheight:= (scalesize.cy * size1.cy) div refscalesize.cy;
           finally
            if not bo1 then begin
