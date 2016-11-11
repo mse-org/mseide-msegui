@@ -18891,8 +18891,8 @@ const
  modalweight =              1 shl 5;
 // transientforcountweight =  1 shl 6;
 // transientfornotnilweight = 1 shl 7;
- transientforweight =       1 shl 8;
- transientforactiveweight = 1 shl 9;
+ transientforactiveweight =       1 shl 8;
+ transientforweight = 1 shl 9;
  invisibleweight =          1 shl 10;
  popupweight =              1 shl 11;
  ultratopweight =           1 shl 12;
