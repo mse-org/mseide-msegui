@@ -1,0 +1,14 @@
+object ${%FORMNAME%}: t${%FORMNAME%}
+  ppmm = 3
+  font.height = 14
+  font.name = 'stf_report'
+  font.dummy = 0
+  grid_size = 2
+  repdesigninfo = (
+    177
+    159
+    460
+    369
+  )
+  moduleclassname = 'treppageform'
+end
