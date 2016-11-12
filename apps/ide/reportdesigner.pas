@@ -74,8 +74,11 @@ type
    fstate: reportdesignerstatesty;
    function ppmm: real;
   protected
+   fisreppage: boolean;
    procedure setmoduleoptions(const aoptions: moduleoptionsty); override;
    function report: tcustomreport;
+   function reppage: treppageform;
+   function getdesigninfo(): prepdesigninfoty;
    function getmoduleparent: twidget; override;
    function markerrect(): rectty; override;
    function getdesignrect(): rectty; override;
@@ -119,9 +122,10 @@ var
 implementation
 
 uses
- reportdesigner_mfm,msearrayutils,msegraphics,msewidgets,msereal;
+ reportdesigner_mfm,msearrayutils,msegraphics,msewidgets,msereal,sysutils;
 type
  tcustomreport1 = class(tcustomreport);
+ treppageform1 = class(treppageform);
  twidget1 = class(twidget);
  
  stringconsts = (
@@ -150,6 +154,7 @@ constructor treportdesignerfo.create(const aowner: tcomponent;
         const adesigner: tdesigner; const aintf: pdesignmoduleintfty;
         const amoduleinfo: pmoduleinfoty);
 begin
+ fisreppage:= amoduleinfo^.instance is treppageform;
  inherited;
  include(twidget1(pointer(reportcontainer)).fwidgetstate1,ws1_designwidget);
 end;
@@ -217,7 +222,7 @@ procedure treportdesignerfo.checktabs;
 var
  int1: integer;
 begin
- if report <> nil then begin
+ if not fisreppage and (report <> nil) then begin
   if report.reppagecount = 0 then begin
    addpage(nil);
    exit;
@@ -239,7 +244,28 @@ end;
 
 function treportdesignerfo.report: tcustomreport;
 begin
+ if fisreppage then begin
+  raise exception.create('No report');
+ end;
  result:= tcustomreport(module);
+end;
+
+function treportdesignerfo.reppage: treppageform;
+begin
+ if not fisreppage then begin
+  raise exception.create('No reppageform');
+ end;
+ result:= treppageform(module);
+end;
+
+function treportdesignerfo.getdesigninfo(): prepdesigninfoty;
+begin
+ if fisreppage then begin
+  result:= @treppageform1(module).frepdesigninfo;
+ end
+ else begin
+  result:= @tcustomreport1(module).frepdesigninfo;
+ end;
 end;
 
 procedure treportdesignerfo.validaterename(acomponent: tcomponent;
@@ -290,18 +316,20 @@ var
  int1,int2: integer;
  widget1: twidget;
 begin
- with tcustomreport1(report) do begin
-  for int1:= 0 to aselections.count-1 do begin
-   widget1:= twidget(aselections[int1]);
-   if widget1 is twidget then begin
-    for int2:= high(freppages) downto 0 do begin
-     if widget1.checkancestor(freppages[int2]) then begin
-      checktabs;
-      tabbar.activetab:= int2;
-      exit;
+ if not fisreppage then begin
+  with tcustomreport1(report) do begin
+   for int1:= 0 to aselections.count-1 do begin
+    widget1:= twidget(aselections[int1]);
+    if widget1 is twidget then begin
+     for int2:= high(freppages) downto 0 do begin
+      if widget1.checkancestor(freppages[int2]) then begin
+       checktabs;
+       tabbar.activetab:= int2;
+       exit;
+      end;
      end;
-    end;
-   end;   
+    end;   
+   end;
   end;
  end;
 end;
@@ -317,7 +345,7 @@ procedure treportdesignerfo.tabmouse(const sender: twidget;
 begin
  with info do begin
   if (eventkind = ek_buttonpress) and (button = mb_left) then begin
-   designer.selectcomponent(report);
+   designer.selectcomponent(module);
   end;
  end;
 end;
@@ -325,7 +353,7 @@ end;
 procedure treportdesignerfo.placemodule();
 begin
  inherited;
- with tcustomreport1(form).frepdesigninfo.widgetrect do begin
+ with getdesigninfo^.widgetrect do begin
   fmodulepos:= pos;
   fmodulesize:= size;
  end;
@@ -334,7 +362,7 @@ end;
 procedure treportdesignerfo.beginstreaming;
 begin
 // tcustomreport1(form).frepdesigninfo.widgetrect:= widgetrect;
- with tcustomreport1(form).frepdesigninfo.widgetrect do begin
+ with getdesigninfo^.widgetrect do begin
   pos:= fmodulepos;
   size:= fmodulesize;
  end;
@@ -347,12 +375,12 @@ end;
 
 function treportdesignerfo.getdesignrect: rectty;
 begin
- result:= tcustomreport1(form).frepdesigninfo.widgetrect;
+ result:= getdesigninfo^.widgetrect;
 end;
 
 function treportdesignerfo.getmodulesize: sizety;
 begin
- result:= tcustomreport1(form).frepdesigninfo.widgetrect.size;
+ result:= getdesigninfo^.widgetrect.size;
 end;
 
 procedure treportdesignerfo.popupupda(const sender: tcustommenu);
@@ -385,24 +413,26 @@ var
 begin
  result:= false;
  if inherited checkdelete() then begin
-  pages:= tcustomreport1(report).freppages;
-  bo1:= false;
-  with fselections do begin  
-   for int1:= 0 to count - 1 do begin
-    comp1:= items[int1];
-    for int2:= 0 to high(pages) do begin
-     if pages[int2] = comp1 then begin
-      bo1:= true;
-      if not askok(sc[ord(sc_wishdelete)]+' '''+
-          msestring(comp1.name)+'''?',sc[ord(sc_warning)],mr_cancel) then begin
-       exit;
+  if not fisreppage then begin
+   pages:= tcustomreport1(report).freppages;
+   bo1:= false;
+   with fselections do begin  
+    for int1:= 0 to count - 1 do begin
+     comp1:= items[int1];
+     for int2:= 0 to high(pages) do begin
+      if pages[int2] = comp1 then begin
+       bo1:= true;
+       if not askok(sc[ord(sc_wishdelete)]+' '''+
+           msestring(comp1.name)+'''?',sc[ord(sc_warning)],mr_cancel) then begin
+        exit;
+       end;
       end;
      end;
     end;
    end;
-  end;
-  if bo1 then begin
-   updatetabs;
+   if bo1 then begin
+    updatetabs;
+   end;
   end;
   result:= true;
  end;
@@ -421,7 +451,7 @@ end;
 procedure treportdesignerfo.placecomponent(const component: tcomponent;
                const apos: pointty; aparent: tcomponent = nil);
 begin
- if component is tcustomreportpage then begin
+ if not fisreppage and (component is tcustomreportpage) then begin
   inherited placecomponent(component,
                      translatewidgetpoint(reportcontainer.pos,
                                     reportcontainer.parentwidget,self),report);
@@ -446,9 +476,7 @@ end;
 
 function treportdesignerfo.getgridsizex: integer;
 begin
- with tcustomreport1(form) do begin
-  result:= round(frepdesigninfo.gridsize * ppmm);
- end;
+ result:= round(getdesigninfo^.gridsize * ppmm);
  if result < 2 then begin
   result:= 2;
  end;
@@ -461,21 +489,31 @@ end;
 
 function treportdesignerfo.getshowgrid: boolean;
 begin
- result:= tcustomreport1(form).frepdesigninfo.showgrid;
+ result:= getdesigninfo^.showgrid;
 end;
 
 function treportdesignerfo.getsnaptogrid: boolean;
 begin
- result:= tcustomreport1(form).frepdesigninfo.snaptogrid;
+ result:= getdesigninfo^.snaptogrid;
 end;
 
 function treportdesignerfo.ppmm: real;
 begin
- if report = nil then begin
-  result:= 3;
+ if fisreppage then begin
+  if reppage = nil then begin
+   result:= 3;
+  end
+  else begin
+   result:= reppage.ppmm;
+  end;
  end
  else begin
-  result:= report.ppmm;
+  if report = nil then begin
+   result:= 3;
+  end
+  else begin
+   result:= report.ppmm;
+  end;
  end;
 end;
 
