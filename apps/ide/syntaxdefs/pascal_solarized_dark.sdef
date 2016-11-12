@@ -43,11 +43,11 @@ keyworddefs pascal
  'PUBLIC' 'PUBLISHED' 'RAISE' 'RECORD' 'REINTRODUCE' 'REPEAT' 
  'RESOURCESTRING'
  'SELF' 'SET' 'SHL' 'SHR'
- 'STDCALL' 'STORED' 'THEN' 'THREADVAR' 'TO' 'TRUE' 'TRY' 'TYPE' 'UNIT' 'UNTIL'
+ 'STDCALL' 'THEN' 'THREADVAR' 'TO' 'TRUE' 'TRY' 'TYPE' 'UNIT' 'UNTIL'
  'USES' 'VAR' 'VIRTUAL' 'WHILE' 'WITH' 'XOR'
  
 keyworddefs property
- 'READ' 'WRITE' 'DEFAULT'
+ 'DEFAULT' 'READ' 'STORED' 'WRITE'
  
 scope option option
  endtokens
