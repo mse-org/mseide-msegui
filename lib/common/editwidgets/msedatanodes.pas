@@ -2097,7 +2097,7 @@ begin
  value.fparentindex:= aindex;
  value.fparent:= self;
  value.settreelevel(ftreelevel+1);
- if fowner <> nil then begin
+ if (fowner <> nil) and (ns_expanded in fstate) then begin
   value.setowner(fowner);
  end;
 end;
@@ -2749,10 +2749,12 @@ var
  int1: integer;
 begin
  inherited;
- for int1:= 0 to fcount - 1 do begin
-  fitems[int1].setowner(aowner);
+ if (aowner = nil) or (ns_expanded in fstate) then begin
+  for int1:= 0 to fcount - 1 do begin
+   fitems[int1].setowner(aowner);
+  end;
  end;
- change;
+ change();
 end;
 
 procedure ttreelistitem.updatechildcheckedstate;
