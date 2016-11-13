@@ -197,6 +197,7 @@ type
    procedure drawcell(const acanvas: tcanvas); virtual;
    procedure mouseevent(var info: mouseeventinfoty); virtual;
    property index: integer read findex;
+   procedure focusrow(); //set assigned grid row to index
    procedure setupeditor(const editor: tinplaceedit;
                        const font: tfont; const notext: boolean); virtual;
 
@@ -387,7 +388,7 @@ type
 
    procedure expandall;
    procedure collapseall;
-   procedure expandtoroot;
+   procedure expandtoroot(const afocusrow: boolean = true);
    procedure collapsetoroot;
    function remove(const aindex: integer): ttreelistitem;
    procedure sort(const casesensitive: boolean;
@@ -398,6 +399,7 @@ type
    procedure setupeditor(const editor: tinplaceedit;
                           const font: tfont; const notext: boolean); override;
    property rootexpanded: boolean read getrootexpanded write setrootexpanded;
+                 //stops after toplevel item of itemlist
    property expanded: boolean read getexpanded write setexpanded;
    function treechecked: boolean; //true if checked and not parentnotchecked
    property items[const aindex: integer]: ttreelistitem read getitems; default;
@@ -1108,6 +1110,18 @@ begin
   end;
   if eventkind in [ek_mouseleave,ek_clientmouseleave] then begin
    exclude(fstate1,ns1_checkboxclicked);
+  end;
+ end;
+end;
+
+procedure tlistitem.focusrow();
+var
+ grid1: tcustomgrid;
+begin
+ if (fowner <> nil) then begin
+  grid1:= fowner.fintf.getgrid();
+  if grid1 <> nil then begin
+   grid1.row:= findex;
   end;
  end;
 end;
@@ -2522,7 +2536,7 @@ begin
  end;
 end;
 
-procedure ttreelistitem.expandtoroot;
+procedure ttreelistitem.expandtoroot(const afocusrow: boolean = true);
 var
  item1: ttreelistitem;
 begin
@@ -2530,6 +2544,9 @@ begin
  while item1 <> nil do begin
   item1.expanded:= true;
   item1:= item1.fparent;
+ end;
+ if afocusrow then begin
+  focusrow();
  end;
 end;
 
@@ -3172,28 +3189,37 @@ begin
 end;
 
 function ttreelistitem.getrootexpanded: boolean;
-var
- n1: ttreelistitem;
 begin
- result:= true;
- n1:= self.fparent;
- while (n1 <> nil) and (n1.fowner <> nil) do begin
-  if not (ns_expanded in fstate) then begin
-   result:= false;
-   break;
-  end;
-  n1:= n1.fparent;
- end;
+ result:= fowner <> nil;
 end;
 
 procedure ttreelistitem.setrootexpanded(const avalue: boolean);
 var
- n1: ttreelistitem;
+ n1,n2: ttreelistitem;
+ bo1: boolean;
 begin
  n1:= self.fparent;
- while (n1 <> nil) and (n1.fowner <> nil) do begin
-  n1.expanded:= avalue;
-  n1:= n1.fparent;
+ if avalue then begin
+  bo1:= false;
+  n2:= self;
+  while n2 <> nil do begin //check if tree has itemlist
+   bo1:= n2.fowner <> nil;
+   if bo1 then begin
+    break;
+   end;
+   n2:= n2.fparent;
+  end;
+  while bo1 and (n1 <> nil) do begin
+   bo1:= n1.fowner = nil; //stop after first expanded
+   n1.expanded:= true;
+   n1:= n1.fparent;
+  end;
+ end
+ else begin
+  while (n1 <> nil) and (n1.fowner <> nil) do begin
+   n1.expanded:= false;
+   n1:= n1.fparent;
+  end;
  end;
 end;
 
