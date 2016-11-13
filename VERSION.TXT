@@ -9,8 +9,9 @@ MSEide+MSEgui breaking changes version history
  tdscontroller.options to tmsebufdataset.options.
  "delayedapplycount" tdscontroller -> tmsebufdataset.
 2016-09-28
- Frame buttons options fbo_disabled overrides readonly state of widget.
- fbo_disabled in existing widgets must be reset at design time once.
+ Frame buttons options fbo_disabled overrides readonly-state of widget.
+ For existing widgets which have been saved in readonly-state fbo_disabled must
+ be cleared one time in design mode.
 2016-09-26
  TCustomSQLConnection DatabaseName, Password, UserName, HostName, Charset and
  Role properties ansistring -> msestring.
