@@ -1635,6 +1635,7 @@ type
    procedure internalrender(const acanvas: tcanvas; const aprinter: tcustomprinter;
                   const acommand: msestring; const astream: ttextstream;
                   const anilstream: boolean; const onafterrender: reporteventty);
+   procedure initpage(const apage: tcustomreportpage);
    procedure unregisterchildwidget(const child: twidget); override;
    procedure getchildren(proc: tgetchildproc; root: tcomponent); override;
    procedure defineproperties(filer: tfiler); override;
@@ -1650,7 +1651,14 @@ type
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
-   procedure insertwidget(const awidget: twidget; const apos: pointty); override;
+   
+   procedure insertwidget(const awidget: twidget; const apos: pointty) override;
+   procedure add(const apage: tcustomreportpage;
+                                         const aindex: int32 = bigint);
+   procedure delete(const aindex: int32);
+   procedure clear();
+   procedure movepage(const curindex,newindex: int32);
+   
    procedure render(const acanvas: tcanvas;
                         const onafterrender: reporteventty = nil); overload;
    procedure render(const aprinter: tstreamprinter;
@@ -6168,15 +6176,45 @@ begin
  end;
 end;
 
+procedure tcustomreport.initpage(const apage: tcustomreportpage);
+begin
+ apage.ppmm:= fppmm;
+end;
+
 procedure tcustomreport.insertwidget(const awidget: twidget;
-               const apos: pointty);
+                                                 const apos: pointty);
 begin
  if not (awidget is tcustomreportpage) then begin
   raise exception.create('Invalid widget');
  end;
  additem(pointerarty(freppages),awidget);
- tcustomreportpage(awidget).ppmm:= fppmm;
+ initpage(tcustomreportpage(awidget));
  inherited insertwidget(awidget,nullpoint);
+end;
+
+procedure tcustomreport.add(const apage: tcustomreportpage;
+                                      const aindex: int32 = bigint);
+begin
+ insertitem(pointerarty(freppages),aindex,apage);
+ initpage(apage);
+ apage.parentwidget:= self;
+end;
+
+procedure tcustomreport.delete(const aindex: int32);
+begin
+ reppages[aindex].destroy();
+end;
+
+procedure tcustomreport.clear();
+begin
+ while freppages <> nil do begin
+  delete(high(freppages));
+ end;
+end;
+
+procedure tcustomreport.movepage(const curindex: int32; const newindex: int32);
+begin
+ moveitem(pointerarty(freppages),curindex,newindex);
 end;
 
 function tcustomreport.exec(thread: tmsethread): integer;
