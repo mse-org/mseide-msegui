@@ -16485,7 +16485,9 @@ end;
 procedure tcustomstringgrid.updatepopupmenu(var amenu: tpopupmenu; 
                          var mouseinfo: mouseeventinfoty);
 begin
- if isdatacell(ffocusedcell) then begin
+ if isdatacell(ffocusedcell) and (oe1_autopopupmenu in
+                  tcustomstringcol(fdatacols.fitems[ffocusedcell.col]).
+                                                     foptionsedit1) then begin
   feditor.updatepopupmenu(amenu,popupmenu,mouseinfo,false);
  end;
  inherited;

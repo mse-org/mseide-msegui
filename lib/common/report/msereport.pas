@@ -1655,6 +1655,7 @@ type
    procedure insertwidget(const awidget: twidget; const apos: pointty) override;
    procedure add(const apage: tcustomreportpage;
                                          const aindex: int32 = bigint);
+                                                        //report owns page
    procedure delete(const aindex: int32);
    procedure clear();
    procedure movepage(const curindex,newindex: int32);
