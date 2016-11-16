@@ -709,8 +709,26 @@ begin
 end;
 
 function sys_deletedir(const filename: filenamety): syserrorty;
+var
+ str1: string;
 begin
- result:= sye_notimplemented;
+ if iswin95 then begin
+  str1:= ansistring(winfilepath(filename,''));
+  if windows.removedirectorya(pchar(str1)) then begin
+   result:= sye_ok;
+  end
+  else begin
+   result:= syelasterror;
+  end;
+ end
+ else begin
+  if windows.removedirectoryw(pmsechar(winfilepath(filename,''))) then begin
+   result:= sye_ok;
+  end
+  else begin
+   result:= syelasterror;
+  end;
+ end;
 end;
 
 
