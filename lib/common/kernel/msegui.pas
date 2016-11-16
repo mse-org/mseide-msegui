@@ -2791,7 +2791,8 @@ type
                    const caption: msestring = '';
                    const acancelaction: notifyeventty = nil;
                    const aexecuteaction: notifyeventty = nil;
-                   const aidleaction: waitidleeventty = nil): boolean;
+                   const aidleaction: waitidleeventty = nil;
+                   const acontinueaction: notifyeventty = nil): boolean;
               //true if not canceled
    procedure terminatewait;
    procedure cancelwait;
@@ -20451,7 +20452,8 @@ function tguiapplication.waitdialog(const athread: tthreadcomp = nil;
                const caption: msestring = '';
                const acancelaction: notifyeventty = nil;
                const aexecuteaction: notifyeventty = nil;
-               const aidleaction: waitidleeventty = nil): boolean;
+               const aidleaction: waitidleeventty = nil;
+               const acontinueaction: notifyeventty = nil): boolean;
 var
 // res1: modalresultty;
  wo1: longword;
@@ -20480,9 +20482,16 @@ begin
      athread.onterminate:= {$ifdef FPC}@{$endif}dothreadterminated;
      athread.run;
     end;
-    repeat
-    until showmessage(atext,caption,[mr_cancel],mr_cancel,[],0,
+    if assigned(acontinueaction) then begin
+     repeat
+     until showmessage(atext,caption,[mr_continue,mr_cancel],mr_cancel,[],0,
+                   [acontinueaction,acancelaction]) in [mr_cancel,mr_continue];
+    end
+    else begin
+     repeat
+     until showmessage(atext,caption,[mr_cancel],mr_cancel,[],0,
                                               [acancelaction]) = mr_cancel;
+    end;
     if wo1 <> exceptioncount then begin
      sysutils.abort;
     end;

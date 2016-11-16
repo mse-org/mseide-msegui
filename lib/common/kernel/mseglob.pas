@@ -23,7 +23,7 @@ type
                   mr_escape,mr_f10, 
                   mr_exception,
                   mr_cancel,mr_abort,mr_ok,mr_yes,mr_no,mr_all,mr_noall,
-                  mr_ignore,mr_skip,mr_skipall);
+                  mr_ignore,mr_skip,mr_skipall,mr_continue);
  pmodalresultty = ^modalresultty;
  modalresultsty = set of modalresultty;
 
