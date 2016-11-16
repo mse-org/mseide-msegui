@@ -265,6 +265,11 @@ procedure createdir(const path: filenamety;
                                  const rights: filerightsty = defaultdirrights);
 procedure createdirpath(const path: filenamety; 
                                  const rights: filerightsty = defaultdirrights);
+function deletedir(const path: filenamety): boolean; 
+           //deletes files and directories recursively, false if not existing
+function trydeletedir(const path: filenamety): boolean; 
+     //deletes files and directories recursively,
+     // false if not existing or not deleted
 function getcurrentdir: filenamety; deprecated;
 function getcurrentdirmse: filenamety;
 function setcurrentdir(const path: filenamety): filenamety; deprecated;
@@ -465,6 +470,47 @@ function trydeletefile(const filename: filenamety): boolean;
                       //false if not existing or not deleted
 begin
  result:= sys_deletefile(filename) = sye_ok;
+end;
+
+function deletefilesanddir(const path: filenamety): syserrorty;
+var
+ ar1: filenamearty;
+ i1: int32;
+begin
+ ar1:= searchfilenames('',path,[fa_all],[fa_dir]);
+ for i1:= 0 to high(ar1) do begin
+  result:= sys_deletefile(path+'/'+ar1[i1]);
+  if result <> sye_ok then begin
+   exit;
+  end;
+ end;
+ ar1:= searchfilenames('',path,[fa_dir]);
+ for i1:= 0 to high(ar1) do begin
+  result:= deletefilesanddir(path+'/'+ar1[i1]);
+  if result <> sye_ok then begin
+   exit;
+  end;
+ end;
+ result:= sys_deletedir(path);
+end;
+
+function deletedir(const path: filenamety): boolean; 
+           //deletes files and directories recursively, false if not existing
+var
+ err: syserrorty;
+begin
+ err:= deletefilesanddir(path);
+ result:= err = sye_ok;
+ if not result and finddir(path) then begin
+  syserror(err,'Can not delete dir "'+path+'". ');
+ end;
+end;
+
+function trydeletedir(const path: filenamety): boolean; 
+     //deletes files and directories recursively,
+     // false if not existing or not deleted
+begin
+ result:= deletefilesanddir(path) = sye_ok;
 end;
 
 procedure createdir(const path: filenamety; 
