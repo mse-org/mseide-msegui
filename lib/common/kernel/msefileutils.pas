@@ -106,6 +106,7 @@ type
 function quotefilename(const name: filenamety): filenamety; overload;
 function quotefilename(const directory,name: filenamety): filenamety; overload;
 function quotefilename(const names: filenamearty): filenamety; overload;
+function quotefilename(const names: array of filenamety): filenamety; overload;
 procedure unquotefilename(const names: filenamety; 
                                var result: filenamearty); overload;
 function unquotefilename(const name: filenamety): filenamety; overload;
@@ -1203,6 +1204,11 @@ begin
    setlength(result,length(result)-1);
   end;
  end;
+end;
+
+function quotefilename(const names: array of filenamety): filenamety; overload;
+begin
+ result:= quotefilename(opentodynarraym(names));
 end;
 
 function quotefilename(const directory,name: filenamety): filenamety;

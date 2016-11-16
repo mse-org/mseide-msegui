@@ -1647,6 +1647,8 @@ type
    procedure setfont(const avalue: trepfont);
    function getfont: trepfont;
    function getfontclass: widgetfontclassty; override;
+   function getdialogcaption: msestring virtual;
+   function getdialogtext: msestring virtual;
 //   procedure doloaded; override;
   public
    constructor create(aowner: tcomponent); override;
@@ -6537,7 +6539,7 @@ begin
   application.beginwait;
   try
    if reo_waitdialog in foptions then begin
-    application.waitdialog(nil,fdialogtext,fdialogcaption,
+    application.waitdialog(nil,getdialogtext,getdialogcaption,
             {$ifdef FPC}@{$endif}docancel,{$ifdef FPC}@{$endif}doexec);
     if not canceled then begin
      application.terminatewait;
@@ -6556,7 +6558,7 @@ begin
   end;
   fthread:= tmsethread.create({$ifdef FPC}@{$endif}exec);
   if reo_waitdialog in foptions then begin
-   application.waitdialog(nil,fdialogtext,fdialogcaption);
+   application.waitdialog(nil,getdialogtext,getdialogcaption);
    waitfor;
   end;
  end;
@@ -6820,6 +6822,22 @@ end;
 function tcustomreport.getfontclass: widgetfontclassty;
 begin
  result:= nil; //static font
+end;
+
+function tcustomreport.getdialogcaption: msestring;
+begin
+ result:= fdialogcaption;
+ if result = '' then begin
+  result:= 'Report'
+ end;
+end;
+
+function tcustomreport.getdialogtext: msestring;
+begin
+ result:= fdialogtext;
+ if result = '' then begin
+  result:= 'Rendering...'
+ end;
 end;
 
 function tcustomreport.prepass: boolean;
