@@ -94,7 +94,7 @@ type
    procedure finalizeexec;
    procedure receiveevent(const event: tobjectevent); override;
    procedure waitforpipeeof;
-   procedure doprocfinished;
+   procedure doprocfinished virtual;
    procedure postprocessdied;
 
     //istatfile

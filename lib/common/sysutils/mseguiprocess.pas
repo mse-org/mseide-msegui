@@ -11,11 +11,85 @@ unit mseguiprocess;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 uses
- mseprocess;
+ mseprocess,msestrings;
 
 type
+ guiprocessoptionty = (prog_waitdialog,
+                       prog_continue); //continue button in wait dialog
+ guiprocessoptionsty = set of guiprocessoptionty;
+
  tguiprocess = class(tmseprocess)
+  private
+   fdialogcaption: msestring;
+   fdialoggaption: msestring;
+   fdialogtext: msestring;
+   foptionsgui: guiprocessoptionsty;
+  protected
+   procedure setactive(const avalue: boolean) override;
+   function getdialogcaption: msestring virtual;
+   function getdialogtext: msestring virtual;
+   procedure cancelev(const sender: tobject);
+   procedure continueev(const sender: tobject);
+   procedure doprocfinished() override;
+  published
+   property dialogcaption: msestring read fdialogcaption write fdialoggaption;
+   property dialogtext: msestring read fdialogtext write fdialogtext;
+   property optionsgui: guiprocessoptionsty read foptionsgui
+                                            write foptionsgui default [];
  end;
  
 implementation
+uses
+ msegui;
+ 
+{ tguiprocess }
+
+procedure tguiprocess.setactive(const avalue: boolean);
+begin
+ inherited;
+ if (prog_waitdialog in foptionsgui) and avalue and active then begin
+  if prog_continue in foptionsgui then begin
+   application.waitdialog(nil,getdialogtext(),getdialogcaption(),@cancelev,nil,
+                                                               nil,@continueev);
+  end
+  else begin
+   application.waitdialog(nil,getdialogtext(),getdialogcaption(),@cancelev);
+  end;
+ end;
+end;
+
+function tguiprocess.getdialogcaption: msestring;
+begin
+ result:= fdialogcaption;
+ if result = '' then begin
+  result:= 'Process'
+ end;
+end;
+
+function tguiprocess.getdialogtext: msestring;
+begin
+ result:= fdialogtext;
+ if result = '' then begin
+  result:= 'Running...'
+ end;
+end;
+
+procedure tguiprocess.cancelev(const sender: tobject);
+begin
+ kill();
+end;
+
+procedure tguiprocess.continueev(const sender: tobject);
+begin
+ active:= false;
+end;
+
+procedure tguiprocess.doprocfinished();
+begin
+ inherited;
+ if (prog_waitdialog in foptionsgui) and application.waitstarted() then begin
+  application.terminatewait();
+ end;
+end;
+
 end.
