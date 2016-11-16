@@ -23,7 +23,7 @@ interface
 implementation
 uses
  msedesignintf,msesysenv,msefilechange,regsysutils_bmp,mseprocess,
- msecomponenteditors,msepython,msestrings,msetexteditor,
+ msecomponenteditors,msepython,msestrings,msetexteditor,mseguiprocess,
  sysutils,mclasses,msesysenvmanagereditor,mseglob,msepropertyeditors;
 type
  tarrayelementeditor1 = class(tarrayelementeditor);
@@ -74,6 +74,7 @@ begin
                                     tpythonscriptseditor);
  registerpropertyeditor(typeinfo(tpythonstringlist),nil,'',
                                              tpythonpropertyeditor);
+ registercomponents('Gui',[tguiprocess]);
 end;
 
 { tsysenvmanagereditor }
