@@ -974,6 +974,19 @@ begin
  end;
 end;
 
+function sys_deletedir(const filename: filenamety): syserrorty;
+var
+ str1: string;
+begin
+ str1:= tosys(filename);
+ if mselibc.rmdir(pchar(str1)) = -1 then begin
+  result:= syelasterror;
+ end
+ else begin
+  result:= sye_ok;
+ end;
+end;
+
 function getfiletype(value: longword): filetypety;
 var
  count: filetypety;

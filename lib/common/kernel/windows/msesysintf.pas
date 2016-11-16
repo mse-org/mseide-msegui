@@ -708,6 +708,12 @@ begin
  end;
 end;
 
+function sys_deletedir(const filename: filenamety): syserrorty;
+begin
+ result:= sye_notimplemented;
+end;
+
+
 function sys_createdir(const path: msestring;
                  const rights: filerightsty): syserrorty;
 var

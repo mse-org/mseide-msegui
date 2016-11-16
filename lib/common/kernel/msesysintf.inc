@@ -41,6 +41,7 @@ function sys_gettempdir: filenamety;
 function sys_setcurrentdir(const dirname: filenamety): syserrorty;
 function sys_copyfile(const oldfile,newfile: filenamety): syserrorty;
 function sys_deletefile(const filename: filenamety): syserrorty;
+function sys_deletedir(const filename: filenamety): syserrorty;
 function sys_renamefile(const oldname,newname: filenamety): syserrorty;
 function sys_createdir(const path: msestring;
                   const rights: filerightsty): syserrorty;
