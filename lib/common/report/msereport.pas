@@ -1653,8 +1653,8 @@ type
    destructor destroy; override;
    
    procedure insertwidget(const awidget: twidget; const apos: pointty) override;
-   procedure add(const apage: tcustomreportpage;
-                                         const aindex: int32 = bigint);
+   function add(const apage: tcustomreportpage;
+                               aindex: int32 = bigint): tcustomreportpage;
                                                         //report owns page
    procedure delete(const aindex: int32);
    procedure clear();
@@ -6193,9 +6193,16 @@ begin
  inherited insertwidget(awidget,nullpoint);
 end;
 
-procedure tcustomreport.add(const apage: tcustomreportpage;
-                                      const aindex: int32 = bigint);
+function tcustomreport.add(const apage: tcustomreportpage;
+                              aindex: int32 = bigint): tcustomreportpage;
+var
+ i1: int32;
 begin
+ result:= apage;
+ i1:= length(freppages);
+ if aindex >= i1 then begin
+  aindex:= i1;
+ end;
  insertitem(pointerarty(freppages),aindex,apage);
  initpage(apage);
  apage.parentwidget:= self;
