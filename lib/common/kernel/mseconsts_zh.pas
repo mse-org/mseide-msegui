@@ -37,7 +37,8 @@ const
   #21462#28040#25152#26377,  //mr_noall
   '&g'#24573#30053,           //mr_ignore
   '&Skip',    //mr_skip
-  'Skip &all' //mr_skipall
+  'Skip &all', //mr_skipall
+  'Co&ntinue'  //mr_continue
   );
 
  zh_modalresulttextnoshortcut: defaultmodalresulttextty =
@@ -57,7 +58,8 @@ const
   #21462#28040#25152#26377, //mr_noall
   #24573#30053,              //mr_ignore
   'Skip',    //mr_skip
-  'Skip all' //mr_skipall
+  'Skip all', //mr_skipall
+  'Continue'  //mr_continue
   );
 
  zh_stockcaption: stockcaptionaty = (

@@ -97,7 +97,8 @@ const
   'No all',   //mr_noall
   '&Ignore',  //mr_ignore
   '&Skip',    //mr_skip
-  'Skip a&ll' //mr_skipall
+  'Skip a&ll', //mr_skipall
+  'Co&ntinue'  //mr_continue
   );
 
  en_modalresulttextnoshortcut: defaultmodalresulttextty =
@@ -117,7 +118,8 @@ const
   'No all',  //mr_noall
   'Ignore',  //mr_ignore
   'Skip',    //mr_skip
-  'Skip all' //mr_skipall
+  'Skip all', //mr_skipall
+  'Continue'  //mr_continue
   );
 
  en_stockcaption: stockcaptionaty = (

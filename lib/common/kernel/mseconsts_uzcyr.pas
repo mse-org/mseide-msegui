@@ -39,7 +39,8 @@ const
   #1202#1077'&'#1095' '#1073#1080#1088#1080 ,     //mr_noall =>  N&ikakie
   '&'#1052#1072#1085' '#1101#1090#1080#1096,       //mr_ignore => Neva&zhno
   '&Skip',    //mr_skip
-  'Skip &all' //mr_skipall
+  'Skip &all', //mr_skipall
+  'Co&ntinue'  //mr_continue
  );
 
  uzcyr_modalresulttextnoshortcut: defaultmodalresulttextty =
@@ -59,7 +60,8 @@ const
   #1202#1077#1095' '#1073#1080#1088#1080 ,   //mr_noall =>  Nikakie  
   #1052#1072#1085' '#1101#1090#1080#1096,	 //mr_ignore => Nevazhno
   'Skip',    //mr_skip
-  'Skip all' //mr_skipall
+  'Skip all', //mr_skipall
+  'Continue'  //mr_continue
   );
 
  uzcyr_stockcaption: stockcaptionaty = (

@@ -75,7 +75,8 @@ const
   'A&ucun',       //mr_noall
   '&Ignorer',     //mr_ignore
   '&Skip',        //mr_skip
-  'Skip &all'     //mr_skipall
+  'Skip &all',    //mr_skipall
+  'Co&ntinue'  //mr_continue
   );
 
  fr_modalresulttextnoshortcut: defaultmodalresulttextty =
@@ -95,7 +96,8 @@ const
   'Aucun',      //mr_noall
   'Ignorer',    //mr_ignore
   'Skip',      //mr_skip
-  'Skip all'   //mr_skipall
+  'Skip all',   //mr_skipall
+  'Continue'  //mr_continue
   );
 
  fr_stockcaption: stockcaptionaty = (

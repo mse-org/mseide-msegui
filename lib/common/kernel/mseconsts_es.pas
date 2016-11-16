@@ -37,7 +37,8 @@ const
   'N&o todo',    //mr_noall
   '&Ignorar',    //mr_ignore
   'O&mitir',     //mr_skip
-  'Omitir &todo' //mr_skipall
+  'Omitir &todo', //mr_skipall
+  'Co&ntinue'  //mr_continue
   );
 
  es_modalresulttextnoshortcut: defaultmodalresulttextty =
@@ -57,7 +58,8 @@ const
   'No todo',    //mr_noall
   'Ignorar',    //mr_ignore
   'Omitir',     //mr_skip
-  'Omitir todo' //mr_skipall
+  'Omitir todo', //mr_skipall
+  'Continue'  //mr_continue
   );
 
  es_stockcaption: stockcaptionaty = (
