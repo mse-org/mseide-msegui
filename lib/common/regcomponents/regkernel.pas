@@ -31,7 +31,7 @@ uses
  msegraphutils,regkernel_bmp,msegraphics,msestrings,msepostscriptprinter,
  mseprinter,msetypes,msedatalist,msedatamodules,mseclasses,formdesigner,
  mseapplication,mseglob,mseguiglob,mseskin,msedesigner,msemacros,
- mseguithreadcomp,mseprocmonitorcomp,msefadepropedit,
+ mseguithreadcomp,mseprocmonitorcomp,msefadepropedit,mseguiprocess,
  msearrayprops,msesumlist,mserttistat,msestockobjects,regglob,msearrayutils,
  msecryptohandler,msestringcontainer,mseformatstr;
 
@@ -195,6 +195,7 @@ begin
                     tfacecomp,tfacelist,tframecomp,tfontcomp,tskincontroller,
 //                    tskinextender,
                     tbitmapcomp,timagelist,tshortcutcontroller,thelpcontroller,
+                    tguiprocess,
                     taction,tguithreadcomp]);
  registercomponenttabhints(['Gui'],['Non visual components with GUI dependence']);
 
