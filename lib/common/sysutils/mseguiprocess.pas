@@ -15,7 +15,7 @@ uses
 
 type
  guiprocessoptionty = (prog_waitdialog,
-                       prog_continue); //continue button in wait dialog
+                       prog_cancontinue); //continue button in wait dialog
  guiprocessoptionsty = set of guiprocessoptionty;
 
  tguiprocess = class(tmseprocess)
@@ -24,6 +24,8 @@ type
    fdialoggaption: msestring;
    fdialogtext: msestring;
    foptionsgui: guiprocessoptionsty;
+   function getcancontinue: boolean;
+   procedure setcancontinue(const avalue: boolean);
   protected
    procedure setactive(const avalue: boolean) override;
    function getdialogcaption: msestring virtual;
@@ -31,6 +33,8 @@ type
    procedure cancelev(const sender: tobject);
    procedure continueev(const sender: tobject);
    procedure doprocfinished() override;
+  public
+   property cancontinue: boolean read getcancontinue write setcancontinue;
   published
    property dialogcaption: msestring read fdialogcaption write fdialoggaption;
    property dialogtext: msestring read fdialogtext write fdialogtext;
@@ -44,11 +48,26 @@ uses
  
 { tguiprocess }
 
+function tguiprocess.getcancontinue: boolean;
+begin
+ result:= prog_cancontinue in foptionsgui;
+end;
+
+procedure tguiprocess.setcancontinue(const avalue: boolean);
+begin
+ if avalue then begin
+  optionsgui:= optionsgui + [prog_cancontinue];
+ end
+ else begin
+  optionsgui:= optionsgui - [prog_cancontinue];
+ end;
+end;
+
 procedure tguiprocess.setactive(const avalue: boolean);
 begin
  inherited;
  if (prog_waitdialog in foptionsgui) and avalue and active then begin
-  if prog_continue in foptionsgui then begin
+  if prog_cancontinue in foptionsgui then begin
    application.waitdialog(nil,getdialogtext(),getdialogcaption(),@cancelev,nil,
                                                                nil,@continueev);
   end
