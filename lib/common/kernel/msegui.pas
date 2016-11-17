@@ -20484,7 +20484,7 @@ begin
     end;
     if assigned(acontinueaction) then begin
      repeat
-     until showmessage(atext,caption,[mr_continue,mr_cancel],mr_cancel,[],0,
+     until showmessage(atext,caption,[mr_continue,mr_cancel],mr_continue,[],0,
                    [acontinueaction,acancelaction]) in [mr_cancel,mr_continue];
     end
     else begin
