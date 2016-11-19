@@ -17454,8 +17454,8 @@ begin
     
     if (fmodalwindow <> nil) and (window <> fmodalwindow) and 
                           not window.istransientfor(fmodalwindow) then begin
-     addpoint1(info.mouse.pos,subpoint(window.fownerwidget.fwidgetrect.pos,
-         fmodalwindow.fownerwidget.fwidgetrect.pos));
+     addpoint1(info.mouse.pos,
+                        subpoint(window.screenpos,fmodalwindow.screenpos));
      window:= fmodalwindow;
     end;
     if (fmousecapturewidget <> nil) and 
