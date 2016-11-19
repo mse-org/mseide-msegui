@@ -18922,6 +18922,13 @@ begin
    goto endlab; //both invisible -> no change in order
   end;
  end;
+ if (result = 0) and
+      ((twindow(l).syscontainer <> sywi_none) or
+       (twindow(r).syscontainer <> sywi_none) or
+       (twindow(l).fcontainer <> 0) or
+       (twindow(r).fcontainer <> 0)) then begin
+  goto endlab; //don't change order of embedded windows
+ end;
  if tws_raise in  twindow(l).fstate then begin
   inc(result,raiseweight);
  end;
