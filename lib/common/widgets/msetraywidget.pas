@@ -38,7 +38,7 @@ type
    procedure objectevent(const sender: tobject;
                             const event: objecteventty); override;
    procedure iconchanged(const sender: tobject);
-   procedure dock;
+   function dock: boolean; //true if OK
    procedure undock;
    procedure setvisible(const avalue: boolean); override;
    procedure loaded; override;
@@ -80,11 +80,22 @@ begin
  inherited;
 end;
 
-procedure ttraywidget.dock;
+function ttraywidget.dock: boolean;
+var
+ bo1: boolean;
 begin
+ result:= true;
  if (parentwidget <> nil) or (window.syscontainer <> sywi_tray) then begin
+  bo1:= visible;
+  visible:= false;
   parentwidget:= nil;
-  window.syscontainer:= sywi_tray;
+  try
+   window.syscontainer:= sywi_tray;
+  except
+   result:= false;
+   exit;
+  end;
+  visible:= bo1;
  end;
 end;
 
@@ -100,11 +111,12 @@ begin
  if (componentstate * [csdesigning,csloading] = []) and 
                                            (avalue <> visible) then begin
   if avalue then begin
-   dock;
-   setcaption(fcaption);
-   iconchanged(nil);
-   settrayhint;
-   inherited;
+   if dock() then begin
+    setcaption(fcaption);
+    iconchanged(nil);
+    settrayhint;
+    inherited;
+   end;
   end
   else begin
    cancelmessage;
@@ -122,8 +134,9 @@ begin
  if not(csdesigning in componentstate) and visible then begin
   visible:= false;
   inherited;
-  dock;
-  visible:= true;
+  if dock() then begin
+   visible:= true;
+  end;
  end
  else begin
   inherited;

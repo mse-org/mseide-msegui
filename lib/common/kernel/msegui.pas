@@ -16833,9 +16833,6 @@ begin
    include(foptions,wo_embedded); 
    guierror(gui_docktosyswindow(fwindow,avalue));
    fsyscontainer:= avalue;
-   if fownerwidget.visible then begin
-//    gui_showsysdock(fwindow);
-   end;
   end;
  end;
 end;

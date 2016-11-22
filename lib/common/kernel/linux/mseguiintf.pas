@@ -740,7 +740,7 @@ type
        net_frame_extents,
        net_request_frame_extents,
        net_system_tray_s0,net_system_tray_opcode,net_system_tray_message_data,
-       xembed,xembed_info,motif_wm_hints,
+       xembed,xembed_info,motif_wm_hints,wm_normal_hints,
        net_none);
  netwmstateoperationty = (nso_remove,nso_add,nso_toggle);
 const
@@ -780,7 +780,7 @@ const
        '_NET_SYSTEM_TRAY_S0','_NET_SYSTEM_TRAY_OPCODE',
        '_NET_SYSTEM_TRAY_MESSAGE_DATA',
        '_XEMBED','_XEMBED_INFO',
-       '_MOTIF_WM_HINTS',
+       '_MOTIF_WM_HINTS','WM_NORMAL_HINTS',
        '');
 // needednetatom = netatomty(ord(high(netatomty))-4);
 type
@@ -4419,13 +4419,16 @@ function gui_docktosyswindow(var child: windowty;
                                    const akind: syswindowty): guierrorty;
 var
  syswin: winidty;
- parentbefore: winidty;
- int1: integer;
+ parentbefore,id1: winidty;
+ i1: integer;
  pt1: pointty;
  rect1: rectty;
+const
+ maxwait = 40; //200ms
 begin
  gdi_lock;
  gui_hidewindow(child.id);       //window must be unmapped for some WM's
+ xsync(appdisp,0);
  if akind = sywi_none then begin 
          //does not work with newer WM's,
          //window must be destroyed
@@ -4439,23 +4442,31 @@ begin
   result:= gue_windownotfound;
   syswin:= getsyswin(akind);
   if syswin <> 0 then begin
-   result:= gue_docktosyswindow;
    initxembed(child.id,xembedflagsunmapped);
-   
+   xdeleteproperty(appdisp,child.id,netatoms[wm_normal_hints]);
    parentbefore:= gui_getparentwindow(child.id);
-   case akind of
-    sywi_tray: begin
-     result:= sendtraymessage(syswin,syswin,system_tray_request_dock,child.id);
+   result:= gue_ok;
+   i1:= 0;
+   repeat
+    case akind of
+     sywi_tray: begin
+      result:= sendtraymessage(syswin,syswin,
+                          system_tray_request_dock,child.id);
+                          //does not always work the first time...
+     end;
     end;
-   end;
-   
-   int1:= 0;
-   xsync(appdisp,0);
-   sys_schedyield;
-   while (gui_getparentwindow(child.id) = parentbefore) and (int1 < 40) do begin
     xsync(appdisp,0);
+    sys_schedyield;
+    xsync(appdisp,0);
+    id1:= gui_getparentwindow(child.id);
+    if (id1 <> parentbefore) and (id1 <> rootid) then begin
+     break;
+    end;
     sleep(5);
-    inc(int1);
+    inc(i1);
+   until i1 = maxwait;
+   if i1 >= maxwait then begin
+    result:= gue_docktosyswindow;
    end;
   end; 
  end;
