@@ -740,7 +740,7 @@ type
        net_frame_extents,
        net_request_frame_extents,
        net_system_tray_s0,net_system_tray_opcode,net_system_tray_message_data,
-       xembed_info,motif_wm_hints,
+       xembed,xembed_info,motif_wm_hints,
        net_none);
  netwmstateoperationty = (nso_remove,nso_add,nso_toggle);
 const
@@ -779,7 +779,7 @@ const
        '_NET_REQUEST_FRAME_EXTENTS',
        '_NET_SYSTEM_TRAY_S0','_NET_SYSTEM_TRAY_OPCODE',
        '_NET_SYSTEM_TRAY_MESSAGE_DATA',
-       '_XEMBED_INFO',
+       '_XEMBED','_XEMBED_INFO',
        '_MOTIF_WM_HINTS',
        '');
 // needednetatom = netatomty(ord(high(netatomty))-4);
@@ -4349,14 +4349,15 @@ end;
 
 const
  xembedversion = 0;
- xembedflags = 0;
+ xembedflagsunmapped = 0;
+ xembedflagsmapped = 1;
 
-procedure initxembed(const id: winidty);
+procedure initxembed(const id: winidty; const flags: int32);
 begin
 {$ifdef mse_debuggdisync}
  checkgdilock;
 {$endif} 
- setlongproperty(id,netatoms[xembed_info],[xembedversion,xembedflags],
+ setlongproperty(id,netatoms[xembed_info],[xembedversion,flags],
                                    netatoms[xembed_info]{cardinalatom});
 end;
 
@@ -4371,8 +4372,9 @@ end;
 function gui_showsysdock(var awindow: windowty): guierrorty;
 begin
  gdi_lock;
- setlongproperty(awindow.id,netatoms[xembed_info],
-      [xembedversion,xembedflags or 1],netatoms[xembed_info]);
+ initxembed(awindow.id,xembedflagsmapped);
+ result:= gui_showwindow(awindow.id); //xembedflagsmapped
+                                      //does not work for some WM's
  result:= gue_ok;
  gdi_unlock;
 end;
@@ -4380,9 +4382,10 @@ end;
 function gui_hidesysdock(var awindow: windowty): guierrorty;
 begin
  gdi_lock;
- setlongproperty(awindow.id,netatoms[xembed_info],[xembedversion,xembedflags],
-                         netatoms[xembed_info]);
- result:= gui_hidewindow(awindow.id);
+ initxembed(awindow.id,xembedflagsunmapped);
+ result:= gui_hidewindow(awindow.id); //xembedflagsunmapped
+                                      //does not work for some WM's
+ result:= gue_ok;
  gdi_unlock;
 end;
 
@@ -4406,7 +4409,7 @@ begin
  if dest <> 0 then begin
   at1:= netatoms[net_system_tray_opcode];
   if (at1 <> 0) and sendnetcardinalmessage(dest,at1,awindow,
-                [lasteventtime,opcode,data1,data2,data3]) then begin
+             [currenttime{lasteventtime},opcode,data1,data2,data3]) then begin
    result:= gue_ok;
   end;
  end;
@@ -4422,8 +4425,10 @@ var
  rect1: rectty;
 begin
  gdi_lock;
- gui_hidewindow(child.id);
- if akind = sywi_none then begin
+ gui_hidewindow(child.id);       //window must be unmapped for some WM's
+ if akind = sywi_none then begin 
+         //does not work with newer WM's,
+         //window must be destroyed
   result:= getwindowrect(child.id,rect1,pt1);
   if result = gue_ok then begin
    result:= gui_reparentwindow(child.id,0,rect1.pos);
@@ -4435,13 +4440,15 @@ begin
   syswin:= getsyswin(akind);
   if syswin <> 0 then begin
    result:= gue_docktosyswindow;
-   initxembed(child.id);
+   initxembed(child.id,xembedflagsunmapped);
+   
    parentbefore:= gui_getparentwindow(child.id);
    case akind of
     sywi_tray: begin
      result:= sendtraymessage(syswin,syswin,system_tray_request_dock,child.id);
     end;
    end;
+   
    int1:= 0;
    xsync(appdisp,0);
    sys_schedyield;
@@ -5644,7 +5651,19 @@ eventrestart:
 {$endif}
       end
       else begin
-       result:= handlexdnd(xev.xclient);
+       if (netatoms[xembed] <> 0) and 
+               (message_type = netatoms[xembed]) then begin
+      {$ifdef mse_debugxembed}
+        debugwindow('*xembed ',window);
+        writeln(' ',inttohex(data.l[0],8),' ',
+                           inttohex(data.l[1],8),' ',
+                           inttohex(data.l[2],8),' ',
+                           inttohex(data.l[3],8));
+      {$endif}
+       end
+       else begin
+        result:= handlexdnd(xev.xclient);
+       end;
       end;
      end;
     end;
@@ -5781,6 +5800,11 @@ eventrestart:
   unmapnotify: begin
    with xev.xunmap do begin
     result:= twindowevent.create(ek_hide,xwindow);
+   end;
+  end;
+  reparentnotify: begin
+   with xev.xreparent do begin
+    result:= treparentevent.create(ek_reparent,xwindow,parent);
    end;
   end;
   focusin,focusout: begin
