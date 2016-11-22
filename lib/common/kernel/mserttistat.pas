@@ -44,6 +44,14 @@ type
    procedure dostatwrite(const writer: tstatwriter); virtual;
   public
    destructor destroy; override;
+   procedure readstat(const reader: tstatreader; const prefix: string);
+   procedure writestat(const writer: tstatwriter; const prefix: string);
+  {$ifdef mse_with_ifi}
+   procedure storevalues(const asource: tmsecomponent;
+                               const prefix: string = '') virtual;
+   procedure loadvalues(const adest: tmsecomponent;
+                               const prefix: string = '') virtual;
+  {$endif}
    procedure expandmacros(const amacrolist: tmacrolist); overload;
    procedure expandmacros(const macros: macroinfoarty;
                       const options: macrooptionsty = 
@@ -142,6 +150,9 @@ procedure objecttovalues(const source: tobject; const dest: tmsecomponent;
 procedure valuestoobject(const source: tmsecomponent; const dest: tobject;
                                                    const prefix: string = '');
 {$endif}                     
+function dupplicateobject(const source: tobject): tobject;
+function dupplicateobjects(const source: objectarty): objectarty;
+
 implementation
 uses
  {$ifdef mse_with_ifi}mseificompglob,{$endif}msedatalist,sysutils,msearrayutils;
@@ -757,6 +768,7 @@ var
  po2: ptypeinfo;
  po3: ptypedata;
  int1: integer;
+ i2: int32;
  intf1: iifidatalink;
  obj1: tobject;
  list1: tdatalist;
@@ -860,37 +872,46 @@ begin
          po2:= gettypedata(proptype^)^.eltype2^;
         {$endif}
          po3:= gettypedata(po2);
-         case po2^.kind of
-          tkinteger: begin
-           if list1 is tintegerdatalist then begin
-            tintegerdatalist(list1).asarray:= getintegerar(source.obj,po1);
+         list1.beginupdate();
+         try
+          i2:= list1.count;
+          case po2^.kind of
+           tkinteger: begin
+            if list1 is tintegerdatalist then begin
+             tintegerdatalist(list1).asarray:= getintegerar(source.obj,po1);
+            end;
+           end;
+           tkint64: begin
+            if list1 is tint64datalist then begin
+             tint64datalist(list1).asarray:= getint64ar(source.obj,po1);
+            end;
+           end;
+           tkfloat: begin
+            if (po3^.floattype = ftdouble) and (list1 is trealdatalist) then begin
+             trealdatalist(list1).asarray:=  getrealar(source.obj,po1);
+            end;
+           end;
+           {$ifdef FPC}tkustring{$else}tkwstring{$endif}: begin
+            if list1 is tpoorstringdatalist then begin
+             tpoorstringdatalist(list1).asarray:= getmsestringar(source.obj,po1);
+            end;
+           end;
+           {$ifdef FPC}tkastring{$else}tklstring{$endif}: begin
+            if list1 is tansistringdatalist then begin
+             tansistringdatalist(list1).asarray:= getstringar(source.obj,po1);
+            end;
+           end;
+           {$ifdef FPC}tkbool{$else}tkenumeration{$endif}: begin
+            if list1 is tintegerdatalist then begin
+             tintegerdatalist(list1).asbooleanarray:= getbooleanar(source.obj,po1);
+            end;
            end;
           end;
-          tkint64: begin
-           if list1 is tint64datalist then begin
-            tint64datalist(list1).asarray:= getint64ar(source.obj,po1);
-           end;
+          if (i2 > list1.count) and list1.facultative then begin
+           list1.count:= i2;
           end;
-          tkfloat: begin
-           if (po3^.floattype = ftdouble) and (list1 is trealdatalist) then begin
-            trealdatalist(list1).asarray:=  getrealar(source.obj,po1);
-           end;
-          end;
-          {$ifdef FPC}tkustring{$else}tkwstring{$endif}: begin
-           if list1 is tpoorstringdatalist then begin
-            tpoorstringdatalist(list1).asarray:= getmsestringar(source.obj,po1);
-           end;
-          end;
-          {$ifdef FPC}tkastring{$else}tklstring{$endif}: begin
-           if list1 is tansistringdatalist then begin
-            tansistringdatalist(list1).asarray:= getstringar(source.obj,po1);
-           end;
-          end;
-          {$ifdef FPC}tkbool{$else}tkenumeration{$endif}: begin
-           if list1 is tintegerdatalist then begin
-            tintegerdatalist(list1).asbooleanarray:= getbooleanar(source.obj,po1);
-           end;
-          end;
+         finally
+          list1.endupdate();
          end;
         end;
        end;
@@ -905,6 +926,81 @@ begin
     end;
    end;
   end;
+ end;
+end;
+
+function dupplicateobject(const source: tobject): tobject;
+var
+ ar1: propinfopoarty; 
+ po1: ppropinfo;
+ po2: ptypeinfo;
+ int1: integer;
+ obj1: tobject;
+begin
+ result:= source.classtype.create();
+ ar1:= getpropinfoar(source);
+ for int1 := 0 to high(ar1) do begin
+  po1:= ar1[int1];
+  with po1^ do begin
+   case po1^.proptype^.kind of
+    tkclass: begin
+     obj1:= tobject(ptruint(getordprop(source,po1)));
+     setordprop(result,po1,ptruint(obj1));
+    end;
+    tkInteger,tkChar,tkEnumeration,tkWChar,tkSet,tkbool: begin
+     setordprop(result,po1,getordprop(source,po1));
+    end;
+    tkint64: begin
+     setint64prop(result,po1,getint64prop(source,po1));
+    end;
+    tkfloat: begin
+     setfloatprop(result,po1,getfloatprop(source,po1));
+    end;
+    tkustring: begin
+     setunicodestrprop(result,po1,getunicodestrprop(source,po1));
+    end;
+    tkwstring: begin
+     setwidestrprop(result,po1,getwidestrprop(source,po1));
+    end;
+    tkastring,tklstring,tkstring: begin
+     setstrprop(result,po1,getstrprop(source,po1));
+    end;
+    tkdynarray: begin
+     po2:= pointer(gettypedata(proptype)^.eltype2);
+                             //wrong define in ttypedata
+     case po2^.kind of
+      tkinteger: begin
+       setintegerar(result,po1,getintegerar(source,po1));
+      end;
+      tkint64: begin
+       setint64ar(result,po1,getint64ar(source,po1));
+      end;
+      tkfloat: begin
+       setrealar(result,po1,getrealar(source,po1));
+      end;
+      tkustring: begin
+       setmsestringar(result,po1,getmsestringar(source,po1));
+      end;
+      tkastring: begin
+       setstringar(result,po1,getstringar(source,po1));
+      end;
+      tkbool: begin
+       setbooleanar(result,po1,getbooleanar(source,po1));
+      end;
+     end;
+    end;
+   end;
+  end;
+ end;
+end;
+
+function dupplicateobjects(const source: objectarty): objectarty;
+var
+ i1: int32;
+begin
+ setlength(result,length(source));
+ for i1:= 0 to high(result) do begin
+  result[i1]:= dupplicateobject(source[i1]);
  end;
 end;
 
@@ -1186,6 +1282,41 @@ begin
  gettexp.free;
  inherited;
 end;
+
+procedure toptions.readstat(const reader: tstatreader; const prefix: string);
+var
+ info1: objectinfoty;
+begin
+ info1.obj:= self;
+ info1.prefix:= prefix;
+ readobjectstat(reader,info1);
+ dostatread(reader);
+end;
+
+procedure toptions.writestat(const writer: tstatwriter;
+                                      const prefix: string);
+var
+ info1: objectinfoty;
+begin
+ info1.obj:= self;
+ info1.prefix:= prefix;
+ dostatwrite(writer);
+ writeobjectstat(writer,info1);
+end;
+
+{$ifdef mse_with_ifi}
+procedure toptions.storevalues(const asource: tmsecomponent;
+               const prefix: string = '');
+begin
+ valuestoobject(asource,self,prefix);
+end;
+
+procedure toptions.loadvalues(const adest: tmsecomponent;
+               const prefix: string = '');
+begin
+ objecttovalues(self,adest,prefix);
+end;
+{$endif}
 
 procedure toptions.dostatread(const reader: tstatreader);
 begin

@@ -108,7 +108,9 @@ type
                        fdo_save,
                        fdo_dispname,fdo_dispnoext,fdo_sysfilename,fdo_params,
                        fdo_directory,fdo_file,
-                       fdo_absolute,fdo_relative,fdo_quotesingle,
+                       fdo_absolute,fdo_relative,fdo_lastdirrelative,
+                       fdo_basedirrelative,
+                       fdo_quotesingle,
                        fdo_link, //links lastdir of controllers with same group
                        fdo_checkexist,fdo_acceptempty,fdo_single,
                        fdo_chdir,fdo_savelastdir,
@@ -164,6 +166,7 @@ type
    function getsysfilename: filenamety;
   protected
    flastdir: filenamety;
+   fbasedir: filenamety;
    fdefaultext: filenamety;
    foptions: filedialogoptionsty;
   public
@@ -192,6 +195,8 @@ type
    function execute(var avalue: filenamety; const  dialogkind: filedialogkindty;
                            const acaption: msestring; 
                             aoptions: filedialogoptionsty): boolean; overload;
+   function canoverwrite(): boolean; 
+                         //true if current filename is allowed to write
    procedure clear;
    procedure componentevent(const event: tcomponentevent);
    property history: msestringarty read fhistory write fhistory;
@@ -202,6 +207,7 @@ type
   published
    property filename: filenamety read getfilename write setfilename;
    property lastdir: filenamety read flastdir write setlastdir;
+   property basedir: filenamety read fbasedir write fbasedir;
    property filter: filenamety read ffilter write ffilter;
    property filterlist: tdoublemsestringdatalist read ffilterlist write setfilterlist;
    property filterindex: integer read ffilterindex write ffilterindex default 0;
@@ -436,6 +442,7 @@ type
    property path: filenamety read getpath write setpath;
    property root: filenamety read froot write setroot;
   published
+   property font: twidgetfont read getfont write setfont stored isfontstored;
    property options: dirtreeoptionsty read getoptions 
                                               write setoptions default [];
    property optionstree: treeitemeditoptionsty read getoptionstree 
@@ -1537,11 +1544,12 @@ end;
 
 procedure tfiledialogfo.foonchildscaled(const sender: TObject);
 begin
-// syncmaxautosize([up,createdir]);
  placeyorder(2,[2],[dir,listview,filename,filter],2);
  aligny(wam_center,[dir,back,forward,home,up,createdir]);
  aligny(wam_center,[filename,showhidden]);
- aligny(wam_center,[filter,ok,cancel]);
+ if ok.height <= filter.height then begin
+  aligny(wam_center,[filter,ok,cancel]);
+ end;
  syncpaintwidth([filename,filter],namecont.bounds_cx);
  listview.synctofontheight;
 end;
@@ -1918,6 +1926,16 @@ begin
  end;
 end;
 
+function tfiledialogcontroller.canoverwrite(): boolean;
+begin
+ with stockobjects do begin
+  result:= not findfile(filename) or 
+       askok(captions[sc_file]+' "'+filename+
+            '" '+ captions[sc_exists_overwrite],
+            captions[sc_warningupper]);
+ end;
+end;
+
 function tfiledialogcontroller.execute(var avalue: filenamety;
                   const dialogkind: filedialogkindty;
                   const acaption: msestring): boolean;
@@ -1993,10 +2011,20 @@ begin
    akind:= fk_file;
   end;
  end;
- if fdo_relative in foptions then begin
-  flastdir:= getcurrentdirmse;
+ if [fdo_relative,fdo_lastdirrelative,fdo_basedirrelative] * 
+                                                 foptions <> [] then begin
+  if fdo_relative in foptions then begin
+   flastdir:= getcurrentdirmse;
+  end
+  else begin
+   if fdo_basedirrelative in foptions then begin
+    flastdir:= fbasedir;
+   end;
+  end;
   for int1:= 0 to high(ffilenames) do begin
-   ffilenames[int1]:= relativepath(filenames[int1],'',akind);
+   if isrootpath(filenames[int1]) then begin
+    ffilenames[int1]:= relativepath(filenames[int1],flastdir,akind);
+   end;
   end;
  end
  else begin
@@ -2045,11 +2073,18 @@ begin
 end;
 
 procedure tfiledialogcontroller.setoptions(Value: filedialogoptionsty);
+(*
 const
  mask1: filedialogoptionsty = [fdo_absolute,fdo_relative];
 // mask2: filedialogoptionsty = [fdo_directory,fdo_file];
  mask3: filedialogoptionsty = [fdo_filtercasesensitive,fdo_filtercaseinsensitive];
+*)
 begin
+ value:= filedialogoptionsty(setsinglebit(card32(value),card32(foptions),
+           [card32([fdo_absolute,fdo_relative,fdo_lastdirrelative,
+                                                      fdo_basedirrelative]),
+            card32([fdo_filtercasesensitive,fdo_filtercaseinsensitive])]));
+ (*
  {$ifdef FPC}longword{$else}longword{$endif}(value):=
       setsinglebit({$ifdef FPC}longword{$else}longword{$endif}(value),
       {$ifdef FPC}longword{$else}longword{$endif}(foptions),
@@ -2062,6 +2097,7 @@ begin
       setsinglebit({$ifdef FPC}longword{$else}longword{$endif}(value),
       {$ifdef FPC}longword{$else}longword{$endif}(foptions),
       {$ifdef FPC}longword{$else}longword{$endif}(mask3));
+ *)
  if foptions <> value then begin
   foptions:= Value;
   if not (fdo_params in foptions) then begin
@@ -2428,7 +2464,7 @@ end;
 { tdirdropdownedit }
 
 procedure tdirdropdownedit.createdropdownwidget(const atext: msestring;
-                    out awidget: twidget);
+                                                        out awidget: twidget);
 begin
  awidget:= tdirtreefo.create(nil);
  with tdirtreefo(awidget) do begin
@@ -2437,6 +2473,9 @@ begin
   path:= atext;
   onpathchanged:= {$ifdef FPC}@{$endif}pathchanged;
   text:= path;
+  if deo_colsizing in fdropdown.options then begin
+   optionssizing:= [osi_right];
+  end;
  end;
  feditor.sellength:= 0;
 end;

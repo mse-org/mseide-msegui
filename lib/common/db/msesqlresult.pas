@@ -333,10 +333,7 @@ type
    procedure loaded; override;
    procedure freefldbuffers;
 //   function isprepared: boolean;
-   procedure open;
-   procedure close;
    procedure doclear(const isclose: boolean);
-   procedure prepare; override;
    procedure checkautocommit; override;
 //   procedure execute;
     //itransactionclient
@@ -363,7 +360,10 @@ type
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
 //   function isutf8: boolean;
+   procedure prepare; override;
    procedure unprepare; override;
+   procedure open;
+   procedure close;
    procedure clear; //frees buffers, does not unprepare
    procedure refresh;
    procedure next;
@@ -458,6 +458,7 @@ type
    procedure setfieldcountfloat(const avalue: integer); override;
    procedure objectevent(const sender: tobject;
                        const event: objecteventty); override;
+   procedure doloadbuffer; override;
   public 
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -465,7 +466,6 @@ type
    function fieldnamesfloat: stringarty; override;
    function fieldnamesinteger: stringarty; override;
    function fieldnamesint64: stringarty; override;
-   procedure loadbuffer; override;
    procedure clearbuffer; override;
   published
    property source: tsqlresult read fsource write setsource;
@@ -474,7 +474,6 @@ type
    property int64cols: tdbcolnamearrayprop read fint64cols write setint64cols;
    property floatcols: tdbcolnamearrayprop read ffloatcols write setfloatcols;
    property optionsdb: lbsqoptionsty read foptionsdb write foptionsdb default [];
-   property onchange;
  end;
 
 //empty variant returned for null fields
@@ -2082,7 +2081,7 @@ begin
  readonlyprop;
 end;
 
-procedure tsqllookupbuffer.loadbuffer;
+procedure tsqllookupbuffer.doloadbuffer;
 var
  int1,int3,int4: integer;
  textf: dbcolarty;
@@ -2093,9 +2092,11 @@ var
  bo1: boolean;
 begin
  application.beginwait;
+{
  beginupdate;
+}
  try
-  clearbuffer;
+//  clearbuffer;
   with fsource do begin
    if (fsource <> nil) and (active or (olbsq_closesqlresult in foptionsdb) and
                (lbs_sourceclosed in fstate) and
@@ -2129,8 +2130,8 @@ begin
        ar1[int1]:= ffloatcols[int1];
       end;
       realf:= cols.colsbyname(ar1);
-      int3:= 0;
-      int1:= 0;
+      int3:= fcount;
+      int1:= fcount;
       try
        while not fsource.eof do begin
         if int3 <= int1 then begin
@@ -2211,7 +2212,7 @@ begin
   include(fstate,lbs_buffervalid);
  finally
   application.endwait;
-  endupdate;
+//  endupdate;
  end;
 end;
 

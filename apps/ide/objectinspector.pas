@@ -220,9 +220,9 @@ type
  tpropertyitem = class(ttreelistedititem)
   private
    function getexpanded: boolean;
-   procedure setexpanded(const Value: boolean);
   protected
    feditor: tpropertyeditor;
+   procedure setexpanded(const Value: boolean) override;
    procedure updatestate;
    procedure updatesubpropertypath;
    function finditembyname(const aname: msestring): tpropertyitem;
@@ -437,7 +437,8 @@ end;
 
 procedure tpropertyitem.setexpanded(const Value: boolean);
 begin
- inherited expanded:= value;
+ inherited;
+// inherited expanded:= value;
  if value <> getexpanded then begin
   feditor.expanded:= value;
   updatestate;

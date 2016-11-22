@@ -52,7 +52,7 @@ const
           [dbnb_first,dbnb_prior,dbnb_next,dbnb_last,dbnb_insert,
            dbnb_delete,dbnb_edit,dbnb_post,dbnb_cancel,dbnb_refresh];
  filterdbnavigbuttons = [dbnb_filter,dbnb_filtermin,dbnb_filtermax,
-                         dbnb_filterclear,dbnb_find];
+                         dbnb_filterclear,dbnb_find,dbnb_filteronoff];
  defaultdbnavigatorheight = 24;
  defaultdbnavigatorwidth = (ord(dbnb_refresh))*defaultdbnavigatorheight;
 
@@ -66,11 +66,13 @@ type
                         dno_norefreshrecno,
                         dno_dialogifinactive,dno_nodialogifempty,
                         dno_nodialogifnoeditmode,dno_nodialogifreadonly,
+                        dno_nonavig, //disable navigation buttons
+                        dno_noinsert,dno_nodelete,dno_noedit, //disable buttons
                         dno_customdialogupdate,
                         dno_postbeforedialog,dno_postoncanclose);
  dbnavigatoroptionsty = set of dbnavigatoroptionty;
  optioneditdbty = (oed_autoedit,oed_noautoedit,oed_autopost,
-                   oed_syncedittonavigator,
+                   oed_syncedittonavigator,oed_focusoninsert,
                    oed_nofilteredit,oed_nofilterminedit,
                    oed_nofiltermaxedit,oed_nofindedit,
                    oed_nonullset, //use TField.DefaultExpression for textedit
@@ -86,8 +88,9 @@ type
 const
  defaultgriddatalinkoptions = [gdo_propscrollbar,gdo_thumbtrack,
                                                     gdo_selectautopost];
- defaulteditwidgetdatalinkoptions = [oed_syncedittonavigator];
- defaultdbnavigatoroptions = [dno_confirmdelete,dno_confirmcopy,dno_append];
+ defaulteditwidgetdatalinkoptions = [{oed_syncedittonavigator}];
+ defaultdbnavigatoroptions = [dno_confirmdelete,dno_confirmcopy,dno_append,
+                                                             dno_shortcuthint];
  designdbnavigbuttons = [dbnb_first,dbnb_prior,dbnb_next,dbnb_last];
  editnavigbuttons = [dbnb_insert,dbnb_delete,dbnb_edit];
 
@@ -106,6 +109,8 @@ type
  idbnaviglink = interface(inullinterface)
   procedure setactivebuttons(const abuttons: dbnavigbuttonsty;
                const afiltered: boolean);
+  procedure setcheckedbuttons(const abuttons: dbnavigbuttonsty;
+                                                 const achecked: boolean);
   function getwidget: twidget;
   function getnavigoptions: dbnavigatoroptionsty;
   procedure dodialogexecute;
@@ -178,6 +183,8 @@ type
    procedure setbuttonwidth(const avalue: integer);
    function getbuttonheight: integer;
    procedure setbuttonheight(const avalue: integer);
+//   function getnonavig: boolean;
+//   procedure setnonavig(const avalue: boolean);
   protected
    procedure inithints;
    procedure doexecute(const sender: tobject);
@@ -192,6 +199,8 @@ type
     //idbnaviglink
    procedure setactivebuttons(const abuttons: dbnavigbuttonsty;
                              const afiltered: boolean);
+   procedure setcheckedbuttons(const abuttons: dbnavigbuttonsty;
+                                                  const achecked: boolean);
    function getnavigoptions: dbnavigatoroptionsty;
    procedure dodialogexecute;
   public
@@ -199,6 +208,7 @@ type
    destructor destroy; override; 
    function canclose(const newfocus: twidget = nil): boolean; override;
    procedure edit();
+//   property nonavig: boolean read getnonavig write setnonavig;
   published
    property statfile;
    property datasource: tdatasource read getdatasource write setdatasource;
@@ -858,6 +868,8 @@ type
    property imagenr;
    property imagenrdisabled;
    property imagedist;
+   property imagedist1;
+   property imagedist2;
    property colorglyph;
    property options;
    property focusrectdist;
@@ -1958,6 +1970,7 @@ type
    property ondataentered;
    property oncopytoclipboard;
    property onpastefromclipboard;
+   property ondrawcell;
   end;
 
  tdbstringcols = class(tstringcols)
@@ -2191,6 +2204,7 @@ type
    flookupbuffer: tcustomlookupbuffer;
    ffieldno: integer;
    fsortfieldno: integer;
+   funsorted: boolean;
   protected
    function getrowtext(const arow: integer): msestring; override;
   public
@@ -2256,7 +2270,7 @@ type
    ffieldno: lookupbufferfieldnoty;
    procedure setfieldno(const avalue: lookupbufferfieldnoty);
   protected
-  //ilookupbufferfieldinfo
+    //ilookupbufferfieldinfo
    function getlbdatakind(const apropname: string): lbdatakindty;
    function getlookupbuffer: tcustomlookupbuffer;
   published
@@ -2274,7 +2288,7 @@ type
    property items[const index: integer]: tlbdropdowncol read getitems; default;
  end;
 
- optionlbty = (olb_copyitems);
+ optionlbty = (olb_copyitems,olb_unsorted);
  optionslbty = set of optionlbty;
                                    
  texterndatadropdownlistcontroller = class(tcustomdropdownlistcontroller)
@@ -2715,6 +2729,7 @@ begin
      fek_filtermax: bu1:= [dbnb_filtermax];
      fek_find: bu1:= [dbnb_find];
     end;
+    fintf.setcheckedbuttons(bu1,true);
     bu1:= bu1+[dbnb_filterclear];
    end;
    dsedit,dsinsert: begin
@@ -2725,6 +2740,8 @@ begin
     end;
    end;
    else begin
+    fintf.setcheckedbuttons(
+                  [dbnb_filter,dbnb_filtermin,dbnb_filtermax,dbnb_find],false);
     bu1:= bu1 + [dbnb_refresh,dbnb_insert,dbnb_delete,dbnb_edit,
                  dbnb_filteronoff,dbnb_copyrecord];
    end;
@@ -2733,7 +2750,7 @@ begin
 //   bu1:= bu1 - editnavigbuttons;
 //  end;
   if not canupdate then begin
-   exclude(bu1,dbnb_edit);
+   bu1:= bu1 - [dbnb_edit,dbnb_autoedit];
   end;
   if dno_append in options1 then begin
    if not canappend then begin
@@ -2758,6 +2775,20 @@ begin
    bu1:= bu1 * designdbnavigbuttons;
   end;
   bo1:= datasource.dataset.filtered;
+ end;
+ if dno_nonavig in options1 then begin
+  bu1:= bu1 - ([dbnb_first,dbnb_prior,dbnb_next,dbnb_last,
+                dbnb_insert,dbnb_delete,dbnb_filteronoff,dbnb_copyrecord]+
+                filterdbnavigbuttons);
+ end;
+ if dno_nodelete in options1 then begin
+  bu1:= bu1 - [dbnb_delete];
+ end;
+ if dno_noinsert in options1 then begin
+  bu1:= bu1 - [dbnb_insert];
+ end;
+ if dno_noedit in options1 then begin
+  bu1:= bu1 - [dbnb_edit];
  end;
  fintf.setactivebuttons(bu1,bo1);
 end;
@@ -2957,11 +2988,23 @@ begin
   end;
  end;
  with buttons[ord(dbnb_autoedit)] do begin
- // imagenr:= ord(stg_triabig);
   options:= options + [mao_checkbox];
  end;
-// buttons[ord(dbnb_dialog)].imagenr:= ord(stg_ellipsesmall);
-// buttons[ord(dbnb_copyrecord)].imagenr:= ord(stg_doublesquare);
+ with buttons[ord(dbnb_filter)] do begin
+  options:= options + [mao_checkbox];
+ end;
+ with buttons[ord(dbnb_filtermin)] do begin
+  options:= options + [mao_checkbox];
+ end;
+ with buttons[ord(dbnb_filtermax)] do begin
+  options:= options + [mao_checkbox];
+ end;
+ with buttons[ord(dbnb_find)] do begin
+  options:= options + [mao_checkbox];
+ end;
+ with buttons[ord(dbnb_filteronoff)] do begin
+  options:= options + [mao_checkbox];
+ end;
   
  fdatalink:= tnavigdatalink.Create(idbnaviglink(self));
  visiblebuttons:= defaultvisibledbnavigbuttons;
@@ -2977,15 +3020,22 @@ end;
 procedure tdbnavigator.inithints;
 var
  int1: integer;
+ sc1: int32;
 begin
  for int1:= 0 to ord(high(dbnavigbuttonty)) do begin
   with buttons[int1] do begin
 //   hint:= stockobjects.captions[stockcaptionty(int1+ord(sc_first))];
    hint:= stockobjects.captions[dbnavighints[dbnavigbuttonty(int1)]];
-   if (dno_shortcuthint in foptions) and 
-             (fshortcuts[dbnavigbuttonty(int1)] <> 0) then begin
-    hint:= hint + ' (' + 
-                  encodeshortcutname(fshortcuts[dbnavigbuttonty(int1)])+')';
+   if (dno_shortcuthint in foptions) then begin
+    if dbnavigbuttonty(int1) = dbnb_dialog then begin
+     sc1:= shortcut;
+    end
+    else begin
+     sc1:= fshortcuts[dbnavigbuttonty(int1)];
+    end;
+    if sc1 <> 0 then begin
+     hint:= hint + ' (' + encodeshortcutname(sc1)+')';
+    end;
    end;
   end;
  end;
@@ -3022,6 +3072,8 @@ begin
  beginupdate;
  try
   with buttons[ord(dbnb_filteronoff)] do begin
+   checked:= afiltered;
+  {
    if afiltered then begin
     imagenr:= ord(stg_dbfilteroff);
     hint:= stockobjects.captions[sc_filter_off];
@@ -3035,6 +3087,7 @@ begin
     hint:= hint + ' (' + 
                   encodeshortcutname(fshortcuts[dbnb_filteronoff])+')';
    end;
+  }
   end;
   for bu1:= low(dbnavigbuttonty) to high(dbnavigbuttonty) do begin
    if (bu1 <> dbnb_dialog) or not (dno_customdialogupdate in foptions) then begin
@@ -3054,6 +3107,31 @@ begin
  end;
  if application.mousewidget = self then begin
   asyncevent(0);
+ end;
+end;
+
+procedure tdbnavigator.setcheckedbuttons(const abuttons: dbnavigbuttonsty;
+               const achecked: boolean);
+var
+ bu1: dbnavigbuttonty;
+begin
+ beginupdate;
+ try
+  for bu1:= low(dbnavigbuttonty) to high(dbnavigbuttonty) do begin
+   if bu1 in abuttons then begin
+    with buttons[ord(bu1)] do begin
+     if achecked then begin
+      state:= state + [as_checked];
+     end
+     else begin
+      state:= state - [as_checked];
+     end;
+    end;
+   end;
+  end;
+  dialogbutton.doupdate;
+ finally
+  endupdate;
  end;
 end;
 
@@ -3151,11 +3229,17 @@ begin
 end;
 
 procedure tdbnavigator.setoptions(const avalue: dbnavigatoroptionsty);
+var
+ diff: dbnavigatoroptionsty;
 begin
- if avalue <> foptions then begin
+ diff:= avalue >< foptions;
+ if diff <> [] then begin
   foptions:= avalue;
   if not (csloading in componentstate) then begin
    inithints;
+   if dno_nonavig in diff then begin
+    fdatalink.updatebuttonstate()
+   end;
   end;
  end;
 end;
@@ -3250,7 +3334,22 @@ procedure tdbnavigator.setbuttonheight(const avalue: integer);
 begin
  flayout.buttons.height:= avalue;
 end;
+{
+function tdbnavigator.getnonavig: boolean;
+begin
+ result:= dno_nonavig in foptions;
+end;
 
+procedure tdbnavigator.setnonavig(const avalue: boolean);
+begin
+ if avalue then begin
+  options:= options + [dno_nonavig];
+ end
+ else begin
+  options:= options - [dno_nonavig];
+ end;
+end;
+}
 { tcustomeditwidgetdatalink }
 
 constructor tcustomeditwidgetdatalink.create(const intf: idbeditfieldlink);
@@ -3412,17 +3511,24 @@ begin
 end;
 
 procedure tcustomeditwidgetdatalink.editingchanged;
+var
+ widget1: twidget;
 begin
  inherited;
+ widget1:= fintf.getwidget;
  if not editing and assigned(fonendedit) and 
-         fintf.getwidget.canevent(tmethod(fonendedit)) then begin
+         widget1.canevent(tmethod(fonendedit)) then begin
   fonendedit(self);
  end;
  setediting(inherited editing and canmodify);
  fintf.updatereadonlystate;
  if editing then begin
-  if (fnavigator <> nil) and (oed_syncedittonavigator in foptions) then begin
-   fnavigator.edit;
+  if (fnavigator <> nil) and (oed_syncedittonavigator in foptions) and
+                                           (dataset.state = dsedit) then begin
+   fnavigator.edit();
+  end;
+  if (oed_focusoninsert in foptions) and (dataset.state = dsinsert) then begin 
+   fintf.seteditfocus();
   end;
   if assigned(fonbeginedit) and 
          fintf.getwidget.canevent(tmethod(fonbeginedit)) then begin
@@ -6395,6 +6501,10 @@ constructor tdropdownlistdatalink.create(const aowner: tcustomgrid;
                const aintf: igriddatalink; const adatalink: tdropdowndatalink);
 begin
  with adatalink do begin
+  self.fdataintf:= fdataintf;
+  self.ftextindex:= ftextindex;
+  self.fkeyindex:= fkeyindex;
+ {
   if (ftextindex >= 0) and (fkeyindex >= 0) then begin
    self.fdataintf:= fdataintf;
    self.ftextindex:= ftextindex;
@@ -6404,6 +6514,7 @@ begin
    fkeyindex:= -1;
    ftextindex:= -1;
   end;
+ }
  end;
  inherited create(aowner,aintf);
 end;
@@ -6876,9 +6987,10 @@ begin
  fcols.assign(avalue);
 end;
 
-function tcustomdbdropdownlistcontroller.getbuttonframeclass: dropdownbuttonframeclassty;
+function tcustomdbdropdownlistcontroller.getbuttonframeclass():
+                                              dropdownbuttonframeclassty;
 begin
- result:= tdropdownbuttonframe;
+ result:= tdropdownmultibuttonframe;
 end;
 
 procedure tcustomdbdropdownlistcontroller.valuecolchanged;
@@ -7666,19 +7778,26 @@ procedure tgriddatalink.doupdaterowdata(const row: integer);
 var
  int1,int2: integer;
  dataset1: tdataset;
+ buffercount1: int32;
 begin
  if (fgrid.componentstate * [csloading,csdesigning,csdestroying] = []) and 
                  (row < fgrid.rowcount) then begin
   dataset1:= dataset;
   if dataset1 <> nil then begin
+   buffercount1:= buffercount;
    if gdls_hasrowstatefield in fstate then begin
     if row >= 0 then begin
-     fieldtorowstate(row);
+     if row < buffercount1 then begin
+      fieldtorowstate(row);
+     end;
     end
     else begin
      int2:= activerecord;
      try
       for int1:= 0 to fgrid.rowhigh do begin
+       if int1 >= buffercount1 then begin
+        break; //buffer invalid
+       end;
        activerecord:= int1;
        fieldtorowstate(int1);
       end;
@@ -7695,6 +7814,9 @@ begin
      int2:= activerecord;
      try
       for int1:= 0 to fgrid.rowhigh do begin
+       if int1 >= buffercount1 then begin
+        break; //buffer invalid
+       end;
        activerecord:= int1;
        fonupdaterowdata(fgrid,int1,dataset1);
       end;
@@ -7703,7 +7825,7 @@ begin
      end;
     end;
    end;   
-   tdatacols1(fgrid.datacols).maxwidthinvalid(-1);
+   tdatacols1(fgrid.datacols).invalidatemaxsize(-1);
   end;
  end;
  if row < 0 then begin
@@ -8593,15 +8715,16 @@ end;
 procedure tgriddatalink.beforefocuscell(const cell: gridcoordty;
                              const selectaction: focuscellactionty);
 begin
- if (selectaction = fca_entergrid) and canautoinsert then begin
+ if (selectaction = fca_entergrid) and canautoinsert and 
+                                        not fautoinserting then begin
   fautoinserting:= true;
   try
    dataset.insert;
+   fgrid.focuscell(fgrid.focusedcell,selectaction); 
+                              //focus col if necessary
   finally
    fautoinserting:= false;
   end;
-  fgrid.focuscell(fgrid.focusedcell,selectaction); 
-                              //focus col if necessary
  end;
 end;
 
@@ -10453,12 +10576,14 @@ begin
  //dummy
 end;
 
-function texterndatadropdownlistcontroller.getbuttonframeclass: dropdownbuttonframeclassty;
+function texterndatadropdownlistcontroller.getbuttonframeclass:
+                                                 dropdownbuttonframeclassty;
 begin
- result:= tdropdownbuttonframe;
+ result:= tdropdownmultibuttonframe;
 end;
 
-function texterndatadropdownlistcontroller.getdropdowncolsclass: dropdowncolsclassty;
+function texterndatadropdownlistcontroller.getdropdowncolsclass:
+                                                       dropdowncolsclassty;
 begin
  result:= tlbdropdowncols;
 end;
@@ -11373,8 +11498,13 @@ var
 begin
  int1:= tlbdropdownlist(fcellinfo.grid).getrecno(arow);
  if int1 >= 0 then begin
-  result:= flookupbuffer.textvaluephys(ffieldno,
+  if funsorted then begin
+   result:= flookupbuffer.textvaluephys(ffieldno,int1);
+  end
+  else begin
+   result:= flookupbuffer.textvaluephys(ffieldno,
           flookupbuffer.textindex(fsortfieldno,int1,true));
+  end;
  end
  else begin
   result:= '';
@@ -11898,6 +12028,8 @@ begin
    flookupbuffer:= lookupbuffer1;
    fsortfieldno:= tcustomlbdropdownlistcontroller(fcontroller).fsortfieldno;
    ffieldno:= tlbdropdowncol(acols[int1]).ffieldno;
+   funsorted:= olb_unsorted in 
+                           tlbdropdownlistcontroller(fcontroller).foptionslb;
   end;
  end;
 end;
@@ -11916,17 +12048,9 @@ begin
     result:= (int1 < flookupbuffer.count) and 
             (msepartialcomparetext(filter,
              flookupbuffer.textvaluelog(ffieldno,int1,true)) = 0);
-   {
-    result:= (int1 < flookupbuffer.count) and 
-            (msecomparetextlen(filter,
-             flookupbuffer.textvaluelog(ffieldno,int1,true)) = 0);
-    if not result then begin
-     inc(int1);
-    end;
-    result:= (int1 < flookupbuffer.count) and 
-          (msecomparetextlen(filter,
-            flookupbuffer.textvaluelog(ffieldno,int1,true)) = 0);
-   }
+   end;
+   if funsorted then begin
+    int1:= flookupbuffer.textindex(ffieldno,int1,true); //get phys recno
    end;
   end;
  end;
@@ -11993,7 +12117,12 @@ begin
   if assigned(fonfilter) then begin
    int3:= 0;
    for int1:= 0 to high(fedrecnums) do begin
-    int4:= flookupbuffer.textindex(sortfieldno,int1,true);
+    if olb_unsorted in foptionslb then begin
+     int4:= int1;
+    end
+    else begin
+     int4:= flookupbuffer.textindex(sortfieldno,int1,true);
+    end;
     bo1:= true;
     fonfilter(flookupbuffer,int4,bo1);
     if bo1 then begin
@@ -12004,7 +12133,15 @@ begin
    setlength(fedrecnums,int3);
   end
   else begin
-   fedrecnums:= flookupbuffer.textindexar(sortfieldno,true);
+   if olb_unsorted in foptionslb then begin
+    setlength(fedrecnums,flookupbuffer.count);
+    for int1:= 0 to high(fedrecnums) do begin
+     fedrecnums[int1]:= int1;
+    end;
+   end
+   else begin
+    fedrecnums:= flookupbuffer.textindexar(sortfieldno,true);
+   end;
   end;
   for int1:= 0 to fcols.count - 1 do begin
    with cols[int1] do begin
@@ -12027,7 +12164,12 @@ function  tcustomlbdropdownlistcontroller.createdropdownlist: tdropdownlist;
 begin
  if olb_copyitems in foptionslb then begin
   reloadlist;
-  result:= tcopydropdownlist.create(self,fcols,nil);
+  if olb_unsorted in foptionslb then begin
+   result:= tdropdownlist.create(self,fcols,nil); //normal locate
+  end
+  else begin
+   result:= tcopydropdownlist.create(self,fcols,nil);
+  end;
  end
  else begin
   result:= tlbdropdownlist.create(self,fcols);
@@ -12059,7 +12201,9 @@ begin
   end
   else begin
    int1:= tlbdropdownlist(fdropdownlist).getrecno(index);
-   int1:= flookupbuffer.textindex(cols[0].fieldno,int1,true)
+   if not (olb_unsorted in foptionslb) then begin
+    int1:= flookupbuffer.textindex(cols[0].fieldno,int1,true)
+   end;
   end;
   tdropdowncols1(fcols).fitemindex:= int1;
  end;

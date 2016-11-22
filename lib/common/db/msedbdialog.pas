@@ -18,7 +18,7 @@ uses
  msewidgetgrid,
  msedatalist,mseeditglob,msegrids,msetypes,msedb,msemenus,mseedit,
  msedataedits,mseevent,msestrings,msecolordialog,msegraphutils,msedialog,
- mseglob;
+ mseglob,msegraphics;
  
 type
  tdbfilenameedit = class(tcustomfilenameedit,idbeditfieldlink,ireccontrol)
@@ -132,6 +132,7 @@ type
    destructor destroy; override;
   published
    property datalink: teditwidgetdatalink read fdatalink write setdatalink;
+   property options;
    property dropdown;
    property onsetvalue;
    property frame;

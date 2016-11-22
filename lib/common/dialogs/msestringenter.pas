@@ -14,14 +14,18 @@ unit msestringenter;
 interface
 uses
  mseforms,msedataedits,msesimplewidgets,msetypes,msegui,mseglob,mseguiglob,
- msedialog,msestrings,msestringcontainer;
+ msedialog,msestrings,msestringcontainer,msemenus,msesplitter,msegraphics,
+ msegraphutils,msewidgets,mseapplication,mseedit,mseificomp,mseificompglob,
+ mseifiglob,msestat,msestatfile,msestream,sysutils;
 
 type
  tstringenterfo = class(tdialogform)
-   value: tstringedit;
    lab: tlabel;
-   ok: tbutton;
+   tlayouter1: tlayouter;
    cancel: tbutton;
+   ok: tbutton;
+   value: tstringedit;
+   procedure layoutexe(const sender: TObject);
  end;
 
 //functions below are threadsave
@@ -33,7 +37,7 @@ function checkpassword(const password: msestring; var modalresult: modalresultty
 
 implementation
 uses
- msestringenter_mfm,msewidgets,msestockobjects;
+ msestringenter_mfm,msestockobjects;
 
 function stringenter(var avalue: msestring; const text: msestring = '';
                                const acaption: msestring = ''): modalresultty;
@@ -96,6 +100,11 @@ begin
  repeat
   result:= checkpassword(password,res);
  until result or (res <> mr_ok);
+end;
+
+procedure tstringenterfo.layoutexe(const sender: TObject);
+begin
+ optionswidget1:= optionswidget1-[ow1_autoheight]; //only on startup
 end;
 
 end.

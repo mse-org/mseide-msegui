@@ -1,4 +1,4 @@
-{ MSEide Copyright (c) 1999-2014 by Martin Schreiber
+{ MSEide Copyright (c) 1999-2016 by Martin Schreiber
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -21,7 +21,7 @@ interface
 implementation
 uses
  classes,mclasses,msereport,msedesignintf,formdesigner,reportdesigner,
- msepropertyeditors,mseformatstr,
+ msepropertyeditors,mseformatstr,mserepps,
  sysutils,msestrings,regreport_bmp,regdb,mselookupbuffer;
 const
  reportintf: designmoduleintfty = 
@@ -29,6 +29,12 @@ const
    initnewcomponent: {$ifdef FPC}@{$endif}initreportcomponent;
    getscale: {$ifdef FPC}@{$endif}getreportscale;
    sourcetoform: nil);
+ reppageformintf: designmoduleintfty = 
+  (createfunc: @createreppageform;
+   initnewcomponent: nil;
+   getscale: @getreppageformscale;
+   sourcetoform: nil);
+
 type
  treptabulatoreditor = class(tclasselementeditor)
   public
@@ -44,15 +50,17 @@ procedure Register;
 begin
  registerclass(treport);
  registerclass(treportpage);
+ registerclass(treppageform);
  registercomponents('Rep',[treportpage,tbandarea,ttilearea,tbandgroup,
                     trecordband,
                     trepvaluedisp,treppagenumdisp,trepprintdatedisp,
                     {trepstringdisplb,trepintegerdisplb,treprealdisplb,
                     trepdatetimedisplb,}
-                    trepspacer]); 
+                    trepspacer,treppsdisp]); 
  registercomponenttabhints(['Rep'],['Report components']);
 
  registerdesignmoduleclass(treport,@reportintf,treportdesignerfo);
+ registerdesignmoduleclass(treppageform,@reppageformintf,treportdesignerfo);
  registerpropertyeditor(typeinfo(treptabulators),nil,'',treptabulatorseditor);
  registerpropertyeditor(typeinfo(tcustomrecordband),treptabulators,'linksource',
                            tlocallinkcomponentpropertyeditor);

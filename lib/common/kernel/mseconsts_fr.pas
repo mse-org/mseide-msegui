@@ -10,41 +10,41 @@
     French translation by Fabrice Michel Bouillerot.
     UTF-8 Accented french characters
     
-    &#192;  A grave
-    &#194;  A circumflex
-    &#196;  A diaresis
-    &#198;  AE Aesh Ash
-    &#200;  E grave
-    &#203;  E diaresis
-    &#201;  E acute
-    &#202;  E circumflex
-    &#203;  E diaresis
-    &#206;  I circumflex
-    &#207;  I diaresis
-    &#212;  O circumflex
-    &#214;  O diaresis
-    &#217;  U grave
-    &#219;  U circumflex
-    &#220;  U diaresis
-    &#224;  a grave
-    &#226;  a circumflex
-    &#228;  a diaresis
-    &#230;  aesc ash
-    &#232;  e grave
-    &#233;  e acute
-    &#234;  e circumflex
-    &#235;  e diaresis
-    &#238;  i circumflex
-    &#239;  i diaresis
-    &#244;  o circumflex
-    &#246;  o diaresis
-    &#249;  u grave
-    &#251;  u circumflex
-    &#252;  u diaresis
-    &#255;  y diaresis
-    &#338;  OE ethel
-    &#339;  oe ethel
-    &#376;  Y diaresis
+    &#0192;  A grave
+    &#0194;  A circumflex
+    &#0196;  A diaresis
+    &#0198;  AE Aesh Ash
+    &#0200;  E grave
+    &#0203;  E diaresis
+    &#0201;  E acute
+    &#0202;  E circumflex
+    &#0203;  E diaresis
+    &#0206;  I circumflex
+    &#0207;  I diaresis
+    &#0212;  O circumflex
+    &#0214;  O diaresis
+    &#0217;  U grave
+    &#0219;  U circumflex
+    &#0220;  U diaresis
+    &#0224;  a grave
+    &#0226;  a circumflex
+    &#0228;  a diaresis
+    &#0230;  aesc ash
+    &#0232;  e grave
+    &#0233;  e acute
+    &#0234;  e circumflex
+    &#0235;  e diaresis
+    &#0238;  i circumflex
+    &#0239;  i diaresis
+    &#0244;  o circumflex
+    &#0246;  o diaresis
+    &#0249;  u grave
+    &#0251;  u circumflex
+    &#0252;  u diaresis
+    &#0255;  y diaresis
+    &#0338;  OE ethel
+    &#0339;  oe ethel
+    &#0376;  Y diaresis
     
     &#8217; apostrophe
 } 
@@ -67,7 +67,7 @@ const
   '',             //mr_f10
   '',             //mr_exception
   '&Effacer',     //mr_cancel
-  '&Arr'#234'ter',//mr_abort
+  '&Arr'#0234'ter',//mr_abort
   '&Valider',     //mr_ok
   '&Oui',         //mr_yes
   '&Non',         //mr_no
@@ -75,7 +75,8 @@ const
   'A&ucun',       //mr_noall
   '&Ignorer',     //mr_ignore
   '&Skip',        //mr_skip
-  'Skip &all'     //mr_skipall
+  'Skip &all',    //mr_skipall
+  'Co&ntinue'  //mr_continue
   );
 
  fr_modalresulttextnoshortcut: defaultmodalresulttextty =
@@ -87,7 +88,7 @@ const
   '',           //mr_f10
   '',           //mr_exception
   'Effacer',    //mr_cancel
-  'Arr'#234'er',//mr_abort
+  'Arr'#0234'er',//mr_abort
   'Valider',    //mr_ok
   'Oui',        //mr_yes
   'Non',        //mr_no
@@ -95,7 +96,8 @@ const
   'Aucun',      //mr_noall
   'Ignorer',    //mr_ignore
   'Skip',      //mr_skip
-  'Skip all'   //mr_skipall
+  'Skip all',   //mr_skipall
+  'Continue'  //mr_continue
   );
 
  fr_stockcaption: stockcaptionaty = (
@@ -108,42 +110,42 @@ const
   'Max.',                                 //sc_Max
   'Erreur de rang',                       //sc_Range_error  
 
-  '&D'#233'faire',                        //sc_Undo  ///         ///
+  '&D'#0233'faire',                        //sc_Undo  ///         ///
   '&Refaire',                             //sc_Redo   //         //
   '&Copier',                              //sc_Copy   // hotkeys //
   'C&ouper',                              //sc_Cut    //         //
   'Co&ller',                              //sc_Paste ///         // hotkeys
-  '&Ins'#233'rer ligne',                  //sc_insert_row ///    //
+  '&Ins'#0233'rer ligne',                  //sc_insert_row ///    //
   '&Ajouter ligne',                       //sc_append_row  // hotkeys  //
   '&Supprimer ligne',                     //sc_delete_row ///         ///
 
-  'R'#233'&pertoire',                     //sc_Dir               /// 
+  'R'#0233'&pertoire',                     //sc_Dir               /// 
   '&Racine',                              //sc_home              //
   '&Remonter',                            //sc_Up                //
-  '&Nouveau r'#233'pertoire',             //sc_New_dir           // hotkeys
+  '&Nouveau r'#0233'pertoire',             //sc_New_dir           // hotkeys
   'N&om',                                 //sc_Name              //
-  '&Afficher fichiers cach'#233's',       //sc_Show_hidden_files //
+  '&Afficher fichiers cach'#0233's',       //sc_Show_hidden_files //
   '&Filtre',                              //sc_Filter            ///   
   'Sauver',                               //sc_save 
   'Ouvrir',                               //sc_open
   'Nom',                                  //sc_name1
-  'Cr'#233'er un nouveau r'#233'pertoire',//sc_create_new_directory
+  'Cr'#0233'er un nouveau r'#0233'pertoire',//sc_create_new_directory
   'Back',                //sc_back
   'Forward',             //sc_forward
   'Up',                  //sc_up
   'Fichier',                              //sc_file
   'existe, Remplacer ?',                  //sc_exists_overwrite
-  'modifi'#233'. Enregistrer ?',          //sc_is_modified_save
+  'modifi'#0233'. Enregistrer ?',          //sc_is_modified_save
   'AVERTISSEMENT',                        //sc_warningupper
   'ERREUR',                               //sc_errorupper
   'Exception',                            //sc_exception
-  'Syst'#232'me',                         //sc_system
+  'Syst'#0232'me',                         //sc_system
   'n'#8217'existe pas',                   //sc_does_not_exist
   'PASSWORD',              //sc_passwordupper
   'Enter password',        //sc_enterpassword
   'Invalid password!',     //sc_invalidpassword
-  'Impossible lire r'#233'pertoire',      //sc_can_not_read_directory
-  'Format graphique non support'#233'',   //sc_graphic_not_supported
+  'Impossible lire r'#0233'pertoire',      //sc_can_not_read_directory
+  'Format graphique non support'#0233'',   //sc_graphic_not_supported
   'Erreur de format graphique',           //sc_graphic_format_error
   'Bitmap MS',                            //sc_MS_Icon
   'Icone MS',                             //sc_MS_Icon
@@ -159,40 +161,40 @@ const
   'Copier l'#8217'enregistrement ?',      //sc_Copy_record_question
   'Fermer page',                          //sc_close_page
   'Premier',                              //sc_first
-  'Pr'#233'c'#233'dent',                  //sc_prior
+  'Pr'#0233'c'#0233'dent',                  //sc_prior
   'Suivant',                              //sc_next
   'Dernier',                              //sc_last
   'Ajouter',                              //sc_append
   'Supprimer',                            //sc_delete
-  #201'diter',                            //sc_edit
+  #0201'diter',                            //sc_edit
   'Poster',                               //sc_post
   'Effacer',                              //sc_cancel
-  'Rafra'#238'chir',                           //sc_refresh
-  #201'dition Filtre',                    //sc_filter_filter
-  #201'dition Filtre Minimum',            //sc_edit_filter_min
-  #201'dition Filtre Maximum',            //sc_filter_edit_max
+  'Rafra'#0238'chir',                           //sc_refresh
+  #0201'dition Filtre',                    //sc_filter_filter
+  #0201'dition Filtre Minimum',            //sc_edit_filter_min
+  #0201'dition Filtre Maximum',            //sc_filter_edit_max
   'Reset filter',       //sc_reset_filter
   'Filtre actif',                         //sc_filter_on
   'Rechercher',                           //sc_search
-  #201'dition automatique',               //sc_autoedit
-  'Copier l'#8217'enregistrement',        //sc_copy_record
+  #0201'dition automatique',               //sc_autoedit
+  'Copier l'#08217'enregistrement',        //sc_copy_record
   'Dialogue',                             //sc_dialog
-  'Ins'#233'rer',                         //sc_insert
+  'Ins'#0233'rer',                         //sc_insert
   'Copier',                               //sc_copy
   'Coller',                               //sc_paste
-  'Ins'#233'rer ligne',                   //sc_row_insert
+  'Ins'#0233'rer ligne',                   //sc_row_insert
   'Ajouter ligne',                        //sc_row_append
   'Supprimer ligne',                      //sc_row_delete
-  'D'#233'faire',                         //sc_undo
+  'D'#0233'faire',                         //sc_undo
   'Refaire',                              //sc_redo
   'Couper',                               //sc_cut
-  'S'#233'lectionner tout',               //sc_select_all
+  'S'#0233'lectionner tout',               //sc_select_all
   'Filtre inactif',                       //sc_filter_off
   'Portrait',                             //sc_portrait print orientation
   'Paysage',                              //sc_landscape print orientation
   'Supprimer ligne ?',                    //sc_Delete_row_question
-  'Lignes s'#233'lectionn'#233'es',       //sc_selected_rows
-  'seulement un '#233'l'#233'ment',       //sc_Single_item_only 
+  'Lignes s'#0233'lectionn'#0233'es',       //sc_selected_rows
+  'seulement un '#0233'l'#0233'ment',       //sc_Single_item_only 
   'Copier cellules',                      //sc_Copy_Cells
   'Coller cellules',                      //sc_Paste_Cells
   'Close',               //sc_close
@@ -211,11 +213,11 @@ function delete_n_selected_rows(const params: array of const): msestring;
 begin
  with params[0] do begin
   if vinteger = 1 then begin
-   result:= 'Effacer le fichier s'#233'lectionn'#233' ?'
+   result:= 'Effacer le fichier s'#0233'lectionn'#0233' ?'
   end
   else begin
    result:= 'Effacer les '+inttostrmse(vinteger)+
-            ' fichiers s'#233'lectionn'#233's ?';
+            ' fichiers s'#0233'lectionn'#0233's ?';
   end;
  end;
 end;

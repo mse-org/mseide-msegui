@@ -150,8 +150,8 @@ Type
        const atransaction:tSQLtransaction;
        const AParams: TmseParams; const autf8: boolean); override;
     procedure internalexecuteunprepared(const cursor: tsqlcursor;
-               const atransaction: tsqltransaction;
-               const asql: string); override;
+               const atransaction: tsqltransaction; const asql: string;
+               const origsql: msestring; const aparams: tmseparams); override;
 
     function GetTransactionHandle(trans : TSQLHandle): pointer; override;
     function Commit(trans : TSQLHandle) : boolean; override;
@@ -170,6 +170,7 @@ Type
    function CreateBlobStream(const Field: TField; const Mode: TBlobStreamMode;
                          const acursor: tsqlcursor): TStream; override;
    function getblobdatasize: integer; override;
+//   function getfeatures(): databasefeaturesty override;
           //iblobconnection
    procedure writeblobdata(const atransaction: tsqltransaction;
              const tablename: string; const acursor: tsqlcursor;
@@ -178,7 +179,7 @@ Type
              out newid: string);
    procedure setupblobdata(const afield: tfield; const acursor: tsqlcursor;
                                    const aparam: tparam);
-   function blobscached: boolean;
+//   function blobscached: boolean;
    function identquotechar: msestring; override;
    
   Public
@@ -225,6 +226,7 @@ Type
     property KeepConnection;
 //    property LoginPrompt;
     property Params;
+    property ongetcredentials;
 //    property OnLogin;
   end;
 
@@ -578,7 +580,8 @@ end;
 constructor tmysqlconnection.create(aowner: tcomponent);
 begin
  inherited;
- fconnoptions:= fconnoptions + [sco_supportparams,sco_emulateretaining];
+ fconnoptions:= fconnoptions + [sco_supportparams,sco_emulateretaining,
+                                                           sco_blobscached];
 end;
 
 Procedure tmysqlconnection.checkerror(const Msg: String; const aconn: pmysql);
@@ -727,13 +730,24 @@ end;
 
 procedure tmysqlconnection.openconnection(var aconn: pmysql);
 Var
-  H,U,P : String;
+  H: string;
+  u,p: msestring;
+  u1,p1: string;
 
 begin
- H:= HostName;
- U:= UserName;
- P:= Password;
- ConnectMySQL(aconn,pchar(H),pchar(U),pchar(P));
+ H:= ansistring(HostName);
+ getcredentials(u,p);
+ u1:= ansistring(u);
+ p1:= ansistring(p);
+// U:= UserName;
+// P:= Password;
+ try
+  ConnectMySQL(aconn,pchar(H),pchar(U1),pchar(P1));
+ finally
+  stringsafefree(u1,false);
+  stringsafefree(p1,false);
+  freecredentials(u,p);
+ end;
  if mysql_select_db(aconn,pchar(DatabaseName)) <> 0 then begin
    checkerror(SErrDatabaseSelectFailed,aconn);
  end;
@@ -1121,8 +1135,8 @@ begin
 end;
 
 procedure tmysqlconnection.internalexecuteunprepared(const cursor: tsqlcursor;
-               const atransaction: tsqltransaction;
-               const asql: string);
+               const atransaction: tsqltransaction; const asql: string;
+                      const origsql: msestring; const aparams: tmseparams);
 var
  C: tmysqlcursor;
 begin
@@ -1831,7 +1845,12 @@ function tmysqlconnection.getblobdatasize: integer;
 begin
  result:= sizeof(integer);
 end;
-
+{
+function tmysqlconnection.getfeatures(): databasefeaturesty;
+begin
+ result:= inherited getfeatures() + [dbf_blobscached];
+end;
+}
 procedure tmysqlconnection.writeblobdata(const atransaction: tsqltransaction;
                const tablename: string; const acursor: tsqlcursor;
                const adata: pointer; const alength: integer;
@@ -1858,12 +1877,12 @@ procedure tmysqlconnection.setupblobdata(const afield: tfield;
 begin
  acursor.blobfieldtoparam(afield,aparam,false);
 end;
-
+{
 function tmysqlconnection.blobscached: boolean;
 begin
  result:= true;
 end;
-
+}
 function tmysqlconnection.getprimarykeyfield(const atablename: string;
                         const acursor: tsqlcursor): string;
 begin

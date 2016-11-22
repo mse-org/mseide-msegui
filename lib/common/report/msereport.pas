@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2014 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2016 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -1525,7 +1525,39 @@ type
   showgrid: boolean;
   snaptogrid: boolean;
  end;
- 
+ prepdesigninfoty = ^repdesigninfoty;
+
+ treppageform = class(treportpage)
+  private
+   function getgrid_show: boolean;
+   procedure setgrid_show(const avalue: boolean);
+   function getgrid_snap: boolean;
+   procedure setgrid_snap(const avalue: boolean);
+   function getgrid_size: real;
+   procedure setgrid_size(avalue: real);
+   procedure writerepdesigninfo(writer: twriter);
+   procedure readrepdesigninfo(reader: treader);
+  protected
+   frepdesigninfo: repdesigninfoty;
+   class function hasresource(): boolean override;
+   class function getmoduleclassname(): string override;
+   procedure defineproperties(filer: tfiler) override;
+  public
+   constructor create(aowner: tcomponent); overload; override;
+   constructor create(aowner: tcomponent; load: boolean); 
+                                     overload; virtual;
+  published
+   property grid_show: boolean read frepdesigninfo.showgrid 
+                                             write setgrid_show default true;
+   property grid_snap: boolean read frepdesigninfo.snaptogrid 
+                                             write setgrid_snap default true;
+   property grid_size: real read frepdesigninfo.gridsize write setgrid_size;   
+   property ppmm;
+   property color default cl_transparent;
+ end;
+
+ reppageformclassty = class of treppageform;
+   
  repstatety = (rs_activepageset,rs_finish,rs_restart,rs_running,rs_endpass,
                rs_dummypage);
  repstatesty = set of repstatety;
@@ -1591,7 +1623,7 @@ type
    frepdesigninfo: repdesigninfoty;
    freppages: reportpagearty;
    fdefaultprintorientation: pageorientationty;
-   class function hasresource: boolean; override;
+   class function hasresource: boolean override;
    procedure updatepagesize;
    procedure dopagebeforerender(const sender: tcustomreportpage;
                                           var empty: boolean);
@@ -1603,6 +1635,7 @@ type
    procedure internalrender(const acanvas: tcanvas; const aprinter: tcustomprinter;
                   const acommand: msestring; const astream: ttextstream;
                   const anilstream: boolean; const onafterrender: reporteventty);
+   procedure initpage(const apage: tcustomreportpage);
    procedure unregisterchildwidget(const child: twidget); override;
    procedure getchildren(proc: tgetchildproc; root: tcomponent); override;
    procedure defineproperties(filer: tfiler); override;
@@ -1614,11 +1647,21 @@ type
    procedure setfont(const avalue: trepfont);
    function getfont: trepfont;
    function getfontclass: widgetfontclassty; override;
+   function getdialogcaption: msestring virtual;
+   function getdialogtext: msestring virtual;
 //   procedure doloaded; override;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
-   procedure insertwidget(const awidget: twidget; const apos: pointty); override;
+   
+   procedure insertwidget(const awidget: twidget; const apos: pointty) override;
+   function add(const apage: tcustomreportpage;
+                               aindex: int32 = bigint): tcustomreportpage;
+                                                        //report owns page
+   procedure delete(const aindex: int32);
+   procedure clear();
+   procedure movepage(const curindex,newindex: int32);
+   
    procedure render(const acanvas: tcanvas;
                         const onafterrender: reporteventty = nil); overload;
    procedure render(const aprinter: tstreamprinter;
@@ -1749,6 +1792,9 @@ function createreport(const aclass: tclass;
 procedure initreportcomponent(const amodule: tcomponent; 
                                          const acomponent: tcomponent);
 function getreportscale(const amodule: tcomponent): real;
+function createreppageform(const aclass: tclass; 
+                   const aclassname: pshortstring): tmsecomponent;
+function getreppageformscale(const amodule: tcomponent): real;
 
 implementation
 uses
@@ -1858,6 +1904,18 @@ begin
 // if acomponent is twidget then begin
 //  twidget(acomponent).scale(getreportscale(amodule));
 // end;
+end;
+
+function createreppageform(const aclass: tclass; 
+                   const aclassname: pshortstring): tmsecomponent;
+begin
+ result:= reppageformclassty(aclass).create(nil,false);
+ tmsecomponent1(result).factualclassname:= aclassname;
+end;
+
+function getreppageformscale(const amodule: tcomponent): real;
+begin
+ result:= tcustomreportpage(amodule).fppmm/defaultppmm;
 end;
 
 { treptabfont }
@@ -5574,13 +5632,15 @@ end;
 
 procedure tcustomreportpage.doonpaint(const acanvas: tcanvas);
 begin
- freport.dopagepaint(self,acanvas);
- if canevent(tmethod(fonpaint)) then begin
-  application.lock;
-  try
-   fonpaint(self,acanvas);
-  finally
-   application.unlock;
+ if freport <> nil then begin
+  freport.dopagepaint(self,acanvas);
+  if canevent(tmethod(fonpaint)) then begin
+   application.lock;
+   try
+    fonpaint(self,acanvas);
+   finally
+    application.unlock;
+   end;
   end;
  end;
 end;
@@ -6044,7 +6104,17 @@ begin
  end;
 end;
 
- {tcustomreport}
+procedure initrepdesigninfo(var ainfo: repdesigninfoty);
+begin
+ with ainfo do begin
+  widgetrect:= makerect(50,50,50,50);
+  gridsize:= 2; //mm
+  showgrid:= true;
+  snaptogrid:= true;
+ end;
+end;
+
+{ tcustomreport }
  
 constructor tcustomreport.create(aowner: tcomponent);
 begin
@@ -6053,12 +6123,7 @@ begin
  fpagewidth:= defaultreppagewidth;
  fpageheight:= defaultreppageheight; 
  foptions:= defaultreportoptions;
- with frepdesigninfo do begin
-  widgetrect:= makerect(50,50,50,50);
-  gridsize:= 2; //mm
-  showgrid:= true;
-  snaptogrid:= true;
- end;
+ initrepdesigninfo(frepdesigninfo);
  inherited;
  visible:= false;
  color:= cl_transparent;
@@ -6114,15 +6179,52 @@ begin
  end;
 end;
 
+procedure tcustomreport.initpage(const apage: tcustomreportpage);
+begin
+ apage.ppmm:= fppmm;
+end;
+
 procedure tcustomreport.insertwidget(const awidget: twidget;
-               const apos: pointty);
+                                                 const apos: pointty);
 begin
  if not (awidget is tcustomreportpage) then begin
   raise exception.create('Invalid widget');
  end;
  additem(pointerarty(freppages),awidget);
- tcustomreportpage(awidget).ppmm:= fppmm;
+ initpage(tcustomreportpage(awidget));
  inherited insertwidget(awidget,nullpoint);
+end;
+
+function tcustomreport.add(const apage: tcustomreportpage;
+                              aindex: int32 = bigint): tcustomreportpage;
+var
+ i1: int32;
+begin
+ result:= apage;
+ i1:= length(freppages);
+ if aindex >= i1 then begin
+  aindex:= i1;
+ end;
+ insertitem(pointerarty(freppages),aindex,apage);
+ initpage(apage);
+ apage.parentwidget:= self;
+end;
+
+procedure tcustomreport.delete(const aindex: int32);
+begin
+ reppages[aindex].destroy();
+end;
+
+procedure tcustomreport.clear();
+begin
+ while freppages <> nil do begin
+  delete(high(freppages));
+ end;
+end;
+
+procedure tcustomreport.movepage(const curindex: int32; const newindex: int32);
+begin
+ moveitem(pointerarty(freppages),curindex,newindex);
 end;
 
 function tcustomreport.exec(thread: tmsethread): integer;
@@ -6437,7 +6539,7 @@ begin
   application.beginwait;
   try
    if reo_waitdialog in foptions then begin
-    application.waitdialog(nil,fdialogtext,fdialogcaption,
+    application.waitdialog(nil,getdialogtext,getdialogcaption,
             {$ifdef FPC}@{$endif}docancel,{$ifdef FPC}@{$endif}doexec);
     if not canceled then begin
      application.terminatewait;
@@ -6456,7 +6558,7 @@ begin
   end;
   fthread:= tmsethread.create({$ifdef FPC}@{$endif}exec);
   if reo_waitdialog in foptions then begin
-   application.waitdialog(nil,fdialogtext,fdialogcaption);
+   application.waitdialog(nil,getdialogtext,getdialogcaption);
    waitfor;
   end;
  end;
@@ -6722,6 +6824,22 @@ begin
  result:= nil; //static font
 end;
 
+function tcustomreport.getdialogcaption: msestring;
+begin
+ result:= fdialogcaption;
+ if result = '' then begin
+  result:= 'Report'
+ end;
+end;
+
+function tcustomreport.getdialogtext: msestring;
+begin
+ result:= fdialogtext;
+ if result = '' then begin
+  result:= 'Rendering...'
+ end;
+end;
+
 function tcustomreport.prepass: boolean;
 begin
  result:= not (rs_endpass in fstate);
@@ -6944,6 +7062,89 @@ begin
                                            [reo_autoreadstat]) then begin
   fstatfile.readstat;
  end;
+end;
+
+{ treppageform }
+
+constructor treppageform.create(aowner: tcomponent);
+begin
+ create(aowner,true);
+end;
+
+constructor treppageform.create(aowner: tcomponent; load: boolean);
+begin
+ initrepdesigninfo(frepdesigninfo);
+ include(fmsecomponentstate,cs_ismodule);
+ inherited create(aowner);
+ color:= cl_transparent;
+ createfont();
+ if load and not (csdesigning in componentstate) and
+          (cs_ismodule in fmsecomponentstate) then begin
+  loadmsemodule(self,treport);
+ end;
+end;
+
+class function treppageform.getmoduleclassname(): string;
+begin
+ result:= 'treppageform';
+end;
+
+class function treppageform.hasresource(): boolean;
+begin
+ result:= self <> treppageform;
+end;
+
+function treppageform.getgrid_show: boolean;
+begin
+ result:= frepdesigninfo.showgrid;
+end;
+
+procedure treppageform.setgrid_show(const avalue: boolean);
+begin
+ frepdesigninfo.showgrid:= avalue;
+ designchanged;
+end;
+
+function treppageform.getgrid_snap: boolean;
+begin
+ result:= frepdesigninfo.snaptogrid;
+end;
+
+procedure treppageform.setgrid_snap(const avalue: boolean);
+begin
+ frepdesigninfo.snaptogrid:= avalue;
+ designchanged;
+end;
+
+function treppageform.getgrid_size: real;
+begin
+ result:= frepdesigninfo.gridsize;
+end;
+
+procedure treppageform.setgrid_size(avalue: real);
+begin
+ if avalue < 2/ppmm then begin
+  avalue:= 2/ppmm;
+ end;
+ frepdesigninfo.gridsize:= avalue;
+ designchanged;
+end;
+
+procedure treppageform.writerepdesigninfo(writer: twriter);
+begin
+ writerectty(writer,frepdesigninfo.widgetrect);
+end;
+
+procedure treppageform.readrepdesigninfo(reader: treader);
+begin
+ frepdesigninfo.widgetrect:= readrectty(reader);
+end;
+
+procedure treppageform.defineproperties(filer: tfiler);
+begin
+ inherited;
+ filer.defineproperty('repdesigninfo',@readrepdesigninfo,
+                                           @writerepdesigninfo,true);
 end;
 
 { tcustomrepvaluedisp }

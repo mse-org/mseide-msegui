@@ -1,4 +1,4 @@
-{ MSEide Copyright (c) 1999-2013 by Martin Schreiber
+{ MSEide Copyright (c) 1999-2016 by Martin Schreiber
    
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -122,7 +122,8 @@ end;
 
 function twatchfo.refreshitem(const index: integer): boolean;
 var
- mstr1: msestring;
+ mstr1,mstr2: msestring;
+ str1: ansistring;
  fc: numformatty;
  fs: numsizety;
  int641: int64;
@@ -131,7 +132,15 @@ begin
  result:= true;
  if (index >= 0) and gdb.cancommand then begin
   if watcheson.value and watchon[index] then begin
-   result:= gdb.readpascalvariable(ansistring(expression[index]),mstr1) <> gdb_timeout;
+   mstr2:= expression[index];
+   if (mstr2 <> '') and (mstr2[1] = '#') then begin
+    result:= gdb.executecommand(ansistring(
+                           copy(mstr2,2,bigint)),str1) <> gdb_timeout;
+    mstr1:= msestring(str1);
+   end
+   else begin
+    result:= gdb.readpascalvariable(ansistring(mstr2),mstr1) <> gdb_timeout;
+   end;
    fc:= numformatty(formatcode[index]);
    if fc <> nf_default then begin
     if trystrtointvalue64(ansistring(mstr1),qword(int641)) then begin

@@ -83,11 +83,14 @@ type
  lookupbufferstatety = (lbs_changed,lbs_buffervalid,lbs_changeeventposted,
                          lbs_sourceclosed);
  lookupbufferstatesty = set of lookupbufferstatety;
-
+ lookupbuffereventty = procedure(const sender: tcustomlookupbuffer) of object;
+ 
  tcustomlookupbuffer = class(tactcomponent)
   private
  //  fbuffervalid: boolean;
    fonchange: notifyeventty;
+   fbeforeload: lookupbuffereventty;
+   fafterload: lookupbuffereventty;
    procedure checkindex(const index: integer);
    function internalfind(const avalue; var index: integerarty;
                 var data; const itemsize: integer;
@@ -125,6 +128,7 @@ type
                        const caseinsensitive: boolean); overload;
    procedure checkarrayindex(const value; const index: integer);
                    //calls checkbuffer
+   procedure doloadbuffer() virtual;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -132,7 +136,7 @@ type
    procedure endupdate;
    procedure clearbuffer; virtual;
    procedure checkbuffer; //automatically called
-   procedure loadbuffer; virtual;
+   procedure loadbuffer;
 
    function find(const fieldno: integer; const avalue: integer;
          out aindex: integer; const filter: lbfiltereventty = nil): boolean; overload;
@@ -240,6 +244,14 @@ type
                               const adefault: realty = emptyreal): realty; overload;
                            
    function count: integer; virtual;
+   procedure addrow(const integervalues: array of integer;
+                    const textvalues: array of msestring;
+                    const floatvalues: array of realty;
+                    const int64values: array of int64);
+   procedure addrows(const integervalues: array of integerarty;
+                    const textvalues: array of msestringarty;
+                    const floatvalues: array of realarty;
+                    const int64values: array of int64arty);
    
    function fieldnamestext: stringarty; virtual;
    function fieldnamesfloat: stringarty; virtual;
@@ -262,11 +274,14 @@ type
                                    read int64valuephys;
    property textvalue[const fieldno,aindex: integer]: msestring 
                                    read textvaluephys;
+   property beforeload: lookupbuffereventty read fbeforeload write fbeforeload;
+   property afterload: lookupbuffereventty read fafterload write fafterload;
    property onchange: notifyeventty read fonchange write fonchange;
  end;
 
  tlookupbuffer = class(tcustomlookupbuffer)
   public
+{
    procedure addrow(const integervalues: array of integer;
                     const textvalues: array of msestring;
                     const floatvalues: array of realty;
@@ -275,11 +290,14 @@ type
                     const textvalues: array of msestringarty;
                     const floatvalues: array of realarty;
                     const int64values: array of int64arty);
+}
   published
    property fieldcounttext;
    property fieldcountinteger;
    property fieldcountint64;
    property fieldcountfloat;
+   property beforeload;
+   property afterload;
    property onchange;
  end;
 
@@ -293,6 +311,10 @@ type
    procedure fieldschanged(const sender: tarrayprop; const index: integer);
   public
    function count: integer; override;
+  published
+   property beforeload;
+   property afterload;
+   property onchange;
  end;
   
  lbdboptionty = (olbdb_closedataset,olbdb_invalidateifmodified);
@@ -339,11 +361,10 @@ type
    
  tdblookupbuffer = class(tcustomdblookupbuffer)
   protected
+   procedure doloadbuffer; override;
   public
    constructor create(aowner: tcomponent); override;
-   procedure loadbuffer; override;
   published
-   property onchange;
    property datasource;
    property textfields;
    property integerfields;
@@ -354,11 +375,10 @@ type
   
  tdbmemolookupbuffer = class(tcustomdblookupbuffer)
   protected
+   procedure doloadbuffer; override;
   public
    constructor create(aowner: tcomponent); override;
-   procedure loadbuffer; override;
   published
-   property onchange;
    property datasource;
    property textfields;
    property integerfields;
@@ -431,10 +451,27 @@ begin
  changed;
 end;
 
-procedure tcustomlookupbuffer.loadbuffer;
-begin
+procedure tcustomlookupbuffer.doloadbuffer();
+begin 
  include(fstate,lbs_buffervalid);
 // fbuffervalid:= true;
+end;
+
+procedure tcustomlookupbuffer.loadbuffer;
+begin
+ beginupdate();
+ try
+  clearbuffer();
+  if canevent(tmethod(fbeforeload)) then begin
+   fbeforeload(self);
+  end;
+  doloadbuffer();
+  if canevent(tmethod(fafterload)) then begin
+   fafterload(self);
+  end;
+ finally
+  endupdate();
+ end;
 end;
 
 procedure tcustomlookupbuffer.checkbuffer;
@@ -1008,7 +1045,7 @@ begin
    end;
   end;
   fcount:= avalue;
-  exclude(fstate,lbs_buffervalid);
+//  exclude(fstate,lbs_buffervalid);
  end;
 end;
 
@@ -1218,8 +1255,107 @@ begin
  result:= nil;
 end;
 
-{ tlookupbuffer }
+procedure tcustomlookupbuffer.addrow(const integervalues: array of integer;
+              const textvalues: array of msestring;
+              const floatvalues: array of realty;
+              const int64values: array of int64);
+var
+ int1: integer;
+begin
+ setcount(fcount + 1);
+ for int1:= 0 to high(integervalues) do begin
+  if int1 > high(fintegerdata) then begin
+   break;
+  end;
+  fintegerdata[int1].data[fcount-1]:= integervalues[int1];
+ end;
+ for int1:= 0 to high(textvalues) do begin
+  if int1 > high(ftextdata) then begin
+   break;
+  end;
+  ftextdata[int1].data[fcount-1]:= textvalues[int1];
+ end;
+ for int1:= 0 to high(floatvalues) do begin
+  if int1 > high(ffloatdata) then begin
+   break;
+  end;
+  ffloatdata[int1].data[fcount-1]:= floatvalues[int1];
+ end;
+ for int1:= 0 to high(int64values) do begin
+  if int1 > high(fint64data) then begin
+   break;
+  end;
+  fint64data[int1].data[fcount-1]:= int64values[int1];
+ end;
+ changed;
+end;
 
+procedure tcustomlookupbuffer.addrows(const integervalues: array of integerarty;
+              const textvalues: array of msestringarty;
+              const floatvalues: array of realarty;
+              const int64values: array of int64arty);
+var
+ int1,int2,int3,countbefore: integer;
+begin
+ int2:= bigint;
+ for int1:= 0 to high(integervalues) do begin
+  if high(integervalues[int1]) < int2 then begin
+   int2:= high(integervalues[int1]);
+  end;
+ end;
+ for int1:= 0 to high(textvalues) do begin
+  if high(textvalues[int1]) < int2 then begin
+   int2:= high(textvalues[int1]);
+  end;
+ end;
+ for int1:= 0 to high(floatvalues) do begin
+  if high(floatvalues[int1]) < int2 then begin
+   int2:= high(floatvalues[int1]);
+  end;
+ end;
+ for int1:= 0 to high(int64values) do begin
+  if high(int64values[int1]) < int2 then begin
+   int2:= high(int64values[int1]);
+  end;
+ end;
+ countbefore:= fcount;
+ setcount(fcount+int2+1);
+ for int1:= 0 to high(integervalues) do begin
+  if int1 > high(fintegerdata) then begin
+   break;
+  end;
+  for int3:= 0 to int2 do begin
+   fintegerdata[int1].data[int3+countbefore]:= integervalues[int1][int3];
+  end;
+ end;
+ for int1:= 0 to high(textvalues) do begin
+  if int1 > high(ftextdata) then begin
+   break;
+  end;
+  for int3:= 0 to int2 do begin
+   ftextdata[int1].data[int3+countbefore]:= textvalues[int1][int3];
+  end;
+ end;
+ for int1:= 0 to high(floatvalues) do begin
+  if int1 > high(ffloatdata) then begin
+   break;
+  end;
+  for int3:= 0 to int2 do begin
+   ffloatdata[int1].data[int3+countbefore]:= floatvalues[int1][int3];
+  end;
+ end;
+ for int1:= 0 to high(int64values) do begin
+  if int1 > high(fint64data) then begin
+   break;
+  end;
+  for int3:= 0 to int2 do begin
+   fint64data[int1].data[int3+countbefore]:= int64values[int1][int3];
+  end;
+ end;
+end;
+
+{ tlookupbuffer }
+{
 procedure tlookupbuffer.addrow(const integervalues: array of integer;
               const textvalues: array of msestring;
               const floatvalues: array of realty;
@@ -1318,7 +1454,7 @@ begin
   end;
  end;
 end;
-
+}
 { tdatalokupbuffer }
 
 procedure tdatalookupbuffer.loaded;
@@ -1558,7 +1694,7 @@ begin
  inherited;
 end;
 
-procedure tdblookupbuffer.loadbuffer;
+procedure tdblookupbuffer.doloadbuffer;
 var
  int1,int3,int4: integer;
  bm: string;
@@ -1573,9 +1709,11 @@ var
  statebefore: tdatasetstate;
  eofbefore: boolean;
 begin
+{
  beginupdate;
  try
   clearbuffer;
+}
   datas:= fdatalink.dataset;
   if (datas <> nil) and 
        (datas.active or 
@@ -1603,8 +1741,8 @@ begin
         ismsestringfield[int1]:= textf[int1] is tmsestringfield;
        end;
        datas.first;
-       int3:= 0;
-       int1:= 0;
+       int3:= fcount;
+       int1:= fcount;
        try
         while not datas.eof do begin
          if int3 <= int1 then begin
@@ -1706,9 +1844,11 @@ begin
    end;
   end;
   include(fstate,lbs_buffervalid);
+{
  finally
   endupdate;
  end;
+}
 end;
 
 { tlookupbuffermemodatalink }
@@ -1735,7 +1875,7 @@ begin
  ffloatfields.fieldtypes:= memofields + msedb.textfields;
 end;
 
-procedure tdbmemolookupbuffer.loadbuffer;
+procedure tdbmemolookupbuffer.doloadbuffer;
 var
  textf: fieldarty;
  integerf: fieldarty;
@@ -1745,9 +1885,11 @@ var
  int1,int2: integer;
  utf8: boolean;
 begin
+{
  beginupdate;
  try
   clearbuffer;
+}
   if fdatalink.active then begin
    utf8:= fdatalink.utf8;
    getfields(integerf,textf,realf,int64f);
@@ -1809,11 +1951,13 @@ begin
    end;
    setcount(int2+1);
   end;
- finally
   include(fstate,lbs_buffervalid);
+{
+ finally
 //  fbuffervalid:= true;
   endupdate;
  end;
+}
 end;
 
 end.

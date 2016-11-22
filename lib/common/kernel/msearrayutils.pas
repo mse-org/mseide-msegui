@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2014 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2016 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -18,6 +18,7 @@ const
 type
  stringsortmodety = (sms_none,sms_upascii,sms_upiascii,sms_up,sms_upi);
  pointercomparemethodty = function(l,r:pointer): integer of object; 
+ pointercomparefuncty = function(l,r:pointer): integer;
 
  arraysortcomparety = function (const l,r): integer;
  sortcomparemethodty = function (const l,r): integer of object;
@@ -225,6 +226,11 @@ function findarrayvalue(const item; const items; const size: integer;
            //true if exact else next bigger
            //for compare: l is item, r are tablevalues
            //array must be sorted
+
+procedure quicksortpointer(const adata: ppointer; //-> array of pointer
+                   const alength: int32; const acompare: pointercomparefuncty);
+                               //position stable
+                               
 procedure mergesortarray(var asortlist; const asize,alength: integer;
                             const acompare: arraysortcomparety;
                             out aindexlist: integerarty; const order: boolean);
@@ -1504,7 +1510,7 @@ type
   compare: arraysortcomparety;
   size: integer;
  end;
- 
+
 function findarrayvalue(const item; const items; 
                const size: integer; const count: integer;
                const compare: arraysortcomparety;
@@ -1687,6 +1693,67 @@ end;
 function compareint64(const l,r): integer;
 begin
  result:= int64(l) - int64(r);
+end;
+
+procedure doquicksortpointer(const compare: pointercomparefuncty; 
+                                                        l, r: ppointer);
+var
+  poi, poj: ppointer;
+  pop: ppointer;
+  po1: ppointer;
+  int1: integer;
+begin
+ repeat
+  poi := l;
+  poj := r;
+  pop := pointer((ptruint(l) div 2 + ptruint(r) div 2) and pointeralignmask);
+                                                            //pivot element
+  repeat
+   while true do begin
+    int1:= compare(poi^,pop^);
+    if int1 = 0 then begin
+     int1:= poi-pop;
+    end;
+    if int1 >= 0 then break;
+    inc(poi);
+   end;
+   while true do begin
+    int1:= compare(poj^,pop^);
+    if int1 = 0 then begin
+     int1:= poj-pop;
+    end;
+    if int1 <= 0 then break;
+    dec(poj);
+   end;
+   if poi <= poj then  begin
+    po1:= poi^; //swap elementm
+    poi^:= poj^;
+    poj^:= po1;
+    if pop = poi then begin
+     pop:= poj
+    end
+    else begin
+     if pop = poj then begin
+      pop:= poi;
+     end;
+    end;
+    inc(poi);
+    dec(poj);
+   end;
+  until poi > poj;
+  if l < poj then begin
+   doquicksortpointer(compare,l, poj);
+  end;
+  l:= poi;
+ until poi >= r;
+end;
+
+procedure quicksortpointer(const adata: ppointer; const alength: int32;
+                                          const acompare: pointercomparefuncty);
+begin
+ if alength > 1 then begin
+  doquicksortpointer(acompare,adata,adata+alength-1);
+ end;
 end;
 
 procedure mergesortarray(var asortlist; const asize,alength: integer;

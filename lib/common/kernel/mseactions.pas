@@ -300,6 +300,8 @@ function getshortcutname(const key: keyty;
 function getsysshortcutdispname(const aitem: sysshortcutty): msestring;
 
 function isvalidshortcut(const ashortcut: shortcutty): boolean;
+function encodeshortcut(const akey: keyty;
+                        const ashiftstate: shiftstatesty): shortcutty;
 function encodeshortcutname(const key: shortcutarty): msestring; overload;
 function encodeshortcutname(const key: shortcutty): msestring; overload;
 function checkshortcutcode(const shortcut: shortcutty;
@@ -655,6 +657,24 @@ begin
     result:= not isnormalshiftkey(key);
    end;
   end;
+ end;
+end;
+
+function encodeshortcut(const akey: keyty;
+                        const ashiftstate: shiftstatesty): shortcutty;
+begin
+ result:= ord(akey) and not modmask;
+ if ss_shift in ashiftstate then begin
+  result:= result or shift;
+ end;
+ if ss_ctrl in ashiftstate then begin
+  result:= result or ctrl;
+ end;
+ if ss_alt in ashiftstate then begin
+  result:= result or alt;
+ end;
+ if ss_second in ashiftstate then begin
+  result:= result or pad;
  end;
 end;
 

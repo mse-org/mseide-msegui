@@ -176,7 +176,7 @@ type
                                                  overload;
    procedure setupblobdata(const afield: tfield; const acursor: tsqlcursor;
                               const aparam: tparam);
-   function blobscached: boolean;
+//   function blobscached: boolean;
           //idbevent
    procedure listen(const sender: tdbevent);
    procedure unlisten(const sender: tdbevent);
@@ -201,7 +201,7 @@ type
                     const FieldDefs : TfieldDefs); override;
    function Fetch(cursor : TSQLCursor) : boolean; override;
    function loadfield(const cursor: tsqlcursor;
-               const datatype: tfieldtype; const fieldnum: integer; //null based
+               const datatype: tfieldtype; const fieldnum: integer; //zero based
      const buffer: pointer; var bufsize: integer;
                                 const aisutf8: boolean): boolean; override;
           //if bufsize < 0 -> buffer was to small, should be -bufsize
@@ -220,6 +220,7 @@ type
     property DatabaseName;
     property KeepConnection;
     property Params;
+    property ongetcredentials;
   end;
 
 function clientversion: string;
@@ -230,7 +231,7 @@ function clientminorversion: integer;
 implementation
 
 uses
- strutils,msesysintf1,msebits,msefloattostr,msedatabase,msesqlresult
+ strutils,msesysintf1,msebits,msefloattostr,msedatabase,msesqlresult,msefbutils
  {$ifndef FPC},classes_del{$ifdef mswindows},windows{$endif}{$endif};
 
 function clientversion: string;
@@ -468,6 +469,9 @@ const
 var
   DPB           : string;
   ADatabaseName : String;
+  u,p: msestring;
+  u1,p1: string;
+  s1: string;
 begin
 {$IfDef LinkDynamically}
  useembeddedfirebird:= ibo_embedded in foptions;
@@ -475,18 +479,26 @@ begin
  try 
 {$EndIf}
   inherited dointernalconnect;
-
-  DPB := chr(isc_dpb_version1);
-  if (UserName <> '') then
-  begin
-    DPB := DPB + chr(isc_dpb_user_name) + chr(Length(UserName)) + UserName;
-    if (Password <> '') then
-      DPB := DPB + chr(isc_dpb_password) + chr(Length(Password)) + Password;
+  getcredentials(u,p);
+  DPB:= chr(isc_dpb_version1);
+  if (u <> '') then begin
+   u1:= ansistring(u);
+   DPB := DPB + chr(isc_dpb_user_name) + chr(Length(u1)) + u1;
+   stringsafefree(u1,false);
+   if (p <> '') then begin
+    p1:= ansistring(p);
+    DPB := DPB + chr(isc_dpb_password) + chr(Length(p1)) + p1;
+    stringsafefree(p1,false);
+   end;
   end;
-  if (Role <> '') then
-     DPB := DPB + chr(isc_dpb_sql_role_name) + chr(Length(Role)) + Role;
+  freecredentials(u,p);
+  if (Role <> '') then begin
+   s1:= ansistring(role);
+   DPB := DPB + chr(isc_dpb_sql_role_name) + chr(Length(s1)) + s1;
+  end;
   if Length(CharSet) > 0 then begin
-    DPB := DPB + Chr(isc_dpb_lc_ctype) + Chr(Length(CharSet)) + CharSet;
+   s1:= ansistring(charset);
+   DPB := DPB + Chr(isc_dpb_lc_ctype) + Chr(Length(s1)) + s1;
   end
   else begin
    if dbo_utf8 in fcontroller.options then begin
@@ -495,11 +507,14 @@ begin
   end;
 
   FSQLDatabaseHandle := nil;
-  if HostName <> '' then ADatabaseName := HostName+':'+DatabaseName
-    else ADatabaseName := DatabaseName;
+  if HostName <> '' then ADatabaseName := ansistring(HostName)+':'+
+                                                ansistring(DatabaseName)
+    else ADatabaseName := ansistring(DatabaseName);
   if isc_attach_database(@FStatus, Length(ADatabaseName), @ADatabaseName[1],
                            @FSQLDatabaseHandle,Length(DPB), @DPB[1]) <> 0 then
+    stringsafefree(dpb,false);
     CheckError('DoInternalConnect', FStatus);
+  stringsafefree(dpb,false);
   SetDBDialect;
 {$IfDef LinkDynamically}
  except
@@ -611,7 +626,7 @@ begin
     TrType:= ftDate{Time};
    end;
    SQL_TYPE_TIME: begin
-    TrType:= ftDateTime;
+    TrType:= ftTime;//ftDateTime;
    end;
    SQL_TIMESTAMP: begin
     TrType := ftDateTime;
@@ -935,7 +950,7 @@ begin
 //  0,1,2,10,11,12,13,14,19,21,22,39,
 //  45,46,47,50,51,52,53,54,55,58: begin
 //   int1:= 1;
-  5,6,8,44,56,57,64: begin
+  5,6,{8,}44,56,57{,64}: begin
    int1:= 2;
   end;
   3: begin
@@ -1366,134 +1381,14 @@ end;
 function TIBConnection.GetSchemaInfoSQL(SchemaType : TSchemaType;
                 SchemaObjectName, SchemaPattern : msestring) : msestring;
 
-var s : msestring;
-
 begin
- s:= '';
-  case SchemaType of
-    stTables     : s := 'select '+
-                          'rdb$relation_id          as recno, '+
-                          '''' + msestring(DatabaseName) +
-                           ''' as catalog_name, '+
-                          '''''                     as schema_name, '+
-                          'rdb$relation_name        as table_name, '+
-                          '0                        as table_type '+
-                        'from '+
-                          'rdb$relations '+
-                        'where '+
-                          '(rdb$system_flag = 0 or rdb$system_flag is null) ' + // and rdb$view_blr is null
-                        'order by rdb$relation_name';
-
-    stSysTables  : s := 'select '+
-                          'rdb$relation_id          as recno, '+
-                          '''' + msestring(DatabaseName) + 
-                          ''' as catalog_name, '+
-                          '''''                     as schema_name, '+
-                          'rdb$relation_name        as table_name, '+
-                          '0                        as table_type '+
-                        'from '+
-                          'rdb$relations '+
-                        'where '+
-                          '(rdb$system_flag > 0) ' + // and rdb$view_blr is null
-                        'order by rdb$relation_name';
-
-    stProcedures : s := 'select '+
-                           'rdb$procedure_id        as recno, '+
-                          '''' + msestring(DatabaseName) +
-                          ''' as catalog_name, '+
-                          '''''                     as schema_name, '+
-                          'rdb$procedure_name       as proc_name, '+
-                          '0                        as proc_type, '+
-                          'rdb$procedure_inputs     as in_params, '+
-                          'rdb$procedure_outputs    as out_params '+
-                        'from '+
-                          'rdb$procedures '+
-                        'WHERE '+
-                          '(rdb$system_flag = 0 or rdb$system_flag is null)';
-    stColumns    : s := 'select '+
-                           'rdb$field_id            as recno, '+
-                          '''' + msestring(DatabaseName) +
-                          ''' as catalog_name, '+
-                          '''''                     as schema_name, '+
-                          'rdb$relation_name        as table_name, '+
-                          'rdb$field_name           as column_name, '+
-                          'rdb$field_position       as column_position, '+
-                          '0                        as column_type, '+
-                          '0                        as column_datatype, '+
-                          '''''                     as column_typename, '+
-                          '0                        as column_subtype, '+
-                          '0                        as column_precision, '+
-                          '0                        as column_scale, '+
-                          '0                        as column_length, '+
-                          '0                        as column_nullable '+
-                        'from '+
-                          'rdb$relation_fields '+
-                        'WHERE '+
-                        '(rdb$system_flag = 0 or rdb$system_flag is null) and'+
-      ' (rdb$relation_name = ''' + Uppercase(SchemaObjectName) + ''') ' +
-                        'order by rdb$field_name';
-  else
-    DatabaseError(SMetadataUnavailable)
-  end; {case}
-  result := s;
+ result:= fbgetschemainfosql(self,schematype,schemaobjectname,schemapattern);
 end;
-
 
 procedure tibconnection.updateindexdefs(var indexdefs : tindexdefs;
                                const atablename : string);
-var 
- res: tsqlresult;
- str1: ansistring;
 begin
- if not assigned(Transaction) then begin
-  DatabaseError(SErrConnTransactionnSet);
- end;
- res:= tsqlresult.Create(nil);
- try
-  with res do begin
-   database:= self;
-   sql.text:= 'select '+
-              'ind.rdb$index_name, '+
-              'ind.rdb$relation_name, '+
-              'ind.rdb$unique_flag, '+
-              'ind_seg.rdb$field_name, '+
-              'rel_con.rdb$constraint_type '+
-            'from '+
-              'rdb$index_segments ind_seg, '+
-              'rdb$indices ind '+
-             'left outer join '+
-              'rdb$relation_constraints rel_con '+
-             'on '+
-              'rel_con.rdb$index_name = ind.rdb$index_name '+
-            'where '+
-              '(ind_seg.rdb$index_name = ind.rdb$index_name) and '+
-              '(ind.rdb$relation_name=''' +  
-                        msestring(uppercase(atablename)) +''') '+
-            'order by '+
-              'ind.rdb$index_name;';
-   active:= true;
-   while not eof do begin
-    with indexdefs.AddIndexDef do begin
-     str1:= cols[0].asstring;
-     name:= trim(str1);
-     fields:= trim(res.cols[3].asstring);
-     if cols[4].asstring = 'PRIMARY KEY' then begin
-      options:= options + [ixPrimary];
-     end;
-     if cols[2].asinteger = 1 then begin
-      options:= options + [ixUnique];
-     end;
-     next;
-     while  not eof and (str1 = cols[0].asstring) do begin
-      fields:= fields + ';' + trim(cols[3].asstring);
-      next;
-     end;
-    end;
-   end;
-  end;
- finally
-  res.free;
- end;
+ fbupdateindexdefs(self,indexdefs,atablename);
 end;
 
 procedure TIBConnection.SetFloat(CurrBuff: pointer; Dbl: Double; Size: integer);
@@ -1741,12 +1636,12 @@ begin
  end;
 {$endif}
 end;
-
+{
 function TIBConnection.blobscached: boolean;
 begin
  result:= false;
 end;
-
+}
 procedure TIBConnection.listen(const sender: tdbevent);
 begin
  feventcontroller.register(sender);

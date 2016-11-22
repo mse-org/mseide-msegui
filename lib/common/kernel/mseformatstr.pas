@@ -1521,7 +1521,7 @@ begin
     end;
     po1^:= '#';
     inc(po1);
-    str1:= inttostr(int2);
+    str1:= '$'+hextostr(card32(int2),4);
     move(pchar(pointer(str1))^,po1^,length(str1));
     inc(po1,length(str1));
    end;
@@ -3113,6 +3113,9 @@ begin
        dec(int1);
       end;
       int3:= intmust - int1 + int2 - 1;
+      if thousandsep <> #0 then begin
+       int3:= int3 + (int1 + int2 - 1) div 4;
+      end;
       if int3 > 0 then begin
        insert(copy(msenullen,1,int3),mstr1,int2); //insert zeros
        inc(int1,int3);
@@ -4053,7 +4056,7 @@ begin
  pchar(pchar(pointer(result))+1)^:= charhexlower[avalue and $f];
 end;
 
-function valtohex(const avalue: word): string; overload;
+function valtohex(const avalue: word): string;
 begin
  setlength(result,4);
  pchar(pointer(result))^:= charhexlower[avalue shr 12];
@@ -4062,7 +4065,7 @@ begin
  pchar(pchar(pointer(result))+3)^:= charhexlower[avalue and $f];
 end;
 
-function valtohex(const avalue: longword): string; overload;
+function valtohex(const avalue: longword): string;
 begin
  setlength(result,8);
  pchar(pointer(result))^:= charhexlower[avalue shr 28];
@@ -4075,7 +4078,7 @@ begin
  pchar(pchar(pointer(result))+7)^:= charhexlower[avalue and $f];
 end;
 
-function valtohex(const avalue: qword): string; overload;
+function valtohex(const avalue: qword): string;
 begin
  result:= valtohex(avalue shr 32)+valtohex(avalue);
 end;

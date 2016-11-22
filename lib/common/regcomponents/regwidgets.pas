@@ -1,4 +1,4 @@
-{ MSEide Copyright (c) 1999-2015 by Martin Schreiber
+{ MSEide Copyright (c) 1999-2016 by Martin Schreiber
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -47,7 +47,7 @@ uses
  msesplitter,msedock,mseforms,mseclasses,typinfo,msearrayprops,msewidgets,
  msegui,formdesigner,msedial,msemenuwidgets,msewindowwidget,msechart,
  msepolygon,msepickwidget,msetraywidget,msedockpanelform,msechartedit,mseedit,
- msebarcode,msedatalist,mseact,mseformatstr
+ msebarcode,msedatalist,mseact,mseformatstr,msesizingform
  {$ifndef mse_no_opengl}
 //  {$ifdef FPC}
      ,mseopenglwidget
@@ -153,6 +153,9 @@ const
  mseformintf: designmoduleintfty = 
   (createfunc: {$ifdef FPC}@{$endif}createmseform;
      initnewcomponent: nil; getscale: nil; sourcetoform: nil);
+ sizingformintf: designmoduleintfty = 
+  (createfunc: {$ifdef FPC}@{$endif}createsizingform;
+     initnewcomponent: nil; getscale: nil; sourcetoform: nil);
  mainformintf: designmoduleintfty = 
   (createfunc: {$ifdef FPC}@{$endif}createmainform;
      initnewcomponent: nil; getscale: nil; sourcetoform: nil);
@@ -175,6 +178,9 @@ begin
  registerclass(tdockform);
  registerclass(tsubform);
  registerclass(tdockpanelform);
+ registerclass(tscrollboxform);
+ registerclass(tsizingform);
+ 
  registercomponents('Widget',[
   tlabel,ticon,
   tstringdisp,trichstringdisp,tintegerdisp,tint64disp,trealdisp,tdatetimedisp,
@@ -231,6 +237,14 @@ begin
  registerpropertyeditor(typeinfo(twidget),tspacer,'linkbottom',
                                  tsisterwidgetpropertyeditor);
 
+ registerpropertyeditor(typeinfo(twidget),tlayouter,'linkleft',
+                                 tsisterwidgetpropertyeditor);
+ registerpropertyeditor(typeinfo(twidget),tlayouter,'linktop',
+                                 tsisterwidgetpropertyeditor);
+ registerpropertyeditor(typeinfo(twidget),tlayouter,'linkright',
+                                 tsisterwidgetpropertyeditor);
+ registerpropertyeditor(typeinfo(twidget),tlayouter,'linkbottom',
+                                 tsisterwidgetpropertyeditor);
  registerpropertyeditor(typeinfo(twidget),tlayouter,'align_leader',
                                  tchildwidgetpropertyeditor);
 
@@ -261,6 +275,7 @@ begin
                     'msegui','msegraphutils','mseclasses']);
                     
  registerdesignmoduleclass(tmseform,@mseformintf);
+ registerdesignmoduleclass(tsizingform,@sizingformintf);
  registerdesignmoduleclass(tmainform,@mainformintf);
  registerdesignmoduleclass(tdockform,@mseformintf);
  registerdesignmoduleclass(tdockpanelform,@dockpanelformintf);

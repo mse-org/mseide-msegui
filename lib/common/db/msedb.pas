@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 2004-2014 by Martin Schreiber
+{ MSEgui Copyright (c) 2004-2016 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -166,7 +166,7 @@ type
    ffieldtypes: fieldtypesty;
    fgetdatasource: getdatasourcefuncty;
   protected
-   //idbeditinfo
+    //idbeditinfo
    function getdataset(const aindex: integer): tdataset;
    procedure getfieldtypes(out apropertynames: stringarty;
                           out afieldtypes: fieldtypesarty);
@@ -394,8 +394,6 @@ type
 //   function getproviderflags1: providerflags1ty;
 //   function getlookupinfo: plookupfieldinfoty;
 
-   function getasid: integer;
-   procedure setasid(const avalue: integer);
   protected
    procedure readlookup(reader: treader);
          //workaround for breaking fix of FPC Mantis 12809
@@ -417,7 +415,7 @@ type
    function asoldid: integer;
    function sum: integer;
 //   property asmsestring: msestring read getasmsestring write setasmsestring;
-   property asid: integer read getasid write setasid; //-1 -> NULL
+//   property asid: integer read getasid write setasid; //-1 -> NULL
    property asenum: integer read getaslongint write setasenum;
    property tagpo: pointer read ftagpo write ftagpo;
   published
@@ -464,7 +462,7 @@ type
    function asoldid: int64;
    function sum: int64;
 //   property asmsestring: msestring read getasmsestring write setasmsestring;
-   property asid: int64 read getasid write setasid; //-1 -> NULL
+//   property asid: int64 read getasid write setasid; //-1 -> NULL
    property Value: Largeint read GetAsLargeint write SetAsLargeint;
    property tagpo: pointer read ftagpo write ftagpo;
   published
@@ -1261,7 +1259,7 @@ type
                          dso_waitcursor,
                          dso_initinternalcalc,
 
-                            //flags below probably will be moved to 
+                            //flags below have been moved to 
                             //tsqlquery.options
                          dso_postsavepoint,dso_deletesavepoint,
                          dso_cancelupdateonerror,dso_cancelupdatesonerror,
@@ -1271,13 +1269,14 @@ type
                          dso_noapply,dso_autoapply,
                          dso_autocommitret,dso_autocommit,
                          dso_refreshafterapply,dso_recnoapplyrefresh,
-                         dso_refreshtransaction,dso_refreshwaitcursor,
+                         dso_refreshtransaction,
                          dso_notransactionrefresh,dso_recnotransactionrefresh,
                          dso_noprepare,
                          dso_cacheblobs,
                          dso_offline, //disconnect database after open
                          dso_local,   //do not connect database on open
                         
+                         dso_refreshwaitcursor, //deprecated
                          dso_noedit,dso_noinsert,dso_noappend,dso_noupdate,
                          dso_nodelete,
                          dso_canceloncheckbrowsemode
@@ -1287,7 +1286,27 @@ type
                          dso_syncmasterdelete,dso_delayeddetailpost,
                          dso_inserttoupdate,dso_syncinsertfields}); 
  datasetoptionsty = set of datasetoptionty;
-
+const
+ deprecatedbdsoptions = [
+                         dso_postsavepoint,dso_deletesavepoint,
+                         dso_cancelupdateonerror,dso_cancelupdatesonerror,
+                         dso_cancelupdateondeleteerror,
+                         dso_editonapplyerror,
+                         dso_restoreupdateonsavepointrollback,
+                         dso_noapply,dso_autoapply,
+                         dso_autocommitret,dso_autocommit,
+                         dso_refreshafterapply,dso_recnoapplyrefresh,
+                         dso_refreshtransaction,
+                         dso_notransactionrefresh,dso_recnotransactionrefresh,
+                         dso_noprepare,
+                         dso_cacheblobs,
+                         dso_offline, //disconnect database after open
+                         dso_local   //do not connect database on open
+                         ];
+type
+ savepointoptionty = (spo_postsavepoint,spo_deletesavepoint);
+ savepointoptionsty = set of savepointoptionty;
+ 
  idscontroller = interface(iactivatorclient)
   procedure inheriteddataevent(const event: tdataevent; const info: ptrint);
   procedure inheritedcancel;
@@ -1310,14 +1329,15 @@ type
   procedure clearfilter;
   procedure begindisplaydata;
   procedure enddisplaydata;
-  procedure doidleapplyupdates;
-  procedure dscontrolleroptionschanged(const aoptions: datasetoptionsty);
+//  procedure doidleapplyupdates;
+//  procedure dscontrolleroptionschanged(const aoptions: datasetoptionsty);
   function getrestorerecno: boolean;
   procedure setrestorerecno(const avalue: boolean);
   property restorerecno: boolean read getrestorerecno write setrestorerecno;
                           //for refresh
   function islastrecord: boolean;
   function updatesortfield(const afield: tfield; const adescend: boolean): boolean;
+  function getsavepointoptions(): savepointoptionsty;
  end;
 
  igetdscontroller = interface(inullinterface)[miid_igetdscontroller]
@@ -1357,7 +1377,7 @@ type
    finsertbm: bookmarkty;
    flinkedfields: fieldlinkarty;
    fstate: dscontrollerstatesty;
-   fdelayedapplycount: integer;
+//   fdelayedapplycount: integer;
    fbmbackup: bookmarkty;
    fupdatecount: integer;
    fstatebefore: tdatasetstate;
@@ -1378,9 +1398,9 @@ type
    procedure setrecnozerobased(const avalue: integer);
    function getrecno: integer;
    procedure setrecno(const avalue: integer);
-   procedure registeronidle;
-   procedure unregisteronidle;
-   procedure setdelayedapplycount(const avalue: integer);
+//   procedure registeronidle;
+//   procedure unregisteronidle;
+//   procedure setdelayedapplycount(const avalue: integer);
    function getnoedit: boolean;
    procedure setnoedit(const avalue: boolean);
    procedure nosavepoint;
@@ -1394,12 +1414,13 @@ type
    procedure setnoupdate(const avalue: boolean);
    function getnodelete: boolean;
    procedure setnodelete(const avalue: boolean);
+   procedure readdelayedapplycount(reader: treader);
   protected
    foptions: datasetoptionsty;
    procedure setoptions(const avalue: datasetoptionsty); virtual;
    procedure setowneractive(const avalue: boolean); override;
    procedure fielddestroyed(const sender: ifieldcomponent);
-   procedure doonidle(var again: boolean);
+//   procedure doonidle(var again: boolean);
    procedure dorefresh(const sender: tobject);
    function savepointbegin: integer; virtual;
    procedure savepointrollback(const aindex: integer = -1); virtual;
@@ -1407,7 +1428,7 @@ type
    procedure savepointrelease; virtual;
    function execoperation(const akind: opkindty;
                               const aafterop: afterdbopeventty): boolean;
-      
+   procedure defineproperties(filer: tfiler) override;      
   public
    constructor create(const aowner: tdataset; const aintf: idscontroller;
                       const arecnooffset: integer = -1;
@@ -1502,8 +1523,8 @@ type
    property fields: tpersistentfields read ffields write setfields;
    property options: datasetoptionsty read foptions write setoptions 
                    default defaultdscontrolleroptions;
-   property delayedapplycount: integer read fdelayedapplycount 
-                                       write setdelayedapplycount default 0;
+//   property delayedapplycount: integer read fdelayedapplycount 
+//                                       write setdelayedapplycount default 0;
                //0 -> no autoapply
    property onstatechanged: datasetstatechangedeventty read fonstatechanged 
                                                 write fonstatechanged;
@@ -1829,7 +1850,7 @@ function opentodynarrayft(const items: array of tfieldtype): fieldtypearty;
 implementation
 uses
  rtlconsts,msefileutils,typinfo,{$ifdef FPC}dbconst{$else}dbconst_del{$endif},
- msearrayutils,mseformatstr,msebits,msefloattostr,
+ msearrayutils,mseformatstr,msebits,msefloattostr,msebufdataset,
  msereal,variants,msedate,msesys,sysconst
  {,msedbgraphics}{$ifdef unix},cwstring{$endif};
 const
@@ -1859,6 +1880,7 @@ type
  tcollection1 = class(tcollection);
  tparam1 = class(tparam);
  tdatasource1 = class(tdatasource);
+ tmsebufdataset1 = class(tmsebufdataset);
 
 function dbtrystringtoguid(const value: string; out guid: tguid): boolean;
 var
@@ -4205,6 +4227,7 @@ begin
  result:= fproviderflags1;
 end;
 }
+{
 function tmselongintfield.getasid: integer;
 begin
  if isnull then begin
@@ -4224,7 +4247,7 @@ begin
   asinteger:= avalue;
  end;
 end;
-
+}
 procedure tmselongintfield.change;
 begin
  if not (fis_changing in fstate) then begin
@@ -7052,7 +7075,8 @@ end;
 
 { tdscontroller }
 
-constructor tdscontroller.create(const aowner: tdataset; const aintf: idscontroller;
+constructor tdscontroller.create(const aowner: tdataset;
+                                   const aintf: idscontroller;
                                    const arecnooffset: integer = -1;
                                    const acancelresync: boolean = true);
 begin
@@ -7062,6 +7086,11 @@ begin
  fcancelresync:= acancelresync;
  foptions:= defaultdscontrolleroptions;
  inherited create(aowner,aintf);
+ if aowner is tmsebufdataset then begin
+  with tmsebufdataset1(aowner) do begin
+   foldopts:= getdefaultoptions * oldbdsoptions;
+  end;
+ end;
 end;
 
 destructor tdscontroller.destroy;
@@ -7069,7 +7098,7 @@ var
  int1: integer;
  field1: tfield;
 begin
- unregisteronidle;
+// unregisteronidle;
  tdataset(fowner).active:= false; //avoid later calls from fowner
  for int1:= 0 to high(flinkedfields) do begin
   flinkedfields[int1].setdsintf(nil);
@@ -7542,12 +7571,12 @@ begin
    application.beginwait;
   end;
   try
-   if dso_local in foptions then begin
-    idscontroller(fintf).openlocal;
-   end
-   else begin
+//   if dso_local in foptions then begin
+//    idscontroller(fintf).openlocal;
+//   end
+//   else begin
     idscontroller(fintf).inheritedinternalopen;
-   end;
+//   end;
   finally
    if bo1 then begin
     application.endwait;
@@ -7568,16 +7597,19 @@ begin
   end;
   updatelinkedfields; //second check
  end;
+{
  if fdelayedapplycount > 0 then begin
   registeronidle;
  end;
+}
 end;
-
+{
 procedure tdscontroller.doonidle(var again: boolean);
 begin
  idscontroller(fintf).doidleapplyupdates;
 end;
-
+}
+(*
 procedure tdscontroller.registeronidle;
 begin
  if not(dscs_onidleregistered in fstate) then begin
@@ -7593,13 +7625,13 @@ begin
   exclude(fstate,dscs_onidleregistered);
  end;
 end;
-
+*)
 procedure tdscontroller.internalclose;
 var
  int1: integer;
  field1: tfield;
 begin
- unregisteronidle;
+// unregisteronidle;
  idscontroller(fintf).inheritedinternalclose;
  with tdataset(fowner) do begin
   for int1:= 0 to fields.count - 1 do begin
@@ -7770,124 +7802,144 @@ end;
 function tdscontroller.execoperation(const akind: opkindty;
                           const aafterop: afterdbopeventty): boolean;
 var
- bo1,bo2,bo3: boolean;
+ bo1,bo2{,bo3}: boolean;
  int1: integer;
+ savepointoptions: savepointoptionsty;
 begin
- bo3:= dscs_posting1 in fstate;
- include(fstate,dscs_posting1);
- try
-  case akind of
-   opk_post: begin
-    if checkcanevent(tdataset(fowner),tmethod(self.fonbeforepost)) then begin
-     fonbeforepost(tdataset(fowner));
-    end;
-   end;
-   opk_delete: begin
-    if checkcanevent(tdataset(fowner),tmethod(self.fonbeforedelete)) then begin
-     fonbeforedelete(tdataset(fowner));
-    end;
-   end;
-  end;
+// bo3:= dscs_posting1 in fstate;
+ if not (dscs_posting1 in fstate) then begin
+  include(fstate,dscs_posting1);
   try
    case akind of
     opk_post: begin
-     bo1:= dso_postsavepoint in foptions;
+     if checkcanevent(tdataset(fowner),tmethod(self.fonbeforepost)) then begin
+      fonbeforepost(tdataset(fowner));
+     end;
     end;
     opk_delete: begin
-     bo1:= dso_deletesavepoint in foptions;
-    end;
-    else begin
-     bo1:= false;
+     if checkcanevent(tdataset(fowner),tmethod(self.fonbeforedelete)) then begin
+      fonbeforedelete(tdataset(fowner));
+     end;
     end;
    end;
    try
-    if bo1 then begin
-     int1:= savepointbegin;
+    savepointoptions:= idscontroller(fintf).getsavepointoptions;
+    case akind of
+     opk_post: begin
+      bo1:= spo_postsavepoint in savepointoptions;
+     end;
+     opk_delete: begin
+      bo1:= spo_deletesavepoint in savepointoptions;
+     end;
+     else begin
+      bo1:= false;
+     end;
     end;
-    result:= true;
-    include(fstate,dscs_posting);
-    try    
+    try
+     if bo1 then begin
+      int1:= savepointbegin;
+     end;
+     result:= true;
+     include(fstate,dscs_posting);
+     try    
+      try
+       case akind of
+        opk_post: begin
+         idscontroller(fintf).inheritedpost();
+        end;
+        opk_delete: begin
+         idscontroller(fintf).inheriteddelete();
+        end;
+        opk_insert: begin
+         idscontroller(fintf).inheritedinsert();
+        end;
+       end;
+      except
+       on epostcancel do begin
+        if bo1 then begin
+         bo1:= false;
+         savepointrollback(int1);
+        end;     
+        result:= false;
+        tdataset(fowner).cancel;
+       end
+       else begin
+        if bo1 then begin
+         bo1:= false;
+         savepointrollback(int1);
+        end;     
+        raise;
+       end;
+      end;      
+     finally
+      exclude(fstate,dscs_posting);
+     end;
+     bo2:= result;
      try
-      case akind of
-       opk_post: begin
-        idscontroller(fintf).inheritedpost();
-       end;
-       opk_delete: begin
-        idscontroller(fintf).inheriteddelete();
-       end;
-       opk_insert: begin
-        idscontroller(fintf).inheritedinsert();
+      if result and assigned(aafterop) then begin
+       aafterop(tdataset(fowner),result);
+      end;
+      if result then begin
+       if akind = opk_post then begin
+        tdataset1(fowner).dataevent(tdataevent(de_afterpost),0);
        end;
       end;
-     except
-      on epostcancel do begin
-       if bo1 then begin
-        bo1:= false;
-        savepointrollback(int1);
-       end;     
-       result:= false;
-       tdataset(fowner).cancel;
+     finally
+      if bo2 then begin
+       self.modified;
+      end;
+     end;
+     if bo1 then begin
+      bo1:= false;
+      if result then begin
+       savepointrelease;
       end
       else begin
-       if bo1 then begin
-        bo1:= false;
-        savepointrollback(int1);
-       end;     
-       raise;
+       savepointrollback(int1);
       end;
-     end;      
-    finally
-     exclude(fstate,dscs_posting);
-    end;
-    bo2:= result;
-    try
-     if result and assigned(aafterop) then begin
-      aafterop(tdataset(fowner),result);
-     end;
-     if result then begin
-      if akind = opk_post then begin
-       tdataset1(fowner).dataevent(tdataevent(de_afterpost),0);
-      end;
-     end;
-    finally
-     if bo2 then begin
-      self.modified;
-     end;
-    end;
-    if bo1 then begin
-     bo1:= false;
-     if result then begin
-      savepointrelease;
-     end
-     else begin
+     end;     
+    except
+     if bo1 then begin
       savepointrollback(int1);
+     end;     
+     raise;
+    end;
+   finally
+    case akind of
+     opk_post: begin
+      if checkcanevent(tdataset(fowner),tmethod(self.fonafterpost)) then begin
+       fonafterpost(tdataset(fowner),result);
+      end;
      end;
-    end;     
-   except
-    if bo1 then begin
-     savepointrollback(int1);
-    end;     
-    raise;
+     opk_delete: begin
+      if checkcanevent(tdataset(fowner),tmethod(self.fonafterdelete)) then begin
+       fonafterdelete(tdataset(fowner),result);
+      end;
+     end;
+    end;    
    end;
   finally
-   case akind of
-    opk_post: begin
-     if checkcanevent(tdataset(fowner),tmethod(self.fonafterpost)) then begin
-      fonafterpost(tdataset(fowner),result);
-     end;
-    end;
-    opk_delete: begin
-     if checkcanevent(tdataset(fowner),tmethod(self.fonafterdelete)) then begin
-      fonafterdelete(tdataset(fowner),result);
-     end;
-    end;
-   end;    
-  end;
- finally
-  if not bo3 then begin
+//   if not bo3 then begin
    exclude(fstate,dscs_posting1);
+//   end;
   end;
  end;
+end;
+
+procedure tdscontroller.readdelayedapplycount(reader: treader);
+var
+ i1: int32;
+begin
+ i1:= reader.readinteger();
+ if fowner is tmsebufdataset then begin
+  tmsebufdataset(fowner).delayedapplycount:= i1;
+ end;
+end;
+
+procedure tdscontroller.defineproperties(filer: tfiler);
+begin
+ inherited;
+ filer.defineproperty('delayedapplycount',@readdelayedapplycount,nil,false);
 end;
 
 function tdscontroller.post(const aafterpost: afterdbopeventty = nil): boolean;
@@ -7960,14 +8012,48 @@ const
                       dso_cancelupdateonerror,dso_cancelupdateondeleteerror];
 {$endif}
 var
- opt,options1,optionsbefore: datasetoptionsty;
+ opt,options1{,optionsbefore}: datasetoptionsty;
+ bdopt: bufdatasetoptionsty;
 begin
- optionsbefore:= foptions;
- opt:= avalue - [dso_refreshwaitcursor];
+ if (csreading in fowner.componentstate) and 
+                                      (fowner is tmsebufdataset) then begin
+  with tmsebufdataset1(fowner) do begin
+   if card32(foldopts) <> card32($ffffffff) then begin //old streaming version
+    bdopt:= [];
+    if dso_postsavepoint in avalue then include(bdopt,bdo_postsavepoint);
+    if dso_postsavepoint in avalue then include(bdopt,bdo_postsavepoint);
+    if dso_deletesavepoint in avalue then include(bdopt,bdo_deletesavepoint);
+    if dso_cancelupdateonerror in avalue then include(bdopt,bdo_cancelupdateonerror);
+    if dso_cancelupdatesonerror in avalue then include(bdopt,bdo_cancelupdatesonerror);
+    if dso_cancelupdateondeleteerror in avalue then include(bdopt,bdo_cancelupdateondeleteerror);
+    if dso_editonapplyerror in avalue then include(bdopt,bdo_editonapplyerror);
+    if dso_restoreupdateonsavepointrollback in avalue then include(bdopt,bdo_restoreupdateonsavepointrollback);
+    if dso_noapply in avalue then include(bdopt,bdo_noapply);
+    if dso_autoapply in avalue then include(bdopt,bdo_autoapply);
+    if dso_autocommitret in avalue then include(bdopt,bdo_autocommitret);
+    if dso_autocommit in avalue then include(bdopt,bdo_autocommit);
+    if dso_refreshafterapply in avalue then include(bdopt,bdo_refreshafterapply);
+    if dso_recnoapplyrefresh in avalue then include(bdopt,bdo_recnoapplyrefresh);
+    if dso_refreshtransaction in avalue then include(bdopt,bdo_refreshtransaction);
+    if dso_notransactionrefresh in avalue then include(bdopt,bdo_notransactionrefresh);
+    if dso_recnotransactionrefresh in avalue then include(bdopt,bdo_recnotransactionrefresh);
+    if dso_noprepare in avalue then include(bdopt,bdo_noprepare);
+    if dso_cacheblobs in avalue then include(bdopt,bdo_cacheblobs);
+    if dso_offline in avalue then include(bdopt,bdo_offline);
+    if dso_local in avalue then include(bdopt,bdo_local);
+    foldopts:= bdopt;
+   end;
+  end;
+ end;
+// optionsbefore:= foptions;
+ opt:= avalue;
  if dso_refreshwaitcursor in avalue then begin
   include(opt,dso_waitcursor);
  end;
+ opt:= opt - [dso_refreshwaitcursor]-deprecatedbdsoptions;
  options1:= datasetoptionsty(longword(foptions) xor longword(opt));
+ foptions:= opt;
+(*
 {$ifdef FPC}
  foptions:= datasetoptionsty(setsinglebit(longword(opt),longword(foptions),
                  [longword([dso_autocommitret,dso_autocommit]),
@@ -7977,6 +8063,7 @@ begin
  foptions:= datasetoptionsty(setsinglebitar32(longword(opt),longword(foptions),
                                           [longword(mask1),longword(mask2)]));
 {$endif}
+*)
  if [dso_noedit,dso_noinsert,dso_noappend,dso_noupdate,dso_nodelete] *
                                                     options1 <> [] then begin
   if ([dso_noedit,dso_noupdate] * opt <> []) and 
@@ -7985,9 +8072,11 @@ begin
   end;
   tdataset1(fowner).dataevent(dedisabledstatechange,0);
  end;
+{
  if optionsbefore <> foptions then begin
   idscontroller(fintf).dscontrolleroptionschanged(foptions);
  end;
+}
 end;
 
 function tdscontroller.isutf8: boolean;
@@ -8054,7 +8143,7 @@ begin
   setlength(result,int2);
  end;
 end;
-
+{
 procedure tdscontroller.setdelayedapplycount(const avalue: integer);
 begin
  if fdelayedapplycount <> avalue then begin
@@ -8076,7 +8165,7 @@ begin
   end;
  end;   
 end;
-
+}
 function tdscontroller.getnoedit: boolean;
 begin
  result:= dso_noedit in foptions;
@@ -8161,35 +8250,38 @@ procedure tdscontroller.dorefresh(const sender: tobject);
 var
  bo1,bo2: boolean;
 begin
- bo2:= dso_waitcursor in foptions;
- if bo2 then begin
-  application.beginwait;
- end;
- try
-  if not tdataset(fowner).active then begin
-   tdataset(fowner).open;
-  end
-  else begin
-   if dscs_restorerecno in fstate then begin
-    exclude(fstate,dscs_restorerecno);
-    bo1:= idscontroller(fintf).restorerecno;
-    idscontroller(fintf).restorerecno:= true;
-    try
-     tdataset(fowner).refresh;
-    finally
-     if not bo1 then begin
-      idscontroller(fintf).restorerecno:= false;
-     end;
-    end;
+ if (sender = nil) or //not delayed
+            (tdataset(fowner).state = dsbrowse) then begin
+  bo2:= dso_waitcursor in foptions;
+  if bo2 then begin
+   application.beginwait;
+  end;
+  try
+   if not tdataset(fowner).active then begin
+    tdataset(fowner).open;
    end
    else begin
-    tdataset(fowner).refresh;
+    if dscs_restorerecno in fstate then begin
+     exclude(fstate,dscs_restorerecno);
+     bo1:= idscontroller(fintf).restorerecno;
+     idscontroller(fintf).restorerecno:= true;
+     try
+      tdataset(fowner).refresh;
+     finally
+      if not bo1 then begin
+       idscontroller(fintf).restorerecno:= false;
+      end;
+     end;
+    end
+    else begin
+     tdataset(fowner).refresh;
+    end;
    end;
+  finally
+   if bo2 then begin
+    application.endwait;
+   end; 
   end;
- finally
-  if bo2 then begin
-   application.endwait;
-  end; 
  end;
 end;
 
@@ -9032,6 +9124,7 @@ begin
 end;
 
 { tmseparam }
+
 constructor tmseparam.Create(ACollection: TCollection);
 begin
  fdatalink:= tfielddatalink.create;
@@ -9053,6 +9146,9 @@ begin
   end;
   fconnector:= avalue;
   if fconnector <> nil then begin
+   if fconnector.fparam <> nil then begin
+    fconnector.fparam.fconnector:= nil;
+   end;
    fconnector.fparam:= self;
   end;
  end;
@@ -9167,6 +9263,7 @@ begin
    if int1 >= 0 then begin
     fdatasources.move(int1,0);
    end;
+   sortdatasources();
   end;
  end;
 end;

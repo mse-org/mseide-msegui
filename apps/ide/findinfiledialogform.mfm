@@ -17,6 +17,7 @@ object findinfileadialogfo: tfindinfiledialogfo
   options = [fo_closeonesc, fo_localshortcuts, fo_autoreadstat, fo_autowritestat, fo_savepos, fo_savezorder]
   statfile = statfile1
   caption = 'Find Text in Files'
+  oncreate = cereateev
   moduleclassname = 'tmseform'
   object findtext: thistoryedit
     frame.caption = '&Text to find'
@@ -59,7 +60,7 @@ object findinfileadialogfo: tfindinfiledialogfo
       0
       0
     )
-    taborder = 1
+    taborder = 3
     onshowhint = dirshowhint
     bounds_x = 8
     bounds_y = 137
@@ -85,7 +86,7 @@ object findinfileadialogfo: tfindinfiledialogfo
       0
       0
     )
-    taborder = 2
+    taborder = 4
     bounds_x = 8
     bounds_y = 185
     bounds_cx = 321
@@ -100,7 +101,8 @@ object findinfileadialogfo: tfindinfiledialogfo
     reffontheight = 14
   end
   object tlayouter1: tlayouter
-    taborder = 3
+    optionswidget = [ow_tabfocus, ow_parenttabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_destroywidgets]
+    taborder = 1
     bounds_x = 0
     bounds_y = 48
     bounds_cx = 154
@@ -164,11 +166,12 @@ object findinfileadialogfo: tfindinfiledialogfo
     end
   end
   object tlayouter2: tlayouter
-    taborder = 4
+    optionswidget = [ow_tabfocus, ow_parenttabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_destroywidgets]
+    taborder = 2
     bounds_x = 154
     bounds_y = 48
-    bounds_cx = 148
-    bounds_cy = 66
+    bounds_cx = 155
+    bounds_cy = 82
     optionsscale = [osc_expandx, osc_shrinkx]
     object wholeword: tbooleanedit
       frame.caption = '&Whole word'
@@ -206,8 +209,29 @@ object findinfileadialogfo: tfindinfiledialogfo
       ondataentered = sourcechangeexe
       onsetvalue = opensetval
     end
+    object incurrentfile: tbooleaneditradio
+      Tag = 1
+      frame.caption = 'Search in &current file'
+      frame.localprops = []
+      frame.localprops1 = []
+      frame.outerframe = (
+        0
+        1
+        134
+        2
+      )
+      taborder = 2
+      bounds_x = 8
+      bounds_y = 64
+      bounds_cx = 147
+      bounds_cy = 16
+      statfile = statfile1
+      ondataentered = sourcechangeexe
+      onsetvalue = currentsetval
+    end
   end
   object tlayouter4: tlayouter
+    optionswidget = [ow_tabfocus, ow_parenttabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_destroywidgets]
     taborder = 5
     bounds_x = 0
     bounds_y = 232
@@ -218,6 +242,7 @@ object findinfileadialogfo: tfindinfiledialogfo
     optionslayout = [lao_aligny]
     align_glue = wam_start
     object tlayouter3: tlayouter
+      optionswidget = [ow_tabfocus, ow_parenttabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_destroywidgets]
       frame.framei_top = 5
       frame.framei_bottom = 5
       frame.localprops = [frl_fitop, frl_fibottom]

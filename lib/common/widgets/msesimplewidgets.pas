@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2013 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2016 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -113,6 +113,8 @@ type
    procedure setautosize_cx(const avalue: integer);
    procedure setautosize_cy(const avalue: integer);
    procedure setimagedist(const avalue: integer);
+   procedure setimagedist1(const avalue: integer);
+   procedure setimagedist2(const avalue: integer);
    procedure setshortcut(const avalue: shortcutty);
    function isshortcutstored: boolean;
    function getshortcut: shortcutty;
@@ -190,15 +192,21 @@ type
                               write setimagenrdisabled
                             stored isimagenrdisabledstored default -2;
 
-   property imagedist: integer read finfo.ca.imagedist write setimagedist default 0;
+   property imagedist: integer read finfo.ca.imagedist 
+                                              write setimagedist default 0;
+   property imagedist1: integer read finfo.ca.imagedist1 
+                                         write setimagedist1 default 0;
+   property imagedist2: integer read finfo.ca.imagedist2
+                                         write setimagedist2 default 0;
    property colorglyph: colorty read factioninfo.colorglyph write setcolorglyph
-                      stored iscolorglyphstored default cl_default;
+                                   stored iscolorglyphstored default cl_default;
    property shortcut: shortcutty read getshortcut write setshortcut 
                                     stored false default 0;
    property shortcut1: shortcutty read getshortcut1 write setshortcut1 
                                     stored false default 0;
    property shortcuts: shortcutarty read factioninfo.shortcut write setshortcuts;
-   property shortcuts1: shortcutarty read factioninfo.shortcut1 write setshortcuts1;
+   property shortcuts1: shortcutarty read factioninfo.shortcut1 
+                                                        write setshortcuts1;
    property onupdate: buttoneventty read fonupdate write fonupdate;
    property onexecute: notifyeventty read factioninfo.onexecute
               write setonexecute stored isonexecutestored;
@@ -206,8 +214,10 @@ type
               write setonbeforeexecute stored isonbeforeexecutestored;
    property onafterexecute: notifyeventty read factioninfo.onafterexecute
               write setonafterexecute stored isonafterexecutestored;
-   property autosize_cx: integer read fautosize_cx write setautosize_cx default 0;
-   property autosize_cy: integer read fautosize_cy write setautosize_cy default 0;
+   property autosize_cx: integer read fautosize_cx
+                                            write setautosize_cx default 0;
+   property autosize_cy: integer read fautosize_cy
+                                            write setautosize_cy default 0;
   published
    property visible stored false;
    property enabled stored false;
@@ -232,6 +242,8 @@ type
    property imagenr;
    property imagenrdisabled;
    property imagedist;
+   property imagedist1;
+   property imagedist2;
    property colorglyph;
    property options;
    property focusrectdist;
@@ -264,6 +276,8 @@ type
    property modalresult;
    property colorglyph;
    property imagedist;
+   property imagedist1;
+   property imagedist2;
    property options;
    property focusrectdist;
    property onupdate;
@@ -346,6 +360,8 @@ type
    property imagenrmouse;
    property imagenrclicked;
    property imagedist;
+   property imagedist1;
+   property imagedist2;
    property colorglyph;
    property options;
    property focusrectdist;
@@ -387,6 +403,8 @@ type
    property font;
    property modalresult;
    property imagedist;
+   property imagedist1;
+   property imagedist2;
    property colorglyph;
    property options;
    property focusrectdist;
@@ -580,7 +598,7 @@ type
    procedure sizechanged; override;
    procedure loaded; override;
    procedure visiblepropchanged; override;
-   function getminshrinksize: sizety; override;
+   function calcminshrinksize: sizety; override;
    procedure defineproperties(filer: tfiler); override;
   public
    constructor create(aowner: tcomponent); override;
@@ -688,6 +706,9 @@ type
    property framewidth;
    property colorframe;
    property colorframeactive;
+   property colorframedisabled;
+   property colorframemouse;
+   property colorframeclicked;
    property colordkshadow;
    property colorshadow;
    property colorlight;
@@ -1259,14 +1280,14 @@ end;
 procedure tcustombutton.setimagepos(const avalue: imageposty);
 begin
  if avalue <> finfo.ca.imagepos then begin
-  if avalue in [ip_left,ip_right,ip_top,ip_bottom,
-                ip_leftcenter,ip_rightcenter,
-                ip_topcenter,ip_bottomcenter] then begin
+//  if avalue in [ip_left,ip_right,ip_top,ip_bottom,
+//                ip_leftcenter,ip_rightcenter,
+//                ip_topcenter,ip_bottomcenter] then begin
    finfo.ca.imagepos:= avalue;
-  end
-  else begin
-   finfo.ca.imagepos:= ip_center;
-  end;
+//  end
+//  else begin
+//   finfo.ca.imagepos:= ip_center;
+//  end;
   checkautosize;
   invalidate;
  end;
@@ -1276,7 +1297,7 @@ procedure tcustombutton.setcaptiondist(const avalue: integer);
 begin
  if avalue <> finfo.ca.captiondist then begin
   finfo.ca.captiondist:= avalue;
-  checkautosize;
+  checkautosize();
  end;
 end;
 
@@ -1284,7 +1305,23 @@ procedure tcustombutton.setimagedist(const avalue: integer);
 begin
  if avalue <> finfo.ca.imagedist then begin
   finfo.ca.imagedist:= avalue;
-  checkautosize;
+  checkautosize();
+ end;
+end;
+
+procedure tcustombutton.setimagedist1(const avalue: integer);
+begin
+ if avalue <> finfo.ca.imagedist1 then begin
+  finfo.ca.imagedist1:= avalue;
+  checkautosize();
+ end;
+end;
+
+procedure tcustombutton.setimagedist2(const avalue: integer);
+begin
+ if avalue <> finfo.ca.imagedist2 then begin
+  finfo.ca.imagedist2:= avalue;
+  checkautosize();
  end;
 end;
 
@@ -1381,43 +1418,20 @@ begin
 end;
 
 procedure tcustombutton.getautopaintsize(var asize: sizety);
-var
- int1: integer;
 begin
- asize:= textrect(getcanvas,finfo.ca.caption,finfo.ca.textflags,font).size;
- if imagepos in [ip_top,ip_bottom,ip_topcenter,ip_bottomcenter] then begin
-  inc(asize.cy,finfo.ca.captiondist);
- end
- else begin  
-  inc(asize.cx,finfo.ca.captiondist);
- end;
- if imagelist <> nil then begin
-  with imagelist do begin
-   if imagepos in [ip_top,ip_bottom,ip_topcenter,ip_bottomcenter] then begin
-    if width > asize.cx then begin
-     asize.cx:= width;
-    end;
-    inc(asize.cy,finfo.ca.imagedist+height);
-   end
-   else begin
-    int1:= height {+ imagedisttop+imagedistbottom};
-    if int1 > asize.cy then begin
-     asize.cy:= int1;
-    end;
-    if imagepos <> ip_center then begin
-     asize.cx:= asize.cx + width;
-    end
-    else begin
-     if width > asize.cx then begin
-      asize.cx:= width;
-     end;
-    end;
-    inc(asize.cx,finfo.ca.imagedist);
-   end;
-  end;
- end;
+ asize:= calccaptionsize(getcanvas,finfo.ca);
  inc(asize.cx,8+fautosize_cx);
  inc(asize.cy,6+fautosize_cy);
+ if (fframe <> nil) then begin
+  if fso_flat in fframe.optionsskin then begin
+   dec(asize.cx,2);
+   dec(asize.cy,2);
+  end;
+  if fso_noanim in fframe.optionsskin then begin
+   dec(asize.cx,2);
+   dec(asize.cy,2);
+  end;
+ end;
  if not (shs_noinnerrect in finfo.state) then begin
   innertopaintsize(asize);
  end;
@@ -2284,12 +2298,12 @@ begin
  end;
 end;
 
-function tcustomscalingwidget.getminshrinksize: sizety;
+function tcustomscalingwidget.calcminshrinksize: sizety;
 var
  size1: sizety;
  box,boy: boolean;
 begin
- result:= inherited getminshrinksize;
+ result:= inherited calcminshrinksize;
  box:= (fanchors * [an_left,an_right] = [an_left,an_right]) and 
             (osc_expandshrinkx in foptionsscale) or 
                                             (osc_expandx in foptionsscale);

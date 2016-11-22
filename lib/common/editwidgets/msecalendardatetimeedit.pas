@@ -19,14 +19,15 @@ interface
 uses
  classes,mclasses,msedataedits,msepopupcalendar,msedropdownlist,msetypes,
  msegraphutils,
- mseguiglob,mseinplaceedit,mseedit,msestrings,msegui,mseevent,msemenus,mseeditglob;
+ mseguiglob,mseinplaceedit,mseedit,msestrings,msegui,mseevent,msemenus,
+ mseeditglob,msegraphics;
  
 type
  tcustomcalendardatetimeedit = class(tcustomdatetimeedit,idropdowncalendar)
   private
    fdropdown: tcalendarcontroller;
-   procedure setframe(const avalue: tdropdownbuttonframe);
-   function getframe: tdropdownbuttonframe;
+   procedure setframe(const avalue: tdropdownmultibuttonframe);
+   function getframe: tdropdownmultibuttonframe;
   protected
    function getcellframe: framety; override;
     //idropdownwidget
@@ -41,7 +42,7 @@ type
    destructor destroy; override;
    property dropdown: tcalendarcontroller read fdropdown write fdropdown;
   published
-   property frame: tdropdownbuttonframe read getframe write setframe;
+   property frame: tdropdownmultibuttonframe read getframe write setframe;
  end;
   
  tcalendardatetimeedit = class(tcustomcalendardatetimeedit)
@@ -80,14 +81,15 @@ begin
  inherited;
 end;
 
-procedure tcustomcalendardatetimeedit.setframe(const avalue: tdropdownbuttonframe);
+procedure tcustomcalendardatetimeedit.setframe(
+                     const avalue: tdropdownmultibuttonframe);
 begin
  inherited setframe(avalue);
 end;
 
-function tcustomcalendardatetimeedit.getframe: tdropdownbuttonframe;
+function tcustomcalendardatetimeedit.getframe: tdropdownmultibuttonframe;
 begin
- result:= tdropdownbuttonframe(inherited getframe);
+ result:= tdropdownmultibuttonframe(inherited getframe);
 end;
 {
 procedure tcustomcalendardatetimeedit.internalcreateframe;

@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2015 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2016 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -22,7 +22,7 @@ uses
  mseevent,mseglob,mseguiglob,msestat,msestatfile,
  mseinplaceedit,msegrids,msetypes,mseshapes,msewidgets,
  msedrawtext,classes,mclasses,msereal,mseclasses,msearrayprops,
- msebitmap,msemenus,msetimer,mseactions,
+ msebitmap,msemenus,msetimer,mseactions,msekeyboard,
  msesimplewidgets,msepointer,msestrings,msescrollbar
          {$ifdef mse_with_ifi},mseifiglob{$endif};
 
@@ -37,6 +37,7 @@ const
  defaulttextflagsactive = [tf_ycentered];
  defaulttextflagsnoycentered = defaulttextflags - [tf_ycentered];
  defaulttextflagsactivenoycentered = defaulttextflagsactive - [tf_ycentered];
+ defaulttextflagsempty = [tf_ycentered,tf_xcentered];
 
 type
 
@@ -50,6 +51,9 @@ type
    property framewidth;
    property colorframe;
    property colorframeactive;
+   property colorframedisabled;
+   property colorframemouse;
+   property colorframeclicked;
    property colordkshadow;
    property colorshadow;
    property colorlight;
@@ -115,6 +119,9 @@ type
    property framewidth;
    property colorframe;
    property colorframeactive;
+   property colorframedisabled;
+   property colorframemouse;
+   property colorframeclicked;
    property colordkshadow;
    property colorshadow;
    property colorlight;
@@ -181,6 +188,9 @@ type
    property framewidth;
    property colorframe;
    property colorframeactive;
+   property colorframedisabled;
+   property colorframemouse;
+   property colorframeclicked;
    property colordkshadow;
    property colorshadow;
    property colorlight;
@@ -213,7 +223,9 @@ type
  buttoneventty = procedure(const sender: tobject; var action: buttonactionty;
                        const buttonindex: integer) of object;
  framebuttonoptionty = 
-       (fbo_left,fbo_invisible,fbo_inactiveinvisible,fbo_disabled,
+       (fbo_left,fbo_invisible,fbo_inactiveinvisible,
+        fbo_disabled,fbo_enabled, //overrides frame readonly state
+        fbo_executeonclientdblclick,
         fbo_flat,fbo_noanim,fbo_nomouseanim,fbo_noclickanim,fbo_nofocusanim);
  framebuttonoptionsty = set of framebuttonoptionty;
 
@@ -225,6 +237,7 @@ type
    foptions: framebuttonoptionsty;
    fonexecute: notifyeventty;
    faction: taction;
+   fshortcut: shortcutty;
    procedure setbuttonwidth(const Value: integer);
    procedure setoptions(const Value: framebuttonoptionsty);
    procedure optionstostate();
@@ -265,6 +278,8 @@ type
    fframerect: rectty;
    finfo: shapeinfoty;
    fframe: tframe;
+   freadonly: boolean; //for checkreadonlystate of tbuttonframe
+   procedure doexec();
    procedure mouseevent(var info: mouseeventinfoty;
                  const intf: iframe; const buttonintf: ibutton;
                  const index: integer);
@@ -294,6 +309,8 @@ type
                                  write setimagenrdisabled default -2; //grayed
    property options: framebuttonoptionsty read foptions write setoptions
                                             default [];
+   property shortcut: shortcutty read fshortcut write fshortcut
+                                                    default ord(key_none) ;
    property action: taction read faction write setaction;
    property onexecute: notifyeventty read fonexecute write fonexecute;
                                 //executed after action execute
@@ -325,6 +342,7 @@ type
    class function getitemclasstype: persistentclassty; override;
    procedure updatewidgetstate;
    function wantmouseevent(const apos: pointty): boolean;
+   procedure dokeydown(var info: keyeventinfoty);
   public
    property items[const index: integer]: tframebutton read getitems1; default;
    procedure checktemplate(const sender: tobject);
@@ -340,6 +358,9 @@ type
    procedure getpaintframe(var aframe: framety); override;
    function getbuttonclass: framebuttonclassty; virtual;
    procedure updatestate; override;
+   procedure internalpaintoverlay(const canvas: tcanvas; 
+                                           const arect: rectty) override;
+   procedure dokeydown(var info: keyeventinfoty) override;
   public
    constructor create(const intf: icaptionframe; const buttonintf: ibutton);
                                                    reintroduce; virtual;
@@ -349,7 +370,6 @@ type
    procedure updatemousestate(const sender: twidget;
                                  const info: mouseeventinfoty); override;
    procedure updatewidgetstate; override;
-   procedure paintoverlay(const canvas: tcanvas; const arect: rectty); override;
    procedure mouseevent(var info: mouseeventinfoty);
    procedure initgridframe; override;
    property buttons: tframebuttons read fbuttons write setbuttons;
@@ -387,6 +407,11 @@ type
  texteditedeventty = procedure(const sender: tcustomedit;
                                       var atext: msestring) of object;
  
+ emptyoptionty = (eo_defaulttext,   //use text of tfacecontroller
+                  eo_showfocused,     //show empty_text if focused
+                  eo_nocolorfocused); //do not show empty_color if focused 
+ emptyoptionsty = set of emptyoptionty;
+
  tcustomedit = class(tpublishedwidget,iedit)
   private
    fonchange: notifyeventty;
@@ -395,27 +420,45 @@ type
    fonpastefromclipboard: updatestringeventty;
    fcursorreadonly: cursorshapety;
    fonpaintimage: painteventty;
+   fempty_text: msestring;
+   fempty_textflags: textflagsty;
+   fempty_textcolor: colorty;
+   fempty_textcolorbackground: colorty;
+   fempty_fontstyle: fontstylesty;
+   fempty_color: colorty;
+   fempty_options: emptyoptionsty;
    function getmaxlength: integer;
    function getpasswordchar: msechar;
    procedure setpasswordchar(const Value: msechar);
-   function gettext: msestring;
    function getoldtext: msestring;
-   procedure settext(const Value: msestring);
    procedure settextflags(const value: textflagsty);
    procedure settextflagsactive(const value: textflagsty);
    function getcaretwidth: integer;
    procedure setcaretwidth(const Value: integer);   
    procedure setcursorreadonly(const avalue: cursorshapety);
    function getoptionsedit1: optionsedit1ty;
+   procedure setempty_text(const avalue: msestring);
+   procedure setempty_textflags(const avalue: textflagsty);
+   procedure setempty_textcolor(const avalue: colorty);
+   procedure setempty_textcolorbackground(const avalue: colorty);
+   procedure setempty_fontstyle(const avalue: fontstylesty);
+   procedure setempty_color(const avalue: colorty);
   protected
    ftextflags: textflagsty;
    ftextflagsactive: textflagsty;
    feditor: tinplaceedit;
    foptionsedit: optionseditty;
+   fstate: dataeditstatesty;
+   function gettext: msestring virtual;
+   procedure settext(const avalue: msestring) virtual;
+//   procedure setcurrenttext(const avalue: msestring);
    function getreadonly: boolean; virtual;
    procedure setreadonly(const avalue: boolean); virtual;
    procedure setmaxlength(const avalue: integer);
    procedure updatetextflags; virtual;
+   function getedittext: msestring; virtual;
+   procedure updateedittext(const force: boolean);
+   procedure updateemptytext();
    procedure updateflagtext(var avalue: msestring);
    function geteditor: tinplaceedit;
    function geteditfont: tfont; virtual;
@@ -443,6 +486,7 @@ type
    procedure dofocus; override;
    procedure dodefocus; override;
    procedure dopaintforeground(const canvas: tcanvas); override;
+   procedure dopaintbackground(const canvas: tcanvas); override;
    procedure paintimage(const canvas: tcanvas); virtual;
    function needsfocuspaint: boolean; override;
 //   procedure doafterpaint(const canvas: tcanvas); override;
@@ -451,8 +495,10 @@ type
    procedure showhint(const aid: int32; var info: hintinfoty); override;
 
    procedure dochange; virtual;
+   procedure formatchanged; virtual;
    procedure internaltextedited(const aevent: texteditedeventty);
    procedure dotextedited; virtual;
+   procedure emptychanged;
    procedure readpwchar(reader: treader);
    procedure writepwchar(writer: twriter);
    procedure defineproperties(filer: tfiler); override;
@@ -505,6 +551,23 @@ type
    property font: twidgetfont read getfont write setfont stored isfontstored;
    property caretwidth: integer read getcaretwidth write setcaretwidth 
                                                     default defaultcaretwidth;
+
+   property empty_options: emptyoptionsty read fempty_options 
+                                           write fempty_options default [];
+   property empty_color: colorty read fempty_color write setempty_color 
+                                           default cl_none;
+   property empty_font: twidgetfontempty read getfontempty write setfontempty 
+                                                  stored isfontemptystored;
+   property empty_fontstyle: fontstylesty read fempty_fontstyle 
+                    write setempty_fontstyle default [];
+   property empty_textflags: textflagsty read fempty_textflags 
+                    write setempty_textflags default defaulttextflagsempty;
+   property empty_text: msestring read fempty_text write setempty_text;
+   property empty_textcolor: colorty read fempty_textcolor 
+                                   write setempty_textcolor default cl_none;
+   property empty_textcolorbackground: colorty read fempty_textcolorbackground
+                          write setempty_textcolorbackground default cl_none;
+
    property onchange: notifyeventty read fonchange write fonchange;
    property ontextedited: texteditedeventty read fontextedited 
                                                            write fontextedited;
@@ -532,8 +595,13 @@ type
    procedure setdelay(const avalue: integer);
    procedure setstatfile(const avalue: tstatfile);
   protected
+   function gettext: msestring override;
+   procedure settext(const avalue: msestring) override;
    procedure dotextedited; override;
    procedure editnotification(var info: editnotificationinfoty); override;
+   procedure loaded() override;
+   procedure dofocus() override;
+   procedure dodefocus() override;
 
     //istatfile
    procedure dostatread(const reader: tstatreader); virtual;
@@ -559,6 +627,16 @@ type
    property textflags;
    property textflagsactive;
    property passwordchar;
+
+   property empty_options;
+   property empty_color;
+   property empty_font;
+   property empty_fontstyle;
+   property empty_textflags;
+   property empty_text;
+   property empty_textcolor;
+   property empty_textcolorbackground;
+   
    property maxlength;
    property caretwidth;
    property cursorreadonly;
@@ -573,7 +651,7 @@ type
 
 implementation
 uses
- sysutils,msekeyboard,msebits,msedataedits,msestockobjects,mseact,
+ sysutils,msebits,msedataedits,msestockobjects,mseact,
  mseassistiveserver,mseassistiveclient;
 
 type
@@ -624,6 +702,7 @@ begin
  finfo.ca.colorglyph:= cl_default;
  finfo.ca.imagenr:= -1;
  finfo.imagenrdisabled:= -2;
+ fshortcut:= ord(key_none);
  include(finfo.state,shs_widgetorg);
  inherited;
 end;
@@ -666,7 +745,8 @@ var
 begin
  statebefore:= finfo.state;
  optionsbefore:= foptions;
- foptions:= Value;
+ card32(foptions):= setsinglebit(card32(Value),card32(foptions),
+                          card32([fbo_disabled,fbo_enabled]));;
  optionstostate();
  if (statebefore <> finfo.state) or 
        ((optionsbefore >< foptions) * 
@@ -744,12 +824,24 @@ begin
  end;
 end;
 
+procedure tframebutton.doexec();
+begin
+ if faction <> nil then begin
+  faction.execute();
+ end;
+ if assigned(fonexecute) then begin
+  fonexecute(self);
+ end;
+end; //doexe
+
 procedure tframebutton.mouseevent(var info: mouseeventinfoty;
      const intf: iframe; const buttonintf: ibutton; const index: integer);
+
 var
- bo1: boolean;
+ bo1,bo2: boolean;
  action1: buttonactionty;
 begin
+ bo2:= false;
  with finfo do begin
   bo1:= shs_clicked in state;
   if updatemouseshapestate(finfo,info,nil,nil) then begin
@@ -771,12 +863,16 @@ begin
    action1:= ba_click;
    buttonintf.buttonaction(action1,index);
    if action1 = ba_click then begin
-    if faction <> nil then begin
-     faction.execute();
-    end;
-    if assigned(fonexecute) then begin
-     fonexecute(self);
-    end;
+    doexec();
+    bo2:= true;
+   end;
+  end;
+ end;
+ if (fbo_executeonclientdblclick in foptions) and not bo2 and
+                (finfo.state * [shs_disabled,shs_invisible] = []) then begin
+  with getwidget() do begin
+   if iswidgetdblclicked(info) then begin
+    doexec();
    end;
   end;
  end;
@@ -853,7 +949,8 @@ procedure tframebutton.updatewidgetstate(const awidget: twidget);
 // invisiblebefore: boolean;
 begin
 // invisiblebefore:= ss_invisible in finfo.state;
- updatewidgetshapestate(finfo,awidget,fbo_disabled in foptions,
+ updatewidgetshapestate(finfo,awidget,(fbo_disabled in foptions) or 
+           freadonly and not (fbo_enabled in foptions),
                                  {fbo_invisible in foptions,}fframe);
  if (fbo_inactiveinvisible in foptions) and 
   (awidget.componentstate * [csdesigning,csdestroying] = []) then begin
@@ -1046,6 +1143,22 @@ begin
  end;
 end;
 
+procedure tframebuttons.dokeydown(var info: keyeventinfoty);
+var
+ i1: int32;
+begin
+ for i1:= 0 to high(fitems) do begin
+  with tframebutton(fitems[i1]) do begin
+   if (finfo.state * [shs_disabled,shs_invisible] = []) and 
+               checkshortcutcode(fshortcut,info) then begin
+    include(info.eventstate,es_processed);
+    doexec();
+    break;
+   end;
+  end;
+ end;
+end;
+
 procedure tframebuttons.checktemplate(const sender: tobject);
 var
  int1: integer;
@@ -1182,8 +1295,8 @@ begin
  end;
 end;
 
-procedure tcustombuttonsframe.paintoverlay(const canvas: tcanvas;
-                                                     const arect: rectty);
+procedure tcustombuttonsframe.internalpaintoverlay(const canvas: tcanvas;
+                                                        const arect: rectty);
 var
  int1: integer;
  color1,color2: colorty;
@@ -1217,6 +1330,16 @@ begin
   end;
  end;
  inherited;
+end;
+
+procedure tcustombuttonsframe.dokeydown(var info: keyeventinfoty);
+begin
+ if not (es_processed in info.eventstate) then begin
+  fbuttons.dokeydown(info);
+  if not (es_processed in info.eventstate) then begin
+   inherited;
+  end;
+ end;
 end;
 
 procedure tcustombuttonsframe.setbuttons(const Value: tframebuttons);
@@ -1303,6 +1426,10 @@ begin
  foptionswidget1:= defaulteditwidgetoptions1;
  ftextflags:= defaulttextflags;
  ftextflagsactive:= defaulttextflagsactive;
+ fempty_textflags:= defaulttextflagsempty;
+ fempty_textcolor:= cl_none;
+ fempty_textcolorbackground:= cl_none;
+ fempty_color:= cl_none;
  updatetextflags;
 end;
 
@@ -1384,6 +1511,16 @@ begin
  feditor.dopaint(canvas);
 end;
 
+procedure tcustomedit.dopaintbackground(const canvas: tcanvas);
+begin
+ inherited;
+ if (fempty_color <> cl_none) and 
+         (fstate * [des_emptytext,des_grayed] = [des_emptytext]) and 
+         (not (eo_nocolorfocused in fempty_options) or not focused)then begin
+  canvas.fillrect(paintclientrect,fempty_color);
+ end;
+end;
+
 function tcustomedit.needsfocuspaint: boolean;
 begin
  result:= inherited needsfocuspaint or 
@@ -1408,6 +1545,12 @@ begin
   end;
   ea_textedited,ea_undone: begin
    dotextedited;
+  end;
+  ea_resetemptytext: begin
+   if des_emptytext in fstate then begin
+    exclude(fstate,des_emptytext);
+    updateemptytext();
+   end;
   end;
  end;
 end;
@@ -1475,20 +1618,17 @@ begin
  end;
 end;
 
-{
-function tcustomedit.getoptionsdb: optionseditdbty;
-begin
- result:= foptionsdb;
-end;
-}
 procedure tcustomedit.setoptionsedit(const avalue: optionseditty);
 var
  opt1: optionsedit1ty;
+ opt: optionseditty;
 begin
  if foptionsedit <> avalue then begin
   opt1:= feditor.optionsedit1;
-  transferoptionsedit(self,avalue,foptionsedit,opt1);
+  transferoptionsedit(self,avalue,opt,opt1);
   feditor.optionsedit1:= opt1;
+  foptionsedit:= optionseditty(setsinglebit(card32(opt),card32(foptionsedit),
+                                 card32([oe_homeonenter,oe_endonenter])));
   updatereadonlystate;
  end;
 end;
@@ -1496,6 +1636,52 @@ end;
 function tcustomedit.getoptionsedit1: optionsedit1ty;
 begin
  result:= feditor.optionsedit1;
+end;
+
+procedure tcustomedit.setempty_text(const avalue: msestring);
+begin
+ fempty_text:= avalue;
+ formatchanged;
+end;
+
+procedure tcustomedit.setempty_textflags(const avalue: textflagsty);
+begin
+ if avalue <> fempty_textflags then begin
+  fempty_textflags:= checktextflags(fempty_textflags,avalue);
+  emptychanged;
+ end;
+end;
+
+procedure tcustomedit.setempty_textcolor(const avalue: colorty);
+begin
+ if avalue <> fempty_textcolor then begin
+  fempty_textcolor:= avalue;
+  emptychanged;
+ end;
+end;
+
+procedure tcustomedit.setempty_textcolorbackground(const avalue: colorty);
+begin
+ if avalue <> fempty_textcolorbackground then begin
+  fempty_textcolorbackground:= avalue;
+  emptychanged;
+ end;
+end;
+
+procedure tcustomedit.setempty_fontstyle(const avalue: fontstylesty);
+begin
+ if avalue <> fempty_fontstyle then begin
+  fempty_fontstyle:= avalue;
+  emptychanged;
+ end;
+end;
+
+procedure tcustomedit.setempty_color(const avalue: colorty);
+begin
+ if avalue <> fempty_color then begin
+  fempty_color:= avalue;
+  invalidate;
+ end;
 end;
 
 procedure tcustomedit.setoptionsedit1(const avalue: optionsedit1ty);
@@ -1666,13 +1852,71 @@ begin
  result:= feditor.oldtext;
 end;
 
-procedure tcustomedit.settext(const Value: msestring);
+procedure tcustomedit.settext(const avalue: msestring);
 begin
- feditor.text:= value;
+ feditor.text:= avalue;
+end;
+{
+procedure tcustomedit.setcurrenttext(const avalue: msestring);
+begin
+ feditor.text:= avalue;
+ if avalue <> '' then begin
+  exclude(fstate,des_emptytext);
+ end;
+end;
+}
+function tcustomedit.getedittext: msestring;
+begin
+ result:= text;
 end;
 
-procedure tcustomedit.updatetextflags;
+procedure tcustomedit.updateemptytext();
 begin
+ if des_emptytext in fstate then begin
+  include(tinplaceedit1(feditor).fstate,ies_emptytext);
+  feditor.font:= getfontempty1{fempty_font};
+  if fempty_textcolor <> cl_none then begin
+   feditor.fontcolor:= fempty_textcolor;
+  end;
+  if fempty_textcolorbackground <> cl_none then begin
+   feditor.fontcolorbackground:= fempty_textcolorbackground;
+  end;
+  if fempty_fontstyle <> [] then begin
+   feditor.fontstyle:= fempty_fontstyle;
+  end;
+ end
+ else begin
+  exclude(tinplaceedit1(feditor).fstate,ies_emptytext);
+  feditor.font:= geteditfont;
+  feditor.fontcolor:= cl_none;
+  feditor.fontcolorbackground:= cl_none;
+  feditor.fontstyle:= [];
+ end;
+ updatetextflags();
+end;
+
+procedure tcustomedit.updateedittext(const force: boolean);
+var
+ mstr1: msestring;
+ state1: dataeditstatesty;
+begin
+ state1:= fstate;
+ mstr1:= getedittext();
+ if (not(des_isdb in fstate) and (mstr1 = '') or (des_dbnull in fstate)) and 
+            (not focused or (eo_showfocused in fempty_options)) then begin
+  mstr1:= fempty_text;
+  include(fstate,des_emptytext);
+ end
+ else begin
+  exclude(fstate,des_emptytext);
+ end;
+ feditor.text:= mstr1;
+ if force or ((des_emptytext in fstate) xor 
+                               (des_emptytext in state1)) then begin
+  updateemptytext();
+ end;
+
+{
  if not (csloading in componentstate) then begin
   if isenabled or (oe_nogray in foptionsedit) then begin
    feditor.textflags:= ftextflags;
@@ -1681,6 +1925,31 @@ begin
   else begin
    feditor.textflags:= ftextflags + [tf_grayed];
    feditor.textflagsactive:= ftextflagsactive + [tf_grayed];
+  end;
+ end;
+}
+end;
+
+procedure tcustomedit.updatetextflags;
+var
+ aflags: textflagsty;
+begin
+ if not (csloading in componentstate) then begin
+  if (des_emptytext in fstate) and (fempty_text <> '') then begin
+   aflags:= fempty_textflags;
+  end
+  else begin
+   aflags:= textflags;
+  end;
+  if isenabled or (oe_nogray in foptionsedit) then begin
+   exclude(fstate,des_grayed);
+   feditor.textflags:= aflags;
+   feditor.textflagsactive:= textflagsactive;
+  end
+  else begin
+   include(fstate,des_grayed);
+   feditor.textflags:= aflags + [tf_grayed];
+   feditor.textflagsactive:= textflagsactive + [tf_grayed];
   end;
  end;
 end;
@@ -1702,7 +1971,7 @@ end;
 procedure tcustomedit.settextflagsactive(const value: textflagsty);
 begin
  if ftextflagsactive <> value then begin
-  ftextflagsactive:= checktextflags(ftextflagsactive,value) - ellipsemask;
+  ftextflagsactive:= checktextflags(ftextflagsactive,value) {- ellipsemask};
   updatetextflags;
  end;
 end;
@@ -1727,6 +1996,13 @@ begin
  end;
 end;
 
+procedure tcustomedit.formatchanged();
+begin
+ if not (csloading in componentstate) then begin
+  invalidate;
+ end;
+end;
+
 procedure tcustomedit.internaltextedited(const aevent: texteditedeventty);
 var
  mstr1: msestring;
@@ -1744,6 +2020,13 @@ end;
 procedure tcustomedit.dotextedited;
 begin
  internaltextedited(fontextedited);
+end;
+
+procedure tcustomedit.emptychanged;
+begin
+ if not (csloading in componentstate) then begin
+  updateedittext(true);
+ end;
 end;
 
 procedure tcustomedit.initnewcomponent(const ascale: real);
@@ -1865,6 +2148,7 @@ end;
 function tcustomedit.gettextcliprect(): rectty;
 begin
  result:= clippedpaintrect();
+ subpoint1(result.pos,paintpos);
 end;
 
 procedure tcustomedit.showhint(const aid: int32; var info: hintinfoty);
@@ -1952,18 +2236,74 @@ begin
 end;
 
 procedure tedit.editnotification(var info: editnotificationinfoty);
+var
+ mstr1: msestring;
 begin
  inherited;
  case info.action of
   ea_textentered: begin
+   mstr1:= text;
+   updateflagtext(mstr1);
+   text:= mstr1;
+   ftimer.fireandstop;
    initfocus;
   end;
+  ea_undone: begin
+   updateedittext(false);
+  end;
  end;
+end;
+
+procedure tedit.loaded();
+begin
+ inherited;
+ updateedittext(false);
+end;
+
+procedure tedit.dofocus();
+begin
+ updateedittext(false);
+ inherited;
+end;
+
+procedure tedit.dodefocus();
+var
+ info1: editnotificationinfoty;
+begin
+ with tinplaceedit1(feditor) do begin
+  if ies_edited in fstate then begin
+   info1:= initactioninfo(ea_textentered);
+   editnotification(info1);
+  end
+  else begin
+   updateedittext(false);
+  end;
+ end;
+ inherited;
 end;
 
 procedure tedit.setstatfile(const avalue: tstatfile);
 begin
  setstatfilevar(istatfile(self),avalue,fstatfile);
+end;
+
+function tedit.gettext: msestring;
+begin
+ result:= inherited gettext();
+ if des_emptytext in fstate then begin
+  result:= '';
+ end;
+end;
+
+procedure tedit.settext(const avalue: msestring);
+begin
+ inherited;
+ if not (csloading in componentstate) then begin
+  if avalue <> '' then begin
+   exclude(fstate,des_emptytext);
+  end;
+  updateedittext(true);
+ end;
 end;
 
 procedure tedit.dostatwrite(const writer: tstatwriter);

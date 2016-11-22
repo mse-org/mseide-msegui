@@ -731,7 +731,8 @@ begin
      if apixelpermm > 0 then begin
       with pimageinfo8(imageinfo)^ do begin
        a.units:= pixelsperinchresolution;
-       a.density:= gmstring(formatfloatmse(apixelpermm*ppmmtoppi,'',true));
+       a.density:= gmstring(ansistring(formatfloatmse(apixelpermm*ppmmtoppi,
+                                                                     '',true)));
       end;
      end;
 
@@ -912,7 +913,8 @@ begin
   with pimageinfo8(imageinfo)^ do begin //a identical for all dephts
    if apixelpermm > 0 then begin
     a.units:= pixelsperinchresolution;
-    a.density:= gmstring(formatfloatmse(apixelpermm*ppmmtoppi,'',true));
+    a.density:= gmstring(ansistring(formatfloatmse(apixelpermm*ppmmtoppi,
+                                                                 '',true)));
    end;
    if aindex >= 0 then begin
     a.subimage:= aindex;

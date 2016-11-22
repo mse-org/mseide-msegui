@@ -43,7 +43,7 @@ type
                                                                   reintroduce;
  end;
 
- tdialogdropdownbuttonframe = class(tdropdownbuttonframe)
+ tdialogdropdownbuttonframe = class(tdropdownmultibuttonframe)
   private
    function getbuttondialog: tdropdownbutton;
    procedure setbuttondialog(const avalue: tdropdownbutton);

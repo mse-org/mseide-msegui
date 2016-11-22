@@ -22,7 +22,9 @@ uses
  mseassistiveclient{$ifdef mse_with_ifi},mseificompglob{$endif};
 
 type
- menuoptionty = (mo_noinsert,mo_stopinsert,mo_insertfirst,mo_noseparator,
+ menuoptionty = (mo_noinsert,mo_stopinsert,mo_insertfirst,
+                 mo_noseparator,
+                 mo_forceseparator, //do not set mao_optional
                  mo_singleregion,mo_shortcutright,mo_commonwidth,
                  mo_activate,{mo_noanim,}mo_mainarrow,mo_updateonidle);
  menuoptionsty = set of menuoptionty;
@@ -53,20 +55,25 @@ type
    function hasvisibleitem: boolean;
    procedure sort;
    procedure assign(source: tpersistent); override;
-   function insert(const index: integer; const aitem: tmenuitem): integer; overload;
+   function insert(const index: integer; 
+                                const aitem: tmenuitem): integer overload;
       //aitem is owned, returns index of new item
                             //if index > count -> index:= count
-   function insert(const index: integer; const aitems: tmenuitems): integer; overload;
+   function insert(const index: integer; 
+                              const aitems: tmenuitems): integer overload;
       //items are copied, returns index of first new item
                             //if index > count -> index:= count
    function insert(const index: integer; const captions: array of msestring;
                             //if index > count -> index:= count
                  const options: array of menuactionoptionsty;
                  const states: array of actionstatesty;
-                 const onexecutes: array of notifyeventty): integer; overload;
+                 const onexecutes: array of notifyeventty): integer overload;
                         //returns index of first new item
-   procedure insertseparator(const index: integer);
-   property items[index: integer]: tmenuitem read getmenuitems write setmenuitems; default;
+   procedure insertseparator(const index: integer;
+                                      const aoptional: boolean = false);
+                            //if index > count -> index:= count
+   property items[index: integer]: tmenuitem read getmenuitems 
+                                             write setmenuitems; default;
    function itembyname(const name: ansistring): tmenuitem;
    function itemindexbyname(const name: ansistring): integer;
  end;
@@ -331,6 +338,7 @@ type
   protected
    ftransientfor: twidget;
    fmouseinfopo: pmouseeventinfoty;
+   procedure settransientfor(const awidget: twidget);
    procedure doidle(var again: boolean);
    procedure readstate(reader: treader); override;
    procedure loaded; override;
@@ -414,12 +422,13 @@ type
                  const aoptions: array of menuactionoptionsty;
                  const states: array of actionstatesty;
                  const onexecutes: array of notifyeventty;
-                 const aseparator: boolean = true): integer; overload;
+                 const aseparator: boolean = true;
+                 const optionalseparator: boolean = true): integer; overload;
                             //returs index of first added item
    class function additems(var amenu: tpopupmenu; const atransientfor: twidget;
                  var mouseinfo: mouseeventinfoty; const items: tmenuitems;
-                 aseparator: boolean = true;
-                 const first: boolean = false): integer; overload;
+                 const aseparator: boolean = true; const first: boolean = false;
+                 const optionalseparator: boolean = true): integer; overload;
                             //returs index of first added item
    class function additems(var amenu: tpopupmenu; const atransientfor: twidget;
                  var mouseinfo: mouseeventinfoty; const items: tcustommenu{;
@@ -526,7 +535,10 @@ implementation
 uses
  sysutils,msestockobjects,rtlconsts,msebits,msemenuwidgets,msedatalist,
  mseactions,msestreaming,msearrayutils,msesysutils;
-
+type
+ tapplication1 = class(tguiapplication)
+ end;
+ 
 procedure freetransientmenu(var amenu: tcustommenu); 
 begin
  if (amenu <> nil) and amenu.ftransient then begin
@@ -558,7 +570,7 @@ constructor tcustommenu.createtransient(const atransientfor: twidget;
 begin
  create(nil);
  ftransient:= true;
- ftransientfor:= atransientfor;
+ settransientfor(atransientfor);
  fmouseinfopo:= amouseinfopo;
  updateskin;
 end;
@@ -737,6 +749,12 @@ begin
   setlinkedvar(avalue,tmsecomponent(ftemplate.checkboxframe));
   sendchangeevent;
  end;
+end;
+
+procedure tcustommenu.settransientfor(const awidget: twidget);
+begin
+ ftransientfor:= awidget;
+ tapplication1(application).flastshowmenuwidget:= awidget;
 end;
 
 procedure tcustommenu.templateevent(const sender: tobject; 
@@ -1933,12 +1951,18 @@ begin
  end;
 end;
 
-procedure tmenuitems.insertseparator(const index: integer);
+procedure tmenuitems.insertseparator(const index: integer;
+                                          const aoptional: boolean = false);
 var
  item1: tmenuitem;
+ opt1: menuactionoptionsty;
 begin
  item1:= tmenuitem.create;
- item1.options:= item1.options + [mao_separator];
+ opt1:= [mao_separator];
+ if aoptional then begin
+  opt1:= [mao_separator,mao_optional];
+ end;
+ item1.options:= item1.options + opt1;
  insert(index,item1);
 end;
 
@@ -2091,20 +2115,20 @@ end;
 function tpopupmenu.show(const atransientfor: twidget;
          const pos: graphicdirectionty): tmenuitem;
 begin
- ftransientfor:= atransientfor;
+ settransientfor(atransientfor);
  try
   doupdate;
   result:= showpopupmenu(fmenu,ftransientfor,pos,self);
   checkexec;
  finally
-  ftransientfor:= nil;
+  settransientfor(nil);
  end;
 end;
 
 function tpopupmenu.show(const atransientfor: twidget;
        var mouseinfo: mouseeventinfoty): tmenuitem;
 begin
- ftransientfor:= atransientfor;
+ settransientfor(atransientfor);
  fmouseinfopo:= @mouseinfo;
  try
   doupdate;
@@ -2112,7 +2136,7 @@ begin
   include(mouseinfo.eventstate,es_processed);
   checkexec;
  finally
-  ftransientfor:= nil;
+  settransientfor(nil);
   fmouseinfopo:= nil;
  end;
 end;
@@ -2120,13 +2144,13 @@ end;
 function tpopupmenu.show(const atransientfor: twidget;
                                     const pos: pointty): tmenuitem;
 begin
- ftransientfor:= atransientfor;
+ settransientfor(atransientfor);
  try
   doupdate;
   result:= showpopupmenu(fmenu,ftransientfor,pos,self);
   checkexec;
  finally
-  ftransientfor:= nil;
+  settransientfor(nil);
  end;
 end;
 
@@ -2138,38 +2162,40 @@ class function tpopupmenu.additems(var amenu: tpopupmenu;
                  const aoptions: array of menuactionoptionsty;
                  const states: array of actionstatesty;
                  const onexecutes: array of notifyeventty;
-                 const aseparator: boolean = true): integer;
+                 const aseparator: boolean = true;
+                 const optionalseparator: boolean = true): integer;
 begin
  if amenu = nil then begin
   amenu:= tpopupmenu.createtransient(atransientfor,@mouseinfo);
  end;
- if aseparator and amenu.menu.hasvisibleitem then begin
-  amenu.menu.submenu.insertseparator(bigint);
+ if aseparator{ and amenu.menu.hasvisibleitem} then begin
+  amenu.menu.submenu.insertseparator(bigint,optionalseparator);
  end;
  result:= amenu.menu.submenu.insert(bigint,captions,aoptions,states,onexecutes);
 end;
 
 class function tpopupmenu.additems(var amenu: tpopupmenu; const atransientfor: twidget;
                  var mouseinfo: mouseeventinfoty; const items: tmenuitems;
-                 aseparator: boolean = true;
-                 const first: boolean = false): integer;
+                 const aseparator: boolean = true;
+                 const first: boolean = false;
+                 const optionalseparator: boolean = true): integer;
 begin
  if amenu = nil then begin
   amenu:= tpopupmenu.createtransient(atransientfor,@mouseinfo);
  end;
  result:= -1; //compiler warning
  if items <> nil then begin
-  aseparator:= aseparator and items.hasvisibleitem and
-                                                amenu.menu.hasvisibleitem;
+//  aseparator:= aseparator and items.hasvisibleitem and
+//                                                amenu.menu.hasvisibleitem;
   if first then begin
    result:= amenu.menu.submenu.insert(0,items);
    if aseparator then begin
-    amenu.menu.submenu.insertseparator(items.count);
+    amenu.menu.submenu.insertseparator(items.count,optionalseparator);
    end;
   end
   else begin
    if aseparator then begin
-    amenu.menu.submenu.insertseparator(bigint);
+    amenu.menu.submenu.insertseparator(bigint,optionalseparator);
    end;
    result:= amenu.menu.submenu.insert(bigint,items);
   end;
@@ -2186,11 +2212,11 @@ var
 begin
  items.fmouseinfopo:= @mouseinfo;
  widget1:= items.ftransientfor;
- items.ftransientfor:= atransientfor;
+ items.settransientfor(atransientfor);
  try
   items.doupdate;
  finally
-  items.ftransientfor:= widget1;
+  items.settransientfor(widget1);
  end;
  bo1:= (amenu = nil) or amenu.ftransient;
  items1:= nil;
@@ -2198,7 +2224,8 @@ begin
   items1:= items.fmenu.fsubmenu;
  end;
  result:= additems(amenu,atransientfor,mouseinfo,items1,
-     not (mo_noseparator in items.foptions),mo_insertfirst in items.foptions);
+     not (mo_noseparator in items.foptions),mo_insertfirst in items.foptions,
+     not (mo_forceseparator in items.foptions));
  if bo1 then begin
   amenu.fmenu.enabled:= items.fmenu.enabled;
   amenu.foptions:= items.foptions;

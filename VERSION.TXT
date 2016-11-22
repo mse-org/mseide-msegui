@@ -1,11 +1,29 @@
 MSEide+MSEgui breaking changes version history
+**********************************************
+2016-10-21
+ tlistitem.drawimage() parameter order changed.
+2016-10-02
+ teditwidgetdatalink.options oed_syncedittonavigator default off.
+2016-09-30
+ Options belonging to bufdataset descendants only moved from
+ tdscontroller.options to tmsebufdataset.options.
+ "delayedapplycount" tdscontroller -> tmsebufdataset.
+2016-09-28
+ Frame buttons options fbo_disabled overrides readonly-state of widget.
+ For existing widgets which have been saved in readonly-state fbo_disabled must
+ be cleared one time in design mode.
+2016-09-26
+ TCustomSQLConnection DatabaseName, Password, UserName, HostName, Charset and
+ Role properties ansistring -> msestring.
+2016-27-04
+ ondrawcelleventty cellinfo parameter var instead of const.
 
 Version 4.2
 2016-02-24
 2015-12-23
- Endpoints of visible tframe.frameimage edges are always painted independed of 
-  the hiddenedges state of neighbors. Copy the middle image to the end images
-  in order to restore the old appearence.
+ Endpoints of visible tframe.frameimage edges are always painted independently
+  of the hiddenedges state of neighbors. Copy the middle image to the end images
+  in order to restore the old appearance.
 2015-11-23
  twidget.findwidget() -> findchild().
   twidget.findtagwidget() -> findtagchild().

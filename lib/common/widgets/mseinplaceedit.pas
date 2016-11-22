@@ -44,12 +44,13 @@ type
  inplaceeditstatety = (ies_focused,ies_emptytext,
                        ies_poschanging,ies_firstclick,ies_istextedit,
                        ies_forcecaret,ies_textrectvalid,ies_touched,
+                       ies_edited,
                        ies_cangroupundo,ies_caretposvalid);
  inplaceeditstatesty = set of inplaceeditstatety;
 
  tinplaceedit = class
   private
-   fowner: twidget;
+   fwidget: twidget;
    fintf: iedit;
    finfo: drawtextinfoty;
    ftextrectbefore: rectty;
@@ -109,7 +110,6 @@ type
    procedure setfont(const avalue: tfont);
    procedure checktextrect;
    function gettextrect: rectty;
-   function getfontcanvas: tcanvas;
 
    procedure setfiltertext(const avalue: msestring);
    function getcaretpos: pointty;
@@ -153,12 +153,16 @@ type
               const tabulators: tcustomtabulators = nil;
               const font: tfont = nil; noinvalidate: boolean = false);
    procedure updatepos(const atextrect,aclientrect: rectty);
+   procedure movepos(const adist: pointty); //shifts textrects
    procedure setscrollvalue(const avalue: real; const horz: boolean);
    property font: tfont read ffont write setfont;
    property fontstyle: fontstylesty read ffontstyle write ffontstyle default [];
    property fontcolor: colorty read ffontcolor write ffontcolor default cl_none;
    property fontcolorbackground: colorty read ffontcolor write 
                                      ffontcolorbackground default cl_none;
+
+   property widget: twidget read fwidget;
+   function getfontcanvas: tcanvas;
 
    function beforechange: boolean; //true if not aborted
    procedure begingroup; virtual;
@@ -370,7 +374,7 @@ end;
 constructor tinplaceedit.create(aowner: twidget; editintf: iedit;
                      istextedit: boolean = false);
 begin
- fowner:= aowner;
+ fwidget:= aowner;
  fintf:= editintf;
  fcaretwidth:= defaultcaretwidth;
  fmaxlength:= -1;
@@ -564,7 +568,7 @@ procedure tinplaceedit.setup(const text: msestring;
               const font: tfont = nil;
               noinvalidate: boolean = false);
 begin
- exclude(fstate,ies_emptytext);
+// exclude(fstate,ies_emptytext);
  finfo.text.text:= text;
  ffiltertext:= '';
  if locating then begin
@@ -576,6 +580,17 @@ begin
  ftextrect := atextrect;
  finfo.dest:= atextrect;
  finfo.clip:= aclientrect;
+ if atextrect.cx < 0 then begin
+  ftextrect.cx:= 0;
+  finfo.dest.cx:= 0;
+ end;
+ if atextrect.cy < 0 then begin
+  ftextrect.cy:= 0;
+  finfo.dest.cy:= 0;
+ end;
+ if aclientrect.cx < 0 then begin
+  finfo.clip.cx:= 0;
+ end;
  ffont:= font;
  resetoffset;
  finfo.text.format:= copy(format);
@@ -599,6 +614,15 @@ begin
  ftextrect := atextrect;
  finfo.dest:= atextrect;
  finfo.clip:= aclientrect;
+ invalidatetext(false,false);
+ internalupdatecaret;
+end;
+
+procedure tinplaceedit.movepos(const adist: pointty);
+begin
+ addpoint1(ftextrect.pos,adist);
+ addpoint1(finfo.dest.pos,adist);
+ addpoint1(finfo.clip.pos,adist);
  invalidatetext(false,false);
  internalupdatecaret;
 end;
@@ -667,8 +691,8 @@ var
  haspasswordchar: boolean;
 
 begin
- if (fupdating > 0) or (ws_destroying in fowner.widgetstate) or
-                    (csdestroying in fowner.componentstate) then begin
+ if (fupdating > 0) or (ws_destroying in fwidget.widgetstate) or
+                    (csdestroying in fwidget.componentstate) then begin
   exit;  //no createwindow by getcanvas
  end;
  wstr1:= ''; //compiler warning
@@ -680,7 +704,7 @@ begin
   nocaret:= true;
  end;
  actioninfo:= initactioninfo(ea_caretupdating);
- if fowner.active or (ies_forcecaret in fstate) or force then begin
+ if fwidget.active or (ies_forcecaret in fstate) or force then begin
   canvas:= getfontcanvas;
   haspasswordchar:= (fpasswordchar <> #0) and not (ies_emptytext in fstate);
   if haspasswordchar then begin
@@ -851,16 +875,16 @@ begin
    if updatecaretcountref <> fupdatecaretcount then begin
     exit;
    end;
-   if (fowner.activefocused or (ies_forcecaret in fstate)) and 
+   if (fwidget.activefocused or (ies_forcecaret in fstate)) and 
                                                          not nocaret then begin
-    fowner.getcaret;
+    fwidget.getcaret;
     with application.caret do begin
      bounds:= actioninfo.caretrect;
      show;
     end;
    end;
    if nocaret then begin
-    if fowner.hascaret then begin
+    if fwidget.hascaret then begin
      application.caret.hide;
     end;
    end;
@@ -899,7 +923,7 @@ begin
  rect1.y:= finfo.clip.y;
  rect1.cy:= finfo.clip.cy;
  if msegraphutils.intersectrect(finfo.clip,rect1,rect1) then begin
-  fowner.invalidaterect(rect1,org_client);
+  fwidget.invalidaterect(rect1,org_client);
  end;
 end;
 
@@ -984,7 +1008,8 @@ end;
 
 function tinplaceedit.canundo: boolean;
 begin
- result:= (fbackup <> finfo.text.text) or fintf.getedited;
+ result:= (ies_edited in fstate) or not (ies_emptytext in fstate) and 
+                               (fbackup <> finfo.text.text) or fintf.getedited;
 end;
 
 function tinplaceedit.cancopy: boolean;
@@ -1001,7 +1026,7 @@ function tinplaceedit.textclipped: boolean;
 begin
 // msedrawtext.textrect(getfontcanvas,finfo);
 // result:= not rectinrect(finfo.res,fowner.innerclientrect);
- result:= not rectinrect(gettextrect,fowner.innerclientrect);
+ result:= not rectinrect(gettextrect,fwidget.innerclientrect);
 end;
 
 function tinplaceedit.lasttextclipped: boolean;
@@ -1066,7 +1091,13 @@ end;
 
 procedure tinplaceedit.clearundo;
 begin
- fbackup:= finfo.text.text;
+ if ies_emptytext in fstate then begin
+  fbackup:= '';
+ end
+ else begin
+  fbackup:= finfo.text.text;
+ end;
+ exclude(fstate,ies_edited);
  foldtext:= fbackup;
  curindexbackup:= fcurindex;
  selstartbackup:= fselstart;
@@ -1082,7 +1113,7 @@ begin
   updateselect;
   curindex:= curindexbackup;
   invalidatetext(false,false);
-  exclude(fstate,ies_touched);
+  fstate:= fstate - [ies_touched,ies_edited];
   notify(ea_undone);
  end;
 end;
@@ -1113,6 +1144,7 @@ begin
   richdelete(finfo.text,fcurindex,1);
   fcurindex:= fcurindex - 1;
  end;
+ fstate:= fstate + [ies_touched,ies_edited];
  internalupdatecaret(true);
  invalidatetext(true,bo1);
  notify(ea_indexmoved);
@@ -1141,6 +1173,7 @@ begin
  else begin
   richdelete(finfo.text,fcurindex+1,1);
  end;
+ fstate:= fstate + [ies_touched,ies_edited];
  invalidatetext(true,bo1);
 // if not bo1 then begin
   internalupdatecaret;
@@ -1244,7 +1277,7 @@ begin
      nochars:= false;
      bo1:= false;
      chars:= chars + lineend;
-     fowner.invalidate;
+     fwidget.invalidate;
     end;
    end;
    if bo1 then begin
@@ -1507,8 +1540,8 @@ begin
                                     not (oe_readonly in opt1) then begin
       if not ((minfo.button = mb_middle) and 
                 (minfo.shiftstate * shiftstatesmask <> [ss_middle])) then begin
-       if not fowner.focused and fowner.canfocus and
-                  (ow_mousefocus in fowner.optionswidget) then begin
+       if not fwidget.focused and fwidget.canfocus and
+                  (ow_mousefocus in fwidget.optionswidget) then begin
         if minfo.button = mb_left then begin
          include(fstate,ies_firstclick);
         end;
@@ -1518,7 +1551,7 @@ begin
         internalupdatecaret(true);
         po1:= fcaretpos;
         include(eventstate,es_nofocus);
-        if not fowner.setfocus then begin
+        if not fwidget.setfocus then begin
          exclude(fstate,ies_firstclick);
          exit;
         end;
@@ -1578,7 +1611,7 @@ begin
      exclude(fstate,ies_firstclick);
     end;
     ek_mousemove: begin
-     if fowner.clicked and
+     if fwidget.clicked and
        not ((ies_firstclick in fstate) and autoselect1) then begin
       fmousemovepos:= minfo.pos;
       if not pointinrect(pos,ftextrect) then begin
@@ -1858,6 +1891,7 @@ begin
    if asellength > 0 then begin
     internaldelete(aselstart,asellength,fcurindex,true);
    end;
+   include(fstate,ies_edited);
    moveindex(fselstart,false);
    sellength:= 0;
    invalidatetext(textinput,nofullinvalidateneeded);
@@ -1894,7 +1928,7 @@ end;
 
 procedure tinplaceedit.clearselection;
 begin
- include(fstate,ies_touched);
+ fstate:= fstate + [ies_touched,ies_edited];
  if fsellength > 0 then begin
   fsellength:= 0;
   updateselect;
@@ -1947,7 +1981,7 @@ begin
    end;
   end;
  end;
- clearundo;
+ clearundo();
  exclude(fstate,ies_touched);
  updatecaret();
 end;
@@ -1973,7 +2007,7 @@ procedure tinplaceedit.settextflags(const Value: textflagsty);
 begin
  if ftextflags <> value then begin
   ftextflags := Value+[tf_clipo];
-  updatetextflags(fowner.focused);
+  updatetextflags(fwidget.focused);
  end;
 end;
 
@@ -1981,7 +2015,7 @@ procedure tinplaceedit.settextflagsactive(const Value: textflagsty);
 begin
  if ftextflagsactive <> value then begin
   ftextflagsactive:= Value+[tf_clipo];
-  updatetextflags(fowner.active);
+  updatetextflags(fwidget.active);
  end;
 end;
 
@@ -1994,6 +2028,7 @@ begin
  str1:= '';
  ftextrectbefore:= finfo.res;
  if length(finfo.text.text) > 0 then begin
+  canvas.save();
   haspasswordchar:= (fpasswordchar <> #0) and not (ies_emptytext in fstate);
   if haspasswordchar then begin
    str1:= finfo.text.text;
@@ -2029,6 +2064,7 @@ begin
   if haspasswordchar then begin
    finfo.text.text:= str1;
   end;
+  canvas.restore();
  end;
  checktextrect;
 end;
@@ -2059,7 +2095,7 @@ end;
 
 function tinplaceedit.getfontcanvas: tcanvas;
 begin
- result:= fowner.getcanvas;
+ result:= fwidget.getcanvas;
  if ffont <> nil then begin
   result.font:= ffont;
  end;
@@ -2150,7 +2186,7 @@ begin
  end;
  addpoint1(ftextrect.pos,dist);
  if scrollcaret then begin
-  fowner.scrollcaret(dist);
+  fwidget.scrollcaret(dist);
  end;
 end;
 
@@ -2244,7 +2280,7 @@ begin
   if rect1.cx > 0 then begin
    int1:= -(finfo.dest.x + round(rect1.cx*avalue) - ftextrect.x);
    if int1 <> 0 then begin
-    fowner.scrollrect(makepoint(int1,0),finfo.clip,true);
+    fwidget.scrollrect(makepoint(int1,0),finfo.clip,true);
     inc(finfo.dest.x,int1);
     inc(fscrollsum.x,int1);
    end;
@@ -2254,7 +2290,7 @@ begin
   if rect1.cy > 0 then begin
    int1:= -(finfo.dest.y + round(rect1.cy*avalue) - ftextrect.y);
    if int1 <> 0 then begin
-    fowner.scrollrect(makepoint(0,int1),finfo.clip,true);
+    fwidget.scrollrect(makepoint(0,int1),finfo.clip,true);
     inc(finfo.dest.y,int1);
     inc(fscrollsum.y,int1);
    end;

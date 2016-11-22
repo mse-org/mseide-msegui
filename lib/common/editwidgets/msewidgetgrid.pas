@@ -119,6 +119,7 @@ type
    fwidgetname: string;
    ffixrowwidgets: widgetarty;
    ffixrowwidgetnames: stringarty;
+   fondrawcell: drawcelleventty;
    procedure updatewidgetrect(const updatedata: boolean = false);
    procedure readwidgetname(reader: treader);
    procedure writewidgetname(writer: twriter);
@@ -199,6 +200,7 @@ type
    property grid: tcustomwidgetgrid read getgrid;
   published
    property datalist stored false; //stored by defineproperties
+   property ondrawcell: drawcelleventty read fondrawcell write fondrawcell;
  end;
  widgetcolarty = array of twidgetcol;
  twidgetfixrow = class(tfixrow)
@@ -431,6 +433,8 @@ type
   public
    constructor create(owner: twidgetcol); reintroduce;
    function empty(const index: integer): boolean; override;   //true wenn leer
+  published
+   property facultative;
  end;
  
  tgridansistringdatalist = class(tansistringdatalist)
@@ -440,6 +444,8 @@ type
    function getdefault: pointer; override;
   public
    constructor create(owner: twidgetcol); reintroduce;
+  published
+   property facultative;
  end;
 
  tgridpointerdatalist = class(tpointerdatalist)
@@ -449,6 +455,8 @@ type
    function getdefault: pointer; override;
   public
    constructor create(owner: twidgetcol); reintroduce;
+  published
+   property facultative;
  end;
 
  tgridintegerdatalist = class(tintegerdatalist)
@@ -458,6 +466,8 @@ type
    function getdefault: pointer; override;
   public
    constructor create(owner: twidgetcol); reintroduce;
+  published
+   property facultative;
  end;
 
  tgridint64datalist = class(tint64datalist)
@@ -467,6 +477,8 @@ type
    function getdefault: pointer; override;
   public
    constructor create(owner: twidgetcol); reintroduce;
+  published
+   property facultative;
  end;
 
  tgridenumdatalist = class(tenumdatalist)
@@ -476,6 +488,8 @@ type
    function getdefaultenum: integer;
   public
    constructor create(owner: twidgetcol); reintroduce;
+  published
+   property facultative;
  end;
 
  tgridenum64datalist = class(tenum64datalist)
@@ -485,6 +499,8 @@ type
    function getdefaultenum: int64;
   public
    constructor create(owner: twidgetcol); reintroduce;
+  published
+   property facultative;
  end;
 
  tgridrealdatalist = class(trealdatalist)
@@ -496,6 +512,8 @@ type
    constructor create(owner: twidgetcol); reintroduce;
    function empty(const index: integer): boolean; override;   //true wenn leer
    procedure updateeditoptions(const aoptions: optionseditty);
+  published
+   property facultative;
  end;
 
 type
@@ -1724,6 +1742,9 @@ begin
     end;
     fintf.drawcell(canvas);
    end;
+  end;
+  if assigned(fondrawcell) then begin
+   fondrawcell(self,canvas,cellinfoty(canvas.drawinfopo^));
   end;
  end;
 end;

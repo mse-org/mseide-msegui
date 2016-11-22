@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2015 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2016 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -811,9 +811,6 @@ type
   stack: canvasvaluesarty;
  end;
 
- edgety = (edg_right,edg_top,edg_left,edg_bottom);
- edgesty = set of edgety;
- 
  edgecolorinfoty = record
   color,effectcolor: colorty;
   effectwidth: integer;
@@ -4572,25 +4569,97 @@ var
   result:= false;
  end;
 
+var
+ al1: alignmentsty;
 begin
- if (asourcerect.cx = 0) or (asourcerect.cy = 0) or 
-    (adestrect.cx = 0) or (adestrect.cy = 0) then begin //no div 0
+ if (asourcerect.cx <= 0) or (asourcerect.cy <= 0) or 
+    (adestrect.cx <= 0) or (adestrect.cy <= 0) then begin //no div 0
   exit;
  end;
  checkgcstate([]);  //gc must be valid
  if asource <> self then begin
   asource.checkgcstate([cs_gc]); //gc must be valid
  end;
- dpoint.x:= adestrect.x + fdrawinfo.origin.x;
- dpoint.y:= adestrect.y + fdrawinfo.origin.y;
- tileorig.x:= atileorigin.x + fdrawinfo.origin.x;
- tileorig.y:= atileorigin.y + fdrawinfo.origin.y;
+ dpoint:= adestrect.pos;
+ if aalignment * [al_fit{,al_tiled}] = [] then begin
+  if not (al_stretchx in aalignment) then begin
+   int1:= adestrect.cx - asourcerect.cx;
+   if al_right in aalignment then begin
+    dpoint.x:= dpoint.x + int1;
+   end
+   else begin
+    if al_xcentered in aalignment then begin
+     if int1 < 0 then begin
+      dec(int1);
+     end;
+     dpoint.x:= dpoint.x + int1 div 2;
+    end;
+   end;
+  end;
+  if not (al_stretchy in aalignment) then begin
+   int1:= adestrect.cy - asourcerect.cy;
+   if al_bottom in aalignment then begin
+    dpoint.y:= dpoint.y + int1;
+   end
+   else begin
+    if al_ycentered in aalignment then begin
+     if int1 < 0 then begin
+      dec(int1);
+     end;
+     dpoint.y:= dpoint.y + int1 div 2;
+    end;
+   end;
+  end;
+ end;
+ tileorig:= atileorigin;
+ if al_tiled in aalignment then begin
+  if aalignment * [al_xcentered,al_right] <> [] then begin
+   tileorig.x:= dpoint.x;
+  end;
+  if aalignment * [al_ycentered,al_bottom] <> [] then begin
+   tileorig.y:= dpoint.y;
+  end;
+  dpoint:= adestrect.pos;
+ end;
+ dpoint.x:= dpoint.x + fdrawinfo.origin.x;
+ dpoint.y:= dpoint.y + fdrawinfo.origin.y;
+ tileorig.x:= tileorig.x + fdrawinfo.origin.x;
+ tileorig.y:= tileorig.y + fdrawinfo.origin.y;
  with asourcerect,asource.fvaluepo^ do begin
   spoint.x:= x + origin.x;
   spoint.y:= y + origin.y;
  end;
  rect1:= moverect(clipbox,fvaluepo^.origin);
  drect.size:= adestrect.size;
+ if not msegraphutils.intersectrect(makerect(spoint,asourcerect.size),
+      makerect(makepoint(0,0),icanvas(asource.fintf).getsize),srect) then begin
+  exit;
+ end;
+ al1:= aalignment * [al_stretchx,al_stretchy,al_fit,al_tiled];
+ if al1 = [] then begin //clip areas to paintdevice rect
+  dpoint.x:= dpoint.x + srect.x - spoint.x;
+  dpoint.y:= dpoint.y + srect.y - spoint.y;
+  if not msegraphutils.intersectrect(makerect(dpoint,srect.size),
+               rect1,drect) then begin
+   exit;
+  end;
+  srect.x:= srect.x + drect.x - dpoint.x;
+  srect.cx:= drect.cx;
+  srect.y:= srect.y + drect.y - dpoint.y;
+  srect.cy:= drect.cy;
+ end
+ else begin
+  srect.pos:= spoint;
+  srect.size:= asourcerect.size;
+  drect.pos:= dpoint;
+  if al1 = [al_stretchx] then begin
+   drect.cy:= srect.cy;
+  end;
+  if al1 = [al_stretchy] then begin
+   drect.cx:= srect.cx;
+  end;
+ end;
+{
  if aalignment * [al_stretchx,al_stretchy,al_fit,al_tiled] = [] then begin
   if not msegraphutils.intersectrect(makerect(spoint,asourcerect.size),
        makerect(makepoint(0,0),icanvas(asource.fintf).getsize),srect) then begin
@@ -4612,6 +4681,7 @@ begin
   srect.size:= asourcerect.size;
   drect.pos:= dpoint;
  end;
+}
  if amask <> nil then begin
   if al_nomaskscale in aalignment then begin
    if checkmaskrect(drect,srect) then begin
@@ -4644,6 +4714,9 @@ begin
     end
     else begin
      if al_xcentered in aalignment then begin
+      if int1 < 0 then begin
+       dec(int1);
+      end;
       drect.x:= drect.x + int1 div 2;
      end;
     end;
@@ -4656,6 +4729,9 @@ begin
     end
     else begin
      if al_ycentered in aalignment then begin
+      if int1 < 0 then begin
+       dec(int1);
+      end;
       drect.y:= drect.y + int1 div 2;
      end;
     end;

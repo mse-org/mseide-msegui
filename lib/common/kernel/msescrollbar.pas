@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2015 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2016 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -22,6 +22,8 @@ const
  defaultpagesizeconst = 0.1;
  defaultpagesize: real = defaultpagesizeconst;
  defaultbuttonminlength = 11;//8;
+ defaultscrollbarcolorpattern = cl_scrollbarpattern;
+ defaultscrollbarcolorpatternclicked = cl_scrollbarpatternclicked;
  repeatdelaytime = 500000; //0.5s
  repeatrepeattime = 100000; //0.1 s
 
@@ -35,7 +37,8 @@ const
 //                                         (sbbu_down,sbbu_move,sbbu_up);
 
 type
- scrollbaroptionty = (sbo_thumbtrack,sbo_moveauto,sbo_showauto,sbo_show,
+ scrollbaroptionty = (sbo_thumbtrack,sbo_clicktovalue,
+                      sbo_moveauto,sbo_showauto,sbo_show,
                       sbo_opposite,sbo_valuekeys,sbo_noarrowkeys,sbo_nopagekeys,
                       sbo_noreflectedclick{,
                       sbo_flat,sbo_noanim});
@@ -84,6 +87,7 @@ type
    fdirection: graphicdirectionty;
    fcolor: colorty;
    fcolorpattern: colorty;
+   fcolorpatternclicked: colorty;
    fvalue: real;
    fbuttonlength: integer;
    fpagesize: real;
@@ -101,6 +105,8 @@ type
 //   fframeendbutton1: tframe;
 //   fframeendbutton2: tframe;
    fface: tface;
+   fface1: tface;
+   fface2: tface;
    fondimchanged: proceventty;
    fbuttonendlength: integer;
    fpaintedbutton: scrollbarareaty;
@@ -131,6 +137,7 @@ type
    procedure dodimchanged;
    function clickedareaisvalid: boolean;
    procedure setcolorpattern(const avalue: colorty);
+   procedure setcolorpatternclicked(const avalue: colorty);
    function getface(): tface;
    procedure setface(const avalue: tface);
    function getfacebutton: tface;
@@ -156,6 +163,10 @@ type
    procedure writewheelsensitivity(writer: twriter);
    function getdisabled: boolean;
    procedure setdisabled(const avalue: boolean);
+   function getface1: tface;
+   procedure setface1(const avalue: tface);
+   function getface2: tface;
+   procedure setface2(const avalue: tface);
   protected
    fstate: scrollbarstatesty;
    fintf: iscrollbar;
@@ -194,18 +205,24 @@ type
    function dostepup(const ashiftstate: shiftstatesty): boolean;
    function dostepdown(const ashiftstate: shiftstatesty): boolean;
    procedure defineproperties(filer: tfiler); override;
+   function actualcolorpattern: colorty;
+   function actualcolorpatternclicked: colorty;
 //   function getbuttonarea(const apos: pointty): buttonareaty; //-1 -> none
   public
    tag: integer;
    constructor create(intf: iscrollbar; org: originty = org_client;
               ondimchanged: proceventty = nil); reintroduce; virtual;
    destructor destroy; override;
+
    procedure createface();
+   procedure createface1();
+   procedure createface2();
    procedure createfacebutton;
    procedure createfaceendbutton;
    procedure createframebutton;
    procedure createframeendbutton1;
    procedure createframeendbutton2;
+
    procedure checktemplate(const sender: tobject);
    procedure paint(const canvas: tcanvas;
                                 const acolor: colorty = cl_none); virtual;
@@ -264,6 +281,8 @@ type
                          write setbuttonendlength default 0;
                      //0 -> square, -1 -> no endbuttons
    property face: tface read getface write setface;
+   property face1: tface read getface1 write setface1;
+   property face2: tface read getface2 write setface2;
    property facebutton: tface read getfacebutton write setfacebutton;
    property faceendbutton: tface read getfaceendbutton write setfaceendbutton;
    property framebutton: tframe read getframebutton write setframebutton;
@@ -273,7 +292,10 @@ type
                                  write setframeendbutton2;
    property color: colorty read fcolor write setcolor default cl_default;
    property colorpattern: colorty read fcolorpattern 
-                   write setcolorpattern default cl_white;
+                   write setcolorpattern default cl_default;
+                   //cl_none -> no pattern
+   property colorpatternclicked: colorty read fcolorpatternclicked
+                   write setcolorpatternclicked default cl_default;
                    //cl_none -> no pattern
    property colorglyph: colorty read fdrawinfo.areas[sbbu_down].ca.colorglyph
                    write setcolorglyph default cl_glyph;
@@ -307,6 +329,8 @@ type
    property buttonminlength;
    property buttonendlength;
    property face;
+   property face1;
+   property face2;
    property facebutton;
    property faceendbutton;
    property framebutton;
@@ -341,6 +365,8 @@ type
    property buttonminlength;
    property buttonendlength;
    property face;
+   property face1;
+   property face2;
    property facebutton;
    property faceendbutton;
    property framebutton;
@@ -384,7 +410,8 @@ begin
  fintf:= intf;
  forg:= org;
  fcolor:= cl_default;
- fcolorpattern:= cl_white;
+ fcolorpattern:= cl_default;
+ fcolorpatternclicked:= cl_default;
  fdrawinfo.areas[sbbu_down].ca.colorglyph:= cl_glyph;
  fdrawinfo.areas[sbbu_up].ca.colorglyph:= cl_glyph;
  fclickedarea:= scrollbarareaty(-1);
@@ -752,23 +779,30 @@ begin
  end;
 end;
 
+procedure tcustomscrollbar.setcolorpatternclicked(const avalue: colorty);
+begin
+ if fcolorpatternclicked <> avalue then begin
+  fcolorpatternclicked := avalue;
+  invalidate;
+ end;
+end;
+
 procedure tcustomscrollbar.paint(const canvas: tcanvas; 
                                            const acolor: colorty = cl_none);
 var
  col1: colorty;
  statebefore: shapestatesty;
 begin
-// statebefore:= []; //compiler warning
  with canvas,self.fdrawinfo do begin
-  save;
-//  fdrawinfo.areas[sbbu_down].face:= ffaceendbutton;
-//  fdrawinfo.areas[sbbu_move].face:= ffacebutton;
-//  fdrawinfo.areas[sbbu_up].face:= ffaceendbutton;
-//  fdrawinfo.areas[sbbu_down].frame:= fframeendbutton1;
-//  fdrawinfo.areas[sbbu_move].frame:= fframebutton;
-//  fdrawinfo.areas[sbbu_up].frame:= fframeendbutton2;
+  save();
   if fface <> nil then begin
    fface.paint(canvas,fdrawinfo.scrollrect);
+  end;
+  if fface1 <> nil then begin
+   fface1.paint(canvas,areas[sba_start].ca.dim);
+  end;
+  if fface2 <> nil then begin
+   fface2.paint(canvas,areas[sba_end].ca.dim);
   end;
   if acolor = cl_none then begin
    col1:= fcolor;
@@ -777,28 +811,8 @@ begin
    col1:= acolor;
   end;
   col1:= fintf.translatecolor(col1);
-//  color:= col1;
   fpaintedbutton:= firstbutton;
   while fpaintedbutton <= lastbutton do begin
-   {
-   case fpaintedbutton of
-    sbbu_down: begin
-     if fframeendbutton1 <> nil then begin
-      fframeendbutton1.paintbackground(canvas,buttonareas[bbu_down],false);
-     end;
-    end;
-    sbbu_move: begin
-     if fframebutton <> nil then begin
-      fframebutton.paintbackground(canvas,buttonareas[bbu_move],false);
-     end;
-    end;
-    sbbu_up: begin
-     if fframeendbutton2 <> nil then begin
-      fframeendbutton2.paintbackground(canvas,buttonareas[bbu_up],false);
-     end;
-    end;
-   end;
-  }
    if acolor <> cl_none then begin
     with areas[fpaintedbutton] do begin
      statebefore:= state;
@@ -810,53 +824,38 @@ begin
    if acolor <> cl_none then begin
     areas[fpaintedbutton].state:= statebefore;
    end;
-  {
-   case fpaintedbutton of
-    sbbu_down: begin
-     if fframeendbutton1 <> nil then begin
-      fframeendbutton1.paintoverlay(canvas,buttonareas[bbu_down]);
-     end;
-    end;
-    sbbu_move: begin
-     if fframebutton <> nil then begin
-      fframebutton.paintoverlay(canvas,buttonareas[bbu_move]);
-     end;
-    end;
-    sbbu_up: begin
-     if fframeendbutton2 <> nil then begin
-      fframeendbutton2.paintoverlay(canvas,buttonareas[bbu_up]);
-     end;
-    end;
-   end;
-   }
    inc(fpaintedbutton);
   end;
   if fface = nil then begin
    colorbackground:= col1;
    brush:= stockobjects.bitmaps[stb_dens50];
-   if fclickedarea = sba_start then begin
-    color:= cl_black;
-   end
-   else begin
-    color:= fcolorpattern;
+   if fface1 = nil then begin
+    if fclickedarea = sba_start then begin
+     color:= actualcolorpatternclicked();
+    end
+    else begin
+     color:= actualcolorpattern();
+    end;
+    if color <> cl_none then begin
+     fillrect(areas[sba_start].ca.dim,cl_brushcanvas);
+    end
+    else begin
+     fillrect(areas[sba_start].ca.dim,col1);
+    end;
    end;
-   if fcolorpattern <> cl_none then begin
-    fillrect(areas[sba_start].ca.dim,cl_brushcanvas);
-   end
-   else begin
-    fillrect(areas[sba_start].ca.dim,col1);
-   end;
-   if fclickedarea = sba_end then begin
-    color:= cl_black;
-   end
-   else begin
-    color:= fcolorpattern;
-   end;
-   if fcolorpattern <> cl_none then begin
-    fillrect(areas[sba_end].ca.dim,cl_brushcanvas);
-   end
-   else begin
-    fillrect(areas[sba_end].ca.dim,col1);
+   if fface2 = nil then begin
+    if fclickedarea = sba_end then begin
+     color:= actualcolorpatternclicked();
+    end
+    else begin
+     color:= actualcolorpattern();
+    end;
+    if color <> cl_none then begin
+     fillrect(areas[sba_end].ca.dim,cl_brushcanvas);
+    end
+    else begin
+     fillrect(areas[sba_end].ca.dim,col1);
+    end;
    end;
   end;
   restore;
@@ -992,6 +991,9 @@ procedure tcustomscrollbar.mouseevent(var info: mouseeventinfoty);
   fclickedarea:= scrollbarareaty(-1);
  end;
 
+var
+ isclicktovalue: boolean;
+
  procedure mousemove(ar1: scrollbarareaty);
  var
   ar2: scrollbarareaty;
@@ -1000,13 +1002,15 @@ procedure tcustomscrollbar.mouseevent(var info: mouseeventinfoty);
    application.widgetcursorshape:= cr_arrow;
   end;
   if clickedareaisvalid then begin
-   if (ar1 <> fclickedarea) and (fclickedarea <> sbbu_move) then begin
+   if (ar1 <> fclickedarea) and (fclickedarea <> sbbu_move) and 
+        ((frepeater = nil) or 
+                      not (fclickedarea in[sba_start,sba_end])) then begin
     releasebutton(false);
     fclickedarea:= scrollbarareaty(scrollbarclicked);
    end;
    if (fclickedarea = sbbu_move) then begin
     ar1:= sbbu_move;{scrollbarareaty(-1);}
-    if info.eventkind = ek_mousemove then begin
+    if (info.eventkind = ek_mousemove) or isclicktovalue then begin
      thumbtrack(info.pos);
      if sbo_thumbtrack in foptions then begin
       fintf.scrollevent(self,sbe_thumbtrack);
@@ -1066,6 +1070,13 @@ begin
     if (info.button = mb_left) and 
      (not(sbo_noreflectedclick in foptions) or 
                           not (es_reflected in info.eventstate)) then begin
+
+     isclicktovalue:= (ar1 in [sba_start,sba_end,sbbu_move]) and 
+                    ((info.shiftstate * keyshiftstatesmask = [ss_ctrl]) or 
+                    (sbo_clicktovalue in foptions));
+     if isclicktovalue then begin
+      ar1:= sbbu_move;
+     end;
      fclickedarea:= ar1;
      if clickedareaisvalid then begin
       include(fdrawinfo.areas[fclickedarea].state,shs_clicked);
@@ -1084,16 +1095,36 @@ begin
      else begin
       if fclickedarea = sbbu_move then begin
        fpickpos:= info.pos;
-       with fdrawinfo.areas[sbbu_move].ca.dim do begin
-        case fdirection of
-         gd_right: fpickoffset:= x - info.pos.x - 
-                               fdrawinfo.areas[sba_start].ca.dim.x;
-         gd_up: fpickoffset:= fdrawinfo.areas[sba_start].ca.dim.cy + info.pos.y;
-         gd_left: fpickoffset:= fdrawinfo.areas[sba_start].ca.dim.cx + 
-                                                         info.pos.x;
-         gd_down: fpickoffset:= y - info.pos.y - 
-                                        fdrawinfo.areas[sba_start].ca.dim.y;
+       if isclicktovalue then begin
+        with fdrawinfo.areas[sbbu_move].ca.dim do begin
+         case fdirection of
+          gd_right: fpickoffset:=-fdrawinfo.areas[sba_start].ca.dim.x - 
+                                                                    cx div 2;
+          gd_up: fpickoffset:= fdrawinfo.areas[sba_start].ca.dim.cy + y +
+                                                                    cy div 2;
+          gd_left: fpickoffset:= fdrawinfo.areas[sba_start].ca.dim.cx + x +
+                                                                    cx div 2;
+          gd_down: fpickoffset:= -fdrawinfo.areas[sba_start].ca.dim.y - 
+                                                                    cy div 2 ;
+         end;
         end;
+       end
+       else begin
+        with fdrawinfo.areas[sbbu_move].ca.dim do begin
+         case fdirection of
+          gd_right: fpickoffset:= x - info.pos.x - 
+                                fdrawinfo.areas[sba_start].ca.dim.x;
+          gd_up: fpickoffset:= fdrawinfo.areas[sba_start].ca.dim.cy +
+                                                               info.pos.y;
+          gd_left: fpickoffset:= fdrawinfo.areas[sba_start].ca.dim.cx + 
+                                                               info.pos.x;
+          gd_down: fpickoffset:= y - info.pos.y - 
+                                         fdrawinfo.areas[sba_start].ca.dim.y;
+         end;
+        end;
+       end;
+       if isclicktovalue then begin
+        mousemove(ar1);
        end;
       end;
      end;
@@ -1113,7 +1144,7 @@ procedure tcustomscrollbar.mousewheelevent(var info: mousewheeleventinfoty;
 begin
  with info do begin
   include(eventstate,es_processed);
-  if (wheel = mw_down) xor (fdirection in [gd_left,gd_down]) then begin
+  if (wheel = mw_down) xor (fdirection in [gd_right,gd_down]) then begin
    if (fstepctrlfact <> 0) or (fstepshiftfact <> 0) then begin
     wheeldown(shiftstate);
    end
@@ -1358,7 +1389,9 @@ destructor tcustomscrollbar.destroy;
 begin
  freeandnil(frepeater);
  inherited;
- fface.Free;
+ fface.free();
+ fface1.free();
+ fface2.free();
  fdrawinfo.areas[sbbu_move].face.free;
  fdrawinfo.areas[sbbu_up].face.free;
  fdrawinfo.areas[sbbu_down].frame.free;
@@ -1447,6 +1480,20 @@ begin
  end;
 end;
 
+procedure tcustomscrollbar.createface1();
+begin
+ if fface1 = nil then begin
+  fface1:= tface.create(iface(self));
+ end;
+end;
+
+procedure tcustomscrollbar.createface2();
+begin
+ if fface2 = nil then begin
+  fface2:= tface.create(iface(self));
+ end;
+end;
+
 function tcustomscrollbar.getface: tface;
 begin
  fintf.getwidget.getoptionalobject(fface,
@@ -1460,6 +1507,34 @@ begin
                                {$ifdef FPC}@{$endif}createface);
  invalidate;
 // fface.assign(avalue);
+end;
+
+function tcustomscrollbar.getface1: tface;
+begin
+ fintf.getwidget.getoptionalobject(fface1,
+                               {$ifdef FPC}@{$endif}createface1);
+ result:= fface1;
+end;
+
+procedure tcustomscrollbar.setface1(const avalue: tface);
+begin
+ fintf.getwidget.setoptionalobject(avalue,fface1,
+                               {$ifdef FPC}@{$endif}createface1);
+ invalidate;
+end;
+
+function tcustomscrollbar.getface2: tface;
+begin
+ fintf.getwidget.getoptionalobject(fface2,
+                               {$ifdef FPC}@{$endif}createface2);
+ result:= fface2;
+end;
+
+procedure tcustomscrollbar.setface2(const avalue: tface);
+begin
+ fintf.getwidget.setoptionalobject(avalue,fface2,
+                               {$ifdef FPC}@{$endif}createface2);
+ invalidate;
 end;
 
 function tcustomscrollbar.getfacebutton: tface;
@@ -1568,6 +1643,15 @@ end;
 
 procedure tcustomscrollbar.checktemplate(const sender: tobject);
 begin
+ if fface <> nil then begin
+  fface.checktemplate(sender);
+ end;
+ if fface1 <> nil then begin
+  fface1.checktemplate(sender);
+ end;
+ if fface2 <> nil then begin
+  fface2.checktemplate(sender);
+ end;
  if fdrawinfo.areas[sbbu_move].face <> nil then begin
   fdrawinfo.areas[sbbu_move].face.checktemplate(sender);
  end;
@@ -1733,6 +1817,22 @@ begin
                       (filer.ancestor = nil) and (fwheelsensitivity <> 1) or
    (filer.ancestor <> nil) and 
       (tcustomscrollbar(filer.ancestor).fwheelsensitivity <> fwheelsensitivity));
+end;
+
+function tcustomscrollbar.actualcolorpattern: colorty;
+begin
+ result:= fcolorpattern;
+ if result = cl_default then begin
+  result:= cl_scrollbarpattern;
+ end;
+end;
+
+function tcustomscrollbar.actualcolorpatternclicked: colorty;
+begin
+ result:= fcolorpatternclicked;
+ if result = cl_default then begin
+  result:= cl_scrollbarpatternclicked;
+ end;
 end;
 {
 function tcustomscrollbar.getbuttonarea(const apos: pointty): buttonareaty;

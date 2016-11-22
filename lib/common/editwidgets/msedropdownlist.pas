@@ -80,6 +80,7 @@ type
    procedure setrowcount(const avalue: integer);
   public
    constructor create(const aowner: tcustomdropdownlistcontroller); reintroduce;
+   class function getitemclasstype: persistentclassty; override;
    procedure beginupdate;
    procedure endupdate;
    procedure clear;
@@ -358,7 +359,8 @@ type
    freadonly: boolean;
    procedure setreadonly(const Value: boolean);
   protected
-   function getbuttonclass: framebuttonclassty; override;
+   procedure updatestate() override;
+   function getbuttonclass: framebuttonclassty override;
    function getbutton: tdropdownbutton;
    procedure setbutton(const avalue: tdropdownbutton);
   public
@@ -438,6 +440,8 @@ type
   public
    constructor create(const intf: idropdown); reintroduce;
    destructor destroy; override;
+   procedure dostatread(const reader: tstatreader); virtual;
+   procedure dostatwrite(const writer: tstatwriter); virtual;
    procedure dropdown; virtual;
    procedure canceldropdown;
    procedure dropdownactivated;
@@ -461,13 +465,16 @@ type
   published
    property options;
  end;
-
+ dropdownwidgeteventty = procedure(const sender: twidget;
+                                    const dropdown: twidget) of object;
  tdropdownwidgetcontroller = class(tdropdowncontroller)
   private
+   fondropdown: dropdownwidgeteventty;
   protected
    fbounds_cy: integer;
    fbounds_cx: integer;
    fdropdownwidget: twidget;
+   fdropdownwidth: int32;
    procedure internaldropdown; override;
    procedure updatedropdownbounds(var arect: rectty); override;
    procedure receiveevent(const event: tobjectevent); override;
@@ -475,17 +482,24 @@ type
   public
    constructor create(const intf: idropdownwidget);
    procedure editnotification(var info: editnotificationinfoty); override;
+   procedure dostatread(const reader: tstatreader); override;
+   procedure dostatwrite(const writer: tstatwriter); override;
+   property dropdownwidget: twidget read fdropdownwidget;
   published
    property bounds_cx: integer read fbounds_cx write fbounds_cx default 0;
                    //0 -> ownerwidget.bounds_cx
    property bounds_cy: integer read fbounds_cy write fbounds_cy default 0;
                    //0 -> dropdownwidget.bounds_cy
-
+   property ondropdown: dropdownwidgeteventty read fondropdown 
+                                                      write fondropdown;
  end;
 
+ dropdownlisteventty = procedure(const sender: twidget;
+                             const dropdown: tdropdownlist) of object;
  tcustomdropdownlistcontroller = class(tcustomdropdowncontroller,
                                                       idropdownlistcontroller)
   private
+   fondropdown: dropdownlisteventty;
    procedure setcols(const Value: tdropdowncols);
    function getitemindex: integer;
    procedure setitemindex(const Value: integer);
@@ -544,8 +558,8 @@ type
   public
    constructor create(const intf: idropdownlist);
    destructor destroy; override;
-   procedure dostatread(const reader: tstatreader);
-   procedure dostatwrite(const writer: tstatwriter);
+   procedure dostatread(const reader: tstatreader); override;
+   procedure dostatwrite(const writer: tstatwriter); override;
    function valuelist: tmsestringdatalist;
    property cols: tdropdowncols read fcols write setcols;
    property valuecol: integer read fvaluecol write setvaluecol default 0;
@@ -575,6 +589,8 @@ type
                                          write setimageframe_right default 0;
    property imageframe_bottom: integer read fimageframe.bottom 
                                          write setimageframe_bottom default 0;
+   property ondropdown: dropdownlisteventty read fondropdown 
+                                                      write fondropdown;
  end;
 
  tnocolsdropdownlistcontroller = class(tcustomdropdownlistcontroller)
@@ -592,6 +608,7 @@ type
    property buttonlength;
    property buttonminlength;
    property buttonendlength;
+   property ondropdown;
  end;
 
  tdropdownlistcontroller = class(tnocolsdropdownlistcontroller)
@@ -627,6 +644,7 @@ type
  tcustombuttonframe1 = class(tcustombuttonframe);
  tstringcol1 = class(tstringcol);
  tframebutton1 = class(tframebutton);
+ tframebuttons1 = class(tframebuttons);
  
  timagefixcol = class(tdropdownfixcol)
   private
@@ -785,6 +803,11 @@ constructor tdropdowndatacols.create(
 begin
  inherited create(aowner,nil);
  count:= 1;
+end;
+
+class function tdropdowndatacols.getitemclasstype: persistentclassty;
+begin
+ result:= tdropdowndata;
 end;
 
 procedure tdropdowndatacols.createitem(const index: integer;
@@ -1260,14 +1283,10 @@ begin
 end;
 
 procedure tcustomdropdownbuttonframe.setreadonly(const Value: boolean);
-var
- int1: integer;
 begin
  if (freadonly <> value) then begin
   freadonly:= Value;
-  for int1:= 0 to buttons.count - 1 do begin
-   buttons[int1].enabled:= not value;
-  end;
+  updatestate();
  end;
 {
  if (freadonly <> value) and (factivebutton < buttons.count) then begin
@@ -1275,6 +1294,16 @@ begin
   buttons[factivebutton].enabled:= not value;
  end;
 }
+end;
+
+procedure tcustomdropdownbuttonframe.updatestate();
+var
+ i1: integer;
+begin
+ for i1:= 0 to buttons.count - 1 do begin
+  tframebutton1(tframebuttons1(buttons).fitems[i1]).freadonly:= freadonly;
+ end;
+ inherited;
 end;
 
 function tcustomdropdownbuttonframe.getbuttonclass: framebuttonclassty;
@@ -1319,6 +1348,16 @@ begin
  inherited;
 end;
 
+procedure tcustomdropdowncontroller.dostatread(const reader: tstatreader);
+begin
+ //dummy
+end;
+
+procedure tcustomdropdowncontroller.dostatwrite(const writer: tstatwriter);
+begin
+ //dummy
+end;
+
 function tcustomdropdowncontroller.getbuttonframeclass: 
                                                   dropdownbuttonframeclassty;
 begin
@@ -1333,7 +1372,7 @@ begin
  if twidget1(widget).fframe = nil then begin
   getbuttonframeclass.create(iscrollframe(widget),ibutton(self));
  end;
- updatereadonlystate;
+ updatereadonlystate();
 end;
 
 procedure tcustomdropdowncontroller.setoptions(
@@ -1601,7 +1640,7 @@ end;
 
 function tdropdowncontroller.getbuttonframeclass: dropdownbuttonframeclassty;
 begin
- result:= tdropdownbuttonframe;
+ result:= tdropdownmultibuttonframe;
 end;
 
 { tdropdownwidgetcontroller }
@@ -1621,6 +1660,9 @@ begin
   try
    idropdownwidget(fintf).createdropdownwidget(fintf.geteditor.text,widget1);
    setlinkedvar(widget1,tmsecomponent(fdropdownwidget));
+   if (deo_colsizing in options) and (fdropdownwidth > 0) then begin
+    bounds_cx:= fdropdownwidth;
+   end;
   except
    if widget1 <> nil then begin
     widget1.release;
@@ -1654,17 +1696,6 @@ begin
  inherited;
  if event.kind = ek_dropdown then begin
   if fdropdownwidget <> nil then begin
-  {
-   if fbounds_cx > 0 then begin
-    fdropdownwidget.bounds_cx:= fbounds_cx;
-   end
-   else begin
-    fdropdownwidget.bounds_cx:= fintf.getwidget.framesize.cx;
-   end;
-   if fbounds_cy > 0 then begin
-    fdropdownwidget.bounds_cy:= fbounds_cy;
-   end;
-   }
    updatedropdownpos(fdropdownwidget.widgetrect);
    fdropdownwidget.window.winid; //update window.options
    if fdropdownwidget.window.ispopup then begin
@@ -1675,6 +1706,9 @@ begin
     fintf.geteditor.forcecaret:= true;
    end;
    try
+    if assigned(fondropdown) then begin
+     fondropdown(fintf.getwidget,fdropdownwidget);
+    end;
     if fdropdownwidget.show(true,fintf.getwidget.window) = mr_ok then begin
      fintf.geteditor.forcecaret:= false;
      setdropdowntext(idropdownwidget(fintf).getdropdowntext(fdropdownwidget),
@@ -1684,8 +1718,9 @@ begin
     fintf.geteditor.forcecaret:= false;
     doafterclosedropdown;
    end;
-//   setlinkedvar(nil,tmsecomponent(fdropdownwidget));
-//   freeandnil(fdropdownwidget);
+   if deo_colsizing in foptions then begin
+    fdropdownwidth:= fdropdownwidget.width;
+   end;
    fdropdownwidget.Free;
    fdropdownwidget:= nil;
   end;
@@ -1705,6 +1740,20 @@ begin
     end;
    end;
   end;
+ end;
+end;
+
+procedure tdropdownwidgetcontroller.dostatread(const reader: tstatreader);
+begin
+ if deo_savestate in foptions then begin
+  fdropdownwidth:= reader.readinteger('dropdownwidth',0);
+ end;
+end;
+
+procedure tdropdownwidgetcontroller.dostatwrite(const writer: tstatwriter);
+begin
+ if deo_savestate in foptions then begin
+  writer.writeinteger('dropdownwidth',fdropdownwidth);
  end;
 end;
 
@@ -1905,6 +1954,9 @@ begin
        int2:= -1;
       end;
       fselectkey:= key_none;
+      if assigned(fondropdown) then begin
+       fondropdown(widget1,fdropdownlist);
+      end;
       show(int1,self.fdropdownrowcount,int2,str1);
       fintf.geteditor.forcecaret:= false;
       include(self.fstate,dcs_itemselecting);
@@ -2222,7 +2274,7 @@ end;
 
 function tnocolsdropdownlistcontroller.getbuttonframeclass: dropdownbuttonframeclassty;
 begin
- result:= tdropdownbuttonframe;
+ result:= tdropdownmultibuttonframe;
 end;
 
 { tdropdownlistcontroller }
@@ -2678,8 +2730,13 @@ end;
 
 function tdropdownlist.getkeystring(const aindex: integer): msestring;
 begin
- with tstringcol(fdatacols[0]) do begin
-  result:= items[aindex];
+ if folded and rowhidden[aindex] then begin
+  result:= '';
+ end
+ else begin
+  with tstringcol(fdatacols[0]) do begin
+   result:= items[aindex];
+  end;
  end;
 end;
 

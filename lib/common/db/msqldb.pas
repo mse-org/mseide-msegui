@@ -30,7 +30,10 @@ uses
 type
  TSchemaType = (stNoSchema,stTables,stSysTables,stProcedures,stColumns,
                     stProcedureParams,stIndexes,stPackages);
- sqlconnoptionty = (sco_supportparams,sco_emulateretaining,sco_nounprepared);
+ sqlconnoptionty = (sco_supportparams,sco_forceparams,
+                    sco_emulateretaining,sco_nounprepared,
+                    sco_blobscached);
+// dbf_params,dbf_blobscached
  sqlconnoptionsty = set of sqlconnoptionty;
 
 // TSQLQuery = class;
@@ -54,86 +57,10 @@ const
 type
  tcustomsqlconnection = class;
  TSQLTransaction = class;
- tmacroproperty = class;
- tsqlstringlist = class(tmsestringdatalist)
-  private
-   fmacros: tmacroproperty;
-   function gettext: msestring;
-   procedure settext(const avalue: msestring);
-   procedure readstrings(reader: treader);
-//   procedure writestrings(writer: twriter);
-   procedure setmacros(const avalue: tmacroproperty);
-  protected
-   procedure defineproperties(filer: tfiler); override;
-  public
-   constructor create; override;
-   destructor destroy; override;
-   procedure assign(source: tpersistent); override;
-   property text: msestring read gettext write settext;
-  published
-   property macros: tmacroproperty read fmacros write setmacros;
- end;
-
- tsqlmacroitem = class;
  
- tmacrostringlist = class(tsqlstringlist)
-  private
-   fowner: tsqlstringlist;
-  protected
-   procedure dochange; override;
-  public
-   constructor create(const aowner: tsqlstringlist); reintroduce;
+ tsqlstringlist = class(tmacrostringlist)
  end;
- 
- tsqlmacroitem = class(townedpersistent)
-  private
-   fname: msestring;
-   fvalue: tmacrostringlist;
-   factive: boolean;
-   procedure setvalue(const avalue: tmacrostringlist);
-   procedure setactive(const avalue: boolean);
-  protected
-  public
-   constructor create(aowner: tobject); override;
-   destructor destroy; override;
-   procedure assign(source: tpersistent); override;
-  published
-   property name: msestring read fname write fname;
-   property value: tmacrostringlist read fvalue write setvalue;
-   property active: boolean read factive write setactive default true;
- end;
-  
- tmacroproperty = class(townedpersistentarrayprop)
-  private
-   foptions: macrooptionsty;
-   function getitems(const aindex: integer): tsqlmacroitem;
-   procedure setitems(const aindex: integer; const avalue: tsqlmacroitem);
-  protected
-   procedure dochange(const aindex: integer); override;
-  public
-   constructor create(const aowner: tsqlstringlist); reintroduce;
-   property items[const aindex: integer]: tsqlmacroitem read getitems 
-                     write setitems; default;
-   function itembyname(const aname: msestring): tsqlmacroitem;
-   function itembynames(const anames: array of msestring): tsqlmacroitem;
-   class function getitemclasstype: persistentclassty; override;
-               //used in dumpunitgroups
-  published
-   property options: macrooptionsty read foptions write foptions 
-                                           default [mao_caseinsensitive];
- end;
-  
-// updatesqloptionty = (uso_refresh);
-// updatesqloptionsty = set of updatesqloptionty;
-          //moved to field providerflags pf1_refresh 
-{
- tupdatesqlstringlist = class(tsqlstringlist)
-  private
-//   foptions: updatesqloptionsty;
-  published
-//   property options: updatesqloptionsty read foptions write foptions default [];
- end;
-}  
+   
   TSQLHandle = Class(TObject)
   end;
   
@@ -201,21 +128,25 @@ type
    property options: databaseoptionsty read foptions write setoptions default [];
  end;
 
+ getcredentialseventty = procedure(const sender: tcustomsqlconnection;
+                            var ausername: msestring; var apassword: msestring) 
+                                                                     of object;
  tmsesqlscript = class;
  tcustomsqlconnection = class(TmDatabase,idbcontroller,iactivatorclient)
   private
-    FPassword            : ansistring;
+    FPassword            : msestring;
     FTransaction         : TSQLTransaction;
-    FUserName            : ansistring;
-    FHostName            : string;
-    FCharSet             : string;
-    FRole                : String;
+    FUserName            : msestring;
+    FHostName            : msestring;
+    FCharSet             : msestring;
+    FRole                : mseString;
 
    fafterconnect: tmsesqlscript;
    fbeforedisconnect: tmsesqlscript;
 //   fdatasets1: datasetarty;
 //   frecnos: integerarty;
    ftransactionwrite: tsqltransaction;
+   fongetcredentials: getcredentialseventty;
    procedure setcontroller(const avalue: tdbcontroller);
    procedure settransaction(const avalue : tsqltransaction);
    procedure settransactionwrite(const avalue: tsqltransaction);
@@ -236,6 +167,9 @@ type
    procedure notification(acomponent: tcomponent; operation: toperation); override;
    
     function StrToStatementType(s : msestring) : TStatementType; virtual;
+    procedure getcredentials(var ausername: msestring; var apassword: msestring);
+    procedure freecredentials(var ausername: msestring; var apassword: msestring);
+                    //fill with #0 before free
     procedure DoInternalConnect; override;
     procedure doafterinternalconnect; override;
     procedure dobeforeinternaldisconnect; override;
@@ -252,7 +186,8 @@ type
                const aparams : tmseparams; const autf8: boolean); virtual; abstract;
     procedure internalexecuteunprepared(const cursor: tsqlcursor;
                const atransaction: tsqltransaction;
-               const asql: string); virtual;
+               const asql: string; const origsql: msestring;
+               const aparams: tmseparams); virtual;
 
     procedure Execute(const cursor: TSQLCursor; const atransaction: tsqltransaction;
                const AParams : TmseParams; const autf8: boolean);
@@ -298,13 +233,16 @@ type
    function readsequence(const sequencename: string): msestring; virtual;
    function sequencecurrvalue(const sequencename: string): msestring; virtual;
    function writesequence(const sequencename: string;
-                    const avalue: largeint): msestring; virtual;                    
-  public
+                    const avalue: largeint): msestring; virtual;
+//   function getfeatures(): databasefeaturesty virtual;
+   function blobscached: boolean;
+ public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
    procedure updateutf8(var autf8: boolean); virtual;
    function isutf8: boolean;
    function todbstring(const avalue: msestring): string;
+   function tomsestring(const avalue: string): msestring;
    procedure FreeFldBuffers(cursor : TSQLCursor); virtual; abstract;
    Function AllocateCursorHandle(const aowner: icursorclient; 
                const aname: ansistring): TSQLCursor; virtual; abstract;
@@ -359,19 +297,21 @@ type
    function fieldtooldsql(const afield: tfield): msestring;
    function paramtosql(const aparam: tparam): msestring;
    
-   property Password : ansistring read FPassword write FPassword;
+   property Password : msestring read FPassword write FPassword;
    property Transaction : TSQLTransaction read FTransaction write SetTransaction;
    property transactionwrite : tsqltransaction read ftransactionwrite 
                                                   write settransactionwrite;
-   property UserName : ansistring read FUserName write FUserName;
-   property CharSet : string read FCharSet write FCharSet;
-   property HostName : string Read FHostName Write FHostName;
+   property UserName : msestring read FUserName write FUserName;
+   property CharSet : msestring read FCharSet write FCharSet;
+   property HostName : msestring Read FHostName Write FHostName;
 
    property Connected: boolean read getconnected write setconnected default false;
-   Property Role :  String read FRole write FRole;
+   Property Role :  msestring read FRole write FRole;
    property afterconnect: tmsesqlscript read fafterconnect write setafteconnect;
    property beforedisconnect: tmsesqlscript read fbeforedisconnect write setbeforedisconnect;
    property controller: tdbcontroller read fcontroller write setcontroller;
+   property ongetcredentials: getcredentialseventty read fongetcredentials 
+                                                        write fongetcredentials;
   end;
 
  tsqlconnection = class(tcustomsqlconnection)
@@ -390,6 +330,7 @@ type
     property KeepConnection;
 //    property LoginPrompt;
     property Params;
+    property ongetcredentials;
     property afterconnect;
     property beforedisconnect;
 //    property OnLogin;
@@ -397,8 +338,9 @@ type
  
   TCommitRollbackAction = (caNone, caCommit, caCommitRetaining, caRollback,
     caRollbackRetaining);
-  transactionoptionty = (tao_fake,tao_fakeretaining,tao_catcherror,
-                                                        tao_refreshdatasets);
+  transactionoptionty = (tao_fake,tao_fakeretaining,
+                         tao_catcherror,tao_rollbackonerror,
+                         tao_refreshdatasets);
   transactionoptionsty = set of transactionoptionty;
   sqltransactioneventty = procedure(const sender: tsqltransaction) of object;
   commiterroreventty = procedure(const sender: tsqltransaction;
@@ -433,6 +375,7 @@ type
     procedure setpendingaction(const avalue: tcommitrollbackaction);
    protected
     fsavepointlevel: integer;
+    procedure CloseTrans; override;
     function GetHandle : Pointer; virtual;
     Procedure SetDatabase (Value : tmdatabase); override;
     procedure disconnect(const sender: itransactionclient; 
@@ -442,7 +385,9 @@ type
     procedure dobeforestop;
     procedure doafterstop;
     procedure checkpendingaction;
-    procedure savepointevent(const akind: savepointeventkindty; const alevel: integer);
+    procedure savepointevent(const akind: savepointeventkindty;
+                                                 const alevel: integer);
+    procedure execerror();
    public
     constructor Create(AOwner : TComponent); override;
     destructor Destroy; override;
@@ -632,12 +577,12 @@ type
    function getactive: boolean; override;
    procedure setactive(avalue: boolean); override;
    procedure dosqlchange(const sender: tobject); override;
-   function isprepared: boolean;
-   procedure prepare; virtual;
    procedure checkautocommit; virtual;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
+   function isprepared: boolean;
+   procedure prepare; virtual;
    procedure unprepare; virtual;
    procedure execute; overload; override;
    procedure execute(const aparams: array of variant); overload;
@@ -874,139 +819,7 @@ begin
  end;
  }
 end;
-   { tsqlstringlist }
 
-constructor tsqlstringlist.create;
-begin
- fmacros:= tmacroproperty.create(self);
- inherited;
-end;
-
-destructor tsqlstringlist.destroy;
-begin
- inherited;
- fmacros.free;
-end;
-
-function tsqlstringlist.gettext: msestring;
-var
- int1,int2: integer;
- po1: pmsestring;
- po2: pmsechar;
- mstr1: msestring;
- ar1: macroinfoarty;
-// po3: pdoublemsestringty;
-begin
- result:= '';
- if count > 0 then begin
-  normalizering;
-  int2:= 0;
-  po1:= pointer(fdatapo);
-  for int1:= 0 to count - 1 do begin
-   inc(int2,length(pmsestringaty(po1)^[int1]));
-  end;
-  mstr1:= lineend;
-  setlength(result,int2+(count-1)*length(mstr1));
-  if result <> '' then begin
-   int2:= 0;
-   po2:= pmsechar(result);
-   for int1:= 0 to count - 2 do begin
-    move(po1^[1],po2^,length(po1^)*sizeof(msechar));
-    inc(po2,length(po1^));
-    move(mstr1[1],po2^,length(mstr1)*sizeof(msechar));
-    inc(po2,length(mstr1));
-    inc(po1);
-   end;
-   move(po1^[1],po2^,length(po1^)*sizeof(msechar)); //last line
-  end;
-  if fmacros.count <> 0 then begin
-   setlength(ar1,fmacros.count);
-//   po3:= fmacros.datapo;
-   for int1:= 0 to high(ar1) do begin
-    with fmacros[int1] do begin
-     ar1[int1].name:= name;
-     if active then begin
-      ar1[int1].value:= value.text;
-     end
-     else begin
-      ar1[int1].value:= '';
-     end;
-//     value:= po3^.b;
-//     name:= po3^.a;
-//     value:= po3^.b;
-    end;
-//    inc(po3);
-   end;    
-   result:= expandmacros(result,ar1,fmacros.foptions);
-  end;
- end;
-end;
-
-procedure tsqlstringlist.settext(const avalue: msestring);
-begin
- asarray:= breaklines(avalue);
-end;
-
-procedure tsqlstringlist.readstrings(reader: treader);
-var
- ar1: stringarty;
- int1: integer;
- bo1: boolean;
-begin
- reader.readlistbegin;
- while not reader.endoflist do begin
-  additem(ar1,reader.readstring);
- end;
- reader.readlistend;
- bo1:= true;
- for int1:= 0 to high(ar1) do begin
-  if not checkutf8(ar1[int1]) then begin
-   bo1:= false;
-   break;
-  end;
- end;
- clear;
- if bo1 then begin
-  for int1:= 0 to high(ar1) do begin
-   add(utf8tostringansi(ar1[int1]));
-  end;
- end
- else begin
-  for int1:= 0 to high(ar1) do begin
-   add(msestring(ar1[int1]));
-  end;
- end;
-end;
-{
-procedure tsqlstringlist.writestrings(writer: twriter);
-begin
- //dummy
-end;
-}
-procedure tsqlstringlist.defineproperties(filer: tfiler);
-begin
- inherited;
- filer.defineproperty('Strings',{$ifdef FPC}@{$endif}readstrings,
-                                                nil{@writestrings},false);
-end;
-
-procedure tsqlstringlist.setmacros(const avalue: tmacroproperty);
-begin
- fmacros.assign(avalue);
-end;
-
-procedure tsqlstringlist.assign(source: tpersistent);
-begin
- beginupdate;
- try
-  inherited;
-  if source is tsqlstringlist then begin
-   fmacros.assign(tsqlstringlist(source).macros);
-  end;
- finally
-  endupdate;
- end;
-end;
 
 { tdbcontroller }
 
@@ -1065,12 +878,12 @@ begin
  if (str1 <> '') and (str1[1] = '''') and 
                     (str1[length(str1)] = '''') then begin
   fdatabasename:= str1;
-  tmdatabase(fowner).databasename:= ansistring(copy(str1,2,length(str1)-2));
+  tmdatabase(fowner).databasename:= copy(str1,2,length(str1)-2);
  end
  else begin
   fdatabasename:= tomsefilepath(str1);
   tmdatabase(fowner).databasename:= 
-                   ansistring(tosysfilepath(filepath(str1,fk_default,true)));
+                   tosysfilepath(filepath(str1,fk_default,true));
  end;
 end;
 
@@ -1133,6 +946,17 @@ function tcustomsqlconnection.writesequence(const sequencename: string;
 begin
  result:= ''; //dummy
 end;
+{
+function tcustomsqlconnection.getfeatures(): databasefeaturesty;
+begin
+ result:= [];
+end;
+}
+function tcustomsqlconnection.blobscached: boolean;
+begin
+ result:= sco_blobscached in fconnoptions;
+// result:= dbf_blobscached in getfeatures;
+end;
 
 procedure tcustomsqlconnection.updateutf8(var autf8: boolean);
 begin
@@ -1162,6 +986,29 @@ begin
      result:= t;
      Exit;
     end;
+end;
+
+procedure tcustomsqlconnection.getcredentials(var ausername: msestring;
+               var apassword: msestring);
+begin
+ if assigned(fongetcredentials) then begin
+  ausername:= username;
+  apassword:= '';
+  fongetcredentials(self,ausername,apassword);
+ end
+ else begin
+  ausername:= username;
+  apassword:= password;
+ end;
+ uniquestring(ausername);
+ uniquestring(apassword);
+end;
+
+procedure tcustomsqlconnection.freecredentials(var ausername: msestring;
+               var apassword: msestring);
+begin
+ stringsafefree(ausername,false);
+ stringsafefree(apassword,false);
 end;
 
 procedure tcustomsqlconnection.settransaction(const avalue : tsqltransaction);
@@ -1281,11 +1128,16 @@ begin
     params1.isutf8:= aisutf8;
    end;
    try
-    if noprepare then begin
-     executeunprepared(cursor,atransaction,params1,asql,aisutf8);
-    end
-    else begin
-     execute(cursor,atransaction,params1,aisutf8);
+    try
+     if noprepare then begin
+      executeunprepared(cursor,atransaction,params1,asql,aisutf8);
+     end
+     else begin
+      execute(cursor,atransaction,params1,aisutf8);
+     end;
+    except
+     atransaction.execerror();
+     raise;
     end;
     result:= cursor.frowsaffected;
    finally
@@ -1428,7 +1280,8 @@ begin
   Result := nil;
 end;
 
-procedure tcustomsqlconnection.Execute(const cursor: TSQLCursor; const atransaction: tsqltransaction;
+procedure tcustomsqlconnection.Execute(const cursor: TSQLCursor;
+               const atransaction: tsqltransaction;
                const AParams : TmseParams; const autf8: boolean);
 begin
  if aparams <> nil then begin
@@ -1436,15 +1289,21 @@ begin
  end;
  beforeaction;
  try
-  internalexecute(cursor,atransaction,aparams,autf8);
+  try
+   internalexecute(cursor,atransaction,aparams,autf8);
+  except
+   atransaction.execerror();
+   raise;
+  end;
  finally
   afteraction;
  end;
 end;
 
-procedure tcustomsqlconnection.internalexecuteunprepared(const cursor: tsqlcursor;
-               const atransaction: tsqltransaction;
-               const asql: string);
+procedure tcustomsqlconnection.internalexecuteunprepared(
+            const cursor: tsqlcursor; const atransaction: tsqltransaction;
+                     const asql: string; const origsql: msestring; 
+                                                    const aparams: tmseparams);
 begin
  raise edatabaseerror.create(name+': executeunprepared not supported.');
 end;
@@ -1456,25 +1315,40 @@ procedure tcustomsqlconnection.Executeunprepared(const cursor: TSQLCursor;
 var
  mstr1: msestring;
  str1: ansistring;
+ par1: tmseparams;
 begin
  if aparams <> nil then begin
   aparams.updatevalues;
  end;
  beforeaction;
  try
+  par1:= nil;
   if (aparams <> nil) and (aparams.count > 0) then begin
-   mstr1:= aparams.expandvalues(asql);
+//   if dbf_params in getfeatures then begin
+   if sco_forceparams in fconnoptions then begin
+    par1:= aparams; //asql used directly
+   end
+   else begin
+    mstr1:= aparams.expandvalues(asql);
+   end;
   end
   else begin
    mstr1:= asql;
   end;
-  if autf8 then begin
-   str1:= stringtoutf8ansi(mstr1);
-  end
-  else begin
-   str1:= ansistring(mstr1);
+  if mstr1 <> '' then begin
+   if autf8 then begin
+    str1:= stringtoutf8ansi(mstr1);
+   end
+   else begin
+    str1:= ansistring(mstr1);
+   end;
   end;
-  internalexecuteunprepared(cursor,atransaction,str1);
+  try
+   internalexecuteunprepared(cursor,atransaction,str1,asql,par1);
+  except
+   atransaction.execerror();
+   raise;
+  end;
  finally
   afteraction;
  end;
@@ -1846,6 +1720,16 @@ begin
  end;
 end;
 
+function tcustomsqlconnection.tomsestring(const avalue: string): msestring;
+begin
+ if isutf8 then begin
+  result:= utf8tostring(avalue);
+ end
+ else begin
+  result:= msestring(avalue);
+ end;
+end;
+
 function tcustomsqlconnection.identquotechar: msestring;
 begin
  result:= '"';
@@ -2103,7 +1987,14 @@ begin
       exit;
      end
      else begin
-      dofinish;
+      if tao_rollbackonerror in foptions then begin
+       try
+        rollback();
+       except //no secondary exceptions
+       end;
+       raise;
+      end;
+      dofinish();
       raise;
      end;
     end;
@@ -2383,6 +2274,12 @@ begin
  end;
 end;
 
+procedure TSQLTransaction.CloseTrans;
+begin
+ inherited;
+ freeandnil(ftrans);
+end;
+
 procedure TSQLTransaction.savepointevent(const akind: savepointeventkindty;
                                                         const alevel: integer);
 var
@@ -2413,6 +2310,16 @@ begin
    fwritedatasets[int1].savepointevent(self,akind,alevel);
   end;
   dec(int1);
+ end;
+end;
+
+procedure TSQLTransaction.execerror();
+begin
+ if (tao_rollbackonerror in foptions) and active then begin
+  try
+   rollback();
+  except //no secondary exceptions
+  end; 
  end;
 end;
 
@@ -2505,7 +2412,7 @@ end;
 
 function TSQLCursor.wantblobfetch: boolean;
 begin
- result:= (fowner <> nil) and fowner.blobsarefetched;
+ result:= (fowner <> nil) and fowner.blobsarefetched();
 end;
 
 function TSQLCursor.stringmemo: boolean;
@@ -2945,120 +2852,12 @@ begin
  fsender:= sender;
  ferror:= aerror;
  ferrormessage:= aerrormessage;
- inherited create(asender.name+': '+amessage);
-end;
-
-{ tsqlmacroitem }
-
-constructor tsqlmacroitem.create(aowner: tobject);
-begin
- factive:= true;
- fvalue:= tmacrostringlist.create(tsqlstringlist(aowner));
- inherited;
-end;
-
-destructor tsqlmacroitem.destroy;
-begin
- fvalue.free;
- inherited;
-end;
-
-procedure tsqlmacroitem.setvalue(const avalue: tmacrostringlist);
-begin
- fvalue.assign(avalue);
-end;
-
-procedure tsqlmacroitem.setactive(const avalue: boolean);
-begin
- if factive <> avalue then begin
-  factive:= avalue;
-  tsqlstringlist(fowner).dochange;
+ if asender <> nil then begin
+  inherited create(asender.name+': '+amessage);
+ end
+ else begin
+  inherited create(amessage);
  end;
-end;
-
-procedure tsqlmacroitem.assign(source: tpersistent);
-begin
- if source is tsqlmacroitem then begin
-  with tsqlmacroitem(source) do begin
-   self.name:= name;
-   self.value:= value;
-   self.active:= active;
-  end;
- end;
-end;
-
-{ tmacroproperty }
-
-constructor tmacroproperty.create(const aowner: tsqlstringlist);
-begin
- fowner:= aowner;
- foptions:= [mao_caseinsensitive];
- inherited create(aowner,tsqlmacroitem);
-end;
-
-procedure tmacroproperty.dochange(const aindex: integer);
-begin
- inherited;
- tsqlstringlist(fowner).dochange;
-end;
-
-function tmacroproperty.getitems(const aindex: integer): tsqlmacroitem;
-begin
- result:= tsqlmacroitem(inherited getitems(aindex));
-end;
-
-procedure tmacroproperty.setitems(const aindex: integer;
-               const avalue: tsqlmacroitem);
-begin
- inherited;
-end;
-
-class function tmacroproperty.getitemclasstype: persistentclassty;
-begin
- result:= tsqlmacroitem;
-end;
-
-function tmacroproperty.itembyname(const aname: msestring): tsqlmacroitem;
-var
- int1: integer;
-begin
- result:= nil;
- for int1:= 0 to high(fitems) do begin
-  if tsqlmacroitem(fitems[int1]).name = aname then begin
-   result:= tsqlmacroitem(fitems[int1]);
-   break;
-  end;
- end;
- if result = nil then begin
-  raise exception.create('Macro "'+ansistring(aname)+'" not found.');
- end;
-end;
-
-function tmacroproperty.itembynames(const anames: array of msestring): tsqlmacroitem;
-var
- int1: integer;
-begin
- result:= nil;
- if length(anames) > 0 then begin
-  result:= itembyname(anames[0]);
-  for int1:= 1 to high(anames) do begin
-   result:= result.value.macros.itembyname(anames[int1]);
-  end;
- end;
-end;
-
-{ tmacrostringlist }
-
-constructor tmacrostringlist.create(const aowner: tsqlstringlist);
-begin
- fowner:= aowner;
- inherited create;
-end;
-
-procedure tmacrostringlist.dochange;
-begin
- inherited;
- fowner.dochange;
 end;
 
 end.

@@ -15,7 +15,7 @@ interface
 uses
  msedataedits,msecommport,msetypes,msedatalist,
  classes,mclasses,mseclasses,msedropdownlist,msestat,
- msemenus,mseevent,msestrings,msegui,mseguiglob,mseedit;
+ msemenus,mseevent,msestrings,msegui,mseguiglob,mseedit,msegraphics;
 type
  setcommnreventty =  procedure(const sender: tobject; var avalue: commnrty;
                           var accept: boolean) of object;

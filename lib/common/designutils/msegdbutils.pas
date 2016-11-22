@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2015 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2016 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -270,7 +270,7 @@ type
    fgdbfrom{,fgdberror}: tpipereader;
    {$ifdef UNIX}
    ftargetterminal: tpseudoterminal;
-   ftargetconsole: tmseprocess;
+   ftargetconsole: tcustommseprocess;
    {$endif}
    fgdb: integer; //processhandle
    fstate: gdbstatesty;
@@ -571,6 +571,8 @@ type
                                          out aresult: msestring): gdbresultty;
    function writepascalvariable(varname: string; const value: string;
                 var aresult: string): gdbresultty;
+   function executecommand(const acommand: string;
+                                    out aresult: string): gdbresultty;
    function evaluateexpression(expression: string;
                                            out aresult: string): gdbresultty;
    function symboltype(symbol: string;
@@ -840,7 +842,7 @@ begin
  {$ifdef UNIX}
  ftargetterminal:= tpseudoterminal.create;
  ftargetterminal.input.oninputavailable:= {$ifdef FPC}@{$endif}targetfrom;
- ftargetconsole:= tmseprocess.create(nil);
+ ftargetconsole:= tcustommseprocess.create(nil);
  ftargetconsole.options:= [pro_output,pro_errorouttoout];
 // ftargetconsole.filename:= 'xterm';
  ftargetconsole.output.oninputavailable:= {$ifdef FPC}@{$endif}xtermfrom;
@@ -3470,6 +3472,23 @@ begin
  end;
 end;
 }
+function tgdbmi.executecommand(const acommand: string;
+               out aresult: string): gdbresultty;
+begin
+ result:= clicommand(acommand);
+ case result of
+  gdb_ok: begin
+   aresult:= fclivalues;
+  end;
+  gdb_message: begin
+   aresult:= errormessage;
+  end;
+  else begin
+   aresult:= gdberrortexts[result];
+  end;
+ end; 
+end;
+
 function tgdbmi.evaluateexpression(expression: string;
                                         out aresult: string): gdbresultty;
 begin
@@ -4432,7 +4451,7 @@ begin
   if (pos('type = ^',str1) = 1) and
                 (symboltype(varname+'^' ,str3) = gdb_ok) then begin
    if pos('type = array of ',str3) = 1 then begin //dwarf dynarray
-    str1:= 'type = ^(array [0..-1] of '+copy(trim(str1),9,bigint)+')'+lineend;
+    str1:= 'type = ^(array [0..-1] of '+copy(trim(str3),17,bigint)+')'+lineend;
    end;
   end;
   if result = gdb_ok then begin

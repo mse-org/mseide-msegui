@@ -14,7 +14,8 @@ uses
  classes,mclasses,mdb,msewidgetgrid,msedataedits,mseeditglob,msestrings,
  msedatalist,
  msedbedit,msedb,msegui,msegrids,msedbdispwidgets,mselookupbuffer,mseclasses,
- mseformatstr,msetypes,mseglob,msemenus,mseguiglob,msebufdataset;
+ mseformatstr,msetypes,mseglob,msemenus,mseguiglob,msebufdataset,
+ msegraphics;
 
 const
  defaultlookupoptionsedit = defaultoptionsedit + [oe_readonly];
@@ -2281,7 +2282,7 @@ function tlookup32dbdispfielddatalink.datatotext(const data): msestring;
   with flookupdatalink do begin
    if fcanlookup and (field <> nil) and
      tmsebufdataset(dataset).indexlocal[flookupindexnum].
-               {$ifdef FPC}find{$else}findval{$endif}([akey],[],bm1) then begin
+                         find([akey],[],bm1,false,false,true) then begin
     result:= idblookupdbdispfieldlink(fintf).lookuptext(bm1);
    end;
   end;
@@ -2309,7 +2310,7 @@ begin
  with flookupdatalink do begin
   if fcanlookup then begin
    if not tmsebufdataset(dataset).indexlocal[flookupindexnum].
-              {$ifdef FPC}find{$else}findval{$endif}([fkey],[],bm1) then begin
+                              find([fkey],[],bm1,false,false,true) then begin
     bm1.recordpo:= nil;
    end;
   end;
@@ -2341,7 +2342,7 @@ function tlookup64dbdispfielddatalink.datatotext(const data): msestring;
   with flookupdatalink do begin
    if fcanlookup and (field <> nil) and
      tmsebufdataset(dataset).indexlocal[flookupindexnum].
-               {$ifdef FPC}find{$else}findval{$endif}([akey],[],bm1) then begin
+                            find([akey],[],bm1,false,false,true) then begin
     result:= idblookupdbdispfieldlink(fintf).lookuptext(bm1);
    end;
   end;
@@ -2369,7 +2370,7 @@ begin
  with flookupdatalink do begin
   if not fisnull and fcanlookup then begin
    if not tmsebufdataset(dataset).indexlocal[flookupindexnum].
-           {$ifdef FPC}find{$else}findval{$endif}([fkey],[],bm1) then begin
+                            find([fkey],[],bm1,false,false,true) then begin
     bm1.recordpo:= nil;
    end;
   end;
@@ -2401,7 +2402,7 @@ function tlookupstrdbdispfielddatalink.datatotext(const data): msestring;
   with flookupdatalink do begin
    if fcanlookup and (field <> nil) and
      tmsebufdataset(dataset).indexlocal[flookupindexnum].
-              {$ifdef FPC}find{$else}findval{$endif}([akey],[],bm1) then begin
+                           find([akey],[],bm1,false,false,true) then begin
     result:= idblookupdbdispfieldlink(fintf).lookuptext(bm1);
    end;
   end;
@@ -2429,7 +2430,7 @@ begin
  with flookupdatalink do begin
   if not fisnull and fcanlookup then begin
    if not tmsebufdataset(dataset).indexlocal[flookupindexnum].
-            {$ifdef FPC}find{$else}findval{$endif}([fkey],[],bm1) then begin
+                          find([fkey],[],bm1,false,false,true) then begin
     bm1.recordpo:= nil;
    end;
   end;

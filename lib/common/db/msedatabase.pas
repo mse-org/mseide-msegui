@@ -91,7 +91,7 @@ type
     fwritedatasets: itransactionclientarty;
     fwritedatasetsactive: booleanarty;
     Procedure SetDatabase (Value : tmdatabase); virtual;
-    procedure CloseTrans;
+    procedure CloseTrans; virtual;
     procedure openTrans;
     Procedure CheckDatabase;
     Procedure CheckActive;
@@ -187,13 +187,13 @@ type
  // tmdatabaseClass = Class Of tmdatabase;
   tmdatabase = class(TCustomConnection)
   private
-   FDataBaseName : String;
+   FDataBaseName : mseString;
 //    FDataSets : TList;
    fdatasets: idatabaseclientarty;
    FTransactions : TList;
    FDirectory : String;
    FKeepConnection : Boolean;
-   FParams : TStrings;
+   FParams : TStringlist;
    FSQLBased : Boolean;
    fonbeforeconnect: databaseeventty;
    fonconnecterror: databaseerroreventty;
@@ -209,7 +209,7 @@ type
    procedure UnRegisterTransaction(TA : tmdbtransaction);
    procedure RemoveDataSets;
    procedure RemoveTransactions;
-   procedure setparams(const avalue: tstrings);
+   procedure setparams(const avalue: tstringlist);
   protected
    FConnected : Boolean;
    FOpenAfterRead : boolean;
@@ -241,10 +241,10 @@ type
    property datasets: idatabaseclientarty read fdatasets;
   published
    property Connected: Boolean read FConnected write SetConnected default false;
-   property DatabaseName: string read FDatabaseName write FDatabaseName;
+   property DatabaseName: msestring read FDatabaseName write FDatabaseName;
    property KeepConnection: Boolean read FKeepConnection 
                               write FKeepConnection default false;
-   property Params : TStrings read FParams Write setparams;
+   property Params : TStringlist read FParams Write setparams;
    property onbeforeconnect: databaseeventty read fonbeforeconnect
                                    write fonbeforeconnect;  
    property onafterconnect: databaseeventty read fonafterconnect 
@@ -431,7 +431,7 @@ begin
      onbeforeconnect(self);
     end;
     try
-     dointernalconnect;
+     dointernalconnect();
      doafterinternalconnect;
      if assigned(onafterconnect) then begin
        onafterconnect(self);
@@ -698,7 +698,7 @@ begin
     DatabaseErrorFmt(SNoTransactionRegistered,[TA.Name]);
 end;
 
-procedure tmdatabase.setparams(const avalue: tstrings);
+procedure tmdatabase.setparams(const avalue: tstringlist);
 begin
  fparams.assign(avalue);
 end;

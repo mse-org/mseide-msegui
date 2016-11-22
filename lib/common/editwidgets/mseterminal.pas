@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2014 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2016 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -16,7 +16,7 @@ uses
  msegrids,classes,mclasses,msestream,mseclasses,msepipestream,mseevent,
  mseinplaceedit,
  msetextedit,msestrings,msesys,mseeditglob,msemenus,msegui,mseguiglob,
- mseprocess,msegridsglob,mseedit,mseglob,msewidgetgrid;
+ mseprocess,msegridsglob,mseedit,mseglob,msewidgetgrid,msegraphics;
 type
  sendtexteventty = procedure(const sender: tobject; 
                        var atext: msestring; var donotsend: boolean) of object;
@@ -50,6 +50,7 @@ type
    fmaxcommandhistory: integer;
    fcommandhistory: msestringarty;
    fhistoryindex: integer;
+   fprocess: tcustommseprocess;
    function getinputfd: integer;
    procedure setinoutfd(const Value: integer);
    procedure setoptions(const avalue: terminaloptionsty);
@@ -66,8 +67,12 @@ type
    procedure setpipewaitus(const avalue: integer);
    function getprompt: msestring;
    procedure setprompt(const avalue: msestring);
+   procedure setprocess(const avalue: tcustommseprocess);
   protected
-   fprocess: tmseprocess;
+   finternalprocess: tcustommseprocess;
+   procedure linkprocess(const aprocess: tcustommseprocess);
+   procedure unlinkprocess(const aprocess: tcustommseprocess);
+   function curprocess: tcustommseprocess;
    procedure setreadonly1(const avalue: boolean);
    procedure igridwidget.setreadonly = setreadonly1;
    procedure setreadonly(const avalue: boolean); override;
@@ -112,6 +117,9 @@ type
                                                     write fcommandhistory;
    property inputcolindex: integer read finputcolindex write finputcolindex;
   published
+   property process: tcustommseprocess read fprocess write setprocess;
+        //replaces internal process,
+        //event properties in source will be owerwritten
    property optionsedit1; //before optionsedit!
    property optionsedit default defaultterminaleditoptions;
    property font;
@@ -171,13 +179,9 @@ begin
 // fhistoryindex:= -1;
  inherited;
  optionsedit:= defaultterminaleditoptions;
- fprocess:= tmseprocess.create(nil);
- with fprocess do begin
-  output.oninputavailable:= {$ifdef FPC}@{$endif}doinputavailable;
-  output.onpipebroken:= {$ifdef FPC}@{$endif}dopipebroken;
-  erroroutput.oninputavailable:= {$ifdef FPC}@{$endif}doinputavailable;
-  erroroutput.onpipebroken:= {$ifdef FPC}@{$endif}dopipebroken;
-  onprocfinished:= {$ifdef FPC}@{$endif}doprocfinished;
+ finternalprocess:= tcustommseprocess.create(nil);
+ linkprocess(finternalprocess);
+ with finternalprocess do begin
   output.overloadsleepus:= 50000;
   erroroutput.overloadsleepus:= 50000;
   options:= defaultoptionsprocess;
@@ -187,8 +191,43 @@ end;
 
 destructor tterminal.destroy;
 begin
- fprocess.free;
+ process:= nil; //unlink
+ finternalprocess.free;
  inherited;
+end;
+
+procedure tterminal.linkprocess(const aprocess: tcustommseprocess);
+begin
+ if not (csdesigning in componentstate) then begin
+  with aprocess do begin
+   output.oninputavailable:= @doinputavailable;
+   output.onpipebroken:= @dopipebroken;
+   erroroutput.oninputavailable:= @doinputavailable;
+   erroroutput.onpipebroken:= @dopipebroken;
+   onprocfinished:= @doprocfinished;
+  end;
+ end;
+end;
+
+procedure tterminal.unlinkprocess(const aprocess: tcustommseprocess);
+begin
+ if not (csdesigning in componentstate) then begin
+  with aprocess do begin
+   output.oninputavailable:= nil;
+   output.onpipebroken:= nil;
+   erroroutput.oninputavailable:= nil;
+   erroroutput.onpipebroken:= nil;
+   onprocfinished:= nil;
+  end;
+ end;
+end;
+
+function tterminal.curprocess: tcustommseprocess;
+begin
+ result:= fprocess;
+ if result = nil then begin
+  result:= finternalprocess;
+ end;
 end;
 
 procedure tterminal.docellevent(const ownedcol: boolean; 
@@ -236,6 +275,17 @@ begin
     end;
    end;
   end;
+ end;
+end;
+
+procedure tterminal.setprocess(const avalue: tcustommseprocess);
+begin
+ if fprocess <> nil then begin
+  unlinkprocess(fprocess);
+ end;
+ fprocess:= avalue;
+ if fprocess <> nil then begin
+  linkprocess(fprocess);
  end;
 end;
 
@@ -324,10 +374,10 @@ begin
        bo2:= echooff(bo3);
        try
         if teo_utf8 in foptions then begin
-         fprocess.input.pipewriter.writeln(stringtoutf8ansi(mstr1));
+         curprocess.input.pipewriter.writeln(stringtoutf8ansi(mstr1));
         end
         else begin
-         fprocess.input.pipewriter.writeln(mstr1);
+         curprocess.input.pipewriter.writeln(mstr1);
         end;
         if not bo3 then begin
          datalist.add('');
@@ -379,7 +429,7 @@ var
 begin
  result:= false;
 {$ifdef unix}
- if (pro_echo in fprocess.options) and running and
+ if (pro_echo in curprocess.options) and running and
         (msetcgetattr(outputfd,terminfo) = 0) then begin
   result:= terminfo.c_lflag and echo = 0;
  end; 
@@ -395,7 +445,7 @@ begin
  result:= false;
  aechoisoff:= false;
 {$ifdef unix}
- if (pro_echo in fprocess.options) and running and
+ if (pro_echo in curprocess.options) and running and
         (msetcgetattr(outputfd,terminfo) = 0) then begin
   result:= terminfo.c_lflag and echo <> 0;
   aechoisoff:= not result;
@@ -435,9 +485,9 @@ begin
     finputcolindex:= finputcolindex + 2;
     include(info.eventstate,es_processed);
     try
-     fprocess.terminate;
+     curprocess.terminate;
     except
-     fprocess.kill;
+     curprocess.kill;
     end;
    end
    else begin
@@ -524,7 +574,7 @@ begin
   end;
   if not (csdestroying in componentstate) then begin
    if canevent(tmethod(fonreceivetext)) then begin
-    fonreceivetext(self,str1,sender = fprocess.erroroutput.pipereader);
+    fonreceivetext(self,str1,sender = curprocess.erroroutput.pipereader);
    end;
    if teo_utf8 in foptions then begin
     addchars(utf8tostringansi(str1));
@@ -579,7 +629,7 @@ end;
 
 procedure tterminal.dopipebroken(const sender: tpipereader);
 begin
- if sender = fprocess.output.pipereader then begin
+ if sender = curprocess.output.pipereader then begin
   if canevent(tmethod(foninputpipebroken)) then begin
    foninputpipebroken(self);
   end;
@@ -603,7 +653,7 @@ function tterminal.execprog(const acommandline: msestring;
                     const aparams: msestringarty = nil; 
                     const aenvvars: msestringarty = nil): integer;
 begin
- with fprocess do begin
+ with curprocess do begin
   active:= false;
 //  if active then begin
 //   componentexception(self,'Process already active.');
@@ -619,32 +669,32 @@ end;
 
 function tterminal.getinputfd: integer;
 begin
- result:= fprocess.output.pipereader.handle;
+ result:= curprocess.output.pipereader.handle;
 end;
 
 function tterminal.prochandle: integer;
 begin
- result:= fprocess.prochandle;
+ result:= curprocess.prochandle;
 end;
 
 procedure tterminal.setinoutfd(const Value: integer);
 begin
- fprocess.output.pipereader.handle:= value;
+ curprocess.output.pipereader.handle:= value;
 end;
 
 function tterminal.waitforprocess: integer;
 begin
- result:= fprocess.waitforprocess;
+ result:= curprocess.waitforprocess;
 end;
 
 function tterminal.exitcode: integer;
 begin
- result:= fprocess.exitcode;
+ result:= curprocess.exitcode;
 end;
 
 function tterminal.running: boolean;
 begin
- result:= fprocess.running;
+ result:= curprocess.running;
 end;
 
 procedure tterminal.setoptions(const avalue: terminaloptionsty);
@@ -657,22 +707,22 @@ end;
 
 function tterminal.getoutputfd: integer;
 begin
- result:= fprocess.input.pipewriter.handle;
+ result:= curprocess.input.pipewriter.handle;
 end;
 
 procedure tterminal.setoutputfd(const avalue: integer);
 begin
- fprocess.input.pipewriter.handle:= avalue;
+ curprocess.input.pipewriter.handle:= avalue;
 end;
 
 function tterminal.geterrorfd: integer;
 begin
- result:= fprocess.erroroutput.pipereader.handle;
+ result:= curprocess.erroroutput.pipereader.handle;
 end;
 
 procedure tterminal.seterrorfd(const avalue: integer);
 begin
- fprocess.erroroutput.pipereader.handle:= avalue;
+ curprocess.erroroutput.pipereader.handle:= avalue;
 end;
 
 procedure tterminal.writestr(const atext: string);
@@ -706,22 +756,22 @@ end;
 }
 procedure tterminal.terminateprocess;
 begin
- fprocess.terminate;
+ curprocess.terminate;
 end;
 
 procedure tterminal.killprocess;
 begin
- fprocess.kill;
+ curprocess.kill;
 end;
 
 function tterminal.getoptionsprocess: processoptionsty;
 begin
- result:= fprocess.options;
+ result:= finternalprocess.options;
 end;
 
 procedure tterminal.setoptionsprocess(const avalue: processoptionsty);
 begin
- fprocess.options:= avalue;
+ finternalprocess.options:= avalue;
 end;
 
 procedure tterminal.beginupdate;
@@ -755,12 +805,12 @@ end;
 
 function tterminal.getpipewaitus: integer;
 begin
- result:= fprocess.pipewaitus;
+ result:= finternalprocess.pipewaitus;
 end;
 
 procedure tterminal.setpipewaitus(const avalue: integer);
 begin
- fprocess.pipewaitus:= avalue;
+ finternalprocess.pipewaitus:= avalue;
 end;
 
 procedure tterminal.setreadonly(const avalue: boolean);

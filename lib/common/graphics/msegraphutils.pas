@@ -62,102 +62,111 @@ const
  cl_namedrgb =   colorty($a0000000);
  cl_user =       colorty($b0000000);
 
- cl_invalid =                cl_functional + 0; 
+ cl_invalid =                  cl_functional + 0; 
                  //can not be used as default value
- cl_default =                cl_functional + 1;
- cl_parent =                 cl_functional + 2;
- cl_transparent =            cl_functional + 3;
- cl_brush =                  cl_functional + 4;
- cl_brushcanvas =            cl_functional + 5;
- cl_none =                   cl_functional + 6; cl_nonenum = 6;
- cl_font =                   cl_functional + 7; //use color of current font
- cl_normal =                 cl_functional + 8; //used in tmenitem.coloractive
- cl_lastfunctional =         cl_functional + 9;
+ cl_default =                  cl_functional + 1;
+ cl_parent =                   cl_functional + 2;
+ cl_transparent =              cl_functional + 3;
+ cl_brush =                    cl_functional + 4;
+ cl_brushcanvas =              cl_functional + 5;
+ cl_none =                     cl_functional + 6; cl_nonenum = 6;
+ cl_font =                     cl_functional + 7; //use color of current font
+ cl_normal =                   cl_functional + 8; //used in tmenitem.coloractive
+ cl_lastfunctional =           cl_functional + 9;
 
- cl_dkshadow =               cl_mapped + 0;
- cl_shadow =                 cl_mapped + 1;
- cl_mid =                    cl_mapped + 2;
- cl_light =                  cl_mapped + 3;
- cl_highlight =              cl_mapped + 4;
- cl_background =             cl_mapped + 5;
- cl_foreground =             cl_mapped + 6;
- cl_active =                 cl_mapped + 7;
- cl_noedit =                 cl_mapped + 8;
- cl_text =                   cl_mapped + 9;
- cl_selectedtext =           cl_mapped + 10;
- cl_selectedtextbackground = cl_mapped + 11;
- cl_infobackground =         cl_mapped + 12;
- cl_glyph =                  cl_mapped + 13;
- cl_activegrip =             cl_mapped + 14;
- cl_empty =                  cl_mapped + 15;
- cl_emptytext =              cl_mapped + 16;
- cl_emptytextbackground =    cl_mapped + 17;
- cl_zebra =                  cl_mapped + 18;
- cl_grayed =                 cl_mapped + 19;
- cl_grayedshadow =           cl_mapped + 20;
- cl_lastmapped =             cl_mapped + 21;
-
- cl_0 =                      cl_namedrgb + 0; //select colorbackground for monochrome bitmaps
- cl_1 =                      cl_namedrgb + 1; //select colorforeground
- cl_black =                  cl_namedrgb + 2;
- cl_dkgray =                 cl_namedrgb + 3;
- cl_gray =                   cl_namedrgb + 4;
- cl_ltgray =                 cl_namedrgb + 5;
- cl_white =                  cl_namedrgb + 6;
-
- cl_red =                    cl_namedrgb + 7;
- cl_green =                  cl_namedrgb + 8;
- cl_blue =                   cl_namedrgb + 9;
- cl_cyan =                   cl_namedrgb + 10;
- cl_magenta =                cl_namedrgb + 11;
- cl_yellow =                 cl_namedrgb + 12;
-
- cl_dkred =                  cl_namedrgb + 13;
- cl_dkgreen =                cl_namedrgb + 14;
- cl_dkblue =                 cl_namedrgb + 15;
- cl_dkcyan =                 cl_namedrgb + 16;
- cl_dkmagenta =              cl_namedrgb + 17;
- cl_dkyellow =               cl_namedrgb + 18;
-
- cl_ltred =                  cl_namedrgb + 19;
- cl_ltgreen =                cl_namedrgb + 20;
- cl_ltblue =                 cl_namedrgb + 21;
- cl_ltcyan =                 cl_namedrgb + 22;
- cl_ltmagenta =              cl_namedrgb + 23;
- cl_ltyellow =               cl_namedrgb + 24;
-
- cl_lastnamedrgb =           cl_namedrgb + 25;
+ cl_dkshadow =                 cl_mapped + 0;
+ cl_shadow =                   cl_mapped + 1;
+ cl_mid =                      cl_mapped + 2;
+ cl_light =                    cl_mapped + 3;
+ cl_highlight =                cl_mapped + 4;
+ cl_background =               cl_mapped + 5;
+ cl_foreground =               cl_mapped + 6;
+ cl_active =                   cl_mapped + 7;
+ cl_noedit =                   cl_mapped + 8;
+ cl_text =                     cl_mapped + 9;
+ cl_selectedtext =             cl_mapped + 10;
+ cl_selectedtextbackground =   cl_mapped + 11;
+ cl_infobackground =           cl_mapped + 12;
+ cl_glyph =                    cl_mapped + 13;
+ cl_activegrip =               cl_mapped + 14;
+ cl_empty =                    cl_mapped + 15;
+ cl_emptytext =                cl_mapped + 16;
+ cl_emptytextbackground =      cl_mapped + 17;
+ cl_zebra =                    cl_mapped + 18;
+ cl_grayed =                   cl_mapped + 19;
+ cl_grayedshadow =             cl_mapped + 20;
  
- cl_user0 =                  cl_user     + 0;
- cl_user1 =                  cl_user     + 1;
- cl_user2 =                  cl_user     + 2;
- cl_user3 =                  cl_user     + 3;
- cl_user4 =                  cl_user     + 4;
- cl_user5 =                  cl_user     + 5;
- cl_user6 =                  cl_user     + 6;
- cl_user7 =                  cl_user     + 7;
- cl_user8 =                  cl_user     + 8;
- cl_user9 =                  cl_user     + 9;
- cl_user10 =                 cl_user     + 10;
- cl_user11 =                 cl_user     + 11;
- cl_user12 =                 cl_user     + 12;
- cl_user13 =                 cl_user     + 13;
- cl_user14 =                 cl_user     + 14;
- cl_user15 =                 cl_user     + 15;
- cl_user16 =                 cl_user     + 16;
- cl_user17 =                 cl_user     + 17;
- cl_user18 =                 cl_user     + 18;
- cl_user19 =                 cl_user     + 19;
- cl_fade0 =                  cl_user     + 20;
- cl_fade1 =                  cl_user     + 21;
- cl_fade2 =                  cl_user     + 22;
- cl_fade3 =                  cl_user     + 23;
- cl_fade4 =                  cl_user     + 24;
- cl_fade5 =                  cl_user     + 25;
- cl_fade6 =                  cl_user     + 26;
- cl_fade7 =                  cl_user     + 27;
- cl_fade8 =                  cl_user     + 28;
- cl_fade9 =                  cl_user     + 29;
+ cl_gridactive =               cl_mapped + 21;
+ cl_gridfocus =                cl_mapped + 22;
+ cl_gridselect =               cl_mapped + 23;
+ cl_gridline =                 cl_mapped + 24;
+ cl_gridlinefix =              cl_mapped + 25;
+ cl_gridframe =                cl_mapped + 26;
+ cl_scrollbarpattern =         cl_mapped + 27;
+ cl_scrollbarpatternclicked=   cl_mapped + 28;
+ cl_lastmapped =               cl_mapped + 29;
+
+ cl_0 =                        cl_namedrgb + 0; //select colorbackground for monochrome bitmaps
+ cl_1 =                        cl_namedrgb + 1; //select colorforeground
+ cl_black =                    cl_namedrgb + 2;
+ cl_dkgray =                   cl_namedrgb + 3;
+ cl_gray =                     cl_namedrgb + 4;
+ cl_ltgray =                   cl_namedrgb + 5;
+ cl_white =                    cl_namedrgb + 6;
+
+ cl_red =                      cl_namedrgb + 7;
+ cl_green =                    cl_namedrgb + 8;
+ cl_blue =                     cl_namedrgb + 9;
+ cl_cyan =                     cl_namedrgb + 10;
+ cl_magenta =                  cl_namedrgb + 11;
+ cl_yellow =                   cl_namedrgb + 12;
+
+ cl_dkred =                    cl_namedrgb + 13;
+ cl_dkgreen =                  cl_namedrgb + 14;
+ cl_dkblue =                   cl_namedrgb + 15;
+ cl_dkcyan =                   cl_namedrgb + 16;
+ cl_dkmagenta =                cl_namedrgb + 17;
+ cl_dkyellow =                 cl_namedrgb + 18;
+
+ cl_ltred =                    cl_namedrgb + 19;
+ cl_ltgreen =                  cl_namedrgb + 20;
+ cl_ltblue =                   cl_namedrgb + 21;
+ cl_ltcyan =                   cl_namedrgb + 22;
+ cl_ltmagenta =                cl_namedrgb + 23;
+ cl_ltyellow =                 cl_namedrgb + 24;
+
+ cl_lastnamedrgb =             cl_namedrgb + 25;
+ 
+ cl_user0 =                    cl_user     + 0;
+ cl_user1 =                    cl_user     + 1;
+ cl_user2 =                    cl_user     + 2;
+ cl_user3 =                    cl_user     + 3;
+ cl_user4 =                    cl_user     + 4;
+ cl_user5 =                    cl_user     + 5;
+ cl_user6 =                    cl_user     + 6;
+ cl_user7 =                    cl_user     + 7;
+ cl_user8 =                    cl_user     + 8;
+ cl_user9 =                    cl_user     + 9;
+ cl_user10 =                   cl_user     + 10;
+ cl_user11 =                   cl_user     + 11;
+ cl_user12 =                   cl_user     + 12;
+ cl_user13 =                   cl_user     + 13;
+ cl_user14 =                   cl_user     + 14;
+ cl_user15 =                   cl_user     + 15;
+ cl_user16 =                   cl_user     + 16;
+ cl_user17 =                   cl_user     + 17;
+ cl_user18 =                   cl_user     + 18;
+ cl_user19 =                   cl_user     + 19;
+ cl_fade0 =                    cl_user     + 20;
+ cl_fade1 =                    cl_user     + 21;
+ cl_fade2 =                    cl_user     + 22;
+ cl_fade3 =                    cl_user     + 23;
+ cl_fade4 =                    cl_user     + 24;
+ cl_fade5 =                    cl_user     + 25;
+ cl_fade6 =                    cl_user     + 26;
+ cl_fade7 =                    cl_user     + 27;
+ cl_fade8 =                    cl_user     + 28;
+ cl_fade9 =                    cl_user     + 29;
  
  cl_lastuser =               cl_user     + 30;
 
@@ -213,7 +222,16 @@ const
     (name: 'cl_emptytextbackground';  rgb:   (blue: $00; green: $00; red: $ff; res: $00)), //17
     (name: 'cl_zebra';  rgb:                 (blue: $ff; green: $ff; red: $e0; res: $00)), //18
     (name: 'cl_grayed'; rgb:                 (blue: $80; green: $80; red: $80; res: $00)), //19
-    (name: 'cl_grayedshadow'; rgb:           (blue: $ff; green: $ff; red: $ff; res: $00))  //20
+    (name: 'cl_grayedshadow'; rgb:           (blue: $ff; green: $ff; red: $ff; res: $00)), //20
+
+    (name: 'cl_gridactive';  rgb:            (blue: $e0; green: $e0; red: $e0; res: $00)), //21
+    (name: 'cl_gridfocus';  rgb:             (blue: $e0; green: $e0; red: $e0; res: $00)), //22
+    (name: 'cl_gridselect';  rgb:            (blue: $e0; green: $e0; red: $e0; res: $00)), //23
+    (name: 'cl_gridline';  rgb:              (blue: $80; green: $80; red: $80; res: $00)), //24
+    (name: 'cl_gridlinefix'; rgb:            (blue: $00; green: $00; red: $00; res: $00)), //25
+    (name: 'cl_gridframe'; rgb:              (blue: $00; green: $00; red: $00; res: $00)), //26
+    (name: 'cl_scrollbarpattern'; rgb:       (blue: $ff; green: $ff; red: $ff; res: $00)), //27
+    (name: 'cl_scrollbarpatternclicked'; rgb:(blue: $00; green: $00; red: $00; res: $00))  //28
    );
 
  defaultnamedrgb: array[0..namedrgbcolorcount-1]
@@ -290,14 +308,20 @@ type
  pgraphicdirectionty = ^graphicdirectionty;
  graphicdirectionsty = set of graphicdirectionty;
  pgraphicdirectionsty = ^graphicdirectionsty;
-
+                 //0       1            2        3      4            5
  alignmentty = (al_left,al_xcentered,al_right,al_top,al_ycentered,al_bottom,
+                 //6
                 al_grayed,
+                 //7           8           9      10 
                 al_stretchx,al_stretchy,al_fit,al_tiled,
+                 //11
                 al_nomaskscale,
+                 //12        13    14
                 al_intpol,al_or,al_and);
  alignmentsty = set of alignmentty;
 
+ edgety = (edg_right,edg_top,edg_left,edg_bottom);
+ edgesty = set of edgety;
  
  fontstylety = (fs_bold,fs_italic,
                 fs_underline,fs_strikeout,fs_selected,fs_blank,
@@ -576,10 +600,14 @@ procedure centerrect(apos: pointty; asize: integer; out rect: rectty);
 function excenterrect(const arect: rectty): rectty;
 function recenterrect(const arect: rectty): rectty;
 
-function inflaterect(const rect: rectty; value: integer): rectty; overload;
-function inflaterect(const rect: rectty; const frame: framety): rectty; overload;
-procedure inflaterect1(var rect: rectty; value: integer); overload;
-procedure inflaterect1(var rect: rectty; const frame: framety); overload;
+function inflaterect(const rect: rectty; value: integer): rectty;
+function inflaterect(const rect: rectty; const value: int32;
+                                     const disablededges: edgesty): rectty;
+function inflaterect(const rect: rectty; const frame: framety): rectty;
+procedure inflaterect1(var rect: rectty; value: integer);
+procedure inflaterect1(var rect: rectty; const value: int32;
+                                                const disablededges: edgesty);
+procedure inflaterect1(var rect: rectty; const frame: framety);
 function deflaterect(const rect: rectty; const frame: framety): rectty;
 procedure deflaterect1(var rect: rectty; const frame: framety);
 procedure normalizerect1(var arect: rectty);
@@ -1541,6 +1569,27 @@ begin
  end;
 end;
 
+function inflaterect(const rect: rectty; const value: int32;
+                                     const disablededges: edgesty): rectty;
+begin
+ result:= rect;
+ with result do begin
+  if not (edg_left in disablededges) then begin
+   dec(x,value);
+   inc(cx,value);
+  end;
+  if not (edg_top in disablededges) then begin
+   dec(y,value);   inc(cy,value);
+  end;
+  if not (edg_right in disablededges) then begin
+   inc(cx,value);
+  end;
+  if not (edg_bottom in disablededges) then begin
+   inc(cy,value);
+  end;
+ end;
+end;
+
 function inflaterect(const rect: rectty; const frame: framety): rectty;
 begin
  result.x:= rect.x - frame.left;
@@ -1558,6 +1607,27 @@ begin
   inc(cx,value);
   inc(cy,value);
   inc(cy,value);
+ end;
+end;
+
+procedure inflaterect1(var rect: rectty; const value: int32;
+                                                const disablededges: edgesty);
+begin
+ with rect do begin
+  if not (edg_left in disablededges) then begin
+   dec(x,value);
+   inc(cx,value);
+  end;
+  if not (edg_top in disablededges) then begin
+   dec(y,value);
+   inc(cy,value);
+  end;
+  if not (edg_right in disablededges) then begin
+   inc(cx,value);
+  end;
+  if not (edg_bottom in disablededges) then begin
+   inc(cy,value);
+  end;
  end;
 end;
 

@@ -18,6 +18,9 @@
 {$if fpc_fullversion >= 30000}
  {$define fpcv3}
 {$endif}
+{$if fpc_fullversion >= 30001}
+ {$define hascompareoptions}
+{$endif}
 unit cwstring;
 {$ifndef FPC}
 interface          //dummy
@@ -38,12 +41,11 @@ implementation
 {$ifdef FPC}{$linklib c}{$endif}
 
 {$ifndef linux}  // Linux (and maybe glibc platforms in general), have iconv in glibc.
-{$ifndef FreeBSD5}
- {$linklib iconv}
- {$define useiconv}
-{$endif}
+ {$ifndef FreeBSD5}
+  {$linklib iconv}
+  {$define useiconv}
+ {$endif}
 {$endif linux}
-
 Uses
 //  BaseUnix,
   msectypes,{$ifndef FPC}msetypes,{$endif}
@@ -54,10 +56,16 @@ Uses
   {msedatalist,}msesysintf1,msesysintf,msestrings;
 
 Const
-{$ifndef useiconv}
-    libiconvname='c';  // is in libc under Linux.
+{$ifdef useiconv}
+ libiconvname='iconv';
 {$else}
-    libiconvname='iconv';
+ libiconvname='c';  // is in libc under Linux.
+{$endif}
+
+{$if defined(darwin) or defined(freebsd) and not defined(freebsd5)}
+ prefix = 'lib';
+{$else}
+ prefix = '';
 {$endif}
 
 { Case-mapping "arrays" }
@@ -111,16 +119,15 @@ type
   iconv_t = pointer;
   nl_item = cint;
 
-function nl_langinfo(__item:nl_item):pchar;cdecl;external libiconvname name 'nl_langinfo';
-{$ifndef Darwin}
-function iconv_open(__tocode:pchar; __fromcode:pchar):iconv_t;cdecl;external libiconvname name 'iconv_open';
-function iconv(__cd:iconv_t; __inbuf:ppchar; __inbytesleft:psize_t; __outbuf:ppchar; __outbytesleft:psize_t):size_t;cdecl;external libiconvname name 'iconv';
-function iconv_close(__cd:iconv_t):cint;cdecl;external libiconvname name 'iconv_close';
-{$else}
-function iconv_open(__tocode:pchar; __fromcode:pchar):iconv_t;cdecl;external libiconvname name 'libiconv_open';
-function iconv(__cd:iconv_t; __inbuf:ppchar; __inbytesleft:psize_t; __outbuf:ppchar; __outbytesleft:psize_t):size_t;cdecl;external libiconvname name 'libiconv';
-function iconv_close(__cd:iconv_t):cint;cdecl;external libiconvname name 'libiconv_close';
-{$endif}
+function nl_langinfo(__item:nl_item):pchar cdecl 
+                                external libiconvname name 'nl_langinfo';
+function iconv_open(__tocode: pchar; __fromcode: pchar): iconv_t cdecl
+                                external libiconvname name prefix+'iconv_open';
+function iconv(__cd: iconv_t; __inbuf: ppchar; __inbytesleft: psize_t;
+              __outbuf: ppchar; __outbytesleft: psize_t): size_t cdecl
+                                external libiconvname name prefix+'iconv';
+function iconv_close(__cd: iconv_t): cint cdecl
+                                external libiconvname name prefix+'iconv_close';
 
 var
 //  iconv_ansi2ucs4,
@@ -345,48 +352,6 @@ begin
   inc(pd);
  end;
 end;
- 
-function CompareWideString(const s1, s2 : WideString): PtrInt;
-var                   //no surrogate pair handling, no decomposition handling
- w1,w2: array[0..1] of ucs4char;
- int1: integer;
- max: integer;
- pa,pb,pe: pmsechar;
-begin
- result:= 0;
- if pointer(s1) <> pointer(s2) then begin
-  if s1 = '' then begin
-   result:= -1;
-  end
-  else begin
-   if s2 = '' then begin
-    result:= 1;
-   end
-   else begin
-    pa:= pointer(s1);
-    pb:= pointer(s2);
-    max:= length(s1);
-    int1:= length(s2);
-    if max > int1 then begin
-     max:= int1;
-    end;
-    pe:= pa + max;
-    while pa <= pe do begin //including terminating #0
-     if pa^ <> pb^ then begin
-      w1[0]:= ord(pa^);
-      w1[1]:= 0;
-      w2[0]:= ord(pb^);
-      w2[1]:= 0;
-      result:= wcscoll(pwchar_t(@w1),pwchar_t(@w2));
-      break;
-     end;
-     inc(pa);
-     inc(pb);
-    end;
-   end;
-  end;
- end;
-end;
 
 function CompareTextWideString(const s1, s2 : WideString): PtrInt;
 var                   //no surrogate pair handling, no decomposition handling
@@ -423,6 +388,55 @@ begin
        result:= wcscoll(pwchar_t(@w1),pwchar_t(@w2));
        break;
       end;
+     end;
+     inc(pa);
+     inc(pb);
+    end;
+   end;
+  end;
+ end;
+end;
+
+function CompareWideString(const s1, s2 : WideString
+          {$ifdef hascompareoptions};Options : TCompareOptions{$endif}): PtrInt;
+var                   //no surrogate pair handling, no decomposition handling
+ w1,w2: array[0..1] of ucs4char;
+ int1: integer;
+ max: integer;
+ pa,pb,pe: pmsechar;
+begin
+{$ifdef hascompareoptions}
+ if (coignorecase in options) then begin
+  result:= comparetextwidestring(s1,s2);
+  exit;
+ end;
+{$endif}
+ result:= 0;
+ if pointer(s1) <> pointer(s2) then begin
+  if s1 = '' then begin
+   result:= -1;
+  end
+  else begin
+   if s2 = '' then begin
+    result:= 1;
+   end
+   else begin
+    pa:= pointer(s1);
+    pb:= pointer(s2);
+    max:= length(s1);
+    int1:= length(s2);
+    if max > int1 then begin
+     max:= int1;
+    end;
+    pe:= pa + max;
+    while pa <= pe do begin //including terminating #0
+     if pa^ <> pb^ then begin
+      w1[0]:= ord(pa^);
+      w1[1]:= 0;
+      w2[0]:= ord(pb^);
+      w2[1]:= 0;
+      result:= wcscoll(pwchar_t(@w1),pwchar_t(@w2));
+      break;
      end;
      inc(pa);
      inc(pb);
@@ -529,7 +543,9 @@ begin
   LowerWideStringProc:= @LowerWideString;
 
   CompareWideStringProc:= @CompareWideString;
+ {$ifndef hascompareoptions}
   CompareTextWideStringProc:= @CompareTextWideString;
+ {$endif}
 {$ifdef unicodeversion}
   Unicode2AnsiMoveProc:= @Wide2AnsiMove;
   Ansi2UnicodeMoveProc:= @Ansi2WideMove;
@@ -538,7 +554,9 @@ begin
   LowerUnicodeStringProc:= @LowerWideString;
 
   CompareUnicodeStringProc:= @CompareWideString;
+ {$ifndef hascompareoptions}
   CompareTextUnicodeStringProc:= @CompareTextWideString;
+ {$endif}
 {$endif}
   {
   CharLengthPCharProc

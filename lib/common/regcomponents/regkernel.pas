@@ -1,4 +1,4 @@
-{ MSEide Copyright (c) 1999-2015 by Martin Schreiber
+{ MSEide Copyright (c) 1999-2016 by Martin Schreiber
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -26,12 +26,12 @@ implementation
 
 uses
  classes,mclasses,msethreadcomp,msebitmap,msetimer,msestatfile,mseact,
- mseactions,mseshapes,msewidgets,mseindexlookupeditor,
+ mseactions,mseshapes,msewidgets,mseindexlookupeditor,msecornermaskeditor,
  msedesignintf,msemenus,msegui,msepipestream,sysutils,
  msegraphutils,regkernel_bmp,msegraphics,msestrings,msepostscriptprinter,
  mseprinter,msetypes,msedatalist,msedatamodules,mseclasses,formdesigner,
- mseapplication,mseglob,mseguiglob,mseskin,msedesigner,
- mseguithreadcomp,mseprocmonitorcomp,msefadepropedit,
+ mseapplication,mseglob,mseguiglob,mseskin,msedesigner,msemacros,
+ mseguithreadcomp,mseprocmonitorcomp,msefadepropedit,mseguiprocess,
  msearrayprops,msesumlist,mserttistat,msestockobjects,regglob,msearrayutils,
  msecryptohandler,msestringcontainer,mseformatstr;
 
@@ -168,7 +168,20 @@ type
    function getvalue: msestring; override;
    procedure edit(); override;
  end;
-    
+
+ tcornermaskeditor = class(tmsestringpropertyeditor)
+  public
+   procedure setvalue(const value: msestring); override;
+   function getvalue: msestring; override;
+   procedure edit(); override;
+ end;
+
+ tmacroseditor = class(tpersistentarraypropertyeditor)
+  protected
+   function itemgetvalue(const sender: tarrayelementeditor): msestring
+                                                                  override;
+ end;
+
 const   
  datamoduleintf: designmoduleintfty = 
   (createfunc: {$ifdef FPC}@{$endif}createmsedatamodule;
@@ -182,6 +195,7 @@ begin
                     tfacecomp,tfacelist,tframecomp,tfontcomp,tskincontroller,
 //                    tskinextender,
                     tbitmapcomp,timagelist,tshortcutcontroller,thelpcontroller,
+                    tguiprocess,
                     taction,tguithreadcomp]);
  registercomponenttabhints(['Gui'],['Non visual components with GUI dependence']);
 
@@ -229,6 +243,8 @@ begin
  registerpropertyeditor(typeinfo(trealarrayprop),tfacetemplate,'fade_opapos',
                                     tfacetemplatefadeopaposeditor);
  
+ registerpropertyeditor(typeinfo(msestring),timagelist,'cornermask',
+                                                       tcornermaskeditor);
  registerpropertyeditor(typeinfo(msestring),timagelist,'indexlookup',
                                                        tindexlookupeditor);
  registerpropertyeditor(typeinfo(msestring),tfacelist,'indexlookup',
@@ -279,6 +295,9 @@ begin
                          tskincontrollerextenderspropertyeditor);
  registerpropertyeditor(typeinfo(stockglyphty),nil,'',
                                       tstockglypheditor);
+ registerpropertyeditor(typeinfo(tmacroproperty),nil,'',
+                                    tmacroseditor);
+
  registerunitgroup(['msestatfile'],['msestat']);
  
  registerdesignmoduleclass(tmsedatamodule,@datamoduleintf);
@@ -745,6 +764,53 @@ begin
  end;
  if editlookupindex(mstr1,imagelist,facelist) then begin
   setmsestringvalue(mstr1,true);
+ end;
+end;
+
+{ tcornermaskeditor }
+
+procedure tcornermaskeditor.setvalue(const value: msestring);
+begin
+ if (value = '') and 
+      askyesno('Do you want to delete the corner mask?') then begin
+  inherited setvalue('');
+ end
+ else begin
+  inherited setvalue(getmsestringvalue(0));
+ end;
+end;
+
+function tcornermaskeditor.getvalue: msestring;
+var
+ mstr1: msestring;
+begin
+ mstr1:= getmsestringvalue(0,true);
+ if mstr1 = '' then begin
+  result:= '<empty>';
+ end
+ else begin
+  result:= '<'+inttostrmse(length(mstr1))+'>';
+ end;
+end;
+
+procedure tcornermaskeditor.edit();
+var
+ mstr1: msestring;
+begin
+ mstr1:= getmsestringvalue(0,true);
+ if editcornermask(mstr1) then begin
+  setmsestringvalue(mstr1,true);
+ end;
+end;
+
+{ tmacroseditor }
+
+function tmacroseditor.itemgetvalue(
+                     const sender: tarrayelementeditor): msestring;
+begin
+ with tstringlistmacroitem(
+              tarrayelementeditor1(sender).getpointervalue) do begin
+  result:= '<'+name+'>';
  end;
 end;
 

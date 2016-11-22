@@ -708,6 +708,30 @@ begin
  end;
 end;
 
+function sys_deletedir(const filename: filenamety): syserrorty;
+var
+ str1: string;
+begin
+ if iswin95 then begin
+  str1:= ansistring(winfilepath(filename,''));
+  if windows.removedirectorya(pchar(str1)) then begin
+   result:= sye_ok;
+  end
+  else begin
+   result:= syelasterror;
+  end;
+ end
+ else begin
+  if windows.removedirectoryw(pmsechar(winfilepath(filename,''))) then begin
+   result:= sye_ok;
+  end
+  else begin
+   result:= syelasterror;
+  end;
+ end;
+end;
+
+
 function sys_createdir(const path: msestring;
                  const rights: filerightsty): syserrorty;
 var

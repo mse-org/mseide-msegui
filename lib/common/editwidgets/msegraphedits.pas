@@ -48,6 +48,9 @@ type
    property framewidth;
    property colorframe;
    property colorframeactive;
+   property colorframedisabled;
+   property colorframemouse;
+   property colorframeclicked;
    property colordkshadow;
    property colorshadow;
    property colorlight;
@@ -154,6 +157,7 @@ type
    procedure updateoptions; virtual;
    procedure loaded; override;
    procedure internalcreateframe; override;
+   procedure enabledchanged() override;
    procedure setenabled(const avalue: boolean); override;
    procedure dofocus; override;
 
@@ -846,6 +850,8 @@ type
    function isimagenrdisabledstored: Boolean;
    procedure setimageoffsetdisabled(const avalue: integer);
    procedure setimagedist(const avalue: integer);
+   procedure setimagedist1(const avalue: integer);
+   procedure setimagedist2(const avalue: integer);
    procedure setshortcut(const avalue: shortcutty);
    function isshortcutstored: boolean;
    function getshortcut: shortcutty;
@@ -913,7 +919,7 @@ type
    procedure dokeyup(var info: keyeventinfoty); override;
    procedure doshortcut(var info: keyeventinfoty; const sender: twidget); override;
    procedure clientrectchanged; override;
-   function getframestateflags: framestateflagsty; override;
+//   function getframestateflags: framestateflagsty; override;
    procedure paintglyph(const canvas: tcanvas; const acolorglyph: colorty;
                   const avalue; const arect: rectty); override;
    procedure internalcreateframe; override;
@@ -927,6 +933,7 @@ type
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
+   procedure execute();
    procedure initnewwidget(const ascale: real); override;
    procedure doupdate;
    procedure synctofontheight; override;
@@ -960,6 +967,10 @@ type
                       //-1 = none, -2 = grayed, -3 = imageoffsetdisabled
    property imagedist: integer read finfo.ca.imagedist 
                                                write setimagedist default 0;
+   property imagedist1: integer read finfo.ca.imagedist1
+                                               write setimagedist1 default 0;
+   property imagedist2: integer read finfo.ca.imagedist2
+                                            write setimagedist2 default 0;
    property colorglyph: colorty read factioninfo.colorglyph write setcolorglyph
                       stored iscolorglyphstored default cl_default;
    property shortcut: shortcutty read getshortcut write setshortcut
@@ -1027,6 +1038,8 @@ type
    property imagenr;
    property imagenrdisabled;
    property imagedist;
+   property imagedist1;
+   property imagedist2;
    property colorglyph;
    property options;
    property focusrectdist;
@@ -1071,6 +1084,8 @@ type
    property captiondist;
    property options;
    property imagedist;
+   property imagedist1;
+   property imagedist2;
    property focusrectdist;
    property onupdate;
    property onexecute;
@@ -1623,6 +1638,12 @@ end;
 procedure tgraphdataedit.internalcreateframe;
 begin
  tgrapheditframe.create(iscrollframe(self));
+end;
+
+procedure tgraphdataedit.enabledchanged();
+begin
+ inherited;
+ invalidate();
 end;
 
 procedure tgraphdataedit.setcolorglyph(const Value: colorty);
@@ -2496,11 +2517,13 @@ begin
    widget1:= fparentwidget.widgets[int1];
    if (widget1 is self.classtype) and (widget1 <> self) and
         (ttogglegraphdataedit(widget1).fgroup = fgroup) then begin
-    inc(fresetting);
-    try
-     ttogglegraphdataedit(widget1).douncheck();
-    finally
-     dec(fresetting);
+    with ttogglegraphdataedit(widget1) do begin
+     inc(fresetting);
+     try
+      douncheck();
+     finally
+      dec(fresetting);
+     end;
     end;
    end;
   end;
@@ -3483,6 +3506,13 @@ begin
  inherited;
 end;
 
+procedure tcustomdatabutton.execute();
+begin
+ if not (shs_disabled in finfo.state) then begin
+  internalexecute;
+ end;
+end;
+
 class function tcustomdatabutton.classskininfo: skininfoty;
 begin
  result:= inherited classskininfo;
@@ -3514,6 +3544,9 @@ procedure tcustomdatabutton.clientrectchanged;
 begin
  inherited;
  frameskinoptionstoshapestate(fframe,finfo);
+ if (fframe = nil) and (fgridintf <> nil) then begin
+  exclude(finfo.state,shs_showdefaultrect);
+ end;
  if shs_flat in finfo.state then begin
   exclude(fwidgetstate1,ws1_nodesignframe);
  end
@@ -3527,7 +3560,7 @@ begin
   finfo.ca.dim:= innerclientrect;
  end;
 end;
-
+{
 function tcustomdatabutton.getframestateflags: framestateflagsty;
 begin
  with finfo do begin
@@ -3537,6 +3570,7 @@ begin
               shs_mouse in state,shs_clicked in state);
  end;
 end;
+}
 {
 function tcustomdatabutton.getframeclicked: boolean;
 begin
@@ -4009,6 +4043,24 @@ procedure tcustomdatabutton.setimagedist(const avalue: integer);
 begin
  if avalue <> finfo.ca.imagedist then begin
   finfo.ca.imagedist:= avalue;
+  formatchanged;
+  checkautosize;
+ end;
+end;
+
+procedure tcustomdatabutton.setimagedist1(const avalue: integer);
+begin
+ if avalue <> finfo.ca.imagedist1 then begin
+  finfo.ca.imagedist1:= avalue;
+  formatchanged;
+  checkautosize;
+ end;
+end;
+
+procedure tcustomdatabutton.setimagedist2(const avalue: integer);
+begin
+ if avalue <> finfo.ca.imagedist2 then begin
+  finfo.ca.imagedist2:= avalue;
   formatchanged;
   checkautosize;
  end;

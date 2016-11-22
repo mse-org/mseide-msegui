@@ -5,6 +5,8 @@ object doublestringlisteditor: tdoublestringlisteditor
   bounds_cx = 338
   bounds_cy = 194
   container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_subfocus, ow_mousetransparent, ow_destroywidgets]
+  container.frame.localprops = []
+  container.frame.localprops1 = []
   container.bounds = (
     0
     0
@@ -41,13 +43,15 @@ object doublestringlisteditor: tdoublestringlisteditor
     reffontheight = 14
   end
   object grid: twidgetgrid
+    frame.localprops = []
+    frame.localprops1 = []
     taborder = 2
     bounds_x = 8
     bounds_y = 8
     bounds_cx = 320
     bounds_cy = 140
     anchors = [an_left, an_top, an_right, an_bottom]
-    optionsgrid = [og_colsizing, og_rowmoving, og_keyrowmoving, og_rowinserting, og_rowdeleting, og_focuscellonenter, og_autofirstrow, og_autoappend, og_wrapcol]
+    optionsgrid = [og_colsizing, og_rowmoving, og_keyrowmoving, og_rowinserting, og_rowdeleting, og_focuscellonenter, og_autofirstrow, og_autoappend, og_wrapcol, og_autopopup, og_mousescrollcol]
     fixcols.count = 1
     fixcols.items = <    
       item
@@ -72,16 +76,17 @@ object doublestringlisteditor: tdoublestringlisteditor
           end>
       end>
     datacols.count = 2
+    datacols.options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savevalue, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
     datacols.items = <    
       item[texta]
         width = 137
-        options = [co_proportional, co_savevalue, co_savestate, co_mousescrollrow]
+        options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_proportional, co_savevalue, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
         widgetname = 'texta'
         dataclass = tgridmsestringdatalist
       end    
       item[textb]
         width = 145
-        options = [co_fill, co_savevalue, co_savestate, co_mousescrollrow]
+        options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_fill, co_savevalue, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
         widgetname = 'textb'
         dataclass = tgridmsestringdatalist
       end>
@@ -94,6 +99,13 @@ object doublestringlisteditor: tdoublestringlisteditor
       frame.levelo = 0
       frame.colorclient = -2147483645
       frame.localprops = [frl_levelo, frl_leveli, frl_colorclient]
+      frame.localprops1 = []
+      frame.buttons.count = 1
+      frame.buttons.items = <      
+        item
+          color = -1879048187
+          imagenr = 17
+        end>
       frame.button.color = -1879048187
       frame.button.imagenr = 17
       taborder = 1
@@ -102,7 +114,7 @@ object doublestringlisteditor: tdoublestringlisteditor
       bounds_y = 0
       bounds_cx = 137
       bounds_cy = 16
-      optionsedit1 = [oe1_savevalue]
+      optionsedit1 = [oe1_autopopupmenu, oe1_savevalue]
       optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_focusrectonreadonly, oe_hintclippedtext]
       reffontheight = 14
     end
@@ -112,6 +124,13 @@ object doublestringlisteditor: tdoublestringlisteditor
       frame.levelo = 0
       frame.colorclient = -2147483645
       frame.localprops = [frl_levelo, frl_leveli, frl_colorclient]
+      frame.localprops1 = []
+      frame.buttons.count = 1
+      frame.buttons.items = <      
+        item
+          color = -1879048187
+          imagenr = 17
+        end>
       frame.button.color = -1879048187
       frame.button.imagenr = 17
       taborder = 2
@@ -120,7 +139,7 @@ object doublestringlisteditor: tdoublestringlisteditor
       bounds_y = 0
       bounds_cx = 145
       bounds_cy = 16
-      optionsedit1 = [oe1_savevalue]
+      optionsedit1 = [oe1_autopopupmenu, oe1_savevalue]
       optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_focusrectonreadonly, oe_hintclippedtext]
       reffontheight = 14
     end
@@ -129,7 +148,8 @@ object doublestringlisteditor: tdoublestringlisteditor
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
     frame.caption = 'Rowcount'
     frame.captionpos = cp_right
-    frame.dummy = 0
+    frame.localprops = []
+    frame.localprops1 = []
     frame.outerframe = (
       0
       0

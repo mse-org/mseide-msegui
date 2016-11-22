@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2015 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2016 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -51,8 +51,10 @@ type
    procedure setalignment(const Value: alignmentsty);
    procedure setopacity(avalue: colorty);
    procedure updatealignment(const dest,source: rectty;
-               const alignment: alignmentsty; out newdest,newsource: rectty;
+               var alignment: alignmentsty; out newdest,newsource: rectty;
                out tileorigin: pointty);
+      //expand copy areas in order to avoid missing pixels by position rounding
+
    procedure setcolorbackground(const Value: colorty);
    procedure setcolorforeground(const Value: colorty);
    procedure readtransparency(reader: treader);
@@ -90,7 +92,7 @@ type
              const bottomup: boolean = false); virtual; //calls change
    function hasimage: boolean;
    procedure paint(const acanvas: tcanvas; const dest: rectty;
-                   const asource: rectty; const aalignment: alignmentsty = [];
+                   const asource: rectty; aalignment: alignmentsty = [];
                          const acolorforeground: colorty = cl_default;
                          const acolorbackground: colorty = cl_default;
                       //used for monochrome bitmaps,
@@ -392,6 +394,7 @@ type
    fonchange: notifyeventty;
 //   fkind: bitmapkindty;
    findexlookup: msestring;
+   fcornermask: msestring;
    procedure setsize(const avalue: sizety);
 //   function getmonochrome: boolean;
 //   procedure setmonochrome(const Value: boolean);
@@ -418,7 +421,9 @@ type
    function getoptions: bitmapoptionsty;
    procedure setoptions(const avalue: bitmapoptionsty);
    procedure setindexlookup(const avalue: msestring);
+   procedure setcornermask(const avalue: msestring);
   protected
+   fcornermaskmaxwidth: int32; //biggest value of cornermask
    function indextoorg(index: integer): pointty;
    procedure change;
    procedure defineproperties(filer: tfiler); override;
@@ -508,7 +513,10 @@ type
    property count: integer read fcount write setcount default 0;
                  //last!
    property indexlookup: msestring read findexlookup write setindexlookup;
-                    //array of int16
+        //array of int16
+   property cornermask: msestring read fcornermask write setcornermask;
+        //array of int16, used in tframe for clipping corners of client area
+        //cornermask[n] = number of clipped pixels from edge of row n.
    property onchange: notifyeventty read fonchange write fonchange;
  end;
 
@@ -766,7 +774,7 @@ begin
 end;
 }
 procedure tbitmap.paint(const acanvas: tcanvas; const dest: rectty;
-                  const asource: rectty; const aalignment: alignmentsty = [];
+                  const asource: rectty; aalignment: alignmentsty = [];
                          const acolorforeground: colorty = cl_default;
                          const acolorbackground: colorty = cl_default;
                          const aopacity: colorty = cl_default);
@@ -957,7 +965,7 @@ begin
   rgb:= colortopixel(normalizeinitcolor(acolor));
   case fkind of
    bmk_mono: begin
-    if odd(rgb) then begin
+    if odd(rgb xor colortopixel(cl_0)) then begin
      by1:= $ff;
     end
     else begin
@@ -1296,8 +1304,9 @@ begin
 end;
 
 procedure tbitmap.updatealignment(const dest,source: rectty;
-            const alignment: alignmentsty; out newdest,newsource: rectty;
+            var alignment: alignmentsty; out newdest,newsource: rectty;
             out tileorigin: pointty);
+     //expand copy areas in order to avoid missing pixels by position rounding
 var
  int1: integer;
 begin
@@ -1306,8 +1315,12 @@ begin
  if al_fit in alignment then begin
   exit;
  end;
+ int1:= 0;
  if al_xcentered in alignment then begin
-  newdest.x:= dest.x + (dest.cx - source.cx) div 2
+  if dest.cx < source.cx then begin
+   int1:= -1;
+  end;
+  newdest.x:= dest.x + (dest.cx - source.cx + int1) div 2
  end
  else begin
   if al_right in alignment then begin
@@ -1315,13 +1328,17 @@ begin
   end;
  end;
  if al_ycentered in alignment then begin
-  newdest.y:= dest.y + (dest.cy - source.cy) div 2
+  if dest.cy < source.cy then begin
+   int1:= -1;
+  end;
+  newdest.y:= dest.y + (dest.cy - source.cy + int1) div 2
  end
  else begin
   if al_bottom in alignment then begin
    newdest.y:= dest.y + dest.cy - source.cy;
   end;
  end;
+ alignment:= alignment - [al_right,al_bottom,al_xcentered,al_ycentered];
  tileorigin:= newdest.pos;
  if al_tiled in alignment then begin
   newdest:= dest;
@@ -3054,13 +3071,13 @@ begin
   dest.clear;
  end
  else begin
+  dest.beginupdate();
   rect1.pos:= indextoorg(index);
   rect1.size:= size;
   dest.clear;
   dest.size:= size;
   dest.copyarea(fbitmap,rect1,nullpoint,rop_copy,masked and not dest.masked);
   if masked and dest.masked then begin
-   dest.colormask:= dest.colormask or colormask;
    dest.mask.copyarea(fbitmap.fmask,rect1,nullpoint,rop_copy,false,
                dest.fmaskcolorforeground,dest.fmaskcolorbackground);
   end;
@@ -3072,6 +3089,7 @@ begin
     dest.mask.init(dest.fmaskcolorforeground);
    end;
   end;
+  dest.endupdate();
  end;
 end;
 
@@ -3226,8 +3244,10 @@ begin
   beginupdate;
   try
    bmp1:= tmaskedbitmap.create(kind);
+   bmp1.maskkind:= fbitmap.maskkind;
    bmp1.masked:= masked;
    bmp2:= tmaskedbitmap.create(kind);
+   bmp2.maskkind:= fbitmap.maskkind;
    bmp2.masked:= masked;
    try
     getimage(fromindex,bmp1);
@@ -3387,6 +3407,23 @@ end;
 procedure timagelist.setindexlookup(const avalue: msestring);
 begin
  findexlookup:= avalue;
+ change;
+end;
+
+procedure timagelist.setcornermask(const avalue: msestring);
+var
+ po1,pe: pint16;
+begin
+ fcornermask:= avalue;
+ fcornermaskmaxwidth:= 0;
+ po1:= pointer(avalue);
+ pe:= po1 + length(avalue);
+ while po1 < pe do begin
+  if po1^ > fcornermaskmaxwidth then begin
+   fcornermaskmaxwidth := po1^;
+  end;
+  inc(po1);
+ end;
  change;
 end;
 

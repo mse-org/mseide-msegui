@@ -28,7 +28,7 @@ uses
   SysUtils,
   classes,mclasses,
   mdb,
-  dbf_prssupp,
+  mdbf_prssupp,
   mdbf_prsdef;
 
 {$define ENG_NUMBERS}

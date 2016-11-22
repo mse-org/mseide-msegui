@@ -34,11 +34,12 @@ type
    function getnumboolean: boolean;
    function getfloatdate: boolean;
    function getint64currency: boolean;
+   function getsavepointoptions(): savepointoptionsty;
    function getfiltereditkind: filtereditkindty;
    procedure beginfilteredit(const akind: filtereditkindty);
    procedure endfilteredit;
    procedure clearfilter();
-   procedure doidleapplyupdates;
+//   procedure doidleapplyupdates;
    function getrestorerecno: boolean;
    procedure setrestorerecno(const avalue: boolean);
    function updatesortfield(const afield: tfield; const adescend: boolean): boolean;
@@ -54,7 +55,7 @@ type
    procedure internaldelete; override;
    procedure internalclose; override;
    function  getcanmodify: boolean; override;
-   procedure dscontrolleroptionschanged(const aoptions: datasetoptionsty);
+//   procedure dscontrolleroptionschanged(const aoptions: datasetoptionsty);
    function islastrecord: boolean;
    procedure begindisplaydata;
    procedure enddisplaydata;
@@ -108,11 +109,12 @@ type
    function getnumboolean: boolean;
    function getfloatdate: boolean;
    function getint64currency: boolean;
+   function getsavepointoptions(): savepointoptionsty;
    function getfiltereditkind: filtereditkindty;
    procedure beginfilteredit(const akind: filtereditkindty);
    procedure endfilteredit;
    procedure clearfilter;
-   procedure doidleapplyupdates;
+//   procedure doidleapplyupdates;
    function getrestorerecno: boolean;
    procedure setrestorerecno(const avalue: boolean);
    function updatesortfield(const afield: tfield; const adescend: boolean): boolean;
@@ -128,7 +130,7 @@ type
    procedure internaldelete; override;
    procedure internalclose; override;
    function  getcanmodify: boolean; override;
-   procedure dscontrolleroptionschanged(const aoptions: datasetoptionsty);
+//   procedure dscontrolleroptionschanged(const aoptions: datasetoptionsty);
    function islastrecord: boolean;
    procedure begindisplaydata;
    procedure enddisplaydata;
@@ -181,11 +183,12 @@ type
    function getnumboolean: boolean;
    function getfloatdate: boolean;
    function getint64currency: boolean;
+   function getsavepointoptions(): savepointoptionsty;
    function getfiltereditkind: filtereditkindty;
    procedure beginfilteredit(const akind: filtereditkindty);
    procedure endfilteredit;
    procedure clearfilter;
-   procedure doidleapplyupdates;
+//   procedure doidleapplyupdates;
    function getrestorerecno: boolean;
    procedure setrestorerecno(const avalue: boolean);
    function updatesortfield(const afield: tfield; const adescend: boolean): boolean;
@@ -201,7 +204,7 @@ type
    procedure internaldelete; override;
    procedure internalclose; override;
    function  getcanmodify: boolean; override;
-   procedure dscontrolleroptionschanged(const aoptions: datasetoptionsty);
+//   procedure dscontrolleroptionschanged(const aoptions: datasetoptionsty);
    function islastrecord: boolean;
    procedure begindisplaydata;
    procedure enddisplaydata;
@@ -252,11 +255,12 @@ type
    function getnumboolean: boolean;
    function getfloatdate: boolean;
    function getint64currency: boolean;
+   function getsavepointoptions(): savepointoptionsty;
    function getfiltereditkind: filtereditkindty;
    procedure beginfilteredit(const akind: filtereditkindty);
    procedure endfilteredit;
    procedure clearfilter;
-   procedure doidleapplyupdates;
+//   procedure doidleapplyupdates;
    function getrestorerecno: boolean;
    procedure setrestorerecno(const avalue: boolean);
    function updatesortfield(const afield: tfield; const adescend: boolean): boolean;
@@ -272,7 +276,7 @@ type
    procedure internaldelete; override;
    procedure internalclose; override;
    function  getcanmodify: boolean; override;
-   procedure dscontrolleroptionschanged(const aoptions: datasetoptionsty);
+//   procedure dscontrolleroptionschanged(const aoptions: datasetoptionsty);
    function islastrecord: boolean;
    procedure begindisplaydata;
    procedure enddisplaydata;
@@ -485,6 +489,11 @@ begin
  result:= false;
 end;
 
+function tmsezreadonlyquery.getsavepointoptions(): savepointoptionsty;
+begin
+ result:= [];
+end;
+
 function tmsezreadonlyquery.getfiltereditkind: filtereditkindty;
 begin
  result:= fek_filter;
@@ -504,22 +513,22 @@ procedure tmsezreadonlyquery.clearfilter;
 begin
  //dummy
 end;
-
+{
 procedure tmsezreadonlyquery.doidleapplyupdates;
 begin
  //dummy
 end;
-
+}
 function tmsezreadonlyquery.getcanmodify: boolean;
 begin
  result:= fcontroller.getcanmodify and inherited getcanmodify;
 end;
-
+{
 procedure tmsezreadonlyquery.dscontrolleroptionschanged(const aoptions: datasetoptionsty);
 begin
  //dummy
 end;
-
+}
 function tmsezreadonlyquery.getrestorerecno: boolean;
 begin
  result:= false;
@@ -754,6 +763,11 @@ begin
  result:= false;
 end;
 
+function tmsezquery.getsavepointoptions(): savepointoptionsty;
+begin
+ result:= [];
+end;
+
 function tmsezquery.getfiltereditkind: filtereditkindty;
 begin
  result:= fek_filter;
@@ -773,22 +787,22 @@ procedure tmsezquery.clearfilter;
 begin
  //dummy
 end;
-
+{
 procedure tmsezquery.doidleapplyupdates;
 begin
  //dummy
 end;
-
+}
 function tmsezquery.getcanmodify: boolean;
 begin
  result:= fcontroller.getcanmodify and inherited getcanmodify;
 end;
-
+{
 procedure tmsezquery.dscontrolleroptionschanged(const aoptions: datasetoptionsty);
 begin
  //dummy
 end;
-
+}
 function tmsezquery.getrestorerecno: boolean;
 begin
  result:= false;
@@ -1018,6 +1032,11 @@ begin
  result:= false;
 end;
 
+function tmseztable.getsavepointoptions(): savepointoptionsty;
+begin
+ result:= [];
+end;
+
 function tmseztable.getfiltereditkind: filtereditkindty;
 begin
  result:= fek_filter;
@@ -1037,22 +1056,22 @@ procedure tmseztable.clearfilter;
 begin
  //dummy
 end;
-
+{
 procedure tmseztable.doidleapplyupdates;
 begin
  //dummy
 end;
-
+}
 function tmseztable.getcanmodify: boolean;
 begin
  result:= fcontroller.getcanmodify and inherited getcanmodify;
 end;
-
+{
 procedure tmseztable.dscontrolleroptionschanged(const aoptions: datasetoptionsty);
 begin
  //dummy
 end;
-
+}
 function tmseztable.getrestorerecno: boolean;
 begin
  result:= false;
@@ -1277,6 +1296,11 @@ begin
  result:= false;
 end;
 
+function tmsezstoredproc.getsavepointoptions(): savepointoptionsty;
+begin
+ result:= [];
+end;
+
 function tmsezstoredproc.getfiltereditkind: filtereditkindty;
 begin
  result:= fek_filter;
@@ -1296,22 +1320,22 @@ procedure tmsezstoredproc.clearfilter;
 begin
 //dummy
 end;
-
+{
 procedure tmsezstoredproc.doidleapplyupdates;
 begin
  //dummy
 end;
-
+}
 function tmsezstoredproc.getcanmodify: boolean;
 begin
  result:= fcontroller.getcanmodify and inherited getcanmodify;
 end;
-
+{
 procedure tmsezstoredproc.dscontrolleroptionschanged(const aoptions: datasetoptionsty);
 begin
  //dummy
 end;
-
+}
 function tmsezstoredproc.getrestorerecno: boolean;
 begin
  result:= false;

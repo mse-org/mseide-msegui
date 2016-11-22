@@ -51,7 +51,7 @@ type
    yeardisp: tdatetimedisp;
    procedure formoncreate(const sender: TObject);
    procedure drawcell(const sender: tcol; const canvas: tcanvas;
-                               const cellinfo: cellinfoty);
+                               var cellinfo: cellinfoty);
    procedure cellevent(const sender: TObject; var info: celleventinfoty);
    procedure moup(const sender: TObject);
    procedure modown(const sender: TObject);
@@ -244,7 +244,7 @@ begin
 end;
 
 procedure tpopupcalendarfo.drawcell(const sender: tcol; const canvas: tcanvas;
-                                    const cellinfo: cellinfoty);
+                                    var cellinfo: cellinfoty);
 var
  flags1: textflagsty;
 begin

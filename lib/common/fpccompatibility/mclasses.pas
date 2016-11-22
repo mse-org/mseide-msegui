@@ -101,6 +101,8 @@ type
 
   TGetChildProc = procedure (Child: TComponent) of object;
 
+  TComponentClass = class of TComponent;
+
   tcomponent = class(tpersistent{,IUnknown,IInterfaceComponentReference})
   private
     FOwner: tcomponent;
@@ -183,6 +185,9 @@ type
     procedure Destroying;
     function ExecuteAction(Action: TBasicAction): Boolean; dynamic;
     function FindComponent(const AName: string): tcomponent;
+    function findtagcomponent(const atag: int32;
+                                const aclass: tcomponentclass): tcomponent;
+              //returns first matching desecendent
     procedure FreeNotification(AComponent: tcomponent);
     procedure RemoveFreeNotification(AComponent: tcomponent);
     procedure FreeOnRelease;
@@ -212,8 +217,6 @@ type
     property Tag: PtrInt read FTag write FTag default 0;
   end;
   pcomponent = ^tcomponent;
-
-  TComponentClass = class of TComponent;
 
   tcollection = class;
   
@@ -975,9 +978,9 @@ TStringsEnumerator = class
 
   TCustomMemoryStream = class(TStream)
   private
+  protected
     FMemory: Pointer;
     FSize, FPosition: PtrInt;
-  protected
     Function GetSize : Int64; Override;
     function GetPosition: Int64; Override;
     procedure SetPointer(Ptr: Pointer; ASize: PtrInt);
@@ -987,16 +990,18 @@ TStringsEnumerator = class
     function Seek(const Offset: Int64; Origin: TSeekOrigin): Int64; override;
     procedure SaveToStream(Stream: TStream);
     procedure SaveToFile(const FileName: string);
-    property Memory: Pointer read FMemory;
+    property memory: Pointer read getmemory;
+    property position1: ptrint read fposition;
+    property size1: ptrint read fsize;
   end;
 
   TMemoryStream = class(TCustomMemoryStream)
   private
     FCapacity: PtrInt;
-    procedure SetCapacity(NewCapacity: PtrInt);
   protected
+    procedure SetCapacity(NewCapacity: PtrInt) virtual;
+    function getcapacity: ptrint virtual;
     function Realloc(var NewCapacity: PtrInt): Pointer; virtual;
-    property Capacity: PtrInt read FCapacity write SetCapacity;
   public
     destructor Destroy; override;
     procedure Clear;
@@ -1004,6 +1009,7 @@ TStringsEnumerator = class
     procedure LoadFromFile(const FileName: string);
     procedure SetSize({$ifdef CPU64}const{$endif CPU64} NewSize: PtrInt); override;
     function Write(const Buffer; Count: LongInt): LongInt; override;
+    property Capacity: PtrInt read getcapacity write SetCapacity;
   end;
 
   TStringStream = class(TStream)
@@ -1938,6 +1944,30 @@ begin
       end;
 end;
 
+function tcomponent.findtagcomponent(const atag: int32;
+                              const aclass: tcomponentclass): tcomponent;
+var
+ i1: integer;
+ comp1: tcomponent;
+begin
+ result:= nil;
+ for i1:= 0 to componentcount - 1 do begin
+  comp1:= components[i1];
+  if (comp1.tag = atag) and 
+         ((aclass = nil) or (comp1 is aclass)) then begin
+   result:= comp1;
+   exit;
+  end;
+ end;
+ if result = nil then begin
+  for i1:= 0 to componentcount - 1 do begin
+   result:= components[i1].findtagcomponent(atag,aclass);
+   if result <> nil then begin
+    exit;
+   end;
+  end;
+ end;
+end;
 
 Procedure TComponent.FreeNotification(AComponent: TComponent);
 
@@ -4093,7 +4123,46 @@ begin
   FCapacity:=NewCapacity;
 end;
 
+function TMemoryStream.getcapacity: ptrint;
+begin
+ result:= fcapacity;
+end;
 
+function tmemorystream.Realloc(var NewCapacity: PtrInt): Pointer;
+var
+ i1: ptrint;
+begin
+ If NewCapacity < 0 Then begin
+  NewCapacity:=0
+ end
+ else begin
+  if newcapacity > fcapacity then begin
+   if newcapacity > tmsgrow then begin
+               // if growing, grow at least a quarter
+    i1:= FCapacity + fcapacity div 4;
+    if NewCapacity < i1 then begin
+     NewCapacity:= i1; // round off to block size.
+    end;
+    NewCapacity := (NewCapacity + (TMSGrow-1)) and not (TMSGROW-1);
+   end
+   else begin
+    newcapacity:= newcapacity * 2 + 32;
+   end;
+  end;
+ end;
+ // Only now check !
+ If NewCapacity = FCapacity then begin
+  Result:= FMemory
+ end
+ else begin
+  Result:= Reallocmem(FMemory,Newcapacity);
+  If (Result = Nil) and (Newcapacity > 0) then begin
+   Raise EStreamError.Create(SMemoryStreamError);
+  end;
+ end;
+end;
+
+(*
 function TMemoryStream.Realloc(var NewCapacity: PtrInt): Pointer;
 
 begin
@@ -4122,7 +4191,7 @@ begin
         Raise EStreamError.Create(SMemoryStreamError);
     end;
 end;
-
+*)
 
 destructor TMemoryStream.Destroy;
 

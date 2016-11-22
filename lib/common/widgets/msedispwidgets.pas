@@ -18,7 +18,7 @@ unit msedispwidgets;
 
 interface
 uses
- classes,mclasses,msegui,mseguiglob,msewidgets,msegraphics,
+ msegraphics,classes,mclasses,msegui,mseguiglob,msewidgets,
  msedrawtext,msegraphutils,
  msemenus,msetypes,msestrings,mseformatstr,mseevent,mseclasses,mserichstring
  {$ifdef mse_with_ifi}
@@ -47,6 +47,9 @@ type
    property framewidth;
    property colorframe;
    property colorframeactive;
+   property colorframedisabled;
+   property colorframemouse;
+   property colorframeclicked;
    property colordkshadow;
    property colorshadow;
    property colorlight;
@@ -492,7 +495,7 @@ end;
 procedure tdispwidget.settextflags(const value: textflagsty);
 begin
  if ftextflags <> value then begin
-  ftextflags:= value;
+  ftextflags:= checktextflags(ftextflags,value);
   updatetextflags;
   invalidatetext;
  end;

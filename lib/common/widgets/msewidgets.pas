@@ -75,21 +75,26 @@ type
 
    procedure updatetextflags;
    procedure updaterects; override;
+   procedure dominsize(var asize: sizety);
+   procedure checkminshrinksize(var asize: sizety) override;
    procedure defineproperties(filer: tfiler); override;
    procedure setdisabled(const value: boolean); override;
    procedure dopaintfocusrect(const canvas: tcanvas;
                                               const rect: rectty); override;
-   function checkshortcut(var info: keyeventinfoty): boolean; override;
+   function checkfocusshortcut(var info: keyeventinfoty): boolean; override;
    function needsfocuspaint: boolean; override;
+   function haspaintrectfocus(): boolean; override; //checks caption
    procedure updatemousestate(const sender: twidget;
                                const info: mouseeventinfoty); override;
+   procedure internalpaintoverlay(const canvas: tcanvas;
+                                          const arect: rectty) override;
+
     //iassistiveclient
    function getassistivecaption(): msestring; override;
    
   public
    constructor create(const intf: icaptionframe);
    destructor destroy; override;
-   procedure paintoverlay(const canvas: tcanvas; const arect: rectty); override;
    procedure scale(const ascale: real); override;
    procedure createfont;
    function pointincaption(const point: pointty): boolean; override;
@@ -120,6 +125,9 @@ type
    property framewidth;
    property colorframe;
    property colorframeactive;
+   property colorframedisabled;
+   property colorframemouse;
+   property colorframeclicked;
    property colordkshadow;
    property colorshadow;
    property colorlight;
@@ -244,12 +252,13 @@ type
    procedure activechanged; override;
    procedure updatemousestate(const sender: twidget; 
                               const info: mouseeventinfoty); override;
+   procedure internalpaintoverlay(const canvas: tcanvas;
+                                         const arect: rectty) override;
  public
    constructor create(const intf: iscrollframe; const scrollintf: iscrollbar);
    destructor destroy; override;
    procedure checktemplate(const sender: tobject); override;
                  //true if match
-   procedure paintoverlay(const canvas: tcanvas; const arect: rectty); override;
    procedure mouseevent(var info: mouseeventinfoty); virtual;
    procedure domousewheelevent(var info: mousewheeleventinfoty;
                                    const pagingreversed: boolean); virtual;
@@ -283,6 +292,9 @@ type
    property hiddenedges;
    property colorframe;
    property colorframeactive;
+   property colorframedisabled;
+   property colorframemouse;
+   property colorframeclicked;
    property framei_left;
    property framei_top;
    property framei_right;
@@ -466,6 +478,9 @@ type
    property framewidth;
    property colorframe;
    property colorframeactive;
+   property colorframedisabled;
+   property colorframemouse;
+   property colorframeclicked;
    property colordkshadow;
    property colorshadow;
    property colorlight;
@@ -608,6 +623,8 @@ type
                const org: originty = org_client; const noclip: boolean = false);
    function getwidget: twidget;
    function getframestateflags: framestateflagsty; virtual;
+   procedure internalpaintoverlay(const canvas: tcanvas;
+                                           const arect: rectty) override;
   public
    constructor create(const intf: icaptionframe; const stepintf: istepbar);
    destructor destroy; override;
@@ -618,7 +635,6 @@ type
                                    const info: mouseeventinfoty); override;
    procedure mouseevent(var info: mouseeventinfoty); virtual;
    procedure domousewheelevent(var info: mousewheeleventinfoty); virtual;
-   procedure paintoverlay(const canvas: tcanvas; const arect: rectty); override;
    procedure checktemplate(const sender: tobject); override;
    procedure updatebuttonstate(const first,delta,count: integer);
    function canstep: boolean;
@@ -650,6 +666,9 @@ type
    property framewidth;
    property colorframe;
    property colorframeactive;
+   property colorframedisabled;
+   property colorframemouse;
+   property colorframeclicked;
    property colordkshadow;
    property colorshadow;
    property colorlight;
@@ -1079,8 +1098,8 @@ type
                      var delta: integer) of object;
 
  tscrollface = class(tface)
+   procedure internalpaint(const canvas: tcanvas; const rect: rectty); override;
   public
-   procedure paint(const canvas: tcanvas; const rect: rectty); override;
  end;
 
  tscrollingwidgetnwr = class;
@@ -1157,7 +1176,9 @@ type
            const transientfor: pwindow;
            const windowevent,transientforshow: boolean): modalresultty; override;
   public
-   constructor create(aowner: tcomponent; transientfor: twindow); reintroduce; overload;
+   constructor create(aowner: tcomponent;
+                             transientfor: twindow); reintroduce; overload;
+   property transientfor: twindow read ftransientfor;
  end;
 
  const
@@ -1166,7 +1187,7 @@ type
 type
  tcustomhintwidget = class(tpopupwidget)
   public
-   constructor create(const aowner: tcomponent; const transientfor: twindow;
+   constructor create(const aowner: tcomponent; const atransientfor: twindow;
              var info: hintinfoty; const sender: tobject); virtual; reintroduce;
   published
    property optionswidget default defaultoptionshintwidget;
@@ -1179,7 +1200,7 @@ type
   protected
    procedure dopaintforeground(const canvas: tcanvas); override;
   public
-   constructor create(const aowner: tcomponent; const transientfor: twindow;
+   constructor create(const aowner: tcomponent; const atransientfor: twindow;
                      var info: hintinfoty; const sender: tobject); override;
  end;
 
@@ -1357,7 +1378,7 @@ function pastefromclipboard(out value: msestring;
             //false if empty
 function placepopuprect(const awindow: twindow; const adest: rectty; //screenorig
                  const placement: captionposty; const asize: sizety): rectty;
- //placement actually only cp_bottomleft and cp_center
+ //placement currently only cp_bottomleft and cp_center
  //todo
 function placepopuprect(const awidget: twidget;
            const adest: rectty; //widgetorig
@@ -2410,6 +2431,7 @@ end;
 procedure tcustomcaptionframe.setcaptionpos(const avalue: captionposty);
 begin
  if (fcaptionpos <> avalue) then begin
+ {
   case avalue of
    cp_leftcenter: fcaptionpos:= cp_left;
    cp_rightcenter: fcaptionpos:= cp_right;
@@ -2417,6 +2439,8 @@ begin
    cp_bottomcenter: fcaptionpos:= cp_bottom;
    else fcaptionpos:= avalue;
   end;
+ }
+  fcaptionpos:= avalue;
   internalupdatestate;
  end;
 end;
@@ -2431,19 +2455,24 @@ begin
  exclude(fstate,fs_rectsvalid);
 end;
 
+function tcustomcaptionframe.haspaintrectfocus(): boolean;
+begin
+ result:= inherited haspaintrectfocus() or (finfo.text.text = '');
+end;
+
 procedure tcustomcaptionframe.dopaintfocusrect(const canvas: tcanvas;
                             const rect: rectty);
 begin
- if (fs_captionfocus in fstate) and (finfo.text.text <> '') then begin
-  drawfocusrect(canvas,inflaterect(finfo.dest,captionmargin));
+ if haspaintrectfocus then begin
+  inherited;
  end
  else begin
-  inherited;
+  drawfocusrect(canvas,inflaterect(finfo.dest,captionmargin));
  end;
 end;
 
-procedure tcustomcaptionframe.paintoverlay(const canvas: tcanvas;
-                                                   const arect: rectty);
+procedure tcustomcaptionframe.internalpaintoverlay(const canvas: tcanvas;
+                                                          const arect: rectty);
 var
  reg1: regionty;
  flagsbefore: textflagsty;
@@ -2690,84 +2719,110 @@ begin
  end;
 
  if not isnullframe(fra1) then begin
-  subpoint1(finfo.dest.pos,pointty(fra1.topleft));
-  if fupdating < 16 then begin
-   inc(fupdating);
-   try
-    rect1:= icaptionframe(fintf).getwidgetrect;
-    rect2:= deflaterect(rect1,fra1);
-    if cfo_fixleft in foptions then begin
-     rect2.x:= rect1.x;
-     if cfo_fixright in foptions then begin
-      rect2.cx:= rect1.cx;
+  widget1:= twidget1(icaptionframe(fintf).getwidget);
+  if widget1.fwidgetstate1 * 
+                        [ws1_anchorsizing,ws1_layoutplacing] = [] then begin
+   subpoint1(finfo.dest.pos,pointty(fra1.topleft));
+   if fupdating < 16 then begin
+    inc(fupdating);
+    try
+     rect1:= icaptionframe(fintf).getwidgetrect;
+     rect2:= deflaterect(rect1,fra1);
+     if cfo_fixleft in foptions then begin
+      rect2.x:= rect1.x;
+      if cfo_fixright in foptions then begin
+       rect2.cx:= rect1.cx;
+      end;
+     end
+     else begin
+      if cfo_fixright in foptions then begin
+       rect2.x:= rect1.x+rect1.cx-rect2.cx;
+      end;
      end;
-    end
-    else begin
-     if cfo_fixright in foptions then begin
-      rect2.x:= rect1.x+rect1.cx-rect2.cx;
+     if cfo_fixtop in foptions then begin
+      rect2.y:= rect1.y;
+      if cfo_fixbottom in foptions then begin
+       rect2.cy:= rect1.cy;
+      end;
+     end
+     else begin
+      if cfo_fixbottom in foptions then begin
+       rect2.y:= rect1.y+rect1.cy-rect2.cy;
+      end;
      end;
+     if (fupdating = 1) and 
+           rectisequal(icaptionframe(fintf).getwidgetrect,rect2) then begin
+      if widget1.fparentwidget <> nil then begin
+       twidget1(widget1.fparentwidget).childautosizechanged(widget1);
+      end; //activate tlayouter
+     end
+     else begin
+      icaptionframe(fintf).setwidgetrect(rect2);
+     end;
+    finally
+     dec(fupdating);
     end;
-    if cfo_fixtop in foptions then begin
-     rect2.y:= rect1.y;
-     if cfo_fixbottom in foptions then begin
-      rect2.cy:= rect1.cy;
-     end;
-    end
-    else begin
-     if cfo_fixbottom in foptions then begin
-      rect2.y:= rect1.y+rect1.cy-rect2.cy;
-     end;
-    end;
-    if (fupdating = 1) and 
-          rectisequal(icaptionframe(fintf).getwidgetrect,rect2) then begin
-     widget1:= twidget1(icaptionframe(fintf).getwidget);
-     if widget1.fparentwidget <> nil then begin
-      twidget1(widget1.fparentwidget).childautosizechanged(widget1);
-     end; //activate tlayouter
-    end
-    else begin
-     icaptionframe(fintf).setwidgetrect(rect2);
-    end;
-   finally
-    dec(fupdating);
    end;
   end;
  end;
  inherited;
 end;
 
-procedure tcustomcaptionframe.checkwidgetsize(var asize: sizety);
+procedure tcustomcaptionframe.dominsize(var asize: sizety);
 var
- size1: sizety;
+ si1: sizety;
+ framesi1: sizety;
 begin
+ framesi1.cx:= fpaintframe.left + fpaintframe.right -
+                                   (fouterframe.left + fouterframe.right);
+ framesi1.cy:= fpaintframe.top + fpaintframe.bottom -
+                                   (fouterframe.top + fouterframe.bottom);
+ if asize.cx < framesi1.cx then begin
+  asize.cx:= framesi1.cx;
+ end;
+ if asize.cy < framesi1.cy then begin
+  asize.cy:= framesi1.cy;
+ end;
  if finfo.text.text <> '' then begin
-  checkstate;
-  size1:= finfo.dest.size;
-  size1.cx:= size1.cx + 2*captionmargin;
-  size1.cy:= size1.cy + 2*captionmargin;
-  case fcaptionpos of
-   cp_lefttop,cp_left,cp_leftbottom,
-   cp_righttop,cp_right,cp_rightbottom: begin
-    if fcaptiondist > 0 then begin
-     size1.cx:= size1.cx + fcaptiondist;
-    end;
-    size1.cy:= size1.cy + abs(fcaptionoffset);
+  checkstate();
+  si1.cx:= finfo.dest.size.cx + 2*captionmargin;
+  si1.cy:= finfo.dest.size.cy + 2*captionmargin;
+  case captionpos of
+   cp_center: begin
+    si1.cx:= si1.cx + abs(fcaptiondist);
+    si1.cy:= si1.cy + abs(fcaptionoffset);
    end;
-   cp_topleft,cp_top,cp_topright,
-   cp_bottomleft,cp_bottom,cp_bottomright: begin
-    if fcaptiondist > 0 then begin
-     size1.cy:= size1.cy + fcaptiondist;
+   cp_righttop,cp_right,cp_rightbottom,cp_lefttop,cp_left,cp_leftbottom: begin
+    si1.cx:= framesi1.cx + si1.cx + abs(fcaptiondist);
+    if fcaptionoffset > 0 then begin
+     si1.cy:= si1.cy + fcaptionoffset;
     end;
-    size1.cx:= size1.cx + abs(fcaptionoffset);
+   end
+   else begin
+    si1.cy:= framesi1.cy + si1.cy + abs(fcaptiondist);
+    if fcaptionoffset > 0 then begin
+     si1.cx:= si1.cx + fcaptionoffset;
+    end;
    end;
   end;
-  if asize.cx < size1.cx then begin
-   asize.cx:= size1.cx;
+  if asize.cx < si1.cx then begin
+   asize.cx:= si1.cx;
   end;
-  if asize.cy < size1.cy then begin
-   asize.cy:= size1.cy;
+  if asize.cy < si1.cy then begin
+   asize.cy:= si1.cy;
   end;
  end;
+end;
+
+procedure tcustomcaptionframe.checkminshrinksize(var asize: sizety);
+begin
+ inherited;
+ dominsize(asize);
+end;
+
+procedure tcustomcaptionframe.checkwidgetsize(var asize: sizety);
+begin        //for autosize
+ dominsize(asize);
 end;
 
 procedure tcustomcaptionframe.setcaptiondist(const Value: integer);
@@ -2997,7 +3052,8 @@ begin
  end;
 end;
 
-function tcustomcaptionframe.checkshortcut(var info: keyeventinfoty): boolean;
+function tcustomcaptionframe.checkfocusshortcut(
+                                      var info: keyeventinfoty): boolean;
 begin
  result:= msegui.checkshortcut(info,finfo.text,true);
 end;
@@ -3217,8 +3273,8 @@ begin
  end;
 end;
 
-procedure tcustomscrollframe.paintoverlay(const canvas: tcanvas;
-                                 const arect: rectty);
+procedure tcustomscrollframe.internalpaintoverlay(const canvas: tcanvas;
+                                                         const arect: rectty);
 begin
  inherited;
  if fs_sbverton in fstate then begin
@@ -3563,7 +3619,7 @@ begin
  end;
 end;
 
-procedure tcustomstepframe.paintoverlay(const canvas: tcanvas; 
+procedure tcustomstepframe.internalpaintoverlay(const canvas: tcanvas; 
                                                          const arect: rectty);
 var
  int1: integer;
@@ -5108,11 +5164,11 @@ begin
   if (eventkind = ek_buttonrelease) and (ws_rclicked in fwidgetstate) and
              not (csdesigning in componentstate) and
              (eventstate * [es_processed,es_child] = []) and
-             (button = mb_right) and (ws_rclicked in fwidgetstate) then begin
+             (button = mb_right) then begin
    dummy:= nil;
-   po1:= info.pos;
+   po1:= pos;
    dopopup(dummy,info);
-   info.pos:= po1; //no mousemove by chage of popup pos
+   pos:= po1; //no mousemove by change of popup pos
   end;
  end;
 end;
@@ -5386,10 +5442,11 @@ end;
 
 procedure tactionwidget.doshow;
 begin
- inherited;
+// inherited;
  if canevent(tmethod(fonshow)) then begin
   fonshow(self);
  end;
+ inherited;
 // include(fwidgetstate,ws_showed);
 // exclude(fwidgetstate,ws_hidden);
 end;
@@ -5473,9 +5530,9 @@ end;
 
 { tscrollface }
 
-procedure tscrollface.paint(const canvas: tcanvas; const rect: rectty);
+procedure tscrollface.internalpaint(const canvas: tcanvas; const rect: rectty);
 begin
- inherited paint(canvas,fintf.getclientrect);
+ inherited internalpaint(canvas,fintf.getclientrect);
 end;
 
 { tscrollingwidgetnwr }
@@ -5739,14 +5796,14 @@ end;
 { tcustomhintwidget }
 
 constructor tcustomhintwidget.create(const aowner: tcomponent; 
-                 const transientfor: twindow;
+                 const atransientfor: twindow;
                  var info: hintinfoty; const sender: tobject);
 var
  rect1,rect2: rectty;
 begin
- inherited create(aowner,transientfor);
+ inherited create(aowner,atransientfor);
  foptionswidget:= defaultoptionshintwidget;
- if transientfor = nil then begin
+ if atransientfor = nil then begin
   include(foptionswidget,ow_ultratop);
  end;
  internalcreateframe;
@@ -5756,20 +5813,20 @@ begin
  fframe.framei_right:= 1;
  fframe.framei_bottom:= 1;
  color:= cl_infobackground;
- rect2:= deflaterect(application.workarea(transientfor),fframe.innerframe);
+ rect2:= deflaterect(application.workarea(atransientfor),fframe.innerframe);
  rect1:= textrect(getcanvas,info.caption,rect2,[tf_wordbreak],
                                             stockobjects.fonts[stf_hint]);
  addsize1(rect1.size,fframe.innerframedim);
 // inc(rect1.cx,fframe.innerframedim.cx);
 // inc(rect1.cy,fframe.innerframedim.cy);
- widgetrect:= placepopuprect(transientfor,info.posrect,info.placement,
+ widgetrect:= placepopuprect(atransientfor,info.posrect,info.placement,
                                                                  rect1.size);
 end;
 
 { thintwidget}
 
 constructor thintwidget.create(const aowner: tcomponent;
-               const transientfor: twindow; var info: hintinfoty;
+               const atransientfor: twindow; var info: hintinfoty;
                const sender: tobject);
 begin
  fcaption:= info.caption;

@@ -87,12 +87,16 @@ CALLTOKENS newline
  
 jumptokens =
 JUMPTOKENS newline
-{{[.]string}[.]} scopename newline}
+[{{[.]string}[.]}] scopename newline}
+
+// scopename newline -> unconditional jump
 
 endtokens =
 ENDTOKENS newline
 {{[.]string}[.]} [stylename] newline}
-
+ 
+ //'' -> end of line
+ 
 *)
 
 {$ifdef FPC}{$mode objfpc}{$h+}{$GOTO ON}{$endif}
@@ -152,6 +156,7 @@ type
   starttokens: starttokenarty;
   endtokens: endtokenarty;
   hasendtokens: boolean;
+  defaulttarget: int32;
   return: boolean;
   fontinfonr: integer;
   currfontinfonr: integer;
@@ -749,52 +754,60 @@ begin
         end;
        end;
        bo1:= true;
-       if (length(scopeinfopo^.starttokens) > 0) and 
-               (char(byte(wpo1^)) in scopestartchars) then begin
+       if (length(scopeinfopo^.starttokens) > 0) then begin
+        if (char(byte(wpo1^)) in scopestartchars) then begin
                        //starttoken suchen
-        for int1:= 0 to high(scopeinfopo^.starttokens) do begin
-         with scopeinfopo^.starttokens[int1] do begin
-          if hastokenchars then begin
-           wpo2:= wpo1;
-           while (wpo2^ <= #255) and (char(byte(wpo2^)) in tokenchars) do begin
-            inc(wpo2);
-            if not shortcircuit then begin
-             break;
+         for int1:= 0 to high(scopeinfopo^.starttokens) do begin
+          with scopeinfopo^.starttokens[int1] do begin
+           if hastokenchars then begin
+            wpo2:= wpo1;
+            while (wpo2^ <= #255) and (char(byte(wpo2^)) in tokenchars) do begin
+             inc(wpo2);
+             if not shortcircuit then begin
+              break;
+             end;
             end;
-           end;
-           int2:= wpo2-wpo1;
-           if int2 > 0 then begin
-            bo1:= false;
-           end;
-          end
-          else begin
-           if caseinsensitive and msestartsstrcaseinsensitive(
-                                              pointer(token.name),wpo1) or
-                  not caseinsensitive and 
-                            msestartsstr(pointer(token.name),wpo1) then begin
-            if checktokenwhitespace(token,wpo1) then begin
+            int2:= wpo2-wpo1;
+            if int2 > 0 then begin
              bo1:= false;
-             int2:= length(token.name);
             end;
-           end;
-          end;
-          if not bo1 then begin
-           if fontinfonr <> 0 then begin
-            changed:= setcharstyle1(format,wpo1-startpo,int2,
-                    charstyles[fontinfonr]) or changed;
-            int3:= int2;
            end
            else begin
-            int3:= 0;     //keine sonderbehandlung
+            if caseinsensitive and msestartsstrcaseinsensitive(
+                                               pointer(token.name),wpo1) or
+                   not caseinsensitive and 
+                             msestartsstr(pointer(token.name),wpo1) then begin
+             if checktokenwhitespace(token,wpo1) then begin
+              bo1:= false;
+              int2:= length(token.name);
+             end;
+            end;
            end;
-           pushscope(scopeinfopo^.starttokens[int1]);
-           changed:= setcharstyle1(format,wpo1-startpo+int3,bigint,
-                          charstyles[scopeinfopo^.currfontinfonr]) or changed;
-           inc(wpo1,int2);
-           dec(alen,int2);
-           dec(keywordlen,int2);
-           break;
+           if not bo1 then begin
+            if fontinfonr <> 0 then begin
+             changed:= setcharstyle1(format,wpo1-startpo,int2,
+                     charstyles[fontinfonr]) or changed;
+             int3:= int2;
+            end
+            else begin
+             int3:= 0;     //keine sonderbehandlung
+            end;
+            pushscope(scopeinfopo^.starttokens[int1]);
+            changed:= setcharstyle1(format,wpo1-startpo+int3,bigint,
+                           charstyles[scopeinfopo^.currfontinfonr]) or changed;
+            inc(wpo1,int2);
+            dec(alen,int2);
+            dec(keywordlen,int2);
+            break;
+           end;
           end;
+         end;
+        end
+        else begin
+         if scopeinfopo^.defaulttarget >= 0 then begin
+          pushscope(scopeinfopo^.starttokens[scopeinfopo^.defaulttarget]);
+          changed:= setcharstyle1(format,wpo1-startpo+int3,bigint,
+                           charstyles[scopeinfopo^.currfontinfonr]) or changed;
          end;
         end;
        end;
@@ -1043,8 +1056,9 @@ begin
  end;
 end;
 
-procedure checktokenchars(const ar1: tokeninfoarty; const caseinsensitive: boolean;
-             out hastokenchars: boolean; out tokenchars: tokencharsty);
+procedure checktokenchars(const ar1: tokeninfoarty; 
+                            const caseinsensitive: boolean;
+                     out hastokenchars: boolean; out tokenchars: tokencharsty);
 var
  int1: integer;
  ch1: char;
@@ -1197,7 +1211,8 @@ var
                   const aendtokens: endtokenarty; ahasendtokens: boolean;
                   areturn: boolean;
                   afontinfonr: integer;
-                  const akeywords: keywordinfoarty): integer;
+                  const akeywords: keywordinfoarty;
+                  const adefaulttarget: int32): integer;
 
  begin
   with syntaxdefpo^ do begin
@@ -1211,6 +1226,7 @@ var
     hasendtokens:= ahasendtokens;
     return:= areturn;
     fontinfonr:= afontinfonr;
+    defaulttarget:= adefaulttarget;
    end;
    updateaktscope;
   end;
@@ -1370,13 +1386,15 @@ var
  lstr2,lstr3,lstr4: lstringty;
  global: boolean;
  wstrar1: msestringarty;
- bo1: boolean;
+ bo1,bo2: boolean;
  aktkeywordfontinfonr: integer;
  ar1: tokeninfoarty; 
  ar2: msestringarty;
  tokenchars1: tokencharsty;
  isnextline: boolean;
  tf1: tokenflagsty;
+ i5: int32;
+ 
 begin
  result:= -1;
  for int1:= 0 to high(fsyntaxdefs) do begin
@@ -1464,7 +1482,8 @@ begin
          nextword(lstr1,lstr3);
          int1:= findname(stylenames,lstr3);
          updateaktscope;
-         addname(scopenames,lstr2,addscoperule(nil,nil,false,false,int1,nil));
+         addname(scopenames,lstr2,addscoperule(
+                                      nil,nil,false,false,int1,nil,-1));
          flags:= [];
         end;
         tn_keywords: begin
@@ -1561,12 +1580,15 @@ begin
         bo1:= nexttokeninfo(lstr1,str1,tf1);
 //        bo1:= nextquotedstring(lstr1,str1);
         if not bo1 then begin        //at least one
-         invalidstring;
+//         invalidstring;
+         ar1:= nil;              //no token def
+        end
+        else begin
+         setlength(ar1,1);
+         ar1[0].name:= msestring(str1);
+         ar1[0].flags:= tf1;
+         addquotedtokens(ar1,isnextline);
         end;
-        setlength(ar1,1);
-        ar1[0].name:= msestring(str1);
-        ar1[0].flags:= tf1;
-        addquotedtokens(ar1,isnextline);
         if not isnextline then begin
          nextword(lstr1,lstr3);
          int1:= findname(scopenames,lstr3);
@@ -1577,11 +1599,11 @@ begin
          namenotfound;
         end;
         int3:= length(scopeinfos[aktscopeinfo].starttokens);
-        checktokenchars(ar1,caseinsensitive,bo1,tokenchars1);
-        if bo1 then begin
+        checktokenchars(ar1,caseinsensitive,bo2,tokenchars1);
+        if bo2 then begin
          setlength(scopeinfos[aktscopeinfo].starttokens,int3+1);
          with scopeinfos[aktscopeinfo].starttokens[int3] do begin
-          hastokenchars:= true;
+          hastokenchars:= hastokenchars or bo1;
           tokenchars:= tokenchars1;
           fontinfonr:= int2;
           scopenr:= int1;
@@ -1590,9 +1612,17 @@ begin
          end;
         end
         else begin
-         setlength(scopeinfos[aktscopeinfo].starttokens,
-                      int3+length(ar1));
-         for int4:= int3 to int3 + high(ar1) do begin
+         if not bo1 then begin
+          setlength(ar1,1); //empty tokenname
+          with scopeinfos[aktscopeinfo] do begin
+           if defaulttarget < 0 then begin //first
+            defaulttarget:= int3;
+           end;
+          end;
+         end;
+         i5:= high(ar1);
+         setlength(scopeinfos[aktscopeinfo].starttokens,int3+i5+1);
+         for int4:= int3 to int3 + i5 do begin
           with scopeinfos[aktscopeinfo].starttokens[int4] do begin
            token:= ar1[int4-int3];
            if caseinsensitive then begin

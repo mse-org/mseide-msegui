@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2015 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2016 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -22,6 +22,9 @@ unit msestrings;
  {$endif}
  {$ifdef mse_fpc_2_3}
   {$define mse_unicodestring}
+ {$endif}
+ {$if fpc_fullversion >= 030000}
+  {$define hascodepage}
  {$endif}
 {$endif}
 
@@ -180,11 +183,19 @@ type
  
  lstringarty = array of lstringty;
  lmsestringarty = array of lmsestringty;
- 
+
  stringheaderty = packed record
+{$ifdef hascodepage}
+  CodePage: TSystemCodePage;
+  ElementSize: Word;
+ {$ifdef CPU64}    { align fields  }
+  Dummy: DWord;
+ {$endif CPU64}
+{$endif}
   ref: sizeint;
   len: sizeint;
  end;
+
  pstringheaderty = ^stringheaderty;
 
 const
@@ -193,11 +204,19 @@ const
 
 type
  tmemorystringstream = class(tmemorystream) 
-        //has room for stringheader, do not change size!
+        //has room for stringheader
+  protected
+   procedure SetCapacity(NewCapacity: PtrInt) override;
+   function getcapacity: ptrint override;
+   function getmemory: pointer; override;
+   Function GetSize : Int64; Override;
+   function GetPosition: Int64; Override;
   public
    constructor create;
+   procedure SetSize({$ifdef CPU64}const{$endif CPU64} NewSize: PtrInt); override;
+   function Seek(const Offset: Int64; Origin: TSeekOrigin): Int64; override;
    procedure destroyasstring(out data: string);
-   //calls destroy, not possible to use as destructor in FPC
+    //calls destroy, not possible to use as destructor in FPC
  end;
  
  searchoptionty = (so_caseinsensitive,so_wholeword,so_wordstart);
@@ -216,11 +235,11 @@ function printableascii(const source: string): string; overload;
 function printableascii(const source: msestring): msestring; overload;
                 //removes all nonprintablechars and ' '
                 
-function replacechar(const source: string; a,b: char): string; overload;
-function replacechar(const source: msestring; a,b: msechar): msestring; overload;
-procedure replacechar1(var dest: string; a,b: char); overload;
-procedure replacechar1(var dest: msestring; a,b: msechar); overload;
-  //replaces a by b
+function replacechar(const source: string; old,new: char): string; overload;
+function replacechar(const source: msestring; old,new: msechar): msestring; overload;
+procedure replacechar1(var dest: string; old,new: char); overload;
+procedure replacechar1(var dest: msestring; old,new: msechar); overload;
+  //replaces old by new
 function stringfromchar(achar: char; count : integer): string; overload;
 function stringfromchar(achar: msechar; count : integer): msestring; overload;
 
@@ -462,6 +481,8 @@ function stripescapesequences(avalue: msestring): msestring;
 
 procedure stringaddref(var str: ansistring); overload;
 procedure stringaddref(var str: msestring); overload;
+procedure stringsafefree(var str: string; const onlyifunique: boolean);
+procedure stringsafefree(var str: msestring; const onlyifunique: boolean);
 
 procedure reallocstring(var value: ansistring); overload;
                 //macht datenkopie ohne free
@@ -1382,6 +1403,32 @@ begin
  end;
 end;
 
+procedure stringsafefree(var str: string; const onlyifunique: boolean);
+var
+ po1: psizeint;
+begin
+ if pointer(str) <> nil then begin
+  po1:= pointer(str)-2*sizeof(sizeint);
+  if (po1^ >= 0) and (not onlyifunique or (po1^ = 1)) then begin
+   fillchar(pointer(str)^,length(str)*sizeof(str[1]),0);
+   str:= '';
+  end;
+ end;
+end;
+
+procedure stringsafefree(var str: msestring; const onlyifunique: boolean);
+var
+ po1: psizeint;
+begin
+ if pointer(str) <> nil then begin
+  po1:= pointer(str)-2*sizeof(sizeint);
+  if (po1^ >= 0) and (not onlyifunique or (po1^ = 1)) then begin
+   fillchar(pointer(str)^,length(str)*sizeof(str[1]),0);
+   str:= '';
+  end;
+ end;
+end;
+
 procedure splitstringquoted(const source: string; out dest: stringarty;
                        quotechar: char = '"'; separator: char = #0);
 var
@@ -2291,11 +2338,11 @@ begin
  dest:= removechar(dest,a);
 end;
 
-function replacechar(const source: string; a,b: char): string;
+function replacechar(const source: string; old,new: char): string;
   //replaces a by b
 begin
  result:= source;
- replacechar1(result,a,b);
+ replacechar1(result,old,new);
 end;
 {
 procedure replacechar1(var dest: string; a,b: char);
@@ -2311,7 +2358,7 @@ begin
  end;
 end;
 }
-procedure replacechar1(var dest: string; a,b: char);
+procedure replacechar1(var dest: string; old,new: char);
   //replaces a by b
 var
  pd,pe: pchar;
@@ -2320,18 +2367,18 @@ begin
  pd:= pointer(dest);
  pe:= pd + length(dest);
  while pd < pe do begin
-  if pd^ = a then begin
-   pd^:= b;
+  if pd^ = old then begin
+   pd^:= new;
   end;
   inc(pd);
  end;
 end;
 
-function replacechar(const source: msestring; a,b: msechar): msestring;
+function replacechar(const source: msestring; old,new: msechar): msestring;
   //replaces a by b
 begin
  result:= source;
- replacechar1(result,a,b);
+ replacechar1(result,old,new);
 end;
 {
 procedure replacechar1(var dest: msestring; a,b: msechar);
@@ -2348,7 +2395,7 @@ begin
 end;
 }
 
-procedure replacechar1(var dest: msestring; a,b: msechar);
+procedure replacechar1(var dest: msestring; old,new: msechar);
   //replaces a by b
 var
  pd,pe: pmsechar;
@@ -2357,8 +2404,8 @@ begin
  pd:= pointer(dest);
  pe:= pd + length(dest);
  while pd < pe do begin
-  if pd^ = a then begin
-   pd^:= b;
+  if pd^ = old then begin
+   pd^:= new;
   end;
   inc(pd);
  end;
@@ -5787,32 +5834,91 @@ end;
 
 
 { tmemorystringstream }
-
+const
+ stringheadersize = sizeof(stringheaderty);
+ 
 constructor tmemorystringstream.create;
-var
- header: stringheaderty;
+//var
+// header: stringheaderty;
 begin
  inherited;
- fillchar(header,sizeof(header),0);
- writebuffer(header,sizeof(header));
+ setcapacity(0);
+ fposition:= stringheadersize;
+// fillchar(header,sizeof(header),0);
+// writebuffer(header,sizeof(header));
+end;
+
+procedure tmemorystringstream.SetCapacity(NewCapacity: PtrInt);
+begin
+ inherited setcapacity(newcapacity + stringheadersize);
+end;
+
+function tmemorystringstream.getcapacity: ptrint;
+begin
+ result:= inherited getcapacity - stringheadersize;
+end;
+
+function tmemorystringstream.Seek(const Offset: Int64;
+               Origin: TSeekOrigin): Int64;
+begin
+  Case Word(Origin) of
+    soFromBeginning : FPosition:=Offset+stringheadersize;
+    soFromEnd       : FPosition:=FSize+Offset;
+    soFromCurrent   : FPosition:=FPosition+Offset;
+  end;
+  Result:=FPosition;
+  {$IFDEF DEBUG}
+  if Result < stringheadersize then
+    raise Exception.Create('TCustomMemoryStream');
+  {$ENDIF}
+end;
+
+function tmemorystringstream.getmemory: pointer;
+begin
+ result:= fmemory + stringheadersize;
+end;
+
+function tmemorystringstream.GetSize: Int64;
+begin
+ result:= fsize - stringheadersize;
+end;
+
+function tmemorystringstream.GetPosition: Int64;
+begin
+ result:= fposition - stringheadersize;
+end;
+
+procedure tmemorystringstream.SetSize(
+                     {$ifdef CPU64}const{$endif CPU64} NewSize: PtrInt);
+begin
+ inherited setsize(newsize + stringheadersize);
 end;
 
 procedure tmemorystringstream.destroyasstring(out data: string);
 var
  ch1: char;
 begin
- with pstringheaderty(memory)^ do begin
-  ref:= 1;
-  len:= size - sizeof(stringheaderty);
- end;
- ch1:= #0;
- position:= size;
- writebuffer(ch1,sizeof(ch1));
  data:= ''; //decref
- pointer(data):= pointer(ptruint(memory) + sizeof(stringheaderty));
- setpointer(nil,0);
-// destroy;            //destroy does not free memory???
- free;
+ if size > 0 then begin
+  with pstringheaderty(fmemory)^ do begin
+ {$ifdef hascodepage}
+   codepage:= cp_acp;
+   elementsize:= 1;
+  {$ifdef cpu64}
+   dummy:= 0;
+  {$endif}
+ {$endif}
+   ref:= 1;
+   len:= size;
+  end;
+  ch1:= #0;
+  position:= size;
+  writebuffer(ch1,sizeof(ch1));
+  pointer(data):= memory; //pointer(ptruint(memory) + sizeof(stringheaderty));
+  setpointer(nil,0);
+ end;
+ // destroy;            //destroy does not free memory???
+ free();
 end;
 
 end.

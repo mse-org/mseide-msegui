@@ -40,8 +40,9 @@ const
   #1053'&'#1080#1082#1072#1082#1080#1077 ,        //mr_noall =>  N&ikakie
   #1053#1077#1074#1072'&'#1078#1085#1086,         //mr_ignore => Neva&zhno
   '&Skip',    //mr_skip
-  'Skip &all' //mr_skipall
- );
+  'Skip &all', //mr_skipall
+  'Co&ntinue'  //mr_continue
+);
 
  ru_modalresulttextnoshortcut: defaultmodalresulttextty =
  ('',                                             //mr_none
@@ -61,7 +62,8 @@ const
   #1053#1080#1082#1072#1082#1080#1077 ,           //mr_noall =>  Nikakie  
   #1053#1077#1074#1072#1078#1085#1086,	          //mr_ignore => Nevazhno
   'Skip',    //mr_skip
-  'Skip all' //mr_skipall
+  'Skip all', //mr_skipall
+  'Continue'  //mr_continue
   );
 
  ru_stockcaption: stockcaptionaty = (

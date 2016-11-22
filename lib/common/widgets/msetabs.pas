@@ -1627,10 +1627,12 @@ procedure ttab.setstate(const Value: tabstatesty);
 begin
  if fstate <> value then begin
   fstate := Value;
+ {
   if (fstate * [ts_invisible,ts_disabled] <> []) and 
        not (csdesigning in tcustomtabbar(fowner).componentstate) then begin
    exclude(fstate,ts_active);
   end;
+ }
   changed;
  end;
 end;

@@ -22,8 +22,9 @@ const
 
 type
 
- stockbitmapty = (stb_none,stb_dens0,stb_dens10,stb_dens25,stb_dens50,stb_dens75,
-                                                          stb_dens90,stb_dens100,
+ stockbitmapty = (stb_default,stb_none,
+                  stb_dens0,stb_dens10,stb_dens25,
+                                stb_dens50,stb_dens75,stb_dens90,stb_dens100,
                   stb_block2,stb_block3,stb_block4,
                   stb_hatchup3,stb_hatchup4,stb_hatchup5,
                   stb_hatchdown3,stb_hatchdown4,stb_hatchdown5,
@@ -158,6 +159,7 @@ type
    function getmseicon: tmaskedbitmap;
    function getcaptions(index: stockcaptionty): msestring;
    function gettextgenerator(index: textgeneratorty): textgeneratorfuncty;
+   procedure setmseicon(const avalue: tmaskedbitmap);
   public
    constructor create;
    destructor destroy; override;
@@ -175,7 +177,7 @@ type
    property textgenerators[index: textgeneratorty]: textgeneratorfuncty 
                                                        read gettextgenerator;
    property glyphs: timagelist read getglyphs;
-   property mseicon: tmaskedbitmap read getmseicon;
+   property mseicon: tmaskedbitmap read getmseicon write setmseicon;
  end;
 
 type
@@ -352,7 +354,7 @@ begin
   {$ifdef mswindows}
   if iswin98 then begin
    case index of             //must be >= 8*8 for win98
-    stb_none: fbitmaps[index].loaddata(makesize(8,8),@b_none_98);
+    stb_default,stb_none: fbitmaps[index].loaddata(makesize(8,8),@b_none_98);
     stb_dens0: fbitmaps[index].loaddata(makesize(8,8),@b_0_98);
     stb_dens10: fbitmaps[index].loaddata(makesize(12,8),@b_10_98);
     stb_dens25: fbitmaps[index].loaddata(makesize(8,8),@b_25_98);
@@ -377,7 +379,7 @@ begin
   end
   else begin
    case index of
-    stb_none: fbitmaps[index].loaddata(makesize(1,1),@b_none);
+    stb_default,stb_none: fbitmaps[index].loaddata(makesize(1,1),@b_none);
     stb_dens0: fbitmaps[index].loaddata(makesize(1,1),@b_0);
     stb_dens10: fbitmaps[index].loaddata(makesize(6,4),@b_10);
     stb_dens25: fbitmaps[index].loaddata(makesize(4,2),@b_25);
@@ -402,7 +404,7 @@ begin
   end;
   {$else}
   case index of
-   stb_none: fbitmaps[index].loaddata(makesize(1,1),@b_none);
+   stb_default,stb_none: fbitmaps[index].loaddata(makesize(1,1),@b_none);
    stb_dens0: fbitmaps[index].loaddata(makesize(1,1),@b_0);
    stb_dens10: fbitmaps[index].loaddata(makesize(6,4),@b_10);
    stb_dens25: fbitmaps[index].loaddata(makesize(4,2),@b_25);
@@ -478,6 +480,11 @@ end;
 function tstockobjects.getmseicon: tmaskedbitmap;
 begin
  result:= stockdata.mseicon.bitmap;
+end;
+
+procedure tstockobjects.setmseicon(const avalue: tmaskedbitmap);
+begin
+ stockdata.mseicon.bitmap.assign(avalue);
 end;
 
 function tstockobjects.getmodalresulttext(index: modalresultty): msestring;

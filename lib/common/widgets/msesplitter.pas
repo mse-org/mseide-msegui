@@ -130,9 +130,13 @@ type
    procedure endpickmove(const sender: tobjectpicker);
    procedure cancelpickmove(const sender: tobjectpicker);
    procedure paintxorpic(const sender: tobjectpicker; const canvas: tcanvas);
+   class function classskininfo: skininfoty; override;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
+   function actualcolor: colorty; override;
+   function actualopaquecolor: colorty; override;
+
    procedure move(const dist: pointty);
 
    property options: splitteroptionsty read foptions write setoptions 
@@ -153,11 +157,10 @@ type
    property dist_bottom: integer read fdist_bottom 
                                     write setdist_bottom default 0;
 
-   property color default defaultsplittercolor;
-   property grip: stockbitmapty read fgrip write setgrip 
-                                               default defaultsplittergrip;
+//   property color default defaultsplittercolor;
+   property grip: stockbitmapty read fgrip write setgrip default stb_default;
    property colorgrip: colorty read fcolorgrip write setcolorgrip 
-                                               default defaultsplittercolorgrip;
+                                                        default cl_default;
    property statfile: tstatfile read fstatfile write setstatfile;
    property statvarname: msestring read getstatvarname write fstatvarname;
    property statpriority: integer read fstatpriority 
@@ -182,7 +185,7 @@ type
    property dist_right;
    property dist_bottom;
 
-//   property color;
+   property color;
    property grip;
    property colorgrip;
    property statfile;
@@ -262,6 +265,7 @@ const
 
 type  
  placeoptionty = (plo_noinvisible,plo_scalesize,
+                  plo_scalefullref, //use whole innerclientrect as size reference
                   plo_endmargin,plo_propmargin,plo_syncmaxautosize,
                   plo_synccaptiondistx,plo_synccaptiondisty,
                   plo_syncpaintwidth,plo_syncpaintheight);
@@ -271,6 +275,7 @@ type
   widget: twidget;
   pos: pointty;
   size: sizety;
+  curminsize: sizety;
   actpos: pointty;
   actsize: sizety;
   refsize: sizety;
@@ -307,6 +312,7 @@ type
    fwidgetinfos: widgetlayoutinfoarty;
    fstate: layouterstatesty;
    fscalesizeref: sizety;
+   fscalesizeextension: sizety;
    ffontsizeref: sizety;
    ffontheightref: integer;
    ffontxscaleref: real;
@@ -329,6 +335,8 @@ type
    function childrenbottom: integer;
    function childrenwidth: integer;
    function childrenheight: integer;
+   function childrenminwidth: integer;
+   function childrenminheight: integer;
    procedure scalesizerefchanged;
    procedure updatescalesizeref;
    procedure delayedupdatelayout();
@@ -410,15 +418,15 @@ constructor tcustomsplitter.create(aowner: tcomponent);
 begin
 // include(fwidgetstate1,ws1_tryshrink);
  foptions:= defaultsplitteroptions;
- fcolorgrip:= defaultsplittercolorgrip;
- fgrip:= defaultsplittergrip;
+ fcolorgrip:= cl_default;
+ fgrip:= stb_default;
  frefrect.x:= -bigint;
  frefrect.y:= -bigint;
  frefrect.cx:= -bigint;
  frefrect.cy:= -bigint;
  include(fwidgetstate1,ws1_framemouse);
  inherited;
- color:= defaultsplittercolor;
+// color:= defaultsplittercolor;
  optionswidget:= defaultoptionswidgetnofocus;
  fobjectpicker:= tobjectpicker.create(iobjectpicker(self),org_widget);
 end;
@@ -560,6 +568,12 @@ begin
  end;
  canvas.drawxorframe(makerect(clippoint(sender.pickoffset),fwidgetrect.size),-4,
             stockobjects.bitmaps[stb_dens25]);
+end;
+
+class function tcustomsplitter.classskininfo: skininfoty;
+begin
+ result:= inherited classskininfo;
+ result.objectkind:= sok_splitter;
 end;
 
 procedure tcustomsplitter.updatelinkedwidgets(const delta: pointty);
@@ -879,6 +893,26 @@ begin
  end;
 end;
 
+function tcustomsplitter.actualcolor: colorty;
+begin
+ if fcolor = cl_default then begin
+  result:= defaultsplittercolor;
+ end
+ else begin
+  result:= inherited actualcolor();
+ end;
+end;
+
+function tcustomsplitter.actualopaquecolor: colorty;
+begin
+ if fcolor = cl_default then begin
+  result:= defaultsplittercolor;
+ end
+ else begin
+  result:= inherited actualopaquecolor();
+ end;
+end;
+
 procedure tcustomsplitter.doasyncevent(var atag: integer);
 var
  pt1,pt2: pointty;
@@ -996,8 +1030,18 @@ begin
  inherited;
  if fgrip <> stb_none then begin
   with acanvas do begin
-   brush:= stockobjects.bitmaps[fgrip];
-   color:= fcolorgrip;
+   if fgrip = stb_default then begin
+    brush:= stockobjects.bitmaps[defaultsplittergrip];
+   end
+   else begin
+    brush:= stockobjects.bitmaps[fgrip];
+   end;
+   if fcolorgrip = cl_default then begin
+    color:= defaultsplittercolorgrip;
+   end
+   else begin
+    color:= fcolorgrip;
+   end;
    fillrect(innerclientrect,cl_brushcanvas);
   end;
  end;
@@ -1404,6 +1448,164 @@ begin
  end;
 end;
 
+function tcustomlayouter.childrenminwidth: integer;
+var
+ i1,i2,i3,i5: int32;
+ variable,space,fix: int32;
+begin
+ variable:= 0;
+ space:= innerframewidth.cx;
+ i1:= high(fwidgets);
+ if i1 > 0 then begin
+  space:= space + fplace_mindist * i1;
+  if plo_propmargin in fplace_options then begin
+   space:= space + 2 * fplace_mindist;
+  end;
+ end; 
+ fix:= space;
+ for i1:= 0 to high(fwidgetinfos) do begin
+  with fwidgetinfos[i1],widget do begin
+   if not (plo_noinvisible in fplace_options) or isvisible then begin
+    if (anchors * [an_left,an_right] = [an_left,an_right]) then begin
+     fix:= fix + minshrinksize.cx;//minscrollsize.cx;
+    end
+    else begin
+     if (plo_scalesize in fplace_options) and 
+                           not (osk_nopropwidth in optionsskin) then begin
+      variable:= variable + bounds_cx;
+     end
+     else begin
+      fix:= fix + bounds_cx;
+     end;
+    end;
+   end;
+  end;
+ end;
+ if plo_scalesize in fplace_options then begin
+           //(x-extension)*(1/ref)*variable + fix = x
+           //x = (fix*ref - extension*variable) / (ref - variable)
+
+  result:= 0;
+  i1:= fix*scalesizeref.cx - fscalesizeextension.cx*variable;
+  i2:= scalesizeref.cx - variable;
+  if i2 <> 0 then begin
+   result:= (i1 + i2 div 2) div i2; //with rounding
+  end;
+  i3:= 0;
+  for i1:= 0 to high(fwidgetinfos) do begin
+   with fwidgetinfos[i1],widget do begin
+    if (not (plo_noinvisible in fplace_options) or isvisible) then begin
+     if not (osk_nopropwidth in optionsskin) then begin
+      if scalesize.cx > 0 then begin
+       i5:= curminsize.cx * refscalesize.cx div scalesize.cx;
+       if i3 < i5 then begin
+        i3:= i5;
+       end;
+      end;
+     end;
+    end;
+   end;
+  end;
+  i3:= i3 + fscalesizeextension.cx; //add not scaling values
+  if result < i3 then begin
+   result:= i3;
+  end;
+ end
+ else begin
+  result:= variable + fix;
+ end;
+end;
+
+function tcustomlayouter.childrenminheight: integer;
+var
+ i1,i2,i3,i5: int32;
+ variable,space,fix: int32;
+begin
+ variable:= 0;
+ space:= innerframewidth.cy;
+ i1:= high(fwidgets);
+ if i1 > 0 then begin
+  space:= space + fplace_mindist * i1;
+  if plo_propmargin in fplace_options then begin
+   space:= space + 2 * fplace_mindist;
+  end;
+ end; 
+ fix:= space;
+ for i1:= 0 to high(fwidgetinfos) do begin
+  with fwidgetinfos[i1],widget do begin
+   if not (plo_noinvisible in fplace_options) or isvisible then begin
+    if (anchors * [an_top,an_bottom] = [an_top,an_bottom]) then begin
+     fix:= fix + minshrinksize.cy; //minscrollsize.cy;
+    end
+    else begin
+     if (plo_scalesize in fplace_options) and 
+                           not (osk_nopropwidth in optionsskin) then begin
+      variable:= variable + bounds_cy;
+     end
+     else begin
+      fix:= fix + bounds_cy;
+     end;
+    end;
+   end;
+  end;
+ end;
+ if plo_scalesize in fplace_options then begin
+           //(y-extension)*(1/ref)*variable + fix = y
+           //y = (fix*ref - extension*variable) / (ref - variable)
+
+  result:= 0;
+  i1:= fix*scalesizeref.cy - fscalesizeextension.cy*variable;
+  i2:= scalesizeref.cy - variable;
+  if i2 <> 0 then begin
+   result:= (i1 + i2 div 2) div i2; //with rounding
+  end;
+  i3:= 0;
+  for i1:= 0 to high(fwidgetinfos) do begin
+   with fwidgetinfos[i1],widget do begin
+    if (not (plo_noinvisible in fplace_options) or isvisible) then begin
+     if not (osk_nopropwidth in optionsskin) then begin
+      if scalesize.cy > 0 then begin
+       i5:= curminsize.cy * refscalesize.cy div scalesize.cy;
+       if i3 < i5 then begin
+        i3:= i5;
+       end;
+      end;
+     end;
+    end;
+   end;
+  end;
+  i3:= i3 + fscalesizeextension.cy; //add not scaling values
+  if result < i3 then begin
+   result:= i3;
+  end;
+ end
+ else begin
+  result:= variable + fix;
+ end;
+end;
+(*
+function tcustomlayouter.childrenminheight: integer;
+var
+ int1: integer;
+begin
+ result:= 0;
+ for int1:= 0 to high(fwidgetinfos) do begin
+  with fwidgetinfos[int1],widget do begin
+   if not(plo_noinvisible in fplace_options) or isvisible then begin
+    if (anchors * [an_top,an_bottom] = [an_top,an_bottom]) or 
+                     (plo_scalesize in fplace_options) and 
+                           not(osk_nopropheight in optionsskin) then begin
+//     result:= result + minscrollsize.cy;
+     result:= result + curminsize.cy;
+    end
+    else begin
+     result:= result + bounds_cy;
+    end;
+   end;
+  end;
+ end;
+end;
+*)
 function tcustomlayouter.childrenleft: integer;
 var
  int1: integer;
@@ -1563,7 +1765,9 @@ var
  int1,int2,int3,int4: integer;
  ar1: widgetarty;
  size1: sizety;
- 
+// outerwidth1: int32;
+ bo1: boolean;
+ i1,i2: int32;
 begin
  if (componentstate * [csloading,csdestroying] = []) and 
                             (flayoutupdating = 0) then begin
@@ -1590,7 +1794,30 @@ begin
        with fwidgetinfos[int1] do begin
         if not (osk_nopropwidth in widget.optionsskin) and 
                                       (refscalesize.cx <> 0) then begin
-         widget.clientwidth:= (scalesize.cx * size1.cx) div refscalesize.cx;
+//         outerwidth1:= 0;
+         with twidget1(widget) do begin
+//          if fframe <> nil then begin
+//           outerwidth1:= fframe.outerframecx;
+//          end;
+          bo1:= ws1_layoutplacing in fwidgetstate1;
+          try
+           include(fwidgetstate1,ws1_layoutplacing);
+           i1:= ((scalesize.cx{-outerwidth1}) * size1.cx) div
+                                               refscalesize.cx;
+           i2:= curminsize.cx;
+           if i1 < i2 then begin
+            i1:= i2;
+           end;
+//           i1:= i1 + outerwidth1;
+           widget.width:= i1;
+           actscalesize.cx:= widget.width;
+//         widget.clientwidth:= (scalesize.cx * size1.cx) div refscalesize.cx;
+          finally
+           if not bo1 then begin
+            exclude(fwidgetstate1,ws1_layoutplacing);
+           end;
+          end;
+         end;
         end;
        end;
       end;
@@ -1600,7 +1827,29 @@ begin
        with fwidgetinfos[int1] do begin
         if not (osk_nopropheight in widget.optionsskin) and 
                                       (refscalesize.cy <> 0) then begin
-         widget.clientheight:= (scalesize.cy * size1.cy) div refscalesize.cy;
+//         outerwidth1:= 0;
+         with twidget1(widget) do begin
+//          if twidget1(widget).fframe <> nil then begin
+//           outerwidth1:= twidget1(widget).fframe.outerframecy;
+//          end;
+          bo1:= ws1_layoutplacing in fwidgetstate1;
+          try
+           include(fwidgetstate1,ws1_layoutplacing);
+           i1:= ((scalesize.cy{-outerwidth1}) * size1.cy) div
+                                              refscalesize.cy {+ outerwidth1};
+           i2:= minshrinksize().cy;
+           if i1 < i2 then begin
+            i1:= i2;
+           end;
+           widget.height:= i1;
+           actscalesize.cy:= widget.height;
+ //         widget.clientheight:= (scalesize.cy * size1.cy) div refscalesize.cy;
+          finally
+           if not bo1 then begin
+            exclude(fwidgetstate1,ws1_layoutplacing);
+           end;
+          end;
+         end;
         end;
        end;
       end;
@@ -1745,43 +1994,47 @@ var
 begin
  if plo_scalesize in fplace_options then begin
   if foptionslayout * [lao_placex,lao_placey] <> [] then begin
+   fscalesizeref:= innerclientsize;
    sum:= nullsize;
-   bo1:= not (plo_noinvisible in fplace_options);
-   for int1:= 0 to high(fwidgets) do begin
-    with widgets[int1] do begin
-     if (bo1 or visible) then begin
-      if osk_nopropwidth in optionsskin then begin 
-       addsize1(sum,size);
+   if not (plo_scalefullref in fplace_options) then begin
+    bo1:= not (plo_noinvisible in fplace_options);
+    for int1:= 0 to high(fwidgets) do begin
+     with widgets[int1] do begin
+      if (bo1 or visible) then begin
+       if osk_nopropwidth in optionsskin then begin 
+        addsize1(sum,size);
+       end
+       else begin
+//        addsize1(sum,framedim);
+       end;
       end
       else begin
-       addsize1(sum,framedim);
       end;
-     end
-     else begin
      end;
     end;
-   end;
-   if bo1 then begin
-    int3:= length(fwidgets);
-   end
-   else begin
-    int3:= 0;
-    for int1:= 0 to high(fwidgets) do begin
-     if fwidgets[int1].visible then begin
-      inc(int3);
+    if bo1 then begin
+     int3:= length(fwidgets);
+    end
+    else begin
+     int3:= 0;
+     for int1:= 0 to high(fwidgets) do begin
+      if fwidgets[int1].visible then begin
+       inc(int3);
+      end;
      end;
     end;
+    if not (plo_propmargin in fplace_options) then begin
+     dec(int3);
+    end;
+    subsize1(fscalesizeref,sum);
+    if int3 > 0 then begin
+     int3:= int3 * fplace_mindist;
+     fscalesizeref.cx:= fscalesizeref.cx - int3;
+     fscalesizeref.cy:= fscalesizeref.cy - int3;
+    end;
    end;
-   if not (plo_propmargin in fplace_options) then begin
-    dec(int3);
-   end;
-   fscalesizeref:= innerclientsize;
-   subsize1(fscalesizeref,sum);
-   if int3 > 0 then begin
-    int3:= int3 * fplace_mindist;
-    fscalesizeref.cx:= fscalesizeref.cx - int3;
-    fscalesizeref.cy:= fscalesizeref.cy - int3;
-   end;
+   fscalesizeextension.cx:= fwidgetrect.cx - fscalesizeref.cx;
+   fscalesizeextension.cy:= fwidgetrect.cy - fscalesizeref.cy;
   end;
  end;
  include(fstate,las_scalesizerefvalid);
@@ -1793,16 +2046,10 @@ var
 begin
  result:= inherited calcminscrollsize;
  if lao_placex in foptionslayout then begin
-  result.cx:= childrenwidth + high(fwidgets) * fplace_mindist + innerframewidth.cx;
-  if plo_propmargin in fplace_options then begin
-   result.cx:= result.cx + 2 * fplace_mindist;
-  end;
+  result.cx:= childrenminwidth;
  end;
  if lao_placey in foptionslayout then begin
-  result.cy:= childrenheight + high(fwidgets) * fplace_mindist + innerframewidth.cy;
-  if plo_propmargin in fplace_options then begin
-   result.cy:= result.cy + 2 * fplace_mindist;
-  end;
+  result.cy:= childrenminheight;
  end;
  if (high(fwidgets) >= 0) and (align_glue <> wam_none) and 
                                      (align_mode <> wam_none)then begin
@@ -1977,17 +2224,19 @@ begin
 end;
 
 procedure tcustomlayouter.setplace_options(const avalue: placeoptionsty);
+var
+ diff1: placeoptionsty;
 begin
- if fplace_options <> avalue then begin
-  if (plo_scalesize in avalue) and 
-       (not (plo_scalesize in fplace_options) or 
-        ((plo_noinvisible in avalue) xor 
-         (plo_noinvisible in fplace_options))) then begin
-   exclude(fstate,las_scalesizerefvalid);
-   scalebasechanged(nil);
-  end;
+ diff1:= fplace_options >< avalue;
+ if diff1 <> [] then begin
   fplace_options:= avalue;
-  updatelayout;
+  if diff1 * [plo_scalesize,plo_scalefullref,plo_noinvisible] <> [] then begin
+   exclude(fstate,las_scalesizerefvalid);
+   if plo_scalesize in fplace_options then begin
+    scalebasechanged(nil);
+   end;
+  end;
+  updatelayout();
  end;
 end;
 
@@ -2125,7 +2374,14 @@ begin
    widget:= awidget;
   end;
   if not (csloading in componentstate) then begin
-   size1:= widget.clientsize;
+//   size1:= widget.clientsize;
+   with twidget1(widget) do begin
+    curminsize:= minshrinksize();
+//    if fframe <> nil then begin
+//     subsize1(curminsize,fframe.outerframedim);
+//    end;
+   end;
+   size1:= widget.size;
    if (flayoutupdating = 0) then begin
          //synchronize ref values with changed widget values
     size2:= self.scalesizeref;
@@ -2202,7 +2458,8 @@ begin
   size1:= scalesizeref;
   for int1:= high(fwidgetinfos) downto 0 do begin
    with fwidgetinfos[int1] do begin
-    scalesize:= widget.clientsize;
+//    scalesize:= widget.clientsize;
+    scalesize:= widget.size;
     actscalesize:= scalesize;
     refscalesize:= size1;
    end;

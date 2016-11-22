@@ -410,7 +410,7 @@ uses
   dbf_dbffile,
   dbf_fields,
   dbf_str,
-  dbf_prssupp,
+  mdbf_prssupp,
   mdbf_prscore,
   dbf_lang;
 

@@ -26,7 +26,8 @@ uses
 
 type
 
- filesourcety = (fs_indirectories,fs_inopenfiles,fs_inprojectdir);
+ filesourcety = (fs_indirectories,fs_inopenfiles,fs_inprojectdir,
+                                                          fs_incurrentfile);
  findinfileoptionty = (fifo_subdirs);
  findinfileoptionsty = set of findinfileoptionty;
 

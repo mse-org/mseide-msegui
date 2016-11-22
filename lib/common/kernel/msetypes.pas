@@ -169,6 +169,8 @@ const
  emptyreal = -1/0;
 {$else}
  emptyreal = real(-1/0);
+ emptydouble = double(-1/0);
+ emptyfloat64 = float64(-1/0);
 {$endif}
  emptydatetime = emptyreal;
 
@@ -179,6 +181,11 @@ const
  minint = low(integer);
  bigint = maxint div 2;
  nullmethod: tmethod = (code: nil; data: nil);
+{$ifdef cpu64}
+ pointeralignmask = $ffffffffffffffff - $7;
+{$else}
+ pointeralignmask = $ffffffff - $3;
+{$endif}
 
 type
  halfinteger = -bigint..bigint;

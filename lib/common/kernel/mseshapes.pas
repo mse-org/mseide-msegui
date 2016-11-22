@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2015 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2016 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -23,13 +23,14 @@ const
  menucheckboxheight = 13;
  defaultshapecaptiondist = 2;
  defaultshapefocusrectdist = 1;
- defaultcaptiontextflags = [tf_xcentered,tf_ycentered];
+ defaultcaptiontextflags = [tf_left,tf_xcentered,tf_ycentered];
 
 // styleactionstates: actionstatesty = [as_shortcutcaption,as_radiobutton];
 type
  buttonedgety =  (bedg_none,bedg_right,bedg_top,bedg_left,bedg_bottom);
 
- tagmouseprocty = procedure (const tag: integer; const info: mouseeventinfoty) of object;
+ tagmouseprocty = procedure (const tag: integer; 
+                                     const info: mouseeventinfoty) of object;
 
  captioninfoty = record
   dim: rectty;
@@ -42,8 +43,8 @@ type
   colorglyph: colorty;
   imagelist: timagelist;
   imagedist: integer;
-  imagedisttop: integer;
-  imagedistbottom: integer;
+  imagedist1: integer; //left or top
+  imagedist2: integer; //right or bottom
   captionclipped: boolean;
  end;
  
@@ -124,6 +125,8 @@ procedure checkbuttonhint(const awidget: twidget; info: mouseeventinfoty;
 
 procedure drawcaption(const acanvas: tcanvas; var ainfo: captioninfoty);
 procedure initcaptioninfo(var ainfo: captioninfoty);
+function calccaptionsize(const acanvas: tcanvas;
+                                        const ainfo: captioninfoty): sizety;
 
 //var
 // animatemouseenter: boolean = true;
@@ -202,7 +205,8 @@ begin
   end;
   exit;
  end;
- if (info.eventkind in [ek_mousemove,ek_mousepark]) then begin
+ if (info.eventkind in [ek_mousemove,ek_mousepark]) and 
+                     not (csdesigning in awidget.componentstate) then begin
   if (int1 >= 0) then begin
    if (int1 <> hintedbutton) and (-(int1+3) <> hintedbutton) then begin
     if twidget1(awidget).getshowhint and ((info.eventkind = ek_mousepark) or 
@@ -398,7 +402,8 @@ begin
       if button = mb_left then begin
        updateshapemoveclick(infoarpo,false);
        exclude(state,shs_moveclick);
-       if not (shs_disabled in state) then begin
+       if not (shs_disabled in state) or 
+         (widget <> nil) and (csdesigning in widget.componentstate) then begin
         if state * [shs_clicked,shs_checkbox,shs_radiobutton] = 
                                       [shs_clicked,shs_checkbox] then begin
          setchecked(info,not (shs_checked in state),widget);
@@ -890,7 +895,7 @@ function drawbuttonframe(const canvas: tcanvas; const info: shapeinfoty;
 var
  level: integer;
  col1: colorty;
-// rect1: rectty;
+ rect1: rectty;
 begin
  result:= false;
  with canvas,info do begin
@@ -926,8 +931,8 @@ begin
     canvas.drawframe(clientrect,-1,cl_black);
     inflaterect1(clientrect,-1);
    end;
+   rect1:= clientrect;
    if (clientrect.cx > 0) and (clientrect.cy > 0) then begin
-    result:= true;
     col1:= color;
     if shs_active in state then begin
      col1:= coloractive;
@@ -939,110 +944,178 @@ begin
      face.paint(canvas,clientrect);
     end;
    end;
-  {
-   if (hiddenedge <> bedg_none) and not (shs_flat in state) then begin
-    rect1:= clientrect;
-    with rect1 do begin
-     case hiddenedge of
-      bedg_left: begin
-       x:= x - 1;
-       cx:= cx + 1
-      end;
-      bedg_top: begin
-       y:= y - 1;
-       cy:= cy + 1;
-      end;
-      bedg_right: begin
-       cx:= cx + 1;
-      end;
-      bedg_bottom: begin
-       cy:= cy + 1;
-      end;
-     end;
-    end;
-    draw3dframe(canvas,rect1,level,defaultframecolors.edges,[]);
-   end
-   else begin
-   }
-    draw3dframe(canvas,clientrect,level,defaultframecolors.edges,hiddenedges);
- //   draw3dframe(canvas,clientrect,level,defaultframecolors.edges,[]);
-   {
-   end;
-   inflaterect1(clientrect,-abs(level));
-   }
+   draw3dframe(canvas,rect1,level,defaultframecolors.edges,hiddenedges);
   end;
-  result:=(clientrect.cx > 0) and (clientrect.cy > 0);
+  inflaterect1(clientrect,-abs(level),hiddenedges);
+  result:= (clientrect.cx > 0) and (clientrect.cy > 0);
  end;
 end;
 
-function adjustimagerect(const info: captioninfoty; var arect: rectty;
-                              out aalign: alignmentsty): rectty;
+function adjustimagerect(const canvas: tcanvas; const info: captioninfoty;
+                         var arect: rectty; out aalign: alignmentsty): rectty;
 var
  pos: imageposty;
- int1,int2: integer; 
+ i1,i2: integer;
+ rect1,rect2: rectty;
 begin
  result:= arect;
  with info do begin
-  case imagepos of
-   ip_left,ip_leftcenter: begin
-    pos:= ip_left;
+  pos:= simpleimagepos[imagepos];
+  if pos in (vertimagepos) then begin
+   if result.cx < imagelist.width then begin
+    i1:= result.cx - imagelist.width;
+    if i1 < 0 then begin
+     dec(i1);
+    end;
    end;
-   ip_right,ip_rightcenter: begin
-    pos:= ip_right;
+   inc(result.x,imagedist1 + (i1 - imagedist1 - imagedist2) div 2);
+   result.cx:= imagelist.width;
+  end
+  else begin
+   i1:= result.cy - imagelist.height;
+   if i1 < 0 then begin
+    dec(i1);
    end;
-   ip_bottom,ip_bottomcenter: begin
-    pos:= ip_bottom;
-   end;
-   ip_top,ip_topcenter: begin
-    pos:= ip_top;
-   end
-   else begin
-    pos:= ip_center;
-   end;
-  end;
-  if not (pos in [ip_top,ip_bottom]) then begin
-   inc(result.y,imagedisttop + 
-    (result.cy - imagedisttop - imagedistbottom - imagelist.height) div 2);
+   inc(result.y,imagedist1 + (i1 - imagedist1 - imagedist2) div 2);
    result.cy:= imagelist.height;
   end;
+
   case pos of
    ip_right: begin
-    aalign:= [al_right{,al_ycentered}];
+    aalign:= [al_right];
+    case imagepos of
+     ip_righttop: begin
+      result.y:= arect.y + imagedist1;
+     end;
+     ip_rightbottom: begin
+      result.y:= arect.cy - imagedist2 - imagelist.height;
+     end;
+    end;
     dec(result.cx,imagedist);
    end;
    ip_left: begin
-    aalign:= [{al_ycentered}];
+    aalign:= [];
+    case imagepos of
+     ip_lefttop: begin
+      result.y:= arect.y + imagedist1;
+     end;
+     ip_leftbottom: begin
+      result.y:= arect.cy - imagedist2 - imagelist.height;
+     end;
+    end;
     inc(result.x,imagedist);
     dec(result.cx,imagedist);
    end;
    ip_bottom: begin
-    aalign:= [al_xcentered,al_bottom];
-    dec(result.cy,imagedist+imagedistbottom);
+    aalign:= [al_bottom];
+    case imagepos of
+     ip_bottomleft: begin
+      result.x:= arect.x + imagedist1;
+     end;
+     ip_bottomright: begin
+      result.x:= arect.cx - imagedist2 - imagelist.width;
+     end;
+    end;
+    dec(result.cy,imagedist);
    end;
    ip_top: begin
-    aalign:= [al_xcentered];
-    inc(result.y,imagedist+imagedistbottom);
+    aalign:= [];
+    case imagepos of
+     ip_topleft: begin
+      result.x:= arect.x + imagedist1;
+     end;
+     ip_topright: begin
+      result.x:= arect.cx - imagedist2 - imagelist.width;
+     end;
+    end;
+    inc(result.y,imagedist);
+    dec(result.cy,imagedist);
    end;
-   else begin
-    aalign:= [al_xcentered{,al_ycentered}];
+   ip_center: begin
+    aalign:= [al_xcentered,al_ycentered];
+    inc(result.x,imagedist);
+   end;
+   ip_centervert: begin
+    aalign:= [al_xcentered,al_ycentered];
+    inc(result.y,imagedist);
    end;
   end;
-  int1:= imagelist.width + imagedist;
-  int2:= imagelist.height + imagedist;
+  i1:= imagelist.width + imagedist;
+  i2:= imagelist.height + imagedist;
   case pos of
    ip_right: begin
-    dec(arect.cx,int1);
+    dec(arect.cx,i1);
    end;
    ip_left: begin
-    inc(arect.x,int1);
-    dec(arect.cx,int1);
+    inc(arect.x,i1);
+    dec(arect.cx,i1);
    end;
    ip_top: begin
-    inc(arect.y,int2);
-    dec(arect.cy,int2);
+    inc(arect.y,i2);
+    dec(arect.cy,i2);
    end;
    ip_bottom: begin
-    dec(arect.cy,int2);
+    dec(arect.cy,i2);
+   end;
+  end;
+  if (tf_glueimage in info.textflags) and 
+                          not (pos in [ip_center,ip_centervert]) then begin
+   rect1:= arect;
+   if pos in (vertimagepos) then begin
+    rect1.cy:= rect1.cy - captiondist;
+    rect2:= textrect(canvas,caption,rect1,textflags,font);
+    i1:= rect1.cy - rect2.cy;
+    if i1 > 0 then begin
+     if tf_ycentered in textflags then begin
+      i1:= i1 div 2;
+      if pos in bottomimagepos then begin
+       result.y:= result.y - i1;
+      end
+      else begin
+       result.y:= result.y + i1;
+      end;
+     end
+     else begin
+      if tf_bottom in textflags then begin
+       if not (pos in bottomimagepos) then begin
+        result.y:= result.y + i1 - imagedist;
+       end;
+      end
+      else begin
+       if pos in bottomimagepos then begin
+        result.y:= result.y - i1 + imagedist;
+       end;
+      end;
+     end;
+    end;
+   end
+   else begin
+    rect1.cx:= rect1.cx - captiondist;
+    rect2:= textrect(canvas,caption,rect1,textflags,font);
+    i1:= rect1.cx - rect2.cx;
+    if i1 > 0 then begin
+     if tf_xcentered in textflags then begin
+      i1:= i1 div 2;
+      if pos in rightimagepos then begin
+       result.x:= result.x - i1;
+      end
+      else begin
+       result.x:= result.x + i1;
+      end;
+     end
+     else begin
+      if tf_right in textflags then begin
+       if not (pos in rightimagepos) then begin
+        result.x:= result.x + i1 - imagedist;
+       end;
+      end
+      else begin
+       if pos in rightimagepos then begin
+        result.x:= result.x - i1 + imagedist;
+       end;
+      end;
+     end;
+    end;
    end;
   end;
  end;
@@ -1063,7 +1136,7 @@ begin
    reg1:= canvas.copyclipregion;
    canvas.intersectcliprect(arect);
    result:= true;
-   rect1:= adjustimagerect(info.ca,arect,align1);
+   rect1:= adjustimagerect(canvas,info.ca,arect,align1);
    if shs_disabled in state then begin
     int1:= imagenrdisabled;
     if int1 = -2 then begin
@@ -1110,51 +1183,43 @@ begin
   tab1:= nil;
   if ca.caption.text <> '' then begin
    rect1:= arect;
+   textflags:= ca.textflags + [tf_clipi];
    case pos of
-    ip_left,ip_leftcenter: begin
-//     textflags:= [tf_ycentered,tf_clipi];
-     inc(rect1.x,ca.captiondist);
-     dec(rect1.cx,ca.captiondist);
+    ip_left,ip_lefttop,ip_leftbottom: begin
+     if tf_right in textflags then begin
+      dec(rect1.x,ca.captiondist);
+     end
+     else begin
+      inc(rect1.x,ca.captiondist);
+      dec(rect1.cx,ca.captiondist);
+     end;
      if countchars(ca.caption.text,msechar(c_tab)) = 1 then begin
       tab1:= buttontab;
       tab1[0].pos:= info.tabpos / defaultppmm;
      end;
     end;
-    ip_right,ip_rightcenter: begin
-//     textflags:= [tf_ycentered,tf_right,tf_clipi];
+    ip_right,ip_righttop,ip_rightbottom: begin
+     if textflags * [tf_right,tf_xcentered] = [] then begin
+      inc(rect1.x,ca.captiondist);
+     end;
      dec(rect1.cx,ca.captiondist);
     end;
-    ip_top,ip_topcenter: begin
-//     textflags:= [tf_xcentered,tf_clipi];
-     inc(rect1.y,ca.captiondist);
+    ip_top,ip_topleft,ip_topright: begin
+     if tf_bottom in textflags then begin
+      dec(rect1.y,ca.captiondist);
+     end
+     else begin
+      inc(rect1.y,ca.captiondist);
+      dec(rect1.cy,ca.captiondist);
+     end;
+    end;
+    ip_bottom,ip_bottomleft,ip_bottomright: begin
+     if textflags * [tf_bottom,tf_ycentered] = [] then begin
+      inc(rect1.y,ca.captiondist);
+     end;
      dec(rect1.cy,ca.captiondist);
     end;
-    ip_bottom,ip_bottomcenter: begin
-//     textflags:= [tf_xcentered,tf_bottom,tf_clipi];
-     dec(rect1.cy,ca.captiondist);
-    end;
-//    else begin
-//     textflags:= [tf_ycentered,tf_xcentered,tf_clipi];
-//    end;
    end;
-{
-   if pos in [ip_leftcenter,ip_rightcenter] then begin
-    include(textflags,tf_xcentered);
-    exclude(textflags,tf_right);
-   end
-   else begin
-    if pos in [ip_bottomcenter,ip_topcenter] then begin
-     include(textflags,tf_ycentered);
-     exclude(textflags,tf_bottom);
-    end;
-   end;
-}
-//   if tf_forcealignment in ca.textflags then begin
-    textflags:= ca.textflags + [tf_clipi];
-//   end
-//   else begin
-//    textflags:= textflags + (ca.textflags - textalignments);
-//   end;
    if shs_disabled in state then begin
     include(textflags,tf_grayed);
    end;
@@ -1199,24 +1264,24 @@ begin
  with ainfo do begin
   rect2:= ainfo.dim;
   if ainfo.imagelist <> nil then begin
-   rect1:= adjustimagerect(ainfo,rect2,align1);
+   rect1:= adjustimagerect(acanvas,ainfo,rect2,align1);
    if colorglyph <> cl_none then begin
     imagelist.paint(acanvas,imagenr,rect1,align1,colorglyph);
    end;
   end;
   case imagepos of
-   ip_left,ip_leftcenter: begin
+   ip_left{,ip_leftcenter}: begin
     inc(rect2.x,captiondist);
     dec(rect2.cx,captiondist);
    end;
-   ip_right,ip_rightcenter: begin
+   ip_right{,ip_rightcenter}: begin
     dec(rect2.cx,captiondist);
    end;
-   ip_top,ip_topcenter: begin
+   ip_top{,ip_topcenter}: begin
     inc(rect2.y,captiondist);
     dec(rect2.cy,captiondist);
    end;
-   ip_bottom,ip_bottomcenter: begin
+   ip_bottom{,ip_bottomcenter}: begin
     dec(rect2.cy,captiondist);
    end;
   end;
@@ -1228,6 +1293,60 @@ begin
   drawtext(acanvas,info1);
   captionclipped:= (info1.res.cx > rect2.cx) or (info1.res.cy > rect2.cy);
   //drawtext(acanvas,caption,rect2,textflags,font);
+ end;
+end;
+
+function calccaptionsize(const acanvas: tcanvas;
+                                        const ainfo: captioninfoty): sizety;
+var
+ int1: integer;
+ vertdist: boolean;
+begin
+ with ainfo do begin
+  result:= textrect(acanvas,caption,textflags,font).size;
+  vertdist:= imagepos in vertimagepos;
+  if vertdist then begin
+   inc(result.cy,captiondist);
+  end
+  else begin  
+   inc(result.cx,captiondist);
+  end;
+  if imagelist <> nil then begin
+   with imagelist do begin
+    if vertdist then begin
+     int1:= width  + imagedist1 + imagedist2;
+     if int1 > result.cx then begin
+      result.cx:= int1;
+     end;
+     int1:= height + imagedist;
+     if imagepos = ip_centervert then begin
+      int1:= int1 + imagedist;
+      if int1 > result.cx then begin
+       result.cy:= int1;
+      end;
+     end
+     else begin
+      result.cy:= result.cy + int1;
+     end;
+    end
+    else begin
+     int1:= height  + imagedist1 + imagedist2;
+     if int1 > result.cy then begin
+      result.cy:= int1;
+     end;
+     int1:= width + imagedist;
+     if imagepos = ip_center then begin
+      int1:= int1 + imagedist;
+      if int1 > result.cx then begin
+       result.cx:= int1;
+      end;
+     end
+     else begin
+      result.cx:= result.cx + int1;
+     end;
+    end;
+   end;
+  end;
  end;
 end;
 

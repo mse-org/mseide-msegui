@@ -99,6 +99,7 @@ type
    procedure insguiexec(const sender: TObject);
    procedure convpasex(const sender: TObject);
    procedure insuidexec(const sender: TObject);
+   procedure stephintev(const sender: TObject; var info: hintinfoty);
   private
    fasking: boolean;
    fgdbpage: tsourcepage;
@@ -1153,7 +1154,7 @@ end;
 
 function tsourcefo.closepage(const aname: filenamety): boolean;
 begin
- result:= closepage(findsourcepage(aname));
+ result:= closepage(findsourcepage(aname,true,true));
 end;
 
 function tsourcefo.closeactivepage: boolean;
@@ -1359,8 +1360,8 @@ begin
         (activepage <> nil) and (popuprow >= 0);
  sender.menu.itembyname('insgui').enabled:= (activepage <> nil);
  sender.menu.itembyname('insuid').enabled:= (activepage <> nil);
- sender.menu.itembyname('convpas').enabled:= (activepage <> nil) and 
-                                                  activepage.edit.hasselection;
+ sender.menu.itembynames(['modifyselection','convpas']).enabled:=
+                      (activepage <> nil) and activepage.edit.hasselection;
  sender.menu.itembyname('addwatch').enabled:= (activepage <> nil) and  
             (sender.mouseinfopo <> nil) and
               (getpascalvarname(activepage.edit,
@@ -1455,7 +1456,7 @@ var
  str1: string[4];
  str2: string;
 begin
- id1:= projectoptions.o.uid;
+ id1:= projectoptions.k.uid;
  if integerenter(id1,minint,maxint,'ID','Enter ID') = mr_ok then begin
   for int1:= 0 to 3 do begin
    str1[int1+1]:= char(bitreverse[byte(
@@ -1479,7 +1480,7 @@ begin
   with activepage.edit do begin
    inserttext(editpos,'['''+msestring(str2)+''']{'+inttostrmse(id1)+'}');
   end;
-  projectoptions.o.uid:= id1+1;
+  projectoptions.k.uid:= id1+1;
  end;
 end;
 
@@ -1558,6 +1559,12 @@ begin
    result:= getpascalvarname(edit,edit.editpos,gridcoord1);
   end;
  end;
+end;
+
+procedure tsourcefo.stephintev(const sender: TObject; var info: hintinfoty);
+begin
+ info.caption:= info.caption + '('+
+      encodeshortcutname(tstockglyphbutton(sender).shortcut)+').';
 end;
 
 end.

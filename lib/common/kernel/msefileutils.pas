@@ -106,6 +106,7 @@ type
 function quotefilename(const name: filenamety): filenamety; overload;
 function quotefilename(const directory,name: filenamety): filenamety; overload;
 function quotefilename(const names: filenamearty): filenamety; overload;
+function quotefilename(const names: array of filenamety): filenamety; overload;
 procedure unquotefilename(const names: filenamety; 
                                var result: filenamearty); overload;
 function unquotefilename(const name: filenamety): filenamety; overload;
@@ -230,10 +231,15 @@ function dirhasentries(const adirname: filenamety;
                          const ainclude: fileattributesty = [fa_all];
                          const aexclude: fileattributesty = []): boolean;
 
-function findfile(const filename: filenamety;
+function findfile(filename: filenamety; //no const bcause of var path param
                              const dirnames: array of filenamety;
-                             out path: filenamety): boolean; overload;
-            //true if found
+                             var path: filenamety): boolean; overload;
+                               //no out because of caller side finalization
+                               //true if found, path not touched if not found
+function findfile(filename: filenamety; //no const bcause of var path param
+                             var path: filenamety): boolean; overload;
+                               //no out because of caller side finalization
+                               //true if found, path not touched if not found
 function findfile(const filename: filenamety; const dirnames:
                          array of filenamety): boolean; overload;
 function findfile(const filename: filenamety): boolean; overload;
@@ -260,6 +266,11 @@ procedure createdir(const path: filenamety;
                                  const rights: filerightsty = defaultdirrights);
 procedure createdirpath(const path: filenamety; 
                                  const rights: filerightsty = defaultdirrights);
+function deletedir(const path: filenamety): boolean; 
+           //deletes files and directories recursively, false if not existing
+function trydeletedir(const path: filenamety): boolean; 
+     //deletes files and directories recursively,
+     // false if not existing or not deleted
 function getcurrentdir: filenamety; deprecated;
 function getcurrentdirmse: filenamety;
 function setcurrentdir(const path: filenamety): filenamety; deprecated;
@@ -460,6 +471,47 @@ function trydeletefile(const filename: filenamety): boolean;
                       //false if not existing or not deleted
 begin
  result:= sys_deletefile(filename) = sye_ok;
+end;
+
+function deletefilesanddir(const path: filenamety): syserrorty;
+var
+ ar1: filenamearty;
+ i1: int32;
+begin
+ ar1:= searchfilenames('',path,[fa_all],[fa_dir]);
+ for i1:= 0 to high(ar1) do begin
+  result:= sys_deletefile(path+'/'+ar1[i1]);
+  if result <> sye_ok then begin
+   exit;
+  end;
+ end;
+ ar1:= searchfilenames('',path,[fa_dir]);
+ for i1:= 0 to high(ar1) do begin
+  result:= deletefilesanddir(path+'/'+ar1[i1]);
+  if result <> sye_ok then begin
+   exit;
+  end;
+ end;
+ result:= sys_deletedir(path);
+end;
+
+function deletedir(const path: filenamety): boolean; 
+           //deletes files and directories recursively, false if not existing
+var
+ err: syserrorty;
+begin
+ err:= deletefilesanddir(path);
+ result:= err = sye_ok;
+ if not result and finddir(path) then begin
+  syserror(err,'Can not delete dir "'+path+'". ');
+ end;
+end;
+
+function trydeletedir(const path: filenamety): boolean; 
+     //deletes files and directories recursively,
+     // false if not existing or not deleted
+begin
+ result:= deletefilesanddir(path) = sye_ok;
 end;
 
 procedure createdir(const path: filenamety; 
@@ -1061,15 +1113,32 @@ begin
  end;
 end;
 
-function findfile(const filename: filenamety; 
-           const dirnames: array of filenamety; out path: filenamety): boolean;
-            //true if found
-//var
-// str1: filenamety;
+function findfile(filename: filenamety;
+           const dirnames: array of filenamety; var path: filenamety): boolean;
+                               //true if found, path not touched if not found
+var
+ fna1: filenamety;
 begin
- path:= searchfile(filename,dirnames);
- if path <> '' then begin
-  path:= path + msefileutils.filename(filename);
+ fna1:= searchfile(filename,dirnames);
+ if fna1 <> '' then begin
+  path:= fna1 + msefileutils.filename(filename);
+  result:= true;
+ end
+ else begin
+  result:= false;
+ end;
+end;
+
+function findfile(filename: filenamety; //no const bcause of var path param
+                             var path: filenamety): boolean;
+                               //no out because of caller side finalization
+                               //true if found, path not touched if not found
+var
+ fna1: filenamety;
+begin
+ fna1:= searchfile(filename);
+ if fna1 <> '' then begin
+  path:= fna1 + msefileutils.filename(filename);
   result:= true;
  end
  else begin
@@ -1135,6 +1204,11 @@ begin
    setlength(result,length(result)-1);
   end;
  end;
+end;
+
+function quotefilename(const names: array of filenamety): filenamety; overload;
+begin
+ result:= quotefilename(opentodynarraym(names));
 end;
 
 function quotefilename(const directory,name: filenamety): filenamety;

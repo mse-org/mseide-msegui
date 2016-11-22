@@ -1,4 +1,4 @@
-{ MSEide Copyright (c) 1999-2014 by Martin Schreiber
+{ MSEide Copyright (c) 1999-2016 by Martin Schreiber
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -140,22 +140,16 @@ type
    function getvalue: msestring; override;
  end;
 }
- tsqlmacroseditor = class(tpersistentarraypropertyeditor)
-  protected
-//   function geteditorclass: propertyeditorclassty; override;
-   function itemgetvalue(const sender: tarrayelementeditor): msestring; 
-                                                                  override;
- end;
 
 implementation
 uses
  {$ifdef FPC}dbconst{$else} dbconst_del,classes_del{$endif},mdb,
- mseibconnection,msefbservice,
+ mseibconnection,msefbconnection,msefbservice,
  msepqconnection,mseodbcconn,{sqldb,}
  mselookupbuffer,mselocaldataset,
  msearrayutils,msedbfieldeditor,sysutils,msetexteditor,
  msedbdispwidgets,msedbgraphics,regdb_bmp,msedbdialog,msegrids,
- msedbcalendardatetimeedit,
+ msedbcalendardatetimeedit,msemacros,
  regwidgets,msebufdataset,msedbevents,msesqlite3conn,msqldb,msemysqlconn,
  msedblookup;
 
@@ -342,11 +336,18 @@ type
    function getinvisibleitems: tintegerset; override;
   public
  end;
+ 
+ tsqlresconncolnamepropertyeditor = class(tstringpropertyeditor)
+  protected
+   function getdefaultstate: propertystatesty; override;
+  public
+   function getvalues: msestringarty; override;
+ end;
 
 procedure Register;
 begin
  registercomponents('DB',[     
-      tmseibconnection,tfbservice,
+      tmseibconnection,tfbservice,tfbconnection,
       tmsepqconnection,tsqlite3connection,tmseodbcconnection,
       tmsemysqlconnection,
       
@@ -423,6 +424,7 @@ begin
       tdbbarcode
       ]);
  registercomponenttabhints(['DBf'],['Datafield and data display components']);
+ registerunitgroup(['msesqldb'],['msebufdataset']);
 
  registerpropertyeditor(typeinfo(tdatalink),nil,'',tdatalinkpropertyeditor);
  registerpropertyeditor(typeinfo(tfielddatalink),nil,'',
@@ -516,7 +518,9 @@ begin
  registerpropertyeditor(typeinfo(boolean),tdataset,'Active',
                                          tdatasetactivepropertyeditor);                              
  registerpropertyeditor(typeinfo(boolean),tsqlresult,'active',
-                                         tdatasetactivepropertyeditor);                              
+                                         tdatasetactivepropertyeditor);
+ registerpropertyeditor(typeinfo(string),tsqlresultconnector,'colname',
+                                            tsqlresconncolnamepropertyeditor);
  registerpropertyeditor(typeinfo(tfielddef),nil,'',tfielddefpropertyeditor);
  registerpropertyeditor(typeinfo(tparam),nil,'',tdbparampropertyeditor);
  registerpropertyeditor(typeinfo(tmseparam),nil,'',tmseparampropertyeditor);
@@ -533,8 +537,6 @@ begin
                      tlbdropdowncolseditor);
  registerpropertyeditor(typeinfo(tdbdropdowncols),nil,'',
                      tdbdropdowncolseditor);
- registerpropertyeditor(typeinfo(tmacroproperty),nil,'',
-                                    tsqlmacroseditor);
 end;
 
 
@@ -1623,16 +1625,6 @@ begin
  end;
 end;
 }
-{ tsqlmacroseditor }
-
-function tsqlmacroseditor.itemgetvalue(
-                     const sender: tarrayelementeditor): msestring;
-begin
- with tsqlmacroitem(tarrayelementeditor1(sender).getpointervalue) do begin
-  result:= '<'+name+'>';
- end;
-end;
-
 {
 function tsqlmacroseditor.geteditorclass: propertyeditorclassty;
 begin
@@ -1683,17 +1675,8 @@ end;
 { tdatasetoptionspropertyeditor }
 
 function tdatasetoptionspropertyeditor.getinvisibleitems: tintegerset;
-{$ifndef FPC}
-const
- mask1: datasetoptionsty = [dso_refreshwaitcursor];
-{$endif}
 begin
- result:= tintegerset(
-     {$ifdef FPC}
-        longword([dso_refreshwaitcursor])
-     {$else}
-        mask1
-     {$endif});
+ result:= tintegerset(card32([dso_refreshwaitcursor]+deprecatedbdsoptions));
 end;
 
 { tdatalinkpropertyeditor }
@@ -1721,6 +1704,35 @@ begin
  result:= inherited getvalue();
  if inst.fieldname <> '' then begin
   result:= '<'+msestring(inst.fieldname)+'>'+result;
+ end;
+end;
+
+{ tsqlresconncolnamepropertyeditor }
+
+function tsqlresconncolnamepropertyeditor.getdefaultstate: propertystatesty;
+begin
+ result:= inherited getdefaultstate;
+ with tsqlresultconnector(fcomponent) do begin
+  if source <> nil then begin
+   result:= result + [ps_valuelist,ps_sortlist];
+  end;
+ end;
+end;
+
+function tsqlresconncolnamepropertyeditor.getvalues: msestringarty;
+var
+ i1: int32;
+begin
+ result:= nil;
+ with tsqlresultconnector(fcomponent) do begin
+  if source <> nil then begin
+   with source do begin
+    setlength(result,fielddefs.count);
+    for i1:= 0 to high(result) do begin
+     result[i1]:= msestring(fielddefs[i1].name);
+    end;
+   end;
+  end;
  end;
 end;
 

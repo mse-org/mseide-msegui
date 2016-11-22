@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2015 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2016 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -18,9 +18,9 @@ unit mseforms;
 interface
 uses
  msewidgets,msemenus,msegraphics,mseapplication,msegui,msegraphutils,mseevent,
- msetypes,msestrings,mseglob,mseguiglob,mseguiintf,msedragglob,
+ msetypes,msestrings,mseglob,mseguiglob,mseguiintf,msedragglob,msepointer,
  msemenuwidgets,msestat,msestatfile,mseclasses,classes,mclasses,msedock,
- msesimplewidgets,msebitmap,typinfo,msesplitter
+ msesimplewidgets,msebitmap,typinfo,msesplitter,mseobjectpicker
  {$ifdef mse_with_ifi},mseifiglob,mseificompglob,mseificomp{$endif};
 
 {$if defined(FPC) and (fpc_fullversion >= 020403)}
@@ -31,6 +31,7 @@ type
  formoptionty = (fo_main,fo_terminateonclose,fo_freeonclose,
                fo_windowclosecancel,
                fo_defaultpos,fo_screencentered,fo_screencenteredvirt,
+               fo_transientforcentered,fo_mainwindowcentered,
                fo_modal,fo_createmodal,
                fo_minimized,fo_maximized,fo_fullscreen,fo_fullscreenvirt,
                fo_closeonesc,fo_cancelonesc,fo_closeonenter,fo_closeonf10,
@@ -94,7 +95,9 @@ type
 
  formstatety = (fos_statreading);
  formstatesty = set of formstatety;
-                              
+ optionsizingty = (osi_left,osi_top,osi_right,osi_bottom);
+ optionssizingty = set of optionsizingty;
+                               
  tcustommseform = class(tcustomeventwidget,istatfile,idockcontroller
                                  {$ifdef mse_with_ifi},iififormlink{$endif})
   private
@@ -133,6 +136,7 @@ type
    ficonchanging: integer;
    fonsysevent: syseventeventty;
    fonsyswindowevent: syseventeventty;
+   fonapplicationevent: applicationeventeventty;
    factivatortarget: tactivator;
    fstatpriority: integer;
 {$ifdef mse_with_ifi}
@@ -157,8 +161,9 @@ type
    procedure seticon(const avalue: tmaskedbitmap);
    procedure registerhandlers;
    procedure unregisterhandlers;
-   procedure setsyseventty(const avalue: syseventeventty);
-   procedure setsyswindoweventty(const avalue: syseventeventty);
+   procedure setonsysevent(const avalue: syseventeventty);
+   procedure setonsyswindowevent(const avalue: syseventeventty);
+   procedure setonapplicationevent(const avalue: applicationeventeventty);
    procedure readonchildscaled(reader: treader);
    procedure setactivatortarget(const avalue: tactivator);
   protected
@@ -200,10 +205,14 @@ type
    procedure doapplicationactivechanged(const avalue: boolean); virtual;
    procedure dosysevent(const awindow: winidty; var aevent: syseventty;
                             var handled: boolean); virtual;
-   procedure objectevent(const sender: tobject; const event: objecteventty); override;
+   procedure doapplicationevent(var aevent: tmseevent; 
+                                       var handled: boolean) virtual;
+   procedure objectevent(const sender: tobject; 
+                                       const event: objecteventty); override;
    procedure receiveevent(const event: tobjectevent); override;
    procedure dokeydown(var info: keyeventinfoty); override;
-   procedure doshortcut(var info: keyeventinfoty; const sender: twidget); override;
+   procedure doshortcut(var info: keyeventinfoty;
+                                       const sender: twidget); override;
    procedure windowcreated; override;
    procedure dofontheightdelta(var delta: integer); override;
    procedure widgetregionchanged(const sender: twidget); override;
@@ -233,6 +242,7 @@ type
 
    procedure updatelayout(const sender: twidget); virtual; 
                                //called from scrollbox.dolayout
+
    //iificommand
    {$ifdef mse_with_ifi}
    procedure executeificommand(var acommand: ificommandcodety); override;
@@ -294,14 +304,19 @@ type
    property onterminated: notifyeventty read fonterminated 
                  write fonterminated;
 
-   property onbeforepaint: painteventty read getonbeforepaint write setonbeforepaint;
+   property onbeforepaint: painteventty read getonbeforepaint
+                                                        write setonbeforepaint;
    property onpaint: painteventty read getonpaint write setonpaint;
-   property onafterpaint: painteventty read getonafterpaint write setonafterpaint;
+   property onafterpaint: painteventty read getonafterpaint 
+                                                          write setonafterpaint;
 
-   property onstatupdate: statupdateeventty read fonstatupdate write fonstatupdate;
+   property onstatupdate: statupdateeventty read fonstatupdate 
+                                                           write fonstatupdate;
    property onstatread: statreadeventty read fonstatread write fonstatread;
-   property onstatbeforeread: notifyeventty read fonstatbeforeread write fonstatbeforeread;
-   property onstatafterread: notifyeventty read fonstatafterread write fonstatafterread;
+   property onstatbeforeread: notifyeventty read fonstatbeforeread 
+                                                       write fonstatbeforeread;
+   property onstatafterread: notifyeventty read fonstatafterread 
+                                                       write fonstatafterread;
    property onstatwrite: statwriteeventty read fonstatwrite write fonstatwrite;
    property onstatbeforewrite: notifyeventty read fonstatbeforewrite 
                                                write fonstatbeforewrite;
@@ -312,16 +327,19 @@ type
                      read fonwidgetactivechanged write fonwidgetactivechanged;
    property onwindowactivechanged: windowchangeeventty 
                       read fonwindowactivechanged write fonwindowactivechanged;
-   property onwindowdestroyed: windoweventty read fonwindowdestroyed write fonwindowdestroyed;
+   property onwindowdestroyed: windoweventty read fonwindowdestroyed 
+                                                      write fonwindowdestroyed;
    property onapplicationactivechanged: booleaneventty 
-                   read fonapplicationactivechanged write fonapplicationactivechanged;
+            read fonapplicationactivechanged write fonapplicationactivechanged;
 
    property onfontheightdelta: fontheightdeltaeventty read fonfontheightdelta
                      write fonfontheightdelta;
    property onlayout: notifyeventty read getonlayout write setonlayout;
-   property onsysevent: syseventeventty read fonsysevent write setsyseventty;
+   property onsysevent: syseventeventty read fonsysevent write setonsysevent;
    property onsyswindowevent: syseventeventty read fonsyswindowevent 
-                                         write setsyswindoweventty;
+                                         write setonsyswindowevent;
+   property onapplicationevent: applicationeventeventty
+                         read fonapplicationevent write setonapplicationevent;
   published
    property container: tformscrollbox read fscrollbox write setscrollbox;
 {$ifdef mse_with_ifi}
@@ -404,6 +422,7 @@ type
    
    property onsysevent;
    property onsyswindowevent;
+   property onapplicationevent;
  end;
 
  tmseform = class(tmseformwidget)
@@ -413,7 +432,7 @@ type
   public
    constructor create(aowner: tcomponent; load: boolean); override;
  end;
-
+ 
  tmainform = class(tmseform)
   protected
    class function getmoduleclassname: string; override;
@@ -605,7 +624,7 @@ type
  end;
  
  scrollboxformclassty = class of tscrollboxform;
- 
+
 function createmseform(const aclass: tclass; 
                    const aclassname: pshortstring): tmsecomponent;
 function createmainform(const aclass: tclass; 
@@ -633,6 +652,7 @@ type
  twindow1 = class(twindow);
  tcustomframe1 = class(tcustomframe);
  treader1 = class(treader);
+ tframemenuwidget1 = class(tframemenuwidget);
 
 
 function createmseform(const aclass: tclass; 
@@ -960,6 +980,10 @@ begin
             (assigned(fonsysevent) or assigned(fonsyswindowevent)) then begin
   application.unregistersyseventhandler({$ifdef FPC}@{$endif}dosysevent);
  end;
+ if not (csdesigning in componentstate) and 
+                                 assigned(fonapplicationevent) then begin
+  application.unregisterapplicationeventhandler(@doapplicationevent);
+ end;
 end;
 
 procedure tcustommseform.registerhandlers;
@@ -1017,7 +1041,9 @@ begin
  end;
  inherited;
  if fmainmenuwidget <> nil then begin
-  fmainmenuwidget.loaded;
+  fmainmenuwidget.visible:= true;
+//  fmainmenuwidget.loaded;
+//  include(tframemenuwidget1(fmainmenuwidget).fwidgetstate,ws_visible);
  end;
  updateoptions;
  updatemainmenutemplates;
@@ -1372,9 +1398,12 @@ end;
 procedure tcustommseform.setoptions(const Value: formoptionsty);
 {$ifndef FPC}
 const
- mask1: formoptionsty = [fo_screencentered,fo_screencenteredvirt,fo_defaultpos];
+ mask1: formoptionsty = [fo_screencentered,fo_screencenteredvirt,
+                         fo_transientforcentered,fo_mainwindowcentered,
+                         fo_defaultpos];
  mask2: formoptionsty = [fo_closeonesc,fo_cancelonesc];
- mask3: formoptionsty = [fo_maximized,fo_minimized,fo_fullscreen,fo_fullscreenvirt];
+ mask3: formoptionsty = [fo_maximized,fo_minimized,fo_fullscreen,
+                         fo_fullscreenvirt];
  mask4: formoptionsty = [fo_modal,fo_createmodal];
 {$endif}
 //var
@@ -1383,7 +1412,8 @@ begin
  if foptions <> value then begin
  {$ifdef FPC}
   foptions:= formoptionsty(setsinglebit(longword(value),longword(foptions),
-   [longword([fo_screencentered,fo_screencenteredvirt,fo_defaultpos]),
+   [longword([fo_screencentered,fo_screencenteredvirt,
+              fo_transientforcentered,fo_mainwindowcentered,fo_defaultpos]),
     longword([fo_closeonesc,fo_cancelonesc]),
     longword([fo_maximized,fo_minimized,fo_fullscreen,fo_fullscreenvirt]),
     longword([fo_modal,fo_createmodal])
@@ -1443,8 +1473,18 @@ begin
       fwindow.windowpos:= wp_screencentered;
      end
      else begin
-      if fo_defaultpos in foptions then begin
-       fwindow.windowpos:= wp_default;
+      if fo_transientforcentered in foptions then begin
+       fwindow.windowpos:= wp_transientforcentered;
+      end
+      else begin
+       if fo_mainwindowcentered in foptions then begin
+        fwindow.windowpos:= wp_mainwindowcentered;
+       end
+       else begin
+        if fo_defaultpos in foptions then begin
+         fwindow.windowpos:= wp_default;
+        end;
+       end;
       end;
      end;
     end;
@@ -1950,7 +1990,7 @@ begin
  end;
 end;
 
-procedure tcustommseform.setsyseventty(const avalue: syseventeventty);
+procedure tcustommseform.setonsysevent(const avalue: syseventeventty);
 begin
  if not (csdesigning in componentstate) then begin
   if assigned(avalue) then begin
@@ -1967,7 +2007,7 @@ begin
  fonsysevent:= avalue;
 end;
 
-procedure tcustommseform.setsyswindoweventty(const avalue: syseventeventty);
+procedure tcustommseform.setonsyswindowevent(const avalue: syseventeventty);
 begin
  if not (csdesigning in componentstate) then begin
   if assigned(avalue) then begin
@@ -1984,6 +2024,24 @@ begin
  fonsyswindowevent:= avalue;
 end;
 
+procedure tcustommseform.setonapplicationevent(
+                                const avalue: applicationeventeventty);
+begin
+ if not (csdesigning in componentstate) then begin
+  if assigned(avalue) then begin
+   if not assigned(fonapplicationevent) then begin
+    application.registerapplicationeventhandler(@doapplicationevent);
+   end;
+  end
+  else begin
+   if assigned(fonapplicationevent) then begin
+    application.unregisterapplicationeventhandler(@doapplicationevent);
+   end;
+  end;
+ end;
+ fonapplicationevent:= avalue;
+end;
+
 procedure tcustommseform.dosysevent(const awindow: winidty;
                var aevent: syseventty; var handled: boolean);
 begin
@@ -1993,6 +2051,14 @@ begin
  if assigned(fonsyswindowevent) and not handled and 
          (awindow <> 0) and (twindow1(window).fwindow.id = awindow) then begin
   fonsyswindowevent(self,aevent,handled);
+ end;
+end;
+
+procedure tcustommseform.doapplicationevent(var aevent: tmseevent;
+               var handled: boolean);
+begin
+ if assigned(fonapplicationevent) then begin
+  fonapplicationevent(self,aevent,handled);
  end;
 end;
 

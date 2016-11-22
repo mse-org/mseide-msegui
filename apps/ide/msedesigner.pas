@@ -5047,7 +5047,7 @@ var
  stream2: tbufstream;
  info: fileinfoty; 
 begin
- if createdatafile and projectoptions.o.checkmethods 
+ if createdatafile and projectoptions.s.checkmethods 
                        and not checkmethodtypes(modulepo,false{,nil}) then begin
   result:= false;
   exit;
@@ -5112,7 +5112,7 @@ begin
  for int1:= 0 to modules.count - 1 do begin
   po1:= modules[int1];
   with po1^ do begin
-   if not modified and projectoptions.o.checkmethods then begin
+   if not modified and projectoptions.s.checkmethods then begin
     if not checkmethodtypes(po1,false{,nil}) then begin
      result:= mr_cancel;
      exit;

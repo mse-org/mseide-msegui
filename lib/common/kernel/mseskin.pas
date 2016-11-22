@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 2008-2014 by Martin Schreiber
+{ MSEgui Copyright (c) 2008-2016 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -12,7 +12,7 @@ unit mseskin;
 interface
 uses
  classes,mclasses,mseclasses,msegui,msescrollbar,mseedit,
- msegraphics,msegraphutils,msebitmap,
+ msegraphics,msegraphutils,msebitmap,msestockobjects,
  msetabs,msetoolbar,msedataedits,msemenus,msearrayprops,msegraphedits,
  msesimplewidgets,
  msegrids,msewidgets,msetypes,mseglob,msestrings,msedrawtext,mseguiglob;
@@ -20,7 +20,11 @@ uses
 type
  scrollbarskininfoty = record
   svcolorpattern: colorty;
+  svcolorpatternclicked: colorty;
   svcolorglyph: colorty;
+  svface: tfacecomp;
+  svface1: tfacecomp;
+  svface2: tfacecomp;
   svfacebu: tfacecomp;
   svfaceendbu: tfacecomp;
   svframebu: tframecomp;
@@ -51,9 +55,10 @@ type
 //  face: tfacecomp;
 //  frame: tframecomp;
   svbuttonface: tfacecomp;
+  svbuttonfacechecked: tfacecomp;
   svbuttonframe: tframecomp;
-  svbuttonframesephorz: tframecomp;
-  svbuttonframesepvert: tframecomp;
+  svbuttonframechecked: tframecomp;
+  svbuttonframesep: tframecomp;
  end;
  gridpropskininfoty = record
   svface: tfacecomp;
@@ -141,11 +146,15 @@ type
   svmain: menuskininfoty;
   svpopup: menuskininfoty;
  end;
+ mainmenuwidgetskininfoty = record
+  svwidget: widgetskininfoty;
+  svmenu: mainmenuskininfoty;
+ end;
  dispwidgetskininfoty = record
   svwidget: widgetskininfoty;
   svcolor: widgetcolorinfoty;
  end;
- dataeditskininfoty = record
+ editskininfoty = record
   svwidget: widgetskininfoty;
   svempty_text: msestring;
   svempty_textflags: textflagsty;
@@ -154,11 +163,24 @@ type
   svempty_fontstyle: fontstylesty;
   svempty_color: colorty;
  end;
- booleaneditskininfoty = record
+ dataeditskininfoty = record
+  svedit: editskininfoty;
+ end;
+ graphdataeditskininfoty = record
   svwidget: widgetskininfoty;
+ end;
+ booleaneditskininfoty = record
+  svgraphdataedit: graphdataeditskininfoty;
   svoptionsadd: buttonoptionsty;
   svoptionsremove: buttonoptionsty;
  end;
+ splitterskininfoty = record
+  svwidget: widgetskininfoty;
+  svcolor: widgetcolorinfoty;
+  svcolorgrip: colorty;
+  svgrip: stockbitmapty;
+ end;
+
  
  tskincolor = class(tvirtualpersistent)
   private
@@ -242,7 +264,7 @@ type
  tskinfontaliass = class(townedpersistentarrayprop)   
   public
    constructor create(const aowner: tcustomskincontroller); reintroduce;
-//   class function getitemclasstype: persistentclassty; override;
+   class function getitemclasstype: persistentclassty; override;
    procedure setfontalias;
  end;
 
@@ -401,10 +423,12 @@ type
                                const ainfo: gridpropskininfoty);
    procedure setgridskin(const instance: tcustomgrid;
                                             const ainfo: gridskininfoty);
+   procedure seteditskin(const instance: tcustomedit;
+                                            const ainfo: editskininfoty);
    procedure setdataeditskin(const instance: tdataedit;
                                             const ainfo: dataeditskininfoty);
    procedure setgraphdataeditskin(const instance: tgraphdataedit;
-                                            const ainfo: dataeditskininfoty);
+                                         const ainfo: graphdataeditskininfoty);
    procedure setwidgetfont(const instance: twidget; const afont: tfont);
    procedure setwidgetcolor(const instance: twidget; const acolor: colorty);
    function setwidgetcolorcaptionframe(
@@ -433,12 +457,14 @@ type
    procedure handletabbar(const ainfo: skininfoty); virtual;
    procedure handletabpage(const ainfo: skininfoty); virtual;
    procedure handletoolbar(const ainfo: skininfoty); virtual;
-   procedure handleedit(const ainfo: skininfoty); virtual;
+   procedure handlesplitter(const ainfo: skininfoty); virtual;
    procedure handledispwidget(const ainfo: skininfoty); virtual;
+   procedure handleedit(const ainfo: skininfoty); virtual;
    procedure handledataedit(const ainfo: skininfoty); virtual;
    procedure handlebooleanedit(const ainfo: skininfoty); virtual;
    procedure handlemainmenu(const ainfo: skininfoty); virtual;
    procedure handlepopupmenu(const ainfo: skininfoty); virtual;
+   procedure handlemainmenuwidget(const ainfo: skininfoty); virtual;
    procedure handlegrid(const ainfo: skininfoty); virtual;
    procedure updateskin1(const ainfo: skininfoty; const remove: boolean);
   public
@@ -499,15 +525,24 @@ type
    ftoolbar_vert: toolbarskininfoty;
    fpopupmenu: menuskininfoty;
    fmainmenu: mainmenuskininfoty;
+   fmainmenuwidget: mainmenuwidgetskininfoty;
    fdispwidget: dispwidgetskininfoty;
+   fedit: editskininfoty;
    fdataedit: dataeditskininfoty;
    fbooleanedit: booleaneditskininfoty;
+   fsplitter: splitterskininfoty;
    
+   procedure setsb_vert_face(const avalue: tfacecomp);
+   procedure setsb_vert_face1(const avalue: tfacecomp);
+   procedure setsb_vert_face2(const avalue: tfacecomp);
    procedure setsb_vert_facebutton(const avalue: tfacecomp);
    procedure setsb_vert_faceendbutton(const avalue: tfacecomp);
    procedure setsb_vert_framebutton(const avalue: tframecomp);
    procedure setsb_vert_frameendbutton1(const avalue: tframecomp);
    procedure setsb_vert_frameendbutton2(const avalue: tframecomp);
+   procedure setsb_horz_face(const avalue: tfacecomp);
+   procedure setsb_horz_face1(const avalue: tfacecomp);
+   procedure setsb_horz_face2(const avalue: tfacecomp);
    procedure setsb_horz_facebutton(const avalue: tfacecomp);
    procedure setsb_horz_faceendbutton(const avalue: tfacecomp);
    procedure setsb_horz_framebutton(const avalue: tframecomp);
@@ -538,11 +573,17 @@ type
 
    procedure setslider_face(const avalue: tfacecomp);
    procedure setslider_frame(const avalue: tframecomp);
+   procedure setssb_vert_face(const avalue: tfacecomp);
+   procedure setssb_vert_face1(const avalue: tfacecomp);
+   procedure setssb_vert_face2(const avalue: tfacecomp);
    procedure setssb_vert_facebutton(const avalue: tfacecomp);
    procedure setssb_vert_faceendbutton(const avalue: tfacecomp);
    procedure setssb_vert_framebutton(const avalue: tframecomp);
    procedure setssb_vert_frameendbutton1(const avalue: tframecomp);
    procedure setssb_vert_frameendbutton2(const avalue: tframecomp);
+   procedure setssb_horz_face(const avalue: tfacecomp);
+   procedure setssb_horz_face1(const avalue: tfacecomp);
+   procedure setssb_horz_face2(const avalue: tfacecomp);
    procedure setssb_horz_facebutton(const avalue: tfacecomp);
    procedure setssb_horz_faceendbutton(const avalue: tfacecomp);
    procedure setssb_horz_framebutton(const avalue: tframecomp);
@@ -555,8 +596,14 @@ type
    procedure setstepbutton_face(const avalue: tfacecomp);
    procedure setstepbutton_frame(const avalue: tframecomp);
 
+   procedure setsplitter_face(const avalue: tfacecomp);
+   procedure setsplitter_frame(const avalue: tframecomp);
+
    procedure setdispwidget_face(const avalue: tfacecomp);
    procedure setdispwidget_frame(const avalue: tframecomp);
+
+   procedure setedit_face(const avalue: tfacecomp);
+   procedure setedit_frame(const avalue: tframecomp);
 
    procedure setdataedit_face(const avalue: tfacecomp);
    procedure setdataedit_frame(const avalue: tframecomp);
@@ -599,15 +646,17 @@ type
    procedure settoolbar_horz_face(const avalue: tfacecomp);
    procedure settoolbar_horz_frame(const avalue: tframecomp);
    procedure settoolbar_horz_buttonface(const avalue: tfacecomp);
+   procedure settoolbar_horz_buttonfacechecked(const avalue: tfacecomp);
    procedure settoolbar_horz_buttonframe(const avalue: tframecomp);
-   procedure settoolbar_horz_buttonframesephorz(const avalue: tframecomp);
-   procedure settoolbar_horz_buttonframesepvert(const avalue: tframecomp);
+   procedure settoolbar_horz_buttonframechecked(const avalue: tframecomp);
+   procedure settoolbar_horz_buttonframesep(const avalue: tframecomp);
    procedure settoolbar_vert_face(const avalue: tfacecomp);
    procedure settoolbar_vert_frame(const avalue: tframecomp);
    procedure settoolbar_vert_buttonface(const avalue: tfacecomp);
+   procedure settoolbar_vert_buttonfacechecked(const avalue: tfacecomp);
    procedure settoolbar_vert_buttonframe(const avalue: tframecomp);
-   procedure settoolbar_vert_buttonframesephorz(const avalue: tframecomp);
-   procedure settoolbar_vert_buttonframesepvert(const avalue: tframecomp);
+   procedure settoolbar_vert_buttonframechecked(const avalue: tframecomp);
+   procedure settoolbar_vert_buttonframesep(const avalue: tframecomp);
 
    
    procedure setpopupmenu_face(const avalue: tfacecomp);
@@ -641,6 +690,27 @@ type
    procedure setmainmenu_popupfontactive(const avalue: tfontcomp);
    procedure setmainmenu_popupseparatorframe(const avalue: tframecomp);
    procedure setmainmenu_popupcheckboxframe(const avalue: tframecomp);
+
+   procedure setmainmenuwidget_face(const avalue: tfacecomp);
+   procedure setmainmenuwidget_frame(const avalue: tframecomp);
+   procedure setmainmenuwidget_itemface(const avalue: tfacecomp);
+   procedure setmainmenuwidget_itemframe(const avalue: tframecomp);
+   procedure setmainmenuwidget_itemfaceactive(const avalue: tfacecomp);
+   procedure setmainmenuwidget_itemframeactive(const avalue: tframecomp);
+   procedure setmainmenuwidget_font(const avalue: tfontcomp);
+   procedure setmainmenuwidget_fontactive(const avalue: tfontcomp);
+   procedure setmainmenuwidget_separatorframe(const avalue: tframecomp);
+   procedure setmainmenuwidget_checkboxframe(const avalue: tframecomp);
+   procedure setmainmenuwidget_popupface(const avalue: tfacecomp);
+   procedure setmainmenuwidget_popupframe(const avalue: tframecomp);
+   procedure setmainmenuwidget_popupitemface(const avalue: tfacecomp);
+   procedure setmainmenuwidget_popupitemframe(const avalue: tframecomp);
+   procedure setmainmenuwidget_popupitemfaceactive(const avalue: tfacecomp);
+   procedure setmainmenuwidget_popupitemframeactive(const avalue: tframecomp);
+   procedure setmainmenuwidget_popupfont(const avalue: tfontcomp);
+   procedure setmainmenuwidget_popupfontactive(const avalue: tfontcomp);
+   procedure setmainmenuwidget_popupseparatorframe(const avalue: tframecomp);
+   procedure setmainmenuwidget_popupcheckboxframe(const avalue: tframecomp);
   protected
    procedure handlewidget(const askin: skininfoty;
                            const acolor: pwidgetcolorinfoty = nil); override;
@@ -652,12 +722,14 @@ type
    procedure handletabbar(const ainfo: skininfoty); override;
    procedure handletabpage(const ainfo: skininfoty); override;
    procedure handletoolbar(const ainfo: skininfoty); override;
-   procedure handleedit(const ainfo: skininfoty); override;
+   procedure handlesplitter(const ainfo: skininfoty); override;
    procedure handledispwidget(const ainfo: skininfoty); override;
+   procedure handleedit(const ainfo: skininfoty); override;
    procedure handledataedit(const ainfo: skininfoty); override;
    procedure handlebooleanedit(const ainfo: skininfoty); override;
    procedure handlemainmenu(const ainfo: skininfoty); override;
    procedure handlepopupmenu(const ainfo: skininfoty); override;
+   procedure handlemainmenuwidget(const ainfo: skininfoty); override;
    procedure handlegrid(const ainfo: skininfoty); override;
   public
    constructor create(aowner: tcomponent); override;
@@ -668,9 +740,18 @@ type
    property sb_horz_colorpattern: colorty 
                       read fsb_horz.svcolorpattern 
                     write fsb_horz.svcolorpattern default cl_default;
+   property sb_horz_colorpatternclicked: colorty 
+                      read fsb_horz.svcolorpatternclicked
+                    write fsb_horz.svcolorpatternclicked default cl_default;
    property sb_horz_colorglyph: colorty 
                         read fsb_horz.svcolorglyph 
                       write fsb_horz.svcolorglyph default cl_default;
+   property sb_horz_face: tfacecomp read fsb_horz.svface 
+                        write setsb_horz_face;
+   property sb_horz_face1: tfacecomp read fsb_horz.svface1
+                        write setsb_horz_face1;
+   property sb_horz_face2: tfacecomp read fsb_horz.svface2
+                        write setsb_horz_face2;
    property sb_horz_facebutton: tfacecomp read fsb_horz.svfacebu 
                         write setsb_horz_facebutton;
    property sb_horz_faceendbutton: tfacecomp read fsb_horz.svfaceendbu 
@@ -685,9 +766,18 @@ type
    property sb_vert_colorpattern: colorty 
                       read fsb_vert.svcolorpattern 
                     write fsb_vert.svcolorpattern default cl_default;
+   property sb_vert_colorpatternclicked: colorty 
+                      read fsb_vert.svcolorpatternclicked
+                    write fsb_vert.svcolorpatternclicked default cl_default;
    property sb_vert_colorglyph: colorty 
                         read fsb_vert.svcolorglyph 
                       write fsb_vert.svcolorglyph default cl_default;
+   property sb_vert_face: tfacecomp read fsb_vert.svface 
+                        write setsb_vert_face;
+   property sb_vert_face1: tfacecomp read fsb_vert.svface1
+                        write setsb_vert_face1;
+   property sb_vert_face2: tfacecomp read fsb_vert.svface2
+                        write setsb_vert_face2;
    property sb_vert_facebutton: tfacecomp read fsb_vert.svfacebu
                         write setsb_vert_facebutton;
    property sb_vert_faceendbutton: tfacecomp read fsb_vert.svfaceendbu 
@@ -713,39 +803,80 @@ type
                  write fwidgetcolor.svcolorcaptionframe default cl_default;
                         //overrides widget_color for widgets with frame caption
 
+   property splitter_color: colorty read fsplitter.svcolor.svcolor
+                         write fsplitter.svcolor.svcolor default cl_default;
+   property splitter_colorcaptionframe: colorty 
+                         read fsplitter.svcolor.svcolorcaptionframe 
+              write fsplitter.svcolor.svcolorcaptionframe default cl_default;
+                        //overrides widget_color for widgets with frame caption
+   property splitter_colorgrip: colorty read fsplitter.svcolorgrip
+                         write fsplitter.svcolorgrip default cl_default;
+   property splitter_grip: stockbitmapty read fsplitter.svgrip
+                         write fsplitter.svgrip default stb_default;
+   property splitter_face: tfacecomp read fsplitter.svwidget.svface
+                                            write setsplitter_face;
+   property splitter_frame: tframecomp read fsplitter.svwidget.svframe 
+                                            write setsplitter_frame;
+
    property dispwidget_color: colorty read fdispwidget.svcolor.svcolor
                          write fdispwidget.svcolor.svcolor default cl_default;
    property dispwidget_colorcaptionframe: colorty 
                          read fdispwidget.svcolor.svcolorcaptionframe 
               write fdispwidget.svcolor.svcolorcaptionframe default cl_default;
+                        //overrides widget_color for widgets with frame caption
    property dispwidget_face: tfacecomp read fdispwidget.svwidget.svface
                                             write setdispwidget_face;
    property dispwidget_frame: tframecomp read fdispwidget.svwidget.svframe 
                                             write setdispwidget_frame;
-   property dataedit_face: tfacecomp 
-                      read fdataedit.svwidget.svface write setdataedit_face;
-   property dataedit_frame: tframecomp read fdataedit.svwidget.svframe 
+
+   property dataedit_face: tfacecomp read fdataedit.svedit.svwidget.svface
+                                                 write setdataedit_face;
+   property dataedit_frame: tframecomp read fdataedit.svedit.svwidget.svframe 
                                                     write setdataedit_frame;
-   property dataedit_empty_text: msestring read fdataedit.svempty_text 
-                                        write fdataedit.svempty_text;
-   property dataedit_empty_color: colorty read fdataedit.svempty_color
-                        write fdataedit.svempty_color default cl_default;
+   property dataedit_empty_text: msestring read fdataedit.svedit.svempty_text 
+                                           write fdataedit.svedit.svempty_text;
+   property dataedit_empty_color: colorty read fdataedit.svedit.svempty_color
+                       write fdataedit.svedit.svempty_color default cl_default;
    property dataedit_empty_fontstyle: fontstylesty 
-                        read fdataedit.svempty_fontstyle 
-                    write fdataedit.svempty_fontstyle default [];
+                        read fdataedit.svedit.svempty_fontstyle 
+                          write fdataedit.svedit.svempty_fontstyle default [];
    property dataedit_empty_textflags: textflagsty 
-                  read fdataedit.svempty_textflags 
-                    write fdataedit.svempty_textflags default [];
-   property dataedit_empty_textcolor: colorty read fdataedit.svempty_textcolor 
-                         write fdataedit.svempty_textcolor default cl_default;
+                  read fdataedit.svedit.svempty_textflags 
+                           write fdataedit.svedit.svempty_textflags default [];
+   property dataedit_empty_textcolor: colorty 
+                          read fdataedit.svedit.svempty_textcolor 
+                   write fdataedit.svedit.svempty_textcolor default cl_default;
    property dataedit_empty_textcolorbackground: colorty 
-                     read fdataedit.svempty_textcolorbackground 
-             write fdataedit.svempty_textcolorbackground default cl_default;
+                     read fdataedit.svedit.svempty_textcolorbackground 
+        write fdataedit.svedit.svempty_textcolorbackground default cl_default;
+
+   property edit_face: tfacecomp read fedit.svwidget.svface
+                                                 write setedit_face;
+   property edit_frame: tframecomp read fedit.svwidget.svframe 
+                                                    write setedit_frame;
+   property edit_empty_text: msestring read fedit.svempty_text 
+                                           write fedit.svempty_text;
+   property edit_empty_color: colorty read fedit.svempty_color
+                       write fedit.svempty_color default cl_default;
+   property edit_empty_fontstyle: fontstylesty 
+                        read fedit.svempty_fontstyle 
+                          write fedit.svempty_fontstyle default [];
+   property edit_empty_textflags: textflagsty 
+                  read fedit.svempty_textflags 
+                           write fedit.svempty_textflags default [];
+   property edit_empty_textcolor: colorty 
+                          read fedit.svempty_textcolor 
+                   write fedit.svempty_textcolor default cl_default;
+   property edit_empty_textcolorbackground: colorty 
+                     read fedit.svempty_textcolorbackground 
+        write fedit.svempty_textcolorbackground default cl_default;
                         
-   property booleanedit_face: tfacecomp read fbooleanedit.svwidget.svface 
+   property booleanedit_face: tfacecomp 
+             read fbooleanedit.svgraphdataedit.svwidget.svface 
                                                    write setbooleanedit_face;
-   property booleanedit_frame: tframecomp read fbooleanedit.svwidget.svframe 
-                        write setbooleanedit_frame;
+   property booleanedit_frame: tframecomp 
+                read fbooleanedit.svgraphdataedit.svwidget.svframe 
+                                                write setbooleanedit_frame;
    property booleanedit_optionsadd: buttonoptionsty 
                         read fbooleanedit.svoptionsadd 
                                 write fbooleanedit.svoptionsadd default[];
@@ -818,6 +949,15 @@ type
    property slider_sb_horz_colorglyph: colorty 
                         read fslider.svsb_horz.svcolorglyph 
                       write fslider.svsb_horz.svcolorglyph default cl_default;
+   property slider_sb_horz_face: tfacecomp 
+                        read fslider.svsb_horz.svface 
+                        write setssb_horz_face;
+   property slider_sb_horz_face1: tfacecomp 
+                        read fslider.svsb_horz.svface1
+                        write setssb_horz_face1;
+   property slider_sb_horz_face2: tfacecomp 
+                        read fslider.svsb_horz.svface2
+                        write setssb_horz_face2;
    property slider_sb_horz_facebutton: tfacecomp 
                         read fslider.svsb_horz.svfacebu 
                         write setssb_horz_facebutton;
@@ -840,6 +980,15 @@ type
    property slider_sb_vert_colorglyph: colorty 
                         read fslider.svsb_vert.svcolorglyph 
                       write fslider.svsb_vert.svcolorglyph default cl_default;
+   property slider_sb_vert_face: tfacecomp 
+                        read fslider.svsb_vert.svface
+                        write setssb_vert_face;
+   property slider_sb_vert_face1: tfacecomp 
+                        read fslider.svsb_vert.svface1
+                        write setssb_vert_face1;
+   property slider_sb_vert_face2: tfacecomp 
+                        read fslider.svsb_vert.svface2
+                        write setssb_vert_face2;
    property slider_sb_vert_facebutton: tfacecomp 
                         read fslider.svsb_vert.svfacebu
                         write setssb_vert_facebutton;
@@ -1093,12 +1242,9 @@ type
    property toolbar_horz_buttonframe: tframecomp 
                         read ftoolbar_horz.svbuttonframe
                             write settoolbar_horz_buttonframe;
-   property toolbar_horz_buttonframesephorz: tframecomp 
-                        read ftoolbar_horz.svbuttonframesephorz
-                            write settoolbar_horz_buttonframesephorz;
-   property toolbar_horz_buttonframesepvert: tframecomp 
-                        read ftoolbar_vert.svbuttonframesepvert
-                            write settoolbar_horz_buttonframesepvert;
+   property toolbar_horz_buttonframesep: tframecomp 
+                        read ftoolbar_horz.svbuttonframesep
+                            write settoolbar_horz_buttonframesep;
    property toolbar_vert_face: tfacecomp read ftoolbar_vert.svwidget.svface 
                             write settoolbar_vert_face;
    property toolbar_vert_frame: tframecomp read ftoolbar_vert.svwidget.svframe
@@ -1108,12 +1254,9 @@ type
    property toolbar_vert_buttonframe: tframecomp 
                         read ftoolbar_vert.svbuttonframe
                             write settoolbar_vert_buttonframe;
-   property toolbar_vert_buttonframesephorz: tframecomp 
-                        read ftoolbar_vert.svbuttonframesephorz
-                            write settoolbar_vert_buttonframesephorz;
-   property toolbar_vert_buttonframesepvert: tframecomp 
-                        read ftoolbar_vert.svbuttonframesepvert
-                            write settoolbar_vert_buttonframesepvert;
+   property toolbar_vert_buttonframesep: tframecomp 
+                        read ftoolbar_vert.svbuttonframesep
+                            write settoolbar_vert_buttonframesep;
 
    property tabpage_face: tfacecomp read ftabpage.svwidget.svface 
                                                 write settabpage_face;
@@ -1203,6 +1346,59 @@ type
    property mainmenu_popupcheckboxframe: tframecomp 
                                  read fmainmenu.svpopup.svcheckboxframe 
                                  write setmainmenu_popupcheckboxframe;
+
+   property mainmenuwidget_face: tfacecomp read fmainmenuwidget.svwidget.svface
+                                            write setmainmenuwidget_face;
+   property mainmenuwidget_frame: tframecomp 
+                         read fmainmenuwidget.svwidget.svframe 
+                                            write setmainmenuwidget_frame;
+   property mainmenuwidget_itemface: tfacecomp read fmainmenuwidget.svmenu.svmain.svitemface 
+                                 write setmainmenuwidget_itemface;
+   property mainmenuwidget_itemframe: tframecomp read fmainmenuwidget.svmenu.svmain.svitemframe 
+                                 write setmainmenuwidget_itemframe;
+   property mainmenuwidget_itemfaceactive: tfacecomp 
+                                 read fmainmenuwidget.svmenu.svmain.svitemfaceactive
+                                 write setmainmenuwidget_itemfaceactive;
+   property mainmenuwidget_itemframeactive: tframecomp 
+                                 read fmainmenuwidget.svmenu.svmain.svitemframeactive 
+                                 write setmainmenuwidget_itemframeactive;
+   property mainmenuwidget_font: tfontcomp read fmainmenuwidget.svmenu.svmain.svfont 
+                                 write setmainmenuwidget_font;
+   property mainmenuwidget_fontactive: tfontcomp read fmainmenuwidget.svmenu.svmain.svfontactive
+                                 write setmainmenuwidget_fontactive;                         
+   property mainmenuwidget_separatorframe: tframecomp 
+                                 read fmainmenuwidget.svmenu.svmain.svseparatorframe 
+                                 write setmainmenuwidget_separatorframe;
+   property mainmenuwidget_checkboxframe: tframecomp 
+                                 read fmainmenuwidget.svmenu.svmain.svcheckboxframe 
+                                 write setmainmenuwidget_checkboxframe;
+
+   property mainmenuwidget_popupface: tfacecomp read fmainmenuwidget.svmenu.svpopup.svface 
+                                 write setmainmenuwidget_popupface;
+   property mainmenuwidget_popupframe: tframecomp read fmainmenuwidget.svmenu.svpopup.svframe 
+                                 write setmainmenuwidget_popupframe;
+   property mainmenuwidget_popupitemface: tfacecomp read fmainmenuwidget.svmenu.svpopup.svitemface 
+                                 write setmainmenuwidget_popupitemface;
+   property mainmenuwidget_popupitemframe: tframecomp 
+                                 read fmainmenuwidget.svmenu.svpopup.svitemframe 
+                                 write setmainmenuwidget_popupitemframe;
+   property mainmenuwidget_popupitemfaceactive: tfacecomp 
+                                 read fmainmenuwidget.svmenu.svpopup.svitemfaceactive
+                                 write setmainmenuwidget_popupitemfaceactive;
+   property mainmenuwidget_popupitemframeactive: tframecomp 
+                                 read fmainmenuwidget.svmenu.svpopup.svitemframeactive 
+                                 write setmainmenuwidget_popupitemframeactive;
+   property mainmenuwidget_popupfont: tfontcomp read fmainmenuwidget.svmenu.svpopup.svfont 
+                                 write setmainmenuwidget_popupfont;
+   property mainmenuwidget_popupfontactive: tfontcomp 
+                                 read fmainmenuwidget.svmenu.svpopup.svfontactive
+                                 write setmainmenuwidget_popupfontactive;
+   property mainmenuwidget_popupseparatorframe: tframecomp 
+                                 read fmainmenuwidget.svmenu.svpopup.svseparatorframe 
+                                 write setmainmenuwidget_popupseparatorframe;
+   property mainmenuwidget_popupcheckboxframe: tframecomp 
+                                 read fmainmenuwidget.svmenu.svpopup.svcheckboxframe 
+                                 write setmainmenuwidget_popupcheckboxframe;
  end;
 
  skincontrollerarty = array of tcustomskincontroller;
@@ -1231,7 +1427,8 @@ procedure setskinhandler(const avalue: tskinhandler);
 
 implementation
 uses
- msetabsglob,sysutils,mseapplication,msearrayutils,msestockobjects,msefont;
+ msetabsglob,sysutils,mseapplication,msearrayutils,msefont,msesplitter,
+ msemenuwidgets;
  
 type
  twidget1 = class(twidget);
@@ -1371,12 +1568,12 @@ constructor tskinfontaliass.create(const aowner: tcustomskincontroller);
 begin
  inherited create(aowner,tskinfontalias);
 end;
-{
+
 class function tskinfontaliass.getitemclasstype: persistentclassty;
 begin
  result:= tskinfontalias;
 end;
-}
+
 procedure tskinfontaliass.setfontalias;
 var
  int1: integer;
@@ -1523,15 +1720,18 @@ begin
      goto endlab;
     end;
    end;
-   case ainfo.objectkind of 
+   case ainfo.objectkind of  //todo: use table
     sok_widget: begin
      handlewidget(ainfo);
     end;
-    sok_edit: begin
-     handleedit(ainfo);
+    sok_splitter: begin
+     handlesplitter(ainfo);
     end;
     sok_dispwidget: begin
      handledispwidget(ainfo);
+    end;
+    sok_edit: begin
+     handleedit(ainfo);
     end;
     sok_dataedit: begin
      handledataedit(ainfo);
@@ -1565,6 +1765,9 @@ begin
     end;
     sok_popupmenu: begin
      handlepopupmenu(ainfo);
+    end;
+    sok_mainmenuwidget: begin
+     handlemainmenuwidget(ainfo);
     end;
     sok_grid: begin
      handlegrid(ainfo);
@@ -1662,12 +1865,13 @@ begin
    end;
    col1:= frame.colorclient;
    size1:= clientsize;
+   addsize1(size1,aframe.template.clientsizeextend);
    with tframe1(frame).fpaintframedelta do begin
     size1.cx:= size1.cx + left + right;
     size1.cy:= size1.cy + top + bottom;
    end;
    frame1:= innerclientframe;
-   frame.template:= aframe;
+   fframe.template:= aframe;
    opt1:= aframe.template.optionsskincontroller;
    if not (fsco_colorclient in opt1) then begin
 //    tframe1(frame).fi.colorclient:= col1; //restore
@@ -1691,7 +1895,8 @@ begin
     size1.cx:= size1.cx - left - right;
     size1.cy:= size1.cy - top - bottom;
    end;
-   if not (osk_noclientsize in optionsskin) then begin
+   if not (osk_noclientsize in optionsskin) and 
+                         not (fsco_noclientsize in opt1) then begin
     clientsize:= size1;      //same clientsize as before
    end;
   end;
@@ -1781,8 +1986,8 @@ begin
  end;
 end;
 
-procedure tcustomskincontroller.setdataeditskin(const instance: tdataedit;
-                                            const ainfo: dataeditskininfoty);
+procedure tcustomskincontroller.seteditskin(const instance: tcustomedit;
+                                            const ainfo: editskininfoty);
 begin
  setwidgetskin(instance,ainfo.svwidget);
  with instance do begin
@@ -1813,8 +2018,14 @@ begin
  end;
 end;
 
+procedure tcustomskincontroller.setdataeditskin(const instance: tdataedit;
+                                            const ainfo: dataeditskininfoty);
+begin
+ seteditskin(instance,ainfo.svedit);
+end;
+
 procedure tcustomskincontroller.setgraphdataeditskin(
-           const instance: tgraphdataedit; const ainfo: dataeditskininfoty);
+          const instance: tgraphdataedit; const ainfo: graphdataeditskininfoty);
 begin
  setwidgetskin(instance,ainfo.svwidget);
 // setwidgetface(instance,ainfo.face);
@@ -1906,11 +2117,27 @@ procedure tcustomskincontroller.setscrollbarskin(const instance: tcustomscrollba
                const ainfo: scrollbarskininfoty);
 begin
  with instance,ainfo do begin
-  if svcolorpattern <> cl_default then begin
+  if (svcolorpattern <> cl_default) and (colorpattern = cl_default) then begin
    colorpattern:= svcolorpattern;
+  end;
+  if (svcolorpatternclicked <> cl_default) and 
+                         (colorpatternclicked = cl_default) then begin
+   colorpatternclicked:= svcolorpatternclicked;
   end;
   if svcolorglyph <> cl_default then begin
    colorglyph:= svcolorglyph;
+  end;
+  if (svface <> nil) then begin
+   createface();
+   setfacetemplate(svface,face);
+  end;
+  if (svface1 <> nil) then begin
+   createface1();
+   setfacetemplate(svface1,face1);
+  end;
+  if (svface2 <> nil) then begin
+   createface2();
+   setfacetemplate(svface2,face2);
   end;
   if (svfacebu <> nil) {and (facebutton = nil)} then begin
    createfacebutton;
@@ -2234,12 +2461,22 @@ begin
  //dummy
 end;
 
+procedure tcustomskincontroller.handlemainmenuwidget(const ainfo: skininfoty);
+begin
+ //dummy
+end;
+
 procedure tcustomskincontroller.handlegrid(const ainfo: skininfoty);
 begin
  //dummy
 end;
 
 procedure tcustomskincontroller.handletoolbar(const ainfo: skininfoty);
+begin
+ //dummy
+end;
+
+procedure tcustomskincontroller.handlesplitter(const ainfo: skininfoty);
 begin
  //dummy
 end;
@@ -2379,23 +2616,36 @@ begin
  fstepbutton.svcolor:= cl_default;
 
  fsb_horz.svcolorpattern:= cl_default;
+ fsb_horz.svcolorpatternclicked:= cl_default;
  fsb_horz.svcolorglyph:= cl_default;
  fsb_vert.svcolorpattern:= cl_default;
+ fsb_vert.svcolorpatternclicked:= cl_default;
  fsb_vert.svcolorglyph:= cl_default;
+
+ fsplitter.svcolor.svcolor:= cl_default;
+ fsplitter.svcolor.svcolorcaptionframe:= cl_default;
+ fsplitter.svcolorgrip:= cl_default;
+ fsplitter.svgrip:= stb_default;
 
  fdispwidget.svcolor.svcolor:= cl_default;
  fdispwidget.svcolor.svcolorcaptionframe:= cl_default;
  
- fdataedit.svempty_color:= cl_default;
- fdataedit.svempty_textcolor:= cl_default;
- fdataedit.svempty_textcolorbackground:= cl_default;
+ fedit.svempty_color:= cl_default;
+ fedit.svempty_textcolor:= cl_default;
+ fedit.svempty_textcolorbackground:= cl_default;
+
+ fdataedit.svedit.svempty_color:= cl_default;
+ fdataedit.svedit.svempty_textcolor:= cl_default;
+ fdataedit.svedit.svempty_textcolorbackground:= cl_default;
 
  fbutton.svcolor:= cl_default;
  fdatabutton.svcolor:= cl_default;
  fslider.svcolor:= cl_default;
  fslider.svsb_horz.svcolorpattern:= cl_default;
+ fslider.svsb_horz.svcolorpatternclicked:= cl_default;
  fslider.svsb_horz.svcolorglyph:= cl_default;
  fslider.svsb_vert.svcolorpattern:= cl_default;
+ fslider.svsb_vert.svcolorpatternclicked:= cl_default;
  fslider.svsb_vert.svcolorglyph:= cl_default;
  fframebutton.svcolor:= cl_default;
  fframebutton.svcolorglyph:= cl_default;
@@ -2428,6 +2678,16 @@ begin
  fbutton.svfont.free;
 end;
 
+procedure tskincontroller.setsplitter_face(const avalue: tfacecomp);
+begin
+ setlinkedvar(avalue,tmsecomponent(fsplitter.svwidget.svface));
+end;
+
+procedure tskincontroller.setsplitter_frame(const avalue: tframecomp);
+begin
+ setlinkedvar(avalue,tmsecomponent(fsplitter.svwidget.svframe));
+end;
+
 procedure tskincontroller.setdispwidget_face(const avalue: tfacecomp);
 begin
  setlinkedvar(avalue,tmsecomponent(fdispwidget.svwidget.svface));
@@ -2438,24 +2698,36 @@ begin
  setlinkedvar(avalue,tmsecomponent(fdispwidget.svwidget.svframe));
 end;
 
+procedure tskincontroller.setedit_face(const avalue: tfacecomp);
+begin
+ setlinkedvar(avalue,tmsecomponent(fedit.svwidget.svface));
+end;
+
+procedure tskincontroller.setedit_frame(const avalue: tframecomp);
+begin
+ setlinkedvar(avalue,tmsecomponent(fedit.svwidget.svframe));
+end;
+
 procedure tskincontroller.setdataedit_face(const avalue: tfacecomp);
 begin
- setlinkedvar(avalue,tmsecomponent(fdataedit.svwidget.svface));
+ setlinkedvar(avalue,tmsecomponent(fdataedit.svedit.svwidget.svface));
 end;
 
 procedure tskincontroller.setdataedit_frame(const avalue: tframecomp);
 begin
- setlinkedvar(avalue,tmsecomponent(fdataedit.svwidget.svframe));
+ setlinkedvar(avalue,tmsecomponent(fdataedit.svedit.svwidget.svframe));
 end;
 
 procedure tskincontroller.setbooleanedit_face(const avalue: tfacecomp);
 begin
- setlinkedvar(avalue,tmsecomponent(fbooleanedit.svwidget.svface));
+ setlinkedvar(avalue,tmsecomponent(
+                                fbooleanedit.svgraphdataedit.svwidget.svface));
 end;
 
 procedure tskincontroller.setbooleanedit_frame(const avalue: tframecomp);
 begin
- setlinkedvar(avalue,tmsecomponent(fbooleanedit.svwidget.svframe));
+ setlinkedvar(avalue,tmsecomponent(
+                               fbooleanedit.svgraphdataedit.svwidget.svframe));
 end;
 
 procedure tskincontroller.setcontainer_face(const avalue: tfacecomp);
@@ -2492,6 +2764,21 @@ begin
  setlinkedvar(avalue,tmsecomponent(ftabbar.svtabvertopo.svsedge_imagelist));
 end;
 
+procedure tskincontroller.setsb_vert_face(const avalue: tfacecomp);
+begin
+ setlinkedvar(avalue,tmsecomponent(fsb_vert.svface));
+end;
+
+procedure tskincontroller.setsb_vert_face1(const avalue: tfacecomp);
+begin
+ setlinkedvar(avalue,tmsecomponent(fsb_vert.svface1));
+end;
+
+procedure tskincontroller.setsb_vert_face2(const avalue: tfacecomp);
+begin
+ setlinkedvar(avalue,tmsecomponent(fsb_vert.svface2));
+end;
+
 procedure tskincontroller.setsb_vert_facebutton(const avalue: tfacecomp);
 begin
  setlinkedvar(avalue,tmsecomponent(fsb_vert.svfacebu));
@@ -2515,6 +2802,21 @@ end;
 procedure tskincontroller.setsb_vert_frameendbutton2(const avalue: tframecomp);
 begin
  setlinkedvar(avalue,tmsecomponent(fsb_vert.svframeendbu2));
+end;
+
+procedure tskincontroller.setsb_horz_face(const avalue: tfacecomp);
+begin
+ setlinkedvar(avalue,tmsecomponent(fsb_horz.svface));
+end;
+
+procedure tskincontroller.setsb_horz_face1(const avalue: tfacecomp);
+begin
+ setlinkedvar(avalue,tmsecomponent(fsb_horz.svface1));
+end;
+
+procedure tskincontroller.setsb_horz_face2(const avalue: tfacecomp);
+begin
+ setlinkedvar(avalue,tmsecomponent(fsb_horz.svface2));
 end;
 
 procedure tskincontroller.setsb_horz_facebutton(const avalue: tfacecomp);
@@ -2622,6 +2924,21 @@ begin
  setlinkedvar(avalue,tmsecomponent(fslider.svwidget.svframe));
 end;
 
+procedure tskincontroller.setssb_vert_face(const avalue: tfacecomp);
+begin
+ setlinkedvar(avalue,tmsecomponent(fslider.svsb_vert.svface));
+end;
+
+procedure tskincontroller.setssb_vert_face1(const avalue: tfacecomp);
+begin
+ setlinkedvar(avalue,tmsecomponent(fslider.svsb_vert.svface1));
+end;
+
+procedure tskincontroller.setssb_vert_face2(const avalue: tfacecomp);
+begin
+ setlinkedvar(avalue,tmsecomponent(fslider.svsb_vert.svface2));
+end;
+
 procedure tskincontroller.setssb_vert_facebutton(const avalue: tfacecomp);
 begin
  setlinkedvar(avalue,tmsecomponent(fslider.svsb_vert.svfacebu));
@@ -2645,6 +2962,21 @@ end;
 procedure tskincontroller.setssb_vert_frameendbutton2(const avalue: tframecomp);
 begin
  setlinkedvar(avalue,tmsecomponent(fslider.svsb_vert.svframeendbu2));
+end;
+
+procedure tskincontroller.setssb_horz_face(const avalue: tfacecomp);
+begin
+ setlinkedvar(avalue,tmsecomponent(fslider.svsb_horz.svface));
+end;
+
+procedure tskincontroller.setssb_horz_face1(const avalue: tfacecomp);
+begin
+ setlinkedvar(avalue,tmsecomponent(fslider.svsb_horz.svface1));
+end;
+
+procedure tskincontroller.setssb_horz_face2(const avalue: tfacecomp);
+begin
+ setlinkedvar(avalue,tmsecomponent(fslider.svsb_horz.svface2));
 end;
 
 procedure tskincontroller.setssb_horz_facebutton(const avalue: tfacecomp);
@@ -2817,21 +3149,27 @@ begin
  setlinkedvar(avalue,tmsecomponent(ftoolbar_horz.svbuttonface));
 end;
 
+procedure tskincontroller.settoolbar_horz_buttonfacechecked(
+              const avalue: tfacecomp);
+begin
+ setlinkedvar(avalue,tmsecomponent(ftoolbar_horz.svbuttonfacechecked));
+end;
+
 procedure tskincontroller.settoolbar_horz_buttonframe(const avalue: tframecomp);
 begin
  setlinkedvar(avalue,tmsecomponent(ftoolbar_horz.svbuttonframe));
 end;
 
-procedure tskincontroller.settoolbar_horz_buttonframesephorz(
-                                                    const avalue: tframecomp);
+procedure tskincontroller.settoolbar_horz_buttonframechecked(
+              const avalue: tframecomp);
 begin
- setlinkedvar(avalue,tmsecomponent(ftoolbar_horz.svbuttonframesephorz));
+ setlinkedvar(avalue,tmsecomponent(ftoolbar_horz.svbuttonframechecked));
 end;
 
-procedure tskincontroller.settoolbar_horz_buttonframesepvert(
+procedure tskincontroller.settoolbar_horz_buttonframesep(
                                                     const avalue: tframecomp);
 begin
- setlinkedvar(avalue,tmsecomponent(ftoolbar_horz.svbuttonframesepvert));
+ setlinkedvar(avalue,tmsecomponent(ftoolbar_horz.svbuttonframesep));
 end;
 
 procedure tskincontroller.settoolbar_vert_face(const avalue: tfacecomp);
@@ -2849,21 +3187,27 @@ begin
  setlinkedvar(avalue,tmsecomponent(ftoolbar_vert.svbuttonface));
 end;
 
+procedure tskincontroller.settoolbar_vert_buttonfacechecked(
+              const avalue: tfacecomp);
+begin
+ setlinkedvar(avalue,tmsecomponent(ftoolbar_vert.svbuttonfacechecked));
+end;
+
 procedure tskincontroller.settoolbar_vert_buttonframe(const avalue: tframecomp);
 begin
  setlinkedvar(avalue,tmsecomponent(ftoolbar_vert.svbuttonframe));
 end;
 
-procedure tskincontroller.settoolbar_vert_buttonframesephorz(
-                                                    const avalue: tframecomp);
+procedure tskincontroller.settoolbar_vert_buttonframechecked(
+              const avalue: tframecomp);
 begin
- setlinkedvar(avalue,tmsecomponent(ftoolbar_vert.svbuttonframesephorz));
+ setlinkedvar(avalue,tmsecomponent(ftoolbar_vert.svbuttonframechecked));
 end;
 
-procedure tskincontroller.settoolbar_vert_buttonframesepvert(
+procedure tskincontroller.settoolbar_vert_buttonframesep(
                                                     const avalue: tframecomp);
 begin
- setlinkedvar(avalue,tmsecomponent(ftoolbar_vert.svbuttonframesepvert));
+ setlinkedvar(avalue,tmsecomponent(ftoolbar_vert.svbuttonframesep));
 end;
 
 procedure tskincontroller.setpopupmenu_face(const avalue: tfacecomp);
@@ -3007,16 +3351,120 @@ begin
  setlinkedvar(avalue,tmsecomponent(fmainmenu.svpopup.svfontactive));
 end;
 
-procedure tskincontroller.setmainmenu_popupseparatorframe(
-              const avalue: tframecomp);
+procedure tskincontroller.setmainmenu_popupseparatorframe(const avalue: tframecomp);
 begin
  setlinkedvar(avalue,tmsecomponent(fmainmenu.svpopup.svseparatorframe));
 end;
 
-procedure tskincontroller.setmainmenu_popupcheckboxframe(
-              const avalue: tframecomp);
+procedure tskincontroller.setmainmenu_popupcheckboxframe(const avalue: tframecomp);
 begin
  setlinkedvar(avalue,tmsecomponent(fmainmenu.svpopup.svcheckboxframe));
+end;
+
+procedure tskincontroller.setmainmenuwidget_face(const avalue: tfacecomp);
+begin
+ setlinkedvar(avalue,tmsecomponent(fmainmenuwidget.svwidget.svface));
+end;
+
+procedure tskincontroller.setmainmenuwidget_frame(const avalue: tframecomp);
+begin
+ setlinkedvar(avalue,tmsecomponent(fmainmenuwidget.svwidget.svframe));
+end;
+
+procedure tskincontroller.setmainmenuwidget_itemface(const avalue: tfacecomp);
+begin
+ setlinkedvar(avalue,tmsecomponent(fmainmenuwidget.svmenu.svmain.svitemface));
+end;
+
+procedure tskincontroller.setmainmenuwidget_itemframe(const avalue: tframecomp);
+begin
+ setlinkedvar(avalue,tmsecomponent(fmainmenuwidget.svmenu.svmain.svitemframe));
+end;
+
+procedure tskincontroller.setmainmenuwidget_itemfaceactive(const avalue: tfacecomp);
+begin
+ setlinkedvar(avalue,tmsecomponent(fmainmenuwidget.svmenu.svmain.svitemfaceactive));
+end;
+
+procedure tskincontroller.setmainmenuwidget_itemframeactive(const avalue: tframecomp);
+begin
+ setlinkedvar(avalue,tmsecomponent(fmainmenuwidget.svmenu.svmain.svitemframeactive));
+end;
+
+procedure tskincontroller.setmainmenuwidget_font(const avalue: tfontcomp);
+begin
+ setlinkedvar(avalue,tmsecomponent(fmainmenuwidget.svmenu.svmain.svfont));
+end;
+
+procedure tskincontroller.setmainmenuwidget_fontactive(const avalue: tfontcomp);
+begin
+ setlinkedvar(avalue,tmsecomponent(fmainmenuwidget.svmenu.svmain.svfontactive));
+end;
+
+procedure tskincontroller.setmainmenuwidget_separatorframe(const avalue: tframecomp);
+begin
+ setlinkedvar(avalue,tmsecomponent(fmainmenuwidget.svmenu.svmain.svseparatorframe));
+end;
+
+procedure tskincontroller.setmainmenuwidget_checkboxframe(const avalue: tframecomp);
+begin
+ setlinkedvar(avalue,tmsecomponent(fmainmenuwidget.svmenu.svmain.svcheckboxframe));
+end;
+
+procedure tskincontroller.setmainmenuwidget_popupface(const avalue: tfacecomp);
+begin
+ setlinkedvar(avalue,tmsecomponent(fmainmenuwidget.svmenu.svpopup.svface));
+end;
+
+procedure tskincontroller.setmainmenuwidget_popupframe(const avalue: tframecomp);
+begin
+ setlinkedvar(avalue,tmsecomponent(fmainmenuwidget.svmenu.svpopup.svframe));
+end;
+
+procedure tskincontroller.setmainmenuwidget_popupitemface(const avalue: tfacecomp);
+begin
+ setlinkedvar(avalue,tmsecomponent(fmainmenuwidget.svmenu.svpopup.svitemface));
+end;
+
+procedure tskincontroller.setmainmenuwidget_popupitemframe(const avalue: tframecomp);
+begin
+ setlinkedvar(avalue,tmsecomponent(fmainmenuwidget.svmenu.svpopup.svitemframe));
+end;
+
+procedure tskincontroller.setmainmenuwidget_popupitemfaceactive(const avalue: tfacecomp);
+begin
+ setlinkedvar(avalue,tmsecomponent(fmainmenuwidget.svmenu.svpopup.svitemfaceactive));
+end;
+
+procedure tskincontroller.setmainmenuwidget_popupitemframeactive(const avalue: tframecomp);
+begin
+ setlinkedvar(avalue,tmsecomponent(fmainmenuwidget.svmenu.svpopup.svitemframeactive));
+end;
+
+procedure tskincontroller.setmainmenuwidget_popupfont(const avalue: tfontcomp);
+begin
+ setlinkedvar(avalue,tmsecomponent(fmainmenuwidget.svmenu.svpopup.svfont));
+end;
+
+procedure tskincontroller.setmainmenuwidget_popupfontactive(
+                                                     const avalue: tfontcomp);
+begin
+ setlinkedvar(avalue,tmsecomponent(
+                                fmainmenuwidget.svmenu.svpopup.svfontactive));
+end;
+
+procedure tskincontroller.setmainmenuwidget_popupseparatorframe(
+                                                const avalue: tframecomp);
+begin
+ setlinkedvar(avalue,tmsecomponent(
+                              fmainmenuwidget.svmenu.svpopup.svseparatorframe));
+end;
+
+procedure tskincontroller.setmainmenuwidget_popupcheckboxframe(
+                                             const avalue: tframecomp);
+begin
+ setlinkedvar(avalue,tmsecomponent(
+                            fmainmenuwidget.svmenu.svpopup.svcheckboxframe));
 end;
 
 procedure tskincontroller.handlewidget(const askin: skininfoty;
@@ -3223,6 +3671,18 @@ var
 begin
  handlewidget(ainfo);
  tb1:= tcustomtoolbar(ainfo.instance);
+ if ftoolbar_horz.svbuttonframesep <> nil then begin
+  with tb1.buttons do begin
+   createframesephorz();
+   setframetemplate(ftoolbar_horz.svbuttonframesep,framesephorz);
+  end;
+ end;
+ if ftoolbar_vert.svbuttonframesep <> nil then begin
+  with tb1.buttons do begin
+   createframesepvert();
+   setframetemplate(ftoolbar_vert.svbuttonframesep,framesepvert);
+  end;
+ end;
  if tb1.width >= tb1.height then begin
   setwidgetskin(tb1,ftoolbar_horz.svwidget);
   setstepbuttonskin(tb1.frame,fstepbutton);
@@ -3232,22 +3692,22 @@ begin
     setfacetemplate(ftoolbar_horz.svbuttonface,face);
    end;
   end;
+  if ftoolbar_horz.svbuttonfacechecked <> nil then begin
+   with tb1.buttons do begin
+    createfacechecked();
+    setfacetemplate(ftoolbar_horz.svbuttonfacechecked,facechecked);
+   end;
+  end;
   if ftoolbar_horz.svbuttonframe <> nil then begin
    with tb1.buttons do begin
     createframe();
     setframetemplate(ftoolbar_horz.svbuttonframe,frame);
    end;
   end;
-  if ftoolbar_horz.svbuttonframesephorz <> nil then begin
+  if ftoolbar_horz.svbuttonframechecked <> nil then begin
    with tb1.buttons do begin
-    createframesephorz();
-    setframetemplate(ftoolbar_horz.svbuttonframesephorz,framesephorz);
-   end;
-  end;
-  if ftoolbar_horz.svbuttonframesepvert <> nil then begin
-   with tb1.buttons do begin
-    createframesepvert();
-    setframetemplate(ftoolbar_horz.svbuttonframesepvert,framesepvert);
+    createframechecked();
+    setframetemplate(ftoolbar_horz.svbuttonframechecked,framechecked);
    end;
   end;
  end
@@ -3260,36 +3720,51 @@ begin
     setfacetemplate(ftoolbar_vert.svbuttonface,face);
    end;
   end;
-  if ftoolbar_horz.svbuttonframe <> nil then begin
+  if ftoolbar_vert.svbuttonfacechecked <> nil then begin
+   with tb1.buttons do begin
+    createfacechecked();
+    setfacetemplate(ftoolbar_vert.svbuttonfacechecked,facechecked);
+   end;
+  end;
+  if ftoolbar_vert.svbuttonframe <> nil then begin
    with tb1.buttons do begin
     createframe();
-    setframetemplate(ftoolbar_horz.svbuttonframe,frame);
+    setframetemplate(ftoolbar_vert.svbuttonframe,frame);
    end;
   end;
-  if ftoolbar_horz.svbuttonframesephorz <> nil then begin
+  if ftoolbar_vert.svbuttonframechecked <> nil then begin
    with tb1.buttons do begin
-    createframesephorz();
-    setframetemplate(ftoolbar_horz.svbuttonframesephorz,framesephorz);
-   end;
-  end;
-  if ftoolbar_horz.svbuttonframesepvert <> nil then begin
-   with tb1.buttons do begin
-    createframesepvert();
-    setframetemplate(ftoolbar_horz.svbuttonframesepvert,framesepvert);
+    createframechecked();
+    setframetemplate(ftoolbar_vert.svbuttonframechecked,framechecked);
    end;
   end;
  end;
 end;
 
-procedure tskincontroller.handleedit(const ainfo: skininfoty);
+procedure tskincontroller.handlesplitter(const ainfo: skininfoty);
 begin
- handlewidget(ainfo);
+ handlewidget(ainfo,@fsplitter.svcolor);
+ setwidgetskin(twidget(ainfo.instance),fsplitter.svwidget);
+ with fsplitter,tcustomsplitter(ainfo.instance) do begin
+  if (svcolorgrip <> cl_default) and (colorgrip = cl_default) then begin
+   colorgrip:= svcolorgrip;
+  end;
+  if (svgrip <> stb_default) and (grip = stb_default) then begin
+   grip:= svgrip;
+  end;
+ end;
 end;
 
 procedure tskincontroller.handledispwidget(const ainfo: skininfoty);
 begin
  handlewidget(ainfo,@fdispwidget.svcolor);
  setwidgetskin(twidget(ainfo.instance),fdispwidget.svwidget);
+end;
+
+procedure tskincontroller.handleedit(const ainfo: skininfoty);
+begin
+ handlewidget(ainfo);
+ seteditskin(tcustomedit(ainfo.instance),fedit);
 end;
 
 procedure tskincontroller.handledataedit(const ainfo: skininfoty);
@@ -3301,7 +3776,7 @@ end;
 procedure tskincontroller.handlebooleanedit(const ainfo: skininfoty);
 begin
  handlewidget(ainfo);
- setwidgetskin(twidget(ainfo.instance),fbooleanedit.svwidget);
+ setwidgetskin(twidget(ainfo.instance),fbooleanedit.svgraphdataedit.svwidget);
  with tcustombooleanedit(ainfo.instance) do begin
   if not (osk_nooptions in optionsskin) then begin
    if fbooleanedit.svoptionsadd <> [] then begin
@@ -3323,6 +3798,13 @@ end;
 procedure tskincontroller.handlepopupmenu(const ainfo: skininfoty);
 begin
  setpopupmenuskin(tpopupmenu(ainfo.instance),fpopupmenu);
+end;
+
+procedure tskincontroller.handlemainmenuwidget(const ainfo: skininfoty);
+begin
+ handlewidget(ainfo);
+ setwidgetskin(twidget(ainfo.instance),fmainmenuwidget.svwidget);
+ setmainmenuskin(tmainmenuwidget(ainfo.instance).menu,fmainmenuwidget.svmenu);
 end;
 
 procedure tskincontroller.handlegrid(const ainfo: skininfoty);

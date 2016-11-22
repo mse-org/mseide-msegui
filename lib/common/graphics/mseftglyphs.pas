@@ -8,7 +8,7 @@
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 }
 unit mseftglyphs;
-{$ifdef FPC}{$mode objfpc}{$h+}{$endif}
+{$ifdef FPC}{$mode objfpc}{$h+}{$goto on}{$endif}
 interface
 uses
  msefreetype,msestrings,msebitmap,msetypes,msegraphutils;
@@ -20,6 +20,7 @@ type
   protected
    fheight: int32;
    fascent: int32;
+   fascent64: int32;
    fdescent: int32;
    fglyphheight: int32;
    flinespacing: int32;
@@ -51,6 +52,11 @@ type
                              const aframe: framety; //padding
                                 const acolor: colorty = cl_text): boolean;
                          //empty bitmap in case of error, retruns true if ok
+   function getcell(const abitmap: tmaskedbitmap; const achar: card32;
+                             const arotation: real; //0.0..1.0 -> 0..360deg CCW
+                             const aframe: framety; //padding
+                                const acolor: colorty = cl_text): boolean;
+                         //empty bitmap in case of error, retruns true if ok
    property height: int32 read fheight;
    property ascent: int32 read fascent;
    property descent: int32 read fdescent;
@@ -78,7 +84,8 @@ begin
   end;
   with fftface^ do begin
    scale:= fheight/units_per_em;
-   fascent:= round(ascender*scale);
+   fascent64:= round(ascender*scale*64); //for transformation matrix
+   fascent:= (fascent64 + 32) div 64; //pixels
    fdescent:= -round(descender*scale);
    fglyphheight:= fascent+fdescent;
    flinespacing:= ceil(height*scale);
@@ -110,35 +117,63 @@ var
  destsize: sizety;
  deststart: pointty;
  mat1: ft_matrix;
+ vec1: ft_vector;
  rea1: real;
+ fcos1,fsin1: real;
  cos1,sin1: int32;
+ charindex1: int32;
+ centre1: pointty;
+label
+ endlab;
 begin
  result:= false;
  abitmap.beginupdate();
  abitmap.clear();
+ charindex1:= ft_get_char_index(fftface,ord(achar));
  if arot <> 0 then begin
   rea1:= 2*pi*arot;
-  cos1:= round(cos(rea1)*numscale);
-  sin1:= round(sin(rea1)*numscale);
+  fcos1:= cos(rea1);
+  fsin1:= sin(rea1);
+  cos1:= round(fcos1*numscale);
+  sin1:= round(fsin1*numscale);
   mat1.xx:= cos1;
   mat1.xy:= -sin1;
   mat1.yx:= sin1;
   mat1.yy:= cos1;
-  ft_set_transform(fftface,@mat1,nil);
+  if acell then begin
+   ft_set_transform(fftface,nil,nil);
+   if ft_load_glyph(fftface,charindex1,ft_load_default) <> 0 then begin
+    goto endlab;
+   end;
+   with fftface^.glyph^.metrics do begin
+//    centre1.x:= width div 2 - horibearingx;
+    centre1.x:= horiadvance div 2;
+//    centre1.y:= horibearingy - height div 2 ;
+    centre1.y:= fascent64 - fheight * 32;
+    vec1.x:= -round(centre1.x*fcos1 - centre1.y*fsin1) + centre1.x;
+    vec1.y:= -round(centre1.x*fsin1 + centre1.y*fcos1) + centre1.y;
+   end;
+   ft_set_transform(fftface,@mat1,@vec1);
+  end
+  else begin
+   ft_set_transform(fftface,@mat1,nil);
+  end;
  end
  else begin
   ft_set_transform(fftface,nil,nil);
  end;
- if ft_load_glyph(fftface,ft_get_char_index(fftface,ord(achar)),
-                                          ft_load_default) = 0 then begin
+ if ft_load_glyph(fftface,charindex1,ft_load_default) = 0 then begin
   if ft_render_glyph(fftface^.glyph,ft_render_mode_normal) = 0 then begin
-   abitmap.options:= [bmo_masked,bmo_graymask];
+   abitmap.options:= abitmap.options + [bmo_masked,bmo_graymask];
    with fftface^.glyph^.bitmap do begin //todo: check bitmap format
     if (width > 0) and (rows > 0) then begin
      sourcesize.cx:= width;
      sourcesize.cy:= rows;
      if acell then begin
-      destsize.cx:= (fftface^.glyph^.advance.x + 32) div 64;
+//      destsize.cx:= (fftface^.glyph^.advance.x + 32) div 64;
+      with fftface^.glyph^.metrics do begin
+       destsize.cx:= (horiadvance + 32) div 64;
+      end;
       destsize.cy:= fglyphheight;
       deststart.x:= aframe.left + fftface^.glyph^.bitmap_left;
       deststart.y:= aframe.top + fascent - fftface^.glyph^.bitmap_top;
@@ -149,7 +184,9 @@ begin
      end; 
      destsize.cx:= destsize.cx + aframe.left + aframe.right;
      destsize.cy:= destsize.cy + aframe.top + aframe.bottom;
-     if (destsize.cx > 0) and (destsize.cx > 0) then begin
+     if (destsize.cx > 0) and (destsize.cx > 0) and 
+                         (deststart.x < destsize.cx) and 
+                                   (deststart.y < destsize.cy) then begin
       abitmap.size:= destsize;
       sourcestart.x:= 0;
       if deststart.x < 0 then begin
@@ -172,21 +209,6 @@ begin
       abitmap.size:= destsize;
       abitmap.mask.init(0);
       de:= abitmap.mask.scanline[deststart.y] + deststart.x;
-     {
-       abitmap.size:= ms((fftface^.glyph^.advance.x + 32) div 64,fglyphheight);
-       de:= abitmap.mask.scanline[fascent-fftface^.glyph^.bitmap_top];
-       if rows1 > abitmap.height then begin
-        rows1:= abitmap.height;
-       end;
-       if width1 > abitmap.width then begin
-        width1:= abitmap.width;
-       end;
-      end
-      else begin
-       abitmap.size:= ms(width,rows);
-       de:= abitmap.mask.scanline[0];
-      end;
-      }
       abitmap.init(acolor);
       if pitch < 0 then begin
        so:= buffer+(rows-1-sourcestart.y)*pitch;
@@ -209,6 +231,7 @@ begin
    result:= true;
   end;
  end;
+endlab:
  abitmap.endupdate();
 end;
 
@@ -243,6 +266,13 @@ function tftglyphs.getcell(const abitmap: tmaskedbitmap; const achar: card32;
                const acolor: colorty = cl_text): boolean;
 begin
  result:= internalgetglyph(abitmap,achar,0.0,aframe,acolor,true);
+end;
+
+function tftglyphs.getcell(const abitmap: tmaskedbitmap; const achar: card32;
+               const arotation: real; const aframe: framety;
+               const acolor: colorty = cl_text): boolean;
+begin
+ result:= internalgetglyph(abitmap,achar,arotation,aframe,acolor,true);
 end;
 
 end.

@@ -436,7 +436,7 @@ var
 begin
  selstart:= selectstart;
  selend:= selectend;
- normalizeselectedrows(int1,int2);
+ getselectedrows(int1,int2);
  ch1:= ' ';
  if atabs then begin
   ch1:= c_tab;
@@ -475,7 +475,7 @@ var
 begin
  selstart:= selectstart;
  selend:= selectend;
- normalizeselectedrows(int1,int2);
+ getselectedrows(int1,int2);
  pos1:= makegridcoord(0,int1);
  pos2.row:= int1;
  po1:= datalist.datapo;
@@ -572,6 +572,9 @@ var
  pos1: gridcoordty;
 begin
  pos1:= wordatpos(apos,str1,delimchars,[]);
+ if str1 = '' then begin
+  pos1:= wordatpos(apos,str1,delimchars,[],true);
+ end;
  if str1 <> '' then begin
   setselection(pos1,makegridcoord(pos1.col+length(str1),pos1.row),true);
  end;

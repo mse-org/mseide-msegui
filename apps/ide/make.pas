@@ -148,7 +148,7 @@ begin
  designnotifications.beforemake(idesigner(designer),atag,bo1);
  if not bo1 then begin
   maker:= tmaker.Create(atag);
-  if projectoptions.o.closemessages then begin
+  if projectoptions.s.closemessages then begin
    messagefo.messages.show;
   end;
  end;
@@ -178,12 +178,12 @@ function buildmakecommandline(const atag: integer): msestring;
  end;
  
 var
- int1,int2: integer;
+ int1,int2,step: integer;
  str1,str2,str3: msestring;
  ar1: filenamearty;
 // wstr1: filenamety;
 begin
- with projectoptions,o,texp do begin
+ with projectoptions,k,texp do begin
   if makecommand = '' then begin
    result:= '';
    exit;
@@ -202,7 +202,18 @@ begin
   if int1 < int2 then begin
    int2:= int1;
   end;
-  for int1:= 0 to int2 do begin
+  if not projectoptions.k.reversepathorder then begin
+   int1:= int2;
+   int2:= -1;
+   step:= -1;
+  end
+  else begin
+   int1:= 0;
+   int2:= int2+1;
+   step:= 1;
+  end;
+  while int1 <> int2 do begin
+//  for int1:= int1 to int2 do begin
    if (atag and unitdirson[int1] <> 0) and
          (unitdirs[int1] <> '') then begin
     str2:= normalizename(unitdirs[int1]);
@@ -219,6 +230,7 @@ begin
      str1:= str1 + ' ' + quotefilename(objpref+str2);
     end;
    end;
+   inc(int1,step);
   end;
   for int1:= 0 to high(makeoptions) do begin
    if (atag and makeoptionson[int1] <> 0) and
@@ -234,7 +246,7 @@ end;
 procedure dodownload;
 begin
  killload;
- if projectoptions.o.closemessages then begin
+ if projectoptions.s.closemessages then begin
   messagefo.messages.show;
  end;
  loader:= tloader.create(nil);
@@ -262,8 +274,8 @@ constructor tprogrunner.create(const aowner: tcomponent;
                               const clearscreen,setmakedir: boolean);
 begin
  inherited create(aowner);
- with projectoptions,o.texp do begin
-  if o.copymessages and (messageoutputfile <> '') and not fnofilecopy then begin
+ with projectoptions,s.texp do begin
+  if s.copymessages and (messageoutputfile <> '') and not fnofilecopy then begin
    fmessagefile:= ttextstream.create(messageoutputfile,fm_create);
   end;
   messagepipe:= tpipereader.create;
@@ -306,7 +318,7 @@ begin
  fmessagefinished:= false;
  ffinished:= false;
  procid:= invalidprochandle;
- with projectoptions,o.texp do begin
+ with projectoptions,k.texp do begin
   if fsetmakedir and (makedir <> '') then begin
    wdbefore:= setcurrentdirmse(makedir);
   end;
@@ -418,12 +430,12 @@ end;
 function tmaker.getcommandline: msestring;
 begin
  result:= '';
- with projectoptions,o do begin
+ with projectoptions,k do begin
   if fstep = maks_before then begin
    while fscriptnum <= high(befcommandon) do begin
     if (befcommandon[fscriptnum] and fmaketag <> 0) and 
                            (fscriptnum <= high(texp.befcommand)) then begin
-     result:= o.texp.befcommand[fscriptnum];
+     result:= k.texp.befcommand[fscriptnum];
      break;
     end;
     inc(fscriptnum);
@@ -445,8 +457,8 @@ begin
   if fstep = maks_after then begin
    while fscriptnum <= high(aftcommandon) do begin
     if (aftcommandon[fscriptnum] and fmaketag <> 0) and 
-                           (fscriptnum <= high(o.texp.aftcommand)) then begin
-     result:= o.texp.aftcommand[fscriptnum];
+                           (fscriptnum <= high(k.texp.aftcommand)) then begin
+     result:= k.texp.aftcommand[fscriptnum];
      break;
     end;
     inc(fscriptnum);

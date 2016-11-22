@@ -224,7 +224,7 @@ object mainfo: tmainfo
         state = [as_localcaption]
       end    
       item
-        submenu.count = 13
+        submenu.count = 14
         submenu.items = <        
           item
             action = actionsmo.selecteditpage
@@ -246,6 +246,9 @@ object mainfo: tmainfo
           end        
           item
             action = actionsmo.copylatexact
+          end        
+          item
+            action = actionsmo.copyword
           end        
           item
             action = actionsmo.cut
@@ -690,7 +693,6 @@ object mainfo: tmainfo
         state = [as_localcaption, as_localonexecute]
         onexecute = aboutonexecute
       end>
-    menu.coloractive = -1879048187
     left = 103
     top = 88
   end

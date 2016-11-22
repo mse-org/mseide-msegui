@@ -85,7 +85,8 @@ type
    fps_pagenumber: integer;
    fmapnames: array[0..255] of string;
    factfont,factcodepage: integer;
-   fstarted: boolean;
+//   fstarted: boolean;
+   flandscape: boolean;
    fpslevel: pslevelty;
    fimagecache: imagecachearty;
    fcacheorder: integerarty;
@@ -95,6 +96,7 @@ type
    procedure setimagecachesize(const avalue: integer);
    procedure setimagecachemaxitemsize(const avalue: integer);
   protected
+   fhaspage: boolean;
    procedure gcdestroyed(const sender: tcanvas); override;
    procedure freeimagecache(const index: integer);
    procedure touchimagecache(const index: integer);
@@ -114,6 +116,7 @@ type
    procedure initgcstate; override;
    procedure initgcvalues; override;
    procedure finalizegcstate; override;
+   procedure checkgcstate(state: canvasstatesty) override;
    procedure checkscale;
    function encodefontname(const namenum,codepage: integer): string;
    function checkfont(const afont: fontnumty; const acodepage: integer): integer;
@@ -179,7 +182,11 @@ type
    function rectsizestring(const asize: sizety): string;
    function sizestring(const asize: sizety): string;
    function rectstring(const arect: rectty): string;
-   procedure pscommand(const atext: string); // writes atext to postscript stream
+   procedure pscommandbegin();
+   procedure pscommandwrite(const atext: string);
+   procedure pscommandend();
+   procedure pscommand(const atext: string); 
+                    // writes atext to postscript stream
   published
    property pslevel: pslevelty read fpslevel write fpslevel default psl_3;
    property imagecachesize: integer read fimagecachesize write setimagecachesize 
@@ -192,6 +199,10 @@ type
 function psrealtostr(const avalue: real): string;
 procedure pstranslate(var mat: psmatrixty; const dist: pspointty);
 procedure psretranslate(var mat: psmatrixty; const dist: pspointty);
+procedure psscale(var mat: psmatrixty; const scale: pspointty);
+procedure psscale(var mat: psmatrixty; const scale: flo64);
+procedure psscalex(var mat: psmatrixty; const scale: flo64);
+procedure psscaley(var mat: psmatrixty; const scale: flo64);
 procedure psrotate(var mat: psmatrixty; const angle: real); //radiant
 function pstransform(const mat: psmatrixty;
               const apoint: pspointty): pspointty; overload;
@@ -200,6 +211,7 @@ function pstransform(const mat: psmatrixty;
 function psdist(const source,dest: pspointty): pspointty; overload;
 //function psdist(const source,dest: pointty): pspointty; overload;
 function pspoint(const apoint: pointty): pspointty;
+procedure psnormalizerect(var ll,ur: pspointty);
  
 implementation
 uses
@@ -221,6 +233,40 @@ procedure psretranslate(var mat: psmatrixty; const dist: pspointty);
 begin
  mat[2,0]:= mat[2,0] - dist.x;
  mat[2,1]:= mat[2,1] - dist.y;
+end;
+
+procedure psscalex(var mat: psmatrixty; const scale: flo64);
+begin
+ mat[0,0]:= mat[0,0] * scale;
+ mat[1,0]:= mat[1,0] * scale;
+ mat[2,0]:= mat[2,0] * scale;
+end;
+
+procedure psscaley(var mat: psmatrixty; const scale: flo64);
+begin
+ mat[0,1]:= mat[0,1] * scale;
+ mat[1,1]:= mat[1,1] * scale;
+ mat[2,1]:= mat[2,1] * scale;
+end;
+
+procedure psscale(var mat: psmatrixty; const scale: pspointty);
+begin
+ mat[0,0]:= mat[0,0] * scale.x;
+ mat[1,0]:= mat[1,0] * scale.x;
+ mat[2,0]:= mat[2,0] * scale.x;
+ mat[0,1]:= mat[0,1] * scale.y;
+ mat[1,1]:= mat[1,1] * scale.y;
+ mat[2,1]:= mat[2,1] * scale.y;
+end;
+
+procedure psscale(var mat: psmatrixty; const scale: flo64);
+begin
+ mat[0,0]:= mat[0,0] * scale;
+ mat[1,0]:= mat[1,0] * scale;
+ mat[2,0]:= mat[2,0] * scale;
+ mat[0,1]:= mat[0,1] * scale;
+ mat[1,1]:= mat[1,1] * scale;
+ mat[2,1]:= mat[2,1] * scale;
 end;
 
 procedure psrotate(var mat: psmatrixty; const angle: real); //radiant
@@ -272,6 +318,22 @@ function pspoint(const apoint: pointty): pspointty;
 begin
  result.x:= apoint.x;
  result.y:= apoint.y;
+end;
+
+procedure psnormalizerect(var ll,ur: pspointty);
+var
+ f1: flo64;
+begin
+ if ll.x > ur.x then begin
+  f1:= ll.x;
+  ll.x:= ur.x;
+  ur.x:= f1;
+ end;
+ if ll.y > ur.y then begin
+  f1:= ll.y;
+  ll.y:= ur.y;
+  ur.y:= f1;
+ end;
 end;
 
 const
@@ -720,12 +782,23 @@ end;
 
 procedure tpostscriptcanvas.checkscale;
 begin
- if fstarted then begin
+ if fhaspage then begin
+  if (printorientation = pao_landscape) xor flandscape then begin
+   if flandscape then begin
+    streamwriteln('-90 rotate');
+   end
+   else begin
+    streamwriteln('90 rotate');
+   end;
+   flandscape:= not flandscape;
+  end;
+{
   streamwrite('initmatrix ');
   if printorientation = pao_landscape then begin
    streamwrite(' 90 rotate');
   end;
   streamwriteln('');
+}
  end;
 end;
 
@@ -761,8 +834,9 @@ begin
 '%%EndProlog'+nl,true);
  end;
  fpreamble:= '';
- fstarted:= true;
- beginpage;
+ fhaspage:= false;
+// fstarted:= true;
+// beginpage;
 end;
 
 procedure tpostscriptcanvas.initgcvalues;
@@ -777,7 +851,16 @@ begin
   streamwrite(
 '%%EndProlog'+nl,true);
  end;
- fstarted:= false;
+ fhaspage:= false;
+// fstarted:= false;
+ inherited;
+end;
+
+procedure tpostscriptcanvas.checkgcstate(state: canvasstatesty);
+begin
+ if (state - [cs_gc] <> []) and not fhaspage then begin
+  beginpage();
+ end;
  inherited;
 end;
 
@@ -1368,9 +1451,9 @@ begin
    ' 1 index '+       //llx,lly,urx
    psrealtostr(foriginy-(rect1.y)*fgcscale)+' '; //llx,lly,urx,ury
  end;
- int1:= {$ifdef FPC}longword{$else}longword{$endif}(flags*mask1) or
-        ({$ifdef FPC}longword{$else}longword{$endif}(flags*mask2) shr 1); 
-        //remove tf_xjustify
+ int1:= (longword(flags*mask1) shr 1) or
+        (longword(flags*mask2) shr 3); 
+        //remove tf_left, tf_xjustify and tf_top
  str1:= str1+alignmentsubs[tftopa[int1]];
 {
  if fs_underline in font.style then begin
@@ -2250,20 +2333,6 @@ endlab:
  end;
 end;
 
-procedure tpostscriptcanvas.endpage;
-var
- int1: integer;
-begin
- inherited;
- if active then begin
-  for int1:= 0 to high(fimagecache) do begin
-   freeimagecache(int1);
-  end;
-  streamwrite('showpage'+nl);
-  inc(fps_pagenumber);
- end;
-end;
-
 procedure tpostscriptcanvas.beginpage;
 var
  str1: string;
@@ -2273,9 +2342,28 @@ begin
   str1:= ' '+inttostr(fps_pagenumber+1);
   streamwrite('%%Page:'+str1+str1+nl+
               '%%PageOrientation: '+pageorientations[printorientation]+nl);
+  streamwriteln('gsave');
+  flandscape:= false;
+  fhaspage:= true;
   checkscale;
  end;
  inherited;
+end;
+
+procedure tpostscriptcanvas.endpage;
+var
+ int1: integer;
+begin
+ inherited;
+ if active then begin
+  for int1:= 0 to high(fimagecache) do begin
+   freeimagecache(int1);
+  end;
+  streamwriteln('grestore');
+  streamwrite('showpage'+nl);
+  fhaspage:= false;
+  inc(fps_pagenumber);
+ end;
 end;
 
 function tpostscriptcanvas.registermap(const acodepage: integer): string;
@@ -2331,13 +2419,28 @@ begin
  checkscale;
 end;
 
-procedure tpostscriptcanvas.pscommand(const atext: string);
+procedure tpostscriptcanvas.pscommandbegin();
 begin
  fdrawinfo.acolorforeground:= color;
  fdrawinfo.acolorbackground:= colorbackground;
  checkgcstate(changedmask);
+end;
+
+procedure tpostscriptcanvas.pscommandwrite(const atext: string);
+begin
  streamwrite(atext);
+end;
+
+procedure tpostscriptcanvas.pscommandend();
+begin
  initgcvalues;
+end;
+
+procedure tpostscriptcanvas.pscommand(const atext: string);
+begin
+ pscommandbegin();
+ pscommandwrite(atext);
+ pscommandend()
 end;
 
 procedure tpostscriptcanvas.freeimagecache(const index: integer);

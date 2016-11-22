@@ -106,8 +106,8 @@ type
    procedure internalExecute(const cursor: TSQLCursor; const atransaction: tsqltransaction;
                      const AParams : TmseParams; const autf8: boolean); override;
    procedure internalexecuteunprepared(const cursor: tsqlcursor;
-               const atransaction: tsqltransaction;
-               const asql: string); override;
+               const atransaction: tsqltransaction; const asql: string;
+               const origsql: msestring; const aparams: tmseparams); override;
    function GetTransactionHandle(trans : TSQLHandle): pointer; override;
    function RollBack(trans : TSQLHandle) : boolean; override;
    function Commit(trans : TSQLHandle) : boolean; override;
@@ -135,7 +135,8 @@ type
              out newid: string);
    procedure setupblobdata(const afield: tfield; const acursor: tsqlcursor;
                                    const aparam: tparam);
-   function blobscached: boolean;
+//   function getfeatures(): databasefeaturesty override;
+//   function blobscached: boolean;
 
           //idbevent
    procedure listen(const sender: tdbevent);
@@ -179,6 +180,7 @@ type
 //    property LoginPrompt;
     property Params;
 //    property OnLogin;
+    property ongetcredentials;
     property eventinterval: integer read geteventinterval 
                      write seteventinterval default defaultdbeventinterval;
   end;
@@ -270,7 +272,8 @@ constructor tpqconnection.create(aowner: tcomponent);
 begin
  feventcontroller:= tdbeventcontroller.create(idbeventcontroller(self));
  inherited;
- fconnoptions:= fconnoptions + [sco_supportparams,sco_emulateretaining];
+ fconnoptions:= fconnoptions + [sco_supportparams,sco_emulateretaining,
+                                                              sco_blobscached];
 end;
 
 destructor TPQConnection.destroy;
@@ -395,19 +398,28 @@ begin
 end;
 
 function tpqconnection.constructconnectstring: ansistring;
+var
+ u,p: msestring;          //how to define encoding of connectionstring?
+ u1,p1: string;
 begin
  result:= '';
- if (UserName <> '') then begin
-  result := result + ' user=''' + UserName + '''';
+ getcredentials(u,p);          
+ if (U <> '') then begin
+  u1:= ansistring(u);
+  result := result + ' user=''' + U1 + '''';
+  stringsafefree(u1,false);
  end;
- if (Password <> '') then begin
-  result:= result + ' password=''' + Password + '''';
+ if (P <> '') then begin
+  p1:= ansistring(p);
+  result:= result + ' password=''' + P1 + '''';
+  stringsafefree(p1,false);
  end;
+ freecredentials(u,p);
  if (HostName <> '') then begin
-  result:= result + ' host=''' + HostName + '''';
+  result:= result + ' host=''' + ansistring(HostName) + '''';
  end;
  if (DatabaseName <> '') then begin
-  result:= result + ' dbname=''' + DatabaseName + '''';
+  result:= result + ' dbname=''' + ansistring(DatabaseName) + '''';
  end
  else begin
   result:= result + ' dbname=''' + 'postgres' + '''';
@@ -864,8 +876,8 @@ begin
 end;
 
 procedure tpqconnection.internalexecuteunprepared(const cursor: tsqlcursor;
-               const atransaction: tsqltransaction;
-               const asql: string);
+               const atransaction: tsqltransaction; const asql: string;
+                const origsql: msestring; const aparams: tmseparams);
 begin
  with TPQCursor(cursor) do begin
   tr := TPQTrans(cursor.ftrans);
@@ -1475,17 +1487,22 @@ procedure TPQConnection.setupblobdata(const afield: tfield;
 begin
  acursor.blobfieldtoparam(afield,aparam,false);
 end;
-
+{
+function TPQConnection.getfeatures(): databasefeaturesty;
+begin
+ result:= inherited getfeatures() + [dbf_blobscached];
+end;
+}
 function TPQConnection.getblobdatasize: integer;
 begin
  result:= sizeof(integer);
 end;
-
+{
 function TPQConnection.blobscached: boolean;
 begin
  result:= true;
 end;
-
+}
 procedure TPQConnection.dolisten(const sender: tdbevent);
 begin
  dopqexec('LISTEN '+sender.eventname+';');

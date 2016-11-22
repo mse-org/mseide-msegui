@@ -109,7 +109,8 @@ type
   ac_objectinspector,             //79 Object Inspector
   ac_storecomponent,              //80 Store Component
   ac_attachingprocess,            //81 Attaching Process
-  ac_loading                      //82 Loading
+  ac_loading,                     //82 Loading
+  ac_sizingform                   //83 Sizing Form
  );
 
 type
@@ -219,6 +220,9 @@ type
    tool7: taction;
    tool8: taction;
    tool9: taction;
+   comment: taction;
+   uncomment: taction;
+   copyword: taction;
    procedure findinfileonexecute(const sender: tobject);
 
    //file
@@ -239,7 +243,7 @@ type
    procedure cutactonexecute(const sender: tobject);
 
    procedure indentonexecute(const sender: TObject);
-   procedure unindentonexecute(const sender: TObject);
+   procedure unidentonexecute(const sender: TObject);
    procedure lowercaseexecute(const sender: TObject);
    procedure uppercaseexecute(const sender: TObject);
    procedure enableonselect(const sender: tcustomaction);
@@ -291,6 +295,11 @@ type
    procedure findcompexe(const sender: TObject);
    procedure findcompallexe(const sender: TObject);
    procedure forcezorderexe(const sender: TObject);
+   procedure commentonexecute(const sender: TObject);
+   procedure uncommentonexecute(const sender: TObject);
+   procedure enablecomment(const sender: tcustomaction);
+   procedure enableuncomment(const sender: tcustomaction);
+   procedure selectwordactiononexecute(const sender: TObject);
   private
    function filterfindcomp(const acomponent: tcomponent): boolean;
   public
@@ -460,6 +469,11 @@ begin
  sourcefo.activepage.edit.deleteselection;
 end;
 
+procedure tactionsmo.selectwordactiononexecute(const sender: TObject);
+begin
+ sourcefo.activepage.copywordatcursor();
+end;
+
 procedure tactionsmo.selecteditpageonexecute(const sender: TObject);
 begin
  selecteditpageform.selecteditpage;
@@ -501,7 +515,7 @@ begin
                                             projectoptions.e.tabindent);
 end;
 
-procedure tactionsmo.unindentonexecute(const sender: TObject);
+procedure tactionsmo.unidentonexecute(const sender: TObject);
 begin
  sourcefo.activepage.edit.unindent(projectoptions.e.blockindent);
 end;
@@ -520,6 +534,28 @@ procedure tactionsmo.enableonselect(const sender: tcustomaction);
 begin
  sender.enabled:= (sourcefo.activepage <> nil) and 
                                       sourcefo.activepage.edit.hasselection;
+end;
+
+procedure tactionsmo.enablecomment(const sender: tcustomaction);
+begin
+ enableonselect(sender);
+ sender.enabled:= sender.enabled and  sourcefo.activepage.cancomment();
+end;
+
+procedure tactionsmo.enableuncomment(const sender: tcustomaction);
+begin
+ enableonselect(sender);
+ sender.enabled:= sender.enabled and  sourcefo.activepage.canuncomment();
+end;
+
+procedure tactionsmo.commentonexecute(const sender: TObject);
+begin
+ sourcefo.activepage.commentselection();
+end;
+
+procedure tactionsmo.uncommentonexecute(const sender: TObject);
+begin
+ sourcefo.activepage.uncommentselection();
 end;
 
 procedure tactionsmo.lineactonexecute(const sender: TObject);
@@ -766,7 +802,7 @@ end;
 
 procedure tactionsmo.projectsourceexe(const sender: TObject);
 begin
- sourcefo.openfile(projectoptions.o.texp.mainfile,true);
+ sourcefo.openfile(projectoptions.k.texp.mainfile,true);
 end;
 
 procedure tactionsmo.projectsaveexe(const sender: TObject);
@@ -842,8 +878,8 @@ end;
 
 procedure tactionsmo.forcezorderexe(const sender: TObject);
 begin
- if projectoptions.o <> nil then begin
-  projectoptions.o.forcezorder:= taction(sender).checked;
+ if projectoptions.s <> nil then begin
+  projectoptions.s.forcezorder:= taction(sender).checked;
   projectoptionsmodified();
  end;
 end;

@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2015 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2016 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -32,7 +32,6 @@ uses
 const
  emptyinteger = minint;
  valuevarname = 'value';
- defaulttextflagsempty = [tf_ycentered,tf_xcentered];
  
 type
  tcustomdataedit = class;
@@ -47,11 +46,6 @@ type
  textchangeeventty = procedure(const sender: tcustomdataedit;
                                       const atext: msestring) of object;
 
- emptyoptionty = (eo_defaulttext,   //use text of tfacecontroller
-                  eo_showfocused,     //show empty_text if focused
-                  eo_nocolorfocused); //do not show empty_color if focused 
- emptyoptionsty = set of emptyoptionty;
-
  tcustomdataedit = class(tcustomedit,igridwidget,istatfile,idragcontroller
                          {$ifdef mse_with_ifi},iifidatalink{$endif})
   private
@@ -64,28 +58,13 @@ type
    fstatvarname: msestring;
    fongettext: gettexteventty;
    fonsettext: settexteventty;
-   fempty_text: msestring;
-   fempty_textflags: textflagsty;
-   fempty_textcolor: colorty;
-   fempty_textcolorbackground: colorty;
-   fempty_fontstyle: fontstylesty;
-   fempty_color: colorty;
-   fempty_options: emptyoptionsty;
    fstatpriority: integer;
-   procedure emptychanged;
    
    procedure setstatfile(const Value: tstatfile);
-   procedure setempty_text(const avalue: msestring);
-   procedure setempty_textflags(const avalue: textflagsty);
-   procedure setempty_textcolor(const avalue: colorty);
-   procedure setempty_textcolorbackground(const avalue: colorty);
-   procedure setempty_fontstyle(const avalue: fontstylesty);
-   procedure setempty_color(const avalue: colorty);
    function getgridrow: integer;
    procedure setgridrow(const avalue: integer);
    function getdisptext: msestring;
   protected
-   fstate: dataeditstatesty;
    fgridintf: iwidgetgrid;
    fgriddatalink: pointer;
    fdatalist: tdatalist;
@@ -110,8 +89,7 @@ type
    procedure updatedatalist; virtual;
    function geteditstate: dataeditstatesty;
    procedure seteditstate(const avalue: dataeditstatesty);
-   procedure updateemptytext();
-   procedure updateedittext(const force: boolean);
+//   procedure updateedittext(const force: boolean);
    function getgridintf: iwidgetgrid;
    procedure checkgrid;
    function checkgriddata: tdatalist; overload;
@@ -125,6 +103,8 @@ type
    procedure valuechanged; virtual;
    procedure dotextchange; virtual;
    procedure modified; virtual; //for dbedits
+   function gettext: msestring override;
+   function getedittext(): msestring override;
    procedure checktext(var atext: msestring; var accept: boolean);
    procedure texttovalue(var accept: boolean;
                              const quiet: boolean); virtual; abstract;
@@ -134,17 +114,16 @@ type
    function internaldatatotext(const data): msestring; virtual; abstract;
    procedure valuetotext;
    procedure setenabled(const avalue: boolean); override;
-   procedure updatetextflags; override;
+//   procedure updatetextflags; override;
    procedure dodefocus; override;
    procedure dofocus; override;
-   procedure formatchanged;
+   procedure formatchanged; override;
    procedure loaded; override;
    procedure fontchanged; override;
    procedure dofontheightdelta(var delta: integer); override;
    procedure sizechanged; override;
    function geteditfont: tfont; override;
    class function classskininfo: skininfoty; override;
-   procedure dopaintbackground(const canvas: tcanvas); override;
 
    function setdropdowntext(const avalue: msestring; const docheckvalue: boolean;
                 const canceled: boolean; const akey: keyty): boolean;
@@ -166,7 +145,6 @@ type
    function locatecurrentindex: integer; override; //index of current row
    procedure locatesetcurrentindex(const aindex: integer); override;
    function getkeystring(const aindex: integer): msestring; override; //locate text
-                   
     //igridwidget
    procedure setfirstclick(var ainfo: mouseeventinfoty); virtual;
    function createdatalist(const sender: twidgetcol): tdatalist; 
@@ -247,7 +225,6 @@ type
    function getedited: boolean; override;
    procedure setedited(const avalue: boolean); virtual;
   public
-   constructor create(aowner: tcomponent); override;
    
    procedure initnewwidget(const ascale: real); override;
    procedure initgridwidget; virtual;
@@ -278,23 +255,10 @@ type
    property statvarname: msestring read getstatvarname write fstatvarname;
    property statpriority: integer read fstatpriority 
                                        write fstatpriority default 0;
-   property empty_options: emptyoptionsty read fempty_options 
-                                           write fempty_options default [];
-   property empty_color: colorty read fempty_color write setempty_color 
-                                           default cl_none;
-   property empty_font: twidgetfontempty read getfontempty write setfontempty 
-                                                  stored isfontemptystored;
-   property empty_fontstyle: fontstylesty read fempty_fontstyle 
-                    write setempty_fontstyle default [];
-   property empty_textflags: textflagsty read fempty_textflags 
-                    write setempty_textflags default defaulttextflagsempty;
-   property empty_text: msestring read fempty_text write setempty_text;
-   property empty_textcolor: colorty read fempty_textcolor 
-                                   write setempty_textcolor default cl_none;
-   property empty_textcolorbackground: colorty read fempty_textcolorbackground
-                          write setempty_textcolorbackground default cl_none;
-   property oncheckvalue: checkvalueeventty read foncheckvalue write foncheckvalue;
-   property ondataentered: notifyeventty read fondataentered write fondataentered;
+   property oncheckvalue: checkvalueeventty read foncheckvalue 
+                                                      write foncheckvalue;
+   property ondataentered: notifyeventty read fondataentered 
+                                                      write fondataentered;
    property ongettext: gettexteventty read fongettext write fongettext;
    property onsettext: settexteventty read fonsettext write fonsettext;
    property ontextchange: textchangeeventty read fontextchange 
@@ -434,6 +398,7 @@ type
    procedure mouseevent(var info: mouseeventinfoty); override;
    procedure domousewheelevent(var info: mousewheeleventinfoty); override;
    procedure dokeydown(var info: keyeventinfoty); override;
+   function getnoscroll(): boolean override;
     //iscrollbar
    procedure scrollevent(sender: tcustomscrollbar; event: scrolleventty);
   public
@@ -506,8 +471,8 @@ type
   private
    fonbeforedropdown: notifyeventty;
    fonafterclosedropdown: notifyeventty;
-   function getframe: tdropdownbuttonframe;
-   procedure setframe(const avalue: tdropdownbuttonframe);
+   function getframe: tdropdownmultibuttonframe;
+   procedure setframe(const avalue: tdropdownmultibuttonframe);
   protected
    fdropdown: tcustomdropdowncontroller;
    function createdropdowncontroller: tcustomdropdowncontroller; virtual;
@@ -523,6 +488,8 @@ type
    procedure dobeforedropdown; virtual;
    procedure doafterclosedropdown; virtual;
    function getvalueempty: integer; virtual;
+   procedure dostatread(const reader: tstatreader); override;
+   procedure dostatwrite(const writer: tstatwriter); override;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -530,7 +497,7 @@ type
    property onafterclosedropdown: notifyeventty read fonafterclosedropdown
                    write fonafterclosedropdown;
   published
-   property frame: tdropdownbuttonframe read getframe write setframe;
+   property frame: tdropdownmultibuttonframe read getframe write setframe;
  end;
 
  tcustomdropdownwidgetedit = class(tcustomdropdownedit,idropdownwidget)
@@ -544,7 +511,8 @@ type
                         out awidget: twidget); virtual; abstract;
    function getdropdowntext(const awidget: twidget): msestring; virtual; abstract;
   public
-   property dropdown: tdropdownwidgetcontroller read getdropdown write setdropdown;
+   property dropdown: tdropdownwidgetcontroller read getdropdown 
+                                                        write setdropdown;
  end;
 
  tdropdownwidgetedit = class(tcustomdropdownwidgetedit)
@@ -580,8 +548,6 @@ type
     //iifidatalink
    function getifilinkkind: ptypeinfo; override;
   {$endif}
-   procedure dostatread(const reader: tstatreader); override;
-   procedure dostatwrite(const writer: tstatwriter); override;
     //idropdownlist
    function getdropdownitems: tdropdowndatacols; virtual;
    function createdropdowncontroller: tcustomdropdowncontroller; override;
@@ -1240,6 +1206,9 @@ type
    property framewidth;
    property colorframe;
    property colorframeactive;
+   property colorframedisabled;
+   property colorframemouse;
+   property colorframeclicked;
    property colordkshadow;
    property colorshadow;
    property colorlight;
@@ -1507,15 +1476,13 @@ begin
 end;
 }
 { tcustomdataedit }
-
+{
 constructor tcustomdataedit.create(aowner: tcomponent);
 begin
- fempty_textflags:= defaulttextflagsempty;
- fempty_textcolor:= cl_none;
- fempty_textcolorbackground:= cl_none;
- fempty_color:= cl_none;
+ include(fstate,des_isdataedit);
  inherited;
 end;
+}
 {
 destructor tcustomdataedit.destroy;
 begin
@@ -1712,7 +1679,7 @@ function tcustomdataedit.emptytext: boolean;
 begin
  result:= des_emptytext in fstate;
 end;
-
+{
 procedure tcustomdataedit.updatetextflags;
 var
  aflags: textflagsty;
@@ -1736,54 +1703,19 @@ begin
   end;
  end;
 end;
+}
 
-procedure tcustomdataedit.updateemptytext();
+function tcustomdataedit.gettext: msestring;
 begin
+ result:= inherited gettext();
  if des_emptytext in fstate then begin
-  include(tinplaceedit1(feditor).fstate,ies_emptytext);
-  feditor.font:= getfontempty1{fempty_font};
-  if fempty_textcolor <> cl_none then begin
-   feditor.fontcolor:= fempty_textcolor;
-  end;
-  if fempty_textcolorbackground <> cl_none then begin
-   feditor.fontcolorbackground:= fempty_textcolorbackground;
-  end;
-  if fempty_fontstyle <> [] then begin
-   feditor.fontstyle:= fempty_fontstyle;
-  end;
- end
- else begin
-  exclude(tinplaceedit1(feditor).fstate,ies_emptytext);
-  feditor.font:= geteditfont;
-  feditor.fontcolor:= cl_none;
-  feditor.fontcolorbackground:= cl_none;
-  feditor.fontstyle:= [];
+  result:= '';
  end;
- updatetextflags();
 end;
 
-procedure tcustomdataedit.updateedittext(const force: boolean);
-var
- mstr1: msestring;
- state1: dataeditstatesty;
+function tcustomdataedit.getedittext(): msestring;
 begin
- state1:= fstate;
- {$ifdef FPC} {$checkpointer off} {$endif}
- mstr1:= datatotext(nil^);
- {$ifdef FPC} {$checkpointer default} {$endif}
- if (not(des_isdb in fstate) and (mstr1 = '') or (des_dbnull in fstate)) and 
-            (not focused or (eo_showfocused in fempty_options)) then begin
-  mstr1:= fempty_text;
-  include(fstate,des_emptytext);
- end
- else begin
-  exclude(fstate,des_emptytext);
- end;
- feditor.text:= mstr1;
- if force or ((des_emptytext in fstate) xor 
-                               (des_emptytext in state1)) then begin
-  updateemptytext();
- end;
+ result:= datatotext(nil^);
 end;
 
 function tcustomdataedit.getdisptext: msestring;
@@ -1795,34 +1727,9 @@ begin
  {$ifdef FPC} {$checkpointer default} {$endif}
  if (not(des_isdb in fstate) and (mstr1 = '') or 
                                    (des_dbnull in fstate)) then begin
-  mstr1:= fempty_text;
+  mstr1:= empty_text;
  end;
  result:= mstr1;
-end;
-
-procedure tcustomdataedit.dopaintbackground(const canvas: tcanvas);
-begin
- inherited;
- if (fempty_color <> cl_none) and 
-         (fstate * [des_emptytext,des_grayed] = [des_emptytext]) and 
-         (not (eo_nocolorfocused in fempty_options) or not focused)then begin
-  canvas.fillrect(paintclientrect,fempty_color);
- end;
-end;
-
-procedure tcustomdataedit.emptychanged;
-begin
- if not (csloading in componentstate) then begin
-  updateedittext(true);
- end;
-end;
-
-procedure tcustomdataedit.setempty_textflags(const avalue: textflagsty);
-begin
- if avalue <> fempty_textflags then begin
-  fempty_textflags:= checktextflags(fempty_textflags,avalue);
-  emptychanged;
- end;
 end;
 
 procedure tcustomdataedit.dodefocus;
@@ -1852,14 +1759,16 @@ begin
  end;
 end;
 
-procedure tcustomdataedit.formatchanged;
+procedure tcustomdataedit.formatchanged();
 begin
  if not (csloading in componentstate) then begin
   if fgridintf <> nil then begin
    fgridintf.changed;
   end;
-  updateedittext(false);
-  invalidate;
+  if not (des_edited in fstate) then begin
+   updateedittext(false); //do not touch pending modifications
+  end;
+  inherited;
  end;
 end;
 
@@ -1948,7 +1857,7 @@ begin
   feditor.undo;
  end
  else begin
-  text:= avalue;
+  text:= avalue; //setcurrenttext(avalue);
   if docheckvalue then begin
    result:= checkvalue;
    if not result then begin
@@ -1963,6 +1872,10 @@ begin
   else begin
    if not canceled then begin
     bo1:= true;
+    if des_emptytext in fstate then begin
+     exclude(fstate,des_emptytext);
+     updateemptytext();
+    end;
     texttovalue(bo1,true);
    end;
   end;
@@ -2070,7 +1983,9 @@ end;
 procedure tcustomdataedit.valuechanged;
 begin
  if not (csloading in componentstate) then begin
-  exclude(fstate,des_dbnull);
+  if not (ws_loadedproc in fwidgetstate) then begin
+   exclude(fstate,des_dbnull);
+  end;
   if (fgridintf <> nil) and not (csdesigning in componentstate) then begin
    valuetogrid(fgridintf.getrow);
   end;
@@ -2250,14 +2165,14 @@ begin
    mstr1:= charstring(passwordchar,length(mstr1));
   end;
   if not (des_isdb in fstate) and (mstr1 = '') and 
-                                  (fempty_text <> '') then begin
+                                  (empty_text <> '') then begin
    empty:= true;
-   mstr1:= fempty_text;
+   mstr1:= empty_text;
   end;
  end
  else begin
   empty:= true;
-  mstr1:= fempty_text;
+  mstr1:= empty_text;
  end;
  if canevent(tmethod(fongettext)) then begin
   fongettext(self,mstr1,false);
@@ -2302,20 +2217,20 @@ var
  procedure cellpaint(const rect: rectty; const innerrect: rectty);
  begin
   if (rect.cx > 0) and (rect.cy > 0) then begin
-   if bo1 and (fempty_color <> cl_none) and 
+   if bo1 and (empty_color <> cl_none) and 
                                   not (des_grayed in fstate) then begin
-    canvas.fillrect(rect,fempty_color);
+    canvas.fillrect(rect,empty_color);
    end;
    paintimage(canvas);
    if mstr1 <> '' then begin
     if bo1 then begin    
      canvas.font:= getfontempty1{fempty_font};
-     atextflags:= fempty_textflags;
-     if fempty_textcolor <> cl_none then begin
-      canvas.font.color:= fempty_textcolor;
+     atextflags:= empty_textflags;
+     if empty_textcolor <> cl_none then begin
+      canvas.font.color:= empty_textcolor;
      end;
-     if fempty_textcolorbackground <> cl_none then begin
-      canvas.font.color:= fempty_textcolorbackground;
+     if empty_textcolorbackground <> cl_none then begin
+      canvas.font.color:= empty_textcolorbackground;
      end;
     end;
     if des_grayed in fstate then begin
@@ -2336,8 +2251,8 @@ begin
  with cellinfoty(canvas.drawinfopo^) do begin
   mstr1:= getcelltext(datapo,bo1);
   if bo1 then begin    
-   if fempty_fontstyle <> [] then begin
-    canvas.font.style:= fempty_fontstyle;
+   if empty_fontstyle <> [] then begin
+    canvas.font.style:= empty_fontstyle;
    end;
   end;
   fra1:= geteditframe;
@@ -2653,11 +2568,6 @@ begin
  result:= mstr1;
 end;
 
-procedure tcustomdataedit.setempty_text(const avalue: msestring);
-begin
- fempty_text:= avalue;
- formatchanged;
-end;
 (*
 procedure tcustomdataedit.createfontempty;
 begin
@@ -2693,38 +2603,6 @@ begin
  emptychanged;
 end;
 *)
-procedure tcustomdataedit.setempty_textcolor(const avalue: colorty);
-begin
- if avalue <> fempty_textcolor then begin
-  fempty_textcolor:= avalue;
-  emptychanged;
- end;
-end;
-
-procedure tcustomdataedit.setempty_textcolorbackground(const avalue: colorty);
-begin
- if avalue <> fempty_textcolorbackground then begin
-  fempty_textcolorbackground:= avalue;
-  emptychanged;
- end;
-end;
-
-procedure tcustomdataedit.setempty_fontstyle(const avalue: fontstylesty);
-begin
- if avalue <> fempty_fontstyle then begin
-  fempty_fontstyle:= avalue;
-  emptychanged;
- end;
-end;
-
-procedure tcustomdataedit.setempty_color(const avalue: colorty);
-begin
- if avalue <> fempty_color then begin
-  fempty_color:= avalue;
-  invalidate;
- end;
-end;
-
 function tcustomdataedit.locatecount: integer;
 //var
 // datalist1: tdatalist;
@@ -2879,14 +2757,11 @@ begin
    modified();
    inherited;
   end;
+  ea_resetemptytext: begin
+   inherited;
+  end;
   ea_undone: begin
    updateedittext(true); //restore empty_* setings
-  end;
-  ea_resetemptytext: begin
-   if des_emptytext in fstate then begin
-    exclude(fstate,des_emptytext);
-    updateemptytext();
-   end;
   end;
   ea_textchanged: begin
    dotextchange;
@@ -3084,7 +2959,7 @@ end;
 
 function tcustomstringedit.getvaluetext: msestring;
 begin
- result:= feditor.text;
+ result:= text;
 end;
 
 procedure tcustomstringedit.updatedisptext(var avalue: msestring);
@@ -3550,6 +3425,13 @@ begin
  end;
 end;
 
+function tcustommemoedit.getnoscroll(): boolean;
+begin
+ result:= inherited getnoscroll() or needsfocuspaintstate() and 
+                             (tcustomframe1(fframe).haspaintrectfocus());
+                         //do not scroll focusrect
+end;
+
 procedure tcustommemoedit.setupeditor;
 begin
  inherited;
@@ -3814,12 +3696,12 @@ begin
  result:= fframe.cellframe;
 end;
 }
-function tcustomdropdownedit.getframe: tdropdownbuttonframe;
+function tcustomdropdownedit.getframe: tdropdownmultibuttonframe;
 begin
- result:= tdropdownbuttonframe(inherited getframe);
+ result:= tdropdownmultibuttonframe(inherited getframe);
 end;
 
-procedure tcustomdropdownedit.setframe(const avalue: tdropdownbuttonframe);
+procedure tcustomdropdownedit.setframe(const avalue: tdropdownmultibuttonframe);
 begin
  inherited setframe(avalue);
 end;
@@ -3848,6 +3730,18 @@ begin
  result:= -1;
 end;
 
+procedure tcustomdropdownedit.dostatread(const reader: tstatreader);
+begin
+ inherited;
+ fdropdown.dostatread(reader);
+end;
+
+procedure tcustomdropdownedit.dostatwrite(const writer: tstatwriter);
+begin
+ inherited;
+ fdropdown.dostatwrite(writer);
+end;
+
 {$ifdef mse_with_ifi}
 function tcustomdropdownedit.getifidatalinkintf: iifidatalink;
 begin
@@ -3862,14 +3756,14 @@ end;
 {
 function tcustomdropdownedit.getbutton: tdropdownbutton;
 begin
- with tdropdownbuttonframe(fframe) do begin
+ with tdropdownmultibuttonframe(fframe) do begin
   result:= tdropdownbutton(buttons[activebutton]);
  end;
 end;
 
 procedure tcustomdropdownedit.setbutton(const avalue: tdropdownbutton);
 begin
- with tdropdownbuttonframe(fframe) do begin
+ with tdropdownmultibuttonframe(fframe) do begin
   tdropdownbutton(buttons[activebutton]).assign(avalue);
  end;
 end;
@@ -3969,18 +3863,6 @@ begin
 end;
 
 {$endif}
-
-procedure tcustomdropdownlistedit.dostatread(const reader: tstatreader);
-begin
- inherited;
- tdropdownlistcontroller(fdropdown).dostatread(reader);
-end;
-
-procedure tcustomdropdownlistedit.dostatwrite(const writer: tstatwriter);
-begin
- inherited;
- tdropdownlistcontroller(fdropdown).dostatwrite(writer);
-end;
 
 function tcustomdropdownlistedit.geteditframe: framety;
 begin
@@ -4220,7 +4102,7 @@ begin
  end
  else begin
   try
-   mstr1:= feditor.text;
+   mstr1:= text;
    checktext(mstr1,accept);
    if not accept then begin
     exit;
@@ -5532,7 +5414,7 @@ var
 begin
  try
   if focused then begin
-   mstr1:= feditor.text;
+   mstr1:= text;
   end
   else begin
    mstr1:= realtytostrrange(fvalue,fformatedit,fvaluerange,fvaluestart)
@@ -6155,7 +6037,7 @@ var
  mstr1: msestring;
  bo1: boolean;
 begin
- mstr1:= feditor.text;
+ mstr1:= text;
  checktext(mstr1,accept);
  if not accept then begin
   result:= emptydatetime; //compiler warning

@@ -63,7 +63,7 @@ var
  mstr1: msestring;
 begin
  if ttemplateeditorfo.create(grid.row).show(mstr1) = mr_ok then begin
-  ftemplates.scan(projectoptions.o.texp.codetemplatedirs);
+  ftemplates.scan(projectoptions.e.texp.codetemplatedirs);
   tcodetemplates1(ftemplates).reload(self);
   templatename.editor.filtertext:= mstr1;
  end;

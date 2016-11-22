@@ -104,8 +104,8 @@ type
              const ATransaction:TSQLTransaction; const AParams:TmseParams;
              const autf8: boolean); override;
     procedure internalexecuteunprepared(const cursor: tsqlcursor;
-               const atransaction: tsqltransaction;
-               const asql: string); override;
+               const atransaction: tsqltransaction; const asql: string;
+               const origsql: msestring; const aparams: tmseparams); override;
 
 
     function CreateBlobStream(const Field: TField; const Mode: TBlobStreamMode;
@@ -120,6 +120,7 @@ type
     // Internal utility functions
     function CreateConnectionString:string;
     function getblobdatasize: integer; override;
+//    function getfeatures(): databasefeaturesty override;
 
           //iblobconnection
    procedure writeblobdata(const atransaction: tsqltransaction;
@@ -129,8 +130,9 @@ type
              out newid: string);
    procedure setupblobdata(const afield: tfield; const acursor: tsqlcursor;
                                    const aparam: tparam);
-   function blobscached: boolean;
+//   function blobscached: boolean;
   public
+   constructor create(aowner: tcomponent); override;
    function AllocateCursorHandle(const aowner: icursorclient;
                            const aname: ansistring): TSQLCursor; override;
    procedure DeAllocateCursorHandle(var cursor:TSQLCursor); override;
@@ -166,6 +168,7 @@ type
 //    property LoginPrompt;  // if true, ODBC drivers might prompt for more details that are not in the connection string
     property Params;       // will be added to connection string
 //    property OnLogin;
+    property ongetcredentials;
   end;
 
   EODBCException = class(Exception)
@@ -307,6 +310,15 @@ begin
   end;
 end;
 
+{ todbcconnection }
+
+constructor TODBCConnection.create(aowner: tcomponent);
+begin
+ inherited;
+ fconnoptions:= fconnoptions + [sco_supportparams,sco_emulateretaining,
+                                                           sco_blobscached];
+end;
+
 procedure todbcconnection.ODBCCheckResult(
                            LastReturnCode:SQLRETURN; HandleType:SQLSMALLINT;
                            AHandle: SQLHANDLE; ErrorMsg: string);
@@ -399,7 +411,6 @@ begin
  end;
 end;
 
-{ TODBCConnection }
 
 // Creates a connection string using the current value of the fields
 function TODBCConnection.CreateConnectionString: string;
@@ -427,14 +438,26 @@ var
   i: Integer;
   Param: string;
   EqualSignPos:integer;
+  u,p: msestring;
+  u1,p1: string;
 begin
   Result:='';
+  getcredentials(u,p);
   if charset <> '' then begin
-   result:= result + 'CHARSET='+charset+';';
+   result:= result + 'CHARSET='+ ansistring(charset)+';';
   end;
-  if DatabaseName<>'' then Result:=Result + 'DSN='+EscapeParamValue(DatabaseName)+';';
+  if DatabaseName<>'' then Result:=Result + 'DSN='+
+                       EscapeParamValue(ansistring(DatabaseName))+';';
   if Driver      <>'' then Result:=Result + 'DRIVER='+EscapeParamValue(Driver)+';';
-  if UserName    <>'' then Result:=Result + 'UID='+EscapeParamValue(UserName)+';PWD='+EscapeParamValue(Password)+';';
+  if U    <>'' then begin
+   u1:= ansistring(u);
+   p1:= ansistring(p);
+   Result:=Result + 'UID='+EscapeParamValue(U1)+';PWD='+
+                                          EscapeParamValue(P1)+';';
+   stringsafefree(u1,false);
+   stringsafefree(p1,false);
+  end;
+  freecredentials(u,p);
   if FileDSN     <>'' then Result:=Result + 'FILEDSN='+EscapeParamValue(FileDSN)+'';
   for i:=0 to Params.Count-1 do
   begin
@@ -482,12 +505,18 @@ function TODBCConnection.getblobdatasize: integer;
 begin
  result:= sizeof(integer);
 end;
-
+{
+function TODBCConnection.getfeatures(): databasefeaturesty;
+begin
+ result:= inherited getfeatures() + [dbf_blobscached];
+end;
+}
+{
 function TODBCConnection.blobscached: boolean;
 begin
  result:= true;
 end;
-
+}
 procedure TODBCConnection.SetParameters(ODBCCursor: TODBCCursor; AParams: TmseParams);
 
  procedure bindnum(i: integer; valuetype: SQLSMALLINT; parametertype: SQLSMALLINT;
@@ -786,10 +815,12 @@ begin
     'Could not connect with connection string "%s".',[ConnectionString]
    );
   except
+   stringsafefree(connectionstring,false);
    SQLFreeHandle(SQL_HANDLE_DBC, FDBCHandle);
    fdbchandle:= nil;
    raise;
   end;
+  stringsafefree(connectionstring,false);
 
 // commented out as the OutConnectionString is not used further at the moment
 //  if ActualLength<BufferLength-1 then
@@ -957,8 +988,8 @@ begin
 end;
 
 procedure todbcconnection.internalexecuteunprepared(const cursor: tsqlcursor;
-               const atransaction: tsqltransaction;
-               const asql: string);
+               const atransaction: tsqltransaction; const asql: string;
+               const origsql: msestring; const aparams: tmseparams);
 var
   ODBCCursor:TODBCCursor;
   Res: SQLRETURN;

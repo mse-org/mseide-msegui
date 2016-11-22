@@ -2145,6 +2145,7 @@ function S_ISDIR(mode : __mode_t) : boolean;
 //function fchmod(__fd: longint; __mode:__mode_t):longint;cdecl;external clib name 'fchmod';
 function __rename(__old: Pchar; __new:Pchar):longint;cdecl;external clib name 'rename';
 function unlink(__name: Pchar): longint;cdecl;external clib name 'unlink';
+function rmdir(__name: Pchar): longint;cdecl;external clib name 'rmdir';
 function getcwd(__buf: Pchar; __size:size_t):Pchar;cdecl;external clib name 'getcwd';
 function getenv(__name: Pchar): Pchar; cdecl; external clib name 'getenv';
 function setenv(envname: pchar; envval: pchar;

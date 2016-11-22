@@ -204,8 +204,8 @@ type
   Published
     property Attributes: TFieldAttributes read FAttributes write SetAttributes default [];
     property DataType: TFieldType read FDataType write SetDataType;
-    property Precision: Longint read FPrecision write SetPrecision;
-    property Size: Integer read FSize write SetSize;
+    property Precision: Longint read FPrecision write SetPrecision default -1;
+    property Size: Integer read FSize write SetSize default 0;
   end;
 
 { TFieldDefs }
@@ -347,6 +347,9 @@ type
    procedure readvisible(reader: treader);
    procedure readreadonly(reader: treader);
    procedure setoptionsfield(const avalue: optionsfieldty);
+   function getbuffervalue: variant;
+   function getasid: int64;
+   procedure setasid(const avalue: int64);
   protected
     FValidating : Boolean;
     FValueBuffer : Pointer;
@@ -442,6 +445,7 @@ type
     property asguid: tguid read getasguid write setasguid;
     property AsLongint: Longint read GetAsLongint write SetAsLongint;
     property AsLargeInt: LargeInt read GetAsLargeInt write SetAsLargeInt;
+    property asid: int64 read getasid write setasid; //-1 -> NULL
     property AsInteger: Integer read GetAsInteger write SetAsInteger;
     property AsString: string read GetAsString write SetAsString;
     property AsWideString: WideString read GetAsWideString 
@@ -472,6 +476,8 @@ type
     property Text: string read GetEditText write SetEditText;
     property ValidChars : TFieldChars read FValidChars write FValidChars;
     property Value: variant read GetAsVariant write SetAsVariant;
+    property buffervalue: variant read getbuffervalue;
+             //returns current value in editbuffer, can be used in OnValidate
     property OldValue: variant read GetOldValue;
     property LookupList: TLookupList read GetLookupList;
 {$push}{$warnings off}
@@ -1186,7 +1192,7 @@ type
   TParamTypes = set of TParamType;
 
   TParamStyle = (psInterbase,psPostgreSQL,psSimulated);
-
+  blobkindty = (bk_none,bk_binary,bk_text);
   TParams = class;
 
   TParam = class(TCollectionItem)
@@ -1199,6 +1205,7 @@ type
     FDataType: TFieldType;
     FParamType: TParamType;
     FSize: Integer;
+   fblobkind: blobkindty;
     Function GetDataSet: TDataSet;
     Function IsParamStored: Boolean;
   protected
@@ -1239,6 +1246,8 @@ type
     procedure SetAsWideString(const aValue: WideString);
     function getasunicodestring: unicodestring;
     procedure setasunicodestring(const avalue: unicodestring);
+   function getasnullmsestring: msestring;
+   procedure setasnullmsestring(const avalue: msestring);
    function getasid: int64;
    procedure setasid(const avalue: int64);
   public
@@ -1281,7 +1290,13 @@ type
                                                        write setasunicodestring;
     property asmsestring: msestring read getasunicodestring 
                                                   write setasunicodestring;
+    property asnullmsestring: msestring read getasnullmsestring 
+                                                  write setasnullmsestring;
+                                                     //'' -> null
     property asid: int64 read getasid write setasid; //-1 -> null
+    property blobkind: blobkindty read fblobkind 
+                                           write fblobkind default bk_none;
+                                  //for blobid
   published
     Property DataType : TFieldType read FDataType write SetDataType;
     Property Name : string read FName write FName;
@@ -1422,6 +1437,9 @@ type
   end;
 {------------------------------------------------------------------------------}
 
+ datasetinternalstatety = (dsis_checkingbrowsemode,dsis_refreshing);
+ datasetinternalstatesty = set of datasetinternalstatety;
+ 
   TDataSet = class(TComponent)
   Private
     Procedure DoInsertAppend(DoAppend : Boolean);
@@ -1495,6 +1513,7 @@ type
     FRecordCount: Longint;
     FIsUniDirectional: Boolean;
     FState : TDataSetState;
+    finternalstate: datasetinternalstatesty;
     FInternalOpenComplete: Boolean;
     Function GetActive : boolean;
     procedure RecalcBufListSize;
@@ -1563,6 +1582,7 @@ type
     procedure OpenCursorcomplete; virtual;
     procedure RefreshInternalCalcFields(Buffer: TRecordBuffer); virtual;
     procedure RestoreState(const Value: TDataSetState);
+    procedure sortdatasources();
     Procedure SetActive (Value : Boolean); virtual;
     procedure SetBookmarkStr(const Value: TBookmarkStr); virtual;
     procedure SetBufListSize(Value: Longint); virtual;
@@ -1693,6 +1713,7 @@ type
     procedure Post; virtual;
     procedure Prior;
     procedure Refresh;
+    function refreshing: boolean;
     procedure Resync(Mode: TResyncMode); virtual;
     procedure SetFields(const Values: array of const);
     function  Translate(Src, Dest: PChar; ToOem: Boolean): Integer; virtual;
@@ -1871,6 +1892,7 @@ type
 //    fonexit: datasourcelinkobjecteventty;
    fonifistatechanged: ifistatechangedeventty;
    freadonly: boolean;
+   fpriority: int32;
    fonenabledchange: tnotifyevent;
     procedure DistributeEvent(Event: TDataEvent; Info: Ptrint);
     procedure RegisterDataLink(DataLink: TDataLink);
@@ -1904,6 +1926,8 @@ type
     property DataSet: TDataSet read FDataSet write SetDataSet;
     property Enabled: Boolean read FEnabled write SetEnabled default True;
     property readonly: boolean read freadonly write setreadonly default false;
+    property priority: int32 read fpriority write fpriority default 0;
+                         //highest priority handled first by dataset
     property OnStateChange: TNotifyEvent read FOnStateChange 
                                                       write FOnStateChange;
     property onenabledchange: tnotifyevent read fonenabledchange 
@@ -2225,11 +2249,11 @@ function SkipComments(var p: PChar; EscapeSlash, EscapeRepeat : Boolean) : boole
 implementation
 
 uses
- {$ifdef FPC}dbconst{$else}dbconst_del{$endif},typinfo;
+ {$ifdef FPC}dbconst{$else}dbconst_del{$endif},typinfo,msearrayutils;
 resourcestring
  sassigndate = 'Can not assign a date value to field "%s"';
  sassigntime = 'Can not assign a time value to field "%s"';
- 
+
 { ---------------------------------------------------------------------
     Auxiliary functions
   ---------------------------------------------------------------------}
@@ -2915,7 +2939,6 @@ begin
     deDataSetScroll : HandleScrollOrChange;
     deLayoutChange  : FEnableControlsEvent:=deLayoutChange;    
   end;
-
   if not ControlsDisabled and (FState <> dsBlockRead) then begin
     for i := 0 to FDataSources.Count - 1 do
       TDataSource(FDataSources[i]).ProcessEvent(Event, Info);
@@ -3735,18 +3758,27 @@ begin
   FIsUniDirectional := Value;
 end;
 
+function compdatasource(item1, item2: pointer): integer;
+begin
+ result:= tdatasource(item2).priority - tdatasource(item1).priority;
+end;
+
+procedure tdataset.sortdatasources();
+begin
+ quicksortpointer(fdatasources.list^,fdatasources.count,@compdatasource);
+                        //position stable sort
+end;
+
 Procedure TDataset.SetActive (Value : Boolean);
 
 begin
-  if value and (Fstate = dsInactive) then
-    begin
-    if csLoading in ComponentState then
-      begin
+  if value and (Fstate = dsInactive) then begin
+    if csLoading in ComponentState then begin
       FOpenAfterRead := true;
       exit;
-      end
-    else
-      begin
+    end
+    else begin
+      sortdatasources();
       DoBeforeOpen;
       FEnableControlsEvent:=deLayoutChange;
       FInternalCalcFields:=False;
@@ -3755,8 +3787,8 @@ begin
         OpenCursor(False);
       finally
         if FState <> dsOpening then OpenCursorComplete;
-        end;
       end;
+    end;
     FModified:=False;
     end
   else if not value and (Fstate <> dsinactive) then
@@ -4156,15 +4188,22 @@ end;
 Procedure TDataset.CheckBrowseMode;
 
 begin
-  CheckActive;
-  DataEvent(deCheckBrowseMode,0);
-  Case State of
-    dsedit,dsinsert: begin
-      UpdateRecord;
-      If Modified then Post else Cancel;
-    end;
-    dsSetKey: Post;
+ if not (dsis_checkingbrowsemode in finternalstate) then begin
+  include(finternalstate,dsis_checkingbrowsemode);
+  try
+   CheckActive;
+   DataEvent(deCheckBrowseMode,0);
+   Case State of
+     dsedit,dsinsert: begin
+       UpdateRecord;
+       If Modified then Post else Cancel;
+     end;
+     dsSetKey: Post;
+   end;
+  finally
+   exclude(finternalstate,dsis_checkingbrowsemode);
   end;
+ end;
 end;
 
 Procedure TDataset.ClearFields;
@@ -4314,6 +4353,9 @@ Procedure TDataset.DoInsertAppend(DoAppend : Boolean);
 
 begin
   CheckBrowseMode;
+  if fstate <> dsbrowse then begin
+   exit; //posting canceled
+  end;
   If Not CanModify then
     DatabaseError(SDatasetReadOnly,Self);
   DoBeforeInsert;
@@ -4444,6 +4486,9 @@ Procedure TDataset.First;
 
 begin
   CheckBrowseMode;
+  if fstate <> dsbrowse then begin
+   exit; //posting canceled
+  end;
   DoBeforeScroll;
   if not FIsUniDirectional then
     ClearBuffers
@@ -4572,6 +4617,9 @@ Procedure TDataset.Last;
 begin
   CheckBiDirectional;
   CheckBrowseMode;
+  if fstate <> dsbrowse then begin
+   exit; //posting canceled
+  end;
   DoBeforeScroll;
   ClearBuffers;
   try
@@ -4667,7 +4715,11 @@ Var
 
 begin
   CheckBrowseMode;
-  Result:=0; TheResult:=0;
+  Result:=0;
+  if fstate <> dsbrowse then begin
+   exit; //posting canceled
+  end;
+  TheResult:=0;
   DoBeforeScroll;
   If (Distance = 0) or
      ((Distance>0) and FEOF) or
@@ -4748,6 +4800,8 @@ end;
 Procedure TDataset.Refresh;
 
 begin
+ include(finternalstate,dsis_refreshing);
+ try
   CheckbrowseMode;
   DoBeforeRefresh;
   UpdateCursorPos;
@@ -4757,12 +4811,23 @@ begin
 //  SetCurrentRecord(FActiverecord);
   Resync([]);
   DoAfterRefresh;
+ finally
+  exclude(finternalstate,dsis_refreshing);
+ end;
+end;
+
+function TDataSet.refreshing: boolean;
+begin
+ result:= dsis_refreshing in finternalstate;
 end;
 
 Procedure TDataset.RegisterDataSource(ADatasource : TDataSource);
 
 begin
   FDatasources.Add(ADataSource);
+  if fstate <> dsinactive then begin
+   sortdatasources();
+  end;
   RecalcBufListSize;
 end;
 
@@ -5136,6 +5201,7 @@ end;
 Constructor TFieldDef.Create(ACollection : TCollection);
 
 begin
+  FPrecision:=-1;
   Inherited create(ACollection);
   FFieldNo:=Index+1;
 end;
@@ -6162,6 +6228,39 @@ begin
  foptionsfield:= avalue;
  if optcha <> [] then begin
   PropertyChanged(True);
+ end;
+end;
+
+function TField.getbuffervalue: variant;
+var
+ bo1: boolean;
+begin
+ bo1:= fvalidating;
+ try
+  fvalidating:= false;
+  result:= getasvariant();
+ finally
+  fvalidating:= bo1;
+ end;
+end;
+
+function tfield.getasid: int64;
+begin
+ if isnull then begin
+  result:= -1;
+ end
+ else begin
+  result:= aslargeint;
+ end;
+end;
+
+procedure tfield.setasid(const avalue: int64);
+begin
+ if avalue = -1 then begin
+  clear;
+ end
+ else begin
+  aslargeint:= avalue;
  end;
 end;
 
@@ -10434,6 +10533,26 @@ begin
   Result:=Bound;
 end;
 
+function TParam.getasnullmsestring: msestring;
+begin
+ if isnull then begin
+  result:= '';
+ end
+ else begin
+  result:= getasunicodestring();
+ end;
+end;
+
+procedure TParam.setasnullmsestring(const avalue: msestring);
+begin
+ if avalue = '' then begin
+  clear;
+ end
+ else begin
+  setasunicodestring(avalue);
+ end;
+end;
+
 Procedure TParam.AssignParam(Param: TParam);
 begin
   if Not Assigned(Param) then
@@ -10445,6 +10564,7 @@ begin
     Size:=0;
     Precision:=0;
     NumericScale:=0;
+    blobkind:= bk_none;
     end
   else
     begin
@@ -10460,6 +10580,7 @@ begin
     Size:=Param.Size;
     Precision:=Param.Precision;
     NumericScale:=Param.NumericScale;
+    blobkind:=Param.blobkind;
     end;
 end;
 
@@ -10928,6 +11049,7 @@ end;
 Procedure TParam.Clear;
 begin
   FValue:=UnAssigned;
+  fblobkind:= bk_none;
 end;
 
 Procedure TParam.GetData(Buffer: Pointer);

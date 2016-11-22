@@ -109,18 +109,14 @@ object breakpointsfo: tbreakpointsfo
         captions.items = <        
           item
             caption = 'on'
-            textflags = []
           end        
           item
             caption = 'File'
-            textflags = []
           end        
           item
-            textflags = []
           end        
           item
             caption = 'Line Nr.'
-            textflags = []
           end        
           item
             caption = 'Address'
@@ -128,22 +124,17 @@ object breakpointsfo: tbreakpointsfo
           item
           end        
           item
-            textflags = []
           end        
           item
             caption = 'Count'
-            textflags = []
           end        
           item
             caption = 'Ignore'
-            textflags = []
           end        
           item
-            textflags = []
           end        
           item
             caption = 'Condition'
-            textflags = []
           end>
       end>
     datacols.count = 13

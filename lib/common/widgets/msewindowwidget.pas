@@ -25,7 +25,7 @@ type
                        const awidgetrect: rectty; var aid: winidty) of object;
  destroywinideventty = procedure(const sender: tcustomwindowwidget;
                        const aid: winidty) of object;
- clientwindowoptionty = (cwo_trackboundsimmediate);
+ clientwindowoptionty = (cwo_trackboundsimmediate,cwo_highrestimer,cwo_noleak);
  clientwindowoptionsty = set of clientwindowoptionty;
                         
  tcustomwindowwidget = class(teventwidget)
@@ -56,6 +56,7 @@ type
    function getchildrect: rectty;
    function getviewport: rectty;
    procedure setfpsmax(const avalue: real);
+   procedure setoptionsclient(const avalue: clientwindowoptionsty);
   protected
    procedure resetrenderstep;
    procedure dotimer(const sender: tobject);
@@ -99,7 +100,7 @@ type
    property fpsmax: real read ffpsmax write setfpsmax; //default -1 -> none
                                               //0 -> as fast as possible
    property optionsclient: clientwindowoptionsty read foptionsclient 
-                                        write foptionsclient default [];
+                                        write setoptionsclient default [];
    property oncreatewinid: createwinideventty read foncreatewinid 
                                      write foncreatewinid;
    property ondestroywinid: destroywinideventty read fondestroywinid 
@@ -156,7 +157,7 @@ uses
  msesysutils;
 type
  twindow1 = class(twindow);
-  
+
 { tcustomwindowwidget }
 
 constructor tcustomwindowwidget.create(aowner: tcomponent);
@@ -520,12 +521,23 @@ begin
  checktimer;
 end;
 
+procedure tcustomwindowwidget.setoptionsclient(
+              const avalue: clientwindowoptionsty);
+begin
+ if avalue <> foptionsclient then begin
+  foptionsclient:= avalue;
+  checktimer(); // check highres
+ end;
+end;
+
 procedure tcustomwindowwidget.checktimer;
 begin
  if componentstate * [csloading,csdesigning,csdestroying] <> [] then begin
   ftimer.enabled:= false;
  end
  else begin
+  ftimer.highres:= cwo_highrestimer in foptionsclient;
+  ftimer.leak:= not (cwo_noleak in foptionsclient);
   if (ffpsmax >= 0) and showing then begin
    if ffpsmax = 0 then begin
     ftimer.interval:= 0;

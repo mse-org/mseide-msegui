@@ -97,18 +97,18 @@ end;
 
 procedure timage.paintbmp(const acanvas: tcanvas; const abmp: tmaskedbitmap;
                           const dest: rectty);
-var
- col1,col2: colorty;
+//var
+// col1,col2: colorty;
 begin
- col1:= acanvas.color;
- col2:= acanvas.colorbackground;
- acanvas.color:= fcolorforeground;
- acanvas.colorbackground:= fcolorbackground;
+// col1:= acanvas.color;
+// col2:= acanvas.colorbackground;
+// acanvas.color:= fcolorforeground;
+// acanvas.colorbackground:= fcolorbackground;
 // abmp.paint(acanvas,makerect(nullpoint,clientsize));
 // abmp.paint(acanvas,innerclientrect);
- abmp.paint(acanvas,dest);
- acanvas.color:= col1;
- acanvas.colorbackground:= col2;
+ abmp.paint(acanvas,dest,fcolorforeground,fcolorbackground);
+// acanvas.color:= col1;
+// acanvas.colorbackground:= col2;
 end;
 
 procedure timage.dopaintforeground(const canvas: tcanvas);

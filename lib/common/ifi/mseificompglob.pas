@@ -37,7 +37,7 @@ type
  end;
 
  iifiexeclink = interface(iifilink)[miid_iifiexeclink]
-  procedure execute;
+  procedure execute(const force: boolean = false);
  end;
 
  iififormlink = interface(iifilink)[miid_iififormlink]

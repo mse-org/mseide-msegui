@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2015 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2016 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -17,7 +17,7 @@ unit mselistbrowser;
 interface
 uses
  mseglob,classes,mclasses,msegrids,msedatanodes,msedatalist,msedragglob,
- msegraphics,msegraphutils,msetypes,msestrings,msemenus,
+ msegraphics,msegraphutils,msetypes,msestrings,msemenus,msestockobjects,
  msebitmap,mseclasses,mseguiglob,msedrawtext,msefileutils,msedataedits,
  mseeditglob,msewidgetgrid,msewidgets,mseedit,mseevent,msegui,msedropdownlist,
  msesys,msedrag,msestat,mseinplaceedit,msepointer,msegridsglob,
@@ -85,7 +85,8 @@ type
   protected
    fformat: formatinfoarty;
   public
-   procedure updatecaption(var alayoutinfo: listitemlayoutinfoty;
+   procedure updatecaption(const acanvas: tcanvas;
+                     var alayoutinfo: listitemlayoutinfoty;
                                         var ainfo: drawtextinfoty); override;
    property richcaption: richstringty read getrichcaption write setrichcaption;
    property captionformat: formatinfoarty read fformat write setcaptionformat;
@@ -151,7 +152,12 @@ type
  
  paintlistitemeventty = procedure(const sender: titemviewlist;
                  const canvas: tcanvas; const item: tlistedititem) of object;
- 
+
+const
+ defaultboxids: treeitemboxidarty = (
+  //tib_none,  tib_empty,   tib_expand,        tib_expanded
+        -1,ord(stg_box),ord(stg_boxexpand),ord(stg_boxexpanded));
+type
  titemviewlist = class(tcustomitemlist,iitemlist)
   private
    flistview: tcustomlistview;
@@ -283,7 +289,7 @@ type
    function getkeystring(const index: integer): msestring;
    function getfocusedindex: integer;
    procedure setfocusedindex(const avalue: integer);
-   procedure setupeditor(const newcell: gridcoordty; posonly: boolean);
+   procedure setupeditor(const newcell: gridcoordty{; posonly: boolean});
    function getdatacollinecolor: colorty;
    function getdatacollinewidth: integer;
    procedure setdatacollinecolor(const Value: colorty);
@@ -465,6 +471,7 @@ type
                                       var ainfo: nodeactioninfoty); override;
    function compare(const l,r): integer; override;
    class function defaultitemclass(): listedititemclassty; virtual;
+   procedure itemclasschanged();
   public
    constructor create; overload; override;
    constructor create(const intf: iitemlist;
@@ -555,6 +562,7 @@ type
  tvalueedits = class(townedpersistentarrayprop)
   public
    constructor create(const aowner: titemedit); reintroduce;
+   class function getitemclasstype: persistentclassty; override;
   published
  end;
  
@@ -564,8 +572,8 @@ type
                   const aitem: tlistitem; var canedit: boolean) of object;
 
  extendimageeventty = procedure(const sender: twidget;
-                           const cellinfopo: pcellinfoty; //nil for non cell call
-                    var aextend: sizety) of object;
+                        const cellinfopo: pcellinfoty; //nil for non cell call
+                                   var ainfo: extrainfoty) of object;
  titemedit = class(tdataedit,iitemlist,ibutton)
   private
    fitemlist: tcustomitemeditlist;
@@ -610,7 +618,7 @@ type
    
    function valuecanedit: boolean;
    procedure doextendimage(const cellinfopo: pcellinfoty; 
-                                        var aextend: sizety); virtual;
+                                        var ainfo: extrainfoty); virtual;
    procedure getautopaintsize(var asize: sizety); override;
    procedure getautocellsize(const acanvas: tcanvas;
                                       var asize: sizety); override;
@@ -747,8 +755,8 @@ type
    procedure setdropdown(const Value: tcustomdropdownlistcontroller);
   protected
    procedure doupdatecelllayout; override;
-   function getframe: tdropdownbuttonframe;
-   procedure setframe(const avalue: tdropdownbuttonframe);
+   function getframe: tdropdownmultibuttonframe;
+   procedure setframe(const avalue: tdropdownmultibuttonframe);
    function getdropdowncontrollerclass: dropdownlistcontrollerclassty; virtual;
     //idropdown
    procedure dobeforedropdown; virtual;
@@ -760,7 +768,7 @@ type
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
   published
-   property frame: tdropdownbuttonframe read getframe write setframe;
+   property frame: tdropdownmultibuttonframe read getframe write setframe;
    property dropdown: tcustomdropdownlistcontroller read fdropdown 
                                                     write setdropdown;
    property onbeforedropdown: notifyeventty read fonbeforedropdown 
@@ -769,7 +777,8 @@ type
                   write fonafterclosedropdown;
  end;
 
- tmbdropdownitemedit = class(tdropdownitemedit)
+ tmbdropdownitemedit = class(tdropdownitemedit)     
+                //redundant, all dropdowns are multibutton
   private
   protected
    function getframe: tdropdownmultibuttonframe;
@@ -829,6 +838,7 @@ type
    frootnode: ttreelistedititem;
    finsertparent: ttreelistedititem;
    finsertparentindex: integer;
+//   foptionsdraw: itemdrawoptionsty;
    procedure setoncreateitem(const value: createtreelistitemeventty);
    function getoncreateitem: createtreelistitemeventty;
    procedure setcolorline(const value: colorty);
@@ -843,7 +853,15 @@ type
    function getonstatwriteitem: statwritetreeitemeventty;
    procedure setonstatwriteitem(const avalue: statwritetreeitemeventty);
    procedure setrootnode(const avalue: ttreelistedititem);
+   function getboxglyph_empty: stockglyphty;
+   procedure setboxglyph_empty(const avalue: stockglyphty);
+   function getboxglyph_expand: stockglyphty;
+   procedure setboxglyph_expand(const avalue: stockglyphty);
+   function getboxglyph_expanded: stockglyphty;
+   procedure setboxglyph_expanded(const avalue: stockglyphty);
+//   procedure setoptionsdraw(const avalue: itemdrawoptionsty);
   protected
+   fboxids: treeitemboxidarty;
    procedure freedata(var data); override;
    procedure docreateobject(var instance: tobject); override;
    procedure createitem(out item: tlistitem); override;
@@ -937,7 +955,17 @@ type
    property fonts;
    property options;
    property onitemnotification;
-   property colorline: colorty read fcolorline write setcolorline default cl_dkgray;
+//   property optionsdraw: itemdrawoptionsty read foptionsdraw 
+//                                           write setoptionsdraw default [];
+   property colorline: colorty read fcolorline write setcolorline 
+                                                        default cl_dkgray;
+   property boxglyph_empty: stockglyphty read getboxglyph_empty 
+                               write setboxglyph_empty default stg_box;
+   property boxglyph_expand: stockglyphty read getboxglyph_expand 
+                               write setboxglyph_expand default stg_boxexpand;
+   property boxglyph_expanded: stockglyphty read getboxglyph_expanded 
+                             write setboxglyph_expanded default stg_boxexpanded;
+
    property oncreateitem: createtreelistitemeventty read getoncreateitem
                       write setoncreateitem;
    property onstatwriteitem: statwritetreeitemeventty read getonstatwriteitem
@@ -989,9 +1017,10 @@ type
    function locatecount: integer; override;        //number of locate values
    function locatecurrentindex: integer; override; //index of current row
    procedure locatesetcurrentindex(const aindex: integer); override;
-   function getkeystring(const aindex: integer): msestring; override; //locate text
+   function getkeystring(const aindex: integer): msestring; override; 
+                                                   //locate text
    procedure doupdatelayout(const nocolinvalidate: boolean); override;
-   function getitemclass: listitemclassty; override;
+//   function getitemclass: listitemclassty; override;
    procedure dokeydown(var info: keyeventinfoty); override;
    procedure docellevent(const ownedcol: boolean; 
                                        var info: celleventinfoty); override;
@@ -1047,6 +1076,10 @@ type
 constructor titemviewlist.create(const alistview: tcustomlistview);
 begin
  flistview:= alistview;
+ with flayoutinfo do begin
+  widget:= alistview;
+  boxids:= defaultboxids;
+ end;
  inherited create(iitemlist(self));
 end;
 
@@ -1822,7 +1855,7 @@ begin
   if (cell1.col <> ffocusedcell.col) or (cell1.row <> ffocusedcell.row) then begin
    focuscell(cell1);
   end;
-  setupeditor(ffocusedcell,true);
+  setupeditor(ffocusedcell{,true});
  end;
 end;
 
@@ -1865,7 +1898,8 @@ begin
   drawcellbackground(acanvas);
   item1:= tlistitem1(focuseditem);
   if item1 <> nil then begin
-   item1.drawimage(fitemlist.flayoutinfo,acanvas);
+   fitemlist.flayoutinfo.variable.calcautocellsize:= false;
+   item1.drawimage(acanvas,fitemlist.flayoutinfo);
    if assigned(fitemlist.fonpaintitem) then begin
     fitemlist.fonpaintitem(fitemlist,acanvas,tlistedititem(pointer(item1)));
    end;
@@ -1968,26 +2002,35 @@ begin
  end;
 end;
 
-procedure tcustomlistview.setupeditor(const newcell: gridcoordty;
-                                                    posonly: boolean);
+procedure tcustomlistview.setupeditor(const newcell: gridcoordty{;
+                                                    posonly: boolean});
 var
- po1: pointty;
- rect1,rect2: rectty;
+ pt1: pointty;
+// rect1,rect2: rectty;
  int1: integer;
 begin
- po1:= cellrect(newcell,cil_paint).pos;
- rect1:= moverect(fitemlist.flayoutinfo.captionrect,po1);
- rect2:= moverect(fitemlist.flayoutinfo.captioninnerrect,po1);
+// rect1:= moverect(fitemlist.flayoutinfo.captionrect,po1);
+// rect2:= moverect(fitemlist.flayoutinfo.captioninnerrect,po1);
  int1:= celltoindex(newcell,false);
  if int1 >= 0 then begin
-  if posonly then begin
-   feditor.updatepos(rect2,rect1);
-  end
-  else begin
-   feditor.setup(fitemlist[int1].caption,0,false,rect2,rect1,nil,nil,getfont);
-   feditor.textflags:= fitemlist.flayoutinfo.textflags + [tf_clipo];
-   feditor.textflagsactive:= feditor.textflags;
+//  if posonly then begin
+//   feditor.updatepos(rect2,rect1);
+//  end
+//  else begin
+//   feditor.setup(fitemlist[int1].caption,0,false,rect2,rect1,nil,nil,getfont);
+
+  pt1:= cellrect(newcell,cil_paint).pos;
+  with fitemlist[int1] do begin
+//   if not posonly then begin
+    feditor.textflags:= fitemlist.flayoutinfo.textflags + [tf_clipo];
+    feditor.textflagsactive:= feditor.textflags;
+    feditor.text:= caption;
+//   end;
+   setupeditor(feditor,getfont,true);
+   feditor.movepos(pt1);
   end;
+
+//  end;
  end;
 end;
 
@@ -2005,7 +2048,7 @@ begin
       focuscell(indextocell(fitemlist.count - 1),info.selectaction);
       exit;
      end;
-     setupeditor(newcell,false);
+     setupeditor(newcell{,false});
     end;
     cek_exit: begin
      editing:= false;
@@ -2577,6 +2620,11 @@ begin
  result:= tlistedititem;
 end;
 
+procedure tcustomitemeditlist.itemclasschanged();
+begin
+ fowner.updatelayout();
+end;
+
 procedure tcustomitemeditlist.setcolorglyph(const Value: colorty);
 begin
  if fcolorglyph <> value then begin
@@ -2766,6 +2814,7 @@ end;
 procedure titemeditlist.setitemclass(const avalue: listedititemclassty);
 begin
  fitemclass:= avalue;
+ itemclasschanged();
 end;
 
 function titemeditlist.getoncreateitem: createlistitemeventty;
@@ -2834,6 +2883,11 @@ begin
  inherited create(aowner,tvalueedititem);
 end;
 
+class function tvalueedits.getitemclasstype: persistentclassty;
+begin
+ result:= tvalueedititem;
+end;
+
 { titemedit }
 
 constructor titemedit.create(aowner: tcomponent);
@@ -2845,6 +2899,7 @@ begin
  if fitemlist = nil then begin
   fitemlist:=  titemeditlist.create(iitemlist(self),self);
  end;
+ flayoutinfofocused.widget:= self;
  inherited;
  textflags:= defaultitemedittextflags;
  textflagsactive:= defaultitemedittextflagsactive;
@@ -3167,8 +3222,8 @@ var
  fra1,fra2: framety;
 begin
  with cellinfoty(canvas.drawinfopo^) do begin
-  doextendimage(canvas.drawinfopo,flayoutinfocell.imageextra);
-  flayoutinfocell.rowindex:= cell.row;
+  doextendimage(canvas.drawinfopo,flayoutinfocell.variable.extra);
+  flayoutinfocell.variable.rowindex:= cell.row;
   flayoutinfocell.textflags:= textflags;
   if finddataedits(tlistitem(datapo^),infos1) then begin
    databefore:= datapo;
@@ -3387,7 +3442,8 @@ end;
 
 function titemedit.getitemclass: listitemclassty;
 begin
- result:= tlistitem;
+// result:= tlistitem;
+ result:= listitemclassty(fitemlist.fitemclass);
 end;
 
 procedure titemedit.setupeditor;
@@ -3404,7 +3460,7 @@ begin
   else begin
    bo1:= des_updatelayout in fstate;
    include(fstate,des_updatelayout);
-   doextendimage(nil,flayoutinfofocused.imageextra);
+   doextendimage(nil,flayoutinfofocused.variable.extra);
    fvalue.setupeditor(feditor,geteditfont,true);
    if not bo1 then begin
     exclude(fstate,des_updatelayout);
@@ -3416,16 +3472,17 @@ end;
 procedure titemedit.dopaintforeground(const acanvas: tcanvas);
 begin
  if fvalue <> nil then begin
-  doextendimage(acanvas.drawinfopo,flayoutinfofocused.imageextra);
+  doextendimage(acanvas.drawinfopo,flayoutinfofocused.variable.extra);
  end;
  inherited;
  if fvalue <> nil then begin
   if fgridintf <> nil then begin
    acanvas.rootbrushorigin:= fgridintf.getbrushorigin;
-   flayoutinfofocused.rowindex:= fgridintf.grid.row;
+   flayoutinfofocused.variable.rowindex:= fgridintf.grid.row;
   end;
   with tlistitem1(fvalue) do begin
-   drawimage(flayoutinfofocused,acanvas);
+   flayoutinfofocused.variable.calcautocellsize:= false;
+   drawimage(acanvas,flayoutinfofocused);
    if feditor.lasttextclipped then begin
     include(fstate1,ns1_captionclipped);
    end
@@ -3767,11 +3824,11 @@ begin
 end;
 
 procedure titemedit.doextendimage(const cellinfopo: pcellinfoty; 
-                                                     var aextend: sizety); 
+                                               var ainfo: extrainfoty); 
 begin
+ fillchar(ainfo,sizeof(ainfo),#0);
  if canevent(tmethod(fonextendimage)) then begin
-  aextend:= nullsize;
-  fonextendimage(self,cellinfopo,aextend);
+  fonextendimage(self,cellinfopo,ainfo);
  end;
 end;                                                                      
 
@@ -3780,11 +3837,16 @@ procedure titemedit.getautopaintsize(var asize: sizety);
 begin
  inherited;
  if (fvalue <> nil) and (fvalue.owner <> nil) then begin
-  fvalue.drawimage(flayoutinfofocused,nil);
+  with flayoutinfofocused.variable do begin
+   calcautocellsize:= true;
+   fillchar(extra,sizeof(extra),#0);
+  end;
+  fvalue.drawimage(editor.getfontcanvas(),flayoutinfofocused);
  end;
  with flayoutinfofocused do begin
-  asize.cx:= asize.cx + imagerect.cx + imageextend.cx + {imageextra.cx +}
-                     treelevelshift; //???
+  asize.cx:= asize.cx + imagerect.cx + variable.imageextend.cx +
+                   {imageextra.cx +}
+                     variable.treelevelshift; //???
   if asize.cy < minsize.cy then begin
    asize.cy:= minsize.cy;
   end;
@@ -4080,26 +4142,26 @@ begin
  fdropdown.createframe;
 end;
 }
-function tdropdownitemedit.getframe: tdropdownbuttonframe;
+function tdropdownitemedit.getframe: tdropdownmultibuttonframe;
 begin
- result:= tdropdownbuttonframe(pointer(inherited getframe));
+ result:= tdropdownmultibuttonframe(pointer(inherited getframe));
 end;
 
-procedure tdropdownitemedit.setframe(const avalue: tdropdownbuttonframe);
+procedure tdropdownitemedit.setframe(const avalue: tdropdownmultibuttonframe);
 begin
  inherited setframe(tbuttonsframe(pointer(avalue)));
 end;
 {
 function tdropdownitemedit.getbutton: tdropdownbutton;
 begin
- with tdropdownbuttonframe(fframe) do begin
+ with tdropdownmultibuttonframe(fframe) do begin
   result:= tdropdownbutton(buttons[activebutton]);
  end;
 end;
 
 procedure tdropdownitemedit.setbutton(const avalue: tdropdownbutton);
 begin
- with tdropdownbuttonframe(fframe) do begin
+ with tdropdownmultibuttonframe(fframe) do begin
   tdropdownbutton(buttons[activebutton]).assign(avalue);
  end;
 end;
@@ -4333,6 +4395,7 @@ end;
 constructor ttreeitemeditlist.create;
 begin
  fcolorline:= cl_dkgray;
+ fboxids:= defaultboxids;
  inherited;
  fitemclass:= ttreelistedititem;
 end;
@@ -4343,11 +4406,66 @@ begin
 // inherited;
  inherited create(intf,aowner);
 end;
-
+{
+procedure ttreeitemeditlist.setoptionsdraw(const avalue: itemdrawoptionsty);
+begin
+ if foptionsdraw <> avalue then begin
+  foptionsdraw:= avalue;
+  if fowner <> nil then begin
+   fowner.itemchanged(-1);
+  end;
+ end;
+end;
+}
 procedure ttreeitemeditlist.setcolorline(const value: colorty);
 begin
  if fcolorline <> value then begin
   fcolorline:= value;
+  if fowner <> nil then begin
+   fowner.itemchanged(-1);
+  end;
+ end;
+end;
+
+function ttreeitemeditlist.getboxglyph_empty: stockglyphty;
+begin
+ result:= stockglyphty(fboxids[tib_empty]);
+end;
+
+procedure ttreeitemeditlist.setboxglyph_empty(const avalue: stockglyphty);
+begin
+ if stockglyphty(fboxids[tib_empty]) <> avalue then begin
+  stockglyphty(fboxids[tib_empty]):= avalue;
+  if fowner <> nil then begin
+   fowner.itemchanged(-1);
+  end;
+ end;
+end;
+
+function ttreeitemeditlist.getboxglyph_expand: stockglyphty;
+begin
+ result:= stockglyphty(fboxids[tib_expand]);
+end;
+
+procedure ttreeitemeditlist.setboxglyph_expand(const avalue: stockglyphty);
+begin
+ if stockglyphty(fboxids[tib_expand]) <> avalue then begin
+  stockglyphty(fboxids[tib_expand]):= avalue;
+  if fowner <> nil then begin
+   fowner.itemchanged(-1);
+  end;
+ end;
+end;
+
+function ttreeitemeditlist.getboxglyph_expanded: stockglyphty;
+begin
+ result:= stockglyphty(fboxids[tib_expanded]);
+end;
+
+procedure ttreeitemeditlist.setboxglyph_expanded(const avalue: stockglyphty);
+begin
+ if stockglyphty(fboxids[tib_expanded]) <> avalue then begin
+  stockglyphty(fboxids[tib_expanded]):= avalue;
   if fowner <> nil then begin
    fowner.itemchanged(-1);
   end;
@@ -5433,6 +5551,7 @@ end;
 procedure ttreeitemeditlist.setitemclass(const avalue: treelistedititemclassty);
 begin
  fitemclass:= avalue;
+ itemclasschanged();
 end;
 
 function ttreeitemeditlist.getexpandedstate: expandedinfoarty;
@@ -5666,12 +5785,12 @@ begin
   result:= zone1 = cz_caption;
  end;
 end;
-
+{
 function ttreeitemedit.getitemclass: listitemclassty;
 begin
  result:= ttreelistedititem;
 end;
-
+}
 (*
 function ttreeitemedit.getkeystring1(const aindex: integer): msestring;
 begin
@@ -5806,7 +5925,9 @@ end;
 procedure ttreeitemedit.doupdatelayout(const nocolinvalidate: boolean);
 begin
  inherited;
+// flayoutinfofocused.drawoptions:= ttreeitemeditlist(fitemlist).foptionsdraw;
  flayoutinfofocused.colorline:= ttreeitemeditlist(fitemlist).fcolorline;
+ flayoutinfofocused.boxids:= ttreeitemeditlist(fitemlist).fboxids;
 end;
 
 {
@@ -6398,7 +6519,7 @@ begin
  caption:= avalue.text;
 end;
 
-procedure trichlistedititem.updatecaption(
+procedure trichlistedititem.updatecaption(const acanvas: tcanvas;
              var alayoutinfo: listitemlayoutinfoty; var ainfo: drawtextinfoty);
 begin
  inherited;

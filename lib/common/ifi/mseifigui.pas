@@ -15,7 +15,7 @@ uses
  msestrings,mseapplication,mseforms,
  msearrayprops,mseglob,msetypes,mseifilink,msewidgetgrid,msemenus,
  mseevent,msegrids,msegraphutils,msedatalist,mseificomp,mseificompglob,
- mseifidialogcomp;
+ mseifidialogcomp,msegraphics;
  
 type
  

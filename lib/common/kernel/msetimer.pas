@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2015 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2016 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -39,6 +39,10 @@ timeroptionsty = set of timeroptionty;
    function getsingleshot: boolean;
    procedure setsingleshot(const avalue: boolean);
    procedure setoptions(const avalue: timeroptionsty);
+   function gethighres: boolean;
+   procedure sethighres(const avalue: boolean);
+   function getleak: boolean;
+   procedure setleak(const avalue: boolean);
   protected
    procedure dotimer; virtual;
   public
@@ -56,8 +60,10 @@ timeroptionsty = set of timeroptionty;
              //in microseconds, max +2000 seconds
              //restarts timer if enabled
              //0 -> fire once in mainloop idle
-   property singleshot: boolean read getsingleshot write setsingleshot;
    property options: timeroptionsty read foptions write setoptions;
+   property singleshot: boolean read getsingleshot write setsingleshot;
+   property highres: boolean read gethighres write sethighres;
+   property leak: boolean read getleak write setleak;
    property ontimer: notifyeventty read fontimer write fontimer;
    property enabled: boolean read fenabled write setenabled default true;
              //last!
@@ -525,7 +531,9 @@ end;
 
 procedure tsimpletimer.fire;
 begin
- dotimer;
+ if assigned(fontimer) then begin //do not clear fenabled
+  fontimer(self);
+ end;
 end;
 
 procedure tsimpletimer.restart;
@@ -566,6 +574,36 @@ begin
     end;
    end;
   end;
+ end;
+end;
+
+function tsimpletimer.gethighres: boolean;
+begin
+ result:= to_highres in foptions;
+end;
+
+procedure tsimpletimer.sethighres(const avalue: boolean);
+begin
+ if avalue then begin
+  options:= foptions + [to_highres];
+ end
+ else begin
+  options:= foptions - [to_highres];
+ end;
+end;
+
+function tsimpletimer.getleak: boolean;
+begin
+ result:= to_leak in foptions;
+end;
+
+procedure tsimpletimer.setleak(const avalue: boolean);
+begin
+ if avalue then begin
+  options:= foptions + [to_leak];
+ end
+ else begin
+  options:= foptions - [to_leak];
  end;
 end;
 

@@ -9,6 +9,9 @@
 }
 unit msesysintf1;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
+{$if fpc_fullversion >= 30001}
+ {$define hascompareoptions}
+{$endif}
 interface
 uses
  msesystypes;
@@ -511,8 +514,20 @@ function DoCompareStringW(const s1, s2: unicodestring; Flags: DWORD): PtrInt;
     if GetLastError<>0 then
       RaiseLastOSError;
   end;
-
-function Win32CompareunicodeString(const s1, s2 : unicodestring) : PtrInt;
+ {$ifdef hascompareoptions}
+function win32compareunicodestring(const s1, s2 : unicodestring;
+                                          options : tcompareoptions): ptrint;
+var
+ flags: dword;
+begin
+ flags:= 0;
+ if coignorecase in options then begin
+  flags:= norm_ignorecase;
+ end;
+ result:= docomparestringw(s1, s2, flags);
+end;
+ {$else}
+function Win32CompareUnicodeString(const s1, s2 : unicodestring) : PtrInt;
   begin
     Result:=DoCompareStringW(s1, s2, 0);
   end;
@@ -521,6 +536,7 @@ function Win32CompareTextunicodeString(const s1, s2 : unicodestring) : PtrInt;
   begin
     Result:=DoCompareStringW(s1, s2, NORM_IGNORECASE);
   end;
+ {$endif}
 {$endif}
 
 procedure doinit;
@@ -530,8 +546,12 @@ var
  
 begin
 {$ifdef FPC}
+ {$ifdef hascompareoptions}
+ widestringmanager.CompareUnicodeStringProc:=@win32CompareUnicodeString;
+ {$else}
  widestringmanager.CompareUnicodeStringProc:=@win32CompareUnicodeString;
  widestringmanager.CompareTextUnicodeStringProc:=@win32CompareTextUnicodeString;
+ {$endif}
 {$endif}
 
  info.dwOSVersionInfoSize:= sizeof(info);

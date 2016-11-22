@@ -6,6 +6,8 @@ object msetexteditorfo: tmsetexteditorfo
   bounds_cx = 369
   bounds_cy = 268
   container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_subfocus, ow_mousetransparent, ow_destroywidgets]
+  container.frame.localprops = []
+  container.frame.localprops1 = []
   container.bounds = (
     0
     0
@@ -38,6 +40,8 @@ object msetexteditorfo: tmsetexteditorfo
     modalresult = mr_cancel
   end
   object grid: twidgetgrid
+    frame.localprops = []
+    frame.localprops1 = []
     taborder = 2
     popupmenu = tpopupmenu1
     bounds_x = 0
@@ -50,7 +54,7 @@ object msetexteditorfo: tmsetexteditorfo
     fixcols.items = <    
       item
         linewidth = 0
-        width = 20
+        width = 40
         numstart = 1
         numstep = 1
       end>
@@ -70,7 +74,7 @@ object msetexteditorfo: tmsetexteditorfo
       frame.framei_top = 0
       frame.framei_bottom = 0
       frame.localprops = [frl_levelo, frl_fileft, frl_fitop, frl_firight, frl_fibottom]
-      frame.dummy = 0
+      frame.localprops1 = []
       taborder = 1
       visible = False
       bounds_x = 0
@@ -78,16 +82,17 @@ object msetexteditorfo: tmsetexteditorfo
       bounds_cx = 2000
       bounds_cy = 14
       font.xscale = 1
-      font.dummy = 0
+      font.localprops = [flp_xscale]
       optionsedit1 = [oe1_keyexecute, oe1_savevalue, oe1_savestate]
       optionsedit = [oe_closequery, oe_checkmrcancel, oe_linebreak, oe_eatreturn, oe_exitoncursor, oe_nofirstarrownavig]
-      oneditnotifcation = editnotify
       options = [seo_autoindent, seo_markbrackets]
+      oneditnotifcation = editnotify
       reffontheight = 14
     end
   end
   object linedisp: tstringdisp
-    frame.dummy = 0
+    frame.localprops = []
+    frame.localprops1 = []
     taborder = 4
     bounds_x = 8
     bounds_y = 242

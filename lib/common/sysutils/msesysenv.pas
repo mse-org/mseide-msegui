@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2013 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2016 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -67,7 +67,8 @@ type
                    seo_haltonerror,seo_exceptiononerror,seo_exitoninfo,
                    seo_noerrormess,
                    seo_tooutput, //info -> outputpipe
-                   seo_toerror   //errormeldung -> errorpipe
+                   seo_toerror,  //errormeldung -> errorpipe
+                   seo_noautoinit //no call of init in loaded()
                    );
  sysenvoptionsty = set of sysenvoptionty;
 
@@ -151,7 +152,7 @@ type
    procedure setvalue(index: integer; const Value: msestring);
    procedure setvalues(index: integer; const Value: msestringarty);
    function setdef(index: integer; avalue: msestringarty;
-             adefined: argumentflagsty): sysenverrornrty; overload;
+                       adefined: argumentflagsty): sysenverrornrty; overload;
    function setdef(index: integer; avalue: msestring;
              adefined: argumentflagsty): sysenverrornrty; overload;
    function getintegervalue1(index: integer): integer;
@@ -164,6 +165,7 @@ type
 //   procedure readhelps(reader: treader);
 //   procedure writehelps(writer: twriter);
    procedure setoptions(const avalue: sysenvoptionsty);
+   function getdefcount: int32;
   protected
    procedure loaded; override;
    procedure defineproperties(filer: tfiler); override;
@@ -176,7 +178,13 @@ type
    function getstatpriority: integer;
   public
    constructor create(aowner: tcomponent); override;
-   procedure init(const arguments: array of argumentdefty);
+   procedure init(const arguments: array of argumentdefty;
+                                           const values: msestringarty);
+   procedure init(const arguments: array of argumentdefty); 
+                                           //use commandline values
+   procedure init(const values: msestringarty); //use defs
+   procedure init(); //use defs and commandline values
+
    procedure processinfo(index: integer; value: string);
    procedure errormessage(const mess: msestring);
    procedure printmessage(value: msestring);
@@ -208,6 +216,7 @@ type
                                    searchinvars: array of integer): filenamety;
                  //bringt letztes filevorkommen
    property defs: sysenvdefarty read fdefs write setdefs;
+   property defcount: int32 read getdefcount;
   published
    property options: sysenvoptionsty read foptions write setoptions 
                                          default defaultsysenvmanageroptions;
@@ -772,7 +781,8 @@ begin
  result:= setdef(index,strar1,adefined);
 end;
 
-procedure tsysenvmanager.init(const arguments: array of argumentdefty);
+procedure tsysenvmanager.init(const arguments: array of argumentdefty;
+                                                const values: msestringarty);
 
 var
  index: integer;
@@ -797,13 +807,15 @@ var
       inc(po1);
      end;
     end;
-   end;
+   end; //checkanames
 
   begin //checkname
    with argumentdef do begin
     result:= kind in typen;
     if result then begin
-     result:= (msecomparestrlen(aname,name) = 0) or checkanames;
+//     result:= (msecomparestrlen(aname,name) = 0) or checkanames;
+     result:= (aname = '') or (msecomparestrlen(name,aname) = 0) or 
+                                                            checkanames();
     end;
    end;
   end;
@@ -834,13 +846,13 @@ var
 
  procedure findswitch(str1: msestring);
  var
-  int1: integer;
+  pardefindex1: integer;
 
   procedure setoptargument;
   var
    needed: boolean;
   begin
-   needed:= not (arf_argopt in arguments[int1].flags);
+   needed:= not (arf_argopt in arguments[pardefindex1].flags);
    inc(index);
    if index < length(strar1) then begin
     if isparameter(strar1[index]) then begin
@@ -849,11 +861,11 @@ var
       errorme(ern_missedargument,strar1[index]);
      end
      else begin
-      errorme(setdef(int1,nil,[arf_envdefined]),strar1[index]);
+      errorme(setdef(pardefindex1,nil,[arf_envdefined]),strar1[index]);
      end;
     end
     else begin
-     errorme(setdef(int1,strar1[index],[arf_envdefined]),strar1[index]);
+     errorme(setdef(pardefindex1,strar1[index],[arf_envdefined]),strar1[index]);
     end;
    end
    else begin
@@ -862,24 +874,24 @@ var
      errorme(ern_missedargument,strar1[index]);
     end
     else begin
-     errorme(setdef(int1,nil,[arf_envdefined]),strar1[index]);
+     errorme(setdef(pardefindex1,nil,[arf_envdefined]),strar1[index]);
     end;
    end;
   end;
 
   procedure checkarguments;
   begin
-   case arguments[int1].kind of
+   case arguments[pardefindex1].kind of
     ak_pararg: begin
      if length(str1) > 0 then begin
-      errorme(setdef(int1,str1,[arf_envdefined]),str1)
+      errorme(setdef(pardefindex1,str1,[arf_envdefined]),str1)
      end
      else begin
       setoptargument;
      end;
     end;
     ak_par: begin
-     errorme(setdef(int1,nil,[arf_envdefined]),str1);
+     errorme(setdef(pardefindex1,nil,[arf_envdefined]),str1);
      if length(str1) > 0 then begin
       findswitch(str1);
      end;
@@ -895,10 +907,10 @@ var
    if isparameter(str1) then begin //langer parameter
     setlength(strar2,2);
     splitstring(str1,strar2,'=');
-    int1:= finddef(at_pars,strar2[0]);
-    if int1 >= 0 then begin
-     with fenvvars[int1] do begin
-      case arguments[int1].kind of
+    pardefindex1:= finddef(at_pars,strar2[0]);
+    if pardefindex1 >= 0 then begin
+     with fenvvars[pardefindex1] do begin
+      case arguments[pardefindex1].kind of
        ak_par: begin
         if length(strar2) > 1 then begin
          errorme(ern_invalidargument,strar1[index]);
@@ -909,7 +921,7 @@ var
        end;
        ak_pararg: begin
         if length(strar2) > 1 then begin
-         errorme(setdef(int1,strar2[1],[arf_envdefined]),strar1[index]);
+         errorme(setdef(pardefindex1,strar2[1],[arf_envdefined]),strar1[index]);
         end
         else begin
          setoptargument;
@@ -919,29 +931,27 @@ var
      end;
     end
     else begin
-     if int1 = -1 then begin
+     if pardefindex1 = -1 then begin
       errorme(ern_invalidparameter,strar1[index]);
      end;
     end;
    end
    else begin
-    int1:= finddef(at_pars,str1);
-    if int1 < 0 then begin
-     int1:= finddef(at_pars,str1[1]);
-     if int1 >= 0 then begin
+    pardefindex1:= finddef(at_pars,str1);
+    if pardefindex1 < 0 then begin
+     pardefindex1:= finddef(at_pars,str1[1]);
+     if pardefindex1 >= 0 then begin
       str1:= copy(str1,2,maxint);
-      if int1 >= 0 then begin
-       checkarguments;
-      end;
+      checkarguments;
      end
      else begin
-      if int1 = -1 then begin
+      if pardefindex1 = -1 then begin
        errorme(ern_invalidparameter,strar1[index]);
       end;
      end;
     end
     else begin
-     str1:= copy(str1,length(arguments[int1].name)+1,maxint);
+     str1:= copy(str1,length(arguments[pardefindex1].name)+1,maxint);
      checkarguments;
     end;
    end;
@@ -952,7 +962,7 @@ var
  end;
 
 var
- int1: integer;
+ i1: integer;
  str1: msestring;
 // {$ifdef UNIX}
 // po1: pchar;
@@ -962,16 +972,16 @@ begin            //init
   exit;
  end;
  setlength(fenvvars,high(arguments)+1);
- for int1:= 0 to high(fenvvars) do begin
-  with fenvvars[int1] do begin
-   flags:= arguments[int1].flags;
-   name:= arguments[int1].name;
+ for i1:= 0 to high(fenvvars) do begin
+  with fenvvars[i1] do begin
+   flags:= arguments[i1].flags;
+   name:= arguments[i1].name;
    setlength(values,1);
-   values[0]:= arguments[int1].initvalue;
+   values[0]:= arguments[i1].initvalue;
   end;
  end;
- strar1:= getcommandlinearguments;
- index:= 1;
+ strar1:= values;
+ index:= 0;
  while index < length(strar1) do begin
   str1:= strar1[index];
   if isparameter(str1) then begin
@@ -979,9 +989,9 @@ begin            //init
    findswitch(str1);
   end
   else begin
-   int1:= finddef([ak_arg],'');
-   if int1 >= 0 then begin
-    errorme(setdef(int1,str1,[arf_envdefined]),str1);
+   i1:= finddef([ak_arg],'');
+   if i1 >= 0 then begin
+    errorme(setdef(i1,str1,[arf_envdefined]),str1);
    end
    else begin
     errorme(ern_invalidargument,str1);
@@ -989,16 +999,16 @@ begin            //init
   end;
   inc(index);
  end;
- for int1:= 0 to high(arguments) do begin
-  if (arf_help in arguments[int1].flags) and 
-        (fenvvars[int1].flags * arf_defined <> []) then begin
+ for i1:= 0 to high(arguments) do begin
+  if (arf_help in arguments[i1].flags) and 
+        (fenvvars[i1].flags * arf_defined <> []) then begin
    printhelp;
    application.terminated:= true;
    exit;
   end;
  end;
- for int1:= 0 to high(arguments) do begin
-  with arguments[int1] do begin
+ for i1:= 0 to high(arguments) do begin
+  with arguments[i1] do begin
    if kind = ak_envvar then begin
     {$ifdef mswindows}
     str1:=
@@ -1006,7 +1016,7 @@ begin            //init
            //!!!!  delphi bug flicken(info in qc)!!
     if str1 <> '' then begin
 //     errorme(setdef(int1,str1,true),name);
-     errorme(setdef(int1,str1,[arf_envdefined]),name);
+     errorme(setdef(i1,str1,[arf_envdefined]),name);
     end;
     {$else}
 {
@@ -1016,15 +1026,47 @@ begin            //init
     end;
 }
     if sys_getenv(name,str1) then begin
-     errorme(setdef(int1,str1,[arf_envdefined]),name);
+     errorme(setdef(i1,str1,[arf_envdefined]),name);
     end;
     {$endif};
    end;
-   if (arf_mandatory in flags) and not defined[int1] then begin
-    errorme(ern_mandatoryparameter,'-'+name);
+   if (arf_mandatory in flags) and not defined[i1] then begin
+    str1:= '';
+    if not (kind in [ak_arg]) then begin
+     str1:= '-';
+    end;
+    errorme(ern_mandatoryparameter,str1+name);
    end;
   end;
  end;
+end;
+
+procedure tsysenvmanager.init(const arguments: array of argumentdefty);
+var
+ ar1: msestringarty;
+begin
+ ar1:= getcommandlinearguments();
+ if high(ar1) > 0 then begin 
+            //FPC 2.6.4 throws an exception in copy() if out of range
+  init(arguments,copy(ar1,1,bigint));
+ end
+ else begin
+  init(arguments,nil);
+ end;
+end;
+
+procedure tsysenvmanager.init(const values: msestringarty); //use defs
+var
+ ar1: argumentdefarty;
+ ar2: msestringararty;
+begin
+ defstoarguments(fdefs,ar1,ar2);
+ init(ar1,values);
+end;
+
+procedure tsysenvmanager.init(); //use defs and commandline values
+begin
+ init(copy(getcommandlinearguments(),1,bigint));
 end;
 
 procedure tsysenvmanager.processinfo(index: integer; value: string);
@@ -1038,14 +1080,16 @@ procedure tsysenvmanager.setoninit(const Value: sysenvmanagereventty);
 begin
  foninit := Value;
  if not (csloading in componentstate) then begin
-  doinit;
+  doinit();
  end;
 end;
 
 procedure tsysenvmanager.loaded;
 begin
  inherited;
- doinit;
+ if not (seo_noautoinit in foptions) then begin
+  doinit();
+ end;
 end;
 
 procedure readdefdata(const reader: treader; var data);
@@ -1252,6 +1296,11 @@ begin
                          (seo_appterminateonexception in avalue) then begin
   application.options:= application.options + [apo_terminateonexception];
  end;
+end;
+
+function tsysenvmanager.getdefcount: int32;
+begin
+ result:= length(fdefs);
 end;
 
 function tsysenvmanager.getstatpriority: integer;

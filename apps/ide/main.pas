@@ -38,7 +38,7 @@ uses
  mselistbrowser,projecttreeform,msepipestream,msestringcontainer,msesys,
  msewidgets;
 const
- versiontext = '4.2.1';
+ versiontext = '4.4.1';
  idecaption = 'MSEide';
  statname = 'mseide';
 
@@ -311,7 +311,9 @@ type
                              const ascopy: boolean = false): boolean;
    procedure saveproject(aname: filenamety; const ascopy: boolean = false);
    procedure savewindowlayout(const astream: ttextstream);
+   procedure savewindowlayout(const awriter: tstatwriter);
    procedure loadwindowlayout(const astream: ttextstream);
+   procedure loadwindowlayout(const areader: tstatreader);
 
    procedure sourcechanged(const sender: tsourcepage);
    function opensource(const filekind: filekindty; const addtoproject: boolean;
@@ -492,7 +494,7 @@ begin
   setlength(wstr2,int1-1); //main name only
  end;
  with projectoptions do begin
-  bo1:= dofind(o.modulenames,o.modulefiles);
+  bo1:= dofind(s.modulenames,s.modulefiles);
  end;
  if not bo1 and 
            projecttree.units.findformbyname(ansistring(wstr2),mstr1) then begin
@@ -570,10 +572,10 @@ begin
   with projectoptions do begin
    po1:= nil;
    wstr2:= msestring(struppercase(atypename));
-   for int1:= 0 to high(o.moduletypes) do begin
-    if o.moduletypes[int1] = wstr2 then begin
-     if int1 <= high(o.modulefiles) then begin
-      checkmodule(o.modulefiles[int1]);
+   for int1:= 0 to high(s.moduletypes) do begin
+    if s.moduletypes[int1] = wstr2 then begin
+     if int1 <= high(s.modulefiles) then begin
+      checkmodule(s.modulefiles[int1]);
      end;
      break;
     end;
@@ -682,7 +684,7 @@ begin
   if result <> mr_cancel then begin
    result:= componentstorefo.saveall(false);
    if result <> mr_cancel then begin
-    with projectoptions,o,texp do begin
+    with projectoptions,s,texp do begin
      if modified and not savechecked then begin
       result:= showmessage(c[ord(project)]+' '+fprojectname+' '+
          c[ord(ismodified)],c[ord(confirmation)],
@@ -1290,7 +1292,7 @@ begin
       else begin
        setstattext(c[ord(downloadfinished)],mtk_finished);
        downloaded;
-       if projectoptions.o.closemessages then begin
+       if projectoptions.s.closemessages then begin
         messagefo.hide;
        end;
       end;
@@ -1503,6 +1505,7 @@ begin
     togglebkptenable.enabled:= togglebkpt.enabled;
 //    find.enabled:= true;
     replace.enabled:= true;
+    copyword.enabled:= true;
 //    actionsmo.repeatfind.enabled:= find.enabled and 
 //           (projectoptions.findreplaceinfo.find.text <> '');
    end;
@@ -1548,6 +1551,7 @@ begin
 //   find.enabled:= false;
 //   actionsmo.repeatfind.enabled:= false;
    replace.enabled:= false;
+   copyword.enabled:= false;
   end;
   if (factivedesignmodule <> nil) then begin
    save.enabled:= factivedesignmodule^.modified;
@@ -1762,8 +1766,8 @@ end;
 
 procedure tmainfo.viewcomponentpaletteonexecute(const sender: TObject);
 begin
- componentpalettefo.window.bringtofront;
  componentpalettefo.show;
+ componentpalettefo.window.bringtofront;
 end;
 
 procedure tmainfo.viewcomponentstoreonexecute(const sender: TObject);
@@ -1773,8 +1777,8 @@ end;
 
 procedure tmainfo.viewdebuggertoolbaronexecute(const sender: TObject);
 begin
- debuggerfo.window.bringtofront;
  debuggerfo.show;
+ debuggerfo.window.bringtofront;
 end;
 
 procedure tmainfo.mainonloaded(const sender: tobject);
@@ -1958,7 +1962,7 @@ var
 begin
  str1:= '';
  int1:= tmenuitem(sender).tag;
- with projectoptions.o.texp do begin
+ with projectoptions.p.texp do begin
   if newfisources[int1] = '' then begin
    sourcefo.newpage;
   end
@@ -1984,7 +1988,7 @@ var
  
 begin
 // if formkindty(tmenuitem(sender).tag) = fok_inherited then begin
- if projectoptions.o.newinheritedforms[tmenuitem(sender).tag] then begin
+ if projectoptions.p.newinheritedforms[tmenuitem(sender).tag] then begin
   po1:= selectinheritedmodule(nil,c[ord(selectancestor)]);
   if po1 = nil then begin
    exit;
@@ -2001,7 +2005,7 @@ begin
  if filedialog(str1,[fdo_save,fdo_checkexist],c[ord(newform)],
                                              [c[ord(pascalfiles)]],
                               ['"*.pas" "*.pp"'],'pas') = mr_ok then begin
-  with projectoptions.o.texp do begin
+  with projectoptions.p.texp do begin
    str4:= newfonamebases[tmenuitem(sender).tag];
    str2:= newfosources[tmenuitem(sender).tag];
    str3:= newfoforms[tmenuitem(sender).tag];
@@ -2302,7 +2306,7 @@ begin
             'pas') = mr_ok then begin
     setcurrentdirmse(filedir(aname));
     with projectoptions do begin
-     with o.t do begin
+     with k.t do begin
       mainfile:= filename(aname);
       aname:= removefileext(mainfile);
       targetfile:= aname+'${EXEEXT}'
@@ -2334,11 +2338,11 @@ begin
    end;
    if not fromprogram then begin
     mstr1:= removefileext(filename(aname));
-    with projectoptions,o do begin
+    with projectoptions,s do begin
      projectfilename:= aname;
      projectdir:= curdir;
      expandprojectmacros;
-     with texp do begin  
+     with p.texp do begin  
       setlength(copiedfiles,length(newprojectfiles));
       macrolist:= tmacrolist.create([mao_curlybraceonly]);
       try
@@ -2366,8 +2370,8 @@ begin
          end;
          copiedfiles[i1]:= dest;
          if newprojectfiles[i1] <> '' then begin
-          if (i1 <= high(expandprojectfilemacros)) and 
-                             expandprojectfilemacros[i1] then begin
+          if (i1 <= high(p.expandprojectfilemacros)) and 
+                             p.expandprojectfilemacros[i1] then begin
            copynewfile(source,dest,false,false,['%PROJECTNAME%','%PROJECTDIR%'],
                                        [mstr1,curdir]);
           end
@@ -2391,10 +2395,10 @@ begin
      saveproject(aname);
      bo1:= true;
      for i1:= 0 to high(copiedfiles) do begin
-      if i1 > high(loadprojectfile) then begin
+      if i1 > high(p.loadprojectfile) then begin
        break;
       end;
-      if loadprojectfile[i1] then begin
+      if p.loadprojectfile[i1] then begin
        if checkfileext(copiedfiles[i1],[formfileext])then begin
         openformfile(copiedfiles[i1],true,false,false,true,false);
        end
@@ -2408,7 +2412,7 @@ begin
    end
    else begin
     saveproject(aname);
-    sourcefo.openfile(projectoptions.o.texp.mainfile,true);
+    sourcefo.openfile(projectoptions.k.texp.mainfile,true);
    end;
   end
   else begin
@@ -2701,7 +2705,7 @@ begin
   fcurrent:= true;
   fnoremakecheck:= false;
   messagefo.messages.lastrow;
-  if projectoptions.o.closemessages then begin
+  if projectoptions.s.closemessages then begin
    messagefo.hide;
   end;
   if fstartcommand <> sc_none then begin
@@ -2855,7 +2859,7 @@ var
  propit: tpropertyitem;
  opt1: execoptionsty; 
 begin
- with tmenuitem(sender),projectoptions,o,texp do begin
+ with tmenuitem(sender),projectoptions,t,texp do begin
   str1:= tosysfilepath(toolfiles[index]);
   if str1 <> '' then begin
    if (index <= high(toolfiles)) and (toolparams[index] <> '') then begin
@@ -2941,13 +2945,63 @@ procedure tmainfo.getstatobjs(const sender: TObject;
                var aobjects: objectinfoarty);
 begin
  with projectoptions do begin
-  addobjectinfoitem(aobjects,o);
+{
+  if not (sg_options in disabled) then begin
+   addobjectinfoitem(aobjects,o);
+  end;
+}
   if not (sg_editor in disabled) then begin
    addobjectinfoitem(aobjects,e);
   end;
   if not (sg_debugger in disabled) then begin
    addobjectinfoitem(aobjects,d);
   end;
+  if not (sg_make in disabled) then begin
+   addobjectinfoitem(aobjects,k);
+  end;
+  if not (sg_macros in disabled) then begin
+   addobjectinfoitem(aobjects,m);
+  end;
+  if not (sg_fontalias in disabled) then begin
+   addobjectinfoitem(aobjects,a);
+  end;
+  if not (sg_usercolors in disabled) then begin
+   addobjectinfoitem(aobjects,u);
+  end;
+  if not (sg_formatmacros in disabled) then begin
+   addobjectinfoitem(aobjects,f);
+  end;
+  if not (sg_templates in disabled) then begin
+   addobjectinfoitem(aobjects,p);
+  end;
+  if not (sg_tools in disabled) then begin
+   addobjectinfoitem(aobjects,t);
+  end;
+  if not (sg_storage in disabled) then begin
+   addobjectinfoitem(aobjects,r);
+  end;
+  if not (sg_state in disabled) then begin
+   addobjectinfoitem(aobjects,s);
+  end;
+ end;
+end;
+
+procedure tmainfo.savewindowlayout(const awriter: tstatwriter);
+var
+ opt1: statfileoptionsty;
+begin
+ opt1:= projectstatfile.options;
+ projectstatfile.options:= mainfo.projectstatfile.options + 
+                                        [sfo_nodata,sfo_nooptions];
+ awriter.setsection('breakpoints');
+ beginpanelplacement();
+ try
+  panelform.updatestat(awriter);
+  awriter.setsection('layout');
+  projectstatfile.updatestat('windowlayout',awriter);
+ finally
+  endpanelplacement();
+  mainfo.projectstatfile.options:= opt1;
  end;
 end;
 
@@ -2957,17 +3011,28 @@ var
 begin
  statwriter:= tstatwriter.create(astream,ce_utf8);
  try
-  statwriter.setsection('breakpoints');
-  beginpanelplacement();
-  try
-   panelform.updatestat(statwriter);
-   statwriter.setsection('layout');
-   mainfo.projectstatfile.updatestat('windowlayout',statwriter);
-  finally
-   endpanelplacement();
-  end;
+  savewindowlayout(statwriter);
  finally
   statwriter.free;
+ end;
+end;
+
+procedure tmainfo.loadwindowlayout(const areader: tstatreader);
+begin
+ beginpanelplacement();
+ try
+  areader.setsection('breakpoints');
+  panelform.updatestat(areader);
+  areader.setsection('layout');
+  projectstatfile.options:= projectstatfile.options + 
+                                          [sfo_nodata,sfo_nooptions];
+  flayoutloading:= true;
+  projectstatfile.readstat('windowlayout',areader);
+ finally
+  flayoutloading:= false;
+  projectstatfile.options:= projectstatfile.options -
+                                          [sfo_nodata,sfo_nooptions];
+  endpanelplacement();
  end;
 end;
 
@@ -2977,20 +3042,9 @@ var
 begin
  statreader:= tstatreader.create(astream,ce_utf8);
  try
-  beginpanelplacement();
-  statreader.setsection('breakpoints');
-  panelform.updatestat(statreader);
-  statreader.setsection('layout');
-  projectstatfile.options:= projectstatfile.options + 
-                                          [sfo_nodata,sfo_nooptions];
-  flayoutloading:= true;
-  projectstatfile.readstat('windowlayout',statreader);
+  loadwindowlayout(statreader);
  finally
-  flayoutloading:= false;
-  projectstatfile.options:= projectstatfile.options -
-                                          [sfo_nodata,sfo_nooptions];
   statreader.free;
-  endpanelplacement();
  end;
 end;
 
@@ -3026,7 +3080,7 @@ end;
 
 procedure tmainfo.statafterread(const sender: TObject);
 begin
- actionsmo.forcezorderact.checked:= projectoptions.o.forcezorder;
+ actionsmo.forcezorderact.checked:= projectoptions.s.forcezorder;
 end;
 
 procedure tmainfo.basedockpaintexe(const sender: twidget;

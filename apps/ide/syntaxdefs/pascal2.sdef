@@ -1,8 +1,9 @@
-#for nested {} comments
 caseinsensitive
+colors cl_default cl_default cl_default cl_default
 pairwords
  'BEGIN' 'CASE' 'TRY' 'RECORD' 'CLASS' 'OBJECT' 'INTERFACE' 'END'
  'REPEAT' 'UNTIL'
+
 styles
  default ''
  words 'b'
@@ -16,19 +17,22 @@ keyworddefs pascal
  'BREAK' 'CASE' 'CDECL' 'CLASS' 'CONST' 'CONSTRUCTOR'
  'CONTINUE' 'DEFAULT' 'DEPRECATED' 'DESTRUCTOR' 'DISPOSE' 'DIV' 'DO' 'DOWNTO'
  'ELSE' 'END' 'EXCEPT' 'EXIT' 'EXPORT' 'EXPORTS' 'EXTERNAL' 'FAIL'
- 'FALSE' 'FAR' 'FILE' 'FINALIZATION' 'FINALLY' 'FOR' 'FORWARD' 'FUNCTION' 'GOTO' 'IF'
- 'IMPLEMENTATION' 'IMPLEMENTS' 'IN' 'INDEX' 'INHERITED'
+ 'FALSE' 'FAR' 'FILE' 'FINALIZATION' 'FINALLY' 'FOR' 'FORWARD' 'FUNCTION' 'GOTO'
+ 'IF' 'IMPLEMENTATION' 'IMPLEMENTS' 'IN' 'INDEX' 'INHERITED'
  'INITIALIZATION' 'INLINE' 'INTERFACE' 'INTERRUPT' 'IS' 'LABEL' 'LIBRARY'
  'MOD' 'NEW' 'NIL' 'NODEFAULT' 'NOT' 'OBJECT'
- 'OF' 'ON' 'OPERATOR' 'OR' 'OUT' 'OTHERWISE' 'PACKED' 'POPSTACK' 'PRIVATE' 
- 'PROCEDURE' 'PROGRAM' 'PROPERTY' 'PROTECTED'
- 'PUBLIC' 'PUBLISHED' 'RAISE' 'READ' 'RECORD' 'REINTRODUCE' 'REPEAT' 
+ 'OF' 'ON' 'OPERATOR' 'OR' 'OUT' 'OTHERWISE' 'OVERLOAD' 'OVERRIDE' 
+ 'PACKED' 'POPSTACK' 'PRIVATE' 
+ 'PROCEDURE' 'PROGRAM' 'PROTECTED'
+ 'PUBLIC' 'PUBLISHED' 'RAISE' 'RECORD' 'REINTRODUCE' 'REPEAT' 
  'RESOURCESTRING'
  'SELF' 'SET' 'SHL' 'SHR'
- 'STDCALL' 'STORED' 'THEN' 'THREADVAR' 'TO' 'TRUE' 'TRY' 'TYPE' 'UNIT' 'UNTIL'
- 'USES' 'VAR' 'VIRTUAL' 'WHILE' 'WITH' 'WRITE' 'XOR'
- 'OVERLOAD' 'OVERRIDE'
-
+ 'STDCALL' 'THEN' 'THREADVAR' 'TO' 'TRUE' 'TRY' 'TYPE' 'UNIT' 'UNTIL'
+ 'USES' 'VAR' 'VIRTUAL' 'WHILE' 'WITH' 'XOR'
+ 
+keyworddefs property
+ 'DEFAULT' 'READ' 'STORED' 'WRITE'
+ 
 scope option option
  endtokens
   '}'
@@ -68,7 +72,23 @@ scope word
   'A' 'B' 'C' 'D' 'E' 'F' 'G' 'H' 'I' 'J' 'K' 'L' 'M' 'N' 'O' 'P' 
   'Q' 'R' 'S' 'T' 'U' 'V' 'W' 'X' 'Y' 'Z' '_' word
  return
- 
+
+scope property1 default
+ keywords words
+  property
+ calltokens  
+  '{$' option
+  '{' comment1
+  '//' comment2
+  '(*' comment3
+ endtokens
+  ';'
+
+scope property words
+ jumptokens
+  property1
+  
+   
 scope main
 
  keywords words
@@ -81,6 +101,7 @@ scope main
   '(*' comment3
   '''' string
   '#' number string
+  .'property'. property
   
 #  '$' hexnumber number
 #  '0' '1' '2' '3' '4' '5' '6' '7' '8' '9' number number

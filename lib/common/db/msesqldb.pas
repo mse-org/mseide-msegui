@@ -20,11 +20,13 @@ type
               fplo_autorefresh,fplo_refreshifactiveonly,
               fplo_refreshifchangedonly,fplo_checkbrowsemodeonrefresh,
               fplo_restorerecno,
-              fplo_syncmasterpost,fplo_syncmastercheckbrowsemode,
+              fplo_syncmasterpost,fplo_delayedsyncmasterpost,
+              fplo_syncmastercancel,
+              fplo_syncmastercheckbrowsemode,
               fplo_syncmasteredit,
               fplo_syncmasterinsert,
               fplo_syncmasterdelete,
-              fplo_syncslavepost,
+              fplo_syncslavepost,fplo_delayedsyncslavepost,
               fplo_syncslavecancel,
               fplo_syncslaveedit,
               fplo_syncslaveinsert,
@@ -34,8 +36,9 @@ type
 const
  defaultfieldparamlinkoptions = [fplo_autorefresh,fplo_refreshifchangedonly];
 
- defaultsqlcontrolleroptions = defaultdscontrolleroptions +
-                         [dso_autoapply,dso_autocommitret];
+ defaultsqlcontrolleroptions = defaultdscontrolleroptions;
+ defaultsqlbdsoptions = defaultbufdatasetoptions +
+                                            [bdo_autoapply,bdo_autocommitret];
 type
  tmsesqltransaction = class(tsqltransaction,iactivatorclient)
   private
@@ -97,6 +100,7 @@ type
 //   procedure setstatementtype(const avalue: TStatementType);
    procedure checkcanupdate;
   protected
+   function getdefaultoptions(): bufdatasetoptionsty override;
    procedure dobeforeapplyupdate; override;
    procedure checkpendingupdates; override;
    procedure setactive(avalue: boolean); override;
@@ -131,10 +135,10 @@ type
    procedure inheritedinternaldelete; virtual;
    procedure inheritedinternalopen;
    procedure inheritedinternalclose;
-   procedure doidleapplyupdates;
+   procedure doidleapplyupdates() override;
 
 //   function wantblobfetch: boolean; override;
-   function getdsoptions: datasetoptionsty; override;
+//   function getdsoptions: datasetoptionsty; override;
    procedure afterpost(const sender: tdataset; var ok: boolean);
 //   function cantransactionrefresh: boolean; override;
 //,   function refreshtransdatasets: boolean; override;
@@ -148,8 +152,10 @@ type
                                      const aisnull: array of boolean);
    function moveby(const distance: integer): integer;
    procedure cancel; override;
-   procedure post; override;
-   procedure delete; override;
+   function post1(): boolean; //true if OK
+   procedure post override;
+   function delete1(): boolean; //true if ok
+   procedure delete override;
 //   procedure insert; override;
    procedure applyupdates(const maxerrors: integer; 
                 const cancelonerror: boolean;
@@ -159,6 +165,8 @@ type
    procedure applyupdate; overload; override;
   published
    property FieldDefs;
+   property delayedapplycount;
+   property options default defaultsqlbdsoptions;
    property controller: tdscontroller read fcontroller write setcontroller;
    property Active: boolean read getactive write setactive1 default false;
    property onapplyrecupdate: applyrecupdateeventty read fonapplyrecupdate
@@ -533,7 +541,12 @@ end;
 
 procedure tmsesqlquery.inheritedinternalopen;
 begin
- inherited internalopen;
+ if bdo_local in foptions then begin
+  openlocal();
+ end
+ else begin
+  inherited internalopen;
+ end;
 end;
 
 procedure tmsesqlquery.internalopen;
@@ -559,8 +572,8 @@ begin
   end;
  end;
  fcontroller.internalopen;
- if not streamloading and not (dso_local in fcontroller.options) then begin
-  connected:= not (dso_offline in fcontroller.options);
+ if not streamloading and not (bdo_local in foptions) then begin
+  connected:= not (bdo_offline in foptions);
  end;
 end;
 
@@ -641,32 +654,53 @@ begin
   end;
  except
   include(fmstate,sqs_updateerror);
+  if bdo_rollbackonupdateerror in foptions then begin
+   if writetransaction <> nil then begin
+    writetransaction.rollback();
+   end;
+  end;
   raise;
  end;
 end;
 
 procedure tmsesqlquery.afterpost(const sender: tdataset; var ok: boolean);
 begin
- if (dso_autoapply in fcontroller.options) and 
+ if (bdo_autoapply in foptions) and 
                        not(bs_noautoapply in fbstate) then begin
-  try
-   applyupdate;
-  except
-   ok:= false;
-   application.handleexception(self);
+  if bdo_autoapplyexceptions in foptions then begin
+   applyupdate();
+  end
+  else begin
+   try
+    applyupdate;
+   except
+    ok:= false;
+    application.handleexception(self);
+   end;
   end;
  end;
 end;
 
+function tmsesqlquery.post1(): boolean;
+begin
+ result:= fcontroller.post(@afterpost);
+end;
+
 procedure tmsesqlquery.post;
 begin
- fcontroller.post(@afterpost);
+ post1();
+end;
+
+function tmsesqlquery.delete1(): boolean;
+begin
+ result:= fcontroller.delete();
 end;
 
 procedure tmsesqlquery.delete;
 begin
- fcontroller.delete();
+ delete1();
 end;
+
 {
 procedure tmsesqlquery.insert;
 begin
@@ -678,25 +712,25 @@ begin
  if writetransaction <> nil then begin //can be nil in local mode
   if (ftransopenref = writetransaction.opencount) then begin
    if (writetransaction.savepointlevel < 0) then begin
-    if dso_autocommitret in fcontroller.options then begin
+    if bdo_autocommitret in foptions then begin
      writetransaction.commitretaining;
     end;
-    if dso_autocommit in fcontroller.options then begin
+    if bdo_autocommit in foptions then begin
      writetransaction.commit;
     end;
    end
    else begin
-    if dso_autocommitret in fcontroller.options then begin
+    if bdo_autocommitret in foptions then begin
      writetransaction.pendingaction:= cacommitretaining;
     end;
-    if dso_autocommit in fcontroller.options then begin
+    if bdo_autocommit in foptions then begin
      writetransaction.pendingaction:= cacommit;
     end;
    end;
   end;
  end;
- if dso_refreshafterapply in fcontroller.options then begin
-  fcontroller.refresh(dso_recnoapplyrefresh in fcontroller.options);
+ if bdo_refreshafterapply in foptions then begin
+  fcontroller.refresh(bdo_recnoapplyrefresh in foptions);
  end;
 end;
 
@@ -717,6 +751,11 @@ begin
  end;
 end;
 
+function tmsesqlquery.getdefaultoptions(): bufdatasetoptionsty;
+begin
+ result:= defaultsqlbdsoptions;
+end;
+
 procedure tmsesqlquery.applyupdates(const maxerrors: integer;
                 const cancelonerror: boolean;
                 const cancelondeleteerror: boolean = false;
@@ -728,7 +767,7 @@ begin
   inherited;
  finally
   if (sqs_updateerror in fmstate) and 
-              (dso_cancelupdatesonerror in fcontroller.options) then begin
+              (bdo_cancelupdatesonerror in foptions) then begin
    cancelupdates;
   end;
  end;
@@ -739,7 +778,7 @@ var
  bo1: boolean;
 begin
  if not (bs_idle in fbstate) and (changecount > 0) and 
-           (changecount >= fcontroller.delayedapplycount) then begin
+           (changecount >= delayedapplycount) then begin
   application.beginwait;
   include(fbstate,bs_idle);
   bo1:= false;
@@ -759,7 +798,7 @@ end;
 
 procedure tmsesqlquery.checkpendingupdates;
 begin
- if (state <> dsinactive) and (fcontroller.delayedapplycount > 0) and 
+ if (state <> dsinactive) and (delayedapplycount > 0) and 
                                   (changecount > 0) then begin
 //  (dso_applyonidle in fcontroller.options) and (changecount > 0) then begin
   applyupdates;
@@ -776,19 +815,19 @@ end;
 
 procedure tmsesqlquery.applyupdates(const maxerrors: integer = 0);
 begin
- applyupdates(maxerrors,fcontroller.options *
-      [dso_cancelupdateonerror,dso_cancelupdatesonerror] <> [],
-      dso_cancelupdateondeleteerror in fcontroller.options,
-      dso_editonapplyerror in fcontroller.options);
+ applyupdates(maxerrors,foptions *
+      [bdo_cancelupdateonerror,bdo_cancelupdatesonerror] <> [],
+      bdo_cancelupdateondeleteerror in foptions,
+      bdo_editonapplyerror in foptions);
 end;
 
 procedure tmsesqlquery.applyupdate;
 begin
  checkcanupdate;
- inherited applyupdate(fcontroller.options *
-      [dso_cancelupdateonerror,dso_cancelupdatesonerror] <> [],
-      dso_cancelupdateondeleteerror in fcontroller.options,
-      dso_editonapplyerror in fcontroller.options);
+ inherited applyupdate(foptions *
+      [bdo_cancelupdateonerror,bdo_cancelupdatesonerror] <> [],
+      bdo_cancelupdateondeleteerror in foptions,
+      bdo_editonapplyerror in foptions);
 end;
 
 function tmsesqlquery.getfieldclass(fieldtype: tfieldtype): tfieldclass;
@@ -855,7 +894,7 @@ end;
 procedure tmsesqlquery.DoAfterDelete;
 begin
  inherited;
- if (dso_autoapply in fcontroller.options) and 
+ if (bdo_autoapply in foptions) and 
                    not(bs_noautoapply in fbstate) then begin
   applyupdates;
  end;
@@ -880,12 +919,12 @@ function tmsesqlquery.isutf8: boolean;
 begin
  result:= fcontroller.isutf8;
 end;
-
+{
 function tmsesqlquery.getdsoptions: datasetoptionsty;
 begin
  result:= fcontroller.options;
 end;
-
+}
 {
 function tmsesqlquery.wantblobfetch: boolean;
 begin
@@ -906,7 +945,7 @@ end;
 
 function tmsesqlquery.islocal: boolean;
 begin
- result:= (dso_local in fcontroller.options) and not connected;
+ result:= (bdo_local in foptions) and not connected;
 end;
 
 procedure tmsesqlquery.inheritedinternalclose;
@@ -1007,22 +1046,29 @@ begin
       bo2:= bo2 or (var1 <> param.value);
       if (frefreshlock = 0) and (fplo_autorefresh in foptions) and 
                                               (destdataset <> nil) and bo2 and
-         (destdataset.active or 
+         (fdestdataset.active or 
                    not (fplo_refreshifactiveonly in foptions)) and
-         not((destdataset.state = dsinsert) and (dataset.state = dsinsert) and
-                      (fplo_syncmasterinsert in foptions))and
-                  (destdataset.state in [dsbrowse,dsedit,dsinsert]) then begin
-       if fplo_checkbrowsemodeonrefresh in foptions then begin
-        fdestdataset.checkbrowsemode;
+         not((fdestdataset.state = dsinsert) and (dataset.state = dsinsert) and
+                      (fplo_syncmasterinsert in foptions)) and
+         not ((fplo_delayedsyncmasterpost in foptions) and
+                (self.fdscontroller <> nil) and 
+                                    self.fdscontroller.posting1) then begin
+       if fdestdataset.active then begin
+        if fplo_checkbrowsemodeonrefresh in foptions then begin
+         fdestdataset.checkbrowsemode;
+        end
+        else begin
+         fdestdataset.cancel;
+        end;
+        if fdestcontroller <> nil then begin
+         fdestcontroller.refresh(fplo_restorerecno in foptions,truedelayus);
+        end
+        else begin
+         fdestdataset.refresh;
+        end;
        end
        else begin
-        fdestdataset.cancel;
-       end;
-       if fdestcontroller <> nil then begin
-        fdestcontroller.refresh(fplo_restorerecno in foptions,truedelayus);
-       end
-       else begin
-        fdestdataset.refresh;
+        fdestdataset.active:= true;
        end;
       end;
      end;
@@ -1056,12 +1102,19 @@ begin
       end;
       if (fplo_syncmasterinsert in foptions) and(dataset.state = dsinsert) and
                                    not (destdataset.state = dsinsert) then begin
-       destdataset.insert;
+       destdataset.insert();
       end;
      end;
      de_afterdelete: begin
-      if (fplo_syncmasterdelete in foptions) then begin
-       destdataset.delete;
+      if (fplo_syncmasterdelete in foptions) and 
+                                   not destdataset.isempty then begin
+       destdataset.delete();
+      end;
+     end;
+     de_afterpost: begin
+      if (fplo_delayedsyncmasterpost in foptions) and
+                           (destdataset.state in [dsinsert,dsedit]) then begin
+       destdataset.post();
       end;
      end;
     end;
@@ -1084,7 +1137,8 @@ begin
    inc(frefreshlock);
    try
     posted1:= false;
-    if foptions * [fplo_syncmasteredit,fplo_syncmasterinsert] <> [] then begin
+    if foptions * [fplo_syncmasteredit,fplo_syncmasterinsert,
+                               fplo_syncmastercancel] <> [] then begin
      if mseclasses.getcorbainterface(dataset,
                      typeinfo(igetdscontroller),intf) and
                                         intf.getcontroller.canceling then begin
@@ -1093,7 +1147,11 @@ begin
      end
      else begin
       if (destdataset.state = dsinsert) and 
-                           (fplo_syncmasterpost in foptions) then begin
+                           (fplo_syncmasterpost in foptions) and 
+                           (dataset.state in [dsedit,dsinsert]) then begin
+       if fplo_delayedsyncmasterpost in foptions then begin
+        exit;
+       end;
        dataset.updaterecord;
        if dataset.modified then begin
         posted1:= true;
@@ -1104,6 +1162,9 @@ begin
      end;
     end;
     if (fplo_syncmasterpost in foptions) then begin
+     if fplo_delayedsyncmasterpost in foptions then begin
+      exit;
+     end;
      posted1:= true;
      destdataset.post;
 //     destdataset.checkbrowsemode;
@@ -1132,6 +1193,147 @@ begin
   end
   else begin
    inherited;
+  end;
+ end;
+end;
+
+{ tparamdestdatalink }
+
+constructor tparamdestdatalink.create(const aowner: tfieldparamlink);
+begin
+ fownerlink:= aowner;
+ inherited create;
+end;
+
+function tparamdestdatalink.cansync(out sourceds: tdataset): boolean;
+begin
+ with fownerlink.fsourcedatalink do begin
+  result:= false;
+  sourceds:= dataset;
+  if sourceds <> nil then begin
+   result:= sourceds.active;
+  end;
+ end;
+end;
+
+procedure tparamdestdatalink.DataEvent(Event: TDataEvent; Info: Ptrint);
+var
+ sourceds: tdataset;
+begin
+ inherited;
+ with fownerlink do begin
+  if cansync(sourceds) then begin
+   case ord(event) of
+    ord(deupdatestate): begin
+     if (fplo_syncslaveedit in foptions) and (dataset.state = dsedit) and 
+                     not (sourceds.state = dsedit) then begin
+      sourceds.edit;
+     end;
+     if (fplo_syncslaveinsert in foptions) and(dataset.state = dsinsert) and
+                                  not (sourceds.state = dsinsert) then begin
+      sourceds.insert;
+     end;
+    end;
+    de_afterdelete: begin
+     if (fplo_syncslavedelete in foptions) and
+                                     not sourceds.isempty then begin
+      sourceds.delete;
+     end;
+    end;
+    de_afterpost: begin
+     if (fplo_delayedsyncslavepost in foptions) and 
+                           (sourceds.state in [dsinsert,dsedit]) then begin
+      sourceds.checkbrowsemode();
+     end;
+    end;
+   end;
+  end;
+ end;
+end;
+
+procedure tparamdestdatalink.CheckBrowseMode;
+label
+ endlab;
+var
+ intf: igetdscontroller;
+ sourceds: tdataset;
+ canceling: boolean;
+begin
+ if cansync(sourceds) then begin
+  with fownerlink do begin
+   inc(fsourcedatalink.frefreshlock);
+   try
+    canceling:= mseclasses.getcorbainterface(
+                            dataset,typeinfo(igetdscontroller),intf) and
+                                        intf.getcontroller.canceling;
+    if fplo_syncslavecancel in foptions then begin
+     if canceling then begin
+      if fsourcedatalink.frefreshlock = 1 then begin
+       sourceds.cancel;
+      end;
+      exit;
+     end
+     else begin
+      if (sourceds.state = dsinsert) and (dataset.state <> dsbrowse) and 
+                           (fplo_syncslavepost in foptions) then begin
+       dataset.updaterecord;
+       if dataset.modified then begin
+        destdataset.post;
+        updatedata;
+        goto endlab;
+       end;
+      end;
+     end;
+    end;
+    if (fplo_syncslavepost in foptions) and 
+                      (dataset.state <> dsbrowse) and not canceling then begin
+     if fplo_delayedsyncslavepost in foptions then begin
+      exit;
+     end;
+     sourceds.post;
+     updatedata;
+    end;
+    inherited;
+   endlab:
+    if (dataset.state in [dsedit,dsinsert]) and not canceling and
+      (foptions * [fplo_syncslaveedit,fplo_syncslaveinsert] <> []) then begin
+     dataset.updaterecord; //synchronize fields
+    end;
+    if (dataset.state = dsinsert) and assigned(onupdateslaveinsert) then begin
+     onupdateslaveinsert(destdataset,dataset);
+    end;
+    if (dataset.state = dsedit) and assigned(onupdateslaveedit) then begin
+     onupdateslaveedit(destdataset,dataset);
+    end;
+   finally
+    dec(fsourcedatalink.frefreshlock);
+   end;
+  end;
+ end
+ else begin
+  inherited;
+ end;
+end;
+
+procedure tparamdestdatalink.updatedata;
+var
+ int1: integer;
+ field1: tfield;
+begin
+ with fownerlink do begin
+  with fdestfields do begin
+   for int1:= 0 to high(fitems) do begin
+    with tdestfield(fitems[int1]) do begin
+     if (fdatalink.field <> nil) and (fdestfieldname <> '') then begin
+      field1:= field(fdestfieldname);
+      if (not (dfo_onlyifnull in foptions) or (field1.isnull)) and 
+         (not (dfo_notifunmodifiedinsert in foptions) or 
+                           dataset.modified) then begin
+       field1.value:= fdatalink.field.value;
+      end;
+     end;
+    end;
+   end;
   end;
  end;
 end;
@@ -1520,136 +1722,6 @@ begin
  result:= fdatalink.dataset;
 end;
 
-{ tparamdestdatalink }
-
-constructor tparamdestdatalink.create(const aowner: tfieldparamlink);
-begin
- fownerlink:= aowner;
- inherited create;
-end;
-
-function tparamdestdatalink.cansync(out sourceds: tdataset): boolean;
-begin
- with fownerlink.fsourcedatalink do begin
-  result:= false;
-  sourceds:= dataset;
-  if sourceds <> nil then begin
-   result:= sourceds.active;
-  end;
- end;
-end;
-
-procedure tparamdestdatalink.DataEvent(Event: TDataEvent; Info: Ptrint);
-var
- sourceds: tdataset;
-begin
- inherited;
- with fownerlink do begin
-  if cansync(sourceds) then begin
-   case ord(event) of
-    ord(deupdatestate): begin
-     if (fplo_syncslaveedit in foptions) and (dataset.state = dsedit) and 
-                     not (sourceds.state = dsedit) then begin
-      sourceds.edit;
-     end;
-     if (fplo_syncslaveinsert in foptions) and(dataset.state = dsinsert) and
-                                  not (sourceds.state = dsinsert) then begin
-      sourceds.insert;
-     end;
-    end;
-    de_afterdelete: begin
-     if (fplo_syncslavedelete in foptions) then begin
-      sourceds.delete;
-     end;
-    end;
-   end;
-  end;
- end;
-end;
-
-procedure tparamdestdatalink.CheckBrowseMode;
-label
- endlab;
-var
- intf: igetdscontroller;
- sourceds: tdataset;
- canceling: boolean;
-begin
- if cansync(sourceds) then begin
-  with fownerlink do begin
-   inc(fsourcedatalink.frefreshlock);
-   try
-    canceling:= mseclasses.getcorbainterface(
-                            dataset,typeinfo(igetdscontroller),intf) and
-                                        intf.getcontroller.canceling;
-    if fplo_syncslavecancel in foptions then begin
-     if canceling then begin
-      if fsourcedatalink.frefreshlock = 1 then begin
-       sourceds.cancel;
-      end;
-      exit;
-     end
-     else begin
-      if (sourceds.state = dsinsert) and (dataset.state <> dsbrowse) and 
-                           (fplo_syncslavepost in foptions) then begin
-       dataset.updaterecord;
-       if dataset.modified then begin
-        destdataset.post;
-        updatedata;
-        goto endlab;
-       end;
-      end;
-     end;
-    end;
-    if (fplo_syncslavepost in foptions) and (dataset.state <> dsbrowse) then begin
-     sourceds.post;
-     updatedata;
-    end;
-    inherited;
-   endlab:
-    if (dataset.state in [dsedit,dsinsert]) and not canceling and
-      (foptions * [fplo_syncslaveedit,fplo_syncslaveinsert] <> []) then begin
-     dataset.updaterecord; //synchronize fields
-    end;
-    if (dataset.state = dsinsert) and assigned(onupdateslaveinsert) then begin
-     onupdateslaveinsert(destdataset,dataset);
-    end;
-    if (dataset.state = dsedit) and assigned(onupdateslaveedit) then begin
-     onupdateslaveedit(destdataset,dataset);
-    end;
-   finally
-    dec(fsourcedatalink.frefreshlock);
-   end;
-  end;
- end
- else begin
-  inherited;
- end;
-end;
-
-procedure tparamdestdatalink.updatedata;
-var
- int1: integer;
- field1: tfield;
-begin
- with fownerlink do begin
-  with fdestfields do begin
-   for int1:= 0 to high(fitems) do begin
-    with tdestfield(fitems[int1]) do begin
-     if (fdatalink.field <> nil) and (fdestfieldname <> '') then begin
-      field1:= field(fdestfieldname);
-      if (not (dfo_onlyifnull in foptions) or (field1.isnull)) and 
-         (not (dfo_notifunmodifiedinsert in foptions) or 
-                           dataset.modified) then begin
-       field1.value:= fdatalink.field.value;
-      end;
-     end;
-    end;
-   end;
-  end;
- end;
-end;
-
 
 { tsqldscontroller }
 
@@ -1666,7 +1738,7 @@ end;
 procedure tsqldscontroller.savepointrollback(const alevel: integer = -1);
 begin
  with tmsesqlquery(fowner) do begin
-  if writetransaction <> nil then begin
+  if (writetransaction <> nil) and writetransaction.active then begin
    writetransaction.savepointrollback(alevel);
   end;
  end;
@@ -1675,7 +1747,7 @@ end;
 procedure tsqldscontroller.savepointrelease;
 begin
  with tmsesqlquery(fowner) do begin
-  if writetransaction <> nil then begin
+  if (writetransaction <> nil) and writetransaction.active then begin
    writetransaction.savepointrelease;
   end;
  end;

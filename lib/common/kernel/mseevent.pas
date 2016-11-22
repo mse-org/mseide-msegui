@@ -26,7 +26,7 @@ type
                 ek_mousemove,ek_mousepark,
                 ek_mouseenter,ek_mouseleave,ek_mousecaptureend,
                 ek_clientmouseenter,ek_clientmouseleave,
-                ek_expose,ek_configure,
+                ek_expose,ek_configure,ek_reparent,
                 ek_terminate,ek_abort,ek_destroy,ek_show,ek_hide,ek_close,
                 ek_activate,ek_loaded,
                 ek_keypress,ek_keyrelease,ek_timer,ek_wakeup,
@@ -53,6 +53,7 @@ type
                  es_local,es_broadcast,es_modal,es_drag,es_objectpicking,
                  es_reflected,es_nofocus,es_designcall);
  eventstatesty = set of eventstatety;
+ 
  tmseevent = class(tnullinterfacedobject)
   private
   protected
@@ -136,10 +137,10 @@ type
 
  texecuteevent = class(tmseevent)
   protected
-   procedure execute; virtual; abstract;
+   procedure execute(); virtual; abstract;
   public
-   constructor create;
-   procedure deliver; virtual;
+   constructor create();
+   procedure deliver(); virtual;
  end;
  
  teventqueue = class(tobjectqueue)
@@ -305,7 +306,7 @@ end;
 
 procedure texecuteevent.deliver;
 begin
- execute;
+ execute();
 end;
 
 { teventqueue }

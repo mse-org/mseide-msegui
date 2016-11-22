@@ -9,7 +9,7 @@
 }
 unit msemenuwidgets;
 
-{$ifdef FPC}{$mode objfpc}{$h+}{$endif}
+{$ifdef FPC}{$mode objfpc}{$h+}{$goto on}{$endif}
 
 interface
 uses
@@ -33,15 +33,21 @@ type
  menulayoutoptionty = (mlo_horz,mlo_keymode,mlo_main,mlo_childreninactive); 
                                //used for popup close by second click
  menulayoutoptionsty = set of menulayoutoptionty;
+ menulayoutstatety = (mls_valid,mls_updating);
+ menulayoutstatesty = set of menulayoutstatety;
 
  menulayoutinfoty = record
   menu: tmenuitem;
+  state: menulayoutstatesty;
   activeitem: integer;
   popupdirection: graphicdirectionty;
   mousepos: pointty;
   options: menulayoutoptionsty;
   sizerect: rectty;
   frameactivediff: framety;
+  imagedistactivediff: int32;
+  imagedist1activediff: int32;
+  imagedist2activediff: int32;
   cells: menucellinfoarty;
 //  colorglyph: colorty;
   itemframetemplate: tframetemplate;
@@ -75,10 +81,12 @@ type
   protected
    flayout: menulayoutinfoty;
    flocalframeandface: boolean;
+   procedure clientrectchanged; override;
    procedure objectevent(const sender: tobject; 
                         const event: objecteventty); override;
    function transientforwindoworwindow: twindow;
    function translatetoscreen(const value: pointty): pointty; virtual;
+   procedure invalidatelayout();
    procedure updatelayout; virtual;
    procedure nextpopupshowing; virtual;
    function isinpopuparea(const apos: pointty): boolean; virtual;
@@ -103,11 +111,14 @@ type
    function trycancelmodal(const newactive: twindow): boolean; override;
    
    procedure release1(const acancelmodal: boolean); virtual;
+   class function classskininfo(): skininfoty; override;
   public
    constructor create(instance: ppopupmenuwidget;
-       const amenu: tmenuitem; const transientfor: twindow;
-       const aowner: tcomponent = nil; const menucomp: tcustommenu = nil); overload;
+              const amenu: tmenuitem; const atransientfor: twindow;
+                          const aowner: tcomponent = nil;
+                                  const menucomp: tcustommenu = nil); overload;
    destructor destroy; override;
+   procedure paint(const canvas: tcanvas); override;
    procedure menuchanged(const sender: tmenuitem);
    procedure release(const nomodaldefer: boolean=false); override;
    procedure updatetemplates;
@@ -131,7 +142,7 @@ type
 //   fstackedoverbefore: twindow;
    fstackedunderbefore: twindow;
    fstate: mainmenuwidgetstatesty;
-   flayoutcalcing: integer;
+//   flayoutcalcing: integer;
    procedure internalsetactiveitem(const Value: integer;
                          const aclicked: boolean; const force: boolean;
                          const nochildreninactive: boolean); override;
@@ -141,14 +152,15 @@ type
    procedure restorefocus;
    function checkprevpopuparea(const apos: pointty): boolean; override;
    procedure nextpopupshowing; override;
-   procedure clientrectchanged; override;
    procedure getautopaintsize(var asize: sizety); override;
    procedure updatelayout; override;
    procedure updatepos; override;
    function isinpopuparea(const apos: pointty): boolean; override;
-   procedure doshortcut(var info: keyeventinfoty; const sender: twidget); override;
+   procedure doshortcut(var info: keyeventinfoty;
+                                             const sender: twidget); override;
    procedure childdeactivated(const sender: tpopupmenuwidget); override;
-   procedure activatemenu(const keymode,aclicked,nokeymodereset: boolean); override;
+   procedure activatemenu(
+               const keymode,aclicked,nokeymodereset: boolean); override;
    procedure deactivatemenu; override;
    procedure selectmenu(const keymode: boolean); override;
    procedure internalcreateframe; override;
@@ -276,6 +288,8 @@ begin
 end;
 
 procedure movemenulayout(var layout: menulayoutinfoty; const dist: pointty);
+//todo: optimize multiple call by loaded()
+
 var
  int1: integer;
 begin
@@ -326,7 +340,7 @@ var
  textwidth: integer;
  tabpos1: integer;
  ashortcutwidth,shortcutwidth: integer;
- item1: tmenuitem1;
+ item1,item2: tmenuitem1;
  hassubmenu: boolean;
  hascheckbox: boolean;
  shift,regioncount: integer;
@@ -352,6 +366,10 @@ var
  checkboxwidth: integer;
  checkboxheight: integer;
  size1: sizety;
+ hasnormalitem: boolean;
+ 
+label
+ suppressed;
  
 begin
  ar1:= nil; //compiler warning
@@ -369,11 +387,16 @@ begin
    checkboxwidth:= checkboxwidth + size1.cx;
    checkboxheight:= checkboxheight + size1.cy;
   end;
+  imagedistactivediff:= 0;
+  imagedist1activediff:= 0;
+  imagedist2activediff:= 0;
   if itemframetemplateactive <> nil then begin
-   frame2:= itemframetemplateactive.paintframe;
-//   with tframetemplate1(itemframetemplateactive) do begin
-//    framehalfwidth:= (abs(levelo) + abs(leveli) + framewidth);
-//   end;
+   with tframetemplate1(itemframetemplateactive) do begin
+    frame2:= paintframe;
+    imagedistactivediff:= imagedist;
+    imagedist1activediff:= imagedist1;
+    imagedist2activediff:= imagedist2;
+   end;
   end
   else begin
    frame2:= nullframe;
@@ -381,6 +404,9 @@ begin
   frameactivediff:= frame2;
   if itemframetemplate <> nil then begin
    with tframetemplate1(itemframetemplate) do begin
+    imagedistactivediff:= imagedistactivediff - imagedist;
+    imagedist1activediff:= imagedist1activediff - imagedist1;
+    imagedist2activediff:= imagedist2activediff - imagedist2;
     frame1:= paintframe;
     subframe1(frameactivediff,frame1);
     if frame1.left > frame2.left then begin
@@ -402,8 +428,8 @@ begin
     frame1:= fi.ba.innerframe;
     extrasp:= fextraspace;
     imagedi:= fimagedist;
-    imageditop:= fimagedisttop;
-    imagedibottom:= fimagedistbottom;
+    imageditop:= fimagedist1;
+    imagedibottom:= fimagedist2;
     noanim1:= fso_noanim in optionsskin;
     nomouseanim1:= fso_nomouseanim in optionsskin;
     noclickanim1:= fso_noclickanim in optionsskin;
@@ -437,12 +463,14 @@ begin
   hascheckbox:= false;
   parentcolor:= actualcolor;
   parentcoloractive:= actualcoloractive;
+  hasnormalitem:= false; //for separator check
   for int1:= 0 to count - 1 do begin
    item1:= tmenuitem1(fsubmenu[int1]);
    with cells[int1] do begin
     fontinactive:= item1.font;
     fontactive:= item1.fontactive;
     with buttoninfo,ca do begin
+     actionstatestoshapestates(item1.finfo,state);
      captiondist:= defaultshapecaptiondist;
      textflags:= [tf_ycentered];
      imagedist:= imagedi;
@@ -463,6 +491,7 @@ begin
      else begin
       tabpos:= 0;
      end;
+     exclude(state,shs_suppressed);
      if mlo_horz in layout.options then begin
       include(state,shs_horz);
      end
@@ -497,13 +526,10 @@ begin
      colorglyph:= item1.actualcolorglyph();
                                    //finfo.colorglyph; //layout.colorglyph;
      colorglyphactive:= item1.actualcolorglyphactive();
-//     if colorglyphactive = cl_default then begin
-//      colorglyphactive:= colorglyph;
-//     end;
      caption:= item1.finfo.caption1;
      imagenr:= item1.finfo.imagenr;
      imagenrdisabled:= item1.finfo.imagenrdisabled;
-     actionstatestoshapestates(item1.finfo,state);
+//     actionstatestoshapestates(item1.finfo,state);
      if (item1.color = cl_default) or (item1.color = cl_parent) then begin
       color:= parentcolor;
      end
@@ -531,8 +557,34 @@ begin
      updatebit(longword(state),ord(shs_nomouseanimation),nomouseanim1);
      updatebit(longword(state),ord(shs_noclickanimation),noclickanim1);
      updatebit(longword(state),ord(shs_nofocusanimation),nofocusanim1);
-    
+
      if not (shs_invisible in state) then begin
+      if shs_separator in state then begin
+       if shs_optional in state then begin
+        include(state,shs_suppressed);
+        if hasnormalitem then begin
+         for int2:= int1+1 to count - 1 do begin
+          item2:= tmenuitem1(fsubmenu[int2]);
+          if item2.options * [mao_separator,mao_optional] = 
+                                                 [mao_separator] then begin
+           break;
+          end;
+          if not (mao_separator in item2.options) and 
+                                not (as_invisible in item2.state) then begin
+           exclude(state,shs_suppressed);
+           break;
+          end;
+         end;
+        end;
+       end;
+       hasnormalitem:= false;
+      end
+      else begin
+       hasnormalitem:= true;
+      end;
+      if shs_suppressed in state then begin
+       goto suppressed;
+      end; 
       hassubmenu:= hassubmenu or (shs_menuarrow in state);
       if [shs_checkbox,shs_radiobutton] * state <> [] then begin
        hascheckbox:= true;
@@ -594,6 +646,7 @@ begin
      else begin
       dim:= nullrect;
      end;
+suppressed:
     end;  //with cells[int1].buttoninfo
    end;   //with cells[int1]
   end;
@@ -620,7 +673,7 @@ begin
     sizemax1:= 0;
     for int1:= 0 to count - 1 do begin
      with cells[int1].buttoninfo,ca do begin
-      if not (shs_invisible in state) then begin
+      if state * [shs_invisible,shs_suppressed] = [] then begin
        if commonwidth then begin
         dim.x:= ax;
         if not (shs_separator in state) then begin
@@ -694,8 +747,8 @@ begin
   for int1:= 0 to count - 1 do begin
    with cells[int1],buttoninfo,ca do begin
     dimouter:= inflaterect(dim,frame2);
-    imagedisttop:= imageditop;
-    imagedistbottom:= imagedibottom;
+    imagedist1:= imageditop;
+    imagedist2:= imagedibottom;
    end;
   end;
  end;
@@ -710,7 +763,8 @@ begin
    result:= -2;
    for int1:= 0 to high(cells) do begin
     with cells[int1].buttoninfo do begin
-     if (state * [shs_disabled,shs_invisible,shs_separator] = []) and
+     if (state * 
+           [shs_disabled,shs_invisible,shs_suppressed,shs_separator] = []) and
                 pointinrect(pos,ca.dim) then begin
       result:= int1;
       break;
@@ -745,63 +799,71 @@ begin
   end; 
   for int1:= 0 to high(cells) do begin
    with cells[int1],buttoninfo do begin
-    colorglyphbefore:= ca.colorglyph;
-    checkboxframe:= checkboxframetemplate;
-    if int1 = activeitem then begin
-     ca.colorglyph:= colorglyphactive;
-     if itemframetemplateactive <> nil then begin
-      itemframetemplateactive.paintbackground(canvas,ca.dim,
-         combineframestateflags(shs_disabled in state,false,false,
-                                               shs_clicked in state,false));
-      if ca.colorglyph = cl_default then begin
-       ca.colorglyph:= itemframetemplateactive.colorglyph;
-      end;
-     end;
-     face:= itemfaceactive;
-     ca.font:= fontactive;
-     state:= state + [shs_focused,shs_active,shs_focusanimation];
-     deflaterect1(ca.dim,frameactivediff);
-     drawmenubutton(canvas,buttoninfo,po2);
-     if itemframetemplateactive <> nil then begin
-      itemframetemplateactive.paintoverlay(canvas,ca.dim,
-            combineframestateflags(false,true,true,shs_clicked in state,false));
-     end;
-     inflaterect1(ca.dim,frameactivediff);
-    end
-    else begin
-     if (shs_separator in state) and (separatorframetemplate <> nil) then begin
-      separatorframetemplate.paintbackgroundframe(canvas,ca.dim);
-      if not (fso_flat in separatorframetemplate.optionsskin) then begin
-       draw3dframe(canvas,
-         inflaterect(deflaterect(ca.dim,separatorframetemplate.innerframe),1),
-                                              -1,defaultframecolors.edges,[]);
-      end;
-      separatorframetemplate.paintoverlayframe(canvas,ca.dim);
-     end
-     else begin
-      if itemframetemplate <> nil then begin
-       itemframetemplate.paintbackground(canvas,ca.dim,
-                combineframestateflags(shs_disabled in state,false,false,
-                                               shs_clicked in state,false));
+    if state * [shs_invisible,shs_suppressed] = [] then begin
+     colorglyphbefore:= ca.colorglyph;
+     checkboxframe:= checkboxframetemplate;
+     if int1 = activeitem then begin
+      ca.colorglyph:= colorglyphactive;
+      if itemframetemplateactive <> nil then begin
+       itemframetemplateactive.paintbackground(canvas,ca.dim,
+          combineframestateflags(shs_disabled in state,false,false,
+                                                shs_clicked in state,false));
        if ca.colorglyph = cl_default then begin
-        ca.colorglyph:= itemframetemplate.colorglyph;
+        ca.colorglyph:= itemframetemplateactive.colorglyph;
        end;
       end;
-      face:= itemface;
-      ca.font:= fontinactive;
-      state:= state - [shs_focused,shs_active,shs_focusanimation];
-      if ca.colorglyph = cl_default then begin
-       ca.colorglyph:= cl_glyph;
+      face:= itemfaceactive;
+      ca.font:= fontactive;
+      state:= state + [shs_focused,shs_active,shs_focusanimation];
+      deflaterect1(ca.dim,frameactivediff);
+      ca.imagedist:= ca.imagedist + imagedistactivediff;
+      ca.imagedist1:= ca.imagedist1 + imagedist1activediff;
+      ca.imagedist2:= ca.imagedist2 + imagedist2activediff;
+      drawmenubutton(canvas,buttoninfo,po2);
+      if itemframetemplateactive <> nil then begin
+       itemframetemplateactive.paintoverlay(canvas,ca.dim,
+             combineframestateflags(false,true,true,shs_clicked in state,false));
       end;
-      drawmenubutton(canvas,buttoninfo,po1);
-      if itemframetemplate <> nil then begin
-           itemframetemplate.paintoverlay(canvas,ca.dim,
-                  combineframestateflags(shs_disabled in state,false,false,
-                  shs_clicked in state,false));
+      inflaterect1(ca.dim,frameactivediff);
+      ca.imagedist:= ca.imagedist - imagedistactivediff;
+      ca.imagedist1:= ca.imagedist1 - imagedist1activediff;
+      ca.imagedist2:= ca.imagedist2 - imagedist2activediff;
+     end
+     else begin
+      if (shs_separator in state) and (separatorframetemplate <> nil) then begin
+       separatorframetemplate.paintbackgroundframe(canvas,ca.dim);
+       if not (fso_flat in separatorframetemplate.optionsskin) then begin
+        draw3dframe(canvas,
+          inflaterect(deflaterect(ca.dim,separatorframetemplate.innerframe),1),
+                                               -1,defaultframecolors.edges,[]);
+       end;
+       separatorframetemplate.paintoverlayframe(canvas,ca.dim);
+      end
+      else begin
+       if itemframetemplate <> nil then begin
+        itemframetemplate.paintbackground(canvas,ca.dim,
+                 combineframestateflags(shs_disabled in state,false,false,
+                                                shs_clicked in state,false));
+        if ca.colorglyph = cl_default then begin
+         ca.colorglyph:= itemframetemplate.colorglyph;
+        end;
+       end;
+       face:= itemface;
+       ca.font:= fontinactive;
+       state:= state - [shs_focused,shs_active,shs_focusanimation];
+       if ca.colorglyph = cl_default then begin
+        ca.colorglyph:= cl_glyph;
+       end;
+       drawmenubutton(canvas,buttoninfo,po1);
+       if itemframetemplate <> nil then begin
+            itemframetemplate.paintoverlay(canvas,ca.dim,
+                   combineframestateflags(shs_disabled in state,false,false,
+                   shs_clicked in state,false));
+       end;
       end;
      end;
-    end;
-    ca.colorglyph:= colorglyphbefore;
+     ca.colorglyph:= colorglyphbefore;
+    end; //visible
    end;
   end;
  end;
@@ -860,7 +922,7 @@ function checkshortcut(const layout: menulayoutinfoty; var info: keyeventinfoty;
   int1:= actualindex;
   repeat
    with layout.cells[actualindex].buttoninfo do begin
-    if (state * [shs_disabled,shs_invisible] = []) and
+    if (state * [shs_disabled,shs_invisible,shs_suppressed] = []) and
             msegui.checkshortcut(info,ca.caption,false) then begin
      result:= actualindex;
      include(info.eventstate,es_processed);
@@ -889,7 +951,7 @@ end;
 { tpopupmenuwidget }
 
 constructor tpopupmenuwidget.create(instance: ppopupmenuwidget; const amenu: tmenuitem;
-         const transientfor: twindow;
+         const atransientfor: twindow;
          const aowner: tcomponent = nil; const menucomp: tcustommenu = nil);
 begin
  fclickeditem:= -1;
@@ -900,15 +962,15 @@ begin
   instance^:= self;
  end;
  initlayoutinfo(self,flayout,amenu,[]{,cl_black});
- inherited create(aowner,transientfor);
+ inherited create(aowner,atransientfor);
  optionswidget:= defaultpopupmenuwidgetoptions;
  internalcreateframe;
  if menucomp <> nil then begin
   assigntemplate(menucomp.template);
  end
  else begin
-  if (transientfor <> nil) and (transientfor.owner is tpopupmenuwidget) then begin
-   assigntemplate(tpopupmenuwidget(transientfor.owner).ftemplates);
+  if (atransientfor <> nil) and (atransientfor.owner is tpopupmenuwidget) then begin
+   assigntemplate(tpopupmenuwidget(atransientfor.owner).ftemplates);
   end;
  end;
  application.registeronapplicationactivechanged(
@@ -1013,7 +1075,7 @@ begin
   else begin
    flayout.checkboxframetemplate:= nil;
   end;
-  updatelayout;
+  invalidatelayout();
  end;
 end;
 
@@ -1113,15 +1175,36 @@ begin
  setwidgetrect(rect1);
 end;
 
-procedure tpopupmenuwidget.updatelayout;
+procedure tpopupmenuwidget.updatelayout();
 begin
- flayout.popupdirection:= gd_right;
- calcmenulayout(flayout,getcanvas,
-//          application.screenrect(transientforwindoworwindow).cy -
-          application.workarea(transientforwindoworwindow).cy -
-          innerclientframewidth.cy);
- movemenulayout(flayout,innerclientrect.pos);            
- updatepos;
+ if flayout.state * [mls_valid,mls_updating] = [] then begin
+  include(flayout.state,mls_updating);
+  try
+   flayout.popupdirection:= gd_right;
+   calcmenulayout(flayout,getcanvas,
+  //          application.screenrect(transientforwindoworwindow).cy -
+            application.workarea(transientforwindoworwindow).cy -
+            innerclientframewidth.cy);
+   movemenulayout(flayout,innerclientrect.pos);            
+   updatepos();
+   invalidate();
+   include(flayout.state,mls_valid);
+  finally
+   exclude(flayout.state,mls_updating);
+  end;
+ end;
+end;
+
+procedure tpopupmenuwidget.invalidatelayout();
+begin
+ if (componentstate * [csloading,csdestroying] = []) then begin
+  exclude(flayout.state,mls_valid);
+  invalidate();
+  if (flayout.menu <> nil) and (flayout.menu.submenu.count > 0) and 
+          ((fwidgetrect.cx <= 0) or (fwidgetrect.cy <= 0)) then begin
+   updatelayout(); //there will be no paint event
+  end;
+ end;
 end;
 
 procedure tpopupmenuwidget.nextpopupshowing;
@@ -1139,7 +1222,7 @@ begin
  flayout.menu.onchange:= {$ifdef FPC}@{$endif}menuchanged;
  fposrect:= aposrect;
  fposition:= aposition;
- updatelayout;
+ updatelayout();
  if fprevpopup <> nil then begin
   frefpos:= fprevpopup.screenpos;
   fprevpopup.window.registermovenotification(ievent(self));
@@ -1169,7 +1252,7 @@ end;
 
 procedure tpopupmenuwidget.menuchanged(const sender: tmenuitem);
 begin
- updatelayout;
+ invalidatelayout();
 end;
 
 procedure tpopupmenuwidget.dopaintforeground(const canvas: tcanvas);
@@ -1536,6 +1619,14 @@ begin
  flayout.mousepos:= application.mouse.pos;
 end;
 
+procedure tpopupmenuwidget.paint(const canvas: tcanvas);
+begin
+ if not (mls_valid in flayout.state) then begin
+  updatelayout();
+ end;
+ inherited;
+end;
+
 procedure tpopupmenuwidget.dokeydown(var info: keyeventinfoty);
 
  procedure checkshortcut(widget: tpopupmenuwidget);
@@ -1687,6 +1778,15 @@ begin
  widget1.release1(cancelmodal);
 end;
 
+procedure tpopupmenuwidget.clientrectchanged;
+begin
+ inherited;
+ if not (mls_updating in flayout.state) then begin
+  invalidatelayout();
+  updatelayout();
+ end;
+end;
+
 procedure tpopupmenuwidget.objectevent(const sender: tobject;
   const event: objecteventty);
 var
@@ -1705,16 +1805,16 @@ begin
                           (sender = ftemplates.itemframe) or 
                           (sender = ftemplates.itemface)) then begin
    updatetemplates; //refresh
-   if not (csloading in componentstate) then begin
-    updatelayout;
-   end;
+//   if not (csloading in componentstate) then begin
+//    invalidatelayout();
+//   end;
   end;
  end;
 end;
 
 procedure tpopupmenuwidget.fontchanged;
 begin
- updatelayout;
+ invalidatelayout();
  if fparentwidget <> nil then begin
   fparentwidget.dolayout(self);
  end;
@@ -1778,6 +1878,12 @@ begin
  release;
 end;
 
+class function tpopupmenuwidget.classskininfo(): skininfoty;
+begin
+ result:= inherited classskininfo();
+ result.objectkind:= sok_mainmenuwidget;
+end;
+
 { tcustommainmenuwidget }
 
 procedure tcustommainmenuwidget.internalcreateframe;
@@ -1789,7 +1895,7 @@ end;
 procedure tcustommainmenuwidget.loaded;
 begin
  inherited;
- updatelayout;
+// updatelayoutx();
 end;
 
 procedure tcustommainmenuwidget.updatepos;
@@ -1802,13 +1908,13 @@ begin
  asize:= addsize(flayout.sizerect.size,innerframewidth);
 end;
 
-procedure tcustommainmenuwidget.updatelayout;
+procedure tcustommainmenuwidget.updatelayout();
 var
  rect1: rectty;
  size1: sizety;
 begin
- if flayoutcalcing = 0 then begin
-  inc(flayoutcalcing);
+ if flayout.state * [mls_valid,mls_updating] = [] then begin
+  include(flayout.state,mls_updating);
   try
    size1:= innerclientrect.size;
    if ow1_autowidth in foptionswidget1 then begin
@@ -1838,16 +1944,12 @@ begin
     end;
    end;
    widgetrect:= rect1;
+   include(flayout.state,mls_valid);
+   invalidate();
   finally
-   dec(flayoutcalcing);
+   exclude(flayout.state,mls_updating);
   end;
  end;
-end;
-
-procedure tcustommainmenuwidget.clientrectchanged;
-begin
- inherited;
- updatelayout;
 end;
 
 procedure tcustommainmenuwidget.nextpopupshowing;
@@ -2058,8 +2160,9 @@ begin
  setlockedparentwidget(aparent);
  flayout.options:= [mlo_horz,mlo_main,mlo_childreninactive];
  flayout.popupdirection:= gd_down;
- if not (csloading in aparent.ComponentState) and not (csloading in componentstate) then begin
-  updatelayout;
+ if not (csloading in aparent.ComponentState) and 
+                             not (csloading in componentstate) then begin
+//  updatelayout();
   visible:= true;
  end;
 end;
@@ -2093,7 +2196,7 @@ begin
  flayout.options:= [mlo_horz,mlo_main,mlo_childreninactive];
  flayout.popupdirection:= gd_down;
  if not (csloading in componentstate) then begin
-  updatelayout;
+//  updatelayout;
  end;
  visible:= true;
 end;
@@ -2136,7 +2239,7 @@ begin
    include(flayout.options,mlo_horz);     
   end;
   if not (csloading in componentstate) then begin
-   updatelayout;
+//   invalidatelayout();
   end;
  end;
 end;
@@ -2148,7 +2251,7 @@ begin
  if (event = oe_changed) and (sender = fmenucomp) and
                                   not (csloading in componentstate) then begin
   assigntemplate(fmenucomp.template);
-  invalidate;                            
+//  invalidatelayout();                            
  end; 
 end;
 

@@ -47,9 +47,9 @@ const
  defaultstartprocessoptions = defaultprocessoptions + [pro_inactive];
  
 type   
- tmseprocess = class;
+ tcustommseprocess = class;
  
- tmseprocess = class(tactcomponent,istatfile,iprocmonitor)
+ tcustommseprocess = class(tactcomponent,istatfile,iprocmonitor)
   private
    finput: tpipewriterpers;
    foutput: tpipereaderpers;
@@ -61,7 +61,6 @@ type
    factive: boolean;
    fprochandle: prochandlety;
    flastprochandle: prochandlety;
-   foptions: processoptionsty;
    fonprocfinished: notifyeventty;
    flistenid: ptruint;
    fexitcode: integer;
@@ -81,12 +80,13 @@ type
    function getcommandline: msestring;
    procedure setcommandline(const avalue: msestring);
    procedure procend;
-   procedure setoptions(const avalue: processoptionsty);
    procedure setinput(const avalue: tpipewriterpers);
    procedure setparams(const avalue: tmsestringdatalist);
    procedure setenvvars(const avalue: tmsestringdatalist);
   protected
+   foptions: processoptionsty;
    fstate: processstatesty;
+   procedure setoptions(const avalue: processoptionsty) virtual;
    procedure setactive(const avalue: boolean); override;
    procedure loaded; override;
    procedure listen;
@@ -94,7 +94,7 @@ type
    procedure finalizeexec;
    procedure receiveevent(const event: tobjectevent); override;
    procedure waitforpipeeof;
-   procedure doprocfinished;
+   procedure doprocfinished virtual;
    procedure postprocessdied;
 
     //istatfile
@@ -121,7 +121,7 @@ type
    property prochandle: prochandlety read fprochandle;
    property lastprochandle: prochandlety read flastprochandle;
    property exitcode: integer read fexitcode;
-  published
+
    property filename: filenamety read ffilename write ffilename;
    property parameter: msestring read fparameter write fparameter;
    property workingdirectory: filenamety read fworkingdirectory 
@@ -147,6 +147,26 @@ type
                           read foncheckabort write foncheckabort;
  end;
 
+ tmseprocess = class(tcustommseprocess)
+  published
+   property filename;
+   property parameter;
+   property workingdirectory;
+   property params;
+   property envvars;
+   property active;
+   property options;
+   property pipewaitus;
+   property statfile;
+   property statvarname;
+   property statpriority;
+   property input;
+   property output;
+   property erroroutput;
+   property onprocfinished;
+   property oncheckabort;
+ end;
+ 
 function getprocessoutput(const acommandline: msestring; const todata: string;
                          out fromdata: string; out errordata: string;
                          const atimeout: integer = -1;
@@ -197,7 +217,7 @@ uses
  mseprocutils,msefileutils,sysutils,msesysintf,msebits,msesys,
  msesysutils;
 type
- tstringprocess = class(tmseprocess)
+ tstringprocess = class(tcustommseprocess)
   private
    ffromdata: string;
    ffromcount: sizeint;
@@ -281,10 +301,10 @@ function startprocessandwait(const acommandline: msestring;
                          //returns program exitcode, -1 in case of error
                          //-2 in case of maxdatalen reached
 var
- proc1: tmseprocess;
+ proc1: tcustommseprocess;
 begin
  result:= -1;
- proc1:= tmseprocess.create(nil);
+ proc1:= tcustommseprocess.create(nil);
  try
   with proc1 do begin
    commandline:= acommandline;
@@ -359,9 +379,9 @@ begin
                                  atimeout,aoptions,acheckabort,amaxdatalen);
 end;
  
-{ tmseprocess }
+{ tcustommseprocess }
 
-constructor tmseprocess.create(aowner: tcomponent);
+constructor tcustommseprocess.create(aowner: tcomponent);
 begin
  foptions:= defaultprocessoptions;
  fprochandle:= invalidprochandle;
@@ -374,7 +394,7 @@ begin
  inherited;
 end;
 
-destructor tmseprocess.destroy;
+destructor tcustommseprocess.destroy;
 begin
  finalizeexec();
  finput.free();    
@@ -388,17 +408,17 @@ begin
 // ferroroutput.free;
 end;
 
-procedure tmseprocess.setoutput(const avalue: tpipereaderpers);
+procedure tcustommseprocess.setoutput(const avalue: tpipereaderpers);
 begin
  foutput.assign(avalue);
 end;
 
-procedure tmseprocess.seterroroutput(const avalue: tpipereaderpers);
+procedure tcustommseprocess.seterroroutput(const avalue: tpipereaderpers);
 begin
  ferroroutput.assign(avalue);
 end;
 
-function tmseprocess.getactive: boolean;
+function tcustommseprocess.getactive: boolean;
 begin
  if componentstate * [csloading,csdesigning] <> [] then begin
   result:= factive;
@@ -408,7 +428,7 @@ begin
  end;
 end;
 
-procedure tmseprocess.doprocfinished;
+procedure tcustommseprocess.doprocfinished;
 begin
  if canevent(tmethod(fonprocfinished)) then begin
   fonprocfinished(self);
@@ -421,7 +441,7 @@ begin
  }
 end;
 
-procedure tmseprocess.procend;
+procedure tcustommseprocess.procend;
 begin  
  fprochandle:= invalidprochandle;
  foutput.pipereader.writehandle:= invalidfilehandle;
@@ -435,7 +455,7 @@ begin
  doprocfinished;
 end;
 
-procedure tmseprocess.postprocessdied;
+procedure tcustommseprocess.postprocessdied;
 begin
  exclude(fstate,prs_listening);
  application.postevent(tchildprocevent.create(ievent(self),fprochandle,
@@ -443,7 +463,7 @@ begin
  fprochandle:= invalidprochandle;
 end;
 
-procedure tmseprocess.setactive(const avalue: boolean);
+procedure tcustommseprocess.setactive(const avalue: boolean);
 var
  outp: tpipereader;
  erroroutp: tpipereader;
@@ -575,7 +595,7 @@ begin
  end;
 end;
 
-procedure tmseprocess.receiveevent(const event: tobjectevent);
+procedure tcustommseprocess.receiveevent(const event: tobjectevent);
 begin
  if (event.kind = ek_childproc) then begin 
   with tchildprocevent(event) do begin
@@ -589,7 +609,7 @@ begin
  end;
 end;
 
-function tmseprocess.waitforprocess(const atimeoutus: integer): boolean;
+function tcustommseprocess.waitforprocess(const atimeoutus: integer): boolean;
                                               //true if process finished
 var
  int1: integer;
@@ -653,7 +673,7 @@ begin
  end;
 end;
 
-function tmseprocess.waitforprocess: integer;
+function tcustommseprocess.waitforprocess: integer;
 begin
  result:= -1;
  if waitforprocess(-1) then begin
@@ -661,45 +681,45 @@ begin
  end;
 end;
 
-procedure tmseprocess.setstatfile(const avalue: tstatfile);
+procedure tcustommseprocess.setstatfile(const avalue: tstatfile);
 begin
  setstatfilevar(istatfile(self),avalue,fstatfile);
 end;
 
-function tmseprocess.getstatvarname: msestring;
+function tcustommseprocess.getstatvarname: msestring;
 begin
  result:= fstatvarname;
 end;
 
-procedure tmseprocess.dostatread(const reader: tstatreader);
+procedure tcustommseprocess.dostatread(const reader: tstatreader);
 begin
  ffilename:= reader.readmsestring('file',ffilename);
  fparameter:= reader.readmsestring('param',fparameter);
 end;
 
-procedure tmseprocess.dostatwrite(const writer: tstatwriter);
+procedure tcustommseprocess.dostatwrite(const writer: tstatwriter);
 begin
  writer.writemsestring('file',ffilename);
  writer.writemsestring('param',fparameter);
 end;
 
-procedure tmseprocess.statreading;
+procedure tcustommseprocess.statreading;
 begin
  //dummy
 end;
 
-procedure tmseprocess.statread;
+procedure tcustommseprocess.statread;
 begin
  //dummy
 end;
 
-procedure tmseprocess.loaded;
+procedure tcustommseprocess.loaded;
 begin
  inherited;
  active:= factive;
 end;
 
-procedure tmseprocess.listen;
+procedure tcustommseprocess.listen;
 begin
  application.lock;
  if not (prs_listening in fstate) and 
@@ -710,7 +730,7 @@ begin
  application.unlock;
 end;
 
-procedure tmseprocess.unlisten;
+procedure tcustommseprocess.unlisten;
 begin
  application.lock;
  try
@@ -724,7 +744,7 @@ begin
  end;
 end;
 
-procedure tmseprocess.finalizeexec;
+procedure tcustommseprocess.finalizeexec;
 begin
  finput.pipewriter.close();
  foutput.pipereader.terminateandwait();
@@ -740,7 +760,7 @@ begin
  ferroroutput.pipereader.close();
 end;
 
-procedure tmseprocess.waitforpipeeof;
+procedure tcustommseprocess.waitforpipeeof;
 var
  int1,int2,int3: integer;
  lwo1: longword;
@@ -768,7 +788,7 @@ begin
  end;
 end;
 
-procedure tmseprocess.processdied(const aprochandle: prochandlety;
+procedure tcustommseprocess.processdied(const aprochandle: prochandlety;
                const aexecresult: integer; const adata: pointer);
 begin
  if (prs_listening in fstate) and (adata = pointer(flistenid)) then begin
@@ -777,7 +797,7 @@ begin
  end
 end;
 
-procedure tmseprocess.updatecommandline;
+procedure tcustommseprocess.updatecommandline;
 begin
  if fcommandline <> '' then begin
   fcommandline1:= fcommandline;
@@ -790,20 +810,20 @@ begin
  end;
 end;
 
-function tmseprocess.getcommandline: msestring;
+function tcustommseprocess.getcommandline: msestring;
 begin
  updatecommandline;
  result:= fcommandline1;
 end;
 
-procedure tmseprocess.setcommandline(const avalue: msestring);
+procedure tcustommseprocess.setcommandline(const avalue: msestring);
 begin
  fcommandline:= avalue;
 end;
 
 
 {
-function tmseprocess.waitforprocess: integer;
+function tcustommseprocess.waitforprocess: integer;
 var
  int1: integer;
 begin
@@ -821,7 +841,7 @@ begin
  end;
 end;
 
-function tmseprocess.waitforprocess(const atimeoutus: integer): boolean;
+function tcustommseprocess.waitforprocess(const atimeoutus: integer): boolean;
                                               //true if process finished
 var
  int1: integer;
@@ -859,12 +879,12 @@ begin
 end;
 }
 
-function tmseprocess.running: boolean;
+function tcustommseprocess.running: boolean;
 begin
  result:= fprochandle <> invalidprochandle;
 end;
 
-procedure tmseprocess.terminate;
+procedure tcustommseprocess.terminate;
 begin
 {$ifdef mswindows}
  kill();
@@ -880,7 +900,7 @@ begin
 {$endif}
 end;
 
-procedure tmseprocess.kill;
+procedure tcustommseprocess.kill;
 begin
  application.lock;
  try
@@ -896,7 +916,7 @@ begin
  end;
 end;
 
-procedure tmseprocess.setoptions(const avalue: processoptionsty);
+procedure tcustommseprocess.setoptions(const avalue: processoptionsty);
 {$ifndef FPC}
 const
  mask1: processoptionsty = [pro_erroroutput,pro_errorouttoout];
@@ -922,22 +942,22 @@ begin
  end;
 end;
 
-function tmseprocess.getstatpriority: integer;
+function tcustommseprocess.getstatpriority: integer;
 begin
  result:= fstatpriority;
 end;
 
-procedure tmseprocess.setinput(const avalue: tpipewriterpers);
+procedure tcustommseprocess.setinput(const avalue: tpipewriterpers);
 begin
  finput.assign(avalue);
 end;
 
-procedure tmseprocess.setparams(const avalue: tmsestringdatalist);
+procedure tcustommseprocess.setparams(const avalue: tmsestringdatalist);
 begin
  fparams.assign(avalue);
 end;
 
-procedure tmseprocess.setenvvars(const avalue: tmsestringdatalist);
+procedure tcustommseprocess.setenvvars(const avalue: tmsestringdatalist);
 begin
  fenvvars.assign(avalue);
 end;
