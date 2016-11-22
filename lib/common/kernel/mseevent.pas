@@ -26,7 +26,7 @@ type
                 ek_mousemove,ek_mousepark,
                 ek_mouseenter,ek_mouseleave,ek_mousecaptureend,
                 ek_clientmouseenter,ek_clientmouseleave,
-                ek_expose,ek_configure,ek_reparent,
+                ek_expose,ek_configure,
                 ek_terminate,ek_abort,ek_destroy,ek_show,ek_hide,ek_close,
                 ek_activate,ek_loaded,
                 ek_keypress,ek_keyrelease,ek_timer,ek_wakeup,

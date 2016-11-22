@@ -74,7 +74,6 @@ end;
 destructor ttraywidget.destroy;
 begin
  visible:= false;
- undock();
  freeandnil(ftimer);
  ficon.free;
  inherited;
@@ -82,10 +81,8 @@ end;
 
 procedure ttraywidget.dock;
 begin
- if (parentwidget <> nil) or (window.syscontainer <> sywi_tray) then begin
-  parentwidget:= nil;
-  window.syscontainer:= sywi_tray;
- end;
+ parentwidget:= nil;
+ window.syscontainer:= sywi_tray;
 end;
 
 procedure ttraywidget.undock;
@@ -121,8 +118,8 @@ procedure ttraywidget.loaded;
 begin
  if not(csdesigning in componentstate) and visible then begin
   visible:= false;
-  inherited;
   dock;
+  inherited;
   visible:= true;
  end
  else begin

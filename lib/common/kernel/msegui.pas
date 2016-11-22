@@ -2351,12 +2351,6 @@ type
    constructor create(akind: eventkindty; winid: winidty);
  end;
  pwindowevent = ^twindowevent;
- treparentevent = class(twindowevent)
-  public
-   fparent: winidty;
-   constructor create(akind: eventkindty; winid: winidty;
-                      aparent: winidty);
- end;
 
  twindow = class(teventobject,icanvas)
   private
@@ -16813,18 +16807,9 @@ procedure twindow.setsyscontainer(const avalue: syswindowty);
 begin
  if avalue <> fsyscontainer then begin
   if (fsyscontainer <> sywi_none) and (fwindow.id <> 0) then begin
-//   gui_docktosyswindow(fwindow,sywi_none); //does not work with newer wm's
-   destroywindow();
+   gui_docktosyswindow(fwindow,sywi_none);
    fsyscontainer:= sywi_none;
    container:= 0;
-   if not (tws_destroying in fstate) then begin
-    createwindow();
-    if avalue = sywi_none then begin
-     if fownerwidget.visible then begin
-      gui_showwindow(winid);
-     end;
-    end;
-   end;
   end;
   if avalue <> sywi_none then begin
    if fwindow.id = 0 then begin
@@ -16833,9 +16818,6 @@ begin
    include(foptions,wo_embedded); 
    guierror(gui_docktosyswindow(fwindow,avalue));
    fsyscontainer:= avalue;
-   if fownerwidget.visible then begin
-//    gui_showsysdock(fwindow);
-   end;
   end;
  end;
 end;
@@ -20783,15 +20765,6 @@ constructor tfadeopacolorarrayprop.create;
 begin
  inherited;
  fvaluedefault:= defaultfadeopacolor;
-end;
-
-{ treparentevent }
-
-constructor treparentevent.create(akind: eventkindty; winid: winidty;
-               aparent: winidty);
-begin
- fparent:= aparent;
- inherited create(ek_reparent,winid);
 end;
 
 initialization
