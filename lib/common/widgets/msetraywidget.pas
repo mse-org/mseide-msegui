@@ -59,7 +59,7 @@ type
  
 implementation
 uses
- mseguiintf,sysutils,msewidgets;
+ mseguiintf,sysutils,msewidgets,msegraphutils;
 
 { ttraywidget }
 

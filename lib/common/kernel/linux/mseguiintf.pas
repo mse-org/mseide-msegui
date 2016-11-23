@@ -4443,7 +4443,8 @@ begin
   syswin:= getsyswin(akind);
   if syswin <> 0 then begin
    initxembed(child.id,xembedflagsunmapped);
-   xdeleteproperty(appdisp,child.id,netatoms[wm_normal_hints]);
+//   xdeleteproperty(appdisp,child.id,netatoms[wm_normal_hints]);
+//   xdeleteproperty(appdisp,child.id,wmclassatom);
    parentbefore:= gui_getparentwindow(child.id);
    result:= gue_ok;
    i1:= 0;
@@ -4466,9 +4467,25 @@ begin
     inc(i1);
    until i1 = maxwait;
    if i1 >= maxwait then begin
+  {$ifdef mse_debugxembed}
+    debugwindow('***error docktosyswindow child ',child.id);
+    debugwindow(' syswin ',syswin);
+  {$endif}
     result:= gue_docktosyswindow;
+   end
+   else begin
+  {$ifdef mse_debugxembed}
+    debugwindow('* docktosyswindow attempt:'+inttostr(i1)+' child',child.id);
+    debugwindow(' syswin ',syswin);
+  {$endif}
    end;
-  end; 
+  end
+  else begin
+  {$ifdef mse_debugxembed}
+    debugwindow('***error docktosyswindow child:',child.id);
+    debugwindow(' syswin:',syswin);
+  {$endif}
+  end;
  end;
  gdi_unlock;
 end;
