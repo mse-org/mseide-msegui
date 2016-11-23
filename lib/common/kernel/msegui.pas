@@ -14843,7 +14843,8 @@ begin
    if fstate * [tws_posvalid,tws_sizevalid] <>
            [tws_posvalid,tws_sizevalid] then begin
     if not windowevent and not (tws_needsdefaultpos in fstate) and
-        (fmoving <= 0) and (windowpos in [wp_normal,wp_default]) then begin
+        (fmoving <= 0) and (windowpos in [wp_normal,wp_default]) and
+        not (wo_embedded in foptions) and (fsyscontainer = sywi_none) then begin
      fnormalwindowrect:= fownerwidget.fwidgetrect;
     {$ifdef mse_debugconfigure}
      with fnormalwindowrect do begin
