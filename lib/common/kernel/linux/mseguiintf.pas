@@ -4448,7 +4448,14 @@ begin
    parentbefore:= gui_getparentwindow(child.id);
    result:= gue_ok;
    i1:= 0;
+   case akind of
+    sywi_tray: begin
+     result:= sendtraymessage(syswin,syswin,
+                         system_tray_request_dock,child.id);
+    end;
+   end;
    repeat
+   {
     case akind of
      sywi_tray: begin
       result:= sendtraymessage(syswin,syswin,
@@ -4456,9 +4463,9 @@ begin
                           //does not always work the first time...
      end;
     end;
+   }
     xsync(appdisp,0);
     sys_schedyield;
-    xsync(appdisp,0);
     id1:= gui_getparentwindow(child.id);
     if (id1 <> parentbefore) and (id1 <> rootid) then begin
      break;
