@@ -68,8 +68,10 @@ function gui_settrayhint(var awindow: windowty;
 function gui_flushgdi(const synchronize: boolean = false): guierrorty;
 function gui_showwindow(id: winidty): guierrorty;
 function gui_hidewindow(id: winidty): guierrorty;
-function gui_raisewindow(id: winidty): guierrorty;
-function gui_lowerwindow(id: winidty): guierrorty;
+function gui_raisewindow(id: winidty; const topmost: boolean = false): guierrorty;
+                                          //windows only
+function gui_lowerwindow(id: winidty; const topmost: boolean = false): guierrorty;
+                                          //windows only
 function gui_stackunderwindow(id: winidty; predecessor: winidty): guierrorty;
 function gui_stackoverwindow(id: winidty; predecessor: winidty): guierrorty;
 function gui_canstackunder: boolean; //no way found to change stacking order in KDE

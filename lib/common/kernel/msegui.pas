@@ -16104,7 +16104,7 @@ begin
     deleteitem(fwindowstack,typeinfo(windowstackinfoarty),int1);
    end;
   end;
-  gui_raisewindow(winid);
+  gui_raisewindow(winid,wo_popup in self.foptions);
   include(fstate,aps_needsupdatewindowstack);
  end;
 end;
@@ -17873,7 +17873,7 @@ begin
       else begin
        gui_setwindowfocus(fmodalwindow.fwindow.id);
       end;
-      gui_raisewindow(fmodalwindow.fwindow.id);
+      gui_raisewindow(fmodalwindow.fwindow.id,wo_popup in fmodalwindow.options);
      end;
     end;
    end;
