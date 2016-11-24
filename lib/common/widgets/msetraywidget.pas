@@ -13,6 +13,7 @@ interface
 uses
  mseclasses,classes,mclasses,msesimplewidgets,mseguiglob,msebitmap,msegui,mseevent,
  mseglob,msegraphics,msestrings,msetimer,msemenus;
+ 
 type
  ttraywidget = class(teventwidget)
   private
@@ -42,6 +43,7 @@ type
    procedure undock;
    procedure setvisible(const avalue: boolean); override;
    procedure loaded; override;
+   procedure updatewindowinfo(var info: windowinfoty) override;
    procedure dopopup(var amenu: tpopupmenu; 
                     var mouseinfo: mouseeventinfoty); override;
 
@@ -141,6 +143,12 @@ begin
  else begin
   inherited;
  end;
+end;
+
+procedure ttraywidget.updatewindowinfo(var info: windowinfoty);
+begin
+ inherited;
+ include(info.options,wo_embedded);
 end;
 
 procedure ttraywidget.seticon(const avalue: tmaskedbitmap);
