@@ -14843,25 +14843,26 @@ begin
    if fstate * [tws_posvalid,tws_sizevalid] <>
            [tws_posvalid,tws_sizevalid] then begin
     if not windowevent and not (tws_needsdefaultpos in fstate) and
-        (fmoving <= 0) and (windowpos in [wp_normal,wp_default]) and
-        not (wo_embedded in foptions) and (fsyscontainer = sywi_none) then begin
-     fnormalwindowrect:= fownerwidget.fwidgetrect;
-    {$ifdef mse_debugconfigure}
-     with fnormalwindowrect do begin
-      if visible then begin
-       debugwindow('*checkwin visible '+
+        (fmoving <= 0) and (windowpos in [wp_normal,wp_default]) then begin
+     if not (wo_embedded in foptions) then begin
+      fnormalwindowrect:= fownerwidget.fwidgetrect;
+     {$ifdef mse_debugconfigure}
+      with fnormalwindowrect do begin
+       if visible then begin
+        debugwindow('*checkwin visible '+
+         inttostr(x)+' '+inttostr(y)+' '+inttostr(cx)+' '+inttostr(cy)+' ',
+                                                                   fwindow.id);
+       end
+       else begin
+        debugwindow('*checkw. invis.   '+
         inttostr(x)+' '+inttostr(y)+' '+inttostr(cx)+' '+inttostr(cy)+' ',
                                                                   fwindow.id);
-      end
-      else begin
-       debugwindow('*checkw. invis.   '+
-       inttostr(x)+' '+inttostr(y)+' '+inttostr(cx)+' '+inttostr(cy)+' ',
-                                                                 fwindow.id);
+       end;
       end;
+     {$endif}
+      appinst.removewindowevents(fwindow.id,ek_configure);
+      guierror(gui_reposwindow(fwindow.id,fnormalwindowrect),self);
      end;
-    {$endif}
-     appinst.removewindowevents(fwindow.id,ek_configure);
-     guierror(gui_reposwindow(fwindow.id,fnormalwindowrect),self);
      fstate:= fstate + [tws_posvalid,tws_sizevalid];
     end;
    end;
@@ -15561,7 +15562,8 @@ begin
  if not (wo_embedded in foptions) then begin
   addpoint1(rect1.pos,aorigin);
  end;
- if not visible or (tws_windowshowpending in fstate) then begin 
+ if not (wo_embedded in foptions) and (not visible or 
+                           (tws_windowshowpending in fstate)) then begin 
                         //do not accept changes by hiding window (kwin bugs)
   if not rectisequal(fownerwidget.fwidgetrect,rect1) then begin
    fstate:= fstate - [tws_posvalid,tws_sizevalid];
@@ -15569,7 +15571,7 @@ begin
  end
  else begin
   if (fstate*[tws_posvalid,tws_sizevalid] <> [tws_posvalid,tws_sizevalid]) and 
-                                     (windowpos <> wp_maximized) then begin
+       (windowpos <> wp_maximized) and not (wo_embedded in foptions) then begin
    checkwindow(false);
   end
   else begin
@@ -16814,12 +16816,17 @@ procedure twindow.setsyscontainer(const avalue: syswindowty);
 begin
  if avalue <> fsyscontainer then begin
   if (fsyscontainer <> sywi_none) and (fwindow.id <> 0) then begin
-//   gui_docktosyswindow(fwindow,sywi_none); //does not work with newer wm's
-   destroywindow();
+  {$ifdef mswindows}
+   gui_docktosyswindow(fwindow,sywi_none); 
+  {$else}
+   destroywindow(); //above code does not work with newer wm's
+  {$endif}
    fsyscontainer:= sywi_none;
    container:= 0;
    if not (tws_destroying in fstate) then begin
+  {$ifndef mswindows}
     createwindow();
+  {$endif}
     if avalue = sywi_none then begin
      if fownerwidget.visible then begin
       gui_showwindow(winid);
