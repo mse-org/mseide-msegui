@@ -148,7 +148,7 @@ end;
 procedure ttraywidget.updatewindowinfo(var info: windowinfoty);
 begin
  inherited;
- include(info.options,wo_embedded);
+ info.options:= info.options + [wo_embedded,wo_noframe];
 end;
 
 procedure ttraywidget.seticon(const avalue: tmaskedbitmap);
