@@ -2147,7 +2147,8 @@ begin
  gdi_unlock;
 end;
 
-function gui_raisewindow(id: winidty): guierrorty;
+function gui_raisewindow(id: winidty; 
+                             const topmost: boolean = false): guierrorty;
 begin
  gdi_lock;
 {$ifdef mse_debugzorder}
@@ -2164,7 +2165,8 @@ begin
  gdi_unlock;
 end;
 
-function gui_lowerwindow(id: winidty): guierrorty;
+function gui_lowerwindow(id: winidty;
+                             const topmost: boolean = false): guierrorty;
 begin
  gdi_lock;
 {$ifdef mse_debugzorder}
