@@ -1009,7 +1009,7 @@ object projectoptionsfo: tprojectoptionsfo
                   reffontheight = 14
                 end
                 object autoindent: tbooleanedit
-                  frame.caption = 'Auto Indent'
+                  frame.caption = 'Auto indent'
                   frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive]
                   frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive]
                   frame.outerframe = (
@@ -5826,7 +5826,7 @@ object projectoptionsfo: tprojectoptionsfo
         bounds_cx = 754
         bounds_cy = 517
         anchors = [an_left, an_top, an_right, an_bottom]
-        caption = 'Tools'
+        caption = 'Too&ls'
         reffontheight = 14
         object twidgetgrid3: twidgetgrid
           optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_focusbackonesc, ow_mousewheel, ow_destroywidgets]
@@ -6205,7 +6205,7 @@ object projectoptionsfo: tprojectoptionsfo
         bounds_cx = 754
         bounds_cy = 517
         anchors = [an_left, an_top, an_right, an_bottom]
-        caption = 'Storage'
+        caption = '&Storage'
         object settingseditor: tbooleanedit
           optionsskin = [osk_nolayoutcx, osk_nolayoutcy]
           frame.caption = 'Editor'
