@@ -4411,7 +4411,7 @@ begin
  if dest <> 0 then begin
   at1:= netatoms[net_system_tray_opcode];
   if (at1 <> 0) and sendnetcardinalmessage(dest,at1,awindow,
-             [currenttime{lasteventtime},opcode,data1,data2,data3]) then begin
+             [{currenttime}lasteventtime,opcode,data1,data2,data3]) then begin
    result:= gue_ok;
   end;
  end;
@@ -4426,7 +4426,7 @@ var
  pt1: pointty;
  rect1: rectty;
 const
- maxwait = 40; //200ms
+ maxwait = 200; //1s
 begin
  gdi_lock;
  gui_hidewindow(child.id);       //window must be unmapped for some WM's
@@ -4509,6 +4509,8 @@ var
  po1: pchar;
  win1: winidty;
  at1: atom;
+label
+ errorlab;
 begin
  gdi_lock;
  result:= gue_notraywindow;
@@ -4521,26 +4523,29 @@ begin
   str1:= str1 + #0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0;
   result:= sendtraymessage(win1,awindow.id,system_tray_begin_message,timeoutms,
                      int1,messageid);
-  fillchar(event1,sizeof(event1),0);
-  with event1 do begin
-   xtype:= clientmessage;
-   display:= appdisp;
-   xwindow:= awindow.id;
-   format:= 8;
-   message_type:= at1;
-   po1:= pchar(str1);
-   while (result = gue_ok) and (int1 > 0) do begin
-    move(po1^,data.b[0],20);
-    inc(po1,20);
-    int1:= int1 - 20;
-    if xsendevent(appdisp,win1,
-            {$ifdef xboolean}false{$else}0{$endif},
-            structurenotifymask or substructurenotifymask{noeventmask},@event1) = 0 then begin
-     result:= gue_sendevent;
+  if result = gue_ok then begin
+   fillchar(event1,sizeof(event1),0);
+   with event1 do begin
+    xtype:= clientmessage;
+    display:= appdisp;
+    xwindow:= awindow.id;
+    format:= 8;
+    message_type:= at1;
+    po1:= pchar(str1);
+    while (result = gue_ok) and (int1 > 0) do begin
+     move(po1^,data.b[0],20);
+     inc(po1,20);
+     int1:= int1 - 20;
+     if xsendevent(appdisp,win1,false,0
+        {structurenotifymask or substructurenotifymask},@event1) = 0 then begin
+      result:= gue_sendevent;
+     end;
     end;
    end;
+   xsync(appdisp,0);
   end;
  end;
+errorlab:
  gdi_unlock;
 end;
 
@@ -4564,13 +4569,7 @@ function gui_settrayhint(var awindow: windowty;
 begin
  result:= gue_ok; //dummy
 end;
-{
-function gui_creategc(paintdevice: paintdevicety; const akind: gckindty;
-     var gc: gcty; const aprintername: msestring = ''): guierrorty;
-begin
- result:= x11creategc(paintdevice,akind,gc,aprintername);
-end;
-}
+
 {$ifndef FPC}
 type
  tlibhandle = longword;
@@ -5521,10 +5520,11 @@ var
  aic: xic;
  window1: twindow;
  buf1: clipboardbufferty;
-
+type
+ char_0_19 = array[0..19] of char;
+ 
 label
- eventrestart;
-    
+ eventrestart;    
 begin
  while true do begin
   if timerevent then begin
@@ -5688,19 +5688,34 @@ eventrestart:
 {$endif}
       end
       else begin
+      {$ifdef mse_debugxembed}
        if (netatoms[xembed] <> 0) and 
                (message_type = netatoms[xembed]) then begin
-      {$ifdef mse_debugxembed}
         debugwindow('*xembed ',window);
         writeln(' ',inttohex(data.l[0],8),' ',
-                           inttohex(data.l[1],8),' ',
-                           inttohex(data.l[2],8),' ',
-                           inttohex(data.l[3],8));
-      {$endif}
-       end
-       else begin
-        result:= handlexdnd(xev.xclient);
+                    inttohex(data.l[1],8),' ',
+                    inttohex(data.l[2],8),' ',
+                    inttohex(data.l[3],8),' ',
+                    inttohex(data.l[4],8));
        end;
+       if (netatoms[net_system_tray_message_data] <> 0) and 
+            (message_type = netatoms[net_system_tray_message_data]) then begin
+        debugwindow(
+         '*net_system_tray_message_data format:'+inttostr(format)+' ',window);
+        writeln(' ',char_0_19(data.b));
+       end;
+       if (netatoms[net_system_tray_opcode] <> 0) and 
+            (message_type = netatoms[net_system_tray_opcode]) then begin
+        debugwindow(
+         '*net_system_tray_opcode format:'+inttostr(format)+' ',window);
+        writeln(' ',inttohex(data.l[0],8),' ',
+                    inttohex(data.l[1],8),' ',
+                    inttohex(data.l[2],8),' ',
+                    inttohex(data.l[3],8),' ',
+                    inttohex(data.l[4],8));
+       end;
+      {$endif}
+       result:= handlexdnd(xev.xclient);
       end;
      end;
     end;
@@ -6371,8 +6386,7 @@ begin
  
   fillchar(netatoms,sizeof(netatoms),0);               //check _net_
   xinternatoms(appdisp,@netatomnames[low(netatomty)],
-           integer(high(netatomty)),{$ifdef xboolean}false{$else}0{$endif},
-           @netatoms[low(netatomty)]);
+                     integer(high(netatomty)),false,@netatoms[low(netatomty)]);
   netsupported:= netsupportedatom <> 0;
   if netsupported then begin
    netsupported:= readatomproperty(rootid,netsupportedatom,atomar);
