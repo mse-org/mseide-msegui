@@ -183,7 +183,7 @@ begin
   else begin
    dbus_connection_set_exit_on_disconnect(conn,0);
    busid:= dbus_bus_get_unique_name(conn);
-   s1:= msebusname+'.p'+inttostr(sys_getpid())+'.i';
+   s1:= msebusname+'-'+inttostr(sys_getpid())+'-';
    i1:= 0;
    repeat
     s2:= s1+inttostr(i1);
@@ -287,7 +287,7 @@ var
    end;
    dbt_STRING,dbt_OBJECT_PATH,dbt_SIGNATURE: begin
     p1:= @pc1;
-    pc1:= pchar(pansistring(pd)^);
+    pc1:= pchar(pansistring(pd^)^);
    end;
    
 // dbt_UNIX_FD,
@@ -350,7 +350,7 @@ var
   result:= true;
  end;//writevalue
 
- function readvalue(var iter: dbusmessageiter; 
+ function readvalue(var aiter: dbusmessageiter; 
                                  var pt: pdbusdataty; var pd: ppointer): boolean;
  var
   i1,i2,i3,i4: int32;
@@ -363,7 +363,9 @@ var
   isstring: boolean;
   typ1: pdynarraytypeinfo;
   t1: dbusdataty;
-  iter2: dbusmessageiter;
+  iter2,iter3: dbusmessageiter;
+  iterpo: pdbusmessageiter;
+  
  label
   oklab;
  begin
@@ -372,14 +374,19 @@ var
    error('dbuscallmethod() resulttypes and results count do not match');
    exit;
   end;
-  i1:= dbus_message_iter_get_arg_type(@iter);
+  iterpo:= @aiter;
+  i1:= dbus_message_iter_get_arg_type(iterpo);
   if i1 = DBUS_TYPE_INVALID then begin
    error('dbuscallmethod() returned param count:'+
                    inttostr(pd - ppointer(@results[0]))+
                               ' expected:'+inttostr(length(results)));
    exit;
   end;
-
+  if i1 = DBUS_TYPE_VARIANT then begin
+   dbus_message_iter_recurse(@aiter,@iter3);   
+   iterpo:= @iter3;
+   i1:= dbus_message_iter_get_arg_type(iterpo); //nested variants?
+  end;
   if i1 <> dbusdatacodes[pt^] then begin
    error('dbuscallmethod() returned param does not match:'+inttostr(i1)+
             ' expected:'+inttostr(dbusdatacodes[pt^]));
@@ -425,7 +432,7 @@ var
      error('dbuscallmethod() array item type not yet supported');
      exit;
     end;
-    i2:= dbus_message_iter_get_element_type(@iter);
+    i2:= dbus_message_iter_get_element_type(iterpo);
     if i2 <> dbusdatacodes[pt^] then begin
      error('dbuscallmethod() returned array item type does not match');
      exit;
@@ -434,7 +441,7 @@ var
     t1:= pt^;
     typ1:= arraytypes[t1];
     i3:= 0;
-    dbus_message_iter_recurse(@iter,@iter2);
+    dbus_message_iter_recurse(iterpo,@iter2);
     while dbus_message_iter_get_arg_type(@iter2) <> DBUS_TYPE_INVALID do begin
      additem(p1^,typ1,i3);
      p2:= ppointer(p1)^ + i1*(i3-1); //data pointer in array
@@ -456,7 +463,7 @@ var
     exit;
    end;     
   end;
-  dbus_message_iter_get_basic(@iter,p1);
+  dbus_message_iter_get_basic(iterpo,p1);
   p1:= pd^;
   if isstring then begin
    if pc1 = nil then begin
@@ -472,7 +479,7 @@ var
    end;
   end;
  oklab:
-  dbus_message_iter_next(@iter);
+  dbus_message_iter_next(@aiter);
   inc(pt);
   inc(pd);
   result:= true;
@@ -520,10 +527,11 @@ begin
     checkok();
    end
    else begin
-    if dbus_message_iter_init(m2,@iter1) = 0 then begin
-     outofmemory();
-     goto errorlab1;
-    end;
+//    if dbus_message_iter_init(m2,@iter1) = 0 then begin
+//     outofmemory();
+//     goto errorlab1;
+//    end;
+    dbus_message_iter_init(m2,@iter1);
     pt:= @resulttypes[0];
     pte:= pt + length(resulttypes);
     pd:= @results[0];
