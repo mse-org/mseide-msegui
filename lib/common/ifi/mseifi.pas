@@ -345,7 +345,7 @@ type
   
  tiosynchronizer = class(teventthread)
   private
-   fwaitingclients: tintegeravltree;   
+   fwaitingclients: tintegeravltree; //todo: use hashlist  
    fondatareceived: stringdataprocty;
   protected
    procedure datareceived(const adata: string);
