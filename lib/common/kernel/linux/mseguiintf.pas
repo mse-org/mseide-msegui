@@ -5504,8 +5504,6 @@ var
 function gui_addpollfd(var id: int32; const afd: int32;
                         const flags: pollflagsty;
                                  const aresult: ppollflagsty = nil): guierrorty;
-var
- i1: int32;
 begin
  result:= gue_ok;
  setlength(pollinfo,high(pollinfo)+2);
@@ -5519,8 +5517,6 @@ begin
 end;
 
 function gui_removepollfd(const id: int32): guierrorty;
-var
- i1: int32;
 begin
  if (id < 0) or (id > high(pollinfo)) then begin
   result:= gue_index;
@@ -5534,8 +5530,6 @@ end;
 
 function gui_setpollfdactive(const id: int32;
                        const aactive: boolean): guierrorty;
-var
- i1: int32;
 begin
  if (id < 0) or (id > high(pollinfo)) then begin
   result:= gue_index;
