@@ -283,6 +283,7 @@ type
    procedure internaldeinitialize;  virtual;
    procedure objecteventdestroyed(const sender: tobjectevent); virtual;
    procedure resettimertrigger;
+   procedure beforedestruction() override;
   public
   {$ifdef mse_debugmutex}
    function getmutexaddr: pointer;
@@ -403,6 +404,7 @@ type
  
 function application: tcustomapplication;
 function applicationallocated: boolean;
+function applicationdestroyed: boolean;
 
 procedure registerapplicationclass(const aclass: applicationclassty);
 
@@ -514,7 +516,8 @@ type
 var
  appinst: tcustomapplication;
  appclass: applicationclassty;
-
+ fapplicationdestroyed: boolean;
+ 
 threadvar
  exceptionactive: integer;
 
@@ -627,6 +630,11 @@ end;
 function applicationallocated: boolean;
 begin
  result:= appinst <> nil;
+end;
+
+function applicationdestroyed: boolean;
+begin
+ result:= fapplicationdestroyed;
 end;
 
 procedure registerapplicationclass(const aclass: applicationclassty);
@@ -1910,6 +1918,12 @@ end;
 procedure tcustomapplication.resettimertrigger;
 begin
  interlockedexchange(ftimertriggercount,0);
+end;
+
+procedure tcustomapplication.beforedestruction();
+begin
+ fapplicationdestroyed:= true;
+ inherited;
 end;
 
 procedure tcustomapplication.releaseobject(const aobject: tobject);
