@@ -17,7 +17,7 @@ uses
 
 const
 {$ifdef mswindows}
- {$define wincall}
+ {$define wincall}  //depends on compiler?
  dbuslib: array[0..0] of filenamety = ('libdbus.dll');
 {$else}
  dbuslib: array[0..0] of filenamety = ('libdbus-1.so');
@@ -146,7 +146,21 @@ const
 
  DBUS_TIMEOUT_INFINITE = cint($7fffffff);
  DBUS_TIMEOUT_USE_DEFAULT = cint(-1);
- 
+
+ DBUS_WATCH_READABLE = 1 shl 0; //**< As in POLLIN */
+ DBUS_WATCH_WRITABLE = 1 shl 1; //**< As in POLLOUT */
+ DBUS_WATCH_ERROR    = 1 shl 2; //**< As in POLLERR (can't watch for
+                                // *   this, but can be present in
+                                // *   current state passed to
+                                // *   dbus_watch_handle()).
+                                // */
+  DBUS_WATCH_HANGUP   = 1 shl 3;  //**< As in POLLHUP (can't watch for
+                                 //*   it, but can be present in current
+                                 //*   state passed to
+                                 //*   dbus_watch_handle()).
+                                 //*/
+  //* Internal to libdbus, there is also _DBUS_WATCH_NVAL in dbus-watch.h */ 
+  
 type
  DBusError = record
   name: pcchar;    //**< public error name field */
@@ -189,15 +203,117 @@ type
  pDBusConnection = ^DBusConnection;
  DBusMessage = record end;
  pDBusMessage = ^DBusMessage;
+ DBusWatch = record end;
+ pDBusWatch = ^DBusWatch;
+ DBusTimeout = record end;
+ pDBusTimeout = ^DBusTimeout;
+
+ DBusFreeFunction = procedure(memory: pointer)
+                                    {$ifdef wincall}stdcall{$else}cdecl{$endif};
+
+///** Called when libdbus needs a new watch to be monitored by the main
+// * loop. Returns #FALSE if it lacks enough memory to add the
+// * watch. Set by dbus_connection_set_watch_functions() or
+// * dbus_server_set_watch_functions().
+// */
+ DBusAddWatchFunction = function(watch: pDBusWatch;
+                                           data: pointer): dbus_bool_t
+                                    {$ifdef wincall}stdcall{$else}cdecl{$endif};
+                                                  
+///** Called when dbus_watch_get_enabled() may return a different value
+// *  than it did before.  Set by dbus_connection_set_watch_functions()
+// *  or dbus_server_set_watch_functions().
+// */
+ DBusWatchToggledFunction = procedure(watch: pDBusWatch; data: pointer)
+                                    {$ifdef wincall}stdcall{$else}cdecl{$endif};
+
+///** Called when libdbus no longer needs a watch to be monitored by the
+// * main loop. Set by dbus_connection_set_watch_functions() or
+// * dbus_server_set_watch_functions().
+// */
+ DBusRemoveWatchFunction = procedure(watch: pDBusWatch; data: pointer)
+                                    {$ifdef wincall}stdcall{$else}cdecl{$endif};
+
+//** Called when libdbus needs a new timeout to be monitored by the main
+// * loop. Returns #FALSE if it lacks enough memory to add the
+// * watch. Set by dbus_connection_set_timeout_functions() or
+// * dbus_server_set_timeout_functions().
+// */
+ DBusAddTimeoutFunction = function(timeout: pDBusTimeout;
+                                            data: pointer): dbus_bool_t
+                                    {$ifdef wincall}stdcall{$else}cdecl{$endif};
+
+//** Called when dbus_timeout_get_enabled() may return a different
+// * value than it did before.
+// * Set by dbus_connection_set_timeout_functions() or
+// * dbus_server_set_timeout_functions().
+// */
+ DBusTimeoutToggledFunction = procedure(timeout: pDBusTimeout; data: pointer)
+                                    {$ifdef wincall}stdcall{$else}cdecl{$endif};
+//** Called when libdbus no longer needs a timeout to be monitored by the
+// * main loop. Set by dbus_connection_set_timeout_functions() or
+// * dbus_server_set_timeout_functions().
+// */
+ DBusRemoveTimeoutFunction = procedure(timeout: pDBusTimeout; data: pointer)
+                                    {$ifdef wincall}stdcall{$else}cdecl{$endif};
+ 
 var
  dbus_bus_get:
-           function(type_: DBusBusType; error: PDBusError): PDBusConnection
+   function(type_: DBusBusType; error: PDBusError): PDBusConnection
                                     {$ifdef wincall}stdcall{$else}cdecl{$endif};
  dbus_bus_get_private: 
-           function(type_: DBusBusType; error: PDBusError): PDBusConnection
+   function(type_: DBusBusType; error: PDBusError): PDBusConnection
                                     {$ifdef wincall}stdcall{$else}cdecl{$endif};
  dbus_connection_close: procedure(connection: pDBusConnection)
                                     {$ifdef wincall}stdcall{$else}cdecl{$endif};
+ dbus_connection_set_watch_functions:
+   function(connection: pDBusConnection; add_function: DBusAddWatchFunction;
+             remove_function: DBusRemoveWatchFunction;
+             toggled_function: DBusWatchToggledFunction;
+             data: pointer;
+             free_data_function: DBusFreeFunction): dbus_bool_t
+                                    {$ifdef wincall}stdcall{$else}cdecl{$endif};
+ dbus_connection_set_timeout_functions:
+   function(connection: pDBusConnection; add_function: DBusAddTimeoutFunction;
+             remove_function: DBusRemoveTimeoutFunction;
+             toggled_function: DBusTimeoutToggledFunction;
+             data: pointer;
+             free_data_function: DBusFreeFunction): dbus_bool_t
+                                    {$ifdef wincall}stdcall{$else}cdecl{$endif};
+
+ dbus_watch_get_unix_fd: function(watch: pDBusWatch): cint
+                                    {$ifdef wincall}stdcall{$else}cdecl{$endif};
+ dbus_watch_get_socket: function(watch: pDBusWatch): cint
+                                   {$ifdef wincall}stdcall{$else}cdecl{$endif};
+ dbus_watch_get_flags: function(watch: pDBusWatch): cuint
+                                   {$ifdef wincall}stdcall{$else}cdecl{$endif};
+ dbus_watch_get_data: function(watch: pDBusWatch): pointer
+                                   {$ifdef wincall}stdcall{$else}cdecl{$endif};
+ dbus_watch_set_data: procedure(watch: pDBusWatch; data: pointer;
+                                     free_data_function: DBusFreeFunction)
+                                   {$ifdef wincall}stdcall{$else}cdecl{$endif};
+ dbus_watch_handle: function(watch: pDBusWatch; flags: cuint): dbus_bool_t
+                                   {$ifdef wincall}stdcall{$else}cdecl{$endif};
+ dbus_watch_get_enabled: function(watch: pDBusWatch): dbus_bool_t
+                                   {$ifdef wincall}stdcall{$else}cdecl{$endif};
+
+ dbus_timeout_get_interval: function(timeout: pDBusTimeout): cint
+                                   {$ifdef wincall}stdcall{$else}cdecl{$endif};
+ dbus_timeout_get_data: function(timeout: pDBusTimeout): pointer
+                                   {$ifdef wincall}stdcall{$else}cdecl{$endif};
+ dbus_timeout_set_data: procedure(timeout: pDBusTimeout; data: pointer;
+                                       free_data_function: DBusFreeFunction)
+                                   {$ifdef wincall}stdcall{$else}cdecl{$endif};
+ dbus_timeout_handle: function(timeout: pDBusTimeout): dbus_bool_t
+                                   {$ifdef wincall}stdcall{$else}cdecl{$endif};
+ dbus_timeout_get_enabled: function(timeout: pDBusTimeout): dbus_bool_t
+                                   {$ifdef wincall}stdcall{$else}cdecl{$endif};
+ dbus_timeout_needs_restart: function(timeout: pDBusTimeout): dbus_bool_t
+                                   {$ifdef wincall}stdcall{$else}cdecl{$endif};
+ dbus_timeout_restarted: procedure(timeout: pDBusTimeout)
+                                   {$ifdef wincall}stdcall{$else}cdecl{$endif};
+
+
  dbus_error_init: procedure(error: pDBusError)
                                     {$ifdef wincall}stdcall{$else}cdecl{$endif};
  dbus_error_free: procedure(error: pDBusError)
@@ -287,46 +403,68 @@ end;
 procedure initializedbus(const sonames: array of filenamety; //[] = default
                                          const onlyonce: boolean = false);                                   
 const
- funcs: array[0..24] of funcinfoty = (
+ funcs: array[0..40] of funcinfoty = (
   (n: 'dbus_bus_get'; d: @dbus_bus_get),                         // 0
   (n: 'dbus_bus_get_private'; d: @dbus_bus_get_private),         // 1
   (n: 'dbus_connection_close'; d: @dbus_connection_close),       // 2
-  (n: 'dbus_error_init'; d: @dbus_error_init),                   // 3
-  (n: 'dbus_error_free'; d: @dbus_error_free),                   // 4
-  (n: 'dbus_error_is_set'; d: @dbus_error_is_set),               // 5
+  (n: 'dbus_connection_set_watch_functions';
+           d: @dbus_connection_set_watch_functions),             // 3
+  (n: 'dbus_connection_set_timeout_functions';
+           d: @dbus_connection_set_timeout_functions),           // 4
+  (n: 'dbus_watch_get_unix_fd'; d: @dbus_watch_get_unix_fd),     // 5
+  (n: 'dbus_watch_get_socket'; d: @dbus_watch_get_socket),       // 6
+  (n: 'dbus_watch_get_flags'; d: @dbus_watch_get_flags),         // 7
+  (n: 'dbus_watch_get_data'; d: @dbus_watch_get_data),           // 8
+  (n: 'dbus_watch_set_data'; d: @dbus_watch_set_data),           // 9
+  (n: 'dbus_watch_handle'; d: @dbus_watch_handle),               //10
+  (n: 'dbus_watch_get_enabled'; d: @dbus_watch_get_enabled),     //11
+
+  (n: 'dbus_timeout_get_interval'; 
+           d: @dbus_timeout_get_interval),                       //12
+  (n: 'dbus_timeout_get_data'; d: @dbus_timeout_get_data),       //13
+  (n: 'dbus_timeout_set_data'; d: @dbus_timeout_set_data),       //14
+  (n: 'dbus_timeout_handle'; d: @dbus_timeout_handle),           //15
+  (n: 'dbus_timeout_get_enabled'; d: @dbus_timeout_get_enabled), //16
+  (n: 'dbus_timeout_needs_restart';
+           d: @dbus_timeout_needs_restart),                      //17
+  (n: 'dbus_timeout_restarted'; d: @dbus_timeout_restarted),     //18
+
+  (n: 'dbus_error_init'; d: @dbus_error_init),                   //19
+  (n: 'dbus_error_free'; d: @dbus_error_free),                   //20
+  (n: 'dbus_error_is_set'; d: @dbus_error_is_set),               //21
   (n: 'dbus_connection_set_exit_on_disconnect';
-           d: @dbus_connection_set_exit_on_disconnect),          // 6
-  (n: 'dbus_bus_get_unique_name'; d: @dbus_bus_get_unique_name), // 7
-  (n: 'dbus_bus_request_name'; d: @dbus_bus_request_name),       // 8
+           d: @dbus_connection_set_exit_on_disconnect),          //22
+  (n: 'dbus_bus_get_unique_name'; d: @dbus_bus_get_unique_name), //23
+  (n: 'dbus_bus_request_name'; d: @dbus_bus_request_name),       //24
   (n: 'dbus_message_new_method_call'; 
-           d: @dbus_message_new_method_call),                    // 9
-  (n: 'dbus_message_unref'; d: @dbus_message_unref),             //10
+           d: @dbus_message_new_method_call),                    //25
+  (n: 'dbus_message_unref'; d: @dbus_message_unref),             //26
   (n: 'dbus_message_iter_init_append';
-           d: @dbus_message_iter_init_append),                   //11
-  (n: 'dbus_message_iter_init'; d: @dbus_message_iter_init),     //12
+           d: @dbus_message_iter_init_append),                   //27
+  (n: 'dbus_message_iter_init'; d: @dbus_message_iter_init),     //28
   (n: 'dbus_message_append_args_valist'; 
-           d: @dbus_message_append_args_valist),                 //13
+           d: @dbus_message_append_args_valist),                 //29
   (n: 'dbus_message_iter_append_basic';
-           d: @dbus_message_iter_append_basic),                  //14
-  (n: 'dbus_message_iter_next'; d: @dbus_message_iter_next),     //15
+           d: @dbus_message_iter_append_basic),                  //30
+  (n: 'dbus_message_iter_next'; d: @dbus_message_iter_next),     //31
   (n: 'dbus_message_iter_get_arg_type';
-           d: @dbus_message_iter_get_arg_type),                  //16
+           d: @dbus_message_iter_get_arg_type),                  //32
   (n: 'dbus_message_iter_get_basic';
-           d: @dbus_message_iter_get_basic),                     //17
+           d: @dbus_message_iter_get_basic),                     //33
   (n: 'dbus_message_iter_open_container'; 
-           d: @dbus_message_iter_open_container),                //18
+           d: @dbus_message_iter_open_container),                //34
   (n: 'dbus_message_iter_close_container'; 
-           d: @dbus_message_iter_close_container),               //19
+           d: @dbus_message_iter_close_container),               //35
   (n: 'dbus_message_iter_abandon_container'; 
-           d: @dbus_message_iter_abandon_container),             //20
+           d: @dbus_message_iter_abandon_container),             //36
   (n: 'dbus_message_iter_recurse'; 
-           d: @dbus_message_iter_recurse),                       //21
+           d: @dbus_message_iter_recurse),                       //37
   (n: 'dbus_message_iter_get_element_type';
-           d: @dbus_message_iter_get_element_type),              //22
+           d: @dbus_message_iter_get_element_type),              //38
   (n: 'dbus_message_iter_get_fixed_array';
-           d: @dbus_message_iter_get_fixed_array),               //23
+           d: @dbus_message_iter_get_fixed_array),               //39
   (n: 'dbus_connection_send_with_reply_and_block';
-           d: @dbus_connection_send_with_reply_and_block)        //24
+           d: @dbus_connection_send_with_reply_and_block)        //40
  );
 
 {

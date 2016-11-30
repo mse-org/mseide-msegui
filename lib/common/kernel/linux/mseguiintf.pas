@@ -24,7 +24,7 @@ interface
  {$define mse_debug}
 {$endif}
 uses
- {$ifdef FPC}xlib{$else}Xlib{$endif},msetypes,mseapplication,
+ {$ifdef FPC}xlib{$else}Xlib{$endif},msetypes,mseapplication,msesys,
  msegraphutils,mseevent,msepointer,mseguiglob,msesystypes,{msestockobjects,}
  msethread{$ifdef FPC},x,xutil,dynlibs{$endif},
  mselibc,msectypes,msesysintf,msegraphics,
@@ -505,7 +505,7 @@ implementation
 uses
  msebits,msekeyboard,sysutils,msesysutils,msefileutils,msedatalist,msedragglob
  {$ifdef with_sm},sm,ice{$endif},msesonames,msegui,mseactions,msex11gdi,
- msearrayutils,msesys,msesysintf1,msesysdnd,classes,rtlconsts,mseclasses,
+ msearrayutils,msesysintf1,msesysdnd,classes,rtlconsts,mseclasses,
  mseglob,msetimer,mseprocess,mseprocmonitor
  {$ifdef mse_debug},mseformatstr{$endif};
 
@@ -5492,6 +5492,64 @@ begin
  sys_mutexunlock(connectmutex2);
 end;
 
+type
+ pollinfoarty = array of pollfd;
+ pollinfodestarty = array of ppollflagsty;
+var
+// pollinfo: array[0..2] of pollfd;
+             //0 connection, 1 sessionmanagement
+ pollinfo: pollinfoarty;
+ pollinfodest: pollinfodestarty;
+
+function gui_addpollfd(var id: int32; const afd: int32;
+                        const flags: pollflagsty;
+                                 const aresult: ppollflagsty = nil): guierrorty;
+var
+ i1: int32;
+begin
+ result:= gue_ok;
+ setlength(pollinfo,high(pollinfo)+2);
+ setlength(pollinfodest,length(pollinfo));
+ id:= high(pollinfo);
+ with pollinfo[id] do begin
+  fd:= afd;
+  events:= int32(flags * [pf_in,pf_pri,pf_out]);
+  pollinfodest[id]:= aresult;
+ end;
+end;
+
+function gui_removepollfd(const id: int32): guierrorty;
+var
+ i1: int32;
+begin
+ if (id < 0) or (id > high(pollinfo)) then begin
+  result:= gue_index;
+ end
+ else begin
+  deleteitem(pollinfo,typeinfo(pollinfo),id);
+  deleteitem(pollinfodest,typeinfo(pollinfodest),id);
+  result:= gue_ok;
+ end;
+end;
+
+function gui_setpollfdactive(const id: int32;
+                       const aactive: boolean): guierrorty;
+var
+ i1: int32;
+begin
+ if (id < 0) or (id > high(pollinfo)) then begin
+  result:= gue_index;
+ end
+ else begin
+  with pollinfo[id] do begin
+   if (fd >= 0) xor aactive then begin
+    fd:= -fd;
+   end;
+  end;
+  result:= gue_ok;
+ end;
+end;
+
 function gui_getevent: tmseevent;
 
 var
@@ -5502,11 +5560,8 @@ var
  buffer: string;
  icstatus: tstatus;
  chars: msestring;
- int1: integer;
+ int1,i2: integer;
 // event: xevent;
- pollinfo: array[0..2] of pollfd;
-             //0 connection, 1 sessionmanagement
- pollcount: integer;
 // str1: string;
 {$ifdef with_sm}
  int2: integer;
@@ -5542,36 +5597,23 @@ begin
   if gui_hasevent then begin
    break;
   end;
-  fillchar(pollinfo,sizeof(pollinfo),0);
-  pollcount:= 2;
-  with pollinfo[0] do begin
-   fd:= xconnectionnumber(appdisp);
-   events:= pollin or pollpri;
-  end;
-  with pollinfo[1] do begin
-   fd:= connectpipe.readdes;
-   events:= pollin or pollpri;
-  end;
-{$ifdef with_sm}
-  if hassm then begin
-   if sminfo.fd > 0 then begin
-    with pollinfo[2] do begin
-     fd:= sminfo.fd;
-     events:= pollin or pollpri;
-    end;
-    inc(pollcount);
-   end;
-  end;
-{$endif}
   if not timerevent and not terminated and not childevent then begin
    repeat
     if not application.unlock then begin
      guierror(gue_notlocked);
     end;
     sys_mutexlock(connectmutex1);
-    int1:= poll(@pollinfo,pollcount,1000); 
     sys_mutexunlock(connectmutex1);
     sys_mutexlock(connectmutex2);
+    int1:= poll(@pollinfo[0],length(pollinfo),1000); //todo: use ppoll?
+    if int1 > 0 then begin
+     for i2:= 0 to high(pollinfo) do begin
+      if pollinfodest[i2] <> nil then begin
+       pollinfodest[i2]^:= pollinfodest[i2]^ + 
+                    pollflagsty(card32(card16(pollinfo[i2].revents)));
+      end;
+     end;
+    end;
     if pollinfo[1].revents <> 0 then begin
      repeat
      until (__read(connectpipe.readdes,dummybyte,1) < 0) and 
@@ -6440,6 +6482,37 @@ begin
  {$ifdef FPC} {$checkpointer default} {$endif}
   end;
  
+//  fillchar(pollinfo,sizeof(pollinfo),0);
+//  pollcount:= 2;
+  pollinfo:= nil;
+  gui_addpollfd(int1,xconnectionnumber(appdisp),[pf_in,pf_pri]); //0
+  gui_addpollfd(int1,connectpipe.readdes,[pf_in,pf_pri]);        //1
+ {$ifdef with_sm}
+  if hassm and (sminfo.fd > 0) then begin
+   gui_addpollfd(int1,sminfo.fd,[pf_in,pf_pri]);                 //2
+  end;
+ {$endif}
+(*
+  with pollinfo[0] do begin
+   fd:= xconnectionnumber(appdisp);
+   events:= pollin or pollpri;
+  end;
+  with pollinfo[1] do begin
+   fd:= connectpipe.readdes;
+   events:= pollin or pollpri;
+  end;
+{$ifdef with_sm}
+  if hassm then begin
+   if sminfo.fd > 0 then begin
+    with pollinfo[2] do begin
+     fd:= sminfo.fd;
+     events:= pollin or pollpri;
+    end;
+    inc(pollcount);
+   end;
+  end;
+{$endif}
+*)
   result:= gue_ok;
  {$ifdef mse_flushgdi}
   xsynchronize(appdisp,1);

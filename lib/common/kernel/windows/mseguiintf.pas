@@ -13,7 +13,7 @@ unit mseguiintf; //i386-win32
 
 interface
 uses
- windows,messages,mseapplication,msetypes,msegraphutils,
+ windows,messages,mseapplication,msetypes,msegraphutils,msesys,
  mseevent,msepointer,mseguiglob,msegraphics,
  msethread,mseformatstr,{msesysintf,}msestrings,msesystypes,msewinglob;
 
@@ -2775,6 +2775,24 @@ end;
 procedure gui_connectmaineventqueue();    //called by application.unlock()
 begin
  //dummy
+end;
+
+function gui_addpollfd(var id: int32; const afd: int32;
+                          const flags: pollflagsty;
+                                 const aresult: ppollflagsty = nil): guierrorty;
+begin
+ result:= gue_notimplemented;
+end;
+
+function gui_removepollfd(const aid: int32): guierrorty;
+begin
+ result:= gue_notimplemented;
+end;
+
+function gui_setpollfdactive(const afd: int32;
+                       const aactive: boolean): guierrorty;
+begin
+ result:= gue_notimplemented;
 end;
 
 function createapphandle(out id: winidty): guierrorty;

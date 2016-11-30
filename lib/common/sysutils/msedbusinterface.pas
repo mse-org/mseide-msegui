@@ -9,9 +9,14 @@
 }
 unit msedbusinterface;
 {$ifdef FPC}{$mode objfpc}{$h+}{$goto on}{$endif}
+
+{$ifdef mswindows}
+ {$define wincall} //depends on compiler?
+{$endif}
+
 interface
 uses
- msectypes,msedbus,msetypes;
+ msectypes,msedbus,msetypes,mseclasses;
 type
  dbusdataty = (
   dbt_INVALID,
@@ -119,16 +124,41 @@ function dbuscallmethod(const bus_name,path,iface,method: string;
 
 implementation
 uses
- sysutils,msestrings,msesysintf,msearrayutils;
+ sysutils,msestrings,msesysintf,msearrayutils,msesys,mseguiintf,msetimer;
 
 const
  msebusname = 'mse.msegui.app';
-  
+type
+
+ tdbuscontroller = class
+  private
+   fconn: pdbusconnection;
+   ferr: dbuserror;
+   fbusid: string;
+   fbusname: string;
+  protected
+   function connect: boolean;
+   procedure disconnect();
+   function doaddwatch(const awatch: pdbuswatch): int32;
+   procedure dowatchtoggled(const awatch: pdbuswatch);
+   procedure doremovewatch(const awatch: pdbuswatch);
+   function doaddtimeout(const atimeout: pdbustimeout): int32;
+   procedure dotimeouttoggled(const atimeout: pdbustimeout);
+   procedure doremovetimeout(const atimeout: pdbustimeout);
+   procedure updatewatch(const awatch: pdbuswatch);
+   procedure updatetimeout(const atimeout: pdbustimeout);
+   procedure dotimer(const sender: tobject);
+  public
+   constructor create();
+   destructor destroy(); override;
+ end;
+ 
 var
  conn: pdbusconnection;
  ferr: dbuserror;
  busid: string;
  busname: string;
+ fdbc: tdbuscontroller;
 
 procedure error(const message: string);
 begin
@@ -780,6 +810,208 @@ errorlab:
  end;
 end;
 *)
+
+function addwatch(watch: pDBusWatch; data: pointer): dbus_bool_t
+                                    {$ifdef wincall}stdcall{$else}cdecl{$endif};
+begin
+ result:= tdbuscontroller(data).doaddwatch(watch);
+end;
+
+procedure watchtoggled(watch: pDBusWatch; data: pointer)
+                                    {$ifdef wincall}stdcall{$else}cdecl{$endif};
+begin
+ tdbuscontroller(data).dowatchtoggled(watch);
+end;
+
+procedure removewatch(watch: pDBusWatch; data: pointer)
+                                    {$ifdef wincall}stdcall{$else}cdecl{$endif};
+begin
+ tdbuscontroller(data).doremovewatch(watch);
+end;
+
+procedure freewatch(memory: pointer)
+                                    {$ifdef wincall}stdcall{$else}cdecl{$endif};
+begin
+ if memory <> nil then begin
+  freemem(memory);
+ end;
+end;
+
+function addtimeout(timeout: pDBusTimeout; data: pointer): dbus_bool_t
+                                    {$ifdef wincall}stdcall{$else}cdecl{$endif};
+begin
+ result:= tdbuscontroller(data).doaddtimeout(timeout);
+end;
+
+procedure timeouttoggled(timeout: pDBusTimeout; data: pointer)
+                                    {$ifdef wincall}stdcall{$else}cdecl{$endif};
+begin
+ tdbuscontroller(data).dotimeouttoggled(timeout);
+end;
+
+procedure removetimeout(timeout: pDBusTimeout; data: pointer)
+                                    {$ifdef wincall}stdcall{$else}cdecl{$endif};
+begin
+ tdbuscontroller(data).doremovetimeout(timeout);
+end;
+
+procedure freetimeout(memory: pointer)
+                                    {$ifdef wincall}stdcall{$else}cdecl{$endif};
+begin
+ tsimpletimer(memory).free();
+end;
+
+{ tdbuscontroller }
+
+constructor tdbuscontroller.create();
+begin
+ inherited;
+end;
+
+destructor tdbuscontroller.destroy();
+begin
+ inherited;
+end;
+
+function tdbuscontroller.connect: boolean;
+var
+ i1,i2: int32;
+ s1,s2: string;
+begin
+ if fconn <> nil then begin
+  result:= true;
+ end;
+ result:= false;
+ try
+  initializedbus([]);
+  dbus_error_init(@ferr);
+  fconn:= dbus_bus_get_private(dbus_bus_session,err);
+  if fconn = nil then begin
+   checkok();
+  end
+  else begin
+   dbus_connection_set_exit_on_disconnect(conn,0);
+   dbus_connection_set_watch_functions(fconn,@addwatch,@removewatch,
+                                       @watchtoggled,self,@freewatch);
+   dbus_connection_set_timeout_functions(fconn,@addtimeout,@removetimeout,
+                                         @timeouttoggled,self,@freetimeout);
+   busid:= dbus_bus_get_unique_name(conn);
+   s1:= msebusname+'-'+inttostr(sys_getpid())+'-';
+   i1:= 0;
+   repeat
+    s2:= s1+inttostr(i1);
+    i2:= dbus_bus_request_name(conn,pchar(s2),
+                                 DBUS_NAME_FLAG_DO_NOT_QUEUE,err());
+    inc(i1);
+    if (i1 > 100) or (i2 < 0)  then begin
+     dbusdisconnect();
+     exit;
+    end;
+   until (i2 = DBUS_REQUEST_NAME_REPLY_PRIMARY_OWNER) or
+           (i2 = DBUS_REQUEST_NAME_REPLY_ALREADY_OWNER); //should not happen
+   busname:= s2;
+   result:= true;
+  end;
+ except
+  on e: exception do begin
+   dbuslasterror:= e.message;
+  end;
+ end;
+end;
+
+procedure tdbuscontroller.disconnect();
+begin
+ if fconn <> nil then begin
+  err(); //free ferr
+  dbus_connection_close(fconn);
+  fconn:= nil;
+  busid:= '';
+  busname:= '';
+  releasedbus();
+ end;
+end;
+
+type
+ watchinfoty = record
+  flags: pollflagsty;
+  id: int32;
+ end;
+ pwatchinfoty = ^watchinfoty;
+ 
+function tdbuscontroller.doaddwatch(const awatch: pdbuswatch): int32;
+var
+ i1,i2: int32;
+ fla1: pollflagsty;
+ p1: pwatchinfoty;
+begin
+ result:= 0;
+ i2:= dbus_watch_get_unix_fd(awatch);
+ if i2 > 0 then begin
+  fla1:= [];
+  i1:= dbus_watch_get_flags(awatch);
+  if i1 and DBUS_WATCH_READABLE <> 0 then begin
+   include(fla1,pf_in);
+  end;
+  if i1 and DBUS_WATCH_WRITABLE <> 0 then begin
+   include(fla1,pf_out);
+  end;
+  getmem(p1,sizeof(p1^));
+  p1^.flags:= [];
+  gui_addpollfd(p1^.id,i2,fla1,@p1^.flags);
+  dbus_watch_set_data(awatch,p1,@freewatch);
+  updatewatch(awatch);
+  result:= 1;
+ end;
+end;
+
+procedure tdbuscontroller.dowatchtoggled(const awatch: pdbuswatch);
+begin
+ updatewatch(awatch);
+end;
+
+procedure tdbuscontroller.doremovewatch(const awatch: pdbuswatch);
+var
+ p1: pwatchinfoty;
+begin
+ p1:= dbus_watch_get_data(awatch);
+ gui_removepollfd(p1^.id);
+end;
+
+function tdbuscontroller.doaddtimeout(const atimeout: pdbustimeout): int32;
+var
+ ti1: tsimpletimer;
+ meth1: notifyeventty;
+begin
+ meth1:= @dotimer;
+ tmethod(meth1).data:= atimeout;
+ ti1:= tsimpletimer.create(0,meth1);
+ dbus_timeout_set_data(atimeout,ti1,@freetimeout);
+ updatetimeout(atimeout);
+ result:= 1;
+end;
+
+procedure tdbuscontroller.dotimeouttoggled(const atimeout: pdbustimeout);
+begin
+ updatetimeout(atimeout);
+end;
+
+procedure tdbuscontroller.doremovetimeout(const atimeout: pdbustimeout);
+begin
+ tsimpletimer(dbus_timeout_get_data(atimeout)).enabled:= false;
+end;
+
+procedure tdbuscontroller.updatewatch(const awatch: pdbuswatch);
+begin
+end;
+
+procedure tdbuscontroller.updatetimeout(const atimeout: pdbustimeout);
+begin
+end;
+
+procedure tdbuscontroller.dotimer(const sender: tobject);
+begin
+end;
+
 initialization
  arraytypes[dbt_INVALID]:= nil;
  arraytypes[dbt_BYTE]:= typeinfo(bytearty);
@@ -799,4 +1031,6 @@ initialization
  arraytypes[dbt_VARIANT]:= nil;
  arraytypes[dbt_STRUCT]:= nil;
  arraytypes[dbt_DICT_ENTRY]:= nil;
+finalization
+ freeandnil(fdbc);
 end.
