@@ -283,7 +283,6 @@ type
    procedure internaldeinitialize;  virtual;
    procedure objecteventdestroyed(const sender: tobjectevent); virtual;
    procedure resettimertrigger;
-   procedure beforedestruction() override;
   public
   {$ifdef mse_debugmutex}
    function getmutexaddr: pointer;
@@ -293,6 +292,7 @@ type
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
    
+   procedure beforedestruction() override;
    procedure initialize;
    procedure deinitialize;
    procedure beginhighrestimer;

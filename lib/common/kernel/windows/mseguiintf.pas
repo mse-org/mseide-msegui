@@ -2784,12 +2784,12 @@ begin
  result:= gue_notimplemented;
 end;
 
-function gui_removepollfd(const aid: int32): guierrorty;
+function gui_removepollfd(const id: int32): guierrorty;
 begin
  result:= gue_notimplemented;
 end;
 
-function gui_setpollfdactive(const afd: int32;
+function gui_setpollfdactive(const id: int32;
                        const aactive: boolean): guierrorty;
 begin
  result:= gue_notimplemented;
