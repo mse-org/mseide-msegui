@@ -5537,7 +5537,17 @@ begin
  else begin
   with pollinfo[id] do begin
    if (fd >= 0) xor aactive then begin
-    fd:= -fd;
+    if fd = 0 then begin
+     fd:= minint;
+    end
+    else begin
+     if fd = minint then begin
+      fd:= 0;
+     end
+     else begin
+      fd:= -fd;
+     end;
+    end;
    end;
   end;
   result:= gue_ok;
@@ -5602,9 +5612,11 @@ begin
     int1:= poll(@pollinfo[0],length(pollinfo),1000); //todo: use ppoll?
     if int1 > 0 then begin
      for i2:= 0 to high(pollinfo) do begin
-      if pollinfodest[i2] <> nil then begin
-       pollinfodest[i2]^:= pollinfodest[i2]^ + 
-                    pollflagsty(card32(card16(pollinfo[i2].revents)));
+      with pollinfo[i2] do begin
+       if (fd >= 0) and (pollinfodest[i2] <> nil) then begin
+        pollinfodest[i2]^:= pollinfodest[i2]^ + 
+                     pollflagsty(card32(card16(revents)));
+       end;
       end;
      end;
     end;

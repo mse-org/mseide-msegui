@@ -207,6 +207,9 @@ type
  pDBusWatch = ^DBusWatch;
  DBusTimeout = record end;
  pDBusTimeout = ^DBusTimeout;
+ DBusPendingCall = record end;
+ pDBusPendingCall = ^DBusPendingCall;
+ ppDBusPendingCall = ^pDBusPendingCall;
 
  DBusFreeFunction = procedure(memory: pointer)
                                     {$ifdef wincall}stdcall{$else}cdecl{$endif};
@@ -255,6 +258,14 @@ type
 // * dbus_server_set_timeout_functions().
 // */
  DBusRemoveTimeoutFunction = procedure(timeout: pDBusTimeout; data: pointer)
+                                    {$ifdef wincall}stdcall{$else}cdecl{$endif};
+
+///**
+// * Called when a pending call now has a reply available. Set with
+// * dbus_pending_call_set_notify().
+// */
+ DBusPendingCallNotifyFunction =  procedure(pending: pDBusPendingCall; 
+                                                     user_data: pointer)
                                     {$ifdef wincall}stdcall{$else}cdecl{$endif};
  
 var
@@ -333,6 +344,7 @@ var
    function(bus_name: pcchar; path: pcchar; iface: pcchar;
                                          method: pcchar): pDBusMessage
                                     {$ifdef wincall}stdcall{$else}cdecl{$endif};
+
  dbus_message_unref: procedure(message: pDBusMessage)
                                     {$ifdef wincall}stdcall{$else}cdecl{$endif};
  dbus_message_iter_init_append: 
@@ -380,6 +392,19 @@ var
    function(connection: pDBusConnection; message: pDBusMessage;
               timeout_milliseconds: cint; error: pDBusError): pDBusMessage
                                     {$ifdef wincall}stdcall{$else}cdecl{$endif};
+ dbus_connection_send_with_reply:
+   function(connection: pDBusConnection; message: pDBusMessage;
+                           pending_return:  ppDBusPendingCall; 
+                                   timeout_milliseconds: cint): dbus_bool_t
+                                    {$ifdef wincall}stdcall{$else}cdecl{$endif};
+
+ dbus_pending_call_unref: procedure(pending: pDBusPendingCall)
+                                    {$ifdef wincall}stdcall{$else}cdecl{$endif};
+ dbus_pending_call_set_notify:
+   function(pending: pDBusPendingCall;
+             function_: DBusPendingCallNotifyFunction;
+             user_data: pointer; free_user_data: DBusFreeFunction): dbus_bool_t
+                                    {$ifdef wincall}stdcall{$else}cdecl{$endif};
 
 procedure initializedbus(const sonames: array of filenamety;
                                           const onlyonce: boolean = false);
@@ -403,7 +428,7 @@ end;
 procedure initializedbus(const sonames: array of filenamety; //[] = default
                                          const onlyonce: boolean = false);                                   
 const
- funcs: array[0..40] of funcinfoty = (
+ funcs: array[0..43] of funcinfoty = (
   (n: 'dbus_bus_get'; d: @dbus_bus_get),                         // 0
   (n: 'dbus_bus_get_private'; d: @dbus_bus_get_private),         // 1
   (n: 'dbus_connection_close'; d: @dbus_connection_close),       // 2
@@ -464,7 +489,12 @@ const
   (n: 'dbus_message_iter_get_fixed_array';
            d: @dbus_message_iter_get_fixed_array),               //39
   (n: 'dbus_connection_send_with_reply_and_block';
-           d: @dbus_connection_send_with_reply_and_block)        //40
+           d: @dbus_connection_send_with_reply_and_block),       //40
+  (n: 'dbus_connection_send_with_reply'; 
+           d: @dbus_connection_send_with_reply),                 //41
+  (n: 'dbus_pending_call_unref'; d: @dbus_pending_call_unref),   //42
+  (n: 'dbus_pending_call_set_notify';
+           d: @dbus_pending_call_set_notify)                     //43
  );
 
 {
