@@ -138,6 +138,7 @@ type
  pwatchinfoty = ^watchinfoty;
 
  pendinfoty = record
+  pending: pdbuspendingcall;
  end;
  ppendinfoty = ^pendinfoty;
   
@@ -148,7 +149,7 @@ type
    fbusid: string;
    fbusname: string;
    fwatches: array of pwatchinfoty;
-   fpends: array of ppendinfoty;
+   fpendings: array of ppendinfoty;
   protected
    function connect: boolean;
    procedure disconnect();
@@ -1126,7 +1127,8 @@ begin
     goto errorlab;
    end;
    getmem(pendinfo1,sizeof(pendinfoty));
-   additem(pointerarty(fpends),pendinfo1);
+   additem(pointerarty(fpendings),pendinfo1);
+   pendinfo1^.pending:= pend1;
    dbus_pending_call_set_notify(pend1,@pendingcallback,
                                       pendinfo1,@freependingcallback);
    
@@ -1186,8 +1188,17 @@ begin
 end;
 
 procedure tdbuscontroller.disconnect();
+var
+ i1: int32;
 begin
  if fconn <> nil then begin
+  while true do begin
+   i1:= high(fpendings);
+   if i1 < 0 then begin
+    break;
+   end;
+   dbus_pending_call_unref(fpendings[i1]^.pending);
+  end;
   if not applicationdestroyed() then  begin
    application.unregisteronidle(@doidle);
   end;
@@ -1196,7 +1207,7 @@ begin
   fconn:= nil;
   fbusid:= '';
   fbusname:= '';
-  releasedbus();
+/////////////////////////  releasedbus();
  end;
 end;
 
@@ -1256,7 +1267,7 @@ var
 begin
  with tsimpletimer(dbus_timeout_get_data(atimeout)) do begin
   b1:= dbus_timeout_get_enabled(atimeout) <> 0;
-  i1:= dbus_timeout_get_interval(atimeout);
+  i1:= dbus_timeout_get_interval(atimeout)*1000;
   if b1 then begin
    if i1 <> interval then begin
     interval:= i1;
@@ -1355,6 +1366,8 @@ end;
 
 procedure tdbuscontroller.dofreependingcallback(memory: pointer);
 begin
+ removeitem(pointerarty(fpendings),memory);
+ freemem(memory);
 end;
 
 initialization
