@@ -5494,7 +5494,11 @@ end;
 
 type
  pollinfoarty = array of pollfd;
- pollinfodestarty = array of ppollflagsty;
+ pollinfoty = record
+  callback: pollcallbackty;
+  data: pointer;
+ end;
+ pollinfodestarty = array of pollinfoty;
 var
 // pollinfo: array[0..2] of pollfd;
              //0 connection, 1 sessionmanagement
@@ -5502,8 +5506,9 @@ var
  pollinfodest: pollinfodestarty;
 
 function gui_addpollfd(var id: int32; const afd: int32;
-                        const flags: pollflagsty;
-                                 const aresult: ppollflagsty = nil): guierrorty;
+                           const aflags: pollflagsty;
+                                const acallback: pollcallbackty = nil;
+                                      const adata: pointer = nil): guierrorty;
 begin
  result:= gue_ok;
  setlength(pollinfo,high(pollinfo)+2);
@@ -5511,8 +5516,11 @@ begin
  id:= high(pollinfo);
  with pollinfo[id] do begin
   fd:= afd;
-  events:= int32(flags * [pf_in,pf_pri,pf_out]);
-  pollinfodest[id]:= aresult;
+  events:= int32(aflags * [pf_in,pf_pri,pf_out]);
+  with pollinfodest[id] do begin
+   callback:= acallback;
+   data:= adata;
+  end;
  end;
 end;
 
@@ -5613,9 +5621,12 @@ begin
     if int1 > 0 then begin
      for i2:= 0 to high(pollinfo) do begin
       with pollinfo[i2] do begin
-       if (fd >= 0) and (pollinfodest[i2] <> nil) then begin
-        pollinfodest[i2]^:= pollinfodest[i2]^ + 
-                     pollflagsty(card32(card16(revents)));
+       if (fd >= 0) then begin
+        with pollinfodest[i2] do begin
+         if (callback <> nil) and (revents <> 0) then begin
+          callback(pollflagsty(card32(card16(revents))),data);
+         end;
+        end;
        end;
       end;
      end;

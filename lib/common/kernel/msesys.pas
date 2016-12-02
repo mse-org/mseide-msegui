@@ -79,6 +79,8 @@ type
               );
  pollflagsty = set of pollflagty;
  ppollflagsty = ^pollflagsty;
+ pollcallbackty = procedure(const aflags: pollflagsty; const adata: pointer);
+ 
  
 const
  filerightattributes = [fa_rusr,fa_wusr,fa_xusr,

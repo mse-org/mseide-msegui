@@ -37,6 +37,16 @@ type
  va_list = record end;
  pva_list = ^va_list;
 
+//**
+// * Indicates the status of incoming data on a #DBusConnection. This determines whether
+// * dbus_connection_dispatch() needs to be called.
+// */
+ DBusDispatchStatus = (
+  DBUS_DISPATCH_DATA_REMAINS,  //**< There is more data to potentially convert to messages. */
+  DBUS_DISPATCH_COMPLETE,      //**< All currently available data has been processed. */
+  DBUS_DISPATCH_NEED_MEMORY    //**< More memory is needed to continue. */
+ );
+
 const
 //** Type code that is never equal to a legitimate type code */
  DBUS_TYPE_INVALID = cint(0);
@@ -277,6 +287,9 @@ var
                                     {$ifdef wincall}stdcall{$else}cdecl{$endif};
  dbus_connection_close: procedure(connection: pDBusConnection)
                                     {$ifdef wincall}stdcall{$else}cdecl{$endif};
+ dbus_shutdown: procedure()
+                                    {$ifdef wincall}stdcall{$else}cdecl{$endif};
+
  dbus_connection_set_watch_functions:
    function(connection: pDBusConnection; add_function: DBusAddWatchFunction;
              remove_function: DBusRemoveWatchFunction;
@@ -323,7 +336,6 @@ var
                                    {$ifdef wincall}stdcall{$else}cdecl{$endif};
  dbus_timeout_restarted: procedure(timeout: pDBusTimeout)
                                    {$ifdef wincall}stdcall{$else}cdecl{$endif};
-
 
  dbus_error_init: procedure(error: pDBusError)
                                     {$ifdef wincall}stdcall{$else}cdecl{$endif};
@@ -397,6 +409,11 @@ var
                            pending_return:  ppDBusPendingCall; 
                                    timeout_milliseconds: cint): dbus_bool_t
                                     {$ifdef wincall}stdcall{$else}cdecl{$endif};
+ dbus_connection_flush: procedure(connection: pDBusConnection)
+                                    {$ifdef wincall}stdcall{$else}cdecl{$endif};
+ dbus_connection_dispatch:
+   function(connection: pDBusConnection): DBusDispatchStatus
+                                    {$ifdef wincall}stdcall{$else}cdecl{$endif};
 
  dbus_pending_call_unref: procedure(pending: pDBusPendingCall)
                                     {$ifdef wincall}stdcall{$else}cdecl{$endif};
@@ -428,73 +445,76 @@ end;
 procedure initializedbus(const sonames: array of filenamety; //[] = default
                                          const onlyonce: boolean = false);                                   
 const
- funcs: array[0..43] of funcinfoty = (
+ funcs: array[0..46] of funcinfoty = (
   (n: 'dbus_bus_get'; d: @dbus_bus_get),                         // 0
   (n: 'dbus_bus_get_private'; d: @dbus_bus_get_private),         // 1
   (n: 'dbus_connection_close'; d: @dbus_connection_close),       // 2
+  (n: 'dbus_shutdown'; d: @dbus_shutdown),                       // 3
   (n: 'dbus_connection_set_watch_functions';
-           d: @dbus_connection_set_watch_functions),             // 3
+           d: @dbus_connection_set_watch_functions),             // 4
   (n: 'dbus_connection_set_timeout_functions';
-           d: @dbus_connection_set_timeout_functions),           // 4
-  (n: 'dbus_watch_get_unix_fd'; d: @dbus_watch_get_unix_fd),     // 5
-  (n: 'dbus_watch_get_socket'; d: @dbus_watch_get_socket),       // 6
-  (n: 'dbus_watch_get_flags'; d: @dbus_watch_get_flags),         // 7
-  (n: 'dbus_watch_get_data'; d: @dbus_watch_get_data),           // 8
-  (n: 'dbus_watch_set_data'; d: @dbus_watch_set_data),           // 9
-  (n: 'dbus_watch_handle'; d: @dbus_watch_handle),               //10
-  (n: 'dbus_watch_get_enabled'; d: @dbus_watch_get_enabled),     //11
+           d: @dbus_connection_set_timeout_functions),           // 5
+  (n: 'dbus_watch_get_unix_fd'; d: @dbus_watch_get_unix_fd),     // 6
+  (n: 'dbus_watch_get_socket'; d: @dbus_watch_get_socket),       // 7
+  (n: 'dbus_watch_get_flags'; d: @dbus_watch_get_flags),         // 8
+  (n: 'dbus_watch_get_data'; d: @dbus_watch_get_data),           // 9
+  (n: 'dbus_watch_set_data'; d: @dbus_watch_set_data),           //10
+  (n: 'dbus_watch_handle'; d: @dbus_watch_handle),               //11
+  (n: 'dbus_watch_get_enabled'; d: @dbus_watch_get_enabled),     //12
 
   (n: 'dbus_timeout_get_interval'; 
-           d: @dbus_timeout_get_interval),                       //12
-  (n: 'dbus_timeout_get_data'; d: @dbus_timeout_get_data),       //13
-  (n: 'dbus_timeout_set_data'; d: @dbus_timeout_set_data),       //14
-  (n: 'dbus_timeout_handle'; d: @dbus_timeout_handle),           //15
-  (n: 'dbus_timeout_get_enabled'; d: @dbus_timeout_get_enabled), //16
+           d: @dbus_timeout_get_interval),                       //13
+  (n: 'dbus_timeout_get_data'; d: @dbus_timeout_get_data),       //14
+  (n: 'dbus_timeout_set_data'; d: @dbus_timeout_set_data),       //15
+  (n: 'dbus_timeout_handle'; d: @dbus_timeout_handle),           //16
+  (n: 'dbus_timeout_get_enabled'; d: @dbus_timeout_get_enabled), //17
   (n: 'dbus_timeout_needs_restart';
-           d: @dbus_timeout_needs_restart),                      //17
-  (n: 'dbus_timeout_restarted'; d: @dbus_timeout_restarted),     //18
+           d: @dbus_timeout_needs_restart),                      //18
+  (n: 'dbus_timeout_restarted'; d: @dbus_timeout_restarted),     //19
 
-  (n: 'dbus_error_init'; d: @dbus_error_init),                   //19
-  (n: 'dbus_error_free'; d: @dbus_error_free),                   //20
-  (n: 'dbus_error_is_set'; d: @dbus_error_is_set),               //21
+  (n: 'dbus_error_init'; d: @dbus_error_init),                   //20
+  (n: 'dbus_error_free'; d: @dbus_error_free),                   //21
+  (n: 'dbus_error_is_set'; d: @dbus_error_is_set),               //22
   (n: 'dbus_connection_set_exit_on_disconnect';
-           d: @dbus_connection_set_exit_on_disconnect),          //22
-  (n: 'dbus_bus_get_unique_name'; d: @dbus_bus_get_unique_name), //23
-  (n: 'dbus_bus_request_name'; d: @dbus_bus_request_name),       //24
+           d: @dbus_connection_set_exit_on_disconnect),          //23
+  (n: 'dbus_bus_get_unique_name'; d: @dbus_bus_get_unique_name), //24
+  (n: 'dbus_bus_request_name'; d: @dbus_bus_request_name),       //25
   (n: 'dbus_message_new_method_call'; 
-           d: @dbus_message_new_method_call),                    //25
-  (n: 'dbus_message_unref'; d: @dbus_message_unref),             //26
+           d: @dbus_message_new_method_call),                    //26
+  (n: 'dbus_message_unref'; d: @dbus_message_unref),             //27
   (n: 'dbus_message_iter_init_append';
-           d: @dbus_message_iter_init_append),                   //27
-  (n: 'dbus_message_iter_init'; d: @dbus_message_iter_init),     //28
+           d: @dbus_message_iter_init_append),                   //28
+  (n: 'dbus_message_iter_init'; d: @dbus_message_iter_init),     //29
   (n: 'dbus_message_append_args_valist'; 
-           d: @dbus_message_append_args_valist),                 //29
+           d: @dbus_message_append_args_valist),                 //30
   (n: 'dbus_message_iter_append_basic';
-           d: @dbus_message_iter_append_basic),                  //30
-  (n: 'dbus_message_iter_next'; d: @dbus_message_iter_next),     //31
+           d: @dbus_message_iter_append_basic),                  //31
+  (n: 'dbus_message_iter_next'; d: @dbus_message_iter_next),     //32
   (n: 'dbus_message_iter_get_arg_type';
-           d: @dbus_message_iter_get_arg_type),                  //32
+           d: @dbus_message_iter_get_arg_type),                  //33
   (n: 'dbus_message_iter_get_basic';
-           d: @dbus_message_iter_get_basic),                     //33
+           d: @dbus_message_iter_get_basic),                     //34
   (n: 'dbus_message_iter_open_container'; 
-           d: @dbus_message_iter_open_container),                //34
+           d: @dbus_message_iter_open_container),                //35
   (n: 'dbus_message_iter_close_container'; 
-           d: @dbus_message_iter_close_container),               //35
+           d: @dbus_message_iter_close_container),               //36
   (n: 'dbus_message_iter_abandon_container'; 
-           d: @dbus_message_iter_abandon_container),             //36
+           d: @dbus_message_iter_abandon_container),             //37
   (n: 'dbus_message_iter_recurse'; 
-           d: @dbus_message_iter_recurse),                       //37
+           d: @dbus_message_iter_recurse),                       //38
   (n: 'dbus_message_iter_get_element_type';
-           d: @dbus_message_iter_get_element_type),              //38
+           d: @dbus_message_iter_get_element_type),              //39
   (n: 'dbus_message_iter_get_fixed_array';
-           d: @dbus_message_iter_get_fixed_array),               //39
+           d: @dbus_message_iter_get_fixed_array),               //40
   (n: 'dbus_connection_send_with_reply_and_block';
-           d: @dbus_connection_send_with_reply_and_block),       //40
+           d: @dbus_connection_send_with_reply_and_block),       //41
   (n: 'dbus_connection_send_with_reply'; 
-           d: @dbus_connection_send_with_reply),                 //41
-  (n: 'dbus_pending_call_unref'; d: @dbus_pending_call_unref),   //42
+           d: @dbus_connection_send_with_reply),                 //42
+  (n: 'dbus_connection_flush'; d: @dbus_connection_flush),       //43
+  (n: 'dbus_connection_dispatch'; d: @dbus_connection_dispatch), //44
+  (n: 'dbus_pending_call_unref'; d: @dbus_pending_call_unref),   //45
   (n: 'dbus_pending_call_set_notify';
-           d: @dbus_pending_call_set_notify)                     //43
+           d: @dbus_pending_call_set_notify)                     //46
  );
 
 {

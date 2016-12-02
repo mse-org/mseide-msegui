@@ -189,6 +189,36 @@ type
    function prev: pdoubleintegerdataty; //wraps to last after first
  end;
 
+ pointerdataty = record
+  key: pointer;
+  data: record end;
+ end;
+ ppointerdataty = ^pointerdataty;
+ pointerhashdataty = record
+  header: hashheaderty;
+  data: pointerdataty;
+ end;
+ ppointerhashdataty = ^pointerhashdataty;
+ 
+ tpointerhashdatalist = class(thashdatalist)
+  private
+  protected
+   function hashkey(const akey): hashvaluety; override;
+   function checkkey(const akey; const aitemdata): boolean; override;
+  public
+   constructor create(const datasize: integer);
+   function add(const akey: pointer): pointer;
+   function addunique(const akey: pointer): pointer;
+   function find(const akey: pointer): pointer;
+   function delete(const akey: pointer; 
+                         const all: boolean = false): boolean; overload;
+                         //true if found
+   function first: ppointerdataty;
+   function next: ppointerdataty; //wraps to first after last
+   function last: ppointerdataty;
+   function prev: ppointerdataty; //wraps to last after first
+ end;
+
  ptruintdataty = record
   key: ptruint;
   data: record end;
@@ -1633,6 +1663,74 @@ function tdoubleintegerhashdatalist.delete(const akeya,akeyb: integer;
                                          const all: boolean = false): boolean;
 begin
  result:= internaldelete(mdikey(akeya,akeyb),all);
+end;
+
+{ tpointerhashdatalist }
+
+constructor tpointerhashdatalist.create(const datasize: integer);
+begin
+ inherited create(datasize + sizeof(pointerdataty));
+end;
+
+function tpointerhashdatalist.hashkey(const akey): hashvaluety;
+begin
+ result:= pointerhash(pointer(akey));
+end;
+
+function tpointerhashdatalist.checkkey(const akey; const aitemdata): boolean;
+begin
+ result:= pointer(akey) = pointerdataty(aitemdata).key;
+end;
+
+function tpointerhashdatalist.add(const akey: pointer): pointer;
+var
+ po1: ppointerhashdataty;
+begin
+ po1:= ppointerhashdataty(internaladd(akey));
+ po1^.data.key:= akey;
+ result:= @po1^.data.data;
+end;
+
+function tpointerhashdatalist.addunique(const akey: pointer): pointer;
+begin
+ result:= find(akey);
+ if result = nil then begin
+  result:= add(akey);
+ end;
+end;
+
+function tpointerhashdatalist.find(const akey: pointer): pointer;
+begin
+ result:= internalfind(akey);
+ if result <> nil then begin
+  result:= @ppointerhashdataty(result)^.data.data;
+ end;
+end;
+
+function tpointerhashdatalist.delete(const akey: pointer;
+               const all: boolean = false): boolean;
+begin
+ result:= internaldelete(akey,all);
+end;
+
+function tpointerhashdatalist.first: ppointerdataty;
+begin
+ result:= ppointerdataty(internalfirst);
+end;
+
+function tpointerhashdatalist.next: ppointerdataty;
+begin
+ result:= ppointerdataty(internalnext);
+end;
+
+function tpointerhashdatalist.last: ppointerdataty;
+begin
+ result:= ppointerdataty(internallast);
+end;
+
+function tpointerhashdatalist.prev: ppointerdataty;
+begin
+ result:= ppointerdataty(internalprev);
 end;
 
 { tptruinthasdatalist }

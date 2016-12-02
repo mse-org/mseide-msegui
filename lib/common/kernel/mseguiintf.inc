@@ -26,8 +26,9 @@ function gui_settimer(us: longword): guierrorty;
 procedure gui_disconnectmaineventqueue(); //called by application.lock()
 procedure gui_connectmaineventqueue();    //called by application.unlock()
 function gui_addpollfd(var id: int32; const afd: int32;
-                           const flags: pollflagsty;
-                                 const aresult: ppollflagsty = nil): guierrorty;
+                           const aflags: pollflagsty;
+                                const acallback: pollcallbackty = nil;
+                                      const adata: pointer = nil): guierrorty;
 function gui_removepollfd(const id: int32): guierrorty;
 function gui_setpollfdactive(const id: int32;
                        const aactive: boolean): guierrorty;

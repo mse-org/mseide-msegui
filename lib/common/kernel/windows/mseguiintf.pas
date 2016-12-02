@@ -2778,8 +2778,9 @@ begin
 end;
 
 function gui_addpollfd(var id: int32; const afd: int32;
-                          const flags: pollflagsty;
-                                 const aresult: ppollflagsty = nil): guierrorty;
+                           const aflags: pollflagsty;
+                                const acallback: pollcallbackty = nil;
+                                      const adata: pointer = nil): guierrorty;
 begin
  result:= gue_notimplemented;
 end;

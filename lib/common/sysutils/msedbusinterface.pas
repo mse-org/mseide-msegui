@@ -16,7 +16,7 @@ unit msedbusinterface;
 
 interface
 uses
- msectypes,msedbus,msetypes,mseclasses,mseevent;
+ mseglob,msectypes,msedbus,msetypes,mseclasses,mseevent,msehash,sysutils;
 type
  dbusdataty = (
   dbt_INVALID,
@@ -40,6 +40,9 @@ type
  );
  pdbusdataty = ^dbusdataty;
  
+ edbus = class(exception)
+ end;
+
 const
  datasizes: array[dbusdataty] of int32 = (
   0,                 //dbt_INVALID,
@@ -106,7 +109,7 @@ const
   DBUS_TYPE_STRUCT_AS_STRING,
   DBUS_TYPE_DICT_ENTRY_AS_STRING
  );
-
+ 
 var
  dbuslasterror: string;
  
@@ -123,7 +126,7 @@ function dbuscallmethod(const returnedto: ievent;
 
 implementation
 uses
- sysutils,msestrings,msesysintf,msearrayutils,msesys,mseguiintf,msetimer,
+ msestrings,msesysintf,msearrayutils,msesys,mseguiintf,msetimer,
  mseapplication;
 
 const
@@ -137,19 +140,73 @@ type
  end;
  pwatchinfoty = ^watchinfoty;
 
- pendinfoty = record
+ timeoutinfoty = record
+  timeout: pdbustimeout;
+  timer: tsimpletimer;
+ end;
+ ptimeoutinfoty = ^timeoutinfoty;
+
+ pendinginfoty = record
   pending: pdbuspendingcall;
  end;
- ppendinfoty = ^pendinfoty;
+ ppendinginfoty = ^pendinginfoty;
+
+ linkinfoty = record
+  link: ievent;
+ end;
+ plinkinfoty = ^linkinfoty;
+ itemkindty = (dbk_watch,dbk_timeout,dbk_pending,dbk_link);
+ 
+ dbusinfoty = record
+  case kind: itemkindty of
+   dbk_watch: (watch: watchinfoty);
+   dbk_timeout: (timeout: timeoutinfoty);
+   dbk_pending: (pending: pendinginfoty);
+   dbk_link: (link: linkinfoty);
+ end;
+ pdbusinfoty = ^dbusinfoty;
+ dbusitemty = record
+  key: pointer;
+  data: dbusinfoty;
+ end;
+ pdbusitemty = ^dbusitemty;
+
+ tdbusitemhashdatalist = class(tpointerhashdatalist,iobjectlink)
+  private
+   fwatches: card32arty;
+   funlinking: boolean;
+  protected
+   procedure finalizeitem(var aitemdata) override;
+   procedure dopollcallback(const aflags: pollflagsty; const adata: pointer);
+   function findwatch(const key: pdbuswatch): pwatchinfoty;
+   function findtimeout(const key: pdbustimeout): ptimeoutinfoty;
+   function findpending(const key: pdbuspendingcall): ppendinginfoty;
+    //iobjectlink
+   procedure link(const source,dest: iobjectlink; valuepo: pointer = nil;
+                         ainterfacetype: pointer = nil; once: boolean = false);
+   procedure unlink(const source,dest: iobjectlink; valuepo: pointer = nil);
+                //source = 1 -> dest destroyed
+   procedure objevent(const sender: iobjectlink; const event: objecteventty);
+   function getinstance: tobject;
+  public
+   constructor create();
+   function addwatch(const key: pdbuswatch): pwatchinfoty;
+   function addlink(const alink: ievent): plinkinfoty;
+//   function addpending(const aitem: pdbuspendingcall): ppendinginfoty;
+//   procedure freeitems();
+   procedure handlewatches();
+ end;
   
- tdbuscontroller = class
+ tdbuscontroller = class(tobject)
   private
    fconn: pdbusconnection;
    ferr: dbuserror;
    fbusid: string;
    fbusname: string;
-   fwatches: array of pwatchinfoty;
-   fpendings: array of ppendinfoty;
+   fitems: tdbusitemhashdatalist;
+//   fwatches: array of pwatchinfoty;
+//   ftimeouts: array of ptimeoutinfoty;
+//   fpendings: array of ppendinfoty;
   protected
    function connect: boolean;
    procedure disconnect();
@@ -166,7 +223,10 @@ type
    function checkok(): boolean;
    procedure doidle(var again: boolean);
    procedure dopendingcallback(pending: pDBusPendingCall; user_data: pointer);
-   procedure dofreependingcallback(memory: pointer);
+//   procedure dofreependingcallback(memory: pointer);
+//   procedure dopollcallback(const aflags: pollflagsty; const adata: pointer);
+   procedure addpending(const apending: pdbuspendingcall);
+
   public
    constructor create();
    destructor destroy(); override;
@@ -184,6 +244,11 @@ var
 // busid: string;
 // busname: string;
  fdbc: tdbuscontroller;
+
+procedure raiseerror(const message: string);
+begin
+ raise edbus.create(message);
+end;
 
 procedure error(const message: string);
 begin
@@ -895,7 +960,7 @@ procedure removewatch(watch: pDBusWatch; data: pointer)
 begin
  tdbuscontroller(data).doremovewatch(watch);
 end;
-
+(*
 procedure freewatch(memory: pointer)
                                     {$ifdef wincall}stdcall{$else}cdecl{$endif};
 begin
@@ -903,7 +968,7 @@ begin
   freemem(memory);
  end;
 end;
-
+*)
 function addtimeout(timeout: pDBusTimeout; data: pointer): dbus_bool_t
                                     {$ifdef wincall}stdcall{$else}cdecl{$endif};
 begin
@@ -921,13 +986,13 @@ procedure removetimeout(timeout: pDBusTimeout; data: pointer)
 begin
  tdbuscontroller(data).doremovetimeout(timeout);
 end;
-
+(*
 procedure freetimeout(memory: pointer)
                                     {$ifdef wincall}stdcall{$else}cdecl{$endif};
 begin
  tsimpletimer(memory).free();
 end;
-
+*)
 procedure pendingcallback(pending: pDBusPendingCall; user_data: pointer)
                                     {$ifdef wincall}stdcall{$else}cdecl{$endif};
 begin
@@ -935,7 +1000,7 @@ begin
   fdbc.dopendingcallback(pending,user_data);
  end;
 end;
-
+(*
 procedure freependingcallback(memory: pointer);
                                     {$ifdef wincall}stdcall{$else}cdecl{$endif};
 begin
@@ -943,11 +1008,201 @@ begin
   fdbc.dofreependingcallback(memory);
  end;
 end;
+*)
+procedure pollcallback(const aflags: pollflagsty; const adata: pointer);
+begin
+ if fdbc <> nil then begin
+  fdbc.fitems.dopollcallback(aflags,adata);
+ end;
+end;
+
+{ tdbusitemhashdatalist }
+
+constructor tdbusitemhashdatalist.create();
+begin
+ inherited create(sizeof(dbusitemty));
+ include(fstate,hls_needsfinalize);
+end;
+
+function tdbusitemhashdatalist.addwatch(const key: pdbuswatch): pwatchinfoty;
+var
+ p1: pdbusinfoty;
+begin
+ p1:= add(key);
+ p1^.kind:= dbk_watch;
+ result:= @p1^.watch;
+ result^.flags:= [];
+ result^.watch:= key;
+ additem(fwatches,getdataoffset(result));
+end;
+
+function tdbusitemhashdatalist.addlink(const alink: ievent): plinkinfoty;
+var
+ p1: pdbusinfoty;
+begin
+ p1:= add(alink);
+ p1^.kind:= dbk_link;
+ result:= @p1^.link;
+ result^.link:= alink;
+ alink.link(iobjectlink(pchar(alink)+1),iobjectlink(self));
+                      //create backlink
+end;
+
+procedure tdbusitemhashdatalist.finalizeitem(var aitemdata);
+begin
+ with dbusitemty(aitemdata) do begin
+  case data.kind of
+   dbk_watch: begin
+    gui_removepollfd(data.watch.id);
+    removeitem(integerarty(fwatches),getdataoffset(@data.watch));
+   end;
+   dbk_timeout: begin
+    data.timeout.timer.free;
+   end;
+   dbk_link: begin
+    if not funlinking then begin
+     data.link.link.unlink(iobjectlink(pchar(iobjectlink(self))+1),
+                                                          data.link.link);
+                       //remove backlink
+    end;
+   end;
+  end;
+ end;
+end;
+
+procedure tdbusitemhashdatalist.dopollcallback(const aflags: pollflagsty;
+               const adata: pointer);
+var
+ p1: pdbusinfoty;
+begin
+ p1:= find(adata);
+ if (p1 <> nil) and (p1^.kind = dbk_watch) then begin //throw no exception
+  p1^.watch.flags:= p1^.watch.flags + aflags;
+ end;
+end;
+
+function tdbusitemhashdatalist.findwatch(const key: pdbuswatch): pwatchinfoty;
+begin
+ result:= find(key);
+ if result = nil then begin
+  raiseerror('Watch not found');
+ end;
+ if pdbusinfoty(pointer(result))^.kind <> dbk_watch then begin
+  raiseerror('Invalid watch');
+ end;
+ result:= @pdbusinfoty(pointer(result))^.watch;
+end;
+
+function tdbusitemhashdatalist.findtimeout(
+              const key: pdbustimeout): ptimeoutinfoty;
+begin
+ result:= find(key);
+ if result = nil then begin
+  raiseerror('Timeout not found');
+ end;
+ if pdbusinfoty(pointer(result))^.kind <> dbk_timeout then begin
+  raiseerror('Invalid timeout');
+ end;
+ result:= @pdbusinfoty(pointer(result))^.timeout;
+end;
+
+function tdbusitemhashdatalist.findpending(
+                              const key: pdbuspendingcall): ppendinginfoty;
+begin
+ result:= find(key);
+ if result = nil then begin
+  raiseerror('Pendingcall not found');
+ end;
+ if pdbusinfoty(pointer(result))^.kind <> dbk_pending then begin
+  raiseerror('Invalid pendingcall');
+ end;
+ result:= @pdbusinfoty(pointer(result))^.pending;
+end;
+
+procedure tdbusitemhashdatalist.link(const source: iobjectlink;
+               const dest: iobjectlink; valuepo: pointer = nil;
+               ainterfacetype: pointer = nil; once: boolean = false);
+begin
+ //dummy
+end;
+
+procedure tdbusitemhashdatalist.unlink(const source: iobjectlink;
+               const dest: iobjectlink; valuepo: pointer = nil);
+begin
+ if not odd(ptruint(source)) then begin //full link
+  delete(source);
+ end;
+end;
+
+procedure tdbusitemhashdatalist.objevent(const sender: iobjectlink;
+               const event: objecteventty);
+begin
+ if event = oe_destroyed then begin
+  funlinking:= true;
+  delete(sender);
+  funlinking:= false;
+ end;
+end;
+
+function tdbusitemhashdatalist.getinstance: tobject;
+begin
+ result:= self;
+end;
+
+{
+function tdbusitemhashdatalist.addpending(
+                          const aitem: pdbuspendingcall): ppendinginfoty;
+begin
+end;
+}
+{
+procedure tdbusitemhashdatalist.freeitems();
+var
+ i1: int32;
+ p1: pdbusitemty;
+begin
+ last();
+ for i1:= 0 to count-1 do begin
+  p1:= pointer(next());
+ end;
+end;
+}
+const
+ watchflags: array[pollflagty] of card32 = (
+  DBUS_WATCH_READABLE, //pf_in,  //POLLIN =   $001;
+  0,                   //pf_pri, //POLLPRI =  $002;
+  DBUS_WATCH_WRITABLE, //pf_out, //POLLOUT =  $004;
+  DBUS_WATCH_ERROR,    //pf_err, //POLLERR =  $008;
+  DBUS_WATCH_HANGUP,   //pf_hup, //POLLHUP =  $010;
+  0                    //pf_nval //POLLNVAL = $020;
+ );
+ 
+procedure tdbusitemhashdatalist.handlewatches();
+var
+ i1: int32;
+ c1: card32;
+ f1: pollflagty;
+begin
+ for i1:= 0 to high(fwatches) do begin
+  with pwatchinfoty(getdatapo(fwatches[i1]))^ do begin
+   if flags <> [] then begin
+    c1:= 0;
+    for f1:= low(f1) to high(f1) do begin
+     if f1 in flags then begin
+      c1:= c1 or watchflags[f1];
+     end;
+    end;
+    dbus_watch_handle(watch,c1);
+   end;
+  end;
+ end; 
+end;
 
 { tdbuscontroller }
 
 constructor tdbuscontroller.create();
 begin
+ fitems:= tdbusitemhashdatalist.create();
  inherited;
 end;
 
@@ -955,6 +1210,7 @@ destructor tdbuscontroller.destroy();
 begin
  disconnect();
  inherited;
+ fitems.free();
 end;
 
 function tdbuscontroller.connected: boolean;
@@ -1095,7 +1351,7 @@ var
  pt: pdbusdataty;
  pd: ppointer;
  pend1: pdbuspendingcall;
- pendinfo1: ppendinfoty;
+ pendinfo1: ppendinginfoty;
  
 label
  errorlab;
@@ -1122,15 +1378,17 @@ begin
     goto errorlab;
    end;
    result:= dbus_connection_send_with_reply(fconn,m1,@pend1,timeout) <> 0;
+   fitems.addlink(returnedto);
+//fitems.delete(returnedto);
    if not result then begin
     outofmemory();
     goto errorlab;
    end;
-   getmem(pendinfo1,sizeof(pendinfoty));
-   additem(pointerarty(fpendings),pendinfo1);
-   pendinfo1^.pending:= pend1;
-   dbus_pending_call_set_notify(pend1,@pendingcallback,
-                                      pendinfo1,@freependingcallback);
+   addpending(pend1);
+//   getmem(pendinfo1,sizeof(pendinfoty));
+//   additem(pointerarty(fpendings),pendinfo1);
+//   pendinfo1^.pending:= pend1;
+   dbus_pending_call_set_notify(pend1,@pendingcallback,nil,nil);
    
 errorlab:
    dbus_message_unref(m1);
@@ -1174,9 +1432,9 @@ begin
 
     //start asynchronous message handling
    dbus_connection_set_watch_functions(fconn,@addwatch,@removewatch,
-                                       @watchtoggled,self,@freewatch);
+                                       @watchtoggled,self,nil);
    dbus_connection_set_timeout_functions(fconn,@addtimeout,@removetimeout,
-                                         @timeouttoggled,self,@freetimeout);
+                                         @timeouttoggled,self,nil);
    application.registeronidle(@doidle);
    result:= true;
   end;
@@ -1192,6 +1450,9 @@ var
  i1: int32;
 begin
  if fconn <> nil then begin
+  dbus_connection_close(fconn);
+  fitems.clear();
+{
   while true do begin
    i1:= high(fpendings);
    if i1 < 0 then begin
@@ -1199,15 +1460,17 @@ begin
    end;
    dbus_pending_call_unref(fpendings[i1]^.pending);
   end;
+}
   if not applicationdestroyed() then  begin
    application.unregisteronidle(@doidle);
   end;
   err(); //free ferr
-  dbus_connection_close(fconn);
+  dbus_shutdown();
+//  dbus_connection_close(fconn);
   fconn:= nil;
   fbusid:= '';
   fbusname:= '';
-/////////////////////////  releasedbus();
+  releasedbus();
  end;
 end;
 
@@ -1228,12 +1491,8 @@ begin
   if i1 and DBUS_WATCH_WRITABLE <> 0 then begin
    include(fla1,pf_out);
   end;
-  getmem(p1,sizeof(watchinfoty));
-  additem(pointerarty(fwatches),p1);
-  p1^.flags:= [];
-  p1^.watch:= awatch;
-  gui_addpollfd(p1^.id,i2,fla1,@p1^.flags);
-  dbus_watch_set_data(awatch,p1,@freewatch);
+  p1:= fitems.addwatch(awatch);
+  gui_addpollfd(p1^.id,i2,fla1,@pollcallback,awatch);
   updatewatch(awatch);
   result:= 1;
  end;
@@ -1241,7 +1500,7 @@ end;
 
 procedure tdbuscontroller.updatewatch(const awatch: pdbuswatch);
 begin
- with pwatchinfoty(dbus_watch_get_data(awatch))^ do begin
+ with fitems.findwatch(awatch)^ do begin
   gui_setpollfdactive(id,dbus_watch_get_enabled(awatch) <> 0);
  end;
 end;
@@ -1252,12 +1511,15 @@ begin
 end;
 
 procedure tdbuscontroller.doremovewatch(const awatch: pdbuswatch);
-var
- p1: pwatchinfoty;
+//var
+// p1: pwatchinfoty;
 begin
+ fitems.delete(awatch);
+{
  p1:= dbus_watch_get_data(awatch);
  gui_removepollfd(p1^.id);
  removeitem(pointerarty(fwatches),p1);
+}
 end;
 
 procedure tdbuscontroller.updatetimeout(const atimeout: pdbustimeout);
@@ -1265,7 +1527,7 @@ var
  i1: int32;
  b1: boolean;
 begin
- with tsimpletimer(dbus_timeout_get_data(atimeout)) do begin
+ with fitems.findtimeout(atimeout)^.timer do begin
   b1:= dbus_timeout_get_enabled(atimeout) <> 0;
   i1:= dbus_timeout_get_interval(atimeout)*1000;
   if b1 then begin
@@ -1283,13 +1545,17 @@ end;
 
 function tdbuscontroller.doaddtimeout(const atimeout: pdbustimeout): int32;
 var
- ti1: tsimpletimer;
  meth1: notifyeventty;
 begin
  meth1:= @dotimer;
  tmethod(meth1).data:= atimeout;
- ti1:= tsimpletimer.create(0,meth1);
- dbus_timeout_set_data(atimeout,ti1,@freetimeout);
+ with pdbusinfoty(fitems.add(atimeout))^ do begin
+  kind:= dbk_timeout;
+  with timeout do begin
+   timer:= tsimpletimer.create(0,meth1);
+  end;
+ end;
+// dbus_timeout_set_data(atimeout,ti1,@freetimeout);
  updatetimeout(atimeout);
  result:= 1;
 end;
@@ -1301,7 +1567,7 @@ end;
 
 procedure tdbuscontroller.doremovetimeout(const atimeout: pdbustimeout);
 begin
- tsimpletimer(dbus_timeout_get_data(atimeout)).enabled:= false;
+ fitems.delete(atimeout);
 end;
 
 procedure tdbuscontroller.dotimer(const sender: tobject);
@@ -1328,35 +1594,14 @@ begin
  end;
 end;
 
-const
- watchflags: array[pollflagty] of card32 = (
-  DBUS_WATCH_READABLE, //pf_in,  //POLLIN =   $001;
-  0,                   //pf_pri, //POLLPRI =  $002;
-  DBUS_WATCH_WRITABLE, //pf_out, //POLLOUT =  $004;
-  DBUS_WATCH_ERROR,    //pf_err, //POLLERR =  $008;
-  DBUS_WATCH_HANGUP,   //pf_hup, //POLLHUP =  $010;
-  0                    //pf_nval //POLLNVAL = $020;
- );
- 
 procedure tdbuscontroller.doidle(var again: boolean);
-var
- i1: int32;
- c1: card32;
- f1: pollflagty;
 begin
- for i1:= 0 to high(fwatches) do begin
-  with fwatches[i1]^ do begin
-   if flags <> [] then begin
-    c1:= 0;
-    for f1:= low(f1) to high(f1) do begin
-     if f1 in flags then begin
-      c1:= c1 or watchflags[f1];
-     end;
-    end;
-    dbus_watch_handle(watch,c1);
-   end;
-  end;
- end; 
+ if fconn <> nil then begin
+  fitems.handlewatches();
+  repeat
+  until dbus_connection_dispatch(fconn) <> DBUS_DISPATCH_DATA_REMAINS;
+  dbus_connection_flush(fconn);
+ end;
 end;
 
 procedure tdbuscontroller.dopendingcallback(pending: pDBusPendingCall;
@@ -1364,12 +1609,22 @@ procedure tdbuscontroller.dopendingcallback(pending: pDBusPendingCall;
 begin
 end;
 
+procedure tdbuscontroller.addpending(const apending: pdbuspendingcall);
+begin
+ with pdbusinfoty(fitems.add(apending))^ do begin
+  kind:= dbk_pending;
+  with pending do begin
+  end;
+ end;
+end;
+
+{
 procedure tdbuscontroller.dofreependingcallback(memory: pointer);
 begin
  removeitem(pointerarty(fpendings),memory);
  freemem(memory);
 end;
-
+}
 initialization
  arraytypes[dbt_INVALID]:= nil;
  arraytypes[dbt_BYTE]:= typeinfo(bytearty);
