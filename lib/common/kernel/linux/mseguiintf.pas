@@ -5587,13 +5587,15 @@ var
  aic: xic;
  window1: twindow;
  buf1: clipboardbufferty;
+ fpwakeup: boolean;
 type
  char_0_19 = array[0..19] of char;
  
 label
  eventrestart;    
 begin
- while true do begin
+ fpwakeup:= false;
+ while not fpwakeup do begin
   if timerevent then begin
    application.postevent(tmseevent.create(ek_timer));
    timerevent:= false;
@@ -5617,7 +5619,8 @@ begin
     sys_mutexlock(connectmutex1);
     sys_mutexunlock(connectmutex1);
     sys_mutexlock(connectmutex2);
-    int1:= poll(@pollinfo[0],length(pollinfo),1000); //todo: use ppoll?
+    int1:= poll(@pollinfo[0],length(pollinfo),1000); 
+                              //todo: use ppoll? no timeout?
     if int1 > 0 then begin
      for i2:= 0 to high(pollinfo) do begin
       with pollinfo[i2] do begin
@@ -5625,6 +5628,7 @@ begin
         with pollinfodest[i2] do begin
          if (callback <> nil) and (revents <> 0) then begin
           callback(pollflagsty(card32(card16(revents))),data);
+          fpwakeup:= true;
          end;
         end;
        end;
@@ -5646,7 +5650,7 @@ begin
      end;
     end;
     application.lock;
-   until (int1 <> -1) or timerevent or terminated or childevent;
+   until (int1 <> -1) or timerevent or terminated or childevent or fpwakeup;
  {$ifdef with_sm}
    if hassm then begin
     if (int1 > 0) and (pollinfo[2].revents <> 0) then begin
