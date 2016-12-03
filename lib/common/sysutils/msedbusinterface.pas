@@ -1617,6 +1617,9 @@ var
  pde: ppointer;
  pt: pdbusdataty;
  pd: ppointer;
+ s1: string;
+ p1: pointer;
+ t1: dbusdataty;
 
 label
  errorlab;
@@ -1629,6 +1632,19 @@ begin
   end
   else begin
    dbus_message_iter_init(amessage,@iter1);
+
+   if dbus_message_get_type(amessage) = DBUS_MESSAGE_TYPE_ERROR then begin
+    p1:= @s1;
+    pd:= @p1;
+    t1:= dbt_string;
+    pt:= @t1;
+    pte:= pt+1;
+    if readvalue(iter1,pt,pd) then begin
+     error(s1);
+    end;
+    goto errorlab;
+   end;
+
    pt:= @resulttypes[0];
    pte:= pt + length(resulttypes);
    pd:= @results[0];
@@ -1660,6 +1676,7 @@ var
 begin
  if fconn <> nil then begin
   result:= true;
+  exit;
  end;
  result:= false;
  try
