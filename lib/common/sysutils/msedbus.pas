@@ -422,6 +422,8 @@ var
              function_: DBusPendingCallNotifyFunction;
              user_data: pointer; free_user_data: DBusFreeFunction): dbus_bool_t
                                     {$ifdef wincall}stdcall{$else}cdecl{$endif};
+ dbus_pending_call_steal_reply: function(pending: pDBusPendingCall): pDBusMessage
+                                    {$ifdef wincall}stdcall{$else}cdecl{$endif};
 
 procedure initializedbus(const sonames: array of filenamety;
                                           const onlyonce: boolean = false);
@@ -445,7 +447,7 @@ end;
 procedure initializedbus(const sonames: array of filenamety; //[] = default
                                          const onlyonce: boolean = false);                                   
 const
- funcs: array[0..46] of funcinfoty = (
+ funcs: array[0..47] of funcinfoty = (
   (n: 'dbus_bus_get'; d: @dbus_bus_get),                         // 0
   (n: 'dbus_bus_get_private'; d: @dbus_bus_get_private),         // 1
   (n: 'dbus_connection_close'; d: @dbus_connection_close),       // 2
@@ -514,7 +516,9 @@ const
   (n: 'dbus_connection_dispatch'; d: @dbus_connection_dispatch), //44
   (n: 'dbus_pending_call_unref'; d: @dbus_pending_call_unref),   //45
   (n: 'dbus_pending_call_set_notify';
-           d: @dbus_pending_call_set_notify)                     //46
+           d: @dbus_pending_call_set_notify),                    //46
+  (n: 'dbus_pending_call_steal_reply'; 
+           d: @dbus_pending_call_steal_reply)                    //47
  );
 
 {

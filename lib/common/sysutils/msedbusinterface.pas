@@ -43,6 +43,12 @@ type
  edbus = class(exception)
  end;
 
+ idbusclient = interface(iobjectlink)
+ end;
+ idbusresponse = interface(idbusclient)
+  procedure replyed(const serial: card32; const amessage: pdbusmessage);
+ end;
+ 
 const
  datasizes: array[dbusdataty] of int32 = (
   0,                 //dbt_INVALID,
@@ -118,11 +124,14 @@ procedure dbusdisconnect();
 function dbusid(): string;
 function dbusname(): string;
 
-function dbuscallmethod(const returnedto: ievent;
+function dbuscallmethod(const returnedto: idbusresponse; var serial: card32;
                const bus_name,path,iface,method: string;
                const paramtypes: array of dbusdataty;
                const params: array of pointer;
                const timeout: int32 = -1): boolean; //true if ok
+function dbusreadmessage(const amessage: pdbusmessage;
+               const resulttypes: array of dbusdataty;
+               const results: array of pointer): boolean; //true if ok
 
 implementation
 uses
@@ -148,11 +157,14 @@ type
 
  pendinginfoty = record
   pending: pdbuspendingcall;
+  serial: card32;
+  link: idbusresponse;
  end;
  ppendinginfoty = ^pendinginfoty;
 
  linkinfoty = record
-  link: ievent;
+  link: idbusclient;
+  pending: pdbuspendingcall;
  end;
  plinkinfoty = ^linkinfoty;
  itemkindty = (dbk_watch,dbk_timeout,dbk_pending,dbk_link);
@@ -175,12 +187,14 @@ type
   private
    fwatches: card32arty;
    funlinking: boolean;
+   fserial: card32;
   protected
    procedure finalizeitem(var aitemdata) override;
    procedure dopollcallback(const aflags: pollflagsty; const adata: pointer);
    function findwatch(const key: pdbuswatch): pwatchinfoty;
    function findtimeout(const key: pdbustimeout): ptimeoutinfoty;
    function findpending(const key: pdbuspendingcall): ppendinginfoty;
+
     //iobjectlink
    procedure link(const source,dest: iobjectlink; valuepo: pointer = nil;
                          ainterfacetype: pointer = nil; once: boolean = false);
@@ -191,7 +205,11 @@ type
   public
    constructor create();
    function addwatch(const key: pdbuswatch): pwatchinfoty;
-   function addlink(const alink: ievent): plinkinfoty;
+   function addlink(const alink: idbusclient;
+                            const apending: pdbuspendingcall): plinkinfoty;
+   function addpending(const apending: pdbuspendingcall;
+                               const alink: idbusresponse;
+                               var aserial: card32): ppendinginfoty;
 //   function addpending(const aitem: pdbuspendingcall): ppendinginfoty;
 //   procedure freeitems();
    procedure handlewatches();
@@ -225,17 +243,19 @@ type
    procedure dopendingcallback(pending: pDBusPendingCall; user_data: pointer);
 //   procedure dofreependingcallback(memory: pointer);
 //   procedure dopollcallback(const aflags: pollflagsty; const adata: pointer);
-   procedure addpending(const apending: pdbuspendingcall);
 
   public
    constructor create();
    destructor destroy(); override;
    function connected: boolean;
-   function dbuscallmethod(const returnedto: ievent;
+   function dbuscallmethod(const returnedto: idbusresponse; var aserial: card32;
                const bus_name,path,iface,method: string;
                const paramtypes: array of dbusdataty;
                const params: array of pointer;
                const timeout: int32 = -1): boolean; //true if ok
+   function readmessage(const amessage: pdbusmessage;
+               const resulttypes: array of dbusdataty;
+               const results: array of pointer): boolean; //true if ok
  end;
  
 var
@@ -378,7 +398,7 @@ begin
  end;
 end;
 
-function dbuscallmethod(const returnedto: ievent;
+function dbuscallmethod(const returnedto: idbusresponse; var serial: card32;
                const bus_name,path,iface,method: string;
                const paramtypes: array of dbusdataty;
                const params: array of pointer;
@@ -386,8 +406,18 @@ function dbuscallmethod(const returnedto: ievent;
 begin
  result:= false;
  if checkconnect() then begin
-  result:= fdbc.dbuscallmethod(returnedto,bus_name,path,iface,method,
+  result:= fdbc.dbuscallmethod(returnedto,serial,bus_name,path,iface,method,
                                             paramtypes,params,timeout);
+ end;
+end;
+
+function dbusreadmessage(const amessage: pdbusmessage;
+               const resulttypes: array of dbusdataty;
+               const results: array of pointer): boolean; //true if ok
+begin
+ result:= false;
+ if checkconnect() then begin
+  result:= fdbc.readmessage(amessage,resulttypes,results);
  end;
 end;
 
@@ -1031,24 +1061,53 @@ begin
  p1:= add(key);
  p1^.kind:= dbk_watch;
  result:= @p1^.watch;
- result^.flags:= [];
- result^.watch:= key;
  additem(fwatches,getdataoffset(result));
+ with result^ do begin
+  flags:= [];
+  watch:= key;
+ end;
 end;
 
-function tdbusitemhashdatalist.addlink(const alink: ievent): plinkinfoty;
+function tdbusitemhashdatalist.addlink(const alink: idbusclient;
+                            const apending: pdbuspendingcall): plinkinfoty;
 var
  p1: pdbusinfoty;
 begin
  p1:= add(alink);
  p1^.kind:= dbk_link;
- result:= @p1^.link;
- result^.link:= alink;
  alink.link(iobjectlink(pchar(alink)+1),iobjectlink(self));
                       //create backlink
+ result:= @p1^.link;
+ with result^ do begin
+  link:= alink;
+  pending:= apending;
+ end;
 end;
 
+function tdbusitemhashdatalist.addpending(const apending: pdbuspendingcall;
+                const alink: idbusresponse;
+                               var aserial: card32): ppendinginfoty;
+var
+ p1: pdbusinfoty;
+begin
+ p1:= add(apending);
+ p1^.kind:= dbk_pending;
+ result:= @p1^.pending;
+ with result^ do begin
+  pending:= apending;
+  link:= alink;
+  inc(fserial);
+  if fserial = 0 then begin
+   inc(fserial);
+  end;
+  serial:= fserial;
+  aserial:= serial;
+ end;
+end;
+var testvar: pdbusinfoty;
 procedure tdbusitemhashdatalist.finalizeitem(var aitemdata);
+var
+ p1: pdbusinfoty;
 begin
  with dbusitemty(aitemdata) do begin
   case data.kind of
@@ -1064,6 +1123,21 @@ begin
      data.link.link.unlink(iobjectlink(pchar(iobjectlink(self))+1),
                                                           data.link.link);
                        //remove backlink
+    end;
+    if data.link.pending <> nil then begin
+     p1:= find(data.link.pending);
+testvar:= p1;
+     if (p1 <> nil) and (p1^.kind = dbk_pending) then begin
+      p1^.pending.link:= nil;
+     end;
+    end;
+   end;
+   dbk_pending: begin
+    if data.pending.link <> nil then begin
+     p1:= find(data.pending.link);
+     if (p1 <> nil) and (p1^.kind = dbk_link) then begin
+      p1^.link.pending:= nil;
+     end;
     end;
    end;
   end;
@@ -1218,7 +1292,8 @@ begin
  result:= fconn <> nil;
 end;
 
-function tdbuscontroller.dbuscallmethod(const returnedto: ievent;
+function tdbuscontroller.dbuscallmethod(const returnedto: idbusresponse;
+               var aserial: card32;
                const bus_name: string; const path: string; const iface: string;
                const method: string; const paramtypes: array of dbusdataty;
                const params: array of pointer;
@@ -1378,13 +1453,13 @@ begin
     goto errorlab;
    end;
    result:= dbus_connection_send_with_reply(fconn,m1,@pend1,timeout) <> 0;
-   fitems.addlink(returnedto);
+   fitems.addlink(returnedto,pend1);
 //fitems.delete(returnedto);
    if not result then begin
     outofmemory();
     goto errorlab;
    end;
-   addpending(pend1);
+   fitems.addpending(pend1,returnedto,aserial);
 //   getmem(pendinfo1,sizeof(pendinfoty));
 //   additem(pointerarty(fpendings),pendinfo1);
 //   pendinfo1^.pending:= pend1;
@@ -1395,6 +1470,188 @@ errorlab:
   end;
  end;
 end;
+
+function tdbuscontroller.readmessage(const amessage: pdbusmessage;
+               const resulttypes: array of dbusdataty;
+               const results: array of pointer): boolean; //true if ok
+var
+ pte: pdbusdataty;
+
+ function readvalue(var aiter: dbusmessageiter; 
+                                 var pt: pdbusdataty; var pd: ppointer): boolean;
+ var
+  i1,i2,i3,i4: int32;
+  si1: sizeint;
+  p1,p2: pointer;
+  p3: pdbusdataty;
+  p4: ppointer;
+  bool1: dbus_bool_t;
+  pc1: pcchar;
+  isstring: boolean;
+  typ1: pdynarraytypeinfo;
+  t1: dbusdataty;
+  iter2,iter3: dbusmessageiter;
+  iterpo: pdbusmessageiter;
+  
+ label
+  oklab;
+ begin
+  result:= false;
+  if pt >= pte then begin
+   error('dbuscallmethod() resulttypes and results count do not match');
+   exit;
+  end;
+  iterpo:= @aiter;
+  i1:= dbus_message_iter_get_arg_type(iterpo);
+  if i1 = DBUS_TYPE_INVALID then begin
+   error('dbuscallmethod() returned param count:'+
+                   inttostr(pd - ppointer(@results[0]))+
+                              ' expected:'+inttostr(length(results)));
+   exit;
+  end;
+  if i1 = DBUS_TYPE_VARIANT then begin
+   dbus_message_iter_recurse(@aiter,@iter3);   
+   iterpo:= @iter3;
+   i1:= dbus_message_iter_get_arg_type(iterpo); //nested variants?
+  end;
+  if i1 <> dbusdatacodes[pt^] then begin
+   error('dbuscallmethod() returned param does not match:'+inttostr(i1)+
+            ' expected:'+inttostr(dbusdatacodes[pt^]));
+   exit;
+  end;
+  isstring:= false;
+  p1:= pd^;
+  case i1 of
+// DBUS_TYPE_INVALID,
+   DBUS_TYPE_BYTE: begin
+   end;
+   DBUS_TYPE_BOOLEAN: begin
+    p1:= @bool1;
+   end;
+   DBUS_TYPE_INT16: begin
+   end;
+   DBUS_TYPE_UINT16: begin
+   end;
+   DBUS_TYPE_INT32: begin
+   end;
+   DBUS_TYPE_UINT32: begin
+   end;
+   DBUS_TYPE_INT64: begin
+   end;
+   DBUS_TYPE_UINT64: begin
+   end;
+   DBUS_TYPE_DOUBLE: begin
+   end;
+   DBUS_TYPE_STRING,DBUS_TYPE_OBJECT_PATH,DBUS_TYPE_SIGNATURE: begin
+    isstring:= true;
+    p1:= @pc1;
+   end;
+   
+// DBUS_TYPE_UNIX_FD,
+   DBUS_TYPE_ARRAY: begin
+    inc(pt);
+    if pt >= pte then begin
+     error('dbuscallmethod() returntypes and returns count do not match');
+     exit;
+    end;
+    i1:= datasizes[pt^];
+    if i1 = 0 then begin
+     error('dbuscallmethod() array item type not yet supported');
+     exit;
+    end;
+    i2:= dbus_message_iter_get_element_type(iterpo);
+    if i2 <> dbusdatacodes[pt^] then begin
+     error('dbuscallmethod() returned array item type does not match');
+     exit;
+    end;
+    p1:= pd^; //pointer to var
+    t1:= pt^;
+    typ1:= arraytypes[t1];
+    i3:= 0;
+    dbus_message_iter_recurse(iterpo,@iter2);
+    while dbus_message_iter_get_arg_type(@iter2) <> DBUS_TYPE_INVALID do begin
+     additem(p1^,typ1,i3);
+     p2:= ppointer(p1)^ + i1*(i3-1); //data pointer in array
+     p4:= @p2;
+     p3:= @t1;
+     if not readvalue(iter2,p3,p4) then begin
+      exit;
+     end;
+    end;
+    si1:= i3;
+    dynarraysetlength(ppointer(p1)^,typ1,1,@si1);
+    goto oklab;
+   end; //array
+// DBUS_TYPE_VARIANT,
+// DBUS_TYPE_STRUCT,
+// DBUS_TYPE_DICT_ENTRY
+   else begin
+    error('dbuscallmethod() invalid returned value');
+    exit;
+   end;     
+  end;
+  dbus_message_iter_get_basic(iterpo,p1);
+  p1:= pd^;
+  if isstring then begin
+   if pc1 = nil then begin
+    pansistring(p1)^:= '';
+   end
+   else begin
+    pansistring(p1)^:= ansistring(pc1);
+   end;
+  end
+  else begin
+   if i1 = DBUS_TYPE_BOOLEAN then begin
+    pboolean(p1)^:= bool1 <> 0;
+   end;
+  end;
+ oklab:
+  dbus_message_iter_next(@aiter);
+  inc(pt);
+  inc(pd);
+  result:= true;
+ end;//readvalue
+
+var
+ iter1: dbusmessageiter;
+ pde: ppointer;
+ pt: pdbusdataty;
+ pd: ppointer;
+
+label
+ errorlab;
+begin
+ result:= false;
+ if checkconnect() then begin
+  if amessage = nil then begin
+   error('NIL message');
+   goto errorlab;
+  end
+  else begin
+   dbus_message_iter_init(amessage,@iter1);
+   pt:= @resulttypes[0];
+   pte:= pt + length(resulttypes);
+   pd:= @results[0];
+   pde:= pd + length(results);
+   while pd < pde do begin
+    if not readvalue(iter1,pt,pd) then begin
+     goto errorlab;
+    end;
+   end;
+   if dbus_message_iter_get_arg_type(@iter1) <> DBUS_TYPE_INVALID then begin
+    error('dbuscallmethod() wrong returned param count');
+    goto errorlab;
+   end;
+   if pt <> pte then begin
+    error('dbuscallmethod() resulttypes and results count do not match');
+    goto errorlab;
+   end;
+   result:= true;
+  end;
+errorlab:
+ end;
+end;
+ 
 
 function tdbuscontroller.connect: boolean;
 var
@@ -1606,16 +1863,21 @@ end;
 
 procedure tdbuscontroller.dopendingcallback(pending: pDBusPendingCall;
                user_data: pointer);
+var
+ m1: pdbusmessage;
 begin
-end;
-
-procedure tdbuscontroller.addpending(const apending: pdbuspendingcall);
-begin
- with pdbusinfoty(fitems.add(apending))^ do begin
-  kind:= dbk_pending;
-  with pending do begin
+ m1:= dbus_pending_call_steal_reply(pending);
+ with fitems.findpending(pending)^ do begin
+  if link <> nil then begin
+   link.replyed(serial,m1);
+   fitems.delete(link);
   end;
+  fitems.delete(pending);
  end;
+ if m1 <> nil then begin
+  dbus_message_unref(m1);
+ end;
+ dbus_pending_call_unref(pending);
 end;
 
 {
