@@ -5587,15 +5587,17 @@ var
  aic: xic;
  window1: twindow;
  buf1: clipboardbufferty;
- fpwakeup: boolean;
+ fdwakeup: boolean;
+ allsig,sig1: sigset_t;
 type
  char_0_19 = array[0..19] of char;
  
 label
  eventrestart;    
 begin
- fpwakeup:= false;
- while not fpwakeup do begin
+ sigfillset(allsig);
+ fdwakeup:= false;
+ while not fdwakeup do begin
   if timerevent then begin
    application.postevent(tmseevent.create(ek_timer));
    timerevent:= false;
@@ -5611,16 +5613,27 @@ begin
   if gui_hasevent then begin
    break;
   end;
+
+  pthread_sigmask(sig_block,@allsig,@sig1); //block signals
   if not timerevent and not terminated and not childevent then begin
    repeat
     if not application.unlock then begin
      guierror(gue_notlocked);
     end;
+    
     sys_mutexlock(connectmutex1);
+//    int1:= poll(@pollinfo[0],length(pollinfo),1000); 
+//                              //todo: use ppoll? no timeout?
+    int1:= ppoll(@pollinfo[0],length(pollinfo),nil,@sig1);
+    if pollinfo[1].revents <> 0 then begin
+     repeat                                     //empty pipe
+     until (__read(connectpipe.readdes,dummybyte,1) < 0) and 
+                                     (sys_getlasterror() = ewouldblock);
+    end;
     sys_mutexunlock(connectmutex1);
     sys_mutexlock(connectmutex2);
-    int1:= poll(@pollinfo[0],length(pollinfo),1000); 
-                              //todo: use ppoll? no timeout?
+    sys_mutexunlock(connectmutex2);
+ 
     if int1 > 0 then begin
      for i2:= 0 to high(pollinfo) do begin
       with pollinfo[i2] do begin
@@ -5628,19 +5641,13 @@ begin
         with pollinfodest[i2] do begin
          if (callback <> nil) and (revents <> 0) then begin
           callback(pollflagsty(card32(card16(revents))),data);
-          fpwakeup:= true;
+          fdwakeup:= true;
          end;
         end;
        end;
       end;
      end;
     end;
-    if pollinfo[1].revents <> 0 then begin
-     repeat
-     until (__read(connectpipe.readdes,dummybyte,1) < 0) and 
-                                     (sys_getlasterror() = eagain);
-    end;
-    sys_mutexunlock(connectmutex2);
      //wakeup clientmessages are sometimes missed with xcb ???
     if int1 = 0 then begin  //timeout
      inc(timeoutcount);
@@ -5650,7 +5657,8 @@ begin
      end;
     end;
     application.lock;
-   until (int1 <> -1) or timerevent or terminated or childevent or fpwakeup;
+   until (int1 <> -1) or timerevent or terminated or childevent or fdwakeup;
+   pthread_sigmask(sig_setmask,@sig1,nil); //enable signals
  {$ifdef with_sm}
    if hassm then begin
     if (int1 > 0) and (pollinfo[2].revents <> 0) then begin
@@ -5689,6 +5697,9 @@ begin
     end;
    end;
 {$endif}
+  end
+  else begin
+   pthread_sigmask(sig_setmask,@sig1,nil); //enable signals
   end;
  end;
  result:= nil;
@@ -6276,7 +6287,6 @@ begin
   lasteventtime:= currenttime;
 
   po1:= checklocale;
-  
   terminated:= false;
   result:= gue_nodisplay;
   timerevent:= false;
@@ -6285,7 +6295,7 @@ begin
   sigchldbefore:= signal(sigchld,{$ifdef FPC}@{$endif}sigchild);
   sigemptyset(sigset1);
   sigaddset(sigset1,sigchld);
-  m_sigprocmask(sig_unblock,sigset1,sigset2); 
+  pthread_sigmask(sig_unblock,@sigset1,@sigset2); 
   
   appdisp:= xopendisplay(nil);
   if appdisp = nil then begin
@@ -6691,4 +6701,3 @@ initialization
  hassm:= geticelib and getsmlib;
  hasxrandrlib:= getxrandrlib;
 end.
-
