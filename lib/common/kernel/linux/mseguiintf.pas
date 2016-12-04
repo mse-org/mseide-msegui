@@ -5589,6 +5589,7 @@ var
  buf1: clipboardbufferty;
  fdwakeup: boolean;
  allsig,sig1: sigset_t;
+ timeout1: timespec;
 type
  char_0_19 = array[0..19] of char;
  
@@ -5596,6 +5597,8 @@ label
  eventrestart;    
 begin
  sigfillset(allsig);
+ timeout1.tv_sec:= 10;
+ timeout1.tv_nsec:= 0;
  fdwakeup:= false;
  while not fdwakeup do begin
   if timerevent then begin
@@ -5624,7 +5627,7 @@ begin
     sys_mutexlock(connectmutex1);
 //    int1:= poll(@pollinfo[0],length(pollinfo),1000); 
 //                              //todo: use ppoll? no timeout?
-    int1:= ppoll(@pollinfo[0],length(pollinfo),nil,@sig1);
+    int1:= ppoll(@pollinfo[0],length(pollinfo),@timeout1,@sig1);
     if pollinfo[1].revents <> 0 then begin
      repeat                                     //empty pipe
      until (__read(connectpipe.readdes,dummybyte,1) < 0) and 
@@ -5651,7 +5654,7 @@ begin
      //wakeup clientmessages are sometimes missed with xcb ???
     if int1 = 0 then begin  //timeout
      inc(timeoutcount);
-     if timeoutcount mod 10 = 0 then begin
+     if timeoutcount mod 1 = 0 then begin
       timerevent:= true; //every 10 seconds without messages 
                          //in case of lost timer alarm
      end;
