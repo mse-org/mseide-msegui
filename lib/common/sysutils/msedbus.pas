@@ -219,12 +219,6 @@ type
  end;
  pDBusMessageIter = ^DBusMessageIter;
 
- DBusBusType = (
-  DBUS_BUS_SESSION,    //**< The login session bus */
-  DBUS_BUS_SYSTEM,     //**< The systemwide bus */
-  DBUS_BUS_STARTER     //**< The bus that started us, if any */
- );
-
  DBusConnection = record end;
  pDBusConnection = ^DBusConnection;
  DBusMessage = record end;
@@ -237,59 +231,109 @@ type
  pDBusPendingCall = ^DBusPendingCall;
  ppDBusPendingCall = ^pDBusPendingCall;
 
+//**
+//* Results that a message handler can return.
+//*/
+DBusHandlerResult = (
+ DBUS_HANDLER_RESULT_HANDLED,         
+   //**< Message has had its effect - no need to run more handlers. */ 
+ DBUS_HANDLER_RESULT_NOT_YET_HANDLED, 
+   //**< Message has not had any effect - see if other handlers want it. */
+ DBUS_HANDLER_RESULT_NEED_MEMORY      
+   //**< Need more memory in order to return #DBUS_HANDLER_RESULT_HANDLED or 
+   //#DBUS_HANDLER_RESULT_NOT_YET_HANDLED.
+   // Please try again later with more memory. */
+);
+
+//**
+//* Called when a message is sent to a registered object path. Found in
+//* #DBusObjectPathVTable which is registered with dbus_connection_register_object_path()
+//* or dbus_connection_register_fallback().
+//*/
+ DBusObjectPathMessageFunction = 
+   function(connection: pDBusConnection; message: pDBusMessage;
+                                 user_data: pointer): DBusHandlerResult
+                                    {$ifdef wincall}stdcall{$else}cdecl{$endif};
+//**
+//* Called when a #DBusObjectPathVTable is unregistered (or its connection is freed).
+//* Found in #DBusObjectPathVTable.
+//*/
+DBusObjectPathUnregisterFunction = procedure(connection: pDBusConnection;
+                                                      user_data: pointer)
+                                    {$ifdef wincall}stdcall{$else}cdecl{$endif};
+
+ DBusObjectPathVTable = record
+  unregister_function: DBusObjectPathUnregisterFunction; 
+                          //**< Function to unregister this handler */
+  message_function: DBusObjectPathMessageFunction; 
+                          //**< Function to handle messages */
+  
+  dbus_internal_pad1: pointer; //**< Reserved for future expansion */
+  dbus_internal_pad2: pointer; //**< Reserved for future expansion */
+  dbus_internal_pad3: pointer; //**< Reserved for future expansion */
+  dbus_internal_pad4: pointer; //**< Reserved for future expansion */
+ end;
+ pDBusObjectPathVTable = ^DBusObjectPathVTable;
+ 
+ DBusBusType = (
+  DBUS_BUS_SESSION,    //**< The login session bus */
+  DBUS_BUS_SYSTEM,     //**< The systemwide bus */
+  DBUS_BUS_STARTER     //**< The bus that started us, if any */
+ );
+
  DBusFreeFunction = procedure(memory: pointer)
                                     {$ifdef wincall}stdcall{$else}cdecl{$endif};
 
-///** Called when libdbus needs a new watch to be monitored by the main
-// * loop. Returns #FALSE if it lacks enough memory to add the
-// * watch. Set by dbus_connection_set_watch_functions() or
-// * dbus_server_set_watch_functions().
-// */
+//** Called when libdbus needs a new watch to be monitored by the main
+//* loop. Returns #FALSE if it lacks enough memory to add the
+//* watch. Set by dbus_connection_set_watch_functions() or
+//* dbus_server_set_watch_functions().
+//*/
  DBusAddWatchFunction = function(watch: pDBusWatch;
                                            data: pointer): dbus_bool_t
                                     {$ifdef wincall}stdcall{$else}cdecl{$endif};
                                                   
-///** Called when dbus_watch_get_enabled() may return a different value
-// *  than it did before.  Set by dbus_connection_set_watch_functions()
-// *  or dbus_server_set_watch_functions().
-// */
+//** Called when dbus_watch_get_enabled() may return a different value
+//*  than it did before.  Set by dbus_connection_set_watch_functions()
+//*  or dbus_server_set_watch_functions().
+//*/
  DBusWatchToggledFunction = procedure(watch: pDBusWatch; data: pointer)
                                     {$ifdef wincall}stdcall{$else}cdecl{$endif};
 
-///** Called when libdbus no longer needs a watch to be monitored by the
-// * main loop. Set by dbus_connection_set_watch_functions() or
-// * dbus_server_set_watch_functions().
-// */
+//** Called when libdbus no longer needs a watch to be monitored by the
+//* main loop. Set by dbus_connection_set_watch_functions() or
+//* dbus_server_set_watch_functions().
+//*/
  DBusRemoveWatchFunction = procedure(watch: pDBusWatch; data: pointer)
                                     {$ifdef wincall}stdcall{$else}cdecl{$endif};
 
 //** Called when libdbus needs a new timeout to be monitored by the main
-// * loop. Returns #FALSE if it lacks enough memory to add the
-// * watch. Set by dbus_connection_set_timeout_functions() or
-// * dbus_server_set_timeout_functions().
-// */
+//* loop. Returns #FALSE if it lacks enough memory to add the
+//* watch. Set by dbus_connection_set_timeout_functions() or
+//* dbus_server_set_timeout_functions().
+//*/
  DBusAddTimeoutFunction = function(timeout: pDBusTimeout;
                                             data: pointer): dbus_bool_t
                                     {$ifdef wincall}stdcall{$else}cdecl{$endif};
 
 //** Called when dbus_timeout_get_enabled() may return a different
-// * value than it did before.
-// * Set by dbus_connection_set_timeout_functions() or
-// * dbus_server_set_timeout_functions().
-// */
+//* value than it did before.
+//* Set by dbus_connection_set_timeout_functions() or
+//* dbus_server_set_timeout_functions().
+//*/
  DBusTimeoutToggledFunction = procedure(timeout: pDBusTimeout; data: pointer)
                                     {$ifdef wincall}stdcall{$else}cdecl{$endif};
 //** Called when libdbus no longer needs a timeout to be monitored by the
-// * main loop. Set by dbus_connection_set_timeout_functions() or
-// * dbus_server_set_timeout_functions().
-// */
+//* main loop. Set by dbus_connection_set_timeout_functions() or
+//* dbus_server_set_timeout_functions().
+//*/
  DBusRemoveTimeoutFunction = procedure(timeout: pDBusTimeout; data: pointer)
                                     {$ifdef wincall}stdcall{$else}cdecl{$endif};
 
-///**
-// * Called when a pending call now has a reply available. Set with
-// * dbus_pending_call_set_notify().
-// */
+//**
+//* Called when a pending call now has a reply available. Set with
+//* dbus_pending_call_set_notify().
+//*/
  DBusPendingCallNotifyFunction =  procedure(pending: pDBusPendingCall; 
                                                      user_data: pointer)
                                     {$ifdef wincall}stdcall{$else}cdecl{$endif};
@@ -321,37 +365,46 @@ var
              free_data_function: DBusFreeFunction): dbus_bool_t
                                     {$ifdef wincall}stdcall{$else}cdecl{$endif};
 
+ dbus_connection_try_register_object_path:
+   function(cionnection: pDBusConnection; path: pchar; 
+                        vtable: pDBusObjectPathVTable;
+                       user_data: pointer; error: pDBusError): dbus_bool_t
+                                    {$ifdef wincall}stdcall{$else}cdecl{$endif};
+ dbus_connection_unregister_object_path:
+   function(connection: pDBusConnection; path: pcchar): dbus_bool_t
+                                    {$ifdef wincall}stdcall{$else}cdecl{$endif};
+
  dbus_watch_get_unix_fd: function(watch: pDBusWatch): cint
                                     {$ifdef wincall}stdcall{$else}cdecl{$endif};
  dbus_watch_get_socket: function(watch: pDBusWatch): cint
-                                   {$ifdef wincall}stdcall{$else}cdecl{$endif};
+                                    {$ifdef wincall}stdcall{$else}cdecl{$endif};
  dbus_watch_get_flags: function(watch: pDBusWatch): cuint
-                                   {$ifdef wincall}stdcall{$else}cdecl{$endif};
+                                    {$ifdef wincall}stdcall{$else}cdecl{$endif};
  dbus_watch_get_data: function(watch: pDBusWatch): pointer
-                                   {$ifdef wincall}stdcall{$else}cdecl{$endif};
+                                    {$ifdef wincall}stdcall{$else}cdecl{$endif};
  dbus_watch_set_data: procedure(watch: pDBusWatch; data: pointer;
                                      free_data_function: DBusFreeFunction)
-                                   {$ifdef wincall}stdcall{$else}cdecl{$endif};
+                                    {$ifdef wincall}stdcall{$else}cdecl{$endif};
  dbus_watch_handle: function(watch: pDBusWatch; flags: cuint): dbus_bool_t
-                                   {$ifdef wincall}stdcall{$else}cdecl{$endif};
+                                    {$ifdef wincall}stdcall{$else}cdecl{$endif};
  dbus_watch_get_enabled: function(watch: pDBusWatch): dbus_bool_t
-                                   {$ifdef wincall}stdcall{$else}cdecl{$endif};
+                                    {$ifdef wincall}stdcall{$else}cdecl{$endif};
 
  dbus_timeout_get_interval: function(timeout: pDBusTimeout): cint
-                                   {$ifdef wincall}stdcall{$else}cdecl{$endif};
+                                    {$ifdef wincall}stdcall{$else}cdecl{$endif};
  dbus_timeout_get_data: function(timeout: pDBusTimeout): pointer
-                                   {$ifdef wincall}stdcall{$else}cdecl{$endif};
+                                    {$ifdef wincall}stdcall{$else}cdecl{$endif};
  dbus_timeout_set_data: procedure(timeout: pDBusTimeout; data: pointer;
                                        free_data_function: DBusFreeFunction)
-                                   {$ifdef wincall}stdcall{$else}cdecl{$endif};
+                                    {$ifdef wincall}stdcall{$else}cdecl{$endif};
  dbus_timeout_handle: function(timeout: pDBusTimeout): dbus_bool_t
-                                   {$ifdef wincall}stdcall{$else}cdecl{$endif};
+                                    {$ifdef wincall}stdcall{$else}cdecl{$endif};
  dbus_timeout_get_enabled: function(timeout: pDBusTimeout): dbus_bool_t
-                                   {$ifdef wincall}stdcall{$else}cdecl{$endif};
+                                    {$ifdef wincall}stdcall{$else}cdecl{$endif};
  dbus_timeout_needs_restart: function(timeout: pDBusTimeout): dbus_bool_t
-                                   {$ifdef wincall}stdcall{$else}cdecl{$endif};
+                                    {$ifdef wincall}stdcall{$else}cdecl{$endif};
  dbus_timeout_restarted: procedure(timeout: pDBusTimeout)
-                                   {$ifdef wincall}stdcall{$else}cdecl{$endif};
+                                    {$ifdef wincall}stdcall{$else}cdecl{$endif};
 
  dbus_error_init: procedure(error: pDBusError)
                                     {$ifdef wincall}stdcall{$else}cdecl{$endif};
@@ -465,7 +518,7 @@ end;
 procedure initializedbus(const sonames: array of filenamety; //[] = default
                                          const onlyonce: boolean = false);                                   
 const
- funcs: array[0..48] of funcinfoty = (
+ funcs: array[0..50] of funcinfoty = (
   (n: 'dbus_bus_get'; d: @dbus_bus_get),                         // 0
   (n: 'dbus_bus_get_private'; d: @dbus_bus_get_private),         // 1
   (n: 'dbus_connection_close'; d: @dbus_connection_close),       // 2
@@ -474,70 +527,74 @@ const
            d: @dbus_connection_set_watch_functions),             // 4
   (n: 'dbus_connection_set_timeout_functions';
            d: @dbus_connection_set_timeout_functions),           // 5
-  (n: 'dbus_watch_get_unix_fd'; d: @dbus_watch_get_unix_fd),     // 6
-  (n: 'dbus_watch_get_socket'; d: @dbus_watch_get_socket),       // 7
-  (n: 'dbus_watch_get_flags'; d: @dbus_watch_get_flags),         // 8
-  (n: 'dbus_watch_get_data'; d: @dbus_watch_get_data),           // 9
-  (n: 'dbus_watch_set_data'; d: @dbus_watch_set_data),           //10
-  (n: 'dbus_watch_handle'; d: @dbus_watch_handle),               //11
-  (n: 'dbus_watch_get_enabled'; d: @dbus_watch_get_enabled),     //12
+  (n: 'dbus_connection_try_register_object_path'; 
+             d: @dbus_connection_try_register_object_path),      // 6
+  (n: 'dbus_connection_unregister_object_path';
+           d: @dbus_connection_unregister_object_path),          // 7
+  (n: 'dbus_watch_get_unix_fd'; d: @dbus_watch_get_unix_fd),     // 8
+  (n: 'dbus_watch_get_socket'; d: @dbus_watch_get_socket),       // 9
+  (n: 'dbus_watch_get_flags'; d: @dbus_watch_get_flags),         //10
+  (n: 'dbus_watch_get_data'; d: @dbus_watch_get_data),           //11
+  (n: 'dbus_watch_set_data'; d: @dbus_watch_set_data),           //12
+  (n: 'dbus_watch_handle'; d: @dbus_watch_handle),               //13
+  (n: 'dbus_watch_get_enabled'; d: @dbus_watch_get_enabled),     //14
 
   (n: 'dbus_timeout_get_interval'; 
-           d: @dbus_timeout_get_interval),                       //13
-  (n: 'dbus_timeout_get_data'; d: @dbus_timeout_get_data),       //14
-  (n: 'dbus_timeout_set_data'; d: @dbus_timeout_set_data),       //15
-  (n: 'dbus_timeout_handle'; d: @dbus_timeout_handle),           //16
-  (n: 'dbus_timeout_get_enabled'; d: @dbus_timeout_get_enabled), //17
+           d: @dbus_timeout_get_interval),                       //15
+  (n: 'dbus_timeout_get_data'; d: @dbus_timeout_get_data),       //16
+  (n: 'dbus_timeout_set_data'; d: @dbus_timeout_set_data),       //17
+  (n: 'dbus_timeout_handle'; d: @dbus_timeout_handle),           //18
+  (n: 'dbus_timeout_get_enabled'; d: @dbus_timeout_get_enabled), //19
   (n: 'dbus_timeout_needs_restart';
-           d: @dbus_timeout_needs_restart),                      //18
-  (n: 'dbus_timeout_restarted'; d: @dbus_timeout_restarted),     //19
+           d: @dbus_timeout_needs_restart),                      //20
+  (n: 'dbus_timeout_restarted'; d: @dbus_timeout_restarted),     //21
 
-  (n: 'dbus_error_init'; d: @dbus_error_init),                   //20
-  (n: 'dbus_error_free'; d: @dbus_error_free),                   //21
-  (n: 'dbus_error_is_set'; d: @dbus_error_is_set),               //22
+  (n: 'dbus_error_init'; d: @dbus_error_init),                   //22
+  (n: 'dbus_error_free'; d: @dbus_error_free),                   //23
+  (n: 'dbus_error_is_set'; d: @dbus_error_is_set),               //24
   (n: 'dbus_connection_set_exit_on_disconnect';
-           d: @dbus_connection_set_exit_on_disconnect),          //23
-  (n: 'dbus_bus_get_unique_name'; d: @dbus_bus_get_unique_name), //24
-  (n: 'dbus_bus_request_name'; d: @dbus_bus_request_name),       //25
+           d: @dbus_connection_set_exit_on_disconnect),          //25
+  (n: 'dbus_bus_get_unique_name'; d: @dbus_bus_get_unique_name), //26
+  (n: 'dbus_bus_request_name'; d: @dbus_bus_request_name),       //27
   (n: 'dbus_message_new_method_call'; 
-           d: @dbus_message_new_method_call),                    //26
-  (n: 'dbus_message_get_type'; d: @dbus_message_get_type),       //27
-  (n: 'dbus_message_unref'; d: @dbus_message_unref),             //28
+           d: @dbus_message_new_method_call),                    //28
+  (n: 'dbus_message_get_type'; d: @dbus_message_get_type),       //29
+  (n: 'dbus_message_unref'; d: @dbus_message_unref),             //30
   (n: 'dbus_message_iter_init_append';
-           d: @dbus_message_iter_init_append),                   //29
-  (n: 'dbus_message_iter_init'; d: @dbus_message_iter_init),     //30
+           d: @dbus_message_iter_init_append),                   //31
+  (n: 'dbus_message_iter_init'; d: @dbus_message_iter_init),     //32
   (n: 'dbus_message_append_args_valist'; 
-           d: @dbus_message_append_args_valist),                 //31
+           d: @dbus_message_append_args_valist),                 //33
   (n: 'dbus_message_iter_append_basic';
-           d: @dbus_message_iter_append_basic),                  //32
-  (n: 'dbus_message_iter_next'; d: @dbus_message_iter_next),     //33
+           d: @dbus_message_iter_append_basic),                  //34
+  (n: 'dbus_message_iter_next'; d: @dbus_message_iter_next),     //35
   (n: 'dbus_message_iter_get_arg_type';
-           d: @dbus_message_iter_get_arg_type),                  //34
+           d: @dbus_message_iter_get_arg_type),                  //36
   (n: 'dbus_message_iter_get_basic';
-           d: @dbus_message_iter_get_basic),                     //35
+           d: @dbus_message_iter_get_basic),                     //37
   (n: 'dbus_message_iter_open_container'; 
-           d: @dbus_message_iter_open_container),                //36
+           d: @dbus_message_iter_open_container),                //38
   (n: 'dbus_message_iter_close_container'; 
-           d: @dbus_message_iter_close_container),               //37
+           d: @dbus_message_iter_close_container),               //39
   (n: 'dbus_message_iter_abandon_container'; 
-           d: @dbus_message_iter_abandon_container),             //38
+           d: @dbus_message_iter_abandon_container),             //40
   (n: 'dbus_message_iter_recurse'; 
-           d: @dbus_message_iter_recurse),                       //39
+           d: @dbus_message_iter_recurse),                       //41
   (n: 'dbus_message_iter_get_element_type';
-           d: @dbus_message_iter_get_element_type),              //40
+           d: @dbus_message_iter_get_element_type),              //42
   (n: 'dbus_message_iter_get_fixed_array';
-           d: @dbus_message_iter_get_fixed_array),               //41
+           d: @dbus_message_iter_get_fixed_array),               //43
   (n: 'dbus_connection_send_with_reply_and_block';
-           d: @dbus_connection_send_with_reply_and_block),       //42
+           d: @dbus_connection_send_with_reply_and_block),       //44
   (n: 'dbus_connection_send_with_reply'; 
-           d: @dbus_connection_send_with_reply),                 //43
-  (n: 'dbus_connection_flush'; d: @dbus_connection_flush),       //44
-  (n: 'dbus_connection_dispatch'; d: @dbus_connection_dispatch), //45
-  (n: 'dbus_pending_call_unref'; d: @dbus_pending_call_unref),   //46
+           d: @dbus_connection_send_with_reply),                 //45
+  (n: 'dbus_connection_flush'; d: @dbus_connection_flush),       //46
+  (n: 'dbus_connection_dispatch'; d: @dbus_connection_dispatch), //47
+  (n: 'dbus_pending_call_unref'; d: @dbus_pending_call_unref),   //48
   (n: 'dbus_pending_call_set_notify';
-           d: @dbus_pending_call_set_notify),                    //47
+           d: @dbus_pending_call_set_notify),                    //49
   (n: 'dbus_pending_call_steal_reply'; 
-           d: @dbus_pending_call_steal_reply)                    //48
+           d: @dbus_pending_call_steal_reply)                    //50
  );
 
 {

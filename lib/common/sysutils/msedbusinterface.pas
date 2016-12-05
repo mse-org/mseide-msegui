@@ -206,6 +206,7 @@ type
  objinfoty = record
   obj: idbusobject;
   path: pointer; //string
+  items: pointer; //stringarty
  end;
  pobjinfoty = ^objinfoty;
  
@@ -270,7 +271,6 @@ type
    fbusname: string;
    fitems: tdbusitemhashdatalist;
    fregisteringobj: pobjinfoty;
-   fregisteringinstance: tobject;
 //   fwatches: array of pwatchinfoty;
 //   ftimeouts: array of ptimeoutinfoty;
 //   fpendings: array of ppendinfoty;
@@ -288,6 +288,7 @@ type
    procedure dotimer(const sender: tobject);
    function err(): pdbuserror;
    function checkok(): boolean;
+   procedure raisedbuserror();
    procedure doidle(var again: boolean);
    procedure dopendingcallback(pending: pDBusPendingCall; user_data: pointer);
    function setupmessage(const bus_name,path,iface,method: string;
@@ -296,6 +297,9 @@ type
    procedure dounregisterobj(const aobj: pobjinfoty);
    procedure doregisteritems(const aobj: pobjinfoty);
    procedure dounregisteritems(const aobj: pobjinfoty);
+
+   procedure registerobjects();
+   
     //idbuscontroller
    procedure registerobject(const sender: idbusobject);
    procedure unregisterobject(const sender: idbusobject);
@@ -429,558 +433,6 @@ begin
                                             resulttypes,results,timeout);
  end;
 end;
-
-(*
-function dbuscallmethod(const bus_name,path,iface,method: string;
-               const paramtypes: array of dbusdataty;
-               const params: array of pointer;
-               const resulttypes: array of dbusdataty;
-               const results: array of pointer; 
-               const timeout: int32 = -1): boolean; //true if ok
-var
- m1,m2: pdbusmessage;
- pte: pdbusdataty;
- pde: ppointer;
-
- function writevalue(var iter: dbusmessageiter;
-                             var pt: pdbusdataty; var pd: ppointer): boolean;
- var
-  p1,pe: pointer;
-  p2: ppointer;
-  p3: pdbusdataty;
-  bool1: dbus_bool_t;
-  pc1: pcchar;
-  iter2: dbusmessageiter;
-  i1,i2: int32;
- label
-  oklab;
- begin
-  result:= false;
-  if pt >= pte then begin
-   error('dbuscallmethod() paramtypes and params count do not match');
-   exit;
-  end;
-  p1:= pd^;
-  case pt^ of
-// dbt_INVALID,
-   dbt_BYTE: begin
-    p1:= @bool1;
-    bool1:= 0;
-    if pboolean(pd)^ then begin
-     bool1:= 1;
-    end;
-   end;
-   dbt_BOOLEAN: begin
-   end;
-   dbt_INT16: begin
-   end;
-   dbt_UINT16: begin
-   end;
-   dbt_INT32: begin
-   end;
-   dbt_UINT32: begin
-   end;
-   dbt_INT64: begin
-   end;
-   dbt_UINT64: begin
-   end;
-   dbt_DOUBLE: begin
-   end;
-   dbt_STRING,dbt_OBJECT_PATH,dbt_SIGNATURE: begin
-    p1:= @pc1;
-    pc1:= pchar(pansistring(pd^)^);
-   end;
-   
-// dbt_UNIX_FD,
-   dbt_ARRAY: begin
-    inc(pt);
-    if pt >= pte then begin
-     error('dbuscallmethod() paramtypes and params count do not match');
-     exit;
-    end;
-    p1:= pd^; //pointer to var
-    i1:= datasizes[pt^];
-    if i1 = 0 then begin
-     error('dbuscallmethod() array item type not yet supported');
-     exit;
-    end;
-    if dbus_message_iter_open_container(@iter,dbusdatacodes[dbt_array],
-                          pchar(dbusdatastrings[pt^]),@iter2) = 0 then begin
-                     //todo: construct valid signature for nested container
-     outofmemory();
-     exit;
-    end;
-    p1:= ppointer(p1)^; //dynamic array
-    i2:= dynarraylength(p1);
-    if p1 <> nil then begin
-     pe:= p1 + i1 * i2;
-     while p1 < pe do begin
-      p2:= @p1; //restore
-      p3:= pt;  //restore
-      if not writevalue(iter2,p3,p2) then begin
-       dbus_message_iter_abandon_container(@iter,@iter2);
-       exit;
-      end;
-      inc(p1,i1);
-     end;
-    end;
-    if dbus_message_iter_close_container(@iter,@iter2) = 0 then begin
-     outofmemory();
-     exit;
-    end;
-    goto oklab;
-   end;
-// dbt_VARIANT,
-// dbt_STRUCT,
-// dbt_DICT_ENTRY
-   else begin
-    result:= false;
-    error('dbuscallmethod() paramtype not yet supported');
-    exit;
-   end;
-  end;
-
-  if dbus_message_iter_append_basic(@iter,
-                                 dbusdatacodes[pt^],p1) = 0 then begin
-   outofmemory();
-   exit;
-  end;
- oklab:
-  inc(pt);
-  inc(pd);
-  result:= true;
- end;//writevalue
-
- function readvalue(var aiter: dbusmessageiter; 
-                                 var pt: pdbusdataty; var pd: ppointer): boolean;
- var
-  i1,i2,i3,i4: int32;
-  si1: sizeint;
-  p1,p2: pointer;
-  p3: pdbusdataty;
-  p4: ppointer;
-  bool1: dbus_bool_t;
-  pc1: pcchar;
-  isstring: boolean;
-  typ1: pdynarraytypeinfo;
-  t1: dbusdataty;
-  iter2,iter3: dbusmessageiter;
-  iterpo: pdbusmessageiter;
-  
- label
-  oklab;
- begin
-  result:= false;
-  if pt >= pte then begin
-   error('dbuscallmethod() resulttypes and results count do not match');
-   exit;
-  end;
-  iterpo:= @aiter;
-  i1:= dbus_message_iter_get_arg_type(iterpo);
-  if i1 = DBUS_TYPE_INVALID then begin
-   error('dbuscallmethod() returned param count:'+
-                   inttostr(pd - ppointer(@results[0]))+
-                              ' expected:'+inttostr(length(results)));
-   exit;
-  end;
-  if i1 = DBUS_TYPE_VARIANT then begin
-   dbus_message_iter_recurse(@aiter,@iter3);   
-   iterpo:= @iter3;
-   i1:= dbus_message_iter_get_arg_type(iterpo); //nested variants?
-  end;
-  if i1 <> dbusdatacodes[pt^] then begin
-   error('dbuscallmethod() returned param does not match:'+inttostr(i1)+
-            ' expected:'+inttostr(dbusdatacodes[pt^]));
-   exit;
-  end;
-  isstring:= false;
-  p1:= pd^;
-  case i1 of
-// DBUS_TYPE_INVALID,
-   DBUS_TYPE_BYTE: begin
-   end;
-   DBUS_TYPE_BOOLEAN: begin
-    p1:= @bool1;
-   end;
-   DBUS_TYPE_INT16: begin
-   end;
-   DBUS_TYPE_UINT16: begin
-   end;
-   DBUS_TYPE_INT32: begin
-   end;
-   DBUS_TYPE_UINT32: begin
-   end;
-   DBUS_TYPE_INT64: begin
-   end;
-   DBUS_TYPE_UINT64: begin
-   end;
-   DBUS_TYPE_DOUBLE: begin
-   end;
-   DBUS_TYPE_STRING,DBUS_TYPE_OBJECT_PATH,DBUS_TYPE_SIGNATURE: begin
-    isstring:= true;
-    p1:= @pc1;
-   end;
-   
-// DBUS_TYPE_UNIX_FD,
-   DBUS_TYPE_ARRAY: begin
-    inc(pt);
-    if pt >= pte then begin
-     error('dbuscallmethod() returntypes and returns count do not match');
-     exit;
-    end;
-    i1:= datasizes[pt^];
-    if i1 = 0 then begin
-     error('dbuscallmethod() array item type not yet supported');
-     exit;
-    end;
-    i2:= dbus_message_iter_get_element_type(iterpo);
-    if i2 <> dbusdatacodes[pt^] then begin
-     error('dbuscallmethod() returned array item type does not match');
-     exit;
-    end;
-    p1:= pd^; //pointer to var
-    t1:= pt^;
-    typ1:= arraytypes[t1];
-    i3:= 0;
-    dbus_message_iter_recurse(iterpo,@iter2);
-    while dbus_message_iter_get_arg_type(@iter2) <> DBUS_TYPE_INVALID do begin
-     additem(p1^,typ1,i3);
-     p2:= ppointer(p1)^ + i1*(i3-1); //data pointer in array
-     p4:= @p2;
-     p3:= @t1;
-     if not readvalue(iter2,p3,p4) then begin
-      exit;
-     end;
-    end;
-    si1:= i3;
-    dynarraysetlength(ppointer(p1)^,typ1,1,@si1);
-    goto oklab;
-   end; //array
-// DBUS_TYPE_VARIANT,
-// DBUS_TYPE_STRUCT,
-// DBUS_TYPE_DICT_ENTRY
-   else begin
-    error('dbuscallmethod() invalid returned value');
-    exit;
-   end;     
-  end;
-  dbus_message_iter_get_basic(iterpo,p1);
-  p1:= pd^;
-  if isstring then begin
-   if pc1 = nil then begin
-    pansistring(p1)^:= '';
-   end
-   else begin
-    pansistring(p1)^:= ansistring(pc1);
-   end;
-  end
-  else begin
-   if i1 = DBUS_TYPE_BOOLEAN then begin
-    pboolean(p1)^:= bool1 <> 0;
-   end;
-  end;
- oklab:
-  dbus_message_iter_next(@aiter);
-  inc(pt);
-  inc(pd);
-  result:= true;
- end;//readvalue
- 
-var
- iter1: dbusmessageiter;
-// iter2: dbusmessageiter;
- i1,i2: int32;
- do1: double;
- p1: pointer;
- pc1: pchar;
- dbuty: dbusdataty;
- s1: string;
- bool1: dbus_bool_t;
- isstring: boolean;
- pt: pdbusdataty;
- pd: ppointer;
-label
- errorlab,errorlab1;
-begin
- result:= false;
- if checkconnect() then begin
-  m1:= dbus_message_new_method_call(pointer(bus_name),pchar(path),
-                                               pointer(iface),pchar(method));
-  if m1 = nil then begin
-   outofmemory();
-   exit;
-  end
-  else begin
-   dbus_message_iter_init_append(m1,@iter1);
-   pt:= @paramtypes[0];
-   pte:= pt + length(paramtypes);
-   pd:= @params[0];
-   pde:= pd + length(params);
-   while pd < pde do begin
-    writevalue(iter1,pt,pd);
-   end;
-   if pt <> pte then begin
-    error('dbuscallmethod() paramtypes and params count do not match');
-    goto errorlab;
-   end;
-   m2:= dbus_connection_send_with_reply_and_block(conn,m1,timeout,err);
-   if m2 = nil then begin
-    checkok();
-   end
-   else begin
-//    if dbus_message_iter_init(m2,@iter1) = 0 then begin
-//     outofmemory();
-//     goto errorlab1;
-//    end;
-    dbus_message_iter_init(m2,@iter1);
-    pt:= @resulttypes[0];
-    pte:= pt + length(resulttypes);
-    pd:= @results[0];
-    pde:= pd + length(results);
-    while pd < pde do begin
-     if not readvalue(iter1,pt,pd) then begin
-      goto errorlab1;
-     end;
-    end;
-    if dbus_message_iter_get_arg_type(@iter1) <> DBUS_TYPE_INVALID then begin
-     error('dbuscallmethod() wrong returned param count');
-     goto errorlab1;
-    end;
-    if pt <> pte then begin
-     error('dbuscallmethod() resulttypes and results count do not match');
-     goto errorlab1;
-    end;
-errorlab1:
-    dbus_message_unref(m2);
-   end;
-errorlab:
-   dbus_message_unref(m1);
-  end;
- end;
-end;
-*)
-(*
-function dbuscallmethod(const bus_name,path,iface,method: string;
-               const params: array of const;
-               const resulttypes: array of dbusdataty;
-               const results: array of pointer; 
-               const timeout: int32 = -1): boolean; //true if ok
-var
- m1,m2: pdbusmessage;
- iter1: dbusmessageiter;
- i1,i2: int32;
- do1: double;
- p1: pointer;
- pc1: pchar;
- dbuty: dbusdataty;
- s1: string;
- bool1: dbus_bool_t;
- isstring: boolean;
-label
- errorlab,errorlab1;
-begin
- result:= false;
- if high(resulttypes) <> high(results) then begin
-  error('dbuscallmethod() resulttypes and results count must be equal');
-  exit;
- end;
- if checkconnect() then begin
-  m1:= dbus_message_new_method_call(pointer(bus_name),pchar(path),
-                                               pointer(iface),pchar(method));
-  if m1 = nil then begin
-   outofmemory();
-   exit;
-  end
-  else begin
-   dbus_message_iter_init_append(m1,@iter1);
-   for i1:= 0 to high(params) do begin
-    with tvarrec(params[i1]) do begin
-     case vtype of
-      vtInteger: begin 
-       dbuty:= dbt_int32;
-       p1:= @vinteger;
-      end;
-      vtBoolean: begin 
-       dbuty:= dbt_boolean;
-       i2:= 0;
-       if vboolean then begin
-        i2:= 1;
-       end;
-       p1:= @i2;
-      end;
-      vtChar: begin 
-       dbuty:= dbt_byte;
-       p1:= @vchar;
-      end;
-      vtExtended: begin 
-       dbuty:= dbt_double;
-       do1:= vextended^;
-       p1:= @do1;
-      end;
-      vtString: begin 
-       dbuty:= dbt_string;
-       if vstring^ = '' then begin
-        pc1:= pchar('')
-       end
-       else begin
-        pc1:= @vstring^[1];
-       end;
-       p1:= @pc1;
-      end;
-//      vtPointer
-      vtPChar: begin 
-       dbuty:= dbt_string;
-       p1:= @vpchar;
-      end;
-//      vtObject
-//      vtClass
-      vtWideChar: begin 
-       dbuty:= dbt_string;
-       s1:= stringtoutf8(vwidechar);
-       p1:= pchar(s1);
-      end;
-      vtPWideChar: begin 
-       dbuty:= dbt_string;
-       s1:= stringtoutf8(vpwidechar);
-       pc1:= pchar(s1); 
-       p1:= @pc1;
-      end;
-      vtAnsiString: begin 
-       dbuty:= dbt_string;
-       pc1:= pchar(string(vansistring));
-       p1:= @pc1;
-      end;
-      vtCurrency: begin 
-       dbuty:= dbt_double;
-       do1:= vcurrency^;
-       p1:= @do1;
-      end;
-//      vtVariant
-//      vtInterface
-      vtWideString: begin 
-       dbuty:= dbt_string;
-       s1:= stringtoutf8(widestring(vwidestring));
-       pc1:= pchar(s1);
-       p1:= @pc1;
-      end;
-      vtInt64: begin 
-       dbuty:= dbt_int64;
-       p1:= vint64;
-      end;
-      vtQWord: begin 
-       dbuty:= dbt_uint64;
-       p1:= vqword;
-      end;
-      vtUnicodeString: begin 
-       dbuty:= dbt_string;
-       s1:= stringtoutf8(unicodestring(vunicodestring));
-       pc1:= pchar(s1);
-       p1:= @pc1;
-      end;
-      else begin
-       error('dbuscallmethod() invalid parameter');
-       goto errorlab;
-      end;
-     end;
-    end;
-    if dbus_message_iter_append_basic(@iter1,
-                                   dbusdatacodes[dbuty],p1) = 0 then begin
-     outofmemory();
-     goto errorlab;
-    end;
-   end;
-   m2:= dbus_connection_send_with_reply_and_block(conn,m1,timeout,err);
-   if m2 = nil then begin
-    checkok();
-   end
-   else begin
-    if dbus_message_iter_init(m2,@iter1) <> 0 then begin
-     i1:= 0;
-     while true do begin
-      i2:= dbus_message_iter_get_arg_type(@iter1);
-      if i2 = DBUS_TYPE_INVALID then begin
-       result:= i1 = length(results);
-       if not result then begin
-        error('dbuscallmethod() returned param count:'+inttostr(i1)+
-                                  ' expected:'+inttostr(length(results)));
-       end;
-       break;
-      end;
-      if i1 > high(results) then begin
-       error('dbuscallmethod() wrong returned param count');
-       goto errorlab1;
-      end;
-      if i2 <> dbusdatacodes[resulttypes[i1]] then begin
-       error('dbuscallmethod() returned param does not match:'+inttostr(i2)+
-                ' expected:'+inttostr(dbusdatacodes[resulttypes[i1]]));
-       goto errorlab1;
-      end;
-      isstring:= false;
-      p1:= results[i1];
-      case i2 of
-//       DBUS_TYPE_INVALID,
-       DBUS_TYPE_BYTE: begin
-        p1:= @bool1;
-       end;
-       DBUS_TYPE_BOOLEAN: begin
-       end;
-       DBUS_TYPE_INT16: begin
-       end;
-       DBUS_TYPE_UINT16: begin
-       end;
-       DBUS_TYPE_INT32: begin
-       end;
-       DBUS_TYPE_UINT32: begin
-       end;
-       DBUS_TYPE_INT64: begin
-       end;
-       DBUS_TYPE_UINT64: begin
-       end;
-       DBUS_TYPE_DOUBLE: begin
-       end;
-       DBUS_TYPE_STRING,DBUS_TYPE_OBJECT_PATH,DBUS_TYPE_SIGNATURE: begin
-        isstring:= true;
-        p1:= @pc1;
-       end;
-       
-//       DBUS_TYPE_UNIX_FD,
-//       DBUS_TYPE_ARRAY,
-//       DBUS_TYPE_VARIANT,
-//       DBUS_TYPE_STRUCT,
-//       DBUS_TYPE_DICT_ENTRY
-       else begin
-        error('dbuscallmethod() invalid returned value');
-        goto errorlab1;
-       end;     
-      end;
-      dbus_message_iter_get_basic(@iter1,p1);
-      p1:= results[i1];
-      if isstring then begin
-       if pc1 = nil then begin
-        pansistring(p1)^:= '';
-       end
-       else begin
-        pansistring(p1)^:= ansistring(pc1);
-       end;
-      end
-      else begin
-       if i1 = DBUS_TYPE_BYTE then begin
-        pboolean(p1)^:= bool1 <> 0;
-       end;
-      end;
-      dbus_message_iter_next(@iter1);
-      inc(i1);
-     end;
-    end;
-errorlab1:
-    dbus_message_unref(m2);
-   end;
-errorlab:
-   dbus_message_unref(m1);
-  end;
- end;
-end;
-*)
 
 function addwatch(watch: pDBusWatch; data: pointer): dbus_bool_t
                                     {$ifdef wincall}stdcall{$else}cdecl{$endif};
@@ -1129,6 +581,7 @@ begin
  with result^ do begin
   obj:= aobj;
   path:= nil;
+  items:= nil;
  end;
 end;
 
@@ -1170,6 +623,7 @@ begin
     fowner.dounregisterobj(@data.obj);
     with data.obj do begin
      string(path):= '';
+     stringarty(items):= nil;
     end;
    end;
   end;
@@ -1486,35 +940,102 @@ oklab:
  result:= m1;
 end;
 
-procedure tdbuscontroller.registeritem(const apath: string;
-               const ahandler: messageeventty);
+function objectpathhandlertrampoline(connection: pDBusConnection;
+       message: pDBusMessage; user_data: pointer): DBusHandlerResult
+                                    {$ifdef wincall}stdcall{$else}cdecl{$endif};
 begin
+ result:= DBUS_HANDLER_RESULT_HANDLED;
+end;
+
+procedure unregisterobjectpath(connection: pDBusConnection;
+                                                      user_data: pointer)
+                                    {$ifdef wincall}stdcall{$else}cdecl{$endif};
+begin
+ freemem(user_data);
+end;
+
+const
+ dbuscallbackvtable: DBusObjectPathVTable = (
+  unregister_function: @unregisterobjectpath; 
+  message_function: @objectpathhandlertrampoline; 
+  dbus_internal_pad1: nil;
+  dbus_internal_pad2: nil;
+  dbus_internal_pad3: nil;
+  dbus_internal_pad4: nil;
+ );
+
+type
+ callbackinfoty = record
+  handler: messageeventty;
+ end;
+ pcallbackinfoty = ^callbackinfoty;
+ 
+procedure tdbuscontroller.registeritem(const apath: string;
+                                           const ahandler: messageeventty);
+var
+ p1: pcallbackinfoty;
+ s1: string;
+begin
+ p1:= getmem(sizeof(callbackinfoty));
  with fregisteringobj^ do begin
-  string(path):= apath;
+  s1:= pchar(string(path)+'/'+apath);
+  if dbus_connection_try_register_object_path(fconn,
+               pchar(s1),
+               @dbuscallbackvtable,p1,err) <> 0 then begin
+   with p1^ do begin
+    handler:= ahandler;
+   end;
+   additem(stringarty(items),apath);
+  end
+  else begin
+   freemem(p1);
+   raisedbuserror();
+  end;
  end;
 end;
 
 procedure tdbuscontroller.doregisteritems(const aobj: pobjinfoty);
 begin
  fregisteringobj:= aobj;
- fregisteringinstance:= aobj^.obj.getinstance();
  try
   aobj^.obj.registeritems(idbuscontroller(self));
  finally
   fregisteringobj:= nil;
-  fregisteringinstance:= nil;
  end;
 end;
 
 procedure tdbuscontroller.dounregisteritems(const aobj: pobjinfoty);
+var
+ p1,pe: pstring;
+ s1,s2: string;
 begin
- aobj^.obj.registeritems(idbuscontroller(self));
+ p1:= aobj^.items;
+ s1:= string(aobj^.path)+'/';
+ pe:= p1 + length(stringarty(aobj^.items));
+ while p1 < pe do begin
+  s2:= s1+p1^;
+  dbus_connection_unregister_object_path(fconn,pchar(s2));
+  inc(p1);
+ end;
+end;
+
+procedure tdbuscontroller.registerobjects();
+var
+ i1: int32;
+ p1: pdbusitemty;
+begin
+ for i1:= 0 to fitems.count - 1 do begin
+  p1:= pointer(fitems.next());
+  if p1^.data.kind = dbk_obj then begin
+   doregisteritems(@p1^.data.obj);
+  end;
+ end;
 end;
 
 procedure tdbuscontroller.dounregisterobj(const aobj: pobjinfoty);
 begin
- if connected then begin
-//  aobj^.obj.unregisteritems(idbuscontroller(self)); 
+ if fconn <> nil then begin
+  dounregisteritems(aobj);
  end;
 end;
 
@@ -1839,6 +1360,7 @@ begin
    dbus_connection_set_timeout_functions(fconn,@addtimeout,@removetimeout,
                                          @timeouttoggled,self,nil);
    application.registeronidle(@doidle);
+   registerobjects();
    result:= true;
   end;
  except
@@ -1988,6 +1510,13 @@ begin
  end;
 end;
 
+procedure tdbuscontroller.raisedbuserror();
+begin
+ if not checkok() then begin
+  raiseerror(dbuslasterror);
+ end;
+end;
+
 procedure tdbuscontroller.doidle(var again: boolean);
 begin
  if fconn <> nil then begin
@@ -2061,7 +1590,7 @@ end;
 
 function tdbusobject.getpath(): string;
 begin
- result:= '/';
+ result:= '';
 end;
 {
 procedure tdbusobject.unregisteritems(const sender: idbuscontroller);
