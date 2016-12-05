@@ -116,6 +116,35 @@ const
   DBUS_TYPE_DICT_ENTRY_AS_STRING
  );
  
+type
+ messageeventty = procedure(const amessage: pdbusmessage) of object;
+ 
+ idbuscontroller = interface;
+ idbusobject = interface(inullinterface)
+  function getinstance: tobject;
+  procedure registeritems(const sender: idbuscontroller);
+  function getpath(): string;
+//  procedure unregisteritems(const sender: idbuscontroller);
+ end;
+ idbuscontroller = interface(inullinterface)
+  procedure registerobject(const sender: idbusobject);
+  procedure unregisterobject(const sender: idbusobject);
+  procedure registeritem(const apath: string; const ahandler: messageeventty);
+ end;
+ 
+ tdbusobject = class(tobject,idbusobject)
+  protected
+   fcontroller: idbuscontroller;
+    //idbusobject
+   function getinstance(): tobject;
+   procedure registeritems(const sender: idbuscontroller) virtual;
+   function getpath(): string virtual;
+//   procedure unregisteritems(const sender: idbuscontroller) virtual;
+  public
+   constructor create(const acontroller: idbuscontroller = nil);
+   destructor destroy(); override;
+ end;
+  
 var
  dbuslasterror: string;
  
@@ -173,7 +202,14 @@ type
   pending: pdbuspendingcall;
  end;
  plinkinfoty = ^linkinfoty;
- itemkindty = (dbk_watch,dbk_timeout,dbk_pending,dbk_link);
+ 
+ objinfoty = record
+  obj: idbusobject;
+  path: pointer; //string
+ end;
+ pobjinfoty = ^objinfoty;
+ 
+ itemkindty = (dbk_watch,dbk_timeout,dbk_pending,dbk_link,dbk_obj);
  
  dbusinfoty = record
   case kind: itemkindty of
@@ -181,6 +217,7 @@ type
    dbk_timeout: (timeout: timeoutinfoty);
    dbk_pending: (pending: pendinginfoty);
    dbk_link: (link: linkinfoty);
+   dbk_obj: (obj: objinfoty);
  end;
  pdbusinfoty = ^dbusinfoty;
  dbusitemty = record
@@ -189,12 +226,15 @@ type
  end;
  pdbusitemty = ^dbusitemty;
 
+ tdbuscontroller = class;
+ 
  tdbusitemhashdatalist = class(tpointerhashdatalist,iobjectlink)
   private
    fwatches: card32arty;
    funlinking: boolean;
    fserial: card32;
   protected
+   fowner: tdbuscontroller;
    procedure finalizeitem(var aitemdata) override;
    procedure dopollcallback(const aflags: pollflagsty; const adata: pointer);
    function findwatch(const key: pdbuswatch): pwatchinfoty;
@@ -209,25 +249,28 @@ type
    procedure objevent(const sender: iobjectlink; const event: objecteventty);
    function getinstance: tobject;
   public
-   constructor create();
+   constructor create(const aowner: tdbuscontroller);
    function addwatch(const key: pdbuswatch): pwatchinfoty;
    function addlink(const alink: idbusclient;
                             const apending: pdbuspendingcall): plinkinfoty;
    function addpending(const apending: pdbuspendingcall;
                                const alink: idbusresponse;
                                var aserial: card32): ppendinginfoty;
+   function addobject(const aobj: idbusobject): pobjinfoty;
 //   function addpending(const aitem: pdbuspendingcall): ppendinginfoty;
 //   procedure freeitems();
    procedure handlewatches();
  end;
   
- tdbuscontroller = class(tobject)
+ tdbuscontroller = class(tobject,idbuscontroller)
   private
    fconn: pdbusconnection;
    ferr: dbuserror;
    fbusid: string;
    fbusname: string;
    fitems: tdbusitemhashdatalist;
+   fregisteringobj: pobjinfoty;
+   fregisteringinstance: tobject;
 //   fwatches: array of pwatchinfoty;
 //   ftimeouts: array of ptimeoutinfoty;
 //   fpendings: array of ppendinfoty;
@@ -250,9 +293,13 @@ type
    function setupmessage(const bus_name,path,iface,method: string;
                              const paramtypes: array of dbusdataty;
                              const params: array of pointer): pdbusmessage;
-//   procedure dofreependingcallback(memory: pointer);
-//   procedure dopollcallback(const aflags: pollflagsty; const adata: pointer);
-
+   procedure dounregisterobj(const aobj: pobjinfoty);
+   procedure doregisteritems(const aobj: pobjinfoty);
+   procedure dounregisteritems(const aobj: pobjinfoty);
+    //idbuscontroller
+   procedure registerobject(const sender: idbusobject);
+   procedure unregisterobject(const sender: idbusobject);
+   procedure registeritem(const apath: string; const ahandler: messageeventty);
   public
    constructor create();
    destructor destroy(); override;
@@ -280,6 +327,15 @@ var
 // busid: string;
 // busname: string;
  fdbc: tdbuscontroller;
+ dbuslibinited: boolean;
+ 
+procedure initdbuslib();
+begin
+ if not dbuslibinited then begin
+  initializedbus([]);
+  dbuslibinited:= true;
+ end;
+end;
 
 procedure raiseerror(const message: string);
 begin
@@ -301,95 +357,18 @@ begin
  result:= (fdbc <> nil) and fdbc.connected;
 end;
 
-(*
-function checkconnect(): boolean; //true if ok
-begin
- result:= conn <> nil; //todo: try reconnect
- if not result then begin
-  error('DBus not active');
- end;
-end;
-*)
-{
-function err(): pdbuserror;
-begin
- if dbus_error_is_set(@ferr) <> 0 then begin
-  dbus_error_free(@ferr);
- end;
- result:= @ferr;
-end;
-
-function checkok(): boolean;
-begin
- result:= dbus_error_is_set(@ferr) = 0;
- if not result then begin
-  dbuslasterror:= ferr.message;
- end;
-end;
-}
-(*
-function dbusconnect(): boolean; //true if ok
-var
- i1,i2: int32;
- s1,s2: string;
-begin
- if conn <> nil then begin
-  result:= true;
- end;
- result:= false;
- try
-  initializedbus([]);
-  dbus_error_init(@ferr);
-  conn:= dbus_bus_get_private(dbus_bus_session,err);
-  if conn = nil then begin
-   checkok();
-  end
-  else begin
-   dbus_connection_set_exit_on_disconnect(conn,0);
-   busid:= dbus_bus_get_unique_name(conn);
-   s1:= msebusname+'-'+inttostr(sys_getpid())+'-';
-   i1:= 0;
-   repeat
-    s2:= s1+inttostr(i1);
-    i2:= dbus_bus_request_name(conn,pchar(s2),
-                                 DBUS_NAME_FLAG_DO_NOT_QUEUE,err());
-    inc(i1);
-    if (i1 > 100) or (i2 < 0)  then begin
-     dbusdisconnect();
-     exit;
-    end;
-   until (i2 = DBUS_REQUEST_NAME_REPLY_PRIMARY_OWNER) or
-           (i2 = DBUS_REQUEST_NAME_REPLY_ALREADY_OWNER); //should not happen
-   busname:= s2;
-   result:= true;
-  end;
- except
-  on e: exception do begin
-   dbuslasterror:= e.message;
-  end;
- end;
-end;
-*)
-function dbusconnect(): boolean; //true if ok
+function dbuscontroller(): tdbuscontroller;
 begin
  if fdbc = nil then begin
   fdbc:= tdbuscontroller.create;
  end;
- result:= fdbc.connect();
+ result:= fdbc;
 end;
-(*
-procedure dbusdisconnect();
+
+function dbusconnect(): boolean; //true if ok
 begin
- if conn <> nil then begin
-  err(); //free ferr
-  dbus_connection_close(conn);
-  conn:= nil;
-  busid:= '';
-  busname:= '';
- end;
- releasedbus();
+ result:= dbuscontroller.connect();
 end;
-*)
 
 procedure dbusdisconnect();
 begin
@@ -1081,8 +1060,9 @@ end;
 
 { tdbusitemhashdatalist }
 
-constructor tdbusitemhashdatalist.create();
+constructor tdbusitemhashdatalist.create(const aowner: tdbuscontroller);
 begin
+ fowner:= aowner;
  inherited create(sizeof(dbusitemty));
  include(fstate,hls_needsfinalize);
 end;
@@ -1138,6 +1118,20 @@ begin
  end;
 end;
 
+function tdbusitemhashdatalist.addobject(
+                                 const aobj: idbusobject): pobjinfoty;
+var
+ p1: pdbusinfoty;
+begin
+ p1:= add(aobj);
+ p1^.kind:= dbk_obj;
+ result:= @p1^.obj;
+ with result^ do begin
+  obj:= aobj;
+  path:= nil;
+ end;
+end;
+
 procedure tdbusitemhashdatalist.finalizeitem(var aitemdata);
 var
  p1: pdbusinfoty;
@@ -1170,6 +1164,12 @@ begin
      if (p1 <> nil) and (p1^.kind = dbk_link) then begin
       p1^.link.pending:= nil;
      end;
+    end;
+   end;
+   dbk_obj: begin
+    fowner.dounregisterobj(@data.obj);
+    with data.obj do begin
+     string(path):= '';
     end;
    end;
   end;
@@ -1313,7 +1313,7 @@ end;
 
 constructor tdbuscontroller.create();
 begin
- fitems:= tdbusitemhashdatalist.create();
+ fitems:= tdbusitemhashdatalist.create(self);
  inherited;
 end;
 
@@ -1484,6 +1484,56 @@ errorlab:
  end;
 oklab:
  result:= m1;
+end;
+
+procedure tdbuscontroller.registeritem(const apath: string;
+               const ahandler: messageeventty);
+begin
+ with fregisteringobj^ do begin
+  string(path):= apath;
+ end;
+end;
+
+procedure tdbuscontroller.doregisteritems(const aobj: pobjinfoty);
+begin
+ fregisteringobj:= aobj;
+ fregisteringinstance:= aobj^.obj.getinstance();
+ try
+  aobj^.obj.registeritems(idbuscontroller(self));
+ finally
+  fregisteringobj:= nil;
+  fregisteringinstance:= nil;
+ end;
+end;
+
+procedure tdbuscontroller.dounregisteritems(const aobj: pobjinfoty);
+begin
+ aobj^.obj.registeritems(idbuscontroller(self));
+end;
+
+procedure tdbuscontroller.dounregisterobj(const aobj: pobjinfoty);
+begin
+ if connected then begin
+//  aobj^.obj.unregisteritems(idbuscontroller(self)); 
+ end;
+end;
+
+procedure tdbuscontroller.registerobject(const sender: idbusobject);
+var
+ p1: pobjinfoty;
+begin
+ p1:= fitems.addobject(sender);
+ with p1^ do begin
+  string(path):= sender.getpath();
+ end;
+ if connected then begin
+  doregisteritems(p1);
+ end;
+end;
+
+procedure tdbuscontroller.unregisterobject(const sender: idbusobject);
+begin
+ fitems.delete(sender);
 end;
 
 function tdbuscontroller.dbuscallmethod(const returnedto: idbusresponse;
@@ -1759,7 +1809,7 @@ begin
  end;
  result:= false;
  try
-  initializedbus([]);
+  initdbuslib();
   dbus_error_init(@ferr);
   fconn:= dbus_bus_get_private(dbus_bus_session,err);
   if fconn = nil then begin
@@ -1975,6 +2025,48 @@ procedure tdbuscontroller.dofreependingcallback(memory: pointer);
 begin
  removeitem(pointerarty(fpendings),memory);
  freemem(memory);
+end;
+}
+{ tdbusobject }
+
+constructor tdbusobject.create(const acontroller: idbuscontroller);
+var
+ b1: boolean;
+begin
+ fcontroller:= acontroller;
+ if fcontroller = nil then begin
+  fcontroller:= idbuscontroller(dbuscontroller);
+ end;
+ inherited create;
+ fcontroller.registerobject(idbusobject(self));
+end;
+
+destructor tdbusobject.destroy();
+begin
+ if fcontroller <> nil then begin
+  fcontroller.unregisterobject(idbusobject(self));
+ end;
+ inherited;
+end;
+
+function tdbusobject.getinstance(): tobject;
+begin
+ result:= self;
+end;
+
+procedure tdbusobject.registeritems(const sender: idbuscontroller);
+begin
+ //dummy
+end;
+
+function tdbusobject.getpath(): string;
+begin
+ result:= '/';
+end;
+{
+procedure tdbusobject.unregisteritems(const sender: idbuscontroller);
+begin
+ //dummy
 end;
 }
 initialization
