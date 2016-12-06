@@ -117,7 +117,7 @@ const
  );
  
 type
- messageeventty = procedure(const amessage: pdbusmessage) of object;
+ messageeventty = procedure(const amessage: pdbusmessage; var handled: boolean) of object;
  
  idbuscontroller = interface;
  idbusobject = interface(inullinterface)
@@ -167,11 +167,15 @@ function dbuscallmethod(const bus_name,path,iface,method: string;
                const resulttypes: array of dbusdataty;
                const results: array of pointer;
                const timeout: int32 = -1): boolean; //blocking, true if ok
+               
+{$ifdef mse_dumpdbus}
+function dbusdumpmessage(const amessage: pdbusmessage): string;
+{$endif}
 
 implementation
 uses
  msestrings,msesysintf,msearrayutils,msesys,mseguiintf,msetimer,
- mseapplication;
+ msefloattostr,mseapplication;
 
 const
  msebusname = 'mse.msegui.app';
@@ -297,8 +301,12 @@ type
    procedure dounregisterobj(const aobj: pobjinfoty);
    procedure doregisteritems(const aobj: pobjinfoty);
    procedure dounregisteritems(const aobj: pobjinfoty);
-
+   procedure unregisteritem(const apath: string);
+   procedure rootfallback(const amessage: pdbusmessage; var handled: boolean);
    procedure registerobjects();
+   procedure unregisterobjects();
+   procedure registerfallback(const apath: string; 
+                                        const ahandler: messageeventty);
    
     //idbuscontroller
    procedure registerobject(const sender: idbusobject);
@@ -410,6 +418,215 @@ begin
  end;
 end;
 
+{$ifdef mse_dumpdbus}
+function dbusdumpmessage(const amessage: pdbusmessage): string;
+var
+ level: int32;
+ 
+ function nilstr(const astr: pcchar): string;
+ begin
+  if astr = nil then begin
+   result:= 'NIL';
+  end
+  else begin
+   result:= string(astr);
+  end;
+ end; //nilstr
+ 
+ function dumptype(const t: int32): string;
+ begin
+  case t of
+   DBUS_TYPE_INVALID: result:= '';
+   DBUS_TYPE_BYTE: result:= 'BYTE';
+   DBUS_TYPE_BOOLEAN: result:= 'BOOLEAN';
+   DBUS_TYPE_INT16: result:= 'INT16';
+   DBUS_TYPE_UINT16: result:= 'UINT16';
+   DBUS_TYPE_INT32: result:= 'INT32';
+   DBUS_TYPE_UINT32: result:= 'UINT32';
+   DBUS_TYPE_INT64: result:= 'INT64';
+   DBUS_TYPE_UINT64: result:= 'UINT64';
+   DBUS_TYPE_DOUBLE: result:= 'DOUBLE';
+   DBUS_TYPE_STRING: result:= 'STRING';
+   DBUS_TYPE_OBJECT_PATH: result:= 'OBJECT_PATH';
+   DBUS_TYPE_SIGNATURE: result:= 'SIGNATURE';
+   DBUS_TYPE_UNIX_FD: result:= 'UNIX_FD';
+   DBUS_TYPE_ARRAY: result:= 'ARRAY';
+   DBUS_TYPE_VARIANT: result:= 'VARIANT';
+   DBUS_TYPE_STRUCT: result:= 'STRUCT';
+   DBUS_TYPE_DICT_ENTRY: result:= 'DICT_ENTRY';
+  end;
+ end;
+
+ function dumpdata(const t: int32; iterpo: pdbusmessageiter): string;
+ var
+  b1: byte;
+  bool1: dbus_bool_t;
+  i16: int16;
+  c16: card16;
+  i32: int32;
+  c32: card32;
+  i64: int64;
+  c64: card64;
+  f64: flo64;
+  pc1: pcchar;
+  
+ begin
+  result:= '';
+  case t of
+   DBUS_TYPE_INVALID: begin end;
+   DBUS_TYPE_BYTE: begin
+    dbus_message_iter_get_basic(iterpo,@b1);
+    result:= inttostr(b1);
+   end;
+   DBUS_TYPE_BOOLEAN: begin
+    dbus_message_iter_get_basic(iterpo,@bool1);
+    result:= inttostr(bool1);
+   end;
+   DBUS_TYPE_INT16: begin;
+    dbus_message_iter_get_basic(iterpo,@i16);
+    result:= inttostr(i16);
+   end; 
+   DBUS_TYPE_UINT16: begin
+    dbus_message_iter_get_basic(iterpo,@c16);
+    result:= inttostr(c16);
+   end;
+   DBUS_TYPE_INT32: begin
+    dbus_message_iter_get_basic(iterpo,@i32);
+    result:= inttostr(i32);
+   end;
+   DBUS_TYPE_UINT32: begin
+    dbus_message_iter_get_basic(iterpo,@c32);
+    result:= inttostr(c32);
+   end;
+   DBUS_TYPE_INT64: begin
+    dbus_message_iter_get_basic(iterpo,@i64);
+    result:= inttostr(i64);
+   end;
+   DBUS_TYPE_UINT64: begin
+    dbus_message_iter_get_basic(iterpo,@c64);
+    result:= inttostr(c64);
+   end;
+   DBUS_TYPE_DOUBLE: begin
+    dbus_message_iter_get_basic(iterpo,@f64);
+    result:= string(doubletostring(f64,-1));
+   end;
+   DBUS_TYPE_STRING,
+   DBUS_TYPE_OBJECT_PATH,
+   DBUS_TYPE_SIGNATURE: begin
+    dbus_message_iter_get_basic(iterpo,@pc1);
+    result:= '"'+string(pc1)+'"';
+   end;
+   DBUS_TYPE_UNIX_FD: begin end;
+   DBUS_TYPE_ARRAY:  begin end;
+   DBUS_TYPE_VARIANT:  begin end;
+   DBUS_TYPE_STRUCT:  begin end;
+   DBUS_TYPE_DICT_ENTRY:  begin end;
+  end;
+ end;
+ 
+ function readvalue(var aiter: dbusmessageiter): string;
+ var
+  i1,i2: int32;
+  iter2,iter3: dbusmessageiter;
+  iterpo: pdbusmessageiter;
+  first: boolean;
+  s1,s2: string;
+ label
+  endlab;  
+ begin
+  inc(level);
+  s2:= charstring(' ',level);
+  result:= s2;
+  iterpo:= @aiter;
+  i1:= dbus_message_iter_get_arg_type(iterpo);
+  if i1 = DBUS_TYPE_INVALID then begin
+   goto endlab;
+  end;
+  if i1 = DBUS_TYPE_VARIANT then begin
+   dbus_message_iter_recurse(@aiter,@iter3);   
+   iterpo:= @iter3;
+   i1:= dbus_message_iter_get_arg_type(iterpo); //nested variants?
+  end;
+  case i1 of
+   DBUS_TYPE_ARRAY: begin
+    i2:= dbus_message_iter_get_element_type(iterpo);
+    dbus_message_iter_recurse(iterpo,@iter2);
+    result:= dumptype(i2)+'[';
+    first:= true;
+    while dbus_message_iter_get_arg_type(@iter2) <> DBUS_TYPE_INVALID do begin
+     s1:= readvalue(iter2);
+     if s1 = '' then begin
+      if not first then begin
+       setlength(result,length(result)-1); //remove last comma
+      end;
+      result:= result+']';
+      break;
+     end
+     else begin
+      result:= result+s1+',';
+     end;
+     first:= false;
+    end;
+   end; //array
+// DBUS_TYPE_VARIANT, //todo
+// DBUS_TYPE_STRUCT,
+// DBUS_TYPE_DICT_ENTRY
+   else begin
+    result:= result+dumptype(i1)+' '+dumpdata(i1,iterpo);
+   end;     
+  end;
+  dbus_message_iter_next(@aiter);
+  
+endlab:
+  if result <> s2 then begin
+   result:= result+lineend;
+  end
+  else begin
+   result:= '';
+  end;
+ end;//readvalue
+
+var
+ iter1: dbusmessageiter;
+ s1: string;
+
+begin
+ level:= 0;
+ result:= '*';
+ if amessage = nil then begin
+  result:= result+'NIL';
+ end
+ else begin
+  dbus_message_iter_init(amessage,@iter1);
+  case dbus_message_get_type(amessage) of
+   DBUS_MESSAGE_TYPE_INVALID: begin
+    result:= result+'INVALID';
+   end;
+   DBUS_MESSAGE_TYPE_METHOD_CALL: begin
+    result:= result+'METHODCALL';
+   end;
+   DBUS_MESSAGE_TYPE_METHOD_RETURN: begin
+    result:= result+'METHOD_RETURN';
+   end;
+   DBUS_MESSAGE_TYPE_ERROR: begin
+    result:= result+'ERROR';
+   end;
+   DBUS_MESSAGE_TYPE_SIGNAL: begin
+    result:= result+'SIGNAL';
+   end;
+  end;
+  result:= result+' '+nilstr(dbus_message_get_destination(amessage))+' '+
+                      nilstr(dbus_message_get_path(amessage))+' '+
+                      nilstr(dbus_message_get_interface(amessage))+' '+
+                      nilstr(dbus_message_get_member(amessage))+' '+lineend;
+  repeat
+   s1:= readvalue(iter1);
+   result:= result+s1;
+  until s1 = '';
+ end;
+end;
+{$endif} 
+
 function dbusreadmessage(const amessage: pdbusmessage;
                const resulttypes: array of dbusdataty;
                const results: array of pointer): boolean; //true if ok
@@ -451,15 +668,7 @@ procedure removewatch(watch: pDBusWatch; data: pointer)
 begin
  tdbuscontroller(data).doremovewatch(watch);
 end;
-(*
-procedure freewatch(memory: pointer)
-                                    {$ifdef wincall}stdcall{$else}cdecl{$endif};
-begin
- if memory <> nil then begin
-  freemem(memory);
- end;
-end;
-*)
+
 function addtimeout(timeout: pDBusTimeout; data: pointer): dbus_bool_t
                                     {$ifdef wincall}stdcall{$else}cdecl{$endif};
 begin
@@ -477,13 +686,7 @@ procedure removetimeout(timeout: pDBusTimeout; data: pointer)
 begin
  tdbuscontroller(data).doremovetimeout(timeout);
 end;
-(*
-procedure freetimeout(memory: pointer)
-                                    {$ifdef wincall}stdcall{$else}cdecl{$endif};
-begin
- tsimpletimer(memory).free();
-end;
-*)
+
 procedure pendingcallback(pending: pDBusPendingCall; user_data: pointer)
                                     {$ifdef wincall}stdcall{$else}cdecl{$endif};
 begin
@@ -494,15 +697,7 @@ begin
   fdbc.dopendingcallback(pending,user_data);
  end;
 end;
-(*
-procedure freependingcallback(memory: pointer);
-                                    {$ifdef wincall}stdcall{$else}cdecl{$endif};
-begin
- if fdbc <> nil then begin
-  fdbc.dofreependingcallback(memory);
- end;
-end;
-*)
+
 procedure pollcallback(const aflags: pollflagsty; const adata: pointer);
 begin
  if fdbc <> nil then begin
@@ -714,24 +909,6 @@ begin
  result:= self;
 end;
 
-{
-function tdbusitemhashdatalist.addpending(
-                          const aitem: pdbuspendingcall): ppendinginfoty;
-begin
-end;
-}
-{
-procedure tdbusitemhashdatalist.freeitems();
-var
- i1: int32;
- p1: pdbusitemty;
-begin
- last();
- for i1:= 0 to count-1 do begin
-  p1:= pointer(next());
- end;
-end;
-}
 const
  watchflags: array[pollflagty] of card32 = (
   DBUS_WATCH_READABLE, //pf_in,  //POLLIN =   $001;
@@ -940,11 +1117,29 @@ oklab:
  result:= m1;
 end;
 
+type
+ callbackinfoty = record
+  handler: messageeventty;
+ end;
+ pcallbackinfoty = ^callbackinfoty;
+
 function objectpathhandlertrampoline(connection: pDBusConnection;
        message: pDBusMessage; user_data: pointer): DBusHandlerResult
                                     {$ifdef wincall}stdcall{$else}cdecl{$endif};
+var
+ b1: boolean;
 begin
- result:= DBUS_HANDLER_RESULT_HANDLED;
+ with pcallbackinfoty(user_data)^ do begin
+  b1:= false;
+  handler(message,b1);
+  if b1 then begin
+   result:= DBUS_HANDLER_RESULT_HANDLED;
+   dbus_message_unref(message);
+  end
+  else begin
+   result:= DBUS_HANDLER_RESULT_NOT_YET_HANDLED;
+  end;
+ end;
 end;
 
 procedure unregisterobjectpath(connection: pDBusConnection;
@@ -964,11 +1159,25 @@ const
   dbus_internal_pad4: nil;
  );
 
-type
- callbackinfoty = record
-  handler: messageeventty;
+
+procedure tdbuscontroller.registerfallback(const apath: string;
+               const ahandler: messageeventty);
+var
+ p1: pcallbackinfoty;
+begin
+ p1:= getmem(sizeof(callbackinfoty));
+ if dbus_connection_try_register_fallback(fconn,
+              pchar(apath),
+              @dbuscallbackvtable,p1,err) <> 0 then begin
+  with p1^ do begin
+   handler:= ahandler;
+  end;
+ end
+ else begin
+  freemem(p1);
+  raisedbuserror();
  end;
- pcallbackinfoty = ^callbackinfoty;
+end;
  
 procedure tdbuscontroller.registeritem(const apath: string;
                                            const ahandler: messageeventty);
@@ -1019,17 +1228,36 @@ begin
  end;
 end;
 
+procedure tdbuscontroller.unregisteritem(const apath: string);
+begin
+ dbus_connection_unregister_object_path(fconn,pchar(apath));
+end;
+
+procedure tdbuscontroller.rootfallback(
+              const amessage: pdbusmessage; var handled: boolean);
+begin
+{$ifdef mse_dumpdbus}
+ write(dbusdumpmessage(amessage));
+{$endif}
+end;
+
 procedure tdbuscontroller.registerobjects();
 var
  i1: int32;
  p1: pdbusitemty;
 begin
+ registerfallback('/',@rootfallback);
  for i1:= 0 to fitems.count - 1 do begin
   p1:= pointer(fitems.next());
   if p1^.data.kind = dbk_obj then begin
    doregisteritems(@p1^.data.obj);
   end;
  end;
+end;
+
+procedure tdbuscontroller.unregisterobjects();
+begin
+ unregisteritem('/');
 end;
 
 procedure tdbuscontroller.dounregisterobj(const aobj: pobjinfoty);
@@ -1373,6 +1601,7 @@ end;
 procedure tdbuscontroller.disconnect();
 begin
  if fconn <> nil then begin
+  unregisterobjects();
   dbus_connection_close(fconn);
   fitems.clear();
   if not applicationdestroyed() then  begin
@@ -1559,8 +1788,6 @@ end;
 { tdbusobject }
 
 constructor tdbusobject.create(const acontroller: idbuscontroller);
-var
- b1: boolean;
 begin
  fcontroller:= acontroller;
  if fcontroller = nil then begin
