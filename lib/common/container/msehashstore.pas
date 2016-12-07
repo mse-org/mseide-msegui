@@ -53,6 +53,7 @@ type
    function add(const idents: identvecty): pointer;
    function find(const idents: identvecty): pointer;
    procedure delete(const idents: identvecty);
+   procedure delete(const item: hashoffsetty); //offset of datapo
  end;
 
 implementation
@@ -179,24 +180,31 @@ nextlab:
  end;
 end;
 
+procedure thashstore.delete(const item: hashoffsetty);
+var
+ p1: pelementhashdataty;
+begin
+ p1:= getdatapo(item-sizeof(elementhashdataty));
+ while true do begin
+  dec(p1^.data.header.refcount);
+  if p1^.data.header.refcount > 0 then begin
+   break;
+  end;
+  internaldeleteitem(phashdataty(pointer(p1))); //memory still valid
+  if p1^.data.header.parent = 0 then begin
+   break;
+  end;
+  p1:= fdata+p1^.data.header.parent;
+ end;
+end;
+
 procedure thashstore.delete(const idents: identvecty);
 var
  p1: pelementhashdataty;
 begin
  p1:= find(idents);
  if p1 <> nil then begin
-  p1:= pointer(p1)-sizeof(elementhashdataty);
-  while true do begin
-   dec(p1^.data.header.refcount);
-   if p1^.data.header.refcount > 0 then begin
-    break;
-   end;
-   internaldeleteitem(phashdataty(pointer(p1))); //memory still valid
-   if p1^.data.header.parent = 0 then begin
-    break;
-   end;
-   p1:= fdata+p1^.data.header.parent;
-  end;
+  delete(getdataoffset(p1));
  end;
 end;
 
