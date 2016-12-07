@@ -174,7 +174,7 @@ function dbusdumpmessage(const amessage: pdbusmessage): string;
 
 implementation
 uses
- msestrings,msesysintf,msearrayutils,msesys,mseguiintf,msetimer,
+ msestrings,msesysintf,msearrayutils,msesys,mseguiintf,msetimer,msestringident,
  msefloattostr,mseapplication;
 
 const
