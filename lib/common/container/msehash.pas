@@ -16,14 +16,17 @@ uses
  msestrings,msetypes;
  
 type
- hashvaluety = longword;
+ identty = card32;
+ pidentty = ^identty;
+ hashvaluety = card32;
  phashvaluety = ^hashvaluety;
+ hashoffsetty = ptruint;
 
  hashheaderty = record
-  prevhash: ptruint; //offset from liststart
-  nexthash: ptruint; //offset from liststart
-  prevlist: ptruint; //-memory offset to previous item
-  nextlist: ptruint; //memory offset to next item
+  prevhash: hashoffsetty; //offset from liststart
+  nexthash: hashoffsetty; //offset from liststart
+  prevlist: hashoffsetty; //-memory offset to previous item
+  nextlist: hashoffsetty; //memory offset to next item
   hash: hashvaluety;
  end;
  phashheaderty = ^hashheaderty;
@@ -73,8 +76,8 @@ type
    property data: pointer read fdata;
    property assignedfirst: ptruint read fassignedfirst;
    property assignedlast: ptruint read fassignedlast;
-   function getdatapo(const aoffset: longword): pointer; inline;
-   function getdataoffset(const adata: pointer): longword; inline;
+   function getdatapo(const aoffset: hashoffsetty): pointer; inline;
+   function getdataoffset(const adata: pointer): hashoffsetty; inline;
    function internaladd(const akey): phashdataty;
    function internaladdhash(hash1: hashvaluety): phashdataty;
    procedure internaldeleteitem(const aitem: phashdataty); overload;
@@ -110,7 +113,7 @@ type
    constructor create(const datasize: integer);
    destructor destroy; override;
    procedure clear; virtual;
-   procedure reset; //next next will return first, next prev will return last
+   procedure reset; //next next() will return first, next prev() will return last
    property capacity: integer read fcapacity write setcapacity;
    property count: integer read fcount;
    procedure mark(out ref: ptruint);
@@ -1324,12 +1327,12 @@ begin
  accept:= false; //dummy
 end;
 
-function thashdatalist.getdatapo(const aoffset: longword): pointer; inline;
+function thashdatalist.getdatapo(const aoffset: hashoffsetty): pointer; inline;
 begin
  result:= pchar(fdata)+aoffset;
 end;
 
-function thashdatalist.getdataoffset(const adata: pointer): longword; inline;
+function thashdatalist.getdataoffset(const adata: pointer): hashoffsetty; inline;
 begin
  result:= pchar(adata)-pchar(fdata);
 end;

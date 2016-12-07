@@ -11,7 +11,7 @@ unit msestringident;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 uses
- {globtypes,}msehash,msestrings;
+ {globtypes,}msehash,msestrings,msetypes;
  
 //{$define caseinsensitive} 
 const
@@ -19,8 +19,6 @@ const
  idstart = $12345678;
 
 type
- identty = uint32;
- pidentty = ^identty;
 // keywordty = identty;
 
  identnamety = record
