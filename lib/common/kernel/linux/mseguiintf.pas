@@ -5499,66 +5499,77 @@ type
   data: pointer;
  end;
  pollinfodestarty = array of pollinfoty;
+ pollinfty = record
+  pollinfo: pollinfoarty;
+  pollinfodest: pollinfodestarty;
+ end;
+ ppollinfty = ^pollinfty;
+ 
 var
 // pollinfo: array[0..2] of pollfd;
              //0 connection, 1 sessionmanagement
- pollinfo: pollinfoarty;
- pollinfodest: pollinfodestarty;
-
+ pollinf: ppollinfty;
+ 
 function gui_addpollfd(var id: int32; const afd: int32;
                            const aflags: pollflagsty;
                                 const acallback: pollcallbackty = nil;
                                       const adata: pointer = nil): guierrorty;
 begin
  result:= gue_ok;
- setlength(pollinfo,high(pollinfo)+2);
- setlength(pollinfodest,length(pollinfo));
- id:= high(pollinfo);
- with pollinfo[id] do begin
-  fd:= afd;
-  events:= int32(aflags * [pf_in,pf_pri,pf_out]);
-  with pollinfodest[id] do begin
-   callback:= acallback;
-   data:= adata;
+ with pollinf^ do begin
+  setlength(pollinfo,high(pollinfo)+2);
+  setlength(pollinfodest,length(pollinfo));
+  id:= high(pollinfo);
+  with pollinfo[id] do begin
+   fd:= afd;
+   events:= int32(aflags * [pf_in,pf_pri,pf_out]);
+   with pollinfodest[id] do begin
+    callback:= acallback;
+    data:= adata;
+   end;
   end;
  end;
 end;
 
 function gui_removepollfd(const id: int32): guierrorty;
 begin
- if (id < 0) or (id > high(pollinfo)) then begin
-  result:= gue_index;
- end
- else begin
-  deleteitem(pollinfo,typeinfo(pollinfo),id);
-  deleteitem(pollinfodest,typeinfo(pollinfodest),id);
-  result:= gue_ok;
+ with pollinf^ do begin
+  if (id < 0) or (id > high(pollinfo)) then begin
+   result:= gue_index;
+  end
+  else begin
+   deleteitem(pollinfo,typeinfo(pollinfo),id);
+   deleteitem(pollinfodest,typeinfo(pollinfodest),id);
+   result:= gue_ok;
+  end;
  end;
 end;
 
 function gui_setpollfdactive(const id: int32;
                        const aactive: boolean): guierrorty;
 begin
- if (id < 0) or (id > high(pollinfo)) then begin
-  result:= gue_index;
- end
- else begin
-  with pollinfo[id] do begin
-   if (fd >= 0) xor aactive then begin
-    if fd = 0 then begin
-     fd:= minint;
-    end
-    else begin
-     if fd = minint then begin
-      fd:= 0;
+ with pollinf^ do begin
+  if (id < 0) or (id > high(pollinfo)) then begin
+   result:= gue_index;
+  end
+  else begin
+   with pollinfo[id] do begin
+    if (fd >= 0) xor aactive then begin
+     if fd = 0 then begin
+      fd:= minint;
      end
      else begin
-      fd:= -fd;
+      if fd = minint then begin
+       fd:= 0;
+      end
+      else begin
+       fd:= -fd;
+      end;
      end;
     end;
    end;
+   result:= gue_ok;
   end;
-  result:= gue_ok;
  end;
 end;
 
@@ -5627,24 +5638,26 @@ begin
     sys_mutexlock(connectmutex1);
 //    int1:= poll(@pollinfo[0],length(pollinfo),1000); 
 //                              //todo: use ppoll? no timeout?
-    int1:= ppoll(@pollinfo[0],length(pollinfo),@timeout1,@sig1);
-    if pollinfo[1].revents <> 0 then begin
-     repeat                                     //empty pipe
-     until (__read(connectpipe.readdes,dummybyte,1) < 0) and 
-                                     (sys_getlasterror() = ewouldblock);
-    end;
-    sys_mutexunlock(connectmutex1);
-    sys_mutexlock(connectmutex2);
-    sys_mutexunlock(connectmutex2);
- 
-    if int1 > 0 then begin
-     for i2:= 0 to high(pollinfo) do begin
-      with pollinfo[i2] do begin
-       if (fd >= 0) then begin
-        with pollinfodest[i2] do begin
-         if (callback <> nil) and (revents <> 0) then begin
-          callback(pollflagsty(card32(card16(revents))),data);
-          fdwakeup:= true;
+    with pollinf^ do begin
+     int1:= ppoll(@pollinfo[0],length(pollinfo),@timeout1,@sig1);
+     if pollinfo[1].revents <> 0 then begin
+      repeat                                     //empty pipe
+      until (__read(connectpipe.readdes,dummybyte,1) < 0) and 
+                                      (sys_getlasterror() = ewouldblock);
+     end;
+     sys_mutexunlock(connectmutex1);
+     sys_mutexlock(connectmutex2);
+     sys_mutexunlock(connectmutex2);
+  
+     if int1 > 0 then begin
+      for i2:= 0 to high(pollinfo) do begin
+       with pollinfo[i2] do begin
+        if (fd >= 0) then begin
+         with pollinfodest[i2] do begin
+          if (callback <> nil) and (revents <> 0) then begin
+           callback(pollflagsty(card32(card16(revents))),data);
+           fdwakeup:= true;
+          end;
          end;
         end;
        end;
@@ -5664,7 +5677,7 @@ begin
    pthread_sigmask(sig_setmask,@sig1,nil); //enable signals
  {$ifdef with_sm}
    if hassm then begin
-    if (int1 > 0) and (pollinfo[2].revents <> 0) then begin
+    if (int1 > 0) and (pollinf^.pollinfo[2].revents <> 0) then begin
      iceprocessmessages(sminfo.iceconnection,nil,int2);
      with sminfo do begin
       if shutdown then begin
@@ -6251,6 +6264,8 @@ var
 begin
  gdi_lock;
  try
+  getmem(pollinf,sizeof(pollinfty));
+  fillchar(pollinf^,sizeof(pollinfty),0);
   sys_mutexcreate(connectmutex1);
   sys_mutexcreate(connectmutex2);
   pipe2(connectpipe,o_cloexec or o_nonblock);
@@ -6518,7 +6533,7 @@ begin
  
 //  fillchar(pollinfo,sizeof(pollinfo),0);
 //  pollcount:= 2;
-  pollinfo:= nil;
+  pollinf^.pollinfo:= nil;
   gui_addpollfd(int1,xconnectionnumber(appdisp),[pf_in,pf_pri]); //0
   gui_addpollfd(int1,connectpipe.readdes,[pf_in,pf_pri]);        //1
  {$ifdef with_sm}
@@ -6643,6 +6658,8 @@ begin
   xseterrorhandler(errorhandlerbefore);
   screenrects:= nil;
   screenrectsvalid:= false;
+  finalize(pollinf^);
+  freemem(pollinf);
  finally
   gdi_unlock;
  end;
