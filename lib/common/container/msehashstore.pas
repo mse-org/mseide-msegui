@@ -48,12 +48,42 @@ type
    function find(const aele: elementdataty): pelementhashdataty;
    function hashkey(const akey): hashvaluety override;
    function checkkey(const akey; const aitemdata): boolean override;
+   function add(const idents: identvecty; 
+                        out adata: pointer): hashoffsetty;
+   function find(const idents: identvecty): pointer;
   public
    constructor create(const datasize: int32);
-   function add(const idents: identvecty): pointer;
-   function find(const idents: identvecty): pointer;
    procedure delete(const idents: identvecty);
    procedure delete(const item: hashoffsetty); //offset of datapo
+ end;
+
+ treeelementheaderty = record
+  element: elementheaderty;
+  children: hashoffsetty; //offset in data array
+  prevsibling: hashoffsetty; //-memory offset to previous item
+  nextsibling: hashoffsetty; //memory offset to next item
+ end;
+ 
+ treeelementdataty = record
+  header: treeelementheaderty;
+  data: record
+  end;
+ end;
+ ptreeelementdataty = ^treeelementdataty;
+ treeelementhashdataty = record
+  header: hashheaderty;
+  data: treeelementdataty;
+ end;
+ ptreeelementhashdataty = ^treeelementhashdataty;
+
+ thashtree = class(thashstore)
+  protected
+   function find(const aele: elementdataty): ptreeelementhashdataty;
+   function add(const idents: identvecty; 
+                        out adata: pointer): hashoffsetty;
+   function find(const idents: identvecty): pointer;
+  public
+   constructor create(const datasize: int32);
  end;
 
 implementation
@@ -65,14 +95,14 @@ begin
  inherited create(sizeof(elementdataty)+datasize);
 end;
 
-function thashstore.add(const idents: identvecty): pointer;
+function thashstore.add(const idents: identvecty; 
+                        out adata: pointer): hashoffsetty;
 var
  p1,pe: pidentty;
  ele: elementdataty;
  p2: pelementhashdataty;
  off1: hashoffsetty;
 begin
- result:= nil;
  if idents.high >= 0 then begin
   ele.header.path:= 0;
   ele.header.parent:= 0;
@@ -84,8 +114,13 @@ begin
   while p1 <= pe do begin
    ele.header.path:= ele.header.path+p1^;
    ele.header.name:= p1^;
-   p2:= find(ele);
-   if p2 = nil then begin
+   if (p1 = pe) then begin
+    p2:= nil;
+   end
+   else begin
+    p2:= find(ele);
+   end;
+   if (p2 = nil) then begin
     p2:= pointer(internaladdhash(ele.header.path));
     p2^.data.header:= ele.header;
     if off1 <> 0 then begin
@@ -93,12 +128,17 @@ begin
     end;
    end;
    inc(ele.header.parentlevel);
-   ele.header.parent:= getdataoffset(p2);
+   ele.header.parent:= getdataoffs(p2);
    off1:= p2-fdata;
    inc(p1);
   end;
   inc(p2^.data.header.refcount);
-  result:= @p2^.data.data;
+  adata:= @p2^.data.data;
+  result:= pointer(adata)-fdata;
+ end
+ else begin
+  result:= 0;
+  adata:= nil;
  end;
 end;
 
@@ -204,8 +244,39 @@ var
 begin
  p1:= find(idents);
  if p1 <> nil then begin
-  delete(getdataoffset(p1));
+  delete(getdataoffs(p1));
  end;
 end;
+
+{ thashtree }
+
+const
+ treeheaderext = sizeof(treeelementhashdataty) - sizeof(elementhashdataty);
+ 
+constructor thashtree.create(const datasize: int32);
+begin
+ inherited create(datasize+treeheaderext);
+end;
+
+function thashtree.find(const aele: elementdataty): ptreeelementhashdataty;
+begin
+ result:= pointer(inherited find(aele));
+end;
+
+function thashtree.add(const idents: identvecty;
+                               out adata: pointer): hashoffsetty;
+begin
+ result:= inherited add(idents,adata)+treeheaderext;
+ adata:= adata+treeheaderext;
+end;
+
+function thashtree.find(const idents: identvecty): pointer;
+begin
+ result:= inherited find(idents);
+ if result <> nil then begin
+  result:= result+treeheaderext;
+ end;
+end;
+
 
 end.

@@ -77,7 +77,7 @@ type
    property assignedfirst: ptruint read fassignedfirst;
    property assignedlast: ptruint read fassignedlast;
    function getdatapo(const aoffset: hashoffsetty): pointer; inline;
-   function getdataoffset(const adata: pointer): hashoffsetty; inline;
+   function getdataoffs(const adata: pointer): hashoffsetty; inline;
    function internaladd(const akey): phashdataty;
    function internaladdhash(hash1: hashvaluety): phashdataty;
    procedure internaldeleteitem(const aitem: phashdataty); overload;
@@ -1332,7 +1332,7 @@ begin
  result:= pchar(fdata)+aoffset;
 end;
 
-function thashdatalist.getdataoffset(const adata: pointer): hashoffsetty; inline;
+function thashdatalist.getdataoffs(const adata: pointer): hashoffsetty; inline;
 begin
  result:= pchar(adata)-pchar(fdata);
 end;

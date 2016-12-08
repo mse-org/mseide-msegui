@@ -245,6 +245,14 @@ DBusHandlerResult = (
    // Please try again later with more memory. */
 );
 
+///**
+// * Called when a message needs to be handled. The result indicates whether or
+// * not more handlers should be run. Set with dbus_connection_add_filter().
+// */
+ DBusHandleMessageFunction = 
+   function(connection: pDBusConnection; message: pDBusMessage;
+                                         user_data: pointer): DBusHandlerResult
+                                    {$ifdef wincall}stdcall{$else}cdecl{$endif};
 //**
 //* Called when a message is sent to a registered object path. Found in
 //* #DBusObjectPathVTable which is registered with dbus_connection_register_object_path()
@@ -365,6 +373,14 @@ var
              free_data_function: DBusFreeFunction): dbus_bool_t
                                     {$ifdef wincall}stdcall{$else}cdecl{$endif};
 
+ dbus_connection_add_filter:
+   function(connection: pDBusConnection; function_: DBusHandleMessageFunction;
+         user_data: pointer; free_data_function: DBusFreeFunction): dbus_bool_t
+                                    {$ifdef wincall}stdcall{$else}cdecl{$endif};
+ dbus_connection_remove_filter:
+   procedure(connection: pDBusConnection;
+              function_: DBusHandleMessageFunction; user_data: pointer);
+                                    {$ifdef wincall}stdcall{$else}cdecl{$endif};
  dbus_connection_try_register_object_path:
    function(cionnection: pDBusConnection; path: pchar; 
                         vtable: pDBusObjectPathVTable;
@@ -563,7 +579,7 @@ end;
 procedure initializedbus(const sonames: array of filenamety; //[] = default
                                          const onlyonce: boolean = false);                                   
 const
- funcs: array[0..67] of funcinfoty = (
+ funcs: array[0..69] of funcinfoty = (
   (n: 'dbus_bus_get'; d: @dbus_bus_get),                         // 0
   (n: 'dbus_bus_get_private'; d: @dbus_bus_get_private),         // 1
   (n: 'dbus_connection_close'; d: @dbus_connection_close),       // 2
@@ -572,102 +588,106 @@ const
            d: @dbus_connection_set_watch_functions),             // 4
   (n: 'dbus_connection_set_timeout_functions';
            d: @dbus_connection_set_timeout_functions),           // 5
+  (n: 'dbus_connection_add_filter';
+           d: @dbus_connection_add_filter),                      // 6
+  (n: 'dbus_connection_remove_filter';
+           d: @dbus_connection_remove_filter),                   // 7
   (n: 'dbus_connection_try_register_object_path'; 
-           d: @dbus_connection_try_register_object_path),        // 6
+           d: @dbus_connection_try_register_object_path),        // 8
   (n: 'dbus_connection_try_register_fallback';
-           d: @dbus_connection_try_register_fallback),           // 7
+           d: @dbus_connection_try_register_fallback),           // 9
   (n: 'dbus_connection_unregister_object_path';
-           d: @dbus_connection_unregister_object_path),          // 8
-  (n: 'dbus_watch_get_unix_fd'; d: @dbus_watch_get_unix_fd),     // 9
-  (n: 'dbus_watch_get_socket'; d: @dbus_watch_get_socket),       //10
-  (n: 'dbus_watch_get_flags'; d: @dbus_watch_get_flags),         //11
-  (n: 'dbus_watch_get_data'; d: @dbus_watch_get_data),           //12
-  (n: 'dbus_watch_set_data'; d: @dbus_watch_set_data),           //13
-  (n: 'dbus_watch_handle'; d: @dbus_watch_handle),               //14
-  (n: 'dbus_watch_get_enabled'; d: @dbus_watch_get_enabled),     //15
+           d: @dbus_connection_unregister_object_path),          //10
+  (n: 'dbus_watch_get_unix_fd'; d: @dbus_watch_get_unix_fd),     //11
+  (n: 'dbus_watch_get_socket'; d: @dbus_watch_get_socket),       //12
+  (n: 'dbus_watch_get_flags'; d: @dbus_watch_get_flags),         //13
+  (n: 'dbus_watch_get_data'; d: @dbus_watch_get_data),           //14
+  (n: 'dbus_watch_set_data'; d: @dbus_watch_set_data),           //15
+  (n: 'dbus_watch_handle'; d: @dbus_watch_handle),               //16
+  (n: 'dbus_watch_get_enabled'; d: @dbus_watch_get_enabled),     //17
 
   (n: 'dbus_timeout_get_interval'; 
-           d: @dbus_timeout_get_interval),                       //16
-  (n: 'dbus_timeout_get_data'; d: @dbus_timeout_get_data),       //17
-  (n: 'dbus_timeout_set_data'; d: @dbus_timeout_set_data),       //18
-  (n: 'dbus_timeout_handle'; d: @dbus_timeout_handle),           //19
-  (n: 'dbus_timeout_get_enabled'; d: @dbus_timeout_get_enabled), //20
+           d: @dbus_timeout_get_interval),                       //18
+  (n: 'dbus_timeout_get_data'; d: @dbus_timeout_get_data),       //19
+  (n: 'dbus_timeout_set_data'; d: @dbus_timeout_set_data),       //20
+  (n: 'dbus_timeout_handle'; d: @dbus_timeout_handle),           //21
+  (n: 'dbus_timeout_get_enabled'; d: @dbus_timeout_get_enabled), //22
   (n: 'dbus_timeout_needs_restart';
-           d: @dbus_timeout_needs_restart),                      //21
-  (n: 'dbus_timeout_restarted'; d: @dbus_timeout_restarted),     //22
+           d: @dbus_timeout_needs_restart),                      //23
+  (n: 'dbus_timeout_restarted'; d: @dbus_timeout_restarted),     //24
 
-  (n: 'dbus_error_init'; d: @dbus_error_init),                   //23
-  (n: 'dbus_error_free'; d: @dbus_error_free),                   //24
-  (n: 'dbus_error_is_set'; d: @dbus_error_is_set),               //25
+  (n: 'dbus_error_init'; d: @dbus_error_init),                   //25
+  (n: 'dbus_error_free'; d: @dbus_error_free),                   //26
+  (n: 'dbus_error_is_set'; d: @dbus_error_is_set),               //27
   (n: 'dbus_connection_set_exit_on_disconnect';
-           d: @dbus_connection_set_exit_on_disconnect),          //26
-  (n: 'dbus_bus_get_unique_name'; d: @dbus_bus_get_unique_name), //27
-  (n: 'dbus_bus_request_name'; d: @dbus_bus_request_name),       //28
+           d: @dbus_connection_set_exit_on_disconnect),          //28
+  (n: 'dbus_bus_get_unique_name'; d: @dbus_bus_get_unique_name), //29
+  (n: 'dbus_bus_request_name'; d: @dbus_bus_request_name),       //30
   (n: 'dbus_message_new_method_call'; 
-           d: @dbus_message_new_method_call),                    //29
-  (n: 'dbus_message_get_type'; d: @dbus_message_get_type),       //30
-  (n: 'dbus_message_set_path'; d: @dbus_message_set_path),       //31
-  (n: 'dbus_message_get_path'; d: @dbus_message_get_path),       //32
+           d: @dbus_message_new_method_call),                    //31
+  (n: 'dbus_message_get_type'; d: @dbus_message_get_type),       //32
+  (n: 'dbus_message_set_path'; d: @dbus_message_set_path),       //33
+  (n: 'dbus_message_get_path'; d: @dbus_message_get_path),       //34
   (n: 'dbus_message_set_interface'; 
-           d: @dbus_message_set_interface),                      //33
+           d: @dbus_message_set_interface),                      //35
   (n: 'dbus_message_get_interface';
-           d: @dbus_message_get_interface),                      //34
-  (n: 'dbus_message_set_member'; d: @dbus_message_set_member),   //35
-  (n: 'dbus_message_get_member'; d: @dbus_message_get_member),   //36
+           d: @dbus_message_get_interface),                      //36
+  (n: 'dbus_message_set_member'; d: @dbus_message_set_member),   //37
+  (n: 'dbus_message_get_member'; d: @dbus_message_get_member),   //38
   (n: 'dbus_message_set_error_name';
-           d: @dbus_message_set_error_name),                     //37
+           d: @dbus_message_set_error_name),                     //39
   (n: 'dbus_message_get_error_name';
-           d: @dbus_message_get_error_name),                     //38
+           d: @dbus_message_get_error_name),                     //40
   (n: 'dbus_message_set_destination';
-           d: @dbus_message_set_destination),                    //39
+           d: @dbus_message_set_destination),                    //41
   (n: 'dbus_message_get_destination';
-           d: @dbus_message_get_destination),                    //40
-  (n: 'dbus_message_set_sender'; d: @dbus_message_set_sender),   //41
-  (n: 'dbus_message_set_sender'; d: @dbus_message_set_sender),   //42
-  (n: 'dbus_message_get_sender'; d: @dbus_message_get_sender),   //43
+           d: @dbus_message_get_destination),                    //42
+  (n: 'dbus_message_set_sender'; d: @dbus_message_set_sender),   //43
+  (n: 'dbus_message_set_sender'; d: @dbus_message_set_sender),   //44
+  (n: 'dbus_message_get_sender'; d: @dbus_message_get_sender),   //45
   (n: 'dbus_message_get_signature';
-           d: @dbus_message_get_signature),                      //44
+           d: @dbus_message_get_signature),                      //46
   (n: 'dbus_message_set_no_reply';
-           d: @dbus_message_set_no_reply),                       //45
+           d: @dbus_message_set_no_reply),                       //47
   (n: 'dbus_message_get_no_reply';
-           d: @dbus_message_get_no_reply),                       //46
+           d: @dbus_message_get_no_reply),                       //48
 
-  (n: 'dbus_message_unref'; d: @dbus_message_unref),             //47
+  (n: 'dbus_message_unref'; d: @dbus_message_unref),             //49
   (n: 'dbus_message_iter_init_append';
-           d: @dbus_message_iter_init_append),                   //48
-  (n: 'dbus_message_iter_init'; d: @dbus_message_iter_init),     //49
+           d: @dbus_message_iter_init_append),                   //50
+  (n: 'dbus_message_iter_init'; d: @dbus_message_iter_init),     //51
   (n: 'dbus_message_append_args_valist'; 
-           d: @dbus_message_append_args_valist),                 //50
+           d: @dbus_message_append_args_valist),                 //52
   (n: 'dbus_message_iter_append_basic';
-           d: @dbus_message_iter_append_basic),                  //51
-  (n: 'dbus_message_iter_next'; d: @dbus_message_iter_next),     //52
+           d: @dbus_message_iter_append_basic),                  //53
+  (n: 'dbus_message_iter_next'; d: @dbus_message_iter_next),     //54
   (n: 'dbus_message_iter_get_arg_type';
-           d: @dbus_message_iter_get_arg_type),                  //53
+           d: @dbus_message_iter_get_arg_type),                  //55
   (n: 'dbus_message_iter_get_basic';
-           d: @dbus_message_iter_get_basic),                     //54
+           d: @dbus_message_iter_get_basic),                     //56
   (n: 'dbus_message_iter_open_container'; 
-           d: @dbus_message_iter_open_container),                //55
+           d: @dbus_message_iter_open_container),                //57
   (n: 'dbus_message_iter_close_container'; 
-           d: @dbus_message_iter_close_container),               //56
+           d: @dbus_message_iter_close_container),               //58
   (n: 'dbus_message_iter_abandon_container'; 
-           d: @dbus_message_iter_abandon_container),             //57
+           d: @dbus_message_iter_abandon_container),             //59
   (n: 'dbus_message_iter_recurse'; 
-           d: @dbus_message_iter_recurse),                       //58
+           d: @dbus_message_iter_recurse),                       //60
   (n: 'dbus_message_iter_get_element_type';
-           d: @dbus_message_iter_get_element_type),              //59
+           d: @dbus_message_iter_get_element_type),              //61
   (n: 'dbus_message_iter_get_fixed_array';
-           d: @dbus_message_iter_get_fixed_array),               //60
+           d: @dbus_message_iter_get_fixed_array),               //62
   (n: 'dbus_connection_send_with_reply_and_block';
-           d: @dbus_connection_send_with_reply_and_block),       //61
+           d: @dbus_connection_send_with_reply_and_block),       //63
   (n: 'dbus_connection_send_with_reply'; 
-           d: @dbus_connection_send_with_reply),                 //62
-  (n: 'dbus_connection_flush'; d: @dbus_connection_flush),       //63
-  (n: 'dbus_connection_dispatch'; d: @dbus_connection_dispatch), //64
-  (n: 'dbus_pending_call_unref'; d: @dbus_pending_call_unref),   //65
+           d: @dbus_connection_send_with_reply),                 //64
+  (n: 'dbus_connection_flush'; d: @dbus_connection_flush),       //65
+  (n: 'dbus_connection_dispatch'; d: @dbus_connection_dispatch), //66
+  (n: 'dbus_pending_call_unref'; d: @dbus_pending_call_unref),   //67
   (n: 'dbus_pending_call_set_notify';
-           d: @dbus_pending_call_set_notify),                    //66
+           d: @dbus_pending_call_set_notify),                    //68
   (n: 'dbus_pending_call_steal_reply'; 
-           d: @dbus_pending_call_steal_reply)                    //67
+           d: @dbus_pending_call_steal_reply)                    //69
  );
 
 {

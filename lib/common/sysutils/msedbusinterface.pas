@@ -129,7 +129,9 @@ type
  idbuscontroller = interface(inullinterface)
   procedure registerobject(const sender: idbusobject);
   procedure unregisterobject(const sender: idbusobject);
-  procedure registeritem(const apath: string; const ahandler: messageeventty);
+  procedure registeritem(const ainterface: string;
+                           const apath: string; const asignature: string;
+                                               const ahandler: messageeventty);
  end;
  
  tdbusobject = class(tobject,idbusobject)
@@ -302,6 +304,7 @@ type
    procedure doregisteritems(const aobj: pobjinfoty);
    procedure dounregisteritems(const aobj: pobjinfoty);
    procedure unregisteritem(const apath: string);
+   procedure mainfilter(const amessage: pdbusmessage; var handled: boolean);
    procedure rootfallback(const amessage: pdbusmessage; var handled: boolean);
    procedure registerobjects();
    procedure unregisterobjects();
@@ -311,7 +314,9 @@ type
     //idbuscontroller
    procedure registerobject(const sender: idbusobject);
    procedure unregisterobject(const sender: idbusobject);
-   procedure registeritem(const apath: string; const ahandler: messageeventty);
+   procedure registeritem(const ainterface: string;
+                           const apath: string; const asignature: string;
+                                               const ahandler: messageeventty);
   public
    constructor create();
    destructor destroy(); override;
@@ -1123,6 +1128,25 @@ type
  end;
  pcallbackinfoty = ^callbackinfoty;
 
+function filtertrampoline(connection: pDBusConnection; message: pDBusMessage;
+                                         user_data: pointer): DBusHandlerResult
+                                    {$ifdef wincall}stdcall{$else}cdecl{$endif};
+var
+ handler: messageeventty;
+ b1: boolean;
+begin
+ tmethod(handler).data:= user_data;
+ tmethod(handler).code:= @tdbuscontroller.mainfilter;
+ handler(message,b1);
+ if b1 then begin
+  result:= DBUS_HANDLER_RESULT_HANDLED;
+  dbus_message_unref(message);
+ end
+ else begin
+  result:= DBUS_HANDLER_RESULT_NOT_YET_HANDLED;
+ end;
+end;
+
 function objectpathhandlertrampoline(connection: pDBusConnection;
        message: pDBusMessage; user_data: pointer): DBusHandlerResult
                                     {$ifdef wincall}stdcall{$else}cdecl{$endif};
@@ -1179,8 +1203,9 @@ begin
  end;
 end;
  
-procedure tdbuscontroller.registeritem(const apath: string;
-                                           const ahandler: messageeventty);
+procedure tdbuscontroller.registeritem(const ainterface: string;
+                           const apath: string; const asignature: string;
+                                               const ahandler: messageeventty);
 var
  p1: pcallbackinfoty;
  s1: string;
@@ -1233,8 +1258,16 @@ begin
  dbus_connection_unregister_object_path(fconn,pchar(apath));
 end;
 
-procedure tdbuscontroller.rootfallback(
-              const amessage: pdbusmessage; var handled: boolean);
+procedure tdbuscontroller.mainfilter(const amessage: pdbusmessage;
+                                                      var handled: boolean);
+begin
+{$ifdef mse_dumpdbus}
+ write(dbusdumpmessage(amessage));
+{$endif}
+end;
+
+procedure tdbuscontroller.rootfallback(const amessage: pdbusmessage;
+                                                      var handled: boolean);
 begin
 {$ifdef mse_dumpdbus}
  write(dbusdumpmessage(amessage));
@@ -1246,7 +1279,7 @@ var
  i1: int32;
  p1: pdbusitemty;
 begin
- registerfallback('/',@rootfallback);
+// registerfallback('/',@rootfallback);
  for i1:= 0 to fitems.count - 1 do begin
   p1:= pointer(fitems.next());
   if p1^.data.kind = dbk_obj then begin
@@ -1257,7 +1290,7 @@ end;
 
 procedure tdbuscontroller.unregisterobjects();
 begin
- unregisteritem('/');
+// unregisteritem('/');
 end;
 
 procedure tdbuscontroller.dounregisterobj(const aobj: pobjinfoty);
@@ -1581,7 +1614,7 @@ begin
    until (i2 = DBUS_REQUEST_NAME_REPLY_PRIMARY_OWNER) or
            (i2 = DBUS_REQUEST_NAME_REPLY_ALREADY_OWNER); //should not happen
    fbusname:= s2;
-
+   dbus_connection_add_filter(fconn,@filtertrampoline,self,nil);
     //start asynchronous message handling
    dbus_connection_set_watch_functions(fconn,@addwatch,@removewatch,
                                        @watchtoggled,self,nil);
@@ -1603,6 +1636,7 @@ begin
  if fconn <> nil then begin
   unregisterobjects();
   dbus_connection_close(fconn);
+  dbus_connection_remove_filter(fconn,@filtertrampoline,self);
   fitems.clear();
   if not applicationdestroyed() then  begin
    application.unregisteronidle(@doidle);
