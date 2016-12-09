@@ -1452,7 +1452,7 @@ var
 begin
  setlength(result,fsectionlist.count);
  for int1:= 0 to high(result) do begin
-  result[int1]:= fsectionlist.next^.key;
+  result[int1]:= fsectionlist.next^.data.key;
  end;
 end;
 
