@@ -70,7 +70,7 @@ type
   protected
    function hashkey(const akey): hashvaluety; override;
    function checkkey(const akey; const aitem: phashdataty): boolean override;
-   class function getrecordsize(): int32 override;
+   function getrecordsize(): int32 override;
   public
 //   constructor create;
    function find(const afont: fonthashdataty): integer;
@@ -417,7 +417,7 @@ begin
  end;           
 end;
 
-class function tfonthashlist.getrecordsize(): int32;
+function tfonthashlist.getrecordsize(): int32;
 begin
  result:= sizeof(fontnumhashdataty);
 end;

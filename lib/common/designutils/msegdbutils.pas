@@ -836,7 +836,7 @@ begin
  fpointerhexdigits:= fpointersize * 2;
  fgdb:= invalidprochandle;
  fguiintf:= true;
- fsourcefiles:= tmsestringhashdatalist.create(0);
+ fsourcefiles:= tmsestringhashdatalist.create();
 // fsourcefiles:= thashedmsestrings.create;
  fstoptime:= emptydatetime;
  {$ifdef UNIX}

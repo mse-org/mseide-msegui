@@ -103,7 +103,7 @@ type
    function hashkey(const akey): hashvaluety; virtual; abstract;
    function checkkey(const akey;
                   const aitem: phashdataty): boolean; virtual; abstract;
-   class function getrecordsize(): int32 virtual abstract;
+   function getrecordsize(): int32 virtual abstract;
    procedure rehash;
    procedure grow;
    procedure finalizeitem(const aitem: phashdataty); virtual;
@@ -146,7 +146,7 @@ type
   protected
    function hashkey(const akey): hashvaluety; override;
    function checkkey(const akey; const aitem: phashdataty): boolean; override;
-   class function getrecordsize(): int32 override;
+   function getrecordsize(): int32 override;
   public
 //   constructor create();
    function add(const akey: integer): pintegerhashdataty;
@@ -184,7 +184,7 @@ type
   protected
    function hashkey(const akey): hashvaluety; override;
    function checkkey(const akey; const aitem: phashdataty): boolean; override;
-   class function getrecordsize(): int32 override;
+   function getrecordsize(): int32 override;
   public
 //   constructor create(const datasize: integer);
    function add(const akeya,akeyb: integer): pdoubleintegerhashdataty;
@@ -218,7 +218,7 @@ type
   protected
    function hashkey(const akey): hashvaluety; override;
    function checkkey(const akey; const aitem: phashdataty): boolean; override;
-   class function getrecordsize(): int32 override;
+   function getrecordsize(): int32 override;
   public
 //   constructor create(const datasize: integer);
    function add(const akey: pointer): ppointerhashdataty;
@@ -249,7 +249,7 @@ type
   protected
    function hashkey(const akey): hashvaluety; override;
    function checkkey(const akey; const aitem: phashdataty): boolean; override;
-   class function getrecordsize(): int32 override;
+   function getrecordsize(): int32 override;
   public
 //   constructor create(const datasize: integer);
    function add(const akey: ptruint): pptruinthashdataty;
@@ -284,14 +284,14 @@ type
   protected
    procedure checkexact(const aitem: phashdataty;
                                        var accept: boolean); override;
-   class function getrecordsize(): int32 override;
+   function getrecordsize(): int32 override;
   public
 //   constructor create;
    procedure add(const akey: ptruint; const avalue: pointer);
    function addunique(const akey: ptruint; const avalue: pointer): boolean;
                    //true if found
    procedure delete(const akey: ptruint; const avalue: pointer); overload;
-   function find(const akey: ptruint): ppointerptruinthashdataty; overload;
+   function find(const akey: ptruint): pointer; overload;
    function find(const akey: ptruint; out avalue: pointer): boolean; overload;
    function first: ppointerptruinthashdataty;
    function next: ppointerptruinthashdataty; //wraps to first after last
@@ -321,7 +321,7 @@ type
   protected
    procedure checkexact(const aitem: phashdataty; var accept: boolean) override;
    procedure finalizeitem(const aitem: phashdataty) override;
-   class function getrecordsize(): int32 override;
+   function getrecordsize(): int32 override;
   public
    constructor create;
    procedure add(const akey: ptruint; const avalue: ansistring);
@@ -361,7 +361,7 @@ type
    procedure checkexact(const aitem: phashdataty;
                                      var accept: boolean); override;
    procedure finalizeitem(const aitem: phashdataty); override;
-   class function getrecordsize(): int32 override;
+   function getrecordsize(): int32 override;
   public
    constructor create;
    procedure add(const akey: ptruint; const avalue: msestring);
@@ -403,7 +403,7 @@ type
    function checklkey(const akey: lstringty; 
                                   const aitemdata: ansistringdataty): boolean;
    procedure finalizeitem(const aitem: phashdataty) override;
-   class function getrecordsize(): int32 override;
+   function getrecordsize(): int32 override;
   public
    constructor create();
    function add(const akey: ansistring): pansistringhashdataty; 
@@ -443,7 +443,7 @@ type
    fpointerparam: pointer;
   protected
    procedure checkexact(const aitem: phashdataty; var accept: boolean) override;
-   class function getrecordsize(): int32 override;
+   function getrecordsize(): int32 override;
   public
 //   constructor create;
    procedure add(const akey: ansistring; const avalue: pointer); overload;
@@ -487,7 +487,7 @@ type
    function checklkey(const akey: lmsestringty;
                                 const aitemdata: msestringdataty): boolean;
    procedure finalizeitem(const aitem: phashdataty) override;
-   class function getrecordsize(): int32 override;
+   function getrecordsize(): int32 override;
   public
    constructor create();
    function add(const akey: msestring): pmsestringhashdataty;
@@ -529,7 +529,7 @@ type
    fpointerparam: pointer;
   protected
    procedure checkexact(const aitem: phashdataty; var accept: boolean) override;
-   class function getrecordsize(): int32 override;
+   function getrecordsize(): int32 override;
   public
 //   constructor create;
    procedure add(const akey: msestring; const avalue: pointer);
@@ -568,7 +568,7 @@ type
    fintegerparam: integer;
   protected
    procedure checkexact(const aitem: phashdataty; var accept: boolean) override;
-   class function getrecordsize(): int32 override;
+   function getrecordsize(): int32 override;
   public
 //   constructor create;
    procedure add(const akey: msestring; const avalue: integer);
@@ -1585,7 +1585,7 @@ begin
  result:= integer(akey) = pintegerhashdataty(aitem)^.data.key;
 end;
 
-class function tintegerhashdatalist.getrecordsize(): int32;
+function tintegerhashdatalist.getrecordsize(): int32;
 begin
  result:= sizeof(integerhashdataty);
 end;
@@ -1648,7 +1648,7 @@ begin
  end;
 end;
 
-class function tdoubleintegerhashdatalist.getrecordsize(): int32;
+function tdoubleintegerhashdatalist.getrecordsize(): int32;
 begin
  result:= sizeof(doubleintegerhashdataty);
 end;
@@ -1734,7 +1734,7 @@ begin
  result:= pointer(akey) = ppointerhashdataty(aitem)^.data.key;
 end;
 
-class function tpointerhashdatalist.getrecordsize(): int32;
+function tpointerhashdatalist.getrecordsize(): int32;
 begin
  result:= sizeof(pointerhashdataty);
 end;
@@ -1825,7 +1825,7 @@ begin
  result:= ptruint(akey) = pptruinthashdataty(aitem)^.data.key;
 end;
 
-class function tptruinthashdatalist.getrecordsize(): int32;
+function tptruinthashdatalist.getrecordsize(): int32;
 begin
  result:= sizeof(ptruinthashdataty);
 end;
@@ -1904,7 +1904,7 @@ begin
  accept:= ppointerptruinthashdataty(aitem)^.data.data = fpointerparam;
 end;
 
-class function tpointerptruinthashdatalist.getrecordsize(): int32;
+function tpointerptruinthashdatalist.getrecordsize(): int32;
 begin
  result:= sizeof(pointerptruinthashdataty);
 end;
@@ -1918,8 +1918,7 @@ begin
  internaldeleteitem(internalfindexact(akey));
 end;
 
-function tpointerptruinthashdatalist.find(
-                     const akey: ptruint): ppointerptruinthashdataty;
+function tpointerptruinthashdatalist.find(const akey: ptruint): pointer;
 begin
  find(akey,result);
 end;
@@ -2044,7 +2043,7 @@ begin
  finalize(pansistringptruinthashdataty(aitem)^.data);
 end;
 
-class function tansistringptruinthashdatalist.getrecordsize(): int32;
+function tansistringptruinthashdatalist.getrecordsize(): int32;
 begin
  result:= sizeof(ansistringptruinthashdataty);
 end;
@@ -2155,7 +2154,7 @@ begin
  finalize(pmsestringptruinthashdataty(aitem)^.data);
 end;
 
-class function tmsestringptruinthashdatalist.getrecordsize(): int32;
+function tmsestringptruinthashdatalist.getrecordsize(): int32;
 begin
  result:= sizeof(msestringptruinthashdataty);
 end;
@@ -2185,7 +2184,7 @@ begin
  finalize(pansistringhashdataty(aitem)^.data);
 end;
 
-class function tansistringhashdatalist.getrecordsize(): int32;
+function tansistringhashdatalist.getrecordsize(): int32;
 begin
  result:= sizeof(ansistringhashdataty);
 end;
@@ -2379,7 +2378,7 @@ begin
  accept:= ppointeransistringhashdataty(aitem)^.data.data = fpointerparam;
 end;
 
-class function tpointeransistringhashdatalist.getrecordsize(): int32;
+function tpointeransistringhashdatalist.getrecordsize(): int32;
 begin
  result:= sizeof(pointeransistringhashdataty);
 end;
@@ -2438,7 +2437,7 @@ begin
  finalize(pmsestringhashdataty(aitem)^.data);
 end;
 
-class function tmsestringhashdatalist.getrecordsize(): int32;
+function tmsestringhashdatalist.getrecordsize(): int32;
 begin
  result:= sizeof(msestringhashdataty);
 end;
@@ -2660,7 +2659,7 @@ begin
  accept:= ppointermsestringhashdataty(aitem)^.data.data = fpointerparam;
 end;
 
-class function tpointermsestringhashdatalist.getrecordsize(): int32;
+function tpointermsestringhashdatalist.getrecordsize(): int32;
 begin
  result:= sizeof(pointermsestringhashdataty);
 end;
@@ -2781,7 +2780,7 @@ begin
  accept:= pintegermsestringhashdataty(aitem)^.data.data = fintegerparam;
 end;
 
-class function tintegermsestringhashdatalist.getrecordsize(): int32;
+function tintegermsestringhashdatalist.getrecordsize(): int32;
 begin
  result:= sizeof(integermsestringhashdataty);
 end;

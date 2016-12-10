@@ -70,6 +70,11 @@ type
   id: integer;
  end;
  pcglobfuncinfoty = ^cglobfuncinfoty;
+ cglobfunchashdataty = record
+  header: hashheaderty;
+  data: cglobfuncinfoty;
+ end;
+ pcglobfunchashdataty = ^cglobfunchashdataty;
  
  tcglobals = class(thashdatalist)
   private
@@ -77,18 +82,19 @@ type
    flistparam: tcrootdeflist;
    fidparam: integer;
    fansistringparam: ansistring;
-   procedure checkfunctioninfo(const aitem; var accept: boolean);
+   procedure checkfunctioninfo(const aitem: phashdataty; var accept: boolean);
    procedure checkfindname(var stop: boolean);
   protected
    procedure add(const alist: tcrootdeflist; const aid: integer);
 //   procedure checkexact(const aitemdata; var accept: boolean); override;
    function hashkey(const akey): hashvaluety; override;
-   function checkkey(const akey; const aitemdata): boolean; override;
+   function checkkey(const akey; const aitem: phashdataty): boolean; override;
    procedure delete(const alist: tcrootdeflist; const aid: integer);
    function checkfind(const aname: ansistring): pcglobfuncinfoty;
+   function getrecordsize(): int32 override;
   public
    property closing: boolean read fclosing;
-   constructor create;
+//   constructor create;
    function finddef(const aname: ansistring): pdefinfoty;
    function findfunction(const aname: ansistring): pfunctioninfoty;
  end;
@@ -501,20 +507,20 @@ begin
 end;
 
 { tcglobals }
-
+{
 constructor tcglobals.create;
 begin
  inherited create(sizeof(cglobfuncinfoty));
 end;
-
+}
 procedure tcglobals.add(const alist: tcrootdeflist; const aid: integer);
 var
- po1: phashdataty;
+ po1: pcglobfunchashdataty;
 begin
  with alist.finfos[aid] do begin
-  po1:= internaladd(name);
+  po1:= pcglobfunchashdataty(internaladd(name));
  end;
- with pcglobfuncinfoty(pointer(@(po1^.data)))^ do begin
+ with po1^.data do begin
   list:= alist;
   id:= aid;
  end;
@@ -525,9 +531,10 @@ begin
  result:= stringhash(ansistring(akey));
 end;
 
-procedure tcglobals.checkfunctioninfo(const aitem; var accept: boolean);
+procedure tcglobals.checkfunctioninfo(const aitem: phashdataty;
+                                                  var accept: boolean);
 begin
- with cglobfuncinfoty(aitem) do begin
+ with pcglobfunchashdataty(aitem)^.data do begin
   accept:= (list = flistparam) and (id = fidparam);
  end;
 end;
@@ -546,9 +553,9 @@ begin
  end;
 end;
 
-function tcglobals.checkkey(const akey; const aitemdata): boolean;
+function tcglobals.checkkey(const akey; const aitem: phashdataty): boolean;
 begin
- with cglobfuncinfoty(aitemdata) do begin
+ with pcglobfunchashdataty(aitem)^.data do begin
   with list.finfos[id] do begin
    result:= ansistring(akey) = name;
   end;
@@ -562,18 +569,23 @@ end;
 
 function tcglobals.checkfind(const aname: ansistring): pcglobfuncinfoty;
 var
- po1: phashdataty;
+ po1: pcglobfunchashdataty;
 begin
  result:= nil;
- po1:= internalfind(aname);
+ po1:= pcglobfunchashdataty(internalfind(aname));
  if po1 = nil then begin
   fansistringparam:= aname;
   projecttree.cmodules.parse({$ifdef FPC}@{$endif}checkfindname);
-  po1:= internalfind(aname);
+  po1:= pcglobfunchashdataty(internalfind(aname));
  end;
  if po1 <> nil then begin
-  result:= pcglobfuncinfoty(@po1^.data);
+  result:= @po1^.data;
  end;
+end;
+
+function tcglobals.getrecordsize(): int32;
+begin
+ result:= sizeof(cglobfunchashdataty);
 end;
 
 function tcglobals.finddef(const aname: ansistring): pdefinfoty;
@@ -591,12 +603,12 @@ end;
 
 function tcglobals.findfunction(const aname: ansistring): pfunctioninfoty;
 var
- po1: phashdataty;
+ po1: pcglobfunchashdataty;
 begin
  result:= nil;
- po1:= internalfind(aname);
+ po1:= pcglobfunchashdataty(internalfind(aname));
  if po1 <> nil then begin
-  with pcglobfuncinfoty(@po1^.data)^ do begin
+  with po1^.data do begin
    with list.unitinfopo^ do begin
     if proglang = pl_c then begin
      result:= c.functions.find(aname);
