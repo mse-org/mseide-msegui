@@ -198,6 +198,7 @@ type
    fnote: byte;
    fnoterange: integer;
    procedure checkeventindex(const aitem: phashdataty; var accept: boolean);
+  protected
    function getrecordsize(): int32 override;
   public
 //   constructor create;

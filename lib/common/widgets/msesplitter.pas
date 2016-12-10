@@ -1458,10 +1458,12 @@ begin
  i1:= high(fwidgets);
  if i1 > 0 then begin
   space:= space + fplace_mindist * i1;
+ end;
+ if i1 >= 0 then begin
   if plo_propmargin in fplace_options then begin
    space:= space + 2 * fplace_mindist;
   end;
- end; 
+ end;
  fix:= space;
  for i1:= 0 to high(fwidgetinfos) do begin
   with fwidgetinfos[i1],widget do begin
@@ -1526,10 +1528,12 @@ begin
  i1:= high(fwidgets);
  if i1 > 0 then begin
   space:= space + fplace_mindist * i1;
+ end;
+ if i1 >= 0 then begin
   if plo_propmargin in fplace_options then begin
    space:= space + 2 * fplace_mindist;
   end;
- end; 
+ end;
  fix:= space;
  for i1:= 0 to high(fwidgetinfos) do begin
   with fwidgetinfos[i1],widget do begin
