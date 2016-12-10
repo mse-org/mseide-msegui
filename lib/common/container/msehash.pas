@@ -50,7 +50,8 @@ type
  findcheckprocty = procedure(const aitem: phashdataty;
                                           var accept: boolean) of object;
 
- hashliststatety = (hls_needsnull,hls_needsfinalize,hls_destroying);
+ hashliststatety = (hls_needsnull,hls_needsinit,hls_needsfinalize,
+                                                       hls_destroying);
  hashliststatesty = set of hashliststatety;
 
  thashdatalist = class
@@ -106,7 +107,8 @@ type
    function getrecordsize(): int32 virtual abstract;
    procedure rehash;
    procedure grow;
-   procedure finalizeitem(const aitem: phashdataty); virtual;
+   procedure inititem(const aitem: phashdataty) virtual;
+   procedure finalizeitem(const aitem: phashdataty) virtual;
    procedure internaliterate(
                        const aiterator: internalhashiteratorprocty); overload;
    procedure iterate(const akey; 
@@ -931,6 +933,9 @@ begin
  result^.header.nextlist:= 0;
  fassignedlast:= puint1; //new item is last
  inc(fcount);
+ if hls_needsinit in fstate then begin
+  inititem(result);
+ end;
 {$ifdef mse_debug_hash}
  checkhash;
 {$endif}
@@ -1148,6 +1153,11 @@ begin
    inc(pchar(po1),phashheaderty(po1)^.nextlist);
   end;
  end;
+end;
+
+procedure thashdatalist.inititem(const aitem: phashdataty);
+begin
+ //dummy
 end;
 
 procedure thashdatalist.finalizeitem(const aitem: phashdataty);
