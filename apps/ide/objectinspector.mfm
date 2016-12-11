@@ -134,7 +134,7 @@ object objectinspectorfo: tobjectinspectorfo
     bounds_cx = 244
     bounds_cy = 224
     anchors = [an_top, an_bottom]
-    optionsgrid = [og_colsizing, og_colmoving, og_focuscellonenter, og_colchangeontabkey, og_wrapcol]
+    optionsgrid = [og_colsizing, og_colmoving, og_colchangeontabkey, og_wrapcol]
     optionsgrid1 = [og1_noresetselect]
     rowcolors.count = 1
     rowcolors.items = (
