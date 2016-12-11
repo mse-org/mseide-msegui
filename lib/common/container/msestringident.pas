@@ -32,17 +32,6 @@ type
  pidentheaderty = ^identheaderty;
  identoffsetty = int32;
  
- indexidentdataty = record
-  key: identnamety; //index of null terminated string
-  data: identty;
- end;
- pindexidentdataty = ^indexidentdataty;
- indexidenthashdataty = record
-  header: hashheaderty;
-  data: indexidentdataty;
- end;
- pindexidenthashdataty = ^indexidenthashdataty;
-
  identdataty = record
   header:identheaderty;
   keyname: identoffsetty; //
@@ -54,8 +43,33 @@ type
  end;
  pidenthashdataty = ^identhashdataty;
 
+ tidenthashdatalist = class(thashdatalist)
+  protected
+   function hashkey(const akey): hashvaluety; override;
+   function checkkey(const akey; const aitem: phashdataty): boolean; override;
+   function getrecordsize(): int32 override;
+  public
+//   constructor create(const asize: int32); 
+                    //total datasize including identheaderty
+   function adduniquedata(const akey: identty;
+                                   out adata: pidenthashdataty): boolean;
+                              //false if duplicate
+ end;
+
  tstringidents = class;
- tidenthashdatalist = class;
+// tidenthashdatalist = class;
+
+ indexidentdataty = record
+  key: identnamety; //index of null terminated string
+  data: identty;
+ end;
+ pindexidentdataty = ^indexidentdataty;
+ indexidenthashdataty = record
+  header: hashheaderty;
+  data: indexidentdataty;
+ end;
+ pindexidenthashdataty = ^indexidenthashdataty;
+
  tindexidenthashdatalist = class(thashdatalist)
 // {$ifdef mse_debugparser}
   private
@@ -64,7 +78,8 @@ type
   protected
    fowner: tstringidents;
    function hashkey(const akey): hashvaluety; override;
-   function checkkey(const akey; const aitemdata): boolean; override;
+   function checkkey(const akey; const aitem: phashdataty): boolean; override;
+   function getrecordsize(): int32 override;
   public
    constructor create(const aowner: tstringidents);
    destructor destroy; override;
@@ -72,17 +87,6 @@ type
    function identname(const aident: identty; out aname: lstringty): boolean;
    function identname(const aident: identty; out aname: identnamety): boolean;
    function getident(const aname: lstringty): pindexidenthashdataty;
- end;
-
- tidenthashdatalist = class(thashdatalist)
-  protected
-   function hashkey(const akey): hashvaluety; override;
-   function checkkey(const akey; const aitemdata): boolean; override;
-  public
-   constructor create(const asize: int32); 
-                    //total datasize including identheaderty
-   function adduniquedata(const akey: identty; out adata: pointer): boolean;
-                              //false if duplicate
  end;
  
  tstringidents = class
@@ -366,33 +370,39 @@ begin
 end;
 
 { tidenthashdatalist }
-
+{
 constructor tidenthashdatalist.create(const asize: int32);
 begin
  inherited create(asize);
 end;
-
+}
 function tidenthashdatalist.hashkey(const akey): hashvaluety;
 begin
  result:= identty(akey);
 end;
 
-function tidenthashdatalist.checkkey(const akey; const aitemdata): boolean;
+function tidenthashdatalist.checkkey(const akey;
+                            const aitem: phashdataty): boolean;
 begin
- result:= identty(akey) = identheaderty(aitemdata).ident;
+ result:= identty(akey) = pidenthashdataty(aitem)^.data.header.ident;
+end;
+
+function tidenthashdatalist.getrecordsize(): int32;
+begin
+ result:= sizeof(identhashdataty);
 end;
 
 function tidenthashdatalist.adduniquedata(const akey: identty;
-                                         out adata: pointer): boolean;
+                                         out adata: pidenthashdataty): boolean;
 begin
- adata:= internalfind(akey);
+ adata:= pidenthashdataty(internalfind(akey));
  result:= adata = nil;
  if result then begin
-  adata:= addr(internaladd(akey)^.data);
-  pidentheaderty(adata)^.ident:= akey;
- end
- else begin
-  inc(adata,sizeof(hashheaderty));
+  adata:= pidenthashdataty(internaladd(akey));
+  adata^.data.header.ident:= akey;
+// end
+// else begin
+//  inc(adata,sizeof(hashheaderty));
  end;
 end;
 
@@ -401,14 +411,19 @@ end;
 constructor tindexidenthashdatalist.create(const aowner: tstringidents);
 begin
  fowner:= aowner;
- inherited create(sizeof(indexidentdataty));
- fidents:= tidenthashdatalist.create(sizeof(identdataty));
+ inherited create();
+ fidents:= tidenthashdatalist.create();
 end;
 
 destructor tindexidenthashdatalist.destroy;
 begin
  inherited;
  fidents.free;
+end;
+
+function tindexidenthashdatalist.getrecordsize(): int32;
+begin
+ result:= sizeof(indexidenthashdataty);
 end;
 
 procedure tindexidenthashdatalist.clear;
@@ -509,7 +524,8 @@ begin
  end;
 end;
 
-function tindexidenthashdatalist.checkkey(const akey; const aitemdata): boolean;
+function tindexidenthashdatalist.checkkey(const akey;
+                                const aitem: phashdataty): boolean;
 var
  po1,po2: pchar;
  int1: integer;
@@ -517,7 +533,7 @@ begin
  result:= false;
  with lstringty(akey) do begin
   po1:= po;
-  po2:= fowner.fstringdata + indexidentdataty(aitemdata).key.offset + 
+  po2:= fowner.fstringdata + pindexidenthashdataty(aitem)^.data.key.offset + 
                                                   sizeof(identbufferty);
   for int1:= 0 to len-1 do begin
   {$ifdef caseinsensitive}

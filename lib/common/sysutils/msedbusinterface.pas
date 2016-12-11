@@ -232,6 +232,11 @@ type
   data: dbusinfoty;
  end;
  pdbusitemty = ^dbusitemty;
+ dbusitemhashdataty = record
+  header: hashheaderty;
+  data: dbusitemty;
+ end;
+ pdbusitemhashdataty = ^dbusitemhashdataty;
 
  tdbuscontroller = class;
  
@@ -242,7 +247,7 @@ type
    fserial: card32;
   protected
    fowner: tdbuscontroller;
-   procedure finalizeitem(var aitemdata) override;
+   procedure finalizeitem(const aitem: phashdataty) override;
    procedure dopollcallback(const aflags: pollflagsty; const adata: pointer);
    function findwatch(const key: pdbuswatch): pwatchinfoty;
    function findtimeout(const key: pdbustimeout): ptimeoutinfoty;
@@ -255,6 +260,7 @@ type
                 //source = 1 -> dest destroyed
    procedure objevent(const sender: iobjectlink; const event: objecteventty);
    function getinstance: tobject;
+   function getrecordsize(): int32 override;
   public
    constructor create(const aowner: tdbuscontroller);
    function addwatch(const key: pdbuswatch): pwatchinfoty;
@@ -715,18 +721,23 @@ end;
 constructor tdbusitemhashdatalist.create(const aowner: tdbuscontroller);
 begin
  fowner:= aowner;
- inherited create(sizeof(dbusitemty));
+ inherited create();
  include(fstate,hls_needsfinalize);
+end;
+
+function tdbusitemhashdatalist.getrecordsize(): int32;
+begin
+ result:= sizeof(dbusitemhashdataty);
 end;
 
 function tdbusitemhashdatalist.addwatch(const key: pdbuswatch): pwatchinfoty;
 var
- p1: pdbusinfoty;
+ p1: pdbusitemhashdataty;
 begin
- p1:= add(key);
- p1^.kind:= dbk_watch;
- result:= @p1^.watch;
- additem(fwatches,getdataoffset(result));
+ p1:= pdbusitemhashdataty(add(key));
+ p1^.data.data.kind:= dbk_watch;
+ result:= @p1^.data.data.watch;
+ additem(fwatches,getdataoffs(result));
  with result^ do begin
   flags:= [];
   watch:= key;
@@ -736,13 +747,13 @@ end;
 function tdbusitemhashdatalist.addlink(const alink: idbusclient;
                             const apending: pdbuspendingcall): plinkinfoty;
 var
- p1: pdbusinfoty;
+ p1: pdbusitemhashdataty;
 begin
- p1:= add(alink);
- p1^.kind:= dbk_link;
+ p1:= pdbusitemhashdataty(add(alink));
+ p1^.data.data.kind:= dbk_link;
  alink.link(iobjectlink(pchar(alink)+1),iobjectlink(self));
                       //create backlink
- result:= @p1^.link;
+ result:= @p1^.data.data.link;
  with result^ do begin
   link:= alink;
   pending:= apending;
@@ -753,11 +764,11 @@ function tdbusitemhashdatalist.addpending(const apending: pdbuspendingcall;
                 const alink: idbusresponse;
                                var aserial: card32): ppendinginfoty;
 var
- p1: pdbusinfoty;
+ p1: pdbusitemhashdataty;
 begin
- p1:= add(apending);
- p1^.kind:= dbk_pending;
- result:= @p1^.pending;
+ p1:= pdbusitemhashdataty(add(apending));
+ p1^.data.data.kind:= dbk_pending;
+ result:= @p1^.data.data.pending;
  with result^ do begin
   pending:= apending;
   link:= alink;
@@ -773,11 +784,11 @@ end;
 function tdbusitemhashdatalist.addobject(
                                  const aobj: idbusobject): pobjinfoty;
 var
- p1: pdbusinfoty;
+ p1: pdbusitemhashdataty;
 begin
- p1:= add(aobj);
- p1^.kind:= dbk_obj;
- result:= @p1^.obj;
+ p1:= pdbusitemhashdataty(add(aobj));
+ p1^.data.data.kind:= dbk_obj;
+ result:= @p1^.data.data.obj;
  with result^ do begin
   obj:= aobj;
   path:= nil;
@@ -785,15 +796,15 @@ begin
  end;
 end;
 
-procedure tdbusitemhashdatalist.finalizeitem(var aitemdata);
+procedure tdbusitemhashdatalist.finalizeitem(const aitem: phashdataty);
 var
- p1: pdbusinfoty;
+ p1: pdbusitemhashdataty;
 begin
- with dbusitemty(aitemdata) do begin
+ with pdbusitemhashdataty(aitem)^.data do begin
   case data.kind of
    dbk_watch: begin
     gui_removepollfd(data.watch.id);
-    removeitem(integerarty(fwatches),getdataoffset(@data.watch));
+    removeitem(integerarty(fwatches),getdataoffs(@data.watch));
    end;
    dbk_timeout: begin
     data.timeout.timer.free;
@@ -805,17 +816,17 @@ begin
                        //remove backlink
     end;
     if data.link.pending <> nil then begin
-     p1:= find(data.link.pending);
-     if (p1 <> nil) and (p1^.kind = dbk_pending) then begin
-      p1^.pending.link:= nil;
+     p1:= pdbusitemhashdataty(find(data.link.pending));
+     if (p1 <> nil) and (p1^.data.data.kind = dbk_pending) then begin
+      p1^.data.data.pending.link:= nil;
      end;
     end;
    end;
    dbk_pending: begin
     if data.pending.link <> nil then begin
-     p1:= find(data.pending.link);
-     if (p1 <> nil) and (p1^.kind = dbk_link) then begin
-      p1^.link.pending:= nil;
+     p1:= pdbusitemhashdataty(find(data.pending.link));
+     if (p1 <> nil) and (p1^.data.data.kind = dbk_link) then begin
+      p1^.data.data.link.pending:= nil;
      end;
     end;
    end;
@@ -833,55 +844,56 @@ end;
 procedure tdbusitemhashdatalist.dopollcallback(const aflags: pollflagsty;
                const adata: pointer);
 var
- p1: pdbusinfoty;
+ p1: pdbusitemhashdataty;
 begin
- p1:= find(adata);
- if (p1 <> nil) and (p1^.kind = dbk_watch) then begin //throw no exception
+ p1:= pdbusitemhashdataty(find(adata));
+ if (p1 <> nil) and (p1^.data.data.kind = dbk_watch) then begin 
+                             //throw no exception
 {$ifdef mse_debugdbus}
-  if p1^.watch.flags <> aflags then begin
+  if p1^.data.data.watch.flags <> aflags then begin
    writeln('**dopollcallback:',int32(aflags));
   end;
 {$endif}
-  p1^.watch.flags:= p1^.watch.flags + aflags;
+  p1^.data.data.watch.flags:= p1^.data.data.watch.flags + aflags;
  end;
 end;
 
 function tdbusitemhashdatalist.findwatch(const key: pdbuswatch): pwatchinfoty;
 begin
- result:= find(key);
+ result:= pointer(find(key));
  if result = nil then begin
   raiseerror('Watch not found');
  end;
- if pdbusinfoty(pointer(result))^.kind <> dbk_watch then begin
+ if pdbusitemhashdataty(result)^.data.data.kind <> dbk_watch then begin
   raiseerror('Invalid watch');
  end;
- result:= @pdbusinfoty(pointer(result))^.watch;
+ result:= @pdbusitemhashdataty(result)^.data.data.watch;
 end;
 
 function tdbusitemhashdatalist.findtimeout(
               const key: pdbustimeout): ptimeoutinfoty;
 begin
- result:= find(key);
+ result:= pointer(find(key));
  if result = nil then begin
   raiseerror('Timeout not found');
  end;
- if pdbusinfoty(pointer(result))^.kind <> dbk_timeout then begin
+ if pdbusitemhashdataty(result)^.data.data.kind <> dbk_timeout then begin
   raiseerror('Invalid timeout');
  end;
- result:= @pdbusinfoty(pointer(result))^.timeout;
+ result:= @pdbusitemhashdataty(result)^.data.data.timeout;
 end;
 
 function tdbusitemhashdatalist.findpending(
                               const key: pdbuspendingcall): ppendinginfoty;
 begin
- result:= find(key);
+ result:= pointer(find(key));
  if result = nil then begin
   raiseerror('Pendingcall not found');
  end;
- if pdbusinfoty(pointer(result))^.kind <> dbk_pending then begin
+ if pdbusitemhashdataty(result)^.data.data.kind <> dbk_pending then begin
   raiseerror('Invalid pendingcall');
  end;
- result:= @pdbusinfoty(pointer(result))^.pending;
+ result:= @pdbusitemhashdataty(result)^.data.data.pending;
 end;
 
 procedure tdbusitemhashdatalist.link(const source: iobjectlink;
@@ -1725,7 +1737,7 @@ var
 begin
  meth1:= @dotimer;
  tmethod(meth1).data:= atimeout;
- with pdbusinfoty(fitems.add(atimeout))^ do begin
+ with pdbusitemhashdataty(fitems.add(atimeout))^.data.data do begin
   kind:= dbk_timeout;
   with timeout do begin
    timer:= tsimpletimer.create(0,meth1);

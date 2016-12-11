@@ -169,7 +169,7 @@ type
    fowner: pmoduleinfoty;
   protected
    procedure finalizeitem(const aitem: phashdataty); override;
-   function find(const value: tobject): pcomponentinfoty;
+   function find(const value: tobject): pcomponentshashdataty;
    procedure destroynotification(const acomponent: tcomponent);
    procedure swapcomponent(const old,new: tcomponent);
    function getrecordsize(): int32 override;
@@ -2090,25 +2090,28 @@ end;
 
 function tmethods.findmethod(const aadress: pointer): pmethodinfoty;
 begin
- result:= pmethodinfoty(find(ptruint(aadress)));
+ result:= pointer(find(ptruint(aadress)));
+ if result <> nil then begin
+  result:= @pmethodshashdataty(result)^.data.data;
+ end;
 end;
 
 function tmethods.findmethodbyname(const aname: string;
                 const atype: ptypeinfo; out namefound: boolean): pmethodinfoty;
 var
  int1: integer;
- po1: pmethodsdataty;
+ po1: pmethodshashdataty;
  str1: string;
 begin
  str1:= uppercase(aname);
  result:= nil;
  namefound:= false;
  for int1:= 0 to count - 1 do begin
-  po1:= pmethodsdataty(next);
-  if uppercase(po1^.data.name) = str1 then begin
+  po1:= pmethodshashdataty(next);
+  if uppercase(po1^.data.data.name) = str1 then begin
    namefound:= true;
-   if (po1^.data.typeinfo = atype) then begin
-    result:= @po1^.data;
+   if (po1^.data.data.typeinfo = atype) then begin
+    result:= @po1^.data.data;
     break;
    end;
   end;
@@ -2232,18 +2235,18 @@ begin
  comp.freenotification(fcomponent);
 end;
 
-function tcomponents.find(const value: tobject): pcomponentinfoty;
+function tcomponents.find(const value: tobject): pcomponentshashdataty;
 begin
- result:= pcomponentinfoty(inherited find(ptruint(value)));
+ result:= pcomponentshashdataty(inherited find(ptruint(value)));
 end;
 
 procedure tcomponents.swapcomponent(const old,new: tcomponent);
 var
- po1: pcomponentinfoty;
+ po1: pcomponentshashdataty;
 begin
  po1:= find(old);
  if po1 <> nil then begin
-  po1^.instance:= new;
+  po1^.data.data.instance:= new;
   old.removefreenotification(fcomponent);
   new.freenotification(fcomponent);
  end;
@@ -2309,11 +2312,11 @@ end;
 procedure tcomponents.namechanged(const acomponent: tcomponent;
                                             const newname: string);
 var
- po1: pcomponentinfoty;
+ po1: pcomponentshashdataty;
 begin
  po1:= find(acomponent);
  if po1 <> nil then begin
-  po1^.name:= newname;
+  po1^.data.data.name:= newname;
  end;
 end;
 
