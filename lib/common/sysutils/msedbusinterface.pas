@@ -176,7 +176,10 @@ function dbuscallmethod(const bus_name,path,iface,method: string;
                const resulttypes: array of dbusdataty;
                const results: array of pointer;
                const timeout: int32 = -1): boolean; //blocking, true if ok
-               
+procedure dbusreply(const amessage: pdbusmessage; 
+                     const paramtypes: array of dbusdataty;
+                                  const params: array of pointer);
+
 {$ifdef mse_dumpdbus}
 function dbusdumpmessage(const amessage: pdbusmessage): string;
 {$endif}
@@ -206,13 +209,15 @@ type
  pendinginfoty = record
   pending: pdbuspendingcall;
   serial: card32;
-  link: idbusresponse;
+  link: hashoffsetty;
+  prev: hashoffsetty;
+  next: hashoffsetty;
  end;
  ppendinginfoty = ^pendinginfoty;
 
  linkinfoty = record
   link: idbusclient;
-  pending: pdbuspendingcall;
+  pending: hashoffsetty; //chain
  end;
  plinkinfoty = ^linkinfoty;
  
@@ -273,7 +278,7 @@ type
    constructor create(const aowner: tdbuscontroller);
    function addwatch(const key: pdbuswatch): pwatchinfoty;
    function addlink(const alink: idbusclient;
-                            const apending: pdbuspendingcall): plinkinfoty;
+                            const apending: hashoffsetty): plinkinfoty;
    function addpending(const apending: pdbuspendingcall;
                                const alink: idbusresponse;
                                var aserial: card32): ppendinginfoty;
@@ -339,7 +344,10 @@ type
    procedure raisedbuserror();
    procedure doidle(var again: boolean);
    procedure dopendingcallback(pending: pDBusPendingCall; user_data: pointer);
-   function setupmessage(const bus_name,path,iface,method: string;
+   procedure setupmessage(const amessage: pdbusmessage;
+                             const paramtypes: array of dbusdataty;
+                             const params: array of pointer);
+   function methodcall(const bus_name,path,iface,method: string;
                              const paramtypes: array of dbusdataty;
                              const params: array of pointer): pdbusmessage;
    procedure dounregisterobj(const aobj: pobjinfoty);
@@ -381,6 +389,9 @@ type
                const resulttypes: array of dbusdataty;
                const results: array of pointer): boolean;
                                   //true if ok
+   procedure reply(const amessage: pdbusmessage; 
+                         const paramtypes: array of dbusdataty;
+                                        const params: array of pointer);
  end;
  
 var
@@ -701,6 +712,15 @@ begin
  end;
 end;
 
+procedure dbusreply(const amessage: pdbusmessage; 
+                     const paramtypes: array of dbusdataty;
+                                  const params: array of pointer);
+begin
+ if checkconnect() then begin
+  fdbc.reply(amessage,paramtypes,params);
+ end;
+end;
+
 function addwatch(watch: pDBusWatch; data: pointer): dbus_bool_t
                                     {$ifdef wincall}stdcall{$else}cdecl{$endif};
 begin
@@ -784,17 +804,29 @@ begin
 end;
 
 function tdbusitemhashdatalist.addlink(const alink: idbusclient;
-                            const apending: pdbuspendingcall): plinkinfoty;
+                            const apending: hashoffsetty): plinkinfoty;
 var
- p1: pdbusitemhashdataty;
+ p1,p2: pdbusitemhashdataty;
 begin
- p1:= pdbusitemhashdataty(add(alink));
- p1^.data.data.kind:= dbk_link;
- alink.link(iobjectlink(pchar(alink)+1),iobjectlink(self));
+ p1:= pdbusitemhashdataty(find(alink));
+ if p1 = nil then begin
+  p1:= pdbusitemhashdataty(add(alink));
+  p1^.data.data.kind:= dbk_link;
+  alink.link(iobjectlink(pchar(alink)+1),iobjectlink(self));
                       //create backlink
+  p1^.data.data.link.pending:= 0;
+ end;
  result:= @p1^.data.data.link;
  with result^ do begin
   link:= alink;
+  if pending <> 0 then begin
+   p2:= getdatapo(pending);
+   p2^.data.data.pending.prev:= apending;
+  end;
+  p2:= getdatapo(apending);
+  p2^.data.data.pending.next:= pending;
+  p2^.data.data.pending.prev:= 0;
+  p2^.data.data.pending.link:= getdataoffs(p1);
   pending:= apending;
  end;
 end;
@@ -810,7 +842,6 @@ begin
  result:= @p1^.data.data.pending;
  with result^ do begin
   pending:= apending;
-  link:= alink;
   inc(fserial);
   if fserial = 0 then begin
    inc(fserial);
@@ -818,6 +849,7 @@ begin
   serial:= fserial;
   aserial:= serial;
  end;
+ addlink(alink,getdataoffs(p1));
 end;
 
 function tdbusitemhashdatalist.addobject(
@@ -839,6 +871,7 @@ end;
 procedure tdbusitemhashdatalist.finalizeitem(const aitem: phashdataty);
 var
  p1: pdbusitemhashdataty;
+ o1: hashoffsetty;
 begin
  with pdbusitemhashdataty(aitem)^.data do begin
   case data.kind of
@@ -855,19 +888,29 @@ begin
                                                           data.link.link);
                        //remove backlink
     end;
-    if data.link.pending <> nil then begin
-     p1:= pdbusitemhashdataty(find(data.link.pending));
-     if (p1 <> nil) and (p1^.data.data.kind = dbk_pending) then begin
-      p1^.data.data.pending.link:= nil;
+    o1:= data.link.pending;
+    while o1 <> 0 do begin
+     p1:= getdatapo(o1);
+     with p1^.data.data.pending do begin
+      o1:= next;
+      link:= 0;
      end;
     end;
    end;
    dbk_pending: begin
-    if data.pending.link <> nil then begin
-     p1:= pdbusitemhashdataty(find(data.pending.link));
-     if (p1 <> nil) and (p1^.data.data.kind = dbk_link) then begin
-      p1^.data.data.link.pending:= nil;
+    with data.pending do begin
+     if link <> 0 then begin
+      if next <> 0 then begin
+       p1:= getdatapo(next);
+       p1^.data.data.pending.prev:= prev;
+      end
+      else begin
+       if prev = 0 then begin //last pending
+        internaldelete(link);
+       end;
+      end;
      end;
+     dbus_pending_call_unref(pending);
     end;
    end;
    dbk_obj: begin
@@ -1020,14 +1063,11 @@ begin
  result:= fconn <> nil;
 end;
 
-function tdbuscontroller.setupmessage(const bus_name,path,iface,method: string;
+procedure tdbuscontroller.setupmessage(const amessage: pdbusmessage;
                              const paramtypes: array of dbusdataty;
-                             const params: array of pointer): pdbusmessage;
-
+                                    const params: array of pointer);
 var
  pte: pdbusdataty;
- m1: pdbusmessage;
-
  
  function writevalue(var iter: dbusmessageiter;
                              var pt: pdbusdataty; var pd: ppointer): boolean;
@@ -1148,33 +1188,51 @@ label
  errorlab,oklab;
 
 begin
- m1:= dbus_message_new_method_call(pointer(bus_name),pchar(path),
+ dbus_message_iter_init_append(amessage,@iter1);
+ pt:= @paramtypes[0];
+ pte:= pt + length(paramtypes);
+ pd:= @params[0];
+ pde:= pd + length(params);
+ while pd < pde do begin
+  if not writevalue(iter1,pt,pd) then begin
+   goto errorlab;
+  end;
+ end;
+ goto oklab;
+ if pt <> pte then begin
+  error('dbuscallmethod() paramtypes and params count do not match');
+  goto errorlab;
+ end;
+errorlab:
+ dbus_message_unref(amessage);
+ raiseerror(dbuslasterror);
+oklab:
+end;
+
+procedure tdbuscontroller.reply(const amessage: pdbusmessage;
+               const paramtypes: array of dbusdataty;
+               const params: array of pointer);
+var
+ m1: pdbusmessage;
+begin
+ m1:= dbus_message_new_method_return(amessage);
+ setupmessage(m1,paramtypes,params);
+ dbus_connection_send(fconn,m1,nil);
+end;
+ 
+
+function tdbuscontroller.methodcall(const bus_name,path,iface,method: string;
+                             const paramtypes: array of dbusdataty;
+                             const params: array of pointer): pdbusmessage;
+begin
+ result:= dbus_message_new_method_call(pointer(bus_name),pchar(path),
                                               pointer(iface),pchar(method));
- if m1 = nil then begin
+ if result = nil then begin
   outofmemory();
  end
  else begin
-  dbus_message_iter_init_append(m1,@iter1);
-  pt:= @paramtypes[0];
-  pte:= pt + length(paramtypes);
-  pd:= @params[0];
-  pde:= pd + length(params);
-  while pd < pde do begin
-   if not writevalue(iter1,pt,pd) then begin
-    goto errorlab;
-   end;
-  end;
-  goto oklab;
-  if pt <> pte then begin
-   error('dbuscallmethod() paramtypes and params count do not match');
-   goto errorlab;
-  end;
-errorlab:
-  dbus_message_unref(m1);
-  m1:= nil;
+  setupmessage(result,paramtypes,params);
  end;
-oklab:
- result:= m1;
 end;
 
 type
@@ -1195,7 +1253,7 @@ begin
  handler(message,b1);
  if b1 then begin
   result:= DBUS_HANDLER_RESULT_HANDLED;
-  dbus_message_unref(message);
+//  dbus_message_unref(message);
  end
  else begin
   result:= DBUS_HANDLER_RESULT_NOT_YET_HANDLED;
@@ -1349,11 +1407,11 @@ begin
                        dbus_message_get_member(amessage),
                        dbus_message_get_signature(amessage));
    if p1 <> nil then begin
+    handled:= true;
     try
      p1^.data.handler(amessage,p1^.data.datapo);
-    finally
-     handled:= true;
-     dbus_message_unref(amessage);
+    except
+     application.handleexception();
     end;
    end;
   end;
@@ -1428,14 +1486,13 @@ label
 begin
  result:= false;
  if checkconnect() then begin
-  m1:= setupmessage(bus_name,path,iface,method,paramtypes,params);
+  m1:= methodcall(bus_name,path,iface,method,paramtypes,params);
   if m1 <> nil then begin
    result:= dbus_connection_send_with_reply(fconn,m1,@pend1,timeout) <> 0;
    if not result then begin
     outofmemory();
     goto errorlab;
    end;
-   fitems.addlink(returnedto,pend1);
    fitems.addpending(pend1,returnedto,aserial);
    dbus_pending_call_set_notify(pend1,@pendingcallback,nil,nil);
 errorlab:
@@ -1459,7 +1516,7 @@ label
 begin
  result:= false;
  if checkconnect() then begin
-  m1:= setupmessage(bus_name,path,iface,method,paramtypes,params);
+  m1:= methodcall(bus_name,path,iface,method,paramtypes,params);
   if m1 <> nil then begin
    m2:= dbus_connection_send_with_reply_and_block(fconn,m1,timeout,err());
    if m2 = nil then begin
@@ -1672,7 +1729,6 @@ begin
 errorlab:
  end;
 end;
- 
 
 function tdbuscontroller.connect: boolean;
 var
@@ -1886,24 +1942,26 @@ begin
   dbus_connection_flush(fconn);
  end;
 end;
-
+var testvar: hashoffsetty;
 procedure tdbuscontroller.dopendingcallback(pending: pDBusPendingCall;
                user_data: pointer);
 var
  m1: pdbusmessage;
+ p1: pdbusitemhashdataty;
 begin
  m1:= dbus_pending_call_steal_reply(pending);
  with fitems.findpending(pending)^ do begin
-  if link <> nil then begin
-   link.replyed(serial,m1);
-   fitems.delete(link);
+testvar:= link;
+  if link <> 0 then begin
+   p1:= fitems.getdatapo(link);
+   idbusresponse(p1^.data.data.link.link).replyed(serial,m1);
+//   fitems.delete(link);
   end;
   fitems.delete(pending);
  end;
  if m1 <> nil then begin
   dbus_message_unref(m1);
  end;
- dbus_pending_call_unref(pending);
 end;
 
 {

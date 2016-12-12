@@ -87,6 +87,7 @@ type
    function internaladdhash(hash1: hashvaluety): phashdataty;
    procedure internaldeleteitem(const aitem: phashdataty); overload;
 //   procedure internaldeleteitem(const aitem: phashdatadataty); overload;
+   procedure internaldelete(const aoffset: hashoffsetty);
    function internaldelete(const akey; const all: boolean): boolean;
    function internalfind(const akey): phashdataty; overload;
    function internalfind(const akey;
@@ -1028,6 +1029,11 @@ begin
   checkhash;
 {$endif}
  end;
+end;
+
+procedure thashdatalist.internaldelete(const aoffset: hashoffsetty);
+begin
+ internaldeleteitem(fdata+aoffset);
 end;
 
 procedure thashdatalist.mark(out ref: hashoffsetty);
