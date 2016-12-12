@@ -634,6 +634,8 @@ function stringhash(const key: lstringty): longword; overload;
 function stringhash(const key: msestring): longword; overload;
 function stringhash(const key: lmsestringty): longword; overload;
 function pointerhash(const key: pointer): longword; inline;
+
+procedure addoffs(var dest: hashoffsetarty; const value: hashoffsetty);
  
 implementation
 uses
@@ -730,6 +732,15 @@ begin
 {$else}
  result:= scramble(ptruint(key) xor (ptruint(key) shr 2));
 {$endif}
+end;
+
+procedure addoffs(var dest: hashoffsetarty; const value: hashoffsetty);
+var
+ i1: int32;
+begin
+ i1:= length(dest);
+ setlength(dest,i1+1);
+ dest[i1]:= value;
 end;
 
 { thashdatalist }
@@ -2364,7 +2375,7 @@ function tpointeransistringhashdatalist.find(const akey: lstringty): pointer;
 begin
  result:= inherited find(akey);
  if result <> nil then begin
-  result:= ppointer(result)^;
+  result:= ppointeransistringhashdataty(result)^.data.data;
  end;
 end;
 
@@ -2631,7 +2642,7 @@ function tpointermsestringhashdatalist.find(const akey: lmsestringty): pointer;
 begin
  result:= inherited find(akey);
  if result <> nil then begin
-  result:= ppointer(result)^;
+  result:= ppointermsestringhashdataty(result)^.data.data;
  end;
 end;
 

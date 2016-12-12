@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 2016 by Martin Schreiber
+ { MSEgui Copyright (c) 2016 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -117,7 +117,10 @@ const
  );
  
 type
- messageeventty = procedure(const amessage: pdbusmessage; var handled: boolean) of object;
+ messageeventty = procedure(const amessage: pdbusmessage;
+                                  var handled: boolean) of object;
+ messagedataeventty = procedure(const amessage: pdbusmessage; 
+                                             const data: pointer) of object;
  
  idbuscontroller = interface;
  idbusobject = interface(inullinterface)
@@ -132,6 +135,10 @@ type
   procedure registeritem(const ainterface: string;
                            const apath: string; const asignature: string;
                                                const ahandler: messageeventty);
+                                                                     //not used
+  procedure registerhandler(const ainterface: string;
+                   const apath: string; const asignature: string;
+                   const ahandler: messagedataeventty; const adata: pointer);
  end;
  
  tdbusobject = class(tobject,idbusobject)
@@ -213,6 +220,7 @@ type
   obj: idbusobject;
   path: pointer; //string
   items: pointer; //stringarty
+  handlers: pointer; //hashoffsetarty
  end;
  pobjinfoty = ^objinfoty;
  
@@ -274,7 +282,34 @@ type
 //   procedure freeitems();
    procedure handlewatches();
  end;
-  
+
+ handlerdataty = record
+  handler: messagedataeventty;
+  datapo: pointer;
+ end;
+ handlerhashdataty = record
+  header: treeelementhashdataty;
+  data: handlerdataty;
+ end;
+ phandlerhashdataty = ^handlerhashdataty;
+ 
+ thandlerhashdatalist = class(thashtree)
+  private
+   fstringidents: tstringidents;
+  protected  
+   function getrecordsize(): int32 override;
+  public
+   constructor create();
+   destructor destroy(); override;
+   function scanpath(var avec: identvecty; 
+                     const apath: pchar; const aseparator: char): boolean;
+                                        //true if ok, too many levels otherwise
+   function add(const aobject,ainterface,apath,asignature: pchar;
+                            out adata: phandlerhashdataty): hashoffsetty;
+   function find(const aobject,ainterface,apath,
+                                       asignature: pchar): phandlerhashdataty;
+ end;
+ 
  tdbuscontroller = class(tobject,idbuscontroller)
   private
    fconn: pdbusconnection;
@@ -283,6 +318,7 @@ type
    fbusname: string;
    fitems: tdbusitemhashdatalist;
    fregisteringobj: pobjinfoty;
+   fhandlers: thandlerhashdatalist;
 //   fwatches: array of pwatchinfoty;
 //   ftimeouts: array of ptimeoutinfoty;
 //   fpendings: array of ppendinfoty;
@@ -320,6 +356,9 @@ type
     //idbuscontroller
    procedure registerobject(const sender: idbusobject);
    procedure unregisterobject(const sender: idbusobject);
+   procedure registerhandler(const ainterface: string;
+                 const apath: string; const asignature: string;
+                 const ahandler: messagedataeventty; const adata: pointer);
    procedure registeritem(const ainterface: string;
                            const apath: string; const asignature: string;
                                                const ahandler: messageeventty);
@@ -793,6 +832,7 @@ begin
   obj:= aobj;
   path:= nil;
   items:= nil;
+  handlers:= nil;
  end;
 end;
 
@@ -835,6 +875,7 @@ begin
     with data.obj do begin
      string(path):= '';
      stringarty(items):= nil;
+     hashoffsetarty(handlers):= nil;
     end;
    end;
   end;
@@ -962,6 +1003,7 @@ end;
 constructor tdbuscontroller.create();
 begin
  fitems:= tdbusitemhashdatalist.create(self);
+ fhandlers:= thandlerhashdatalist.create();
  inherited;
 end;
 
@@ -970,6 +1012,7 @@ begin
  disconnect();
  inherited;
  fitems.free();
+ fhandlers.free();
 end;
 
 function tdbuscontroller.connected: boolean;
@@ -1240,6 +1283,20 @@ begin
  end;
 end;
 
+procedure tdbuscontroller.registerhandler(const ainterface: string;
+               const apath: string; const asignature: string;
+               const ahandler: messagedataeventty; const adata: pointer);
+var
+ offs1: hashoffsetty;
+ p1: phandlerhashdataty;
+begin
+ offs1:= fhandlers.add(pointer(string(fregisteringobj^.path)),
+               pointer(ainterface),pointer(apath),pointer(asignature),p1);
+ addoffs(hashoffsetarty(fregisteringobj^.handlers),offs1);
+ p1^.data.datapo:= adata;
+ p1^.data.handler:= ahandler;
+end;
+
 procedure tdbuscontroller.doregisteritems(const aobj: pobjinfoty);
 begin
  fregisteringobj:= aobj;
@@ -1254,6 +1311,7 @@ procedure tdbuscontroller.dounregisteritems(const aobj: pobjinfoty);
 var
  p1,pe: pstring;
  s1,s2: string;
+ po1,poe: phashoffsetty;
 begin
  p1:= aobj^.items;
  s1:= string(aobj^.path)+'/';
@@ -1262,6 +1320,12 @@ begin
   s2:= s1+p1^;
   dbus_connection_unregister_object_path(fconn,pchar(s2));
   inc(p1);
+ end;
+ po1:= aobj^.handlers;
+ poe:= po1 + length(hashoffsetarty(aobj^.handlers));
+ while po1 < poe do begin
+  fhandlers.delete(po1^);  
+  inc(po1);
  end;
 end;
 
@@ -1272,10 +1336,28 @@ end;
 
 procedure tdbuscontroller.mainfilter(const amessage: pdbusmessage;
                                                       var handled: boolean);
+var
+ p1: phandlerhashdataty;
 begin
 {$ifdef mse_dumpdbus}
  write(dbusdumpmessage(amessage));
 {$endif}
+ case dbus_message_get_type(amessage) of
+  DBUS_MESSAGE_TYPE_METHOD_CALL: begin
+   p1:= fhandlers.find(dbus_message_get_path(amessage),
+                       dbus_message_get_interface(amessage),
+                       dbus_message_get_member(amessage),
+                       dbus_message_get_signature(amessage));
+   if p1 <> nil then begin
+    try
+     p1^.data.handler(amessage,p1^.data.datapo);
+    finally
+     handled:= true;
+     dbus_message_unref(amessage);
+    end;
+   end;
+  end;
+ end;
 end;
 
 procedure tdbuscontroller.rootfallback(const amessage: pdbusmessage;
@@ -1289,13 +1371,13 @@ end;
 procedure tdbuscontroller.registerobjects();
 var
  i1: int32;
- p1: pdbusitemty;
+ p1: pdbusitemhashdataty;
 begin
 // registerfallback('/',@rootfallback);
  for i1:= 0 to fitems.count - 1 do begin
   p1:= pointer(fitems.next());
-  if p1^.data.kind = dbk_obj then begin
-   doregisteritems(@p1^.data.obj);
+  if p1^.data.data.kind = dbk_obj then begin
+   doregisteritems(@p1^.data.data.obj);
   end;
  end;
 end;
@@ -1871,6 +1953,97 @@ begin
  //dummy
 end;
 }
+{ thandlerhashdatalist }
+
+constructor thandlerhashdatalist.create();
+begin
+ fstringidents:= tstringidents.create();
+ inherited;
+end;
+
+destructor thandlerhashdatalist.destroy();
+begin
+ inherited;
+ fstringidents.free();
+end;
+
+function thandlerhashdatalist.scanpath(var avec: identvecty; 
+                     const apath: pchar; const aseparator: char): boolean;
+var
+ p1,p2: pchar;
+begin
+ result:= true;
+ if apath <> nil then begin
+  p1:= apath;
+  with avec do begin
+   while p1^ <> #0 do begin
+    if high >= system.high(d) then begin
+     result:= false;
+     exit;
+    end;
+    p2:= p1;
+    while (p2^ <> aseparator) and (p2^ <> #0) do begin
+     inc(p2);
+    end;
+    inc(high);
+    d[high]:= fstringidents.getident(p1,p2);
+    if p2^ = #0 then begin
+     break;
+    end;
+    p1:= p2+1;
+   end;
+  end;
+ end;
+end;
+
+function thandlerhashdatalist.add(
+              const aobject,ainterface,apath,asignature: pchar;
+                             out adata: phandlerhashdataty): hashoffsetty;
+ procedure pathlenerror();
+ begin
+  raiseerror('Too many path elements');
+ end;//pathlenerror
+ 
+var
+ vec1: identvecty;
+begin
+ vec1.high:= -1;
+ if not  scanpath(vec1,pchar(aobject),'/') then begin
+  pathlenerror();
+ end;
+ if not  scanpath(vec1,pchar(ainterface),'.') then begin
+  pathlenerror();
+ end;
+ if not  scanpath(vec1,pchar(apath),'.') then begin
+  pathlenerror();
+ end;
+ if not  scanpath(vec1,pchar(asignature),#0) then begin
+  pathlenerror();
+ end;
+ result:= inherited add(vec1,pointer(adata));
+end;
+
+function thandlerhashdatalist.find(const aobject: pchar;
+               const ainterface: pchar; const apath: pchar;
+               const asignature: pchar): phandlerhashdataty;
+var
+ vec1: identvecty;
+begin
+ result:= nil;
+ vec1.high:= -1;
+ if scanpath(vec1,aobject,'/') and
+    scanpath(vec1,ainterface,'.') and
+    scanpath(vec1,apath,'.') and
+    scanpath(vec1,asignature,#0) then begin
+  result:= phandlerhashdataty(inherited find(vec1));
+ end;
+end;
+
+function thandlerhashdatalist.getrecordsize(): int32;
+begin
+ result:= sizeof(handlerhashdataty);
+end;
+
 initialization
  arraytypes[dbt_INVALID]:= nil;
  arraytypes[dbt_BYTE]:= typeinfo(bytearty);

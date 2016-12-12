@@ -120,7 +120,7 @@ type
    function nametolstring(const aname: identnamety): lstringty; inline;
 
    procedure clear();
-   procedure init();
+//   procedure init();
  end;
        
 implementation
@@ -304,18 +304,21 @@ var
  by1: byte;
  po1: pchar;
 begin
- wo1:= hashmask[0];
- po1:= akey.po;
- for int1:= 0 to akey.len-1 do begin
- {$ifdef caseinsensitive}
-  by1:= byte(lowerchars[po1[int1]]);
- {$else}
-  by1:= byte(po1[int1]);
- {$endif}
-  wo1:= ((wo1 + by1) xor by1);
+ result:= 0;
+ if akey.len > 0 then begin
+  wo1:= hashmask[0];
+  po1:= akey.po;
+  for int1:= 0 to akey.len-1 do begin
+  {$ifdef caseinsensitive}
+   by1:= byte(lowerchars[po1[int1]]);
+  {$else}
+   by1:= byte(po1[int1]);
+  {$endif}
+   wo1:= ((wo1 + by1) xor by1);
+  end;
+  wo1:= (wo1 xor wo1 shl 7);
+  result:= (wo1 or (longword(wo1) shl 16)) xor hashmask[akey.len and $7];
  end;
- wo1:= (wo1 xor wo1 shl 7);
- result:= (wo1 or (longword(wo1) shl 16)) xor hashmask[akey.len and $7];
 end;
 
 function tstringidents.storestring(const astr: lstringty): identnamety; 
@@ -343,6 +346,7 @@ end;
 constructor tstringidents.create();
 begin
  fidentlist:= tindexidenthashdatalist.create(self);
+ clear();
 end;
 
 destructor tstringidents.destroy();
@@ -360,15 +364,16 @@ begin
  end;
  fstringindex:= 0;
  fstringlen:= 0;
- fstringident:= 0;
+ fstringident:= idstart; //invalid
+ nextident();
 end;
-
+{
 procedure tstringidents.init();
 begin
  fstringident:= idstart; //invalid
  nextident();
 end;
-
+}
 { tidenthashdatalist }
 {
 constructor tidenthashdatalist.create(const asize: int32);
