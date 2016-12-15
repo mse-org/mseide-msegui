@@ -207,7 +207,7 @@ type
  ptimeoutinfoty = ^timeoutinfoty;
 
  pendinginfoty = record
-  pending: pdbuspendingcall;
+  pendingpo: pdbuspendingcall;
   serial: card32;
   link: hashoffsetty;
   prev: hashoffsetty;
@@ -217,7 +217,7 @@ type
 
  linkinfoty = record
   link: idbusclient;
-  pending: hashoffsetty; //chain
+  pendingoffs: hashoffsetty; //chain
  end;
  plinkinfoty = ^linkinfoty;
  
@@ -814,20 +814,20 @@ begin
   p1^.data.data.kind:= dbk_link;
   alink.link(iobjectlink(pchar(alink)+1),iobjectlink(self));
                       //create backlink
-  p1^.data.data.link.pending:= 0;
+  p1^.data.data.link.pendingoffs:= 0;
  end;
  result:= @p1^.data.data.link;
  with result^ do begin
   link:= alink;
-  if pending <> 0 then begin
-   p2:= getdatapo(pending);
+  if pendingoffs <> 0 then begin
+   p2:= getdatapo(pendingoffs);
    p2^.data.data.pending.prev:= apending;
   end;
   p2:= getdatapo(apending);
-  p2^.data.data.pending.next:= pending;
+  p2^.data.data.pending.next:= pendingoffs;
   p2^.data.data.pending.prev:= 0;
   p2^.data.data.pending.link:= getdataoffs(p1);
-  pending:= apending;
+  pendingoffs:= apending;
  end;
 end;
 
@@ -841,7 +841,7 @@ begin
  p1^.data.data.kind:= dbk_pending;
  result:= @p1^.data.data.pending;
  with result^ do begin
-  pending:= apending;
+  pendingpo:= apending;
   inc(fserial);
   if fserial = 0 then begin
    inc(fserial);
@@ -888,7 +888,7 @@ begin
                                                           data.link.link);
                        //remove backlink
     end;
-    o1:= data.link.pending;
+    o1:= data.link.pendingoffs;
     while o1 <> 0 do begin
      p1:= getdatapo(o1);
      with p1^.data.data.pending do begin
@@ -899,18 +899,22 @@ begin
    end;
    dbk_pending: begin
     with data.pending do begin
-     if link <> 0 then begin
-      if next <> 0 then begin
-       p1:= getdatapo(next);
-       p1^.data.data.pending.prev:= prev;
-      end
-      else begin
-       if prev = 0 then begin //last pending
-        internaldelete(link);
+     if prev <> 0 then begin
+      p1:= getdatapo(prev);
+      p1^.data.data.pending.next:= next;
+     end
+     else begin //first in pending chain
+      if link <> 0 then begin
+       p1:= getdatapo(link);
+       if next <> 0 then begin
+        p1^.data.data.link.pendingoffs:= next;
+       end
+       else begin
+        internaldelete(link); //empty pending chain
        end;
       end;
      end;
-     dbus_pending_call_unref(pending);
+     dbus_pending_call_unref(pendingpo);
     end;
    end;
    dbk_obj: begin
