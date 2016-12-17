@@ -79,7 +79,8 @@ type
               );
  pollflagsty = set of pollflagty;
  ppollflagsty = ^pollflagsty;
- pollcallbackty = procedure(const aflags: pollflagsty; const adata: pointer);
+ pollcallbackty = procedure(const aflags: pollflagsty;
+                                    const adata: pointer) of object;
  
  
 const

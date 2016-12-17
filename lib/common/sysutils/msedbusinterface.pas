@@ -17,7 +17,7 @@ unit msedbusinterface;
 interface
 uses
  mseglob,msectypes,msedbus,msetypes,mseclasses,mseevent,msehash,sysutils,
- msesys,msetimer,msehashstore,msestringident;
+ msesys,msetimer,msehashstore,msestringident,mselinklist;
  
 type
  dbusdataty = (
@@ -48,8 +48,8 @@ type
  idbusclient = interface(iobjectlink)
  end;
  idbusresponse = interface(idbusclient)
-  procedure replied(const serial: card32; const amessage: pdbusmessage;
-                                               const auser_data: pointer);
+  procedure replied(const serial: card32; const amessage: pdbusmessage{;
+                                               const auser_data: pointer});
  end;
  
 const
@@ -296,7 +296,7 @@ type
    function checkok(): boolean;
    procedure raisedbuserror();
    procedure doidle(var again: boolean);
-   procedure dopendingcallback(pending: pDBusPendingCall; user_data: pointer);
+   procedure dopendingcallback(pending: pDBusPendingCall{; user_data: pointer});
    procedure setupmessage(const amessage: pdbusmessage;
                              const paramtypes: array of dbusdataty;
                              const params: array of pointer);
@@ -403,7 +403,14 @@ uses
 
 const
  msebusname = 'mse.msegui.app';
-
+{
+type
+ userdatarecty = record
+  service: tdbusservice;
+  data: pointer;
+ end;
+ puserdatarecty = ^userdatarecty;
+}
 var
 // conn: pdbusconnection;
 // ferr: dbuserror;
@@ -411,6 +418,7 @@ var
 // busname: string;
 // fdbc: tdbusservice;
  dbuslibinited: boolean;
+// userdatacache: linklistty;
  
 procedure initdbuslib();
 begin
@@ -767,13 +775,6 @@ begin
  tdbusservice(data).doremovetimeout(timeout);
 end;
 
-type
- userdatarecty = record
-  service: tdbusservice;
-  data: pointer;
- end;
- puserdatarecty = ^userdatarecty;
- 
 procedure pendingcallback(pending: pDBusPendingCall; user_data: pointer)
                                     {$ifdef wincall}stdcall{$else}cdecl{$endif};
 begin
@@ -781,19 +782,22 @@ begin
 {$ifdef mse_debugdbus}
  writeln('**pendingcallback');
 {$endif}
- with puserdatarecty(user_data)^ do begin
+ tdbusservice(user_data).dopendingcallback(pending);
+{
+ with puserdatarecty(getlistitem(userdatacache,ptruint(user_data)))^ do begin
   service.dopendingcallback(pending,data);
  end;
+}
 end;
-
+{
 procedure pollcallback(const aflags: pollflagsty; const adata: pointer);
 begin
 // if fdbc <> nil then begin
- with puserdatarecty(adata)^ do begin
+ with puserdatarecty(getlistitem(userdatacache,ptruint(adata)))^ do begin
   service.fitems.dopollcallback(aflags,data);
  end;
 end;
-
+}
 { tdbusitemhashdatalist }
 
 constructor tdbusitemhashdatalist.create(const aowner: tdbusservice);
@@ -851,8 +855,7 @@ begin
 end;
 
 function tdbusitemhashdatalist.addpending(const apending: pdbuspendingcall;
-                const alink: idbusresponse;
-                               var aserial: card32): ppendinginfoty;
+            const alink: idbusresponse; var aserial: card32): ppendinginfoty;
 var
  p1: pdbusitemhashdataty;
 begin
@@ -1522,7 +1525,7 @@ begin
     goto errorlab;
    end;
    fitems.addpending(pend1,returnedto,aserial);
-   dbus_pending_call_set_notify(pend1,@pendingcallback,nil,nil);
+   dbus_pending_call_set_notify(pend1,@pendingcallback,self,nil);
 errorlab:
    dbus_message_unref(m1);
   end;
@@ -1846,7 +1849,7 @@ begin
    include(fla1,pf_out);
   end;
   p1:= fitems.addwatch(awatch);
-  gui_addpollfd(p1^.id,i2,fla1,@pollcallback,awatch);
+  gui_addpollfd(p1^.id,i2,fla1,@fitems.dopollcallback,awatch);
   updatewatch(awatch);
   result:= 1;
  end;
@@ -1971,8 +1974,8 @@ begin
  end;
 end;
 var testvar: hashoffsetty;
-procedure tdbusservice.dopendingcallback(pending: pDBusPendingCall;
-               user_data: pointer);
+procedure tdbusservice.dopendingcallback(pending: pDBusPendingCall{;
+               user_data: pointer});
 var
  m1: pdbusmessage;
  p1: pdbusitemhashdataty;
@@ -1982,7 +1985,7 @@ begin
 testvar:= link;
   if link <> 0 then begin
    p1:= fitems.getdatapo(link);
-   idbusresponse(p1^.data.data.link.link).replied(serial,m1,user_data);
+   idbusresponse(p1^.data.data.link.link).replied(serial,m1{,user_data});
 //   fitems.delete(link);
   end;
   fitems.delete(pending);
@@ -2165,4 +2168,7 @@ initialization
  arraytypes[dbt_VARIANT]:= nil;
  arraytypes[dbt_STRUCT]:= nil;
  arraytypes[dbt_DICT_ENTRY]:= nil;
+// clearlist(userdatacache,sizeof(userdatarecty),0);
+finalization
+// freelist(userdatacache);
 end.
