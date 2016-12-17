@@ -16,7 +16,9 @@ unit msedbusinterface;
 
 interface
 uses
- mseglob,msectypes,msedbus,msetypes,mseclasses,mseevent,msehash,sysutils;
+ mseglob,msectypes,msedbus,msetypes,mseclasses,mseevent,msehash,sysutils,
+ msesys,msetimer,msehashstore,msestringident;
+ 
 type
  dbusdataty = (
   dbt_INVALID,
@@ -46,7 +48,8 @@ type
  idbusclient = interface(iobjectlink)
  end;
  idbusresponse = interface(idbusclient)
-  procedure replyed(const serial: card32; const amessage: pdbusmessage);
+  procedure replied(const serial: card32; const amessage: pdbusmessage;
+                                               const auser_data: pointer);
  end;
  
 const
@@ -120,16 +123,18 @@ type
  messageeventty = procedure(const amessage: pdbusmessage;
                                   var handled: boolean) of object;
  messagedataeventty = procedure(const amessage: pdbusmessage; 
-                                             const data: pointer) of object;
+                      const data: pointer; var handled: boolean) of object;
+                                               //default false
  
- idbuscontroller = interface;
+ idbusservice = interface;
+ 
  idbusobject = interface(inullinterface)
   function getinstance: tobject;
-  procedure registeritems(const sender: idbuscontroller);
+  procedure registeritems(const sender: idbusservice);
   function getpath(): string;
 //  procedure unregisteritems(const sender: idbuscontroller);
  end;
- idbuscontroller = interface(inullinterface)
+ idbusservice = interface(inullinterface)
   procedure registerobject(const sender: idbusobject);
   procedure unregisterobject(const sender: idbusobject);
   procedure registeritem(const ainterface: string;
@@ -140,57 +145,6 @@ type
                    const apath: string; const asignature: string;
                    const ahandler: messagedataeventty; const adata: pointer);
  end;
- 
- tdbusobject = class(tobject,idbusobject)
-  protected
-   fcontroller: idbuscontroller;
-    //idbusobject
-   function getinstance(): tobject;
-   procedure registeritems(const sender: idbuscontroller) virtual;
-   function getpath(): string virtual;
-//   procedure unregisteritems(const sender: idbuscontroller) virtual;
-  public
-   constructor create(const acontroller: idbuscontroller = nil);
-   destructor destroy(); override;
- end;
-  
-var
- dbuslasterror: string;
- 
-function dbusconnect(): boolean; //true if ok
-procedure dbusdisconnect();
-function dbusid(): string;
-function dbusname(): string;
-
-function dbuscallmethod(const returnedto: idbusresponse; var serial: card32;
-               const bus_name,path,iface,method: string;
-               const paramtypes: array of dbusdataty;
-               const params: array of pointer;
-               const timeout: int32 = -1): boolean; //true if ok
-function dbusreadmessage(const amessage: pdbusmessage;
-               const resulttypes: array of dbusdataty;
-               const results: array of pointer): boolean; //true if ok
-function dbuscallmethod(const bus_name,path,iface,method: string;
-               const paramtypes: array of dbusdataty;
-               const params: array of pointer;
-               const resulttypes: array of dbusdataty;
-               const results: array of pointer;
-               const timeout: int32 = -1): boolean; //blocking, true if ok
-procedure dbusreply(const amessage: pdbusmessage; 
-                     const paramtypes: array of dbusdataty;
-                                  const params: array of pointer);
-
-{$ifdef mse_dumpdbus}
-function dbusdumpmessage(const amessage: pdbusmessage): string;
-{$endif}
-
-implementation
-uses
- msestrings,msesysintf,msearrayutils,msesys,mseguiintf,msetimer,msestringident,
- msefloattostr,mseapplication,msehashstore;
-
-const
- msebusname = 'mse.msegui.app';
 
 type
  watchinfoty = record
@@ -251,7 +205,7 @@ type
  end;
  pdbusitemhashdataty = ^dbusitemhashdataty;
 
- tdbuscontroller = class;
+ tdbusservice = class;
  
  tdbusitemhashdatalist = class(tpointerhashdatalist,iobjectlink)
   private
@@ -259,7 +213,7 @@ type
    funlinking: boolean;
    fserial: card32;
   protected
-   fowner: tdbuscontroller;
+   fowner: tdbusservice;
    procedure finalizeitem(const aitem: phashdataty) override;
    procedure dopollcallback(const aflags: pollflagsty; const adata: pointer);
    function findwatch(const key: pdbuswatch): pwatchinfoty;
@@ -275,7 +229,7 @@ type
    function getinstance: tobject;
    function getrecordsize(): int32 override;
   public
-   constructor create(const aowner: tdbuscontroller);
+   constructor create(const aowner: tdbusservice);
    function addwatch(const key: pdbuswatch): pwatchinfoty;
    function addlink(const alink: idbusclient;
                             const apending: hashoffsetty): plinkinfoty;
@@ -314,8 +268,8 @@ type
    function find(const aobject,ainterface,apath,
                                        asignature: pchar): phandlerhashdataty;
  end;
- 
- tdbuscontroller = class(tobject,idbuscontroller)
+  
+ tdbusservice = class(tobject,idbusservice)
   private
    fconn: pdbusconnection;
    ferr: dbuserror;
@@ -328,7 +282,6 @@ type
 //   ftimeouts: array of ptimeoutinfoty;
 //   fpendings: array of ppendinfoty;
   protected
-   function connect: boolean;
    procedure disconnect();
    function doaddwatch(const awatch: pdbuswatch): int32;
    procedure dowatchtoggled(const awatch: pdbuswatch);
@@ -361,6 +314,12 @@ type
    procedure registerfallback(const apath: string; 
                                         const ahandler: messageeventty);
    
+   function checkconnect(): boolean;
+  public
+   constructor create();
+   destructor destroy(); override;
+   function connected: boolean;
+   function connect: boolean;
     //idbuscontroller
    procedure registerobject(const sender: idbusobject);
    procedure unregisterobject(const sender: idbusobject);
@@ -370,10 +329,6 @@ type
    procedure registeritem(const ainterface: string;
                            const apath: string; const asignature: string;
                                                const ahandler: messageeventty);
-  public
-   constructor create();
-   destructor destroy(); override;
-   function connected: boolean;
    function dbuscallmethod(const returnedto: idbusresponse; var aserial: card32;
                const bus_name,path,iface,method: string;
                const paramtypes: array of dbusdataty;
@@ -385,21 +340,76 @@ type
                const resulttypes: array of dbusdataty;
                const results: array of pointer;
                const timeout: int32 = -1): boolean; //blocking, true if ok
-   function readmessage(const amessage: pdbusmessage;
+   function dbusreadmessage(const amessage: pdbusmessage;
                const resulttypes: array of dbusdataty;
                const results: array of pointer): boolean;
                                   //true if ok
-   procedure reply(const amessage: pdbusmessage; 
+   procedure dbusreply(const amessage: pdbusmessage; 
                          const paramtypes: array of dbusdataty;
                                         const params: array of pointer);
+   property dbusname: string read fbusname;
  end;
- 
+
+ tdbusobject = class(tobject,idbusobject)
+  protected
+   fservice: tdbusservice;
+   function getintrospectdata: string virtual;
+   procedure introspect(const amessage: pdbusmessage; const adata: pointer;
+                                                        var ahandled: boolean);
+    //idbusobject
+   function getinstance(): tobject;
+   procedure registeritems(const sender: idbusservice) virtual;
+   function getpath(): string virtual;
+//   procedure unregisteritems(const sender: idbusservice) virtual;
+  public
+   constructor create(const aservice: tdbusservice);
+   destructor destroy(); override;
+ end;
+  
+var
+ dbuslasterror: string;
+{
+function dbusconnect(): boolean; //true if ok
+procedure dbusdisconnect();
+function dbusid(): string;
+function dbusname(): string;
+
+function dbuscallmethod(const returnedto: idbusresponse; var serial: card32;
+               const bus_name,path,iface,method: string;
+               const paramtypes: array of dbusdataty;
+               const params: array of pointer;
+               const timeout: int32 = -1): boolean; //true if ok
+function dbusreadmessage(const amessage: pdbusmessage;
+               const resulttypes: array of dbusdataty;
+               const results: array of pointer): boolean; //true if ok
+function dbuscallmethod(const bus_name,path,iface,method: string;
+               const paramtypes: array of dbusdataty;
+               const params: array of pointer;
+               const resulttypes: array of dbusdataty;
+               const results: array of pointer;
+               const timeout: int32 = -1): boolean; //blocking, true if ok
+procedure dbusreply(const amessage: pdbusmessage; 
+                     const paramtypes: array of dbusdataty;
+                                  const params: array of pointer);
+}
+{$ifdef mse_dumpdbus}
+function dbusdumpmessage(const amessage: pdbusmessage): string;
+{$endif}
+
+implementation
+uses
+ msestrings,msesysintf,msearrayutils,mseguiintf,
+ msefloattostr,mseapplication;
+
+const
+ msebusname = 'mse.msegui.app';
+
 var
 // conn: pdbusconnection;
 // ferr: dbuserror;
 // busid: string;
 // busname: string;
- fdbc: tdbuscontroller;
+// fdbc: tdbusservice;
  dbuslibinited: boolean;
  
 procedure initdbuslib();
@@ -424,16 +434,16 @@ procedure outofmemory();
 begin
  error('Out of memory');
 end;
-
+(*
 function checkconnect(): boolean;
 begin
  result:= (fdbc <> nil) and fdbc.connected;
 end;
 
-function dbuscontroller(): tdbuscontroller;
+function dbuscontroller(): tdbusservice;
 begin
  if fdbc = nil then begin
-  fdbc:= tdbuscontroller.create;
+  fdbc:= tdbusservice.create;
  end;
  result:= fdbc;
 end;
@@ -478,7 +488,7 @@ begin
                                             paramtypes,params,timeout);
  end;
 end;
-
+*)
 {$ifdef mse_dumpdbus}
 function dbusdumpmessage(const amessage: pdbusmessage): string;
 var
@@ -687,7 +697,7 @@ begin
  end;
 end;
 {$endif} 
-
+(*
 function dbusreadmessage(const amessage: pdbusmessage;
                const resulttypes: array of dbusdataty;
                const results: array of pointer): boolean; //true if ok
@@ -720,64 +730,73 @@ begin
   fdbc.reply(amessage,paramtypes,params);
  end;
 end;
-
+*)
 function addwatch(watch: pDBusWatch; data: pointer): dbus_bool_t
                                     {$ifdef wincall}stdcall{$else}cdecl{$endif};
 begin
- result:= tdbuscontroller(data).doaddwatch(watch);
+ result:= tdbusservice(data).doaddwatch(watch);
 end;
 
 procedure watchtoggled(watch: pDBusWatch; data: pointer)
                                     {$ifdef wincall}stdcall{$else}cdecl{$endif};
 begin
- tdbuscontroller(data).dowatchtoggled(watch);
+ tdbusservice(data).dowatchtoggled(watch);
 end;
 
 procedure removewatch(watch: pDBusWatch; data: pointer)
                                     {$ifdef wincall}stdcall{$else}cdecl{$endif};
 begin
- tdbuscontroller(data).doremovewatch(watch);
+ tdbusservice(data).doremovewatch(watch);
 end;
 
 function addtimeout(timeout: pDBusTimeout; data: pointer): dbus_bool_t
                                     {$ifdef wincall}stdcall{$else}cdecl{$endif};
 begin
- result:= tdbuscontroller(data).doaddtimeout(timeout);
+ result:= tdbusservice(data).doaddtimeout(timeout);
 end;
 
 procedure timeouttoggled(timeout: pDBusTimeout; data: pointer)
                                     {$ifdef wincall}stdcall{$else}cdecl{$endif};
 begin
- tdbuscontroller(data).dotimeouttoggled(timeout);
+ tdbusservice(data).dotimeouttoggled(timeout);
 end;
 
 procedure removetimeout(timeout: pDBusTimeout; data: pointer)
                                     {$ifdef wincall}stdcall{$else}cdecl{$endif};
 begin
- tdbuscontroller(data).doremovetimeout(timeout);
+ tdbusservice(data).doremovetimeout(timeout);
 end;
 
+type
+ userdatarecty = record
+  service: tdbusservice;
+  data: pointer;
+ end;
+ puserdatarecty = ^userdatarecty;
+ 
 procedure pendingcallback(pending: pDBusPendingCall; user_data: pointer)
                                     {$ifdef wincall}stdcall{$else}cdecl{$endif};
 begin
- if fdbc <> nil then begin
+// if fdbc <> nil then begin
 {$ifdef mse_debugdbus}
-  writeln('**pendingcallback');
+ writeln('**pendingcallback');
 {$endif}
-  fdbc.dopendingcallback(pending,user_data);
+ with puserdatarecty(user_data)^ do begin
+  service.dopendingcallback(pending,data);
  end;
 end;
 
 procedure pollcallback(const aflags: pollflagsty; const adata: pointer);
 begin
- if fdbc <> nil then begin
-  fdbc.fitems.dopollcallback(aflags,adata);
+// if fdbc <> nil then begin
+ with puserdatarecty(adata)^ do begin
+  service.fitems.dopollcallback(aflags,data);
  end;
 end;
 
 { tdbusitemhashdatalist }
 
-constructor tdbusitemhashdatalist.create(const aowner: tdbuscontroller);
+constructor tdbusitemhashdatalist.create(const aowner: tdbusservice);
 begin
  fowner:= aowner;
  inherited create();
@@ -1045,16 +1064,16 @@ begin
  end; 
 end;
 
-{ tdbuscontroller }
+{ tdbusservice }
 
-constructor tdbuscontroller.create();
+constructor tdbusservice.create();
 begin
  fitems:= tdbusitemhashdatalist.create(self);
  fhandlers:= thandlerhashdatalist.create();
  inherited;
 end;
 
-destructor tdbuscontroller.destroy();
+destructor tdbusservice.destroy();
 begin
  disconnect();
  inherited;
@@ -1062,12 +1081,12 @@ begin
  fhandlers.free();
 end;
 
-function tdbuscontroller.connected: boolean;
+function tdbusservice.connected: boolean;
 begin
  result:= fconn <> nil;
 end;
 
-procedure tdbuscontroller.setupmessage(const amessage: pdbusmessage;
+procedure tdbusservice.setupmessage(const amessage: pdbusmessage;
                              const paramtypes: array of dbusdataty;
                                     const params: array of pointer);
 var
@@ -1213,7 +1232,7 @@ errorlab:
 oklab:
 end;
 
-procedure tdbuscontroller.reply(const amessage: pdbusmessage;
+procedure tdbusservice.dbusreply(const amessage: pdbusmessage;
                const paramtypes: array of dbusdataty;
                const params: array of pointer);
 var
@@ -1225,7 +1244,7 @@ begin
 end;
  
 
-function tdbuscontroller.methodcall(const bus_name,path,iface,method: string;
+function tdbusservice.methodcall(const bus_name,path,iface,method: string;
                              const paramtypes: array of dbusdataty;
                              const params: array of pointer): pdbusmessage;
 begin
@@ -1253,7 +1272,7 @@ var
  b1: boolean;
 begin
  tmethod(handler).data:= user_data;
- tmethod(handler).code:= @tdbuscontroller.mainfilter;
+ tmethod(handler).code:= @tdbusservice.mainfilter;
  handler(message,b1);
  if b1 then begin
   result:= DBUS_HANDLER_RESULT_HANDLED;
@@ -1301,7 +1320,7 @@ const
  );
 
 
-procedure tdbuscontroller.registerfallback(const apath: string;
+procedure tdbusservice.registerfallback(const apath: string;
                const ahandler: messageeventty);
 var
  p1: pcallbackinfoty;
@@ -1320,7 +1339,7 @@ begin
  end;
 end;
  
-procedure tdbuscontroller.registeritem(const ainterface: string;
+procedure tdbusservice.registeritem(const ainterface: string;
                            const apath: string; const asignature: string;
                                                const ahandler: messageeventty);
 var
@@ -1345,7 +1364,12 @@ begin
  end;
 end;
 
-procedure tdbuscontroller.registerhandler(const ainterface: string;
+function tdbusservice.checkconnect(): boolean;
+begin
+ result:= connected();
+end;
+
+procedure tdbusservice.registerhandler(const ainterface: string;
                const apath: string; const asignature: string;
                const ahandler: messagedataeventty; const adata: pointer);
 var
@@ -1359,17 +1383,17 @@ begin
  p1^.data.handler:= ahandler;
 end;
 
-procedure tdbuscontroller.doregisteritems(const aobj: pobjinfoty);
+procedure tdbusservice.doregisteritems(const aobj: pobjinfoty);
 begin
  fregisteringobj:= aobj;
  try
-  aobj^.obj.registeritems(idbuscontroller(self));
+  aobj^.obj.registeritems(idbusservice(self));
  finally
   fregisteringobj:= nil;
  end;
 end;
 
-procedure tdbuscontroller.dounregisteritems(const aobj: pobjinfoty);
+procedure tdbusservice.dounregisteritems(const aobj: pobjinfoty);
 var
  p1,pe: pstring;
  s1,s2: string;
@@ -1391,12 +1415,12 @@ begin
  end;
 end;
 
-procedure tdbuscontroller.unregisteritem(const apath: string);
+procedure tdbusservice.unregisteritem(const apath: string);
 begin
  dbus_connection_unregister_object_path(fconn,pchar(apath));
 end;
 
-procedure tdbuscontroller.mainfilter(const amessage: pdbusmessage;
+procedure tdbusservice.mainfilter(const amessage: pdbusmessage;
                                                       var handled: boolean);
 var
  p1: phandlerhashdataty;
@@ -1411,9 +1435,9 @@ begin
                        dbus_message_get_member(amessage),
                        dbus_message_get_signature(amessage));
    if p1 <> nil then begin
-    handled:= true;
+    handled:= false;
     try
-     p1^.data.handler(amessage,p1^.data.datapo);
+     p1^.data.handler(amessage,p1^.data.datapo,handled);
     except
      application.handleexception();
     end;
@@ -1422,7 +1446,7 @@ begin
  end;
 end;
 
-procedure tdbuscontroller.rootfallback(const amessage: pdbusmessage;
+procedure tdbusservice.rootfallback(const amessage: pdbusmessage;
                                                       var handled: boolean);
 begin
 {$ifdef mse_dumpdbus}
@@ -1430,7 +1454,7 @@ begin
 {$endif}
 end;
 
-procedure tdbuscontroller.registerobjects();
+procedure tdbusservice.registerobjects();
 var
  i1: int32;
  p1: pdbusitemhashdataty;
@@ -1444,19 +1468,19 @@ begin
  end;
 end;
 
-procedure tdbuscontroller.unregisterobjects();
+procedure tdbusservice.unregisterobjects();
 begin
 // unregisteritem('/');
 end;
 
-procedure tdbuscontroller.dounregisterobj(const aobj: pobjinfoty);
+procedure tdbusservice.dounregisterobj(const aobj: pobjinfoty);
 begin
  if fconn <> nil then begin
   dounregisteritems(aobj);
  end;
 end;
 
-procedure tdbuscontroller.registerobject(const sender: idbusobject);
+procedure tdbusservice.registerobject(const sender: idbusobject);
 var
  p1: pobjinfoty;
 begin
@@ -1469,12 +1493,12 @@ begin
  end;
 end;
 
-procedure tdbuscontroller.unregisterobject(const sender: idbusobject);
+procedure tdbusservice.unregisterobject(const sender: idbusobject);
 begin
  fitems.delete(sender);
 end;
 
-function tdbuscontroller.dbuscallmethod(const returnedto: idbusresponse;
+function tdbusservice.dbuscallmethod(const returnedto: idbusresponse;
                var aserial: card32;
                const bus_name: string; const path: string; const iface: string;
                const method: string; const paramtypes: array of dbusdataty;
@@ -1505,7 +1529,7 @@ errorlab:
  end;
 end;
 
-function tdbuscontroller.dbuscallmethod(const bus_name: string;
+function tdbusservice.dbuscallmethod(const bus_name: string;
                const path: string; const iface: string; const method: string;
                const paramtypes: array of dbusdataty;
                const params: array of pointer;
@@ -1527,7 +1551,7 @@ begin
     checkok();
    end
    else begin
-    result:= readmessage(m2,resulttypes,results);
+    result:= dbusreadmessage(m2,resulttypes,results);
     dbus_message_unref(m2);
    end;
 errorlab:
@@ -1536,7 +1560,7 @@ errorlab:
  end;
 end;
 
-function tdbuscontroller.readmessage(const amessage: pdbusmessage;
+function tdbusservice.dbusreadmessage(const amessage: pdbusmessage;
                const resulttypes: array of dbusdataty;
                const results: array of pointer): boolean; 
                                      //true if ok
@@ -1734,7 +1758,7 @@ errorlab:
  end;
 end;
 
-function tdbuscontroller.connect: boolean;
+function tdbusservice.connect: boolean;
 var
  i1,i2: int32;
  s1,s2: string;
@@ -1785,7 +1809,7 @@ begin
  end;
 end;
 
-procedure tdbuscontroller.disconnect();
+procedure tdbusservice.disconnect();
 begin
  if fconn <> nil then begin
   unregisterobjects();
@@ -1804,7 +1828,7 @@ begin
  end;
 end;
 
-function tdbuscontroller.doaddwatch(const awatch: pdbuswatch): int32;
+function tdbusservice.doaddwatch(const awatch: pdbuswatch): int32;
 var
  i1,i2: int32;
  fla1: pollflagsty;
@@ -1828,19 +1852,19 @@ begin
  end;
 end;
 
-procedure tdbuscontroller.updatewatch(const awatch: pdbuswatch);
+procedure tdbusservice.updatewatch(const awatch: pdbuswatch);
 begin
  with fitems.findwatch(awatch)^ do begin
   gui_setpollfdactive(id,dbus_watch_get_enabled(awatch) <> 0);
  end;
 end;
 
-procedure tdbuscontroller.dowatchtoggled(const awatch: pdbuswatch);
+procedure tdbusservice.dowatchtoggled(const awatch: pdbuswatch);
 begin
  updatewatch(awatch);
 end;
 
-procedure tdbuscontroller.doremovewatch(const awatch: pdbuswatch);
+procedure tdbusservice.doremovewatch(const awatch: pdbuswatch);
 //var
 // p1: pwatchinfoty;
 begin
@@ -1852,7 +1876,7 @@ begin
 }
 end;
 
-procedure tdbuscontroller.updatetimeout(const atimeout: pdbustimeout);
+procedure tdbusservice.updatetimeout(const atimeout: pdbustimeout);
 var
  i1: int32;
  b1: boolean;
@@ -1873,7 +1897,7 @@ begin
  end;
 end;
 
-function tdbuscontroller.doaddtimeout(const atimeout: pdbustimeout): int32;
+function tdbusservice.doaddtimeout(const atimeout: pdbustimeout): int32;
 var
  meth1: notifyeventty;
 begin
@@ -1890,17 +1914,17 @@ begin
  result:= 1;
 end;
 
-procedure tdbuscontroller.dotimeouttoggled(const atimeout: pdbustimeout);
+procedure tdbusservice.dotimeouttoggled(const atimeout: pdbustimeout);
 begin
  updatetimeout(atimeout);
 end;
 
-procedure tdbuscontroller.doremovetimeout(const atimeout: pdbustimeout);
+procedure tdbusservice.doremovetimeout(const atimeout: pdbustimeout);
 begin
  fitems.delete(atimeout);
 end;
 
-procedure tdbuscontroller.dotimer(const sender: tobject);
+procedure tdbusservice.dotimer(const sender: tobject);
 var
  timeout1: pdbustimeout;
 begin
@@ -1911,7 +1935,7 @@ begin
  dbus_timeout_handle(timeout1);
 end;
 
-function tdbuscontroller.err(): pdbuserror;
+function tdbusservice.err(): pdbuserror;
 begin
  if dbus_error_is_set(@ferr) <> 0 then begin
   dbus_error_free(@ferr);
@@ -1919,7 +1943,7 @@ begin
  result:= @ferr;
 end;
 
-function tdbuscontroller.checkok(): boolean;
+function tdbusservice.checkok(): boolean;
 begin
  result:= dbus_error_is_set(@ferr) = 0;
  if not result then begin
@@ -1927,14 +1951,14 @@ begin
  end;
 end;
 
-procedure tdbuscontroller.raisedbuserror();
+procedure tdbusservice.raisedbuserror();
 begin
  if not checkok() then begin
   raiseerror(dbuslasterror);
  end;
 end;
 
-procedure tdbuscontroller.doidle(var again: boolean);
+procedure tdbusservice.doidle(var again: boolean);
 begin
  if fconn <> nil then begin
 {$ifdef mse_debugdbus}
@@ -1947,7 +1971,7 @@ begin
  end;
 end;
 var testvar: hashoffsetty;
-procedure tdbuscontroller.dopendingcallback(pending: pDBusPendingCall;
+procedure tdbusservice.dopendingcallback(pending: pDBusPendingCall;
                user_data: pointer);
 var
  m1: pdbusmessage;
@@ -1958,7 +1982,7 @@ begin
 testvar:= link;
   if link <> 0 then begin
    p1:= fitems.getdatapo(link);
-   idbusresponse(p1^.data.data.link.link).replyed(serial,m1);
+   idbusresponse(p1^.data.data.link.link).replied(serial,m1,user_data);
 //   fitems.delete(link);
   end;
   fitems.delete(pending);
@@ -1969,7 +1993,7 @@ testvar:= link;
 end;
 
 {
-procedure tdbuscontroller.dofreependingcallback(memory: pointer);
+procedure tdbusservice.dofreependingcallback(memory: pointer);
 begin
  removeitem(pointerarty(fpendings),memory);
  freemem(memory);
@@ -1977,20 +2001,17 @@ end;
 }
 { tdbusobject }
 
-constructor tdbusobject.create(const acontroller: idbuscontroller);
+constructor tdbusobject.create(const aservice: tdbusservice);
 begin
- fcontroller:= acontroller;
- if fcontroller = nil then begin
-  fcontroller:= idbuscontroller(dbuscontroller);
- end;
+ fservice:= aservice;
  inherited create;
- fcontroller.registerobject(idbusobject(self));
+ fservice.registerobject(idbusobject(self));
 end;
 
 destructor tdbusobject.destroy();
 begin
- if fcontroller <> nil then begin
-  fcontroller.unregisterobject(idbusobject(self));
+ if fservice <> nil then begin
+  fservice.unregisterobject(idbusobject(self));
  end;
  inherited;
 end;
@@ -2000,17 +2021,36 @@ begin
  result:= self;
 end;
 
-procedure tdbusobject.registeritems(const sender: idbuscontroller);
+procedure tdbusobject.registeritems(const sender: idbusservice);
 begin
- //dummy
+ sender.registerhandler('org.freedesktop.DBus.Introspectable','Introspect','',
+                                                              @introspect,nil);
 end;
 
 function tdbusobject.getpath(): string;
 begin
  result:= '';
 end;
+
+function tdbusobject.getintrospectdata: string;
+begin
+ result:= '';
+end;
+
+procedure tdbusobject.introspect(const amessage: pdbusmessage;
+                               const adata: pointer; var ahandled: boolean);
+var
+ s1: string;
+begin
+ s1:= getintrospectdata();
+ if s1 <> '' then begin
+  fservice.dbusreply(amessage,[dbt_string],[@s1]);
+  ahandled:= true;
+ end;
+end;
+
 {
-procedure tdbusobject.unregisteritems(const sender: idbuscontroller);
+procedure tdbusobject.unregisteritems(const sender: idbusservice);
 begin
  //dummy
 end;
@@ -2125,6 +2165,4 @@ initialization
  arraytypes[dbt_VARIANT]:= nil;
  arraytypes[dbt_STRUCT]:= nil;
  arraytypes[dbt_DICT_ENTRY]:= nil;
-finalization
- freeandnil(fdbc);
 end.
