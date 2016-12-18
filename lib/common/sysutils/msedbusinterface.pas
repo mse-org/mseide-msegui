@@ -18,6 +18,9 @@ interface
 uses
  mseglob,msectypes,msedbus,msetypes,mseclasses,mseevent,msehash,sysutils,
  msesys,msetimer,msehashstore,msestringident,mselinklist;
+
+const
+ msebusname = 'mse.msegui.app';
  
 type
  dbusdataty = (
@@ -41,6 +44,7 @@ type
   dbt_DICT_ENTRY
  );
  pdbusdataty = ^dbusdataty;
+ dbusdatatyarty = array of dbusdataty;
  
  edbus = class(exception)
  end;
@@ -134,15 +138,16 @@ type
   function getpath(): string;
 //  procedure unregisteritems(const sender: idbuscontroller);
  end;
+
  idbusservice = interface(inullinterface)
   procedure registerobject(const sender: idbusobject);
   procedure unregisterobject(const sender: idbusobject);
   procedure registeritem(const ainterface: string;
-                           const apath: string; const asignature: string;
+                const apath: string; const asignature: string;
                                                const ahandler: messageeventty);
                                                                      //not used
   procedure registerhandler(const ainterface: string;
-                   const apath: string; const asignature: string;
+                   const apath: string; const asignature: array of dbusdataty;
                    const ahandler: messagedataeventty; const adata: pointer);
  end;
 
@@ -320,11 +325,11 @@ type
    destructor destroy(); override;
    function connected: boolean;
    function connect: boolean;
-    //idbuscontroller
+    //idbusservice
    procedure registerobject(const sender: idbusobject);
    procedure unregisterobject(const sender: idbusobject);
    procedure registerhandler(const ainterface: string;
-                 const apath: string; const asignature: string;
+                 const apath: string; const asignature: array of dbusdataty;
                  const ahandler: messagedataeventty; const adata: pointer);
    procedure registeritem(const ainterface: string;
                            const apath: string; const asignature: string;
@@ -350,11 +355,14 @@ type
    property dbusname: string read fbusname;
  end;
 
+{$typeinfo on}
  tdbusobject = class(tlinkedobject,idbusobject)
   protected
    fservice: tdbusservice;
    function getintrospectdata: string virtual;
    procedure introspect(const amessage: pdbusmessage; const adata: pointer;
+                                                        var ahandled: boolean);
+   procedure get(const amessage: pdbusmessage; const adata: pointer;
                                                         var ahandled: boolean);
     //idbusobject
    function getinstance(): tobject;
@@ -365,6 +373,7 @@ type
    constructor create(const aservice: tdbusservice);
    destructor destroy(); override;
  end;
+{$typeinfo off}
   
 var
  dbuslasterror: string;
@@ -396,13 +405,13 @@ procedure dbusreply(const amessage: pdbusmessage;
 function dbusdumpmessage(const amessage: pdbusmessage): string;
 {$endif}
 
+procedure additem(var dest: dbusdatatyarty; const value: dbusdataty);
+
 implementation
 uses
- msestrings,msesysintf,msearrayutils,mseguiintf,
- msefloattostr,mseapplication;
+ msestrings,msesysintf,mseguiintf,
+ msefloattostr,mseapplication,msearrayutils;
 
-const
- msebusname = 'mse.msegui.app';
 {
 type
  userdatarecty = record
@@ -418,6 +427,7 @@ var
 // busname: string;
 // fdbc: tdbusservice;
  dbuslibinited: boolean;
+ nextidnumber: card16;
 // userdatacache: linklistty;
  
 procedure initdbuslib();
@@ -442,6 +452,23 @@ procedure outofmemory();
 begin
  error('Out of memory');
 end;
+
+procedure additem(var dest: dbusdatatyarty; const value: dbusdataty);
+begin
+ setlength(dest,high(dest)+2);
+ dest[high(dest)]:= value;
+end;
+
+function getsignature(const asignature: array of dbusdataty): string;
+var
+ i1: int32;
+begin
+ result:= '';
+ for i1:= 0 to high(asignature) do begin
+  result:= result + dbusdatastrings[asignature[i1]];
+ end;
+end;
+
 (*
 function checkconnect(): boolean;
 begin
@@ -819,7 +846,7 @@ begin
  p1:= pdbusitemhashdataty(add(key));
  p1^.data.data.kind:= dbk_watch;
  result:= @p1^.data.data.watch;
- additem(fwatches,getdataoffs(result));
+ msearrayutils.additem(fwatches,getdataoffs(result));
  with result^ do begin
   flags:= [];
   watch:= key;
@@ -1358,7 +1385,7 @@ begin
    with p1^ do begin
     handler:= ahandler;
    end;
-   additem(stringarty(items),apath);
+   msearrayutils.additem(stringarty(items),apath);
   end
   else begin
    freemem(p1);
@@ -1370,17 +1397,22 @@ end;
 function tdbusservice.checkconnect(): boolean;
 begin
  result:= connected();
+ if not result then begin
+  result:= connect();
+ end;
 end;
 
 procedure tdbusservice.registerhandler(const ainterface: string;
-               const apath: string; const asignature: string;
+               const apath: string; const asignature: array of dbusdataty;
                const ahandler: messagedataeventty; const adata: pointer);
 var
  offs1: hashoffsetty;
  p1: phandlerhashdataty;
+ s1: string;
 begin
+ s1:= getsignature(asignature);
  offs1:= fhandlers.add(pointer(string(fregisteringobj^.path)),
-               pointer(ainterface),pointer(apath),pointer(asignature),p1);
+               pointer(ainterface),pointer(apath),pointer(s1),p1);
  addoffs(hashoffsetarty(fregisteringobj^.handlers),offs1);
  p1^.data.datapo:= adata;
  p1^.data.handler:= ahandler;
@@ -1663,7 +1695,7 @@ var
     i3:= 0;
     dbus_message_iter_recurse(iterpo,@iter2);
     while dbus_message_iter_get_arg_type(@iter2) <> DBUS_TYPE_INVALID do begin
-     additem(p1^,typ1,i3);
+     msearrayutils.additem(p1^,typ1,i3);
      p2:= ppointer(p1)^ + i1*(i3-1); //data pointer in array
      p4:= @p2;
      p3:= @t1;
@@ -1782,18 +1814,19 @@ begin
    dbus_connection_set_exit_on_disconnect(fconn,0);
    fbusid:= dbus_bus_get_unique_name(fconn);
    s1:= msebusname+'-'+inttostr(sys_getpid())+'-';
-   i1:= 0;
+   i1:= nextidnumber;
    repeat
     s2:= s1+inttostr(i1);
     i2:= dbus_bus_request_name(fconn,pchar(s2),
                                  DBUS_NAME_FLAG_DO_NOT_QUEUE,err());
     inc(i1);
-    if (i1 > 100) or (i2 < 0)  then begin
+    if (i1 > nextidnumber+200) or (i2 < 0)  then begin
      disconnect();
      exit;
     end;
-   until (i2 = DBUS_REQUEST_NAME_REPLY_PRIMARY_OWNER) or
-           (i2 = DBUS_REQUEST_NAME_REPLY_ALREADY_OWNER); //should not happen
+   until (i2 = DBUS_REQUEST_NAME_REPLY_PRIMARY_OWNER){ or
+           (i2 = DBUS_REQUEST_NAME_REPLY_ALREADY_OWNER)};
+   nextidnumber:= i1;
    fbusname:= s2;
    dbus_connection_add_filter(fconn,@filtertrampoline,self,nil);
     //start asynchronous message handling
@@ -2026,8 +2059,10 @@ end;
 
 procedure tdbusobject.registeritems(const sender: idbusservice);
 begin
- sender.registerhandler('org.freedesktop.DBus.Introspectable','Introspect','',
+ sender.registerhandler('org.freedesktop.DBus.Introspectable','Introspect',[],
                                                               @introspect,nil);
+ sender.registerhandler('org.freedesktop.DBus.Properties','Get',
+        [dbt_string,dbt_string,dbt_variant],@get,nil);
 end;
 
 function tdbusobject.getpath(): string;
@@ -2050,6 +2085,11 @@ begin
   fservice.dbusreply(amessage,[dbt_string],[@s1]);
   ahandled:= true;
  end;
+end;
+
+procedure tdbusobject.get(const amessage: pdbusmessage; const adata: pointer;
+               var ahandled: boolean);
+begin
 end;
 
 {
