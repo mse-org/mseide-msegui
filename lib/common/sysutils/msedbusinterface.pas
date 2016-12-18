@@ -269,7 +269,7 @@ type
                                        asignature: pchar): phandlerhashdataty;
  end;
   
- tdbusservice = class(tobject,idbusservice)
+ tdbusservice = class(tlinkedobject,idbusservice)
   private
    fconn: pdbusconnection;
    ferr: dbuserror;
@@ -350,7 +350,7 @@ type
    property dbusname: string read fbusname;
  end;
 
- tdbusobject = class(tobject,idbusobject)
+ tdbusobject = class(tlinkedobject,idbusobject)
   protected
    fservice: tdbusservice;
    function getintrospectdata: string virtual;
@@ -2006,7 +2006,7 @@ end;
 
 constructor tdbusobject.create(const aservice: tdbusservice);
 begin
- fservice:= aservice;
+ setlinkedvar(aservice,tlinkedobject(fservice));
  inherited create;
  fservice.registerobject(idbusobject(self));
 end;
