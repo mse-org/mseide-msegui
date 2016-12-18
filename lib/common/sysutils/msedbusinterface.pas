@@ -136,7 +136,7 @@ type
   function getinstance: tobject;
   procedure registeritems(const sender: idbusservice);
   function getpath(): string;
-  function getintrospecttext(const indent: int32): string;
+  function getintrospecttext(const aindent: int32): string;
 //  procedure unregisteritems(const sender: idbuscontroller);
  end;
 
@@ -382,11 +382,12 @@ type
                                                         var ahandled: boolean);
    procedure propgetall(const amessage: pdbusmessage; const adata: pointer;
                                                         var ahandled: boolean);
+   function getintrospectitems(): string virtual;
     //idbusobject
 //   function getinstance(): tobject;
    procedure registeritems(const sender: idbusservice) virtual;
    function getpath(): string virtual;
-   function getintrospecttext(const indent: int32): string virtual;
+   function getintrospecttext(const aindent: int32): string virtual;
 //   procedure unregisteritems(const sender: idbusservice) virtual;
   public
    constructor create(const aservice: tdbusservice);
@@ -431,6 +432,8 @@ uses
  msestrings,msesysintf,mseguiintf,
  msefloattostr,mseapplication,msearrayutils;
 
+const
+ lineend = c_linefeed;
 {
 type
  userdatarecty = record
@@ -485,6 +488,28 @@ begin
  result:= '';
  for i1:= 0 to high(asignature) do begin
   result:= result + dbusdatastrings[asignature[i1]];
+ end;
+end;
+
+function indent(const atext: string;const aindent: int32): string;
+var
+ p1,p2: pchar;
+ s1: string;
+begin
+ result:= '';
+ if atext <> '' then begin
+  s1:= charstring(' ',2*aindent);
+  p1:= pchar(atext);
+  while p1^ <> #0 do begin
+   p2:= p1;
+   while (p1^ <> #0) and (p1^ <> c_linefeed) do begin
+    inc(p1);
+   end;
+   if p1^ <> #0 then begin
+    inc(p1);
+   end;
+   result:= result+s1+psubstr(p2,p1);
+  end;
  end;
 end;
 
@@ -2166,12 +2191,13 @@ begin
  result:= '';
 end;
 
-function tdbusobject.getintrospecttext(const indent: int32): string;
+function tdbusobject.getintrospecttext(const aindent: int32): string;
 var
  s1: string;
 begin
- s1:= charstring(' ',2*indent);
+ s1:= charstring(' ',2*aindent);
  result:= s1+'<node name="'+getpath()+'">'+lineend;
+ result:= result + indent(getintrospectitems(),aindent+1);
  result:= result+s1+'</node>'+lineend;
 end;
 
@@ -2198,6 +2224,19 @@ end;
 procedure tdbusobject.propgetall(const amessage: pdbusmessage;
                const adata: pointer; var ahandled: boolean);
 begin
+end;
+
+const
+ introspectintf =
+'<interface name="org.freedesktop.DBus.Introspectable">'+lineend+
+'  <method name="Introspect">'+lineend+
+'    <arg direction="out" type="s" />'+lineend+
+'  </method>'+lineend+
+'</interface>'+lineend;
+
+function tdbusobject.getintrospectitems(): string;
+begin
+ result:= introspectintf;
 end;
 
 {
