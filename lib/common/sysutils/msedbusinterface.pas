@@ -136,15 +136,16 @@ type
   function getinstance: tobject;
   procedure registeritems(const sender: idbusservice);
   function getpath(): string;
+  function getintrospecttext(const indent: int32): string;
 //  procedure unregisteritems(const sender: idbuscontroller);
  end;
 
  idbusservice = interface(inullinterface)
   procedure registerobject(const sender: idbusobject);
   procedure unregisterobject(const sender: idbusobject);
-  procedure registeritem(const ainterface: string;
-                const apath: string; const asignature: string;
-                                               const ahandler: messageeventty);
+//  procedure registeritem(const ainterface: string;
+//                const apath: string; const asignature: string;
+//                                               const ahandler: messageeventty);
                                                                      //not used
   procedure registerhandler(const ainterface: string;
                    const apath: string; const asignature: array of dbusdataty;
@@ -181,9 +182,11 @@ type
  plinkinfoty = ^linkinfoty;
  
  objinfoty = record
+  prev: hashoffsetty;
+  next: hashoffsetty;
   obj: idbusobject;
-  path: pointer; //string
-  items: pointer; //stringarty
+//  path: pointer; //string
+//  items: pointer; //stringarty
   handlers: pointer; //hashoffsetarty
  end;
  pobjinfoty = ^objinfoty;
@@ -219,6 +222,7 @@ type
    fserial: card32;
   protected
    fowner: tdbusservice;
+   fobjects: hashoffsetty; //chain
    procedure finalizeitem(const aitem: phashdataty) override;
    procedure dopollcallback(const aflags: pollflagsty; const adata: pointer);
    function findwatch(const key: pdbuswatch): pwatchinfoty;
@@ -274,7 +278,7 @@ type
                                        asignature: pchar): phandlerhashdataty;
  end;
   
- tdbusservice = class(tlinkedobject,idbusservice)
+ tdbusservice = class(tlinkedobject,idbusservice,idbusobject)
   private
    fconn: pdbusconnection;
    ferr: dbuserror;
@@ -282,6 +286,7 @@ type
    fbusname: string;
    fitems: tdbusitemhashdatalist;
    fregisteringobj: pobjinfoty;
+   fregisteringpath: string;
    fhandlers: thandlerhashdatalist;
 //   fwatches: array of pwatchinfoty;
 //   ftimeouts: array of ptimeoutinfoty;
@@ -320,6 +325,16 @@ type
                                         const ahandler: messageeventty);
    
    function checkconnect(): boolean;
+   procedure introspect(const amessage: pdbusmessage; const adata: pointer;
+                                                        var ahandled: boolean);
+
+    //idbusobject for rootobject
+//   function getinstance: tobject;
+   procedure registeritems(const sender: idbusservice);
+   function getpath(): string;
+   function getintrospecttext(const indent: int32): string;
+//  procedure unregisteritems(const sender: idbuscontroller);
+
   public
    constructor create();
    destructor destroy(); override;
@@ -331,9 +346,9 @@ type
    procedure registerhandler(const ainterface: string;
                  const apath: string; const asignature: array of dbusdataty;
                  const ahandler: messagedataeventty; const adata: pointer);
-   procedure registeritem(const ainterface: string;
-                           const apath: string; const asignature: string;
-                                               const ahandler: messageeventty);
+//   procedure registeritem(const ainterface: string;
+//                           const apath: string; const asignature: string;
+//                                               const ahandler: messageeventty);
    function dbuscallmethod(const returnedto: idbusresponse; var aserial: card32;
                const bus_name,path,iface,method: string;
                const paramtypes: array of dbusdataty;
@@ -349,9 +364,9 @@ type
                const resulttypes: array of dbusdataty;
                const results: array of pointer): boolean;
                                   //true if ok
-   procedure dbusreply(const amessage: pdbusmessage; 
+   function dbusreply(const amessage: pdbusmessage; 
                          const paramtypes: array of dbusdataty;
-                                        const params: array of pointer);
+                                     const params: array of pointer): boolean;
    property dbusname: string read fbusname;
  end;
 
@@ -359,15 +374,19 @@ type
  tdbusobject = class(tlinkedobject,idbusobject)
   protected
    fservice: tdbusservice;
-   function getintrospectdata: string virtual;
    procedure introspect(const amessage: pdbusmessage; const adata: pointer;
                                                         var ahandled: boolean);
-   procedure get(const amessage: pdbusmessage; const adata: pointer;
+   procedure propget(const amessage: pdbusmessage; const adata: pointer;
+                                                        var ahandled: boolean);
+   procedure propset(const amessage: pdbusmessage; const adata: pointer;
+                                                        var ahandled: boolean);
+   procedure propgetall(const amessage: pdbusmessage; const adata: pointer;
                                                         var ahandled: boolean);
     //idbusobject
-   function getinstance(): tobject;
+//   function getinstance(): tobject;
    procedure registeritems(const sender: idbusservice) virtual;
    function getpath(): string virtual;
+   function getintrospecttext(const indent: int32): string virtual;
 //   procedure unregisteritems(const sender: idbusservice) virtual;
   public
    constructor create(const aservice: tdbusservice);
@@ -905,15 +924,25 @@ function tdbusitemhashdatalist.addobject(
                                  const aobj: idbusobject): pobjinfoty;
 var
  p1: pdbusitemhashdataty;
+ o1: hashoffsetty;
 begin
  p1:= pdbusitemhashdataty(add(aobj));
+ o1:= getdataoffs(p1);
  p1^.data.data.kind:= dbk_obj;
  result:= @p1^.data.data.obj;
  with result^ do begin
   obj:= aobj;
-  path:= nil;
-  items:= nil;
+//  path:= nil;
+//  items:= nil;
   handlers:= nil;
+  prev:= 0;
+  next:= fobjects;
+  if fobjects <> 0 then begin
+   with pdbusitemhashdataty(getdatapo(fobjects))^.data.data.obj do begin
+    prev:= o1;
+   end;
+  end;
+  fobjects:= o1;
  end;
 end;
 
@@ -969,8 +998,21 @@ begin
    dbk_obj: begin
     fowner.dounregisterobj(@data.obj);
     with data.obj do begin
-     string(path):= '';
-     stringarty(items):= nil;
+     if next <> 0 then begin
+      with pdbusitemhashdataty(getdatapo(next))^.data.data do begin
+       obj.prev:= prev;
+      end;
+     end;
+     if prev <> 0 then begin
+      with pdbusitemhashdataty(getdatapo(prev))^.data.data do begin
+       obj.next:= next;
+      end;
+     end
+     else begin
+      fobjects:= next;
+     end;
+//     string(path):= '';
+//     stringarty(items):= nil;
      hashoffsetarty(handlers):= nil;
     end;
    end;
@@ -1101,10 +1143,12 @@ begin
  fitems:= tdbusitemhashdatalist.create(self);
  fhandlers:= thandlerhashdatalist.create();
  inherited;
+ registerobject(idbusobject(self));
 end;
 
 destructor tdbusservice.destroy();
 begin
+ unregisterobject(idbusobject(self));
  disconnect();
  inherited;
  fitems.free();
@@ -1262,15 +1306,15 @@ errorlab:
 oklab:
 end;
 
-procedure tdbusservice.dbusreply(const amessage: pdbusmessage;
+function tdbusservice.dbusreply(const amessage: pdbusmessage;
                const paramtypes: array of dbusdataty;
-               const params: array of pointer);
+               const params: array of pointer): boolean;
 var
  m1: pdbusmessage;
 begin
  m1:= dbus_message_new_method_return(amessage);
  setupmessage(m1,paramtypes,params);
- dbus_connection_send(fconn,m1,nil);
+ result:= dbus_connection_send(fconn,m1,nil) <> 0;
 end;
  
 
@@ -1368,7 +1412,7 @@ begin
   raisedbuserror();
  end;
 end;
- 
+{ 
 procedure tdbusservice.registeritem(const ainterface: string;
                            const apath: string; const asignature: string;
                                                const ahandler: messageeventty);
@@ -1378,7 +1422,7 @@ var
 begin
  p1:= getmem(sizeof(callbackinfoty));
  with fregisteringobj^ do begin
-  s1:= pchar(string(path)+'/'+apath);
+  s1:= pchar(fregisteringpath+'/'+apath);
   if dbus_connection_try_register_object_path(fconn,
                pchar(s1),
                @dbuscallbackvtable,p1,err) <> 0 then begin
@@ -1393,13 +1437,54 @@ begin
   end;
  end;
 end;
-
+}
 function tdbusservice.checkconnect(): boolean;
 begin
  result:= connected();
  if not result then begin
   result:= connect();
  end;
+end;
+
+const
+ introspectheader =
+'<!DOCTYPE node PUBLIC "-//freedesktop//DTD D-BUS Object Introspection 1.0//EN"'+lineend+
+'"http://www.freedesktop.org/standards/dbus/1.0/introspect.dtd">'+lineend;
+
+procedure tdbusservice.introspect(const amessage: pdbusmessage;
+               const adata: pointer; var ahandled: boolean);
+var
+ s1,s2: string;
+ o1: hashoffsetty;
+begin
+ s1:= introspectheader+'<node>'+lineend;
+ o1:= fitems.fobjects;
+ while o1 <> 0 do begin
+  with pdbusitemhashdataty(fitems.getdatapo(o1))^.data.data.obj do begin
+   s1:= s1+obj.getintrospecttext(1);
+   o1:= next;
+  end;
+ end;
+ s1:= s1+'</node>'+lineend;
+ if dbusreply(amessage,[dbt_string],[@s1]) then begin
+  ahandled:= true;
+ end;
+end;
+
+procedure tdbusservice.registeritems(const sender: idbusservice);
+begin
+ sender.registerhandler('org.freedesktop.DBus.Introspectable','Introspect',[],
+                                                              @introspect,nil);
+end;
+
+function tdbusservice.getpath(): string;
+begin
+ result:= '';
+end;
+
+function tdbusservice.getintrospecttext(const indent: int32): string;
+begin
+ result:= ''; //dummy
 end;
 
 procedure tdbusservice.registerhandler(const ainterface: string;
@@ -1411,7 +1496,7 @@ var
  s1: string;
 begin
  s1:= getsignature(asignature);
- offs1:= fhandlers.add(pointer(string(fregisteringobj^.path)),
+ offs1:= fhandlers.add(pointer(string(fregisteringpath)),
                pointer(ainterface),pointer(apath),pointer(s1),p1);
  addoffs(hashoffsetarty(fregisteringobj^.handlers),offs1);
  p1^.data.datapo:= adata;
@@ -1421,10 +1506,12 @@ end;
 procedure tdbusservice.doregisteritems(const aobj: pobjinfoty);
 begin
  fregisteringobj:= aobj;
+ fregisteringpath:= '/'+aobj^.obj.getpath();
  try
   aobj^.obj.registeritems(idbusservice(self));
  finally
   fregisteringobj:= nil;
+  fregisteringpath:= '';
  end;
 end;
 
@@ -1434,6 +1521,7 @@ var
  s1,s2: string;
  po1,poe: phashoffsetty;
 begin
+{
  p1:= aobj^.items;
  s1:= string(aobj^.path)+'/';
  pe:= p1 + length(stringarty(aobj^.items));
@@ -1442,6 +1530,7 @@ begin
   dbus_connection_unregister_object_path(fconn,pchar(s2));
   inc(p1);
  end;
+}
  po1:= aobj^.handlers;
  poe:= po1 + length(hashoffsetarty(aobj^.handlers));
  while po1 < poe do begin
@@ -1519,10 +1608,13 @@ procedure tdbusservice.registerobject(const sender: idbusobject);
 var
  p1: pobjinfoty;
 begin
+
  p1:= fitems.addobject(sender);
+{
  with p1^ do begin
   string(path):= sender.getpath();
  end;
+}
  if connected then begin
   doregisteritems(p1);
  end;
@@ -2051,18 +2143,22 @@ begin
  end;
  inherited;
 end;
-
+{
 function tdbusobject.getinstance(): tobject;
 begin
  result:= self;
 end;
-
+}
 procedure tdbusobject.registeritems(const sender: idbusservice);
 begin
  sender.registerhandler('org.freedesktop.DBus.Introspectable','Introspect',[],
                                                               @introspect,nil);
  sender.registerhandler('org.freedesktop.DBus.Properties','Get',
-        [dbt_string,dbt_string,dbt_variant],@get,nil);
+        [dbt_string,dbt_string],@propget,nil);
+ sender.registerhandler('org.freedesktop.DBus.Properties','Set',
+        [dbt_string,dbt_string,dbt_variant],@propset,nil);
+ sender.registerhandler('org.freedesktop.DBus.Properties','GetAll',
+        [dbt_string],@propgetall,nil);
 end;
 
 function tdbusobject.getpath(): string;
@@ -2070,9 +2166,13 @@ begin
  result:= '';
 end;
 
-function tdbusobject.getintrospectdata: string;
+function tdbusobject.getintrospecttext(const indent: int32): string;
+var
+ s1: string;
 begin
- result:= '';
+ s1:= charstring(' ',2*indent);
+ result:= s1+'<node name="'+getpath()+'">'+lineend;
+ result:= result+s1+'</node>'+lineend;
 end;
 
 procedure tdbusobject.introspect(const amessage: pdbusmessage;
@@ -2080,15 +2180,23 @@ procedure tdbusobject.introspect(const amessage: pdbusmessage;
 var
  s1: string;
 begin
- s1:= getintrospectdata();
- if s1 <> '' then begin
-  fservice.dbusreply(amessage,[dbt_string],[@s1]);
-  ahandled:= true;
- end;
+ s1:= introspectheader+getintrospecttext(0);
+ fservice.dbusreply(amessage,[dbt_string],[@s1]);
+ ahandled:= true;
 end;
 
-procedure tdbusobject.get(const amessage: pdbusmessage; const adata: pointer;
+procedure tdbusobject.propget(const amessage: pdbusmessage; const adata: pointer;
                var ahandled: boolean);
+begin
+end;
+
+procedure tdbusobject.propset(const amessage: pdbusmessage;
+               const adata: pointer; var ahandled: boolean);
+begin
+end;
+
+procedure tdbusobject.propgetall(const amessage: pdbusmessage;
+               const adata: pointer; var ahandled: boolean);
 begin
 end;
 
