@@ -386,6 +386,9 @@ type
    procedure propgetall(const amessage: pdbusmessage; const adata: pointer;
                                                         var ahandled: boolean);
    function getintrospectitems(): string virtual;
+   function getpropintf: string virtual;
+   function rootpath: string;
+
     //idbusobject
 //   function getinstance(): tobject;
    procedure registeritems(const sender: idbusservice) virtual;
@@ -432,7 +435,7 @@ procedure additem(var dest: dbusdatatyarty; const value: dbusdataty);
 
 implementation
 uses
- msestrings,msesysintf,mseguiintf,
+ msestrings,msesysintf,mseguiintf,typinfo,
  msefloattostr,mseapplication,msearrayutils;
 
 const
@@ -547,6 +550,17 @@ begin
    end;
    result:= result+s1+psubstr(p2,p1);
   end;
+ end;
+end;
+
+function dbuspath(const apath: string): string;
+var
+ i1: int32;
+begin
+ result:= apath;
+ i1:= length(result);
+ if (i1 > 1) and (result[i1] = '/') then begin
+  setlength(result,i1-1); //remove trailing '/'
  end;
 end;
 
@@ -1245,7 +1259,7 @@ var
   iter2: dbusmessageiter;
   i1,i2: int32;
  label
-  oklab;
+  oklab,oklab1;
  begin
   result:= false;
   if pt >= pte then begin
@@ -1322,7 +1336,28 @@ var
     end;
     goto oklab;
    end;
-// dbt_VARIANT,
+   dbt_VARIANT: begin
+    inc(pt);
+    if pt >= pte then begin
+     error('dbuscallmethod() paramtypes and params count do not match');
+     exit;
+    end;
+    if dbus_message_iter_open_container(@iter,dbusdatacodes[dbt_variant],
+                          pchar(dbusdatastrings[pt^]),@iter2) = 0 then begin
+                     //todo: construct valid signature for nested container
+     outofmemory();
+     exit;
+    end;
+    if not writevalue(iter2,pt,pd) then begin
+     dbus_message_iter_abandon_container(@iter,@iter2);
+     exit;
+    end;
+    if dbus_message_iter_close_container(@iter,@iter2) = 0 then begin
+     outofmemory();
+     exit;
+    end;
+    goto oklab1;
+   end;
 // dbt_STRUCT,
 // dbt_DICT_ENTRY
    else begin
@@ -1340,6 +1375,7 @@ var
  oklab:
   inc(pt);
   inc(pd);
+ oklab1:
   result:= true;
  end;//writevalue
 
@@ -1583,7 +1619,7 @@ end;
 procedure tdbusservice.doregisteritems(const aobj: pobjinfoty);
 begin
  fregisteringobj:= aobj;
- fregisteringpath:= '/'+aobj^.obj.getpath();
+ fregisteringpath:= '/'+dbuspath(aobj^.obj.getpath());
  try
   aobj^.obj.registeritems(idbusservice(self));
  finally
@@ -2175,7 +2211,7 @@ begin
   dbus_connection_flush(fconn);
  end;
 end;
-var testvar: hashoffsetty;
+
 procedure tdbusservice.dopendingcallback(pending: pDBusPendingCall{;
                user_data: pointer});
 var
@@ -2184,7 +2220,6 @@ var
 begin
  m1:= dbus_pending_call_steal_reply(pending);
  with fitems.findpending(pending)^ do begin
-testvar:= link;
   if link <> 0 then begin
    p1:= fitems.getdatapo(link);
    idbusresponse(p1^.data.data.link.link).replied(serial,m1{,user_data});
@@ -2248,7 +2283,7 @@ var
  s1: string;
 begin
  s1:= charstring(' ',2*aindent);
- result:= s1+'<node name="'+getpath()+'">'+lineend;
+ result:= s1+'<node name="'+dbuspath(getpath())+'">'+lineend;
  result:= result + indent(getintrospectitems(),aindent+1);
  result:= result+s1+'</node>'+lineend;
 end;
@@ -2265,9 +2300,40 @@ end;
 
 procedure tdbusobject.propget(const amessage: pdbusmessage; const adata: pointer;
                var ahandled: boolean);
+var
+ s1,s2: string;
+ p1: ppropinfo;
 begin
- fservice.dbuserror(amessage,
-                  'org.freedesktop.DBus.Error.UnknownInterface','abcde');
+ if fservice.dbusreadmessage(amessage,[dbt_string,dbt_string],[@s1,@s2]) then begin
+  if (s1 = '') or (s1 = getpropintf()) then begin
+   p1:= getpropinfo(self,s2);
+   if p1 = nil then begin
+    fservice.dbuserror(amessage,
+                  'org.freedesktop.DBus.Error.InvalidArgs',
+                  'Property '+s2+' was not found in object '+rootpath());
+   end
+   else begin
+    if p1^.getproc = nil then begin
+     fservice.dbuserror(amessage,
+                  'org.freedesktop.DBus.Error.PropertyWriteOnly', //unofficional
+                  'Property '+s2+' is write only');
+    end
+    else begin
+     case p1^.proptype^.kind of
+      tkastring: begin
+       s1:= getstrprop(self,p1);
+       fservice.dbusreply(amessage,[dbt_variant,dbt_string],[@s1]);
+      end;
+     end;
+    end;
+   end;
+  end
+  else begin
+   fservice.dbuserror(amessage,
+                  'org.freedesktop.DBus.Error.UnknownInterface',
+                  'Interface '+s1+' was not found in object '+rootpath());
+  end;
+ end;
  ahandled:= true;
 end;
 
@@ -2284,6 +2350,16 @@ end;
 function tdbusobject.getintrospectitems(): string;
 begin
  result:= introspectintf+propertiesintf;
+end;
+
+function tdbusobject.getpropintf: string;
+begin
+ result:= '';
+end;
+
+function tdbusobject.rootpath: string;
+begin
+ result:= '/'+dbuspath(getpath());
 end;
 
 {
