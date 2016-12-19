@@ -368,6 +368,8 @@ type
    function dbusreply(const amessage: pdbusmessage; 
                          const paramtypes: array of dbusdataty;
                                      const params: array of pointer): boolean;
+   function dbuserror(const amessage: pdbusmessage; 
+                         const aname: string; const atext: string): boolean;
    property dbusname: string read fbusname;
  end;
 
@@ -526,7 +528,7 @@ begin
  end;
 end;
 
-function indent(const atext: string;const aindent: int32): string;
+function indent(const atext: string; const aindent: int32): string;
 var
  p1,p2: pchar;
  s1: string;
@@ -1380,6 +1382,15 @@ var
 begin
  m1:= dbus_message_new_method_return(amessage);
  setupmessage(m1,paramtypes,params);
+ result:= dbus_connection_send(fconn,m1,nil) <> 0;
+end;
+
+function tdbusservice.dbuserror(const amessage: pdbusmessage;
+               const aname: string; const atext: string): boolean;
+var
+ m1: pdbusmessage;
+begin
+ m1:= dbus_message_new_error(amessage,pchar(aname),pointer(atext));
  result:= dbus_connection_send(fconn,m1,nil) <> 0;
 end;
  
@@ -2255,6 +2266,9 @@ end;
 procedure tdbusobject.propget(const amessage: pdbusmessage; const adata: pointer;
                var ahandled: boolean);
 begin
+ fservice.dbuserror(amessage,
+                  'org.freedesktop.DBus.Error.UnknownInterface','abcde');
+ ahandled:= true;
 end;
 
 procedure tdbusobject.propset(const amessage: pdbusmessage;
