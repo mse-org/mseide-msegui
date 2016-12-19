@@ -436,6 +436,14 @@ uses
 const
  lineend = c_linefeed;
 
+ peerintf =
+'<interface name="org.freedesktop.DBus.Peer">'+lineend+
+'  <method name="Ping"/>'+lineend+
+'  <method name="GetMachineId">'+lineend+
+'    <arg name="machine_uuid" type="s" direction="out"/>'+lineend+
+'  </method>'+lineend+
+'</interface>'+lineend;
+
  introspectintf =
 '<interface name="org.freedesktop.DBus.Introspectable">'+lineend+
 '  <method name="Introspect">'+lineend+
@@ -1532,7 +1540,7 @@ end;
 procedure tdbusservice.registeritems(const sender: idbusservice);
 begin
  sender.registerhandler('org.freedesktop.DBus.Introspectable','Introspect',[],
-                                                              @introspect,nil);
+                                                             @introspect,nil);
 end;
 
 function tdbusservice.getpath(): string;
@@ -1542,7 +1550,7 @@ end;
 
 function tdbusservice.getintrospecttext(const aindent: int32): string;
 begin
- result:= indent(introspectintf,aindent);
+ result:= indent(peerintf+introspectintf,aindent);
 end;
 
 procedure tdbusservice.registerhandler(const ainterface: string;
