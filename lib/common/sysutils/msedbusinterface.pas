@@ -223,6 +223,7 @@ type
   protected
    fowner: tdbusservice;
    fobjects: hashoffsetty; //chain
+   flastobject: hashoffsetty;
    procedure finalizeitem(const aitem: phashdataty) override;
    procedure dopollcallback(const aflags: pollflagsty; const adata: pointer);
    function findwatch(const key: pdbuswatch): pwatchinfoty;
@@ -332,7 +333,7 @@ type
 //   function getinstance: tobject;
    procedure registeritems(const sender: idbusservice);
    function getpath(): string;
-   function getintrospecttext(const indent: int32): string;
+   function getintrospecttext(const aindent: int32): string;
 //  procedure unregisteritems(const sender: idbuscontroller);
 
   public
@@ -434,6 +435,32 @@ uses
 
 const
  lineend = c_linefeed;
+
+ introspectintf =
+'<interface name="org.freedesktop.DBus.Introspectable">'+lineend+
+'  <method name="Introspect">'+lineend+
+'    <arg direction="out" type="s" />'+lineend+
+'  </method>'+lineend+
+'</interface>'+lineend;
+
+ propertiesintf =
+'<interface name="org.freedesktop.DBus.Properties">'+lineend+
+'  <method name="Get">'+lineend+
+'    <arg name="interface_name" direction="in" type="s"/>'+lineend+
+'    <arg name="property_name" direction="in" type="s"/>'+lineend+
+'    <arg name="value" direction="out" type="v"/>'+lineend+
+'  </method>'+lineend+
+'  <method name="Set">'+lineend+
+'    <arg name="interface_name" direction="in" type="s"/>'+lineend+
+'    <arg name="property_name" direction="in" type="s"/>'+lineend+
+'    <arg name="value" direction="in" type="v"/>'+lineend+
+'  </method>'+lineend+
+'  <method name="GetAll">'+lineend+
+'    <arg name="interface_name" direction="in" type="s"/>'+lineend+
+'    <arg name="props" direction="out" type="a{sv}"/>'+lineend+
+'  </method>'+lineend+
+'</interface>'+lineend;
+
 {
 type
  userdatarecty = record
@@ -953,6 +980,9 @@ var
 begin
  p1:= pdbusitemhashdataty(add(aobj));
  o1:= getdataoffs(p1);
+ if flastobject = 0 then begin
+  flastobject:= o1;
+ end;
  p1^.data.data.kind:= dbk_obj;
  result:= @p1^.data.data.obj;
  with result^ do begin
@@ -1027,6 +1057,9 @@ begin
       with pdbusitemhashdataty(getdatapo(next))^.data.data do begin
        obj.prev:= prev;
       end;
+     end
+     else begin
+      flastobject:= prev;
      end;
      if prev <> 0 then begin
       with pdbusitemhashdataty(getdatapo(prev))^.data.data do begin
@@ -1483,11 +1516,11 @@ var
  o1: hashoffsetty;
 begin
  s1:= introspectheader+'<node>'+lineend;
- o1:= fitems.fobjects;
+ o1:= fitems.flastobject;
  while o1 <> 0 do begin
   with pdbusitemhashdataty(fitems.getdatapo(o1))^.data.data.obj do begin
    s1:= s1+obj.getintrospecttext(1);
-   o1:= next;
+   o1:= prev;
   end;
  end;
  s1:= s1+'</node>'+lineend;
@@ -1507,9 +1540,9 @@ begin
  result:= '';
 end;
 
-function tdbusservice.getintrospecttext(const indent: int32): string;
+function tdbusservice.getintrospecttext(const aindent: int32): string;
 begin
- result:= ''; //dummy
+ result:= indent(introspectintf,aindent);
 end;
 
 procedure tdbusservice.registerhandler(const ainterface: string;
@@ -2226,17 +2259,9 @@ procedure tdbusobject.propgetall(const amessage: pdbusmessage;
 begin
 end;
 
-const
- introspectintf =
-'<interface name="org.freedesktop.DBus.Introspectable">'+lineend+
-'  <method name="Introspect">'+lineend+
-'    <arg direction="out" type="s" />'+lineend+
-'  </method>'+lineend+
-'</interface>'+lineend;
-
 function tdbusobject.getintrospectitems(): string;
 begin
- result:= introspectintf;
+ result:= introspectintf+propertiesintf;
 end;
 
 {
