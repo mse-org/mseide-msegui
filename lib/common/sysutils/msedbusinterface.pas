@@ -363,7 +363,8 @@ type
                const timeout: int32 = -1): boolean; //blocking, true if ok
    function dbusreadmessage(const amessage: pdbusmessage;
                const resulttypes: array of dbusdataty;
-               const results: array of pointer): boolean;
+                const results: array of pointer;
+                const apartial: boolean = false): boolean;
                                   //true if ok
    function dbusreply(const amessage: pdbusmessage; 
                          const paramtypes: array of dbusdataty;
@@ -389,6 +390,10 @@ type
    function getpropintf: string virtual;
    function rootpath: string;
 
+   procedure propertyget(const amessage: pdbusmessage;
+                        const aname: string; var ahandled: boolean) virtual;
+   procedure propertyset(const amessage: pdbusmessage;
+                        const aname: string; var ahandled: boolean) virtual;
     //idbusobject
 //   function getinstance(): tobject;
    procedure registeritems(const sender: idbusservice) virtual;
@@ -1801,8 +1806,9 @@ errorlab:
 end;
 
 function tdbusservice.dbusreadmessage(const amessage: pdbusmessage;
-               const resulttypes: array of dbusdataty;
-               const results: array of pointer): boolean; 
+                  const resulttypes: array of dbusdataty;
+                             const results: array of pointer;
+                                  const apartial: boolean = false): boolean; 
                                      //true if ok
 var
  pte: pdbusdataty;
@@ -1984,7 +1990,8 @@ begin
      goto errorlab;
     end;
    end;
-   if dbus_message_iter_get_arg_type(@iter1) <> DBUS_TYPE_INVALID then begin
+   if not apartial and (dbus_message_iter_get_arg_type(@iter1) <> 
+                                                DBUS_TYPE_INVALID) then begin
     error('dbuscallmethod() wrong returned param count');
     goto errorlab;
    end;
@@ -2303,26 +2310,31 @@ procedure tdbusobject.propget(const amessage: pdbusmessage; const adata: pointer
 var
  s1,s2: string;
  p1: ppropinfo;
+ b1: boolean;
 begin
  if fservice.dbusreadmessage(amessage,[dbt_string,dbt_string],[@s1,@s2]) then begin
   if (s1 = '') or (s1 = getpropintf()) then begin
-   p1:= getpropinfo(self,s2);
-   if p1 = nil then begin
-    fservice.dbuserror(amessage,
-                  'org.freedesktop.DBus.Error.InvalidArgs',
-                  'Property '+s2+' was not found in object '+rootpath());
-   end
-   else begin
-    if p1^.getproc = nil then begin
+   b1:= false;
+   propertyget(amessage,s2,b1);
+   if not b1 then begin
+    p1:= getpropinfo(self,s2);
+    if p1 = nil then begin
      fservice.dbuserror(amessage,
-                  'org.freedesktop.DBus.Error.PropertyWriteOnly', //unofficional
-                  'Property '+s2+' is write only');
+                   'org.freedesktop.DBus.Error.InvalidArgs',
+                   'Property '+s2+' was not found in object '+rootpath());
     end
     else begin
-     case p1^.proptype^.kind of
-      tkastring: begin
-       s1:= getstrprop(self,p1);
-       fservice.dbusreply(amessage,[dbt_variant,dbt_string],[@s1]);
+     if p1^.getproc = nil then begin
+      fservice.dbuserror(amessage,
+                   'org.freedesktop.DBus.Error.PropertyWriteOnly', //unofficional
+                   'Property '+s2+' is write only');
+     end
+     else begin
+      case p1^.proptype^.kind of
+       tkastring: begin
+        s1:= getstrprop(self,p1);
+        fservice.dbusreply(amessage,[dbt_variant,dbt_string],[@s1]);
+       end;
       end;
      end;
     end;
@@ -2339,7 +2351,56 @@ end;
 
 procedure tdbusobject.propset(const amessage: pdbusmessage;
                const adata: pointer; var ahandled: boolean);
+var
+ s1,s2,s3: string;
+ p1: ppropinfo;
+ b1: boolean;
+label
+ oklab;
 begin
+ if fservice.dbusreadmessage(amessage,[dbt_string,dbt_string],
+                                            [@s1,@s2],true) then begin
+  if (s1 = '') or (s1 = getpropintf()) then begin
+   b1:= false;
+   propertyset(amessage,s2,b1);
+   if not b1 then begin
+    p1:= getpropinfo(self,s2);
+    if p1 = nil then begin
+     fservice.dbuserror(amessage,
+                   'org.freedesktop.DBus.Error.InvalidArgs',
+                   'Property '+s2+' was not found in object '+rootpath());
+    end
+    else begin
+     if p1^.setproc = nil then begin
+      fservice.dbuserror(amessage,
+                   'org.freedesktop.DBus.Error.PropertyReadOnly',
+                                   'Property '+s2+' is read only');
+     end
+     else begin
+      case p1^.proptype^.kind of
+       tkastring: begin
+        if fservice.dbusreadmessage(amessage,
+                  [dbt_string,dbt_string,dbt_string],[@s1,@s2,@s3]) then begin
+         setstrprop(self,p1,s3);
+         goto oklab;
+        end;
+       end;
+      end;
+      fservice.dbuserror(amessage,
+                   'org.freedesktop.DBus.Error.InvalidArgs',
+                                   'Property '+s2+' wrong type');
+     end;
+    end;
+   end;
+  end
+  else begin
+   fservice.dbuserror(amessage,
+                  'org.freedesktop.DBus.Error.UnknownInterface',
+                  'Interface '+s1+' was not found in object '+rootpath());
+  end;
+ end;
+oklab:
+ ahandled:= true;
 end;
 
 procedure tdbusobject.propgetall(const amessage: pdbusmessage;
@@ -2360,6 +2421,18 @@ end;
 function tdbusobject.rootpath: string;
 begin
  result:= '/'+dbuspath(getpath());
+end;
+
+procedure tdbusobject.propertyget(const amessage: pdbusmessage;
+               const aname: string; var ahandled: boolean);
+begin
+ //dummy
+end;
+
+procedure tdbusobject.propertyset(const amessage: pdbusmessage;
+               const aname: string; var ahandled: boolean);
+begin
+ //dummy
 end;
 
 {
