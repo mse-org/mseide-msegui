@@ -421,6 +421,7 @@ type
    function dbussignal(const path,iface,name: string;
                          const paramtypes: array of dbusdataty;
                                const params: array of pointer): boolean;
+   property dbusid: string read fbusid;
    property dbusname: string read fbusname;
  end;
 
@@ -2742,7 +2743,7 @@ begin
   result:= result+'interface='+''''+ainterface+''',';
  end;
  if amember <> '' then begin
-  result:= result+'member='+''''+ainterface+''',';
+  result:= result+'member='+''''+amember+''',';
  end;
  if result <> '' then begin
   setlength(result,length(result)-1);
