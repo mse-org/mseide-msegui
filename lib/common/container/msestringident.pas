@@ -123,6 +123,7 @@ type
    function getidentname(const aname: string): identnamety;
    function getidentname(const aident: identty): string;
    function getidentnamel(const aident: identty): lstringty;
+   function getidentnamep(const aident: identty): pchar;
 //   function getidentnamel(const aeledata: pointer): lstringty;
    function getidentname2(const aident: identty): identnamety;
 //   function getidentname2(const aeledata: pointer): identnamety;
@@ -280,6 +281,13 @@ begin
 {$endif}
 end;
 
+function tstringidents.getidentnamep(const aident: identty): pchar;
+var
+ ls1: lstringty;
+begin
+ result:= getidentnamel(aident).po;
+end;
+
 (*
 function tstringidents.getidentname2(const aeledata: pointer): identnamety;
 begin
@@ -345,6 +353,7 @@ begin
   fstringlen:= fstringindex*2+mindatasize;
   reallocmem(fstringdata,fstringlen);
   fillchar((pchar(pointer(fstringdata))+int1)^,fstringlen-int1,0);
+                 //for terminating 0
  end;
  po1:= fstringdata + int1;
  po1^.header.len:= int2;

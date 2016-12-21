@@ -92,8 +92,10 @@ const
  );
 
  methodhandlerid = strid0;
+ signalmatchid = strid1;
  signalhandlerid = strid1;
- 
+ separatorid = strid3;
+  
 var
  arraytypes: array[dbusdataty] of pdynarraytypeinfo;
 const
@@ -159,12 +161,13 @@ type
  idbusservice = interface(inullinterface)
   procedure registerobject(const sender: idbusobject);
   procedure unregisterobject(const sender: idbusobject);
-//  procedure registeritem(const ainterface: string;
-//                const apath: string; const asignature: string;
-//                                               const ahandler: messageeventty);
-                                                                     //not used
-  procedure registerhandler(const ainterface: string;
-                   const apath: string; const asignature: array of dbusdataty;
+  procedure registermethodhandler(const ainterface: string;
+                   const amember: string; const asignature: array of dbusdataty;
+                   const ahandler: messagedataeventty; const adata: pointer);
+
+  procedure registersignalhandler(const asender: string; const apath: string;
+                   const ainterface: string;
+                   const amember: string; const asignature: array of dbusdataty;
                    const ahandler: messagedataeventty; const adata: pointer);
  end;
 
@@ -268,12 +271,28 @@ type
    procedure handlewatches();
  end;
 
- handlerkindty = (hk_method,hk_signal);
+ handlerkindty = (hk_match,hk_method,hk_signal);
 
- handlerdataty = record 
-  kind: handlerkindty;
+ signaldataty = record
+  match: hashoffsetty;
+ end;
+ handlerhandlerdataty = record
   handler: messagedataeventty;
   datapo: pointer;
+  case handlerkindty of
+   hk_signal: (signal: signaldataty);
+ end;
+ handlermatchdataty = record
+  match: identty;
+  refcount: int32;
+ end;
+
+ handlerdataty = record 
+  case kind: handlerkindty of
+   hk_match:
+    (match: handlermatchdataty);
+   hk_method,hk_signal:
+    (handler: handlerhandlerdataty);
  end;
  handlerhashdataty = record
   header: treeelementhashdataty;
@@ -284,20 +303,24 @@ type
  thandlerhashdatalist = class(thashtree)
   private
    fstringidents: tstringidents;
+   femptystringid: identty;
   protected  
+   fowner: tdbusservice;
    function getrecordsize(): int32 override;
+   procedure finalizeitem(const aitem: phashdataty) override;
+   
   public
-   constructor create();
+   constructor create(const aowner: tdbusservice);
    destructor destroy(); override;
    function scanpath(var avec: identvecty; 
                      const apath: pchar; const aseparator: char): boolean;
                                         //true if ok, too many levels otherwise
-   function addmethod(const aobject,ainterface,amember,asignature: pchar;
-                            out adata: phandlerhashdataty): hashoffsetty;
+   function addmethod(const aobject,ainterface,amember,asignature: string;
+                                 out adata: phandlerhashdataty): hashoffsetty;
    function findmethod(const aobject,ainterface,apath,
                                        asignature: pchar): phandlerhashdataty;
    function addsignal(
-              const asender,apath,aobject,ainterface,amemeber,asignature: pchar;
+              const asender,apath,ainterface,amember,asignature: string;
                              out adata: phandlerhashdataty): hashoffsetty;
  end;
   
@@ -367,12 +390,13 @@ type
     //idbusservice
    procedure registerobject(const sender: idbusobject);
    procedure unregisterobject(const sender: idbusobject);
-   procedure registerhandler(const ainterface: string;
+   procedure registermethodhandler(const ainterface: string;
                  const amember: string; const asignature: array of dbusdataty;
                  const ahandler: messagedataeventty; const adata: pointer);
-//   procedure registeritem(const ainterface: string;
-//                           const apath: string; const asignature: string;
-//                                               const ahandler: messageeventty);
+   procedure registersignalhandler(const asender: string; const apath: string;
+                   const ainterface: string;
+                   const amember: string; const asignature: array of dbusdataty;
+                   const ahandler: messagedataeventty; const adata: pointer);
    function dbuscallmethod(const returnedto: idbusresponse; var aserial: card32;
                const bus_name,path,iface,method: string;
                const paramtypes: array of dbusdataty;
@@ -1255,7 +1279,7 @@ end;
 constructor tdbusservice.create();
 begin
  fitems:= tdbusitemhashdatalist.create(self);
- fhandlers:= thandlerhashdatalist.create();
+ fhandlers:= thandlerhashdatalist.create(self);
  inherited;
  registerobject(idbusobject(self));
 end;
@@ -1676,8 +1700,8 @@ end;
 
 procedure tdbusservice.registeritems(const sender: idbusservice);
 begin
- sender.registerhandler('org.freedesktop.DBus.Introspectable','Introspect',[],
-                                                             @introspect,nil);
+ sender.registermethodhandler(
+         'org.freedesktop.DBus.Introspectable','Introspect',[],@introspect,nil);
 end;
 
 function tdbusservice.getpath(): string;
@@ -1690,7 +1714,7 @@ begin
  result:= indent(peerintf+introspectintf,aindent);
 end;
 
-procedure tdbusservice.registerhandler(const ainterface: string;
+procedure tdbusservice.registermethodhandler(const ainterface: string;
                const amember: string; const asignature: array of dbusdataty;
                const ahandler: messagedataeventty; const adata: pointer);
 var
@@ -1699,11 +1723,30 @@ var
  s1: string;
 begin
  s1:= getsignature(asignature);
- offs1:= fhandlers.addmethod(pointer(string(fregisteringpath)),
-               pointer(ainterface),pointer(amember),pointer(s1),p1);
+ offs1:= fhandlers.addmethod(fregisteringpath,ainterface,amember,s1,p1);
  addoffs(hashoffsetarty(fregisteringobj^.handlers),offs1);
- p1^.data.datapo:= adata;
- p1^.data.handler:= ahandler;
+ with p1^.data.handler do begin
+  datapo:= adata;
+  handler:= ahandler;
+ end;
+end;
+
+procedure tdbusservice.registersignalhandler(const asender: string;
+               const apath: string; const ainterface: string;
+               const amember: string; const asignature: array of dbusdataty;
+               const ahandler: messagedataeventty; const adata: pointer);
+var
+ offs1: hashoffsetty;
+ p1: phandlerhashdataty;
+ s1: string;
+begin
+ s1:= getsignature(asignature);
+ offs1:= fhandlers.addsignal(asender,apath,ainterface,amember,s1,p1);
+ addoffs(hashoffsetarty(fregisteringobj^.handlers),offs1);
+ with p1^.data.handler do begin
+  datapo:= adata;
+  handler:= ahandler;
+ end;
 end;
 
 procedure tdbusservice.doregisteritems(const aobj: pobjinfoty);
@@ -1764,7 +1807,9 @@ begin
    if p1 <> nil then begin
     handled:= false;
     try
-     p1^.data.handler(amessage,p1^.data.datapo,handled);
+     with p1^.data.handler do begin
+      handler(amessage,datapo,handled);
+     end;
     except
      //application.handleexception(); does not work because of idle recursion
      on e: exception do begin
@@ -2358,14 +2403,17 @@ end;
 }
 procedure tdbusobject.registeritems(const sender: idbusservice);
 begin
- sender.registerhandler('org.freedesktop.DBus.Introspectable','Introspect',[],
-                                                              @introspect,nil);
- sender.registerhandler('org.freedesktop.DBus.Properties','Get',
-        [dbt_string,dbt_string],@propget,nil);
- sender.registerhandler('org.freedesktop.DBus.Properties','Set',
-        [dbt_string,dbt_string,dbt_variant],@propset,nil);
- sender.registerhandler('org.freedesktop.DBus.Properties','GetAll',
-        [dbt_string],@propgetall,nil);
+ sender.registermethodhandler(
+        'org.freedesktop.DBus.Introspectable','Introspect',[],@introspect,nil);
+ sender.registermethodhandler(
+        'org.freedesktop.DBus.Properties','Get',
+                              [dbt_string,dbt_string],@propget,nil);
+ sender.registermethodhandler(
+        'org.freedesktop.DBus.Properties','Set',
+                              [dbt_string,dbt_string,dbt_variant],@propset,nil);
+ sender.registermethodhandler(
+        'org.freedesktop.DBus.Properties','GetAll',
+                              [dbt_string],@propgetall,nil);
 end;
 
 function tdbusobject.getpath(): string;
@@ -2608,10 +2656,13 @@ end;
 }
 { thandlerhashdatalist }
 
-constructor thandlerhashdatalist.create();
+constructor thandlerhashdatalist.create(const aowner: tdbusservice);
 begin
+ fowner:= aowner;
  fstringidents:= tstringidents.create();
- inherited;
+ femptystringid:= fstringidents.getident('');
+ include(fstate,hls_needsfinalize);
+ inherited create();
 end;
 
 destructor thandlerhashdatalist.destroy();
@@ -2650,7 +2701,7 @@ begin
 end;
 
 function thandlerhashdatalist.addmethod(
-              const aobject,ainterface,amember,asignature: pchar;
+              const aobject,ainterface,amember,asignature: string;
                              out adata: phandlerhashdataty): hashoffsetty;
  procedure pathlenerror();
  begin
@@ -2678,8 +2729,28 @@ begin
  adata^.data.kind:= hk_method;
 end;
 
+function constructmatch(const asender,apath,ainterface,amember: string): string;
+begin
+ result:= '';
+ if asender <> '' then begin
+  result:= result+'sender='+''''+asender+''',';
+ end;
+ if apath <> '' then begin
+  result:= result+'path='+''''+apath+''',';
+ end;
+ if ainterface <> '' then begin
+  result:= result+'interface='+''''+ainterface+''',';
+ end;
+ if amember <> '' then begin
+  result:= result+'member='+''''+ainterface+''',';
+ end;
+ if result <> '' then begin
+  setlength(result,length(result)-1);
+ end;
+end;
+
 function thandlerhashdatalist.addsignal(
-              const asender,apath,aobject,ainterface,amemeber,asignature: pchar;
+              const asender,apath,ainterface,amember,asignature: string;
                              out adata: phandlerhashdataty): hashoffsetty;
  procedure pathlenerror();
  begin
@@ -2688,23 +2759,37 @@ function thandlerhashdatalist.addsignal(
  
 var
  vec1: identvecty;
+ p1: phandlerhashdataty;
+ s1: string;
 begin
- vec1.high:= 0;
- vec1.d[0]:= methodhandlerid;
- if not  scanpath(vec1,pchar(aobject),'/') then begin
-  pathlenerror();
+ s1:= 'type=signal,'+constructmatch(asender,apath,ainterface,amember);
+ vec1.high:= 2;
+ vec1.d[0]:= signalmatchid;
+ vec1.d[1]:= fstringidents.getident(s1);
+ p1:= phandlerhashdataty(find(vec1));
+ if p1 = nil then begin
+  add(vec1,pointer(p1));
+  dbus_bus_add_match(fowner.fconn,pchar(s1),nil);
+  p1^.data.kind:= hk_match;
+  with p1^.data.match do begin
+   match:= vec1.d[1];
+   refcount:= 0;
+  end;
  end;
- if not  scanpath(vec1,pchar(ainterface),'.') then begin
-  pathlenerror();
- end;
- if not  scanpath(vec1,pchar(apath),'.') then begin
-  pathlenerror();
- end;
- if not  scanpath(vec1,pchar(asignature),#0) then begin
-  pathlenerror();
- end;
+ inc(p1^.data.match.refcount);
+
+ vec1.high:= 5;
+ vec1.d[0]:= signalhandlerid;
+ vec1.d[1]:= fstringidents.getident(asender);
+ vec1.d[2]:= fstringidents.getident(apath);
+ vec1.d[3]:= fstringidents.getident(ainterface);
+ vec1.d[4]:= fstringidents.getident(amember);
+ vec1.d[5]:= fstringidents.getident(asignature);
  result:= inherited add(vec1,pointer(adata));
  adata^.data.kind:= hk_signal;
+ with adata^.data.handler do begin
+  signal.match:= getdataoffs(p1);
+ end;
 end;
 
 function thandlerhashdatalist.findmethod(const aobject: pchar;
@@ -2727,6 +2812,30 @@ end;
 function thandlerhashdatalist.getrecordsize(): int32;
 begin
  result:= sizeof(handlerhashdataty);
+end;
+
+procedure thandlerhashdatalist.finalizeitem(const aitem: phashdataty);
+var
+ p1: phandlerhashdataty;
+begin
+ with phandlerhashdataty(aitem)^ do begin
+  case data.kind of 
+   hk_match: begin
+    if fowner.fconn <> nil then begin
+     dbus_bus_remove_match(fowner.fconn,
+                  fstringidents.getidentnamep(data.match.match),nil);
+    end;
+   end;
+   hk_signal: begin
+    p1:= getdatapo(data.handler.signal.match);
+    dec(p1^.data.match.refcount);
+    if p1^.data.match.refcount = 0 then begin
+     internaldelete(data.handler.signal.match);
+    end;
+   end;
+  end;
+ end;
+ inherited;
 end;
 
 initialization

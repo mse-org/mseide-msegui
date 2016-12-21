@@ -572,6 +572,13 @@ var
    function(pending: pDBusPendingCall): pDBusMessage
                                     {$ifdef wincall}stdcall{$else}cdecl{$endif};
 
+ dbus_bus_add_match: 
+   procedure(connection: pDBusConnection; rule: pcchar; error: pDBusError)
+                                    {$ifdef wincall}stdcall{$else}cdecl{$endif};
+ dbus_bus_remove_match: 
+   procedure(connection: pDBusConnection; rule: pcchar; error: pDBusError)
+                                    {$ifdef wincall}stdcall{$else}cdecl{$endif};
+
 procedure initializedbus(const sonames: array of filenamety;
                                           const onlyonce: boolean = false);
                                      //[] = default
@@ -594,7 +601,7 @@ end;
 procedure initializedbus(const sonames: array of filenamety; //[] = default
                                          const onlyonce: boolean = false);                                   
 const
- funcs: array[0..73] of funcinfoty = (
+ funcs: array[0..75] of funcinfoty = (
   (n: 'dbus_bus_get'; d: @dbus_bus_get),                         // 0
   (n: 'dbus_bus_get_private'; d: @dbus_bus_get_private),         // 1
   (n: 'dbus_connection_close'; d: @dbus_connection_close),       // 2
@@ -707,7 +714,9 @@ const
   (n: 'dbus_pending_call_set_notify';
            d: @dbus_pending_call_set_notify),                    //72
   (n: 'dbus_pending_call_steal_reply'; 
-           d: @dbus_pending_call_steal_reply)                    //73
+           d: @dbus_pending_call_steal_reply),                   //73
+  (n: 'dbus_bus_add_match'; d: @dbus_bus_add_match),             //74
+  (n: 'dbus_bus_remove_match'; d: @dbus_bus_remove_match)        //75
  );
 
 {
