@@ -91,6 +91,9 @@ const
   sizeof(dictentryty)  //dbt_DICT_ENTRY
  );
 
+ methodhandlerid = strid0;
+ signalhandlerid = strid1;
+ 
 var
  arraytypes: array[dbusdataty] of pdynarraytypeinfo;
 const
@@ -265,7 +268,10 @@ type
    procedure handlewatches();
  end;
 
- handlerdataty = record
+ handlerkindty = (hk_method,hk_signal);
+
+ handlerdataty = record 
+  kind: handlerkindty;
   handler: messagedataeventty;
   datapo: pointer;
  end;
@@ -286,10 +292,13 @@ type
    function scanpath(var avec: identvecty; 
                      const apath: pchar; const aseparator: char): boolean;
                                         //true if ok, too many levels otherwise
-   function add(const aobject,ainterface,apath,asignature: pchar;
+   function addmethod(const aobject,ainterface,amember,asignature: pchar;
                             out adata: phandlerhashdataty): hashoffsetty;
-   function find(const aobject,ainterface,apath,
+   function findmethod(const aobject,ainterface,apath,
                                        asignature: pchar): phandlerhashdataty;
+   function addsignal(
+              const asender,apath,aobject,ainterface,amemeber,asignature: pchar;
+                             out adata: phandlerhashdataty): hashoffsetty;
  end;
   
  tdbusservice = class(tlinkedobject,idbusservice,idbusobject)
@@ -359,7 +368,7 @@ type
    procedure registerobject(const sender: idbusobject);
    procedure unregisterobject(const sender: idbusobject);
    procedure registerhandler(const ainterface: string;
-                 const apath: string; const asignature: array of dbusdataty;
+                 const amember: string; const asignature: array of dbusdataty;
                  const ahandler: messagedataeventty; const adata: pointer);
 //   procedure registeritem(const ainterface: string;
 //                           const apath: string; const asignature: string;
@@ -1682,7 +1691,7 @@ begin
 end;
 
 procedure tdbusservice.registerhandler(const ainterface: string;
-               const apath: string; const asignature: array of dbusdataty;
+               const amember: string; const asignature: array of dbusdataty;
                const ahandler: messagedataeventty; const adata: pointer);
 var
  offs1: hashoffsetty;
@@ -1690,8 +1699,8 @@ var
  s1: string;
 begin
  s1:= getsignature(asignature);
- offs1:= fhandlers.add(pointer(string(fregisteringpath)),
-               pointer(ainterface),pointer(apath),pointer(s1),p1);
+ offs1:= fhandlers.addmethod(pointer(string(fregisteringpath)),
+               pointer(ainterface),pointer(amember),pointer(s1),p1);
  addoffs(hashoffsetarty(fregisteringobj^.handlers),offs1);
  p1^.data.datapo:= adata;
  p1^.data.handler:= ahandler;
@@ -1748,7 +1757,7 @@ begin
 {$endif}
  case dbus_message_get_type(amessage) of
   DBUS_MESSAGE_TYPE_METHOD_CALL: begin
-   p1:= fhandlers.find(dbus_message_get_path(amessage),
+   p1:= fhandlers.findmethod(dbus_message_get_path(amessage),
                        dbus_message_get_interface(amessage),
                        dbus_message_get_member(amessage),
                        dbus_message_get_signature(amessage));
@@ -2640,8 +2649,8 @@ begin
  end;
 end;
 
-function thandlerhashdatalist.add(
-              const aobject,ainterface,apath,asignature: pchar;
+function thandlerhashdatalist.addmethod(
+              const aobject,ainterface,amember,asignature: pchar;
                              out adata: phandlerhashdataty): hashoffsetty;
  procedure pathlenerror();
  begin
@@ -2651,7 +2660,37 @@ function thandlerhashdatalist.add(
 var
  vec1: identvecty;
 begin
- vec1.high:= -1;
+ vec1.high:= 0;
+ vec1.d[0]:= methodhandlerid;
+ if not  scanpath(vec1,pchar(aobject),'/') then begin
+  pathlenerror();
+ end;
+ if not  scanpath(vec1,pchar(ainterface),'.') then begin
+  pathlenerror();
+ end;
+ if not  scanpath(vec1,pchar(amember),'.') then begin
+  pathlenerror();
+ end;
+ if not  scanpath(vec1,pchar(asignature),#0) then begin
+  pathlenerror();
+ end;
+ result:= inherited add(vec1,pointer(adata));
+ adata^.data.kind:= hk_method;
+end;
+
+function thandlerhashdatalist.addsignal(
+              const asender,apath,aobject,ainterface,amemeber,asignature: pchar;
+                             out adata: phandlerhashdataty): hashoffsetty;
+ procedure pathlenerror();
+ begin
+  raiseerror('Too many path elements');
+ end;//pathlenerror
+ 
+var
+ vec1: identvecty;
+begin
+ vec1.high:= 0;
+ vec1.d[0]:= methodhandlerid;
  if not  scanpath(vec1,pchar(aobject),'/') then begin
   pathlenerror();
  end;
@@ -2665,16 +2704,18 @@ begin
   pathlenerror();
  end;
  result:= inherited add(vec1,pointer(adata));
+ adata^.data.kind:= hk_signal;
 end;
 
-function thandlerhashdatalist.find(const aobject: pchar;
+function thandlerhashdatalist.findmethod(const aobject: pchar;
                const ainterface: pchar; const apath: pchar;
                const asignature: pchar): phandlerhashdataty;
 var
  vec1: identvecty;
 begin
  result:= nil;
- vec1.high:= -1;
+ vec1.high:= 0;
+ vec1.d[0]:= methodhandlerid;
  if scanpath(vec1,aobject,'/') and
     scanpath(vec1,ainterface,'.') and
     scanpath(vec1,apath,'.') and

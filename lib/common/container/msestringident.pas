@@ -16,8 +16,18 @@ uses
 //{$define caseinsensitive} 
 const
  firstident = 256;
- idstart = $12345678;
-
+ stridstart = $12345678; //not used
+ strid0 = $2468ACF1;
+ strid1 = $48D159E3;
+ strid2 = $91A2B3C6;
+ strid3 = $2345678C;
+ strid4 = $468ACF19;
+ strid5 = $8D159E33;
+ strid6 = $1A2B3C66;
+ strid7 = $345678CD;
+ strid8 = $68ACF19B;
+ strid9 = $D159E337;
+ 
 type
 // keywordty = identty;
 
@@ -364,7 +374,7 @@ begin
  end;
  fstringindex:= 0;
  fstringlen:= 0;
- fstringident:= idstart; //invalid
+ fstringident:= strid9;
  nextident();
 end;
 {
