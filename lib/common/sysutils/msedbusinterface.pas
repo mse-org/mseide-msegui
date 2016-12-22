@@ -17,7 +17,7 @@ unit msedbusinterface;
 interface
 uses
  mseglob,msectypes,msedbus,msetypes,mseclasses,mseevent,msehash,sysutils,
- msesys,msetimer,msehashstore,msestringident,mselinklist;
+ msesys,msetimer,msehashstore,msestringident,mselinklist,typinfo;
 
 const
  msebusname = 'mse.msegui.app';
@@ -46,11 +46,16 @@ type
  pdbusdataty = ^dbusdataty;
  dbusdatatyarty = array of dbusdataty;
 
- variantvaluekindty = (vvk_string,vvk_int32);
+ variantvaluekindty = (vvk_string,vvk_int32,vvk_dynar);
+ dynarinfoty = record
+  data: pointer;
+  typinfo: ptypeinfo;
+ end;
  variantvaluety = record
   case kind: variantvaluekindty of
    vvk_string: (vstring: pointer;);
    vvk_int32: (vint32: int32;);
+   vvk_dynar: (vdynar: dynarinfoty);
  end;
    
  dictentryty = record
@@ -490,7 +495,7 @@ procedure additem(var dest: dbusdatatyarty; const value: dbusdataty);
 
 implementation
 uses
- msestrings,msesysintf,mseguiintf,typinfo,
+ msestrings,msesysintf,mseguiintf,
  msefloattostr,mseapplication,msearrayutils;
 
 const
@@ -2611,6 +2616,16 @@ begin
   vint32:= avalue;
  end;
 end;
+
+procedure setvariantdynarvalue(const avalue: pointer;
+                    const atypeinfo: ptypeinfo; var avariant: variantvaluety);
+begin
+ with avariant do begin
+  kind:= vvk_dynar;
+  vdynar.data:= avalue;
+  vdynar.typinfo:= atypeinfo;
+ end;
+end;
  
 procedure tdbusobject.propgetall(const amessage: pdbusmessage;
                const adata: pointer; var ahandled: boolean);
@@ -2638,7 +2653,11 @@ begin
       end;
       tkinteger: begin
        setvariantvalue(int32(getordprop(self,p2^)),p1^.value);
-      end
+      end;
+      tkdynarray: begin
+       setvariantdynarvalue(pointer(ptruint(getordprop(self,p2^))),
+                                                     proptype,p1^.value);
+      end;
       else begin
        dec(p1); //invalid data
       end;
