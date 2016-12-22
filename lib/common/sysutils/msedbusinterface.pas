@@ -46,10 +46,11 @@ type
  pdbusdataty = ^dbusdataty;
  dbusdatatyarty = array of dbusdataty;
 
- variantvaluekindty = (vvk_string);
+ variantvaluekindty = (vvk_string,vvk_int32);
  variantvaluety = record
   case kind: variantvaluekindty of
    vvk_string: (vstring: pointer;);
+   vvk_int32: (vint32: int32;);
  end;
    
  dictentryty = record
@@ -155,7 +156,7 @@ type
   procedure registeritems(const sender: idbusservice);
   function getpath(): string;
   function getintrospecttext(const aindent: int32): string;
-//  procedure unregisteritems(const sender: idbuscontroller);
+  procedure busconnected();
  end;
 
  idbusservice = interface(inullinterface)
@@ -368,23 +369,17 @@ type
    procedure dounregisteritems(const aobj: pobjinfoty);
    procedure unregisteritem(const apath: string);
    procedure mainfilter(const amessage: pdbusmessage; var handled: boolean);
-//   procedure rootfallback(const amessage: pdbusmessage; var handled: boolean);
    procedure registerobjects();
    procedure unregisterobjects();
-  {
-   procedure registerfallback(const apath: string; 
-                                        const ahandler: messageeventty);
-  }
    function checkconnect(): boolean;
    procedure introspect(const amessage: pdbusmessage; const adata: pointer;
                                                         var ahandled: boolean);
 
     //idbusobject for rootobject
-//   function getinstance: tobject;
    procedure registeritems(const sender: idbusservice);
    function getpath(): string;
    function getintrospecttext(const aindent: int32): string;
-//  procedure unregisteritems(const sender: idbuscontroller);
+   procedure busconnected();
 
   public
    constructor create();
@@ -451,11 +446,10 @@ type
    procedure propertyset(const amessage: pdbusmessage;
                         const aname: string; var ahandled: boolean) virtual;
     //idbusobject
-//   function getinstance(): tobject;
    procedure registeritems(const sender: idbusservice) virtual;
    function getpath(): string virtual;
    function getintrospecttext(const aindent: int32): string virtual;
-//   procedure unregisteritems(const sender: idbusservice) virtual;
+   procedure busconnected() virtual;
   public
    constructor create(const aservice: tdbusservice);
    destructor destroy(); override;
@@ -1432,6 +1426,10 @@ var
       d2[1]:= dbt_string;
       p1:= @p4^.value.vstring;
      end;
+     vvk_int32: begin
+      d2[1]:= dbt_int32;
+      p1:= @p4^.value.vint32;
+     end;
      else begin
       result:= false;
       error('dbuscallmethod() paramtype not yet supported');
@@ -1719,6 +1717,11 @@ begin
  result:= indent(peerintf+introspectintf,aindent);
 end;
 
+procedure tdbusservice.busconnected();
+begin
+ //dummy
+end;
+
 procedure tdbusservice.registermethodhandler(const ainterface: string;
                const amember: string; const asignature: array of dbusdataty;
                const ahandler: messagedataeventty; const adata: pointer);
@@ -1772,16 +1775,6 @@ var
  s1,s2: string;
  po1,poe: phashoffsetty;
 begin
-{
- p1:= aobj^.items;
- s1:= string(aobj^.path)+'/';
- pe:= p1 + length(stringarty(aobj^.items));
- while p1 < pe do begin
-  s2:= s1+p1^;
-  dbus_connection_unregister_object_path(fconn,pchar(s2));
-  inc(p1);
- end;
-}
  po1:= aobj^.handlers;
  poe:= po1 + length(hashoffsetarty(aobj^.handlers));
  while po1 < poe do begin
@@ -1859,25 +1852,22 @@ begin
   end;
  end;
 end;
-(*
-procedure tdbusservice.rootfallback(const amessage: pdbusmessage;
-                                                      var handled: boolean);
-begin
-{$ifdef mse_dumpdbus}
- write(dbusdumpmessage(amessage));
-{$endif}
-end;
-*)
+
 procedure tdbusservice.registerobjects();
 var
  i1: int32;
  p1: pdbusitemhashdataty;
 begin
-// registerfallback('/',@rootfallback);
  for i1:= 0 to fitems.count - 1 do begin
   p1:= pointer(fitems.next());
   if p1^.data.data.kind = dbk_obj then begin
    doregisteritems(@p1^.data.data.obj);
+  end;
+ end;
+ for i1:= 0 to fitems.count - 1 do begin
+  p1:= pointer(fitems.next());
+  if p1^.data.data.kind = dbk_obj then begin
+   p1^.data.data.obj.obj.busconnected();
   end;
  end;
 end;
@@ -1900,13 +1890,9 @@ var
 begin
 
  p1:= fitems.addobject(sender);
-{
- with p1^ do begin
-  string(path):= sender.getpath();
- end;
-}
  if connected then begin
   doregisteritems(p1);
+  sender.busconnected();
  end;
 end;
 
@@ -2470,6 +2456,11 @@ begin
  result:= result+s1+'</node>'+lineend;
 end;
 
+procedure tdbusobject.busconnected();
+begin
+ //dummy
+end;
+
 procedure tdbusobject.introspect(const amessage: pdbusmessage;
                                const adata: pointer; var ahandled: boolean);
 var
@@ -2613,6 +2604,14 @@ begin
  end;
 end;
  
+procedure setvariantvalue(const avalue: int32; var avariant: variantvaluety);
+begin
+ with avariant do begin
+  kind:= vvk_int32;
+  vint32:= avalue;
+ end;
+end;
+ 
 procedure tdbusobject.propgetall(const amessage: pdbusmessage;
                const adata: pointer; var ahandled: boolean);
 var
@@ -2636,6 +2635,9 @@ begin
      case proptype^.kind of
       tkastring: begin
        setvariantvalue(getstrprop(self,p2^),p1^.value);
+      end;
+      tkinteger: begin
+       setvariantvalue(int32(getordprop(self,p2^)),p1^.value);
       end
       else begin
        dec(p1); //invalid data
