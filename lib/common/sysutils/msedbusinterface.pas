@@ -275,6 +275,8 @@ type
 
  signaldataty = record
   match: hashoffsetty;
+  prev: hashoffsetty;
+  next: hashoffsetty;
  end;
  handlerhandlerdataty = record
   handler: messagedataeventty;
@@ -317,11 +319,13 @@ type
                                         //true if ok, too many levels otherwise
    function addmethod(const aobject,ainterface,amember,asignature: string;
                                  out adata: phandlerhashdataty): hashoffsetty;
-   function findmethod(const aobject,ainterface,apath,
+   function findmethod(const aobject,ainterface,amember,
                                        asignature: pchar): phandlerhashdataty;
    function addsignal(
               const asender,apath,ainterface,amember,asignature: string;
                              out adata: phandlerhashdataty): hashoffsetty;
+   function findsignal(const asender,apath,ainterface,amember,
+                                       asignature: pchar): phandlerhashdataty;
  end;
   
  tdbusservice = class(tlinkedobject,idbusservice,idbusobject)
@@ -1795,10 +1799,29 @@ procedure tdbusservice.mainfilter(const amessage: pdbusmessage;
                                                       var handled: boolean);
 var
  p1: phandlerhashdataty;
+
+ procedure handlesignal();
+ begin
+  while not handled and (p1 <> nil) do begin
+   try
+    with p1^.data.handler do begin
+     handler(amessage,datapo,handled);
+    end;
+   except
+    //application.handleexception(); does not work because of idle recursion
+    on e: exception do begin
+     error(e.message);
+    end;
+   end;
+   p1:= fhandlers.getdatapoornil(p1^.data.handler.signal.next);
+  end;
+ end;
+ 
 begin
 {$ifdef mse_dumpdbus}
  write(dbusdumpmessage(amessage));
 {$endif}
+ handled:= false;
  case dbus_message_get_type(amessage) of
   DBUS_MESSAGE_TYPE_METHOD_CALL: begin
    p1:= fhandlers.findmethod(dbus_message_get_path(amessage),
@@ -1806,7 +1829,6 @@ begin
                        dbus_message_get_member(amessage),
                        dbus_message_get_signature(amessage));
    if p1 <> nil then begin
-    handled:= false;
     try
      with p1^.data.handler do begin
       handler(amessage,datapo,handled);
@@ -1817,6 +1839,22 @@ begin
       error(e.message);
      end;
     end;
+   end;
+  end;
+  DBUS_MESSAGE_TYPE_SIGNAL: begin
+   p1:= fhandlers.findsignal(dbus_message_get_sender(amessage),
+                       dbus_message_get_path(amessage),
+                       dbus_message_get_interface(amessage),
+                       dbus_message_get_member(amessage),
+                       dbus_message_get_signature(amessage));
+   handlesignal();
+   if not handled then begin
+    p1:= fhandlers.findsignal('', //try any sender
+                       dbus_message_get_path(amessage),
+                       dbus_message_get_interface(amessage),
+                       dbus_message_get_member(amessage),
+                       dbus_message_get_signature(amessage));
+    handlesignal();
    end;
   end;
  end;
@@ -2762,9 +2800,10 @@ var
  vec1: identvecty;
  p1: phandlerhashdataty;
  s1: string;
+ o1,o2: hashoffsetty;
 begin
  s1:= 'type=signal,'+constructmatch(asender,apath,ainterface,amember);
- vec1.high:= 2;
+ vec1.high:= 1;
  vec1.d[0]:= signalmatchid;
  vec1.d[1]:= fstringidents.getident(s1);
  p1:= phandlerhashdataty(find(vec1));
@@ -2777,6 +2816,7 @@ begin
    refcount:= 0;
   end;
  end;
+ o1:= getdataoffs(p1);
  inc(p1^.data.match.refcount);
 
  vec1.high:= 5;
@@ -2786,15 +2826,25 @@ begin
  vec1.d[3]:= fstringidents.getident(ainterface);
  vec1.d[4]:= fstringidents.getident(amember);
  vec1.d[5]:= fstringidents.getident(asignature);
+ find(vec1,o2);  //always the last entered?
  result:= inherited add(vec1,pointer(adata));
  adata^.data.kind:= hk_signal;
  with adata^.data.handler do begin
-  signal.match:= getdataoffs(p1);
+  signal.match:= o1;
+  signal.prev:= 0;
+  if o2 <> 0 then begin
+   phandlerhashdataty(getdatapo(o2))^.data.handler.signal.prev:= result; 
+                                                 
+   signal.next:= o2;
+  end
+  else begin
+   signal.next:= 0;
+  end;
  end;
 end;
 
 function thandlerhashdatalist.findmethod(const aobject: pchar;
-               const ainterface: pchar; const apath: pchar;
+               const ainterface: pchar; const amember: pchar;
                const asignature: pchar): phandlerhashdataty;
 var
  vec1: identvecty;
@@ -2804,10 +2854,27 @@ begin
  vec1.d[0]:= methodhandlerid;
  if scanpath(vec1,aobject,'/') and
     scanpath(vec1,ainterface,'.') and
-    scanpath(vec1,apath,'.') and
+    scanpath(vec1,amember,'.') and
     scanpath(vec1,asignature,#0) then begin
   result:= phandlerhashdataty(inherited find(vec1));
  end;
+end;
+
+function thandlerhashdatalist.findsignal(const asender: pchar;
+       const apath: pchar; const ainterface: pchar;
+          const amember: pchar; const asignature: pchar): phandlerhashdataty;
+var
+ vec1: identvecty;
+ p1: phandlerhashdataty;
+begin
+ vec1.high:= 5;
+ vec1.d[0]:= signalhandlerid;
+ vec1.d[1]:= fstringidents.getident(asender);
+ vec1.d[2]:= fstringidents.getident(apath);
+ vec1.d[3]:= fstringidents.getident(ainterface);
+ vec1.d[4]:= fstringidents.getident(amember);
+ vec1.d[5]:= fstringidents.getident(asignature);
+ result:= phandlerhashdataty(inherited find(vec1));
 end;
 
 function thandlerhashdatalist.getrecordsize(): int32;
@@ -2828,6 +2895,14 @@ begin
     end;
    end;
    hk_signal: begin
+    if data.handler.signal.next <> 0 then begin
+     phandlerhashdataty(getdatapo(data.handler.signal.next))^.
+               data.handler.signal.prev:= data.handler.signal.prev;
+    end;
+    if data.handler.signal.prev <> 0 then begin
+     phandlerhashdataty(getdatapo(data.handler.signal.prev))^.
+               data.handler.signal.next:= data.handler.signal.next;
+    end;
     p1:= getdatapo(data.handler.signal.match);
     dec(p1^.data.match.refcount);
     if p1^.data.match.refcount = 0 then begin

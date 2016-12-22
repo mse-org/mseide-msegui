@@ -91,6 +91,8 @@ type
    function add(const idents: identvecty;
                             out aelement: ptreeelementhashdataty): hashoffsetty;
    function find(const idents: identvecty): ptreeelementhashdataty;
+   function find(const idents: identvecty; 
+                               out aoffs: hashoffsetty): ptreeelementhashdataty;
 //   function find(const aele: elementdataty): ptreeelementhashdataty;
 //   function add(const idents: identvecty; 
 //                        out aelement: pointer): hashoffsetty;
@@ -373,6 +375,18 @@ end;
 function thashtree.find(const idents: identvecty): ptreeelementhashdataty;
 begin
  result:= ptreeelementhashdataty(inherited find(idents));
+end;
+
+function thashtree.find(const idents: identvecty;
+               out aoffs: hashoffsetty): ptreeelementhashdataty;
+begin
+ result:= ptreeelementhashdataty(inherited find(idents));
+ if result = nil then begin
+  aoffs:= 0;
+ end
+ else begin
+  aoffs:= pointer(result)-fdata;
+ end;
 end;
 
 function thashtree.datapo(const aoffs: hashoffsetty): ptreeelementhashdataty;
