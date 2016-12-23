@@ -41,22 +41,29 @@ type
   dbt_ARRAY,
   dbt_VARIANT,
   dbt_STRUCT,
-  dbt_DICT_ENTRY
+  dbt_DICT_ENTRY,
+  dbt_msevariant
  );
  pdbusdataty = ^dbusdataty;
  dbusdatatyarty = array of dbusdataty;
 
- variantvaluekindty = (vvk_string,vvk_int32,vvk_dynar);
+ variantvaluekindty = (vvk_string,vvk_int32,vvk_dynar,vvk_record);
  dynarinfoty = record
   data: pointer;
   typinfo: ptypeinfo;
  end;
+ recordinfoty = record
+ end;
+ 
  variantvaluety = record
+  types: dbusdatatyarty;
   case kind: variantvaluekindty of
    vvk_string: (vstring: pointer;);
    vvk_int32: (vint32: int32;);
    vvk_dynar: (vdynar: dynarinfoty);
+   vvk_record: (vrecord: recordinfoty);
  end;
+ pvariantvaluety = ^variantvaluety;
    
  dictentryty = record
   name: string;
@@ -76,7 +83,7 @@ type
  end;
  
 const
- datasizes: array[dbusdataty] of int32 = (
+ dbusdatasizes: array[dbusdataty] of int32 = (
   0,                   //dbt_INVALID,
   sizeof(byte),        //dbt_BYTE,
   sizeof(boolean),     //dbt_BOOLEAN,
@@ -94,7 +101,8 @@ const
   0,                   //dbt_ARRAY,
   0,                   //dbt_VARIANT,
   0,                   //dbt_STRUCT,
-  sizeof(dictentryty)  //dbt_DICT_ENTRY
+  sizeof(dictentryty), //dbt_DICT_ENTRY
+  sizeof(variantvaluety)  //dbt_msevariant
  );
 
  methodhandlerid = strid0;
@@ -123,7 +131,8 @@ const
   DBUS_TYPE_ARRAY,
   DBUS_TYPE_VARIANT,
   DBUS_TYPE_STRUCT,
-  DBUS_TYPE_DICT_ENTRY
+  DBUS_TYPE_DICT_ENTRY,
+  -1 //dbt_msevariant
  );
 
  dbusdatastrings: array[dbusdataty] of string = (
@@ -144,7 +153,8 @@ const
   DBUS_TYPE_ARRAY_AS_STRING,
   DBUS_TYPE_VARIANT_AS_STRING,
   DBUS_TYPE_STRUCT_AS_STRING,
-  '{sv}'  //DBUS_TYPE_DICT_ENTRY_AS_STRING
+  '{sv}',  //DBUS_TYPE_DICT_ENTRY_AS_STRING
+  ''  //dbt_msevariant
  );
  
 type
@@ -551,6 +561,7 @@ var
  dbuslibinited: boolean;
  nextidnumber: card16;
 // userdatacache: linklistty;
+ dbusalignments: array[dbusdataty] of int32;
  
 procedure initdbuslib();
 begin
@@ -1302,6 +1313,52 @@ begin
  result:= fconn <> nil;
 end;
 
+procedure alignandstep(const atype: dbusdataty; var adataad: pointer);
+var
+ pu1: ptruint;
+begin
+ pu1:= dbusalignments[atype]-1;
+ adataad:= pointer((ptruint(adataad)+pu1) and not pu1) + //align
+                             dbusdatasizes[atype];
+end;
+
+procedure align(const atype: dbusdataty; var adataad: pointer);
+var
+ pu1: ptruint;
+begin
+ pu1:= dbusalignments[atype]-1;
+ adataad:= pointer((ptruint(adataad)+pu1) and not pu1);
+end;
+
+function dbusdatastring(const atype: dbusdataty; var adataad: pointer): string;
+var
+ i1: int32;
+ p1: pointer;
+begin
+ align(atype,adataad);
+ case atype of
+  dbt_msevariant: begin
+   result:= '';
+   with pvariantvaluety(adataad)^ do begin
+    case kind of
+     vvk_dynar: begin
+     end;
+     vvk_record: begin
+     end;
+     else begin
+      p1:= nil;
+      result:= dbusdatastring(types[0],p1); //simple type
+     end;
+    end;
+   end;
+  end;
+  else begin      //structs, dictentries?
+   result:= dbusdatastrings[atype];
+  end;
+ end;
+ adataad:= adataad + dbusdatasizes[atype];
+end;
+
 procedure tdbusservice.setupmessage(const amessage: pdbusmessage;
                              const paramtypes: array of dbusdataty;
                                     const params: array of pointer);
@@ -1314,7 +1371,8 @@ var
   p1,pe: pointer;
   p2: ppointer;
   p3: pdbusdataty;
-  p4: pdictentryty;
+  pdict: pdictentryty;
+  pvariant: pvariantvaluety;
   p5: pointer;
   bool1: dbus_bool_t;
   pc1: pcchar;
@@ -1369,7 +1427,7 @@ var
      exit;
     end;
     p1:= pd^; //pointer to var
-    i1:= datasizes[pt^];
+    i1:= dbusdatasizes[pt^];
     if i1 = 0 then begin
      error('dbuscallmethod() array item type not yet supported');
      exit;
@@ -1406,9 +1464,9 @@ var
      error('dbuscallmethod() paramtypes and params count do not match');
      exit;
     end;
+    p1:= pd^;
     if dbus_message_iter_open_container(@iter,dbusdatacodes[dbt_variant],
-                          pchar(dbusdatastrings[pt^]),@iter2) = 0 then begin
-                     //todo: construct valid signature for nested container
+                        pchar(dbusdatastring(pt^,p1)),@iter2) = 0 then begin
      outofmemory();
      exit;
     end;
@@ -1424,6 +1482,8 @@ var
    end;
 // dbt_STRUCT,
    dbt_DICT_ENTRY: begin
+    pdict:= pd^;
+{
     d2[0]:= dbt_variant;
     p4:= pd^;
     case p4^.value.kind of
@@ -1441,6 +1501,7 @@ var
       exit;
      end;
     end;
+   }
     if dbus_message_iter_open_container(@iter,dbusdatacodes[dbt_dict_entry],
                                                     nil,@iter2) = 0 then begin
      outofmemory();
@@ -1448,13 +1509,16 @@ var
     end;
     d1:= dbt_string;
     p3:= @d1;
-    p5:= @p4^.name;
+    p5:= @pdict^.name;
     p2:= @p5;
     if not writevalue(iter2,p3,p2) then begin //name
      dbus_message_iter_abandon_container(@iter,@iter2);
      exit;
     end;
-    p3:= @d2; //variant
+    d2[0]:= dbt_variant;
+    d2[1]:= dbt_msevariant;
+    p3:= @d2;
+    p1:= @pdict^.value;
     p2:= @p1;
     if not writevalue(iter2,p3,p2) then begin //value
      dbus_message_iter_abandon_container(@iter,@iter2);
@@ -1465,7 +1529,28 @@ var
      exit;
     end;
     goto oklab1;
-   end
+   end;
+   dbt_msevariant: begin
+    pvariant:= pd^;
+    case pvariant^.kind of
+     vvk_string: begin
+      p1:= @pvariant^.vstring;
+     end;
+     vvk_int32: begin
+      p1:= @pvariant^.vint32;
+     end;
+     else begin
+      error('dbuscallmethod() variant data type not yet supported');
+      exit;
+     end;
+    end;
+    p2:= @p1;
+    p3:= pointer(pvariant^.types);
+    if not writevalue(iter,p3,p2) then begin
+     exit;
+    end;
+    goto oklab;
+   end;
    else begin
     result:= false;
     error('dbuscallmethod() paramtype not yet supported');
@@ -2053,7 +2138,7 @@ var
      error('dbuscallmethod() returntypes and returns count do not match');
      exit;
     end;
-    i1:= datasizes[pt^];
+    i1:= dbusdatasizes[pt^];
     if i1 = 0 then begin
      error('dbuscallmethod() array item type not yet supported');
      exit;
@@ -2604,6 +2689,8 @@ procedure setvariantvalue(const avalue: string; var avariant: variantvaluety);
 begin
  with avariant do begin
   kind:= vvk_string;
+  setlength(types,1);
+  types[0]:= dbt_string;
   vstring:= nil;
   string(vstring):= avalue;
  end;
@@ -2613,6 +2700,8 @@ procedure setvariantvalue(const avalue: int32; var avariant: variantvaluety);
 begin
  with avariant do begin
   kind:= vvk_int32;
+  setlength(types,1);
+  types[0]:= dbt_int32;
   vint32:= avalue;
  end;
 end;
@@ -2935,7 +3024,77 @@ begin
  inherited;
 end;
 
-initialization
+{
+var
+ card32rec: record b: byte; v: card32 end;
+const
+ card32align: int32 = (@card32rec.v - @card32rec.b);
+ 
+ dbusalignments: array[dbusdataty] of int32 = (
+  0,                   //dbt_INVALID,
+  sizeof(byte),        //dbt_BYTE,
+  sizeof(boolean),     //dbt_BOOLEAN,
+  sizeof(int16),       //dbt_INT16,
+  sizeof(card16),      //dbt_UINT16,
+  sizeof(int32),       //dbt_INT32,
+  sizeof(card32),      //dbt_UINT32,
+  sizeof(int64),       //dbt_INT64,
+  sizeof(card64),      //dbt_UINT64,
+  sizeof(flo64),       //dbt_DOUBLE,
+  sizeof(ansistring),  //dbt_STRING,
+  sizeof(ansistring),  //dbt_OBJECT_PATH,
+  sizeof(ansistring),  //dbt_SIGNATURE,
+  0,                   //dbt_UNIX_FD,
+  0,                   //dbt_ARRAY,
+  0,                   //dbt_VARIANT,
+  0,                   //dbt_STRUCT,
+  sizeof(dictentryty), //dbt_DICT_ENTRY
+  sizeof(variantvaluety)  //dbt_msevariant
+ );
+}
+
+procedure doinit();
+var
+ card32rec: record b: byte; v: card32 end;
+ card64rec: record b: byte; v: card64 end;
+ flo64rec: record b: byte; v: flo64 end;
+ porec: record b: byte; v: pointer end;
+ dictrec: record b: byte; v: dictentryty end;
+ msevarrec: record b: byte; v: variantvaluety end;
+ offs32: int32;
+ offs64: int32;
+ offsflo64: int32;
+ offspo: int32;
+ offsdict: int32;
+ offsmsevar: int32;
+begin
+ offs32:= @card32rec.v - @card32rec.b;
+ offs64:= @card64rec.v - @card64rec.b;
+ offsflo64:= @flo64rec.v - @flo64rec.b;
+ offspo:= @porec.v - @porec.b;
+ offsdict:= @dictrec.v - @dictrec.b;
+ offsmsevar:= @msevarrec.v - @msevarrec.b;
+
+ dbusalignments[dbt_INVALID]:= 0;
+ dbusalignments[dbt_BYTE]:= sizeof(byte);
+ dbusalignments[dbt_BOOLEAN]:= sizeof(boolean);
+ dbusalignments[dbt_INT16]:= sizeof(int16);
+ dbusalignments[dbt_UINT16]:= sizeof(uint16);
+ dbusalignments[dbt_INT32]:= offs32;
+ dbusalignments[dbt_UINT32]:= offs32;
+ dbusalignments[dbt_INT64]:= offs64;
+ dbusalignments[dbt_UINT64]:=  offs64;
+ dbusalignments[dbt_DOUBLE]:= offsflo64;
+ dbusalignments[dbt_STRING]:= offspo;
+ dbusalignments[dbt_OBJECT_PATH]:= offspo;
+ dbusalignments[dbt_SIGNATURE]:= offspo;
+ dbusalignments[dbt_UNIX_FD]:= 0;
+ dbusalignments[dbt_ARRAY]:= 0;
+ dbusalignments[dbt_VARIANT]:= 0;
+ dbusalignments[dbt_STRUCT]:= 0;
+ dbusalignments[dbt_DICT_ENTRY]:= offsdict;
+ dbusalignments[dbt_msevariant]:= offsmsevar;
+
  arraytypes[dbt_INVALID]:= nil;
  arraytypes[dbt_BYTE]:= typeinfo(bytearty);
  arraytypes[dbt_BOOLEAN]:= typeinfo(booleanarty);
@@ -2954,6 +3113,11 @@ initialization
  arraytypes[dbt_VARIANT]:= nil;
  arraytypes[dbt_STRUCT]:= nil;
  arraytypes[dbt_DICT_ENTRY]:= nil;
+ arraytypes[dbt_msevariant]:= nil;
+end;
+
+initialization
+ doinit();
 // clearlist(userdatacache,sizeof(userdatarecty),0);
 finalization
 // freelist(userdatacache);
