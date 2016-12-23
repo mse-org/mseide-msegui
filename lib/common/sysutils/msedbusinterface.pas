@@ -42,7 +42,8 @@ type
   dbt_VARIANT,
   dbt_STRUCT,
   dbt_DICT_ENTRY,
-  dbt_msevariant
+  dbt_msevariant,
+  dbt_structend
  );
  pdbusdataty = ^dbusdataty;
  dbusdatatyarty = array of dbusdataty;
@@ -52,7 +53,10 @@ type
   data: pointer;
   typinfo: ptypeinfo;
  end;
+ pdynarinfoty = ^dynarinfoty;
  recordinfoty = record
+  dataad: pointer;
+  typinfo: ptypeinfo;
  end;
  
  variantvaluety = record
@@ -98,11 +102,12 @@ const
   sizeof(ansistring),  //dbt_OBJECT_PATH,
   sizeof(ansistring),  //dbt_SIGNATURE,
   0,                   //dbt_UNIX_FD,
-  0,                   //dbt_ARRAY,
+  sizeof(dynarinfoty), //dbt_ARRAY,
   0,                   //dbt_VARIANT,
   0,                   //dbt_STRUCT,
   sizeof(dictentryty), //dbt_DICT_ENTRY
-  sizeof(variantvaluety)  //dbt_msevariant
+  sizeof(variantvaluety), //dbt_msevariant
+  0                    //dbt_structend
  );
 
  methodhandlerid = strid0;
@@ -132,7 +137,8 @@ const
   DBUS_TYPE_VARIANT,
   DBUS_TYPE_STRUCT,
   DBUS_TYPE_DICT_ENTRY,
-  -1 //dbt_msevariant
+  -1, //dbt_msevariant
+  -1  //dbt_structend
  );
 
  dbusdatastrings: array[dbusdataty] of string = (
@@ -150,11 +156,12 @@ const
   DBUS_TYPE_OBJECT_PATH_AS_STRING,
   DBUS_TYPE_SIGNATURE_AS_STRING,
   DBUS_TYPE_UNIX_FD_AS_STRING,
-  DBUS_TYPE_ARRAY_AS_STRING,
-  DBUS_TYPE_VARIANT_AS_STRING,
-  DBUS_TYPE_STRUCT_AS_STRING,
+  '',//DBUS_TYPE_ARRAY_AS_STRING,
+  '',//DBUS_TYPE_VARIANT_AS_STRING,
+  '',//DBUS_TYPE_STRUCT_AS_STRING,
   '{sv}',  //DBUS_TYPE_DICT_ENTRY_AS_STRING
-  ''  //dbt_msevariant
+  '', //dbt_msevariant
+  ''  //dbt_structend
  );
  
 type
@@ -454,6 +461,9 @@ type
    function getintrospectitems(): string virtual;
    function getpropintf: string virtual;
    function rootpath: string;
+   procedure propchangesignal(const amember: string);
+   procedure setrecordprop(const adataad: pointer; atype: ptypeinfo;
+                                                  var avalue: variantvaluety);
 
    procedure propertyget(const amessage: pdbusmessage;
                         const aname: string; var ahandled: boolean) virtual;
@@ -991,6 +1001,159 @@ begin
  end;
 end;
 }
+
+function aligntoptr(const p: pointer): pointer; inline;
+begin
+{$ifdef FPC_REQUIRES_PROPER_ALIGNMENT}
+ result:=align(p,sizeof(p));
+{$else FPC_REQUIRES_PROPER_ALIGNMENT}
+ result:=p;
+{$endif FPC_REQUIRES_PROPER_ALIGNMENT}
+end;
+
+procedure alignandstep(const atype: dbusdataty; var adataad: pointer);
+var
+ pu1: ptruint;
+begin
+ pu1:= dbusalignments[atype]-1;
+ adataad:= pointer((ptruint(adataad)+pu1) and not pu1) + //align
+                             dbusdatasizes[atype];
+end;
+
+procedure align(const atype: dbusdataty; var adataad: pointer);
+var
+ pu1: ptruint;
+begin
+ pu1:= dbusalignments[atype]-1;
+ adataad:= pointer((ptruint(adataad)+pu1) and not pu1);
+end;
+
+const
+ inttypestrings: array[tordtype] of string = (
+ //otSByte,                 otUByte,                 
+   DBUS_TYPE_BYTE_AS_STRING,DBUS_TYPE_BYTE_AS_STRING,
+ //otSWord,                  otUWord,                   
+   DBUS_TYPE_INT16_AS_STRING,DBUS_TYPE_UINT16_AS_STRING,
+ //otSLong,                  otULong
+   DBUS_TYPE_INT32_AS_STRING,DBUS_TYPE_UINT32_AS_STRING);
+   
+function dbusdatastring(const atypeinfo: ptypeinfo): string;
+var
+ p1: ptypedata;
+ p2,PE: pmanagedfield;
+begin
+ result:= '';
+ p1:= gettypedata(atypeinfo);
+ case atypeinfo^.kind of
+  tkdynarray: begin
+   result:= 'a'+dbusdatastring(p1^.eltype2);
+  end;
+  tkrecord: begin
+   result:= '(';
+   p2:= aligntoptr(@p1^.managedfldcount+sizeof(p1^.managedfldcount));
+   pe:= p2+p1^.managedfldcount;
+   while p2 < pe do begin
+    result:= result+dbusdatastring(p2^.typeref);
+    inc(p2);
+   end;
+   result:= result+')';
+  end;
+  tkinteger: begin
+   result:= inttypestrings[p1^.ordtype];
+  end;
+  tkastring: begin
+   result:= 's';
+  end;
+  else begin
+   raiseerror('type not supported');
+  end;
+ end;
+end;
+
+const
+ inttypes: array[tordtype] of dbusdataty = (
+ //otSByte, otUByte,                 
+   dbt_byte,dbt_byte,
+ //otSWord,  otUWord,                   
+   dbt_int16,dbt_uint16,
+ //otSLong,  otULong
+   dbt_int32,dbt_uint32);
+
+procedure stackarray(const source: dbusdatatyarty; var dest: dbusdatatyarty);
+var
+ i1: int32;
+begin
+ i1:= length(dest);
+ setlength(dest,i1+length(source));
+ move(source[0],dest[i1],length(source)*sizeof(source[0]));
+end;
+
+function dbusdatatypes(const atypeinfo: ptypeinfo): dbusdatatyarty;
+var
+ p1: ptypedata;
+ p2,PE: pmanagedfield;
+begin
+ setlength(result,1);
+ p1:= gettypedata(atypeinfo);
+ case atypeinfo^.kind of
+  tkdynarray: begin
+   result[0]:= dbt_array;
+   stackarray(dbusdatatypes(p1^.eltype2),result);
+  end;
+  tkrecord: begin
+   result[0]:= dbt_struct;
+   p2:= aligntoptr(@p1^.managedfldcount+sizeof(p1^.managedfldcount));
+   pe:= p2+p1^.managedfldcount;
+   while p2 < pe do begin
+    stackarray(dbusdatatypes(p2^.typeref),result);
+    inc(p2);
+   end;
+   setlength(result,high(result)+2);
+   result[high(result)]:= dbt_structend;
+  end;
+  tkinteger: begin
+   result[0]:= inttypes[p1^.ordtype];
+  end;
+  tkastring: begin
+   result[0]:= dbt_string;
+  end;
+  else begin
+   raiseerror('type not supported');
+  end;
+ end;
+end;
+
+function dbusdatastring(const atype: dbusdataty; var adataad: pointer): string;
+var
+ i1: int32;
+ p1: pointer;
+begin
+ align(atype,adataad);
+ case atype of
+  dbt_msevariant: begin
+   result:= '';
+   with pvariantvaluety(adataad)^ do begin
+    case kind of
+     vvk_dynar: begin
+      result:= dbusdatastring(vdynar.typinfo);
+     end;
+     vvk_record: begin
+      result:= dbusdatastring(vrecord.typinfo);
+     end;
+     else begin
+      p1:= nil;
+      result:= dbusdatastring(types[0],p1); //simple type
+     end;
+    end;
+   end;
+  end;
+  else begin      //structs, dictentries?
+   result:= dbusdatastrings[atype];
+  end;
+ end;
+ adataad:= adataad + dbusdatasizes[atype];
+end;
+
 { tdbusitemhashdatalist }
 
 constructor tdbusitemhashdatalist.create(const aowner: tdbusservice);
@@ -1313,58 +1476,9 @@ begin
  result:= fconn <> nil;
 end;
 
-procedure alignandstep(const atype: dbusdataty; var adataad: pointer);
-var
- pu1: ptruint;
-begin
- pu1:= dbusalignments[atype]-1;
- adataad:= pointer((ptruint(adataad)+pu1) and not pu1) + //align
-                             dbusdatasizes[atype];
-end;
-
-procedure align(const atype: dbusdataty; var adataad: pointer);
-var
- pu1: ptruint;
-begin
- pu1:= dbusalignments[atype]-1;
- adataad:= pointer((ptruint(adataad)+pu1) and not pu1);
-end;
-
-function dbusdatastring(const atype: dbusdataty; var adataad: pointer): string;
-var
- i1: int32;
- p1: pointer;
-begin
- align(atype,adataad);
- case atype of
-  dbt_msevariant: begin
-   result:= '';
-   with pvariantvaluety(adataad)^ do begin
-    case kind of
-     vvk_dynar: begin
-     end;
-     vvk_record: begin
-     end;
-     else begin
-      p1:= nil;
-      result:= dbusdatastring(types[0],p1); //simple type
-     end;
-    end;
-   end;
-  end;
-  else begin      //structs, dictentries?
-   result:= dbusdatastrings[atype];
-  end;
- end;
- adataad:= adataad + dbusdatasizes[atype];
-end;
-
 procedure tdbusservice.setupmessage(const amessage: pdbusmessage;
                              const paramtypes: array of dbusdataty;
                                     const params: array of pointer);
-var
- pte: pdbusdataty;
- 
  function writevalue(var iter: dbusmessageiter;
                              var pt: pdbusdataty; var pd: ppointer): boolean;
  var
@@ -1373,6 +1487,8 @@ var
   p3: pdbusdataty;
   pdict: pdictentryty;
   pvariant: pvariantvaluety;
+  pdynar: pdynarinfoty;
+  ptypda: ptypedata;
   p5: pointer;
   bool1: dbus_bool_t;
   pc1: pcchar;
@@ -1380,14 +1496,17 @@ var
   i1,i2: int32;
   d1: dbusdataty;
   d2: array[0..1] of dbusdataty;
+  s1: string;
  label
   oklab,oklab1;
  begin
   result:= false;
+{
   if pt >= pte then begin
    error('dbuscallmethod() paramtypes and params count do not match');
    exit;
   end;
+}
   p1:= pd^;
   case pt^ of
 // dbt_INVALID,
@@ -1422,19 +1541,21 @@ var
 // dbt_UNIX_FD,
    dbt_ARRAY: begin
     inc(pt);
+{
     if pt >= pte then begin
      error('dbuscallmethod() paramtypes and params count do not match');
      exit;
     end;
-    p1:= pd^; //pointer to var
-    i1:= dbusdatasizes[pt^];
-    if i1 = 0 then begin
-     error('dbuscallmethod() array item type not yet supported');
-     exit;
+}
+    pdynar:= pd^; //pointer to dynarinfoty
+    ptypda:= gettypedata(pdynar^.typinfo);  
+    i1:= ptypda^.elsize;
+    s1:= dbusdatastrings[pt^];
+    if s1 = '' then begin
+     s1:= dbusdatastring(ptypda^.eltype2);
     end;
     if dbus_message_iter_open_container(@iter,dbusdatacodes[dbt_array],
-                          pchar(dbusdatastrings[pt^]),@iter2) = 0 then begin
-                     //todo: construct valid signature for nested container
+              pchar(s1),@iter2) = 0 then begin
      outofmemory();
      exit;
     end;
@@ -1460,10 +1581,12 @@ var
    end;
    dbt_VARIANT: begin
     inc(pt);
+    {
     if pt >= pte then begin
      error('dbuscallmethod() paramtypes and params count do not match');
      exit;
     end;
+    }
     p1:= pd^;
     if dbus_message_iter_open_container(@iter,dbusdatacodes[dbt_variant],
                         pchar(dbusdatastring(pt^,p1)),@iter2) = 0 then begin
@@ -1539,6 +1662,12 @@ var
      vvk_int32: begin
       p1:= @pvariant^.vint32;
      end;
+     vvk_dynar: begin
+      p1:= @pvariant^.vdynar.data;
+     end;
+     vvk_record: begin
+      p1:= @pvariant^.vrecord.dataad;
+     end;
      else begin
       error('dbuscallmethod() variant data type not yet supported');
       exit;
@@ -1574,6 +1703,8 @@ var
  pde: ppointer;
  iter1: dbusmessageiter;
  pt: pdbusdataty;
+ pte: pdbusdataty;
+ 
  pd: ppointer;
 
 label
@@ -2711,8 +2842,20 @@ procedure setvariantdynarvalue(const avalue: pointer;
 begin
  with avariant do begin
   kind:= vvk_dynar;
+  types:= dbusdatatypes(atypeinfo);
   vdynar.data:= avalue;
   vdynar.typinfo:= atypeinfo;
+ end;
+end;
+
+procedure setvariantrecordvalue(const avaluead: pointer;
+                    atypeinfo: ptypeinfo; var avariant: variantvaluety);
+begin
+ with avariant do begin
+  kind:= vvk_record;
+  types:= dbusdatatypes(atypeinfo);
+  vrecord.dataad:= avaluead;
+  vrecord.typinfo:= atypeinfo;
  end;
 end;
  
@@ -2724,6 +2867,7 @@ var
  i1,i2: int32;
  p1: pdictentryty;
  p2: pppropinfo;
+ dynar1: dynarinfoty;
 begin
  propertiesget(ar1);
  i1:= length(ar1);
@@ -2757,7 +2901,9 @@ begin
    inc(p2);
   end;
   setlength(ar1,p1-pdictentryty(pointer(ar1)));
-  if fservice.dbusreply(amessage,[dbt_array,dbt_dict_entry],[@ar1]) then begin
+  dynar1.data:= pointer(ar1);
+  dynar1.typinfo:= typeinfo(ar1);
+  if fservice.dbusreply(amessage,[dbt_array,dbt_dict_entry],[@dynar1]) then begin
    ahandled:= true;
   end;
  finally
@@ -2778,6 +2924,22 @@ end;
 function tdbusobject.rootpath: string;
 begin
  result:= '/'+dbuspath(getpath());
+end;
+
+procedure tdbusobject.propchangesignal(const amember: string);
+begin
+ if fservice.connected then begin
+  fservice.dbussignal(rootpath(),getpropintf(),amember,[],[]);
+ end;
+end;
+
+procedure tdbusobject.setrecordprop(const adataad: pointer;
+               atype: ptypeinfo; var avalue: variantvaluety);
+begin
+ if atype^.kind = tkdynarray then begin
+  atype:= gettypedata(atype)^.eltype2;
+ end;
+ setvariantrecordvalue(adataad,atype,avalue);
 end;
 
 procedure tdbusobject.propertyget(const amessage: pdbusmessage;
