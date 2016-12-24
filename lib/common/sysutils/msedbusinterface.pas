@@ -58,9 +58,12 @@ type
   dataad: pointer;
   typinfo: ptypeinfo;
  end;
- 
+ precordinfoty = ^recordinfoty;
+ variantflagty = (vf_variant);
+ variantflagsty = set of variantflagty;
  variantvaluety = record
   types: dbusdatatyarty;
+  flags: variantflagsty;
   case kind: variantvaluekindty of
    vvk_string: (vstring: pointer;);
    vvk_int32: (vint32: int32;);
@@ -68,6 +71,7 @@ type
    vvk_record: (vrecord: recordinfoty);
  end;
  pvariantvaluety = ^variantvaluety;
+ variantvaluearty = array of variantvaluety;
    
  dictentryty = record
   name: string;
@@ -141,6 +145,13 @@ const
   -1  //dbt_structend
  );
 
+ dbusdatatycodes: array[variantvaluekindty] of cint = (
+  DBUS_TYPE_STRING,   //vvk_string,
+  DBUS_TYPE_INT32,    //vvk_int32,
+  DBUS_TYPE_INVALID,  //vvk_dynar,
+  DBUS_TYPE_INVALID   //vvk_record
+ );
+ 
  dbusdatastrings: array[dbusdataty] of string = (
   DBUS_TYPE_INVALID_AS_STRING,
   DBUS_TYPE_BYTE_AS_STRING,
@@ -381,11 +392,9 @@ type
    procedure doidle(var again: boolean);
    procedure dopendingcallback(pending: pDBusPendingCall{; user_data: pointer});
    procedure setupmessage(const amessage: pdbusmessage;
-                             const paramtypes: array of dbusdataty;
-                             const params: array of pointer);
+                                     const params: array of variantvaluety);
    function methodcall(const bus_name,path,iface,method: string;
-                             const paramtypes: array of dbusdataty;
-                             const params: array of pointer): pdbusmessage;
+                           const params: array of variantvaluety): pdbusmessage;
    procedure dounregisterobj(const aobj: pobjinfoty);
    procedure doregisteritems(const aobj: pobjinfoty);
    procedure dounregisteritems(const aobj: pobjinfoty);
@@ -420,12 +429,10 @@ type
                    const ahandler: messagedataeventty; const adata: pointer);
    function dbuscallmethod(const returnedto: idbusresponse; var aserial: card32;
                const bus_name,path,iface,method: string;
-               const paramtypes: array of dbusdataty;
-               const params: array of pointer;
+               const params: array of variantvaluety;
                const timeout: int32 = -1): boolean; //true if ok
    function dbuscallmethod(const bus_name,path,iface,method: string;
-               const paramtypes: array of dbusdataty;
-               const params: array of pointer;
+               const params: array of variantvaluety;
                const resulttypes: array of dbusdataty;
                const results: array of pointer;
                const timeout: int32 = -1): boolean; //blocking, true if ok
@@ -435,13 +442,11 @@ type
                 const apartial: boolean = false): boolean;
                                   //true if ok
    function dbusreply(const amessage: pdbusmessage; 
-                         const paramtypes: array of dbusdataty;
-                                     const params: array of pointer): boolean;
+                            const params: array of variantvaluety): boolean;
    function dbuserror(const amessage: pdbusmessage; 
                          const aname: string; const atext: string): boolean;
    function dbussignal(const path,iface,name: string;
-                         const paramtypes: array of dbusdataty;
-                               const params: array of pointer): boolean;
+                               const params: array of variantvaluety): boolean;
    property dbusid: string read fbusid;
    property dbusname: string read fbusname;
  end;
@@ -512,6 +517,8 @@ function dbusdumpmessage(const amessage: pdbusmessage): string;
 {$endif}
 
 procedure additem(var dest: dbusdatatyarty; const value: dbusdataty);
+function variantvalue(const avalue: string; 
+                  const aflags: variantflagsty = []): variantvaluearty;
 
 implementation
 uses
@@ -1050,7 +1057,7 @@ begin
   end;
   tkrecord: begin
    result:= '(';
-   p2:= aligntoptr(@p1^.managedfldcount+sizeof(p1^.managedfldcount));
+   p2:= aligntoptr(pointer(@p1^.managedfldcount)+sizeof(p1^.managedfldcount));
    pe:= p2+p1^.managedfldcount;
    while p2 < pe do begin
     result:= result+dbusdatastring(p2^.typeref);
@@ -1102,7 +1109,7 @@ begin
   end;
   tkrecord: begin
    result[0]:= dbt_struct;
-   p2:= aligntoptr(@p1^.managedfldcount+sizeof(p1^.managedfldcount));
+   p2:= aligntoptr(pointer(@p1^.managedfldcount)+sizeof(p1^.managedfldcount));
    pe:= p2+p1^.managedfldcount;
    while p2 < pe do begin
     stackarray(dbusdatatypes(p2^.typeref),result);
@@ -1153,6 +1160,91 @@ begin
  end;
  adataad:= adataad + dbusdatasizes[atype];
 end;
+
+procedure finalizevariantvalue(var avariant: variantvaluety);
+begin
+ with avariant do begin
+  case kind of
+   vvk_string: begin
+//    string(vstring):= '';
+   end;
+  end;
+ end;
+end;
+
+procedure finalizedictentryar(var adict: dictentryarty);
+var
+ p1,pe: pdictentryty;
+begin
+ p1:= pointer(adict);
+ pe:= p1 + length(adict);
+ while p1 < pe do begin
+  finalizevariantvalue(p1^.value);
+  inc(p1);
+ end;
+end;
+
+procedure setvariantvalue(const avalue: string; var avariant: variantvaluety;
+                              const aflags: variantflagsty = []);
+begin
+ with avariant do begin
+  kind:= vvk_string;
+  setlength(types,1);
+  types[0]:= dbt_string;
+  vstring:= pointer(avalue);
+//  vstring:= nil;
+//  string(vstring):= avalue;
+ end;
+end;
+
+function variantvalue(const avalue: string; 
+                  const aflags: variantflagsty = []): variantvaluearty;
+begin
+ setlength(result,1);
+ setvariantvalue(avalue,result[0],aflags);
+end;
+ 
+procedure setvariantvalue(const avalue: int32; var avariant: variantvaluety);
+begin
+ with avariant do begin
+  kind:= vvk_int32;
+  setlength(types,1);
+  types[0]:= dbt_int32;
+  vint32:= avalue;
+ end;
+end;
+
+procedure setvariantdynarvalue(const avalue: pointer;
+                    const atypeinfo: ptypeinfo; var avariant: variantvaluety;
+                    const aflags: variantflagsty = []);
+begin
+ with avariant do begin
+  kind:= vvk_dynar;
+  flags:= aflags;
+  types:= dbusdatatypes(atypeinfo);
+  vdynar.data:= avalue;
+  vdynar.typinfo:= atypeinfo;
+ end;
+end;
+
+function variantdynarvalue(const avalue: pointer; const atypeinfo: ptypeinfo;
+                  const aflags: variantflagsty = []): variantvaluearty;
+begin
+ setlength(result,1);
+ setvariantdynarvalue(avalue,atypeinfo,result[0],aflags);
+end;
+
+procedure setvariantrecordvalue(const avaluead: pointer;
+                    atypeinfo: ptypeinfo; var avariant: variantvaluety);
+begin
+ with avariant do begin
+  kind:= vvk_record;
+  types:= dbusdatatypes(atypeinfo);
+  vrecord.dataad:= avaluead;
+  vrecord.typinfo:= atypeinfo;
+ end;
+end;
+ 
 
 { tdbusitemhashdatalist }
 
@@ -1475,20 +1567,24 @@ function tdbusservice.connected: boolean;
 begin
  result:= fconn <> nil;
 end;
-
+(*
 procedure tdbusservice.setupmessage(const amessage: pdbusmessage;
                              const paramtypes: array of dbusdataty;
                                     const params: array of pointer);
+
  function writevalue(var iter: dbusmessageiter;
-                             var pt: pdbusdataty; var pd: ppointer): boolean;
+          var pt: pdbusdataty; var pd: ppointer; var datapo: pointer): boolean;
  var
   p1,pe: pointer;
   p2: ppointer;
   p3: pdbusdataty;
   pdict: pdictentryty;
+  precord: precordinfoty;
+  record1: recordinfoty;
   pvariant: pvariantvaluety;
   pdynar: pdynarinfoty;
   ptypda: ptypedata;
+  pd1: pointer;
   p5: pointer;
   bool1: dbus_bool_t;
   pc1: pcchar;
@@ -1566,7 +1662,7 @@ procedure tdbusservice.setupmessage(const amessage: pdbusmessage;
      while p1 < pe do begin
       p2:= @p1; //restore
       p3:= pt;  //restore
-      if not writevalue(iter2,p3,p2) then begin
+      if not writevalue(iter2,p3,p2,pd1) then begin //pd1 is dummy
        dbus_message_iter_abandon_container(@iter,@iter2);
        exit;
       end;
@@ -1581,19 +1677,13 @@ procedure tdbusservice.setupmessage(const amessage: pdbusmessage;
    end;
    dbt_VARIANT: begin
     inc(pt);
-    {
-    if pt >= pte then begin
-     error('dbuscallmethod() paramtypes and params count do not match');
-     exit;
-    end;
-    }
     p1:= pd^;
     if dbus_message_iter_open_container(@iter,dbusdatacodes[dbt_variant],
                         pchar(dbusdatastring(pt^,p1)),@iter2) = 0 then begin
      outofmemory();
      exit;
     end;
-    if not writevalue(iter2,pt,pd) then begin
+    if not writevalue(iter2,pt,pd,pd1) then begin //pd1 is dummy
      dbus_message_iter_abandon_container(@iter,@iter2);
      exit;
     end;
@@ -1603,7 +1693,35 @@ procedure tdbusservice.setupmessage(const amessage: pdbusmessage;
     end;
     goto oklab1;
    end;
-// dbt_STRUCT,
+   dbt_STRUCT: begin
+    precord:= pd^;
+    inc(pt);
+    pd1:= precord^.dataad; //record start
+    if dbus_message_iter_open_container(@iter,dbusdatacodes[dbt_struct],
+                                                    nil,@iter2) = 0 then begin
+     outofmemory();
+     exit;
+    end;
+    while pt^ <> dbt_structend do begin
+     if pt^ = dbt_struct then begin
+      record1.dataad:= pd1; //typinfo not used
+      p1:= @record1;
+      p2:= @p1;
+     end
+     else begin
+      p2:= @pd1; //restore
+     end;
+     if not writevalue(iter2,pt,p2,pd1) then begin
+      dbus_message_iter_abandon_container(@iter,@iter2);
+      exit;
+     end;
+    end;
+    if dbus_message_iter_close_container(@iter,@iter2) = 0 then begin
+     outofmemory();
+     exit;
+    end;
+    goto oklab1;
+   end;
    dbt_DICT_ENTRY: begin
     pdict:= pd^;
 {
@@ -1634,7 +1752,7 @@ procedure tdbusservice.setupmessage(const amessage: pdbusmessage;
     p3:= @d1;
     p5:= @pdict^.name;
     p2:= @p5;
-    if not writevalue(iter2,p3,p2) then begin //name
+    if not writevalue(iter2,p3,p2,pd1) then begin //name, pd1 is dummy
      dbus_message_iter_abandon_container(@iter,@iter2);
      exit;
     end;
@@ -1643,7 +1761,7 @@ procedure tdbusservice.setupmessage(const amessage: pdbusmessage;
     p3:= @d2;
     p1:= @pdict^.value;
     p2:= @p1;
-    if not writevalue(iter2,p3,p2) then begin //value
+    if not writevalue(iter2,p3,p2,pd1) then begin //value, pd1 is dummy
      dbus_message_iter_abandon_container(@iter,@iter2);
      exit;
     end;
@@ -1675,7 +1793,7 @@ procedure tdbusservice.setupmessage(const amessage: pdbusmessage;
     end;
     p2:= @p1;
     p3:= pointer(pvariant^.types);
-    if not writevalue(iter,p3,p2) then begin
+    if not writevalue(iter,p3,p2,pd1) then begin //pd1 is dummy
      exit;
     end;
     goto oklab;
@@ -1692,6 +1810,7 @@ procedure tdbusservice.setupmessage(const amessage: pdbusmessage;
    outofmemory();
    exit;
   end;
+  alignandstep(pt^,datapo);
  oklab:
   inc(pt);
   inc(pd);
@@ -1706,6 +1825,7 @@ var
  pte: pdbusdataty;
  
  pd: ppointer;
+ pd1: pointer;
 
 label
  errorlab,oklab;
@@ -1717,7 +1837,7 @@ begin
  pd:= @params[0];
  pde:= pd + length(params);
  while pd < pde do begin
-  if not writevalue(iter1,pt,pd) then begin
+  if not writevalue(iter1,pt,pd,pd1) then begin //pd1 is dummy
    goto errorlab;
   end;
  end;
@@ -1731,15 +1851,68 @@ errorlab:
  raiseerror(dbuslasterror);
 oklab:
 end;
+*)
+
+procedure tdbusservice.setupmessage(const amessage: pdbusmessage;
+                                     const params: array of variantvaluety);
+
+ function writevalue(var iter: dbusmessageiter;
+                             const param: variantvaluety): boolean;
+ var
+  p1: pointer;
+  pc: pchar;
+ label
+  oklab,oklab1;
+ begin
+  case param.kind of
+   vvk_string: begin
+    pc:= pchar(param.vstring);
+    p1:= @pc;
+   end;
+   vvk_int32: begin
+    p1:= @param.vint32;
+   end;
+   vvk_dynar: begin
+//    p1:= @pvariant^.vdynar.data;
+   end;
+   vvk_record: begin
+//    p1:= @pvariant^.vrecord.dataad;
+   end;
+   else begin
+    raiseerror('dbuscallmethod() variant data type not yet supported');
+   end;
+  end;
+  if dbus_message_iter_append_basic(@iter,
+                               dbusdatatycodes[param.kind],p1) = 0 then begin
+   outofmemory();
+   exit;
+  end;
+  result:= true;
+ end;//writevalue
+
+var
+ pd,pe: pvariantvaluety;
+ iter1: dbusmessageiter;
+begin
+ dbus_message_iter_init_append(amessage,@iter1);
+ pd:= @params[0];
+ pe:= pd + length(params);
+ while pd < pe do begin
+  if not writevalue(iter1,pd^) then begin //pd1 is dummy
+   dbus_message_unref(amessage);
+   raiseerror(dbuslasterror);
+  end;
+  inc(pd);
+ end;
+end;
 
 function tdbusservice.dbusreply(const amessage: pdbusmessage;
-               const paramtypes: array of dbusdataty;
-               const params: array of pointer): boolean;
+               const params: array of variantvaluety): boolean;
 var
  m1: pdbusmessage;
 begin
  m1:= dbus_message_new_method_return(amessage);
- setupmessage(m1,paramtypes,params);
+ setupmessage(m1,params);
  result:= dbus_connection_send(fconn,m1,nil) <> 0;
  dbus_message_unref(m1);
 end;
@@ -1755,22 +1928,21 @@ begin
 end;
 
 function tdbusservice.dbussignal(const path: string; const iface: string;
-               const name: string; const paramtypes: array of dbusdataty;
-               const params: array of pointer): boolean;
+               const name: string;
+               const params: array of variantvaluety): boolean;
 var
  m1: pdbusmessage;
 begin
  result:= false;
  m1:= dbus_message_new_signal(pchar(path),pchar(iface),pchar(name));
- setupmessage(m1,paramtypes,params);
+ setupmessage(m1,params);
  result:= dbus_connection_send(fconn,m1,nil) <> 0;
  dbus_message_unref(m1);
 end;
  
 
 function tdbusservice.methodcall(const bus_name,path,iface,method: string;
-                             const paramtypes: array of dbusdataty;
-                             const params: array of pointer): pdbusmessage;
+                           const params: array of variantvaluety): pdbusmessage;
 begin
  result:= dbus_message_new_method_call(pointer(bus_name),pchar(path),
                                               pointer(iface),pchar(method));
@@ -1778,7 +1950,7 @@ begin
   outofmemory();
  end
  else begin
-  setupmessage(result,paramtypes,params);
+  setupmessage(result,params);
  end;
 end;
 
@@ -1917,7 +2089,7 @@ begin
   end;
  end;
  s1:= s1+'</node>'+lineend;
- if dbusreply(amessage,[dbt_string],[@s1]) then begin
+ if dbusreply(amessage,variantvalue(s1)) then begin
   ahandled:= true;
  end;
 end;
@@ -2125,8 +2297,8 @@ end;
 function tdbusservice.dbuscallmethod(const returnedto: idbusresponse;
                var aserial: card32;
                const bus_name: string; const path: string; const iface: string;
-               const method: string; const paramtypes: array of dbusdataty;
-               const params: array of pointer;
+               const method: string;
+               const params: array of variantvaluety;
                const timeout: int32 = -1): boolean;
 
 var
@@ -2138,7 +2310,7 @@ label
 begin
  result:= false;
  if checkconnect() then begin
-  m1:= methodcall(bus_name,path,iface,method,paramtypes,params);
+  m1:= methodcall(bus_name,path,iface,method,params);
   if m1 <> nil then begin
    result:= dbus_connection_send_with_reply(fconn,m1,@pend1,timeout) <> 0;
    if not result then begin
@@ -2155,8 +2327,7 @@ end;
 
 function tdbusservice.dbuscallmethod(const bus_name: string;
                const path: string; const iface: string; const method: string;
-               const paramtypes: array of dbusdataty;
-               const params: array of pointer;
+               const params: array of variantvaluety;
                const resulttypes: array of dbusdataty;
                const results: array of pointer;
                const timeout: int32 = -1): boolean;
@@ -2168,7 +2339,7 @@ label
 begin
  result:= false;
  if checkconnect() then begin
-  m1:= methodcall(bus_name,path,iface,method,paramtypes,params);
+  m1:= methodcall(bus_name,path,iface,method,params);
   if m1 <> nil then begin
    m2:= dbus_connection_send_with_reply_and_block(fconn,m1,timeout,err());
    if m2 = nil then begin
@@ -2688,7 +2859,7 @@ var
  s1: string;
 begin
  s1:= introspectheader+getintrospecttext(0);
- fservice.dbusreply(amessage,[dbt_string],[@s1]);
+ fservice.dbusreply(amessage,variantvalue(s1));
  ahandled:= true;
 end;
 
@@ -2720,7 +2891,7 @@ begin
       case p1^.proptype^.kind of
        tkastring: begin
         s1:= getstrprop(self,p1);
-        fservice.dbusreply(amessage,[dbt_variant,dbt_string],[@s1]);
+        fservice.dbusreply(amessage,variantvalue(s1,[vf_variant]));
        end;
       end;
      end;
@@ -2793,72 +2964,6 @@ end;
 type
  pppropinfo = ^ppropinfo;
 
-procedure finalizevariantvalue(var avariant: variantvaluety);
-begin
- with avariant do begin
-  case kind of
-   vvk_string: begin
-    string(vstring):= '';
-   end;
-  end;
- end;
-end;
-
-procedure finalizedictentryar(var adict: dictentryarty);
-var
- p1,pe: pdictentryty;
-begin
- p1:= pointer(adict);
- pe:= p1 + length(adict);
- while p1 < pe do begin
-  finalizevariantvalue(p1^.value);
-  inc(p1);
- end;
-end;
-
-procedure setvariantvalue(const avalue: string; var avariant: variantvaluety);
-begin
- with avariant do begin
-  kind:= vvk_string;
-  setlength(types,1);
-  types[0]:= dbt_string;
-  vstring:= nil;
-  string(vstring):= avalue;
- end;
-end;
- 
-procedure setvariantvalue(const avalue: int32; var avariant: variantvaluety);
-begin
- with avariant do begin
-  kind:= vvk_int32;
-  setlength(types,1);
-  types[0]:= dbt_int32;
-  vint32:= avalue;
- end;
-end;
-
-procedure setvariantdynarvalue(const avalue: pointer;
-                    const atypeinfo: ptypeinfo; var avariant: variantvaluety);
-begin
- with avariant do begin
-  kind:= vvk_dynar;
-  types:= dbusdatatypes(atypeinfo);
-  vdynar.data:= avalue;
-  vdynar.typinfo:= atypeinfo;
- end;
-end;
-
-procedure setvariantrecordvalue(const avaluead: pointer;
-                    atypeinfo: ptypeinfo; var avariant: variantvaluety);
-begin
- with avariant do begin
-  kind:= vvk_record;
-  types:= dbusdatatypes(atypeinfo);
-  vrecord.dataad:= avaluead;
-  vrecord.typinfo:= atypeinfo;
- end;
-end;
- 
 procedure tdbusobject.propgetall(const amessage: pdbusmessage;
                const adata: pointer; var ahandled: boolean);
 var
@@ -2867,12 +2972,14 @@ var
  i1,i2: int32;
  p1: pdictentryty;
  p2: pppropinfo;
- dynar1: dynarinfoty;
+// dynar1: dynarinfoty;
 begin
  propertiesget(ar1);
+
  i1:= length(ar1);
  ar2:= getpropinfoar(self);
  setlength(ar1,i1+length(ar2)); //max
+
  try
   p1:= @ar1[i1];
   p2:= pointer(ar2);
@@ -2901,9 +3008,10 @@ begin
    inc(p2);
   end;
   setlength(ar1,p1-pdictentryty(pointer(ar1)));
-  dynar1.data:= pointer(ar1);
-  dynar1.typinfo:= typeinfo(ar1);
-  if fservice.dbusreply(amessage,[dbt_array,dbt_dict_entry],[@dynar1]) then begin
+//  dynar1.data:= pointer(ar1);
+//  dynar1.typinfo:= typeinfo(ar1);
+  if fservice.dbusreply(amessage,
+                    variantdynarvalue(pointer(ar1),typeinfo(ar1))) then begin
    ahandled:= true;
   end;
  finally
@@ -2929,7 +3037,7 @@ end;
 procedure tdbusobject.propchangesignal(const amember: string);
 begin
  if fservice.connected then begin
-  fservice.dbussignal(rootpath(),getpropintf(),amember,[],[]);
+  fservice.dbussignal(rootpath(),getpropintf(),amember,[]);
  end;
 end;
 
