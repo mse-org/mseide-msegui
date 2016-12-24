@@ -380,7 +380,7 @@ type
    fquotechar: msechar;
    fseparator: msechar;
    fforcequote: boolean;
-  public                //!!!!!!todo: correct encoding, (linebreaks, whitespaces ...)
+  public
    constructor create(ahandle: integer); override;
    function readcsvstring(out value: msestring): boolean;
                      //true if lineend
