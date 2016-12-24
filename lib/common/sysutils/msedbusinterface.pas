@@ -55,14 +55,14 @@ type
  end;
  pdynarinfoty = ^dynarinfoty;
  recordinfoty = record
-  dataad: pointer;
-  typinfo: ptypeinfo;
+  data: pointer; //variantvaluearty
+//  typinfo: ptypeinfo;
  end;
  precordinfoty = ^recordinfoty;
- variantflagty = (vf_variant);
+ variantflagty = (vf_var,vf_dict);
  variantflagsty = set of variantflagty;
  variantvaluety = record
-  types: dbusdatatyarty;
+//  types: dbusdatatyarty;
   flags: variantflagsty;
   case kind: variantvaluekindty of
    vvk_string: (vstring: pointer;);
@@ -467,8 +467,6 @@ type
    function getpropintf: string virtual;
    function rootpath: string;
    procedure propchangesignal(const amember: string);
-   procedure setrecordprop(const adataad: pointer; atype: ptypeinfo;
-                                                  var avalue: variantvaluety);
 
    procedure propertyget(const amessage: pdbusmessage;
                         const aname: string; var ahandled: boolean) virtual;
@@ -517,8 +515,21 @@ function dbusdumpmessage(const amessage: pdbusmessage): string;
 {$endif}
 
 procedure additem(var dest: dbusdatatyarty; const value: dbusdataty);
+
+procedure setvariantvalue(const avalue: string; var avariant: variantvaluety;
+                              const aflags: variantflagsty = []);
 function variantvalue(const avalue: string; 
-                  const aflags: variantflagsty = []): variantvaluearty;
+                  const aflags: variantflagsty = []): variantvaluety;
+procedure setvariantvalue(const avalue: int32; var avariant: variantvaluety;
+                                const aflags: variantflagsty = []);
+function setvariantvalue(const avalue: int32;
+                                const aflags: variantflagsty = []): variantvaluety;
+procedure setvariantvalue(const avaluead: pointer; const atypeinfo: ptypeinfo;
+           var avariant: variantvaluety; const aflags: variantflagsty = []);
+function variantvalue(const avaluead: pointer; const atypeinfo: ptypeinfo;
+                           const aflags: variantflagsty = []): variantvaluety;
+
+function itemtypeinfo(const dynartypeinfo: ptypeinfo): ptypeinfo;
 
 implementation
 uses
@@ -601,6 +612,11 @@ end;
 procedure outofmemory();
 begin
  error('Out of memory');
+end;
+
+function itemtypeinfo(const dynartypeinfo: ptypeinfo): ptypeinfo;
+begin
+ result:= gettypedata(dynartypeinfo)^.eltype2;
 end;
 
 procedure additem(var dest: dbusdatatyarty; const value: dbusdataty);
@@ -1047,7 +1063,7 @@ const
 function dbusdatastring(const atypeinfo: ptypeinfo): string;
 var
  p1: ptypedata;
- p2,PE: pmanagedfield;
+ p2,pe: pmanagedfield;
 begin
  result:= '';
  p1:= gettypedata(atypeinfo);
@@ -1075,6 +1091,52 @@ begin
    raiseerror('type not supported');
   end;
  end;
+end;
+
+{$ifdef mse_debugvariant}
+var
+ variantlevel: int32;
+{$endif}
+
+function dbusdatastring(const avalue: variantvaluety): string;
+var
+ p1,pe: pvariantvaluety;
+begin
+{$ifdef mse_debugvariant}
+ inc(variantlevel);
+ writeln('**dbusdatastring:',variantlevel,':',avalue.kind);
+{$endif}
+ case avalue.kind of
+  vvk_string: begin
+   result:= dbusdatastrings[dbt_string];
+  end;
+  vvk_int32: begin
+   result:= dbusdatastrings[dbt_int32];
+  end;
+  vvk_dynar: begin
+   result:= dbusdatastring(avalue.vdynar.typinfo);
+  end;
+  vvk_record: begin
+   result:= '(';
+   p1:= avalue.vrecord.data;
+   pe:= p1 + length(variantvaluearty(avalue.vrecord.data));
+ {$ifdef mse_debugvariant}
+   writeln('*recordcount:',variantlevel,':',pe-p1);
+ {$endif}
+   while p1 < pe do begin
+    result:= result+dbusdatastring(p1^);
+    inc(p1);
+   end;
+   result:= result+')';
+  end;
+  else begin
+   raiseerror('type not supported');
+  end;
+ end;
+{$ifdef mse_debugvariant}
+ writeln('*dbusdatastring:',variantlevel,':',result);
+ dec(variantlevel);
+{$endif}
 end;
 
 const
@@ -1129,7 +1191,7 @@ begin
   end;
  end;
 end;
-
+{
 function dbusdatastring(const atype: dbusdataty; var adataad: pointer): string;
 var
  i1: int32;
@@ -1160,14 +1222,25 @@ begin
  end;
  adataad:= adataad + dbusdatasizes[atype];
 end;
-
+}
 procedure finalizevariantvalue(var avariant: variantvaluety);
+var
+ p1,pe: pvariantvaluety;
 begin
  with avariant do begin
   case kind of
-   vvk_string: begin
-//    string(vstring):= '';
+   vvk_record: begin
+    p1:= vrecord.data;
+    pe:= p1 + length(variantvaluearty(vrecord.data));
+    while p1 < pe do begin
+     finalizevariantvalue(p1^);
+     inc(p1);
+    end;
+    variantvaluearty(vrecord.data):= nil;
    end;
+//   vvk_string: begin
+//    string(vstring):= '';
+//   end;
   end;
  end;
 end;
@@ -1189,8 +1262,9 @@ procedure setvariantvalue(const avalue: string; var avariant: variantvaluety;
 begin
  with avariant do begin
   kind:= vvk_string;
-  setlength(types,1);
-  types[0]:= dbt_string;
+  flags:= aflags;
+//  setlength(types,1);
+//  types[0]:= dbt_string;
   vstring:= pointer(avalue);
 //  vstring:= nil;
 //  string(vstring):= avalue;
@@ -1198,22 +1272,30 @@ begin
 end;
 
 function variantvalue(const avalue: string; 
-                  const aflags: variantflagsty = []): variantvaluearty;
+                  const aflags: variantflagsty = []): variantvaluety;
 begin
- setlength(result,1);
- setvariantvalue(avalue,result[0],aflags);
+ setvariantvalue(avalue,result,aflags);
 end;
  
-procedure setvariantvalue(const avalue: int32; var avariant: variantvaluety);
+procedure setvariantvalue(const avalue: int32; var avariant: variantvaluety;
+                                const aflags: variantflagsty = []);
 begin
  with avariant do begin
   kind:= vvk_int32;
-  setlength(types,1);
-  types[0]:= dbt_int32;
+  flags:= aflags;
+//  setlength(types,1);
+//  types[0]:= dbt_int32;
   vint32:= avalue;
  end;
 end;
 
+function setvariantvalue(const avalue: int32;
+                                const aflags: variantflagsty = []): variantvaluety;
+begin
+ setvariantvalue(avalue,result,aflags);
+end;
+
+{
 procedure setvariantdynarvalue(const avalue: pointer;
                     const atypeinfo: ptypeinfo; var avariant: variantvaluety;
                     const aflags: variantflagsty = []);
@@ -1221,31 +1303,114 @@ begin
  with avariant do begin
   kind:= vvk_dynar;
   flags:= aflags;
-  types:= dbusdatatypes(atypeinfo);
+//  types:= dbusdatatypes(atypeinfo);
   vdynar.data:= avalue;
   vdynar.typinfo:= atypeinfo;
  end;
 end;
 
 function variantdynarvalue(const avalue: pointer; const atypeinfo: ptypeinfo;
-                  const aflags: variantflagsty = []): variantvaluearty;
+                  const aflags: variantflagsty = []): variantvaluety;
 begin
- setlength(result,1);
- setvariantdynarvalue(avalue,atypeinfo,result[0],aflags);
+ setvariantdynarvalue(avalue,atypeinfo,result,aflags);
+end;
+}
+
+procedure setvariantvalue(const avaluead: pointer; const atypeinfo: ptypeinfo;
+           var avariant: variantvaluety; const aflags: variantflagsty = []);
+var
+ pt: ptypedata;
+ p1,pe: pmanagedfield;
+ pvalue: pvariantvaluety;
+begin
+{$ifdef mse_debugvariant}
+inc(variantlevel);
+writeln('**setvariantvalue:',variantlevel,':',atypeinfo^.name,' ',atypeinfo^.kind);
+{$endif}
+
+ pt:= gettypedata(atypeinfo);
+ with avariant do begin
+  flags:= aflags;
+  case atypeinfo^.kind of
+   tkastring: begin
+    setvariantvalue(pstring(avaluead)^,avariant,aflags);
+   end;
+   tkinteger: begin
+    if pt^.ordtype <> otslong then begin
+     raiseerror('Invalid ord type');
+    end;
+    setvariantvalue(pint32(avaluead)^,avariant,aflags);
+   end;
+   tkdynarray: begin
+    kind:= vvk_dynar;
+    vdynar.data:= ppointer(avaluead)^;
+    vdynar.typinfo:= atypeinfo;
+   end;
+   tkrecord: begin
+    kind:= vvk_record;
+    setlength(variantvaluearty(vrecord.data),pt^.managedfldcount);
+    p1:= aligntoptr(pointer(@pt^.managedfldcount)+sizeof(pt^.managedfldcount));
+    pe:= p1+pt^.managedfldcount;
+    pvalue:= vrecord.data;
+{$ifdef mse_debugvariant}
+writeln('*recordfieldcount:',variantlevel,':',pe-p1);
+{$endif}
+    while p1 < pe do begin
+     setvariantvalue(avaluead+p1^.fldoffset,p1^.typeref,pvalue^);
+     inc(p1);
+     inc(pvalue);
+    end;
+{$ifdef mse_debugvariant}
+writeln('*endfields:',variantlevel);
+{$endif}
+   end;
+   else begin
+    raiseerror('Invalid type');
+   end;
+  end;
+ end;
+{$ifdef mse_debugvariant}
+ dec(variantlevel);
+{$endif}
 end;
 
-procedure setvariantrecordvalue(const avaluead: pointer;
+function variantvalue(const avaluead: pointer; const atypeinfo: ptypeinfo;
+                           const aflags: variantflagsty = []): variantvaluety;
+begin
+ setvariantvalue(avaluead,atypeinfo,result,aflags);
+end;
+{
+procedure setvariantrecordvalue(const avalue: pointer;
                     atypeinfo: ptypeinfo; var avariant: variantvaluety);
+var
+ pt: ptypedata;
+ p1,pe: pmanagedfield;
+ pvalue: pvariantvaluety;
 begin
  with avariant do begin
   kind:= vvk_record;
-  types:= dbusdatatypes(atypeinfo);
-  vrecord.dataad:= avaluead;
-  vrecord.typinfo:= atypeinfo;
+//  types:= dbusdatatypes(atypeinfo);
+  vrecord.data:= nil;
+//  vrecord.typinfo:= atypeinfo;
+  pt:= gettypedata(atypeinfo);
+  setlength(variantvaluearty(vrecord.data),pt^.managedfldcount);
+  p1:= aligntoptr(pointer(@pt^.managedfldcount)+sizeof(pt^.managedfldcount));
+  pe:= p1+pt^.managedfldcount;
+  pvalue:= vrecord.data;
+  while p1 < pe do begin
+   setvariantvalue(avalue+p1^.fldoffset,p1^.typeref,pvalue^);
+   inc(p1);
+   inc(pvalue);
+  end;
  end;
 end;
- 
 
+function variantrecordvalue(const avaluead: pointer; 
+                const atypeinfo: ptypeinfo): variantvaluety;
+begin
+ setvariantrecordvalue(avaluead,atypeinfo,result);
+end;
+}
 { tdbusitemhashdatalist }
 
 constructor tdbusitemhashdatalist.create(const aowner: tdbusservice);
@@ -1856,38 +2021,162 @@ end;
 procedure tdbusservice.setupmessage(const amessage: pdbusmessage;
                                      const params: array of variantvaluety);
 
- function writevalue(var iter: dbusmessageiter;
+ function writevalue(const aiter: dbusmessageiter;
                              const param: variantvaluety): boolean;
  var
   p1: pointer;
+  pe: pointer;
   pc: pchar;
+  pv: pvariantvaluety;
+  pt: ptypeinfo;
+  v1: variantvaluety;
+  i1: int32;
+  iter1,iter2,iter3: dbusmessageiter;
+  s1: string;
+  pdict: pdictentryty;
+  piter: pdbusmessageiter;
  label
-  oklab,oklab1;
+  oklab,
+  errorlab,error1lab,error2lab;
  begin
+  if vf_var in param.flags then begin
+   if dbus_message_iter_open_container(@aiter,dbusdatacodes[dbt_variant],
+                      pchar(dbusdatastring(param)),@iter3) = 0 then begin
+    outofmemory;
+    exit;
+   end;
+   piter:= @iter3;
+  end
+  else begin
+   piter:= @aiter;
+  end;
   case param.kind of
    vvk_string: begin
-    pc:= pchar(param.vstring);
+    pc:= pchar(string(param.vstring));
     p1:= @pc;
    end;
    vvk_int32: begin
     p1:= @param.vint32;
    end;
    vvk_dynar: begin
-//    p1:= @pvariant^.vdynar.data;
+    if vf_dict in param.flags then begin
+     s1:= dbusdatastrings[dbt_dict_entry];
+    end
+    else begin
+     pt:= gettypedata(param.vdynar.typinfo)^.eltype2;
+     s1:= dbusdatastring(pt);
+    end;
+    if dbus_message_iter_open_container(piter,dbusdatacodes[dbt_array],
+              pchar(s1),@iter1) = 0 then begin
+     outofmemory();
+     goto errorlab;
+    end;
+    if vf_dict in param.flags then begin
+     pdict:= param.vdynar.data;
+     pe:= pointer(pdict+length(dictentryarty(param.vdynar.data)));
+     while pointer(pdict) < pe do begin
+      if dbus_message_iter_open_container(@iter1,dbusdatacodes[dbt_dict_entry],
+                nil,@iter2) = 0 then begin
+       outofmemory();
+       goto error1lab;
+      end;
+      v1.flags:= [];
+      v1.kind:= vvk_string;
+      v1.vstring:= pointer(pdict^.name);
+      if not writevalue(iter2,v1) then begin
+       goto error2lab;
+      end;
+      if not writevalue(iter2,pdict^.value) then begin
+       goto error2lab;
+      end;
+      if dbus_message_iter_close_container(@iter1,@iter2) = 0 then begin
+       outofmemory();
+       goto error1lab;
+      end;
+      inc(pdict);
+     end;
+    end
+    else begin
+     case pt^.kind of
+      tkinteger: begin
+       i1:= dynarraylength(param.vdynar.data);
+       if i1 > 0 then begin
+        if dbus_message_iter_append_fixed_array(@iter1,
+         dbusdatacodes[inttypes[gettypedata(pt)^.ordtype]],param.vdynar.data,
+                          i1) = 0 then begin
+         outofmemory();
+         goto error1lab;
+        end;
+       end;
+      end;
+      tkrecord: begin
+       pv:= param.vdynar.data;
+       pe:= pv+length(variantvaluearty(param.vdynar.data));
+       while pv < pe do begin
+        if not writevalue(iter1,pv^) then begin
+         goto error1lab;
+        end;
+        inc(pv);
+       end;
+      end;
+      else begin
+       raiseerror('dbuscallmethod() data type not yet supported');
+      end;
+     end;
+    end;
+    if dbus_message_iter_close_container(piter,@iter1) = 0 then begin
+     outofmemory();
+     goto errorlab;
+    end;
+    goto oklab;
    end;
    vvk_record: begin
-//    p1:= @pvariant^.vrecord.dataad;
+    if dbus_message_iter_open_container(piter,dbusdatacodes[dbt_struct],
+                                                  nil,@iter1) = 0 then begin
+     outofmemory();
+     goto errorlab;
+    end;
+    pv:= param.vrecord.data;
+    pe:= pv+length(variantvaluearty(param.vrecord.data));
+    while pv < pe do begin
+     if not writevalue(iter1,pv^) then begin
+      goto error1lab;
+     end;
+     inc(pv);
+    end;
+    if dbus_message_iter_close_container(piter,@iter1) = 0 then begin
+     outofmemory();
+     goto errorlab;
+    end;
+    goto oklab;
    end;
    else begin
     raiseerror('dbuscallmethod() variant data type not yet supported');
    end;
   end;
-  if dbus_message_iter_append_basic(@iter,
+  if dbus_message_iter_append_basic(piter,
                                dbusdatatycodes[param.kind],p1) = 0 then begin
    outofmemory();
-   exit;
+   goto errorlab;
+  end;
+ oklab:
+  if piter <> @aiter then begin
+   if dbus_message_iter_close_container(@aiter,piter) = 0 then begin
+    outofmemory();
+    exit;
+   end;
   end;
   result:= true;
+  exit;
+
+ error2lab:
+  dbus_message_iter_abandon_container(@iter1,@iter2);
+ error1lab:
+  dbus_message_iter_abandon_container(piter,@iter1);
+ errorlab:
+  if piter <> @aiter then begin
+   dbus_message_iter_abandon_container(piter,piter);
+  end;
  end;//writevalue
 
 var
@@ -2891,7 +3180,7 @@ begin
       case p1^.proptype^.kind of
        tkastring: begin
         s1:= getstrprop(self,p1);
-        fservice.dbusreply(amessage,variantvalue(s1,[vf_variant]));
+        fservice.dbusreply(amessage,variantvalue(s1,[vf_var]));
        end;
       end;
      end;
@@ -2972,6 +3261,7 @@ var
  i1,i2: int32;
  p1: pdictentryty;
  p2: pppropinfo;
+ p3: pointer;
 // dynar1: dynarinfoty;
 begin
  propertiesget(ar1);
@@ -2989,14 +3279,14 @@ begin
      p1^.name:= name;
      case proptype^.kind of
       tkastring: begin
-       setvariantvalue(getstrprop(self,p2^),p1^.value);
+       setvariantvalue(getstrprop(self,p2^),p1^.value,[vf_var]);
       end;
       tkinteger: begin
-       setvariantvalue(int32(getordprop(self,p2^)),p1^.value);
+       setvariantvalue(int32(getordprop(self,p2^)),p1^.value,[vf_var]);
       end;
       tkdynarray: begin
-       setvariantdynarvalue(pointer(ptruint(getordprop(self,p2^))),
-                                                     proptype,p1^.value);
+       p3:= pointer(ptruint(getordprop(self,p2^)));
+       setvariantvalue(@p3,proptype,p1^.value,[vf_var]);
       end;
       else begin
        dec(p1); //invalid data
@@ -3011,7 +3301,7 @@ begin
 //  dynar1.data:= pointer(ar1);
 //  dynar1.typinfo:= typeinfo(ar1);
   if fservice.dbusreply(amessage,
-                    variantdynarvalue(pointer(ar1),typeinfo(ar1))) then begin
+             variantvalue(@ar1,typeinfo(ar1),[vf_dict])) then begin
    ahandled:= true;
   end;
  finally
@@ -3040,16 +3330,17 @@ begin
   fservice.dbussignal(rootpath(),getpropintf(),amember,[]);
  end;
 end;
-
+{
 procedure tdbusobject.setrecordprop(const adataad: pointer;
-               atype: ptypeinfo; var avalue: variantvaluety);
+               atype: ptypeinfo; var avalue: variantvaluety;
+               const aflags: variantflagsty = []);
 begin
  if atype^.kind = tkdynarray then begin
   atype:= gettypedata(atype)^.eltype2;
  end;
- setvariantrecordvalue(adataad,atype,avalue);
+ setvariantvalue(adataad,atype,avalue,aflags);
 end;
-
+}
 procedure tdbusobject.propertyget(const amessage: pdbusmessage;
                const aname: string; var ahandled: boolean);
 begin

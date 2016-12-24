@@ -514,6 +514,10 @@ var
  dbus_message_iter_append_basic:
    function(iter: pDBusMessageIter; type_: cint; value: pointer): dbus_bool_t
                                     {$ifdef wincall}stdcall{$else}cdecl{$endif};
+ dbus_message_iter_append_fixed_array:
+   function(iter: pDBusMessageIter; element_type: cint; value: pointer;
+                                            n_elements: cint): dbus_bool_t
+                                    {$ifdef wincall}stdcall{$else}cdecl{$endif};
 
  dbus_message_iter_next: function (iter: pDBusMessageIter): dbus_bool_t
                                     {$ifdef wincall}stdcall{$else}cdecl{$endif};
@@ -601,7 +605,7 @@ end;
 procedure initializedbus(const sonames: array of filenamety; //[] = default
                                          const onlyonce: boolean = false);                                   
 const
- funcs: array[0..75] of funcinfoty = (
+ funcs: array[0..76] of funcinfoty = (
   (n: 'dbus_bus_get'; d: @dbus_bus_get),                         // 0
   (n: 'dbus_bus_get_private'; d: @dbus_bus_get_private),         // 1
   (n: 'dbus_connection_close'; d: @dbus_connection_close),       // 2
@@ -686,37 +690,39 @@ const
            d: @dbus_message_append_args_valist),                 //55
   (n: 'dbus_message_iter_append_basic';
            d: @dbus_message_iter_append_basic),                  //56
-  (n: 'dbus_message_iter_next'; d: @dbus_message_iter_next),     //57
+  (n: 'dbus_message_iter_append_fixed_array';
+           d: @dbus_message_iter_append_fixed_array),            //57
+  (n: 'dbus_message_iter_next'; d: @dbus_message_iter_next),     //58
   (n: 'dbus_message_iter_get_arg_type';
-           d: @dbus_message_iter_get_arg_type),                  //58
+           d: @dbus_message_iter_get_arg_type),                  //59
   (n: 'dbus_message_iter_get_basic';
-           d: @dbus_message_iter_get_basic),                     //59
+           d: @dbus_message_iter_get_basic),                     //60
   (n: 'dbus_message_iter_open_container'; 
-           d: @dbus_message_iter_open_container),                //60
+           d: @dbus_message_iter_open_container),                //61
   (n: 'dbus_message_iter_close_container'; 
-           d: @dbus_message_iter_close_container),               //61
+           d: @dbus_message_iter_close_container),               //62
   (n: 'dbus_message_iter_abandon_container'; 
-           d: @dbus_message_iter_abandon_container),             //62
+           d: @dbus_message_iter_abandon_container),             //63
   (n: 'dbus_message_iter_recurse'; 
-           d: @dbus_message_iter_recurse),                       //63
+           d: @dbus_message_iter_recurse),                       //64
   (n: 'dbus_message_iter_get_element_type';
-           d: @dbus_message_iter_get_element_type),              //64
+           d: @dbus_message_iter_get_element_type),              //65
   (n: 'dbus_message_iter_get_fixed_array';
-           d: @dbus_message_iter_get_fixed_array),               //65
+           d: @dbus_message_iter_get_fixed_array),               //66
   (n: 'dbus_connection_send_with_reply_and_block';
-           d: @dbus_connection_send_with_reply_and_block),       //66
+           d: @dbus_connection_send_with_reply_and_block),       //67
   (n: 'dbus_connection_send_with_reply'; 
-           d: @dbus_connection_send_with_reply),                 //67
-  (n: 'dbus_connection_send'; d: @dbus_connection_send),         //68
-  (n: 'dbus_connection_flush'; d: @dbus_connection_flush),       //69
-  (n: 'dbus_connection_dispatch'; d: @dbus_connection_dispatch), //70
-  (n: 'dbus_pending_call_unref'; d: @dbus_pending_call_unref),   //71
+           d: @dbus_connection_send_with_reply),                 //68
+  (n: 'dbus_connection_send'; d: @dbus_connection_send),         //69
+  (n: 'dbus_connection_flush'; d: @dbus_connection_flush),       //70
+  (n: 'dbus_connection_dispatch'; d: @dbus_connection_dispatch), //71
+  (n: 'dbus_pending_call_unref'; d: @dbus_pending_call_unref),   //72
   (n: 'dbus_pending_call_set_notify';
-           d: @dbus_pending_call_set_notify),                    //72
+           d: @dbus_pending_call_set_notify),                    //73
   (n: 'dbus_pending_call_steal_reply'; 
-           d: @dbus_pending_call_steal_reply),                   //73
-  (n: 'dbus_bus_add_match'; d: @dbus_bus_add_match),             //74
-  (n: 'dbus_bus_remove_match'; d: @dbus_bus_remove_match)        //75
+           d: @dbus_pending_call_steal_reply),                   //74
+  (n: 'dbus_bus_add_match'; d: @dbus_bus_add_match),             //75
+  (n: 'dbus_bus_remove_match'; d: @dbus_bus_remove_match)        //76
  );
 
 {
