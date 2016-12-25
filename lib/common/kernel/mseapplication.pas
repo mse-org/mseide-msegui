@@ -308,7 +308,7 @@ type
    function idle: boolean; virtual;
    function modallevel: integer; virtual; abstract; //-1 invalid,
                                                     //0 single loop stack
-   property applicationname: msestring read fapplicationname 
+   property applicationname: msestring read fapplicationname
                                                  write fapplicationname;
    
    procedure postevent(event: tmseevent;

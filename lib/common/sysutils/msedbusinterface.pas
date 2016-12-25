@@ -48,17 +48,18 @@ type
  pdbusdataty = ^dbusdataty;
  dbusdatatyarty = array of dbusdataty;
 
- variantvaluekindty = (vvk_string,vvk_int32,vvk_dynar,vvk_record);
+ variantvaluekindty = (vvk_string,vvk_int32,vvk_dynar,vvk_record,vvk_variantar);
  dynarinfoty = record
   data: pointer;
   typinfo: ptypeinfo;
  end;
  pdynarinfoty = ^dynarinfoty;
- recordinfoty = record
+ variantarinfoty = record
   data: pointer; //variantvaluearty
-//  typinfo: ptypeinfo;
+  typinfo: ptypeinfo;
  end;
- precordinfoty = ^recordinfoty;
+// pvariantarinfoty = ^variantarinfoty;
+
  variantflagty = (vf_var,vf_dict);
  variantflagsty = set of variantflagty;
  variantvaluety = record
@@ -68,7 +69,7 @@ type
    vvk_string: (vstring: pointer;);
    vvk_int32: (vint32: int32;);
    vvk_dynar: (vdynar: dynarinfoty);
-   vvk_record: (vrecord: recordinfoty);
+   vvk_record,vvk_variantar: (vvariantar: variantarinfoty);
  end;
  pvariantvaluety = ^variantvaluety;
  variantvaluearty = array of variantvaluety;
@@ -149,7 +150,8 @@ const
   DBUS_TYPE_STRING,   //vvk_string,
   DBUS_TYPE_INT32,    //vvk_int32,
   DBUS_TYPE_INVALID,  //vvk_dynar,
-  DBUS_TYPE_INVALID   //vvk_record
+  DBUS_TYPE_INVALID,  //vvk_record
+  DBUS_TYPE_INVALID   //vvk_variantar
  );
  
  dbusdatastrings: array[dbusdataty] of string = (
@@ -305,7 +307,7 @@ type
    procedure handlewatches();
  end;
 
- handlerkindty = (hk_match,hk_method,hk_signal);
+ handlerkindty = (hk_none,hk_match,hk_method,hk_signal);
 
  signaldataty = record
   match: hashoffsetty;
@@ -455,6 +457,8 @@ type
  tdbusobject = class(tlinkedobject,idbusobject)
   protected
    fservice: tdbusservice;
+   function getpropvalue(const aprop: ppropinfo;
+                             out avalue: variantvaluety): boolean;
    procedure introspect(const amessage: pdbusmessage; const adata: pointer;
                                                         var ahandled: boolean);
    procedure propget(const amessage: pdbusmessage; const adata: pointer;
@@ -1116,10 +1120,13 @@ begin
   vvk_dynar: begin
    result:= dbusdatastring(avalue.vdynar.typinfo);
   end;
+  vvk_variantar: begin
+   result:= dbusdatastring(avalue.vvariantar.typinfo);
+  end;
   vvk_record: begin
    result:= '(';
-   p1:= avalue.vrecord.data;
-   pe:= p1 + length(variantvaluearty(avalue.vrecord.data));
+   p1:= avalue.vvariantar.data;
+   pe:= p1 + length(variantvaluearty(avalue.vvariantar.data));
  {$ifdef mse_debugvariant}
    writeln('*recordcount:',variantlevel,':',pe-p1);
  {$endif}
@@ -1225,18 +1232,19 @@ end;
 }
 procedure finalizevariantvalue(var avariant: variantvaluety);
 var
- p1,pe: pvariantvaluety;
+ p1: pvariantvaluety;
+ pe: pointer;
 begin
  with avariant do begin
   case kind of
-   vvk_record: begin
-    p1:= vrecord.data;
-    pe:= p1 + length(variantvaluearty(vrecord.data));
+   vvk_variantar,vvk_record: begin
+    p1:= vvariantar.data;
+    pe:= p1 + length(variantvaluearty(vvariantar.data));
     while p1 < pe do begin
      finalizevariantvalue(p1^);
      inc(p1);
     end;
-    variantvaluearty(vrecord.data):= nil;
+    variantvaluearty(vvariantar.data):= nil;
    end;
 //   vvk_string: begin
 //    string(vstring):= '';
@@ -1320,8 +1328,11 @@ procedure setvariantvalue(const avaluead: pointer; const atypeinfo: ptypeinfo;
            var avariant: variantvaluety; const aflags: variantflagsty = []);
 var
  pt: ptypedata;
- p1,pe: pmanagedfield;
+ p1: pmanagedfield;
+ pe: pointer;
  pvalue: pvariantvaluety;
+ pvar: pvariantvaluety;
+ p2: pointer;
 begin
 {$ifdef mse_debugvariant}
 inc(variantlevel);
@@ -1343,15 +1354,40 @@ writeln('**setvariantvalue:',variantlevel,':',atypeinfo^.name,' ',atypeinfo^.kin
    end;
    tkdynarray: begin
     kind:= vvk_dynar;
-    vdynar.data:= ppointer(avaluead)^;
-    vdynar.typinfo:= atypeinfo;
+    case pt^.eltype2^.kind of
+     tkrecord: begin
+      if vf_dict in aflags then begin
+       vdynar.data:= ppointer(avaluead)^;
+       vdynar.typinfo:= atypeinfo;
+      end
+      else begin
+       kind:= vvk_variantar; //needs finalize
+       vvariantar.typinfo:= atypeinfo;
+       vvariantar.data:= nil;
+       p2:= ppointer(avaluead)^;
+       setlength(variantvaluearty(vvariantar.data),
+                               dynarraylength(p2));
+       pvar:= vvariantar.data;
+       pe:= pvar + dynarraylength(p2);
+       while pvar < pe do begin
+        setvariantvalue(p2,pt^.eltype2,pvar^);
+        inc(pvar);
+        inc(p2,pt^.elsize);
+       end;
+      end;
+     end
+     else begin
+      vdynar.data:= ppointer(avaluead)^;
+      vdynar.typinfo:= atypeinfo;
+     end;
+    end;
    end;
    tkrecord: begin
     kind:= vvk_record;
-    setlength(variantvaluearty(vrecord.data),pt^.managedfldcount);
+    setlength(variantvaluearty(vvariantar.data),pt^.managedfldcount);
     p1:= aligntoptr(pointer(@pt^.managedfldcount)+sizeof(pt^.managedfldcount));
     pe:= p1+pt^.managedfldcount;
-    pvalue:= vrecord.data;
+    pvalue:= vvariantar.data;
 {$ifdef mse_debugvariant}
 writeln('*recordfieldcount:',variantlevel,':',pe-p1);
 {$endif}
@@ -2058,6 +2094,28 @@ procedure tdbusservice.setupmessage(const amessage: pdbusmessage;
    vvk_int32: begin
     p1:= @param.vint32;
    end;
+   vvk_variantar: begin
+    pt:= gettypedata(param.vvariantar.typinfo)^.eltype2;
+    s1:= dbusdatastring(pt);
+    if dbus_message_iter_open_container(piter,dbusdatacodes[dbt_array],
+              pchar(s1),@iter1) = 0 then begin
+     outofmemory();
+     goto errorlab;
+    end;
+    pv:= param.vvariantar.data;
+    pe:= pv+length(variantvaluearty(param.vvariantar.data));
+    while pv < pe do begin
+     if not writevalue(iter1,pv^) then begin
+      goto error1lab;
+     end;
+     inc(pv);
+    end;
+    if dbus_message_iter_close_container(piter,@iter1) = 0 then begin
+     outofmemory();
+     goto errorlab;
+    end;
+    goto oklab;
+   end;
    vvk_dynar: begin
     if vf_dict in param.flags then begin
      s1:= dbusdatastrings[dbt_dict_entry];
@@ -2102,13 +2160,14 @@ procedure tdbusservice.setupmessage(const amessage: pdbusmessage;
        i1:= dynarraylength(param.vdynar.data);
        if i1 > 0 then begin
         if dbus_message_iter_append_fixed_array(@iter1,
-         dbusdatacodes[inttypes[gettypedata(pt)^.ordtype]],param.vdynar.data,
+         dbusdatacodes[inttypes[gettypedata(pt)^.ordtype]],@param.vdynar.data,
                           i1) = 0 then begin
          outofmemory();
          goto error1lab;
         end;
        end;
       end;
+{
       tkrecord: begin
        pv:= param.vdynar.data;
        pe:= pv+length(variantvaluearty(param.vdynar.data));
@@ -2119,6 +2178,7 @@ procedure tdbusservice.setupmessage(const amessage: pdbusmessage;
         inc(pv);
        end;
       end;
+}
       else begin
        raiseerror('dbuscallmethod() data type not yet supported');
       end;
@@ -2136,8 +2196,8 @@ procedure tdbusservice.setupmessage(const amessage: pdbusmessage;
      outofmemory();
      goto errorlab;
     end;
-    pv:= param.vrecord.data;
-    pe:= pv+length(variantvaluearty(param.vrecord.data));
+    pv:= param.vvariantar.data;
+    pe:= pv+length(variantvaluearty(param.vvariantar.data));
     while pv < pe do begin
      if not writevalue(iter1,pv^) then begin
       goto error1lab;
@@ -2258,6 +2318,7 @@ var
 begin
  tmethod(handler).data:= user_data;
  tmethod(handler).code:= @tdbusservice.mainfilter;
+ b1:= false;
  handler(message,b1);
  if b1 then begin
   result:= DBUS_HANDLER_RESULT_HANDLED;
@@ -3152,12 +3213,43 @@ begin
  ahandled:= true;
 end;
 
+function tdbusobject.getpropvalue(const aprop: ppropinfo;
+                             out avalue: variantvaluety): boolean;
+var
+ p3: pointer;
+begin
+ result:= true;
+ with aprop^ do begin
+  if getproc <> nil then begin
+   case proptype^.kind of
+    tkastring: begin
+     setvariantvalue(getstrprop(self,aprop),avalue,[vf_var]);
+    end;
+    tkinteger: begin
+     setvariantvalue(int32(getordprop(self,aprop)),avalue,[vf_var]);
+    end;
+    tkdynarray: begin
+     p3:= pointer(ptruint(getordprop(self,aprop)));
+     setvariantvalue(@p3,proptype,avalue,[vf_var]);
+    end;
+    else begin
+     result:= false;
+    end;
+   end;
+  end
+  else begin
+   result:= false;
+  end;
+ end;
+end;
+
 procedure tdbusobject.propget(const amessage: pdbusmessage; const adata: pointer;
                var ahandled: boolean);
 var
  s1,s2: string;
  p1: ppropinfo;
  b1: boolean;
+ v1: variantvaluety;
 begin
  if fservice.dbusreadmessage(amessage,[dbt_string,dbt_string],[@s1,@s2]) then begin
   if (s1 = '') or (s1 = getpropintf()) then begin
@@ -3171,18 +3263,13 @@ begin
                    'Property '+s2+' was not found in object '+rootpath());
     end
     else begin
-     if p1^.getproc = nil then begin
+     if getpropvalue(p1,v1) then begin
+      fservice.dbusreply(amessage,[v1]);
+     end
+     else begin
       fservice.dbuserror(amessage,
                    'org.freedesktop.DBus.Error.PropertyWriteOnly', //unofficional
                    'Property '+s2+' is write only');
-     end
-     else begin
-      case p1^.proptype^.kind of
-       tkastring: begin
-        s1:= getstrprop(self,p1);
-        fservice.dbusreply(amessage,variantvalue(s1,[vf_var]));
-       end;
-      end;
      end;
     end;
    end;
@@ -3261,7 +3348,6 @@ var
  i1,i2: int32;
  p1: pdictentryty;
  p2: pppropinfo;
- p3: pointer;
 // dynar1: dynarinfoty;
 begin
  propertiesget(ar1);
@@ -3274,26 +3360,9 @@ begin
   p1:= @ar1[i1];
   p2:= pointer(ar2);
   for i2:= i1 to high(ar1) do begin
-   with p2^^ do begin
-    if getproc <> nil then begin
-     p1^.name:= name;
-     case proptype^.kind of
-      tkastring: begin
-       setvariantvalue(getstrprop(self,p2^),p1^.value,[vf_var]);
-      end;
-      tkinteger: begin
-       setvariantvalue(int32(getordprop(self,p2^)),p1^.value,[vf_var]);
-      end;
-      tkdynarray: begin
-       p3:= pointer(ptruint(getordprop(self,p2^)));
-       setvariantvalue(@p3,proptype,p1^.value,[vf_var]);
-      end;
-      else begin
-       dec(p1); //invalid data
-      end;
-     end;
-     inc(p1);
-    end;
+   if getpropvalue(p2^,p1^.value) then begin
+    p1^.name:= p2^^.name;
+    inc(p1);
    end;
    inc(p2);
   end;
@@ -3371,7 +3440,7 @@ begin
  fowner:= aowner;
  fstringidents:= tstringidents.create();
  femptystringid:= fstringidents.getident('');
- include(fstate,hls_needsfinalize);
+ fstate:= fstate+[hls_needsnull,hls_needsfinalize];
  inherited create();
 end;
 
@@ -3387,9 +3456,15 @@ var
  p1,p2: pchar;
 begin
  result:= true;
- if apath <> nil then begin
-  p1:= apath;
-  with avec do begin
+ with avec do begin
+  if high >= system.high(d) then begin
+   result:= false;
+   exit;
+  end;
+  inc(high);
+  d[high]:= separatorid;
+  if apath <> nil then begin
+   p1:= apath;
    while p1^ <> #0 do begin
     if high >= system.high(d) then begin
      result:= false;
@@ -3528,6 +3603,9 @@ begin
     scanpath(vec1,amember,'.') and
     scanpath(vec1,asignature,#0) then begin
   result:= phandlerhashdataty(inherited find(vec1));
+  if (result <> nil) and (result^.data.kind <> hk_method) then begin
+   result:= nil;
+  end;
  end;
 end;
 
@@ -3546,6 +3624,9 @@ begin
  vec1.d[4]:= fstringidents.getident(amember);
  vec1.d[5]:= fstringidents.getident(asignature);
  result:= phandlerhashdataty(inherited find(vec1));
+ if (result <> nil) and (result^.data.kind <> hk_signal) then begin
+  result:= nil;
+ end;
 end;
 
 function thandlerhashdatalist.getrecordsize(): int32;

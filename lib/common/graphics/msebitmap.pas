@@ -19,7 +19,8 @@ uses
 const
  defaultimagelistwidth = 16;
  defaultimagelistheight = 16;
- defaultimagelistsize: sizety = (cx: defaultimagelistwidth; cy: defaultimagelistheight);
+ defaultimagelistsize: sizety = (cx: defaultimagelistwidth; 
+                                            cy: defaultimagelistheight);
 
 type
  imagebufferinfoty = record
