@@ -48,7 +48,8 @@ type
  pdbusdataty = ^dbusdataty;
  dbusdatatyarty = array of dbusdataty;
 
- variantvaluekindty = (vvk_string,vvk_int32,vvk_dynar,vvk_record,vvk_variantar);
+ variantvaluekindty = (vvk_none,vvk_string,vvk_int32,vvk_dynar,
+                                             vvk_record,vvk_variantar);
  dynarinfoty = record
   data: pointer;
   typinfo: ptypeinfo;
@@ -147,6 +148,7 @@ const
  );
 
  dbusdatatycodes: array[variantvaluekindty] of cint = (
+  DBUS_TYPE_INVALID,  //vvk_none
   DBUS_TYPE_STRING,   //vvk_string,
   DBUS_TYPE_INT32,    //vvk_int32,
   DBUS_TYPE_INVALID,  //vvk_dynar,
@@ -473,7 +475,7 @@ type
    procedure propchangesignal(const amember: string);
 
    procedure propertyget(const amessage: pdbusmessage;
-                        const aname: string; var ahandled: boolean) virtual;
+                      const aname: string; var avalue: variantvaluety) virtual;
    procedure propertiesget(var props: dictentryarty) virtual;
    procedure propertyset(const amessage: pdbusmessage;
                         const aname: string; var ahandled: boolean) virtual;
@@ -1384,6 +1386,7 @@ writeln('**setvariantvalue:',variantlevel,':',atypeinfo^.name,' ',atypeinfo^.kin
    end;
    tkrecord: begin
     kind:= vvk_record;
+    vvariantar.data:= nil;
     setlength(variantvaluearty(vvariantar.data),pt^.managedfldcount);
     p1:= aligntoptr(pointer(@pt^.managedfldcount)+sizeof(pt^.managedfldcount));
     pe:= p1+pt^.managedfldcount;
@@ -3253,9 +3256,9 @@ var
 begin
  if fservice.dbusreadmessage(amessage,[dbt_string,dbt_string],[@s1,@s2]) then begin
   if (s1 = '') or (s1 = getpropintf()) then begin
-   b1:= false;
-   propertyget(amessage,s2,b1);
-   if not b1 then begin
+   v1.kind:= vvk_none;
+   propertyget(amessage,s2,v1);
+   if v1.kind = vvk_none then begin
     p1:= getpropinfo(self,s2);
     if p1 = nil then begin
      fservice.dbuserror(amessage,
@@ -3263,15 +3266,15 @@ begin
                    'Property '+s2+' was not found in object '+rootpath());
     end
     else begin
-     if getpropvalue(p1,v1) then begin
-      fservice.dbusreply(amessage,[v1]);
-     end
-     else begin
+     if not getpropvalue(p1,v1) then begin
       fservice.dbuserror(amessage,
                    'org.freedesktop.DBus.Error.PropertyWriteOnly', //unofficional
                    'Property '+s2+' is write only');
      end;
     end;
+   end;
+   if v1.kind <> vvk_none then begin
+    fservice.dbusreply(amessage,[v1]);
    end;
   end
   else begin
@@ -3411,7 +3414,7 @@ begin
 end;
 }
 procedure tdbusobject.propertyget(const amessage: pdbusmessage;
-               const aname: string; var ahandled: boolean);
+               const aname: string; var avalue: variantvaluety);
 begin
  //dummy
 end;

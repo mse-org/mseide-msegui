@@ -21,7 +21,7 @@ type
  
  tooltipinfoty = record
   iconname: string;
-  iconpixmap: iconpixmapty;
+  iconpixmap: array of iconpixmapty;
   title: string;
   text: string;
  end;
@@ -53,6 +53,8 @@ type
    function getpath(): string override;
    procedure busconnected() override;
    procedure propertiesget(var props: dictentryarty) override;
+   procedure propertyget(const amessage: pdbusmessage;
+                   const aname: string; var avalue: variantvaluety) override;
    function getpropintf: string override;
    procedure registeritems(const sender: idbusservice) override;
    procedure contextmenu(const amessage: pdbusmessage; const adata: pointer;
@@ -290,6 +292,15 @@ begin
   name:= 'ToolTip';
   setvariantvalue(@ftooltip,itemtypeinfo(typeinfo(tooltipinfoarty)),
                                                            value,[vf_var]);
+ end;
+end;
+
+procedure tstatusnotifieritem.propertyget(const amessage: pdbusmessage;
+               const aname: string; var avalue: variantvaluety);
+begin
+ if aname = 'ToolTip' then begin
+  setvariantvalue(@ftooltip,itemtypeinfo(typeinfo(tooltipinfoarty)),
+                                                           avalue,[vf_var]);
  end;
 end;
 
