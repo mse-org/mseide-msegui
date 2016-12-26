@@ -48,7 +48,7 @@ type
  pdbusdataty = ^dbusdataty;
  dbusdatatyarty = array of dbusdataty;
 
- variantvaluekindty = (vvk_none,vvk_string,vvk_int32,vvk_dynar,
+ variantvaluekindty = (vvk_none,vvk_string,vvk_int32,vvk_card32,vvk_dynar,
                                              vvk_record,vvk_variantar);
  dynarinfoty = record
   data: pointer;
@@ -69,6 +69,7 @@ type
   case kind: variantvaluekindty of
    vvk_string: (vstring: pointer;);
    vvk_int32: (vint32: int32;);
+   vvk_card32: (vcard32: card32;);
    vvk_dynar: (vdynar: dynarinfoty);
    vvk_record,vvk_variantar: (vvariantar: variantarinfoty);
  end;
@@ -151,6 +152,7 @@ const
   DBUS_TYPE_INVALID,  //vvk_none
   DBUS_TYPE_STRING,   //vvk_string,
   DBUS_TYPE_INT32,    //vvk_int32,
+  DBUS_TYPE_UINT32,   //vvk_card32,
   DBUS_TYPE_INVALID,  //vvk_dynar,
   DBUS_TYPE_INVALID,  //vvk_record
   DBUS_TYPE_INVALID   //vvk_variantar
@@ -460,7 +462,7 @@ type
  end;
 
 {$typeinfo on}
- tdbusobject = class(tlinkedobject,idbusobject)
+ tdbusobject = class(teventobject,idbusobject)
   protected
    fservice: tdbusservice;
    function getpropvalue(const aprop: ppropinfo;
@@ -533,7 +535,11 @@ function variantvalue(const avalue: string;
                   const aflags: variantflagsty = []): variantvaluety;
 procedure setvariantvalue(const avalue: int32; var avariant: variantvaluety;
                                 const aflags: variantflagsty = []);
-function setvariantvalue(const avalue: int32;
+function variantvalue(const avalue: int32;
+                                const aflags: variantflagsty = []): variantvaluety;
+procedure setvariantvalue(const avalue: card32; var avariant: variantvaluety;
+                                const aflags: variantflagsty = []);
+function variantvalue(const avalue: card32;
                                 const aflags: variantflagsty = []): variantvaluety;
 procedure setvariantvalue(const avaluead: pointer; const atypeinfo: ptypeinfo;
            var avariant: variantvaluety; const aflags: variantflagsty = []);
@@ -1304,13 +1310,27 @@ begin
  with avariant do begin
   kind:= vvk_int32;
   flags:= aflags;
-//  setlength(types,1);
-//  types[0]:= dbt_int32;
   vint32:= avalue;
  end;
 end;
 
-function setvariantvalue(const avalue: int32;
+function variantvalue(const avalue: int32;
+                                const aflags: variantflagsty = []): variantvaluety;
+begin
+ setvariantvalue(avalue,result,aflags);
+end;
+
+procedure setvariantvalue(const avalue: card32; var avariant: variantvaluety;
+                                const aflags: variantflagsty = []);
+begin
+ with avariant do begin
+  kind:= vvk_card32;
+  flags:= aflags;
+  vcard32:= avalue;
+ end;
+end;
+
+function variantvalue(const avalue: card32;
                                 const aflags: variantflagsty = []): variantvaluety;
 begin
  setvariantvalue(avalue,result,aflags);
@@ -2077,6 +2097,7 @@ procedure tdbusservice.setupmessage(const amessage: pdbusmessage;
   p1: pointer;
   pe: pointer;
   pc: pchar;
+  ps: pstring;
   pv: pvariantvaluety;
   pt: ptypeinfo;
   v1: variantvaluety;
@@ -2107,6 +2128,9 @@ procedure tdbusservice.setupmessage(const amessage: pdbusmessage;
    end;
    vvk_int32: begin
     p1:= @param.vint32;
+   end;
+   vvk_card32: begin
+    p1:= @param.vcard32;
    end;
    vvk_variantar: begin
     pt:= gettypedata(param.vvariantar.typinfo)^.eltype2;
@@ -2178,6 +2202,22 @@ procedure tdbusservice.setupmessage(const amessage: pdbusmessage;
                           i1) = 0 then begin
          outofmemory();
          goto error1lab;
+        end;
+       end;
+      end;
+      tkastring: begin
+       i1:= dynarraylength(param.vdynar.data);
+       if i1 > 0 then begin
+        ps:= param.vdynar.data;
+        pe:= ps+i1;
+        while ps < pe do begin
+         pc:= pchar(ps^);
+         if dbus_message_iter_append_basic(
+                        @iter1,dbusdatacodes[dbt_string],@pc) = 0 then begin
+          outofmemory();
+          goto error1lab;
+         end;
+         inc(ps);
         end;
        end;
       end;
@@ -3422,7 +3462,7 @@ end;
 
 procedure tdbusobject.propchangesignal(const amember: string);
 begin
- if fservice.connected then begin
+ if (fservice <> nil) and fservice.connected then begin
   fservice.dbussignal(rootpath(),getpropintf(),amember,[]);
  end;
 end;

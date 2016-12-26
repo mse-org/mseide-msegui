@@ -7,11 +7,15 @@
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 }
+//
+// for internal use in MSEgui only
+//
 unit msestatusnotifieritem;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 uses
- msedbusinterface,msestrings,msetypes,msebitmap,msedbus;
+ msedbusinterface,msestrings,msetypes,msebitmap,msedbus,msegraphutils,
+ mseevent;
 type
  desktopkindty = (desk_none,desk_freedesktop,desk_kde);
 
@@ -32,6 +36,9 @@ type
 
  statusnotifiercategoryty = (snc_applicationstatus,snc_communications,
                              snc_systemservices,snc_hardware);
+ tstatusnotifieritem = class;
+ statusnotifierposprocty = procedure(const sender: tstatusnotifieritem;
+                                               const apos: pointty) of object;
  tstatusnotifieritem = class(tdbusobject)
   private
    fstatuscategory: statusnotifiercategoryty;
@@ -49,6 +56,9 @@ type
    fatentionmoviename: string;
    ftooltip: tooltipinfoty;
    factive: boolean;
+   foncontextmenu: statusnotifierposprocty;
+   fonactivate: statusnotifierposprocty;
+   fmessageid: card32;
    function getcategory: string;
    function getid: string;
    procedure setactive(const avalue: boolean);
@@ -71,10 +81,16 @@ type
    procedure scroll(const amessage: pdbusmessage; const adata: pointer;
                                                         var ahandled: boolean);
    function checkdesktop(): boolean;
+   procedure receiveevent(const event: tobjectevent) override;
   public
    constructor create();
    destructor destroy(); override;
    property desktopkind: desktopkindty read fdesktopkind;
+   function showmessage(const message: msestring;
+                          out messageid: card32;
+                          const timeoutms: card32 = 0): boolean;
+   function cancelmessage(const messageid: card32): boolean;
+
    property active: boolean read factive write setactive;
    property statuscategory: statusnotifiercategoryty read fstatuscategory
                          write fstatuscategory default snc_applicationstatus;
@@ -84,6 +100,7 @@ type
    procedure setStatus(const avalue: string);
    procedure setWindowId(const avalue: int32);
    procedure setIconName(const avalue: string);
+   procedure setIconPixmap(const avalue: tmaskedbitmap);
    procedure setIconPixmap(const avalue: iconpixmaparty);
    procedure setOverlayIconName(const avalue: string);
    procedure setOverlayIconPixmap(const avalue: iconpixmaparty);
@@ -91,6 +108,10 @@ type
    procedure setAtentionIconPixmap(const avalue: iconpixmaparty);
    procedure setAtentionMovieName(const avalue: string);
    property ToolTip: tooltipinfoty read ftooltip;
+   property oncontextmenu: statusnotifierposprocty read foncontextmenu 
+                                                        write foncontextmenu;
+   property onactivate: statusnotifierposprocty read fonactivate 
+                                                        write fonactivate;
   published
    property Category: string read getcategory;
    property Id: string read getid;
@@ -110,12 +131,8 @@ function bitmaptoiconpixmap(const abitmap: tmaskedbitmap): iconpixmapty;
 
 implementation
 uses
- mseapplication,msegraphics,msegraphutils;
-//const
-// intfname = 'org.freedesktop.StatusNotifierItem';
-// intfname = 'org.kde.StatusNotifierItem';
+ mseapplication,msegraphics;
 type
-// dbuspixelty = packed record b,g,r,a: card8 end; //in network byte order
  dbuspixelty = packed record a,r,g,b: card8 end; //in network byte order
  pdbuspixelty = ^dbuspixelty;
  
@@ -266,6 +283,38 @@ begin
  active:= false;
 end;
 
+function tstatusnotifieritem.showmessage(const message: msestring;
+               out messageid: card32; const timeoutms: card32 = 0): boolean;
+var
+ s1: string;
+ c1: card32;
+ p1: pointer;
+begin
+ inc(fmessageid);
+ s1:= getid;
+ if fmessageid = 0 then begin
+  inc(fmessageid);
+ end;
+ messageid:= fmessageid;
+ p1:= nil;
+ result:= fservice.dbuscallmethod('org.freedesktop.Notifications',
+           '/org/freedesktop/Notifications','org.freedesktop.Notifications',
+           'Notify',
+           [variantvalue(s1),variantvalue(fmessageid),variantvalue(''),
+            variantvalue(stringtoutf8(message)),variantvalue(''),
+            variantvalue(@p1,typeinfo(stringarty)),
+            variantvalue(@p1,typeinfo(dictentryarty),[vf_dict]),
+            variantvalue(int32(timeoutms))],[dbt_uint32],[@c1]);
+end;
+
+function tstatusnotifieritem.cancelmessage(
+              const messageid: card32): boolean;
+begin
+ result:= fservice.dbuscallmethod('org.freedesktop.Notifications',
+           '/org/freedesktop/Notifications','org.freedesktop.Notifications',
+           'CloseNotification',[variantvalue(messageid)],[],[]);
+end;
+
 const
  categorynames: array[statusnotifiercategoryty] of string = (
   //snc_applicationstatus,snc_communications,snc_systemservices,snc_hardware
@@ -354,16 +403,11 @@ begin
  inherited;
 // s1:= fservice.dbusname;
  s1:= fservice.dbusid;
-write('**statusnotifieritem');
  if not fservice.dbuscallmethod(
              interfacestart[fdesktopkind]+'StatusNotifierWatcher',
              '/StatusNotifierWatcher',
              interfacestart[fdesktopkind]+'StatusNotifierWatcher',
              'RegisterStatusNotifierItem',variantvalue(s1),[],[]) then begin
-  writeln('error:'+dbuslasterror);
- end
- else begin
-  writeln('OK');
  end;
 end;
 
@@ -404,13 +448,23 @@ begin
         'Scroll',[dbt_int32,dbt_string],@scroll,nil);
 end;
 
+procedure tstatusnotifieritem.receiveevent(const event: tobjectevent);
+begin
+ inherited;
+ if (event.kind = ek_objectdata) and (event is tpointobjectevent) and
+                                             assigned(foncontextmenu) then begin
+  foncontextmenu(self,tpointobjectevent(event).data);
+ end;
+end;
+
 procedure tstatusnotifieritem.contextmenu(const amessage: pdbusmessage;
                const adata: pointer; var ahandled: boolean);
 var
  x,y: int32;
 begin
  if fservice.dbusreadmessage(amessage,[dbt_int32,dbt_int32],[@x,@y]) then begin
-writeln('**contextmenu');
+  application.postevent(tpointobjectevent.create(mp(x,y),ievent(self)));
+      //deadlock in dbus library if called directly because of modal call
   fservice.dbusreply(amessage,[]);
   ahandled:= true;
  end
@@ -422,8 +476,10 @@ var
  x,y: int32;
 begin
  if fservice.dbusreadmessage(amessage,[dbt_int32,dbt_int32],[@x,@y]) then begin
-writeln('**activate');
   fservice.dbusreply(amessage,[]);
+  if assigned(fonactivate) then begin
+   fonactivate(self,mp(x,y));
+  end;
   ahandled:= true;
  end
 end;
@@ -434,7 +490,9 @@ var
  x,y: int32;
 begin
  if fservice.dbusreadmessage(amessage,[dbt_int32,dbt_int32],[@x,@y]) then begin
-writeln('**secondaryactivate');
+  if assigned(fonactivate) then begin
+   foncontextmenu(self,mp(x,y));
+  end;
   fservice.dbusreply(amessage,[]);
   ahandled:= true;
  end
@@ -448,7 +506,6 @@ var
 begin
  if fservice.dbusreadmessage(amessage,[dbt_int32,dbt_string],
                                                 [@delta,@orientation]) then begin
-writeln('**scroll');
   fservice.dbusreply(amessage,[]);
   ahandled:= true;
  end
@@ -468,7 +525,7 @@ end;
 procedure tstatusnotifieritem.setStatus(const avalue: string);
 begin
  fstatus:= avalue;
- if fservice.connected then begin
+ if (fservice <> nil) and fservice.connected then begin
   fservice.dbussignal(rootpath(),getpropintf(),'NewStatus',
                                                variantvalue(fstatus));
  end;
@@ -483,6 +540,18 @@ procedure tstatusnotifieritem.setIconName(const avalue: string);
 begin
  ficonname:= avalue;
  propchangesignal('NewIcon');
+end;
+
+procedure tstatusnotifieritem.setIconPixmap(const avalue: tmaskedbitmap);
+var
+ ar1: iconpixmaparty;
+begin
+ ar1:= nil;
+ if (avalue <> nil) and avalue.hasimage() then begin
+  setlength(ar1,1);
+  ar1[0]:= bitmaptoiconpixmap(avalue);
+ end;
+ seticonpixmap(ar1);
 end;
 
 procedure tstatusnotifieritem.setIconPixmap(const avalue: iconpixmaparty);
