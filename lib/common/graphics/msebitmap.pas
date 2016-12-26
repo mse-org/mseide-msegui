@@ -3066,8 +3066,28 @@ end;
 procedure timagelist.getimage(const index: integer; const dest: tmaskedbitmap);
 var
  rect1: rectty;
-
 begin
+ dest.clear;
+ if (index >= 0) or (index < fcount) then begin
+  dest.beginupdate();
+  dest.kind:= fbitmap.kind;
+  dest.masked:= fbitmap.masked;
+  if dest.masked then begin
+   dest.mask.kind:= fbitmap.mask.kind;
+  end;
+  dest.transparentcolor:= fbitmap.transparentcolor;
+  dest.colorforeground:= fbitmap.colorforeground;
+  dest.colorbackground:= fbitmap.colorbackground;
+  rect1.pos:= indextoorg(index);
+  rect1.size:= size;
+  dest.size:= size;
+  dest.copyarea(fbitmap,rect1,nullpoint,rop_copy,false);
+  if dest.masked then begin
+   dest.mask.copyarea(fbitmap.fmask,rect1,nullpoint,rop_copy,false);
+  end;
+  dest.endupdate();
+ end;
+{
  if (index < 0) or (index >= fcount) then begin
   dest.clear;
  end
@@ -3092,6 +3112,7 @@ begin
   end;
   dest.endupdate();
  end;
+}
 end;
 
 procedure timagelist.setimage(index: integer; image: tmaskedbitmap;
