@@ -445,6 +445,10 @@ type
                 const results: array of pointer;
                 const apartial: boolean = false): boolean;
                                   //true if ok
+   function dbusgetproperty(const bus_name,path,iface,property_name: string;
+               const resulttypes: array of dbusdataty;
+               const results: array of pointer;
+               const timeout: int32 = -1): boolean; //blocking, true if ok
    function dbusreply(const amessage: pdbusmessage; 
                             const params: array of variantvaluety): boolean;
    function dbuserror(const amessage: pdbusmessage; 
@@ -521,6 +525,7 @@ function dbusdumpmessage(const amessage: pdbusmessage): string;
 {$endif}
 
 procedure additem(var dest: dbusdatatyarty; const value: dbusdataty);
+procedure additem(var dest: variantvaluearty; const value: variantvaluety);
 
 procedure setvariantvalue(const avalue: string; var avariant: variantvaluety;
                               const aflags: variantflagsty = []);
@@ -626,6 +631,12 @@ begin
 end;
 
 procedure additem(var dest: dbusdatatyarty; const value: dbusdataty);
+begin
+ setlength(dest,high(dest)+2);
+ dest[high(dest)]:= value;
+end;
+
+procedure additem(var dest: variantvaluearty; const value: variantvaluety);
 begin
  setlength(dest,high(dest)+2);
  dest[high(dest)]:= value;
@@ -2708,6 +2719,17 @@ errorlab:
  end;
 end;
 
+function tdbusservice.dbusgetproperty(
+               const bus_name,path,iface,property_name: string;
+               const resulttypes: array of dbusdataty;
+               const results: array of pointer;
+               const timeout: int32 = -1): boolean; //blocking, true if ok
+begin
+ result:= dbuscallmethod(bus_name,path,'org.freedesktop.DBus.Properties','Get',
+              [variantvalue(iface),variantvalue(property_name)],
+                                             resulttypes,results,timeout)
+end;
+
 function tdbusservice.dbusreadmessage(const amessage: pdbusmessage;
                   const resulttypes: array of dbusdataty;
                              const results: array of pointer;
@@ -2975,7 +2997,7 @@ begin
   fconn:= nil;
   fbusid:= '';
   fbusname:= '';
-  releasedbus();
+//  releasedbus();
  end;
 end;
 
@@ -3155,7 +3177,9 @@ constructor tdbusobject.create(const aservice: tdbusservice);
 begin
  setlinkedvar(aservice,tlinkedobject(fservice));
  inherited create;
- fservice.registerobject(idbusobject(self));
+ if fservice <> nil then begin
+  fservice.registerobject(idbusobject(self));
+ end;
 end;
 
 destructor tdbusobject.destroy();

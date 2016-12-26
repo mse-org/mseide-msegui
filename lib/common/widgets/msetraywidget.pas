@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2013 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2016 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -9,12 +9,18 @@
 }
 unit msetraywidget;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
+{$ifndef mswindows} {$define mse_usedbus} {$endif}
+
 interface
 uses
- mseclasses,classes,mclasses,msesimplewidgets,mseguiglob,msebitmap,msegui,mseevent,
- mseglob,msegraphics,msestrings,msetimer,msemenus;
+ mseclasses,classes,mclasses,msesimplewidgets,mseguiglob,msebitmap,msegui,
+ mseevent,mseglob,msegraphics,msestrings,msetimer,msemenus
+ {$ifdef mse_usedbus},msestatusnotifieritem{$endif};
  
 type
+ traywidgetoptionty = (two_nodbus);
+ traywidgetoptionsty = set of traywidgetoptionty;
+ 
  ttraywidget = class(teventwidget)
   private
    ficon: tmaskedbitmap;
@@ -24,11 +30,16 @@ type
    fmessageid: longword;
    ftimer: tsimpletimer;
    fcaption: msestring;
+   foptions: traywidgetoptionsty;
    procedure seticon(const avalue: tmaskedbitmap);
    procedure setimagelist(const avalue: timagelist);
    procedure setimagenum(const avalue: integer);
    procedure setcaption(const avalue: msestring);
+   procedure setoptions(const avalue: traywidgetoptionsty);
   protected
+  {$ifdef mse_usedbus}
+   fstatusnotifieritem: tstatusnotifieritem;
+  {$endif} 
   {$ifdef mswindows}
    procedure showhint(const aid: int32; var info: hintinfoty); override;
   {$endif}
@@ -39,6 +50,7 @@ type
    procedure objectevent(const sender: tobject;
                             const event: objecteventty); override;
    procedure iconchanged(const sender: tobject);
+   function hasdbus: boolean;
    function dock: boolean; //true if OK
    procedure undock;
    procedure setvisible(const avalue: boolean); override;
@@ -57,6 +69,7 @@ type
    property imagelist: timagelist read fimagelist write setimagelist;
    property imagenum: integer read fimagenum write setimagenum default -1;
    property caption: msestring read fcaption write setcaption;
+   property options: traywidgetoptionsty read foptions write setoptions;
  end;
  
 implementation
@@ -67,6 +80,9 @@ uses
 
 constructor ttraywidget.create(aowner: tcomponent);
 begin
+ {$ifdef mse_usedbus}
+ fstatusnotifieritem:= tstatusnotifieritem.create();
+ {$endif} 
  fimagenum:= -1;
  ficon:= tcenteredbitmap.create(bmk_rgb{false});
  ficon.onchange:= {$ifdef FPC}@{$endif}iconchanged;
@@ -80,6 +96,9 @@ begin
  freeandnil(ftimer);
  ficon.free;
  inherited;
+{$ifdef mse_usedbus}
+ fstatusnotifieritem.free();
+{$endif} 
 end;
 
 function ttraywidget.dock: boolean;
@@ -87,18 +106,26 @@ var
  bo1: boolean;
 begin
  result:= true;
- if (parentwidget <> nil) or (window.syscontainer <> sywi_tray) then begin
-  bo1:= visible;
-  visible:= false;
-  parentwidget:= nil;
-  try
-   window.syscontainer:= sywi_tray;
-  except
-   result:= false;
-   exit;
+{$ifdef mse_usedbus}
+ if hasdbus then begin
+ end
+ else begin
+{$endif}
+  if (parentwidget <> nil) or (window.syscontainer <> sywi_tray) then begin
+   bo1:= visible;
+   visible:= false;
+   parentwidget:= nil;
+   try
+    window.syscontainer:= sywi_tray;
+   except
+    result:= false;
+    exit;
+   end;
+   visible:= bo1;
   end;
-  visible:= bo1;
+{$ifdef mse_usedbus}
  end;
+{$endif}
 end;
 
 procedure ttraywidget.undock;
@@ -108,22 +135,52 @@ begin
  end;
 end;
 
+function ttraywidget.hasdbus(): boolean;
+begin
+ result:= (fstatusnotifieritem <> nil) and 
+              (fstatusnotifieritem.desktopkind <> desk_none);
+end;
+
 procedure ttraywidget.setvisible(const avalue: boolean);
 begin
+{$ifdef mse_usedbus}
+ if (componentstate * [csdesigning,csloading] = []) and 
+  (hasdbus and (avalue <> fstatusnotifieritem.active) or
+    not hasdbus and (avalue <> visible)) then begin
+{$else}
  if (componentstate * [csdesigning,csloading] = []) and 
                                            (avalue <> visible) then begin
+{$endif}
   if avalue then begin
    if dock() then begin
     setcaption(fcaption);
     iconchanged(nil);
     settrayhint;
-    inherited;
+   {$ifdef mse_usedbus}
+    if hasdbus then begin
+     fstatusnotifieritem.active:= true;
+    end
+    else begin
+   {$endif} 
+     inherited;
+   {$ifdef mse_usedbus}
+    end;
+   {$endif}
    end;
   end
   else begin
-   cancelmessage;
-   inherited;
-   undock;
+   cancelmessage();
+   {$ifdef mse_usedbus}
+    if hasdbus then begin
+     fstatusnotifieritem.active:= false;
+    end
+    else begin
+   {$endif}
+     inherited;
+   {$ifdef mse_usedbus}
+    end;
+   {$endif}
+   undock();
   end;
  end
  else begin
@@ -177,7 +234,7 @@ begin
      bmp1.assign(ficon);
     end
     else begin
-     bmp1.masked:= fimagelist.masked;
+//     bmp1.masked:= fimagelist.masked;
      fimagelist.getimage(fimagenum,bmp1);
     end;
     invalidate;
@@ -292,6 +349,19 @@ begin
  fcaption:= avalue;
  if ownswindow then begin
   window.caption:= fcaption;
+ end;
+end;
+
+procedure ttraywidget.setoptions(const avalue: traywidgetoptionsty);
+begin
+ if avalue <> foptions then begin
+  foptions:= avalue;
+  if not (two_nodbus in foptions) and (fstatusnotifieritem = nil) then begin
+   fstatusnotifieritem:= tstatusnotifieritem.create();
+  end
+  else begin
+   freeandnil(fstatusnotifieritem);
+  end;
  end;
 end;
 

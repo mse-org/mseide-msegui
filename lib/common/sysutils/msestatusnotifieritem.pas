@@ -13,6 +13,8 @@ interface
 uses
  msedbusinterface,msestrings,msetypes,msebitmap,msedbus;
 type
+ desktopkindty = (desk_none,desk_freedesktop,desk_kde);
+
  iconpixmapty = record
   cx,cy: int32;
   data: bytearty;
@@ -46,9 +48,12 @@ type
    fatentioniconpixmap: iconpixmaparty;
    fatentionmoviename: string;
    ftooltip: tooltipinfoty;
+   factive: boolean;
    function getcategory: string;
    function getid: string;
+   procedure setactive(const avalue: boolean);
   protected
+   fdesktopkind: desktopkindty;
    function getintrospectitems(): string override;
    function getpath(): string override;
    procedure busconnected() override;
@@ -65,7 +70,12 @@ type
                                                         var ahandled: boolean);
    procedure scroll(const amessage: pdbusmessage; const adata: pointer;
                                                         var ahandled: boolean);
+   function checkdesktop(): boolean;
   public
+   constructor create();
+   destructor destroy(); override;
+   property desktopkind: desktopkindty read fdesktopkind;
+   property active: boolean read factive write setactive;
    property statuscategory: statusnotifiercategoryty read fstatuscategory
                          write fstatuscategory default snc_applicationstatus;
    procedure setToolTip(const avalue: tooltipinfoty);
@@ -101,9 +111,9 @@ function bitmaptoiconpixmap(const abitmap: tmaskedbitmap): iconpixmapty;
 implementation
 uses
  mseapplication,msegraphics,msegraphutils;
-const
+//const
 // intfname = 'org.freedesktop.StatusNotifierItem';
- intfname = 'org.kde.StatusNotifierItem';
+// intfname = 'org.kde.StatusNotifierItem';
 type
 // dbuspixelty = packed record b,g,r,a: card8 end; //in network byte order
  dbuspixelty = packed record a,r,g,b: card8 end; //in network byte order
@@ -170,8 +180,10 @@ begin
 end;
 
 const
- datadef =
-'<interface name="'+intfname+'">'+lineend+
+ datadef1 =
+'<interface name="';
+ datadef2 =
+'">'+lineend+
 ''+lineend+
 '  <property name="Category" type="s" access="read"/>'+lineend+
 '  <property name="Id" type="s" access="read"/>'+lineend+
@@ -238,6 +250,23 @@ const
 ''+lineend+
 '</interface>'+lineend;
 
+const
+ interfacestart: array[desktopkindty] of string = (
+  '','org.freedesktop.','org.kde.');
+  
+constructor tstatusnotifieritem.create();
+begin
+ inherited create(nil);
+ checkdesktop();
+end;
+
+destructor tstatusnotifieritem.destroy();
+begin
+ inherited;
+ active:= false;
+end;
+
+const
  categorynames: array[statusnotifiercategoryty] of string = (
   //snc_applicationstatus,snc_communications,snc_systemservices,snc_hardware
        'ApplicationStatus',  'Communications',  'SystemServices',  'Hardware');  
@@ -256,9 +285,61 @@ begin
  result:= fid1;
 end;
 
+function tstatusnotifieritem.checkdesktop(): boolean;
+var
+ b1,b2: boolean;
+ desk1: desktopkindty;
+begin
+ if fservice = nil then begin
+  fservice:= tdbusservice.create();
+  try
+   b1:= false;
+   if fservice.connect() then begin
+    for desk1:= desktopkindty(1) to high(desk1) do begin
+     if fservice.dbusgetproperty(interfacestart[desk1]+'StatusNotifierWatcher',
+      '/StatusNotifierWatcher',interfacestart[desk1]+'StatusNotifierWatcher',
+      'IsStatusNotifierHostRegistered',[dbt_boolean],[@b2]) then begin
+      if b2 then begin
+       fdesktopkind:= desk1;
+       break;
+      end;
+     end;
+    end;
+   end;
+   if fdesktopkind = desk_none then begin
+    fservice.destroy();
+    fservice:= nil;
+   end;
+  except
+   fservice.destroy;
+   fservice:= nil;
+   raise;
+  end;
+ end;
+ result:= fservice <> nil;
+end;
+
+procedure tstatusnotifieritem.setactive(const avalue: boolean);
+begin
+ if avalue <> factive then begin
+  if factive then begin
+   fservice.destroy;
+   fservice:= nil;
+   factive:= false;
+  end
+  else begin
+   if checkdesktop() then begin
+    factive:= true;
+    fservice.registerobject(idbusobject(self));
+   end;
+  end;
+ end;
+end;
+
 function tstatusnotifieritem.getintrospectitems(): string;
 begin
- result:= inherited getintrospectitems() + datadef;
+ result:= inherited getintrospectitems() + 
+ datadef1+getpropintf()+datadef2;
 end;
 
 function tstatusnotifieritem.getpath(): string;
@@ -273,11 +354,12 @@ begin
  inherited;
 // s1:= fservice.dbusname;
  s1:= fservice.dbusid;
- write('*statusnoifieritem ');
- if not fservice.dbuscallmethod('org.kde.StatusNotifierWatcher',
+write('**statusnotifieritem');
+ if not fservice.dbuscallmethod(
+             interfacestart[fdesktopkind]+'StatusNotifierWatcher',
              '/StatusNotifierWatcher',
-             'org.kde.StatusNotifierWatcher','RegisterStatusNotifierItem',
-                                          variantvalue(s1),[],[]) then begin
+             interfacestart[fdesktopkind]+'StatusNotifierWatcher',
+             'RegisterStatusNotifierItem',variantvalue(s1),[],[]) then begin
   writeln('error:'+dbuslasterror);
  end
  else begin
@@ -306,19 +388,19 @@ end;
 
 function tstatusnotifieritem.getpropintf: string;
 begin
- result:= intfname;
+ result:= interfacestart[fdesktopkind]+'StatusNotifierItem';
 end;
 
 procedure tstatusnotifieritem.registeritems(const sender: idbusservice);
 begin
  inherited;
- sender.registermethodhandler(intfname,
+ sender.registermethodhandler(getpropintf(),
         'ContextMenu',[dbt_int32,dbt_int32],@contextmenu,nil);
- sender.registermethodhandler(intfname,
+ sender.registermethodhandler(getpropintf(),
         'Activate',[dbt_int32,dbt_int32],@activate,nil);
- sender.registermethodhandler(intfname,
+ sender.registermethodhandler(getpropintf(),
         'SecondaryActivate',[dbt_int32,dbt_int32],@secondaryactivate,nil);
- sender.registermethodhandler(intfname,
+ sender.registermethodhandler(getpropintf(),
         'Scroll',[dbt_int32,dbt_string],@scroll,nil);
 end;
 
