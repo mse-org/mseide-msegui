@@ -335,7 +335,7 @@ begin
  with info do begin
   sys_mutexlock(lock);
   try
-   result:= true;
+   result:= false;
    if refcount = 0 then begin
     if (high(libnames) >= 0) or (high(libnamesdefault) >= 0) then begin
  {$ifdef set8087cw}

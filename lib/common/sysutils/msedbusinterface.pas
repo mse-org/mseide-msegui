@@ -608,11 +608,14 @@ var
 // userdatacache: linklistty;
  dbusalignments: array[dbusdataty] of int32;
  
-procedure initdbuslib();
+function initdbuslib(): boolean;
 begin
+ result:= true;
  if not dbuslibinited then begin
-  initializedbus([]);
-  dbuslibinited:= true;
+  result:= initializedbus([]);
+  if result then begin
+   dbuslibinited:= true;
+  end;
  end;
 end;
 
@@ -2981,7 +2984,9 @@ begin
  end;
  result:= false;
  try
-  initdbuslib();
+  if not initdbuslib() then begin
+   exit;
+  end;
   dbus_error_init(@ferr);
   fconn:= dbus_bus_get_private(dbus_bus_session,err);
   if fconn = nil then begin

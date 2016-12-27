@@ -20,7 +20,7 @@ const
  {$define wincall}  //depends on compiler?
  dbuslib: array[0..0] of filenamety = ('libdbus.dll');
 {$else}
- dbuslib: array[0..0] of filenamety = ('libdbus-1.so');
+ dbuslib: array[0..1] of filenamety = ('libdbus-1.so','libdbus-1.so.3');
 {$endif}
 
 type
@@ -583,9 +583,9 @@ var
    procedure(connection: pDBusConnection; rule: pcchar; error: pDBusError)
                                     {$ifdef wincall}stdcall{$else}cdecl{$endif};
 
-procedure initializedbus(const sonames: array of filenamety;
-                                          const onlyonce: boolean = false);
-                                     //[] = default
+function initializedbus(const sonames: array of filenamety; //[] = default
+                             const onlyonce: boolean = false): boolean;
+                                    //true if ok
 procedure releasedbus();
 
 implementation
@@ -602,8 +602,8 @@ procedure finidbus();
 begin
 end;
 
-procedure initializedbus(const sonames: array of filenamety; //[] = default
-                                         const onlyonce: boolean = false);                                   
+function initializedbus(const sonames: array of filenamety; //[] = default
+                             const onlyonce: boolean = false): boolean;
 const
  funcs: array[0..76] of funcinfoty = (
   (n: 'dbus_bus_get'; d: @dbus_bus_get),                         // 0
@@ -733,7 +733,8 @@ const
 
 begin
  if not onlyonce or (libinfo.refcount = 0) then begin
-  initializedynlib(libinfo,sonames,dbuslib,funcs,[],errormessage,@inidbus);
+  result:= initializedynlib(libinfo,sonames,dbuslib,funcs,[],
+                                          errormessage,@inidbus,true);
  end;
 end;
 
