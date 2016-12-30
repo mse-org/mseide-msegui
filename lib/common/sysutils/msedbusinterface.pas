@@ -1295,7 +1295,7 @@ begin
   flags:= aflags;
 //  setlength(types,1);
 //  types[0]:= dbt_string;
-  vstring:= pointer(avalue);
+  vstring:= pchar(avalue);
 //  vstring:= nil;
 //  string(vstring):= avalue;
  end;

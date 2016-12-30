@@ -68,6 +68,8 @@ type
    destructor destroy; override;
    procedure showmessage(const amessage: msestring;
                                      const timeoutms: integer = 0);
+   procedure showmessage(const amessage: msestring; const atitle: msestring;
+                                     const timeoutms: integer = 0);
    procedure cancelmessage();
   published
    property icon: tmaskedbitmap read ficon write seticon;
@@ -347,7 +349,7 @@ begin
 end;
 
 procedure ttraywidget.showmessage(const amessage: msestring;
-               const timeoutms: integer);
+                        const atitle: msestring; const timeoutms: integer = 0);
 begin
 {$ifdef mse_usedbus}
  if visible or hasdbus and fstatusnotifieritem.active then begin
@@ -358,7 +360,7 @@ begin
   if amessage <> '' then begin
   {$ifdef mse_usedbus}
    if hasdbus then begin
-    fstatusnotifieritem.showmessage(amessage,fmessageid,timeoutms);
+    fstatusnotifieritem.showmessage(amessage,atitle,fmessageid,timeoutms);
    end
    else begin
   {$endif}
@@ -372,6 +374,12 @@ begin
    end;
   end;
  end;
+end;
+
+procedure ttraywidget.showmessage(const amessage: msestring;
+               const timeoutms: integer);
+begin
+ showmessage(amessage,'',timeoutms);
 end;
 
 procedure ttraywidget.cancelmessage;

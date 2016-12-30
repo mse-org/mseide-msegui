@@ -86,7 +86,7 @@ type
    constructor create();
    destructor destroy(); override;
    property desktopkind: desktopkindty read fdesktopkind;
-   function showmessage(const message: msestring;
+   function showmessage(const message: msestring; const title: msestring;
                           out messageid: card32;
                           const timeoutms: card32 = 0): boolean;
    function cancelmessage(const messageid: card32): boolean;
@@ -284,14 +284,17 @@ begin
 end;
 
 function tstatusnotifieritem.showmessage(const message: msestring;
+                         const title: msestring;
                out messageid: card32; const timeoutms: card32 = 0): boolean;
 var
- s1: string;
+ s1,s2,s3: string;
  c1: card32;
  p1: pointer;
 begin
  inc(fmessageid);
  s1:= getid;
+ s2:= stringtoutf8(title);
+ s3:= stringtoutf8(message);
  if fmessageid = 0 then begin
   inc(fmessageid);
  end;
@@ -300,8 +303,10 @@ begin
  result:= fservice.dbuscallmethod('org.freedesktop.Notifications',
            '/org/freedesktop/Notifications','org.freedesktop.Notifications',
            'Notify',
-           [variantvalue(s1),variantvalue(fmessageid),variantvalue(''),
-            variantvalue(stringtoutf8(message)),variantvalue(''),
+           [variantvalue(s1),variantvalue(fmessageid),
+            variantvalue(''),
+            variantvalue(s2),
+            variantvalue(s3),
             variantvalue(@p1,typeinfo(stringarty)),
             variantvalue(@p1,typeinfo(dictentryarty),[vf_dict]),
             variantvalue(int32(timeoutms))],[dbt_uint32],[@c1]);
