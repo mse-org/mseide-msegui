@@ -116,18 +116,18 @@ type
 
  tstringobjectevent = class(tobjectevent)
   private
-   fdata: ansistring;
   public
+   data: ansistring;
    constructor create(const adata: ansistring; const dest: ievent);
-   property data: ansistring read fdata write fdata;
+//   property data: ansistring read fdata write fdata;
  end;
 
  tpointobjectevent = class(tobjectevent)
   private
-   fdata: pointty;
   public
+   data: pointty;
    constructor create(const adata: pointty; const dest: ievent);
-   property data: pointty read fdata write fdata;
+ //  property data: pointty read fdata write fdata;
  end;
  
  tuserevent = class(tobjectevent)
@@ -283,7 +283,7 @@ end;
 
 constructor tstringobjectevent.create(const adata: ansistring; const dest: ievent);
 begin
- fdata:= adata;
+ data:= adata;
  inherited create(ek_objectdata,dest);
 end;
 
@@ -291,7 +291,7 @@ end;
 
 constructor tpointobjectevent.create(const adata: pointty; const dest: ievent);
 begin
- fdata:= adata;
+ data:= adata;
  inherited create(ek_objectdata,dest);
 end;
 
