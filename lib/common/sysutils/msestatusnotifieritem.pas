@@ -131,7 +131,7 @@ function bitmaptoiconpixmap(const abitmap: tmaskedbitmap): iconpixmapty;
 
 implementation
 uses
- mseapplication,msegraphics;
+ mseapplication,msegraphics,sysutils;
 type
  dbuspixelty = packed record a,r,g,b: card8 end; //in network byte order
  pdbuspixelty = ^dbuspixelty;
@@ -281,6 +281,7 @@ destructor tstatusnotifieritem.destroy();
 begin
  inherited;
  active:= false;
+ freeandnil(fservice);
 end;
 
 function tstatusnotifieritem.showmessage(const message: msestring;
