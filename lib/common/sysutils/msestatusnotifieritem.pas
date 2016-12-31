@@ -80,11 +80,11 @@ type
                                                         var ahandled: boolean);
    procedure scroll(const amessage: pdbusmessage; const adata: pointer;
                                                         var ahandled: boolean);
-   function checkdesktop(): boolean;
    procedure receiveevent(const event: tobjectevent) override;
   public
    constructor create();
    destructor destroy(); override;
+   function checkdesktop(): boolean;
    property desktopkind: desktopkindty read fdesktopkind;
    function showmessage(const message: msestring; const title: msestring;
                           out messageid: card32;
@@ -274,14 +274,14 @@ const
 constructor tstatusnotifieritem.create();
 begin
  inherited create(nil);
- checkdesktop();
+// checkdesktop();
 end;
 
 destructor tstatusnotifieritem.destroy();
 begin
  inherited;
  active:= false;
- freeandnil(fservice);
+ freeandnil(fservice); //in case of checkdesktop out of setactive
 end;
 
 function tstatusnotifieritem.showmessage(const message: msestring;

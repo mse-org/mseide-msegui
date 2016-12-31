@@ -4417,6 +4417,19 @@ begin
  end;
 end;
 
+function removesizehints(id: winidty): guierrorty;
+var
+ sizehints: pxsizehints;
+begin
+ sizehints:= xallocsizehints;
+ with sizehints^ do begin
+  flags:= 0;
+ end;
+ xsetwmnormalhints(appdisp,id,sizehints);
+ xfree(sizehints);
+ result:= gue_ok;
+end;
+
 function gui_docktosyswindow(var child: windowty;
                                    const akind: syswindowty): guierrorty;
 var
@@ -4444,6 +4457,7 @@ begin
   result:= gue_windownotfound;
   syswin:= getsyswin(akind);
   if syswin <> 0 then begin
+   removesizehints(child.id);   
    initxembed(child.id,xembedflagsunmapped);
 //   xdeleteproperty(appdisp,child.id,netatoms[wm_normal_hints]);
 //   xdeleteproperty(appdisp,child.id,wmclassatom);

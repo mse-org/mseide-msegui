@@ -9,8 +9,11 @@
 }
 unit msetraywidget;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
-{$ifndef mswindows} {$define mse_usedbus} {$endif}
-
+{$ifndef mswindows} 
+ {$ifndef mse_no_dbus}
+  {$define mse_usedbus} 
+ {$endif}
+{$endif}
 interface
 uses
  mseclasses,classes,mclasses,msesimplewidgets,mseguiglob,msebitmap,msegui,
@@ -18,7 +21,7 @@ uses
  {$ifdef mse_usedbus},msestatusnotifieritem{$endif};
  
 type
- traywidgetoptionty = (two_nodbus);
+ traywidgetoptionty = (two_usedbus);
  traywidgetoptionsty = set of traywidgetoptionty;
  
  ttraywidget = class(teventwidget)
@@ -31,6 +34,7 @@ type
    ftimer: tsimpletimer;
    fcaption: msestring;
    foptions: traywidgetoptionsty;
+   fondbusactivate: notifyeventty;
    procedure seticon(const avalue: tmaskedbitmap);
    procedure setimagelist(const avalue: timagelist);
    procedure setimagenum(const avalue: integer);
@@ -54,7 +58,9 @@ type
    procedure objectevent(const sender: tobject;
                             const event: objecteventty); override;
    procedure iconchanged(const sender: tobject);
+  {$ifdef mse_usedbus}
    function hasdbus: boolean;
+  {$endif}
    function dock: boolean; //true if OK
    procedure undock;
    procedure setvisible(const avalue: boolean); override;
@@ -70,13 +76,17 @@ type
                                      const timeoutms: integer = 0);
    procedure showmessage(const amessage: msestring; const atitle: msestring;
                                      const timeoutms: integer = 0);
+                              //for dbus org.freedesktop.Notifications
    procedure cancelmessage();
   published
    property icon: tmaskedbitmap read ficon write seticon;
    property imagelist: timagelist read fimagelist write setimagelist;
    property imagenum: integer read fimagenum write setimagenum default -1;
    property caption: msestring read fcaption write setcaption;
-   property options: traywidgetoptionsty read foptions write setoptions;
+   property options: traywidgetoptionsty read foptions 
+                                          write setoptions default [];
+   property ondebusactivate: notifyeventty read fondbusactivate write
+                                                             fondbusactivate;
  end;
  
 implementation
@@ -87,12 +97,14 @@ uses
 
 constructor ttraywidget.create(aowner: tcomponent);
 begin
+(*
  {$ifdef mse_usedbus}
  if not (csdesigning in componentstate) then begin
   fstatusnotifieritem:= tstatusnotifieritem.create();
   fstatusnotifieritem.oncontextmenu:= @dbusdocontextmenu;
  end;
  {$endif} 
+*)
  fimagenum:= -1;
  ficon:= tcenteredbitmap.create(bmk_rgb{false});
  ficon.onchange:= {$ifdef FPC}@{$endif}iconchanged;
@@ -111,6 +123,23 @@ begin
 {$endif} 
 end;
 
+procedure ttraywidget.setoptions(const avalue: traywidgetoptionsty);
+begin
+ if avalue <> foptions then begin
+  foptions:= avalue;
+ {$ifdef mse_usedbus}
+  if (two_usedbus in foptions) and (fstatusnotifieritem = nil) then begin
+   fstatusnotifieritem:= tstatusnotifieritem.create();
+   fstatusnotifieritem.oncontextmenu:= @dbusdocontextmenu;
+   fstatusnotifieritem.onactivate:= @dbusdoactivate;
+  end
+  else begin
+   freeandnil(fstatusnotifieritem);
+  end;
+ {$endif}
+ end;
+end;
+
 function ttraywidget.dock: boolean;
 var
  bo1: boolean;
@@ -118,6 +147,7 @@ begin
  result:= true;
 {$ifdef mse_usedbus}
  if hasdbus then begin
+  //nothing to do
  end
  else begin
 {$endif}
@@ -145,11 +175,13 @@ begin
  end;
 end;
 
+{$ifdef mse_usedbus}
 function ttraywidget.hasdbus(): boolean;
 begin
  result:= (fstatusnotifieritem <> nil) and 
-              (fstatusnotifieritem.desktopkind <> desk_none);
+                                     fstatusnotifieritem.checkdesktop();
 end;
+{$endif}
 
 procedure ttraywidget.setvisible(const avalue: boolean);
 begin
@@ -413,18 +445,6 @@ begin
  end;
 end;
 
-procedure ttraywidget.setoptions(const avalue: traywidgetoptionsty);
-begin
- if avalue <> foptions then begin
-  foptions:= avalue;
-  if not (two_nodbus in foptions) and (fstatusnotifieritem = nil) then begin
-   fstatusnotifieritem:= tstatusnotifieritem.create();
-  end
-  else begin
-   freeandnil(fstatusnotifieritem);
-  end;
- end;
-end;
 {$ifdef mse_usedbus}
 procedure ttraywidget.dbusdocontextmenu(const sender: tstatusnotifieritem;
                const apos: pointty);
@@ -437,7 +457,9 @@ end;
 procedure ttraywidget.dbusdoactivate(const sender: tstatusnotifieritem;
                const apos: pointty);
 begin
- //dummy
+ if canevent(tmethod(fondbusactivate)) then begin
+  fondbusactivate(self);
+ end;
 end;
 {$endif}
 
