@@ -1670,12 +1670,13 @@ begin
                         not fscrollbox.fboundsread) then begin
   rect1:= innerwidgetrect;
   if fmainmenuwidget <> nil then begin
-{$warnings off}
-   twidget1(fmainmenuwidget).setwidgetrect(
-         makerect(paintpos,makesize(paintsize.cx,fmainmenuwidget.bounds_cy)));
-{$warnings on}
-   inc(rect1.y,fmainmenuwidget.bounds_cy);
-   dec(rect1.cy,fmainmenuwidget.bounds_cy);
+   with tframemenuwidget1(fmainmenuwidget) do begin
+    setwidgetrect(makerect(self.paintpos,makesize(
+                                        self.paintsize.cx,bounds_cy)));
+    updatelayout();
+    inc(rect1.y,bounds_cy);
+    dec(rect1.cy,bounds_cy);
+   end;
   end;
   fscrollbox.setwidgetrect(rect1);
  end;
