@@ -1925,6 +1925,7 @@ begin
     widget.updateskin(true);
     if placementrect <> nil then begin
      widget.visible:= true;
+     application.processmessages(); //decorate window
      widget.window.decoratedwidgetrect:= placepopuprect(transientfor,
                         placementrect^,placement,widget.window.decoratedsize);
     end;
