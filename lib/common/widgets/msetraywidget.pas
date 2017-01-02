@@ -35,6 +35,7 @@ type
    fcaption: msestring;
    foptions: traywidgetoptionsty;
    fondbusactivate: notifyeventty;
+   fondbussecondaryactivate: notifyeventty;
    procedure seticon(const avalue: tmaskedbitmap);
    procedure setimagelist(const avalue: timagelist);
    procedure setimagenum(const avalue: integer);
@@ -46,6 +47,8 @@ type
    procedure dbusdocontextmenu(const sender: tstatusnotifieritem;
                                                const apos: pointty);
    procedure dbusdoactivate(const sender: tstatusnotifieritem;
+                                               const apos: pointty);
+   procedure dbusdosecondaryactivate(const sender: tstatusnotifieritem;
                                                const apos: pointty);
   {$endif} 
   {$ifdef mswindows}
@@ -85,8 +88,10 @@ type
    property caption: msestring read fcaption write setcaption;
    property options: traywidgetoptionsty read foptions 
                                           write setoptions default [];
-   property ondebusactivate: notifyeventty read fondbusactivate write
+   property ondbusactivate: notifyeventty read fondbusactivate write
                                                              fondbusactivate;
+   property ondbussecondaryactivate: notifyeventty 
+                 read fondbussecondaryactivate write fondbussecondaryactivate;
  end;
  
 implementation
@@ -132,6 +137,7 @@ begin
    fstatusnotifieritem:= tstatusnotifieritem.create();
    fstatusnotifieritem.oncontextmenu:= @dbusdocontextmenu;
    fstatusnotifieritem.onactivate:= @dbusdoactivate;
+   fstatusnotifieritem.onsecondaryactivate:= @dbusdosecondaryactivate;
   end
   else begin
    freeandnil(fstatusnotifieritem);
@@ -459,6 +465,14 @@ procedure ttraywidget.dbusdoactivate(const sender: tstatusnotifieritem;
 begin
  if canevent(tmethod(fondbusactivate)) then begin
   fondbusactivate(self);
+ end;
+end;
+
+procedure ttraywidget.dbusdosecondaryactivate(const sender: tstatusnotifieritem;
+               const apos: pointty);
+begin
+ if canevent(tmethod(fondbussecondaryactivate)) then begin
+  fondbussecondaryactivate(self);
  end;
 end;
 {$endif}

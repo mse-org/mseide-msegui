@@ -59,6 +59,7 @@ type
    foncontextmenu: statusnotifierposprocty;
    fonactivate: statusnotifierposprocty;
    fmessageid: card32;
+   fonsecondaryactivate: statusnotifierposprocty;
    function getcategory: string;
    function getid: string;
    procedure setactive(const avalue: boolean);
@@ -76,8 +77,8 @@ type
                                                         var ahandled: boolean);
    procedure activate(const amessage: pdbusmessage; const adata: pointer;
                                                         var ahandled: boolean);
-   procedure secondaryactivate(const amessage: pdbusmessage; const adata: pointer;
-                                                        var ahandled: boolean);
+   procedure secondaryactivate(const amessage: pdbusmessage;
+                                  const adata: pointer; var ahandled: boolean);
    procedure scroll(const amessage: pdbusmessage; const adata: pointer;
                                                         var ahandled: boolean);
    procedure receiveevent(const event: tobjectevent) override;
@@ -112,6 +113,8 @@ type
                                                         write foncontextmenu;
    property onactivate: statusnotifierposprocty read fonactivate 
                                                         write fonactivate;
+   property onsecondaryactivate: statusnotifierposprocty 
+                        read fonsecondaryactivate write fonsecondaryactivate;
   published
    property Category: string read getcategory;
    property Id: string read getid;
@@ -496,10 +499,10 @@ var
  x,y: int32;
 begin
  if fservice.dbusreadmessage(amessage,[dbt_int32,dbt_int32],[@x,@y]) then begin
-  if assigned(fonactivate) then begin
-   foncontextmenu(self,mp(x,y));
-  end;
   fservice.dbusreply(amessage,[]);
+  if assigned(fonsecondaryactivate) then begin
+   fonsecondaryactivate(self,mp(x,y));
+  end;
   ahandled:= true;
  end
 end;
