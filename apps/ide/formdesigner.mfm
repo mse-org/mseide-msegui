@@ -20,7 +20,7 @@ object formdesignerfo: tformdesignerfo
   onactivate = enterexe
   visible = False
   bounds_x = 68
-  bounds_y = 239
+  bounds_y = 277
   bounds_cx = 287
   bounds_cy = 300
   container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_mousetransparent, ow_mousewheel]

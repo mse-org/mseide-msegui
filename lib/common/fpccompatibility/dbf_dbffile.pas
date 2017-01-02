@@ -2701,7 +2701,7 @@ var
 function CodePagesProc(CodePageString: PChar): Cardinal; stdcall;
 begin
   // add codepage to list
-  TempCodePageList.Add(Pointer(GetIntFromStrLength(CodePageString, StrLen(CodePageString), -1)));
+  TempCodePageList.Add(Pointer(ptrint(GetIntFromStrLength(CodePageString, StrLen(CodePageString), -1))));
 
   // continue enumeration
   Result := 1;
@@ -2772,7 +2772,7 @@ end;
 
 function TDbfGlobals.CodePageInstalled(ACodePage: Integer): Boolean;
 begin
-  Result := FCodePages.IndexOf(Pointer(ACodePage)) >= 0;
+  Result := FCodePages.IndexOf(Pointer(ptrint(ACodePage))) >= 0;
 end;
 
 initialization

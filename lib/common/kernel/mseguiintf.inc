@@ -25,6 +25,13 @@ function gui_settimer(us: longword): guierrorty;
 
 procedure gui_disconnectmaineventqueue(); //called by application.lock()
 procedure gui_connectmaineventqueue();    //called by application.unlock()
+function gui_addpollfd(var id: int32; const afd: int32;
+                           const aflags: pollflagsty;
+                                const acallback: pollcallbackty = nil;
+                                      const adata: pointer = nil): guierrorty;
+function gui_removepollfd(const id: int32): guierrorty;
+function gui_setpollfdactive(const id: int32;
+                       const aactive: boolean): guierrorty;
 
 function gui_hasevent: boolean;         //false if no event pending
 function gui_getevent: tmseevent;          //can be nil
@@ -68,8 +75,10 @@ function gui_settrayhint(var awindow: windowty;
 function gui_flushgdi(const synchronize: boolean = false): guierrorty;
 function gui_showwindow(id: winidty): guierrorty;
 function gui_hidewindow(id: winidty): guierrorty;
-function gui_raisewindow(id: winidty): guierrorty;
-function gui_lowerwindow(id: winidty): guierrorty;
+function gui_raisewindow(id: winidty; const topmost: boolean = false): guierrorty;
+                                          //windows only
+function gui_lowerwindow(id: winidty; const topmost: boolean = false): guierrorty;
+                                          //windows only
 function gui_stackunderwindow(id: winidty; predecessor: winidty): guierrorty;
 function gui_stackoverwindow(id: winidty; predecessor: winidty): guierrorty;
 function gui_canstackunder: boolean; //no way found to change stacking order in KDE

@@ -13,7 +13,7 @@ unit mseguiintf; //i386-win32
 
 interface
 uses
- windows,messages,mseapplication,msetypes,msegraphutils,
+ windows,messages,mseapplication,msetypes,msegraphutils,msesys,
  mseevent,msepointer,mseguiglob,msegraphics,
  msethread,mseformatstr,{msesysintf,}msestrings,msesystypes,msewinglob;
 
@@ -1423,22 +1423,49 @@ begin
  result:= gue_ok;
 end;
 
-function gui_raisewindow(id: winidty): guierrorty;
+function gui_raisewindow(id: winidty; 
+                        const topmost: boolean = false): guierrorty;
+var
+ w1: hwnd;
 begin
 {$ifdef mse_debugzorder}
- debugwindow('gui_raisewindow ',id);
+ if hwndtopmost then begin
+  debugwindow('gui_raisewindow topmost ',id);
+ end
+ else begin
+  debugwindow('gui_raisewindow ',id);
+ end;
 {$endif}
- windows.SetWindowPos(id,hwnd_top,0,0,0,0,swp_noactivate or swp_nomove or
+ if topmost then begin
+  w1:= hwnd_topmost;
+ end
+ else begin
+  w1:= hwnd_top;
+ end;
+ windows.SetWindowPos(id,w1,0,0,0,0,swp_noactivate or swp_nomove or
                           swp_noownerzorder or swp_nosize);
  result:= gue_ok;
 end;
 
-function gui_lowerwindow(id: winidty): guierrorty;
+function gui_lowerwindow(id: winidty; const topmost: boolean): guierrorty;
+var
+ w1: hwnd;
 begin
 {$ifdef mse_debugzorder}
- debugwindow('gui_lowerwindow ',id);
+ if topmost then begin
+  debugwindow('gui_lowerwindow topmost ',id);
+ end
+ else begin
+  debugwindow('gui_lowerwindow ',id);
+ end;
 {$endif}
- windows.SetWindowPos(id,hwnd_bottom,0,0,0,0,swp_noactivate or swp_nomove or
+ if topmost then begin
+  w1:= hwnd_notopmost;
+ end
+ else begin
+  w1:= hwnd_bottom;
+ end;
+ windows.SetWindowPos(id,w1,0,0,0,0,swp_noactivate or swp_nomove or
                           swp_noownerzorder or swp_nosize);
  result:= gue_ok;
 end;
@@ -2115,6 +2142,11 @@ begin
  configuredwindow:= id;
  if gui_getwindowsize(id) <> wsi_minimized then begin
   getwindowrectpa(id,rect1,pt1);
+ {$ifdef mse_debugconfigure}
+  debugwindow('*postconfigureevent x:'+inttostr(rect1.x)+' y:'+inttostr(rect1.y)+
+   ' cx:'+inttostr(rect1.cx)+' cy:'+inttostr(rect1.cy)+
+   ' ox:'+inttostr(pt1.x)+' oy:'+inttostr(pt1.y)+' ',id);
+ {$endif}
   eventlist.add(twindowrectevent.create(ek_configure,id,
                           rect1,pt1));
  end
@@ -2134,9 +2166,23 @@ begin
   if windows.GetclientRect(id,rect2) then begin
    getframe(rect1,rect2,frame);
    arect:= inflaterect(rect,frame);
+ {$ifdef mse_debugconfigure}
+   debugwindow('*reposwindow rect x:'+inttostr(rect.x)+' y:'+inttostr(rect.y)+
+                     ' cx:'+inttostr(rect.cx)+' cy:'+inttostr(rect.cy)+' ',id);
+   debugwriteln('  setwindowpos x:'+inttostr(arect.x)+' y:'+inttostr(arect.y)+
+                 ' cx:'+inttostr(arect.cx)+' cy:'+inttostr(arect.cy)+
+                 ' ancestor:'+inttostr(getancestor(id,ga_parent))+
+                 ' root:'+inttostr(getancestor(id,ga_root)));
+ {$endif}
    configuredwindow:= 0;
    if windows.SetWindowPos(id,0,arect.x,arect.y,arect.cx,arect.cy,
-                swp_nozorder or swp_noactivate) then begin
+                                  swp_nozorder or swp_noactivate) then begin
+   {$ifdef mse_debugconfigure}
+    windows.getwindowrect(id,@arect);
+    winrecttorect(arect);
+    debugwriteln('  getwindowpos x:'+inttostr(arect.x)+' y:'+inttostr(arect.y)+
+                 ' cx:'+inttostr(arect.cx)+' cy:'+inttostr(arect.cy));
+   {$endif}
     result:= gue_ok;
    end;
   end;
@@ -2272,11 +2318,16 @@ function WindowProc(ahWnd: HWND; Msg: UINT; wParam: WPARAM; lParam: LPARAM): LRE
   
   windows.getcursorpos(tpoint(pt1));
   gui_getwindowrect(ahwnd,rect1);
+ {$ifdef mse_debugconfigure} 
+  debugwindow('*inittraycallback ',ahwnd);
+  debugwriteln('  cursor x:'+inttostr(pt1.x)+' y:'+inttostr(pt1.y));
+ {$endif}
   cursorpos.x:= rect1.cx div 2;
   cursorpos.y:= rect1.cy div 2;
   if reposition then begin
    gui_reposwindow(ahwnd,makerect(pt1.x-cursorpos.x,pt1.y-cursorpos.y,
                                                            rect1.cx,rect1.cy));
+                 //shift widget center to mousepos
 //   setforegroundwindow(applicationwindow);
   end;
  end;
@@ -2724,6 +2775,25 @@ end;
 procedure gui_connectmaineventqueue();    //called by application.unlock()
 begin
  //dummy
+end;
+
+function gui_addpollfd(var id: int32; const afd: int32;
+                           const aflags: pollflagsty;
+                                const acallback: pollcallbackty = nil;
+                                      const adata: pointer = nil): guierrorty;
+begin
+ result:= gue_notimplemented;
+end;
+
+function gui_removepollfd(const id: int32): guierrorty;
+begin
+ result:= gue_notimplemented;
+end;
+
+function gui_setpollfdactive(const id: int32;
+                       const aactive: boolean): guierrorty;
+begin
+ result:= gue_notimplemented;
 end;
 
 function createapphandle(out id: winidty): guierrorty;

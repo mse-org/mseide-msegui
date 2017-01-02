@@ -24,7 +24,7 @@ interface
  {$define mse_debug}
 {$endif}
 uses
- {$ifdef FPC}xlib{$else}Xlib{$endif},msetypes,mseapplication,
+ {$ifdef FPC}xlib{$else}Xlib{$endif},msetypes,mseapplication,msesys,
  msegraphutils,mseevent,msepointer,mseguiglob,msesystypes,{msestockobjects,}
  msethread{$ifdef FPC},x,xutil,dynlibs{$endif},
  mselibc,msectypes,msesysintf,msegraphics,
@@ -505,7 +505,7 @@ implementation
 uses
  msebits,msekeyboard,sysutils,msesysutils,msefileutils,msedatalist,msedragglob
  {$ifdef with_sm},sm,ice{$endif},msesonames,msegui,mseactions,msex11gdi,
- msearrayutils,msesys,msesysintf1,msesysdnd,classes,rtlconsts,mseclasses,
+ msearrayutils,msesysintf1,msesysdnd,classes,rtlconsts,mseclasses,
  mseglob,msetimer,mseprocess,mseprocmonitor
  {$ifdef mse_debug},mseformatstr{$endif};
 
@@ -740,7 +740,7 @@ type
        net_frame_extents,
        net_request_frame_extents,
        net_system_tray_s0,net_system_tray_opcode,net_system_tray_message_data,
-       xembed_info,motif_wm_hints,
+       xembed,xembed_info,motif_wm_hints,wm_normal_hints,
        net_none);
  netwmstateoperationty = (nso_remove,nso_add,nso_toggle);
 const
@@ -780,7 +780,7 @@ const
        '_NET_SYSTEM_TRAY_S0','_NET_SYSTEM_TRAY_OPCODE',
        '_NET_SYSTEM_TRAY_MESSAGE_DATA',
        '_XEMBED_INFO',
-       '_MOTIF_WM_HINTS',
+       '_MOTIF_WM_HINTS','WM_NORMAL_HINTS',
        '');
 // needednetatom = netatomty(ord(high(netatomty))-4);
 type
@@ -2147,7 +2147,8 @@ begin
  gdi_unlock;
 end;
 
-function gui_raisewindow(id: winidty): guierrorty;
+function gui_raisewindow(id: winidty; 
+                             const topmost: boolean = false): guierrorty;
 begin
  gdi_lock;
 {$ifdef mse_debugzorder}
@@ -2164,7 +2165,8 @@ begin
  gdi_unlock;
 end;
 
-function gui_lowerwindow(id: winidty): guierrorty;
+function gui_lowerwindow(id: winidty;
+                             const topmost: boolean = false): guierrorty;
 begin
  gdi_lock;
 {$ifdef mse_debugzorder}
@@ -3419,7 +3421,7 @@ end;
 function gui_hasevent: boolean;
 begin
  gdi_lock;
- result:= (xpending(appdisp) > 0) or timerevent;
+ result:= ((xpending(appdisp) > 0) or timerevent) and not terminated;
  gdi_unlock;
 end;
 
@@ -4406,23 +4408,39 @@ begin
  if dest <> 0 then begin
   at1:= netatoms[net_system_tray_opcode];
   if (at1 <> 0) and sendnetcardinalmessage(dest,at1,awindow,
-                [lasteventtime,opcode,data1,data2,data3]) then begin
+             [{currenttime}lasteventtime,opcode,data1,data2,data3]) then begin
    result:= gue_ok;
   end;
  end;
+end;
+
+function removesizehints(id: winidty): guierrorty;
+var
+ sizehints: pxsizehints;
+begin
+ sizehints:= xallocsizehints;
+ with sizehints^ do begin
+  flags:= 0;
+ end;
+ xsetwmnormalhints(appdisp,id,sizehints);
+ xfree(sizehints);
+ result:= gue_ok;
 end;
 
 function gui_docktosyswindow(var child: windowty;
                                    const akind: syswindowty): guierrorty;
 var
  syswin: winidty;
- parentbefore: winidty;
- int1: integer;
+ parentbefore,id1: winidty;
+ i1: integer;
  pt1: pointty;
  rect1: rectty;
+const
+ maxwait = 200; //1s
 begin
  gdi_lock;
  gui_hidewindow(child.id);
+ xsync(appdisp,0);
  if akind = sywi_none then begin
   result:= getwindowrect(child.id,rect1,pt1);
   if result = gue_ok then begin
@@ -4434,23 +4452,58 @@ begin
   result:= gue_windownotfound;
   syswin:= getsyswin(akind);
   if syswin <> 0 then begin
-   result:= gue_docktosyswindow;
+   removesizehints(child.id);   
    initxembed(child.id);
+//   xdeleteproperty(appdisp,child.id,netatoms[wm_normal_hints]);
+//   xdeleteproperty(appdisp,child.id,wmclassatom);
    parentbefore:= gui_getparentwindow(child.id);
+   result:= gue_ok;
+   i1:= 0;
    case akind of
     sywi_tray: begin
-     result:= sendtraymessage(syswin,syswin,system_tray_request_dock,child.id);
+     result:= sendtraymessage(syswin,syswin,
+                         system_tray_request_dock,child.id);
     end;
    end;
-   int1:= 0;
-   xsync(appdisp,0);
-   sys_schedyield;
-   while (gui_getparentwindow(child.id) = parentbefore) and (int1 < 40) do begin
+   repeat
+   {
+    case akind of
+     sywi_tray: begin
+      result:= sendtraymessage(syswin,syswin,
+                          system_tray_request_dock,child.id);
+                          //does not always work the first time...
+     end;
+    end;
+   }
     xsync(appdisp,0);
+    sys_schedyield;
+    id1:= gui_getparentwindow(child.id);
+    if (id1 <> parentbefore) and (id1 <> rootid) then begin
+     break;
+    end;
     sleep(5);
-    inc(int1);
+    inc(i1);
+   until i1 = maxwait;
+   if i1 >= maxwait then begin
+  {$ifdef mse_debugxembed}
+    debugwindow('***error docktosyswindow child ',child.id);
+    debugwindow(' syswin ',syswin);
+  {$endif}
+    result:= gue_docktosyswindow;
+   end
+   else begin
+  {$ifdef mse_debugxembed}
+    debugwindow('* docktosyswindow attempt:'+inttostr(i1)+' child',child.id);
+    debugwindow(' syswin ',syswin);
+  {$endif}
    end;
-  end; 
+  end
+  else begin
+  {$ifdef mse_debugxembed}
+    debugwindow('***error docktosyswindow child:',child.id);
+    debugwindow(' syswin:',syswin);
+  {$endif}
+  end;
  end;
  gdi_unlock;
 end;
@@ -4465,6 +4518,8 @@ var
  po1: pchar;
  win1: winidty;
  at1: atom;
+label
+ errorlab;
 begin
  gdi_lock;
  result:= gue_notraywindow;
@@ -4477,26 +4532,29 @@ begin
   str1:= str1 + #0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0#0;
   result:= sendtraymessage(win1,awindow.id,system_tray_begin_message,timeoutms,
                      int1,messageid);
-  fillchar(event1,sizeof(event1),0);
-  with event1 do begin
-   xtype:= clientmessage;
-   display:= appdisp;
-   xwindow:= awindow.id;
-   format:= 8;
-   message_type:= at1;
-   po1:= pchar(str1);
-   while (result = gue_ok) and (int1 > 0) do begin
-    move(po1^,data.b[0],20);
-    inc(po1,20);
-    int1:= int1 - 20;
-    if xsendevent(appdisp,win1,
-            {$ifdef xboolean}false{$else}0{$endif},
-            structurenotifymask or substructurenotifymask{noeventmask},@event1) = 0 then begin
-     result:= gue_sendevent;
+  if result = gue_ok then begin
+   fillchar(event1,sizeof(event1),0);
+   with event1 do begin
+    xtype:= clientmessage;
+    display:= appdisp;
+    xwindow:= awindow.id;
+    format:= 8;
+    message_type:= at1;
+    po1:= pchar(str1);
+    while (result = gue_ok) and (int1 > 0) do begin
+     move(po1^,data.b[0],20);
+     inc(po1,20);
+     int1:= int1 - 20;
+     if xsendevent(appdisp,win1,false,0
+        {structurenotifymask or substructurenotifymask},@event1) = 0 then begin
+      result:= gue_sendevent;
+     end;
     end;
    end;
+   xsync(appdisp,0);
   end;
  end;
+errorlab:
  gdi_unlock;
 end;
 
@@ -4520,13 +4578,7 @@ function gui_settrayhint(var awindow: windowty;
 begin
  result:= gue_ok; //dummy
 end;
-{
-function gui_creategc(paintdevice: paintdevicety; const akind: gckindty;
-     var gc: gcty; const aprintername: msestring = ''): guierrorty;
-begin
- result:= x11creategc(paintdevice,akind,gc,aprintername);
-end;
-}
+
 {$ifndef FPC}
 type
  tlibhandle = longword;
@@ -5449,6 +5501,87 @@ begin
  sys_mutexunlock(connectmutex2);
 end;
 
+type
+ pollinfoarty = array of pollfd;
+ pollinfoty = record
+  callback: pollcallbackty;
+  data: pointer;
+ end;
+ pollinfodestarty = array of pollinfoty;
+ pollinfty = record
+  pollinfo: pollinfoarty;
+  pollinfodest: pollinfodestarty;
+ end;
+ ppollinfty = ^pollinfty;
+ 
+var
+// pollinfo: array[0..2] of pollfd;
+             //0 connection, 1 sessionmanagement
+ pollinf: ppollinfty;
+ 
+function gui_addpollfd(var id: int32; const afd: int32;
+                           const aflags: pollflagsty;
+                                const acallback: pollcallbackty = nil;
+                                      const adata: pointer = nil): guierrorty;
+begin
+ result:= gue_ok;
+ with pollinf^ do begin
+  setlength(pollinfo,high(pollinfo)+2);
+  setlength(pollinfodest,length(pollinfo));
+  id:= high(pollinfo);
+  with pollinfo[id] do begin
+   fd:= afd;
+   events:= int32(aflags * [pf_in,pf_pri,pf_out]);
+   with pollinfodest[id] do begin
+    callback:= acallback;
+    data:= adata;
+   end;
+  end;
+ end;
+end;
+
+function gui_removepollfd(const id: int32): guierrorty;
+begin
+ with pollinf^ do begin
+  if (id < 0) or (id > high(pollinfo)) then begin
+   result:= gue_index;
+  end
+  else begin
+   deleteitem(pollinfo,typeinfo(pollinfo),id);
+   deleteitem(pollinfodest,typeinfo(pollinfodest),id);
+   result:= gue_ok;
+  end;
+ end;
+end;
+
+function gui_setpollfdactive(const id: int32;
+                       const aactive: boolean): guierrorty;
+begin
+ with pollinf^ do begin
+  if (id < 0) or (id > high(pollinfo)) then begin
+   result:= gue_index;
+  end
+  else begin
+   with pollinfo[id] do begin
+    if (fd >= 0) xor aactive then begin
+     if fd = 0 then begin
+      fd:= minint;
+     end
+     else begin
+      if fd = minint then begin
+       fd:= 0;
+      end
+      else begin
+       fd:= -fd;
+      end;
+     end;
+    end;
+   end;
+   result:= gue_ok;
+  end;
+ end;
+end;
+
 function gui_getevent: tmseevent;
 
 var
@@ -5459,11 +5592,8 @@ var
  buffer: string;
  icstatus: tstatus;
  chars: msestring;
- int1: integer;
+ int1,i2: integer;
 // event: xevent;
- pollinfo: array[0..2] of pollfd;
-             //0 connection, 1 sessionmanagement
- pollcount: integer;
 // str1: string;
 {$ifdef with_sm}
  int2: integer;
@@ -5477,12 +5607,20 @@ var
  aic: xic;
  window1: twindow;
  buf1: clipboardbufferty;
-
+ fdwakeup: boolean;
+ allsig,sig1: sigset_t;
+ timeout1: timespec;
+type
+ char_0_19 = array[0..19] of char;
+ 
 label
- eventrestart;
-    
+ eventrestart;    
 begin
- while true do begin
+ sigfillset(allsig);
+ timeout1.tv_sec:= 10;
+ timeout1.tv_nsec:= 0;
+ fdwakeup:= false;
+ while not fdwakeup do begin
   if timerevent then begin
    application.postevent(tmseevent.create(ek_timer));
    timerevent:= false;
@@ -5498,55 +5636,57 @@ begin
   if gui_hasevent then begin
    break;
   end;
-  fillchar(pollinfo,sizeof(pollinfo),0);
-  pollcount:= 2;
-  with pollinfo[0] do begin
-   fd:= xconnectionnumber(appdisp);
-   events:= pollin or pollpri;
-  end;
-  with pollinfo[1] do begin
-   fd:= connectpipe.readdes;
-   events:= pollin or pollpri;
-  end;
-{$ifdef with_sm}
-  if hassm then begin
-   if sminfo.fd > 0 then begin
-    with pollinfo[2] do begin
-     fd:= sminfo.fd;
-     events:= pollin or pollpri;
-    end;
-    inc(pollcount);
-   end;
-  end;
-{$endif}
+
+  pthread_sigmask(sig_block,@allsig,@sig1); //block signals
   if not timerevent and not terminated and not childevent then begin
    repeat
     if not application.unlock then begin
      guierror(gue_notlocked);
     end;
+    
     sys_mutexlock(connectmutex1);
-    int1:= poll(@pollinfo,pollcount,1000); 
-    sys_mutexunlock(connectmutex1);
-    sys_mutexlock(connectmutex2);
-    if pollinfo[1].revents <> 0 then begin
-     repeat
-     until (__read(connectpipe.readdes,dummybyte,1) < 0) and 
-                                     (sys_getlasterror() = eagain);
+//    int1:= poll(@pollinfo[0],length(pollinfo),1000); 
+//                              //todo: use ppoll? no timeout?
+    with pollinf^ do begin
+     int1:= ppoll(@pollinfo[0],length(pollinfo),@timeout1,@sig1);
+     if pollinfo[1].revents <> 0 then begin
+      repeat                                     //empty pipe
+      until (__read(connectpipe.readdes,dummybyte,1) < 0) and 
+                                      (sys_getlasterror() = ewouldblock);
+     end;
+     sys_mutexunlock(connectmutex1);
+     sys_mutexlock(connectmutex2);
+     sys_mutexunlock(connectmutex2);
+  
+     if int1 > 0 then begin
+      for i2:= 0 to high(pollinfo) do begin
+       with pollinfo[i2] do begin
+        if (fd >= 0) then begin
+         with pollinfodest[i2] do begin
+          if (callback <> nil) and (revents <> 0) then begin
+           callback(pollflagsty(card32(card16(revents))),data);
+           fdwakeup:= true;
+          end;
+         end;
+        end;
+       end;
+      end;
+     end;
     end;
-    sys_mutexunlock(connectmutex2);
      //wakeup clientmessages are sometimes missed with xcb ???
     if int1 = 0 then begin  //timeout
      inc(timeoutcount);
-     if timeoutcount mod 10 = 0 then begin
+     if timeoutcount mod 1 = 0 then begin
       timerevent:= true; //every 10 seconds without messages 
                          //in case of lost timer alarm
      end;
     end;
     application.lock;
-   until (int1 <> -1) or timerevent or terminated or childevent;
+   until (int1 <> -1) or timerevent or terminated or childevent or fdwakeup;
+   pthread_sigmask(sig_setmask,@sig1,nil); //enable signals
  {$ifdef with_sm}
    if hassm then begin
-    if (int1 > 0) and (pollinfo[2].revents <> 0) then begin
+    if (int1 > 0) and (pollinf^.pollinfo[2].revents <> 0) then begin
      iceprocessmessages(sminfo.iceconnection,nil,int2);
      with sminfo do begin
       if shutdown then begin
@@ -5582,6 +5722,9 @@ begin
     end;
    end;
 {$endif}
+  end
+  else begin
+   pthread_sigmask(sig_setmask,@sig1,nil); //enable signals
   end;
  end;
  result:= nil;
@@ -5644,6 +5787,28 @@ eventrestart:
 {$endif}
       end
       else begin
+      {$ifdef mse_debugxembed}
+                    inttohex(data.l[1],8),' ',
+                    inttohex(data.l[2],8),' ',
+                    inttohex(data.l[3],8),' ',
+                    inttohex(data.l[4],8));
+       end;
+       if (netatoms[net_system_tray_message_data] <> 0) and 
+            (message_type = netatoms[net_system_tray_message_data]) then begin
+        debugwindow(
+         '*net_system_tray_message_data format:'+inttostr(format)+' ',window);
+        writeln(' ',char_0_19(data.b));
+       end;
+       if (netatoms[net_system_tray_opcode] <> 0) and 
+            (message_type = netatoms[net_system_tray_opcode]) then begin
+        debugwindow(
+         '*net_system_tray_opcode format:'+inttostr(format)+' ',window);
+        writeln(' ',inttohex(data.l[0],8),' ',
+                    inttohex(data.l[1],8),' ',
+                    inttohex(data.l[2],8),' ',
+                    inttohex(data.l[3],8),' ',
+                    inttohex(data.l[4],8));
+       end;
        result:= handlexdnd(xev.xclient);
       end;
      end;
@@ -6098,6 +6263,8 @@ var
 begin
  gdi_lock;
  try
+  getmem(pollinf,sizeof(pollinfty));
+  fillchar(pollinf^,sizeof(pollinfty),0);
   sys_mutexcreate(connectmutex1);
   sys_mutexcreate(connectmutex2);
   pipe2(connectpipe,o_cloexec or o_nonblock);
@@ -6137,7 +6304,6 @@ begin
   lasteventtime:= currenttime;
 
   po1:= checklocale;
-  
   terminated:= false;
   result:= gue_nodisplay;
   timerevent:= false;
@@ -6146,7 +6312,7 @@ begin
   sigchldbefore:= signal(sigchld,{$ifdef FPC}@{$endif}sigchild);
   sigemptyset(sigset1);
   sigaddset(sigset1,sigchld);
-  m_sigprocmask(sig_unblock,sigset1,sigset2); 
+  pthread_sigmask(sig_unblock,@sigset1,@sigset2); 
   
   appdisp:= xopendisplay(nil);
   if appdisp = nil then begin
@@ -6310,8 +6476,7 @@ begin
  
   fillchar(netatoms,sizeof(netatoms),0);               //check _net_
   xinternatoms(appdisp,@netatomnames[low(netatomty)],
-           integer(high(netatomty)),{$ifdef xboolean}false{$else}0{$endif},
-           @netatoms[low(netatomty)]);
+                     integer(high(netatomty)),false,@netatoms[low(netatomty)]);
   netsupported:= netsupportedatom <> 0;
   if netsupported then begin
    netsupported:= readatomproperty(rootid,netsupportedatom,atomar);
@@ -6365,6 +6530,37 @@ begin
  {$ifdef FPC} {$checkpointer default} {$endif}
   end;
  
+//  fillchar(pollinfo,sizeof(pollinfo),0);
+//  pollcount:= 2;
+  pollinf^.pollinfo:= nil;
+  gui_addpollfd(int1,xconnectionnumber(appdisp),[pf_in,pf_pri]); //0
+  gui_addpollfd(int1,connectpipe.readdes,[pf_in,pf_pri]);        //1
+ {$ifdef with_sm}
+  if hassm and (sminfo.fd > 0) then begin
+   gui_addpollfd(int1,sminfo.fd,[pf_in,pf_pri]);                 //2
+  end;
+ {$endif}
+(*
+  with pollinfo[0] do begin
+   fd:= xconnectionnumber(appdisp);
+   events:= pollin or pollpri;
+  end;
+  with pollinfo[1] do begin
+   fd:= connectpipe.readdes;
+   events:= pollin or pollpri;
+  end;
+{$ifdef with_sm}
+  if hassm then begin
+   if sminfo.fd > 0 then begin
+    with pollinfo[2] do begin
+     fd:= sminfo.fd;
+     events:= pollin or pollpri;
+    end;
+    inc(pollcount);
+   end;
+  end;
+{$endif}
+*)
   result:= gue_ok;
  {$ifdef mse_flushgdi}
   xsynchronize(appdisp,1);
@@ -6461,6 +6657,8 @@ begin
   xseterrorhandler(errorhandlerbefore);
   screenrects:= nil;
   screenrectsvalid:= false;
+  finalize(pollinf^);
+  freemem(pollinf);
  finally
   gdi_unlock;
  end;
@@ -6522,4 +6720,3 @@ initialization
  hassm:= geticelib and getsmlib;
  hasxrandrlib:= getxrandrlib;
 end.
-

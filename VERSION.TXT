@@ -1,5 +1,7 @@
 MSEide+MSEgui breaking changes version history
 **********************************************
+2016-12-26
+ timagelist.getimage returns bitmap- and maskbitmap-kind of imagelist.
 2016-10-21
  tlistitem.drawimage() parameter order changed.
 2016-10-02

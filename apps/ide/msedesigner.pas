@@ -71,6 +71,11 @@ type
   data: methodinfoty;
  end;
  pmethodsdataty = ^methodsdataty;
+ methodshashdataty = record
+  header: hashheaderty;
+  data: methodsdataty;
+ end;
+ pmethodshashdataty = ^methodshashdataty;
  
  tmethods = class(tptruinthashdatalist)
   private
@@ -80,10 +85,11 @@ type
    fmethodtable: pointer;
 {$endif}
   protected
-   procedure finalizeitem(var aitemdata); override;
+   procedure finalizeitem(const aitem: phashdataty); override;
    procedure deletemethod(const aadress: pointer);
    procedure addmethod(const aname: string; const aaddress: pointer;
-                       const atypeinfo: ptypeinfo);
+                                              const atypeinfo: ptypeinfo);
+   function getrecordsize(): int32 override;
   public
    constructor create(adesigner: tdesigner);
    destructor destroy; override;
@@ -150,6 +156,11 @@ type
   data: componentinfoty;
  end;
  pcomponentsdataty = ^componentsdataty;
+ componentshashdataty = record
+  header: hashheaderty;
+  data: componentsdataty;
+ end;
+ pcomponentshashdataty = ^componentshashdataty;
   
  tcomponents = class(tptruinthashdatalist)
   private
@@ -157,16 +168,17 @@ type
    fcomponent: tcomponentslink; // to receive componentnotifications
    fowner: pmoduleinfoty;
   protected
-   procedure finalizeitem(var aitemdata); override;
-   function find(const value: tobject): pcomponentinfoty;
+   procedure finalizeitem(const aitem: phashdataty); override;
+   function find(const value: tobject): pcomponentshashdataty;
    procedure destroynotification(const acomponent: tcomponent);
    procedure swapcomponent(const old,new: tcomponent);
+   function getrecordsize(): int32 override;
   public
    constructor create(const aowner: pmoduleinfoty; const adesigner: tdesigner);
    destructor destroy; override;
    procedure assigncomps(const module: tmsecomponent);
    procedure add(comp: tcomponent);
-   function next: pcomponentinfoty;
+   function next: pcomponentshashdataty;
    function getcomponents: componentarty;
    function getdispnames: componentnamearty;
    function getcomponent(const aname: string;
@@ -1903,7 +1915,7 @@ end;
 constructor tmethods.create(adesigner: tdesigner);
 begin
  fdesigner:= adesigner;
- inherited create(sizeof(methodinfoty));
+ inherited create();
  fstate:= fstate + [hls_needsnull,hls_needsfinalize];
 end;
 
@@ -1915,15 +1927,20 @@ begin
  inherited;
 end;
 
+function tmethods.getrecordsize(): int32;
+begin
+ result:= sizeof(methodshashdataty);
+end;
+
 procedure tmethods.addmethod(const aname: string; const aaddress: pointer;
                              const atypeinfo: ptypeinfo);
 var
- po1: pmethodinfoty;
+ po1: pmethodshashdataty;
 begin
  {$ifdef FPC} {$checkpointer off} {$endif}
- po1:= add(ptruint(aaddress));
+ po1:= pmethodshashdataty(add(ptruint(aaddress)));
  {$ifdef FPC} {$checkpointer default} {$endif}
- with po1^ do begin
+ with po1^.data.data do begin
   name:= aname;
   address:= aaddress;
   typeinfo:= atypeinfo;
@@ -2073,25 +2090,28 @@ end;
 
 function tmethods.findmethod(const aadress: pointer): pmethodinfoty;
 begin
- result:= pmethodinfoty(find(ptruint(aadress)));
+ result:= pointer(find(ptruint(aadress)));
+ if result <> nil then begin
+  result:= @pmethodshashdataty(result)^.data.data;
+ end;
 end;
 
 function tmethods.findmethodbyname(const aname: string;
                 const atype: ptypeinfo; out namefound: boolean): pmethodinfoty;
 var
  int1: integer;
- po1: pmethodsdataty;
+ po1: pmethodshashdataty;
  str1: string;
 begin
  str1:= uppercase(aname);
  result:= nil;
  namefound:= false;
  for int1:= 0 to count - 1 do begin
-  po1:= pmethodsdataty(next);
-  if uppercase(po1^.data.name) = str1 then begin
+  po1:= pmethodshashdataty(next);
+  if uppercase(po1^.data.data.name) = str1 then begin
    namefound:= true;
-   if (po1^.data.typeinfo = atype) then begin
-    result:= @po1^.data;
+   if (po1^.data.data.typeinfo = atype) then begin
+    result:= @po1^.data.data;
     break;
    end;
   end;
@@ -2101,27 +2121,27 @@ end;
 function tmethods.findmethodbyname(const aname: string): pmethodinfoty;
 var
  int1: integer;
- po1: pmethodsdataty;
+ po1: pmethodshashdataty;
  str1: string;
 begin
  str1:= uppercase(aname);
  result:= nil;
  for int1:= 0 to count - 1 do begin
-  po1:= pmethodsdataty(next);
-  if uppercase(po1^.data.name) = str1 then begin
-   result:= @po1^.data;
+  po1:= pmethodshashdataty(next);
+  if uppercase(po1^.data.data.name) = str1 then begin
+   result:= @po1^.data.data;
    break;
   end;
  end;
 end;
 
-procedure tmethods.finalizeitem(var aitemdata);
+procedure tmethods.finalizeitem(const aitem: phashdataty);
 begin
  if fdesigner.fmodules.fmethodnames <> nil then begin
   fdesigner.fmodules.fmethodnames.delete(
-         ptruint(methodsdataty(aitemdata).data.address));
+         ptruint(pmethodshashdataty(aitem)^.data.data.address));
  end;
- finalize(methodsdataty(aitemdata)); 
+ finalize(pmethodshashdataty(aitem)^.data.data);
 end;
 
 { tcomponents }
@@ -2133,7 +2153,7 @@ begin
  fdesigner:= adesigner;
  fcomponent:= tcomponentslink.Create(nil);
  fcomponent.fownercomps:= self;
- inherited create(sizeof(componentinfoty));
+ inherited create();
  fstate:= fstate + [hls_needsnull,hls_needsfinalize];
 end;
 
@@ -2143,15 +2163,20 @@ begin
  inherited;
 end;
 
+function tcomponents.getrecordsize(): int32;
+begin
+ result:= sizeof(componentshashdataty);
+end;
+
 procedure tcomponents.destroynotification(const acomponent: tcomponent);
 begin
  fdesigner.componentdestroyed(acomponent,fowner);
  delete(ptruint(acomponent),true);
 end;
 
-procedure tcomponents.finalizeitem(var aitemdata);
+procedure tcomponents.finalizeitem(const aitem: phashdataty);
 begin
- finalize(componentsdataty(aitemdata));
+ finalize(pcomponentshashdataty(aitem)^.data.data);
 end;
 
 (*
@@ -2198,30 +2223,30 @@ end;
 
 procedure tcomponents.add(comp: tcomponent);
 var
- po1: pcomponentinfoty;
+ po1: pcomponentshashdataty;
 begin
  {$ifdef FPC} {$checkpointer off} {$endif}
- po1:= inherited add(ptruint(comp));
+ po1:= pcomponentshashdataty(inherited add(ptruint(comp)));
  {$ifdef FPC} {$checkpointer default} {$endif}
- with po1^ do begin
+ with po1^.data.data do begin
   instance:= comp;
   name:= comp.Name;
  end;
  comp.freenotification(fcomponent);
 end;
 
-function tcomponents.find(const value: tobject): pcomponentinfoty;
+function tcomponents.find(const value: tobject): pcomponentshashdataty;
 begin
- result:= pcomponentinfoty(inherited find(ptruint(value)));
+ result:= pcomponentshashdataty(inherited find(ptruint(value)));
 end;
 
 procedure tcomponents.swapcomponent(const old,new: tcomponent);
 var
- po1: pcomponentinfoty;
+ po1: pcomponentshashdataty;
 begin
  po1:= find(old);
  if po1 <> nil then begin
-  po1^.instance:= new;
+  po1^.data.data.instance:= new;
   old.removefreenotification(fcomponent);
   new.freenotification(fcomponent);
  end;
@@ -2237,16 +2262,16 @@ begin
  end;
 end;
 
-function tcomponents.next: pcomponentinfoty;
+function tcomponents.next: pcomponentshashdataty;
 begin
- result:= @pcomponentsdataty(inherited next)^.data;
+ result:= pcomponentshashdataty(inherited next);
 end;
 
 function tcomponents.getcomponent(const aname: string;
                           const children: boolean = false): tcomponent;
 var
  int1,int2: integer;
- po1: pcomponentinfoty;
+ po1: pcomponentshashdataty;
  str1: string;
  ar1: stringarty;
 begin
@@ -2265,8 +2290,8 @@ begin
   end;
   for int1:= 0 to count - 1 do begin
    po1:= next;
-   if uppercase(po1^.name) = ar1[0] then begin
-    result:= po1^.instance;
+   if uppercase(po1^.data.data.name) = ar1[0] then begin
+    result:= po1^.data.data.instance;
     for int2:= 1 to high(ar1) do begin
      result:= result.findcomponent(ar1[int2]);
      if (result = nil) then begin
@@ -2287,11 +2312,11 @@ end;
 procedure tcomponents.namechanged(const acomponent: tcomponent;
                                             const newname: string);
 var
- po1: pcomponentinfoty;
+ po1: pcomponentshashdataty;
 begin
  po1:= find(acomponent);
  if po1 <> nil then begin
-  po1^.name:= newname;
+  po1^.data.data.name:= newname;
  end;
 end;
 
@@ -2307,7 +2332,7 @@ begin
  setlength(result,count);
  for int1:= 0 to count - 1 do begin
   with result[int1] do begin
-   instance:= next^.instance;
+   instance:= next^.data.data.instance;
    dispname:= fdesigner.getcomponentdispname(instance);
   end;
  end;
@@ -4199,7 +4224,7 @@ begin
   setactivemodule(nil);
  end;
  for int1:= 0 to amodule^.components.count - 1 do begin
-  fselections.remove(amodule^.components.next^.instance);
+  fselections.remove(amodule^.components.next^.data.data.instance);
  end;
  designnotifications.moduledestroyed(idesigner(self),amodule^.instance);
  designnotifications.selectionchanged(idesigner(self),
@@ -4535,7 +4560,7 @@ begin
  end;
  with amodule^ do begin
   for int1:= 0 to components.count - 1 do begin
-   comp1:= components.next^.instance;
+   comp1:= components.next^.data.data.instance;
    doinit(comp1);
    if not result then begin
     break;
@@ -5469,7 +5494,7 @@ var
 //    check(next^.instance);
 //   end;
    for int1:= 0 to count - 1 do begin
-    comp1:= next^.instance;
+    comp1:= next^.data.data.instance;
     check(comp1);
     for int3:= 0 to comp1.componentcount - 1  do begin
      comp2:= comp1.components[int3];
@@ -5568,7 +5593,7 @@ begin
   end;
   with po1^.components do begin
    for int2:= 0 to count - 1 do begin
-    comp1:= next^.instance;
+    comp1:= next^.data.data.instance;
     check(comp1);
    end;
   end;
@@ -5711,7 +5736,7 @@ begin
    else begin
     with po1^.components do begin
      for int2:= 0 to count - 1 do begin
-      comp1:= next^.instance;
+      comp1:= next^.data.data.instance;
       check(comp1);
      end;
     end;

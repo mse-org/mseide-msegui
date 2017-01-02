@@ -78,7 +78,7 @@ type
    grid: twidgetgrid;
    props: ttreeitemedit;
    gridpopup: tpopupmenu;
-   values: tmbdropdownitemedit;
+   values: tdropdownitemedit;
    compedit: trichbutton;
    findbu: tstockglyphbutton;
    mainpopup: tpopupmenu;
@@ -128,7 +128,8 @@ type
    procedure asyncexe(const sender: TObject; var atag: Integer);
    procedure paintimageexe(const sender: twidget; const acanvas: tcanvas);
    procedure extendimageexe(const sender: twidget;
-                      const cellinfopo: pcellinfoty; var aextend: sizety);
+                      const cellinfopo: pcellinfoty; var info: extrainfoty);
+
    procedure propskeydownexe(const sender: twidget; var ainfo: keyeventinfoty);
    procedure enterexe(const sender: TObject);
   private
@@ -1904,11 +1905,11 @@ begin
 end;
 
 procedure tobjectinspectorfo.extendimageexe(const sender: twidget;
-               const cellinfopo: pcellinfoty; var aextend: sizety);
+               const cellinfopo: pcellinfoty;  var info: extrainfoty);
 begin
  wascolorprop:= iscolorprop(sender,cellinfopo,propcolor);
  if wascolorprop then begin
-  aextend.cx:= aextend.cx+sender.clientheight;
+  info.image.cx:= info.image.cx+sender.clientheight;
  end;
 end;
 

@@ -152,6 +152,15 @@ type
   index: integer;
  end;
  ppatchty = ^patchty;
+ patchdataty = record
+  header: ptruintdataty;
+  data: patchty;
+ end;
+ patchhashdataty = record
+  header: hashheaderty;
+  data: patchdataty;
+ end;
+ ppatchhashdataty = ^patchhashdataty;
  
  tmidipatch = class(townedpersistent)
   private
@@ -188,10 +197,12 @@ type
    findexresult: integer;
    fnote: byte;
    fnoterange: integer;
-   procedure checkeventindex(const aitemdata; var accept: boolean);
+   procedure checkeventindex(const aitem: phashdataty; var accept: boolean);
+  protected
+   function getrecordsize(): int32 override;
   public
-   constructor create;
-   function add(const apatch: tmidipatch): ppatchty;
+//   constructor create;
+   function add(const apatch: tmidipatch): ppatchhashdataty;
    function geteventindex(const aevent: midieventinfoty): integer;
  end;
   
@@ -679,7 +690,7 @@ begin
  for int1:= 0 to fpatches.count - 1 do begin
   patch1:= tmidipatch(fpatches.fitems[int1]);  
   if destlist.find(patch1.channel,po2) then begin
-   fpatchpanel.add(patch1)^.index:= ptrint(po2);
+   fpatchpanel.add(patch1)^.data.data.index:= ptrint(po2);
   end;
  end;
  destlist.free;
@@ -1130,17 +1141,22 @@ begin
 end;
 
 { tpatchinfolist }
-
+{
 constructor tpatchinfolist.create;
 begin
  inherited create(sizeof(patchty));
 end;
+}
+function tpatchinfolist.getrecordsize(): int32;
+begin
+ result:= sizeof(patchhashdataty);
+end;
 
-function tpatchinfolist.add(const apatch: tmidipatch): ppatchty;
+function tpatchinfolist.add(const apatch: tmidipatch): ppatchhashdataty;
 begin
  with apatch do begin
-  result:= inherited add((track shl 5) or ord(midichannel));
-  result^.info:= finfo;
+  result:= ppatchhashdataty(inherited add((track shl 5) or ord(midichannel)));
+  result^.data.data.info:= finfo;
  end;
 end;
 
@@ -1160,11 +1176,12 @@ begin
  result:= findexresult;
 end;
 
-procedure tpatchinfolist.checkeventindex(const aitemdata; var accept: boolean);
+procedure tpatchinfolist.checkeventindex(const aitem: phashdataty; 
+                                                            var accept: boolean);
 var
  int1: integer;
 begin
- with ppatchty(@ptruintdataty(aitemdata).data)^,info do begin
+ with ppatchhashdataty(aitem)^.data.data,info do begin
   if (fnote >= notemin) and (fnote <= notemax) then begin
    int1:= notemax - notemin;
    if int1 < fnoterange then begin

@@ -15,8 +15,8 @@ unit mseifids;
 interface
 uses
  classes,mclasses,mdb,mseifi,mseclasses,mseglob,mseevent,msedb,msetypes,
- msebufdataset,
- msestrings,mseifilink,msesqldb,msearrayprops,msehash,mseapplication;
+ msebufdataset,msehash,
+ msestrings,mseifilink,msesqldb,msearrayprops,mseapplication;
 
 
 type
@@ -113,7 +113,21 @@ type
                       const dest: ievent);
  end;
 
+ changedataty = record
+  header: ptruintdataty;
+  data: record end; //array of byte for change flags
+ end;
+ changehashdataty = record
+  header: hashheaderty;
+  data: changedataty;
+ end;
+ pchangehashdataty = ^changehashdataty;
+ 
  tcurrentchangedlist = class(tptruinthashdatalist)
+  private
+   fnullmasksize: int32;
+  protected
+   function getrecordsize(): int32 override;
   public 
    constructor create(const anullmasksize: integer);
    procedure fieldchanged(const afield: tfield; const aindex: integer);
@@ -146,11 +160,7 @@ type
    procedure postrecord1(const akind: fieldreckindty;
                                    const amodifiedfields: pbyte);
    procedure receiveevent(const event: tobjectevent);
-  {$ifdef FPC}
-   procedure sendchangedrecord(var aitem: ptruintdataty);
-  {$else}
-   procedure sendchangedrecord(var aitem{: pptruintdataty});
-  {$endif}
+   procedure sendchangedrecord(const aitem: pchangehashdataty);
    procedure setowneractive(const avalue: boolean); override;
   public
    constructor create(const aowner: tdataset; const aintf: iifidscontroller);
@@ -864,19 +874,12 @@ begin
  end;
 end;
 
-{$ifdef FPC}
-procedure tifidscontroller.sendchangedrecord(var aitem: ptruintdataty);
+procedure tifidscontroller.sendchangedrecord(const aitem: pchangehashdataty);
 begin
- fdscontroller.recnozerobased:= aitem.key;
- postrecord1(frk_edit,pbyte(@aitem.data));
+ fdscontroller.recnozerobased:= aitem^.data.header.key;
+ postrecord1(frk_edit,@(aitem^.data.data));
+// postrecord1(frk_edit,pbyte(@aitem.data));
 end;
-{$else}
-procedure tifidscontroller.sendchangedrecord(var aitem{: pptruintdataty});
-begin
- fdscontroller.recnozerobased:= ptruintdataty(aitem).key;
- postrecord1(frk_edit,pbyte(@ptruintdataty(aitem).data));
-end;
-{$endif}
 
 procedure tifidscontroller.sendchangedrecords(const alist: tcurrentchangedlist);
 //var
@@ -885,11 +888,7 @@ begin
  if alist.count > 0 then begin
   fdscontroller.beginupdate;
   try
-  {$ifdef FPC}
    alist.iterate(hashiteratorprocty(@sendchangedrecord));
-  {$else}
-   alist.iterate(sendchangedrecord);
-  {$endif}
   finally
    fdscontroller.endupdate;
   end;
@@ -3064,14 +3063,21 @@ end;
 
 constructor tcurrentchangedlist.create(const anullmasksize: integer);
 begin
- inherited create(anullmasksize);
+ fnullmasksize:= anullmasksize;
+ inherited create();
  include(fstate,hls_needsnull);
+end;
+
+function tcurrentchangedlist.getrecordsize(): int32;
+begin
+ result:= sizeof(ptruinthashdataty)+fnullmasksize;
 end;
 
 procedure tcurrentchangedlist.fieldchanged(const afield: tfield;
                                              const aindex: integer);
 begin
- setfieldflag(pbyte(addunique(ptruint(aindex))),afield.fieldno-1);
+ setfieldflag(@pchangehashdataty(addunique(ptruint(aindex)))^.data.data,
+                                                              afield.fieldno-1);
 end;
 
 end.

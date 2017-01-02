@@ -1873,9 +1873,9 @@ function sigaction(__sig: longint; Action: PSigAction;
        OldAction: PSigAction): Integer;
                     cdecl;external clib name 'sigaction'; overload;
 
-function m_sigprocmask(__how:longint; var SigSet : TSigSet;
-            var oldset: Tsigset):longint;cdecl;external clib name 'sigprocmask';
-function m_sigismember(var SigSet : TSigSet; SigNum : Longint):longint;cdecl;external clib name 'sigismember';
+//function m_sigprocmask(__how:longint; var SigSet : TSigSet;
+//            var oldset: Tsigset):longint;cdecl;external clib name 'sigprocmask';
+//function m_sigismember(var SigSet : TSigSet; SigNum : Longint):longint;cdecl;external clib name 'sigismember';
 
 const
  __SIZEOF_PTHREAD_MUTEX_T = {$ifdef CPU64}40{$else}24{$endif};
@@ -2340,7 +2340,11 @@ type
       events : smallint;
       revents : smallint;
    end;
-function poll(__fds: Ppollfd; __nfds:nfds_t; __timeout:longint):longint;cdecl;external clib name 'poll';
+function poll(__fds: Ppollfd; __nfds:nfds_t; __timeout:longint): cint
+                                              cdecl external clib name 'poll';
+function ppoll (__fds: ppollfd;__nfds: nfds_t; __timeout: ptimespec;
+                                                __ss: p__sigset_t): cint 
+                                              cdecl external clib name 'ppoll';
 const
 {$ifdef linux}
    SIG_BLOCK = 0;

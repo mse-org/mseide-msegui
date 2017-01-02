@@ -6,7 +6,7 @@ object mainfo: tmainfo
   frame.grip_options = [go_fixsizebutton, go_floatbutton, go_topbutton, go_backgroundbutton, go_lockbutton, go_nolockbutton, go_buttonhints]
   visible = False
   bounds_x = 45
-  bounds_y = 165
+  bounds_y = 203
   bounds_cx = 459
   bounds_cy = 149
   container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_subfocus, ow_mousetransparent, ow_destroywidgets]

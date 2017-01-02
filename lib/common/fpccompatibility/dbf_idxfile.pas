@@ -654,7 +654,7 @@ end;
 
 function LocaleCallBack(LocaleString: PChar): Integer; stdcall;
 begin
-  LCIDList.Add(Pointer(StrToInt('$'+LocaleString)));
+  LCIDList.Add(Pointer(ptrint(StrToInt('$'+LocaleString))));
   Result := 1;
 end;
 

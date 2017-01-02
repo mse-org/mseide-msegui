@@ -345,7 +345,7 @@ type
   
  tiosynchronizer = class(teventthread)
   private
-   fwaitingclients: tintegeravltree;   
+   fwaitingclients: tintegeravltree; //todo: use hashlist  
    fondatareceived: stringdataprocty;
   protected
    procedure datareceived(const adata: string);
@@ -1363,7 +1363,7 @@ end;
 procedure tcustomiochannel.receiveevent(const event: tobjectevent);
 begin
  if (event.kind = ek_objectdata) and (event is tstringobjectevent) then begin
-  datareceived(tstringobjectevent(event).fdata);
+  datareceived(tstringobjectevent(event).data);
  end
  else begin
   inherited;

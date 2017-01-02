@@ -16,54 +16,61 @@ uses
  msestrings,msetypes;
  
 type
- hashvaluety = longword;
+ identty = card32;
+ pidentty = ^identty;
+ hashvaluety = card32;
  phashvaluety = ^hashvaluety;
+ hashoffsetty = int32;//ptruint;
+ phashoffsetty = ^hashoffsetty;
+ hashoffsetarty = array of hashoffsetty;
 
  hashheaderty = record
-  prevhash: ptruint; //offset from liststart
-  nexthash: ptruint; //offset from liststart
-  prevlist: ptruint; //-memory offset to previous item
-  nextlist: ptruint; //memory offset to next item
+  prevhash: hashoffsetty; //offset from liststart
+  nexthash: hashoffsetty; //offset from liststart
+  prevlist: hashoffsetty; //memory offset to previous item
+  nextlist: hashoffsetty; //memory offset to next item
   hash: hashvaluety;
+//dummy: card32;
  end;
  phashheaderty = ^hashheaderty;
-
+{
  hashdatadataty = record
  end;
  phashdatadataty = ^hashdatadataty;
-  
+} 
  hashdataty = record
   header: hashheaderty;
-  data: hashdatadataty;
+//  data: hashdatadataty;
  end;
  phashdataty = ^hashdataty;
 
- hashiteratorprocty = procedure(var aitemdata) of object;
+ hashiteratorprocty = procedure(const aitem: phashdataty) of object;
  internalhashiteratorprocty = procedure(const aitem: phashdataty) of object;
- keyhashiteratorprocty = procedure(var aitemdata) of object; 
-                                       //hashdatadataty
- findcheckprocty = procedure(const aitemdata; var accept: boolean) of object;
+ keyhashiteratorprocty = procedure(const aitem: phashdataty) of object; 
+ findcheckprocty = procedure(const aitem: phashdataty;
+                                          var accept: boolean) of object;
 
- hashliststatety = (hls_needsnull,hls_needsfinalize,hls_destroying);
+ hashliststatety = (hls_needsnull,hls_needsinit,hls_needsfinalize,
+                                                       hls_destroying);
  hashliststatesty = set of hashliststatety;
 
  thashdatalist = class
   private
 //   fdatasize: integer;
-   frecsize: integer;
-   fcapacity: integer;
-   fcount: integer;
-   fassignedfirst: ptruint; //offset to fdata
-   fassignedlast: ptruint; //offset to fdata
-   fdeletedroot: ptruint;  //offset to fdata
-   fcurrentitem: ptruint;  //offset to fdata.data
+   frecsize: int32;
+   fcapacity: int32;
+   fcount: int32;
+   fassignedfirst: hashoffsetty; //offset to fdata
+   fassignedlast: hashoffsetty; //offset to fdata
+   fdeletedroot: hashoffsetty;  //offset to fdata
+   fcurrentitem: hashoffsetty;  //offset to fdata.data
    fdestpo: phashdataty;
    procedure setcapacity(const avalue: integer);
    procedure moveitem(const aitem: phashdataty);
   protected
    fdata: pointer;         //first record is a dummy
    fmask: hashvaluety;
-   fhashtable: ptruintarty;
+   fhashtable: hashoffsetarty;//ptruintarty;
    fstate: hashliststatesty;
   {$ifdef mse_debug_hash}
    procedure checkhash;
@@ -71,14 +78,16 @@ type
    procedure checknotexists(const aitem: phashdataty);
   {$endif}
    property data: pointer read fdata;
-   property assignedfirst: ptruint read fassignedfirst;
-   property assignedlast: ptruint read fassignedlast;
-   function getdatapo(const aoffset: longword): pointer; inline;
-   function getdataoffset(const adata: pointer): longword; inline;
+   property assignedfirst: hashoffsetty read fassignedfirst;
+   property assignedlast: hashoffsetty read fassignedlast;
+   function getdatapoornil(const aoffset: hashoffsetty): pointer; inline;
+   function getdatapo(const aoffset: hashoffsetty): pointer; inline;
+   function getdataoffs(const adata: pointer): hashoffsetty; inline;
    function internaladd(const akey): phashdataty;
    function internaladdhash(hash1: hashvaluety): phashdataty;
    procedure internaldeleteitem(const aitem: phashdataty); overload;
-   procedure internaldeleteitem(const aitem: phashdatadataty); overload;
+//   procedure internaldeleteitem(const aitem: phashdatadataty); overload;
+   procedure internaldelete(const aoffset: hashoffsetty);
    function internaldelete(const akey; const all: boolean): boolean;
    function internalfind(const akey): phashdataty; overload;
    function internalfind(const akey;
@@ -92,29 +101,32 @@ type
    function internalfindexact(const akey): phashdataty; overload;
    function internalfindexact(const akey;
                            out acount: integer): phashdataty; overload;
-   procedure checkexact(const aitemdata; var accept: boolean); virtual;
+   procedure checkexact(const aitem: phashdataty; var accept: boolean) virtual;
    function hashkey(const akey): hashvaluety; virtual; abstract;
-   function checkkey(const akey; const aitemdata): boolean; virtual; abstract;
+   function checkkey(const akey;
+                  const aitem: phashdataty): boolean; virtual; abstract;
+   function getrecordsize(): int32 virtual abstract;
    procedure rehash;
    procedure grow;
-   procedure finalizeitem(var aitemdata); virtual;
+   procedure inititem(const aitem: phashdataty) virtual;
+   procedure finalizeitem(const aitem: phashdataty) virtual;
    procedure internaliterate(
                        const aiterator: internalhashiteratorprocty); overload;
    procedure iterate(const akey; 
                             const aiterator: keyhashiteratorprocty); overload;
-   function internalfirst: phashdatadataty;
-   function internallast: phashdatadataty;
-   function internalnext: phashdatadataty;
-   function internalprev: phashdatadataty;
+   function internalfirstx: phashdataty;
+   function internallastx: phashdataty;
+   function internalnextx: phashdataty;
+   function internalprevx: phashdataty;
   public
-   constructor create(const datasize: integer);
+   constructor create();
    destructor destroy; override;
    procedure clear; virtual;
-   procedure reset; //next next will return first, next prev will return last
+   procedure reset; //next next() will return first, next prev() will return last
    property capacity: integer read fcapacity write setcapacity;
    property count: integer read fcount;
-   procedure mark(out ref: ptruint);
-   procedure release(const ref: ptruint);
+   procedure mark(out ref: hashoffsetty);
+   procedure release(const ref: hashoffsetty);
    function absdata(const ref: ptrint): pointer; 
                    //returns pointer to hashdataty.data from mark(ref)
    property recsize: int32 read frecsize;
@@ -123,7 +135,7 @@ type
  
  integerdataty = record
   key: integer;
-  data: record end;
+//  data: record end;
  end;
  pintegerdataty = ^integerdataty;
  integerhashdataty = record
@@ -136,21 +148,23 @@ type
   private
   protected
    function hashkey(const akey): hashvaluety; override;
-   function checkkey(const akey; const aitemdata): boolean; override;
+   function checkkey(const akey; const aitem: phashdataty): boolean; override;
+   function getrecordsize(): int32 override;
   public
-   constructor create(const datasize: integer);
-   function add(const akey: integer): pointer;
-   function addunique(const akey: integer): pointer;
-   function addunique(const akey: integer; out adata: pointer): boolean;
+//   constructor create();
+   function add(const akey: integer): pintegerhashdataty;
+   function addunique(const akey: integer): pintegerhashdataty;
+   function addunique(const akey: integer; 
+                           out adata: pintegerhashdataty): boolean;
                                              //true if new
-   function find(const akey: integer): pointer;
+   function find(const akey: integer): pintegerhashdataty;
    function delete(const akey: integer; 
                          const all: boolean = false): boolean; overload;
                          //true if found
-   function first: pintegerdataty;
-   function next: pintegerdataty; //wraps to first after last
-   function last: pintegerdataty;
-   function prev: pintegerdataty; //wraps to last after first
+   function first: pintegerhashdataty;
+   function next: pintegerhashdataty; //wraps to first after last
+   function last: pintegerhashdataty;
+   function prev: pintegerhashdataty; //wraps to last after first
  end;
 
  doubleintegerty = record
@@ -159,7 +173,7 @@ type
  end;
  doubleintegerdataty = record
   key: doubleintegerty;
-  data: record end;
+//  data: record end;
  end;
  pdoubleintegerdataty = ^doubleintegerdataty;
  doubleintegerhashdataty = record
@@ -172,26 +186,59 @@ type
   private
   protected
    function hashkey(const akey): hashvaluety; override;
-   function checkkey(const akey; const aitemdata): boolean; override;
+   function checkkey(const akey; const aitem: phashdataty): boolean; override;
+   function getrecordsize(): int32 override;
   public
-   constructor create(const datasize: integer);
-   function add(const akeya,akeyb: integer): pointer;
-   function addunique(const akeya,akeyb: integer): pointer;
-   function addunique(const akeya,akeyb: integer; out adata: pointer): boolean;
+//   constructor create(const datasize: integer);
+   function add(const akeya,akeyb: integer): pdoubleintegerhashdataty;
+   function addunique(const akeya,akeyb: integer): pdoubleintegerhashdataty;
+   function addunique(const akeya,akeyb: integer; 
+                           out adata: pdoubleintegerhashdataty): boolean;
                                              //true if new
-   function find(const akeya,akeyb: integer): pointer;
+   function find(const akeya,akeyb: integer): pdoubleintegerhashdataty;
    function delete(const akeya,akeyb: integer; 
                          const all: boolean = false): boolean; overload;
                          //true if found
-   function first: pdoubleintegerdataty;
-   function next: pdoubleintegerdataty; //wraps to first after last
-   function last: pdoubleintegerdataty;
-   function prev: pdoubleintegerdataty; //wraps to last after first
+   function first: pdoubleintegerhashdataty;
+   function next: pdoubleintegerhashdataty; //wraps to first after last
+   function last: pdoubleintegerhashdataty;
+   function prev: pdoubleintegerhashdataty; //wraps to last after first
+ end;
+
+ pointerdataty = record
+  key: pointer;
+//  data: record end;
+ end;
+ ppointerdataty = ^pointerdataty;
+ pointerhashdataty = record
+  header: hashheaderty;
+  data: pointerdataty;
+ end;
+ ppointerhashdataty = ^pointerhashdataty;
+ 
+ tpointerhashdatalist = class(thashdatalist)
+  private
+  protected
+   function hashkey(const akey): hashvaluety; override;
+   function checkkey(const akey; const aitem: phashdataty): boolean; override;
+   function getrecordsize(): int32 override;
+  public
+//   constructor create(const datasize: integer);
+   function add(const akey: pointer): ppointerhashdataty;
+   function addunique(const akey: pointer): ppointerhashdataty;
+   function find(const akey: pointer): ppointerhashdataty;
+   function delete(const akey: pointer;
+                         const all: boolean = false): boolean; overload;
+                         //true if found
+   function first: ppointerhashdataty;
+   function next: ppointerhashdataty; //wraps to first after last
+   function last: ppointerhashdataty;
+   function prev: ppointerhashdataty; //wraps to last after first
  end;
 
  ptruintdataty = record
   key: ptruint;
-  data: record end;
+//  data: record end;
  end;
  pptruintdataty = ^ptruintdataty;
  ptruinthashdataty = record
@@ -204,19 +251,20 @@ type
   private
   protected
    function hashkey(const akey): hashvaluety; override;
-   function checkkey(const akey; const aitemdata): boolean; override;
+   function checkkey(const akey; const aitem: phashdataty): boolean; override;
+   function getrecordsize(): int32 override;
   public
-   constructor create(const datasize: integer);
-   function add(const akey: ptruint): pointer;
-   function addunique(const akey: ptruint): pointer;
-   function find(const akey: ptruint): pointer;
+//   constructor create(const datasize: integer);
+   function add(const akey: ptruint): pptruinthashdataty;
+   function addunique(const akey: ptruint): pptruinthashdataty;
+   function find(const akey: ptruint): pptruinthashdataty;
    function delete(const akey: ptruint; 
                          const all: boolean = false): boolean; overload;
                          //true if found
-   function first: pptruintdataty;
-   function next: pptruintdataty; //wraps to first after last
-   function last: pptruintdataty;
-   function prev: pptruintdataty; //wraps to last after first
+   function first: pptruinthashdataty;
+   function next: pptruinthashdataty; //wraps to first after last
+   function last: pptruinthashdataty;
+   function prev: pptruinthashdataty; //wraps to last after first
  end;
 
  pointerptruintdataty = record
@@ -231,25 +279,27 @@ type
  ppointerptruinthashdataty = ^pointerptruinthashdataty;
 
  pointerptruintiteratorprocty = 
-                     procedure(var aitem: pointerptruintdataty) of object;
+           procedure(const aitem: pointerptruinthashdataty) of object;
 
  tpointerptruinthashdatalist = class(tptruinthashdatalist)
   private
    fpointerparam: pointer;
   protected
-   procedure checkexact(const aitemdata; var accept: boolean); override;
+   procedure checkexact(const aitem: phashdataty;
+                                       var accept: boolean); override;
+   function getrecordsize(): int32 override;
   public
-   constructor create;
+//   constructor create;
    procedure add(const akey: ptruint; const avalue: pointer);
    function addunique(const akey: ptruint; const avalue: pointer): boolean;
                    //true if found
    procedure delete(const akey: ptruint; const avalue: pointer); overload;
    function find(const akey: ptruint): pointer; overload;
    function find(const akey: ptruint; out avalue: pointer): boolean; overload;
-   function first: ppointerptruintdataty;
-   function next: ppointerptruintdataty; //wraps to first after last
-   function last: ppointerptruintdataty;
-   function prev: ppointerptruintdataty; //wraps to last after first
+   function first: ppointerptruinthashdataty;
+   function next: ppointerptruinthashdataty; //wraps to first after last
+   function last: ppointerptruinthashdataty;
+   function prev: ppointerptruinthashdataty; //wraps to last after first
    procedure iterate(const akey: ptruint;
                      const aiterator: pointerptruintiteratorprocty); overload;
  end;
@@ -266,28 +316,29 @@ type
  pansistringptruinthashdataty = ^ansistringptruinthashdataty;
 
  ansistringptruintiteratorprocty = 
-                     procedure(var aitem: ansistringptruintdataty) of object;
+            procedure(const aitem: pansistringptruinthashdataty) of object;
 
  tansistringptruinthashdatalist = class(tptruinthashdatalist)
   private
    fansistringparam: ansistring;
   protected
-   procedure checkexact(const aitemdata; var accept: boolean); override;
-   procedure finalizeitem(var aitemdata); override;
+   procedure checkexact(const aitem: phashdataty; var accept: boolean) override;
+   procedure finalizeitem(const aitem: phashdataty) override;
+   function getrecordsize(): int32 override;
   public
    constructor create;
    procedure add(const akey: ptruint; const avalue: ansistring);
    function addunique(const akey: ptruint; const avalue: ansistring): boolean;
                    //true if found
-   procedure delete(const akey: ptruint; const avalue: ansistring); overload;
-   function find(const akey: ptruint): ansistring; overload;
-   function find(const akey: ptruint; out avalue: ansistring): boolean; overload;
-   function first: pansistringptruintdataty;
-   function next: pansistringptruintdataty; //wraps to first after last
-   function last: pansistringptruintdataty;
-   function prev: pansistringptruintdataty; //wraps to last after first
+   procedure delete(const akey: ptruint; const avalue: ansistring) overload;
+   function find(const akey: ptruint): ansistring overload;
+   function find(const akey: ptruint; out avalue: ansistring): boolean overload;
+   function first: pansistringptruinthashdataty;
+   function next: pansistringptruinthashdataty; //wraps to first after last
+   function last: pansistringptruinthashdataty;
+   function prev: pansistringptruinthashdataty; //wraps to last after first
    procedure iterate(const akey: ptruint;
-                     const aiterator: ansistringptruintiteratorprocty); overload;
+                     const aiterator: ansistringptruintiteratorprocty) overload;
    function setdata(const akey: ptruint; const avalue: ansistring): boolean;
                       //false if not found
  end;
@@ -304,14 +355,16 @@ type
  pmsestringptruinthashdataty = ^msestringptruinthashdataty;
 
  msestringptruintiteratorprocty = 
-                     procedure(var aitem: msestringptruintdataty) of object;
+                procedure(const aitem: pmsestringptruinthashdataty) of object;
 
  tmsestringptruinthashdatalist = class(tptruinthashdatalist)
   private
    fmsestringparam: msestring;
   protected
-   procedure checkexact(const aitemdata; var accept: boolean); override;
-   procedure finalizeitem(var aitemdata); override;
+   procedure checkexact(const aitem: phashdataty;
+                                     var accept: boolean); override;
+   procedure finalizeitem(const aitem: phashdataty); override;
+   function getrecordsize(): int32 override;
   public
    constructor create;
    procedure add(const akey: ptruint; const avalue: msestring);
@@ -320,10 +373,10 @@ type
    procedure delete(const akey: ptruint; const avalue: msestring); overload;
    function find(const akey: ptruint): msestring; overload;
    function find(const akey: ptruint; out avalue: msestring): boolean; overload;
-   function first: pmsestringptruintdataty;
-   function next: pmsestringptruintdataty; //wraps to first after last
-   function last: pmsestringptruintdataty;
-   function prev: pmsestringptruintdataty; //wraps to last after first
+   function first: pmsestringptruinthashdataty;
+   function next: pmsestringptruinthashdataty; //wraps to first after last
+   function last: pmsestringptruinthashdataty;
+   function prev: pmsestringptruinthashdataty; //wraps to last after first
    procedure iterate(const akey: ptruint;
                      const aiterator: msestringptruintiteratorprocty); overload;
    function setdata(const akey: ptruint; const avalue: msestring): boolean;
@@ -332,7 +385,7 @@ type
  
  ansistringdataty = record
   key: ansistring;
-  data: record end;
+//  data: record end;
  end;
  pansistringdataty = ^ansistringdataty;
  ansistringhashdataty = record
@@ -341,33 +394,35 @@ type
  end;
  pansistringhashdataty = ^ansistringhashdataty;
  
- ansistringhashiteratorprocty = procedure(var aitem: ansistringdataty) of object;
+ ansistringhashiteratorprocty = 
+                     procedure(const aitem: pansistringhashdataty) of object;
 
  tansistringhashdatalist = class(thashdatalist)
   private
   protected
    function hashkey(const akey): hashvaluety; override;
-   function checkkey(const akey; const aitemdata): boolean; override;
+   function checkkey(const akey; const aitem: phashdataty): boolean; override;
    function hashlkey(const akey: lstringty): hashvaluety;
-   function checklkey(const akey: lstringty; const aitemdata): boolean;
-   procedure finalizeitem(var aitemdata); override;
+   function checklkey(const akey: lstringty; 
+                                  const aitemdata: ansistringdataty): boolean;
+   procedure finalizeitem(const aitem: phashdataty) override;
+   function getrecordsize(): int32 override;
   public
-   constructor create(const datasize: integer);
-   function add(const akey: ansistring): pointer; 
-            //returns pointer on ansistringdataty.data
-   function addunique(const akey: ansistring): pointer;
-   function find(const akey: ansistring): pointer; overload;
-   function find(const akey: lstringty): pointer; overload;
+   constructor create();
+   function add(const akey: ansistring): pansistringhashdataty; 
+   function addunique(const akey: ansistring): pansistringhashdataty;
+   function find(const akey: ansistring): pansistringhashdataty; overload;
+   function find(const akey: lstringty): pansistringhashdataty; overload;
    function delete(const akey: ansistring; 
                          const all: boolean = false): boolean; overload;
                          //true if found
    function delete(const akey: lstringty; 
                          const all: boolean = false): boolean; overload;
                          //true if found
-   function first: pansistringdataty;
-   function next: pansistringdataty; //wraps to first after last
-   function last: pansistringdataty;
-   function prev: pansistringdataty; //wraps to last after first
+   function first: pansistringhashdataty;
+   function next: pansistringhashdataty; //wraps to first after last
+   function last: pansistringhashdataty;
+   function prev: pansistringhashdataty; //wraps to last after first
    procedure iterate(const akey: ansistring;
                      const aiterator: ansistringhashiteratorprocty); overload;
  end;
@@ -384,36 +439,37 @@ type
  ppointeransistringhashdataty = ^pointeransistringhashdataty;
 
  pointeransistringiteratorprocty = 
-                     procedure(var aitem: pointeransistringdataty) of object;
+             procedure(const aitem: ppointeransistringhashdataty) of object;
 
  tpointeransistringhashdatalist = class(tansistringhashdatalist)
   private
    fpointerparam: pointer;
   protected
-   procedure checkexact(const aitemdata; var accept: boolean); override;
+   procedure checkexact(const aitem: phashdataty; var accept: boolean) override;
+   function getrecordsize(): int32 override;
   public
-   constructor create;
+//   constructor create;
    procedure add(const akey: ansistring; const avalue: pointer); overload;
    procedure add(const keys: array of string;
                    startindex: pointer = pointer($00000001)); overload;
                              //data = arrayindex + startindex
    function addunique(const akey: ansistring; const avalue: pointer): boolean;
                    //true if found
-   procedure delete(const akey: ansistring; const avalue: pointer); overload;
+   procedure delete(const akey: ansistring; const avalue: pointer) overload;
    function find(const akey: ansistring): pointer; overload;
-   function find(const akey: ansistring; out avalue: pointer): boolean; overload;
+   function find(const akey: ansistring; out avalue: pointer): boolean overload;
    function find(const akey: lstringty): pointer; overload;
-   function first: ppointeransistringdataty;
-   function next: ppointeransistringdataty; //wraps to first after last
-   function last: ppointeransistringdataty;
-   function prev: ppointeransistringdataty; //wraps to last after first
+   function first: ppointeransistringhashdataty;
+   function next: ppointeransistringhashdataty; //wraps to first after last
+   function last: ppointeransistringhashdataty;
+   function prev: ppointeransistringhashdataty; //wraps to last after first
    procedure iterate(const akey: ansistring;
-                     const aiterator: pointeransistringiteratorprocty); overload;
+                     const aiterator: pointeransistringiteratorprocty) overload;
  end;
 
  msestringdataty = record
   key: msestring;
-  data: record end;
+//  data: record end;
  end;
  pmsestringdataty = ^msestringdataty;
  msestringhashdataty = record
@@ -422,34 +478,37 @@ type
  end;
  pmsestringhashdataty = ^msestringhashdataty;
  
- msestringiteratorprocty = procedure(var aitem: msestringdataty) of object;
+ msestringiteratorprocty = 
+               procedure(const aitem: pmsestringhashdataty) of object;
 
  tmsestringhashdatalist = class(thashdatalist)
   private
   protected
    function hashkey(const akey): hashvaluety; override;
-   function checkkey(const akey; const aitemdata): boolean; override;
+   function checkkey(const akey; const aitem: phashdataty): boolean; override;
    function hashlkey(const akey: lmsestringty): hashvaluety;
-   function checklkey(const akey: lmsestringty; const aitemdata): boolean;
-   procedure finalizeitem(var aitemdata); override;
+   function checklkey(const akey: lmsestringty;
+                                const aitemdata: msestringdataty): boolean;
+   procedure finalizeitem(const aitem: phashdataty) override;
+   function getrecordsize(): int32 override;
   public
-   constructor create(const datasize: integer);
-   function add(const akey: msestring): pointer;
-                 //returns pointer on msestringdataty.data
-   function addunique(const akey: msestring): pointer;
-   function find(const akey: msestring): pointer; overload;
-   function find(const akey: lmsestringty): pointer; overload;
-   function find(const akey: msestring; out acount: integer): pointer; overload;
+   constructor create();
+   function add(const akey: msestring): pmsestringhashdataty;
+   function addunique(const akey: msestring): pmsestringhashdataty;
+   function find(const akey: msestring): pmsestringhashdataty; overload;
+   function find(const akey: lmsestringty): pmsestringhashdataty; overload;
+   function find(const akey: msestring;
+               out acount: integer): pmsestringhashdataty; overload;
    function delete(const akey: msestring; 
                          const all: boolean = false): boolean; overload;
                                       //true if found
    function delete(const akey: lmsestringty; 
                          const all: boolean = false): boolean; overload;
                                       //true if found
-   function first: pmsestringdataty;
-   function next: pmsestringdataty; //wraps to first after last
-   function last: pmsestringdataty;
-   function prev: pmsestringdataty; //wraps to last after first
+   function first: pmsestringhashdataty;
+   function next: pmsestringhashdataty; //wraps to first after last
+   function last: pmsestringhashdataty;
+   function prev: pmsestringhashdataty; //wraps to last after first
    procedure iterate(const akey: msestring;
                      const aiterator: msestringiteratorprocty); overload;
  end;
@@ -466,15 +525,16 @@ type
  ppointermsestringhashdataty = ^pointermsestringhashdataty;
 
  pointermsestringiteratorprocty = 
-                       procedure(var aitem: pointermsestringdataty) of object;
+                procedure(const aitem: ppointermsestringhashdataty) of object;
 
  tpointermsestringhashdatalist = class(tmsestringhashdatalist)
   private
    fpointerparam: pointer;
   protected
-   procedure checkexact(const aitemdata; var accept: boolean); override;
+   procedure checkexact(const aitem: phashdataty; var accept: boolean) override;
+   function getrecordsize(): int32 override;
   public
-   constructor create;
+//   constructor create;
    procedure add(const akey: msestring; const avalue: pointer);
    function addunique(const akey: msestring; const avalue: pointer): boolean;
                    //true if found
@@ -484,10 +544,10 @@ type
    function find(const akey: msestring; out avalue: pointer;
                                         out acount: integer): boolean; overload;
    function find(const akey: lmsestringty): pointer; overload;
-   function first: ppointermsestringdataty;
-   function next: ppointermsestringdataty; //wraps to first after last
-   function last: ppointermsestringdataty;
-   function prev: ppointermsestringdataty; //wraps to last after first
+   function first: ppointermsestringhashdataty;
+   function next: ppointermsestringhashdataty; //wraps to first after last
+   function last: ppointermsestringhashdataty;
+   function prev: ppointermsestringhashdataty; //wraps to last after first
    procedure iterate(const akey: msestring;
                      const aiterator: pointermsestringiteratorprocty); overload;
  end;
@@ -504,15 +564,16 @@ type
  pintegermsestringhashdataty = ^integermsestringhashdataty;
 
  integermsestringiteratorprocty = 
-                       procedure(var aitem: integermsestringdataty) of object;
+             procedure(const aitem: pintegermsestringhashdataty) of object;
 
  tintegermsestringhashdatalist = class(tmsestringhashdatalist)
   private
    fintegerparam: integer;
   protected
-   procedure checkexact(const aitemdata; var accept: boolean); override;
+   procedure checkexact(const aitem: phashdataty; var accept: boolean) override;
+   function getrecordsize(): int32 override;
   public
-   constructor create;
+//   constructor create;
    procedure add(const akey: msestring; const avalue: integer);
    function addunique(const akey: msestring; const avalue: integer): boolean;
                    //true if found
@@ -522,10 +583,10 @@ type
    function find(const akey: msestring; out avalue: integer;
                                         out acount: integer): boolean; overload;
    function find(const akey: lmsestringty): integer; overload; //-1 if not found
-   function first: pintegermsestringdataty;
-   function next: pintegermsestringdataty; //wraps to first after last
-   function last: pintegermsestringdataty;
-   function prev: pintegermsestringdataty; //wraps to last after first
+   function first: pintegermsestringhashdataty;
+   function next: pintegermsestringhashdataty; //wraps to first after last
+   function last: pintegermsestringhashdataty;
+   function prev: pintegermsestringhashdataty; //wraps to last after first
    procedure iterate(const akey: msestring;
                      const aiterator: integermsestringiteratorprocty); overload;
  end;
@@ -542,12 +603,12 @@ type
  pobjectmsestringhashdataty = ^objectmsestringhashdataty;
 
  objectmsestringiteratorprocty = 
-                       procedure(var aitem: objectmsestringdataty) of object;
+              procedure(const aitem: pobjectmsestringhashdataty) of object;
 
  tobjectmsestringhashdatalist = class(tpointermsestringhashdatalist)
   protected
    fownsobjects: boolean;
-   procedure finalizeitem(var aitemdata); override;
+   procedure finalizeitem(const aitem: phashdataty) override;
   public
    constructor create(const aownsobjects: boolean = true);
    procedure add(const akey: msestring; const avalue: tobject);
@@ -558,10 +619,10 @@ type
    function find(const akey: msestring; out avalue: tobject): boolean; overload;
    function find(const akey: msestring; out avalue: tobject;
                                         out acount: integer): boolean; overload;
-   function first: pobjectmsestringdataty;
-   function next: pobjectmsestringdataty; //wraps to first after last
-   function last: pobjectmsestringdataty;
-   function prev: pobjectmsestringdataty; //wraps to last after first
+   function first: pobjectmsestringhashdataty;
+   function next: pobjectmsestringhashdataty; //wraps to first after last
+   function last: pobjectmsestringhashdataty;
+   function prev: pobjectmsestringhashdataty; //wraps to last after first
    procedure iterate(const akey: msestring;
                      const aiterator: objectmsestringiteratorprocty); overload;
  end;
@@ -574,6 +635,8 @@ function stringhash(const key: lstringty): longword; overload;
 function stringhash(const key: msestring): longword; overload;
 function stringhash(const key: lmsestringty): longword; overload;
 function pointerhash(const key: pointer): longword; inline;
+
+procedure addoffs(var dest: hashoffsetarty; const value: hashoffsetty);
  
 implementation
 uses
@@ -672,12 +735,22 @@ begin
 {$endif}
 end;
 
+procedure addoffs(var dest: hashoffsetarty; const value: hashoffsetty);
+var
+ i1: int32;
+begin
+ i1:= length(dest);
+ setlength(dest,i1+1);
+ dest[i1]:= value;
+end;
+
 { thashdatalist }
 
-constructor thashdatalist.create(const datasize: integer);
+constructor thashdatalist.create();
 begin
 // fdatasize:= datasize;
- frecsize:= (sizeof(hashheaderty) + datasize + 3) and not 3;
+// frecsize:= (sizeof(hashheaderty) + datasize + 3) and not 3;
+ frecsize:= (getrecordsize() + 3) and not 3;
  inherited create;
 end;
 
@@ -690,20 +763,30 @@ end;
 
 procedure thashdatalist.moveitem(const aitem: phashdataty);
 begin
- move(aitem^.data,fdestpo^.data,frecsize-sizeof(hashheaderty));
+ move((pointer(aitem)+sizeof(hashheaderty))^,
+                     (pointer(fdestpo)+sizeof(hashheaderty))^,
+                                          frecsize-sizeof(hashheaderty));
  with fdestpo^.header do begin
   nextlist:= frecsize;
-  prevlist:= frecsize;
+  prevlist:= -frecsize;
   hash:= aitem^.header.hash;
  end;
  inc(pchar(fdestpo),frecsize);
 end;
 
-procedure thashdatalist.setcapacity(const avalue: integer);
+function thashdatalist.getdatapoornil(const aoffset: hashoffsetty): pointer;
+begin
+ result:= nil;
+ if aoffset <> 0 then begin
+  result:= fdata+aoffset;
+ end;
+end;
+
+procedure thashdatalist.setcapacity(const avalue: int32);
 var
  int1,int2: integer;
  po1: pointer;
- puint1: ptruint;
+ puint1: hashoffsetty;
 begin
  if avalue <> fcapacity then begin
 {$ifdef mse_debug_hash}
@@ -712,8 +795,7 @@ begin
   if avalue < fcount then begin
    raise exception.create('Capacity < count.');
   end;
-  if longword(avalue) >= {high(ptruint)}
-                       high(longword) div longword(frecsize) then begin
+  if avalue >= {high(ptruint)} maxint div frecsize then begin
    raise exception.create('Capacity too big.');
   end;
   
@@ -783,15 +865,15 @@ end;
 
 procedure thashdatalist.rehash;
 var
- puint2: ptruint;
+ puint2: hashoffsetty;
  po1: phashdataty;
- po2: pptruint;
+ po2: phashoffsetty;
 begin
  if fassignedfirst <> 0 then begin
   po1:= pointer(pchar(fdata) + fassignedfirst);
   while true do begin
-   po2:= pptruint(pchar(fhashtable) + 
-                            (po1^.header.hash and fmask)*sizeof(ptruint));
+   po2:= phashoffsetty(pchar(fhashtable) + 
+                            (po1^.header.hash and fmask)*sizeof(hashoffsetty));
    puint2:= po2^;
    po1^.header.nexthash:= puint2;
    po1^.header.prevhash:= 0;
@@ -815,7 +897,7 @@ end;
 
 function thashdatalist.internaladdhash(hash1: hashvaluety): phashdataty;
 var
- puint1,puint2: ptruint;
+ puint1,puint2: hashoffsetty;//ptruint;
 // hash1: hashvaluety;
 begin
 {$ifdef mse_debug_hash}
@@ -831,7 +913,8 @@ begin
    fdeletedroot:= 0;
   end;
   if hls_needsnull in fstate then begin
-   fillchar(result^.data,frecsize-sizeof(hashheaderty),0);
+   fillchar((pointer(result)+sizeof(hashheaderty))^,
+                                     frecsize-sizeof(hashheaderty),0);
   end;
  end
  else begin
@@ -842,7 +925,7 @@ begin
 {$endif}
  result^.header.prevhash:= 0;
  result^.header.hash:= hash1;
- hash1:= hash1 and ptruint(fmask);
+ hash1:= hash1 and fmask;
  puint2:= fhashtable[hash1];
  result^.header.nexthash:= puint2;
  puint1:= pchar(result) - fdata;
@@ -853,15 +936,18 @@ begin
   fassignedfirst:= puint1;
  end
  else begin
-  result^.header.prevlist:= puint1 - fassignedlast;
+  result^.header.prevlist:= fassignedlast-puint1;
                           //memory offset to next item
   phashdataty(pchar(fdata)+fassignedlast)^.header.nextlist:= 
-                                              result^.header.prevlist;
-                          //-memory offset to previous item
+                                              -result^.header.prevlist;
+                          //memory offset to previous item
  end;
  result^.header.nextlist:= 0;
  fassignedlast:= puint1; //new item is last
  inc(fcount);
+ if hls_needsinit in fstate then begin
+  inititem(result);
+ end;
 {$ifdef mse_debug_hash}
  checkhash;
 {$endif}
@@ -874,7 +960,7 @@ end;
 
 procedure thashdatalist.internaldeleteitem(const aitem: phashdataty);
 var
- puint1: ptruint;
+ puint1: hashoffsetty;
  bo1: boolean;
 begin
  if aitem <> nil then begin
@@ -885,7 +971,7 @@ begin
    fcurrentitem:= 0;
   end;
   if hls_needsfinalize in fstate then begin
-   finalizeitem(aitem^.data);
+   finalizeitem(aitem);
   end;
   puint1:= pchar(aitem) - fdata;
   with aitem^.header do begin
@@ -908,7 +994,7 @@ begin
    end;
    bo1:= false;  
    if puint1 <> fassignedfirst then begin //not first
-    inc(phashdataty(pchar(aitem)-prevlist)^.header.nextlist,nextlist);
+    inc(phashdataty(pchar(aitem)+prevlist)^.header.nextlist,nextlist);
    end
    else begin
     bo1:= true;
@@ -921,7 +1007,7 @@ begin
     end;
    end
    else begin
-    dec(fassignedlast,prevlist);
+    inc(fassignedlast,prevlist);
     phashdataty(fdata+fassignedlast)^.header.nextlist:= 0;
    end;
 
@@ -935,18 +1021,27 @@ begin
   end;
   fdeletedroot:= puint1;
   dec(fcount);
+  if fcount = 0 then begin
+   fassignedfirst:= 0;
+   fassignedlast:= 0;
+  end;
 {$ifdef mse_debug_hash}
   checkhash;
 {$endif}
  end;
 end;
 
-procedure thashdatalist.mark(out ref: ptruint);
+procedure thashdatalist.internaldelete(const aoffset: hashoffsetty);
+begin
+ internaldeleteitem(fdata+aoffset);
+end;
+
+procedure thashdatalist.mark(out ref: hashoffsetty);
 begin
  ref:= fassignedlast;
 end;
 
-procedure thashdatalist.release(const ref: ptruint);
+procedure thashdatalist.release(const ref: hashoffsetty);
 var
  po1,pend: phashdataty;
 begin
@@ -958,7 +1053,7 @@ begin
    if po1^.header.prevlist = 0 then begin
     break;
    end;
-   dec(pchar(po1),po1^.header.prevlist);
+   inc(pchar(po1),po1^.header.prevlist);
   end;
  end;
 end;
@@ -968,14 +1063,14 @@ function thashdatalist.absdata(const ref: ptrint): pointer;
 begin
  result:= fdata + ref + sizeof(hashheaderty);
 end;
-
+{
 procedure thashdatalist.internaldeleteitem(const aitem: phashdatadataty);
 begin
  if aitem <> nil then begin
   internaldeleteitem(phashdataty(pchar(aitem)-sizeof(hashheaderty)));
  end;
 end;
-
+}
 function thashdatalist.internaldelete(const akey; const all: boolean): boolean;
 var
  po1: phashdataty;
@@ -1018,14 +1113,14 @@ end;
 
 procedure thashdatalist.iterate(const aiterator: hashiteratorprocty);
 var
- puint1: ptruint;
+ puint1: hashoffsetty;
  po1: phashdataty;
 begin
  if fcount > 0 then begin
   po1:= pointer(pchar(fdata) + fassignedfirst);
   while true do begin
    puint1:= phashheaderty(po1)^.nextlist;
-   aiterator(pointer(pchar(po1)+sizeof(hashheaderty))^);
+   aiterator(po1);
    if puint1 = 0 then begin
     break;
    end;
@@ -1038,7 +1133,7 @@ procedure thashdatalist.iterate(const akey;
                                         const aiterator: keyhashiteratorprocty);
 var
  ha1: hashvaluety;
- uint1: ptruint;
+ uint1: hashoffsetty;
  po1: phashdataty;
 begin
  po1:= nil;
@@ -1048,8 +1143,8 @@ begin
   if uint1 <> 0 then begin
    po1:= phashdataty(pchar(fdata) + uint1);
    while true do begin
-    if (po1^.header.hash = ha1) and checkkey(akey,po1^.data) then begin
-     aiterator(pointer(@po1^.data)^);
+    if (po1^.header.hash = ha1) and checkkey(akey,po1) then begin
+     aiterator(po1);
     end;
     if po1^.header.nexthash = 0 then begin
      break;
@@ -1077,7 +1172,12 @@ begin
  end;
 end;
 
-procedure thashdatalist.finalizeitem(var aitemdata);
+procedure thashdatalist.inititem(const aitem: phashdataty);
+begin
+ //dummy
+end;
+
+procedure thashdatalist.finalizeitem(const aitem: phashdataty);
 begin
  //dummy
 end;
@@ -1086,7 +1186,7 @@ function thashdatalist.internalfind(const akey;
                                          hash1: hashvaluety): phashdataty;
 var
 // ha1: hashvaluety;
- uint1: ptruint;
+ uint1: hashoffsetty;
  po1: phashdataty;
 begin
 {$ifdef mse_debug_hash}
@@ -1099,7 +1199,7 @@ begin
   if uint1 <> 0 then begin
    po1:= phashdataty(pchar(fdata) + uint1);
    while true do begin
-    if (po1^.header.hash = hash1) and checkkey(akey,po1^.data) then begin
+    if (po1^.header.hash = hash1) and checkkey(akey,po1) then begin
      break;
     end;
     if po1^.header.nexthash = 0 then begin
@@ -1121,7 +1221,7 @@ end;
 function thashdatalist.internalfind(const akey; out acount: integer): phashdataty;
 var
  ha1: hashvaluety;
- uint1: ptruint;
+ uint1: hashoffsetty;
  po1: phashdataty;
 begin
  result:= nil;
@@ -1132,7 +1232,7 @@ begin
   if uint1 <> 0 then begin
    po1:= phashdataty(pchar(fdata) + uint1);
    while true do begin
-    if (po1^.header.hash = ha1) and checkkey(akey,po1^.data) then begin
+    if (po1^.header.hash = ha1) and checkkey(akey,po1) then begin
      if result = nil then begin
       result:= po1;
      end;
@@ -1156,7 +1256,7 @@ function thashdatalist.internalfind(const akey;
                              const acheckproc: findcheckprocty): phashdataty;
 var
  ha1: hashvaluety;
- uint1: ptruint;
+ uint1: hashoffsetty;
  po1: phashdataty;
  bo1: boolean;
 begin
@@ -1168,8 +1268,8 @@ begin
    po1:= phashdataty(pchar(fdata) + uint1);
    bo1:= false;
    while true do begin
-    if (po1^.header.hash = ha1) and checkkey(akey,po1^.data) then begin
-     acheckproc(pointer(@po1^.data)^,bo1);
+    if (po1^.header.hash = ha1) and checkkey(akey,po1) then begin
+     acheckproc(po1,bo1);
      if bo1 then begin
       break;
      end;
@@ -1190,7 +1290,7 @@ function thashdatalist.internalfind(const akey;
                              out acount: integer): phashdataty;
 var
  ha1: hashvaluety;
- uint1: ptruint;
+ uint1: hashoffsetty;
  po1: phashdataty;
  bo1: boolean;
 begin
@@ -1203,8 +1303,8 @@ begin
    po1:= phashdataty(pchar(fdata) + uint1);
    bo1:= false;
    while true do begin
-    if (po1^.header.hash = ha1) and checkkey(akey,po1^.data) then begin
-     acheckproc(pointer(@po1^.data)^,bo1);
+    if (po1^.header.hash = ha1) and checkkey(akey,po1) then begin
+     acheckproc(po1,bo1);
      if bo1 then begin
       if result = nil then begin
        result:= po1;
@@ -1237,25 +1337,25 @@ begin
  result:= internalfind(akey,{$ifdef FPC}@{$endif}checkexact,acount);
 end;
 
-function thashdatalist.internalfirst: phashdatadataty;
+function thashdatalist.internalfirstx: phashdataty;
 begin
  result:= nil;
  if count > 0 then begin
   fcurrentitem:= fassignedfirst;
-  result:= phashdatadataty(pchar(fdata) + fcurrentitem + sizeof(hashheaderty));
+  result:= fdata + fcurrentitem;
  end;
 end;
 
-function thashdatalist.internallast: phashdatadataty;
+function thashdatalist.internallastx: phashdataty;
 begin
  result:= nil;
  if count > 0 then begin
   fcurrentitem:= fassignedlast;
-  result:= phashdatadataty(pchar(fdata) + fcurrentitem + sizeof(hashheaderty));
+  result:= fdata + fcurrentitem;
  end;
 end;
 
-function thashdatalist.internalnext: phashdatadataty;
+function thashdatalist.internalnextx: phashdataty;
 var
  po1: phashdataty;
 begin
@@ -1268,11 +1368,11 @@ begin
   else begin
    fcurrentitem:= fcurrentitem + po1^.header.nextlist;
   end;
-  result:= fdata + fcurrentitem + sizeof(hashheaderty);
+  result:= fdata + fcurrentitem;
  end;
 end;
 
-function thashdatalist.internalprev: phashdatadataty;
+function thashdatalist.internalprevx: phashdataty;
 var
  po1: phashdataty;
 begin
@@ -1283,23 +1383,24 @@ begin
    fcurrentitem:= fassignedlast;
   end
   else begin
-   fcurrentitem:= fcurrentitem - po1^.header.prevlist;
+   fcurrentitem:= fcurrentitem + po1^.header.prevlist;
   end;
-  result:= fdata + fcurrentitem + sizeof(hashheaderty);
+  result:= fdata + fcurrentitem;
  end;
 end;
 
-procedure thashdatalist.checkexact(const aitemdata; var accept: boolean);
+procedure thashdatalist.checkexact(const aitem: phashdataty;
+                                                     var accept: boolean);
 begin
  accept:= false; //dummy
 end;
 
-function thashdatalist.getdatapo(const aoffset: longword): pointer; inline;
+function thashdatalist.getdatapo(const aoffset: hashoffsetty): pointer; inline;
 begin
  result:= pchar(fdata)+aoffset;
 end;
 
-function thashdatalist.getdataoffset(const adata: pointer): longword; inline;
+function thashdatalist.getdataoffs(const adata: pointer): hashoffsetty; inline;
 begin
  result:= pchar(adata)-pchar(fdata);
 end;
@@ -1309,7 +1410,7 @@ procedure thashdatalist.checkhash;
 var
  int1,int2,int3: integer;
  po1,po2: phashdataty;
- uint1: ptruint;
+ uint1: hashoffsetty;
 begin
  if (fmask <> 0) and (fhashtable <> nil) then begin
   int3:= 0;
@@ -1352,7 +1453,7 @@ begin
   po1:= fdata + fassignedfirst;
   if po1^.header.prevlist <> 0 then begin
    raise exception.create('fprevlist not 0.');
-  end;   
+  end;
   while true do begin
    inc(int1);
    if int1 > fcount then begin
@@ -1370,7 +1471,7 @@ begin
   po1:= fdata + fassignedlast;
   if po1^.header.nextlist <> 0 then begin
    raise exception.create('fnextlist not 0.');
-  end;   
+  end;
   while true do begin
    inc(int1);
    if int1 > fcount then begin
@@ -1379,10 +1480,15 @@ begin
    if po1^.header.prevlist = 0 then begin
     break;
    end;
-   po1:= pointer(po1) - po1^.header.prevlist;
+   po1:= pointer(po1) + po1^.header.prevlist;
   end;
   if int1 <> count then begin
    raise exception.create('Wrong backward list count.');
+  end;
+ end
+ else begin
+  if fcount <> 0 then begin
+   raise exception.create('Wrong count.');
   end;
  end;
  int1:= 0;
@@ -1405,7 +1511,7 @@ procedure thashdatalist.checkexists(const aitem: phashdataty);
 var
  int1: integer;
  po1: phashdataty;
- uint1: ptruint;
+ uint1: hashoffsetty;
 begin
  checkhash;
  if fmask <> 0 then begin
@@ -1432,7 +1538,7 @@ procedure thashdatalist.checknotexists(const aitem: phashdataty);
 var
  int1: integer;
  po1: phashdataty;
- uint1: ptruint;
+ uint1: hashoffsetty;
 begin
  checkhash;
  if fmask <> 0 then begin
@@ -1457,36 +1563,30 @@ end;
 {$endif}
 
 { tintegerhasdatalist }
-
-constructor tintegerhashdatalist.create(const datasize: integer);
+{
+constructor tintegerhashdatalist.create();
 begin
- inherited create(datasize + sizeof(integerdataty));
+ inherited create(datasize + sizeof(integerhashdataty)-sizeof(hashdataty));
 end;
-
+}
 function tintegerhashdatalist.hashkey(const akey): hashvaluety;
 // todo: optimize
 begin
  result:= scramble((integer(akey) xor (integer(akey) shr 2)));
 end;
 
-function tintegerhashdatalist.add(const akey: integer): pointer;
-var
- po1: pintegerhashdataty;
+function tintegerhashdatalist.add(const akey: integer): pintegerhashdataty;
 begin
- po1:= pintegerhashdataty(internaladd(akey));
- po1^.data.key:= akey;
- result:= @po1^.data.data;
+ result:= pintegerhashdataty(internaladd(akey));
+ result^.data.key:= akey;
 end;
 
-function tintegerhashdatalist.find(const akey: integer): pointer;
+function tintegerhashdatalist.find(const akey: integer): pintegerhashdataty;
 begin
- result:= internalfind(akey);
- if result <> nil then begin
-  result:= @pintegerhashdataty(result)^.data.data;
- end;
+ result:= pintegerhashdataty(internalfind(akey));
 end;
 
-function tintegerhashdatalist.addunique(const akey: integer): pointer;
+function tintegerhashdatalist.addunique(const akey: integer): pintegerhashdataty;
 begin
  result:= find(akey);
  if result = nil then begin
@@ -1495,7 +1595,7 @@ begin
 end;
 
 function tintegerhashdatalist.addunique(const akey: integer; 
-                                                out adata: pointer): boolean;
+                                       out adata: pintegerhashdataty): boolean;
                                              //true if new
 begin
  adata:= find(akey);
@@ -1506,29 +1606,35 @@ begin
  end;
 end;
 
-function tintegerhashdatalist.checkkey(const akey; const aitemdata): boolean;
+function tintegerhashdatalist.checkkey(const akey;
+                                 const aitem: phashdataty): boolean;
 begin
- result:= integer(akey) = integerdataty(aitemdata).key;
+ result:= integer(akey) = pintegerhashdataty(aitem)^.data.key;
 end;
 
-function tintegerhashdatalist.first: pintegerdataty;
+function tintegerhashdatalist.getrecordsize(): int32;
 begin
- result:= pintegerdataty(internalfirst);
+ result:= sizeof(integerhashdataty);
 end;
 
-function tintegerhashdatalist.next: pintegerdataty;
+function tintegerhashdatalist.first: pintegerhashdataty;
 begin
- result:= pintegerdataty(internalnext);
+ result:= pintegerhashdataty(internalfirstx);
 end;
 
-function tintegerhashdatalist.last: pintegerdataty;
+function tintegerhashdatalist.next: pintegerhashdataty;
 begin
- result:= pintegerdataty(internallast);
+ result:= pintegerhashdataty(internalnextx);
 end;
 
-function tintegerhashdatalist.prev: pintegerdataty;
+function tintegerhashdatalist.last: pintegerhashdataty;
 begin
- result:= pintegerdataty(internalprev);
+ result:= pintegerhashdataty(internallastx);
+end;
+
+function tintegerhashdatalist.prev: pintegerhashdataty;
+begin
+ result:= pintegerhashdataty(internalprevx);
 end;
 
 function tintegerhashdatalist.delete(const akey: integer;
@@ -1544,12 +1650,12 @@ begin
  result.a:= a;
  result.b:= b;
 end;
-
+{
 constructor tdoubleintegerhashdatalist.create(const datasize: integer);
 begin
  inherited create(datasize + sizeof(doubleintegerdataty));
 end;
-
+}
 function tdoubleintegerhashdatalist.hashkey(const akey): hashvaluety;
 var
  i1: int32;
@@ -1561,36 +1667,38 @@ begin
 end;
 
 function tdoubleintegerhashdatalist.checkkey(const akey;
-               const aitemdata): boolean;
+               const aitem: phashdataty): boolean;
 begin
  with doubleintegerty(akey) do begin
-  result:= (a = doubleintegerdataty(aitemdata).key.a) and
-                 (b = doubleintegerdataty(aitemdata).key.b);
+  result:= (a = pdoubleintegerhashdataty(aitem)^.data.key.a) and
+                 (b = pdoubleintegerhashdataty(aitem)^.data.key.b);
  end;
 end;
 
-function tdoubleintegerhashdatalist.add(const akeya,akeyb: integer): pointer;
+function tdoubleintegerhashdatalist.getrecordsize(): int32;
+begin
+ result:= sizeof(doubleintegerhashdataty);
+end;
+
+function tdoubleintegerhashdatalist.add(
+                      const akeya,akeyb: integer): pdoubleintegerhashdataty;
 var
- po1: pdoubleintegerhashdataty;
  k1: doubleintegerty;
 begin
  k1.a:= akeya;
  k1.b:= akeyb;
- po1:= pdoubleintegerhashdataty(internaladd(k1));
- po1^.data.key:= k1;
- result:= @po1^.data.data;
+ result:= pdoubleintegerhashdataty(internaladd(k1));
+ result^.data.key:= k1;
 end;
 
-function tdoubleintegerhashdatalist.find(const akeya,akeyb: integer): pointer;
+function tdoubleintegerhashdatalist.find(
+                      const akeya,akeyb: integer): pdoubleintegerhashdataty;
 begin
- result:= internalfind(mdikey(akeya,akeyb));
- if result <> nil then begin
-  result:= @pdoubleintegerhashdataty(result)^.data.data;
- end;
+ result:= pdoubleintegerhashdataty(internalfind(mdikey(akeya,akeyb)));
 end;
 
 function tdoubleintegerhashdatalist.addunique(
-                                const akeya,akeyb: integer): pointer;
+                          const akeya,akeyb: integer): pdoubleintegerhashdataty;
 begin
  result:= find(akeya,akeyb);
  if result = nil then begin
@@ -1599,7 +1707,7 @@ begin
 end;
 
 function tdoubleintegerhashdatalist.addunique(const akeya,akeyb: integer; 
-                                                   out adata: pointer): boolean;
+                                 out adata: pdoubleintegerhashdataty): boolean;
 begin
  adata:= find(akeya,akeyb);
  result:= false;
@@ -1609,24 +1717,24 @@ begin
  end;
 end;
 
-function tdoubleintegerhashdatalist.first: pdoubleintegerdataty;
+function tdoubleintegerhashdatalist.first: pdoubleintegerhashdataty;
 begin
- result:= pdoubleintegerdataty(internalfirst);
+ result:= pdoubleintegerhashdataty(internalfirstx);
 end;
 
-function tdoubleintegerhashdatalist.next: pdoubleintegerdataty;
+function tdoubleintegerhashdatalist.next: pdoubleintegerhashdataty;
 begin
- result:= pdoubleintegerdataty(internalnext);
+ result:= pdoubleintegerhashdataty(internalnextx);
 end;
 
-function tdoubleintegerhashdatalist.last: pdoubleintegerdataty;
+function tdoubleintegerhashdatalist.last: pdoubleintegerhashdataty;
 begin
- result:= pdoubleintegerdataty(internallast);
+ result:= pdoubleintegerhashdataty(internallastx);
 end;
 
-function tdoubleintegerhashdatalist.prev: pdoubleintegerdataty;
+function tdoubleintegerhashdatalist.prev: pdoubleintegerhashdataty;
 begin
- result:= pdoubleintegerdataty(internalprev);
+ result:= pdoubleintegerhashdataty(internalprevx);
 end;
 
 function tdoubleintegerhashdatalist.delete(const akeya,akeyb: integer; 
@@ -1635,38 +1743,37 @@ begin
  result:= internaldelete(mdikey(akeya,akeyb),all);
 end;
 
-{ tptruinthasdatalist }
-
-constructor tptruinthashdatalist.create(const datasize: integer);
+{ tpointerhashdatalist }
+{
+constructor tpointerhashdatalist.create(const datasize: integer);
 begin
- inherited create(datasize + sizeof(ptruintdataty));
+ inherited create(datasize + sizeof(pointerdataty));
 end;
-
-function tptruinthashdatalist.hashkey(const akey): hashvaluety;
-// todo: optimize
+}
+function tpointerhashdatalist.hashkey(const akey): hashvaluety;
 begin
  result:= pointerhash(pointer(akey));
-// result:= scramble(ptruint(akey) xor (ptruint(akey) shr 2));
 end;
 
-function tptruinthashdatalist.add(const akey: ptruint): pointer;
-var
- po1: pptruinthashdataty;
+function tpointerhashdatalist.checkkey(const akey;
+                                    const aitem: phashdataty): boolean;
 begin
- po1:= pptruinthashdataty(internaladd(akey));
- po1^.data.key:= akey;
- result:= @po1^.data.data;
+ result:= pointer(akey) = ppointerhashdataty(aitem)^.data.key;
 end;
 
-function tptruinthashdatalist.find(const akey: ptruint): pointer;
+function tpointerhashdatalist.getrecordsize(): int32;
 begin
- result:= internalfind(akey);
- if result <> nil then begin
-  result:= @pptruinthashdataty(result)^.data.data;
- end;
+ result:= sizeof(pointerhashdataty);
 end;
 
-function tptruinthashdatalist.addunique(const akey: ptruint): pointer;
+function tpointerhashdatalist.add(const akey: pointer): ppointerhashdataty;
+begin
+ result:= ppointerhashdataty(internaladd(akey));
+ result^.data.key:= akey;
+end;
+
+function tpointerhashdatalist.addunique(
+                               const akey: pointer): ppointerhashdataty;
 begin
  result:= find(akey);
  if result = nil then begin
@@ -1674,29 +1781,100 @@ begin
  end;
 end;
 
-function tptruinthashdatalist.checkkey(const akey; const aitemdata): boolean;
+function tpointerhashdatalist.find(const akey: pointer): ppointerhashdataty;
 begin
- result:= ptruint(akey) = ptruintdataty(aitemdata).key;
+ result:= ppointerhashdataty(internalfind(akey));
 end;
 
-function tptruinthashdatalist.first: pptruintdataty;
+function tpointerhashdatalist.delete(const akey: pointer;
+               const all: boolean = false): boolean;
 begin
- result:= pptruintdataty(internalfirst);
+ result:= internaldelete(akey,all);
 end;
 
-function tptruinthashdatalist.next: pptruintdataty;
+function tpointerhashdatalist.first: ppointerhashdataty;
 begin
- result:= pptruintdataty(internalnext);
+ result:= ppointerhashdataty(internalfirstx);
 end;
 
-function tptruinthashdatalist.last: pptruintdataty;
+function tpointerhashdatalist.next: ppointerhashdataty;
 begin
- result:= pptruintdataty(internallast);
+ result:= ppointerhashdataty(internalnextx);
 end;
 
-function tptruinthashdatalist.prev: pptruintdataty;
+function tpointerhashdatalist.last: ppointerhashdataty;
 begin
- result:= pptruintdataty(internalprev);
+ result:= ppointerhashdataty(internallastx);
+end;
+
+function tpointerhashdatalist.prev: ppointerhashdataty;
+begin
+ result:= ppointerhashdataty(internalprevx);
+end;
+
+{ tptruinthasdatalist }
+{
+constructor tptruinthashdatalist.create(const datasize: integer);
+begin
+ inherited create(datasize + sizeof(ptruintdataty));
+end;
+}
+function tptruinthashdatalist.hashkey(const akey): hashvaluety;
+// todo: optimize
+begin
+ result:= pointerhash(pointer(akey));
+// result:= scramble(ptruint(akey) xor (ptruint(akey) shr 2));
+end;
+
+function tptruinthashdatalist.add(const akey: ptruint): pptruinthashdataty;
+begin
+ result:= pptruinthashdataty(internaladd(akey));
+ result^.data.key:= akey;
+end;
+
+function tptruinthashdatalist.find(const akey: ptruint): pptruinthashdataty;
+begin
+ result:= pptruinthashdataty(internalfind(akey));
+end;
+
+function tptruinthashdatalist.addunique(
+                        const akey: ptruint): pptruinthashdataty;
+begin
+ result:= find(akey);
+ if result = nil then begin
+  result:= add(akey);
+ end;
+end;
+
+function tptruinthashdatalist.checkkey(const akey;
+                                  const aitem: phashdataty): boolean;
+begin
+ result:= ptruint(akey) = pptruinthashdataty(aitem)^.data.key;
+end;
+
+function tptruinthashdatalist.getrecordsize(): int32;
+begin
+ result:= sizeof(ptruinthashdataty);
+end;
+
+function tptruinthashdatalist.first: pptruinthashdataty;
+begin
+ result:= pptruinthashdataty(internalfirstx);
+end;
+
+function tptruinthashdatalist.next: pptruinthashdataty;
+begin
+ result:= pptruinthashdataty(internalnextx);
+end;
+
+function tptruinthashdatalist.last: pptruinthashdataty;
+begin
+ result:= pptruinthashdataty(internallastx);
+end;
+
+function tptruinthashdatalist.prev: pptruinthashdataty;
+begin
+ result:= pptruinthashdataty(internalprevx);
 end;
 
 function tptruinthashdatalist.delete(const akey: ptruint;
@@ -1706,27 +1884,27 @@ begin
 end;
 
 { tpointerptruinthashdatalist }
-
+{
 constructor tpointerptruinthashdatalist.create;
 begin
  inherited create(sizeof(pointer));
 end;
-
+}
 procedure tpointerptruinthashdatalist.add(const akey: ptruint;
                                        const avalue: pointer);
 begin
- ppointer(inherited add(akey))^:= avalue;
+ ppointerptruinthashdataty(inherited add(akey))^.data.data:= avalue;
 end;
 
 function tpointerptruinthashdatalist.find(const akey: ptruint;
-                                             out avalue: pointer): boolean;
+                                            out avalue: pointer): boolean;
 var
- po1: ppointer;
+ po1: ppointerptruinthashdataty;
 begin
- po1:= inherited find(akey);
+ po1:= ppointerptruinthashdataty(inherited find(akey));
  result:= po1 <> nil;
  if result then begin
-  avalue:= po1^;
+  avalue:= po1^.data.data;
  end
  else begin
   avalue:= nil;
@@ -1736,21 +1914,26 @@ end;
 function tpointerptruinthashdatalist.addunique(const akey: ptruint;
                                                const avalue: pointer): boolean;
 var
- po1: ppointer;
+ po1: ppointerptruinthashdataty;
 begin
  result:= true;
- po1:= inherited find(akey);
+ po1:= ppointerptruinthashdataty(inherited find(akey));
  if po1 = nil then begin
   result:= false;
-  po1:= inherited add(akey);
-  po1^:= avalue;
+  po1:= ppointerptruinthashdataty(inherited add(akey));
+  po1^.data.data:= avalue;
  end;
 end;
 
-procedure tpointerptruinthashdatalist.checkexact(const aitemdata;
-               var accept: boolean);
+procedure tpointerptruinthashdatalist.checkexact(
+          const aitem: phashdataty; var accept: boolean);
 begin
- accept:= pointerptruintdataty(aitemdata).data = fpointerparam;
+ accept:= ppointerptruinthashdataty(aitem)^.data.data = fpointerparam;
+end;
+
+function tpointerptruinthashdatalist.getrecordsize(): int32;
+begin
+ result:= sizeof(pointerptruinthashdataty);
 end;
 
 procedure tpointerptruinthashdatalist.delete(const akey: ptruint;
@@ -1767,24 +1950,24 @@ begin
  find(akey,result);
 end;
 
-function tpointerptruinthashdatalist.first: ppointerptruintdataty;
+function tpointerptruinthashdatalist.first: ppointerptruinthashdataty;
 begin
- result:= ppointerptruintdataty(internalfirst);
+ result:= ppointerptruinthashdataty(internalfirstx);
 end;
 
-function tpointerptruinthashdatalist.next: ppointerptruintdataty;
+function tpointerptruinthashdatalist.next: ppointerptruinthashdataty;
 begin
- result:= ppointerptruintdataty(internalnext);
+ result:= ppointerptruinthashdataty(internalnextx);
 end;
 
-function tpointerptruinthashdatalist.last: ppointerptruintdataty;
+function tpointerptruinthashdatalist.last: ppointerptruinthashdataty;
 begin
- result:= ppointerptruintdataty(internallast);
+ result:= ppointerptruinthashdataty(internallastx);
 end;
 
-function tpointerptruinthashdatalist.prev: ppointerptruintdataty;
+function tpointerptruinthashdatalist.prev: ppointerptruinthashdataty;
 begin
- result:= ppointerptruintdataty(internalprev);
+ result:= ppointerptruinthashdataty(internalprevx);
 end;
 
 procedure tpointerptruinthashdatalist.iterate(const akey: ptruint;
@@ -1797,25 +1980,25 @@ end;
 
 constructor tansistringptruinthashdatalist.create;
 begin
- inherited create(sizeof(ansistring));
+ inherited create();
  fstate:= fstate + [hls_needsnull,hls_needsfinalize];
 end;
 
 procedure tansistringptruinthashdatalist.add(const akey: ptruint;
                                        const avalue: ansistring);
 begin
- pansistring(inherited add(akey))^:= avalue;
+ pansistringptruinthashdataty(inherited add(akey))^.data.data:= avalue;
 end;
 
 function tansistringptruinthashdatalist.find(const akey: ptruint;
                                              out avalue: ansistring): boolean;
 var
- po1: pansistring;
+ po1: pansistringptruinthashdataty;
 begin
- po1:= inherited find(akey);
+ po1:= pansistringptruinthashdataty(inherited find(akey));
  result:= po1 <> nil;
  if result then begin
-  avalue:= po1^;
+  avalue:= po1^.data.data;
  end
  else begin
   avalue:= '';
@@ -1825,21 +2008,21 @@ end;
 function tansistringptruinthashdatalist.addunique(const akey: ptruint;
                                                const avalue: ansistring): boolean;
 var
- po1: pansistring;
+ po1: pansistringptruinthashdataty;
 begin
  result:= true;
- po1:= inherited find(akey);
+ po1:= pansistringptruinthashdataty(inherited find(akey));
  if po1 = nil then begin
   result:= false;
-  po1:= inherited add(akey);
-  po1^:= avalue;
+  po1:= pansistringptruinthashdataty(inherited add(akey));
+  po1^.data.data:= avalue;
  end;
 end;
 
-procedure tansistringptruinthashdatalist.checkexact(const aitemdata;
-               var accept: boolean);
+procedure tansistringptruinthashdatalist.checkexact(
+          const aitem: phashdataty; var accept: boolean);
 begin
- accept:= ansistringptruintdataty(aitemdata).data = fansistringparam;
+ accept:= pansistringptruinthashdataty(aitem)^.data.data = fansistringparam;
 end;
 
 procedure tansistringptruinthashdatalist.delete(const akey: ptruint;
@@ -1856,24 +2039,24 @@ begin
  find(akey,result);
 end;
 
-function tansistringptruinthashdatalist.first: pansistringptruintdataty;
+function tansistringptruinthashdatalist.first: pansistringptruinthashdataty;
 begin
- result:= pansistringptruintdataty(internalfirst);
+ result:= pansistringptruinthashdataty(internalfirstx);
 end;
 
-function tansistringptruinthashdatalist.next: pansistringptruintdataty;
+function tansistringptruinthashdatalist.next: pansistringptruinthashdataty;
 begin
- result:= pansistringptruintdataty(internalnext);
+ result:= pansistringptruinthashdataty(internalnextx);
 end;
 
-function tansistringptruinthashdatalist.last: pansistringptruintdataty;
+function tansistringptruinthashdatalist.last: pansistringptruinthashdataty;
 begin
- result:= pansistringptruintdataty(internallast);
+ result:= pansistringptruinthashdataty(internallastx);
 end;
 
-function tansistringptruinthashdatalist.prev: pansistringptruintdataty;
+function tansistringptruinthashdatalist.prev: pansistringptruinthashdataty;
 begin
- result:= pansistringptruintdataty(internalprev);
+ result:= pansistringptruinthashdataty(internalprevx);
 end;
 
 procedure tansistringptruinthashdatalist.iterate(const akey: ptruint;
@@ -1882,20 +2065,25 @@ begin
  iterate(akey,keyhashiteratorprocty(aiterator));
 end;
 
-procedure tansistringptruinthashdatalist.finalizeitem(var aitemdata);
+procedure tansistringptruinthashdatalist.finalizeitem(const aitem: phashdataty);
 begin
- finalize(ansistringptruintdataty(aitemdata));
+ finalize(pansistringptruinthashdataty(aitem)^.data);
+end;
+
+function tansistringptruinthashdatalist.getrecordsize(): int32;
+begin
+ result:= sizeof(ansistringptruinthashdataty);
 end;
 
 function tansistringptruinthashdatalist.setdata(const akey: ptruint;
-               const avalue: ansistring): boolean;
+                                        const avalue: ansistring): boolean;
 var
- po1: pansistring;
+ po1: pansistringptruinthashdataty;
 begin
- po1:= inherited find(akey);
+ po1:= pansistringptruinthashdataty(inherited find(akey));
  result:= po1 <> nil;
  if result then begin
-  po1^:= avalue;
+  po1^.data.data:= avalue;
  end;
 end;
 
@@ -1903,25 +2091,25 @@ end;
 
 constructor tmsestringptruinthashdatalist.create;
 begin
- inherited create(sizeof(msestring));
+ inherited create();
  fstate:= fstate + [hls_needsnull,hls_needsfinalize];
 end;
 
 procedure tmsestringptruinthashdatalist.add(const akey: ptruint;
                                        const avalue: msestring);
 begin
- pmsestring(inherited add(akey))^:= avalue;
+ pmsestringptruinthashdataty(inherited add(akey))^.data.data:= avalue;
 end;
 
 function tmsestringptruinthashdatalist.find(const akey: ptruint;
                                              out avalue: msestring): boolean;
 var
- po1: pmsestring;
+ po1: pmsestringptruinthashdataty;
 begin
- po1:= inherited find(akey);
+ po1:= pmsestringptruinthashdataty(inherited find(akey));
  result:= po1 <> nil;
  if result then begin
-  avalue:= po1^;
+  avalue:= po1^.data.data;
  end
  else begin
   avalue:= '';
@@ -1931,21 +2119,21 @@ end;
 function tmsestringptruinthashdatalist.addunique(const akey: ptruint;
                                                const avalue: msestring): boolean;
 var
- po1: pmsestring;
+ po1: pmsestringptruinthashdataty;
 begin
  result:= true;
- po1:= inherited find(akey);
+ po1:= pmsestringptruinthashdataty(inherited find(akey));
  if po1 = nil then begin
   result:= false;
-  po1:= inherited add(akey);
-  po1^:= avalue;
+  po1:= pmsestringptruinthashdataty(inherited add(akey));
+  po1^.data.data:= avalue;
  end;
 end;
 
-procedure tmsestringptruinthashdatalist.checkexact(const aitemdata;
+procedure tmsestringptruinthashdatalist.checkexact(const aitem: phashdataty;
                var accept: boolean);
 begin
- accept:= msestringptruintdataty(aitemdata).data = fmsestringparam;
+ accept:= pmsestringptruinthashdataty(aitem)^.data.data = fmsestringparam;
 end;
 
 procedure tmsestringptruinthashdatalist.delete(const akey: ptruint;
@@ -1962,24 +2150,24 @@ begin
  find(akey,result);
 end;
 
-function tmsestringptruinthashdatalist.first: pmsestringptruintdataty;
+function tmsestringptruinthashdatalist.first: pmsestringptruinthashdataty;
 begin
- result:= pmsestringptruintdataty(internalfirst);
+ result:= pmsestringptruinthashdataty(internalfirstx);
 end;
 
-function tmsestringptruinthashdatalist.next: pmsestringptruintdataty;
+function tmsestringptruinthashdatalist.next: pmsestringptruinthashdataty;
 begin
- result:= pmsestringptruintdataty(internalnext);
+ result:= pmsestringptruinthashdataty(internalnextx);
 end;
 
-function tmsestringptruinthashdatalist.last: pmsestringptruintdataty;
+function tmsestringptruinthashdatalist.last: pmsestringptruinthashdataty;
 begin
- result:= pmsestringptruintdataty(internallast);
+ result:= pmsestringptruinthashdataty(internallastx);
 end;
 
-function tmsestringptruinthashdatalist.prev: pmsestringptruintdataty;
+function tmsestringptruinthashdatalist.prev: pmsestringptruinthashdataty;
 begin
- result:= pmsestringptruintdataty(internalprev);
+ result:= pmsestringptruinthashdataty(internalprevx);
 end;
 
 procedure tmsestringptruinthashdatalist.iterate(const akey: ptruint;
@@ -1988,57 +2176,64 @@ begin
  iterate(akey,keyhashiteratorprocty(aiterator));
 end;
 
-procedure tmsestringptruinthashdatalist.finalizeitem(var aitemdata);
+procedure tmsestringptruinthashdatalist.finalizeitem(const aitem: phashdataty);
 begin
- finalize(msestringptruintdataty(aitemdata));
+ finalize(pmsestringptruinthashdataty(aitem)^.data);
+end;
+
+function tmsestringptruinthashdatalist.getrecordsize(): int32;
+begin
+ result:= sizeof(msestringptruinthashdataty);
 end;
 
 function tmsestringptruinthashdatalist.setdata(const akey: ptruint;
                const avalue: msestring): boolean;
 var
- po1: pmsestring;
+ po1: pmsestringptruinthashdataty;
 begin
- po1:= inherited find(akey);
+ po1:= pmsestringptruinthashdataty(inherited find(akey));
  result:= po1 <> nil;
  if result then begin
-  po1^:= avalue;
+  po1^.data.data:= avalue;
  end;
 end;
 
 { tansistringhashdatalist }
 
-constructor tansistringhashdatalist.create(const datasize: integer);
+constructor tansistringhashdatalist.create();
 begin
- inherited create(datasize + sizeof(ansistringdataty));
+ inherited create();
  fstate:= fstate + [hls_needsnull,hls_needsfinalize];
 end;
 
-procedure tansistringhashdatalist.finalizeitem(var aitemdata);
+procedure tansistringhashdatalist.finalizeitem(const aitem: phashdataty);
 begin
- finalize(ansistringdataty(aitemdata));
+ finalize(pansistringhashdataty(aitem)^.data);
 end;
 
-function tansistringhashdatalist.add(const akey: ansistring): pointer;
-var
- po1: pansistringhashdataty;
+function tansistringhashdatalist.getrecordsize(): int32;
 begin
- po1:= pansistringhashdataty(internaladd(akey));
- po1^.data.key:= akey;
- result:= @po1^.data.data;
+ result:= sizeof(ansistringhashdataty);
 end;
 
-function tansistringhashdatalist.find(const akey: ansistring): pointer;
+function tansistringhashdatalist.add(
+                       const akey: ansistring): pansistringhashdataty;
 begin
- result:= internalfind(akey);
- if result <> nil then begin
-  result:= @pansistringdataty(pchar(result)+sizeof(hashheaderty))^.data;
- end;
+ result:= pansistringhashdataty(internaladd(akey));
+ result^.data.key:= akey;
 end;
 
-function tansistringhashdatalist.find(const akey: lstringty): pointer;
+function tansistringhashdatalist.find(
+                               const akey: ansistring): pansistringhashdataty;
+begin
+ result:= pansistringhashdataty(internalfind(akey));
+end;
+
+function tansistringhashdatalist.find(
+                              const akey: lstringty): pansistringhashdataty;
 var
  ha1: hashvaluety;
- uint1: ptruint;
+ uint1: hashoffsetty;
  po1: phashdataty;
 begin
  po1:= nil;
@@ -2048,7 +2243,8 @@ begin
   if uint1 <> 0 then begin
    po1:= phashdataty(pchar(fdata) + uint1);
    while true do begin
-    if (po1^.header.hash = ha1) and checklkey(akey,po1^.data) then begin
+    if (po1^.header.hash = ha1) and checklkey(akey,
+                          pansistringhashdataty(po1)^.data) then begin
      break;
     end;
     if po1^.header.nexthash = 0 then begin
@@ -2059,13 +2255,11 @@ begin
    end;
   end;
  end;
- result:= po1;
- if result <> nil then begin
-  result:= @pmsestringdataty(pchar(result)+sizeof(hashheaderty))^.data;
- end;
+ result:= pansistringhashdataty(po1);
 end;
 
-function tansistringhashdatalist.addunique(const akey: ansistring): pointer;
+function tansistringhashdatalist.addunique(
+                        const akey: ansistring): pansistringhashdataty;
 begin
  result:= find(akey);
  if result = nil then begin
@@ -2083,23 +2277,25 @@ begin
  result:= stringhash(akey);
 end;
 
-function tansistringhashdatalist.checkkey(const akey; const aitemdata): boolean;
+function tansistringhashdatalist.checkkey(const akey;
+                                   const aitem: phashdataty): boolean;
 var
  int1: integer;
 begin
- result:= pointer(akey) = pointer(ansistringdataty(aitemdata).key);
+ result:= pointer(akey) = pointer(pansistringhashdataty(aitem)^.data.key);
  if not result then begin
   int1:= length(ansistring(akey));
-  result:= (int1 = length(ansistringdataty(aitemdata).key)) and
-      comparemem(pointer(akey),pointer(ansistringdataty(aitemdata).key),int1);
+  result:= (int1 = length(pansistringhashdataty(aitem)^.data.key)) and
+      comparemem(pointer(akey),
+                    pointer(pansistringhashdataty(aitem)^.data.key),int1);
  end;
 end;
 
 function tansistringhashdatalist.checklkey(const akey: lstringty;
-                                                const aitemdata): boolean;
+                             const aitemdata: ansistringdataty): boolean;
 begin
- result:= (akey.len = length(ansistringdataty(aitemdata).key)) and
-      comparemem(akey.po,pointer(ansistringdataty(aitemdata).key),akey.len);
+ result:= (akey.len = length(aitemdata.key)) and
+      comparemem(akey.po,pointer(aitemdata.key),akey.len);
 end;
 
 function tansistringhashdatalist.delete(const akey: ansistring;
@@ -2117,24 +2313,24 @@ begin
  result:= internaldelete(str1,all);
 end;
 
-function tansistringhashdatalist.first: pansistringdataty;
+function tansistringhashdatalist.first: pansistringhashdataty;
 begin
- result:= pansistringdataty(internalfirst);
+ result:= pansistringhashdataty(internalfirstx);
 end;
 
-function tansistringhashdatalist.next: pansistringdataty;
+function tansistringhashdatalist.next: pansistringhashdataty;
 begin
- result:= pansistringdataty(internalnext);
+ result:= pansistringhashdataty(internalnextx);
 end;
 
-function tansistringhashdatalist.last: pansistringdataty;
+function tansistringhashdatalist.last: pansistringhashdataty;
 begin
- result:= pansistringdataty(internallast);
+ result:= pansistringhashdataty(internallastx);
 end;
 
-function tansistringhashdatalist.prev: pansistringdataty;
+function tansistringhashdatalist.prev: pansistringhashdataty;
 begin
- result:= pansistringdataty(internalprev);
+ result:= pansistringhashdataty(internalprevx);
 end;
 
 procedure tansistringhashdatalist.iterate(const akey: ansistring;
@@ -2144,16 +2340,16 @@ begin
 end;
 
 { tpointeransistringhashdatalist }
-
+{
 constructor tpointeransistringhashdatalist.create;
 begin
  inherited create(sizeof(pointer));
 end;
-
+}
 procedure tpointeransistringhashdatalist.add(const akey: ansistring;
                                        const avalue: pointer);
 begin
- ppointer(inherited add(akey))^:= avalue;
+ ppointeransistringhashdataty(inherited add(akey))^.data.data:= avalue;
 end;
 
 procedure tpointeransistringhashdatalist.add(const keys: array of string;
@@ -2169,12 +2365,12 @@ end;
 function tpointeransistringhashdatalist.find(const akey: ansistring;
                                              out avalue: pointer): boolean;
 var
- po1: ppointer;
+ po1: ppointeransistringhashdataty;
 begin
- po1:= inherited find(akey);
+ po1:= ppointeransistringhashdataty(inherited find(akey));
  result:= po1 <> nil;
  if result then begin
-  avalue:= po1^;
+  avalue:= po1^.data.data;
  end
  else begin
   avalue:= nil;
@@ -2185,28 +2381,33 @@ function tpointeransistringhashdatalist.find(const akey: lstringty): pointer;
 begin
  result:= inherited find(akey);
  if result <> nil then begin
-  result:= ppointer(result)^;
+  result:= ppointeransistringhashdataty(result)^.data.data;
  end;
 end;
 
 function tpointeransistringhashdatalist.addunique(const akey: ansistring;
                                                const avalue: pointer): boolean;
 var
- po1: ppointer;
+ po1: ppointeransistringhashdataty;
 begin
  result:= true;
- po1:= inherited find(akey);
+ po1:= ppointeransistringhashdataty(inherited find(akey));
  if po1 = nil then begin
   result:= false;
-  po1:= inherited add(akey);
-  po1^:= avalue;
+  po1:= ppointeransistringhashdataty(inherited add(akey));
+  po1^.data.data:= avalue;
  end;
 end;
 
-procedure tpointeransistringhashdatalist.checkexact(const aitemdata;
+procedure tpointeransistringhashdatalist.checkexact(const aitem: phashdataty;
                var accept: boolean);
 begin
- accept:= pointeransistringdataty(aitemdata).data = fpointerparam;
+ accept:= ppointeransistringhashdataty(aitem)^.data.data = fpointerparam;
+end;
+
+function tpointeransistringhashdatalist.getrecordsize(): int32;
+begin
+ result:= sizeof(pointeransistringhashdataty);
 end;
 
 procedure tpointeransistringhashdatalist.delete(const akey: ansistring;
@@ -2223,24 +2424,24 @@ begin
  find(akey,result);
 end;
 
-function tpointeransistringhashdatalist.first: ppointeransistringdataty;
+function tpointeransistringhashdatalist.first: ppointeransistringhashdataty;
 begin
- result:= ppointeransistringdataty(internalfirst);
+ result:= ppointeransistringhashdataty(internalfirstx);
 end;
 
-function tpointeransistringhashdatalist.next: ppointeransistringdataty;
+function tpointeransistringhashdatalist.next: ppointeransistringhashdataty;
 begin
- result:= ppointeransistringdataty(internalnext);
+ result:= ppointeransistringhashdataty(internalnextx);
 end;
 
-function tpointeransistringhashdatalist.last: ppointeransistringdataty;
+function tpointeransistringhashdatalist.last: ppointeransistringhashdataty;
 begin
- result:= ppointeransistringdataty(internallast);
+ result:= ppointeransistringhashdataty(internallastx);
 end;
 
-function tpointeransistringhashdatalist.prev: ppointeransistringdataty;
+function tpointeransistringhashdatalist.prev: ppointeransistringhashdataty;
 begin
- result:= ppointeransistringdataty(internalprev);
+ result:= ppointeransistringhashdataty(internalprevx);
 end;
 
 procedure tpointeransistringhashdatalist.iterate(const akey: ansistring;
@@ -2251,38 +2452,41 @@ end;
 
 { tmsestringhashdatalist }
 
-constructor tmsestringhashdatalist.create(const datasize: integer);
+constructor tmsestringhashdatalist.create();
 begin
- inherited create(datasize + sizeof(msestringdataty));
+ inherited create();
  fstate:= fstate + [hls_needsnull,hls_needsfinalize];
 end;
 
-procedure tmsestringhashdatalist.finalizeitem(var aitemdata);
+procedure tmsestringhashdatalist.finalizeitem(
+                                         const aitem: phashdataty);
 begin
- finalize(msestringdataty(aitemdata));
+ finalize(pmsestringhashdataty(aitem)^.data);
 end;
 
-function tmsestringhashdatalist.add(const akey: msestring): pointer;
-var
- po1: pmsestringhashdataty;
+function tmsestringhashdatalist.getrecordsize(): int32;
 begin
- po1:= pmsestringhashdataty(internaladd(akey));
- po1^.data.key:= akey;
- result:= @po1^.data.data;
+ result:= sizeof(msestringhashdataty);
 end;
 
-function tmsestringhashdatalist.find(const akey: msestring): pointer;
+function tmsestringhashdatalist.add(
+                      const akey: msestring): pmsestringhashdataty;
 begin
- result:= internalfind(akey);
- if result <> nil then begin
-  result:= @pmsestringdataty(pchar(result)+sizeof(hashheaderty))^.data;
- end;
+ result:= pmsestringhashdataty(internaladd(akey));
+ result^.data.key:= akey;
 end;
 
-function tmsestringhashdatalist.find(const akey: lmsestringty): pointer;
+function tmsestringhashdatalist.find(
+                             const akey: msestring): pmsestringhashdataty;
+begin
+ result:= pmsestringhashdataty(internalfind(akey));
+end;
+
+function tmsestringhashdatalist.find(
+                     const akey: lmsestringty): pmsestringhashdataty;
 var
  ha1: hashvaluety;
- uint1: ptruint;
+ uint1: hashoffsetty;
  po1: phashdataty;
 begin
  po1:= nil;
@@ -2292,7 +2496,8 @@ begin
   if uint1 <> 0 then begin
    po1:= phashdataty(pchar(fdata) + uint1);
    while true do begin
-    if (po1^.header.hash = ha1) and checklkey(akey,po1^.data) then begin
+    if (po1^.header.hash = ha1) and checklkey(akey,
+                             pmsestringhashdataty(po1)^.data) then begin
      break;
     end;
     if po1^.header.nexthash = 0 then begin
@@ -2303,22 +2508,17 @@ begin
    end;
   end;
  end;
- result:= po1;
- if result <> nil then begin
-  result:= @pmsestringdataty(pchar(result)+sizeof(hashheaderty))^.data;
- end;
+ result:= pmsestringhashdataty(po1);
 end;
 
 function tmsestringhashdatalist.find(const akey: msestring;
-                                                out acount: integer): pointer;
+                                out acount: integer): pmsestringhashdataty;
 begin
- result:= internalfind(akey,acount);
- if result <> nil then begin
-  result:= @pmsestringdataty(pchar(result)+sizeof(hashheaderty))^.data;
- end;
+ result:= pmsestringhashdataty(internalfind(akey,acount));
 end;
 
-function tmsestringhashdatalist.addunique(const akey: msestring): pointer;
+function tmsestringhashdatalist.addunique(
+                           const akey: msestring): pmsestringhashdataty;
 begin
  result:= find(akey);
  if result = nil then begin
@@ -2336,22 +2536,24 @@ begin
  result:= stringhash(akey);
 end;
 
-function tmsestringhashdatalist.checklkey(const akey: lmsestringty; const aitemdata): boolean;
+function tmsestringhashdatalist.checklkey(const akey: lmsestringty;
+                              const aitemdata: msestringdataty): boolean;
 begin
- result:= (akey.len = length(msestringdataty(aitemdata).key)) and
-      comparemem(akey.po,pointer(msestringdataty(aitemdata).key),
+ result:= (akey.len = length(aitemdata.key)) and
+      comparemem(akey.po,pointer(aitemdata.key),
                                                akey.len*sizeof(msechar));
 end;
 
-function tmsestringhashdatalist.checkkey(const akey; const aitemdata): boolean;
+function tmsestringhashdatalist.checkkey(const akey;
+                                 const aitem: phashdataty): boolean;
 var
  int1: integer;
 begin
- result:= pointer(akey) = pointer(msestringdataty(aitemdata).key);
+ result:= pointer(akey) = pointer(pmsestringhashdataty(aitem)^.data.key);
  if not result then begin
   int1:= length(msestring(akey));
-  result:= (int1 = length(msestringdataty(aitemdata).key)) and
-      comparemem(pointer(akey),pointer(msestringdataty(aitemdata).key),
+  result:= (int1 = length(pmsestringhashdataty(aitem)^.data.key)) and
+      comparemem(pointer(akey),pointer(pmsestringhashdataty(aitem)^.data.key),
                                int1*sizeof(msechar));
  end;
 // result:= msestring(akey) = msestringdataty(aitemdata).key;
@@ -2372,24 +2574,24 @@ begin
  result:= internaldelete(mstr1,all);
 end;
 
-function tmsestringhashdatalist.first: pmsestringdataty;
+function tmsestringhashdatalist.first: pmsestringhashdataty;
 begin
- result:= pmsestringdataty(internalfirst);
+ result:= pmsestringhashdataty(internalfirstx);
 end;
 
-function tmsestringhashdatalist.next: pmsestringdataty;
+function tmsestringhashdatalist.next: pmsestringhashdataty;
 begin
- result:= pmsestringdataty(internalnext);
+ result:= pmsestringhashdataty(internalnextx);
 end;
 
-function tmsestringhashdatalist.last: pmsestringdataty;
+function tmsestringhashdatalist.last: pmsestringhashdataty;
 begin
- result:= pmsestringdataty(internallast);
+ result:= pmsestringhashdataty(internallastx);
 end;
 
-function tmsestringhashdatalist.prev: pmsestringdataty;
+function tmsestringhashdatalist.prev: pmsestringhashdataty;
 begin
- result:= pmsestringdataty(internalprev);
+ result:= pmsestringhashdataty(internalprevx);
 end;
 
 procedure tmsestringhashdatalist.iterate(const akey: msestring;
@@ -2399,27 +2601,28 @@ begin
 end;
 
 { tpointermsestringhashdatalist }
-
+{
 constructor tpointermsestringhashdatalist.create;
 begin
- inherited create(sizeof(pointer));
+ inherited create(sizeof(pointermsestringhashdataty) - 
+                                      sizeof(msestringhashdataty));
 end;
-
+}
 procedure tpointermsestringhashdatalist.add(const akey: msestring;
                                        const avalue: pointer);
 begin
- ppointer(inherited add(akey))^:= avalue;
+ ppointermsestringhashdataty(inherited add(akey))^.data.data:= avalue;
 end;
 
 function tpointermsestringhashdatalist.find(const akey: msestring;
                                              out avalue: pointer): boolean;
 var
- po1: ppointer;
+ po1: ppointermsestringhashdataty;
 begin
- po1:= inherited find(akey);
+ po1:= ppointermsestringhashdataty(inherited find(akey));
  result:= po1 <> nil;
  if result then begin
-  avalue:= po1^;
+  avalue:= po1^.data.data;
  end
  else begin
   avalue:= nil;
@@ -2429,12 +2632,12 @@ end;
 function tpointermsestringhashdatalist.find(const akey: msestring;
                         out avalue: pointer; out acount: integer): boolean;
 var
- po1: ppointer;
+ po1: ppointermsestringhashdataty;
 begin
- po1:= inherited find(akey,acount);
+ po1:= ppointermsestringhashdataty(internalfind(akey,acount));
  result:= po1 <> nil;
  if result then begin
-  avalue:= po1^;
+  avalue:= po1^.data.data;
  end
  else begin
   avalue:= nil;
@@ -2445,7 +2648,7 @@ function tpointermsestringhashdatalist.find(const akey: lmsestringty): pointer;
 begin
  result:= inherited find(akey);
  if result <> nil then begin
-  result:= ppointer(result)^;
+  result:= ppointermsestringhashdataty(result)^.data.data;
  end;
 end;
 
@@ -2466,41 +2669,46 @@ end;
 function tpointermsestringhashdatalist.addunique(const akey: msestring;
                                                const avalue: pointer): boolean;
 var
- po1: ppointer;
+ po1: ppointermsestringhashdataty;
 begin
  result:= true;
- po1:= inherited find(akey);
+ po1:= ppointermsestringhashdataty(inherited find(akey));
  if po1 = nil then begin
   result:= false;
-  po1:= inherited add(akey);
-  po1^:= avalue;
+  po1:= ppointermsestringhashdataty(inherited add(akey));
+  po1^.data.data:= avalue;
  end;
 end;
 
-procedure tpointermsestringhashdatalist.checkexact(const aitemdata;
-               var accept: boolean);
+procedure tpointermsestringhashdatalist.checkexact(
+                      const aitem: phashdataty; var accept: boolean);
 begin
- accept:= pointermsestringdataty(aitemdata).data = fpointerparam;
+ accept:= ppointermsestringhashdataty(aitem)^.data.data = fpointerparam;
 end;
 
-function tpointermsestringhashdatalist.first: ppointermsestringdataty;
+function tpointermsestringhashdatalist.getrecordsize(): int32;
 begin
- result:= ppointermsestringdataty(internalfirst);
+ result:= sizeof(pointermsestringhashdataty);
 end;
 
-function tpointermsestringhashdatalist.next: ppointermsestringdataty;
+function tpointermsestringhashdatalist.first: ppointermsestringhashdataty;
 begin
- result:= ppointermsestringdataty(internalnext);
+ result:= ppointermsestringhashdataty(internalfirstx);
 end;
 
-function tpointermsestringhashdatalist.last: ppointermsestringdataty;
+function tpointermsestringhashdatalist.next: ppointermsestringhashdataty;
 begin
- result:= ppointermsestringdataty(internallast);
+ result:= ppointermsestringhashdataty(internalnextx);
 end;
 
-function tpointermsestringhashdatalist.prev: ppointermsestringdataty;
+function tpointermsestringhashdatalist.last: ppointermsestringhashdataty;
 begin
- result:= ppointermsestringdataty(internalprev);
+ result:= ppointermsestringhashdataty(internallastx);
+end;
+
+function tpointermsestringhashdatalist.prev: ppointermsestringhashdataty;
+begin
+ result:= ppointermsestringhashdataty(internalprevx);
 end;
 
 procedure tpointermsestringhashdatalist.iterate(const akey: msestring;
@@ -2509,33 +2717,28 @@ begin
  iterate(akey,keyhashiteratorprocty(aiterator));
 end;
 
-
-
-
-
-
 { tintegermsestringhashdatalist }
-
+{
 constructor tintegermsestringhashdatalist.create;
 begin
  inherited create(sizeof(integer));
 end;
-
+}
 procedure tintegermsestringhashdatalist.add(const akey: msestring;
                                        const avalue: integer);
 begin
- pinteger(inherited add(akey))^:= avalue;
+ pintegermsestringhashdataty(inherited add(akey))^.data.data:= avalue;
 end;
 
 function tintegermsestringhashdatalist.find(const akey: msestring;
                                              out avalue: integer): boolean;
 var
- po1: pinteger;
+ po1: pintegermsestringhashdataty;
 begin
- po1:= inherited find(akey);
+ po1:= pintegermsestringhashdataty(inherited find(akey));
  result:= po1 <> nil;
  if result then begin
-  avalue:= po1^;
+  avalue:= po1^.data.data;
  end
  else begin
   avalue:= -1;
@@ -2545,12 +2748,12 @@ end;
 function tintegermsestringhashdatalist.find(const akey: msestring;
                         out avalue: integer; out acount: integer): boolean;
 var
- po1: pinteger;
+ po1: pintegermsestringhashdataty;
 begin
- po1:= inherited find(akey,acount);
+ po1:= pintegermsestringhashdataty(inherited find(akey,acount));
  result:= po1 <> nil;
  if result then begin
-  avalue:= po1^;
+  avalue:= po1^.data.data;
  end
  else begin
   avalue:= -1;
@@ -2559,11 +2762,11 @@ end;
 
 function tintegermsestringhashdatalist.find(const akey: lmsestringty): integer;
 var
- po1: pinteger;
+ po1: pintegermsestringhashdataty;
 begin
- po1:= inherited find(akey);
+ po1:= pintegermsestringhashdataty(inherited find(akey));
  if po1 <> nil then begin
-  result:= po1^;
+  result:= po1^.data.data;
  end
  else begin
   result:= -1;
@@ -2587,41 +2790,46 @@ end;
 function tintegermsestringhashdatalist.addunique(const akey: msestring;
                                                const avalue: integer): boolean;
 var
- po1: pinteger;
+ po1: pintegermsestringhashdataty;
 begin
  result:= true;
- po1:= inherited find(akey);
+ po1:= pintegermsestringhashdataty(inherited find(akey));
  if po1 = nil then begin
   result:= false;
-  po1:= inherited add(akey);
-  po1^:= avalue;
+  po1:= pintegermsestringhashdataty(inherited add(akey));
+  po1^.data.data:= avalue;
  end;
 end;
 
-procedure tintegermsestringhashdatalist.checkexact(const aitemdata;
+procedure tintegermsestringhashdatalist.checkexact(const aitem: phashdataty;
                var accept: boolean);
 begin
- accept:= integermsestringdataty(aitemdata).data = fintegerparam;
+ accept:= pintegermsestringhashdataty(aitem)^.data.data = fintegerparam;
 end;
 
-function tintegermsestringhashdatalist.first: pintegermsestringdataty;
+function tintegermsestringhashdatalist.getrecordsize(): int32;
 begin
- result:= pintegermsestringdataty(internalfirst);
+ result:= sizeof(integermsestringhashdataty);
 end;
 
-function tintegermsestringhashdatalist.next: pintegermsestringdataty;
+function tintegermsestringhashdatalist.first: pintegermsestringhashdataty;
 begin
- result:= pintegermsestringdataty(internalnext);
+ result:= pintegermsestringhashdataty(internalfirstx);
 end;
 
-function tintegermsestringhashdatalist.last: pintegermsestringdataty;
+function tintegermsestringhashdatalist.next: pintegermsestringhashdataty;
 begin
- result:= pintegermsestringdataty(internallast);
+ result:= pintegermsestringhashdataty(internalnextx);
 end;
 
-function tintegermsestringhashdatalist.prev: pintegermsestringdataty;
+function tintegermsestringhashdatalist.last: pintegermsestringhashdataty;
 begin
- result:= pintegermsestringdataty(internalprev);
+ result:= pintegermsestringhashdataty(internallastx);
+end;
+
+function tintegermsestringhashdatalist.prev: pintegermsestringhashdataty;
+begin
+ result:= pintegermsestringhashdataty(internalprevx);
 end;
 
 procedure tintegermsestringhashdatalist.iterate(const akey: msestring;
@@ -2673,24 +2881,24 @@ begin
  result:= inherited find(akey,pointer(avalue),acount);
 end;
 
-function tobjectmsestringhashdatalist.first: pobjectmsestringdataty;
+function tobjectmsestringhashdatalist.first: pobjectmsestringhashdataty;
 begin
- result:= pobjectmsestringdataty(internalfirst);
+ result:= pobjectmsestringhashdataty(internalfirstx);
 end;
 
-function tobjectmsestringhashdatalist.next: pobjectmsestringdataty;
+function tobjectmsestringhashdatalist.next: pobjectmsestringhashdataty;
 begin
- result:= pobjectmsestringdataty(internalnext);
+ result:= pobjectmsestringhashdataty(internalnextx);
 end;
 
-function tobjectmsestringhashdatalist.last: pobjectmsestringdataty;
+function tobjectmsestringhashdatalist.last: pobjectmsestringhashdataty;
 begin
- result:= pobjectmsestringdataty(internallast);
+ result:= pobjectmsestringhashdataty(internallastx);
 end;
 
-function tobjectmsestringhashdatalist.prev: pobjectmsestringdataty;
+function tobjectmsestringhashdatalist.prev: pobjectmsestringhashdataty;
 begin
- result:= pobjectmsestringdataty(internalprev);
+ result:= pobjectmsestringhashdataty(internalprevx);
 end;
 
 procedure tobjectmsestringhashdatalist.iterate(const akey: msestring;
@@ -2699,11 +2907,11 @@ begin
  inherited iterate(akey,pointermsestringiteratorprocty(aiterator));
 end;
 
-procedure tobjectmsestringhashdatalist.finalizeitem(var aitemdata);
+procedure tobjectmsestringhashdatalist.finalizeitem(const aitem: phashdataty);
 begin
  inherited;
  if fownsobjects then begin
-  with objectmsestringdataty(aitemdata) do begin
+  with pobjectmsestringhashdataty(aitem)^.data do begin
    data.free;
   end;
  end;

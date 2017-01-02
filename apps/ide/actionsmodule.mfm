@@ -2,7 +2,7 @@ object actionsmo: tactionsmo
   bounds_cx = 543
   bounds_cy = 435
   left = 7
-  top = 160
+  top = 198
   moduleclassname = 'tmsedatamodule'
   object makeact: taction
     Tag = 1

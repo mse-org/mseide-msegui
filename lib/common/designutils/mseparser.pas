@@ -707,7 +707,7 @@ begin
  if application.waitescaped then begin
   abort;
  end;
- fdefines:= tdefineslist.create(0);
+ fdefines:= tdefineslist.create();
  ffilelist:= afilelist;
  flastvalidident:= bigint;
  setlength(fincludefiledirs,1);

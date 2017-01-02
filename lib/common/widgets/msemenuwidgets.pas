@@ -239,12 +239,19 @@ function showpopupmenu(const menu: tmenuitem; const transientfor: twidget;
                  const menucomp: tcustommenu = nil): tmenuitem; overload;
 var
  widget: tpopupmenuwidget;
+ window1: twindow;
 begin
  if menu.canshow then begin
 //  tmenuitem1(menu).ftransientfor:= transientfor;
-  tpopupmenuwidget.create(@widget,menu,transientfor.window,nil,menucomp);
+  window1:= nil;
+  if transientfor <> nil then begin
+   window1:= transientfor.window;
+  end;
+  tpopupmenuwidget.create(@widget,menu,window1,nil,menucomp);
   try
-   widget.color:= transientfor.window.owner.actualopaquecolor;
+   if window1 <> nil then begin
+    widget.color:= window1.owner.actualopaquecolor;
+   end;
    result:= widget.showmenu(pos,dir,true);
   finally
    widget.Free;

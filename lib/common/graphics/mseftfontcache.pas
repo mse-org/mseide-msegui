@@ -17,7 +17,7 @@ unit mseftfontcache;
 
 interface
 uses
- msefontcache,msegraphics,msestrings,msetypes,mseguiglob,msegraphutils;
+ msefontcache,msegraphics,msestrings,msetypes,mseguiglob,msegraphutils,msehash;
  
 type
  bitmapdataty = record
@@ -35,11 +35,11 @@ type
    procedure internalfreefont(const afont: ptruint); override;
    function internalgetfont(const ainfo: getfontinfoty;
                               out aheight: integer): boolean; override;
-   procedure updatefontinfo(const adataoffset: longword;
+   procedure updatefontinfo(const adataoffset: hashoffsetty;
                                 var adata: fontcachedataty); override;
    procedure drawglyph(var drawinfo: drawinfoty; const pos: pointty;
                        const bitmap: pbitmapdataty); virtual; abstract;
-   function getdataoffs(const afont: fontty): longword; override;
+   function getdataoffsfont(const afont: fontty): hashoffsetty; override;
    function textbackgroundrect(const drawinfo: drawinfoty;
                         const afont: fontty; out arect: rectty): boolean;
   public
@@ -84,7 +84,7 @@ type
    fsize: longword;
    fcapacity: longword;
   protected
-   fdataoffset: longword;
+   fdataoffset: hashoffsetty;
    fascent: integer;
    fdescent: integer;
    fglyphheight: integer;
@@ -140,7 +140,7 @@ begin
  end;
 end;
 
-procedure tftfontcache.updatefontinfo(const adataoffset: longword;
+procedure tftfontcache.updatefontinfo(const adataoffset: hashoffsetty;
                                               var adata: fontcachedataty);
 var
  scale: real;
@@ -300,7 +300,7 @@ begin
  end;
 end;
 
-function tftfontcache.getdataoffs(const afont: fontty): longword;
+function tftfontcache.getdataoffsfont(const afont: fontty): hashoffsetty;
 begin
  result:= tftface(pointer(afont)).fdataoffset;
 end;

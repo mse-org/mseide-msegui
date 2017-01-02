@@ -69,9 +69,10 @@ type
  tfonthashlist = class(thashdatalist)
   protected
    function hashkey(const akey): hashvaluety; override;
-   function checkkey(const akey; const aitemdata): boolean; override;
+   function checkkey(const akey; const aitem: phashdataty): boolean override;
+   function getrecordsize(): int32 override;
   public
-   constructor create;
+//   constructor create;
    function find(const afont: fonthashdataty): integer;
    procedure add(const afont: fontnumty);
    procedure delete(const afont: fontnumty);
@@ -391,12 +392,12 @@ begin
 end;
 
 { tfonthashlist }
-
+{
 constructor tfonthashlist.create;
 begin
  inherited create(sizeof(fontnumdataty));
 end;
-
+}
 function tfonthashlist.hashkey(const akey): hashvaluety;
 begin
  with fontdataty(akey) do begin
@@ -405,15 +406,20 @@ begin
  end;
 end;
 
-function tfonthashlist.checkkey(const akey; const aitemdata): boolean;
+function tfonthashlist.checkkey(const akey; const aitem: phashdataty): boolean;
 var
  po1: pfontdataty;
 begin
- po1:= fonts[fontnumdataty(aitemdata).num].data;
+ po1:= fonts[pfontnumhashdataty(aitem)^.data.num].data;
  with fontdataty(akey) do begin
   result:= comparemem(@po1^.h.d,@h.d,sizeof(h.d)) and
                       (po1^.h.name = h.name) and (po1^.h.charset = h.charset);
  end;           
+end;
+
+function tfonthashlist.getrecordsize(): int32;
+begin
+ result:= sizeof(fontnumhashdataty);
 end;
 
 function tfonthashlist.find(const afont: fonthashdataty): integer;

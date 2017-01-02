@@ -69,6 +69,19 @@ type
  fileattributesty = set of fileattributety;
  accessmodety = (am_read,am_write,am_execute,am_exist);
  accessmodesty = set of accessmodety;
+
+ pollflagty = (pf_in,  //POLLIN =   $001;
+               pf_pri, //POLLPRI =  $002;
+               pf_out, //POLLOUT =  $004;
+               pf_err, //POLLERR =  $008;
+               pf_hup, //POLLHUP =  $010;
+               pf_nval //POLLNVAL = $020;
+              );
+ pollflagsty = set of pollflagty;
+ ppollflagsty = ^pollflagsty;
+ pollcallbackty = procedure(const aflags: pollflagsty;
+                                    const adata: pointer) of object;
+ 
  
 const
  filerightattributes = [fa_rusr,fa_wusr,fa_xusr,

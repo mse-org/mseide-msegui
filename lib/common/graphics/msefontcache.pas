@@ -46,17 +46,19 @@ type
    finstancepo: pfontcache;
   protected
    function hashkey(const akey): hashvaluety; override;
-   function checkkey(const akey; const aitemdata): boolean; override;
-   procedure finalizeitem(var aitemdata); override;
-   function find(const afont: fontdataty): pfontcachedataty;
+   function checkkey(const akey; 
+                       const aitem: phashdataty): boolean; override;
+   procedure finalizeitem(const aitem: phashdataty); override;
+   function find(const afont: fontdataty): pfontcachehashdataty;
 
    procedure internalfreefont(const afont: ptruint); virtual;
    function internalgetfont(const ainfo: getfontinfoty;
                              out aheight: integer): boolean; virtual; abstract;
-   procedure updatefontinfo(const adataoffset: longword;
+   procedure updatefontinfo(const adataoffset: hashoffsetty;
                      var adata: fontcachedataty); virtual; abstract;
-   function getdataoffs(const afont: fontty): longword; virtual; abstract;
-  public
+   function getdataoffsfont(const afont: fontty): hashoffsetty; virtual; abstract;
+   function getrecordsize(): int32 override;
+   public
    constructor create(var ainstance: tfontcache); 
    procedure getfont(var drawinfo: drawinfoty);
    procedure freefontdata(var drawinfo: drawinfoty);
@@ -77,13 +79,13 @@ constructor tfontcache.create(var ainstance: tfontcache);
 begin
  finstancepo:= @ainstance;
  ainstance:= self;
- inherited create(sizeof(fontcachedataty));
+ inherited create();
  fstate:= fstate + [hls_needsnull,hls_needsfinalize];
 end;
 
-procedure tfontcache.finalizeitem(var aitemdata);
+procedure tfontcache.finalizeitem(const aitem: phashdataty);
 begin
- finalize(fontcachedataty(aitemdata));
+ finalize(pfontcachehashdataty(aitem)^.data);
 end;
 
 function tfontcache.hashkey(const akey): hashvaluety;
@@ -93,24 +95,21 @@ begin
  end;
 end;
 
-function tfontcache.checkkey(const akey; const aitemdata): boolean;
+function tfontcache.checkkey(const akey; const aitem: phashdataty): boolean;
 begin
- with fontdataty(akey),fontcachedataty(aitemdata) do begin
+ with fontdataty(akey),pfontcachehashdataty(aitem)^.data do begin
   result:= (h.name = keyname) and (h.d.height = keyheight);
  end;
 end;
 
-function tfontcache.find(const afont: fontdataty): pfontcachedataty;
+function tfontcache.find(const afont: fontdataty): pfontcachehashdataty;
 begin
- result:= pointer(internalfind(afont));
- if result <> nil then begin
-  result:= @pfontcachehashdataty(result)^.data;
- end;
+ result:= pfontcachehashdataty(internalfind(afont));
 end;
 
 procedure tfontcache.getfont(var drawinfo: drawinfoty);
 var
- po1: pfontcachedataty;
+ po1: pfontcachehashdataty;
  h1: integer;
 begin
  with drawinfo.getfont do begin
@@ -123,20 +122,20 @@ begin
      ok:= false;
      exit;
     end;
-    po1:= @((internaladd(fontdata^)^.data));
-    po1^.keyname:= fontdata^.h.name;
-    po1^.keyheight:= fontdata^.h.d.height;
-    po1^.font:= font;
-    po1^.height:= h1;
-    updatefontinfo(getdataoffset(po1),po1^);
+    po1:= pfontcachehashdataty(internaladd(fontdata^));
+    po1^.data.keyname:= fontdata^.h.name;
+    po1^.data.keyheight:= fontdata^.h.d.height;
+    po1^.data.font:= font;
+    po1^.data.height:= h1;
+    updatefontinfo(getdataoffs(@po1^.data),po1^.data);
    end;
-   inc(po1^.refcount);
-   font:= po1^.font;
-   ascent:= po1^.ascent;
-   descent:= po1^.descent;
-   linespacing:= po1^.linespacing;
-   realheight:= po1^.height;
-   caretshift:= po1^.caretshift;
+   inc(po1^.data.refcount);
+   font:= po1^.data.font;
+   ascent:= po1^.data.ascent;
+   descent:= po1^.data.descent;
+   linespacing:= po1^.data.linespacing;
+   realheight:= po1^.data.height;
+   caretshift:= po1^.data.caretshift;
   end;
  end;
 end;
@@ -184,18 +183,23 @@ begin
  //dummy
 end;
 
+function tfontcache.getrecordsize(): int32;
+begin
+ result:= sizeof(fontcachehashdataty);
+end;
+
 procedure tfontcache.freefontdata(var drawinfo: drawinfoty);
 var
- po1: pfontcachedataty;
+ po1: pfontcachehashdataty;
 begin
  with drawinfo.getfont.fontdata^ do begin
   if font <> 0 then begin
-   po1:= getdatapo(getdataoffs(font));
-   dec(po1^.refcount);
-   if po1^.refcount = 0 then begin
+   po1:= getdatapo(getdataoffsfont(font));
+   dec(po1^.data.refcount);
+   if po1^.data.refcount = 0 then begin
     internalfreefont(font);
    end;
-   internaldeleteitem(phashdatadataty(po1));
+   internaldeleteitem(phashdataty(po1));
   end;
  end;
  if count = 0 then begin
