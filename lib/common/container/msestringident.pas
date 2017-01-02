@@ -282,8 +282,6 @@ begin
 end;
 
 function tstringidents.getidentnamep(const aident: identty): pchar;
-var
- ls1: lstringty;
 begin
  result:= getidentnamel(aident).po;
 end;

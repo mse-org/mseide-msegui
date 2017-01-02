@@ -2411,7 +2411,7 @@ procedure unregisterobjectpath(connection: pDBusConnection;
 begin
  freemem(user_data);
 end;
-
+{
 const
  dbuscallbackvtable: DBusObjectPathVTable = (
   unregister_function: @unregisterobjectpath; 
@@ -2421,7 +2421,7 @@ const
   dbus_internal_pad3: nil;
   dbus_internal_pad4: nil;
  );
-
+}
 {
 procedure tdbusservice.registerfallback(const apath: string;
                const ahandler: messageeventty);
@@ -2484,7 +2484,7 @@ const
 procedure tdbusservice.introspect(const amessage: pdbusmessage;
                const adata: pointer; var ahandled: boolean);
 var
- s1,s2: string;
+ s1: string;
  o1: hashoffsetty;
 begin
  s1:= introspectheader+'<node>'+lineend;
@@ -2571,8 +2571,6 @@ end;
 
 procedure tdbusservice.dounregisteritems(const aobj: pobjinfoty);
 var
- p1,pe: pstring;
- s1,s2: string;
  po1,poe: phashoffsetty;
 begin
  po1:= aobj^.handlers;
@@ -3320,7 +3318,6 @@ procedure tdbusobject.propget(const amessage: pdbusmessage; const adata: pointer
 var
  s1,s2: string;
  p1: ppropinfo;
- b1: boolean;
  v1: variantvaluety;
 begin
  if fservice.dbusreadmessage(amessage,[dbt_string,dbt_string],[@s1,@s2]) then begin
@@ -3686,7 +3683,6 @@ function thandlerhashdatalist.findsignal(const asender: pchar;
           const amember: pchar; const asignature: pchar): phandlerhashdataty;
 var
  vec1: identvecty;
- p1: phandlerhashdataty;
 begin
  vec1.high:= 5;
  vec1.d[0]:= signalhandlerid;

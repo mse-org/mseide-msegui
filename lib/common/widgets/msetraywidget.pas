@@ -7,9 +7,9 @@
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 }
-unit msetraywidget;
+unit msetraywidget; 
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
-{$ifndef mswindows} 
+{$ifndef mswindows}
  {$ifndef mse_no_dbus}
   {$define mse_usedbus} 
  {$endif}
