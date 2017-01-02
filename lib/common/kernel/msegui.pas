@@ -2351,6 +2351,12 @@ type
    constructor create(akind: eventkindty; winid: winidty);
  end;
  pwindowevent = ^twindowevent;
+ treparentevent = class(twindowevent)
+  public
+   fparent: winidty;
+   constructor create(akind: eventkindty; winid: winidty;
+                      aparent: winidty);
+ end;
 
  twindow = class(teventobject,icanvas)
   private
@@ -16817,8 +16823,16 @@ begin
   {$endif}
    fsyscontainer:= sywi_none;
    container:= 0;
+   if not (tws_destroying in fstate) then begin
   {$ifndef mswindows}
+    createwindow();
   {$endif}
+    if avalue = sywi_none then begin
+     if fownerwidget.visible then begin
+      gui_showwindow(winid);
+     end;
+    end;
+   end;
   end;
   if avalue <> sywi_none then begin
    if fwindow.id = 0 then begin
@@ -20774,6 +20788,15 @@ constructor tfadeopacolorarrayprop.create;
 begin
  inherited;
  fvaluedefault:= defaultfadeopacolor;
+end;
+
+{ treparentevent }
+
+constructor treparentevent.create(akind: eventkindty; winid: winidty;
+               aparent: winidty);
+begin
+ fparent:= aparent;
+ inherited create(ek_reparent,winid);
 end;
 
 initialization

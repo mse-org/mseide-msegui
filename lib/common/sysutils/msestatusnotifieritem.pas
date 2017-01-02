@@ -345,13 +345,12 @@ end;
 
 function tstatusnotifieritem.checkdesktop(): boolean;
 var
- b1,b2: boolean;
+ b2: boolean;
  desk1: desktopkindty;
 begin
  if fservice = nil then begin
   fservice:= tdbusservice.create();
   try
-   b1:= false;
    if fservice.connect() then begin
     for desk1:= desktopkindty(1) to high(desk1) do begin
      if fservice.dbusgetproperty(interfacestart[desk1]+'StatusNotifierWatcher',

@@ -931,25 +931,17 @@ end;
 
 function dupplicateobject(const source: tobject): tobject;
 var
- comp1: tobject;
  ar1: propinfopoarty; 
- po1,po4: ppropinfo;
+ po1: ppropinfo;
  po2: ptypeinfo;
- po3: ptypedata;
  int1: integer;
- i2: int32;
- intf1: iifidatalink;
  obj1: tobject;
- list1: tdatalist;
- bo1: boolean;
- info1: objectinfoty;
 begin
  result:= source.classtype.create();
  ar1:= getpropinfoar(source);
  for int1 := 0 to high(ar1) do begin
   po1:= ar1[int1];
   with po1^ do begin
-   bo1:= true;
    case po1^.proptype^.kind of
     tkclass: begin
      obj1:= tobject(ptruint(getordprop(source,po1)));
@@ -976,7 +968,6 @@ begin
     tkdynarray: begin
      po2:= pointer(gettypedata(proptype)^.eltype2);
                              //wrong define in ttypedata
-     po3:= gettypedata(po2);
      case po2^.kind of
       tkinteger: begin
        setintegerar(result,po1,getintegerar(source,po1));

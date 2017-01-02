@@ -119,6 +119,7 @@ end;
 destructor ttraywidget.destroy;
 begin
  visible:= false;
+ undock();
  freeandnil(ftimer);
  ficon.free;
  inherited;
@@ -171,6 +172,7 @@ begin
 {$ifdef mse_usedbus}
  end;
 {$endif}
+end;
 
 procedure ttraywidget.undock;
 begin
@@ -238,8 +240,8 @@ procedure ttraywidget.loaded;
 begin
  if not(csdesigning in componentstate) and visible then begin
   visible:= false;
-  if dock() then begin
   inherited;
+  if dock() then begin
    visible:= true;
   end;
  end
