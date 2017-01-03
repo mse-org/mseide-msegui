@@ -23,7 +23,7 @@ uses
  mseinplaceedit,msegrids,msetypes,mseshapes,msewidgets,
  msedrawtext,classes,mclasses,msereal,mseclasses,msearrayprops,
  msebitmap,msemenus,msetimer,mseactions,msekeyboard,
- msesimplewidgets,msepointer,msestrings,msescrollbar
+ msesimplewidgets,msepointer,msestrings,msescrollbar,mseassistiveclient
          {$ifdef mse_with_ifi},mseifiglob{$endif};
 
 const
@@ -505,7 +505,8 @@ type
    function verticalfontheightdelta: boolean; override;
    procedure setoptionsedit1(const avalue: optionsedit1ty); virtual;
      //iassistiveclient
-   function getassistivecaretindex(): int32; override;
+   function getassistivecaretindex(): int32 override;
+   function getassistiveflags(): assistiveflagsty override;
      //iedit
    function getoptionsedit: optionseditty; virtual;
    function hasselection: boolean; virtual;
@@ -652,7 +653,7 @@ type
 implementation
 uses
  sysutils,msebits,msedataedits,msestockobjects,mseact,
- mseassistiveserver,mseassistiveclient;
+ mseassistiveserver;
 
 type
  twidget1 = class(twidget);
@@ -1700,6 +1701,14 @@ end;
 function tcustomedit.getassistivecaretindex(): int32;
 begin
  result:= feditor.curindex;
+end;
+
+function tcustomedit.getassistiveflags(): assistiveflagsty;
+begin
+ result:= inherited getassistiveflags + [asf_edit];
+ if readonly then begin
+  include(result,asf_readonly);
+ end;
 end;
 
 function tcustomedit.geteditfont: tfont;

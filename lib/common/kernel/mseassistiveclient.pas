@@ -17,7 +17,7 @@ uses
  msestrings,mseglob,mseinterfaces,msetypes,mseificompglob;
 type
  assistiveflagty = (asf_embedded,asf_grid,asf_gridcell,asf_datetime,asf_menu,
-                    asf_message);
+                    asf_message,asf_edit,asf_readonly);
  assistiveflagsty = set of assistiveflagty;
  
  iassistiveclient = interface(inullinterface)[miid_iassistiveclient]
