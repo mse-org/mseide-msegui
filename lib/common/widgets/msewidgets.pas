@@ -1048,6 +1048,8 @@ type
    function getcaption: msestring; virtual;
    procedure setcaption(const Value: msestring); virtual;
    procedure windowcreated; override;
+    //iassistiveclient
+   function getassistivecaption(): msestring; override;
   public
    property caption: msestring read getcaption write setcaption;
  end;
@@ -1903,8 +1905,9 @@ begin
       widgetrect:= rect1;
       parentwidget:= widget;
       if buttons[int1] in noshortcut then begin
-       captiontorichstring(stockobjects.modalresulttextnoshortcut[buttons[int1]],
-                                  finfo.ca.caption);
+       captiontorichstring(
+                stockobjects.modalresulttextnoshortcut[buttons[int1]],
+                                                             finfo.ca.caption);
       end
       else begin
        captiontorichstring(stockobjects.modalresulttext[buttons[int1]],
@@ -1980,12 +1983,12 @@ function showmessage(const atext,caption: msestring;
                      const noshortcut: modalresultsty = [];
                      const minwidth: integer = 0;
                      const exttext: msestring = '';
-                     const position: messagepositionty = mepo_default): modalresultty;
+              const position: messagepositionty = mepo_default): modalresultty;
 var
  rect1: rectty;
 begin
  result:= internalshowmessage(atext,caption,buttons,defaultbutton,
-                 noshortcut,messagerect(position,rect1),cp_center,minwidth,[],exttext);
+          noshortcut,messagerect(position,rect1),cp_center,minwidth,[],exttext);
 end;
 
 function showmessage(const atext,caption: msestring;
@@ -1995,7 +1998,7 @@ function showmessage(const atext,caption: msestring;
                      const minwidth: integer;
                      const actions: array of notifyeventty;
                      const exttext: msestring = '';
-                     const position: messagepositionty = mepo_default): modalresultty;
+             const position: messagepositionty = mepo_default): modalresultty;
 var
  rect1: rectty;
 begin
@@ -5527,6 +5530,11 @@ begin
  if fcaption <> '' then begin
   caption:= fcaption;                //set windowcaption
  end;
+end;
+
+function tcaptionwidget.getassistivecaption(): msestring;
+begin
+ result:= getcaption();
 end;
 
 { tscrollface }
