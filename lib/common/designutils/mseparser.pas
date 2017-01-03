@@ -237,6 +237,7 @@ type
    function testident(const ident: integer): boolean;
                        //skips whitespace, true if ident found
    function checknamenoident: boolean;
+   function skipnamenoident: boolean;
    function checkname: boolean; overload;
    function checkname(const aname: ansistring): boolean; overload;
    function getname(out value: lstringty): boolean; overload;
@@ -1566,6 +1567,14 @@ begin
  result:= (getident = -1) and (fto^.kind = tk_name);
  if result then begin
   nexttoken;
+ end;
+end;
+
+function tparser.skipnamenoident: boolean;
+begin
+ result:= (getident = -1);
+ if result and (fto^.kind = tk_name) then begin
+  nexttoken();
  end;
 end;
 

@@ -224,7 +224,7 @@ begin
     end
     else begin
 //     ident1:= getident;
-     if checknamenoident then begin
+     if skipnamenoident then begin
       case adef^.kind of
        syk_typedef: begin
         if checkoperator('=') then begin
@@ -448,6 +448,7 @@ begin
    end;
   end
   else begin
+   apos:= sourcepos;
    result:= true;
   end;
   if result then begin
@@ -456,6 +457,8 @@ begin
      setlength(params,length(params)+1);
      with params[high(params)] do begin
       typename:= getorigname;
+      start:= apos;
+      stop:= sourcepos;
      end;
     end
     else begin
