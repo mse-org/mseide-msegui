@@ -14,7 +14,7 @@ unit msewidgets;
 interface
 uses
  classes,mclasses,msegui,mseguiglob,msetypes,msestrings,msegraphutils,
- msegraphics,msesystypes,
+ msegraphics,msesystypes,mseassistiveclient,
  mseevent,msescrollbar,msemenus,mserichstring,msedrawtext,mseglob,mseact,
  mseshapes,mseclasses,msebitmap,msetimer;
 
@@ -1425,6 +1425,9 @@ type
    fexttext: msestring;
    procedure dopaintforeground(const canvas: tcanvas); override;
    procedure dokeydown(var ainfo: keyeventinfoty); override;
+    //iassistiveclient
+   function getassistivetext(): msestring override;
+   function getassistiveflags(): assistiveflagsty override;
   public
    constructor create(const aowner: tcomponent; const apopuptransient: boolean;
                         const ahasaction: boolean; const exttext: msestring);
@@ -2401,6 +2404,16 @@ begin
   copytoclipboard(replacechar(info.text.text+fexttext,#0 ,' '));
  end;
  inherited;
+end;
+
+function tshowmessagewidget.getassistivetext(): msestring;
+begin
+ result:= info.text.text;
+end;
+
+function tshowmessagewidget.getassistiveflags(): assistiveflagsty;
+begin
+ result:= inherited getassistiveflags + [asf_message];
 end;
 
 { tcustomcaptionframe }
