@@ -14629,6 +14629,9 @@ begin
  if not (ws_iswidget in fwidgetstate) then begin
   include(result,asf_embedded);
  end;
+ if osk_container in foptionsskin then begin
+  include(result,asf_container);
+ end;
 end;
 
 function twidget.getifidatalinkintf(): iifidatalink;
