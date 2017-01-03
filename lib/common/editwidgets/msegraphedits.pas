@@ -2356,6 +2356,10 @@ end;
 function tgraphdataedit.getassistiveflags: assistiveflagsty;
 begin
  result:= inherited getassistiveflags;
+ result:= result + [asf_graphicedit];
+ if readonly then begin
+  include(result,asf_readonly);
+ end;
  if fgridintf <> nil then begin
   include(result,asf_gridcell);
  end;

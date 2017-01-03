@@ -1705,7 +1705,7 @@ end;
 
 function tcustomedit.getassistiveflags(): assistiveflagsty;
 begin
- result:= inherited getassistiveflags + [asf_edit];
+ result:= inherited getassistiveflags + [asf_textedit];
  if readonly then begin
   include(result,asf_readonly);
  end;
