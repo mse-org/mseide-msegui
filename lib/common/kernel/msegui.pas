@@ -1746,6 +1746,7 @@ type
    procedure updatemousestate(const info: mouseeventinfoty); virtual;
                                    //updates fstate about mouseposition
    procedure setclientclick; //grabs mouse and sets clickflags
+   procedure releasebuttonpressgrab();
 
    procedure registerchildwidget(const child: twidget); virtual;
    procedure unregisterchildwidget(const child: twidget); virtual;
@@ -10978,6 +10979,13 @@ procedure twidget.setclientclick;
 begin
  appinst.capturemouse(self,true);
  fwidgetstate:= fwidgetstate + [ws_lclicked,ws_clientmousecaptured];
+end;
+
+procedure twidget.releasebuttonpressgrab();
+begin
+ if appinst.fmousecapturewidget = self then begin
+  appinst.ungrabpointer();
+ end;
 end;
 
 procedure twidget.clientmouseevent(var info: mouseeventinfoty);

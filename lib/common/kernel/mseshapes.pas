@@ -438,6 +438,7 @@ begin
           else begin
            widget.invalidaterect(ca.dim);
           end;
+          twidget1(widget).releasebuttonpressgrab();
          end;
          doexecute(tag,mouseevent);
          exit;
