@@ -3192,7 +3192,7 @@ function tdbusservice.checkok(): boolean;
 begin
  result:= dbus_error_is_set(@ferr) = 0;
  if not result then begin
-  dbuslasterror:= ferr.message;
+  dbuslasterror:= string(ferr.message);
  end;
 end;
 
@@ -3859,5 +3859,6 @@ initialization
  doinit();
 // clearlist(userdatacache,sizeof(userdatarecty),0);
 finalization
+ dbuslasterror:= ''; //memory leak without on FPC 2.6.4
 // freelist(userdatacache);
 end.
