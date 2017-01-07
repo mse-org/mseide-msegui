@@ -1111,7 +1111,11 @@ type
  {$endif}
  record
    TypeRef: PTypeInfo;
+  {$ifdef mse_fpc_3_0}
    FldOffset: SizeInt;
+  {$else}
+   FldOffset: longint;
+  {$endif}
  end;
 {$endif}
 
@@ -1450,8 +1454,10 @@ writeln('**setvariantvalue:',variantlevel,':',atypeinfo^.name,' ',atypeinfo^.kin
    tkrecord: begin
     kind:= vvk_record;
     vvariantar.data:= nil;
-    setlength(variantvaluearty(vvariantar.data),precordtypedata(pt)^.managedfldcount);
-    p1:= aligntoptr(pointer(@precordtypedata(pt)^.managedfldcount)+sizeof(precordtypedata(pt)^.managedfldcount));
+    setlength(variantvaluearty(vvariantar.data),
+                         precordtypedata(pt)^.managedfldcount);
+    p1:= aligntoptr(pointer(@precordtypedata(pt)^.managedfldcount)+
+                               sizeof(precordtypedata(pt)^.managedfldcount));
     pe:= p1+precordtypedata(pt)^.managedfldcount;
     pvalue:= vvariantar.data;
 {$ifdef mse_debugvariant}

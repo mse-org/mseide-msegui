@@ -182,9 +182,9 @@ const
  bigint = maxint div 2;
  nullmethod: tmethod = (code: nil; data: nil);
 {$ifdef cpu64}
- pointeralignmask = $ffffffffffffffff - $7;
+ pointeralignmask = ptruint($ffffffffffffffff) - $7;
 {$else}
- pointeralignmask = $ffffffff - $3;
+ pointeralignmask = ptruint($ffffffff) - $3;
 {$endif}
 
 type
