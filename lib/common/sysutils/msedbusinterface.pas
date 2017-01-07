@@ -8,7 +8,9 @@
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 }
 unit msedbusinterface;
-{$ifdef FPC}{$mode objfpc}{$h+}{$goto on}{$endif}
+{$ifdef FPC}{$mode objfpc}{$h+}{$goto on}
+ {$if FPC_FULLVERSION >= 30000} {$define mse_FPC_3_0} {$endif}
+{$endif}
 
 {$ifdef mswindows}
  {$define wincall} //depends on compiler?
@@ -636,7 +638,7 @@ end;
 
 function itemtypeinfo(const dynartypeinfo: ptypeinfo): ptypeinfo;
 begin
- result:= gettypedata(dynartypeinfo)^.eltype2;
+ result:= ptypeinfo(gettypedata(dynartypeinfo)^.eltype2);
 end;
 
 procedure additem(var dest: dbusdatatyarty; const value: dbusdataty);
@@ -1085,7 +1087,34 @@ const
    DBUS_TYPE_INT16_AS_STRING,DBUS_TYPE_UINT16_AS_STRING,
  //otSLong,                  otULong
    DBUS_TYPE_INT32_AS_STRING,DBUS_TYPE_UINT32_AS_STRING);
-   
+type
+{$ifdef mse_fpc_3_0}
+ precordtypedata = ptypedata;
+{$else}
+ recordtypedata = 
+ {$ifndef FPC_REQUIRES_PROPER_ALIGNMENT}
+ packed
+ {$endif}
+ record
+  case TTypeKind of
+   tkrecord: (
+    RecSize: Integer;
+    ManagedFldCount: Integer;
+    {ManagedFields: array[1..ManagedFldCount] of TManagedField}
+   );
+ end;
+ precordtypedata = ^recordtypedata;
+ PManagedField = ^TManagedField;
+ TManagedField =
+ {$ifndef FPC_REQUIRES_PROPER_ALIGNMENT}
+ packed
+ {$endif}
+ record
+   TypeRef: PTypeInfo;
+   FldOffset: SizeInt;
+ end;
+{$endif}
+
 function dbusdatastring(const atypeinfo: ptypeinfo): string;
 var
  p1: ptypedata;
@@ -1095,12 +1124,12 @@ begin
  p1:= gettypedata(atypeinfo);
  case atypeinfo^.kind of
   tkdynarray: begin
-   result:= 'a'+dbusdatastring(p1^.eltype2);
+   result:= 'a'+dbusdatastring(ptypeinfo(p1^.eltype2));
   end;
   tkrecord: begin
    result:= '(';
-   p2:= aligntoptr(pointer(@p1^.managedfldcount)+sizeof(p1^.managedfldcount));
-   pe:= p2+p1^.managedfldcount;
+   p2:= aligntoptr(pointer(@precordtypedata(p1)^.managedfldcount)+sizeof(precordtypedata(p1)^.managedfldcount));
+   pe:= p2+precordtypedata(p1)^.managedfldcount;
    while p2 < pe do begin
     result:= result+dbusdatastring(p2^.typeref);
     inc(p2);
@@ -1189,19 +1218,19 @@ end;
 function dbusdatatypes(const atypeinfo: ptypeinfo): dbusdatatyarty;
 var
  p1: ptypedata;
- p2,PE: pmanagedfield;
+ p2,pe: pmanagedfield;
 begin
  setlength(result,1);
  p1:= gettypedata(atypeinfo);
  case atypeinfo^.kind of
   tkdynarray: begin
    result[0]:= dbt_array;
-   stackarray(dbusdatatypes(p1^.eltype2),result);
+   stackarray(dbusdatatypes(ptypeinfo(p1^.eltype2)),result);
   end;
   tkrecord: begin
    result[0]:= dbt_struct;
-   p2:= aligntoptr(pointer(@p1^.managedfldcount)+sizeof(p1^.managedfldcount));
-   pe:= p2+p1^.managedfldcount;
+   p2:= aligntoptr(pointer(@precordtypedata(p1)^.managedfldcount)+sizeof(precordtypedata(p1)^.managedfldcount));
+   pe:= p2+precordtypedata(p1)^.managedfldcount;
    while p2 < pe do begin
     stackarray(dbusdatatypes(p2^.typeref),result);
     inc(p2);
@@ -1390,7 +1419,7 @@ writeln('**setvariantvalue:',variantlevel,':',atypeinfo^.name,' ',atypeinfo^.kin
    end;
    tkdynarray: begin
     kind:= vvk_dynar;
-    case pt^.eltype2^.kind of
+    case ptypeinfo(pt^.eltype2)^.kind of
      tkrecord: begin
       if vf_dict in aflags then begin
        vdynar.data:= ppointer(avaluead)^;
@@ -1406,7 +1435,7 @@ writeln('**setvariantvalue:',variantlevel,':',atypeinfo^.name,' ',atypeinfo^.kin
        pvar:= vvariantar.data;
        pe:= pvar + dynarraylength(p2);
        while pvar < pe do begin
-        setvariantvalue(p2,pt^.eltype2,pvar^);
+        setvariantvalue(p2,ptypeinfo(pt^.eltype2),pvar^);
         inc(pvar);
         inc(p2,pt^.elsize);
        end;
@@ -1421,9 +1450,9 @@ writeln('**setvariantvalue:',variantlevel,':',atypeinfo^.name,' ',atypeinfo^.kin
    tkrecord: begin
     kind:= vvk_record;
     vvariantar.data:= nil;
-    setlength(variantvaluearty(vvariantar.data),pt^.managedfldcount);
-    p1:= aligntoptr(pointer(@pt^.managedfldcount)+sizeof(pt^.managedfldcount));
-    pe:= p1+pt^.managedfldcount;
+    setlength(variantvaluearty(vvariantar.data),precordtypedata(pt)^.managedfldcount);
+    p1:= aligntoptr(pointer(@precordtypedata(pt)^.managedfldcount)+sizeof(precordtypedata(pt)^.managedfldcount));
+    pe:= p1+precordtypedata(pt)^.managedfldcount;
     pvalue:= vvariantar.data;
 {$ifdef mse_debugvariant}
 writeln('*recordfieldcount:',variantlevel,':',pe-p1);
@@ -2136,7 +2165,7 @@ procedure tdbusservice.setupmessage(const amessage: pdbusmessage;
     p1:= @param.vcard32;
    end;
    vvk_variantar: begin
-    pt:= gettypedata(param.vvariantar.typinfo)^.eltype2;
+    pt:= ptypeinfo(gettypedata(param.vvariantar.typinfo)^.eltype2);
     s1:= dbusdatastring(pt);
     if dbus_message_iter_open_container(piter,dbusdatacodes[dbt_array],
               pchar(s1),@iter1) = 0 then begin
@@ -2162,7 +2191,7 @@ procedure tdbusservice.setupmessage(const amessage: pdbusmessage;
      s1:= dbusdatastrings[dbt_dict_entry];
     end
     else begin
-     pt:= gettypedata(param.vdynar.typinfo)^.eltype2;
+     pt:= ptypeinfo(gettypedata(param.vdynar.typinfo)^.eltype2);
      s1:= dbusdatastring(pt);
     end;
     if dbus_message_iter_open_container(piter,dbusdatacodes[dbt_array],
