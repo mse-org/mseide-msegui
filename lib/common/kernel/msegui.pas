@@ -27,7 +27,7 @@ uses
 
 const
  mseguiversiontext = '4.4.1';
- copyrighttext = 'Copyright 1999-2016';
+ copyrighttext = 'Copyright 1999-2017';
  
  defaultwidgetcolor = cl_default;
  defaulttoplevelwidgetcolor = cl_background;
