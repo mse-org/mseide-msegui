@@ -235,6 +235,8 @@ type
    function widgetcol: twidgetcol;
    property gridrow: integer read getgridrow write setgridrow;
                       //returns -1 if no grid, setting ignored if no grid
+   function gridrowhigh: int32; //-1 if no grid
+   function griddatarowhigh: int32; //-1 if no grid
    function gridcol: integer;
    function griddata: tdatalist;
    property gridintf: iwidgetgrid read fgridintf;
@@ -2388,6 +2390,26 @@ begin
  end
  else begin
   result:= fgridintf.getcol.grid.row;
+ end;
+end;
+
+function tcustomdataedit.gridrowhigh: int32;
+begin
+ if fgridintf = nil then begin
+  result:= -1;
+ end
+ else begin
+  result:= fgridintf.getcol.grid.rowhigh;
+ end;
+end;
+
+function tcustomdataedit.griddatarowhigh: int32;
+begin
+ if fgridintf = nil then begin
+  result:= -1;
+ end
+ else begin
+  result:= fgridintf.getcol.grid.datarowhigh;
  end;
 end;
 

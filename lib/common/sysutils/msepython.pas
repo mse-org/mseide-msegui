@@ -87,10 +87,22 @@ type
    property onprocfinished;
    property oncheckabort;
  end;
+
+function pyboolean(const avalue: boolean): msestring;
  
 implementation
 uses
  sysutils;
+
+function pyboolean(const avalue: boolean): msestring;
+begin
+ if avalue then begin
+  result:= '1';
+ end
+ else begin
+  result:= '0';
+ end;
+end;
  
 { tpythonscript }
 

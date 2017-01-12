@@ -253,6 +253,8 @@ type
    function actualcolor: colorty; override;
    function widgetcol: twidgetcol;
    function gridrow: integer;
+   function gridrowhigh: int32; //-1 if no grid
+   function griddatarowhigh: int32; //-1 if no grid
    function gridcol: integer;
    function griddata: tdatalist;
 
@@ -2007,6 +2009,26 @@ begin
  end
  else begin
   result:= fgridintf.getcol.grid.row;
+ end;
+end;
+
+function tgraphdataedit.gridrowhigh: int32;
+begin
+ if fgridintf = nil then begin
+  result:= -1;
+ end
+ else begin
+  result:= fgridintf.getcol.grid.rowhigh;
+ end;
+end;
+
+function tgraphdataedit.griddatarowhigh: int32;
+begin
+ if fgridintf = nil then begin
+  result:= -1;
+ end
+ else begin
+  result:= fgridintf.getcol.grid.datarowhigh;
  end;
 end;
 
