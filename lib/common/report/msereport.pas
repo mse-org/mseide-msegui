@@ -686,10 +686,10 @@ type
    function getvisibility: boolean;
    procedure updatevisibility; virtual;
    function lastbandheight: integer; virtual;
-   procedure clientmouseevent(var info: mouseeventinfoty); override;
    procedure loaded; override;
 
    procedure setppmm(const avalue: real);
+   procedure clientmouseevent(var info: mouseeventinfoty); override;
       //iobjectpicker
    function getcursorshape(const sender: tobjectpicker;
                                 var ashape: cursorshapety): boolean;
@@ -3741,6 +3741,7 @@ begin
  fzebra_step:= 2;
  fzebra_color:= cl_infobackground;
  inherited;
+ include(fwidgetstate1,ws1_designactive);
  fanchors:= defaultbandanchors;
  foptionswidget:= defaultbandoptionswidget;
 end;
@@ -4524,10 +4525,10 @@ end;
 
 procedure tcustomrecordband.clientmouseevent(var info: mouseeventinfoty);
 begin
- if fobjectpicker <> nil then begin
+ inherited;
+ if not (es_processed in info.eventstate) and (fobjectpicker <> nil) then begin
   fobjectpicker.mouseevent(info);
  end;
- inherited;
 end;
 
 procedure tcustomrecordband.objectevent(const sender: tobject;
