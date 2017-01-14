@@ -96,7 +96,7 @@ type
                  const options: locateoptionsty = []): locateresultty;
 }
    function CreateBlobStream(Field: TField; Mode: TBlobStreamMode): TStream; override;
-   procedure AppendRecord(const Values: array of const);
+   procedure appendrecord(const values: array of const);
    procedure cancel; override;
    procedure post; override;
    function moveby(const distance: integer): integer;
@@ -174,7 +174,7 @@ begin
  result:= fcontroller.locate(key,field,options);
 end;
 }
-procedure tlocaldataset.AppendRecord(const Values: array of const);
+procedure tlocaldataset.appendrecord(const values: array of const);
 begin
  fcontroller.appendrecord(values);
 end;
