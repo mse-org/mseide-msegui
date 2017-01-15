@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2016 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2017 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -315,9 +315,17 @@ function comparestrlen(const S1,S2: string): integer;
 function msecomparestrlen(const S1,S2: msestring): integer;
                 //case sensitiv, beruecksichtigt nur s1 laenge
 
-function msecomparestr(const S1, S2: msestring): Integer; {$ifdef FPC} inline; {$endif}
+function msecomparestr(const S1, S2: msestring): Integer
+                                               {$ifdef FPC} inline; {$endif}
                 //case sensitive
-function msecomparetext(const S1, S2: msestring): Integer;{$ifdef FPC} inline; {$endif}
+function msecomparetext(const S1, S2: msestring): Integer
+                                               {$ifdef FPC} inline; {$endif}
+                //case insensitive
+function msecomparestrnative(const S1, S2: msestring): Integer
+                                               {$ifdef FPC} inline; {$endif}
+                //case sensitive
+function msecomparetextnative(const S1, S2: msestring): Integer
+                                               {$ifdef FPC} inline; {$endif}
                 //case insensitive
 function mseCompareTextlen(const S1, S2: msestring): Integer;
                 //case insensitiv, beruecksichtigt nur s1 laenge
@@ -5583,6 +5591,103 @@ begin
 {$else}
  result:= widecomparetext(s1,s2);
 {$endif}
+end;
+
+function comparenative(const s1,s2: msestring;
+                                   const caseinsensitive: boolean): int32;
+var
+ p1,p2: pmsechar;
+ pa,pb: pmsechar;
+ i1,ia,ib: int32;
+ si0,si1,si2: sizeint;
+ c1,c2: msechar;
+ b1: boolean;
+begin
+ b1:= false;
+ if (s1 <> '') and (s2 <> '') then begin
+  p1:= pmsechar(pointer(s1)) + (length(s1) - 1);
+  pa:= p1;
+  while pa >= pointer(s1) do begin
+   if (pa^ > '9') or (pa^ < '0') then begin
+    break;
+   end;
+   dec(pa);
+  end;
+  if pa <> p1 then begin
+   p2:= pmsechar(pointer(s2)) + (length(s2) - 1);
+   pb:= p2;
+   while pb >= pointer(s2) do begin
+    if (pb^ > '9') or (pb^ < '0') then begin
+     break;
+    end;
+    dec(pb);
+   end;
+   if pb <> p2 then begin
+    si0:= pa - pmsechar(pointer(s1));
+    if si0 = pb - pmsechar(pointer(s2)) then begin
+     inc(si0);
+     i1:= 1;
+     ia:= 0;
+     while p1 > pa do begin
+      ia:= ia + i1 * (card16(p1^)-card16('0'));
+      i1:= i1 * 10;
+      dec(p1);
+     end;
+     i1:= 1;
+     ib:= 0;
+     while p2 > pb do begin
+      ib:= ib + i1 * (card16(p2^)-card16('0'));
+      i1:= i1 * 10;
+      dec(p2);
+     end;
+     si1:= length(s1);
+     si2:= length(s2);
+     (psizeint(pointer(s1))-1)^:= si0;
+     (psizeint(pointer(s2))-1)^:= si0;
+     inc(pa);
+     c1:= pa^;
+     pa^:= #0;
+     inc(pb);
+     c2:= pb^;
+     pb^:= #0;
+     if caseinsensitive then begin
+      result:= msecomparetext(s1,s2);
+     end
+     else begin
+      result:= msecomparestr(s1,s2);
+     end;
+     if result = 0 then begin
+      result:= ia - ib;
+     end;
+     (psizeint(pointer(s1))-1)^:= si1;
+     (psizeint(pointer(s2))-1)^:= si2;
+     pa^:= c1;
+     pb^:= c2;
+     b1:= true;
+    end;
+   end;
+  end;
+ end;
+ if not b1 then begin
+  if caseinsensitive then begin
+   result:= msecomparetext(s1,s2);
+  end
+  else begin
+   result:= msecomparestr(s1,s2);
+  end;
+ end;
+end;
+
+function msecomparestrnative(const S1, S2: msestring): Integer;
+                //case sensitive
+begin
+ result:= comparenative(s1,s2,false);
+end;
+
+function msecomparetextnative(const S1, S2: msestring): Integer;
+                //case insensitive
+begin
+ result:= comparenative(s1,s2,true);
 end;
 
 function mseCompareTextlen(const S1, S2: msestring): Integer;

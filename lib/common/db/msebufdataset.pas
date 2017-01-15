@@ -264,7 +264,7 @@ type
    destructor destroy; override;
  end;
 
- indexfieldoptionty = (ifo_desc,ifo_caseinsensitive);
+ indexfieldoptionty = (ifo_desc,ifo_caseinsensitive,ifo_natural);
  indexfieldoptionsty = set of indexfieldoptionty;
  
  tindexfield = class(townedpersistent)
@@ -1490,6 +1490,16 @@ begin
  result:= msecomparetext(msestring(l),msestring(r));
 end;
 
+function compstringn(const l,r): integer;
+begin
+ result:= msecomparestrnative(msestring(l),msestring(r));
+end;
+
+function compstringin(const l,r): integer;
+begin
+ result:= msecomparetextnative(msestring(l),msestring(r));
+end;
+
 function compguid(const l,r): integer;
 var
  int1: integer;
@@ -1510,30 +1520,44 @@ type
   cvtype: integer;
   compfunc: arraysortcomparety;
   compfunci: arraysortcomparety;
+  compfuncn: arraysortcomparety;
+  compfuncin: arraysortcomparety;
  end;
  
 const
  comparefuncs: array[fieldcomparekindty] of fieldcompareinfoty = 
   ((datatypes: integerindexfields; cvtype: vtinteger;
-                compfunc: {$ifdef FPC}@{$endif}compinteger;
-                compfunci: {$ifdef FPC}@{$endif}compinteger),
+                compfunc: @compinteger;
+                compfunci: @compinteger;
+                compfuncn: @compinteger;
+                compfuncin: @compinteger),
    (datatypes: largeintindexfields; cvtype: vtint64;
-                compfunc: {$ifdef FPC}@{$endif}compint64;
-                compfunci: {$ifdef FPC}@{$endif}compint64),
+                compfunc: @compint64;
+                compfunci: @compint64;
+                compfuncn: @compint64;
+                compfuncin: @compint64),
    (datatypes: floatindexfields; cvtype: vtextended;
-                compfunc: {$ifdef FPC}@{$endif}compfloat;
-                compfunci: {$ifdef FPC}@{$endif}compfloat),
+                compfunc: @compfloat;
+                compfunci: @compfloat;
+                compfuncn: @compfloat;
+                compfuncin: @compfloat),
    (datatypes: currencyindexfields; cvtype: vtcurrency;
-                compfunc: {$ifdef FPC}@{$endif}compcurrency;
-                compfunci: {$ifdef FPC}@{$endif}compcurrency),
+                compfunc: @compcurrency;
+                compfunci: @compcurrency;
+                compfuncn: @compcurrency;
+                compfuncin: @compcurrency),
    (datatypes: stringindexfields;
           cvtype: {$ifdef mse_hasvtunicodestring}vtunicodestring
                   {$else}vtwidestring{$endif};
-                compfunc: {$ifdef FPC}@{$endif}compstring;
-                compfunci: {$ifdef FPC}@{$endif}compstringi),
+                compfunc: @compstring;
+                compfunci: @compstringi;
+                compfuncn: @compstringn;
+                compfuncin: @compstringin),
    (datatypes: guidindexfields; cvtype: mse_vtguid;
-                compfunc: {$ifdef FPC}@{$endif}compguid;
-                compfunci: {$ifdef FPC}@{$endif}compguid)
+                compfunc: @compguid;
+                compfunci: @compguid;
+                compfuncn: @compguid;
+                compfuncin: @compguid)
 );
 
 procedure alignfieldpos(var avalue: integer);
@@ -9713,10 +9737,20 @@ begin
        if datatype in datatypes then begin
         vtype:= cvtype;
         if ifo_caseinsensitive in options then begin
-         comparefunc:= compfunci;
+         if ifo_natural in options then begin
+          comparefunc:= compfuncin;
+         end
+         else begin
+          comparefunc:= compfunci;
+         end;
         end
         else begin
-         comparefunc:= compfunc;
+         if ifo_natural in options then begin
+          comparefunc:= compfuncn;
+         end
+         else begin
+          comparefunc:= compfunc;
+         end;
         end;
         break;
        end;

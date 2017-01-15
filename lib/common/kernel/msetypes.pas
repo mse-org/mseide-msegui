@@ -156,6 +156,7 @@ type
   PPtrUInt = ^PtrUInt;
  {$endif}
 
+ ppsizeint = ^psizeint;
  ppppointer = ^pppointer;
  preal = ^real;
  realty = type double;
