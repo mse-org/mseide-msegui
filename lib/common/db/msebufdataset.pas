@@ -1492,12 +1492,12 @@ end;
 
 function compstringn(const l,r): integer;
 begin
- result:= msecomparestrnative(msestring(l),msestring(r));
+ result:= msecomparestrnatural(msestring(l),msestring(r));
 end;
 
 function compstringin(const l,r): integer;
 begin
- result:= msecomparetextnative(msestring(l),msestring(r));
+ result:= msecomparetextnatural(msestring(l),msestring(r));
 end;
 
 function compguid(const l,r): integer;

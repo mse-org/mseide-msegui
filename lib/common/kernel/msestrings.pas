@@ -321,10 +321,10 @@ function msecomparestr(const S1, S2: msestring): Integer
 function msecomparetext(const S1, S2: msestring): Integer
                                                {$ifdef FPC} inline; {$endif}
                 //case insensitive
-function msecomparestrnative(const S1, S2: msestring): Integer
+function msecomparestrnatural(const S1, S2: msestring): Integer
                                                {$ifdef FPC} inline; {$endif}
                 //case sensitive
-function msecomparetextnative(const S1, S2: msestring): Integer
+function msecomparetextnatural(const S1, S2: msestring): Integer
                                                {$ifdef FPC} inline; {$endif}
                 //case insensitive
 function mseCompareTextlen(const S1, S2: msestring): Integer;
@@ -5593,7 +5593,7 @@ begin
 {$endif}
 end;
 
-function comparenative(const s1,s2: msestring;
+function comparenatural(const s1,s2: msestring;
                                    const caseinsensitive: boolean): int32;
 var
  p1,p2: pmsechar;
@@ -5678,16 +5678,16 @@ begin
  end;
 end;
 
-function msecomparestrnative(const S1, S2: msestring): Integer;
+function msecomparestrnatural(const S1, S2: msestring): Integer;
                 //case sensitive
 begin
- result:= comparenative(s1,s2,false);
+ result:= comparenatural(s1,s2,false);
 end;
 
-function msecomparetextnative(const S1, S2: msestring): Integer;
+function msecomparetextnatural(const S1, S2: msestring): Integer;
                 //case insensitive
 begin
- result:= comparenative(s1,s2,true);
+ result:= comparenatural(s1,s2,true);
 end;
 
 function mseCompareTextlen(const S1, S2: msestring): Integer;
