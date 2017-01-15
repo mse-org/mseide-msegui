@@ -5604,7 +5604,7 @@ var
  b1: boolean;
 begin
  b1:= false;
- if (s1 <> '') and (s2 <> '') then begin
+ if (s1 <> '') and (pointer(s1) <> pointer(s2)) then begin
   p1:= pmsechar(pointer(s1)) + (length(s1) - 1);
   pa:= p1;
   while pa >= pointer(s1) do begin
