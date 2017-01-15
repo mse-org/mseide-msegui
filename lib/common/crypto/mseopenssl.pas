@@ -173,7 +173,7 @@ var
  SSL_CTX_set_verify: procedure(ctx: PSSL_CTX; mode: cint;
                                                 arg2: PFunction); cdecl;
 
- SSLv2_method: function():PSSL_METHOD; cdecl;
+// SSLv2_method: function():PSSL_METHOD; cdecl;
  SSLv3_method: function():PSSL_METHOD; cdecl;
  TLSv1_method: function():PSSL_METHOD; cdecl;
  SSLv23_method: function():PSSL_METHOD; cdecl;
@@ -371,7 +371,7 @@ procedure initializeopenssl(const sonames: array of filenamety;
                                  const sonamesutil: array of filenamety);
                                      //[] = default
 const
- funcs: array[0..{$ifndef mswindows}54{$else}44{$endif}] of funcinfoty = (
+ funcs: array[0..{$ifndef mswindows}53{$else}43{$endif}] of funcinfoty = (
    (n: 'SSL_get_error'; d: {$ifndef FPC}@{$endif}@SSL_get_error),
    (n: 'SSL_library_init'; d: {$ifndef FPC}@{$endif}@SSL_library_init),
    (n: 'SSL_load_error_strings'; d: {$ifndef FPC}@{$endif}@SSL_load_error_strings),
@@ -382,7 +382,7 @@ const
    (n: 'SSL_set_rfd'; d: {$ifndef FPC}@{$endif}@SSL_set_rfd),
    (n: 'SSL_set_wfd'; d: {$ifndef FPC}@{$endif}@SSL_set_wfd),
    (n: 'SSL_set_cipher_list'; d: {$ifndef FPC}@{$endif}@SSL_set_cipher_list),
-   (n: 'SSLv2_method'; d: {$ifndef FPC}@{$endif}@SSLv2_method),
+//   (n: 'SSLv2_method'; d: {$ifndef FPC}@{$endif}@SSLv2_method),
    (n: 'SSLv3_method'; d: {$ifndef FPC}@{$endif}@SSLv3_method),
    (n: 'TLSv1_method'; d: {$ifndef FPC}@{$endif}@TLSv1_method),
    (n: 'SSLv23_method'; d: {$ifndef FPC}@{$endif}@SSLv23_method),
