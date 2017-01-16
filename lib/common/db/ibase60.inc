@@ -3218,11 +3218,9 @@ begin
  //workarond: call 
  //  initializeibase60(fbembedlib);
  //at program start in order to prevent unloading of FB-lib 
-{
  if fb_shutdown <> nil then begin
   fb_shutdown(100,-fb_shutrsn_app_stopped);
  end;
-}
 end;
 
 Procedure ReleaseIBase60;
@@ -3234,6 +3232,10 @@ end;
 initialization
  initializelibinfo(libinfo);
 finalization
+ if libinfo.refcount > 0 then begin
+  libinfo.refcount:= 1;
+  releaseibase60();
+ end;
  finalizelibinfo(libinfo);
 {$ENDIF}
 
