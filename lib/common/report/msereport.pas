@@ -5238,7 +5238,12 @@ end;
 
 function tbasebandarea.reppagenum: integer;
 begin
- result:= freportpage.freport.pagenum;
+ if freportpage.freport <> nil then begin
+  result:= freportpage.freport.pagenum;
+ end
+ else begin
+  result:= 0;
+ end;
 end;
 
 function tbasebandarea.pageprintstarttime: tdatetime;
@@ -5253,12 +5258,22 @@ end;
 
 function tbasebandarea.getlastreppagecount: integer;
 begin
- result:= freportpage.freport.flastpagecount;
+ if freportpage.freport <> nil then begin
+  result:= freportpage.freport.flastpagecount;
+ end
+ else begin
+  result:= 0;
+ end;
 end;
 
 function tbasebandarea.repprintstarttime: tdatetime;
 begin
- result:= freportpage.freport.fprintstarttime;
+ if freportpage.freport <> nil then begin
+  result:= freportpage.freport.fprintstarttime;
+ end
+ else begin
+  result:= nowlocal;
+ end;
 end;
 
 function tbasebandarea.getreppage: tcustomreportpage;
@@ -5656,7 +5671,9 @@ begin
    application.unlock;
   end;
  end;
- freport.dopageafterpaint(self,acanvas);
+ if freport <> nil then begin
+  freport.dopageafterpaint(self,acanvas);
+ end;
 end;
 
 procedure tcustomreportpage.renderbackground(const acanvas: tcanvas);
@@ -5960,7 +5977,12 @@ end;
 
 function tcustomreportpage.reppagenum: integer;
 begin
- result:= freport.fpagenum;
+ if freport <> nil then begin
+  result:= freport.fpagenum;
+ end
+ else begin
+  result:= 0;
+ end;
 end;
 
 function tcustomreportpage.getdatasource: tdatasource;
@@ -5975,7 +5997,12 @@ end;
 
 function tcustomreportpage.repprintstarttime: tdatetime;
 begin
- result:= freport.fprintstarttime;
+ if freport <> nil then begin
+  result:= freport.fprintstarttime;
+ end
+ else begin
+  result:= nowlocal();
+ end;
 end;
 
 procedure tcustomreportpage.setdatasource(const avalue: tdatasource);
@@ -5985,7 +6012,9 @@ end;
 
 procedure tcustomreportpage.activatepage;
 begin
- freport.activepage:= finditem(pointerarty(freport.freppages),self);
+ if freport <> nil then begin
+  freport.activepage:= finditem(pointerarty(freport.freppages),self);
+ end;
 end;
 
 procedure tcustomreportpage.finish;
@@ -6056,7 +6085,12 @@ end;
 
 function tcustomreportpage.getlastreppagecount: integer;
 begin
- result:= freport.flastpagecount;
+ if freport <> nil then begin
+  result:= freport.flastpagecount;
+ end
+ else begin
+  result:= 0;
+ end;
 end;
 
 procedure tcustomreportpage.setfont(const avalue: trepwidgetfont);
