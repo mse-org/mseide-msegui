@@ -20470,9 +20470,13 @@ end;
 
 procedure tguiapplication.dowaitidle(var again: boolean);
 begin
- unregisteronidle({$ifdef FPC}@{$endif}dowaitidle);
- processmessages;
- fexecuteaction(self);
+ with tinternalapplication(self) do begin
+  if fmodalwindow <> fmodalwindowbeforewaitdialog then begin //wait for message window
+   unregisteronidle({$ifdef FPC}@{$endif}dowaitidle);
+   processmessages;
+   fexecuteaction(self);
+  end;
+ end;
 end;
 
 procedure tguiapplication.dowaitidle1(var again: boolean);
