@@ -299,7 +299,7 @@ end;
 
 procedure releasefb();
 begin
- //nothing to do
+ fb_get_master_interface().getdispatcher().shutdown(nil,0,0);
 end;
 
 procedure initializefirebird(const sonames: array of filenamety; //[] = default
@@ -392,5 +392,9 @@ end;
 initialization
  initializelibinfo(libinfo);
 finalization
+ if libinfo.refcount > 0 then begin
+  libinfo.refcount:= 1;
+  releasefirebird();
+ end;
  finalizelibinfo(libinfo);
 end.
