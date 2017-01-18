@@ -1,5 +1,8 @@
 MSEide+MSEgui breaking changes version history
 **********************************************
+2017-01-18
+ msefbconnection.pas -> msefbconnection3.pas.
+ tfbconnection -> tfbconnection3.
 2016-12-26
  timagelist.getimage returns bitmap- and maskbitmap-kind of imagelist.
 2016-10-21
