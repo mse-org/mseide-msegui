@@ -216,6 +216,12 @@ static const USHORT type_lengths[DTYPE_TYPE_MAX] =
  isc_info_req_update_count = 15;
  isc_info_req_delete_count = 16;
 
+ isc_spb_version = isc_spb_current_version;
+ isc_spb_user_name = isc_dpb_user_name;           //shortstring
+ isc_spb_password = isc_dpb_password;             //shortstring
+ isc_spb_sql_role_name = isc_dpb_sql_role_name;
+ isc_spb_res_stat = isc_spb_bkp_stat;
+
 type
  {$packrecords c}
  SSHORT = cshort;
@@ -248,7 +254,17 @@ type
   end;
  end;
  pvary = ^vary;
+
+ fbapity = record
+  master: imaster;
+  status: istatus;
+  provider: iprovider;
+  util: iutil;
+ end;
  
+procedure inifbapi(var api: fbapity);
+procedure finifbapi(var api: fbapity);
+
 procedure initializefirebird(const sonames: array of filenamety;
                                           const onlyonce: boolean = false);
                                      //[] = default
@@ -300,6 +316,38 @@ end;
 procedure releasefb();
 begin
  master.getdispatcher().shutdown(nil,0,0);
+end;
+
+procedure inifbapi(var api: fbapity);
+begin
+ initializefirebird([],true);
+ with api do begin
+  if master = nil then begin
+   master:= fb_get_master_interface();
+  end;
+  if status = nil then begin
+   status:= master.getstatus();
+  end;
+  if provider = nil then begin
+   provider:= master.getdispatcher();
+  end;
+  if util = nil then begin
+   util:= master.getutilinterface();
+  end;
+ end;
+end;
+
+procedure finifbapi(var api: fbapity);
+begin
+ with api do begin
+  util:= nil;
+  provider:= nil;
+  if status <> nil then begin
+   status.dispose();
+   status:= nil;
+  end;
+  master:= nil;
+ end;
 end;
 
 procedure initializefirebird(const sonames: array of filenamety; //[] = default

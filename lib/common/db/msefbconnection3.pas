@@ -82,13 +82,6 @@ type
    procedure close() override;
  end;
   
- fbapity = record
-  master: imaster;
-  status: istatus;
-  provider: iprovider;
-  util: iutil;
- end;
- 
  fbeventinfoty = record
   event: tdbevent;
   name: string;
@@ -152,8 +145,8 @@ type
    feventlength: int32;
    feventbuffer: pbyte;
    feventcountbuffer: array of ULONG;
-   procedure iniapi();
-   procedure finiapi();
+//   procedure iniapi();
+//   procedure finiapi();
    function getpb(const akind: paramblockkindty): ixpbbuilder;
    function buildpb(const akind: paramblockkindty;
                         const ainfo: pparaminfoty; const acount: int32;
@@ -482,7 +475,7 @@ var
 begin
  inited1:= fapi.master = nil;
  if inited1 then begin
-  iniapi;
+  inifbapi(fapi);
  end;
  try
   clearstatus();
@@ -494,11 +487,11 @@ begin
   checkstatus('createdatabase');
  finally
   if inited1 then begin
-   finiapi;
+   finifbapi(fapi);
   end;
  end;
 end;
-
+{
 procedure tfbconnection3.iniapi();
 begin
  initializefirebird([],true);
@@ -530,7 +523,7 @@ begin
   master:= nil;
  end;
 end;
-
+}
 procedure tfbconnection3.clearstatus(); inline;
 begin
  fapi.status.init();
@@ -653,7 +646,7 @@ var
  u1,p1: string;
 begin
  flistencount:= 0;
- iniapi();
+ inifbapi(fapi);
  try 
   inherited dointernalconnect;
   pb:= buildpb(pbk_database,@paramconsts,length(paramconsts),params,true);
@@ -697,7 +690,7 @@ begin
   checkstatus('dointernalconnect');
   fattachment.addref();
  except
-  finiapi();
+  finifbapi(fapi);
 //  releasefirebird;
   raise;
  end;

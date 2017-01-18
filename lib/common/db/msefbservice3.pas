@@ -6,7 +6,9 @@ unit msefbservice3;
 
 interface
 uses
- classes,mclasses,mseclasses,ibase60dyn,msetypes,mdb,msestrings,mibconnection,
+ classes,mclasses,mseclasses,firebird,msefirebird,msetypes,mdb,msestrings,
+ msefbconnection3,
+// mibconnection,
  msethread,sysutils;
 
 const
@@ -115,19 +117,19 @@ type
   
  tfbservice3 = class;
 
- efbserviceerror = class(edatabaseerror)
+ efbserviceerror3 = class(edatabaseerror)
   private
    ferror: integer;
    ferrormessage: msestring;
    fsender: tfbservice3;
-   fstatus: statusvectorty;
+//   fstatus: statusvectorty;
   public
-   constructor create(const asender: tfbservice3; const amessage: msestring;
-                       const aerror: statusvectorty);
+   constructor create(const asender: tfbservice3;
+                 const astatus: istatus; const aerrormessage: msestring);
    property sender: tfbservice3 read fsender;
    property error: integer read ferror;
    property errormessage: msestring read ferrormessage;
-   property status: statusvectorty read fstatus;
+//   property status: statusvectorty read fstatus;
  end;
 
  fbservicestatety = (fbss_connected,fbss_busy);
@@ -141,14 +143,14 @@ type
                             var e: exception; var handled: boolean) of object;
  fbserviceendeventty = procedure (const sender: tfbservice3;
                                             const aborted: boolean) of object;
- tfbservicemonitor = class(tmsethread)
+ tfbservicemonitor3 = class(tmsethread)
   private
-   fprocname: string;
+   fprocname: msestring;
   protected
    fowner: tfbservice3;
    function execute(thread: tmsethread): integer; override;
   public
-   constructor create(const aowner: tfbservice3; const procname: string);
+   constructor create(const aowner: tfbservice3; const procname: msestring);
    destructor destroy(); override;
  end;
   
@@ -158,14 +160,14 @@ type
    fusername: ansistring;
    fpassword: ansistring;
    fstate: fbservicestatesty;
-   fhandle: isc_svc_handle;
-   fstatus: statusvectorty; //array [0..19] of isc_status;
-   flasterror: statusvectorty;
+   fservice: iservice;
+//   fstatus: statusvectorty; //array [0..19] of isc_status;
+//   flasterror: istatus;
    flasterrormessage: msestring;
    foptions: fbserviceoptionsty;
    finfotimeout: int32;
    fonasynctext: fbservicetexteventty;
-   fmonitor: tfbservicemonitor;
+   fmonitor: tfbservicemonitor3;
    fonerror: fbserviceerroreventty;
    fonasyncend: fbserviceendeventty;
    fasynctext: msestringarty;
@@ -174,27 +176,31 @@ type
    function getconnected: boolean;
    procedure setconnected(const avalue: boolean);
   protected
+   fapi: fbapity;
    function connectionmessage(atext: pchar): msestring;
    procedure loaded(); override;
    procedure doasyncevent(var atag: int32); override;
+   procedure clearstatus(); inline;
+   function statusok(): boolean; inline;
+   procedure checkstatus(const aerrormessage: msestring);
    procedure connect();
    procedure closeconn();
    procedure disconnect();
    procedure readstate(reader: treader); override;
    procedure raiseerror(const e: exception; const dberr: boolean);
-   procedure dberror(const msg: string; const comp: tcomponent;
+   procedure dberror(const msg: msestring; const comp: tcomponent;
                                                          const dberr: boolean);
-   procedure checkerror(const procname : string;
-                            const status : statusvectorty);
-   procedure checkerror(const procname : string;
-                            const status: integer);
+//   procedure checkerror(const procname : string;
+//                            const status : istatus);
+//   procedure checkerror(const procname : string;
+//                            const status: integer);
    procedure checkbusy();
-   procedure invalidresponse(const procname: string);
+   procedure invalidresponse(const procname: msestring);
 
-   procedure start(const procname: string; const params: string);
-   function getinfo(const procname: string; const items: array of byte;
+   procedure start(const procname: msestring; const params: string);
+   function getinfo(const procname: msestring; const items: array of byte;
                                                   const async: boolean): string;
-   procedure runcommand(const procname: string; const params: string);
+   procedure runcommand(const procname: msestring; const params: string);
    function getmsestringitem(var buffer: pointer; out res: msestring;
                                const cutspace: boolean = false): boolean;
                                                          //returns eof state
@@ -204,16 +210,16 @@ type
                                               const value: msestring); 
                                                 //value limited to 65535 chars
    function internalusers(const ausername: string): fbuserinfoarty;
-   procedure gettext(const procname: string; const params: string;
+   procedure gettext(const procname: msestring; const params: string;
                  var res:  msestringarty; const maxrowcount: integer);
                                  //ring buffer
-   procedure startmonitor(const procname: string; const aparams: string);
+   procedure startmonitor(const procname: msestring; const aparams: string);
    function serviceisrunning: boolean;
-   procedure tagaction(const aprocname: string; const aaction: int32; 
+   procedure tagaction(const aprocname: msestring; const aaction: int32; 
                               var res: msestringarty;
                               const maxrowcount: int32);
-   procedure tagaction(const aprocname: string; const aaction: int32);
-   procedure traceaction(const aprocname: string; const aaction: int32;
+   procedure tagaction(const aprocname: msestring; const aaction: int32);
+   procedure traceaction(const aprocname: msestring; const aaction: int32;
                          const aid: card32; var res: msestringarty;
                          const maxrowcount: int32);
    procedure adduserparams(var params1: string; 
@@ -291,7 +297,7 @@ type
    procedure repairstart(const adbname: msestring;
                                        const aoptions: repairoptionsty);
 
-   property lasterror: statusvectorty read flasterror;
+//   property lasterror: statusvectorty read flasterror;
    property lasterrormessage: msestring read flasterrormessage;
    property asynctext: msestringarty read fasynctext write fasynctext;
   published
@@ -500,36 +506,53 @@ begin
  end;
 end;
 
-{ efbserviceerror }
+{ efbserviceerror3 }
 
-constructor efbserviceerror.create(const asender: tfbservice3;
-               const amessage: msestring; const aerror: statusvectorty);
+constructor efbserviceerror3.create(const asender: tfbservice3;
+               const astatus: istatus; const aerrormessage: msestring);
+var
+ str1: string;
+ msg1: msestring;
+ po1: nativeintptr;
+ err1: integer;
 begin
- fstatus:= aerror;
+ str1:= formatstatus(astatus); 
+ msg1:= aerrormessage;
+ if str1 <> '' then begin
+  msg1:= msg1 + lineend + msestring(str1);
+ end;
+ po1:= astatus.geterrors;
+ err1:= 0;
+ if po1 <> nil then begin
+  err1:= gds__sqlcode(po1);
+ end;
  fsender:= sender;
- ferror:= aerror[1];
- ferrormessage:= amessage;
- inherited create(asender.name+': '+ansistring(amessage));
+ ferror:= err1;
+ ferrormessage:= msg1;
+ if sender <> nil then begin
+  sender.flasterrormessage:= msg1;
+ end;
+ inherited create(asender.name+': '+ansistring(msg1));
 end;
 
-{ tfbservicemonitor }
+{ tfbservicemonitor3 }
 
-constructor tfbservicemonitor.create(const aowner: tfbservice3;
-                                               const procname: string);
+constructor tfbservicemonitor3.create(const aowner: tfbservice3;
+                                               const procname: msestring);
 begin
  fowner:= aowner;
  fprocname:= procname;
  inherited create();
 end;
 
-destructor tfbservicemonitor.destroy();
+destructor tfbservicemonitor3.destroy();
 begin
  terminate();
  application.waitforthread(self);
  inherited;
 end;
 
-function tfbservicemonitor.execute(thread: tmsethread): integer;
+function tfbservicemonitor3.execute(thread: tmsethread): integer;
 
  procedure cancel();
  begin
@@ -611,9 +634,13 @@ begin
  rowmax1:= 0;
  ar1:= nil;
  while not terminated and not application.terminated do begin
-  fowner.checkerror(fprocname,isc_service_query(@fowner.fstatus,@fowner.fhandle,
-    nil,length(params1),pointer(params1),length(items1),pointer(items1),
-                                             length(buffer1),pointer(buffer1)));
+  fowner.clearstatus();
+  fowner.fservice.query(fowner.fapi.status,length(params1),pointer(params1),
+              length(items1),pointer(items1),length(buffer1),pointer(buffer1));
+//  fowner.checkerror(fprocname,isc_service_query(@fowner.fstatus,@fowner.fhandle,
+//    nil,length(params1),pointer(params1),length(items1),pointer(items1),
+//                                             length(buffer1),pointer(buffer1)));
+  fowner.checkstatus(fprocname);
   if terminated or application.terminated then begin
    break;
   end;
@@ -710,7 +737,7 @@ end;
 
 constructor tfbservice3.create(aowner: tcomponent);
 begin
- fhandle:= FB_API_NULLHANDLE;
+// fhandle:= FB_API_NULLHANDLE;
  finfotimeout:= defaultinfotimeout;
  inherited;
 end;
@@ -737,7 +764,7 @@ end;
 
 function tfbservice3.getconnected: boolean;
 begin
- result:= fhandle <> FB_API_NULLHANDLE;
+ result:= fservice <> nil;
 end;
 
 procedure tfbservice3.setconnected(const avalue: boolean);
@@ -788,6 +815,23 @@ begin
  end;
 end;
 
+procedure tfbservice3.clearstatus();
+begin
+ fapi.status.init();
+end;
+
+function tfbservice3.statusok(): boolean;
+begin
+ result:= fapi.status.getstate() and istatus.state_errors = 0
+end;
+
+procedure tfbservice3.checkstatus(const aerrormessage: msestring);
+begin
+ if fapi.status.getstate() and istatus.state_errors <> 0 then begin
+  raise efbserviceerror3.create(self,fapi.status,aerrormessage);
+ end;
+end;
+
 procedure tfbservice3.connect();
 const
  servicename = 'service_mgr';
@@ -795,9 +839,9 @@ var
  params1: string;
  str1: string;
 begin
- if fhandle = FB_API_NULLHANDLE then begin
+ if fservice = nil then begin
   try
-   initializeibase60([]);
+   inifbapi(fapi);
    if fhostname = '' then begin
     str1:= servicename;
    end
@@ -807,12 +851,17 @@ begin
    params1:=  char(isc_spb_version)+char(isc_spb_current_version);
    addshortparam(params1,isc_spb_user_name,fusername);
    addshortparam(params1,isc_spb_password,fpassword);
-   checkerror('Connect',isc_service_attach(@fstatus,length(str1),pointer(str1),
-                                    @fhandle,length(params1),pointer(params1)));
+   clearstatus();
+//   checkerror('Connect',isc_service_attach(@fstatus,length(str1),pointer(str1),
+//                                    @fhandle,length(params1),pointer(params1)));
+   fservice:= fapi.provider.attachservicemanager(fapi.status,pchar(str1),
+                                              length(params1),pointer(params1));
+   checkstatus('Connect');
+   fservice.addref();
   except
    exclude(fstate,fbss_connected);
-   fhandle:= FB_API_NULLHANDLE;
-   releaseibase60();
+   fservice:= nil;
+   finifbapi(fapi);
    raise;
   end;
  end;
@@ -822,10 +871,11 @@ end;
 procedure tfbservice3.closeconn();
 begin
  fstate:= fstate - [fbss_connected,fbss_busy];
- if fhandle <> FB_API_NULLHANDLE then begin
-  isc_service_detach(@fstatus,@fhandle);
-  fhandle:= FB_API_NULLHANDLE;
-  releaseibase60();
+ if fservice <> nil then begin
+  fservice.detach(fapi.status);
+  fservice.release();
+  fservice:= nil;
+  finifbapi(fapi);
  end;
 end;
 
@@ -878,12 +928,12 @@ begin
  end;
 end;
 
-procedure tfbservice3.dberror(const msg: string; const comp: tcomponent;
+procedure tfbservice3.dberror(const msg: msestring; const comp: tcomponent;
                                                          const dberr: boolean);
 begin
- raiseerror(edatabaseerror.create(msg,comp),dberr);
+ raiseerror(edatabaseerror.create(ansistring(msg),comp),dberr);
 end;
-
+(*
 procedure tfbservice3.checkerror(const procname: string;
                const status: statusvectorty);
 var
@@ -900,7 +950,7 @@ begin
   end;
   flasterror:= status;
   flasterrormessage:= msg;
-  raiseerror(efbserviceerror.create(self,msg,status),true);
+  raiseerror(efbserviceerror3.create(self,msg,status),true);
  end;
 end;
 //{$warnings on}
@@ -911,7 +961,7 @@ begin
   checkerror(procname,fstatus);
  end;
 end;
-
+*)
 procedure tfbservice3.checkbusy();
 begin
  if not connected then begin
@@ -922,9 +972,10 @@ begin
  end;
 end;
 
-procedure tfbservice3.invalidresponse(const procname: string);
+procedure tfbservice3.invalidresponse(const procname: msestring);
 begin
- raiseerror(edatabaseerror.create('Invalid '+procname+' response',self),true);
+ raiseerror(edatabaseerror.create(
+    ansistring('Invalid '+procname+' response'),self),true);
 end;
 
 function tfbservice3.todbstring(const avalue: msestring): string;
@@ -947,16 +998,19 @@ begin
  end;
 end;
 
-procedure tfbservice3.start(const procname: string; const params: string);
+procedure tfbservice3.start(const procname: msestring; const params: string);
 begin
  checkbusy();
  fasynctext:= nil;
- checkerror(procname,isc_service_start(@fstatus,@fhandle,nil,
-                                   length(params),pointer(params)));
+ clearstatus();
+ fservice.start(fapi.status,length(params),pointer(params));
+// checkerror(procname,isc_service_start(@fstatus,@fhandle,nil,
+//                                   length(params),pointer(params)));
+ checkstatus(procname);
  include(fstate,fbss_busy);
 end;
 
-function tfbservice3.getinfo(const procname: string; 
+function tfbservice3.getinfo(const procname: msestring; 
                    const items: array of byte; const async: boolean): string;
 var
  params1: string;
@@ -965,8 +1019,12 @@ begin
  addtimeout(params1,finfotimeout);
  setlength(result,1024);
  while true do begin
-  checkerror(procname,isc_service_query(@fstatus,@fhandle,nil,length(params1),
-      pointer(params1),length(items),@items[0],length(result),pointer(result)));
+  clearstatus();
+  fservice.query(fapi.status,length(params1),pointer(params1),
+                    length(items),@items[0],length(result),pointer(result));
+//  checkerror(procname,isc_service_query(@fstatus,@fhandle,nil,length(params1),
+//      pointer(params1),length(items),@items[0],length(result),pointer(result)));
+  checkstatus(procname);
   if pbyte(pointer(result))^ <> isc_info_truncated then begin
    if not async then begin
     exclude(fstate,fbss_busy);
@@ -977,7 +1035,7 @@ begin
  end;
 end;
 
-procedure tfbservice3.runcommand(const procname: string;
+procedure tfbservice3.runcommand(const procname: msestring;
                const params: string);
 var
  ar1: msestringarty;
@@ -1221,7 +1279,7 @@ begin
  runcommand('deleteuser',params1);
 end;
 
-procedure tfbservice3.gettext(const procname: string; const params: string;
+procedure tfbservice3.gettext(const procname: msestring; const params: string;
             var res:  msestringarty; const maxrowcount: integer);
 
 var
@@ -1268,9 +1326,13 @@ begin
  remainder:= '';
  circindex:= 0;
  while true do begin
-  checkerror(procname,isc_service_query(@fstatus,@fhandle,nil,length(params1),
-                    pointer(params1),length(items1),pointer(items1),
-                                             length(buffer1),pointer(buffer1)));
+  clearstatus();
+  fservice.query(fapi.status,length(params1),pointer(params1),
+            length(items1),pointer(items1),length(buffer1),pointer(buffer1));
+  checkstatus(procname);
+//  checkerror(procname,isc_service_query(@fstatus,@fhandle,nil,length(params1),
+//                    pointer(params1),length(items1),pointer(items1),
+//                                             length(buffer1),pointer(buffer1)));
   case pbyte(pointer(buffer1))^ of
    isc_info_svc_to_eof: begin         
     po1:= pointer(buffer1)+1;
@@ -1332,12 +1394,13 @@ begin
  exclude(fstate,fbss_busy);
 end;
 
-procedure tfbservice3.startmonitor(const procname: string; const aparams: string);
+procedure tfbservice3.startmonitor(const procname: msestring; 
+                                                  const aparams: string);
 begin
 // checkbusy();
  start(procname,aparams);
  freeandnil(fmonitor);
- fmonitor:= tfbservicemonitor.create(self,procname);
+ fmonitor:= tfbservicemonitor3.create(self,procname);
 end;
 
 function tfbservice3.serviceisrunning(): boolean;
@@ -1375,14 +1438,15 @@ begin
  startmonitor('tracestart',params1);
 end;
 
-procedure tfbservice3.tagaction(const aprocname: string; const aaction: int32;
-                              var res: msestringarty;
-                              const maxrowcount: int32);
+procedure tfbservice3.tagaction(const aprocname: msestring; 
+                    const aaction: int32; var res: msestringarty;
+                                               const maxrowcount: int32);
 begin
  gettext(aprocname,char(aaction),res,maxrowcount);
 end;
 
-procedure tfbservice3.tagaction(const aprocname: string; const aaction: int32);
+procedure tfbservice3.tagaction(const aprocname: msestring; 
+                                                 const aaction: int32);
 var
  ar1: msestringarty;
 begin
@@ -1395,9 +1459,9 @@ begin
  tagaction('tracelist',isc_action_svc_trace_list,res,maxrowcount);
 end;
 
-procedure tfbservice3.traceaction(const aprocname: string; const aaction: int32;
-               const aid: card32; var res: msestringarty;
-               const maxrowcount: int32);
+procedure tfbservice3.traceaction(const aprocname: msestring;
+            const aaction: int32; const aid: card32; var res: msestringarty;
+                                                     const maxrowcount: int32);
 var
  params1: string;
 begin
