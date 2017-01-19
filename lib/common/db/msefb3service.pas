@@ -633,101 +633,104 @@ begin
  rowindex1:= 0;
  rowmax1:= 0;
  ar1:= nil;
- while not terminated and not application.terminated do begin
-  fowner.clearstatus();
-  fowner.fservice.query(fowner.fapi.status,length(params1),pointer(params1),
-              length(items1),pointer(items1),length(buffer1),pointer(buffer1));
-//  fowner.checkerror(fprocname,isc_service_query(@fowner.fstatus,@fowner.fhandle,
-//    nil,length(params1),pointer(params1),length(items1),pointer(items1),
-//                                             length(buffer1),pointer(buffer1)));
-  fowner.checkstatus(fprocname);
-  if terminated or application.terminated then begin
-   break;
-  end;
-  case pbyte(pointer(buffer1))^ of
-   isc_info_svc_to_eof: begin            
-    po1:= pointer(buffer1)+1;
-    i1:= readvalue16(po1);
-    if i1 > 0 then begin
-     i2:= length(str1);
-     setlength(str1,i1+i2);
-     move(po1^,(pointer(str1)+i2)^,i1);
-    end;
-    if i1 < buffersize-10 then begin 
-                 //not truncated, firebird seems not to fill buffer completely
-     if str1 <> '' then begin
-      application.lock();
-      try
-       mstr1:= fowner.tomsestring(str1);
-       rowmax1:= fowner.fasyncmaxrowcount;
-       if rowmax1 < 0 then begin
-        rowmax1:= high(rowmax1);
-       end;
-       if length(ar1) > rowmax1 then begin
-        setlength(ar1,rowmax1);
-       end;
-       if rowindex1 > rowmax1 then begin
-        rowindex1:= 0;
-       end;
-       if rowmax1 > 0 then begin
-        po2:= pointer(mstr1);
-        ps:= po2;
-        pe:= po2+length(mstr1);
-        while po2 < pe do begin
-         if (po2^ = c_return) or (po2^ = c_linefeed) then begin
-          addstringsegment(remainder,ps,po2);
-          add();
-          if (po2^ = c_return) then begin
-           inc(po2);
-          end;
-          if (po2^ = c_linefeed) then begin
-           inc(po2);
-          end;
-          ps:= po2;
-         end
-         else begin
-          inc(po2);
-         end;
+ try
+  while not terminated and not application.terminated do begin
+   fowner.clearstatus();
+   fowner.fservice.query(fowner.fapi.status,length(params1),pointer(params1),
+               length(items1),pointer(items1),length(buffer1),pointer(buffer1));
+ //  fowner.checkerror(fprocname,isc_service_query(@fowner.fstatus,@fowner.fhandle,
+ //    nil,length(params1),pointer(params1),length(items1),pointer(items1),
+ //                                             length(buffer1),pointer(buffer1)));
+   fowner.checkstatus(fprocname);
+   if terminated or application.terminated then begin
+    break;
+   end;
+   case pbyte(pointer(buffer1))^ of
+    isc_info_svc_to_eof: begin            
+     po1:= pointer(buffer1)+1;
+     i1:= readvalue16(po1);
+     if i1 > 0 then begin
+      i2:= length(str1);
+      setlength(str1,i1+i2);
+      move(po1^,(pointer(str1)+i2)^,i1);
+     end;
+     if i1 < buffersize-10 then begin 
+                  //not truncated, firebird seems not to fill buffer completely
+      if str1 <> '' then begin
+       application.lock();
+       try
+        mstr1:= fowner.tomsestring(str1);
+        rowmax1:= fowner.fasyncmaxrowcount;
+        if rowmax1 < 0 then begin
+         rowmax1:= high(rowmax1);
         end;
-        addstringsegment(remainder,ps,po2);
+        if length(ar1) > rowmax1 then begin
+         setlength(ar1,rowmax1);
+        end;
+        if rowindex1 > rowmax1 then begin
+         rowindex1:= 0;
+        end;
+        if rowmax1 > 0 then begin
+         po2:= pointer(mstr1);
+         ps:= po2;
+         pe:= po2+length(mstr1);
+         while po2 < pe do begin
+          if (po2^ = c_return) or (po2^ = c_linefeed) then begin
+           addstringsegment(remainder,ps,po2);
+           add();
+           if (po2^ = c_return) then begin
+            inc(po2);
+           end;
+           if (po2^ = c_linefeed) then begin
+            inc(po2);
+           end;
+           ps:= po2;
+          end
+          else begin
+           inc(po2);
+          end;
+         end;
+         addstringsegment(remainder,ps,po2);
+        end;
+        if assigned(fowner.fonasynctext) then begin
+         fowner.fonasynctext(fowner,mstr1);
+        end;
+       finally
+        application.unlock();
        end;
-       if assigned(fowner.fonasynctext) then begin
-        fowner.fonasynctext(fowner,mstr1);
+       str1:= '';
+      end
+      else begin
+       application.lock();
+       try
+        if not fowner.serviceisrunning() then begin
+         add();
+         ok:= true;
+         cancel();
+         endtext(false);
+         break;
+        end;
+       finally
+        application.unlock();
        end;
-      finally
-       application.unlock();
-      end;
-      str1:= '';
-     end
-     else begin
-      application.lock();
-      try
-       if not fowner.serviceisrunning() then begin
-        add();
-        ok:= true;
-        cancel();
-        endtext(false);
-        break;
-       end;
-      finally
-       application.unlock();
       end;
      end;
     end;
-   end;
-   else begin
-    fowner.invalidresponse(fprocname);
+    else begin
+     fowner.invalidresponse(fprocname);
+    end;
    end;
   end;
- end;
- if not ok then begin 
-  application.lock();
-  try
-   add();
-   cancel();
-   endtext(true);
-  finally
-   application.unlock();
+ finally
+  if not ok then begin 
+   application.lock();
+   try
+    add();
+    cancel();
+    endtext(true);
+   finally
+    application.unlock();
+   end;
   end;
  end;
  result:= 0;
