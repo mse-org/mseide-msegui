@@ -91,6 +91,7 @@ type
    
    function readbuffer: string; //does not try to get additional data
    function readuln(var value: string): boolean;
+   function readuln(var value: string; out hasmoredata: boolean): boolean;
            //bringt auch unvollstaendige zeilen, false wenn unvollstaendig
            //no decoding
    function readstrln(var value: string): boolean; override; 
@@ -678,7 +679,8 @@ begin
  end;
 end;
 
-function tpipereader.readuln(var value: string): boolean;
+function tpipereader.readuln(var value: string;
+               out hasmoredata: boolean): boolean;
 begin
  value:= '';
  result:= false;
@@ -693,6 +695,14 @@ begin
    checkdata;
   until result or (fdatastatus = pr_empty);
 // end;
+ hasmoredata:= fdatastatus <> pr_empty;
+end;
+
+function tpipereader.readuln(var value: string): boolean;
+var
+ b1: boolean;
+begin
+ result:= readuln(value,b1);
 end;
 
 function tpipereader.readstrln(var value: string): boolean;

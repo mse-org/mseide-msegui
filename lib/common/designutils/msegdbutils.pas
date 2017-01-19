@@ -684,7 +684,8 @@ uses
  msebits,msesysintf,msesysintf1,mseguiintf,msearrayutils,msesys,msedate,
  actionsmodule
         {$ifdef UNIX},mselibc{$else},windows{$endif};
-
+type
+ tpypereader1 = class(tpipereader);
 const                                      
  stopreasons: array[stopreasonty] of string = 
            //sr_none sr_unknown, sr_error sr_startup sr_exception sr_gdbdied
@@ -1768,16 +1769,19 @@ begin
 // writedebug(str1);
 end;
 }
+
 procedure tgdbmi.gdbfrom(const sender: tpipereader);
 var
  str1,str2: string;
- bo1: boolean;
+ b1,b2: boolean;
  int1: integer;
 begin
- bo1:= false; //compiler warning
+ b1:= false; //compiler warning
  repeat
+ (*
   if gs_syncget in fstate then begin
-   bo1:= fgdbfrom.readstrln(str1);
+   bo1:= fgdbfrom.readstrln(str1); 
+         //does not post pipereader semaphore in case of timeout
   {$ifdef mse_debuggdb}
    if bo1 then begin
     debugwriteln(str1);
@@ -1785,12 +1789,13 @@ begin
   {$endif}
   end
   else begin
+ *)
    str1:= '';
    int1:= 0;
    while true do begin
-    bo1:= fgdbfrom.readuln(str2);
+    b1:= fgdbfrom.readuln(str2,b2);
    {$ifdef mse_debuggdb}
-    if bo1 then begin
+    if b1 then begin
      debugwriteln(str2);
     end
     else begin
@@ -1801,15 +1806,17 @@ begin
     if str2 <> '' then begin
      int1:= 0;
     end;
-    if bo1 or (str1 = '') or (int1 > 10) then begin
+    if b1 or (str1 = '') or (int1 > 10) then begin
      break;
     end;
     sys_schedyield;
     inc(int1);
     sleep(100); //try to get the lineend
    end;
+ {
   end;
-  if bo1 then begin
+ }
+  if b1 then begin
    interpret(str1);
   end
   else begin
@@ -1817,7 +1824,12 @@ begin
     targetoutput(str1);
    end;
   end;
- until not bo1;
+ until not b2; //all data read
+{
+ if tpypereader1(fgdbfrom).fmsbufcount <> 0 then begin
+  testvar:= 1;
+ end;
+}
 end;
 
 {$ifdef UNIX}
