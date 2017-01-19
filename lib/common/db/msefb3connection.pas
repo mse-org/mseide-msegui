@@ -11,7 +11,7 @@
 // todo: - prepare-less execute and openCursor (needs FB-optimisation)
 //       - move dbcontroller interface to tcustomsqlconnection
 //
-unit msefbconnection3;
+unit msefb3connection;
 {$ifdef FPC}{$mode objfpc}{$h+}{$goto on}{$endif}
 interface
 uses
@@ -27,14 +27,14 @@ type
  fbconnectionoptionty = (fbo_sqlinfo);
  fbconnectionoptionsty = set of fbconnectionoptionty;
  
- tfbconnection3 = class;
+ tfb3connection = class;
  
  tfbtrans = class(tsqlhandle)
   protected
-   fconnection: tfbconnection3;
+   fconnection: tfb3connection;
    ftransaction: itransaction;
   public
-   constructor create(const aconnection: tfbconnection3);
+   constructor create(const aconnection: tfb3connection);
    destructor destroy(); override;
  end;
 
@@ -65,7 +65,7 @@ type
   
  tfbcursor = class(tsqlcursor)
   protected
-   fconnection: tfbconnection3;
+   fconnection: tfb3connection;
    fparambinding: tparambinding;
    fstatement: istatement;
    fstatementflags: card32;
@@ -77,7 +77,7 @@ type
    frowbuffer: string;
   public
    constructor create(const aowner: icursorclient;
-                                       const aconnection: tfbconnection3);
+                                       const aconnection: tfb3connection);
    destructor destroy(); override;
    procedure close() override;
  end;
@@ -94,12 +94,12 @@ type
   private
    frefcount: int32;
   protected
-   fowner: tfbconnection3;
+   fowner: tfb3connection;
    fmutex: mutexty;
    ffired: boolean;
    freleased: boolean;
   public
-   constructor create(const aowner: tfbconnection3);
+   constructor create(const aowner: tfb3connection);
    destructor destroy(); override;
    procedure addRef() override;
    function release(): Integer override;
@@ -118,7 +118,7 @@ type
  end;
  pparaminfoty = ^paraminfoty;
  
- tfbconnection3 = class(tcustomsqlconnection,iblobconnection,
+ tfb3connection = class(tcustomsqlconnection,iblobconnection,
                                          idbevent,idbeventcontroller)
   private
    fdialect: integer;
@@ -263,7 +263,7 @@ type
  
  efberror = class(econnectionerror)
   public
-   constructor create(const asender: tfbconnection3;
+   constructor create(const asender: tfb3connection;
                  const astatus: istatus; const aerrormessage: msestring);
  end;
 
@@ -277,7 +277,7 @@ const
  
 { tfbeventcallback }
 
-constructor tfbeventcallback.create(const aowner: tfbconnection3);
+constructor tfbeventcallback.create(const aowner: tfb3connection);
 begin
  fowner:= aowner;
  sys_mutexcreate(fmutex);
@@ -422,7 +422,7 @@ end;
 
 { efberror }
 
-constructor efberror.create(const asender: tfbconnection3;
+constructor efberror.create(const asender: tfb3connection;
                const astatus: istatus; const aerrormessage: msestring);
 var
  str1: string;
@@ -447,9 +447,9 @@ begin
  inherited create(asender,ansistring(msg1),msg1,err1);
 end;
 
-{ tfbconnection3 }
+{ tfb3connection }
 
-constructor tfbconnection3.create(aowner: tcomponent);
+constructor tfb3connection.create(aowner: tcomponent);
 begin
  fdialect:= sql_dialect_v6;
  feventcontroller:= tdbeventcontroller.create(idbeventcontroller(self));
@@ -461,13 +461,13 @@ begin
     //no output messagemetadata for execute()
 end;
 
-destructor tfbconnection3.destroy();
+destructor tfb3connection.destroy();
 begin
  inherited;
  feventcontroller.free;
 end;
 
-procedure tfbconnection3.createdatabase(const asql: ansistring);
+procedure tfb3connection.createdatabase(const asql: ansistring);
 var
  inited1: boolean;
  bo1: boolean;
@@ -492,7 +492,7 @@ begin
  end;
 end;
 {
-procedure tfbconnection3.iniapi();
+procedure tfb3connection.iniapi();
 begin
  initializefirebird([],true);
  with fapi do begin
@@ -511,7 +511,7 @@ begin
  end;
 end;
 
-procedure tfbconnection3.finiapi();
+procedure tfb3connection.finiapi();
 begin
  with fapi do begin
   util:= nil;
@@ -524,24 +524,24 @@ begin
  end;
 end;
 }
-procedure tfbconnection3.clearstatus(); inline;
+procedure tfb3connection.clearstatus(); inline;
 begin
  fapi.status.init();
 end;
 
-function tfbconnection3.statusok(): boolean; inline;
+function tfb3connection.statusok(): boolean; inline;
 begin
  result:= fapi.status.getstate() and istatus.state_errors = 0
 end;
 
-procedure tfbconnection3.checkstatus(const aerrormessage: msestring);
+procedure tfb3connection.checkstatus(const aerrormessage: msestring);
 begin
  if fapi.status.getstate() and istatus.state_errors <> 0 then begin
   raise efberror.create(self,fapi.status,aerrormessage);
  end;
 end;
 
-function tfbconnection3.getpb(const akind: paramblockkindty): ixpbbuilder;
+function tfb3connection.getpb(const akind: paramblockkindty): ixpbbuilder;
 var
  kind1: card32;
 begin
@@ -560,7 +560,7 @@ const
 // pbk_database,pbk_transaction
        'database',  'transaction');
        
-function tfbconnection3.buildpb(const akind: paramblockkindty;
+function tfb3connection.buildpb(const akind: paramblockkindty;
                const ainfo: pparaminfoty; const acount: int32;
                const aparams: tstringlist; const force: boolean): ixpbbuilder;
 
@@ -626,7 +626,7 @@ next:
  end;
 end;
 
-procedure tfbconnection3.dointernalconnect();
+procedure tfb3connection.dointernalconnect();
 const
  utf8name = 'UTF8';
  paramconsts: array[0..3] of paraminfoty =
@@ -697,7 +697,7 @@ begin
  feventcontroller.connect();
 end;
 
-procedure tfbconnection3.dointernaldisconnect;
+procedure tfb3connection.dointernaldisconnect;
 begin
  inherited;
  if fattachment <> nil then begin
@@ -709,17 +709,17 @@ begin
  feventcontroller.disconnect();
 end;
 
-function tfbconnection3.allocatetransactionhandle: tsqlhandle;
+function tfb3connection.allocatetransactionhandle: tsqlhandle;
 begin
  result:= tfbtrans.create(self);
 end;
 
-function tfbconnection3.gettransactionhandle(trans: tsqlhandle): pointer;
+function tfb3connection.gettransactionhandle(trans: tsqlhandle): pointer;
 begin
  result:= tfbtrans(trans).ftransaction;
 end;
 
-function tfbconnection3.startdbtransaction(const trans: tsqlhandle;
+function tfb3connection.startdbtransaction(const trans: tsqlhandle;
                const aparams: tstringlist): boolean;
                
 const
@@ -794,7 +794,7 @@ begin
  result:= true;
 end;
 
-function tfbconnection3.commit(trans: tsqlhandle): boolean;
+function tfb3connection.commit(trans: tsqlhandle): boolean;
 begin
  with tfbtrans(trans) do begin
   clearstatus();
@@ -805,7 +805,7 @@ begin
  end;
 end;
 
-function tfbconnection3.rollback(trans: tsqlhandle): boolean;
+function tfb3connection.rollback(trans: tsqlhandle): boolean;
 begin
  with tfbtrans(trans) do begin
   clearstatus();
@@ -816,7 +816,7 @@ begin
  end;
 end;
 
-procedure tfbconnection3.internalcommitretaining(trans: tsqlhandle);
+procedure tfb3connection.internalcommitretaining(trans: tsqlhandle);
 begin
  with tfbtrans(trans) do begin
   clearstatus();
@@ -825,7 +825,7 @@ begin
  end;
 end;
 
-procedure tfbconnection3.internalrollbackretaining(trans: tsqlhandle);
+procedure tfb3connection.internalrollbackretaining(trans: tsqlhandle);
 begin
  with tfbtrans(trans) do begin
   clearstatus();
@@ -834,25 +834,25 @@ begin
  end;
 end;
 
-function tfbconnection3.allocatecursorhandle(const aowner: icursorclient;
+function tfb3connection.allocatecursorhandle(const aowner: icursorclient;
                const aname: ansistring): tsqlcursor;
 begin
  result:= tfbcursor.create(aowner,self);
 end;
 
-procedure tfbconnection3.deallocatecursorhandle(var cursor: tsqlcursor);
+procedure tfb3connection.deallocatecursorhandle(var cursor: tsqlcursor);
 begin
  freeandnil(cursor);
 end;
 
-procedure tfbconnection3.freefldbuffers(cursor: tsqlcursor);
+procedure tfb3connection.freefldbuffers(cursor: tsqlcursor);
 begin
  with tfbcursor(cursor) do begin
   frowbuffer:= '';
  end;
 end;
 
-procedure tfbconnection3.preparestatement(const cursor: tsqlcursor;
+procedure tfb3connection.preparestatement(const cursor: tsqlcursor;
                const atransaction: tsqltransaction; const asql: msestring;
                const aparams: tmseparams);
 var
@@ -883,7 +883,7 @@ begin
  end;
 end;
 
-procedure tfbconnection3.unpreparestatement(cursor: tsqlcursor);
+procedure tfb3connection.unpreparestatement(cursor: tsqlcursor);
 begin
  with tfbcursor(cursor) do begin
   if cs_hasstatement in fcursorstate then begin
@@ -900,7 +900,7 @@ begin
  end;
 end;
 
-procedure tfbconnection3.cursorclose(const cursor: tfbcursor);
+procedure tfb3connection.cursorclose(const cursor: tfbcursor);
 begin
  with cursor do begin
   frowbuffer:= '';
@@ -1076,7 +1076,7 @@ begin
                                     ainfo^._cursor,pisc_quad(dest)^));
 end;
 
-procedure tfbconnection3.updateresultmetadata(const acursor: tfbcursor;
+procedure tfb3connection.updateresultmetadata(const acursor: tfbcursor;
                                        const outmetadata: pimessagemetadata);
 var
  metadata: imessagemetadata;
@@ -1267,7 +1267,7 @@ begin
  end;
 end;
 
-procedure tfbconnection3.internalexecute(const cursor: tsqlcursor;
+procedure tfb3connection.internalexecute(const cursor: tsqlcursor;
               const atransaction: tsqltransaction; const aparams: tmseparams;
               const autf8: boolean);
 var
@@ -1387,7 +1387,7 @@ end;
 
 (* not ready, needs FB3 improvement
 
-procedure tfbconnection3.internalexecuteunprepared(const cursor: tsqlcursor;
+procedure tfb3connection.internalexecuteunprepared(const cursor: tsqlcursor;
                const atransaction: tsqltransaction; const asql: string;
                       const origsql: msestring; const aparams: tmseparams);
      //not used
@@ -1429,7 +1429,7 @@ begin
 end;
 *)
 
-procedure tfbconnection3.addfielddefs(const cursor: tsqlcursor;
+procedure tfb3connection.addfielddefs(const cursor: tsqlcursor;
                const fielddefs: tfielddefs);
 var
  i1: int32;
@@ -1445,19 +1445,19 @@ begin
  end;
 end;
 
-procedure tfbconnection3.updateindexdefs(var indexdefs: tindexdefs;
+procedure tfb3connection.updateindexdefs(var indexdefs: tindexdefs;
                const atablename: string);
 begin
  fbupdateindexdefs(self,indexdefs,atablename);
 end;
 
-function tfbconnection3.getschemainfosql(schematype : tschematype;
+function tfb3connection.getschemainfosql(schematype : tschematype;
                 schemaobjectname, schemapattern : msestring) : msestring;
 begin
  result:= fbgetschemainfosql(self,schematype,schemaobjectname,schemapattern);
 end;
 
-function tfbconnection3.fetch(cursor: tsqlcursor): boolean;
+function tfb3connection.fetch(cursor: tsqlcursor): boolean;
 var
  i1: int32;
 begin
@@ -1480,7 +1480,7 @@ begin
  end;
 end;
 
-function tfbconnection3.loadfield(const cursor: tsqlcursor;
+function tfb3connection.loadfield(const cursor: tsqlcursor;
                const datatype: tfieldtype; const fieldnum: integer;
                const buffer: pointer; var bufsize: integer;
                const aisutf8: boolean): boolean;
@@ -1504,7 +1504,7 @@ begin
  end;
 end;
 
-function tfbconnection3.fetchblob(const cursor: tsqlcursor;
+function tfb3connection.fetchblob(const cursor: tsqlcursor;
                const fieldnum: integer): ansistring;
 var
  blobId : ISC_QUAD;
@@ -1519,7 +1519,7 @@ begin
  end;
 end;
 
-function tfbconnection3.version: msestring;
+function tfb3connection.version: msestring;
 var
  versioncallback: tversioncallback;
 begin
@@ -1541,7 +1541,7 @@ const
  infotags: array[0..1] of byte = 
                      (isc_info_blob_max_segment,isc_info_blob_total_length);
 
-function tfbconnection3.getblobstream(const acursor: tsqlcursor;
+function tfb3connection.getblobstream(const acursor: tsqlcursor;
                const blobid: isc_quad;
                const forstring: boolean = false): tmemorystream;
 var
@@ -1610,35 +1610,35 @@ begin
  end;
 end;
 
-function tfbconnection3.getblobstring(const acursor: tsqlcursor;
+function tfb3connection.getblobstring(const acursor: tsqlcursor;
                const blobid: isc_quad): string;
 begin
  tmemorystringstream(getblobstream(acursor,blobid,true)).destroyasstring(result);
 end;
 
-function tfbconnection3.getdatabasename: filenamety;
+function tfb3connection.getdatabasename: filenamety;
 begin
  result:= fcontroller.getdatabasename;
 end;
 
-procedure tfbconnection3.setdatabasename(const avalue: filenamety);
+procedure tfb3connection.setdatabasename(const avalue: filenamety);
 begin
  fcontroller.setdatabasename(avalue);
 end;
 
-function tfbconnection3.getconnected: boolean;
+function tfb3connection.getconnected: boolean;
 begin
  result:= inherited connected;
 end;
 
-procedure tfbconnection3.setconnected(const avalue: boolean);
+procedure tfb3connection.setconnected(const avalue: boolean);
 begin
  if fcontroller.setactive(avalue) then begin
   inherited connected:= avalue;
  end;
 end;
 
-function tfbconnection3.createblobstream(const field: tfield;
+function tfb3connection.createblobstream(const field: tfield;
                const mode: tblobstreammode; const acursor: tsqlcursor): tstream;
 var
   blobId : ISC_QUAD;
@@ -1657,12 +1657,12 @@ begin
  end;
 end;
 
-function tfbconnection3.getblobdatasize: integer;
+function tfb3connection.getblobdatasize: integer;
 begin
  result:= 8;
 end;
 
-procedure tfbconnection3.writeblobdata(const atransaction: tsqltransaction;
+procedure tfb3connection.writeblobdata(const atransaction: tsqltransaction;
                const tablename: string; const acursor: tsqlcursor;
                const adata: pointer; const alength: integer;
                const afield: tfield; const aparam: tparam; out newid: string);
@@ -1713,7 +1713,7 @@ begin
  end;
 end;
 
-procedure tfbconnection3.setupblobdata(const afield: tfield;
+procedure tfb3connection.setupblobdata(const afield: tfield;
                const acursor: tsqlcursor; const aparam: tparam);
 var
  blobid: isc_quad;
@@ -1728,7 +1728,7 @@ begin
  end;
 end;
 
-procedure tfbconnection3.listen(const sender: tdbevent);
+procedure tfb3connection.listen(const sender: tdbevent);
 begin
  feventcontroller.register(sender);
  if connected then begin
@@ -1736,7 +1736,7 @@ begin
  end;
 end;
 
-procedure tfbconnection3.unlisten(const sender: tdbevent);
+procedure tfb3connection.unlisten(const sender: tdbevent);
 begin
  if connected then begin
   dounlisten(sender);
@@ -1744,7 +1744,7 @@ begin
  feventcontroller.unregister(sender);
 end;
 
-procedure tfbconnection3.fire(const sender: tdbevent);
+procedure tfb3connection.fire(const sender: tdbevent);
 var
  trans: tmsesqltransaction;
 begin
@@ -1760,7 +1760,7 @@ begin
  end;
 end;
 
-function tfbconnection3.getdbevent(var aname: string; var aid: int64): boolean;
+function tfb3connection.getdbevent(var aname: string; var aid: int64): boolean;
 var
  i1: int32;
 begin
@@ -1793,7 +1793,7 @@ begin
  end;
 end;
 
-procedure tfbconnection3.clearevents();
+procedure tfb3connection.clearevents();
 begin
  if feventcallback <> nil then begin
   sys_mutexlock(feventcallback.fmutex);
@@ -1809,32 +1809,32 @@ begin
  feventcountbuffer:= nil;
 end;
 
-procedure tfbconnection3.loaded();
+procedure tfb3connection.loaded();
 begin
  inherited;
  fcontroller.loaded;
 end;
 
-function tfbconnection3.readsequence(const sequencename: string): msestring;
+function tfb3connection.readsequence(const sequencename: string): msestring;
 begin
  result:= 'select gen_id('+msestring(sequencename)+
                                    ',1) as res from RDB$DATABASE;';
 end;
 
-function tfbconnection3.sequencecurrvalue(const sequencename: string): msestring;
+function tfb3connection.sequencecurrvalue(const sequencename: string): msestring;
 begin
  result:= 'select gen_id('+msestring(sequencename)+
                                     ',0) as res from RDB$DATABASE;';
 end;
 
-function tfbconnection3.writesequence(const sequencename: string;
+function tfb3connection.writesequence(const sequencename: string;
                const avalue: largeint): msestring;
 begin
  result:= 'set generator '+msestring(sequencename)+
                                     ' to '+inttostrmse(avalue)+';';
 end;
 
-procedure tfbconnection3.updateevents(const aerrormessage: msestring);
+procedure tfb3connection.updateevents(const aerrormessage: msestring);
                   //mutex must be locked, event leaks possible
 var
  i1: integer;
@@ -1872,7 +1872,7 @@ begin
  end;
 end;
 
-procedure tfbconnection3.dolisten(const sender: tdbevent);
+procedure tfb3connection.dolisten(const sender: tdbevent);
 begin
  if feventcallback <> nil then begin
   sys_mutexlock(feventcallback.fmutex);
@@ -1887,7 +1887,7 @@ begin
  updateevents('dolisten');
 end;
 
-procedure tfbconnection3.dounlisten(const sender: tdbevent);
+procedure tfb3connection.dounlisten(const sender: tdbevent);
 var
  i1: integer;
  po1: pfbeventinfoty;
@@ -1914,7 +1914,7 @@ end;
 
 { tfbtrans }
 
-constructor tfbtrans.create(const aconnection: tfbconnection3);
+constructor tfbtrans.create(const aconnection: tfb3connection);
 begin
  fconnection:= aconnection;
 end;
@@ -1930,7 +1930,7 @@ end;
 { tfbcursor }
 
 constructor tfbcursor.create(const aowner: icursorclient;
-               const aconnection: tfbconnection3);
+               const aconnection: tfb3connection);
 begin
  fconnection:= aconnection;
  inherited create(aowner,fconnection.name);

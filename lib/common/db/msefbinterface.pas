@@ -14,7 +14,7 @@ unit msefbinterface;
 {$ifdef FPC}{$mode delphi}{$h+}{$endif}
 interface
 uses
- firebird,msetypes,msefbconnection3,mdb,msedb,msestrings;
+ firebird,msetypes,msefb3connection,mdb,msedb,msestrings;
 type
 
  paraminfoty = record
@@ -73,7 +73,7 @@ uses
  
 type
  tfbcursor1 = class(tfbcursor);
- tfbconnection1 = class(tfbconnection3);
+ tfbconnection1 = class(tfb3connection);
  
 { tparamdata }
 

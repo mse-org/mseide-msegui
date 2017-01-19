@@ -24,7 +24,8 @@ type
  tarrayprop = class;
  arrayproparrayty = array of tarrayprop;
 
- arraychangeeventty = procedure(const sender: tarrayprop; const index: integer) of object;
+ arraychangeeventty = procedure(const sender: tarrayprop; 
+                                       const index: integer) of object;
  arraysizechangeeventty = procedure(sender: tarrayprop) of object;
 
  arraypropstatety = (aps_linking,aps_destroying,aps_needsindexing,aps_moved);

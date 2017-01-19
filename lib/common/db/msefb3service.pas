@@ -1,4 +1,4 @@
-unit msefbservice3;
+unit msefb3service;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 {$if fpc_fullversion >= 30000}
  {$define fpcv3}
@@ -7,7 +7,7 @@ unit msefbservice3;
 interface
 uses
  classes,mclasses,mseclasses,firebird,msefirebird,msetypes,mdb,msestrings,
- msefbconnection3,
+ msefb3connection,
 // mibconnection,
  msethread,sysutils;
 
@@ -115,18 +115,18 @@ type
  nbakoptionty = (nbo_notriggers);
  nbakoptionsty = set of nbakoptionty;
   
- tfbservice3 = class;
+ tfb3service = class;
 
  efbserviceerror3 = class(edatabaseerror)
   private
    ferror: integer;
    ferrormessage: msestring;
-   fsender: tfbservice3;
+   fsender: tfb3service;
 //   fstatus: statusvectorty;
   public
-   constructor create(const asender: tfbservice3;
+   constructor create(const asender: tfb3service;
                  const astatus: istatus; const aerrormessage: msestring);
-   property sender: tfbservice3 read fsender;
+   property sender: tfb3service read fsender;
    property error: integer read ferror;
    property errormessage: msestring read ferrormessage;
 //   property status: statusvectorty read fstatus;
@@ -137,24 +137,24 @@ type
  fbserviceoptionty = (fbso_utf8,fbso_utf8message);
  fbserviceoptionsty = set of fbserviceoptionty;
 
- fbservicetexteventty = procedure (const sender: tfbservice3;
+ fbservicetexteventty = procedure (const sender: tfb3service;
                                            const atext: msestring) of object;
- fbserviceerroreventty = procedure (const sender: tfbservice3; 
+ fbserviceerroreventty = procedure (const sender: tfb3service; 
                             var e: exception; var handled: boolean) of object;
- fbserviceendeventty = procedure (const sender: tfbservice3;
+ fbserviceendeventty = procedure (const sender: tfb3service;
                                             const aborted: boolean) of object;
  tfbservicemonitor3 = class(tmsethread)
   private
    fprocname: msestring;
   protected
-   fowner: tfbservice3;
+   fowner: tfb3service;
    function execute(thread: tmsethread): integer; override;
   public
-   constructor create(const aowner: tfbservice3; const procname: msestring);
+   constructor create(const aowner: tfb3service; const procname: msestring);
    destructor destroy(); override;
  end;
   
- tfbservice3 = class(tmsecomponent)
+ tfb3service = class(tmsecomponent)
   private
    fhostname: ansistring;
    fusername: ansistring;
@@ -508,7 +508,7 @@ end;
 
 { efbserviceerror3 }
 
-constructor efbserviceerror3.create(const asender: tfbservice3;
+constructor efbserviceerror3.create(const asender: tfb3service;
                const astatus: istatus; const aerrormessage: msestring);
 var
  str1: string;
@@ -537,7 +537,7 @@ end;
 
 { tfbservicemonitor3 }
 
-constructor tfbservicemonitor3.create(const aowner: tfbservice3;
+constructor tfbservicemonitor3.create(const aowner: tfb3service;
                                                const procname: msestring);
 begin
  fowner:= aowner;
@@ -733,22 +733,22 @@ begin
  result:= 0;
 end;
 
-{ tfbservice3 }
+{ tfb3service }
 
-constructor tfbservice3.create(aowner: tcomponent);
+constructor tfb3service.create(aowner: tcomponent);
 begin
 // fhandle:= FB_API_NULLHANDLE;
  finfotimeout:= defaultinfotimeout;
  inherited;
 end;
 
-destructor tfbservice3.destroy();
+destructor tfb3service.destroy();
 begin
  disconnect();
  inherited;
 end;
 
-procedure tfbservice3.cancel();
+procedure tfb3service.cancel();
 begin
  freeandnil(fmonitor);
  if connected then begin
@@ -757,17 +757,17 @@ begin
  end;
 end;
 
-function tfbservice3.busy(): boolean;
+function tfb3service.busy(): boolean;
 begin
  result:= fbss_busy in fstate;
 end;
 
-function tfbservice3.getconnected: boolean;
+function tfb3service.getconnected: boolean;
 begin
  result:= fservice <> nil;
 end;
 
-procedure tfbservice3.setconnected(const avalue: boolean);
+procedure tfb3service.setconnected(const avalue: boolean);
 begin
  if csreading in componentstate then begin
   updatebit1(card32(fstate),ord(fbss_connected),avalue);
@@ -782,7 +782,7 @@ begin
  end;
 end;
 
-function tfbservice3.connectionmessage(atext: pchar): msestring;
+function tfb3service.connectionmessage(atext: pchar): msestring;
 begin
  if fbso_utf8message in foptions then begin
   result:= utf8tostring(atext);
@@ -792,7 +792,7 @@ begin
  end;
 end;
 
-procedure tfbservice3.loaded();
+procedure tfb3service.loaded();
 begin
  inherited;
  if fbss_connected in fstate then begin
@@ -800,7 +800,7 @@ begin
  end;
 end;
 
-procedure tfbservice3.doasyncevent(var atag: int32);
+procedure tfb3service.doasyncevent(var atag: int32);
 begin
  inherited;
  if canevent(tmethod(fonasyncendmain)) then begin
@@ -815,24 +815,24 @@ begin
  end;
 end;
 
-procedure tfbservice3.clearstatus();
+procedure tfb3service.clearstatus();
 begin
  fapi.status.init();
 end;
 
-function tfbservice3.statusok(): boolean;
+function tfb3service.statusok(): boolean;
 begin
  result:= fapi.status.getstate() and istatus.state_errors = 0
 end;
 
-procedure tfbservice3.checkstatus(const aerrormessage: msestring);
+procedure tfb3service.checkstatus(const aerrormessage: msestring);
 begin
  if fapi.status.getstate() and istatus.state_errors <> 0 then begin
   raise efbserviceerror3.create(self,fapi.status,aerrormessage);
  end;
 end;
 
-procedure tfbservice3.connect();
+procedure tfb3service.connect();
 const
  servicename = 'service_mgr';
 var
@@ -868,7 +868,7 @@ begin
  include(fstate,fbss_connected);
 end;
 
-procedure tfbservice3.closeconn();
+procedure tfb3service.closeconn();
 begin
  fstate:= fstate - [fbss_connected,fbss_busy];
  if fservice <> nil then begin
@@ -879,7 +879,7 @@ begin
  end;
 end;
 
-procedure tfbservice3.disconnect();
+procedure tfb3service.disconnect();
 begin
  if (fmonitor <> nil) and 
               (sys_getcurrentthread() <> fmonitor.id) then begin
@@ -888,13 +888,13 @@ begin
  closeconn();
 end;
 
-procedure tfbservice3.readstate(reader: treader);
+procedure tfb3service.readstate(reader: treader);
 begin
  disconnect();
  inherited;
 end;
 
-procedure tfbservice3.raiseerror(const e: exception; const dberr: boolean);
+procedure tfb3service.raiseerror(const e: exception; const dberr: boolean);
 var
  bo1: boolean;
  e1: exception;
@@ -928,13 +928,13 @@ begin
  end;
 end;
 
-procedure tfbservice3.dberror(const msg: msestring; const comp: tcomponent;
+procedure tfb3service.dberror(const msg: msestring; const comp: tcomponent;
                                                          const dberr: boolean);
 begin
  raiseerror(edatabaseerror.create(ansistring(msg),comp),dberr);
 end;
 (*
-procedure tfbservice3.checkerror(const procname: string;
+procedure tfb3service.checkerror(const procname: string;
                const status: statusvectorty);
 var
  buf: array [0..1024] of char;
@@ -955,14 +955,14 @@ begin
 end;
 //{$warnings on}
 
-procedure tfbservice3.checkerror(const procname: string; const status: integer);
+procedure tfb3service.checkerror(const procname: string; const status: integer);
 begin
  if status <> 0 then begin
   checkerror(procname,fstatus);
  end;
 end;
 *)
-procedure tfbservice3.checkbusy();
+procedure tfb3service.checkbusy();
 begin
  if not connected then begin
   dberror('Not connected',self,false);
@@ -972,13 +972,13 @@ begin
  end;
 end;
 
-procedure tfbservice3.invalidresponse(const procname: msestring);
+procedure tfb3service.invalidresponse(const procname: msestring);
 begin
  raiseerror(edatabaseerror.create(
     ansistring('Invalid '+procname+' response'),self),true);
 end;
 
-function tfbservice3.todbstring(const avalue: msestring): string;
+function tfb3service.todbstring(const avalue: msestring): string;
 begin
  if fbso_utf8 in foptions then begin
   result:= stringtoutf8ansi(avalue);
@@ -988,7 +988,7 @@ begin
  end;
 end;
 
-function tfbservice3.tomsestring(const avalue: string): msestring;
+function tfb3service.tomsestring(const avalue: string): msestring;
 begin
  if fbso_utf8 in foptions then begin
   result:= utf8tostring(avalue);
@@ -998,7 +998,7 @@ begin
  end;
 end;
 
-procedure tfbservice3.start(const procname: msestring; const params: string);
+procedure tfb3service.start(const procname: msestring; const params: string);
 begin
  checkbusy();
  fasynctext:= nil;
@@ -1010,7 +1010,7 @@ begin
  include(fstate,fbss_busy);
 end;
 
-function tfbservice3.getinfo(const procname: msestring; 
+function tfb3service.getinfo(const procname: msestring; 
                    const items: array of byte; const async: boolean): string;
 var
  params1: string;
@@ -1035,7 +1035,7 @@ begin
  end;
 end;
 
-procedure tfbservice3.runcommand(const procname: msestring;
+procedure tfb3service.runcommand(const procname: msestring;
                const params: string);
 var
  ar1: msestringarty;
@@ -1043,7 +1043,7 @@ begin
  gettext(procname,params,ar1,1);
 end;
 
-function tfbservice3.getmsestringitem(var buffer: pointer; out res: msestring;
+function tfb3service.getmsestringitem(var buffer: pointer; out res: msestring;
                            const cutspace: boolean = false): boolean;
 var
  i1,i2: int32;
@@ -1064,7 +1064,7 @@ begin
  inc(buffer,i1);
 end;
 
-function tfbservice3.getmsestringitem(var buffer: pointer; const id: int32;
+function tfb3service.getmsestringitem(var buffer: pointer; const id: int32;
                var value: msestring): boolean;
 begin
  result:= false;
@@ -1075,13 +1075,13 @@ begin
  end;
 end;
 
-procedure tfbservice3.addmseparam(var params: string; const id: int32;
+procedure tfb3service.addmseparam(var params: string; const id: int32;
                const value: msestring);
 begin
  addparam(params,id,todbstring(value));
 end;
 {
-function tfbservice3.getline(const procname: string; 
+function tfb3service.getline(const procname: string; 
                            var res: msestring; out eof: boolean): boolean;
 var
  params1: string;
@@ -1110,7 +1110,7 @@ begin
  end;
 end;
 }
-function tfbservice3.serverinfo(): fbserverinfoty;
+function tfb3service.serverinfo(): fbserverinfoty;
 var
  buffer: string;
  po1: pbyte;
@@ -1140,7 +1140,7 @@ begin
  end;
 end;
 
-function tfbservice3.internalusers(const ausername: string): fbuserinfoarty;
+function tfb3service.internalusers(const ausername: string): fbuserinfoarty;
 var
  params1,buffer1: string;
  po1: pbyte;
@@ -1192,12 +1192,12 @@ begin
  setlength(result,count);
 end;
 
-function tfbservice3.users(): fbuserinfoarty;
+function tfb3service.users(): fbuserinfoarty;
 begin
  result:= internalusers('');
 end;
 
-function tfbservice3.user(const ausername: msestring;
+function tfb3service.user(const ausername: msestring;
                             var ainfo: fbuserinfoty): boolean;
 var
  ar1: fbuserinfoarty;
@@ -1209,7 +1209,7 @@ begin
  end;
 end;
 
-procedure tfbservice3.adduserparams(var params1: string; 
+procedure tfb3service.adduserparams(var params1: string; 
                       const ainfo: fbuserinfoty; const aitems: fbuseritemsty);
 begin
  with ainfo do begin
@@ -1246,7 +1246,7 @@ begin
  end;
 end;
 
-procedure tfbservice3.adduser(const ainfo: fbuserinfoty;
+procedure tfb3service.adduser(const ainfo: fbuserinfoty;
                                          const items: fbuseritemsty);
 var
  params1: string;
@@ -1256,7 +1256,7 @@ begin
  runcommand('adduser',params1);
 end;
 
-procedure tfbservice3.modifyuser(const ainfo: fbuserinfoty;
+procedure tfb3service.modifyuser(const ainfo: fbuserinfoty;
                const items: fbuseritemsty);
 var
  params1: string;
@@ -1266,7 +1266,7 @@ begin
  runcommand('modifyuser',params1);
 end;
 
-procedure tfbservice3.deleteuser(const ausername: msestring;
+procedure tfb3service.deleteuser(const ausername: msestring;
                                         const arolename: msestring = '');
 var
  params1: string;
@@ -1279,7 +1279,7 @@ begin
  runcommand('deleteuser',params1);
 end;
 
-procedure tfbservice3.gettext(const procname: msestring; const params: string;
+procedure tfb3service.gettext(const procname: msestring; const params: string;
             var res:  msestringarty; const maxrowcount: integer);
 
 var
@@ -1394,7 +1394,7 @@ begin
  exclude(fstate,fbss_busy);
 end;
 
-procedure tfbservice3.startmonitor(const procname: msestring; 
+procedure tfb3service.startmonitor(const procname: msestring; 
                                                   const aparams: string);
 begin
 // checkbusy();
@@ -1403,7 +1403,7 @@ begin
  fmonitor:= tfbservicemonitor3.create(self,procname);
 end;
 
-function tfbservice3.serviceisrunning(): boolean;
+function tfb3service.serviceisrunning(): boolean;
 var
  buffer1: string;
  po1: pointer;
@@ -1419,13 +1419,13 @@ begin
  end; 
 end;
 
-procedure tfbservice3.getlog(var res: msestringarty;
+procedure tfb3service.getlog(var res: msestringarty;
                                const maxrowcount: int32 = -1);
 begin
  tagaction('getlog',isc_action_svc_get_fb_log,res,maxrowcount);
 end;
 
-procedure tfbservice3.tracestart(const cfg: msestring;
+procedure tfb3service.tracestart(const cfg: msestring;
                                            const _name: msestring = '');
 var
  params1: string;
@@ -1438,14 +1438,14 @@ begin
  startmonitor('tracestart',params1);
 end;
 
-procedure tfbservice3.tagaction(const aprocname: msestring; 
+procedure tfb3service.tagaction(const aprocname: msestring; 
                     const aaction: int32; var res: msestringarty;
                                                const maxrowcount: int32);
 begin
  gettext(aprocname,char(aaction),res,maxrowcount);
 end;
 
-procedure tfbservice3.tagaction(const aprocname: msestring; 
+procedure tfb3service.tagaction(const aprocname: msestring; 
                                                  const aaction: int32);
 var
  ar1: msestringarty;
@@ -1453,13 +1453,13 @@ begin
  tagaction(aprocname,aaction,ar1,1);
 end;
 
-procedure tfbservice3.tracelist(var res: msestringarty;
+procedure tfb3service.tracelist(var res: msestringarty;
                               const maxrowcount: int32 = -1);
 begin
  tagaction('tracelist',isc_action_svc_trace_list,res,maxrowcount);
 end;
 
-procedure tfbservice3.traceaction(const aprocname: msestring;
+procedure tfb3service.traceaction(const aprocname: msestring;
             const aaction: int32; const aid: card32; var res: msestringarty;
                                                      const maxrowcount: int32);
 var
@@ -1470,35 +1470,35 @@ begin
  gettext(aprocname,params1,res,maxrowcount);
 end;
 
-procedure tfbservice3.tracestop(const aid: card32; var res: msestringarty;
+procedure tfb3service.tracestop(const aid: card32; var res: msestringarty;
                               const maxrowcount: int32 = -1);
 begin
  traceaction('tracestop',isc_action_svc_trace_stop,aid,res,maxrowcount);
 end;
 
-procedure tfbservice3.tracesuspend(const aid: card32; var res: msestringarty;
+procedure tfb3service.tracesuspend(const aid: card32; var res: msestringarty;
                                                  const maxrowcount: int32 = -1);
 begin
  traceaction('tracesuspend',isc_action_svc_trace_suspend,aid,res,maxrowcount);
 end;
 
-procedure tfbservice3.traceresume(const aid: card32; var res: msestringarty;
+procedure tfb3service.traceresume(const aid: card32; var res: msestringarty;
                                                  const maxrowcount: int32 = -1);
 begin
  traceaction('traceresume',isc_action_svc_trace_resume,aid,res,maxrowcount);
 end;
 
-procedure tfbservice3.setmapping();
+procedure tfb3service.setmapping();
 begin
  tagaction('setmapping',isc_action_svc_set_mapping);
 end;
 
-procedure tfbservice3.dropmapping();
+procedure tfb3service.dropmapping();
 begin
  tagaction('dropmapping',isc_action_svc_drop_mapping);
 end;
 
-procedure tfbservice3.dbstats(const adbname: msestring;
+procedure tfb3service.dbstats(const adbname: msestring;
                const aoptions: dbstatoptionsty; const acommandline: msestring; 
                var res: msestringarty; const maxrowcount: int32 = -1);
 var
@@ -1513,7 +1513,7 @@ begin
  gettext('dbstats',params1,res,maxrowcount);
 end;
 
-procedure tfbservice3.properties(const adbname: msestring;
+procedure tfb3service.properties(const adbname: msestring;
                const ainfo: fbpropertyinfoty; const aitems: fbpropertyitemsty;
                var res:  msestringarty; const maxrowcount: integer);
 var
@@ -1580,7 +1580,7 @@ begin
  gettext('properties',params1,res,maxrowcount);
 end;
 
-procedure tfbservice3.validatestart(const dbname: msestring;
+procedure tfb3service.validatestart(const dbname: msestring;
                const tabincl: msestring = ''; const tabexcl: msestring = '';
                const idxincl: msestring = ''; const idxexcl: msestring = '';
                const locktimeout: card32 = 0);
@@ -1607,7 +1607,7 @@ begin
  startmonitor('validatestart',params1);
 end;
 
-procedure tfbservice3.backupstart(const dbname: msestring;
+procedure tfb3service.backupstart(const dbname: msestring;
       const backupfiles: array of msestring; const lengths: array of card32;
       const verbose: boolean = false; const stat: string = '';
       const aoptions: backupoptionsty = [];
@@ -1639,7 +1639,7 @@ begin
  startmonitor('backupstart',params1);
 end;
 
-procedure tfbservice3.restorestart(const backupfiles: array of msestring;
+procedure tfb3service.restorestart(const backupfiles: array of msestring;
               const dbfiles: array of msestring; const lengths: array of card32;
               const verbose: boolean = false; const stat: string = '';
               const aoptions: restoreoptionsty = [];
@@ -1693,7 +1693,7 @@ begin
  startmonitor('restorestart',params1);
 end;
 
-procedure tfbservice3.nbakstart(const dbname: msestring; const _file: msestring;
+procedure tfb3service.nbakstart(const dbname: msestring; const _file: msestring;
                const level: card32; const options: nbakoptionsty;
                const direct: string = '');
 var
@@ -1710,7 +1710,7 @@ begin
  startmonitor('nbak',params1);
 end;
 
-procedure tfbservice3.nreststart(const dbname: msestring;
+procedure tfb3service.nreststart(const dbname: msestring;
                const files: array of msestring; const options: nbakoptionsty);
 var
  params1: string;
@@ -1725,7 +1725,7 @@ begin
  startmonitor('nrest',params1);
 end;
 
-procedure tfbservice3.repairstart(const adbname: msestring;
+procedure tfb3service.repairstart(const adbname: msestring;
                const aoptions: repairoptionsty);
 var
  params1: string;
