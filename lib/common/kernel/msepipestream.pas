@@ -518,6 +518,9 @@ function tpipereader.readbytes(var buf): integer;
   if fmsbufcount = 0 then begin
    exclude(fstate,tss_pipeactive);
    fthread.sempost;
+  end
+  else begin
+   include(fstate,tss_pipeactive);
   end;
  end;
  
