@@ -295,6 +295,7 @@ function compfiletime(const a,b: tdatetime): integer;
 
 function intermediatefilename(const aname: filenamety): filenamety;
 function msegettempdir: filenamety;
+function msegettempfilename(const aname: filenamety): filenamety;
 
 implementation
 
@@ -314,6 +315,11 @@ const
 function msegettempdir: filenamety;
 begin
  result:= sys_gettempdir;
+end;
+
+function msegettempfilename(const aname: filenamety): filenamety;
+begin
+ result:= intermediatefilename(filepath(msegettempdir,aname,fk_file));
 end;
 
 function intermediatefilename(const aname: filenamety): filenamety;

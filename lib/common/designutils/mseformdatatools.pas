@@ -31,6 +31,9 @@ procedure formtexttoobjsource(sourcefilename: filenamety;
    //if formclass = '' -> extracted from sourcefile,
    //if unitname = '' -> unitname = filename
 
+procedure datatoobjsource(const source: tstream; const dest: ttextstream;
+                                                   const unitname: msestring);
+
 procedure getobjforminfo(instream: ttextstream; var formname,formclass: string);
                     //!!!!todo var -> out (fpcbug 3221)
 procedure createlanglib(const libfilename: filenamety;
@@ -288,6 +291,20 @@ begin
  finally
   instream.Free;
  end;
+end;
+
+procedure datatoobjsource(const source: tstream; const dest: ttextstream;
+                                                   const unitname: msestring);
+var
+ s1: string;
+begin
+ dest.writeln('unit ' + unitname+';');
+ dest.writeln(compilerdefaults);
+ dest.writeln('interface');
+ s1:= readstreamdatastring(source);
+ writeconstdata(pointer(s1),length(s1),'data',dest);
+ dest.writeln('implementation');
+ dest.writeln('end.');
 end;
 
 initialization

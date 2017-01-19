@@ -138,6 +138,7 @@ type
    fhelpfooter: msestring;
    fonafterinit: sysenvmanagereventty;
    fstatpriority: integer;
+   ferrorcount: int32;
    procedure setoninit(const Value: sysenvmanagereventty);
    procedure doinit;
    procedure errorme(nr: sysenverrornrty; value: msestring);
@@ -178,12 +179,13 @@ type
    function getstatpriority: integer;
   public
    constructor create(aowner: tcomponent); override;
-   procedure init(const arguments: array of argumentdefty;
-                                           const values: msestringarty);
-   procedure init(const arguments: array of argumentdefty); 
+   function init(const arguments: array of argumentdefty;
+                                  const values: msestringarty): boolean;
+                                                //true if ok
+   function init(const arguments: array of argumentdefty): boolean;
                                            //use commandline values
-   procedure init(const values: msestringarty); //use defs
-   procedure init(); //use defs and commandline values
+   function init(const values: msestringarty): boolean; //use defs
+   function init(): boolean; //use defs and commandline values
 
    procedure processinfo(index: integer; value: string);
    procedure errormessage(const mess: msestring);
@@ -193,7 +195,7 @@ type
             const firstenvvarmacro: integer = -1;
             const lastenvvarmacro: integer = -1;
                               prepend: macroinfoarty = nil): macroinfoarty;
-
+   property errorcount: int32 read ferrorcount;
    property defined[index: integer]: boolean read getdefined
                                                   write setdefined; default;
    property objectlinker: tobjectlinker read getobjectlinker 
@@ -432,6 +434,7 @@ var
  str1: string;
 begin
  if nr <> ern_io then begin
+  inc(ferrorcount);
   if not (seo_noerrormess in foptions) then begin
    if nr = ern_user then begin
     str1:= ansistring(value);
@@ -781,8 +784,8 @@ begin
  result:= setdef(index,strar1,adefined);
 end;
 
-procedure tsysenvmanager.init(const arguments: array of argumentdefty;
-                                                const values: msestringarty);
+function tsysenvmanager.init(const arguments: array of argumentdefty;
+                                       const values: msestringarty): boolean;
 
 var
  index: integer;
@@ -968,6 +971,7 @@ var
 // po1: pchar;
 // {$endif}
 begin            //init
+ ferrorcount:= 0;
  if high(arguments) = -1 then begin
   exit;
  end;
@@ -1039,34 +1043,35 @@ begin            //init
    end;
   end;
  end;
+ result:= ferrorcount = 0;
 end;
 
-procedure tsysenvmanager.init(const arguments: array of argumentdefty);
+function tsysenvmanager.init(const arguments: array of argumentdefty): boolean;
 var
  ar1: msestringarty;
 begin
  ar1:= getcommandlinearguments();
  if high(ar1) > 0 then begin 
             //FPC 2.6.4 throws an exception in copy() if out of range
-  init(arguments,copy(ar1,1,bigint));
+  result:= init(arguments,copy(ar1,1,bigint));
  end
  else begin
-  init(arguments,nil);
+  result:= init(arguments,nil);
  end;
 end;
 
-procedure tsysenvmanager.init(const values: msestringarty); //use defs
+function tsysenvmanager.init(const values: msestringarty): boolean; //use defs
 var
  ar1: argumentdefarty;
  ar2: msestringararty;
 begin
  defstoarguments(fdefs,ar1,ar2);
- init(ar1,values);
+ result:= init(ar1,values);
 end;
 
-procedure tsysenvmanager.init(); //use defs and commandline values
+function tsysenvmanager.init(): boolean; //use defs and commandline values
 begin
- init(copy(getcommandlinearguments(),1,bigint));
+ result:= init(copy(getcommandlinearguments(),1,bigint));
 end;
 
 procedure tsysenvmanager.processinfo(index: integer; value: string);

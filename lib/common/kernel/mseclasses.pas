@@ -772,6 +772,12 @@ type
    procedure writerootcomponent(aroot: tcomponent);
    property masterancestor: boolean read fmasterancestor;
  end;
+
+ tobjectdatastream = class(tcustommemorystream)
+  public
+   constructor create(data: pobjectdataty);
+   function Write(const Buffer; Count: Longint): Longint; override;
+ end;
  
  setsplitpairty = record
                    oldenum,newenum: string
@@ -1016,13 +1022,13 @@ const
   filersignature : array[1..4] of char = 'TPF0';
 type
 {$endif}
-
+{
  tobjectdatastream = class(tcustommemorystream)
   public
    constructor create(data: pobjectdataty);
    function Write(const Buffer; Count: Longint): Longint; override;
  end;
-
+}
  objectdatainfoty = record
   objectclass: tclass;
   objectdata: pobjectdataty;
