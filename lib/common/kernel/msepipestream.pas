@@ -660,7 +660,8 @@ var
  bo1: boolean;
 begin
  if not (tss_error in fstate) and 
-          ((tss_pipeactive in fstate) or (bufend <> bufoffset)) then begin
+          ((bufend <> bufoffset) or (tss_pipeactive in fstate) or
+                             (sys_getcurrentthread = fthread.id)) then begin
   bo1:= inherited readstrln(str1);
   fpipebuffer:= fpipebuffer + str1;
   if bo1 then begin
@@ -681,7 +682,7 @@ begin
   result:= pr_empty;
  end;
 end;
-
+var testvar: integer;
 function tpipereader.readuln(var value: string;
                out hasmoredata: boolean): boolean;
 begin
@@ -699,6 +700,9 @@ begin
   until result or (fdatastatus = pr_empty);
 // end;
  hasmoredata:= fdatastatus <> pr_empty;
+if not hasmoredata and (fmsbufcount > 0) then begin
+testvar:= 1;
+end;
 end;
 
 function tpipereader.readuln(var value: string): boolean;
