@@ -682,7 +682,7 @@ begin
   result:= pr_empty;
  end;
 end;
-var testvar: integer;
+
 function tpipereader.readuln(var value: string;
                out hasmoredata: boolean): boolean;
 begin
@@ -700,9 +700,6 @@ begin
   until result or (fdatastatus = pr_empty);
 // end;
  hasmoredata:= fdatastatus <> pr_empty;
-if not hasmoredata and (fmsbufcount > 0) then begin
-testvar:= 1;
-end;
 end;
 
 function tpipereader.readuln(var value: string): boolean;

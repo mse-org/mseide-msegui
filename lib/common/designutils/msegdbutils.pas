@@ -1769,7 +1769,7 @@ begin
 // writedebug(str1);
 end;
 }
-var testvar: int32;
+
 procedure tgdbmi.gdbfrom(const sender: tpipereader);
 var
  str1,str2: string;
@@ -1825,11 +1825,6 @@ begin
    end;
   end;
  until not b2; //all data read
-
- if tpypereader1(fgdbfrom).fmsbufcount <> 0 then begin
-  testvar:= 1;
- end;
-
 end;
 
 {$ifdef UNIX}
