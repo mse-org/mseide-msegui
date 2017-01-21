@@ -5369,7 +5369,7 @@ begin
  fvisiblepage:= true;
  fdatalink:= treportpagedatalink.create;
  inherited;
- fwidgetstate1:= fwidgetstate1 + [ws1_nodesignvisible,ws1_nodesignmove
+ fwidgetstate1:= fwidgetstate1 + [{ws1_nodesignvisible,}ws1_nodesignmove
                                 {,ws1_nodesignhandles,ws1_nodesigndelete}];
 // fpagewidth:= defaultreppagewidth;
 // fpageheight:= defaultreppageheight; 
