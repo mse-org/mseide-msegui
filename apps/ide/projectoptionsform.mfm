@@ -5188,7 +5188,6 @@ object projectoptionsfo: tprojectoptionsfo
           datarowheight = 16
           reffontheight = 14
           object formatmacronames: tstringedit
-            optionswidget1 = [ow1_fontglyphheight]
             optionsskin = [osk_framebuttononly]
             taborder = 1
             onshowhint = hintexpandedmacros
