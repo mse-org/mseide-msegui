@@ -347,6 +347,7 @@ type
    procedure readvisible(reader: treader);
    procedure readreadonly(reader: treader);
    procedure setoptionsfield(const avalue: optionsfieldty);
+   procedure setlookupdataset(const avalue: tdataset);
    function getbuffervalue: variant;
    function getasid: int64;
    procedure setasid(const avalue: int64);
@@ -507,7 +508,7 @@ type
                                                    write FImportedConstraint;
     property KeyFields: string read FKeyFields write FKeyFields;
     property LookupCache: Boolean read FLookupCache write FLookupCache;
-    property LookupDataSet: TDataSet read FLookupDataSet write FLookupDataSet;
+    property LookupDataSet: TDataSet read FLookupDataSet write setLookupDataSet;
     property LookupKeyFields: string read FLookupKeyFields 
                                                     write FLookupKeyFields;
     property LookupResultField: string read FLookupResultField 
@@ -6228,6 +6229,17 @@ begin
  foptionsfield:= avalue;
  if optcha <> [] then begin
   PropertyChanged(True);
+ end;
+end;
+
+procedure TField.setlookupdataset(const avalue: tdataset);
+begin
+ if flookupdataset <> nil then begin
+  flookupdataset.removefreenotification(self);
+ end;
+ flookupdataset:= avalue;
+ if flookupdataset <> nil then begin
+  flookupdataset.freenotification(self);
  end;
 end;
 
