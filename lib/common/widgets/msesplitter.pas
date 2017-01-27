@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2016 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2017 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -258,7 +258,10 @@ type
  layoutoptionty = (lao_alignx,lao_placex,lao_aligny,lao_placey,
                    lao_scaleleft,lao_scaletop,
                    lao_scalewidth,lao_scaleheight,
-                   lao_scalefont,lao_scalechildfont);
+                   lao_scalefont,lao_scalechildfont,
+                   lao_syncmaxautosize,
+                   lao_synccaptiondistx,lao_synccaptiondisty,
+                   lao_syncpaintwidth,lao_syncpaintheight);
  layoutoptionsty = set of layoutoptionty; 
 const
  defaultlayoutoptions = [];
@@ -266,11 +269,19 @@ const
 type  
  placeoptionty = (plo_noinvisible,plo_scalesize,
                   plo_scalefullref, //use whole innerclientrect as size reference
-                  plo_endmargin,plo_propmargin,plo_syncmaxautosize,
+                  plo_endmargin,plo_propmargin,
+                  plo_syncmaxautosize,
                   plo_synccaptiondistx,plo_synccaptiondisty,
                   plo_syncpaintwidth,plo_syncpaintheight);
  placeoptionsty = set of placeoptionty;
-
+const
+ deprecatedplaceoptions = [plo_syncmaxautosize,
+                  plo_synccaptiondistx,plo_synccaptiondisty,
+                  plo_syncpaintwidth,plo_syncpaintheight];
+ invisibleplaceoptions = [ord(plo_syncmaxautosize),
+                  ord(plo_synccaptiondistx),ord(plo_synccaptiondisty),
+                  ord(plo_syncpaintwidth),ord(plo_syncpaintheight)];
+type
  widgetlayoutinfoty = record
   widget: twidget;
   pos: pointty;
@@ -325,7 +336,7 @@ type
    procedure setplace_maxdist(const avalue: integer);
    procedure setalign_glue(const avalue: widgetalignmodety);
    procedure setplace_mode(const avalue: widgetalignmodety);
-   procedure setplace_options(const avalue: placeoptionsty);
+   procedure setplace_options(avalue: placeoptionsty);
   protected
    procedure scalebasechanged(const sender: twidget); override;
    function scalesizeref: sizety;
@@ -1859,10 +1870,10 @@ begin
       end;
      end;
     end;
-    if plo_syncmaxautosize in fplace_options then begin
+    if lao_syncmaxautosize in foptionslayout then begin
      syncmaxautosize(fwidgets);
     end;
-    if plo_syncpaintwidth in fplace_options then begin
+    if lao_syncpaintwidth in foptionslayout then begin
      int1:= -1;
      if (lao_alignx in foptionslayout) and 
                               (falign_glue in [wam_start,wam_end]) then begin
@@ -1870,7 +1881,7 @@ begin
      end;
      syncpaintwidth(fwidgets,int1);
     end;
-    if plo_syncpaintheight in fplace_options then begin
+    if lao_syncpaintheight in foptionslayout then begin
      int1:= -1;
      if (lao_aligny in foptionslayout) and
                          (falign_glue in [wam_start,wam_end]) then begin
@@ -1878,10 +1889,10 @@ begin
      end;
      syncpaintheight(fwidgets);
     end;
-    if plo_synccaptiondistx in fplace_options then begin
+    if lao_synccaptiondistx in foptionslayout then begin
      synccaptiondistx(fwidgets);
     end;
-    if plo_synccaptiondisty in fplace_options then begin
+    if lao_synccaptiondisty in foptionslayout then begin
      synccaptiondisty(fwidgets);
     end;
     if lao_alignx in foptionslayout then begin
@@ -2227,10 +2238,17 @@ begin
  end;
 end;
 
-procedure tcustomlayouter.setplace_options(const avalue: placeoptionsty);
+procedure tcustomlayouter.setplace_options(avalue: placeoptionsty);
 var
  diff1: placeoptionsty;
 begin
+ if (csreading in componentstate) and 
+                 (avalue * deprecatedplaceoptions <> []) then begin
+  optionslayout:= optionslayout + 
+    layoutoptionsty(card32(avalue * deprecatedplaceoptions) shl 
+                         (ord(lao_syncmaxautosize) - ord(plo_syncmaxautosize)));
+ end;
+ avalue:= avalue - deprecatedplaceoptions;
  diff1:= fplace_options >< avalue;
  if diff1 <> [] then begin
   fplace_options:= avalue;

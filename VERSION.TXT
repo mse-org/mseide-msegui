@@ -1,5 +1,11 @@
 MSEide+MSEgui breaking changes version history
 **********************************************
+2017-01-27 tlayouter.place_options plo_syncmaxautosize,
+ plo_synccaptiondistx,plo_synccaptiondisty,
+ plo_syncpaintwidth,plo_syncpaintheight ->
+ optionslayout lao_syncmaxautosize,
+ lao_synccaptiondistx,lao_synccaptiondisty,
+ lao_syncpaintwidth,lao_syncpaintheight.
 2017-01-19
  msefbconnection.pas -> msefb3connection.pas.
  tfbconnection -> tfb3connection.

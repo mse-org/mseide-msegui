@@ -1,4 +1,4 @@
-{ MSEide Copyright (c) 1999-2016 by Martin Schreiber
+{ MSEide Copyright (c) 1999-2017 by Martin Schreiber
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -148,6 +148,11 @@ type
    function geteditorclass: propertyeditorclassty; override;  
   public
  end;
+
+ toptionsplaceeditor = class(tsetpropertyeditor)
+  protected
+   function getinvisibleitems: tintegerset; override;
+ end;
   
 const
  mseformintf: designmoduleintfty = 
@@ -247,6 +252,8 @@ begin
                                  tsisterwidgetpropertyeditor);
  registerpropertyeditor(typeinfo(twidget),tlayouter,'align_leader',
                                  tchildwidgetpropertyeditor);
+ registerpropertyeditor(typeinfo(placeoptionsty),tlayouter,'place_options',
+                                 toptionsplaceeditor);
 
 // registerpropertyeditor(typeinfo(tface),tdial,'',toptionalclasspropertyeditor);
  registerpropertyeditor(typeinfo(ttraces),nil,'',ttraceseditor);
@@ -480,6 +487,13 @@ end;
 function tframebuttonseditor.geteditorclass: propertyeditorclassty;
 begin
  result:= tframebuttonitemeditor;
+end;
+
+{ toptionsplaceeditor }
+
+function toptionsplaceeditor.getinvisibleitems: tintegerset;
+begin
+ result:= invisibleplaceoptions;
 end;
 
 initialization
