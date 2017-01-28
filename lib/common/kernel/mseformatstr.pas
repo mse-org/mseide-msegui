@@ -4525,10 +4525,10 @@ begin
    if (po1^ < '0') or (po1^ > '9')  then begin
     exit;
    end;
-   if value < 0 then begin
-    exit;
-   end;
-   if value > max then begin
+//   if value < 0 then begin
+//    exit;
+//   end;
+   if card32(value) > max then begin
     exit;
    end;
    value:= value * 10 + (byte(po1^) - byte('0'));
@@ -4597,10 +4597,10 @@ begin
    if (po1^ < '0') or (po1^ > '9')  then begin
     exit;
    end;
-   if value < 0 then begin
-    exit;
-   end;
-   if value > max then begin
+//   if value < 0 then begin
+//    exit;
+//   end;
+   if card32(value) > max then begin
     exit;
    end;
    value:= value * 10 + (word(po1^) - word('0'));
@@ -4747,10 +4747,10 @@ begin
    if (po1^ < '0') or (po1^ > '9')  then begin
     exit;
    end;
-   if value < 0 then begin
-    exit;
-   end;
-   if value > max then begin
+//   if value < 0 then begin
+//    exit;
+//   end;
+   if card64(value) > max then begin
     exit;
    end;
    value:= value * 10 + (ord(po1^) - ord('0'));
@@ -4821,10 +4821,10 @@ begin
    if (po1^ < '0') or (po1^ > '9')  then begin
     exit;
    end;
-   if value < 0 then begin
-    exit;
-   end;
-   if value > max then begin
+//   if value < 0 then begin
+//    exit;
+//   end;
+   if card64(value) > max then begin
     exit;
    end;
    value:= value * 10 + (ord(po1^) - ord('0'));
