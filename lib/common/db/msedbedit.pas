@@ -208,6 +208,7 @@ type
    destructor destroy; override; 
    function canclose(const newfocus: twidget = nil): boolean; override;
    procedure edit();
+   function canautoedit(): boolean;
 //   property nonavig: boolean read getnonavig write setnonavig;
   published
    property statfile;
@@ -2817,6 +2818,11 @@ procedure tnavigdatalink.editingchanged;
 begin
  inherited;
  updatebuttonstate;
+ with twidget1(fintf.getwidget) do begin
+  if fobjectlinker <> nil then begin
+   fobjectlinker.sendevent(oe_changed);
+  end;
+ end;
 end;
 
 procedure tnavigdatalink.recordchanged(field: tfield);
@@ -3306,6 +3312,12 @@ begin
  end;
 end;
 
+function tdbnavigator.canautoedit(): boolean;
+begin
+ result:= autoedit or fdatalink.active and 
+                             (fdatalink.dataset.state in [dsedit,dsinsert])
+end;
+
 function tdbnavigator.canclose(const newfocus: twidget = nil): boolean;
 begin
  if (dno_postoncanclose in foptions) and fdatalink.active and 
@@ -3443,7 +3455,7 @@ begin
  if canmodify then begin
   if (dataset.state = dsbrowse) and 
        ((oed_autoedit in foptions) or
-         (fnavigator <> nil) and fnavigator.autoedit
+         (fnavigator <> nil) and fnavigator.canautoedit()
        ) then begin
    dataset.edit;
   end
@@ -3498,7 +3510,7 @@ begin
                     not (oed_noautoedit in foptions) and
                     ((oed_autoedit in foptions) or
                      (datasource <> nil) and datasource.AutoEdit or 
-                     (fnavigator <> nil) and fnavigator.autoedit
+                     (fnavigator <> nil) and fnavigator.canautoedit
                     )
                 )
           ) then begin
