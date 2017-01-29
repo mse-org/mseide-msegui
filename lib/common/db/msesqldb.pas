@@ -21,7 +21,9 @@ type
               fplo_refreshifchangedonly,fplo_checkbrowsemodeonrefresh,
               fplo_restorerecno,
               fplo_syncmasterpost,fplo_delayedsyncmasterpost,
+              fplo_syncmasterapplyupdates,
               fplo_syncmastercancel,
+              fplo_syncmastercancelupdates,
               fplo_syncmastercheckbrowsemode,
               fplo_syncmasteredit,
               fplo_syncmasterinsert,
@@ -1145,6 +1147,9 @@ begin
                      typeinfo(igetdscontroller),intf) and
                                         intf.getcontroller.canceling then begin
       destdataset.cancel;
+      if fplo_syncmastercancelupdates in foptions then begin
+       destdataset.cancelupdates();
+      end;
       exit;
      end
      else begin
@@ -1570,6 +1575,12 @@ begin
  foptions:= fieldparamlinkoptionsty(setsinglebit(card32(avalue),
               card32(foptions),
                 card32([fplo_syncslaveinsert,fplo_syncslaveinserttoedit])));
+ if fplo_syncmastercancelupdates in avalue then begin
+  foptions:= foptions + [fplo_syncmastercancel];
+ end;
+ if not (fplo_syncmastercancel in avalue) then begin
+  foptions:= foptions - [fplo_syncmastercancelupdates];
+ end;
 end;
 
 { tsequencedatalink }
