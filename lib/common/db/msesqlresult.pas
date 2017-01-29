@@ -326,6 +326,8 @@ type
    procedure setafteropen(const avalue: tmsesqlscript);
    procedure changed;
    procedure setfielddefs(const avalue: tsqlresultfielddefs);
+   function getcols(const index: int32): tdbcol;
+   procedure setcols(const index: int32; const avalue: tdbcol);
   protected
    procedure dosqlchange(const sender : tobject); override;
    function getactive: boolean; override;
@@ -381,6 +383,7 @@ type
           //whole resultset, empty variant returned for null fields
    procedure loaddatalists(const datalists: array of tdatalist);
    property datacols: tdbcols read fdatacols;
+   property cols[const index: int32]: tdbcol read getcols write setcols; default;
    property bof: boolean read fbof;
    property eof: boolean read feof;
   published
@@ -1618,6 +1621,16 @@ end;
 procedure tsqlresult.setfielddefs(const avalue: tsqlresultfielddefs);
 begin
  ffielddefs.assign(avalue);
+end;
+
+function tsqlresult.getcols(const index: int32): tdbcol;
+begin
+ result:= fdatacols[index];
+end;
+
+procedure tsqlresult.setcols(const index: int32; const avalue: tdbcol);
+begin
+ fdatacols[index].assign(avalue);
 end;
 
 function tsqlresult.getsqltransactionwrite: tsqltransaction;
