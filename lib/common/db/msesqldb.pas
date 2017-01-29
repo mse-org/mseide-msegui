@@ -21,9 +21,9 @@ type
               fplo_refreshifchangedonly,fplo_checkbrowsemodeonrefresh,
               fplo_restorerecno,
               fplo_syncmasterpost,fplo_delayedsyncmasterpost,
-              fplo_syncmasterapplyupdates,
               fplo_syncmastercancel,
               fplo_syncmastercancelupdates,
+              fplo_syncmasterapplyupdate,
               fplo_syncmastercheckbrowsemode,
               fplo_syncmasteredit,
               fplo_syncmasterinsert,
@@ -1119,6 +1119,11 @@ begin
       if (fplo_delayedsyncmasterpost in foptions) and
                            (destdataset.state in [dsinsert,dsedit]) then begin
        destdataset.post();
+      end;
+     end;
+     de_afterapplyupdate: begin
+      if (fplo_syncmasterapplyupdate in foptions) then begin
+       destdataset.applyupdates();
       end;
      end;
     end;

@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 2004-2016 by Martin Schreiber
+{ MSEgui Copyright (c) 2004-2017 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -34,6 +34,7 @@ const
  de_afterinsert = ord(high(tdataevent))+3;
  de_afterpost = ord(high(tdataevent))+4;
  de_hasactiveedit = ord(high(tdataevent))+5;
+ de_afterapplyupdate = ord(high(tdataevent))+6;
 
  defaultdscontrolleroptions = [{dso_cancelupdateondeleteerror}];
  allfieldkinds = [fkData,fkCalculated,fkLookup,fkInternalCalc];

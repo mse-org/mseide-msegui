@@ -3876,6 +3876,7 @@ begin
      end;
     end;
     if rr_applied in response then begin
+     dataevent(tdataevent(de_afterapplyupdate),0);
      afterapply; //possible commit
     end;
    end;
@@ -3955,6 +3956,7 @@ begin
     end;
    end;
    if not bo1 then begin
+    dataevent(tdataevent(de_afterapplyupdate),0);
     afterapply; //possible commit
    end;
    doafterapplyupdate;
