@@ -61,18 +61,18 @@ begin
     active:= true;
     while not eof do begin
      with indexdefs.AddIndexDef do begin
-      str1:= cols[0].asstring;
+      str1:= datacols[0].asstring;
       name:= trim(str1);
-      fields:= trim(res.cols[3].asstring);
-      if cols[4].asstring = 'PRIMARY KEY' then begin
+      fields:= trim(res.datacols[3].asstring);
+      if datacols[4].asstring = 'PRIMARY KEY' then begin
        options:= options + [ixPrimary];
       end;
-      if cols[2].asinteger = 1 then begin
+      if datacols[2].asinteger = 1 then begin
        options:= options + [ixUnique];
       end;
       next;
-      while  not eof and (str1 = cols[0].asstring) do begin
-       fields:= fields + ';' + trim(cols[3].asstring);
+      while  not eof and (str1 = datacols[0].asstring) do begin
+       fields:= fields + ';' + trim(datacols[3].asstring);
        next;
       end;
      end;

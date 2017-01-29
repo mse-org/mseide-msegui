@@ -1740,8 +1740,8 @@ begin
      statementtype:= stselect;
      refresh;
      if not eof then begin
-      for int1:= 0 to cols.count - 1 do begin
-       with cols[int1] do begin
+      for int1:= 0 to datacols.count - 1 do begin
+       with datacols[int1] do begin
         fld1:= self.fields.fieldbyname(fieldname);
         fld1.value:= asvariant;
        end;

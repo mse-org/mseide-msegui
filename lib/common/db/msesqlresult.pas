@@ -309,7 +309,7 @@ type
 //   fcursor: tsqlcursor;
 //   fparams: tmseparams;
    ffielddefs: tsqlresultfielddefs;
-   fcols: tdbcols;
+   fdatacols: tdbcols;
    feof: boolean;
    fbof: boolean;
 //   foptions: sqlresultoptionsty;
@@ -362,9 +362,11 @@ type
 //   function isutf8: boolean;
    procedure prepare; override;
    procedure unprepare; override;
-   procedure open;
+   procedure open(const aparams: array of variant);
+   procedure open();
    procedure close;
    procedure clear; //frees buffers, does not unprepare
+   procedure refresh(const aparams: array of variant);
    procedure refresh;
    procedure next;
    function rowsaffected: integer; //-1 if not supported
@@ -378,7 +380,7 @@ type
    function asvariantarar(const aclose: boolean = false): variantararty;
           //whole resultset, empty variant returned for null fields
    procedure loaddatalists(const datalists: array of tdatalist);
-   property cols: tdbcols read fcols;
+   property datacols: tdbcols read fdatacols;
    property bof: boolean read fbof;
    property eof: boolean read feof;
   published
@@ -1296,7 +1298,7 @@ begin
  fbof:= true;
  feof:= true;
 // fparams:= tmseparams.create(self);
- fcols:= tdbcols.create({$ifdef FPC}@{$endif}getname);
+ fdatacols:= tdbcols.create({$ifdef FPC}@{$endif}getname);
  ffielddefs:= tsqlresultfielddefs.create(nil);
 // fsql:= tsqlstringlist.create;
 // fsql.onchange:= @onchangesql;
@@ -1313,7 +1315,7 @@ begin
 // fsql.free;
 // fparams.free;
  ffielddefs.free;
- fcols.free;
+ fdatacols.free;
 end;
 
 procedure tsqlresult.setsql(const avalue: tsqlstringlist);
@@ -1393,7 +1395,7 @@ begin
  //dummy
 end;
 
-procedure tsqlresult.open;
+procedure tsqlresult.open(const aparams: array of variant);
 begin
  if canevent(tmethod(fonbeforeopen)) then begin
   fonbeforeopen(self);
@@ -1402,10 +1404,10 @@ begin
   fbeforeopen.execute;
  end;
 // prepare;
- execute;
+ execute(aparams);
 // ffielddefs.clear;
  fdatabase.addfielddefs(fcursor,ffielddefs);
- fcols.initfields(self,fcursor,ffielddefs);
+ fdatacols.initfields(self,fcursor,ffielddefs);
 // ffielddefs.bindconnectors;
  factive:= true;
  feof:= false;
@@ -1420,6 +1422,11 @@ begin
  if canevent(tmethod(fonafteropen)) then begin
   fonafteropen(self);
  end;
+end;
+
+procedure tsqlresult.open;
+begin
+ open([]);
 end;
 
 procedure tsqlresult.doclear(const isclose: boolean);
@@ -1447,7 +1454,7 @@ begin
  sendchangeevent(oe_releasefields);
  freefldbuffers;
  inherited setactive(false);
- fcols.clear;
+ fdatacols.clear;
  changed;
 end;
 
@@ -1470,6 +1477,7 @@ begin
  end;
 }
 end;
+
 {
 procedure tsqlresult.prepare;
 var
@@ -1566,19 +1574,25 @@ begin
  feof:= not fdatabase.fetch(fcursor);
 end;
 
-procedure tsqlresult.refresh;
+procedure tsqlresult.refresh(const aparams: array of variant);
 begin
  if not active then begin
-  active:= true;
+  open(aparams);
+//  active:= true;
  end
  else begin
   doclear(false);
   feof:= false;
-  execute; 
+  execute(aparams);
   next;
   fbof:= true;
-  changed;
+  changed();
  end;
+end;
+
+procedure tsqlresult.refresh;
+begin
+ refresh([]);
 end;
 
 procedure tsqlresult.refreshtransaction;
@@ -1659,11 +1673,11 @@ end;
 function tsqlresult.asvariant(const aclose: boolean = false): variant;
 begin
  refresh;
- if eof or (cols.count = 0) then begin
+ if eof or (fdatacols.count = 0) then begin
   result:= null;//unassigned;
  end
  else begin
-  result:= cols[0].asvariant;
+  result:= fdatacols[0].asvariant;
  end;
  if aclose then begin
   active:= false;
@@ -1680,13 +1694,13 @@ var
  int1: integer;
 begin
  refresh;
- if eof or (cols.count = 0) then begin
+ if eof or (fdatacols.count = 0) then begin
   result:= null;//unassigned;
  end
  else begin
-  setlength(result,cols.count);
+  setlength(result,fdatacols.count);
   for int1:= 0 to high(result) do begin
-   result[int1]:= cols[int1].asvariant;
+   result[int1]:= fdatacols[int1].asvariant;
   end;
  end;
  if aclose then begin
@@ -1704,7 +1718,7 @@ var
  int1,int2: integer;
 begin
  refresh;
- if eof or (cols.count = 0) then begin
+ if eof or (fdatacols.count = 0) then begin
   result:= nil;
   while not eof do begin
    next; //eat the rest;
@@ -1717,9 +1731,9 @@ begin
    if int2 > high(result) then begin
     setlength(result,high(result)*2);
    end;
-   setlength(result[int2],cols.count);
-   for int1:= 0 to cols.count - 1 do begin
-    result[int2][int1]:= tdbcol(fcols.fitems[int1]).asvariant;
+   setlength(result[int2],fdatacols.count);
+   for int1:= 0 to fdatacols.count - 1 do begin
+    result[int2][int1]:= tdbcol(fdatacols.fitems[int1]).asvariant;
    end;
    inc(int2);
    next;
@@ -1798,7 +1812,7 @@ begin
  setlength(proc1,int2);
  dec(int2);
  for int1:= 0 to int2 do begin
-  col1[int1]:= tdbcol(fcols.fitems[acols[int1]]);
+  col1[int1]:= tdbcol(fdatacols.fitems[acols[int1]]);
   if datalists[int1] <> nil then begin
    case datalists[int1].datatype of
     dl_integer: begin
@@ -1872,7 +1886,7 @@ var
  ar1: integerarty;
 begin
  refresh();
- if length(datalists) > cols.count then begin
+ if length(datalists) > fdatacols.count then begin
   componentexception(self,'Too many datalists.');
  end;
  setlength(ar1,length(datalists));
@@ -2114,22 +2128,22 @@ begin
       for int1:= 0 to high(ar1) do begin
        ar1[int1]:= ftextcols[int1];
       end;
-      textf:= cols.colsbyname(ar1);
+      textf:= fdatacols.colsbyname(ar1);
       setlength(ar1,fintegercols.count);
       for int1:= 0 to high(ar1) do begin
        ar1[int1]:= fintegercols[int1];
       end;
-      integerf:= cols.colsbyname(ar1);
+      integerf:= fdatacols.colsbyname(ar1);
       setlength(ar1,fint64cols.count);
       for int1:= 0 to high(ar1) do begin
        ar1[int1]:= fint64cols[int1];
       end;
-      int64f:= cols.colsbyname(ar1);
+      int64f:= fdatacols.colsbyname(ar1);
       setlength(ar1,floatcols.count);
       for int1:= 0 to high(ar1) do begin
        ar1[int1]:= ffloatcols[int1];
       end;
-      realf:= cols.colsbyname(ar1);
+      realf:= fdatacols.colsbyname(ar1);
       int3:= fcount;
       int1:= fcount;
       try
@@ -2371,7 +2385,7 @@ begin
    if (fcolname <> '') and (sender.getinstance = fsource) then begin
     fcol:= nil;
     str1:= uppercase(fcolname);
-    with fsource.fcols do begin
+    with fsource.fdatacols do begin
      for int1:= 0 to high(fitems) do begin
       col1:= tdbcol(fitems[int1]);
       if col1.fuppername = str1 then begin

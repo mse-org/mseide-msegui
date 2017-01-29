@@ -23,7 +23,7 @@ type
               fplo_syncmasterpost,fplo_delayedsyncmasterpost,
               fplo_syncmastercancel,
               fplo_syncmastercancelupdates,
-              fplo_syncmasterapplyupdate,
+              fplo_syncmasterapplyupdates,
               fplo_syncmastercheckbrowsemode,
               fplo_syncmasteredit,
               fplo_syncmasterinsert,
@@ -307,6 +307,8 @@ type
    fonupdateslaveinsert: slavedataseteventty;
    fdestparams: tdestparams;
    fdestfields: tdestfields;
+   fonmasterdelete: masterdataseteventty;
+   fonslavedelete: slavedataseteventty;
    function getdatasource: tdatasource; overload;
    procedure setdatasource(const avalue: tdatasource);
    function getvisualcontrol: boolean;
@@ -367,6 +369,10 @@ type
                      write fonupdateslaveedit;
    property onupdateslaveinsert: slavedataseteventty read fonupdateslaveinsert
                      write fonupdateslaveinsert;
+   property onmasterdelete: masterdataseteventty read fonmasterdelete 
+                                                     write fonmasterdelete;
+   property onslavedelete: masterdataseteventty read fonslavedelete 
+                                                     write fonslavedelete;
  end;
 
  tsequencelink = class;
@@ -1114,6 +1120,9 @@ begin
                                    not destdataset.isempty then begin
        destdataset.delete();
       end;
+      if assigned(fonmasterdelete) then begin
+       fonmasterdelete(destdataset,dataset);
+      end;
      end;
      de_afterpost: begin
       if (fplo_delayedsyncmasterpost in foptions) and
@@ -1122,7 +1131,7 @@ begin
       end;
      end;
      de_afterapplyupdate: begin
-      if (fplo_syncmasterapplyupdate in foptions) then begin
+      if (fplo_syncmasterapplyupdates in foptions) then begin
        destdataset.applyupdates();
       end;
      end;
@@ -1265,6 +1274,9 @@ begin
      if (fplo_syncslavedelete in foptions) and
                                      not sourceds.isempty then begin
       sourceds.delete;
+     end;
+     if assigned(fonslavedelete) then begin
+      fonslavedelete(destdataset,dataset);
      end;
     end;
     de_afterpost: begin

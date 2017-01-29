@@ -1193,7 +1193,7 @@ begin
    database:= Self;
    sql.text:= GetSchemaInfoSQL(SchemaType, msestring(SchemaObjectName), '');
    active:= true;
-   col1:= cols.colbyname(returnfield);
+   col1:= datacols.colbyname(returnfield);
    if rowsreturned >= 0 then begin
     setlength(list,rowsreturned);
    end
