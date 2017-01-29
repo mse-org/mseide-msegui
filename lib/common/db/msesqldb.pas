@@ -29,7 +29,7 @@ type
               fplo_syncslavepost,fplo_delayedsyncslavepost,
               fplo_syncslavecancel,
               fplo_syncslaveedit,
-              fplo_syncslaveinsert,
+              fplo_syncslaveinsert,fplo_syncslaveinserttoedit,
               fplo_syncslavedelete
               );
  fieldparamlinkoptionsty = set of fieldparamlinkoptionty;
@@ -317,7 +317,9 @@ type
    procedure setfieldname(const avalue: string);
    procedure readdatafield(reader: treader);
    procedure setdestfields(const avalue: tdestfields);
+   procedure setoptions(const avalue: fieldparamlinkoptionsty);
   protected
+   fcheckbrowsemodelock: int32;
    procedure loaded; override;
    procedure defineproperties(filer: tfiler); override;
     //idbeditinfo
@@ -346,7 +348,7 @@ type
    property paramname: string read fparamname write fparamname;
    property delayus: integer read fdelayus write setdelayus default -1;
                 //-1 -> off, 0 -> on idle
-   property options: fieldparamlinkoptionsty read foptions write foptions
+   property options: fieldparamlinkoptionsty read foptions write setoptions
                       default defaultfieldparamlinkoptions;
    property destparams: tdestparams read fdestparams 
                                             write setdestparams;
@@ -421,7 +423,7 @@ type
 implementation
 uses
  {$ifdef FPC}dbconst{$else}dbconst_del{$endif},msesysutils,typinfo,msedatalist,
- msesqlresult;
+ msesqlresult,msebits;
  
 { tmsesqltransaction }
 
@@ -1170,8 +1172,9 @@ begin
 //     destdataset.checkbrowsemode;
     end
     else begin
-     if (fplo_syncmastercheckbrowsemode in foptions) then begin
-      destdataset.checkbrowsemode;
+     if (fplo_syncmastercheckbrowsemode in foptions) and 
+                                     (fcheckbrowsemodelock = 0) then begin
+      destdataset.checkbrowsemode();
      end;
     end;
     inherited;
@@ -1229,9 +1232,23 @@ begin
                      not (sourceds.state = dsedit) then begin
       sourceds.edit;
      end;
-     if (fplo_syncslaveinsert in foptions) and(dataset.state = dsinsert) and
-                                  not (sourceds.state = dsinsert) then begin
-      sourceds.insert;
+     if ([fplo_syncslaveinsert,fplo_syncslaveinserttoedit] * foptions <>
+                               []) and (dataset.state = dsinsert) then begin
+      inc(fcheckbrowsemodelock);
+      try
+       if (fplo_syncslaveinsert in foptions) and
+                                       (sourceds.state <> dsinsert) then begin
+        sourceds.insert();
+       end
+       else begin
+        if (fplo_syncslaveinserttoedit in foptions) and
+                                         (sourceds.state <> dsedit) then begin
+         sourceds.edit();
+        end;
+       end;
+      finally
+       dec(fcheckbrowsemodelock);
+      end;
      end;
     end;
     de_afterdelete: begin
@@ -1546,6 +1563,13 @@ end;
 procedure tfieldparamlink.setdestfields(const avalue: tdestfields);
 begin
  fdestfields.assign(avalue);
+end;
+
+procedure tfieldparamlink.setoptions(const avalue: fieldparamlinkoptionsty);
+begin
+ foptions:= fieldparamlinkoptionsty(setsinglebit(card32(avalue),
+              card32(foptions),
+                card32([fplo_syncslaveinsert,fplo_syncslaveinserttoedit])));
 end;
 
 { tsequencedatalink }
