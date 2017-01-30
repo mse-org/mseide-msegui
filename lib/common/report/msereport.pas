@@ -6318,9 +6318,11 @@ var
     for int1:= 0 to high(fdatasets) do begin
      with fdatasets[int1] do begin
       if active then begin
-       try
-        recno:= recnos[int1];
-       except;
+       if (recnos[int1] > 0) and (recnos[int1] <= recordcount) then begin
+        try
+         recno:= recnos[int1];
+        except;
+        end;
        end;
       end;
       if not (reo_nodisablecontrols in foptions) then begin
