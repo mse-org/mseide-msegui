@@ -740,8 +740,8 @@ begin
   end;
   sqlresult1:= fdbcolinfointf.getsqlresult(int2);
   if sqlresult1 <> nil then begin
-   if {sqlresult1.active or} (sqlresult1.cols.count > 0) then begin
-    for int1:= 0 to sqlresult1.cols.count -1 do begin
+   if {sqlresult1.active or} (sqlresult1.datacols.count > 0) then begin
+    for int1:= 0 to sqlresult1.datacols.count -1 do begin
      with sqlresult1.cols[int1] do begin
       if (ft = []) or (datatype = ftunknown) or (datatype in ft) then begin
        additem(result,msestring(fieldname));

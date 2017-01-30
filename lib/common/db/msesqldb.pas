@@ -32,7 +32,7 @@ type
               fplo_syncslavecancel,
               fplo_syncslaveedit,
               fplo_syncslaveinsert,fplo_syncslaveinserttoedit,
-              fplo_syncslavedelete
+              fplo_syncslavedelete,fplo_syncslavedeletetoedit
               );
  fieldparamlinkoptionsty = set of fieldparamlinkoptionty;
 const
@@ -1275,6 +1275,9 @@ begin
                                      not sourceds.isempty then begin
       sourceds.delete;
      end;
+     if fplo_syncslavedeletetoedit in foptions then begin
+      sourceds.edit();
+     end;
      if assigned(fonslavedelete) then begin
       fonslavedelete(destdataset,dataset);
      end;
@@ -1591,7 +1594,8 @@ procedure tfieldparamlink.setoptions(const avalue: fieldparamlinkoptionsty);
 begin
  foptions:= fieldparamlinkoptionsty(setsinglebit(card32(avalue),
               card32(foptions),
-                card32([fplo_syncslaveinsert,fplo_syncslaveinserttoedit])));
+                [card32([fplo_syncslaveinsert,fplo_syncslaveinserttoedit]),
+                 card32([fplo_syncslavedelete,fplo_syncslavedeletetoedit])]));
  if fplo_syncmastercancelupdates in avalue then begin
   foptions:= foptions + [fplo_syncmastercancel];
  end;

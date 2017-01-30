@@ -211,7 +211,7 @@ begin
  if high(acols) <> high(acolnames) then begin
   componentexception(self,'fetchdata() item count mismatch.');
  end;
- internalloaddatalists(cols.colsindexbyname(acolnames),acols);
+ internalloaddatalists(datacols.colsindexbyname(acolnames),acols);
 {
  ar2:= cols.colsindexbyname(acolnames);
  if high(ar2) > high(acols) then begin

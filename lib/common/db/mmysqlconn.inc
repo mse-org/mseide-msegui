@@ -959,9 +959,9 @@ begin
    database := Self;
    sql.text:= 'show index from ' +  msestring(aTableName);
    active:= true;
-   keynamef:= cols.colbyname('Key_name');
-   columnnamef:= cols.colbyname('Column_name');
-   nonuniquef:= cols.colbyname('Non_unique');
+   keynamef:= datacols.colbyname('Key_name');
+   columnnamef:= datacols.colbyname('Column_name');
+   nonuniquef:= datacols.colbyname('Non_unique');
    while not eof do begin
     with IndexDefs.AddIndexDef do begin
      Name:= trim(keynamef.asstring);
