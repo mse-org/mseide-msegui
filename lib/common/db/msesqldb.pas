@@ -333,7 +333,6 @@ type
    procedure notification(acomponent: tcomponent;
                                 operation: toperation); override;
    function truedelayus: integer;
-   procedure checkrefresh;
    function param(const aname: string): tparam; overload;
    function field(const aname: string): tfield; overload;
   public
@@ -341,6 +340,7 @@ type
    destructor destroy; override;
    function param: tparam; overload;
    function field: tfield; overload;
+   procedure checkrefresh;
    procedure delayoff;
    procedure delayon;
   published
