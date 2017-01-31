@@ -8365,9 +8365,9 @@ begin
   child.ftaborder:= high(fwidgets);
   sortzorder;
   updatetaborder(child);
-  if child.visible and not child.isloading then begin
+  if child.isvisible then begin
    widgetregionchanged(child);
-   if focused then begin
+   if focused and not child.isloading then begin
     checksubfocus(false);
    end;
   end;
