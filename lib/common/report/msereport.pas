@@ -1328,7 +1328,8 @@ type
  end;
 
  reportpageoptionty = (rpo_once,rpo_firsteven,rpo_firstodd,
-                       rpo_delayednextrecord,rpo_datasourceonly);
+                       rpo_delayednextrecord,rpo_datasourceonly,
+                       rpo_reportpagewidth,rpo_reportpageheight);
  reportpageoptionsty = set of reportpageoptionty;
 
  reportpageeventty = procedure(const sender: tcustomreportpage) of object;
@@ -6123,6 +6124,11 @@ begin
   else begin
    result:= freport.fpagewidth;
   end;
+ end
+ else begin
+  if (rpo_reportpagewidth in foptions) and (freport <> nil) then begin
+   result:= freport.fpagewidth;
+  end;
  end;
 end;
 
@@ -6134,6 +6140,11 @@ begin
    result:= defaultpageheight;
   end
   else begin
+   result:= freport.fpageheight;
+  end;
+ end
+ else begin
+  if (rpo_reportpageheight in foptions) and (freport <> nil) then begin
    result:= freport.fpageheight;
   end;
  end;
