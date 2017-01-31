@@ -1115,6 +1115,7 @@ type
    fonlayout: notifyeventty;
    foncalcminscrollsize: calcminscrollsizeeventty;
    fminclientsize: sizety;
+   fonscrolled: pointeventty;
    function getframe: tscrollboxframe;
    procedure setframe(const Value: tscrollboxframe);
 //   procedure setclientpos(const avalue: pointty);
@@ -1127,6 +1128,7 @@ type
    procedure dofontheightdelta(var delta: integer); override;
    procedure internalcreateframe; override;
    procedure doscroll(const dist: pointty); override;
+   procedure doscrolled(const dist: pointty); override;
    procedure mouseevent(var info: mouseeventinfoty); override;
    procedure childmouseevent(const sender: twidget;
                               var info: mouseeventinfoty); override;
@@ -1144,6 +1146,7 @@ type
    procedure writestate(writer: twriter); override;
    procedure dolayout(const sender: twidget); override;
    property onscroll: pointeventty read fonscroll write fonscroll;
+   property onscrolled: pointeventty read fonscrolled write fonscrolled;
    property onfontheightdelta: fontheightdeltaeventty read fonfontheightdelta
                      write fonfontheightdelta;
    property onlayout: notifyeventty read fonlayout write fonlayout;
@@ -4429,9 +4432,10 @@ begin
   apos.y:= 0;
  end;
  pt1:= subpoint(apos,fclientrect.pos);
- twidget1(fowner).scroll(pt1);
+// twidget1(fowner).scroll(pt1);
  fclientrect.pos:= apos;
  addpoint1(finnerclientrect.pos,pt1);
+ twidget1(fowner).scroll(pt1);
 end;
 
 procedure tcustomscrollboxframe.setscrollpos(apos: pointty);
@@ -5615,7 +5619,14 @@ procedure tscrollingwidgetnwr.doscroll(const dist: pointty);
 begin
  inherited;
  if canevent(tmethod(fonscroll)) then begin
-// if assigned(fonscroll) then begin
+  fonscroll(self,dist);
+ end;
+end;
+
+procedure tscrollingwidgetnwr.doscrolled(const dist: pointty);
+begin
+ inherited;
+ if canevent(tmethod(fonscroll)) then begin
   fonscroll(self,dist);
  end;
 end;

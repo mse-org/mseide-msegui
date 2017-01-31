@@ -655,6 +655,7 @@ type
  tscrollbox = class(tscalingwidget)
   private
    fonscroll: pointeventty;
+   fonscrolled: pointeventty;
    function getframe: tscrollboxframe;
    procedure setframe(const value: tscrollboxframe);
   protected
@@ -665,6 +666,7 @@ type
                               var info: mouseeventinfoty); override;
    procedure domousewheelevent(var info: mousewheeleventinfoty); override;
    procedure doscroll(const dist: pointty); override;
+   procedure doscrolled(const dist: pointty); override;
    procedure clampinview(const arect: rectty; const bottomright: boolean); override;
 //   procedure setclientpos(const avalue: pointty);
   public
@@ -672,6 +674,7 @@ type
   published
    property frame: tscrollboxframe read getframe write setframe;
    property onscroll: pointeventty read fonscroll write fonscroll;
+   property onscrolled: pointeventty read fonscrolled write fonscrolled;
    property optionswidget default defaultscrollboxoptionswidget;
    property optionsscale default defaultscrollboxoptionsscale;
  end;
@@ -2502,6 +2505,14 @@ begin
  inherited;
  if canevent(tmethod(fonscroll)) then begin
   fonscroll(self,dist);
+ end;
+end;
+
+procedure tscrollbox.doscrolled(const dist: pointty);
+begin
+ inherited;
+ if canevent(tmethod(fonscrolled)) then begin
+  fonscrolled(self,dist);
  end;
 end;
 

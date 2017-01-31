@@ -76,6 +76,7 @@ type
    procedure dolayout(const sender: twidget); override;
   published
    property onscroll;
+   property onscrolled;
    property onresize;
    property onfontheightdelta;
    property onlayout;

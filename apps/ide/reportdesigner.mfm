@@ -23,7 +23,7 @@ inherited reportdesignerfo: treportdesignerfo
     frame.localprops1 = []
     taborder = 4
     bounds_x = 7
-    bounds_y = 18
+    bounds_y = 19
     bounds_cx = 336
     bounds_cy = 7
     anchors = [an_left, an_top, an_right]
@@ -71,7 +71,7 @@ inherited reportdesignerfo: treportdesignerfo
     bounds_x = 120
     bounds_y = 0
     bounds_cx = 221
-    bounds_cy = 18
+    bounds_cy = 19
     anchors = [an_left, an_top, an_right]
     onactivetabchange = tabcha
     ontabmoving = tabmo
@@ -83,22 +83,22 @@ inherited reportdesignerfo: treportdesignerfo
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_mousewheel, ow_destroywidgets]
     color = -1879048187
     frame.optionsscroll = [oscr_drag, oscr_key, oscr_mousewheel]
-    frame.colorclient = -1610612730
+    frame.colorclient = 16762052
     frame.localprops = [frl_colorclient]
     frame.localprops1 = []
     taborder = 1
     bounds_x = 7
-    bounds_y = 25
+    bounds_y = 26
     bounds_cx = 335
-    bounds_cy = 434
+    bounds_cy = 433
     anchors = [an_left, an_top, an_right, an_bottom]
     onlayout = repcomtainerchildscaled
-    onscroll = reportcontainerscroll
+    onscrolled = reportcontainerscrolled
   end
   object tspacer1: tspacer[3]
     taborder = 2
     bounds_x = 144
-    bounds_y = 18
+    bounds_y = 19
     bounds_cx = 50
     bounds_cy = 5
     linktop = tabbar
@@ -109,9 +109,9 @@ inherited reportdesignerfo: treportdesignerfo
     color = -1879048185
     taborder = 3
     bounds_x = 0
-    bounds_y = 25
+    bounds_y = 26
     bounds_cx = 7
-    bounds_cy = 434
+    bounds_cy = 433
     anchors = [an_left, an_top, an_bottom]
     dial.widthmm = 0.3
     dial.direction = gd_down
@@ -151,7 +151,7 @@ inherited reportdesignerfo: treportdesignerfo
   object tspacer2: tspacer[5]
     taborder = 5
     bounds_x = 144
-    bounds_y = 25
+    bounds_y = 26
     bounds_cx = 50
     bounds_cy = 5
     linktop = dialh
@@ -202,7 +202,7 @@ inherited reportdesignerfo: treportdesignerfo
   object tspacer4: tspacer[9]
     taborder = 9
     bounds_x = 16
-    bounds_y = 25
+    bounds_y = 26
     bounds_cx = 50
     bounds_cy = 5
     linktop = dialh

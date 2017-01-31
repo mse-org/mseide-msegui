@@ -1819,6 +1819,7 @@ type
    procedure doafterpaint(const canvas: tcanvas); virtual;
 
    procedure doscroll(const dist: pointty); virtual;
+   procedure doscrolled(const dist: pointty); virtual;
 
    procedure doloaded; virtual;
    procedure dohide; virtual;
@@ -12946,6 +12947,11 @@ begin
  //dummy
 end;
 
+procedure twidget.doscrolled(const dist: pointty);
+begin
+ //dummy
+end;
+
 procedure twidget.scrollwidgets(const dist: pointty);
  procedure movereg(const awidget: twidget);
  var
@@ -13117,6 +13123,7 @@ begin
  end;
  scrollrect(dist,rect1,true);
  scrollwidgets(dist);
+ doscrolled(dist);
 end;
 
 procedure twidget.update;

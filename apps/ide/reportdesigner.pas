@@ -63,7 +63,8 @@ type
    procedure formresized(const sender: TObject);
    procedure reportchildmouseevent(const sender: twidget;
                    var info: mouseeventinfoty);
-   procedure reportcontainerscroll(const sender: twidget; const point: pointty);
+   procedure reportcontainerscrolled(const sender: twidget;
+                   const point: pointty);
    procedure repcomtainerchildscaled(const sender: TObject);
 //   procedure updatewidgethideexe(const sender: tcustomaction); override;
 //   procedure repshowallexe(const sender: TObject);
@@ -587,7 +588,7 @@ begin
  updatedials;
 end;
 
-procedure treportdesignerfo.reportcontainerscroll(const sender: twidget;
+procedure treportdesignerfo.reportcontainerscrolled(const sender: twidget;
                const point: pointty);
 begin
  updatedials;
