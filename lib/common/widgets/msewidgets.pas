@@ -3137,12 +3137,14 @@ begin
  inherited;
  if pointincaption(info.pos) then begin
   with twidget1(sender) do begin
-   include(fwidgetstate,ws_wantmousebutton);    //for twidget.iswidgetclick
-   if cfo_captionfocus in foptions then begin
-    include(fwidgetstate,ws_wantmousefocus);
-   end;
-   if fs_captionhint in fstate then begin
-    include(fwidgetstate,ws_wantmousemove);
+   if not (ow_mousetransparent in foptionswidget) then begin
+    include(fwidgetstate,ws_wantmousebutton);    //for twidget.iswidgetclick
+    if cfo_captionfocus in foptions then begin
+     include(fwidgetstate,ws_wantmousefocus);
+    end;
+    if fs_captionhint in fstate then begin
+     include(fwidgetstate,ws_wantmousemove);
+    end;
    end;
   end;
  end;
