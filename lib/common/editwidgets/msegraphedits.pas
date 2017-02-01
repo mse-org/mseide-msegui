@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2016 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2017 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -1825,6 +1825,9 @@ begin
    fifiserverintf.dataentered(iifidatalink(self),gridrow);
   end;
  {$endif}
+  if (oe1_sendchangeeventbycheckvalue in optionsedit1) then begin
+   sendchangeevent();
+  end;
  end;
 end;
 

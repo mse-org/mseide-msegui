@@ -439,6 +439,8 @@ type
   private
    fpagewidth: real;
    fpageheight: real;
+   feditwidth: tcustomrealedit;
+   feditheight: tcustomrealedit;
    function getvalue: stdpagesizety;
    procedure setvalue(const avalue: stdpagesizety);
    procedure printerchanged; override;
@@ -446,11 +448,16 @@ type
    procedure setpageheight(const avalue: real);
    function getonsetvalue: pagesizeeventty;
    procedure setongetvalue(const avalue: pagesizeeventty);
+   procedure seteditwidth(const avalue: tcustomrealedit);
+   procedure seteditheight(const avalue: tcustomrealedit);
   protected
    procedure getdropdowninfo(var aenums: integerarty;
                                 const names: tdropdowndatacols); override;
    procedure dochange; override;
    procedure checkpagedim;
+   procedure updateedits();
+   procedure objevent(const sender: iobjectlink;
+                                 const event: objecteventty) override;
   public
    constructor create(aowner: tcomponent); override;
    function pagesizename: msestring;
@@ -458,6 +465,8 @@ type
    property pageheight: real read fpageheight write setpageheight;
   published
    property value: stdpagesizety read getvalue write setvalue default sps_a4;
+   property editwidth: tcustomrealedit read feditwidth write seteditwidth;
+   property editheight: tcustomrealedit read feditheight write seteditheight;
    property onsetvalue: pagesizeeventty read getonsetvalue
                                                  write setongetvalue;
  end;
@@ -1604,6 +1613,7 @@ begin
    fpagewidth:= width;
    fpageheight:= height;
   end;
+  updateedits();
  end;
  inherited;
 end;
@@ -1653,6 +1663,7 @@ var
  wi1,he1: currency;
  pa1: stdpagesizety;
 begin
+ updateedits();
  wi1:= fpagewidth;
  he1:= fpageheight;
  for pa1:= stdpagesizety(1) to high(stdpagesizety) do begin
@@ -1666,6 +1677,34 @@ begin
  value:= sps_user;
 end;
 
+procedure tpagesizeselector.updateedits();
+begin
+ if componentstate * [csloading,csdestroying] = [] then begin
+  if (feditwidth <> nil) and not 
+          (csdestroying in feditwidth.componentstate) then begin
+   feditwidth.value:= fpagewidth;
+  end;
+  if (feditheight <> nil) and not 
+          (csdestroying in feditheight.componentstate) then begin
+   feditheight.value:= fpageheight;
+  end;
+ end;
+end;
+
+procedure tpagesizeselector.objevent(const sender: iobjectlink;
+               const event: objecteventty);
+begin
+ inherited;
+ if (event = oe_changed) then begin
+  if (feditwidth <> nil) and (sender.getinstance = feditwidth) then begin
+   pagewidth:= feditwidth.value;
+  end;
+  if (feditheight <> nil) and (sender.getinstance = feditheight) then begin
+   pageheight:= feditheight.value;
+  end;
+ end;
+end;
+
 function tpagesizeselector.getonsetvalue: pagesizeeventty;
 begin
  result:= pagesizeeventty(fonsetvalue1);
@@ -1674,6 +1713,22 @@ end;
 procedure tpagesizeselector.setongetvalue(const avalue: pagesizeeventty);
 begin
  pagesizeeventty(fonsetvalue1):= avalue;
+end;
+
+procedure tpagesizeselector.seteditwidth(const avalue: tcustomrealedit);
+begin
+ if avalue <> feditwidth then begin
+  setlinkedvar(avalue,tmsecomponent(feditwidth));
+  updateedits();
+ end;
+end;
+
+procedure tpagesizeselector.seteditheight(const avalue: tcustomrealedit);
+begin
+ if avalue <> feditheight then begin
+  setlinkedvar(avalue,tmsecomponent(feditheight));
+  updateedits();
+ end;
 end;
 
 { tpageorientationselector }

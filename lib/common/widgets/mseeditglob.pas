@@ -73,6 +73,7 @@ type
                   oe1_readonlydialog,
                   oe1_savevalue,oe1_savestate,oe1_saveoptions,
                   oe1_checkvalueafterstatread,
+                  oe1_sendchangeeventbycheckvalue,
                   oe1_nocellpaint, //draw widget image instead of cell image
                                    //for titemedit value edits
                   oe1_thumbtrack   //for tcoloredit

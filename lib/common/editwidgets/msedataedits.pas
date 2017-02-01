@@ -1530,6 +1530,9 @@ begin
       fifiserverintf.dataentered(getifidatalinkintf,gridrow);
      end;
     {$endif}
+     if (oe1_sendchangeeventbycheckvalue in optionsedit1) then begin
+      sendchangeevent();
+     end;
      if focused then begin
       initfocus;
      end;
