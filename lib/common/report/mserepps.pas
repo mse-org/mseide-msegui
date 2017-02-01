@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 2016 by Martin Schreiber
+{ MSEgui Copyright (c) 2016-2017 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -33,6 +33,9 @@ type
    fpsfile: filenamety;
    foptionsps: optionspsty;
    flayout: layoutflagsty;
+   fscale: flo64;
+   fshifthorz: flo64;
+   fshiftvert: flo64;
    procedure setlayout(const avalue: layoutflagsty);
   protected
    procedure render(const acanvas: tcanvas; var empty: boolean) override;
@@ -45,6 +48,9 @@ type
                                                  default defaultoptionsps;
    property layout: layoutflagsty read flayout 
                                     write setlayout default [];
+   property scale: flo64 read fscale write fscale;
+   property shifthorz: flo64 read fshifthorz write fshifthorz; //mm
+   property shiftvert: flo64 read fshiftvert write fshiftvert; //mm
 //   property value: msestring read fvalue write setvalue;
    property font;
 //   property tabs;
@@ -74,13 +80,14 @@ type
  
 implementation
 uses
- msestream,msesys,mseformatstr,msebits;
+ msestream,msesys,mseformatstr,msebits,mseprinter;
  
 { treppsdisp }
 
 constructor treppsdisp.create(aowner: tcomponent);
 begin
  foptionsps:= defaultoptionsps;
+ fscale:= 1;
  inherited;
  fanchors:= [an_left,an_top];
 end;
@@ -147,12 +154,12 @@ begin
 //        pscommandwrite('/showpage_orig /showpage load def'+nl);
         pscommandwrite('/showpage {} bind def'+nl);
                                     //disable showpage command
+        mat1:= psunitymatrix;
         if hasbb then begin
          destpos:= addpoint(rootpos,innerclientwidgetpos);
          destsize:= innerclientsize;
          destll:= devpos(mp(destpos.x,destpos.y+destsize.cy));
          destur:= devpos(mp(destpos.x+destsize.cx,destpos.y));
-         mat1:= psunitymatrix;
          if la_mirrorx in flayout then begin
           mat1[0,0]:= -1.0;
           bbll.x:= -bbll.x;
@@ -247,8 +254,43 @@ begin
           end;
          end;
          pstranslate(mat1,psdist(pt1,pt2));
-         pscommandwrite(matrixstring(mat1)+' concat'+nl);
+         psscale(mat1,fscale);
+         if la_right in flayout then begin
+          pt1.x:= destur.x * (1-fscale); //right
+         end
+         else begin
+          if flayout * [la_stretchx,la_xcentered,la_fit] <> [] then begin
+           pt1.x:= ((destll.x + destur.x) * (1-fscale)) / 2;
+          end
+          else begin //left
+           pt1.x:= destll.x * (1-fscale);
+          end;
+         end;
+         if flayout * [la_stretchy,la_ycentered,
+                                        la_fit,la_bottom] = [] then begin
+          pt1.y:= destur.y * (1-fscale); //top
+         end
+         else begin
+          if not (la_bottom in flayout) then begin
+           pt1.y:= ((destll.y + destur.y) * (1-fscale)) / 2;
+          end
+          else begin //bottom
+           pt1.y:= destll.y * (fscale - 1);
+          end;
+         end;
+         pt1.x:= pt1.x + mmtoprintscale* fshifthorz;
+         pt1.y:= pt1.y + mmtoprintscale* fshiftvert;
+        end
+        else begin
+         psscale(mat1,fscale);
+         pt1.x:= mmtoprintscale* fshifthorz;
+         pt1.y:= mmtoprintscale* fshiftvert;
         end;
+        pstranslate(mat1,pt1);
+        pscommandwrite(psrealtostr(destll.x)+' '+psrealtostr(destll.y) + ' '+
+                        psrealtostr(destur.x-destll.x)+' '+
+                        psrealtostr(destur.y-destll.y)+' rectclip'+nl);
+        pscommandwrite(matrixstring(mat1)+' concat'+nl);
        end;
       end;
      end
