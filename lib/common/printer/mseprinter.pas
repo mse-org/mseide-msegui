@@ -496,6 +496,7 @@ type
  
 function stringtopages(const avalue: msestring): pagerangearty;
                   //one based, example: '1-5,7,9,11-13'
+function checkstdpagesize(const awidth,aheight: flo64): stdpagesizety;
 
 implementation
 uses
@@ -505,6 +506,24 @@ uses
 type
  tfont1 = class(tfont);
  tcanvas1 = class(tcanvas);
+
+function checkstdpagesize(const awidth,aheight: flo64): stdpagesizety;
+var
+ wi1,he1: currency;
+ pa1: stdpagesizety;
+begin
+ wi1:= awidth;
+ he1:= aheight;
+ for pa1:= stdpagesizety(1) to high(stdpagesizety) do begin
+  with stdpagesizes[pa1] do begin
+   if (currency(width) = wi1) and (currency(height) = he1) then begin
+    result:= pa1;
+    exit;
+   end;
+  end;
+ end;
+ result:= sps_user;
+end;
  
 function stringtopages(const avalue: msestring): pagerangearty;
 var
@@ -647,6 +666,14 @@ begin
     fpa_width:= height;
     fpa_height:= width;
    end;
+  end;
+ end
+ else begin
+  if fpa_orientation = pao_portrait then begin
+   fpa_size:= checkstdpagesize(fpa_width,fpa_height);
+  end
+  else begin
+   fpa_size:= checkstdpagesize(fpa_height,fpa_width);
   end;
  end;
  if not (csloading in componentstate) then begin
@@ -1659,22 +1686,10 @@ begin
 end;
 
 procedure tpagesizeselector.checkpagedim;
-var
- wi1,he1: currency;
- pa1: stdpagesizety;
 begin
  updateedits();
- wi1:= fpagewidth;
- he1:= fpageheight;
- for pa1:= stdpagesizety(1) to high(stdpagesizety) do begin
-  with stdpagesizes[pa1] do begin
-   if (currency(width) = wi1) and (currency(height) = he1) then begin
-    value:= pa1;
-    exit;
-   end;
-  end;
- end;
- value:= sps_user;
+ value:= checkstdpagesize(fpagewidth,fpageheight);
+ 
 end;
 
 procedure tpagesizeselector.updateedits();
