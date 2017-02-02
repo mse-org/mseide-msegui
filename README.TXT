@@ -1,7 +1,7 @@
 MSEide+MSEgui Pascal Cross Platform GUI Development System.
 
 2016-08-08 Version 4.4
-Copyright (c) 1999-2015 by Martin Schreiber
+Copyright (c) 1999-2017 by Martin Schreiber
 
 - Compiles with FPC 2.6.4, 3.0.0 or 3.0.2
 - For FreeBSD-x86_64, Linux-i386, Linux-x86_64, Linux-arm(Raspberry Pi),
@@ -12,7 +12,7 @@ Copyright (c) 1999-2015 by Martin Schreiber
 - All screen drawing is double buffered.
 - Has docking forms and MDI.
 - Has embedded forms (similar to TFrame).
-- Has database access components and data edit widgets.
+- Has sophisticated database access components and data edit widgets.
 - Internationalization functionality with resource modules.
 - Report generator.
 
