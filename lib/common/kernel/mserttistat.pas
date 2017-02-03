@@ -438,7 +438,8 @@ begin
     {$ifdef FPC}
      tkbool: begin
       setordprop(obj,po1,
-         ord(longbool(reader.readboolean(mstr1,getordprop(obj,po1) <> 0))));
+//         ord(longbool(reader.readboolean(mstr1,getordprop(obj,po1) <> 0))));
+         ord(reader.readboolean(mstr1,getordprop(obj,po1) <> 0)));
      end;
     {$endif}
      tkwstring: begin

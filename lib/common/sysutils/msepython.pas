@@ -15,6 +15,8 @@ uses
 
 const
  defaultpythonprocoptions = defaultprocessoptions + [pro_input];
+ pyboolstrings: array[boolean] of msestring = ('False','True');
+ 
 type
  tpythonstringlist = class(tmacrostringlist)
  end;
