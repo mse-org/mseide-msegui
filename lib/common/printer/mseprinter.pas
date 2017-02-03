@@ -465,8 +465,12 @@ type
    property pageheight: real read fpageheight write setpageheight;
   published
    property value: stdpagesizety read getvalue write setvalue default sps_a4;
-   property editwidth: tcustomrealedit read feditwidth write seteditwidth;
-   property editheight: tcustomrealedit read feditheight write seteditheight;
+   property editwidth: tcustomrealedit read feditwidth 
+                                                 write seteditwidth;
+             //set optionsedit1 oe1_sendchangeeventbycheckvalue in editwidget
+   property editheight: tcustomrealedit read feditheight 
+                                                 write seteditheight; 
+             //set optionsedit1 oe1_sendchangeeventbycheckvalue in editwidget
    property onsetvalue: pagesizeeventty read getonsetvalue
                                                  write setongetvalue;
  end;

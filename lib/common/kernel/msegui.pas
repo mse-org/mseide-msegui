@@ -131,6 +131,7 @@ type
                  osk_nopropwidth,osk_nopropheight, //used by tlayouter
                  osk_nopropfont,                   //used by tlayouter
                  osk_noalignx,osk_noaligny,        //used by tlayouter
+                 osk_nopaintref,                   //used by alignx()/aligny()
                  osk_nolayoutcx,osk_nolayoutcy     //used by syncmaxaoutsize()
                  );
  optionsskinty = set of optionskinty;
@@ -8087,7 +8088,7 @@ function twidget.alignx(const mode: widgetalignmodety;
    case mode of
     wam_start: begin
      result:= frootpos.x + framepos.x;
-     if fframe <> nil then begin
+     if (fframe <> nil) and not (osk_nopaintref in foptionsskin)  then begin
       with fframe do begin
        checkstate();
        result:= result + fwidth.left;
@@ -8099,7 +8100,7 @@ function twidget.alignx(const mode: widgetalignmodety;
     end;
     else begin //wam_end
      result:= frootpos.x + framepos.x + awidget.framesize.cx;
-     if fframe <> nil then begin
+     if (fframe <> nil) and not (osk_nopaintref in foptionsskin) then begin
       with fframe do begin
        checkstate();
        result:= result - fwidth.right;
@@ -8211,7 +8212,7 @@ function twidget.aligny(const mode: widgetalignmodety;
    case mode of
     wam_start: begin
      result:= frootpos.y + framepos.y;
-     if fframe <> nil then begin
+     if (fframe <> nil) and not (osk_nopaintref in foptionsskin) then begin
       with fframe do begin
        checkstate();
        result:= result + fwidth.top;
@@ -8223,7 +8224,7 @@ function twidget.aligny(const mode: widgetalignmodety;
     end;
     else begin //wam_end
      result:= frootpos.y + framepos.y + awidget.framesize.cy;
-     if fframe <> nil then begin
+     if (fframe <> nil)  and not (osk_nopaintref in foptionsskin) then begin
       with fframe do begin
        checkstate();
        result:= result - fwidth.bottom;
