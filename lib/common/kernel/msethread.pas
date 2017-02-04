@@ -86,7 +86,6 @@ type
                       const astacksizekb: integer = 0); override;
    destructor destroy; override;
    function semwait(const atimeoutus: integer = 0): boolean;
-                                             //true if not destroyed
    function sempost: boolean; //true if not destroyed
    function semtrywait: boolean;
    function semcount: integer;
