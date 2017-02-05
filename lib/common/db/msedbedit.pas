@@ -114,6 +114,7 @@ type
   function getwidget: twidget;
   function getnavigoptions: dbnavigatoroptionsty;
   procedure dodialogexecute;
+  procedure updatereadonly();
  end;
 
  tnavigdatalink = class(tmsedatalink)
@@ -204,6 +205,7 @@ type
                                                   const achecked: boolean);
    function getnavigoptions: dbnavigatoroptionsty;
    procedure dodialogexecute;
+   procedure updatereadonly();
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override; 
@@ -2821,6 +2823,7 @@ procedure tnavigdatalink.editingchanged;
 begin
  inherited;
  updatebuttonstate();
+ fintf.updatereadonly();
  with twidget1(fintf.getwidget) do begin
   if fobjectlinker <> nil then begin
    fobjectlinker.sendevent(oe_changed);
@@ -2891,6 +2894,7 @@ begin
        fobjectlinker.sendevent(oe_changed);
       end;
      end;
+     fintf.updatereadonly();
     end;
     dbnb_copyrecord: begin
      if (dscontroller <> nil) and
@@ -3111,9 +3115,6 @@ begin
    end;
   end;
   dialogbutton.doupdate;
-  if canevent(tmethod(fonreadonlychange)) then begin
-   fonreadonlychange(self,not autoedit);
-  end;
  finally
   endupdate;
  end;
@@ -3191,6 +3192,7 @@ begin
  inherited;
  colorglyph:= colorglyph;
  inithints;
+ updatereadonly();
 end;
 
 procedure tdbnavigator.internalshortcut(var info: keyeventinfoty;
@@ -3260,6 +3262,13 @@ procedure tdbnavigator.dodialogexecute();
 begin
  if canevent(tmethod(fondialogexecute)) then begin
   fondialogexecute(self);
+ end;
+end;
+
+procedure tdbnavigator.updatereadonly();
+begin
+ if canevent(tmethod(fonreadonlychange)) then begin
+  fonreadonlychange(self,not canautoedit);
  end;
 end;
 

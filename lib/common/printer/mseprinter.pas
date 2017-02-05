@@ -441,6 +441,7 @@ type
    fpageheight: real;
    feditwidth: tcustomrealedit;
    feditheight: tcustomrealedit;
+   fupdatesize: boolean;
    function getvalue: stdpagesizety;
    procedure setvalue(const avalue: stdpagesizety);
    procedure printerchanged; override;
@@ -460,6 +461,7 @@ type
                                  const event: objecteventty) override;
   public
    constructor create(aowner: tcomponent); override;
+   procedure updatesize();
    function pagesizename: msestring;
    property pagewidth: real read fpagewidth write setpagewidth;
    property pageheight: real read fpageheight write setpageheight;
@@ -1698,28 +1700,52 @@ end;
 
 procedure tpagesizeselector.updateedits();
 begin
- if componentstate * [csloading,csdestroying] = [] then begin
-  if (feditwidth <> nil) and not 
-          (csdestroying in feditwidth.componentstate) then begin
-   feditwidth.value:= fpagewidth;
+ if (componentstate * [csloading,csdestroying] = []) and 
+                                          not fupdatesize then begin
+  fupdatesize:= true;
+  try
+   if (feditwidth <> nil) and not 
+           (csdestroying in feditwidth.componentstate) then begin
+    feditwidth.value:= fpagewidth;
+   end;
+   if (feditheight <> nil) and not 
+           (csdestroying in feditheight.componentstate) then begin
+    feditheight.value:= fpageheight;
+   end;
+  finally
+   fupdatesize:= false;
   end;
-  if (feditheight <> nil) and not 
-          (csdestroying in feditheight.componentstate) then begin
-   feditheight.value:= fpageheight;
+ end;
+end;
+
+procedure tpagesizeselector.updatesize();
+begin
+ if not fupdatesize then begin
+  fupdatesize:= true;
+  try
+   if (feditwidth <> nil) then begin
+    pagewidth:= feditwidth.value;
+   end;
+   if (feditheight <> nil) then begin
+    pageheight:= feditheight.value;
+   end;
+  finally
+   fupdatesize:= false;
   end;
  end;
 end;
 
 procedure tpagesizeselector.objevent(const sender: iobjectlink;
                const event: objecteventty);
+var
+ inst1: tobject;
 begin
  inherited;
- if (event = oe_changed) then begin
-  if (feditwidth <> nil) and (sender.getinstance = feditwidth) then begin
-   pagewidth:= feditwidth.value;
-  end;
-  if (feditheight <> nil) and (sender.getinstance = feditheight) then begin
-   pageheight:= feditheight.value;
+ if (event = oe_changed) then begin 
+  inst1:= sender.getinstance();
+  if (inst1 <> nil) and 
+       ((inst1 = feditwidth) or (inst1 = feditheight)) then begin
+   updatesize();
   end;
  end;
 end;
