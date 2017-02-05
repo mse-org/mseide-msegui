@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2016 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2017 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -167,6 +167,7 @@ type
    fshortcuts: array[dbnavigbuttonty] of shortcutty;
    foptions: dbnavigatoroptionsty;
    fondialogexecute: notifyeventty;
+   fonreadonlychange: booleanchangedeventty;
    function getdatasource: tdatasource;
    procedure setdatasource(const Value: tdatasource);
    procedure setvisiblebuttons(const avalue: dbnavigbuttonsty);
@@ -269,6 +270,8 @@ type
    property dialogbutton: tdbnavigbutton read gettoolbutton write settoolbutton;
    property ondialogexecute: notifyeventty read fondialogexecute 
                            write fondialogexecute;
+   property onreadonlychange: booleanchangedeventty read fonreadonlychange 
+                                                      write fonreadonlychange;
  end;
  
  tcustomeditwidgetdatalink = class;
@@ -2817,7 +2820,7 @@ end;
 procedure tnavigdatalink.editingchanged;
 begin
  inherited;
- updatebuttonstate;
+ updatebuttonstate();
  with twidget1(fintf.getwidget) do begin
   if fobjectlinker <> nil then begin
    fobjectlinker.sendevent(oe_changed);
@@ -3108,6 +3111,9 @@ begin
    end;
   end;
   dialogbutton.doupdate;
+  if canevent(tmethod(fonreadonlychange)) then begin
+   fonreadonlychange(self,not autoedit);
+  end;
  finally
   endupdate;
  end;
