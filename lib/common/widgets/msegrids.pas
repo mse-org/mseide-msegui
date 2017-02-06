@@ -1505,6 +1505,8 @@ type
    procedure setnewrowcol(const avalue: integer);
    function getrowselected(const index: integer): boolean;
    procedure setrowselected(const index: integer; const avalue: boolean);
+   function getreadonly: boolean;
+   procedure setreadonly(const avalue: boolean);
   protected
    frowstate: trowstatelist;
    fscrollsize: integer;
@@ -1596,6 +1598,7 @@ type
                      //invalidaxis = all
    property rowstate: trowstatelist read frowstate;
    function defaultrowheight: integer;
+   property readonly: boolean read getreadonly write setreadonly;
   published
    property sortcol: integer read fsortcol write setsortcol default -1;
                                       //-1 -> all
@@ -8342,6 +8345,21 @@ end;
 procedure tdatacols.Setrowselected(const index: integer; const avalue: boolean);
 begin
  setselected(makegridcoord(invalidaxis,index),avalue);
+end;
+
+function tdatacols.getreadonly: boolean;
+begin
+ result:= co_readonly in foptions;
+end;
+
+procedure tdatacols.setreadonly(const avalue: boolean);
+begin
+ if avalue then begin
+  options:= foptions + [co_readonly];
+ end
+ else begin
+  options:= foptions - [co_readonly];
+ end;
 end;
 
 procedure tdatacols.clearselection;
