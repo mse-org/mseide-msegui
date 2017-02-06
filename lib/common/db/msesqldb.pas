@@ -1104,14 +1104,17 @@ begin
 end;
 
 procedure tparamsourcedatalink.DataEvent(Event: TDataEvent; Info: Ptrint);
+var
+ b1: boolean;
 begin
  inherited;
  with fownerlink do begin
-  if (destdataset <> nil) and destdataset.active then begin
-   inc(frefreshlock);
-   try
-    case ord(event) of
-     ord(deupdatestate): begin
+  b1:= (destdataset <> nil) and destdataset.active;
+  inc(frefreshlock);
+  try
+   case ord(event) of
+    ord(deupdatestate): begin
+     if b1 then begin
       if (fplo_syncmasteredit in foptions) and (dataset.state = dsedit) and 
                       not (fownerlink.destdataset.state = dsedit) then begin
        destdataset.edit;
@@ -1121,33 +1124,33 @@ begin
        destdataset.insert();
       end;
      end;
-     de_afterdelete: begin
-      if (fplo_syncmasterdelete in foptions) and 
-                                   not destdataset.isempty then begin
-       destdataset.delete();
-      end;
-      if assigned(fonmasterdelete) then begin
-       fonmasterdelete(destdataset,dataset);
-      end;
+    end;
+    de_afterdelete: begin
+     if b1 and (fplo_syncmasterdelete in foptions) and 
+                                  not destdataset.isempty then begin
+      destdataset.delete();
      end;
-     de_afterpost: begin
-      if (fplo_delayedsyncmasterpost in foptions) and
-                           (destdataset.state in [dsinsert,dsedit]) then begin
-       destdataset.post();
-      end;
-      if assigned(fonmasterpost) then begin
-       fonmasterpost(destdataset,dataset);
-      end;
-     end;
-     de_afterapplyupdate: begin
-      if (fplo_syncmasterapplyupdates in foptions) then begin
-       destdataset.applyupdates();
-      end;
+     if assigned(fonmasterdelete) then begin
+      fonmasterdelete(destdataset,dataset);
      end;
     end;
-   finally
-    dec(frefreshlock);
+    de_afterpost: begin
+     if b1 and (fplo_delayedsyncmasterpost in foptions) and
+                          (destdataset.state in [dsinsert,dsedit]) then begin
+      destdataset.post();
+     end;
+     if assigned(fonmasterpost) then begin
+      fonmasterpost(destdataset,dataset);
+     end;
+    end;
+    de_afterapplyupdate: begin
+     if b1 and (fplo_syncmasterapplyupdates in foptions) then begin
+      destdataset.applyupdates();
+     end;
+    end;
    end;
+  finally
+   dec(frefreshlock);
   end;
  end;
 end;
@@ -1250,12 +1253,14 @@ end;
 procedure tparamdestdatalink.DataEvent(Event: TDataEvent; Info: Ptrint);
 var
  sourceds: tdataset;
+ b1: boolean;
 begin
  inherited;
  with fownerlink do begin
-  if cansync(sourceds) then begin
-   case ord(event) of
-    ord(deupdatestate): begin
+  b1:= cansync(sourceds);
+  case ord(event) of
+   ord(deupdatestate): begin
+    if b1 then begin
      if (fplo_syncslaveedit in foptions) and (dataset.state = dsedit) and 
                      not (sourceds.state = dsedit) then begin
       sourceds.edit;
@@ -1279,7 +1284,9 @@ begin
       end;
      end;
     end;
-    de_afterdelete: begin
+   end;
+   de_afterdelete: begin
+    if b1 then begin
      if (fplo_syncslavedelete in foptions) and
                                      not sourceds.isempty then begin
       sourceds.delete;
@@ -1287,18 +1294,18 @@ begin
      if fplo_syncslavedeletetoedit in foptions then begin
       sourceds.edit();
      end;
-     if assigned(fonslavedelete) then begin
-      fonslavedelete(destdataset,dataset);
-     end;
     end;
-    de_afterpost: begin
-     if (fplo_delayedsyncslavepost in foptions) and 
-                           (sourceds.state in [dsinsert,dsedit]) then begin
-      sourceds.checkbrowsemode();
-     end;
-     if assigned(fonslavepost) then begin
-      fonslavepost(destdataset,dataset);
-     end;
+    if assigned(fonslavedelete) then begin
+     fonslavedelete(destdataset,dataset);
+    end;
+   end;
+   de_afterpost: begin
+    if b1 and (fplo_delayedsyncslavepost in foptions) and 
+                          (sourceds.state in [dsinsert,dsedit]) then begin
+     sourceds.checkbrowsemode();
+    end;
+    if assigned(fonslavepost) then begin
+     fonslavepost(destdataset,dataset);
     end;
    end;
   end;
