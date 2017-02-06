@@ -177,7 +177,7 @@ uses
 
 const
  pascaldelims = msestring(' :;+-*/(){},=<>' + c_linefeed + c_return + c_tab);
- selectdelims = pascaldelims+'.[]';
+ selectdelims = pascaldelims+'.[]''"';
  nodelimstrings: array[0..0] of msestring = ('->'); //for c
  bmbitshift = 4;
  bmbitmask = integer($3ff0);

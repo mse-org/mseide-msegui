@@ -1080,6 +1080,7 @@ type
            const adatatype: listdatatypety): msestringarty; virtual;
   public
    function sourcefieldnames: stringarty;
+   function sourcefieldtype(const afieldname: string): listdatatypety virtual;
 end;
 
  iifidataconnection = interface(inullinterface)[miid_iifidataconnection]
@@ -1145,6 +1146,7 @@ end;
                      const adatatype: listdatatypety): msestringarty; override;
   public
    constructor create(const aowner: tconnectedifidatasource);
+   function sourcefieldtype(const afieldname: string): listdatatypety override;
  end;
   
  tconnectedifidatasource = class(tifidatasource)
@@ -3830,10 +3832,14 @@ begin
  result:= fowner.getfieldnames(datatype);
 end;
 
-procedure tififieldlink.setdesignsourcefieldname(const aname: ifisourcefieldnamety);
+procedure tififieldlink.setdesignsourcefieldname(
+                           const aname: ifisourcefieldnamety);
 begin
  if ffieldname = '' then begin
   ffieldname:= aname;
+ end;
+ if fdatatype = dl_none then begin
+  datatype:= fowner.sourcefieldtype(aname);
  end;
 end;
 
@@ -3887,12 +3893,27 @@ begin
  end;
 end;
 
+function tififieldlinks.sourcefieldtype(
+                                 const afieldname: string): listdatatypety;
+begin
+ result:= dl_none; //dummy
+end;
+
 { tificonnectedfields }
 
 constructor tificonnectedfields.create(const aowner: tconnectedifidatasource);
 begin
  inherited create;
  fowner:= aowner;
+end;
+
+function tificonnectedfields.sourcefieldtype(
+              const afieldname: string): listdatatypety;
+begin
+ result:= dl_none;
+ if fowner.fconnectionintf <> nil then begin
+  result:= fowner.fconnectionintf.getdatatype(afieldname);
+ end;
 end;
 
 function tificonnectedfields.getfieldnames(

@@ -309,6 +309,8 @@ type
    fdestfields: tdestfields;
    fonmasterdelete: masterdataseteventty;
    fonslavedelete: slavedataseteventty;
+   fonmasterpost: masterdataseteventty;
+   fonslavepost: slavedataseteventty;
    function getdatasource: tdatasource; overload;
    procedure setdatasource(const avalue: tdatasource);
    function getvisualcontrol: boolean;
@@ -371,8 +373,12 @@ type
                      write fonupdateslaveinsert;
    property onmasterdelete: masterdataseteventty read fonmasterdelete 
                                                      write fonmasterdelete;
-   property onslavedelete: masterdataseteventty read fonslavedelete 
+   property onslavedelete: slavedataseteventty read fonslavedelete 
                                                      write fonslavedelete;
+   property onmasterpost: masterdataseteventty read fonmasterpost 
+                                                     write fonmasterpost;
+   property onslavepost: slavedataseteventty read fonslavepost
+                                                     write fonslavepost;
  end;
 
  tsequencelink = class;
@@ -1029,7 +1035,7 @@ begin
       fparamset:= true;
       bo1:= false;
       bo2:= not (fplo_refreshifchangedonly in foptions) or 
-                                         not fdestdataset.active;
+                               (fdestdataset = nil) or not fdestdataset.active;
       if not bo2 then begin
        var1:= param.value;
       end;
@@ -1128,6 +1134,9 @@ begin
       if (fplo_delayedsyncmasterpost in foptions) and
                            (destdataset.state in [dsinsert,dsedit]) then begin
        destdataset.post();
+      end;
+      if assigned(fonmasterpost) then begin
+       fonmasterpost(destdataset,dataset);
       end;
      end;
      de_afterapplyupdate: begin
@@ -1286,6 +1295,9 @@ begin
      if (fplo_delayedsyncslavepost in foptions) and 
                            (sourceds.state in [dsinsert,dsedit]) then begin
       sourceds.checkbrowsemode();
+     end;
+     if assigned(fonslavepost) then begin
+      fonslavepost(destdataset,dataset);
      end;
     end;
    end;
