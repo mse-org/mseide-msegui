@@ -136,6 +136,7 @@ type
    procedure oncopy(const sender: tobject);
    procedure oncut(const sender: tobject);
    procedure onpaste(const sender: tobject);
+   procedure onselectall(const sender: tobject);
    procedure redo; virtual;
    function canredo: boolean; virtual;
    function pastefromclipboard(
@@ -417,6 +418,11 @@ begin
  pastefromclipboard;
 end;
 
+procedure tinplaceedit.onselectall(const sender: tobject);
+begin
+ selectall();
+end;
+
 procedure tinplaceedit.updatepopupmenu(var amenu: tpopupmenu; 
                 const popupmenu: tpopupmenu; var mouseinfo: mouseeventinfoty;
                 const hasselection{, cangridcopy}: boolean);
@@ -491,12 +497,13 @@ begin
       stockobjects.captions[sc_Cuthk]+sepchar+
               '('+encodeshortcutname(sysshortcuts[sho_cut])+')',
       stockobjects.captions[sc_Pastehk]+sepchar+
-              '('+encodeshortcutname(sysshortcuts[sho_paste])+')'],
+              '('+encodeshortcutname(sysshortcuts[sho_paste])+')',
+      stockobjects.captions[sc_Select_allhk]+sepchar+
+              '('+encodeshortcutname(sysshortcuts[sho_selectall])+')'
+              ],
      [[mao_nocandefocus],[mao_nocandefocus],[mao_nocandefocus],
-              [mao_nocandefocus]],
-               states,[{$ifdef FPC}@{$endif}onundo,{$ifdef FPC}@{$endif}onredo,
-               {$ifdef FPC}@{$endif}oncopy,
-     {$ifdef FPC}@{$endif}oncut,{$ifdef FPC}@{$endif}onpaste]);
+              [mao_nocandefocus],[mao_nocandefocus]],
+               states,[@onundo,@onredo,@oncopy,@oncut,@onpaste,@onselectall]);
  end
  else begin
   tpopupmenu.additems(amenu,fintf.getwidget,mouseinfo,
@@ -506,11 +513,13 @@ begin
       stockobjects.captions[sc_Cuthk]+sepchar+
               '('+encodeshortcutname(sysshortcuts[sho_cut])+')',
       stockobjects.captions[sc_Pastehk]+sepchar+
-              '('+encodeshortcutname(sysshortcuts[sho_paste])+')'],
-     [[mao_nocandefocus],[mao_nocandefocus],[mao_nocandefocus],[mao_nocandefocus]],
-               states,[{$ifdef FPC}@{$endif}onundo,
-               {$ifdef FPC}@{$endif}oncopy,
-     {$ifdef FPC}@{$endif}oncut,{$ifdef FPC}@{$endif}onpaste]);
+              '('+encodeshortcutname(sysshortcuts[sho_paste])+')',
+      stockobjects.captions[sc_Select_allhk]+sepchar+
+              '('+encodeshortcutname(sysshortcuts[sho_selectall])+')'
+              ],
+     [[mao_nocandefocus],[mao_nocandefocus],[mao_nocandefocus],
+      [mao_nocandefocus],[mao_nocandefocus]],
+               states,[@onundo,@oncopy,@oncut,@onpaste,@onselectall]);
  end;
 end;
 

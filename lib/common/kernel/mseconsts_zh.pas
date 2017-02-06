@@ -72,11 +72,12 @@ const
   #26368#22823,                       //sc_Max
   #28322#20986#38169#35823,           //sc_Range_error  
 
-  '&u'#21462#28040,                   //sc_Undohk  ///              ///
-  '&Redo',                            //sc_Redohk   //               //
-  '&c'#22797#21046,                   //sc_Copyhk   // hotkeys       //
-  '&t'#21098#20999,                   //sc_Cuthk    //               //
-  '&p'#31896#36148,                   //sc_Pastehk ///               // hotkeys
+  '&u'#21462#28040,                   //sc_Undohk       ///         ///
+  '&Redo',                            //sc_Redohk        //          //
+  '&c'#22797#21046,                   //sc_Copyhk        // hotkeys  //
+  '&t'#21098#20999,                   //sc_Cuthk         //          //
+  '&p'#31896#36148,                   //sc_Pastehk       //          // hotkeys
+  '&Select all',                      //sc_Select_allhk ///          //
   '&I'#25554#20837#19968#34892,       //sc_insert_rowhk ///          //
   '&A'#22686#21152#19968#34892,       //sc_append_rowhk  // hotkeys  //
   '&D'#21024#38500#25152#36873#34892, //sc_delete_rowhk ///         ///

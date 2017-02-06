@@ -72,14 +72,15 @@ const
   'M'#0225'x.',                  //sc_Max
   'Error de rango',             //sc_Range_error  
 
-  '&Deshacer',                  //sc_Undo   ///              ///
-  '&Rehacer',                   //sc_Redo    //               //
-  '&Copiar',                    //sc_Copy     // hotkeys       //
-  'C&ortar',                    //sc_Cut    //               //
-  '&Pegar',                     //sc_Paste ///               // hotkeys
-  '&Insertar fila',             //sc_insert_row ///          //
-  '&A'#0241'adir fila',          //sc_append_row  // hotkeys  //
-  '&Borrar fila',               //sc_delete_row ///         ///
+  '&Deshacer',                  //sc_Undohk        ///         ///
+  '&Rehacer',                   //sc_Redohk         //          //
+  '&Copiar',                    //sc_Copyhk         // hotkeys  //
+  'C&ortar',                    //sc_Cuthk          //          //
+  '&Pegar',                     //sc_Pastehk        //          // hotkeys
+  '&Select all',                //sc_Select_allhk  ///          //
+  '&Insertar fila',             //sc_insert_rowhk  ///          //
+  '&A'#0241'adir fila',          //sc_append_rowhk  // hotkeys  //
+  '&Borrar fila',               //sc_delete_rowhk  ///         ///
 
   '&Carpetas',                    //sc_Dir               /// 
   '&Principal',                   //sc_home               //

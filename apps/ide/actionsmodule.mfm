@@ -2277,8 +2277,8 @@ object actionsmo: tactionsmo
   end
   object instemplate: taction
     onexecute = instemplateactonexecute
-    left = 360
-    top = 80
+    left = 368
+    top = 96
     sc = (
       1
       16468
@@ -2414,8 +2414,8 @@ object actionsmo: tactionsmo
   object copylatexact: taction
     caption = 'Copy &LaTeX'
     onexecute = copylatexactonexecute
-    left = 360
-    top = 56
+    left = 368
+    top = 80
     sc = (
       2
       16459
@@ -2516,6 +2516,16 @@ object actionsmo: tactionsmo
     sc = (
       1
       24663
+    )
+  end
+  object selectall: taction
+    caption = 'Select &all'
+    onexecute = seleclallactonexecute
+    left = 344
+    top = 56
+    sc = (
+      1
+      16449
     )
   end
 end

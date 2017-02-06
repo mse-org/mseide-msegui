@@ -110,14 +110,15 @@ const
   'Max.',                                 //sc_Max
   'Erreur de rang',                       //sc_Range_error  
 
-  '&D'#0233'faire',                        //sc_Undo  ///         ///
-  '&Refaire',                             //sc_Redo   //         //
-  '&Copier',                              //sc_Copy   // hotkeys //
-  'C&ouper',                              //sc_Cut    //         //
-  'Co&ller',                              //sc_Paste ///         // hotkeys
-  '&Ins'#0233'rer ligne',                  //sc_insert_row ///    //
-  '&Ajouter ligne',                       //sc_append_row  // hotkeys  //
-  '&Supprimer ligne',                     //sc_delete_row ///         ///
+  '&D'#0233'faire',                        //sc_Undo        ///         ///
+  '&Refaire',                             //sc_Redo          //          //
+  '&Copier',                              //sc_Copy          // hotkeys  //
+  'C&ouper',                              //sc_Cut           //          //
+  'Co&ller',                              //sc_Paste         //          // hotkeys
+  '&Select all',                          //sc_Select_allhk ///          //
+  '&Ins'#0233'rer ligne',                  //sc_insert_row ///           //
+  '&Ajouter ligne',                       //sc_append_row   // hotkeys   //
+  '&Supprimer ligne',                     //sc_delete_row  ///          ///
 
   'R'#0233'&pertoire',                     //sc_Dir               /// 
   '&Racine',                              //sc_home              //

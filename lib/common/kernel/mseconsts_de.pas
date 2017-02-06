@@ -69,14 +69,15 @@ const
   'Max',                     //sc_Max
   'Bereichs Fehler',         //sc_Range_error  
 
-  '&R'#0252'ckg'#0228'ngig',   //sc_Undohk  ///              ///
-  '&Redo',                   //sc_Redohk   //               //
-  '&Kopieren',               //sc_Copyhk   // hotkeys       //
-  '&Ausschneiden',           //sc_Cuthk    //               //
-  '&Einf'#0252'gen',          //sc_Pastehk ///               // hotkeys
-  'Zeile e&inf'#0252'gen',    //sc_insert_rowhk ///          //
-  'Zeile a&nf'#0252'gen',     //sc_append_rowhk  // hotkeys  //
-  'Zeile &l'#0246'schen',     //sc_delete_rowhk ///         ///
+  '&R'#0252'ckg'#0228'ngig', //sc_Undohk       ///         ///
+  '&Redo',                   //sc_Redohk        //          //
+  '&Kopieren',               //sc_Copyhk        // hotkeys  //
+  '&Ausschneiden',           //sc_Cuthk         //          //
+  '&Einf'#0252'gen',         //sc_Pastehk       //          // hotkeys
+  'Alles &markieren',        //sc_Select_allhk ///          //
+  'Zeile e&inf'#0252'gen',   //sc_insert_rowhk ///          //
+  'Zeile a&nf'#0252'gen',    //sc_append_rowhk  // hotkeys  //
+  'Zeile &l'#0246'schen',    //sc_delete_rowhk ///         ///
 
   '&Dir',                 //sc_Dirhk               /// 
   '&Home',                //sc_homehk               //

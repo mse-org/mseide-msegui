@@ -70,11 +70,12 @@ const
   'Min',                   //sc_Min
   'Max',                   //sc_Max
   'Range salah',           //sc_Range_error  
-  '&Batal',                //sc_Undohk  ///
-  '&Redo',                 //sc_Redohk   //               //
-  '&Salin',                //sc_Copyhk   // hotkeys
-  'Po&tong',               //sc_Cuthk    //
-  '&Tempel',               //sc_Pastehk ///
+  '&Batal',                //sc_Undohk       ///
+  '&Redo',                 //sc_Redohk        //          //
+  '&Salin',                //sc_Copyhk        // hotkeys
+  'Po&tong',               //sc_Cuthk         //
+  '&Tempel',               //sc_Pastehk       //
+  '&Select all',           //sc_Select_allhk ///         //
   '&Sisipkan Baris',       //sc_insert_rowhk
   '&Tambah Baris',         //sc_append_rowhk
   '&Hapus Baris',          //sc_delete_rowhk

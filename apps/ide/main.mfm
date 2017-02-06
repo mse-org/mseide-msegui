@@ -224,7 +224,7 @@ object mainfo: tmainfo
         state = [as_localcaption]
       end    
       item
-        submenu.count = 14
+        submenu.count = 15
         submenu.items = <        
           item
             action = actionsmo.selecteditpage
@@ -258,6 +258,9 @@ object mainfo: tmainfo
           end        
           item
             action = actionsmo.delete
+          end        
+          item
+            action = actionsmo.selectall
           end        
           item
             options = [mao_separator, mao_shortcutcaption]

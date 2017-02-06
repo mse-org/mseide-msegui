@@ -82,6 +82,7 @@ const
   #1050#1118#1095#1080#1088#1080#1096 ,           //sc_Copyhk   // hotkeys=> Skopirovat`
   #1054#1083#1080#1073' '#1090#1072#1096#1083#1072#1096 ,      //sc_Cuthk      => Vyrezat`
   #1025#1079#1080#1073' '#1179#1118#1081#1080#1096 ,           //sc_Pastehk    => Vstavit`
+  '&Select all',        //sc_Select_allhk ///          //
   '&Insert Row',        //sc_insert_rowhk ///          //
   '&Append Row',        //sc_append_rowhk  // hotkeys  //
   '&Delete Row',        //sc_delete_rowhk ///         ///

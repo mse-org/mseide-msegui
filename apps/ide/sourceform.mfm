@@ -303,7 +303,7 @@ object sourcefo: tsourcefo
   end
   object formpopup: tpopupmenu
     onupdate = popupmonupdate
-    menu.submenu.count = 29
+    menu.submenu.count = 30
     menu.submenu.items = <    
       item
         action = actionsmo.selecteditpage
@@ -353,6 +353,9 @@ object sourcefo: tsourcefo
       end    
       item
         action = actionsmo.paste
+      end    
+      item
+        action = actionsmo.selectall
       end    
       item
         options = [mao_separator, mao_shortcutcaption]

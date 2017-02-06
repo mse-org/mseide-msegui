@@ -132,11 +132,12 @@ const
   'Max',                //sc_Max
   'Range error',        //sc_Range_error  
 
-  '&Undo',              //sc_Undohk  ///              ///
-  '&Redo',              //sc_Redohk   //               //
-  '&Copy',              //sc_Copyhk   // hotkeys       //
-  'Cu&t',               //sc_Cuthk    //               //
-  '&Paste',             //sc_Pastehk ///               // hotkeys
+  '&Undo',              //sc_Undohk       ///         ///
+  '&Redo',              //sc_Redohk        //          //
+  '&Copy',              //sc_Copyhk        // hotkeys  //
+  'Cu&t',               //sc_Cuthk         //          //
+  '&Paste',             //sc_Pastehk       //          // hotkeys
+  'Select &all',        //sc_Select_allhk ///          //
   '&Insert Row',        //sc_insert_rowhk ///          //
   '&Append Row',        //sc_append_rowhk  // hotkeys  //
   '&Delete Row',        //sc_delete_rowhk ///         ///

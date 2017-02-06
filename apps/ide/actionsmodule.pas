@@ -223,6 +223,7 @@ type
    comment: taction;
    uncomment: taction;
    copyword: taction;
+   selectall: taction;
    procedure findinfileonexecute(const sender: tobject);
 
    //file
@@ -234,6 +235,7 @@ type
    procedure closeallactonexecute(const sender: tobject);
 
    //editor
+   procedure seleclallactonexecute(const sender: TObject);
    procedure pasteactonexecute(const sender: tobject);
    procedure deleteactonexecute(const sender: tobject);
    procedure selecteditpageonexecute(const sender: TObject);
@@ -362,6 +364,8 @@ begin
  cut.shortcut1:= sysshortcuts1[sho_cut];
  paste.shortcut:= sysshortcuts[sho_paste];
  paste.shortcut1:= sysshortcuts1[sho_paste];
+ selectall.shortcut:= sysshortcuts[sho_selectall];
+ selectall.shortcut1:= sysshortcuts1[sho_selectall];
  findcompact.shortcut:= find.shortcut;
  findcompact.shortcut1:= find.shortcut1;
  findcompallact.shortcut:= find.shortcut;
@@ -458,6 +462,11 @@ begin
 end;
 
 //editor
+
+procedure tactionsmo.seleclallactonexecute(const sender: TObject);
+begin
+ sourcefo.activepage.edit.selectall();
+end;
 
 procedure tactionsmo.pasteactonexecute(const sender: tobject);
 begin
