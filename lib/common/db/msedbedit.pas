@@ -2053,7 +2053,8 @@ type
    procedure datachange(const arow: integer);
    function getrow: integer;
    procedure setrow(arow: integer);
-   procedure changed;
+   procedure changed();
+   procedure edited();
    function empty(index: integer): boolean;
    procedure updateeditoptions(var aoptions: optionseditty;
                                     const aoptions1: optionsedit1ty);
@@ -10070,6 +10071,11 @@ begin
 end;
 
 procedure tcustomdbstringgrid.changed;
+begin
+ //dummy
+end;
+
+procedure tcustomdbstringgrid.edited();
 begin
  //dummy
 end;

@@ -1899,6 +1899,7 @@ type
    fstatpriority: integer;
 {$ifdef mse_with_ifi}
    fifilink: tifigridlinkcomp;
+   fonedited: notifyeventty;
    procedure ifirowchange;
    function getifilinkkind: ptypeinfo;
    procedure setifilink(const avalue: tifigridlinkcomp);
@@ -2096,6 +2097,7 @@ type
    procedure dorowsdeleting(var index,count: integer); virtual;
    procedure dorowsdeleted(index,count: integer); virtual;
    procedure dorowsmodified;
+   procedure doedited();
    procedure dorowsdatachanged(const acell: gridcoordty; 
                                            const acount: integer); virtual;
    procedure dorowcountchanged(const countbefore,newcount: integer); virtual;
@@ -2501,7 +2503,8 @@ type
    property onrowsmodified: notifyeventty read fonrowsmodified 
                                               write fonrowsmodified;
              //called if user deletes, inserts or moves rows
-
+   property onedited: notifyeventty read fonedited write fonedited;
+             //called if user types celltext or chages a cell value
    property onsort: gridsorteventty read fonsort write fonsort;
    property onsortchanged: gridnotifyeventty read fonsortchanged 
                                                    write fonsortchanged;
@@ -2589,6 +2592,7 @@ type
    property onrowsdeleting;
    property onrowsdeleted;
    property onrowsmodified;
+   property onedited;
    property onscrollrows;
    property ongetmorerows;
    property oncellevent;
@@ -2735,6 +2739,7 @@ type
    property onrowsdeleting;
    property onrowsdeleted;
    property onrowsmodified;
+   property onedited;
    property onscrollrows;
    property ongetmorerows;
    property oncellevent;
@@ -10508,10 +10513,16 @@ begin
    bo1:= true;
   end;
   if fdatacols.canpaste or canevent(tmethod(fonpasteselection)) then begin
+   if fdatacols.readonly then begin
+    state1:= [as_disabled];
+   end
+   else begin
+    state1:= [];
+   end;
    tpopupmenu.additems(amenu,self,mouseinfo,[
         stockobjects.captions[sc_paste_cells]+sepchar+
       '('+encodeshortcutname(sysshortcuts[sho_pastecells])+')'],
-                 [],[],[{$ifdef FPC}@{$endif}dopastecells],not bo1);
+                 [],[state1],[{$ifdef FPC}@{$endif}dopastecells],not bo1);
    bo1:= true;
   end;
   
@@ -16370,6 +16381,13 @@ begin
  end;
 end;
 
+procedure tcustomgrid.doedited();
+begin
+ if canevent(tmethod(fonedited)) then begin
+  fonedited(self);
+ end;
+end;
+
 function tcustomgrid.getstatpriority: integer;
 begin
  result:= fstatpriority;
@@ -16798,6 +16816,7 @@ begin
    case info.action of
     ea_textedited: begin
      modified;
+     self.doedited();
     end;
     ea_textentered: begin
      bo1:= true;

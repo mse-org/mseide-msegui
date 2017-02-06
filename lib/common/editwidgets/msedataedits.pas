@@ -2781,6 +2781,9 @@ begin
    include(fstate,des_edited);
    modified();
    inherited;
+   if fgridintf <> nil then begin
+    fgridintf.edited();
+   end;
   end;
   ea_resetemptytext: begin
    inherited;

@@ -1810,6 +1810,9 @@ end;
 
 function tgraphdataedit.docheckvalue(var avalue): boolean;
 begin
+ if fgridintf <> nil then begin
+  fgridintf.edited();
+ end;
  result:= true;
  internalcheckvalue(avalue,result);
  if result then begin

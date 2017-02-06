@@ -42,7 +42,8 @@ type
   procedure datachange(const index: integer);
   function getrow: integer;
   procedure setrow(arow: integer);
-  procedure changed;
+  procedure changed();
+  procedure edited();
   function empty(index: integer): boolean;
   function cangridcopy: boolean;
   procedure updateeditoptions(var aoptions: optionseditty;
@@ -139,6 +140,7 @@ type
    fintf: igridwidget;
     //iwidgetgrid
    function getgrid: tcustomwidgetgrid;
+   procedure edited();
    function getbrushorigin: pointty;
    function getcol: twidgetcol;
    procedure getdata(var arow: integer; var dest);
@@ -416,6 +418,7 @@ type
    property onrowsdeleting;
    property onrowsdeleted;
    property onrowsmodified;
+   property onedited;
    property onscrollrows;
    property ongetmorerows;
    property oncellevent;
@@ -1969,6 +1972,11 @@ end;
 function twidgetcol.getgrid: tcustomwidgetgrid;
 begin
  result:= tcustomwidgetgrid(fcellinfo.grid);
+end;
+
+procedure twidgetcol.edited();
+begin
+ tcustomwidgetgrid(fcellinfo.grid).doedited();
 end;
 
 function twidgetcol.getbrushorigin: pointty;
