@@ -14828,6 +14828,11 @@ begin
  if canevent(tmethod(fonrowsdeleting)) then begin
   fonrowsdeleting(self,index,count);
  end;
+ {$ifdef mse_with_ifi}
+  if fifilink <> nil then begin
+   fifilink.controller.dorowsdeleting(index,count);
+  end;
+ {$endif}
 end;
 
 procedure tcustomgrid.dorowsdeleted(index, count: integer);

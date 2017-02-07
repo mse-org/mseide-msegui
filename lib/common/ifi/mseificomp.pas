@@ -659,6 +659,8 @@ type
  
  ificelleventty = procedure(const sender: tobject; 
                            var info: ificelleventinfoty) of object;
+ ifibeforeblockeventty = procedure(const sender: tobject;
+                                var aindex,acount: integer) of object;
 
  tificolitem = class(tmsecomponentlinkitem)
   private
@@ -782,6 +784,7 @@ type
    frowstatefoldlevel: trowstatefoldlevelhandler;
    frowstatehidden: trowstatehiddenhandler;
    frowstatefoldissum: trowstatefoldissumhandler;
+   fonrowsdeleting: ifibeforeblockeventty;
    procedure setrowcount(const avalue: integer);
    procedure setdatacols(const avalue: tifilinkcomparrayprop);
    function getrowstate: tcustomrowstatelist;
@@ -814,6 +817,7 @@ type
    constructor create(const aowner: tmsecomponent); override;
    destructor destroy; override;
    procedure docellevent(var info: ificelleventinfoty);
+   procedure dorowsdeleting(var index,count: integer);
    procedure appendrow(const avalues: array of const;
                          const checkautoappend: boolean = false);
    function canclose: boolean;
@@ -822,6 +826,8 @@ type
   published
    property rowcount: integer read frowcount write setrowcount default 0;
    property oncellevent: ificelleventty read foncellevent write foncellevent;
+   property onrowsdeleting: ifibeforeblockeventty read fonrowsdeleting
+              write fonrowsdeleting;
 //  property onclientcellevent: celleventty read fclientcellevent 
 //                                                 write fclientcellevent;
    property datacols: tifilinkcomparrayprop read fdatacols write setdatacols;
@@ -4461,6 +4467,14 @@ procedure tgridclientcontroller.docellevent(var info: ificelleventinfoty);
 begin
  if fowner.canevent(tmethod(foncellevent)) then begin
   foncellevent(self,info);
+ end;
+end;
+
+procedure tgridclientcontroller.dorowsdeleting(var index: integer;
+               var count: integer);
+begin
+ if fowner.canevent(tmethod(fonrowsdeleting)) then begin
+  fonrowsdeleting(self,index,count);
  end;
 end;
 
