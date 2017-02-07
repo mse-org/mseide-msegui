@@ -13,7 +13,7 @@
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
- Modified 2013-2014 by Martin Schreiber
+ Modified 2013-2017 by Martin Schreiber
 
  **********************************************************************}
 unit mdb;
@@ -243,7 +243,7 @@ type
 {$pop}  
 
   optionfieldty = (of_readonly,of_required,of_visible,
-                 of_initinsert,of_nocopyrecord,
+                 of_initinsert,of_initcopy,of_nocopyrecord,
                  of_ininsert,of_inupdate,of_inwhere,of_inkey,of_hidden,
                  of_refreshinsert,of_refreshupdate);
   optionsfieldty = set of optionfieldty;
@@ -1438,7 +1438,8 @@ type
   end;
 {------------------------------------------------------------------------------}
 
- datasetinternalstatety = (dsis_checkingbrowsemode,dsis_refreshing);
+ datasetinternalstatety = (dsis_checkingbrowsemode,dsis_refreshing,
+                                                          dsis_recordcopy);
  datasetinternalstatesty = set of datasetinternalstatety;
  
   TDataSet = class(TComponent)
@@ -1733,6 +1734,7 @@ type
 //    property Fields[Index: Longint]: TField read GetField write SetField;
     property Found: Boolean read FFound;
     property Modified: Boolean read FModified;
+    procedure modify(); //set modified flag
     property IsUniDirectional: Boolean read FIsUniDirectional default False;
     property RecordCount: Longint read GetRecordCount;
     property RecNo: Longint read GetRecNo write SetRecNo;
@@ -3110,8 +3112,15 @@ begin
  po1:= pointer(fields.ffieldlist.list);
  for int1:= 0 to fields.count -1 do begin
   with tfield(po1^) do begin
-   if of_initinsert in foptionsfield then begin
-    asstring:= defaultexpression;
+   if dsis_recordcopy in finternalstate then begin
+    if of_initcopy in foptionsfield then begin
+     asstring:= defaultexpression;
+    end;
+   end
+   else begin
+    if of_initinsert in foptionsfield then begin
+     asstring:= defaultexpression;
+    end;
    end;
   end;
   inc(po1);
@@ -4965,6 +4974,13 @@ Function TDataSet.UpdateStatus: TUpdateStatus;
 
 begin
   Result:=usUnmodified;
+end;
+
+procedure TDataSet.modify();
+begin
+ if fstate in [dsedit,dsinsert] then begin
+  setmodified(true);
+ end;
 end;
 
 Procedure TDataset.RemoveField (Field : TField);

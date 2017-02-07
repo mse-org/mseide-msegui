@@ -69,7 +69,8 @@ type
                         dno_nonavig, //disable navigation buttons
                         dno_noinsert,dno_nodelete,dno_noedit, //disable buttons
                         dno_customdialogupdate,
-                        dno_postbeforedialog,dno_postoncanclose);
+                        dno_postbeforedialog,dno_postoncanclose,
+                        dno_candefocuswindow);
  dbnavigatoroptionsty = set of dbnavigatoroptionty;
  optioneditdbty = (oed_autoedit,oed_noautoedit,oed_autopost,
                    oed_syncedittonavigator,oed_focusoninsert,
@@ -2845,13 +2846,20 @@ var
 begin
  if (datasource <> nil) and (datasource.State <> dsinactive) then begin
   widget1:= fintf.getwidget;
+  options1:= fintf.getnavigoptions;
   if not (abutton in [dbnb_cancel,dbnb_delete,dbnb_autoedit]) then begin
-   if (widget1.parentwidget <> nil) and
-           not widget1.parentwidget.canparentclose then begin
-    exit;
+   if dno_candefocuswindow in options1 then begin
+    if not widget1.rootwidget.canparentclose then begin
+     exit;
+    end;
+   end
+   else begin
+    if (widget1.parentwidget <> nil) and
+            not widget1.parentwidget.canparentclose then begin
+     exit;
+    end;
    end;
   end;
-  options1:= fintf.getnavigoptions;
   with datasource.dataset do begin
    case abutton of
     dbnb_first: first;

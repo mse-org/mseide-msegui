@@ -8444,7 +8444,6 @@ procedure tdscontroller.copyrecord(const aappend: boolean = false);
 var
  ar1: variantarty;
  ar2: booleanarty;
- ar3: booleanarty;
  field1: tfield;
 // intf1: imsefield;
  int1: integer;
@@ -8453,25 +8452,20 @@ begin
  if checkcanevent(tdataset(fowner),tmethod(fonbeforecopyrecord)) then begin
   fonbeforecopyrecord(tdataset(fowner));
  end;
- with tdataset(fowner) do begin
-  setlength(ar1,fields.count);
-  setlength(ar2,length(ar1));
-  setlength(ar3,length(ar1));
-  for int1:= 0 to high(ar1) do begin
-   field1:= fields[int1];
-   bo1:= (field1.fieldkind in [fkdata,fkinternalcalc]) and
-               not (of_nocopyrecord in field1.optionsfield);
-   if bo1 then begin
-    ar2[int1]:= true;
-    ar1[int1]:= field1.value;
-   end;
-   bo1:= (of_initinsert in field1.optionsfield) and bo1;
-   if bo1 then begin
-    ar3[int1]:= true;
-    field1.optionsfield:= field1.optionsfield - [of_initinsert];
-   end;
-  end;
+ with tdataset1(fowner) do begin
+  include(finternalstate,dsis_recordcopy);
   try
+   setlength(ar1,fields.count);
+   setlength(ar2,length(ar1));
+   for int1:= 0 to high(ar1) do begin
+    field1:= fields[int1];
+    bo1:= (field1.fieldkind in [fkdata,fkinternalcalc]) and
+                not (of_nocopyrecord in field1.optionsfield);
+    if bo1 then begin
+     ar2[int1]:= true;
+     ar1[int1]:= field1.value;
+    end;
+   end;
    if aappend then begin
     append;
    end
@@ -8481,17 +8475,13 @@ begin
    for int1:= 0 to high(ar1) do begin
     if ar2[int1] and not varisnull(ar1[int1]) then begin
      field1:= fields[int1];
-     if field1.isnull then begin
+     if field1.isnull or (of_initcopy in field1.optionsfield) then begin
       field1.value:= ar1[int1];
      end;
     end;
    end;
   finally
-   for int1:= 0 to high(ar3) do begin
-    if ar3[int1] then begin
-     field1.optionsfield:= field1.optionsfield + [of_initinsert];
-    end;
-   end;
+   exclude(finternalstate,dsis_recordcopy);
   end;
  end;
  if checkcanevent(tdataset(fowner),tmethod(fonaftercopyrecord)) then begin
