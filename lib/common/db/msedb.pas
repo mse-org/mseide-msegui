@@ -1347,6 +1347,7 @@ type
 
  fieldlinkarty = array of ifieldcomponent;
  dscontrollerstatety = (dscs_posting,dscs_posting1,dscs_canceling,
+                        dscs_refreshing,
                         dscs_onidleregistered,
                         dscs_restorerecno);
  dscontrollerstatesty = set of dscontrollerstatety;
@@ -1495,6 +1496,7 @@ type
    procedure postcancel; //can be called in BeforePost, calls cancel after abort
    procedure cancel;
    function canceling: boolean;
+   function refreshing(): boolean;
    function emptyinsert: boolean;
    procedure refresh(const restorerecno: boolean; const delayus: integer = -1);
                            //-1 -> no delay, 0 -> in onidle
@@ -7501,6 +7503,11 @@ begin
  result:= dscs_canceling in fstate;
 end;
 
+function tdscontroller.refreshing(): boolean;
+begin
+ result:= dscs_refreshing in fstate;
+end;
+
 function tdscontroller.moveby(const distance: integer): integer;
 begin
  with tdataset1(fowner) do begin
@@ -8249,11 +8256,12 @@ end;
 
 procedure tdscontroller.dorefresh(const sender: tobject);
 var
- bo1,bo2: boolean;
+ bo1,bo2,bo3: boolean;
 begin
  if (sender = nil) or //not delayed
             (tdataset(fowner).state = dsbrowse) then begin
   bo2:= dso_waitcursor in foptions;
+  bo3:= dscs_refreshing in fstate;
   if bo2 then begin
    application.beginwait;
   end;
@@ -8282,6 +8290,9 @@ begin
    if bo2 then begin
     application.endwait;
    end; 
+   if not bo3 then begin
+    exclude(fstate,dscs_refreshing);
+   end;
   end;
  end;
 end;

@@ -1119,6 +1119,7 @@ end;
    procedure getbindinginfo(const alink: pointer); 
   protected
    factive: boolean;
+   frefreshing: boolean;
    ffields: tififields;
    procedure setactive(const avalue: boolean); override;
    procedure open; virtual;
@@ -1136,6 +1137,7 @@ end;
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
    procedure refresh;
+   property refreshing: boolean read frefreshing;
   published
    property fields: tififields read ffields write setfields;
    property active: boolean read factive write setactive default false;
@@ -3715,9 +3717,17 @@ begin
 end;
 
 procedure tifidatasource.refresh;
+var
+ b1: boolean;
 begin
- active:= false;
- active:= true;
+ b1:= frefreshing;
+ try
+  frefreshing:= true;
+  active:= false;
+  active:= true;
+ finally
+  frefreshing:= b1;
+ end;
 end;
 
 procedure tifidatasource.loaded;
