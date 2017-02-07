@@ -298,6 +298,7 @@ type
    fparamname: string;
    fonsetparam: setparameventty;
    fonaftersetparam: notifyeventty;
+   fonrefresh: notifyeventty;
    foptions: fieldparamlinkoptionsty;
    fdelayus: integer;
    fnodelay: integer;
@@ -363,6 +364,8 @@ type
    property onsetparam: setparameventty read fonsetparam write fonsetparam;
    property onaftersetparam: notifyeventty read fonaftersetparam
                                   write fonaftersetparam;
+   property onrefresh: notifyeventty read fonrefresh
+                                  write fonrefresh;
    property onupdatemasteredit: masterdataseteventty read fonupdatemasteredit 
                      write fonupdatemasteredit;
    property onupdatemasterinsert: masterdataseteventty read fonupdatemasterinsert 
@@ -1060,31 +1063,37 @@ begin
        fonaftersetparam(fownerlink);
       end;
       bo2:= bo2 or (var1 <> param.value);
-      if (frefreshlock = 0) and (fplo_autorefresh in foptions) and 
-                                              (destdataset <> nil) and bo2 and
-         (fdestdataset.active or 
-                   not (fplo_refreshifactiveonly in foptions)) and
-         not((fdestdataset.state = dsinsert) and (dataset.state = dsinsert) and
-                      (fplo_syncmasterinsert in foptions)) and
-         not ((fplo_delayedsyncmasterpost in foptions) and
-                (self.fdscontroller <> nil) and 
-                                    self.fdscontroller.posting1) then begin
-       if fdestdataset.active then begin
-        if fplo_checkbrowsemodeonrefresh in foptions then begin
-         fdestdataset.checkbrowsemode;
+      if (frefreshlock = 0) and bo2 then begin
+       if (fplo_autorefresh in foptions) and 
+          (destdataset <> nil) and
+          (fdestdataset.active or 
+                    not (fplo_refreshifactiveonly in foptions)) and
+          not((fdestdataset.state = dsinsert) and 
+                  (dataset.state = dsinsert) and
+                          (fplo_syncmasterinsert in foptions)) and
+          not ((fplo_delayedsyncmasterpost in foptions) and
+                 (self.fdscontroller <> nil) and 
+                                     self.fdscontroller.posting1) then begin
+        if fdestdataset.active then begin
+         if fplo_checkbrowsemodeonrefresh in foptions then begin
+          fdestdataset.checkbrowsemode;
+         end
+         else begin
+          fdestdataset.cancel;
+         end;
+         if fdestcontroller <> nil then begin
+          fdestcontroller.refresh(fplo_restorerecno in foptions,truedelayus);
+         end
+         else begin
+          fdestdataset.refresh;
+         end;
         end
         else begin
-         fdestdataset.cancel;
+         fdestdataset.active:= true;
         end;
-        if fdestcontroller <> nil then begin
-         fdestcontroller.refresh(fplo_restorerecno in foptions,truedelayus);
-        end
-        else begin
-         fdestdataset.refresh;
-        end;
-       end
-       else begin
-        fdestdataset.active:= true;
+       end;
+       if assigned(fonrefresh) then begin
+        fonrefresh(fownerlink);
        end;
       end;
      end;
