@@ -1347,7 +1347,7 @@ type
 
  fieldlinkarty = array of ifieldcomponent;
  dscontrollerstatety = (dscs_posting,dscs_posting1,dscs_canceling,
-                        dscs_refreshing,
+                        dscs_deleting,dscs_refreshing,
                         dscs_onidleregistered,
                         dscs_restorerecno);
  dscontrollerstatesty = set of dscontrollerstatety;
@@ -1497,6 +1497,7 @@ type
    procedure cancel;
    function canceling: boolean;
    function refreshing(): boolean;
+   function deleting(): boolean;
    function emptyinsert: boolean;
    procedure refresh(const restorerecno: boolean; const delayus: integer = -1);
                            //-1 -> no delay, 0 -> in onidle
@@ -7508,6 +7509,11 @@ begin
  result:= dscs_refreshing in fstate;
 end;
 
+function tdscontroller.deleting(): boolean;
+begin
+ result:= dscs_deleting in fstate;
+end;
+
 function tdscontroller.moveby(const distance: integer): integer;
 begin
  with tdataset1(fowner) do begin
@@ -7810,13 +7816,17 @@ end;
 function tdscontroller.execoperation(const akind: opkindty;
                           const aafterop: afterdbopeventty): boolean;
 var
- bo1,bo2{,bo3}: boolean;
+ bo1,bo2,b3: boolean;
  int1: integer;
  savepointoptions: savepointoptionsty;
 begin
 // bo3:= dscs_posting1 in fstate;
  if not (dscs_posting1 in fstate) then begin
   include(fstate,dscs_posting1);
+  b3:= dscs_deleting in fstate;
+  if akind = opk_delete then begin
+   include(fstate,dscs_deleting);
+  end;
   try
    case akind of
     opk_post: begin
@@ -7927,9 +7937,10 @@ begin
     end;    
    end;
   finally
-//   if not bo3 then begin
-   exclude(fstate,dscs_posting1);
-//   end;
+  if not b3 then begin
+   exclude(fstate,dscs_deleting);
+  end;
+  exclude(fstate,dscs_posting1);
   end;
  end;
 end;
