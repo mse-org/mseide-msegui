@@ -1274,7 +1274,8 @@ type
    ffontselect: tcolsfont;
    function getcols(const index: integer): tcol;
    procedure setwidth(const value: integer);
-   procedure setoptions(const Value: coloptionsty);
+   procedure setoptions(const avalue: coloptionsty);
+   procedure setoptions(const avalue: coloptionsty; const aforce: boolean);
    procedure setoptions1(const Value: coloptions1ty);
    procedure setfocusrectdist(const avalue: integer);
    procedure setfontactivenum(const avalue: integer);
@@ -7710,23 +7711,29 @@ begin
  end;
 end;
 
-procedure tcols.setoptions(const Value: coloptionsty);
+procedure tcols.setoptions(const avalue: coloptionsty;
+                                         const aforce: boolean);
 var
  int1: integer;
  mask: longword;
 begin
- if foptions <> value then begin
-  mask:= longword(value - deprecatedcoloptions) xor longword(foptions);
-  foptions:= Value - deprecatedcoloptions;
-  if csreading in fgrid.componentstate then begin
-   transferdeprecatedcoloptions(value,foptions1);
+ mask:= longword(avalue - deprecatedcoloptions) xor longword(foptions);
+ foptions:= avalue - deprecatedcoloptions;
+ if csreading in fgrid.componentstate then begin
+  transferdeprecatedcoloptions(avalue,foptions1);
+ end;
+ if not (csloading in fgrid.componentstate) or aforce then begin
+  for int1:= 0 to count - 1 do begin
+   tcol(items[int1]).options:= coloptionsty(replacebits(longword(foptions),
+                  longword(tcol(items[int1]).options),mask));
   end;
-  if not (csloading in fgrid.componentstate) then begin
-   for int1:= 0 to count - 1 do begin
-    tcol(items[int1]).options:= coloptionsty(replacebits(longword(foptions),
-                   longword(tcol(items[int1]).options),mask));
-   end;
-  end;
+ end;
+end;
+
+procedure tcols.setoptions(const avalue: coloptionsty);
+begin
+ if foptions <> avalue then begin
+  setoptions(avalue,false);
  end;
 end;
 
@@ -8359,11 +8366,11 @@ end;
 
 procedure tdatacols.setreadonly(const avalue: boolean);
 begin
- if avalue then begin
-  options:= foptions + [co_readonly];
+ if avalue then begin //propagate to items independent of loading state
+  setoptions(foptions + [co_readonly],true);
  end
  else begin
-  options:= foptions - [co_readonly];
+  setoptions(foptions - [co_readonly],true);
  end;
 end;
 

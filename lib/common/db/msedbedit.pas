@@ -205,13 +205,13 @@ type
                                                   const achecked: boolean);
    function getnavigoptions: dbnavigatoroptionsty;
    procedure dodialogexecute;
-   procedure updatereadonly();
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override; 
    function canclose(const newfocus: twidget = nil): boolean; override;
    procedure edit();
    function canautoedit(): boolean;
+   procedure updatereadonly(); //call onreadonlychange
 //   property nonavig: boolean read getnonavig write setnonavig;
   published
    property statfile;
