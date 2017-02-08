@@ -312,6 +312,7 @@ type
    fonslavedelete: slavedataseteventty;
    fonmasterpost: masterdataseteventty;
    fonslavepost: slavedataseteventty;
+   fonmasterapplyupdate: masterdataseteventty;
    function getdatasource: tdatasource; overload;
    procedure setdatasource(const avalue: tdatasource);
    function getvisualcontrol: boolean;
@@ -382,6 +383,8 @@ type
                                                      write fonmasterpost;
    property onslavepost: slavedataseteventty read fonslavepost
                                                      write fonslavepost;
+   property onmasterapplyupdate: masterdataseteventty read fonmasterapplyupdate 
+                                                     write fonmasterapplyupdate;
  end;
 
  tsequencelink = class;
@@ -1155,6 +1158,9 @@ begin
     de_afterapplyupdate: begin
      if b1 and (fplo_syncmasterapplyupdates in foptions) then begin
       destdataset.applyupdates();
+     end;
+     if assigned(fonmasterapplyupdate) then begin
+      fonmasterapplyupdate(destdataset,dataset);
      end;
     end;
    end;
