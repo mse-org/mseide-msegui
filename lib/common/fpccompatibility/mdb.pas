@@ -1921,6 +1921,7 @@ type
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
     procedure Edit;
+    procedure updaterecord();
     function IsLinkedTo(ADataSet: TDataSet): Boolean;
     property State: TDataSetState read FState;
     property active: boolean read getactive;
@@ -9367,7 +9368,6 @@ begin
     Dataset.Edit;
 end;
 
-
 Function TDataSource.IsLinkedTo(ADataSet: TDataSet): Boolean;
 
 begin
@@ -9523,6 +9523,11 @@ begin
       DoUpdateData;
     end;
  end;
+end;
+
+procedure TDataSource.updaterecord();
+begin
+ processevent(deupdaterecord,0);
 end;
 
 procedure TDataSource.ifistatechanged(const sender: tdatalink;
