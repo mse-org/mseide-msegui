@@ -1499,7 +1499,8 @@ type
    function refreshing(): boolean;
    function deleting(): boolean;
    function emptyinsert: boolean;
-   procedure refresh(const restorerecno: boolean; const delayus: integer = -1);
+   procedure refresh(const restorerecno: boolean = false;
+                                               const delayus: integer = -1);
                            //-1 -> no delay, 0 -> in onidle
    procedure checkrefresh; //makes pending delayed refresh
    procedure copyrecord(const aappend: boolean = false);
