@@ -1503,6 +1503,7 @@ type
                            //-1 -> no delay, 0 -> in onidle
    procedure checkrefresh; //makes pending delayed refresh
    procedure copyrecord(const aappend: boolean = false);
+   function copying(): boolean;
 
    function assql(const avalue: boolean): msestring; overload;
    function assql(const avalue: msestring): msestring; overload;
@@ -8498,6 +8499,11 @@ begin
  if checkcanevent(tdataset(fowner),tmethod(fonaftercopyrecord)) then begin
   fonaftercopyrecord(tdataset(fowner));
  end;
+end;
+
+function tdscontroller.copying(): boolean;
+begin
+ result:=  dsis_recordcopy in tdataset1(fowner).finternalstate;
 end;
 
 { tfieldlinkdatalink }
