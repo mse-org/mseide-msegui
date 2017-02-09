@@ -13329,16 +13329,11 @@ procedure twidget.getchildren(proc: tgetchildproc; root: tcomponent);
 var
  int1: integer;
  widget: twidget;
-// ev1: getchildreneventty; 
 begin
  for int1:= 0 to high(fwidgets) do begin
   widget:= fwidgets[int1];
   if (ws_iswidget in widget.fwidgetstate) and
-     //(
-     (widget.owner = root){ or 
-         bo1 and (widget.owner <> nil) and 
-           (issubcomponent(widget.owner,root) or //common owner
-               issubcomponent(root,widget.owner)))} then begin
+     (widget.owner = root) then begin
    proc(widget);
   end;
  end;

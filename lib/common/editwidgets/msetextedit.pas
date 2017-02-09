@@ -1582,6 +1582,7 @@ begin
       if fupdating = 0 then begin
        inc(fupdating);
        try
+        fgridintf.edited();
         int1:= fgridintf.getrow;
         fgridintf.setdata(int1,feditor.richtext,true);
         gridvaluechanged(int1);

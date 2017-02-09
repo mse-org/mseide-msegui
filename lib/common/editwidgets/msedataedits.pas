@@ -1982,7 +1982,9 @@ end;
 
 procedure tcustomdataedit.modified;
 begin
- //dummy
+ if fgridintf <> nil then begin
+  fgridintf.edited();
+ end;
 end;
 
 procedure tcustomdataedit.valuechanged;
@@ -2781,9 +2783,6 @@ begin
    include(fstate,des_edited);
    modified();
    inherited;
-   if fgridintf <> nil then begin
-    fgridintf.edited();
-   end;
   end;
   ea_resetemptytext: begin
    inherited;
