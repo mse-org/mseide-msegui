@@ -175,6 +175,9 @@ function expandmacros(const value: msestring; const macros: macroinfoarty;
 function expandmacros(const value: msestring; 
                const anames,avalues: array of msestring;
    const options: macrooptionsty = [mao_caseinsensitive]): msestring;
+function expandmacros1(const value: msestring; 
+               const anames,avalues: array of msestring;
+   const options: macrooptionsty = [mao_caseinsensitive]): msestring;
 
 function expandmacros2(const value: msestring; 
                const anames,avalues: array of msestring;
@@ -274,6 +277,13 @@ begin
 end;
 
 function expandmacros(const value: msestring; 
+               const anames,avalues: array of msestring;
+   const options: macrooptionsty = [mao_caseinsensitive]): msestring;
+begin
+ result:= expandmacros(value,initmacros(anames,avalues,[]),options);
+end;
+
+function expandmacros1(const value: msestring; 
                const anames,avalues: array of msestring;
    const options: macrooptionsty = [mao_caseinsensitive]): msestring;
 begin

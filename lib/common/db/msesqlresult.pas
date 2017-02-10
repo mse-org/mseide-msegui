@@ -177,6 +177,7 @@ type
   private
   protected
    function getasboolean: boolean; override;
+   function getasinteger: integer; override;
    function getvariantvar: variant; override;
    function getassql: msestring; override;
    function getasstring: string; override;
@@ -982,6 +983,16 @@ begin
  end
  else begin
   result:= buf;
+ end;
+end;
+
+function tbooleandbcol.getasinteger: integer;
+begin
+ if getasboolean() then begin
+  result:= 1;
+ end
+ else begin
+  result:= 0;
  end;
 end;
 
