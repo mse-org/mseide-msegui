@@ -1595,7 +1595,7 @@ type
    function getasinteger(const afield: tfield): integer;
    function getaslargeint(const afield: tfield): int64;
    
-  //idbeditinfo
+    //idbeditinfo
    function getdataset(const aindex: integer): tdataset;
    procedure getfieldtypes(out propertynames: stringarty;
                           out fieldtypes: fieldtypesarty);

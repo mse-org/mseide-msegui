@@ -478,6 +478,7 @@ type
   protected
    fdropdown: tcustomdropdowncontroller;
    function createdropdowncontroller: tcustomdropdowncontroller; virtual;
+   procedure loaded() override;
    procedure texttovalue(var accept: boolean; const quiet: boolean); override;
    procedure dohide; override;
    {$ifdef mse_with_ifi}
@@ -1447,6 +1448,7 @@ type
  tcustomwidgetgrid1 = class(tcustomwidgetgrid);
  tdropdowncontroller1 = class(tdropdowncontroller);
  tcustomdropdownlistcontroller1 = class(tcustomdropdownlistcontroller);
+ tcustomdropdowncontroller1 = class(tcustomdropdowncontroller);
  tinplaceedit1 = class(tinplaceedit);
 // tdatacol1 = class(tdatacol);
 
@@ -3663,6 +3665,13 @@ end;
 function tcustomdropdownedit.createdropdowncontroller: tcustomdropdowncontroller;
 begin
  result:= tdropdowncontroller.create(idropdown(self));
+end;
+
+procedure tcustomdropdownedit.loaded();
+begin
+ inherited;
+ tcustomdropdowncontroller1(fdropdown).updatereadonlystate();
+                                                          //for db dropdowns
 end;
 
 procedure tcustomdropdownedit.dobeforedropdown;
