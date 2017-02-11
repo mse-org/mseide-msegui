@@ -1901,6 +1901,7 @@ type
 {$ifdef mse_with_ifi}
    fifilink: tifigridlinkcomp;
    fonedited: notifyeventty;
+   fnorowedit: boolean;
    procedure ifirowchange;
    function getifilinkkind: ptypeinfo;
    procedure setifilink(const avalue: tifigridlinkcomp);
@@ -2144,6 +2145,7 @@ type
    function caninsertrow: boolean; virtual;
    function canappendrow: boolean; virtual;
    function candeleterow: boolean; virtual;
+   function canmoverow: boolean; virtual;
 
    procedure updatepopupmenu(var amenu: tpopupmenu; 
                          var mouseinfo: mouseeventinfoty); override;
@@ -2378,6 +2380,7 @@ type
                 default [];
    property optionsfold: optionsfoldty read foptionsfold 
                                            write foptionsfold default [];
+   property norowedit: boolean read fnorowedit write fnorowedit;
    property sorted: boolean read getsorted write setsorted;
    property folded: boolean read getfolded write setfolded;
    
@@ -10466,17 +10469,22 @@ end;
 
 function tcustomgrid.caninsertrow: boolean;
 begin
- result:= true;
+ result:= not fnorowedit;
 end;
 
 function tcustomgrid.canappendrow: boolean;
 begin
- result:= true;
+ result:= not fnorowedit;
 end;
 
 function tcustomgrid.candeleterow: boolean;
 begin
- result:= true;
+ result:= not fnorowedit;
+end;
+
+function tcustomgrid.canmoverow: boolean;
+begin
+ result:= not fnorowedit;
 end;
 
 procedure tcustomgrid.updatepopupmenu(var amenu: tpopupmenu; 
@@ -10556,7 +10564,7 @@ begin
    tpopupmenu.additems(amenu,self,mouseinfo,[
          stockobjects.captions[sc_delete_rowhk]+sepchar+
        '('+encodeshortcutname(sysshortcuts[sho_rowdelete])+')'],
-                  [],[state1],[{$ifdef FPC}@{$endif}dodeleterows],not bo1);
+                  [[mao_nocandefocus]],[state1],[{$ifdef FPC}@{$endif}dodeleterows],not bo1);
    bo1:= true;
   end;
  end;
@@ -13204,7 +13212,7 @@ begin
     case info.key of
      key_up: begin
       if shiftstate = [ss_ctrl] then begin
-       if og_keyrowmoving in foptionsgrid then begin
+       if (og_keyrowmoving in foptionsgrid) and canmoverow() then begin
         if ffocusedcell.row > 0 then begin
          moverow(ffocusedcell.row,ffocusedcell.row - 1,1,true);
          showcell(ffocusedcell);
@@ -13223,7 +13231,7 @@ begin
      end;
      key_down: begin
       if shiftstate = [ss_ctrl] then begin
-       if og_keyrowmoving in foptionsgrid then begin
+       if (og_keyrowmoving in foptionsgrid) and canmoverow then begin
         if (ffocusedcell.row >= 0) and (ffocusedcell.row < frowcount-1) then begin
          moverow(ffocusedcell.row,ffocusedcell.row + 1,1,true);
          showcell(ffocusedcell);
@@ -13686,7 +13694,8 @@ var
 
  function canrowmoving: boolean;
  begin
-  result:= (csdesigning in componentstate) or (og_rowmoving in foptionsgrid);
+  result:= (csdesigning in componentstate) or 
+           ((og_rowmoving in foptionsgrid) and canmoverow);
  end;
 
  function checkfixcol(nofixed: boolean = false): boolean;
