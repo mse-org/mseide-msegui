@@ -947,12 +947,12 @@ var
  po1: pmsestring;
 begin
  checkgrid;
- ffilerights:= stream.filerights;
  if restorestate then begin
   getstate(statsave);
  end;
  beginupdate;
  clear;
+ ffilerights:= stream.filerights;
  try
   flines.loadfromstream(stream);
   ffoundeolstyle:= stream.foundeolstyle();
