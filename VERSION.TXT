@@ -1,5 +1,7 @@
 MSEide+MSEgui breaking changes version history
 **********************************************
+Version 4.4
+2017-02-13
 2017-01-29
  tsqlresult.cols -> datacols.
 2017-01-27 tlayouter.place_options plo_syncmaxautosize,
