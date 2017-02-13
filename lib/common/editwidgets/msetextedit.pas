@@ -951,9 +951,9 @@ begin
   getstate(statsave);
  end;
  beginupdate;
- clear;
- ffilerights:= stream.filerights;
  try
+  clear();
+  ffilerights:= stream.filerights;
   flines.loadfromstream(stream);
   ffoundeolstyle:= stream.foundeolstyle();
   fhasbom:= false;
