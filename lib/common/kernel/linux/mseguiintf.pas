@@ -6289,17 +6289,16 @@ begin
   {$endif}
   {$ifdef with_sm} 
   if hassm then begin
-    //todo: error handling
    if sminfo.smconnection = nil then begin
-    if iceaddconnectionwatch({$ifdef FPC}@{$endif}icewatch,@sminfo) <> 0 then begin
+    if iceaddconnectionwatch(@icewatch,@sminfo) <> 0 then begin
      with smcb do begin
-      save_yourself.callback:= {$ifdef FPC}@{$endif}SmcSaveYourself;
+      save_yourself.callback:= @SmcSaveYourself;
       save_yourself.client_data:= @sminfo;
-      die.callback:= {$ifdef FPC}@{$endif}SmcDie;
+      die.callback:= @SmcDie;
       die.client_data:= @sminfo;
-      save_complete.callback:= {$ifdef FPC}@{$endif}SmcSaveComplete;
+      save_complete.callback:= @SmcSaveComplete;
       save_complete.client_data:= @sminfo;
-      shutdown_cancelled.callback:= {$ifdef FPC}@{$endif}SmcShutdownCancelled;
+      shutdown_cancelled.callback:= @SmcShutdownCancelled;
       shutdown_cancelled.client_data:= @sminfo;
      end;
      
@@ -6308,6 +6307,10 @@ begin
          SmcShutdownCancelledProcMask,smcb,nil,clientid,sizeof(smerror),@smerror);
      if clientid <> nil then begin
       xfree(clientid);
+     end;
+     if sminfo.smconnection = nil then begin
+      hassm:= false;
+      sys_errorout('Sessionmanager Error: '+ smerror+lineend);
      end;
     end;
    end;
