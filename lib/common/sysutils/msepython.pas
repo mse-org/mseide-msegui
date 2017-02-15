@@ -99,11 +99,19 @@ uses
 function pyboolean(const avalue: boolean): msestring;
 begin
  if avalue then begin
+  result:= 'True';
+ end
+ else begin
+  result:= 'False';
+ end;
+{
+ if avalue then begin
   result:= '1';
  end
  else begin
   result:= '0';
  end;
+}
 end;
  
 { tpythonscript }

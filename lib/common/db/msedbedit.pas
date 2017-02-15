@@ -3300,6 +3300,7 @@ procedure tdbnavigator.setautoedit(const avalue: boolean);
 begin
  if buttons[ord(dbnb_autoedit)].checked <>  avalue then begin
   buttons[ord(dbnb_autoedit)].checked:= avalue;
+  updatereadonly();
   if fobjectlinker <> nil then begin
    fobjectlinker.sendevent(oe_changed);
   end;
