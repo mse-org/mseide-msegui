@@ -722,6 +722,9 @@ type
    property value;
    property valuedefault;
    property group;
+{$ifdef mse_with_ifi}
+   property ifilink;
+{$endif}
  end;
 
  tcustomintegergraphdataedit = class;
