@@ -3,6 +3,8 @@ object setcreateorderfo: tsetcreateorderfo
   bounds_y = 264
   bounds_cx = 381
   bounds_cy = 340
+  container.frame.localprops = []
+  container.frame.localprops1 = []
   container.bounds = (
     0
     0
@@ -14,6 +16,8 @@ object setcreateorderfo: tsetcreateorderfo
   onclosequery = formonclosequery
   moduleclassname = 'tmseform'
   object grid: tstringgrid
+    frame.localprops = []
+    frame.localprops1 = []
     bounds_x = 0
     bounds_y = 0
     bounds_cx = 381
@@ -71,7 +75,7 @@ object setcreateorderfo: tsetcreateorderfo
     bounds_cx = 58
     bounds_cy = 20
     anchors = [an_right, an_bottom]
-    state = [as_localcaption]
+    state = [as_default, as_localdefault, as_localcaption]
     caption = '&OK'
     modalresult = mr_ok
     reffontheight = 14
@@ -84,7 +88,7 @@ object setcreateorderfo: tsetcreateorderfo
     bounds_cx = 58
     bounds_cy = 20
     anchors = [an_right, an_bottom]
-    state = [as_default, as_localdefault, as_localcaption]
+    state = [as_localdefault, as_localcaption]
     caption = '&Cancel'
     modalresult = mr_cancel
     reffontheight = 14
