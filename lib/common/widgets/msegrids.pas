@@ -11571,10 +11571,11 @@ function tcustomgrid.focuscell(cell: gridcoordty;
 
  function isappend(const arow: integer): boolean;
  begin
-  result:= not (gs_isdb in fstate) and  not (gs1_autoappendlock in fstate1) and
-      ((og_autoappend in foptionsgrid) and canappendrow and 
+  result:= canappendrow and 
+   (not (gs_isdb in fstate) and  not (gs1_autoappendlock in fstate1) and
+      ((og_autoappend in foptionsgrid) and  
                        (arow >= frowcount) and (frowcount <> 0) or
-       (arow = 0) and (frowcount = 0) and (og_autofirstrow in foptionsgrid));
+       (arow = 0) and (frowcount = 0) and (og_autofirstrow in foptionsgrid)));
  end;
  
  procedure doselectaction;
