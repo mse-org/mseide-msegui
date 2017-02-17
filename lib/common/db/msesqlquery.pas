@@ -182,6 +182,7 @@ type
    function deleterecquery : msestring;
    function writetransaction: tsqltransaction;
                   //self.transaction if self.transactionwrite = nil
+   procedure refresh(const aparams: array of variant); overload;
    procedure Prepare; virtual;
    procedure UnPrepare; virtual;
    procedure ExecSQL; virtual;
@@ -772,6 +773,21 @@ begin
     inherited SetFilterText(Value);
     if active then ApplyFilter;
     end;
+end;
+
+procedure tsqlquery.refresh(const aparams: array of variant);
+var
+ i1: int32;
+begin
+ for i1:= 0 to high(aparams) do begin
+  params[i1].value:= aparams[i1];
+ end;
+ if active then begin
+  inherited refresh();
+ end
+ else begin
+  active:= true;
+ end;
 end;
 
 procedure TSQLQuery.Prepare;
