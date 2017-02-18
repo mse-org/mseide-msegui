@@ -24,7 +24,7 @@ unit mseificomp;
 interface
 uses
  classes,mclasses,mseclasses,{msegui,}mseifiglob,mseglob,typinfo,msestrings,
- msetypes,mseinterfaces,
+ msetypes,mseinterfaces,msetimer,
  mseificompglob,msearrayprops,msedatalist,msestat,msestatfile,mseapplication,
  mseeditglob;
 
@@ -1110,6 +1110,7 @@ end;
    findex: integer;
    fnamear: stringarty;
    flistar: datalistarty;
+   ftimer: tsimpletimer;
    procedure setfields(const avalue: tififields);
   {$ifdef usedelegation}
    property fieldsurceintf: iififieldsource read ffieldsourceintf 
@@ -1124,6 +1125,7 @@ end;
    procedure setactive(const avalue: boolean); override;
    procedure open; virtual;
    procedure afteropen;
+   procedure dorefresh(const sender: tobject);
    procedure close; virtual;
    procedure loaded; override;
    procedure doactivated; override;
@@ -1136,7 +1138,9 @@ end;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
-   procedure refresh;
+   procedure refresh(const delayus: integer = -1);
+                           //-1 -> no delay, 0 -> in onidle
+   procedure checkrefresh(); //makes pending delayed refresh
    property refreshing: boolean read frefreshing;
   published
    property fields: tififields read ffields write setfields;
@@ -3663,6 +3667,7 @@ end;
 
 destructor tifidatasource.destroy;
 begin
+ freeandnil(ftimer);
  inherited;
  ffields.free;
 end;
@@ -3716,7 +3721,7 @@ begin
  end;
 end;
 
-procedure tifidatasource.refresh;
+procedure tifidatasource.dorefresh(const sender: tobject);
 var
  b1: boolean;
 begin
@@ -3727,6 +3732,30 @@ begin
   active:= true;
  finally
   frefreshing:= b1;
+ end;
+end;
+
+procedure tifidatasource.refresh(const delayus: integer = -1);
+begin
+ if delayus < 0 then begin
+  freeandnil(ftimer);
+  dorefresh(nil);
+ end
+ else begin
+  if ftimer = nil then begin
+   ftimer:= tsimpletimer.create(delayus,@dorefresh,true,[to_single]);
+  end
+  else begin
+   ftimer.interval:= delayus; //single shot
+   ftimer.enabled:= true;
+  end;
+ end;
+end;
+
+procedure tifidatasource.checkrefresh();
+begin
+ if ftimer <> nil then begin
+  ftimer.firependingandstop; //cancel wait
  end;
 end;
 
