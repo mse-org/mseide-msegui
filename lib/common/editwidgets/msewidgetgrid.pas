@@ -1202,7 +1202,8 @@ begin
   
   focuscount:= ffocuscount;
   activewidgetbefore:= factivewidget;
-  if not enter and (selectaction <> fca_exitgrid) then begin
+  if not enter and 
+          ((selectaction <> fca_exitgrid) or (newcell.row < 0)) then begin
    factivewidget:= nil;
    bo1:= true;
    if not (gs1_rowdeleting in twidgetgrid(fcellinfo.grid).fstate1) then begin

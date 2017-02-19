@@ -3724,13 +3724,23 @@ end;
 procedure tifidatasource.dorefresh(const sender: tobject);
 var
  b1: boolean;
+ ar1: datalistarty;
+ ar2: stringarty;
+ int1: integer;
 begin
+ destdatalists(ar2,ar1);
  b1:= frefreshing;
+ frefreshing:= true;
+ for int1:= 0 to high(ar1) do begin
+  ar1[int1].beginupdate();
+ end;
  try
-  frefreshing:= true;
   active:= false;
   active:= true;
  finally
+  for int1:= 0 to high(ar1) do begin
+   ar1[int1].endupdate();
+  end;
   frefreshing:= b1;
  end;
 end;
