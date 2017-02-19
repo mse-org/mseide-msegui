@@ -1262,6 +1262,11 @@ type
   public
    class function getinstancepo(owner: tobject): pfont; override;
  end;
+
+ tcolsfontselect = class(tparentfont)
+  public
+   class function getinstancepo(owner: tobject): pfont; override;
+ end;
  
  tcols = class(tgridarrayprop)
   private
@@ -1271,7 +1276,8 @@ type
    ffocusrectdist: integer;
    ffontactivenum: integer;
    ffontfocusednum: integer;
-   ffontselect: tcolsfont;
+   ffontselect: tcolsfontselect;
+   ffont: tcolsfont;
    function getcols(const index: integer): tcol;
    procedure setwidth(const value: integer);
    procedure setoptions(const avalue: coloptionsty);
@@ -1280,10 +1286,13 @@ type
    procedure setfocusrectdist(const avalue: integer);
    procedure setfontactivenum(const avalue: integer);
    procedure setfontfocusednum(const avalue: integer);
-   function getfontselect: tcolsfont;
+   function getfontselect: tcolsfontselect;
    function isfontselectstored: Boolean;
-   procedure setfontselect(const Value: tcolsfont);
+   procedure setfontselect(const avalue: tcolsfontselect);
    procedure fontselectchanged(const sender: tobject);
+   function getfont: tcolsfont;
+   procedure setfont(const avalue: tcolsfont);
+   function isfontstored: Boolean;
   protected
    fdataupdating: integer;
    procedure begindataupdate; virtual;
@@ -1310,6 +1319,7 @@ type
    constructor create(aowner: tcustomgrid; aclasstype: gridpropclassty);
    destructor destroy; override;
    procedure invalidatemaxsize(const arow: integer = -1);
+   procedure createfont();
    procedure createfontselect();
    procedure move(const curindex,newindex: integer); override;
    function mergedwidth(const acol: integer; const amerged: longword): integer;
@@ -1317,8 +1327,10 @@ type
    property cols[const index: integer]: tcol read getcols; default;
    property focusrectdist: integer read ffocusrectdist 
                                 write setfocusrectdist default 0;
-   property fontselect: tcolsfont read getfontselect 
+   property fontselect: tcolsfontselect read getfontselect 
                     write setfontselect stored isfontselectstored;
+   property font: tcolsfont read getfont 
+                    write setfont stored isfontstored;
   published
    property width: integer read fwidth
                 write setwidth default griddefaultcolwidth;
@@ -1611,6 +1623,7 @@ type
    property width;
    property options default defaultdatacoloptions;
    property options1 default defaultdatacoloptions1;
+   property font;
    property fontselect;
    property linewidth;
    property linecolor default defaultdatalinecolor;
@@ -3588,7 +3601,10 @@ end;
 function tcol.actualfont: tfont;
 begin
  if ffont = nil then begin
-  result:= fcellinfo.grid.getfont;
+  result:= tcols(prop).ffont;
+  if result = nil then begin
+   result:= fcellinfo.grid.getfont;
+  end;
  end
  else begin
   result:= ffont;
@@ -7537,6 +7553,13 @@ end;
 
 class function tcolsfont.getinstancepo(owner: tobject): pfont;
 begin
+ result:= @tcols(owner).ffont;
+end;
+
+{ tcolsfontselect }
+
+class function tcolsfontselect.getinstancepo(owner: tobject): pfont;
+begin
  result:= @tcols(owner).ffontselect;
 end;
 
@@ -7553,6 +7576,7 @@ end;
 destructor tcols.destroy;
 begin
  inherited;
+ ffont.free; 
  ffontselect.free; 
 end;
 
@@ -7803,18 +7827,49 @@ begin
  end;
 end;
 
-function tcols.getfontselect: tcolsfont;
+function tcols.getfont: tcolsfont;
 begin
- getoptionalobject(fgrid.componentstate,ffontselect,
-                                   {$ifdef FPC}@{$endif}createfontselect);
+ getoptionalobject(fgrid.componentstate,ffont,@createfont);
+ result:= ffont;
+end;
+
+procedure tcols.setfont(const avalue: tcolsfont);
+begin
+ if avalue <> ffont then begin
+  setoptionalobject(fgrid.ComponentState,avalue,ffont,
+                               @createfont);
+  fgrid.invalidate;
+ end;
+end;
+
+function tcols.isfontstored: Boolean;
+begin
+ result:= ffont <> nil;
+end;
+
+procedure tcols.createfont;
+begin
+ if ffont = nil then begin
+  ffont:= tcolsfont.create;
+  ffont.onchange:= @fontselectchanged;
+ end;
+end;
+
+procedure tcols.fontselectchanged(const sender: tobject);
+begin
+ fgrid.invalidate;
+end;
+
+function tcols.getfontselect: tcolsfontselect;
+begin
+ getoptionalobject(fgrid.componentstate,ffontselect,@createfontselect);
  result:= ffontselect;
 end;
 
-procedure tcols.setfontselect(const Value: tcolsfont);
+procedure tcols.setfontselect(const avalue: tcolsfontselect);
 begin
- if value <> ffontselect then begin
-  setoptionalobject(fgrid.ComponentState,value,ffontselect,
-                               {$ifdef FPC}@{$endif}createfontselect);
+ if avalue <> ffontselect then begin
+  setoptionalobject(fgrid.ComponentState,avalue,ffontselect,@createfontselect);
   fgrid.invalidate;
  end;
 end;
@@ -7827,14 +7882,9 @@ end;
 procedure tcols.createfontselect;
 begin
  if ffontselect = nil then begin
-  ffontselect:= tcolsfont.create;
-  ffontselect.onchange:= {$ifdef FPC}@{$endif}fontselectchanged;
+  ffontselect:= tcolsfontselect.create;
+  ffontselect.onchange:= @fontselectchanged;
  end;
-end;
-
-procedure tcols.fontselectchanged(const sender: tobject);
-begin
- fgrid.invalidate;
 end;
 
 procedure tcols.move(const curindex, newindex: integer);

@@ -1885,10 +1885,13 @@ end;
 
 function twidgetcol.actualfont: tfont;
 begin
+ result:= nil;
  if fintf <> nil then begin
-  result:= twidget1(fintf.getwidget).getfont;
- end
- else begin
+  with twidget1(fintf.getwidget) do begin
+   result:= ffont;
+  end;
+ end;
+ if result = nil then begin
   result:= inherited actualfont;
  end;
 end;
