@@ -2526,7 +2526,8 @@ begin
  result:= false;
  if (newfocus <> self) and not (des_statreading in fstate) and
                 not ((oe_checkmrcancel in foptionsedit) and 
-                            (window.modalresult = mr_cancel)) then begin
+                            (window.modalresult = mr_cancel)) and
+                                                   not readonly then begin
   if fgridintf = nil then begin
    result:= (newfocus = nil) and 
                (not (des_isdb in fstate) or (des_dbnullcheck in fstate));
