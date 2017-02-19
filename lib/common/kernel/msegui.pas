@@ -172,7 +172,7 @@ type
                    ws1_noframewidgetshift,ws1_framemouse,
                    ws1_nodesignvisible,ws1_nodesignframe,ws1_nodesignhandles,
                    ws1_nodesigndelete,ws1_nodesignmove,
-                   ws1_designactive,ws1_designwidget,
+                   ws1_designactive,ws1_nodisabledclick,ws1_designwidget,
                    ws1_fakevisible,ws1_nominsize,
                          //used for report size calculations
                    ws1_onkeydowncalled

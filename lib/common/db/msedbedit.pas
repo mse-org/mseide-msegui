@@ -2997,7 +2997,7 @@ begin
  fshortcuts[dbnb_post]:= ord(key_f2);
 // fshortcuts[dbnb_dialog]:= ord(key_f3);
  inherited;
- include(fwidgetstate1,ws1_designactive);
+ fwidgetstate1:= fwidgetstate1 + [ws1_designactive,ws1_nodisabledclick];
  size:= makesize(defaultdbnavigatorwidth,defaultdbnavigatorheight);
  include(ttoolbuttons1(buttons).fbuttonstate,tbs_nocandefocus);
  buttons.count:= ord(high(dbnavigbuttonty))+1;

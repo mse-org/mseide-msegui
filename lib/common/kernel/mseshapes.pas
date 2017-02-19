@@ -450,7 +450,8 @@ begin
      ek_buttonpress: begin
       if canclick and (button = mb_left) and 
       (not(shs_disabled in state) or 
-             (widget <> nil) and (csdesigning in widget.componentstate)) 
+             (widget <> nil) and (csdesigning in widget.componentstate) and
+             not (ws1_nodisabledclick in twidget1(widget).fwidgetstate1)) 
              and pointinshape(pos,info) then begin
        state:= state + [shs_clicked,shs_moveclick];
        updateshapemoveclick(infoarpo,true);
