@@ -995,6 +995,8 @@ type
    procedure setactive(value: boolean); override;
 
    procedure CalculateFields(Buffer: PChar); override;
+   procedure notification(acomponent: tcomponent;
+                                   operation: toperation) override;
    procedure loaded override;                              
    procedure defineproperties(filer: tfiler) override;
    procedure readstate(reader: treader) override;
@@ -4345,6 +4347,7 @@ begin
        with tmsebufdataset(lookupdataset) do begin
         lookupvaluefield:= findfield(field1.lookupresultfield);
         if lookupvaluefield <> nil then begin
+         lookupvaluefield.freenotification(self);
          ar2:= splitstring(lookupkeyfields,';',true);
          if high(ar2) = high(keyfieldar) then begin
           for int3:= 0 to indexlocal.count - 1 do begin
@@ -8781,6 +8784,22 @@ begin
    DoOnCalcFields;
   finally
    restorestate(state1);
+  end;
+ end;
+end;
+
+procedure tmsebufdataset.notification(acomponent: tcomponent;
+               operation: toperation);
+var
+ i1: int32;
+begin
+ inherited;
+ if not (csdestroying in componentstate) and (operation = opremove) then begin
+  for i1:= 0 to high(flookupfieldinfos) do begin
+   if acomponent = flookupfieldinfos[i1].lookupvaluefield then begin
+    active:= false;
+    break;
+   end;
   end;
  end;
 end;
