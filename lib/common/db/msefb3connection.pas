@@ -897,6 +897,7 @@ begin
    fstatement:= nil;
    exclude(fcursorstate,cs_hasstatement);
   end;
+  fprepared:= false;
  end;
 end;
 
