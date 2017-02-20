@@ -90,7 +90,7 @@ const
  defaultgriddatalinkoptions = [gdo_propscrollbar,gdo_thumbtrack,
                                                     gdo_selectautopost];
  defaulteditwidgetdatalinkoptions = [{oed_syncedittonavigator}];
- defaultdbnavigatoroptions = [dno_confirmdelete,dno_confirmcopy,dno_append,
+ defaultdbnavigatoroptions = [dno_confirmdelete,dno_confirmcopy,{dno_append,}
                                                              dno_shortcuthint];
  designdbnavigbuttons = [dbnb_first,dbnb_prior,dbnb_next,dbnb_last];
  editnavigbuttons = [dbnb_insert,dbnb_delete,dbnb_edit];
@@ -115,7 +115,7 @@ type
   function getwidget: twidget;
   function getnavigoptions: dbnavigatoroptionsty;
   procedure dodialogexecute;
-  procedure updatereadonly();
+  procedure updatereadonly(const force: boolean = false);
  end;
 
  tnavigdatalink = class(tmsedatalink)
@@ -170,6 +170,7 @@ type
    foptions: dbnavigatoroptionsty;
    fondialogexecute: notifyeventty;
    fonreadonlychange: booleanchangedeventty;
+   fcanautoeditbefore: boolean;
    function getdatasource: tdatasource;
    procedure setdatasource(const Value: tdatasource);
    procedure setvisiblebuttons(const avalue: dbnavigbuttonsty);
@@ -212,7 +213,8 @@ type
    function canclose(const newfocus: twidget = nil): boolean; override;
    procedure edit();
    function canautoedit(): boolean;
-   procedure updatereadonly(); //call onreadonlychange
+   procedure updatereadonly(const force: boolean = false);
+                                        //call onreadonlychange
 //   property nonavig: boolean read getnonavig write setnonavig;
   published
    property statfile;
@@ -3201,7 +3203,7 @@ begin
  inherited;
  colorglyph:= colorglyph;
  inithints;
- updatereadonly();
+ updatereadonly(true);
 end;
 
 procedure tdbnavigator.internalshortcut(var info: keyeventinfoty;
@@ -3274,10 +3276,16 @@ begin
  end;
 end;
 
-procedure tdbnavigator.updatereadonly();
+procedure tdbnavigator.updatereadonly(const force: boolean = false);
+var
+ b1: boolean;
 begin
- if canevent(tmethod(fonreadonlychange)) then begin
-  fonreadonlychange(self,not canautoedit);
+ b1:= canautoedit;
+ if (b1 <> fcanautoeditbefore) or force then begin
+  fcanautoeditbefore:= b1;
+  if canevent(tmethod(fonreadonlychange)) then begin
+   fonreadonlychange(self,not b1);
+  end;
  end;
 end;
 
