@@ -368,7 +368,7 @@ end;
 
 procedure TConnectionName.SelectDatabase;
 begin
-  if mysql_select_db(FMySQL,pchar(DatabaseName))<>0 then
+  if mysql_select_db(FMySQL,pchar(ansistring(DatabaseName)))<>0 then
     checkerror(SErrDatabaseSelectFailed);
 end;
 

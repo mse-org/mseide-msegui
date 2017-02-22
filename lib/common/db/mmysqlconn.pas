@@ -748,7 +748,7 @@ begin
   stringsafefree(p1,false);
   freecredentials(u,p);
  end;
- if mysql_select_db(aconn,pchar(DatabaseName)) <> 0 then begin
+ if mysql_select_db(aconn,pchar(ansistring(DatabaseName))) <> 0 then begin
    checkerror(SErrDatabaseSelectFailed,aconn);
  end;
 end;
@@ -758,14 +758,6 @@ begin
  mysql_close(aconnection);
  aconnection:= nil;
 end;
-
-{
-procedure tmysqlconnection.SelectDatabase;
-begin
-  if mysql_select_db(FMySQL,pchar(DatabaseName))<>0 then
-    checkerror(SErrDatabaseSelectFailed);
-end;
-}
 
 procedure tmysqlconnection.DoInternalConnect;
 var
@@ -792,18 +784,21 @@ var
  int1: integer;
  bo1: boolean;
 begin
- bo1:= transaction.active;
- try
-  for int1:= 0 to params.count-1 do begin
-   executedirect(msestring(params[int1]));
-  end;
-  if not bo1 then begin
-   bo1:= true;
-   transaction.commit;
-  end;
- finally
-  if not bo1 then begin
-   transaction.rollback;
+ if params.count > 0 then begin
+  checktransaction(name,transaction);
+  bo1:= transaction.active;
+  try
+   for int1:= 0 to params.count-1 do begin
+    executedirect(msestring(params[int1]));
+   end;
+   if not bo1 then begin
+    bo1:= true;
+    transaction.commit;
+   end;
+  finally
+   if not bo1 then begin
+    transaction.rollback;
+   end;
   end;
  end;
 end;

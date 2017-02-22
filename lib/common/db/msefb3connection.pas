@@ -684,7 +684,7 @@ begin
   fattachment:= nil;
   clearstatus();
   fattachment:= fapi.provider.attachdatabase(fapi.status,
-                  pchar(stringtoutf8(databasename1)),
+                  pchar(stringtoutf8ansi(databasename1)),
                     pb.getbufferlength(fapi.status),pb.getbuffer(fapi.status));
   pb.dispose();
   checkstatus('dointernalconnect');
