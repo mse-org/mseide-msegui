@@ -6557,6 +6557,7 @@ end;
 
 procedure tfieldsdatalink.fieldchanged;
 begin
+ updateactive(); //active flag must be valid 
  recordchanged(nil);
 end;
 

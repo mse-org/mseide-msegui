@@ -1795,6 +1795,7 @@ type
    function getreadonly: Boolean;
    function getactive: Boolean;
   protected
+   procedure updateactive();
     procedure ActiveChanged; virtual;
     procedure CheckBrowseMode; virtual;
     procedure DataEvent(Event: TDataEvent; Info: Ptrint); virtual;
@@ -9128,6 +9129,12 @@ end;
 function TDataLink.getactive: Boolean;
 begin
  result:= factive and (fdatasource <> nil) and (fdatasource.enabled);
+end;
+
+procedure TDataLink.updateactive();
+begin
+ setactive((fdatasource <> nil) and (fdatasource.fdataset <> nil) and
+                                               fdatasource.fdataset.active);
 end;
 {
 procedure TDataLink.doenter(const aobject: tobject);
