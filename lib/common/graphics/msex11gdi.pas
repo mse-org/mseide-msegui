@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2015 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2017 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -337,13 +337,16 @@ const
  xftcolorcachemask = $1f;
 type
  xftstatety = (xfts_clipregionvalid,xfts_smooth,xfts_foregroundvalid,
-               xfts_monobrush);
+               xfts_monobrush,xfts_hasdashes);
  xftstatesty = set of xftstatety;
  x11gcdty = record
   triainfo: triainfoty; //first!
   gcdrawingflags: drawingflagsty;
   gcrasterop: rasteropty;
   gcclipregion: regionty;
+  gclinewidth_: int32;
+  gccapstyle_: int32;
+//  gchasdashes: boolean;
   xftdraw: pxftdraw;
   xftdrawpic: tpicture;
   xftcolor: txftcolor;
@@ -1179,6 +1182,7 @@ var
  xvalues: xgcvalues;
  agc: tgc;
  int1: integer;
+ needslinecheck: boolean;
 
 begin
 {$ifdef mse_debuggdisync}
@@ -1187,6 +1191,7 @@ begin
  xmask:= 0;
  with drawinfo.gcvalues^,drawinfo.gc,x11gcty(platformdata).d do begin
   agc:= tgc(handle);
+  needslinecheck:= false;
   if gvm_colorforeground in mask then begin
    xmask:= xmask or gcforeground;
    xvalues.foreground:= colorforeground;
@@ -1220,10 +1225,16 @@ begin
    end;
    if (df_smooth in drawingflags) and fhasxft then begin
     checkxftdraw(drawinfo);
-    include(xftstate,xfts_smooth);
+    if not (xfts_smooth in xftstate) then begin
+     include(xftstate,xfts_smooth);
+     needslinecheck:= true;
+    end;
    end
    else begin
-    exclude(xftstate,xfts_smooth);
+    if xfts_smooth in xftstate then begin
+     exclude(xftstate,xfts_smooth);
+     needslinecheck:= true;
+    end;
    end;
   end;
   gcdrawingflags:= drawingflags;
@@ -1234,6 +1245,7 @@ begin
    gcrasterop:= rasterop;
   end;
   if gvm_linewidth in mask then begin
+   needslinecheck:= true;
    xmask:= xmask or gclinewidth;
    xvalues.line_width:= 
                    (lineinfo.width + linewidthroundvalue) shr linewidthshift;
@@ -1245,9 +1257,17 @@ begin
     triainfo.linewidth1:= triainfo.linewidth;
    end;
    triainfo.linewidth16:= triainfo.linewidth1 shl 16;
+   gclinewidth_:= xvalues.line_width;
   end;
   if gvm_dashes in mask then begin
    with lineinfo do begin
+    needslinecheck:= true;
+    if dashes = '' then begin
+     exclude(xftstate,xfts_hasdashes);
+    end
+    else begin
+     include(xftstate,xfts_hasdashes);
+    end;    
     triainfo.xftdashes:= dashes;
     int1:= length(dashes);
     if int1 <> 0 then begin
@@ -1266,10 +1286,12 @@ begin
    xmask:= xmask or gclinestyle;
   end;
   if gvm_capstyle in mask then begin
+   needslinecheck:= true;
 //   triainfo.capstyle:= lineinfo.capstyle;
    triainfo.triaflags:= triainfo.triaflags - triacapmask + 
                        triacapflags[lineinfo.capstyle];
    xvalues.cap_style:= capstyles[lineinfo.capstyle];
+   gccapstyle_:= xvalues.cap_style;
    xmask:= xmask or gccapstyle;
   end;
   if gvm_joinstyle in mask then begin
@@ -1333,6 +1355,22 @@ begin
     xvalues.tile:= xftbrush;
     xmask:= xmask or gctile;
    end;
+  end;
+  if needslinecheck then begin
+   if (gclinewidth_ = 0) and not (xfts_smooth in xftstate) then begin
+    xvalues.line_width:= 1;
+    if xfts_hasdashes in xftstate then begin
+     xvalues.cap_style:= capbutt;
+    end
+    else begin
+     xvalues.cap_style:= capprojecting;
+    end;
+   end
+   else begin
+    xvalues.line_width:= gclinewidth_;
+    xvalues.cap_style:= gccapstyle_;
+   end;
+   xmask:= xmask or (gclinewidth or gccapstyle);
   end;
   if xmask <> 0 then begin
    xchangegc(appdisp,agc,xmask,@xvalues);
