@@ -372,6 +372,7 @@ type
    procedure refresh(const aparams: array of variant);
    procedure refresh;
    procedure next;
+   function countrest(): int32; //including current record
    function rowsaffected: integer; //-1 if not supported
    function rowsreturned: integer; //-1 if not supported
 //   procedure asvariant(out avalue: variant); overload; //internal compiler error
@@ -1586,6 +1587,15 @@ begin
   raise edatabaseerror.create(name+': EOF.');
  end;
  feof:= not fdatabase.fetch(fcursor);
+end;
+
+function tsqlresult.countrest(): int32;
+begin
+ result:= 0;
+ while not eof do begin
+  inc(result);
+  next();
+ end;
 end;
 
 procedure tsqlresult.refresh(const aparams: array of variant);
