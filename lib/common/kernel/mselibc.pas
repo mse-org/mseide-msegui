@@ -879,16 +879,14 @@ type
 {$endif} //bsd
 
 
- 
  P_stat64 = ^_stat64;
  Pstat64 = ^_stat64;
  _stat64 = _stat; 
-
 {$else} //cpu32
 
  P_stat = ^_stat;
  PStat = ^_stat;
-
+ {$ifdef linux}
  _stat = packed record //probably wrong, not used
    st_dev : __dev_t;
    __pad1 : word;
@@ -913,10 +911,11 @@ type
    __unused4 : dword;
    __unused5 : dword;
  end;
- 
+ {$endif}
    P_stat64 = ^_stat64;
    Pstat64 = ^_stat64;
 {$ifndef cpuarm}
+ {$ifdef linux}
    _stat64 = packed record
     st_dev: culonglong;                 // 0
     __pad0: array[0..3] of byte;        // 8
@@ -939,6 +938,56 @@ type
     st_ino: culonglong;                 //88
                                         //96
   end;
+ {$else}       //bsd
+ ino_t = cuint32;
+ mode_t = cuint16;
+ n_link_t = cuint16;
+ uid_t = cuint32;
+ gid_t = cuint32;
+ off_t = cint64;
+ blkcnt_t = cint64;
+ blksize_t = cuint32;
+ fflags_t = cuint32;
+ 
+ _stat = packed record
+  st_dev: __dev_t;          //* inode's device */
+  st_ino: ino_t;            //* inode's number */
+  st_mode: mode_t;          //* inode protection mode */
+  st_nlink: n_link_t;       //* number of hard links */
+  st_uid: uid_t;            //* user ID of the file's owner */
+  st_gid: gid_t;            //* group ID of the file's group */
+  st_rdev: __dev_t;         //* device type */
+  st_atime: culong;         //* time of last access */
+  st_atime_nsec: culong;
+  st_mtime: culong;         //* time of last data modification */
+  st_mtime_nsec: culong;
+  st_ctime: culong;         //* time of last file status change */
+  st_ctime_nsec: culong;
+  st_size: off_t;           //* file size, in bytes */
+  st_blocks: blkcnt_t;      //* blocks allocated for file */
+  st_blksize: blksize_t;    //* optimal blocksize for I/O */
+  st_flags: fflags_t;       //* user defined flags for file */
+  st_gen: cuint32;          //* file generation number */
+  st_lspare: cint32;
+  st_birthtim: timespec;    //* time of file creation */
+  {$ifndef cpu64}
+  pad: array[0..15-sizeof(timespec)] of byte;
+  {$endif}
+  (*
+        /*
+         * Explicitly pad st_birthtim to 16 bytes so that the size of
+         * struct stat is backwards compatible.  We use bitfields instead
+         * of an array of chars so that this doesn't require a C99 compiler
+         * to compile if the size of the padding is 0.  We use 2 bitfields
+         * to cover up to 64 bits on 32-bit machines.  We assume that
+         * CHAR_BIT is 8...
+         */
+        unsigned int :(8 / 2) * (16 - (int)sizeof(struct timespec));
+        unsigned int :(8 / 2) * (16 - (int)sizeof(struct timespec));
+  *)
+ end;
+ _stat64 = _stat;
+ {$endif} //bsd
 {$else}  //cpuarm for raspberry pi
  _stat64 = packed record
  st_dev: culonglong;     //* Device.  */
