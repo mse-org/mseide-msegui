@@ -4956,6 +4956,12 @@ begin
      end;
      count:= acount;
     end;
+    int1:= count - 2;
+    if (int1 > 0) and (apoints[int1].x = apoints[int1+1].x) and 
+                   (apoints[int1].y = apoints[int1+1].y) then begin
+                   //coincident endpoints are not drawn on x11
+     dec(count);
+    end;
     closed:= aclosed;
     points:= @apoints[first];
    end;

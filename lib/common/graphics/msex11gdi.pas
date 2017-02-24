@@ -1356,6 +1356,7 @@ begin
     xmask:= xmask or gctile;
    end;
   end;
+ 
   if needslinecheck then begin
    if (gclinewidth_ = 0) and not (xfts_smooth in xftstate) then begin
     xvalues.line_width:= 1;
@@ -1372,6 +1373,7 @@ begin
    end;
    xmask:= xmask or (gclinewidth or gccapstyle);
   end;
+ 
   if xmask <> 0 then begin
    xchangegc(appdisp,agc,xmask,@xvalues);
   end;
