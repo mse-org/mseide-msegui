@@ -66,6 +66,11 @@ type
 
 const
  utf16privatebase = $f800; //used to store invalid utf8 chars in filenamety
+ utf16private = utf16privatebase + 0; 
+    //prefix for private area codepoint, following word is low byte
+ utf16invalid = utf16privatebase + 1;
+    //prefix for invalid utf8 byte, following word is data byte
+ 
  utferrorchar = char('?'); //single byte only
  
  {$ifdef mse_unicodestring}
@@ -911,10 +916,21 @@ begin
     end
     else begin
      if (ca1 > $dbff) then begin //3 byte
-      if (uto_storeinvalid in options) and 
-                (ca1 >= utf16privatebase) and 
-                          (ca1 <= utf16privatebase + $ff) then begin
-       pd^:= ca1 - utf16privatebase;
+      if (uto_storeinvalid in options) then begin
+       if ca1 = utf16private then begin
+        ca1:= ca1 or ps^;
+        store3();
+        inc(ps);
+       end
+       else begin
+        if ca1 = utf16invalid then begin
+         pd^:= ps^;
+         inc(ps);
+        end
+        else begin
+         store3(); //should not happen
+        end;
+       end;
       end
       else begin
        store3();
@@ -998,13 +1014,18 @@ function utf8tostring(const value: pchar; const alength: integer;
                            const options: utfoptionsty = []): msestring;
 var
  by1: card8;
+ wo1: card16;
  pc,pe: pcard8;
- pd: pcard16;
- 
+ pd,pde: pcard16;
+ storeinvalid: boolean;
+ p1: pointer; 
+  
  procedure seterror(); inline;
  begin
-  if uto_storeinvalid in options then begin
-   pd^:= utf16privatebase + by1;
+  if storeinvalid then begin
+   pd^:= utf16invalid;
+   inc(pd);
+   pd^:= by1;
   end
   else begin
    pd^:= card16(utferrorchar);
@@ -1012,8 +1033,10 @@ var
  end;
  
 begin
+ storeinvalid:= uto_storeinvalid in options;
  setlength(result,alength); //max
  pd:= pcard16(pointer(result));
+ pde:= pd+alength;
  pc:= pointer(value);
  pe:= pc+alength;
  while pc < pe do begin
@@ -1025,7 +1048,14 @@ begin
   else begin
    if by1 < $e0 then begin //2 byte
     if (pc < pe) and (pc^ and $c0 = $80) then begin 
-     pd^:= ((by1 and $1f) shl word(6)) or (pc^ and $3f);
+     wo1:= ((by1 and $1f) shl word(6)) or (pc^ and $3f);
+     if storeinvalid and (wo1 >= utf16privatebase) and 
+                           (wo1 < utf16privatebase + 256) then begin
+      pd^:= utf16private;
+      wo1:= wo1 and $00ff;
+      inc(pd);
+     end;
+     pd^:= wo1;
      if pd^ < $80 then begin
       seterror();  //overlong
      end;
@@ -1077,6 +1107,13 @@ begin
      end;
     end;
    end;
+  end;
+  if (pd >= pde) and (pc < pe) then begin //pd should never be bigger than pde, 
+                                          //there is at most one inc(pd) in loop
+   p1:= pointer(result);
+   setlength(result,length(result) + length(result) div 3 + 16);
+   pointer(pd):= pointer(pd)+(pointer(result)-p1);
+   pde:= pcard16(pointer(result))+length(result);
   end;
   inc(pd);
  end;
