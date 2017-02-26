@@ -453,9 +453,13 @@ begin
    richinsert(str1,po1^[pos1.row],1);
    tundoinplaceedit1(feditor).fundolist.setpos(pos1,false);
    tundoinplaceedit1(feditor).fundolist.inserttext(pos1,pos2,str1,false,false);
-//   inserttext(pos1,str1);
    inc(pos1.row);
    pos2.row:= pos1.row;
+  end;
+  if selstart.row = selend.row then begin
+   editor.richtext:= po1^[int2];
+   selstart.col:= selstart.col + acount;
+   selend.col:= selend.col + acount;
   end;
   setselection(selstart,selend,true);
  finally
@@ -480,6 +484,7 @@ begin
  pos2.row:= int1;
  po1:= datalist.datapo;
  beginupdate;
+ int4:= 0;
  feditor.begingroup;
  try
   clearselection;
@@ -502,13 +507,18 @@ begin
     pos2.col:= int4;
     str1:= copy(po1^[pos1.row].text,1,int4);
     richdelete(po1^[pos1.row],1,int4);
-//    str1:= charstring(msechar(' '),int4);
     tundoinplaceedit1(feditor).fundolist.setpos(pos2,false);
     tundoinplaceedit1(feditor).fundolist.deletetext(pos2,pos1,str1,false,true);
-//    deletetext(pos1,pos2);
    end;
    inc(pos1.row);
    inc(pos2.row);
+  end;
+  if selstart.row = selend.row then begin
+   if int4 < 0 then begin
+    int4:= 0;
+   end;
+   selstart.col:= selstart.col - int4;
+   selend.col:= selend.col - int4;
   end;
   setselection(selstart,selend,true);
  finally
