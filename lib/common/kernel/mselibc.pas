@@ -48,7 +48,11 @@ type
 {$ifdef linux}
  __time_t = __SLONGWORD_TYPE;
 {$else}
+ {$ifdef CPU64}
  __time_t = cint64;
+ {$else}
+ __time_t = cint32;
+ {$endif}
 {$endif}
  __useconds_t = __U32_TYPE;
  __suseconds_t = __SLONGWORD_TYPE;
