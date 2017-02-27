@@ -54,8 +54,12 @@ If you wish to to compile the IDE:
 Compiling MSEide from commandline on Linux and FreeBSD:
 fpc -Fulib/common/* -Fulib/common/kernel/linux apps/ide/mseide.pas
 On Windows:
-ppc386.exe -Fulib\common\* -Fulib\common\kernel\windows apps\ide\mseide.pas
+fpc -Fulib\common\* -Fulib\common\kernel\windows apps\ide\mseide.pas
 
+If FPC crashes while compiling try on Linux and FreeBSD:
+fpc -B -Fulib/common/* -Fulib/common/kernel/linux apps/ide/mseide.pas
+On Windows:
+fpc -B -Fulib\common\* -Fulib\common\kernel\windows apps\ide\mseide.pas
 
 Creating a new GUI project
 **************************
