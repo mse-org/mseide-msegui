@@ -494,7 +494,7 @@ end;
 
 function tcustomsplitter.clippoint(const aoffset: pointty): pointty;
 var
- int1: integer;
+ int1,i2: integer;
 begin
  if fparentwidget <> nil then begin
   result:= subpoint(
@@ -515,6 +515,10 @@ begin
   if (flinkleft <> nil)  then begin
    with twidget1(flinkleft) do begin
     int1:= widgetminsize.cx;
+    i2:= minshrinksize.cx;
+    if i2 > int1 then begin
+     int1:= i2;
+    end;
     if fwidgetrect.cx + result.x < int1 then begin
      result.x:= int1 - fwidgetrect.cx;
     end;
@@ -528,6 +532,10 @@ begin
   if flinkright <> nil then begin
    with twidget1(flinkright) do begin
     int1:= widgetminsize.cx;
+    i2:= minshrinksize.cx;
+    if i2 > int1 then begin
+     int1:= i2;
+    end;
     if fwidgetrect.cx - result.x < int1 then begin
      result.x:= - (int1 - fwidgetrect.cx);
     end;
@@ -543,6 +551,10 @@ begin
   if (flinktop <> nil) then begin
    with twidget1(flinktop) do begin
     int1:= widgetminsize.cy;
+    i2:= minshrinksize.cy;
+    if i2 > int1 then begin
+     int1:= i2;
+    end;
     if fwidgetrect.cy + result.y < int1 then begin
      result.y:= int1 - fwidgetrect.cy;
     end;
@@ -556,6 +568,10 @@ begin
   if flinkbottom <> nil then begin
    with twidget1(flinkbottom) do begin
     int1:= widgetminsize.cy;
+    i2:= minshrinksize.cy;
+    if i2 > int1 then begin
+     int1:= i2;
+    end;
     if fwidgetrect.cy - result.y < int1 then begin
      result.y:= - (int1 - fwidgetrect.cy);
     end;

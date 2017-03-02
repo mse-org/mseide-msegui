@@ -1723,10 +1723,10 @@ begin
  if not fupdatesize then begin
   fupdatesize:= true;
   try
-   if (feditwidth <> nil) then begin
+   if (feditwidth <> nil) and (feditwidth.value <> emptyreal) then begin
     pagewidth:= feditwidth.value;
    end;
-   if (feditheight <> nil) then begin
+   if (feditheight <> nil) and (feditheight.value <> emptyreal) then begin
     pageheight:= feditheight.value;
    end;
   finally
