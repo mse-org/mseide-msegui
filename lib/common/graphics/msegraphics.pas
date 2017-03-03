@@ -3382,7 +3382,7 @@ begin
   avalue:= 0;
  end;
 // if finfopo^.baseinfo.height <> avalue then begin
-  finfopo^.baseinfo.height:= round(avalue * (1shl fontsizeshift));
+  finfopo^.baseinfo.height:= round(avalue * (1 shl fontsizeshift));
   releasehandles;
 // end;
 end;

@@ -935,9 +935,17 @@ begin
  end;
  if not (exo_noshell in options) then begin
   command1:= shell;
-  setlength(params1,3);
+  if params <> nil then begin
+//   i1:= length(parsecommandline(commandline));
+//   for i1:= i1 to i1 + high(params) do begin
+   for i1:= 1 to length(params) do begin
+    commandline1:= commandline1 + ' ${'+inttostr(i1)+'}';
+   end;
+  end;
+  setlength(params1,4);
   params1[1]:= pchar('-c');
   params1[2]:= pchar(commandline1);
+  params1[3]:= pchar(command1);      //shell name
  end
  else begin
   command1:= ansistring(tosysfilepath(msestring(commandline)));
