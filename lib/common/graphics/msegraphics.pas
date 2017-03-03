@@ -564,7 +564,9 @@ type
    procedure setcolorselect(const Value: colorty);
    function getcolorselect: colorty;
    procedure setheight(avalue: integer);
+   procedure setheightflo(avalue: flo64);
    function getheight: integer;
+   function getheightflo: flo64;
    function getwidth: integer;
    procedure setwidth(avalue: integer);
    procedure setstyle(const Value: fontstylesty);
@@ -674,6 +676,8 @@ type
    property italic: boolean read getitalic write setitalic;
    property underline: boolean read getunderline write setunderline;
    property strikeout: boolean read getstrikeout write setstrikeout;   
+   property heightflo: flo64 read getheightflo write setheightflo;
+                  //pixel, 0 = default
 
   published
    property color: colorty read getcolor write setcolor
@@ -3354,6 +3358,11 @@ begin
  result:= (finfopo^.baseinfo.height + fontsizeroundvalue) shr fontsizeshift;
 end;
 
+function tfont.getheightflo: flo64;
+begin
+ result:= finfopo^.baseinfo.height / (1 shl fontsizeshift);
+end;
+
 procedure tfont.setheight(avalue: integer);
 begin
  include(flocalprops,flp_height);
@@ -3364,6 +3373,18 @@ begin
   finfopo^.baseinfo.height:= avalue shl fontsizeshift;
   releasehandles;
  end;
+end;
+
+procedure tfont.setheightflo(avalue: flo64);
+begin
+ include(flocalprops,flp_height);
+ if avalue < 0 then begin
+  avalue:= 0;
+ end;
+// if finfopo^.baseinfo.height <> avalue then begin
+  finfopo^.baseinfo.height:= round(avalue * (1shl fontsizeshift));
+  releasehandles;
+// end;
 end;
 
 function tfont.getwidth: integer;
