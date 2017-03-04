@@ -39,6 +39,9 @@ var
  screenrenderpictformat,bitmaprenderpictformat,
                    alpharenderpictformat,
  rgbrenderpictformat,argbrenderpictformat: pxrenderpictformat;
+ zerolineworkaround: boolean; 
+  //use one pixel line width instead of 0-line, new X11 servers don't
+  //draw 0-line endpixels reliable
 
 function createalphapicture(const size: sizety;
                                const arepeat: boolean = false): tpicture;
@@ -1357,7 +1360,7 @@ begin
    end;
   end;
  
-  if needslinecheck then begin
+  if needslinecheck and zerolineworkaround then begin
    if (gclinewidth_ = 0) and not (xfts_smooth in xftstate) then begin
     xvalues.line_width:= 1;
     if xfts_hasdashes in xftstate then begin
@@ -3321,6 +3324,7 @@ begin
 end;
 }
 initialization
+ zerolineworkaround:= true;
  fhasxft:= getxftlib;
  hasxrender:= getxrenderlib;
 // gdinumber:= registergdi(x11getgdifuncs);
