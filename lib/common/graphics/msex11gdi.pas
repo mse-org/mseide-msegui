@@ -39,9 +39,6 @@ var
  screenrenderpictformat,bitmaprenderpictformat,
                    alpharenderpictformat,
  rgbrenderpictformat,argbrenderpictformat: pxrenderpictformat;
- zerolineworkaround: boolean; 
-  //use one pixel line width instead of 0-line, new X11 servers don't
-  //draw 0-line endpixels reliable
 
 function createalphapicture(const size: sizety;
                                const arepeat: boolean = false): tpicture;
@@ -3324,7 +3321,7 @@ begin
 end;
 }
 initialization
- zerolineworkaround:= true;
+// zerolineworkaround:= true;
  fhasxft:= getxftlib;
  hasxrender:= getxrenderlib;
 // gdinumber:= registergdi(x11getgdifuncs);

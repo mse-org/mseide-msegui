@@ -76,6 +76,10 @@ MSEgui command line parameters
  Change the used fonts. Example for a 16 pixel height default font:
  --FONTALIAS=stf_default,,16
 
+--NOZEROLINES
+ Use 1-width lines instead of 0-width lines. X11 only. Workaround for buggy HW-accelerated
+ X-servers which don't draw lineends exactly. Can degrade performance.
+
 --NOZORDERHANDLING
  Do not touch Z-order of the windows.
 

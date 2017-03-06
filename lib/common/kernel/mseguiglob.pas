@@ -299,6 +299,9 @@ type
 const
  E_NOINTERFACE = longword($80004002);
 var
+ zerolineworkaround: boolean;
+  //use one pixel line width instead of 0-line, new X11 servers don't
+  //draw 0-line endpixels reliable
  nozorderhandling: boolean;
  norestackwindow: boolean;
  stackmodebelowworkaround: boolean;

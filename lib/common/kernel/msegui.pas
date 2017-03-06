@@ -19264,6 +19264,11 @@ begin
    norestackwindow:= true;
    continue;
   end;
+  if ar1[int1] = '--NOZEROLINES' then begin
+   zerolineworkaround:= true;
+   deleteitem();
+   continue;
+  end;
   if ar1[int1] = '--NOZORDERHANDLING' then begin
    nozorderhandling:= true;
    deleteitem();
