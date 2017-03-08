@@ -9,9 +9,9 @@ savedmemoryfiles=6
 run.sta=6
  [runfo]
  stackedunder=
- x=337
- y=266
- cx=767
+ x=348
+ y=198
+ cx=897
  cy=460
 macros.sta=9
  [macrosfo]
@@ -27,16 +27,16 @@ memodialog.sta=8
  [msememodialogfo]
  x=507
  y=359
- cx=386
- cy=291
+ cx=481
+ cy=255
  wsize=0
  active=1
  visible=1
 testedit.sta=9
  [testeditfo]
  stackedunder=
- x=255
- y=239
+ x=632
+ y=260
  cx=596
  cy=581
  wsize=0
@@ -57,8 +57,8 @@ groupedit.sta=9
  stackedunder=
  x=225
  y=419
- cx=604
- cy=525
+ cx=596
+ cy=581
  wsize=0
  active=1
  visible=1
@@ -115,7 +115,7 @@ c=1
   (
   kind=1
   a=0,665,4,MSEuniverse
-  c=3
+  c=4
    (
    kind=2
    a=0,648,1,MSEgit
@@ -182,6 +182,28 @@ c=1
    aec=0
    ie=0
    )
+   (
+   kind=2
+   a=0,648,1,MSEkicadBOM
+   teststate=1
+   path=kicad/bom/msekicadbom.pas
+   comment=
+   cc=${FPC} -Fu${MSEBASEDIR}/mseuniverse/tools/toolsskin -Fu../lib ${FILE}
+   cd=${file_noname($file)}
+   rc=
+   rd=
+   in=
+   eo=
+   ao=0
+   ee=
+   ae=0
+   eec=
+   cr=0
+   ao=
+   ae=
+   aec=0
+   ie=0
+   )
   teststate=1
   path=${MSEBASEDIR}/mseuniverse${MAC_IFDEF(DIREXT)}/tools/
   comment=
@@ -237,7 +259,7 @@ macrovalues=10
  ppc386
  ppcx64
  /home/mse/packs/standard/git/
- ${FILE_SYS(${MSEBASEDIR}/mseide-msegui/lib/common/)}
+ ${FILE_SYS(${MSEBASEDIR}/mseide-msegui${MAC_IFDEF(DIREXT)}/lib/common/)}
  -Fu${FILE_SYS(${FPCINSTDIR}/${FPCUNITDIR}/*)}
  -Fu${MSELIBDIR}* -Fu${FILE_SYS(${MSELIBDIR}kernel/)}${TARGET}
  ${FPCINSTDIR}${FILE_SYS(${COMPILERBIN})}
@@ -254,7 +276,7 @@ macroon=10
  63
  63
  63
-macrogroup=1
+macrogroup=0
 groupcomment=6
  386
  x64
@@ -264,25 +286,26 @@ groupcomment=6
  
 [mainfo]
 stackedunder=
-x=54
-y=313
-cx=1018
-cy=316
+x=129
+y=75
+cx=588
+cy=254
 wsize=0
 active=1
 visible=1
 [mainfo.grid]
-propcolwidthref=927
+propcolwidthref=497
 width0=50
 sortdescend0=0
-width1=281
+width1=151
 sortdescend1=0
-width2=548
+width2=294
 sortdescend2=0
-width3=413
+width3=221
 sortdescend3=0
 sortdescend4=0
-rowstate=7
+rowstate=8
+ 0 0
  0 0
  0 0
  0 0
