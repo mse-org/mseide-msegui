@@ -1422,19 +1422,35 @@ type
    onexecute: notifyeventty;
  end;
 
+ showmessageinfoty = record
+  atext,caption: msestring;
+  buttons: array of modalresultty;
+  defaultbutton: modalresultty;
+  noshortcut: modalresultsty;
+  placementrect: prectty; placement: captionposty;
+  minwidth: integer; actions: array of notifyeventty;
+  exttext: msestring;
+  result: modalresultty;
+ end;
+ pshowmessageinfoty = ^showmessageinfoty;
+
  tshowmessagewidget = class(tmessagewidget)
   protected
    info: drawtextinfoty;
    fexttext: msestring;
+   finfo: pshowmessageinfoty;
    procedure dopaintforeground(const canvas: tcanvas); override;
    procedure dokeydown(var ainfo: keyeventinfoty); override;
+   procedure doidle(var again: boolean);
     //iassistiveclient
    function getassistivetext(): msestring override;
    function getassistiveflags(): assistiveflagsty override;
   public
    constructor create(const aowner: tcomponent; const apopuptransient: boolean;
-                        const ahasaction: boolean; const exttext: msestring);
-end;
+                        const ahasaction: boolean; const exttext: msestring;
+                        const ainfo: pshowmessageinfoty);
+   destructor destroy(); override;
+ end;
 
 procedure buttonoptionstoshapestate(avalue: buttonoptionsty;
                                               var astate: shapestatesty);
@@ -1788,18 +1804,6 @@ begin
  end;
 end;
 
-type
- showmessageinfoty = record
-  atext,caption: msestring;
-  buttons: array of modalresultty;
-  defaultbutton: modalresultty;
-  noshortcut: modalresultsty;
-  placementrect: prectty; placement: captionposty;
-  minwidth: integer; actions: array of notifyeventty;
-  exttext: msestring;
-  result: modalresultty;
- end;
- pshowmessageinfoty = ^showmessageinfoty;
  
 procedure syncshowmessage(const adata: pointer);
 const
@@ -1829,7 +1833,7 @@ begin
          //stays invisible, no wm_configured processing on win32
    widget:= tshowmessagewidget.create(nil,(transientfor <> nil) and 
                (transientfor.ispopup) and transientfor.owner.visible,
-               high(actions) >= 0,exttext);
+               high(actions) >= 0,exttext,pshowmessageinfoty(adata));
    widget.name:= '_showmessage'; //debug purpose
    widget.parentwidget:= widget1; //do not create window handle of widget
    try
@@ -1932,12 +1936,14 @@ begin
     inc(widget.info.dest.x,textoffset div 2);
     dec(widget.info.dest.cx,textoffset);
     widget.updateskin(true);
+   {
     if placementrect <> nil then begin
      widget.visible:= true;
      application.processmessages(); //decorate window
      widget.window.decoratedwidgetrect:= placepopuprect(transientfor,
                         placementrect^,placement,widget.window.decoratedsize);
     end;
+   }
     result:= widget.show(true,transientfor);
    finally
     widget1.free;
@@ -2388,10 +2394,20 @@ end;
 
 constructor tshowmessagewidget.create(const aowner: tcomponent;
            const apopuptransient: boolean; const ahasaction: boolean;
-           const exttext: msestring);
+           const exttext: msestring; const ainfo: pshowmessageinfoty);
 begin
  fexttext:= exttext;
+ finfo:= ainfo;
  inherited create(aowner,apopuptransient,ahasaction);
+ if finfo^.placementrect <> nil then begin
+  application.registeronidle(@doidle);
+ end;
+end;
+
+destructor tshowmessagewidget.destroy();
+begin
+ application.unregisteronidle(@doidle);
+ inherited;
 end;
 
 procedure tshowmessagewidget.dopaintforeground(const canvas: tcanvas);
@@ -2407,6 +2423,15 @@ begin
   copytoclipboard(replacechar(info.text.text+fexttext,#0 ,' '));
  end;
  inherited;
+end;
+
+procedure tshowmessagewidget.doidle(var again: boolean);
+begin
+ application.unregisteronidle(@doidle);
+ if finfo^.placementrect <> nil then begin
+  window.decoratedwidgetrect:= placepopuprect(window.transientfor,
+                  finfo^.placementrect^,finfo^.placement,window.decoratedsize);
+ end;
 end;
 
 function tshowmessagewidget.getassistivetext(): msestring;

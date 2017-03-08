@@ -46,8 +46,12 @@ const
  CS_ASCII =       2; //* ASCII            */
  CS_UNICODE_FSS = 3; //* UNICODE in FSS format */
  CS_UTF8 =        4; //* UTF-8 */
- 
+
+{$ifdef cpu64}
+ FB_DOUBLE_ALIGN = 8;
+{$else}  
  FB_DOUBLE_ALIGN = 4; //check!
+{$endif}
  ISC_TIME_SECONDS_PRECISION = 10000;
  GDS_EPOCH_START = 40617;
  fbdatetimeoffset = -15018; //fpdate -> tdatetime;
