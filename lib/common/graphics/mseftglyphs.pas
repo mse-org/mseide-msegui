@@ -17,6 +17,7 @@ type
  tftglyphs = class
   private
    fftface: pft_face;
+   procedure setheight(const avalue: int32);
   protected
    fheight: int32;
    fascent: int32;
@@ -57,7 +58,7 @@ type
                              const aframe: framety; //padding
                                 const acolor: colorty = cl_text): boolean;
                          //empty bitmap in case of error, retruns true if ok
-   property height: int32 read fheight;
+   property height: int32 read fheight write setheight;
    property ascent: int32 read fascent;
    property descent: int32 read fdescent;
    property glyphheight: int32 read fglyphheight;
@@ -72,15 +73,26 @@ uses
 
 constructor tftglyphs.create(const afontfile: filenamety;
                              const afontindex: int32; const aheight: int32);
-var
- scale: real;
 begin
- fheight:= aheight;
  initializefreetype([]);
  if ft_new_face(ftlib,pchar(ansistring(tosysfilepath(afontfile))),
                                               afontindex,fftface) = 0 then begin
-  if ft_set_pixel_sizes(fftface,0,aheight) <> 0 then begin
-   raise exception.create('Can not set font height '+inttostr(aheight));
+  fheight:= -1; //force loading of 0
+  height:= aheight;
+ end
+ else begin
+  raise exception.create('Can not load font "'+ansistring(afontfile)+'"');
+ end;
+end;
+
+procedure tftglyphs.setheight(const avalue: int32);
+var
+ scale: real;
+begin
+ if fheight <> avalue then begin
+  fheight:= avalue;
+  if ft_set_pixel_sizes(fftface,0,avalue) <> 0 then begin
+   raise exception.create('Can not set font height '+inttostr(fheight));
   end;
   with fftface^ do begin
    scale:= fheight/units_per_em;
@@ -90,9 +102,6 @@ begin
    fglyphheight:= fascent+fdescent;
    flinespacing:= ceil(height*scale);
   end;
- end
- else begin
-  raise exception.create('Can not load font "'+ansistring(afontfile)+'"');
  end;
 end;
 
