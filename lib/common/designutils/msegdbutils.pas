@@ -11,7 +11,7 @@ unit msegdbutils;
 
 {$ifdef FPC}{$mode objfpc}{$h+}{$goto on}{$endif}
 {$ifndef FPC}{$ifdef linux} {$define UNIX} {$endif}{$endif}
-
+//{$define mse_usedebugbreakprocess}
 interface
 uses
  msestream,mseclasses,classes,mclasses,msetypes,mseevent,msehash,msepipestream,
@@ -683,7 +683,14 @@ uses
  sysutils,mseformatstr,mseprocutils,msesysutils,msefileutils,msemacros,
  msebits,msesysintf,msesysintf1,mseguiintf,msearrayutils,msesys,msedate,
  actionsmodule
-        {$ifdef UNIX},mselibc{$else},windows{$endif};
+        {$ifdef UNIX},mselibc{$else},windows,msedynload{$endif};
+{$ifdef mswindows}
+ {$ifdef mse_usedebugbreakprocess}
+var
+ debugbreakprocess: function(Process: HANDLE): BOOL; stdcall;
+ {$endif}
+{$endif}
+
 type
  tpypereader1 = class(tpipereader);
 const                                      
@@ -1281,8 +1288,8 @@ end;
 
 const
  getexceptionname: array[processorty] of string = (
-//pro_i386,     pro_x86_64,   pro_arm,     pro_armm3,
-  '($eax^+12)^','($rax^+24)^','($r0^+12)^','($r0^+12)^',
+//pro_i386,     pro_x86_64,                      pro_arm,     pro_armm3,
+  '($eax^+12)^','ppointer(ppointer($rax)^+24)^','($r0^+12)^','($r0^+12)^',
 //pro_cpu32,pro_avr32,pro_rl78
   '',       '',       '');
  
@@ -2469,33 +2476,42 @@ begin
 // internalcommand('-exec-interrupt');
  if fprocid <> 0 then begin
  {$ifdef mswindows}
-  prochandle:= openprocess(
-   PROCESS_CREATE_THREAD or PROCESS_QUERY_INFORMATION or PROCESS_VM_OPERATION or
-   PROCESS_VM_WRITE or PROCESS_VM_READ, False, fprocid);
-  if prochandle <> 0 then begin
-   bo1:= false;
-   modhandle:= GetModuleHandle(kernel32);
-   if modhandle <> 0 then begin
-    debugbreakaddr:= windows.getprocaddress(modhandle,'DebugBreak');
-    if debugbreakaddr <> nil then begin
-     {$ifdef FPC}pointer(createremotethreadaddr){$else}
-     createremotethreadaddr{$endif}:= windows.GetProcAddress(modhandle, 'CreateRemoteThread');
-     if assigned(createremotethreadaddr) then begin
-      threadhandle:= createremotethreadaddr(prochandle, nil, 0, debugbreakaddr,
-                            nil, 0, finterruptthreadid);
-      if threadhandle <> 0 then begin
-       closehandle(threadhandle);
-       bo1:= true;
+  {$ifdef mse_usedebugbreakprocess}
+  if debugbreakprocess <> nil then begin
+   debugbreakprocess(fprocid);
+  end
+  else begin
+  {$endif}
+   prochandle:= openprocess(
+    PROCESS_CREATE_THREAD or PROCESS_QUERY_INFORMATION or PROCESS_VM_OPERATION or
+    PROCESS_VM_WRITE or PROCESS_VM_READ, False, fprocid);
+   if prochandle <> 0 then begin
+    bo1:= false;
+    modhandle:= GetModuleHandle(kernel32);
+    if modhandle <> 0 then begin
+     debugbreakaddr:= windows.getprocaddress(modhandle,'DebugBreak');
+     if debugbreakaddr <> nil then begin
+      {$ifdef FPC}pointer(createremotethreadaddr){$else}
+      createremotethreadaddr{$endif}:= windows.GetProcAddress(modhandle, 'CreateRemoteThread');
+      if assigned(createremotethreadaddr) then begin
+       threadhandle:= createremotethreadaddr(prochandle, nil, 0, debugbreakaddr,
+                             nil, 0, finterruptthreadid);
+       if threadhandle <> 0 then begin
+        closehandle(threadhandle);
+        bo1:= true;
+       end;
       end;
      end;
     end;
+    closehandle(prochandle);
+    if not bo1 then begin
+     GenerateConsoleCtrlEvent(CTRL_BREAK_EVENT, fprocid);
+      //for win95
+    end;
    end;
-   closehandle(prochandle);
-   if not bo1 then begin
-    GenerateConsoleCtrlEvent(CTRL_BREAK_EVENT, fprocid);
-     //for win95
-   end;
+  {$ifdef mse_usedebugbreakprocess}
   end;
+  {$endif}
  {$else}
    kill(fprocid,sigint);
  {$endif !mswindows}
@@ -4889,4 +4905,11 @@ end;
 
 initialization
  stopreasontext:= defaultstopreasontext; 
+{$ifdef mswindows}
+ {$ifdef mse_usedebugbreakprocess}
+ checkprocaddresses(['Kernel32.dll'],
+      ['DebugBreakProcess'],
+      [@DebugBreakProcess]);
+ {$endif}
+{$endif}
 end.

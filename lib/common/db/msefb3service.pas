@@ -324,7 +324,7 @@ type
  
 implementation
 uses
- msebits,msearrayutils,mseapplication,msesysintf;
+ msebits,msearrayutils,mseapplication,msesysintf,msefileutils;
 const
  restoreconsts: array[restoreoptionty] of card32 = (isc_spb_res_deactivate_idx,
      isc_spb_res_no_shadow,isc_spb_res_no_validity,isc_spb_res_one_at_a_time,
@@ -1657,10 +1657,10 @@ var
 begin
  params1:= char(isc_action_svc_restore);
  for i1:= 0 to high(backupfiles) do begin
-  addmseparam(params1,isc_spb_bkp_file,backupfiles[i1]);
+  addmseparam(params1,isc_spb_bkp_file,tosysfilepath(backupfiles[i1]));
  end;
  for i1:= 0 to high(dbfiles) do begin
-  addmseparam(params1,isc_spb_dbname,dbfiles[i1]);
+  addmseparam(params1,isc_spb_dbname,tosysfilepath(dbfiles[i1]));
   if i1 <= high(lengths) then begin
    addparam(params1,isc_spb_res_length,lengths[i1]);
   end;
