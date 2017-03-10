@@ -16,7 +16,7 @@ type
    add: tintegeredit;
    procedure adent(const sender: TObject);
    procedure drawfixcol(const sender: tcol; const canvas: tcanvas;
-                   const cellinfo: cellinfoty);
+                                               var cellinfo: cellinfoty); 
    procedure updatelayoutexe(const sender: TObject);
    procedure formshow(const sender: TObject);
    procedure cellsetvalue(const sender: TObject; var avalue: msestring;
@@ -33,7 +33,7 @@ uses
  memoryform_mfm,mseformatstr,msedrawtext,main,msegdbutils,msewidgets;
  
 type
- bitwidthty = (bw_8,bw_16,bw_32); 
+ bitwidthty = (bw_8,bw_16,bw_32,bw_64); 
  
 procedure tmemoryfo.adent(const sender: TObject);
 begin
@@ -47,6 +47,7 @@ var
  bytes: bytearty;
  words: wordarty;
  longwords: longwordarty;
+ qwords: card64arty;
 begin
  if memon.value and isvisible then begin
   firstadd:= add.value and $fffffff0;
@@ -105,6 +106,22 @@ begin
       end;
      end;
     end;
+    bw_64: begin
+     qwords:= nil;
+     mainfo.gdb.readmemoryqwords(add.value,cnt.value div 8,qwords);
+     int3:= -(add.value and $f) div 8;
+     for int1:= 0 to linecount-1 do begin        //todo: optimize
+      for int2:= 0 to 1 do begin
+       if (int3 < 0) or (int3 > high(qwords)) then begin
+        grid[int2][int1]:= '';
+       end
+       else begin
+        grid[int2][int1]:= hextostrmse(qwords[int3],16);
+       end;
+       inc(int3);
+      end;
+     end;
+    end;
    end;
   end;
   grid.invalidate;
@@ -115,7 +132,7 @@ begin
 end;
 
 procedure tmemoryfo.drawfixcol(const sender: tcol; const canvas: tcanvas;
-               const cellinfo: cellinfoty);
+                                                   var cellinfo: cellinfoty);
 begin
  drawtext(canvas,hextostrmse(longword(firstadd+cellinfo.cell.row*16),8),
                                                       cellinfo.innerrect);
@@ -156,6 +173,16 @@ begin
     grid.datacols[int1].onsetvalue:= {$ifdef FPC}@{$endif}cellsetvalue;
    end;
    add.value:= add.value and not 7;
+  end;
+  bw_64: begin
+   mstr1:= 'WWWWWWWWWWWWWWWW';
+   grid.datacols.count:= 2;
+   for int1:= 0 to 1 do begin
+    grid.fixrows[-1].captions[int1].caption:= msechar(charhex[int1*8]);
+//    grid.datacols[int1].ondataentered:= {$ifdef FPC}@{$endif}celldataentered;
+    grid.datacols[int1].onsetvalue:= {$ifdef FPC}@{$endif}cellsetvalue;
+   end;
+   add.value:= add.value and not 15;
   end;
  end;
  int1:= getcanvas.getstringwidth(mstr1,grid.font);

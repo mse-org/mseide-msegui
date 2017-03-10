@@ -504,6 +504,8 @@ type
            const aname: string; var avalue: wordarty): boolean;
    function getlongwordarrayvalue(const response: resultinfoarty; 
                   const aname: string; var avalue: longwordarty): boolean;
+   function getqwordarrayvalue(const response: resultinfoarty; 
+                      const aname: string; var avalue: card64arty): boolean;
 
    function fileexec(const filename: filenamety;
                            const noproginfo: boolean = false): gdbresultty;
@@ -552,6 +554,8 @@ type
                  var aresult: wordarty): gdbresultty;
    function readmemorylongwords(const address: qword; const count: integer;
                  var aresult: longwordarty): gdbresultty;
+   function readmemoryqwords(const address: qword; const count: integer;
+                 var aresult: card64arty): gdbresultty;
    function readmemorybyte(const address: qword;
                                                out aresult: byte): gdbresultty;
    function readmemoryword(const address: qword; 
@@ -3064,6 +3068,11 @@ begin
  longwordarty(dataarray)[index]:= strtointvalue(text);
 end;
 
+procedure setqwordnum(var dataarray; const index: integer; const text: string);
+begin
+ card64arty(dataarray)[index]:= strtointvalue64(text);
+end;
+
 procedure setstringlen(var dataarray; const len: integer);
 begin
  setlength(stringarty(dataarray),len);
@@ -3082,6 +3091,11 @@ end;
 procedure setlongwordlen(var dataarray; const len: integer);
 begin
  setlength(longwordarty(dataarray),len);
+end;
+
+procedure setqwordlen(var dataarray; const len: integer);
+begin
+ setlength(card64arty(dataarray),len);
 end;
 
 function tgdbmi.getnumarrayvalue(const response: resultinfoarty; const aname: string;
@@ -3161,6 +3175,13 @@ function tgdbmi.getlongwordarrayvalue(const response: resultinfoarty; const anam
 begin
  result:= getnumarrayvalue(response,aname,avalue,{$ifdef FPC}@{$endif}setlongwordnum,
                     {$ifdef FPC}@{$endif}setlongwordlen);
+end;
+
+function tgdbmi.getqwordarrayvalue(const response: resultinfoarty;
+               const aname: string; var avalue: card64arty): boolean;
+begin
+ result:= getnumarrayvalue(response,aname,avalue,{$ifdef FPC}@{$endif}setqwordnum,
+                    {$ifdef FPC}@{$endif}setqwordlen);
 end;
 
 function tgdbmi.getenumvalue(const response: resultinfoarty; const aname: string;
@@ -3701,7 +3722,8 @@ var
  ar1,ar2: resultinfoarty;
 begin
  aresult:= nil;
- result:= synccommand('-data-read-memory '+ hextocstr(address,fpointerhexdigits) + ' u 2 1 ' + inttostr(count));
+ result:= synccommand('-data-read-memory '+ 
+            hextocstr(address,fpointerhexdigits) + ' u 2 1 ' + inttostr(count));
  if result = gdb_ok then begin
   result:= gdb_dataerror;
   if getarrayvalue(fsyncvalues,'memory',false,ar1) then begin
@@ -3720,12 +3742,33 @@ var
  ar1,ar2: resultinfoarty;
 begin
  aresult:= nil;
- result:= synccommand('-data-read-memory '+ hextocstr(address,fpointerhexdigits) + ' u 4 1 ' + inttostr(count));
+ result:= synccommand('-data-read-memory '+
+           hextocstr(address,fpointerhexdigits) + ' u 4 1 ' + inttostr(count));
  if result = gdb_ok then begin
   result:= gdb_dataerror;
   if getarrayvalue(fsyncvalues,'memory',false,ar1) then begin
    if gettuplevalue(ar1,'',ar2)  then begin
     if getlongwordarrayvalue(ar2,'data',aresult) then begin
+     result:= gdb_ok;
+    end;
+   end;
+  end;
+ end;
+end;
+
+function tgdbmi.readmemoryqwords(const address: qword; const count: integer;
+               var aresult: card64arty): gdbresultty;
+var
+ ar1,ar2: resultinfoarty;
+begin
+ aresult:= nil;
+ result:= synccommand('-data-read-memory '+ 
+            hextocstr(address,fpointerhexdigits) + ' u 8 1 ' + inttostr(count));
+ if result = gdb_ok then begin
+  result:= gdb_dataerror;
+  if getarrayvalue(fsyncvalues,'memory',false,ar1) then begin
+   if gettuplevalue(ar1,'',ar2)  then begin
+    if getqwordarrayvalue(ar2,'data',aresult) then begin
      result:= gdb_ok;
     end;
    end;
