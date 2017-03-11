@@ -676,10 +676,10 @@ begin
    end;
   end;
   if hostname <> '' then begin
-   databasename1:= msestring(hostname)+':'+ databasename;
+   databasename1:= msestring(hostname)+':'+ fdatabasename;
   end
   else begin
-   databasename1:= databasename;
+   databasename1:= fdatabasename;
   end;
   fattachment:= nil;
   clearstatus();
@@ -707,6 +707,7 @@ begin
  end;
  clearevents();
  feventcontroller.disconnect();
+ finifbapi(fapi);
 end;
 
 function tfb3connection.allocatetransactionhandle: tsqlhandle;

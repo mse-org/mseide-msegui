@@ -187,7 +187,6 @@ type
  // tmdatabaseClass = Class Of tmdatabase;
   tmdatabase = class(TCustomConnection)
   private
-   FDataBaseName : mseString;
 //    FDataSets : TList;
    fdatasets: idatabaseclientarty;
    FTransactions : TList;
@@ -211,6 +210,7 @@ type
    procedure RemoveTransactions;
    procedure setparams(const avalue: tstringlist);
   protected
+   FDataBaseName : mseString;
    FConnected : Boolean;
    FOpenAfterRead : boolean;
    procedure setconnected(const avalue: boolean); override;
