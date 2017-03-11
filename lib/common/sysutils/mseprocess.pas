@@ -803,7 +803,7 @@ begin
   fcommandline1:= fcommandline;
  end
  else begin
-  fcommandline1:= tosysfilepath(ffilename);
+  fcommandline1:= quotefilename(tosysfilepath(ffilename));
   if fparameter <> '' then begin
    fcommandline1:= fcommandline1 + ' ' + fparameter;
   end;
