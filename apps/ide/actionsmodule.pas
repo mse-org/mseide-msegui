@@ -751,6 +751,7 @@ begin
    gdb.attach(int1,info);
    loadexec(true,false);
    refreshstopinfo(info);
+   breakpointsfo.updatebreakpoints();
   end;
  end;
 end;
@@ -766,6 +767,7 @@ begin
    gdb.attachtarget(info);
    loadexec(true,false);
    refreshstopinfo(info);
+   breakpointsfo.updatebreakpoints();
   end;
  end;
 end;

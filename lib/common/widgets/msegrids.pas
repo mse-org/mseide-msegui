@@ -2651,6 +2651,7 @@ type
    function getcaretcliprect: rectty; override;  //origin = clientrect.pos
    property cols[index: integer]: tstringcol read getcols write setcols; default;
    function currentdatalist: tmsestringdatalist;
+   procedure initnewcomponent(const ascale: real) override;
 
   //iedit
    function getoptionsedit: optionseditty; virtual;
@@ -17215,6 +17216,12 @@ begin
   result:= tmsestringdatalist(
            tcustomstringcol(fdatacols.fitems[ffocusedcell.col]).fdata);
  end;
+end;
+
+procedure tcustomstringgrid.initnewcomponent(const ascale: real);
+begin
+ inherited;
+ synctofontheight();
 end;
 
 function tcustomstringgrid.locatecount: integer;

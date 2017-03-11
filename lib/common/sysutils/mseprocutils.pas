@@ -548,7 +548,12 @@ begin
  wd1:= tosysfilepath(workingdirectory);
  mstr1:= commandline;
  for i1:= 0 to high(params) do begin
-  mstr1:= mstr1 + ' '+quotestring(params[i1],'"',false);
+  if params[i1] = '' then begin
+   mstr1:= mstr1 + ' ""';
+  end
+  else begin
+   mstr1:= mstr1 + ' '+quotestring(params[i1],'"',false);
+  end;
  end;
 
  cmd1:= copy(mstr1,1,bigint); //must be writeable for createprocessw

@@ -1261,14 +1261,13 @@ end;
 function tgdbmi.getshortstring(const address: string; out avalue: string): boolean;
 var
  str1: string;
- int1: ptruint;
+ int1: card64;
  ar1: bytearty;
 begin
  avalue:= '';
  result:= evaluateexpression(address,str1) = gdb_ok;
  if result then begin
-  try
-   int1:= strtoint(str1);
+  if trystrtohex64(str1,int1) then begin
    if readmemorybytes(int1,1,ar1) = gdb_ok then begin
     if ar1[0] <> 0 then begin
      if readmemorybytes(int1+1,ar1[0],ar1) = gdb_ok then begin
@@ -1278,7 +1277,9 @@ begin
      end;
     end;
    end;
-  except
+  end
+  else begin
+   result:= false;
   end;
  end;
 end;
