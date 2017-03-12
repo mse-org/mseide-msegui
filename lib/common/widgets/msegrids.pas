@@ -2651,7 +2651,6 @@ type
    function getcaretcliprect: rectty; override;  //origin = clientrect.pos
    property cols[index: integer]: tstringcol read getcols write setcols; default;
    function currentdatalist: tmsestringdatalist;
-   procedure initnewcomponent(const ascale: real) override;
 
   //iedit
    function getoptionsedit: optionseditty; virtual;
@@ -2685,6 +2684,7 @@ type
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
+   procedure initnewcomponent(const ascale: real) override;
    procedure synctofontheight; override;
    function canclose(const newfocus: twidget): boolean; override;
    function textclipped(const acell: gridcoordty;
@@ -17221,6 +17221,7 @@ end;
 procedure tcustomstringgrid.initnewcomponent(const ascale: real);
 begin
  inherited;
+ datacols.count:= 1;
  synctofontheight();
 end;
 

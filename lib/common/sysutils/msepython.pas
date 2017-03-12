@@ -94,7 +94,7 @@ function pyboolean(const avalue: boolean): msestring;
  
 implementation
 uses
- sysutils;
+ sysutils,mseapplication;
 
 function pyboolean(const avalue: boolean): msestring;
 begin
@@ -209,7 +209,11 @@ begin
   end
   else begin
    active:= true;
-   input.pipewriter.write(ms1);
+   try
+    input.pipewriter.write(ms1);
+   except
+    application.handleexception();
+   end;
    input.pipewriter.close();
   end;
   if atimeoutus < 0 then begin

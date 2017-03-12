@@ -968,7 +968,7 @@ begin
 
  setlength(envvars1,length(envvars)+1);
  for i1:= 0 to high(env) do begin
-  envvars1[i1]:= pchar(ansistring(env[i1]));
+  envvars1[i1]:= pchar(env[i1]);
  end;
  envvars1[high(envvars1)]:= nil;
 
