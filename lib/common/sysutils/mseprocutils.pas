@@ -924,6 +924,7 @@ var
  command1,commandline1: ansistring;
  params1,envvars1: pointerarty;
  par,env: stringarty;
+ useshell: boolean;
 begin
  wd1:= '';
  commandline1:= ansistring(commandline);
@@ -938,13 +939,19 @@ begin
  for i1:= 0 to high(env) do begin
   env[i1]:= ansistring(envvars[i1]);
  end;
- if not (exo_noshell in options) then begin
+ useshell:= not (exo_noshell in options);
+ if useshell then begin
   command1:= shell;
   if params <> nil then begin
 //   i1:= length(parsecommandline(commandline));
 //   for i1:= i1 to i1 + high(params) do begin
    for i1:= 1 to length(params) do begin
-    commandline1:= commandline1 + ' ${'+inttostr(i1)+'}';
+    if params[i1-1] = '' then begin
+     commandline1:= commandline1 + ' ""';
+    end
+    else begin
+     commandline1:= commandline1 + ' ${'+inttostr(i1)+'}';
+    end;
    end;
   end;
   setlength(params1,4);
@@ -961,7 +968,7 @@ begin
  i2:= length(params1);
  setlength(params1,i2+length(params)+1);
  for i1:= 0 to high(par) do begin
-  params1[i2]:= pchar(ansistring(par[i1]));
+  params1[i2]:= pchar(par[i1]);
   inc(i2);
  end;
  params1[high(params1)]:= nil;
