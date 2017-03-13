@@ -1941,24 +1941,27 @@ end;
 
 procedure tcustomedit.updatetextflags;
 var
- aflags: textflagsty;
+ aflags,aflagsactive: textflagsty;
 begin
  if not (csloading in componentstate) then begin
-  if (des_emptytext in fstate) and (fempty_text <> '') then begin
+  if (des_emptytext in fstate) {and (fempty_text <> '')} and 
+                                         (fempty_textflags <> []) then begin
    aflags:= fempty_textflags;
+   aflagsactive:= aflags;
   end
   else begin
    aflags:= textflags;
+   aflagsactive:= textflagsactive;
   end;
   if isenabled or (oe_nogray in foptionsedit) then begin
    exclude(fstate,des_grayed);
    feditor.textflags:= aflags;
-   feditor.textflagsactive:= textflagsactive;
+   feditor.textflagsactive:= aflagsactive;
   end
   else begin
    include(fstate,des_grayed);
    feditor.textflags:= aflags + [tf_grayed];
-   feditor.textflagsactive:= textflagsactive + [tf_grayed];
+   feditor.textflagsactive:= aflagsactive + [tf_grayed];
   end;
  end;
 end;
@@ -1967,6 +1970,9 @@ procedure tcustomedit.enabledchanged;
 begin
  inherited;
  updatetextflags;
+ if (fempty_color <> cl_none) and (des_emptytext in fstate) then begin
+  invalidate();
+ end;
 end;
 
 procedure tcustomedit.settextflags(const value: textflagsty);

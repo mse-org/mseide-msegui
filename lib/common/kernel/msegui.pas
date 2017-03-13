@@ -8615,8 +8615,24 @@ var
  autosizecha: boolean;
  autosi: sizety;
  simi,sima: sizety;
+ rect1: rectty;
 begin
  autosizecha:= false;
+ if not (csloading in fcomponentstate) and (fparentwidget <> nil) then begin
+  if (fanchors * [an_left,an_right] = []) or 
+                     (fanchors * [an_top,an_bottom] = []) then begin
+                 //instead of calling parentclientrectchanged()
+   rect1:= fparentwidget.clientwidgetrect;
+   if fanchors * [an_left,an_right] = [] then begin
+    value.x:= rect1.x;
+    value.cx:= rect1.cx;
+   end;
+   if fanchors * [an_top,an_bottom] = [] then begin
+    value.y:= rect1.y;
+    value.cy:= rect1.cy;
+   end;
+  end;
+ end;
  if ([ow1_autowidth,ow1_autoheight]*foptionswidget1 <> []) and 
                                  not (csloading in componentstate) then begin
   if not windowevent then begin
