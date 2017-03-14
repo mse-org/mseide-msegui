@@ -107,8 +107,8 @@ begin
      scale:= 0;
      case datatype of
       ftunknown: begin
-       if isnull then begin
-        sqltype:= SQL_NULL;
+       if _isnull then begin
+        sqltype:= SQL_NULL+1;
        end;
       end;
       ftboolean: begin
@@ -183,71 +183,74 @@ begin
      totsize1:= totsize1 + sqllen;
      totsize1:= (totsize1 + 1) and not 1;
      nulloffset:= totsize1;
-     totsize1:= totsize1 + 2;
+     totsize1:= totsize1 + 2; //null flag
     end;
    end;
    getmem(fparambuffer,totsize1);
    fmessagelength:= totsize1;
    for i1:= 0 to fcount-1 do begin
     with fitems[i1] do begin
-     if _type <> SQL_NULL then begin
-      po1:= fparambuffer + offset;
-      with params[fparambinding[i1]] do begin
-       pisc_short(fparambuffer+nulloffset)^:= card8(_isnull);
-       if _isnull then begin
-        if blobkind <> bk_none then begin
-         _type:= SQL_BLOB+1;
+     po1:= fparambuffer + offset;
+     with params[fparambinding[i1]] do begin
+      if _isnull then begin
+       pisc_short(fparambuffer+nulloffset)^:= -1;
+      end
+      else begin;
+       pisc_short(fparambuffer+nulloffset)^:= 0;
+      end;
+      if _isnull then begin
+       if blobkind <> bk_none then begin
+        _type:= SQL_BLOB+1;
+       end;
+      end
+      else begin
+       case _type of
+        SQL_BOOLEAN+1: begin
+         pcard8(po1)^:= card8(asboolean);
         end;
-       end
-       else begin
-        case _type of
-         SQL_BOOLEAN+1: begin
-          pcard8(po1)^:= card8(asboolean);
-         end;
-         SQL_LONG+1: begin
-          pint32(po1)^:= asinteger;
-         end;
-         SQL_INT64+1: begin
-          if blobkind <> bk_none then begin
-           _type:= SQL_BLOB+1;
-           pisc_quad(po1)^:= ISC_QUAD(aslargeint);
-          end
-          else begin
-           if scale = -4 then begin
-            pcurrency(po1)^:= ascurrency;
-           end
-           else begin
-            pint64(po1)^:= aslargeint;
-           end;
-          end;         
-         end;
-         SQL_DOUBLE+1: begin
-          pdouble(po1)^:= asfloat;
-         end;
-         SQL_TIMESTAMP+1: begin
-          dt1:= asdatetime;
-          pisc_timestamp(po1)^.timestamp_date:= trunc(dt1) - fbdatetimeoffset;
-          dt1:= abs(frac(dt1));
-          pisc_timestamp(po1)^.timestamp_time:= 
-                    round(dt1*3600*24*ISC_TIME_SECONDS_PRECISION);
-         end;
-         SQL_TEXT+1: begin
-          move(pointer(data[i1])^,po1^,length(data[i1]));
-         end;
-         SQL_BLOB+1: begin
-          if subtype = isc_blob_text then begin
-           str1:= params.asdbstring(i1);
-          end
-          else begin
-           str1:= asstring;
-          end;
-          tfbconnection1(fconnection).writeblobdata(cursor.ftrans,'',nil,
-                                      pointer(str1),length(str1),nil,nil,str2);
-          pisc_quad(po1)^:= pisc_quad(pointer(str2))^;
-         end;
+        SQL_LONG+1: begin
+         pint32(po1)^:= asinteger;
+        end;
+        SQL_INT64+1: begin
+         if blobkind <> bk_none then begin
+          _type:= SQL_BLOB+1;
+          pisc_quad(po1)^:= ISC_QUAD(aslargeint);
+         end
          else begin
-          raise exception.create('Internal error 20160908A');
+          if scale = -4 then begin
+           pcurrency(po1)^:= ascurrency;
+          end
+          else begin
+           pint64(po1)^:= aslargeint;
+          end;
+         end;         
+        end;
+        SQL_DOUBLE+1: begin
+         pdouble(po1)^:= asfloat;
+        end;
+        SQL_TIMESTAMP+1: begin
+         dt1:= asdatetime;
+         pisc_timestamp(po1)^.timestamp_date:= trunc(dt1) - fbdatetimeoffset;
+         dt1:= abs(frac(dt1));
+         pisc_timestamp(po1)^.timestamp_time:= 
+                   round(dt1*3600*24*ISC_TIME_SECONDS_PRECISION);
+        end;
+        SQL_TEXT+1: begin
+         move(pointer(data[i1])^,po1^,length(data[i1]));
+        end;
+        SQL_BLOB+1: begin
+         if subtype = isc_blob_text then begin
+          str1:= params.asdbstring(i1);
+         end
+         else begin
+          str1:= asstring;
          end;
+         tfbconnection1(fconnection).writeblobdata(cursor.ftrans,'',nil,
+                                     pointer(str1),length(str1),nil,nil,str2);
+         pisc_quad(po1)^:= pisc_quad(pointer(str2))^;
+        end;
+        else begin
+         raise exception.create('Internal error 20160908A');
         end;
        end;
       end;
