@@ -6589,9 +6589,9 @@ begin
    if reo_waitdialog in foptions then begin
     application.waitdialog(nil,getdialogtext,getdialogcaption,
             {$ifdef FPC}@{$endif}docancel,{$ifdef FPC}@{$endif}doexec);
-    if not canceled then begin
-     application.terminatewait;
-    end;
+//    if not canceled then begin
+//     application.terminatewait;
+//    end;
    end
    else begin
     exec(nil);

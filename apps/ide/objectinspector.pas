@@ -1090,6 +1090,8 @@ var
 
 begin
  designer.begincomponentmodify;
+ props.itemlist.beginupdate;
+ values.itemlist.beginupdate;
  try
   if ps_volatile in sender.state then begin
    refresh;
@@ -1141,6 +1143,8 @@ begin
   end;
   mainfo.sourcechanged(nil);
  finally
+  props.itemlist.endupdate;
+  values.itemlist.endupdate;
   designer.endcomponentmodify;
  end;
 end;
