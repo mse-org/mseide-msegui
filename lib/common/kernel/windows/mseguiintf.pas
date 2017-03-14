@@ -2347,7 +2347,8 @@ var
  shiftstate1: uint;
  imc: himc;
  imminfo: compositionform;
- 
+label
+ nodefwindowproclab; 
 begin
  if application.ismainthread then begin
   sysevent.hwnd:= ahwnd;
@@ -2577,6 +2578,9 @@ begin
    eventlist.add(tkeyevent.create(ahwnd,false,key1,key1,shiftstate,
                                     charbuffer,timestamp));
    charbuffer:= '';
+   if (shiftstate = []) and (key1 = key_f10) then begin
+    goto nodefwindowproclab; //no windows menu activation
+   end;
   end;
   wm_keyup,wm_syskeyup: begin
    shiftstate:= winkeystatetoshiftstate(lparam);
@@ -2611,6 +2615,7 @@ begin
  else begin
   result:= defwindowprocw(ahwnd,msg,wparam,lparam);
  end;
+nodefwindowproclab:
  if ahwnd = sizingwindow then begin
   inc(eventlooping);
   try
