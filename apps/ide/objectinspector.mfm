@@ -113,7 +113,6 @@ object objectinspectorfo: tobjectinspectorfo
     bounds_x = 0
     bounds_y = 1
     bounds_cx = 171
-    bounds_cy = 22
     anchors = [an_left, an_top, an_right]
     onsetvalue = compselectoronsetvalue
     dropdown.options = [deo_selectonly, deo_autodropdown, deo_keydropdown]
@@ -122,7 +121,7 @@ object objectinspectorfo: tobjectinspectorfo
       item
       end>
     onbeforedropdown = compselectorbeforedropdown
-    reffontheight = 16
+    reffontheight = 14
   end
   object grid: twidgetgrid
     frame.localprops = [frl_levelo, frl_colorclient]
@@ -134,7 +133,7 @@ object objectinspectorfo: tobjectinspectorfo
     bounds_cx = 244
     bounds_cy = 224
     anchors = [an_top, an_bottom]
-    optionsgrid = [og_colsizing, og_colmoving, og_colchangeontabkey, og_wrapcol]
+    optionsgrid = [og_colsizing, og_colmoving, og_focuscellonenter, og_colchangeontabkey, og_wrapcol]
     optionsgrid1 = [og1_noresetselect]
     rowcolors.count = 1
     rowcolors.items = (
@@ -214,7 +213,7 @@ object objectinspectorfo: tobjectinspectorfo
     drag.onbeforedragbegin = gridondragbegin
     drag.onbeforedragover = gridondragover
     drag.onbeforedragdrop = gridondragdrop
-    reffontheight = 16
+    reffontheight = 14
     object props: ttreeitemedit
       optionswidget1 = [ow1_autoheight]
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
@@ -229,7 +228,7 @@ object objectinspectorfo: tobjectinspectorfo
       bounds_x = 0
       bounds_y = 0
       bounds_cx = 90
-      bounds_cy = 18
+      bounds_cy = 16
       optionsedit1 = []
       optionsedit = [oe_readonly, oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_resetselectonexit, oe_exitoncursor, oe_hintclippedtext, oe_locate]
       onkeydown = propskeydownexe
@@ -284,7 +283,7 @@ object objectinspectorfo: tobjectinspectorfo
         item
         end>
       onbeforedropdown = valuesbeforedropdown
-      reffontheight = 16
+      reffontheight = 14
     end
   end
   object compedit: trichbutton
@@ -304,17 +303,17 @@ object objectinspectorfo: tobjectinspectorfo
     face.fade_direction = gd_down
     face.localprops = [fal_fadirection]
     hint = 'Show component editor.'
-    bounds_x = 217
+    bounds_x = 215
     bounds_y = 2
-    bounds_cx = 25
-    bounds_cy = 20
+    bounds_cx = 27
+    bounds_cy = 18
     anchors = [an_top, an_right]
     state = [as_disabled, as_localdisabled, as_localcaption, as_localhint, as_localonexecute]
     facedisabled.localprops = []
     facedisabled.template = guitemplatesmo.fadevertkonvex
     caption = '&ED'
     onexecute = compeditonexecute
-    reffontheight = 16
+    reffontheight = 14
   end
   object findbu: tstockglyphbutton
     optionswidget1 = [ow1_fontglyphheight, ow1_autoscale]
@@ -322,12 +321,12 @@ object objectinspectorfo: tobjectinspectorfo
     bounds_x = 197
     bounds_y = 2
     bounds_cx = 18
-    bounds_cy = 20
+    bounds_cy = 18
     anchors = [an_top, an_right]
     state = [as_localcaption, as_localimagelist, as_localimagenr]
     glyph = stg_ellipsesmall
     action = actionsmo.findcompallact
-    reffontheight = 16
+    reffontheight = 14
   end
   object gridpopup: tpopupmenu
     onupdate = popupupdate
