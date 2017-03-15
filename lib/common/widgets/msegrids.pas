@@ -13671,7 +13671,8 @@ end;
 procedure tcustomgrid.doenter;
 begin
  inherited;
- if (og_focuscellonenter in foptionsgrid) and 
+ if ((og_focuscellonenter in foptionsgrid) or 
+          (ffocusedcell.col >= 0) and (ffocusedcell.row >= 0)) and 
                not (gs1_focuscellonenterlock in fstate1)then begin
   focuscell(ffocusedcell,fca_entergrid);
  end;
