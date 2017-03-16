@@ -1108,7 +1108,10 @@ end;
 
 procedure tframebuttons.dosizechanged;
 begin
- tcustombuttonframe(fowner).updatestate;
+ if not (csloading in 
+         tcustombuttonframe(fowner).fintf.getwidget.componentstate) then begin
+  tcustombuttonframe(fowner).updatestate;
+ end;
  inherited;
 end;
 
