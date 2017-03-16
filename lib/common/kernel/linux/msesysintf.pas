@@ -1093,6 +1093,14 @@ begin
  end;
 end;
 
+function sys_getusername: msestring;
+var
+ po1: pchar;
+begin
+ po1:= cuserid(nil);
+ result:= msestring(ansistring(po1));
+end;
+
 function sys_getapphomedir: filenamety;
 begin
  result:= sys_getuserhomedir;

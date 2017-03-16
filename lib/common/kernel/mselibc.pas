@@ -1967,6 +1967,7 @@ type
   __timezone_ptr_t = ^timezone;
 
 function getpid:__pid_t;cdecl;external clib name 'getpid';
+function cuserid (_string: pcchar): pcchar; external clib name 'cuserid';
 function sscanf(__s:Pchar; __format:Pchar; args:array of const):longint;cdecl;external clib name 'sscanf';
 function sched_yield:longint;cdecl;external clib name 'sched_yield';
 function usleep(__useconds:__useconds_t):longint;cdecl;external clib name 'usleep';

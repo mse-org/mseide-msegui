@@ -1808,6 +1808,25 @@ function sys_getuserhomedir: filenamety;
 begin
  result:= userhomedir;
 end;
+{
+function sys_getusername: msestring;
+var
+ str1: ansistring;
+ mstr1: msestring;
+ i1:= DWORD;
+begin
+ if iswin95 then begin
+  
+ end
+ else begin
+ end;
+end;
+}
+
+function sys_getusername: msestring;
+begin
+ result:= '';
+end;
 
 function sys_gettempdir: filenamety;
 var
