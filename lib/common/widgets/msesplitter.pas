@@ -303,6 +303,7 @@ type
  widgetlayoutinfoarty = array of widgetlayoutinfoty;
 
  layouterstatety = (las_propsizing,las_scalesizerefvalid,
+                    las_scalesizerefset,las_widgetinfoloaded,
                     las_delayedupdatelayoutpending);
  layouterstatesty = set of layouterstatety;
  
@@ -351,6 +352,7 @@ type
    procedure scalesizerefchanged;
    procedure updatescalesizeref;
    procedure delayedupdatelayout();
+   procedure checkwidgetinfo();
    procedure updatelayout;
    procedure loaded; override;
    procedure fontchanged; override;
@@ -363,7 +365,7 @@ type
    procedure unregisterchildwidget(const child: twidget); override;
    function widgetinfoindex(const awidget: twidget): integer;
    procedure updatewidgetinfo(var ainfo: widgetlayoutinfoty; 
-                                    const awidget: twidget);
+                        const awidget: twidget; const force: boolean = false);
    procedure doasyncevent(var atag: integer); override;
   public
    constructor create(aowner: tcomponent); override;
@@ -1717,6 +1719,19 @@ begin
  end;
 end;
 
+procedure tcustomlayouter.checkwidgetinfo();
+var
+ i1: integer;
+begin
+ if not (las_widgetinfoloaded in fstate) and 
+                          not(csloading in componentstate) then begin
+  include(fstate,las_widgetinfoloaded);
+  for i1:= high(fwidgetinfos) downto 0 do begin
+   updatewidgetinfo(fwidgetinfos[i1],nil,true);
+  end;
+ end;
+end;
+
 procedure tcustomlayouter.updatelayout;
 var
  ar2: integerarty;
@@ -1811,6 +1826,7 @@ begin
   if canevent(tmethod(fonbeforelayout)) then begin
    fonbeforelayout(self);
   end;
+  checkwidgetinfo();
   inc(flayoutupdating);
   try  
    updateoptionsscale;
@@ -2023,8 +2039,12 @@ var
  sum: sizety;
  bo1: boolean;
 begin
+ include(fstate,las_scalesizerefvalid);
  if plo_scalesize in fplace_options then begin
   if foptionslayout * [lao_placex,lao_placey] <> [] then begin
+   if las_scalesizerefset in fstate then begin
+    checkwidgetinfo(); //store initial values set in loaded state
+   end;
    fscalesizeref:= innerclientsize;
    sum:= nullsize;
    if not (plo_scalefullref in fplace_options) then begin
@@ -2066,9 +2086,10 @@ begin
    end;
    fscalesizeextension.cx:= fwidgetrect.cx - fscalesizeref.cx;
    fscalesizeextension.cy:= fwidgetrect.cy - fscalesizeref.cy;
+   include(fstate,las_scalesizerefset);
+   checkwidgetinfo(); //store initial values
   end;
  end;
- include(fstate,las_scalesizerefvalid);
 end;
 
 function tcustomlayouter.calcminscrollsize: sizety;
@@ -2146,13 +2167,8 @@ begin
 end;
 
 procedure tcustomlayouter.loaded;
-var
- int1: integer;
 begin
  inherited;
- for int1:= high(fwidgetinfos) downto 0 do begin
-  updatewidgetinfo(fwidgetinfos[int1],nil);
- end;
  updatelayout;
 end;
 
@@ -2401,7 +2417,7 @@ begin
 end;
 
 procedure tcustomlayouter.updatewidgetinfo(var ainfo: widgetlayoutinfoty;
-               const awidget: twidget);
+               const awidget: twidget; const force: boolean = false);
 var
  size1,size2: sizety;
  int1: integer;
@@ -2420,7 +2436,7 @@ begin
 //    end;
    end;
    size1:= widget.size;
-   if (flayoutupdating = 0) then begin
+   if (flayoutupdating = 0) or force then begin
          //synchronize ref values with changed widget values
     size2:= self.scalesizeref;
     if size1.cx <> actscalesize.cx then begin
