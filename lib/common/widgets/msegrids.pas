@@ -7836,7 +7836,12 @@ end;
 function tcols.getfont: tcolsfont;
 begin
  getoptionalobject(fgrid.componentstate,ffont,@createfont);
- result:= ffont;
+ if ffont <> nil then begin
+  result:= ffont;
+ end
+ else begin
+  result:= tcolsfont(pointer(fgrid.font));
+ end;
 end;
 
 procedure tcols.setfont(const avalue: tcolsfont);

@@ -480,7 +480,7 @@ begin
     result:= int1 + 1;
    end;
   end
-  else begin
+  else begin               //todo: do not load same substitute multiple times
    finalize(data1);
    fillchar(data1,sizeof(data1),0);
    getfontvalues(fontinfo,data1);
