@@ -7874,7 +7874,12 @@ end;
 function tcols.getfontselect: tcolsfontselect;
 begin
  getoptionalobject(fgrid.componentstate,ffontselect,@createfontselect);
- result:= ffontselect;
+ if ffontselect <> nil then begin
+  result:= ffontselect;
+ end
+ else begin
+  result:= tcolsfontselect(pointer(fgrid.font));
+ end;
 end;
 
 procedure tcols.setfontselect(const avalue: tcolsfontselect);
