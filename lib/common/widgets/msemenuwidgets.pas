@@ -1242,7 +1242,8 @@ begin
   transientforwindow:= application.activewindow;
  end;
  if aactivate and (flayout.activeitem < 0) then begin
-  capturemouse;
+  show(); //window must be visible for mouse grab
+  capturemouse();
   setactiveitem(nextmenuitem(flayout));
 //  if flayout.activeitem < 0 then begin
 //   exit;
