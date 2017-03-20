@@ -276,6 +276,10 @@ inherited reportdesignerfo: treportdesignerfo
       item
       end    
       item
+      end    
+      item
+      end    
+      item
       end>
   end
   inherited hidecompact: taction[11]

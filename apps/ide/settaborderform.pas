@@ -51,21 +51,27 @@ type
    fparent: twidget;
    fchildren: widgetarty;
    fdesigner: tdesigner;
+   fwidgetorder: boolean; //set Z-order instead of taborder
   public
-   constructor create(awidget: twidget; adesigner: tdesigner);
+   constructor create(awidget: twidget; adesigner: tdesigner;
+                                           const awidgetorder: boolean);
  end;
 
-procedure settaborderdialog(const awidget: twidget);
+procedure settaborderdialog(const awidget: twidget; 
+                                           const awidgetorder: boolean);
 
 implementation
 uses
  settaborderform_mfm,msegraphutils;
-
-procedure settaborderdialog(const awidget: twidget);
+type
+ twidget1 = class(twidget);
+  
+procedure settaborderdialog(const awidget: twidget; 
+                                           const awidgetorder: boolean);
 var
  fo: tsettaborderfo;
 begin
- fo:= tsettaborderfo.create(awidget,designer);
+ fo:= tsettaborderfo.create(awidget,designer,awidgetorder);
  try
   fo.show(true);
  finally
@@ -75,12 +81,17 @@ end;
 
  {tsettaborderfo}
  
-constructor tsettaborderfo.create(awidget: twidget; adesigner: tdesigner);
+constructor tsettaborderfo.create(awidget: twidget; adesigner: tdesigner; 
+                                           const awidgetorder: boolean);
 begin
  fwidget:= awidget;
  fparent:= awidget.parentwidget;
  fdesigner:= adesigner;
+ fwidgetorder:= awidgetorder;
  inherited create(nil);
+ if fwidgetorder then begin
+  caption:= 'Set Widget Order';
+ end;
 end;
 
 procedure tsettaborderfo.formmouseevent(const sender: twidget; var info: mouseeventinfoty);
@@ -130,14 +141,27 @@ end;
 procedure tsettaborderfo.formonclosequery(const sender: tcustommseform;
            var amodalresult: modalresultty);
 var
- int1: integer;
+ i1: integer;
+ ar1: widgetarty;
 begin
  if amodalresult = mr_ok then begin
-  for int1:= 0 to grid.rowcount - 1 do begin
-   fchildren[windex[int1]].taborder:= int1;
-  end;
-  for int1:= 0 to high(fchildren) do begin
-   fdesigner.componentmodified(fchildren[int1]);
+  if fwidgetorder then begin
+   setlength(ar1,grid.rowcount);
+   for i1:= 0 to grid.rowcount - 1 do begin
+    ar1[i1]:= fchildren[windex[i1]];
+   end;
+   with twidget1(fparent.container) do begin
+    fwidgets:= ar1;
+    widgetregionchanged(nil);    
+   end;
+  end
+  else begin
+   for i1:= 0 to grid.rowcount - 1 do begin
+    fchildren[windex[i1]].taborder:= i1;
+   end;
+   for i1:= 0 to high(fchildren) do begin
+    fdesigner.componentmodified(fchildren[i1]);
+   end;
   end;
  end;
 end;
@@ -146,7 +170,12 @@ procedure tsettaborderfo.formonloaded(const sender: TObject);
 var
  int1: integer;
 begin
- fchildren:= fparent.container.gettaborderedwidgets;
+ if fwidgetorder then begin
+  fchildren:= twidget1(fparent.container).fwidgets;
+ end
+ else begin
+  fchildren:= fparent.container.gettaborderedwidgets;
+ end;
  grid.rowcount:= length(fchildren);
  for int1:= 0 to high(fchildren) do begin
   wname[int1]:= msestring(fchildren[int1].Name);
@@ -181,7 +210,7 @@ begin
   if start.enabled and iscellclick(info,[ccr_dblclick,ccr_nokeyreturn]) then begin
    w1:= fchildren[windex[info.cell.row]];
    if w1.childrencount > 0 then begin
-    settaborderdialog(w1[0]);
+    settaborderdialog(w1[0],fwidgetorder);
    end;
   end;
  end;

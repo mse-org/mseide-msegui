@@ -111,7 +111,7 @@ object formdesignerfo: tformdesignerfo
   top = 180
   moduleclassname = 'tdockform'
   object popupme: tpopupmenu
-    menu.submenu.count = 31
+    menu.submenu.count = 33
     menu.submenu.items = <    
       item
         caption = 'Show objectinspector'
@@ -211,10 +211,31 @@ object formdesignerfo: tformdesignerfo
         state = [as_localcaption]
       end    
       item
+        caption = '&Iconify'
+        name = 'iconify'
+        state = [as_localcaption, as_localonexecute]
+        onexecute = doiconify
+      end    
+      item
+        caption = '&Deiconify'
+        name = 'deiconify'
+        state = [as_localcaption, as_localonexecute]
+        onexecute = dodeiconify
+      end    
+      item
+        options = [mao_separator, mao_shortcutcaption]
+      end    
+      item
         caption = '&Edit Component'
         name = 'editcomp'
         state = [as_localcaption, as_localonexecute]
         onexecute = doeditcomponent
+      end    
+      item
+        caption = 'Sync. to Font Height'
+        name = 'synctofo'
+        state = [as_localcaption, as_localonexecute]
+        onexecute = dosyncfontheight
       end    
       item
         caption = 'Bring to Front'
@@ -229,16 +250,9 @@ object formdesignerfo: tformdesignerfo
         onexecute = dosendtoback
       end    
       item
-        caption = '&Iconify'
-        name = 'iconify'
+        caption = 'Set Widget Order'
         state = [as_localcaption, as_localonexecute]
-        onexecute = doiconify
-      end    
-      item
-        caption = '&Deiconify'
-        name = 'deiconify'
-        state = [as_localcaption, as_localonexecute]
-        onexecute = dodeiconify
+        onexecute = dosetwidgetorder
       end    
       item
         caption = 'Set Tab Order'
@@ -250,12 +264,6 @@ object formdesignerfo: tformdesignerfo
         caption = 'Set Creation Order'
         state = [as_localcaption, as_localonexecute]
         onexecute = dosetcreationorder
-      end    
-      item
-        caption = 'Sync. to Font Height'
-        name = 'synctofo'
-        state = [as_localcaption, as_localonexecute]
-        onexecute = dosyncfontheight
       end    
       item
         caption = 'Revert to inherited'

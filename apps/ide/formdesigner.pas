@@ -154,6 +154,7 @@ type
    procedure beffloatexe(const sender: twidget; var arect: rectty);
    procedure floatexe(const sender: TObject);
    procedure enterexe(const sender: TObject);
+   procedure dosetwidgetorder(const sender: TObject);
   private
    fdesigner: tdesigner;
    fform: twidget;
@@ -2908,7 +2909,12 @@ end;
 
 procedure tformdesignerfo.dosettaborder(const sender: tobject);
 begin
- settaborderdialog(twidget(fselections.items[0]));
+ settaborderdialog(twidget(fselections.items[0]),false);
+end;
+
+procedure tformdesignerfo.dosetwidgetorder(const sender: TObject);
+begin
+ settaborderdialog(twidget(fselections.items[0]),true);
 end;
 
 procedure tformdesignerfo.dosetcreationorder(const sender: TObject);
@@ -4117,6 +4123,7 @@ begin
  factarea:= avalue;
  fmovearea:= factarea;
 end;
+
 
 { tformdesignerdockcontroller }
 
