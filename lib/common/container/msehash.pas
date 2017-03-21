@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2014 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2017 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -14,7 +14,9 @@ unit msehash;
 interface
 uses
  msestrings,msetypes;
- 
+//
+//todo: use objects instead of records
+// 
 type
  identty = card32;
  pidentty = ^identty;

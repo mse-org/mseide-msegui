@@ -111,7 +111,7 @@ begin
  sigchldbefore:= signal(sigchld,{$ifdef FPC}@{$endif}sigchild);
  sigemptyset(sigset1);
  sigaddset(sigset1,sigchld);
- m_sigprocmask(sig_unblock,sigset1,sigset2); 
+ sigprocmask(sig_unblock,@sigset1,@sigset2); 
 end;
 
 procedure nogui_deinit;
