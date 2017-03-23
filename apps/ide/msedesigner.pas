@@ -951,9 +951,20 @@ begin
 end;
 
 procedure tsubmodulelist.add(const amodule: tmsecomponent);
+var
+ comp1: tmsecomponent;
 begin
  if findancestor(amodule) = nil then begin
-  inherited add(amodule,fdesigner.copycomponent(amodule,amodule,false,false));
+  comp1:= fdesigner.copycomponent(amodule,amodule,false,false);
+  if comp1 is twidget then begin
+   with twidget1(comp1) do begin
+    if ownswindow1() then begin
+     freeandnil(fwindow);  //never mapped
+     rootchanged([]);
+    end;
+   end;
+  end;
+  inherited add(amodule,comp1);
 //  inherited add(amodule,fdesigner.copycomponent(amodule,nil));
  end;
 end;

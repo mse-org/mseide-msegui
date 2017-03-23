@@ -3138,8 +3138,9 @@ function combineframestateflags(
                          const astate: shapestatesty): framestateflagsty;
 
 {$ifdef mse_debug}
-procedure debugwindow(const atext: string; const aid: winidty); overload;
-procedure debugwindow(const atext: string; const aid1,aid2: winidty); overload;
+procedure debugwindow(const atext: string; const awindow: twindow);
+procedure debugwindow(const atext: string; const aid: winidty);
+procedure debugwindow(const atext: string; const aid1,aid2: winidty);
 function checkwindowname(const aid: winidty; const aname: string): boolean;
 {$endif}
 
@@ -3289,8 +3290,8 @@ type
    procedure windowdestroyed(aid: winidty);
    procedure setwindowfocus(winid: winidty);
    procedure unsetwindowfocus(winid: winidty);
-   procedure registerwindow(window: twindow);
-   procedure unregisterwindow(window: twindow);
+   procedure registerwindow(awindow: twindow);
+   procedure unregisterwindow(awindow: twindow);
    procedure widgetdestroyed(const widget: twidget);
 
    procedure processexposeevent(event: twindowrectevent);
@@ -17952,31 +17953,37 @@ begin
  end;
 end;
 
-procedure tinternalapplication.registerwindow(window: twindow);
+procedure tinternalapplication.registerwindow(awindow: twindow);
 begin
  lock;
  try
-  if finditem(pointerarty(fwindows),window) >= 0 then begin
-   guierror(gue_alreadyregistered,window.fownerwidget.name);
+  if finditem(pointerarty(fwindows),awindow) >= 0 then begin
+   guierror(gue_alreadyregistered,awindow.fownerwidget.name);
   end;
-  additem(pointerarty(fwindows),window);
+  additem(pointerarty(fwindows),awindow);
   zorderinvalid();
+ {$ifdef mse_debugzorder}
+  debugwindow('**registerwindow**',awindow);
+ {$endif}
  finally
   unlock;
  end;
 end;
 
-procedure tinternalapplication.unregisterwindow(window: twindow);
+procedure tinternalapplication.unregisterwindow(awindow: twindow);
 var
  int1: integer;
 begin
  lock;
  try
-  int1:= removeitem(pointerarty(fwindows),window);
+ {$ifdef mse_debugzorder}
+  debugwindow('**unregisterwindow**',awindow);
+ {$endif}
+  int1:= removeitem(pointerarty(fwindows),awindow);
   if (int1 >= 0) and (int1 <= fwindowupdateindex) then begin
    dec(fwindowupdateindex);
   end;
-  if window.fwindow.id = fmousewinid then begin
+  if awindow.fwindow.id = fmousewinid then begin
    fmousewinid:= 0;
   end;
  finally
@@ -18107,6 +18114,20 @@ begin
 end;
 
 {$ifdef mse_debug}
+procedure debugwindow(const atext: string; const awindow: twindow);
+var
+ str1: string;
+begin
+ if awindow <> nil then begin
+  str1:= atext+hextostr(awindow.fwindow.id)+' ';
+  str1:= str1+awindow.owner.name;
+ end
+ else begin
+  str1:= str1+'NIL';
+ end;
+ debugwriteln(str1);
+end;
+
 procedure debugwindow(const atext: string; const aid: winidty);
 var
  str1: string;
