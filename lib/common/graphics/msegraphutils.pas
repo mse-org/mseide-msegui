@@ -103,8 +103,9 @@ const
  cl_gridlinefix =              cl_mapped + 25;
  cl_gridframe =                cl_mapped + 26;
  cl_scrollbarpattern =         cl_mapped + 27;
- cl_scrollbarpatternclicked=   cl_mapped + 28;
- cl_lastmapped =               cl_mapped + 29;
+ cl_scrollbarpatternclicked =  cl_mapped + 28;
+ cl_defaultrect =              cl_mapped + 29;
+ cl_lastmapped =               cl_mapped + 30;
 
  cl_0 =                        cl_namedrgb + 0; //select colorbackground for monochrome bitmaps
  cl_1 =                        cl_namedrgb + 1; //select colorforeground
@@ -231,7 +232,8 @@ const
     (name: 'cl_gridlinefix'; rgb:            (blue: $00; green: $00; red: $00; res: $00)), //25
     (name: 'cl_gridframe'; rgb:              (blue: $00; green: $00; red: $00; res: $00)), //26
     (name: 'cl_scrollbarpattern'; rgb:       (blue: $ff; green: $ff; red: $ff; res: $00)), //27
-    (name: 'cl_scrollbarpatternclicked'; rgb:(blue: $00; green: $00; red: $00; res: $00))  //28
+    (name: 'cl_scrollbarpatternclicked'; rgb:(blue: $00; green: $00; red: $00; res: $00)), //28
+    (name: 'cl_defaultrect';             rgb:(blue: $00; green: $00; red: $00; res: $00))  //29
    );
 
  defaultnamedrgb: array[0..namedrgbcolorcount-1]
