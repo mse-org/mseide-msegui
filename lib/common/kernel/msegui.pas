@@ -10494,10 +10494,10 @@ begin
  end;
 end;
 
-procedure twidget.invalidateframestate;
+procedure twidget.invalidateframestate();
 begin
- if ((fframe = nil) or (fframe.fi.frameimage_list = nil)) and 
-          (fframe.fi.colorframedefault = cl_default) then begin
+ if (fframe = nil) or ((fframe.fi.frameimage_list = nil) and 
+                    (fframe.fi.colorframedefault = cl_default)) then begin
   invalidate();
  end
  else begin
