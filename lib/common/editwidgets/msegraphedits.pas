@@ -51,6 +51,7 @@ type
    property colorframedisabled;
    property colorframemouse;
    property colorframeclicked;
+   property colorframedefault;
    property colordkshadow;
    property colorshadow;
    property colorlight;

@@ -128,6 +128,7 @@ type
    property colorframedisabled;
    property colorframemouse;
    property colorframeclicked;
+   property colorframedefault;
    property colordkshadow;
    property colorshadow;
    property colorlight;
@@ -295,6 +296,7 @@ type
    property colorframedisabled;
    property colorframemouse;
    property colorframeclicked;
+   property colorframedefault;
    property framei_left;
    property framei_top;
    property framei_right;
@@ -481,6 +483,7 @@ type
    property colorframedisabled;
    property colorframemouse;
    property colorframeclicked;
+   property colorframedefault;
    property colordkshadow;
    property colorshadow;
    property colorlight;
@@ -669,6 +672,7 @@ type
    property colorframedisabled;
    property colorframemouse;
    property colorframeclicked;
+   property colorframedefault;
    property colordkshadow;
    property colorshadow;
    property colorlight;
@@ -2342,6 +2346,7 @@ begin
  if not (bo_nodefaultframeactive in foptions) and 
                ((shs_default in finfo.state) or focused) then begin
   include(result,fsf_offset1);
+  include(result,fsf_default);
  end;
 end;
 

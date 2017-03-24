@@ -255,12 +255,12 @@ type
                       frl1_colorglyph, //for menu template
                       frl1_colorpattern,
                       frl1_colorframedisabled,frl1_colorframemouse,
-                      frl1_colorframeclicked
+                      frl1_colorframeclicked,frl1_colorframedefault
                      );
  framelocalprops1ty = set of framelocalprop1ty;
 
  framestateflagty = (fsf_offset1,fsf_disabled,fsf_focused,fsf_active,
-                     fsf_mouse,fsf_clicked);
+                     fsf_mouse,fsf_clicked,fsf_default);
  framestateflagsty = set of framestateflagty;
  
 const
@@ -299,7 +299,7 @@ const
                       frl1_focusrectdist,
                       frl1_colorglyph,frl1_colorpattern,
                       frl1_colorframedisabled,frl1_colorframemouse,
-                      frl1_colorframeclicked];
+                      frl1_colorframeclicked,frl1_colorframedefault];
 type
  facelocalpropty = (fal_options,fal_framei_left,fal_framei_top,
                     fal_framei_right,fal_framei_bottom,
@@ -417,6 +417,7 @@ type
   colorframedisabled: colorty;
   colorframemouse: colorty;
   colorframeclicked: colorty;
+  colorframedefault: colorty;
   hiddenedges: edgesty;
   framecolors: framecolorinfoty;
   colorclient: colorty;
@@ -476,6 +477,8 @@ type
    function iscolorframemousestored: boolean;
    procedure setcolorframeclicked(const avalue: colorty);
    function iscolorframeclickedstored: boolean;
+   procedure setcolorframedefault(const avalue: colorty);
+   function iscolorframedefaultstored: boolean;
    procedure setcolordkshadow(const avalue: colorty);
    function iscolordkshadowstored: boolean;
    procedure setcolorshadow(const avalue: colorty);
@@ -674,6 +677,9 @@ type
    property colorframeclicked: colorty read fi.colorframeclicked 
                      write setcolorframeclicked
                      stored iscolorframeclickedstored default cl_default;
+   property colorframedefault: colorty read fi.colorframedefault
+                     write setcolorframedefault
+                     stored iscolorframedefaultstored default cl_default;
 
    property colordkshadow: colorty read fi.framecolors.edges.shadow.effectcolor
               write setcolordkshadow
@@ -805,6 +811,7 @@ type
    property colorframedisabled;
    property colorframemouse;
    property colorframeclicked;
+   property colorframedefault;
    property framei_left;
    property framei_top;
    property framei_right;
@@ -896,6 +903,7 @@ type
    procedure setcolorframedisabled(const avalue: colorty);
    procedure setcolorframemouse(const avalue: colorty);
    procedure setcolorframeclicked(const avalue: colorty);
+   procedure setcolorframedefault(const avalue: colorty);
    procedure setcolordkshadow(const avalue: colorty);
    procedure setcolorshadow(const avalue: colorty);
    procedure setcolorlight(const avalue: colorty);
@@ -1003,6 +1011,8 @@ type
                      write setcolorframemouse default cl_default;
    property colorframeclicked: colorty read fi.ba.colorframeclicked 
                      write setcolorframeclicked default cl_default;
+   property colorframedefault: colorty read fi.ba.colorframedefault 
+                     write setcolorframedefault default cl_default;
    property colorglyph: colorty read fi.ba.colorglyph
                      write setcolorglyph default cl_default;
    property colorpattern: colorty read fi.ba.colorpattern
@@ -4178,6 +4188,7 @@ begin
   colorframedisabled:= cl_default;
   colorframemouse:= cl_default;
   colorframeclicked:= cl_default;
+  colorframedefault:= cl_default;
   colorglyph:= cl_default;
   colorpattern:= cl_default;
   initdefaultvalues(framecolors.edges);
@@ -4295,7 +4306,8 @@ function tcustomframe.needsactiveinvalidate: boolean;
 begin
  with fi do begin
   result:= (frameimage_list <> nil) and (frameimage_offsetactive <> 0) or
-           (frameface_list <> nil) and (frameface_offsetactive <> 0);
+           (frameface_list <> nil) and (frameface_offsetactive <> 0) or 
+           (fi.colorframedefault <> cl_default);
  end;
 end;
 
@@ -4310,7 +4322,8 @@ function tcustomframe.needsfocusedinvalidate: boolean;
 begin
  with fi do begin
   result:= (frameimage_list <> nil) and (frameimage_offsetactive <> 0) or 
-           (frameface_list <> nil) and (frameface_offsetfocused <> 0);
+           (frameface_list <> nil) and (frameface_offsetfocused <> 0) or 
+           (fi.colorframedefault <> cl_default);;
  end;
 end;
 
@@ -4604,6 +4617,12 @@ begin
                                       (fsf_disabled in astate) then begin
       col1:= afi.colorframedisabled;
      end
+     else begin
+      if (afi.colorframedefault <> cl_default) and
+                                       (fsf_default in astate) then begin
+       col1:= afi.colorframedefault;
+      end
+     end;
     end;
    end;
   end;
@@ -5243,6 +5262,14 @@ begin
  end;
 end;
 
+procedure tcustomframe.setcolorframedefault(const avalue: colorty);
+begin
+ include(flocalprops1,frl1_colorframedefault);
+ if fi.colorframedefault <> avalue then begin
+  fi.colorframedefault:= avalue;
+  fintf.invalidatewidget;
+ end;
+end;
 
 procedure tcustomframe.setcolordkshadow(const avalue: colorty);
 begin
@@ -5351,6 +5378,9 @@ begin
   end;
   if not (frl1_colorframeclicked in flocalprops1) then begin
    colorframeclicked:= ainfo.ba.colorframeclicked;
+  end;
+  if not (frl1_colorframedefault in flocalprops1) then begin
+   colorframedefault:= ainfo.ba.colorframedefault;
   end;
   with framecolors.edges do begin
    if not (frl_colordkshadow in flocalprops) then begin
@@ -5696,6 +5726,11 @@ end;
 function tcustomframe.iscolorframeclickedstored: boolean;
 begin
  result:= (ftemplate = nil) or (frl1_colorframeclicked in flocalprops1);
+end;
+
+function tcustomframe.iscolorframedefaultstored: boolean;
+begin
+ result:= (ftemplate = nil) or (frl1_colorframedefault in flocalprops1);
 end;
 
 function tcustomframe.iscolordkshadowstored: boolean;
@@ -6058,6 +6093,12 @@ end;
 procedure tframetemplate.setcolorframeclicked(const avalue: colorty);
 begin
  fi.ba.colorframeclicked:= avalue;
+ changed;
+end;
+
+procedure tframetemplate.setcolorframedefault(const avalue: colorty);
+begin
+ fi.ba.colorframedefault:= avalue;
  changed;
 end;
 
@@ -10455,11 +10496,12 @@ end;
 
 procedure twidget.invalidateframestate;
 begin
- if (fframe = nil) or (fframe.fi.frameimage_list = nil) then begin
-  invalidate;
+ if ((fframe = nil) or (fframe.fi.frameimage_list = nil)) and 
+          (fframe.fi.colorframedefault = cl_default) then begin
+  invalidate();
  end
  else begin
-  invalidatewidget;
+  invalidatewidget();
  end;
 end;
 

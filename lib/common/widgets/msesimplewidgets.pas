@@ -712,6 +712,7 @@ type
    property colorframedisabled;
    property colorframemouse;
    property colorframeclicked;
+   property colorframedefault;
    property colordkshadow;
    property colorshadow;
    property colorlight;
@@ -1388,7 +1389,7 @@ begin
     with tcustombutton(widget1) do begin
      if shs_default in finfo.state then begin
       exclude(finfo.state,shs_default);
-      invalidate;
+      invalidateframestate();
      end;
     end;
    end;
@@ -1410,7 +1411,7 @@ begin
      if as_default in factioninfo.state then begin
       if not (shs_default in finfo.state) then begin
        include(finfo.state,shs_default);
-       invalidateframestate;
+       invalidateframestate();
       end;
      end;
     end;
