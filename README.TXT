@@ -78,7 +78,8 @@ MSEgui command line parameters
 
 --NOZEROLINES
  Use 1-width lines instead of 0-width lines. X11 only. Workaround for buggy HW-accelerated
- X-servers which don't draw lineends exactly. Can degrade performance.
+ X-servers which don't draw lineends exactly. Can degrade performance, see
+ https://bugzilla.opensuse.org/show_bug.cgi?id=1021803
 
 --NOZORDERHANDLING
  Do not touch Z-order of the windows.
