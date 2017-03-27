@@ -6716,6 +6716,7 @@ begin
   active:= true;
  finally
   exclude(fbstate,bs_loading);
+  floadingstream:= nil;
  end;
 end;
 
