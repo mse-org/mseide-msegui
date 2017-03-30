@@ -19,6 +19,7 @@ uses
  
 type
  scrollbarskininfoty = record
+  svwidth: int32;        //-2 -> default
   svcolor: colorty;
   svcolorpattern: colorty;
   svcolorpatternclicked: colorty;
@@ -743,6 +744,8 @@ type
    procedure createbutton_font;
    procedure createdatabutton_font;
   published
+   property sb_horz_width: int32 read fsb_horz.svwidth
+                                 write fsb_horz.svwidth default -2;
    property sb_horz_color: colorty 
                       read fsb_horz.svcolor
                     write fsb_horz.svcolor default cl_default;
@@ -782,6 +785,8 @@ type
    property sb_horz_frameendbutton2: tframecomp read fsb_horz.svframeendbu2
                         write setsb_horz_frameendbutton2;
 
+   property sb_vert_width: int32 read fsb_vert.svwidth
+                                 write fsb_vert.svwidth default -2;
    property sb_vert_color: colorty read fsb_vert.svcolor
                     write fsb_vert.svcolor default cl_default;
    property sb_vert_colorpattern: colorty read fsb_vert.svcolorpattern 
@@ -973,6 +978,8 @@ type
    property slider_frame: tframecomp read fslider.svwidget.svframe 
                                                       write setslider_frame;
 
+   property slider_sb_horz_width: int32 read fslider.svsb_horz.svwidth
+                                 write fslider.svsb_horz.svwidth default -2;
    property slider_sb_horz_color: colorty 
                       read fslider.svsb_horz.svcolor 
                     write fslider.svsb_horz.svcolor default cl_default;
@@ -1024,6 +1031,8 @@ type
                         read fslider.svsb_horz.svframeendbu2
                         write setssb_horz_frameendbutton2;
 
+   property slider_sb_vert_width: int32 read fslider.svsb_vert.svwidth
+                                 write fslider.svsb_vert.svwidth default -2;
    property slider_sb_vert_color: colorty 
                       read fslider.svsb_vert.svcolor
                           write fslider.svsb_vert.svcolor default cl_default;
@@ -2183,10 +2192,14 @@ begin
  end;
 end;
 
-procedure tcustomskincontroller.setscrollbarskin(const instance: tcustomscrollbar;
+procedure tcustomskincontroller.setscrollbarskin(
+                const instance: tcustomscrollbar;
                const ainfo: scrollbarskininfoty);
 begin
  with instance,ainfo do begin
+  if svwidth <> -2 then begin
+   width:= svwidth;
+  end;
   if (svcolor <> cl_default) and (color = cl_default) then begin
    color:= svcolor;
   end;
@@ -2700,6 +2713,7 @@ end;
 procedure initscrollbarskininfo(var ascrollbar: scrollbarskininfoty);
 begin
  with ascrollbar do begin
+  svwidth:= -2;
   svcolor:= cl_default;
   svcolorpattern:= cl_default;
   svcolorpatternclicked:= cl_default;
