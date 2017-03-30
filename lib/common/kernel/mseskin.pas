@@ -19,10 +19,15 @@ uses
  
 type
  scrollbarskininfoty = record
+  svcolor: colorty;
   svcolorpattern: colorty;
   svcolorpatternclicked: colorty;
   svcolorglyph: colorty;
   svbuttonendlength: int32; //-2 -> default
+  svbuttonlength: int32; //-2 -> default
+  svbuttonminlength: int32; //-2 -> default
+  svindentstart: int32;  //0 -> default
+  svindentend: int32;    //0 -> default
   svface: tfacecomp;
   svface1: tfacecomp;
   svface2: tfacecomp;
@@ -738,6 +743,9 @@ type
    procedure createbutton_font;
    procedure createdatabutton_font;
   published
+   property sb_horz_color: colorty 
+                      read fsb_horz.svcolor
+                    write fsb_horz.svcolor default cl_default;
    property sb_horz_colorpattern: colorty 
                       read fsb_horz.svcolorpattern 
                     write fsb_horz.svcolorpattern default cl_default;
@@ -749,6 +757,14 @@ type
                       write fsb_horz.svcolorglyph default cl_default;
    property sb_horz_buttonendlength: int32 read fsb_horz.svbuttonendlength 
                                  write fsb_horz.svbuttonendlength default -2;
+   property sb_horz_buttonlength: int32 read fsb_horz.svbuttonlength 
+                                 write fsb_horz.svbuttonlength default -2;
+   property sb_horz_buttonminlength: int32 read fsb_horz.svbuttonminlength 
+                                 write fsb_horz.svbuttonminlength default -2;
+   property sb_horz_indentstart: int32 read fsb_horz.svindentstart 
+                                  write fsb_horz.svindentstart default 0;
+   property sb_horz_indentend: int32 read fsb_horz.svindentend
+                                  write fsb_horz.svindentend default 0;
    property sb_horz_face: tfacecomp read fsb_horz.svface 
                         write setsb_horz_face;
    property sb_horz_face1: tfacecomp read fsb_horz.svface1
@@ -766,17 +782,26 @@ type
    property sb_horz_frameendbutton2: tframecomp read fsb_horz.svframeendbu2
                         write setsb_horz_frameendbutton2;
 
-   property sb_vert_colorpattern: colorty 
-                      read fsb_vert.svcolorpattern 
+   property sb_vert_color: colorty read fsb_vert.svcolor
+                    write fsb_vert.svcolor default cl_default;
+   property sb_vert_colorpattern: colorty read fsb_vert.svcolorpattern 
                     write fsb_vert.svcolorpattern default cl_default;
    property sb_vert_colorpatternclicked: colorty 
-                      read fsb_vert.svcolorpatternclicked
+                    read fsb_vert.svcolorpatternclicked
                     write fsb_vert.svcolorpatternclicked default cl_default;
    property sb_vert_colorglyph: colorty 
                         read fsb_vert.svcolorglyph 
                       write fsb_vert.svcolorglyph default cl_default;
    property sb_vert_buttonendlength: int32 read fsb_vert.svbuttonendlength 
                                  write fsb_vert.svbuttonendlength default -2;
+   property sb_vert_buttonlength: int32 read fsb_vert.svbuttonlength 
+                                 write fsb_vert.svbuttonlength default -2;
+   property sb_vert_buttonminlength: int32 read fsb_vert.svbuttonminlength 
+                                 write fsb_vert.svbuttonminlength default -2;
+   property sb_vert_indentstart: int32 read fsb_vert.svindentstart 
+                                  write fsb_vert.svindentstart default 0;
+   property sb_vert_indentend: int32 read fsb_vert.svindentend
+                                  write fsb_vert.svindentend default 0;
    property sb_vert_face: tfacecomp read fsb_vert.svface 
                         write setsb_vert_face;
    property sb_vert_face1: tfacecomp read fsb_vert.svface1
@@ -948,15 +973,32 @@ type
    property slider_frame: tframecomp read fslider.svwidget.svframe 
                                                       write setslider_frame;
 
+   property slider_sb_horz_color: colorty 
+                      read fslider.svsb_horz.svcolor 
+                    write fslider.svsb_horz.svcolor default cl_default;
    property slider_sb_horz_colorpattern: colorty 
                       read fslider.svsb_horz.svcolorpattern 
                     write fslider.svsb_horz.svcolorpattern default cl_default;
+   property slider_sb_horz_colorpatternclicked: colorty 
+                      read fslider.svsb_horz.svcolorpatternclicked
+             write fslider.svsb_horz.svcolorpatternclicked default cl_default;
    property slider_sb_horz_colorglyph: colorty 
                         read fslider.svsb_horz.svcolorglyph 
                       write fslider.svsb_horz.svcolorglyph default cl_default;
    property slider_sb_horz_buttonendlength: int32 
-                 read fslider.svsb_horz.svbuttonendlength 
+                         read fslider.svsb_horz.svbuttonendlength 
                            write fslider.svsb_horz.svbuttonendlength default -2;
+   property slider_sb_horz_buttonlength: int32 
+                   read fslider.svsb_horz.svbuttonlength 
+                             write fslider.svsb_horz.svbuttonlength default -2;
+   property slider_sb_horz_buttonminlength: int32 
+                   read fslider.svsb_horz.svbuttonminlength 
+                          write fslider.svsb_horz.svbuttonminlength default -2;
+   property slider_sb_horz_indentstart: int32 
+                        read fslider.svsb_horz.svindentstart 
+                               write fslider.svsb_horz.svindentstart default 0;
+   property slider_sb_horz_indentend: int32 read fslider.svsb_horz.svindentend
+                                  write fslider.svsb_horz.svindentend default 0;
    property slider_sb_horz_face: tfacecomp 
                         read fslider.svsb_horz.svface 
                         write setssb_horz_face;
@@ -982,15 +1024,32 @@ type
                         read fslider.svsb_horz.svframeendbu2
                         write setssb_horz_frameendbutton2;
 
+   property slider_sb_vert_color: colorty 
+                      read fslider.svsb_vert.svcolor
+                          write fslider.svsb_vert.svcolor default cl_default;
    property slider_sb_vert_colorpattern: colorty 
                       read fslider.svsb_vert.svcolorpattern 
                     write fslider.svsb_vert.svcolorpattern default cl_default;
+   property slider_sb_vert_colorpatternclicked: colorty 
+                      read fslider.svsb_vert.svcolorpatternclicked
+              write fslider.svsb_vert.svcolorpatternclicked default cl_default;
    property slider_sb_vert_colorglyph: colorty 
                         read fslider.svsb_vert.svcolorglyph 
                       write fslider.svsb_vert.svcolorglyph default cl_default;
    property slider_sb_vert_buttonendlength: int32 
                  read fslider.svsb_vert.svbuttonendlength 
-                           write fslider.svsb_vert.svbuttonendlength default -2;
+                          write fslider.svsb_vert.svbuttonendlength default -2;
+   property slider_sb_vert_buttonlength: int32 
+                   read fslider.svsb_vert.svbuttonlength 
+                             write fslider.svsb_vert.svbuttonlength default -2;
+   property slider_sb_vert_buttonminlength: int32 
+                   read fslider.svsb_vert.svbuttonminlength 
+                          write fslider.svsb_vert.svbuttonminlength default -2;
+   property slider_sb_vert_indentstart: int32 
+                        read fslider.svsb_vert.svindentstart 
+                               write fslider.svsb_horz.svindentstart default 0;
+   property slider_sb_vert_indentend: int32 read fslider.svsb_vert.svindentend
+                                  write fslider.svsb_vert.svindentend default 0;
    property slider_sb_vert_face: tfacecomp 
                         read fslider.svsb_vert.svface
                         write setssb_vert_face;
@@ -2128,6 +2187,9 @@ procedure tcustomskincontroller.setscrollbarskin(const instance: tcustomscrollba
                const ainfo: scrollbarskininfoty);
 begin
  with instance,ainfo do begin
+  if (svcolor <> cl_default) and (color = cl_default) then begin
+   color:= svcolor;
+  end;
   if (svcolorpattern <> cl_default) and (colorpattern = cl_default) then begin
    colorpattern:= svcolorpattern;
   end;
@@ -2140,6 +2202,18 @@ begin
   end;
   if svbuttonendlength <> -2 then begin
    buttonendlength:= svbuttonendlength;
+  end;
+  if svbuttonlength <> -2 then begin
+   buttonlength:= svbuttonlength;
+  end;
+  if svbuttonminlength <> -2 then begin
+   buttonminlength:= svbuttonminlength;
+  end;
+  if svindentstart <> 0 then begin
+   indentstart:= svindentstart;
+  end;
+  if svindentend <> 0 then begin
+   indentend:= svindentend;
   end;
   if (svface <> nil) then begin
    createface();
@@ -2623,20 +2697,29 @@ begin
  info.svsedge_colorhlwidth:= -1;
 end;
 
+procedure initscrollbarskininfo(var ascrollbar: scrollbarskininfoty);
+begin
+ with ascrollbar do begin
+  svcolor:= cl_default;
+  svcolorpattern:= cl_default;
+  svcolorpatternclicked:= cl_default;
+  svcolorglyph:= cl_default;
+  svbuttonendlength:= -2;
+  svbuttonlength:= -2;
+  svbuttonminlength:= -2;
+//  svindentstart:= -2; //default 0
+//  svindentend:= -2;
+ end;
+end;
+
 constructor tskincontroller.create(aowner: tcomponent);
 begin
  fwidgetcolor.svcolor:= cl_default;
  fwidgetcolor.svcolorcaptionframe:= cl_default;
  fstepbutton.svcolor:= cl_default;
 
- fsb_horz.svcolorpattern:= cl_default;
- fsb_horz.svcolorpatternclicked:= cl_default;
- fsb_horz.svcolorglyph:= cl_default;
- fsb_horz.svbuttonendlength:= -2;
- fsb_vert.svcolorpattern:= cl_default;
- fsb_vert.svcolorpatternclicked:= cl_default;
- fsb_vert.svcolorglyph:= cl_default;
- fsb_vert.svbuttonendlength:= -2;
+ initscrollbarskininfo(fsb_horz);
+ initscrollbarskininfo(fsb_vert);
 
  fsplitter.svcolor.svcolor:= cl_default;
  fsplitter.svcolor.svcolorcaptionframe:= cl_default;
@@ -2657,14 +2740,8 @@ begin
  fbutton.svcolor:= cl_default;
  fdatabutton.svcolor:= cl_default;
  fslider.svcolor:= cl_default;
- fslider.svsb_horz.svcolorpattern:= cl_default;
- fslider.svsb_horz.svcolorpatternclicked:= cl_default;
- fslider.svsb_horz.svcolorglyph:= cl_default;
- fslider.svsb_horz.svbuttonendlength:= -2;
- fslider.svsb_vert.svcolorpattern:= cl_default;
- fslider.svsb_vert.svcolorpatternclicked:= cl_default;
- fslider.svsb_vert.svcolorglyph:= cl_default;
- fslider.svsb_vert.svbuttonendlength:= -2;
+ initscrollbarskininfo(fslider.svsb_horz);
+ initscrollbarskininfo(fslider.svsb_vert);
  fframebutton.svcolor:= cl_default;
  fframebutton.svcolorglyph:= cl_default;
  inittabsskininfo(ftabbar.svtabhorz);

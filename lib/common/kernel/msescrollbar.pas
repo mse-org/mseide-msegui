@@ -298,7 +298,7 @@ type
                    write setcolorpatternclicked default cl_default;
                    //cl_none -> no pattern
    property colorglyph: colorty read fdrawinfo.areas[sbbu_down].ca.colorglyph
-                   write setcolorglyph default cl_glyph;
+                   write setcolorglyph default cl_default;
                    //cl_none -> no no glyph
    property onbeforeevent: beforescrollbareventty read fonbeforeevent 
                                                         write fonbeforeevent;
@@ -338,6 +338,7 @@ type
    property frameendbutton2;
    property color;
    property colorpattern;
+   property colorpatternclicked;
    property colorglyph;
    property onbeforeevent;
    property onafterevent;
@@ -374,6 +375,7 @@ type
    property frameendbutton2;
    property color;
    property colorpattern;
+   property colorpatternclicked;
    property colorglyph;
    property onbeforeevent;
    property onafterevent;
@@ -412,8 +414,8 @@ begin
  fcolor:= cl_default;
  fcolorpattern:= cl_default;
  fcolorpatternclicked:= cl_default;
- fdrawinfo.areas[sbbu_down].ca.colorglyph:= cl_glyph;
- fdrawinfo.areas[sbbu_up].ca.colorglyph:= cl_glyph;
+ fdrawinfo.areas[sbbu_down].ca.colorglyph:= cl_default;
+ fdrawinfo.areas[sbbu_up].ca.colorglyph:= cl_default;
  fclickedarea:= scrollbarareaty(-1);
  fbuttonminlength:= defaultbuttonminlength;
  fwidth:= defaultscrollbarwidth;
