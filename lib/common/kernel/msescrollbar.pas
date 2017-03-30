@@ -67,6 +67,9 @@ type
  end;
 
  scrollbardrawinfoty = record
+  frame: tframe;
+  outerrect: rectty;
+  dim: rectty;
   scrollrect: rectty;
 //  buttonareas: array[buttonareaty] of rectty;
   areas: array[scrollbarareaty] of shapeinfoty;
@@ -83,7 +86,7 @@ type
  tcustomscrollbar = class(tnullinterfacedpersistent,iframe,iface)
   private
    forg: originty;
-   fdim: rectty;
+//   fdim: rectty;
    fdirection: graphicdirectionty;
    fcolor: colorty;
    fcolorpattern: colorty;
@@ -167,6 +170,8 @@ type
    procedure setface1(const avalue: tface);
    function getface2: tface;
    procedure setface2(const avalue: tface);
+   function getframe: tframe;
+   procedure setframe(const avalue: tframe);
   protected
    fstate: scrollbarstatesty;
    fintf: iscrollbar;
@@ -219,6 +224,7 @@ type
    procedure createface2();
    procedure createfacebutton;
    procedure createfaceendbutton;
+   procedure createframe;
    procedure createframebutton;
    procedure createframeendbutton1;
    procedure createframeendbutton2;
@@ -251,7 +257,7 @@ type
    property direction: graphicdirectionty read fdirection write setdirection
                                 default gd_right;
    property value: real read fvalue write setvalue;
-   property dim: rectty read fdim write setdim;
+   property dim: rectty read fdrawinfo.dim write setdim;
 
    property width: integer read fwidth write setwidth default defaultscrollbarwidth;
    property indentstart: integer read findentstart write setindentstart default 0;
@@ -285,6 +291,7 @@ type
    property face2: tface read getface2 write setface2;
    property facebutton: tface read getfacebutton write setfacebutton;
    property faceendbutton: tface read getfaceendbutton write setfaceendbutton;
+   property frame: tframe read getframe write setframe;
    property framebutton: tframe read getframebutton write setframebutton;
    property frameendbutton1: tframe read getframeendbutton1 
                                  write setframeendbutton1;
@@ -333,6 +340,7 @@ type
    property face2;
    property facebutton;
    property faceendbutton;
+   property frame;
    property framebutton;
    property frameendbutton1;
    property frameendbutton2;
@@ -370,6 +378,7 @@ type
    property face2;
    property facebutton;
    property faceendbutton;
+   property frame;
    property framebutton;
    property frameendbutton1;
    property frameendbutton2;
@@ -472,7 +481,11 @@ var
   
 begin
  scrolllength:= 0;
- with fdim,fdrawinfo do begin
+ with fdrawinfo,dim do begin
+  dim:= outerrect;
+  if frame <> nil then begin
+   deflaterect1(dim,frame.innerframe);
+  end;
   minblen:= fbuttonminlength;
   areas[sbbu_up].ca.imagelist:= stockobjects.glyphs;
   areas[sbbu_down].ca.imagelist:= stockobjects.glyphs;
@@ -672,7 +685,7 @@ end;
 procedure tcustomscrollbar.invalidate;
 begin
  updatedim;
- fintf.invalidaterect(fdim,forg);
+ fintf.invalidaterect(fdrawinfo.outerrect,forg);
 end;
 
 procedure tcustomscrollbar.invalidatepos;
@@ -696,7 +709,8 @@ end;
 
 procedure tcustomscrollbar.setdim(const arect: rectty);
 begin
- fdim:= arect;
+ fdrawinfo.outerrect:= arect;
+// fdim:= arect;
  invalidate;
 end;
 
@@ -797,6 +811,9 @@ var
 begin
  with canvas,self.fdrawinfo do begin
   save();
+  if frame <> nil then begin
+   frame.paintbackground(canvas,outerrect,false);
+  end;
   if fface <> nil then begin
    fface.paint(canvas,fdrawinfo.scrollrect);
   end;
@@ -859,6 +876,9 @@ begin
      fillrect(areas[sba_end].ca.dim,col1);
     end;
    end;
+  end;
+  if frame <> nil then begin
+   frame.paintoverlay(canvas,outerrect);
   end;
   restore;
  end;
@@ -1396,6 +1416,7 @@ begin
  fface2.free();
  fdrawinfo.areas[sbbu_move].face.free;
  fdrawinfo.areas[sbbu_up].face.free;
+ fdrawinfo.frame.free;
  fdrawinfo.areas[sbbu_down].frame.free;
  fdrawinfo.areas[sbbu_move].frame.free;
  fdrawinfo.areas[sbbu_up].frame.free;
@@ -1575,11 +1596,30 @@ begin
  invalidate;
 end;
 
+procedure tcustomscrollbar.createframe;
+begin
+ if fdrawinfo.frame = nil then begin
+  fdrawinfo.frame:= tframe.create(iframe(self));
+ end;
+end;
+
 procedure tcustomscrollbar.createframebutton;
 begin
  if fdrawinfo.areas[sbbu_move].frame = nil then begin
   fdrawinfo.areas[sbbu_move].frame:= tframe.create(iframe(self));
  end;
+end;
+
+function tcustomscrollbar.getframe: tframe;
+begin
+ fintf.getwidget.getoptionalobject(fdrawinfo.frame,@createframe);
+ result:= tframe(fdrawinfo.frame);
+end;
+
+procedure tcustomscrollbar.setframe(const avalue: tframe);
+begin
+ fintf.getwidget.setoptionalobject(avalue,fdrawinfo.frame,@createframe);
+ invalidate;
 end;
 
 function tcustomscrollbar.getframebutton: tframe;
@@ -1724,7 +1764,8 @@ end;
 
 function tcustomscrollbar.getwidgetrect: rectty;
 begin
- result:= fdim;
+ result:= fdrawinfo.outerrect;
+// result:= fdim;
 end;
 
 function tcustomscrollbar.getframestateflags: framestateflagsty;

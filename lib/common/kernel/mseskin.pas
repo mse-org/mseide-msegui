@@ -34,6 +34,7 @@ type
   svface2: tfacecomp;
   svfacebu: tfacecomp;
   svfaceendbu: tfacecomp;
+  svframe: tframecomp;
   svframebu: tframecomp;
   svframeendbu1: tframecomp;
   svframeendbu2: tframecomp;
@@ -544,6 +545,7 @@ type
    procedure setsb_vert_face2(const avalue: tfacecomp);
    procedure setsb_vert_facebutton(const avalue: tfacecomp);
    procedure setsb_vert_faceendbutton(const avalue: tfacecomp);
+   procedure setsb_vert_frame(const avalue: tframecomp);
    procedure setsb_vert_framebutton(const avalue: tframecomp);
    procedure setsb_vert_frameendbutton1(const avalue: tframecomp);
    procedure setsb_vert_frameendbutton2(const avalue: tframecomp);
@@ -552,6 +554,7 @@ type
    procedure setsb_horz_face2(const avalue: tfacecomp);
    procedure setsb_horz_facebutton(const avalue: tfacecomp);
    procedure setsb_horz_faceendbutton(const avalue: tfacecomp);
+   procedure setsb_horz_frame(const avalue: tframecomp);
    procedure setsb_horz_framebutton(const avalue: tframecomp);
    procedure setsb_horz_frameendbutton1(const avalue: tframecomp);
    procedure setsb_horz_frameendbutton2(const avalue: tframecomp);
@@ -585,6 +588,7 @@ type
    procedure setssb_vert_face2(const avalue: tfacecomp);
    procedure setssb_vert_facebutton(const avalue: tfacecomp);
    procedure setssb_vert_faceendbutton(const avalue: tfacecomp);
+   procedure setssb_vert_frame(const avalue: tframecomp);
    procedure setssb_vert_framebutton(const avalue: tframecomp);
    procedure setssb_vert_frameendbutton1(const avalue: tframecomp);
    procedure setssb_vert_frameendbutton2(const avalue: tframecomp);
@@ -593,6 +597,7 @@ type
    procedure setssb_horz_face2(const avalue: tfacecomp);
    procedure setssb_horz_facebutton(const avalue: tfacecomp);
    procedure setssb_horz_faceendbutton(const avalue: tfacecomp);
+   procedure setssb_horz_frame(const avalue: tframecomp);
    procedure setssb_horz_framebutton(const avalue: tframecomp);
    procedure setssb_horz_frameendbutton1(const avalue: tframecomp);
    procedure setssb_horz_frameendbutton2(const avalue: tframecomp);
@@ -778,7 +783,9 @@ type
                         write setsb_horz_facebutton;
    property sb_horz_faceendbutton: tfacecomp read fsb_horz.svfaceendbu 
                         write setsb_horz_faceendbutton;
-   property sb_horz_framebutton: tframecomp read fsb_horz.svframebu 
+   property sb_horz_frame: tframecomp read fsb_horz.svframe 
+                        write setsb_horz_frame;
+   property sb_horz_framebutton: tframecomp read fsb_horz.svframebu
                         write setsb_horz_framebutton;
    property sb_horz_frameendbutton1: tframecomp read fsb_horz.svframeendbu1 
                         write setsb_horz_frameendbutton1;
@@ -817,6 +824,8 @@ type
                         write setsb_vert_facebutton;
    property sb_vert_faceendbutton: tfacecomp read fsb_vert.svfaceendbu 
                         write setsb_vert_faceendbutton;
+   property sb_vert_frame: tframecomp read fsb_vert.svframe 
+                        write setsb_vert_frame;
    property sb_vert_framebutton: tframecomp read fsb_vert.svframebu 
                         write setsb_vert_framebutton;
    property sb_vert_frameendbutton1: tframecomp read fsb_vert.svframeendbu1 
@@ -1021,6 +1030,9 @@ type
    property slider_sb_horz_faceendbutton: tfacecomp 
                         read fslider.svsb_horz.svfaceendbu 
                         write setssb_horz_faceendbutton;
+   property slider_sb_horz_frame: tframecomp 
+                        read fslider.svsb_horz.svframe
+                        write setssb_horz_frame;
    property slider_sb_horz_framebutton: tframecomp 
                         read fslider.svsb_horz.svframebu
                         write setssb_horz_framebutton;
@@ -1074,6 +1086,9 @@ type
    property slider_sb_vert_faceendbutton: tfacecomp 
                         read fslider.svsb_vert.svfaceendbu 
                         write setssb_vert_faceendbutton;
+   property slider_sb_vert_frame: tframecomp 
+                        read fslider.svsb_vert.svframe 
+                        write setssb_vert_frame;
    property slider_sb_vert_framebutton: tframecomp 
                         read fslider.svsb_vert.svframebu 
                         write setssb_vert_framebutton;
@@ -2250,6 +2265,11 @@ begin
    setfacetemplate(svfaceendbu,faceendbutton);
 //   faceendbutton.template:= faceendbu;
   end;
+  if (svframe <> nil) {and (framebutton = nil)} then begin
+   createframe;
+   setframetemplate(svframe,frame);
+//   framebutton.template:= framebu;
+  end;
   if (svframebu <> nil) {and (framebutton = nil)} then begin
    createframebutton;
    setframetemplate(svframebu,framebutton);
@@ -2898,6 +2918,11 @@ begin
  setlinkedvar(avalue,tmsecomponent(fsb_vert.svfaceendbu));
 end;
 
+procedure tskincontroller.setsb_vert_frame(const avalue: tframecomp);
+begin
+ setlinkedvar(avalue,tmsecomponent(fsb_vert.svframe));
+end;
+
 procedure tskincontroller.setsb_vert_framebutton(const avalue: tframecomp);
 begin
  setlinkedvar(avalue,tmsecomponent(fsb_vert.svframebu));
@@ -2936,6 +2961,11 @@ end;
 procedure tskincontroller.setsb_horz_faceendbutton(const avalue: tfacecomp);
 begin
  setlinkedvar(avalue,tmsecomponent(fsb_horz.svfaceendbu));
+end;
+
+procedure tskincontroller.setsb_horz_frame(const avalue: tframecomp);
+begin
+ setlinkedvar(avalue,tmsecomponent(fsb_horz.svframe));
 end;
 
 procedure tskincontroller.setsb_horz_framebutton(const avalue: tframecomp);
@@ -3058,6 +3088,11 @@ begin
  setlinkedvar(avalue,tmsecomponent(fslider.svsb_vert.svfaceendbu));
 end;
 
+procedure tskincontroller.setssb_vert_frame(const avalue: tframecomp);
+begin
+ setlinkedvar(avalue,tmsecomponent(fslider.svsb_vert.svframe));
+end;
+
 procedure tskincontroller.setssb_vert_framebutton(const avalue: tframecomp);
 begin
  setlinkedvar(avalue,tmsecomponent(fslider.svsb_vert.svframebu));
@@ -3096,6 +3131,11 @@ end;
 procedure tskincontroller.setssb_horz_faceendbutton(const avalue: tfacecomp);
 begin
  setlinkedvar(avalue,tmsecomponent(fslider.svsb_horz.svfaceendbu));
+end;
+
+procedure tskincontroller.setssb_horz_frame(const avalue: tframecomp);
+begin
+ setlinkedvar(avalue,tmsecomponent(fslider.svsb_horz.svframe));
 end;
 
 procedure tskincontroller.setssb_horz_framebutton(const avalue: tframecomp);
