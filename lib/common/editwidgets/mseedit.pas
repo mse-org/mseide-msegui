@@ -1314,9 +1314,8 @@ begin
    if not (shs_invisible in finfo.state)
                             {(fbo_invisible in foptions)} then begin
     if fframe <> nil then begin
-//     canvas.save;
-     fframe.paintbackground(canvas,fframerect,false);
-//     canvas.restore;
+     canvas.save;
+     fframe.paintbackground(canvas,fframerect,true,false);
     end;
     if  (color = cl_default) or (color = cl_parent) then begin
      if color2 = cl_none then begin
@@ -1331,6 +1330,7 @@ begin
      drawtoolbutton(canvas,finfo);
     end;
     if fframe <> nil then begin
+     canvas.restore;
      fframe.paintoverlay(canvas,fframerect);
     end;
    end;

@@ -618,7 +618,8 @@ type
     //iassistiveclient
    function getassistivecaption(): msestring; virtual;
    procedure internalpaintbackground(const canvas: tcanvas;
-             const arect: rectty; const clipandmove: boolean) virtual;
+                    const arect: rectty; const clip: boolean;
+                                         const move: boolean) virtual;
    procedure internalpaintoverlay(const canvas: tcanvas;
                                              const arect: rectty) virtual;
   public
@@ -632,8 +633,9 @@ type
    procedure showhint(const aid: int32; var info: hintinfoty); virtual;
    
    procedure paintbackground(const canvas: tcanvas;
-             const arect: rectty; const clipandmove: boolean);
+             const arect: rectty; const clip: boolean; const move: boolean);
    procedure paintoverlay(const canvas: tcanvas; const arect: rectty);
+   function pointinmask(const pos: pointty; const arect: rectty): boolean;
 
    function outerframedim: sizety; //widgetsize - framesize
    function outerframecx: int32;
@@ -860,10 +862,11 @@ type
  
  beforeframepaintbackgroundeventty = procedure (const sender: tcustomframe;
             const canvas: tcanvas; const arect: rectty; 
-                  const clipandmove: boolean; var handled: boolean) of object;
+                  const clip: boolean; const move: boolean;
+                                             var handled: boolean) of object;
  afterframepaintbackgroundeventty = procedure (const sender: tcustomframe;
             const canvas: tcanvas; const arect: rectty; 
-                                      const clipandmove: boolean) of object;
+                           const clip: boolean; const move: boolean) of object;
  beforeframepaintoverlayeventty = procedure (const sender: tcustomframe; 
               const canvas: tcanvas; const arect: rectty; 
                                            var handled: boolean) of object;
@@ -4237,57 +4240,64 @@ begin
  inherited;
 end;
 
-procedure tcustomframe.updatemousestate(const sender: twidget;
-                 const info: mouseeventinfoty);
-
- function mouseinclient(): boolean;
- var
-  rect1: rectty;
-  po1: pint16;
- begin
-  result:= pointinrect(info.pos,fpaintrect);
-  if result and (fi.frameimage_list <> nil) and 
-                   (fi.frameimage_list.cornermask <> '') then begin
-   rect1:= deflaterect(mr(nullpoint,fintf.getwidgetrect.size),fouterframe);
-   with timagelist1(fi.frameimage_list) do begin
-    po1:= pointer(cornermask);
-    if (info.pos.x < fcornermaskmaxwidth) and 
-                    (info.pos.y < rect1.y + length(cornermask)) then begin
-                           //topleft
-     result:= info.pos.x >= rect1.x + po1[info.pos.y-rect1.y];
+function tcustomframe.pointinmask(const pos: pointty;
+                                         const arect: rectty): boolean;
+var
+ rect1: rectty;
+ po1: pint16;
+begin
+// result:= pointinrect(info.pos,fpaintrect);
+ if {result and} (fi.frameimage_list <> nil) and 
+                  (fi.frameimage_list.cornermask <> '') then begin
+  rect1:= arect;
+//  rect1:= deflaterect(mr(nullpoint,fintf.getwidgetrect.size),fouterframe);
+  with timagelist1(fi.frameimage_list) do begin
+   po1:= pointer(cornermask);
+   if (pos.x < fcornermaskmaxwidth) and 
+                   (pos.y < rect1.y + length(cornermask)) then begin
+                          //topleft
+    result:= pos.x >= rect1.x + po1[pos.y-rect1.y];
+   end
+   else begin
+    if (pos.x < fcornermaskmaxwidth) and 
+            (pos.y >= rect1.y + rect1.cy - length(cornermask)) then begin
+                          //bottomleft
+     result:= pos.x >= rect1.x + po1[rect1.y + rect1.cy - pos.y -1];
     end
     else begin
-     if (info.pos.x < fcornermaskmaxwidth) and 
-             (info.pos.y >= rect1.y + rect1.cy - length(cornermask)) then begin
-                           //bottomleft
-      result:= info.pos.x >= rect1.x + po1[rect1.y + rect1.cy - info.pos.y -1];
+     if (pos.x >= rect1.x + rect1.cx - fcornermaskmaxwidth) and 
+          (pos.y >= rect1.y + rect1.cy - length(cornermask)) then begin
+                          //bottomright
+      result:= pos.x < rect1.x + rect1.cx - 
+                                    po1[rect1.y + rect1.cy - pos.y -1];
      end
      else begin
-      if (info.pos.x >= rect1.x + rect1.cx - fcornermaskmaxwidth) and 
-           (info.pos.y >= rect1.y + rect1.cy - length(cornermask)) then begin
-                           //bottomright
-       result:= info.pos.x < rect1.x + rect1.cx - 
-                                     po1[rect1.y + rect1.cy - info.pos.y -1];
-      end
-      else begin
-       if (info.pos.x >= rect1.x + rect1.cx - fcornermaskmaxwidth) and 
-                         (info.pos.y < rect1.y + length(cornermask)) then begin
-                           //topright
-        result:= info.pos.x < rect1.x + rect1.cx - 
-                                     po1[info.pos.y-rect1.y];
-       end;
+      if (pos.x >= rect1.x + rect1.cx - fcornermaskmaxwidth) and 
+                        (pos.y < rect1.y + length(cornermask)) then begin
+                          //topright
+       result:= pos.x < rect1.x + rect1.cx - 
+                                    po1[pos.y-rect1.y];
       end;
      end;
     end;
    end;
   end;
- end; //mouseinclient
- 
+ end
+ else begin
+  result:= true;
+ end;
+end;
+
+procedure tcustomframe.updatemousestate(const sender: twidget;
+                 const info: mouseeventinfoty);
+
 begin
  checkstate;
  with sender do begin
   if not (ow_mousetransparent in foptionswidget) then begin
-   if mouseinclient() then begin
+   if pointinrect(info.pos,fpaintrect) and
+    pointinmask(info.pos,
+     deflaterect(mr(nullpoint,fintf.getwidgetrect.size),fouterframe)) then begin
     fwidgetstate:= fwidgetstate + [ws_mouseinclient,ws_wantmousemove,
                                        ws_wantmousebutton,ws_wantmousefocus];
    end
@@ -4479,14 +4489,14 @@ begin
 end;
 
 procedure tcustomframe.internalpaintbackground(const canvas: tcanvas;
-                            const arect: rectty; const clipandmove: boolean);
+                const arect: rectty; const clip: boolean; const move: boolean);
 var
  rect1,rect2,rect3: rectty;
  po1,ps,pe: pint16;
  i1: int32;
 begin
  rect1:= deflaterect(arect,fpaintframe);
- if clipandmove then begin
+ if clip then begin
   canvas.intersectcliprect(rect1);
   if (fi.frameimage_list <> nil) and 
                          (fi.frameimage_list.cornermask <> '') then begin
@@ -4547,14 +4557,15 @@ begin
  if not (fso_faceoverlay in optionsskin) then begin
   paintframeface(canvas,rect1);
  end;
- if clipandmove then begin
+ if move then begin
   canvas.move(addpoint(fpaintrect.pos,fclientrect.pos));
   canvas.brushorigin:= nullpoint;
  end;
 end;
 
 procedure tcustomframe.paintbackground(const canvas: tcanvas;
-                            const arect: rectty; const clipandmove: boolean);
+                            const arect: rectty; const clip: boolean;
+                                                     const move: boolean);
 var
  bo1: boolean;
 begin
@@ -4563,22 +4574,22 @@ begin
                                        fonbeforepaintbackground) then begin
    bo1:= false;
    tframetemplate(ftemplate.ftemplate).fonbeforepaintbackground(
-                                            self,canvas,arect,clipandmove,bo1);
+                                            self,canvas,arect,clip,move,bo1);
    if not bo1 then begin
-    internalpaintbackground(canvas,arect,clipandmove);
+    internalpaintbackground(canvas,arect,clip,move);
    end;
   end
   else begin
-   internalpaintbackground(canvas,arect,clipandmove);
+   internalpaintbackground(canvas,arect,clip,move);
   end;
   if assigned(tframetemplate(ftemplate.ftemplate).
                                        fonafterpaintbackground) then begin
    tframetemplate(ftemplate.ftemplate).fonafterpaintbackground(
-                                           self,canvas,arect,clipandmove);
+                                           self,canvas,arect,clip,move);
   end;
  end
  else begin
-  internalpaintbackground(canvas,arect,clipandmove);
+  internalpaintbackground(canvas,arect,clip,move);
  end;
 end;
 
@@ -9583,7 +9594,7 @@ begin
  if frame <> nil then begin
   colorbefore:= canvas.color;
   canvas.color:= actualcolor;
-  fframe.paintbackground(canvas,makerect(nullpoint,fwidgetrect.size),true);
+  fframe.paintbackground(canvas,makerect(nullpoint,fwidgetrect.size),true,true);
   canvas.color:= colorbefore;
  end;
  if not canvas.clipregionisempty then begin
@@ -9626,7 +9637,7 @@ begin
  if frame <> nil then begin
   colorbefore:= canvas.color;
   canvas.color:= actualcolor;
-  fframe.paintbackground(canvas,arect,true);
+  fframe.paintbackground(canvas,arect,true,true);
   canvas.color:= colorbefore;
  end;
  if not canvas.clipregionisempty then begin

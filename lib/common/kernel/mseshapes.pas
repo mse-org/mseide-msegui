@@ -353,6 +353,9 @@ begin
  else begin
   result:= pointinrect(pos,deflaterect(info.ca.dim,info.mouseframe));
  end;
+ if result and (info.frame <> nil) then begin
+  result:= info.frame.pointinmask(pos,info.ca.dim);
+ end;
 end;
 
 function updatemouseshapestate(var info: shapeinfoty;
@@ -1361,7 +1364,8 @@ begin
 //  frameskinoptionstoshapestate(info.frame,info);
   if info.frame <> nil then begin 
    frameskinoptionstoshapestate(info.frame,info);
-   info.frame.paintbackground(canvas,info.ca.dim,false);
+   canvas.save();
+   info.frame.paintbackground(canvas,info.ca.dim,true,false);
    if not (fso_noinnerrect in info.frame.optionsskin) then begin
     frame1:= info.frame.innerframe;
    end
@@ -1376,6 +1380,7 @@ begin
   end;
   if info.frame <> nil then begin
 {$warnings off}
+   canvas.restore();
    inflaterect1(info.ca.dim,frame1);
    info.frame.paintoverlay(canvas,info.ca.dim);
   end; 
@@ -1526,9 +1531,8 @@ begin
     if not (fso_noinnerrect in frame.optionsskin) then begin
      deflaterect1(ca.dim,frame.framei);
     end;
-//    canvas.save;
-    frame.paintbackground(canvas,info.ca.dim,false);
-//    canvas.restore;   
+    canvas.save;
+    frame.paintbackground(canvas,info.ca.dim,true,false);
     frame1:= frame.paintframe;
     deflaterect1(ca.dim,frame1);
     frameskinoptionstoshapestate(frame,info);
@@ -1574,6 +1578,7 @@ begin
     drawbuttoncaption(canvas,info,rect1,pos1,@rect2);
    end;
    if frame <> nil then begin
+    canvas.restore();
     inflaterect1(info.ca.dim,frame1);
     frame.paintoverlay(canvas,info.ca.dim);
     ca.dim:= rect3;

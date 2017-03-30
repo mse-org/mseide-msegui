@@ -4758,7 +4758,7 @@ begin
  end;
  if not (rea1 = emptyreal) then begin
   canvas.save;
-  fbar_frame.paintbackground(canvas,po2^,true); 
+  fbar_frame.paintbackground(canvas,po2^,true,true); 
              //moves origin to paintrect and sets cliprect
   canvas.intersectcliprect(po3^);
   fbar_face.paint(canvas,po1^);

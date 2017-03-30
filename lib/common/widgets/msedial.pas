@@ -805,7 +805,7 @@ procedure tdialmarker.paint(const acanvas: tcanvas);
   end;
   if finfo.bar_frame <> nil then begin
    acanvas.save;
-   finfo.bar_frame.paintbackground(acanvas,finfo.barrect,true);
+   finfo.bar_frame.paintbackground(acanvas,finfo.barrect,true,true);
    if finfo.bar_face <> nil then begin
     rect2:= deflaterect(finfo.barrect,finfo.bar_frame.innerframe);
     acanvas.remove(pointty(finfo.bar_frame.paintframe.topleft));

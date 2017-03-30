@@ -1,5 +1,8 @@
 MSEide+MSEgui breaking changes version history
 **********************************************
+2017-03-30
+ Changed parameter clipandmove -> clip, move in 
+ beforeframepaintbackgroundeventty and beforeframepaintbackgroundeventty.
 2017-02-20
  dno_append removed from tdbnavigator default options.
 

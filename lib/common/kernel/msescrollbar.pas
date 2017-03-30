@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2016 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2017 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -812,7 +812,7 @@ begin
  with canvas,self.fdrawinfo do begin
   save();
   if frame <> nil then begin
-   frame.paintbackground(canvas,outerrect,false);
+   frame.paintbackground(canvas,outerrect,true,false);
   end;
   if fface <> nil then begin
    fface.paint(canvas,fdrawinfo.scrollrect);
