@@ -22,6 +22,7 @@ type
   svcolorpattern: colorty;
   svcolorpatternclicked: colorty;
   svcolorglyph: colorty;
+  svbuttonendlength: int32; //-2 -> default
   svface: tfacecomp;
   svface1: tfacecomp;
   svface2: tfacecomp;
@@ -746,6 +747,8 @@ type
    property sb_horz_colorglyph: colorty 
                         read fsb_horz.svcolorglyph 
                       write fsb_horz.svcolorglyph default cl_default;
+   property sb_horz_buttonendlength: int32 read fsb_horz.svbuttonendlength 
+                                 write fsb_horz.svbuttonendlength default -2;
    property sb_horz_face: tfacecomp read fsb_horz.svface 
                         write setsb_horz_face;
    property sb_horz_face1: tfacecomp read fsb_horz.svface1
@@ -772,6 +775,8 @@ type
    property sb_vert_colorglyph: colorty 
                         read fsb_vert.svcolorglyph 
                       write fsb_vert.svcolorglyph default cl_default;
+   property sb_vert_buttonendlength: int32 read fsb_vert.svbuttonendlength 
+                                 write fsb_vert.svbuttonendlength default -2;
    property sb_vert_face: tfacecomp read fsb_vert.svface 
                         write setsb_vert_face;
    property sb_vert_face1: tfacecomp read fsb_vert.svface1
@@ -949,6 +954,9 @@ type
    property slider_sb_horz_colorglyph: colorty 
                         read fslider.svsb_horz.svcolorglyph 
                       write fslider.svsb_horz.svcolorglyph default cl_default;
+   property slider_sb_horz_buttonendlength: int32 
+                 read fslider.svsb_horz.svbuttonendlength 
+                           write fslider.svsb_horz.svbuttonendlength default -2;
    property slider_sb_horz_face: tfacecomp 
                         read fslider.svsb_horz.svface 
                         write setssb_horz_face;
@@ -980,6 +988,9 @@ type
    property slider_sb_vert_colorglyph: colorty 
                         read fslider.svsb_vert.svcolorglyph 
                       write fslider.svsb_vert.svcolorglyph default cl_default;
+   property slider_sb_vert_buttonendlength: int32 
+                 read fslider.svsb_vert.svbuttonendlength 
+                           write fslider.svsb_vert.svbuttonendlength default -2;
    property slider_sb_vert_face: tfacecomp 
                         read fslider.svsb_vert.svface
                         write setssb_vert_face;
@@ -2127,6 +2138,9 @@ begin
   if svcolorglyph <> cl_default then begin
    colorglyph:= svcolorglyph;
   end;
+  if svbuttonendlength <> -2 then begin
+   buttonendlength:= svbuttonendlength;
+  end;
   if (svface <> nil) then begin
    createface();
    setfacetemplate(svface,face);
@@ -2618,9 +2632,11 @@ begin
  fsb_horz.svcolorpattern:= cl_default;
  fsb_horz.svcolorpatternclicked:= cl_default;
  fsb_horz.svcolorglyph:= cl_default;
+ fsb_horz.svbuttonendlength:= -2;
  fsb_vert.svcolorpattern:= cl_default;
  fsb_vert.svcolorpatternclicked:= cl_default;
  fsb_vert.svcolorglyph:= cl_default;
+ fsb_vert.svbuttonendlength:= -2;
 
  fsplitter.svcolor.svcolor:= cl_default;
  fsplitter.svcolor.svcolorcaptionframe:= cl_default;
@@ -2644,9 +2660,11 @@ begin
  fslider.svsb_horz.svcolorpattern:= cl_default;
  fslider.svsb_horz.svcolorpatternclicked:= cl_default;
  fslider.svsb_horz.svcolorglyph:= cl_default;
+ fslider.svsb_horz.svbuttonendlength:= -2;
  fslider.svsb_vert.svcolorpattern:= cl_default;
  fslider.svsb_vert.svcolorpatternclicked:= cl_default;
  fslider.svsb_vert.svcolorglyph:= cl_default;
+ fslider.svsb_vert.svbuttonendlength:= -2;
  fframebutton.svcolor:= cl_default;
  fframebutton.svcolorglyph:= cl_default;
  inittabsskininfo(ftabbar.svtabhorz);
