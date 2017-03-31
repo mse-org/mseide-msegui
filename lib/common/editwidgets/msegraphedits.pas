@@ -416,6 +416,8 @@ type
    fupdating: integer;
    procedure setscrollbar(const avalue: tsliderscrollbar);
   protected
+   procedure beginpaint(); //disable invalidate and updating
+   procedure endpaint();
    procedure setdirection(const avalue: graphicdirectionty); override;
    procedure objectchanged(const sender: tobject); override;
    procedure clientrectchanged; override;
@@ -502,6 +504,7 @@ type
                   const avalue; const arect: rectty); override;
    procedure internalcreateframe; override;
    procedure defineproperties(filer: tfiler); override;
+   procedure gridtovalue(arow: integer); override;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -1456,7 +1459,7 @@ end;
 procedure tcustomslider.paintglyph(const canvas: tcanvas;
                const acolorglyph: colorty; const avalue; const arect: rectty);
 var
- rea1: realty;
+ rea1,rea2: realty;
  col1: colorty;
  bo1: boolean;
 begin
@@ -1481,14 +1484,22 @@ begin
  end;
  if rea1 = emptyreal then begin
   rea1:= 0;
- end; 
- inc(fupdating);
-// fscrollbar.value:= rea1;
- if @avalue <> nil then begin
+ end;
+ beginpaint();
+ rea2:= fscrollbar.value;
+ if @avalue <> nil then begin //cell
+  fscrollbar.value:= rea1;
   bo1:= fscrollbar.focused;
   fscrollbar.focused:= false;
+ end
+ else begin
+  if not fscrollbar.buttonmoving then begin
+   fscrollbar.value:= rea1;
+   rea2:= rea1;
+  end;
  end;
  fscrollbar.paint(canvas,col1);
+ fscrollbar.value:= rea2;
  if @avalue <> nil then begin
   fscrollbar.focused:= bo1;
   if (fgridintf <> nil) then begin
@@ -1498,7 +1509,7 @@ begin
     canvas.remove(arect.pos); //innerrext?
   end;
  end;
- dec(fupdating);
+ endpaint();
  inherited;
 end;
 
@@ -1590,6 +1601,18 @@ end;
 procedure tcustomslider.setscrollbar(const avalue: tsliderscrollbar);
 begin
  fscrollbar.assign(avalue);
+end;
+
+procedure tcustomslider.beginpaint();
+begin
+ inc(fupdating);
+ inc(fnoinvalidate);
+end;
+
+procedure tcustomslider.endpaint();
+begin
+ dec(fupdating);
+ dec(fnoinvalidate);
 end;
 
 procedure tcustomslider.dochange;
@@ -4854,6 +4877,12 @@ begin
  filer.defineproperty('format',{$ifdef FPC}@{$endif}readformat,
                                     {$ifdef FPC}@{$endif}writeformat,true);
  filer.defineproperty('valuescale',{$ifdef FPC}@{$endif}readvaluescale,nil,false);
+end;
+
+procedure tcustomprogressbar.gridtovalue(arow: integer);
+begin
+ inherited;
+ updatebar();
 end;
 
 { tsliderframe }

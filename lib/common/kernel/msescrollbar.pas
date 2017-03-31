@@ -234,6 +234,7 @@ type
                                 const acolor: colorty = cl_none); virtual;
                        //color <> cl_none -> flat paint for grid cell
    function wantmouseevent(const apos: pointty): boolean;
+   function buttonmoving(): boolean; //true if position button clicked
    procedure mouseevent(var info: mouseeventinfoty);
    procedure mousewheelevent(var info: mousewheeleventinfoty;
                                const pagingreversed: boolean = false);
@@ -991,6 +992,11 @@ function tcustomscrollbar.wantmouseevent(const apos: pointty): boolean;
 begin
  result:= (fclickedarea <> scrollbarareaty(-1)) or
                  (findarea(apos) <> scrollbarareaty(-1));
+end;
+
+function tcustomscrollbar.buttonmoving(): boolean;
+begin
+ result:= fclickedarea = sbbu_move;
 end;
 
 procedure tcustomscrollbar.mouseevent(var info: mouseeventinfoty);
