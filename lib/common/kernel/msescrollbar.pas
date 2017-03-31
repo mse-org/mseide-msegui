@@ -879,10 +879,10 @@ begin
     end;
    end;
   end;
+  restore;
   if frame <> nil then begin
    frame.paintoverlay(canvas,outerrect);
   end;
-  restore;
  end;
 end;
 
