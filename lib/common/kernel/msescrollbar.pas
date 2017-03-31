@@ -838,7 +838,8 @@ begin
      state:= state - [shs_mouse,shs_clicked];     
     end; 
    end;
-   fillrect(areas[fpaintedbutton].ca.dim,col1);
+//   fillrect(areas[fpaintedbutton].ca.dim,col1);
+   areas[fpaintedbutton].color:= col1;
    drawtoolbutton(canvas,areas[fpaintedbutton]);
    if acolor <> cl_none then begin
     areas[fpaintedbutton].state:= statebefore;
