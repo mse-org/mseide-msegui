@@ -1253,7 +1253,7 @@ begin
  end;
 end;
 
-function ucs4tostring(const achar: dword): msestring;
+function ucs4tostring(achar: dword): msestring;
 begin
  if achar < $10000 then begin
   setlength(result,1);
@@ -1261,6 +1261,7 @@ begin
  end
  else begin
   setlength(result,2);
+  achar:= achar - $10000;
   pmsechar(pointer(result))^:= 
                         msechar(word((achar shr 10) and $3ff or $d800));
   (pmsechar(pointer(result))+1)^:= msechar(word(achar) and $3ff or $dc00);
