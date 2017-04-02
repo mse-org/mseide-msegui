@@ -638,7 +638,7 @@ function checkutf8ansi(const value: ansistring): boolean;
               //true if valid utf8
 function stringtolatin1(const value: msestring): string;
 function latin1tostring(const value: string): msestring;
-function ucs4tostring(const achar: dword): msestring;
+function ucs4tostring(achar: dword): msestring;
 function getucs4char(const value: msestring; const aindex: int32): ucs4char;
             //returns surrogatevalue if index between high and low codeunit
 
