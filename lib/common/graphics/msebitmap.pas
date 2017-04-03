@@ -448,6 +448,8 @@ type
    function addimage(const image: tmaskedbitmap; //nil -> empty item
                               const aalignment: alignmentsty = []): integer;
 
+   procedure clipcornermask(const canvas: tcanvas;
+                      const arect: rectty; const ahiddenedges: edgesty);
    procedure paint(const acanvas: tcanvas; const index: integer;
                    const dest: pointty; const acolor: colorty = cl_default;
                    const acolorbackground: colorty = cl_default;
@@ -2953,6 +2955,66 @@ procedure timagelist.paintlookup(const acanvas: tcanvas; const index: integer;
                const aopacity: colorty = cl_default             );
 begin
  paint(acanvas,lookup(index),dest,alignment,acolor,acolorbackground,aopacity);
+end;
+
+procedure timagelist.clipcornermask(const canvas: tcanvas;
+                      const arect: rectty; const ahiddenedges: edgesty);
+var
+ rect2,rect3: rectty;
+ po1,ps,pe: pint16;
+ i1: int32;
+begin
+ if cornermask <> '' then begin
+  po1:= pointer(cornermask);
+  pe:= po1 + length(msestring(pointer(po1)));
+  rect2.cy:= 1;
+  rect3:= arect;
+  if ahiddenedges * [edg_top,edg_left] = [] then begin
+   rect2.pos:= rect3.pos;
+   ps:= po1;
+   while ps < pe do begin
+    rect2.cx:= ps^;
+    canvas.subcliprect(rect2);
+    inc(rect2.y);
+    inc(ps);
+   end;
+  end;
+  if ahiddenedges * [edg_left,edg_bottom] = [] then begin
+   rect2.x:= rect3.x;
+   rect2.y:= rect3.y + rect3.cy - 1;
+   ps:= po1;
+   while ps < pe do begin
+    rect2.cx:= ps^;
+    canvas.subcliprect(rect2);
+    dec(rect2.y);
+    inc(ps);
+   end;
+  end;
+  if ahiddenedges * [edg_bottom,edg_right] = [] then begin
+   rect2.y:= rect3.y + rect3.cy - 1;
+   ps:= po1;
+   i1:= arect.x + arect.cx;
+   while ps < pe do begin
+    rect2.cx:= ps^;
+    rect2.x:= i1 - ps^;
+    canvas.subcliprect(rect2);
+    dec(rect2.y);
+    inc(ps);
+   end;
+  end;
+  if ahiddenedges * [edg_right,edg_top] = [] then begin
+   rect2.y:= rect3.y;
+   ps:= po1;
+   i1:= rect3.x + rect3.cx;
+   while ps < pe do begin
+    rect2.cx:= ps^;
+    rect2.x:= i1 - ps^;
+    canvas.subcliprect(rect2);
+    inc(rect2.y);
+    inc(ps);
+   end;
+  end;
+ end;
 end;
 
 procedure timagelist.paint(const acanvas: tcanvas; const index: integer;

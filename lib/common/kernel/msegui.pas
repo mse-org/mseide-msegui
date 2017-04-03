@@ -615,13 +615,13 @@ type
    procedure paintframeface(const canvas: tcanvas; const arect: rectty);
    class procedure drawframe(const canvas: tcanvas; const rect2: rectty; 
            const afi: baseframeinfoty; const astate: framestateflagsty);
-    //iassistiveclient
-   function getassistivecaption(): msestring; virtual;
    procedure internalpaintbackground(const canvas: tcanvas;
                     const arect: rectty; const clip: boolean;
                                          const move: boolean) virtual;
    procedure internalpaintoverlay(const canvas: tcanvas;
                                              const arect: rectty) virtual;
+    //iassistiveclient
+   function getassistivecaption(): msestring; virtual;
   public
    constructor create(const intf: iframe); reintroduce;
    destructor destroy; override;
@@ -4491,64 +4491,15 @@ end;
 procedure tcustomframe.internalpaintbackground(const canvas: tcanvas;
                 const arect: rectty; const clip: boolean; const move: boolean);
 var
- rect1,rect2,rect3: rectty;
- po1,ps,pe: pint16;
- i1: int32;
+ rect1: rectty;
 begin
  rect1:= deflaterect(arect,fpaintframe);
  if clip then begin
   canvas.intersectcliprect(rect1);
   if (fi.frameimage_list <> nil) and 
-                         (fi.frameimage_list.cornermask <> '') then begin
-   po1:= pointer(fi.frameimage_list.cornermask);
-   pe:= po1 + length(msestring(pointer(po1)));
-   rect2.cy:= 1;
-   rect3:= deflaterect(arect,fouterframe);
-   if fi.hiddenedges * [edg_top,edg_left] = [] then begin
-    rect2.pos:= rect3.pos;
-    ps:= po1;
-    while ps < pe do begin
-     rect2.cx:= ps^;
-     canvas.subcliprect(rect2);
-     inc(rect2.y);
-     inc(ps);
-    end;
-   end;
-   if fi.hiddenedges * [edg_left,edg_bottom] = [] then begin
-    rect2.x:= rect3.x;
-    rect2.y:= rect3.y + rect3.cy - 1;
-    ps:= po1;
-    while ps < pe do begin
-     rect2.cx:= ps^;
-     canvas.subcliprect(rect2);
-     dec(rect2.y);
-     inc(ps);
-    end;
-   end;
-   if fi.hiddenedges * [edg_bottom,edg_right] = [] then begin
-    rect2.y:= rect3.y + rect3.cy - 1;
-    ps:= po1;
-    i1:= arect.x + arect.cx;
-    while ps < pe do begin
-     rect2.cx:= ps^;
-     rect2.x:= i1 - ps^;
-     canvas.subcliprect(rect2);
-     dec(rect2.y);
-     inc(ps);
-    end;
-   end;
-   if fi.hiddenedges * [edg_right,edg_top] = [] then begin
-    rect2.y:= rect3.y;
-    ps:= po1;
-    i1:= rect3.x + rect3.cx;
-    while ps < pe do begin
-     rect2.cx:= ps^;
-     rect2.x:= i1 - ps^;
-     canvas.subcliprect(rect2);
-     inc(rect2.y);
-     inc(ps);
-    end;
-   end;
+                 (fi.frameimage_list.cornermask <> '')then begin
+   fi.frameimage_list.clipcornermask(canvas,
+                         deflaterect(arect,fouterframe),fi.hiddenedges);
   end;
  end;
  if fi.colorclient <> cl_transparent then begin
@@ -7009,6 +6960,7 @@ var
 
 var
  bmp: tmaskedbitmap;
+ reg1: regionty;
 
  procedure paintimage(const canvas: tcanvas);
  begin
@@ -7019,6 +6971,10 @@ var
    end;
   end;
   if fi.frameimage_list <> nil then begin
+   if reg1 <> 0 then begin
+    canvas.clipregion:= reg1;
+    reg1:= 0;
+   end;
    fi.frameimage_list.paintlookup(canvas,fi.frameimage_offset,arect.pos);
    fi.frameimage_list.paintlookup(canvas,fi.frameimage_offset+1,
      makerect(arect.x,
@@ -7045,11 +7001,17 @@ var
               fi.frameimage_list.height),[al_stretchx]);
   end;
  end; //paintimage
-
 begin
+ reg1:= 0;
  rect:= deflaterect(arect,fi.framei);
  if intersectrect(rect,canvas.clipbox,rect1) or 
                testintersectrect(arect,canvas.clipbox) then begin
+  if (fi.frameimage_list <> nil) and 
+                         (fi.frameimage_list.cornermask <> '') then begin
+   reg1:= canvas.copyclipregion();
+   fi.frameimage_list.clipcornermask(canvas,arect,[]);
+  end;
+ 
   alpha:= fi.options * faceoptionsmask1 <> [];
   if options * [fao_fadeoverlay,fao_alphaimage] = [fao_fadeoverlay] then begin
    paintimage(canvas);
@@ -7136,6 +7098,9 @@ begin
    paintimage(falphabuffer.mask.canvas);
    falphabuffer.mask.canvas.origin:= nullpoint;
   end;
+ end;
+ if reg1 <> 0 then begin
+  canvas.clipregion:= reg1;
  end;
 end;
 

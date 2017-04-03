@@ -933,7 +933,7 @@ begin
    if (state * [shs_focused,shs_showdefaultrect] = 
                            [shs_focused,shs_showdefaultrect]) or
           (state * [shs_disabled,shs_default] = [shs_default]) then begin
-    canvas.drawframe(clientrect,-1,cl_defaultrect);
+    canvas.drawframe(clientrect,-1,cl_buttondefaultrect);
     inflaterect1(clientrect,-1);
    end;
    rect1:= clientrect;
@@ -1359,12 +1359,29 @@ procedure drawtoolbutton(const canvas: tcanvas; var info: shapeinfoty);
 var
  rect1: rectty;
  frame1: framety;
+ co0,co1,co2,co3: colorty;
 begin 
  if not (shs_invisible in info.state) then begin
 //  frameskinoptionstoshapestate(info.frame,info);
   if info.frame <> nil then begin 
    frameskinoptionstoshapestate(info.frame,info);
    canvas.save();
+   co1:= info.color;
+   co2:= info.coloractive;
+   co3:= info.frame.colorclient;
+   if shs_active in info.state then begin
+    co0:= co2;
+    info.coloractive:= cl_transparent;
+   end
+   else begin
+    co0:= co1;
+    info.color:= cl_transparent;
+   end;
+   if co0 <> cl_transparent then begin
+    if co3 = cl_transparent then begin
+     tframe1(info.frame).fi.colorclient:= co0;
+    end;
+   end;
    info.frame.paintbackground(canvas,info.ca.dim,true,false);
    if not (fso_noinnerrect in info.frame.optionsskin) then begin
     frame1:= info.frame.innerframe;
@@ -1379,14 +1396,17 @@ begin
    drawbuttonimage(canvas,info,rect1{,cp_center});
   end;
   if info.frame <> nil then begin
-{$warnings off}
    canvas.restore();
    inflaterect1(info.ca.dim,frame1);
    info.frame.paintoverlay(canvas,info.ca.dim);
+   if co3 = cl_transparent then begin
+    info.color:= co1;
+    info.coloractive:= co2;
+    tframe1(info.frame).fi.colorclient:= co3;
+   end;
   end; 
  end;
 end;
-{$warnings on}
 
 function drawbuttoncheckbox(const canvas: tcanvas; const info: shapeinfoty;
               var arect: rectty; const pos: imageposty = ip_left): boolean;
