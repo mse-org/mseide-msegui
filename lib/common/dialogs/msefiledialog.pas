@@ -14,12 +14,13 @@ unit msefiledialog;
 interface
 
 uses
- mseglob,mseguiglob,msegui,mseforms,classes,mclasses,mseclasses,msewidgets,
- msegrids,mselistbrowser,mseedit,msesimplewidgets,msedataedits,msedialog,
- msetypes,msestrings,msesystypes,msesys,msedispwidgets,msedatalist,msestat,
- msestatfile,msebitmap,msedatanodes,msefileutils,msedropdownlist,mseevent,
- msegraphedits,mseeditglob,msesplitter,msemenus,msegridsglob,msegraphics,
- msegraphutils,msedirtree,msewidgetgrid;
+ mseglob,mseguiglob,mseforms,classes,mclasses,mseclasses,msewidgets,msegrids,
+ mselistbrowser,mseedit,msesimplewidgets,msedataedits,msedialog,msetypes,
+ msestrings,msesystypes,msesys,msedispwidgets,msedatalist,msestat,msestatfile,
+ msebitmap,msedatanodes,msefileutils,msedropdownlist,mseevent,msegraphedits,
+ mseeditglob,msesplitter,msemenus,msegridsglob,msegraphics,msegraphutils,
+ msedirtree,msewidgetgrid,mseact,mseapplication,msegui,mseificomp,
+ mseificompglob,mseifiglob,msestream,sysutils,msemenuwidgets,msescrollbar;
 
 const
  defaultlistviewoptionsfile = defaultlistviewoptions + [lvo_readonly];
@@ -472,26 +473,23 @@ type
  end;
  
  tfiledialogfo = class(tmseform)
-   cancel: tbutton;
    listview: tfilelistview;
-   ok: tbutton;
-   showhidden: tbooleanedit;
-   namecont: tgroupbox;
-   tspacer1: tspacer;
-   tspacer2: tspacer;
+   tlayouter2: tlayouter;
    bucont: tspacer;
+   showhidden: tbooleanedit;
    tspacer4: tspacer;
-   up: tbutton;
-   createdir: tbutton;
-   filename: thistoryedit;
+   cancel: tbutton;
+   ok: tbutton;
+   tlayouter1: tlayouter;
    filter: tdropdownlistedit;
-   dir: tdirdropdownedit;
+   filename: thistoryedit;
+   tlayouter3: tlayouter;
+   createdir: tbutton;
    home: tbutton;
-   tspacer3: tspacer;
-   tspacer5: tspacer;
-   tspacer6: tspacer;
    forward: tstockglyphbutton;
    back: tstockglyphbutton;
+   up: tstockglyphbutton;
+   dir: tdirdropdownedit;
    procedure createdironexecute(const sender: TObject);
    procedure listviewselectionchanged(const sender: tcustomlistview);
    procedure listviewitemevent(const sender: tcustomlistview;
@@ -507,7 +505,7 @@ type
    procedure filteronsetvalue(const sender: tobject; var avalue: msestring; var accept: boolean);
    procedure filepathentered(const sender: tobject);
    procedure okonexecute(const sender: tobject);
-   procedure foonchildscaled(const sender: TObject);
+   procedure layoutev(const sender: TObject);
    procedure showhiddenonsetvalue(const sender: TObject; var avalue: Boolean; 
                   var accept: Boolean);
    procedure formoncreate(const sender: TObject);
@@ -582,7 +580,7 @@ procedure updatefileinfo(const item: tlistitem; const info: fileinfoty;
 
 implementation
 uses
- msefiledialog_mfm,sysutils,msebits,mseactions,
+ msefiledialog_mfm,msebits,mseactions,
  msestringenter,msefiledialogres,msekeyboard,
  msestockobjects,msesysintf,msearrayutils;
 
@@ -1542,15 +1540,19 @@ begin
 // end;
 end;
 
-procedure tfiledialogfo.foonchildscaled(const sender: TObject);
+procedure tfiledialogfo.layoutev(const sender: TObject);
 begin
- placeyorder(2,[2],[dir,listview,filename,filter],2);
- aligny(wam_center,[dir,back,forward,home,up,createdir]);
+// placeyorder(2,[2],[dir,listview],2);
+// aligny(wam_center,[dir,back,forward,home,up,createdir]);
  aligny(wam_center,[filename,showhidden]);
  if ok.height <= filter.height then begin
   aligny(wam_center,[filter,ok,cancel]);
+ end
+ else begin
+  ok.top:= showhidden.bottom + 4;
+  aligny(wam_center,[ok,cancel]);
  end;
- syncpaintwidth([filename,filter],namecont.bounds_cx);
+// syncpaintwidth([filename,filter],namecont.bounds_cx);
  listview.synctofontheight;
 end;
 
