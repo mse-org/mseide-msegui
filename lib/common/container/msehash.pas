@@ -87,6 +87,8 @@ type
    function getdataoffs(const adata: pointer): hashoffsetty; inline;
    function internaladd(const akey): phashdataty;
    function internaladdhash(hash1: hashvaluety): phashdataty;
+   procedure inserthash(ahash: hashvaluety; const adata: phashdataty);
+   procedure removehash(aitem: phashdataty); // does not delete ithem
    procedure internaldeleteitem(const aitem: phashdataty); overload;
 //   procedure internaldeleteitem(const aitem: phashdatadataty); overload;
    procedure internaldelete(const aoffset: hashoffsetty);
@@ -874,13 +876,15 @@ begin
  if fassignedfirst <> 0 then begin
   po1:= pointer(pchar(fdata) + fassignedfirst);
   while true do begin
-   po2:= phashoffsetty(pchar(fhashtable) + 
-                            (po1^.header.hash and fmask)*sizeof(hashoffsetty));
-   puint2:= po2^;
-   po1^.header.nexthash:= puint2;
-   po1^.header.prevhash:= 0;
-   po2^:= pchar(po1) - fdata;
-   phashdataty(pchar(fdata)+puint2)^.header.prevhash:= po2^;
+   if po1^.header.prevhash >= 0 then begin //hash removed otherwise
+    po2:= phashoffsetty(pchar(fhashtable) + 
+                             (po1^.header.hash and fmask)*sizeof(hashoffsetty));
+    puint2:= po2^;
+    po1^.header.nexthash:= puint2;
+    po1^.header.prevhash:= 0;
+    po2^:= pchar(po1) - fdata;
+    phashdataty(pchar(fdata)+puint2)^.header.prevhash:= po2^;
+   end;
    if po1^.header.nextlist = 0 then begin
     break;
    end;
@@ -933,6 +937,7 @@ begin
  puint1:= pchar(result) - fdata;
  fhashtable[hash1]:= puint1;
  phashdataty(pchar(fdata)+puint2)^.header.prevhash:= puint1;
+             //[0] is dummy
  if fcount = 0 then begin
   result^.header.prevlist:= 0;
   fassignedfirst:= puint1;
@@ -958,6 +963,38 @@ end;
 function thashdatalist.internaladd(const akey): phashdataty;
 begin
  result:= internaladdhash(hashkey(akey));
+end;
+
+procedure thashdatalist.inserthash(ahash: hashvaluety;
+                                          const adata: phashdataty);
+var
+ puint1,puint2: hashoffsetty;//ptruint;
+begin
+ adata^.header.prevhash:= 0;
+ adata^.header.hash:= 	ahash;
+ ahash:= ahash and fmask;
+ puint2:= fhashtable[ahash];
+ adata^.header.nexthash:= puint2;
+ puint1:= pointer(adata) - fdata;
+ fhashtable[ahash]:= puint1;
+ phashdataty(fdata+puint2)^.header.prevhash:= puint1;
+             //[0] is dummy
+end;
+
+procedure thashdatalist.removehash(aitem: phashdataty);
+begin
+ with aitem^.header do begin
+  if nexthash <> 0 then begin
+   phashdataty(pchar(fdata)+nexthash)^.header.prevhash:= prevhash;
+  end;
+  if prevhash <> 0 then begin
+   phashdataty(pchar(fdata)+prevhash)^.header.nexthash:= nexthash;
+  end
+  else begin
+   fhashtable[hash and fmask]:= nexthash;
+  end;
+  prevhash:= -1; //nothashed mrker
+ end;
 end;
 
 procedure thashdatalist.internaldeleteitem(const aitem: phashdataty);
