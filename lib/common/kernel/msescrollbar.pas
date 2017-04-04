@@ -812,6 +812,14 @@ var
 begin
  with canvas,self.fdrawinfo do begin
   save();
+  if acolor = cl_none then begin
+   col1:= fcolor;
+  end
+  else begin
+   col1:= acolor;
+  end;
+  col1:= fintf.translatecolor(col1);
+  canvas.fillrect(dim,col1);
   if frame <> nil then begin
    frame.paintbackground(canvas,outerrect,true,false);
   end;
@@ -824,13 +832,6 @@ begin
   if fface2 <> nil then begin
    fface2.paint(canvas,areas[sba_end].ca.dim);
   end;
-  if acolor = cl_none then begin
-   col1:= fcolor;
-  end
-  else begin
-   col1:= acolor;
-  end;
-  col1:= fintf.translatecolor(col1);
   fpaintedbutton:= firstbutton;
   while fpaintedbutton <= lastbutton do begin
    if acolor <> cl_none then begin
@@ -840,7 +841,7 @@ begin
     end; 
    end;
 //   fillrect(areas[fpaintedbutton].ca.dim,col1);
-   areas[fpaintedbutton].color:= col1;
+//   areas[fpaintedbutton].color:= col1;
    drawtoolbutton(canvas,areas[fpaintedbutton]);
    if acolor <> cl_none then begin
     areas[fpaintedbutton].state:= statebefore;
@@ -861,7 +862,7 @@ begin
      fillrect(areas[sba_start].ca.dim,cl_brushcanvas);
     end
     else begin
-     fillrect(areas[sba_start].ca.dim,col1);
+//     fillrect(areas[sba_start].ca.dim,col1);
     end;
    end;
    if fface2 = nil then begin
@@ -875,7 +876,7 @@ begin
      fillrect(areas[sba_end].ca.dim,cl_brushcanvas);
     end
     else begin
-     fillrect(areas[sba_end].ca.dim,col1);
+//     fillrect(areas[sba_end].ca.dim,col1);
     end;
    end;
   end;
