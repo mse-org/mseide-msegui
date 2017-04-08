@@ -1,0 +1,85 @@
+styles
+ default ''
+ words 'b'
+ type 'b'
+ comment 'i' cl_dkblue
+ macros 'b' cl_dkred
+ string '' cl_dkblue
+
+keyworddefs java
+  'abstract' 'assert' 'byte' 'break' 'case' 'catch' 'char' 'const' 
+  'continue' 'default' 'delete' 'do' 'double' 'else' 
+  'enum' 'extends' 'instanceof' 'fastcall' 'finally' 
+  'for' 'false' 'goto' 'if' 'import' 'inline' 'interface'
+  'implements' 'interrupt' 'long' 'near' 'new' 'null' 'protected' 
+  'strictfp' 'return' 'synchronized' 'this' 'throw' 'throws' 'try' 'transient' 'volatile' 'while'
+
+keyworddefs javaplus
+  'void' 'public' 'package' 'private' 'final' 'class' 'static' 'boolean' 'int' 'native' 'float'
+ 
+scope escapechar string
+ endtokens
+# return on any char
+
+scope string string
+ calltokens
+  '\' escapechar
+ endtokens
+  '"'
+
+scope string1 string
+ calltokens
+  '\' escapechar
+ endtokens
+  ''''
+
+scope comment1 comment
+ endtokens
+  '*/'
+
+scope comment2 comment
+ endtokens
+  ''
+
+scope method1 type
+ return
+
+scope macros macros
+
+ jumptokens
+  '/*' comment1
+  '//' comment2
+
+ endtokens
+  ''
+scope block
+ keywords
+  java
+  javaplus type  
+
+ calltokens
+  '/*' comment1
+  '//' comment2
+  '#' macros
+  '"' string
+  '''' string1
+  '{' block default
+
+ endtokens
+  '}' default
+
+scope main
+
+ keywords words
+  java
+
+  javaplus type
+
+ calltokens
+  '/*' comment1
+  '//' comment2
+  '#' macros
+  '"' string
+  '''' string1
+  
+
