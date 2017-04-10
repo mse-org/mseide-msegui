@@ -146,11 +146,9 @@ object filedialogfo: Tfiledialogfo
         frame.captionpos = cp_right
         frame.localprops = []
         frame.localprops1 = []
-        frame.button.color = -2147483646
         frame.buttons.count = 1
         frame.buttons.items = <        
           item
-            color = -2147483646
           end>
         frame.outerframe = (
           0
@@ -181,11 +179,9 @@ object filedialogfo: Tfiledialogfo
         frame.captionpos = cp_right
         frame.localprops = []
         frame.localprops1 = []
-        frame.button.color = -2147483646
         frame.buttons.count = 1
         frame.buttons.items = <        
           item
-            color = -2147483646
           end>
         frame.outerframe = (
           0
@@ -326,11 +322,9 @@ object filedialogfo: Tfiledialogfo
       frame.captionpos = cp_right
       frame.localprops = []
       frame.localprops1 = []
-      frame.button.color = -2147483646
       frame.buttons.count = 1
       frame.buttons.items = <      
         item
-          color = -2147483646
         end>
       frame.outerframe = (
         0
