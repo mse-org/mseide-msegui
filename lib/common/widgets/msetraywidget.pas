@@ -292,7 +292,8 @@ begin
    inc(ficonchanging);
    bmp1:= tmaskedbitmap.create(bmk_rgb{false});
    try
-    if (fimagelist = nil) or (fimagenum < 0) then begin
+    if (fimagelist = nil) or (fimagenum < 0) or 
+                         (fimagenum >= fimagelist.count) then begin
      bmp1.assign(ficon);
     end
     else begin
