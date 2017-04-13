@@ -319,6 +319,8 @@ type
   font: tfont;
   selected: boolean;
   readonly: boolean;
+  focused: boolean;
+  active: boolean;
   notext: boolean;
   ismousecell: boolean;
   datapo: pointer;
@@ -3710,7 +3712,7 @@ end;
 procedure tcol.paint(var info: colpaintinfoty);
 var
  int1,int2,int3: integer;
- isfocusedcol,isfocusedcell: boolean;
+ isgridcol,isfocusedcol,isfocusedcell: boolean;
  bo1,bo2: boolean;
  saveindex: integer;
  linewidthbefore: integer;
@@ -3748,8 +3750,8 @@ begin
                 fcellinfo.grid.fbrushorigin.x + fcellinfo.grid.fscrollrect.x;
    end;
    fcellinfo.font:= nil;
-   isfocusedcol:= (fcellinfo.cell.col = fcellinfo.grid.ffocusedcell.col) and
-       (gs_cellentered in fcellinfo.grid.fstate);
+   isgridcol:= (fcellinfo.cell.col = fcellinfo.grid.ffocusedcell.col);
+   isfocusedcol:= isgridcol and (gs_cellentered in fcellinfo.grid.fstate);
    canvas.drawinfopo:= @fcellinfo;
    canvas.move(makepoint(fcellrect.x,fcellrect.y + ystart));
    fcellinfo.foldinfo:= nil;
@@ -3818,6 +3820,9 @@ begin
       fcellinfo.datapo:= getdatapo(row1);
       fcellinfo.selected:= getselected(row1);
       fcellinfo.readonly:= fcellinfo.grid.getrowreadonlystate(row1);
+      fcellinfo.focused:= isgridcol and
+                                     (row1 = fcellinfo.grid.ffocusedcell.row);
+      fcellinfo.active:= isfocusedcell;
       fcellinfo.notext:= false;
       fcellinfo.ismousecell:= 
                (fcellinfo.grid.fmousecell.col = fcellinfo.cell.col) and 
@@ -3833,6 +3838,8 @@ begin
        if isfocusedcell then begin
         drawfocusedcell(canvas);
         if calcautocellsize then begin
+//         fcellinfo.focused:= false;
+         fcellinfo.active:= false;
          drawcell(canvas); //possibly bigger
         end;
        end

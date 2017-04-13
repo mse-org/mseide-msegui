@@ -506,6 +506,8 @@ type
    property imnr_readonly;
    property imnr_checked;
    property imnr_subitems;
+   property imnr_focused;
+   property imnr_active;
    property imagelist;
    property imagewidth;
    property imageheight;
@@ -946,6 +948,8 @@ type
    property imnr_readonly;
    property imnr_checked;
    property imnr_subitems;
+   property imnr_focused;
+   property imnr_active;
    property imagelist;
    property imagewidth;
    property imageheight;
@@ -3220,8 +3224,17 @@ var
  infos1: recvaluearty;
  i1: int32;
  fra1,fra2: framety;
+ fs1: widgetstatesty;
 begin
  with cellinfoty(canvas.drawinfopo^) do begin
+  fs1:= [];
+  if focused then begin
+   include(fs1,ws_focused);
+   if active then begin
+    include(fs1,ws_active);
+   end;
+  end;
+  flayoutinfocell.variable.widgetstate:= fs1;
   doextendimage(canvas.drawinfopo,flayoutinfocell.variable.extra);
   flayoutinfocell.variable.rowindex:= cell.row;
   flayoutinfocell.textflags:= textflags;
@@ -3482,6 +3495,7 @@ begin
   end;
   with tlistitem1(fvalue) do begin
    flayoutinfofocused.variable.calcautocellsize:= false;
+   flayoutinfofocused.variable.widgetstate:= widgetstate;
    drawimage(acanvas,flayoutinfofocused);
    if feditor.lasttextclipped then begin
     include(fstate1,ns1_captionclipped);

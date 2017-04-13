@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2016 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2017 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -88,6 +88,7 @@ type
   imageextend: sizety;
   treelevelshift: integer;
   rowindex: integer;
+  widgetstate: widgetstatesty;
   calcautocellsize: boolean;
  end;
 
@@ -158,7 +159,8 @@ type
    procedure setcaption(const avalue: msestring); virtual;
    function checkaction(aaction: nodeactionty): boolean;
    procedure actionnotification(var ainfo: nodeactioninfoty); virtual;
-   function getactimagenr: integer; virtual;
+   function getactimagenr(
+                 const alayoutinfo: listitemlayoutinfoty): integer; virtual;
    procedure objectevent(const sender: tobject;
                                       const event: objecteventty); virtual;
    procedure setowner(const aowner: tcustomitemlist); virtual;
@@ -451,6 +453,8 @@ type
    fonstatwrite: statwriteitemlisteventty;
    fonstatread: statreaditemlisteventty;
    ffonts: tfontarrayprop;
+   fimnr_focused: integer;
+   fimnr_active: integer;
    procedure setimnr_base(const Value: integer);
    procedure setimnr_expanded(const Value: integer);
    procedure setimnr_selected(const Value: integer);
@@ -466,6 +470,8 @@ type
    procedure setimagesize(const avalue: sizety);
    procedure setimagealignment(const avalue: alignmentsty);
    procedure setfonts(const avalue: tfontarrayprop);
+   procedure setimnr_focused(const avalue: integer);
+   procedure setimnr_active(const avalue: integer);
   protected
    fdefaultnodestate: nodestatesty;
    fimagelist: timagelist;
@@ -499,8 +505,8 @@ type
                                      out item: tlistitem); virtual;
    procedure statreaditem(const reader: tstatreader;
                     var aitem: tlistitem); virtual;
-   procedure statreadtreeitem(const reader: tstatreader; const parent: ttreelistitem;
-                    var aitem: ttreelistitem); virtual;
+   procedure statreadtreeitem(const reader: tstatreader; 
+               const parent: ttreelistitem; var aitem: ttreelistitem); virtual;
    procedure statwriteitem(const writer: tstatwriter;
                     const aitem: tlistitem); virtual;
    procedure statwritetreeitem(const writer: tstatwriter;
@@ -554,6 +560,10 @@ type
                                                write setimnr_checked default 0;
    property imnr_subitems: integer read fimnr_subitems 
                                               write setimnr_subitems default 0;
+   property imnr_focused: integer read fimnr_focused 
+                                              write setimnr_focused default 0;
+   property imnr_active: integer read fimnr_active 
+                                              write setimnr_active default 0;
    property imagelist: timagelist read fimagelist write setimagelist;
    property imagewidth: integer read fimagesize.cx 
                                                  write setimagewidth default 0;
@@ -847,7 +857,7 @@ begin
                                                                   imagerect.cx;
    end;
    if not nopaint then begin //acanvas <> nil then begin
-    int1:= getactimagenr;
+    int1:= getactimagenr(alayoutinfo);
     if (int1 >= 0) and (int1 < aimagelist.count) then begin
       //todo: check imagepos and the like
      with imagerect do begin
@@ -1172,7 +1182,8 @@ begin
  end;
 end;
 
-function tlistitem.getactimagenr: integer;
+function tlistitem.getactimagenr(
+               const alayoutinfo: listitemlayoutinfoty): integer;
 begin
  result:= fowner.fimnr_base + fimagenr;
  if not (ns_imagenrfix in fstate) then begin
@@ -1190,6 +1201,12 @@ begin
   end;
   if ns_subitems in fstate then begin
    inc(result,fowner.fimnr_subitems);
+  end;
+  if ws_focused in alayoutinfo.variable.widgetstate then begin
+   inc(result,fowner.fimnr_focused);
+  end;
+  if ws_active in alayoutinfo.variable.widgetstate then begin
+   inc(result,fowner.fimnr_active);
   end;
  end;
 end;
@@ -1550,6 +1567,22 @@ procedure tcustomitemlist.setimnr_subitems(const Value: integer);
 begin
  if fimnr_subitems <> value then begin
   fimnr_subitems := Value;
+  invalidate;
+ end;
+end;
+
+procedure tcustomitemlist.setimnr_focused(const avalue: integer);
+begin
+ if fimnr_focused <> avalue then begin
+  fimnr_focused := avalue;
+  invalidate;
+ end;
+end;
+
+procedure tcustomitemlist.setimnr_active(const avalue: integer);
+begin
+ if fimnr_active <> avalue then begin
+  fimnr_active := avalue;
   invalidate;
  end;
 end;
