@@ -1196,8 +1196,8 @@ begin
   if ns_readonly in fstate then begin
    inc(result,fowner.fimnr_readonly);
   end;
-  if ns_selected in fstate then begin
-   inc(result,fowner.fimnr_selected);
+  if ns_checked in fstate then begin
+   inc(result,fowner.fimnr_checked);
   end;
   if ns_subitems in fstate then begin
    inc(result,fowner.fimnr_subitems);
