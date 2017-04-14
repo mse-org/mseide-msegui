@@ -4248,33 +4248,38 @@ var
 begin
 // result:= pointinrect(info.pos,fpaintrect);
  if {result and} (fi.frameimage_list <> nil) and 
-                  (fi.frameimage_list.cornermask <> '') then begin
+                  fi.frameimage_list.hascornermask then begin
   rect1:= arect;
 //  rect1:= deflaterect(mr(nullpoint,fintf.getwidgetrect.size),fouterframe);
   with timagelist1(fi.frameimage_list) do begin
-   po1:= pointer(cornermask);
-   if (pos.x < fcornermaskmaxwidth) and 
-                   (pos.y < rect1.y + length(cornermask)) then begin
+   if (pos.x < fcornermaskmaxtopleft) and 
+                   (pos.y < rect1.y + length(cornermask_topleft)) then begin
                           //topleft
+    po1:= pointer(cornermask_topleft);
     result:= pos.x >= rect1.x + po1[pos.y-rect1.y];
    end
    else begin
-    if (pos.x < fcornermaskmaxwidth) and 
-            (pos.y >= rect1.y + rect1.cy - length(cornermask)) then begin
+    if (pos.x < fcornermaskmaxbottomleft) and 
+            (pos.y >= rect1.y + rect1.cy - 
+                            length(cornermask_bottomleft)) then begin
                           //bottomleft
+     po1:= pointer(cornermask_bottomleft);
      result:= pos.x >= rect1.x + po1[rect1.y + rect1.cy - pos.y -1];
     end
     else begin
-     if (pos.x >= rect1.x + rect1.cx - fcornermaskmaxwidth) and 
-          (pos.y >= rect1.y + rect1.cy - length(cornermask)) then begin
+     if (pos.x >= rect1.x + rect1.cx - fcornermaskmaxbottomright) and 
+          (pos.y >= rect1.y + rect1.cy - 
+                                length(cornermask_bottomright)) then begin
                           //bottomright
+      po1:= pointer(cornermask_bottomright);
       result:= pos.x < rect1.x + rect1.cx - 
                                     po1[rect1.y + rect1.cy - pos.y -1];
      end
      else begin
-      if (pos.x >= rect1.x + rect1.cx - fcornermaskmaxwidth) and 
-                        (pos.y < rect1.y + length(cornermask)) then begin
+      if (pos.x >= rect1.x + rect1.cx - fcornermaskmaxtopright) and 
+                 (pos.y < rect1.y + length(cornermask_topright)) then begin
                           //topright
+       po1:= pointer(cornermask_topright);
        result:= pos.x < rect1.x + rect1.cx - 
                                     po1[pos.y-rect1.y];
       end;
@@ -4497,7 +4502,7 @@ begin
  if clip then begin
   canvas.intersectcliprect(rect1);
   if (fi.frameimage_list <> nil) and 
-                 (fi.frameimage_list.cornermask <> '')then begin
+                 fi.frameimage_list.hascornermask then begin
    fi.frameimage_list.clipcornermask(canvas,
                          deflaterect(arect,fouterframe),fi.hiddenedges);
   end;
@@ -7007,7 +7012,7 @@ begin
  if intersectrect(rect,canvas.clipbox,rect1) or 
                testintersectrect(arect,canvas.clipbox) then begin
   if (fi.frameimage_list <> nil) and 
-                         (fi.frameimage_list.cornermask <> '') then begin
+                         fi.frameimage_list.hascornermask then begin
    reg1:= canvas.copyclipregion();
    fi.frameimage_list.clipcornermask(canvas,arect,[]);
   end;

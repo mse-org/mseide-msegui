@@ -243,7 +243,13 @@ begin
  registerpropertyeditor(typeinfo(trealarrayprop),tfacetemplate,'fade_opapos',
                                     tfacetemplatefadeopaposeditor);
  
- registerpropertyeditor(typeinfo(msestring),timagelist,'cornermask',
+ registerpropertyeditor(typeinfo(msestring),timagelist,'cornermask_topleft',
+                                                       tcornermaskeditor);
+ registerpropertyeditor(typeinfo(msestring),timagelist,'cornermask_bottomleft',
+                                                       tcornermaskeditor);
+ registerpropertyeditor(typeinfo(msestring),timagelist,'cornermask_bottomright',
+                                                       tcornermaskeditor);
+ registerpropertyeditor(typeinfo(msestring),timagelist,'cornermask_topright',
                                                        tcornermaskeditor);
  registerpropertyeditor(typeinfo(msestring),timagelist,'indexlookup',
                                                        tindexlookupeditor);

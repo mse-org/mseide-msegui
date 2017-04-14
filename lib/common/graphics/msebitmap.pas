@@ -395,7 +395,13 @@ type
    fonchange: notifyeventty;
 //   fkind: bitmapkindty;
    findexlookup: msestring;
-   fcornermask: msestring;
+//   fcornermask: msestring;
+   fcornermask_topleft: msestring;
+   fcornermask_bottomleft: msestring;
+   fcornermask_bottomright: msestring;
+   fcornermask_topright: msestring;
+   fneedscornermaskcheck: boolean;
+   fhascornermask: boolean;
    procedure setsize(const avalue: sizety);
 //   function getmonochrome: boolean;
 //   procedure setmonochrome(const Value: boolean);
@@ -419,15 +425,24 @@ type
    procedure readmasked(reader: treader);
    procedure readcolormask(reader: treader);
    procedure readmonochrome(reader: treader);
+   procedure readcornermask(reader: treader);
    function getoptions: bitmapoptionsty;
    procedure setoptions(const avalue: bitmapoptionsty);
    procedure setindexlookup(const avalue: msestring);
-   procedure setcornermask(const avalue: msestring);
+   procedure setcornermask_topleft(const avalue: msestring);
+   procedure setcornermask_bottomleft(const avalue: msestring);
+   procedure setcornermask_bottomright(const avalue: msestring);
+   procedure setcornermask_topright(const avalue: msestring);
   protected
-   fcornermaskmaxwidth: int32; //biggest value of cornermask
+   fcornermaskmaxtopleft: int32; //biggest value of cornermask
+   fcornermaskmaxbottomleft: int32; //biggest value of cornermask
+   fcornermaskmaxbottomright: int32; //biggest value of cornermask
+   fcornermaskmaxtopright: int32; //biggest value of cornermask
    function indextoorg(index: integer): pointty;
    procedure change;
    procedure defineproperties(filer: tfiler); override;
+   procedure cornermaskchanged();
+   procedure loaded() override;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -504,6 +519,7 @@ type
    property graymask: boolean read getgraymask write setgraymask default false;
    property colormask: boolean read getcolormask 
                                               write setcolormask default false;
+   property hascornermask: boolean read fhascornermask;
   published
    property width: integer read fsize.cx
                  write setwidth default defaultimagelistwidth;
@@ -517,7 +533,14 @@ type
                  //last!
    property indexlookup: msestring read findexlookup write setindexlookup;
         //array of int16
-   property cornermask: msestring read fcornermask write setcornermask;
+   property cornermask_topleft: msestring read fcornermask_topleft 
+                                                 write setcornermask_topleft;
+   property cornermask_bottomleft: msestring read fcornermask_bottomleft 
+                                                 write setcornermask_bottomleft;
+   property cornermask_bottomright: msestring read fcornermask_bottomright
+                                                write setcornermask_bottomright;
+   property cornermask_topright: msestring read fcornermask_topright 
+                                                 write setcornermask_topright;
         //array of int16, used in tframe for clipping corners of client area
         //cornermask[n] = number of clipped pixels from edge of row n.
    property onchange: notifyeventty read fonchange write fonchange;
@@ -2964,12 +2987,12 @@ var
  po1,ps,pe: pint16;
  i1: int32;
 begin
- if cornermask <> '' then begin
-  po1:= pointer(cornermask);
-  pe:= po1 + length(msestring(pointer(po1)));
+ if hascornermask then begin
   rect2.cy:= 1;
   rect3:= arect;
   if ahiddenedges * [edg_top,edg_left] = [] then begin
+   po1:= pointer(cornermask_topleft);
+   pe:= po1 + length(msestring(pointer(po1)));
    rect2.pos:= rect3.pos;
    ps:= po1;
    while ps < pe do begin
@@ -2980,6 +3003,8 @@ begin
    end;
   end;
   if ahiddenedges * [edg_left,edg_bottom] = [] then begin
+   po1:= pointer(cornermask_bottomleft);
+   pe:= po1 + length(msestring(pointer(po1)));
    rect2.x:= rect3.x;
    rect2.y:= rect3.y + rect3.cy - 1;
    ps:= po1;
@@ -2991,6 +3016,8 @@ begin
    end;
   end;
   if ahiddenedges * [edg_bottom,edg_right] = [] then begin
+   po1:= pointer(cornermask_bottomright);
+   pe:= po1 + length(msestring(pointer(po1)));
    rect2.y:= rect3.y + rect3.cy - 1;
    ps:= po1;
    i1:= arect.x + arect.cx;
@@ -3003,6 +3030,8 @@ begin
    end;
   end;
   if ahiddenedges * [edg_right,edg_top] = [] then begin
+   po1:= pointer(cornermask_topright);
+   pe:= po1 + length(msestring(pointer(po1)));
    rect2.y:= rect3.y;
    ps:= po1;
    i1:= rect3.x + rect3.cx;
@@ -3413,6 +3442,15 @@ begin
  end;
 end;
 
+procedure timagelist.readcornermask(reader: treader);
+begin
+ fcornermask_topleft:= reader.readunicodestring;
+ fcornermask_bottomleft:= fcornermask_topleft;
+ fcornermask_bottomright:= fcornermask_topleft;
+ fcornermask_topright:= fcornermask_topleft;
+ cornermaskchanged();
+end;
+
 procedure timagelist.defineproperties(filer: tfiler);
 var
  ancestorbefore: tpersistent;
@@ -3421,6 +3459,7 @@ begin
  filer.defineproperty('monochrome',@readmonochrome,nil,false);
  filer.defineproperty('masked',@readmasked,nil,false);
  filer.defineproperty('colormask',@readcolormask,nil,false);
+ filer.defineproperty('cornermask',@readcornermask,nil,false);
  ancestorbefore:= filer.ancestor;
  if ancestorbefore <> nil then begin
   filer.ancestor:= timagelist(ancestorbefore).fbitmap;
@@ -3494,21 +3533,71 @@ begin
  change;
 end;
 
-procedure timagelist.setcornermask(const avalue: msestring);
-var
- po1,pe: pint16;
+procedure timagelist.setcornermask_topleft(const avalue: msestring);
 begin
- fcornermask:= avalue;
- fcornermaskmaxwidth:= 0;
- po1:= pointer(avalue);
- pe:= po1 + length(avalue);
- while po1 < pe do begin
-  if po1^ > fcornermaskmaxwidth then begin
-   fcornermaskmaxwidth := po1^;
+ fcornermask_topleft:= avalue;
+ cornermaskchanged();
+end;
+
+procedure timagelist.setcornermask_bottomleft(const avalue: msestring);
+begin
+ fcornermask_bottomleft:= avalue;
+ cornermaskchanged();
+end;
+
+procedure timagelist.setcornermask_bottomright(const avalue: msestring);
+begin
+ fcornermask_bottomright:= avalue;
+ cornermaskchanged();
+end;
+
+procedure timagelist.setcornermask_topright(const avalue: msestring);
+begin
+ fcornermask_topright:= avalue;
+ cornermaskchanged();
+end;
+
+procedure timagelist.cornermaskchanged();
+
+ procedure check(const avalue: msestring; var maxwidth: int32);
+ var
+  po1,pe: pint16;
+ begin
+  maxwidth:= 0;
+  if avalue <> '' then begin
+   fhascornermask:= true;
+   po1:= pointer(avalue);
+   pe:= po1 + length(avalue);
+   while po1 < pe do begin
+    if po1^ > maxwidth then begin
+     maxwidth := po1^;
+    end;
+    inc(po1);
+   end;
   end;
-  inc(po1);
+ end; //check
+
+begin
+ if not (csloading in componentstate) then begin
+  fhascornermask:= false;
+  check(fcornermask_topleft,fcornermaskmaxtopleft);
+  check(fcornermask_bottomleft,fcornermaskmaxbottomleft);
+  check(fcornermask_bottomright,fcornermaskmaxbottomright);
+  check(fcornermask_topright,fcornermaskmaxtopright);
+  change;
+ end
+ else begin
+  fneedscornermaskcheck:= true;
  end;
- change;
+end;
+
+procedure timagelist.loaded();
+begin
+ inherited;
+ if fneedscornermaskcheck then begin
+  cornermaskchanged();
+  fneedscornermaskcheck:= false;
+ end;
 end;
 
 { tcenteredbitmap }

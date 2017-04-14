@@ -1228,6 +1228,7 @@ const
  codetemplateselectstatname ='templselect.sta';
  codetemplateparamstatname = 'templparam.sta';
  codetemplateeditstatname =  'templedit.sta';
+ cornermaskeditstatname =  'cornermask.sta';
  
  siginfocount = 30;
 var
@@ -1754,6 +1755,7 @@ begin
    deletememorystatstream(codetemplateselectstatname);
    deletememorystatstream(codetemplateparamstatname);
    deletememorystatstream(codetemplateeditstatname);
+   deletememorystatstream(cornermaskeditstatname);
    {$ifndef mse_no_db}{$ifdef FPC}
    deletememorystatstream(dbfieldeditorstatname);
    {$endif}{$endif}
@@ -2146,6 +2148,7 @@ begin
   updatememorystatstream('codetemplateselect',codetemplateselectstatname);
   updatememorystatstream('codetemplateparam',codetemplateparamstatname);
   updatememorystatstream('codetemplateedit',codetemplateeditstatname);
+  updatememorystatstream('cornermaskedit',cornermaskeditstatname);
 {$ifndef mse_no_db}{$ifdef FPC}
   updatememorystatstream('dbfieldeditor',dbfieldeditorstatname);
 {$endif}{$endif}
