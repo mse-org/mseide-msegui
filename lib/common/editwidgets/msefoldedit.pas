@@ -358,7 +358,8 @@ var
 begin
  with cellinfoty(canvas.drawinfopo^) do begin
   rect1:= rect;
-  drawimage(canvas,foldinfo,rect,selected,readonly,pmsestringintty(datapo));
+  drawimage(canvas,foldinfo,rect,cds_selected in drawstate,
+                   cds_readonly in drawstate,pmsestringintty(datapo));
   int1:= innerrect.x;
   int2:= innerrect.cx;
   try

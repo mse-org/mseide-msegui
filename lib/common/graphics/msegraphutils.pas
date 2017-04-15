@@ -105,7 +105,10 @@ const
  cl_scrollbarpattern =         cl_mapped + 27;
  cl_scrollbarpatternclicked =  cl_mapped + 28;
  cl_buttondefaultrect =        cl_mapped + 29;
- cl_lastmapped =               cl_mapped + 30;
+ cl_glyphactive =              cl_mapped + 30;
+ cl_treeline =                 cl_mapped + 31;
+ cl_treelineactive =           cl_mapped + 32;
+ cl_lastmapped =               cl_mapped + 33;
 
  cl_0 =                        cl_namedrgb + 0; //select colorbackground for monochrome bitmaps
  cl_1 =                        cl_namedrgb + 1; //select colorforeground
@@ -233,7 +236,10 @@ const
     (name: 'cl_gridframe'; rgb:              (blue: $00; green: $00; red: $00; res: $00)), //26
     (name: 'cl_scrollbarpattern'; rgb:       (blue: $ff; green: $ff; red: $ff; res: $00)), //27
     (name: 'cl_scrollbarpatternclicked'; rgb:(blue: $00; green: $00; red: $00; res: $00)), //28
-    (name: 'cl_buttondefaultrect'; rgb:      (blue: $00; green: $00; red: $00; res: $00))  //29
+    (name: 'cl_buttondefaultrect'; rgb:      (blue: $00; green: $00; red: $00; res: $00)), //29
+    (name: 'cl_glyphactive'; rgb:            (blue: $00; green: $00; red: $00; res: $00)), //30
+    (name: 'cl_treeline'; rgb:               (blue: $80; green: $80; red: $80; res: $00)), //31
+    (name: 'cl_treelineactive'; rgb:         (blue: $80; green: $80; red: $80; res: $00))  //32
    );
 
  defaultnamedrgb: array[0..namedrgbcolorcount-1]

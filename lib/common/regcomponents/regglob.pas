@@ -18,13 +18,16 @@ unit regglob;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 uses
- msepropertyeditors,typinfo,msebitmap;
+ msepropertyeditors,typinfo,msebitmap,msestrings;
  
 type
  tstockglypheditor = class(tenumpropertyeditor)
   protected
+   function hasimagelist(): boolean;
    function gettypeinfo: ptypeinfo; override;
    function getdefaultstate: propertystatesty; override;
+   procedure setvalue(const value: msestring); override;
+   function getvalue: msestring; override;
   public
    procedure edit; override;
  end;
@@ -45,7 +48,7 @@ type
 
 implementation
 uses
- msestockobjects,mseimageselectorform,mseclasses;
+ msestockobjects,mseimageselectorform,mseclasses,mseformatstr;
  
 { tstockglypharraypropertyeditor }
 
@@ -61,17 +64,58 @@ begin
  result:= typeinfo(stockglyphty);
 end;
 
+function tstockglypheditor.hasimagelist(): boolean;
+var
+ intf1: iimagelistinfo;
+begin
+ result:= getcorbainterface(fprops[0].instance,
+           typeinfo(iimagelistinfo),intf1) and (intf1.getimagelist() <> nil);
+end;
+
 function tstockglypheditor.getdefaultstate: propertystatesty;
 begin
  result:= inherited getdefaultstate + [ps_dialog];
+ if hasimagelist then begin
+  result:= result - [ps_valuelist];
+ end;
+end;
+
+procedure tstockglypheditor.setvalue(const value: msestring);
+begin
+ if hasimagelist then begin
+  setordvalue(strtointvalue(ansistring(value)));
+ end
+ else begin
+  inherited;
+ end;
+end;
+
+function tstockglypheditor.getvalue: msestring;
+begin
+ if hasimagelist then begin
+  result:= inttostrmse(getordvalue);
+ end
+ else begin
+  result:= inherited getvalue();
+ end;
 end;
 
 procedure tstockglypheditor.edit;
 var
  int1: integer;
+ intf1: iimagelistinfo;
+ list1: timagelist;
 begin
  int1:= getordvalue;
- timageselectorfo.create(nil,stockobjects.glyphs,int1);
+ intf1:= nil;
+ if getcorbainterface(fprops[0].instance,
+              typeinfo(iimagelistinfo),intf1) then begin
+  list1:= intf1.getimagelist;
+ end;
+ if list1 = nil then begin
+  list1:= stockobjects.glyphs;
+ end;
+ timageselectorfo.create(nil,list1,int1);
  setordvalue(int1);
 end;
 

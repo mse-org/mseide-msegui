@@ -3839,7 +3839,7 @@ begin
    exclude(finfo.state,shs_disabled);
   end;
   with pcellinfoty(canvas.drawinfopo)^ do begin
-   if ismousecell and (bo_executeonclick in foptions) and 
+   if (cds_ismousecell in drawstate) and (bo_executeonclick in foptions) and 
                  not(shs_disabled in finfo.state) and not readonly then begin
     include(finfo.state,shs_mouse);
    end;

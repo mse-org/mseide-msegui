@@ -307,7 +307,11 @@ type
  rowfoldinfoarty = array of rowfoldinfoty;
  rowfoldinfoaty = array[0..0] of rowfoldinfoty;
  prowfoldinfoaty = ^rowfoldinfoaty;
-  
+
+ celldrawstatety = (cds_selected,cds_readonly,cds_focused,cds_active,cds_notext,
+                    cds_usecoloractive,cds_ismousecell);
+ celldrawstatesty = set of celldrawstatety;
+ 
  cellinfoty = record
   grid: tcustomgrid;
   cell: gridcoordty;
@@ -317,12 +321,14 @@ type
   color: colorty;
   colorline: colorty;
   font: tfont;
-  selected: boolean;
-  readonly: boolean;
-  focused: boolean;
-  active: boolean;
-  notext: boolean;
-  ismousecell: boolean;
+  drawstate: celldrawstatesty;
+//  selected: boolean;
+//  readonly: boolean;
+//  focused: boolean;
+//  active: boolean;
+//  notext: boolean;
+//  useactivecolor: boolean;
+//  ismousecell: boolean;
   datapo: pointer;
   rowstate: prowstatety;
   foldinfo: prowfoldinfoty;
@@ -3818,15 +3824,29 @@ begin
        fcellinfo.foldinfo:= @foldinfo[int1];
       end;
       fcellinfo.datapo:= getdatapo(row1);
-      fcellinfo.selected:= getselected(row1);
-      fcellinfo.readonly:= fcellinfo.grid.getrowreadonlystate(row1);
-      fcellinfo.focused:= isgridcol and
-                                     (row1 = fcellinfo.grid.ffocusedcell.row);
-      fcellinfo.active:= isfocusedcell;
-      fcellinfo.notext:= false;
-      fcellinfo.ismousecell:= 
-               (fcellinfo.grid.fmousecell.col = fcellinfo.cell.col) and 
-                                (fcellinfo.grid.fmousecell.row = row1);
+      fcellinfo.drawstate:= [];
+      if getselected(row1) then begin
+       include(fcellinfo.drawstate,cds_selected);
+      end;
+      if fcellinfo.grid.getrowreadonlystate(row1) then begin
+       include(fcellinfo.drawstate,cds_readonly);
+      end;
+      if isgridcol and (row1 = fcellinfo.grid.ffocusedcell.row) then begin
+       include(fcellinfo.drawstate,cds_focused);
+      end;
+      if isfocusedcell then begin
+       include(fcellinfo.drawstate,cds_active);
+      end;
+      if isfocusedcell or (co1_rowcoloractive in foptions1) and 
+                            (row1 = fcellinfo.grid.ffocusedcell.row) then begin
+       include(fcellinfo.drawstate,cds_usecoloractive);
+      end;
+       
+//      fcellinfo.notext:= false;
+      if  (fcellinfo.grid.fmousecell.col = fcellinfo.cell.col) and 
+                              (fcellinfo.grid.fmousecell.row = row1) then begin
+       include(fcellinfo.drawstate,cds_ismousecell);
+      end;
       saveindex:= canvas.save;
       fcellinfo.color:= rowcolor(row1);
       canvas.intersectcliprect(mr(nullpoint,fcellrect.size));
@@ -3839,7 +3859,7 @@ begin
         drawfocusedcell(canvas);
         if calcautocellsize then begin
 //         fcellinfo.focused:= false;
-         fcellinfo.active:= false;
+         exclude(fcellinfo.drawstate,cds_active);
          drawcell(canvas); //possibly bigger
         end;
        end
@@ -7434,7 +7454,7 @@ procedure tfixcol.drawcell(const canvas: tcanvas);
 begin
  inherited;
  with cellinfoty(canvas.drawinfopo^) do begin
-  if not notext then begin
+  if not (cds_notext in drawstate) then begin
    ftextinfo.dest:= innerrect;
    if cell.row < fcaptions.count then begin
     ftextinfo.text.text:= fcaptions[cell.row];

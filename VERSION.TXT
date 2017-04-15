@@ -1,5 +1,8 @@
 MSEide+MSEgui breaking changes version history
 **********************************************
+2017-04-14
+ cellinfoty boolean flags replaced by celldrawstatesty set.
+ 
 Version 4.4.2
 2017-04-08
 2017-04-03

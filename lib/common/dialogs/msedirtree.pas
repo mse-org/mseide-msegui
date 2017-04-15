@@ -31,7 +31,7 @@ type
    constructor create(const aowner: tcustomitemlist = nil;
               const aparent: ttreelistitem = nil); override;
    procedure setentries(const list: tcustomfiledatalist;
-                        const checksubdirectories,showhidden,checkbox: boolean);
+                  const achecksubdirectories,ashowhidden,acheckbox: boolean);
    function findsubdir(const aname: filenamety): tdirlistitem;
    function getpath: filenamety;
  end;
@@ -143,7 +143,7 @@ begin
 end;
 
 procedure tdirlistitem.setentries(const list: tcustomfiledatalist;
-                     const checksubdirectories,showhidden,checkbox: boolean);
+                     const achecksubdirectories,ashowhidden,acheckbox: boolean);
 var
  po1: pfileinfoty;
  ar1: treelistedititemarty;
@@ -156,7 +156,7 @@ begin
  clear;
  if list <> nil then begin
   po1:= list.datapo;
-  if showhidden then begin
+  if ashowhidden then begin
    excl:= [];
   end
   else begin
@@ -166,13 +166,13 @@ begin
   for int1:= 0 to list.count - 1 do begin
    item1:= tdirlistitem.create;
    item1.froot:= froot;
-   if checkbox then begin
+   if acheckbox then begin
     item1.fstate:= item1.fstate + [ns_checkbox,ns_showchildchecked];
    end;
    ar1[int1]:= item1;
    item1.finfo:= po1^;
    item1.updateinfo;
-   if checksubdirectories and 
+   if achecksubdirectories and 
             (item1.finfo.extinfo1.filetype = ft_dir) then begin
     fna1:= filepath(getpath,item1.finfo.name,fk_file);
     if {$ifdef mswindows}

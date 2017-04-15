@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2016 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2017 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -156,7 +156,12 @@ type
 const
  defaultboxids: treeitemboxidarty = (
   //tib_none,  tib_empty,   tib_expand,        tib_expanded
-        -1,ord(stg_box),ord(stg_boxexpand),ord(stg_boxexpanded));
+        -1,ord(stg_box),ord(stg_boxexpand),ord(stg_boxexpanded),
+  //tib_checkbox,         tib_checkboxchecked
+    ord(stg_checkbox),ord(stg_checkboxchecked),
+  //tib_checkboxparentnotchecked,tib_checkboxchildchecked
+    ord(stg_checkboxparentnotchecked),ord(stg_checkboxchildchecked)
+    );
 type
  titemviewlist = class(tcustomitemlist,iitemlist)
   private
@@ -174,7 +179,7 @@ type
    function getgrid: tcustomgrid;
    function getlayoutinfo(const acellinfo: pcellinfoty): plistitemlayoutinfoty;
    procedure itemcountchanged;
-   function getcolorglyph: colorty;
+//   function getcolorglyph: colorty;
    procedure updateitemvalues(const index: integer; const acount: integer);
    function getcomponentstate: tcomponentstate;
 
@@ -265,6 +270,7 @@ type
    foptions: listviewoptionsty;
    fcellwidth: integer;
    fcolorglyph: colorty;
+   fcolorglyphactive: colorty;
    fediting: boolean;
    fonitemsmoved: gridblockmovedeventty;
    fcellframe: tcellframe;
@@ -285,6 +291,7 @@ type
    function getcolorselect: colorty;
    procedure setcolorselect(const Value: colorty);
    procedure setcolorglyph(const Value: colorty);
+   procedure setcolorglyphactive(const Value: colorty);
    procedure setediting(const Value: boolean);
    function getkeystring(const index: integer): msestring;
    function getfocusedindex: integer;
@@ -371,7 +378,9 @@ type
    property colorselect: colorty read getcolorselect 
                                     write setcolorselect default cl_default;
    property colorglyph: colorty read fcolorglyph 
-                                    write setcolorglyph default cl_black;
+                                    write setcolorglyph default cl_glyph;
+   property colorglyphactive: colorty read fcolorglyphactive
+                            write setcolorglyphactive default cl_glyphactive;
    property cellwidth: integer read fcellwidth write setcellwidth
                    default defaultcellwidth;
    property cellheight: integer read getcellheight write setcellheight
@@ -457,13 +466,30 @@ type
 
  titemedit = class;
 
- tcustomitemeditlist = class(tcustomitemlist)
+ tcustomitemeditlist = class(tcustomitemlist,iimagelistinfo)
   private
    fcolorglyph: colorty;
+   fcolorglyphactive: colorty;
+   fcolorline: colorty;
+   fcolorlineactive: colorty;
    fowner: titemedit;
    fonitemnotification: nodenotificationeventty;
-   procedure setcolorglyph(const Value: colorty);
+   fboxglyph_list: timagelist;
+   fboxglyph_listactive: timagelist;
+   procedure setcolorglyph(const avalue: colorty);
+   procedure setcolorglyphactive(const avalue: colorty);
+   function getboxglyph_checkbox: stockglyphty;
+   procedure setboxglyph_checkbox(const avalue: stockglyphty);
+   function getboxglyph_checkboxchecked: stockglyphty;
+   procedure setboxglyph_checkboxchecked(const avalue: stockglyphty);
+   function getboxglyph_checkboxparentnotchecked: stockglyphty;
+   procedure setboxglyph_checkboxparentnotchecked(const avalue: stockglyphty);
+   function getboxglyph_checkboxchildchecked: stockglyphty;
+   procedure setboxglyph_checkboxchildchecked(const avalue: stockglyphty);
+   procedure setboxglyp_list(const avalue: timagelist);
+   procedure setboxglyp_listactive(const avalue: timagelist);
   protected
+   fboxids: treeitemboxidarty;
    procedure createstatitem(const reader: tstatreader;
                                      out item: tlistitem); override;
    procedure doitemchange(const index: integer); override;
@@ -472,6 +498,8 @@ type
    function compare(const l,r): integer; override;
    class function defaultitemclass(): listedititemclassty; virtual;
    procedure itemclasschanged();
+    //iimagelistinfo
+   function getimagelist: timagelist;
   public
    constructor create; overload; override;
    constructor create(const intf: iitemlist;
@@ -483,8 +511,26 @@ type
                                acount: integer = -1); //-1 = all
    property owner: titemedit read fowner;
    property colorglyph: colorty read fcolorglyph 
-                                    write setcolorglyph default cl_black;
+                                    write setcolorglyph default cl_glyph;
                       //for monochrome imagelist
+   property colorglyphactive: colorty read fcolorglyphactive
+                             write setcolorglyphactive default cl_glyphactive;
+                      //for monochrome imagelist
+   property boxglyph_list: timagelist read fboxglyph_list write setboxglyp_list;
+   property boxglyph_listactive: timagelist read fboxglyph_listactive 
+                                                    write setboxglyp_listactive;
+   property boxglyph_checkbox: stockglyphty read getboxglyph_checkbox 
+                               write setboxglyph_checkbox default stg_checkbox;
+   property boxglyph_checkboxchecked: stockglyphty 
+                         read getboxglyph_checkboxchecked 
+                 write setboxglyph_checkboxchecked default stg_checkboxchecked;
+   property boxglyph_checkboxparentnotchecked: stockglyphty 
+             read getboxglyph_checkboxparentnotchecked
+                   write setboxglyph_checkboxparentnotchecked 
+                                   default stg_checkboxparentnotchecked;
+   property boxglyph_checkboxchildchecked: stockglyphty 
+                          read getboxglyph_checkboxchildchecked
+        write setboxglyph_checkboxchildchecked default stg_checkboxchildchecked;
    property onitemnotification: nodenotificationeventty
                  read fonitemnotification write fonitemnotification;
   published
@@ -500,6 +546,14 @@ type
   public
    property itemclass: listedititemclassty read getitemclass write setitemclass;
   published
+   property colorglyph;
+   property colorglyphactive;
+   property boxglyph_list;
+   property boxglyph_listactive;
+   property boxglyph_checkbox;
+   property boxglyph_checkboxchecked;
+   property boxglyph_checkboxparentnotchecked;
+   property boxglyph_checkboxchildchecked;
    property imnr_base;
    property imnr_expanded;
    property imnr_selected;
@@ -651,7 +705,7 @@ type
    function getgrid: tcustomgrid;
    function getlayoutinfo(const acellinfo: pcellinfoty): plistitemlayoutinfoty;
    procedure itemcountchanged;
-   function getcolorglyph: colorty;
+//   function getcolorglyph: colorty;
 
     //igridwidget
    procedure setfirstclick(var ainfo: mouseeventinfoty); override;
@@ -833,7 +887,6 @@ type
    fchangingnode: ttreelistitem;
    finsertcount: integer;
    finsertindex: integer;
-   fcolorline: colorty;
    fondragbegin: treeitemdragbegineventty;
    fondragover: treeitemdragovereventty;
    fondragdrop: treeitemdragdropeventty;
@@ -844,6 +897,7 @@ type
    procedure setoncreateitem(const value: createtreelistitemeventty);
    function getoncreateitem: createtreelistitemeventty;
    procedure setcolorline(const value: colorty);
+   procedure setcolorlineactive(const value: colorty);
    function getonstatreaditem: statreadtreeitemeventty;
    procedure setonstatreaditem(const avalue: statreadtreeitemeventty);
    function getitems1(const index: integer): ttreelistedititem;
@@ -862,8 +916,16 @@ type
    function getboxglyph_expanded: stockglyphty;
    procedure setboxglyph_expanded(const avalue: stockglyphty);
 //   procedure setoptionsdraw(const avalue: itemdrawoptionsty);
+{
+   function getboxglyphactive_empty: stockglyphty;
+   procedure setboxglyphactive_empty(const avalue: stockglyphty);
+   function getboxglyphactive_expand: stockglyphty;
+   procedure setboxglyphactive_expand(const avalue: stockglyphty);
+   function getboxglyphactive_expanded: stockglyphty;
+   procedure setboxglyphactive_expanded(const avalue: stockglyphty);
+}
   protected
-   fboxids: treeitemboxidarty;
+//   fboxidsactive: treeitemboxidarty;
    procedure freedata(var data); override;
    procedure docreateobject(var instance: tobject); override;
    procedure createitem(out item: tlistitem); override;
@@ -942,6 +1004,14 @@ type
    property insertparentindex: integer read finsertparentindex;
                                   //valid in oncreateitem
   published
+   property colorglyph;
+   property colorglyphactive;
+   property boxglyph_list;
+   property boxglyph_listactive;
+   property boxglyph_checkbox;
+   property boxglyph_checkboxchecked;
+   property boxglyph_checkboxparentnotchecked;
+   property boxglyph_checkboxchildchecked;
    property imnr_base;
    property imnr_expanded;
    property imnr_selected;
@@ -962,14 +1032,24 @@ type
 //   property optionsdraw: itemdrawoptionsty read foptionsdraw 
 //                                           write setoptionsdraw default [];
    property colorline: colorty read fcolorline write setcolorline 
-                                                        default cl_dkgray;
+                                                        default cl_treeline;
+   property colorlineactive: colorty read fcolorlineactive 
+                          write setcolorlineactive default cl_treelineactive;
    property boxglyph_empty: stockglyphty read getboxglyph_empty 
                                write setboxglyph_empty default stg_box;
    property boxglyph_expand: stockglyphty read getboxglyph_expand 
                                write setboxglyph_expand default stg_boxexpand;
    property boxglyph_expanded: stockglyphty read getboxglyph_expanded 
                              write setboxglyph_expanded default stg_boxexpanded;
-
+{
+   property boxglyphactive_empty: stockglyphty read getboxglyphactive_empty 
+                               write setboxglyphactive_empty default stg_box;
+   property boxglyphactive_expand: stockglyphty read getboxglyphactive_expand 
+                           write setboxglyphactive_expand default stg_boxexpand;
+   property boxglyphactive_expanded: stockglyphty 
+                            read getboxglyphactive_expanded 
+                    write setboxglyphactive_expanded default stg_boxexpanded;
+}
    property oncreateitem: createtreelistitemeventty read getoncreateitem
                       write setoncreateitem;
    property onstatwriteitem: statwritetreeitemeventty read getonstatwriteitem
@@ -1090,6 +1170,14 @@ end;
 function titemviewlist.getlayoutinfo(
                           const acellinfo: pcellinfoty): plistitemlayoutinfoty;
 begin
+ if acellinfo <> nil then begin
+  if cds_usecoloractive in acellinfo^.drawstate then begin
+   flayoutinfo.variable.colorglyph:= flistview.colorglyph;
+  end
+  else begin
+   flayoutinfo.variable.colorglyph:= flistview.colorglyphactive;
+  end;
+ end;
  result:= @flayoutinfo;
 end;
 
@@ -1127,12 +1215,12 @@ begin
  end;
 // invalidate;
 end;
-
+{
 function titemviewlist.getcolorglyph: colorty;
 begin
  result:= flistview.fcolorglyph;
 end;
-
+}
 procedure titemviewlist.updateitemvalues(const index: integer;
                                                       const acount: integer);
 begin
@@ -1540,7 +1628,8 @@ end;
 constructor tcustomlistview.create(aowner: tcomponent);
 begin
  foptions:= defaultlistviewoptions;
- fcolorglyph:= cl_black;
+ fcolorglyph:= cl_glyph;
+ fcolorglyphactive:= cl_glyphactive;
  fcellcursor:= cr_default;
  if fitemlist = nil then begin
   fitemlist:= titemviewlist.create(self);
@@ -2189,7 +2278,15 @@ end;
 procedure tcustomlistview.setcolorglyph(const Value: colorty);
 begin
  if fcolorglyph <> value then begin
-  fcolorglyph := Value;
+  fcolorglyph:= Value;
+  invalidate;
+ end;
+end;
+
+procedure tcustomlistview.setcolorglyphactive(const Value: colorty);
+begin
+ if fcolorglyphactive <> value then begin
+  fcolorglyphactive:= Value;
   invalidate;
  end;
 end;
@@ -2606,7 +2703,9 @@ end;
 
 constructor tcustomitemeditlist.create;
 begin
- fcolorglyph:= cl_black;
+ fcolorglyph:= cl_glyph;
+ fcolorglyphactive:= cl_glyphactive;
+ fboxids:= defaultboxids;
  inherited;
  fitemclass:= defaultitemclass();
  fstate:= fstate + [dls_nogridstreaming,dls_propertystreaming];
@@ -2629,12 +2728,98 @@ begin
  fowner.updatelayout();
 end;
 
-procedure tcustomitemeditlist.setcolorglyph(const Value: colorty);
+function tcustomitemeditlist.getimagelist: timagelist;
 begin
- if fcolorglyph <> value then begin
-  fcolorglyph:= value;
+ result:= fboxglyph_list;
+end;
+
+procedure tcustomitemeditlist.setcolorglyph(const avalue: colorty);
+begin
+ if fcolorglyph <> avalue then begin
+  fcolorglyph:= avalue;
   fowner.itemchanged(-1);
  end;
+end;
+
+procedure tcustomitemeditlist.setcolorglyphactive(const avalue: colorty);
+begin
+ if fcolorglyphactive <> avalue then begin
+  fcolorglyphactive:= avalue;
+  fowner.itemchanged(-1);
+ end;
+end;
+
+function tcustomitemeditlist.getboxglyph_checkbox: stockglyphty;
+begin
+ result:= stockglyphty(fboxids[tib_checkbox]);
+end;
+
+procedure tcustomitemeditlist.setboxglyph_checkbox(const avalue: stockglyphty);
+begin
+ if stockglyphty(fboxids[tib_checkbox]) <> avalue then begin
+  stockglyphty(fboxids[tib_checkbox]):= avalue;
+  if fowner <> nil then begin
+   fowner.itemchanged(-1);
+  end;
+ end;
+end;
+
+function tcustomitemeditlist.getboxglyph_checkboxchecked: stockglyphty;
+begin
+ result:= stockglyphty(fboxids[tib_checkboxchecked]);
+end;
+
+procedure tcustomitemeditlist.setboxglyph_checkboxchecked(
+              const avalue: stockglyphty);
+begin
+ if stockglyphty(fboxids[tib_checkboxchecked]) <> avalue then begin
+  stockglyphty(fboxids[tib_checkboxchecked]):= avalue;
+  if fowner <> nil then begin
+   fowner.itemchanged(-1);
+  end;
+ end;
+end;
+
+function tcustomitemeditlist.getboxglyph_checkboxparentnotchecked: stockglyphty;
+begin
+ result:= stockglyphty(fboxids[tib_checkboxparentnotchecked]);
+end;
+
+procedure tcustomitemeditlist.setboxglyph_checkboxparentnotchecked(
+              const avalue: stockglyphty);
+begin
+ if stockglyphty(fboxids[tib_checkboxparentnotchecked]) <> avalue then begin
+  stockglyphty(fboxids[tib_checkboxparentnotchecked]):= avalue;
+  if fowner <> nil then begin
+   fowner.itemchanged(-1);
+  end;
+ end;
+end;
+
+function tcustomitemeditlist.getboxglyph_checkboxchildchecked: stockglyphty;
+begin
+ result:= stockglyphty(fboxids[tib_checkboxchildchecked]);
+end;
+
+procedure tcustomitemeditlist.setboxglyph_checkboxchildchecked(
+              const avalue: stockglyphty);
+begin
+ if stockglyphty(fboxids[tib_checkboxchildchecked]) <> avalue then begin
+  stockglyphty(fboxids[tib_checkboxchildchecked]):= avalue;
+  if fowner <> nil then begin
+   fowner.itemchanged(-1);
+  end;
+ end;
+end;
+
+procedure tcustomitemeditlist.setboxglyp_list(const avalue: timagelist);
+begin
+ setlinkedvar(avalue,tmsecomponent(fboxglyph_list));
+end;
+
+procedure tcustomitemeditlist.setboxglyp_listactive(const avalue: timagelist);
+begin
+ setlinkedvar(avalue,tmsecomponent(fboxglyph_listactive));
 end;
 
 procedure tcustomitemeditlist.assign(const aitems: listitemarty);
@@ -2969,6 +3154,10 @@ function titemedit.getlayoutinfo(
 begin
  if (ws1_painting in fwidgetstate1) or (des_updatelayout in fstate) then begin
   result:= @flayoutinfofocused;
+  with result^.variable do begin
+   colorglyph:= fitemlist.fcolorglyphactive;
+   colorline:= fitemlist.fcolorlineactive;
+  end;
  end
  else begin
   result:= @flayoutinfocell;
@@ -2977,6 +3166,18 @@ begin
            (acellinfo^.rect.cy <> fcalcsize.cy)) then begin
    fcalcsize:= acellinfo^.rect.size;
    calclayout(fcalcsize,flayoutinfocell);
+  end;
+ end;
+ if acellinfo <> nil then begin 
+  with result^.variable do begin
+   if cds_usecoloractive in acellinfo^.drawstate then begin
+    colorglyph:= fitemlist.fcolorglyphactive;
+    colorline:= fitemlist.fcolorlineactive;
+   end
+   else begin
+    colorglyph:= fitemlist.fcolorglyph;
+    colorline:= fitemlist.fcolorline;
+   end;
   end;
  end;
 end;
@@ -3715,12 +3916,12 @@ begin
  updatefilterselect;
 end;
 *)
-
+{
 function titemedit.getcolorglyph: colorty;
 begin
  result:= fitemlist.fcolorglyph;
 end;
-
+}
 procedure titemedit.docellevent(const ownedcol: boolean;
                                             var info: celleventinfoty);
 begin
@@ -3845,7 +4046,6 @@ begin
   fonextendimage(self,cellinfopo,ainfo);
  end;
 end;                                                                      
-
 
 procedure titemedit.getautopaintsize(var asize: sizety);
 begin
@@ -4408,8 +4608,8 @@ end;
 
 constructor ttreeitemeditlist.create;
 begin
- fcolorline:= cl_dkgray;
- fboxids:= defaultboxids;
+ fcolorline:= cl_treeline;
+ fcolorlineactive:= cl_treelineactive;
  inherited;
  fitemclass:= ttreelistedititem;
 end;
@@ -4435,6 +4635,16 @@ procedure ttreeitemeditlist.setcolorline(const value: colorty);
 begin
  if fcolorline <> value then begin
   fcolorline:= value;
+  if fowner <> nil then begin
+   fowner.itemchanged(-1);
+  end;
+ end;
+end;
+
+procedure ttreeitemeditlist.setcolorlineactive(const value: colorty);
+begin
+ if fcolorlineactive <> value then begin
+  fcolorlineactive:= value;
   if fowner <> nil then begin
    fowner.itemchanged(-1);
   end;
@@ -4485,7 +4695,54 @@ begin
   end;
  end;
 end;
+{
+function ttreeitemeditlist.getboxglyphactive_empty: stockglyphty;
+begin
+ result:= stockglyphty(fboxidsactive[tib_empty]);
+end;
 
+procedure ttreeitemeditlist.setboxglyphactive_empty(const avalue: stockglyphty);
+begin
+ if stockglyphty(fboxidsactive[tib_empty]) <> avalue then begin
+  stockglyphty(fboxidsactive[tib_empty]):= avalue;
+  if fowner <> nil then begin
+   fowner.itemchanged(-1);
+  end;
+ end;
+end;
+
+function ttreeitemeditlist.getboxglyphactive_expand: stockglyphty;
+begin
+ result:= stockglyphty(fboxidsactive[tib_expand]);
+end;
+
+procedure ttreeitemeditlist.setboxglyphactive_expand(
+              const avalue: stockglyphty);
+begin
+ if stockglyphty(fboxidsactive[tib_expand]) <> avalue then begin
+  stockglyphty(fboxids[tib_expand]):= avalue;
+  if fowner <> nil then begin
+   fowner.itemchanged(-1);
+  end;
+ end;
+end;
+
+function ttreeitemeditlist.getboxglyphactive_expanded: stockglyphty;
+begin
+ result:= stockglyphty(fboxidsactive[tib_expanded]);
+end;
+
+procedure ttreeitemeditlist.setboxglyphactive_expanded(
+              const avalue: stockglyphty);
+begin
+ if stockglyphty(fboxidsactive[tib_expanded]) <> avalue then begin
+  stockglyphty(fboxidsactive[tib_expanded]):= avalue;
+  if fowner <> nil then begin
+   fowner.itemchanged(-1);
+  end;
+ end;
+end;
+}
 function ttreeitemeditlist.getonstatreaditem: statreadtreeitemeventty;
 begin
  result:= onstatreadtreeitem;
@@ -5940,7 +6197,7 @@ procedure ttreeitemedit.doupdatelayout(const nocolinvalidate: boolean);
 begin
  inherited;
 // flayoutinfofocused.drawoptions:= ttreeitemeditlist(fitemlist).foptionsdraw;
- flayoutinfofocused.colorline:= ttreeitemeditlist(fitemlist).fcolorline;
+// flayoutinfofocused.colorline:= ttreeitemeditlist(fitemlist).fcolorline;
  flayoutinfofocused.boxids:= ttreeitemeditlist(fitemlist).fboxids;
 end;
 

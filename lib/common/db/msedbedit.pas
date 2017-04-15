@@ -9112,7 +9112,7 @@ procedure tdbwidgetindicatorcol.drawcell(const canvas: tcanvas);
 begin
  with cellinfoty(canvas.drawinfopo^),tdbwidgetfixcols(prop) do begin
   if fdatalink.active and (cell.row = fdatalink.activerecord) then begin
-   notext:= true;
+   include(drawstate,cds_notext);
    inherited;
    drawindicatorcell(canvas,fdatalink,fcolorindicator);
   end
@@ -9951,7 +9951,7 @@ procedure tdbstringindicatorcol.drawcell(const canvas: tcanvas);
 begin
  with cellinfoty(canvas.drawinfopo^),tdbstringfixcols(prop) do begin
   if fdatalink.active and (cell.row = fdatalink.activerecord) then begin
-   notext:= true;
+   include(drawstate,cds_notext);
    inherited;
    drawindicatorcell(canvas,fdatalink,fcolorindicator);
   end

@@ -60,10 +60,13 @@ type
                  );
  nodeoptionsty = set of nodeoptionty;
 
- treeitemboxty = (tib_none,tib_empty,tib_expand,tib_expanded);
+ treeitemboxty = (tib_none,tib_empty,tib_expand,tib_expanded,
+                  tib_checkbox,tib_checkboxchecked,
+                  tib_checkboxparentnotchecked,tib_checkboxchildchecked);
  itemdrawoptionty = (ido_solidline);
  itemdrawoptionsty = set of itemdrawoptionty;
  treeitemboxidarty = array[treeitemboxty] of int32;
+ ptreeitemboxidarty = treeitemboxidarty;
 
 const
  invalidatestates = [ns_expanded,ns_selected,ns_checked,
@@ -90,6 +93,9 @@ type
   rowindex: integer;
   widgetstate: widgetstatesty;
   calcautocellsize: boolean;
+  colorline: colorty;
+  colorglyph: colorty;
+  boxids: ptreeitemboxidarty;
  end;
 
  listitemlayoutinfoty = record
@@ -104,7 +110,7 @@ type
   expandboxrect: rectty;
   checkboxrect: rectty;
   checkboxinnerrect: rectty;
-  colorline: colorty;
+//  colorline: colorty;
   boxids: treeitemboxidarty;
 //  drawoptions: itemdrawoptionsty;
   variable: variablelistiteminfoty; //variable
@@ -128,7 +134,7 @@ type
   function getlayoutinfo(const acellinfo: pcellinfoty): plistitemlayoutinfoty;
   procedure updatelayout;
   procedure itemcountchanged;
-  function getcolorglyph: colorty;
+//  function getcolorglyph: colorty;
   procedure updateitemvalues(const index: integer; const count: integer);
   function getcomponentstate: tcomponentstate;
  end;
@@ -147,6 +153,8 @@ type
    procedure setvaluetext1(const avalue: msestring);
    function gettop: boolean;
    procedure settop(const avalue: boolean);
+   function getcheckbox: boolean;
+   procedure setcheckbox(const avalue: boolean);
   protected
    fstate: nodestatesty;
    fstate1: nodestates1ty;
@@ -215,6 +223,7 @@ type
                       //nil -> fowner.imagelist
    property imagenr: integer read fimagenr write setimagenr;
    property selected: boolean read getselected write setselected;
+   property checkbox: boolean read getcheckbox write setcheckbox;
    property checked: boolean read getchecked write setchecked;
    property owner: tcustomitemlist read fowner;
    function getvaluetext: msestring; virtual;
@@ -824,7 +833,7 @@ procedure tlistitem.drawimage(const acanvas: tcanvas;
 var
  int1: integer;
  aimagelist: timagelist;
- glyphno: stockglyphty;
+ glyphno: int32;
  nopaint: boolean;
 begin
  aimagelist:= imagelist;
@@ -833,22 +842,22 @@ begin
   variable.imageextend:= nullsize;
   if not nopaint then begin //acanvas <> nil then begin
    if (no_checkbox in foptions) and (ns_checkbox in self.fstate) then begin
-    glyphno:= stg_checkbox;
+    glyphno:= boxids[tib_checkbox];
     if ns_checked in self.fstate then begin
-     glyphno:= stg_checkboxchecked;
+     glyphno:= boxids[tib_checkboxchecked];
      if (ns_showparentnotchecked in self.fstate) and 
                        (ns1_parentnotchecked in self.fstate1) then begin
-      glyphno:= stg_checkboxparentnotchecked;
+      glyphno:= boxids[tib_checkboxparentnotchecked];
      end;
     end
     else begin
      if (ns_showchildchecked in self.fstate) and 
                        (ns1_childchecked in self.fstate1) then begin
-      glyphno:= stg_checkboxchildchecked;
+      glyphno:= boxids[tib_checkboxchildchecked];
      end;
     end;
-    stockobjects.glyphs.paint(acanvas,ord(glyphno),checkboxrect,
-                   [al_xcentered,al_ycentered],fintf.getcolorglyph);
+    stockobjects.glyphs.paint(acanvas,glyphno,checkboxrect,
+                   [al_xcentered,al_ycentered],variable.colorglyph);
    end;
   end;
   if aimagelist <> nil then begin
@@ -862,7 +871,7 @@ begin
       //todo: check imagepos and the like
      with imagerect do begin
       aimagelist.paint(acanvas,int1,mr(x,y,cx+variable.imageextend.cx,cy),
-                                       imagealignment,fintf.getcolorglyph);
+                                       imagealignment,variable.colorglyph);
      end;
     end;
    end;
@@ -1163,6 +1172,21 @@ begin
  end
  else begin
   setstate(fstate - [ns_checked]);
+ end;
+end;
+
+function tlistitem.getcheckbox: boolean;
+begin
+ result:= ns_checkbox in fstate;
+end;
+
+procedure tlistitem.setcheckbox(const avalue: boolean);
+begin
+ if avalue then begin
+  setstate(fstate + [ns_checkbox]);
+ end
+ else begin
+  setstate(fstate - [ns_checkbox]);
  end;
 end;
 
@@ -3094,15 +3118,15 @@ begin
     end;
     setlength(lines,int1+1);
     if no_solidline in options then begin
-     acanvas.drawlinesegments(lines,colorline);
+     acanvas.drawlinesegments(lines,variable.colorline);
     end
     else begin
-     drawdottedlinesegments(acanvas,lines,colorline);
+     drawdottedlinesegments(acanvas,lines,variable.colorline);
     end;
    end;
    if box <> tib_none then begin
     stockobjects.glyphs.paint(acanvas,boxids[box],expandboxrect,
-                   [al_xcentered,al_ycentered],fintf.getcolorglyph);
+                   [al_xcentered,al_ycentered],variable.colorglyph);
    end;
   end;
  end;
