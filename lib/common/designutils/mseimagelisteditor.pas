@@ -16,7 +16,8 @@ uses
  mseforms,msegui,mseglob,mseguiglob,msebitmap,msesimplewidgets,msegraphics,
  mselistbrowser,msegrids,msefiledialog,msestat,msestatfile,msestrings,
  msegraphedits,msecolordialog,msemenus,msesplitter,msegraphutils,msewidgets,
- mseifiglob,msetypes,msedataedits,mseedit,msedatanodes;
+ mseifiglob,msetypes,msedataedits,mseedit,msedatanodes,mseact,mseapplication,
+ mseificomp,mseificompglob,msestream,sysutils;
 
 const
  imagelisteditorstatname =  'imagelisteditor.sta';
@@ -38,6 +39,7 @@ type
    transparentcolor: tcoloredit;
    masked: tbooleanedit;
    popup: tpopupmenu;
+   versionnum: tenumedit;
    procedure addonexecute(const sender: tobject);
    procedure clearonexecute(const sender: tobject);
    procedure disponitemevent(const sender: tcustomlistview; const index: integer;
@@ -50,34 +52,64 @@ type
    procedure updatemenuexe(const sender: tcustommenu);
    procedure pasteexe(const sender: TObject);
    procedure copyexe(const sender: TObject);
+   procedure versionsetev(const sender: TObject; var avalue: Integer;
+                   var accept: Boolean);
+   procedure versiondatentev(const sender: TObject);
+   procedure createitemev(const sender: tcustomitemlist;
+                   var item: tlistedititem);
+   procedure statupdateev(const sender: TObject; const filer: tstatfiler);
   private
    fcopyitems: integerarty;
    procedure listchange(const sender: tobject);
+   procedure updateversion();
+   function focuseditem: int32;
  end;
 
 function editimagelist(aimagelist: timagelist): modalresultty;
 
 implementation
 uses
- mseimagelisteditor_mfm,sysutils,mseformatstr,msegridsglob,mseactions,
+ mseimagelisteditor_mfm,mseformatstr,msegridsglob,mseactions,
  msekeyboard,msefileutils,msegraphicstream;
 
+var
+ currentversion: int32;
+
+type
+ timageitem = class(tlistedititem)
+  public
+   procedure drawimage(const acanvas: tcanvas;
+                           var alayoutinfo: listitemlayoutinfoty) override;
+ end;
+  
 function editimagelist(aimagelist: timagelist): modalresultty;
 var
  dialog: timagelisteditorfo;
+ i1: int32;
 begin
  dialog:= timagelisteditorfo.create(nil);
  try
   with dialog do begin
    imagelist.onchange:= {$ifdef FPC}@{$endif}listchange;
    imagelist.Assign(aimagelist);
+   for i1:= 0 to imagelist.versioncount - 1 do begin
+    versionnum.dropdown.cols.addrow([inttostrmse(i1)]);
+   end;
+   if (currentversion < 0) or 
+              (currentversion >= imagelist.versioncount) then begin
+    currentversion:= 0;
+   end;
+   versionnum.value:= currentversion;
+//   imagelist.versioncurrent:= versionnum.value;
+   updateversion();
+
    result:= show(true);
    if result = mr_ok then begin
     aimagelist.Assign(imagelist);
    end;
   end;
  finally
-  dialog.Free;
+  dialog.destroy();
  end;
 end;
 
@@ -88,6 +120,7 @@ var
  bmp: tmaskedbitmap;
  ar1: filenamearty;
  int1: integer;
+ i1: int32;
 begin
  filedialog.controller.filename:= filedialog.controller.lastdir;
  filedialog.controller.filterlist.asarraya:= graphicfilefilternames;
@@ -96,6 +129,7 @@ begin
   unquotefilename(filedialog.controller.filename,ar1);
   bmp:= tmaskedbitmap.create(bmk_rgb);
   try
+   i1:= focuseditem;
    for int1:= 0 to high(ar1) do begin
     bmp.transparentcolor:= cl_none;
     bmp.loadfromfile(ar1[int1],
@@ -114,11 +148,26 @@ begin
       end;
      end;
     end;
-    if stretch.value then begin
-     imagelist.addimage(bmp,[al_stretchx,al_stretchy,al_intpol]);
+    if currentversion = 0 then begin
+     if stretch.value then begin
+      imagelist.addimage(bmp,[al_stretchx,al_stretchy,al_intpol]);
+     end
+     else begin
+      imagelist.addimage(bmp);
+     end;
     end
     else begin
-     imagelist.addimage(bmp);
+     if stretch.value then begin
+      imagelist.setimage(i1,bmp,[al_stretchx,al_stretchy,al_intpol],
+                                                         currentversion);
+     end
+     else begin
+      imagelist.setimage(i1,bmp,[],currentversion);
+     end;
+     inc(i1);
+     if i1 >= imagelist.count then begin
+      i1:= 0;
+     end;
     end;
    end;
   finally
@@ -159,26 +208,28 @@ begin
  if info.eventkind = cek_keydown then begin
   if (info.keyeventinfopo^.key = key_delete) and 
       (info.keyeventinfopo^.shiftstate*singlekeyshiftstatesmask = []) then begin
-   fcopyitems:= nil;
-   imagelist.beginupdate;
-   try
-    int2:= 0;
-    for int1:= 0 to disp.itemlist.count - 1 do begin
-     if ns_selected in disp.itemlist[int1].state then begin
-      imagelist.deleteimage(int2);
-     end
-     else begin
-      inc(int2);
+   if currentversion = 0 then begin
+    fcopyitems:= nil;
+    imagelist.beginupdate;
+    try
+     int2:= 0;
+     for int1:= 0 to disp.itemlist.count - 1 do begin
+      if ns_selected in disp.itemlist[int1].state then begin
+       imagelist.deleteimage(int2);
+      end
+      else begin
+       inc(int2);
+      end;
      end;
-    end;
-    with disp do begin
-     datacols.clearselection;
-     if focusedindex >= 0 then begin
-      items[focusedindex].selected:= true;
+     with disp do begin
+      datacols.clearselection;
+      if focusedindex >= 0 then begin
+       items[focusedindex].selected:= true;
+      end;
      end;
+    finally
+     imagelist.endupdate;
     end;
-   finally
-    imagelist.endupdate;
    end;
   end
   else begin
@@ -197,7 +248,7 @@ end;
 procedure timagelisteditorfo.disponitemsmoved(const sender: tcustomgrid;
                   const fromindex,toindex,count: integer);
 begin
- imagelist.moveimage(fromindex,toindex);
+ imagelist.moveimage(fromindex,toindex,currentversion);
  listchange(nil);
 end;
 
@@ -218,6 +269,27 @@ begin
  disp.endupdate;
 end;
 
+procedure timagelisteditorfo.updateversion();
+begin
+ currentversion:= versionnum.value;
+ if currentversion = 0 then begin
+  clear.enabled:= true;
+  add.caption:= '&Add';
+ end
+ else begin
+  clear.enabled:= false;
+  add.caption:= '&Replace';
+ end;
+end;
+
+function timagelisteditorfo.focuseditem: int32;
+begin
+ result:= disp.focusedindex;
+ if result < 0 then begin
+  result:= 0;
+ end;
+end;
+
 procedure timagelisteditorfo.layoutchanged(const sender: tcustomlistview);
 begin
  with sender do begin
@@ -234,7 +306,7 @@ end;
 procedure timagelisteditorfo.pasteexe(const sender: TObject);
 var
  insertid,copystart: int32;
- i1: int32;
+ i1,i2: int32;
  bmp1: tmaskedbitmap;
 begin
  if fcopyitems <> nil then begin
@@ -244,12 +316,25 @@ begin
   imagelist.beginupdate();
   insertid:= disp.focusedindex;
   copystart:= imagelist.count;
-  for i1:= 0 to high(fcopyitems) do begin
-   imagelist.getimage(fcopyitems[i1],bmp1);  
-   imagelist.addimage(bmp1);  
-  end;
-  for i1:= 0 to high(fcopyitems) do begin
-   imagelist.moveimage(copystart+i1,insertid+i1);
+  if currentversion = 0 then begin
+   for i1:= 0 to high(fcopyitems) do begin
+    imagelist.getimage(fcopyitems[i1],bmp1);  
+    imagelist.addimage(bmp1);  
+   end;
+   for i1:= 0 to high(fcopyitems) do begin
+    imagelist.moveimage(copystart+i1,insertid+i1);
+   end;
+  end
+  else begin
+   i2:= focuseditem;
+   for i1:= 0 to high(fcopyitems) do begin
+    imagelist.getimage(fcopyitems[i1],bmp1,currentversion);
+    imagelist.setimage(i2,bmp1,[],currentversion);
+    inc(i2);
+    if i2 >= imagelist.count then begin
+     i2:= 0;
+    end;
+   end;
   end;
   imagelist.endupdate();
   bmp1.free;
@@ -259,6 +344,45 @@ end;
 procedure timagelisteditorfo.copyexe(const sender: TObject);
 begin
  fcopyitems:= disp.getselectedindexes;
+end;
+
+procedure timagelisteditorfo.versionsetev(const sender: TObject;
+               var avalue: Integer; var accept: Boolean);
+begin
+ if avalue >= imagelist.versioncount then begin
+  avalue:= imagelist.versioncount -1;
+ end;
+ if avalue < 0 then begin
+  avalue:= 0;
+ end;
+end;
+
+procedure timagelisteditorfo.versiondatentev(const sender: TObject);
+begin
+ fcopyitems:= nil;
+ updateversion();
+ disp.invalidate();
+end;
+
+procedure timagelisteditorfo.createitemev(const sender: tcustomitemlist;
+               var item: tlistedititem);
+begin
+ item:= timageitem.create(sender);
+end;
+
+procedure timagelisteditorfo.statupdateev(const sender: TObject;
+               const filer: tstatfiler);
+begin
+ filer.updatevalue('currentversion',currentversion);
+end;
+
+{ timageitem }
+
+procedure timageitem.drawimage(const acanvas: tcanvas;
+               var alayoutinfo: listitemlayoutinfoty);
+begin
+ alayoutinfo.variable.imageversion:= currentversion;
+ inherited;
 end;
 
 end.

@@ -989,6 +989,7 @@ procedure registerpropertyeditor(propertytype: ptypeinfo;
 function imagefilepropedit(out afilename: filenamety;
                                          out aformat: string): modalresultty;
 function getcomponentpropname(const acomp: tcomponent): msestring;
+function wantpropertydelete(const fromval,toval: int32): boolean;
   
 implementation
 uses
@@ -1022,6 +1023,14 @@ var
  fpropertyeditors: tpropertyeditors;
  ftextpropertyfont: tfont;
  mo: tmsepropertyeditorsmo;
+
+function wantpropertydelete(const fromval,toval: int32): boolean;
+begin
+ result:= (toval < fromval) or 
+          askok(mo.c[ord(wishdelete)]+' '+inttostrmse(fromval) +
+         ' '+mo.c[ord(str_to)]+' '+ inttostrmse(toval) + '?',
+         stockobjects.captions[sc_confirmation]);
+end;
 
 function getcomponentpropname(const acomp: tcomponent): msestring;
 begin

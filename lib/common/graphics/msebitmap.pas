@@ -389,7 +389,8 @@ type
   private
    fsize: sizety;
    fcolcount,frowcount: integer;
-   fbitmap: tmaskedbitmap;
+//   fbitmap: tmaskedbitmap;
+   fbitmaps: array of tmaskedbitmap;
    fcount: integer;
    fupdating: integer;
    fonchange: notifyeventty;
@@ -412,8 +413,9 @@ type
    procedure settransparentcolor(avalue: colorty);
    procedure setheight(const Value: integer);
    procedure setwidth(const Value: integer);
-   procedure setbitmap(const Value: tmaskedbitmap);
-   procedure copyimages(const image: tmaskedbitmap; const destindex: integer);
+//   procedure setbitmap(const Value: tmaskedbitmap);
+   procedure copyimages(const image: tmaskedbitmap; const destindex: integer;
+                                                 const aversion: int32);
    function getcolormask: boolean;
    procedure setcolormask(const avalue: boolean);
    function getkind: bitmapkindty;
@@ -433,16 +435,26 @@ type
    procedure setcornermask_bottomleft(const avalue: msestring);
    procedure setcornermask_bottomright(const avalue: msestring);
    procedure setcornermask_topright(const avalue: msestring);
+   function getversioncount: int32;
+   procedure setversioncount(const avalue: int32);
+   function getbitmap: tmaskedbitmap;
+//   procedure setversioncurrent(avalue: int32);
+   function getbitmaps(const aindex: int32): tmaskedbitmap;
   protected
+   fversionhigh: int32; //versioncount - 1 
+//   fversioncurrent: int32; //use for painting
    fcornermaskmaxtopleft: int32; //biggest value of cornermask
    fcornermaskmaxbottomleft: int32; //biggest value of cornermask
    fcornermaskmaxbottomright: int32; //biggest value of cornermask
    fcornermaskmaxtopright: int32; //biggest value of cornermask
+   procedure checkversionindex(const aindex: int32);
    function indextoorg(index: integer): pointty;
    procedure change;
    procedure defineproperties(filer: tfiler); override;
    procedure cornermaskchanged();
    procedure loaded() override;
+   procedure writeimage(stream: tstream);
+   procedure readimage(stream: tstream);
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -452,61 +464,74 @@ type
 
    procedure clear;
    procedure deleteimage(const index: integer);
-   procedure moveimage(const fromindex: integer; const toindex: integer);
+   procedure moveimage(const fromindex: integer; const toindex: integer;
+                                                 const aversion: int32 = 0);
    procedure setimage(index: integer; image: tmaskedbitmap;
          const source: rectty; 
-         const aalignment: alignmentsty = []); overload;
+         const aalignment: alignmentsty = [];
+                         const aversion: int32 = 0); overload;
    procedure setimage(index: integer; image: tmaskedbitmap; 
                                       //nil -> empty item
-                     const aalignment: alignmentsty = []); overload;
-   procedure getimage(const index: integer; const dest: tmaskedbitmap);
+                     const aalignment: alignmentsty = [];
+                         const aversion: int32 = 0); overload;
+   procedure getimage(const index: integer; const dest: tmaskedbitmap;
+                                                 const aversion: int32 = 0);
    function addimage(const image: tmaskedbitmap; //nil -> empty item
-                              const aalignment: alignmentsty = []): integer;
+                              const aalignment: alignmentsty = []{;
+                         const aversion: int32 = 0}): integer;
 
    procedure clipcornermask(const canvas: tcanvas;
                       const arect: rectty; const ahiddenedges: edgesty);
    procedure paint(const acanvas: tcanvas; const index: integer;
                    const dest: pointty; const acolor: colorty = cl_default;
                    const acolorbackground: colorty = cl_default;
-                   const aopacity: colorty = cl_default
+                   const aopacity: colorty = cl_default;
+                         const aversion: int32 = 0
             ); overload;
    procedure paint(const acanvas: tcanvas; const index: integer;
                    const dest: rectty; const alignment: alignmentsty = [];
                    const acolor: colorty = cl_default;
                    const acolorbackground: colorty = cl_default;
-                   const aopacity: colorty = cl_default
+                   const aopacity: colorty = cl_default;
+                         const aversion: int32 = 0
             ); overload;
    procedure paint(const acanvas: tcanvas; const index: integer;
                    const dest: rectty; source: rectty;
                    const alignment: alignmentsty = [];
                    const acolor: colorty = cl_default;
                    const acolorbackground: colorty = cl_default;
-                   const aopacity: colorty = cl_default
+                   const aopacity: colorty = cl_default;
+                         const aversion: int32 = 0
             ); overload;
    procedure paintlookup(const acanvas: tcanvas; const index: integer;
                    const dest: pointty; const acolor: colorty = cl_default;
                    const acolorbackground: colorty = cl_default;
-                   const aopacity: colorty = cl_default
+                   const aopacity: colorty = cl_default;
+                         const aversion: int32 = 0
             ); overload;
    procedure paintlookup(const acanvas: tcanvas; const index: integer;
                    const dest: rectty; const alignment: alignmentsty = [];
                    const acolor: colorty = cl_default;
                    const acolorbackground: colorty = cl_default;
-                   const aopacity: colorty = cl_default
+                   const aopacity: colorty = cl_default;
+                         const aversion: int32 = 0
             ); overload;
    procedure paintlookup(const acanvas: tcanvas; const index: integer;
                    const dest: rectty; source: rectty;
                    const alignment: alignmentsty = [];
                    const acolor: colorty = cl_default;
                    const acolorbackground: colorty = cl_default;
-                   const aopacity: colorty = cl_default
+                   const aopacity: colorty = cl_default;
+                         const aversion: int32 = 0
             ); overload;
    function lookup(const aindex: int32): int32;
 
    procedure assign(sender: tpersistent); override;
 
    property size: sizety read fsize write setsize;
-   property bitmap: tmaskedbitmap read fbitmap write setbitmap;
+//   property bitmap: tmaskedbitmap read fbitmap write setbitmap;
+   property bitmap: tmaskedbitmap read getbitmap;
+   property bitmaps[const aindex: int32]: tmaskedbitmap read getbitmaps;
 
    property kind: bitmapkindty read getkind write setkind default bmk_rgb;
    property maskkind: bitmapkindty read getmaskkind 
@@ -521,6 +546,10 @@ type
                                               write setcolormask default false;
    property hascornermask: boolean read fhascornermask;
   published
+   property versioncount: int32 read getversioncount 
+                                write setversioncount default 1; //first!
+//   property versioncurrent: int32 read fversioncurrent 
+//                                write setversioncurrent default 0;
    property width: integer read fsize.cx
                  write setwidth default defaultimagelistwidth;
    property height: integer read fsize.cy
@@ -570,7 +599,8 @@ procedure freeimage(var aimage: imagety);
 
 implementation
 uses
- mseguiintf,msebits,msestream,mseevent,msesys,msearrayutils,msegraphicstream
+ mseguiintf,msebits,msestream,mseevent,msesys,msearrayutils,msegraphicstream,
+ rtlconsts
  {$ifndef FPC},classes_del{$endif};
 
 type
@@ -2809,18 +2839,100 @@ end;
 { timagelist }
 
 constructor timagelist.create(aowner: tcomponent);
+var
+ bmp1: tmaskedbitmap;
 begin
  fsize:= defaultimagelistsize;
  inherited;
- fbitmap:= tmaskedbitmap.create(bmk_rgb);
- fbitmap.transparentcolor:= cl_none;
+ bmp1:= tmaskedbitmap.create(bmk_rgb);
+ bmp1.transparentcolor:= cl_none;
+ setlength(fbitmaps,1);
+ fbitmaps[0]:= bmp1;
  masked:= true;
 end;
 
 destructor timagelist.destroy;
 begin
- fbitmap.Free;
+ if fbitmaps <> nil then begin //otherwise exception in constructor
+  versioncount:= 1;
+  fbitmaps[0].Free;
+ end;
  inherited;
+end;
+
+function timagelist.getversioncount: int32;
+begin
+ result:= fversionhigh + 1;
+end;
+
+procedure timagelist.setversioncount(const avalue: int32);
+var
+ i1,i2: int32;
+ bmp1,bmp2: tmaskedbitmap;
+begin
+ i1:= avalue - 1;
+ if i1 < 0 then begin
+  i1:= 0;
+ end;
+ if i1 <> fversionhigh then begin
+  if i1 < fversionhigh then begin
+   for i2:= fversionhigh downto i1 + 1 do begin
+    fbitmaps[i2].destroy();
+   end;
+   setlength(fbitmaps,i1+1);
+  end
+  else begin
+   bmp1:= fbitmaps[0];
+   setlength(fbitmaps,avalue);
+   for i2:= fversionhigh + 1 to i1 do begin
+    bmp2:= tmaskedbitmap.create(bmp1.kind);
+    if not (csreading in componentstate) then begin
+     bmp2.assign(bmp1);
+    end
+    else begin
+     bmp2.transparentcolor:= bmp1.transparentcolor;
+     bmp2.options:= bmp1.options;
+     bmp2.size:= bmp1.size;
+    end;
+    fbitmaps[i2]:= bmp2;
+   end;
+  end;
+  fversionhigh:= i1;
+{
+  if fversioncurrent > i1 then begin
+   fversioncurrent:= 0;
+  end;
+}
+ end;
+end;
+{
+procedure timagelist.setversioncurrent(avalue: int32);
+begin
+ if (avalue < 0) or (avalue > fversionhigh) then begin
+  avalue:= 0;
+ end;
+ if fversioncurrent <> avalue then begin
+  fversioncurrent:= avalue;
+  change();
+ end;
+end;
+}
+procedure timagelist.checkversionindex(const aindex: int32);
+begin
+ if (aindex < 0) or (aindex > fversionhigh) then begin
+  tlist.Error(SListIndexError, aIndex);
+ end;
+end;
+
+function timagelist.getbitmaps(const aindex: int32): tmaskedbitmap;
+begin
+ checkversionindex(aindex);
+ result:= fbitmaps[aindex];
+end;
+
+function timagelist.getbitmap: tmaskedbitmap;
+begin
+ result:= fbitmaps[0];
 end;
 
 procedure timagelist.clear;
@@ -2835,40 +2947,43 @@ var
  sizebefore: sizety;
  countbefore: integer;
  rect1,rect2: rectty;
+ i1: int32;
 begin
  if not sizeisequal(fsize,avalue) then begin
   sizebefore:= fsize;
   fsize:= avalue;
   if fcount <> 0 then begin
    beginupdate;
-   bmp1:= tmaskedbitmap.create(bmk_rgb);
-   bmp1.assign(fbitmap);
-   bmp2:= tmaskedbitmap.create(bmk_rgb);
-   bmp2.assign(fbitmap); //get mask and color modes
-   bmp2.size:= sizebefore;
-   fbitmap.clear;
-   countbefore:= fcount;
-   count:= 0;
-   count:= countbefore;
-   rect1:= makerect(nullpoint,fsize);
-   rect2:= makerect(nullpoint,sizebefore);
-   centerinrect(rect1,rect2);
-   for int1:= 0 to count - 1 do begin
-    bmp2.canvas.copyarea(bmp1.canvas,rect2,nullpoint);
-    if bmp1.mask <> nil then begin
-     bmp2.mask.canvas.copyarea(bmp1.mask.canvas,rect2,nullpoint);
-    end;
-    setimage(int1,bmp2,rect1);
-    with rect2 do begin
-     inc(x,cx);
-     if x >= bmp1.fsize.cx then begin
-      x:= 0;
-      inc(y,cy);
+   for i1:= 0 to fversionhigh do begin
+    bmp1:= tmaskedbitmap.create(bmk_rgb);
+    bmp1.assign(fbitmaps[i1]);
+    bmp2:= tmaskedbitmap.create(bmk_rgb);
+    bmp2.assign(fbitmaps[i1]); //get mask and color modes
+    bmp2.size:= sizebefore;
+    fbitmaps[i1].clear;
+    countbefore:= fcount;
+    count:= 0;
+    count:= countbefore;
+    rect1:= makerect(nullpoint,fsize);
+    rect2:= makerect(nullpoint,sizebefore);
+    centerinrect(rect1,rect2);
+    for int1:= 0 to count - 1 do begin
+     bmp2.canvas.copyarea(bmp1.canvas,rect2,nullpoint);
+     if bmp1.mask <> nil then begin
+      bmp2.mask.canvas.copyarea(bmp1.mask.canvas,rect2,nullpoint);
+     end;
+     setimage(int1,bmp2,rect1);
+     with rect2 do begin
+      inc(x,cx);
+      if x >= bmp1.fsize.cx then begin
+       x:= 0;
+       inc(y,cy);
+      end;
      end;
     end;
+    bmp1.free;
+    bmp2.free;
    end;
-   bmp1.free;
-   bmp2.free;
    endupdate;
   end;
  end;
@@ -2885,12 +3000,16 @@ end;
 
 function timagelist.getmasked: boolean;
 begin
- result:= fbitmap.masked;
+ result:= fbitmaps[0].masked;
 end;
 
 procedure timagelist.setmasked(const Value: boolean);
+var
+ i1: int32;
 begin
- fbitmap.masked:= value;
+ for i1:= 0 to fversionhigh do begin
+  fbitmaps[i1].masked:= value;
+ end;
 end;
 {
 function timagelist.getmonochrome: boolean;
@@ -2900,22 +3019,30 @@ end;
 }
 function timagelist.getgraymask: boolean;
 begin
- result:= fbitmap.graymask;
+ result:= fbitmaps[0].graymask;
 end;
 
 procedure timagelist.setgraymask(const avalue: boolean);
+var
+ i1: int32;
 begin
- fbitmap.graymask:= avalue;
+ for i1:= 0 to fversionhigh do begin
+  fbitmaps[i1].graymask:= avalue;
+ end;
 end;
 
 function timagelist.getcolormask: boolean;
 begin
- result:= fbitmap.colormask;
+ result:= fbitmaps[0].colormask;
 end;
 
 procedure timagelist.setcolormask(const avalue: boolean);
+var
+ i1: int32;
 begin
- fbitmap.colormask:= avalue;
+ for i1:= 0 to fversionhigh do begin
+  fbitmaps[i1].colormask:= avalue;
+ end;
 end;
 {
 procedure timagelist.setmonochrome(const Value: boolean);
@@ -2930,10 +3057,13 @@ procedure timagelist.paint(const acanvas: tcanvas; const index: integer;
          const dest: rectty;  const alignment: alignmentsty = [];
          const acolor: colorty = cl_default;
          const acolorbackground: colorty = cl_default;
-                         const aopacity: colorty = cl_default);
+                         const aopacity: colorty = cl_default;
+                         const aversion: int32 = 0);
 begin
  if (index >= 0) and (index < count) then begin
-  fbitmap.paint(acanvas,dest,makerect(indextoorg(index),fsize),alignment,acolor,
+  checkversionindex(aversion);
+  fbitmaps[aversion].paint(acanvas,dest,makerect(indextoorg(index),fsize),
+                                   alignment,acolor,
                                           acolorbackground,aopacity);
  end;
 end;
@@ -2943,12 +3073,14 @@ procedure timagelist.paint(const acanvas: tcanvas; const index: integer;
          const alignment: alignmentsty = [];
          const acolor: colorty = cl_default;
          const acolorbackground: colorty = cl_default;
-                         const aopacity: colorty = cl_default);
+                         const aopacity: colorty = cl_default;
+                         const aversion: int32 = 0);
 
 begin
- addpoint1(source.pos,indextoorg(index));
  if (index >= 0) and (index < count) then begin
-  fbitmap.paint(acanvas,dest,source,alignment,acolor,acolorbackground,
+  addpoint1(source.pos,indextoorg(index));
+  checkversionindex(aversion);
+  fbitmaps[aversion].paint(acanvas,dest,source,alignment,acolor,acolorbackground,
                               aopacity);
  end;
 end;
@@ -2956,18 +3088,21 @@ end;
 procedure timagelist.paintlookup(const acanvas: tcanvas; const index: integer;
                const dest: pointty; const acolor: colorty = cl_default;
                const acolorbackground: colorty = cl_default;
-               const aopacity: colorty = cl_default             );
+               const aopacity: colorty = cl_default;
+                         const aversion: int32 = 0);
 begin
- paint(acanvas,lookup(index),dest,acolor,acolorbackground,aopacity);
+ paint(acanvas,lookup(index),dest,acolor,acolorbackground,aopacity,aversion);
 end;
 
 procedure timagelist.paintlookup(const acanvas: tcanvas; const index: integer;
                const dest: rectty; const alignment: alignmentsty = [];
                const acolor: colorty = cl_default;
                const acolorbackground: colorty = cl_default;
-               const aopacity: colorty = cl_default             );
+               const aopacity: colorty = cl_default;
+                         const aversion: int32 = 0);
 begin
- paint(acanvas,lookup(index),dest,alignment,acolor,acolorbackground,aopacity);
+ paint(acanvas,lookup(index),dest,alignment,acolor,acolorbackground,aopacity,
+                                   aversion);
 end;
 
 procedure timagelist.paintlookup(const acanvas: tcanvas; const index: integer;
@@ -2975,9 +3110,11 @@ procedure timagelist.paintlookup(const acanvas: tcanvas; const index: integer;
                const alignment: alignmentsty = [];
                const acolor: colorty = cl_default;
                const acolorbackground: colorty = cl_default;
-               const aopacity: colorty = cl_default             );
+               const aopacity: colorty = cl_default;
+                         const aversion: int32 = 0);
 begin
- paint(acanvas,lookup(index),dest,alignment,acolor,acolorbackground,aopacity);
+ paint(acanvas,lookup(index),dest,alignment,acolor,acolorbackground,aopacity,
+                           aversion);
 end;
 
 procedure timagelist.clipcornermask(const canvas: tcanvas;
@@ -3049,43 +3186,54 @@ end;
 procedure timagelist.paint(const acanvas: tcanvas; const index: integer;
                    const dest: pointty; const acolor: colorty = cl_default;
                    const acolorbackground: colorty = cl_default;
-                         const aopacity: colorty = cl_default);
+                         const aopacity: colorty = cl_default;
+                         const aversion: int32 = 0);
 begin
  paint(acanvas,index,makerect(dest,size),[],acolor,acolorbackground,
-                              aopacity);
+                              aopacity,aversion);
 end;
 
 function timagelist.gettransparentcolor: colorty;
 begin
- result:= fbitmap.ftransparentcolor;
+ result:= fbitmaps[0].ftransparentcolor;
 end;
 
 procedure timagelist.settransparentcolor(avalue: colorty);
+var
+ i1: int32;
 begin
  if avalue = cl_invalid then begin
   avalue:= cl_none;
  end;
- fbitmap.transparentcolor:= avalue;
+ for i1:= 0 to fversionhigh do begin
+  fbitmaps[i1].transparentcolor:= avalue;
+ end;
 end;
 
 procedure timagelist.setimage(index: integer; image: tmaskedbitmap;
                       const source: rectty;
-                      const aalignment: alignmentsty = []);
+                      const aalignment: alignmentsty = [];
+                         const aversion: int32 = 0);
 var
  rect1,rect2,destrect: rectty;
  bo1: boolean;
  ima1: tmaskedbitmap;
+ bmp1: tmaskedbitmap;
 begin
  rect2.pos:= indextoorg(index);
  rect2.size:= fsize;
+ checkversionindex(aversion);
+ bmp1:= fbitmaps[aversion];
  if image = nil then begin
-  fbitmap.canvas.fillrect(rect2,fbitmap.colorbackground);
+  bmp1.canvas.fillrect(rect2,
+                           bmp1.colorbackground);
   if masked then begin
-   if fbitmap.mask.kind = bmk_mono then begin
-    fbitmap.mask.canvas.fillrect(rect2,cl_0);
+   if bmp1.mask.kind = bmk_mono then begin
+    bmp1.mask.canvas.fillrect(rect2,cl_0);
    end
    else begin
-    fbitmap.mask.canvas.fillrect(rect2,fbitmap.fmaskcolorbackground);
+    bmp1.mask.canvas.fillrect(
+                         rect2,bmp1.fmaskcolorbackground);
    end;
   end;
  end
@@ -3109,116 +3257,101 @@ begin
    end;
   end;
   if masked then begin
-   fbitmap.copyarea(ima1,rect1,rect2,aalignment,rop_copy,false);
+   bmp1.copyarea(ima1,rect1,rect2,aalignment,rop_copy,false);
    if ima1.masked then begin
     if bo1 then begin
-     if fbitmap.mask.kind = bmk_mono then begin
-      fbitmap.mask.canvas.fillrect(rect2,cl_0);
+     if bmp1.mask.kind = bmk_mono then begin
+      bmp1.mask.canvas.fillrect(rect2,cl_0);
      end
      else begin
-      fbitmap.mask.canvas.fillrect(rect2,fbitmap.fmaskcolorbackground);
+      bmp1.mask.canvas.fillrect(rect2,
+                     bmp1.fmaskcolorbackground);
      end;
     end;
-    fbitmap.mask.copyarea(ima1.mask,rect1,rect2,aalignment,rop_copy,false,
-            fbitmap.fmaskcolorforeground,fbitmap.fmaskcolorbackground);
+    bmp1.mask.copyarea(
+                  ima1.mask,rect1,rect2,aalignment,rop_copy,false,
+                            bmp1.fmaskcolorforeground,
+                                   bmp1.fmaskcolorbackground);
    end
    else begin
     if bo1 then begin
-     if fbitmap.mask.kind = bmk_mono then begin
-      fbitmap.mask.canvas.fillrect(rect2,cl_0);
+     if bmp1.mask.kind = bmk_mono then begin
+      bmp1.mask.canvas.fillrect(rect2,cl_0);
      end
      else begin
-      fbitmap.mask.canvas.fillrect(rect2,fbitmap.fmaskcolorbackground);
+      bmp1.mask.canvas.fillrect(rect2,
+                                   bmp1.fmaskcolorbackground);
      end;
     end;
-    if fbitmap.mask.kind = bmk_mono then begin
-     fbitmap.mask.canvas.fillrect(destrect,cl_1);
+    if bmp1.mask.kind = bmk_mono then begin
+     bmp1.mask.canvas.fillrect(destrect,cl_1);
     end
     else begin
-     fbitmap.mask.canvas.fillrect(destrect,fbitmap.fmaskcolorforeground);
+     bmp1.mask.canvas.fillrect(
+                         destrect,bmp1.fmaskcolorforeground);
     end;
    end;
   end
   else begin
    if bo1 then begin
     if kind = bmk_mono then begin
-     fbitmap.canvas.fillrect(rect2,cl_0);
+     bmp1.canvas.fillrect(rect2,cl_0);
     end
     else begin
-     fbitmap.canvas.fillrect(rect2,fbitmap.fcolorbackground);
+     bmp1.canvas.fillrect(rect2,bmp1.fcolorbackground);
     end;
    end;
-   fbitmap.copyarea(ima1,rect1,rect2,aalignment,rop_copy,false);
+   bmp1.copyarea(ima1,rect1,rect2,aalignment,rop_copy,false);
   end;
  end;
  change;
 end;
 
-procedure timagelist.getimage(const index: integer; const dest: tmaskedbitmap);
+procedure timagelist.getimage(const index: integer; const dest: tmaskedbitmap;
+                         const aversion: int32 = 0);
 var
  rect1: rectty;
+ bmp1: tmaskedbitmap;
 begin
  dest.clear;
  if (index >= 0) or (index < fcount) then begin
+  checkversionindex(aversion);
+  bmp1:= fbitmaps[aversion];
   dest.beginupdate();
-  dest.kind:= fbitmap.kind;
-  dest.masked:= fbitmap.masked;
+  dest.kind:= bmp1.kind;
+  dest.masked:= bmp1.masked;
   if dest.masked then begin
-   dest.mask.kind:= fbitmap.mask.kind;
+   dest.mask.kind:= bmp1.mask.kind;
   end;
-  dest.transparentcolor:= fbitmap.transparentcolor;
-  dest.colorforeground:= fbitmap.colorforeground;
-  dest.colorbackground:= fbitmap.colorbackground;
+  dest.transparentcolor:= bmp1.transparentcolor;
+  dest.colorforeground:= bmp1.colorforeground;
+  dest.colorbackground:= bmp1.colorbackground;
   rect1.pos:= indextoorg(index);
   rect1.size:= size;
   dest.size:= size;
-  dest.copyarea(fbitmap,rect1,nullpoint,rop_copy,false);
+  dest.copyarea(bmp1,rect1,nullpoint,rop_copy,false);
   if dest.masked then begin
-   dest.mask.copyarea(fbitmap.fmask,rect1,nullpoint,rop_copy,false);
+   dest.mask.copyarea(bmp1.fmask,rect1,nullpoint,rop_copy,false);
   end;
   dest.endupdate();
  end;
-{
- if (index < 0) or (index >= fcount) then begin
-  dest.clear;
- end
- else begin
-  dest.beginupdate();
-  rect1.pos:= indextoorg(index);
-  rect1.size:= size;
-  dest.clear;
-  dest.size:= size;
-  dest.copyarea(fbitmap,rect1,nullpoint,rop_copy,masked and not dest.masked);
-  if masked and dest.masked then begin
-   dest.mask.copyarea(fbitmap.fmask,rect1,nullpoint,rop_copy,false,
-               dest.fmaskcolorforeground,dest.fmaskcolorbackground);
-  end;
-  if dest.masked and not masked then begin
-   if dest.mask.kind = bmk_mono then begin
-    dest.mask.init(cl_1);
-   end
-   else begin
-    dest.mask.init(dest.fmaskcolorforeground);
-   end;
-  end;
-  dest.endupdate();
- end;
-}
 end;
 
 procedure timagelist.setimage(index: integer; image: tmaskedbitmap;
-                                     const aalignment: alignmentsty = []);
+                                     const aalignment: alignmentsty = [];
+                                                 const aversion: int32 = 0);
 begin
  if image = nil then begin
-  setimage(index,nil,makerect(nullpoint,fsize),[]);
+  setimage(index,nil,makerect(nullpoint,fsize),[],aversion);
  end
  else begin
-  setimage(index,image,makerect(nullpoint,image.fsize),aalignment);
+  setimage(index,image,makerect(nullpoint,image.fsize),aalignment,aversion);
  end;
 end;
 
 procedure timagelist.copyimages(const image: tmaskedbitmap; 
-                                                 const destindex: integer);
+                                                 const destindex: integer;
+                                                 const aversion: int32);
 var
  rect1: rectty;
  int1,int2: integer;
@@ -3246,7 +3379,7 @@ begin
    if int1 >= fcount then begin
     exit;
    end;
-   setimage(int1,image,rect1);
+   setimage(int1,image,rect1,[],aversion);
    inc(int1);
    inc(rect1.x,fsize.cx);
   end;
@@ -3260,12 +3393,15 @@ var
  int1,int2: integer;
  buffer: tmaskedbitmap;
  bo1: boolean;
+ i1: int32;
 
 begin
  if fcount <> value then begin
   fcount := Value;
   if value = 0 then begin
-   fbitmap.clear;
+   for i1:= 0 to fversionhigh do begin
+    fbitmaps[i1].clear;
+   end;
    frowcount:= 0;
    fcolcount:= 0;
   end
@@ -3282,13 +3418,15 @@ begin
    frowcount:= int2; //square
    fcolcount:= int2;
    if bo1 then begin
-    buffer:= tmaskedbitmap.create(kind);
-    buffer.assign1(fbitmap,false);
-    fbitmap.size:= makesize(int2*fsize.cx,int2*fsize.cy);
-    if not buffer.isempty then begin
-     copyimages(buffer,0);
+    for i1:= 0 to fversionhigh do begin
+     buffer:= tmaskedbitmap.create(kind);
+     buffer.assign1(fbitmaps[i1],false);
+     fbitmaps[i1].size:= makesize(int2*fsize.cx,int2*fsize.cy);
+     if not buffer.isempty then begin
+      copyimages(buffer,0,i1);
+     end;
+     buffer.Free;
     end;
-    buffer.Free;
    end;
   end;
   change;
@@ -3296,16 +3434,21 @@ begin
 end;
 
 function timagelist.addimage(const image: tmaskedbitmap;
-                            const aalignment: alignmentsty = []): integer;
+                            const aalignment: alignmentsty = []{;
+                                         const aversion: int32 = 0}): integer;
 var
  newcolcount,newrowcount,newcount: integer;
  bmp1: tmaskedbitmap;
+ i1: int32;
 begin
+// checkversionindex(aversion);
  result:= -1;
  if image = nil then begin
   result:= fcount;
   count:= fcount+1;
-  setimage(result,nil);
+  for i1:= 0 to fversionhigh do begin
+   setimage(result,nil,[],i1);
+  end;
  end
  else begin
   if not image.isempty then begin
@@ -3331,7 +3474,9 @@ begin
     newrowcount:= (bmp1.size.cy + fsize.cy-1) div fsize.cy;
     newcount:= newcolcount * newrowcount;
     count:= fcount + newcount;
-    copyimages(bmp1,result);
+    for i1:= 0 to fversionhigh do begin
+     copyimages(bmp1,result,i1);
+    end;
    finally
     if bmp1 <> image then begin
      bmp1.free;
@@ -3343,41 +3488,53 @@ begin
 end;
 
 procedure timagelist.deleteimage(const index: integer);
+var
+ i1: int32;
 begin
- moveimage(index,count-1);
+ for i1:= 0 to fversionhigh do begin
+  moveimage(index,count-1,i1);
+ end;
  count:= fcount - 1;
 end;
 
-procedure timagelist.moveimage(const fromindex: integer; const toindex: integer);
+procedure timagelist.moveimage(const fromindex: integer; const toindex: integer;
+                                                 const aversion: int32 = 0);
 var
  bmp1,bmp2: tmaskedbitmap;
  int1: integer;
+// i1,i2: int32;
 begin
  if fromindex <> toindex then begin
+  checkversionindex(aversion);
   beginupdate;
   try
    bmp1:= tmaskedbitmap.create(kind);
-   bmp1.maskkind:= fbitmap.maskkind;
+   bmp1.maskkind:= fbitmaps[0].maskkind;
    bmp1.masked:= masked;
    bmp2:= tmaskedbitmap.create(kind);
-   bmp2.maskkind:= fbitmap.maskkind;
+   bmp2.maskkind:= fbitmaps[0].maskkind;
    bmp2.masked:= masked;
+//   i2:= fversioncurrent;
    try
-    getimage(fromindex,bmp1);
-    if fromindex < toindex then begin
-     for int1:= fromindex + 1 to toindex do begin
-      getimage(int1,bmp2);
-      setimage(int1-1,bmp2);
+//    for i1:= 0 to fversionhigh do begin
+//     fversioncurrent:= i1;
+     getimage(fromindex,bmp1,aversion);
+     if fromindex < toindex then begin
+      for int1:= fromindex + 1 to toindex do begin
+       getimage(int1,bmp2,aversion);
+       setimage(int1-1,bmp2,[],aversion);
+      end;
+     end
+     else begin
+      for int1:= fromindex-1 downto toindex do begin
+       getimage(int1,bmp2,aversion);
+       setimage(int1+1,bmp2,[],aversion);
+      end;
      end;
-    end
-    else begin
-     for int1:= fromindex-1 downto toindex do begin
-      getimage(int1,bmp2);
-      setimage(int1+1,bmp2);
-     end;
-    end;
-    setimage(toindex,bmp1);
+     setimage(toindex,bmp1,[],aversion);
+//    end;
    finally
+//    fversioncurrent:= i2;
     bmp1.free;
     bmp2.Free;
    end;
@@ -3396,12 +3553,12 @@ procedure timagelist.setwidth(const Value: integer);
 begin
  setsize(makesize(value,fsize.cy));
 end;
-
+{
 procedure timagelist.setbitmap(const Value: tmaskedbitmap);
 begin
- addimage(fbitmap);
+ addimage(fbitmap); //???
 end;
-
+}
 procedure timagelist.beginupdate;
 begin
  inc(fupdating);
@@ -3451,7 +3608,45 @@ begin
  cornermaskchanged();
 end;
 
+procedure timagelist.writeimage(stream: tstream);
+var
+ i1: int32;
+begin
+ for i1:= 0 to fversionhigh do begin
+  fbitmaps[i1].writeimage(stream);
+ end;
+end;
+
+procedure timagelist.readimage(stream: tstream);
+var
+ i1: int32;
+begin
+ for i1:= 0 to fversionhigh do begin
+  fbitmaps[i1].readimage(stream);
+ end;
+end;
+
 procedure timagelist.defineproperties(filer: tfiler);
+
+ function checkimage(): boolean;
+ var
+  i1: int32;
+ begin
+  with timagelist(filer.ancestor) do begin
+   result:= (self.count <> count) or (self.fversionhigh <> fversionhigh) or
+         (self.fsize.cx <> fsize.cx) or (self.fsize.cy <> fsize.cy) or
+         (self.fbitmaps[0].options <> fbitmaps[0].options);
+   if not result then begin
+    for i1:= 0 to fversionhigh do begin
+     if self.fbitmaps[i1].writedata(fbitmaps[i1]) then begin
+      result:= true;
+      break;
+     end;
+    end;
+   end;
+  end;
+ end; //checkimage
+
 var
  ancestorbefore: tpersistent;
 begin
@@ -3460,12 +3655,18 @@ begin
  filer.defineproperty('masked',@readmasked,nil,false);
  filer.defineproperty('colormask',@readcolormask,nil,false);
  filer.defineproperty('cornermask',@readcornermask,nil,false);
- ancestorbefore:= filer.ancestor;
- if ancestorbefore <> nil then begin
-  filer.ancestor:= timagelist(ancestorbefore).fbitmap;
+ if fversionhigh = 0 then begin
+  ancestorbefore:= filer.ancestor;
+  if (ancestorbefore <> nil) then begin
+   filer.ancestor:= timagelist(ancestorbefore).fbitmaps[0];
+  end;
+  fbitmaps[0].defineproperties(filer); //imagedata
+  filer.ancestor:= ancestorbefore;
+ end
+ else begin
+  filer.definebinaryproperty('image',@readimage,@writeimage,
+                               (filer.ancestor = nil) or checkimage());
  end;
- fbitmap.defineproperties(filer); //imagedata
- filer.ancestor:= ancestorbefore;
 end;
 
 function timagelist.lookup(const aindex: int32): int32;
@@ -3480,15 +3681,20 @@ begin
 end;
 
 procedure timagelist.assign(sender: tpersistent);
+var
+ i1: int32;
 begin
  if sender is timagelist then begin
   count:= 0;
   with timagelist(sender) do begin
+   self.versioncount:= versioncount;
    self.fsize:= fsize;
    self.fcolcount:= fcolcount;
    self.frowcount:= frowcount;
    self.fcount:= fcount;
-   self.fbitmap.assign(fbitmap);
+   for i1:= 0 to fversionhigh do begin
+    self.fbitmaps[i1].assign(fbitmaps[i1]);
+   end;
   end;
   change;
  end
@@ -3499,32 +3705,44 @@ end;
 
 function timagelist.getkind: bitmapkindty;
 begin
- result:= fbitmap.kind;
+ result:= fbitmaps[0].kind;
 end;
 
 procedure timagelist.setkind(const avalue: bitmapkindty);
+var
+ i1: int32;
 begin
- fbitmap.kind:= avalue;
+ for i1:= 0 to fversionhigh do begin
+  fbitmaps[i1].kind:= avalue;
+ end;
 end;
 
 function timagelist.getmaskkind: bitmapkindty;
 begin
- result:= fbitmap.maskkind;
+ result:= fbitmaps[0].maskkind;
 end;
 
 procedure timagelist.setmaskkind(const avalue: bitmapkindty);
+var
+ i1: int32;
 begin
- fbitmap.maskkind:= avalue; 
+ for i1:= 0 to fversionhigh do begin
+  fbitmaps[i1].maskkind:= avalue;
+ end;
 end;
 
 function timagelist.getoptions: bitmapoptionsty;
 begin
- result:= fbitmap.options;
+ result:= fbitmaps[0].options;
 end;
 
 procedure timagelist.setoptions(const avalue: bitmapoptionsty);
+var
+ i1: int32;
 begin
- fbitmap.options:= avalue;
+ for i1:= 0 to fversionhigh do begin
+  fbitmaps[i1].options:= avalue;
+ end;
 end;
 
 procedure timagelist.setindexlookup(const avalue: msestring);

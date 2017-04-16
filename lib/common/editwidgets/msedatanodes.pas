@@ -95,7 +95,9 @@ type
   calcautocellsize: boolean;
   colorline: colorty;
   colorglyph: colorty;
-  boxids: ptreeitemboxidarty;
+//  boxids: ptreeitemboxidarty;
+  glyphversion: int32; //for stockglyphs
+  imageversion: int32; //for imagelist
  end;
 
  listitemlayoutinfoty = record
@@ -857,7 +859,8 @@ begin
      end;
     end;
     stockobjects.glyphs.paint(acanvas,glyphno,checkboxrect,
-                   [al_xcentered,al_ycentered],variable.colorglyph);
+           [al_xcentered,al_ycentered],variable.colorglyph,
+                    cl_default,cl_default,variable.glyphversion);
    end;
   end;
   if aimagelist <> nil then begin
@@ -871,7 +874,8 @@ begin
       //todo: check imagepos and the like
      with imagerect do begin
       aimagelist.paint(acanvas,int1,mr(x,y,cx+variable.imageextend.cx,cy),
-                                       imagealignment,variable.colorglyph);
+                     imagealignment,variable.colorglyph,
+                             cl_default,cl_default,variable.imageversion);
      end;
     end;
    end;
@@ -3126,7 +3130,8 @@ begin
    end;
    if box <> tib_none then begin
     stockobjects.glyphs.paint(acanvas,boxids[box],expandboxrect,
-                   [al_xcentered,al_ycentered],variable.colorglyph);
+     [al_xcentered,al_ycentered],variable.colorglyph,
+                                    cl_default,cl_default,variable.glyphversion);
    end;
   end;
  end;

@@ -277,6 +277,7 @@ type
    foncopytoclipboard: updatestringeventty;
    fonpastefromclipboard: updatestringeventty;
    fcellcursor: cursorshapety;
+   fglyphversionactive: int32;
    procedure createcellframe;
    function getcellframe: tcellframe;
    procedure setcellframe(const avalue: tcellframe);
@@ -318,6 +319,7 @@ type
    procedure setcellcursor(const avalue: cursorshapety);
    function getcellsize: sizety;
    procedure setcellsize(const avalue: sizety);
+   procedure setglyphversionactive(const avalue: int32);
   protected
    fitemlist: titemviewlist;
    class function classskininfo: skininfoty; override;
@@ -381,6 +383,8 @@ type
                                     write setcolorglyph default cl_glyph;
    property colorglyphactive: colorty read fcolorglyphactive
                             write setcolorglyphactive default cl_glyphactive;
+   property glyphversionactive: int32 read fglyphversionactive write
+                                           setglyphversionactive default 0;
    property cellwidth: integer read fcellwidth write setcellwidth
                    default defaultcellwidth;
    property cellheight: integer read getcellheight write setcellheight
@@ -474,8 +478,9 @@ type
    fcolorlineactive: colorty;
    fowner: titemedit;
    fonitemnotification: nodenotificationeventty;
-   fboxglyph_list: timagelist;
-   fboxglyph_listactive: timagelist;
+//   fboxglyph_list: timagelist;
+//   fboxglyph_listactive: timagelist;
+   fglyphversionactive: int32;
    procedure setcolorglyph(const avalue: colorty);
    procedure setcolorglyphactive(const avalue: colorty);
    function getboxglyph_checkbox: stockglyphty;
@@ -486,8 +491,9 @@ type
    procedure setboxglyph_checkboxparentnotchecked(const avalue: stockglyphty);
    function getboxglyph_checkboxchildchecked: stockglyphty;
    procedure setboxglyph_checkboxchildchecked(const avalue: stockglyphty);
-   procedure setboxglyp_list(const avalue: timagelist);
-   procedure setboxglyp_listactive(const avalue: timagelist);
+//   procedure setboxglyp_list(const avalue: timagelist);
+//   procedure setboxglyp_listactive(const avalue: timagelist);
+   procedure setglyphversionactive(const avalue: int32);
   protected
    fboxids: treeitemboxidarty;
    procedure createstatitem(const reader: tstatreader;
@@ -516,9 +522,11 @@ type
    property colorglyphactive: colorty read fcolorglyphactive
                              write setcolorglyphactive default cl_glyphactive;
                       //for monochrome imagelist
-   property boxglyph_list: timagelist read fboxglyph_list write setboxglyp_list;
-   property boxglyph_listactive: timagelist read fboxglyph_listactive 
-                                                    write setboxglyp_listactive;
+   property glyphversionactive: int32 read fglyphversionactive write
+                                           setglyphversionactive default 0;
+//   property boxglyph_list: timagelist read fboxglyph_list write setboxglyp_list;
+//   property boxglyph_listactive: timagelist read fboxglyph_listactive 
+//                                                    write setboxglyp_listactive;
    property boxglyph_checkbox: stockglyphty read getboxglyph_checkbox 
                                write setboxglyph_checkbox default stg_checkbox;
    property boxglyph_checkboxchecked: stockglyphty 
@@ -548,8 +556,9 @@ type
   published
    property colorglyph;
    property colorglyphactive;
-   property boxglyph_list;
-   property boxglyph_listactive;
+   property glyphversionactive;
+//   property boxglyph_list;
+//   property boxglyph_listactive;
    property boxglyph_checkbox;
    property boxglyph_checkboxchecked;
    property boxglyph_checkboxparentnotchecked;
@@ -1006,8 +1015,9 @@ type
   published
    property colorglyph;
    property colorglyphactive;
-   property boxglyph_list;
-   property boxglyph_listactive;
+   property glyphversionactive;
+//   property boxglyph_list;
+//   property boxglyph_listactive;
    property boxglyph_checkbox;
    property boxglyph_checkboxchecked;
    property boxglyph_checkboxparentnotchecked;
@@ -1171,8 +1181,12 @@ function titemviewlist.getlayoutinfo(
                           const acellinfo: pcellinfoty): plistitemlayoutinfoty;
 begin
  if acellinfo <> nil then begin
+  flayoutinfo.variable.glyphversion:= 0;
   if cds_usecoloractive in acellinfo^.drawstate then begin
    flayoutinfo.variable.colorglyph:= flistview.colorglyph;
+   if flistview.glyphversionactive < stockobjects.glyphs.versioncount then begin
+    flayoutinfo.variable.glyphversion:= flistview.glyphversionactive;
+   end;
   end
   else begin
    flayoutinfo.variable.colorglyph:= flistview.colorglyphactive;
@@ -2604,6 +2618,16 @@ begin
  cellheight:= avalue.cy;
 end;
 
+procedure tcustomlistview.setglyphversionactive(const avalue: int32);
+begin
+ if fglyphversionactive <> avalue then begin
+  fglyphversionactive:= avalue;
+  if fglyphversionactive < 0 then begin
+   fglyphversionactive:= 0;
+  end;
+ end;
+end;
+
 class function tcustomlistview.classskininfo: skininfoty;
 begin
  result:= inherited classskininfo;
@@ -2730,7 +2754,8 @@ end;
 
 function tcustomitemeditlist.getimagelist: timagelist;
 begin
- result:= fboxglyph_list;
+ result:= nil;
+// result:= fboxglyph_list;
 end;
 
 procedure tcustomitemeditlist.setcolorglyph(const avalue: colorty);
@@ -2811,7 +2836,7 @@ begin
   end;
  end;
 end;
-
+{
 procedure tcustomitemeditlist.setboxglyp_list(const avalue: timagelist);
 begin
  setlinkedvar(avalue,tmsecomponent(fboxglyph_list));
@@ -2820,6 +2845,19 @@ end;
 procedure tcustomitemeditlist.setboxglyp_listactive(const avalue: timagelist);
 begin
  setlinkedvar(avalue,tmsecomponent(fboxglyph_listactive));
+end;
+}
+procedure tcustomitemeditlist.setglyphversionactive(const avalue: int32);
+begin
+ if fglyphversionactive <> avalue then begin
+  fglyphversionactive:= avalue;
+  if fglyphversionactive < 0 then begin
+   fglyphversionactive:= 0;
+  end;
+  if fowner <> nil then begin
+   fowner.itemchanged(-1);
+  end;
+ end;
 end;
 
 procedure tcustomitemeditlist.assign(const aitems: listitemarty);
@@ -3153,10 +3191,11 @@ function titemedit.getlayoutinfo(
                        const acellinfo: pcellinfoty): plistitemlayoutinfoty;
 begin
  if (ws1_painting in fwidgetstate1) or (des_updatelayout in fstate) then begin
-  result:= @flayoutinfofocused;
-  with result^.variable do begin
+  result:= @flayoutinfofocused;                     //active
+  with result^.variable do begin 
    colorglyph:= fitemlist.fcolorglyphactive;
    colorline:= fitemlist.fcolorlineactive;
+   glyphversion:= fitemlist.glyphversionactive;
   end;
  end
  else begin
@@ -3168,16 +3207,21 @@ begin
    calclayout(fcalcsize,flayoutinfocell);
   end;
  end;
- if acellinfo <> nil then begin 
-  with result^.variable do begin
+ with result^.variable do begin 
+  if acellinfo <> nil then begin 
    if cds_usecoloractive in acellinfo^.drawstate then begin
     colorglyph:= fitemlist.fcolorglyphactive;
     colorline:= fitemlist.fcolorlineactive;
+    glyphversion:= fitemlist.glyphversionactive;
    end
    else begin
     colorglyph:= fitemlist.fcolorglyph;
     colorline:= fitemlist.fcolorline;
+    glyphversion:= 0;
    end;
+  end;
+  if stockobjects.glyphs.versioncount <= glyphversion then begin
+   glyphversion:= 0;
   end;
  end;
 end;

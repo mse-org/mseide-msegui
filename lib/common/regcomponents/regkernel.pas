@@ -182,6 +182,11 @@ type
                                                                   override;
  end;
 
+ timagelistversioncounteditor = class(tordinalpropertyeditor)
+  public
+   procedure setvalue(const value: msestring); override;
+end;
+ 
 const   
  datamoduleintf: designmoduleintfty = 
   (createfunc: {$ifdef FPC}@{$endif}createmsedatamodule;
@@ -243,6 +248,8 @@ begin
  registerpropertyeditor(typeinfo(trealarrayprop),tfacetemplate,'fade_opapos',
                                     tfacetemplatefadeopaposeditor);
  
+ registerpropertyeditor(typeinfo(int32),timagelist,'versioncount',
+                                                timagelistversioncounteditor);
  registerpropertyeditor(typeinfo(msestring),timagelist,'cornermask_topleft',
                                                        tcornermaskeditor);
  registerpropertyeditor(typeinfo(msestring),timagelist,'cornermask_bottomleft',
@@ -818,6 +825,24 @@ begin
               tarrayelementeditor1(sender).getpointervalue) do begin
   result:= '<'+name+'>';
  end;
+end;
+
+{ timagelistversioncounteditor }
+
+procedure timagelistversioncounteditor.setvalue(const value: msestring);
+var
+ int1: integer;
+ va: integer;
+begin
+ va:= strtoint(value);
+ if va < 0 then begin
+  va:= 0;
+ end;
+ int1:= timagelist(fcomponent).versioncount;
+ if not wantpropertydelete(va,int1-1) then begin
+  exit;
+ end;
+ inherited;
 end;
 
 initialization

@@ -597,7 +597,7 @@ type
    property grip_colorglyph: colorty read fgrip_colorglyph write
                  setgrip_colorglyph default cl_glyph;
    property grip_colorglyphactive: colorty read fgrip_colorglyphactive write
-                 setgrip_colorglyphactive default cl_glyph;
+                 setgrip_colorglyphactive default cl_glyphactive;
    property grip_colorbutton: colorty read fgrip_colorbutton write
                  setgrip_colorbutton default cl_transparent;
    property grip_colorbuttonactive: colorty read fgrip_colorbuttonactive write
@@ -4273,7 +4273,7 @@ begin
  fgrip_color:= defaultgripcolor;
  fgrip_coloractive:= defaultgripcoloractive;
  fgrip_colorglyph:= cl_glyph;
- fgrip_colorglyphactive:= cl_glyph;
+ fgrip_colorglyphactive:= cl_glyphactive;
  fgrip_colorbutton:= cl_transparent;
  fgrip_colorbuttonactive:= cl_transparent;
  fgrip_size:= defaultgripsize;
