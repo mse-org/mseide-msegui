@@ -480,7 +480,7 @@ type
    fonitemnotification: nodenotificationeventty;
 //   fboxglyph_list: timagelist;
 //   fboxglyph_listactive: timagelist;
-   fglyphversionactive: int32;
+   fboxglyph_versionactive: int32;
    procedure setcolorglyph(const avalue: colorty);
    procedure setcolorglyphactive(const avalue: colorty);
    function getboxglyph_checkbox: stockglyphty;
@@ -493,7 +493,7 @@ type
    procedure setboxglyph_checkboxchildchecked(const avalue: stockglyphty);
 //   procedure setboxglyp_list(const avalue: timagelist);
 //   procedure setboxglyp_listactive(const avalue: timagelist);
-   procedure setglyphversionactive(const avalue: int32);
+   procedure setboxglyph_versionactive(const avalue: int32);
   protected
    fboxids: treeitemboxidarty;
    procedure createstatitem(const reader: tstatreader;
@@ -522,11 +522,11 @@ type
    property colorglyphactive: colorty read fcolorglyphactive
                              write setcolorglyphactive default cl_glyphactive;
                       //for monochrome imagelist
-   property glyphversionactive: int32 read fglyphversionactive write
-                                           setglyphversionactive default 0;
 //   property boxglyph_list: timagelist read fboxglyph_list write setboxglyp_list;
 //   property boxglyph_listactive: timagelist read fboxglyph_listactive 
 //                                                    write setboxglyp_listactive;
+   property boxglyph_versionactive: int32 read fboxglyph_versionactive write
+                                           setboxglyph_versionactive default 0;
    property boxglyph_checkbox: stockglyphty read getboxglyph_checkbox 
                                write setboxglyph_checkbox default stg_checkbox;
    property boxglyph_checkboxchecked: stockglyphty 
@@ -556,7 +556,7 @@ type
   published
    property colorglyph;
    property colorglyphactive;
-   property glyphversionactive;
+   property boxglyph_versionactive;
 //   property boxglyph_list;
 //   property boxglyph_listactive;
    property boxglyph_checkbox;
@@ -1015,7 +1015,7 @@ type
   published
    property colorglyph;
    property colorglyphactive;
-   property glyphversionactive;
+   property boxglyph_versionactive;
 //   property boxglyph_list;
 //   property boxglyph_listactive;
    property boxglyph_checkbox;
@@ -2847,12 +2847,12 @@ begin
  setlinkedvar(avalue,tmsecomponent(fboxglyph_listactive));
 end;
 }
-procedure tcustomitemeditlist.setglyphversionactive(const avalue: int32);
+procedure tcustomitemeditlist.setboxglyph_versionactive(const avalue: int32);
 begin
- if fglyphversionactive <> avalue then begin
-  fglyphversionactive:= avalue;
-  if fglyphversionactive < 0 then begin
-   fglyphversionactive:= 0;
+ if fboxglyph_versionactive <> avalue then begin
+  fboxglyph_versionactive:= avalue;
+  if fboxglyph_versionactive < 0 then begin
+   fboxglyph_versionactive:= 0;
   end;
   if fowner <> nil then begin
    fowner.itemchanged(-1);
@@ -3195,7 +3195,7 @@ begin
   with result^.variable do begin 
    colorglyph:= fitemlist.fcolorglyphactive;
    colorline:= fitemlist.fcolorlineactive;
-   glyphversion:= fitemlist.glyphversionactive;
+   glyphversion:= fitemlist.boxglyph_versionactive;
   end;
  end
  else begin
@@ -3212,7 +3212,7 @@ begin
    if cds_usecoloractive in acellinfo^.drawstate then begin
     colorglyph:= fitemlist.fcolorglyphactive;
     colorline:= fitemlist.fcolorlineactive;
-    glyphversion:= fitemlist.glyphversionactive;
+    glyphversion:= fitemlist.boxglyph_versionactive;
    end
    else begin
     colorglyph:= fitemlist.fcolorglyph;
