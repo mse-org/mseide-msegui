@@ -819,6 +819,9 @@ begin
         ca.colorglyph:= itemframetemplateactive.colorglyph;
        end;
       end;
+      if ca.colorglyph = cl_default then begin
+       ca.colorglyph:= cl_glyphactive;
+      end;
       face:= itemfaceactive;
       ca.font:= fontactive;
       state:= state + [shs_focused,shs_active,shs_focusanimation];
