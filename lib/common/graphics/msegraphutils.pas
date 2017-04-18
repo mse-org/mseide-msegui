@@ -939,6 +939,44 @@ begin
  end;
 end;
 
+var
+ mappedcolorlookup: array[0..mappedcolorcount-1] of int32 = (
+  0, //cl_dkshadow =                 cl_mapped + 0;
+  1, //cl_shadow =                   cl_mapped + 1;
+  2, //cl_mid =                      cl_mapped + 2;
+  3, //cl_light =                    cl_mapped + 3;
+  4, //cl_highlight =                cl_mapped + 4;
+  5, //cl_background =               cl_mapped + 5;
+  6, //cl_foreground =               cl_mapped + 6;
+  7, //cl_active =                   cl_mapped + 7;
+  8, //cl_noedit =                   cl_mapped + 8;
+  9, //cl_text =                     cl_mapped + 9;
+  10,//cl_selectedtext =             cl_mapped + 10;
+  11,//cl_selectedtextbackground =   cl_mapped + 11;
+  12,//cl_infobackground =           cl_mapped + 12;
+  13,//cl_glyph =                    cl_mapped + 13;
+  30,//cl_glyphactive =              cl_mapped + 30;
+  14,//cl_activegrip =               cl_mapped + 14;
+  15,//cl_empty =                    cl_mapped + 15;
+  16,//cl_emptytext =                cl_mapped + 16;
+  17,//cl_emptytextbackground =      cl_mapped + 17;
+  18,//cl_zebra =                    cl_mapped + 18;
+  19,//cl_grayed =                   cl_mapped + 19;
+  20,//cl_grayedshadow =             cl_mapped + 20;
+  
+  21,//cl_gridactive =               cl_mapped + 21;
+  22,//cl_gridfocus =                cl_mapped + 22;
+  23,//cl_gridselect =               cl_mapped + 23;
+  24,//cl_gridline =                 cl_mapped + 24;
+  25,//cl_gridlinefix =              cl_mapped + 25;
+  26,//cl_gridframe =                cl_mapped + 26;
+  27,//cl_scrollbarpattern =         cl_mapped + 27;
+  28,//cl_scrollbarpatternclicked =  cl_mapped + 28;
+  29,//cl_buttondefaultrect =        cl_mapped + 29;
+  31,//cl_treeline =                 cl_mapped + 31;
+  32 //cl_treelineactive =           cl_mapped + 32;
+ );
+ 
 function getcolornames: msestringarty;
 var
  int1,int2: integer;
@@ -950,7 +988,7 @@ begin
  end;
  int2:= namedrgbcolorcount;
  for int1:= 0 to high(defaultmapped) do begin
-  result[int1+int2]:= msestring(defaultmapped[int1].name);
+  result[int1+int2]:= msestring(defaultmapped[mappedcolorlookup[int1]].name);
  end;
  inc(int2,mappedcolorcount);
  result[int2]:= msestring(defaultfunctional[cl_nonenum].name);
@@ -983,7 +1021,7 @@ begin
  end;
  int2:= namedrgbcolorcount;
  for int1:= 0 to high(defaultmapped) do begin
-  result[int1+int2]:= cl_mapped + longword(int1);
+  result[int1+int2]:= cl_mapped + longword(mappedcolorlookup[int1]);
  end;
  inc(int2,mappedcolorcount);
  result[int2]:= cl_functional+cl_nonenum; //cl_invalid skipped
