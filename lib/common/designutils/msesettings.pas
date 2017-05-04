@@ -86,9 +86,8 @@ type
    msedir: tfilenameedit;
    fpclibdir: tfilenameedit;
    fpcdir: tfilenameedit;
-   tspacer1: tspacer;
+   tspacer1: tlayouter;
    targetosdir: tstringedit;
-   tsplitter2: tsplitter;
    target: tstringedit;
    exeext: tstringedit;
    tsplitter1: tsplitter;
