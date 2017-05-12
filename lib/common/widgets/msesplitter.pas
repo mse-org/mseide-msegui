@@ -284,6 +284,7 @@ const
 type
  widgetlayoutinfoty = record
   widget: twidget;
+  layoutplacingbefore: boolean;
   pos: pointty;
   size: sizety;
   curminsize: sizety;
@@ -422,6 +423,7 @@ uses
  msebits,math;
 type
  twidget1 = class(twidget);
+ tcustomframe1 = class(tcustomframe);
 
 {$define useround}
 
@@ -1830,8 +1832,14 @@ begin
   inc(flayoutupdating);
   try  
    updateoptionsscale;
-   beginscaling;   
+   beginscaling;
    if widgetcount > 0 then begin
+    for i1:= 0 to high(fwidgetinfos) do begin
+     with fwidgetinfos[i1],twidget1(widget) do begin
+      layoutplacingbefore:= ws1_layoutplacing in fwidgetstate1;
+      include(fwidgetstate1,ws1_layoutplacing);
+     end;
+    end;
     if (foptionslayout*[lao_placex,lao_placey] <> []) and
                        (plo_scalesize in fplace_options) then begin
         //scale to variable clientsize
@@ -1841,29 +1849,22 @@ begin
        with fwidgetinfos[int1] do begin
         if not (osk_nopropwidth in widget.optionsskin) and 
                                       (refscalesize.cx <> 0) then begin
-//         outerwidth1:= 0;
          with twidget1(widget) do begin
-//          if fframe <> nil then begin
-//           outerwidth1:= fframe.outerframecx;
-//          end;
-          bo1:= ws1_layoutplacing in fwidgetstate1;
-          try
-           include(fwidgetstate1,ws1_layoutplacing);
-           i1:= ((scalesize.cx{-outerwidth1}) * size1.cx) div
-                                               refscalesize.cx;
+//          bo1:= ws1_layoutplacing in fwidgetstate1;
+//          try
+//           include(fwidgetstate1,ws1_layoutplacing);
+           i1:= (scalesize.cx * size1.cx) div refscalesize.cx;
            i2:= curminsize.cx;
            if i1 < i2 then begin
             i1:= i2;
            end;
-//           i1:= i1 + outerwidth1;
            widget.width:= i1;
            actscalesize.cx:= widget.width;
-//         widget.clientwidth:= (scalesize.cx * size1.cx) div refscalesize.cx;
-          finally
-           if not bo1 then begin
-            exclude(fwidgetstate1,ws1_layoutplacing);
-           end;
-          end;
+//          finally
+//           if not bo1 then begin
+//            exclude(fwidgetstate1,ws1_layoutplacing);
+//           end;
+//          end;
          end;
         end;
        end;
@@ -1874,28 +1875,22 @@ begin
        with fwidgetinfos[int1] do begin
         if not (osk_nopropheight in widget.optionsskin) and 
                                       (refscalesize.cy <> 0) then begin
-//         outerwidth1:= 0;
          with twidget1(widget) do begin
-//          if twidget1(widget).fframe <> nil then begin
-//           outerwidth1:= twidget1(widget).fframe.outerframecy;
-//          end;
-          bo1:= ws1_layoutplacing in fwidgetstate1;
-          try
-           include(fwidgetstate1,ws1_layoutplacing);
-           i1:= ((scalesize.cy{-outerwidth1}) * size1.cy) div
-                                              refscalesize.cy {+ outerwidth1};
+//          bo1:= ws1_layoutplacing in fwidgetstate1;
+//          try
+//           include(fwidgetstate1,ws1_layoutplacing);
+           i1:= (scalesize.cy * size1.cy) div refscalesize.cy;
            i2:= minshrinksize().cy;
            if i1 < i2 then begin
             i1:= i2;
            end;
            widget.height:= i1;
            actscalesize.cy:= widget.height;
- //         widget.clientheight:= (scalesize.cy * size1.cy) div refscalesize.cy;
-          finally
-           if not bo1 then begin
-            exclude(fwidgetstate1,ws1_layoutplacing);
-           end;
-          end;
+//          finally
+//           if not bo1 then begin
+//            exclude(fwidgetstate1,ws1_layoutplacing);
+//           end;
+//          end;
          end;
         end;
        end;
@@ -2024,6 +2019,13 @@ begin
     end;
    end;
   finally
+   for i1:= 0 to high(fwidgetinfos) do begin
+    with fwidgetinfos[i1],twidget1(widget) do begin
+     if not layoutplacingbefore then begin
+      exclude(fwidgetstate1,ws1_layoutplacing);
+     end;
+    end;
+   end;
    endscaling;
    dec(flayoutupdating);
   end;

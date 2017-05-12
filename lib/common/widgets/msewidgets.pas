@@ -2747,7 +2747,10 @@ begin
  end;
  subframe1(fra1,fouterframe);
 
- if cfo_autowidth in foptions then begin
+ widget1:= twidget1(icaptionframe(fintf).getwidget);
+
+ if (cfo_autowidth in foptions) or 
+        (widget1.anchors * [an_left,an_right] = [an_left,an_right]) then begin
   if fcaptionpos in [cp_topleft,cp_bottomleft,
                           cp_top,cp_bottom,cp_center] then begin
    fouterframe.right:= 0;
@@ -2757,7 +2760,8 @@ begin
    fouterframe.left:= 0;
   end;
  end;
- if cfo_autoheight in foptions then begin
+ if (cfo_autoheight in foptions) or 
+        (widget1.anchors * [an_top,an_bottom] = [an_top,an_bottom]) then begin
   if fcaptionpos in [cp_lefttop,cp_righttop,
                           cp_left,cp_right,cp_center] then begin
    fouterframe.bottom:= 0;
@@ -2769,7 +2773,6 @@ begin
  end;
 
  if not isnullframe(fra1) then begin
-  widget1:= twidget1(icaptionframe(fintf).getwidget);
   if widget1.fwidgetstate1 * 
                         [ws1_anchorsizing,ws1_layoutplacing] = [] then begin
    subpoint1(finfo.dest.pos,pointty(fra1.topleft));
