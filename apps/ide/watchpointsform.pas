@@ -75,6 +75,7 @@ var
  int1,int2: integer;
 begin
  for int1:= 0 to grid.rowhigh do begin
+  wptcount[int1]:= 0;
   for int2:= 0 to high(breakpoints) do begin
    with breakpoints[int2] do begin
     if bkptno = wptno[int1] then begin

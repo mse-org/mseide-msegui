@@ -706,11 +706,22 @@ procedure tbreakpointsfo.refresh;
 var
  breakpoints: breakpointinfoarty;
  int1,int2: integer;
- po1: pintegeraty;
+// po1: pintegeraty;
 begin
  if gdb.active and (visible or watchpointsfo.visible) then begin
   gdb.breaklist(breakpoints,false);
   if visible then begin
+   for int1:= 0 to grid.rowhigh do begin
+    count[int1]:= 0;
+    for int2:= 0 to high(breakpoints) do begin
+     with breakpoints[int2] do begin
+      if bkptno = self.bkptno[int1] then begin
+       count[int1]:= passcount;
+      end;
+     end;
+    end;
+   end;
+{
    po1:= bkptno.griddata.datapo;
    for int1:= 0 to high(breakpoints) do begin
     with breakpoints[int1] do begin
@@ -721,6 +732,7 @@ begin
      end;
     end;
    end;
+}
   end;
   if watchpointsfo.visible then begin
    watchpointsfo.refresh(breakpoints);
