@@ -26,9 +26,9 @@ type
    function hasimagelist(): boolean;
    function gettypeinfo: ptypeinfo; override;
    function getdefaultstate: propertystatesty; override;
+  public
    procedure setvalue(const value: msestring); override;
    function getvalue: msestring; override;
-  public
    procedure edit; override;
  end;
 

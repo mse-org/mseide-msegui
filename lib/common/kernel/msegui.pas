@@ -12006,8 +12006,14 @@ begin
 end;
 
 procedure twidget.clampinview(const arect: rectty; const bottomright: boolean);
+var
+ rect1: rectty;
 begin
- //dummy
+ if fparentwidget <> nil then begin
+  rect1:= arect;
+  addpoint1(rect1.pos,subpoint(paintparentpos,fparentwidget.paintpos));
+  fparentwidget.clampinview(rect1,bottomright);
+ end;
 end;
 
 procedure twidget.doactivate;

@@ -1814,7 +1814,7 @@ var
  ar1: widgetarty;
  size1: sizety;
 // outerwidth1: int32;
- bo1: boolean;
+// bo1: boolean;
  i1,i2: int32;
 begin
  if (componentstate * [csloading,csdestroying] = []) and 

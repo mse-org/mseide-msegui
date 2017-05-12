@@ -5767,6 +5767,7 @@ procedure tscrollingwidgetnwr.clampinview(const arect: rectty; const bottomright
 begin
  updateroot;
  frame.showrect(removerect(arect,clientpos),bottomright);
+ inherited;
 // frame.showrect(removerect(arect,clientwidgetpos));
 // frame.showrect(arect);
 end;
