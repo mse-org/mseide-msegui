@@ -9831,6 +9831,8 @@ var
  loopcount{,firsthscrollindex}: integer;
  bo1: boolean;
  reshowfocusedcell: boolean;
+ propcolwidthrefchanged: boolean;
+ i1: int32;
 begin
  reshowfocusedcell:= false;
  if focusedcellvalid then begin
@@ -9874,7 +9876,9 @@ begin
  end;
  loopcount:= 0;
  repeat
+  i1:= fpropcolwidthref;
   calcpropcolwidthref;
+  propcolwidthrefchanged:= fpropcolwidthref <> i1;
   scrollstate:= frame.state;
   fystep:= fdatarowheight + fdatarowlinewidth;
   ffixcols.updatelayout;
@@ -9982,9 +9986,9 @@ begin
   updatevisiblerows; //scroll needs valid visiblerows
   tgridframe(fframe).updatestate;
   inc(loopcount);
- until (frame.state * scrollbarframestates = 
-                       scrollstate * scrollbarframestates) or
-                                          (loopcount > 40);
+ until not propcolwidthrefchanged and 
+       (frame.state * scrollbarframestates = 
+                       scrollstate * scrollbarframestates) or (loopcount > 40);
 
  if bo1 then begin
   fobjectpicker.paintxorpic;
