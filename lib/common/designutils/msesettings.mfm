@@ -5,7 +5,6 @@ object settingsfo: tsettingsfo
   bounds_y = 106
   bounds_cx = 348
   bounds_cy = 570
-  container.frame.clientwidth = 330
   container.frame.localprops = []
   container.frame.localprops1 = []
   container.bounds = (
@@ -89,15 +88,15 @@ object settingsfo: tsettingsfo
     bounds_cx = 348
     bounds_cy = 407
     anchors = [an_left, an_top, an_right]
-    optionsscale = [osc_expandy, osc_shrinky]
+    optionsscale = [osc_expandy, osc_shrinky, osc_expandshrinkx, osc_expandshrinky]
     optionslayout = [lao_placey]
     linkbottom = macrogrid
     object tspacer1: tlayouter
       optionswidget = [ow_tabfocus, ow_parenttabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_destroywidgets]
       taborder = 9
-      bounds_x = 9
+      bounds_x = 8
       bounds_y = 333
-      bounds_cx = 329
+      bounds_cx = 330
       bounds_cy = 37
       anchors = [an_left, an_top, an_right]
       optionsscale = [osc_expandy, osc_shrinky, osc_expandshrinkx, osc_expandshrinky]
@@ -120,7 +119,7 @@ object settingsfo: tsettingsfo
         taborder = 2
         bounds_x = 178
         bounds_y = 0
-        bounds_cx = 151
+        bounds_cx = 152
         bounds_cy = 37
         anchors = [an_left, an_top, an_right]
         onsetvalue = setvalue
