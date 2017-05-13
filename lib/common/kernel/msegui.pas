@@ -1517,6 +1517,7 @@ type
   sender: twidget;
   direction: graphicdirectionty;
   startingrect: rectty;
+  wraprect: rectty;
   distance: integer;
   nearest: twidget;
   down: boolean;
@@ -2151,6 +2152,7 @@ type
                                     //translates to widgetpos if necessary
 
    function rootpos: pointty;
+   function rootwidgetrect: rectty;
    property screenpos: pointty read getscreenpos write setscreenpos;
 
    function clientpostowidgetpos(const apos: pointty): pointty;
@@ -10070,6 +10072,12 @@ begin
  result:= frootpos;
 end;
 
+function twidget.rootwidgetrect: rectty;
+begin
+ updateroot;
+ result.pos:= frootpos;
+ result.size:= fwidgetrect.size;
+end;
 function twidget.getscreenpos: pointty;
 begin
  updateroot;
@@ -12055,16 +12063,14 @@ const
  orthoweighting = 30;
 var
  dist: integer;
- widget1: twidget;
  srect,drect: rectty;
  send,dend: integer;
  int1: integer;
- 
 begin
  with info do begin
   drect:= navigrect;
+  addpoint1(drect.pos,rootpos);
   srect:= startingrect;
-  translatewidgetpoint1(srect.pos,nil,self);
   if direction in [gd_right,gd_left] then begin
    send:= srect.y + srect.cy;
    dend:= drect.y + drect.cy;
@@ -12092,22 +12098,13 @@ begin
     result:= bigint;
     exit;
    end;
-   widget1:= sender.fparentwidget;
-   while (ow_arrowfocusout in widget1.foptionswidget) and 
-                        (widget1.fparentwidget <> nil) do begin
-    widget1:= widget1.fparentwidget;
+   if direction in [gd_right,gd_left] then begin
+    dist:= dist + wraprect.cx;
+   end
+   else begin
+    dist:= dist + wraprect.cy;
    end;
-   if widget1 <> nil then begin
-    with widget1 do begin
-     if direction in [gd_right,gd_left] then begin
-      dist:= dist + width;
-     end
-     else begin
-      dist:= dist + height;
-     end;
-    end;
-    dist:= dist * wrapweighting;
-   end;
+   dist:= dist * wrapweighting;
   end;
   if dist < 0 then begin
    dist:= bigint div 2;
@@ -12201,6 +12198,25 @@ end;
 
 procedure twidget.handlenavigkeys(var info: keyeventinfoty;
                                      const nowrap: boolean = false);
+
+ procedure expandwraprect(var wraprect: rectty; const awidget: twidget);
+ var
+  i1: int32;
+  widget1: twidget;
+ begin
+  for i1:= 0 to high(awidget.fwidgets) do begin
+   widget1:= awidget.fwidgets[i1];
+   with widget1 do begin
+    if (ow_arrowfocus in widget1.foptionswidget) and visible then begin
+     combinerect1(wraprect,rootwidgetrect);
+     if ow_arrowfocusin in widget1.foptionswidget then begin
+      expandwraprect(wraprect,widget1);
+     end;
+    end;
+   end;
+  end;
+ end;
+
 var
  naviginfo: naviginfoty;
  widget1: twidget;
@@ -12246,7 +12262,15 @@ begin
         sender:= self;
         down:= false;
         startingrect:= navigstartrect;
-        translatewidgetpoint1(startingrect.pos,self,nil);
+        addpoint1(startingrect.pos,rootpos);
+        widget1:= fparentwidget;
+        wraprect:= widget1.rootwidgetrect;
+        while (ow_arrowfocusout in widget1.foptionswidget) and 
+                             (widget1.fparentwidget <> nil) do begin
+         widget1:= widget1.fparentwidget;    //todo: position shift
+         combinerect1(wraprect,widget1.rootwidgetrect);
+        end;
+        expandwraprect(wraprect,widget1);
         fparentwidget.navigrequest(naviginfo,nowrap);
         if nearest <> nil then begin
          nearest.setfocus;

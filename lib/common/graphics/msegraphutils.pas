@@ -655,6 +655,8 @@ function intersectrect(const a,b: rectty): rectty; overload;
 procedure intersectrect1(var dest: rectty; const source: rectty);
 function testintersectrect(const a,b: rectty): boolean;
      //true on intersection
+function combinerect(const a,b: rectty): rectty;
+procedure combinerect1(var a: rectty; const b: rectty);
 function clipinrect(const point: pointty;
                                const boundsrect: rectty): pointty; overload;
 function clipinrect(const rect: rectty;
@@ -1799,6 +1801,38 @@ var
  rect1: rectty;
 begin
  result:= intersectrect(a,b,rect1);
+end;
+
+function combinerect(const a,b: rectty): rectty;
+var
+ i1: int32;
+ ps,pe: pointty;
+begin
+ ps:= a.pos;
+ if a.x > b.x then begin
+  ps.x:= b.x;
+ end;
+ if a.y > b.y then begin
+  ps.y:= b.y;
+ end;
+ pe.x:= a.x + a.cx;
+ i1:= b.x + b.cx;
+ if i1 > pe.x then begin
+  pe.x:= i1;
+ end;
+ pe.y:= a.y + a.cy;
+ i1:= b.y + b.cy;
+ if i1 > pe.y then begin
+  pe.y:= i1;
+ end;
+ result.pos:= ps;
+ result.cx:= pe.x-ps.x;
+ result.cy:= pe.y-ps.y;
+end;
+
+procedure combinerect1(var a: rectty; const b: rectty);
+begin
+ a:= combinerect(a,b);
 end;
 
 function rectinrect(const inner,outer: rectty): boolean;
