@@ -744,7 +744,7 @@ object projectoptionsfo: tprojectoptionsfo
                 taborder = 2
                 bounds_x = 0
                 bounds_y = 91
-                bounds_cx = 507
+                bounds_cx = 572
                 bounds_cy = 70
                 optionsscale = [osc_expandx, osc_shrinkx, osc_expandy, osc_shrinky]
                 optionslayout = [lao_aligny]
@@ -832,7 +832,7 @@ object projectoptionsfo: tprojectoptionsfo
                   taborder = 1
                   bounds_x = 143
                   bounds_y = 10
-                  bounds_cx = 364
+                  bounds_cx = 429
                   bounds_cy = 51
                   optionsscale = [osc_expandx, osc_shrinkx, osc_expandy, osc_shrinky, osc_expandshrinkx, osc_expandshrinky]
                   optionslayout = [lao_aligny]
@@ -952,6 +952,25 @@ object projectoptionsfo: tprojectoptionsfo
                     value = 80
                     min = 1
                     max = 100
+                    reffontheight = 14
+                  end
+                  object pairmaxrowcount: tintegeredit
+                    frame.caption = 'Mark max'#10'rowcount'
+                    frame.localprops = []
+                    frame.localprops1 = []
+                    frame.outerframe = (
+                      0
+                      31
+                      1
+                      0
+                    )
+                    taborder = 4
+                    bounds_x = 368
+                    bounds_y = 0
+                    bounds_cx = 61
+                    bounds_cy = 51
+                    value = 100
+                    min = 1
                     reffontheight = 14
                   end
                 end

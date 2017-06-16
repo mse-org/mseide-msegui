@@ -24,6 +24,7 @@ type
 const
  openbrackets: array[bracketkindty] of msechar = (#0,'(','[','{');
  closebrackets: array[bracketkindty] of msechar = (#0,')',']','}');
+ defaultpairmaxrowcount = 100;
 
 type
  syntaxeditoptionty = (seo_autoindent,seo_markbrackets,seo_markpairwords,
@@ -42,6 +43,7 @@ type
    fbracketsetting: integer;
    fbracketchecking: integer;
    fpairmarkbkgcolor: colorty;
+   fpairmaxrowcount: int32;
    fpairwords: pairwordsty;
 //   fpairwordslower: msestringararty;
    procedure setsyntaxpainter(const Value: tsyntaxpainter);
@@ -109,9 +111,11 @@ type
                        const delimchars: msestring {= defaultmsedelimchars});
    procedure selectword(const apos: gridcoordty; const delimchars: msestring);
    function matchbracket(const apos: gridcoordty; const akind: bracketkindty;
-                const open: boolean; maxrows: integer = 100): gridcoordty;
+                const open: boolean; maxrows: int32 = -1): gridcoordty;
+                                    //-1 -> use maxpairrows
    function matchpairword(var apos: gridcoordty; //adjusted to word a start
-             out lena,lenb: int32; maxrows: integer = 100): gridcoordty;
+             out lena,lenb: int32; maxrows: int32 = -1): gridcoordty;
+                                    //-1 -> use maxpairrows
    property pairwords: pairwordsty read fpairwords write setpairwords;
                  //last item of a pairword item is endtoken
                  //upprcase values must be uppercase for caseinsensitive
@@ -134,6 +138,8 @@ type
         //cl_none -> force none,
         //cl_default -> use syntaxpainter value if defined else cl_none
         //otherwise use syntaxpainter value if defined
+   property pairmaxrowcount: int32 read fpairmaxrowcount 
+                        write fpairmaxrowcount default defaultpairmaxrowcount;
  end;
 
 function checkbracketkind(const achar: msechar;
@@ -183,6 +189,7 @@ begin
  fmark1:= invalidmark;
  fmark2:= invalidmark;
  fpairmarkbkgcolor:= cl_none;
+ fpairmaxrowcount:= defaultpairmaxrowcount;
  inherited;
 end;
 
@@ -592,7 +599,7 @@ end;
 
 function tsyntaxedit.matchbracket(const apos: gridcoordty;
                   const akind: bracketkindty;
-                 const open: boolean; maxrows: integer = 100): gridcoordty;
+                 const open: boolean; maxrows: integer = -1): gridcoordty;
                  
 var
  level: integer;
@@ -608,6 +615,9 @@ begin
  y:= apos.row;
  openchar:= openbrackets[akind];
  closechar:= closebrackets[akind];
+ if maxrows < 0 then begin
+  maxrows:= fpairmaxrowcount;
+ end;
  if open then begin
   while (maxrows > 0) and (y < flines.count) do begin
    strpo:= pmsestring(flines.getitempo(y));
@@ -662,7 +672,7 @@ end;
 
 function tsyntaxedit.matchpairword(var apos: gridcoordty;
                                              out lena,lenb: int32;
-                                     maxrows: integer = 100): gridcoordty;
+                                     maxrows: integer = -1): gridcoordty;
 var
  mstr1,{mstr1l,}mstr2{,mstr2l}: msestring;
  forward1: boolean;
@@ -674,6 +684,9 @@ var
 label
  lab1;
 begin
+ if maxrows < 0 then begin
+  maxrows:= fpairmaxrowcount;
+ end;
  if fpairwords.upper <> nil then begin
   mstr1:= '';
   if (apos.row >= 0) and (apos.row < flines.count) then begin

@@ -220,6 +220,7 @@ type
    fnoformdesignerdocking: boolean;
    ftrimtrailingwhitespace: boolean;
    fpairmarkcolor: integer;
+   fpairmaxrowcount: integer;
    fcomponenthints: boolean;
    function limitgridsize(const avalue: integer): integer;
    procedure setgridsizex(const avalue: integer);
@@ -266,6 +267,8 @@ type
    property statementcolor: integer read fstatementcolor write fstatementcolor;
    property pairmarkcolor: integer read fpairmarkcolor 
                                              write fpairmarkcolor;
+   property pairmaxrowcount: integer read fpairmaxrowcount 
+                                             write fpairmaxrowcount;
    
    property editfontantialiased: boolean read feditfontantialiased 
                                               write feditfontantialiased;
@@ -1064,6 +1067,7 @@ type
    settingsformatmacros: tbooleanedit;
    settingsfontalias: tbooleanedit;
    makeoptpurpose: tstringedit;
+   pairmaxrowcount: tintegeredit;
    procedure acttiveselectondataentered(const sender: TObject);
    procedure colonshowhint(const sender: tdatacol; const arow: Integer; 
                       var info: hintinfoty);
@@ -3253,6 +3257,7 @@ begin
  statementcolor:= $E0FFFF;
 // pairmarkcolor:= int32(cl_ltyellow);
  pairmarkcolor:= int32(cl_none);
+ pairmaxrowcount:= 100;
  editfontantialiased:= true;
  editmarkbrackets:= true;
 // editmarkpairwords:= true;
