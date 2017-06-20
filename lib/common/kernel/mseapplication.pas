@@ -1355,9 +1355,6 @@ begin
                      ' count: '+inttostr(flockcount) + ' thread: '+
                      inttostr(flockthread));
   {$endif}
-  {$ifdef mse_debugmutex}
-  checklockcount;
-  {$endif}
  end;
 end;
 
@@ -1748,7 +1745,6 @@ end;
 
 procedure tcustomapplication.processmessages;
 var
- int1: integer;
  bo1: boolean;
 begin
  if not ismainthread then begin
@@ -1756,11 +1752,13 @@ begin
  end;
  bo1:= aps_processmessages in fstate;
  include(fstate,aps_processmessages);
- int1:= unlockall;
+// int1:= unlockall;
+ lock();
  try
   doeventloop(true);
+  unlock();
  finally
-  relockall(int1);
+//  relockall(int1);
   if not bo1 then begin
    exclude(fstate,aps_processmessages);
   end;
