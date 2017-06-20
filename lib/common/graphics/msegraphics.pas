@@ -1422,7 +1422,8 @@ procedure checkgdiunlocked;
 implementation
 uses
  SysUtils,msegui,mseguiintf,msestreaming,mseformatstr,msestockobjects,
- msearrayutils,mselist,msebits,msewidgets,msesysintf1,msesysutils,msefont;
+ msearrayutils,mselist,msebits,msewidgets,
+ msesysintf1,msesysintf,msesysutils,msefont;
 
 type
  lineoptionty = (lio_antialias);
@@ -1443,7 +1444,7 @@ begin
  initdefaultvalues(avalue.shadow);
  initdefaultvalues(avalue.light);
 end;
-
+        
 {$ifdef mse_debuggdisync}
 procedure gdilockerror(const text: msestring);
 var
@@ -1467,7 +1468,7 @@ end;
 
 procedure checkgdilock;
 begin
- if not application.locked then begin
+ if not application.islockedthread then begin
   gdilockerror('GDI lock error.');
  end;
 end;

@@ -47,11 +47,9 @@ type
 function unigettimestamp(timeoutusec: integer): timespec;
 procedure initmutex(out mutex: pthread_mutex_t);
 
-implementation
-
-uses
- dateutils,msedate;
-
+{$ifdef mse_debuggdisync}
+ {$define mse_debugmutex}
+{$endif}
 {$ifdef mse_debugmutex}
 var
  mutexsequ: integer;
@@ -64,6 +62,11 @@ var
  appmutexunlockc: integer;
  appmutexunlocks: integer;
 {$endif}
+
+implementation
+
+uses
+ dateutils,msedate  {$ifdef mse_debugmutex},mseapplication,msesysintf{$endif};
  
 function unigettimestamp(timeoutusec: integer): timespec;
 var
@@ -144,7 +147,7 @@ begin
   {$ifdef mse_debugmutex}
   interlockedincrement(mutexsequ);
   interlockedincrement(mutexcount);
-  if application.getmutexaddr = @mutex then begin
+  if applicationallocated and (application.getmutexaddr = @mutex) then begin
    interlockedincrement(appmutexcount);
    appmutexlockth:= sys_getcurrentthread;
    appmutexlockc:= appmutexcount;
@@ -186,7 +189,7 @@ begin
  {$ifdef mse_debugmutex}
  interlockedincrement(mutexsequ);
  interlockeddecrement(mutexcount);
- if application.getmutexaddr = @mutex then begin
+ if applicationallocated and (application.getmutexaddr = @mutex) then begin
   interlockeddecrement(appmutexcount);
   appmutexunlockth:= sys_getcurrentthread;
   appmutexunlockc:= appmutexcount;
