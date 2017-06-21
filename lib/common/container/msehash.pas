@@ -209,6 +209,45 @@ type
    function prev: pdoubleintegerhashdataty; //wraps to last after first
  end;
 
+ tripleintegerty = record
+  a: int32;
+  b: int32;
+  c: int32;
+ end;
+ tripleintegerdataty = record
+  key: tripleintegerty;
+//  data: record end;
+ end;
+ ptripleintegerdataty = ^tripleintegerdataty;
+ tripleintegerhashdataty = record
+  header: hashheaderty;
+  data: tripleintegerdataty;
+ end;
+ ptripleintegerhashdataty = ^tripleintegerhashdataty;
+
+ ttripleintegerhashdatalist = class(thashdatalist)
+  private
+  protected
+   function hashkey(const akey): hashvaluety; override;
+   function checkkey(const akey; const aitem: phashdataty): boolean; override;
+   function getrecordsize(): int32 override;
+  public
+//   constructor create(const datasize: integer);
+   function add(const akeya,akeyb,akeyc: int32): ptripleintegerhashdataty;
+   function addunique(const akeya,akeyb,akeyc: int32): ptripleintegerhashdataty;
+   function addunique(const akeya,akeyb,akeyc: int32; 
+                           out adata: ptripleintegerhashdataty): boolean;
+                                             //true if new
+   function find(const akeya,akeyb,akeyc: int32): ptripleintegerhashdataty;
+   function delete(const akeya,akeyb,akeyc: int32; 
+                         const all: boolean = false): boolean; overload;
+                         //true if found
+   function first: ptripleintegerhashdataty;
+   function next: ptripleintegerhashdataty; //wraps to first after last
+   function last: ptripleintegerhashdataty;
+   function prev: ptripleintegerhashdataty; //wraps to last after first
+ end;
+
  pointerdataty = record
   key: pointer;
 //  data: record end;
@@ -1689,12 +1728,7 @@ begin
  result.a:= a;
  result.b:= b;
 end;
-{
-constructor tdoubleintegerhashdatalist.create(const datasize: integer);
-begin
- inherited create(datasize + sizeof(doubleintegerdataty));
-end;
-}
+
 function tdoubleintegerhashdatalist.hashkey(const akey): hashvaluety;
 var
  i1: int32;
@@ -1780,6 +1814,104 @@ function tdoubleintegerhashdatalist.delete(const akeya,akeyb: integer;
                                          const all: boolean = false): boolean;
 begin
  result:= internaldelete(mdikey(akeya,akeyb),all);
+end;
+
+{ ttripleintegerhashdatalist }
+
+function mtikey(a,b,c: int32): tripleintegerty; inline;
+begin
+ result.a:= a;
+ result.b:= b;
+ result.c:= c;
+end;
+
+function ttripleintegerhashdatalist.hashkey(const akey): hashvaluety;
+var
+ i1: int32;
+begin
+ with tripleintegerty(akey) do begin
+  i1:= a + b + c;
+ end;
+ result:= scramble((integer(i1) xor (integer(i1) shr 2)));
+end;
+
+function ttripleintegerhashdatalist.checkkey(const akey;
+               const aitem: phashdataty): boolean;
+begin
+ with tripleintegerty(akey) do begin
+  result:= (a = ptripleintegerhashdataty(aitem)^.data.key.a) and
+           (b = ptripleintegerhashdataty(aitem)^.data.key.b) and
+           (c = ptripleintegerhashdataty(aitem)^.data.key.c);
+ end;
+end;
+
+function ttripleintegerhashdatalist.getrecordsize(): int32;
+begin
+ result:= sizeof(tripleintegerhashdataty);
+end;
+
+function ttripleintegerhashdatalist.add(
+                  const akeya,akeyb,akeyc: integer): ptripleintegerhashdataty;
+var
+ k1: tripleintegerty;
+begin
+ k1.a:= akeya;
+ k1.b:= akeyb;
+ k1.c:= akeyc;
+ result:= ptripleintegerhashdataty(internaladd(k1));
+ result^.data.key:= k1;
+end;
+
+function ttripleintegerhashdatalist.find(
+                 const akeya,akeyb,akeyc: integer): ptripleintegerhashdataty;
+begin
+ result:= ptripleintegerhashdataty(internalfind(mtikey(akeya,akeyb,akeyc)));
+end;
+
+function ttripleintegerhashdatalist.addunique(
+                 const akeya,akeyb,akeyc: integer): ptripleintegerhashdataty;
+begin
+ result:= find(akeya,akeyb,akeyc);
+ if result = nil then begin
+  result:= add(akeya,akeyb,akeyc);
+ end;
+end;
+
+function ttripleintegerhashdatalist.addunique(const akeya,akeyb,akeyc: integer; 
+                                 out adata: ptripleintegerhashdataty): boolean;
+begin
+ adata:= find(akeya,akeyb,akeyc);
+ result:= false;
+ if adata = nil then begin
+  adata:= add(akeya,akeyb,akeyc);
+  result:= true;
+ end;
+end;
+
+function ttripleintegerhashdatalist.first: ptripleintegerhashdataty;
+begin
+ result:= ptripleintegerhashdataty(internalfirstx);
+end;
+
+function ttripleintegerhashdatalist.next: ptripleintegerhashdataty;
+begin
+ result:= ptripleintegerhashdataty(internalnextx);
+end;
+
+function ttripleintegerhashdatalist.last: ptripleintegerhashdataty;
+begin
+ result:= ptripleintegerhashdataty(internallastx);
+end;
+
+function ttripleintegerhashdatalist.prev: ptripleintegerhashdataty;
+begin
+ result:= ptripleintegerhashdataty(internalprevx);
+end;
+
+function ttripleintegerhashdatalist.delete(const akeya,akeyb,akeyc: integer; 
+                                         const all: boolean = false): boolean;
+begin
+ result:= internaldelete(mtikey(akeya,akeyb,akeyc),all);
 end;
 
 { tpointerhashdatalist }
