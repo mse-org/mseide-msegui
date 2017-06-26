@@ -1935,8 +1935,9 @@ object projectoptionsfo: tprojectoptionsfo
             object tlayouter2: tlayouter
               optionswidget = [ow_tabfocus, ow_parenttabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_destroywidgets]
               color = -2147483645
+              frame.framei_left = 1
               frame.framei_right = 2
-              frame.localprops = [frl_firight]
+              frame.localprops = [frl_fileft, frl_firight]
               frame.localprops1 = []
               taborder = 2
               bounds_x = 0
@@ -1972,9 +1973,9 @@ object projectoptionsfo: tprojectoptionsfo
                   0
                 )
                 onshowhint = hintexpandedmacros
-                bounds_x = 0
+                bounds_x = 1
                 bounds_y = 0
-                bounds_cx = 526
+                bounds_cx = 524
                 bounds_cy = 37
                 anchors = [an_left, an_top, an_right]
                 textflags = [tf_ycentered, tf_noselect, tf_ellipseleft]
@@ -1993,7 +1994,7 @@ object projectoptionsfo: tprojectoptionsfo
                   2
                 )
                 taborder = 1
-                bounds_x = 528
+                bounds_x = 527
                 bounds_y = 20
                 bounds_cx = 108
                 bounds_cy = 16
@@ -2010,7 +2011,7 @@ object projectoptionsfo: tprojectoptionsfo
                   2
                 )
                 taborder = 2
-                bounds_x = 638
+                bounds_x = 637
                 bounds_y = 20
                 bounds_cx = 37
                 bounds_cy = 16
@@ -2289,7 +2290,8 @@ object projectoptionsfo: tprojectoptionsfo
             object serverla: tlayouter
               optionswidget = [ow_tabfocus, ow_parenttabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_destroywidgets]
               color = -2147483645
-              frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetdisabled, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_optionsskin]
+              frame.framei_left = 1
+              frame.localprops = [frl_fileft, frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetdisabled, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_optionsskin]
               frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive]
               taborder = 1
               bounds_x = 0
@@ -2324,7 +2326,7 @@ object projectoptionsfo: tprojectoptionsfo
                   0
                 )
                 onshowhint = hintexpandedmacros
-                bounds_x = 0
+                bounds_x = 1
                 bounds_y = 0
                 bounds_cx = 524
                 bounds_cy = 37
@@ -2345,7 +2347,7 @@ object projectoptionsfo: tprojectoptionsfo
                   0
                 )
                 taborder = 1
-                bounds_x = 526
+                bounds_x = 527
                 bounds_y = 0
                 bounds_cx = 129
                 bounds_cy = 37
@@ -2371,7 +2373,7 @@ object projectoptionsfo: tprojectoptionsfo
                   2
                 )
                 taborder = 2
-                bounds_x = 657
+                bounds_x = 658
                 bounds_y = 20
                 bounds_cx = 82
                 bounds_cy = 16
@@ -2404,7 +2406,7 @@ object projectoptionsfo: tprojectoptionsfo
               onshowhint = hintexpandedmacros
               bounds_x = 1
               bounds_y = 0
-              bounds_cx = 523
+              bounds_cx = 524
               bounds_cy = 37
               anchors = [an_left, an_top, an_right]
               textflags = [tf_ycentered, tf_noselect, tf_ellipseleft]
