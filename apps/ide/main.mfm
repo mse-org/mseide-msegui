@@ -5,8 +5,8 @@ object mainfo: tmainfo
   frame.grip_size = 10
   frame.grip_options = [go_fixsizebutton, go_floatbutton, go_topbutton, go_backgroundbutton, go_lockbutton, go_nolockbutton, go_buttonhints]
   visible = False
-  bounds_x = 45
-  bounds_y = 203
+  bounds_x = 708
+  bounds_y = 111
   bounds_cx = 459
   bounds_cy = 149
   container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_subfocus, ow_mousetransparent, ow_destroywidgets]
@@ -75,8 +75,8 @@ object mainfo: tmainfo
     startupbkpton = False
     onevent = gdbonevent
     overloadsleepus = 10000
-    left = 104
-    top = 24
+    left = 120
+    top = 32
   end
   object mainstatfile: tstatfile
     filename = 'mseide.sta'
@@ -84,7 +84,7 @@ object mainfo: tmainfo
     options = [sfo_createpath, sfo_transaction, sfo_activatorread, sfo_activatorwrite]
     onstatupdate = mainstatfileonupdatestat
     onstatbeforewrite = mainstatbeforewriteexe
-    top = 24
+    top = 32
   end
   object mainmenu1: tmainmenu
     options = [mo_shortcutright, mo_activate, mo_updateonidle]
@@ -697,29 +697,28 @@ object mainfo: tmainfo
         onexecute = aboutonexecute
       end>
     left = 103
-    top = 88
+    top = 96
   end
   object openfile: tfiledialog
     statfile = projectstatfile
     controller.options = [fdo_checkexist]
     controller.captionopen = 'Open file'
     controller.captionsave = 'Save file as'
-    left = 80
     top = 1
   end
   object projectstatfile: tstatfile
     filename = 'status.sta'
     onstatbeforeread = statbefread
     onstatafterread = statafterread
-    top = 56
+    top = 64
   end
   object vievmenuicons: timagelist
     width = 18
     height = 18
     options = [bmo_masked, bmo_colormask]
     count = 19
-    left = 309
-    top = 88
+    left = 313
+    top = 96
     image = {
       00000000060000005A0000005A000000883D0000000000000000000000000000
       0000000000000000000000000000000000000000FFFFFF06CB582601C5440B01
@@ -1438,22 +1437,21 @@ object mainfo: tmainfo
   end
   object dummyimagelist: timagelist
     width = 24
-    left = 104
-    top = 56
+    left = 120
+    top = 64
   end
   object viewmenu: tframecomp
     left = 208
-    top = 88
+    top = 96
   end
   object runprocmon: tprocessmonitor
     onchilddied = runprocdied
     left = 192
-    top = 24
+    top = 32
   end
   object statoptions: trttistat
     ongetobjects = getstatobjs
-    left = 8
-    top = 88
+    top = 96
   end
   object projectfiledia: tfiledialog
     statfile = projectstatfile
@@ -1471,13 +1469,13 @@ object mainfo: tmainfo
     controller.captionopen = 'Open Project'
     controller.captionsave = 'Save Project'
     optionsedit1 = [oe1_autopopupmenu, oe1_keyexecute, oe1_savestate, oe1_checkvalueafterstatread]
-    left = 264
+    left = 256
     top = 1
   end
   object targetpipe: tpipereadercomp
     oninputavailable = targetpipeinput
-    left = 296
-    top = 24
+    left = 312
+    top = 32
   end
   object c: tstringcontainer
     strings.data = (
@@ -1535,8 +1533,8 @@ object mainfo: tmainfo
       'Load Window Layout'
       'Docking Area'
     )
-    left = 232
-    top = 56
+    left = 256
+    top = 64
   end
   object openform: tfiledialog
     statfile = projectstatfile
@@ -1549,7 +1547,7 @@ object mainfo: tmainfo
     controller.defaultext = 'mfm'
     controller.options = [fdo_checkexist]
     controller.captionopen = 'Open Form File'
-    left = 168
+    left = 120
     top = 1
   end
   object formbg: tbitmapcomp
@@ -1564,6 +1562,6 @@ object mainfo: tmainfo
       C7C7C708B8B8B808C7C7C708B8B8B808
     }
     left = 312
-    top = 56
+    top = 64
   end
 end
