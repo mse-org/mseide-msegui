@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2011 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2017 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -157,6 +157,13 @@ function updatefontstyle1(var formats: formatinfoarty; aindex: integer;
 function updatefontstyle(const formats: formatinfoarty; aindex: integer;
                 len: halfinteger;
                 astyle: fontstylety; aset: boolean): formatinfoarty;
+function updatefontstyle1(var formats: formatinfoarty; aindex: integer;
+                              len: halfinteger;
+                              astyles: fontstylesty; aset: boolean): boolean;
+                                 //true if changed
+function updatefontstyle(const formats: formatinfoarty; aindex: integer;
+                len: halfinteger;
+                astyles: fontstylesty; aset: boolean): formatinfoarty;
 
 function setcharstyle1(var formats: formatinfoarty; aindex,len: halfinteger;
                             const style: charstylety): boolean;
@@ -218,9 +225,15 @@ function expandtabs(const s: richstringty; const tabcharcount: integer): richstr
 function richformatinfotostring(const aformat: formatinfoty): ansistring;
 {$endif}
 
+var
+ hotkeyfontstylesadd: fontstylesty;    //default [fs_underline]
+ hotkeyfontstylesremove: fontstylesty; //default []
+ hotkeycolor: colorty;                 //default cl_none
+ hotkeycolorbackground: colorty;       //default cl_none
+
 implementation
 uses
- typinfo,msearrayutils;
+ typinfo,msearrayutils,msegraphics;
 
 type
  tpoorstringdatalist1 = class(tpoorstringdatalist);
@@ -275,6 +288,24 @@ var
  int1: integer;
  ch1: msechar;
  po1: pmsechar;
+
+ procedure sethotstyle();
+ begin
+  with dest do begin
+   updatefontstyle1(format,po1-pmsechar(pointer(text)),1,
+                                              hotkeyfontstylesadd,true);
+   updatefontstyle1(format,po1-pmsechar(pointer(text)),1,
+                                              hotkeyfontstylesremove,false);
+   if hotkeycolor <> cl_none then begin
+    setfontcolor1(format,po1-pmsechar(pointer(text)),1,hotkeycolor);
+   end;
+   if hotkeycolorbackground <> cl_none then begin
+    setcolorbackground1(format,po1-pmsechar(pointer(text)),1,
+                                                  hotkeycolorbackground);
+   end;
+  end;
+ end;//sethotstyle
+ 
 begin
  with dest do begin
   setlength(text,length(caption)); //max
@@ -288,13 +319,13 @@ begin
      po1^:= ch1;
      inc(int1);
      if caption[int1+1] = '&' then begin    //there is a trailing #0
-      updatefontstyle1(format,po1-pmsechar(pointer(text)),1,fs_underline,true);
+      sethotstyle();
       inc(int1);
      end;
      inc(po1);
     end
     else begin
-     updatefontstyle1(format,po1-pmsechar(pointer(text)),1,fs_underline,true);
+     sethotstyle();
     end;
    end
    else begin
@@ -308,6 +339,16 @@ begin
 end;
 
 function richstringtocaption(const caption: richstringty): captionty;
+ function checkhotkey(const astyle: charstylety): boolean;
+ begin
+  result:= (astyle.fontstyle * hotkeyfontstylesadd = hotkeyfontstylesadd) and
+            (astyle.fontstyle * hotkeyfontstylesremove = []) and
+            ((hotkeycolor = cl_none) or (astyle.fontcolor = hotkeycolor)) and
+            ((hotkeycolorbackground = cl_none) or 
+                     (astyle.colorbackground = hotkeycolorbackground));
+            ;
+ end;//checkhotkey
+ 
 var
  int1: integer;
  po1: pmsechar;
@@ -317,7 +358,8 @@ begin
   setlength(result,length(text)*2+1);
   po1:= pmsechar(pointer(result));
   for int1:= 1 to length(text) do begin
-   if fs_underline in getfontstyle(format,int1-1) then begin
+//   if fs_underline in getfontstyle(format,int1-1) then begin
+   if checkhotkey(getcharstyle(format,int1-1)) then begin
     po1^:= '&';
     inc(po1);
    end;
@@ -329,7 +371,7 @@ begin
     inc(po1);
    end;
   end;
-  if fs_underline in getfontstyle(format,length(text)) then begin
+  if checkhotkey(getcharstyle(format,length(text))) then begin
    po1^:= '&';
    inc(po1);
   end;
@@ -565,28 +607,42 @@ begin
 end;
 
 function updatefontstyle1(var formats: formatinfoarty; aindex: integer; len: halfinteger;
-                              astyle: fontstylety; aset: boolean): boolean;
+                              astyles: fontstylesty; aset: boolean): boolean;
                               //true if changed
 var
  style: charstylety;
  newinfos: newinfosty;
 begin
  if aset then begin
-  style.fontstyle:= [astyle];
+  style.fontstyle:= astyles;
  end
  else begin
   style.fontstyle:= [];
  end;
- newinfos:= newinfosty({$ifdef FPC}longword({$else}word(byte{$endif}([astyle])));
+ newinfos:= newinfosty({$ifdef FPC}longword({$else}word(byte{$endif}(astyles)));
  result:= setfontinfolen(formats,aindex,len,style,newinfos);
+end;
+
+function updatefontstyle1(var formats: formatinfoarty; aindex: integer; len: halfinteger;
+                              astyle: fontstylety; aset: boolean): boolean;
+                              //true if changed
+begin
+ result:= updatefontstyle1(formats,aindex,len,[astyle],aset);
+end;
+
+function updatefontstyle(const formats: formatinfoarty; aindex: integer;
+                len: halfinteger;
+                astyles: fontstylesty; aset: boolean): formatinfoarty;
+begin
+ result:= copy(formats);
+ updatefontstyle1(result,aindex,len,astyles,aset);
 end;
 
 function updatefontstyle(const formats: formatinfoarty; aindex: integer;
                 len: halfinteger;
                 astyle: fontstylety; aset: boolean): formatinfoarty;
 begin
- result:= copy(formats);
- updatefontstyle1(result,aindex,len,astyle,aset);
+ result:= updatefontstyle(formats,aindex,len,[astyle],aset);
 end;
 
 function setcharstyle1(var formats: formatinfoarty;
@@ -1368,5 +1424,17 @@ function trichstringdatalist.getstatdata(const index: integer): msestring;
 begin
  result:= items[index];
 end;
+
+initialization
+{
+ hotkeyfontstylesadd:= [fs_underline];
+ hotkeyfontstylesremove:= [];
+ hotkeycolor:= cl_none;
+ hotkeycolorbackground:= cl_none;
+}
+ hotkeyfontstylesadd:= [fs_bold];
+ hotkeyfontstylesremove:= [];
+ hotkeycolor:= cl_red;
+ hotkeycolorbackground:= cl_yellow;
 
 end.
