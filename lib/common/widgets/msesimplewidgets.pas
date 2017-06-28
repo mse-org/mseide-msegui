@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2016 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2017 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -164,6 +164,7 @@ type
    procedure objectevent(const sender: tobject;
                                      const event: objecteventty); override;
    function verticalfontheightdelta: boolean; override;
+   procedure updatehotkeys() override;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -872,6 +873,12 @@ end;
 function tcustombutton.verticalfontheightdelta: boolean;
 begin
  result:= tf_rotate90 in textflags;
+end;
+
+procedure tcustombutton.updatehotkeys();
+begin
+ inherited;
+ calccaptiontext(factioninfo);
 end;
 
 procedure tcustombutton.synctofontheight;

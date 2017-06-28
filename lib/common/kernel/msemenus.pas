@@ -217,6 +217,7 @@ type
    procedure beginload;
    procedure endload;
    procedure doupdate;
+   procedure updatehotkeys();
    procedure doshortcut(var info: keyeventinfoty);
    function count: integer;
    function hasvisibleitem: boolean;
@@ -361,6 +362,7 @@ type
    procedure assign(source: tpersistent); override;
    procedure doshortcut(var info: keyeventinfoty);
    procedure doupdate;
+   procedure updatehotkeys();
    function count: integer;
    function transientfor: twidget;
    function mouseinfopo: pmouseeventinfoty;
@@ -634,6 +636,13 @@ begin
  fmenu.doupdate;
  if canevent(tmethod(fonupdate)) then begin
   fonupdate(self);
+ end;
+end;
+
+procedure tcustommenu.updatehotkeys();
+begin
+ if fmenu <> nil then begin
+  fmenu.updatehotkeys();
  end;
 end;
 
@@ -1275,6 +1284,16 @@ begin
  end;
  if finfo.action <> nil then begin
   finfo.action.doupdate;
+ end;
+end;
+
+procedure tmenuitem.updatehotkeys();
+var
+ i1: int32;
+begin
+ calccaptiontext(finfo);
+ for i1:= 0 to count - 1 do begin
+  items[i1].updatehotkeys();
  end;
 end;
 

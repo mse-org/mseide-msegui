@@ -45,8 +45,9 @@ type
   private
    fcaptionpos: captionposty;
    fupdating: integer;
-   function getcaption: msestring;
-   procedure setcaption(const Value: msestring);
+   fcaption: msestring;
+//   function getcaption: msestring;
+   procedure setcaption(const avalue: msestring);
    procedure fontchanged(const sender: tobject);
    function isfontstored: Boolean;
    procedure setfont(const Value: tframefont);
@@ -75,6 +76,7 @@ type
 
    procedure updatetextflags;
    procedure updaterects; override;
+   procedure updatehotkeys() override;
    procedure dominsize(var asize: sizety);
    procedure checkminshrinksize(var asize: sizety) override;
    procedure defineproperties(filer: tfiler); override;
@@ -104,7 +106,7 @@ type
 
    property options: captionframeoptionsty read foptions 
                      write setoptions default defaultcaptionframeoptions;
-   property caption: msestring read getcaption write setcaption;
+   property caption: msestring read fcaption write setcaption;
    property captiontextflags: textflagsty read finfo.flags write
                                            setcaptiontextflags default [];
    property captionpos: captionposty read fcaptionpos
@@ -2466,16 +2468,17 @@ begin
  inherited;
  ffont.free;
 end;
-
+{
 function tcustomcaptionframe.getcaption: msestring;
 begin
  result:= richstringtocaption(finfo.text);
 end;
-
-procedure tcustomcaptionframe.setcaption(const Value: msestring);
+}
+procedure tcustomcaptionframe.setcaption(const avalue: msestring);
 begin
- captiontorichstring(value,finfo.text);
- internalupdatestate;
+ fcaption:= avalue;
+ captiontorichstring(avalue,finfo.text);
+ internalupdatestate();
 end;
 
 procedure tcustomcaptionframe.setcaptionpos(const avalue: captionposty);
@@ -2819,6 +2822,12 @@ begin
   end;
  end;
  inherited;
+end;
+
+procedure tcustomcaptionframe.updatehotkeys();
+begin
+ captiontorichstring(fcaption,finfo.text);
+ internalupdatestate();
 end;
 
 procedure tcustomcaptionframe.dominsize(var asize: sizety);
@@ -3185,7 +3194,7 @@ end;
 
 function tcustomcaptionframe.getassistivecaption(): msestring;
 begin
- result:= getcaption();
+ result:= fcaption;
 end;
 
 procedure tcustomcaptionframe.scale(const ascale: real);

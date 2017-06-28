@@ -381,6 +381,10 @@ type
    fgroupinfo: groupinfoarty;
    fgroups: string;
    forder: integer;
+   fhotkey_fontstylesadd: fontstylesty;
+   fhotkey_fontstylesremove: fontstylesty;
+   fhotkey_color: colorty;
+   fhotkey_colorbackground: colorty;
    procedure setactive(const avalue: boolean);
    procedure setcolors(const avalue: tskincolors);
    procedure setfontalias(const avalue: tskinfontaliass);
@@ -394,9 +398,15 @@ type
    procedure setskinfont(const aindex: integer; const avalue: tskinfont);
    procedure setgroups(const avalue: string);
    procedure checkactive;
+   procedure sethotkey_fontstylesadd(const avalue: fontstylesty);
+   procedure sethotkey_fontstylesremove(const avalue: fontstylesty);
+   procedure sethotkey_colorbackground(const avalue: colorty);
+   procedure sethotkey_color(const avalue: colorty);
+   procedure checkhotkey();
   protected
    fextendernames: stringarty;
    fextenders: skinextenderarty;
+   fhashotkey: boolean;
    function getextendernames: stringarty;
    procedure objectevent(const sender: tobject;
                     const event: objecteventty); override;
@@ -512,6 +522,14 @@ type
    property font_helvetica: tskinfont index 8 read getskinfont write setskinfont;
    property font_roman: tskinfont index 9 read getskinfont write setskinfont;
    property font_courier: tskinfont index 10 read getskinfont write setskinfont;
+   property hotkey_fontstylesadd: fontstylesty read fhotkey_fontstylesadd
+                            write sethotkey_fontstylesadd default [];
+   property hotkey_fontstylesremove: fontstylesty read fhotkey_fontstylesremove
+                            write sethotkey_fontstylesremove default [];
+   property hotkey_color: colorty read fhotkey_color write sethotkey_color 
+                                                          default cl_default;
+   property hotkey_colorbackground: colorty read fhotkey_colorbackground 
+                             write sethotkey_colorbackground default cl_default;
  end;
 
  tskincontroller = class(tcustomskincontroller)
@@ -1522,7 +1540,7 @@ procedure setskinhandler(const avalue: tskinhandler);
 implementation
 uses
  msetabsglob,sysutils,mseapplication,msearrayutils,msefont,msesplitter,
- msemenuwidgets;
+ msemenuwidgets,mserichstring;
  
 type
  twidget1 = class(twidget);
@@ -1697,6 +1715,8 @@ begin
  for fo1:= low(stockfontty) to high(stockfontty) do begin
   fskinfonts[fo1]:= tskinfont.create;
  end;
+ fhotkey_color:= cl_default;
+ fhotkey_colorbackground:= cl_default;
  inherited;
 end;
 
@@ -1723,6 +1743,7 @@ begin
  for fo1:= low(stockfontty) to high(stockfontty) do begin
   fskinfonts[fo1].updatefont(stockobjects.fonts[fo1]);
  end;
+ checkhotkey();
  if canevent(tmethod(fonactivate)) then begin
   fonactivate(self);   
  end;
@@ -1770,6 +1791,54 @@ begin
    doactivate;
    fhandler.doactivate(self);
   end;
+ end;
+end;
+
+procedure tcustomskincontroller.sethotkey_fontstylesadd(
+              const avalue: fontstylesty);
+begin
+ fhotkey_fontstylesadd:= avalue;
+ checkhotkey();
+end;
+
+procedure tcustomskincontroller.sethotkey_fontstylesremove(
+              const avalue: fontstylesty);
+begin
+ fhotkey_fontstylesremove:= avalue;
+ checkhotkey();
+end;
+
+procedure tcustomskincontroller.sethotkey_color(const avalue: colorty);
+begin
+ fhotkey_color:= avalue;
+ checkhotkey();
+end;
+
+procedure tcustomskincontroller.sethotkey_colorbackground(
+              const avalue: colorty);
+begin
+ fhotkey_colorbackground:= avalue;
+ checkhotkey();
+end;
+
+procedure tcustomskincontroller.checkhotkey();
+begin
+ fhashotkey:= false;
+ if fhotkey_fontstylesadd <> [] then begin
+  hotkeyfontstylesadd:= fhotkey_fontstylesadd;
+  fhashotkey:= true;
+ end;
+ if fhotkey_fontstylesremove <> [] then begin
+  hotkeyfontstylesremove:= fhotkey_fontstylesremove;
+  fhashotkey:= true;
+ end;
+ if fhotkey_color <> cl_default then begin
+  hotkeycolor:= fhotkey_color;
+  fhashotkey:= true;
+ end;
+ if fhotkey_colorbackground <> cl_default then begin
+  hotkeycolorbackground:= fhotkey_colorbackground;
+  fhashotkey:= true;
  end;
 end;
 
@@ -2025,6 +2094,9 @@ procedure tcustomskincontroller.setwidgetskin(const instance: twidget;
 begin
  setwidgetface(instance,ainfo.svface);
  setwidgetframe(instance,ainfo.svframe);
+ if fhashotkey then begin
+  instance.updatehotkeys();
+ end;
 end;
 {
 procedure tcustomskincontroller.setwidgetskintemplate(const instance: twidget;
@@ -2430,6 +2502,9 @@ begin
    checkboxframetemplate:= ainfo.svcheckboxframe;
   end;
  end;
+ if fhashotkey then begin
+  instance.updatehotkeys();
+ end;
 end;
 
 procedure tcustomskincontroller.setmainmenuskin(const instance: tcustommainmenu;
@@ -2499,6 +2574,9 @@ begin
     end;
    end;
   end;
+ end;
+ if fhashotkey then begin
+  instance.updatehotkeys();
  end;
 end;
 

@@ -620,6 +620,7 @@ type
                                          const move: boolean) virtual;
    procedure internalpaintoverlay(const canvas: tcanvas;
                                              const arect: rectty) virtual;
+   procedure updatehotkeys() virtual;
     //iassistiveclient
    function getassistivecaption(): msestring; virtual;
   public
@@ -1958,6 +1959,7 @@ type
    procedure createfont;
    procedure createfontempty;
    procedure checkautosize;
+   procedure updatehotkeys() virtual;
 
    function isloading: boolean;      //checks ws_loadlock and csdestroing too
    procedure beginupdate; //sets ws_loadlock and noinvalidate
@@ -4622,6 +4624,11 @@ begin
   paintframeface(canvas,deflaterect(arect,fpaintframe));
  end;
  drawframe(canvas,deflaterect(arect,fouterframe),fi,fintf.getframestateflags);
+end;
+
+procedure tcustomframe.updatehotkeys();
+begin
+ //dummy
 end;
 
 procedure tcustomframe.paintoverlay(const canvas: tcanvas;
@@ -14401,6 +14408,13 @@ begin
   finally
    exclude(fwidgetstate1,ws1_autosizing);
   end;
+ end;
+end;
+
+procedure twidget.updatehotkeys();
+begin
+ if fframe <> nil then begin
+  fframe.updatehotkeys();
  end;
 end;
 

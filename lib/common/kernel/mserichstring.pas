@@ -1426,15 +1426,8 @@ begin
 end;
 
 initialization
-{
  hotkeyfontstylesadd:= [fs_underline];
  hotkeyfontstylesremove:= [];
  hotkeycolor:= cl_none;
  hotkeycolorbackground:= cl_none;
-}
- hotkeyfontstylesadd:= [fs_bold];
- hotkeyfontstylesremove:= [];
- hotkeycolor:= cl_red;
- hotkeycolorbackground:= cl_yellow;
-
 end.
