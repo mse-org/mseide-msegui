@@ -233,7 +233,7 @@ var
 
 implementation
 uses
- typinfo,msearrayutils,msegraphics;
+ typinfo,msearrayutils;
 
 type
  tpoorstringdatalist1 = class(tpoorstringdatalist);
