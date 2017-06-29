@@ -3031,7 +3031,7 @@ procedure syncpaintheight(const awidgets: array of twidget;
       //(ex. largest caption)
 
 function checkshortcut(var info: keyeventinfoty;
-          const caption: richstringty; const checkalt: boolean): boolean; overload;
+          const caption: msestring; const checkalt: boolean): boolean; overload;
 function checkshortcut(var info: keyeventinfoty;
           const key: keyty; const shiftstate: shiftstatesty): boolean; overload;
 
@@ -3502,7 +3502,7 @@ begin
  awidget.bounds_cymax:= avalue;
 end;
 
-function checkshortcut(var info: keyeventinfoty; const caption: richstringty;
+function checkshortcut(var info: keyeventinfoty; const caption: msestring;
                          const checkalt: boolean): boolean;
 begin
  with info do begin

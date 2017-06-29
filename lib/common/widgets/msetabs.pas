@@ -53,7 +53,8 @@ type
  
  ttab = class(tindexpersistent,iimagelistinfo)
   private
-   fcaption: richstringty;
+   frichcaption: richstringty;
+   fcaptionx: msestring;
    fhint: msestring;
    fstate: tabstatesty;
    fcolor: colorty;
@@ -62,8 +63,8 @@ type
    fimagelist: timagelist;
    fimagenr: imagenrty;
    fimagenrdisabled: imagenrty;
-   function getcaption: captionty;
-   procedure setcaption(const Value: captionty);
+//   function getcaption: captionty;
+   procedure setcaption(const avalue: captionty);
    procedure changed;
    procedure setstate(const Value: tabstatesty);
    procedure setcolor(const Value: colorty);
@@ -98,7 +99,7 @@ type
    property ident: integer read fident;
    property active: boolean read getactive write setactive;
   published
-   property caption: captionty read getcaption write setcaption;
+   property caption: captionty read fcaptionx write setcaption;
    property state: tabstatesty read fstate write setstate default [];
    property color: colorty read fcolor write setcolor default cl_default;
    property coloractive: colorty read fcoloractive
@@ -1105,7 +1106,7 @@ var
  procedure docommon(const tab: ttab; var cell: shapeinfoty; var textrect: rectty);
  begin
   with tab,cell,ca do begin
-   caption:= fcaption;
+   caption:= frichcaption;
    textflags:= layout.tabs.ftextflags;
    imagedist:= layout.tabs.fimagedist;
    imagepos:= layout.tabs.fimagepos;//captiontoimagepos[layout.tabs.fcaptionpos];
@@ -1230,7 +1231,7 @@ begin
     with tabs[int1],cells[int1],ca do begin
      dim.y:= aval;
      dofont(tabs[int1],cells[int1]);
-     rect1:= textrect(canvas,fcaption,
+     rect1:= textrect(canvas,frichcaption,
                 makerect(normpos,aval,normsize-cxinflate,bigint),
                                                               textflags1,font);
      docommon(tabs[int1],cells[int1],rect1);
@@ -1290,7 +1291,7 @@ begin
     with tabs[int1],cells[int1],ca do begin
      dim.x:= aval;
      dofont(tabs[int1],cells[int1]);
-     rect1:= textrect(canvas,fcaption,
+     rect1:= textrect(canvas,frichcaption,
                 makerect(aval,normpos,bigint,normsize-cyinflate),
                                                               textflags1,font);
      docommon(tabs[int1],cells[int1],rect1);
@@ -1606,15 +1607,16 @@ function ttab.isfontactivestored: boolean;
 begin
  result:= ffontactive <> nil;
 end;
-
+{
 function ttab.getcaption: captionty;
 begin
  result:= richstringtocaption(fcaption);
 end;
-
-procedure ttab.setcaption(const Value: captionty);
+}
+procedure ttab.setcaption(const avalue: captionty);
 begin
- captiontorichstring(value,fcaption);
+ fcaptionx:= avalue;
+ captiontorichstring(avalue,frichcaption);
  changed;
 end;
 
@@ -1644,7 +1646,7 @@ end;
 
 procedure ttab.doshortcut(var info: keyeventinfoty; const sender: twidget);
 begin
- if checkshortcut(info,fcaption,true) then begin
+ if checkshortcut(info,fcaptionx,true) then begin
   active:= true;
  end;
 end;
@@ -2464,7 +2466,7 @@ end;
 
 function comptabs(const l,r): integer;
 begin
- result:= msecomparetext(ttab(l).fcaption.text,ttab(r).fcaption.text);
+ result:= msecomparetext(ttab(l).frichcaption.text,ttab(r).frichcaption.text);
 end;
 
 procedure tcustomtabbar.tabchanged(const sender: ttab);

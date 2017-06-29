@@ -1420,12 +1420,17 @@ type
  tcustomframe1 = class(tcustomframe);
 
  tmessagebutton = class(tsimplebutton)
+  private
+   fcaption: msestring;
+   procedure setcaption(const avalue: msestring);
   protected
    modalresult: modalresultty;
    procedure doexecute; override;
-   procedure doshortcut(var info: keyeventinfoty; const sender: twidget); override;
+   procedure doshortcut(var info: keyeventinfoty;
+                                   const sender: twidget); override;
   public
    onexecute: notifyeventty;
+   property caption: msestring read fcaption write setcaption;
  end;
 
  showmessageinfoty = record
@@ -1921,13 +1926,20 @@ begin
       widgetrect:= rect1;
       parentwidget:= widget;
       if buttons[int1] in noshortcut then begin
+       caption:= 
+                stockobjects.modalresulttextnoshortcut[buttons[int1]];
+{
        captiontorichstring(
                 stockobjects.modalresulttextnoshortcut[buttons[int1]],
                                                              finfo.ca.caption);
+}
       end
       else begin
+       caption:= stockobjects.modalresulttext[buttons[int1]];
+{
        captiontorichstring(stockobjects.modalresulttext[buttons[int1]],
                                finfo.ca.caption);
+}
       end;
       if int1 <= high(actions) then begin
        onexecute:= actions[int1];
@@ -2378,6 +2390,13 @@ end;
 }
 { tmessagebutton }
 
+procedure tmessagebutton.setcaption(const avalue: msestring);
+begin
+ fcaption:= avalue;
+ captiontorichstring(avalue,finfo.ca.caption);
+ invalidate();
+end;
+
 procedure tmessagebutton.doexecute;
 begin
  if assigned(onexecute) then begin
@@ -2388,7 +2407,7 @@ end;
 
 procedure tmessagebutton.doshortcut(var info: keyeventinfoty; const sender: twidget);
 begin
- if checkshortcut(info,finfo.ca.caption,bo_altshortcut in options) then begin
+ if checkshortcut(info,caption,bo_altshortcut in options) then begin
   include(info.eventstate,es_processed);
   internalexecute;
  end
@@ -3117,7 +3136,7 @@ end;
 function tcustomcaptionframe.checkfocusshortcut(
                                       var info: keyeventinfoty): boolean;
 begin
- result:= msegui.checkshortcut(info,finfo.text,true);
+ result:= msegui.checkshortcut(info,fcaption,true);
 end;
 
 procedure tcustomcaptionframe.setdisabled(const value: boolean);

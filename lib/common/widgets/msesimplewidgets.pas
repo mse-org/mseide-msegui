@@ -917,7 +917,7 @@ function tcustombutton.checkfocusshortcut(var info: keyeventinfoty): boolean;
 begin
  result:= inherited checkfocusshortcut(info) or
      (bo_focusonshortcut in options) and
-          msegui.checkshortcut(info,factioninfo.caption1,
+          msegui.checkshortcut(info,factioninfo.captiontext,
           bo_altshortcut in options) and canfocus;
 end;
 
@@ -939,7 +939,8 @@ begin
    bo2:= es_processed in info.eventstate;
    exclude(info.eventstate,es_processed);
    bo1:= (bo_executeonshortcut in options) and 
-    msegui.checkshortcut(info,factioninfo.caption1,bo_altshortcut in options) or
+    msegui.checkshortcut(info,factioninfo.captiontext,
+                                         bo_altshortcut in options) or
    (finfo.state * [shs_invisible,shs_disabled,shs_default] = [shs_default]) and
        (info.key = key_return) and
         ((info.shiftstate = []) or 
@@ -1914,7 +1915,7 @@ end;
 
 function tcustomlabel.checkfocusshortcut(var info: keyeventinfoty): boolean;
 begin
- result:= checkshortcut(info,frichcaption,true) and canfocus;
+ result:= canfocus and checkshortcut(info,fcaptionx,true);
 end;
 
 { tcustomicon }

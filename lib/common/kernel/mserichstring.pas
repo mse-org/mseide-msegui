@@ -211,8 +211,8 @@ function breakrichlines(const source: richstringty): richstringarty;
 procedure captiontorichstring(const caption: captionty; var dest: richstringty);
 //procedure captiontorichstring(const caption: captionty; out result: richstringty);
 function richstringtocaption(const caption: richstringty): captionty;
-function isshortcut(key: keyty; const caption: richstringty): boolean; overload;
-function isshortcut(key: msechar; const caption: richstringty): boolean; overload;
+function isshortcut(key: keyty; const caption: msestring): boolean; overload;
+function isshortcut(key: msechar; const caption: msestring): boolean; overload;
 //function checkshortcut(var info: keyeventinfoty;
 //          const caption: richstringty; const checkalt: boolean): boolean; overload;
       //moved to msegui
@@ -379,6 +379,37 @@ begin
  setlength(result,po1-pmsechar(pointer(result)));
 end;
 
+function isshortcut(key: msechar; const caption: msestring): boolean;
+var
+ p1: pmsechar;
+begin
+ result:= false;
+ if caption <> '' then begin
+  p1:= pointer(caption);
+  while p1^ <> #0  do begin
+   if p1^ = '&' then begin
+    inc(p1);
+    if p1^ <> '&' then begin
+     result:= msecomparetext(p1^,key) = 0;
+     break;
+    end;
+   end;
+   inc(p1);
+  end;
+ end;
+{
+ with caption do begin
+  if (format = nil) or (format[0].index >= length(text)) or (length(key) < 1) then begin
+   result:= false;
+  end
+  else begin
+   result:= mseuppercase(text[format[0].index+1]) = mseuppercase(key);
+//   result:= charuppercase(text[format[0].index+1]) = charuppercase(key);
+  end;
+ end;
+ }
+end;
+{
 function isshortcut(key: msechar; const caption: richstringty): boolean;
 begin
  with caption do begin
@@ -391,8 +422,8 @@ begin
   end;
  end;
 end;
-
-function isshortcut(key: keyty; const caption: richstringty): boolean;
+}
+function isshortcut(key: keyty; const caption: msestring): boolean;
 begin
  result:= isshortcut(keytomsechar(key),caption);
 end;

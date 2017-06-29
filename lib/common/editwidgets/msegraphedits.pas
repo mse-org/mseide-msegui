@@ -3715,7 +3715,8 @@ begin
     bo2:= es_processed in info.eventstate;
     exclude(info.eventstate,es_processed);
     bo1:= (bo_executeonshortcut in options) and 
-     msegui.checkshortcut(info,factioninfo.caption1,bo_altshortcut in options) or
+     msegui.checkshortcut(info,factioninfo.captiontext,
+                                        bo_altshortcut in options) or
     (finfo.state * [shs_invisible,shs_disabled,shs_default] = [shs_default]) and
        (info.key = key_return) and
        ((info.shiftstate = []) or 
@@ -3981,7 +3982,7 @@ end;
 function tcustomdatabutton.checkfocusshortcut(var info: keyeventinfoty): boolean;
 begin
  result:= inherited checkfocusshortcut(info) or 
-         msegui.checkshortcut(info,finfo.ca.caption,true);
+         msegui.checkshortcut(info,factioninfo.captiontext,true);
 end;
 
 procedure tcustomdatabutton.togglevalue(const areadonly: boolean;

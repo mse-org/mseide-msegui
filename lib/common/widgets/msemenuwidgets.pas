@@ -14,7 +14,7 @@ unit msemenuwidgets;
 interface
 uses
  classes,mclasses,msewidgets,mseshapes,msemenus,msegraphutils,msegraphics,
- msetypes,msegui,mseglob,mseguiglob,mseevent,mseclasses;
+ msetypes,msegui,mseglob,mseguiglob,mseevent,mseclasses,msestrings;
 
 const
  defaultpopupmenuwidgetoptions = 
@@ -22,6 +22,7 @@ const
 type
  menucellinfoty = record
   buttoninfo: shapeinfoty;
+  caption: msestring;
   dimouter: rectty;
   fontinactive: tfont;
   fontactive: tfont;
@@ -221,7 +222,7 @@ function showpopupmenu(const menu: tmenuitem; const transientfor: twidget;
 implementation
 uses
  msedrawtext,mserichstring,msestockobjects,sysutils,msekeyboard,msebits,
- mseact,mseguiintf,msestrings,msebitmap,msesysutils,
+ mseact,mseguiintf,msebitmap,msesysutils,
  mseassistiveclient,mseassistiveserver;
 
 type
@@ -474,6 +475,7 @@ begin
   for int1:= 0 to count - 1 do begin
    item1:= tmenuitem1(fsubmenu[int1]);
    with cells[int1] do begin
+    caption:= item1.caption;
     fontinactive:= item1.font;
     fontactive:= item1.fontactive;
     with buttoninfo,ca do begin
@@ -931,9 +933,9 @@ function checkshortcut(const layout: menulayoutinfoty; var info: keyeventinfoty;
   end;
   int1:= actualindex;
   repeat
-   with layout.cells[actualindex].buttoninfo do begin
-    if (state * [shs_disabled,shs_invisible,shs_suppressed] = []) and
-            msegui.checkshortcut(info,ca.caption,false) then begin
+   with layout.cells[actualindex] do begin
+    if (buttoninfo.state * [shs_disabled,shs_invisible,shs_suppressed] = []) and
+            msegui.checkshortcut(info,caption,false) then begin
      result:= actualindex;
      include(info.eventstate,es_processed);
      break;
