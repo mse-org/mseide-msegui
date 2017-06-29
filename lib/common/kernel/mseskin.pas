@@ -1824,21 +1824,24 @@ end;
 procedure tcustomskincontroller.checkhotkey();
 begin
  fhashotkey:= false;
- if fhotkey_fontstylesadd <> [] then begin
-  hotkeyfontstylesadd:= fhotkey_fontstylesadd;
-  fhashotkey:= true;
- end;
- if fhotkey_fontstylesremove <> [] then begin
-  hotkeyfontstylesremove:= fhotkey_fontstylesremove;
-  fhashotkey:= true;
- end;
- if fhotkey_color <> cl_default then begin
-  hotkeycolor:= fhotkey_color;
-  fhashotkey:= true;
- end;
- if fhotkey_colorbackground <> cl_default then begin
-  hotkeycolorbackground:= fhotkey_colorbackground;
-  fhashotkey:= true;
+ if factive and 
+            (factivedesign or not (csdesigning in componentstate)) then begin
+  if fhotkey_fontstylesadd <> [] then begin
+   hotkeyfontstylesadd:= fhotkey_fontstylesadd;
+   fhashotkey:= true;
+  end;
+  if fhotkey_fontstylesremove <> [] then begin
+   hotkeyfontstylesremove:= fhotkey_fontstylesremove;
+   fhashotkey:= true;
+  end;
+  if fhotkey_color <> cl_default then begin
+   hotkeycolor:= fhotkey_color;
+   fhashotkey:= true;
+  end;
+  if fhotkey_colorbackground <> cl_default then begin
+   hotkeycolorbackground:= fhotkey_colorbackground;
+   fhashotkey:= true;
+  end;
  end;
 end;
 
