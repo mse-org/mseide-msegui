@@ -22,7 +22,7 @@ const
 type
  menucellinfoty = record
   buttoninfo: shapeinfoty;
-  caption: msestring;
+//  caption: msestring;
   dimouter: rectty;
   fontinactive: tfont;
   fontactive: tfont;
@@ -227,6 +227,7 @@ uses
 
 type
  tmenuitem1 = class(tmenuitem);
+ tmenuitems1 = class(tmenuitems);
  twidget1 = class(twidget);
 // tcustomframe1 = class(tcustomframe);
  twindow1 = class(twindow);
@@ -475,7 +476,7 @@ begin
   for int1:= 0 to count - 1 do begin
    item1:= tmenuitem1(fsubmenu[int1]);
    with cells[int1] do begin
-    caption:= item1.caption;
+//    caption:= item1.caption;
     fontinactive:= item1.font;
     fontactive:= item1.fontactive;
     with buttoninfo,ca do begin
@@ -918,41 +919,43 @@ begin
  end;
 end;
 
-function checkshortcut(const layout: menulayoutinfoty; var info: keyeventinfoty;
-                                  out multiple: boolean;
-           actualindex: integer = -1): integer;
+function checkshortcut(const layout: menulayoutinfoty;
+            var info: keyeventinfoty; out multiple: boolean;
+                                     currentindex: integer = -1): integer;
 
- function getshortcut(actualindex: integer): integer;
+ function getshortcut(currentindex: integer): integer;
  var
   int1: integer;
- begin
+ begin 
   result:= -1;
-  inc(actualindex);
-  if actualindex >= length(layout.cells) then begin
-   actualindex:= 0;
+  inc(currentindex);
+  if currentindex >= length(layout.cells) then begin
+   currentindex:= 0;
   end;
-  int1:= actualindex;
+  int1:= currentindex;
   repeat
-   with layout.cells[actualindex] do begin
+   with layout.cells[currentindex] do begin
     if (buttoninfo.state * [shs_disabled,shs_invisible,shs_suppressed] = []) and
-            msegui.checkshortcut(info,caption,false) then begin
-     result:= actualindex;
+      msegui.checkshortcut(info,
+        tmenuitem(tmenuitems1(tmenuitem1(layout.menu).fsubmenu).
+                            fitems[currentindex]).caption,false) then begin
+     result:= currentindex;
      include(info.eventstate,es_processed);
      break;
     end;
    end;
-   inc(actualindex);
-   if actualindex >= length(layout.cells) then begin
-    actualindex:= 0;
+   inc(currentindex);
+   if currentindex >= length(layout.cells) then begin
+    currentindex:= 0;
    end;
-  until actualindex = int1;
+  until currentindex = int1;
  end;
 
 begin
  result:= -1;
  multiple:= false;
  if length(layout.cells) > 0 then begin
-  result:= getshortcut(actualindex);
+  result:= getshortcut(currentindex);
   if result >= 0 then begin
    exclude(info.eventstate,es_processed);
    multiple:= getshortcut(result) <> result;
