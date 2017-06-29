@@ -164,12 +164,12 @@ type
    procedure objectevent(const sender: tobject;
                                      const event: objecteventty); override;
    function verticalfontheightdelta: boolean; override;
-   procedure updatehotkeys() override;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
    procedure synctofontheight; override;
    procedure doupdate;
+   procedure updatehotkeys() override;
 
    property bounds_cx default defaultbuttonwidth;
    property bounds_cy default defaultbuttonheight;
@@ -422,7 +422,7 @@ type
  tcustomlabel = class(tpublishedwidget)
   private
    frichcaption: richstringty;
-   fcaptionx: msestring;
+   fcaption: msestring;
    factualtextflags: textflagsty;
    ftextflags: textflagsty;
    foptions: labeloptionsty;
@@ -439,12 +439,12 @@ type
    procedure clientrectchanged; override;
    function verticalfontheightdelta: boolean; override;
    function checkfocusshortcut(var info: keyeventinfoty): boolean; override;
-   procedure updatehotkeys() override;
   public
    constructor create(aowner: tcomponent); override;
    procedure synctofontheight; override;
+   procedure updatehotkeys() override;
    procedure initnewcomponent(const ascale: real); override;
-   property caption: msestring read fcaptionx write setcaption;
+   property caption: msestring read fcaption write setcaption;
    property font: twidgetfont read getfont write setfont stored isfontstored;
    property fontempty: twidgetfontempty read getfontempty 
                             write setfontempty stored isfontemptystored;
@@ -1811,7 +1811,7 @@ end;
 }
 procedure tcustomlabel.setcaption(const avalue: msestring);
 begin
- fcaptionx:= avalue;
+ fcaption:= avalue;
  if lao_nounderline in foptions then begin
   frichcaption.text:= avalue;
  end
@@ -1825,7 +1825,7 @@ end;
 procedure tcustomlabel.updatehotkeys();
 begin
  inherited;
- setcaption(fcaptionx);
+ setcaption(fcaption);
 end;
 
 procedure tcustomlabel.settextflags(const Value: textflagsty);
@@ -1878,11 +1878,11 @@ begin
   invalidate;
   if (lao_nounderline in opt1) and not(csreading in componentstate) then begin
    if lao_nounderline in avalue then begin
-    frichcaption.text:= fcaptionx;
+    frichcaption.text:= fcaption;
     frichcaption.format:= nil;
    end
    else begin
-    captiontorichstring(fcaptionx,frichcaption);
+    captiontorichstring(fcaption,frichcaption);
    end;
    checkautosize();
   end;
@@ -1915,7 +1915,7 @@ end;
 
 function tcustomlabel.checkfocusshortcut(var info: keyeventinfoty): boolean;
 begin
- result:= canfocus and checkshortcut(info,fcaptionx,true);
+ result:= canfocus and checkshortcut(info,fcaption,true);
 end;
 
 { tcustomicon }

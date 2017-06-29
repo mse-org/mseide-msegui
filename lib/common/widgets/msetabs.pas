@@ -54,7 +54,7 @@ type
  ttab = class(tindexpersistent,iimagelistinfo)
   private
    frichcaption: richstringty;
-   fcaptionx: msestring;
+   fcaption: msestring;
    fhint: msestring;
    fstate: tabstatesty;
    fcolor: colorty;
@@ -99,7 +99,7 @@ type
    property ident: integer read fident;
    property active: boolean read getactive write setactive;
   published
-   property caption: captionty read fcaptionx write setcaption;
+   property caption: captionty read fcaption write setcaption;
    property state: tabstatesty read fstate write setstate default [];
    property color: colorty read fcolor write setcolor default cl_default;
    property coloractive: colorty read fcoloractive
@@ -1615,7 +1615,7 @@ end;
 }
 procedure ttab.setcaption(const avalue: captionty);
 begin
- fcaptionx:= avalue;
+ fcaption:= avalue;
  captiontorichstring(avalue,frichcaption);
  changed;
 end;
@@ -1646,7 +1646,7 @@ end;
 
 procedure ttab.doshortcut(var info: keyeventinfoty; const sender: twidget);
 begin
- if checkshortcut(info,fcaptionx,true) then begin
+ if checkshortcut(info,fcaption,true) then begin
   active:= true;
  end;
 end;

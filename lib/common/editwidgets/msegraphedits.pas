@@ -944,6 +944,7 @@ type
    destructor destroy; override;
    procedure execute();
    procedure initnewwidget(const ascale: real); override;
+   procedure updatehotkeys() override;
    procedure doupdate;
    procedure synctofontheight; override;
    procedure initgridwidget; override;
@@ -4181,6 +4182,12 @@ end;
 procedure tcustomdatabutton.calccaptiontext(var ainfo: actioninfoty);
 begin
  mseactions.calccaptiontext(ainfo,shortcutseparator);
+end;
+
+procedure tcustomdatabutton.updatehotkeys();
+begin
+ inherited;
+ calccaptiontext(factioninfo);
 end;
 
 procedure tcustomdatabutton.actionchanged;
