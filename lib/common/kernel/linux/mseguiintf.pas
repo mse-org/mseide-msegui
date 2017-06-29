@@ -549,6 +549,20 @@ type
  {$define xtextproperty:= txtextproperty}
  {$define xcolor:= txcolor}
  {$define xpointer:= txpointer}
+   TXIMProc = procedure (para1:PXIM; para2:XPointer; para3:XPointer);cdecl;
+
+   TXICProc = function (para1:PXIC; para2:XPointer; para3:XPointer):TBool;cdecl;
+   PXIMCallback = ^TXIMCallback;
+   TXIMCallback = record
+        client_data : TXPointer;
+        callback : TXIMProc;
+     end;
+
+   PXICCallback = ^TXICCallback;
+   TXICCallback = record
+        client_data : TXPointer;
+        callback : TXICProc;
+     end;
 {$else}
    tboolresult = longbool;
    PXIM = ^TXIM;
@@ -6212,7 +6226,7 @@ begin
  end;
 end;
 
-procedure imdestroyed(ic: txim; client_data: xpointer;
+procedure imdestroyed(ic: pxim; client_data: xpointer;
                                           call_data: xpointer); cdecl;
 var
  po1: pchar;
