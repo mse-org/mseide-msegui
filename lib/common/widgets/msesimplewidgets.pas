@@ -421,12 +421,13 @@ type
 type 
  tcustomlabel = class(tpublishedwidget)
   private
-   fcaption: richstringty;
+   frichcaption: richstringty;
+   fcaptionx: msestring;
    factualtextflags: textflagsty;
    ftextflags: textflagsty;
    foptions: labeloptionsty;
-   procedure setcaption(const Value: msestring);
-   function getcaption: msestring;
+   procedure setcaption(const avalue: msestring);
+//   function getcaption: msestring;
    procedure updatetextflags;
    procedure settextflags(const Value: textflagsty);
    procedure setoptions(const avalue: labeloptionsty);
@@ -438,11 +439,12 @@ type
    procedure clientrectchanged; override;
    function verticalfontheightdelta: boolean; override;
    function checkfocusshortcut(var info: keyeventinfoty): boolean; override;
+   procedure updatehotkeys() override;
   public
    constructor create(aowner: tcomponent); override;
    procedure synctofontheight; override;
    procedure initnewcomponent(const ascale: real); override;
-   property caption: msestring read getcaption write setcaption;
+   property caption: msestring read fcaptionx write setcaption;
    property font: twidgetfont read getfont write setfont stored isfontstored;
    property fontempty: twidgetfontempty read getfontempty 
                             write setfontempty stored isfontemptystored;
@@ -1793,9 +1795,9 @@ end;
 procedure tcustomlabel.dopaintforeground(const canvas: tcanvas);
 begin
  inherited;
- drawtext(canvas,fcaption,innerclientrect,factualtextflags,font);
+ drawtext(canvas,frichcaption,innerclientrect,factualtextflags,font);
 end;
-
+{
 function tcustomlabel.getcaption: msestring;
 begin
  if lao_nounderline in foptions then begin
@@ -1805,17 +1807,24 @@ begin
   result:= richstringtocaption(fcaption);
  end;
 end;
-
-procedure tcustomlabel.setcaption(const Value: msestring);
+}
+procedure tcustomlabel.setcaption(const avalue: msestring);
 begin
+ fcaptionx:= avalue;
  if lao_nounderline in foptions then begin
-  fcaption.text:= value;
+  frichcaption.text:= avalue;
  end
  else begin
-  captiontorichstring(Value,fcaption);
+  captiontorichstring(avalue,frichcaption);
  end;
  checkautosize;
  invalidate;
+end;
+
+procedure tcustomlabel.updatehotkeys();
+begin
+ inherited;
+ setcaption(fcaptionx);
 end;
 
 procedure tcustomlabel.settextflags(const Value: textflagsty);
@@ -1868,11 +1877,11 @@ begin
   invalidate;
   if (lao_nounderline in opt1) and not(csreading in componentstate) then begin
    if lao_nounderline in avalue then begin
-    fcaption.text:= richstringtocaption(fcaption);
-    fcaption.format:= nil;
+    frichcaption.text:= fcaptionx;
+    frichcaption.format:= nil;
    end
    else begin
-    captiontorichstring(fcaption.text,fcaption);
+    captiontorichstring(fcaptionx,frichcaption);
    end;
    checkautosize();
   end;
@@ -1881,7 +1890,7 @@ end;
 
 procedure tcustomlabel.getautopaintsize(var asize: sizety);
 begin
- asize:= textrect(getcanvas,fcaption,innerclientrect,ftextflags).size;
+ asize:= textrect(getcanvas,frichcaption,innerclientrect,ftextflags).size;
  innertopaintsize(asize);
 end;
 
@@ -1905,7 +1914,7 @@ end;
 
 function tcustomlabel.checkfocusshortcut(var info: keyeventinfoty): boolean;
 begin
- result:= checkshortcut(info,fcaption,true) and canfocus;
+ result:= checkshortcut(info,frichcaption,true) and canfocus;
 end;
 
 { tcustomicon }

@@ -2097,9 +2097,9 @@ procedure tcustomskincontroller.setwidgetskin(const instance: twidget;
 begin
  setwidgetface(instance,ainfo.svface);
  setwidgetframe(instance,ainfo.svframe);
- if fhashotkey then begin
-  instance.updatehotkeys();
- end;
+// if fhashotkey then begin
+//  instance.updatehotkeys();
+// end;
 end;
 {
 procedure tcustomskincontroller.setwidgetskintemplate(const instance: twidget;
@@ -3742,6 +3742,9 @@ begin
   end;
   if not setwidgetcolorcaptionframe(wi1,co2) then begin
    setwidgetcolor(wi1,co1);
+  end;
+  if fhashotkey then begin
+   updatehotkeys();
   end;
  end;
 end;
