@@ -389,7 +389,7 @@ begin
   while p1^ <> #0  do begin
    if p1^ = '&' then begin
     inc(p1);
-    if p1^ <> '&' then begin
+    if (p1^ <> '&') and (p1^ <> ' ') then begin
      result:= msecomparetext(p1^,key) = 0;
      break;
     end;

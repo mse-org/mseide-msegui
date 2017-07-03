@@ -1244,6 +1244,7 @@ procedure drawbutton(const canvas: tcanvas; const info: shapeinfoty);
 var
  rect1,rect2: rectty;
 // pos: captionposty;
+ pos1: imageposty;
 begin
  if not (shs_invisible in info.state) and 
                         drawbuttonframe(canvas,info,rect1) then begin
@@ -1254,8 +1255,30 @@ begin
                    [shs_focused,shs_showfocusrect] then begin
     drawfocusrect(canvas,inflaterect(rect2,-focusrectdist));
    end;
-   drawbuttoncaption(canvas,info,rect1,info.ca.imagepos
-                           {swapcaptionpos[info.ca.captionpos]},nil);
+   pos1:= info.ca.imagepos;
+   if info.ca.imagelist = nil then begin
+    if tf_right in ca.textflags then begin
+     pos1:= ip_right;
+    end
+    else begin
+     if (tf_left in ca.textflags) or 
+                (info.ca.textflags * [tf_xcentered,tf_xjustify] = []) then begin
+      pos1:= ip_left;
+     end
+     else begin
+      if tf_bottom in info.ca.textflags then begin
+       pos1:= ip_bottom;
+      end
+      else begin
+       if (tf_top in info.ca.textflags) or 
+                        (info.ca.textflags * [tf_ycentered] = []) then begin
+        pos1:= ip_top;
+       end;
+      end;
+     end;
+    end;
+   end;
+   drawbuttoncaption(canvas,info,rect1,pos1,nil);
   end;
  end;
 end;
