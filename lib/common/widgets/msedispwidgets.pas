@@ -215,12 +215,14 @@ type
    property value;
  end;
 
- tcustomrichstringdisp = class(tbasestringdisp)
+ tcustomrichstringdisp = class(tbasestringdisp,irichstringprop)
   private
 //   fvalue: richstringty;
    fondatachange: updaterichstringeventty;
    procedure setvalue(const avalue: msestring);
+   function getrichvalue(): richstringty;
    procedure setrichvalue(const avalue: richstringty);
+   procedure setformat(const avalue: formatinfoarty);
    procedure readvalue(reader: treader);
    procedure readrichvalue(reader: treader);
    procedure writerichvalue(writer: twriter);
@@ -232,6 +234,7 @@ type
    procedure clear; override;
    property value: msestring read finfo.text.text write setvalue stored false;
    property richvalue: richstringty read finfo.text write setrichvalue;
+   property formatvalue: formatinfoarty read finfo.text.format write setformat;
   published
    property ondatachange: updaterichstringeventty read fondatachange
                                                       write fondatachange;
@@ -795,10 +798,21 @@ begin
 // end;
 end;
 
+function tcustomrichstringdisp.getrichvalue(): richstringty;
+begin
+ result:= finfo.text;
+end;
+
 procedure tcustomrichstringdisp.setrichvalue(const avalue: richstringty);
 begin
  finfo.text:= avalue;
  valuechanged;
+end;
+
+procedure tcustomrichstringdisp.setformat(const avalue: formatinfoarty);
+begin
+ finfo.text.format:= copy(avalue);
+ valuechanged();
 end;
 
 procedure tcustomrichstringdisp.readvalue(reader: treader);
@@ -820,6 +834,7 @@ procedure tcustomrichstringdisp.defineproperties(filer: tfiler);
 var
  b1: boolean;
 begin
+ inherited;
  filer.defineproperty('value',@readvalue,nil,false);
  if filer.ancestor <> nil then begin
   b1:= isequalrichstring(tcustomrichstringdisp(filer.ancestor).finfo.text,

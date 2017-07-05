@@ -1,0 +1,15 @@
+object msefontformatdialogfo: tmsefontformatdialogfo
+  bounds_x = 337
+  bounds_y = 266
+  bounds_cx = 100
+  bounds_cy = 100
+  container.frame.localprops = []
+  container.frame.localprops1 = []
+  container.bounds = (
+    0
+    0
+    100
+    100
+  )
+  moduleclassname = 'tmseform'
+end

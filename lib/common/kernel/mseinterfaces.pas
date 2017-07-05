@@ -63,7 +63,8 @@ min_irecordfield,
 min_irecordvaluefield,
 mim_idockcontroller,
 min_iassistiveclientgrid,
-min_iassistiveclientmenu);
+min_iassistiveclientmenu,
+min_irichstringprop);
 
 const
  miid_iformdesigner =          'AA.mse';{0}
@@ -116,7 +117,8 @@ const
  miid_irecordvaluefield =      '9A.mse';{47}
  miid_idockcontroller =        'DA.mse';{48}
  miid_iassistiveclientgrid =   'jA.mse';{49}
- miid_iassistiveclientmenu =  'TA.mse';{50}
+ miid_iassistiveclientmenu =   'TA.mse';{50}
+ miid_irichstringprop =        'zA.mse';{51}
   
 implementation
 end.

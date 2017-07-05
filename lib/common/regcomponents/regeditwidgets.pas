@@ -131,7 +131,7 @@ type
 procedure Register;
 begin
  registercomponents('Edit',[twidgetgrid,
-   tstringedit,tmemoedit,
+   tstringedit,tmemoedit,trichmemoedit,
    tintegeredit,tint64edit,trealedit,trealspinedit,trealsumedit,
    tdatetimeedit,
    tcalendardatetimeedit,
@@ -188,6 +188,8 @@ begin
  registerpropertyeditor(typeinfo(tvalueedits),nil,'',tvalueeditspropertyeditor);
  registerpropertyeditor(typeinfo(twidget),tvalueedititem,'',
                            titemvalueeditpropertyeditor);
+ registerpropertyeditor(typeinfo(msestring),tcustomrichmemoedit,'value',
+                                           trichstringeditor);
 end;
 
 { tdropdowndatacolpropertyeditor }

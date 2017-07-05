@@ -43,7 +43,7 @@ type
 implementation
 uses
  classes,mclasses,msesimplewidgets,msegrids,msemenus,mseimage,msedispwidgets,
- msetoolbar,msetabs,msedesignintf,regwidgets_bmp,mselistbrowser,
+ msetoolbar,msetabs,msedesignintf,regwidgets_bmp,mselistbrowser,mserichstring,
  msesplitter,msedock,mseforms,mseclasses,typinfo,msearrayprops,msewidgets,
  msegui,formdesigner,msedial,msemenuwidgets,msewindowwidget,msechart,
  msepolygon,msepickwidget,msetraywidget,msedockpanelform,msechartedit,mseedit,
@@ -153,7 +153,7 @@ type
   protected
    function getinvisibleitems: tintegerset; override;
  end;
-  
+
 const
  mseformintf: designmoduleintfty = 
   (createfunc: {$ifdef FPC}@{$endif}createmseform;
@@ -273,6 +273,8 @@ begin
                                            tframebuttoneditor);
  registerpropertyeditor(typeinfo(tframebuttons),nil,'',
                                            tframebuttonseditor);
+ registerpropertyeditor(typeinfo(msestring),tcustomrichstringdisp,'value',
+                                           trichstringeditor);
 
  registerpropertyeditor(typeinfo(labeloptionsty),tcustomlabel,'',
                                            tvolatilesetpropertyeditor);

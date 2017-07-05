@@ -238,6 +238,11 @@ type
    function getvalue: msestring; override;
  end;
 
+ trichstringeditor = class(tmsestringpropertyeditor)
+  public
+   procedure edit; override;
+ end;
+   
  tordinalpropertyeditor = class(tpropertyeditor)
   protected
    function getdefaultstate: propertystatesty; override;
@@ -1000,7 +1005,7 @@ uses
  msereallisteditor,msedoublereallisteditor,msecomptree,
  mseintegerlisteditor,mseact,msesys,
  msecolordialog,msememodialog,
- mseshapes,msestockobjects,msetexteditor,
+ mseshapes,msestockobjects,msetexteditor,mserichstringeditor,
  msegraphicstream,msedate,
  mseformatbmpicoread{$ifdef FPC},mseformatjpgread,mseformatpngread,
  mseformatpnmread,mseformattgaread,mseformatxpmread,mseformattiffread{$endif},
@@ -3388,6 +3393,26 @@ begin
  mstr1:= encodemsestring(getmsestringvalue(0));
  if memodialog(mstr1,false) = mr_ok then begin
   setmsestringvalue(decodemsestring(mstr1));
+ end;
+end;
+
+{ trichstringeditor }
+
+procedure trichstringeditor.edit;
+var
+ intf1: irichstringprop;
+ rstr1: richstringty;
+begin
+ if getcorbainterface(component,typeinfo(irichstringprop),intf1) then begin
+  rstr1:= intf1.getrichvalue();
+  rstr1.text:= encodemsestring(rstr1.text);
+  if richstringdialog(rstr1,false) = mr_ok then begin
+   rstr1.text:= decodemsestring(rstr1.text);
+   intf1.setrichvalue(rstr1);
+  end;
+ end
+ else begin
+  inherited;
  end;
 end;
 

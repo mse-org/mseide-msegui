@@ -22,7 +22,7 @@ uses
  msetypes,msestrings,msedatalist,mseglob,mseguiglob,msedragglob,
  mseevent,msegraphutils,msedrawtext,msestat,msestatfile,mseclasses,
  msearrayprops,msegrids,msewidgetgrid,msedropdownlist,msedrag,mseforms,
- mseformatstr,typinfo,msemenus,msebitmap,mseassistiveclient,
+ mseformatstr,typinfo,msemenus,msebitmap,mseassistiveclient,mserichstring,
  msescrollbar,msewidgets,msepopupcalendar,msekeyboard,msepointer,msegridsglob
  {$ifdef mse_with_ifi}
  ,mseificomp,mseifiglob,mseificompglob
@@ -416,6 +416,38 @@ type
  end;
 
  tmemoedit = class(tcustommemoedit)
+  published
+   property value;
+   property valuedefault;
+   property onsetvalue;
+   property frame;
+   property textflags;
+   property textflagsactive;
+{$ifdef mse_with_ifi}
+   property ifilink;
+{$endif}
+ end;
+ 
+ tcustomrichmemoedit = class(tcustommemoedit,irichstringprop)
+  private
+   procedure readrichvalue(reader: treader);
+   procedure writerichvalue(writer: twriter);
+  protected
+   fformat: formatinfoarty;
+   frichflags: richflagsty;
+   function getformat: formatinfoarty override;
+   procedure setformat(const avalue: formatinfoarty);
+   procedure defineproperties(filer: tfiler) override;
+    //irichstringprop
+   function getrichvalue(): richstringty;
+   procedure setrichvalue(const avalue: richstringty);
+  public
+   property value stored false;
+   property richvalue: richstringty read getrichvalue write setrichvalue;
+   property formatvalue: formatinfoarty read fformat write setformat;
+ end;
+ 
+ trichmemoedit = class(tcustomrichmemoedit)
   published
    property value;
    property valuedefault;
@@ -6441,6 +6473,58 @@ constructor tenumdropdowncontroller.create(const intf: idropdownlist);
 begin
  inherited;
  cols.nostreaming:= false;
+end;
+
+{ tcustomrichmemoedit }
+
+function tcustomrichmemoedit.getformat: formatinfoarty;
+begin
+ result:= fformat;
+end;
+
+procedure tcustomrichmemoedit.setformat(const avalue: formatinfoarty);
+begin
+ fformat:= copy(avalue);
+ valuechanged();
+end;
+
+function tcustomrichmemoedit.getrichvalue(): richstringty;
+begin
+ result.text:= value;
+ result.format:= fformat;
+ result.flags:= frichflags;
+end;
+
+procedure tcustomrichmemoedit.setrichvalue(const avalue: richstringty);
+begin
+ fformat:= copy(avalue.format);
+ frichflags:= avalue.flags;
+ value:= avalue.text;
+end;
+
+procedure tcustomrichmemoedit.readrichvalue(reader: treader);
+begin
+ richvalue:= readrichstring(reader);
+end;
+
+procedure tcustomrichmemoedit.writerichvalue(writer: twriter);
+begin
+ writerichstring(writer,richvalue);
+end;
+
+procedure tcustomrichmemoedit.defineproperties(filer: tfiler);
+var
+ b1: boolean;
+begin
+ inherited;
+ if filer.ancestor <> nil then begin
+  b1:= isequalrichstring(tcustomrichmemoedit(filer.ancestor).richvalue,
+                                                                   richvalue);
+ end
+ else begin
+  b1:= not isemptyrichstring(richvalue);
+ end;
+ filer.defineproperty('richvalue',@readrichvalue,@writerichvalue,b1);
 end;
 
 end.

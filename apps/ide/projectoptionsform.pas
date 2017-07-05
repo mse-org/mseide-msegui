@@ -1233,6 +1233,8 @@ const
  codetemplateparamstatname = 'templparam.sta';
  codetemplateeditstatname =  'templedit.sta';
  cornermaskeditstatname =  'cornermask.sta';
+ memodialogstatname =  'memodialog.sta';
+ richmemodialogstatname =  'richmemodialog.sta';
  
  siginfocount = 30;
 var
@@ -2152,6 +2154,9 @@ begin
   updatememorystatstream('codetemplateselect',codetemplateselectstatname);
   updatememorystatstream('codetemplateparam',codetemplateparamstatname);
   updatememorystatstream('codetemplateedit',codetemplateeditstatname);
+  updatememorystatstream('cornermaskedit',cornermaskeditstatname);
+  updatememorystatstream('memodialog',memodialogstatname);
+  updatememorystatstream('richmemodialog',richmemodialogstatname);
   updatememorystatstream('cornermaskedit',cornermaskeditstatname);
 {$ifndef mse_no_db}{$ifdef FPC}
   updatememorystatstream('dbfieldeditor',dbfieldeditorstatname);

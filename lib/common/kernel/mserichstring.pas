@@ -13,8 +13,8 @@ unit mserichstring;
 
 interface
 uses
- SysUtils,msetypes,msekeyboard,mseevent,msedatalist,msegraphutils,
- {classes,}mclasses,msestrings;
+ sysutils,msetypes,msekeyboard,mseevent,msedatalist,msegraphutils,
+ {classes,}mclasses,msestrings,mseglob,mseinterfaces;
 
 const
  fsboldmask = $01;
@@ -72,6 +72,11 @@ type
 
  updaterichstringeventty = procedure(const sender: tobject; 
                                         var avalue: richstringty) of object;
+
+ irichstringprop = interface(inullinterface)[miid_irichstringprop]
+  function getrichvalue: richstringty;
+  procedure setrichvalue(const avalue: richstringty);
+ end;
 
  trichstringdatalist = class(tmsestringdatalist)
   private

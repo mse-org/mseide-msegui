@@ -19,7 +19,7 @@ unit mseedit;
 interface
 uses
  msegui,mseeditglob,msegraphics,msegraphutils,msedatalist,
- mseevent,mseglob,mseguiglob,msestat,msestatfile,
+ mseevent,mseglob,mseguiglob,msestat,msestatfile,mserichstring,
  mseinplaceedit,msegrids,msetypes,mseshapes,msewidgets,
  msedrawtext,classes,mclasses,msereal,mseclasses,msearrayprops,
  msebitmap,msemenus,msetimer,mseactions,msekeyboard,
@@ -469,6 +469,7 @@ type
    function geteditframe: framety; virtual;
    procedure gettextrects(out outer: rectty; out inner: rectty);
    procedure setupeditor; virtual;
+   function getformat(): formatinfoarty virtual;
    procedure internalcreateframe; override;
    procedure clientrectchanged; override;
    procedure getautopaintsize(var asize: sizety); override;
@@ -1754,9 +1755,14 @@ begin
  if not (csloading in componentstate) then begin
   gettextrects(outer1,inner1);
   with feditor do begin
-   setup(text,curindex,true,inner1,outer1,nil,nil,geteditfont);
+   setup(text,curindex,true,inner1,outer1,getformat(),nil,geteditfont);
   end;
  end;
+end;
+
+function tcustomedit.getformat(): formatinfoarty;
+begin
+ result:= nil;
 end;
 
 {
