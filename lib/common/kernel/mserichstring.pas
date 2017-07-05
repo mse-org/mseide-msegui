@@ -266,48 +266,59 @@ procedure writerichstring(const writer: twriter; const value: richstringty);
 var
  i1: int32;
 begin
- writer.writelistbegin();
+ if value.format = nil then begin
+  writer.writeunicodestring(value.text);
+ end
+ else begin
+  writer.writelistbegin();
   writer.writeunicodestring(value.text);
   writer.writelistbegin();
-   for i1:= 0 to high(value.format) do begin
-    writer.writelistbegin();
-     with value.format[i1] do begin
-      writer.writeinteger(index);
-      writer.writeset(card32(newinfos),typeinfo(newinfos));
-      writer.writeinteger(style.fontcolor);
-      writer.writeinteger(style.colorbackground);
-      writer.writeset(card32(style.fontstyle),typeinfo(style.fontstyle));
-     end;
-    writer.writelistend();
-   end;
+  for i1:= 0 to high(value.format) do begin
+   writer.writelistbegin();
+    with value.format[i1] do begin
+     writer.writeinteger(index);
+     writer.writeset(card32(newinfos),typeinfo(newinfos));
+     writer.writeinteger(style.fontcolor);
+     writer.writeinteger(style.colorbackground);
+     writer.writeset(card32(style.fontstyle),typeinfo(style.fontstyle));
+    end;
+   writer.writelistend();
+  end;
   writer.writelistend();
- writer.writelistend();
+  writer.writelistend();
+ end;
 end;
 
 function readrichstring(const reader: treader): richstringty;
 var
  i1: int32;
 begin
- reader.readlistbegin();
+ if not reader.beginoflist then begin
+  result.format:= nil;
+  result.text:= reader.readunicodestring();
+ end
+ else begin
+  reader.readlistbegin();
   result.text:= reader.readunicodestring();
   reader.readlistbegin();
-   result.format:= nil;
-   i1:= 0;
-   while reader.beginoflist() do begin
-    reader.readlistbegin();
-    msearrayutils.additem(result.format,typeinfo(result.format),i1);
-    with result.format[i1-1] do begin
-     index:= reader.readinteger();
-     newinfos:= newinfosty(reader.readset(typeinfo(newinfos)));
-     style.fontcolor:= reader.readinteger();
-     style.colorbackground:= reader.readinteger();
-     style.fontstyle:= fontstylesty(reader.readset(typeinfo(style.fontstyle)));
-    end;
-    reader.readlistend();
+  result.format:= nil;
+  i1:= 0;
+  while reader.beginoflist() do begin
+   reader.readlistbegin();
+   msearrayutils.additem(result.format,typeinfo(result.format),i1);
+   with result.format[i1-1] do begin
+    index:= reader.readinteger();
+    newinfos:= newinfosty(reader.readset(typeinfo(newinfos)));
+    style.fontcolor:= reader.readinteger();
+    style.colorbackground:= reader.readinteger();
+    style.fontstyle:= fontstylesty(reader.readset(typeinfo(style.fontstyle)));
    end;
-   setlength(result.format,i1);
+   reader.readlistend();
+  end;
+  setlength(result.format,i1);
   reader.readlistend();
- reader.readlistend();
+  reader.readlistend();
+ end;
 end;
 
 function splitrichstring(const avalue: richstringty; const separator: msechar): richstringarty;
