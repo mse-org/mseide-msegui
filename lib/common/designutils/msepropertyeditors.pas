@@ -3402,7 +3402,6 @@ procedure trichstringpropertyeditor.edit;
 var
  intf1: irichstringprop;
  rstr1: richstringty;
- ar1: objectarty;
  i1: int32;
 begin
  if getcorbainterface(component,typeinfo(irichstringprop),intf1) then begin
