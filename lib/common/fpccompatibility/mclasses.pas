@@ -509,6 +509,7 @@ type
     procedure DefineBinaryProperty(const Name: string;
       AReadData, WriteData: TStreamProc;
       HasData: Boolean); override;
+    function beginoflist(): boolean;
     function EndOfList: Boolean;
     procedure EndReferences;
     procedure FixupReferences;
@@ -5916,6 +5917,11 @@ begin
     end;
     SetLength(FPropName, 0);
   end;
+end;
+
+function treader.beginoflist(): boolean;
+begin
+ result:= fdriver.nextvalue = valist;
 end;
 
 function TReader.EndOfList: Boolean;

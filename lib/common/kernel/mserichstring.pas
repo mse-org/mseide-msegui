@@ -14,7 +14,7 @@ unit mserichstring;
 interface
 uses
  SysUtils,msetypes,msekeyboard,mseevent,msedatalist,msegraphutils,
- classes,mclasses,msestrings;
+ {classes,}mclasses,msestrings;
 
 const
  fsboldmask = $01;
@@ -180,6 +180,7 @@ function setselected(const text: richstringty;
                                         start,len: halfinteger): richstringty;
 
 function isequalrichstring(const a,b: richstringty): boolean;
+function isemptyrichstring(const value: richstringty): boolean;
 function isequalformat(const a,b: formatinfoarty): boolean;
 function isequalformatinfo(const a,b: formatinfoty): boolean;
 
@@ -221,6 +222,9 @@ function isshortcut(key: msechar; const caption: msestring): boolean; overload;
 
 function expandtabs(const s: richstringty; const tabcharcount: integer): richstringty;
 
+procedure writerichstring(const writer: twriter; const value: richstringty);
+function readrichstring(const reader: treader): richstringty;
+
 {$ifdef FPC}
 function richformatinfotostring(const aformat: formatinfoty): ansistring;
 {$endif}
@@ -249,6 +253,54 @@ begin
  end;
 end;
 {$endif}
+
+procedure writerichstring(const writer: twriter; const value: richstringty);
+var
+ i1: int32;
+begin
+ writer.writelistbegin();
+  writer.writeunicodestring(value.text);
+  writer.writelistbegin();
+   for i1:= 0 to high(value.format) do begin
+    writer.writelistbegin();
+     with value.format[i1] do begin
+      writer.writeinteger(index);
+      writer.writeset(card32(newinfos),typeinfo(newinfos));
+      writer.writeinteger(style.fontcolor);
+      writer.writeinteger(style.colorbackground);
+      writer.writeset(card32(style.fontstyle),typeinfo(style.fontstyle));
+     end;
+    writer.writelistend();
+   end;
+  writer.writelistend();
+ writer.writelistend();
+end;
+
+function readrichstring(const reader: treader): richstringty;
+var
+ i1: int32;
+begin
+ reader.readlistbegin();
+  result.text:= reader.readunicodestring();
+  reader.readlistbegin();
+   result.format:= nil;
+   i1:= 0;
+   while reader.beginoflist() do begin
+    reader.readlistbegin();
+    msearrayutils.additem(result.format,typeinfo(result.format),i1);
+    with result.format[i1-1] do begin
+     index:= reader.readinteger();
+     newinfos:= newinfosty(reader.readset(typeinfo(newinfos)));
+     style.fontcolor:= reader.readinteger();
+     style.colorbackground:= reader.readinteger();
+     style.fontstyle:= fontstylesty(reader.readset(typeinfo(style.fontstyle)));
+    end;
+    reader.readlistend();
+   end;
+   setlength(result.format,i1);
+  reader.readlistend();
+ reader.readlistend();
+end;
 
 function splitrichstring(const avalue: richstringty; const separator: msechar): richstringarty;
 var
@@ -783,6 +835,11 @@ end;
 function isequalrichstring(const a,b: richstringty): boolean;
 begin
  result:= (a.text = b.text) and isequalformat(a.format,b.format);
+end;
+
+function isemptyrichstring(const value: richstringty): boolean;
+begin
+ result:= (value.text = '') and (value.format = nil) and (value.flags = []);
 end;
 
 procedure richdelete(var value: richstringty; aindex,count: integer);

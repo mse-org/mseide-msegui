@@ -221,12 +221,16 @@ type
    fondatachange: updaterichstringeventty;
    procedure setvalue(const avalue: msestring);
    procedure setrichvalue(const avalue: richstringty);
+   procedure readvalue(reader: treader);
+   procedure readrichvalue(reader: treader);
+   procedure writerichvalue(writer: twriter);
   protected
    function getvaluetext: msestring; override;
    procedure valuechanged; override;
+   procedure defineproperties(filer: tfiler) override;
   public
    procedure clear; override;
-   property value: msestring read finfo.text.text write setvalue;
+   property value: msestring read finfo.text.text write setvalue stored false;
    property richvalue: richstringty read finfo.text write setrichvalue;
   published
    property ondatachange: updaterichstringeventty read fondatachange
@@ -795,6 +799,36 @@ procedure tcustomrichstringdisp.setrichvalue(const avalue: richstringty);
 begin
  finfo.text:= avalue;
  valuechanged;
+end;
+
+procedure tcustomrichstringdisp.readvalue(reader: treader);
+begin
+ value:= reader.readunicodestring();
+end;
+
+procedure tcustomrichstringdisp.readrichvalue(reader: treader);
+begin
+ richvalue:= readrichstring(reader);
+end;
+
+procedure tcustomrichstringdisp.writerichvalue(writer: twriter);
+begin
+ writerichstring(writer,finfo.text);
+end;
+
+procedure tcustomrichstringdisp.defineproperties(filer: tfiler);
+var
+ b1: boolean;
+begin
+ filer.defineproperty('value',@readvalue,nil,false);
+ if filer.ancestor <> nil then begin
+  b1:= isequalrichstring(tcustomrichstringdisp(filer.ancestor).finfo.text,
+                                                                   finfo.text);
+ end
+ else begin
+  b1:= not isemptyrichstring(finfo.text);
+ end;
+ filer.defineproperty('richvalue',@readrichvalue,@writerichvalue,b1);
 end;
 
 function tcustomrichstringdisp.getvaluetext: msestring;
