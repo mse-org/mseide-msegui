@@ -274,7 +274,7 @@ begin
  registerpropertyeditor(typeinfo(tframebuttons),nil,'',
                                            tframebuttonseditor);
  registerpropertyeditor(typeinfo(msestring),tcustomrichstringdisp,'value',
-                                           trichstringeditor);
+                                           trichstringpropertyeditor);
 
  registerpropertyeditor(typeinfo(labeloptionsty),tcustomlabel,'',
                                            tvolatilesetpropertyeditor);

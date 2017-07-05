@@ -1235,6 +1235,7 @@ const
  cornermaskeditstatname =  'cornermask.sta';
  memodialogstatname =  'memodialog.sta';
  richmemodialogstatname =  'richmemodialog.sta';
+ fontformatdialogstatname =  'fontformatdialog.sta';
  
  siginfocount = 30;
 var
@@ -1762,6 +1763,9 @@ begin
    deletememorystatstream(codetemplateparamstatname);
    deletememorystatstream(codetemplateeditstatname);
    deletememorystatstream(cornermaskeditstatname);
+   deletememorystatstream(memodialogstatname);
+   deletememorystatstream(richmemodialogstatname);
+   deletememorystatstream(fontformatdialogstatname);
    {$ifndef mse_no_db}{$ifdef FPC}
    deletememorystatstream(dbfieldeditorstatname);
    {$endif}{$endif}
@@ -2157,7 +2161,7 @@ begin
   updatememorystatstream('cornermaskedit',cornermaskeditstatname);
   updatememorystatstream('memodialog',memodialogstatname);
   updatememorystatstream('richmemodialog',richmemodialogstatname);
-  updatememorystatstream('cornermaskedit',cornermaskeditstatname);
+  updatememorystatstream('fontformatdialog',fontformatdialogstatname);
 {$ifndef mse_no_db}{$ifdef FPC}
   updatememorystatstream('dbfieldeditor',dbfieldeditorstatname);
 {$endif}{$endif}

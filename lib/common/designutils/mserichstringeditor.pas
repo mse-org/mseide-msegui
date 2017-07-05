@@ -14,7 +14,7 @@ uses
  mseglob,mseguiglob,mseapplication,msestat,msemenus,msegui,msegraphics,
  msegraphutils,mseevent,mseclasses,mseforms,msedataedits,mseedit,msestrings,
  msetypes,msestatfile,msesimplewidgets,msewidgets,msedialog,classes,mclasses,
- msedropdownlist,msesplitter,mserichstring;
+ msedropdownlist,msesplitter,mserichstring,mseactions,mseact;
  
 type
  trichstringeditorfo = class(tmseform)
@@ -24,8 +24,10 @@ type
    tbutton2: tbutton;
    tbutton1: tbutton;
    tpopupmenu1: tpopupmenu;
-   procedure menuupdateev(const sender: tcustommenu);
+   tbutton3: tbutton;
+   formatedact: taction;
    procedure fontformateditev(const sender: TObject);
+   procedure updateactev(const sender: tcustomaction);
   public
    constructor create(const aowner: tcomponent; const readonly: boolean);
                                                                   reintroduce;
@@ -65,15 +67,15 @@ begin
  memo.readonly:= readonly;
 end;
 
-procedure trichstringeditorfo.menuupdateev(const sender: tcustommenu);
-begin
- sender.menu.submenu[0].enabled:= memo.editor.hasselection;
-end;
-
 procedure trichstringeditorfo.fontformateditev(const sender: TObject);
 begin
  memo.formatvalue:= editfontformat(memo.formatvalue,
                              memo.editor.selstart,memo.editor.sellength);
+end;
+
+procedure trichstringeditorfo.updateactev(const sender: tcustomaction);
+begin
+ sender.enabled:= memo.editor.hasselection;
 end;
 
 end.

@@ -141,7 +141,10 @@ type
 const
  emptyrichstring: richstringty = (text: ''; format: nil; flags: []);
  richlineend: richstringty = (text: lineend; format: nil; flags: []);
- 
+
+function charstyletocolor(const color: colorty): colorty;
+function colortocharstyle(const color: colorty): colorty;
+
 function setfontcolor1(var formats: formatinfoarty; aindex: integer; 
                        len: halfinteger; color: colorty): boolean;
                                  //true if changed
@@ -642,6 +645,26 @@ begin
  result:= result and not (isempty and (length(formats) = 0));
 end;
 
+function charstyletocolor(const color: colorty): colorty;
+begin
+ if color = 0 then begin
+  result:= cl_default;
+ end
+ else begin
+  result:= not(color);
+ end;
+end;
+
+function colortocharstyle(const color: colorty): colorty;
+begin
+ if color = cl_default then begin
+  result:= 0;
+ end
+ else begin
+  result:= not(color);
+ end;
+end;
+
 function setfontcolor1(var formats: formatinfoarty; aindex: integer;
                              len: halfinteger;
                              color: colorty): boolean;
@@ -738,7 +761,8 @@ function setcharstyle1(var formats: formatinfoarty;
                                   //true if changed
 begin
  result:= setfontinfolen(formats,aindex,len,style,
-     [ni_fontcolor,ni_colorbackground,ni_bold,ni_italic,ni_underline,ni_strikeout]);
+     [ni_fontcolor,ni_colorbackground,ni_bold,ni_italic,ni_underline,
+                                                   ni_strikeout,ni_blank]);
 end;
 
 function setcharstyle(const formats: formatinfoarty;

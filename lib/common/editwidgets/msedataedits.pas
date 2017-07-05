@@ -6485,7 +6485,8 @@ end;
 procedure tcustomrichmemoedit.setformat(const avalue: formatinfoarty);
 begin
  fformat:= copy(avalue);
- valuechanged();
+ feditor.format:= fformat;
+// valuechanged();
 end;
 
 function tcustomrichmemoedit.getrichvalue(): richstringty;

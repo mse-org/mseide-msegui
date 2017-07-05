@@ -1,15 +1,232 @@
-object msefontformatdialogfo: tmsefontformatdialogfo
-  bounds_x = 337
-  bounds_y = 266
-  bounds_cx = 100
-  bounds_cy = 100
+object fontformatdialogfo: tfontformatdialogfo
+  visible = False
+  bounds_x = 399
+  bounds_y = 175
+  bounds_cx = 279
+  bounds_cy = 160
   container.frame.localprops = []
   container.frame.localprops1 = []
   container.bounds = (
     0
     0
-    100
-    100
+    279
+    160
   )
+  options = [fo_freeonclose, fo_closeonesc, fo_autoreadstat, fo_autowritestat, fo_savepos, fo_savezorder, fo_savestate]
+  statfile = tstatfile1
+  caption = 'Edit Font Format'
   moduleclassname = 'tmseform'
+  object tlayouter1: tlayouter
+    optionswidget = [ow_tabfocus, ow_parenttabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_destroywidgets]
+    bounds_x = 80
+    bounds_y = 133
+    bounds_cx = 192
+    bounds_cy = 20
+    anchors = [an_left, an_right, an_bottom]
+    optionsscale = [osc_expandy, osc_shrinky, osc_expandshrinkx, osc_expandshrinky]
+    optionslayout = [lao_placex, lao_aligny]
+    align_glue = wam_start
+    place_mindist = 8
+    place_maxdist = 8
+    place_mode = wam_end
+    linktop = tlayouter2
+    dist_top = 4
+    options = [spao_gluebottom]
+    object tbutton2: tbutton
+      optionswidget1 = [ow1_fontglyphheight, ow1_autoscale, ow1_autowidth]
+      bounds_x = 140
+      bounds_y = 0
+      bounds_cx = 52
+      bounds_cy = 20
+      bounds_cxmin = 50
+      state = [as_localcaption]
+      caption = '&Cancel'
+      font.name = 'stf_default'
+      font.localprops = []
+      modalresult = mr_cancel
+      reffontheight = 14
+    end
+    object tbutton1: tbutton
+      optionswidget1 = [ow1_fontglyphheight, ow1_autoscale, ow1_autowidth]
+      taborder = 1
+      bounds_x = 82
+      bounds_y = 0
+      bounds_cx = 50
+      bounds_cy = 20
+      bounds_cxmin = 50
+      state = [as_default, as_localdefault, as_localcaption]
+      caption = '&OK'
+      modalresult = mr_ok
+      reffontheight = 14
+    end
+  end
+  object tlayouter2: tlayouter
+    optionswidget = [ow_tabfocus, ow_parenttabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_destroywidgets]
+    taborder = 1
+    bounds_x = 0
+    bounds_y = 0
+    bounds_cx = 279
+    bounds_cy = 129
+    anchors = [an_top, an_bottom]
+    object tlayouter3: tlayouter
+      optionswidget = [ow_tabfocus, ow_parenttabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_destroywidgets]
+      taborder = 1
+      bounds_x = 156
+      bounds_y = 3
+      bounds_cx = 84
+      bounds_cy = 126
+      anchors = [an_left, an_top, an_bottom]
+      optionsscale = [osc_expandx, osc_shrinkx, osc_expandshrinkx, osc_expandshrinky]
+      optionslayout = [lao_placey]
+      place_mindist = 4
+      place_maxdist = 4
+      object bolded: tbooleanedit
+        frame.caption = 'B&old'
+        frame.localprops = []
+        frame.localprops1 = []
+        frame.outerframe = (
+          0
+          1
+          30
+          2
+        )
+        bounds_x = 8
+        bounds_y = 0
+        bounds_cx = 43
+        bounds_cy = 16
+      end
+      object italiced: tbooleanedit
+        frame.caption = '&Italic'
+        frame.localprops = []
+        frame.localprops1 = []
+        frame.outerframe = (
+          0
+          1
+          32
+          2
+        )
+        taborder = 1
+        bounds_x = 8
+        bounds_y = 20
+        bounds_cx = 45
+        bounds_cy = 16
+      end
+      object underlineed: tbooleanedit
+        frame.caption = '&Underline'
+        frame.localprops = []
+        frame.localprops1 = []
+        frame.outerframe = (
+          0
+          1
+          63
+          2
+        )
+        taborder = 2
+        bounds_x = 8
+        bounds_y = 40
+        bounds_cx = 76
+        bounds_cy = 16
+      end
+      object strikeouted: tbooleanedit
+        frame.caption = '&Strikeout'
+        frame.localprops = []
+        frame.localprops1 = []
+        frame.outerframe = (
+          0
+          1
+          60
+          2
+        )
+        taborder = 3
+        bounds_x = 8
+        bounds_y = 60
+        bounds_cx = 73
+        bounds_cy = 16
+      end
+      object blanked: tbooleanedit
+        frame.caption = 'Bl&ank'
+        frame.localprops = []
+        frame.localprops1 = []
+        frame.outerframe = (
+          0
+          1
+          37
+          2
+        )
+        taborder = 4
+        bounds_x = 8
+        bounds_y = 80
+        bounds_cx = 50
+        bounds_cy = 16
+      end
+    end
+    object tlayouter4: tlayouter
+      optionswidget = [ow_tabfocus, ow_parenttabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_destroywidgets]
+      bounds_x = 0
+      bounds_y = 0
+      bounds_cx = 156
+      bounds_cy = 129
+      anchors = [an_left, an_top, an_bottom]
+      optionsscale = [osc_expandx, osc_shrinkx, osc_expandshrinkx, osc_expandshrinky]
+      optionslayout = [lao_placey]
+      place_mindist = 4
+      place_maxdist = 4
+      linkright = tlayouter3
+      object backgroundcolored: tcoloredit
+        frame.caption = '&Backgroundcolor'
+        frame.localprops = []
+        frame.localprops1 = []
+        frame.buttons.count = 2
+        frame.buttons.items = <        
+          item
+          end        
+          item
+            imagenr = 17
+          end>
+        frame.buttonellipse.imagenr = 17
+        frame.outerframe = (
+          0
+          17
+          0
+          0
+        )
+        taborder = 1
+        bounds_x = 8
+        bounds_y = 41
+        bounds_cx = 148
+        bounds_cy = 37
+        reffontheight = 14
+      end
+      object fontcolored: tcoloredit
+        frame.caption = '&Fontcolor'
+        frame.localprops = []
+        frame.localprops1 = []
+        frame.buttons.count = 2
+        frame.buttons.items = <        
+          item
+          end        
+          item
+            imagenr = 17
+          end>
+        frame.buttonellipse.imagenr = 17
+        frame.outerframe = (
+          0
+          17
+          0
+          0
+        )
+        bounds_x = 8
+        bounds_y = 0
+        bounds_cx = 148
+        bounds_cy = 37
+        reffontheight = 14
+      end
+    end
+  end
+  object tstatfile1: tstatfile
+    filename = 'fontformatdialog.sta'
+    options = [sfo_memory, sfo_activatorread, sfo_activatorwrite]
+    left = 64
+    top = 104
+  end
 end

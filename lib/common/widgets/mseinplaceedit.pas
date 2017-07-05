@@ -2161,6 +2161,7 @@ end;
 procedure tinplaceedit.setformat(const avalue: formatinfoarty);
 begin
  finfo.text.format:= copy(avalue);
+ updateselect();
  invalidatetext(false,false);
  if ies_focused in fstate then begin
   internalupdatecaret;

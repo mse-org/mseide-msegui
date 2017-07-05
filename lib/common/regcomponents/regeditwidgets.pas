@@ -189,7 +189,7 @@ begin
  registerpropertyeditor(typeinfo(twidget),tvalueedititem,'',
                            titemvalueeditpropertyeditor);
  registerpropertyeditor(typeinfo(msestring),tcustomrichmemoedit,'value',
-                                           trichstringeditor);
+                                           trichstringpropertyeditor);
 end;
 
 { tdropdowndatacolpropertyeditor }

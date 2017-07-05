@@ -238,7 +238,7 @@ type
    function getvalue: msestring; override;
  end;
 
- trichstringeditor = class(tmsestringpropertyeditor)
+ trichstringpropertyeditor = class(tmsestringpropertyeditor)
   public
    procedure edit; override;
  end;
@@ -3396,19 +3396,27 @@ begin
  end;
 end;
 
-{ trichstringeditor }
+{ trichstringpropertyeditor }
 
-procedure trichstringeditor.edit;
+procedure trichstringpropertyeditor.edit;
 var
  intf1: irichstringprop;
  rstr1: richstringty;
+ ar1: objectarty;
+ i1: int32;
 begin
  if getcorbainterface(component,typeinfo(irichstringprop),intf1) then begin
   rstr1:= intf1.getrichvalue();
   rstr1.text:= encodemsestring(rstr1.text);
   if richstringdialog(rstr1,false) = mr_ok then begin
    rstr1.text:= decodemsestring(rstr1.text);
-   intf1.setrichvalue(rstr1);
+   for i1:= 0 to high(fprops) do begin
+    if getcorbainterface(fprops[i1].instance,
+                      typeinfo(irichstringprop),intf1) then begin
+     intf1.setrichvalue(rstr1);
+    end;
+   end;
+   modified;
   end;
  end
  else begin

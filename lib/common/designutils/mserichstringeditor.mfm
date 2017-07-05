@@ -75,6 +75,17 @@ object richstringeditorfo: trichstringeditorfo
       modalresult = mr_ok
       reffontheight = 14
     end
+    object tbutton3: tbutton
+      optionswidget1 = [ow1_fontglyphheight, ow1_autoscale, ow1_autowidth]
+      taborder = 2
+      bounds_x = 126
+      bounds_y = 0
+      bounds_cx = 86
+      bounds_cy = 20
+      bounds_cxmin = 50
+      action = formatedact
+      reffontheight = 14
+    end
   end
   object tstatfile1: tstatfile
     filename = 'richmemodialog.sta'
@@ -83,15 +94,20 @@ object richstringeditorfo: trichstringeditorfo
     top = 104
   end
   object tpopupmenu1: tpopupmenu
-    onupdate = menuupdateev
     menu.submenu.count = 1
     menu.submenu.items = <    
       item
-        caption = 'Fontformat'
-        state = [as_localcaption, as_localonexecute]
-        onexecute = fontformateditev
+        action = formatedact
       end>
     left = 168
     top = 104
+  end
+  object formatedact: taction
+    caption = '&Font Format'
+    options = [ao_updateonidle]
+    onexecute = fontformateditev
+    onupdate = updateactev
+    left = 168
+    top = 144
   end
 end
