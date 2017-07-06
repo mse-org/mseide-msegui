@@ -1573,6 +1573,9 @@ procedure tcustomrichbutton.setcaptionrich(const avalue: msestring);
 begin
  fcaptionrich:= avalue;
  factioninfo.caption1.text:= avalue;
+ if avalue = '' then begin
+  factioninfo.caption1.format:= nil;
+ end;
  richcaptionchanged();
 end;
 
@@ -1719,9 +1722,12 @@ end;
 
 procedure tcustomrichbutton.richcaptionchanged();
 begin
- actioninfotoshapeinfo(self,factioninfo,finfo);
- invalidate();
- checkautosize();
+ if not (csloading in componentstate) then begin
+  calccaptiontext(factioninfo);
+  actioninfotoshapeinfo(self,factioninfo,finfo);
+  invalidate();
+  checkautosize();
+ end;
 end;
 
 procedure tcustomrichbutton.calccaptiontext(var ainfo: actioninfoty);
