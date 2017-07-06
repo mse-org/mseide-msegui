@@ -139,7 +139,7 @@ type
     //iactionlink
    function getactioninfopo: pactioninfoty;
    function shortcutseparator: msechar;
-   procedure calccaptiontext(var ainfo: actioninfoty);
+   procedure calccaptiontext(var ainfo: actioninfoty) virtual;
    procedure actionchanged;
    
    procedure setoptions(const avalue: buttonoptionsty); override;
@@ -287,7 +287,7 @@ type
    property onafterexecute;
  end;
 
- tcustomrichbutton = class(tcustombutton)
+ tcustomrichbutton = class(tcustombutton,irichstringprop)
   private
    ffaceactive: tcustomface;
    ffacedisabled: tcustomface;
@@ -295,6 +295,7 @@ type
    ffaceclicked: tcustomface;
    fimagenrmouse: imagenrty;
    fimagenrclicked: imagenrty;
+   fcaptionrich: msestring;
    function getfaceactive: tcustomface;
    procedure setfaceactive(const avalue: tcustomface);
    function getfacemouse: tcustomface;
@@ -305,10 +306,18 @@ type
    procedure setfacedisabled(const avalue: tcustomface);
    procedure setimagenrmouse(const avalue: imagenrty);
    procedure setimagenrclicked(const avalue: imagenrty);
+   procedure setcaptionrich(const avalue: msestring);
+   procedure setrichvalue(const avalue: richstringty);
+   function getrichvalue(): richstringty;
+   procedure readrichcaption(reader: treader);
+   procedure writerichcaption(writer: twriter);
   protected
-   function getactface: tcustomface; override;
-   procedure dopaintforeground(const canvas: tcanvas); override;
-   procedure objectchanged(const sender: tobject); override;
+   function getactface: tcustomface override;
+   procedure dopaintforeground(const canvas: tcanvas) override;
+   procedure objectchanged(const sender: tobject) override;
+   procedure richcaptionchanged();
+   procedure calccaptiontext(var ainfo: actioninfoty) override;
+   procedure defineproperties(filer: tfiler) override;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -324,6 +333,9 @@ type
                                         write setimagenrmouse default -1;
    property imagenrclicked: imagenrty read fimagenrclicked
                                         write setimagenrclicked default -1;
+   property captionrich: msestring read fcaptionrich 
+                                   write setcaptionrich stored false;
+   property richcaption: richstringty read finfo.ca.caption write setrichvalue;
   published
    property onmouseevent;
    property onbeforepaint;
@@ -348,6 +360,7 @@ type
    property autosize_cy;
    property action;
    property caption;
+   property captionrich;
    property textflags;
    property shortcut;
    property shortcut1;
@@ -396,6 +409,7 @@ type
    property autosize_cy;
    property action;
    property caption;
+   property captionrich;
    property textflags;
    property shortcut;
    property shortcut1;
@@ -1555,6 +1569,25 @@ begin
  end;
 end;
 
+procedure tcustomrichbutton.setcaptionrich(const avalue: msestring);
+begin
+ fcaptionrich:= avalue;
+ factioninfo.caption1.text:= avalue;
+ richcaptionchanged();
+end;
+
+procedure tcustomrichbutton.setrichvalue(const avalue: richstringty);
+begin
+ factioninfo.caption1:= avalue;
+ fcaptionrich:= avalue.text;
+ richcaptionchanged();
+end;
+
+function tcustomrichbutton.getrichvalue(): richstringty;
+begin
+ result:= factioninfo.caption1;
+end;
+
 function tcustomrichbutton.getfaceactive: tcustomface;
 begin
  getoptionalobject(ffaceactive,{$ifdef FPC}@{$endif}createfaceactive);
@@ -1682,6 +1715,46 @@ begin
  if ffaceclicked <> nil then begin
   ffaceclicked.checktemplate(sender);
  end;
+end;
+
+procedure tcustomrichbutton.richcaptionchanged();
+begin
+ actioninfotoshapeinfo(self,factioninfo,finfo);
+ invalidate();
+ checkautosize();
+end;
+
+procedure tcustomrichbutton.calccaptiontext(var ainfo: actioninfoty);
+begin
+ if fcaptionrich = '' then begin //else don't display text of fcaption
+  inherited;
+ end;
+end;
+
+procedure tcustomrichbutton.readrichcaption(reader: treader);
+begin
+ richcaption:= readrichstring(reader);
+end;
+
+procedure tcustomrichbutton.writerichcaption(writer: twriter);
+begin
+ writerichstring(writer,finfo.ca.caption);
+end;
+
+procedure tcustomrichbutton.defineproperties(filer: tfiler);
+var
+ b1: boolean;
+begin
+ inherited;
+ if filer.ancestor <> nil then begin
+  b1:= isequalrichstring(
+      tcustomrichbutton(filer.ancestor).factioninfo.caption1,
+                                            factioninfo.caption1);
+ end
+ else begin
+  b1:= not isemptyrichstring(factioninfo.caption1);
+ end;
+ filer.defineproperty('richcaption',@readrichcaption,@writerichcaption,b1);
 end;
 
 {

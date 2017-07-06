@@ -278,8 +278,8 @@ begin
     with value.format[i1] do begin
      writer.writeinteger(index);
      writer.writeset(card32(newinfos),typeinfo(newinfos));
-     writer.writeinteger(style.fontcolor);
-     writer.writeinteger(style.colorbackground);
+     writer.writeinteger(int32(style.fontcolor));
+     writer.writeinteger(int32(style.colorbackground));
      writer.writeset(card32(style.fontstyle),typeinfo(style.fontstyle));
     end;
    writer.writelistend();

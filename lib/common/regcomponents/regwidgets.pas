@@ -275,6 +275,8 @@ begin
                                            tframebuttonseditor);
  registerpropertyeditor(typeinfo(msestring),tcustomrichstringdisp,'value',
                                            trichstringpropertyeditor);
+ registerpropertyeditor(typeinfo(msestring),tcustomrichbutton,'captionrich',
+                                           trichstringpropertyeditor);
 
  registerpropertyeditor(typeinfo(labeloptionsty),tcustomlabel,'',
                                            tvolatilesetpropertyeditor);
