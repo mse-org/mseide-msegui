@@ -909,7 +909,7 @@ begin
  po1:= sender.getactioninfopo;
  setsimpleshortcut(value,po1^);
  include(po1^.state,as_localshortcut);
- calccaptiontext(po1^,sender.shortcutseparator);
+ sender.calccaptiontext(po1^{,sender.shortcutseparator});
  sender.actionchanged;
 end;
 
@@ -931,7 +931,7 @@ begin
  po1:= sender.getactioninfopo;
  po1^.shortcut:= value;
  include(po1^.state,as_localshortcut);
- calccaptiontext(po1^,sender.shortcutseparator);
+ sender.calccaptiontext(po1^{,sender.shortcutseparator});
  sender.actionchanged;
 end;
 
