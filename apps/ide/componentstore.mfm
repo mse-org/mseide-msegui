@@ -110,6 +110,7 @@ object componentstorefo: tcomponentstorefo
           end        
           item
             caption = 'Sel'
+            hint = 'Select item for inserting'
           end        
           item
             caption = 'Description'
@@ -122,7 +123,7 @@ object componentstorefo: tcomponentstorefo
     datacols.options = [co_proportional, co_savestate, co_mousescrollrow]
     datacols.items = <    
       item[node]
-        width = 111
+        width = 110
         options = [co_drawfocus, co_proportional, co_savestate, co_mousescrollrow]
         widgetname = 'node'
         dataclass = ttreeitemeditlist
@@ -136,21 +137,20 @@ object componentstorefo: tcomponentstorefo
       end    
       item[sel]
         color = -2147483646
-        width = 19
+        width = 28
         options = [co_fixwidth, co_proportional, co_savestate, co_mousescrollrow]
-        widthmin = 19
-        widthmax = 19
+        widthmin = 0
         widgetname = 'sel'
         dataclass = tgridintegerdatalist
       end    
       item[compdesc]
-        width = 112
+        width = 103
         options = [co_fill, co_savestate, co_mousescrollrow]
         widgetname = 'compdesc'
         dataclass = tgridmsestringdatalist
       end    
       item[filepath]
-        width = 185
+        width = 186
         options = [co_proportional, co_savestate, co_mousescrollrow]
         widgetname = 'filepath'
         dataclass = tgridmsestringdatalist
@@ -172,7 +172,7 @@ object componentstorefo: tcomponentstorefo
       visible = False
       bounds_x = 0
       bounds_y = 0
-      bounds_cx = 111
+      bounds_cx = 110
       bounds_cy = 16
       optionsedit1 = []
       optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_hintclippedtext, oe_locate]
@@ -184,9 +184,9 @@ object componentstorefo: tcomponentstorefo
     end
     object sel: tdatabutton
       taborder = 2
-      bounds_x = 112
+      bounds_x = 111
       bounds_y = 0
-      bounds_cx = 19
+      bounds_cx = 28
       bounds_cy = 16
       optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick]
       optionsedit1 = [oe1_autopopupmenu, oe1_keyexecute, oe1_savestate]
@@ -226,9 +226,9 @@ object componentstorefo: tcomponentstorefo
       frame.button.imagenr = 17
       taborder = 3
       visible = False
-      bounds_x = 132
+      bounds_x = 140
       bounds_y = 0
-      bounds_cx = 112
+      bounds_cx = 103
       bounds_cy = 16
       optionsedit1 = []
       optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_hintclippedtext]
@@ -252,9 +252,9 @@ object componentstorefo: tcomponentstorefo
       frame.button.imagenr = 17
       taborder = 4
       visible = False
-      bounds_x = 245
+      bounds_x = 244
       bounds_y = 0
-      bounds_cx = 185
+      bounds_cx = 186
       bounds_cy = 16
       optionsedit1 = []
       optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_hintclippedtext]
