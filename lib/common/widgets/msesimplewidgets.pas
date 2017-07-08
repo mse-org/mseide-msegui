@@ -132,6 +132,7 @@ type
    procedure readsc1(reader: treader);
    procedure writesc1(writer: twriter);
   protected
+   fexeccanceled: boolean;
    procedure defineproperties(filer: tfiler); override;
    procedure fontchanged; override;
    procedure setcolor(const avalue: colorty); override;
@@ -909,12 +910,18 @@ begin
 end;
 
 procedure tcustombutton.doexecute;
+var
+ b1: boolean;
 begin
  if (fmodalresult <> mr_none) or 
-      (options * [bo_nocandefocus,bo_candefocuswindow] <> [bo_candefocuswindow]) or
-      rootwidget.canparentclose then begin
-  doactionexecute(self,factioninfo,false,(fmodalresult <> mr_none) or 
-                     (options * [bo_nocandefocus,bo_candefocuswindow] <> []));
+  (options * [bo_nocandefocus,bo_candefocuswindow] <> [bo_candefocuswindow]) or
+                                            rootwidget.canparentclose then begin
+  fexeccanceled:= not doactionexecute1(
+         self,factioninfo,b1,false,(fmodalresult <> mr_none) or 
+                  (options * [bo_nocandefocus,bo_candefocuswindow] <> []));
+ end
+ else begin
+  fexeccanceled:= true;
  end;
  if fmodalresult <> mr_none then begin
   window.modalresult:= fmodalresult;
@@ -930,9 +937,9 @@ end;
 function tcustombutton.checkfocusshortcut(var info: keyeventinfoty): boolean;
 begin
  result:= inherited checkfocusshortcut(info) or
-     (bo_focusonshortcut in options) and
-          msegui.checkshortcut(info,factioninfo.captiontext,
-          bo_altshortcut in options) and canfocus;
+               (bo_focusonshortcut in options) and
+                     msegui.checkshortcut(info,factioninfo.captiontext,
+                                     bo_altshortcut in options) and canfocus;
 end;
 
 procedure tcustombutton.doshortcut(var info: keyeventinfoty; const sender: twidget);
@@ -942,32 +949,40 @@ begin
  if not (es_processed in info.eventstate) and 
                not (csdesigning in componentstate) and 
                             not (shs_disabled in finfo.state) then begin
+{
   if checkfocusshortcut(info) then begin
    setfocus();
   end;
+}
   bo1:= doactionshortcut(self,factioninfo,info);
-  if bo1 and (bo_focusonactionshortcut in foptions) and canfocus then begin
-   setfocus();
-  end;
-  if bo1 and (fmodalresult <> mr_none) then begin
-   window.modalresult:= fmodalresult;
+  if bo1 then begin
+   if (bo_focusonactionshortcut in foptions) and canfocus then begin
+    setfocus();
+   end;
+   if fmodalresult <> mr_none then begin
+    window.modalresult:= fmodalresult;
+   end;
   end;
   if not bo1 and not (es_preview in info.eventstate) then begin
-   bo2:= es_processed in info.eventstate;
+//   bo2:= es_processed in info.eventstate;
+//   exclude(info.eventstate,es_processed);
+   bo2:= msegui.checkshortcut(info,factioninfo.captiontext,
+                                         bo_altshortcut in options);
    exclude(info.eventstate,es_processed);
-   bo1:= (bo_executeonshortcut in options) and 
-    msegui.checkshortcut(info,factioninfo.captiontext,
-                                         bo_altshortcut in options) or
+   bo1:= (bo_executeonshortcut in options) and bo2 or
    (finfo.state * [shs_invisible,shs_disabled,shs_default] = [shs_default]) and
        (info.key = key_return) and
         ((info.shiftstate = []) or 
          (bo_executedefaultonenterkey in options) and 
          (info.shiftstate = [ss_second]));
    if bo1 then begin
-    bo2:= true;
-    internalexecute;
-   end;
-   if bo2 then begin
+    fexeccanceled:= false;
+    internalexecute();
+    if not fexeccanceled then begin
+     if checkfocusshortcut(info) then begin
+      setfocus();
+     end;
+    end;
     include(info.eventstate,es_processed);
    end;
   end;

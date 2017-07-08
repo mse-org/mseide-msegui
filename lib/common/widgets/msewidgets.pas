@@ -1266,7 +1266,7 @@ type
    finfo: shapeinfoty;
    class function classskininfo: skininfoty; override;
    procedure setoptions(const avalue: buttonoptionsty); virtual;
-   procedure internalexecute;
+   procedure internalexecute();
    procedure doshapeexecute(const atag: integer; const info: mouseeventinfoty);
    procedure doexecute; virtual;
    procedure doasyncevent(var atag: integer); override;
@@ -2235,7 +2235,7 @@ begin
  end;
 end;
 
-procedure tactionsimplebutton.internalexecute;
+procedure tactionsimplebutton.internalexecute();
 begin
  if bo_asyncexecute in foptions then begin
   asyncevent;
