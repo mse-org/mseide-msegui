@@ -943,9 +943,12 @@ begin
                not (csdesigning in componentstate) and 
                             not (shs_disabled in finfo.state) then begin
   if checkfocusshortcut(info) then begin
-   setfocus;
+   setfocus();
   end;
   bo1:= doactionshortcut(self,factioninfo,info);
+  if bo1 and (bo_focusonactionshortcut in foptions) and canfocus then begin
+   setfocus();
+  end;
   if bo1 and (fmodalresult <> mr_none) then begin
    window.modalresult:= fmodalresult;
   end;
@@ -973,34 +976,7 @@ begin
   end;
  end;
 end;
-{
-procedure tcustombutton.doshortcut(var info: keyeventinfoty; const sender: twidget);
-begin
- if not (es_processed in info.eventstate) then begin
-  if not (csdesigning in componentstate) and 
-    (checkshortcutcode(shortcut,info) or
-     checkshortcutcode(shortcut1,info) or
-    (bo_executeonshortcut in options) and not (shs_disabled in finfo.state) and
-           msegui.checkshortcut(info,factioninfo.caption1,
-           bo_altshortcut in options) or
-    (finfo.state * [shs_invisible,shs_disabled,shs_default] = [shs_default]) and
-       ((info.key = key_return) or 
-        (info.key = key_enter) and (bo_executedefaultonenterkey in options)) and
-       (info.shiftstate = [])
-    ) then begin
-   exclude(info.eventstate,es_processed); //set by checkshortcut
-   if checkfocusshortcut(info) then begin
-    setfocus;
-   end;
-   include(info.eventstate,es_processed);
-   internalexecute;
-  end;
-  if not (es_processed in info.eventstate) then begin
-   inherited;
-  end;
- end;
-end;
-}
+
 function tcustombutton.getframe: tframe;
 begin
  result:= tframe(fframe);

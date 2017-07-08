@@ -1235,7 +1235,8 @@ type
  buttonoptionty = (bo_executeonclick,bo_executeonkey,bo_executeonshortcut,
                    bo_executedefaultonenterkey,
                    bo_asyncexecute,
-                   bo_focusonshortcut, //for tcustombutton
+                   bo_focusonshortcut,bo_focusonactionshortcut,
+                                                        //for tcustombutton
                    bo_updateonidle,
                    bo_shortcutcaption,bo_altshortcut,
                    {bo_flat,bo_noanim,bo_nofocusrect,bo_nodefaultrect,}
