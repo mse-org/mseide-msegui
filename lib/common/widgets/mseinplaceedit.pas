@@ -1470,7 +1470,7 @@ begin
         actioninfo.dir:= gd_right;
         if checkaction(actioninfo) then begin
          if not(oe_exitoncursor in opt1) or
-             (fsellength = length(finfo.text.text)) and 
+             ((fsellength = length(finfo.text.text)) and (fsellength <> 0)) and 
              (shiftstate1 <> [ss_shift]) and 
              (oe_nofirstarrownavig in opt1) then begin
           if shiftstate1 <> [ss_shift] then begin
