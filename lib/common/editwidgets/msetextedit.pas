@@ -406,6 +406,7 @@ type
    function canredo: boolean;
    procedure lowercase; //selection -> lowercase;
    procedure uppercase; //selection -> uppercase
+   procedure tabtospace; //selection tab -> space
   published
    property maxundocount: integer read getmaxundocount write
                   setmaxundocount default defaultundomaxcount;
@@ -2658,6 +2659,23 @@ begin
    mstr1:= selectedtext;
    deleteselection;
    inserttext(mseuppercase(mstr1),true);
+  finally
+   tundoinplaceedit(feditor).endgroup;
+  end;
+ end;
+end;
+
+procedure tundotextedit.tabtospace;
+var
+ mstr1: msestring;
+begin
+ if hasselection then begin
+  tundoinplaceedit(feditor).begingroup;
+  try
+   mstr1:= selectedtext;
+   replacechar1(mstr1,msechar(c_tab),msechar(' '));
+   deleteselection;
+   inserttext(mstr1,true);
   finally
    tundoinplaceedit(feditor).endgroup;
   end;

@@ -2528,4 +2528,11 @@ object actionsmo: tactionsmo
       16449
     )
   end
+  object tabtospace: taction
+    caption = '&Tabs to space'
+    onexecute = tabtospaceexecute
+    onupdate = enableonselect
+    left = 360
+    top = 168
+  end
 end

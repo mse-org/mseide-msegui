@@ -370,7 +370,7 @@ object sourcefo: tsourcefo
         options = [mao_separator, mao_shortcutcaption]
       end    
       item
-        submenu.count = 7
+        submenu.count = 8
         submenu.items = <        
           item
             action = actionsmo.indent
@@ -389,6 +389,9 @@ object sourcefo: tsourcefo
           end        
           item
             action = actionsmo.uppercase
+          end        
+          item
+            action = actionsmo.tabtospace
           end        
           item
             caption = 'Convert to &Pascal string'

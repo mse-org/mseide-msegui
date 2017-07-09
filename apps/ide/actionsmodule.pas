@@ -224,6 +224,7 @@ type
    uncomment: taction;
    copyword: taction;
    selectall: taction;
+   tabtospace: taction;
    procedure findinfileonexecute(const sender: tobject);
 
    //file
@@ -302,6 +303,7 @@ type
    procedure enablecomment(const sender: tcustomaction);
    procedure enableuncomment(const sender: tcustomaction);
    procedure selectwordactiononexecute(const sender: TObject);
+   procedure tabtospaceexecute(const sender: TObject);
   private
    function filterfindcomp(const acomponent: tcomponent): boolean;
   public
@@ -537,6 +539,11 @@ end;
 procedure tactionsmo.uppercaseexecute(const sender: TObject);
 begin
  sourcefo.activepage.edit.uppercase;
+end;
+
+procedure tactionsmo.tabtospaceexecute(const sender: TObject);
+begin
+ sourcefo.activepage.edit.tabtospace;
 end;
 
 procedure tactionsmo.enableonselect(const sender: tcustomaction);
