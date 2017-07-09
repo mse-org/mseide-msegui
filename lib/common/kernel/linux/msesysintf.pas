@@ -1096,9 +1096,41 @@ end;
 function sys_getusername: msestring;
 var
  po1: pchar;
+ s1: string;
+ pwd: passwd;
+ res: ppasswd;
+ i1: cint;
 begin
- po1:= cuserid(nil);
- result:= msestring(ansistring(po1));
+ result:= '';
+ if getpwuid_r <> nil then begin
+  setlength(s1,10000);
+  while true do begin
+   i1:= getpwuid_r(getuid(),@pwd,pointer(s1),length(s1),@res);
+   case i1 of
+    0: begin
+     if res <> nil then begin
+      result:= msestring(ansistring(pwd.pw_name));
+     end;
+     break;
+    end;
+    eintr: begin
+     //try again
+    end;
+    erange: begin
+     setlength(s1,length(s1)*2);
+    end;
+    else begin
+     break; //error
+    end;
+   end; 
+  end;
+ end
+ else begin
+  if cuserid <> nil then begin
+   po1:= cuserid(nil);
+   result:= msestring(ansistring(po1));
+  end;
+ end;
 end;
 
 function sys_getapphomedir: filenamety;

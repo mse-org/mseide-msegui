@@ -1965,9 +1965,28 @@ type
 
   P__timezone_ptr_t = ^__timezone_ptr_t;
   __timezone_ptr_t = ^timezone;
-
+ 
+ passwd = record
+  pw_name: pcchar;   //* user name */
+  pw_passwd: pcchar; //* encrypted password */
+  pw_uid: uid_t;     //* user uid */
+  pw_gid: gid_t;     //* user gid */
+  pw_change: time_t; //* password change time */
+  pw_class: pcchar;  //* user access class	*/
+  pw_gecos: pcchar;  //* Honeywell login info */
+  pw_dir: pcchar;    //* home directory */
+  pw_shell: pcchar;  //* default shell */
+  pw_expire: time_t; //* account expiration */
+  pw_fields: cint;   //* internal: fields filled in */
+ end;
+ ppasswd = ^passwd;
+ pppasswd = ^ppasswd;
+ 
 function getpid:__pid_t;cdecl;external clib name 'getpid';
-function cuserid (_string: pcchar): pcchar; external clib name 'cuserid';
+function getuid(): uid_t cdecl;external clib name 'getuid';
+function geteuid(): uid_t cdecl;external clib name 'geteuid';
+ //function cuserid (_string: pcchar): pcchar; cdecl; external clib name 'cuserid';
+          //not available on freebsd
 function sscanf(__s:Pchar; __format:Pchar; args:array of const):longint;cdecl;external clib name 'sscanf';
 function sched_yield:longint;cdecl;external clib name 'sched_yield';
 function usleep(__useconds:__useconds_t):longint;cdecl;external clib name 'usleep';
@@ -1977,6 +1996,11 @@ function __errno_location: PInteger; cdecl;external clib name '__errno_location'
 function __errno_location: PInteger; cdecl;external clib name '__error';
 {$endif}
 function strerror_r(__errnum:longint; __buf:Pchar; __buflen:size_t):Pchar;cdecl;external clib name 'strerror_r';
+
+var
+ getpwuid_r: function(uid: uid_t; pwd: ppasswd; buffer: pchar; bufsize: size_t;
+                                                 _result: pppasswd): cint cdecl;
+ cuserid: function(_string: pcchar): pcchar cdecl;
 
 //termios
 const
@@ -3212,8 +3236,10 @@ var
 
 procedure initlib;
 const
- funcs: array[0..0] of funcinfoty = (
-   (n: 'clock_gettime'; d: {$ifndef FPC}@{$endif}@clock_gettime) //0
+ funcs: array[0..2] of funcinfoty = (
+   (n: 'clock_gettime'; d: @clock_gettime), //0
+   (n: 'getpwuid_r'; d: @getpwuid_r),       //1
+   (n: 'cuserid'; d: @cuserid)              //2
    );    
 begin
  try
