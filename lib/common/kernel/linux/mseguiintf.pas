@@ -3213,9 +3213,18 @@ begin
  gdi_unlock;
 end;
 
+var
+ mainthreadid: threadty;
+ connectpipe: tpipedescriptors;
+ dummybyte: byte;
+ 
 procedure sigtimer(SigNum: Integer); cdecl;
 begin
  timerevent:= true;
+ if sys_getcurrentthread() <> mainthreadid then begin
+           //FreeBSD needs this
+  sys_write(connectpipe.writedes,@dummybyte,1);
+ end;
 end;
 
 procedure sigterminate(SigNum: Integer); cdecl;
@@ -5502,8 +5511,6 @@ end;
 var
  connectmutex1: mutexty;
  connectmutex2: mutexty;
- connectpipe: tpipedescriptors;
- dummybyte: byte;
 
 procedure gui_disconnectmaineventqueue(); //called by gdi_lock()
 begin
@@ -6745,6 +6752,7 @@ begin
 end;
 
 initialization
+ mainthreadid:= sys_getcurrentthread();
 // norestackwindow:= true;
  noreconfigurewmwindow:= true;
  stackmodebelowworkaround:= false;
