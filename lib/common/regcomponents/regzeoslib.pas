@@ -23,7 +23,7 @@ uses
  ZStoredProcedure,ZSqlMetadata,
  ZSqlProcessor,ZSqlMonitor,ZSequence,msezeos,regzeoslib_bmp,regdb,
  msepropertyeditors,ZSqlStrings,ZAbstractRODataset,mseglob,msegui,mdb,msedb,
- msestrings;
+ msetypes{msestrings};
  
 type
  tzprotocolpropertyeditor = class(tstringpropertyeditor)
