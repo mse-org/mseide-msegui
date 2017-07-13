@@ -14,7 +14,7 @@ unit mseopenssl;
 interface
 
 uses
- msedynload,msestrings,msectypes;
+ msedynload,msetypes{msestrings},msectypes;
 const
 {$ifdef mswindows}
  openssllib: array[0..1] of filenamety = ('libssl32.dll','ssleay32.dll');

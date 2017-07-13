@@ -18,7 +18,7 @@ function macmacros(): macroinfoarty;
 
 implementation
 uses
- msestrings,msesysintf;
+ msetypes{msestrings},msesysintf;
 
 var
  fmacmacros: macroinfoarty;

@@ -3,7 +3,7 @@ unit mseunicodeps;
 interface
 
 uses
- msestrings;
+ msetypes,msestrings;
  
 type
  unicodepagety = (ucp_00,ucp_01,ucp_02,ucp_03,ucp_04,ucp_05,ucp_06,

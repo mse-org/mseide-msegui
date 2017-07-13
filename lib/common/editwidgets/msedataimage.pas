@@ -18,7 +18,8 @@ interface
 uses
  classes,mclasses,mseguiglob,msegui,mseimage,msewidgetgrid,msegrids,msedatalist,
  msegraphutils,msedragglob,
- msegraphics,mseclasses,mseeditglob,msebitmap,msemenus,mseevent,msestrings,
+ msegraphics,mseclasses,mseeditglob,msebitmap,msemenus,mseevent,
+ msetypes{msestrings},
  msepointer,msegridsglob{$ifdef mse_with_ifi},mseificomp,mseifiglob{$endif},
  mseglob;
  

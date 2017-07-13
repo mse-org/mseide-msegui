@@ -20,8 +20,8 @@ unit messageform;
 
 interface
 uses
- msegui,mseclasses,mseforms,msegrids,msemenus,msedataedits,msesimplewidgets,
- classes,mclasses,projectoptionsform;
+ msetypes,msegui,mseclasses,mseforms,msegrids,msemenus,msedataedits,
+ msesimplewidgets,classes,mclasses,projectoptionsform;
 
 type
  tmessagefo = class(tdockform)

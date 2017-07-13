@@ -53,7 +53,7 @@ uses
 {$IFDEF LinkDynamically}
       sysutils,
 {$ENDIF}
-     {$ifdef FPC}dynlibs,{$endif}msectypes,msestrings;
+     {$ifdef FPC}dynlibs,{$endif}msectypes,msetypes{msestrings};
 
 const
 {$ifdef mswindows}

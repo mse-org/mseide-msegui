@@ -30,7 +30,7 @@ implementation
 
 interface
 uses
- sysutils,msesetlocale,mselibc{$ifdef fpcv3},unixcp{$endif};
+ msetypes,sysutils,msesetlocale,mselibc{$ifdef fpcv3},unixcp{$endif};
 type
  eiconv = class(econverterror)
  end;

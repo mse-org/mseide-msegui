@@ -20,7 +20,7 @@ unit make;
 
 interface
 uses
- msestrings,msepipestream,msesystypes;
+ msetypes,msestrings,msepipestream,msesystypes;
  
 procedure domake(atag: integer);
 procedure abortmake;
@@ -42,7 +42,7 @@ uses
  sourceform,mseeditglob,msefileutils,msesys,
  msesysutils,msegraphics,messageform,msedesignintf,msedesigner,
  mseprocmonitor,mseevent,
- msetypes,classes,mclasses,mseclasses,mseapplication,msestream,
+ classes,mclasses,mseclasses,mseapplication,msestream,
  msegui,actionsmodule;
  
 type

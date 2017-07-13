@@ -18,7 +18,7 @@ function execmacros(): macroinfoarty;
 
 implementation
 uses
- mseprocess,mseprocutils,msefileutils,msestrings,mseformatstr;
+ mseprocess,mseprocutils,msefileutils,msetypes{msestrings},mseformatstr;
 
 var
  fexecmacros: macroinfoarty;

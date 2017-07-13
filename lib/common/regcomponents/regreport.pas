@@ -22,7 +22,7 @@ implementation
 uses
  classes,mclasses,msereport,msedesignintf,formdesigner,reportdesigner,
  msepropertyeditors,mseformatstr,mserepps,
- sysutils,msestrings,regreport_bmp,regdb,mselookupbuffer;
+ sysutils,msetypes{msestrings},regreport_bmp,regdb,mselookupbuffer;
 const
  reportintf: designmoduleintfty = 
   (createfunc: {$ifdef FPC}@{$endif}createreport;

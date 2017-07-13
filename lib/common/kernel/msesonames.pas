@@ -11,7 +11,7 @@ unit msesonames;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 uses
- msestrings;
+ msetypes;
 {$ifdef mswindows}
 //const
 // sqlite3lib: array[0..0] of filenamety = ('sqlite3.dll');  

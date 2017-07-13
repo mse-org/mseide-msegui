@@ -111,7 +111,7 @@ unit msepulsesimple;
 
 interface
 uses
- msestrings,msepulseglob,msectypes;
+ msetypes{msestrings},msepulseglob,msectypes;
  
 const
 {$ifdef mswindows}

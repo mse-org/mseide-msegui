@@ -11,7 +11,7 @@ unit msepulse;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 uses
- msestrings,msepulseglob,msectypes;
+ msetypes{msestrings},msepulseglob,msectypes;
 
 const
 {$ifdef mswindows}

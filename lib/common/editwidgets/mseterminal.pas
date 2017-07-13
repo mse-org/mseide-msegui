@@ -13,7 +13,7 @@ unit mseterminal;
 
 interface
 uses
- msegrids,classes,mclasses,msestream,mseclasses,msepipestream,mseevent,
+ msetypes,msegrids,classes,mclasses,msestream,mseclasses,msepipestream,mseevent,
  mseinplaceedit,
  msetextedit,msestrings,msesys,mseeditglob,msemenus,msegui,mseguiglob,
  mseprocess,msegridsglob,mseedit,mseglob,msewidgetgrid,msegraphics;
@@ -164,7 +164,7 @@ type
 
 implementation
 uses
- msesysutils,mseprocutils,msewidgets,msetypes,mseprocmonitor,
+ msesysutils,mseprocutils,msewidgets,mseprocmonitor,
  msekeyboard,sysutils,msesysintf,rtlconsts,msegraphutils,msearrayutils,
  msesysintf1,mserichstring,msedatalist
  {$ifdef unix},mselibc{$endif};

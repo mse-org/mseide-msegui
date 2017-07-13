@@ -25,7 +25,8 @@ uses
  classes,mclasses,mseedit,msedataedits,msegraphedits,
  msedataimage,mselistbrowser,msecalendardatetimeedit,
  msewidgetgrid,msetextedit,msedesignintf,regeditwidgets_bmp,msepropertyeditors,
- msedropdownlist,mseterminal,msedrawtext,msedatanodes,{msedialog,}msestrings,
+ msedropdownlist,mseterminal,msedrawtext,msedatanodes,{msedialog,}
+ msetypes,msestrings,
  regwidgets,msearrayprops,typinfo,msestockobjects,msefoldedit,msebitmap,mseglob,
  msestream,mserealsumedit,msedatalist,msegui,msegrids,msesumlist,mseclasses,
  sysutils,regglob,msearrayutils,mseeditglob;

@@ -20,7 +20,7 @@ unit regwidgets;
 
 interface
 uses
- msepropertyeditors,msestrings,sysutils;
+ msetypes,msepropertyeditors,msestrings,sysutils;
 
 type 
  tgridpropseditor = class(tpersistentarraypropertyeditor)

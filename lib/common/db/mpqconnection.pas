@@ -22,7 +22,7 @@ interface
 uses
   classes,mclasses,SysUtils, msqldb, mdb,
   {$ifdef FPC}dbconst{$else}dbconst_del{$endif},
-            msedbevents,msestrings,msedb,
+            msedbevents,msetypes{msestrings},msedb,
 {$IfDef LinkDynamically}
   postgres3dyn;
 {$Else}
@@ -188,7 +188,7 @@ type
 implementation
 
 uses
- math,msestream,msetypes,msedatalist,mseformatstr,msedatabase,msectypes,
+ math,msestream,msedatalist,mseformatstr,msedatabase,msectypes,msestrings,
  variants,msevariants,msesqlresult{$ifndef FPC},classes_del{$endif};
 
 ResourceString

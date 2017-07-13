@@ -18,7 +18,7 @@ unit cdesignparser;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 uses
- mseparser,msedesignparser,mselist,msestrings,msehash;
+ msetypes,mseparser,msedesignparser,mselist,msestrings,msehash;
  
 type
 

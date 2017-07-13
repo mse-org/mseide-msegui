@@ -2,7 +2,7 @@ unit msedynload;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 uses
- msesystypes,{$ifdef FPC}dynlibs,{$endif}msestrings,sysutils,msetypes,msesys;
+ msesystypes,{$ifdef FPC}dynlibs,{$endif}{msestrings,}sysutils,msetypes{,msesys};
 
 {$ifndef cpuarm}{$define set8087cw}{$endif}
 
@@ -83,8 +83,7 @@ function quotelibnames(const libnames: array of filenamety): msestring;
 implementation
 
 uses
- msesysintf1{$ifndef FPC}{$ifdef mswindows},windows{$endif}{$endif}
- {,msedatalist},msearrayutils;
+ msesysintf1{,msearrayutils};
 
 function getprocaddresses(const lib: tlibhandle;
                           const procedures: array of funcinfoty;

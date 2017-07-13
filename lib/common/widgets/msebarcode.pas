@@ -12,7 +12,8 @@ unit msebarcode;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 uses
- classes,mclasses,msewidgets,msebitmap,msegraphics,mseclasses,msegraphutils,
+ msetypes,classes,mclasses,msewidgets,msebitmap,msegraphics,mseclasses,
+ msegraphutils,
  msestrings,msegui,msemenus,mseguiglob;
  
 type

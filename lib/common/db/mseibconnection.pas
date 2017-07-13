@@ -11,7 +11,8 @@ unit mseibconnection;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 uses
- mdb,classes,mclasses,mibconnection,msestrings,msedb,msesqldb,msqldb,ibase60dyn,
+ mdb,classes,mclasses,mibconnection,msetypes{msestrings},
+ msedb,msesqldb,msqldb,ibase60dyn,
  msebufdataset,msedatabase;
 type
  tmseibconnection = class(tibconnection,idbcontroller)

@@ -17,6 +17,23 @@ uses
 
 type
 {$ifdef FPC}
+ {$ifndef mse_nounicodestring}
+  {$if defined(FPC) and (fpc_fullversion >= 020300)}
+   {$define mse_unicodestring}
+  {$ifend}
+ {$endif}
+ {$ifndef mse_unicodestring}
+  {$ifdef FPC_WINLIKEWIDESTRING}
+   {$define msestringsarenotrefcounted}
+  {$endif}
+ {$endif}
+{$else}
+ {$ifdef mswindows}
+  {$define msestringsarenotrefcounted}
+ {$endif}
+{$endif}
+
+{$ifdef FPC}
  {$if defined(FPC) and (fpc_fullversion >= 020300)}
   {$define mse_fpc_2_3_0}
  {$ifend}
@@ -164,6 +181,58 @@ type
 
  datetimekindty = (dtk_date,dtk_time,dtk_datetime);
  dayofweekty = (dw_sun,dw_mon,dw_tue,dw_wed,dw_thu,dw_fri,dw_sat);
+
+const
+ maxdatasize = $7fffffff;
+ {$ifdef mswindows}
+ pathdelim = '\';
+ lineend = #$0d#$0a;
+ {$else}
+ pathdelim = '/';
+ lineend = #$0a;
+ {$endif}
+
+ c_dle = #$10;
+ c_stx = #$02;
+ c_etx = #$03;
+ c_linefeed = #$0a;
+ c_formfeed = #$0c;
+ c_return = #$0d;
+ c_tab = #$09;
+ c_backspace = #$08;
+ c_esc = #$1b;
+ c_delete = #$7f;
+ c_softhyphen = #$ad;
+
+type
+ {$ifdef mse_unicodestring}
+ msestring = unicodestring;
+ msechar = unicodechar;
+ pmsechar = punicodechar;
+ {$else}
+ msestring = widestring;
+ msechar = widechar;
+ pmsechar = pwidechar;
+ {$endif}
+
+ pmsestring = ^msestring;
+ msestringarty = array of msestring;
+ pmsestringarty = ^msestringarty;
+ msestringaty = array[0..0] of msestring;
+ pmsestringaty = ^msestringaty;
+ msestringararty = array of msestringarty;
+
+ widestringarty = array of widestring;
+// charaty = array[0..maxdatasize-1] of char;
+// pcharaty = ^charaty;
+ msecharaty = array[0..maxdatasize div sizeof(msechar)-1] of msechar;
+ pmsecharaty = ^msecharaty;
+ captionty = msestring;
+ filenamety = msestring;
+ pfilenamety = ^filenamety;
+ filenamearty = msestringarty;
+ filenamechar = msechar;
+ pfilenamechar = ^filenamechar;
 
 const
 {$ifndef FPC}

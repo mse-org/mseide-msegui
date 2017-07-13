@@ -81,7 +81,7 @@ uses
   TinyGL,
   {$ENDIF}
   {$ENDIF}
-  msegl,msestrings;
+  msegl,msetypes{,msestrings};
 
 const
 {$ifdef mswindows}

@@ -57,7 +57,7 @@ unit msegl;
 interface
 
 uses
- SysUtils,msestrings{$ifdef mswindows},windows{$endif},msedynload,
+ SysUtils,msetypes,msestrings{$ifdef mswindows},windows{$endif},msedynload,
  mseglextglob;
 
 const
@@ -1571,7 +1571,7 @@ uses
 {$if defined(cpui386) or defined(cpux86_64)}
   math,
 {$ifend}
-  msesys,msetypes,msedatalist{$ifdef mswindows}{$else}{$endif};
+  msesys,msedatalist{$ifdef mswindows}{$else}{$endif};
 
 {$ifdef mswindows}
 function WinChoosePixelFormat(DC: HDC; p2: PPixelFormatDescriptor): Integer;

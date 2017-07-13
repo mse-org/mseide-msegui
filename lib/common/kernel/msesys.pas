@@ -147,9 +147,6 @@ type
    property error: syserrorty read geterror;
  end;
  
- ecrashstatfile = class(exception)
- end;
- 
 var
  defaultprintcommand: msestring;
  

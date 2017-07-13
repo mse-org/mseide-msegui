@@ -18,7 +18,7 @@ function strmacros(): macroinfoarty;
 
 implementation
 uses
- mseprocess,mseprocutils,msefileutils,msestrings,sysutils;
+ mseprocess,mseprocutils,msefileutils,msetypes{msestrings},sysutils;
 
 var
  fstrmacros: macroinfoarty;

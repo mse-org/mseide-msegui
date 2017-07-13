@@ -75,7 +75,7 @@ unit msezlib;
 interface
 
 uses
- msedynload,msestrings,msectypes;
+ msedynload,msetypes{msestrings},msectypes;
 const
 {$ifdef mswindows}
  zliblib: array[0..0] of filenamety = ('zli1.dll');

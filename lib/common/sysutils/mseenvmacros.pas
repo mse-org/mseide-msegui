@@ -18,7 +18,7 @@ function envmacros(): macroinfoarty;
 
 implementation
 uses
- msestrings,msesysintf;
+ msetypes{msestrings},msesysintf;
 
 var
  fenvmacros: macroinfoarty;

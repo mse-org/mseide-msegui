@@ -18,7 +18,7 @@ unit regglob;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 uses
- msepropertyeditors,typinfo,msebitmap,msestrings;
+ msepropertyeditors,typinfo,msebitmap,msetypes{msestrings};
  
 type
  tstockglypheditor = class(tenumpropertyeditor)

@@ -21,7 +21,7 @@ unit componentpaletteform;
 interface
 uses
  msegui,mseclasses,mseforms,msetabs,msetoolbar,msegraphutils,msestat,mseguiglob,
- msedragglob,msestrings;
+ msedragglob,msetypes{msestrings};
 
 type
  tcomponentpalettefo = class(tdockform)

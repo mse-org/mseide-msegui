@@ -11,7 +11,7 @@ unit mseguiprocess;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 uses
- mseprocess,msestrings;
+ mseprocess,msetypes{msestrings};
 
 type
  guiprocessoptionty = (prog_waitdialog,

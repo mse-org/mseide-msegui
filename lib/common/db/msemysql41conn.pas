@@ -12,7 +12,8 @@ unit msemysql41conn;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 uses
- mdb,classes,mclasses,mmysql41conn,msestrings,msedb,msqldb,msedatabase;
+ mdb,classes,mclasses,mmysql41conn,msetypes{msestrings},
+ msedb,msqldb,msedatabase;
  
 type
  tmsemysql41connection = class(tmysql41connection,idbcontroller)

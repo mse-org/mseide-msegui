@@ -11,7 +11,7 @@ unit sqlite3dyn;
 
 interface
 uses
- {msesonames,}msedynload,msestrings{$ifndef FPC},msetypes{$endif};
+ {msesonames,}msedynload,msetypes{msestrings}{$ifndef FPC}{$endif};
 const
 {$ifdef mswindows}
  sqlite3lib: array[0..0] of filenamety = ('sqlite3.dll');  

@@ -16,7 +16,8 @@ unit msetraywidget;
 {$endif}
 interface
 uses
- mseclasses,classes,mclasses,msesimplewidgets,mseguiglob,msebitmap,msegui,
+ msetypes,mseclasses,classes,mclasses,msesimplewidgets,mseguiglob,msebitmap,
+ msegui,
  mseevent,mseglob,msegraphics,msestrings,msetimer,msemenus,msegraphutils
  {$ifdef mse_usedbus},msestatusnotifieritem{$endif};
  

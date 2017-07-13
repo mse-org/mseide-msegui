@@ -20,7 +20,8 @@ unit watchpointsform;
 
 interface
 uses
- msegui,mseclasses,mseforms,msedataedits,msegraphedits,msewidgetgrid,msestat,
+ msetypes,msegui,mseclasses,mseforms,msedataedits,msegraphedits,msewidgetgrid,
+ msestat,
  msegdbutils,msesimplewidgets,msemenus,msestrings,msegrids,msestringcontainer;
 
 type

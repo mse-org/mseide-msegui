@@ -11,7 +11,8 @@ unit mseprocmonitorcomp;
 {$ifdef FPC}{$mode objfpc}{$h+}{$interfaces corba}{$endif}
 interface
 uses
- mseclasses,msesystypes,mseevent,mseprocmonitor,mseprocutils,msestrings;
+ msetypes,mseclasses,msesystypes,mseevent,mseprocmonitor,mseprocutils,
+                                                                 msestrings;
  
 type
  proclisteninfoty = record

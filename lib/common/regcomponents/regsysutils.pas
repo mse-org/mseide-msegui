@@ -23,7 +23,8 @@ interface
 implementation
 uses
  msedesignintf,msesysenv,msefilechange,regsysutils_bmp,mseprocess,
- msecomponenteditors,msepython,msestrings,msetexteditor,
+ msecomponenteditors,msepython,
+ msetypes{msestrings},msetexteditor,
  sysutils,mclasses,msesysenvmanagereditor,mseglob,msepropertyeditors;
 type
  tarrayelementeditor1 = class(tarrayelementeditor);

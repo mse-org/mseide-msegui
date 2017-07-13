@@ -19,7 +19,7 @@ unit msedbfieldeditor;
 interface
 uses
  mdb,msegui,mseclasses,mseforms,msedb,msestat,msestatfile,msesimplewidgets,
- msegrids,msewidgetgrid,msesplitter,msedataedits,msestrings,mseeditglob,
+ msegrids,msewidgetgrid,msesplitter,msedataedits,msetypes{msestrings},mseeditglob,
  msegraphedits,mseglob,msegridsglob,msestringcontainer;
 
 const
@@ -71,7 +71,7 @@ function editpersistentfields(const instance: tpersistentfields): boolean;
 
 implementation
 uses
- mseguiglob,msedbfieldeditor_mfm,typinfo,msetypes,msewidgets;
+ mseguiglob,msedbfieldeditor_mfm,typinfo,msewidgets,msestrings;
  
 type
  tpersistentfields1 = class(tpersistentfields);

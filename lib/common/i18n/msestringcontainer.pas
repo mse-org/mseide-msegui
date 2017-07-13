@@ -11,7 +11,7 @@ unit msestringcontainer;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 uses
- mseclasses,msedatalist,classes,mclasses,msehash,msestrings;
+ msetypes,mseclasses,msedatalist,classes,mclasses,msehash,msestrings;
  
 type
  tstringcontainer = class;

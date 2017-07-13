@@ -19,7 +19,7 @@ unit toolhandlermodule;
 interface
 uses
  classes,mclasses,mseglob,mseapplication,mseclasses,msedatamodules,msepipestream,
- mseprocess,mseprocutils,msestrings;
+ mseprocess,mseprocutils,msetypes,msestrings;
 
 type
  ttoolhandlermo = class(tmsedatamodule)

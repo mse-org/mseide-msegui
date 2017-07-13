@@ -13,7 +13,7 @@ unit msekeyboard;
 
 interface
 uses
- msestrings;
+ msetypes{,msestrings};
 type
  keyty = (
         key_none =               $0000,

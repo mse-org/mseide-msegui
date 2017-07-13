@@ -11,7 +11,7 @@ unit msefbutils;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 uses
- mdb,msqldb,msestrings;
+ mdb,msqldb,msetypes{msestrings};
  
 procedure fbupdateindexdefs(const sender: tcustomsqlconnection;
                             var indexdefs : tindexdefs;

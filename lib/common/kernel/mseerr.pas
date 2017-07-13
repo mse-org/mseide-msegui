@@ -29,7 +29,7 @@ type
 
 implementation
 uses
- msestrings;
+ msetypes{msestrings};
 
 { eerror }
 

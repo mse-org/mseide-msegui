@@ -11,7 +11,7 @@ unit msecryptohandler;
 {$ifdef FPC}{$mode objfpc}{$h+}{$goto on}{$endif}
 interface
 uses
- msestream,classes,mclasses,sysutils,msestrings,mseformatstr,mseglob;
+ msestream,classes,mclasses,sysutils,msetypes{msestrings},mseformatstr,mseglob;
  
 type
  cryptoerrorty = (cerr_error,cerr_ciphernotfound,cerr_notseekable,
@@ -178,7 +178,7 @@ const
 
 implementation
 uses
- msebits,msesystypes,msesys,msetypes;
+ msebits,msesystypes,msesys;
 
 { tbasecryptohandler }
  

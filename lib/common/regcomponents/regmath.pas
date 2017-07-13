@@ -22,7 +22,8 @@ interface
 
 implementation
 uses
- classes,mclasses,msefft,msedesignintf,msesignal,msefilter,mseformatstr,
+ msetypes,classes,mclasses,msefft,msedesignintf,msesignal,msefilter,
+ mseformatstr,
  msepropertyeditors,msestrings,msedesigner,msesigfft,regmath_bmp,
  msesiggui,msesigfftgui,msesignoise,msesigmidi,msedatalist,
  mseiircoeffeditor,msefircoeffeditor,msegui,sysutils,mseglob;

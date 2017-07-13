@@ -16,7 +16,7 @@ unit postgres3dyn;
 interface
 
 uses
-  {$ifdef FPC}dynlibs,{$else}msetypes,{$endif} SysUtils, msectypes,msestrings;
+  {$ifdef FPC}dynlibs,{$else}{$endif} SysUtils, msectypes,msetypes{msestrings};
 
 const
 {$ifdef mswindows}

@@ -21,7 +21,7 @@ unit programparametersform;
 interface
 uses
  mseforms,msestat,mseglob,msestatfile,msesimplewidgets,msedataedits,msefiledialog,
- msewidgetgrid,msegraphedits,msememodialog,msegui,msestrings;
+ msewidgetgrid,msegraphedits,msememodialog,msegui,msetypes{msestrings};
 
 type
  tprogramparametersfo = class(tmseform)

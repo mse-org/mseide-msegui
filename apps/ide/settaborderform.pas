@@ -20,7 +20,8 @@ unit settaborderform;
 
 interface
 uses
- mseforms,msegrids,msegui,msewidgetgrid,msedataedits,msesimplewidgets,msedesigner,
+ msetypes,mseforms,msegrids,msegui,msewidgetgrid,msedataedits,msesimplewidgets,
+ msedesigner,
  mseevent,mseglob,mseguiglob,msestat,msestatfile,msegridsglob,msestrings;
 
 type

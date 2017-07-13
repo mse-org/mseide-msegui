@@ -11,7 +11,8 @@ unit msezstream;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 uses
- classes,mclasses,msezlib,msecryptohandler,msestream,mseclasses,msestrings;
+ classes,mclasses,msezlib,msecryptohandler,msestream,mseclasses,
+ msetypes{msestrings};
 
 const
  defaultzstreambuffersize = 16384;

@@ -66,7 +66,10 @@ var
 implementation
 
 uses
- dateutils,msedate  {$ifdef mse_debugmutex},mseapplication,msesysintf{$endif};
+ dateutils(*,msedate  {$ifdef mse_debugmutex},mseapplication,msesysintf{$endif}*);
+
+const
+ unidatetimeoffset = -25569;
  
 function unigettimestamp(timeoutusec: integer): timespec;
 var

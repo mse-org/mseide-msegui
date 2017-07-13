@@ -6,7 +6,7 @@ interface
 
 {$IFDEF LinkDynamically}
 uses
- {$ifdef FPC}Dynlibs,{$else}msetypes,{$endif} sysutils, msestrings,msectypes;
+ {$ifdef FPC}Dynlibs,{$else}{$endif} sysutils, msetypes{msestrings},msectypes;
 
 const
  {$define cvcall}

@@ -51,15 +51,6 @@ uses
 {$endif}
 
 type
- {$ifdef mse_unicodestring}
- msestring = unicodestring;
- msechar = unicodechar;
- pmsechar = punicodechar;
- {$else}
- msestring = widestring;
- msechar = widechar;
- pmsechar = pwidechar;
- {$endif}
  stringposty = (sp_left,sp_center,sp_right);
  utfoptionty = (uto_storeinvalid);  //store invalid utf8 chars in private area
  utfoptionsty = set of utfoptionty;
@@ -78,38 +69,10 @@ const
  {$else}
  msestringtypekind = tkwstring;
  {$endif}
- c_dle = #$10;
- c_stx = #$02;
- c_etx = #$03;
- c_linefeed = #$0a;
- c_formfeed = #$0c;
- c_return = #$0d;
- c_tab = #$09;
- c_backspace = #$08;
- c_esc = #$1b;
- c_delete = #$7f;
- c_softhyphen = #$ad;
-
- {$ifdef mswindows}
- pathdelim = '\';
- lineend = #$0d#$0a;
- {$else}
- pathdelim = '/';
- lineend = #$0a;
- {$endif}
  defaultdelimchars = ' '+c_tab+c_return+c_linefeed;
  defaultmsedelimchars = msestring(defaultdelimchars);
 
-const
- maxdatasize = $7fffffff;
 type
- pmsestring = ^msestring;
- msestringarty = array of msestring;
- pmsestringarty = ^msestringarty;
- msestringaty = array[0..0] of msestring;
- pmsestringaty = ^msestringaty;
- msestringararty = array of msestringarty;
-
  doublestringty = record
   a,b: string;
  end;
@@ -123,19 +86,7 @@ type
  doublemsestringarty = array of doublemsestringty;
  doublemsestringaty = array[0..0] of doublemsestringty;
  pdoublemsestringaty = ^doublemsestringaty;
- 
- widestringarty = array of widestring;
- charaty = array[0..maxdatasize-1] of char;
- pcharaty = ^charaty;
- msecharaty = array[0..maxdatasize div sizeof(msechar)-1] of msechar;
- pmsecharaty = ^msecharaty;
- captionty = msestring;
- filenamety = msestring;
- pfilenamety = ^filenamety;
- filenamearty = msestringarty;
- filenamechar = msechar;
- pfilenamechar = ^filenamechar;
- 
+  
 const 
  upperchars: array[char] of char = (
   #$00,#$01,#$02,#$03,#$04,#$05,#$06,#$07,#$08,#$09,#$0a,#$0b,#$0c,#$0d,#$0e,#$0f,

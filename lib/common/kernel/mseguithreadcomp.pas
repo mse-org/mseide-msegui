@@ -11,7 +11,7 @@ unit mseguithreadcomp;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 uses
- msethreadcomp,msegui,msestrings;
+ msethreadcomp,msegui,msetypes{msestrings};
 type
  tguithreadcomp = class(tthreadcomp)
   private

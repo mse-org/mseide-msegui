@@ -19,7 +19,8 @@ unit regifirem;
 interface
 implementation
 uses
- classes,mclasses,mseifi,msedesignintf,msepropertyeditors,msestrings,msedesigner,
+ classes,mclasses,mseifi,msedesignintf,msepropertyeditors,
+ msetypes{msestrings},msedesigner,
  mseclasses,mseifids,mseifiglob,msegui,typinfo,msesockets,mseifigui,
  mseifilink,msessl,mdb,regifirem_bmp,mseifidbgui,msecryptohandler;
  

@@ -20,7 +20,8 @@ unit panelform;
 
 interface
 uses
- classes,mclasses,msegui,mseclasses,mseforms,msemenus,msestat,msestrings,
+ classes,mclasses,msegui,mseclasses,mseforms,msemenus,msestat,
+ msetypes{msestrings},
  msedock,msegraphutils,msegraphics,mseguiglob,msesimplewidgets,msewidgets,
  msestringcontainer;
 
@@ -52,7 +53,7 @@ procedure endpanelplacement();
 implementation
 
 uses
- panelform_mfm,main,sysutils,msekeyboard,mselist,msetypes,msedatalist,
+ panelform_mfm,main,sysutils,msekeyboard,mselist,msedatalist,
  msearrayutils,mseformatstr;
 
 var

@@ -124,7 +124,7 @@ procedure deinit;
 implementation
 uses
  msesysintf1,msesysintf,SysUtils,mseapplication,msesystypes,msesysutils,
- mseformatstr;
+ mseformatstr{$ifndef mswindows},mselibc{$endif};
 
 const
  enabletimertag = 8346320;
@@ -759,5 +759,8 @@ begin
 end;
 
 initialization
+{$ifndef mswindows}
+ initlibc(); //clock_gettime must be inited
+{$endif}
  timebefore:= sys_gettimeus;
 end.

@@ -11,7 +11,7 @@ unit msesystypes;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 uses
- msetypes;
+ msetypes,sysutils;
 type
  {$ifndef FPC}
  tlibhandle = thandle;
@@ -34,6 +34,10 @@ type
                 sye_copyfile,sye_createdir,sye_noconsole,sye_notimplemented,
                 sye_sockaddr,sye_socket,sye_isdir
                );
+
+ ecrashstatfile = class(exception)
+ end;
+ 
 const
  invalidprocid = -1;
  invalidprochandle = -1;

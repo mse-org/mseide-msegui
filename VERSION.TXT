@@ -1,5 +1,7 @@
 MSEide+MSEgui breaking changes version history
 **********************************************
+2017-07-13
+ Definition of "msestring" moved from "msestrings" to "msetypes".
 2017-04-14
  cellinfoty boolean flags replaced by celldrawstatesty set.
  

@@ -3107,6 +3107,8 @@ function mmap(addr: pointer; lengthint: size_t; prot: cint; flags: cint;
 function munmap(addr: pointer; length: size_t): cint; cdecl;
                                                external clib name 'munmap';
 
+procedure initlibc();
+
 implementation
 uses
  msedynload{,msesys};
@@ -3249,9 +3251,20 @@ begin
  end;
 end;
 
+var
+ inited: boolean;
+ 
+procedure initlibc();
+begin
+ if not inited then begin
+  inited:= true;
+  initializelibinfo(rtlibinfo);
+  initlib();
+ end;
+end;
+
 initialization
- initializelibinfo(rtlibinfo);
- initlib;
+ initlibc();
 finalization
  finalizelibinfo(rtlibinfo);
 end.

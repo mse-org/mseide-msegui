@@ -289,7 +289,7 @@ procedure readstat(const adest: array of statreadeventty;
                               const atext: string; const section: msestring);
 implementation
 uses
- sysutils,mseformatstr,msefileutils,msearrayutils;
+ sysutils,mseformatstr,msefileutils,msearrayutils,msesystypes;
 
 type
  tdatalist1 = class(tdatalist);

@@ -11,7 +11,8 @@ unit msepython;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 uses
- mseprocess,mclasses,msearrayprops,msemacros,mseclasses,msestrings;
+ mseprocess,mclasses,msearrayprops,msemacros,mseclasses,
+ msetypes{msestrings};
 
 const
  defaultpythonprocoptions = defaultprocessoptions + [pro_input];

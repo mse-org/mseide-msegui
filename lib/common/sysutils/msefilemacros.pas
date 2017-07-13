@@ -18,7 +18,7 @@ function filemacros(): macroinfoarty;
 
 implementation
 uses
- msefileutils,msestrings;
+ msefileutils,msetypes{msestrings};
 
 var
  ffilemacros: macroinfoarty;

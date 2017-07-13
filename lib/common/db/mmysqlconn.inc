@@ -28,7 +28,7 @@
 interface
 
 uses
-  classes,mclasses,SysUtils,msqldb,mdb,dynlibs,msestrings,msedb,
+  classes,mclasses,SysUtils,msqldb,mdb,dynlibs,msetypes{msestrings},msedb,
 {$IfDef mysql50}
   mysql50dyn;
   {$DEFINE TConnectionName:=TMySQL50Connection}
@@ -207,7 +207,7 @@ Type
 
 implementation
 uses 
- dbconst,msebufdataset,msetypes,msesqlresult;
+ msestrings,dbconst,msebufdataset,msesqlresult;
 type
  tmsebufdataset1 = class(tmsebufdataset);
  

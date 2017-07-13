@@ -20,7 +20,8 @@ unit formdesigner;
 
 interface
 uses
- classes,mclasses,mseforms,mseguiglob,msegui,mseevent,msegraphutils,msegraphics,
+ msetypes,classes,mclasses,mseforms,mseguiglob,msegui,mseevent,msegraphutils,
+ msegraphics,
  msedesignintf,mseclasses,msemenuwidgets,msemenus,msefiledialog,msedesigner,
  typinfo,componentpaletteform,msestrings,msewidgets,msepointer,
  mseglob{$ifndef mse_no_db}{$ifdef FPC},msereport{$endif}{$endif},msetimer,
@@ -427,7 +428,7 @@ implementation
 uses
  formdesigner_mfm,mselist,msekeyboard,msebits,sysutils,
  msestockobjects,msedrawtext,selectsubmoduledialogform,mseshapes,settaborderform,
- msedatalist,objectinspector,projectoptionsform,main,msedatamodules,msetypes,
+ msedatalist,objectinspector,projectoptionsform,main,msedatamodules,
  setcreateorderform,componentstore,msearrayutils,actionsmodule,msecomptree
  {$ifndef FPC},classes_del{$endif};
 

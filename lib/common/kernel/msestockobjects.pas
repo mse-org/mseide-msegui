@@ -13,7 +13,7 @@ unit msestockobjects;
 
 interface
 uses
- msegraphics,mseglob,msegui,msebitmap,msegraphutils,mseclasses,
+ msetypes,msegraphics,mseglob,msegui,msebitmap,msegraphutils,mseclasses,
  msestrings,msedatamodules,mseguiglob;
 
 const
