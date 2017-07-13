@@ -1679,7 +1679,9 @@ begin
     dec(rect1.cy,bounds_cy);
    end;
   end;
-  fscrollbox.setwidgetrect(rect1);
+  if fscrollbox <> nil then begin
+   fscrollbox.setwidgetrect(rect1);
+  end;
  end;
 end;
 
