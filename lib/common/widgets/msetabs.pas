@@ -4112,7 +4112,7 @@ begin
  inherited;
  foptionswidget:= defaulttaboptionswidget;
  optionsskin:= defaulttaboptionsskin;
- ftabs:= tcustomtabbar1.create(self,nil);
+ ftabs:= tcustomtabbar1.create(self,nil,true);
  include(ftabs.fwidgetstate1,ws1_designactive);
  include(ftabs.fstate,tbs_designdrag);
  ftabs.fanchors:= [an_left,an_top,an_right];

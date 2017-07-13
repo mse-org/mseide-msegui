@@ -1944,10 +1944,15 @@ type
   public
    constructor create(aowner: tcomponent); overload; override;
    constructor create(const aowner: tcomponent;
+                                  const aparentwidget: twidget); overload;
+   constructor create(const aowner: tcomponent;
                       const aparentwidget: twidget;
-                      const aiswidget: boolean = true); overload;
+                      const aiswidget: boolean{ = true}); overload;
+                      //uses setlockedparentwidget
    constructor createandinit(const aowner: tcomponent; 
-                      const aparentwidget: twidget); overload;
+                                 const aparentwidget: twidget;
+                                           const aiswidget: boolean); overload;
+                      //uses setlockedparentwidget
    destructor destroy; override;
    procedure afterconstruction; override;   
    procedure initnewcomponent(const ascale: real); override;
@@ -7749,7 +7754,7 @@ begin
 end;
 
 constructor twidget.create(const aowner: tcomponent; 
-             const aparentwidget: twidget; const aiswidget: boolean = true);
+             const aparentwidget: twidget; const aiswidget: boolean{ = true});
 begin
  create(aowner);
  setlockedparentwidget(aparentwidget);
@@ -7764,11 +7769,20 @@ begin
 end;
 
 constructor twidget.createandinit(const aowner: tcomponent; 
-                      const aparentwidget: twidget);
+                      const aparentwidget: twidget; const aiswidget: boolean);
 begin
- create(aowner,aparentwidget);
+ create(aowner,aparentwidget,aiswidget);
  initnewcomponent(1);
  initnewwidget(1);
+end;
+
+constructor twidget.create(const aowner: tcomponent;
+               const aparentwidget: twidget);
+begin
+ if aparentwidget <> nil then begin
+  parentwidget:= aparentwidget;
+ end;
+ create(aowner);
 end;
 
 procedure twidget.afterconstruction;
