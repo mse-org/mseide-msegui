@@ -967,12 +967,12 @@ begin
  with info do begin
   pos:= simpleimagepos[imagepos];
   if pos in (vertimagepos) then begin
-   if result.cx < imagelist.width then begin
+//   if result.cx < imagelist.width then begin
     i1:= result.cx - imagelist.width;
     if i1 < 0 then begin
      dec(i1);
     end;
-   end;
+//   end;
    inc(result.x,imagedist1 + (i1 - imagedist1 - imagedist2) div 2);
    result.cx:= imagelist.width;
   end

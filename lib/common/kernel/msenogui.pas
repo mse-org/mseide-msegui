@@ -11,7 +11,8 @@ unit msenogui;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 uses
- sysutils,classes,mclasses,mseapplication,mseevent,msesystypes,msestrings;
+ sysutils,classes,mclasses,mseapplication,mseevent,msesystypes,
+ msetypes,msestrings;
 type
  tnoguiapplication = class(tcustomapplication)
   private
