@@ -16,7 +16,7 @@ interface
  
 implementation
 uses
- mseconsts,msestrings,sysutils,mseformatstr;
+ mseconsts,msetypes{msestrings},sysutils,mseformatstr;
 
 const
  id_modalresulttext: defaultmodalresulttextty =

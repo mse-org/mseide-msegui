@@ -18,7 +18,7 @@ uses
  
 implementation
 uses
- msestrings,sysutils,mseformatstr;
+ msetypes{msestrings},sysutils,mseformatstr;
 const
  zh_modalresulttext: defaultmodalresulttextty =
  ('',                        //mr_none

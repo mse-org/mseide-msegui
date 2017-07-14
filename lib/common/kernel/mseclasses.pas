@@ -3479,8 +3479,9 @@ begin
  end;
 end;
 
-procedure setlinkedcomponent(const sender: iobjectlink; const source: tmsecomponent;
-                      var instance: tmsecomponent; ainterfacetype: pointer = nil);
+procedure setlinkedcomponent(const sender: iobjectlink;
+           const source: tmsecomponent;
+                   var instance: tmsecomponent; ainterfacetype: pointer = nil);
 begin
  if source <> nil then begin
   sender.link(sender,ievent(source),@instance,ainterfacetype);
@@ -3491,8 +3492,8 @@ begin
  instance:= source;
 end;
 
-procedure createobjectlinker(const owner: iobjectlink; onevent: objectlinkeventty;
-                                  var instance: tobjectlinker);
+procedure createobjectlinker(const owner: iobjectlink;
+                onevent: objectlinkeventty; var instance: tobjectlinker);
  //sets finstancepo
 begin
  if instance = nil then begin

@@ -11,7 +11,7 @@ unit msegraphicsmagick;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 uses
- msestrings,msectypes,msedynload;
+ msetypes{msestrings},msectypes,msedynload;
  
 const
 {$ifdef mswindows}

@@ -16,7 +16,7 @@ unit mseconsts_ru;
 interface
 implementation
 uses
- mseconsts,msestrings,sysutils,mseformatstr;
+ mseconsts,msetypes{msestrings},sysutils,mseformatstr;
  
 const
  ru_modalresulttext: defaultmodalresulttextty = (

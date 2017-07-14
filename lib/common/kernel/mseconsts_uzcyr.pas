@@ -20,7 +20,7 @@ uses
  
 implementation
 uses
- msestrings,sysutils,mseformatstr;
+ msetypes{msestrings},sysutils,mseformatstr;
 const
  uzcyr_modalresulttext: defaultmodalresulttextty = (
   '',                                             //mr_none => Nichego

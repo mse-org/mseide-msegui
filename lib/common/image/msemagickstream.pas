@@ -11,7 +11,7 @@ unit msemagickstream;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 uses
- msestrings,msegraphicsmagick,sysutils,mclasses,msebitmap,msegraphutils;
+ msetypes{msestrings},msegraphicsmagick,sysutils,mclasses,msebitmap,msegraphutils;
 const
  defaultblur = 1.0;
 type
@@ -77,7 +77,7 @@ function pinggmgraphic(const source: tstream;
 implementation
 uses
  msegraphics,msegraphicstream,msestream,msestockobjects,
- msetypes,msectypes,msebits,mseclasses,mseformatstr,math;
+ msectypes,msebits,mseclasses,mseformatstr,math;
 
 type
  tbitmap1 = class(tbitmap);

@@ -12,7 +12,7 @@ unit mseuniintf; //X11
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 uses
- msegraphics,msestrings;
+ msegraphics,msetypes{msestrings};
  
 {$include ../mseuniintf.inc}
 
@@ -20,7 +20,7 @@ function uni_listfontswithglyph(achar: msechar): msestringarty;
 
 implementation
 uses
- mseguiintf,msex11gdi,mxft,xlib,msetypes,msefontconfig;
+ mseguiintf,msex11gdi,mxft,xlib,msefontconfig;
  
 function uni_getfontwithglyph(var drawinfo: drawinfoty): boolean;
 var

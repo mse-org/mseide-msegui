@@ -2,7 +2,7 @@ unit mseunicode;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 uses
- msestrings,msegraphics,msegraphutils,mseguiglob;
+ msetypes{msestrings},msegraphics,msegraphutils,mseguiglob;
  
 type
  
