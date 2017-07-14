@@ -21,7 +21,7 @@ unit msefreetype;
 
 interface
 uses
- msestrings,sysutils,msectypes;
+ msetypes,sysutils,msectypes;
  
 const
 
