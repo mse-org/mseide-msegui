@@ -12,7 +12,7 @@ unit mseresourcetools;
 
 interface
 uses
- msestrings,sysutils,classes,mclasses,mseparser;
+ msetypes,msestrings,sysutils,classes,mclasses,mseparser;
 
 function rsjgetconsts(const astream: tstream): constinfoarty; 
 procedure resourcetexttoresourcesource(const sourcefilename: filenamety;

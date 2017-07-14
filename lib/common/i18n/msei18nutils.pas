@@ -30,7 +30,7 @@ unit msei18nutils;
 
 interface
 uses
- msei18nglob,msefileutils;
+ msetypes,msei18nglob,msefileutils;
 //todo: optimize resourcestring loading
 //      wide resourcestrings
 
