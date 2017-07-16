@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-20014 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2014 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -31,7 +31,7 @@ type
  threadstatesty = set of threadstatety;
 
  tmsethread = class
-  private
+  protected
    finfo: threadinfoty;
    fthreadproc: threadprocty;
    fexecresult: integer;
@@ -42,7 +42,6 @@ type
    function getterminated: boolean;
    function getfreeonterminate: boolean;
    procedure setfreeonterminate(const avalue: boolean);
-  protected
    function execute(thread: tmsethread): integer; virtual;
    procedure run(); virtual;
   public
@@ -66,7 +65,7 @@ type
  end;
 
  tmutexthread = class(tmsethread)
-  private
+  protected
    fmutex: mutexty;
   public
    constructor create(const athreadproc: threadprocty;
@@ -78,7 +77,7 @@ type
  end;
 
  tsemthread = class(tmutexthread)
-  private
+  protected
    fsem: semty;
   public
    constructor create(const athreadproc: threadprocty;
@@ -92,7 +91,7 @@ type
  end;
 
  teventthread = class(tsemthread)
-  private
+  protected
    feventlist: teventqueue;
   public
    constructor create(const athreadproc: threadprocty;
@@ -108,13 +107,12 @@ type
  end;
 
  tsynchronizeevent = class(texecuteevent)
-  private
+  protected
    fsem: semty;
    fsuccess: boolean;
    fexceptionclass: exceptclass;
    fexceptionmessage: string;
    fquiet: boolean;
-  protected
    procedure internalfree1; override;
   public
    constructor create(const aquiet: boolean);
