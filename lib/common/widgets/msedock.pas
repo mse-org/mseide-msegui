@@ -564,6 +564,7 @@ type
    constructor create(const intf: icaptionframe;
                                      const acontroller: tdockcontroller);
    destructor destroy; override;
+   procedure checktemplate(const sender: tobject) override;
    procedure showhint(const aid: int32; var info: hintinfoty); override;
    procedure updatemousestate(const sender: twidget;
                                   const info: mouseeventinfoty); override;
@@ -4297,6 +4298,14 @@ begin
  inherited;
 end;
 
+procedure tgripframe.checktemplate(const sender: tobject);
+begin
+ inherited;
+ if fgrip_face <> nil then begin
+  fgrip_face.checktemplate(sender);
+ end;
+end;
+
 procedure tgripframe.showhint(const aid: int32; var info: hintinfoty);
 begin
  case dockbuttonrectty(-(aid - hintidframe)) of
@@ -5077,9 +5086,11 @@ end;
 procedure tgripframe.setlinkedvar(const source: tmsecomponent;
                var dest: tmsecomponent; const linkintf: iobjectlink = nil);
 begin
-{$warnings off}
- twidget1(fcontroller.fintf).setlinkedvar(source,dest,linkintf);
-{$warnings on}
+ with twidget1(fcontroller.fintf.getwidget) do begin
+  if not (csdestroying in componentstate) then begin
+   setlinkedvar(source,dest,linkintf);
+  end;
+ end;
 end;
 
 function tgripframe.getcomponentstate: tcomponentstate;
