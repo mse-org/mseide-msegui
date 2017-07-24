@@ -43,6 +43,7 @@ type
    procedure addtext(const atext: string);
    procedure dofind;
    procedure repeatfind;
+   procedure findback;
  end;
  
 var
@@ -135,11 +136,17 @@ begin
  findintextedit(terminal,projectoptions.targetconsolefindinfo,ffindpos);
 end;
 
+procedure ttargetconsolefo.findback;
+begin
+ findintextedit(terminal,projectoptions.targetconsolefindinfo,ffindpos,true);
+end;
+
 procedure ttargetconsolefo.popupupdateexe(const sender: tcustommenu);
 begin
  with actionsmo do begin
   find.enabled:= true;
   repeatfind.enabled:= true;
+  findback.enabled:= true;
  end;
 end;
 

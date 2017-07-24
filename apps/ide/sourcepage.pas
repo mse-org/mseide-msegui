@@ -128,6 +128,7 @@ type
    procedure doline;
    procedure dofind;
    procedure repeatfind;
+   procedure findback;
    procedure doreplace;
    procedure reload;
    procedure doundo;
@@ -163,7 +164,7 @@ function getpascalvarname(const edit: tsyntaxedit; pos: gridcoordty;
 function getpascalvarname(const edit: tsyntaxedit;
                              const pos: pointty): msestring; overload;
 procedure findintextedit(const edit: tcustomtextedit; var info: findinfoty;
-                     var findpos: gridcoordty);
+              var findpos: gridcoordty; const backward: boolean = false);
 implementation
 
 uses
@@ -935,14 +936,28 @@ begin
 end;
 
 procedure findintextedit(const edit: tcustomtextedit; var info: findinfoty;
-                     var findpos: gridcoordty);
+                                  var findpos: gridcoordty;
+                                              const backward: boolean = false);
 var
  pt1: gridcoordty;
+ isback: boolean;
 begin
  with info do begin
+  if text = '' then begin
+   exit;
+  end;
+  if backward then begin
+   info.options:= info.options >< [so_backward];
+  end;
+  isback:= so_backward in info.options;
   if selectedonly then begin
    if edit.hasselection then begin
-    normalizetextrect(edit.selectstart,edit.selectend,findpos,pt1);
+    if isback then begin
+     normalizetextrect(edit.selectstart,edit.selectend,pt1,findpos);
+    end
+    else begin
+     normalizetextrect(edit.selectstart,edit.selectend,findpos,pt1);
+    end;
     if not edit.find(text,options,findpos,pt1,true) then begin
      textnotfound(info);
     end
@@ -954,21 +969,47 @@ begin
   else begin
    findpos:= edit.editpos;
 //   dec(ffindpos.col);
-   if not edit.find(text,options,findpos,bigcoord,true,findshowpos) then begin
-    if (findpos.row = 0) and (findpos.col = 0) then begin
+   if isback then begin
+    pt1:= nullcoord;
+   end
+   else begin
+    pt1:= bigcoord;
+   end;
+   if not edit.find(text,options,findpos,pt1,true,findshowpos) then begin
+    if (edit.linecount = 0) or
+          isback and (findpos.row = edit.linecount-1) and 
+                  (findpos.col = length(edit.gridvalue[edit.linecount-1])) or 
+             not isback and (findpos.row = 0) and (findpos.col = 0) then begin
      textnotfound(info);
     end
     else begin
-     if askok(sourcefo.c[ord(str_text)]+' '''+text+
-              ''' '+sourcefo.c[ord(str_notfound)]+' '+
-              sourcefo.c[ord(restartbegin)]) then begin
-      findpos:= nullcoord;
-      if not edit.find(text,options,findpos,edit.editpos,true,findshowpos) then begin
-       textnotfound(info);
+     if isback then begin
+      if askok(sourcefo.c[ord(str_text)]+' '''+text+
+               ''' '+sourcefo.c[ord(str_notfound)]+' '+
+               sourcefo.c[ord(restartend)]) then begin
+       findpos:= bigcoord;
+       if not edit.find(text,options,findpos,edit.editpos,true,
+                                                  findshowpos) then begin
+        textnotfound(info);
+       end;
+      end;
+     end
+     else begin
+      if askok(sourcefo.c[ord(str_text)]+' '''+text+
+               ''' '+sourcefo.c[ord(str_notfound)]+' '+
+               sourcefo.c[ord(restartbegin)]) then begin
+       findpos:= nullcoord;
+       if not edit.find(text,options,findpos,edit.editpos,true,
+                                                  findshowpos) then begin
+        textnotfound(info);
+       end;
       end;
      end;
     end;
    end;
+  end;
+  if backward then begin
+   info.options:= info.options >< [so_backward];
   end;
  end;
 end;
@@ -1122,7 +1163,11 @@ end;
 procedure tsourcepage.repeatfind;
 begin
  findintextedit(edit,projectoptions.findreplaceinfo.find,ffindpos);
-// find;
+end;
+
+procedure tsourcepage.findback;
+begin
+ findintextedit(edit,projectoptions.findreplaceinfo.find,ffindpos,true);
 end;
 
 procedure tsourcepage.hidehint;

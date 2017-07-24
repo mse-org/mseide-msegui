@@ -47,7 +47,8 @@ type
   replaceoccu,       //14 Do you wish to to replace this occurence?
   gotoline,          //15 Go to line number:
   findline,          //16 Find line
-  modieditalso       //17 There are modifications in edit buffer also.
+  modieditalso,      //17 There are modifications in edit buffer also.
+  restartend         //18 Restart from end of file?
  );
 
  tsourcefo = class;

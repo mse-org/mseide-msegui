@@ -225,6 +225,7 @@ type
    copyword: taction;
    selectall: taction;
    tabtospace: taction;
+   findback: taction;
    procedure findinfileonexecute(const sender: tobject);
 
    //file
@@ -304,6 +305,7 @@ type
    procedure enableuncomment(const sender: tcustomaction);
    procedure selectwordactiononexecute(const sender: TObject);
    procedure tabtospaceexecute(const sender: TObject);
+   procedure findbackonexecute(const sender: TObject);
   private
    function filterfindcomp(const acomponent: tcomponent): boolean;
   public
@@ -599,6 +601,16 @@ begin
  end;
 end;
 
+procedure tactionsmo.findbackonexecute(const sender: TObject);
+begin
+ if targetconsolefo.activeentered then begin
+  targetconsolefo.findback;
+ end
+ else begin
+  sourcefo.activepage.findback;
+ end;
+end;
+
 procedure tactionsmo.replaceactonexecute(const sender: tobject);
 begin
  sourcefo.activepage.doreplace;
@@ -855,6 +867,7 @@ begin
   repeatfind.enabled:= find.enabled and 
            (projectoptions.findreplaceinfo.find.text <> '');
  end;
+ findback.enabled:= repeatfind.enabled;
  findcompallact.enabled:= not find.enabled;
 end;
 

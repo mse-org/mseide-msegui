@@ -560,6 +560,7 @@ object sourcefo: tsourcefo
       'Go to line number:'
       'Find line'
       'There are modifications in edit buffer also.'
+      'Restart from end of file?'
     )
     left = 176
     top = 104

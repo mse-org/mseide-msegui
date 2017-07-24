@@ -88,13 +88,16 @@ object targetconsolefo: ttargetconsolefo
   end
   object popupmen: tpopupmenu
     onupdate = popupupdateexe
-    menu.submenu.count = 4
+    menu.submenu.count = 5
     menu.submenu.items = <    
       item
         action = actionsmo.find
       end    
       item
         action = actionsmo.repeatfind
+      end    
+      item
+        action = actionsmo.findback
       end    
       item
         options = [mao_separator, mao_shortcutcaption]

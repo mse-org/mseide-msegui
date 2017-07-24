@@ -22,7 +22,8 @@ interface
 uses
  mseforms,msesimplewidgets,msedataedits,msegraphedits,msetextedit,msestrings,
  msetypes,msestat,msestatfile,projectoptionsform,mseglob,mseevent,msegui,
- msemenus,msesplitter,msegraphics,msegraphutils,msewidgets;
+ msemenus,msesplitter,msegraphics,msegraphutils,msewidgets,mseguiglob,
+ mseificomp,mseificompglob,mseifiglob,msescrollbar;
 
 type
 
@@ -34,9 +35,10 @@ type
    cancel: tbutton;
    tbutton2: tbutton;
    tlayouter2: tlayouter;
-   selectedonly: tbooleanedit;
    wholeword: tbooleanedit;
    casesensitive: tbooleanedit;
+   backward: tbooleanedit;
+   selectedonly: tbooleanedit;
   private
    procedure valuestoinfo(out info: findinfoty);
    procedure infotovalues(const info: findinfoty);
@@ -48,7 +50,7 @@ function finddialogexecute(var info: findinfoty): boolean;
 
 implementation
 uses
- mseguiglob,finddialogform_mfm;
+ finddialogform_mfm;
 
 procedure updatefindvalues(const astatfiler: tstatfiler;
                                           var aoptions: findinfoty);
@@ -87,7 +89,8 @@ begin
  with info do begin
   text:= findtext.value;
   history:= findtext.dropdown.valuelist.asarray;
-  options:= encodesearchoptions(not casesensitive.value,wholeword.value);
+  options:= encodesearchoptions(not casesensitive.value,wholeword.value,
+                                                      false,backward.value);
   selectedonly:= self.selectedonly.value;
  end;
 end;
@@ -99,6 +102,7 @@ begin
   findtext.dropdown.valuelist.asarray:= history;
   casesensitive.value:= not (so_caseinsensitive in options);
   wholeword.value:= so_wholeword in options;
+  backward.value:= so_backward in options;
 //  self.selectedonly.value:= selectedonly;
  end;
 end;

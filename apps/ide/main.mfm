@@ -197,7 +197,7 @@ object mainfo: tmainfo
         state = [as_localcaption]
       end    
       item
-        submenu.count = 6
+        submenu.count = 7
         submenu.items = <        
           item
             action = actionsmo.line
@@ -207,6 +207,9 @@ object mainfo: tmainfo
           end        
           item
             action = actionsmo.repeatfind
+          end        
+          item
+            action = actionsmo.findback
           end        
           item
             action = actionsmo.replace

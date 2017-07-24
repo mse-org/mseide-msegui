@@ -2259,11 +2259,28 @@ var
   end;
  end;
 
+ function checkresultback: boolean;
+ begin
+  if (int1 > 0) and ((int2 > endpos.row) or 
+     (int2 = textpos.row) and (int1 <= textpos.col)) then begin
+   textpos.row:= int2;
+   textpos.col:= int1-length(atext);
+   result:= true;
+   if selectfound then begin
+    setselection(makegridcoord(textpos.col + length(atext),textpos.row),textpos,
+                                   true,ashowcell);
+   end;
+  end
+  else begin
+   result:= false;
+  end;
+ end;
+
 var
  po1: prichstringty;
  pos1: gridcoordty;
  str1,str2: msestring;
-
+ isback: boolean;
 begin
  result:= false;
  if flines.count > 0 then begin
@@ -2275,41 +2292,68 @@ begin
    str1:= atext;
    str2:= '';
   end;
+  isback:= so_backward in options;
   pos1:= textpos;
   endrow:= endpos.row;
   if endrow >= flines.count then begin
    endrow:= flines.count - 1;
   end;
+  if isback and (endrow < 0) then begin
+   endrow:= 0;
+  end;
   po1:= flines.datapo;
   if pos1.row < 0 then begin
+   if isback then begin
+    exit;
+   end;
    pos1.row:= 0;
    pos1.col:= 1;
   end
   else begin
-   if pos1.row <= endrow then begin
-    inc(pos1.col);
-    if pos1.col < 1 then begin
-     pos1.col:= 1;
+   if isback then begin
+    if pos1.row >= flines.count then begin
+     pos1.row:= flines.count-1;
     end;
    end
    else begin
-    exit;
+    if pos1.row <= endrow then begin
+     inc(pos1.col);
+     if pos1.col < 1 then begin
+      pos1.col:= 1;
+     end;
+    end;
    end;
   end;
   inc(po1,pos1.row);
   int1:= msestringsearch(str1,po1^.text,pos1.col,options,str2);
   int2:= pos1.row;
-  while true do begin
-   if checkresult then begin
-    result:= true;
-    exit;
+  if isback then begin
+   while true do begin
+    if checkresultback then begin
+     result:= true;
+     exit;
+    end;
+    dec(int2);
+    if int2 < endrow then begin
+     exit;
+    end;
+    dec(po1);
+    int1:= msestringsearch(str1,po1^.text,bigint,options,str2);
    end;
-   inc(int2);
-   if int2 > endrow then begin
-    exit;
+  end
+  else begin
+   while true do begin
+    if checkresult then begin
+     result:= true;
+     exit;
+    end;
+    inc(int2);
+    if int2 > endrow then begin
+     exit;
+    end;
+    inc(po1);
+    int1:= msestringsearch(str1,po1^.text,1,options,str2);
    end;
-   inc(po1);
-   int1:= msestringsearch(str1,po1^.text,1,options,str2);
   end;
  end;
 end;

@@ -175,7 +175,7 @@ type
     //calls destroy, not possible to use as destructor in FPC
  end;
  
- searchoptionty = (so_caseinsensitive,so_wholeword,so_wordstart);
+ searchoptionty = (so_caseinsensitive,so_wholeword,so_wordstart,so_backward);
  searchoptionsty = set of searchoptionty;
 
 procedure trimright1(var s: string); overload;
@@ -298,7 +298,8 @@ function mseissametextlen(const apartstring,astring: msestring): boolean;
 
 function encodesearchoptions(const caseinsensitive: boolean = false;
                         const wholeword: boolean = false;
-                        const wordstart: boolean = false): searchoptionsty;
+                        const wordstart: boolean = false;
+                        const backward: boolean = false): searchoptionsty;
 function msestringsearch(const substring,s: msestring; start: integer;
                       const options: searchoptionsty;
                       const substringupcase: msestring = ''): integer; overload;
@@ -3223,12 +3224,14 @@ end;
 
 function encodesearchoptions(const caseinsensitive: boolean = false;
                         const wholeword: boolean = false;
-                        const wordstart: boolean = false): searchoptionsty;
+                        const wordstart: boolean = false;
+                        const backward: boolean = false): searchoptionsty;
 begin
  result:= [];
  if caseinsensitive then include(result,so_caseinsensitive);
  if wholeword then include(result,so_wholeword);
  if wordstart then include(result,so_wordstart);
+ if backward then include(result,so_backward);
 end;
 
 function quotestring(value: string; quotechar: char;
@@ -3669,6 +3672,7 @@ begin
  end;
 end;
 
+//todo: optimise
 function msestringsearch(const substring,s: msestring; start: integer;
                               const options: searchoptionsty; 
                               const substringupcase: msestring = ''): integer;
@@ -3677,198 +3681,387 @@ var
  ch1,ch2: msechar;
  str1,str2: msestring;
  opt1: searchoptionsty;
+ slen,sublen: int32;
 
 begin
  result:= 0;
- if start = 0 then begin
-  start:= 1;
- end;
  if (length(substring) = 0) or (length(s) = 0) then begin
   exit;
  end;
- if options * [so_wholeword,so_wordstart] <> [] then begin
-  opt1:= options - [so_wholeword,so_wordstart];
-  result:= start;
-  repeat
-   result:= msestringsearch(substring,s,result,opt1,substringupcase);
-   if result <> 0 then begin
-    if (result = 1) or not isnamechar(s[result-1]) then begin
-     if not (so_wholeword in options) then begin
-      break; //so_wordstart
-     end;
-     if (result + length(substring) > length(s)) then begin
-      break;
-     end
-     else begin
-      if not isnamechar(s[result + length(substring)]) then begin
-       break; //io
+ sublen:= length(substring);
+ slen:= length(s);
+ if so_backward in options then begin //backward search
+  if start <= 0 then begin
+   exit;
+  end;
+  if start > slen then begin
+   start:= slen;
+  end;
+  if options * [so_wholeword,so_wordstart] <> [] then begin
+   opt1:= options - [so_wholeword,so_wordstart];
+   result:= start;
+   repeat
+    result:= msestringsearch(substring,s,result,opt1,substringupcase);
+    if result <> 0 then begin
+     if (result = slen) or not isnamechar(s[result+1]) then begin
+      if not (so_wholeword in options) then begin
+       break; //so_wordstart
+      end;
+      if (result - length(substring) > 0) then begin
+       break;
       end
       else begin
-       inc(result); //kein ganzes wort
+       if not isnamechar(s[result - length(substring)]) then begin
+        break; //io
+       end
+       else begin
+        dec(result); //kein ganzes wort
+       end;
       end;
+     end
+     else begin
+      dec(result);
      end;
     end
     else begin
-     inc(result);
-    end;
-   end
-   else begin
-    break;
-   end;
-  until result > length(s);
-  if result > length(s) then begin
-   result:= 0;
-  end;
- end
- else begin
-  if so_caseinsensitive in options then begin
-   if substringupcase = '' then begin
-    str1:= mseuppercase(substring);
-    str2:= mselowercase(substring);
-   end
-   else begin
-    str1:= substringupcase;
-    str2:= substring;
-   end;
-   ch2:= str1[1];
-   ch1:= str2[1];
-   for int1:= start to length(s) do begin
-    if (s[int1] = ch1) or (s[int1] = ch2) then begin
-     result:= int1-1;
-     for int2:= 1 to length(str1) do begin
-      if (s[result+int2] <> str1[int2]) and
-             (s[result+int2] <> str2[int2]) then begin
-       result:= -1;
-       break;
-      end;
-     end;
-     inc(result);
-    end;
-    if result <> 0 then begin
      break;
     end;
-   end
+   until result < 1;
+   if result < 1 then begin
+    result:= 0;
+   end;
   end
   else begin
-   ch1:= substring[1];
-   for int1:= start to length(s) do begin
-    if s[int1] = ch1 then begin
-     result:= int1-1;
-     for int2:= 1 to length(substring) do begin
-      if s[result+int2] <> substring[int2] then begin
-       result:= -1;
-       break;
-      end;
-     end;
-     inc(result);
+   if so_caseinsensitive in options then begin
+    if substringupcase = '' then begin
+     str1:= mseuppercase(substring);
+     str2:= mselowercase(substring);
+    end
+    else begin
+     str1:= substringupcase;
+     str2:= substring;
     end;
+    ch2:= str1[sublen];
+    ch1:= str2[sublen];
+    for int1:= start downto sublen do begin
+     if (s[int1] = ch1) or (s[int1] = ch2) then begin
+      result:= int1-sublen;
+      for int2:= sublen downto 1 do begin
+       if (s[result+int2] <> str1[int2]) and
+              (s[result+int2] <> str2[int2]) then begin
+        result:= -1;
+        break;
+       end;
+      end;
+      inc(result);
+     end;
+     if result <> 0 then begin
+      result:= result+sublen-1;
+      break;
+     end;
+    end
+   end
+   else begin
+    ch1:= substring[sublen];      //casesensitive
+    for int1:= start downto sublen do begin
+     if s[int1] = ch1 then begin
+      result:= int1-sublen;
+      for int2:= sublen downto 1 do begin
+       if s[result+int2] <> substring[int2] then begin
+        result:= -1;
+        break;
+       end;
+      end;
+      inc(result);
+     end;
+     if result <> 0 then begin
+      result:= result+sublen-1;
+      break;
+     end;
+    end
+   end;
+  end;
+ end
+ else begin //not backward
+  if options * [so_wholeword,so_wordstart] <> [] then begin
+   opt1:= options - [so_wholeword,so_wordstart];
+   result:= start;
+   repeat
+    result:= msestringsearch(substring,s,result,opt1,substringupcase);
     if result <> 0 then begin
+     if (result = 1) or not isnamechar(s[result-1]) then begin
+      if not (so_wholeword in options) then begin
+       break; //so_wordstart
+      end;
+      if result + sublen > slen then begin
+       break;
+      end
+      else begin
+       if not isnamechar(s[result + sublen]) then begin
+        break; //io
+       end
+       else begin
+        inc(result); //kein ganzes wort
+       end;
+      end;
+     end
+     else begin
+      inc(result);
+     end;
+    end
+    else begin
      break;
     end;
+   until result > slen;
+   if result > slen then begin
+    result:= 0;
+   end;
+  end
+  else begin
+   if so_caseinsensitive in options then begin
+    if substringupcase = '' then begin
+     str1:= mseuppercase(substring);
+     str2:= mselowercase(substring);
+    end
+    else begin
+     str1:= substringupcase;
+     str2:= substring;
+    end;
+    ch2:= str1[1];
+    ch1:= str2[1];
+    for int1:= start to slen do begin
+     if (s[int1] = ch1) or (s[int1] = ch2) then begin
+      result:= int1-1;
+      for int2:= 1 to sublen do begin
+       if (s[result+int2] <> str1[int2]) and
+              (s[result+int2] <> str2[int2]) then begin
+        result:= -1;
+        break;
+       end;
+      end;
+      inc(result);
+     end;
+     if result <> 0 then begin
+      break;
+     end;
+    end
    end
+   else begin
+    ch1:= substring[1];
+    for int1:= start to slen do begin
+     if s[int1] = ch1 then begin
+      result:= int1-1;
+      for int2:= 1 to sublen do begin
+       if s[result+int2] <> substring[int2] then begin
+        result:= -1;
+        break;
+       end;
+      end;
+      inc(result);
+     end;
+     if result <> 0 then begin
+      break;
+     end;
+    end
+   end;
   end;
- end;
+ end; //not backward
 end;
 
+//todo: optimise
 function stringsearch(const substring,s: ansistring; start: integer;
-                      const options: searchoptionsty;
-                      const substringupcase: ansistring = ''): integer; overload;
+                              const options: searchoptionsty; 
+                              const substringupcase: ansistring = ''): integer;
 var
  int1,int2: integer;
  ch1,ch2: char;
  str1,str2: ansistring;
  opt1: searchoptionsty;
+ slen,sublen: int32;
 
 begin
  result:= 0;
- if start = 0 then begin
-  start:= 1;
- end;
  if (length(substring) = 0) or (length(s) = 0) then begin
   exit;
  end;
- if so_wholeword in options then begin
-  opt1:= options - [so_wholeword,so_wordstart];
-  result:= start;
-  repeat
-   result:= stringsearch(substring,s,result,opt1,substringupcase);
-   if result <> 0 then begin
-    if (result = 1) or not isnamechar(s[result-1]) then begin
-     if not (so_wholeword in options) then begin
-      break; //so_wordstart
-     end;
-     if (result + length(substring) > length(s)) then begin
-      break;
-     end
-     else begin
-      if not isnamechar(s[result + length(substring)]) then begin
-       break; //io
+ sublen:= length(substring);
+ slen:= length(s);
+ if so_backward in options then begin //backward search
+  if start <= 0 then begin
+   exit;
+  end;
+  if start > slen then begin
+   start:= slen;
+  end;
+  if options * [so_wholeword,so_wordstart] <> [] then begin
+   opt1:= options - [so_wholeword,so_wordstart];
+   result:= start;
+   repeat
+    result:= stringsearch(substring,s,result,opt1,substringupcase);
+    if result <> 0 then begin
+     if (result = slen) or not isnamechar(s[result+1]) then begin
+      if not (so_wholeword in options) then begin
+       break; //so_wordstart
+      end;
+      if (result - length(substring) > 0) then begin
+       break;
       end
       else begin
-       inc(result); //kein ganzes wort
+       if not isnamechar(s[result - length(substring)]) then begin
+        break; //io
+       end
+       else begin
+        dec(result); //kein ganzes wort
+       end;
       end;
+     end
+     else begin
+      dec(result);
      end;
     end
     else begin
-     inc(result);
-    end;
-   end
-   else begin
-    break;
-   end;
-  until result > length(s);
-  if result > length(s) then begin
-   result:= 0;
-  end;
- end
- else begin
-  if so_caseinsensitive in options then begin
-   if substringupcase = '' then begin
-    str1:= uppercase(substring);
-    str2:= lowercase(substring);
-   end
-   else begin
-    str1:= substringupcase;
-    str2:= substring;
-   end;
-   ch2:= str1[1];
-   ch1:= str2[1];
-   for int1:= start to length(s) do begin
-    if (s[int1] = ch1) or (s[int1] = ch2) then begin
-     result:= int1-1;
-     for int2:= 1 to length(str1) do begin
-      if (s[result+int2] <> str1[int2]) and
-             (s[result+int2] <> str2[int2]) then begin
-       result:= -1;
-       break;
-      end;
-     end;
-     inc(result);
-    end;
-    if result <> 0 then begin
      break;
     end;
-   end
+   until result < 1;
+   if result < 1 then begin
+    result:= 0;
+   end;
   end
   else begin
-   ch1:= substring[1];
-   for int1:= start to length(s) do begin
-    if s[int1] = ch1 then begin
-     result:= int1-1;
-     for int2:= 1 to length(substring) do begin
-      if s[result+int2] <> substring[int2] then begin
-       result:= -1;
-       break;
-      end;
-     end;
-     inc(result);
+   if so_caseinsensitive in options then begin
+    if substringupcase = '' then begin
+     str1:= uppercase(substring);
+     str2:= lowercase(substring);
+    end
+    else begin
+     str1:= substringupcase;
+     str2:= substring;
     end;
+    ch2:= str1[sublen];
+    ch1:= str2[sublen];
+    for int1:= start downto sublen do begin
+     if (s[int1] = ch1) or (s[int1] = ch2) then begin
+      result:= int1-sublen;
+      for int2:= sublen downto 1 do begin
+       if (s[result+int2] <> str1[int2]) and
+              (s[result+int2] <> str2[int2]) then begin
+        result:= -1;
+        break;
+       end;
+      end;
+      inc(result);
+     end;
+     if result <> 0 then begin
+      result:= result+sublen-1;
+      break;
+     end;
+    end
+   end
+   else begin
+    ch1:= substring[sublen];      //casesensitive
+    for int1:= start downto sublen do begin
+     if s[int1] = ch1 then begin
+      result:= int1-sublen;
+      for int2:= sublen downto 1 do begin
+       if s[result+int2] <> substring[int2] then begin
+        result:= -1;
+        break;
+       end;
+      end;
+      inc(result);
+     end;
+     if result <> 0 then begin
+      result:= result+sublen-1;
+      break;
+     end;
+    end
+   end;
+  end;
+ end
+ else begin //not backward
+  if options * [so_wholeword,so_wordstart] <> [] then begin
+   opt1:= options - [so_wholeword,so_wordstart];
+   result:= start;
+   repeat
+    result:= stringsearch(substring,s,result,opt1,substringupcase);
     if result <> 0 then begin
+     if (result = 1) or not isnamechar(s[result-1]) then begin
+      if not (so_wholeword in options) then begin
+       break; //so_wordstart
+      end;
+      if result + sublen > slen then begin
+       break;
+      end
+      else begin
+       if not isnamechar(s[result + sublen]) then begin
+        break; //io
+       end
+       else begin
+        inc(result); //kein ganzes wort
+       end;
+      end;
+     end
+     else begin
+      inc(result);
+     end;
+    end
+    else begin
      break;
     end;
+   until result > slen;
+   if result > slen then begin
+    result:= 0;
+   end;
+  end
+  else begin
+   if so_caseinsensitive in options then begin
+    if substringupcase = '' then begin
+     str1:= uppercase(substring);
+     str2:= lowercase(substring);
+    end
+    else begin
+     str1:= substringupcase;
+     str2:= substring;
+    end;
+    ch2:= str1[1];
+    ch1:= str2[1];
+    for int1:= start to slen do begin
+     if (s[int1] = ch1) or (s[int1] = ch2) then begin
+      result:= int1-1;
+      for int2:= 1 to sublen do begin
+       if (s[result+int2] <> str1[int2]) and
+              (s[result+int2] <> str2[int2]) then begin
+        result:= -1;
+        break;
+       end;
+      end;
+      inc(result);
+     end;
+     if result <> 0 then begin
+      break;
+     end;
+    end
    end
+   else begin
+    ch1:= substring[1];
+    for int1:= start to slen do begin
+     if s[int1] = ch1 then begin
+      result:= int1-1;
+      for int2:= 1 to sublen do begin
+       if s[result+int2] <> substring[int2] then begin
+        result:= -1;
+        break;
+       end;
+      end;
+      inc(result);
+     end;
+     if result <> 0 then begin
+      break;
+     end;
+    end
+   end;
   end;
- end;
+ end; //not backward
 end;
 
 function replacestring(const s: msestring; oldsub: msestring;

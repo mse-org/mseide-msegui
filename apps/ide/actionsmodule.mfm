@@ -225,7 +225,7 @@ object actionsmo: tactionsmo
     caption = 'Find in F&iles'
     onexecute = findinfileonexecute
     left = 152
-    top = 60
+    top = 76
     sc = (
       1
       24646
@@ -251,7 +251,7 @@ object actionsmo: tactionsmo
     hint = 'Breakpoints on/off'
     onexecute = bkptsononexecute
     left = 152
-    top = 220
+    top = 236
     sc = (
       1
       16450
@@ -266,7 +266,7 @@ object actionsmo: tactionsmo
     statfile = mainfo.projectstatfile
     onexecute = watchesononexecute
     left = 152
-    top = 236
+    top = 252
     sc = (
       1
       16471
@@ -286,7 +286,7 @@ object actionsmo: tactionsmo
     caption = '&Toggle Breakpoint'
     onexecute = togglebreakpointexe
     left = 152
-    top = 188
+    top = 204
     sc = (
       1
       308
@@ -296,7 +296,7 @@ object actionsmo: tactionsmo
     caption = 'Toggle Bkpt. &enabled'
     onexecute = togglebkptenableactonexecute
     left = 152
-    top = 204
+    top = 220
     sc = (
       1
       8500
@@ -1283,7 +1283,7 @@ object actionsmo: tactionsmo
     caption = 'Toggle Form/&Unit'
     onexecute = toggleformunitonexecute
     left = 152
-    top = 80
+    top = 104
     sc = (
       1
       315
@@ -1324,7 +1324,7 @@ object actionsmo: tactionsmo
     statfile = mainfo.projectstatfile
     onchange = bluedotsononchange
     left = 152
-    top = 253
+    top = 269
   end
   object replace: taction
     caption = 'Find && &Replace'
@@ -1369,7 +1369,7 @@ object actionsmo: tactionsmo
     top = 152
   end
   object shortcuts: tshortcutcontroller
-    actions.count = 97
+    actions.count = 98
     actions.items = <    
       item
         dispname = 'File'
@@ -1435,10 +1435,18 @@ object actionsmo: tactionsmo
       end    
       item
         action = repeatfind
-        dispname = 'Repeat Find'
+        dispname = 'Search again'
         sc = (
           1
           306
+        )
+      end    
+      item
+        action = findback
+        dispname = 'Search back'
+        sc = (
+          1
+          8498
         )
       end    
       item
@@ -1996,7 +2004,7 @@ object actionsmo: tactionsmo
   object toggleinspector: taction
     caption = 'Toggle Form/Inspector'
     left = 152
-    top = 96
+    top = 120
     sc = (
       1
       314
@@ -2425,7 +2433,7 @@ object actionsmo: tactionsmo
   object findcompact: taction
     onexecute = findcompexe
     left = 152
-    top = 128
+    top = 152
     sc = (
       1
       16454
@@ -2435,7 +2443,7 @@ object actionsmo: tactionsmo
     caption = '&Find Component'
     onexecute = findcompallexe
     left = 152
-    top = 144
+    top = 168
   end
   object forcezorderact: taction
     caption = 'Force &Z-Order'
@@ -2534,5 +2542,15 @@ object actionsmo: tactionsmo
     onupdate = enableonselect
     left = 360
     top = 168
+  end
+  object findback: taction
+    caption = 'Search &back'
+    onexecute = findbackonexecute
+    left = 152
+    top = 60
+    sc = (
+      1
+      8498
+    )
   end
 end
