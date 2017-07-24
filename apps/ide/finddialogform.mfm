@@ -53,7 +53,7 @@ object finddialogfo: tfinddialogfo
       bounds_cy = 16
     end
     object casesensitive: tbooleanedit
-      frame.caption = 'case&sensitive'
+      frame.caption = '&casesensitive'
       frame.localprops = []
       frame.localprops1 = []
       frame.outerframe = (
@@ -84,7 +84,7 @@ object finddialogfo: tfinddialogfo
       bounds_cy = 16
     end
     object selectedonly: tbooleanedit
-      frame.caption = 'select&ed only'
+      frame.caption = '&selected only'
       frame.localprops = []
       frame.localprops1 = []
       frame.outerframe = (
@@ -102,7 +102,7 @@ object finddialogfo: tfinddialogfo
     end
   end
   object findtext: thistoryedit
-    frame.caption = 'Text to &find'
+    frame.caption = '&Text to find'
     frame.localprops = []
     frame.localprops1 = []
     frame.buttons.count = 1
