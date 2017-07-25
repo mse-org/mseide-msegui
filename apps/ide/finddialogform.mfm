@@ -3,104 +3,22 @@ object finddialogfo: tfinddialogfo
   visible = False
   bounds_x = 319
   bounds_y = 205
-  bounds_cx = 391
+  bounds_cx = 371
   bounds_cy = 93
+  anchors = [an_left, an_top, an_right]
   container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_mousetransparent, ow_destroywidgets]
   container.frame.localprops = []
   container.frame.localprops1 = []
   container.bounds = (
     0
     0
-    391
+    371
     93
   )
   options = [fo_closeonesc, fo_localshortcuts, fo_autoreadstat, fo_autowritestat, fo_savepos, fo_savezorder]
   statfile = statfile1
   caption = 'Find Text'
   moduleclassname = 'tmseform'
-  object tlayouter2: tlayouter
-    optionswidget = [ow_tabfocus, ow_parenttabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_destroywidgets]
-    frame.localprops = []
-    frame.localprops1 = []
-    taborder = 1
-    bounds_x = 8
-    bounds_y = 47
-    bounds_cx = 374
-    bounds_cy = 16
-    optionsscale = [osc_expandx, osc_shrinkx, osc_expandy, osc_shrinky, osc_expandshrinkx, osc_expandshrinky]
-    optionslayout = [lao_placex, lao_aligny]
-    align_glue = wam_start
-    place_mindist = 4
-    place_maxdist = 4
-    linktop = findtext
-    linkbottom = tlayouter1
-    dist_top = 4
-    dist_bottom = 4
-    object wholeword: tbooleanedit
-      frame.caption = '&whole word'
-      frame.localprops = []
-      frame.localprops1 = []
-      frame.outerframe = (
-        0
-        1
-        73
-        2
-      )
-      taborder = 2
-      bounds_x = 208
-      bounds_y = 0
-      bounds_cx = 86
-      bounds_cy = 16
-    end
-    object casesensitive: tbooleanedit
-      frame.caption = '&casesensitive'
-      frame.localprops = []
-      frame.localprops1 = []
-      frame.outerframe = (
-        0
-        1
-        88
-        2
-      )
-      bounds_x = 0
-      bounds_y = 0
-      bounds_cx = 101
-      bounds_cy = 16
-    end
-    object backward: tbooleanedit
-      frame.caption = '&backward'
-      frame.localprops = []
-      frame.localprops1 = []
-      frame.outerframe = (
-        0
-        1
-        63
-        2
-      )
-      taborder = 3
-      bounds_x = 298
-      bounds_y = 0
-      bounds_cx = 76
-      bounds_cy = 16
-    end
-    object selectedonly: tbooleanedit
-      frame.caption = '&selected only'
-      frame.localprops = []
-      frame.localprops1 = []
-      frame.outerframe = (
-        0
-        1
-        86
-        2
-      )
-      taborder = 1
-      bounds_x = 105
-      bounds_y = 0
-      bounds_cx = 99
-      bounds_cy = 16
-      statfile = statfile1
-    end
-  end
   object findtext: thistoryedit
     frame.caption = '&Text to find'
     frame.localprops = []
@@ -117,7 +35,7 @@ object finddialogfo: tfinddialogfo
     )
     bounds_x = 8
     bounds_y = 6
-    bounds_cx = 376
+    bounds_cx = 356
     bounds_cy = 37
     anchors = [an_left, an_top, an_right]
     optionsedit1 = [oe1_autopopupmenu, oe1_savevalue, oe1_savestate]
@@ -128,42 +46,163 @@ object finddialogfo: tfinddialogfo
       end>
     reffontheight = 14
   end
-  object tlayouter1: tlayouter
+  object tlayouter4: tlayouter
     optionswidget = [ow_tabfocus, ow_parenttabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_destroywidgets]
-    frame.localprops = []
-    frame.localprops1 = []
-    taborder = 2
-    bounds_x = 273
-    bounds_y = 67
-    bounds_cx = 109
-    bounds_cy = 20
-    anchors = [an_top, an_right]
-    optionsscale = [osc_expandx, osc_shrinkx, osc_expandy, osc_shrinky]
-    optionslayout = [lao_placex, lao_aligny, lao_syncmaxautosize]
+    taborder = 1
+    bounds_x = 8
+    bounds_y = 47
+    bounds_cx = 358
+    bounds_cy = 36
+    anchors = [an_left, an_top, an_right]
+    optionsscale = [osc_expandy, osc_shrinky, osc_expandshrinkx, osc_expandshrinky]
+    optionslayout = [lao_placex, lao_aligny]
     align_glue = wam_start
-    place_mindist = 5
-    place_maxdist = 5
-    place_mode = wam_end
-    object cancel: tbutton
-      bounds_x = 57
-      bounds_y = 0
-      bounds_cx = 52
-      bounds_cy = 20
-      anchors = [an_top, an_right]
-      state = [as_localcaption]
-      caption = '&Cancel'
-      modalresult = mr_cancel
-    end
-    object tbutton2: tbutton
+    place_mindist = 4
+    place_maxdist = 4
+    place_options = [plo_endmargin]
+    linktop = findtext
+    dist_top = 4
+    object tlayouter3: tlayouter
+      optionswidget = [ow_tabfocus, ow_parenttabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_destroywidgets]
       taborder = 1
+      bounds_x = 105
+      bounds_y = 0
+      bounds_cx = 86
+      bounds_cy = 36
+      optionsscale = [osc_expandx, osc_shrinkx, osc_expandy, osc_shrinky, osc_expandshrinkx, osc_expandshrinky]
+      optionslayout = [lao_alignx, lao_placey]
+      align_glue = wam_start
+      place_mindist = 4
+      place_maxdist = 4
+      object wholeword: tbooleanedit
+        frame.caption = '&whole word'
+        frame.localprops = []
+        frame.localprops1 = []
+        frame.outerframe = (
+          0
+          1
+          73
+          2
+        )
+        bounds_x = 0
+        bounds_y = 0
+        bounds_cx = 86
+        bounds_cy = 16
+      end
+      object backward: tbooleanedit
+        frame.caption = '&backward'
+        frame.localprops = []
+        frame.localprops1 = []
+        frame.outerframe = (
+          0
+          1
+          63
+          2
+        )
+        taborder = 1
+        bounds_x = 0
+        bounds_y = 20
+        bounds_cx = 76
+        bounds_cy = 16
+      end
+    end
+    object tlayouter2: tlayouter
+      optionswidget = [ow_tabfocus, ow_parenttabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_destroywidgets]
+      frame.localprops = []
+      frame.localprops1 = []
       bounds_x = 0
       bounds_y = 0
-      bounds_cx = 52
+      bounds_cx = 101
+      bounds_cy = 36
+      optionsscale = [osc_expandx, osc_shrinkx, osc_expandy, osc_shrinky, osc_expandshrinkx, osc_expandshrinky]
+      optionslayout = [lao_alignx, lao_placey]
+      align_glue = wam_start
+      place_mindist = 4
+      place_maxdist = 4
+      dist_top = 4
+      dist_bottom = 4
+      object casesensitive: tbooleanedit
+        frame.caption = 'c&asesensitive'
+        frame.localprops = []
+        frame.localprops1 = []
+        frame.outerframe = (
+          0
+          1
+          88
+          2
+        )
+        bounds_x = 0
+        bounds_y = 0
+        bounds_cx = 101
+        bounds_cy = 16
+      end
+      object selectedonly: tbooleanedit
+        frame.caption = '&selected only'
+        frame.localprops = []
+        frame.localprops1 = []
+        frame.outerframe = (
+          0
+          1
+          86
+          2
+        )
+        taborder = 1
+        bounds_x = 0
+        bounds_y = 20
+        bounds_cx = 99
+        bounds_cy = 16
+        statfile = statfile1
+      end
+    end
+    object tlayouter1: tlayouter
+      optionswidget = [ow_tabfocus, ow_parenttabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_destroywidgets]
+      taborder = 2
+      bounds_x = 195
+      bounds_y = 8
+      bounds_cx = 163
       bounds_cy = 20
-      anchors = [an_top, an_right]
-      state = [as_default, as_localdefault, as_localcaption]
-      caption = '&OK'
-      modalresult = mr_ok
+      anchors = [an_left, an_top, an_right]
+      optionsscale = [osc_expandy, osc_shrinky, osc_expandshrinkx, osc_expandshrinky]
+      optionslayout = [lao_aligny]
+      align_glue = wam_start
+      place_options = [plo_endmargin]
+      object tlayouter5: tlayouter
+        optionswidget = [ow_tabfocus, ow_parenttabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_destroywidgets]
+        frame.localprops = []
+        frame.localprops1 = []
+        bounds_x = 51
+        bounds_y = 0
+        bounds_cx = 109
+        bounds_cy = 20
+        anchors = [an_top, an_right]
+        optionsscale = [osc_expandx, osc_shrinkx, osc_expandy, osc_shrinky]
+        optionslayout = [lao_placex, lao_aligny, lao_syncmaxautosize]
+        align_glue = wam_start
+        place_mindist = 5
+        place_maxdist = 5
+        place_mode = wam_end
+        object cancel: tbutton
+          taborder = 1
+          bounds_x = 57
+          bounds_y = 0
+          bounds_cx = 52
+          bounds_cy = 20
+          anchors = [an_top, an_right]
+          state = [as_localcaption]
+          caption = '&Cancel'
+          modalresult = mr_cancel
+        end
+        object tbutton2: tbutton
+          bounds_x = 0
+          bounds_y = 0
+          bounds_cx = 52
+          bounds_cy = 20
+          anchors = [an_top, an_right]
+          state = [as_default, as_localdefault, as_localcaption]
+          caption = '&OK'
+          modalresult = mr_ok
+        end
+      end
     end
   end
   object statfile1: tstatfile

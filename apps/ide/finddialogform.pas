@@ -31,14 +31,17 @@ type
    findtext: thistoryedit;
    statfile1: tstatfile;
    ok: tbutton;
+   tlayouter4: tlayouter;
+   tlayouter3: tlayouter;
+   wholeword: tbooleanedit;
+   backward: tbooleanedit;
+   tlayouter2: tlayouter;
+   casesensitive: tbooleanedit;
+   selectedonly: tbooleanedit;
    tlayouter1: tlayouter;
+   tlayouter5: tlayouter;
    cancel: tbutton;
    tbutton2: tbutton;
-   tlayouter2: tlayouter;
-   wholeword: tbooleanedit;
-   casesensitive: tbooleanedit;
-   backward: tbooleanedit;
-   selectedonly: tbooleanedit;
   private
    procedure valuestoinfo(out info: findinfoty);
    procedure infotovalues(const info: findinfoty);
