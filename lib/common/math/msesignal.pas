@@ -51,7 +51,7 @@ const
 
 type
  sigsampleroptionty = (sso_fulltick,sso_negtrig,sso_autorun,
-                       sso_fftmag); //used by tsigsamplerfft
+                       sso_fftmag,sso_average); //used by tsigsamplerfft
  sigsampleroptionsty = set of sigsampleroptionty;
 
 const
@@ -135,13 +135,13 @@ type
    function getsigcontroller: tsigcontroller;
    function getsigclientinfopo: psigclientinfoty;
    function getsigoptions: sigclientoptionsty; virtual;
-   procedure lockapplication;  //releases controller lock, can not be nested,
-                               //call from locked signal thread only
-   procedure unlockapplication;//acquires controller lock
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
    procedure clear; virtual;
+   procedure lockapplication;  //releases controller lock, can not be nested,
+                               //call from locked signal thread only
+   procedure unlockapplication;//acquires controller lock
   published
    property controller: tsigcontroller read fcontroller write setcontroller;
  end;
@@ -517,21 +517,21 @@ type
    ftrigger: tchangedoubleinputconn;
    ftriggerlevel: tchangedoubleinputconn;
    fonbufferfull: samplerbufferfulleventty;
-   foptions: sigsampleroptionsty;
    ftimer: tsimpletimer;
    frefreshus: integer;
    procedure setbufferlength(const avalue: integer);
    procedure settrigger(const avalue: tchangedoubleinputconn);
    procedure settriggerlevel(const avalue: tchangedoubleinputconn);
-   procedure setoptions(const avalue: sigsampleroptionsty);
    procedure setrefreshus(const avalue: integer);
   protected
+   foptions: sigsampleroptionsty;
    fnegtrig: boolean;
    fstarted: boolean;
    fstartpending: boolean;
    fpretrigger: boolean;
    frunning: boolean;
    fsigbuffer: samplerbufferty;
+   procedure setoptions(const avalue: sigsampleroptionsty) virtual;
    procedure updateoptions(var avalue: sigsampleroptionsty); virtual;
    procedure dotimer(const sender: tobject);
    procedure dotriggerchange(const sender: tobject);
