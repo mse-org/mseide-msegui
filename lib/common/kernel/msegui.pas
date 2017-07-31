@@ -2350,7 +2350,7 @@ type
                   tws_grouphidden,tws_groupminimized,tws_groupmaximized,
                   tws_transientforminimized,
                   tws_grab,tws_activatelocked,
-                  tws_canvasoverride,tws_destroying,
+                  tws_canvasoverride,tws_destroying,tws_candefocus,
                   tws_raise,tws_lower);
  windowstatesty = set of windowstatety;
 
@@ -16545,8 +16545,18 @@ begin
 end;
 
 function twindow.candefocus: boolean;
+var
+ b1: boolean;
 begin
- result:= (ffocusedwidget = nil) or ffocusedwidget.canclose(nil);
+ b1:= tws_candefocus in fstate;
+ include(fstate,tws_candefocus);
+ try
+  result:= (ffocusedwidget = nil) or ffocusedwidget.canclose(nil);
+ finally;
+  if not b1 then begin
+   exclude(fstate,tws_candefocus); 
+  end;
+ end;
 end;
 
 procedure twindow.nofocus;

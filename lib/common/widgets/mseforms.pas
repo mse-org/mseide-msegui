@@ -1171,7 +1171,8 @@ var
  modres: modalresultty;
 begin
  result:= inherited canclose(newfocus);
- if result and (newfocus = nil) then begin
+ if result and (newfocus = nil) and ((fwindow = nil) or 
+                  not (tws_candefocus in fwindow.state)) then begin
   modres:= twindow1(window).fmodalresult;
   if (modres = mr_windowclosed) and (fo_nowindowclose in foptions) then begin
    result:= false;
