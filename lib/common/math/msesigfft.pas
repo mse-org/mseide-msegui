@@ -128,12 +128,17 @@ type
    procedure setwindowfuncpar1(const avalue: double);
   protected
    ffftbuffer: samplerbufferty;
+   faveragecount: int32;
    procedure dobufferfull; override;
    procedure initmodel; override;
    procedure updateoptions(var avalue: sigsampleroptionsty); override;
+   procedure setoptions(const avalue: sigsampleroptionsty) override;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
+   procedure clear override;
+   procedure clearaverage();
+   property averagecount: int32 read faveragecount;
   published
    property windowfunc: windowfuncty read getwindowfunc 
                 write setwindowfunc default wf_rectangular;
@@ -352,6 +357,17 @@ begin
  inherited;
 end;
 
+procedure tsigsamplerfft.clear;
+begin
+ inherited;
+ clearaverage();
+end;
+
+procedure tsigsamplerfft.clearaverage();
+begin
+ faveragecount:= 0;
+end;
+
 function tsigsamplerfft.getwindowfunc: windowfuncty;
 begin
  result:= ffft.windowfunc;
@@ -384,13 +400,38 @@ end;
 
 procedure tsigsamplerfft.dobufferfull;
 var
- int1: integer;
+ i1: int32;
+ f1,f2: flo64;
+ p1,p2,pe: pflo64;
 begin
  inherited;
  if sso_fftmag in options then begin
-  for int1:= 0 to high(ffftbuffer) do begin
-   ffft.inpreal:= realarty(fsigbuffer[int1]);
-   ffftbuffer[int1]:= doublearty(ffft.outreal);
+  if sso_average in options then begin
+   for i1:= 0 to high(ffftbuffer) do begin
+    ffft.inpreal:= realarty(fsigbuffer[i1]);
+    if faveragecount = 0 then begin
+     ffftbuffer[i1]:= doublearty(ffft.outreal);
+    end
+    else begin
+     f1:= faveragecount;
+     f2:= faveragecount+1;
+     p1:= @ffftbuffer[i1][0];
+     p2:= @ffft.outreal[0];
+     pe:= p1 + length(ffftbuffer[i1]);
+     while p1 < pe do begin
+      p1^:= (p1^*f1+p2^)/f2;
+      inc(p1);
+      inc(p2);
+     end;
+    end;
+   end;
+   inc(faveragecount);
+  end
+  else begin
+   for i1:= 0 to high(ffftbuffer) do begin
+    ffft.inpreal:= realarty(fsigbuffer[i1]);
+    ffftbuffer[i1]:= doublearty(ffft.outreal);
+   end;
   end;
   if assigned(fonfft) then begin
    fonfft(self,ffftbuffer);
@@ -405,11 +446,20 @@ begin
  inherited;
  ffftbuffer:= nil;
  setlength(ffftbuffer,inputs.count);
+ faveragecount:= 0;
 end;
 
 procedure tsigsamplerfft.updateoptions(var avalue: sigsampleroptionsty);
 begin
  //dummy
+end;
+
+procedure tsigsamplerfft.setoptions(const avalue: sigsampleroptionsty);
+begin
+ if (avalue >< foptions) * [sso_average] <> [] then begin
+  clearaverage();
+ end;
+ inherited;
 end;
 
 end.
