@@ -8474,6 +8474,9 @@ begin
   try
    if entered and (fwindow <> nil) then begin
     window.nofocus;
+    if fwindow.focusedwidget <> nil then begin
+     exit;
+    end;
    end;
    if (value <> nil) then begin
     if value = self then begin
@@ -15988,8 +15991,16 @@ begin
    widget1:= ffocusedwidget;
    if widget1 <> nil then begin
     if not (csdestroying in widget1.componentstate) then begin
-     if not widget1.canclose(widget) then begin
-      exit;
+     bo1:= tws_candefocus in fstate;
+     try
+      include(fstate,tws_candefocus);
+      if not widget1.canclose(widget) then begin
+       exit;
+      end;
+     finally
+      if not bo1 then begin
+       exclude(fstate,tws_candefocus);
+      end;
      end;
      if (ffocuscount <> focuscountbefore) then begin
       exit;

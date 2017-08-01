@@ -295,8 +295,8 @@ type
    function nogrip: boolean;
    function canfloat: boolean;
    procedure refused(const apos: pointty);
-   procedure calclayout(const dragobject: tdockdragobject;
-                        const nonewplace: boolean);
+   function calclayout(const dragobject: tdockdragobject;
+                      const nonewplace: boolean): boolean; //false if canceled
    procedure setpickshape(const ashape: cursorshapety);
    procedure restorepickshape;
    function checkbuttonarea(const apos: pointty): dockbuttonrectty;
@@ -1889,8 +1889,8 @@ begin
  end;
 end;
 
-procedure tdockcontroller.calclayout(const dragobject: tdockdragobject;
-                                     const nonewplace: boolean);
+function tdockcontroller.calclayout(const dragobject: tdockdragobject;
+                                     const nonewplace: boolean): boolean;
 var
  rect1{,rect2}: rectty;
  po1: pointty;
@@ -1911,6 +1911,7 @@ var
 label
  endlab;
 begin
+ result:= false;
  container1:= twidget1(fintf.getwidget.container);
  if container1.componentstate * [csdestroying,csdesigning] <> [] then begin
   exit;
@@ -1993,6 +1994,9 @@ begin
    if fsplitdir <> sd_tabed then begin
     widget1.size:= xorrect.size;
     widget1.parentwidget:= container1;
+    if widget1.parentwidget <> container1 then begin
+     exit; //probably widget can not be defocused
+    end;
    end;
    if getparentcontroller(controller1) then begin
     controller1.layoutchanged; //notify removing
@@ -2110,6 +2114,7 @@ endlab:
   foncalclayout(widget1,ar1);
  end;
  dolayoutchanged;
+ result:= true;
 end;
 
 procedure tdockcontroller.updateminscrollsize(var asize: sizety);
@@ -2205,9 +2210,11 @@ var
  parentbefore: tdockcontroller;
 begin 
  dragobj.fdock.getparentcontroller(parentbefore);
- calclayout(tdockdragobject(dragobj),false);
- updaterefsize;
- result:= dragobj.fdock.dodock(self);
+ result:= false;
+ if calclayout(tdockdragobject(dragobj),false) then begin
+  updaterefsize;
+  result:= dragobj.fdock.dodock(self);
+ end;
 end;
 
 procedure tdockcontroller.childstatechanged(const sender: twidget;
