@@ -2573,6 +2573,9 @@ begin
    fonbeforefloat(widget1,rect1);
   end;
   parentwidget:= nil;
+  if parentwidget <> nil then begin
+   exit;
+  end;
   widgetrect:= rect1;
   if fmdistate = mds_maximized then begin
    anchors:= [an_left,an_top];
