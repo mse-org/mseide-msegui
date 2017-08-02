@@ -6753,7 +6753,7 @@ end;
 
 initialization
  mainthreadid:= sys_getcurrentthread();
-// norestackwindow:= true;
+ norestackwindow:= true;
  noreconfigurewmwindow:= true;
  stackmodebelowworkaround:= false;
 // nocreatestaticgravity:= true;
