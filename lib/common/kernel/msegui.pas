@@ -184,6 +184,7 @@ type
                  fs_sbleft,fs_sbtop,fs_sbright,fs_sbbottom,
                  fs_nowidget,fs_nosetinstance,fs_framemouse,
                  fs_disabled,fs_creating,fs_stateupdating,
+                 fs_clientrectchanging,
                  fs_cancaptionsyncx,fs_cancaptionsyncy,
                  fs_drawfocusrect,fs_paintrectfocus,
                  fs_captionfocus,fs_captionhint,
@@ -4801,7 +4802,14 @@ begin
   fpaintposbefore:= fpaintrect.pos;
   updateclientrect;
   include(fstate,fs_rectsvalid);
-  fintf.clientrectchanged;
+  if not (fs_clientrectchanging in fstate) then begin
+   include(fstate,fs_clientrectchanging);
+   try
+    fintf.clientrectchanged;
+   finally
+    exclude(fstate,fs_clientrectchanging);
+   end;
+  end;
  end
  else begin
   updateclientrect();
@@ -18373,6 +18381,7 @@ begin       //eventloop
     if ((fcurrmodalinfo = nil) or (high(fcurrmodalinfo^.events) < 0)) and 
                                                      (getevents = 0) then begin
      checkwindowstack;
+     int1:= 0;
      repeat
       bo1:= false;
       fwindowupdateindex:= 0;
@@ -18384,7 +18393,8 @@ begin       //eventloop
        end;
        inc(fwindowupdateindex);
       end;
-     until not bo1 and not terminated; //no more to paint
+      inc(int1);
+     until not bo1 and not terminated or (int1 > 8); //no more to paint
      exclude(fstate,aps_invalidated);
      if terminated or (aps_exitloop in fstate) then begin
       break;
