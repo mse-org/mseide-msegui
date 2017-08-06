@@ -4307,11 +4307,27 @@ begin
  gdi_unlock;
 end;
 
+procedure unmapwindow(id: winidty);
+var
+ ev1: txunmapevent;
+ root1: winidty;
+begin
+ root1:= gui_getrootwindow(id);
+ xunmapwindow(appdisp,id);
+ ev1._type:= unmapnotify;
+ ev1.event:= root1;
+ ev1.window:= id;
+ ev1.from_configure:= 0;
+ xsendevent(appdisp,root1,{$ifdef xboolean}false{$else}0{$endif},
+                  substructurenotifymask or substructureredirectmask,@ev1);
+                                               //synthetic
+end;
+
 function gui_hidewindow(id: winidty): guierrorty;
 begin
  gdi_lock;
  unsetime(id);
- xunmapwindow(appdisp,id);
+ unmapwindow(id);
  result:= gue_ok;
  gdi_unlock;
 end;
