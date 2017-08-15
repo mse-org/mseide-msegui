@@ -46,6 +46,10 @@ Installation:
 6. In 'Project'-'Open' select 'yourdirectory/msegui/apps/demo/demo.prj'.
 7. 'Target'-'Continue'.
 
+If you get the error "/usr/bin/ld: cannot find -lX11" install the 
+libX11-devel or libX11-dev package or make a symbolic link
+/usr/lib/libX11.so -> /usr/lib/libX11.so.6
+
 If you wish to to compile the IDE:
 
 1. In 'Project'-'Open' select 'yourdirectory/msegui/apps/ide/mseide.prj'.
