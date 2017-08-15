@@ -130,7 +130,7 @@ begin
    if col > maxfoundpos then begin
     int1:= col - maxcenteredpos;
     str2:= '...'+msestring(copy(text,int1,maxfoundlength));
-    col:= maxcenteredpos + 3;
+    col:= maxcenteredpos + 4;
     if length(text) > length(str2) + int1 - 4 then begin
      str2:= str2 + '...';
     end;
