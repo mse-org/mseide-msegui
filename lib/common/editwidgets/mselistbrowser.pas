@@ -160,7 +160,9 @@ const
   //tib_checkbox,         tib_checkboxchecked
     ord(stg_checkbox),ord(stg_checkboxchecked),
   //tib_checkboxparentnotchecked,tib_checkboxchildchecked
-    ord(stg_checkboxparentnotchecked),ord(stg_checkboxchildchecked)
+    ord(stg_checkboxparentnotchecked),ord(stg_checkboxchildchecked),
+  //tib_checkboxchildnotchecked
+    ord(stg_checkboxchildnotchecked)
     );
 type
  titemviewlist = class(tcustomitemlist,iitemlist)
@@ -491,6 +493,8 @@ type
    procedure setboxglyph_checkboxparentnotchecked(const avalue: stockglyphty);
    function getboxglyph_checkboxchildchecked: stockglyphty;
    procedure setboxglyph_checkboxchildchecked(const avalue: stockglyphty);
+   function getboxglyph_checkboxchildnotchecked: stockglyphty;
+   procedure setboxglyph_checkboxchildnotchecked(const avalue: stockglyphty);
 //   procedure setboxglyp_list(const avalue: timagelist);
 //   procedure setboxglyp_listactive(const avalue: timagelist);
    procedure setboxglyph_versionactive(const avalue: int32);
@@ -539,6 +543,10 @@ type
    property boxglyph_checkboxchildchecked: stockglyphty 
                           read getboxglyph_checkboxchildchecked
         write setboxglyph_checkboxchildchecked default stg_checkboxchildchecked;
+   property boxglyph_checkboxchildnotchecked: stockglyphty 
+                          read getboxglyph_checkboxchildnotchecked
+                          write setboxglyph_checkboxchildnotchecked 
+                                          default stg_checkboxchildnotchecked;
    property onitemnotification: nodenotificationeventty
                  read fonitemnotification write fonitemnotification;
   published
@@ -993,6 +1001,7 @@ type
    function getcheckednodes(const amode: getnodemodety = 
                                               gno_matching): treelistitemarty;
    procedure updatechildcheckedtree; //slow!
+   procedure updatechildnotcheckedtree; //slow!
    procedure updateparentnotcheckedtree; //slow!
    
    procedure expandall;
@@ -2831,6 +2840,22 @@ procedure tcustomitemeditlist.setboxglyph_checkboxchildchecked(
 begin
  if stockglyphty(fboxids[tib_checkboxchildchecked]) <> avalue then begin
   stockglyphty(fboxids[tib_checkboxchildchecked]):= avalue;
+  if fowner <> nil then begin
+   fowner.itemchanged(-1);
+  end;
+ end;
+end;
+
+function tcustomitemeditlist.getboxglyph_checkboxchildnotchecked: stockglyphty;
+begin
+ result:= stockglyphty(fboxids[tib_checkboxchildnotchecked]);
+end;
+
+procedure tcustomitemeditlist.setboxglyph_checkboxchildnotchecked(
+              const avalue: stockglyphty);
+begin
+ if stockglyphty(fboxids[tib_checkboxchildnotchecked]) <> avalue then begin
+  stockglyphty(fboxids[tib_checkboxchildnotchecked]):= avalue;
   if fowner <> nil then begin
    fowner.itemchanged(-1);
   end;
@@ -4847,11 +4872,15 @@ procedure ttreeitemeditlist.change(const index: integer);
 begin
  if (index < 0) and (nochange = 0) and 
   ((no_updatechildchecked in foptions) or 
-        (no_updateparentnotchecked in foptions)) then begin
+               (no_updatechildnotchecked in foptions) or
+                         (no_updateparentnotchecked in foptions)) then begin
   inherited beginupdate; //no ils_subnodecountupdating
   try
    if (no_updatechildchecked in foptions) then begin
     updatechildcheckedtree();
+   end;
+   if (no_updatechildnotchecked in foptions) then begin
+    updatechildnotcheckedtree();
    end;
    if (no_updateparentnotchecked in foptions) then begin
     updateparentnotcheckedtree();
@@ -5185,6 +5214,9 @@ begin
    end;
    if ns_showchildchecked in n2.state then begin
     anode.updatechildcheckedstate();
+   end;
+   if ns_showchildnotchecked in n2.state then begin
+    anode.updatechildnotcheckedstate();
    end;
   end
   else begin
@@ -5538,6 +5570,29 @@ begin
     with po1^ do begin
      if ftreelevel = 0 then begin
       updatechildcheckedtree;
+     end;
+    end;
+   end;
+   inc(po1);
+  end;
+ finally
+  endupdate;
+ end;
+end;
+
+procedure ttreeitemeditlist.updatechildnotcheckedtree;
+var
+ po1,pe: ptreelistedititem;
+begin
+ beginupdate;
+ try
+  po1:= datapo;
+  pe:= po1 + count;
+  while po1 < pe do begin
+   if po1^ <> nil then begin
+    with po1^ do begin
+     if ftreelevel = 0 then begin
+      updatechildnotcheckedtree;
      end;
     end;
    end;

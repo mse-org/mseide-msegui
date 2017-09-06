@@ -23,9 +23,10 @@ type
  nodestatty = (ns_expanded,ns_selected,ns_readonly,ns_checked,
                ns_subitems,ns_drawemptybox,ns_imagenrfix,
 //               ns_destroying,ns_updating,ns_noowner,
-               ns_checkbox,ns_showchildchecked,ns_showparentnotchecked,
+               ns_checkbox,ns_showchildchecked,ns_showchildnotchecked,
+               ns_showparentnotchecked,
                ns_nosubnodestat,
-               ns_casesensitive,ns_sorted,ns_res13,//ns_captionclipped,
+               ns_casesensitive,ns_sorted,//ns_captionclipped,
                    ns_res14,ns_res15,
                    ns_useri0,ns_useri1,ns_useri2,ns_useri3,
                           //with invalidate and statsave
@@ -40,7 +41,7 @@ type
  nodestate1ty = (ns1_statechanged,ns1_rootchange,ns1_candrag,
                  ns1_destroying,ns1_notbyownerdestroying,
                  ns1_updating,ns1_noowner,ns1_captionclipped,
-                 ns1_childchecked,ns1_parentnotchecked,
+                 ns1_childchecked,ns1_childnotchecked,ns1_parentnotchecked,
                  ns1_checkboxclicked,ns1_customsort,
                  ns1_nofreeroot,ns1_top,ns1_fixedcaption,ns1_nodefaultimagelist
  //                ns1_irecordfield,      //implements irecordfield
@@ -51,6 +52,8 @@ type
  nodeoptionty = (no_drawemptybox,no_solidline,no_checkbox,
                  no_updatechildchecked, 
                          //track ns1_childchecked state, slow!
+                 no_updatechildnotchecked, 
+                         //track ns1_childnotchecked state, slow!
                  no_updateparentnotchecked, 
                          //track ns1_parentnotchecked state, slow!
                  no_cellitemselect,     //copy cell select state to item select
@@ -62,7 +65,8 @@ type
 
  treeitemboxty = (tib_none,tib_empty,tib_expand,tib_expanded,
                   tib_checkbox,tib_checkboxchecked,
-                  tib_checkboxparentnotchecked,tib_checkboxchildchecked);
+                  tib_checkboxparentnotchecked,tib_checkboxchildchecked,
+                  tib_checkboxchildnotchecked);
  itemdrawoptionty = (ido_solidline);
  itemdrawoptionsty = set of itemdrawoptionty;
  treeitemboxidarty = array[treeitemboxty] of int32;
@@ -327,6 +331,8 @@ type
 
    procedure updatechildcheckedstate();   //updates ancestors
    procedure updatechildcheckedtree();    //updates self and descendents
+   procedure updatechildnotcheckedtree(); //updates self and descendents
+   procedure updatechildnotcheckedstate(); //updates ancestors
    procedure updateparentnotcheckedstate(); //updates affected descendents
    procedure updateparentnotcheckedtree(); //updates all descendents
    property parent: ttreelistitem read fparent;
@@ -850,6 +856,12 @@ begin
      if (ns_showparentnotchecked in self.fstate) and 
                        (ns1_parentnotchecked in self.fstate1) then begin
       glyphno:= boxids[tib_checkboxparentnotchecked];
+     end
+     else begin
+      if (ns_showchildnotchecked in self.fstate) and 
+                        (ns1_childnotchecked in self.fstate1) then begin
+       glyphno:= boxids[tib_checkboxchildnotchecked];
+      end;
      end;
     end
     else begin
@@ -2842,24 +2854,20 @@ var
 begin
  node1:= fparent;
  if ns_checked in fstate then begin
-  while (node1 <> nil) and {(ns_showchildchecked in node1.fstate) and}
-                               not (ns1_childchecked in node1.fstate1) do begin
+  while (node1 <> nil) and not (ns1_childchecked in node1.fstate1) do begin
    include(node1.fstate1,ns1_childchecked);
    node1.change;
    node1:= node1.fparent;
   end;
  end
  else begin
-  if {not (ns_showchildchecked in fstate) or}
-                     not (ns1_childchecked in fstate1) then begin
+  if not (ns1_childchecked in fstate1) then begin
    while (node1 <> nil) and (ns_showchildchecked in node1.fstate) and
                                  (ns1_childchecked in node1.fstate1) do begin
     with node1 do begin
      for int1:= 0 to fcount-1 do begin
       with fitems[int1] do begin
-       if (ns_checked in fstate) or
-                         {(ns_showchildchecked in fstate) and}
-                         (ns1_childchecked in fstate1) then begin
+       if (ns_checked in fstate) or (ns1_childchecked in fstate1) then begin
         exit;
        end;
       end;
@@ -2876,6 +2884,44 @@ begin
  end;
 end;
 
+procedure ttreelistitem.updatechildnotcheckedstate();
+var
+ node1: ttreelistitem;
+ i1: integer;
+begin
+ if not (ns1_childnotchecked in fstate1) then begin
+  node1:= fparent;
+  if ns_checked in fstate then begin
+   while (node1 <> nil) and (ns_showchildnotchecked in node1.fstate) and
+                            (ns1_childnotchecked in node1.fstate1) do begin
+    with node1 do begin
+     for i1:= 0 to fcount-1 do begin
+      with fitems[i1] do begin
+       if not (ns_checked in fstate) or 
+                           (ns1_childnotchecked in fstate1) then begin
+        exit;
+       end;
+      end;
+     end;
+     exclude(fstate1,ns1_childnotchecked);
+     change();
+     node1:= fparent;
+    end;
+   end;
+  end
+  else begin
+   while (node1 <> nil) and (ns_showchildnotchecked in node1.fstate) and
+                       not (ns1_childnotchecked in node1.fstate1) do begin
+    with node1 do begin
+     include(fstate1,ns1_childnotchecked);
+     change();
+     node1:= fparent;
+    end;
+   end;
+  end;
+ end;
+end;
+
 procedure ttreelistitem.updatechildcheckedtree;
 var
  int1: integer;
@@ -2884,6 +2930,18 @@ begin
  for int1:= 0 to fcount-1 do begin
   with fitems[int1] do begin
    updatechildcheckedtree;
+  end;
+ end;
+end;
+
+procedure ttreelistitem.updatechildnotcheckedtree;
+var
+ int1: integer;
+begin
+ updatechildnotcheckedstate;
+ for int1:= 0 to fcount-1 do begin
+  with fitems[int1] do begin
+   updatechildnotcheckedtree;
   end;
  end;
 end;
@@ -2980,6 +3038,9 @@ begin
   if (fowner <> nil) then begin
    if (no_updatechildchecked in fowner.foptions) then begin
     updatechildcheckedstate();
+   end;
+   if (no_updatechildnotchecked in fowner.foptions) then begin
+    updatechildnotcheckedstate();
    end;
    if (no_updateparentnotchecked in fowner.foptions) then begin
     updateparentnotcheckedstate();
