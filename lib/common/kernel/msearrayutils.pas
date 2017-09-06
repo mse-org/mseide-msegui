@@ -217,10 +217,10 @@ function compareiansistring(const l,r): integer;
 function comparemsestring(const l,r): integer;
 function compareimsestring(const l,r): integer;
 
-function findarrayvalue(const item; const items; const size: integer;
+function findarrayvalue(const item; const items; const itemsize: integer;
                const count: integer; const compare: arraysortcomparety;
                out foundindex: integer): boolean; overload;
-function findarrayvalue(const item; const items; const size: integer; 
+function findarrayvalue(const item; const items; const itemsize: integer; 
                const index: integerarty; const compare: arraysortcomparety;
                out foundindex: integer): boolean; overload;
            //true if exact else next bigger
@@ -231,17 +231,17 @@ procedure quicksortpointer(const adata: ppointer; //-> array of pointer
                    const alength: int32; const acompare: pointercomparefuncty);
                                //position stable
                                
-procedure mergesortarray(var asortlist; const asize,alength: integer;
+procedure mergesortarray(var asortlist; const aitemsize,alength: integer;
                             const acompare: arraysortcomparety;
                             out aindexlist: integerarty; const order: boolean);
                             //asortlist = array of type
 procedure mergesort(var adata: pointerarty; const acount: integer;
                                 const compare: pointercomparemethodty); overload;
 
-procedure mergesort(var adata: pointer; const asize,acount: integer;
+procedure mergesort(var adata: pointer; const aitemsize,acount: integer;
                             const acompare: sortcomparemethodty); overload;
                       //reallocates adata memory
-procedure mergesort(const adata: pointer; const asize,acount: integer;
+procedure mergesort(const adata: pointer; const aitemsize,acount: integer;
                             const acompare: sortcomparemethodty;
                             out aindexlist: integerarty); overload;
 procedure mergesort(const adata: pointer; const asize,acount: integer; 
@@ -261,7 +261,7 @@ procedure mergesortpointer(const adata: pointer; const asize,acount: integer;
                             const acompare: sortcomparemethodty;
                             out apointerlist: pointerarty); overload;
 
-function findarrayitem(const item; const ar; const size: integer;
+function findarrayitem(const item; const ar; const itemsize: integer;
                             const compare: arraysortcomparety;
                                  out foundindex: integer): boolean; overload;
            //ar = sorted array of type
@@ -274,10 +274,10 @@ function findarrayitem(const item; const ar: pointerarty;
            //true if exact else next bigger
            //for compare: l is item, r are tablevalues
 
-procedure sortarray(var sortlist; const size: integer;
+procedure sortarray(var sortlist; const itemsize: integer;
            const compare: arraysortcomparety); overload;
          //sortlist = array of type
-procedure sortarray(var sortlist; const size: integer; 
+procedure sortarray(var sortlist; const itemsize: integer; 
                   const compare: arraysortcomparety;
                   out indexlist: integerarty); overload;
          //sortlist = array of type
@@ -1512,7 +1512,7 @@ type
  end;
 
 function findarrayvalue(const item; const items; 
-               const size: integer; const count: integer;
+               const itemsize: integer; const count: integer;
                const compare: arraysortcomparety;
                out foundindex: integer): boolean;
            //true if exact else next bigger
@@ -1530,7 +1530,7 @@ begin
 //  bo1:= false;
   while true do begin
    int1:= (ilo + ihi) div 2;
-   int2:= compare(item,(pchar(items)+int1*size)^);
+   int2:= compare(item,(pchar(items)+int1*itemsize)^);
     if int2 >= 0 then begin //item <= pivot
      if int2 = 0 then begin
       result:= true; //found
@@ -1560,18 +1560,18 @@ begin
  end;
 end;
 
-function findarrayitem(const item; const ar; const size: integer;
+function findarrayitem(const item; const ar; const itemsize: integer;
                const compare: arraysortcomparety;
                out foundindex: integer): boolean;
            //ar = array of type
            //true if exact else next bigger
            //for compare: l is item, r are tablevalues
 begin
- result:= findarrayvalue(item,ar,size,length(pointerarty(ar)),
+ result:= findarrayvalue(item,ar,itemsize,length(pointerarty(ar)),
                                                      compare,foundindex);
 end;
 
-function findarrayvalue(const item; const items; const size: integer;
+function findarrayvalue(const item; const items; const itemsize: integer;
                const index: integerarty;
                const compare: arraysortcomparety; 
                out foundindex: integer): boolean;
@@ -1590,7 +1590,7 @@ begin
 //  bo1:= false;
   while true do begin
    int1:= (ilo + ihi) div 2;
-   int2:= compare(item,(pchar(items)+index[int1]*size)^);
+   int2:= compare(item,(pchar(items)+index[int1]*itemsize)^);
    if int2 >= 0 then begin //item <= pivot
     if int2 = 0 then begin
      result:= true; //found
@@ -1756,7 +1756,7 @@ begin
  end;
 end;
 
-procedure mergesortarray(var asortlist; const asize,alength: integer;
+procedure mergesortarray(var asortlist; const aitemsize,alength: integer;
               const acompare: arraysortcomparety;
                       out aindexlist: integerarty; const order: boolean);
                             //asortlist = array of type
@@ -1809,7 +1809,7 @@ begin
   end;
   while true do begin //runs
    while true do begin //steps
-    while acompare((po1+l^*asize)^,(po1+r^*asize)^) <= 0 do begin
+    while acompare((po1+l^*aitemsize)^,(po1+r^*aitemsize)^) <= 0 do begin
                                                            //merge from left
      d^:= l^;
      inc(l);
@@ -1823,7 +1823,7 @@ begin
       goto endstep;
      end;
     end;
-    while acompare((po1+l^*asize)^,(po1+r^*asize)^) > 0 do begin
+    while acompare((po1+l^*aitemsize)^,(po1+r^*aitemsize)^) > 0 do begin
                                                          //merge from right;
      d^:= r^;
      inc(r);
@@ -1879,7 +1879,7 @@ endstep:
   aindexlist:= ar1;
  end;
  if order then begin
-  orderarray(aindexlist,asortlist,asize);
+  orderarray(aindexlist,asortlist,aitemsize);
  end;
 end;
 
@@ -1971,7 +1971,7 @@ endstep:
 end;
 *)
 
-procedure mergesort(const adata: pointer; const asize,acount: integer;
+procedure mergesort(const adata: pointer; const aitemsize,acount: integer;
                             const acompare: sortcomparemethodty;
                             out aindexlist: integerarty);
         //todo: optimize
@@ -2023,7 +2023,7 @@ begin
   end;
   while true do begin //runs
    while true do begin //steps
-    while acompare((po1+l^*asize)^,(po1+r^*asize)^) <= 0 do begin
+    while acompare((po1+l^*aitemsize)^,(po1+r^*aitemsize)^) <= 0 do begin
                                                            //merge from left
      d^:= l^;
      inc(l);
@@ -2037,7 +2037,7 @@ begin
       goto endstep;
      end;
     end;
-    while acompare((po1+l^*asize)^,(po1+r^*asize)^) > 0 do begin
+    while acompare((po1+l^*aitemsize)^,(po1+r^*aitemsize)^) > 0 do begin
                                                          //merge from right;
      d^:= r^;
      inc(r);
@@ -2363,20 +2363,20 @@ begin
  moved:= bo1;
 end;
 
-procedure mergesort(var adata: pointer; const asize,acount: integer;
+procedure mergesort(var adata: pointer; const aitemsize,acount: integer;
                             const acompare: sortcomparemethodty);
 var
  ar1: integerarty;
  ps,pd,po1: pointer;
  int1: integer;
 begin
- mergesort(adata,asize,acount,acompare,ar1);
- pd:= getmem(asize*acount);
+ mergesort(adata,aitemsize,acount,acompare,ar1);
+ pd:= getmem(aitemsize*acount);
  po1:= pd;
  ps:= adata;
  for int1:= 0 to high(ar1) do begin
-  move((ps+ar1[int1])^,po1^,asize);
-  inc(po1,asize);
+  move((ps+ar1[int1])^,po1^,aitemsize);
+  inc(po1,aitemsize);
  end;
  freemem(ps);
  adata:= pd;
@@ -2814,19 +2814,20 @@ begin
  sortlist:= ar1;
 end;
 
-procedure sortarray(var sortlist; const size: integer;
+procedure sortarray(var sortlist; const itemsize: integer;
                        const compare: arraysortcomparety;
                        out indexlist: integerarty);
 begin
- mergesortarray(sortlist,size,length(bytearty(sortlist)),compare,indexlist,true);
+ mergesortarray(sortlist,itemsize,length(bytearty(sortlist)),
+                                                  compare,indexlist,true);
 end;
 
-procedure sortarray(var sortlist; const size: integer;
+procedure sortarray(var sortlist; const itemsize: integer;
                             const compare: arraysortcomparety);
 var
  indexlist: integerarty;
 begin
- sortarray(sortlist,size,compare,indexlist);
+ sortarray(sortlist,itemsize,compare,indexlist);
 end;
 
 procedure sortarray(var dest: pointerarty; const compare: arraysortcomparety;
