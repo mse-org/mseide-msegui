@@ -9517,7 +9517,7 @@ var
  int1: integer;
 begin
  exclude(fwidgetstate,ws_minclientsizevalid);
-// widgetregioninvalid;
+ widgetregioninvalid();
  if isvisible then begin
   invalidatewidget;
   reclipcaret;
