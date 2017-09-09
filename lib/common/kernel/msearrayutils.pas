@@ -120,6 +120,8 @@ procedure insertitem(var dest: integerarty; index: integer;
                                               value: integer); overload;
 procedure insertitem(var dest: int64arty; index: integer; 
                                               value: int64); overload;
+procedure insertitem(var dest: booleanarty; index: integer; 
+                                              value: boolean); overload;
 procedure insertitem(var dest: longwordarty; index: integer;
                                               value: longword); overload;
 procedure insertitem(var dest: realarty; index: integer;
@@ -963,6 +965,14 @@ begin
 end;
 
 procedure insertitem(var dest: int64arty; index: integer; value: int64);
+begin
+ setlength(dest,high(dest) + 2);
+ move(dest[index],dest[index+1],(high(dest)-index) * sizeof(dest[0]));
+ dest[index]:= value;
+end;
+
+procedure insertitem(var dest: booleanarty; index: integer; 
+                                              value: boolean);
 begin
  setlength(dest,high(dest) + 2);
  move(dest[index],dest[index+1],(high(dest)-index) * sizeof(dest[0]));

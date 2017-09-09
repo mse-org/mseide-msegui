@@ -1060,6 +1060,9 @@ begin
      else begin
       if ar1[int1].getcorbainterface(typeinfo(idocktarget),intf1) then begin
        dcont1:= intf1.getdockcontroller;
+       if dcont1.fmdistate = mds_floating then begin
+        dcont1.fmdistate:= mds_normal; //placed by setparent
+       end;
        opt1:= dcont1.foptionsdock;
 //       needspropref:= needspropref or not (dos_proprefvalid in dcont1.fdockstate);
        dcont1.fdockstate:= dcont1.fdockstate + [{dos_proprefvalid,}dos_showed];
@@ -1099,6 +1102,9 @@ begin
     else begin
      if ar1[int1].getcorbainterface(typeinfo(idocktarget),intf1) then begin
       dcont1:= intf1.getdockcontroller;
+      if dcont1.fmdistate = mds_floating then begin
+       dcont1.fmdistate:= mds_normal; //placed by setparent
+      end;
       if dos_showed in dcont1.fdockstate then begin
        exclude(dcont1.fdockstate,dos_showed);
        dcont1.fhiddensizeref:= fplacementrect.size;
@@ -2026,7 +2032,7 @@ begin
      widget1.widgetrect:= fsizingrect;
     end;
    end;
-   checksplit(ar1,propsize,varsize,fixsize,fixcount,prop,fix,false);
+   ar1:= checksplit(ar1,propsize,varsize,fixsize,fixcount,prop,fix,false);
    if dirchanged or (propsize = 0) and newwidget then begin
     for int1:= 0 to high(prop) do begin //split even
      prop[int1]:= true;
@@ -2213,7 +2219,7 @@ begin
  result:= false;
  if calclayout(tdockdragobject(dragobj),false) then begin
   updaterefsize;
-  result:= dragobj.fdock.dodock(self);
+  result:= dragobj.fdock.dodock(parentbefore);
  end;
 end;
 
@@ -2542,7 +2548,9 @@ begin
    if (fmdistate <> mds_minimized) or (oldparent <> controller1) then begin
     fmdistate:= mds_normal;
    end;
-   controller1.dochilddock(widget1);
+   if oldparent <> controller1 then begin
+    controller1.dochilddock(widget1);
+   end;
   end;
  end;
  result:= floatdockcount = int1;
@@ -2556,49 +2564,54 @@ var
  controller1: tdockcontroller;
  rect1: rectty;
 begin
- result:= false;
  widget1:= twidget1(fintf.getwidget);
- getparentcontroller(controller1);
- with widget1 do begin
-  if fmdistate <> mds_normal then begin
-   rect1.pos:= translatewidgetpoint(fnormalrect.pos,parentwidget,nil);
-   rect1.size:= fnormalrect.size;
-  end
-  else begin
-   rect1.pos:= screenpos;
-   rect1.size:= size;
+ if widget1.parentwidget = nil then begin
+  result:= true;
+ end
+ else begin
+  result:= false;
+  getparentcontroller(controller1);
+  with widget1 do begin
+   if fmdistate <> mds_normal then begin
+    rect1.pos:= translatewidgetpoint(fnormalrect.pos,parentwidget,nil);
+    rect1.size:= fnormalrect.size;
+   end
+   else begin
+    rect1.pos:= screenpos;
+    rect1.size:= size;
+   end;
+   addpoint1(rect1.pos,adist);
+   if canevent(tmethod(fonbeforefloat)) then begin
+    fonbeforefloat(widget1,rect1);
+   end;
+   parentwidget:= nil;
+   if parentwidget <> nil then begin
+    exit;
+   end;
+   widgetrect:= rect1;
+   if fmdistate = mds_maximized then begin
+    anchors:= [an_left,an_top];
+   end;
   end;
-  addpoint1(rect1.pos,adist);
-  if canevent(tmethod(fonbeforefloat)) then begin
-   fonbeforefloat(widget1,rect1);
+  fmdistate:= mds_floating;
+ // widget1.pos:= addpoint(widget1.pos,adist);
+  wstr1:= getfloatcaption;
+  if wstr1 <> '' then begin
+   widget1.window.caption:= wstr1;
   end;
-  parentwidget:= nil;
-  if parentwidget <> nil then begin
-   exit;
+  updategrip(sd_none,widget1);
+  inc(floatdockcount);
+  int1:= floatdockcount;
+  if widget1.canevent(tmethod(fonfloat)) then begin
+   fonfloat(widget1);
   end;
-  widgetrect:= rect1;
-  if fmdistate = mds_maximized then begin
-   anchors:= [an_left,an_top];
+  if (floatdockcount = int1) and (controller1 <> nil) then begin
+   fhiddensizeref:= nullsize;
+   controller1.dochildfloat(widget1);
+   widget1.activate;
   end;
+  result:= floatdockcount = int1;
  end;
- fmdistate:= mds_floating;
-// widget1.pos:= addpoint(widget1.pos,adist);
- wstr1:= getfloatcaption;
- if wstr1 <> '' then begin
-  widget1.window.caption:= wstr1;
- end;
- updategrip(sd_none,widget1);
- inc(floatdockcount);
- int1:= floatdockcount;
- if widget1.canevent(tmethod(fonfloat)) then begin
-  fonfloat(widget1);
- end;
- if (floatdockcount = int1) and (controller1 <> nil) then begin
-  fhiddensizeref:= nullsize;
-  controller1.dochildfloat(widget1);
-  widget1.activate;
- end;
- result:= floatdockcount = int1;
 end;
 
 function tdockcontroller.float(): boolean; 

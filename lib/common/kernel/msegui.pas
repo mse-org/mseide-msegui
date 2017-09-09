@@ -1907,10 +1907,8 @@ type
    function getshrinkpriority: integer; virtual; //default 0
    procedure tryshrink(const aclientsize: sizety); virtual;
    function calcminscrollsize: sizety; virtual;
-   function minscrollsize: sizety; //uses cache
    function getminshrinkpos: pointty; virtual;
    function calcminshrinksize: sizety; virtual;
-   function minshrinksize: sizety; //uses cache
    function getcontainer: twidget; virtual;
    function getchildwidgets(const index: integer): twidget; virtual;
 
@@ -2180,6 +2178,8 @@ type
            //calls checkwidgetsize and frame.checkwidgetsize
    property maxsize: sizety read fmaxsize write setmaxsize;
    function maxclientsize: sizety; virtual;
+   function minscrollsize: sizety; //uses cache
+   function minshrinksize: sizety; //uses cache
    property bounds_x: integer read fwidgetrect.x write setbounds_x;
    property bounds_y: integer read fwidgetrect.y write setbounds_y;
    property bounds_cx: integer read fwidgetrect.cx write setbounds_cx
