@@ -1107,7 +1107,9 @@ begin
       end;
       if dos_showed in dcont1.fdockstate then begin
        exclude(dcont1.fdockstate,dos_showed);
-       dcont1.fhiddensizeref:= fplacementrect.size;
+       if not (dos_updating4 in dcont1.fdockstate) then begin //no statreading
+        dcont1.fhiddensizeref:= fplacementrect.size;
+       end;
       end;
      end;
     end;
