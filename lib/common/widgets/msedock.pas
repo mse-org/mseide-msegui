@@ -1071,7 +1071,7 @@ begin
         if fsplitdir in [sd_vert,sd_horz] then begin
          int3:= fr^.si(dcont1.fhiddensizeref);
          bo1:= int3 > 0; //widget is visible again, restore old size
-         if bo1 and (od_propsize in opt1)  then begin
+         if bo1 and (opt1 * [od_propsize,od_fixsize] = [od_propsize]) then begin
           fw^.setsize(widget1,
                fw^.size(widget1)*fr^.si(fplacementrect.size) div int3);
                      //adjust to current container size
