@@ -2344,6 +2344,9 @@ var
      sd1:= fsplitdir;
      fsplitdir:= fasplitdir;
      count1:= length(checksplit);
+     if count1 = 0 then begin
+      exit;
+     end;
      fsplitdir:= sd1;
      if (widget.parentwidget <> container1) and
                  not widget1.checkdescendent(ftabwidget) then begin
