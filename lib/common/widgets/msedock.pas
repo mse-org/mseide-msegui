@@ -2034,7 +2034,12 @@ begin
      widget1.widgetrect:= fsizingrect;
     end;
    end;
-   ar1:= checksplit(ar1,propsize,varsize,fixsize,fixcount,prop,fix,false);
+   if fsplitdir = sd_tabed then begin //use all children
+    checksplit(ar1,propsize,varsize,fixsize,fixcount,prop,fix,false);
+   end
+   else begin                         //use visible children only
+    ar1:= checksplit(ar1,propsize,varsize,fixsize,fixcount,prop,fix,false);
+   end;
    if dirchanged or (propsize = 0) and newwidget then begin
     for int1:= 0 to high(prop) do begin //split even
      prop[int1]:= true;
