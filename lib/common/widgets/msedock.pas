@@ -2356,14 +2356,14 @@ var
                  not widget1.checkdescendent(ftabwidget) then begin
       inc(count1);
      end;
-     if count1 = 0 then begin
-      exit;
-     end;
      findex:= count1-1;
      case fasplitdir of
       sd_vert: begin
        rect1.y:= container1.screenpos.y + container1.paintpos.y;
        rect1.cy:= size1.cy;
+       if count1 = 0 then begin
+        exit; //should not happen
+       end;
        rect1.cx:= size1.cx div (count1);
        if rect1.cx > 0 then begin
         findex:= (pt1.x div rect1.cx);
@@ -2377,6 +2377,9 @@ var
       sd_horz: begin
        rect1.x:= container1.screenpos.x + container1.paintpos.x;
        rect1.cx:= size1.cx;
+       if count1 = 0 then begin
+        exit; //should not happen
+       end;
        rect1.cy:= size1.cy div (count1);
        if rect1.cy > 0 then begin
         findex:= (pt1.y div rect1.cy);
