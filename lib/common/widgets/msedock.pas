@@ -261,6 +261,7 @@ type
    procedure settab_widthmin(const avalue: integer);
    procedure settab_widthmax(const avalue: integer);
    procedure setsplitdir(const avalue: splitdirty);
+   procedure setcurrentsplitdir(const avalue: splitdirty);
   protected
    foptionsdock: optionsdockty;
    fr: prectaccessty;
@@ -368,7 +369,8 @@ type
    function childicon(): tmaskedbitmap;
 
    property mdistate: mdistatety read fmdistate write setmdistate;
-   property currentsplitdir: splitdirty read fsplitdir;
+   property currentsplitdir: splitdirty read fsplitdir 
+                                              write setcurrentsplitdir;
    function close: boolean; //simulates mr_windowclosed for owner
    function closeactivewidget: boolean;
                    //simulates mr_windowclosed for active widget, true if ok
@@ -928,7 +930,7 @@ procedure tdocktabpage.unregisterchildwidget(const child: twidget);
 begin
  inherited;
  if (child = ftarget) then begin
-  ftarget:= nil;
+//  ftarget:= nil;
   child.anchors:= ftargetanchors;
   if not application.terminated then begin
    visible:= false;
@@ -2349,13 +2351,13 @@ var
      sd1:= fsplitdir;
      fsplitdir:= fasplitdir;
      count1:= length(checksplit);
-     if count1 = 0 then begin
-      exit;
-     end;
      fsplitdir:= sd1;
      if (widget.parentwidget <> container1) and
                  not widget1.checkdescendent(ftabwidget) then begin
       inc(count1);
+     end;
+     if count1 = 0 then begin
+      exit;
      end;
      findex:= count1-1;
      case fasplitdir of
@@ -2582,7 +2584,7 @@ begin
   result:= false;
   getparentcontroller(controller1);
   with widget1 do begin
-   if fmdistate <> mds_normal then begin
+   if not (fmdistate in [mds_normal,mds_floating]) then begin
     rect1.pos:= translatewidgetpoint(fnormalrect.pos,parentwidget,nil);
     rect1.size:= fnormalrect.size;
    end
@@ -3873,7 +3875,12 @@ begin
    result:= fintf.getwidget.getsortxchildren();
   end
   else begin
-   result:= fintf.getwidget.getsortychildren();
+   if fsplitdir = sd_tabed then begin
+    result:= nil;
+   end
+   else begin
+    result:= fintf.getwidget.getsortychildren();
+   end;
   end;
  end;
 end;
@@ -4270,6 +4277,14 @@ begin
     calclayout(nil,false);
    end;
   end;
+ end;
+end;
+
+procedure tdockcontroller.setcurrentsplitdir(const avalue: splitdirty);
+begin
+ if (avalue <> sd_none) and (avalue <> fsplitdir) then begin
+  fasplitdir:= avalue;
+  calclayout(nil,false);
  end;
 end;
 
