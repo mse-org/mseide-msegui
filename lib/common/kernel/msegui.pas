@@ -613,6 +613,8 @@ type
    procedure checkminscrollsize(var asize: sizety) virtual;
    procedure checkminclientsize(var asize: sizety) virtual;
    procedure checkminshrinksize(var asize: sizety) virtual;
+   procedure addscrollbarwidth(var asize: sizety) virtual;
+   procedure subscrollbarwidth(var asize: sizety) virtual;
    procedure paintframeface(const canvas: tcanvas; const arect: rectty);
    class procedure drawframe(const canvas: tcanvas; const rect2: rectty; 
            const afi: baseframeinfoty; const astate: framestateflagsty);
@@ -2213,6 +2215,7 @@ type
                                                 write setdefaultfocuschild;
 
    function framedim: sizety;                //widgetrect.size - paintrect.size
+   function framedimnoscrollbar: sizety;     
    function clientframewidth: sizety;        //widgetrect.size - clientrect.size
    function innerclientframewidth: sizety;   
                           //widgetrect.size - innerclientrect.size
@@ -6014,6 +6017,16 @@ begin
 end;
 
 procedure tcustomframe.checkminshrinksize(var asize: sizety);
+begin
+ //dummy
+end;
+
+procedure tcustomframe.addscrollbarwidth(var asize: sizety);
+begin
+ //dummy
+end;
+
+procedure tcustomframe.subscrollbarwidth(var asize: sizety);
 begin
  //dummy
 end;
@@ -10187,6 +10200,14 @@ begin
  {$ifdef FPC} {$checkpointer off} {$endif}
  result:= calcframewidth(@fframe.fpaintrect);
  {$ifdef FPC} {$checkpointer default} {$endif}
+end;
+
+function twidget.framedimnoscrollbar: sizety;
+begin
+ result:= framedim();
+ if fframe <> nil then begin
+  fframe.addscrollbarwidth(result);
+ end;
 end;
 
 function twidget.clientframewidth: sizety;  

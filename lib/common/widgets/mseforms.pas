@@ -1796,7 +1796,7 @@ begin
  with fscrollbox do begin
   result:= paintrect;
   deflaterect1(result,tcustomframe1(fframe).fi.innerframe);
-  addpoint1(result.pos,clientpos);
+  addpoint1(result.pos,clientpos); //???
  end;
 end;
 

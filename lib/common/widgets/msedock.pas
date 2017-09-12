@@ -262,6 +262,7 @@ type
    procedure settab_widthmax(const avalue: integer);
    procedure setsplitdir(const avalue: splitdirty);
    procedure setcurrentsplitdir(const avalue: splitdirty);
+   function getdockrect: rectty;
   protected
    foptionsdock: optionsdockty;
    fr: prectaccessty;
@@ -371,6 +372,8 @@ type
    property mdistate: mdistatety read fmdistate write setmdistate;
    property currentsplitdir: splitdirty read fsplitdir 
                                               write setcurrentsplitdir;
+   property dockrect: rectty read getdockrect; 
+                             //origin = getwidget.container.pos
    function close: boolean; //simulates mr_windowclosed for owner
    function closeactivewidget: boolean;
                    //simulates mr_windowclosed for active widget, true if ok
@@ -4288,6 +4291,21 @@ begin
  if (avalue <> sd_none) and (avalue <> fsplitdir) then begin
   fasplitdir:= avalue;
   calclayout(nil,false);
+ end;
+end;
+
+function tdockcontroller.getdockrect: rectty;
+var
+ w1: twidget;
+begin
+ if (ftabwidget <> nil) and 
+                 (tdocktabwidget(ftabwidget).activepage <> nil) then begin
+  w1:= tdocktabwidget(ftabwidget).activepage.container;
+  result:= w1.paintrect;
+  translatewidgetpoint1(result.pos,w1,getwidget().container);
+ end
+ else begin
+  result:= idockcontroller(fintf).getplacementrect(); //origin container.pos
  end;
 end;
 

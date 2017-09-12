@@ -251,6 +251,8 @@ type
    procedure updatevisiblescrollbars; virtual;
    procedure updaterects; override;
    procedure getpaintframe(var frame: framety); override;
+   procedure addscrollbarwidth(var asize: sizety) override;
+   procedure subscrollbarwidth(var asize: sizety) override;
    function getscrollbarclass(vert: boolean): framescrollbarclassty; virtual;
    procedure activechanged; override;
    procedure updatemousestate(const sender: twidget; 
@@ -3305,6 +3307,26 @@ begin
   if fs_sbtop in fstate then inc(top,fhorz.width);
   if fs_sbright in fstate then inc(right,fvert.width);
   if fs_sbbottom in fstate then inc(bottom,fhorz.width);
+ end;
+end;
+
+procedure tcustomscrollframe.addscrollbarwidth(var asize: sizety);
+begin
+ with asize do begin
+  if fs_sbleft in fstate then inc(cx,fvert.width);
+  if fs_sbtop in fstate then inc(cy,fhorz.width);
+  if fs_sbright in fstate then inc(cx,fvert.width);
+  if fs_sbbottom in fstate then inc(cy,fhorz.width);
+ end;
+end;
+
+procedure tcustomscrollframe.subscrollbarwidth(var asize: sizety);
+begin
+ with asize do begin
+  if fs_sbleft in fstate then inc(cx,fvert.width);
+  if fs_sbtop in fstate then inc(cy,fhorz.width);
+  if fs_sbright in fstate then inc(cx,fvert.width);
+  if fs_sbbottom in fstate then inc(cy,fhorz.width);
  end;
 end;
 
