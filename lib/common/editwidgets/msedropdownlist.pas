@@ -16,7 +16,7 @@ uses
  mseclasses,mseedit,mseevent,mseglob,mseguiglob,msegrids,msedatalist,msegui,
  mseinplaceedit,msearrayprops,classes,mclasses,msegraphics,msedrawtext,
  msegraphutils,
- msetimer,mseforms,msetypes,msestrings,msestockobjects,msescrollbar,
+ msetimer,{mseforms,}msetypes,msestrings,msestockobjects,msescrollbar,
  msekeyboard,msegridsglob,mseeditglob,msestat,msebitmap;
 
 const

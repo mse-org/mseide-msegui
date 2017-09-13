@@ -3137,6 +3137,8 @@ function isdblclick(const ainfo: mouseeventinfoty;
                            const abutton: mousebuttonty  = mb_left): boolean;
 function eatdblclick(var ainfo: mouseeventinfoty;
                            const abutton: mousebuttonty  = mb_left): boolean;
+function simulatemodalresult(const awidget: twidget;
+                              const amodres: modalresultty): boolean;
 
 procedure beep;
 procedure guibeep;
@@ -4047,6 +4049,30 @@ begin
  result:= isdblclick(ainfo,abutton);
  if result then begin
   include(ainfo.eventstate,es_processed);
+ end;
+end;
+
+function simulatemodalresult(const awidget: twidget;
+                              const amodres: modalresultty): boolean;
+begin
+ result:= awidget <> nil;
+ if result then begin
+  with awidget.window do begin
+   fmodalresult:= amodres;
+   try
+    result:= awidget.canclose(nil);
+    if result then begin
+     awidget.hide;
+    end;
+   finally
+    if fmodalresult = amodres then begin
+     fmodalresult:= mr_none;
+    end;
+   end;
+  end;
+ end
+ else begin
+  result:= false;
  end;
 end;
 

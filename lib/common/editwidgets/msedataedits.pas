@@ -21,9 +21,9 @@ uses
  classes,mclasses,msegui,mseinplaceedit,mseeditglob,msegraphics,mseedit,
  msetypes,msestrings,msedatalist,mseglob,mseguiglob,msedragglob,
  mseevent,msegraphutils,msedrawtext,msestat,msestatfile,mseclasses,
- msearrayprops,msegrids,msewidgetgrid,msedropdownlist,msedrag,mseforms,
+ msearrayprops,msegrids,msewidgetgrid,msedropdownlist,msedrag,{mseforms,}
  mseformatstr,typinfo,msemenus,msebitmap,mseassistiveclient,mserichstring,
- msescrollbar,msewidgets,msepopupcalendar,msekeyboard,msepointer,msegridsglob
+ msescrollbar,msewidgets,{msepopupcalendar,}msekeyboard,msepointer,msegridsglob
  {$ifdef mse_with_ifi}
  ,mseificomp,mseifiglob,mseificompglob
  {$endif}
