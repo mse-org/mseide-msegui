@@ -4156,26 +4156,41 @@ end;
 procedure tdockcontroller.settab_frame(const avalue: tframecomp);
 begin
  setlinkedvar(avalue,tmsecomponent(ftab_frame));
+ if ftabwidget <> nil then begin
+  tdocktabwidget(ftabwidget).updateoptions;
+ end;
 end;
 
 procedure tdockcontroller.settab_face(const avalue: tfacecomp);
 begin
  setlinkedvar(avalue,tmsecomponent(ftab_face));
+ if ftabwidget <> nil then begin
+  tdocktabwidget(ftabwidget).updateoptions;
+ end;
 end;
 
 procedure tdockcontroller.settab_facetab(const avalue: tfacecomp);
 begin
  setlinkedvar(avalue,tmsecomponent(ftab_facetab));
+ if ftabwidget <> nil then begin
+  tdocktabwidget(ftabwidget).updateoptions;
+ end;
 end;
 
 procedure tdockcontroller.settab_faceactivetab(const avalue: tfacecomp);
 begin
  setlinkedvar(avalue,tmsecomponent(ftab_faceactivetab));
+ if ftabwidget <> nil then begin
+  tdocktabwidget(ftabwidget).updateoptions;
+ end;
 end;
 
 procedure tdockcontroller.settab_frametab(const avalue: tframecomp);
 begin
  setlinkedvar(avalue,tmsecomponent(ftab_frametab));
+ if ftabwidget <> nil then begin
+  tdocktabwidget(ftabwidget).updateoptions;
+ end;
 end;
 
 function tdockcontroller.getactivetabpage: ttabpage;
