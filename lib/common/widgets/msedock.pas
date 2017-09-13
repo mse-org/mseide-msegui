@@ -208,6 +208,7 @@ type
    ftab_face: tfacecomp;
    ftab_facetab: tfacecomp;
    ftab_faceactivetab: tfacecomp;
+   ftab_frametab: tframecomp;
    fplacementrect: rectty;
    fhiddensizeref: sizety;
    fbands: bandinfoarty;
@@ -263,6 +264,7 @@ type
    procedure setsplitdir(const avalue: splitdirty);
    procedure setcurrentsplitdir(const avalue: splitdirty);
    function getdockrect: rectty;
+   procedure settab_frametab(const avalue: tframecomp);
   protected
    foptionsdock: optionsdockty;
    fr: prectaccessty;
@@ -410,6 +412,7 @@ type
                         write settab_colortab default cl_transparent;
    property tab_coloractivetab: colorty read ftab_coloractivetab 
                         write settab_coloractivetab default cl_active;
+   property tab_frametab: tframecomp read ftab_frametab write settab_frametab;
    property tab_facetab: tfacecomp read ftab_facetab write settab_facetab;
    property tab_faceactivetab: tfacecomp read ftab_faceactivetab 
                                                  write settab_faceactivetab;
@@ -855,6 +858,13 @@ begin
   end
   else begin
    self.tab_face:= nil;
+  end;
+  if ftab_frametab <> nil then begin
+   self.tab_frametab:= tframe(1);
+   self.tab_frametab.assign(ftab_frametab);
+  end
+  else begin
+   self.tab_frametab:= nil;
   end;
   if ftab_facetab <> nil then begin
    self.tab_facetab:= tface(1);
@@ -4125,6 +4135,11 @@ end;
 procedure tdockcontroller.settab_faceactivetab(const avalue: tfacecomp);
 begin
  setlinkedvar(avalue,tmsecomponent(ftab_faceactivetab));
+end;
+
+procedure tdockcontroller.settab_frametab(const avalue: tframecomp);
+begin
+ setlinkedvar(avalue,tmsecomponent(ftab_frametab));
 end;
 
 procedure tdockcontroller.objectevent(const sender: tobject;
