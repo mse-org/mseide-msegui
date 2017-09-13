@@ -458,6 +458,8 @@ type
   function gettabnoface: boolean;
   function getcolortab: colorty;
   function getcoloractivetab: colorty;
+  function getfacetab: tfacecomp;
+  function getfaceactivetab: tfacecomp;
   function getfonttab: tfont;
   function getfontactivetab: tfont;
   function getimagelist: timagelist;
@@ -504,6 +506,8 @@ type
    fsubform: twidget;
    fsubforminstancevarpo: pwidget;
    foninitsubform: initsubformeventty;
+   ffacetab: tfacecomp;
+   ffaceactivetab: tfacecomp;
    function getcaption: captionty;
    procedure setcaption(const Value: captionty);
    function gettabhint: msestring;
@@ -534,6 +538,10 @@ type
    function getfontactivetab1: ttabpagefontactivetab;
    procedure setfontactivetab(const avalue: ttabpagefontactivetab);
    function isfontactivetabstored: boolean;
+   procedure setfacetab(const avalue: tfacecomp);
+   procedure setfaceactivetab(const avalue: tfacecomp);
+   function getfacetab: tfacecomp;
+   function getfaceactivetab: tfacecomp;
   protected
    class function classskininfo: skininfoty; override;
    procedure changed;
@@ -569,6 +577,8 @@ type
                   write setcolortab default cl_default;
    property coloractivetab: colorty read getcoloractivetab
                   write setcoloractivetab default cl_default;
+   property facetab: tfacecomp read getfacetab write setfacetab;
+   property faceactivetab: tfacecomp read getfaceactivetab write setfaceactivetab;
    property fonttab: ttabpagefonttab read getfonttab1 write setfonttab
                                                         stored isfonttabstored;
    property fontactivetab: ttabpagefontactivetab read getfontactivetab1
@@ -1017,7 +1027,17 @@ var
      inc(textrect.cy,fimagelist.height+imagedist);
     end;
    end;
-   
+   facetemplate:= nil;
+   if ts_active in fstate then begin
+    if tab.faceactive <> nil then begin
+     facetemplate:= tab.faceactive.template;
+    end;
+   end
+   else begin
+    if tab.face <> nil then begin
+     facetemplate:= tab.face.template;
+    end;
+   end;
   end;
  end; //docommon
 
@@ -3321,6 +3341,32 @@ begin
  end;
 end;
 
+procedure ttabpage.setfacetab(const avalue: tfacecomp);
+begin
+ if ffacetab <> avalue then begin
+  setlinkedvar(avalue,tmsecomponent(ffacetab));
+  changed();
+ end;
+end;
+
+procedure ttabpage.setfaceactivetab(const avalue: tfacecomp);
+begin
+ if ffaceactivetab <> avalue then begin
+  setlinkedvar(avalue,tmsecomponent(ffaceactivetab));
+  changed();
+ end;
+end;
+
+function ttabpage.getfacetab: tfacecomp;
+begin
+ result:= ffacetab;
+end;
+
+function ttabpage.getfaceactivetab: tfacecomp;
+begin
+ result:= ffaceactivetab;
+end;
+
 procedure ttabpage.registerchildwidget(const child: twidget);
 begin
  if child is ttabpage then begin
@@ -3603,6 +3649,7 @@ begin
  result:= ffontactivetab <> nil;
 end;
 
+
 {
 function ttabpage.gettabwidth: integer;
 begin
@@ -3735,6 +3782,8 @@ begin
     hint:= sender.gettabhint;
     color:= sender.getcolortab;
     coloractive:= sender.getcoloractivetab;
+    face:= sender.getfacetab;
+    faceactive:= sender.getfaceactivetab;
     bo1:= sender.gettabnoface;
     if bo1 then begin
      state:= state + [ts_noface];

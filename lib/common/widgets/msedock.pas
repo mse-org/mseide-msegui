@@ -228,6 +228,8 @@ type
    fonbeforefloat: dockrecteventty;
    fcolortab: colorty;
    fcoloractivetab: colorty;
+   ffacetab: tfacecomp;
+   ffaceactivetab: tfacecomp;
    procedure updaterefsize;
    procedure setdockhandle(const avalue: tdockhandle);
    function checksplit(const awidgets: widgetarty;
@@ -271,6 +273,8 @@ type
    function getactivetabpage: ttabpage;
    procedure setcolortab(const avalue: colorty);
    procedure setcoloractivetab(const avalue: colorty);
+   procedure setfacetab(const avalue: tfacecomp);
+   procedure setfaceactivetab(const avalue: tfacecomp);
   protected
    foptionsdock: optionsdockty;
    fr: prectaccessty;
@@ -434,6 +438,8 @@ type
                                      write setcolortab default cl_default;
    property coloractivetab: colorty read fcoloractivetab 
                                      write setcoloractivetab default cl_default;
+   property facetab: tfacecomp read ffacetab write setfacetab;
+   property faceactivetab: tfacecomp read ffaceactivetab write setfaceactivetab;
    property caption: msestring read fcaption write setcaption;
    property splitdir: splitdirty read fdefaultsplitdir write setsplitdir 
                       default sd_none; //sets default and current splitdir,
@@ -2937,6 +2943,8 @@ begin
  if fcoloractivetab <> cl_default then begin
   sender.coloractivetab:= fcoloractivetab;
  end;
+ sender.facetab:= ffacetab;
+ sender.faceactivetab:= ffaceactivetab;
 end;
 
 procedure tdockcontroller.dostatread(const reader: tstatreader);
@@ -4217,6 +4225,26 @@ begin
   fcoloractivetab:= avalue;
   if ftabpage <> nil then begin
    ftabpage.coloractivetab:= fcoloractivetab;
+  end;
+ end;
+end;
+
+procedure tdockcontroller.setfacetab(const avalue: tfacecomp);
+begin
+ if ffacetab <> avalue then begin
+  setlinkedvar(avalue,tmsecomponent(ffacetab));
+  if ftabpage <> nil then begin
+   ftabpage.facetab:= ffacetab;
+  end;
+ end;
+end;
+
+procedure tdockcontroller.setfaceactivetab(const avalue: tfacecomp);
+begin
+ if ffaceactivetab <> avalue then begin
+  setlinkedvar(avalue,tmsecomponent(ffaceactivetab));
+  if ftabpage <> nil then begin
+   ftabpage.faceactivetab:= ffaceactivetab;
   end;
  end;
 end;

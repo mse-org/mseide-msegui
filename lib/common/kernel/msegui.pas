@@ -1178,11 +1178,13 @@ type
  end;
 
  tcustomface = class;
- iface = interface(inullinterface)
+ iface1 = interface(inullinterface)
+  function translatecolor(const acolor: colorty): colorty;
+ end;
+ iface = interface(iface1)
   procedure invalidatewidget;
   procedure invalidaterect(const rect: rectty; 
                const org: originty = org_client; const noclip: boolean = false);
- function translatecolor(const acolor: colorty): colorty;
   function getclientrect: rectty;
   procedure setlinkedvar(const source: tmsecomponent; var dest: tmsecomponent;
               const linkintf: iobjectlink = nil);
@@ -1408,7 +1410,7 @@ type
  afterfacepainteventty = procedure (const sender: tcustomface;
             const canvas: tcanvas; const arect: rectty) of object;
 
- tfacetemplate = class(tpersistenttemplate)
+ tfacetemplate = class(tpersistenttemplate,iface1)
   private
    fi: faceinfoty;
    fonbeforepaint: beforefacepainteventty;
@@ -1438,10 +1440,13 @@ type
    procedure copyinfo(const source: tpersistenttemplate); override;
    procedure internalcreate; override;
    procedure defineproperties(filer: tfiler); override;
+    //iface1
+   function translatecolor(const acolor: colorty): colorty;
   public
    constructor create(const owner: tmsecomponent;
                                    const onchange: notifyeventty); override;
    destructor destroy; override;
+   procedure paint(const canvas: tcanvas; const arect: rectty);
   published
    property options: faceoptionsty read fi.options write setoptions default [];
    property framei_left: integer read fi.framei.left 
@@ -6845,6 +6850,343 @@ begin
  end;
 end;
 
+procedure facepaint(const canvas: tcanvas; const arect: rectty;
+            const fi: faceinfoty; const fintf: iface1;
+               var falphabuffer: tmaskedbitmap; var falphabufferdest: pointty);
+
+var
+ rect,rect1: rectty;
+
+ procedure createalphabuffer(const amasked: boolean);
+ begin
+  if falphabuffer = nil then begin
+   falphabuffer:= tmaskedbitmap.create(bmk_rgb);
+  end;
+  if amasked then begin
+   falphabuffer.options:= [bmo_masked,bmo_colormask];
+  end;
+  falphabuffer.size:= rect1.size;
+  falphabufferdest:= rect1.pos;
+  falphabuffer.canvas.copyarea(canvas,rect1,nullpoint);
+ end;
+
+var
+ pixelscale: real;
+ vert: boolean;
+ alpha: boolean;
+ startpix,pixcount: integer;
+ 
+ procedure calcfade(const fadepos: trealarrayprop; 
+                    const fadecolor: tcolorarrayprop; const bmp: tbitmap);
+ var
+  posar: realarty;
+  rgbs: array of rgbtriplety;
+  int1,int2: integer;
+  po1,pe: prgbtriplety;
+  pixelstep: real;
+  pixinc: integer;
+  curpix,nextpix: integer;
+  redsum,greensum,bluesum,lengthsum: real;
+  curnode,nextnode: integer;
+  rea1,rea2: real;
+  opar,opag,opab: int32;
+  co1: rgbtriplety;
+  col1,col2: prgbtriplety;
+  
+ begin
+  posar:= trealarrayprop1(fadepos).fitems;
+  with tfadecolorarrayprop(fadecolor) do begin
+   setlength(rgbs,length(fitems));
+   for int1:= 0 to high(rgbs) do begin
+    rgbs[int1]:= colortorgb(fintf.translatecolor(fitems[int1]));
+   end;
+   if alpha then begin
+    po1:= pointer(rgbs);
+    pe:= po1+length(rgbs);
+    while po1 < pe do begin
+     po1^.red:= 255-po1^.red;
+     po1^.green:= 255-po1^.green;
+     po1^.blue:= 255-po1^.blue;
+     inc(po1);
+    end;
+   end;
+  end;
+  if fadecolor = fi.fade_opacolor then begin
+   co1:= colortorgb(fi.fade_opacity);
+   opar:= (co1.red * 256) div 255;
+   opag:= (co1.green * 256) div 255;
+   opab:= (co1.blue * 256) div 255;
+  end
+  else begin
+   opar:= 256;
+   opag:= 256;
+   opab:= 256;
+  end;
+  if high(rgbs) > 0 then begin
+   po1:= bmp.scanline[0];
+   pixelstep:= 1/pixelscale;
+   pixinc:= sizeof(rgbtriplety);
+   if fi.fade_direction in [gd_up,gd_left] then begin //revert
+    if fi.fade_direction = gd_left then begin
+     startpix:= rect.x+rect.cx-rect1.x-rect1.cx;
+    end
+    else begin
+     startpix:= rect.y+rect.cy-rect1.y-rect1.cy;
+    end;
+    inc(po1,pixcount-1);
+    pixinc:= -pixinc;
+   end;
+   curnode:= 0;
+   int1:= 0;
+   while int1 < pixcount do begin
+    rea1:= (int1+startpix)*pixelstep + 0.000001;
+    if int1 = 0 then begin
+     while posar[curnode] < rea1 do begin
+      inc(curnode);
+     end;
+     dec(curnode);
+    end;
+    nextnode:= curnode;
+    rea1:= rea1 + pixelstep;
+    while (posar[nextnode] < rea1) and (nextnode < high(posar)) do begin
+     inc(nextnode);
+    end;
+    if nextnode > curnode+1 then begin //calc average
+     redsum:= 0;
+     greensum:= 0;
+     bluesum:= 0;
+     lengthsum:= 0;
+     for int2:= curnode to nextnode - 2 do begin //todo: optimize
+      rea1:= posar[int2+1] - posar[int2];
+      redsum:= redsum + (rgbs[int2].red+rgbs[int2+1].red)*rea1;
+      greensum:= greensum + (rgbs[int2].green+rgbs[int2+1].green)*rea1;
+      bluesum:= bluesum + (rgbs[int2].blue+rgbs[int2+1].blue)*rea1;
+      lengthsum:= lengthsum + rea1;
+     end;
+     if lengthsum > 0 then begin
+      rea1:= 1/(2*lengthsum);
+      with po1^ do begin
+       red:= (round(redsum*rea1)*opar) div 256;
+       green:= (round(greensum*rea1)*opag) div 256;
+       blue:= (round(bluesum*rea1)*opab) div 256;
+       res:= 0;
+      end;
+     end
+     else begin
+      po1^:= rgbs[curnode];
+     end;
+     dec(nextnode);
+    end
+    else begin
+     nextpix:= trunc(posar[nextnode]*pixelscale)-startpix;
+     if int1 = nextpix then begin
+      po1^:= rgbs[curnode];
+     end
+     else begin
+      curpix:= trunc(posar[curnode]*pixelscale)-startpix;
+      if nextpix = curpix then begin
+       rea1:= 1;
+      end
+      else begin
+       rea1:= 1/(nextpix-curpix);
+      end;
+      if nextpix > pixcount then begin
+       nextpix:= pixcount;
+      end;
+      col1:= @rgbs[curnode];
+      col2:= @rgbs[nextnode];
+      for int2:= int1-curpix to nextpix-curpix-1 do begin
+       rea2:= rea1*int2;
+       with po1^ do begin
+        res:= 0;
+        red:= ((col1^.red + 
+                      round((col2^.red-col1^.red)*rea2))*opar) div 256;
+        green:= ((col1^.green + 
+                      round((col2^.green-col1^.green)*rea2))*opag) div 256;
+        blue:= ((col1^.blue + 
+                      round((col2^.blue-col1^.blue)*rea2))*opab) div 256;
+       end;
+       inc(pchar(po1),pixinc);
+      end;
+      dec(pchar(po1),pixinc);
+      int1:= nextpix-1;
+     end;         
+    end;
+    curnode:= nextnode;
+    inc(int1);
+    inc(pchar(po1),pixinc);
+   end;
+  end
+  else begin //count = 1
+   co1.red:= (rgbs[0].red*opar) div 256;
+   co1.green:= (rgbs[0].green*opag) div 256;
+   co1.blue:= (rgbs[0].blue*opag) div 256;
+   co1.res:= 0;
+   if vert then begin
+    bmp.canvas.drawline(nullpoint,makepoint(0,rect1.cy-1),colorty(co1));
+   end
+   else begin
+    bmp.canvas.drawline(nullpoint,makepoint(rect1.cx-1,0),colorty(co1));
+   end;
+  end;
+ end; //calcfade
+
+var
+ bmp: tmaskedbitmap;
+ reg1: regionty;
+
+ procedure paintimage(const canvas: tcanvas);
+ begin
+  if fi.image.hasimage then begin
+   fi.image.paint(canvas,mr(addpoint(rect.pos,fi.image.fpos),rect.size));
+   if fao_alphafadeimage in fi.options then begin
+    if falphabuffer <> nil then begin
+     falphabuffer.paint(canvas,falphabufferdest);
+     freeandnil(falphabuffer);
+    end;
+   end;
+  end;
+  if fi.frameimage_list <> nil then begin
+   if reg1 <> 0 then begin
+    canvas.clipregion:= reg1;
+    reg1:= 0;
+   end;
+   fi.frameimage_list.paintlookup(canvas,fi.frameimage_offset,arect.pos);
+   fi.frameimage_list.paintlookup(canvas,fi.frameimage_offset+1,
+     makerect(arect.x,
+              arect.y+fi.frameimage_list.height,
+              fi.frameimage_list.width,
+              arect.cy-2*fi.frameimage_list.height),[al_stretchy]);
+   fi.frameimage_list.paintlookup(canvas,fi.frameimage_offset+2,arect,[al_bottom]);
+   fi.frameimage_list.paintlookup(canvas,fi.frameimage_offset+3,
+     makerect(arect.x+fi.frameimage_list.width,
+              arect.y+arect.cy-fi.frameimage_list.height,
+              arect.cx-2*fi.frameimage_list.width,
+              fi.frameimage_list.height),[al_stretchx]);
+   fi.frameimage_list.paintlookup(canvas,fi.frameimage_offset+4,arect,
+                                                [al_bottom,al_right]);
+   fi.frameimage_list.paintlookup(canvas,fi.frameimage_offset+5,
+     makerect(arect.x+arect.cx-fi.frameimage_list.width,
+              arect.y+fi.frameimage_list.height,
+              fi.frameimage_list.width,
+              arect.cy-2*fi.frameimage_list.height),[al_stretchy]);
+   fi.frameimage_list.paintlookup(canvas,fi.frameimage_offset+6,arect,[al_right]);
+   fi.frameimage_list.paintlookup(canvas,fi.frameimage_offset+7,
+     makerect(arect.x+fi.frameimage_list.width,arect.y,
+              arect.cx-2*fi.frameimage_list.width,
+              fi.frameimage_list.height),[al_stretchx]);
+  end;
+ end; //paintimage
+begin
+ reg1:= 0;
+ rect:= deflaterect(arect,fi.framei);
+ if intersectrect(rect,canvas.clipbox,rect1) or 
+               testintersectrect(arect,canvas.clipbox) then begin
+  if (fi.frameimage_list <> nil) and 
+                         fi.frameimage_list.hascornermask then begin
+   reg1:= canvas.copyclipregion();
+   fi.frameimage_list.clipcornermask(canvas,arect,[]);
+  end;
+ 
+  alpha:= fi.options * faceoptionsmask1 <> [];
+  if fi.options * [fao_fadeoverlay,fao_alphaimage] = 
+                                              [fao_fadeoverlay] then begin
+   paintimage(canvas);
+  end;
+  if (fi.fade_color.count > 0) and (rect1.cx > 0) and (rect1.cy > 0) then begin
+   if (fi.fade_color.count > 1) or 
+     ((fi.fade_opacolor.count > 0) or (fi.fade_opacity <> cl_none)) and 
+                               (fi.options * faceoptionsmask1 = []) then begin
+    case fi.fade_direction of
+     gd_up,gd_down: begin
+      pixelscale:= rect.cy;
+      vert:= true;
+      startpix:= rect1.y-rect.y;
+      pixcount:= rect1.cy;
+     end
+     else begin //gd_right,gd_left
+      pixelscale:= rect.cx;
+      vert:= false;
+      startpix:= rect1.x-rect.x;
+      pixcount:= rect1.cx;
+     end;
+    end;
+    bmp:= tmaskedbitmap.create(bmk_rgb);
+    if vert then begin
+     bmp.size:= makesize(1,rect1.cy);
+    end
+    else begin
+     bmp.size:= makesize(rect1.cx,1);
+    end;
+    calcfade(fi.fade_pos,fi.fade_color,bmp);
+    if fi.options * faceoptionsmask1 = [] then begin
+     if fi.fade_opapos.count > 0 then begin
+      bmp.colormask:= true;
+      calcfade(fi.fade_opapos,fi.fade_opacolor,bmp.mask);
+     end
+     else begin
+      bmp.opacity:= fi.fade_opacity;
+     end;
+     bmp.paint(canvas,rect1,[al_stretchx,al_stretchy]);
+    end
+    else begin
+     createalphabuffer(true);
+     bmp.paint(falphabuffer.mask.canvas,makerect(nullpoint,rect1.size),
+                     makerect(nullpoint,bmp.size),[al_stretchx,al_stretchy]);
+    end;
+    bmp.Free;
+   end
+   else begin //fade_color.count = 1
+    if alpha then begin
+     if fao_alphaimage in fi.options then begin
+      createalphabuffer(true);
+      falphabuffer.mask.canvas.fillrect(mr(nullpoint,rect1.size),
+             invertcolor(tfadecolorarrayprop1(fi.fade_color).fitems[0]));
+     end
+     else begin
+      createalphabuffer(false);
+      falphabuffer.opacity:=
+              invertcolor(tfadecolorarrayprop1(fi.fade_color).fitems[0]);
+     end;
+    end
+    else begin
+     canvas.fillrect(rect1,tfadecolorarrayprop1(fi.fade_color).fitems[0]);
+    end;
+   end;
+  end
+  else begin //fade_color.count = 0
+   if alpha then begin
+    if fao_alphaimage in fi.options then begin
+     createalphabuffer(true);
+     falphabuffer.mask.canvas.fillrect(mr(nullpoint,rect1.size),
+                                               invertcolor(fi.fade_opacity));
+    end
+    else begin
+     createalphabuffer(false);
+     falphabuffer.opacity:= invertcolor(fi.fade_opacity);
+    end;
+   end;
+  end;
+  if fi.options * [fao_fadeoverlay,fao_alphaimage] = [] then begin
+   paintimage(canvas);
+  end;
+  if (fao_alphaimage in fi.options) and (falphabuffer <> nil) then begin
+   falphabuffer.mask.canvas.origin:= subpoint(rect.pos,rect1.pos);
+   paintimage(falphabuffer.mask.canvas);
+   falphabuffer.mask.canvas.origin:= nullpoint;
+  end;
+ end;
+ if reg1 <> 0 then begin
+  canvas.clipregion:= reg1;
+ end;
+end;
+
+procedure tcustomface.internalpaint(const canvas: tcanvas; const arect: rectty);
+begin
+ facepaint(canvas,arect,fi,fintf,falphabuffer,falphabufferdest);
+end;
+
+(*
 procedure tcustomface.internalpaint(const canvas: tcanvas; const arect: rectty);
 
 var
@@ -7169,7 +7511,7 @@ begin
   canvas.clipregion:= reg1;
  end;
 end;
-
+*)
 procedure tcustomface.paint(const canvas: tcanvas; const arect: rectty);
 var
  bo1: boolean;
@@ -7516,6 +7858,16 @@ begin
  fi.fade_opacolor.Free;
 end;
 
+procedure tfacetemplate.paint(const canvas: tcanvas; const arect: rectty);
+var
+ bmp: tmaskedbitmap;
+ pt1: pointty;
+begin
+ bmp:= nil;
+ facepaint(canvas,arect,fi,iface1(self),bmp,pt1);
+ bmp.free;
+end;
+
 procedure tfacetemplate.setfade_direction(const Value: graphicdirectionty);
 begin
  fi.fade_direction:= Value;
@@ -7651,6 +8003,11 @@ procedure tfacetemplate.defineproperties(filer: tfiler);
 begin
  inherited;
  filer.defineproperty('fade_transparency',@readtransparency,nil,false);
+end;
+
+function tfacetemplate.translatecolor(const acolor: colorty): colorty;
+begin
+ result:= acolor;
 end;
 
 { tfacecomp }

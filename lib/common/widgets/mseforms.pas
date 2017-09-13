@@ -643,6 +643,7 @@ type
    fimagenr: integer;
    fimagenrdisabled: integer;
    fcolortab,fcoloractivetab: colorty;
+   ffacetab,ffaceactivetab: tfacecomp;
    ftabhint: msestring;
    ftabnoface: boolean;
    fonselect: notifyeventty;
@@ -678,6 +679,10 @@ type
    function getfontactivetab1: ttabformfontactivetab;
    procedure setfontactivetab(const avalue: ttabformfontactivetab);
    function isfontactivetabstored: boolean;
+   function getfacetab: tfacecomp;
+   procedure setfacetab(const avalue: tfacecomp);
+   function getfaceactivetab: tfacecomp;
+   procedure setfaceactivetab(const avalue: tfacecomp);
   protected
    class function getmoduleclassname: string; override;
    procedure changed;
@@ -706,6 +711,9 @@ type
                                     write setcolortab default cl_default;
    property coloractivetab: colorty read getcoloractivetab
                                     write setcoloractivetab default cl_default;
+   property facetab: tfacecomp read getfacetab write setfacetab;
+   property faceactivetab: tfacecomp read getfaceactivetab 
+                                                write setfaceactivetab;
    property fonttab: ttabformfonttab read getfonttab1 write setfonttab
                                                         stored isfonttabstored;
    property fontactivetab: ttabformfontactivetab read getfontactivetab1 
@@ -2875,15 +2883,23 @@ procedure ttabform.objectevent(const sender: tobject;
                const event: objecteventty);
 begin
  inherited;
- if sender = fimagelist then begin
-  if event = oe_destroyed then begin
+ if event = oe_destroyed then begin
+  if sender = fimagelist then begin
    fimagelist:= nil;
    changed;
-  end
-  else begin
-   if event = oe_changed then begin
-    changed;
-   end;
+  end;
+  if sender = ffacetab then begin
+   ffacetab:= nil;
+   changed;
+  end;
+  if sender = ffaceactivetab then begin
+   ffaceactivetab:= nil;
+   changed;
+  end;
+ end
+ else begin
+  if event = oe_changed then begin
+   changed;
   end;
  end;
 end;
@@ -2956,6 +2972,32 @@ end;
 function ttabform.isfontactivetabstored: boolean;
 begin
  result:= ffontactivetab <> nil;
+end;
+
+function ttabform.getfacetab: tfacecomp;
+begin
+ result:= ffacetab;
+end;
+
+procedure ttabform.setfacetab(const avalue: tfacecomp);
+begin
+ if ffacetab <> avalue then begin
+  setlinkedvar(avalue,tmsecomponent(ffacetab));
+  changed();
+ end;
+end;
+
+function ttabform.getfaceactivetab: tfacecomp;
+begin
+ result:= ffaceactivetab;
+end;
+
+procedure ttabform.setfaceactivetab(const avalue: tfacecomp);
+begin
+ if ffaceactivetab <> avalue then begin
+  setlinkedvar(avalue,tmsecomponent(ffaceactivetab));
+  changed();
+ end;
 end;
 
 {

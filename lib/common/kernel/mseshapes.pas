@@ -56,6 +56,7 @@ type
   group: integer;
   color: colorty;
   coloractive: colorty;
+  facetemplate: tfacetemplate;
   imagenrdisabled: integer;       //-2 -> grayed
   imagecheckedoffset: integer;
   face: tcustomface;
@@ -945,8 +946,13 @@ begin
     if col1 <> cl_transparent then begin
      fillrect(clientrect,col1);
     end;
-    if face <> nil then begin
-     face.paint(canvas,clientrect);
+    if facetemplate <> nil then begin
+     facetemplate.paint(canvas,clientrect);
+    end
+    else begin
+     if face <> nil then begin
+      face.paint(canvas,clientrect);
+     end;
     end;
    end;
    draw3dframe(canvas,rect1,level,defaultframecolors.edges,hiddenedges);
@@ -1557,12 +1563,9 @@ end;
 procedure drawtab(const canvas: tcanvas; var info: shapeinfoty; 
                                    const innerframe: pframety = nil);
 var
-// int1: integer;
-// color1: colorty;
  rect1,rect2,rect3: rectty;
  pos1: imageposty;
  frame1: framety;
-// pt1,pt2: pointty;
  edges1: edgesty;
  
 begin
@@ -1580,26 +1583,22 @@ begin
     deflaterect1(ca.dim,frame1);
     frameskinoptionstoshapestate(frame,info);
    end;     
-//   edge1:= bedg_none;
-
-//   if state * [shs_active,shs_clicked] = [shs_active] then begin
-    if shs_opposite in state then begin
-     if shs_vert in state then begin
-      edges1:= [edg_left];
-     end
-     else begin
-      edges1:= [edg_top];
-     end;
+   if shs_opposite in state then begin
+    if shs_vert in state then begin
+     edges1:= [edg_left];
     end
     else begin
-     if shs_vert in state then begin
-      edges1:= [edg_right];
-     end
-     else begin
-      edges1:= [edg_bottom];
-     end;
+     edges1:= [edg_top];
     end;
-//   end;
+   end
+   else begin
+    if shs_vert in state then begin
+     edges1:= [edg_right];
+    end
+    else begin
+     edges1:= [edg_bottom];
+    end;
+   end;
    if drawbuttonframe(canvas,info,rect1,edges1) then begin
     if ca.imagepos = ip_right then begin
      pos1:= ip_right;
@@ -1627,37 +1626,6 @@ begin
     ca.dim:= rect3;
    end; 
   end;
-  {
-  if not (shs_active in state) then begin
-   if shs_opposite in state then begin
-    color1:= defaultframecolors.edges.shadow.color;
-   end
-   else begin
-    color1:= defaultframecolors.edges.light.effectcolor;
-   end;
-   if shs_vert in state then begin
-    if shs_opposite in state then begin
-     int1:= ca.dim.x;
-    end
-    else begin
-     int1:= ca.dim.x+ca.dim.cx-1;
-    end;
-    pt1:= makepoint(int1,ca.dim.y);
-    pt2:= makepoint(int1,ca.dim.y+ca.dim.cy-1);
-   end
-   else begin
-    if shs_opposite in state then begin
-     int1:= ca.dim.y;
-    end
-    else begin
-     int1:= ca.dim.y+ca.dim.cy-1;
-    end;
-    pt1:= makepoint(ca.dim.x,int1);
-    pt2:= makepoint(ca.dim.x+ca.dim.cx-1,int1);
-   end;
-   canvas.drawline(pt1,pt2,color1);
-  end;
-  }
  end;
 end;
 
