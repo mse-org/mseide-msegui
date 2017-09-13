@@ -64,6 +64,8 @@ type
    fimagenr: imagenrty;
    fimagenrdisabled: imagenrty;
 //   function getcaption: captionty;
+   fface: tfacecomp;
+   ffaceactive: tfacecomp;
    procedure setcaption(const avalue: captionty);
    procedure changed;
    procedure setstate(const Value: tabstatesty);
@@ -81,6 +83,8 @@ type
    function getfontactive: ttabfontactive;
    procedure setfontactive(const avalue: ttabfontactive);
    function isfontactivestored: boolean;
+   procedure setface(const avalue: tfacecomp);
+   procedure setfaceactive(const avalue: tfacecomp);
   protected
    ftag: integer;
    ffont: ttabfont;
@@ -104,6 +108,8 @@ type
    property color: colorty read fcolor write setcolor default cl_default;
    property coloractive: colorty read fcoloractive
                  write setcoloractive default cl_default;
+   property face: tfacecomp read fface write setface;
+   property faceactive: tfacecomp read ffaceactive write setfaceactive;
    property font: ttabfont read getfont write setfont  stored isfontstored;
    property fontactive: ttabfontactive read getfontactive write setfontactive
                                           stored isfontactivestored;
@@ -1497,6 +1503,7 @@ function ttab.isfontactivestored: boolean;
 begin
  result:= ffontactive <> nil;
 end;
+
 {
 function ttab.getcaption: captionty;
 begin
@@ -1557,6 +1564,22 @@ begin
  end;
 end;
 
+procedure ttab.setface(const avalue: tfacecomp);
+begin
+ if fface <> avalue then begin
+  setlinkedvar(avalue,tmsecomponent(fface));
+  changed();
+ end;
+end;
+
+procedure ttab.setfaceactive(const avalue: tfacecomp);
+begin
+ if ffaceactive <> avalue then begin
+  setlinkedvar(avalue,tmsecomponent(ffaceactive));
+  changed();
+ end;
+end;
+
 function ttab.getactive: boolean;
 begin
  result:= ts_active in fstate;
@@ -1599,15 +1622,23 @@ end;
 procedure ttab.objectevent(const sender: tobject; const event: objecteventty);
 begin
  inherited;
- if sender = fimagelist then begin
-  if event = oe_destroyed then begin
+ if event = oe_destroyed then begin
+  if sender = fimagelist then begin
    fimagelist:= nil;
+   changed();
+  end;
+  if sender = fface then begin
+   fface:= nil;
+   changed();
+  end;
+  if sender = ffaceactive then begin
+   ffaceactive:= nil;
+   changed();
+  end;
+ end
+ else begin
+  if event = oe_changed then begin
    changed;
-  end
-  else begin
-   if event = oe_changed then begin
-    changed;
-   end;
   end;
  end;
 end;
