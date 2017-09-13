@@ -16,7 +16,7 @@ uses
  msewidgets,classes,mclasses,msedrag,msegui,msegraphutils,mseevent,mseclasses,
  msegraphics,msestockobjects,mseglob,mseguiglob,msestat,msestatfile,msepointer,
  msesplitter,msesimplewidgets,msetypes,msestrings,msebitmap,mseobjectpicker,
- msetabsglob,msemenus,msedrawtext,mseshapes,msedragglob,mseinterfaces;
+ msetabsglob,msemenus,msedrawtext,mseshapes,msedragglob,mseinterfaces,msetabs;
  
 //todo: optimize
 
@@ -191,7 +191,8 @@ type
    fsplitdir,fasplitdir: splitdirty;
    fmdistate: mdistatety;
    fnormalrect: rectty;
-   ftabwidget: twidget; //tdocktabwidget, circular interface reference
+   ftabwidget: ttabwidget; //tdocktabwidget
+   ftabpage: ttabpage;     //tdocktabpage
    ftaborder: msestringarty;
    factivetab: integer; //used only for statreading
    fuseroptions: optionsdockty;
@@ -225,6 +226,8 @@ type
    fchildren: stringarty;
    ffocusedchild: integer;
    fonbeforefloat: dockrecteventty;
+   fcolortab: colorty;
+   fcoloractivetab: colorty;
    procedure updaterefsize;
    procedure setdockhandle(const avalue: tdockhandle);
    function checksplit(const awidgets: widgetarty;
@@ -265,6 +268,9 @@ type
    procedure setcurrentsplitdir(const avalue: splitdirty);
    function getdockrect: rectty;
    procedure settab_frametab(const avalue: tframecomp);
+   function getactivetabpage: ttabpage;
+   procedure setcolortab(const avalue: colorty);
+   procedure setcoloractivetab(const avalue: colorty);
   protected
    foptionsdock: optionsdockty;
    fr: prectaccessty;
@@ -331,6 +337,7 @@ type
    function canbegindrag: boolean; override;
    procedure dostatplace(const aparent: twidget;
                               const avisible: boolean; arect: rectty); virtual;
+   procedure updatetabpage(const sender: ttabpage);
   public
    constructor create(aintf: idockcontroller);
    destructor destroy; override;
@@ -367,7 +374,10 @@ type
    function getfloatcaption: msestring;
    function getitems: widgetarty; //reference count = 1
    function getwidget: twidget;
-   function activewidget: twidget; //focused child or active tab
+   function activewidget: twidget; //focused child
+   property tabwidget: ttabwidget read ftabwidget; //can be nil
+   property activetabpage: ttabpage read getactivetabpage;
+
    function dockparentname(): string; //'' if none
    function childicon(): tmaskedbitmap;
 
@@ -383,7 +393,6 @@ type
    function dockto(const dest: tdockcontroller; const apos: pointty): boolean;
    procedure dock(const source: tdockcontroller; const arect: rectty);
         //simulates dostatread, use in beginplacement()/endplacement()
-
   published
    property dockhandle: tdockhandle read fdockhandle write setdockhandle;
    property splitter_size: integer read fsplitter_size 
@@ -421,7 +430,10 @@ type
                             default defaulttabsizemin;
    property tab_sizemax: integer read ftab_sizemax write settab_sizemax
                             default defaulttabsizemax;
-   
+   property colortab: colorty read fcolortab 
+                                     write setcolortab default cl_default;
+   property coloractivetab: colorty read fcoloractivetab 
+                                     write setcoloractivetab default cl_default;
    property caption: msestring read fcaption write setcaption;
    property splitdir: splitdirty read fdefaultsplitdir write setsplitdir 
                       default sd_none; //sets default and current splitdir,
@@ -696,7 +708,7 @@ procedure paintdockingareacaption(const canvas: tcanvas; const sender: twidget;
 
 implementation
 uses
- msearrayutils,sysutils,msebits,msetabs,mseguiintf,mseforms,msestream,
+ msearrayutils,sysutils,msebits,{msetabs,}mseguiintf,{mseforms,}msestream,
  mseformatstr;
 
 type
@@ -705,6 +717,7 @@ type
  tcustomframe1 = class(tcustomframe);
  tcustomtabwidget1 = class(tcustomtabwidget);
  tface1 = class(tface);
+ ttabwidget1 = class(ttabwidget);
 
 const
  useroptionsmask: optionsdockty = [od_fixsize,od_top,od_background,
@@ -746,6 +759,7 @@ type
   public
    constructor create(const atabwidget: tdocktabwidget; const awidget: twidget);
               reintroduce;
+   destructor destroy(); override;
  end;
 
 procedure paintdockingareacaption(const canvas: tcanvas; const sender: twidget;
@@ -929,7 +943,9 @@ begin
  ftarget:= awidget;
  ftargetanchors:= awidget.anchors;
  if awidget.getcorbainterface(typeinfo(idocktarget),intf1) then begin
-  caption:= intf1.getdockcontroller.getdockcaption;
+  intf1.getdockcontroller.updatetabpage(self);
+//  caption:= intf1.getdockcontroller.getdockcaption;
+  
  end
  else begin
   caption:= 'Page '+inttostrmse(atabwidget.count);
@@ -937,6 +953,12 @@ begin
  awidget.anchors:= [];
  parentwidget:= atabwidget;
  insertwidget(awidget,paintpos);
+end;
+
+destructor tdocktabpage.destroy();
+begin
+ fcontroller.ftabpage:= nil;
+ inherited;
 end;
 
 procedure tdocktabpage.unregisterchildwidget(const child: twidget);
@@ -1002,6 +1024,8 @@ begin
  ftab_sizemin:= defaulttabsizemin;
  ftab_sizemax:= defaulttabsizemax;
  ftab_textflags:= defaultcaptiontextflags;
+ fcolortab:= cl_default;
+ fcoloractivetab:= cl_default;
  inherited create(aintf);
 end;
 
@@ -2109,7 +2133,7 @@ begin
      if ftabwidget = nil then begin
       ftabwidget:= tdocktabwidget.create(self,container1);
       ftabwidget.anchors:= [];
-      include(twidget1(ftabwidget).foptionswidget1,ow1_noautosizing);
+      include(ttabwidget1(ftabwidget).foptionswidget1,ow1_noautosizing);
      end;
      with tdocktabwidget(ftabwidget) do begin
       for int1:= 0 to high(ar1) do begin
@@ -2900,6 +2924,18 @@ begin
                                                             ievent(widget0)));
   end;
   visible:= avisible;
+ end;
+end;
+
+procedure tdockcontroller.updatetabpage(const sender: ttabpage);
+begin
+ ftabpage:= sender;
+ sender.caption:= getdockcaption;
+ if fcolortab <> cl_default then begin
+  sender.colortab:= fcolortab;
+ end;
+ if fcoloractivetab <> cl_default then begin
+  sender.coloractivetab:= fcoloractivetab;
  end;
 end;
 
@@ -4140,6 +4176,34 @@ end;
 procedure tdockcontroller.settab_frametab(const avalue: tframecomp);
 begin
  setlinkedvar(avalue,tmsecomponent(ftab_frametab));
+end;
+
+function tdockcontroller.getactivetabpage: ttabpage;
+begin
+ result:= nil;
+ if ftabwidget <> nil then begin
+  result:= ttabpage(ftabwidget.activepage);
+ end;
+end;
+
+procedure tdockcontroller.setcolortab(const avalue: colorty);
+begin
+ if fcolortab <> avalue then begin
+  fcolortab:= avalue;
+  if ftabpage <> nil then begin
+   ftabpage.colortab:= fcolortab;
+  end;
+ end;
+end;
+
+procedure tdockcontroller.setcoloractivetab(const avalue: colorty);
+begin
+ if fcoloractivetab <> avalue then begin
+  fcoloractivetab:= avalue;
+  if ftabpage <> nil then begin
+   ftabpage.coloractivetab:= fcoloractivetab;
+  end;
+ end;
 end;
 
 procedure tdockcontroller.objectevent(const sender: tobject;
