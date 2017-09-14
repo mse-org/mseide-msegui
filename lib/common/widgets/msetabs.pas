@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2016 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2017 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -1070,6 +1070,7 @@ var
  tabshift1: int32;
  edgesize: int32;
  normpos,normsize: int32;
+ extraspace1: int32;
  
 begin
  with layout do begin
@@ -1090,9 +1091,11 @@ begin
                                                        //for not flat button 
   cyinflate:= tabs.fcaptionframe.top + tabs.fcaptionframe.bottom + 2;
                                                        //for not flat button
+  extraspace1:= 0;
   if tabs.fframe <> nil then begin
    with tabs.fframe do begin
     frame1:= innerframe;
+    extraspace1:= extraspace;
     cxinflate:= cxinflate + frame1.left + frame1.right;
     cyinflate:= cyinflate + frame1.top + frame1.bottom;
     if fso_flat in optionsskin then begin
@@ -1145,6 +1148,9 @@ begin
    endval:= dim.y + dim.cy;
    for int1:= 0 to high(cells) do begin
     with tabs[int1],cells[int1],ca do begin
+     if int1 <> 0 then begin
+      aval:= aval + extraspace1;
+     end;
      dim.y:= aval;
      dofont(tabs[int1],cells[int1]);
      rect1:= textrect(canvas,frichcaption,
@@ -1205,6 +1211,9 @@ begin
    totsize.cy:= 0;
    for int1:= 0 to high(cells) do begin
     with tabs[int1],cells[int1],ca do begin
+     if int1 <> 0 then begin
+      aval:= aval + extraspace1;
+     end;
      dim.x:= aval;
      dofont(tabs[int1],cells[int1]);
      rect1:= textrect(canvas,frichcaption,
