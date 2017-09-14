@@ -435,10 +435,10 @@ begin
 //     framehalfwidth:= int1;
 //    end;
     frame1:= fi.ba.innerframe;
-    extrasp:= fextraspace;
-    imagedi:= fimagedist;
-    imageditop:= fimagedist1;
-    imagedibottom:= fimagedist2;
+    extrasp:= fi.ba.extraspace;
+    imagedi:= fi.ba.imagedist;
+    imageditop:= fi.ba.imagedist1;
+    imagedibottom:= fi.ba.imagedist2;
     noanim1:= fso_noanim in optionsskin;
     nomouseanim1:= fso_nomouseanim in optionsskin;
     noclickanim1:= fso_noclickanim in optionsskin;

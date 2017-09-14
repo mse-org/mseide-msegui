@@ -253,6 +253,9 @@ type
                      }
                       frl1_font,frl1_captiondist,frl1_captionoffset,
                       frl1_focusrectdist,
+                      frl1_imagedist,frl1_imagedist1,frl1_imagedist2,
+                      frl1_extraspace,
+                      frl1_foleft,frl1_fotop,frl1_foright,frl1_fobottom,
                       frl1_colorglyph, //for menu template
                       frl1_colorpattern,
                       frl1_colorframedisabled,frl1_colorframemouse,
@@ -298,6 +301,9 @@ const
                      }
                       frl1_font,frl1_captiondist,frl1_captionoffset,
                       frl1_focusrectdist,
+                      frl1_extraspace,
+                      frl1_imagedist,frl1_imagedist1,frl1_imagedist2,
+                      frl1_foleft,frl1_fotop,frl1_foright,frl1_fobottom,
                       frl1_colorglyph,frl1_colorpattern,
                       frl1_colorframedisabled,frl1_colorframemouse,
                       frl1_colorframeclicked,frl1_colorframedefault];
@@ -423,7 +429,12 @@ type
   framecolors: framecolorinfoty;
   colorclient: colorty;
   innerframe: framety;
+  outerframe: framety;
   focusrectdist: int32;
+  extraspace: int32;
+  imagedist: int32;
+  imagedist1: int32;
+  imagedist2: int32;
 
   colorglyph: colorty;      //for menu template and scrollbar
   colorpattern: colorty;    //for scrollbar
@@ -505,6 +516,16 @@ type
    procedure setframei_top(const Value: integer);
    function isfitopstored: boolean;
 
+   procedure setframeo(const avalue: framety);   
+   procedure setframeo_bottom(const Value: integer);
+   function isfobottomstored: boolean;
+   procedure setframeo_left(const Value: integer);
+   function isfoleftstored: boolean;
+   procedure setframeo_right(const Value: integer);
+   function isforightstored: boolean;
+   procedure setframeo_top(const Value: integer);
+   function isfotopstored: boolean;
+
    procedure setframeimage_list(const avalue: timagelist);
    function getimagelist: timagelist;
    function isframeimage_liststored: boolean;
@@ -554,6 +575,14 @@ type
    function iscolorclientstored: boolean;
    procedure setfocusrectdist(const avalue: int32);
    function isfocusrectdiststored: boolean;
+   procedure setextraspace(const avalue: int32);
+   function isextraspacestored: boolean;
+   procedure setimagedist(const avalue: int32);
+   function isimagediststored: boolean;
+   procedure setimagedist1(const avalue: int32);
+   function isimagedist1stored: boolean;
+   procedure setimagedist2(const avalue: int32);
+   function isimagedist2stored: boolean;
    procedure settemplate(const avalue: tframecomp);
    procedure setlocalprops(const avalue: framelocalpropsty);
    procedure setlocalprops1(const avalue: framelocalprops1ty);
@@ -707,6 +736,7 @@ type
                      stored iscolorhlwidthstored default -1;
    property hiddenedges: edgesty read fi.hiddenedges 
                         write sethiddenedges default [];
+
    property framei: framety read fi.innerframe write setframei;
                       //does not set localprops
    property framei_left: integer read fi.innerframe.left write setframei_left
@@ -718,6 +748,18 @@ type
    property framei_bottom: integer read fi.innerframe.bottom
                      write setframei_bottom
                      stored isfibottomstored default 0;
+
+   property frameo: framety read fi.outerframe write setframeo;
+                      //does not set localprops
+   property frameo_left: integer read fi.outerframe.left write setframeo_left
+                     stored isfoleftstored default 0;
+   property frameo_top: integer read fi.outerframe.top  write setframeo_top
+                     stored isfotopstored default 0;
+   property frameo_right: integer read fi.outerframe.right write setframeo_right
+                     stored isforightstored default 0;
+   property frameo_bottom: integer read fi.outerframe.bottom
+                     write setframeo_bottom
+                     stored isfobottomstored default 0;
 
    property frameimage_list: timagelist read fi.frameimage_list 
                     write setframeimage_list stored isframeimage_liststored;
@@ -798,6 +840,18 @@ type
    property focusrectdist: int32 read fi.focusrectdist 
                          write setfocusrectdist 
                                    stored isfocusrectdiststored default 0;
+   property extraspace: int32 read fi.extraspace
+                         write setextraspace
+                                   stored isextraspacestored default 0;
+   property imagedist: int32 read fi.imagedist 
+                         write setimagedist 
+                                   stored isimagediststored default 0;
+   property imagedist1: int32 read fi.imagedist1
+                         write setimagedist1
+                                   stored isimagedist1stored default 0;
+   property imagedist2: int32 read fi.imagedist2
+                         write setimagedist2
+                                   stored isimagedist2stored default 0;
    property colorclient: colorty read fi.colorclient write setcolorclient
                     stored iscolorclientstored default cl_transparent;
    property localprops: framelocalpropsty read flocalprops 
@@ -822,6 +876,10 @@ type
    property framei_top;
    property framei_right;
    property framei_bottom;
+   property frameo_left;
+   property frameo_top;
+   property frameo_right;
+   property frameo_bottom;
 
    property frameimage_list;
    property frameimage_left;
@@ -848,6 +906,10 @@ type
    property optionsskin;
 
    property focusrectdist;
+   property extraspace;
+   property imagedist;
+   property imagedist1;
+   property imagedist2;
 
    property colorclient;
    property colordkshadow;
@@ -970,10 +1032,10 @@ type
    procedure readimagedistbottom(reader: treader);
   protected
    fi: frameinfoty;
-   fextraspace: integer;
-   fimagedist: integer;
-   fimagedist1: integer;
-   fimagedist2: integer;
+//   fextraspace: integer;
+//   fimagedist: integer;
+//   fimagedist1: integer;
+//   fimagedist2: integer;
    procedure doassignto(dest: tpersistent); override;
    function getinfosize: integer; override;
    function getinfoad: pointer; override;
@@ -1102,13 +1164,13 @@ type
                  write setcaptionoffset default 0; //not used if font not set
    property fucusrectdist: int32 read fi.ba.focusrectdist 
                         write setfocusrectdist default 0;   
-   property extraspace: integer read fextraspace
+   property extraspace: integer read fi.ba.extraspace
                         write setextraspace default 0;
-   property imagedist: integer read fimagedist
+   property imagedist: integer read fi.ba.imagedist
                         write setimagedist default 0;
-   property imagedist1: integer read fimagedist1
+   property imagedist1: integer read fi.ba.imagedist1
                         write setimagedist1 default 0;
-   property imagedist2: integer read fimagedist2
+   property imagedist2: integer read fi.ba.imagedist2
                         write setimagedist2 default 0;
    property colorclient: colorty read fi.ba.colorclient write setcolorclient 
                                             default cl_transparent;
@@ -4976,17 +5038,68 @@ begin
  end;
 end;
 
+procedure tcustomframe.setframei_bottom(const Value: integer);
+begin
+ include(flocalprops,frl_fibottom);
+ if fi.innerframe.bottom <> value then begin
+  fi.innerframe.bottom:= Value;
+  internalupdatestate;
+ end;
+end;
+
 procedure tcustomframe.setframei(const avalue: framety);
 begin
  fi.innerframe:= avalue;
  internalupdatestate;
 end;
 
-procedure tcustomframe.setframei_bottom(const Value: integer);
+procedure tcustomframe.setframeo_left(const Value: integer);
 begin
- include(flocalprops,frl_fibottom);
- if fi.innerframe.bottom <> value then begin
-  fi.innerframe.bottom:= Value;
+ include(flocalprops1,frl1_foleft);
+ if fi.outerframe.left <> value then begin
+  fi.outerframe.left:= Value;
+  internalupdatestate();
+ end;
+end;
+
+procedure tcustomframe.setframeo_top(const Value: integer);
+begin
+ include(flocalprops1,frl1_fotop);
+ if fi.outerframe.top <> value then begin
+  fi.outerframe.top:= Value;
+  internalupdatestate();
+ end;
+end;
+
+procedure tcustomframe.setframeo_right(const Value: integer);
+begin
+ include(flocalprops1,frl1_foright);
+ if fi.outerframe.right <> value then begin
+  fi.outerframe.right:= Value;
+  internalupdatestate();
+ end;
+end;
+
+procedure tcustomframe.setframeo_bottom(const Value: integer);
+begin
+ include(flocalprops1,frl1_fobottom);
+ if fi.outerframe.bottom <> value then begin
+  fi.outerframe.bottom:= Value;
+  internalupdatestate();
+ end;
+end;
+
+procedure tcustomframe.setframeo(const avalue: framety);
+begin
+ fi.outerframe:= avalue;
+ internalupdatestate;
+end;
+
+procedure tcustomframe.setframeimage_list(const avalue: timagelist);
+begin
+ include(flocalprops,frl_frameimagelist);
+ if fi.frameimage_list <> avalue then begin
+  fintf.getwidget.setlinkedvar(avalue,tmsecomponent(fi.frameimage_list));
   internalupdatestate;
  end;
 end;
@@ -5000,12 +5113,39 @@ begin
  end;
 end;
 
-procedure tcustomframe.setframeimage_list(const avalue: timagelist);
+procedure tcustomframe.setextraspace(const avalue: int32);
 begin
- include(flocalprops,frl_frameimagelist);
- if fi.frameimage_list <> avalue then begin
-  fintf.getwidget.setlinkedvar(avalue,tmsecomponent(fi.frameimage_list));
-  internalupdatestate;
+ include(flocalprops1,frl1_extraspace);
+ if fi.extraspace <> avalue then begin
+  fi.extraspace:= avalue;
+  internalupdatestate();
+ end;
+end;
+
+procedure tcustomframe.setimagedist(const avalue: int32);
+begin
+ include(flocalprops1,frl1_imagedist);
+ if fi.imagedist <> avalue then begin
+  fi.imagedist:= avalue;
+  internalupdatestate();
+ end;
+end;
+
+procedure tcustomframe.setimagedist1(const avalue: int32);
+begin
+ include(flocalprops1,frl1_imagedist1);
+ if fi.imagedist1 <> avalue then begin
+  fi.imagedist1:= avalue;
+  internalupdatestate();
+ end;
+end;
+
+procedure tcustomframe.setimagedist2(const avalue: int32);
+begin
+ include(flocalprops1,frl1_imagedist2);
+ if fi.imagedist2 <> avalue then begin
+  fi.imagedist2:= avalue;
+  internalupdatestate();
  end;
 end;
 
@@ -5441,6 +5581,19 @@ begin
    innerframe.bottom:= ainfo.ba.innerframe.bottom;
   end;
 
+  if not (frl1_foleft in flocalprops1) then begin
+   outerframe.left:= ainfo.ba.outerframe.left;
+  end;
+  if not (frl1_fotop in flocalprops1) then begin
+   outerframe.top:= ainfo.ba.outerframe.top;
+  end;
+  if not (frl1_foright in flocalprops1) then begin
+   outerframe.right:= ainfo.ba.outerframe.right;
+  end;
+  if not (frl1_fobottom in flocalprops1) then begin
+   outerframe.bottom:= ainfo.ba.outerframe.bottom;
+  end;
+
   if not (frl_frameimagelist in flocalprops) then begin
    fintf.getwidget.setlinkedvar(ainfo.ba.frameimage_list,
    tmsecomponent(frameimage_list));
@@ -5521,6 +5674,18 @@ begin
   
   if not (frl1_focusrectdist in flocalprops1) then begin
    focusrectdist:= ainfo.ba.focusrectdist;
+  end;
+  if not (frl1_extraspace in flocalprops1) then begin
+   extraspace:= ainfo.ba.extraspace;
+  end;
+  if not (frl1_imagedist in flocalprops1) then begin
+   imagedist:= ainfo.ba.imagedist;
+  end;
+  if not (frl1_imagedist1 in flocalprops1) then begin
+   imagedist1:= ainfo.ba.imagedist1;
+  end;
+  if not (frl1_imagedist2 in flocalprops1) then begin
+   imagedist2:= ainfo.ba.imagedist2;
   end;
 
   if not (frl_optionsskin in flocalprops) then begin
@@ -5720,12 +5885,7 @@ function tcustomframe.isframewidthstored: boolean;
 begin
  result:= (ftemplate = nil) or (frl_framewidth in flocalprops);
 end;
-{
-function tcustomframe.isextraspacestored: boolean;
-begin
- result:= (ftemplate = nil) or (frl_extraspace in flocalprops);
-end;
-}
+
 function tcustomframe.iscolorframestored: boolean;
 begin
  result:= (ftemplate = nil) or (frl_colorframe in flocalprops);
@@ -5809,6 +5969,26 @@ end;
 function tcustomframe.isfitopstored: boolean;
 begin
  result:= (ftemplate = nil) or (frl_fitop in flocalprops);
+end;
+
+function tcustomframe.isfobottomstored: boolean;
+begin
+ result:= (ftemplate = nil) or (frl1_fobottom in flocalprops1);
+end;
+
+function tcustomframe.isfoleftstored: boolean;
+begin
+ result:= (ftemplate = nil) or (frl1_foleft in flocalprops1);
+end;
+
+function tcustomframe.isforightstored: boolean;
+begin
+ result:= (ftemplate = nil) or (frl1_foright in flocalprops1);
+end;
+
+function tcustomframe.isfotopstored: boolean;
+begin
+ result:= (ftemplate = nil) or (frl1_fotop in flocalprops1);
 end;
 
 function tcustomframe.isframeimage_liststored: boolean;
@@ -5970,6 +6150,26 @@ begin
  result:= (ftemplate = nil) or (frl1_focusrectdist in flocalprops1);
 end;
 
+function tcustomframe.isextraspacestored: boolean;
+begin
+ result:= (ftemplate = nil) or (frl1_extraspace in flocalprops1);
+end;
+
+function tcustomframe.isimagediststored: boolean;
+begin
+ result:= (ftemplate = nil) or (frl1_imagedist in flocalprops1);
+end;
+
+function tcustomframe.isimagedist1stored: boolean;
+begin
+ result:= (ftemplate = nil) or (frl1_imagedist1 in flocalprops1);
+end;
+
+function tcustomframe.isimagedist2stored: boolean;
+begin
+ result:= (ftemplate = nil) or (frl1_imagedist2 in flocalprops1);
+end;
+
 procedure tcustomframe.changedirection(const oldvalue: graphicdirectionty;
                const newvalue: graphicdirectionty);
 var
@@ -5985,6 +6185,14 @@ begin
  framei_top:= fra1.top;
  framei_right:= fra1.right;
  framei_bottom:= fra1.bottom;
+ for int1:= 0 to 3 do begin
+  pintegeraty(@fra1)^[int1]:= 
+         pintegeraty(@fi.outerframe)^[(int1+int2) and $3];
+ end;
+ frameo_left:= fra1.left;
+ frameo_top:= fra1.top;
+ frameo_right:= fra1.right;
+ frameo_bottom:= fra1.bottom;
 end;
 
 procedure tcustomframe.scale(const ascale: real);
@@ -6221,25 +6429,25 @@ end;
 
 procedure tframetemplate.setextraspace(const avalue: integer);
 begin
- fextraspace := avalue;
+ fi.ba.extraspace := avalue;
  changed;
 end;
 
 procedure tframetemplate.setimagedist(const avalue: integer);
 begin
- fimagedist := avalue;
+ fi.ba.imagedist := avalue;
  changed;
 end;
 
 procedure tframetemplate.setimagedist1(const avalue: integer);
 begin
- fimagedist1 := avalue;
+ fi.ba.imagedist1 := avalue;
  changed;
 end;
 
 procedure tframetemplate.setimagedist2(const avalue: integer);
 begin
- fimagedist2 := avalue;
+ fi.ba.imagedist2 := avalue;
  changed;
 end;
 
@@ -6539,12 +6747,12 @@ end;
 
 procedure tframetemplate.readimagedisttop(reader: treader);
 begin
- fimagedist1:= reader.readinteger();
+ fi.ba.imagedist1:= reader.readinteger();
 end;
 
 procedure tframetemplate.readimagedistbottom(reader: treader);
 begin
- fimagedist2:= reader.readinteger();
+ fi.ba.imagedist2:= reader.readinteger();
 end;
 
 procedure tframetemplate.defineproperties(filer: tfiler);

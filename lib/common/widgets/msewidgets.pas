@@ -142,6 +142,10 @@ type
    property framei_top;
    property framei_right;
    property framei_bottom;
+   property frameo_left;
+   property frameo_top;
+   property frameo_right;
+   property frameo_bottom;
 
    property frameimage_list;
    property frameimage_left;
@@ -180,6 +184,10 @@ type
    property captiondist;
    property captionoffset;
    property focusrectdist;
+   property extraspace;
+   property imagedist;
+   property imagedist1;
+   property imagedist2;
    property font;
    property localprops;  //before template
    property localprops1; //before template
@@ -305,6 +313,10 @@ type
    property framei_top;
    property framei_right;
    property framei_bottom;
+   property frameo_left;
+   property frameo_top;
+   property frameo_right;
+   property frameo_bottom;
 
    property frameimage_list;
    property frameimage_left;
@@ -345,6 +357,10 @@ type
    property captiondist;
    property captionoffset;
    property focusrectdist;
+   property extraspace;
+   property imagedist;
+   property imagedist1;
+   property imagedist2;
    property font;
    property localprops; //before template
    property localprops1; //before template
@@ -500,6 +516,10 @@ type
    property framei_top;
    property framei_right;
    property framei_bottom;
+   property frameo_left;
+   property frameo_top;
+   property frameo_right;
+   property frameo_bottom;
 
    property frameimage_list;
    property frameimage_left;
@@ -537,6 +557,10 @@ type
    property captiondist;
    property captionoffset;
    property focusrectdist;
+   property extraspace;
+   property imagedist;
+   property imagedist1;
+   property imagedist2;
    property font;
    property localprops; //before template
    property localprops1; //before template
@@ -690,6 +714,10 @@ type
    property framei_top;
    property framei_right;
    property framei_bottom;
+   property frameo_left;
+   property frameo_top;
+   property frameo_right;
+   property frameo_bottom;
 
    property frameimage_list;
    property frameimage_left;
@@ -727,6 +755,10 @@ type
    property captiondist;
    property captionoffset;
    property focusrectdist;
+   property extraspace;
+   property imagedist;
+   property imagedist1;
+   property imagedist2;
    property font;
    property localprops; //before template
    property localprops1; //before template

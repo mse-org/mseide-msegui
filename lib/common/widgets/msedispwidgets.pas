@@ -62,6 +62,10 @@ type
    property framei_top default 1;
    property framei_right default 1;
    property framei_bottom default 1;
+   property frameo_left;
+   property frameo_top;
+   property frameo_right;
+   property frameo_bottom;
 
    property frameimage_list;
    property frameimage_left;
@@ -103,6 +107,10 @@ type
    property captionoffset;
 //   property captionnoclip;
    property focusrectdist;
+   property extraspace;
+   property imagedist;
+   property imagedist1;
+   property imagedist2;
    property font;
    property localprops; //before template
    property localprops1; //before template
