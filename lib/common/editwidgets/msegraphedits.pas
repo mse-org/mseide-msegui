@@ -3617,12 +3617,19 @@ begin
  else begin
   include(fwidgetstate1,ws1_nodesignframe);
  end;
+ finfo.ca.dim:= clientrect;
+ if (fframe <> nil) and not(shs_noinnerrect in finfo.state)  then begin
+                                  //otherwise mouse rect
+  deflaterect1(finfo.ca.dim,fframe.frameo);
+ end;
+ {
  if shs_noinnerrect in finfo.state then begin
   finfo.ca.dim:= clientrect;
  end
  else begin
   finfo.ca.dim:= innerclientrect;
  end;
+ }
 end;
 {
 function tcustomdatabutton.getframestateflags: framestateflagsty;

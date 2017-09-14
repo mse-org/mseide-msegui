@@ -988,6 +988,10 @@ type
    procedure setframei_left(const Value: integer);
    procedure setframei_right(const Value: integer);
    procedure setframei_top(const Value: integer);
+   procedure setframeo_bottom(const Value: integer);
+   procedure setframeo_left(const Value: integer);
+   procedure setframeo_right(const Value: integer);
+   procedure setframeo_top(const Value: integer);
    procedure setframewidth(const Value: integer);
    procedure setextraspace(const avalue: integer);
    procedure setimagedist(const avalue: integer);
@@ -1095,6 +1099,15 @@ type
                      write setframei_right default 0;
    property framei_bottom: integer read fi.ba.innerframe.bottom 
                      write setframei_bottom default 0;
+
+   property frameo_left: integer read fi.ba.outerframe.left 
+                     write setframeo_left default 0;
+   property frameo_top: integer read fi.ba.outerframe.top 
+                     write setframeo_top default 0;
+   property frameo_right: integer read fi.ba.outerframe.right 
+                     write setframeo_right default 0;
+   property frameo_bottom: integer read fi.ba.outerframe.bottom 
+                     write setframeo_bottom default 0;
                      
    property frameimage_list: timagelist read fi.ba.frameimage_list
                      write setframeimage_list;
@@ -2344,6 +2357,7 @@ type
    function innerclientpaintpos: pointty;    //origin = paintpos
    function innerclientwidgetpos: pointty;   //origin = pos
    procedure innertopaintsize(var asize: sizety);
+   procedure outertopaintsize(var asize: sizety);
    procedure painttowidgetsize(var asize: sizety);
 
    property frame: tcustomframe read getframe write setframe;
@@ -6418,6 +6432,30 @@ end;
 procedure tframetemplate.setframei_top(const Value: integer);
 begin
  fi.ba.innerframe.top := Value;
+ changed;
+end;
+
+procedure tframetemplate.setframeo_bottom(const Value: integer);
+begin
+ fi.ba.outerframe.bottom := Value;
+ changed;
+end;
+
+procedure tframetemplate.setframeo_left(const Value: integer);
+begin
+ fi.ba.outerframe.left := Value;
+ changed;
+end;
+
+procedure tframetemplate.setframeo_right(const Value: integer);
+begin
+ fi.ba.outerframe.right := Value;
+ changed;
+end;
+
+procedure tframetemplate.setframeo_top(const Value: integer);
+begin
+ fi.ba.outerframe.top := Value;
  changed;
 end;
 
@@ -11919,6 +11957,16 @@ begin
   with fframe do begin
    asize.cx:= asize.cx + framei_left + framei_right;
    asize.cy:= asize.cy + framei_top + framei_bottom;
+  end;
+ end; 
+end;
+
+procedure twidget.outertopaintsize(var asize: sizety);
+begin
+ if fframe <> nil then begin
+  with fframe do begin
+   asize.cx:= asize.cx + frameo_left + frameo_right;
+   asize.cy:= asize.cy + frameo_top + frameo_bottom;
   end;
  end; 
 end;

@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2016 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2017 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -2243,12 +2243,19 @@ procedure tactionsimplebutton.clientrectchanged;
 begin
  inherited;
  frameskinoptionstoshapestate(fframe,finfo);
+ finfo.ca.dim:= clientrect;
+ if (fframe <> nil) and not(shs_noinnerrect in finfo.state)  then begin
+                                  //otherwise mouse rect
+  deflaterect1(finfo.ca.dim,fframe.frameo);
+ end;
+{
  if shs_noinnerrect in finfo.state then begin
   finfo.ca.dim:= clientrect;
  end
  else begin
   finfo.ca.dim:= innerclientrect;
  end;
+}
  if shs_flat in finfo.state then begin
   exclude(fwidgetstate1,ws1_nodesignframe);
  end
@@ -2288,6 +2295,7 @@ end;
 procedure tactionsimplebutton.dopaintforeground(const canvas: tcanvas);
 begin
  inherited;
+ finfo.frame:= fframe;
  drawbutton(canvas,finfo);
 end;
 

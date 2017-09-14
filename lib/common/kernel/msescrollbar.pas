@@ -630,43 +630,6 @@ begin
                                                     areas[sba_end].ca.dim.y;
    end;
   end;
- {
-  updatebutton(sbbu_down);
-  updatebutton(sbbu_move);
-  updatebutton(sbbu_up);
- }
- { 
-  with areas[sbbu_down].ca do begin
-   buttonareas[bbu_down]:= dim;
-   if (areas[sbbu_down].frame <> nil) then begin 
-    deflaterect1(dim,areas[sbbu_down].frame.paintframe);
-    if not (fso_noinnerrect in areas[sbbu_down].frame.optionsskin) then begin
-     deflaterect1(dim,areas[sbbu_down].frame.framei);
-    end;
-   end;
-  end;
-  frameskinoptionstoshapestate(areas[sbbu_down].frame,areas[sbbu_down]);
-  with areas[sbbu_move].ca do begin
-   buttonareas[bbu_move]:= dim;
-   if (areas[sbbu_move].frame <> nil) then begin 
-    deflaterect1(dim,areas[sbbu_move].frame.paintframe);
-    if not (fso_noinnerrect in areas[sbbu_move].frame.optionsskin) then begin
-     deflaterect1(dim,areas[sbbu_move].frame.framei);
-    end;
-   end;
-  end;
-  frameskinoptionstoshapestate(areas[sbbu_move].frame,areas[sbbu_move]);
-  with areas[sbbu_up].ca do begin
-   buttonareas[bbu_up]:= dim;
-   if (areas[sbbu_up].frame <> nil) then begin
-    deflaterect1(dim,areas[sbbu_up].frame.paintframe);
-    if not (fso_noinnerrect in areas[sbbu_up].frame.optionsskin) then begin
-     deflaterect1(dim,areas[sbbu_up].frame.framei);
-    end;
-   end;
-  end;
-  frameskinoptionstoshapestate(areas[sbbu_up].frame,areas[sbbu_up]);
- }
  end;
 end;
 

@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2016 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2017 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -160,7 +160,7 @@ begin
   updatebit(longword(dest.state),ord(shs_noinnerrect),
                              fso_noinnerrect in aframe.optionsskin);
   if shs_noinnerrect in dest.state then begin
-   dest.mouseframe:= aframe.framei;
+   dest.mouseframe:= aframe.frameo;
   end
   else begin
    dest.mouseframe:= nullframe;
@@ -1194,6 +1194,9 @@ begin
   tab1:= nil;
   if ca.caption.text <> '' then begin
    rect1:= arect;
+   if info.frame <> nil then begin
+    deflaterect1(rect1,info.frame.framei);
+   end;
    textflags:= ca.textflags + [tf_clipi];
    case pos of
     ip_left,ip_lefttop,ip_leftbottom: begin
@@ -1412,12 +1415,18 @@ begin
     end;
    end;
    info.frame.paintbackground(canvas,info.ca.dim,true,false);
+   frame1:= info.frame.paintframe;
+   if not (fso_noinnerrect in info.frame.optionsskin) then begin
+    addframe1(frame1,info.frame.frameo);
+   end;
+   {
    if not (fso_noinnerrect in info.frame.optionsskin) then begin
     frame1:= info.frame.innerframe;
    end
    else begin
     frame1:= info.frame.paintframe;
    end;
+   }
    deflaterect1(info.ca.dim,frame1);
   end;
   if drawbuttonframe(canvas,info,rect1) then begin
@@ -1575,7 +1584,7 @@ begin
     //todo: optimize, move settings to tcustomstepframe updatestate
     rect3:= ca.dim;
     if not (fso_noinnerrect in frame.optionsskin) then begin
-     deflaterect1(ca.dim,frame.framei);
+     deflaterect1(ca.dim,frame.frameo);
     end;
     canvas.save;
     frame.paintbackground(canvas,info.ca.dim,true,false);

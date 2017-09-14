@@ -1289,7 +1289,9 @@ begin
     end;
     if (fframe <> nil) and 
                  not (fso_noinnerrect in fframe.optionsskin) then begin
-     finfo.ca.dim:= deflaterect(fframerect,fframe.innerframe);
+     finfo.ca.dim:= deflaterect(fframerect,fframe.paintframe);
+     deflaterect1(finfo.ca.dim,fframe.frameo);
+//     finfo.ca.dim:= deflaterect(fframerect,fframe.innerframe);
     end
     else begin
      finfo.ca.dim:= fframerect;

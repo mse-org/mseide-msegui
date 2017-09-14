@@ -133,6 +133,12 @@ type
  ttabframe = class(tframe)
   public
    constructor create(const intf: iframe);
+  published
+   property framei_left default defaultcaptiondist;
+   property framei_top default defaultcaptiondist;
+   property framei_right default defaultcaptiondist;
+   property framei_bottom default defaultcaptiondist;
+   property imagedist default defaultimagedist;
  end;
 
  ttabsfont = class(tparentfont)
@@ -150,9 +156,9 @@ type
    fcolor: colorty;
    fcoloractive: colorty;
    fimagepos: imageposty;
-   fcaptionframe: framety;
-   fimagedist: integer;
-   fframe: tframe;
+//   fcaptionframe: framety;
+//   fimagedist: integer;
+   fframe: ttabframe;
    fface: tface;
    ffaceactive: tface;
    fhint: msestring;
@@ -178,13 +184,15 @@ type
    procedure setcolor(const avalue: colorty);
    procedure setcoloractive(const avalue: colorty);
    procedure setimagepos(const avalue: imageposty);
+   {
    procedure setcaptionframe_left(const avalue: integer);
    procedure setcaptionframe_top(const avalue: integer);
    procedure setcaptionframe_right(const avalue: integer);
    procedure setcaptionframe_bottom(const avalue: integer);
    procedure setimagedist(const avalue: integer);
-   function getframe: tframe;
-   procedure setframe(const avalue: tframe);
+   }
+   function getframe: ttabframe;
+   procedure setframe(const avalue: ttabframe);
    procedure setshift(const avalue: integer);
    function getfont: ttabsfont;
    procedure setfont(const avalue: ttabsfont);
@@ -193,6 +201,11 @@ type
    procedure setfontactive(const avalue: ttabsfontactive);
    function isfontactivestored: boolean;
    procedure readcaptionpos(reader: treader);
+   procedure readcaptionframe_left(reader: treader);
+   procedure readcaptionframe_top(reader: treader);
+   procedure readcaptionframe_right(reader: treader);
+   procedure readcaptionframe_bottom(reader: treader);
+   procedure readimagedist(reader: treader);
    procedure settextflags(const avalue: textflagsty);
    procedure setwidth(const avalue: integer);
    procedure setwidthmin(const avalue: integer);
@@ -265,6 +278,7 @@ type
                                                 default defaultcaptiontextflags;   
    property imagepos: imageposty read fimagepos write
                           setimagepos default defaultimagepos;
+{
    property captionframe_left: integer read fcaptionframe.left write
                           setcaptionframe_left default defaultcaptiondist;
    property captionframe_top: integer read fcaptionframe.top write
@@ -275,6 +289,7 @@ type
                           setcaptionframe_bottom default defaultcaptiondist;
    property imagedist: integer read fimagedist write setimagedist 
                                                        default defaultimagedist;
+}
    property shift: integer read fshift write setshift default defaulttabshift;
                        //defaulttabshift (-100) -> 1
    property edge_level: int32 read fedge_level write setedge_level
@@ -302,7 +317,7 @@ type
    property edge_imagepaintshift: int32 read fedge_imagepaintshift 
                                      write setedge_imagepaintshift default 0;
 
-   property frame: tframe read getframe write setframe;
+   property frame: ttabframe read getframe write setframe;
                   //frameimage_offset1 active for first tab
    property face: tface read getface write setface;
    property faceactive: tface read getfaceactive write setfaceactive;
@@ -312,6 +327,7 @@ type
  tabbarlayoutinfoty = record
   tabs: ttabs;
   dim: rectty;
+  captionframe: framety;
   totsize: sizety;
   activetab: integer;
   focusedtab: integer;
@@ -670,8 +686,8 @@ type
    procedure settab_colortab(const avalue: colorty);
    function gettab_coloractivetab: colorty;
    procedure settab_coloractivetab(const avalue: colorty);
-   function gettab_frametab: tframe;
-   procedure settab_frametab(const avalue: tframe);
+   function gettab_frametab: ttabframe;
+   procedure settab_frametab(const avalue: ttabframe);
    function gettab_facetab: tface;
    procedure settab_facetab(const avalue: tface);
    function gettab_faceactivetab: tface;
@@ -680,6 +696,7 @@ type
    function getidents: integerarty;
    function gettab_imagepos: imageposty;
    procedure settab_imagepos(const avalue: imageposty);
+   {
    function gettab_captionframe_left: integer;
    procedure settab_captionframe_left(const avalue: integer);
    function gettab_captionframe_top: integer;
@@ -690,6 +707,7 @@ type
    procedure settab_captionframe_bottom(const avalue: integer);
    function gettab_imagedist: integer;
    procedure settab_imagedist(const avalue: integer);
+   }
    function gettab_shift: integer;
    procedure settab_shift(const avalue: integer);
    function gettab_optionswidget: optionswidgetty;
@@ -707,6 +725,11 @@ type
    function istab_fontactivetabstored: boolean;
    procedure readtab_captionpos(reader: treader);
    procedure readoptions(reader: treader);
+   procedure readtab_captionframe_left(reader: treader);
+   procedure readtab_captionframe_top(reader: treader);
+   procedure readtab_captionframe_right(reader: treader);
+   procedure readtab_captionframe_bottom(reader: treader);
+   procedure readtab_imagedist(reader: treader);
    function gettab_textflags: textflagsty;
    procedure settab_textflags(const avalue: textflagsty);
    function gettab_width: integer;
@@ -857,6 +880,7 @@ type
                                                 write settab_widthmin default 0;
    property tab_widthmax: integer read gettab_widthmax 
                                                 write settab_widthmax default 0;
+{
    property tab_captionframe_left: integer read gettab_captionframe_left write
                           settab_captionframe_left default defaultcaptiondist;
    property tab_captionframe_top: integer read gettab_captionframe_top write
@@ -867,6 +891,7 @@ type
                           settab_captionframe_bottom default defaultcaptiondist;
    property tab_imagedist: integer read gettab_imagedist write settab_imagedist 
                                                        default defaultimagedist;
+}
    property tab_shift: integer read gettab_shift write settab_shift
                                                       default defaulttabshift;
                        //defaulttabshift (-100) -> 1
@@ -895,9 +920,10 @@ type
    property tab_edge_imagepaintshift: int32 read getedge_imagepaintshift 
                                      write setedge_imagepaintshift default 0;
                     
-   property tab_frametab: tframe read gettab_frametab write settab_frametab;
+   property tab_frametab: ttabframe read gettab_frametab write settab_frametab;
    property tab_facetab: tface read gettab_facetab write settab_facetab;
-   property tab_faceactivetab: tface read gettab_faceactivetab write settab_faceactivetab;
+   property tab_faceactivetab: tface read gettab_faceactivetab 
+                                                    write settab_faceactivetab;
    property tab_size: integer read ftab_size write settab_size;
    property tab_sizemin: integer read ftab_sizemin write settab_sizemin
                             default defaulttabsizemin;
@@ -961,11 +987,13 @@ type
    property tab_width;
    property tab_widthmin;
    property tab_widthmax;
+   {
    property tab_captionframe_left;
    property tab_captionframe_top;
    property tab_captionframe_right;
    property tab_captionframe_bottom;
    property tab_imagedist;
+   }
    property tab_shift;
    property tab_edge_level;
    property tab_edge_colordkshadow;
@@ -1001,6 +1029,7 @@ type
  twidget1 = class(twidget);
  tmsecomponent1 = class(tmsecomponent);
  tcustomstepframe1 = class(tcustomstepframe);
+ ttabframe1 = class(ttabframe);
 
 procedure calctablayout(var layout: tabbarlayoutinfoty;
                      const canvas: tcanvas; const focused: boolean);
@@ -1008,13 +1037,14 @@ procedure calctablayout(var layout: tabbarlayoutinfoty;
 var
  horzimage: boolean;
  vertimage: boolean;
+ imagedi: int32;
  
  procedure docommon(const tab: ttab; var cell: shapeinfoty; var textrect: rectty);
  begin
   with tab,cell,ca do begin
    caption:= frichcaption;
    textflags:= layout.tabs.ftextflags;
-   imagedist:= layout.tabs.fimagedist;
+   imagedist:= imagedi;
    imagepos:= layout.tabs.fimagepos;//captiontoimagepos[layout.tabs.fcaptionpos];
    imagelist:= fimagelist;
    imagenr:= fimagenr;
@@ -1071,6 +1101,7 @@ var
  edgesize: int32;
  normpos,normsize: int32;
  extraspace1: int32;
+ extra1: int32;
  
 begin
  with layout do begin
@@ -1086,18 +1117,29 @@ begin
   textflags1:= tabs.textflags - [tf_ellipseleft,tf_ellipseright];
   tabshift1:= tabs.ftabshift;
   negtabshift1:= tabshift1 < 0;
-
-  cxinflate:= tabs.fcaptionframe.left + tabs.fcaptionframe.right + 2;
-                                                       //for not flat button 
-  cyinflate:= tabs.fcaptionframe.top + tabs.fcaptionframe.bottom + 2;
-                                                       //for not flat button
-  extraspace1:= 0;
   if tabs.fframe <> nil then begin
    with tabs.fframe do begin
-    frame1:= innerframe;
     extraspace1:= extraspace;
-    cxinflate:= cxinflate + frame1.left + frame1.right;
-    cyinflate:= cyinflate + frame1.top + frame1.bottom;
+//    captionframe:= nullframe;
+    captionframe:= framei;
+    imagedi:= imagedist;
+   end;
+  end
+  else begin
+   extraspace1:= 0;
+   captionframe.left:= defaultcaptiondist;
+   captionframe.top:= defaultcaptiondist;
+   captionframe.right:= defaultcaptiondist;
+   captionframe.bottom:= defaultcaptiondist;
+   imagedi:= defaultimagedist;
+  end;
+  cxinflate:= captionframe.left + captionframe.right + 2; //for not flat button
+  cyinflate:= captionframe.top + captionframe.bottom + 2; //for not flat button
+  if tabs.fframe <> nil then begin
+   with tabs.fframe do begin
+    frame1:= frameo;
+    cxinflate:= cxinflate + frame1.left + frame1.right + frameframecx;
+    cyinflate:= cyinflate + frame1.top + frame1.bottom + frameframecy;
     if fso_flat in optionsskin then begin
      cxinflate:= cxinflate - 2;
      cyinflate:= cyinflate - 2;
@@ -1148,8 +1190,12 @@ begin
    endval:= dim.y + dim.cy;
    for int1:= 0 to high(cells) do begin
     with tabs[int1],cells[int1],ca do begin
+     extra1:= 0;
      if int1 <> 0 then begin
       aval:= aval + extraspace1;
+     end;
+     if int1 <> high(cells) then begin
+      extra1:= extraspace1;
      end;
      dim.y:= aval;
      dofont(tabs[int1],cells[int1]);
@@ -1175,12 +1221,12 @@ begin
      if bo1 or (aval >= endval) then begin
       include(state,shs_invisible);
       if not bo1 then begin
-       inc(asize,dim.cy);
+       inc(asize,dim.cy+extra1);
       end;
      end
      else begin
       inc(aval,dim.cy);
-      inc(asize,dim.cy);
+      inc(asize,dim.cy+extra1);
       if (aval <= endval) then begin
        lasttab:= int1;
       end;
@@ -1211,8 +1257,12 @@ begin
    totsize.cy:= 0;
    for int1:= 0 to high(cells) do begin
     with tabs[int1],cells[int1],ca do begin
+     extra1:= 0;
      if int1 <> 0 then begin
       aval:= aval + extraspace1;
+     end;
+     if int1 <> high(cells) then begin
+      extra1:= extraspace1;
      end;
      dim.x:= aval;
      dofont(tabs[int1],cells[int1]);
@@ -1249,12 +1299,12 @@ begin
      if bo1 or (aval >= endval) then begin
       include(state,shs_invisible);
       if not bo1 then begin
-       inc(asize,dim.cx);
+       inc(asize,dim.cx+extra1);
       end;
      end
      else begin
       inc(aval,dim.cx);
-      inc(asize,dim.cx);
+      inc(asize,dim.cx+extra1);
       if (aval <= endval) then begin
        lasttab:= int1;
       end;
@@ -1710,6 +1760,11 @@ end;
 
 constructor ttabframe.create(const intf: iframe);
 begin
+ fi.innerframe.left:= defaultcaptiondist;
+ fi.innerframe.top:= defaultcaptiondist;
+ fi.innerframe.right:= defaultcaptiondist;
+ fi.innerframe.bottom:= defaultcaptiondist;
+ fi.imagedist:= defaultimagedist;
  inherited;
  include(fstate,fs_needsmouseinvalidate);
 end;
@@ -1737,11 +1792,13 @@ begin
  fcoloractive:= cl_default;
  fimagepos:= defaultimagepos;
  ftextflags:= defaultcaptiontextflags;
+ {
  fcaptionframe.left:= defaultcaptiondist;
  fcaptionframe.top:= defaultcaptiondist;
  fcaptionframe.right:= defaultcaptiondist;
  fcaptionframe.bottom:= defaultcaptiondist;
  fimagedist:= defaultimagedist;
+ }
  fshift:= defaulttabshift;
  ftabshift:= 1;
  fedge_level:= defaultedgelevel;
@@ -1769,11 +1826,45 @@ begin
  imagepos:= readcaptiontoimagepos(reader);
 end;
 
+procedure ttabs.readcaptionframe_left(reader: treader);
+begin
+ createframe();
+ ttabframe1(fframe).fi.innerframe.left:= reader.readinteger;
+end;
+
+procedure ttabs.readcaptionframe_top(reader: treader);
+begin
+ createframe();
+ ttabframe1(fframe).fi.innerframe.top:= reader.readinteger;
+end;
+
+procedure ttabs.readcaptionframe_right(reader: treader);
+begin
+ createframe();
+ ttabframe1(fframe).fi.innerframe.right:= reader.readinteger;
+end;
+
+procedure ttabs.readcaptionframe_bottom(reader: treader);
+begin
+ createframe();
+ ttabframe1(fframe).fi.innerframe.bottom:= reader.readinteger;
+end;
+
+procedure ttabs.readimagedist(reader: treader);
+begin
+ createframe();
+ ttabframe1(fframe).fi.imagedist:= reader.readinteger;
+end;
+
 procedure ttabs.defineproperties(filer: tfiler);
 begin
  inherited;
- filer.defineproperty('captionpos',
-                             {$ifdef FPC}@{$endif}readcaptionpos,nil,false);
+ filer.defineproperty('captionpos', @readcaptionpos,nil,false);
+ filer.defineproperty('captionframe_left', @readcaptionframe_left,nil,false);
+ filer.defineproperty('captionframe_top', @readcaptionframe_top,nil,false);
+ filer.defineproperty('captionframe_right', @readcaptionframe_right,nil,false);
+ filer.defineproperty('captionframe_bottom', @readcaptionframe_bottom,nil,false);
+ filer.defineproperty('imagedist', @readimagedist,nil,false);
 end;
 
 procedure ttabs.changed;
@@ -1956,7 +2047,7 @@ begin
   changed();
  end;
 end;
-
+{
 procedure ttabs.setcaptionframe_left(const avalue: integer);
 begin
  if avalue <> fcaptionframe.left then begin
@@ -1996,7 +2087,7 @@ begin
   changed;
  end;  
 end;
-
+}
 procedure ttabs.setshift(const avalue: integer);
 begin
  if avalue <> fshift then begin
@@ -2098,7 +2189,7 @@ end;
 
 procedure ttabs.setframeinstance(instance: tcustomframe);
 begin
- fframe:= tframe(instance);
+ fframe:= ttabframe(instance);
 end;
 
 procedure ttabs.setstaticframe(value: boolean);
@@ -2196,14 +2287,14 @@ begin
  end;
 end;
 
-function ttabs.getframe: tframe;
+function ttabs.getframe: ttabframe;
 begin
  tcustomtabbar(fowner).getoptionalobject(fframe,
                                {$ifdef FPC}@{$endif}createframe);
  result:= fframe;
 end;
 
-procedure ttabs.setframe(const avalue: tframe);
+procedure ttabs.setframe(const avalue: ttabframe);
 var int1: integer;
 begin
  tcustomtabbar(fowner).setoptionalobject(avalue,fframe,
@@ -2571,7 +2662,12 @@ begin
     else begin
      tabs.factcellindex:= int1;
      frame:= tabs.fframe; //todo: move to layoutcalc
-     drawtab(canvas,po1^,@tabs.fcaptionframe);
+     if frame <> nil then begin
+      drawtab(canvas,po1^,nil);
+     end
+     else begin
+      drawtab(canvas,po1^,@captionframe);
+     end;
     end;
    end;
    inc(po1);
@@ -2630,7 +2726,12 @@ begin
    tabs.factcellindex:= actcell1;
    po1:= @cells[actcell1];
    po1^.frame:= tabs.fframe; //todo: move to layoutcalc
-   drawtab(canvas,po1^,@tabs.fcaptionframe);
+   if tabs.fframe = nil then begin
+    drawtab(canvas,po1^,@captionframe);
+   end
+   else begin
+    drawtab(canvas,po1^,nil);
+   end;
   end;
  end;
 end;
@@ -4017,13 +4118,50 @@ begin
  end;
 end;
 
+procedure tcustomtabwidget.readtab_captionframe_left(reader: treader);
+begin
+ ftabs.createframe();
+ ttabframe1(ftabs.fframe).fi.innerframe.left:= reader.readinteger();
+end;
+
+procedure tcustomtabwidget.readtab_captionframe_top(reader: treader);
+begin
+ ftabs.createframe();
+ ttabframe1(ftabs.fframe).fi.innerframe.top:= reader.readinteger();
+end;
+
+procedure tcustomtabwidget.readtab_captionframe_right(reader: treader);
+begin
+ ftabs.createframe();
+ ttabframe1(ftabs.fframe).fi.innerframe.right:= reader.readinteger();
+end;
+
+procedure tcustomtabwidget.readtab_captionframe_bottom(reader: treader);
+begin
+ ftabs.createframe();
+ ttabframe1(ftabs.fframe).fi.innerframe.bottom:= reader.readinteger();
+end;
+
+procedure tcustomtabwidget.readtab_imagedist(reader: treader);
+begin
+ ftabs.createframe();
+ ttabframe1(ftabs.fframe).fi.imagedist:= reader.readinteger();
+end;
+
 procedure tcustomtabwidget.defineproperties(filer: tfiler);
 begin
  inherited;
- filer.defineproperty('tab_captionpos',
-                             {$ifdef FPC}@{$endif}readtab_captionpos,nil,false);
- filer.defineproperty('options',
-                             {$ifdef FPC}@{$endif}readoptions,nil,false);
+ filer.defineproperty('tab_captionpos',@readtab_captionpos,nil,false);
+ filer.defineproperty('options',@readoptions,nil,false);
+ filer.defineproperty('tab_captionframe_left',
+                                      @readtab_captionframe_left,nil,false);
+ filer.defineproperty('tab_captionframe_top',
+                                      @readtab_captionframe_top,nil,false);
+ filer.defineproperty('tab_captionframe_right',
+                                      @readtab_captionframe_right,nil,false);
+ filer.defineproperty('tab_captionframe_bottom',
+                                      @readtab_captionframe_bottom,nil,false);
+ filer.defineproperty('tab_imagedist', @readtab_imagedist,nil,false);
 end;
 
 procedure tcustomtabwidget.internaladd(const page: itabpage; aindex: integer);	
@@ -4746,12 +4884,12 @@ begin
  ftabs.tabs.coloractive:= avalue;
 end;
 
-function tcustomtabwidget.gettab_frametab: tframe;
+function tcustomtabwidget.gettab_frametab: ttabframe;
 begin
  result:= ftabs.tabs.frame;
 end;
 
-procedure tcustomtabwidget.settab_frametab(const avalue: tframe);
+procedure tcustomtabwidget.settab_frametab(const avalue: ttabframe);
 begin
  ftabs.tabs.frame:= avalue;
 end;
@@ -4785,7 +4923,7 @@ procedure tcustomtabwidget.settab_imagepos(const avalue: imageposty);
 begin
  ftabs.tabs.imagepos:= avalue;
 end;
-
+{
 function tcustomtabwidget.gettab_captionframe_left: integer;
 begin
  result:= ftabs.tabs.captionframe_left;
@@ -4835,7 +4973,7 @@ procedure tcustomtabwidget.settab_imagedist(const avalue: integer);
 begin
  ftabs.tabs.imagedist:= avalue;
 end;
-
+}
 function tcustomtabwidget.gettab_shift: integer;
 begin
  result:= ftabs.tabs.shift;

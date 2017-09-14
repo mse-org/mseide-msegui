@@ -880,7 +880,7 @@ begin
    self.tab_face:= nil;
   end;
   if ftab_frametab <> nil then begin
-   self.tab_frametab:= tframe(1);
+   self.tab_frametab:= ttabframe(1);
    self.tab_frametab.assign(ftab_frametab);
   end
   else begin
