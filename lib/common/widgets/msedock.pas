@@ -523,6 +523,7 @@ type
    fgrip_textflagsright: textflagsty;
    fgrip_captiondist: integer;
    fgrip_captionoffset: integer;
+   fgrip_hint: msestring;
    procedure setgrip_color(const avalue: colorty);
    procedure setgrip_grip(const avalue: stockbitmapty);
    procedure setgrip_size(const avalue: integer);
@@ -639,6 +640,7 @@ type
    property grip_face: tface read getgrip_face write setgrip_face;
    property grip_faceactive: tface read getgrip_faceactive 
                                             write setgrip_faceactive;
+   property grip_hint: msestring read fgrip_hint write fgrip_hint;
  end;
 
  tdockpanel = class(tscalingwidget,idockcontroller,idocktarget,istatfile)
@@ -4512,7 +4514,12 @@ procedure tgripframe.showhint(const aid: int32; var info: hintinfoty);
 begin
  case dockbuttonrectty(-(aid - hintidframe)) of
   dbr_handle: begin
-   info.caption:= fcontroller.getfloatcaption;
+   if fgrip_hint = '' then begin
+    info.caption:= fcontroller.getfloatcaption;
+   end
+   else begin
+    info.caption:= fgrip_hint;
+   end;
   end;
   dbr_close: begin
    info.caption:= sc(sc_close);
