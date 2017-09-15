@@ -1038,6 +1038,8 @@ var
  horzimage: boolean;
  vertimage: boolean;
  imagedi: int32;
+ imagedi1: int32;
+ imagedi2: int32;
  
  procedure docommon(const tab: ttab; var cell: shapeinfoty; var textrect: rectty);
  begin
@@ -1045,15 +1047,17 @@ var
    caption:= frichcaption;
    textflags:= layout.tabs.ftextflags;
    imagedist:= imagedi;
+   imagedist1:= imagedi1;
+   imagedist2:= imagedi2;
    imagepos:= layout.tabs.fimagepos;//captiontoimagepos[layout.tabs.fcaptionpos];
    imagelist:= fimagelist;
    imagenr:= fimagenr;
    imagenrdisabled:= fimagenrdisabled;
    if imagelist <> nil then begin
-    if horzimage then begin
+    if not vertimage then begin
      inc(textrect.cx,fimagelist.width+imagedist);
     end;
-    if vertimage then begin
+    if not horzimage then begin
      inc(textrect.cy,fimagelist.height+imagedist);
     end;
    end;
@@ -1102,6 +1106,7 @@ var
  normpos,normsize: int32;
  extraspace1: int32;
  extra1: int32;
+ imageinflate: int32;
  
 begin
  with layout do begin
@@ -1123,6 +1128,8 @@ begin
 //    captionframe:= nullframe;
     captionframe:= framei;
     imagedi:= imagedist;
+    imagedi1:= imagedist1;
+    imagedi2:= imagedist2;
    end;
   end
   else begin
@@ -1132,9 +1139,12 @@ begin
    captionframe.right:= defaultcaptiondist;
    captionframe.bottom:= defaultcaptiondist;
    imagedi:= defaultimagedist;
+   imagedi1:= 0;
+   imagedi2:= 0;
   end;
   cxinflate:= captionframe.left + captionframe.right + 2; //for not flat button
   cyinflate:= captionframe.top + captionframe.bottom + 2; //for not flat button
+  imageinflate:= imagedi1 + imagedi2 + 2;                 //for not flat button
   if tabs.fframe <> nil then begin
    with tabs.fframe do begin
     frame1:= frameo;
@@ -1143,6 +1153,7 @@ begin
     if fso_flat in optionsskin then begin
      cxinflate:= cxinflate - 2;
      cyinflate:= cyinflate - 2;
+     imageinflate:= imageinflate - 2;
     end;
    end;
   end;
@@ -1214,8 +1225,9 @@ begin
       include(fstate,ts_captionclipped);
      end;
      dim.cy:= rect1.cy+cyinflate;
-     if (imagelist <> nil) and (imagelist.height > dim.cy) then begin
-      dim.cy:= imagelist.height;
+     if (imagelist <> nil) and not vertimage and
+                           (imagelist.height+imageinflate > dim.cy) then begin
+      dim.cy:= imagelist.height+imageinflate;
      end;
      bo1:= (ts_invisible in fstate) or (int1 < firsttab);
      if bo1 or (aval >= endval) then begin
@@ -1330,7 +1342,7 @@ begin
     totsize.cy:= twidget1(tabs.fowner).getfont1.glyphheight;
    end;
    totsize.cy:= totsize.cy + cysizeinflate;
-  end;
+  end; //horizontal
   bo1:= not twidget(tabs.fowner).isenabled;
   for int1:= 0 to high(cells) do begin
    with tabs[int1],cells[int1],ca do begin
