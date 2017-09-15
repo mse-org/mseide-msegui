@@ -15,6 +15,12 @@ const
  threadslib = 'libpthread.so.0';
 {$endif}
 
+{$ifdef linux}
+ shmlib = 'rt';
+{$else}
+ shmlib = clib;
+{$endif}
+
 {$packrecords c}
  
 type
@@ -3101,6 +3107,10 @@ const
 
  MAP_FAILED = pointer(ptrint(-1));
 
+function shm_open(name: pcchar; oflag: cint; mode: mode_t): cint; cdecl;
+                                                external shmlib name 'shm_open';
+function shm_unlink(name: pcchar): cint; cdecl; 
+                                              external shmlib name 'shm_unlink';
 function mmap(addr: pointer; lengthint: size_t; prot: cint; flags: cint;
                                fd: cint; offset: off_t): pointer; cdecl;
                                                external clib name 'mmap';
