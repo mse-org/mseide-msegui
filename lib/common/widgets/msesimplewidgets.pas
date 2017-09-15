@@ -1446,8 +1446,12 @@ end;
 
 procedure tcustombutton.getautopaintsize(var asize: sizety);
 begin
- asize:= calccaptionsize(getcanvas,finfo.ca);
- innertopaintsize(asize);
+ if fframe <> nil then begin
+  asize:= calccaptionsize(getcanvas,finfo.ca,@tcustomframe1(fframe).fi.innerframe);
+ end
+ else begin
+  asize:= calccaptionsize(getcanvas,finfo.ca,nil);
+ end;
  inc(asize.cx,8+fautosize_cx);
  inc(asize.cy,6+fautosize_cy);
  if (fframe <> nil) then begin

@@ -126,8 +126,8 @@ procedure checkbuttonhint(const awidget: twidget; info: mouseeventinfoty;
 
 procedure drawcaption(const acanvas: tcanvas; var ainfo: captioninfoty);
 procedure initcaptioninfo(var ainfo: captioninfoty);
-function calccaptionsize(const acanvas: tcanvas;
-                                        const ainfo: captioninfoty): sizety;
+function calccaptionsize(const acanvas: tcanvas; const ainfo: captioninfoty; 
+                                  const captionframe: pframety = nil): sizety;
 
 //var
 // animatemouseenter: boolean = true;
@@ -1334,13 +1334,19 @@ begin
 end;
 
 function calccaptionsize(const acanvas: tcanvas;
-                                        const ainfo: captioninfoty): sizety;
+         const ainfo: captioninfoty; const captionframe: pframety = nil): sizety;
 var
  int1: integer;
  vertdist: boolean;
 begin
  with ainfo do begin
   result:= textrect(acanvas,caption,textflags,font).size;
+  if captionframe <> nil then begin
+   with captionframe^ do begin
+    result.cx:= result.cx + left + right;
+    result.cy:= result.cy + top + bottom;
+   end;
+  end;
   vertdist:= imagepos in vertimagepos;
   if vertdist then begin
    inc(result.cy,captiondist);

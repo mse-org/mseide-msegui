@@ -203,7 +203,7 @@ function postotextindex(const canvas: tcanvas; var info: drawtextinfoty;
     //false if out of text
 function textindextopos(const canvas: tcanvas; var info: drawtextinfoty;
                                  aindex: integer): pointty;
-
+                                 
 implementation
 uses
  mseguiintf,msebits,msearrayutils,{$ifdef FPC}math{$else}Math{$endif},msereal,
