@@ -4149,32 +4149,36 @@ end;
 
 procedure tcustomtabwidget.readtab_captionframe_left(reader: treader);
 begin
- ftabs.createframe();
- ttabframe1(ftabs.fframe).fi.innerframe.left:= reader.readinteger();
+ ftabs.flayoutinfo.tabs.createframe();
+ ttabframe1(ftabs.flayoutinfo.tabs.fframe).fi.innerframe.left:= 
+                                                         reader.readinteger();
 end;
 
 procedure tcustomtabwidget.readtab_captionframe_top(reader: treader);
 begin
- ftabs.createframe();
- ttabframe1(ftabs.fframe).fi.innerframe.top:= reader.readinteger();
+ ftabs.flayoutinfo.tabs.createframe();
+ ttabframe1(ftabs.flayoutinfo.tabs.fframe).fi.innerframe.top:= 
+                                                         reader.readinteger();
 end;
 
 procedure tcustomtabwidget.readtab_captionframe_right(reader: treader);
 begin
- ftabs.createframe();
- ttabframe1(ftabs.fframe).fi.innerframe.right:= reader.readinteger();
+ ftabs.flayoutinfo.tabs.createframe();
+ ttabframe1(ftabs.flayoutinfo.tabs.fframe).fi.innerframe.right:=
+                                                         reader.readinteger();
 end;
 
 procedure tcustomtabwidget.readtab_captionframe_bottom(reader: treader);
 begin
- ftabs.createframe();
- ttabframe1(ftabs.fframe).fi.innerframe.bottom:= reader.readinteger();
+ ftabs.flayoutinfo.tabs.createframe();
+ ttabframe1(ftabs.flayoutinfo.tabs.fframe).fi.innerframe.bottom:= 
+                                                         reader.readinteger();
 end;
 
 procedure tcustomtabwidget.readtab_imagedist(reader: treader);
 begin
- ftabs.createframe();
- ttabframe1(ftabs.fframe).fi.imagedist:= reader.readinteger();
+ ftabs.flayoutinfo.tabs.createframe();
+ ttabframe1(ftabs.flayoutinfo.tabs.fframe).fi.imagedist:= reader.readinteger();
 end;
 
 procedure tcustomtabwidget.defineproperties(filer: tfiler);
