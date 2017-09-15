@@ -1107,6 +1107,8 @@ var
  extraspace1: int32;
  extra1: int32;
  imageinflate: int32;
+ i1: int32;
+ maximagesize: int32;
  
 begin
  with layout do begin
@@ -1267,6 +1269,7 @@ begin
    asize:= aval;
    endval:= dim.x + dim.cx;
    totsize.cy:= 0;
+   maximagesize:= 0;
    for int1:= 0 to high(cells) do begin
     with tabs[int1],cells[int1],ca do begin
      extra1:= 0;
@@ -1307,6 +1310,15 @@ begin
      rect1.cx:= int2;
 
      dim.cx:= rect1.cx + cxinflate;
+     if (imagelist <> nil) then begin
+      i1:= imagelist.height;
+      if not vertimage then begin
+       i1:= i1 + imageinflate;
+       if i1 > maximagesize then begin
+        maximagesize:= i1;
+       end;
+      end;
+     end;
      bo1:= (ts_invisible in fstate) or (int1 < firsttab);
      if bo1 or (aval >= endval) then begin
       include(state,shs_invisible);
@@ -1342,6 +1354,11 @@ begin
     totsize.cy:= twidget1(tabs.fowner).getfont1.glyphheight;
    end;
    totsize.cy:= totsize.cy + cysizeinflate;
+   maximagesize:= maximagesize + cysizeinflate - cyinflate; 
+                                         //space for tabshift and edge
+   if totsize.cy < maximagesize then begin
+    totsize.cy:= maximagesize;
+   end;
   end; //horizontal
   bo1:= not twidget(tabs.fowner).isenabled;
   for int1:= 0 to high(cells) do begin
