@@ -6338,12 +6338,16 @@ begin
  xsetlocalemodifiers('');
  im:= xopenim(appdisp,nil,nil,nil);
  if im = nil then begin
+  xsetlocalemodifiers('@im=none');
+  im:= xopenim(appdisp,nil,nil,nil);
+  {
   xsetlocalemodifiers('@im=local');
   im:= xopenim(appdisp,nil,nil,nil);
   if im = nil then begin
    xsetlocalemodifiers('@im=');
    im:= xopenim(appdisp,nil,nil,nil);
   end;
+  }
  end;
  result:= im <> nil;
  if result then begin
