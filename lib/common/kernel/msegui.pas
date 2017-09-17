@@ -18454,7 +18454,7 @@ var
 begin
 {$ifdef mse_debugkey}
  debugwriteln('*'+getenumname(typeinfo(eventkindty),ord(event.kind))+
-       ' "'+event.fchars+'" '+inttostr(ord(event.fkey)));
+       ' "'+ansistring(event.fchars)+'" '+inttostr(ord(event.fkey)));
 {$endif}
  try 
   fkeyeventinfo:= @info;

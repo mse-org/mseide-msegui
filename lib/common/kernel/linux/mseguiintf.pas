@@ -4840,8 +4840,12 @@ var
  repeatkey: integer;
  repeatkeytime: ttime;
 
-procedure resetrepeatkey;
+procedure resetrepeatkey();
 begin
+{$ifdef mse_debugkey}
+ debugwriteln('resetrepeatkey key:'+inttostr(repeatkey)+
+                                ' time:'+inttostr(repeatkeytime));
+{$endif}
  repeatkey:= 0;
  repeatkeytime:= 0;
 end;
@@ -5626,6 +5630,22 @@ end;
 
 function gui_getevent: tmseevent;
 
+ function checkrepeatkey(const aevent: xevent): boolean;
+ begin
+  if (repeatkey = aevent.xkey.keycode) and 
+                     (repeatkeytime = aevent.xkey.time) then begin
+  {$ifdef mse_debugkey}
+   debugwriteln('is repeatkey key:'+inttostr(repeatkey)+
+                                  ' time:'+inttostr(repeatkeytime));
+  {$endif}
+   result:= true;
+  end
+  else begin
+   resetrepeatkey();
+   result:= false;
+  end;
+ end;//checkrepeatkey
+
 var
  xev,xev2: xevent;
  w: winidty;
@@ -5634,7 +5654,7 @@ var
  buffer: string;
  icstatus: tstatus;
  chars: msestring;
- int1,i2: integer;
+ i1,i2: integer;
 // event: xevent;
 // str1: string;
 {$ifdef with_sm}
@@ -5652,12 +5672,15 @@ var
  fdwakeup: boolean;
  allsig,sig1: sigset_t;
  timeout1: timespec;
+ b1: boolean;
 type
  char_0_19 = array[0..19] of char;
  
 label
- eventrestart;    
+ eventrestart;
 begin
+ result:= nil;
+
  sigfillset(allsig);
  timeout1.tv_sec:= 10;
  timeout1.tv_nsec:= 0;
@@ -5690,7 +5713,7 @@ begin
 //    int1:= poll(@pollinfo[0],length(pollinfo),1000); 
 //                              //todo: use ppoll? no timeout?
     with pollinf^ do begin
-     int1:= ppoll(@pollinfo[0],length(pollinfo),@timeout1,@sig1);
+     i1:= ppoll(@pollinfo[0],length(pollinfo),@timeout1,@sig1);
      if pollinfo[1].revents <> 0 then begin
       repeat                                     //empty pipe
       until (__read(connectpipe.readdes,dummybyte,1) < 0) and 
@@ -5700,7 +5723,7 @@ begin
      sys_mutexlock(connectmutex2);
      sys_mutexunlock(connectmutex2);
   
-     if int1 > 0 then begin
+     if i1 > 0 then begin
       for i2:= 0 to high(pollinfo) do begin
        with pollinfo[i2] do begin
         if (fd >= 0) then begin
@@ -5716,7 +5739,7 @@ begin
      end;
     end;
      //wakeup clientmessages are sometimes missed with xcb ???
-    if int1 = 0 then begin  //timeout
+    if i1 = 0 then begin  //timeout
      inc(timeoutcount);
      if timeoutcount mod 1 = 0 then begin
       timerevent:= true; //every 10 seconds without messages 
@@ -5724,11 +5747,11 @@ begin
      end;
     end;
     application.lock;
-   until (int1 <> -1) or timerevent or terminated or childevent or fdwakeup;
+   until (i1 <> -1) or timerevent or terminated or childevent or fdwakeup;
    pthread_sigmask(sig_setmask,@sig1,nil); //enable signals
  {$ifdef with_sm}
    if hassm then begin
-    if (int1 > 0) and (pollinf^.pollinfo[2].revents <> 0) then begin
+    if (i1 > 0) and (pollinf^.pollinfo[2].revents <> 0) then begin
      iceprocessmessages(sminfo.iceconnection,nil,int2);
      with sminfo do begin
       if shutdown then begin
@@ -5769,19 +5792,48 @@ begin
    pthread_sigmask(sig_setmask,@sig1,nil); //enable signals
   end;
  end;
- result:= nil;
- if xpending(appdisp) <= 0 then begin
+
+eventrestart:
+ b1:= false;
+ while true do begin
+  i1:= xpending(appdisp);
+  if i1 > 0 then begin
+   xnextevent(appdisp,@xev);
+   if (xev.xtype = keyrelease) and (i1 > 1) then begin
+    xpeekevent(appdisp,@xev2);
+    if (xev2.xtype = keypress) and 
+                 (xev.xkey.keycode = xev2.xkey.keycode) and
+                                    (xev.xkey.time = xev2.xkey.time) then begin
+     repeatkey:= xev.xkey.keycode;
+     repeatkeytime:= xev.xkey.time;
+    {$ifdef mse_debugkey}
+     debugwriteln('repeatkey key:'+inttostr(repeatkey)+
+                                      ' time:'+inttostr(repeatkeytime));
+    {$endif}
+    end;
+   end;
+  {$ifdef mse_debugsysevent}
+   debugwriteln('sysevent '+inttostr(xev.xany.xtype)+' '+
+                                                inttostr(xev.xany.xwindow));
+  {$endif}
+   if longint(xfilterevent(@xev,none)) = 0 then begin
+    b1:= true;
+    break;
+   end
+   else begin
+  {$ifdef mse_debugsysevent}
+   debugwriteln('sysevent filtered');
+  {$endif}
+   end;
+  end;
+ end;
+ if not b1 then begin
+ {$ifdef mse_debugsysevent}
+  debugwriteln('sysevent exit');
+ {$endif}
   exit;
  end;
 
-eventrestart:
- xnextevent(appdisp,@xev);
-{$ifdef mse_debugsysevent}
- writeln(xev.xany.xtype,' ',xev.xany.xwindow);
-{$endif}
- if longint(xfilterevent(@xev,none)) <> 0 then begin
-  exit;
- end;
  bo1:= false;
  tguiapplication1(application).sysevent(xev.xany.xwindow,syseventty(xev),bo1);
  if bo1 then begin
@@ -5885,6 +5937,7 @@ eventrestart:
   end;
   keypress: begin
    with xev.xkey do begin
+    b1:= false;
     {$ifdef FPC}
     aic:= getic(window);
     {$else}
@@ -5892,15 +5945,16 @@ eventrestart:
     {$endif}
     lasteventtime:= time;
     setlength(buffer,20);
-    int1:= xutf8lookupstring(aic,@xev.xkey,@buffer[1],length(buffer),@akey,@icstatus);
-    setlength(buffer,int1);
+    i1:= xutf8lookupstring(aic,@xev.xkey,@buffer[1],length(buffer),
+                                                          @akey,@icstatus);
+    setlength(buffer,i1);
     if icstatus = xbufferoverflow then begin
      xutf8lookupstring(aic,@xev.xkey,@buffer[1],length(buffer),@akey,@icstatus);
     end;
     chars:= utf8tostringansi(buffer);
    {$ifdef mse_debugkey}
-    debugwriteln('*X11keypress window '+hextostr(window,8)+'"'+chars+'" '+
-                                                              inttostr(akey));
+    debugwriteln('*X11keypress window '+hextostr(window,8)+'"'+buffer+'" key:'+
+                                     inttostr(akey)+' time:'+inttostr(time));
    {$endif}
     case icstatus of
      xlookupnone: exit;
@@ -5916,6 +5970,9 @@ eventrestart:
      escapepressed:= true;
     end;
     shiftstate1:= shiftstate1 + xtoshiftstate(state,key1,mb_none,false);
+    if checkrepeatkey(xev) then begin
+     include(shiftstate1,ss_repeat);
+    end;
     if (keycode = repeatkey) and (time = repeatkeytime) then begin
      include(shiftstate1,ss_repeat);
      resetrepeatkey;
@@ -5928,16 +5985,23 @@ eventrestart:
   keyrelease: begin
    with xev.xkey do begin
     lasteventtime:= time;
-    int1:= keycode;
+    if checkrepeatkey(xev) then begin
+    {$ifdef mse_debugkey}
+     debugwriteln('keyrelease dropped, eventrestart');
+    {$endif}
+     goto eventrestart;
+    end;
+    i1:= keycode;
     xlookupstring(@xev.xkey,nil,0,@akey,nil);
    {$ifdef mse_debugkey}
     debugwriteln('*X11keyrelease window '+hextostr(window,8)+
-                                            ' key '+inttostr(akey));
+                           ' key:'+inttostr(akey)+' time:'+inttostr(time));
    {$endif}
     shiftstate1:= [];
     key1:= xkeytokey(akey,shiftstate1);
     key2:= getkeynomod(xev.xkey);
     shiftstate1:= shiftstate1 + xtoshiftstate(state,key1,mb_none,true);
+  (* does not work anymore because of intermediate messages by IM
     if xpending(appdisp) > 0 then begin
      xpeekevent(appdisp,@xev);
      if (xev.xtype = keypress) and (time - lasteventtime < 10) and 
@@ -5950,6 +6014,7 @@ eventrestart:
       goto eventrestart;  //auto repeat key, don't send
      end;
     end;
+  *)
     result:= tkeyevent.create(xwindow,true,key1,key2,shiftstate1,'',time*1000);
    end;
   end;
