@@ -2114,7 +2114,7 @@ begin
   bo1:= des_statreading in fstate;
   include(fstate,des_statreading);
   try
-   checkvalue;
+   checkvalue(true);
   finally
    if not bo1 then begin
     exclude(fstate,des_statreading);
