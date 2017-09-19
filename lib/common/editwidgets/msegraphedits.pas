@@ -930,7 +930,8 @@ type
    procedure mouseevent(var info: mouseeventinfoty); override;
    procedure dokeydown(var info: keyeventinfoty); override;
    procedure dokeyup(var info: keyeventinfoty); override;
-   procedure doshortcut(var info: keyeventinfoty; const sender: twidget); override;
+   procedure doshortcut(var info: keyeventinfoty;
+                                          const sender: twidget); override;
    procedure clientrectchanged; override;
 //   function getframestateflags: framestateflagsty; override;
    procedure paintglyph(const canvas: tcanvas; const acolorglyph: colorty;

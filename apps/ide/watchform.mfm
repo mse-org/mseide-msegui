@@ -52,9 +52,9 @@ object watchfo: twatchfo
     D5D5D501D9D9D903FFFFFF017C7C7C01D9D9D903B9B9B90192929201D9D9D905
     99999901B2B2B201D9D9D904C8C8C80186868601D9D9D904FFFFFF017C7C7C01
     D9D9D916FFFFFF017C7C7C01D9D9D916FFFFFF017C7C7C01FFFFFF17D0D0D060
-    0000000800000008000000BF00000008FFFFFF00FFFFFF08FFFFFF02FFFFFFC0
-    FFFFFF00FFFFFF08FFFFFF00FFFFFF08FFFFFF08FFFFFF08FFFFFFBFFFFFFF08
-    FFFFFF00FFFFFF02FFFFFF08FFFFFF0000000000000000BF0000000000000008
+    00000000000000000000000000000000FFFFFF00FFFFFF00FFFFFF00FFFFFF00
+    FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00
+    FFFFFF00FFFFFF00FFFFFF00FFFFFF0000000000000000000000000000000000
   }
   moduleclassname = 'tdockform'
   object grid: twidgetgrid
@@ -195,9 +195,6 @@ object watchfo: twatchfo
       onsetvalue = expresultonsetvalue
     end
     object formatcode: tdatabutton
-      frame.optionsskin = [fso_nofocusrect, fso_nodefaultrect]
-      frame.localprops = [frl_optionsskin]
-      frame.localprops1 = []
       taborder = 4
       bounds_x = 248
       bounds_y = 0
@@ -206,6 +203,7 @@ object watchfo: twatchfo
       ondataentered = formatent
       state = [as_invisible, as_localimagelist]
       imagelist = timagelist1
+      focusrectdist = 0
       imagenums.count = 5
       imagenums.items = (
         -1
