@@ -4839,27 +4839,27 @@ begin
   if afi.frameimage_list <> nil then begin
    if not (edg_left in afi.hiddenedges) then begin
     int1:= afi.frameimage_list.width + afi.frameimage_left;
-    if int1 > left then begin
+//    if int1 > left then begin
      left:= int1;
-    end;
+//    end;
    end;
    if not (edg_right in afi.hiddenedges) then begin
     int1:= afi.frameimage_list.width + afi.frameimage_right;
-    if int1 > right then begin
+//    if int1 > right then begin
      right:= int1;
-    end;
+//    end;
    end;
    if not (edg_top in afi.hiddenedges) then begin
     int1:= afi.frameimage_list.height + afi.frameimage_top;
-    if int1 > top then begin
+//    if int1 > top then begin
      top:= int1;
-    end;
+//    end;
    end;
    if not (edg_bottom in afi.hiddenedges) then begin
     int1:= afi.frameimage_list.height + afi.frameimage_bottom;
-    if int1 > bottom then begin
+//    if int1 > bottom then begin
      bottom:= int1;
-    end;
+//    end;
    end;
   end;
  end;
