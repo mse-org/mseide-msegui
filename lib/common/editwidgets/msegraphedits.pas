@@ -829,6 +829,22 @@ type
  end;
 
  databuttoneventty = procedure(const sender: tcustomdatabutton) of object;
+
+ tvaluefontarrayprop = class(tpersistentarrayprop)
+  private
+   fowner: tcustomdatabutton;
+   procedure setitems(const index: integer; const avalue: tfont);
+  protected
+   function getitems(const index: integer): tfont;
+   procedure createitem(const index: integer; var item: tpersistent); override;
+   procedure dochange(const sender: tobject);
+  public
+   constructor create(const aowner: tcustomdatabutton);
+   class function getitemclasstype: persistentclassty; override;
+                         //used in dumpunitgroups
+   property items[const index: integer]: tfont read getitems 
+                                                   write setitems; default;
+ end;
   
  tcustomdatabutton = class(tcustomintegergraphdataedit,iactionlink,iimagelistinfo)
   private
@@ -844,6 +860,7 @@ type
    fvaluecaptions: tmsestringarrayprop;
    fonupdate: databuttoneventty;
    fvaluedisabled: integer;
+   fvaluefonts: tvaluefontarrayprop;
    procedure setcolorglyph(const avalue: colorty);
    function iscolorglyphstored: boolean;
    procedure setvaluefaces(const avalue: tvaluefacearrayprop);
@@ -894,6 +911,7 @@ type
    procedure setimageoffsetmouse(const avalue: integer);
    procedure setimageoffsetclicked(const avalue: integer);
    procedure setvaluedisabled(const avalue: integer);
+   procedure setvaluefonts(const avalue: tvaluefontarrayprop);
   protected
    finfo: shapeinfoty;
    factioninfo: actioninfoty;
@@ -960,6 +978,8 @@ type
                                                      write setvaluefaces;
    property valuecaptions: tmsestringarrayprop read fvaluecaptions
                                                   write setvaluecaptions;
+   property valuefonts: tvaluefontarrayprop read fvaluefonts
+                                                  write setvaluefonts;
    property font: twidgetfont read getfont write setfont stored isfontstored;
    property action: tcustomaction read factioninfo.action write setaction;
    property caption: captionty read factioninfo.captiontext write setcaption 
@@ -1040,6 +1060,7 @@ type
    property optionsskin;
    property valuefaces;
    property valuecaptions;
+   property valuefonts;
    property font;
 
    property action;
@@ -3532,6 +3553,45 @@ begin
  result:= tface(inherited getitems(index));
 end;
 
+{ tvaluefontarrayprop }
+
+constructor tvaluefontarrayprop.create(const aowner: tcustomdatabutton);
+begin
+ fowner:= aowner;
+ inherited create(nil);
+end;
+
+class function tvaluefontarrayprop.getitemclasstype: persistentclassty;
+begin
+ result:= tfont;
+end;
+
+procedure tvaluefontarrayprop.createitem(const index: integer;
+                                                      var item: tpersistent);
+begin
+ item:= tfont.create;
+ item.assign(fowner.font);
+ tfont(item).onchange:= @dochange;
+end;
+
+procedure tvaluefontarrayprop.dochange(const sender: tobject);
+begin
+ fowner.formatchanged;
+end;
+
+procedure tvaluefontarrayprop.setitems(const index: integer; const avalue: tfont);
+begin
+ checkindex(index);
+ if fitems[index] <> nil then begin
+  fitems[index].assign(avalue);
+ end;
+end;
+
+function tvaluefontarrayprop.getitems(const index: integer): tfont;
+begin
+ result:= tfont(inherited getitems(index));
+end;
+
 { tcustomdatabutton }
 
 constructor tcustomdatabutton.create(aowner: tcomponent);
@@ -3549,6 +3609,7 @@ begin
  fmax:= 0;
  fvaluefaces:= tvaluefacearrayprop.create(self);
  fvaluecaptions:= tmsestringarrayprop.create;
+ fvaluefonts:= tvaluefontarrayprop.create(self);
  optionswidget:= defaultoptionswidget - [ow_mousefocus];
  initshapeinfo(finfo);
  finfo.ca.imagepos:= ip_center;
@@ -3567,6 +3628,7 @@ begin
  end;
  fvaluefaces.free;
  fvaluecaptions.free;
+ fvaluefonts.free;
  fimagenums.free;
  inherited;
 end;
@@ -3832,6 +3894,16 @@ procedure tcustomdatabutton.paintglyph(const canvas: tcanvas;
    result:= nil;
   end;
  end;
+
+ function actualfont(const aindex: integer): tfont;
+ begin
+  if (aindex >= 0) and (aindex < fvaluefonts.count) then begin
+   result:= fvaluefonts[aindex];
+  end
+  else begin
+   result:= font;
+  end;
+ end;
  
 var
  statebefore: shapestatesty;
@@ -3842,6 +3914,7 @@ begin
  if (@avalue <> nil) then begin
   finfo.ca.caption:= actualcaption(integer(avalue));
   finfo.face:= actualface(integer(avalue));
+  finfo.ca.font:= actualfont(int32(avalue));
   statebefore:= finfo.state;
   dimbefore:= finfo.ca.dim;
   finfo.ca.dim:= arect;
@@ -3869,6 +3942,7 @@ begin
  else begin
   finfo.ca.caption:= actualcaption(fvalue);
   finfo.face:= actualface(fvalue);
+  finfo.ca.font:= actualfont(fvalue);
   setactualimagenr(fvalue);
   drawbutton(canvas,finfo);
  end;
@@ -4400,6 +4474,11 @@ begin
   end;
   }
  end;
+end;
+
+procedure tcustomdatabutton.setvaluefonts(const avalue: tvaluefontarrayprop);
+begin
+ fvaluefonts.assign(avalue);
 end;
 
 function tcustomdatabutton.valueenabledstate(const avalue: integer): boolean;

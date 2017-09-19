@@ -865,6 +865,7 @@ type
    property optionsskin;
    property valuefaces;
    property valuecaptions;
+   property valuefonts;
    property font;
    property action;
    property caption;
