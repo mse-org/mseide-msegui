@@ -898,6 +898,7 @@ type
    property min; 
    property max;
    property valuedisabled;
+   property onclientmouseevent;
  end;
 
  tdbbooleaneditradio = class(tcustombooleaneditradio,idbeditfieldlink,ireccontrol)

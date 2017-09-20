@@ -1,4 +1,4 @@
-{ MSEide Copyright (c) 1999-2016 by Martin Schreiber
+{ MSEide Copyright (c) 1999-2017 by Martin Schreiber
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -205,7 +205,8 @@ begin
  registercomponenttabhints(['Gui'],['Non visual components with GUI dependence']);
 
  registercomponents('NoGui',[tstatfile,trttistat,tnoguiaction,tactivator,
-                    ttimer,tthreadcomp,tpipereadercomp,tprocessmonitor,
+                    ttimer,tanimtimer,tanimitemcomp,tthreadcomp,tpipereadercomp,
+                    tprocessmonitor,
                     tstringcontainer,tkeystringcontainer]);
  registercomponenttabhints(['NoGui'],['Components without GUI dependence']);
 

@@ -837,7 +837,7 @@ type
   protected
    function getitems(const index: integer): tfont;
    procedure createitem(const index: integer; var item: tpersistent); override;
-   procedure dochange(const sender: tobject);
+   procedure fontchange(const sender: tobject);
   public
    constructor create(const aowner: tcustomdatabutton);
    class function getitemclasstype: persistentclassty; override;
@@ -1097,6 +1097,7 @@ type
    property min; 
    property max;
    property valuedisabled;
+   property onclientmouseevent;
  end;
 
  tstockglyphdatabutton = class(tcustomdatabutton)
@@ -3571,10 +3572,10 @@ procedure tvaluefontarrayprop.createitem(const index: integer;
 begin
  item:= tfont.create;
  item.assign(fowner.font);
- tfont(item).onchange:= @dochange;
+ tfont(item).onchange:= @fontchange;
 end;
 
-procedure tvaluefontarrayprop.dochange(const sender: tobject);
+procedure tvaluefontarrayprop.fontchange(const sender: tobject);
 begin
  fowner.formatchanged;
 end;

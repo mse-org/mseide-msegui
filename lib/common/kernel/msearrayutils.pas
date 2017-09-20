@@ -178,6 +178,8 @@ procedure moveitem(var dest: integerarty; const sourceindex: integer;
 
 function adduniqueitem(var dest: pointerarty; const value: pointer): integer;
                         //returns index
+function addnewitem(var dest: pointerarty; const value: pointer): integer;
+                        //returns index, -1 if already existing
 
 function isequalarray(const a: integerarty; const b: integerarty): boolean;
 
@@ -1250,6 +1252,22 @@ begin
  for int1:= 0 to high(dest) do begin
   if dest[int1] = value then begin
    result:= int1;
+   exit;
+  end;
+ end;
+ result:= high(dest) + 1;
+ setlength(dest,result+1);
+ dest[result]:= value;
+end;
+
+function addnewitem(var dest: pointerarty; const value: pointer): integer;
+                        //returns index
+var
+ int1: integer;
+begin
+ for int1:= 0 to high(dest) do begin
+  if dest[int1] = value then begin
+   result:= -1;
    exit;
   end;
  end;
