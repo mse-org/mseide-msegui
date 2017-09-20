@@ -1461,7 +1461,10 @@ var
       fw^.setsize(widget1,fw^.size(widget1)+int1); //extend size
      end
      else begin
-      widget1.parentwidget.changeclientsize(fr^.makesize(int1,0));
+      widget1.parentwidget.clientsize:= 
+           addsize(widget1.parentwidget.clientsize,fr^.makesize(int1,0));
+              //not async
+//      widget1.parentwidget.changeclientsize(fr^.makesize(int1,0));
      end;
     end;
    end;
