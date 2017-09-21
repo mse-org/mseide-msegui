@@ -1457,15 +1457,20 @@ var
    end
    else begin
     if hasparent1 then begin
+     fw^.setanchordsize(widget1,fw^.size(widget1)+int1); //extend size
+     {
      if not fw^.anchstop(widget1) then begin
       fw^.setsize(widget1,fw^.size(widget1)+int1); //extend size
      end
      else begin
-      widget1.parentwidget.clientsize:= 
+      if not fw^.anchboth(widget1) then begin //use setanchordsize?
+       widget1.parentwidget.clientsize:= 
            addsize(widget1.parentwidget.clientsize,fr^.makesize(int1,0));
               //not async
 //      widget1.parentwidget.changeclientsize(fr^.makesize(int1,0));
+      end;
      end;
+     }
     end;
    end;
   end
