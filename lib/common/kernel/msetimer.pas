@@ -1319,7 +1319,7 @@ end;
 
 function tanimitemcomp.getenabled: boolean;
 begin
- result:= fitem.enabled;
+ result:= fenabled;
 end;
 
 procedure tanimitemcomp.setenabled(const avalue: boolean);
