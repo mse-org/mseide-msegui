@@ -12821,7 +12821,8 @@ begin
    end;
    dist:= (drect.y + drect.cy div 2) - (srect.y + srect.cy div 2);   
   end;
-  result:= abs(result) * orthoweighting;
+  result:= abs(result);
+  result:= result * orthoweighting;
   if direction in [gd_left,gd_up] then begin
    dist:= -dist;
   end;

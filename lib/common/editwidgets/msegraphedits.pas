@@ -2755,8 +2755,19 @@ begin
 end;
 
 function ttogglegraphdataedit.navigrect: rectty;
+var
+ p1: captionposty;
 begin
  result:= widgetsizerect;
+ if (fframe <> nil) then begin
+  p1:= tcaptionframe(fframe).captionpos;
+  if p1 in rightcaptionpos then begin
+   result.x:= paintpos.x;
+  end;
+  if p1 in bottomcaptionpos then begin
+   result.y:= paintpos.y;
+  end;
+ end;
 end;
 
 { tcustombooleanedit }
