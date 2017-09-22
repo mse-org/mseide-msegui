@@ -12816,7 +12816,7 @@ begin
   else begin
    dend:= drect.x + drect.cx;
    result:= drect.x + srect.x;
-   if (srect.x >= drect.x) and (srect.x < dend) then begin
+   if (srect.x + 3 >= drect.x) and (srect.x < dend) then begin
     result:= 0;
    end;
    dist:= (drect.y + drect.cy div 2) - (srect.y + srect.cy div 2);   
