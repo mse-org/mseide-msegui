@@ -747,8 +747,8 @@ type
    fvalue: integer;
    fvaluedefault: integer;
    fonsetvalue: setintegereventty;
-   fmin: integer;
-   fmax: integer;
+   fvaluemin: integer;
+   fvaluemax: integer;
 //   fdatalist: tintegerdatalist;
    fonpaintglyph: paintintegerglypheventty;
    procedure setvalue(const avalue: integer);
@@ -760,9 +760,11 @@ type
    function getifilink: tifiintegerlinkcomp;
    procedure setifilink(const avalue: tifiintegerlinkcomp);
   {$endif}
-   procedure setmin(const avalue: integer);
-   procedure setmax(const avalue: integer);
+   procedure setvaluemin(const avalue: integer);
+   procedure setvaluemax(const avalue: integer);
    function getdatalist: tintegerdatalist;
+   procedure readmin(reader: treader);
+   procedure readmax(reader: treader);
   protected
 //   procedure setgridintf(const intf: iwidgetgrid); override;
    procedure setvaluedata(const source); override;
@@ -789,6 +791,7 @@ type
                 const avalue; const arect: rectty); override;
    procedure datalistdestroyed; override;
    procedure updatedatalist; override;
+   procedure defineproperties(filer: tfiler) override;
   public
    function checkvalue: boolean; override;
    procedure togglegridvalue(const index: integer); override;
@@ -802,9 +805,9 @@ type
    property value: integer read fvalue write setvalue default 0;
    property valuedefault: integer read fvaluedefault 
                                        write fvaluedefault default 0;
-   property min: integer read fmin write setmin default 0; 
+   property valuemin: integer read fvaluemin write setvaluemin default 0; 
                                                //checked by togglevalue
-   property max: integer read fmax write setmax default 0; 
+   property valuemax: integer read fvaluemax write setvaluemax default 0; 
                                                //checked by togglevalue
    property onpaintglyph: paintintegerglypheventty read fonpaintglyph 
                                                          write fonpaintglyph;
@@ -829,6 +832,22 @@ type
  end;
 
  databuttoneventty = procedure(const sender: tcustomdatabutton) of object;
+
+ tvaluefontarrayprop = class(tpersistentarrayprop)
+  private
+   fowner: tcustomdatabutton;
+   procedure setitems(const index: integer; const avalue: tfont);
+  protected
+   function getitems(const index: integer): tfont;
+   procedure createitem(const index: integer; var item: tpersistent); override;
+   procedure fontchange(const sender: tobject);
+  public
+   constructor create(const aowner: tcustomdatabutton);
+   class function getitemclasstype: persistentclassty; override;
+                         //used in dumpunitgroups
+   property items[const index: integer]: tfont read getitems 
+                                                   write setitems; default;
+ end;
   
  tcustomdatabutton = class(tcustomintegergraphdataedit,iactionlink,iimagelistinfo)
   private
@@ -844,6 +863,7 @@ type
    fvaluecaptions: tmsestringarrayprop;
    fonupdate: databuttoneventty;
    fvaluedisabled: integer;
+   fvaluefonts: tvaluefontarrayprop;
    procedure setcolorglyph(const avalue: colorty);
    function iscolorglyphstored: boolean;
    procedure setvaluefaces(const avalue: tvaluefacearrayprop);
@@ -894,6 +914,7 @@ type
    procedure setimageoffsetmouse(const avalue: integer);
    procedure setimageoffsetclicked(const avalue: integer);
    procedure setvaluedisabled(const avalue: integer);
+   procedure setvaluefonts(const avalue: tvaluefontarrayprop);
   protected
    finfo: shapeinfoty;
    factioninfo: actioninfoty;
@@ -930,7 +951,8 @@ type
    procedure mouseevent(var info: mouseeventinfoty); override;
    procedure dokeydown(var info: keyeventinfoty); override;
    procedure dokeyup(var info: keyeventinfoty); override;
-   procedure doshortcut(var info: keyeventinfoty; const sender: twidget); override;
+   procedure doshortcut(var info: keyeventinfoty;
+                                          const sender: twidget); override;
    procedure clientrectchanged; override;
 //   function getframestateflags: framestateflagsty; override;
    procedure paintglyph(const canvas: tcanvas; const acolorglyph: colorty;
@@ -959,6 +981,8 @@ type
                                                      write setvaluefaces;
    property valuecaptions: tmsestringarrayprop read fvaluecaptions
                                                   write setvaluecaptions;
+   property valuefonts: tvaluefontarrayprop read fvaluefonts
+                                                  write setvaluefonts;
    property font: twidgetfont read getfont write setfont stored isfontstored;
    property action: tcustomaction read factioninfo.action write setaction;
    property caption: captionty read factioninfo.captiontext write setcaption 
@@ -1023,8 +1047,8 @@ type
                                       write setvaluedisabled default -2; 
                   //button.enabled:= value <> valuedisabled
                   //-2 -> not checked
-   property min default -1; 
-   property max default 0;
+   property valuemin default -1; 
+   property valuemax default 0;
    property optionswidget default defaultoptionswidget - [ow_mousefocus];
   published
    property visible stored false;
@@ -1039,6 +1063,7 @@ type
    property optionsskin;
    property valuefaces;
    property valuecaptions;
+   property valuefonts;
    property font;
 
    property action;
@@ -1061,6 +1086,8 @@ type
    property onexecute;
    property onbeforeexecute;
    property onafterexecute;
+   property onmouseevent;
+   property onclientmouseevent;
 
    property imageoffset;
    property imageoffsetdisabled;
@@ -1072,8 +1099,8 @@ type
    property group;
    property value;
    property valuedefault;
-   property min; 
-   property max;
+   property valuemin; 
+   property valuemax;
    property valuedisabled;
  end;
 
@@ -1107,10 +1134,12 @@ type
    property onafterexecute;
    property onsetvalue;
    property onpaintglyph;
+   property onmouseevent;
+   property onclientmouseevent;
    property value;
    property valuedefault;
-   property min; 
-   property max;
+   property valuemin; 
+   property valuemax;
    property valuedisabled;
  end; 
  
@@ -1151,8 +1180,8 @@ type
    property onpaintglyph;
    property value default -1;
    property valuedefault default -1;
-   property min; 
-   property max;
+   property valuemin; 
+   property valuemax;
    property imagelist;
    property imageoffset;
    property imagenums;
@@ -3289,14 +3318,14 @@ begin
          (bo_cantoggle in foptions) or (value = fvaluedefault) then begin
   if down then begin
    dec(avalue);
-   if avalue < fmin then begin
-    avalue:= fmax;
+   if avalue < fvaluemin then begin
+    avalue:= fvaluemax;
    end;
   end
   else begin
    inc(avalue);
-   if avalue > fmax then begin
-    avalue:= fmin;
+   if avalue > fvaluemax then begin
+    avalue:= fvaluemin;
    end;
   end;
   result:= true;
@@ -3328,7 +3357,7 @@ procedure tcustomintegergraphdataedit.togglevalue(const areadonly: boolean;
 var
  int1: integer;
 begin
- if not areadonly and (fmin <> fmax) then begin
+ if not areadonly and (fvaluemin <> fvaluemax) then begin
   int1:= fvalue;
   if doinc(int1,down) then begin
    docheckvalue(int1);
@@ -3355,7 +3384,7 @@ procedure tcustomintegergraphdataedit.togglegridvalue(const index: integer);
 var
  int1: integer;
 begin
- if fmin <> fmax then begin
+ if fvaluemin <> fvaluemax then begin
   int1:= gridvalue[index];
   if doinc(int1,false) then begin
    gridvalue[index]:= int1;
@@ -3425,10 +3454,10 @@ var
  int1: integer;
 begin
  int1:= fvaluedefault + 1;
- if int1 > fmax then begin
+ if int1 > fvaluemax then begin
   int1:= int1 -2;
-  if int1 < fmin then begin
-   int1:= fmin;
+  if int1 < fvaluemin then begin
+   int1:= fvaluemin;
   end;
  end;
  gridvalue[index]:= int1;
@@ -3457,9 +3486,9 @@ begin
 end;
 {$endif}
 
-procedure tcustomintegergraphdataedit.setmin(const avalue: integer);
+procedure tcustomintegergraphdataedit.setvaluemin(const avalue: integer);
 begin
- fmin:= avalue;
+ fvaluemin:= avalue;
  if fdatalist <> nil then begin
   with tgridintegerdatalist(fdatalist) do begin
    min:= avalue;
@@ -3467,9 +3496,9 @@ begin
  end;
 end;
 
-procedure tcustomintegergraphdataedit.setmax(const avalue: integer);
+procedure tcustomintegergraphdataedit.setvaluemax(const avalue: integer);
 begin
- fmax:= avalue;
+ fvaluemax:= avalue;
  if fdatalist <> nil then begin
   with tgridintegerdatalist(fdatalist) do begin
    max:= avalue;
@@ -3480,10 +3509,27 @@ end;
 procedure tcustomintegergraphdataedit.updatedatalist;
 begin
  with tgridintegerdatalist(fdatalist) do begin
-  min:= self.min;
-  max:= self.max;
+  min:= self.valuemin;
+  max:= self.valuemax;
   notcheckedvalue:= self.valuedefault;
  end;
+end;
+
+procedure tcustomintegergraphdataedit.readmin(reader: treader);
+begin
+ valuemin:= reader.readinteger();
+end;
+
+procedure tcustomintegergraphdataedit.readmax(reader: treader);
+begin
+ valuemax:= reader.readinteger();
+end;
+
+procedure tcustomintegergraphdataedit.defineproperties(filer: tfiler);
+begin
+ inherited;
+ filer.defineproperty('min',@readmin,nil,false);
+ filer.defineproperty('max',@readmax,nil,false);
 end;
 
 function tcustomintegergraphdataedit.getdatalist: tintegerdatalist;
@@ -3531,6 +3577,45 @@ begin
  result:= tface(inherited getitems(index));
 end;
 
+{ tvaluefontarrayprop }
+
+constructor tvaluefontarrayprop.create(const aowner: tcustomdatabutton);
+begin
+ fowner:= aowner;
+ inherited create(nil);
+end;
+
+class function tvaluefontarrayprop.getitemclasstype: persistentclassty;
+begin
+ result:= tfont;
+end;
+
+procedure tvaluefontarrayprop.createitem(const index: integer;
+                                                      var item: tpersistent);
+begin
+ item:= tfont.create;
+ item.assign(fowner.font);
+ tfont(item).onchange:= @fontchange;
+end;
+
+procedure tvaluefontarrayprop.fontchange(const sender: tobject);
+begin
+ fowner.formatchanged;
+end;
+
+procedure tvaluefontarrayprop.setitems(const index: integer; const avalue: tfont);
+begin
+ checkindex(index);
+ if fitems[index] <> nil then begin
+  fitems[index].assign(avalue);
+ end;
+end;
+
+function tvaluefontarrayprop.getitems(const index: integer): tfont;
+begin
+ result:= tfont(inherited getitems(index));
+end;
+
 { tcustomdatabutton }
 
 constructor tcustomdatabutton.create(aowner: tcomponent);
@@ -3544,10 +3629,11 @@ begin
  fimagenrdisabled:= -2;
  fvalue:= -1;
  fvaluedefault:= -1;
- fmin:= -1;
- fmax:= 0;
+ fvaluemin:= -1;
+ fvaluemax:= 0;
  fvaluefaces:= tvaluefacearrayprop.create(self);
  fvaluecaptions:= tmsestringarrayprop.create;
+ fvaluefonts:= tvaluefontarrayprop.create(self);
  optionswidget:= defaultoptionswidget - [ow_mousefocus];
  initshapeinfo(finfo);
  finfo.ca.imagepos:= ip_center;
@@ -3566,6 +3652,7 @@ begin
  end;
  fvaluefaces.free;
  fvaluecaptions.free;
+ fvaluefonts.free;
  fimagenums.free;
  inherited;
 end;
@@ -3831,6 +3918,16 @@ procedure tcustomdatabutton.paintglyph(const canvas: tcanvas;
    result:= nil;
   end;
  end;
+
+ function actualfont(const aindex: integer): tfont;
+ begin
+  if (aindex >= 0) and (aindex < fvaluefonts.count) then begin
+   result:= fvaluefonts[aindex];
+  end
+  else begin
+   result:= font;
+  end;
+ end;
  
 var
  statebefore: shapestatesty;
@@ -3841,6 +3938,7 @@ begin
  if (@avalue <> nil) then begin
   finfo.ca.caption:= actualcaption(integer(avalue));
   finfo.face:= actualface(integer(avalue));
+  finfo.ca.font:= actualfont(int32(avalue));
   statebefore:= finfo.state;
   dimbefore:= finfo.ca.dim;
   finfo.ca.dim:= arect;
@@ -3868,6 +3966,7 @@ begin
  else begin
   finfo.ca.caption:= actualcaption(fvalue);
   finfo.face:= actualface(fvalue);
+  finfo.ca.font:= actualfont(fvalue);
   setactualimagenr(fvalue);
   drawbutton(canvas,finfo);
  end;
@@ -4399,6 +4498,11 @@ begin
   end;
   }
  end;
+end;
+
+procedure tcustomdatabutton.setvaluefonts(const avalue: tvaluefontarrayprop);
+begin
+ fvaluefonts.assign(avalue);
 end;
 
 function tcustomdatabutton.valueenabledstate(const avalue: integer): boolean;

@@ -4014,12 +4014,14 @@ begin
  result:= fobjectlinker;
 end;
 
-procedure tlinkedobject.objectevent(const sender: tobject; const event: objecteventty);
+procedure tlinkedobject.objectevent(const sender: tobject; 
+                                                    const event: objecteventty);
 begin
  //dummy
 end;
 
-procedure tlinkedobject.setlinkedvar(const source: tmsecomponent; var dest: tmsecomponent;
+procedure tlinkedobject.setlinkedvar(const source: tmsecomponent;
+                                                        var dest: tmsecomponent;
               const linkintf: iobjectlink = nil);
 begin
  if linkintf = nil then begin
@@ -4030,7 +4032,8 @@ begin
  end;
 end;
 
-procedure tlinkedobject.setlinkedvar(const source: tlinkedobject; var dest: tlinkedobject;
+procedure tlinkedobject.setlinkedvar(const source: tlinkedobject; 
+                                                        var dest: tlinkedobject;
               const linkintf: iobjectlink = nil);
 begin
  if linkintf = nil then begin
@@ -4041,18 +4044,21 @@ begin
  end;
 end;
 
-procedure tlinkedobject.link(const source,dest: iobjectlink; valuepo: pointer = nil;
-                              ainterfacetype: pointer = nil; once: boolean = false);
+procedure tlinkedobject.link(const source,dest: iobjectlink;
+                          valuepo: pointer = nil;
+                          ainterfacetype: pointer = nil; once: boolean = false);
 begin
  getobjectlinker.link(source,dest,valuepo,ainterfacetype,once);
 end;
 
-procedure tlinkedobject.unlink(const source,dest: iobjectlink; valuepo: pointer = nil);
+procedure tlinkedobject.unlink(const source,dest: iobjectlink;
+                                                        valuepo: pointer = nil);
 begin
  getobjectlinker.unlink(source,dest,valuepo);
 end;
 
-procedure tlinkedobject.objevent(const sender: iobjectlink; const event: objecteventty);
+procedure tlinkedobject.objevent(const sender: iobjectlink;
+                                                    const event: objecteventty);
 begin
  getobjectlinker.objevent(sender,event);
 end;
@@ -4082,8 +4088,8 @@ begin
  //dummy
 end;
 
-procedure tlinkedrecordlist.setlinkedvar(const source: tmsecomponent; var dest: tmsecomponent;
-              const linkintf: iobjectlink = nil);
+procedure tlinkedrecordlist.setlinkedvar(const source: tmsecomponent; 
+                    var dest: tmsecomponent; const linkintf: iobjectlink = nil);
 begin
  if linkintf = nil then begin
   getobjectlinker.setlinkedvar(iobjectlink(self),source,dest);

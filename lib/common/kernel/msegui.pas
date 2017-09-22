@@ -3131,9 +3131,9 @@ type
  setwidgetintegerty = procedure(const awidget: twidget; const avalue: integer);
  widgetaccessty = record
   pos,size,stop,min,max,opos,osize,ostop,omin,omax: getwidgetintegerty;
-  setpos,setsize,setstop,setmin,setmax,
+  setpos,setsize,setanchordsize,setstop,setmin,setmax,
            setopos,setosize,setostop,setomin,setomax: setwidgetintegerty;
-  anchstop,oanchstop: getwidgetbooleanty;
+  anchstop,oanchstop,anchboth,oanchboth: getwidgetbooleanty;
  end;
  pwidgetaccessty = ^widgetaccessty;
  
@@ -3143,14 +3143,18 @@ function wbounds_y(const awidget: twidget): integer;
 procedure wsetbounds_y(const awidget: twidget; const avalue: integer);
 function wbounds_cx(const awidget: twidget): integer;
 procedure wsetbounds_cx(const awidget: twidget; const avalue: integer);
+procedure wsetanchord_cx(const awidget: twidget; const avalue: integer);
 function wbounds_cy(const awidget: twidget): integer;
 procedure wsetbounds_cy(const awidget: twidget; const avalue: integer);
+procedure wsetanchord_cy(const awidget: twidget; const avalue: integer);
 function wstopx(const awidget: twidget): integer;
 procedure wsetstopx(const awidget: twidget; const avalue: integer);
 function wstopy(const awidget: twidget): integer;
 procedure wsetstopy(const awidget: twidget; const avalue: integer);
 function wanchstopx(const awidget: twidget): boolean;
 function wanchstopy(const awidget: twidget): boolean;
+function wanchbothx(const awidget: twidget): boolean;
+function wanchbothy(const awidget: twidget): boolean;
 
 function wbounds_cxmin(const awidget: twidget): integer;
 procedure wsetbounds_cxmin(const awidget: twidget; const avalue: integer);
@@ -3175,6 +3179,7 @@ const
   omax: {$ifdef FPC}@{$endif}wbounds_cymax;
   setpos: {$ifdef FPC}@{$endif}wsetbounds_x;
   setsize: {$ifdef FPC}@{$endif}wsetbounds_cx;
+  setanchordsize: {$ifdef FPC}@{$endif}wsetanchord_cx;
   setstop: {$ifdef FPC}@{$endif}wsetstopx;
   setmin: {$ifdef FPC}@{$endif}wsetbounds_cxmin;
   setmax: {$ifdef FPC}@{$endif}wsetbounds_cxmax;
@@ -3185,6 +3190,8 @@ const
   setomax: {$ifdef FPC}@{$endif}wsetbounds_cymax;
   anchstop: {$ifdef FPC}@{$endif}wanchstopx;
   oanchstop: {$ifdef FPC}@{$endif}wanchstopy;
+  anchboth: {$ifdef FPC}@{$endif}wanchbothx;
+  oanchboth: {$ifdef FPC}@{$endif}wanchbothy;
  );
  widgetaccessy: widgetaccessty = (
   pos: {$ifdef FPC}@{$endif}wbounds_y;
@@ -3199,6 +3206,7 @@ const
   omax: {$ifdef FPC}@{$endif}wbounds_cxmax;
   setpos: {$ifdef FPC}@{$endif}wsetbounds_y;
   setsize: {$ifdef FPC}@{$endif}wsetbounds_cy;
+  setanchordsize: {$ifdef FPC}@{$endif}wsetanchord_cy;
   setstop: {$ifdef FPC}@{$endif}wsetstopy;
   setmin: {$ifdef FPC}@{$endif}wsetbounds_cymin;
   setmax: {$ifdef FPC}@{$endif}wsetbounds_cymax;
@@ -3209,6 +3217,8 @@ const
   setomax: {$ifdef FPC}@{$endif}wsetbounds_cxmax;
   anchstop: {$ifdef FPC}@{$endif}wanchstopy;
   oanchstop: {$ifdef FPC}@{$endif}wanchstopx;
+  anchboth: {$ifdef FPC}@{$endif}wanchbothy;
+  oanchboth: {$ifdef FPC}@{$endif}wanchbothx;
  );
   
 function application: tguiapplication;
@@ -3504,6 +3514,13 @@ begin
  awidget.bounds_cx:= avalue;
 end;
 
+procedure wsetanchord_cx(const awidget: twidget; const avalue: integer);
+begin
+ if not wanchbothx(awidget) then begin
+  awidget.setanchordwidgetsize(ms(avalue,awidget.bounds_cy));
+ end;
+end;
+
 function wbounds_y(const awidget: twidget): integer;
 begin
  result:= awidget.fwidgetrect.y;
@@ -3517,6 +3534,13 @@ end;
 function wbounds_cy(const awidget: twidget): integer;
 begin
  result:= awidget.fwidgetrect.cy;
+end;
+
+procedure wsetanchord_cy(const awidget: twidget; const avalue: integer);
+begin
+ if not wanchbothy(awidget) then begin
+  awidget.setanchordwidgetsize(ms(awidget.bounds_cx,avalue));
+ end;
 end;
 
 procedure wsetbounds_cy(const awidget: twidget; const avalue: integer);
@@ -3552,6 +3576,22 @@ end;
 function wanchstopy(const awidget: twidget): boolean;
 begin
  result:= an_bottom in awidget.anchors;
+end;
+
+function wanchbothx(const awidget: twidget): boolean;
+var
+ an1: anchorsty;
+begin
+ an1:= [an_left,an_right] * awidget.anchors;
+ result:= (an1 = []) or (an1 = [an_left,an_right]);
+end;
+
+function wanchbothy(const awidget: twidget): boolean;
+var
+ an1: anchorsty;
+begin
+ an1:= [an_top,an_bottom] * awidget.anchors;
+ result:= (an1 = []) or (an1 = [an_top,an_bottom]);
 end;
 
 function wbounds_cxmin(const awidget: twidget): integer;
@@ -4839,27 +4879,27 @@ begin
   if afi.frameimage_list <> nil then begin
    if not (edg_left in afi.hiddenedges) then begin
     int1:= afi.frameimage_list.width + afi.frameimage_left;
-    if int1 > left then begin
+//    if int1 > left then begin
      left:= int1;
-    end;
+//    end;
    end;
    if not (edg_right in afi.hiddenedges) then begin
     int1:= afi.frameimage_list.width + afi.frameimage_right;
-    if int1 > right then begin
+//    if int1 > right then begin
      right:= int1;
-    end;
+//    end;
    end;
    if not (edg_top in afi.hiddenedges) then begin
     int1:= afi.frameimage_list.height + afi.frameimage_top;
-    if int1 > top then begin
+//    if int1 > top then begin
      top:= int1;
-    end;
+//    end;
    end;
    if not (edg_bottom in afi.hiddenedges) then begin
     int1:= afi.frameimage_list.height + afi.frameimage_bottom;
-    if int1 > bottom then begin
+//    if int1 > bottom then begin
      bottom:= int1;
-    end;
+//    end;
    end;
   end;
  end;

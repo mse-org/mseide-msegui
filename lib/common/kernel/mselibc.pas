@@ -2206,7 +2206,6 @@ function fstat(__fd:longint; __buf:Pstat):longint;
 
 function stat64(__file:Pchar; __buf:Pstat64):longint;
 function fstat64(__fd:longint; __buf:Pstat64):longint;
-
 function lstat(__file:Pchar; __buf:Pstat):longint;
 function lstat64(__file:Pchar; __buf:Pstat64):longint;
 {$else} //linux
@@ -2223,6 +2222,9 @@ function lstat(__file:Pchar; __buf:Pstat):longint; cdecl;
 function lstat64(__file:Pchar; __buf:Pstat64):longint; cdecl;
                                    external clib name 'lstat';
 {$endif} //not linux
+
+function flock(fd: cint; operation: cint): cint; cdecl;
+                                   external clib name 'flock';
 
 function S_ISDIR(mode : __mode_t) : boolean;
 

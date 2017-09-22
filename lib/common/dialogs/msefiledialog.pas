@@ -199,6 +199,8 @@ type
    function canoverwrite(): boolean; 
                          //true if current filename is allowed to write
    procedure clear;
+   procedure setfilenamelastdir(const afilename: filenamety);
+                                    //lastdir relative
    procedure componentevent(const event: tcomponentevent);
    property history: msestringarty read fhistory write fhistory;
    property filenames: filenamearty read ffilenames write ffilenames;
@@ -2114,6 +2116,11 @@ begin
  ffilenames:= nil;
  flastdir:= '';
  fhistory:= nil;
+end;
+
+procedure tfiledialogcontroller.setfilenamelastdir(const afilename: filenamety);
+begin
+ filename:= filepath(lastdir,afilename);
 end;
 
 procedure tfiledialogcontroller.setlastdir(const avalue: filenamety);

@@ -5474,8 +5474,8 @@ begin
       if realdata.defaultzero then begin
        valuedefault:= 0;
       end;
-      min:= realdata.min;
-      max:= realdata.max;
+      valuemin:= realdata.min;
+      valuemax:= realdata.max;
      end;
     end;
     lfk_integer: begin
@@ -5497,10 +5497,10 @@ begin
        vala.valuedefault:= 0;
        valb.valuedefault:= 0;
       end;
-      vala.min:= complexdata.min;
-      vala.max:= complexdata.max;
-      valb.min:= vala.min;
-      valb.max:= vala.max;
+      vala.valuemin:= complexdata.min;
+      vala.valuemax:= complexdata.max;
+      valb.valuemin:= vala.valuemin;
+      valb.valuemax:= vala.valuemax;
      end;
     end;
    end;

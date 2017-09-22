@@ -25,7 +25,7 @@ type
                                 //disabled for ttimer
                   to_autostart);//set enabled for to_single by setting interval,
                                 //disabled for ttimer
-timeroptionsty = set of timeroptionty;
+ timeroptionsty = set of timeroptionty;
  
  tsimpletimer = class(tnullinterfacedobject)
   private
@@ -117,6 +117,164 @@ timeroptionsty = set of timeroptionty;
              //last!
  end;
 
+const
+ defaultanimtick = 100000; //microseconds
+ 
+type
+ animkindty = (ank_single,ank_sawtooth,ank_triangle);
+ animoptionty = (ano_enabled,
+                 ano_autodestroy //animitem destroyed if enable set to false
+                                 //or ank_single terminates
+                );
+ animoptionsty = set of animoptionty;
+ 
+ tanimtimer = class;
+ tanimitem = class;
+ 
+ animtickeventty = procedure(const sender: tanimitem; 
+                                         const avalue: flo64) of object;
+ animstatety = (ans_down,ans_finished);
+ animstatesty = set of animstatety;
+ 
+ tanimitem = class(tlinkedobject)
+  private
+   fontick: animtickeventty;
+   fonstart: notifyeventty;
+   fonstop: notifyeventty;
+   procedure setenabled(const avalue: boolean);
+   procedure settickus(const avalue: int32);
+   procedure setkind(const avalue: animkindty);
+   procedure setoptions(const avalue: animoptionsty);
+   function getdown: boolean;
+   procedure setdown(const avalue: boolean);
+   function getvalue: flo64;
+  protected
+   fowner: tobject;
+   ftimer: tanimtimer;
+   fenabled: boolean;
+   fref: card32;
+   fnexttick: card32;
+   ftickus: int32;
+   ftickref: card32;
+   fkind: animkindty;
+   fstate: animstatesty;
+   foptions: animoptionsty;
+   finterval: flo64;
+   ftime: flo64;
+   procedure tick(); virtual;
+   procedure objectevent(const sender: tobject;
+                            const event: objecteventty); override;
+   procedure settimer(const atimer: tanimtimer);
+   procedure setnexttick();
+   procedure setnexttick1();
+  public
+   constructor create(const aowner: iobjectlink; const atimer: tanimtimer;
+                    const aontick: animtickeventty;
+                    const ainterval: flo64; //seconds
+                    const akind: animkindty = ank_single;
+                    const aoptions: animoptionsty = [ano_enabled];
+                                   const atickus: int32 = 0); //0 = default
+   constructor create(const aowner: tmsecomponent; const atimer: tanimtimer; 
+                    const aontick: animtickeventty;
+                    const ainterval: flo64; //seconds
+                    const akind: animkindty = ank_single;
+                    const aoptions: animoptionsty = [ano_enabled];
+                                   const atickus: int32 = 0); //0 = default
+   destructor destroy(); override;
+   procedure reset();
+   procedure restart();
+   property kind: animkindty read fkind write setkind;
+   property options: animoptionsty read foptions write setoptions;
+   property enabled: boolean read fenabled write setenabled;
+   property tickus: int32 read ftickus write settickus default 0;
+   property time: flo64 read ftime write ftime;
+   property down: boolean read getdown write setdown;
+   property value: flo64 read getvalue;
+   property interval: flo64 read finterval write finterval;
+   property timer: tanimtimer read ftimer write settimer;
+   property ontick: animtickeventty read fontick write fontick;
+   property onstart: notifyeventty read fonstart write fonstart;
+   property onstop: notifyeventty read fonstop write fonstop;
+ end;
+ panimitem = ^tanimitem;
+ animitemarty = array of tanimitem;
+  
+ tanimtimer = class(tmsecomponent)
+  private
+   ftouched: boolean;
+   function gettickus: int32;
+   procedure settickus(const avalue: int32);
+   function gethighres: boolean;
+   procedure sethighres(const avalue: boolean);
+   procedure setenabled(const avalue: boolean);
+  protected
+   fenabledcount: int32;
+   fitems: animitemarty;
+   ftimer: tsimpletimer;
+   fenabled: boolean;
+   procedure dotimer(const sender: tobject);
+   procedure add(const aitem: tanimitem);
+   procedure remove(const aitem: tanimitem);
+   procedure itemenabled(const avalue: boolean);
+   procedure checkenabled();
+   procedure loaded() override;
+  public
+   constructor create(aowner: tcomponent); override;
+   destructor destroy; override;
+   property enabledcount: int32 read fenabledcount;
+  published
+   property tickus: int32 read gettickus write settickus default defaultanimtick;
+   property highres: boolean read gethighres write sethighres default false;
+   property enabled: boolean read fenabled write setenabled default false;
+ end;
+ 
+ tanimitemcomp = class(tmsecomponent)
+  private
+   fitem: tanimitem;
+   fenabled: boolean;
+   function getkind: animkindty;
+   procedure setkind(const avalue: animkindty);
+   function getoptions: animoptionsty;
+   procedure setoptions(const avalue: animoptionsty);
+   function gettimer: tanimtimer;
+   procedure settimer(const avalue: tanimtimer);
+   function getenabled: boolean;
+   procedure setenabled(const avalue: boolean);
+   function gettickus: int32;
+   procedure settickus(const avalue: int32);
+   function gettime: flo64;
+   procedure settime(const avalue: flo64);
+   function getontick: animtickeventty;
+   procedure setontick(const avalue: animtickeventty);
+   function getonstop: notifyeventty;
+   procedure setonstop(const avalue: notifyeventty);
+   function getinterval: flo64;
+   procedure setinterval(const avalue: flo64);
+   function getonstart: notifyeventty;
+   procedure setonstart(const avalue: notifyeventty);
+   function getdown: boolean;
+   procedure setdown(const avalue: boolean);
+  protected
+   procedure loaded() override;
+  public
+   constructor create(aowner: tcomponent); override;
+   destructor destroy(); override;
+   procedure reset();
+   procedure restart();
+   property time: flo64 read gettime write settime;
+   property down: boolean read getdown write setdown;
+  published
+   property kind: animkindty read getkind write setkind default ank_single;
+//   property options: animoptionsty read getoptions write setoptions;
+   property interval: flo64 read getinterval write setinterval;
+   property enabled: boolean read getenabled write setenabled default false;
+   property timer: tanimtimer read gettimer write settimer;
+   property tickus: int32 read gettickus write settickus default 0;
+   property ontick: animtickeventty read getontick write setontick;
+   property onstart: notifyeventty read getonstart write setonstart;
+   property onstop: notifyeventty read getonstop write setonstop;
+ end;
+ 
 procedure tick(sender: tobject);
 procedure init;
 procedure deinit;
@@ -124,6 +282,7 @@ procedure deinit;
 implementation
 uses
  msesysintf1,msesysintf,SysUtils,mseapplication,msesystypes,msesysutils,
+ msearrayutils,
  mseformatstr{$ifndef mswindows},mselibc{$endif};
 
 const
@@ -756,6 +915,507 @@ begin
   interval:= finterval2;
  end;
  inherited;
+end;
+
+{ tanimitem }
+
+constructor tanimitem.create(const aowner: iobjectlink;
+               const atimer: tanimtimer;
+               const aontick: animtickeventty;
+               const ainterval: flo64;
+               const akind: animkindty = ank_single;
+               const aoptions: animoptionsty = [ano_enabled];
+                                             const atickus: int32 = 0);
+begin
+ ftickus:= atickus;
+ fontick:= aontick;
+ finterval:= ainterval;
+ fkind:= akind;
+ foptions:= aoptions;
+ if aowner <> nil then begin
+  fowner:= aowner.getinstance();
+  getobjectlinker.link(iobjectlink(self),aowner);
+ end;
+ settimer(atimer);
+ inherited create();
+ enabled:= ano_enabled in aoptions;
+end;
+
+constructor tanimitem.create(const aowner: tmsecomponent; 
+               const atimer: tanimtimer;
+               const aontick: animtickeventty;
+               const ainterval: flo64;
+               const akind: animkindty = ank_single;
+               const aoptions: animoptionsty = [ano_enabled];
+                                            const atickus: int32 = 0);
+var
+ ev1: ievent;
+begin
+ ev1:= nil;
+ if aowner <> nil then begin
+  ev1:= ievent(aowner);
+ end;
+ create(ev1,atimer,aontick,ainterval,akind,aoptions,atickus);
+end;
+
+destructor tanimitem.destroy();
+begin
+ settimer(nil);
+ inherited;
+end;
+
+procedure tanimitem.reset();
+begin
+ ftime:= 0;
+ fstate:= fstate - [ans_down,ans_finished];
+end;
+
+procedure tanimitem.restart();
+begin
+ reset();
+ if enabled then begin
+  if assigned(fonstart) then begin
+   fonstart(self);
+  end;
+ end
+ else begin
+  enabled:= true;
+ end;
+end;
+
+procedure tanimitem.setnexttick();
+begin
+ fref:= timebefore;
+ setnexttick1;
+end;
+
+procedure tanimitem.setnexttick1();
+begin
+ if ftickus = 0 then begin
+  fnexttick:= timebefore+ftimer.tickus;
+ end
+ else begin
+  fnexttick:= timebefore+ftickus;
+ end;
+end;
+
+function tanimitem.getvalue: flo64;
+begin
+ if (fkind = ank_triangle) and (ans_down in fstate) then begin
+  result:= 1-ftime;
+ end
+ else begin
+  result:= ftime;
+ end; 
+end;
+
+procedure tanimitem.tick();
+var
+ c1: card32;
+ b1: boolean;
+begin
+ if (ftickus = 0) or (ftickus = ftimer.tickus) or 
+                          laterorsame(fnexttick,timebefore) then begin
+  c1:= timebefore-fref;
+//  if int32(c1) >= 0 then begin
+   if finterval > 0 then begin
+    ftime:= ftime + (c1/1000000)/finterval; //seconds
+   end;
+   b1:= false;
+   while ftime > 1 do begin
+    if fkind = ank_single then begin
+     b1:= true;
+     ftime:= 1;
+     break;
+    end;
+    ftime:= ftime-1;
+    fstate:= fstate >< [ans_down];
+   end;
+   fref:= timebefore;
+   setnexttick1();
+   if assigned(fontick) then begin
+    fontick(self,getvalue);
+   end;
+   if b1 then begin
+    enabled:= false;
+    include(fstate,ans_finished);
+   end;
+//  end
+//  else begin
+   setnexttick1;
+//  end;
+ end;
+end;
+
+procedure tanimitem.objectevent(const sender: tobject;
+               const event: objecteventty);
+begin
+ if (event = oe_destroyed) then begin
+  if sender = ftimer then begin
+   ftimer:= nil;
+  end;
+  if sender = fowner then begin
+   destroy();
+  end;
+ end;
+end;
+
+procedure tanimitem.setenabled(const avalue: boolean);
+begin
+ if fenabled <> avalue then begin
+  if not avalue or not(ans_finished in fstate) then begin
+   fenabled:= avalue;
+   if ftimer <> nil then begin
+    ftimer.itemenabled(avalue);
+   end;
+   if not enabled then begin
+    if assigned(fonstop) then begin
+     fonstop(self);
+    end;
+    if ano_autodestroy in foptions then begin
+     destroy();
+    end;
+   end
+   else begin
+    if assigned(fonstart) then begin
+     fonstart(self);
+    end;
+    fref:= timebefore;
+    fnexttick:= fref;
+    tick(); //immediately
+   end;
+  end;
+ end;
+end;
+
+procedure tanimitem.settickus(const avalue: int32);
+begin
+ if ftickus <> avalue then begin
+  ftickus:= avalue;
+  setnexttick();
+ end;
+end;
+
+procedure tanimitem.setkind(const avalue: animkindty);
+begin
+ fkind:= avalue;
+end;
+
+procedure tanimitem.setoptions(const avalue: animoptionsty);
+begin
+ foptions:= avalue;
+end;
+
+function tanimitem.getdown: boolean;
+begin
+ result:= ans_down in fstate;
+end;
+
+procedure tanimitem.setdown(const avalue: boolean);
+begin
+ if avalue then begin
+  include(fstate,ans_down);
+ end
+ else begin
+  exclude(fstate,ans_down);
+ end;
+end;
+
+procedure tanimitem.settimer(const atimer: tanimtimer);
+begin
+ if ftimer <> atimer then begin
+  if ftimer <> nil then begin
+   ftimer.remove(self);
+  end;
+  ftimer:= atimer;
+  if ftimer <> nil then begin
+   ftimer.add(self);
+  end;
+ end;
+end;
+
+{ tanimtimer }
+
+constructor tanimtimer.create(aowner: tcomponent);
+begin
+ ftimer:= tsimpletimer.create(defaultanimtick,@dotimer,false,[to_leak]);
+ inherited;
+end;
+
+destructor tanimtimer.destroy;
+begin
+ enabled:= false;
+ ftimer.free;
+ inherited;
+end;
+
+function tanimtimer.gettickus: int32;
+begin
+ result:= ftimer.interval;
+end;
+
+procedure tanimtimer.settickus(const avalue: int32);
+begin
+ ftimer.interval:= avalue;
+end;
+
+function tanimtimer.gethighres: boolean;
+begin
+ result:= ftimer.highres;
+end;
+
+procedure tanimtimer.sethighres(const avalue: boolean);
+begin
+ ftimer.highres:= avalue;
+end;
+
+procedure tanimtimer.setenabled(const avalue: boolean);
+begin
+ fenabled:= avalue;
+ if not (csreading in componentstate) then begin
+  checkenabled();
+ end;
+end;
+
+procedure tanimtimer.dotimer(const sender: tobject);
+var
+ p1,pe: panimitem;
+ i1: int32;
+label
+ loopstart;
+begin
+ i1:= 0;
+ while i1 < 8 do begin //emergency brake
+loopstart:
+  if fenabledcount > 0 then begin
+   p1:= pointer(fitems);
+   pe:= p1+high(fitems);
+   while p1 <= pe do begin
+    if p1^.enabled then begin
+     ftouched:= false;
+     p1^.tick(); 
+     if ftouched then begin
+      goto loopstart;
+     end;
+    end;
+    inc(p1);
+   end;
+   break;
+  end
+  else begin
+   break;
+  end;
+  inc(i1);
+ end;
+end;
+
+procedure tanimtimer.add(const aitem: tanimitem);
+begin
+ if addnewitem(pointerarty(fitems),aitem) >= 0 then begin
+  ftouched:= true;
+  aitem.getobjectlinker.link(self);
+  if aitem.enabled then begin
+   itemenabled(true);
+  end;
+ end;
+end;
+
+procedure tanimtimer.remove(const aitem: tanimitem);
+begin
+ if removeitem(pointerarty(fitems),aitem) >= 0 then begin
+  ftouched:= true;
+  aitem.getobjectlinker.unlink(self);
+  if aitem.enabled then begin
+   itemenabled(false);
+  end;
+ end;
+end;
+
+procedure tanimtimer.itemenabled(const avalue: boolean);
+begin
+ if avalue then begin
+  inc(fenabledcount);
+  checkenabled();
+ end
+ else begin
+  dec(fenabledcount);
+  if fenabledcount <= 0 then begin
+   ftimer.enabled:= false;
+  end;
+ end;
+end;
+
+procedure tanimtimer.checkenabled();
+var
+ p1,pe: panimitem;
+begin
+ if fenabled and (fenabledcount > 0) then begin
+  if not ftimer.enabled then begin
+   p1:= pointer(fitems);
+   pe:= p1+high(fitems);
+   while p1 <= pe do begin
+    if p1^.enabled then begin
+     p1^.setnexttick();
+    end;
+    inc(p1);
+   end;
+   ftimer.enabled:= true;
+  end;
+ end
+ else begin
+  ftimer.enabled:= false;
+ end;
+end;
+
+procedure tanimtimer.loaded();
+begin
+ inherited;
+ checkenabled();
+end;
+
+{ tanimitemcomp }
+
+constructor tanimitemcomp.create(aowner: tcomponent);
+begin
+ fitem:= tanimitem.create(self,nil,nil,1.0,ank_single,[],0);
+ inherited;
+end;
+
+destructor tanimitemcomp.destroy();
+begin
+ fitem.free;
+ inherited;
+end;
+
+function tanimitemcomp.getkind: animkindty;
+begin
+ result:= fitem.kind;
+end;
+
+procedure tanimitemcomp.setkind(const avalue: animkindty);
+begin
+ fitem.kind:= avalue;
+end;
+
+function tanimitemcomp.getoptions: animoptionsty;
+begin
+ result:= fitem.options;
+end;
+
+procedure tanimitemcomp.setoptions(const avalue: animoptionsty);
+begin
+ fitem.options:= avalue - [ano_autodestroy];
+end;
+
+function tanimitemcomp.gettimer: tanimtimer;
+begin
+ result:= fitem.timer;
+end;
+
+procedure tanimitemcomp.settimer(const avalue: tanimtimer);
+begin
+ fitem.timer:= avalue;
+end;
+
+function tanimitemcomp.getenabled: boolean;
+begin
+ result:= fenabled;
+end;
+
+procedure tanimitemcomp.setenabled(const avalue: boolean);
+begin
+ fenabled:= avalue;
+ if not (csreading in componentstate) then begin
+  fitem.enabled:= avalue;
+ end;
+end;
+
+function tanimitemcomp.gettickus: int32;
+begin
+ result:= fitem.tickus;
+end;
+
+procedure tanimitemcomp.settickus(const avalue: int32);
+begin
+ fitem.tickus:= avalue;
+end;
+
+function tanimitemcomp.gettime: flo64;
+begin
+ result:= fitem.time;
+end;
+
+procedure tanimitemcomp.settime(const avalue: flo64);
+begin
+ fitem.time:= avalue;
+end;
+
+function tanimitemcomp.getontick: animtickeventty;
+begin
+ result:= fitem.ontick;
+end;
+
+procedure tanimitemcomp.setontick(const avalue: animtickeventty);
+begin
+ fitem.ontick:= avalue;
+end;
+
+function tanimitemcomp.getonstart: notifyeventty;
+begin
+ result:= fitem.onstart;
+end;
+
+procedure tanimitemcomp.setonstart(const avalue: notifyeventty);
+begin
+ fitem.onstart:= avalue;
+end;
+
+function tanimitemcomp.getdown: boolean;
+begin
+ result:= fitem.down;
+end;
+
+procedure tanimitemcomp.setdown(const avalue: boolean);
+begin
+ fitem.down:= avalue;
+end;
+
+function tanimitemcomp.getonstop: notifyeventty;
+begin
+ result:= fitem.onstop;
+end;
+
+procedure tanimitemcomp.setonstop(const avalue: notifyeventty);
+begin
+ fitem.onstop:= avalue;
+end;
+
+function tanimitemcomp.getinterval: flo64;
+begin
+ result:= fitem.interval;
+end;
+
+procedure tanimitemcomp.setinterval(const avalue: flo64);
+begin
+ fitem.interval:= avalue;
+end;
+
+procedure tanimitemcomp.reset();
+begin
+ fitem.reset;
+end;
+
+procedure tanimitemcomp.restart();
+begin
+ fitem.restart();
+end;
+
+procedure tanimitemcomp.loaded();
+begin
+ inherited;
+ if fenabled then begin
+  fitem.enabled:= true;
+ end;
 end;
 
 initialization

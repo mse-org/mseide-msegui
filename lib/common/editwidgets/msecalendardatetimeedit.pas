@@ -51,8 +51,8 @@ type
    property value {stored false};
    property formatedit;
    property formatdisp;
-   property min {stored false};
-   property max {stored false};
+   property valuemin {stored false};
+   property valuemax {stored false};
    property kind;
    property options;
 {$ifdef mse_with_ifi}

@@ -217,6 +217,10 @@ type
   items: markitemarty;
  end;
  
+const
+ emptymarkinfo: markinfoty = (backgroundcolor: cl_none; items: nil);
+ 
+type
  clientinfoty = record
   client: tobject;
   syntaxdefhandle: integer;
