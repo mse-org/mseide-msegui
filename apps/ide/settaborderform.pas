@@ -185,7 +185,7 @@ begin
    grid.row:= int1;
   end;
  end;
- mousetaborder.max:= high(fchildren);
+ mousetaborder.valuemax:= high(fchildren);
 end;
 
 

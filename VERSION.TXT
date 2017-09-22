@@ -1,5 +1,8 @@
 MSEide+MSEgui breaking changes version history
 **********************************************
+2017-09-22
+ tdatabutton.min -> valuemin, max -> valuemax.
+ tintegeredit.min -> valuemin, max -> valuemax.
 2017-09-14
  Definition of the inner active area of buttons is made with
  the new tframe property frameo_* instead of framei_*,

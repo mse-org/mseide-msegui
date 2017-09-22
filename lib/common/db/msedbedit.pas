@@ -748,8 +748,8 @@ type
    property datalink: teditwidgetdatalink read fdatalink write setdatalink;
    property base;
    property bitcount;
-   property min;
-   property max;
+   property valuemin;
+   property valuemax;
    property onsetvalue;
  end;
 
@@ -823,8 +823,8 @@ type
    property datalink: teditwidgetdatalink read fdatalink write setdatalink; 
    property onsetvalue;
    property onpaintglyph;
-   property min; 
-   property max;
+   property valuemin; 
+   property valuemax;
    property imagelist;
    property imageoffset;
    property imagenums;
@@ -898,8 +898,8 @@ type
    property onsetvalue;
    property onpaintglyph;
    property valuedefault;
-   property min; 
-   property max;
+   property valuemin; 
+   property valuemax;
    property valuedisabled;
  end;
 

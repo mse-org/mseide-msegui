@@ -42,8 +42,8 @@ begin
   try
    with fo do begin
     value.value:= avalue;
-    value.min:= amin;
-    value.max:= amax;
+    value.valuemin:= amin;
+    value.valuemax:= amax;
     caption:= acaption;
     lab.caption:= text;
     result:= fo.show(true,nil);

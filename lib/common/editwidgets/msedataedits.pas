@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2016 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2017 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -692,8 +692,8 @@ type
    fvalue: integer;
    fbase: numbasety;
    fbitcount: integer;
-   fmin: integer;
-   fmax: integer;
+   fvaluemin: integer;
+   fvaluemax: integer;
    fvaluedefault: integer;
    procedure setvalue(const Value: integer);
    procedure setbase(const Value: numbasety);
@@ -706,8 +706,10 @@ type
    function getifilink: tifiintegerlinkcomp;
    procedure setifilink(const avalue: tifiintegerlinkcomp);
   {$endif}
-   procedure setmin(const avalue: integer);
-   procedure setmax(const avalue: integer);
+   procedure setvaluemin(const avalue: integer);
+   procedure setvaluemax(const avalue: integer);
+   procedure readmin(reader: treader);
+   procedure readmax(reader: treader);
   protected
    fisnull: boolean; //used in tdbintegeredit
    procedure setvaluedata(const source); override;
@@ -725,17 +727,19 @@ type
    procedure setnullvalue; override;
    function getdefaultvalue: pointer; override;
    procedure updatedatalist; override;
+   procedure defineproperties(filer: tfiler) override;
   public
    constructor create(aowner: tcomponent); override;
    procedure fillcol(const value: integer);
    procedure assigncol(const value: tintegerdatalist);
    property onsetvalue: setintegereventty read fonsetvalue write fonsetvalue;
    property value: integer read fvalue write setvalue default 0;
-   property valuedefault: integer read fvaluedefault write fvaluedefault default 0;
+   property valuedefault: integer read fvaluedefault 
+                                    write fvaluedefault default 0;
    property base: numbasety read fbase write setbase default nb_dec;
    property bitcount: integer read fbitcount write setbitcount default 32;
-   property min: integer read fmin write setmin default 0;
-   property max: integer read fmax write setmax default maxint;
+   property valuemin: integer read fvaluemin write setvaluemin default 0;
+   property valuemax: integer read fvaluemax write setvaluemax default maxint;
 
    property gridvalue[const index: integer]: integer
         read getgridvalue write setgridvalue; default;
@@ -753,8 +757,8 @@ type
    property valuedefault;
    property base;
    property bitcount;
-   property min;
-   property max;
+   property valuemin;
+   property valuemax;
   {$ifdef mse_with_ifi}
    property ifilink;
   {$endif}
@@ -4128,7 +4132,7 @@ constructor tcustomintegeredit.create(aowner: tcomponent);
 begin
  fbase:= nb_dec;
  fbitcount:= 32;
- fmax:= maxint;
+ fvaluemax:= maxint;
  inherited;
 end;
 
@@ -4211,15 +4215,16 @@ begin
 }
  if accept then begin
   if not fisnull then begin
-   if fmax < fmin then begin //unsigned
-    if (longword(int1) < longword(fmin)) or (longword(int1) > longword(fmax)) then begin
-     rangeerror(fmin,fmax,quiet);
+   if fvaluemax < fvaluemin then begin //unsigned
+    if (longword(int1) < longword(fvaluemin)) or 
+                         (longword(int1) > longword(fvaluemax)) then begin
+     rangeerror(fvaluemin,fvaluemax,quiet);
      accept:= false;
     end;
    end
    else begin
-    if (int1 < fmin) or (int1 > fmax) then begin
-     rangeerror(fmin,fmax,quiet);
+    if (int1 < fvaluemin) or (int1 > fvaluemax) then begin
+     rangeerror(fvaluemin,fvaluemax,quiet);
      accept:= false;
     end;
    end;
@@ -4249,11 +4254,11 @@ begin
  except
   int1:= 0;
  end;
- if int1 < fmin then begin
-  int1:= fmin;
+ if int1 < fvaluemin then begin
+  int1:= fvaluemin;
  end;
- if int1 > fmax then begin
-  int1:= fmax;
+ if int1 > fvaluemax then begin
+  int1:= fvaluemax;
  end;
  integer(data):= int1;
 end;
@@ -4272,7 +4277,7 @@ begin
 //               tintegerdatalist(fgridintf.getcol.datalist),fmin,fmax);
 // end
 // else begin
-  value:= reader.readinteger(valuevarname,value,fmin,fmax);
+  value:= reader.readinteger(valuevarname,value,fvaluemin,fvaluemax);
 // end;
 end;
 
@@ -4364,9 +4369,9 @@ begin
  result:= @fvaluedefault;
 end;
 
-procedure tcustomintegeredit.setmin(const avalue: integer);
+procedure tcustomintegeredit.setvaluemin(const avalue: integer);
 begin
- fmin:= avalue;
+ fvaluemin:= avalue;
  if fdatalist <> nil then begin
   with tgridintegerdatalist(fdatalist) do begin
    min:= avalue;
@@ -4374,9 +4379,9 @@ begin
  end;  
 end;
 
-procedure tcustomintegeredit.setmax(const avalue: integer);
+procedure tcustomintegeredit.setvaluemax(const avalue: integer);
 begin
- fmax:= avalue;
+ fvaluemax:= avalue;
  if fdatalist <> nil then begin
   with tgridintegerdatalist(fdatalist) do begin
    max:= avalue;
@@ -4384,12 +4389,30 @@ begin
  end;  
 end;
 
+
 procedure tcustomintegeredit.updatedatalist;
 begin
  with tgridintegerdatalist(fdatalist) do begin
-  min:= self.min;
-  max:= self.max;
+  min:= self.valuemin;
+  max:= self.valuemax;
  end;
+end;
+
+procedure tcustomintegeredit.readmin(reader: treader);
+begin
+ valuemin:= reader.readinteger;
+end;
+
+procedure tcustomintegeredit.readmax(reader: treader);
+begin
+ valuemax:= reader.readinteger;
+end;
+
+procedure tcustomintegeredit.defineproperties(filer: tfiler);
+begin
+ inherited;
+ filer.defineproperty('min',@readmin,nil,false);
+ filer.defineproperty('max',@readmax,nil,false);
 end;
 
 function tcustomintegeredit.griddata: tgridintegerdatalist;

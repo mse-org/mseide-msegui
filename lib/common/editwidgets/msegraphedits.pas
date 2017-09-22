@@ -747,8 +747,8 @@ type
    fvalue: integer;
    fvaluedefault: integer;
    fonsetvalue: setintegereventty;
-   fmin: integer;
-   fmax: integer;
+   fvaluemin: integer;
+   fvaluemax: integer;
 //   fdatalist: tintegerdatalist;
    fonpaintglyph: paintintegerglypheventty;
    procedure setvalue(const avalue: integer);
@@ -760,9 +760,11 @@ type
    function getifilink: tifiintegerlinkcomp;
    procedure setifilink(const avalue: tifiintegerlinkcomp);
   {$endif}
-   procedure setmin(const avalue: integer);
-   procedure setmax(const avalue: integer);
+   procedure setvaluemin(const avalue: integer);
+   procedure setvaluemax(const avalue: integer);
    function getdatalist: tintegerdatalist;
+   procedure readmin(reader: treader);
+   procedure readmax(reader: treader);
   protected
 //   procedure setgridintf(const intf: iwidgetgrid); override;
    procedure setvaluedata(const source); override;
@@ -789,6 +791,7 @@ type
                 const avalue; const arect: rectty); override;
    procedure datalistdestroyed; override;
    procedure updatedatalist; override;
+   procedure defineproperties(filer: tfiler) override;
   public
    function checkvalue: boolean; override;
    procedure togglegridvalue(const index: integer); override;
@@ -802,9 +805,9 @@ type
    property value: integer read fvalue write setvalue default 0;
    property valuedefault: integer read fvaluedefault 
                                        write fvaluedefault default 0;
-   property min: integer read fmin write setmin default 0; 
+   property valuemin: integer read fvaluemin write setvaluemin default 0; 
                                                //checked by togglevalue
-   property max: integer read fmax write setmax default 0; 
+   property valuemax: integer read fvaluemax write setvaluemax default 0; 
                                                //checked by togglevalue
    property onpaintglyph: paintintegerglypheventty read fonpaintglyph 
                                                          write fonpaintglyph;
@@ -1044,8 +1047,8 @@ type
                                       write setvaluedisabled default -2; 
                   //button.enabled:= value <> valuedisabled
                   //-2 -> not checked
-   property min default -1; 
-   property max default 0;
+   property valuemin default -1; 
+   property valuemax default 0;
    property optionswidget default defaultoptionswidget - [ow_mousefocus];
   published
    property visible stored false;
@@ -1096,8 +1099,8 @@ type
    property group;
    property value;
    property valuedefault;
-   property min; 
-   property max;
+   property valuemin; 
+   property valuemax;
    property valuedisabled;
  end;
 
@@ -1135,8 +1138,8 @@ type
    property onclientmouseevent;
    property value;
    property valuedefault;
-   property min; 
-   property max;
+   property valuemin; 
+   property valuemax;
    property valuedisabled;
  end; 
  
@@ -1177,8 +1180,8 @@ type
    property onpaintglyph;
    property value default -1;
    property valuedefault default -1;
-   property min; 
-   property max;
+   property valuemin; 
+   property valuemax;
    property imagelist;
    property imageoffset;
    property imagenums;
@@ -3315,14 +3318,14 @@ begin
          (bo_cantoggle in foptions) or (value = fvaluedefault) then begin
   if down then begin
    dec(avalue);
-   if avalue < fmin then begin
-    avalue:= fmax;
+   if avalue < fvaluemin then begin
+    avalue:= fvaluemax;
    end;
   end
   else begin
    inc(avalue);
-   if avalue > fmax then begin
-    avalue:= fmin;
+   if avalue > fvaluemax then begin
+    avalue:= fvaluemin;
    end;
   end;
   result:= true;
@@ -3354,7 +3357,7 @@ procedure tcustomintegergraphdataedit.togglevalue(const areadonly: boolean;
 var
  int1: integer;
 begin
- if not areadonly and (fmin <> fmax) then begin
+ if not areadonly and (fvaluemin <> fvaluemax) then begin
   int1:= fvalue;
   if doinc(int1,down) then begin
    docheckvalue(int1);
@@ -3381,7 +3384,7 @@ procedure tcustomintegergraphdataedit.togglegridvalue(const index: integer);
 var
  int1: integer;
 begin
- if fmin <> fmax then begin
+ if fvaluemin <> fvaluemax then begin
   int1:= gridvalue[index];
   if doinc(int1,false) then begin
    gridvalue[index]:= int1;
@@ -3451,10 +3454,10 @@ var
  int1: integer;
 begin
  int1:= fvaluedefault + 1;
- if int1 > fmax then begin
+ if int1 > fvaluemax then begin
   int1:= int1 -2;
-  if int1 < fmin then begin
-   int1:= fmin;
+  if int1 < fvaluemin then begin
+   int1:= fvaluemin;
   end;
  end;
  gridvalue[index]:= int1;
@@ -3483,9 +3486,9 @@ begin
 end;
 {$endif}
 
-procedure tcustomintegergraphdataedit.setmin(const avalue: integer);
+procedure tcustomintegergraphdataedit.setvaluemin(const avalue: integer);
 begin
- fmin:= avalue;
+ fvaluemin:= avalue;
  if fdatalist <> nil then begin
   with tgridintegerdatalist(fdatalist) do begin
    min:= avalue;
@@ -3493,9 +3496,9 @@ begin
  end;
 end;
 
-procedure tcustomintegergraphdataedit.setmax(const avalue: integer);
+procedure tcustomintegergraphdataedit.setvaluemax(const avalue: integer);
 begin
- fmax:= avalue;
+ fvaluemax:= avalue;
  if fdatalist <> nil then begin
   with tgridintegerdatalist(fdatalist) do begin
    max:= avalue;
@@ -3506,10 +3509,27 @@ end;
 procedure tcustomintegergraphdataedit.updatedatalist;
 begin
  with tgridintegerdatalist(fdatalist) do begin
-  min:= self.min;
-  max:= self.max;
+  min:= self.valuemin;
+  max:= self.valuemax;
   notcheckedvalue:= self.valuedefault;
  end;
+end;
+
+procedure tcustomintegergraphdataedit.readmin(reader: treader);
+begin
+ valuemin:= reader.readinteger();
+end;
+
+procedure tcustomintegergraphdataedit.readmax(reader: treader);
+begin
+ valuemax:= reader.readinteger();
+end;
+
+procedure tcustomintegergraphdataedit.defineproperties(filer: tfiler);
+begin
+ inherited;
+ filer.defineproperty('min',@readmin,nil,false);
+ filer.defineproperty('max',@readmax,nil,false);
 end;
 
 function tcustomintegergraphdataedit.getdatalist: tintegerdatalist;
@@ -3609,8 +3629,8 @@ begin
  fimagenrdisabled:= -2;
  fvalue:= -1;
  fvaluedefault:= -1;
- fmin:= -1;
- fmax:= 0;
+ fvaluemin:= -1;
+ fvaluemax:= 0;
  fvaluefaces:= tvaluefacearrayprop.create(self);
  fvaluecaptions:= tmsestringarrayprop.create;
  fvaluefonts:= tvaluefontarrayprop.create(self);
