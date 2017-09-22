@@ -449,14 +449,17 @@ type
   private
    fvalue: integer;
    fvaluedefault: integer;
-   fmin: integer;
-   fmax: integer;
+   fvaluemin: integer;
+   fvaluemax: integer;
    fonclientsetvalue: setintegerclienteventty;
    procedure setvalue1(const avalue: integer);
-   procedure setmin(const avalue: integer);
-   procedure setmax(const avalue: integer);
+   procedure setvaluemin(const avalue: integer);
+   procedure setvaluemax(const avalue: integer);
    function getgriddata: tifiintegerdatalist;
+   procedure readmin(reader: treader);
+   procedure readmax(reader: treader);
   protected
+   procedure defineproperties(filer: tfiler) override;
    procedure valuestoclient(const alink: pointer); override;
    procedure clienttovalues(const alink: pointer); override;
    procedure setvalue(const sender: iificlient;
@@ -473,8 +476,8 @@ type
    property value: integer read fvalue write setvalue1 default 0;
    property valuedefault: integer read fvaluedefault 
                                         write fvaluedefault default 0;
-   property min: integer read fmin write setmin default 0;
-   property max: integer read fmax write setmax default maxint;
+   property valuemin: integer read fvaluemin write setvaluemin default 0;
+   property valuemax: integer read fvaluemax write setvaluemax default maxint;
    property onclientsetvalue: setintegerclienteventty 
                 read fonclientsetvalue write fonclientsetvalue;
  end;
@@ -485,14 +488,17 @@ type
   private
    fvalue: int64;
    fvaluedefault: int64;
-   fmin: int64;
-   fmax: int64;
+   fvaluemin: int64;
+   fvaluemax: int64;
    fonclientsetvalue: setint64clienteventty;
    procedure setvalue1(const avalue: int64);
-   procedure setmin(const avalue: int64);
-   procedure setmax(const avalue: int64);
+   procedure setvaluemin(const avalue: int64);
+   procedure setvaluemax(const avalue: int64);
    function getgriddata: tifiint64datalist;
+   procedure readmin(reader: treader);
+   procedure readmax(reader: treader);
   protected
+   procedure defineproperties(filer: tfiler) override;
    procedure valuestoclient(const alink: pointer); override;
    procedure clienttovalues(const alink: pointer); override;
    procedure setvalue(const sender: iificlient;
@@ -509,8 +515,8 @@ type
    property value: int64 read fvalue write setvalue1 default 0;
    property valuedefault: int64 read fvaluedefault 
                                         write fvaluedefault default 0;
-   property min: int64 read fmin write setmin default 0;
-   property max: int64 read fmax write setmax default maxint;
+   property valuemin: int64 read fvaluemin write setvaluemin default 0;
+   property valuemax: int64 read fvaluemax write setvaluemax default maxint;
    property onclientsetvalue: setint64clienteventty 
                 read fonclientsetvalue write fonclientsetvalue;
  end;
@@ -529,7 +535,7 @@ type
    property dropdown: tifidropdownlistcontroller read fdropdown write setdropdown;
    property value default -1;
    property valuedefault default -1;
-   property min default -1;
+   property valuemin default -1;
  end;
 
  tifibooleandatalist = class;
@@ -578,17 +584,19 @@ type
   private
    fvalue: realty;
    fvaluedefault: realty;
-   fmin: realty;
-   fmax: realty;
+   fvaluemin: realty;
+   fvaluemax: realty;
    fonclientsetvalue: setrealclienteventty;
    procedure setvalue1(const avalue: realty);
-   procedure setmin(const avalue: realty);
-   procedure setmax(const avalue: realty);
+   procedure setvaluemin(const avalue: realty);
+   procedure setvaluemax(const avalue: realty);
    procedure readvalue(reader: treader);
-   procedure readmin(reader: treader);
-   procedure readmax(reader: treader);
+   procedure readmin1(reader: treader);
+   procedure readmax1(reader: treader);
    procedure readvaluedefault(reader: treader);
    function getgriddata: tifirealdatalist;
+   procedure readmin(reader: treader);
+   procedure readmax(reader: treader);
   protected
    procedure valuestoclient(const alink: pointer); override;
    procedure clienttovalues(const alink: pointer); override;
@@ -610,8 +618,8 @@ type
    property value: realty read fvalue write setvalue1 {stored false};
    property valuedefault: realty read fvaluedefault
                                           write fvaluedefault {stored false};
-   property min: realty read fmin write setmin {stored false};
-   property max: realty read fmax write setmax {stored false};
+   property valuemin: realty read fvaluemin write setvaluemin {stored false};
+   property valuemax: realty read fvaluemax write setvaluemax {stored false};
    property onclientsetvalue: setrealclienteventty 
                        read fonclientsetvalue write fonclientsetvalue;
  end;
@@ -622,17 +630,19 @@ type
   private
    fvalue: tdatetime;
    fvaluedefault: tdatetime;
-   fmin: tdatetime;
-   fmax: tdatetime;
+   fvaluemin: tdatetime;
+   fvaluemax: tdatetime;
    fonclientsetvalue: setdatetimeclienteventty;
    procedure setvalue1(const avalue: tdatetime);
-   procedure setmin(const avalue: tdatetime);
-   procedure setmax(const avalue: tdatetime);
+   procedure setvaluemin(const avalue: tdatetime);
+   procedure setvaluemax(const avalue: tdatetime);
    procedure readvalue(reader: treader);
-   procedure readmin(reader: treader);
-   procedure readmax(reader: treader);
+   procedure readmin1(reader: treader);
+   procedure readmax1(reader: treader);
    procedure readvaluedefault(reader: treader);
    function getgriddata: tifidatetimedatalist;
+   procedure readmin(reader: treader);
+   procedure readmax(reader: treader);
   protected
    procedure valuestoclient(const alink: pointer); override;
    procedure clienttovalues(const alink: pointer); override;
@@ -651,8 +661,8 @@ type
    property value: tdatetime read fvalue write setvalue1 {stored false};
    property valuedefault: tdatetime read fvaluedefault 
                                              write fvaluedefault {stored false};
-   property min: tdatetime read fmin write setmin {stored false};
-   property max: tdatetime read fmax write setmax {stored false};
+   property valuemin: tdatetime read fvaluemin write setvaluemin {stored false};
+   property valuemax: tdatetime read fvaluemax write setvaluemax {stored false};
    property onclientsetvalue: setdatetimeclienteventty 
                        read fonclientsetvalue write fonclientsetvalue;
  end;
@@ -2645,7 +2655,7 @@ end;
 
 constructor tintegerclientcontroller.create(const aowner: tmsecomponent);
 begin
- fmax:= maxint;
+ fvaluemax:= maxint;
  inherited create(aowner,tkinteger);
 end;
 
@@ -2658,8 +2668,8 @@ end;
 procedure tintegerclientcontroller.valuestoclient(const alink: pointer);
 begin
  setintegerval(iificlient(alink),'value',fvalue);
- setintegerval(iificlient(alink),'min',fmin);
- setintegerval(iificlient(alink),'max',fmax);
+ setintegerval(iificlient(alink),'valuemin',fvaluemin);
+ setintegerval(iificlient(alink),'valuemax',fvaluemax);
  inherited;
 end;
 
@@ -2678,15 +2688,15 @@ begin
  inherited;
 end;
 
-procedure tintegerclientcontroller.setmin(const avalue: integer);
+procedure tintegerclientcontroller.setvaluemin(const avalue: integer);
 begin
- fmin:= avalue;
+ fvaluemin:= avalue;
  change;
 end;
 
-procedure tintegerclientcontroller.setmax(const avalue: integer);
+procedure tintegerclientcontroller.setvaluemax(const avalue: integer);
 begin
- fmax:= avalue;
+ fvaluemax:= avalue;
  change;
 end;
 {
@@ -2718,6 +2728,23 @@ begin
  result:= tifiintegerdatalist(ifigriddata);
 end;
 
+procedure tintegerclientcontroller.readmin(reader: treader);
+begin
+ valuemin:= reader.readinteger;
+end;
+
+procedure tintegerclientcontroller.readmax(reader: treader);
+begin
+ valuemax:= reader.readinteger;
+end;
+
+procedure tintegerclientcontroller.defineproperties(filer: tfiler);
+begin
+ inherited;
+ filer.defineproperty('min',@readmin,nil,false);
+ filer.defineproperty('max',@readmax,nil,false);
+end;
+
 procedure tintegerclientcontroller.statreadvalue(const reader: tstatreader);
 begin
  inherited;
@@ -2744,7 +2771,7 @@ end;
 
 constructor tint64clientcontroller.create(const aowner: tmsecomponent);
 begin
- fmax:= maxint;
+ fvaluemax:= maxint;
  inherited create(aowner,tkint64);
 end;
 
@@ -2757,8 +2784,8 @@ end;
 procedure tint64clientcontroller.valuestoclient(const alink: pointer);
 begin
  setint64val(iificlient(alink),'value',fvalue);
- setint64val(iificlient(alink),'min',fmin);
- setint64val(iificlient(alink),'max',fmax);
+ setint64val(iificlient(alink),'valuemin',fvaluemin);
+ setint64val(iificlient(alink),'valuemax',fvaluemax);
  inherited;
 end;
 
@@ -2777,15 +2804,15 @@ begin
  inherited;
 end;
 
-procedure tint64clientcontroller.setmin(const avalue: int64);
+procedure tint64clientcontroller.setvaluemin(const avalue: int64);
 begin
- fmin:= avalue;
+ fvaluemin:= avalue;
  change;
 end;
 
-procedure tint64clientcontroller.setmax(const avalue: int64);
+procedure tint64clientcontroller.setvaluemax(const avalue: int64);
 begin
- fmax:= avalue;
+ fvaluemax:= avalue;
  change;
 end;
 {
@@ -2815,6 +2842,23 @@ end;
 function tint64clientcontroller.getgriddata: tifiint64datalist;
 begin
  result:= tifiint64datalist(ifigriddata);
+end;
+
+procedure tint64clientcontroller.readmin(reader: treader);
+begin
+ valuemin:= reader.readinteger();
+end;
+
+procedure tint64clientcontroller.readmax(reader: treader);
+begin
+ valuemax:= reader.readinteger()
+end;
+
+procedure tint64clientcontroller.defineproperties(filer: tfiler);
+begin
+ inherited;
+ filer.defineproperty('min',@readmin,nil,false);
+ filer.defineproperty('max',@readmax,nil,false);
 end;
 
 procedure tint64clientcontroller.statreadvalue(const reader: tstatreader);
@@ -2949,8 +2993,8 @@ constructor trealclientcontroller.create(const aowner: tmsecomponent);
 begin
  fvalue:= emptyreal;
  fvaluedefault:= emptyreal;
- fmin:= emptyreal;
- fmax:= bigreal;
+ fvaluemin:= emptyreal;
+ fvaluemax:= bigreal;
  inherited create(aowner,tkfloat);
 end;
 
@@ -2963,8 +3007,8 @@ end;
 procedure trealclientcontroller.valuestoclient(const alink: pointer);
 begin
  setrealtyval(iificlient(alink),'value',fvalue);
- setrealtyval(iificlient(alink),'min',fmin);
- setrealtyval(iificlient(alink),'max',fmax);
+ setrealtyval(iificlient(alink),'valuemin',fvaluemin);
+ setrealtyval(iificlient(alink),'valuemax',fvaluemax);
  inherited;
 end;
 
@@ -2988,15 +3032,15 @@ begin
  result:= tifirealdatalist.create(self);
 end;
 
-procedure trealclientcontroller.setmin(const avalue: realty);
+procedure trealclientcontroller.setvaluemin(const avalue: realty);
 begin
- fmin:= avalue;
+ fvaluemin:= avalue;
  change;
 end;
 
-procedure trealclientcontroller.setmax(const avalue: realty);
+procedure trealclientcontroller.setvaluemax(const avalue: realty);
 begin
- fmax:= avalue;
+ fvaluemax:= avalue;
  change;
 end;
 
@@ -3005,19 +3049,29 @@ begin
  value:= readrealty(reader);
 end;
 
-procedure trealclientcontroller.readmin(reader: treader);
+procedure trealclientcontroller.readmin1(reader: treader);
 begin
- fmin:= readrealty(reader);
+ fvaluemin:= readrealty(reader);
 end;
 
-procedure trealclientcontroller.readmax(reader: treader);
+procedure trealclientcontroller.readmax1(reader: treader);
 begin
- fmax:= readrealty(reader);
+ fvaluemax:= readrealty(reader);
 end;
 
 procedure trealclientcontroller.readvaluedefault(reader: treader);
 begin
  valuedefault:= readrealty(reader);
+end;
+
+procedure trealclientcontroller.readmin(reader: treader);
+begin
+ valuemin:= reader.readinteger;
+end;
+
+procedure trealclientcontroller.readmax(reader: treader);
+begin
+ valuemax:= reader.readinteger;
 end;
 
 procedure trealclientcontroller.defineproperties(filer: tfiler);
@@ -3026,9 +3080,11 @@ begin
  
  filer.DefineProperty('val',
              {$ifdef FPC}@{$endif}readvalue,nil,false);
- filer.DefineProperty('mi',{$ifdef FPC}@{$endif}readmin,nil,false);
- filer.DefineProperty('ma',{$ifdef FPC}@{$endif}readmax,nil,false);
+ filer.DefineProperty('mi',{$ifdef FPC}@{$endif}readmin1,nil,false);
+ filer.DefineProperty('ma',{$ifdef FPC}@{$endif}readmax1,nil,false);
  filer.DefineProperty('def',{$ifdef FPC}@{$endif}readvaluedefault,nil,false);
+ filer.defineproperty('min',@readmin,nil,false);
+ filer.defineproperty('max',@readmax,nil,false);
 end;
 
 function trealclientcontroller.getgriddata: tifirealdatalist;
@@ -3059,8 +3115,8 @@ constructor tdatetimeclientcontroller.create(const aowner: tmsecomponent);
 begin
  fvalue:= emptydatetime;
  fvaluedefault:= emptydatetime;
- fmin:= emptydatetime;
- fmax:= bigdatetime;
+ fvaluemin:= emptydatetime;
+ fvaluemax:= bigdatetime;
  inherited create(aowner,tkfloat);
 end;
 
@@ -3073,8 +3129,8 @@ end;
 procedure tdatetimeclientcontroller.valuestoclient(const alink: pointer);
 begin
  setdatetimeval(iificlient(alink),'value',fvalue);
- setdatetimeval(iificlient(alink),'min',fmin);
- setdatetimeval(iificlient(alink),'max',fmax);
+ setdatetimeval(iificlient(alink),'valuemin',fvaluemin);
+ setdatetimeval(iificlient(alink),'valuemax',fvaluemax);
  inherited;
 end;
 
@@ -3098,15 +3154,15 @@ begin
  result:= tifidatetimedatalist.create(self);
 end;
 
-procedure tdatetimeclientcontroller.setmin(const avalue: tdatetime);
+procedure tdatetimeclientcontroller.setvaluemin(const avalue: tdatetime);
 begin
- fmin:= avalue;
+ fvaluemin:= avalue;
  change;
 end;
 
-procedure tdatetimeclientcontroller.setmax(const avalue: tdatetime);
+procedure tdatetimeclientcontroller.setvaluemax(const avalue: tdatetime);
 begin
- fmax:= avalue;
+ fvaluemax:= avalue;
  change;
 end;
 
@@ -3120,9 +3176,9 @@ begin
  writerealty(writer,fvalue);
 end;
 }
-procedure tdatetimeclientcontroller.readmin(reader: treader);
+procedure tdatetimeclientcontroller.readmin1(reader: treader);
 begin
- fmin:= readrealty(reader);
+ fvaluemin:= readrealty(reader);
 end;
 {
 procedure tdatetimeclientcontroller.writemin(writer: twriter);
@@ -3130,9 +3186,9 @@ begin
  writerealty(writer,fmin);
 end;
 }
-procedure tdatetimeclientcontroller.readmax(reader: treader);
+procedure tdatetimeclientcontroller.readmax1(reader: treader);
 begin
- fmax:= readrealty(reader);
+ fvaluemax:= readrealty(reader);
 end;
 {
 procedure tdatetimeclientcontroller.writemax(writer: twriter);
@@ -3150,15 +3206,27 @@ begin
  writerealty(writer,fvaluedefault);
 end;
 }
+procedure tdatetimeclientcontroller.readmin(reader: treader);
+begin
+ valuemin:= reader.readinteger();
+end;
+
+procedure tdatetimeclientcontroller.readmax(reader: treader);
+begin
+ valuemax:= reader.readinteger();
+end;
+
 procedure tdatetimeclientcontroller.defineproperties(filer: tfiler);
 begin
  inherited;
  
  filer.DefineProperty('val',
              {$ifdef FPC}@{$endif}readvalue,nil,false);
- filer.DefineProperty('mi',{$ifdef FPC}@{$endif}readmin,nil,false);
- filer.DefineProperty('ma',{$ifdef FPC}@{$endif}readmax,nil,false);
+ filer.DefineProperty('mi',{$ifdef FPC}@{$endif}readmin1,nil,false);
+ filer.DefineProperty('ma',{$ifdef FPC}@{$endif}readmax1,nil,false);
  filer.DefineProperty('def',{$ifdef FPC}@{$endif}readvaluedefault,nil,false);
+ filer.defineproperty('min',@readmin,nil,false);
+ filer.defineproperty('max',@readmax,nil,false);
 end;
 {
 function tdatetimeclientcontroller.getgridvalues: datetimearty;
@@ -3568,7 +3636,7 @@ constructor tenumclientcontroller.create(const aowner: tmsecomponent);
 begin
  fdropdown:= tifidropdownlistcontroller.create(self);
  inherited;
- fmin:= -1;
+ fvaluemin:= -1;
  fvalue:= -1;
  fvaluedefault:= -1;
 end;
