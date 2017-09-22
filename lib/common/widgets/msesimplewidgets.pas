@@ -352,6 +352,7 @@ type
    property faceclicked;
    property facedisabled;
    property onmouseevent;
+   property onclientmouseevent;
    property onbeforepaint;
    property onpaintbackground;
    property onpaint;
@@ -401,6 +402,7 @@ type
    property faceclicked;
    property facedisabled;
    property onmouseevent;
+   property onclientmouseevent;
    property onbeforepaint;
    property onpaintbackground;
    property onpaint;

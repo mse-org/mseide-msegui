@@ -887,6 +887,9 @@ type
    property onexecute;
    property onbeforeexecute;
    property onafterexecute;
+   property onmouseevent;
+   property onclientmouseevent;
+
    property imageoffset;
    property imageoffsetdisabled;
    property imageoffsetmouse;
@@ -898,7 +901,6 @@ type
    property min; 
    property max;
    property valuedisabled;
-   property onclientmouseevent;
  end;
 
  tdbbooleaneditradio = class(tcustombooleaneditradio,idbeditfieldlink,ireccontrol)

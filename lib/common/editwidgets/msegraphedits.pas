@@ -1083,6 +1083,8 @@ type
    property onexecute;
    property onbeforeexecute;
    property onafterexecute;
+   property onmouseevent;
+   property onclientmouseevent;
 
    property imageoffset;
    property imageoffsetdisabled;
@@ -1097,7 +1099,6 @@ type
    property min; 
    property max;
    property valuedisabled;
-   property onclientmouseevent;
  end;
 
  tstockglyphdatabutton = class(tcustomdatabutton)
@@ -1130,6 +1131,8 @@ type
    property onafterexecute;
    property onsetvalue;
    property onpaintglyph;
+   property onmouseevent;
+   property onclientmouseevent;
    property value;
    property valuedefault;
    property min; 
