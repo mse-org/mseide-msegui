@@ -770,8 +770,8 @@ type
    fvalue: int64;
    fbase: numbasety;
    fbitcount: integer;
-   fmin: int64;
-   fmax: int64;
+   fvaluemin: int64;
+   fvaluemax: int64;
    fvaluedefault: int64;
    procedure setvalue(const Value: int64);
    procedure setbase(const Value: numbasety);
@@ -786,8 +786,11 @@ type
    function getifilink: tifiint64linkcomp;
    procedure setifilink(const avalue: tifiint64linkcomp);
   {$endif}
+   procedure readmin(reader: treader);
+   procedure readmax(reader: treader);
   protected
    fisnull: boolean; //used in tdbintegeredit
+   procedure defineproperties(filer: tfiler) override;
    procedure setvaluedata(const source); override;
    procedure getvaluedata(out dest); override;
    procedure texttovalue(var accept: boolean; const quiet: boolean); override;
@@ -811,8 +814,8 @@ type
    property valuedefault: int64 read fvaluedefault write fvaluedefault default 0;
    property base: numbasety read fbase write setbase default nb_dec;
    property bitcount: integer read fbitcount write setbitcount default 64;
-   property min: int64 read fmin write fmin{setmin} default 0;
-   property max: int64 read fmax write fmax{setmax}; 
+   property valuemin: int64 read fvaluemin write fvaluemin{setmin} default 0;
+   property valuemax: int64 read fvaluemax write fvaluemax{setmax}; 
                              // {$ifdef FPC}default maxint64{$endif};
 
    property gridvalue[const index: integer]: int64
@@ -831,8 +834,8 @@ type
    property valuedefault;
    property base;
    property bitcount;
-   property min;
-   property max;
+   property valuemin;
+   property valuemax;
   {$ifdef mse_with_ifi}
    property ifilink;
   {$endif}
@@ -924,7 +927,7 @@ type
   private
    fbitcount: integer;
    fbase: numbasety;
-   fmin,fmax: integer;
+   fvaluemin,fvaluemax: integer;
    fvalueoffset: integer;
    function getgridvalue(const index: integer): integer;
    procedure setgridvalue(const index, aValue: integer);
@@ -938,10 +941,12 @@ type
    function getifilink: tifienumlinkcomp;
    procedure setifilink1(const avalue: tifienumlinkcomp);
   {$endif}
-   procedure setmin(const avalue: integer);
-   procedure setmax(const avalue: integer);
+   procedure setvaluemin(const avalue: integer);
+   procedure setvaluemax(const avalue: integer);
    function getdropdown: tenumdropdowncontroller;
    procedure setdropdown(const avalue: tenumdropdowncontroller);
+   procedure readmin(reader: treader);
+   procedure readmax(reader: treader);
   protected
    fonsetvalue1: setintegereventty;
    fvalue1: integer;
@@ -970,6 +975,7 @@ type
    function textcellcopy: boolean; override;
    procedure updatedatalist; override;
    procedure paintimage(const canvas: tcanvas); override;
+   procedure defineproperties(filer: tfiler) override;
   public
    enums: integerarty; //nil -> enum = item rowindex + valueoffset
    constructor create(aowner: tcomponent); override;
@@ -988,8 +994,8 @@ type
    property valueempty: integer read fvalueempty write fvalueempty default -1;
    property base: numbasety read fbase write setbase default nb_dec;
    property bitcount: integer read fbitcount write setbitcount default 32;
-   property min: integer read fmin write setmin default -1;
-   property max: integer read fmax write setmax default maxint;
+   property valuemin: integer read fvaluemin write setvaluemin default -1;
+   property valuemax: integer read fvaluemax write setvaluemax default maxint;
    property gridvalue[const index: integer]: integer
         read getgridvalue write setgridvalue; default;
    property gridvalues: integerarty read getgridvalues write setgridvalues;
@@ -1023,8 +1029,8 @@ type
    property valueempty;
    property base;
    property bitcount;
-   property min;
-   property max;
+   property valuemin;
+   property valuemax;
    property onsetvalue;
 {$ifdef mse_with_ifi}
    property ifilink;
@@ -1051,8 +1057,8 @@ type
    property valuedefault;
    property base;
    property bitcount;
-   property min;
-   property max;
+   property valuemin;
+   property valuemax;
    property onsetvalue;
 {$ifdef mse_with_ifi}
    property ifilink;
@@ -1123,8 +1129,8 @@ type
    procedure setformatedit(const Value: msestring);
    procedure readvalue(reader: treader);
    procedure readvaluedefault(reader: treader);
-   procedure readmin(reader: treader);
-   procedure readmax(reader: treader);
+   procedure readmin1(reader: treader);
+   procedure readmax1(reader: treader);
    function getgridvalue(const index: integer): realty;
    function getgridintvalue(const index: integer): integer;
    procedure setgridvalue(const index: integer; const avalue: realty);
@@ -1148,17 +1154,20 @@ type
    procedure setasstring(const avalue: msestring);
    function getintvalue: integer;
    procedure setintvalue(const avalue: integer);
+   procedure readmin(reader: treader);
+   procedure readmax(reader: treader);
   protected
    fvalue: realty;
    fvaluedefault: realty;
-   fmin: realty;
-   fmax: realty;
+   fvaluemin: realty;
+   fvaluemax: realty;
    procedure setvaluedata(const source); override;
    procedure getvaluedata(out dest); override;
    procedure updatedatalist; override;
-   procedure setmin(const avalue: realty); virtual;
-   procedure setmax(const avalue: realty); virtual;
-   function gettextvalue(var accept: boolean; const quiet: boolean): realty; virtual;
+   procedure setvaluemin(const avalue: realty); virtual;
+   procedure setvaluemax(const avalue: realty); virtual;
+   function gettextvalue(var accept: boolean;
+                                const quiet: boolean): realty; virtual;
    procedure texttovalue(var accept: boolean; const quiet: boolean); override;
    function internaldatatotext(const data): msestring; override;
    procedure texttodata(const atext: msestring; var data); override;
@@ -1194,8 +1203,8 @@ type
    property formatdisp: msestring read fformatdisp write setformatdisp;
    property valuerange: real read fvaluerange write setvaluerange;
    property valuestart: real read fvaluestart write setvaluestart;
-   property min: realty read fmin write setmin;
-   property max: realty read fmax write setmax;
+   property valuemin: realty read fvaluemin write setvaluemin;
+   property valuemax: realty read fvaluemax write setvaluemax;
    property gridvalue[const index: integer]: realty
         read getgridvalue write setgridvalue; default;
    property gridintvalue[const index: integer]: integer
@@ -1221,8 +1230,8 @@ type
    property formatdisp;
    property valuerange;
    property valuestart;
-   property min;
-   property max;
+   property valuemin;
+   property valuemax;
   {$ifdef mse_with_ifi}
    property ifilink;
   {$endif}
@@ -1356,8 +1365,8 @@ type
    property formatdisp;
    property valuerange;
    property valuestart;
-   property min;
-   property max;
+   property valuemin;
+   property valuemax;
    property step;
    property stepctrlfact;
    property stepshiftfact;
@@ -1374,8 +1383,8 @@ type
    fvaluedefault: tdatetime;
    fformatdisp: msestring;
    fformatedit: msestring;
-   fmin: tdatetime;
-   fmax: tdatetime;
+   fvaluemin: tdatetime;
+   fvaluemax: tdatetime;
    fkind: datetimekindty;
    foptions: datetimeeditoptionsty;
    fconvert: dateconvertty;
@@ -1390,19 +1399,21 @@ type
    procedure setkind(const avalue: datetimekindty);
    procedure readvalue(reader: treader);
    procedure readvaluedefault(reader: treader);
-   procedure readmin(reader: treader);
-   procedure readmax(reader: treader);
+   procedure readmin1(reader: treader);
+   procedure readmax1(reader: treader);
   {$ifdef mse_with_ifi}
    function getifilink: tifidatetimelinkcomp;
    procedure setifilink(const avalue: tifidatetimelinkcomp);
   {$endif}
    procedure setoptions(const avalue: datetimeeditoptionsty);
-   procedure setmin(const avalue: tdatetime);
-   procedure setmax(const avalue: tdatetime);
+   procedure setvaluemin(const avalue: tdatetime);
+   procedure setvaluemax(const avalue: tdatetime);
    function getshowlocal: boolean;
    procedure setshowlocal(const avalue: boolean);
    function getshowutc: boolean;
    procedure setshowutc(const avalue: boolean);
+   procedure readmin(reader: treader);
+   procedure readmax(reader: treader);
   protected
    procedure setvaluedata(const source); override;
    procedure getvaluedata(out dest); override;
@@ -1435,8 +1446,8 @@ type
                                              write fvaluedefault {stored false};
    property formatedit: msestring read fformatedit write setformatedit;
    property formatdisp: msestring read fformatdisp write setformatdisp;
-   property min: tdatetime read fmin write setmin;
-   property max: tdatetime read fmax write setmax;
+   property valuemin: tdatetime read fvaluemin write setvaluemin;
+   property valuemax: tdatetime read fvaluemax write setvaluemax;
    property kind: datetimekindty read fkind write setkind default dtk_date;
    property options: datetimeeditoptionsty read foptions write setoptions
                                                                    default [];
@@ -1458,8 +1469,8 @@ type
    property valuedefault {stored false};
    property formatedit;
    property formatdisp;
-   property min {stored false};
-   property max {stored false};
+   property valuemin {stored false};
+   property valuemax {stored false};
    property kind;
    property options;
   {$ifdef mse_with_ifi}
@@ -4436,7 +4447,7 @@ constructor tcustomint64edit.create(aowner: tcomponent);
 begin
  fbase:= nb_dec;
  fbitcount:= 64;
- fmax:= maxint64;
+ fvaluemax:= maxint64;
  inherited;
 end;
 
@@ -4493,15 +4504,16 @@ begin
  end;
  if accept then begin
   if not fisnull then begin
-   if fmax < fmin then begin //unsigned
-    if (uint64(int1) < uint64(fmin)) or (uint64(int1) > uint64(fmax)) then begin
-     rangeerror(fmin,fmax,quiet);
+   if fvaluemax < fvaluemin then begin //unsigned
+    if (uint64(int1) < uint64(fvaluemin)) or 
+                          (uint64(int1) > uint64(fvaluemax)) then begin
+     rangeerror(fvaluemin,fvaluemax,quiet);
      accept:= false;
     end;
    end
    else begin
-    if (int1 < fmin) or (int1 > fmax) then begin
-     rangeerror(fmin,fmax,quiet);
+    if (int1 < fvaluemin) or (int1 > fvaluemax) then begin
+     rangeerror(fvaluemin,fvaluemax,quiet);
      accept:= false;
     end;
    end;
@@ -4531,11 +4543,11 @@ begin
  except
   int1:= 0;
  end;
- if int1 < fmin then begin
-  int1:= fmin;
+ if int1 < fvaluemin then begin
+  int1:= fvaluemin;
  end;
- if int1 > fmax then begin
-  int1:= fmax;
+ if int1 > fvaluemax then begin
+  int1:= fvaluemax;
  end;
  int64(data):= int1;
 end;
@@ -4554,7 +4566,7 @@ begin
 //          tintegerdatalist(fgridintf.getcol.datalist),fmin,fmax);
 // end
 // else begin
-  value:= reader.readint64(valuevarname,value,fmin,fmax);
+  value:= reader.readint64(valuevarname,value,fvaluemin,fvaluemax);
 // end;
 end;
 
@@ -4629,6 +4641,23 @@ end;
 procedure tcustomint64edit.setifilink(const avalue: tifiint64linkcomp);
 begin
  inherited setifilink(avalue);
+end;
+
+procedure tcustomint64edit.readmin(reader: treader);
+begin
+ valuemin:= reader.readint64;
+end;
+
+procedure tcustomint64edit.readmax(reader: treader);
+begin
+ valuemax:= reader.readint64;
+end;
+
+procedure tcustomint64edit.defineproperties(filer: tfiler);
+begin
+ inherited;
+ filer.defineproperty('min',@readmin,nil,false);
+ filer.defineproperty('max',@readmax,nil,false);
 end;
 
 {$endif}
@@ -4866,8 +4895,8 @@ begin
  fvalueempty:= -1;
  fbase:= nb_dec;
  fbitcount:= 32;
- fmin:= -1;
- fmax:= maxint;
+ fvaluemin:= -1;
+ fvaluemax:= maxint;
  inherited;
 end;
 
@@ -5059,8 +5088,9 @@ begin
    end;
   end;
  end;
- if not ({(des_isdb in fstate) and} (int1 = fvalueempty)) and (int1 < fmin) or (int1 > fmax) then begin
-  rangeerror(fmin,fmax,quiet);
+ if not ({(des_isdb in fstate) and} (int1 = fvalueempty)) and 
+                            (int1 < fvaluemin) or (int1 > fvaluemax) then begin
+  rangeerror(fvaluemin,fvaluemax,quiet);
   accept:= false;
  end;
  if accept then begin
@@ -5092,8 +5122,8 @@ begin
 // end
 // else begin
   if enums <> nil then begin
-   min1:= fmin;
-   max1:= fmax;
+   min1:= fvaluemin;
+   max1:= fvaluemax;
   end
   else begin
    if deo_forceselect in fdropdown.options then begin
@@ -5200,9 +5230,9 @@ begin
 end;
 {$endif}
 
-procedure tcustomenuedit.setmin(const avalue: integer);
+procedure tcustomenuedit.setvaluemin(const avalue: integer);
 begin
- fmin:= avalue;
+ fvaluemin:= avalue;
  if fdatalist <> nil then begin
   with tgridenumdatalist(fdatalist) do begin
    min:= avalue;
@@ -5210,9 +5240,9 @@ begin
  end;
 end;
 
-procedure tcustomenuedit.setmax(const avalue: integer);
+procedure tcustomenuedit.setvaluemax(const avalue: integer);
 begin
- fmax:= avalue;
+ fvaluemax:= avalue;
  if fdatalist <> nil then begin
   with tgridenumdatalist(fdatalist) do begin
    max:= avalue;
@@ -5223,8 +5253,8 @@ end;
 procedure tcustomenuedit.updatedatalist;
 begin
  with tgridenumdatalist(fdatalist) do begin
-  min:= self.min;
-  max:= self.max;
+  min:= self.valuemin;
+  max:= self.valuemax;
  end;
 end;
 
@@ -5244,6 +5274,23 @@ begin
                       deflaterect(clientrect,fimageframe),[al_ycentered]);
   end;
  end;
+end;
+
+procedure tcustomenuedit.readmin(reader: treader);
+begin
+ valuemin:= reader.readinteger;
+end;
+
+procedure tcustomenuedit.readmax(reader: treader);
+begin
+ valuemax:= reader.readinteger;
+end;
+
+procedure tcustomenuedit.defineproperties(filer: tfiler);
+begin
+ inherited;
+ filer.defineproperty('min',@readmin,nil,false);
+ filer.defineproperty('max',@readmax,nil,false); 
 end;
 
 function tcustomenuedit.getdropdown: tenumdropdowncontroller;
@@ -5430,8 +5477,8 @@ constructor tcustomrealedit.create(aowner: tcomponent);
 begin
  fvalue:= emptyreal;
  fvaluedefault:= emptyreal;
- fmin:= emptyreal;
- fmax:= bigreal;
+ fvaluemin:= emptyreal;
+ fvaluemax:= bigreal;
  fvaluerange:= 1;
  inherited;
  include(foptionswidget,ow_mousewheel);
@@ -5546,8 +5593,9 @@ begin
   rea1:= reapplyrange(rea1,fvaluerange,fvaluestart);
   if not (((des_isdb in fstate) or (oe_null in foptionsedit)) and 
                                          (rea1 = emptyreal)) then begin
-   if (cmprealty(fmin,rea1) > 0) or (cmprealty(fmax,rea1) < 0) then begin
-    rangeerror(fmin,fmax,quiet);
+   if (cmprealty(fvaluemin,rea1) > 0) or 
+                      (cmprealty(fvaluemax,rea1) < 0) then begin
+    rangeerror(fvaluemin,fvaluemax,quiet);
     accept:= false;
    end;
   end;
@@ -5583,11 +5631,11 @@ begin
  except
   rea1:= emptyreal;
  end;
- if cmprealty(fmin,rea1) > 0 then begin
-  rea1:= fmin;
+ if cmprealty(fvaluemin,rea1) > 0 then begin
+  rea1:= fvaluemin;
  end;
- if cmprealty(fmax,rea1) < 0 then begin
-  rea1:= fmax;
+ if cmprealty(fvaluemax,rea1) < 0 then begin
+  rea1:= fvaluemax;
  end;
  realty(data):= rea1;
 end;
@@ -5602,19 +5650,29 @@ begin
  valuedefault:= readrealty(reader);
 end;
 
-procedure tcustomrealedit.readmin(reader: treader);
+procedure tcustomrealedit.readmin1(reader: treader);
 begin
- fmin:= readrealty(reader);
+ fvaluemin:= readrealty(reader);
 end;
 
-procedure tcustomrealedit.readmax(reader: treader);
+procedure tcustomrealedit.readmax1(reader: treader);
 begin
- fmax:= readrealty(reader);
+ fvaluemax:= readrealty(reader);
 end;
 
 procedure tcustomrealedit.readvaluescale(reader: treader);
 begin
  valuerange:= valuescaletorange(reader);
+end;
+
+procedure tcustomrealedit.readmin(reader: treader);
+begin
+ valuemin:= reader.readfloat;
+end;
+
+procedure tcustomrealedit.readmax(reader: treader);
+begin
+ valuemax:= reader.readfloat;
 end;
 
 procedure tcustomrealedit.defineproperties(filer: tfiler);
@@ -5625,15 +5683,18 @@ begin
  
  filer.DefineProperty('val',
              {$ifdef FPC}@{$endif}readvalue,nil,false);
- filer.DefineProperty('mi',{$ifdef FPC}@{$endif}readmin,nil,false);
- filer.DefineProperty('ma',{$ifdef FPC}@{$endif}readmax,nil,false);
+ filer.DefineProperty('mi',{$ifdef FPC}@{$endif}readmin1,nil,false);
+ filer.DefineProperty('ma',{$ifdef FPC}@{$endif}readmax1,nil,false);
  filer.DefineProperty('def',{$ifdef FPC}@{$endif}readvaluedefault,nil,false);
- filer.defineproperty('valuescale',{$ifdef FPC}@{$endif}readvaluescale,nil,false);
+ filer.defineproperty('valuescale',@readvaluescale,nil,false);
+ filer.defineproperty('min',@readmin,nil,false);
+ filer.defineproperty('max',@readmax,nil,false);
 end;
 
 procedure tcustomrealedit.readstatvalue(const reader: tstatreader);
 begin
- value:= reader.readreal(valuevarname,value,fmin,fmax,oe_null in foptionsedit);
+ value:= reader.readreal(valuevarname,value,fvaluemin,fvaluemax,
+                                               oe_null in foptionsedit);
 end;
 
 procedure tcustomrealedit.writestatvalue(const writer: tstatwriter);
@@ -5790,9 +5851,9 @@ begin
  result:= @fvaluedefault;
 end;
 
-procedure tcustomrealedit.setmin(const avalue: realty);
+procedure tcustomrealedit.setvaluemin(const avalue: realty);
 begin
- fmin:= avalue;
+ fvaluemin:= avalue;
  if fdatalist <> nil then begin
   with tgridrealdatalist(fdatalist) do begin
    min:= avalue;
@@ -5800,9 +5861,9 @@ begin
  end;
 end;
 
-procedure tcustomrealedit.setmax(const avalue: realty);
+procedure tcustomrealedit.setvaluemax(const avalue: realty);
 begin
- fmax:= avalue;
+ fvaluemax:= avalue;
  if fdatalist <> nil then begin
   with tgridrealdatalist(fdatalist) do begin
    max:= avalue;
@@ -5813,8 +5874,8 @@ end;
 procedure tcustomrealedit.updatedatalist;
 begin
  with tgridrealdatalist(fdatalist) do begin
-  min:= self.min;
-  max:= self.max;
+  min:= self.valuemin;
+  max:= self.valuemax;
   updateeditoptions(foptionsedit);
  end;
 end;
@@ -5898,11 +5959,11 @@ function tcustomrealspinedit.gettextvalue(var accept: boolean;
  function initvalue: realty;
  begin
   result:= 0;
-  if result < fmin then begin
-   result:= fmin;
+  if result < fvaluemin then begin
+   result:= fvaluemin;
   end;
-  if result > fmax then begin
-   result:= fmax;
+  if result > fvaluemax then begin
+   result:= fvaluemax;
   end;
  end;
  
@@ -5911,10 +5972,10 @@ label
 begin
  case fstepflag of
   sk_last: begin
-   result:= fmax;
+   result:= fvaluemax;
   end;
   sk_first: begin
-   result:= fmin;
+   result:= fvaluemin;
   end;
   sk_up: begin
    result:= fvalue;
@@ -5938,11 +5999,11 @@ begin
   end;   
  end;
 endlab:
- if result < fmin then begin
-  result:= fmin;
+ if result < fvaluemin then begin
+  result:= fvaluemin;
  end;
- if result > fmax then begin
-  result:= fmax;
+ if result > fvaluemax then begin
+  result:= fvaluemax;
  end;
 endlab1:
  fstepflag:= stepkindty(-1);
@@ -6067,8 +6128,8 @@ constructor tcustomdatetimeedit.create(aowner: tcomponent);
 begin
  fvalue:= emptydatetime;
  fvaluedefault:= emptydatetime;
- fmin:= emptydatetime;
- fmax:= bigdatetime;
+ fvaluemin:= emptydatetime;
+ fvaluemax:= bigdatetime;
  inherited;
 end;
 
@@ -6168,16 +6229,17 @@ begin
   if not (((des_isdb in fstate) or (oe_null in foptionsedit)) and 
                                         (dat1 = emptydatetime)) then begin
    if fkind = dtk_time then begin
-    if (fmax = emptydatetime) and not (dat1 = emptydatetime) or
-         not (fmin = emptydatetime) and (dat1 < frac(fmin)) or 
-                    (dat1 > frac(fmax)) then begin
-     rangeerror(fmin,fmax,quiet);
+    if (fvaluemax = emptydatetime) and not (dat1 = emptydatetime) or
+         not (fvaluemin = emptydatetime) and (dat1 < frac(fvaluemin)) or 
+                    (dat1 > frac(fvaluemax)) then begin
+     rangeerror(fvaluemin,fvaluemax,quiet);
      accept:= false;
     end;
    end
    else begin
-    if (cmprealty(fmin,dat1) > 0) or (cmprealty(fmax,dat1) < 0) then begin
-     rangeerror(fmin,fmax,quiet);
+    if (cmprealty(fvaluemin,dat1) > 0) or 
+                      (cmprealty(fvaluemax,dat1) < 0) then begin
+     rangeerror(fvaluemin,fvaluemax,quiet);
      accept:= false;
     end;
    end;
@@ -6218,11 +6280,11 @@ begin
    checkdateconvert(fconvert,dat1);
   end;
  end;
- if cmprealty(fmin,dat1) > 0 then begin
-  dat1:= fmin;
+ if cmprealty(fvaluemin,dat1) > 0 then begin
+  dat1:= fvaluemin;
  end;
- if cmprealty(fmax,dat1) < 0 then begin
-  dat1:= fmax;
+ if cmprealty(fvaluemax,dat1) < 0 then begin
+  dat1:= fvaluemax;
  end;
  tdatetime(data):= dat1;
 end;
@@ -6281,7 +6343,8 @@ end;
 
 procedure tcustomdatetimeedit.readstatvalue(const reader: tstatreader);
 begin
- value:= reader.readreal(valuevarname,value,fmin,fmax,oe_null in foptionsedit);
+ value:= reader.readreal(valuevarname,value,fvaluemin,fvaluemax,
+                                                          oe_null in foptionsedit);
 end;
 
 procedure tcustomdatetimeedit.writestatvalue(const writer: tstatwriter);
@@ -6317,15 +6380,26 @@ begin
  valuedefault:= readrealty(reader);
 end;
 
+procedure tcustomdatetimeedit.readmin1(reader: treader);
+begin
+ fvaluemin:= readrealty(reader);
+end;
+
+procedure tcustomdatetimeedit.readmax1(reader: treader);
+begin
+ fvaluemax:= readrealty(reader);
+end;
+
 procedure tcustomdatetimeedit.readmin(reader: treader);
 begin
- fmin:= readrealty(reader);
+ valuemin:= reader.readfloat();
 end;
 
 procedure tcustomdatetimeedit.readmax(reader: treader);
 begin
- fmax:= readrealty(reader);
+ valuemax:= reader.readfloat();
 end;
+
 
 procedure tcustomdatetimeedit.defineproperties(filer: tfiler);
 begin
@@ -6333,10 +6407,12 @@ begin
  
  filer.DefineProperty('val',
              {$ifdef FPC}@{$endif}readvalue,nil,false);
- filer.DefineProperty('mi',{$ifdef FPC}@{$endif}readmin,nil,false);
- filer.DefineProperty('ma',{$ifdef FPC}@{$endif}readmax,nil,false);
+ filer.DefineProperty('mi',{$ifdef FPC}@{$endif}readmin1,nil,false);
+ filer.DefineProperty('ma',{$ifdef FPC}@{$endif}readmax1,nil,false);
  filer.DefineProperty('def',
              {$ifdef FPC}@{$endif}readvaluedefault,nil,false);
+ filer.defineproperty('min',@readmin,nil,false);
+ filer.defineproperty('max',@readmax,nil,false);
 end;
 
 function tcustomdatetimeedit.isempty(const atext: msestring): boolean;
@@ -6396,9 +6472,9 @@ begin
  end;
 end;
 
-procedure tcustomdatetimeedit.setmin(const avalue: tdatetime);
+procedure tcustomdatetimeedit.setvaluemin(const avalue: tdatetime);
 begin
- fmin:= avalue;
+ fvaluemin:= avalue;
  if fdatalist <> nil then begin
   with tgridrealdatalist(fdatalist) do begin
    min:= avalue;
@@ -6406,9 +6482,9 @@ begin
  end; 
 end;
 
-procedure tcustomdatetimeedit.setmax(const avalue: tdatetime);
+procedure tcustomdatetimeedit.setvaluemax(const avalue: tdatetime);
 begin
- fmax:= avalue;
+ fvaluemax:= avalue;
  if fdatalist <> nil then begin
   with tgridrealdatalist(fdatalist) do begin
    max:= avalue;
@@ -6419,8 +6495,8 @@ end;
 procedure tcustomdatetimeedit.updatedatalist;
 begin
  with tgridrealdatalist(fdatalist) do begin
-  min:= self.min;
-  max:= self.max;
+  min:= self.valuemin;
+  max:= self.valuemax;
   updateeditoptions(foptionsedit);
  end;
 end;

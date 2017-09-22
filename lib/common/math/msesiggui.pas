@@ -94,8 +94,8 @@ type
    foutmax: real;
    procedure setoutmin(const avalue: real);
    procedure setoutmax(const avalue: real);
-   procedure setmin(const avalue: realty); override;
-   procedure setmax(const avalue: realty); override;
+   procedure setvaluemin(const avalue: realty); override;
+   procedure setvaluemax(const avalue: realty); override;
 
    procedure updatesigvalue;
    procedure dochange; override;
@@ -457,7 +457,7 @@ begin
  inherited;
  fvalue:= 0;
  fvaluedefault:= 0;
- fmin:= -bigreal;
+ fvaluemin:= -bigreal;
  foutmax:= 1;
 end;
 
@@ -609,13 +609,13 @@ begin
  updatesigvalue;
 end;
 }
-procedure tsigrealedit.setmin(const avalue: realty);
+procedure tsigrealedit.setvaluemin(const avalue: realty);
 begin
  inherited;
  updatesigvalue;
 end;
 
-procedure tsigrealedit.setmax(const avalue: realty);
+procedure tsigrealedit.setvaluemax(const avalue: realty);
 begin
  inherited;
  updatesigvalue;

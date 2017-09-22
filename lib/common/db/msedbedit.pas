@@ -971,8 +971,8 @@ type
    destructor destroy; override;
   published
    property datalink: teditwidgetdatalink read fdatalink write setdatalink;
-   property min {stored false};
-   property max {stored false};
+   property valuemin {stored false};
+   property valuemax {stored false};
    property formatedit;
    property formatdisp;
    property valuerange;
@@ -1011,8 +1011,8 @@ type
    destructor destroy; override;
   published
    property datalink: teditwidgetdatalink read fdatalink write setdatalink;
-   property min {stored false};
-   property max {stored false};
+   property valuemin {stored false};
+   property valuemax {stored false};
    property formatedit;
    property formatdisp;
    property valuerange;
@@ -1119,8 +1119,8 @@ type
    destructor destroy; override;
   published
    property datalink: teditwidgetdatalink read fdatalink write setdatalink;
-   property min {stored false};
-   property max {stored false};
+   property valuemin {stored false};
+   property valuemax {stored false};
    property formatedit;
    property formatdisp;
    property kind;
@@ -1181,8 +1181,8 @@ type
    property valueempty;
    property base;
    property bitcount;
-   property min;
-   property max;
+   property valuemin;
+   property valuemax;
    property onsetvalue;
    property onbeforedropdown;
    property onafterclosedropdown;

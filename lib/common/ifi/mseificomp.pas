@@ -2846,12 +2846,12 @@ end;
 
 procedure tint64clientcontroller.readmin(reader: treader);
 begin
- valuemin:= reader.readinteger();
+ valuemin:= reader.readint64();
 end;
 
 procedure tint64clientcontroller.readmax(reader: treader);
 begin
- valuemax:= reader.readinteger()
+ valuemax:= reader.readint64()
 end;
 
 procedure tint64clientcontroller.defineproperties(filer: tfiler);
@@ -3066,12 +3066,12 @@ end;
 
 procedure trealclientcontroller.readmin(reader: treader);
 begin
- valuemin:= reader.readinteger;
+ valuemin:= reader.readfloat;
 end;
 
 procedure trealclientcontroller.readmax(reader: treader);
 begin
- valuemax:= reader.readinteger;
+ valuemax:= reader.readfloat;
 end;
 
 procedure trealclientcontroller.defineproperties(filer: tfiler);
@@ -3208,12 +3208,12 @@ end;
 }
 procedure tdatetimeclientcontroller.readmin(reader: treader);
 begin
- valuemin:= reader.readinteger();
+ valuemin:= reader.readfloat();
 end;
 
 procedure tdatetimeclientcontroller.readmax(reader: treader);
 begin
- valuemax:= reader.readinteger();
+ valuemax:= reader.readfloat();
 end;
 
 procedure tdatetimeclientcontroller.defineproperties(filer: tfiler);

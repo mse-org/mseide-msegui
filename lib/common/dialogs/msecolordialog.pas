@@ -335,7 +335,7 @@ constructor tcustomcoloredit.create(aowner: tcomponent);
 begin
  inherited;
  enums:= integerarty(getcolorvalues);
- min:= minint;
+ valuemin:= minint;
  base:= nb_hex;
  valuedefault:= cl_none;
  value:= valuedefault;

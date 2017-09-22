@@ -52,8 +52,8 @@ type
   published
    property datalink: teditwidgetdatalink read fdatalink write setdatalink;
    property dropdown;
-   property min {stored false};
-   property max {stored false};
+   property valuemin {stored false};
+   property valuemax {stored false};
    property formatedit;
    property formatdisp;
    property kind;
