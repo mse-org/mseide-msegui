@@ -2284,11 +2284,14 @@ begin
                                     [2,predecessor,stackmode]);
      end
      else begin
-     {$ifdef mse_debugzorder}
-      debugwriteln('  reconfigurewmwindow');
-     {$endif}
       changes.sibling:= predecessor;
       changes.stack_mode:= stackmode;
+     {$ifdef mse_debugzorder}
+      debugwriteln('  reconfigurewmwindow');
+      debugwindow( '   window: ',id);
+      debugwindow( '   sibling:',changes.sibling);
+      debugwriteln('   mode:   '+inttostr(changes.stack_mode));
+     {$endif}
       xreconfigurewmwindow(appdisp,id,msedefaultscreenno,
                                    cwsibling or cwstackmode,@changes);
      end;
