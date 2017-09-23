@@ -1,0 +1,20 @@
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Addr4
+   fun:SYSUTILS_$$_STRSCAN$PCHAR$CHAR$$PCHAR
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Addr16
+   fun:SYSTEM_$$_INDEXBYTE$formal$INT64$BYTE$$INT64
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Cond
+   fun:XcursorImageHash
+   fun:XcursorNoticePutBitmap
+   fun:XPutImage
+   fun:MSEGUIINTF_$$_GUI_IMAGETOPIXMAP$IMAGETY$QWORD$LONGWORD$$GDIERRORTY
+}
+
+ 
