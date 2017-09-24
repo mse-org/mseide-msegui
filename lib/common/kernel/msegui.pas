@@ -4406,11 +4406,10 @@ var
  rect1: rectty;
  po1: pint16;
 begin
-// result:= pointinrect(info.pos,fpaintrect);
- if {result and} (fi.frameimage_list <> nil) and 
+ result:= true;
+ if (fi.frameimage_list <> nil) and 
                   fi.frameimage_list.hascornermask then begin
   rect1:= arect;
-//  rect1:= deflaterect(mr(nullpoint,fintf.getwidgetrect.size),fouterframe);
   with timagelist1(fi.frameimage_list) do begin
    if (pos.x < fcornermaskmaxtopleft) and 
                    (pos.y < rect1.y + length(cornermask_topleft)) then begin
@@ -4447,9 +4446,6 @@ begin
     end;
    end;
   end;
- end
- else begin
-  result:= true;
  end;
 end;
 
