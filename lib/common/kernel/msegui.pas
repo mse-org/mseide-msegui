@@ -11259,7 +11259,7 @@ begin
   end
   else begin
    if info.mouseeventinfopo = nil then begin
-    fillchar(ainfo,0,sizeof(ainfo));
+    fillchar(ainfo,sizeof(ainfo),0);
     ainfo.pos:= info.pos;
     updatemousestate(ainfo);
    end
