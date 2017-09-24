@@ -66,7 +66,8 @@ var
 implementation
 
 uses
- dateutils(*,msedate  {$ifdef mse_debugmutex},mseapplication,msesysintf{$endif}*);
+ dateutils {$ifdef mse_debugmutex},mseapplication,msesysintf{$endif}
+ (*,msedate *);
 
 const
  unidatetimeoffset = -25569;
