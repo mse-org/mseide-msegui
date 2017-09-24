@@ -592,7 +592,7 @@ begin
  end;
 end;
 
-procedure tterminal.addchars(const avalue: msestring);			
+procedure tterminal.addchars(const avalue: msestring);
 var
  mstr1: msestring;
 begin
