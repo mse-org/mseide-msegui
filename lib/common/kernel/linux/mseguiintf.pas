@@ -5683,7 +5683,6 @@ label
  eventrestart;
 begin
  result:= nil;
-
  sigfillset(allsig);
  timeout1.tv_sec:= 10;
  timeout1.tv_nsec:= 0;
@@ -5824,10 +5823,13 @@ eventrestart:
     break;
    end
    else begin
-  {$ifdef mse_debugsysevent}
-   debugwriteln('sysevent filtered');
-  {$endif}
+   {$ifdef mse_debugsysevent}
+    debugwriteln('sysevent filtered');
+   {$endif}
    end;
+  end
+  else begin
+   break;
   end;
  end;
  if not b1 then begin
