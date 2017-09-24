@@ -773,7 +773,7 @@ type
 procedure paintdockingareacaption(const canvas: tcanvas; const sender: twidget;
                              const atext: msestring = 'Docking Area');
 begin
- if sender.childrencount = 0 then begin
+ if sender.visiblechildrencount = 0 then begin
   canvas.save;
   canvas.font.height:= 20;
   drawtext(canvas,atext,sender.paintclientrect(),

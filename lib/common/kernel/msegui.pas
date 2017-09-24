@@ -2151,6 +2151,7 @@ type
    property parentwidget: twidget read fparentwidget write setparentwidget;
    function getrootwidgetpath: widgetarty; //root widget is last
    function widgetcount: integer;
+   function visiblewidgetcount(): int32;
    function parentwidgetindex: integer; 
                             //index in parentwidget.widgets, -1 if none
    function indexofwidget(const awidget: twidget): integer;
@@ -2169,6 +2170,7 @@ type
    property container: twidget read getcontainer;
    function containeroffset: pointty;
    function childrencount: integer; virtual;
+   function visiblechildrencount: integer;
    property children[const index: integer]: twidget read getchildwidgets;
                                                                       default;
                                //children of container
@@ -8574,6 +8576,10 @@ begin
  result:= length(fwidgets);
 end;
 
+function twidget.visiblewidgetcount(): int32;
+begin
+end;
+
 function twidget.getcontainer: twidget;
 begin
  result:= self;
@@ -8595,6 +8601,19 @@ end;
 function twidget.childrencount: integer;
 begin
  result:= widgetcount;
+end;
+
+function twidget.visiblechildrencount: integer;
+var
+ i1,i2: int32;
+begin
+ i2:= 0;
+ for i1:= 0 to childrencount - 1 do begin
+  if children[i1].visible then begin
+   inc(i2);
+  end;
+ end;
+ result:= i2;
 end;
 
 function twidget.getwidgets(const index: integer): twidget;
