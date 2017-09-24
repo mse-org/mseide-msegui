@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="100"
+   height="100"
+   id="svg2"
+   version="1.1"
+   inkscape:version="0.48.3.1 r9886"
+   sodipodi:docname="frames.svg"
+   inkscape:export-filename="/home/mse/packs/standard/git/mseide-msegui/icons/frames/frames.png"
+   inkscape:export-xdpi="90"
+   inkscape:export-ydpi="90">
+  <defs
+     id="defs4">
+    <inkscape:path-effect
+       effect="envelope"
+       id="path-effect3799"
+       is_visible="true"
+       yy="true"
+       xx="true"
+       bendpath1="M 20,17 50.999996,6.2600001"
+       bendpath2="m 50.999996,6.2600001 0,33.4800039"
+       bendpath3="m 8,39.740004 42.999996,0"
+       bendpath4="M 8,6.2600001 8,39.740004"
+       bendpath1-nodetypes="cc" />
+    <inkscape:path-effect
+       effect="bend_path"
+       id="path-effect3797"
+       is_visible="true"
+       bendpath="m 8,23.000002 42.999996,0"
+       prop_scale="0.93"
+       scale_y_rel="false"
+       vertical="false" />
+    <filter
+       inkscape:collect="always"
+       id="filter3792"
+       x="-0.077392084"
+       width="1.1547842"
+       y="-0.17896919"
+       height="1.3579384">
+      <feGaussianBlur
+         inkscape:collect="always"
+         stdDeviation="1.193128"
+         id="feGaussianBlur3794" />
+    </filter>
+  </defs>
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="11.3"
+     inkscape:cx="37.709582"
+     inkscape:cy="82.497005"
+     inkscape:document-units="px"
+     inkscape:current-layer="layer1"
+     showgrid="true">
+    <inkscape:grid
+       type="xygrid"
+       id="grid3004"
+       empspacing="1"
+       visible="true"
+       enabled="true"
+       snapvisiblegridlinesonly="true"
+       dotted="false" />
+  </sodipodi:namedview>
+  <metadata
+     id="metadata7">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(0,-952.36218)">
+    <path
+       transform="translate(0,952.36218)"
+       style="opacity:0.81159417000000000;color:#000000;fill:none;fill-opacity:1;fill-rule:nonzero;stroke:#000000;stroke-width:3.38700007999999997;stroke-linecap:butt;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dashoffset:0;marker:none;visibility:visible;display:inline;overflow:visible;filter:url(#filter3792);enable-background:accumulate"
+       d="M 9,6 12.035398,5 47,5 l 3,2 1,3 0,27 -1,3 -3,1 L 12,41 9,40 8,37 8,9.2035398 z"
+       id="rect3006"
+       inkscape:connector-curvature="0"
+       sodipodi:nodetypes="ccccccccccccc" />
+  </g>
+</svg>
