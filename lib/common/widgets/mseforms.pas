@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2016 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2017 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -408,6 +408,7 @@ type
    property ondeactivate;
    property onhide;
    property onevent;
+   property oncomponentevent;
    property onasyncevent;
 
    property onstatupdate;
@@ -561,6 +562,7 @@ type
    property ondeactivate;
    property onhide;
    property onevent;
+   property oncomponentevent;
    property onasyncevent;
 
    property onstatupdate;

@@ -812,6 +812,7 @@ type
    fonfocusedwidgetchanged: widgetchangeeventty;
    fonpaintbackground: painteventty;
 
+   foncomponentevent: componenteventeventty;
    procedure setpopupmenu(const Value: tpopupmenu);
    function getframe: tcaptionframe;
    procedure setframe(const value: tcaptionframe);
@@ -858,6 +859,7 @@ type
    procedure dokeyup(var info: keyeventinfoty); override;
    procedure doshortcut(var info: keyeventinfoty; const sender: twidget); override;
    procedure receiveevent(const event: tobjectevent); override;
+   procedure componentevent(const event: tcomponentevent) override;
    procedure doasyncevent(var atag: integer); override;
 
    procedure internalcreateframe; override;
@@ -892,8 +894,10 @@ type
 
    property onloaded: notifyeventty read fonloaded write fonloaded;
 
-   property onbeforepaint: painteventty read fonbeforepaint write fonbeforepaint;
-   property onpaintbackground: painteventty read fonpaintbackground write fonpaintbackground;
+   property onbeforepaint: painteventty read fonbeforepaint 
+                                                      write fonbeforepaint;
+   property onpaintbackground: painteventty read fonpaintbackground
+                                                      write fonpaintbackground;
    property onpaint: painteventty read fonpaint write fonpaint;
    property onafterpaint: painteventty read fonafterpaint write fonafterpaint;
 
@@ -904,6 +908,8 @@ type
    property onclosequery: queryeventty read fonclosequery write fonclosequery;
 
    property onevent: eventeventty read fonevent write fonevent;
+   property oncomponentevent: componenteventeventty read foncomponentevent 
+                                                  write foncomponentevent;
    property onasyncevent: asynceventeventty read fonasyncevent write fonasyncevent;
   public
    function canclose(const newfocus: twidget = nil): boolean; override;
@@ -5623,6 +5629,14 @@ procedure tactionwidget.receiveevent(const event: tobjectevent);
 begin
  if canevent(tmethod(fonevent)) then begin
   fonevent(self,event);
+ end;
+ inherited;
+end;
+
+procedure tactionwidget.componentevent(const event: tcomponentevent);
+begin
+ if canevent(tmethod(foncomponentevent)) then begin
+  foncomponentevent(self,event);
  end;
  inherited;
 end;

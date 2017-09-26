@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2016 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2017 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -81,6 +81,7 @@ const
      '{$ifdef FPC}{$mode objfpc}{$h+}{$endif}';
 
 type
+ tcomponentevent = class;
  posteventoptionty = (peo_local,peo_first,peo_modaldefer);
  posteventoptionsty = set of posteventoptionty;
  
@@ -91,6 +92,8 @@ type
                                 var accept: boolean) of object;
  eventeventty = procedure (const sender: tobject;
                               const aevent: tobjectevent) of object;
+ componenteventeventty = procedure (const sender: tobject;
+                                  const aevent: tcomponentevent) of object;
  asynceventeventty = procedure (const sender: tobject;
                                        var atag: integer) of object;
 
