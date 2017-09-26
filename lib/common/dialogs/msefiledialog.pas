@@ -84,12 +84,12 @@ type
    property excludeattrib: fileattributesty read fexcludeattrib 
                   write fexcludeattrib default [fa_hidden];
    property maskar: filenamearty read fmaskar write fmaskar; //nil -> all
-   property mask: filenamety read getmask write setmask; //'' -> all
    property path: filenamety read getpath write setpath;
                   //calls readlist
    property selectednames: filenamearty read getselectednames write setselectednames;
    property  checksubdir: boolean read getchecksubdir write setchecksubdir;
   published
+   property mask: filenamety read getmask write setmask; //'' -> all
    property options default defaultlistviewoptionsfile;
    property optionsfile: filelistviewoptionsty read foptionsfile 
                  write setoptionsfile default defaultfilelistviewoptions;
