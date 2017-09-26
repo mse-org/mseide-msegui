@@ -7806,12 +7806,12 @@ begin
    if not bo1 then begin
     internalpaint(canvas,arect);
    end;
-   if assigned(tfacetemplate(ftemplate.template).fonafterpaint) then begin
-    tfacetemplate(ftemplate.template).fonafterpaint(self,canvas,arect);
-   end;
   end
   else begin
    internalpaint(canvas,arect);
+  end;
+  if assigned(tfacetemplate(ftemplate.template).fonafterpaint) then begin
+   tfacetemplate(ftemplate.template).fonafterpaint(self,canvas,arect);
   end;
  end
  else begin
