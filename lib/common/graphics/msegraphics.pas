@@ -1004,7 +1004,7 @@ type
 
    procedure drawline(const startpoint,endpoint: pointty;
                                         const acolor: colorty = cl_default);
-   procedure drawline(const startpoint: pointty; const delta: sizety;
+   procedure drawline(const startpoint: pointty; const length: sizety;
                                         const acolor: colorty = cl_default);
    procedure drawlinesegments(const apoints: array of segmentty;
                          const acolor: colorty = cl_default);
@@ -5107,15 +5107,15 @@ begin
  drawlinesegments([segment(startpoint,endpoint)],acolor);
 end;
 
-procedure tcanvas.drawline(const startpoint: pointty; const delta: sizety;
+procedure tcanvas.drawline(const startpoint: pointty; const length: sizety;
                const acolor: colorty = cl_default);
 var
  seg1: segmentty;
 begin
  if cs_inactive in fstate then exit;
  seg1.a:= startpoint;
- seg1.b.x:= seg1.a.x + delta.cx - 1;
- seg1.b.y:= seg1.a.y + delta.cy - 1;
+ seg1.b.x:= seg1.a.x + length.cx;
+ seg1.b.y:= seg1.a.y + length.cy;
  drawlinesegments([seg1],acolor);
 end;
 
