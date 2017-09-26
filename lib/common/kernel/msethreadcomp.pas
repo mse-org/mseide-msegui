@@ -100,6 +100,7 @@ end;
 procedure tthreadcomp.run(const adatapo: pointer = nil);
 begin
  terminateandwait;
+ factive:= true;
  fdatapo:= adatapo;
 // fthread:= teventthread.create({$ifdef FPC}@{$endif}threadproc,false,
 //                                      fstacksizekb);
