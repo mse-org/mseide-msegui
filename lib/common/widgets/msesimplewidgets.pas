@@ -72,6 +72,8 @@ type
    property onmove;
    property onclosequery;
 
+   property onasyncevent;
+   property oncomponentevent;
  end;
 
  tcustombutton = class;
