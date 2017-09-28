@@ -10507,6 +10507,7 @@ var
  widget1: twidget;
  bo1,bo2: boolean;
  face1: tcustomface;
+ obj1: tobject;
 begin
  bo2:= ws1_painting in fwidgetstate1;
  include(fwidgetstate1,ws1_painting);
@@ -10543,10 +10544,13 @@ begin
    canvas.font:= getfont;
    canvas.color:= actcolor;
    canvas.drawinfopo:= nil;
+   obj1:= canvas.target;
+   canvas.target:= self;
    dopaint(canvas);
    if not canvas.clipregionisempty then begin
     doonpaint(canvas);
    end;
+   canvas.target:= obj1;
   end;
   canvas.restore(saveindex);
   if bo1 then begin

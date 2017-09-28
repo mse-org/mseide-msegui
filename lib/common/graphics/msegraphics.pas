@@ -952,6 +952,7 @@ type
    procedure movewindowrect(const adist: pointty; const arect: rectty);
    procedure defineproperties(filer: tfiler); override;
   public
+   target: tobject;     //currently assigned widget in twidget.paint()
    drawinfopo: pointer; //used to transport additional drawing information
    constructor create(const user: tobject; const intf: icanvas); virtual;
    destructor destroy; override;
