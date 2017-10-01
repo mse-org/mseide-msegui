@@ -744,6 +744,7 @@ type
    property hiddenedges;
    property colorclient;
    property colorbutton;
+   property colorglyph;
    property framei_left;
    property framei_top;
    property framei_right;

@@ -1034,7 +1034,9 @@ var
 var
  ar1: scrollbarareaty;
 begin
- if info.eventkind in mouseposevents then begin
+ if (info.eventkind in mouseposevents) and (info.shiftstate * 
+              (keyshiftstatesmask + [ss_middle,ss_right]) = []) and 
+      not (info.button in [mb_right,mb_middle]) then begin
   ar1:= findarea(info.pos);
   if (ar1 = scrollbarareaty(-1)) and clickedareaisvalid then begin
    ar1:= scrollbarareaty(scrollbarclicked);

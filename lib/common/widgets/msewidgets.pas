@@ -612,6 +612,7 @@ type
    fbuttonface: tface;
    fbuttonframe: tframe;
    factbuttonindex: integer;
+   fcolorglyph: colorty;
    procedure setbuttonsize(const Value: integer);
    procedure setbuttonpos(const Value: stepbuttonposty);
    procedure setbuttonsinline(const value: boolean);
@@ -625,6 +626,7 @@ type
    procedure setbuttonface(const avalue: tface);
    function getbuttonframe: tframe;
    procedure setbuttonframe(const avalue: tframe);
+   procedure setcolorglyph(const avalue: colorty);
   protected
    fforceinvisiblebuttons: stepkindsty;
    fforcevisiblebuttons: stepkindsty;
@@ -669,10 +671,15 @@ type
    procedure checktemplate(const sender: tobject); override;
    procedure updatebuttonstate(const first,delta,count: integer);
    function canstep: boolean;
-   function executestepevent(const event: stepkindty; const stepinfo: framestepinfoty;
-               const aindex: integer): integer;
-   property buttonsize: integer read fbuttonsize write setbuttonsize default defaultstepbuttonsize;
-   property colorbutton: colorty read fcolorbutton write setcolorbutton default cl_default;
+   function executestepevent(const event: stepkindty; 
+             const stepinfo: framestepinfoty; const aindex: integer): integer;
+   property buttonsize: integer read fbuttonsize write setbuttonsize 
+                                               default defaultstepbuttonsize;
+   property colorbutton: colorty read fcolorbutton 
+                                      write setcolorbutton default cl_default;
+                                       //cl_default maps to widget color
+   property colorglyph: colorty read fcolorglyph 
+                                      write setcolorglyph default cl_default;
                                        //cl_default maps to widget color
    property buttonface: tface read getbuttonface write setbuttonface;
    property buttonframe: tframe read getbuttonframe write setbuttonframe;
@@ -683,9 +690,12 @@ type
               write setbuttonsinvisible default [sk_first,sk_last];
    property buttonsvisible: stepkindsty read fforcevisiblebuttons
               write setbuttonsvisible default [];
-   property buttonpos: stepbuttonposty read fbuttonpos write setbuttonpos default sbp_right;
-   property buttonslast: boolean read fbuttonslast write setbuttonslast default false;
-   property buttonsinline: boolean read fbuttonsinline write setbuttonsinline default false;
+   property buttonpos: stepbuttonposty read fbuttonpos 
+                                       write setbuttonpos default sbp_right;
+   property buttonslast: boolean read fbuttonslast 
+                                          write setbuttonslast default false;
+   property buttonsinline: boolean read fbuttonsinline 
+                                          write setbuttonsinline default false;
    property mousewheel: boolean read fmousewheel write fmousewheel default true;
  end;
 
@@ -710,6 +720,7 @@ type
    property hiddenedges;
    property colorclient;
    property colorbutton;
+   property colorglyph;
    property framei_left;
    property framei_top;
    property framei_right;
@@ -3671,6 +3682,7 @@ begin
  fbuttonsize:= defaultstepbuttonsize;
  fforceinvisiblebuttons:= [sk_first,sk_last];
  fcolorbutton:= cl_default;
+ fcolorglyph:= cl_default;
  intf.setstaticframe(true);
  fmousewheel:= true;
  frepeatedbutton:= -1;
@@ -3909,6 +3921,15 @@ begin
  end;
 end;
 
+procedure tcustomstepframe.setcolorglyph(const avalue: colorty);
+begin
+ if fcolorglyph <> avalue then begin
+  fcolorglyph:= avalue;
+  updatelayout;
+  icaptionframe(fintf).getwidget.invalidaterect(fdim,org_widget);
+ end;
+end;
+
 procedure tcustomstepframe.setdisabledbuttons(const avalue: stepkindsty);
 begin
  if fdisabledbuttons <> avalue then begin
@@ -4115,6 +4136,7 @@ begin             //updatelayout
     end;
     imagenrdisabled:= -2;
     color:= color1;
+    ca.colorglyph:= fcolorglyph;
     tag:= int1;
     doexecute:= {$ifdef FPC}@{$endif}execute;
     ca.dim.cx:= acx;
