@@ -269,7 +269,7 @@ type
    property objectlinker: tobjectlinker read getobjectlinker
                 {$ifdef msehasimplements}implements istatfile{$endif};
    property colorglyph: colorty read fcolorglyph write setcolorglyph
-           default cl_glyph;
+                                                           default cl_default;
    property readonly: boolean read getreadonly write setreadonly;
   published
    property statfile: tstatfile read fstatfile write setstatfile;
@@ -1695,7 +1695,7 @@ begin
  foptionsedit:= defaultoptionsedit;
  foptionsedit1:= defaultoptionsedit1;
  inherited;
- fcolorglyph:= cl_glyph;
+ fcolorglyph:= cl_default;
 end;
 
 procedure tgraphdataedit.internalcreateframe;
@@ -2857,6 +2857,9 @@ begin
   bo1:= boolean(avalue);
  end;
  co1:= acolorglyph;
+ if co1 = cl_default then begin
+  co1:= cl_glyph;
+ end;
  if (bo_coloractive in foptions) and active then begin
   canvas.fillrect(arect,cl_selectedtextbackground);
   co1:= cl_selectedtext;
