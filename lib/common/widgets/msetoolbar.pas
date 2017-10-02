@@ -78,7 +78,7 @@ type
    procedure doexecute(const tag: integer; const info: mouseeventinfoty);
    procedure objectevent(const sender: tobject; const event: objecteventty); override;
    procedure defineproperties(filer: tfiler); override;
-   //iactionlink
+    //iactionlink
    procedure actionchanged;
    function getactioninfopo: pactioninfoty;
    procedure doshortcut(var info: keyeventinfoty);
@@ -109,9 +109,9 @@ type
                                      write setimagenrdisabled
                                      stored isimagenrdisabledstored default -2;
    property colorglyph: colorty read finfo.colorglyph write setcolorglyph 
-                       stored iscolorglyphstored default cl_glyph;
+                       stored iscolorglyphstored default cl_default;
    property color: colorty read finfo.color write setcolor 
-                       stored iscolorstored default cl_transparent;
+                       stored iscolorstored default cl_default;
    property imagecheckedoffset: integer read finfo.imagecheckedoffset
               write setimagecheckedoffset
                             stored isimagecheckedoffsetstored default 0;
@@ -271,8 +271,10 @@ type
    property height: integer read fheight write setheight default 0;
    property imagelist: timagelist read fimagelist write setimagelist;
    property colorglyph: colorty read fcolorglyph 
-                                       write setcolorglyph default cl_glyph;
-   property color: colorty read fcolor write setcolor default cl_transparent;
+                                       write setcolorglyph default cl_default;
+                                            //cl_default -> cl_glyph
+   property color: colorty read fcolor write setcolor default cl_default;
+                                            //cl_default -> cl_transparent
    property face: tface read getface write setface;
    property facechecked: tface read getfacechecked write setfacechecked;
    property frame: tframe read getframe write setframe;
@@ -464,6 +466,7 @@ constructor tcustomtoolbutton.create(const aowner: tobject;
 begin
  initactioninfo(finfo);
  finfo.color:= ttoolbuttons(aprop).color;
+ finfo.colorglyph:= ttoolbuttons(aprop).colorglyph;
  inherited;
 end;
 
@@ -828,8 +831,8 @@ end;
 
 constructor tcustomtoolbuttons.create(const aowner: tcustomtoolbar);
 begin
- fcolorglyph:= cl_glyph;
- fcolor:= cl_transparent;
+ fcolorglyph:= cl_default;
+ fcolor:= cl_default;
  inherited create(aowner,getbuttonclass);
 end;
 
@@ -863,10 +866,10 @@ begin
    if fimagelist <> nil then begin
     imagelist:= fimagelist;
    end;
-   if fcolorglyph <> cl_glyph then begin
+   if fcolorglyph <> cl_default then begin
     colorglyph:= fcolorglyph;
    end;
-   if fcolor <> cl_transparent then begin
+   if fcolor <> cl_default then begin
     color:= fcolor;
    end;
 //   state:= state - [as_localimagelist,as_localcolorglyph,as_localcolor];
@@ -1363,6 +1366,12 @@ begin
        with cells[int1] do begin
         color:= cl_parent;
         actioninfotoshapeinfo(buttons[int1].finfo,cells[int1]);
+        if color = cl_default then begin
+         color:= cl_transparent;
+        end;
+        if ca.colorglyph = cl_default then begin
+         ca.colorglyph:= cl_glyph;
+        end;
         if shs_separator in state then begin
          exclude(state,shs_flat);
         end
@@ -1552,7 +1561,13 @@ begin
      actionstatestoshapestates(button1.finfo,state);
      ca.imagenr:= buttons[int1].finfo.imagenr;
      ca.colorglyph:= buttons[int1].finfo.colorglyph;
+     if ca.colorglyph = cl_default then begin
+      ca.colorglyph:= cl_glyph;
+     end;
      color:= buttons[int1].finfo.color;
+     if color = cl_default then begin
+      color:= cl_transparent;
+     end;
      ca.imagelist:= timagelist(buttons[int1].finfo.imagelist);
      doexecute:= {$ifdef FPC}@{$endif}buttons[int1].doexecute;
      invalidaterect(ca.dim);

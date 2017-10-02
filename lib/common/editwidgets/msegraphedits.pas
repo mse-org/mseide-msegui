@@ -270,6 +270,7 @@ type
                 {$ifdef msehasimplements}implements istatfile{$endif};
    property colorglyph: colorty read fcolorglyph write setcolorglyph
                                                            default cl_default;
+                                      //cl_default -> cl_glyph
    property readonly: boolean read getreadonly write setreadonly;
   published
    property statfile: tstatfile read fstatfile write setstatfile;
