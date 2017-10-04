@@ -436,7 +436,7 @@
      inkscape:pageopacity="0"
      inkscape:pageshadow="2"
      inkscape:zoom="9.7131484"
-     inkscape:cx="42.519684"
+     inkscape:cx="46.328954"
      inkscape:cy="42.519684"
      inkscape:document-units="mm"
      inkscape:current-layer="layer5"
@@ -474,7 +474,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
+        <dc:title />
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -614,17 +614,6 @@
      inkscape:groupmode="layer"
      id="layer5"
      inkscape:label="text">
-    <text
-       xml:space="preserve"
-       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:32px;line-height:100%;font-family:Sans;-inkscape-font-specification:Sans;text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-       x="5.0277638"
-       y="63.597233"
-       id="text4402"
-       sodipodi:linespacing="100%"><tspan
-         sodipodi:role="line"
-         id="tspan4404"
-         x="5.0277638"
-         y="63.597233">Anim</tspan></text>
     <path
        style="color:#000000;display:inline;overflow:visible;visibility:visible;opacity:1;fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke:#fd0303;stroke-width:8;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;marker:none;marker-start:none;marker-mid:none;marker-end:none;enable-background:accumulate"
        d="M 12.401575,72.637793 C 62.007874,23.031494 62.007874,23.031494 62.007874,23.031494 l -7.086614,-7.086615 14.173228,0 0,14.173229 -7.086614,-7.086614"
