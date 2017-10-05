@@ -12,7 +12,7 @@ unit msedbdispwidgets;
 interface
 uses
  mdb,classes,mclasses,msesimplewidgets,msedb,msetypes,mseclasses,mseguiglob,
- mseglob,mseinterfaces,
+ mseglob,mseinterfaces,msegraphics,
  msedispwidgets,msestrings,mselookupbuffer,msegui,msemenus,mseevent,
  msebarcode;
  

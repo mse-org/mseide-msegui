@@ -11,7 +11,7 @@ unit msewindowwidget;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 uses
- classes,mclasses,msegui,msetypes,msegraphutils,mseguiintf,msewidgets,
+ classes,mclasses,mseclasses,msegui,msetypes,msegraphutils,mseguiintf,msewidgets,
  msegraphics,msesimplewidgets,mseevent,msemenus,mseguiglob,msetimer;
  
 type

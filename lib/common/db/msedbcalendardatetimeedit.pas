@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2013 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2017 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -15,7 +15,7 @@ unit msedbcalendardatetimeedit;
 interface
 uses
  mdb,classes,mclasses,msecalendardatetimeedit,msedbedit,msedb,msegui,
- msewidgetgrid,mseevent,
+ msewidgetgrid,mseevent,msegraphics,
  msedatalist,mseeditglob,msegrids,msemenus,mseguiglob,mseedit,msedataedits,
  msestrings,msetypes;
  

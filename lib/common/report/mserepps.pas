@@ -12,7 +12,7 @@ unit mserepps;
 interface
 uses
  msetypes,msereport,msestrings,msepostscriptprinter,msegraphics,mclasses,
- msegraphutils,msegui;
+ msegraphutils,msegui,msemenus,mseguiglob;
 type
  optionpsty = (ops_noheadercomments,ops_noshowpage);
  optionspsty = set of optionpsty;
