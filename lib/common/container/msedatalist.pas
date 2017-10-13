@@ -761,9 +761,13 @@ type
    property asstringarray:stringarty read getasstringarray write setasstringarray;
    property items[index: integer]: msestring read Getitems write Setitems; default;
  end;
-
+ 
+ stringdatalistoptionty = (sdo_naturalsort);
+ stringdatalistoptionsty = set of stringdatalistoptionty;
+ 
  tmsestringdatalist = class(tpoorstringdatalist)
   private
+   foptions: stringdatalistoptionsty;
   protected
    function compare(const l,r): integer; override;
    function comparecaseinsensitive(const l,r): integer; override;
@@ -772,6 +776,9 @@ type
    function add(const value: msestring): integer; override;
    procedure insert(const index: integer; const item: msestring); override;
    procedure fill(acount: integer; const defaultvalue: msestring);
+  published
+   property options: stringdatalistoptionsty read foptions 
+                                             write foptions default [];
  end;
 
  tdoublemsestringdatalist = class(tpoorstringdatalist)
@@ -5377,12 +5384,22 @@ end;
 
 function tmsestringdatalist.compare(const l,r): integer;
 begin
- result:= msecomparestr(msestring(l),msestring(r));
+ if sdo_naturalsort in foptions then begin
+  result:= msecomparestrnatural(msestring(l),msestring(r));
+ end
+ else begin
+  result:= msecomparestr(msestring(l),msestring(r));
+ end;
 end;
 
 function tmsestringdatalist.comparecaseinsensitive(const l,r): integer;
 begin
- result:= msecomparetext(msestring(l),msestring(r));
+ if sdo_naturalsort in foptions then begin
+  result:= msecomparetextnatural(msestring(l),msestring(r));
+ end
+ else begin
+  result:= msecomparetext(msestring(l),msestring(r));
+ end;
 end;
 
 procedure tmsestringdatalist.fill(acount: integer; const defaultvalue: msestring);
