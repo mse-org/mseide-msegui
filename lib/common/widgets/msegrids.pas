@@ -2796,7 +2796,7 @@ function iscellkeypress(const info: celleventinfoty;
 function iscellclick(const info: celleventinfoty;
              const restrictions: cellclickrestrictionsty = [];
              const shiftstatemustinclude: shiftstatesty = [];
-             const shiftstatemustnotinclude: shiftstatesty = []): boolean;
+         const shiftstatemustnotinclude: shiftstatesty = [ss_repeat]): boolean;
 
 function isrowenter(const info: celleventinfoty;
                                const noentergrid: boolean = false): boolean;
@@ -2856,7 +2856,7 @@ end;
 function iscellclick(const info: celleventinfoty;
              const restrictions: cellclickrestrictionsty = [];
              const shiftstatemustinclude: shiftstatesty = [];
-             const shiftstatemustnotinclude: shiftstatesty = []): boolean;
+          const shiftstatemustnotinclude: shiftstatesty = [ss_repeat]): boolean;
 begin
  result:= false;
  with info do begin
