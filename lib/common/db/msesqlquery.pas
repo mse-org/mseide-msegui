@@ -191,12 +191,12 @@ type
    function rowsreturned: integer; //-1 if not supported
    function rowsaffected: integer; //-1 if not supported
    property updaterowsaffected: integer read fupdaterowsaffected;
+          //sum of rowsaffected of insert, update and delete query,
+          //reset by close, applyupdate and applyupdates, -1 if not supported.
 //   procedure SetSchemaInfo( SchemaType : TSchemaType; SchemaObjectName, SchemaPattern : string); virtual;
    function CreateBlobStream(Field: TField; Mode: TBlobStreamMode): TStream; override;
    property Prepared : boolean read IsPrepared;
    property connected: boolean read getconnected write setconnected;
-             //sum of rowsaffected of insert, update and delete query,
-             //reset by close, applyupdate and applyupdates, -1 if not supported.
   published
    property ReadOnly : Boolean read FReadOnly write SetReadOnly default false;
    property ParseSQL : Boolean read FParseSQL write SetParseSQL default true;

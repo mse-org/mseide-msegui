@@ -178,9 +178,11 @@ type
   kind: tupdatekind;
   po: pointer;
  end;
+ updatekindty = (uk_modify=ord(ukmodify),uk_insert=ord(ukinsert),
+                 uk_delete=ord(ukdelete),uk_modifyinupdate);
  updatelogheaderty = record
   logging: boolean;
-  kind: tupdatekind;
+  kind: updatekindty;
   po: pointer;
   deletedrecord: pintrecordty;
  end;
@@ -241,7 +243,8 @@ type
    procedure readrecord(const arecord: pintrecordty);
  end;
 
- resolverresponsety = (rr_abort,rr_quiet,rr_revert,rr_again,rr_applied);
+ resolverresponsety = (rr_abort,rr_quiet,rr_revert,rr_again,rr_applied,
+                       rr_skipped); //for fkinternalcalc only updates
  resolverresponsesty = set of resolverresponsety;
 
  updateerroreventty = procedure(
@@ -493,7 +496,7 @@ type
                                                         write fonindexchanged;
  end;
 
- recupdateflagty = (ruf_applied,ruf_error,ruf_append);
+ recupdateflagty = (ruf_applied,ruf_error,ruf_append,ruf_inupdate);
  recupdateflagsty = set of recupdateflagty;
 
  recupdateinfoty = record
@@ -532,7 +535,7 @@ type
                       );
  bufdatasetstatesty = set of bufdatasetstatety;
 
- bufdatasetstate1ty = (bs1_needsresync,
+ bufdatasetstate1ty = (bs1_needsresync,bs1_inupdatechanged,
      bs1_lookupnotifying,bs1_lookupnotifypending,bs1_posting,bs1_recordupdating,
                           bs1_deferdeleterecupdatebuffer,bs1_restoreupdate,
                           bs1_onidleregistered);
@@ -2566,6 +2569,7 @@ end;
 procedure tmsebufdataset.internalinsert;
 begin
  include(fbstate,bs_editing);
+ exclude(fbstate1,bs1_inupdatechanged);
  with pdsrecordty(activebuffer)^.dsheader.bookmark.data do begin
   recordpo:= nil;
   recno:= frecno;
@@ -2577,6 +2581,7 @@ procedure tmsebufdataset.internaledit;
 begin
  addrefvalues(pdsrecordty(activebuffer)^.header);
  fbstate:= fbstate + [bs_startedit,bs_editing];
+ exclude(fbstate1,bs1_inupdatechanged);
 // include(fbstate,bs_editing);
  inherited;
 end;
@@ -3177,6 +3182,10 @@ begin
     else begin
      result:= @pdsrecordty(activebuffer)^.header;
     end;
+    if (int1 >= 0) and  // data field
+              (of_inupdate in afield.optionsfield) then begin
+     include(fbstate1,bs1_inupdatechanged);
+    end;
    end;
   end;
  end;
@@ -3687,81 +3696,87 @@ begin
   move(origpo^.header,fnewvaluebuffer^.header,frecordsize);
   addrefvalues(fnewvaluebuffer^.header);
   try
-   repeat
-    exclude(fbstate,bs_curvaluemodified);
-    getcalcfields(pchar(fnewvaluebuffer));
-    if rr_again in response then begin
-     dec(ffailedcount);
-     exclude(info.flags,ruf_error);
-    end;
-    Response:= [rr_applied];
-    try
+   if (info.updatekind <> ukmodify) or (ruf_inupdate in info.flags) then begin
+    repeat
+     exclude(fbstate,bs_curvaluemodified);
+     getcalcfields(pchar(fnewvaluebuffer));
+     if rr_again in response then begin
+      dec(ffailedcount);
+      exclude(info.flags,ruf_error);
+     end;
+     Response:= [rr_applied];
      try
-      if by1 then begin
-       ApplyRecUpdate(info.UpdateKind);
-       inc(fappliedcount);
-      end;
-     except
-      on E: EDatabaseError do begin
-       include(info.flags,ruf_error);
-       e1:= e;
-       Inc(fFailedCount);
-       if e is eapplyerror then begin
-        response:= eapplyerror(e).response;
-       end
-       else begin
-        if longword(ffailedcount) > longword(MaxErrors) then begin
-         Response:= [rr_abort]
+      try
+       if by1 then begin
+        ApplyRecUpdate(info.UpdateKind);
+        inc(fappliedcount);
+       end;
+      except
+       on E: EDatabaseError do begin
+        include(info.flags,ruf_error);
+        e1:= e;
+        Inc(fFailedCount);
+        if e is eapplyerror then begin
+         response:= eapplyerror(e).response;
         end
         else begin
-         Response:= [];
-        end;
-       end;
-       e.message:= 'An error occured while applying the updates in a record: '+
-                               e.message;
-       if checkcanevent(self,tmethod(OnUpdateError)) then begin
-        OnUpdateError(Self,edatabaseerror(e1),info.UpdateKind,Response);
-        if rr_applied in response then begin
-         dec(ffailedcount);
-        end;
-       end;
-       if rr_abort in response then begin
-        checkrevert;
-        if not (rr_quiet in response) then begin
-         if e = e1 then begin
-          raise;
+         if longword(ffailedcount) > longword(MaxErrors) then begin
+          Response:= [rr_abort]
          end
          else begin
-          if e1 <> nil then begin
-           Raise e1;
+          Response:= [];
+         end;
+        end;
+        e.message:= 'An error occured while applying the updates in a record: '+
+                                e.message;
+        if checkcanevent(self,tmethod(OnUpdateError)) then begin
+         OnUpdateError(Self,edatabaseerror(e1),info.UpdateKind,Response);
+         if rr_applied in response then begin
+          dec(ffailedcount);
+         end;
+        end;
+        if rr_abort in response then begin
+         checkrevert;
+         if not (rr_quiet in response) then begin
+          if e = e1 then begin
+           raise;
+          end
+          else begin
+           if e1 <> nil then begin
+            Raise e1;
+           end;
           end;
          end;
         end;
+       end
+       else begin
+        raise;
        end;
-      end
-      else begin
-       raise;
+      end;
+     finally
+      if bs_curvaluemodified in fbstate then begin
+       by2:= true;
+       dointernalcalcfields(false);
+ //      if (updatekind = ukmodify) and 
+ //                          (bs_refreshupdateindex in fbstate) or
+ //      (updatekind = ukinsert) and 
+ //                          (bs_refreshinsertindex in fbstate) then begin
+ //       int1:= factindex;
+  //      factindex:= -1; //do not use recno
+ 
+       saveindex(origpo,@fnewvaluebuffer^.header,ar1,ar2,ar3);
+       relocateindex(origpo,ar1,ar2,ar3);
+  //      factindex:= int1;
+ //      end;
       end;
      end;
-    finally
-     if bs_curvaluemodified in fbstate then begin
-      by2:= true;
-      dointernalcalcfields(false);
-//      if (updatekind = ukmodify) and 
-//                          (bs_refreshupdateindex in fbstate) or
-//      (updatekind = ukinsert) and 
-//                          (bs_refreshinsertindex in fbstate) then begin
-//       int1:= factindex;
- //      factindex:= -1; //do not use recno
-
-      saveindex(origpo,@fnewvaluebuffer^.header,ar1,ar2,ar3);
-      relocateindex(origpo,ar1,ar2,ar3);
- //      factindex:= int1;
-//      end;
-     end;
-    end;
-   until response <> [rr_again];
-   checkrevert;
+    until response <> [rr_again];
+    checkrevert;
+   end
+   else begin
+    response:= [rr_applied,rr_skipped];
+    checkrevert();
+   end;
   finally
    exclude(fbstate,bs_recapplying);
    if by2 and (info.updatekind <> ukdelete) then begin
@@ -4111,6 +4126,11 @@ begin
        exclude(info.flags,ruf_append);
       end;
      end;
+    end;
+   end;
+   if bs1_inupdatechanged in fbstate1 then begin
+    with fupdatebuffer[fcurrentupdatebuffer] do begin
+     include(info.flags,ruf_inupdate);
     end;
    end;
   end;
@@ -6310,12 +6330,17 @@ begin
   if (info.bookmark.recordpo <> nil) or (deletedrecord <> nil) then begin
    deletedrecord:= adeletedrecord;
    logging:= alogging;
-   kind:= info.updatekind;
+   if ruf_inupdate in info.flags then begin
+    kind:= uk_modifyinupdate;
+   end
+   else begin
+    kind:= updatekindty(info.updatekind);
+   end;
    po:= info.bookmark.recordpo;
    awriter.writelogbufferheader(header1);
    if (alogmode = lf_update) and 
-       ((kind = ukmodify) or 
-              not logging and (kind = ukdelete) and (po <> nil)) then begin
+       ((kind in [uk_modify,uk_modifyinupdate]) or 
+              not logging and (kind = uk_delete) and (po <> nil)) then begin
     datapo:= @(oldvalues^.header);
     awriter.write(datapo^.fielddata,fnullmasksize);
     for int2:= 0 to high(ffieldinfos) do begin
@@ -6563,7 +6588,14 @@ begin
         setlength(oldupdatepointers,length(updabuf));
        end;     
        with updabuf[int2],header1.update do begin
-        info.updatekind:= kind;
+        if kind = uk_modifyinupdate then begin
+         info.updatekind:= ukmodify;
+         include(info.flags,ruf_inupdate);
+        end
+        else begin
+         info.updatekind:= tupdatekind(kind);
+         exclude(info.flags,ruf_inupdate);
+        end;
         oldupdatepointers[int2]:= po;
         int3:= -1;
         if deletedrecord <> nil then begin
@@ -6574,7 +6606,7 @@ begin
           end;
          end;
         end;
-        if kind = ukdelete then begin 
+        if kind = uk_delete then begin 
          if logging and (po <> deletedrecord) then begin
           if (int3 < 0) or 
                            not findrec(deletedrecord,po1,int1,true) then begin
@@ -6612,7 +6644,7 @@ begin
           formaterror;        //old pointer not found
          end;
         end;
-        if kind = ukmodify then begin
+        if kind in [uk_modify,uk_modifyinupdate] then begin
          oldvalues:= intallocrecord;
          reader.readrecord(oldvalues);
         end;
@@ -6632,17 +6664,17 @@ begin
          formaterror;
         end;
         case kind of
-         ukmodify: begin
+         uk_modify,uk_modifyinupdate: begin
           cancelrecupdate(updabuf[int3]);
          end;
-         ukdelete: begin
+         uk_delete: begin
           with updabuf[int3] do begin
            appendrecord(info.bookmark.recordpo);
            additem(appended,oldupdatepointers[int3]);
 //           additem(appended,bookmark.recordpo);
           end;
          end;
-         ukinsert: begin
+         uk_insert: begin
           if not findrec(oldupdatepointers[int3],po1,int1,true) then begin
            formaterror;
           end;
