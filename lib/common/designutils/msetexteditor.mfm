@@ -81,8 +81,6 @@ object msetexteditorfo: tmsetexteditorfo
       bounds_y = 0
       bounds_cx = 2000
       bounds_cy = 14
-      font.xscale = 1
-      font.localprops = [flp_xscale]
       optionsedit1 = [oe1_keyexecute, oe1_savevalue, oe1_savestate]
       optionsedit = [oe_closequery, oe_checkmrcancel, oe_linebreak, oe_eatreturn, oe_exitoncursor, oe_nofirstarrownavig]
       options = [seo_autoindent, seo_markbrackets]
