@@ -590,7 +590,7 @@ type
                                         const arect: rectty) override;
    
   public
-   constructor create(const intf: icaptionframe;
+   constructor create(const aintf: icaptionframe;
                                      const acontroller: tdockcontroller);
    destructor destroy; override;
    procedure createface();
@@ -4476,7 +4476,7 @@ end;
 
 { tgripframe }
 
-constructor tgripframe.create(const intf: icaptionframe;
+constructor tgripframe.create(const aintf: icaptionframe;
                        const acontroller: tdockcontroller);
 begin
  fgrip_color:= defaultgripcolor;
@@ -4495,7 +4495,7 @@ begin
  fgrip_textflagsright:= defaulttextflagsright;
  fgrip_captiondist:= 1;
  fcontroller:= acontroller;
- inherited create(intf);
+ inherited create(aintf);
  fobjectpicker:= tobjectpicker.create(iobjectpicker(self));
 end;
 

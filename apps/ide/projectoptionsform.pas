@@ -1236,6 +1236,7 @@ const
  memodialogstatname =  'memodialog.sta';
  richmemodialogstatname =  'richmemodialog.sta';
  fontformatdialogstatname =  'fontformatdialog.sta';
+ taborderoverridedialogstatname =  'taborderoverrideeditor.sta';
  
  siginfocount = 30;
 var
@@ -1766,6 +1767,7 @@ begin
    deletememorystatstream(memodialogstatname);
    deletememorystatstream(richmemodialogstatname);
    deletememorystatstream(fontformatdialogstatname);
+   deletememorystatstream(taborderoverridedialogstatname);
    {$ifndef mse_no_db}{$ifdef FPC}
    deletememorystatstream(dbfieldeditorstatname);
    {$endif}{$endif}
@@ -2162,6 +2164,8 @@ begin
   updatememorystatstream('memodialog',memodialogstatname);
   updatememorystatstream('richmemodialog',richmemodialogstatname);
   updatememorystatstream('fontformatdialog',fontformatdialogstatname);
+  updatememorystatstream('taborderoverridedialog',
+                                            taborderoverridedialogstatname);
 {$ifndef mse_no_db}{$ifdef FPC}
   updatememorystatstream('dbfieldeditor',dbfieldeditorstatname);
 {$endif}{$endif}

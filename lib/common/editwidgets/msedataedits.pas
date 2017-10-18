@@ -1245,7 +1245,7 @@ type
   private
    procedure setbuttonsvisible(const avalue: stepkindsty);
   public
-   constructor create(const intf: icaptionframe; const stepintf: istepbar);
+   constructor create(const aintf: icaptionframe; const stepintf: istepbar);
    property buttonsinvisible default [];
   published
    property options;
@@ -5923,7 +5923,7 @@ end;
 
 { tspineditframe }
 
-constructor tspineditframe.create(const intf: icaptionframe;
+constructor tspineditframe.create(const aintf: icaptionframe;
                const stepintf: istepbar);
 begin
  include(fstepstate,sfs_spinedit);

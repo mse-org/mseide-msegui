@@ -34,7 +34,7 @@ type
    function getbuttonellipse: tdropdownbutton;
    procedure setbuttonellipse(const avalue: tdropdownbutton);
   public
-   constructor create(const intf: icaptionframe;
+   constructor create(const aintf: icaptionframe;
                                      const buttonintf: ibutton); override;                                                  
   published
    property buttonellipse: tdropdownbutton read getbuttonellipse 
@@ -256,7 +256,7 @@ end;
 
 { tellipsedropdownbuttonframe }
 
-constructor tellipsedropdownbuttonframe.create(const intf: icaptionframe;
+constructor tellipsedropdownbuttonframe.create(const aintf: icaptionframe;
                const buttonintf: ibutton);
 begin
  inherited;

@@ -399,6 +399,7 @@ type
    fowner: tobject;
   public
    constructor create(aowner: tobject); reintroduce; virtual;
+   property owner: tobject read fowner;
  end;
 
  teventobject = class(tlinkedobject,ievent)
@@ -556,6 +557,7 @@ type
    function checkowner(component: tcomponent): boolean;
                  //true if component is owner or self
    function rootowner: tcomponent;
+//   function rootcomponent: tcomponent; //rootowner or self
    function getrootcomponentpath: componentarty;
    function linkedobjects: objectarty;
                  //returns items of objeclinker and free notify list
@@ -797,6 +799,10 @@ type
 function ownscomponent(const owner: tcomponent; const child: tcomponent): boolean;
 function ownernamepath(const acomponent: tcomponent): string; 
                      //namepath from root to acomponent separated by '.'
+function ownernamepath(const aroot: tcomponent;
+                                const acomponent: tcomponent): string; 
+                     //namepath from aroot to acomponent separated by '.'
+                     //excluding aroot
 function namepathowner(const acomponent: tcomponent): string; 
                      //namepath from acomponent to root separated by '.'
 function getnumberedname(const acomp: tcomponent;
@@ -905,6 +911,9 @@ function fixupsetchildorder(const sender: tcomponent;
 function findcomponentbynamepath(const namepath: string): tcomponent;
 function findcomponentbynamepath(const namepath: string;
                                 const root: tcomponent): tcomponent;
+function findsubcomponentbynamepath(const namepath: string;
+                                const root: tcomponent): tcomponent;
+                                //name path does not contain root
 function getlinkedcomponents(const acomponent: tcomponent): componentarty;
                  //returns items of free notify list
 
@@ -1757,6 +1766,30 @@ begin
    result:= name;
    comp:= owner;
    while comp <> nil do begin
+    if comp.Name <> '' then begin
+     result:= comp.Name + '.' + result;
+    end;
+    comp:= comp.Owner;
+   end;
+  end;
+ end;
+end;
+
+function ownernamepath(const aroot: tcomponent;
+                                const acomponent: tcomponent): string; 
+                     //namepath from aroot to acomponent separated by '.'
+                     //excluding aroot
+var
+ comp: tcomponent;
+begin
+ if acomponent = nil then begin
+  result:= ''
+ end
+ else begin
+  with acomponent do begin
+   result:= name;
+   comp:= owner;
+   while (comp <> nil) and (comp <> aroot) do begin
     if comp.Name <> '' then begin
      result:= comp.Name + '.' + result;
     end;
@@ -4403,7 +4436,15 @@ begin
   end;
  end;
 end;
-
+{
+function tmsecomponent.rootcomponent: tcomponent;
+begin
+ result:= rootowner;
+ if result = nil then begin
+  result:= self;
+ end;
+end;
+}
 function tmsecomponent.getrootcomponentpath: componentarty;
 var
  count: integer;
@@ -5565,6 +5606,7 @@ end;
 
 function findcomponentbynamepath(const namepath: string;
                                 const root: tcomponent): tcomponent;
+                                //name path does not contain root
 var
  po1,po2: pchar;
 // comp1: tcomponent;
@@ -5589,6 +5631,35 @@ begin
      break;
     end;
    end;
+  end;
+ end;
+end;
+
+function findsubcomponentbynamepath(const namepath: string;
+                                const root: tcomponent): tcomponent;
+var
+ po1,po2: pchar;
+ comp1: tcomponent;
+begin
+ result:= nil;
+ if (root <> nil) and (namepath <> '') then begin
+  comp1:= root;
+  po1:= pchar(namepath);
+  po2:= po1;
+  while true do begin
+   po1:= po2;
+   while (po2^ <> '.') and (po2^ <> #0) do begin
+    inc(po2);
+   end;
+   result:= comp1.findcomponent(psubstr(po1,po2));
+   if result = nil then begin
+    break;
+   end;
+   if po2^ = #0 then begin
+    break;
+   end;
+   inc(po2);
+   comp1:= result;
   end;
  end;
 end;

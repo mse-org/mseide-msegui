@@ -43,7 +43,7 @@ type
 
  teditframe = class(tcustomcaptionframe)
   public
-   constructor create(const intf: icaptionframe);
+   constructor create(const aintf: icaptionframe);
   published
    property options;
    property levelo default -2;
@@ -119,7 +119,7 @@ type
  
  tscrolleditframe = class(tcustomthumbtrackscrollframe)
   public
-   constructor create(const intf: iscrollframe; const scrollintf: iscrollbar);
+   constructor create(const aintf: iscrollframe; const scrollintf: iscrollbar);
   published
    property options;
    property optionsscroll;
@@ -200,7 +200,7 @@ type
 
  tscrollboxeditframe = class(tcustomscrollboxframe)
   public
-   constructor create(const intf: iscrollframe; const owner: twidget);
+   constructor create(const aintf: iscrollframe; const owner: twidget);
   published
    property levelo default -2;
    property leveli;
@@ -382,7 +382,7 @@ type
                                            const arect: rectty) override;
    procedure dokeydown(var info: keyeventinfoty) override;
   public
-   constructor create(const intf: icaptionframe; const buttonintf: ibutton);
+   constructor create(const aintf: icaptionframe; const buttonintf: ibutton);
                                                    reintroduce; virtual;
    destructor destroy; override;
    procedure checktemplate(const sender: tobject); override;
@@ -407,7 +407,7 @@ type
    function getbutton: tframebutton;
    procedure setbutton(const avalue: tframebutton);
   public
-   constructor create(const intf: icaptionframe; const buttonintf: ibutton);
+   constructor create(const aintf: icaptionframe; const buttonintf: ibutton);
                                                                      override;
    property activebutton: integer read factivebutton write setactivebutton 
                                                                     default 0;
@@ -684,7 +684,7 @@ type
 
 { teditframe }
 
-constructor teditframe.create(const intf: icaptionframe);
+constructor teditframe.create(const aintf: icaptionframe);
 begin
  inherited;
  fi.colorclient:= cl_foreground;
@@ -695,7 +695,8 @@ end;
 
 { tscrolleditframe }
 
-constructor tscrolleditframe.create(const intf: iscrollframe; const scrollintf: iscrollbar);
+constructor tscrolleditframe.create(const aintf: iscrollframe; 
+                                             const scrollintf: iscrollbar);
 begin
  inherited;
  colorclient:= cl_foreground;
@@ -706,7 +707,7 @@ end;
 
 { tscrollboxeditframe }
 
-constructor tscrollboxeditframe.create(const intf: iscrollframe;
+constructor tscrollboxeditframe.create(const aintf: iscrollframe;
                                                   const owner: twidget);
 begin
  inherited;
@@ -1219,14 +1220,14 @@ end;
 
 { tcustombuttonsframe }
 
-constructor tcustombuttonsframe.create(const intf: icaptionframe;
+constructor tcustombuttonsframe.create(const aintf: icaptionframe;
                                              const buttonintf: ibutton);
 begin
  factivebutton:= -1; //none
  fbuttons:= tframebuttons.create(self,getbuttonclass);
  fbuttonintf:= buttonintf;
- intf.setstaticframe(true);
- inherited create(intf);
+ aintf.setstaticframe(true);
+ inherited create(aintf);
 end;
 
 destructor tcustombuttonsframe.destroy;
@@ -1406,7 +1407,7 @@ end;
 
 { tcutombuttonframe }
 
-constructor tcustombuttonframe.create(const intf: icaptionframe;
+constructor tcustombuttonframe.create(const aintf: icaptionframe;
                                              const buttonintf: ibutton);
 begin
  inherited;

@@ -1756,7 +1756,7 @@ type
    function getscrollbarclass(vert: boolean): framescrollbarclassty; override;
    procedure scrollevent(sender: tcustomscrollbar; event: scrolleventty); override;
   public
-   constructor create(const intf: iscrollframe; const owner: twidget;
+   constructor create(const aintf: iscrollframe; const owner: twidget;
                              const autoscrollintf: iautoscrollframe);
  end;
 
@@ -9204,7 +9204,7 @@ end;
 
 { tdbgridframe }
 
-constructor tdbgridframe.create(const intf: iscrollframe; const owner: twidget;
+constructor tdbgridframe.create(const aintf: iscrollframe; const owner: twidget;
                const autoscrollintf: iautoscrollframe);
 begin
  inherited;

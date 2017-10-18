@@ -364,7 +364,7 @@ type
    function getbutton: tdropdownbutton;
    procedure setbutton(const avalue: tdropdownbutton);
   public
-   constructor create(const intf: icaptionframe;
+   constructor create(const aintf: icaptionframe;
                                          const buttonintf: ibutton); override;                                                  
    procedure updatedropdownoptions(const avalue: dropdowneditoptionsty);
    property readonly: boolean read freadonly write setreadonly default false;
@@ -1276,7 +1276,7 @@ end;
 }
 { tcustomdropdownbuttonframe }
 
-constructor tcustomdropdownbuttonframe.create(const intf: icaptionframe;
+constructor tcustomdropdownbuttonframe.create(const aintf: icaptionframe;
                const buttonintf: ibutton);
 begin
  inherited;

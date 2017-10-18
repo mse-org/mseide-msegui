@@ -196,14 +196,14 @@ const
 type
  ttoolbuttonframe = class(tframe)
   public
-   constructor create(const intf: iframe);
+   constructor create(const aintf: iframe);
   published
    property optionsskin default defaulttoolbuttonoptionsskin;
  end;
  
  ttoolseparatorframe = class(ttoolbuttonframe)
   public
-   constructor create(const intf: iframe);
+   constructor create(const aintf: iframe);
   published
    property optionsskin default defaulttoolseparatoroptionsskin;
  end;
@@ -812,7 +812,7 @@ end;
 
 { ttoolbuttonframe }
 
-constructor ttoolbuttonframe.create(const intf: iframe);
+constructor ttoolbuttonframe.create(const aintf: iframe);
 begin
  include(fstate,fs_nosetinstance);
  inherited;
@@ -821,7 +821,7 @@ end;
 
 { ttoolseparatorframe }
 
-constructor ttoolseparatorframe.create(const intf: iframe);
+constructor ttoolseparatorframe.create(const aintf: iframe);
 begin
  inherited;
  fi.optionsskin:= defaulttoolseparatoroptionsskin;

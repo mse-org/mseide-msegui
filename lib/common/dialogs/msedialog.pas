@@ -35,7 +35,7 @@ type
    function getbutton: tstockglyphframebutton;
    procedure setbutton(const avalue: tstockglyphframebutton);
   public
-   constructor create(const intf: icaptionframe;
+   constructor create(const aintf: icaptionframe;
                        const buttonintf: ibutton); reintroduce;
   published
    property button: tstockglyphframebutton read getbutton write setbutton;
@@ -239,7 +239,7 @@ end;
 
 { tellipsebuttonframe }
 
-constructor tellipsebuttonframe.create(const intf: icaptionframe;
+constructor tellipsebuttonframe.create(const aintf: icaptionframe;
   const buttonintf: ibutton);
 begin
  inherited;

@@ -279,7 +279,7 @@ type
 
  tcellframe = class(tframe)
   public
-   constructor create(const intf: iframe);
+   constructor create(const aintf: iframe);
   published
    property framei_left default 1;
    property framei_top default 1;
@@ -1736,7 +1736,7 @@ type
   protected
    function getscrollbarclass(vert: boolean): framescrollbarclassty; override;
   public
-   constructor create(const intf: iscrollframe; const owner: twidget;
+   constructor create(const aintf: iscrollframe; const owner: twidget;
                              const autoscrollintf: iautoscrollframe);
   published
    property levelo default -2;
@@ -3008,7 +3008,7 @@ end;
 
 { tcellframe }
 
-constructor tcellframe.create(const intf: iframe);
+constructor tcellframe.create(const aintf: iframe);
 begin
  inherited;
  include(fstate,fs_nowidget);
@@ -3020,7 +3020,7 @@ end;
 
 { tgridframe }
 
-constructor tgridframe.create(const intf: iscrollframe; const owner: twidget;
+constructor tgridframe.create(const aintf: iscrollframe; const owner: twidget;
                            const autoscrollintf: iautoscrollframe);
 begin
  inherited;

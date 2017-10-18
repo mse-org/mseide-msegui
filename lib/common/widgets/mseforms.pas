@@ -140,6 +140,7 @@ type
    fonapplicationevent: applicationeventeventty;
    factivatortarget: tactivator;
    fstatpriority: integer;
+   ftaborderoverride: ttaborderoverride;
 {$ifdef mse_with_ifi}
    fifilink: tififormlinkcomp;
    function getifilinkkind: ptypeinfo;
@@ -167,6 +168,7 @@ type
    procedure setonapplicationevent(const avalue: applicationeventeventty);
    procedure readonchildscaled(reader: treader);
    procedure setactivatortarget(const avalue: tactivator);
+   procedure settaborderoverride(const avalue: ttaborderoverride);
   protected
    fformstate: formstatesty;
    fscrollbox: tformscrollbox; //needed to distinguish between scrolled and
@@ -192,6 +194,8 @@ type
    procedure loaded; override;
    procedure autoreadstat;
    procedure setoptionswidget(const avalue: optionswidgetty); override;
+   function nexttaborderoverride(const sender: twidget;
+                                      const down: boolean): twidget override;
 
    function getcaption: msestring;
    procedure setcaption(const Value: msestring); virtual;
@@ -348,6 +352,8 @@ type
 {$endif}
    property activatortarget: tactivator read factivatortarget 
                                              write setactivatortarget;
+   property taborderoverride: ttaborderoverride read ftaborderoverride 
+                                                  write settaborderoverride;
    property onshortcut;
  end;
 
@@ -766,6 +772,7 @@ type
  treader1 = class(treader);
  tframemenuwidget1 = class(tframemenuwidget);
  tcustomtabwidget1 = class(tcustomtabwidget);
+ ttaborderoverride1 = class(ttaborderoverride);
 
 
 function createmseform(const aclass: tclass; 
@@ -994,6 +1001,7 @@ end;
 constructor tcustommseform.create(aowner: tcomponent; load: boolean);
 
 begin
+ ftaborderoverride:= ttaborderoverride.create(self);
  ficon:= tmaskedbitmap.create(bmk_rgb);
  ficon.onchange:= {$ifdef FPC}@{$endif}iconchanged;
  fwidgetrect.x:= 100;
@@ -1038,6 +1046,7 @@ begin
  fmainmenuwidget.free;
  statfile:= nil; //unlink client connection
  inherited; //csdesigningflag is removed
+ ftaborderoverride.free();
  if not bo1 and candestroyevent(tmethod(fondestroyed)) then begin
   fondestroyed(self);
  end;
@@ -1189,6 +1198,7 @@ begin
   end;
  end;
  inherited;
+ ttaborderoverride1(ftaborderoverride).endread(reader);
  if bo1 then begin
 {$warnings off}
   exclude(tcomponent1(fscrollbox).FComponentState,csreading);
@@ -1386,6 +1396,15 @@ begin
  inherited;
  replacebits1(longword(fscrollbox.foptionswidget),longword(avalue),
                    longword(containercommonflags));
+end;
+
+function tcustommseform.nexttaborderoverride(const sender: twidget;
+               const down: boolean): twidget;
+begin
+ result:= ftaborderoverride.nexttaborder(sender,down);
+ if result = nil then begin
+  result:= inherited nexttaborderoverride(sender,down);
+ end;
 end;
 
 procedure tcustommseform.doeventloopstart;
@@ -2214,6 +2233,11 @@ end;
 procedure tcustommseform.setactivatortarget(const avalue: tactivator);
 begin
  setlinkedvar(avalue,tmsecomponent(factivatortarget));
+end;
+
+procedure tcustommseform.settaborderoverride(const avalue: ttaborderoverride);
+begin
+ ftaborderoverride.assign(avalue);
 end;
 
 function tcustommseform.internalgeticon(): tmaskedbitmap;

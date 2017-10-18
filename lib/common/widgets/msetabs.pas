@@ -132,7 +132,7 @@ type
 
  ttabframe = class(tframe)
   public
-   constructor create(const intf: iframe);
+   constructor create(const aintf: iframe);
   published
    property framei_left default defaultcaptiondist;
    property framei_top default defaultcaptiondist;
@@ -1787,7 +1787,7 @@ end;
 }
 { ttabframe }
 
-constructor ttabframe.create(const intf: iframe);
+constructor ttabframe.create(const aintf: iframe);
 begin
  fi.innerframe.left:= defaultcaptiondist;
  fi.innerframe.top:= defaultcaptiondist;

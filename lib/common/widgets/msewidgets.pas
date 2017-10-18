@@ -9,12 +9,12 @@
 }
 unit msewidgets;
 
-{$ifdef FPC}{$mode objfpc}{$h+}{$interfaces corba}{$endif}
+{$ifdef FPC}{$mode objfpc}{$h+}{$interfaces corba}{$goto on}{$endif}
 
 interface
 uses
  classes,mclasses,msegui,mseguiglob,msetypes,msestrings,msegraphutils,
- msegraphics,msesystypes,mseassistiveclient,
+ msegraphics,msesystypes,mseassistiveclient,mselist,
  mseevent,msescrollbar,msemenus,mserichstring,msedrawtext,mseglob,mseact,
  mseshapes,mseclasses,msebitmap,msetimer;
 
@@ -40,7 +40,32 @@ type
 const
  defaultcaptionframeoptions = [];
 type
+ doublewidgetty = record 
+                   a,b: twidget;
+                  end;
+ pdoublewidgetty = ^doublewidgetty;
+ doublewidgetarty = array of doublewidgetty;
 
+ ttaborderoverride = class(tlinkedpersistent)
+  private
+   procedure readitems(reader: treader);
+   procedure writeitems(writer: twriter);
+  protected
+   fowner: twidget;
+   fitems: doublewidgetarty;
+   fwidgetnames: stringarty;
+   procedure defineproperties(filer: tfiler) override;
+   procedure objevent(const sender: iobjectlink;
+                                const event: objecteventty) override;
+   procedure endread(const reader: treader);
+  public
+   constructor create(const aowner: twidget); reintroduce;
+   destructor destroy(); override;
+   procedure clear();
+   function nexttaborder(sender: twidget; const down: boolean): twidget;
+   procedure add(const aa,ab: twidget);
+ end;
+ 
  tcustomcaptionframe = class(tcustomframe)
   private
    fcaptionpos: captionposty;
@@ -95,7 +120,7 @@ type
    function getassistivecaption(): msestring; override;
    
   public
-   constructor create(const intf: icaptionframe);
+   constructor create(const aintf: icaptionframe);
    destructor destroy; override;
    procedure scale(const ascale: real); override;
    procedure createfont;
@@ -196,7 +221,7 @@ type
 
  timpressedcaptionframe = class(tcaptionframe)
   public
-   constructor create(const intf: icaptionframe);
+   constructor create(const aintf: icaptionframe);
   published
    property levelo default -2;
  end;
@@ -268,7 +293,7 @@ type
    procedure internalpaintoverlay(const canvas: tcanvas;
                                          const arect: rectty) override;
  public
-   constructor create(const intf: iscrollframe; const scrollintf: iscrollbar);
+   constructor create(const aintf: iscrollframe; const scrollintf: iscrollbar);
    destructor destroy; override;
    procedure checktemplate(const sender: tobject); override;
                  //true if match
@@ -441,7 +466,7 @@ type
     //iscrollbox
    function getscrollsize: sizety;
   public
-   constructor create(const intf: iscrollframe; const owner: twidget);
+   constructor create(const aintf: iscrollframe; const owner: twidget);
    procedure childmouseevent(const sender: twidget;
                                 var info: mouseeventinfoty); virtual;
    procedure domousewheelevent(var info: mousewheeleventinfoty;
@@ -659,7 +684,7 @@ type
    procedure internalpaintoverlay(const canvas: tcanvas;
                                            const arect: rectty) override;
   public
-   constructor create(const intf: icaptionframe; const stepintf: istepbar);
+   constructor create(const aintf: icaptionframe; const stepintf: istepbar);
    destructor destroy; override;
    procedure createbuttonface;
    procedure createbuttonframe;
@@ -1144,7 +1169,7 @@ type
    procedure scrollevent(sender: tcustomscrollbar; event: scrolleventty); override;
    procedure updaterects; override;
   public
-   constructor create(const intf: iscrollframe; const owner: twidget;
+   constructor create(const aintf: iscrollframe; const owner: twidget;
                  const autoscrollintf: iautoscrollframe);
    procedure updateclientrect; override;
    property scrollpos: pointty read getscrollpos write setscrollpos;
@@ -1459,7 +1484,7 @@ implementation
 
 uses
  msebits,mseguiintf,msestockobjects,msekeyboard,sysutils,msemenuwidgets,
- mseactions,msepointer,msestreaming,msesys;
+ mseactions,msepointer,msestreaming,msesys,msearrayutils;
 
 const
  captionmargin = 1; //distance focusrect to caption in tcaptionframe
@@ -2532,11 +2557,11 @@ end;
 
 { tcustomcaptionframe }
 
-constructor tcustomcaptionframe.create(const intf: icaptionframe);
+constructor tcustomcaptionframe.create(const aintf: icaptionframe);
 begin
  fcaptionpos:= cp_topleft;
  fcaptiondist:= 1;
- inherited create(intf);
+ inherited create(aintf);
  if ffont = nil then begin
   finfo.font:= icaptionframe(fintf).getframefont;
  end;
@@ -3322,13 +3347,13 @@ end;
 
 { tcustomscrollframe }
 
-constructor tcustomscrollframe.create(const intf: iscrollframe;
+constructor tcustomscrollframe.create(const aintf: iscrollframe;
                                                 const scrollintf: iscrollbar);
 begin
- intf.setstaticframe(true);
+ aintf.setstaticframe(true);
  foptionsscroll:= defaultoptionsscroll;
  fdragbuttons:= defaultdragbuttons;
- inherited create(intf);
+ inherited create(aintf);
  fhorz:= getscrollbarclass(false).create(scrollintf,org_widget,
              {$ifdef FPC}@{$endif}updatestate);
  fvert:= getscrollbarclass(true).create(scrollintf,org_widget,
@@ -3675,7 +3700,7 @@ end;
 
 { tcustomstepframe }
 
-constructor tcustomstepframe.create(const intf: icaptionframe;
+constructor tcustomstepframe.create(const aintf: icaptionframe;
   const stepintf: istepbar);
 begin
  fstepintf:= stepintf;
@@ -3683,10 +3708,10 @@ begin
  fforceinvisiblebuttons:= [sk_first,sk_last];
  fcolorbutton:= cl_default;
  fcolorglyph:= cl_default;
- intf.setstaticframe(true);
+ aintf.setstaticframe(true);
  fmousewheel:= true;
  frepeatedbutton:= -1;
- inherited create(intf);
+ inherited create(aintf);
 end;
 
 destructor tcustomstepframe.destroy;
@@ -4390,7 +4415,7 @@ end;
 
 { tcustomscrollboxframe }
 
-constructor tcustomscrollboxframe.create(const intf: iscrollframe;
+constructor tcustomscrollboxframe.create(const aintf: iscrollframe;
                                                       const owner: twidget);
 begin
  fzoom.re:= 1;
@@ -4399,7 +4424,7 @@ begin
  fzoomheightstep:= 1;
 // fzoomwheelsensitivity:= 1;
  fowner:= owner;
- inherited create(intf,iscrollbox(self));
+ inherited create(aintf,iscrollbox(self));
  fstate:= fstate+ [fs_canclientextendx,fs_canclientextendy];
  initinnerframe;
  internalupdatestate;
@@ -5151,11 +5176,11 @@ end;
 
 { tcustomautoscrollframe }
 
-constructor tcustomautoscrollframe.create(const intf: iscrollframe; const owner: twidget;
-                    const autoscrollintf: iautoscrollframe);
+constructor tcustomautoscrollframe.create(const aintf: iscrollframe;
+             const owner: twidget; const autoscrollintf: iautoscrollframe);
 begin
  fintf1:= autoscrollintf;
- inherited create(intf,owner);
+ inherited create(aintf,owner);
 end;
 
 function tcustomautoscrollframe.getscrollpos: pointty;
@@ -6149,11 +6174,225 @@ end;
 
 { timpressedcaptionframe }
 
-constructor timpressedcaptionframe.create(const intf: icaptionframe);
+constructor timpressedcaptionframe.create(const aintf: icaptionframe);
 begin
  inherited;
  fi.levelo:= -2;
  internalupdatestate();
+end;
+
+{ ttaborderoverride }
+
+constructor ttaborderoverride.create(const aowner: twidget);
+begin
+ fowner:= aowner;
+ inherited create();
+end;
+
+destructor ttaborderoverride.destroy();
+begin
+// clear();
+ inherited;
+end;
+
+procedure ttaborderoverride.clear();
+var
+ p1,pe: pdoublewidgetty;
+begin
+ p1:= pointer(fitems);
+ if p1 <> nil then begin
+  pe:= p1 + high(fitems);
+  while p1 <= pe do begin
+   setlinkedvar(nil,tmsecomponent(p1^.a));
+   setlinkedvar(nil,tmsecomponent(p1^.b));
+   inc(p1);
+  end;
+  fitems:= nil;
+ end;
+end;
+
+procedure ttaborderoverride.readitems(reader: treader);
+begin
+ clear();
+ fwidgetnames:= nil;
+ reader.readlistbegin();
+ while not reader.endoflist() do begin
+  additem(fwidgetnames,reader.readstring());
+ end;
+ reader.readlistend();
+end;
+
+procedure ttaborderoverride.writeitems(writer: twriter);
+var
+ p1,pe: pdoublewidgetty;
+begin
+ writer.writelistbegin();
+ p1:= pointer(fitems);
+ pe:= p1 + length(fitems);
+ while p1 < pe do begin
+  writer.writestring(ownernamepath(writer.root,p1^.a));
+  writer.writestring(ownernamepath(writer.root,p1^.b));
+  inc(p1);
+ end;
+ writer.writelistend();
+end;
+
+procedure ttaborderoverride.defineproperties(filer: tfiler);
+var
+ b1: boolean;
+ p1,p2,pe: pdoublewidgetty;
+begin
+ inherited;
+ b1:= fitems <> nil;
+ if (filer is twriter) and (filer.ancestor <> nil) then begin
+  with ttaborderoverride(filer.ancestor) do begin
+   b1:= high(fitems) <> high(self.fitems);
+   if not b1 then begin
+    p1:= pointer(fitems);
+    pe:= p1 + length(fitems);
+    p2:= pointer(self.fitems);
+    while p1 < pe do begin
+     if ((p1^.a = nil) <> (p2^.a = nil)) or
+        ((p1^.b = nil) <> (p2^.b = nil)) or
+        (p1^.a <> nil) and (p1^.a.name <> p2^.a.name) or 
+        (p1^.b <> nil) and (p1^.b.name <> p2^.b.name) then begin
+                   //todo: better check for changed owner
+      b1:= true;
+      break;
+     end;
+     inc(p1);
+     inc(p2);
+    end;
+   end;
+  end;
+ end;
+ filer.defineproperty('items',@readitems,@writeitems,b1); 
+end;
+
+procedure ttaborderoverride.objevent(const sender: iobjectlink;
+               const event: objecteventty);
+var
+ p1,pe: pdoublewidgetty;
+ w1: tobject;
+begin
+ if event = oe_destroyed then begin
+  if csdestroying in fowner.componentstate then begin
+   fitems:= nil;
+  end
+  else begin
+   w1:= sender.getinstance();
+   p1:= pointer(fitems);
+   if p1 <> nil then begin
+    pe:= p1 + high(fitems);
+    while p1 <= pe do begin
+     if p1^.a = w1 then begin
+      p1^.a:= nil;
+     end;
+     if p1^.b = w1 then begin
+      p1^.b:= nil;
+     end;
+     inc(p1);
+    end;
+   end;
+  end;
+ end;
+ inherited;
+end;
+
+procedure ttaborderoverride.endread(const reader: treader);
+var
+ p1,pe: pstring;
+ compa,compb: tcomponent;
+begin
+ if (fwidgetnames <> nil) then begin
+  clear;
+  p1:= pointer(fwidgetnames);
+  pe:= p1+high(fwidgetnames);
+  while p1 < pe do begin
+   compa:= findsubcomponentbynamepath(p1^,reader.root);
+   inc(p1);
+   compb:= findsubcomponentbynamepath(p1^,reader.root);
+   inc(p1);
+   if ((compa = nil) or (compa is twidget)) and 
+                         ((compb = nil) or (compb is twidget)) then begin
+    add(twidget(compa),twidget(compb));
+   end;
+  end;
+  fwidgetnames:= nil;
+ end;
+end;
+
+function ttaborderoverride.nexttaborder(sender: twidget;
+               const down: boolean): twidget;
+var
+ ar1: doublewidgetarty;
+ p1,pe: pdoublewidgetty;
+label
+ restartlab,endlab;
+begin
+ result:= nil;
+ if fitems <> nil then begin
+  ar1:= copy(fitems);
+  while true do begin
+restartlab:
+   if down then begin
+    pe:= pointer(ar1);
+    p1:= pe+high(ar1);
+    while p1 >= pe do begin
+     if p1^.b = sender then begin
+      result:= p1^.a;
+      if (result <> nil) and not result.canfocus() then begin
+       p1^.b:= nil; //avoid circles
+       sender:= result;
+       goto restartlab; //next try
+      end
+      else begin
+       goto endlab;
+      end;
+     end;
+     dec(p1);
+    end;
+    exit; //no match
+   end
+   else begin
+    p1:= pointer(ar1);
+    pe:= p1+high(ar1);
+    while p1 <= pe do begin
+     if p1^.a = sender then begin
+      result:= p1^.b;
+      if (result <> nil) and not result.canfocus() then begin
+       p1^.a:= nil; //avoid circles
+       sender:= result;
+       goto restartlab; //next try
+      end
+      else begin
+       goto endlab;
+      end;
+     end;
+     inc(p1);
+    end;
+    exit; //no match
+   end;
+  end;
+ end;
+endlab:
+ if (result <> nil) and not result.canfocus() then begin
+  result:= result.nexttaborder(down)
+ end;
+end;
+
+procedure ttaborderoverride.add(const aa: twidget; const ab: twidget);
+begin
+ if (aa <> nil) or (ab <> nil) then begin
+  setlength(fitems,high(fitems)+2);
+  with fitems[high(fitems)] do begin
+   a:= aa;
+   b:= ab;
+   if aa <> nil then begin
+    getobjectlinker.link(iobjectlink(self),ievent(aa));
+   end;
+  end;
+ end;
 end;
 
 end.

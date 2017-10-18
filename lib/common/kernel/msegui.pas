@@ -691,7 +691,7 @@ type
    procedure initgridframe; virtual;
    procedure changedirection(const oldvalue: graphicdirectionty;
                                             const newvalue: graphicdirectionty);
-
+   property intf: iframe read fintf;
    property levelo: integer read fi.levelo write setlevelo
                      stored islevelostored default 0;
    property leveli: integer read fi.leveli write setleveli
@@ -1766,6 +1766,9 @@ type
                                        const nowrap: boolean = false); virtual;
    function navigdistance(var info: naviginfoty;
                           const nowrap: boolean = false): integer; virtual;
+
+   function nexttaborderoverride(const sender: twidget;
+                              const down: boolean = false): twidget virtual;
 
    function getwidgetrects(const awidgets: array of twidget): rectarty;
    procedure setwidgetrects(const awidgets: array of twidget;
@@ -12276,6 +12279,15 @@ begin
  end;
 end;
 
+function twidget.nexttaborderoverride(const sender: twidget;
+                               const down: boolean = false): twidget;
+begin
+ result:= nil;
+ if fparentwidget <> nil then begin
+  result:= fparentwidget.nexttaborderoverride(sender,down);
+ end;
+end;
+
 function twidget.nexttaborder(const down: boolean = false;
                                         nowrap: boolean = false): twidget;
 label
@@ -12283,8 +12295,8 @@ label
 var
  int1: integer;
 begin
- result:= nil;
- if (fparentwidget <> nil) and 
+ result:= nexttaborderoverride(self,down);
+ if (result = nil) and (fparentwidget <> nil) and 
            not (csdestroying in fparentwidget.componentstate) then begin
   int1:= ftaborder;
   if down then begin

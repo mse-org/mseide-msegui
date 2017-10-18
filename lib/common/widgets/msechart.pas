@@ -114,7 +114,7 @@ type
 
  tbarframe = class(tframe)
   public
-   constructor create(const intf: iframe);
+   constructor create(const aintf: iframe);
  end;
  ttrace = class;
 
@@ -575,7 +575,7 @@ type
 
  tchartframe = class(tscrollboxframe)
   public
-   constructor create(const intf: iscrollframe; const owner: twidget);
+   constructor create(const aintf: iscrollframe; const owner: twidget);
   published
    property framei_left default 0;
    property framei_top default 0;
@@ -3335,7 +3335,7 @@ end;
 
 { tchartframe }
 
-constructor tchartframe.create(const intf: iscrollframe; const owner: twidget);
+constructor tchartframe.create(const aintf: iscrollframe; const owner: twidget);
 begin
  inherited;
  fi.innerframe.left:= 0;
@@ -4571,7 +4571,7 @@ end;
 
 { tbarframe }
 
-constructor tbarframe.create(const intf: iframe);
+constructor tbarframe.create(const aintf: iframe);
 begin
  inherited;
  include(fstate,fs_nowidget);

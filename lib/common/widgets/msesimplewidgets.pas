@@ -576,7 +576,7 @@ type
   
  tgroupboxframe = class(tcaptionframe)
   public
-   constructor create(const intf: icaptionframe);
+   constructor create(const aintf: icaptionframe);
   published
    property framei_left default 2;
    property framei_top default 2;
@@ -2255,7 +2255,7 @@ end;
 
 { tgroupboxframe }
 
-constructor tgroupboxframe.create(const intf: icaptionframe);
+constructor tgroupboxframe.create(const aintf: icaptionframe);
 begin
  inherited;
  fi.levelo:= -1;

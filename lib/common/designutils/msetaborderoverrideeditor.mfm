@@ -1,0 +1,194 @@
+object msetaborderoverrideeditorfo: tmsetaborderoverrideeditorfo
+  visible = False
+  bounds_x = 337
+  bounds_y = 266
+  bounds_cx = 332
+  bounds_cy = 245
+  container.frame.localprops = []
+  container.frame.localprops1 = []
+  container.bounds = (
+    0
+    0
+    332
+    245
+  )
+  options = [fo_freeonclose, fo_cancelonesc, fo_autoreadstat, fo_autowritestat, fo_savepos, fo_savezorder, fo_savestate]
+  statfile = tstatfile1
+  caption = 'Taborder override'
+  moduleclassname = 'tmseform'
+  object tsplitter1: tsplitter
+    optionswidget = [ow_tabfocus, ow_parenttabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_destroywidgets]
+    color = -2147483645
+    bounds_x = 208
+    bounds_y = 208
+    bounds_cx = 123
+    bounds_cy = 30
+    anchors = [an_right, an_bottom]
+    optionsscale = [osc_expandx, osc_shrinkx, osc_expandy, osc_shrinky]
+    linktop = texpandingwidget1
+    grip = stb_none
+    object tbutton2: tbutton
+      optionswidget1 = [ow1_fontglyphheight, ow1_autoscale, ow1_autowidth]
+      taborder = 1
+      bounds_x = 58
+      bounds_y = 8
+      bounds_cx = 52
+      bounds_cy = 22
+      bounds_cxmin = 50
+      anchors = [an_top, an_right]
+      state = [as_localcaption]
+      caption = '&Cancel'
+      modalresult = mr_cancel
+      reffontheight = 14
+    end
+    object tbutton1: tbutton
+      optionswidget1 = [ow1_fontglyphheight, ow1_autoscale, ow1_autowidth]
+      bounds_x = 0
+      bounds_y = 8
+      bounds_cx = 50
+      bounds_cy = 22
+      bounds_cxmin = 50
+      anchors = [an_top, an_right]
+      state = [as_default, as_localdefault, as_localcaption]
+      caption = '&OK'
+      modalresult = mr_ok
+      reffontheight = 14
+    end
+    object tspacer2: tspacer
+      taborder = 2
+      bounds_x = 50
+      bounds_y = 8
+      bounds_cx = 8
+      bounds_cy = 20
+      linkleft = tbutton1
+      linkright = tbutton2
+      options = [spao_glueright]
+    end
+  end
+  object texpandingwidget1: texpandingwidget
+    taborder = 1
+    bounds_x = 0
+    bounds_y = 0
+    bounds_cx = 332
+    bounds_cy = 208
+    anchors = [an_top]
+    optionsscale = [osc_expandy, osc_expandshrinkx, osc_expandshrinky]
+    object grid: twidgetgrid
+      frame.localprops = []
+      frame.localprops1 = []
+      bounds_x = 0
+      bounds_y = 0
+      bounds_cx = 332
+      bounds_cy = 208
+      anchors = []
+      optionsgrid = [og_colsizing, og_rowmoving, og_keyrowmoving, og_rowinserting, og_rowdeleting, og_focuscellonenter, og_autofirstrow, og_autoappend, og_colchangeontabkey, og_wrapcol, og_autopopup, og_mousescrollcol]
+      fixcols.count = 1
+      fixcols.items = <      
+        item
+          width = 27
+          numstep = 1
+        end>
+      fixrows.count = 1
+      fixrows.items = <      
+        item
+          height = 16
+          captions.count = 2
+          captions.items = <          
+            item
+              caption = 'a'
+            end          
+            item
+              caption = 'b'
+            end>
+        end>
+      datacols.count = 2
+      datacols.options = [co_proportional, co_savevalue, co_savestate, co_mousescrollrow]
+      datacols.items = <      
+        item[aed]
+          width = 144
+          options = [co_proportional, co_savestate, co_mousescrollrow]
+          widgetname = 'aed'
+          dataclass = tgridmsestringdatalist
+        end      
+        item[bed]
+          width = 154
+          options = [co_fill, co_savestate, co_mousescrollrow]
+          widgetname = 'bed'
+          dataclass = tgridmsestringdatalist
+        end>
+      datarowheight = 16
+      statfile = tstatfile1
+      reffontheight = 14
+      object aed: tdropdownlistedit
+        optionswidget1 = [ow1_fontglyphheight]
+        optionsskin = [osk_framebuttononly]
+        frame.levelo = 0
+        frame.colorclient = -2147483645
+        frame.localprops = [frl_levelo, frl_leveli, frl_colorclient]
+        frame.localprops1 = []
+        frame.button.color = -1879048187
+        frame.buttons.count = 2
+        frame.buttons.items = <        
+          item
+            color = -1879048187
+          end        
+          item
+            imagenr = 17
+            onexecute = dialogexev
+          end>
+        taborder = 1
+        visible = False
+        bounds_x = 0
+        bounds_y = 0
+        bounds_cx = 144
+        bounds_cy = 16
+        optionsedit1 = [oe1_autopopupmenu, oe1_keyexecute, oe1_savestate, oe1_checkvalueafterstatread]
+        optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_focusrectonreadonly, oe_hintclippedtext]
+        dropdown.options = [deo_selectonly, deo_autodropdown, deo_keydropdown, deo_cliphint]
+        dropdown.cols.count = 1
+        dropdown.cols.items = <        
+          item
+          end>
+        reffontheight = 14
+      end
+      object bed: tdropdownlistedit
+        optionswidget1 = [ow1_fontglyphheight]
+        optionsskin = [osk_framebuttononly]
+        frame.levelo = 0
+        frame.colorclient = -2147483645
+        frame.localprops = [frl_levelo, frl_leveli, frl_colorclient]
+        frame.localprops1 = []
+        frame.button.color = -1879048187
+        frame.buttons.count = 2
+        frame.buttons.items = <        
+          item
+            color = -1879048187
+          end        
+          item
+            imagenr = 17
+            onexecute = dialogexev
+          end>
+        taborder = 2
+        visible = False
+        bounds_x = 145
+        bounds_y = 0
+        bounds_cx = 154
+        bounds_cy = 16
+        optionsedit1 = [oe1_autopopupmenu, oe1_keyexecute, oe1_savestate, oe1_checkvalueafterstatread]
+        optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_focusrectonreadonly, oe_hintclippedtext]
+        dropdown.options = [deo_selectonly, deo_autodropdown, deo_keydropdown, deo_cliphint]
+        dropdown.cols.count = 1
+        dropdown.cols.items = <        
+          item
+          end>
+        reffontheight = 14
+      end
+    end
+  end
+  object tstatfile1: tstatfile
+    filename = 'taborderoverrideeditor.sta'
+    options = [sfo_memory]
+    left = 16
+    top = 216
+  end
+end

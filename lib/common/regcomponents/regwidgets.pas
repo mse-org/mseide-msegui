@@ -47,7 +47,8 @@ uses
  msesplitter,msedock,mseforms,mseclasses,typinfo,msearrayprops,msewidgets,
  msegui,formdesigner,msedial,msemenuwidgets,msewindowwidget,msechart,
  msepolygon,msepickwidget,msetraywidget,msedockpanelform,msechartedit,mseedit,
- msebarcode,msedatalist,mseact,mseformatstr,msesizingform
+ msebarcode,msedatalist,mseact,mseformatstr,msesizingform,
+ msetaborderoverrideeditor,msedesigner,mseglob
  {$ifndef mse_no_opengl}
 //  {$ifdef FPC}
      ,mseopenglwidget
@@ -62,6 +63,7 @@ type
  tdatacols1 = class(tdatacols);
  tfixcols1 = class(tfixcols);
  tfixrows1 = class(tfixrows);
+ ttaborderoverride1 = class(ttaborderoverride);
  
  
 type
@@ -154,6 +156,13 @@ type
    function getinvisibleitems: tintegerset; override;
  end;
 
+ ttaborderoverridepropertyeditor = class(tclasspropertyeditor)
+  protected
+   function getdefaultstate: propertystatesty; override;
+  public
+   procedure edit override;
+ end;
+ 
 const
  mseformintf: designmoduleintfty = 
   (createfunc: {$ifdef FPC}@{$endif}createmseform;
@@ -280,6 +289,9 @@ begin
 
  registerpropertyeditor(typeinfo(labeloptionsty),tcustomlabel,'',
                                            tvolatilesetpropertyeditor);
+                                           
+ registerpropertyeditor(typeinfo(ttaborderoverride),nil,'',
+                                   ttaborderoverridepropertyeditor);
   
  registerunitgroup(['msegrids'],['msegui','msegraphutils','mseclasses']);
  registerunitgroup(['msewidgetgrid'],['msedataedits',
@@ -498,6 +510,46 @@ end;
 function toptionsplaceeditor.getinvisibleitems: tintegerset;
 begin
  result:= invisibleplaceoptions;
+end;
+
+{ ttaborderoverridepropertyeditor }
+
+function ttaborderoverridepropertyeditor.getdefaultstate: propertystatesty;
+begin
+ if fmodule is twidget then begin
+  result:= inherited getdefaultstate + [ps_dialog];
+ end;
+end;
+
+procedure ttaborderoverridepropertyeditor.edit;
+var
+ rcomp: tcomponent;
+  
+var
+ prop: ttaborderoverride1;
+ i1: int32;
+begin
+ prop:= ttaborderoverride1(getpointervalue());
+// rcomp:= rootcomponent(prop.fowner);
+ rcomp:= prop.fowner;
+ with tmsetaborderoverrideeditorfo.create(rcomp) do begin
+  grid.beginupdate();
+  grid.rowcount:= length(prop.fitems);
+  for i1:= 0 to grid.rowhigh do begin
+   with prop.fitems[i1] do begin
+    aed[i1]:= msestring(compnamepath(a));
+    bed[i1]:= msestring(compnamepath(b));
+   end;
+  end;
+  grid.endupdate();
+  if show(ml_application) = mr_ok then begin
+   prop.clear();
+   for i1:= 0 to grid.rowhigh do begin
+    prop.add(findcomp(aed[i1]),findcomp(bed[i1]));
+   end;
+   modified();
+  end;
+ end;
 end;
 
 initialization

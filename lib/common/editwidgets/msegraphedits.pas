@@ -40,7 +40,7 @@ type
   protected
    function getdefaultcolorclient: colorty; virtual;
   public
-   constructor create(const intf: icaptionframe);
+   constructor create(const aintf: icaptionframe);
   published
    property options default defaultgrapheditframeoptions;
    property levelo default -2;
@@ -1207,7 +1207,7 @@ const
 
 { tgrapheditframe }
 
-constructor tgrapheditframe.create(const intf: icaptionframe);
+constructor tgrapheditframe.create(const aintf: icaptionframe);
 begin
  inherited;
  options:= defaultgrapheditframeoptions;

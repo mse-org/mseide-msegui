@@ -48,7 +48,7 @@ type
    function getbuttondialog: tdropdownbutton;
    procedure setbuttondialog(const avalue: tdropdownbutton);
   public
-   constructor create(const intf: icaptionframe;
+   constructor create(const aintf: icaptionframe;
                                          const buttonintf: ibutton); override;                                                  
   published
    property buttondialog: tdropdownbutton read getbuttondialog 
@@ -199,7 +199,7 @@ end;
 
 { tdialogdropdownbuttonframe }
 
-constructor tdialogdropdownbuttonframe.create(const intf: icaptionframe;
+constructor tdialogdropdownbuttonframe.create(const aintf: icaptionframe;
                const buttonintf: ibutton);
 begin
  inherited;

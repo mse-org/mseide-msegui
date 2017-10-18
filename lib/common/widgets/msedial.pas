@@ -135,7 +135,7 @@ type
 
  tmarkerframe = class(tframe)
   public
-   constructor create(const intf: iframe);
+   constructor create(const aintf: iframe);
  end;
 
  markerinfoty = record
@@ -3028,7 +3028,7 @@ end;
 
 { tmarkerframe }
 
-constructor tmarkerframe.create(const intf: iframe);
+constructor tmarkerframe.create(const aintf: iframe);
 begin
  inherited;
  include(fstate,fs_nowidget);
