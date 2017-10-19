@@ -360,6 +360,8 @@ type
    procedure readstate(reader: treader); override;
    procedure loaded; override;
    procedure fontchanged; override;
+   function nexttaborderoverride(const sender: twidget;
+                                      const down: boolean): twidget override;
    procedure widgetregionchanged(const sender: twidget); override;
    procedure childclientrectchanged(const sender: twidget); override;
    procedure childautosizechanged(const sender: twidget); override;
@@ -389,14 +391,14 @@ type
                                      default wam_start;
    property place_options: placeoptionsty read fplace_options 
                                      write setplace_options default [];
+   property taborderoverride: ttaborderoverride read ftaborderoverride 
+                                                  write settaborderoverride;
    property optionswidget default defaultgroupboxoptionswidget;
    property onbeforelayout: layoutereventty read fonbeforelayout 
                                                     write fonbeforelayout;
    property onafterlayout: layoutereventty read fonafterlayout 
                                                     write fonafterlayout;
   published
-   property taborderoverride: ttaborderoverride read ftaborderoverride 
-                                                  write settaborderoverride;
    property visible default true;
  end;
 
@@ -2205,6 +2207,15 @@ begin
 //  end;
   ffontxscaleref:= getfont.xscale;
   ffontsizeref:= clientsize;
+ end;
+end;
+
+function tcustomlayouter.nexttaborderoverride(const sender: twidget;
+               const down: boolean): twidget;
+begin
+ result:= ftaborderoverride.nexttaborder(sender,down);
+ if result = nil then begin
+  result:= inherited nexttaborderoverride(sender,down);
  end;
 end;
 

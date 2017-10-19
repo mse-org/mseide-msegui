@@ -523,7 +523,6 @@ end;
 
 procedure ttaborderoverridepropertyeditor.edit;
 var
- rcomp: tcomponent;
  prop: ttaborderoverride1;
  i1: int32;
 begin
