@@ -45,9 +45,13 @@ type
                   end;
  pdoublewidgetty = ^doublewidgetty;
  doublewidgetarty = array of doublewidgetty;
-
+ ttaborderoverride = class;
+ tabordereventty = procedure(const sender: ttaborderoverride;
+                     const current: twidget; const down: boolean; 
+                                                  var next: twidget) of object;
  ttaborderoverride = class(tlinkedpersistent)
   private
+   fontaborder: tabordereventty;
    procedure readitems(reader: treader);
    procedure writeitems(writer: twriter);
   protected
@@ -64,6 +68,9 @@ type
    procedure clear();
    function nexttaborder(sender: twidget; const down: boolean): twidget;
    procedure add(const aa,ab: twidget);
+   property owner: twidget read fowner;
+  published
+   property ontaborder: tabordereventty read fontaborder write fontaborder;
  end;
  
  tcustomcaptionframe = class(tcustomframe)
@@ -6352,7 +6359,7 @@ restartlab:
      end;
      dec(p1);
     end;
-    exit; //no match
+    goto endlab; //no match
    end
    else begin
     p1:= pointer(ar1);
@@ -6371,13 +6378,16 @@ restartlab:
      end;
      inc(p1);
     end;
-    exit; //no match
+    goto endlab; //no match
    end;
   end;
  end;
 endlab:
  if (result <> nil) and not result.canfocus() then begin
   result:= result.nexttaborder(down)
+ end;
+ if fowner.canevent(tmethod(fontaborder)) then begin
+  fontaborder(self,sender,down,result);
  end;
 end;
 
