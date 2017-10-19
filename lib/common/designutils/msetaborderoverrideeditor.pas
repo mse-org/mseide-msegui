@@ -20,10 +20,11 @@ type
    bed: tdropdownlistedit;
    procedure dialogexev(const sender: TObject);
   private
-   ftopcomponent: tcomponent;
+   frootcomp: tcomponent;
+   ftopwidget: twidget;
    function filterwidgets(const acomponent: tcomponent): boolean;
   public
-   constructor create(const atopcomponent: tcomponent); reintroduce;
+   constructor create(const atopwidget: twidget); reintroduce;
    function findcomp(const aname: msestring): twidget;
    function findwidgetcomp(const aname: msestring): twidget;
    function widgetnamepath(awidget: twidget): string;
@@ -35,13 +36,22 @@ uses
  msetaborderoverrideeditor_mfm,msedesigner,msecomptree;
 
 constructor tmsetaborderoverrideeditorfo.create(
-                                          const atopcomponent: tcomponent);
+                                          const atopwidget: twidget);
 var
  ar1: msestringarty;
 begin
  inherited create(nil);
- ftopcomponent:= atopcomponent;
- ar1:= designer.getcomponentnamelist(twidget,ftopcomponent,@filterwidgets);
+ ftopwidget:= atopwidget;
+ if csinline in atopwidget.componentstate then begin
+  frootcomp:= atopwidget;
+ end
+ else begin
+  frootcomp:= atopwidget.owner;
+  if frootcomp = nil then begin
+   frootcomp:= atopwidget;
+  end;
+ end;
+ ar1:= designer.getwidgetnamelist(nil,ftopwidget,@filterwidgets);
  aed.dropdown.cols[0].asarray:= ar1;
  bed.dropdown.cols[0].asarray:= ar1;
 end;
@@ -56,7 +66,7 @@ var
 begin
  str1:= ansistring(aname);
  ar1:= splitstring(str1,'.');
- comp1:= ftopcomponent;
+ comp1:= frootcomp;
  w1:= nil;
  for i1:= 0 to high(ar1) do begin
   w1:= twidget(comp1.findcomponent(ar1[i1]));
@@ -80,7 +90,7 @@ var
 begin
  str1:= ansistring(aname);
  ar1:= splitstring(str1,'.');
- comp1:= ftopcomponent;
+ comp1:= frootcomp;
  w1:= nil;
  for i1:= 0 to high(ar1) do begin
   w1:= twidget(comp1.findcomponent(ar1[i1]));
@@ -101,7 +111,7 @@ begin
  if awidget <> nil then begin
   result:= awidget.name;
   awidget:= awidget.parentwidget;
-  while (awidget <> nil) and (awidget <> ftopcomponent) do begin
+  while (awidget <> nil) and (awidget <> ftopwidget) do begin
    if ws_iswidget in awidget.widgetstate then begin
     result:= awidget.name+'.'+result;
    end;
@@ -116,7 +126,7 @@ begin
  if acomp <> nil then begin
   result:= acomp.name;
   acomp:= acomp.owner;
-  while (acomp <> nil) and (acomp <> ftopcomponent) do begin
+  while (acomp <> nil) and (acomp <> frootcomp) do begin
    result:= acomp.name+'.'+result;
    acomp:= acomp.owner;
   end;
@@ -136,8 +146,8 @@ var
  tree1: tcompnameitem;
  mstr1: msestring;
 begin
- if ftopcomponent is twidget then begin
-  tree1:= designer.getwidgetnametree(twidget(ftopcomponent));
+// if ftopcomponent is twidget then begin
+  tree1:= designer.getwidgetnametree(ftopwidget);
   w1:= tdropdownlistedit(tcustomframe(
                          tframebutton(sender).owner).intf.getwidget);
   w2:= findcomp(w1.value);
@@ -148,13 +158,14 @@ begin
    mstr1:= w1.value;
   end;
   if compnamedialog(tree1,mstr1,false) = mr_ok then begin
+   replacechar1(mstr1,':','.');
    w2:= findwidgetcomp(mstr1);
    if w2 <> nil then begin
     mstr1:= msestring(compnamepath(w2));
    end;
    w1.value:= mstr1;
   end;
- end;
+// end;
 end;
 
 end.

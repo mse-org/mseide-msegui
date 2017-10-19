@@ -524,15 +524,12 @@ end;
 procedure ttaborderoverridepropertyeditor.edit;
 var
  rcomp: tcomponent;
-  
-var
  prop: ttaborderoverride1;
  i1: int32;
 begin
  prop:= ttaborderoverride1(getpointervalue());
 // rcomp:= rootcomponent(prop.fowner);
- rcomp:= prop.fowner;
- with tmsetaborderoverrideeditorfo.create(rcomp) do begin
+ with tmsetaborderoverrideeditorfo.create(prop.fowner) do begin
   grid.beginupdate();
   grid.rowcount:= length(prop.fitems);
   for i1:= 0 to grid.rowhigh do begin

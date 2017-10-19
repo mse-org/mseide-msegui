@@ -1,4 +1,4 @@
-{ MSEide Copyright (c) 1999-2015 by Martin Schreiber
+{ MSEide Copyright (c) 1999-2017 by Martin Schreiber
    
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -548,13 +548,16 @@ type
            const filter: compfilterfuncty = nil): msestringarty; overload;
    function getcomponentnamelist(const acomponentclass: tcomponentclass;
                                  const arootcomp: tcomponent;
-           const filter: compfilterfuncty = nil): msestringarty; overload;
+                 const filter: compfilterfuncty = nil): msestringarty; overload;
    function getcomponentnametree(const acomponentclass: tcomponentclass;
                                  const includeinherited: boolean;
                                  const findmode: boolean;
                                  const aowner: tcomponent = nil;
                           const filter: compfilterfuncty = nil;
                           const amodule: tcomponent = nil): tcompnameitem;
+   function getwidgetnamelist(const awidgetclass: widgetclassty;
+                          const arootwidget: twidget;
+                           const filter: compfilterfuncty = nil): msestringarty;
    function getwidgetnametree(const rootwidget: twidget): tcompnameitem;
    
    function getancestorclassinfo(const ainstance: tcomponent;
@@ -5645,6 +5648,41 @@ begin
  result:= nil;
  acount:= 0;
  check(arootcomp,'');
+ setlength(result,acount);
+ sortarray(result);
+end;
+
+function tdesigner.getwidgetnamelist(const awidgetclass: widgetclassty;
+               const arootwidget: twidget;
+                          const filter: compfilterfuncty = nil): msestringarty;
+var
+ acount: integer;
+
+ procedure check(const awidget: twidget; prefix: msestring);
+ var
+  i1: int32;
+ begin
+  if prefix = '!' then begin //first
+   prefix:= '';
+  end
+  else begin
+   if ((awidgetclass = nil) or (awidget is awidgetclass)) and 
+                                              filter(awidget) then begin
+    additem(result,prefix+msestring(awidget.name),acount);
+   end;
+   if csinline in awidget.componentstate then begin
+    prefix:= prefix + msestring(awidget.name)+'.';
+   end;
+  end;
+  for i1:= 0 to awidget.widgetcount-1 do begin
+   check(awidget.widgets[i1],prefix);
+  end;
+ end;
+ 
+begin
+ result:= nil;
+ acount:= 0;
+ check(arootwidget,'!');
  setlength(result,acount);
  sortarray(result);
 end;

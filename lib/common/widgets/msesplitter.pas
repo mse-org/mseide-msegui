@@ -331,6 +331,7 @@ type
    ffontxscaleref: real;
    fonbeforelayout: layoutereventty;
    fonafterlayout: layoutereventty;
+   ftaborderoverride: ttaborderoverride;
    procedure setoptionslayout(const avalue: layoutoptionsty);
    procedure setalign_mode(const avalue: widgetalignmodety);
    procedure setalign_leader(const avalue: twidget);
@@ -339,6 +340,7 @@ type
    procedure setalign_glue(const avalue: widgetalignmodety);
    procedure setplace_mode(const avalue: widgetalignmodety);
    procedure setplace_options(avalue: placeoptionsty);
+   procedure settaborderoverride(const avalue: ttaborderoverride);
   protected
    procedure scalebasechanged(const sender: twidget); override;
    function scalesizeref: sizety;
@@ -355,6 +357,7 @@ type
    procedure delayedupdatelayout();
    procedure checkwidgetinfo();
    procedure updatelayout;
+   procedure readstate(reader: treader); override;
    procedure loaded; override;
    procedure fontchanged; override;
    procedure widgetregionchanged(const sender: twidget); override;
@@ -370,6 +373,7 @@ type
    procedure doasyncevent(var atag: integer); override;
   public
    constructor create(aowner: tcomponent); override;
+   destructor destroy(); override;
    property optionslayout: layoutoptionsty read foptionslayout write setoptionslayout
                            default defaultlayoutoptions;
    property align_mode: widgetalignmodety read falign_mode write setalign_mode
@@ -391,11 +395,14 @@ type
    property onafterlayout: layoutereventty read fonafterlayout 
                                                     write fonafterlayout;
   published
+   property taborderoverride: ttaborderoverride read ftaborderoverride 
+                                                  write settaborderoverride;
    property visible default true;
  end;
 
  tlayouter = class(tcustomlayouter)
   published
+   property taborderoverride;
    property optionslayout;
    property align_mode;
    property align_leader;
@@ -424,6 +431,7 @@ uses
 type
  twidget1 = class(twidget);
  tcustomframe1 = class(tcustomframe);
+ ttaborderoverride1 = class(ttaborderoverride);
 
 {$define useround}
 
@@ -1421,6 +1429,7 @@ end;
 
 constructor tcustomlayouter.create(aowner: tcomponent);
 begin
+ ftaborderoverride:= ttaborderoverride.create(self);
  foptionslayout:= defaultlayoutoptions;
  falign_mode:= wam_center;
 // faligny_mode:= wam_center;
@@ -1430,6 +1439,12 @@ begin
  inherited;
  foptionswidget:= defaultgroupboxoptionswidget;
  include(fwidgetstate,ws_visible);
+end;
+
+destructor tcustomlayouter.destroy();
+begin
+ inherited;
+ ftaborderoverride.free();
 end;
 
 procedure tcustomlayouter.setoptionslayout(const avalue: layoutoptionsty);
@@ -2035,6 +2050,12 @@ begin
  end;
 end;
 
+procedure tcustomlayouter.readstate(reader: treader);
+begin
+ inherited;
+ ttaborderoverride1(ftaborderoverride).endread(reader);
+end;
+
 procedure tcustomlayouter.updatescalesizeref;
 var
  int1,int3: integer;
@@ -2294,6 +2315,10 @@ begin
   end;
   updatelayout();
  end;
+end;
+
+procedure tcustomlayouter.settaborderoverride(const avalue: ttaborderoverride);
+begin
 end;
 
 procedure tcustomlayouter.clientrectchanged;
