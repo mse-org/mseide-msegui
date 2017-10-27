@@ -280,6 +280,9 @@ type
    procedure remask; //recalc mask
    procedure automask; //transparentcolor is bottomright pixel
 
+   procedure savetomaskedimage(out aimage: maskedimagety);
+   procedure loadfrommaskedimage(const aimage: maskedimagety);
+   
    function loadfromstring(const avalue: string; const format: string;
                                                          //'' = any
                                         const params: array of const): string;
@@ -596,6 +599,7 @@ type
 
 procedure zeropad(var aimage: imagety);
 procedure freeimage(var aimage: imagety);
+procedure freeimage(var aimage: maskedimagety);
 
 implementation
 uses
@@ -659,6 +663,12 @@ begin
   gui_freeimagemem(aimage.pixels);
   fillchar(aimage,sizeof(aimage),0);
  end;
+end;
+
+procedure freeimage(var aimage: maskedimagety);
+begin
+ freeimage(aimage.image);
+ freeimage(aimage.mask);
 end;
 
 { tformatstream }
@@ -2060,6 +2070,32 @@ begin
  masked:= true;
  checkmask;
  change;
+end;
+
+procedure tmaskedbitmap.savetomaskedimage(out aimage: maskedimagety);
+begin
+ savetoimage(aimage.image);
+ if masked then begin
+  fmask.savetoimage(aimage.mask);
+ end
+ else begin
+  freeimage(aimage.mask);
+ end;
+end;
+
+procedure tmaskedbitmap.loadfrommaskedimage(const aimage: maskedimagety);
+begin
+ loadfromimage(aimage.image);
+ if aimage.mask.pixels <> nil then begin
+  if fmask = nil then begin
+   createmask(aimage.mask.kind);
+  end;
+  fmask.loadfromimage(aimage.mask);
+  include(fstate,pms_maskvalid);
+ end
+ else begin
+  masked:= false;
+ end;
 end;
 
 procedure tmaskedbitmap.setmask(const Value: tbitmap);

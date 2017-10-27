@@ -173,7 +173,6 @@ type
    function getrowdatapo(const arow: integer): pointer; virtual;
    procedure setgridintf(const intf: iwidgetgrid);
    function getgridintf: iwidgetgrid;
-   function getcellframe: framety; virtual;
    function needscellfocuspaint(): boolean;
    function getcellcursor(const arow: integer; const acellzone: cellzonety;
                              const apos: pointty): cursorshapety; virtual;
@@ -297,6 +296,8 @@ type
    function gettext: msestring overload reintroduce;
    procedure settext(const atext: msestring) reintroduce;
    function getrichtext(const start, stop: gridcoordty): richstringty;
+
+   function getcellframe: framety; virtual;
    
    function linecount: integer;
    property gridvalue[const index: integer]: msestring 
@@ -921,8 +922,13 @@ begin
     int1:= col;
     feditor.begingroup;
     try
-     deletetext(mgc(0,row),mgc(0,row+1));
-     col:= int1;
+     if (fgridintf <> nil) and 
+               tcustomwidgetgrid1(fgridintf.getcol.grid).
+                                       deleterowconfirmation() then begin
+
+      deletetext(mgc(0,row),mgc(0,row+1));
+      col:= int1;
+     end;
     finally
      feditor.endgroup;
     end;
