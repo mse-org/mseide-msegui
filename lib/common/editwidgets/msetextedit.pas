@@ -49,8 +49,14 @@ type
   pos: gridcoordty;
  end;
 
+ tcustomtextedit = class;
  textmouseeventty = procedure(const sender: tobject;
           var info: textmouseeventinfoty) of object;
+ textdraweventty = procedure(const sender: tcustomtextedit;
+                  const canvas: tcanvas; const atext: richstringty;
+                  const cellinfo: pcellinfoty; var handled: boolean) of object;
+                        //cellinfo = nil for focused widget
+ setupeditoreventty = procedure(const sender: tcustomtextedit) of object;
 
  texteditstatety = (tes_selectinvalid,tes_cellentering,tes_xposinvalid);
  texteditstatesty = set of texteditstatety;
@@ -88,6 +94,8 @@ type
    fhasbom: boolean;
    foptions: texteditoptionsty;
    feolstyle: eolstylety;
+   fondrawtext: textdraweventty;
+   fonsetupeditor: setupeditoreventty;
    procedure setstatfile(const Value: tstatfile);
    function geteditpos: gridcoordty;
    procedure seteditpos1(const value: gridcoordty);
@@ -130,6 +138,7 @@ type
    function beforechange: boolean; //true if not aborted
    procedure fontchanged; override;
    procedure tabulatorschanged(const sender: tarrayprop; const index: integer);
+   procedure painttext(const canvas: tcanvas); override;
    procedure dobeforepaintforeground(const canvas: tcanvas); override;
    procedure dokeydown(var info: keyeventinfoty); override;
    procedure getstate(out state: texteditstatety); virtual;
@@ -334,13 +343,17 @@ type
                      //offset to innerclientrect.x
    property marginlinecolor: colorty read fmarginlinecolor 
                                      write setmarginlinecolor default cl_none;
-   property onfontchanged: notifyeventty read fonfontchanged write fonfontchanged;
+   property onfontchanged: notifyeventty read fonfontchanged 
+                                                 write fonfontchanged;
    property onmodifiedchanged: booleanchangedeventty read fonmodifiedchanged
-                                     write fonmodifiedchanged;
+                                                     write fonmodifiedchanged;
    property ontextmouseevent: textmouseeventty read fontextmouseevent 
-                                     write fontextmouseevent;
+                                                   write fontextmouseevent;
    property oneditnotifcation: editnotificationeventty read foneditnotification 
-                                     write foneditnotification;
+                                                      write foneditnotification;
+   property ondrawtext: textdraweventty read fondrawtext write fondrawtext;
+   property onsetupeditor: setupeditoreventty read fonsetupeditor
+                                                      write fonsetupeditor;
    property oncellevent: celleventty read foncellevent write foncellevent;
   published
    property optionswidget default defaulttexteditwidgetoptions;
@@ -379,6 +392,8 @@ type
    property ontextmouseevent;
    property oneditnotifcation;
    property oncellevent;
+   property ondrawtext;
+   property onsetupeditor;
  end;
 
  tundotextedit = class(ttextedit,iundo)
@@ -619,16 +634,39 @@ begin
   if fframe = nil then begin
    inc(int1,texteditminimalframe.left);
   end;
-  canvas.drawline(makepoint(int1,0),makepoint(int1,clientsize.cy),fmarginlinecolor);
+  canvas.drawline(makepoint(int1,0),makepoint(int1,clientsize.cy),
+                                                      fmarginlinecolor);
  end;
+end;
+
+procedure tcustomtextedit.painttext(const canvas: tcanvas);
+var
+ b1: boolean;
+begin
+ if assigned(fondrawtext) then begin
+  b1:= false;
+  fondrawtext(self,canvas,feditor.richtext,nil,b1);
+  if b1 then begin
+   exit;
+  end;
+ end;
+ inherited;
 end;
 
 procedure tcustomtextedit.drawcell(const canvas: tcanvas);
 var
  rect1: rectty;
  int1: integer;
+ b1: boolean;
 begin
  with cellinfoty(canvas.drawinfopo^) do begin
+  if assigned(fondrawtext) then begin
+   b1:= false;
+   fondrawtext(self,canvas,prichstringty(datapo)^,canvas.drawinfopo,b1);
+   if b1 then begin
+    exit;
+   end;
+  end;
   if calcautocellsize then begin
    rect1:= textrect(canvas,prichstringty(datapo)^,innerrect,
                                       feditor.textflags,nil,ftabulators);
@@ -2441,24 +2479,20 @@ begin
 end;
 
 procedure tcustomtextedit.setupeditor;
-//{$ifdef FPC}
-//var
-// str1: msestring;
-//{$endif}
 var
  rect1: rectty;
 begin
  if not (csloading in componentstate) then begin
   with feditor do begin
-// {$ifdef FPC}     //!!!!todo fpcerror 3197
-//   str1:= text;
-// {$endif}
   //feditor text already set
    rect1:= innerclientrect;
    if fframe = nil then begin
     deflaterect1(rect1,texteditminimalframe);
    end;
    setup(text,curindex,false,rect1,clientrect,richtext.format,ftabulators,font);
+  end;
+  if canevent(tmethod(fonsetupeditor)) then begin
+   fonsetupeditor(self);
   end;
  end;
 end;

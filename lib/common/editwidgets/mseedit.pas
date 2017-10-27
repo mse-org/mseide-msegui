@@ -509,6 +509,7 @@ type
    procedure dopaintforeground(const canvas: tcanvas); override;
    procedure dopaintbackground(const canvas: tcanvas); override;
    procedure paintimage(const canvas: tcanvas); virtual;
+   procedure painttext(const canvas: tcanvas); virtual;
    function needsfocuspaint: boolean; override;
 //   procedure doafterpaint(const canvas: tcanvas); override;
    procedure rootchanged(const aflags: rootchangeflagsty); override;
@@ -1532,11 +1533,16 @@ begin
  inherited;
 end;
 
+procedure tcustomedit.painttext(const canvas: tcanvas);
+begin
+ feditor.dopaint(canvas);
+end;
+
 procedure tcustomedit.dopaintforeground(const canvas: tcanvas);
 begin
  inherited;
  paintimage(canvas);
- feditor.dopaint(canvas);
+ painttext(canvas);
 end;
 
 procedure tcustomedit.dopaintbackground(const canvas: tcanvas);
