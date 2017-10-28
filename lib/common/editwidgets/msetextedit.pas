@@ -155,6 +155,7 @@ type
                const endpos: gridcoordty; const backwards: boolean); virtual;
 
    procedure dotextmouseevent(var info: textmouseeventinfoty);
+   procedure dosetupeditor();
    procedure setupeditor; override;
    procedure dofontheightdelta(var delta: integer); override;
    procedure sizechanged; override;
@@ -219,6 +220,8 @@ type
                      const donotify: boolean;
                      const ashowcell: cellpositionty);
    procedure internalclearselection;
+   procedure internaldeletetext(const start, stop: gridcoordty;
+                                                      const userinput: boolean);
     //iassistiveclient
    function getassistivetext(): msestring; override;
    function getassistiveflags: assistiveflagsty; override;   
@@ -926,7 +929,7 @@ begin
                tcustomwidgetgrid1(fgridintf.getcol.grid).
                                        deleterowconfirmation() then begin
 
-      deletetext(mgc(0,row),mgc(0,row+1));
+      internaldeletetext(mgc(0,row),mgc(0,row+1),true);
       col:= int1;
      end;
     finally
@@ -1225,7 +1228,12 @@ begin
    end;
    if length(ar1) > 1 then begin
     ar1[high(ar1)]:= ar1[high(ar1)] + copy(flines[apos.row],apos.col + 1,bigint);
-    grid.insertrow(apos.row+1,high(ar1));
+    if apos.col = 0 then begin
+     grid.insertrow(apos.row,high(ar1));
+    end
+    else begin
+     grid.insertrow(apos.row+1,high(ar1));
+    end;
     for int1:= 1 to high(ar1) do begin
      flines.items[apos.row+int1]:= ar1[int1];
     end;
@@ -1274,7 +1282,8 @@ begin
  inserttext(apos,atext,po1,selected,insertbackwards);
 end;
 
-procedure tcustomtextedit.deletetext(const start, stop: gridcoordty);
+procedure tcustomtextedit.internaldeletetext(const start, stop: gridcoordty;
+                                                      const userinput: boolean);
 var
  po1,po2: gridcoordty;
  bo1: boolean;
@@ -1297,13 +1306,31 @@ begin
    seteditpos(po1,false);
 //   feditor.updatecaret; //locked by beginupdate
    if po1.row = po2.row then begin
-    richdelete(prichstringty(flines.getitempo(po1.row))^,po1.col+1,po2.col-po1.col);
+    richdelete(prichstringty(flines.getitempo(po1.row))^,po1.col+1,
+                                                              po2.col-po1.col);
    end
    else begin
-    richdelete(prichstringty(flines.getitempo(po1.row))^,po1.col+1,bigint);
+    if po1.col > 0 then begin
+     richdelete(prichstringty(flines.getitempo(po1.row))^,po1.col+1,bigint);
+    end;
     if po2.col > 0 then begin
      richdelete(prichstringty(flines.getitempo(po2.row))^,1,po2.col);
     end;
+    if po1.col > 0 then begin
+     if po2.row < flines.count then begin
+      prichstringty(flines.getitempo(po1.row))^:=
+          richconcat(prichstringty(flines.getitempo(po1.row))^,
+          prichstringty(flines.getitempo(po2.row))^);
+     end;
+     inc(po1.row);
+     if po1.row < flines.count then begin
+      grid.deleterow(po1.row,po2.row-po1.row+1,userinput);
+     end;
+    end
+    else begin
+     grid.deleterow(po1.row,po2.row-po1.row,userinput);
+    end;
+{
     if po2.row < flines.count then begin
      prichstringty(flines.getitempo(po1.row))^:=
           richconcat(prichstringty(flines.getitempo(po1.row))^,
@@ -1317,6 +1344,7 @@ begin
       grid.deleterow(po1.row,po2.row-po1.row);
      end;
     end;
+}
    end;
    if grid.updating then begin
     gridtovalue(-1);
@@ -1330,6 +1358,11 @@ begin
    endupdate;
   end;
  end;
+end;
+
+procedure tcustomtextedit.deletetext(const start, stop: gridcoordty);
+begin
+ internaldeletetext(start,stop,false);
 end;
 
 function tcustomtextedit.appendrow(const atext: richstringty): integer;
@@ -1948,6 +1981,7 @@ begin
       if selectaction = fca_focusinrepeater then begin
        fgridintf.getcol.grid.setcellclientclick(self);
       end;
+      dosetupeditor();
      finally
       if not bo1 then begin
        exclude(ftextstate,tes_cellentering);
@@ -2484,6 +2518,13 @@ begin
  //dummy
 end;
 
+procedure tcustomtextedit.dosetupeditor();
+begin
+ if canevent(tmethod(fonsetupeditor)) then begin
+  fonsetupeditor(self);
+ end;
+end;
+
 procedure tcustomtextedit.setupeditor;
 var
  rect1: rectty;
@@ -2497,9 +2538,7 @@ begin
    end;
    setup(text,curindex,false,rect1,clientrect,richtext.format,ftabulators,font);
   end;
-  if canevent(tmethod(fonsetupeditor)) then begin
-   fonsetupeditor(self);
-  end;
+  dosetupeditor();
  end;
 end;
 
