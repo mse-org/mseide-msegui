@@ -23,11 +23,12 @@ const
                                             cy: defaultimagelistheight);
 
 type
+{
  imagebufferinfoty = record
   image: imagety;
   mask: imagety;
  end;
- 
+}
  tbitmapcomp = class;
 
  tbitmap = class(tsimplebitmap)
@@ -263,9 +264,11 @@ type
                                         //nil -> default
    destructor destroy; override;
    procedure clear; override;
-   class procedure freeimageinfo(var ainfo: imagebufferinfoty);
-   procedure loadfromimagebuffer(const abuffer: imagebufferinfoty);
-   procedure savetoimagebuffer(out abuffer: imagebufferinfoty);
+//   class procedure freeimageinfo(var ainfo: maskedimagety);
+   procedure loadfrommaskedimage(const aimage: maskedimagety);
+   procedure savetomaskedimage(out aimage: maskedimagety);
+//   procedure loadfromimagebuffer(const abuffer: maskedimagety);
+//   procedure savetoimagebuffer(out abuffer: maskedimagety);
    function bitmap: tmaskedbitmap; //self if source = nil
    
    procedure releasehandle; override;
@@ -280,8 +283,6 @@ type
    procedure remask; //recalc mask
    procedure automask; //transparentcolor is bottomright pixel
 
-   procedure savetomaskedimage(out aimage: maskedimagety);
-   procedure loadfrommaskedimage(const aimage: maskedimagety);
    
    function loadfromstring(const avalue: string; const format: string;
                                                          //'' = any
@@ -597,10 +598,6 @@ type
    property pos: integer read fseekpos write setpos;
  end;
 
-procedure zeropad(var aimage: imagety);
-procedure freeimage(var aimage: imagety);
-procedure freeimage(var aimage: maskedimagety);
-
 implementation
 uses
  mseguiintf,msebits,msestream,mseevent,msesys,msearrayutils,msegraphicstream,
@@ -613,49 +610,6 @@ type
  twriter1 = class(twriter);
 type
  tbitmap1 = class(tbitmap);
-
-procedure zeropad(var aimage: imagety);
-var
- mask: longword;
- step: integer;
- po1: plongword;
- int1: integer;
-begin
- with aimage do begin         //todo: little/big endian
-  case kind of
-   bmk_mono: begin
-    mask:= bitmask[size.cx and $1f];
-   end;
-   bmk_gray: begin
-    case size.cx and $3 of
-     0: begin
-      mask:= 0;
-     end;
-     1: begin
-      mask:= $000000ff;
-     end;
-     2: begin
-      mask:= $0000ffff;
-     end;
-     3: begin
-      mask:= $00ffffff;
-     end;
-    end;
-   end
-   else begin
-    mask:= 0;
-   end;
-   if mask <> 0 then begin
-    step:= linelength;
-    po1:= @pixels[step-1];
-    for int1:= size.cy - 1 downto 0 do begin
-     po1^:= po1^ and mask;   //mask padding
-     inc(po1,step);
-    end; 
-   end;
-  end;
- end;
-end;
 
 procedure freeimage(var aimage: imagety);
 begin
@@ -1694,6 +1648,7 @@ begin
  inherited;
 end;
 
+{
 class procedure tmaskedbitmap.freeimageinfo(var ainfo: imagebufferinfoty);
 begin
  with ainfo do begin
@@ -1707,7 +1662,7 @@ begin
   end;
  end;
 end;
-
+}
 procedure tmaskedbitmap.freemask;
 begin
  freeandnil(fmask);
@@ -2071,7 +2026,7 @@ begin
  checkmask;
  change;
 end;
-
+{
 procedure tmaskedbitmap.savetomaskedimage(out aimage: maskedimagety);
 begin
  savetoimage(aimage.image);
@@ -2091,13 +2046,13 @@ begin
    createmask(aimage.mask.kind);
   end;
   fmask.loadfromimage(aimage.mask);
-  include(fstate,pms_maskvalid);
+//  include(fstate,pms_maskvalid);
  end
  else begin
   masked:= false;
  end;
 end;
-
+}
 procedure tmaskedbitmap.setmask(const Value: tbitmap);
 var
  ki1: bitmapkindty;
@@ -2725,15 +2680,15 @@ begin
  end;
 end;
 
-procedure tmaskedbitmap.loadfromimagebuffer(const abuffer: imagebufferinfoty);
+procedure tmaskedbitmap.loadfrommaskedimage(const aimage: maskedimagety);
 begin
- loadfromimage(abuffer.image);
- if abuffer.mask.pixels <> nil then begin
+ loadfromimage(aimage.image);
+ if aimage.mask.pixels <> nil then begin
   include(foptions,bmo_masked);
-  createmask(abuffer.mask.kind);
-  fmask.loadfromimage(abuffer.mask);
+  createmask(aimage.mask.kind);
+  fmask.loadfromimage(aimage.mask);
   foptions:= foptions - bmomaskkindoptions;
-  case abuffer.mask.kind of
+  case aimage.mask.kind of
    bmk_rgb: begin
     include(foptions,bmo_colormask);
    end;
@@ -2758,14 +2713,14 @@ begin
  end;  
 end;
 
-procedure tmaskedbitmap.savetoimagebuffer(out abuffer: imagebufferinfoty);
+procedure tmaskedbitmap.savetomaskedimage(out aimage: maskedimagety);
 begin
- savetoimage(abuffer.image);
+ savetoimage(aimage.image);
  if fmask <> nil then begin
-  fmask.savetoimage(abuffer.mask);
+  fmask.savetoimage(aimage.mask);
  end
  else begin
-  fillchar(abuffer.mask,sizeof(abuffer.mask),0);
+  fillchar(aimage.mask,sizeof(aimage.mask),0);
  end;
 end;
 

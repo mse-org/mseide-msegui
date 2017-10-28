@@ -1412,6 +1412,8 @@ procedure drawdottedlinesegments(const acanvas: tcanvas; const lines: segmentart
 procedure allocimage(out image: imagety; const asize: sizety;
                                              const akind: bitmapkindty);
 procedure freeimage(var image: imagety);
+procedure freeimage(var image: maskedimagety);
+procedure zeropad(var image: imagety);
 procedure checkimagebgr(var aimage: imagety; const bgr: boolean);
 procedure movealignment(const source: alignmentsty; var dest: alignmentsty);
 
@@ -1564,14 +1566,57 @@ end;
 
 procedure freeimage(var image: imagety);
 begin
- with image do begin
-  if pixels <> nil then begin
-   gui_freeimagemem(pixels);
-   pixels:= nil;
-   length:= 0;
-   linelength:= 0;
-   linebytes:= 0;
-   size:= nullsize;
+ if image.pixels <> nil then begin
+  gui_freeimagemem(image.pixels);
+  fillchar(image,sizeof(image),0);
+ end;
+end;
+
+procedure freeimage(var image: maskedimagety);
+begin
+ freeimage(image.image);
+ freeimage(image.mask);
+end;
+
+procedure zeropad(var image: imagety);
+var
+ mask: longword;
+ step: integer;
+ po1: plongword;
+ int1: integer;
+begin
+ with image do begin         //todo: little/big endian
+  case kind of
+   bmk_mono: begin
+    mask:= bitmask[size.cx and $1f];
+   end;
+   bmk_gray: begin
+    case size.cx and $3 of
+     0: begin
+      mask:= 0;
+     end;
+     1: begin
+      mask:= $000000ff;
+     end;
+     2: begin
+      mask:= $0000ffff;
+     end;
+     3: begin
+      mask:= $00ffffff;
+     end;
+    end;
+   end
+   else begin
+    mask:= 0;
+   end;
+   if mask <> 0 then begin
+    step:= linelength;
+    po1:= @pixels[step-1];
+    for int1:= size.cy - 1 downto 0 do begin
+     po1^:= po1^ and mask;   //mask padding
+     inc(po1,step);
+    end; 
+   end;
   end;
  end;
 end;
