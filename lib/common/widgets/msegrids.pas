@@ -10152,9 +10152,9 @@ begin
       int2:= rect1.y + rect1.cy;
       for int1:= startrow to high(fvisiblerows) do begin
        if prowstaterowheightty(
-               rowstate1.getitempo(fvisiblerows[int1]))^.rowheight.ypos >
+               rowstate1.getitempo(fvisiblerows[int1]))^.rowheight.ypos >=
                       int2 then begin
-        endrow:= int1;
+        endrow:= int1-1;
         break;
        end;
       end;

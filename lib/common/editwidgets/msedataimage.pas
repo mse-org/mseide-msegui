@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2014 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2017 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -61,7 +61,7 @@ type
   private
    fonchange: notifyeventty;
    fformat: string;
-   fgridsetting: integer;
+   fgridsettingx: integer;
    procedure checkgrid;
    function getgridvalue(index: integer): string;
    procedure setgridvalue(index: integer; const avalue: string);
@@ -69,7 +69,7 @@ type
    procedure writevalue(stream: tstream);
    function getcachesize: int32;
    procedure setcachesize(const avalue: int32);
-   function getvalue: string;
+//   function getvalue: string;
   protected
    fgridintf: iwidgetgrid;
    fgriddatalink: pointer;
@@ -139,9 +139,10 @@ type
    function loadfromstream(const astream: tstream): string;    //returns format
    function loadfromfile(const afilename: filenamety): string; //returns format
    procedure storeimage(const aformat: string; const params: array of const);
+                   //writes image data to value property
    procedure drawimage(const canvas: tcanvas; const cellinfo: pcellinfoty;
                                                            const dest: rectty);
-   property value: string read getvalue write setvalue stored false;
+   property value: string read fvalue{getvalue} write setvalue stored false;
    property gridvalue[index: integer]: string read getgridvalue
                              write setgridvalue; default;
    property format: string read fformat write setformat;
@@ -164,7 +165,7 @@ type
    
 implementation
 uses
- msestream,sysutils;
+ msestream,sysutils,mseformatstr;
 type
  tsimplebitmap1 = class(tsimplebitmap);
  tcustomwidgetgrid1 = class(tcustomwidgetgrid);
@@ -302,6 +303,40 @@ var
  int1: integer;
  str1: string;
 begin
+ if pointer(fvalue) <> pointer(avalue) then begin
+ {
+  if pointer(avalue) <> pointer(fvalue) then begin
+   fcache.delete(fvalue); 
+  end;
+ }
+  fvalue:= avalue;
+  try
+   fcurformat:= bitmap.loadfromstring(avalue,fformat,[]);
+  except
+   fcurformat:= '';
+   bitmap.clear;
+  end;
+  if (fgridintf <> nil) and not (csdesigning in componentstate) and 
+                                                  (fgridsettingx = 0) then begin
+   int1:= fgridintf.getrow();
+   fgridintf.getdata(int1,str1);
+   fgridintf.setdata(int1,avalue,false);
+   if pointer(avalue) <> pointer(str1) then begin
+    fcache.delete(str1); 
+   end;
+  end;
+ end;
+// if csdesigning in componentstate then begin
+//  fvalue:= avalue;
+// end;
+ changed;
+end;
+{
+procedure tcustomdataimage.setvalue(const avalue: string);
+var
+ int1: integer;
+ str1: string;
+begin
  if (fgridintf <> nil) and not (csdesigning in componentstate) then begin
   inc(fgridsetting);
   try
@@ -326,7 +361,7 @@ begin
   fcache.delete(str1); 
  end;
 end;
-
+}
 function tcustomdataimage.seteditfocus: boolean;
 begin
  if fgridintf = nil then begin
@@ -535,10 +570,17 @@ procedure tcustomdataimage.gridtovalue(row: integer);
 var
  str1: string;
 begin
- if fgridsetting = 0 then begin
-  fgridintf.getdata(row,str1);
-  value:= str1;
- end;
+// if fgridsetting = 0 then begin
+// if row <> -2 then begin //not default value
+  inc(fgridsettingx);
+  try
+   fgridintf.getdata(row,str1);
+   value:= str1;
+  finally
+   dec(fgridsettingx);
+  end;
+// end;
+// end;
 end;
 
 procedure tcustomdataimage.docellevent(const ownedcol: boolean;
@@ -695,11 +737,13 @@ begin
   fcache.clear;
  end;
 end;
-
+(*
 function tcustomdataimage.getvalue: string;
-var
- i1: int32;
+//var
+// i1: int32;
 begin
+ result:= fvalue;
+{
  result:= '';
  if fgridintf <> nil then begin
   i1:= fgridintf.getgrid.row;
@@ -707,8 +751,9 @@ begin
    result:= gridvalue[i1];
   end;
  end;
+}
 end;
-
+*)
 procedure tcustomdataimage.defineproperties(filer: tfiler);
 begin
  inherited;
