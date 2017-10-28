@@ -4779,7 +4779,13 @@ begin
     end;
    end;
   end;
- end; 
+ end
+ else begin
+  if (mode = bmwrite) and (field.fieldno-1 >= 0) and  // data field
+             (of_inupdate in field.optionsfield) then begin
+   include(fbstate1,bs1_inupdatechanged);
+  end;
+ end;
 end;
 
 function tmsebufdataset.getfieldblobid(const field: tfield;
