@@ -148,7 +148,7 @@ object disassfo: tdisassfo
     datarowheight = 16
     onscrollrows = scrollrows
     oncellevent = celleventexe
-    reffontheight = 14
+    reffontheight = 13
   end
   object popupmen: tpopupmenu
     onupdate = popupupdate

@@ -281,8 +281,8 @@ begin
 end;
 
 procedure tdbdataimage.setvalue(const avalue: string);
-var
- bufferbefore: string;
+//var
+// bufferbefore: string;
 begin
 // bufferbefore:= fvaluebuffer;
 // fvaluebuffer:= avalue;
