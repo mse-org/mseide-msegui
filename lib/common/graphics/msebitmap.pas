@@ -3213,6 +3213,7 @@ begin
  if (al_thumbnail in aalignment) and 
            ((source.cx > fsize.cx) or (source.cy > fsize.cy)) then begin
   include(aalignment,al_fit);
+  exclude(aalignment,al_thumbnail);
  end;
  rect2.pos:= indextoorg(index);
  rect2.size:= fsize;
