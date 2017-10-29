@@ -6966,7 +6966,8 @@ begin
  if (avalue.x <> fpos.x) or (avalue.y <> fpos.y) then begin
   if (fowner <> nil) then begin
    if hasimage() then begin
-    if (alignment*[al_stretchx,al_stretchy,al_tiled] = []) then begin
+    if (alignment*[al_stretchx,al_stretchy,
+                         al_tiled,al_fit,al_thumbnail] = []) then begin
      fowner.fintf.invalidaterect(mr(fpos,fsize),org_paint);
      fpos:= avalue;
      fowner.fintf.invalidaterect(mr(fpos,fsize),org_paint);

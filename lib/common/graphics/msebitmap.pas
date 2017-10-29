@@ -471,9 +471,8 @@ type
    procedure moveimage(const fromindex: integer; const toindex: integer;
                                                  const aversion: int32 = 0);
    procedure setimage(index: integer; image: tmaskedbitmap;
-         const source: rectty; 
-         const aalignment: alignmentsty = [];
-                         const aversion: int32 = 0); overload;
+         const source: rectty; aalignment: alignmentsty = [];
+                                          const aversion: int32 = 0);
    procedure setimage(index: integer; image: tmaskedbitmap; 
                                       //nil -> empty item
                      const aalignment: alignmentsty = [];
@@ -1332,7 +1331,8 @@ var
 begin
  newdest:= dest;
  newsource:= source;
- if al_fit in alignment then begin
+ if (al_fit in alignment) or (al_thumbnail in alignment) and 
+                     ((dest.cx < source.cx) or (dest.cy < source.cy)) then begin
   exit;
  end;
  int1:= 0;
@@ -3202,8 +3202,7 @@ begin
 end;
 
 procedure timagelist.setimage(index: integer; image: tmaskedbitmap;
-                      const source: rectty;
-                      const aalignment: alignmentsty = [];
+                      const source: rectty; aalignment: alignmentsty = [];
                          const aversion: int32 = 0);
 var
  rect1,rect2,destrect: rectty;
@@ -3211,6 +3210,10 @@ var
  ima1: tmaskedbitmap;
  bmp1: tmaskedbitmap;
 begin
+ if (al_thumbnail in aalignment) and 
+           ((source.cx > fsize.cx) or (source.cy > fsize.cy)) then begin
+  include(aalignment,al_fit);
+ end;
  rect2.pos:= indextoorg(index);
  rect2.size:= fsize;
  checkversionindex(aversion);

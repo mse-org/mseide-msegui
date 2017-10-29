@@ -927,7 +927,7 @@ type
               const adestrect: rectty; acopymode: rasteropty;
               atransparentcolor: colorty;
               amask: tsimplebitmap; const amaskpos: pointty;
-              const aalignment: alignmentsty; 
+              aalignment: alignmentsty; 
               //only al_stretchx, al_stretchy and al_tiled used
               const atileorigin: pointty;
               const aopacity: colorty); //cl_none -> opaque);
@@ -1495,41 +1495,13 @@ begin
 end;
 
 procedure movealignment(const source: alignmentsty; var dest: alignmentsty);
-{$ifndef FPC}
-const
- mask1: alignmentsty = [al_intpol,al_or,al_and];
- mask2: alignmentsty = [al_left,al_xcentered,al_right];
- mask3: alignmentsty = [al_top,al_ycentered,al_bottom];
- mask4: alignmentsty = [al_fit,al_tiled];
-{$endif}
 begin
- {$ifdef FPC}
  dest:= alignmentsty(setsinglebit(
                 longword(source),longword(dest),
                 [longword([al_intpol,al_or,al_and]),
                  longword([al_left,al_xcentered,al_right]),
                 longword([al_top,al_ycentered,al_bottom]),
-                longword([al_fit,al_tiled])]));
- {$else}
- dest:= alignmentsty(setsinglebitar16(word(source),word(dest),
-                    [word(mask1),word(mask2),word(mask3),word(mask4)]));
- {$endif}
-(*
-  value1:= alignmentsty(setsinglebit(
-                          {$ifdef FPC}longword{$else}word{$endif}(source),
-                          {$ifdef FPC}longword{$else}word{$endif}(dest),
-                          {$ifdef FPC}longword{$else}word{$endif}(mask1)));
-  value2:= alignmentsty(setsinglebit(
-                          {$ifdef FPC}longword{$else}word{$endif}(source),
-                          {$ifdef FPC}longword{$else}word{$endif}(dest),
-                          {$ifdef FPC}longword{$else}word{$endif}(mask2)));
-  value3:= alignmentsty(setsinglebit(
-                          {$ifdef FPC}longword{$else}word{$endif}(source),
-                          {$ifdef FPC}longword{$else}word{$endif}(dest),
-                          {$ifdef FPC}longword{$else}word{$endif}(mask3)));
-  dest:= (source - (mask1+mask2+mask3))+
-                              (value1*mask1)+(value2*mask2)+(value3*mask3);
-*)
+                longword([al_fit,al_thumbnail,al_tiled])]));
 end;
 
 procedure allocimage(out image: imagety; const asize: sizety;
@@ -4602,7 +4574,7 @@ procedure tcanvas.internalcopyarea(asource: tcanvas; const asourcerect: rectty;
                            atransparentcolor: colorty;
                            amask: tsimplebitmap;
                            const amaskpos: pointty;
-                           const aalignment: alignmentsty;
+                           aalignment: alignmentsty;
                            const atileorigin: pointty;
                            const aopacity: colorty); //cl_none -> opaque
 
@@ -4645,6 +4617,10 @@ begin
  if (asourcerect.cx <= 0) or (asourcerect.cy <= 0) or 
     (adestrect.cx <= 0) or (adestrect.cy <= 0) then begin //no div 0
   exit;
+ end;
+ if (al_thumbnail in aalignment) and ((asourcerect.cx > adestrect.cx) or
+          (asourcerect.cy > adestrect.cy)) then begin
+  include(aalignment,al_fit);
  end;
  checkgcstate([]);  //gc must be valid
  if asource <> self then begin
@@ -4729,29 +4705,6 @@ begin
    drect.cx:= srect.cx;
   end;
  end;
-{
- if aalignment * [al_stretchx,al_stretchy,al_fit,al_tiled] = [] then begin
-  if not msegraphutils.intersectrect(makerect(spoint,asourcerect.size),
-       makerect(makepoint(0,0),icanvas(asource.fintf).getsize),srect) then begin
-   exit;
-  end;
-  dpoint.x:= dpoint.x + srect.x - spoint.x;
-  dpoint.y:= dpoint.y + srect.y - spoint.y;
-  if not msegraphutils.intersectrect(makerect(dpoint,srect.size),
-               rect1,drect) then begin
-   exit;
-  end;
-  srect.x:= srect.x + drect.x - dpoint.x;
-  srect.cx:= drect.cx;
-  srect.y:= srect.y + drect.y - dpoint.y;
-  srect.cy:= drect.cy;
- end
- else begin
-  srect.pos:= spoint;
-  srect.size:= asourcerect.size;
-  drect.pos:= dpoint;
- end;
-}
  if amask <> nil then begin
   if al_nomaskscale in aalignment then begin
    if checkmaskrect(drect,srect) then begin
