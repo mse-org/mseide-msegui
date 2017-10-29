@@ -3429,15 +3429,29 @@ function tarraypropertyeditor.allequal: boolean;
 var
  int1: integer;
  int2: integer;
+ p1: tarrayprop;
 begin
  result:= inherited allequal;
  if not result then begin
   result:= true;
-  int2:= tarrayprop(getpointervalue).count;
-  for int1:= 1 to high(fprops) do begin
-   if int2 <> tarrayprop(getpointervalue(int1)).count then begin
-    result:= false;
-    break;
+  p1:= tarrayprop(getpointervalue);
+  if p1 <> nil then begin
+   int2:= p1.count;
+   for int1:= 1 to high(fprops) do begin
+    p1:= tarrayprop(getpointervalue(int1));
+    if (p1 = nil) or (int2 <> p1.count) then begin
+     result:= false;
+     break;
+    end;
+   end;
+  end
+  else begin
+   for int1:= 1 to high(fprops) do begin
+    p1:= tarrayprop(getpointervalue(int1));
+    if p1 <> nil then begin
+     result:= false;
+     break;
+    end;
    end;
   end;
  end;
