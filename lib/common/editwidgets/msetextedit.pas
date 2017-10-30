@@ -1273,9 +1273,9 @@ begin
  end;
 end;
 
-procedure tcustomtextedit.inserttext(const apos: gridcoordty; const atext: msestring;
-                 selected: boolean = false;
-                 insertbackwards: boolean = false);
+procedure tcustomtextedit.inserttext(const apos: gridcoordty;
+                 const atext: msestring; selected: boolean = false;
+                                           insertbackwards: boolean = false);
 var
  po1: gridcoordty;
 begin
