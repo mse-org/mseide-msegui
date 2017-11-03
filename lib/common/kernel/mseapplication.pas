@@ -348,10 +348,10 @@ type
    function unlock: boolean;
     //release mutex if calling thread holds the mutex,
     //false if no unlock done
-   function unlockall: integer;
+   function unlockall: integer virtual;
     //release mutex recursive if calling thread holds the mutex,
     //returns count for relockall
-   procedure relockall(count: integer);
+   procedure relockall(count: integer) virtual;
    procedure lockifnotmainthread;
    procedure unlockifnotmainthread;
 

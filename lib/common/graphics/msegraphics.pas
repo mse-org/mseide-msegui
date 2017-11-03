@@ -1367,6 +1367,8 @@ procedure initdefaultvalues(var avalue: edgecolorpairinfoty);
 procedure gdi_lock();
 procedure gdi_unlock();
 function gdi_locked(): boolean;
+function gdi_unlockall(): int32;
+procedure gdi_relockall(const acount: int32);
 
 procedure gdi_call(const func: gdifuncty; var drawinfo: drawinfoty;
                                    gdi: pgdifunctionaty = nil);
@@ -1427,7 +1429,7 @@ procedure checkgdiunlocked;
 implementation
 uses
  SysUtils,msegui,mseguiintf,msestreaming,mseformatstr,msestockobjects,
- msearrayutils,mselist,msebits,msewidgets,
+ msearrayutils,mselist,msebits,msewidgets,msesystypes,
  msesysintf1,msesysintf,msesysutils,msefont;
 
 type
@@ -1436,6 +1438,7 @@ type
 
 var
  gdilockcount: integer;
+ gdilockthread: threadty;
 
 procedure initdefaultvalues(var avalue: edgecolorinfoty);
 begin
@@ -1643,6 +1646,7 @@ end;
 procedure gdi_lock();
 begin
  application.lock();
+ gdilockthread:= sys_getcurrentthread();
  if (gdilockcount = 0) and not application.ismainthread then begin
   gui_disconnectmaineventqueue();
  end;
@@ -1652,6 +1656,9 @@ end;
 procedure gdi_unlock();
 begin
  dec(gdilockcount);
+ if gdilockcount = 0 then begin
+  gdilockthread:= 0;
+ end;
  if (gdilockcount = 0) and not application.ismainthread then begin
   gui_connectmaineventqueue();
  end;
@@ -1661,6 +1668,30 @@ end;
 function gdi_locked(): boolean;
 begin
  result:= (gdilockcount > 0) or application.islockedmainthread();
+end;
+
+function gdi_unlockall(): int32;
+begin
+ if gdilockthread = sys_getcurrentthread() then begin
+  result:= gdilockcount;
+  if result > 1 then begin
+   gdilockcount:= 1;
+  end;
+  if result > 0 then begin
+   gdi_unlock();
+  end;
+ end
+ else begin
+  result:= 0;
+ end;
+end;
+
+procedure gdi_relockall(const acount: int32);
+begin
+ if acount > 0 then begin
+  gdi_lock();
+  gdilockcount:= gdilockcount + acount - 1;
+ end;
 end;
 
 procedure gdi_call(const func: gdifuncty; var drawinfo: drawinfoty;

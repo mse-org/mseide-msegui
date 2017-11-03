@@ -2898,6 +2898,8 @@ type
    function idle: boolean; override;
    function modallevel: integer; override;
 
+   function unlockall: integer override;
+   procedure relockall(count: integer) override;
    procedure beginnoignorewaitevents;   
    procedure endnoignorewaitevents;   
    procedure beginwait(const aprocessmessages: boolean = false); override;
@@ -21568,6 +21570,21 @@ begin
    result:= fcurrmodalinfo^.level;
   end;
  end;
+end;
+
+threadvar
+ gdilocks: int32;
+ 
+function tguiapplication.unlockall: integer;
+begin
+ gdilocks:= gdilocks + gdi_unlockall();
+ inherited;
+end;
+
+procedure tguiapplication.relockall(count: integer);
+begin
+ inherited;
+ gdi_relockall(gdilocks);
 end;
 
 procedure tguiapplication.objecteventdestroyed(const sender: tobjectevent);
