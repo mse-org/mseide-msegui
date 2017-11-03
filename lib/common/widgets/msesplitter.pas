@@ -393,13 +393,13 @@ type
                                      write setplace_options default [];
    property taborderoverride: ttaborderoverride read ftaborderoverride 
                                                   write settaborderoverride;
-   property optionswidget default defaultgroupboxoptionswidget;
    property onbeforelayout: layoutereventty read fonbeforelayout 
                                                     write fonbeforelayout;
    property onafterlayout: layoutereventty read fonafterlayout 
                                                     write fonafterlayout;
   published
    property visible default true;
+   property optionswidget default defaultgroupboxoptionswidget;
  end;
 
  tlayouter = class(tcustomlayouter)
