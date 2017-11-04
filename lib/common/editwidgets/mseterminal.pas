@@ -624,7 +624,9 @@ begin
    mstr1:= avalue;
   end;
   datalist.addchars(mstr1,[aco_processeditchars],fmaxchars);
-  updateeditpos;
+  if window.haswinid then begin //possible deadlock by synchronize() otherwise
+   updateeditpos;
+  end;
  end;
 end;
 
