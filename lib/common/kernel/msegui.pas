@@ -2969,6 +2969,10 @@ type
                           //nil -> virtualscreeen
    function workarea(const awindow: twindow = nil): rectty;
                           //nil -> current active window
+   function ppmm(const awindow: twindow = nil): complexty;
+         //nil -> current active window, pixel per mm,
+         //result.re -> horizontal
+         //result.im -> vertical
    property activewindow: twindow read factivewindow;
    property lastactivewindow: twindow read flastactivewindow;
    property inactivewindow: twindow read finactivewindow;
@@ -20514,6 +20518,22 @@ begin
   id:= awindow.winid;
  end;
  result:= gui_getworkarea(id);
+end;
+
+function tguiapplication.ppmm(const awindow: twindow = nil): complexty;
+var
+ id: winidty;
+begin
+ id:= 0;
+ if awindow = nil then begin
+  if factivewindow <> nil then begin
+   id:= factivewindow.winid;   
+  end;
+ end
+ else begin
+  id:= awindow.winid;
+ end;
+ gui_getppmm(id,result.re,result.im);
 end;
 
 function tguiapplication.normalactivewindow: twindow;

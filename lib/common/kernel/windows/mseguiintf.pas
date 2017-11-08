@@ -3080,6 +3080,12 @@ begin
  end;
 end;
 
+procedure gui_getppmm(id: winidty; out appmmwidth,appmmheight: flo64);
+                                           //0.0 if not supported
+begin
+ appmmwidth:= 0;
+ appmmheight:= 0;
+end;
 
 const
  NIF_MESSAGE = $00000001;

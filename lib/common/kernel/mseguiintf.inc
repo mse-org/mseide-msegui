@@ -92,8 +92,10 @@ function gui_getwindowpos(id: winidty; out pos: pointty): guierrorty;
 function gui_getwindowsize(id: winidty): windowsizety;
 function gui_getwindowdesktop(const id: winidty): integer;
 function gui_windowvisible(id: winidty): boolean;
-function gui_setwindowstate(id: winidty; size: windowsizety; visible: boolean): guierrorty;
-function gui_setwindowcaption(id: winidty; const caption: msestring): guierrorty;
+function gui_setwindowstate(id: winidty; size: windowsizety;
+                                           visible: boolean): guierrorty;
+function gui_setwindowcaption(id: winidty; 
+                                   const caption: msestring): guierrorty;
 function gui_setwindowicon(id: winidty; const icon,mask: pixmapty): guierrorty;
             
 function gui_setsizeconstraints(id: winidty; const min,max: sizety): guierrorty;
@@ -119,6 +121,9 @@ function gui_movewindowrect(id: winidty; const dist: pointty;
 function gui_windowatpos(const pos: pointty): winidty;
 function gui_getscreenrect(const id: winidty): rectty; //0 -> virtual screen
 function gui_getworkarea(id: winidty): rectty;
+procedure gui_getppmm(id: winidty; out appmmwidth,appmmheight: flo64);
+                                           //0.0 if not supported
+
 function gui_setapplicationicon(const icon,mask: pixmapty): guierrorty;
 function gui_pidtowinid(const pids: procidarty): winidty;
 

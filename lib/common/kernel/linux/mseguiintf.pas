@@ -2427,8 +2427,15 @@ begin
  gdi_unlock;
 end;
 
+type
+ screeninfoty = record
+  rect: rectty;
+  ppmmwidth,ppmmheight: flo64;
+ end;
+ screeninfoarty = array of screeninfoty;
+ 
 var
- screenrects: rectarty;
+ screenrects: screeninfoarty;
  screenrectsvalid: boolean;
 
 procedure updatescreenrects();
@@ -2458,11 +2465,25 @@ begin
       po3:= crtcs[int2];
       if po3 <> nil then begin
        with screenrects[rectnum] do begin
-        x:= po3^.x;
-        y:= po3^.y;
-        cx:= po3^.width;
-        cy:= po3^.height;
-        inc(rectnum);
+        with rect do begin
+         x:= po3^.x;
+         y:= po3^.y;
+         cx:= po3^.width;
+         cy:= po3^.height;
+         inc(rectnum);
+        end;
+        if po2^.mm_width > 0 then begin
+         ppmmwidth:= po3^.width / po2^.mm_width;
+        end
+        else begin
+         ppmmwidth:= 0;
+        end;
+        if po2^.mm_height > 0 then begin
+         ppmmheight:= po3^.height / po2^.mm_height;
+        end
+        else begin
+         ppmmheight:= 0;
+        end;
        end;
       end;
      end;
@@ -2492,16 +2513,51 @@ begin
  end;
 end;
 
-function gui_getworkarea(id: winidty): rectty;
+function getscreenrectindex(id: winidty): int32;
 var
- bo1: boolean;
+ i1: int32;
  rect1: rectty;
  pt1: pointty;
- int1,int2: integer;
 label
  endlab;
 begin
- int2:= 0;
+ result:= -1;
+ checkscreenrects();
+ if screenrects <> nil then begin
+  if id = 0 then begin
+   id:= rootid;
+  end;
+  if gui_getdecoratedwindowrect(id,rect1) = gue_ok then begin
+   for i1:= 0 to high(screenrects) do begin
+    if rectinrect(rect1,screenrects[i1].rect) then begin
+     result:= i1;
+     goto endlab;
+    end;
+   end;
+   pt1.x:= rect1.x + rect1.cx div 2;
+   pt1.y:= rect1.y + rect1.cy div 2;
+   for i1:= 0 to high(screenrects) do begin
+    if pointinrect(pt1,screenrects[i1].rect) then begin
+     result:= i1;
+     goto endlab;
+    end;
+   end;
+  end;
+  for i1:= 0 to high(screenrects) do begin
+   if testintersectrect(rect1,screenrects[i1].rect) then begin
+    result:= i1;
+    goto endlab;
+   end;
+  end;
+ end;
+endlab:
+end;
+
+function gui_getworkarea(id: winidty): rectty;
+var
+ i1: int32;
+ bo1: boolean;
+begin
  gdi_lock;
  bo1:= false;
  if netsupported then begin
@@ -2511,40 +2567,41 @@ begin
  if not bo1 then begin
   result:= gui_getscreenrect(id);
  end;
- checkscreenrects();
- if screenrects <> nil then begin
-  if id = 0 then begin
-   id:= rootid;
-  end;
-  if gui_getdecoratedwindowrect(id,rect1) = gue_ok then begin
-   int2:= -1;
-   for int1:= 0 to high(screenrects) do begin
-    if rectinrect(rect1,screenrects[int1]) then begin
-     int2:= int1;
-     goto endlab;
-    end;
-   end;
-   pt1.x:= rect1.x + rect1.cx div 2;
-   pt1.y:= rect1.y + rect1.cy div 2;
-   for int1:= 0 to high(screenrects) do begin
-    if pointinrect(pt1,screenrects[int1]) then begin
-     int2:= int1;
-     goto endlab;
-    end;
-   end;
-  end;
-  for int1:= 0 to high(screenrects) do begin
-   if testintersectrect(rect1,screenrects[int1]) then begin
-    int2:= int1;
-    goto endlab;
-   end;
-  end;
-endlab: 
-  if int2 >= 0 then begin
-   result:= intersectrect(result,screenrects[int1]);
-  end;
+ i1:= getscreenrectindex(id);
+ if i1 >= 0 then begin
+  result:= intersectrect(result,screenrects[i1].rect);
  end;
  gdi_unlock;
+end;
+
+procedure gui_getppmm(id: winidty; out appmmwidth,appmmheight: flo64);
+                                           //0.0 if not supported
+var
+ i1: int32;
+begin
+ i1:= getscreenrectindex(id);
+ appmmwidth:= 0;
+ appmmheight:= 0;
+ if i1 >= 0 then begin
+  with screenrects[i1] do begin
+   appmmwidth:= ppmmwidth;
+   appmmheight:= ppmmheight;
+  end;
+ end;
+ if appmmwidth = 0 then begin
+  with defscreen^ do begin
+   if mwidth > 0 then begin
+    appmmwidth:= width / mwidth;
+   end;
+  end;
+ end;
+ if appmmheight = 0 then begin
+  with defscreen^ do begin
+   if mheight > 0 then begin
+    appmmheight:= height / mheight;
+   end;
+  end;
+ end;
 end;
 
 function getwindowframe(id: winidty): framety;
