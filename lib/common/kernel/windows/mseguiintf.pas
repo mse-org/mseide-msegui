@@ -3082,9 +3082,17 @@ end;
 
 procedure gui_getppmm(id: winidty; out appmmwidth,appmmheight: flo64);
                                            //0.0 if not supported
+var
+ dc: hdc;
 begin
  appmmwidth:= 0;
  appmmheight:= 0;
+ dc:= getdc(id);
+ if dc <> 0 then begin
+  appmmwidth:= getdevicecaps(dc,logpixelsx) / 25.4;
+  appmmheight:= getdevicecaps(dc,logpixelsy) / 25.4;
+  releasedc(id,dc);
+ end; 
 end;
 
 const
