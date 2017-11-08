@@ -2416,17 +2416,6 @@ begin
  gdi_unlock;
 end;
 
-function gui_getscreenrect(const id: winidty): rectty; //0 -> virtual screen
-begin
- gdi_lock;
- result.pos:= nullpoint; //todo: multimonitor
-{$ifdef FPC} {$checkpointer off} {$endif}
- result.cx:= defscreen^.width;
- result.cy:= defscreen^ .height;
-{$ifdef FPC} {$checkpointer default} {$endif}
- gdi_unlock;
-end;
-
 type
  screeninfoty = record
   rect: rectty;
@@ -2553,6 +2542,27 @@ begin
 endlab:
 end;
 
+function gui_getscreenrect(const id: winidty): rectty; //0 -> virtual screen
+var
+ i1: int32;
+begin
+ gdi_lock;
+ if id <> 0 then begin
+  i1:= getscreenrectindex(id);
+  if i1 >= 0 then begin
+   result:= screenrects[i1].rect;
+   exit;
+  end;
+ end;
+ result.pos:= nullpoint;
+{$ifdef FPC} {$checkpointer off} {$endif}
+ result.cx:= defscreen^.width;
+ result.cy:= defscreen^ .height;
+{$ifdef FPC} {$checkpointer default} {$endif}
+ gdi_unlock;
+end;
+
+
 function gui_getworkarea(id: winidty): rectty;
 var
  i1: int32;
@@ -2579,6 +2589,7 @@ procedure gui_getppmm(id: winidty; out appmmwidth,appmmheight: flo64);
 var
  i1: int32;
 begin
+ gdi_lock();
  i1:= getscreenrectindex(id);
  appmmwidth:= 0;
  appmmheight:= 0;
@@ -2602,6 +2613,7 @@ begin
    end;
   end;
  end;
+ gdi_unlock();
 end;
 
 function getwindowframe(id: winidty): framety;

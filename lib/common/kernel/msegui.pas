@@ -20501,6 +20501,9 @@ var
  id: winidty;
 begin
  id:= 0;
+ if awindow <> nil then begin
+  id:= awindow.winid;
+ end;
  result:= gui_getscreenrect(id);
 end;
 
