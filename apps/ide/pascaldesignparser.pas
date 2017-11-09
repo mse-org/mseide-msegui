@@ -1,4 +1,4 @@
-{ MSEide Copyright (c) 1999-2016 by Martin Schreiber
+{ MSEide Copyright (c) 1999-2017 by Martin Schreiber
    
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -59,7 +59,7 @@ type
                  const atext: string); overload;
     procedure parse; override;
     function dogetincludefile(const afilename: filenamety;
-                     const astatementstart,astatementend: sourceposty): tscanner; override;
+          const astatementstart,astatementend: sourceposty): tscanner override;
     function parseprocedureheader(atoken: pascalidentty;
                    procedureinfopo: pprocedureinfoty): boolean;
   end;
@@ -68,7 +68,8 @@ function findclassinfobyinstance(const ainstance: tmsecomponent;
                                  const infopo: punitinfoty): pclassinfoty;
 function isemptysourcepos(const apos: sourceposty): boolean;
 function isinrowrange(const apos,startpos,endpos: sourceposty): boolean;
-procedure parsepascaldef(const adef: pdefinfoty; out atext: string; out scope: tdeflist);
+procedure parsepascaldef(const adef: pdefinfoty; out atext: string;
+                                                           out scope: tdeflist);
 
 implementation
 uses
@@ -77,7 +78,8 @@ type
  tdeflist1 = class(tdeflist);
  tusesinfolist1 = class(tusesinfolist);
  
-procedure parsepascaldef(const adef: pdefinfoty; out atext: string; out scope: tdeflist);
+procedure parsepascaldef(const adef: pdefinfoty; out atext: string;
+                                                           out scope: tdeflist);
 var
  parser: tpascalparser;
 
@@ -394,56 +396,63 @@ begin
  else begin
   if checkoperator('(') then begin
    include(aflags,mef_brackets);
-   while not eof do begin
-    defaultstr:= '';
-    int1:= getident;
-    case pascalidentty(int1) of
-     pid_const: paraflags:= [pfconst];
-     pid_var: paraflags:= [pfvar];
-     pid_out: paraflags:= [pfout];
-     else paraflags:= [];
-    end;
-    if (paraflags = []) and (int1 >= 0) then begin
-     break;
-    end;
+   if checkoperator(')') then begin
     apos:= sourcepos;
-    ar1:= lstringartostringar(getorignamelist);
-    if not checkoperator(':') then begin
-     epos:= sourcepos;
-     putparams(''); //untyped
-    end
-    else begin
-     if checkident(ord(pid_array)) then begin
-      include(paraflags,pfarray);
-      checkident(ord(pid_of));
-      if checkident(ord(pid_const)) then begin
-       str1:= 'TVarRec';
+    result:= true; //no params
+   end
+   else begin
+    while not eof do begin
+     defaultstr:= '';
+     int1:= getident;
+     case pascalidentty(int1) of
+      pid_const: paraflags:= [pfconst];
+      pid_var: paraflags:= [pfvar];
+      pid_out: paraflags:= [pfout];
+      else paraflags:= [];
+     end;
+     if (paraflags = []) and (int1 >= 0) then begin
+      break;
+     end;
+     apos:= sourcepos;
+     ar1:= lstringartostringar(getorignamelist);
+     if not checkoperator(':') then begin
+      epos:= sourcepos;
+      putparams(''); //untyped
+     end
+     else begin
+      if checkident(ord(pid_array)) then begin
+       include(paraflags,pfarray);
+       checkident(ord(pid_of));
+       if checkident(ord(pid_const)) then begin
+        str1:= 'TVarRec';
+       end
+       else begin
+        str1:= getorigname;
+       end;
       end
       else begin
        str1:= getorigname;
       end;
-     end
-     else begin
-      str1:= getorigname;
+      if str1 = '' then begin
+       break;
+      end;
+      if checkoperator('=') then begin
+       skipwhitespace;
+       po1:= fto^.value.po;
+       skipexpression;
+       defaultstr:= getorigtext(po1);
+      end;
+      epos:= sourcepos;
+      putparams(str1);
      end;
-     if str1 = '' then begin
+     if checkoperator(')') then begin
+      apos:= sourcepos;
+      result:= true;
       break;
      end;
-     if checkoperator('=') then begin
-      skipwhitespace;
-      po1:= fto^.value.po;
-      skipexpression;
-      defaultstr:= getorigtext(po1);
+     if not checkoperator(';') then begin
+      break;
      end;
-     epos:= sourcepos;
-     putparams(str1);
-    end;
-    if checkoperator(')') then begin
-     result:= true;
-     break;
-    end;
-    if not checkoperator(';') then begin
-     break;
     end;
    end;
   end
