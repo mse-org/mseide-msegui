@@ -465,6 +465,8 @@ begin
     if checkoperator(':') then begin
      setlength(params,length(params)+1);
      with params[high(params)] do begin
+      name:= 'result';
+      flags:= [pfvar];
       typename:= getorigname;
       start:= apos;
       stop:= sourcepos;
