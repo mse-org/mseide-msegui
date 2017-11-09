@@ -2545,13 +2545,15 @@ end;
 function gui_getscreenrect(const id: winidty): rectty; //0 -> virtual screen
 var
  i1: int32;
+label
+ endlab;
 begin
- gdi_lock;
+ gdi_lock();
  if id <> 0 then begin
   i1:= getscreenrectindex(id);
   if i1 >= 0 then begin
    result:= screenrects[i1].rect;
-   exit;
+   goto endlab;
   end;
  end;
  result.pos:= nullpoint;
@@ -2559,7 +2561,8 @@ begin
  result.cx:= defscreen^.width;
  result.cy:= defscreen^ .height;
 {$ifdef FPC} {$checkpointer default} {$endif}
- gdi_unlock;
+endlab:
+ gdi_unlock();
 end;
 
 
@@ -5776,7 +5779,7 @@ begin
   pthread_sigmask(sig_block,@allsig,@sig1); //block signals
   if not timerevent and not terminated and not childevent then begin
    repeat
-    if not application.unlock then begin
+    if not application.unlock() then begin
      guierror(gue_notlocked);
     end;
     

@@ -1658,9 +1658,9 @@ begin
  dec(gdilockcount);
  if gdilockcount = 0 then begin
   gdilockthread:= 0;
- end;
- if (gdilockcount = 0) and not application.ismainthread then begin
-  gui_connectmaineventqueue();
+  if not application.ismainthread then begin
+   gui_connectmaineventqueue();
+  end;
  end;
  application.unlock();
 end;
