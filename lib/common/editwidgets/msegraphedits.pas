@@ -932,6 +932,7 @@ type
    procedure gridtovalue(arow: integer); override;
    
    procedure setcolor(const avalue: colorty); override;
+   procedure objectchanged(const sender: tobject); override;
 
     //iactionlink
    function getactioninfopo: pactioninfoty;
@@ -4472,6 +4473,16 @@ begin
   inherited;      //no actionchanged
  end;
  setactioncolor(iactionlink(self),avalue);
+end;
+
+procedure tcustomdatabutton.objectchanged(const sender: tobject);
+var
+ i1: int32;
+begin
+ inherited;
+ for i1:= 0 to high(fvaluefaces.fitems) do begin
+  tcustomface(fvaluefaces.fitems[i1]).checktemplate(sender);
+ end;
 end;
 
 procedure tcustomdatabutton.doupdate;
