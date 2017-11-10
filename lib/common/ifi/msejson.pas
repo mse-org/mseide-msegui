@@ -273,7 +273,7 @@ function jsonencode(const avalue: jsonvaluety; const adest: tstream): syserrorty
   if error = sye_ok then begin
    error:= adest.trywritebuffer(pointer(atext)^,length(atext));
   end;
- end; //put
+ end;//put
  
  procedure putvalue(const avalue: jsonvaluety);
  var
@@ -343,7 +343,7 @@ function jsonencode(const avalue: jsonvaluety; const adest: tstream): syserrorty
     end;
    end;
   end;
- end; //putvalue
+ end;//putvalue
 
 begin
  error:= sye_ok;
@@ -366,7 +366,7 @@ var
     inc(pc);
    end;
   end;
- end; //skipwhitespace
+ end;//skipwhitespace
 
  function getstring: msestring;
  var
@@ -389,10 +389,16 @@ var
     end;
     move(pointer(mstr1)^,(pmsechar(pointer(result))+i1)^,
                                            length(mstr1)*sizeof(msechar));
+   end
+   else begin
+    if len >= capacity then begin //at least one character reserve
+     capacity:= 2*len+32;
+     setlength(result,capacity);
+    end;
    end;
-  end; //put
+  end;//put
 
- begin //getstring
+ begin//getstring
   po1:= pc;
   pe1:= pe;
   result:= '';
@@ -437,7 +443,7 @@ var
    error:= true;
   end;
   setlength(result,len);
- end; //getstring
+ end;//getstring
 
  procedure getobj(var avalue: jsonvaluety); forward;
  procedure getarray(var avalue: jsonvaluety); forward;
@@ -525,7 +531,7 @@ var
     end;
    end;
   end;
- end; //getvalue
+ end;//getvalue
  
  procedure getarray(var avalue: jsonvaluety);
  var
@@ -555,7 +561,7 @@ var
   setlength(ar1,count);
   arrayaddref(ar1);
   avalue.ar:= pointer(ar1);
- end; //getarray
+ end;//getarray
   
  procedure getobj(var avalue: jsonvaluety);
  var
@@ -593,7 +599,7 @@ var
   setlength(ar1,count);
   arrayaddref(ar1);
   avalue.obj:= pointer(ar1);
- end; //getobj
+ end;//getobj
  
 begin
  error:= false;
@@ -631,7 +637,7 @@ var
   if raiseexception then begin
    nameserror(copy(opentodynarraym(names),0,i1+1));
   end;
- end; //nameerror
+ end;//nameerror
  
 begin
  pv:= @avalue;
@@ -655,8 +661,8 @@ begin
     break;
    end;
   end;
-  result:= pv;
  end;
+ result:= pv;
 end;
 
 function jsonfindvaluevalue(const avalue: jsonvaluety;
