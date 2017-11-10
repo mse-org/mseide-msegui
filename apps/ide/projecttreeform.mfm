@@ -65,10 +65,10 @@ object projecttreefo: tprojecttreefo
         widgetname = 'edit'
         dataclass = titemeditlist
       end>
-    datarowheight = 15
+    datarowheight = 17
     statfile = mainfo.projectstatfile
     oncellevent = gridcellevent
-    reffontheight = 14
+    reffontheight = 16
     object projectedit: ttreeitemedit
       optionswidget1 = [ow1_autoheight]
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
@@ -83,7 +83,7 @@ object projecttreefo: tprojecttreefo
       bounds_x = 0
       bounds_y = 0
       bounds_cx = 141
-      bounds_cy = 16
+      bounds_cy = 18
       optionsedit1 = []
       optionsedit = [oe_readonly, oe_undoonesc, oe_checkmrcancel, oe_exitoncursor, oe_hintclippedtext, oe_locate]
       onchange = projecteditonchange
@@ -94,6 +94,7 @@ object projecttreefo: tprojecttreefo
       oncheckrowmove = itemoncheckrowmove
     end
     object edit: trecordfieldedit
+      optionswidget1 = [ow1_fontglyphheight]
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
       color = -1879048185
       frame.levelo = 0
@@ -119,7 +120,7 @@ object projecttreefo: tprojecttreefo
       bounds_x = 142
       bounds_y = 0
       bounds_cx = 129
-      bounds_cy = 15
+      bounds_cy = 17
       optionsedit1 = []
       optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_hintclippedtext]
       textflags = [tf_ycentered, tf_clipo, tf_noselect, tf_ellipseleft]
@@ -128,7 +129,7 @@ object projecttreefo: tprojecttreefo
       dropdown.cols.items = <      
         item
         end>
-      reffontheight = 14
+      reffontheight = 16
     end
   end
   object unitpopup: tpopupmenu
