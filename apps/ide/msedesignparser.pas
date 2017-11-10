@@ -104,7 +104,8 @@ type
   paraminfoarty = array of paraminfoty;
   
   methodflagty = (mef_virtual,mef_abstract,mef_inherited,mef_override,
-                        mef_reintroduce,mef_overload{,mef_inline},mef_brackets);
+                        mef_reintroduce,mef_overload{,mef_inline},
+                        mef_brackets,mef_forward);
   methodflagsty = set of methodflagty;
   
   methodparaminfoty = record

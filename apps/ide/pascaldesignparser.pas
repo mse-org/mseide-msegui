@@ -1145,7 +1145,6 @@ var
  procedure parseprocedure(const akind: tmethodkind);
  var
   classname,procname: lstringty;
-  pos1: sourceposty;
   po1: pclassinfoty;
   po2: pprocedureinfoty;
   po3: pdefinfoty;
@@ -1164,11 +1163,17 @@ var
      name:= lstringtostring(lstr1);
      uppername:= lstringtostring(procname);
     end;
-   end;
+   end;//setprocinfo
  var
+  pos1,pos2: sourceposty;
   i1: int32;
+  isforward: boolean;
+  kind1: symbolkindty;
+ label
+  endlab;
  begin
   if procnestinglevel < 32 then begin
+   isforward:= false;
    classname.po:= nil;
    classname.len:= 0;
    inc(procnestinglevel);
@@ -1188,6 +1193,7 @@ var
      po1:= nil;
     end;
     methodinfo.kind:= akind;
+    methodinfo.flags:= [];
     if parseprocparams(akind,methodinfo.flags,
                             methodinfo.params,classname.po <> nil) then begin
      if po1 <> nil then begin //class or object
@@ -1209,15 +1215,30 @@ var
       deflist1.fparentscope:= po1^.deflist;
      end
      else begin
-      po2:= funitinfopo^.p.procedurelist.finditembyuppername(
+      pos2:= sourcepos;
+      if checkident(ord(pid_forward)) then begin
+       include(methodinfo.flags,mef_forward);
+       isforward:= true;
+       checkoperator(';');
+       skipwhitespaceonly();
+       pos2:= sourcepos;
+      end;
+      po2:= nil;
+      if not isforward then begin
+       po2:= funitinfopo^.p.procedurelist.finditembyuppername(
                                               procname,methodinfo,false);
+      end;
       if po2 = nil then begin
        po2:= funitinfopo^.p.procedurelist.newitem;
        setprocinfo(po2)
       end;
+      kind1:= syk_procimp;
+      if isforward then begin
+       kind1:= syk_procdef;
+      end;
       po3:= funitinfopo^.deflist.beginnode(
                 lstringtostring(procname)+mangleprocparams(methodinfo),
-                syk_procimp,pos1,sourcepos);
+                kind1,pos1,pos2);
       deflist1:= tdeflist1(po3^.deflist);
       po3^.procindex:= po2^.b.index;
       po2:= nil;
@@ -1225,14 +1246,19 @@ var
      if po2 <> nil then begin
       po3^.procindex:= po2^.b.index;
       po2^.impheaderstartpos:= pos1;
-      po2^.impheaderendpos:= sourcepos;
+      po2^.impheaderendpos:= pos2;
      end;
-     for i1:= 0 to high(methodinfo.params) do begin
-      with methodinfo.params[i1] do begin
-       funitinfopo^.deflist.add(name,syk_pardef,start,stop);
+     if not isforward then begin
+      for i1:= 0 to high(methodinfo.params) do begin
+       with methodinfo.params[i1] do begin
+        funitinfopo^.deflist.add(name,syk_pardef,start,stop);
+       end;
       end;
      end;
-
+     if isforward then begin
+      funitinfopo^.deflist.endnode(pos2);
+      goto endlab;
+     end;
      while not eof do begin
       if getident(aident) then begin
        case pascalidentty(aident) of
@@ -1279,6 +1305,7 @@ var
      end;
     end;
    end;
+ endlab:
    dec(procnestinglevel);
   end;
  end;
