@@ -280,7 +280,7 @@ begin
  result:= '';
  ar1:= nil; //compiler warning
  if aformatlabel = '' then begin
-  found:= true;
+  found:= high(formats) >= 0;
   for int1:= 0 to high(formats) do begin
    with formats[int1] do begin
     if assigned(readproc) then begin
