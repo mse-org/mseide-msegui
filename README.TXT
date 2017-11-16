@@ -285,7 +285,7 @@ If you wish to do it from scratch:
   a file named 'regcomponents.inc'.
 - Build the IDE with -dmorecomponents as option.
 
-If you want add custom icons to your components:
+If you want to add custom icons to your components:
 
 - Convert 24*24 pixel BMP or PNG files with tools/bmp2pas to
   an icon unit ('*_bmp.pas').
