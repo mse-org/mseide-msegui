@@ -5580,7 +5580,7 @@ var
 begin
  rea1:= gettextvalue(accept,quiet);
  if accept then begin
-  str1:= realtytostr(rea1,fformatedit);
+  str1:= realtytostring(rea1,fformatedit);
   if trystrtorealty(str1,rea2) then begin //round to editformat
    rea1:= rea2;
   end;

@@ -1284,8 +1284,8 @@ begin
  end
  else begin
   with tlookuplbdispfielddatalink(fdatalink) do begin
-   fvalue:= reapplyrange(flookupbuffer.floatvaluephys(flookupvaluefieldno,aindex),
-                           valuerange,valuestart);
+   fvalue:= reapplyrange(flookupbuffer.floatvaluephys(
+                             flookupvaluefieldno,aindex),valuerange,valuestart);
   end;
  end;
 end;
@@ -1293,8 +1293,8 @@ end;
 function tdbreallookuplb.lookuptext(const aindex: integer): msestring;
 begin
  with tlookuplbdispfielddatalink(fdatalink) do begin
-  result:= realtytostr(flookupbuffer.floatvaluephys(flookupvaluefieldno,aindex),
-                                                   fformat);
+  result:= realtytostring(flookupbuffer.floatvaluephys(
+                                         flookupvaluefieldno,aindex),fformat);
  end;
 end;
 
@@ -1355,7 +1355,7 @@ end;
 function tdbreallookupdb.lookuptext(const abm: bookmarkdataty): msestring;
 begin
  with tlookupdbdispfielddatalink(fdatalink) do begin
-  result:= realtytostr(getfloatlookupvalue(abm),fformat);
+  result:= realtytostring(getfloatlookupvalue(abm),fformat);
  end;
 end;
 
@@ -1405,7 +1405,7 @@ end;
 function tdbreallookup64db.lookuptext(const abm: bookmarkdataty): msestring;
 begin
  with tlookupdbdispfielddatalink(fdatalink) do begin
-  result:= realtytostr(getfloatlookupvalue(abm),fformat);
+  result:= realtytostring(getfloatlookupvalue(abm),fformat);
  end;
 end;
 
@@ -1455,7 +1455,7 @@ end;
 function tdbreallookupstrdb.lookuptext(const abm: bookmarkdataty): msestring;
 begin
  with tlookupdbdispfielddatalink(fdatalink) do begin
-  result:= realtytostr(getfloatlookupvalue(abm),fformat);
+  result:= realtytostring(getfloatlookupvalue(abm),fformat);
  end;
 end;
 
@@ -1774,7 +1774,7 @@ end;
 function tdbreallookup64lb.lookuptext(const aindex: integer): msestring;
 begin
  with tlookuplbdispfielddatalink(fdatalink) do begin
-  result:= realtytostr(flookupbuffer.floatvaluephys(flookupvaluefieldno,aindex),
+  result:= realtytostring(flookupbuffer.floatvaluephys(flookupvaluefieldno,aindex),
                                                    fformat);
  end;
 end;
@@ -1962,7 +1962,7 @@ end;
 function tdbreallookupstrlb.lookuptext(const aindex: integer): msestring;
 begin
  with tlookuplbdispfielddatalink(fdatalink) do begin
-  result:= realtytostr(flookupbuffer.floatvaluephys(flookupvaluefieldno,aindex),
+  result:= realtytostring(flookupbuffer.floatvaluephys(flookupvaluefieldno,aindex),
                                                    fformat);
  end;
 end;

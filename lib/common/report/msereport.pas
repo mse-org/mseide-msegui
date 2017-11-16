@@ -2114,7 +2114,7 @@ function treptabulatoritem.getdisptext: richstringty;
  begin
   case flookupkind of
    lk_float: begin
-    result.text:= realtytostr(avalue,fformat);
+    result.text:= realtytostring(avalue,fformat);
    end;
    lk_time: begin
     result.text:= mseformatstr.timetostring(avalue,fformat);
@@ -2151,12 +2151,12 @@ begin
       lk_integer: begin
        int1:= flookupbuffer.lookupinteger(flookupkeyfieldno,
                     flookupvaluefieldno,i64key);
-       result.text:= realtytostr(int1,fformat);
+       result.text:= realtytostring(int1,fformat);
       end;
       lk_int64: begin
        int641:= flookupbuffer.lookupint64(flookupkeyfieldno,
                     flookupvaluefieldno,i64key);
-       result.text:= realtytostr(int641,fformat);
+       result.text:= realtytostring(int641,fformat);
       end;
       lk_float,lk_time,lk_date,lk_datetime: begin
        dofloat(flookupbuffer.lookupfloat(flookupkeyfieldno,
@@ -2175,12 +2175,12 @@ begin
        lk_integer: begin
         int1:= flookupbuffer.lookupinteger(flookupkeyfieldno,
                      flookupvaluefieldno,skey);
-        result.text:= realtytostr(int1,fformat);
+        result.text:= realtytostring(int1,fformat);
        end;
        lk_int64: begin
         int641:= flookupbuffer.lookupint64(flookupkeyfieldno,
                      flookupvaluefieldno,skey);
-        result.text:= realtytostr(int641,fformat);
+        result.text:= realtytostring(int641,fformat);
        end;
        lk_float,lk_time,lk_date,lk_datetime: begin
         dofloat(flookupbuffer.lookupfloat(flookupkeyfieldno,
@@ -2198,12 +2198,12 @@ begin
        lk_integer: begin
         int1:= flookupbuffer.lookupinteger(flookupkeyfieldno,
                      flookupvaluefieldno,ikey);
-        result.text:= realtytostr(int1,fformat);
+        result.text:= realtytostring(int1,fformat);
        end;
        lk_int64: begin
         int641:= flookupbuffer.lookupint64(flookupkeyfieldno,
                      flookupvaluefieldno,ikey);
-        result.text:= realtytostr(int641,fformat);
+        result.text:= realtytostring(int641,fformat);
        end;
        lk_float,lk_time,lk_date,lk_datetime: begin
         dofloat(flookupbuffer.lookupfloat(flookupkeyfieldno,
@@ -2226,27 +2226,27 @@ begin
      end
      else begin
       if rto_count in foptions then begin
-       result.text:= realtytostr(sumcount,fformat);
+       result.text:= realtytostring(sumcount,fformat);
       end
       else begin
        if rto_average in foptions then begin
         int1:= sumcount;
         if int1 = 0 then begin
-         result.text:= realtytostr(0,fformat);
+         result.text:= realtytostring(0,fformat);
         end
         else begin
          case datatype of 
           ftinteger,ftword,ftsmallint,ftboolean: begin
-           result.text:= realtytostr(sumasinteger/int1,fformat);
+           result.text:= realtytostring(sumasinteger/int1,fformat);
           end;
           ftlargeint: begin
-           result.text:= realtytostr(sumaslargeint/int1,fformat);
+           result.text:= realtytostring(sumaslargeint/int1,fformat);
           end;
           ftfloat,ftcurrency: begin
-           result.text:= realtytostr(sumasfloat/int1,fformat);
+           result.text:= realtytostring(sumasfloat/int1,fformat);
           end;
           ftbcd: begin
-           result.text:= realtytostr(sumascurrency/int1,fformat);
+           result.text:= realtytostring(sumascurrency/int1,fformat);
           end;
          end;
         end;
@@ -2254,16 +2254,16 @@ begin
        else begin
         case datatype of 
          ftinteger,ftword,ftsmallint,ftboolean: begin
-          result.text:= realtytostr(sumasinteger,fformat);
+          result.text:= realtytostring(sumasinteger,fformat);
          end;
          ftlargeint: begin
-          result.text:= realtytostr(sumaslargeint,fformat);
+          result.text:= realtytostring(sumaslargeint,fformat);
          end;
          ftfloat,ftcurrency: begin
-          result.text:= realtytostr(sumasfloat,fformat);
+          result.text:= realtytostring(sumasfloat,fformat);
          end;
          ftbcd: begin
-          result.text:= realtytostr(sumascurrency,fformat);
+          result.text:= realtytostring(sumascurrency,fformat);
          end;
         end;
        end;
@@ -2284,7 +2284,7 @@ begin
     result.text:= '';
    end
    else begin
-    result.text:= realtytostr(sumcount,fformat);
+    result.text:= realtytostring(sumcount,fformat);
    end
   end
   else begin
@@ -7639,7 +7639,7 @@ var
 begin
  rea1:= flookupbuffer.lookupfloat(flookupkeyfieldno,flookupvaluefieldno,
                                             fkeyvalue);
- result:= realtytostr(rea1,fformat)
+ result:= realtytostring(rea1,fformat)
 end;
 
 { trepdatetimedisplb }

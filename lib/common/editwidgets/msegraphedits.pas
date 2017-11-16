@@ -4937,7 +4937,7 @@ begin
   canvas.restore;
   fbar_frame.paintoverlay(canvas,po2^);
   if fformat <> '' then begin
-   drawtext(canvas,realtytostr(applyrange(rea1,fvaluerange,fvaluestart),
+   drawtext(canvas,realtytostring(applyrange(rea1,fvaluerange,fvaluestart),
                                          fformat),arect,ftextflags,ffont);
   end;
  end;
