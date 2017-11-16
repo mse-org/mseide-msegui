@@ -317,11 +317,13 @@ begin
  end;
  if not atry then begin
   if not found then begin
-   formaterror(stockobjects.captions[sc_graphic_format_not_supported],
+   formaterror(
+      ansistring(stockobjects.captions[sc_graphic_format_not_supported]),
                                                               aformatlabel);
   end
   else begin
-   formaterror(stockobjects.captions[sc_graphic_format_error],aformatlabel);
+   formaterror(ansistring(stockobjects.captions[sc_graphic_format_error]),
+                                                                aformatlabel);
   end;
  end;
 end;
@@ -343,7 +345,8 @@ begin
   end;
  end;
  if int2 < 0 then begin
-  formaterror(stockobjects.captions[sc_graphic_format_not_supported],
+  formaterror(
+        ansistring(stockobjects.captions[sc_graphic_format_not_supported]),
                                                                aformatlabel);
  end;
  with formats[int2] do begin
