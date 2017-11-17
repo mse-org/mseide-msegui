@@ -300,9 +300,6 @@ type
    procedure childstatechanged(const sender: twidget; 
                          const newstate,oldstate: widgetstatesty); virtual;
 
-   function getparentcontroller(
-                     out acontroller: tdockcontroller): boolean; overload;
-   function getparentcontroller: tdockcontroller; overload;
    property useroptions: optionsdockty read fuseroptions write setuseroptions
                      default defaultoptionsdock;
 
@@ -345,6 +342,7 @@ type
   public
    constructor create(aintf: idockcontroller);
    destructor destroy; override;
+
    function beforedragevent(var info: draginfoty): boolean; override;
    procedure enddrag; override;
    procedure mouseevent(var info: mouseeventinfoty); override;
@@ -382,6 +380,9 @@ type
    property tabwidget: ttabwidget read ftabwidget; //can be nil
    property activetabpage: ttabpage read getactivetabpage;
 
+   function getparentcontroller(
+                     out acontroller: tdockcontroller): boolean; overload;
+   function getparentcontroller: tdockcontroller; overload;
    function dockparentname(): string; //'' if none
    function childicon(): tmaskedbitmap;
 
