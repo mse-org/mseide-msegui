@@ -1196,6 +1196,7 @@ var
     methodinfo.flags:= [];
     if parseprocparams(akind,methodinfo.flags,
                             methodinfo.params,classname.po <> nil) then begin
+     pos2:= sourcepos;
      if po1 <> nil then begin //class or object
       po2:= po1^.procedurelist.finditembyuppername(procname,methodinfo,true);
                                     //can update methodinfo
@@ -1215,7 +1216,6 @@ var
       deflist1.fparentscope:= po1^.deflist;
      end
      else begin
-      pos2:= sourcepos;
       if checkident(ord(pid_forward)) then begin
        include(methodinfo.flags,mef_forward);
        isforward:= true;
