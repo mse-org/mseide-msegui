@@ -280,7 +280,7 @@ begin
  result:= '';
  ar1:= nil; //compiler warning
  if aformatlabel = '' then begin
-  found:= true;
+  found:= high(formats) >= 0;
   for int1:= 0 to high(formats) do begin
    with formats[int1] do begin
     if assigned(readproc) then begin
@@ -317,11 +317,13 @@ begin
  end;
  if not atry then begin
   if not found then begin
-   formaterror(stockobjects.captions[sc_graphic_format_not_supported],
+   formaterror(
+      ansistring(stockobjects.captions[sc_graphic_format_not_supported]),
                                                               aformatlabel);
   end
   else begin
-   formaterror(stockobjects.captions[sc_graphic_format_error],aformatlabel);
+   formaterror(ansistring(stockobjects.captions[sc_graphic_format_error]),
+                                                                aformatlabel);
   end;
  end;
 end;
@@ -343,7 +345,8 @@ begin
   end;
  end;
  if int2 < 0 then begin
-  formaterror(stockobjects.captions[sc_graphic_format_not_supported],
+  formaterror(
+        ansistring(stockobjects.captions[sc_graphic_format_not_supported]),
                                                                aformatlabel);
  end;
  with formats[int2] do begin

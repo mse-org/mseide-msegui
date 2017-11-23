@@ -1,4 +1,4 @@
-{ MSEide Copyright (c) 1999-2016 by Martin Schreiber
+{ MSEide Copyright (c) 1999-2017 by Martin Schreiber
    
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -59,7 +59,7 @@ type
                  const atext: string); overload;
     procedure parse; override;
     function dogetincludefile(const afilename: filenamety;
-                     const astatementstart,astatementend: sourceposty): tscanner; override;
+          const astatementstart,astatementend: sourceposty): tscanner override;
     function parseprocedureheader(atoken: pascalidentty;
                    procedureinfopo: pprocedureinfoty): boolean;
   end;
@@ -68,7 +68,8 @@ function findclassinfobyinstance(const ainstance: tmsecomponent;
                                  const infopo: punitinfoty): pclassinfoty;
 function isemptysourcepos(const apos: sourceposty): boolean;
 function isinrowrange(const apos,startpos,endpos: sourceposty): boolean;
-procedure parsepascaldef(const adef: pdefinfoty; out atext: string; out scope: tdeflist);
+procedure parsepascaldef(const adef: pdefinfoty; out atext: string;
+                                                           out scope: tdeflist);
 
 implementation
 uses
@@ -77,7 +78,8 @@ type
  tdeflist1 = class(tdeflist);
  tusesinfolist1 = class(tusesinfolist);
  
-procedure parsepascaldef(const adef: pdefinfoty; out atext: string; out scope: tdeflist);
+procedure parsepascaldef(const adef: pdefinfoty; out atext: string;
+                                                           out scope: tdeflist);
 var
  parser: tpascalparser;
 
@@ -394,56 +396,63 @@ begin
  else begin
   if checkoperator('(') then begin
    include(aflags,mef_brackets);
-   while not eof do begin
-    defaultstr:= '';
-    int1:= getident;
-    case pascalidentty(int1) of
-     pid_const: paraflags:= [pfconst];
-     pid_var: paraflags:= [pfvar];
-     pid_out: paraflags:= [pfout];
-     else paraflags:= [];
-    end;
-    if (paraflags = []) and (int1 >= 0) then begin
-     break;
-    end;
+   if checkoperator(')') then begin
     apos:= sourcepos;
-    ar1:= lstringartostringar(getorignamelist);
-    if not checkoperator(':') then begin
-     epos:= sourcepos;
-     putparams(''); //untyped
-    end
-    else begin
-     if checkident(ord(pid_array)) then begin
-      include(paraflags,pfarray);
-      checkident(ord(pid_of));
-      if checkident(ord(pid_const)) then begin
-       str1:= 'TVarRec';
+    result:= true; //no params
+   end
+   else begin
+    while not eof do begin
+     defaultstr:= '';
+     int1:= getident;
+     case pascalidentty(int1) of
+      pid_const: paraflags:= [pfconst];
+      pid_var: paraflags:= [pfvar];
+      pid_out: paraflags:= [pfout];
+      else paraflags:= [];
+     end;
+     if (paraflags = []) and (int1 >= 0) then begin
+      break;
+     end;
+     apos:= sourcepos;
+     ar1:= lstringartostringar(getorignamelist);
+     if not checkoperator(':') then begin
+      epos:= sourcepos;
+      putparams(''); //untyped
+     end
+     else begin
+      if checkident(ord(pid_array)) then begin
+       include(paraflags,pfarray);
+       checkident(ord(pid_of));
+       if checkident(ord(pid_const)) then begin
+        str1:= 'TVarRec';
+       end
+       else begin
+        str1:= getorigname;
+       end;
       end
       else begin
        str1:= getorigname;
       end;
-     end
-     else begin
-      str1:= getorigname;
+      if str1 = '' then begin
+       break;
+      end;
+      if checkoperator('=') then begin
+       skipwhitespace;
+       po1:= fto^.value.po;
+       skipexpression;
+       defaultstr:= getorigtext(po1);
+      end;
+      epos:= sourcepos;
+      putparams(str1);
      end;
-     if str1 = '' then begin
+     if checkoperator(')') then begin
+      apos:= sourcepos;
+      result:= true;
       break;
      end;
-     if checkoperator('=') then begin
-      skipwhitespace;
-      po1:= fto^.value.po;
-      skipexpression;
-      defaultstr:= getorigtext(po1);
+     if not checkoperator(';') then begin
+      break;
      end;
-     epos:= sourcepos;
-     putparams(str1);
-    end;
-    if checkoperator(')') then begin
-     result:= true;
-     break;
-    end;
-    if not checkoperator(';') then begin
-     break;
     end;
    end;
   end
@@ -456,6 +465,8 @@ begin
     if checkoperator(':') then begin
      setlength(params,length(params)+1);
      with params[high(params)] do begin
+      name:= 'result';
+      flags:= [pfvar];
       typename:= getorigname;
       start:= apos;
       stop:= sourcepos;
@@ -1134,7 +1145,6 @@ var
  procedure parseprocedure(const akind: tmethodkind);
  var
   classname,procname: lstringty;
-  pos1: sourceposty;
   po1: pclassinfoty;
   po2: pprocedureinfoty;
   po3: pdefinfoty;
@@ -1153,11 +1163,17 @@ var
      name:= lstringtostring(lstr1);
      uppername:= lstringtostring(procname);
     end;
-   end;
+   end;//setprocinfo
  var
+  pos1,pos2: sourceposty;
   i1: int32;
+  isforward: boolean;
+  kind1: symbolkindty;
+ label
+  endlab;
  begin
   if procnestinglevel < 32 then begin
+   isforward:= false;
    classname.po:= nil;
    classname.len:= 0;
    inc(procnestinglevel);
@@ -1177,8 +1193,10 @@ var
      po1:= nil;
     end;
     methodinfo.kind:= akind;
+    methodinfo.flags:= [];
     if parseprocparams(akind,methodinfo.flags,
                             methodinfo.params,classname.po <> nil) then begin
+     pos2:= sourcepos;
      if po1 <> nil then begin //class or object
       po2:= po1^.procedurelist.finditembyuppername(procname,methodinfo,true);
                                     //can update methodinfo
@@ -1198,15 +1216,29 @@ var
       deflist1.fparentscope:= po1^.deflist;
      end
      else begin
-      po2:= funitinfopo^.p.procedurelist.finditembyuppername(
+      if checkident(ord(pid_forward)) then begin
+       include(methodinfo.flags,mef_forward);
+       isforward:= true;
+       checkoperator(';');
+       skipwhitespaceonly();
+       pos2:= sourcepos;
+      end;
+      po2:= nil;
+      if not isforward then begin
+       po2:= funitinfopo^.p.procedurelist.finditembyuppername(
                                               procname,methodinfo,false);
+      end;
       if po2 = nil then begin
        po2:= funitinfopo^.p.procedurelist.newitem;
        setprocinfo(po2)
       end;
+      kind1:= syk_procimp;
+      if isforward then begin
+       kind1:= syk_procdef;
+      end;
       po3:= funitinfopo^.deflist.beginnode(
                 lstringtostring(procname)+mangleprocparams(methodinfo),
-                syk_procimp,pos1,sourcepos);
+                kind1,pos1,pos2);
       deflist1:= tdeflist1(po3^.deflist);
       po3^.procindex:= po2^.b.index;
       po2:= nil;
@@ -1214,14 +1246,19 @@ var
      if po2 <> nil then begin
       po3^.procindex:= po2^.b.index;
       po2^.impheaderstartpos:= pos1;
-      po2^.impheaderendpos:= sourcepos;
+      po2^.impheaderendpos:= pos2;
      end;
-     for i1:= 0 to high(methodinfo.params) do begin
-      with methodinfo.params[i1] do begin
-       funitinfopo^.deflist.add(name,syk_pardef,start,stop);
+     if not isforward then begin
+      for i1:= 0 to high(methodinfo.params) do begin
+       with methodinfo.params[i1] do begin
+        funitinfopo^.deflist.add(name,syk_pardef,start,stop);
+       end;
       end;
      end;
-
+     if isforward then begin
+      funitinfopo^.deflist.endnode(pos2);
+      goto endlab;
+     end;
      while not eof do begin
       if getident(aident) then begin
        case pascalidentty(aident) of
@@ -1268,6 +1305,7 @@ var
      end;
     end;
    end;
+ endlab:
    dec(procnestinglevel);
   end;
  end;

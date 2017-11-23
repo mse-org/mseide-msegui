@@ -393,13 +393,13 @@ type
                                      write setplace_options default [];
    property taborderoverride: ttaborderoverride read ftaborderoverride 
                                                   write settaborderoverride;
-   property optionswidget default defaultgroupboxoptionswidget;
    property onbeforelayout: layoutereventty read fonbeforelayout 
                                                     write fonbeforelayout;
    property onafterlayout: layoutereventty read fonafterlayout 
                                                     write fonafterlayout;
   published
    property visible default true;
+   property optionswidget default defaultgroupboxoptionswidget;
  end;
 
  tlayouter = class(tcustomlayouter)
@@ -509,12 +509,21 @@ end;
 function tcustomsplitter.clippoint(const aoffset: pointty): pointty;
 var
  int1,i2: integer;
+ rect1,rect2: rectty;
 begin
  if fparentwidget <> nil then begin
+  rect1:= twidget1(fparentwidget).clientwidgetrect;
+  rect2:= twidget1(fparentwidget).innerwidgetrect;
+  if not (an_right in fanchors) then begin
+   rect1.cx:= rect2.x+rect2.cx-rect1.x;
+  end;
+  if not (an_bottom in fanchors) then begin
+   rect1.cy:= rect2.y+rect2.cy-rect1.y;
+  end;
   result:= subpoint(
             clipinrect(
               makerect(addpoint(aoffset,fwidgetrect.pos),fwidgetrect.size),
-                 twidget1(fparentwidget).clientwidgetrect).pos,fwidgetrect.pos);
+                 rect1).pos,fwidgetrect.pos);
  end
  else begin
   result:= aoffset;

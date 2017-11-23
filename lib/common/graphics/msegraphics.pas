@@ -927,7 +927,7 @@ type
               const adestrect: rectty; acopymode: rasteropty;
               atransparentcolor: colorty;
               amask: tsimplebitmap; const amaskpos: pointty;
-              const aalignment: alignmentsty; 
+              aalignment: alignmentsty; 
               //only al_stretchx, al_stretchy and al_tiled used
               const atileorigin: pointty;
               const aopacity: colorty); //cl_none -> opaque);
@@ -1367,6 +1367,8 @@ procedure initdefaultvalues(var avalue: edgecolorpairinfoty);
 procedure gdi_lock();
 procedure gdi_unlock();
 function gdi_locked(): boolean;
+function gdi_unlockall(): int32;
+procedure gdi_relockall(const acount: int32);
 
 procedure gdi_call(const func: gdifuncty; var drawinfo: drawinfoty;
                                    gdi: pgdifunctionaty = nil);
@@ -1412,6 +1414,8 @@ procedure drawdottedlinesegments(const acanvas: tcanvas; const lines: segmentart
 procedure allocimage(out image: imagety; const asize: sizety;
                                              const akind: bitmapkindty);
 procedure freeimage(var image: imagety);
+procedure freeimage(var image: maskedimagety);
+procedure zeropad(var image: imagety);
 procedure checkimagebgr(var aimage: imagety; const bgr: boolean);
 procedure movealignment(const source: alignmentsty; var dest: alignmentsty);
 
@@ -1425,7 +1429,7 @@ procedure checkgdiunlocked;
 implementation
 uses
  SysUtils,msegui,mseguiintf,msestreaming,mseformatstr,msestockobjects,
- msearrayutils,mselist,msebits,msewidgets,
+ msearrayutils,mselist,msebits,msewidgets,msesystypes,
  msesysintf1,msesysintf,msesysutils,msefont;
 
 type
@@ -1434,6 +1438,7 @@ type
 
 var
  gdilockcount: integer;
+ gdilockthread: threadty;
 
 procedure initdefaultvalues(var avalue: edgecolorinfoty);
 begin
@@ -1493,41 +1498,13 @@ begin
 end;
 
 procedure movealignment(const source: alignmentsty; var dest: alignmentsty);
-{$ifndef FPC}
-const
- mask1: alignmentsty = [al_intpol,al_or,al_and];
- mask2: alignmentsty = [al_left,al_xcentered,al_right];
- mask3: alignmentsty = [al_top,al_ycentered,al_bottom];
- mask4: alignmentsty = [al_fit,al_tiled];
-{$endif}
 begin
- {$ifdef FPC}
  dest:= alignmentsty(setsinglebit(
                 longword(source),longword(dest),
                 [longword([al_intpol,al_or,al_and]),
                  longword([al_left,al_xcentered,al_right]),
                 longword([al_top,al_ycentered,al_bottom]),
-                longword([al_fit,al_tiled])]));
- {$else}
- dest:= alignmentsty(setsinglebitar16(word(source),word(dest),
-                    [word(mask1),word(mask2),word(mask3),word(mask4)]));
- {$endif}
-(*
-  value1:= alignmentsty(setsinglebit(
-                          {$ifdef FPC}longword{$else}word{$endif}(source),
-                          {$ifdef FPC}longword{$else}word{$endif}(dest),
-                          {$ifdef FPC}longword{$else}word{$endif}(mask1)));
-  value2:= alignmentsty(setsinglebit(
-                          {$ifdef FPC}longword{$else}word{$endif}(source),
-                          {$ifdef FPC}longword{$else}word{$endif}(dest),
-                          {$ifdef FPC}longword{$else}word{$endif}(mask2)));
-  value3:= alignmentsty(setsinglebit(
-                          {$ifdef FPC}longword{$else}word{$endif}(source),
-                          {$ifdef FPC}longword{$else}word{$endif}(dest),
-                          {$ifdef FPC}longword{$else}word{$endif}(mask3)));
-  dest:= (source - (mask1+mask2+mask3))+
-                              (value1*mask1)+(value2*mask2)+(value3*mask3);
-*)
+                longword([al_fit,al_thumbnail,al_tiled])]));
 end;
 
 procedure allocimage(out image: imagety; const asize: sizety;
@@ -1564,14 +1541,57 @@ end;
 
 procedure freeimage(var image: imagety);
 begin
- with image do begin
-  if pixels <> nil then begin
-   gui_freeimagemem(pixels);
-   pixels:= nil;
-   length:= 0;
-   linelength:= 0;
-   linebytes:= 0;
-   size:= nullsize;
+ if image.pixels <> nil then begin
+  gui_freeimagemem(image.pixels);
+  fillchar(image,sizeof(image),0);
+ end;
+end;
+
+procedure freeimage(var image: maskedimagety);
+begin
+ freeimage(image.image);
+ freeimage(image.mask);
+end;
+
+procedure zeropad(var image: imagety);
+var
+ mask: longword;
+ step: integer;
+ po1: plongword;
+ int1: integer;
+begin
+ with image do begin         //todo: little/big endian
+  case kind of
+   bmk_mono: begin
+    mask:= bitmask[size.cx and $1f];
+   end;
+   bmk_gray: begin
+    case size.cx and $3 of
+     0: begin
+      mask:= 0;
+     end;
+     1: begin
+      mask:= $000000ff;
+     end;
+     2: begin
+      mask:= $0000ffff;
+     end;
+     3: begin
+      mask:= $00ffffff;
+     end;
+    end;
+   end
+   else begin
+    mask:= 0;
+   end;
+   if mask <> 0 then begin
+    step:= linelength;
+    po1:= @pixels[step-1];
+    for int1:= size.cy - 1 downto 0 do begin
+     po1^:= po1^ and mask;   //mask padding
+     inc(po1,step);
+    end; 
+   end;
   end;
  end;
 end;
@@ -1626,6 +1646,7 @@ end;
 procedure gdi_lock();
 begin
  application.lock();
+ gdilockthread:= sys_getcurrentthread();
  if (gdilockcount = 0) and not application.ismainthread then begin
   gui_disconnectmaineventqueue();
  end;
@@ -1635,8 +1656,11 @@ end;
 procedure gdi_unlock();
 begin
  dec(gdilockcount);
- if (gdilockcount = 0) and not application.ismainthread then begin
-  gui_connectmaineventqueue();
+ if gdilockcount = 0 then begin
+  gdilockthread:= 0;
+  if not application.ismainthread then begin
+   gui_connectmaineventqueue();
+  end;
  end;
  application.unlock();
 end;
@@ -1644,6 +1668,30 @@ end;
 function gdi_locked(): boolean;
 begin
  result:= (gdilockcount > 0) or application.islockedmainthread();
+end;
+
+function gdi_unlockall(): int32;
+begin
+ if gdilockthread = sys_getcurrentthread() then begin
+  result:= gdilockcount;
+  if result > 1 then begin
+   gdilockcount:= 1;
+  end;
+  if result > 0 then begin
+   gdi_unlock();
+  end;
+ end
+ else begin
+  result:= 0;
+ end;
+end;
+
+procedure gdi_relockall(const acount: int32);
+begin
+ if acount > 0 then begin
+  gdi_lock();
+  gdilockcount:= gdilockcount + acount - 1;
+ end;
 end;
 
 procedure gdi_call(const func: gdifuncty; var drawinfo: drawinfoty;
@@ -4557,7 +4605,7 @@ procedure tcanvas.internalcopyarea(asource: tcanvas; const asourcerect: rectty;
                            atransparentcolor: colorty;
                            amask: tsimplebitmap;
                            const amaskpos: pointty;
-                           const aalignment: alignmentsty;
+                           aalignment: alignmentsty;
                            const atileorigin: pointty;
                            const aopacity: colorty); //cl_none -> opaque
 
@@ -4600,6 +4648,10 @@ begin
  if (asourcerect.cx <= 0) or (asourcerect.cy <= 0) or 
     (adestrect.cx <= 0) or (adestrect.cy <= 0) then begin //no div 0
   exit;
+ end;
+ if (al_thumbnail in aalignment) and ((asourcerect.cx > adestrect.cx) or
+          (asourcerect.cy > adestrect.cy)) then begin
+  include(aalignment,al_fit);
  end;
  checkgcstate([]);  //gc must be valid
  if asource <> self then begin
@@ -4684,29 +4736,6 @@ begin
    drect.cx:= srect.cx;
   end;
  end;
-{
- if aalignment * [al_stretchx,al_stretchy,al_fit,al_tiled] = [] then begin
-  if not msegraphutils.intersectrect(makerect(spoint,asourcerect.size),
-       makerect(makepoint(0,0),icanvas(asource.fintf).getsize),srect) then begin
-   exit;
-  end;
-  dpoint.x:= dpoint.x + srect.x - spoint.x;
-  dpoint.y:= dpoint.y + srect.y - spoint.y;
-  if not msegraphutils.intersectrect(makerect(dpoint,srect.size),
-               rect1,drect) then begin
-   exit;
-  end;
-  srect.x:= srect.x + drect.x - dpoint.x;
-  srect.cx:= drect.cx;
-  srect.y:= srect.y + drect.y - dpoint.y;
-  srect.cy:= drect.cy;
- end
- else begin
-  srect.pos:= spoint;
-  srect.size:= asourcerect.size;
-  drect.pos:= dpoint;
- end;
-}
  if amask <> nil then begin
   if al_nomaskscale in aalignment then begin
    if checkmaskrect(drect,srect) then begin

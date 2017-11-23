@@ -2898,6 +2898,8 @@ type
    function idle: boolean; override;
    function modallevel: integer; override;
 
+   function unlockall: integer override;
+   procedure relockall(count: integer) override;
    procedure beginnoignorewaitevents;   
    procedure endnoignorewaitevents;   
    procedure beginwait(const aprocessmessages: boolean = false); override;
@@ -2967,6 +2969,10 @@ type
                           //nil -> virtualscreeen
    function workarea(const awindow: twindow = nil): rectty;
                           //nil -> current active window
+   function ppmm(const awindow: twindow = nil): complexty;
+         //nil -> current active window, pixel per mm,
+         //result.re -> horizontal
+         //result.im -> vertical
    property activewindow: twindow read factivewindow;
    property lastactivewindow: twindow read flastactivewindow;
    property inactivewindow: twindow read finactivewindow;
@@ -6966,7 +6972,8 @@ begin
  if (avalue.x <> fpos.x) or (avalue.y <> fpos.y) then begin
   if (fowner <> nil) then begin
    if hasimage() then begin
-    if (alignment*[al_stretchx,al_stretchy,al_tiled] = []) then begin
+    if (alignment*[al_stretchx,al_stretchy,
+                         al_tiled,al_fit,al_thumbnail] = []) then begin
      fowner.fintf.invalidaterect(mr(fpos,fsize),org_paint);
      fpos:= avalue;
      fowner.fintf.invalidaterect(mr(fpos,fsize),org_paint);
@@ -20494,6 +20501,9 @@ var
  id: winidty;
 begin
  id:= 0;
+ if awindow <> nil then begin
+  id:= awindow.winid;
+ end;
  result:= gui_getscreenrect(id);
 end;
 
@@ -20511,6 +20521,22 @@ begin
   id:= awindow.winid;
  end;
  result:= gui_getworkarea(id);
+end;
+
+function tguiapplication.ppmm(const awindow: twindow = nil): complexty;
+var
+ id: winidty;
+begin
+ id:= 0;
+ if awindow = nil then begin
+  if factivewindow <> nil then begin
+   id:= factivewindow.winid;   
+  end;
+ end
+ else begin
+  id:= awindow.winid;
+ end;
+ gui_getppmm(id,result.re,result.im);
 end;
 
 function tguiapplication.normalactivewindow: twindow;
@@ -21567,6 +21593,21 @@ begin
    result:= fcurrmodalinfo^.level;
   end;
  end;
+end;
+
+threadvar
+ gdilocks: int32;
+ 
+function tguiapplication.unlockall: integer;
+begin
+ gdilocks:= gdilocks + gdi_unlockall();
+ inherited;
+end;
+
+procedure tguiapplication.relockall(count: integer);
+begin
+ inherited;
+ gdi_relockall(gdilocks);
 end;
 
 procedure tguiapplication.objecteventdestroyed(const sender: tobjectevent);

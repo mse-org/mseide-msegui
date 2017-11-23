@@ -50,6 +50,7 @@ type
    flistlevel: integer;
    foptions: statfileroptionsty;
   protected
+   fcurrentsection: msestring;
   public
    constructor create(const astream: ttextstream;
                             const aencoding: charencodingty = ce_utf8);
@@ -60,6 +61,7 @@ type
    property stream: ttextstream read fstream;
 
    procedure setsection(const name: msestring);
+   property currentsection: msestring read fcurrentsection;
    procedure updatevalue(const name: msestring; var value: boolean); overload;
    procedure updatevalue(const name: msestring; var value: byte); overload;
    procedure updatevalue(const name: msestring; var value: word); overload;
@@ -129,7 +131,9 @@ type
                       const aencoding: charencodingty = ce_utf8); overload;
    destructor destroy; override;
    function sections: msestringarty;
-   function findsection(const name: msestring): boolean; //true if found
+   function hassection(const name: msestring): boolean; //true if found
+   function findsection(const name: msestring): boolean; 
+                             //switch section, true if found
    function checkvar(const name: msestring): boolean; //true if found
    function streamdata: string;    //returns data after [-]
    function streamtext: msestring; //returns text after [-]
@@ -1094,6 +1098,11 @@ begin
  end;
 end;
 
+function tstatreader.hassection(const name: msestring): boolean;
+begin
+ result:= fsectionlist.find(name) <> nil;
+end;
+
 function tstatreader.findsection(const name: msestring): boolean;
 var
  int1: integer;
@@ -1102,9 +1111,11 @@ begin
  int1:= ptruint(fsectionlist.find(name));
  if int1 = 0 then begin
   factsection:= nil;
+  fcurrentsection:= '';
  end
  else begin
   factsection:= @fsections[int1-1];
+  fcurrentsection:= name;
  end;
  result:= int1 <> 0;
 end;
@@ -1518,6 +1529,7 @@ end;
 
 procedure tstatwriter.writesection(const name: msestring);
 begin
+ fcurrentsection:= name;
  fstream.writeln(msestring('[')+name+msestring(']'));
  flistlevel:= 0;
 end;

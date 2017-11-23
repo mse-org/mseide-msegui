@@ -150,7 +150,7 @@ var
  size1: sizety;
 begin
  result:= inherited calcminscrollsize;
- if not (al_fit in fbitmap.alignment) then begin
+ if fbitmap.alignment * [al_fit,al_thumbnail] = [] then begin
   size1:= result;
   if not (al_stretchx in fbitmap.alignment) then begin
    size1.cx:= fbitmap.bitmap.width+innerframewidth.cx;

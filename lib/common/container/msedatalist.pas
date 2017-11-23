@@ -78,7 +78,7 @@ type
                     dls_remote,   //used in ificomp datalist
                     dls_remotelock,
                     dls_rowdeleting, //used in treeitemeditlist
-                    dls_facultative
+                    dls_facultative,dls_binarydata
                     );
  dataliststatesty = set of dataliststatety;
 
@@ -4513,12 +4513,23 @@ end;
 
 function tansistringdatalist.getstatdata(const index: integer): msestring;
 begin
- result:= msestring(items[index]);
+ if dls_binarydata in fstate then begin
+  result:= msestring(encodebase64(items[index]));
+ end
+ else begin
+  result:= msestring(items[index]);
+ end;
 end;
 
-procedure tansistringdatalist.setstatdata(const index: integer; const value: msestring);
+procedure tansistringdatalist.setstatdata(const index: integer;
+                                                const value: msestring);
 begin
- items[index]:= ansistring(value);
+ if dls_binarydata in fstate then begin
+  items[index]:= decodebase64(ansistring(value));
+ end
+ else begin
+  items[index]:= ansistring(value);
+ end;
 end;
 
 function tansistringdatalist.getasarray: stringarty;

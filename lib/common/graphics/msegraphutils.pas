@@ -320,11 +320,11 @@ type
  alignmentty = (al_left,al_xcentered,al_right,al_top,al_ycentered,al_bottom,
                  //6
                 al_grayed,
-                 //7           8           9      10 
-                al_stretchx,al_stretchy,al_fit,al_tiled,
-                 //11
+                 //7           8           9      10           11
+                al_stretchx,al_stretchy,al_fit,al_thumbnail,al_tiled,
+                 //12
                 al_nomaskscale,
-                 //12        13    14
+                 //13        14    15
                 al_intpol,al_or,al_and);
  alignmentsty = set of alignmentty;
 
@@ -794,7 +794,9 @@ function calcrectalignment(const dest: rectty; source: rectty;
                                  const alignment: alignmentsty): rectty;
 begin
  result:= dest;
- if al_tiled in alignment then begin
+ if (al_tiled in alignment) or 
+    (al_thumbnail in alignment) and 
+         ((dest.cx < source.cx) or (dest.cy < source.cy)) then begin
   exit;
  end;
  if al_fit in alignment then begin

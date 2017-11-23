@@ -2106,6 +2106,7 @@ procedure updateprojectoptions(const statfiler: tstatfiler;
                   const afilename: filenamety);
 var
  int1,int2,int3: integer;
+ b1: boolean;
  modulenames1: msestringarty;
  moduletypes1: msestringarty;
  
@@ -2175,10 +2176,13 @@ begin
 {$endif}{$endif}
 
   updateprojectsettings(statfiler,[]);
+  b1:= projecttree.updatestat(statfiler) or statfiler.iswriter;
   breakpointsfo.updatestat(statfiler);
   panelform.updatestat(statfiler); //uses section breakpoints!
-  
-  projecttree.updatestat(statfiler);
+  if not b1 then begin
+   projecttree.updatestat(statfiler); //backward compatibility with section
+                                      //breakpoints
+  end;
   componentstorefo.updatestat(statfiler);
 
   setsection('components');

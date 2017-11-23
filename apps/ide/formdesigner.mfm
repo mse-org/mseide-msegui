@@ -251,6 +251,7 @@ object formdesignerfo: tformdesignerfo
       end    
       item
         caption = 'Set Widget Order'
+        name = 'setwidgetord'
         state = [as_localcaption, as_localonexecute]
         onexecute = dosetwidgetorder
       end    

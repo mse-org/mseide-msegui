@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2016 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2017 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -315,7 +315,7 @@ type
   pid_and=0,pid_array,pid_as,pid_asm,pid_begin,pid_case,pid_class,pid_const,pid_constructor,
   pid_destructor,pid_dispinterface,pid_div,pid_do,pid_downto,pid_else,pid_end,pid_except,
   pid_exports,pid_file,pid_finalization,pid_finally,pid_for,pid_function,pid_goto,pid_if,
-  pid_implementation,pid_in,pid_initialization,pid_inline,pid_interface,
+  pid_implementation,pid_in,pid_initialization,pid_inline,pid_forward,pid_interface,
   pid_is,pid_label,pid_library,pid_mod,pid_nil,pid_not,pid_object,pid_of,pid_or,pid_out,
   pid_overload,
   pid_packed,pid_procedure,pid_program,pid_property,pid_raise,pid_record,pid_repeat,
@@ -338,7 +338,7 @@ type
   'and','array','as','asm','begin','case','class','const','constructor',
   'destructor','dispinterface','div','do','downto','else','end','except',
   'exports','file','finalization','finally','for','function','goto','if',
-  'implementation','in','initialization','inline','interface',
+  'implementation','in','initialization','inline','forward','interface',
   'is','label','library','mod','nil','not','object','of','or','out',
   'overload',
   'packed','procedure','program','property','raise','record','repeat',

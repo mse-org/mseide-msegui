@@ -218,6 +218,9 @@ function trystrtorealtydot(const ein: string; out value: realty): boolean;
 function trystrtorealtydot(const ein: msestring; out value: realty): boolean;
 //function realtytostr(const val: realty; const format: msestring = ''): msestring;
 function realtytostr(const val: realty; const format: msestring = '';
+                                const scale: real = 1): msestring; deprecated;
+                                //use realtytostring() instead
+function realtytostring(const val: realty; const format: msestring = '';
                                             const scale: real = 1): msestring;
 function realtytostrrange(const val: realty; const format: msestring = '';
                                             const range: real = 1;
@@ -3724,7 +3727,7 @@ begin
  result:= trystrtodouble(s,double(value),'.');
 end;
 
-function realtytostr(const val: realty; const format: msestring = '';
+function realtytostring(const val: realty; const format: msestring = '';
                                             const scale: real = 1): msestring;
 var
  rea1: real;
@@ -3741,6 +3744,12 @@ begin
   end;
   result:= formatfloatmse(rea1,format,defaultformatsettingsmse);
  end;
+end;
+
+function realtytostr(const val: realty; const format: msestring = '';
+                                            const scale: real = 1): msestring;
+begin
+ result:= realtytostring(val,format,scale);
 end;
 
 function currencytostr(const avalue: currency): string; 

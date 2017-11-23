@@ -4812,7 +4812,7 @@ end;
 
 function trealtypropertyeditor.getvalue: msestring;
 begin
- result:= realtytostr(getfloatvalue);
+ result:= realtytostring(getfloatvalue);
 end;
 
 procedure trealtypropertyeditor.setvalue(const value: msestring);

@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2015 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2017 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -79,8 +79,8 @@ type
    procedure resetoffset;
    function getinsertstate: boolean;
    procedure setinsertstate(const Value: boolean);
-   procedure setsellength(const Value: halfinteger);
-   procedure setselstart(const Value: integer);
+   procedure setsellength(const avalue: halfinteger);
+   procedure setselstart(const avalue: integer);
    function getforcecaret: boolean;
    procedure setforcecaret(const avalue: boolean);
    procedure internalupdatecaret(force: boolean = false;
@@ -122,7 +122,7 @@ type
    function initactioninfo(aaction: editactionty): editnotificationinfoty;
    function updateindex(const avalue: int32): int32;
    procedure checkindexvalues;
-   procedure setcurindex(const Value: integer);
+   procedure setcurindex(const avalue: integer);
    procedure deletechar; virtual;
    procedure deleteback; virtual;
    procedure internaldelete(start,len,startindex: integer; selected: boolean); virtual;
@@ -1794,26 +1794,26 @@ begin
  end;
 end;
 
-procedure tinplaceedit.setcurindex(const Value: integer);
+procedure tinplaceedit.setcurindex(const avalue: integer);
 begin
  include(fstate,ies_touched);
- fcurindex:= updateindex(value);
+ fcurindex:= updateindex(avalue);
  exclude(fstate,ies_caretposvalid);
  internalupdatecaret(ies_forcecaret in fstate);
 end;
 
-procedure tinplaceedit.setsellength(const Value: halfinteger);
+procedure tinplaceedit.setsellength(const avalue: halfinteger);
 begin
- if fsellength <> value then begin
-  fsellength:= updateindex(Value) - fselstart;
+ if fsellength <> avalue then begin
+  fsellength:= updateindex(fselstart+avalue) - fselstart;
   updateselect;
  end;
 end;
 
-procedure tinplaceedit.setselstart(const Value: integer);
+procedure tinplaceedit.setselstart(const avalue: integer);
 begin
- if fselstart <> value then begin
-  fselstart:= updateindex(Value);
+ if fselstart <> avalue then begin
+  fselstart:= updateindex(avalue);
   if fsellength > 0 then begin
    updateselect;
   end;
@@ -2607,7 +2607,8 @@ begin
       fintf.inserttext(startpos,textbefore,uf_selected in flags,false);
      end;
      ut_deletetext: begin
-      fintf.inserttext(endpos,text,uf_selected in flags, not(uf_backwards in flags));
+      fintf.inserttext(endpos,text,uf_selected in flags,
+                                       not(uf_backwards in flags));
      end;
     end;
     if utype <> ut_setpos then begin

@@ -69,6 +69,7 @@ type
    fdestpo: phashdataty;
    procedure setcapacity(const avalue: integer);
    procedure moveitem(const aitem: phashdataty);
+   function getdatasize: int32;
   protected
    fdata: pointer;         //first record is a dummy
    fmask: hashvaluety;
@@ -127,6 +128,7 @@ type
    destructor destroy; override;
    procedure clear; virtual;
    procedure reset; //next next() will return first, next prev() will return last
+   property datasize: int32 read getdatasize;
    property capacity: integer read fcapacity write setcapacity;
    property count: integer read fcount;
    procedure mark(out ref: hashoffsetty);
@@ -815,6 +817,11 @@ begin
   hash:= aitem^.header.hash;
  end;
  inc(pchar(fdestpo),frecsize);
+end;
+
+function thashdatalist.getdatasize: int32;
+begin
+ result:= fcount * frecsize;
 end;
 
 function thashdatalist.getdatapoornil(const aoffset: hashoffsetty): pointer;

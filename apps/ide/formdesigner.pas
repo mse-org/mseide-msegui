@@ -1715,7 +1715,8 @@ begin
   end;
   itembyname('iconify').enabled:= bo3;
   itembyname('deiconify').enabled:= bo4;
-  
+
+  itembyname('setwidgetord').enabled:= bo1;  
   itembyname('settabord').enabled:= bo1 and 
           (twidget(fselections.items[0]).parentwidget.childrencount >= 2);
   itembyname('synctofo').enabled:= fselections.count > 0;

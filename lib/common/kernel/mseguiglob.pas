@@ -285,7 +285,7 @@ type
                gue_docktosyswindow,
                gue_notraywindow,gue_sendevent,gue_noshelllib,
                gue_noglx,gue_novisual,gue_rendercontext,
-               gue_nodragpending,gue_index
+               gue_nodragpending,gue_index,gue_lockcounterror
                );
 
  egui = class(eerror)
@@ -376,7 +376,8 @@ const
    'Could not find visual.',
    'Could not create a rendering context.',
    'No drag operation pending.',
-   'Invalid index.'
+   'Invalid index.',
+   'Lock count error.'
    );
 
 

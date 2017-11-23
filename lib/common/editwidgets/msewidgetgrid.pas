@@ -450,6 +450,11 @@ type
   published
    property facultative;
  end;
+ tgridbinarystringdatalist = class(tgridansistringdatalist)
+  public
+   constructor create(owner: twidgetcol);
+ end;
+
 
  tgridpointerdatalist = class(tpointerdatalist)
   private
@@ -1504,7 +1509,8 @@ begin
    end
    else begin
     if (dl1 <> nil) and not (dl1 is fintf.getdatalistclass) then begin
-     componentexception(awidget,'Wrong datalist type.');
+     dl1.destroy();
+     dl1:= fintf.createdatalist(self); //fix wrong datalist class
     end;
     fdata:= dl1;
    end;
@@ -3949,6 +3955,11 @@ begin
  result:= tgridansistringdatalist.create(aowner);
 end;
 
+function createtgridbinarystringdatalist(const aowner:twidgetcol): tdatalist;
+begin
+ result:= tgridbinarystringdatalist.create(aowner);
+end;
+
 function createtgridpointerdatalist(const aowner:twidgetcol): tdatalist;
 begin
  result:= tgridpointerdatalist.create(aowner);
@@ -3987,12 +3998,22 @@ begin
  optionsgrid:= optionsgrid + newcomponentoptionsgridadd;
 end;
 
+{ tgridbinarystringdatalist }
+
+constructor tgridbinarystringdatalist.create(owner: twidgetcol);
+begin
+ inherited;
+ include(fstate,dls_binarydata);
+end;
+
 initialization
  griddatalists:= tpointeransistringhashdatalist.create;
  registergriddatalistclass(tgridmsestringdatalist.classname,
                      {$ifdef FPC}@{$endif}createtgridmsestringdatalist);
  registergriddatalistclass(tgridansistringdatalist.classname,
                      {$ifdef FPC}@{$endif}createtgridansistringdatalist);
+ registergriddatalistclass(tgridbinarystringdatalist.classname,
+                     {$ifdef FPC}@{$endif}createtgridbinarystringdatalist);
  registergriddatalistclass(tgridpointerdatalist.classname,
                      {$ifdef FPC}@{$endif}createtgridpointerdatalist);
  registergriddatalistclass(tgridintegerdatalist.classname,

@@ -1,5 +1,6 @@
 MSEide+MSEgui breaking changes version history
 **********************************************
+2017-10-28 imagebufferinfoty -> maskedimagety.
 2017-09-22
  tdatabutton.min -> valuemin, max -> valuemax.
  tintegeredit.min -> valuemin, max -> valuemax.

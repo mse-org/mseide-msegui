@@ -31,7 +31,7 @@ type
 
  timagecachenode = class(tcachenode)
   private
-   fimage: imagebufferinfoty;
+   fimage: maskedimagety;
    fformat: string;
   protected
    flocal: boolean;
@@ -88,7 +88,7 @@ type
  tdbdataimage = class(tcustomdataimage,idbgraphicfieldlink,ireccontrol)
   private
    fdatalink: tgraphicdatalink;
-   fvaluebuffer: string;
+//   fvaluebuffer: string;
     //idbeditfieldlink
    function getgriddatasource: tdatasource;
    function getedited: boolean;
@@ -202,11 +202,11 @@ end;
 
 procedure tdbdataimage.valuetofield;
 begin
- if fvaluebuffer = '' then begin
+ if fvalue{buffer} = '' then begin
   fdatalink.clear;
  end
  else begin
-  fdatalink.asstring:= fvaluebuffer;
+  fdatalink.asstring:= fvalue{buffer};
  end;
 end;
 
@@ -281,17 +281,18 @@ begin
 end;
 
 procedure tdbdataimage.setvalue(const avalue: string);
-var
- bufferbefore: string;
+//var
+// bufferbefore: string;
 begin
- bufferbefore:= fvaluebuffer;
- fvaluebuffer:= avalue;
- try
+// bufferbefore:= fvaluebuffer;
+// fvaluebuffer:= avalue;
+// try
   fdatalink.modified;
+  inherited;
   fdatalink.valuechanged(iificlient(self));
- finally
-  fvaluebuffer:= bufferbefore;
- end; 
+// finally
+//  fvaluebuffer:= bufferbefore;
+// end; 
 end;
 
 procedure tdbdataimage.setmaxlength(const avalue: integer);
@@ -353,14 +354,14 @@ begin
    if (fimagecache <> nil) and assigned(fgetblobid) then begin
     n1:= timagecachenode.create(id1);
     n1.format:= result;
-    adest.savetoimagebuffer(n1.fimage);
+    adest.savetomaskedimage(n1.fimage);
     n1.fsize:= (n1.fimage.image.length + n1.fimage.mask.length) *
                                        sizeof(longword);
     fimagecache.addnode(n1);
    end;
   end
   else begin
-   adest.loadfromimagebuffer(n1.fimage);
+   adest.loadfrommaskedimage(n1.fimage);
    result:= n1.format;
   end;
  end;
@@ -488,7 +489,7 @@ end;
 
 destructor timagecachenode.destroy;
 begin
- tmaskedbitmap.freeimageinfo(fimage);
+ freeimage(fimage);
  inherited;
 end;
 

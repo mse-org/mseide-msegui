@@ -278,7 +278,8 @@ type
    function units: tunitsnode;
    function cmodules: tcmodulesnode;
    function files: tfilesnode;
-   procedure updatestat(const filer: tstatfiler);
+   function updatestat(const filer: tstatfiler): boolean; 
+                                          //true if read data found
    procedure updatelist;
  end;
 
@@ -1060,7 +1061,7 @@ begin
  projecttreefo.grid.invalidate;
 end;
 
-procedure tprojecttree.updatestat(const filer: tstatfiler);
+function tprojecttree.updatestat(const filer: tstatfiler): boolean;
 
  procedure scan(const anode: tprojectnode);
  var
@@ -1080,6 +1081,7 @@ procedure tprojecttree.updatestat(const filer: tstatfiler);
  end;
  
 begin
+ result:= false;
  if not filer.candata then begin
   exit;
  end;
@@ -1087,6 +1089,9 @@ begin
   funits.clear;
   fcmodules.clear;
   ffiles.clear;
+  with tstatreader(filer) do begin
+   result:= checkvar('units') or checkvar('cmodules') or checkvar('files');
+  end;
  end;
  projecttreefo.projectedit.itemlist.beginupdate;
  try

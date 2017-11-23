@@ -144,6 +144,19 @@ type
    property oncopytoclipboard;
    property onpastefromclipboard;
 
+   property statfile;   
+   property statvarname;
+   property statpriority;
+   property encoding;
+
+   property onfontchanged;
+   property onmodifiedchanged;
+   property ontextmouseevent;
+   property oneditnotifcation;
+   property oncellevent;
+   property ondrawtext;
+   property onsetupeditor;
+
    property oninputpipebroken: notifyeventty read foninputpipebroken 
                                                    write foninputpipebroken;
    property onerrorpipebroken: notifyeventty read fonerrorpipebroken 
@@ -611,7 +624,9 @@ begin
    mstr1:= avalue;
   end;
   datalist.addchars(mstr1,[aco_processeditchars],fmaxchars);
-  updateeditpos;
+  if window.haswinid then begin //possible deadlock by synchronize() otherwise
+   updateeditpos;
+  end;
  end;
 end;
 

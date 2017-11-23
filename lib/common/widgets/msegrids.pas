@@ -2060,6 +2060,7 @@ type
    procedure resetuserinput(const avalue: boolean);
    procedure doinsertrow(const sender: tobject); virtual;
    procedure doappendrow(const sender: tobject); virtual;
+   function deleterowconfirmation(): boolean;
    procedure dodeleterow(const sender: tobject); virtual;
    procedure dodeleteselectedrows(const sender: tobject); virtual;
    procedure dodeleterows(const sender: tobject);
@@ -2369,8 +2370,9 @@ type
                             const auserinput: boolean = false); virtual;
    procedure moverow(curindex,newindex: integer; count: integer = 1;
                             const auserinput: boolean = false); virtual;
-   procedure insertrow(aindex: integer; acount: integer = 1;
-                                  const auserinput: boolean = false);
+   function insertrow(aindex: integer; acount: integer = 1;
+                                  const auserinput: boolean = false): int32;
+                                  //returns index of first row;
    procedure deleterow(aindex: integer; acount: integer = 1;
                                   const auserinput: boolean = false);
    function appinsrow(aindex: integer;const auserinput: boolean = false): int32; 
@@ -10150,9 +10152,9 @@ begin
       int2:= rect1.y + rect1.cy;
       for int1:= startrow to high(fvisiblerows) do begin
        if prowstaterowheightty(
-               rowstate1.getitempo(fvisiblerows[int1]))^.rowheight.ypos >
+               rowstate1.getitempo(fvisiblerows[int1]))^.rowheight.ypos >=
                       int2 then begin
-        endrow:= int1;
+        endrow:= int1-1;
         break;
        end;
       end;
@@ -14617,10 +14619,11 @@ begin
  end;
 end;
 
-procedure tcustomgrid.insertrow(aindex: integer; acount: integer = 1;
-                                          const auserinput: boolean = false);
+function tcustomgrid.insertrow(aindex: integer; acount: integer = 1;
+                                    const auserinput: boolean = false): int32;
 begin
  internalinsertrow(aindex,acount,auserinput);
+ result:= aindex;
 end;
 
 procedure tcustomgrid.internaldeleterow(var aindex: integer;
@@ -16155,13 +16158,18 @@ begin
  end;
 end;
 
-procedure tcustomgrid.dodeleterow(const sender: tobject);
+function tcustomgrid.deleterowconfirmation(): boolean;
 begin
  with stockobjects do begin
-  if (og1_norowdeletequery in foptionsgrid1) or
-    askok(captions[sc_Delete_row_question],captions[sc_Confirmation]) then begin
-   deleterow(ffocusedcell.row,1,true);
-  end;
+  result:= (og1_norowdeletequery in foptionsgrid1) or
+    askok(captions[sc_Delete_row_question],captions[sc_Confirmation]);
+ end;
+end;
+
+procedure tcustomgrid.dodeleterow(const sender: tobject);
+begin
+ if deleterowconfirmation() then begin
+  deleterow(ffocusedcell.row,1,true);
  end;
 end;
 

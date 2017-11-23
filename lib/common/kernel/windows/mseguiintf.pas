@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2015 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2017 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -1109,6 +1109,7 @@ begin
   int1:= setdibits(dc,pixmap,0,image.size.cy,image.pixels,
               tbitmapinfo(pbitmapinfo(@bitmapinfo)^),dib_rgb_colors);
 //  releasedc(0,dc);
+  transformimageformat(image,false); //restore orginal bitorder
   if int1 <> 0 then begin
    result:= gde_ok;
   end;
@@ -3079,6 +3080,20 @@ begin
  end;
 end;
 
+procedure gui_getppmm(id: winidty; out appmmwidth,appmmheight: flo64);
+                                           //0.0 if not supported
+var
+ dc: hdc;
+begin
+ appmmwidth:= 0;
+ appmmheight:= 0;
+ dc:= getdc(id);
+ if dc <> 0 then begin
+  appmmwidth:= getdevicecaps(dc,logpixelsx) / 25.4;
+  appmmheight:= getdevicecaps(dc,logpixelsy) / 25.4;
+  releasedc(id,dc);
+ end; 
+end;
 
 const
  NIF_MESSAGE = $00000001;

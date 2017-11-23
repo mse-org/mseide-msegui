@@ -932,6 +932,7 @@ type
    procedure gridtovalue(arow: integer); override;
    
    procedure setcolor(const avalue: colorty); override;
+   procedure objectchanged(const sender: tobject); override;
 
     //iactionlink
    function getactioninfopo: pactioninfoty;
@@ -4474,6 +4475,16 @@ begin
  setactioncolor(iactionlink(self),avalue);
 end;
 
+procedure tcustomdatabutton.objectchanged(const sender: tobject);
+var
+ i1: int32;
+begin
+ inherited;
+ for i1:= 0 to high(fvaluefaces.fitems) do begin
+  tcustomface(fvaluefaces.fitems[i1]).checktemplate(sender);
+ end;
+end;
+
 procedure tcustomdatabutton.doupdate;
 begin
  if factioninfo.action <> nil then begin
@@ -4926,7 +4937,7 @@ begin
   canvas.restore;
   fbar_frame.paintoverlay(canvas,po2^);
   if fformat <> '' then begin
-   drawtext(canvas,realtytostr(applyrange(rea1,fvaluerange,fvaluestart),
+   drawtext(canvas,realtytostring(applyrange(rea1,fvaluerange,fvaluestart),
                                          fformat),arect,ftextflags,ffont);
   end;
  end;
