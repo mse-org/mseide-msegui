@@ -1,4 +1,4 @@
-{ MSEide Copyright (c) 1999-2016 by Martin Schreiber
+{ MSEide Copyright (c) 1999-2017 by Martin Schreiber
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -38,7 +38,7 @@ uses
  mselistbrowser,projecttreeform,msepipestream,msestringcontainer,msesys,
  msewidgets;
 const
- versiontext = '4.4.3';
+ versiontext = '4.6';
  idecaption = 'MSEide';
  statname = 'mseide';
 
