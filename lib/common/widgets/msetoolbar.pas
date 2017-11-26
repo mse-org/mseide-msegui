@@ -1276,6 +1276,7 @@ var
 
 var
  int1,int2,int3: integer;
+ i2: int32;
  rect1,rect2: rectty;
  endxy: integer;
 // bu1: stepbuttonposty;
@@ -1401,8 +1402,12 @@ begin
          end;
          if vert and (rect1.y + rect1.cy > endxy) or
              not vert and (rect1.x + rect1.cx > endxy) then begin
+          i2:= int1;
+          if i2 = ffirstbutton then begin
+           inc(i2);
+          end;
           if stepinfo.pageup = buttons.count then begin //first loop
-           pageup:= int1;
+           pageup:= i2;
           end;
           if (int3 > 0) then begin
            dec(int3);
@@ -1416,7 +1421,7 @@ begin
            end;
           end
           else begin
-           pageend:= int1;
+           pageend:= i2;
            break;
           end;
          end;
@@ -1459,7 +1464,12 @@ begin
          end;
         end;
         if int2 < 0 then begin
-         pagedown:= int1 + 1;
+         if int1 = ffirstbutton - 1 then begin
+          pagedown:= int1;
+         end
+         else begin
+          pagedown:= int1 + 1;
+         end;
          break;
         end;
        end;
@@ -1651,7 +1661,6 @@ end;
 
 procedure tcustomtoolbar.clientrectchanged;
 begin
- flayoutok:= false;
  inherited;
  updatelayout;
 end;
