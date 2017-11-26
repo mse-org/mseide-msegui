@@ -1157,9 +1157,13 @@ begin
 end;
 
 procedure tcustomtoolbar.checkvert(const asize: sizety);
+var
+ si1: sizety;
 begin
  with flayout do begin
-  vert:= asize.cy > asize.cx;
+  si1:= framesize;
+  vert:= si1.cy > si1.cx;
+//  vert:= asize.cy > asize.cx;
   if (tbo_novert in foptions) then begin
    vert:= false;
   end;
@@ -1279,6 +1283,7 @@ var
  size1: sizety; 
  pageend: integer;
  bo1: boolean;
+ bu1: stepkindsty;
 begin
  if fupdating <> 0 then begin
   flayoutok:= false;
@@ -1506,14 +1511,16 @@ begin
       if down = 0 then begin
        down:= -1;
       end;
+      bu1:= tcustomstepframe1(fframe).neededbuttons;
       frame.updatebuttonstate(ffirstbutton,pageend-ffirstbutton,buttons.count);
+      flayoutok:= flayoutok and (bu1 = tcustomstepframe1(fframe).neededbuttons);
      end;
      if flayoutok then begin
       size1:= self.size;
       checkautosize;
       if (size1.cx <> bounds_cx) or (size1.cy <> bounds_cy) then begin
        tcustomstepframe1(fframe).neededbuttons:= [];
-                  //try again
+       flayoutok:= false;  //try again
       end;
      end;
     end;
@@ -1644,6 +1651,7 @@ end;
 
 procedure tcustomtoolbar.clientrectchanged;
 begin
+ flayoutok:= false;
  inherited;
  updatelayout;
 end;
