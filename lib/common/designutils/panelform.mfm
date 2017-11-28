@@ -1,0 +1,37 @@
+object panelfo: tpanelfo
+  optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_hinton]
+  frame.localprops = []
+  frame.localprops1 = []
+  frame.grip_size = 10
+  frame.grip_options = [go_closebutton, go_fixsizebutton, go_floatbutton, go_topbutton, go_backgroundbutton, go_lockbutton, go_nolockbutton, go_buttonhints]
+  onpaint = paintexe
+  visible = False
+  bounds_x = 157
+  bounds_y = 493
+  bounds_cx = 323
+  bounds_cy = 195
+  container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_mousetransparent]
+  container.frame.framei_left = 0
+  container.frame.framei_top = 0
+  container.frame.framei_right = 0
+  container.frame.framei_bottom = 0
+  container.frame.localprops = [frl_fileft, frl_fitop, frl_firight, frl_fibottom]
+  container.frame.localprops1 = []
+  container.onpaint = paintexe
+  container.bounds = (
+    0
+    0
+    313
+    195
+  )
+  dragdock.tab_options = [tabo_dragsource, tabo_dragdest, tabo_hintclippedtext]
+  dragdock.tab_textflags = [tf_ycentered, tf_ellipseright]
+  dragdock.tab_widthmax = 100
+  dragdock.optionsdock = [od_savepos, od_savezorder, od_canmove, od_canfloat, od_candock, od_acceptsdock, od_dockparent, od_splitvert, od_splithorz, od_tabed, od_proportional, od_propsize, od_captionhint, od_childicons]
+  dragdock.onlayoutchanged = panellayoutchanged
+  dragdock.oncaptionchanged = panellayoutchanged
+  options = [fo_savepos, fo_savezorder, fo_savestate]
+  statfile = mainfo.projectstatfile
+  onclose = onclo
+  moduleclassname = 'tdockform'
+end
