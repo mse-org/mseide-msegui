@@ -483,12 +483,14 @@ function tdockpanelformcontroller.createdynamiccomp(
               const aclass: msecomponentclassty): tmsecomponent;
 begin
  application.createdatamodule(aclass,result);
+ registerdynamiccomp(result);
 end;
 
 function tdockpanelformcontroller.createdynamicwidget(
                                    const aclass: widgetclassty): twidget;
 begin
  application.createform(aclass,result);
+ registerdynamiccomp(result);
 end;
 
 procedure tdockpanelformcontroller.objectevent(const sender: tobject;
