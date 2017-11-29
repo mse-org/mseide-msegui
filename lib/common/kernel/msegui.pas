@@ -8491,14 +8491,20 @@ end;
 destructor twidget.destroy;
 var
  widget1: twidget;
+ window1: twindow;
 begin
  include(fwidgetstate,ws_destroying);
  if (appinst <> nil) then begin
   appinst.widgetdestroyed(self);
  end;
-// updateroot;
- if fwindow <> nil then begin
-  fwindow.widgetdestroyed(self);
+ window1:= fwindow;
+ widget1:= fparentwidget;
+ while (window1 = nil) and (widget1 <> nil) do begin
+  window1:= widget1.fwindow;
+  widget1:= widget1.fparentwidget;
+ end;
+ if window1 <> nil then begin
+  window1.widgetdestroyed(self);
  end;
  if fwidgets <> nil then begin
   if ow_destroywidgets in foptionswidget then begin

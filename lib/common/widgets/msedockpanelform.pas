@@ -96,6 +96,12 @@ type
      procedure(const sender: tdockpanelcontroller; 
                                   var aclass: panelfoclassty) of object;
 }
+ createdynamiccompeventty =
+     procedure(const sender: tdockpanelformcontroller; 
+                  const aclassname: string;
+                  const aname: string; var acomponent: tmsecomponent) of object;
+ dynamiccompeventty = procedure(const sender: tdockpanelformcontroller;
+                           const acomponent: tmsecomponent) of object;
 
  tdockpanelformcontroller = class(tmsecomponent,istatfile)
   private
@@ -114,6 +120,10 @@ type
    fstatfileclients: tstatfilearrayprop;
    fstatpriority: integer;
    fdockingareacaption: msestring;
+   fdynamiccomps: msecomponentarty;
+   foncreatedynamiccomp: createdynamiccompeventty;
+   fonregisterdynamiccomp: dynamiccompeventty;
+   fonunregisterdynamiccomp: dynamiccompeventty;
    procedure updatestat(const filer: tstatfiler);
    procedure setmenu(const avalue: tcustommenu);
 //   procedure checkstatfile(const avalue: tstatfile; const ref: tstatfile);
@@ -121,6 +131,8 @@ type
    procedure setstatfileclient(const avalue: tstatfile);
    procedure setstatfileclients(const avalue: tstatfilearrayprop);
   protected
+   procedure objectevent(const sender: tobject;
+                                 const event: objecteventty) override;
     //istatfile
    procedure dostatread(const reader: tstatreader); virtual;
    procedure dostatwrite(const writer: tstatwriter); virtual;
@@ -134,6 +146,14 @@ type
    function newpanel(aname: string = ''): tdockpanelform;
    procedure updatewindowcaptions(const avalue: msestring);
    procedure removepanels;
+   function createdynamiccomp(const aclassname: string): tmsecomponent;
+                                            //nil if not found
+   function createdynamiccomp(
+                 const aclass: msecomponentclassty): tmsecomponent;
+   function createdynamicwidget(const aclass: widgetclassty): twidget;
+   procedure registerdynamiccomp(const acomp: tmsecomponent);
+   procedure unregisterdynamiccomp(const acomp: tmsecomponent);
+   property dynamiccomps: msecomponentarty read fdynamiccomps;
   published
    property menu: tcustommenu read fmenu write setmenu;
    property statfile: tstatfile read fstatfile write setstatfile;
@@ -160,8 +180,12 @@ type
                      read fonupdatemenu write fonupdatemenu;
    property oncreatepanel: createpaneleventty read foncreatepanel 
                                                       write foncreatepanel;
-//   property ongetpanelclass: getpanelclasseventty read fongetpanelclass 
-//                                                     write fongetpanelclass;
+   property oncreatedynamiccomp: createdynamiccompeventty 
+                       read foncreatedynamiccomp write foncreatedynamiccomp;
+   property onregisterdynamiccomp: dynamiccompeventty 
+           read fonregisterdynamiccomp write fonregisterdynamiccomp;
+   property onunregisterdynamiccomp: dynamiccompeventty 
+           read fonunregisterdynamiccomp write fonunregisterdynamiccomp;
  end;
  
 function createdockpanelform(const aclass: tclass; 
@@ -211,7 +235,14 @@ begin
 end;
 
 destructor tdockpanelformcontroller.destroy;
+var
+ i1: int32;
 begin
+ for i1:= high(fdynamiccomps) downto 0 do begin
+  ievent(fdynamiccomps[i1]).unlink(ievent(self),
+                                        ievent(fdynamiccomps[i1]));
+ end;
+ fdynamiccomps:= nil;
  inherited;
  freeandnil(fpanellist);
  fstatfileclients.free;
@@ -219,24 +250,43 @@ end;
 
 procedure tdockpanelformcontroller.updatestat(const filer: tstatfiler);
 var
- ar1: msestringarty;
- int1: integer;
+ ar1,ar2,ar3: msestringarty;
+ i1: integer;
+ comp1: tmsecomponent;
 begin
  ar1:= nil;
  if filer.iswriter then begin
   setlength(ar1,fpanellist.count);
-  for int1:= 0 to high(ar1) do begin
-   ar1[int1]:= msestring(tdockpanelform(fpanellist[int1]).name);
+  for i1:= 0 to high(ar1) do begin
+   ar1[i1]:= msestring(tdockpanelform(fpanellist[i1]).name);
+  end;
+  setlength(ar2,length(fdynamiccomps));
+  for i1:= 0 to high(ar2) do begin
+   ar2[i1]:= msestring(fdynamiccomps[i1].classname+','+fdynamiccomps[i1].name);
   end;
  end;
  filer.updatevalue('panels',ar1);
+ filer.updatevalue('dynamiccomps',ar2);
  if not filer.iswriter then begin
-  for int1:= fpanellist.count - 1 downto 0 do begin
-   tdockpanelform(fpanellist[int1]).free;
+  if canevent(tmethod(foncreatedynamiccomp)) then begin
+   for i1:= 0 to high(ar2) do begin
+    ar3:= splitstring(ar2[i1],',');
+    if high(ar3) > 0 then begin
+     comp1:= nil;
+     foncreatedynamiccomp(self,string(ar3[0]),string(ar3[1]),comp1);
+     if comp1 <> nil then begin
+      comp1.name:= string(ar3[1]);
+      registerdynamiccomp(comp1);
+     end;
+    end;
+   end;
   end;
-  for int1:= 0 to high(ar1) do begin
+  for i1:= fpanellist.count - 1 downto 0 do begin
+   tdockpanelform(fpanellist[i1]).free;
+  end;
+  for i1:= 0 to high(ar1) do begin
    try
-    with newpanel(ansistring(ar1[int1])) do begin
+    with newpanel(ansistring(ar1[i1])) do begin
      if statfile = self.statfile then begin
       statreading();
      end;
@@ -246,10 +296,10 @@ begin
   end;
  end;
  with fstatfileclients do begin
-  for int1:= 0 to count - 1 do begin
-   with items[int1] do begin
+  for i1:= 0 to count - 1 do begin
+   with items[i1] do begin
     if (statfile <> nil) and (statfile <> fstatfile) then begin
-     statfile.updatestat('client_'+inttostrmse(int1),filer);
+     statfile.updatestat('client_'+inttostrmse(i1),filer);
     end;
    end;
   end;
@@ -368,7 +418,9 @@ end;
 
 procedure tdockpanelformcontroller.statreading;
 begin
- //dummy
+ while high(fdynamiccomps) >= 0 do begin
+  fdynamiccomps[high(fdynamiccomps)].destroy();
+ end;
 end;
 
 procedure tdockpanelformcontroller.statread;
@@ -401,7 +453,8 @@ begin
  end;
 end;
 
-procedure tdockpanelformcontroller.setstatfileclients(const avalue: tstatfilearrayprop);
+procedure tdockpanelformcontroller.setstatfileclients(
+                                     const avalue: tstatfilearrayprop);
 begin
  fstatfileclients.assign(avalue);
 end;
@@ -411,6 +464,86 @@ begin
  while fpanellist.count > 0 do begin
   tobject(fpanellist.items[fpanellist.count-1]).free;
  end; 
+end;
+
+function tdockpanelformcontroller.createdynamiccomp(
+                                  const aclassname: string): tmsecomponent;
+var
+ cla1: tpersistentclass;
+begin
+ result:= nil;
+ cla1:= getclass(aclassname);
+ if cla1.inheritsfrom(tmsecomponent) then begin
+  application.createdatamodule(msecomponentclassty(cla1),result);
+//  result:= msecomponentclassty(cla1).create(nil);
+ end;
+end;
+
+function tdockpanelformcontroller.createdynamiccomp(
+              const aclass: msecomponentclassty): tmsecomponent;
+begin
+ application.createdatamodule(aclass,result);
+end;
+
+function tdockpanelformcontroller.createdynamicwidget(
+                                   const aclass: widgetclassty): twidget;
+begin
+ application.createform(aclass,result);
+end;
+
+procedure tdockpanelformcontroller.objectevent(const sender: tobject;
+               const event: objecteventty);
+var
+ i1: int32;
+begin
+ if event = oe_destroyed then begin
+  for i1:= high(fdynamiccomps) downto 0 do begin
+   if fdynamiccomps[i1] = sender then begin
+    deleteitem(pointerarty(fdynamiccomps),i1);
+    if canevent(tmethod(fonunregisterdynamiccomp)) then begin
+     fonunregisterdynamiccomp(self,tmsecomponent(sender));
+    end;
+    break;
+   end;
+  end;
+ end;
+ inherited;
+end;
+
+procedure tdockpanelformcontroller.registerdynamiccomp(
+                                               const acomp: tmsecomponent);
+var
+ i1: int32;
+begin
+ for i1:= 0 to high(fdynamiccomps) do begin
+  if fdynamiccomps[i1] = acomp then begin
+   exit;
+  end;
+ end;
+ setlength(fdynamiccomps,high(fdynamiccomps)+2);
+ fdynamiccomps[high(fdynamiccomps)]:= acomp;
+ ievent(acomp).link(ievent(self),ievent(acomp));
+ if canevent(tmethod(fonregisterdynamiccomp)) then begin
+  fonregisterdynamiccomp(self,acomp);
+ end;
+end;
+
+procedure tdockpanelformcontroller.unregisterdynamiccomp(
+              const acomp: tmsecomponent);
+var
+ i1: int32;
+begin
+ for i1:= high(fdynamiccomps) downto 0 do begin
+  if fdynamiccomps[i1] = acomp then begin
+   ievent(fdynamiccomps[i1]).unlink(ievent(self),
+                                        ievent(fdynamiccomps[i1]));
+   deleteitem(pointerarty(fdynamiccomps),i1);
+   if canevent(tmethod(fonunregisterdynamiccomp)) then begin
+    fonunregisterdynamiccomp(self,acomp);
+   end;
+   exit;
+  end;
+ end;
 end;
 
 function tdockpanelformcontroller.getstatpriority: integer;
