@@ -1,4 +1,4 @@
-{ MSEide Copyright (c) 1999-2016 by Martin Schreiber
+{ MSEide Copyright (c) 1999-2017 by Martin Schreiber
    
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -274,11 +274,7 @@ type
                                                           const area: areaty);
    procedure updateclickedcomponent;
    procedure deletecomponent(const component: tcomponent);
-   procedure selectcomponent(const component: tcomponent;
-                                             mode: selectmodety = sm_select);
-                                  //component can be nil
    procedure selectparentwidget(const awidget: twidget);
-   procedure clearselection;
    procedure domodified;
 
    procedure selectchildexec(const sender: tobject);
@@ -390,6 +386,10 @@ type
    procedure beginstreaming(); virtual;
    procedure endstreaming(); virtual;
    procedure findcompdialog();
+   procedure clearselection;
+   procedure selectcomponent(const component: tcomponent;
+                                             mode: selectmodety = sm_select);
+                                  //component can be nil
 
    property module: tmsecomponent read fmodule write setmodule;
    property form: twidget read fform;
@@ -423,6 +423,7 @@ function createdesignform(const aowner: tdesigner;
                  const amodule: pmoduleinfoty): tformdesignerfo;
 function selectinheritedmodule(const amodule: pmoduleinfoty;
                                const caption: msestring = ''): pmoduleinfoty;
+function getdesignform(const acomp: tcomponent): tformdesignerfo;
 
 implementation
 uses
@@ -2748,6 +2749,24 @@ begin
   end;
  finally
   fo.Free;
+ end;
+end;
+
+function getdesignform(const acomp: tcomponent): tformdesignerfo;
+var
+ comp1: tcomponent;
+ p1: pmoduleinfoty;
+begin
+ result:= nil;
+ comp1:= rootcomponent(acomp);
+ if comp1 <> nil then begin
+  p1:= designer.modules.findmodulebyinstance(comp1);
+  if p1 <> nil then begin
+   pointer(result):= p1^.designform;
+   if not (result is tformdesignerfo) then begin
+    result:= nil;
+   end;
+  end;
  end;
 end;
 

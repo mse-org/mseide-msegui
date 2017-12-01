@@ -176,6 +176,9 @@ type
    procedure refresh;
    procedure clickedcomponentchanged(const aclickedcomp: tcomponent);
    procedure showmethodsource(const aeditor: tmethodpropertyeditor);
+   function selectprop(const anamepath: msestringarty;
+                           const acol: int32; const exact: boolean): boolean;
+   procedure asyncactivate();
 
    //idesignnotification
    procedure itemdeleted(const adesigner: idesigner;
@@ -192,15 +195,18 @@ type
                      const amodule: tmsecomponent; const newname: string);
    procedure selectionchanged(const adesigner: idesigner;
                                    const aselection: idesignerselections);
-   procedure moduleactivated(const adesigner: idesigner; const amodule: tmsecomponent);
-   procedure moduledeactivated(const adesigner: idesigner; const amodule: tmsecomponent);
-   procedure moduledestroyed(const adesigner: idesigner; const amodule: tmsecomponent);
+   procedure moduleactivated(const adesigner: idesigner;
+                                     const amodule: tmsecomponent);
+   procedure moduledeactivated(const adesigner: idesigner;
+                                     const amodule: tmsecomponent);
+   procedure moduledestroyed(const adesigner: idesigner;
+                                     const amodule: tmsecomponent);
    procedure methodcreated(const adesigner: idesigner;
                           const amodule: tmsecomponent;
                           const aname: string; const atype: ptypeinfo);
    procedure methodnamechanged(const adesigner: idesigner;
-                          const amodule: tmsecomponent;
-                          const newname,oldname: string; const atypeinfo: ptypeinfo);
+                   const amodule: tmsecomponent;
+                   const newname,oldname: string; const atypeinfo: ptypeinfo);
    procedure showobjecttext(const adesigner: idesigner;
                    const afilename: filenamety; const backupcreated: boolean);
    procedure closeobjecttext(const adesigner: idesigner;
@@ -215,7 +221,8 @@ type
    function getproperties(const objects: objectarty; const amodule: tmsecomponent;
                           const acomponent: tcomponent): propertyeditorarty;
    procedure propertymodified(const sender: tpropertyeditor);
-   function getmatchingmethods(const sender: tpropertyeditor; atype: ptypeinfo): msestringarty;
+   function getmatchingmethods(const sender: tpropertyeditor;
+                                         atype: ptypeinfo): msestringarty;
  end;
 
  tpropertyitem = class(ttreelistedititem)
@@ -246,7 +253,7 @@ const
  ado_rereadprops = 1;  //asyncevent codes
  ado_updatecomponentname = 2;
  ado_compselection = 3;
-// objectinspectorcaption = 'Object Inspector';
+ ado_activate = 4;
  selectcolor = cl_ltred;
 
 type
@@ -901,41 +908,100 @@ begin
   result:= reviseproperties(result);
  end;
 end;
+{
+function tobjectinspectorfo.selectprop(const anamepath: msestringarty;
+                           const acol: int32; const exact: boolean): boolean;
+var
+ i1: integer;
+ item1,item2,item3: tpropertyitem;
+begin
+ result:= false;
+ if anamepath <> nil then begin
+  item1:= tpropertyitem.create;
+  try
+   item1.assign(props.itemlist);
+   item2:= item1;
+   result:= true;
+   item3:= item2;  //compiler warning
+   for i1:= 0 to high(anamepath) do begin
+    item3:= item2;
+    item2:= item2.finditembyname(anamepath[i1]);
+    if item2 = nil then begin
+     result:= not exact;
+     break;
+    end;
+   end;
+   if result then begin
+    if item2 = nil then begin
+     item2:= item3;
+    end;
+    grid.focuscell(makegridcoord(acol,item2.findex));
+   end;
+  finally
+   item1.Free;
+  end;
+ end;
+end;
+}
+function tobjectinspectorfo.selectprop(const anamepath: msestringarty;
+                           const acol: int32; const exact: boolean): boolean;
+var
+ i1: integer;
+ p1,pe,p2: ^tpropertyitem;
+ item1: tpropertyitem;
+begin
+ result:= false;
+ if anamepath <> nil then begin
+  p1:= props.itemlist.datapo;
+  pe:= p1 + props.itemlist.count;
+  while p1 < pe do begin
+   if (p1^.treelevel = 0) and (p1^.caption = anamepath[0]) then begin
+    break;
+   end;
+   inc(p1);
+  end;
+  if p1 < pe then begin
+   result:= true;
+   item1:= p1^;
+   p1:= @item1;
+   for i1:= 1 to high(anamepath) do begin
+    p1^.expanded:= true;
+    p2:= p1;
+    p1:= pointer(p1^.fitems);
+    pe:= p1 + p2^.count;
+    while p1 < pe do begin
+     if p1^.fcaption = anamepath[i1] then begin
+      break;
+     end;
+     inc(p1);
+    end;
+    if p1 = pe then begin
+     result:= not exact;
+     break;
+    end;
+   end;
+   if result then begin
+    grid.focuscell(makegridcoord(acol,p1^.findex));
+   end;
+  end;
+ end;
+end;
+
+procedure tobjectinspectorfo.asyncactivate();
+begin
+ asyncevent(ado_activate,[peo_modaldefer]);
+end;
 
 function tobjectinspectorfo.restoreactprop(const acomponent: tcomponent;
                    acol: integer; exact: boolean = false): boolean;
 var
  po1: pcompinfoty;
- int1: integer;
- item1,item2,item3: tpropertyitem;
 begin
  result:= false;
  if acomponent <> nil then begin
   po1:= fcomponentinfos.getitempo(fcomponentinfos.find(acomponent));
-  if (po1 <> nil) and (high(po1^.actprop) >= 0) then begin
-   item1:= tpropertyitem.create;
-   try
-    item1.assign(props.itemlist);
-    item2:= item1;
-    result:= true;
-    item3:= item2;  //compiler warning
-    for int1:= 0 to high(po1^.actprop) do begin
-     item3:= item2;
-     item2:= item2.finditembyname(po1^.actprop[int1]);
-     if item2 = nil then begin
-      result:= not exact;
-      break;
-     end;
-    end;
-    if result then begin
-     if item2 = nil then begin
-      item2:= item3;
-     end;
-     grid.focuscell(makegridcoord(acol,item2.findex));
-    end;
-   finally
-    item1.Free;
-   end;
+  if po1 <> nil then begin
+   result:= selectprop(po1^.actprop,acol,exact);
   end;
  end;
 end;
@@ -1043,6 +1109,9 @@ begin
   end;
   ado_updatecomponentname: begin
    updatecomponentname;
+  end;
+  ado_activate: begin
+   activate();
   end;
  end;
 end;

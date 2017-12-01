@@ -38,6 +38,7 @@ type
  tmenuitem = class;
 
  menuitemeventty = procedure(const sender: tmenuitem) of object;
+ menuitemprocty = procedure(const sender: tmenuitem);
 
  tmenuitems = class(tpersistentarrayprop,ievent)
   private

@@ -95,7 +95,8 @@ type
    procedure activatemenu(
               const keymode,aclicked,nokeymodereset: boolean); virtual;
    procedure deactivatemenu; virtual;
-   procedure selectmenu(const keymode: boolean); virtual;
+   procedure selectmenu(const keymode: boolean;
+                                      const keyreturn: boolean); virtual;
    function rootpopup: tpopupmenuwidget;
    procedure closepopupstack(aselecteditem: tmenuitem;
                                const cancelmodal: boolean = false);
@@ -163,7 +164,8 @@ type
    procedure activatemenu(
                const keymode,aclicked,nokeymodereset: boolean); override;
    procedure deactivatemenu; override;
-   procedure selectmenu(const keymode: boolean); override;
+   procedure selectmenu(const keymode: boolean; 
+                                   const keyreturn: boolean); override;
    procedure internalcreateframe; override;
    procedure loaded; override;
    procedure mouseevent(var info: mouseeventinfoty); override;
@@ -219,6 +221,10 @@ function showpopupmenu(const menu: tmenuitem; const transientfor: twidget;
 function showpopupmenu(const menu: tmenuitem; const transientfor: twidget;
                                           var mouseinfo: mouseeventinfoty): tmenuitem; overload;
                                           }
+
+var
+ menuexehandlerdesign: menuitemprocty;
+ 
 implementation
 uses
  msedrawtext,mserichstring,msestockobjects,sysutils,msekeyboard,msebits,
@@ -1401,17 +1407,10 @@ begin
        invalidaterect(dimouter);
        if bo1 then begin
         include(info.eventstate,es_processed);
- //       int1:= activeitem;
-        selectmenu(false);
- //       include(state,shs_mouse);
- //       if (activeitem < 0) and (application.mousecapturewidget = nil) and 
- //                 (int1 <= high(cells)) then begin
- //        activeitem:= int1; //restore mouseactivating
- //       end;
+        selectmenu(false,false);
         if (mlo_main in options) and (fclickeditem = activeitem) then begin
          fclickeditem:= -1;
          closepopupstack(nil);
- //        include(state,shs_mouse);
          exit;
         end;
         fclickeditem:= activeitem;
@@ -1422,22 +1421,8 @@ begin
     ek_clientmouseleave: begin
      resetmouseflag;
      if (fnextpopup = nil) then begin
- //     if itembefore >= 0 then begin
- //      subpoint1(info.pos,clientpos);
- //      updatemouseshapestate(cells[itembefore].buttoninfo,info,self,nil);
- //     end;
       setactiveitem(-1);
- //     if itembefore >= 0 then begin
- //      subpoint1(info.pos,clientpos);
- //      updatemouseshapestate(cells[itembefore].buttoninfo,info,self,nil);
- //     end;
-     end
- //    else begin
- //     if activeitem >= 0 then begin
- //      subpoint1(info.pos,clientpos);
- //      updatemouseshapestate(cells[activeitem].buttoninfo,info,self,nil);
- //     end;
- //    end;
+     end;
     end;
    end;
   end;
@@ -1577,33 +1562,33 @@ begin
  end;
 end;
 
-procedure tpopupmenuwidget.selectmenu(const keymode: boolean);
+procedure tpopupmenuwidget.selectmenu(const keymode: boolean;
+                                                    const keyreturn: boolean);
 var
- int1: integer;
+ i1: integer;
  bo1: boolean;
 begin
  with flayout do begin
+  bo1:= not((menu.owner <> nil) and 
+                           (csdesigning in menu.owner.componentstate));
+  i1:= activeitem;
   if mlo_childreninactive in options then begin
    exclude(options,mlo_childreninactive);
-   internalsetactiveitem(activeitem,false,true,false);
+   internalsetactiveitem(i1,false,true,false);
   end;
- end;
- if (fnextpopup <> nil) then begin
-  if keymode then begin
-   fnextpopup.activatemenu(keymode,false,false);
+  if (fnextpopup <> nil) then begin
+   if keymode and (bo1 or not keyreturn) then begin
+    fnextpopup.activatemenu(keymode,false,false);
+   end
+   else begin
+    fnextpopup.window.bringtofront; //win32 workaround
+   end;
   end
   else begin
-   fnextpopup.window.bringtofront; //win32 workaround
-  end;
- end
- else begin
-  with flayout do begin
-   bo1:= not ((menu.owner <> nil) and (csdesigning in menu.owner.componentstate));
-   if activeitem >= 0 then begin
-    int1:= activeitem;
-    with menu[int1] do begin
+   if i1 >= 0 then begin
+    with menu[i1] do begin
      if (mao_asyncexecute in options) then begin
-      closepopupstack(menu[int1]);
+      closepopupstack(menu[i1]);
       if bo1 then begin
        asyncexecute;
       end;
@@ -1613,10 +1598,16 @@ begin
       if bo1 then begin
        execute;
       end;
-      closepopupstack(menu[int1]);
+      closepopupstack(menu[i1]);
      end;
     end;
    end;
+  end;
+  if not bo1 and assigned(menuexehandlerdesign) and (i1 >= 0) and
+          (not (mlo_main in options) or (fclickeditem = i1) or 
+               (menu[i1].submenu.count = 0)) then begin
+   closepopupstack(menu[i1]);
+   menuexehandlerdesign(menu[i1]);
   end;
  end;
 end;
@@ -1657,7 +1648,7 @@ procedure tpopupmenuwidget.dokeydown(var info: keyeventinfoty);
      setactiveitem(int1);
      beginkeymode;
      if not bo1 then begin
-      selectmenu(true);
+      selectmenu(true,false);
      end;
     end;
    end;
@@ -1699,7 +1690,7 @@ begin
    case key of
     key_return,{key_enter,}key_space: begin
      if not (ss_repeat in shiftstate) then begin
-      selectmenu(true);
+      selectmenu(true,true);
      end;
     end;
     key_up: begin
@@ -2123,7 +2114,8 @@ begin
  flayout.menu.owner.checkexec;
 end;
 
-procedure tcustommainmenuwidget.selectmenu(const keymode: boolean);
+procedure tcustommainmenuwidget.selectmenu(const keymode: boolean;
+                                                   const keyreturn: boolean);
 begin
  checkactivate(true,fnextpopup = nil);
  if fnextpopup <> nil then begin
