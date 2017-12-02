@@ -79,7 +79,6 @@ type
   private
    ftimer: tsimpletimer;
    foptions: dragoptionsty;
-   procedure dokeypress(const sender: twidget; var info: keyeventinfoty);
    procedure initdraginfo(var info: draginfoty;
                          const eventkind: drageventkindty; const pos: pointty);
    function checkcandragdrop(const pos: pointty;
@@ -92,6 +91,8 @@ type
    fintf: idragcontroller;
    fsysdndobjects: array[0..3] of sysdndinfoty;
    flastwidget: twidget;
+   procedure dokeypress(const sender: twidget; var info: keyeventinfoty)
+                                                                     virtual;
    procedure doexpiresdnd(const sender: tobject);
    function checkclickstate(const info: mouseeventinfoty): boolean; virtual;
    function checksysdnd(const aaction: sysdndactionty;
@@ -232,11 +233,12 @@ begin
  if ds_haddragobject in fstate then begin
   application.cursorshape:= cr_default;
  end;
- application.unregisteronkeypress({$ifdef FPC}@{$endif}dokeypress);
+ application.unregisteronkeypress(@dokeypress);
  fstate:= fstate - dragstates;
 end;
 
-procedure tcustomdragcontroller.dokeypress(const sender: twidget; var info: keyeventinfoty);
+procedure tcustomdragcontroller.dokeypress(const sender: twidget;
+                                                var info: keyeventinfoty);
 begin
  if active and (info.key = key_escape) then begin
   enddrag;

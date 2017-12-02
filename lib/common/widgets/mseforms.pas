@@ -484,6 +484,7 @@ type
    procedure statread; override;
    procedure dostatread1(const reader: tstatreader); override;
    procedure dostatwrite1(const writer: tstatwriter); override;
+//   procedure dokeydown(var info: keyeventinfoty) override;
    procedure childmouseevent(const sender: twidget;
                           var info: mouseeventinfoty); override;
    procedure statechanged; override;
@@ -2430,7 +2431,15 @@ begin
   fdragdock.dostatwrite(writer,nil);
  end;
 end;
-
+{
+procedure tcustomdockform.dokeydown(var info: keyeventinfoty);
+begin
+ fdragdock.keydown(info);
+ if not es_processed in info.eventstate then begin
+  inherited;
+ end;
+end;
+}
 procedure tcustomdockform.statreading;
 begin
  tdockcontroller(fdragdock).statreading;

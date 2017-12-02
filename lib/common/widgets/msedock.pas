@@ -218,6 +218,7 @@ type
    fsizes: integerarty;
    frefsize: integer;
    fwidgetsbefore: widgetarty;
+   fwidgetrectsbefore: rectarty;
    ftab_textflags: textflagsty;
    ftab_width: integer;
    ftab_widthmin: integer;
@@ -285,8 +286,15 @@ type
    
    procedure checkdirection;
    procedure objectevent(const sender: tobject;
-                                      const event: objecteventty); override;
-   function checkclickstate(const info: mouseeventinfoty): boolean; override;
+                                      const event: objecteventty) override;
+   function checkclickstate(const info: mouseeventinfoty): boolean override;
+   procedure dokeypress(const sender: twidget; var info: keyeventinfoty)
+                                                                     override;
+
+   procedure drawxorpic(const ashow: boolean; var canvas1: tcanvas);
+   procedure endmouseop1();
+   procedure endmouseop2();
+   procedure cancelsizing();
    
    function doclose(const awidget: twidget): boolean;
    procedure setmdistate(const avalue: mdistatety); virtual;
@@ -718,7 +726,7 @@ procedure paintdockingareacaption(const canvas: tcanvas; const sender: twidget;
 implementation
 uses
  msearrayutils,sysutils,msebits,{msetabs,}mseguiintf,{mseforms,}msestream,
- mseformatstr;
+ mseformatstr,msekeyboard;
 
 type
  twidget1 = class(twidget);
@@ -3311,6 +3319,88 @@ begin
    not ((fmdistate = mds_maximized) and not (od_canfloat in foptionsdock));
 end;
 
+procedure tdockcontroller.drawxorpic(const ashow: boolean;
+                                        var canvas1: tcanvas);
+var
+ rect1: rectty;
+begin
+ if canvas1 = nil then begin
+  canvas1:= fintf.getwidget().container.getcanvas(org_widget);
+ end;
+ if dos_moving in fdockstate then begin
+  canvas1.drawxorframe(fsizingrect,-2,stockobjects.bitmaps[stb_dens50]);
+ end
+ else begin
+  if not (od_thumbtrack in foptionsdock) then begin
+   if fsplitdir = sd_vert then begin
+    rect1:= moverect(fsizingrect,makepoint(fsizeoffset,0));
+   end
+   else begin
+    rect1:= moverect(fsizingrect,makepoint(0,fsizeoffset));
+   end;
+   canvas1.fillxorrect(rect1,stockobjects.bitmaps[stb_dens50]);
+  end;
+ end;
+ if ashow then begin
+  include(fdockstate,dos_xorpic);
+ end
+ else begin
+  exclude(fdockstate,dos_xorpic);
+ end;
+end;
+
+procedure tdockcontroller.endmouseop1();
+var
+ c1: tcanvas;
+begin
+ restorepickshape();
+ if dos_xorpic in fdockstate then begin
+  c1:= nil;
+  drawxorpic(false,c1); //remove pic
+ end;
+ if fsizeindex >= 0 then begin
+  application.unregisteronkeypress(@dokeypress);
+ end;
+end;
+
+const
+ resetmousedockstate =
+        [{dos_closebuttonclicked,dos_maximizebuttonclicked,
+          dos_normalizebuttonclicked,dos_minimizebuttonclicked,
+          dos_fixsizebuttonclicked,dos_floatbuttonclicked,dos_topbuttonclicked,
+          dos_backgroundbuttonclicked,
+          dos_lockbuttonclicked,dos_nolockbuttonclicked,}dos_moving];
+
+procedure tdockcontroller.endmouseop2();
+begin
+ fdockstate:= fdockstate - resetmousedockstate;
+ fclickedbutton:= dbr_none;
+end;
+
+procedure tdockcontroller.cancelsizing();
+var
+ i1: int32;
+begin
+ endmouseop1();
+ endmouseop2();
+ fsizeindex:= -1;
+ if (od_thumbtrack in foptionsdock) and 
+          (high(fwidgetrectsbefore) = high(fwidgetsbefore)) then begin
+  include(fdockstate,dos_updating1);
+  try
+   for i1:= 0 to high(fwidgetrectsbefore) do begin
+    fwidgetsbefore[i1].widgetrect:= fwidgetrectsbefore[i1];
+   end;
+  finally
+   fwidgetrectsbefore:= nil;
+   exclude(fdockstate,dos_updating1);
+   calclayout(nil,true);
+   updaterefsize();
+  end;
+ end;
+ fwidgetrectsbefore:= nil;
+end;
+
 procedure tdockcontroller.clientmouseevent(var info: mouseeventinfoty);
 
 var
@@ -3533,35 +3623,6 @@ var
 var
  canvas1: tcanvas;
  
- procedure drawxorpic(const ashow: boolean);
- var
-  rect1: rectty;
- begin
-  if canvas1 = nil then begin
-   canvas1:= widget1.container.getcanvas(org_widget);
-  end;
-  if dos_moving in fdockstate then begin
-   canvas1.drawxorframe(fsizingrect,-2,stockobjects.bitmaps[stb_dens50]);
-  end
-  else begin
-   if not (od_thumbtrack in foptionsdock) then begin
-    if fsplitdir = sd_vert then begin
-     rect1:= moverect(fsizingrect,makepoint(fsizeoffset,0));
-    end
-    else begin
-     rect1:= moverect(fsizingrect,makepoint(0,fsizeoffset));
-    end;
-    canvas1.fillxorrect(rect1,stockobjects.bitmaps[stb_dens50]);
-   end;
-  end;
-  if ashow then begin
-   include(fdockstate,dos_xorpic);
-  end
-  else begin
-   exclude(fdockstate,dos_xorpic);
-  end;
- end; //drawxorpic
-
  procedure dosize;
  begin
   checksizeoffset;
@@ -3595,15 +3656,9 @@ var
   end;
  end; //setmousebutton
  
-const
- resetmousedockstate =
-        [{dos_closebuttonclicked,dos_maximizebuttonclicked,
-          dos_normalizebuttonclicked,dos_minimizebuttonclicked,
-          dos_fixsizebuttonclicked,dos_floatbuttonclicked,dos_topbuttonclicked,
-          dos_backgroundbuttonclicked,
-          dos_lockbuttonclicked,dos_nolockbuttonclicked,}dos_moving];
 var
  bu1: dockbuttonrectty;
+ i1: int32;
 
 begin
  inherited;
@@ -3622,7 +3677,7 @@ begin
       restorepickshape;
       fsizeindex:= -1;
       if dos_xorpic in fdockstate then begin
-       drawxorpic(false); //remove pic
+       drawxorpic(false,canvas1); //remove pic
       end;
       exclude(fstate,ds_clicked);
       fdockstate:= fdockstate - resetmousedockstate;
@@ -3656,16 +3711,16 @@ begin
       end
       else begin
        if fsplitdir = sd_vert then begin
-        drawxorpic(false);   //remove pic
+        drawxorpic(false,canvas1);   //remove pic
         fsizeoffset:= pos.x - fpickpos.x;
         checksizeoffset;
-        drawxorpic(true);   //draw pic
+        drawxorpic(true,canvas1);   //draw pic
        end;
        if fsplitdir = sd_horz then begin
-        drawxorpic(false);  //remove pic
+        drawxorpic(false,canvas1);  //remove pic
         fsizeoffset:= pos.y - fpickpos.y;
         checksizeoffset;
-        drawxorpic(true);  //draw pic
+        drawxorpic(true,canvas1);  //draw pic
        end;
       end;
      end;
@@ -3681,40 +3736,31 @@ begin
         include(fdockstate,dos_moving);
        end
        else begin
+        application.registeronkeypress(@dokeypress);
         exclude(fdockstate,dos_moving);
+        if od_thumbtrack in foptionsdock then begin
+         setlength(fwidgetrectsbefore,length(fwidgetsbefore));
+         for i1:= 0 to high(fwidgetsbefore) do begin
+          fwidgetrectsbefore[i1]:= fwidgetsbefore[i1].widgetrect;
+         end;
+        end;
        end;
-       drawxorpic(true);
+       drawxorpic(true,canvas1);
       end;
       if not (ss_shift in shiftstate) then begin
        bu1:= checkbuttonarea(pos);
        setmousebutton(bu1);
        fclickedbutton:= bu1;
-      {
-       case checkbuttonarea(pos) of
-        dbr_close: include(fdockstate,dos_closebuttonclicked);
-        dbr_maximize: include(fdockstate,dos_maximizebuttonclicked);
-        dbr_normalize: include(fdockstate,dos_normalizebuttonclicked);
-        dbr_minimize: include(fdockstate,dos_minimizebuttonclicked);
-        dbr_fixsize: include(fdockstate,dos_fixsizebuttonclicked);
-        dbr_float: include(fdockstate,dos_floatbuttonclicked);
-        dbr_top: include(fdockstate,dos_topbuttonclicked);
-        dbr_background: include(fdockstate,dos_backgroundbuttonclicked);
-        dbr_lock: include(fdockstate,dos_lockbuttonclicked);
-        dbr_nolock: include(fdockstate,dos_nolockbuttonclicked);
-       end;
-      }
       end;
      end;
     end;
     ek_buttonrelease: begin
-     restorepickshape;
-     if dos_xorpic in fdockstate then begin
-      drawxorpic(false); //remove pic
-     end;
+     endmouseop1();
      if fsizeindex >= 0 then begin
-      dosize;
+      fwidgetrectsbefore:= nil;
+      dosize();
       fsizeindex:= -1;
-      fintf.getwidget.invalidate;
+      fintf.getwidget.invalidate();
       checksizing((dos_moving in fdockstate) or 
                          (od_nosplitsize in foptionsdock));
      end
@@ -3777,8 +3823,7 @@ begin
        end;
       end;
      end;
-     fdockstate:= fdockstate - resetmousedockstate;
-     fclickedbutton:= dbr_none;
+     endmouseop2();
     end;
    end;
   end;
@@ -4402,6 +4447,16 @@ begin
  else begin
   result:= info.shiftstate - [ss_left] = [];
  end;
+end;
+
+procedure tdockcontroller.dokeypress(const sender: twidget;
+               var info: keyeventinfoty);
+begin
+ if (info.key = key_escape) and (fsizeindex >= 0) then begin
+  include(info.eventstate,es_processed);
+  cancelsizing();
+ end;
+ inherited;
 end;
 
 procedure tdockcontroller.setsplitdir(const avalue: splitdirty);
