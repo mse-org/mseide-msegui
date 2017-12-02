@@ -2226,7 +2226,7 @@ begin
   for int1:= 0 to high(ar1) do begin
    int2:= fw^.size(ar1[int1])+fsplitter_size;
    bandlength:= bandlength+int2;
-   if bandlength >= placementlength then begin //next band
+   if bandlength >{=} placementlength then begin //next band
     if not bo1 then begin //shift to next band
      bandlength:= bandlength - int2;
      if bandlength > maxlength then begin
