@@ -3690,7 +3690,7 @@ begin
        setmousebutton(checkbuttonarea(pos));
       end;
       checksizing((dos_moving in fdockstate) or 
-                         (od_nosplitsize in foptionsdock));
+                                    (od_nosplitsize in foptionsdock));
      end
      else begin
       setmousebutton(dbr_none);
@@ -3701,7 +3701,7 @@ begin
        if fsplitdir = sd_horz then begin
         fsizeoffset:= pos.y - fpickpos.y;
        end;
-       dosize;
+       dosize();
        if fsplitdir = sd_vert then begin
         fpickpos.x:= fpickpos.x+fsizeoffset;
        end;
@@ -3758,6 +3758,9 @@ begin
      endmouseop1();
      if fsizeindex >= 0 then begin
       fwidgetrectsbefore:= nil;
+      if od_thumbtrack in foptionsdock then begin
+       fsizeoffset:= 0;
+      end;
       dosize();
       fsizeindex:= -1;
       fintf.getwidget.invalidate();
