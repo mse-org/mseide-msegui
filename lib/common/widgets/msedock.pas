@@ -2155,12 +2155,14 @@ begin
    sd_tabed: begin
     include(fdockstate,dos_updating5);
     try
+     fsplitterrects:= nil;
      if ftabwidget = nil then begin
       ftabwidget:= tdocktabwidget.create(self,container1);
-      ftabwidget.anchors:= [];
       include(ttabwidget1(ftabwidget).foptionswidget1,ow1_noautosizing);
+      ftabwidget.anchors:= [an_left,an_right,an_top,an_bottom];
      end;
      with tdocktabwidget(ftabwidget) do begin
+      widgetrect:= fplacementrect;
       for int1:= 0 to high(ar1) do begin
        if (ar1[int1] <> ftabwidget) and
              ((ar1[int1].parentwidget = nil) or
@@ -2352,6 +2354,7 @@ var
   rect2: rectty;
   pt1: pointty;
   x1,y1: integer;
+  f1: flo64;
  begin
   with info,tdockdragobject(dragobjectpo^) do begin
    nofit:= (od_nofit in optionsdock) and (fsplitdir in [sd_vert,sd_horz]);
@@ -2374,8 +2377,10 @@ var
     subpoint1(rect1.pos,addpoint(pickpos,widget.clientwidgetpos));
     if not nofit then begin
 //     size1:= widget1.clientsize;
-     pt1:= addpoint(info.pos,container1.clientpos); //paint origin
-     size1:= container1.paintsize;
+//     pt1:= addpoint(info.pos,container1.clientpos); //paint origin
+     pt1:= subpoint(info.pos,fplacementrect.pos); //paint origin
+//     size1:= container1.paintsize;
+     size1:= fplacementrect.size;
      with size1 do begin
       x1:= cx div 8;
       y1:= (cy * 7) div 8;
@@ -2399,15 +2404,18 @@ var
        end;
       end;
      end;
-     size1:= container1.paintsize;
+//     size1:= container1.paintsize;
+     size1:= fplacementrect.size;
      if (widget.anchors * [an_left,an_right] = []) and 
                                (fsplitdir = sd_none) then begin
-      rect1.x:= container1.screenpos.x + container1.paintpos.x;
+      rect1.x:= container1.screenpos.x + fplacementrect.x;
+                                            //container1.paintpos.x;
       rect1.cx:= size1.cx;
      end;
      if (widget.anchors * [an_top,an_bottom] = []) and 
                                (fsplitdir = sd_none) then begin
-      rect1.y:= container1.screenpos.y + container1.paintpos.y;
+      rect1.y:= container1.screenpos.y + fplacementrect.y;
+                                                 //container1.paintpos.y;
       rect1.cy:= size1.cy;
      end;
      sd1:= fsplitdir;
@@ -2421,32 +2429,38 @@ var
      findex:= count1-1;
      case fasplitdir of
       sd_vert: begin
-       rect1.y:= container1.screenpos.y + container1.paintpos.y;
+       rect1.y:= container1.screenpos.y + fplacementrect.y;
+                                             //container1.paintpos.y;
        rect1.cy:= size1.cy;
        if count1 = 0 then begin
         exit; //should not happen
        end;
-       rect1.cx:= size1.cx div (count1);
+       f1:= size1.cx / count1;
+       rect1.cx:= size1.cx div count1;
        if rect1.cx > 0 then begin
         findex:= (pt1.x div rect1.cx);
-        rect1.x:=  findex * rect1.cx +
-                container1.screenpos.x + container1.paintpos.x;
+        rect1.x:=  round(findex * f1) +
+                container1.screenpos.x + fplacementrect.x;
+                                               //container1.paintpos.x;
        end;
        if count1 = 1 then begin
         dec(rect1.cx,rect1.cx div 16);
        end;
       end;
       sd_horz: begin
-       rect1.x:= container1.screenpos.x + container1.paintpos.x;
+       rect1.x:= container1.screenpos.x + fplacementrect.x;
+                                              //container1.paintpos.x;
        rect1.cx:= size1.cx;
        if count1 = 0 then begin
         exit; //should not happen
        end;
-       rect1.cy:= size1.cy div (count1);
+       f1:= size1.cy / count1;
+       rect1.cy:= size1.cy div count1;
        if rect1.cy > 0 then begin
         findex:= (pt1.y div rect1.cy);
-        rect1.y:=  findex * rect1.cy +
-                container1.screenpos.y + container1.paintpos.y;
+        rect1.y:=  round(findex * f1) +
+                container1.screenpos.y + fplacementrect.y;
+                                              //container1.paintpos.y;
        end;
        if count1 = 1 then begin
         int1:= rect1.cy div 16;
@@ -2477,7 +2491,7 @@ var
      end
      else begin
       setxorwidget(container1,clipinrect(rect1,
-        makerect(translatewidgetpoint(container1.paintpos,
+        makerect(translatewidgetpoint(fplacementrect.pos{container1.paintpos},
         container1,nil),size1)));
      end;
     end
