@@ -4359,7 +4359,19 @@ begin
  {$ifdef FPC} {$checkpointer off} {$endif}
  xgetwmnormalhints(appdisp,id,sizehints,@int1);
  with sizehints^ do begin
-  flags:= flags or pminsize or pmaxsize;
+//  flags:= flags or pminsize or pmaxsize;
+  if (min.cx <> 0) or (min.cy <> 0) then begin
+   flags:= flags or pminsize;
+  end
+  else begin
+   flags:= flags and not pminsize;
+  end;
+  if (max.cx <> 0) or (max.cy <> 0) then begin
+   flags:= flags or pmaxsize;
+  end
+  else begin
+   flags:= flags and not pmaxsize;
+  end;
   min_width:= min.cx;
   min_height:= min.cy;
   if max.cx = 0 then begin
