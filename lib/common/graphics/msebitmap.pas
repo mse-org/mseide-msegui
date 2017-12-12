@@ -442,16 +442,16 @@ type
    function getversioncount: int32;
    procedure setversioncount(const avalue: int32);
    function getbitmap: tmaskedbitmap;
-//   procedure setversioncurrent(avalue: int32);
-   function getbitmaps(const aindex: int32): tmaskedbitmap;
+   procedure setversiondefault(avalue: int32);
+   function getbitmaps(aindex: int32): tmaskedbitmap;
   protected
    fversionhigh: int32; //versioncount - 1 
-//   fversioncurrent: int32; //use for painting
+   fversiondefault: int32; //use for painting
    fcornermaskmaxtopleft: int32; //biggest value of cornermask
    fcornermaskmaxbottomleft: int32; //biggest value of cornermask
    fcornermaskmaxbottomright: int32; //biggest value of cornermask
    fcornermaskmaxtopright: int32; //biggest value of cornermask
-   procedure checkversionindex(const aindex: int32);
+   procedure updateversionindex(var aindex: int32);
    function indextoorg(index: integer): pointty;
    procedure change;
    procedure defineproperties(filer: tfiler); override;
@@ -468,17 +468,19 @@ type
 
    procedure clear;
    procedure deleteimage(const index: integer);
+   
+    //aimage-1 -> use versiondefault
+    
    procedure moveimage(const fromindex: integer; const toindex: integer;
-                                                 const aversion: int32 = 0);
+                                                       aversion: int32 = -1);
    procedure setimage(index: integer; image: tmaskedbitmap;
          const source: rectty; aalignment: alignmentsty = [];
-                                          const aversion: int32 = 0);
+                                                       aversion: int32 = -1);
    procedure setimage(index: integer; image: tmaskedbitmap; 
                                       //nil -> empty item
-                     const aalignment: alignmentsty = [];
-                         const aversion: int32 = 0); overload;
+                  const aalignment: alignmentsty = []; aversion: int32 = -1);
    procedure getimage(const index: integer; const dest: tmaskedbitmap;
-                                                 const aversion: int32 = 0);
+                                                       aversion: int32 = -1);
    function addimage(const image: tmaskedbitmap; //nil -> empty item
                               const aalignment: alignmentsty = []{;
                          const aversion: int32 = 0}): integer;
@@ -488,45 +490,33 @@ type
    procedure paint(const acanvas: tcanvas; const index: integer;
                    const dest: pointty; const acolor: colorty = cl_default;
                    const acolorbackground: colorty = cl_default;
-                   const aopacity: colorty = cl_default;
-                         const aversion: int32 = 0
-            ); overload;
+                   const aopacity: colorty = cl_default; aversion: int32 = -1);
    procedure paint(const acanvas: tcanvas; const index: integer;
                    const dest: rectty; const alignment: alignmentsty = [];
                    const acolor: colorty = cl_default;
                    const acolorbackground: colorty = cl_default;
-                   const aopacity: colorty = cl_default;
-                         const aversion: int32 = 0
-            ); overload;
+                   const aopacity: colorty = cl_default; aversion: int32 = -1);
    procedure paint(const acanvas: tcanvas; const index: integer;
                    const dest: rectty; source: rectty;
                    const alignment: alignmentsty = [];
                    const acolor: colorty = cl_default;
                    const acolorbackground: colorty = cl_default;
-                   const aopacity: colorty = cl_default;
-                         const aversion: int32 = 0
-            ); overload;
+                   const aopacity: colorty = cl_default; aversion: int32 = -1);
    procedure paintlookup(const acanvas: tcanvas; const index: integer;
                    const dest: pointty; const acolor: colorty = cl_default;
                    const acolorbackground: colorty = cl_default;
-                   const aopacity: colorty = cl_default;
-                         const aversion: int32 = 0
-            ); overload;
+                   const aopacity: colorty = cl_default; aversion: int32 = -1);
    procedure paintlookup(const acanvas: tcanvas; const index: integer;
                    const dest: rectty; const alignment: alignmentsty = [];
                    const acolor: colorty = cl_default;
                    const acolorbackground: colorty = cl_default;
-                   const aopacity: colorty = cl_default;
-                         const aversion: int32 = 0
-            ); overload;
+                   const aopacity: colorty = cl_default; aversion: int32 = -1);
    procedure paintlookup(const acanvas: tcanvas; const index: integer;
                    const dest: rectty; source: rectty;
                    const alignment: alignmentsty = [];
                    const acolor: colorty = cl_default;
                    const acolorbackground: colorty = cl_default;
-                   const aopacity: colorty = cl_default;
-                         const aversion: int32 = 0
-            ); overload;
+                   const aopacity: colorty = cl_default; aversion: int32 = -1);
    function lookup(const aindex: int32): int32;
 
    procedure assign(sender: tpersistent); override;
@@ -551,8 +541,8 @@ type
   published
    property versioncount: int32 read getversioncount 
                                 write setversioncount default 1; //first!
-//   property versioncurrent: int32 read fversioncurrent 
-//                                write setversioncurrent default 0;
+   property versiondefault: int32 read fversiondefault 
+                                write setversiondefault default 0;
    property width: integer read fsize.cx
                  write setwidth default defaultimagelistwidth;
    property height: integer read fsize.cy
@@ -2889,35 +2879,38 @@ begin
    end;
   end;
   fversionhigh:= i1;
-{
-  if fversioncurrent > i1 then begin
-   fversioncurrent:= 0;
+  if fversiondefault > i1 then begin
+   fversiondefault:= 0;
   end;
-}
  end;
 end;
-{
-procedure timagelist.setversioncurrent(avalue: int32);
+
+procedure timagelist.setversiondefault(avalue: int32);
 begin
  if (avalue < 0) or (avalue > fversionhigh) then begin
   avalue:= 0;
  end;
- if fversioncurrent <> avalue then begin
-  fversioncurrent:= avalue;
+ if fversiondefault <> avalue then begin
+  fversiondefault:= avalue;
   change();
  end;
 end;
-}
-procedure timagelist.checkversionindex(const aindex: int32);
+
+procedure timagelist.updateversionindex(var aindex: int32);
 begin
- if (aindex < 0) or (aindex > fversionhigh) then begin
-  tlist.Error(SListIndexError, aIndex);
+ if (aindex < 0) then begin
+  aindex:= fversiondefault;
+ end
+ else begin
+  if aindex > fversionhigh then begin
+   tlist.Error(SListIndexError, aIndex);
+  end;
  end;
 end;
 
-function timagelist.getbitmaps(const aindex: int32): tmaskedbitmap;
+function timagelist.getbitmaps(aindex: int32): tmaskedbitmap;
 begin
- checkversionindex(aindex);
+ updateversionindex(aindex);
  result:= fbitmaps[aindex];
 end;
 
@@ -3049,10 +3042,10 @@ procedure timagelist.paint(const acanvas: tcanvas; const index: integer;
          const acolor: colorty = cl_default;
          const acolorbackground: colorty = cl_default;
                          const aopacity: colorty = cl_default;
-                         const aversion: int32 = 0);
+                         aversion: int32 = -1);
 begin
  if (index >= 0) and (index < count) then begin
-  checkversionindex(aversion);
+  updateversionindex(aversion);
   fbitmaps[aversion].paint(acanvas,dest,makerect(indextoorg(index),fsize),
                                    alignment,acolor,
                                           acolorbackground,aopacity);
@@ -3065,12 +3058,12 @@ procedure timagelist.paint(const acanvas: tcanvas; const index: integer;
          const acolor: colorty = cl_default;
          const acolorbackground: colorty = cl_default;
                          const aopacity: colorty = cl_default;
-                         const aversion: int32 = 0);
+                          aversion: int32 = -1);
 
 begin
  if (index >= 0) and (index < count) then begin
+  updateversionindex(aversion);
   addpoint1(source.pos,indextoorg(index));
-  checkversionindex(aversion);
   fbitmaps[aversion].paint(acanvas,dest,source,alignment,acolor,acolorbackground,
                               aopacity);
  end;
@@ -3079,8 +3072,7 @@ end;
 procedure timagelist.paintlookup(const acanvas: tcanvas; const index: integer;
                const dest: pointty; const acolor: colorty = cl_default;
                const acolorbackground: colorty = cl_default;
-               const aopacity: colorty = cl_default;
-                         const aversion: int32 = 0);
+               const aopacity: colorty = cl_default; aversion: int32 = -1);
 begin
  paint(acanvas,lookup(index),dest,acolor,acolorbackground,aopacity,aversion);
 end;
@@ -3089,8 +3081,7 @@ procedure timagelist.paintlookup(const acanvas: tcanvas; const index: integer;
                const dest: rectty; const alignment: alignmentsty = [];
                const acolor: colorty = cl_default;
                const acolorbackground: colorty = cl_default;
-               const aopacity: colorty = cl_default;
-                         const aversion: int32 = 0);
+               const aopacity: colorty = cl_default; aversion: int32 = -1);
 begin
  paint(acanvas,lookup(index),dest,alignment,acolor,acolorbackground,aopacity,
                                    aversion);
@@ -3101,8 +3092,7 @@ procedure timagelist.paintlookup(const acanvas: tcanvas; const index: integer;
                const alignment: alignmentsty = [];
                const acolor: colorty = cl_default;
                const acolorbackground: colorty = cl_default;
-               const aopacity: colorty = cl_default;
-                         const aversion: int32 = 0);
+               const aopacity: colorty = cl_default; aversion: int32 = -1);
 begin
  paint(acanvas,lookup(index),dest,alignment,acolor,acolorbackground,aopacity,
                            aversion);
@@ -3178,7 +3168,7 @@ procedure timagelist.paint(const acanvas: tcanvas; const index: integer;
                    const dest: pointty; const acolor: colorty = cl_default;
                    const acolorbackground: colorty = cl_default;
                          const aopacity: colorty = cl_default;
-                         const aversion: int32 = 0);
+                         aversion: int32 = -1);
 begin
  paint(acanvas,index,makerect(dest,size),[],acolor,acolorbackground,
                               aopacity,aversion);
@@ -3203,7 +3193,7 @@ end;
 
 procedure timagelist.setimage(index: integer; image: tmaskedbitmap;
                       const source: rectty; aalignment: alignmentsty = [];
-                         const aversion: int32 = 0);
+                         aversion: int32 = -1);
 var
  rect1,rect2,destrect: rectty;
  bo1: boolean;
@@ -3217,7 +3207,7 @@ begin
  end;
  rect2.pos:= indextoorg(index);
  rect2.size:= fsize;
- checkversionindex(aversion);
+ updateversionindex(aversion);
  bmp1:= fbitmaps[aversion];
  if image = nil then begin
   bmp1.canvas.fillrect(rect2,
@@ -3303,14 +3293,14 @@ begin
 end;
 
 procedure timagelist.getimage(const index: integer; const dest: tmaskedbitmap;
-                         const aversion: int32 = 0);
+                                                          aversion: int32 = -1);
 var
  rect1: rectty;
  bmp1: tmaskedbitmap;
 begin
  dest.clear;
  if (index >= 0) or (index < fcount) then begin
-  checkversionindex(aversion);
+  updateversionindex(aversion);
   bmp1:= fbitmaps[aversion];
   dest.beginupdate();
   dest.kind:= bmp1.kind;
@@ -3334,7 +3324,7 @@ end;
 
 procedure timagelist.setimage(index: integer; image: tmaskedbitmap;
                                      const aalignment: alignmentsty = [];
-                                                 const aversion: int32 = 0);
+                                                        aversion: int32 = -1);
 begin
  if image = nil then begin
   setimage(index,nil,makerect(nullpoint,fsize),[],aversion);
@@ -3493,14 +3483,14 @@ begin
 end;
 
 procedure timagelist.moveimage(const fromindex: integer; const toindex: integer;
-                                                 const aversion: int32 = 0);
+                                                 aversion: int32 = -1);
 var
  bmp1,bmp2: tmaskedbitmap;
  int1: integer;
 // i1,i2: int32;
 begin
  if fromindex <> toindex then begin
-  checkversionindex(aversion);
+  updateversionindex(aversion);
   beginupdate;
   try
    bmp1:= tmaskedbitmap.create(kind);
