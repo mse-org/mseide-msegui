@@ -363,7 +363,7 @@ var
  image,image2: pointer;
  hasmask,monomask,rotmask: boolean;
  si1,si2: sizety;
- imagebuffer: imagebufferinfoty;
+ imagebuffer: maskedimagety;
  buf: pointer;
  maskscanstep: integer;
  maskscanpo: pointer;
@@ -881,7 +881,7 @@ var
 
 var
  imageinfo: pointer;
- imagebuffer: imagebufferinfoty;
+ imagebuffer: maskedimagety;
  str1: string; //todo: use tstream -> c-stream adaptor
  bo2: boolean;
  datapo: pointer;
@@ -1041,7 +1041,7 @@ begin
   end;
   if result <> '' then begin
    if bo2 then begin
-    tmaskedbitmap(dest).loadfromimagebuffer(imagebuffer);
+    tmaskedbitmap(dest).loadfrommaskedimage(imagebuffer);
    end
    else begin
     tbitmap(dest).loadfromimage(imagebuffer.image);
