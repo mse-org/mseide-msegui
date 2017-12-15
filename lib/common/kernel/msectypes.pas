@@ -91,6 +91,9 @@ type
 
  cenum = cint;
 
+ wchar_t   = cint32;
+ pwchar_t  = ^wchar_t;
+
 {$ifdef cpu64}
   size_t = cuint64;
   off_t = cuint64;
