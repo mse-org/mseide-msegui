@@ -3211,7 +3211,7 @@ begin
 // end;
 end;
 
-procedure shutdown();
+procedure shutdown(const data: pointer);
 begin
  //FB-embedded crash on Linux exit, probably atexit() call in FB-lib,
  //fb_shutdown() call does not help

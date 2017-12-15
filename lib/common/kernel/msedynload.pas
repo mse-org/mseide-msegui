@@ -20,6 +20,7 @@ type
   cw8087: word;             //fpu control word after lib load
  end;
  dynlibprocty = procedure(const dynlib: dynlibinfoty);
+ dynloadcallbackty = procedure(const data: pointer);
 
  edynload = class(ecrashstatfile)
  end;
@@ -33,13 +34,15 @@ function initializedynlib(var info: dynlibinfoty;
                               const funcs: array of funcinfoty;
                               const funcsopt: array of funcinfoty;
                               const errormessage: msestring = '';
-                              const callback: procedurety = nil;
-                              const noexception: boolean = false): boolean;
+                              const callback: dynloadcallbackty = nil;
+                              const noexception: boolean = false;
+                              const callbackdata: pointer = nil): boolean;
                                         //called after lib load
                               //returns true if all funcsopt found
 procedure releasedynlib(var info: dynlibinfoty;
-                         const callback: procedurety = nil;
-                         const nodlunload: boolean = false);
+                         const callback: dynloadcallbackty = nil;
+                         const nodlunload: boolean = false;
+                         const callbackdata: pointer = nil);
                                //called before lib unload
 procedure regdynlibinit(var info: dynlibinfoty; const initproc: dynlibprocty);
 procedure regdynlibdeinit(var info: dynlibinfoty; const initproc: dynlibprocty);
@@ -322,8 +325,9 @@ function initializedynlib(var info: dynlibinfoty;
                               const funcs: array of funcinfoty;
                               const funcsopt: array of funcinfoty;
                               const errormessage: msestring = '';
-                              const callback: procedurety = nil;
-                              const noexception: boolean = false): boolean;
+                              const callback: dynloadcallbackty = nil;
+                              const noexception: boolean = false;
+                              const callbackdata: pointer = nil): boolean;
                               //true if all funcsopt found
 var
  int1: integer;
@@ -383,7 +387,7 @@ begin
       dynlibprocty(inithooks[int1])(info);
      end;
      if ({$ifndef FPC}@{$endif}callback <> nil) then begin
-      callback();
+      callback(callbackdata);
      end;
     end;
    end
@@ -397,8 +401,9 @@ begin
 end;
 
 procedure releasedynlib(var info: dynlibinfoty;
-                      const callback: procedurety = nil;
-                      const nodlunload: boolean = false);
+                      const callback: dynloadcallbackty = nil;
+                      const nodlunload: boolean = false;
+                      const callbackdata: pointer = nil);
 var
  int1: integer;
 begin
@@ -412,7 +417,7 @@ begin
     if refcount = 1 then begin //not initialized otherwise
      try
       if {$ifndef FPC}@{$endif}callback <> nil then begin
-       callback();
+       callback(callbackdata);
       end;
       for int1:= 0 to high(deinithooks) do begin
        dynlibprocty(deinithooks[int1])(info);

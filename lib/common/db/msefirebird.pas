@@ -311,13 +311,13 @@ var
  master: imaster;
  util: iutil;
  
-procedure initfb();
+procedure initfb(const data: pointer);
 begin
  master:= fb_get_master_interface();
  util:= master.getutilinterface();
 end;
 
-procedure releasefb();
+procedure releasefb(const data: pointer);
 begin
  master.getdispatcher().shutdown(nil,0,0);
 end;

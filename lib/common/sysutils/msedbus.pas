@@ -594,11 +594,11 @@ uses
 var 
  libinfo: dynlibinfoty;
 
-procedure inidbus();
+procedure inidbus(const data: pointer);
 begin
 end;
 
-procedure finidbus();
+procedure finidbus(const data: pointer);
 begin
 end;
 

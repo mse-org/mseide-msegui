@@ -346,7 +346,7 @@ begin
  result:= sys_getcurrentthread;
 end;
 
-procedure initssllib;
+procedure initssllib(const data: pointer);
 var
  int1: cint;
 begin
@@ -478,7 +478,7 @@ begin
  end;
 end;
 
-procedure deinitssllib;
+procedure deinitssllib(const data: pointer);
 var
  int1: cint;
 begin

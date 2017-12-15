@@ -1592,7 +1592,7 @@ begin
  regdynlibdeinit(libinfo,deinitproc);
 end;
  
-procedure init;
+procedure init(const data: pointer);
 begin
   { according to bug 7570, this is necessary on all x86 platforms,
     maybe we've to fix the sse control word as well }
@@ -1610,7 +1610,7 @@ begin
  mseglloadextensions([gle_gl_version_1_5]);
 end;
 
-procedure deinit;
+procedure deinit(const data: pointer);
 begin
  //dummy
 end;

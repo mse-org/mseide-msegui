@@ -222,7 +222,7 @@ begin
  m.yx:= 0;
 end;
 
-procedure init;
+procedure init(const data: pointer);
 {$ifdef mswindows}
 var
  li: pfcstrlist;
@@ -259,7 +259,7 @@ begin
  end;
 end;
 
-procedure deinit;
+procedure deinit(const data: pointer);
 begin
 // fcfini;
 end;

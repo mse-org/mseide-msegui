@@ -20,7 +20,7 @@ unit mseespeakng;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 uses
- msectypes,msetypes;
+ msectypes,msetypes,sysutils,msestrings;
  {$packrecords c}
  
 const
@@ -57,7 +57,22 @@ const
  ENS_UNKNOWN_PHONEME_FEATURE = $10000FFF;
  ENS_UNKNOWN_TEXT_ENCODING = $100010FF;
 
+ espeakCHARS_AUTO =        0;
+ espeakCHARS_UTF8 =        1;
+ espeakCHARS_8BIT =        2;
+ espeakCHARS_WCHAR =       3;
+ espeakCHARS_16BIT =       4;
+ espeakSSML =            $10;
+ espeakPHONEMES =       $100;
+ espeakENDPAUSE =      $1000;
+ espeakKEEP_NAMEDATA = $2000;
+
+ ENOUTPUT_MODE_SYNCHRONOUS = $0001;
+ ENOUTPUT_MODE_SPEAK_AUDIO = $0002;
+
 type
+ espeak_ng_OUTPUT_MODE = cint32;
+
  espeak_PARAMETER = (
   espeakSILENCE=0, //* internal use */
   espeakRATE=1,
@@ -102,11 +117,12 @@ type
 
 
  espeak_ng_STATUS = cuint;
+ {
  espeak_ng_OUTPUT_MODE = (
   ENOUTPUT_MODE_SYNCHRONOUS = $0001,
   ENOUTPUT_MODE_SPEAK_AUDIO = $0002
  );
-
+}
  espeak_ng_CONTEXT_TYPE = (
   ERROR_CONTEXT_FILE,
   ERROR_CONTEXT_VERSION
@@ -120,12 +136,17 @@ type
  end;
  espeak_ng_ERROR_CONTEXT = ^espeak_ng_ERROR_CONTEXT_;
 
+ tespeakerror = class(exception)
+  public
+   constructor create(const err: espeak_ng_STATUS);
+ end;
+ 
 var
  espeak_ng_ClearErrorContext:
   procedure(context: espeak_ng_ERROR_CONTEXT) 
                                 {$ifdef wincall}stdcall{$else}cdecl{$endif};
  espeak_ng_GetStatusCodeMessage:
-  procedure(status: espeak_ng_STATUS;buffer: pcchar;length: size_t)
+  procedure(status: espeak_ng_STATUS; buffer: pcchar; length: size_t)
                                 {$ifdef wincall}stdcall{$else}cdecl{$endif};
 {
 ESPEAK_NG_API void
@@ -139,7 +160,7 @@ espeak_ng_PrintStatusCodeMessage(espeak_ng_STATUS status,
   function(context: espeak_ng_ERROR_CONTEXT): espeak_ng_STATUS
                                {$ifdef wincall}stdcall{$else}cdecl{$endif};
  espeak_ng_InitializeOutput:
-  function(output_mode: espeak_ng_OUTPUT_MODE;buffer_length: cint;
+  function(output_mode: espeak_ng_OUTPUT_MODE; buffer_length: cint;
                                       device: pcchar): espeak_ng_STATUS
                                {$ifdef wincall}stdcall{$else}cdecl{$endif};
  espeak_ng_GetSampleRate:
@@ -167,6 +188,67 @@ espeak_ng_PrintStatusCodeMessage(espeak_ng_STATUS status,
                      unique_identifier: pcuint;
                      user_data: pointer): espeak_ng_STATUS
                                {$ifdef wincall}stdcall{$else}cdecl{$endif};
+{from espeak_Synthesize():
+/* Synthesize speech for the specified text.  
+ The speech sound data is passed to the calling
+ program in buffers by means of the callback function specified by 
+ espeak_SetSynthCallback(). The command is asynchronous: 
+ it is internally buffered and returns as soon as possible.
+ If espeak_Initialize was previously called with AUDIO_OUTPUT_PLAYBACK
+ as argument, the sound data are played by eSpeak.
+
+text: The text to be spoken, terminated by a zero character.
+   It may be either 8-bit characters,
+   wide characters (wchar_t), or UTF8 encoding.  Which of these is determined 
+   by the "flags" parameter.
+
+size: Equal to (or greatrer than) the size of the text data, in bytes.
+   This is used in order
+   to allocate internal storage space for the text.  This value is not used for
+   AUDIO_OUTPUT_SYNCHRONOUS mode.
+
+position:  The position in the text where speaking starts. Zero indicates 
+   speak from the
+   start of the text.
+
+position_type:  Determines whether "position" is a number of characters, words,
+                or sentences.
+   Values:
+
+end_position:  If set, this gives a character position at which speaking
+               will stop.  A value of zero indicates no end position.
+
+flags:  These may be OR'd together:
+   Type of character codes, one of:
+      espeakCHARS_UTF8     UTF8 encoding
+      espeakCHARS_8BIT     The 8 bit ISO-8859 character set for 
+                           the particular language.
+      espeakCHARS_AUTO     8 bit or UTF8  (this is the default)
+      espeakCHARS_WCHAR    Wide characters (wchar_t)
+      espeakCHARS_16BIT    16 bit characters.
+
+   espeakSSML   Elements within < > are treated as SSML elements, 
+                or if not recognised are ignored.
+
+   espeakPHONEMES  Text within [[ ]] is treated as phonemes codes 
+                   (in espeak's Hirshenbaum encoding).
+
+   espeakENDPAUSE  If set then a sentence pause is added at the end of the 
+                   text.  If not set then this pause is suppressed.
+
+unique_identifier: This must be either NULL, or point to an integer variable to
+    which eSpeak writes a message identifier number.
+    eSpeak includes this number in espeak_EVENT messages which are the result of
+    this call of espeak_Synth().
+
+user_data: a pointer (or NULL) which will be passed to the callback function in
+    espeak_EVENT messages.
+
+Return: EE_OK: operation achieved
+        EE_BUFFER_FULL: the command can not be buffered;
+          you may try after a while to call the function again.
+ EE_INTERNAL_ERROR.
+}
  espeak_ng_SynthesizeMark:
   function(text: pointer; size: size_t;
                          index_mark: pcchar;
@@ -175,6 +257,22 @@ espeak_ng_PrintStatusCodeMessage(espeak_ng_STATUS status,
                          unique_identifier: pcuint;
                          user_data: pointer): espeak_ng_STATUS
                                {$ifdef wincall}stdcall{$else}cdecl{$endif};
+{from espeak_SynthesizeMark():
+/* Synthesize speech for the specified text. 
+   Similar to espeak_Synth() but the start position is
+   specified by the name of a <mark> element in the text.
+
+   index_mark:  The "name" attribute of a <mark> element within the
+      text which specified the point at which synthesis starts.  UTF8 string.
+
+   For the other parameters, see espeak_Synth()
+
+   Return: EE_OK: operation achieved
+           EE_BUFFER_FULL: the command can not be buffered;
+             you may try after a while to call the function again.
+	   EE_INTERNAL_ERROR.
+*/
+}
  espeak_ng_SpeakKeyName:
   function(key_name: pchar): espeak_ng_STATUS
                                {$ifdef wincall}stdcall{$else}cdecl{$endif};
@@ -219,7 +317,10 @@ espeak_ng_CompilePhonemeDataPath(long rate,
                                  espeak_ng_ERROR_CONTEXT *context);
 }
 
-procedure initializeespeakng(const sonames: array of filenamety); //[] = default
+function espeakngerrormessage(const err: espeak_ng_STATUS): string;
+
+procedure initializeespeakng(const sonames: array of filenamety;
+                          const espeakdatapath: string = ''); //[],'' = default
 procedure releaseespeakng();
 
 implementation
@@ -227,20 +328,73 @@ uses
  msedynload;
 var
  libinfo: dynlibinfoty;
+ err: espeak_ng_ERROR_CONTEXT_;
 
-procedure initializeespeakng(const sonames: array of filenamety);
+function espeakngerrormessage(const err: espeak_ng_STATUS): string;
+var
+ buf: array[0..500] of char;
+begin
+ espeak_ng_GetStatusCodeMessage(err,@buf,sizeof(buf));
+ result:= string(pchar(@buf))
+end;
+
+procedure checkerror(const astate: espeak_ng_status);
+begin
+ if astate <> 0 then begin
+  raise tespeakerror.create(astate);
+ end;
+end;
+
+procedure ini(const data: pointer);
+begin
+ espeak_ng_InitializePath(data);
+ checkerror(espeak_ng_Initialize(@err));
+end;
+
+procedure fini(const data: pointer);
+begin
+ espeak_ng_terminate();
+end;
+
+procedure initializeespeakng(const sonames: array of filenamety;
+                          const espeakdatapath: string = '');
 
 const
- funcs: array[0..0] of funcinfoty = (
-  (n: 'espeak_ng_ClearErrorContext'; d: @espeak_ng_ClearErrorContext)
+ funcs: array[0..16] of funcinfoty = (
+  (n: 'espeak_ng_ClearErrorContext'; d: @espeak_ng_ClearErrorContext),
+  (n: 'espeak_ng_GetStatusCodeMessage'; d: @espeak_ng_GetStatusCodeMessage),
+  (n: 'espeak_ng_InitializePath'; d: @ espeak_ng_InitializePath),
+  (n: 'espeak_ng_Initialize'; d: @espeak_ng_Initialize),
+  (n: 'espeak_ng_InitializeOutput'; d: @espeak_ng_InitializeOutput),
+  (n: 'espeak_ng_GetSampleRate'; d: @espeak_ng_GetSampleRate),
+  (n: 'espeak_ng_SetParameter'; d: @espeak_ng_SetParameter),
+  (n: 'espeak_ng_SetPunctuationList'; d: @espeak_ng_SetPunctuationList),
+  (n: 'espeak_ng_SetVoiceByName'; d: @espeak_ng_SetVoiceByName),
+  (n: 'espeak_ng_SetVoiceByProperties'; d: @espeak_ng_SetVoiceByProperties),
+  (n: 'espeak_ng_Synthesize'; d: @espeak_ng_Synthesize),
+  (n: 'espeak_ng_SynthesizeMark'; d: @espeak_ng_SynthesizeMark),
+  (n: 'espeak_ng_SpeakKeyName'; d: @espeak_ng_SpeakKeyName),
+  (n: 'espeak_ng_SpeakCharacter'; d: @espeak_ng_SpeakCharacter),
+  (n: 'espeak_ng_Cancel'; d: @espeak_ng_Cancel),
+  (n: 'espeak_ng_Synchronize'; d: @espeak_ng_Synchronize),
+  (n: 'espeak_ng_Terminate'; d: @espeak_ng_Terminate)
  );
  errormessage = 'Can not load eSpeakNG library. ';
 begin
- initializedynlib(libinfo,sonames,sqlite3lib,funcs,[],errormessage);
+ initializedynlib(libinfo,sonames,sqlite3lib,funcs,[],errormessage,@ini,false,
+                                                      pointer(espeakdatapath));
 end;
 
 procedure releaseespeakng();
 begin
+ releasedynlib(libinfo,@fini);
+end;
+
+{ tespeakerror }
+
+constructor tespeakerror.create(const err: espeak_ng_STATUS);
+begin
+ inherited create('eSpeak error:'+lineend+espeakngerrormessage(err));
 end;
 
 initialization
