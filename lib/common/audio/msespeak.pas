@@ -40,17 +40,59 @@ type
  end;
 }
  genderty = (gen_none,gen_male,gen_female);
+ punctuationty = (pu_none,pu_all,pu_some);
  tvoice = class(townedpersistent)
   private
    fgender: genderty;
+   fpitch: int32;
+   frate: int32;
+   fvolume: int32;
+   frange: int32;
+   fpunctuation: punctuationty;
+   fcapitals: int32;
+   fwordgap: int32;
    procedure setgender(const avalue: genderty);
+   procedure setpitch(const avalue: int32);
+   procedure setrate(const avalue: int32);
+   procedure setvolume(const avalue: int32);
+   procedure setrange(const avalue: int32);
+   procedure setpunctuation(const avalue: punctuationty);
+   procedure setcapitals(const avalue: int32);
+   procedure setwordgap(const avalue: int32);
   protected
    procedure changed();
+  public
+   constructor create(aowner: tobject); override;
   published
  //  property name: msestring read fname write setname;
-   property gender: genderty read fgender write setgender;
+   property gender: genderty read fgender write setgender default gen_none;
+   property rate: int32 read frate write setrate default espeakRATE_NORMAL;
+     {espeakRATE:    speaking speed in word per minute.  Values 80 to 450.}
+   property volume: int32 read fvolume write setvolume default 100;
+     {espeakVOLUME:  volume in range 0-200 or more.
+                     0=silence, 100=normal full volume, greater values may
+                     produce amplitude compression or distortion}
+   property pitch: int32 read fpitch write setpitch default 50;
+     {espeakPITCH:   base pitch, range 0-100.  50=normal}
+   property range: int32 read frange write setrange default 50;
+     {espeakRANGE:   pitch range, range 0-100. 0-monotone, 50=normal}
+   property punctuation: punctuationty read fpunctuation 
+                          write setpunctuation default pu_none;
+     {espeakPUNCTUATION:  which punctuation characters to announce:
+         value in espeak_PUNCT_TYPE (none, all, some),
+         see espeak_GetParameter() to specify which characters are announced.}
+   property capitals: int32 read fcapitals write setcapitals default 0;
+     {espeakCAPITALS: announce capital letters by:
+         0=none,
+         1=sound icon,
+         2=spelling,
+         3 or higher, by raising pitch.  
+           This values gives the amount in Hz by which the pitch
+            of a word raised to indicate it has a capital letter.}
+   property wordgap: int32 read fwordgap write setwordgap default 0;
+     {espeakWORDGAP:  pause between words, units of 10mS (at the default speed)}
  end;
- 
+
  tvoices = class(townedpersistentarrayprop)
   private
    function getitems(const index: int32): tvoice;
@@ -233,13 +275,20 @@ begin
   avoice:= 0;
  end;
  if not (ss_voicevalid in fstate) or (flastvoice <> avoice) then begin
+  include(fstate,ss_voicevalid);
+  flastvoice:= avoice;
   fillchar(info1,sizeof(info1),0);
   with voices[avoice] do begin
    info1.gender:= ord(gender);
+   checkerror(espeak_ng_setvoicebyproperties(@info1));
+   checkerror(espeak_ng_setparameter(espeakRATE,rate,0));
+   checkerror(espeak_ng_setparameter(espeakVOLUME,volume,0));
+   checkerror(espeak_ng_setparameter(espeakPITCH,pitch,0));
+   checkerror(espeak_ng_setparameter(espeakRANGE,range,0));
+   checkerror(espeak_ng_setparameter(espeakPUNCTUATION,ord(punctuation),0));
+   checkerror(espeak_ng_setparameter(espeakCAPITALS,capitals,0));
+   checkerror(espeak_ng_setparameter(espeakWORDGAP,wordgap,0));
   end;
-  include(fstate,ss_voicevalid);
-  flastvoice:= avoice;
-  checkerror(espeak_ng_setvoicebyproperties(@info1));
  end;
 end;
 
@@ -278,6 +327,15 @@ end;
 
 { tvoice }
 
+constructor tvoice.create(aowner: tobject);
+begin
+ fpitch:= 50;
+ frate:= espeakRATE_NORMAL;
+ fvolume:= 100;
+ frange:= 50;
+ inherited;
+end;
+
 procedure tvoice.changed();
 begin
  tespeakng(fowner).voicechanged();
@@ -287,7 +345,63 @@ procedure tvoice.setgender(const avalue: genderty);
 begin
  if avalue <> fgender then begin
   fgender:= avalue;
-  changed;
+  changed();
+ end;
+end;
+
+procedure tvoice.setpitch(const avalue: int32);
+begin
+ if avalue <> fpitch then begin
+  fpitch:= avalue;
+  changed();
+ end;
+end;
+
+procedure tvoice.setrate(const avalue: int32);
+begin
+ if avalue <> frate then begin
+  frate:= avalue;
+  changed();
+ end;
+end;
+
+procedure tvoice.setvolume(const avalue: int32);
+begin
+ if avalue <> fvolume then begin
+  fvolume:= avalue;
+  changed();
+ end;
+end;
+
+procedure tvoice.setrange(const avalue: int32);
+begin
+ if avalue <> frange then begin
+  frange:= avalue;
+  changed();
+ end;
+end;
+
+procedure tvoice.setpunctuation(const avalue: punctuationty);
+begin
+ if avalue <> fpunctuation then begin
+  fpunctuation:= avalue;
+  changed();
+ end;
+end;
+
+procedure tvoice.setcapitals(const avalue: int32);
+begin
+ if avalue <> fcapitals then begin
+  fcapitals:= avalue;
+  changed();
+ end;
+end;
+
+procedure tvoice.setwordgap(const avalue: int32);
+begin
+ if avalue <> fwordgap then begin
+  fwordgap:= avalue;
+  changed();
  end;
 end;
 

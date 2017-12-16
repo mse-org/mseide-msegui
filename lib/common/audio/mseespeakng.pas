@@ -70,6 +70,11 @@ const
  ENOUTPUT_MODE_SYNCHRONOUS = $0001;
  ENOUTPUT_MODE_SPEAK_AUDIO = $0002;
 
+// values for 'value' in espeak_SetParameter(espeakRATE, value, 0), nominally in words-per-minute
+ espeakRATE_MINIMUM = 80;
+ espeakRATE_MAXIMUM = 450;
+ espeakRATE_NORMAL = 175;
+
 type
  espeak_ng_OUTPUT_MODE = cint32;
 
@@ -170,6 +175,39 @@ espeak_ng_PrintStatusCodeMessage(espeak_ng_STATUS status,
   function(parameter: espeak_PARAMETER; value: cint;
                                        relative: cint): espeak_ng_STATUS
                                {$ifdef wincall}stdcall{$else}cdecl{$endif};
+{from espeak_SetParameter():
+/* Sets the value of the specified parameter.
+   relative=0   Sets the absolute value of the parameter.
+   relative=1   Sets a relative value of the parameter.
+
+   parameter:
+      espeakRATE:    speaking speed in word per minute.  Values 80 to 450.
+
+      espeakVOLUME:  volume in range 0-200 or more.
+                     0=silence, 100=normal full volume, greater values may produce amplitude compression or distortion
+
+      espeakPITCH:   base pitch, range 0-100.  50=normal
+
+      espeakRANGE:   pitch range, range 0-100. 0-monotone, 50=normal
+
+      espeakPUNCTUATION:  which punctuation characters to announce:
+         value in espeak_PUNCT_TYPE (none, all, some),
+         see espeak_GetParameter() to specify which characters are announced.
+
+      espeakCAPITALS: announce capital letters by:
+         0=none,
+         1=sound icon,
+         2=spelling,
+         3 or higher, by raising pitch.  This values gives the amount in Hz by which the pitch
+            of a word raised to indicate it has a capital letter.
+
+      espeakWORDGAP:  pause between words, units of 10mS (at the default speed)
+
+   Return: EE_OK: operation achieved
+           EE_BUFFER_FULL: the command can not be buffered;
+             you may try after a while to call the function again.
+	   EE_INTERNAL_ERROR.
+*/}
  espeak_ng_SetPunctuationList:
   function(punctlist: pwchar_t): espeak_ng_STATUS
                                {$ifdef wincall}stdcall{$else}cdecl{$endif};
