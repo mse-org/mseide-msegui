@@ -1887,12 +1887,14 @@ end;
 
 function tstringlistarrayprop.getitems(index: integer): tstringlist;
 begin
+ checkindex(index);
  result:= tstringlist(fitems[index]);
 end;
 
 procedure tstringlistarrayprop.setitems(index: integer;
   const Value: tstringlist);
 begin
+ checkindex(index);
  tstringlist(fitems[index]).assign(value);
 end;
 
