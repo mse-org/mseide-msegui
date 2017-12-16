@@ -146,6 +146,8 @@ type
    procedure speakkeyname(const akey: msestring;
                              const aoptions: speakoptionsty = [];
                                 const avoice: int32 = -1); //-1 -> default
+   procedure wait();
+   procedure cancel();
   published
    property active: boolean read factive write setactive default false;
    property datapath: filenamety read fdatapath write fdatapath;
@@ -413,6 +415,22 @@ begin
  if so_wait in aoptions then begin
   checkerror(espeak_ng_synchronize());
  end;
+end;
+
+procedure tespeakng.wait();
+begin
+ if not factive then begin
+  exit;
+ end;
+ checkerror(espeak_ng_synchronize());
+end;
+
+procedure tespeakng.cancel();
+begin
+ if not factive then begin
+  exit;
+ end;
+ checkerror(espeak_ng_cancel());
 end;
 
 { tvoice }
