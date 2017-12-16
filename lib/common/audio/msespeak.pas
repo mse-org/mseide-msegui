@@ -143,6 +143,9 @@ type
    procedure speakcharacter(const achar: char32;
                              const aoptions: speakoptionsty = [];
                                 const avoice: int32 = -1); //-1 -> default
+   procedure speakkeyname(const akey: msestring;
+                             const aoptions: speakoptionsty = [];
+                                const avoice: int32 = -1); //-1 -> default
   published
    property active: boolean read factive write setactive default false;
    property datapath: filenamety read fdatapath write fdatapath;
@@ -387,7 +390,26 @@ begin
  if so_cancel in aoptions then begin
   checkerror(espeak_ng_cancel());
  end;
+ checkvoice(avoice);
  checkerror(espeak_ng_speakcharacter(ord(achar)));
+ if so_wait in aoptions then begin
+  checkerror(espeak_ng_synchronize());
+ end;
+end;
+
+procedure tespeakng.speakkeyname(const akey: msestring;
+               const aoptions: speakoptionsty = []; const avoice: int32 = -1);
+begin
+ if not factive then begin
+  exit;
+ end;
+ if so_cancel in aoptions then begin
+  checkerror(espeak_ng_cancel());
+ end;
+ if akey <> '' then begin
+  checkvoice(avoice);
+  checkerror(espeak_ng_speakkeyname(pchar(stringtoutf8(akey))));
+ end;
  if so_wait in aoptions then begin
   checkerror(espeak_ng_synchronize());
  end;
