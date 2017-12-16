@@ -23,22 +23,7 @@ type
  speakoptionsty = set of speakoptionty;
 
  tespeakng = class;
-{
- espeak_VOICE = record
-  name: pcchar;      // a given name for this voice. UTF8 string.
-  languages: pcchar;  // list of pairs of (byte) priority + 
-                      //(string) language (and dialect qualifier)
-  identifier: pcchar; // the filename for this voice within
-                      //espeak-ng-data/voices
-  gender: cuchar;  // 0=none 1=male, 2=female,
-  age: cuchar;     // 0=not specified, or age in years
-  variant: cuchar; // only used when passed as a parameter to 
-                   //espeak_SetVoiceByProperties
-  xx1: cuchar;     // for internal use
-  score: cint;       // for internal use
-  spare: pointer;     // for internal use
- end;
-}
+
  genderty = (gen_none,gen_male,gen_female);
  punctuationty = (pu_none,pu_all,pu_some);
  tvoice = class(townedpersistent)
@@ -51,6 +36,11 @@ type
    fpunctuation: punctuationty;
    fcapitals: int32;
    fwordgap: int32;
+   fname: msestring;
+   flanguage: msestring;
+   fidentifier: msestring;
+   fage: card8;
+   fvariant: card8;
    procedure setgender(const avalue: genderty);
    procedure setpitch(const avalue: int32);
    procedure setrate(const avalue: int32);
@@ -59,13 +49,27 @@ type
    procedure setpunctuation(const avalue: punctuationty);
    procedure setcapitals(const avalue: int32);
    procedure setwordgap(const avalue: int32);
+   procedure setname(const avalue: msestring);
+   procedure setlanguage(const avalue: msestring);
+   procedure setidentifier(const avalue: msestring);
+   procedure setage(const avalue: card8);
+   procedure setvariant(const avalue: card8);
   protected
    procedure changed();
   public
    constructor create(aowner: tobject); override;
   published
  //  property name: msestring read fname write setname;
+   property name: msestring read fname write setname;
+   property language: msestring read flanguage write setlanguage;
+                  //example: en-uk
+   property identifier: msestring read fidentifier write setidentifier;
+                  // the filename for this voice within
+                  //espeak-ng-data/voices
    property gender: genderty read fgender write setgender default gen_none;
+   property age: card8 read fage write setage default 0;
+   property variant: card8 read fvariant write setvariant default 0;
+
    property rate: int32 read frate write setrate default espeakRATE_NORMAL;
      {espeakRATE:    speaking speed in word per minute.  Values 80 to 450.}
    property volume: int32 read fvolume write setvolume default 100;
@@ -267,6 +271,7 @@ end;
 procedure tespeakng.checkvoice(avoice: int32);
 var
  info1: espeak_voice;
+ s1,s2,s3: string;
 begin
  if avoice < 0 then begin
   avoice:= fvoicedefault;
@@ -279,7 +284,15 @@ begin
   flastvoice:= avoice;
   fillchar(info1,sizeof(info1),0);
   with voices[avoice] do begin
+   s1:= stringtoutf8(name);
+   info1.name:= pointer(s1);
+   s2:= stringtoutf8(language);
+   info1.languages:= pointer(s2);
+   s3:= stringtoutf8(tosysfilepath(identifier));
+   info1.identifier:= pointer(s3);
    info1.gender:= ord(gender);
+   info1.age:= age;
+   info1.variant:= variant;
    checkerror(espeak_ng_setvoicebyproperties(@info1));
    checkerror(espeak_ng_setparameter(espeakRATE,rate,0));
    checkerror(espeak_ng_setparameter(espeakVOLUME,volume,0));
@@ -291,6 +304,22 @@ begin
   end;
  end;
 end;
+{
+ espeak_VOICE = record
+  name: pcchar;      // a given name for this voice. UTF8 string.
+  languages: pcchar;  // list of pairs of (byte) priority + 
+                      //(string) language (and dialect qualifier)
+  identifier: pcchar; // the filename for this voice within
+                      //espeak-ng-data/voices
+  gender: cuchar;  // 0=none 1=male, 2=female,
+  age: cuchar;     // 0=not specified, or age in years
+  variant: cuchar; // only used when passed as a parameter to 
+                   //espeak_SetVoiceByProperties
+  xx1: cuchar;     // for internal use
+  score: cint;       // for internal use
+  spare: pointer;     // for internal use
+ end;
+}
 
 procedure tespeakng.speak(const atext: msestring;
                const aoptions: speakoptionsty = []; const avoice: int32 = -1);
@@ -401,6 +430,46 @@ procedure tvoice.setwordgap(const avalue: int32);
 begin
  if avalue <> fwordgap then begin
   fwordgap:= avalue;
+  changed();
+ end;
+end;
+
+procedure tvoice.setname(const avalue: msestring);
+begin
+ if avalue <> fname then begin
+  fname:= avalue;
+  changed();
+ end;
+end;
+
+procedure tvoice.setlanguage(const avalue: msestring);
+begin
+ if avalue <> flanguage then begin
+  flanguage:= avalue;
+  changed();
+ end;
+end;
+
+procedure tvoice.setidentifier(const avalue: msestring);
+begin
+ if avalue <> fidentifier then begin
+  fidentifier:= avalue;
+  changed();
+ end;
+end;
+
+procedure tvoice.setage(const avalue: card8);
+begin
+ if avalue <> fage then begin
+  fage:= avalue;
+  changed();
+ end;
+end;
+
+procedure tvoice.setvariant(const avalue: card8);
+begin
+ if avalue <> fvariant then begin
+  fvariant:= avalue;
   changed();
  end;
 end;
