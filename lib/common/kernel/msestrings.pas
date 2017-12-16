@@ -1223,13 +1223,16 @@ end;
 function getucs4char(const value: msestring; const aindex: int32): ucs4char;
             //returns surrogatevalue if index between high and low codeunit
 begin
- result:= ord(value[aindex]);
- if result and $fc00 = $d800 then begin
-  result:= ((result - $d800) shl 10) + ord(value[aindex+1]) - $dc00 + $10000;
- end
- else begin
-  if (result and $fc00 = $dc00) and (aindex > 1) then begin
-   result:= result - $dc00 + ((ord(value[aindex-1]) - $d800) shl 10) + $10000;
+ result:= 0;
+ if (aindex > 0) and (aindex <= length(value)) then begin
+  result:= ord(value[aindex]);
+  if result and $fc00 = $d800 then begin
+   result:= ((result - $d800) shl 10) + ord(value[aindex+1]) - $dc00 + $10000;
+  end
+  else begin
+   if (result and $fc00 = $dc00) and (aindex > 1) then begin
+    result:= result - $dc00 + ((ord(value[aindex-1]) - $d800) shl 10) + $10000;
+   end;
   end;
  end;
 end;
