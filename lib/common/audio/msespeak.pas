@@ -140,6 +140,9 @@ type
    destructor destroy(); override;
    procedure speak(const atext: msestring; const aoptions: speakoptionsty = [];
                         const avoice: int32 = -1); //-1 -> default
+   procedure speakcharacter(const achar: char32;
+                             const aoptions: speakoptionsty = [];
+                                const avoice: int32 = -1); //-1 -> default
   published
    property active: boolean read factive write setactive default false;
    property datapath: filenamety read fdatapath write fdatapath;
@@ -370,6 +373,21 @@ begin
   checkerror(espeak_ng_synthesize(pchar(s1),length(s1),0,pos_character,0,
                  f1,nil,nil));
  end;
+ if so_wait in aoptions then begin
+  checkerror(espeak_ng_synchronize());
+ end;
+end;
+
+procedure tespeakng.speakcharacter(const achar: char32;
+        const aoptions: speakoptionsty = []; const avoice: int32 = -1);
+begin
+ if not factive then begin
+  exit;
+ end;
+ if so_cancel in aoptions then begin
+  checkerror(espeak_ng_cancel());
+ end;
+ checkerror(espeak_ng_speakcharacter(ord(achar)));
  if so_wait in aoptions then begin
   checkerror(espeak_ng_synchronize());
  end;
