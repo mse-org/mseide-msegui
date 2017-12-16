@@ -108,7 +108,7 @@ type
    property items[const index: int32]: tvoice read getitems write setitems; default;
  end;
 
- speakstatety = (ss_voicevalid);
+ speakstatety = (ss_voicevalid,ss_punctuationvalid);
  speakstatesty = set of speakstatety;
   
  tespeakng = class(tmsecomponent)
@@ -121,9 +121,11 @@ type
    fbufferlengt: int32;
    fvoicedefault: int32;
    fvoices: tvoices;
+   fpunctuationlist: msestring;
    procedure setactive(const avalue: boolean);
    procedure setvoicedefault(avalue: int32);
    procedure setvoices(const avalue: tvoices);
+   procedure setpunctuationlist(const avalue: msestring);
   protected
    fstate: speakstatesty;
    flastvoice: int32;
@@ -148,6 +150,9 @@ type
    property voicedefault: int32 read fvoicedefault 
                                    write setvoicedefault default 0;
    property voices: tvoices read fvoices write setvoices;
+   property punctuationlist: msestring read fpunctuationlist
+                                                 write setpunctuationlist;
+                                          //for voice.punctuation pu_some
  end;
  
 implementation
@@ -225,6 +230,12 @@ begin
  fvoices.assign(avalue);
 end;
 
+procedure tespeakng.setpunctuationlist(const avalue: msestring);
+begin
+ fpunctuationlist:= avalue;
+ exclude(fstate,ss_punctuationvalid);
+end;
+
 procedure tespeakng.loaded();
 begin
  inherited;
@@ -272,12 +283,22 @@ procedure tespeakng.checkvoice(avoice: int32);
 var
  info1: espeak_voice;
  s1,s2,s3: string;
+ ar1: card32arty;
+ i1: int32;
 begin
  if avoice < 0 then begin
   avoice:= fvoicedefault;
  end;
  if (avoice >= fvoices.count) then begin
   avoice:= 0;
+ end;
+ if not (ss_punctuationvalid in fstate) then begin
+  include(fstate,ss_punctuationvalid);
+  setlength(ar1,length(fpunctuationlist));
+  for i1:= 0 to high(ar1) do begin
+   ar1[i1]:= ord(fpunctuationlist[i1+1]);
+  end;
+  checkerror(espeak_ng_setpunctuationlist(pointer(ar1)));
  end;
  if not (ss_voicevalid in fstate) or (flastvoice <> avoice) then begin
   include(fstate,ss_voicevalid);
