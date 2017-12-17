@@ -159,6 +159,8 @@ type
   public
    constructor create(aownsobjects: boolean);
    destructor destroy; override;
+   procedure lock();
+   procedure unlock();
    procedure clear; override;
    procedure post(event: tmseevent);
    function wait(const timeoutus: integer = 0): tmseevent;
@@ -343,6 +345,16 @@ begin
  sys_semdestroy(fsem);
  sys_mutexdestroy(fmutex);
  inherited;
+end;
+
+procedure teventqueue.lock();
+begin
+ sys_mutexlock(fmutex);
+end;
+
+procedure teventqueue.unlock();
+begin
+ sys_mutexunlock(fmutex);
 end;
 
 procedure teventqueue.post(event: tmseevent);

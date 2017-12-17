@@ -97,13 +97,14 @@ type
    constructor create(const athreadproc: threadprocty;
                      const afreeonterminate: boolean = false;
                      const astacksizekb: integer = 0); overload; override;
-   destructor destroy; override;
-   procedure terminate; override;
+   destructor destroy(); override;
+   procedure terminate(); override;
    procedure postevent(event: tmseevent);
-   procedure clearevents;
+   procedure clearevents();
    function waitevent(const timeoutus: integer = -1): tmseevent;
                  // -1 infinite, 0 no block
-   function eventcount: integer;
+   function eventcount(): integer;
+   property eventlist: teventqueue read feventlist;
  end;
 
  tsynchronizeevent = class(texecuteevent)
@@ -408,7 +409,9 @@ end;
 
 function teventthread.eventcount: integer;
 begin
+ feventlist.lock();
  result:= feventlist.count;
+ feventlist.unlock();
 end;
 
 procedure teventthread.postevent(event: tmseevent);
@@ -430,7 +433,7 @@ begin
  end;
 end;
 
-procedure teventthread.clearevents;
+procedure teventthread.clearevents();
 begin
  feventlist.clear;
 end;
