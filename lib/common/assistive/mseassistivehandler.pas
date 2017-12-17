@@ -13,18 +13,38 @@ interface
 uses
  classes,mclasses,mseclasses,mseassistiveserver,
  mseguiglob,mseglob,msestrings,mseinterfaces,mseact,mseshapes,
- mseassistiveclient,msemenuwidgets,msegrids;
+ mseassistiveclient,msemenuwidgets,msegrids,msespeak;
 
 type
  assistiveserverstatety = (ass_active);
  assistiveserverstatesty = set of assistiveserverstatety;
 
+ tassistivespeak = class(tcustomespeakng)
+  public
+   constructor create(aowner: tcomponent); override;
+  published
+   property datapath;
+   property options;
+   property device;
+   property bufferlength;
+   property voicedefault;
+   property voices;
+   property volume;
+   property rate;
+   property pitch;
+   property range;
+   property wordgap;
+   property punctuationlist;
+ end;
+
  tassistiveserver = class(tmsecomponent,iassistiveserver)
   private
    factive: boolean;
+   fspeaker: tassistivespeak;
    procedure setactive(const avalue: boolean);
    procedure activate();
    procedure deactivate();
+   procedure setspeaker(const avalue: tassistivespeak);
   protected
    fstate: assistiveserverstatesty;
    procedure loaded() override;
@@ -44,8 +64,12 @@ type
    procedure dochange(const sender: iassistiveclient);
    procedure docellevent(const sender: iassistiveclientgrid; 
                                        const info: celleventinfoty);
+  public
+   constructor create(aowner: tcomponent); override;
+   destructor destroy(); override;
   published
    property active: boolean read factive write setactive default false;
+   property speaker: tassistivespeak read fspeaker write setspeaker;
  end;
  
 implementation
@@ -53,6 +77,18 @@ uses
  msegui;
  
 { tassistiveserver }
+
+constructor tassistiveserver.create(aowner: tcomponent);
+begin
+ fspeaker:= tassistivespeak.create(nil);
+ inherited;
+end;
+
+destructor tassistiveserver.destroy();
+begin
+ inherited;
+ fspeaker.free();
+end;
 
 procedure tassistiveserver.setactive(const avalue: boolean);
 begin
@@ -83,6 +119,11 @@ begin
   assistiveserver:= nil;
   exclude(fstate,ass_active);
  end;
+end;
+
+procedure tassistiveserver.setspeaker(const avalue: tassistivespeak);
+begin
+ fspeaker.assign(avalue);
 end;
 
 procedure tassistiveserver.loaded();
@@ -136,6 +177,14 @@ end;
 procedure tassistiveserver.docellevent(const sender: iassistiveclientgrid;
                const info: celleventinfoty);
 begin
+end;
+
+{ tassistivespeak }
+
+constructor tassistivespeak.create(aowner: tcomponent);
+begin
+ inherited;
+ setsubcomponent(true);
 end;
 
 end.
