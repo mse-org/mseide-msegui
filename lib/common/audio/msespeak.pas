@@ -14,7 +14,8 @@ unit msespeak;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 uses
- classes,mclasses,mseclasses,msetypes,mseespeakng,msearrayprops;
+ classes,mclasses,mseclasses,msetypes,mseespeakng,msearrayprops,
+ msethread,mseevent,msesystypes;
 type
  espeakoptionty = (eso_nospeakaudio);
  espeakoptionsty = set of espeakoptionty;
@@ -55,7 +56,8 @@ type
    procedure setage(const avalue: card8);
    procedure setvariant(const avalue: card8);
   protected
-   procedure changed();
+   procedure beginchange();
+   procedure endchange();
   public
    constructor create(aowner: tobject); override;
   published
@@ -102,13 +104,42 @@ type
    function getitems(const index: int32): tvoice;
    procedure setitems(const index: int32; const avalue: tvoice);
   protected
-   procedure checkcount(var acount: integer) override;
+   procedure setcount1(acount: integer; doinit: boolean); override;
   public
    constructor create(const aowner: tespeakng);
-   property items[const index: int32]: tvoice read getitems write setitems; default;
+   property items[const index: int32]: tvoice read getitems
+                                                write setitems; default;
  end;
 
- speakstatety = (ss_voicevalid,ss_punctuationvalid);
+ speakmodety = (smo_text,smo_char,smo_key);
+ tspeakevent = class(tmseevent)
+  protected
+   fmode: speakmodety;
+   fvoice: int32;
+   foptions: speakoptionsty;
+   ftext: msestring;
+   fchar: char32;
+  public
+   constructor create(const text: msestring; const options: speakoptionsty;
+                                                         const voice: int32);
+   constructor create(const achar: char32; const options: speakoptionsty;
+                                                         const voice: int32);
+   constructor createkey(const key: msestring; const options: speakoptionsty;
+                                                         const voice: int32);
+ end;
+{
+ tspeakthread = class(teventthread)
+  protected
+   fidlecond: condty;
+  public
+   constructor create(const athreadproc: threadprocty;
+                     const afreeonterminate: boolean = false;
+                     const astacksizekb: integer = 0); overload; override;
+   destructor destroy(); override;
+   procedure clearevents() override;
+ end;
+}  
+ speakstatety = (ss_voicevalid,ss_punctuationvalid,ss_connected,ss_idle);
  speakstatesty = set of speakstatety;
   
  tespeakng = class(tmsecomponent)
@@ -122,19 +153,37 @@ type
    fvoicedefault: int32;
    fvoices: tvoices;
    fpunctuationlist: msestring;
+   fvolume: flo64;
    procedure setactive(const avalue: boolean);
    procedure setvoicedefault(avalue: int32);
    procedure setvoices(const avalue: tvoices);
    procedure setpunctuationlist(const avalue: msestring);
+   procedure setvolume(const avalue: flo64);
   protected
    fstate: speakstatesty;
    flastvoice: int32;
+   fspeakthread: teventthread;
+   fidlecond: condty;
+   function speakexe(athread: tmsethread): int32;
    procedure loaded() override;
    procedure connect();
    procedure disconnect();
    procedure checkerror(const astate: espeak_ng_status);
    procedure voicechanged();
    procedure checkvoice(avoice: int32);
+   procedure internalspeak(const atext: msestring; 
+                               const aoptions: speakoptionsty;
+                                                 const avoice: int32);
+   procedure internalspeakcharacter(const achar: char32;
+                             const aoptions: speakoptionsty;
+                                           const avoice: int32);
+   procedure internalspeakkeyname(const akey: msestring;
+                                     const aoptions: speakoptionsty;
+                                                      const avoice: int32);
+   procedure lock();
+   procedure unlock();
+   procedure postidle();
+   procedure postevent(const aevent: tspeakevent);
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy(); override;
@@ -158,6 +207,7 @@ type
    property voicedefault: int32 read fvoicedefault 
                                    write setvoicedefault default 0;
    property voices: tvoices read fvoices write setvoices;
+   property volume: flo64 read fvolume write setvolume; //default 1.0
    property punctuationlist: msestring read fpunctuationlist
                                                  write setpunctuationlist;
                                           //for voice.punctuation pu_some
@@ -165,7 +215,36 @@ type
  
 implementation
 uses
- msestrings,msefileutils,msectypes;
+ msestrings,msefileutils,msectypes,mseapplication,msesysintf1;
+
+{ tspeakevent }
+
+constructor tspeakevent.create(const text: msestring;
+                   const options: speakoptionsty; const voice: int32);
+begin
+ fmode:= smo_text;
+ foptions:= options;
+ fvoice:= voice;
+ ftext:= text;
+end;
+
+constructor tspeakevent.create(const achar: char32;
+               const options: speakoptionsty; const voice: int32);
+begin
+ fmode:= smo_char;
+ foptions:= options;
+ fvoice:= voice;
+ fchar:= achar;
+end;
+
+constructor tspeakevent.createkey(const key: msestring;
+               const options: speakoptionsty; const voice: int32);
+begin
+ fmode:= smo_key;
+ foptions:= options;
+ fvoice:= voice;
+ ftext:= key;
+end;
 
 { tvoices }
 
@@ -187,18 +266,21 @@ begin
  count:= 1;
 end;
 
-procedure tvoices.checkcount(var acount: integer);
+procedure tvoices.setcount1(acount: integer; doinit: boolean);
 begin
- if acount < 1 then begin
+ tespeakng(fowner).lock();
+ if (acount < 1) and not (aps_destroying in fstate) then begin
   acount:= 1;
  end;
  inherited;
+ tespeakng(fowner).unlock();
 end;
  
 { tespeakng }
 
 constructor tespeakng.create(aowner: tcomponent);
 begin
+ volume:= 1;
  inherited;
  fvoices:= tvoices.create(self);
 end;
@@ -244,6 +326,51 @@ begin
  exclude(fstate,ss_punctuationvalid);
 end;
 
+procedure tespeakng.setvolume(const avalue: flo64);
+begin
+ if fvolume <> avalue then begin
+  fvolume:= avalue;
+  voicechanged;
+ end;
+end;
+
+function tespeakng.speakexe(athread: tmsethread): int32;
+var
+ ev1: tspeakevent;
+begin
+ with teventthread(athread) do begin
+  while not terminated do begin
+   pointer(ev1):= waitevent();
+   if ev1 is tspeakevent then begin
+    try
+     case ev1.fmode of
+      smo_text: begin
+       internalspeak(ev1.ftext,ev1.foptions,ev1.fvoice);
+      end;
+      smo_char: begin
+       internalspeakcharacter(ev1.fchar,ev1.foptions,ev1.fvoice);
+      end;
+      smo_key: begin
+       internalspeakkeyname(ev1.ftext,ev1.foptions,ev1.fvoice);
+      end;
+     end;
+     espeak_ng_synchronize();
+    except
+     application.handleexception();
+    end;
+   end;
+   ev1.free();
+   eventlist.lock();
+   if eventlist.count = 0 then begin
+    postidle();
+   end;
+   eventlist.unlock();
+  end;
+  postidle();
+ end;
+ result:= 0;
+end;
+
 procedure tespeakng.loaded();
 begin
  inherited;
@@ -258,19 +385,27 @@ var
  m1: espeak_ng_OUTPUT_MODE;
 begin
  if not (csdesigning in componentstate) then begin
+  sys_condcreate(fidlecond);
   voicechanged();
   initializeespeakng([],stringtoutf8(tosysfilepath(fdatapath)));
-  m1:= 0;
+  m1:= {0;//}ENOUTPUT_MODE_SYNCHRONOUS; 
+             //espeak_ng_cancel() does not work in synchronous mode
   if not (eso_nospeakaudio in foptions) then begin
    m1:= m1 or ENOUTPUT_MODE_SPEAK_AUDIO;
   end;
   checkerror(espeak_ng_InitializeOutput(m1,0,nil));
+  include(fstate,ss_connected);
+  fspeakthread:= teventthread.create(@speakexe);
  end;
 end;
 
 procedure tespeakng.disconnect();
 begin
  if not (csdesigning in componentstate) then begin
+  cancel();
+  fspeakthread.free();
+  sys_conddestroy(fidlecond);
+  exclude(fstate,ss_connected);
   releaseespeakng();
  end;
 end;
@@ -294,75 +429,91 @@ var
  ar1: card32arty;
  i1: int32;
 begin
- if avoice < 0 then begin
-  avoice:= fvoicedefault;
- end;
- if (avoice >= fvoices.count) then begin
-  avoice:= 0;
- end;
- if not (ss_punctuationvalid in fstate) then begin
-  include(fstate,ss_punctuationvalid);
-  setlength(ar1,length(fpunctuationlist));
-  for i1:= 0 to high(ar1) do begin
-   ar1[i1]:= ord(fpunctuationlist[i1+1]);
+ lock();
+ try
+  if avoice < 0 then begin
+   avoice:= fvoicedefault;
   end;
-  checkerror(espeak_ng_setpunctuationlist(pointer(ar1)));
- end;
- if not (ss_voicevalid in fstate) or (flastvoice <> avoice) then begin
-  include(fstate,ss_voicevalid);
-  flastvoice:= avoice;
-  fillchar(info1,sizeof(info1),0);
-  with voices[avoice] do begin
-   s1:= stringtoutf8(name);
-   info1.name:= pointer(s1);
-   s2:= stringtoutf8(language);
-   info1.languages:= pointer(s2);
-   s3:= stringtoutf8(tosysfilepath(identifier));
-   info1.identifier:= pointer(s3);
-   info1.gender:= ord(gender);
-   info1.age:= age;
-   info1.variant:= variant;
-   checkerror(espeak_ng_setvoicebyproperties(@info1));
-   checkerror(espeak_ng_setparameter(espeakRATE,rate,0));
-   checkerror(espeak_ng_setparameter(espeakVOLUME,volume,0));
-   checkerror(espeak_ng_setparameter(espeakPITCH,pitch,0));
-   checkerror(espeak_ng_setparameter(espeakRANGE,range,0));
-   checkerror(espeak_ng_setparameter(espeakPUNCTUATION,ord(punctuation),0));
-   checkerror(espeak_ng_setparameter(espeakCAPITALS,capitals,0));
-   checkerror(espeak_ng_setparameter(espeakWORDGAP,wordgap,0));
+  if (avoice >= fvoices.count) then begin
+   avoice:= 0;
   end;
+  if not (ss_punctuationvalid in fstate) then begin
+   include(fstate,ss_punctuationvalid);
+   setlength(ar1,length(fpunctuationlist));
+   for i1:= 0 to high(ar1) do begin
+    ar1[i1]:= ord(fpunctuationlist[i1+1]);
+   end;
+   checkerror(espeak_ng_setpunctuationlist(pointer(ar1)));
+  end;
+  if not (ss_voicevalid in fstate) or (flastvoice <> avoice) then begin
+   include(fstate,ss_voicevalid);
+   flastvoice:= avoice;
+   fillchar(info1,sizeof(info1),0);
+   with voices[avoice] do begin
+    s1:= stringtoutf8(name);
+    info1.name:= pointer(s1);
+    s2:= stringtoutf8(language);
+    info1.languages:= pointer(s2);
+    s3:= stringtoutf8(tosysfilepath(identifier));
+    info1.identifier:= pointer(s3);
+    info1.gender:= ord(gender);
+    info1.age:= age;
+    info1.variant:= variant;
+    checkerror(espeak_ng_setvoicebyproperties(@info1));
+    checkerror(espeak_ng_setparameter(espeakRATE,rate,0));
+    checkerror(espeak_ng_setparameter(espeakVOLUME,
+                                           round(volume*self.volume),0));
+    checkerror(espeak_ng_setparameter(espeakPITCH,pitch,0));
+    checkerror(espeak_ng_setparameter(espeakRANGE,range,0));
+    {checkerror(}espeak_ng_setparameter(espeakPUNCTUATION,
+                                                  ord(punctuation),0){)};
+    {checkerror(}espeak_ng_setparameter(espeakCAPITALS,capitals,0){)};
+      //bug in espeak:
+      //espeakPUNCTUATION and espeakCAPITALS return einval in syncronous mode
+    checkerror(espeak_ng_setparameter(espeakWORDGAP,wordgap,0));
+   end;
+  end;
+ finally
+  unlock();
  end;
 end;
-{
- espeak_VOICE = record
-  name: pcchar;      // a given name for this voice. UTF8 string.
-  languages: pcchar;  // list of pairs of (byte) priority + 
-                      //(string) language (and dialect qualifier)
-  identifier: pcchar; // the filename for this voice within
-                      //espeak-ng-data/voices
-  gender: cuchar;  // 0=none 1=male, 2=female,
-  age: cuchar;     // 0=not specified, or age in years
-  variant: cuchar; // only used when passed as a parameter to 
-                   //espeak_SetVoiceByProperties
-  xx1: cuchar;     // for internal use
-  score: cint;       // for internal use
-  spare: pointer;     // for internal use
- end;
-}
 
-procedure tespeakng.speak(const atext: msestring;
-               const aoptions: speakoptionsty = []; const avoice: int32 = -1);
+procedure tespeakng.wait();
+begin
+ if not (ss_connected in fstate) then begin
+  exit;
+ end;
+ with fspeakthread do begin
+  sys_condlock(fidlecond);
+  while true do begin
+   if ss_idle in fstate then begin
+    sys_condunlock(fidlecond);
+    break;
+   end
+   else begin
+    sys_condwait(fidlecond,0);
+   end;
+  end;
+ end;
+ checkerror(espeak_ng_synchronize());
+end;
+
+procedure tespeakng.cancel();
+begin
+ if not (ss_connected in fstate) then begin
+  exit;
+ end;
+ fspeakthread.clearevents();
+ checkerror(espeak_ng_cancel());
+ postidle();
+end;
+
+procedure tespeakng.internalspeak(const atext: msestring;
+               const aoptions: speakoptionsty; const avoice: int32);
 var
  s1: string;
  f1: cuint;
 begin
- if not factive then begin
-  exit;
- end;
- if so_cancel in aoptions then begin
-  checkerror(espeak_ng_cancel());
- end;
- if atext <> '' then begin
   checkvoice(avoice);
   f1:= espeakCHARS_UTF8;
   if so_ssml in aoptions then begin
@@ -377,60 +528,99 @@ begin
   s1:= stringtoutf8(atext);
   checkerror(espeak_ng_synthesize(pchar(s1),length(s1),0,pos_character,0,
                  f1,nil,nil));
+end;
+
+procedure tespeakng.lock();
+begin
+ if ss_connected in fstate then begin
+  fspeakthread.lock();
+ end;
+end;
+
+procedure tespeakng.unlock();
+begin
+ if ss_connected in fstate then begin
+  fspeakthread.unlock();
+ end;
+end;
+
+procedure tespeakng.postidle();
+begin
+ sys_condlock(fidlecond);
+ include(fstate,ss_idle);
+ sys_condbroadcast(fidlecond);
+ sys_condunlock(fidlecond);
+end;
+
+procedure tespeakng.postevent(const aevent: tspeakevent);
+begin
+ sys_condlock(fidlecond);
+ exclude(fstate,ss_idle);
+ fspeakthread.postevent(aevent);
+ sys_condunlock(fidlecond);
+end;
+
+procedure tespeakng.speak(const atext: msestring;
+               const aoptions: speakoptionsty = []; const avoice: int32 = -1);
+begin
+ if not (ss_connected in fstate) then begin
+  exit;
+ end;
+ if so_cancel in aoptions then begin
+  cancel();
+ end;
+ if atext <> '' then begin
+  postevent(tspeakevent.create(atext,aoptions,avoice));
  end;
  if so_wait in aoptions then begin
-  checkerror(espeak_ng_synchronize());
+  wait();
  end;
+end;
+
+procedure tespeakng.internalspeakcharacter(const achar: char32;
+                       const aoptions: speakoptionsty; const avoice: int32);
+begin
+ checkvoice(avoice);
+ checkerror(espeak_ng_speakcharacter(ord(achar)));
 end;
 
 procedure tespeakng.speakcharacter(const achar: char32;
         const aoptions: speakoptionsty = []; const avoice: int32 = -1);
 begin
- if not factive then begin
+ if not (ss_connected in fstate) then begin
   exit;
  end;
  if so_cancel in aoptions then begin
-  checkerror(espeak_ng_cancel());
+  cancel();
  end;
- checkvoice(avoice);
- checkerror(espeak_ng_speakcharacter(ord(achar)));
+ postevent(tspeakevent.create(achar,aoptions,avoice));
  if so_wait in aoptions then begin
-  checkerror(espeak_ng_synchronize());
+  wait();
  end;
+end;
+
+procedure tespeakng.internalspeakkeyname(const akey: msestring;
+                       const aoptions: speakoptionsty; const avoice: int32);
+begin
+ checkvoice(avoice);
+ checkerror(espeak_ng_speakkeyname(pchar(stringtoutf8(akey))));
 end;
 
 procedure tespeakng.speakkeyname(const akey: msestring;
                const aoptions: speakoptionsty = []; const avoice: int32 = -1);
 begin
- if not factive then begin
+ if not (ss_connected in fstate) then begin
   exit;
  end;
  if so_cancel in aoptions then begin
-  checkerror(espeak_ng_cancel());
+  cancel();
  end;
  if akey <> '' then begin
-  checkvoice(avoice);
-  checkerror(espeak_ng_speakkeyname(pchar(stringtoutf8(akey))));
+  postevent(tspeakevent.createkey(akey,aoptions,avoice));
  end;
  if so_wait in aoptions then begin
-  checkerror(espeak_ng_synchronize());
+  wait();
  end;
-end;
-
-procedure tespeakng.wait();
-begin
- if not factive then begin
-  exit;
- end;
- checkerror(espeak_ng_synchronize());
-end;
-
-procedure tespeakng.cancel();
-begin
- if not factive then begin
-  exit;
- end;
- checkerror(espeak_ng_cancel());
 end;
 
 { tvoice }
@@ -444,112 +634,131 @@ begin
  inherited;
 end;
 
-procedure tvoice.changed();
+procedure tvoice.beginchange();
+begin
+ tespeakng(fowner).lock();
+end;
+
+procedure tvoice.endchange();
 begin
  tespeakng(fowner).voicechanged();
+ tespeakng(fowner).unlock();
 end;
 
 procedure tvoice.setgender(const avalue: genderty);
 begin
  if avalue <> fgender then begin
+  beginchange();
   fgender:= avalue;
-  changed();
+  endchange();
  end;
 end;
 
 procedure tvoice.setpitch(const avalue: int32);
 begin
  if avalue <> fpitch then begin
+  beginchange();
   fpitch:= avalue;
-  changed();
+  endchange();
  end;
 end;
 
 procedure tvoice.setrate(const avalue: int32);
 begin
  if avalue <> frate then begin
+  beginchange();
   frate:= avalue;
-  changed();
+  endchange();
  end;
 end;
 
 procedure tvoice.setvolume(const avalue: int32);
 begin
  if avalue <> fvolume then begin
+  beginchange();
   fvolume:= avalue;
-  changed();
+  endchange();
  end;
 end;
 
 procedure tvoice.setrange(const avalue: int32);
 begin
  if avalue <> frange then begin
+  beginchange();
   frange:= avalue;
-  changed();
+  endchange();
  end;
 end;
 
 procedure tvoice.setpunctuation(const avalue: punctuationty);
 begin
  if avalue <> fpunctuation then begin
+  beginchange();
   fpunctuation:= avalue;
-  changed();
+  endchange();
  end;
 end;
 
 procedure tvoice.setcapitals(const avalue: int32);
 begin
  if avalue <> fcapitals then begin
+  beginchange();
   fcapitals:= avalue;
-  changed();
+  endchange();
  end;
 end;
 
 procedure tvoice.setwordgap(const avalue: int32);
 begin
  if avalue <> fwordgap then begin
+  beginchange();
   fwordgap:= avalue;
-  changed();
+  endchange();
  end;
 end;
 
 procedure tvoice.setname(const avalue: msestring);
 begin
  if avalue <> fname then begin
+  beginchange();
   fname:= avalue;
-  changed();
+  endchange();
  end;
 end;
 
 procedure tvoice.setlanguage(const avalue: msestring);
 begin
  if avalue <> flanguage then begin
+  beginchange();
   flanguage:= avalue;
-  changed();
+  endchange();
  end;
 end;
 
 procedure tvoice.setidentifier(const avalue: msestring);
 begin
  if avalue <> fidentifier then begin
+  beginchange();
   fidentifier:= avalue;
-  changed();
+  endchange();
  end;
 end;
 
 procedure tvoice.setage(const avalue: card8);
 begin
  if avalue <> fage then begin
+  beginchange();
   fage:= avalue;
-  changed();
+  endchange();
  end;
 end;
 
 procedure tvoice.setvariant(const avalue: card8);
 begin
  if avalue <> fvariant then begin
+  beginchange();
   fvariant:= avalue;
-  changed();
+  endchange();
  end;
 end;
 

@@ -317,6 +317,10 @@ Return: EE_OK: operation achieved
  espeak_ng_SpeakCharacter:
   function(character: wchar_t): espeak_ng_STATUS
                                {$ifdef wincall}stdcall{$else}cdecl{$endif};
+ espeak_IsPlaying:
+  function(): cint {$ifdef wincall}stdcall{$else}cdecl{$endif};
+   //* Returns 1 if audio is played, 0 otherwise.
+
  espeak_ng_Cancel:
   function(): espeak_ng_STATUS {$ifdef wincall}stdcall{$else}cdecl{$endif};
  espeak_ng_Synchronize:
@@ -398,7 +402,7 @@ procedure initializeespeakng(const sonames: array of filenamety;
                           const espeakdatapath: string = '');
 
 const
- funcs: array[0..16] of funcinfoty = (
+ funcs: array[0..17] of funcinfoty = (
   (n: 'espeak_ng_ClearErrorContext'; d: @espeak_ng_ClearErrorContext),
   (n: 'espeak_ng_GetStatusCodeMessage'; d: @espeak_ng_GetStatusCodeMessage),
   (n: 'espeak_ng_InitializePath'; d: @ espeak_ng_InitializePath),
@@ -413,6 +417,7 @@ const
   (n: 'espeak_ng_SynthesizeMark'; d: @espeak_ng_SynthesizeMark),
   (n: 'espeak_ng_SpeakKeyName'; d: @espeak_ng_SpeakKeyName),
   (n: 'espeak_ng_SpeakCharacter'; d: @espeak_ng_SpeakCharacter),
+  (n: 'espeak_IsPlaying'; d: @espeak_IsPlaying),
   (n: 'espeak_ng_Cancel'; d: @espeak_ng_Cancel),
   (n: 'espeak_ng_Synchronize'; d: @espeak_ng_Synchronize),
   (n: 'espeak_ng_Terminate'; d: @espeak_ng_Terminate)
