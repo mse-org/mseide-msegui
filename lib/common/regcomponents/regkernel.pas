@@ -201,7 +201,7 @@ begin
 //                    tskinextender,
                     tbitmapcomp,timagelist,tshortcutcontroller,thelpcontroller,
                     tguiprocess,
-                    taction,tguithreadcomp,tassistivehandler]);
+                    taction,tguithreadcomp,tassistiveserver]);
  registercomponenttabhints(['Gui'],['Non visual components with GUI dependence']);
 
  registercomponents('NoGui',[tstatfile,trttistat,tnoguiaction,tactivator,

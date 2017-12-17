@@ -16,17 +16,17 @@ uses
  mseassistiveclient,msemenuwidgets,msegrids;
 
 type
- assistivehandlerstatety = (ahs_active);
- assistivehandlerstatesty = set of assistivehandlerstatety;
+ assistiveserverstatety = (ass_active);
+ assistiveserverstatesty = set of assistiveserverstatety;
 
- tassistivehandler = class(tmsecomponent,iassistiveserver)
+ tassistiveserver = class(tmsecomponent,iassistiveserver)
   private
    factive: boolean;
    procedure setactive(const avalue: boolean);
    procedure activate();
    procedure deactivate();
   protected
-   fstate: assistivehandlerstatesty;
+   fstate: assistiveserverstatesty;
    procedure loaded() override;
    
     //iassistiveserver
@@ -52,9 +52,9 @@ implementation
 uses
  msegui;
  
-{ tassistivehandler }
+{ tassistiveserver }
 
-procedure tassistivehandler.setactive(const avalue: boolean);
+procedure tassistiveserver.setactive(const avalue: boolean);
 begin
  if factive <> avalue then begin
   factive:= avalue;
@@ -69,23 +69,23 @@ begin
  end;
 end;
 
-procedure tassistivehandler.activate();
+procedure tassistiveserver.activate();
 begin
  if not (csdesigning in componentstate) then begin
   assistiveserver:= iassistiveserver(self);
-  include(fstate,ahs_active);
+  include(fstate,ass_active);
  end;
 end;
 
-procedure tassistivehandler.deactivate();
+procedure tassistiveserver.deactivate();
 begin
  if not (csdesigning in componentstate) then begin
   assistiveserver:= nil;
-  exclude(fstate,ahs_active);
+  exclude(fstate,ass_active);
  end;
 end;
 
-procedure tassistivehandler.loaded();
+procedure tassistiveserver.loaded();
 begin
  inherited;
  if factive then begin
@@ -94,46 +94,46 @@ begin
  end;
 end;
 
-procedure tassistivehandler.doenter(const sender: iassistiveclient);
+procedure tassistiveserver.doenter(const sender: iassistiveclient);
 begin
  guibeep();
 end;
 
-procedure tassistivehandler.doitementer(const sender: iassistiveclient;
+procedure tassistiveserver.doitementer(const sender: iassistiveclient;
                const items: shapeinfoarty; const aindex: integer);
 begin
 end;
 
-procedure tassistivehandler.doitementer(const sender: iassistiveclient;
+procedure tassistiveserver.doitementer(const sender: iassistiveclient;
                const items: menucellinfoarty; const aindex: integer);
 begin
 end;
 
-procedure tassistivehandler.clientmouseevent(const sender: iassistiveclient;
+procedure tassistiveserver.clientmouseevent(const sender: iassistiveclient;
                const info: mouseeventinfoty);
 begin
 end;
 
-procedure tassistivehandler.dofocuschanged(const oldwidget: iassistiveclient;
+procedure tassistiveserver.dofocuschanged(const oldwidget: iassistiveclient;
                const newwidget: iassistiveclient);
 begin
 end;
 
-procedure tassistivehandler.dokeydown(const sender: iassistiveclient;
+procedure tassistiveserver.dokeydown(const sender: iassistiveclient;
                const info: keyeventinfoty);
 begin
 end;
 
-procedure tassistivehandler.doactionexecute(const sender: tobject;
+procedure tassistiveserver.doactionexecute(const sender: tobject;
                const info: actioninfoty);
 begin
 end;
 
-procedure tassistivehandler.dochange(const sender: iassistiveclient);
+procedure tassistiveserver.dochange(const sender: iassistiveclient);
 begin
 end;
 
-procedure tassistivehandler.docellevent(const sender: iassistiveclientgrid;
+procedure tassistiveserver.docellevent(const sender: iassistiveclientgrid;
                const info: celleventinfoty);
 begin
 end;
