@@ -27,7 +27,7 @@ implementation
 uses
  classes,mclasses,msethreadcomp,msebitmap,msetimer,msestatfile,mseact,
  mseactions,mseshapes,msewidgets,mseindexlookupeditor,msecornermaskeditor,
- msedesignintf,msemenus,msegui,msepipestream,sysutils,
+ msedesignintf,msemenus,msegui,msepipestream,sysutils,mseassistivehandler,
  msegraphutils,regkernel_bmp,msegraphics,msestrings,msepostscriptprinter,
  mseprinter,msetypes,msedatalist,msedatamodules,mseclasses,formdesigner,
  mseapplication,mseglob,mseguiglob,mseskin,msedesigner,msemacros,
@@ -201,7 +201,7 @@ begin
 //                    tskinextender,
                     tbitmapcomp,timagelist,tshortcutcontroller,thelpcontroller,
                     tguiprocess,
-                    taction,tguithreadcomp]);
+                    taction,tguithreadcomp,tassistivehandler]);
  registercomponenttabhints(['Gui'],['Non visual components with GUI dependence']);
 
  registercomponents('NoGui',[tstatfile,trttistat,tnoguiaction,tactivator,
