@@ -195,9 +195,18 @@ begin
 end;
 
 procedure tassistiveserver.speakall(const sender: iassistiveclient);
+var
+ fla1: assistiveflagsty;
+ s1: msestring;
 begin
+ fla1:= sender.getassistiveflags();
  startspeak();
- speaktext(sender.getassistivecaption(),fvoicecaption);
+ s1:= '';
+ if asf_button in fla1 then begin
+  s1:= stockobjects.captions[sc_button] + ' ';
+ end;
+ s1:= s1 + sender.getassistivecaption();
+ speaktext(s1,fvoicecaption);
  speaktext(sender.getassistivetext(),fvoicetext);
 end;
 

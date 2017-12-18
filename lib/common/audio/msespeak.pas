@@ -91,7 +91,7 @@ type
      {espeakPUNCTUATION:  which punctuation characters to announce:
          value in espeak_PUNCT_TYPE (none, all, some),
          see espeak_GetParameter() to specify which characters are announced.}
-   property capitals: int32 read fcapitals write setcapitals default 0;
+   property capitals: int32 read fcapitals write setcapitals default -1;
      {espeakCAPITALS: announce capital letters by:
          0=none,
          1=sound icon,
@@ -99,7 +99,8 @@ type
          3 or higher, by raising pitch.  
            This values gives the amount in Hz by which the pitch
             of a word raised to indicate it has a capital letter.}
-   property wordgap: int32 read fwordgap write setwordgap default 0;
+   property wordgap: int32 read fwordgap write setwordgap default -1;
+                                                   //-1 = default
      {espeakWORDGAP:  pause between words, units of 10mS (at the default speed)}
  end;
 
@@ -161,12 +162,13 @@ type
    frate: flo64;
    fpitch: flo64;
    frange: flo64;
-   fwordgap: flo64;
+   fwordgap: int32;
    flanguage: msestring;
    fidentifier: msestring;
    fgender: genderty;
    fage: card8;
    fvariant: card8;
+   fcapitals: int32;
    procedure setactive(const avalue: boolean);
    procedure setvoicedefault(avalue: int32);
    procedure setvoices(const avalue: tvoices);
@@ -175,12 +177,13 @@ type
    procedure setrate(const avalue: flo64);
    procedure setpitch(const avalue: flo64);
    procedure setrange(const avalue: flo64);
-   procedure setwordgap(const avalue: flo64);
+   procedure setwordgap(const avalue: int32);
    procedure setlanguage(const avalue: msestring);
    procedure setidentifier(const avalue: msestring);
    procedure setgender(const avalue: genderty);
    procedure setage(const avalue: card8);
    procedure setvariant(const avalue: card8);
+   procedure setcapitals(const avalue: int32);
   protected
    fstate: speakstatesty;
    flastvoice: int32;
@@ -241,7 +244,9 @@ type
    property rate: flo64 read frate write setrate;          //default 1.0
    property pitch: flo64 read fpitch write setpitch;       //default 1.0
    property range: flo64 read frange write setrange;       //default 1.0
-   property wordgap: flo64 read fwordgap write setwordgap; //default 1.0
+   property capitals: int32 read fcapitals write setcapitals default 0;
+   property wordgap: int32 read fwordgap write setwordgap default 0;
+                                                          //n*10ms
    property punctuationlist: msestring read fpunctuationlist
                                                  write setpunctuationlist;
                                           //for voice.punctuation pu_some
@@ -340,7 +345,6 @@ begin
  frate:= 1;
  fpitch:= 1;
  frange:= 1;
- fwordgap:= 1;
  inherited;
  fvoices:= tvoices.create(self);
 end;
@@ -425,7 +429,7 @@ begin
  end;
 end;
 
-procedure tcustomespeakng.setwordgap(const avalue: flo64);
+procedure tcustomespeakng.setwordgap(const avalue: int32);
 begin
  if fwordgap <> avalue then begin
   beginchange();
@@ -475,6 +479,15 @@ begin
  if fvariant <> avalue then begin
   beginchange();
   fvariant:= avalue;
+  endchange();
+ end;
+end;
+
+procedure tcustomespeakng.setcapitals(const avalue: int32);
+begin
+ if fcapitals <> avalue then begin
+  beginchange();
+  fcapitals:= avalue;
   endchange();
  end;
 end;
@@ -588,7 +601,7 @@ begin
    flastvoice:= avoice;
    fillchar(info1,sizeof(info1),0);
    with voices[avoice] do begin
-    s1:= stringtoutf8(name);
+    s1:= stringtoutf8(voicename);
     info1.name:= pointer(s1);
     if language <> '' then begin
      s2:= stringtoutf8(language);
@@ -641,11 +654,22 @@ begin
     checkerror(espeak_ng_setparameter(espeakRANGE,round(range*self.range),0));
     {checkerror(}espeak_ng_setparameter(espeakPUNCTUATION,
                                                   ord(punctuation),0){)};
-    {checkerror(}espeak_ng_setparameter(espeakCAPITALS,capitals,0){)};
+    if capitals < 0 then begin
+     i1:= self.capitals;
+    end
+    else begin
+     i1:= capitals;
+    end;
+    {checkerror(}espeak_ng_setparameter(espeakCAPITALS,i1,0){)};
       //bug in espeak:
       //espeakPUNCTUATION and espeakCAPITALS return einval in syncronous mode
-    checkerror(espeak_ng_setparameter(espeakWORDGAP,
-                              round(wordgap*self.wordgap),0));
+    if wordgap < 0 then begin
+     i1:= self.wordgap;
+    end
+    else begin
+     i1:= wordgap;
+    end;
+    checkerror(espeak_ng_setparameter(espeakWORDGAP,i1,0));
    end;
   end;
  finally
@@ -817,6 +841,8 @@ begin
  frate:= espeakRATE_NORMAL;
  fvolume:= 100;
  frange:= 50;
+ fcapitals:= -1;
+ fwordgap:= -1;
  inherited;
 end;
 {

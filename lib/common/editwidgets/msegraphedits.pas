@@ -114,7 +114,8 @@ type
    property colorclient default cl_foreground;
  end;
  
- tgraphdataedit = class(tactionpublishedwidget,igridwidget,istatfile
+ tgraphdataedit = class(tactionpublishedwidget,igridwidget,istatfile,
+                         iassistiveclientdata
                   {$ifdef mse_with_ifi},iifidatalink{$endif})
   private
    fonchange: notifyeventty;
@@ -648,6 +649,8 @@ type
    function getgridvaluebitmask(const index: integer): longword;
    procedure setgridvaluebitmask(const index: integer; const avalue: longword);
    procedure dokeydown(var info: keyeventinfoty); override;
+   
+   function getassistivetext(): msestring override;
   public
    constructor create(aowner: tcomponent); override;
    procedure fillcol(const avalue: longbool);
@@ -933,6 +936,7 @@ type
    
    procedure setcolor(const avalue: colorty); override;
    procedure objectchanged(const sender: tobject); override;
+   function getassistiveflags(): assistiveflagsty override;
 
     //iactionlink
    function getactioninfopo: pactioninfoty;
@@ -1893,6 +1897,9 @@ begin
  {$endif}
   if (oe1_sendchangeeventbycheckvalue in optionsedit1) then begin
    sendchangeevent();
+  end;
+  if assistiveserver <> nil then begin
+   assistiveserver.dodataentered(iassistiveclientdata(self));
   end;
  end;
 end;
@@ -3149,6 +3156,16 @@ begin
     inherited;
    end;
   end;
+ end;
+end;
+
+function tcustombooleanedit.getassistivetext(): msestring;
+begin
+ if value then begin
+  result:= stockobjects.captions[sc_on];
+ end
+ else begin
+  result:= stockobjects.captions[sc_off];
  end;
 end;
 
@@ -4483,6 +4500,11 @@ begin
  for i1:= 0 to high(fvaluefaces.fitems) do begin
   tcustomface(fvaluefaces.fitems[i1]).checktemplate(sender);
  end;
+end;
+
+function tcustomdatabutton.getassistiveflags(): assistiveflagsty;
+begin
+ result:= inherited getassistiveflags() + [asf_button];
 end;
 
 procedure tcustomdatabutton.doupdate;

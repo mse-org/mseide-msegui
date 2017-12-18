@@ -167,7 +167,10 @@ const
   'Im Hintergrund',            //sc_stay_in_background
   'Blockiere Unterfenster',    //sc_lock_children
   'Kein Blockieren',           //sc_no_lock
-  'Eingabe'                    //sc_input
+  'Eingabe',                   //sc_input
+  'Schaltfläche',              //sc_button
+  'Ein',                       //sc_on
+  'Aus'                        //sc_off
 );
     
 function delete_n_selected_rows(const params: array of const): msestring;

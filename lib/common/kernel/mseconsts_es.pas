@@ -170,7 +170,10 @@ const
   'Permanecer en el fondo',            //sc_stay_in_background
   'Bloquear hijas',                    //sc_lock_children
   'Sin bloquear',                      //sc_no_lock
-  'Input'                              //sc_input
+  'Input',                             //sc_input
+  'Button',                            //sc_button
+  'On',                                //sc_on
+  'Off'                                //sc_off
 );
     
 function delete_n_selected_rows(const params: array of const): msestring;

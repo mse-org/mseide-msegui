@@ -212,7 +212,10 @@ const
   'Stay in background',  //sc_stay_in_background
   'Lock children',       //sc_lock_children
   'No lock',             //sc_no_lock
-  'Input'                //sc_input
+  'Input',               //sc_input
+  'Button',              //sc_button
+  'On',                  //sc_on
+  'Off'                  //sc_off
 );
     
 function delete_n_selected_rows(const params: array of const): msestring;

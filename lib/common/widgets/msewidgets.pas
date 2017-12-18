@@ -1361,6 +1361,7 @@ type
    procedure clientrectchanged; override;
    function getframestateflags: framestateflagsty; override;
    function navigstartrect: rectty; override;
+   function getassistiveflags(): assistiveflagsty override;
   public
    constructor create(aowner: tcomponent); override;
    procedure execute;
@@ -2461,6 +2462,11 @@ begin
  result:= inherited navigstartrect;
  result.x:= result.x + result.cx div 2;
  result. cx:= 0;
+end;
+
+function tactionsimplebutton.getassistiveflags(): assistiveflagsty;
+begin
+ result:= inherited getassistiveflags() + [asf_button];
 end;
 
 {
