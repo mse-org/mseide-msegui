@@ -7,13 +7,16 @@
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 }
+//
+// under construction
+//
 unit mseassistivehandler;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 uses
  classes,mclasses,mseclasses,mseassistiveserver,
  mseguiglob,mseglob,msestrings,mseinterfaces,mseact,mseshapes,
- mseassistiveclient,msemenuwidgets,msegrids,msespeak;
+ mseassistiveclient,msemenuwidgets,msegrids,msespeak,msetypes;
 
 type
  assistiveserverstatety = (ass_active);
@@ -29,6 +32,11 @@ type
    property bufferlength;
    property voicedefault;
    property voices;
+   property language;
+   property identifier;
+   property gender;
+   property age;
+   property variant;
    property volume;
    property rate;
    property pitch;
@@ -41,14 +49,19 @@ type
   private
    factive: boolean;
    fspeaker: tassistivespeak;
+   fvoicecaption: int32;
+   fvoicetext: int32;
    procedure setactive(const avalue: boolean);
-   procedure activate();
-   procedure deactivate();
    procedure setspeaker(const avalue: tassistivespeak);
   protected
    fstate: assistiveserverstatesty;
+   procedure activate();
+   procedure deactivate();
+
    procedure loaded() override;
-   
+
+   procedure startspeak();
+      
     //iassistiveserver
    procedure doenter(const sender: iassistiveclient);
    procedure doitementer(const sender: iassistiveclient; //sender can be nil
@@ -67,9 +80,17 @@ type
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy(); override;
+   procedure wait();
+   procedure cancel();
+   procedure speaktext(const atext: msestring; const avoice: int32 = 0);
+   procedure speakall(const sender: iassistiveclient);
   published
    property active: boolean read factive write setactive default false;
    property speaker: tassistivespeak read fspeaker write setspeaker;
+   property voicecaption: int32 read fvoicecaption 
+                                          write fvoicecaption default 0;
+   property voicetext: int32 read fvoicetext 
+                                          write fvoicetext default 0;
  end;
  
 implementation
@@ -108,6 +129,7 @@ end;
 procedure tassistiveserver.activate();
 begin
  if not (csdesigning in componentstate) then begin
+  fspeaker.active:= true;
   assistiveserver:= iassistiveserver(self);
   include(fstate,ass_active);
  end;
@@ -117,6 +139,7 @@ procedure tassistiveserver.deactivate();
 begin
  if not (csdesigning in componentstate) then begin
   assistiveserver:= nil;
+  fspeaker.active:= false;
   exclude(fstate,ass_active);
  end;
 end;
@@ -135,9 +158,37 @@ begin
  end;
 end;
 
+procedure tassistiveserver.wait();
+begin
+ fspeaker.wait();
+end;
+
+procedure tassistiveserver.cancel();
+begin
+ fspeaker.cancel();
+end;
+
+procedure tassistiveserver.speaktext(const atext: msestring;
+               const avoice: int32 = 0);
+begin
+ fspeaker.speak(atext,[so_endpause],avoice);
+end;
+
+procedure tassistiveserver.speakall(const sender: iassistiveclient);
+begin
+ startspeak();
+ speaktext(sender.getassistivecaption(),fvoicecaption);
+ speaktext(sender.getassistivetext(),fvoicetext);
+end;
+
+procedure tassistiveserver.startspeak();
+begin
+ cancel();
+end;
+
 procedure tassistiveserver.doenter(const sender: iassistiveclient);
 begin
- guibeep();
+ speakall(sender);
 end;
 
 procedure tassistiveserver.doitementer(const sender: iassistiveclient;
