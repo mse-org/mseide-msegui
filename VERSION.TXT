@@ -1,5 +1,7 @@
 MSEide+MSEgui breaking changes version history
 **********************************************
+2017-12-18
+ iassitiveserver.clientmouseevent() -> doclientmouseevent()
 2017-12-15
  initializedynlib(),releasdynlib() callback has data pointer parameter.
 Version 4.6

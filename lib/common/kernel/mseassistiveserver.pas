@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 2015 by Martin Schreiber
+{ MSEgui Copyright (c) 2015-2015 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -21,7 +21,7 @@ type
                             const items: shapeinfoarty; const aindex: integer);
   procedure doitementer(const sender: iassistiveclient; //sender can be nil
                          const items: menucellinfoarty; const aindex: integer);
-  procedure clientmouseevent(const sender: iassistiveclient;
+  procedure doclientmouseevent(const sender: iassistiveclient;
                                           const info: mouseeventinfoty);
   procedure dofocuschanged(const oldwidget,newwidget: iassistiveclient);
   procedure dokeydown(const sender: iassistiveclient;

@@ -68,7 +68,7 @@ type
                              const items: shapeinfoarty; const aindex: integer);
    procedure doitementer(const sender: iassistiveclient; //sender can be nil
                           const items: menucellinfoarty; const aindex: integer);
-   procedure clientmouseevent(const sender: iassistiveclient;
+   procedure doclientmouseevent(const sender: iassistiveclient;
                                            const info: mouseeventinfoty);
    procedure dofocuschanged(const oldwidget,newwidget: iassistiveclient);
    procedure dokeydown(const sender: iassistiveclient;
@@ -201,7 +201,7 @@ procedure tassistiveserver.doitementer(const sender: iassistiveclient;
 begin
 end;
 
-procedure tassistiveserver.clientmouseevent(const sender: iassistiveclient;
+procedure tassistiveserver.doclientmouseevent(const sender: iassistiveclient;
                const info: mouseeventinfoty);
 begin
 end;
