@@ -140,7 +140,8 @@ type
                     sc_Single_item_only,sc_Copy_Cells,sc_Paste_Cells,
                     sc_close,sc_maximize,sc_normalize,sc_minimize,sc_fix_size,
                     sc_float,sc_stay_on_top,sc_stay_in_background,
-                    sc_lock_children,sc_no_lock
+                    sc_lock_children,sc_no_lock,
+                    sc_input
                     );
  textgeneratorfuncty = function(const params: array of const): msestring;
  textgeneratorty = (tg_delete_n_selected_rows);

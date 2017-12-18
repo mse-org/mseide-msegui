@@ -10,12 +10,16 @@
 unit mseinplaceedit;
 
 {$ifdef FPC}{$mode objfpc}{$h+}{$interfaces corba}{$endif}
+{$ifndef mse_no_ifi}
+ {$define mse_with_ifi}
+{$endif}
 
 interface
 uses
  msegui,mseguiglob,msegraphics,msedrawtext,msegraphutils,
  mserichstring,msetimer,mseevent,msetypes,msestrings,mseeditglob,msedatalist,
- msemenus,mseactions,mseact,mseglob,msegridsglob;
+ msemenus,mseactions,mseact,mseglob,msegridsglob,mseassistiveclient,
+ mseificompglob{$ifdef mse_with_ifi},mseifiglob{$endif};
 
 const
  defaultundomaxcount = 256;
@@ -48,7 +52,7 @@ type
                        ies_cangroupundo,ies_caretposvalid);
  inplaceeditstatesty = set of inplaceeditstatety;
 
- tinplaceedit = class
+ tinplaceedit = class(tobject,iassistiveclientedit)
   private
    fwidget: twidget;
    fintf: iedit;
@@ -125,7 +129,8 @@ type
    procedure setcurindex(const avalue: integer);
    procedure deletechar; virtual;
    procedure deleteback; virtual;
-   procedure internaldelete(start,len,startindex: integer; selected: boolean); virtual;
+   procedure internaldelete(start,len,startindex: integer;
+                                           selected: boolean); virtual;
    function checkaction(const aaction: editactionty): boolean; overload;
    function checkaction(var info: editnotificationinfoty): boolean; overload;
    procedure enterchars(const chars: msestring); virtual;
@@ -144,6 +149,17 @@ type
                                                       //true if pasted
    function copytoclipboard(const buffer: clipboardbufferty): boolean;           //true if copied
    function cuttoclipboard(const buffer: clipboardbufferty): boolean; virtual;   //true if cut
+    //iassistiveclient
+   function getinstance: tobject;
+   function getassistivename(): msestring;
+   function getassistivecaption(): msestring;
+   function getassistivetext(): msestring;
+   function getassistivecaretindex(): int32; //-1 -> none
+   function getassistivehint(): msestring;
+   function getassistiveflags(): assistiveflagsty;
+  {$ifdef mse_with_ifi}
+   function getifidatalinkintf(): iifidatalink; //can be nil
+  {$endif}
   public
    constructor create(aowner: twidget; editintf: iedit;
                                          istextedit: boolean = false);
@@ -351,8 +367,11 @@ function textendpoint(const start: pointty; const text: msestring): pointty;
 
 implementation
 uses
- msekeyboard,sysutils,msesysutils,msebits,msewidgets,classes,msestockobjects;
- 
+ msekeyboard,sysutils,msesysutils,msebits,msewidgets,classes,msestockobjects,
+ mseassistiveserver;
+type
+ twidget1 = class(twidget);
+  
 var
  overwrite: boolean; //insertstate
 
@@ -1462,8 +1481,8 @@ begin
          (fcurindex = length(finfo.text.text)) and 
            ((shiftstate1 <> [ss_shift]) or (fsellength = 0) or 
             (ies_istextedit in fstate) or
-            (fsellength = length(finfo.text.text)) and (oe_autoselect in opt1) and
-               (shiftstate1 <> [ss_shift])
+            (fsellength = length(finfo.text.text)) and
+                     (oe_autoselect in opt1) and (shiftstate1 <> [ss_shift])
            ) or
          (opt1 * [oe_readonly,oe_caretonreadonly] =
                   [oe_readonly]) then begin
@@ -1849,6 +1868,47 @@ function tinplaceedit.cuttoclipboard(const buffer: clipboardbufferty): boolean;
 begin
  result:= copytoclipboard(buffer);
  deleteselection;
+end;
+
+function tinplaceedit.getinstance: tobject;
+begin
+ result:= twidget1(fwidget).getinstance();
+end;
+
+function tinplaceedit.getassistivename(): msestring;
+begin
+ result:= twidget1(fwidget).getassistivename();
+end;
+
+function tinplaceedit.getassistivecaption(): msestring;
+begin
+ result:= twidget1(fwidget).getassistivecaption();
+end;
+
+function tinplaceedit.getassistivetext(): msestring;
+begin
+ result:= twidget1(fwidget).getassistivetext();
+end;
+
+function tinplaceedit.getassistivecaretindex(): int32;
+begin
+ result:= twidget1(fwidget).getassistivecaretindex();
+end;
+
+function tinplaceedit.getassistivehint(): msestring;
+begin
+ result:= twidget1(fwidget).getassistivehint();
+end;
+
+function tinplaceedit.getassistiveflags(): assistiveflagsty;
+begin
+ result:= twidget1(fwidget).getassistiveflags();
+ include(result,asf_inplaceedit);
+end;
+
+function tinplaceedit.getifidatalinkintf(): iifidatalink;
+begin
+ result:= twidget1(fwidget).getifidatalinkintf();
 end;
 
 function tinplaceedit.cuttoclipboard: boolean;
@@ -2250,6 +2310,9 @@ begin
   inserttext(chars,false);
  finally
   endgroup;
+ end;
+ if assistiveserver <> nil then begin
+  assistiveserver.doeditcharenter(iassistiveclientedit(self),chars);
  end;
 end;
 

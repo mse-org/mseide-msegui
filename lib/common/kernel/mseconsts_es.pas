@@ -169,7 +169,8 @@ const
   'Permanecer en el primer plano',     //sc_stay_on_top
   'Permanecer en el fondo',            //sc_stay_in_background
   'Bloquear hijas',                    //sc_lock_children
-  'Sin bloquear'                       //sc_no_lock
+  'Sin bloquear',                      //sc_no_lock
+  'Input'                              //sc_input
 );
     
 function delete_n_selected_rows(const params: array of const): msestring;

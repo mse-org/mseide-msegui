@@ -166,7 +166,8 @@ const
   'Im Fordergrund',            //sc_stay_on_top
   'Im Hintergrund',            //sc_stay_in_background
   'Blockiere Unterfenster',    //sc_lock_children
-  'Kein Blockieren'            //sc_no_lock
+  'Kein Blockieren',           //sc_no_lock
+  'Eingabe'                    //sc_input
 );
     
 function delete_n_selected_rows(const params: array of const): msestring;

@@ -172,7 +172,8 @@ const
   'Stay on top',         //sc_stay_on_top
   'Stay in background',  //sc_stay_in_background
   'Lock children',       //sc_lock_children
-  'No lock'              //sc_no_lock
+  'No lock',             //sc_no_lock
+  'Input'                //sc_input
                        );
     
 function delete_n_selected_rows(const params: array of const): msestring;

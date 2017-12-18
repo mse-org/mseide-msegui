@@ -46,7 +46,8 @@ type
  textchangeeventty = procedure(const sender: tcustomdataedit;
                                       const atext: msestring) of object;
 
- tcustomdataedit = class(tcustomedit,igridwidget,istatfile,idragcontroller
+ tcustomdataedit = class(tcustomedit,igridwidget,istatfile,idragcontroller,
+                          iassistiveclientdata
                          {$ifdef mse_with_ifi},iifidatalink{$endif})
   private
    fontextchange: textchangeeventty;
@@ -1484,7 +1485,8 @@ function inttorealty(const avalue: integer): realty;
 
 implementation
 uses
- sysutils,msereal,msebits,msestreaming,msestockobjects,msefloattostr;
+ sysutils,msereal,msebits,msestreaming,msestockobjects,msefloattostr,
+ mseassistiveserver;
 
 type
  tdatalist1 = class(tdatalist);
@@ -1586,6 +1588,9 @@ begin
      end;
      if focused then begin
       initfocus;
+     end;
+     if assistiveserver <> nil then begin
+      assistiveserver.dodataentered(iassistiveclientdata(self));
      end;
     end;
    end;

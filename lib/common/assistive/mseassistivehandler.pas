@@ -16,7 +16,8 @@ interface
 uses
  classes,mclasses,mseclasses,mseassistiveserver,
  mseguiglob,mseglob,msestrings,mseinterfaces,mseact,mseshapes,
- mseassistiveclient,msemenuwidgets,msegrids,msespeak,msetypes;
+ mseassistiveclient,msemenuwidgets,msegrids,msespeak,msetypes,
+ msestockobjects;
 
 type
  assistiveserverstatety = (ass_active);
@@ -75,15 +76,21 @@ type
                                          const info: keyeventinfoty);
    procedure doactionexecute(const sender: tobject; const info: actioninfoty);
    procedure dochange(const sender: iassistiveclient);
+   procedure dodataentered(const sender: iassistiveclientdata);
    procedure docellevent(const sender: iassistiveclientgrid; 
                                        const info: celleventinfoty);
+   procedure doeditcharenter(const sender: iassistiveclientedit;
+                                                const achar: msestring);
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy(); override;
    procedure wait();
    procedure cancel();
    procedure speaktext(const atext: msestring; const avoice: int32 = 0);
+   procedure speaktext(const atext: stockcaptionty; const avoice: int32 = 0);
+   procedure speakcharacter(const achar: char32; const avoice: int32 = 0);
    procedure speakall(const sender: iassistiveclient);
+   procedure speakinput(const sender: iassistiveclientdata);
   published
    property active: boolean read factive write setactive default false;
    property speaker: tassistivespeak read fspeaker write setspeaker;
@@ -174,9 +181,30 @@ begin
  fspeaker.speak(atext,[so_endpause],avoice);
 end;
 
+procedure tassistiveserver.speaktext(const atext: stockcaptionty;
+               const avoice: int32 = 0);
+begin
+ speaktext(stockobjects.captions[atext]);
+end;
+
+procedure tassistiveserver.speakcharacter(const achar: char32;
+               const avoice: int32 = 0);
+begin
+ startspeak();
+ fspeaker.speakcharacter(achar,[so_endpause],avoice);
+end;
+
 procedure tassistiveserver.speakall(const sender: iassistiveclient);
 begin
  startspeak();
+ speaktext(sender.getassistivecaption(),fvoicecaption);
+ speaktext(sender.getassistivetext(),fvoicetext);
+end;
+
+procedure tassistiveserver.speakinput(const sender: iassistiveclientdata);
+begin
+ startspeak();
+ speaktext(sc_input,fvoicecaption);
  speaktext(sender.getassistivecaption(),fvoicecaption);
  speaktext(sender.getassistivetext(),fvoicetext);
 end;
@@ -225,9 +253,25 @@ procedure tassistiveserver.dochange(const sender: iassistiveclient);
 begin
 end;
 
+procedure tassistiveserver.dodataentered(const sender: iassistiveclientdata);
+begin
+ speakinput(sender);
+end;
+
 procedure tassistiveserver.docellevent(const sender: iassistiveclientgrid;
                const info: celleventinfoty);
 begin
+end;
+
+procedure tassistiveserver.doeditcharenter(const sender: iassistiveclientedit;
+               const achar: msestring);
+begin
+ if length(achar) = 1 then begin
+  speakcharacter(getucs4char(achar,1),fvoicetext);
+ end
+ else begin
+  speaktext(achar,fvoicetext);
+ end;
 end;
 
 { tassistivespeak }
