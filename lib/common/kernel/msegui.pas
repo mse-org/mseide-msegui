@@ -18317,6 +18317,7 @@ begin
     fillchar(info,sizeof(info),0);
     with info.mouse do begin
      timestamp:= ftimestamp;
+     serial:= application.getserial();
      if freflected then begin
       include(eventstate,es_reflected);
      end;
@@ -18545,6 +18546,7 @@ begin
     with info do begin
      eventkind:= fkind;
      timestamp:= event.timestamp;
+     serial:= application.getserial();
      key:= fkey;
      keynomod:= fkeynomod;
      case key of

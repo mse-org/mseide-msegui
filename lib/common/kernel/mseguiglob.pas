@@ -69,6 +69,7 @@ type
   pos: pointty;
   eventstate: eventstatesty;
   timestamp: longword; //usec, 0 -> invalid
+  serial: card32; //0 -> invalid
   button: mousebuttonty;
  end;
  pmouseeventinfoty = ^mouseeventinfoty;
@@ -79,6 +80,7 @@ type
   pos: pointty;
   eventstate: eventstatesty;
   timestamp: longword; //usec, 0 -> invalid
+  serial: card32; //0 -> invalid
   wheel: mousewheelty;
   delta: real;
  end;
@@ -97,6 +99,7 @@ type
   shiftstate: shiftstatesty;
   eventstate: eventstatesty;
   timestamp: longword; //usec
+  serial: card32; //0 -> invalid
  end;
  pkeyeventinfoty = ^keyeventinfoty;
 

@@ -259,6 +259,7 @@ type
    fthread: threadty;
    fstate: applicationstatesty;
    fwaitcount: integer;
+   fserial: card32;
    fnoignorewaitevents: integer;
    fonterminatedlist: tnotifylist;
    fonterminatequerylist: tonterminatequerylist;
@@ -300,6 +301,7 @@ type
    property highrestimer: boolean read gethighrestimer;
    
    function procid: procidty;
+   function getserial(): card32;
    function createdatamodule(instanceclass: msecomponentclassty;
                                                 var reference): tmsecomponent;
    procedure run;
@@ -1836,6 +1838,13 @@ end;
 function tcustomapplication.procid: procidty;
 begin
  result:= sys_getpid;
+end;
+
+function tcustomapplication.getserial(): card32;
+begin
+ repeat
+  result:= interlockedincrement(fserial);
+ until result <> 0;
 end;
 
 procedure tcustomapplication.internalinitialize;
