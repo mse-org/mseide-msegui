@@ -422,12 +422,12 @@ begin
  end;
 end;
 
-procedure initft;
+procedure initft(const data: pointer);
 begin
  ftcheckerror(ft_init_freetype(ftlib),'Init freetype library.');
 end;
 
-procedure deinitft;
+procedure deinitft(const data: pointer);
 begin
  ftcheckerror(ft_done_freetype(ftlib),'Deinit freetype library.');
  ftlib:= nil;

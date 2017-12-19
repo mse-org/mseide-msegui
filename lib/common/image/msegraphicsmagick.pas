@@ -1020,7 +1020,7 @@ begin
  result:= qdepth;
 end;
   
-procedure init;
+procedure init(const data: pointer);
 var
  l1: culong;
 begin
@@ -1039,7 +1039,7 @@ begin
  end;
 end;
 
-procedure deinit;
+procedure deinit(const data: pointer);
 begin
  destroymagick();
 end;
