@@ -170,7 +170,11 @@ const
   'Eingabe',                   //sc_input
   'Schaltfläche',              //sc_button
   'Ein',                       //sc_on
-  'Aus'                        //sc_off
+  'Aus',                       //sc_off
+  'Linker Rand',               //sc_leftborder
+  'Oberer Rand',               //sc_topborder
+  'Rechter Rand',              //sc_rightborder
+  'Unterer Rand'               //sc_bottomborder
 );
     
 function delete_n_selected_rows(const params: array of const): msestring;

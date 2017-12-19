@@ -2392,7 +2392,8 @@ end;
 
 function tcontainer1.getiassistiveclient(): iassistiveclient;
 begin
- result:= iassistiveclientgrid(fgrid);
+// result:= iassistiveclientgrid(fgrid);
+ result:= fgrid.getiassistiveclient();
 end;
 
 {

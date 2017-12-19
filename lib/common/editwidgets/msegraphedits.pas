@@ -152,6 +152,7 @@ type
    procedure updateifigriddata(const sender: tobject; const alist: tdatalist);
    function getgriddata: tdatalist;
    function getvalueprop: ppropinfo;
+   function getiassistiveclient(): iassistiveclient override;
     //iassistiveclient
    function getifidatalinkintf(): iifidatalink; override;
    function getassistiveflags: assistiveflagsty; override;
@@ -1776,7 +1777,7 @@ procedure tgraphdataedit.dochange;
 begin
  if not (ws_loadedproc in fwidgetstate) then begin
   if assistiveserver <> nil then begin
-   assistiveserver.dochange(iassistiveclient(self));
+   assistiveserver.dochange(getiassistiveclient());
   end;
   if canevent(tmethod(fonchange)) then begin
    fonchange(self);
@@ -1899,7 +1900,7 @@ begin
    sendchangeevent();
   end;
   if assistiveserver <> nil then begin
-   assistiveserver.dodataentered(iassistiveclientdata(self));
+   assistiveserver.dodataentered(iassistiveclientdata(getiassistiveclient()));
   end;
  end;
 end;
@@ -2444,6 +2445,11 @@ end;
 function tgraphdataedit.getvalueprop: ppropinfo;
 begin
   result:= getpropinfo(self,'value');
+end;
+
+function tgraphdataedit.getiassistiveclient(): iassistiveclient;
+begin
+ result:= iassistiveclientdata(self);
 end;
 
 function tgraphdataedit.getifidatalinkintf(): iifidatalink;

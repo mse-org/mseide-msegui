@@ -177,16 +177,6 @@ type
    procedure writesc1(writer: twriter);
    procedure setcolorglyphactive(const avalue: colorty);
    function getactiveitem(out aitem: tmenuitem): boolean;
-    //iassistiveclient
-   function getassistivename(): msestring; virtual;
-   function getassistivecaption(): msestring; virtual;
-   function getassistivetext(): msestring; virtual;
-   function getassistivecaretindex(): int32; virtual;
-   function getassistivehint(): msestring; virtual;
-   function getassistiveflags(): assistiveflagsty; virtual;
-  {$ifdef mse_with_ifi}
-   function getifidatalinkintf(): iifidatalink; virtual;
-  {$endif}
   protected
    finfo: actioninfoty;
    fowner: tcustommenu;
@@ -198,6 +188,18 @@ type
    procedure defineproperties(filer: tfiler); override;
    procedure befexec;
    function doexec: boolean;
+
+   function getiassistiveclient(): iassistiveclientmenu virtual;
+    //iassistiveclient
+   function getassistivename(): msestring; virtual;
+   function getassistivecaption(): msestring; virtual;
+   function getassistivetext(): msestring; virtual;
+   function getassistivecaretindex(): int32; virtual;
+   function getassistivehint(): msestring; virtual;
+   function getassistiveflags(): assistiveflagsty; virtual;
+  {$ifdef mse_with_ifi}
+   function getifidatalinkintf(): iifidatalink; virtual;
+  {$endif}
 
     //iactionlink
    function getactioninfopo: pactioninfoty;
@@ -1185,6 +1187,11 @@ function tmenuitem.doexec: boolean;
 begin
  result:= doactionexecute(self,finfo,true,
                              mao_nocandefocus in finfo.options,@befexec);
+end;
+
+function tmenuitem.getiassistiveclient(): iassistiveclientmenu;
+begin
+ result:= iassistiveclientmenu(self);
 end;
 
 function tmenuitem.internalexecute(async: boolean): boolean;

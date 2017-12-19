@@ -149,6 +149,7 @@ type
                                                       //true if pasted
    function copytoclipboard(const buffer: clipboardbufferty): boolean;           //true if copied
    function cuttoclipboard(const buffer: clipboardbufferty): boolean; virtual;   //true if cut
+   function getiassistiveclient(): iassistiveclientedit virtual;
     //iassistiveclient
    function getinstance: tobject;
    function getassistivename(): msestring;
@@ -1870,6 +1871,11 @@ begin
  deleteselection;
 end;
 
+function tinplaceedit.getiassistiveclient(): iassistiveclientedit;
+begin
+ result:= iassistiveclientedit(self);
+end;
+
 function tinplaceedit.getinstance: tobject;
 begin
  result:= twidget1(fwidget).getinstance();
@@ -2312,7 +2318,7 @@ begin
   endgroup;
  end;
  if assistiveserver <> nil then begin
-  assistiveserver.doeditcharenter(iassistiveclientedit(self),chars);
+  assistiveserver.doeditcharenter(getiassistiveclient(),chars);
  end;
 end;
 

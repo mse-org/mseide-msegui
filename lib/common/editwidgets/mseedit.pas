@@ -2034,7 +2034,7 @@ begin
  checkautosize;
  if not (ws_loadedproc in fwidgetstate) then begin
   if assistiveserver <> nil then begin
-   assistiveserver.dochange(iassistiveclient(self));
+   assistiveserver.dochange(getiassistiveclient());
   end;
   if canevent(tmethod(fonchange)) then begin
    fonchange(self);

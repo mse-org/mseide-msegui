@@ -12,7 +12,7 @@ unit mseassistiveserver;
 interface
 uses
  mseguiglob,mseglob,msestrings,mseinterfaces,mseact,mseshapes,
- mseassistiveclient,msemenuwidgets,msegrids,msetypes;
+ mseassistiveclient,msemenuwidgets,msegrids,msetypes,msegraphutils;
 
 type
  iassistiveserver = interface(inullinterface)[miid_iassistiveserver]
@@ -33,11 +33,14 @@ type
                                       const info: celleventinfoty);
   procedure doeditcharenter(const sender: iassistiveclientedit;
                                                 const achar: msestring);
+  procedure navigbordertouched(const sender: iassistiveclient;
+                                       const adirection: graphicdirectionty);
 end;
 
 var
  assistiveserver: iassistiveserver;
  noassistivedefaultbutton: boolean;
+ assistivewidgetnavig: boolean;
  
 implementation
 end.

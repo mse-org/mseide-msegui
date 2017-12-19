@@ -17,7 +17,7 @@ uses
  classes,mclasses,mseclasses,mseassistiveserver,mseevent,
  mseguiglob,mseglob,msestrings,mseinterfaces,mseact,mseshapes,
  mseassistiveclient,msemenuwidgets,msegrids,msespeak,msetypes,
- msestockobjects;
+ msestockobjects,msegraphutils;
 
 type
  assistiveserverstatety = (ass_active);
@@ -82,6 +82,8 @@ type
                                        const info: celleventinfoty);
    procedure doeditcharenter(const sender: iassistiveclientedit;
                                                 const achar: msestring);
+   procedure navigbordertouched(const sender: iassistiveclient;
+                                       const adirection: graphicdirectionty);
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy(); override;
@@ -140,6 +142,7 @@ begin
   fspeaker.active:= true;
   assistiveserver:= iassistiveserver(self);
   noassistivedefaultbutton:= true;
+  assistivewidgetnavig:= true;
   include(fstate,ass_active);
   application.invalidate();
  end;
@@ -150,6 +153,7 @@ begin
  if not (csdesigning in componentstate) then begin
   assistiveserver:= nil;
   noassistivedefaultbutton:= false;
+  assistivewidgetnavig:= false;
   fspeaker.active:= false;
   exclude(fstate,ass_active);
   application.invalidate();
@@ -189,7 +193,7 @@ end;
 procedure tassistiveserver.speaktext(const atext: stockcaptionty;
                const avoice: int32 = 0);
 begin
- speaktext(stockobjects.captions[atext]);
+ speaktext(stockobjects.captions[atext],avoice);
 end;
 
 procedure tassistiveserver.speakcharacter(const achar: char32;
@@ -302,6 +306,32 @@ begin
  else begin
   speaktext(achar,fvoicetext);
  end;
+end;
+
+procedure tassistiveserver.navigbordertouched(const sender: iassistiveclient;
+               const adirection: graphicdirectionty);
+var
+ ca1: stockcaptionty;
+begin
+ case adirection of
+  gd_left: begin
+   ca1:= sc_leftborder;
+  end;
+  gd_up: begin
+   ca1:= sc_topborder;
+  end;
+  gd_right: begin
+   ca1:= sc_rightborder;
+  end;
+  gd_down: begin
+   ca1:= sc_bottomborder;
+  end;
+  else begin
+   exit;
+  end;
+ end;
+ startspeak();
+ speaktext(ca1,fvoicecaption);
 end;
 
 { tassistivespeak }

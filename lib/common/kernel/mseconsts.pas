@@ -234,7 +234,11 @@ const
   'Input',               //sc_input
   'Button',              //sc_button
   'On',                  //sc_on
-  'Off'                  //sc_off
+  'Off',                 //sc_off
+  'Left border',         //sc_leftborder
+  'Top border',          //sc_topborder
+  'Right border',        //sc_rightborder
+  'Bottom border'        //sc_bottomborder
                        );
 
 function delete_n_selected_rows(const params: array of const): msestring;

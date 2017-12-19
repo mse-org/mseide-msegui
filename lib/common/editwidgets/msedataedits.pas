@@ -163,6 +163,7 @@ type
                                            var result: cellzonety); virtual;
    function getnulltext: msestring; virtual;
    function getcelltext(const datapo: pointer; out empty: boolean): msestring;
+   function getiassistiveclient(): iassistiveclient override;
    function getassistivecelltext(const arow: int32): msestring;
     //iassistiveclient
    function getassistivetext(): msestring; override;
@@ -1590,7 +1591,8 @@ begin
       initfocus;
      end;
      if assistiveserver <> nil then begin
-      assistiveserver.dodataentered(iassistiveclientdata(self));
+      assistiveserver.dodataentered(
+                       iassistiveclientdata(getiassistiveclient()));
      end;
     end;
    end;
@@ -2241,6 +2243,11 @@ begin
   fongettext(self,mstr1,false);
  end;
  result:= mstr1;
+end;
+
+function tcustomdataedit.getiassistiveclient(): iassistiveclient;
+begin
+ result:= iassistiveclientdata(self);
 end;
 
 function tcustomdataedit.getassistivecelltext(const arow: int32): msestring;

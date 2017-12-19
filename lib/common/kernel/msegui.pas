@@ -12993,6 +12993,8 @@ var
  naviginfo: naviginfoty;
  widget1: twidget;
  shiftstate1: shiftstatesty;
+ b1: boolean;
+ pt1,pt2: pointty;
 begin
  with info do begin
   shiftstate1:= shiftstate * shiftstatesmask;
@@ -13045,7 +13047,31 @@ begin
         expandwraprect(wraprect,widget1);
         fparentwidget.navigrequest(naviginfo,nowrap);
         if nearest <> nil then begin
-         nearest.setfocus;
+         if assistivewidgetnavig then begin
+          b1:= false;
+          pt1:= rootpos;
+          pt2:= nearest.rootpos;
+          case direction of
+           gd_left: begin
+            b1:= pt1.x < pt2.x;
+           end;
+           gd_up: begin
+            b1:= pt1.y < pt2.y;
+           end;
+           gd_right: begin
+            b1:= pt1.x > pt2.x;
+           end;
+           gd_down: begin
+            b1:= pt1.y > pt2.y;
+           end;
+          end;
+          if b1 and (assistiveserver <> nil) then begin
+           assistiveserver.navigbordertouched(getiassistiveclient(),direction);
+          end;
+         end;
+         if not b1 then begin
+          nearest.setfocus();
+         end;
         end;
        end;
       end;
@@ -16818,11 +16844,11 @@ begin
    if assistiveserver <> nil then begin
     ass1:= nil;
     if focusedwidgetbefore <> nil then begin
-     ass1:= iassistiveclient(focusedwidgetbefore);
+     ass1:= focusedwidgetbefore.getiassistiveclient();
     end;
     ass2:= nil;
     if focusedwidget <> nil then begin
-     ass2:= iassistiveclient(focusedwidget);
+     ass2:= focusedwidget.getiassistiveclient();
     end;
     assistiveserver.dofocuschanged(ass1,ass2);
    end;

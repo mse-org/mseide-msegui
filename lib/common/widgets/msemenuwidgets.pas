@@ -1486,7 +1486,8 @@ begin
     end;
     capturemouse;
     if assistiveserver <> nil then begin
-     assistiveserver.doitementer(iassistiveclientmenu(menu),cells,activeitem);
+     assistiveserver.doitementer(tmenuitem1(menu).getiassistiveclient(),
+                                                            cells,activeitem);
     end;
    end;
   end

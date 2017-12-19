@@ -11454,7 +11454,8 @@ begin
    datacols[info.cell.col].docellevent(info);
   end;
   if assistiveserver <> nil then begin
-   assistiveserver.docellevent(iassistiveclientgrid(self),info);
+   assistiveserver.docellevent(iassistiveclientgrid(getiassistiveclient()),
+                                                                        info);
   end;
  {$ifdef mse_with_ifi}
   if fifilink <> nil then begin
