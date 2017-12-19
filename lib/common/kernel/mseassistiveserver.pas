@@ -15,6 +15,10 @@ uses
  mseassistiveclient,msemenuwidgets,msegrids,msetypes,msegraphutils;
 
 type
+
+ editinputmodety = (eim_insert,eim_overwrite);
+ edittextblockmodety = (etbm_delete,etbm_cut,etbm_copy,etbm_insert,etbm_paste);
+ 
  iassistiveserver = interface(inullinterface)[miid_iassistiveserver]
   procedure doenter(const sender: iassistiveclient);
   procedure doitementer(const sender: iassistiveclient; //sender can be nil
@@ -33,6 +37,15 @@ type
                                       const info: celleventinfoty);
   procedure doeditcharenter(const sender: iassistiveclientedit;
                                                 const achar: msestring);
+  procedure doeditchardelete(const sender: iassistiveclientedit;
+                                                const achar: msestring);
+  procedure doeditwithdrawn(const sender: iassistiveclientedit);
+  procedure doeditindexmoved(const sender: iassistiveclientedit;
+                                                const aindex: int32);
+  procedure doeditinputmodeset(const sender: iassistiveclientedit;
+                                                const amode: editinputmodety);
+  procedure doedittextblock(const sender: iassistiveclientedit;
+                    const amode: edittextblockmodety; const atext: msestring);
   procedure navigbordertouched(const sender: iassistiveclient;
                                        const adirection: graphicdirectionty);
 end;

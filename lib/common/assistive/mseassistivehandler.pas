@@ -82,6 +82,15 @@ type
                                        const info: celleventinfoty);
    procedure doeditcharenter(const sender: iassistiveclientedit;
                                                 const achar: msestring);
+   procedure doeditchardelete(const sender: iassistiveclientedit;
+                                                const achar: msestring);
+   procedure doeditindexmoved(const sender: iassistiveclientedit;
+                                                const aindex: int32);
+   procedure doeditwithdrawn(const sender: iassistiveclientedit);
+   procedure doedittextblock(const sender: iassistiveclientedit;
+                     const amode: edittextblockmodety; const atext: msestring);
+   procedure doeditinputmodeset(const sender: iassistiveclientedit;
+                                                const amode: editinputmodety);
    procedure navigbordertouched(const sender: iassistiveclient;
                                        const adirection: graphicdirectionty);
   public
@@ -199,7 +208,6 @@ end;
 procedure tassistiveserver.speakcharacter(const achar: char32;
                const avoice: int32 = 0);
 begin
- startspeak();
  fspeaker.speakcharacter(achar,[so_endpause],avoice);
 end;
 
@@ -300,11 +308,95 @@ end;
 procedure tassistiveserver.doeditcharenter(const sender: iassistiveclientedit;
                const achar: msestring);
 begin
+ startspeak();
  if length(achar) = 1 then begin
   speakcharacter(getucs4char(achar,1),fvoicetext);
  end
  else begin
   speaktext(achar,fvoicetext);
+ end;
+end;
+
+procedure tassistiveserver.doeditchardelete(const sender: iassistiveclientedit;
+               const achar: msestring);
+begin
+ startspeak();
+ speaktext(sc_deleted,fvoicecaption);
+ if length(achar) = 1 then begin
+  speakcharacter(getucs4char(achar,1),fvoicetext);
+ end
+ else begin
+  speaktext(achar,fvoicetext);
+ end;
+end;
+
+procedure tassistiveserver.doeditindexmoved(const sender: iassistiveclientedit;
+               const aindex: int32);
+var
+ s1: msestring;
+begin
+ startspeak();
+ s1:= sender.getassistivetext();
+ if aindex < length(s1) then begin
+  if aindex = 0 then begin
+   speaktext(sc_beginoftext,fvoicecaption);
+  end;
+  speakcharacter(getucs4char(s1,aindex+1),fvoicetext);
+ end
+ else begin
+  speaktext(sc_endoftext,fvoicecaption);
+ end;
+end;
+
+procedure tassistiveserver.doeditwithdrawn(const sender: iassistiveclientedit);
+begin
+ startspeak();
+ speaktext(sc_withdrawn,fvoicecaption);
+ speaktext(sender.getassistivetext(),fvoicetext);
+end;
+
+procedure tassistiveserver.doedittextblock(const sender: iassistiveclientedit;
+               const amode: edittextblockmodety; const atext: msestring);
+var
+ sc1: stockcaptionty;
+begin
+ case amode of
+  etbm_delete: begin
+   sc1:= sc_deleted;
+  end;
+  etbm_cut: begin
+   sc1:= sc_cut;
+  end;
+  etbm_copy: begin
+   sc1:= sc_copied;
+  end;
+  etbm_insert: begin
+   sc1:= sc_inserted;
+  end;
+  etbm_paste: begin
+   sc1:= sc_pasted;
+  end;
+  else begin
+   exit;
+  end;
+ end;
+ startspeak();
+ speaktext(sc1,fvoicecaption);
+ speaktext(atext,fvoicetext);
+end;
+
+procedure tassistiveserver.doeditinputmodeset(
+              const sender: iassistiveclientedit; const amode: editinputmodety);
+begin
+ startspeak();
+ speaktext(sc_inputmode,fvoicecaption);
+ case amode of
+  eim_insert: begin
+   speaktext(sc_insert,fvoicetext);
+  end;
+  eim_overwrite: begin
+   speaktext(sc_overwrite,fvoicetext);
+  end;
  end;
 end;
 

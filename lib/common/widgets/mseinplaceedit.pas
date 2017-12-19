@@ -1020,9 +1020,18 @@ begin
 end;
 
 procedure tinplaceedit.setinsertstate(const Value: boolean);
+var
+ m1: editinputmodety;
 begin
  overwrite:= not value;
  internalupdatecaret;
+ if assistiveserver <> nil then begin
+  m1:= eim_insert;
+  if overwrite then begin
+   m1:= eim_overwrite;
+  end;
+  assistiveserver.doeditinputmodeset(getiassistiveclient(),m1);
+ end;
 end;
 
 function tinplaceedit.optionsedit: optionseditty;
@@ -1111,11 +1120,19 @@ begin
 end;
 
 procedure tinplaceedit.deleteselection;
+var
+ s1: msestring;
 begin
+ if assistiveserver <> nil then begin
+  s1:= selectedtext();
+ end;
  if fsellength > 0 then begin
   clearundo;
  end;
  internaldeleteselection(true); //every time called for ttextedit
+ if assistiveserver <> nil then begin
+  assistiveserver.doedittextblock(getiassistiveclient(),etbm_delete,s1);
+ end;
 end;
 
 procedure tinplaceedit.clearundo;
@@ -1144,6 +1161,9 @@ begin
   invalidatetext(false,false);
   fstate:= fstate - [ies_touched,ies_edited];
   notify(ea_undone);
+  if assistiveserver <> nil then begin
+   assistiveserver.doeditwithdrawn(getiassistiveclient);
+  end;
  end;
 end;
 
@@ -1151,6 +1171,7 @@ procedure tinplaceedit.deleteback;
 var
  bo1: boolean;
  ch1: msechar;
+ s1: msestring;
 begin
  if ies_emptytext in fstate then begin
   exit;
@@ -1166,10 +1187,12 @@ begin
                 ((card16(ch1) and $fc00 = $dc00) or 
                  (finfo.text.text[fcurindex-1] = c_return) and 
                               (ch1 = c_linefeed)) then begin
+  s1:= copy(finfo.text.text,fcurindex-1,2);
   richdelete(finfo.text,fcurindex-1,2);
   fcurindex:= fcurindex - 2;
  end
  else begin
+  s1:= copy(finfo.text.text,fcurindex,1);
   richdelete(finfo.text,fcurindex,1);
   fcurindex:= fcurindex - 1;
  end;
@@ -1177,6 +1200,9 @@ begin
  internalupdatecaret(true);
  invalidatetext(true,bo1);
  notify(ea_indexmoved);
+ if assistiveserver <> nil then begin
+  assistiveserver.doeditchardelete(getiassistiveclient(),s1);
+ end;
 end;
 
 procedure tinplaceedit.deletechar;
@@ -1675,7 +1701,8 @@ begin
  result:= fcaretpos.x - getfontcanvas.getfontmetrics('o').width;
 end;
 
-procedure tinplaceedit.inserttext(const text: msestring; nooverwrite: boolean = true);
+procedure tinplaceedit.inserttext(const text: msestring;
+                                       nooverwrite: boolean = true);
 var
  int1,int2,int3: integer;
 begin
@@ -1706,6 +1733,9 @@ begin
  end
  else begin
   invalidatetext(true,false);
+ end;
+ if assistiveserver <> nil then begin
+  assistiveserver.doedittextblock(getiassistiveclient(),etbm_insert,text);
  end;
 end;
 
@@ -1794,6 +1824,9 @@ begin
    include(info.state,eas_shift);
   end;
   notify(info);
+  if assistiveserver <> nil then begin
+   assistiveserver.doeditindexmoved(getiassistiveclient(),fcurindex);
+  end;
  end;
 end;
 
@@ -1853,6 +1886,10 @@ begin
    mstr1:= selectedtext;
    fintf.updatecopytoclipboard(mstr1);
    msewidgets.copytoclipboard(mstr1,info.bufferkind);
+   if assistiveserver <> nil then begin
+    assistiveserver.doedittextblock(getiassistiveclient(),etbm_copy,
+                                                            selectedtext);
+   end;
   end
   else begin
    result:= false;
@@ -1866,9 +1903,16 @@ begin
 end;
 
 function tinplaceedit.cuttoclipboard(const buffer: clipboardbufferty): boolean;
+var
+ s1: msestring;
 begin
+ s1:= selectedtext;
  result:= copytoclipboard(buffer);
  deleteselection;
+ if assistiveserver <> nil then begin
+  assistiveserver.doedittextblock(getiassistiveclient(),etbm_cut,
+                                                          s1);
+ end;
 end;
 
 function tinplaceedit.getiassistiveclient(): iassistiveclientedit;
@@ -1941,6 +1985,9 @@ begin
    fselstart:= int1;
    fsellength:= length(wstr1);
    updateselect;
+   if assistiveserver <> nil then begin
+    assistiveserver.doedittextblock(getiassistiveclient(),etbm_paste,wstr1);
+   end;
   end
   else begin
    result:= false;

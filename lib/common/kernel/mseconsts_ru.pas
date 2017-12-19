@@ -219,7 +219,16 @@ const
   'Left border',         //sc_leftborder
   'Top border',          //sc_topborder
   'Right border',        //sc_rightborder
-  'Bottom border'        //sc_bottomborder
+  'Bottom border',       //sc_bottomborder
+  'Begin of text',       //sc_beginoftext
+  'End of text',         //sc_endoftext
+  'Inputmode',           //sc_inputmode
+  'Overwrite',           //sc_overwrite
+  'Deleted',             //sc_deleted
+  'Copied',              //sc_copied
+  'Inserted',            //sc_inserted
+  'Pasted',              //sc_pasted
+  'Withdrawn'            //sc_withdrawn
 );
     
 function delete_n_selected_rows(const params: array of const): msestring;

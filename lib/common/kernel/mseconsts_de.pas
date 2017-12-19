@@ -161,7 +161,7 @@ const
   'Maximieren',                //sc_maximize
   'Normalisieren',             //sc_normalize
   'Minimieren',                //sc_minimize
-  'Feste Gr'#0246'sse',         //sc_fix_size
+  'Feste Gr'#0246'sse',        //sc_fix_size
   'Lösen',                     //sc_float
   'Im Fordergrund',            //sc_stay_on_top
   'Im Hintergrund',            //sc_stay_in_background
@@ -174,7 +174,16 @@ const
   'Linker Rand',               //sc_leftborder
   'Oberer Rand',               //sc_topborder
   'Rechter Rand',              //sc_rightborder
-  'Unterer Rand'               //sc_bottomborder
+  'Unterer Rand',              //sc_bottomborder
+  'Text start',                //sc_beginoftext
+  'Text ende',                 //sc_endoftext
+  'Eingabe Modus',             //sc_inputmode
+  #$00DC'berschreiben',        //sc_overwrite
+  'Gel'#$00F6'scht',           //sc_deleted
+  'Kopiert',                   //sc_copied
+  'Eingef'#$00FC'gt',          //sc_inserted
+  'Eingef'#$00FC'gt',          //sc_pasted
+  'R'#$00FC'ckg'#$00E4'ngig'   //sc_withdrawn
 );
     
 function delete_n_selected_rows(const params: array of const): msestring;
