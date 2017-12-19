@@ -13047,8 +13047,8 @@ begin
         expandwraprect(wraprect,widget1);
         fparentwidget.navigrequest(naviginfo,nowrap);
         if nearest <> nil then begin
+         b1:= false;
          if assistivewidgetnavig then begin
-          b1:= false;
           pt1:= rootpos;
           pt2:= nearest.rootpos;
           case direction of
