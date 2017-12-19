@@ -1492,7 +1492,7 @@ implementation
 
 uses
  msebits,mseguiintf,msestockobjects,msekeyboard,sysutils,msemenuwidgets,
- mseactions,msepointer,msestreaming,msesys,msearrayutils;
+ mseactions,msepointer,msestreaming,msesys,msearrayutils,mseassistiveserver;
 
 const
  captionmargin = 1; //distance focusrect to caption in tcaptionframe
@@ -2395,7 +2395,9 @@ begin
     pressbutton;
    end
    else begin
-    if isenterkey(self,key) or (key = key_period) then begin
+    if (isenterkey(self,key) or (key = key_period)) and
+                                      (not noassistivedefaultbutton) then begin
+                                       //only space key if assisted
      include(eventstate,es_processed);
      internalexecute;
     end;

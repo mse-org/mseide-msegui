@@ -149,7 +149,7 @@ type
    function gethint: msestring; override;
    procedure sethint(const Value: msestring); override;
    function ishintstored: boolean; override;
-    //iactiveclient
+    //iassistiveclient
    function getassistivecaption(): msestring; override;
 
    procedure setenabled(const avalue: boolean); override;
@@ -857,7 +857,7 @@ type
 
 implementation
 uses
- msekeyboard,sysutils,mseactions,msestreaming;
+ msekeyboard,sysutils,mseactions,msestreaming,mseassistiveserver;
 type
  tcustomframe1 = class(tcustomframe);
  ttaborderoverride1 = class(ttaborderoverride);
@@ -992,11 +992,12 @@ begin
                                          bo_altshortcut in options);
    exclude(info.eventstate,es_processed);
    bo1:= (bo_executeonshortcut in options) and bo2 or
-   (finfo.state * [shs_invisible,shs_disabled,shs_default] = [shs_default]) and
+   ((finfo.state * [shs_invisible,shs_disabled,shs_default] = [shs_default]) and
        (info.key = key_return) and
         ((info.shiftstate = []) or 
          (bo_executedefaultonenterkey in options) and 
-         (info.shiftstate = [ss_second]));
+         (info.shiftstate = [ss_second]))) and (not noassistivedefaultbutton);
+                                   //no default button if assisted
    if bo1 then begin
     fexeccanceled:= false;
     internalexecute();

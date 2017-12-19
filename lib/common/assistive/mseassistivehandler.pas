@@ -14,7 +14,7 @@ unit mseassistivehandler;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 uses
- classes,mclasses,mseclasses,mseassistiveserver,
+ classes,mclasses,mseclasses,mseassistiveserver,mseevent,
  mseguiglob,mseglob,msestrings,mseinterfaces,mseact,mseshapes,
  mseassistiveclient,msemenuwidgets,msegrids,msespeak,msetypes,
  msestockobjects;
@@ -56,6 +56,7 @@ type
    procedure setspeaker(const avalue: tassistivespeak);
   protected
    fstate: assistiveserverstatesty;
+   fdataenteredkeyserial: card32;
    procedure activate();
    procedure deactivate();
 
@@ -102,7 +103,7 @@ type
  
 implementation
 uses
- msegui;
+ msegui,msekeyboard;
  
 { tassistiveserver }
 
@@ -138,7 +139,9 @@ begin
  if not (csdesigning in componentstate) then begin
   fspeaker.active:= true;
   assistiveserver:= iassistiveserver(self);
+  noassistivedefaultbutton:= true;
   include(fstate,ass_active);
+  application.invalidate();
  end;
 end;
 
@@ -146,8 +149,10 @@ procedure tassistiveserver.deactivate();
 begin
  if not (csdesigning in componentstate) then begin
   assistiveserver:= nil;
+  noassistivedefaultbutton:= false;
   fspeaker.active:= false;
   exclude(fstate,ass_active);
+  application.invalidate();
  end;
 end;
 
@@ -250,7 +255,19 @@ end;
 
 procedure tassistiveserver.dokeydown(const sender: iassistiveclient;
                const info: keyeventinfoty);
+var
+ fla1: assistiveflagsty;
 begin
+ if not (es_child in info.eventstate) then begin
+  if (info.key = key_return) and 
+                (info.shiftstate*keyshiftstatesmask = []) then begin
+   fla1:= sender.getassistiveflags();
+   if info.serial <> fdataenteredkeyserial then begin
+    speakall(sender);
+   end;
+  end;
+  fdataenteredkeyserial:= 0;
+ end;
 end;
 
 procedure tassistiveserver.doactionexecute(const sender: tobject;
@@ -264,6 +281,10 @@ end;
 
 procedure tassistiveserver.dodataentered(const sender: iassistiveclientdata);
 begin
+ fdataenteredkeyserial:= 0;
+ if application.keyeventinfo <> nil then begin
+  fdataenteredkeyserial:= application.keyeventinfo^.serial;
+ end;
  speakinput(sender);
 end;
 

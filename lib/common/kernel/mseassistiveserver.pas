@@ -37,6 +37,7 @@ end;
 
 var
  assistiveserver: iassistiveserver;
+ noassistivedefaultbutton: boolean;
  
 implementation
 end.
