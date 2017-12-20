@@ -13071,7 +13071,8 @@ begin
            end;
           end;
           if b1 and (canassistive()) then begin
-           assistiveserver.navigbordertouched(getiassistiveclient(),direction);
+           assistiveserver.donavigbordertouched(getiassistiveclient(),
+                                                                  direction);
           end;
          end;
          if not b1 then begin
@@ -13080,7 +13081,7 @@ begin
         end
         else begin
          if canassistive() then begin
-          assistiveserver.navigbordertouched(getiassistiveclient(),direction);
+          assistiveserver.donavigbordertouched(getiassistiveclient(),direction);
          end;
         end;
        end;

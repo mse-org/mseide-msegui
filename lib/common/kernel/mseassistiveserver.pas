@@ -50,7 +50,7 @@ type
                                                 const amode: editinputmodety);
   procedure doedittextblock(const sender: iassistiveclientedit;
                     const amode: edittextblockmodety; const atext: msestring);
-  procedure navigbordertouched(const sender: iassistiveclient;
+  procedure donavigbordertouched(const sender: iassistiveclient;
                                        const adirection: graphicdirectionty);
 end;
 

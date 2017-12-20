@@ -155,7 +155,7 @@ type
                      const amode: edittextblockmodety; const atext: msestring);
    procedure doeditinputmodeset(const sender: iassistiveclientedit;
                                                 const amode: editinputmodety);
-   procedure navigbordertouched(const sender: iassistiveclient;
+   procedure donavigbordertouched(const sender: iassistiveclient;
                                        const adirection: graphicdirectionty);
   public
    constructor create(aowner: tcomponent); override;
@@ -622,7 +622,7 @@ begin
  end;
 end;
 
-procedure tassistiveserver.navigbordertouched(const sender: iassistiveclient;
+procedure tassistiveserver.donavigbordertouched(const sender: iassistiveclient;
                const adirection: graphicdirectionty);
 var
  ca1: stockcaptionty;
