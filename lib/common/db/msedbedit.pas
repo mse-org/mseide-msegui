@@ -913,7 +913,7 @@ type
    function getgriddatasource: tdatasource;
    function createdatalist(const sender: twidgetcol): tdatalist; override;
    function checkvalue(const quiet: boolean = false): boolean; reintroduce;
-   function docheckvalue(var avalue): boolean; override;
+   function docheckvalue(var avalue; const quiet: boolean): boolean; override;
 //   procedure dochange; override;
 //   procedure doenter; override;
 //   procedure doexit; override;
@@ -5199,7 +5199,8 @@ begin
  result:= true;//dummy
 end;
 
-function tdbbooleaneditradio.docheckvalue(var avalue): boolean;
+function tdbbooleaneditradio.docheckvalue(var avalue; 
+                                               const quiet: boolean): boolean;
 var
  widget: twidget;
  int1: integer;
@@ -5211,11 +5212,11 @@ begin
    widget:= fparentwidget.widgets[int1];
    if (widget is tdbbooleaneditradio) and (widget <> self) and
         (tcustombooleaneditradio(widget).group = group) then begin
-    tdbbooleaneditradio(widget).docheckvalue(bo1);
+    tdbbooleaneditradio(widget).docheckvalue(bo1,quiet);
    end;
   end;
  end;
- result:= inherited docheckvalue(avalue);
+ result:= inherited docheckvalue(avalue,quiet);
 end;
 {
 procedure tdbbooleaneditradio.dochange;
