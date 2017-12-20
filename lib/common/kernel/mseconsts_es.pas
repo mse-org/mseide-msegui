@@ -186,7 +186,8 @@ const
   'Copied',              //sc_copied
   'Inserted',            //sc_inserted
   'Pasted',              //sc_pasted
-  'Withdrawn'            //sc_withdrawn
+  'Withdrawn',           //sc_withdrawn
+  'Window'               //sc_window
 );
     
 function delete_n_selected_rows(const params: array of const): msestring;

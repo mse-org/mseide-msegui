@@ -110,7 +110,8 @@ type
                     ow1_nocancloseifhidden,
                     ow1_modalcallonactivate,ow1_modalcallondeactivate,
                                //used in tactionwidget
-                    ow1_noautosizing //used in tdockcontroller
+                    ow1_noautosizing, //used in tdockcontroller
+                    ow1_noassistive
                     );
                                          
 const
@@ -2014,7 +2015,8 @@ type
    function windowpo: pwindowty;
    function canclose1: boolean; 
 
-   function getiassistiveclient(): iassistiveclient; virtual;   
+   function getiassistiveclient(): iassistiveclient virtual;
+   function canassistive(): boolean virtual;
     //iassistiveclient
    function getassistivename(): msestring; virtual;
    function getassistivecaption(): msestring; virtual;
@@ -11574,7 +11576,7 @@ procedure twidget.mouseevent(var info: mouseeventinfoty);
   include(info.eventstate,es_client);
   try
    clientmouseevent(info);
-   if (assistiveserver <> nil) {and (ws_iswidget in widgetstate)} then begin
+   if (canassistive()) {and (ws_iswidget in widgetstate)} then begin
     assistiveserver.doclientmouseevent(getiassistiveclient(),info);
    end;
   finally
@@ -12386,7 +12388,7 @@ begin
     end;
    end;
    include(fwidgetstate,ws_entered);
-   if (assistiveserver <> nil) and (ws_iswidget in widgetstate) then begin
+   if (canassistive()) and (ws_iswidget in widgetstate) then begin
     assistiveserver.doenter(getiassistiveclient());
    end;
    doenter;
@@ -13065,7 +13067,7 @@ begin
             b1:= pt1.y > pt2.y;
            end;
           end;
-          if b1 and (assistiveserver <> nil) then begin
+          if b1 and (canassistive()) then begin
            assistiveserver.navigbordertouched(getiassistiveclient(),direction);
           end;
          end;
@@ -13104,7 +13106,7 @@ procedure twidget.dokeydown1(var info: keyeventinfoty);
 begin
  exclude(fwidgetstate1,ws1_onkeydowncalled);
  dokeydown(info);
- if (assistiveserver <> nil) and (ws_iswidget in widgetstate) then begin
+ if (canassistive()) and (ws_iswidget in widgetstate) then begin
   assistiveserver.dokeydown(getiassistiveclient(),info);
  end;
 end;
@@ -15424,6 +15426,13 @@ begin
  result:= iassistiveclient(self);
 end;
 
+function twidget.canassistive(): boolean;
+begin
+ result:= (assistiveserver <> nil) and 
+              not (ow1_noassistive in foptionswidget1) and 
+                                    not (csdesigning in componentstate);
+end;
+
 procedure twidget.beginupdate;
 begin
  if fwidgetupdating = 0 then begin
@@ -15876,6 +15885,10 @@ begin
       appinst.factivewindow:= self;
       appinst.flastactivewindow:= self;
       if not (tws_activatelocked in fstate) then begin
+       if fownerwidget.canassistive() then begin
+        assistiveserver.dowindowactivated(
+                           self.fownerwidget.getiassistiveclient());
+       end;
        if ffocusedwidget <> nil then begin
         widgetar:= ffocusedwidget.getrootwidgetpath;
         for int1:= high(widgetar) downto 0 do begin
@@ -15981,6 +15994,9 @@ begin
     appinst.fonwindowactivechangelist.dowindowchange(appinst.factivewindow,nil);
    end;
    if factivecount = activecountbefore then begin
+    if fownerwidget.canassistive() then begin
+     assistiveserver.dowindowdeactivated(self.fownerwidget.getiassistiveclient());
+    end;
     widget1:= nil;
     if appinst.factivewindow <> nil then begin
      widget1:= appinst.factivewindow.focusedwidget;
@@ -16160,6 +16176,9 @@ begin
      end;
     end;
    end;
+  end;
+  if not fownerwidget.visible and (fownerwidget.canassistive()) then begin
+   assistiveserver.dowindowdeactivated(self.fownerwidget.getiassistiveclient());
   end;
  end;
 end;
@@ -16841,7 +16860,7 @@ begin
    else begin
     fenteredwidget:= nil;
    end;
-   if assistiveserver <> nil then begin
+   if fownerwidget.canassistive() then begin
     ass1:= nil;
     if focusedwidgetbefore <> nil then begin
      ass1:= focusedwidgetbefore.getiassistiveclient();

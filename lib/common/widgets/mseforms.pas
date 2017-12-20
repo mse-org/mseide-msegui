@@ -247,8 +247,9 @@ type
 
    procedure updatelayout(const sender: twidget); virtual; 
                                //called from scrollbox.dolayout
-
-   //iificommand
+    //iassistiveclient
+   function getassistivecaption(): msestring override;
+    //iificommand
    {$ifdef mse_with_ifi}
    procedure executeificommand(var acommand: ificommandcodety); override;
    {$endif}
@@ -2185,6 +2186,16 @@ end;
 procedure tcustommseform.updatelayout(const sender: twidget);
 begin
  //dummy
+end;
+
+function tcustommseform.getassistivecaption(): msestring;
+begin
+ if caption <> '' then begin
+  result:= caption;
+ end
+ else begin
+  result:= inherited getassistivecaption();
+ end;
 end;
 
 procedure tcustommseform.readonchildscaled(reader: treader);

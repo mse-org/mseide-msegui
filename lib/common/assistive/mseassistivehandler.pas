@@ -17,9 +17,10 @@ uses
  classes,mclasses,mseclasses,mseassistiveserver,mseevent,
  mseguiglob,mseglob,msestrings,mseinterfaces,mseact,mseshapes,
  mseassistiveclient,msemenuwidgets,msegrids,msespeak,msetypes,
- msestockobjects,msegraphutils;
+ msestockobjects,msegraphutils,msegui,msehash;
 
 type
+ 
  assistiveserverstatety = (ass_active);
  assistiveserverstatesty = set of assistiveserverstatety;
 
@@ -46,25 +47,85 @@ type
    property punctuationlist;
  end;
 
+ tassistiveserver = class;
+ tassistivewidgetitem = class;
+
+ assistiveeventty = 
+  procedure(const sender: tassistivewidgetitem; const server: tassistiveserver;
+                 const intf: iassistiveclient; var handled: boolean) of object;
+
+ tassistivewidgetitem = class(tmsecomponent)
+  private
+   fserver: tassistiveserver;
+   fwidget: twidget;
+   fonwindowactivated: assistiveeventty;
+   procedure setserver(const avalue: tassistiveserver);
+   procedure setwidget(const avalue: twidget);
+  protected
+   procedure link();
+   procedure unlink();
+   procedure objectevent(const sender: tobject;
+                                 const event: objecteventty) override;
+   procedure dowindowactivated(const sender: tassistiveserver;
+                         const aintf: iassistiveclient; var handled: boolean);
+  public
+   destructor destroy(); override;
+  published
+   property server: tassistiveserver read fserver write setserver;
+   property widget: twidget read fwidget write setwidget;
+   property onwindowactivated: assistiveeventty read fonwindowactivated 
+                                                    write fonwindowactivated;
+ end;
+
+ assistivewidgetdataty = record
+  item: tassistivewidgetitem;
+ end;
+ 
+ assistivewidgethashdataty = record
+  header: pointerhashdataty; //datapointer = interface
+  data: assistivewidgetdataty;
+ end;
+ passistivewidgethashdataty = ^assistivewidgethashdataty;
+ 
+ tassistivewidgetitemlist = class(tpointerhashdatalist)
+  protected
+   function getrecordsize(): int32 override;   
+ end;
+
+ assistiveservereventty = 
+  procedure(const sender: tassistiveserver;
+                 const intf: iassistiveclient; var handled: boolean) of object;
+ 
  tassistiveserver = class(tmsecomponent,iassistiveserver)
   private
    factive: boolean;
    fspeaker: tassistivespeak;
    fvoicecaption: int32;
    fvoicetext: int32;
+   fonwindowactivated: assistiveservereventty;
    procedure setactive(const avalue: boolean);
    procedure setspeaker(const avalue: tassistivespeak);
   protected
    fstate: assistiveserverstatesty;
    fdataenteredkeyserial: card32;
+   fitems: tassistivewidgetitemlist;
    procedure activate();
    procedure deactivate();
 
    procedure loaded() override;
 
    procedure startspeak();
+   
+   procedure registeritem(const aintf: iassistiveclient;
+                             const aitem: tassistivewidgetitem);
+   procedure unregisteritem(const aintf: iassistiveclient);
+   function finditem(aintf: iassistiveclient;
+                        out aitem: tassistivewidgetitem): boolean;
       
     //iassistiveserver
+   procedure dowindowactivated(const sender: iassistiveclient);
+   procedure dowindowdeactivated(const sender: iassistiveclient);
+   procedure dowindowclosed(const sender: iassistiveclient);
    procedure doenter(const sender: iassistiveclient);
    procedure doitementer(const sender: iassistiveclient; //sender can be nil
                              const items: shapeinfoarty; const aindex: integer);
@@ -110,17 +171,92 @@ type
                                           write fvoicecaption default 0;
    property voicetext: int32 read fvoicetext 
                                           write fvoicetext default 0;
+   property onwindowactivated: assistiveservereventty read
+                         fonwindowactivated write fonwindowactivated;
  end;
  
 implementation
 uses
- msegui,msekeyboard;
+ msekeyboard;
+type
+ twidget1 = class(twidget);
  
+{ tassistivespeak }
+
+constructor tassistivespeak.create(aowner: tcomponent);
+begin
+ inherited;
+ setsubcomponent(true);
+end;
+
+{ tassistivewidgetitem }
+
+destructor tassistivewidgetitem.destroy();
+begin
+ server:= nil;
+ inherited;
+end;
+
+procedure tassistivewidgetitem.setserver(const avalue: tassistiveserver);
+begin
+ unlink();
+ setlinkedvar(avalue,tmsecomponent(fserver));
+ link();
+end;
+
+procedure tassistivewidgetitem.setwidget(const avalue: twidget);
+begin
+ unlink();
+ setlinkedvar(avalue,tmsecomponent(fwidget));
+ link();
+end;
+
+procedure tassistivewidgetitem.link();
+begin
+ if (fwidget <> nil) and (fserver <> nil) and 
+            not (csdesigning in componentstate) then begin
+  fserver.registeritem(twidget1(fwidget).getiassistiveclient,self);
+ end;
+end;
+
+procedure tassistivewidgetitem.unlink();
+begin
+ if (fserver <> nil) and (fwidget <> nil) and 
+                               not (csdesigning in componentstate) then begin
+  fserver.unregisteritem(twidget1(fwidget).getiassistiveclient());
+ end;
+end;
+
+procedure tassistivewidgetitem.objectevent(const sender: tobject;
+               const event: objecteventty);
+begin
+ if (event = oe_destroyed) and (sender = fwidget) then begin
+  unlink();
+ end;
+ inherited;
+end;
+
+procedure tassistivewidgetitem.dowindowactivated(const sender: tassistiveserver;
+               const aintf: iassistiveclient; var handled: boolean);
+begin
+ if canevent(tmethod(fonwindowactivated)) then begin
+  fonwindowactivated(self,sender,aintf,handled);
+ end;
+end;
+
+{ tassistivewidgetitemlist }
+
+function tassistivewidgetitemlist.getrecordsize(): int32;
+begin
+ result:= sizeof(assistivewidgethashdataty);
+end;
+
 { tassistiveserver }
 
 constructor tassistiveserver.create(aowner: tcomponent);
 begin
  fspeaker:= tassistivespeak.create(nil);
+ fitems:= tassistivewidgetitemlist.create();
  inherited;
 end;
 
@@ -128,6 +264,7 @@ destructor tassistiveserver.destroy();
 begin
  inherited;
  fspeaker.free();
+ fitems.free();
 end;
 
 procedure tassistiveserver.setactive(const avalue: boolean);
@@ -238,6 +375,61 @@ end;
 procedure tassistiveserver.startspeak();
 begin
  cancel();
+end;
+
+procedure tassistiveserver.registeritem(const aintf: iassistiveclient;
+                     const aitem: tassistivewidgetitem);
+begin
+ with passistivewidgethashdataty(fitems.add(aintf))^ do begin
+  data.item:= aitem;
+ end;
+end;
+
+procedure tassistiveserver.unregisteritem(const aintf: iassistiveclient);
+begin
+ fitems.delete(aintf,true);
+end;
+
+function tassistiveserver.finditem(aintf: iassistiveclient;
+               out aitem: tassistivewidgetitem): boolean;
+var
+ p1: passistivewidgethashdataty;
+begin
+ aitem:= nil;
+ p1:= pointer(fitems.find(aintf));
+ if p1 <> nil then begin
+  aitem:= p1^ .data.item;
+ end;
+end;
+
+procedure tassistiveserver.dowindowactivated(const sender: iassistiveclient);
+var
+ b1: boolean;
+ item1: tassistivewidgetitem;
+begin
+ b1:= false;
+ if finditem(sender,item1) then begin
+  item1.dowindowactivated(self,sender,b1);
+ end;
+ if not b1 then begin
+  if canevent(tmethod(fonwindowactivated)) then begin
+   fonwindowactivated(self,sender,b1);
+  end;
+  if not b1 then begin
+   startspeak();
+   speaktext(sc_windowactivated,fvoicecaption);
+   speaktext(sender.getassistivecaption(),fvoicecaption);
+   speaktext(sender.getassistivetext(),fvoicetext);
+  end;
+ end;
+end;
+
+procedure tassistiveserver.dowindowdeactivated(const sender: iassistiveclient);
+begin
+end;
+
+procedure tassistiveserver.dowindowclosed(const sender: iassistiveclient);
+begin
 end;
 
 procedure tassistiveserver.doenter(const sender: iassistiveclient);
@@ -424,14 +616,6 @@ begin
  end;
  startspeak();
  speaktext(ca1,fvoicecaption);
-end;
-
-{ tassistivespeak }
-
-constructor tassistivespeak.create(aowner: tcomponent);
-begin
- inherited;
- setsubcomponent(true);
 end;
 
 end.

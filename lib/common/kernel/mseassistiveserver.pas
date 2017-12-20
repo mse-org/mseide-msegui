@@ -20,6 +20,9 @@ type
  edittextblockmodety = (etbm_delete,etbm_cut,etbm_copy,etbm_insert,etbm_paste);
  
  iassistiveserver = interface(inullinterface)[miid_iassistiveserver]
+  procedure dowindowactivated(const sender: iassistiveclient);
+  procedure dowindowdeactivated(const sender: iassistiveclient);
+  procedure dowindowclosed(const sender: iassistiveclient);
   procedure doenter(const sender: iassistiveclient);
   procedure doitementer(const sender: iassistiveclient; //sender can be nil
                             const items: shapeinfoarty; const aindex: integer);

@@ -183,7 +183,8 @@ const
   'Kopiert',                   //sc_copied
   'Eingef'#$00FC'gt',          //sc_inserted
   'Eingef'#$00FC'gt',          //sc_pasted
-  'R'#$00FC'ckg'#$00E4'ngig'   //sc_withdrawn
+  'R'#$00FC'ckg'#$00E4'ngig',  //sc_withdrawn
+  'Fenster aktiviert'          //sc_windowactivated
 );
     
 function delete_n_selected_rows(const params: array of const): msestring;

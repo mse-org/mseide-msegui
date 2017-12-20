@@ -1025,7 +1025,7 @@ var
 begin
  overwrite:= not value;
  internalupdatecaret;
- if assistiveserver <> nil then begin
+ if twidget1(fwidget).canassistive() then begin
   m1:= eim_insert;
   if overwrite then begin
    m1:= eim_overwrite;
@@ -1123,14 +1123,14 @@ procedure tinplaceedit.deleteselection;
 var
  s1: msestring;
 begin
- if assistiveserver <> nil then begin
+ if twidget1(fwidget).canassistive() then begin
   s1:= selectedtext();
  end;
  if fsellength > 0 then begin
   clearundo;
  end;
  internaldeleteselection(true); //every time called for ttextedit
- if assistiveserver <> nil then begin
+ if twidget1(fwidget).canassistive() then begin
   assistiveserver.doedittextblock(getiassistiveclient(),etbm_delete,s1);
  end;
 end;
@@ -1161,7 +1161,7 @@ begin
   invalidatetext(false,false);
   fstate:= fstate - [ies_touched,ies_edited];
   notify(ea_undone);
-  if assistiveserver <> nil then begin
+  if twidget1(fwidget).canassistive() then begin
    assistiveserver.doeditwithdrawn(getiassistiveclient);
   end;
  end;
@@ -1200,7 +1200,7 @@ begin
  internalupdatecaret(true);
  invalidatetext(true,bo1);
  notify(ea_indexmoved);
- if assistiveserver <> nil then begin
+ if twidget1(fwidget).canassistive() then begin
   assistiveserver.doeditchardelete(getiassistiveclient(),s1);
  end;
 end;
@@ -1734,7 +1734,7 @@ begin
  else begin
   invalidatetext(true,false);
  end;
- if assistiveserver <> nil then begin
+ if twidget1(fwidget).canassistive() then begin
   assistiveserver.doedittextblock(getiassistiveclient(),etbm_insert,text);
  end;
 end;
@@ -1824,7 +1824,7 @@ begin
    include(info.state,eas_shift);
   end;
   notify(info);
-  if assistiveserver <> nil then begin
+  if twidget1(fwidget).canassistive() then begin
    assistiveserver.doeditindexmoved(getiassistiveclient(),fcurindex);
   end;
  end;
@@ -1886,7 +1886,7 @@ begin
    mstr1:= selectedtext;
    fintf.updatecopytoclipboard(mstr1);
    msewidgets.copytoclipboard(mstr1,info.bufferkind);
-   if assistiveserver <> nil then begin
+   if twidget1(fwidget).canassistive() then begin
     assistiveserver.doedittextblock(getiassistiveclient(),etbm_copy,
                                                             selectedtext);
    end;
@@ -1909,7 +1909,7 @@ begin
  s1:= selectedtext;
  result:= copytoclipboard(buffer);
  deleteselection;
- if assistiveserver <> nil then begin
+ if twidget1(fwidget).canassistive() then begin
   assistiveserver.doedittextblock(getiassistiveclient(),etbm_cut,
                                                           s1);
  end;
@@ -1985,7 +1985,7 @@ begin
    fselstart:= int1;
    fsellength:= length(wstr1);
    updateselect;
-   if assistiveserver <> nil then begin
+   if twidget1(fwidget).canassistive() then begin
     assistiveserver.doedittextblock(getiassistiveclient(),etbm_paste,wstr1);
    end;
   end
@@ -2364,7 +2364,7 @@ begin
  finally
   endgroup;
  end;
- if assistiveserver <> nil then begin
+ if twidget1(fwidget).canassistive() then begin
   assistiveserver.doeditcharenter(getiassistiveclient(),chars);
  end;
 end;
