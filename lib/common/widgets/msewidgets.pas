@@ -3322,7 +3322,7 @@ end;
 
 function tcustomcaptionframe.getassistivecaption(): msestring;
 begin
- result:= fcaption;
+ result:= finfo.text.text;
 end;
 
 procedure tcustomcaptionframe.scale(const ascale: real);
