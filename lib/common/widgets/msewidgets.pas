@@ -1513,6 +1513,7 @@ type
    procedure doexecute; override;
    procedure doshortcut(var info: keyeventinfoty;
                                    const sender: twidget); override;
+   function getassistivecaption(): msestring override;
   public
    onexecute: notifyeventty;
    property caption: msestring read fcaption write setcaption;
@@ -2514,6 +2515,14 @@ begin
  else begin
   inherited;
  end;
+end;
+
+function tmessagebutton.getassistivecaption(): msestring;
+var
+ capt1: richstringty;
+begin
+ captiontorichstring(fcaption,capt1);
+ result:= capt1.text;
 end;
 
 { tshowmessagewidget }

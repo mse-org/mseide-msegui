@@ -1243,7 +1243,7 @@ end;
 function tcustombutton.getassistivecaption(): msestring;
 begin
  if factioninfo.captiontext <> '' then begin
-  result:= factioninfo.captiontext;
+  result:= finfo.ca.caption.text;
  end
  else begin
   result:= inherited getassistivecaption();
