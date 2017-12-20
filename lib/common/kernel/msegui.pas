@@ -12526,6 +12526,9 @@ begin
  if not (ws_active in fwidgetstate) then begin
   include(fwidgetstate,ws_active);
   doactivate;
+  if canassistive() then begin
+   assistiveserver.doactivate(getiassistiveclient());
+  end;
  end;
 end;
 
@@ -13073,6 +13076,11 @@ begin
          end;
          if not b1 then begin
           nearest.setfocus();
+         end;
+        end
+        else begin
+         if canassistive() then begin
+          assistiveserver.navigbordertouched(getiassistiveclient(),direction);
          end;
         end;
        end;

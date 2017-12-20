@@ -1590,7 +1590,7 @@ begin
      if focused then begin
       initfocus;
      end;
-     if assistiveserver <> nil then begin
+     if canassistive() and not quiet then begin
       assistiveserver.dodataentered(
                        iassistiveclientdata(getiassistiveclient()));
      end;

@@ -176,7 +176,7 @@ type
    procedure internalgetgridvalue(index: integer; out value);
    procedure internalsetgridvalue(index: integer; const avalue);
    procedure dochange; virtual;
-   function docheckvalue(var avalue): boolean; virtual;
+   function docheckvalue(var avalue; const quiet: boolean): boolean; virtual;
    procedure valuechanged; virtual;
    procedure modified; virtual; //for dbwidgets
    procedure formatchanged;
@@ -265,7 +265,7 @@ type
    function gridcol: integer;
    function griddata: tdatalist;
 
-   function checkvalue: boolean; virtual; abstract;
+   function checkvalue(const quiet: boolean = false): boolean virtual abstract;
    function seteditfocus: boolean;
 
    property objectlinker: tobjectlinker read getobjectlinker
@@ -379,7 +379,7 @@ type
    constructor create(aowner: tcomponent); override;
    procedure fillcol(const value: realty);
    procedure assigncol(const avalue: trealdatalist);
-   function checkvalue: boolean; override;
+   function checkvalue(const quiet: boolean = false): boolean override;
    function isnull: boolean;
    property gridvalue[const index: integer]: realty
         read getgridvalue write setgridvalue; default;
@@ -655,7 +655,7 @@ type
   public
    constructor create(aowner: tcomponent); override;
    procedure fillcol(const avalue: longbool);
-   function checkvalue: boolean; override;
+   function checkvalue(const quiet: boolean = false): boolean override;
    procedure togglegridvalue(const index: integer); override;
    
    property value: boolean read getvalue write setvalue default false;
@@ -798,7 +798,7 @@ type
    procedure updatedatalist; override;
    procedure defineproperties(filer: tfiler) override;
   public
-   function checkvalue: boolean; override;
+   function checkvalue(const quiet: boolean = false): boolean override;
    procedure togglegridvalue(const index: integer); override;
    procedure fillcol(const avalue: integer);
    property gridvalue[const index: integer]: integer
@@ -1423,9 +1423,10 @@ begin
  value:= emptyreal;
 end;
 
-function tcustomrealgraphdataedit.checkvalue: boolean;
+function tcustomrealgraphdataedit.checkvalue(
+                                   const quiet: boolean = false): boolean;
 begin
- result:= docheckvalue(fvalue);
+ result:= docheckvalue(fvalue,quiet);
 end;
 
 {$ifdef mse_with_ifi}
@@ -1604,7 +1605,7 @@ begin
    if fupdating = 0 then begin
     inc(fupdating);
     rea1:= sender.value;
-    if not docheckvalue(rea1) then begin
+    if not docheckvalue(rea1,false) then begin
      sender.value:= value;
     end
     else begin
@@ -1876,7 +1877,7 @@ begin
  end;
 end;
 
-function tgraphdataedit.docheckvalue(var avalue): boolean;
+function tgraphdataedit.docheckvalue(var avalue; const quiet: boolean): boolean;
 begin
  if fgridintf <> nil then begin
   fgridintf.edited();
@@ -1899,7 +1900,7 @@ begin
   if (oe1_sendchangeeventbycheckvalue in optionsedit1) then begin
    sendchangeevent();
   end;
-  if assistiveserver <> nil then begin
+  if canassistive() and not quiet then begin
    assistiveserver.dodataentered(iassistiveclientdata(getiassistiveclient()));
   end;
  end;
@@ -1999,7 +2000,7 @@ end;
 procedure tgraphdataedit.statread;
 begin
  if (oe1_checkvalueafterstatread in foptionsedit1) and fvalueread then begin
-  checkvalue;
+  checkvalue(true);
  end;
 end;
 
@@ -2812,7 +2813,7 @@ begin
  if not areadonly then begin
   bo1:= not fvalue;
   fedited:= true;
-  docheckvalue(bo1);
+  docheckvalue(bo1,false);
  end;
 end;
 
@@ -2947,9 +2948,9 @@ begin
  fgridintf.getcol.changed;
 end;
 
-function tcustombooleanedit.checkvalue: boolean;
+function tcustombooleanedit.checkvalue(const quiet: boolean = false): boolean;
 begin
- result:= docheckvalue(fvalue);
+ result:= docheckvalue(fvalue,quiet);
 end;
 
 function tcustombooleanedit.getgridvalue(const index: integer): longbool;
@@ -3281,7 +3282,7 @@ begin
   internalcheckeditem(bo1);
   if (bo_cantoggle in foptions) or not fvalue or not bo1 then begin
    bo2:= not fvalue;
-   docheckvalue(bo2);
+   docheckvalue(bo2,false);
   end;
  end;
 end;
@@ -3344,9 +3345,10 @@ begin
  fgridintf.setdata(arow,fvalue);
 end;
 
-function tcustomintegergraphdataedit.checkvalue: boolean;
+function tcustomintegergraphdataedit.checkvalue(
+                              const quiet: boolean = false): boolean;
 begin
- result:= docheckvalue(fvalue);
+ result:= docheckvalue(fvalue,quiet);
 end;
 
 function tcustomintegergraphdataedit.doinc(var avalue: integer;
@@ -3399,7 +3401,7 @@ begin
  if not areadonly and (fvaluemin <> fvaluemax) then begin
   int1:= fvalue;
   if doinc(int1,down) then begin
-   docheckvalue(int1);
+   docheckvalue(int1,false);
   end;
  end;
 end;

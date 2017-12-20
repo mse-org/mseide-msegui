@@ -21,9 +21,11 @@ uses
 
 type
  
- assistiveserverstatety = (ass_active);
+ assistiveserverstatety = (ass_active,ass_windowactivated);
  assistiveserverstatesty = set of assistiveserverstatety;
-
+const
+ internalstates = [ass_active];
+type
  tassistivespeak = class(tcustomespeakng)
   public
    constructor create(aowner: tcomponent); override;
@@ -127,6 +129,7 @@ type
    procedure dowindowdeactivated(const sender: iassistiveclient);
    procedure dowindowclosed(const sender: iassistiveclient);
    procedure doenter(const sender: iassistiveclient);
+   procedure doactivate(const sender: iassistiveclient);
    procedure doitementer(const sender: iassistiveclient; //sender can be nil
                              const items: shapeinfoarty; const aindex: integer);
    procedure doitementer(const sender: iassistiveclient; //sender can be nil
@@ -162,8 +165,11 @@ type
    procedure speaktext(const atext: msestring; const avoice: int32 = 0);
    procedure speaktext(const atext: stockcaptionty; const avoice: int32 = 0);
    procedure speakcharacter(const achar: char32; const avoice: int32 = 0);
-   procedure speakall(const sender: iassistiveclient);
+   procedure speakall(const sender: iassistiveclient; const addtext: boolean);
    procedure speakinput(const sender: iassistiveclientdata);
+   procedure setstate(const astate: assistiveserverstatesty);
+   procedure removestate(const astate: assistiveserverstatesty);
+   property state: assistiveserverstatesty read fstate;
   published
    property active: boolean read factive write setactive default false;
    property speaker: tassistivespeak read fspeaker write setspeaker;
@@ -348,13 +354,16 @@ begin
  fspeaker.speakcharacter(achar,[so_endpause],avoice);
 end;
 
-procedure tassistiveserver.speakall(const sender: iassistiveclient);
+procedure tassistiveserver.speakall(const sender: iassistiveclient;
+                                                        const addtext: boolean);
 var
  fla1: assistiveflagsty;
  s1: msestring;
 begin
  fla1:= sender.getassistiveflags();
- startspeak();
+ if not addtext then begin
+  startspeak();
+ end;
  s1:= '';
  if asf_button in fla1 then begin
   s1:= stockobjects.captions[sc_button] + ' ';
@@ -370,6 +379,16 @@ begin
  speaktext(sc_input,fvoicecaption);
  speaktext(sender.getassistivecaption(),fvoicecaption);
  speaktext(sender.getassistivetext(),fvoicetext);
+end;
+
+procedure tassistiveserver.setstate(const astate: assistiveserverstatesty);
+begin
+ fstate:= fstate + (astate-internalstates);
+end;
+
+procedure tassistiveserver.removestate(const astate: assistiveserverstatesty);
+begin
+ fstate:= fstate - (astate-internalstates);
 end;
 
 procedure tassistiveserver.startspeak();
@@ -407,6 +426,7 @@ var
  b1: boolean;
  item1: tassistivewidgetitem;
 begin
+ setstate([ass_windowactivated]);
  b1:= false;
  if finditem(sender,item1) then begin
   item1.dowindowactivated(self,sender,b1);
@@ -434,7 +454,17 @@ end;
 
 procedure tassistiveserver.doenter(const sender: iassistiveclient);
 begin
- speakall(sender);
+end;
+
+procedure tassistiveserver.doactivate(const sender: iassistiveclient);
+var
+ w1: twidget;
+begin
+ pointer(w1):= sender.getinstance();
+ if w1 = w1.window.focusedwidget then begin
+  speakall(sender,ass_windowactivated in fstate);
+  removestate([ass_windowactivated]);
+ end;
 end;
 
 procedure tassistiveserver.doitementer(const sender: iassistiveclient;
@@ -467,7 +497,7 @@ begin
                 (info.shiftstate*keyshiftstatesmask = []) then begin
    fla1:= sender.getassistiveflags();
    if info.serial <> fdataenteredkeyserial then begin
-    speakall(sender);
+    speakall(sender,false);
    end;
   end;
   fdataenteredkeyserial:= 0;
