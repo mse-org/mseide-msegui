@@ -25,10 +25,6 @@ type
   procedure dowindowclosed(const sender: iassistiveclient);
   procedure doenter(const sender: iassistiveclient);
   procedure doactivate(const sender: iassistiveclient);
-  procedure doitementer(const sender: iassistiveclient; //sender can be nil
-                            const items: shapeinfoarty; const aindex: integer);
-  procedure doitementer(const sender: iassistiveclient; //sender can be nil
-                         const items: menucellinfoarty; const aindex: integer);
   procedure doclientmouseevent(const sender: iassistiveclient;
                                           const info: mouseeventinfoty);
   procedure dofocuschanged(const oldwidget,newwidget: iassistiveclient);
@@ -52,6 +48,11 @@ type
                     const amode: edittextblockmodety; const atext: msestring);
   procedure donavigbordertouched(const sender: iassistiveclient;
                                        const adirection: graphicdirectionty);
+
+  procedure doitementer(const sender: iassistiveclient; //sender can be nil
+                            const items: shapeinfoarty; const aindex: integer);
+  procedure doitementer(const sender: iassistiveclient; //sender can be nil
+                         const items: menucellinfoarty; const aindex: integer);
 end;
 
 var
