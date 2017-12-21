@@ -20,8 +20,7 @@ uses
  msestockobjects,msegraphutils,msegui,msehash;
 
 type
- 
- assistiveserverstatety = (ass_active,ass_windowactivated);
+ assistiveserverstatety = (ass_active,ass_windowactivated,ass_textblock);
  assistiveserverstatesty = set of assistiveserverstatety;
 const
  internalstates = [ass_active];
@@ -827,7 +826,7 @@ begin
   end;
   if not b1 then begin
    startspeak();
-   speaktext(sc_windowactivated,fvoicecaption);
+//   speaktext(sc_windowactivated,fvoicecaption);
    speaktext(sender.getassistivecaption(),fvoicecaption);
    speaktext(sender.getassistivetext(),fvoicetext);
   end;
@@ -1051,6 +1050,7 @@ var
  b1: boolean;
  item1: tassistivewidgetitem;
 begin
+ include(fstate,ass_textblock);
  b1:= false;
  if finditem(sender,item1) then begin
   item1.dochange(self,sender,b1);
@@ -1086,7 +1086,9 @@ begin
    foneditindexmoved(self,sender,aindex,b1);
   end;
   if not b1 then begin
-   startspeak();
+   if not (ass_textblock in fstate) then begin
+    startspeak();
+   end;
    s1:= sender.getassistivetext();
    if aindex < length(s1) then begin
     if aindex = 0 then begin
@@ -1099,6 +1101,7 @@ begin
    end;
   end;
  end;
+ exclude(fstate,ass_textblock);
 end;
 
 procedure tassistiveserver.doeditwithdrawn(const sender: iassistiveclientedit);
@@ -1106,6 +1109,7 @@ var
  b1: boolean;
  item1: tassistivewidgetitem;
 begin
+ include(fstate,ass_textblock);
  b1:= false;
  if finditem(sender,item1) then begin
   item1.doeditwithdrawn(self,sender,b1);
@@ -1129,6 +1133,7 @@ var
  item1: tassistivewidgetitem;
  sc1: stockcaptionty;
 begin
+ include(fstate,ass_textblock);
  b1:= false;
  if finditem(sender,item1) then begin
   item1.doedittextblock(self,sender,amode,atext,b1);

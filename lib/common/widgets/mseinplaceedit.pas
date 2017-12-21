@@ -1130,7 +1130,7 @@ begin
   clearundo;
  end;
  internaldeleteselection(true); //every time called for ttextedit
- if twidget1(fwidget).canassistive() then begin
+ if (s1 <> '') and twidget1(fwidget).canassistive() then begin
   assistiveserver.doedittextblock(getiassistiveclient(),etbm_delete,s1);
  end;
 end;
