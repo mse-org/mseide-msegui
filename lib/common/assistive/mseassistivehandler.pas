@@ -20,7 +20,8 @@ uses
  msestockobjects,msegraphutils,msegui,msehash;
 
 type
- assistiveserverstatety = (ass_active,ass_windowactivated,ass_textblock);
+ assistiveserverstatety = (ass_active,ass_windowactivated,ass_menuactivated,
+                          ass_textblock);
  assistiveserverstatesty = set of assistiveserverstatety;
 const
  internalstates = [ass_active];
@@ -814,6 +815,7 @@ procedure tassistiveserver.dowindowactivated(const sender: iassistiveclient);
 var
  b1: boolean;
  item1: tassistivewidgetitem;
+ fla1: assistiveflagsty;
 begin
  setstate([ass_windowactivated]);
  b1:= false;
@@ -825,10 +827,17 @@ begin
    fonwindowactivated(self,sender,b1);
   end;
   if not b1 then begin
+   fla1:= sender.getassistiveflags();
    startspeak();
-//   speaktext(sc_windowactivated,fvoicecaption);
-   speaktext(sender.getassistivecaption(),fvoicecaption);
-   speaktext(sender.getassistivetext(),fvoicetext);
+   if asf_menu in fla1 then begin
+    setstate([ass_menuactivated]);
+    speaktext(sc_menu,fvoicecaption);
+   end
+   else begin
+ //   speaktext(sc_windowactivated,fvoicecaption);
+    speaktext(sender.getassistivecaption(),fvoicecaption);
+    speaktext(sender.getassistivetext(),fvoicetext);
+   end;
   end;
  end;
 end;
@@ -888,19 +897,23 @@ procedure tassistiveserver.doactivate(const sender: iassistiveclient);
 var
  b1: boolean;
  item1: tassistivewidgetitem;
+ fla1: assistiveflagsty;
 begin
  b1:= false;
  if finditem(sender,item1) then begin
-  item1.dowindowclosed(self,sender,b1);
+  item1.doactivate(self,sender,b1);
  end;
  if not b1 then begin
-  if canevent(tmethod(fonwindowclosed)) then begin
-   fonwindowclosed(self,sender,b1);
+  if canevent(tmethod(fonactivate)) then begin
+   fonactivate(self,sender,b1);
   end;
   if twidget(sender.getinstance).focused then begin
    if not b1 then begin
-    speakall(sender,ass_windowactivated in fstate);
-    removestate([ass_windowactivated]);
+    fla1:= sender.getassistiveflags();
+    if not ((asf_menu in fla1) and (ass_menuactivated in fstate)) then begin
+     speakall(sender,ass_windowactivated in fstate);
+     removestate([ass_windowactivated]);
+    end;
    end;
   end;
  end;
@@ -1247,6 +1260,9 @@ begin
  if canevent(tmethod(fonitementer)) then begin
   fonitementer(self,sender,items,aindex,b1);
  end;
+ if not b1 then begin
+ end;
+ removestate([ass_windowactivated,ass_menuactivated]);
 end;
 
 procedure tassistiveserver.doitementer(const sender: iassistiveclient;
@@ -1258,6 +1274,13 @@ begin
  if canevent(tmethod(fonmenuitementer)) then begin
   fonmenuitementer(self,sender,items,aindex,b1);
  end;
+ if not b1 then begin
+  if not (ass_menuactivated in fstate) then begin
+   startspeak();
+  end;
+  speaktext(items[aindex].buttoninfo.ca.caption.text,fvoicetext);
+ end;
+ removestate([ass_windowactivated,ass_menuactivated]);
 end;
 
 end.

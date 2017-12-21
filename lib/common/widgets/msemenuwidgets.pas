@@ -14,7 +14,8 @@ unit msemenuwidgets;
 interface
 uses
  classes,mclasses,msewidgets,mseshapes,msemenus,msegraphutils,msegraphics,
- msetypes,msegui,mseglob,mseguiglob,mseevent,mseclasses,msestrings;
+ msetypes,msegui,mseglob,mseguiglob,mseevent,mseclasses,msestrings,
+ mseassistiveclient;
 
 const
  defaultpopupmenuwidgetoptions = 
@@ -114,6 +115,7 @@ type
    
    procedure release1(const acancelmodal: boolean); virtual;
    class function classskininfo(): skininfoty; override;
+   function getassistiveflags(): assistiveflagsty override;
   public
    constructor create(instance: ppopupmenuwidget;
               const amenu: tmenuitem; const atransientfor: twindow;
@@ -228,8 +230,7 @@ var
 implementation
 uses
  msedrawtext,mserichstring,msestockobjects,sysutils,msekeyboard,msebits,
- mseact,mseguiintf,msebitmap,msesysutils,
- mseassistiveclient,mseassistiveserver;
+ mseact,mseguiintf,msebitmap,msesysutils,mseassistiveserver;
 
 type
  tmenuitem1 = class(tmenuitem);
@@ -1890,6 +1891,11 @@ class function tpopupmenuwidget.classskininfo(): skininfoty;
 begin
  result:= inherited classskininfo();
  result.objectkind:= sok_mainmenuwidget;
+end;
+
+function tpopupmenuwidget.getassistiveflags(): assistiveflagsty;
+begin
+ result:= inherited getassistiveflags() + [asf_menu];
 end;
 
 { tcustommainmenuwidget }
