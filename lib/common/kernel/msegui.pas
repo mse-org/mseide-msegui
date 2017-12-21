@@ -16857,14 +16857,20 @@ begin
      if ffocuscount <> focuscountbefore then begin
       exit;
      end;
+     if int1 = 0 then begin
+      widgetar[int1].internaldofocus();
+      if ffocuscount <> focuscountbefore then begin
+       exit;
+      end;
+     end;
      if bo1 then begin
-      widgetar[int1].internaldoactivate;
+      widgetar[int1].internaldoactivate();
      end;
      if ffocuscount <> focuscountbefore then begin
       exit;
      end;
     end;
-    ffocusedwidget.internaldofocus;
+//    ffocusedwidget.internaldofocus;
    end
    else begin
     fenteredwidget:= nil;
