@@ -2397,7 +2397,7 @@ begin
    end
    else begin
     if (isenterkey(self,key) or (key = key_period)) and
-                                      (not noassistivedefaultbutton) then begin
+                   not (aso_nodefaultbutton in assistiveoptions) then begin
                                        //only space key if assisted
      include(eventstate,es_processed);
      internalexecute;

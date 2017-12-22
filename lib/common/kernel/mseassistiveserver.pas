@@ -18,7 +18,12 @@ type
 
  editinputmodety = (eim_insert,eim_overwrite);
  edittextblockmodety = (etbm_delete,etbm_cut,etbm_copy,etbm_insert,etbm_paste);
+ assistiveoptionty = (aso_nodefaultbutton,aso_widgetnavig);
+ assistiveoptionsty = set of assistiveoptionty;
+const
+ defaultassistiveoptions = [aso_nodefaultbutton,aso_widgetnavig];
  
+type
  iassistiveserver = interface(inullinterface)[miid_iassistiveserver]
   procedure dowindowactivated(const sender: iassistiveclient);
   procedure dowindowdeactivated(const sender: iassistiveclient);
@@ -57,8 +62,7 @@ end;
 
 var
  assistiveserver: iassistiveserver;
- noassistivedefaultbutton: boolean;
- assistivewidgetnavig: boolean;
+ assistiveoptions: assistiveoptionsty;
  
 implementation
 end.

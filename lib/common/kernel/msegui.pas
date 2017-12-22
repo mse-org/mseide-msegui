@@ -13053,7 +13053,7 @@ begin
         fparentwidget.navigrequest(naviginfo,nowrap);
         if nearest <> nil then begin
          b1:= false;
-         if assistivewidgetnavig then begin
+         if aso_widgetnavig in assistiveoptions then begin
           pt1:= rootpos;
           pt2:= nearest.rootpos;
           case direction of

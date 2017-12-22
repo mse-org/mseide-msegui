@@ -317,8 +317,10 @@ type
    fonitementer: assistiveserveritemeventty;
    fonmenuitementer: assistiveservermenuitemeventty;
    fonactionexecute: assistiveserveractioneventty;
+   foptions: assistiveoptionsty;
    procedure setactive(const avalue: boolean);
    procedure setspeaker(const avalue: tassistivespeak);
+   procedure setoptions(const avalue: assistiveoptionsty);
   protected
    fstate: assistiveserverstatesty;
    fdataenteredkeyserial: card32;
@@ -385,6 +387,8 @@ type
    property state: assistiveserverstatesty read fstate;
   published
    property active: boolean read factive write setactive default false;
+   property options: assistiveoptionsty read foptions 
+                             write setoptions default defaultassistiveoptions;
    property speaker: tassistivespeak read fspeaker write setspeaker;
    property voicecaption: int32 read fvoicecaption 
                                           write fvoicecaption default 0;
@@ -651,6 +655,7 @@ end;
 
 constructor tassistiveserver.create(aowner: tcomponent);
 begin
+ foptions:= defaultassistiveoptions;
  fspeaker:= tassistivespeak.create(nil);
  fitems:= tassistivewidgetitemlist.create();
  inherited;
@@ -683,8 +688,9 @@ begin
  if not (csdesigning in componentstate) then begin
   fspeaker.active:= true;
   assistiveserver:= iassistiveserver(self);
-  noassistivedefaultbutton:= true;
-  assistivewidgetnavig:= true;
+  assistiveoptions:= options;
+//  noassistivedefaultbutton:= true;
+//  assistivewidgetnavig:= true;
   include(fstate,ass_active);
   application.invalidate();
  end;
@@ -694,8 +700,7 @@ procedure tassistiveserver.deactivate();
 begin
  if not (csdesigning in componentstate) then begin
   assistiveserver:= nil;
-  noassistivedefaultbutton:= false;
-  assistivewidgetnavig:= false;
+  assistiveoptions:= [];
   fspeaker.active:= false;
   exclude(fstate,ass_active);
   application.invalidate();
@@ -705,6 +710,14 @@ end;
 procedure tassistiveserver.setspeaker(const avalue: tassistivespeak);
 begin
  fspeaker.assign(avalue);
+end;
+
+procedure tassistiveserver.setoptions(const avalue: assistiveoptionsty);
+begin
+ foptions:= avalue;
+ if ass_active in fstate then begin
+  assistiveoptions:= foptions;
+ end;
 end;
 
 procedure tassistiveserver.loaded();

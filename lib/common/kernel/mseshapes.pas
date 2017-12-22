@@ -934,7 +934,8 @@ begin
    if (state * [shs_focused,shs_showdefaultrect] = 
                            [shs_focused,shs_showdefaultrect]) or
           (state * [shs_disabled,shs_default] = [shs_default]) then begin
-    if not noassistivedefaultbutton then begin //no default button if assisted
+    if not (aso_nodefaultbutton in assistiveoptions) then begin 
+                                               //no default button if assisted
      canvas.drawframe(clientrect,-1,cl_buttondefaultrect);
      inflaterect1(clientrect,-1);
     end;
