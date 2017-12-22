@@ -1924,15 +1924,16 @@ type
    procedure doscroll(const dist: pointty); virtual;
    procedure doscrolled(const dist: pointty); virtual;
 
-   procedure doloaded; virtual;
-   procedure dohide; virtual;
-   procedure doshow; virtual;
-   procedure doactivate; virtual;
-   procedure dodeactivate; virtual;
-   procedure doenter; virtual;
-   procedure doexit; virtual;
-   procedure dofocus; virtual;
-   procedure dodefocus; virtual;
+   procedure doloaded() virtual;
+   procedure dohide() virtual;
+   procedure doshow() virtual;
+   procedure doactivate() virtual;
+   procedure doafteractivate() virtual;
+   procedure dodeactivate() virtual;
+   procedure doenter() virtual;
+   procedure doexit() virtual;
+   procedure dofocus() virtual;
+   procedure dodefocus() virtual;
    procedure dochildfocused(const sender: twidget); virtual;
    procedure dofocuschanged(const oldwidget,newwidget: twidget); virtual;
    procedure domousewheelevent(var info: mousewheeleventinfoty); virtual;
@@ -2018,14 +2019,15 @@ type
    function getiassistiveclient(): iassistiveclient virtual;
    function canassistive(): boolean virtual;
     //iassistiveclient
-   function getassistivename(): msestring; virtual;
-   function getassistivecaption(): msestring; virtual;
-   function getassistivetext(): msestring; virtual;
-   function getassistivecaretindex(): int32; virtual;
-   function getassistivehint(): msestring; virtual;
-   function getassistiveflags: assistiveflagsty; virtual;
+   function getassistivewidget: tobject virtual;
+   function getassistivename(): msestring virtual;
+   function getassistivecaption(): msestring virtual;
+   function getassistivetext(): msestring virtual;
+   function getassistivecaretindex(): int32 virtual;
+   function getassistivehint(): msestring virtual;
+   function getassistiveflags: assistiveflagsty virtual;
   {$ifdef mse_with_ifi}
-   function getifidatalinkintf(): iifidatalink; virtual;
+   function getifidatalinkintf(): iifidatalink virtual;
   {$endif}
   public
    constructor create(aowner: tcomponent); overload; override;
@@ -12529,6 +12531,7 @@ begin
   if canassistive() then begin
    assistiveserver.doactivate(getiassistiveclient());
   end;
+  doafteractivate();
  end;
 end;
 
@@ -12825,6 +12828,11 @@ begin
   fparentwidget.clampinview(rect1,false);
  end;
  activechanged;
+end;
+
+procedure twidget.doafteractivate();
+begin
+ //dummy
 end;
 
 procedure twidget.dodeactivate;
@@ -15440,6 +15448,11 @@ begin
  result:= (assistiveserver <> nil) and 
               not (ow1_noassistive in foptionswidget1) and 
                                     not (csdesigning in componentstate);
+end;
+
+function twidget.getassistivewidget: tobject;
+begin
+ result:= self;
 end;
 
 procedure twidget.beginupdate;
