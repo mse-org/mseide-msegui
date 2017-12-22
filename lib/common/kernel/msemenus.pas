@@ -1851,7 +1851,7 @@ var
  item1: tmenuitem;
 begin
  if getactiveitem(item1) then begin
-  result:= item1.finfo.captiontext;
+  result:= item1.finfo.caption1.text;
  end
  else begin
   result:= '';

@@ -117,6 +117,7 @@ type
    procedure release1(const acancelmodal: boolean); virtual;
    class function classskininfo(): skininfoty; override;
    function getassistiveflags(): assistiveflagsty override;
+   function getassistivecaption(): msestring override;
    function prevmenuitem(const info: menulayoutinfoty): integer;
    function nextmenuitem(const info: menulayoutinfoty): integer;
   public
@@ -901,7 +902,7 @@ begin
    if result < 0 then begin
     if aso_menunavig in assistiveoptions then begin
      result:= activeitem;
-     if canassistive then begin
+     if canassistive and active then begin
       assistiveserver.donavigbordertouched(getiassistiveclient,gd_up);
      end;
      break;
@@ -925,7 +926,7 @@ begin
     if result >= menu.count then begin
      if aso_menunavig in assistiveoptions then begin
       result:= activeitem;
-      if canassistive then begin
+      if canassistive and active then begin
        assistiveserver.donavigbordertouched(getiassistiveclient,gd_down);
       end;
       break;
@@ -1856,7 +1857,7 @@ end;
 procedure tpopupmenuwidget.doafteractivate();
 begin
  inherited;
- if canassistive() and (activeitem >= 0) then begin
+ if canassistive() then begin
   with flayout do begin
    assistiveserver.doitementer(tmenuitem1(menu).getiassistiveclient(),
                                                            cells,activeitem);
@@ -1924,6 +1925,14 @@ end;
 function tpopupmenuwidget.getassistiveflags(): assistiveflagsty;
 begin
  result:= inherited getassistiveflags() + [asf_menu];
+end;
+
+function tpopupmenuwidget.getassistivecaption(): msestring;
+begin
+ result:= tmenuitem1(flayout.menu).finfo.caption1.text;
+ if result = '' then begin
+  result:= inherited getassistivecaption();
+ end;
 end;
 
 { tcustommainmenuwidget }

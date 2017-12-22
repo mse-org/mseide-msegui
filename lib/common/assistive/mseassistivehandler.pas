@@ -978,6 +978,8 @@ begin
     fla1:= sender.getassistiveflags();
     if asf_menu in fla1 then begin
      setstate([ass_menuactivated]);
+     speakmenustart(sender);
+     speaktext(sender.getassistivecaption(),fvoicecaption);
     end
     else begin
      speakall(sender,ass_windowactivated in fstate);
@@ -1391,14 +1393,16 @@ begin
   fonmenuitementer(self,sender,items,aindex,b1);
  end;
  if not b1 then begin
-  startspeak();
-  if ass_menuactivated in fstate then begin
-   speakmenustart(sender);
+  if not (ass_menuactivated in fstate) then begin
+   startspeak();
   end;
 //   speakmenustart(sender);
 //   setstate([ass_menuactivated]);
 //  end;
-  speaktext(items[aindex].buttoninfo.ca.caption.text,fvoicetext);
+//  if aindex >= 0 then begin
+   speaktext(sender.getassistivecaption(),fvoicetext);
+//   speaktext(items[aindex].buttoninfo.ca.caption.text,fvoicetext);
+//  end;
  end;
  removestate([{ass_windowactivated,}ass_menuactivated]);
 end;

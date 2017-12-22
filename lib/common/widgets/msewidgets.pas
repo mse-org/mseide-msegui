@@ -5301,6 +5301,7 @@ begin
  if (fpopupmenu <> nil) and not ((es_child in mouseinfo.eventstate) and
                               (mo_noinsert in fpopupmenu.options)) then begin
   tpopupmenu.additems(amenu,self,mouseinfo,fpopupmenu);
+  amenu.menu.caption:= fpopupmenu.menu.caption; //for tassistivehandler
  end;
 end;
 
