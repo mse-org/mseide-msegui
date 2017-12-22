@@ -20,8 +20,9 @@ uses
  msestockobjects,msegraphutils,msegui,msehash;
 
 type
- assistiveserverstatety = (ass_active,ass_windowactivated,ass_menuactivated,
-                          ass_textblock);
+ assistiveserverstatety =
+  (ass_active,ass_windowactivated,ass_menuactivated,ass_menuactivatepending,
+                                              ass_textblock);
  assistiveserverstatesty = set of assistiveserverstatety;
 const
  internalstates = [ass_active];
@@ -378,6 +379,7 @@ type
    procedure speakcharacter(const achar: char32; const avoice: int32 = 0);
    procedure speakall(const sender: iassistiveclient; const addtext: boolean);
    procedure speakinput(const sender: iassistiveclientdata);
+   procedure speakmenustart(const sender: iassistiveclient);
    procedure setstate(const astate: assistiveserverstatesty);
    procedure removestate(const astate: assistiveserverstatesty);
    property state: assistiveserverstatesty read fstate;
@@ -769,6 +771,11 @@ begin
  speaktext(sender.getassistivetext(),fvoicetext);
 end;
 
+procedure tassistiveserver.speakmenustart(const sender: iassistiveclient);
+begin
+ speaktext(sc_menu,fvoicecaption);
+end;
+
 procedure tassistiveserver.setstate(const astate: assistiveserverstatesty);
 begin
  fstate:= fstate + (astate-internalstates);
@@ -828,18 +835,22 @@ begin
   end;
   if not b1 then begin
    fla1:= sender.getassistiveflags();
-   startspeak();
    if asf_menu in fla1 then begin
-    setstate([ass_menuactivated]);
-    speaktext(sc_menu,fvoicecaption);
+    if not (ass_menuactivatepending in fstate) then begin
+     setstate([ass_menuactivated]);
+     startspeak();
+     speakmenustart(sender);
+    end;
    end
    else begin
+    startspeak();
  //   speaktext(sc_windowactivated,fvoicecaption);
     speaktext(sender.getassistivecaption(),fvoicecaption);
     speaktext(sender.getassistivetext(),fvoicetext);
    end;
   end;
  end;
+ removestate([ass_menuactivatepending]);
 end;
 
 procedure tassistiveserver.dowindowdeactivated(const sender: iassistiveclient);
@@ -910,7 +921,8 @@ begin
   if twidget(sender.getinstance).focused then begin
    if not b1 then begin
     fla1:= sender.getassistiveflags();
-    if not ((asf_menu in fla1) and (ass_menuactivated in fstate)) then begin
+    if not ((asf_menu in fla1) and 
+       (fstate * [ass_menuactivated,ass_menuactivatepending] <> [])) then begin
      speakall(sender,ass_windowactivated in fstate);
      removestate([ass_windowactivated]);
     end;
@@ -1277,6 +1289,8 @@ begin
  if not b1 then begin
   if not (ass_menuactivated in fstate) then begin
    startspeak();
+   speakmenustart(sender);
+   setstate([ass_menuactivatepending]);
   end;
   speaktext(items[aindex].buttoninfo.ca.caption.text,fvoicetext);
  end;
