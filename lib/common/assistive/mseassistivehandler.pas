@@ -276,7 +276,8 @@ type
                  const oldwidget,newwidget: iassistiveclient;
                  var handled: boolean) of object;
  assistiveserveractioneventty = 
-   procedure (const sender:tassistivehandler;
+   procedure (const sender: tassistivehandler;
+                 const intf: iassistiveclient; //intf can be nil
                  const actionobj: tobject; const info: actioninfoty;
                                                 var handled: boolean) of object;
  assistiveserveritemeventty = 
@@ -348,7 +349,6 @@ tassistivehandler = class(tmsecomponent,iassistiveserver)
                                            const info: mouseeventinfoty);
    procedure dokeydown(const sender: iassistiveclient;
                                          const info: keyeventinfoty);
-   procedure doactionexecute(const sender: tobject; const info: actioninfoty);
    procedure dochange(const sender: iassistiveclient);
    procedure dodataentered(const sender: iassistiveclientdata);
    procedure docellevent(const sender: iassistiveclientgrid; 
@@ -366,10 +366,13 @@ tassistivehandler = class(tmsecomponent,iassistiveserver)
                                                 const amode: editinputmodety);
    procedure donavigbordertouched(const sender: iassistiveclient;
                                        const adirection: graphicdirectionty);
-   procedure dofocuschanged(const oldwidget,newwidget: iassistiveclient);
-   procedure doitementer(const sender: iassistiveclient; //sender can be nil
+   procedure dofocuschanged(const sender: iassistiveclient;
+                                const oldwidget,newwidget: iassistiveclient);
+   procedure doactionexecute(const sender: iassistiveclient;//sender can be nil
+                           const senderobj: tobject; const info: actioninfoty);
+   procedure doitementer(const sender: iassistiveclient;    //sender can be nil
                              const items: shapeinfoarty; const aindex: integer);
-   procedure doitementer(const sender: iassistiveclient; //sender can be nil
+   procedure doitementer(const sender: iassistiveclient;    //sender can be nil
                           const items: menucellinfoarty; const aindex: integer);
   public
    constructor create(aowner: tcomponent); override;
@@ -407,7 +410,7 @@ tassistivehandler = class(tmsecomponent,iassistiveserver)
                       read fonclientmouseevent write fonclientmouseevent;
    property onfocuschanged: assistiveserverfocuschangedeventty 
                            read fonfocuschanged write fonfocuschanged;
-   property onkeydown: assistiveserverkeyeventty read fonkeydown 
+   property onkeydown: assistiveserverkeyeventty read fonkeydown
                                                       write fonkeydown;
    property onchange: assistiveservereventty read fonchange write fonchange;
    property ondataentered: assistiveserverdataeventty read fondataentered 
@@ -438,7 +441,7 @@ tassistivehandler = class(tmsecomponent,iassistiveserver)
  
 implementation
 uses
- msekeyboard;
+ msekeyboard,sysutils,msesysutils;
 type
  twidget1 = class(twidget);
  
@@ -831,12 +834,28 @@ begin
  end;
 end;
 
+{$ifdef mse_debugassistive}
+procedure debug(const text: string; const intf: iassistiveclient);
+begin
+ debugwrite('*'+text+':');
+ if intf <> nil then begin
+  debugwriteln(twidget(intf.getinstance).name);
+ end
+ else begin
+  debugwriteln('');
+ end;
+end;
+{$endif}
+
 procedure tassistivehandler.dowindowactivated(const sender: iassistiveclient);
 var
  b1: boolean;
  item1: tassistivewidgetitem;
  fla1: assistiveflagsty;
 begin
+{$ifdef mse_debugassistive}
+ debug('windowactivated',sender);
+{$endif}
  setstate([ass_windowactivated]);
  b1:= false;
  if finditem(sender,item1) then begin
@@ -849,8 +868,8 @@ begin
   if not b1 then begin
    fla1:= sender.getassistiveflags();
    if asf_menu in fla1 then begin
+    setstate([ass_menuactivated]);
     if not (ass_menuactivatepending in fstate) then begin
-     setstate([ass_menuactivated]);
      startspeak();
      speakmenustart(sender);
     end;
@@ -871,6 +890,9 @@ var
  b1: boolean;
  item1: tassistivewidgetitem;
 begin
+{$ifdef mse_debugassistive}
+ debug('windowdeactivated',sender);
+{$endif}
  b1:= false;
  if finditem(sender,item1) then begin
   item1.dowindowdeactivated(self,sender,b1);
@@ -883,6 +905,10 @@ begin
    cancel();
   end;
  end;
+ removestate([ass_windowactivated]);
+ if asf_menu in sender.getassistiveflags() then begin
+  removestate([ass_menuactivated]);
+ end;
 end;
 
 procedure tassistivehandler.dowindowclosed(const sender: iassistiveclient);
@@ -890,6 +916,9 @@ var
  b1: boolean;
  item1: tassistivewidgetitem;
 begin
+{$ifdef mse_debugassistive}
+ debug('windowclosed',sender);
+{$endif}
  b1:= false;
  if finditem(sender,item1) then begin
   item1.dowindowclosed(self,sender,b1);
@@ -906,6 +935,9 @@ var
  b1: boolean;
  item1: tassistivewidgetitem;
 begin
+{$ifdef mse_debugassistive}
+ debug('enter',sender);
+{$endif}
  b1:= false;
  if finditem(sender,item1) then begin
   item1.doenter(self,sender,b1);
@@ -923,6 +955,9 @@ var
  item1: tassistivewidgetitem;
  fla1: assistiveflagsty;
 begin
+{$ifdef mse_debugassistive}
+ debug('activate',sender);
+{$endif}
  b1:= false;
  if finditem(sender,item1) then begin
   item1.doactivate(self,sender,b1);
@@ -934,8 +969,8 @@ begin
   if twidget(sender.getinstance).focused then begin
    if not b1 then begin
     fla1:= sender.getassistiveflags();
-    if not ((asf_menu in fla1) and 
-       (fstate * [ass_menuactivated,ass_menuactivatepending] <> [])) then begin
+    if not ((asf_menu in fla1) {and 
+       (fstate * [ass_menuactivated,ass_menuactivatepending] <> [])}) then begin
      speakall(sender,ass_windowactivated in fstate);
      removestate([ass_windowactivated]);
     end;
@@ -950,6 +985,9 @@ var
  b1: boolean;
  item1: tassistivewidgetitem;
 begin
+{$ifdef mse_debugassistive}
+ debug('clientmouseevent',sender);
+{$endif}
  b1:= false;
  if finditem(sender,item1) then begin
   item1.doclientmouseevent(self,sender,info,b1);
@@ -961,11 +999,14 @@ begin
  end;
 end;
 
-procedure tassistivehandler.dofocuschanged(const oldwidget: iassistiveclient;
-               const newwidget: iassistiveclient);
+procedure tassistivehandler.dofocuschanged(const sender: iassistiveclient;
+         const oldwidget: iassistiveclient; const newwidget: iassistiveclient);
 var
  b1: boolean;
 begin
+{$ifdef mse_debugassistive}
+ debug('focuschanged',sender);
+{$endif}
  b1:= false;
  if canevent(tmethod(fonfocuschanged)) then begin
   fonfocuschanged(self,oldwidget,newwidget,b1);
@@ -977,6 +1018,9 @@ procedure tassistivehandler.dokeydown(const sender: iassistiveclient;
 //var
 // fla1: assistiveflagsty;
 begin
+{$ifdef mse_debugassistive}
+ debug('keydown',sender);
+{$endif}
  if not (es_child in info.eventstate) then begin
   if (info.key = key_return) and 
                 (info.shiftstate*keyshiftstatesmask = []) then begin
@@ -989,14 +1033,17 @@ begin
  end;
 end;
 
-procedure tassistivehandler.doactionexecute(const sender: tobject;
-               const info: actioninfoty);
+procedure tassistivehandler.doactionexecute(const sender: iassistiveclient;
+                          const senderobj: tobject;  const info: actioninfoty);
 var
  b1: boolean;
 begin
+{$ifdef mse_debugassistive}
+ debug('actionexecute',sender);
+{$endif}
  b1:= false;
  if canevent(tmethod(fonactionexecute)) then begin
-  fonactionexecute(self,sender,info,b1);
+  fonactionexecute(self,sender,senderobj,info,b1);
  end;
 end;
 
@@ -1005,6 +1052,9 @@ var
  b1: boolean;
  item1: tassistivewidgetitem;
 begin
+{$ifdef mse_debugassistive}
+ debug('change',sender);
+{$endif}
  b1:= false;
  if finditem(sender,item1) then begin
   item1.dochange(self,sender,b1);
@@ -1021,6 +1071,9 @@ var
  b1: boolean;
  item1: tassistivewidgetitem;
 begin
+{$ifdef mse_debugassistive}
+ debug('dataentered',sender);
+{$endif}
  fdataenteredkeyserial:= 0;
  if application.keyeventinfo <> nil then begin
   fdataenteredkeyserial:= application.keyeventinfo^.serial;
@@ -1045,6 +1098,9 @@ var
  b1: boolean;
  item1: tassistivewidgetitem;
 begin
+{$ifdef mse_debugassistive}
+ debug('editcellevent',sender);
+{$endif}
  b1:= false;
  if finditem(sender,item1) then begin
   item1.docellevent(self,sender,info,b1);
@@ -1062,6 +1118,9 @@ var
  b1: boolean;
  item1: tassistivewidgetitem;
 begin
+{$ifdef mse_debugassistive}
+ debug('editcharenter',sender);
+{$endif}
  b1:= false;
  if finditem(sender,item1) then begin
   item1.doeditcharenter(self,sender,achar,b1);
@@ -1088,6 +1147,9 @@ var
  b1: boolean;
  item1: tassistivewidgetitem;
 begin
+{$ifdef mse_debugassistive}
+ debug('editchardelete',sender);
+{$endif}
  include(fstate,ass_textblock);
  b1:= false;
  if finditem(sender,item1) then begin
@@ -1115,6 +1177,9 @@ var
  item1: tassistivewidgetitem;
  s1: msestring;
 begin
+{$ifdef mse_debugassistive}
+ debug('editindexmoved',sender);
+{$endif}
  b1:= false;
  if finditem(sender,item1) then begin
   item1.doeditindexmoved(self,sender,aindex,b1);
@@ -1147,6 +1212,9 @@ var
  b1: boolean;
  item1: tassistivewidgetitem;
 begin
+{$ifdef mse_debugassistive}
+ debug('editwithdrawn',sender);
+{$endif}
  include(fstate,ass_textblock);
  b1:= false;
  if finditem(sender,item1) then begin
@@ -1171,6 +1239,9 @@ var
  item1: tassistivewidgetitem;
  sc1: stockcaptionty;
 begin
+{$ifdef mse_debugassistive}
+ debug('edittextblock',sender);
+{$endif}
  include(fstate,ass_textblock);
  b1:= false;
  if finditem(sender,item1) then begin
@@ -1214,6 +1285,9 @@ var
  b1: boolean;
  item1: tassistivewidgetitem;
 begin
+{$ifdef mse_debugassistive}
+ debug('editinputmodeset',sender);
+{$endif}
  b1:= false;
  if finditem(sender,item1) then begin
   item1.doeditinputmodeset(self,sender,amode,b1);
@@ -1244,6 +1318,9 @@ var
  item1: tassistivewidgetitem;
  ca1: stockcaptionty;
 begin
+{$ifdef mse_debugassistive}
+ debug('navigbordertouched',sender);
+{$endif}
  b1:= false;
  if finditem(sender,item1) then begin
   item1.donavigbordertouched(self,sender,adirection,b1);
@@ -1281,13 +1358,15 @@ procedure tassistivehandler.doitementer(const sender: iassistiveclient;
 var
  b1: boolean;
 begin
+{$ifdef mse_debugassistive}
+ debug('shapeitementer',sender);
+{$endif}
  b1:= false;
  if canevent(tmethod(fonitementer)) then begin
   fonitementer(self,sender,items,aindex,b1);
  end;
  if not b1 then begin
  end;
- removestate([ass_windowactivated,ass_menuactivated]);
 end;
 
 procedure tassistivehandler.doitementer(const sender: iassistiveclient;
@@ -1295,19 +1374,22 @@ procedure tassistivehandler.doitementer(const sender: iassistiveclient;
 var
  b1: boolean;
 begin
+{$ifdef mse_debugassistive}
+ debug('menuitementer',sender);
+{$endif}
  b1:= false;
  if canevent(tmethod(fonmenuitementer)) then begin
   fonmenuitementer(self,sender,items,aindex,b1);
  end;
  if not b1 then begin
+  startspeak();
   if not (ass_menuactivated in fstate) then begin
-   startspeak();
    speakmenustart(sender);
-   setstate([ass_menuactivatepending]);
+   setstate([ass_menuactivated]);
   end;
   speaktext(items[aindex].buttoninfo.ca.caption.text,fvoicetext);
  end;
- removestate([ass_windowactivated,ass_menuactivated]);
+// removestate([ass_windowactivated,ass_menuactivated]);
 end;
 
 end.

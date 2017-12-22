@@ -360,7 +360,9 @@ implementation
 uses
  sysutils,mserichstring,msestream,typinfo,mseformatstr,msestreaming,
  msestockobjects,mseassistiveserver;
- 
+type
+ twidget1 = class(twidget);
+  
 const   
  letterkeycount = ord('z') - ord('a') + 1;
  cipherkeycount = ord('9') - ord('0') + 1;
@@ -396,7 +398,13 @@ var
 procedure handleassistiveexec(const sender: tobject; const info: actioninfoty);
 begin
  if assistiveserver <> nil then begin
-  assistiveserver.doactionexecute(sender,info);
+  if sender is twidget then begin
+   assistiveserver.doactionexecute(twidget1(sender).getiassistiveclient(),
+                                                                 sender,info);
+  end
+  else begin
+   assistiveserver.doactionexecute(nil,sender,info);
+  end;
  end;
 end;
 

@@ -32,10 +32,10 @@ type
   procedure doactivate(const sender: iassistiveclient);
   procedure doclientmouseevent(const sender: iassistiveclient;
                                           const info: mouseeventinfoty);
-  procedure dofocuschanged(const oldwidget,newwidget: iassistiveclient);
+  procedure dofocuschanged(const sender: iassistiveclient;
+                                const oldwidget,newwidget: iassistiveclient);
   procedure dokeydown(const sender: iassistiveclient;
                                         const info: keyeventinfoty);
-  procedure doactionexecute(const sender: tobject; const info: actioninfoty);
   procedure dochange(const sender: iassistiveclient);
   procedure dodataentered(const sender: iassistiveclientdata);
   procedure docellevent(const sender: iassistiveclientgrid; 
@@ -54,9 +54,11 @@ type
   procedure donavigbordertouched(const sender: iassistiveclient;
                                        const adirection: graphicdirectionty);
 
-  procedure doitementer(const sender: iassistiveclient; //sender can be nil
+  procedure doactionexecute(const sender: iassistiveclient;//sender can be nil
+                            const senderobj: tobject; const info: actioninfoty);
+  procedure doitementer(const sender: iassistiveclient;    //sender can be nil
                             const items: shapeinfoarty; const aindex: integer);
-  procedure doitementer(const sender: iassistiveclient; //sender can be nil
+  procedure doitementer(const sender: iassistiveclient;    //sender can be nil
                          const items: menucellinfoarty; const aindex: integer);
 end;
 

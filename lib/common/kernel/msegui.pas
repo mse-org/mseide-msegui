@@ -16884,7 +16884,8 @@ begin
     if focusedwidget <> nil then begin
      ass2:= focusedwidget.getiassistiveclient();
     end;
-    assistiveserver.dofocuschanged(ass1,ass2);
+    assistiveserver.dofocuschanged(fownerwidget.getiassistiveclient(),
+                                                                ass1,ass2);
    end;
    fownerwidget.dofocuschanged(focusedwidgetbefore,ffocusedwidget);
    if (appinst.factivewindow = self) and 

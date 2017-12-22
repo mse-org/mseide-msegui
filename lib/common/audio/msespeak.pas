@@ -276,7 +276,8 @@ type
 
 implementation
 uses
- msestrings,msefileutils,msectypes,mseapplication,msesysintf1;
+ msestrings,msefileutils,msectypes,mseapplication,msesysintf1,
+ sysutils,msesysutils;
 
 { tspeakevent }
 
@@ -702,6 +703,9 @@ begin
  if not (ss_connected in fstate) then begin
   exit;
  end;
+{$ifdef mse_debugassistive}
+ debugwriteln('---cancel');
+{$endif}
  fspeakthread.clearevents();
  checkerror(espeak_ng_cancel());
  postidle();
@@ -725,6 +729,10 @@ begin
    f1:= f1 or espeakENDPAUSE;
   end;
   s1:= stringtoutf8(atext);
+  replacechar1(s1,c_tab,' ');
+ {$ifdef mse_debugassistive}
+   debugwriteln(inttostr(length(s1))+':'+s1);
+ {$endif}
   checkerror(espeak_ng_synthesize(pchar(s1),length(s1),0,pos_character,0,
                  f1,nil,nil));
 end;
@@ -779,6 +787,9 @@ begin
  if so_cancel in aoptions then begin
   cancel();
  end;
+{$ifdef mse_debugassistive}
+ debugwriteln('**'+atext);
+{$endif}
  if atext <> '' then begin
   postevent(tspeakevent.create(atext,aoptions,avoice));
  end;
