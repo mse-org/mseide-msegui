@@ -50,61 +50,61 @@ type
    property punctuationlist;
  end;
 
- tassistiveserver = class;
+ tassistivehandler = class;
  tassistivewidgetitem = class;
 
  assistiveeventty = 
-  procedure(const sender: tassistivewidgetitem; const server: tassistiveserver;
+  procedure(const sender: tassistivewidgetitem; const handler: tassistivehandler;
                  const intf: iassistiveclient; var handled: boolean) of object;
  assistivemouseeventty = 
-  procedure(const sender: tassistivewidgetitem; const server: tassistiveserver;
+  procedure(const sender: tassistivewidgetitem; const handler: tassistivehandler;
                  const intf: iassistiveclient; const info: mouseeventinfoty;
                                                var handled: boolean) of object;
  assistivefocuschangedeventty = 
-  procedure(const sender: tassistivewidgetitem; const server: tassistiveserver;
+  procedure(const sender: tassistivewidgetitem; const handler: tassistivehandler;
                  const intf: iassistiveclient; 
                  const oldwidget,newwidget: iassistiveclient;
                  var handled: boolean) of object;
  assistivekeyeventty = 
-  procedure(const sender: tassistivewidgetitem; const server: tassistiveserver;
+  procedure(const sender: tassistivewidgetitem; const handler: tassistivehandler;
                  const intf: iassistiveclient; const info: keyeventinfoty;
                                                var handled: boolean) of object;
  assistivedataeventty = 
-  procedure(const sender: tassistivewidgetitem; const server: tassistiveserver;
+  procedure(const sender: tassistivewidgetitem; const handler: tassistivehandler;
              const intf: iassistiveclientdata; var handled: boolean) of object;
  assistivecelleventty = 
-  procedure(const sender: tassistivewidgetitem; const server: tassistiveserver;
+  procedure(const sender: tassistivewidgetitem; const handler: tassistivehandler;
                  const intf: iassistiveclientgrid; const info: celleventinfoty;
                                                var handled: boolean) of object;
  assistiveediteventty = 
-  procedure(const sender: tassistivewidgetitem; const server: tassistiveserver;
+  procedure(const sender: tassistivewidgetitem; const handler: tassistivehandler;
               const intf: iassistiveclientedit; var handled: boolean) of object;
  assistiveeditstringeventty = 
-  procedure(const sender: tassistivewidgetitem; const server: tassistiveserver;
+  procedure(const sender: tassistivewidgetitem; const handler: tassistivehandler;
                 const intf: iassistiveclientedit; const atext: msestring;
                                             var handled: boolean) of object;
  assistiveeditindexeventty = 
-  procedure(const sender: tassistivewidgetitem; const server: tassistiveserver;
+  procedure(const sender: tassistivewidgetitem; const handler: tassistivehandler;
                         const intf: iassistiveclientedit; const index: int32; 
                                                var handled: boolean) of object;
  assistiveeditinputmodeeventty = 
-  procedure(const sender: tassistivewidgetitem; const server: tassistiveserver;
+  procedure(const sender: tassistivewidgetitem; const handler: tassistivehandler;
                  const intf: iassistiveclientedit; const amode: editinputmodety;
                                                var handled: boolean) of object;
  assistiveedittextblockeventty = 
-  procedure(const sender: tassistivewidgetitem; const server: tassistiveserver;
+  procedure(const sender: tassistivewidgetitem; const handler: tassistivehandler;
               const intf: iassistiveclientedit;
                  const amode: edittextblockmodety; const atext: msestring;
                                                var handled: boolean) of object;
  assistivedirectioneventty = 
-  procedure(const sender: tassistivewidgetitem; const server: tassistiveserver;
+  procedure(const sender: tassistivewidgetitem; const handler: tassistivehandler;
                             const intf: iassistiveclient;
                                      const adirection: graphicdirectionty;
                                                 var handled: boolean) of object;
 
  tassistivewidgetitem = class(tmsecomponent)
   private
-   fserver: tassistiveserver;
+   fhandler: tassistivehandler;
    fwidget: twidget;
    fonwindowactivated: assistiveeventty;
    fonwindowdeactivated: assistiveeventty;
@@ -123,62 +123,62 @@ type
    foneditinputmodeset: assistiveeditinputmodeeventty;
    fonedittextblock: assistiveedittextblockeventty;
    fonnavigbordertouched: assistivedirectioneventty;
-   procedure setserver(const avalue: tassistiveserver);
+   procedure sethandler(const avalue:tassistivehandler);
    procedure setwidget(const avalue: twidget);
   protected
-   procedure linkserver();
-   procedure unlinkserver();
+   procedure linkhandler();
+   procedure unlinkhandler();
    procedure objectevent(const sender: tobject;
                                  const event: objecteventty) override;
-   procedure dowindowactivated(const sender: tassistiveserver;
+   procedure dowindowactivated(const sender:tassistivehandler;
                          const aintf: iassistiveclient; var handled: boolean);
-   procedure dowindowdeactivated(const sender: tassistiveserver;
+   procedure dowindowdeactivated(const sender:tassistivehandler;
                          const aintf: iassistiveclient; var handled: boolean);
-   procedure dowindowclosed(const sender: tassistiveserver;
+   procedure dowindowclosed(const sender:tassistivehandler;
                           const aintf: iassistiveclient; var handled: boolean);
-   procedure doenter(const sender: tassistiveserver;
+   procedure doenter(const sender:tassistivehandler;
                           const aintf: iassistiveclient; var handled: boolean);
-   procedure doactivate(const sender: tassistiveserver;
+   procedure doactivate(const sender:tassistivehandler;
                           const aintf: iassistiveclient; var handled: boolean);
-   procedure doclientmouseevent(const sender: tassistiveserver;
+   procedure doclientmouseevent(const sender:tassistivehandler;
               const aintf: iassistiveclient; const info: mouseeventinfoty;
                                                         var handled: boolean);
-   procedure dokeydown(const sender: tassistiveserver;
+   procedure dokeydown(const sender:tassistivehandler;
            const aintf: iassistiveclient; const info: keyeventinfoty;
                                                         var handled: boolean);
-   procedure dochange(const sender: tassistiveserver; 
+   procedure dochange(const sender:tassistivehandler; 
                          const aintf: iassistiveclient; var handled: boolean);
-   procedure dodataentered(const sender: tassistiveserver;
+   procedure dodataentered(const sender:tassistivehandler;
                      const aintf: iassistiveclientdata; var handled: boolean);
-   procedure docellevent(const sender: tassistiveserver;
+   procedure docellevent(const sender:tassistivehandler;
                const aintf: iassistiveclientgrid; const info: celleventinfoty;
                                                         var handled: boolean);
-   procedure doeditcharenter(const sender: tassistiveserver;
+   procedure doeditcharenter(const sender:tassistivehandler;
                 const aintf: iassistiveclientedit; const achar: msestring;
                                                         var handled: boolean);
-   procedure doeditchardelete(const sender: tassistiveserver;
+   procedure doeditchardelete(const sender:tassistivehandler;
                 const aintf: iassistiveclientedit; const achar: msestring;
                                                         var handled: boolean);
-   procedure doeditindexmoved(const sender: tassistiveserver;
+   procedure doeditindexmoved(const sender:tassistivehandler;
                    const aintf: iassistiveclientedit; const aindex: int32;
                                                         var handled: boolean);
-   procedure doeditwithdrawn(const sender: tassistiveserver;
+   procedure doeditwithdrawn(const sender:tassistivehandler;
                      const aintf: iassistiveclientedit; var handled: boolean);
-   procedure doedittextblock(const sender: tassistiveserver;
+   procedure doedittextblock(const sender:tassistivehandler;
                      const aintf: iassistiveclientedit;
                      const amode: edittextblockmodety; const atext: msestring;
                                                          var handled: boolean);
-   procedure doeditinputmodeset(const sender: tassistiveserver;
+   procedure doeditinputmodeset(const sender:tassistivehandler;
               const aintf: iassistiveclientedit; const amode: editinputmodety;
                                                          var handled: boolean);
-   procedure donavigbordertouched(const sender: tassistiveserver;
+   procedure donavigbordertouched(const sender:tassistivehandler;
                                          const aintf: iassistiveclient;
                                          const adirection: graphicdirectionty;
                                                          var handled: boolean);
   public
    destructor destroy(); override;
   published
-   property server: tassistiveserver read fserver write setserver;
+   property handler: tassistivehandler read fhandler write sethandler;
    property widget: twidget read fwidget write setwidget;
    property onwindowactivated: assistiveeventty read fonwindowactivated 
                                                     write fonwindowactivated;
@@ -228,69 +228,69 @@ type
  end;
 
  assistiveservereventty = 
-  procedure(const sender: tassistiveserver;
+  procedure(const sender:tassistivehandler;
                  const intf: iassistiveclient; var handled: boolean) of object;
  assistiveserverkeyeventty = 
-  procedure(const sender: tassistiveserver;
+  procedure(const sender:tassistivehandler;
                  const intf: iassistiveclient; const info: keyeventinfoty;
                                                var handled: boolean) of object;
  assistiveservermouseeventty = 
-  procedure(const sender: tassistiveserver;
+  procedure(const sender:tassistivehandler;
                  const intf: iassistiveclient; const info: mouseeventinfoty;
                                                var handled: boolean) of object;
  assistiveserverdataeventty = 
-  procedure(const sender: tassistiveserver;
+  procedure(const sender:tassistivehandler;
              const intf: iassistiveclientdata; var handled: boolean) of object;
  assistiveservercelleventty = 
-  procedure(const sender: tassistiveserver;
+  procedure(const sender:tassistivehandler;
                  const intf: iassistiveclientgrid; const info: celleventinfoty;
                                                var handled: boolean) of object;
  assistiveservereditstringeventty = 
-  procedure(const sender: tassistiveserver;
+  procedure(const sender:tassistivehandler;
             const intf: iassistiveclientedit; const achar: msestring;
                                                var handled: boolean) of object;
  assistiveserverediteventty = 
-  procedure(const sender: tassistiveserver;
+  procedure(const sender:tassistivehandler;
               const intf: iassistiveclientedit; var handled: boolean) of object;
  assistiveservereditindexeventty = 
-  procedure(const sender: tassistiveserver;
+  procedure(const sender:tassistivehandler;
                         const intf: iassistiveclientedit; const index: int32; 
                                                var handled: boolean) of object;
  assistiveservereditinputmodeeventty = 
-  procedure(const sender: tassistiveserver;
+  procedure(const sender:tassistivehandler;
                  const intf: iassistiveclientedit; const amode: editinputmodety;
                                                var handled: boolean) of object;
  assistiveserveredittextblockeventty = 
-  procedure(const sender: tassistiveserver;
+  procedure(const sender:tassistivehandler;
               const intf: iassistiveclientedit;
                  const amode: edittextblockmodety; const atext: msestring;
                                                var handled: boolean) of object;
  assistiveserverdirectioneventty = 
-  procedure(const sender: tassistiveserver;
+  procedure(const sender:tassistivehandler;
                             const intf: iassistiveclient;
                                      const adirection: graphicdirectionty;
                                                 var handled: boolean) of object;
 
  assistiveserverfocuschangedeventty = 
-  procedure(const sender: tassistiveserver;
+  procedure(const sender:tassistivehandler;
                  const oldwidget,newwidget: iassistiveclient;
                  var handled: boolean) of object;
  assistiveserveractioneventty = 
-   procedure (const sender: tassistiveserver;
+   procedure (const sender:tassistivehandler;
                  const actionobj: tobject; const info: actioninfoty;
                                                 var handled: boolean) of object;
  assistiveserveritemeventty = 
-   procedure (const sender: tassistiveserver;
+   procedure (const sender:tassistivehandler;
                  const intf: iassistiveclient; //intf can be nil
                    const items: shapeinfoarty; const aindex: integer;
                                                 var handled: boolean) of object;
  assistiveservermenuitemeventty = 
-   procedure (const sender: tassistiveserver;
+   procedure (const sender:tassistivehandler;
                const intf: iassistiveclient; //intf can be nil
                 const items: menucellinfoarty; const aindex: integer;
                                                 var handled: boolean) of object;
  
- tassistiveserver = class(tmsecomponent,iassistiveserver)
+tassistivehandler = class(tmsecomponent,iassistiveserver)
   private
    factive: boolean;
    fspeaker: tassistivespeak;
@@ -454,37 +454,37 @@ end;
 
 destructor tassistivewidgetitem.destroy();
 begin
- server:= nil;
+ handler:= nil;
  inherited;
 end;
 
-procedure tassistivewidgetitem.setserver(const avalue: tassistiveserver);
+procedure tassistivewidgetitem.sethandler(const avalue:tassistivehandler);
 begin
- unlinkserver();
- setlinkedvar(avalue,tmsecomponent(fserver));
- linkserver();
+ unlinkhandler();
+ setlinkedvar(avalue,tmsecomponent(fhandler));
+ linkhandler();
 end;
 
 procedure tassistivewidgetitem.setwidget(const avalue: twidget);
 begin
- unlinkserver();
+ unlinkhandler();
  setlinkedvar(avalue,tmsecomponent(fwidget));
- linkserver();
+ linkhandler();
 end;
 
-procedure tassistivewidgetitem.linkserver();
+procedure tassistivewidgetitem.linkhandler();
 begin
- if (fwidget <> nil) and (fserver <> nil) and 
+ if (fwidget <> nil) and (fhandler <> nil) and 
             not (csdesigning in componentstate) then begin
-  fserver.registeritem(twidget1(fwidget).getiassistiveclient,self);
+  fhandler.registeritem(twidget1(fwidget).getiassistiveclient,self);
  end;
 end;
 
-procedure tassistivewidgetitem.unlinkserver();
+procedure tassistivewidgetitem.unlinkhandler();
 begin
- if (fserver <> nil) and (fwidget <> nil) and 
+ if (fhandler <> nil) and (fwidget <> nil) and 
                                not (csdesigning in componentstate) then begin
-  fserver.unregisteritem(twidget1(fwidget).getiassistiveclient());
+  fhandler.unregisteritem(twidget1(fwidget).getiassistiveclient());
  end;
 end;
 
@@ -492,12 +492,12 @@ procedure tassistivewidgetitem.objectevent(const sender: tobject;
                const event: objecteventty);
 begin
  if (event = oe_destroyed) and (sender = fwidget) then begin
-  unlinkserver();
+  unlinkhandler();
  end;
  inherited;
 end;
 
-procedure tassistivewidgetitem.dowindowactivated(const sender: tassistiveserver;
+procedure tassistivewidgetitem.dowindowactivated(const sender:tassistivehandler;
                const aintf: iassistiveclient; var handled: boolean);
 begin
  if canevent(tmethod(fonwindowactivated)) then begin
@@ -506,7 +506,7 @@ begin
 end;
 
 procedure tassistivewidgetitem.dowindowdeactivated(
-              const sender: tassistiveserver; const aintf: iassistiveclient;
+              const sender:tassistivehandler; const aintf: iassistiveclient;
                var handled: boolean);
 begin
  if canevent(tmethod(fonwindowdeactivated)) then begin
@@ -514,7 +514,7 @@ begin
  end;
 end;
 
-procedure tassistivewidgetitem.dowindowclosed(const sender: tassistiveserver;
+procedure tassistivewidgetitem.dowindowclosed(const sender:tassistivehandler;
                const aintf: iassistiveclient; var handled: boolean);
 begin
  if canevent(tmethod(fonwindowclosed)) then begin
@@ -522,7 +522,7 @@ begin
  end;
 end;
 
-procedure tassistivewidgetitem.doenter(const sender: tassistiveserver;
+procedure tassistivewidgetitem.doenter(const sender:tassistivehandler;
                const aintf: iassistiveclient; var handled: boolean);
 begin
  if canevent(tmethod(fonenter)) then begin
@@ -530,7 +530,7 @@ begin
  end;
 end;
 
-procedure tassistivewidgetitem.doactivate(const sender: tassistiveserver;
+procedure tassistivewidgetitem.doactivate(const sender:tassistivehandler;
                const aintf: iassistiveclient; var handled: boolean);
 begin
  if canevent(tmethod(fonactivate)) then begin
@@ -539,7 +539,7 @@ begin
 end;
 
 procedure tassistivewidgetitem.doclientmouseevent(
-              const sender: tassistiveserver; const aintf: iassistiveclient;
+              const sender:tassistivehandler; const aintf: iassistiveclient;
                const info: mouseeventinfoty; var handled: boolean);
 begin
  if canevent(tmethod(fonclientmouseevent)) then begin
@@ -547,7 +547,7 @@ begin
  end;
 end;
 
-procedure tassistivewidgetitem.dokeydown(const sender: tassistiveserver;
+procedure tassistivewidgetitem.dokeydown(const sender:tassistivehandler;
                const aintf: iassistiveclient; const info: keyeventinfoty;
                var handled: boolean);
 begin
@@ -556,7 +556,7 @@ begin
  end;
 end;
 
-procedure tassistivewidgetitem.dochange(const sender: tassistiveserver;
+procedure tassistivewidgetitem.dochange(const sender:tassistivehandler;
                const aintf: iassistiveclient; var handled: boolean);
 begin
  if canevent(tmethod(fonchange)) then begin
@@ -564,7 +564,7 @@ begin
  end;
 end;
 
-procedure tassistivewidgetitem.dodataentered(const sender: tassistiveserver;
+procedure tassistivewidgetitem.dodataentered(const sender:tassistivehandler;
                const aintf: iassistiveclientdata; var handled: boolean);
 begin
  if canevent(tmethod(fondataentered)) then begin
@@ -572,7 +572,7 @@ begin
  end;
 end;
 
-procedure tassistivewidgetitem.docellevent(const sender: tassistiveserver;
+procedure tassistivewidgetitem.docellevent(const sender:tassistivehandler;
                const aintf: iassistiveclientgrid; const info: celleventinfoty;
                var handled: boolean);
 begin
@@ -581,7 +581,7 @@ begin
  end;
 end;
 
-procedure tassistivewidgetitem.doeditcharenter(const sender: tassistiveserver;
+procedure tassistivewidgetitem.doeditcharenter(const sender:tassistivehandler;
                const aintf: iassistiveclientedit; const achar: msestring;
                var handled: boolean);
 begin
@@ -590,7 +590,7 @@ begin
  end;
 end;
 
-procedure tassistivewidgetitem.doeditchardelete(const sender: tassistiveserver;
+procedure tassistivewidgetitem.doeditchardelete(const sender:tassistivehandler;
                const aintf: iassistiveclientedit; const achar: msestring;
                var handled: boolean);
 begin
@@ -599,7 +599,7 @@ begin
  end;
 end;
 
-procedure tassistivewidgetitem.doeditindexmoved(const sender: tassistiveserver;
+procedure tassistivewidgetitem.doeditindexmoved(const sender:tassistivehandler;
                const aintf: iassistiveclientedit; const aindex: int32;
                var handled: boolean);
 begin
@@ -608,7 +608,7 @@ begin
  end;
 end;
 
-procedure tassistivewidgetitem.doeditwithdrawn(const sender: tassistiveserver;
+procedure tassistivewidgetitem.doeditwithdrawn(const sender:tassistivehandler;
                const aintf: iassistiveclientedit; var handled: boolean);
 begin
  if canevent(tmethod(foneditwithdrawn)) then begin
@@ -616,7 +616,7 @@ begin
  end;
 end;
 
-procedure tassistivewidgetitem.doedittextblock(const sender: tassistiveserver;
+procedure tassistivewidgetitem.doedittextblock(const sender:tassistivehandler;
                const aintf: iassistiveclientedit;
                const amode: edittextblockmodety; const atext: msestring;
                var handled: boolean);
@@ -627,7 +627,7 @@ begin
 end;
 
 procedure tassistivewidgetitem.doeditinputmodeset(
-              const sender: tassistiveserver; const aintf: iassistiveclientedit;
+              const sender:tassistivehandler; const aintf: iassistiveclientedit;
                const amode: editinputmodety; var handled: boolean);
 begin
  if canevent(tmethod(foneditinputmodeset)) then begin
@@ -636,7 +636,7 @@ begin
 end;
 
 procedure tassistivewidgetitem.donavigbordertouched(
-              const sender: tassistiveserver; const aintf: iassistiveclient;
+              const sender:tassistivehandler; const aintf: iassistiveclient;
                const adirection: graphicdirectionty; var handled: boolean);
 begin
  if canevent(tmethod(fonnavigbordertouched)) then begin
@@ -651,9 +651,9 @@ begin
  result:= sizeof(assistivewidgethashdataty);
 end;
 
-{ tassistiveserver }
+{tassistivehandler }
 
-constructor tassistiveserver.create(aowner: tcomponent);
+constructor tassistivehandler.create(aowner: tcomponent);
 begin
  foptions:= defaultassistiveoptions;
  fspeaker:= tassistivespeak.create(nil);
@@ -661,14 +661,14 @@ begin
  inherited;
 end;
 
-destructor tassistiveserver.destroy();
+destructor tassistivehandler.destroy();
 begin
  inherited;
  fspeaker.free();
  fitems.free();
 end;
 
-procedure tassistiveserver.setactive(const avalue: boolean);
+procedure tassistivehandler.setactive(const avalue: boolean);
 begin
  if factive <> avalue then begin
   factive:= avalue;
@@ -683,7 +683,7 @@ begin
  end;
 end;
 
-procedure tassistiveserver.activate();
+procedure tassistivehandler.activate();
 begin
  if not (csdesigning in componentstate) then begin
   fspeaker.active:= true;
@@ -696,7 +696,7 @@ begin
  end;
 end;
 
-procedure tassistiveserver.deactivate();
+procedure tassistivehandler.deactivate();
 begin
  if not (csdesigning in componentstate) then begin
   assistiveserver:= nil;
@@ -707,12 +707,12 @@ begin
  end;
 end;
 
-procedure tassistiveserver.setspeaker(const avalue: tassistivespeak);
+procedure tassistivehandler.setspeaker(const avalue: tassistivespeak);
 begin
  fspeaker.assign(avalue);
 end;
 
-procedure tassistiveserver.setoptions(const avalue: assistiveoptionsty);
+procedure tassistivehandler.setoptions(const avalue: assistiveoptionsty);
 begin
  foptions:= avalue;
  if ass_active in fstate then begin
@@ -720,7 +720,7 @@ begin
  end;
 end;
 
-procedure tassistiveserver.loaded();
+procedure tassistivehandler.loaded();
 begin
  inherited;
  if factive then begin
@@ -729,35 +729,35 @@ begin
  end;
 end;
 
-procedure tassistiveserver.wait();
+procedure tassistivehandler.wait();
 begin
  fspeaker.wait();
 end;
 
-procedure tassistiveserver.cancel();
+procedure tassistivehandler.cancel();
 begin
  fspeaker.cancel();
 end;
 
-procedure tassistiveserver.speaktext(const atext: msestring;
+procedure tassistivehandler.speaktext(const atext: msestring;
                const avoice: int32 = 0);
 begin
  fspeaker.speak(atext,[so_endpause],avoice);
 end;
 
-procedure tassistiveserver.speaktext(const atext: stockcaptionty;
+procedure tassistivehandler.speaktext(const atext: stockcaptionty;
                const avoice: int32 = 0);
 begin
  speaktext(stockobjects.captions[atext],avoice);
 end;
 
-procedure tassistiveserver.speakcharacter(const achar: char32;
+procedure tassistivehandler.speakcharacter(const achar: char32;
                const avoice: int32 = 0);
 begin
  fspeaker.speakcharacter(achar,[so_endpause],avoice);
 end;
 
-procedure tassistiveserver.speakall(const sender: iassistiveclient;
+procedure tassistivehandler.speakall(const sender: iassistiveclient;
                                                         const addtext: boolean);
 var
  fla1: assistiveflagsty;
@@ -776,7 +776,7 @@ begin
  speaktext(sender.getassistivetext(),fvoicetext);
 end;
 
-procedure tassistiveserver.speakinput(const sender: iassistiveclientdata);
+procedure tassistivehandler.speakinput(const sender: iassistiveclientdata);
 begin
  startspeak();
  speaktext(sc_input,fvoicecaption);
@@ -784,27 +784,27 @@ begin
  speaktext(sender.getassistivetext(),fvoicetext);
 end;
 
-procedure tassistiveserver.speakmenustart(const sender: iassistiveclient);
+procedure tassistivehandler.speakmenustart(const sender: iassistiveclient);
 begin
  speaktext(sc_menu,fvoicecaption);
 end;
 
-procedure tassistiveserver.setstate(const astate: assistiveserverstatesty);
+procedure tassistivehandler.setstate(const astate: assistiveserverstatesty);
 begin
  fstate:= fstate + (astate-internalstates);
 end;
 
-procedure tassistiveserver.removestate(const astate: assistiveserverstatesty);
+procedure tassistivehandler.removestate(const astate: assistiveserverstatesty);
 begin
  fstate:= fstate - (astate-internalstates);
 end;
 
-procedure tassistiveserver.startspeak();
+procedure tassistivehandler.startspeak();
 begin
  cancel();
 end;
 
-procedure tassistiveserver.registeritem(const aintf: iassistiveclient;
+procedure tassistivehandler.registeritem(const aintf: iassistiveclient;
                      const aitem: tassistivewidgetitem);
 begin
  with passistivewidgethashdataty(fitems.add(aintf))^ do begin
@@ -812,12 +812,12 @@ begin
  end;
 end;
 
-procedure tassistiveserver.unregisteritem(const aintf: iassistiveclient);
+procedure tassistivehandler.unregisteritem(const aintf: iassistiveclient);
 begin
  fitems.delete(aintf,true);
 end;
 
-function tassistiveserver.finditem(aintf: iassistiveclient;
+function tassistivehandler.finditem(aintf: iassistiveclient;
                out aitem: tassistivewidgetitem): boolean;
 var
  p1: passistivewidgethashdataty;
@@ -831,7 +831,7 @@ begin
  end;
 end;
 
-procedure tassistiveserver.dowindowactivated(const sender: iassistiveclient);
+procedure tassistivehandler.dowindowactivated(const sender: iassistiveclient);
 var
  b1: boolean;
  item1: tassistivewidgetitem;
@@ -866,7 +866,7 @@ begin
  removestate([ass_menuactivatepending]);
 end;
 
-procedure tassistiveserver.dowindowdeactivated(const sender: iassistiveclient);
+procedure tassistivehandler.dowindowdeactivated(const sender: iassistiveclient);
 var
  b1: boolean;
  item1: tassistivewidgetitem;
@@ -885,7 +885,7 @@ begin
  end;
 end;
 
-procedure tassistiveserver.dowindowclosed(const sender: iassistiveclient);
+procedure tassistivehandler.dowindowclosed(const sender: iassistiveclient);
 var
  b1: boolean;
  item1: tassistivewidgetitem;
@@ -901,7 +901,7 @@ begin
  end;
 end;
 
-procedure tassistiveserver.doenter(const sender: iassistiveclient);
+procedure tassistivehandler.doenter(const sender: iassistiveclient);
 var
  b1: boolean;
  item1: tassistivewidgetitem;
@@ -917,7 +917,7 @@ begin
  end;
 end;
 
-procedure tassistiveserver.doactivate(const sender: iassistiveclient);
+procedure tassistivehandler.doactivate(const sender: iassistiveclient);
 var
  b1: boolean;
  item1: tassistivewidgetitem;
@@ -944,7 +944,7 @@ begin
  end;
 end;
 
-procedure tassistiveserver.doclientmouseevent(const sender: iassistiveclient;
+procedure tassistivehandler.doclientmouseevent(const sender: iassistiveclient;
                const info: mouseeventinfoty);
 var
  b1: boolean;
@@ -961,7 +961,7 @@ begin
  end;
 end;
 
-procedure tassistiveserver.dofocuschanged(const oldwidget: iassistiveclient;
+procedure tassistivehandler.dofocuschanged(const oldwidget: iassistiveclient;
                const newwidget: iassistiveclient);
 var
  b1: boolean;
@@ -972,7 +972,7 @@ begin
  end;
 end;
 
-procedure tassistiveserver.dokeydown(const sender: iassistiveclient;
+procedure tassistivehandler.dokeydown(const sender: iassistiveclient;
                const info: keyeventinfoty);
 //var
 // fla1: assistiveflagsty;
@@ -989,7 +989,7 @@ begin
  end;
 end;
 
-procedure tassistiveserver.doactionexecute(const sender: tobject;
+procedure tassistivehandler.doactionexecute(const sender: tobject;
                const info: actioninfoty);
 var
  b1: boolean;
@@ -1000,7 +1000,7 @@ begin
  end;
 end;
 
-procedure tassistiveserver.dochange(const sender: iassistiveclient);
+procedure tassistivehandler.dochange(const sender: iassistiveclient);
 var
  b1: boolean;
  item1: tassistivewidgetitem;
@@ -1016,7 +1016,7 @@ begin
  end;
 end;
 
-procedure tassistiveserver.dodataentered(const sender: iassistiveclientdata);
+procedure tassistivehandler.dodataentered(const sender: iassistiveclientdata);
 var
  b1: boolean;
  item1: tassistivewidgetitem;
@@ -1039,7 +1039,7 @@ begin
  end;
 end;
 
-procedure tassistiveserver.docellevent(const sender: iassistiveclientgrid;
+procedure tassistivehandler.docellevent(const sender: iassistiveclientgrid;
                const info: celleventinfoty);
 var
  b1: boolean;
@@ -1056,7 +1056,7 @@ begin
  end;
 end;
 
-procedure tassistiveserver.doeditcharenter(const sender: iassistiveclientedit;
+procedure tassistivehandler.doeditcharenter(const sender: iassistiveclientedit;
                const achar: msestring);
 var
  b1: boolean;
@@ -1082,7 +1082,7 @@ begin
  end;
 end;
 
-procedure tassistiveserver.doeditchardelete(const sender: iassistiveclientedit;
+procedure tassistivehandler.doeditchardelete(const sender: iassistiveclientedit;
                const achar: msestring);
 var
  b1: boolean;
@@ -1108,7 +1108,7 @@ begin
  end;
 end;
 
-procedure tassistiveserver.doeditindexmoved(const sender: iassistiveclientedit;
+procedure tassistivehandler.doeditindexmoved(const sender: iassistiveclientedit;
                const aindex: int32);
 var
  b1: boolean;
@@ -1142,7 +1142,7 @@ begin
  exclude(fstate,ass_textblock);
 end;
 
-procedure tassistiveserver.doeditwithdrawn(const sender: iassistiveclientedit);
+procedure tassistivehandler.doeditwithdrawn(const sender: iassistiveclientedit);
 var
  b1: boolean;
  item1: tassistivewidgetitem;
@@ -1164,7 +1164,7 @@ begin
  end;
 end;
 
-procedure tassistiveserver.doedittextblock(const sender: iassistiveclientedit;
+procedure tassistivehandler.doedittextblock(const sender: iassistiveclientedit;
                const amode: edittextblockmodety; const atext: msestring);
 var
  b1: boolean;
@@ -1208,7 +1208,7 @@ begin
  end;
 end;
 
-procedure tassistiveserver.doeditinputmodeset(
+procedure tassistivehandler.doeditinputmodeset(
               const sender: iassistiveclientedit; const amode: editinputmodety);
 var
  b1: boolean;
@@ -1237,7 +1237,7 @@ begin
  end;
 end;
 
-procedure tassistiveserver.donavigbordertouched(const sender: iassistiveclient;
+procedure tassistivehandler.donavigbordertouched(const sender: iassistiveclient;
                const adirection: graphicdirectionty);
 var
  b1: boolean;
@@ -1276,7 +1276,7 @@ begin
  end;
 end;
 
-procedure tassistiveserver.doitementer(const sender: iassistiveclient;
+procedure tassistivehandler.doitementer(const sender: iassistiveclient;
                const items: shapeinfoarty; const aindex: integer);
 var
  b1: boolean;
@@ -1290,7 +1290,7 @@ begin
  removestate([ass_windowactivated,ass_menuactivated]);
 end;
 
-procedure tassistiveserver.doitementer(const sender: iassistiveclient;
+procedure tassistivehandler.doitementer(const sender: iassistiveclient;
                const items: menucellinfoarty; const aindex: integer);
 var
  b1: boolean;
