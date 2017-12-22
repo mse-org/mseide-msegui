@@ -18,10 +18,10 @@ type
 
  editinputmodety = (eim_insert,eim_overwrite);
  edittextblockmodety = (etbm_delete,etbm_cut,etbm_copy,etbm_insert,etbm_paste);
- assistiveoptionty = (aso_nodefaultbutton,aso_widgetnavig);
+ assistiveoptionty = (aso_nodefaultbutton,aso_widgetnavig,aso_menunavig);
  assistiveoptionsty = set of assistiveoptionty;
 const
- defaultassistiveoptions = [aso_nodefaultbutton,aso_widgetnavig];
+ defaultassistiveoptions = [aso_nodefaultbutton,aso_widgetnavig,aso_menunavig];
  
 type
  iassistiveserver = interface(inullinterface)[miid_iassistiveserver]

@@ -117,6 +117,8 @@ type
    procedure release1(const acancelmodal: boolean); virtual;
    class function classskininfo(): skininfoty; override;
    function getassistiveflags(): assistiveflagsty override;
+   function prevmenuitem(const info: menulayoutinfoty): integer;
+   function nextmenuitem(const info: menulayoutinfoty): integer;
   public
    constructor create(instance: ppopupmenuwidget;
               const amenu: tmenuitem; const atransientfor: twindow;
@@ -890,20 +892,27 @@ begin
  end;
 end;
 
-function prevmenuitem(const info: menulayoutinfoty): integer;
+function tpopupmenuwidget.prevmenuitem(const info: menulayoutinfoty): integer;
 begin
  with info do begin
   result:= activeitem;
   repeat
    dec(result);
    if result < 0 then begin
+    if aso_menunavig in assistiveoptions then begin
+     result:= activeitem;
+     if canassistive then begin
+      assistiveserver.donavigbordertouched(getiassistiveclient,gd_up);
+     end;
+     break;
+    end;
     result:= menu.count - 1;
    end;
   until menu[result].canactivate or (result = activeitem);
  end;
 end;
 
-function nextmenuitem(const info: menulayoutinfoty): integer;
+function tpopupmenuwidget.nextmenuitem(const info: menulayoutinfoty): integer;
 begin
  with info do begin
   if menu.count = 0 then begin
@@ -914,6 +923,13 @@ begin
    repeat
     inc(result);
     if result >= menu.count then begin
+     if aso_menunavig in assistiveoptions then begin
+      result:= activeitem;
+      if canassistive then begin
+       assistiveserver.donavigbordertouched(getiassistiveclient,gd_down);
+      end;
+      break;
+     end;
      if activeitem = -1 then begin
       result:= -1;
       break;
