@@ -836,10 +836,15 @@ end;
 
 {$ifdef mse_debugassistive}
 procedure debug(const text: string; const intf: iassistiveclient);
+var
+ wi1: twidget;
 begin
  debugwrite('*'+text+':');
  if intf <> nil then begin
-  debugwriteln(twidget(intf.getinstance).name);
+  pointer(wi1):= intf.getassistivewidget();
+  if wi1 <> nil then begin
+   debugwriteln(wi1.name);
+  end;
  end
  else begin
   debugwriteln('');
@@ -868,11 +873,13 @@ begin
   if not b1 then begin
    fla1:= sender.getassistiveflags();
    if asf_menu in fla1 then begin
+   {
     setstate([ass_menuactivated]);
     if not (ass_menuactivatepending in fstate) then begin
      startspeak();
      speakmenustart(sender);
     end;
+   }
    end
    else begin
     startspeak();
@@ -966,11 +973,13 @@ begin
   if canevent(tmethod(fonactivate)) then begin
    fonactivate(self,sender,b1);
   end;
-  if twidget(sender.getinstance).focused then begin
+  if twidget(sender.getassistivewidget).focused then begin
    if not b1 then begin
     fla1:= sender.getassistiveflags();
-    if not ((asf_menu in fla1) {and 
-       (fstate * [ass_menuactivated,ass_menuactivatepending] <> [])}) then begin
+    if asf_menu in fla1 then begin
+     setstate([ass_menuactivated]);
+    end
+    else begin
      speakall(sender,ass_windowactivated in fstate);
      removestate([ass_windowactivated]);
     end;
@@ -1383,13 +1392,15 @@ begin
  end;
  if not b1 then begin
   startspeak();
-  if not (ass_menuactivated in fstate) then begin
+  if ass_menuactivated in fstate then begin
    speakmenustart(sender);
-   setstate([ass_menuactivated]);
   end;
+//   speakmenustart(sender);
+//   setstate([ass_menuactivated]);
+//  end;
   speaktext(items[aindex].buttoninfo.ca.caption.text,fvoicetext);
  end;
-// removestate([ass_windowactivated,ass_menuactivated]);
+ removestate([{ass_windowactivated,}ass_menuactivated]);
 end;
 
 end.

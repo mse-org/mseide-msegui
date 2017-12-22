@@ -191,6 +191,7 @@ type
 
    function getiassistiveclient(): iassistiveclientmenu virtual;
     //iassistiveclient
+   function getassistivewidget(): tobject;
    function getassistivename(): msestring; virtual;
    function getassistivecaption(): msestring; virtual;
    function getassistivetext(): msestring; virtual;
@@ -1192,6 +1193,11 @@ end;
 function tmenuitem.getiassistiveclient(): iassistiveclientmenu;
 begin
  result:= iassistiveclientmenu(self);
+end;
+
+function tmenuitem.getassistivewidget(): tobject;
+begin
+ result:= nil;
 end;
 
 function tmenuitem.internalexecute(async: boolean): boolean;

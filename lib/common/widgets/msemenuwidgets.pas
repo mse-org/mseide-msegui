@@ -83,6 +83,7 @@ type
   protected
    flayout: menulayoutinfoty;
    flocalframeandface: boolean;
+   procedure doafteractivate() override;
    procedure clientrectchanged; override;
    procedure objectevent(const sender: tobject; 
                         const event: objecteventty); override;
@@ -1486,7 +1487,7 @@ begin
      end;
     end;
     capturemouse;
-    if assistiveserver <> nil then begin
+    if canassistive and active then begin
      assistiveserver.doitementer(tmenuitem1(menu).getiassistiveclient(),
                                                             cells,activeitem);
     end;
@@ -1833,6 +1834,17 @@ procedure tpopupmenuwidget.applicationactivechanged(const avalue: boolean);
 begin
  if not avalue and not (mlo_main in flayout.options) and visible then begin
   closepopupstack(nil);
+ end;
+end;
+
+procedure tpopupmenuwidget.doafteractivate();
+begin
+ inherited;
+ if canassistive() and (activeitem >= 0) then begin
+  with flayout do begin
+   assistiveserver.doitementer(tmenuitem1(menu).getiassistiveclient(),
+                                                           cells,activeitem);
+  end;
  end;
 end;
 

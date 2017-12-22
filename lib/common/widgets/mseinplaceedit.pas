@@ -152,6 +152,7 @@ type
    function getiassistiveclient(): iassistiveclientedit virtual;
     //iassistiveclient
    function getinstance: tobject;
+   function getassistivewidget(): tobject;
    function getassistivename(): msestring;
    function getassistivecaption(): msestring;
    function getassistivetext(): msestring;
@@ -1923,6 +1924,11 @@ end;
 function tinplaceedit.getinstance: tobject;
 begin
  result:= twidget1(fwidget).getinstance();
+end;
+
+function tinplaceedit.getassistivewidget(): tobject;
+begin
+ result:= twidget1(fwidget).getassistivewidget();
 end;
 
 function tinplaceedit.getassistivename(): msestring;

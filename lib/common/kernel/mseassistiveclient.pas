@@ -24,6 +24,7 @@ type
  
  iassistiveclient = interface(inullinterface)[miid_iassistiveclient]
   function getinstance: tobject;
+  function getassistivewidget: tobject; //twidget, can be nil
   function getassistivename(): msestring;
   function getassistivecaption(): msestring;
   function getassistivetext(): msestring;

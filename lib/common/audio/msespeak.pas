@@ -730,9 +730,9 @@ begin
   end;
   s1:= stringtoutf8(atext);
   replacechar1(s1,c_tab,' ');
- {$ifdef mse_debugassistive}
-   debugwriteln(inttostr(length(s1))+':'+s1);
- {$endif}
+// {$ifdef mse_debugassistive}
+//   debugwriteln(inttostr(length(s1))+':'+s1);
+// {$endif}
   checkerror(espeak_ng_synthesize(pchar(s1),length(s1),0,pos_character,0,
                  f1,nil,nil));
 end;
