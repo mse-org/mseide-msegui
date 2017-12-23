@@ -1711,7 +1711,9 @@ begin
    beginkeymode;
    case key of
     key_return,{key_enter,}key_space: begin
-     if not (ss_repeat in shiftstate) then begin
+     if not (ss_repeat in shiftstate) and 
+             not ((aso_noreturnkeymenuexecute in assistiveoptions) and 
+                                                (key = key_return)) then begin
       selectmenu(true,true);
      end;
     end;
