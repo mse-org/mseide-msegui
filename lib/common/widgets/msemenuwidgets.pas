@@ -1504,7 +1504,8 @@ begin
      end;
     end;
     capturemouse;
-    if canassistive and (active or (fnextpopup <> nil)) then begin
+    if canassistive and (active or 
+               (fnextpopup <> nil) and (mlo_main in flayout.options)) then begin
                                    //for mainmenu
      assistiveserver.doitementer(tmenuitem1(menu).getiassistiveclient(),
                                                             cells,activeitem);
