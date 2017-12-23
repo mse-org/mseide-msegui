@@ -2518,11 +2518,12 @@ begin
 end;
 
 function tmessagebutton.getassistivecaption(): msestring;
-var
- capt1: richstringty;
+//var
+// capt1: richstringty;
 begin
- captiontorichstring(fcaption,capt1);
- result:= capt1.text;
+ result:= fcaption;
+// captiontorichstring(fcaption,capt1);
+// result:= capt1.text;
 end;
 
 { tshowmessagewidget }
@@ -3322,7 +3323,7 @@ end;
 
 function tcustomcaptionframe.getassistivecaption(): msestring;
 begin
- result:= finfo.text.text;
+ result:= fcaption;
 end;
 
 procedure tcustomcaptionframe.scale(const ascale: real);

@@ -1930,7 +1930,7 @@ end;
 
 function tpopupmenuwidget.getassistivecaption(): msestring;
 begin
- result:= tmenuitem1(flayout.menu).finfo.caption1.text;
+ result:= tmenuitem1(flayout.menu).finfo.captiontext;
  if result = '' then begin
   result:= inherited getassistivecaption();
  end;

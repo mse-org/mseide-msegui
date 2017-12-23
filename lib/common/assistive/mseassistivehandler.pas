@@ -379,6 +379,7 @@ tassistivehandler = class(tmsecomponent,iassistiveserver)
    destructor destroy(); override;
    procedure wait();
    procedure cancel();
+   function getcaptiontext(const sender: iassistiveclient): msestring;
    procedure speaktext(const atext: msestring; const avoice: int32 = 0);
    procedure speaktext(const atext: stockcaptionty; const avoice: int32 = 0);
    procedure speakcharacter(const achar: char32; const avoice: int32 = 0);
@@ -441,7 +442,7 @@ tassistivehandler = class(tmsecomponent,iassistiveserver)
  
 implementation
 uses
- msekeyboard,sysutils,msesysutils;
+ msekeyboard,sysutils,msesysutils,mserichstring;
 type
  twidget1 = class(twidget);
  
@@ -742,6 +743,17 @@ begin
  fspeaker.cancel();
 end;
 
+function tassistivehandler.getcaptiontext(
+              const sender: iassistiveclient): msestring;
+var
+ s1: msestring;
+ capt1: richstringty;
+begin
+ s1:= sender.getassistivecaption();
+ captiontorichstring(s1,capt1);
+ result:= capt1.text;
+end;
+
 procedure tassistivehandler.speaktext(const atext: msestring;
                const avoice: int32 = 0);
 begin
@@ -774,7 +786,7 @@ begin
  if asf_button in fla1 then begin
   s1:= stockobjects.captions[sc_button] + ' ';
  end;
- s1:= s1 + sender.getassistivecaption();
+ s1:= s1 + getcaptiontext(sender);
  speaktext(s1,fvoicecaption);
  speaktext(sender.getassistivetext(),fvoicetext);
 end;
@@ -783,7 +795,7 @@ procedure tassistivehandler.speakinput(const sender: iassistiveclientdata);
 begin
  startspeak();
  speaktext(sc_input,fvoicecaption);
- speaktext(sender.getassistivecaption(),fvoicecaption);
+ speaktext(getcaptiontext(sender),fvoicecaption);
  speaktext(sender.getassistivetext(),fvoicetext);
 end;
 
@@ -887,7 +899,7 @@ begin
    else begin
     startspeak();
  //   speaktext(sc_windowactivated,fvoicecaption);
-    speaktext(sender.getassistivecaption(),fvoicecaption);
+    speaktext(getcaptiontext(sender),fvoicecaption);
     speaktext(sender.getassistivetext(),fvoicetext);
    end;
   end;
@@ -982,7 +994,7 @@ begin
     if asf_menu in fla1 then begin
      setstate([ass_menuactivated]);
      speakmenustart(sender);
-     speaktext(sender.getassistivecaption(),fvoicecaption);
+     speaktext(getcaptiontext(sender),fvoicecaption);
     end
     else begin
      speakall(sender,ass_windowactivated in fstate);
@@ -1403,7 +1415,7 @@ begin
 //   setstate([ass_menuactivated]);
 //  end;
 //  if aindex >= 0 then begin
-   speaktext(sender.getassistivecaption(),fvoicetext);
+   speaktext(getcaptiontext(sender),fvoicetext);
 //   speaktext(items[aindex].buttoninfo.ca.caption.text,fvoicetext);
 //  end;
  end;

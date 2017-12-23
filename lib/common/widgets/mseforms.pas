@@ -2190,10 +2190,8 @@ end;
 
 function tcustommseform.getassistivecaption(): msestring;
 begin
- if caption <> '' then begin
-  result:= caption;
- end
- else begin
+ result:= caption;
+ if result = '' then begin
   result:= inherited getassistivecaption();
  end;
 end;
