@@ -844,6 +844,9 @@ begin
   pointer(wi1):= intf.getassistivewidget();
   if wi1 <> nil then begin
    debugwriteln(wi1.name);
+  end
+  else begin
+   debugwriteln('NIL');
   end;
  end
  else begin
@@ -909,7 +912,7 @@ begin
    fonwindowdeactivated(self,sender,b1);
   end;
   if not b1 then begin
-   cancel();
+//   cancel();
   end;
  end;
  removestate([ass_windowactivated]);
