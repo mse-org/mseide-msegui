@@ -1342,13 +1342,17 @@ var
    end;
   end;
  end;
- 
+var
+ canmousemove1: boolean;
 begin
  if (csdesigning in componentstate) and (ws_iswidget in fwidgetstate) then begin
   inherited;
  end
  else begin
   with info,flayout do begin
+   canmousemove1:= (csdesigning in componentstate) or
+            not (aso_nomenumousemove in assistiveoptions) or 
+                  (eventkind in mouseposevents - [ek_mousemove,ek_mousepark]);
    itembefore:= activeitem;
    pt1:= translatewidgetpoint(info.pos,self,nil);
    if (mlo_keymode in options) and
@@ -1362,14 +1366,14 @@ begin
      exclude(options,mlo_keymode);
     end;
    end;
-   if (eventkind = ek_mousemove) and (fnextpopup <> nil) and
+   if (eventkind = ek_mousemove) and canmousemove1 and (fnextpopup <> nil) and
           pointinrect(pt1,fnextpopup.fwidgetrect) and 
                               not (mlo_childreninactive in options) then begin
     invalidaterect(cells[activeitem].dimouter);
     fnextpopup.activatemenu(false,ss_left in info.shiftstate,true);
     exit;
    end;
-   if eventkind in mouseposevents then begin
+   if (eventkind in mouseposevents) and canmousemove1 then begin
     if not checkprevpopuparea(pt1) then begin
      if pointinrect(pos,paintrect) then begin
       pt2:= subpoint(pos,paintpos);
