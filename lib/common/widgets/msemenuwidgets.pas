@@ -1778,6 +1778,15 @@ begin
     if not (es_processed in eventstate) then begin
      checkshortcut(self);
     end;
+   end
+   else begin
+    if (shiftstate = [ss_shift]) and (key = key_menu) and 
+                                       (fnextpopup = nil) then begin
+     include(eventstate,es_processed);
+     setactiveitem(0);
+     beginkeymode();
+     selectmenu(true,false);
+    end;
    end;
   end;
   if not (es_processed in eventstate) and (fprevpopup <> nil) then begin
@@ -2036,8 +2045,10 @@ procedure tcustommainmenuwidget.doshortcut(var info: keyeventinfoty;
 begin
  inherited;
  if not (csdesigning in componentstate) then begin
-  if not (es_processed in info.eventstate) and (info.shiftstate = [ss_alt]) and
-                   not (es_modal in info.eventstate) then begin
+  if not (es_processed in info.eventstate) and 
+         not (es_modal in info.eventstate) and 
+           ((info.shiftstate = [ss_alt]) or 
+            (info.shiftstate = [ss_shift]) and (info.key = key_menu)) then begin
    dokeydown1(info);
   end;
   if not (es_processed in info.eventstate) and (fmenucomp <> nil) then begin
