@@ -894,6 +894,8 @@ begin
 end;
 
 function tpopupmenuwidget.prevmenuitem(const info: menulayoutinfoty): integer;
+var
+ dir1: graphicdirectionty;
 begin
  with info do begin
   result:= activeitem;
@@ -902,8 +904,12 @@ begin
    if result < 0 then begin
     if aso_menunavig in assistiveoptions then begin
      result:= activeitem;
-     if canassistive and active then begin
-      assistiveserver.donavigbordertouched(getiassistiveclient,gd_up);
+     if canassistive and active or (mlo_main in info.options) then begin
+      dir1:= gd_up;
+      if mlo_horz in info.options then begin
+       dir1:= gd_left;
+      end;
+      assistiveserver.donavigbordertouched(getiassistiveclient,dir1);
      end;
      break;
     end;
@@ -914,6 +920,8 @@ begin
 end;
 
 function tpopupmenuwidget.nextmenuitem(const info: menulayoutinfoty): integer;
+var
+ dir1: graphicdirectionty;
 begin
  with info do begin
   if menu.count = 0 then begin
@@ -926,8 +934,12 @@ begin
     if result >= menu.count then begin
      if aso_menunavig in assistiveoptions then begin
       result:= activeitem;
-      if canassistive and active then begin
-       assistiveserver.donavigbordertouched(getiassistiveclient,gd_down);
+      if canassistive and active or (mlo_main in info.options) then begin
+       dir1:= gd_down;
+       if mlo_horz in info.options then begin
+        dir1:= gd_right;
+       end;
+       assistiveserver.donavigbordertouched(getiassistiveclient,dir1);
       end;
       break;
      end;
@@ -1509,7 +1521,7 @@ begin
     end;
     capturemouse;
     if canassistive and (active or 
-               (fnextpopup <> nil) and (mlo_main in flayout.options)) then begin
+               {(fnextpopup <> nil) and} (mlo_main in flayout.options)) then begin
                                    //for mainmenu
      assistiveserver.doitementer(tmenuitem1(menu).getiassistiveclient(),
                                                             cells,activeitem);

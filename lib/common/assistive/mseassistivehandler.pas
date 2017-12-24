@@ -228,6 +228,8 @@ type
  end;
 
  assistiveservereventty = 
+  procedure(const sender:tassistivehandler; var handled: boolean) of object;
+ assistiveserverclienteventty = 
   procedure(const sender:tassistivehandler;
                  const intf: iassistiveclient; var handled: boolean) of object;
  assistiveserverkeyeventty = 
@@ -297,15 +299,15 @@ tassistivehandler = class(tmsecomponent,iassistiveserver)
    fspeaker: tassistivespeak;
    fvoicecaption: int32;
    fvoicetext: int32;
-   fonwindowactivated: assistiveservereventty;
-   fonwindowdeactivated: assistiveservereventty;
-   fonwindowclosed: assistiveservereventty;
-   fonenter: assistiveservereventty;
-   fonactivate: assistiveservereventty;
+   fonwindowactivated: assistiveserverclienteventty;
+   fonwindowdeactivated: assistiveserverclienteventty;
+   fonwindowclosed: assistiveserverclienteventty;
+   fonenter: assistiveserverclienteventty;
+   fonactivate: assistiveserverclienteventty;
    fonclientmouseevent: assistiveservermouseeventty;
    fonfocuschanged: assistiveserverfocuschangedeventty;
    fonkeydown: assistiveserverkeyeventty;
-   fonchange: assistiveservereventty;
+   fonchange: assistiveserverclienteventty;
    fondataentered: assistiveserverdataeventty;
    foncellevent: assistiveservercelleventty;
    foneditcharenter: assistiveservereditstringeventty;
@@ -319,6 +321,8 @@ tassistivehandler = class(tmsecomponent,iassistiveserver)
    fonmenuitementer: assistiveservermenuitemeventty;
    fonactionexecute: assistiveserveractioneventty;
    foptions: assistiveoptionsty;
+   fonapplicationactivated: assistiveservereventty;
+   fonapplicationdeactivated: assistiveservereventty;
    procedure setactive(const avalue: boolean);
    procedure setspeaker(const avalue: tassistivespeak);
    procedure setoptions(const avalue: assistiveoptionsty);
@@ -340,6 +344,8 @@ tassistivehandler = class(tmsecomponent,iassistiveserver)
                         out aitem: tassistivewidgetitem): boolean;
       
     //iassistiveserver
+   procedure doapplicationactivated();
+   procedure doapplicationdeactivated();
    procedure dowindowactivated(const sender: iassistiveclient);
    procedure dowindowdeactivated(const sender: iassistiveclient);
    procedure dowindowclosed(const sender: iassistiveclient);
@@ -398,14 +404,18 @@ tassistivehandler = class(tmsecomponent,iassistiveserver)
                                           write fvoicecaption default 0;
    property voicetext: int32 read fvoicetext 
                                           write fvoicetext default 0;
-   property onwindowactivated: assistiveservereventty read
-                         fonwindowactivated write fonwindowactivated;
-   property onwindowdeactivated: assistiveservereventty
+   property onapplicationactivated: assistiveservereventty 
+                 read fonapplicationactivated write fonapplicationactivated;
+   property onapplicationdeactivated: assistiveservereventty
+                read fonapplicationdeactivated write fonapplicationdeactivated;
+   property onwindowactivated: assistiveserverclienteventty
+                     read fonwindowactivated write fonwindowactivated;
+   property onwindowdeactivated: assistiveserverclienteventty
                          read fonwindowdeactivated write fonwindowdeactivated;
-   property onwindowclosed: assistiveservereventty read fonwindowclosed
+   property onwindowclosed: assistiveserverclienteventty read fonwindowclosed
                                                       write fonwindowclosed;
-   property onenter: assistiveservereventty read fonenter write fonenter;
-   property onactivate: assistiveservereventty read fonactivate 
+   property onenter: assistiveserverclienteventty read fonenter write fonenter;
+   property onactivate: assistiveserverclienteventty read fonactivate 
                                                         write fonactivate;
    property onclientmouseevent: assistiveservermouseeventty 
                       read fonclientmouseevent write fonclientmouseevent;
@@ -413,7 +423,8 @@ tassistivehandler = class(tmsecomponent,iassistiveserver)
                            read fonfocuschanged write fonfocuschanged;
    property onkeydown: assistiveserverkeyeventty read fonkeydown
                                                       write fonkeydown;
-   property onchange: assistiveservereventty read fonchange write fonchange;
+   property onchange: assistiveserverclienteventty read fonchange 
+                                                         write fonchange;
    property ondataentered: assistiveserverdataeventty read fondataentered 
                                                         write fondataentered;
    property oncellevent: assistiveservercelleventty read foncellevent
@@ -846,6 +857,7 @@ begin
  end;
 end;
 
+
 {$ifdef mse_debugassistive}
 procedure debug(const text: string; const intf: iassistiveclient);
 var
@@ -866,6 +878,35 @@ begin
  end;
 end;
 {$endif}
+
+procedure tassistivehandler.doapplicationactivated();
+var
+ b1: boolean;
+begin
+{$ifdef mse_debugassistive}
+ debug('applicationactivated',nil);
+{$endif}
+ b1:= false;
+ if canevent(tmethod(fonapplicationactivated)) then begin
+  fonapplicationactivated(self,b1);
+ end;
+end;
+
+procedure tassistivehandler.doapplicationdeactivated();
+var
+ b1: boolean;
+begin
+{$ifdef mse_debugassistive}
+ debug('applicationdeactivated',nil);
+{$endif}
+ b1:= false;
+ if canevent(tmethod(fonapplicationdeactivated)) then begin
+  fonapplicationdeactivated(self,b1);
+ end;
+ if not b1 then begin
+  cancel();
+ end;
+end;
 
 procedure tassistivehandler.dowindowactivated(const sender: iassistiveclient);
 var

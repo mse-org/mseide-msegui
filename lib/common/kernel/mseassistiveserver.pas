@@ -28,6 +28,8 @@ const
  
 type
  iassistiveserver = interface(inullinterface)[miid_iassistiveserver]
+  procedure doapplicationactivated();
+  procedure doapplicationdeactivated();
   procedure dowindowactivated(const sender: iassistiveclient);
   procedure dowindowdeactivated(const sender: iassistiveclient);
   procedure dowindowclosed(const sender: iassistiveclient);

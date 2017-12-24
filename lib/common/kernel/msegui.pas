@@ -19013,6 +19013,14 @@ begin
    hidehint;
   end;
   fonapplicationactivechangedlist.doevent(bo1);
+  if assistiveserver <> nil then begin
+   if aps_active in fstate then begin
+    assistiveserver.doapplicationactivated();
+   end
+   else begin
+    assistiveserver.doapplicationdeactivated();
+   end;
+  end;
  end;
 end;
 
