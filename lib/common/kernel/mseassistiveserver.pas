@@ -63,7 +63,8 @@ type
                             const senderobj: tobject; const info: actioninfoty);
   procedure doitementer(const sender: iassistiveclient;    //sender can be nil
                             const items: shapeinfoarty; const aindex: integer);
-  procedure doitementer(const sender: iassistiveclient;    //sender can be nil
+  procedure domenuactivated(const sender: iassistiveclientmenu);
+  procedure doitementer(const sender: iassistiveclientmenu;//sender can be nil
                          const items: menucellinfoarty; const aindex: integer);
 end;
 

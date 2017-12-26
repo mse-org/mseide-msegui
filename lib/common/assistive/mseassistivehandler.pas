@@ -287,9 +287,13 @@ type
                  const intf: iassistiveclient; //intf can be nil
                    const items: shapeinfoarty; const aindex: integer;
                                                 var handled: boolean) of object;
+ assistiveservermenueventty = 
+   procedure (const sender:tassistivehandler;
+               const intf: iassistiveclientmenu;
+                                    var handled: boolean) of object;
  assistiveservermenuitemeventty = 
    procedure (const sender:tassistivehandler;
-               const intf: iassistiveclient; //intf can be nil
+               const intf: iassistiveclientmenu;//intf can be nil
                 const items: menucellinfoarty; const aindex: integer;
                                                 var handled: boolean) of object;
  
@@ -323,6 +327,7 @@ tassistivehandler = class(tmsecomponent,iassistiveserver)
    foptions: assistiveoptionsty;
    fonapplicationactivated: assistiveservereventty;
    fonapplicationdeactivated: assistiveservereventty;
+   fonmenuactivated: assistiveservermenueventty;
    procedure setactive(const avalue: boolean);
    procedure setspeaker(const avalue: tassistivespeak);
    procedure setoptions(const avalue: assistiveoptionsty);
@@ -378,13 +383,15 @@ tassistivehandler = class(tmsecomponent,iassistiveserver)
                            const senderobj: tobject; const info: actioninfoty);
    procedure doitementer(const sender: iassistiveclient;    //sender can be nil
                              const items: shapeinfoarty; const aindex: integer);
-   procedure doitementer(const sender: iassistiveclient;    //sender can be nil
+   procedure domenuactivated(const sender: iassistiveclientmenu);
+   procedure doitementer(const sender: iassistiveclientmenu;//sender can be nil
                           const items: menucellinfoarty; const aindex: integer);
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy(); override;
    procedure wait();
    procedure cancel();
+   function getcaptiontext(const acaption: msestring): msestring;
    function getcaptiontext(const sender: iassistiveclient): msestring;
    procedure speaktext(const atext: msestring; const avoice: int32 = 0);
    procedure speaktext(const atext: stockcaptionty; const avoice: int32 = 0);
@@ -447,6 +454,8 @@ tassistivehandler = class(tmsecomponent,iassistiveserver)
                                                          write fonactionexecute;
    property onitementer: assistiveserveritemeventty read fonitementer 
                                                             write fonitementer;
+   property onmenuactivated: assistiveservermenueventty
+                        read fonmenuactivated write fonmenuactivated;
    property onmenuitementer: assistiveservermenuitemeventty
                         read fonmenuitementer write fonmenuitementer;
  end;
@@ -754,15 +763,18 @@ begin
  fspeaker.cancel();
 end;
 
-function tassistivehandler.getcaptiontext(
-              const sender: iassistiveclient): msestring;
+function tassistivehandler.getcaptiontext(const acaption: msestring): msestring;
 var
- s1: msestring;
  capt1: richstringty;
 begin
- s1:= sender.getassistivecaption();
- captiontorichstring(s1,capt1);
+ captiontorichstring(acaption,capt1);
  result:= capt1.text;
+end;
+
+function tassistivehandler.getcaptiontext(
+                                 const sender: iassistiveclient): msestring;
+begin
+ result:= getcaptiontext(sender.getassistivecaption());
 end;
 
 procedure tassistivehandler.speaktext(const atext: msestring;
@@ -1033,9 +1045,11 @@ begin
    if not b1 then begin
     fla1:= sender.getassistiveflags();
     if asf_menu in fla1 then begin
+    {
      setstate([ass_menuactivated]);
      speakmenustart(sender);
      speaktext(getcaptiontext(sender),fvoicecaption);
+    }
     end
     else begin
      speakall(sender,ass_windowactivated in fstate);
@@ -1433,10 +1447,30 @@ begin
   fonitementer(self,sender,items,aindex,b1);
  end;
  if not b1 then begin
+  //todo
  end;
 end;
 
-procedure tassistivehandler.doitementer(const sender: iassistiveclient;
+procedure tassistivehandler.domenuactivated(const sender: iassistiveclientmenu);
+var
+ b1: boolean;
+begin
+{$ifdef mse_debugassistive}
+ debug('menuactivated',sender);
+{$endif}
+ b1:= false;
+ if canevent(tmethod(fonmenuactivated)) then begin
+  fonmenuactivated(self,sender,b1);
+ end;
+ if not b1 then begin
+  setstate([ass_menuactivated]);
+  speakmenustart(sender);
+  speaktext(getcaptiontext(sender.getassistiveselfcaption()),fvoicecaption);
+ end;
+ setstate([ass_menuactivated]);
+end;
+
+procedure tassistivehandler.doitementer(const sender: iassistiveclientmenu;
                const items: menucellinfoarty; const aindex: integer);
 var
  b1: boolean;
@@ -1456,7 +1490,7 @@ begin
 //   setstate([ass_menuactivated]);
 //  end;
 //  if aindex >= 0 then begin
-   speaktext(getcaptiontext(sender),fvoicetext);
+   speaktext(getcaptiontext(iassistiveclient(sender)),fvoicetext);
 //   speaktext(items[aindex].buttoninfo.ca.caption.text,fvoicetext);
 //  end;
  end;

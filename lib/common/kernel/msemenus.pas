@@ -201,6 +201,9 @@ type
   {$ifdef mse_with_ifi}
    function getifidatalinkintf(): iifidatalink; virtual;
   {$endif}
+   function getassistiveselfcaption(): msestring;
+   function getassistiveselfname(): msestring;
+   function getassistiveselfhint(): msestring;
 
     //iactionlink
    function getactioninfopo: pactioninfoty;
@@ -1888,6 +1891,21 @@ end;
 function tmenuitem.getifidatalinkintf(): iifidatalink;
 begin
  result:= nil;
+end;
+
+function tmenuitem.getassistiveselfcaption(): msestring;
+begin
+ result:= caption;
+end;
+
+function tmenuitem.getassistiveselfname(): msestring;
+begin
+ result:= msestring(name);
+end;
+
+function tmenuitem.getassistiveselfhint(): msestring;
+begin
+ result:= hint;
 end;
 
 { tmenuitems }

@@ -32,8 +32,9 @@ type
  end;
  menucellinfoarty = array of menucellinfoty;
 
- menulayoutoptionty = (mlo_horz,mlo_keymode,mlo_main,mlo_childreninactive); 
+ menulayoutoptionty = (mlo_horz,mlo_keymode,mlo_main,mlo_childreninactive,
                                //used for popup close by second click
+                       mlo_assistivelocked); 
  menulayoutoptionsty = set of menulayoutoptionty;
  menulayoutstatety = (mls_valid,mls_updating);
  menulayoutstatesty = set of menulayoutstatety;
@@ -120,6 +121,7 @@ type
    function getassistivecaption(): msestring override;
    function prevmenuitem(const info: menulayoutinfoty): integer;
    function nextmenuitem(const info: menulayoutinfoty): integer;
+   procedure assistivemenuactivated();
   public
    constructor create(instance: ppopupmenuwidget;
               const amenu: tmenuitem; const atransientfor: twindow;
@@ -1439,6 +1441,10 @@ begin
       with cells[activeitem],buttoninfo do begin
        bo1:= shs_clicked in state;
        exclude(state,shs_clicked);
+       if not (csdesigning in componentstate) or 
+                       (aso_nomenumousemove in assistiveoptions) then begin
+        exclude(state,shs_mouse);
+       end;
        invalidaterect(dimouter);
        if bo1 then begin
         include(info.eventstate,es_processed);
@@ -1472,8 +1478,10 @@ procedure tpopupmenuwidget.internalsetactiveitem(const avalue: integer;
           const nochildreninactive: boolean);
 var
  value1: integer;
+ activeitembefore: int32;
 begin
  with flayout do begin
+  activeitembefore:= activeitem;
   value1:= avalue;
   if (value1 < 0) or (menu = nil) then begin
    value1:= -1;
@@ -1520,11 +1528,16 @@ begin
      end;
     end;
     capturemouse;
-    if canassistive and (active or 
-               {(fnextpopup <> nil) and} (mlo_main in flayout.options)) then begin
+    if canassistive and not (mlo_assistivelocked in flayout.options) and
+             (active or (mlo_main in flayout.options )) then begin
                                    //for mainmenu
-     assistiveserver.doitementer(tmenuitem1(menu).getiassistiveclient(),
+     if activeitembefore < 0 then begin
+      assistivemenuactivated();
+     end
+     else begin
+      assistiveserver.doitementer(tmenuitem1(menu).getiassistiveclient(),
                                                             cells,activeitem);
+     end;
     end;
    end;
   end
@@ -1612,7 +1625,12 @@ begin
   i1:= activeitem;
   if mlo_childreninactive in options then begin
    exclude(options,mlo_childreninactive);
-   internalsetactiveitem(i1,false,true,false);
+   include(flayout.options,mlo_assistivelocked);
+   try
+    internalsetactiveitem(i1,false,true,false);
+   finally
+    exclude(flayout.options,mlo_assistivelocked);
+   end;
   end;
   if (fnextpopup <> nil) then begin
    if keymode and (bo1 or not keyreturn) then begin
@@ -1799,9 +1817,14 @@ begin
     if (shiftstate = [ss_shift]) and (key = key_menu) and 
                                        (fnextpopup = nil) then begin
      include(eventstate,es_processed);
-     setactiveitem(0);
-     beginkeymode();
-     selectmenu(true,false);
+     include(flayout.options,mlo_assistivelocked);
+     try
+      setactiveitem(0);
+      beginkeymode();
+      selectmenu(true,false);
+     finally
+      exclude(flayout.options,mlo_assistivelocked);
+     end;
     end;
    end;
   end;
@@ -1883,14 +1906,22 @@ begin
  end;
 end;
 
+procedure tpopupmenuwidget.assistivemenuactivated();
+var
+ intf1: iassistiveclientmenu;
+begin
+ with flayout do begin 
+  intf1:= tmenuitem1(menu).getiassistiveclient();
+  assistiveserver.domenuactivated(intf1);
+  assistiveserver.doitementer(intf1,cells,activeitem);
+ end;
+end;
+
 procedure tpopupmenuwidget.doafteractivate();
 begin
  inherited;
  if canassistive() then begin
-  with flayout do begin
-   assistiveserver.doitementer(tmenuitem1(menu).getiassistiveclient(),
-                                                           cells,activeitem);
-  end;
+  assistivemenuactivated();
  end;
 end;
 

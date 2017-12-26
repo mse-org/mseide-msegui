@@ -55,6 +55,9 @@ type
  end;
  
  iassistiveclientmenu = interface(iassistiveclient)[miid_iassistiveclientmenu]
+  function getassistiveselfcaption(): msestring;
+  function getassistiveselfname(): msestring;
+  function getassistiveselfhint(): msestring;
  end;
 
 implementation
