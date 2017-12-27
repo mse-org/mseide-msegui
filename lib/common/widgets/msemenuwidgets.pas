@@ -32,11 +32,10 @@ type
  end;
  menucellinfoarty = array of menucellinfoty;
 
- menulayoutoptionty = (mlo_horz,mlo_keymode,mlo_main,mlo_childreninactive,
-                               //used for popup close by second click
-                       mlo_assistivelocked); 
+ menulayoutoptionty = (mlo_horz,mlo_keymode,mlo_main,mlo_childreninactive);
+                               //used for popup close by second click); 
  menulayoutoptionsty = set of menulayoutoptionty;
- menulayoutstatety = (mls_valid,mls_updating);
+ menulayoutstatety = (mls_valid,mls_updating,mls_assistivelocked);
  menulayoutstatesty = set of menulayoutstatety;
 
  menulayoutinfoty = record
@@ -1528,7 +1527,7 @@ begin
      end;
     end;
     capturemouse;
-    if canassistive and not (mlo_assistivelocked in flayout.options) and
+    if canassistive and not (mls_assistivelocked in flayout.state) and
              (active or (mlo_main in flayout.options )) then begin
                                    //for mainmenu
      if activeitembefore < 0 then begin
@@ -1625,11 +1624,11 @@ begin
   i1:= activeitem;
   if mlo_childreninactive in options then begin
    exclude(options,mlo_childreninactive);
-   include(flayout.options,mlo_assistivelocked);
+   include(flayout.state,mls_assistivelocked);
    try
     internalsetactiveitem(i1,false,true,false);
    finally
-    exclude(flayout.options,mlo_assistivelocked);
+    exclude(flayout.state,mls_assistivelocked);
    end;
   end;
   if (fnextpopup <> nil) then begin
@@ -1701,8 +1700,15 @@ procedure tpopupmenuwidget.dokeydown(var info: keyeventinfoty);
    with widget do begin
     int1:= msemenuwidgets.checkshortcut(flayout,info,bo1,flayout.activeitem);
     if int1 >= 0 then begin
-     setactiveitem(int1);
-     beginkeymode;
+     if not bo1 then begin
+      include(flayout.state,mls_assistivelocked);
+     end;
+     try
+      setactiveitem(int1);
+      beginkeymode;
+     finally
+      exclude(flayout.state,mls_assistivelocked);
+     end;
      if not bo1 then begin
       selectmenu(true,false);
      end;
@@ -1817,13 +1823,13 @@ begin
     if (shiftstate = [ss_shift]) and (key = key_menu) and 
                                        (fnextpopup = nil) then begin
      include(eventstate,es_processed);
-     include(flayout.options,mlo_assistivelocked);
+     include(flayout.state,mls_assistivelocked);
      try
       setactiveitem(0);
       beginkeymode();
       selectmenu(true,false);
      finally
-      exclude(flayout.options,mlo_assistivelocked);
+      exclude(flayout.state,mls_assistivelocked);
      end;
     end;
    end;
