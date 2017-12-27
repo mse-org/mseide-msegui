@@ -170,25 +170,25 @@ const
   'Permanecer en el fondo',            //sc_stay_in_background
   'Bloquear hijas',                    //sc_lock_children
   'Sin bloquear',                      //sc_no_lock
-  'Input',                             //sc_input
-  'Button',                            //sc_button
-  'On',                                //sc_on
-  'Off',                                //sc_off
-  'Left border',         //sc_leftborder
-  'Top border',          //sc_topborder
-  'Right border',        //sc_rightborder
-  'Bottom border',       //sc_bottomborder
-  'Begin of text',       //sc_beginoftext
-  'End of text',         //sc_endoftext
-  'Inputmode',           //sc_inputmode
-  'Overwrite',           //sc_overwrite
-  'Deleted',             //sc_deleted
-  'Copied',              //sc_copied
-  'Inserted',            //sc_inserted
-  'Pasted',              //sc_pasted
-  'Withdrawn',           //sc_withdrawn
-  'Window',              //sc_window
-  'Menu'                 //sc_menu
+  'Entrada',                           //sc_input
+  'Bot'#0243'n',                       //sc_button
+  'Encendido',                         //sc_on
+  'Apagado',                           //sc_off
+  'Borde izquierdo',         //sc_leftborder
+  'Borde superior',          //sc_topborder
+  'Borde derecho',           //sc_rightborder
+  'Borde inferior',          //sc_bottomborder
+  'Principio del texto',     //sc_beginoftext
+  'Fin del texto',           //sc_endoftext
+  'Modo entrada',            //sc_inputmode
+  'Sobrescribir',            //sc_overwrite
+  'Borrado',                 //sc_deleted
+  'Copiado',                 //sc_copied
+  'Insertado',               //sc_inserted
+  'Pegado',                  //sc_pasted
+  'Withdrawn',               //sc_withdrawn
+  'Ventana',                 //sc_window
+  'Men'#0250                 //sc_menu
 );
     
 function delete_n_selected_rows(const params: array of const): msestring;
