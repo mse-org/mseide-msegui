@@ -13,7 +13,8 @@ unit msemenuwidgets;
 
 interface
 uses
- classes,mclasses,msewidgets,mseshapes,msemenus,msegraphutils,msegraphics,
+ mseapplication,classes,mclasses,msewidgets,mseshapes,msemenus,msegraphutils,
+ msegraphics,
  msetypes,msegui,mseglob,mseguiglob,mseevent,mseclasses,msestrings,
  mseassistiveclient;
 
@@ -1490,7 +1491,7 @@ begin
    if (menu <> nil) and (activeitem >= 0) and 
                     (activeitem < menu.submenu.count) then begin
     if (fnextpopup <> nil) then begin
-     fnextpopup.release(true);
+     fnextpopup.release1(false);
     end;
     with cells[activeitem],buttoninfo do begin
      state:= state - [shs_clicked,{shs_mouse,}shs_active,shs_focused];

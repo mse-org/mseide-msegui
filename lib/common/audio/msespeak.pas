@@ -788,7 +788,7 @@ begin
   cancel();
  end;
 {$ifdef mse_debugassistive}
- debugwriteln('**'+atext);
+ debugwriteln('**'+string(atext));
 {$endif}
  if atext <> '' then begin
   postevent(tspeakevent.create(atext,aoptions,avoice));

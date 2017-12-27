@@ -11578,7 +11578,7 @@ procedure twidget.mouseevent(var info: mouseeventinfoty);
   include(info.eventstate,es_client);
   try
    clientmouseevent(info);
-   if (canassistive()) {and (ws_iswidget in widgetstate)} then begin
+   if canassistive() {and (ws_iswidget in widgetstate)} then begin
     assistiveserver.doclientmouseevent(getiassistiveclient(),info);
    end;
   finally
@@ -13120,11 +13120,25 @@ begin
 end;
 
 procedure twidget.dokeydown1(var info: keyeventinfoty);
+var
+ b1: boolean;
+ w1: twidget;
 begin
- exclude(fwidgetstate1,ws1_onkeydowncalled);
- dokeydown(info);
- if (canassistive()) and (ws_iswidget in widgetstate) then begin
-  assistiveserver.dokeydown(getiassistiveclient(),info);
+ b1:= canassistive() and (ws_iswidget in widgetstate);
+ if b1 then begin
+  w1:= nil;
+  setlinkedvar(self,tmsecomponent(w1)); //destroy check
+ end;
+ try
+  exclude(fwidgetstate1,ws1_onkeydowncalled);
+  dokeydown(info);
+  if b1 and (w1 <> nil) then begin
+   assistiveserver.dokeydown(getiassistiveclient(),info);
+  end;
+ finally
+  if b1 and (w1 <> nil) then begin //destroy check
+   setlinkedvar(nil,tmsecomponent(w1));
+  end;
  end;
 end;
 
