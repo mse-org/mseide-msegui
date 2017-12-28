@@ -1464,6 +1464,7 @@ begin
  end;
  if not b1 then begin
   setstate([ass_menuactivated]);
+  startspeak();
   speakmenustart(sender);
   speaktext(getcaptiontext(sender.getassistiveselfcaption()),fvoicecaption);
  end;

@@ -1342,7 +1342,7 @@ var
 // int1: integer;
  pt1,pt2: pointty;
 
- procedure resetmouseflag;
+ procedure resetmouseflag();
  begin
   with flayout do begin
    if (fmouseitem >= 0) and (fmouseitem <= high(cells)) then begin
@@ -1355,7 +1355,30 @@ var
     fmouseitem:= -1;
    end;
   end;
- end;
+ end; //resetmouseflag
+
+ procedure setmouseitem(const sender: tpopupmenuwidget; const apos: pointty);
+ var
+  pt2: pointty;
+ begin
+  with sender,flayout do begin
+   pt2:= subpoint(apos,paintpos);
+   internalsetactiveitem(getcellatpos(flayout,pt2),
+                ss_left in info.shiftstate,false,pointinrect(pt2,sizerect));
+   if activeitem >= 0 then begin
+    include(cells[activeitem].buttoninfo.state,shs_mouse);
+    fmouseitem:= activeitem;
+    if (itembefore <> activeitem) and 
+              tmenuitem1(menu.items[activeitem]).canshowhint then begin
+     application.restarthint(self);
+    end;
+   end
+   else begin
+    resetmouseflag;
+   end;
+  end;
+ end; //setmouseitem
+
 var
  canmousemove1: boolean;
 begin
@@ -1380,30 +1403,30 @@ begin
      exclude(options,mlo_keymode);
     end;
    end;
-   if (eventkind = ek_mousemove) and canmousemove1 and (fnextpopup <> nil) and
+   if (fnextpopup <> nil) and
           pointinrect(pt1,fnextpopup.fwidgetrect) and 
                               not (mlo_childreninactive in options) then begin
-    invalidaterect(cells[activeitem].dimouter);
-    fnextpopup.activatemenu(false,ss_left in info.shiftstate,true);
-    exit;
+    if (eventkind = ek_mousemove) and canmousemove1 or 
+         (eventkind = ek_buttonpress) and 
+               (aso_nomenumousemove in assistiveoptions) and
+                                 not(csdesigning in componentstate) then begin
+     invalidaterect(cells[activeitem].dimouter);
+     if eventkind = ek_buttonpress then begin
+      setmouseitem(fnextpopup,translatewidgetpoint(pos,self,fnextpopup));
+      if fnextpopup.activeitem >= 0 then begin
+       with fnextpopup,flayout,cells[activeitem],buttoninfo do begin
+        include(state,shs_clicked);
+       end;
+      end;
+     end;
+     fnextpopup.activatemenu(false,ss_left in info.shiftstate,true);
+     exit;
+    end;
    end;
    if (eventkind in mouseposevents) and canmousemove1 then begin
     if not checkprevpopuparea(pt1) then begin
      if pointinrect(pos,paintrect) then begin
-      pt2:= subpoint(pos,paintpos);
-      internalsetactiveitem(getcellatpos(flayout,pt2),ss_left in info.shiftstate,
-                            false,pointinrect(pt2,sizerect));
-      if activeitem >= 0 then begin
-       include(cells[activeitem].buttoninfo.state,shs_mouse);
-       fmouseitem:= activeitem;
-       if (itembefore <> activeitem) and 
-                 tmenuitem1(menu.items[activeitem]).canshowhint then begin
-        application.restarthint(self);
-       end;
-      end
-      else begin
-       resetmouseflag;
-      end;
+      setmouseitem(self,pos);
      end
      else begin
       resetmouseflag;
@@ -1744,6 +1767,7 @@ procedure tpopupmenuwidget.dokeydown(var info: keyeventinfoty);
 
 var
  int1: integer;
+ intf1: iassistiveclientmenu;
 begin
  with info,flayout do begin
   if (shiftstate*shiftstatesmask = []) then begin
@@ -1780,11 +1804,17 @@ begin
       end
       else begin
        if rootpopup <> self then begin
-        with rootpopup do begin
+        with rootpopup,flayout do begin
          if mlo_main in flayout.options then begin
           exclude(eventstate,es_processed);
           swapkeys;
           int1:= activeitem;
+          if canassistive and 
+                    not (mls_assistivelocked in flayout.state) then begin
+                                         //for mainmenu
+           intf1:= tmenuitem1(menu).getiassistiveclient();
+           assistiveserver.domenuactivated(intf1);
+          end;
           dokeydown1(info);
           if activeitem = int1 then begin
            include(options,mlo_keymode);
