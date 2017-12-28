@@ -396,10 +396,12 @@ tassistivehandler = class(tmsecomponent,iassistiveserver)
    procedure speaktext(const atext: msestring; const avoice: int32 = 0);
    procedure speaktext(const atext: stockcaptionty; const avoice: int32 = 0);
    procedure speakcharacter(const achar: char32; const avoice: int32 = 0);
-   procedure speakall(const sender: iassistiveclient; const addtext: boolean);
+   procedure speakall(const sender: iassistiveclient; const addtext: boolean;
+                                                         const ahint: boolean);
    procedure speakinput(const sender: iassistiveclientdata);
    procedure speakmenustart(const sender: iassistiveclient);
-   procedure speakallmenu(const sender: iassistiveclientmenu);
+   procedure speakallmenu(const sender: iassistiveclientmenu;
+                                               const ahint: boolean);
    procedure setstate(const astate: assistiveserverstatesty);
    procedure removestate(const astate: assistiveserverstatesty);
    property state: assistiveserverstatesty read fstate;
@@ -799,7 +801,7 @@ begin
 end;
 
 procedure tassistivehandler.speakall(const sender: iassistiveclient;
-                                                        const addtext: boolean);
+                             const addtext: boolean; const ahint: boolean);
 var
  fla1: assistiveflagsty;
  s1: msestring;
@@ -813,7 +815,7 @@ begin
  if asf_menu in fla1 then begin
   pointer(w1):= sender.getinstance();
   if w1 is tpopupmenuwidget then begin
-   speakallmenu(tmenuitem1(w1.flayout.menu).getiassistiveclient());
+   speakallmenu(tmenuitem1(w1.flayout.menu).getiassistiveclient(),ahint);
    exit;
   end; 
  end;
@@ -823,6 +825,9 @@ begin
  s1:= s1 + getcaptiontext(sender);
  speaktext(s1,fvoicecaption);
  speaktext(sender.getassistivetext(),fvoicetext);
+ if ahint then begin
+  speaktext(sender.getassistivehint(),fvoicecaption);
+ end;
 end;
 
 procedure tassistivehandler.speakinput(const sender: iassistiveclientdata);
@@ -1065,7 +1070,7 @@ begin
     }
     end
     else begin
-     speakall(sender,ass_windowactivated in fstate);
+     speakall(sender,ass_windowactivated in fstate,false);
      removestate([ass_windowactivated]);
     end;
    end;
@@ -1120,7 +1125,7 @@ begin
                 (info.shiftstate*keyshiftstatesmask = []) then begin
 //   fla1:= sender.getassistiveflags();
    if info.serial <> fdataenteredkeyserial then begin
-    speakall(sender,false);
+    speakall(sender,false,true);
    end;
   end;
   fdataenteredkeyserial:= 0;
@@ -1470,12 +1475,16 @@ begin
  end;
 end;
 
-procedure tassistivehandler.speakallmenu(const sender: iassistiveclientmenu);
+procedure tassistivehandler.speakallmenu(const sender: iassistiveclientmenu;
+                                           const ahint: boolean);
 begin
  startspeak();
  speakmenustart(sender);
  speaktext(getcaptiontext(sender.getassistiveselfcaption()),fvoicecaption);
  speaktext(getcaptiontext(sender.getassistivecaption()),fvoicetext);
+ if ahint then begin
+  speaktext(sender.getassistivehint(),fvoicecaption);
+ end;
 end;
 
 procedure tassistivehandler.domenuactivated(const sender: iassistiveclientmenu);
@@ -1491,7 +1500,7 @@ begin
  end;
  if not b1 then begin
   setstate([ass_menuactivated]);
-  speakallmenu(sender);
+  speakallmenu(sender,false);
  end;
  setstate([ass_menuactivated]);
 end;
