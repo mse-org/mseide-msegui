@@ -814,6 +814,9 @@ begin
  if so_cancel in aoptions then begin
   cancel();
  end;
+{$ifdef mse_debugassistive}
+ debugwriteln('***'+string(unicodechar(achar)));
+{$endif}
  postevent(tspeakevent.create(achar,aoptions,avoice));
  if so_wait in aoptions then begin
   wait();
@@ -836,6 +839,9 @@ begin
  if so_cancel in aoptions then begin
   cancel();
  end;
+{$ifdef mse_debugassistive}
+ debugwriteln('****'+string(akey));
+{$endif}
  if akey <> '' then begin
   postevent(tspeakevent.createkey(akey,aoptions,avoice));
  end;

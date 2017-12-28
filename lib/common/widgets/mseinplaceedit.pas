@@ -127,6 +127,8 @@ type
    function updateindex(const avalue: int32): int32;
    procedure checkindexvalues;
    procedure setcurindex(const avalue: integer);
+   procedure moveindex1(newindex: integer; shift: boolean = false;
+                                   donotify: boolean = true);
    procedure deletechar; virtual;
    procedure deleteback; virtual;
    procedure internaldelete(start,len,startindex: integer;
@@ -1247,6 +1249,7 @@ var
  shiftstate1,shiftstate2: shiftstatesty;
  int1: integer;
  ismultilinectrl: boolean;
+ s1: msestring;
 
 begin
  with kinfo do begin
@@ -1389,7 +1392,12 @@ begin
       key_delete: begin
        if canedit then begin
         if fsellength > 0 then begin
+         s1:= selectedtext();
          internaldeleteselection(true);
+         if twidget1(fwidget).canassistive() then begin
+          assistiveserver.doedittextblock(getiassistiveclient(),
+                                                       etbm_delete,s1);
+         end;
         end
         else begin
          actioninfo.action:= ea_delchar;
@@ -1449,11 +1457,11 @@ begin
        else begin
         if not (oe1_multiline in foptionsedit1) or 
                                  (ss_ctrl in shiftstate1) then begin
-         moveindex(0,ss_shift in shiftstate1);
+         moveindex1(0,ss_shift in shiftstate1);
         end
         else begin
          int1:= mousepostotextindex(mp(-bigint,fcaretpos.y));
-         moveindex(int1,ss_shift in shiftstate1);
+         moveindex1(int1,ss_shift in shiftstate1);
         end;
        end;
       end;
@@ -1464,11 +1472,11 @@ begin
        else begin
         if not (oe1_multiline in foptionsedit1) or 
                                  (ss_ctrl in shiftstate1) then begin
-         moveindex(length(finfo.text.text),ss_shift in shiftstate1);
+         moveindex1(length(finfo.text.text),ss_shift in shiftstate1);
         end
         else begin
          int1:= mousepostotextindex(mp(bigint,fcaretpos.y));
-         moveindex(int1,ss_shift in shiftstate1);
+         moveindex1(int1,ss_shift in shiftstate1);
         end;
        end;
       end;
@@ -1497,7 +1505,7 @@ begin
         end;
        end
        else begin
-        moveindex(fcurindex-1,shiftstate1 = [ss_shift]);
+        moveindex1(fcurindex-1,shiftstate1 = [ss_shift]);
        end;
       end;
       key_right: begin
@@ -1530,7 +1538,7 @@ begin
         end;
        end
        else begin
-        moveindex(fcurindex+1,shiftstate1 = [ss_shift]);
+        moveindex1(fcurindex+1,shiftstate1 = [ss_shift]);
        end;
       end
       else begin
@@ -1735,9 +1743,11 @@ begin
  else begin
   invalidatetext(true,false);
  end;
+ {
  if twidget1(fwidget).canassistive() then begin
   assistiveserver.doedittextblock(getiassistiveclient(),etbm_insert,text);
  end;
+ }
 end;
 
 procedure tinplaceedit.moveindex(newindex: integer; shift: boolean;
@@ -1825,9 +1835,20 @@ begin
    include(info.state,eas_shift);
   end;
   notify(info);
+  {
   if twidget1(fwidget).canassistive() then begin
    assistiveserver.doeditindexmoved(getiassistiveclient(),fcurindex);
   end;
+  }
+ end;
+end;
+
+procedure tinplaceedit.moveindex1(newindex: integer; shift: boolean = false;
+               donotify: boolean = true);
+begin
+ moveindex(newindex,shift,donotify);
+ if twidget1(fwidget).canassistive() then begin
+  assistiveserver.doeditindexmoved(getiassistiveclient(),fcurindex);
  end;
 end;
 

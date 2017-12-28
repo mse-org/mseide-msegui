@@ -22,7 +22,7 @@ uses
 type
  assistiveserverstatety =
   (ass_active,ass_windowactivated,ass_menuactivated,ass_menuactivatepending,
-                                              ass_textblock);
+                                              ass_textblock,ass_textblock1);
  assistiveserverstatesty = set of assistiveserverstatety;
 const
  internalstates = [ass_active];
@@ -829,7 +829,7 @@ procedure tassistivehandler.speakinput(const sender: iassistiveclientdata);
 begin
  startspeak();
  speaktext(sc_input,fvoicecaption);
- speaktext(getcaptiontext(sender),fvoicecaption);
+ speaktext(getcaptiontext(sender.getassistivecaption()),fvoicecaption);
  speaktext(sender.getassistivetext(),fvoicetext);
 end;
 
@@ -1224,7 +1224,13 @@ begin
    foneditcharenter(self,sender,achar,b1);
   end;
   if not b1 then begin
-   startspeak();
+   if not (ass_textblock1 in fstate) then begin
+    startspeak();
+   end
+   else begin
+    speaktext(sc_input,fvoicecaption);
+   end;
+   exclude(fstate,ass_textblock1);
    if length(achar) = 1 then begin
     speakcharacter(getucs4char(achar,1),fvoicetext);
    end
@@ -1336,7 +1342,7 @@ begin
 {$ifdef mse_debugassistive}
  debug('edittextblock',sender);
 {$endif}
- include(fstate,ass_textblock);
+ fstate:= fstate + [ass_textblock,ass_textblock1];
  b1:= false;
  if finditem(sender,item1) then begin
   item1.doedittextblock(self,sender,amode,atext,b1);
