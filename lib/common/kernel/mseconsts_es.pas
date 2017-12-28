@@ -8,14 +8,14 @@
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
     Spanish translation by Julio Jimenez Borreguero.
-    
-} 
+
+}
 unit mseconsts_es;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 uses
  mseconsts;
- 
+
 implementation
 uses
  msetypes{msestrings},sysutils,mseformatstr;
@@ -70,7 +70,7 @@ const
   'Error',                      //sc_Error
   'M'#0237'n.',                  //sc_Min
   'M'#0225'x.',                  //sc_Max
-  'Error de rango',             //sc_Range_error  
+  'Error de rango',             //sc_Range_error
 
   '&Deshacer',                  //sc_Undohk        ///         ///
   '&Rehacer',                   //sc_Redohk         //          //
@@ -82,14 +82,14 @@ const
   '&A'#0241'adir fila',          //sc_append_rowhk  // hotkeys  //
   '&Borrar fila',               //sc_delete_rowhk  ///         ///
 
-  '&Carpetas',                    //sc_Dir               /// 
+  '&Carpetas',                    //sc_Dir               ///
   '&Principal',                   //sc_home               //
   '&Subir un nivel',              //sc_Up                 //
   'Crear carpeta',                //sc_New_dir            // hotkeys
   'N&ombre',                      //sc_Name               //
   '&Mostrar archivos ocultos',    //sc_Show_hidden_files  //
-  '&Filtro',                      //sc_Filter            ///   
-  'Guardar',                      //sc_save 
+  '&Filtro',                      //sc_Filter            ///
+  'Guardar',                      //sc_save
   'Abrir',                        //sc_open
   'Nombre',                       //sc_name1
   'Crear una carpeta nueva',               //sc_create_new_directory
@@ -112,7 +112,7 @@ const
   'Error de formato gr'#0225'fico',     //sc_graphic_format_error
   'Bitmap MS',                         //sc_MS_Icon
   'Icono MS',                          //sc_MS_Icon
-  'Imagen JPEG',                       //sc_JPEG_Image 
+  'Imagen JPEG',                       //sc_JPEG_Image
   'Imagen PNG',                        //sc_PNG_Image
   'Imagen XPM',                        //sc_XPM_Image
   'Imagen PNM',                        //sc_PNM_Image
@@ -157,7 +157,7 @@ const
   'Apaisado',                          //sc_landscape print orientation
   #0191'Borrar fila?',                  //sc_Delete_row_question
   'filas seleccionadas?',              //sc_selected_rows
-  'un elemento solamente',             //sc_Single_item_only 
+  'un elemento solamente',             //sc_Single_item_only
   'Copiar Celdas',                     //sc_Copy_Cells
   'Pegar Celdas',                      //sc_Paste_Cells
   'Cerrar',               //sc_close
@@ -186,11 +186,11 @@ const
   'Copiado',                 //sc_copied
   'Insertado',               //sc_inserted
   'Pegado',                  //sc_pasted
-  'Withdrawn',               //sc_withdrawn
-  'Ventana',                 //sc_window
+  'Retirado',                //sc_withdrawn
+  'Ventana activada',        //sc_windowactivated
   'Men'#0250                 //sc_menu
 );
-    
+
 function delete_n_selected_rows(const params: array of const): msestring;
 begin
  with params[0] do begin
