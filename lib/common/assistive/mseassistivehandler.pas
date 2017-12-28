@@ -101,6 +101,10 @@ type
                             const intf: iassistiveclient;
                                      const adirection: graphicdirectionty;
                                                 var handled: boolean) of object;
+ assistivestringeventty = 
+  procedure(const sender: tassistivewidgetitem;
+                const handler: tassistivehandler;
+                   const intf: iassistiveclient; var atext: msestring) of object;
 
  tassistivewidgetitem = class(tmsecomponent)
   private
@@ -123,6 +127,12 @@ type
    foneditinputmodeset: assistiveeditinputmodeeventty;
    fonedittextblock: assistiveedittextblockeventty;
    fonnavigbordertouched: assistivedirectioneventty;
+   fongetcaption: assistivestringeventty;
+   fcaption: msestring;
+   fongettext: assistivestringeventty;
+   fongethint: assistivestringeventty;
+   ftext: msestring;
+   fhint: msestring;
    procedure sethandler(const avalue:tassistivehandler);
    procedure setwidget(const avalue: twidget);
   protected
@@ -175,11 +185,20 @@ type
                                          const aintf: iassistiveclient;
                                          const adirection: graphicdirectionty;
                                                          var handled: boolean);
+   function getcaption(const sender: tassistivehandler;
+                          const aintf: iassistiveclient): msestring;
+   function gettext(const sender: tassistivehandler;
+                          const aintf: iassistiveclient): msestring;
+   function gethint(const sender: tassistivehandler;
+                          const aintf: iassistiveclient): msestring;
   public
    destructor destroy(); override;
   published
    property handler: tassistivehandler read fhandler write sethandler;
    property widget: twidget read fwidget write setwidget;
+   property caption: msestring read fcaption write fcaption;
+   property text: msestring read ftext write ftext;
+   property hint: msestring read fhint write fhint;
    property onwindowactivated: assistiveeventty read fonwindowactivated 
                                                     write fonwindowactivated;
    property onwindowdeactivated: assistiveeventty read fonwindowdeactivated
@@ -210,6 +229,12 @@ type
                                   read fonedittextblock write fonedittextblock;
    property onnavigbordertouched: assistivedirectioneventty
                 read fonnavigbordertouched write fonnavigbordertouched;
+   property ongetcaption: assistivestringeventty read fongetcaption 
+                                                       write fongetcaption;
+   property ongettext: assistivestringeventty read fongettext
+                                                       write fongettext;
+   property ongethint: assistivestringeventty read fongethint
+                                                       write fongethint;
  end;
 
  assistivewidgetdataty = record
@@ -393,6 +418,8 @@ tassistivehandler = class(tmsecomponent,iassistiveserver)
    procedure cancel();
    function getcaptiontext(const acaption: msestring): msestring;
    function getcaptiontext(const sender: iassistiveclient): msestring;
+   function gettexttext(const sender: iassistiveclient): msestring;
+   function gethinttext(const sender: iassistiveclient): msestring;
    procedure speaktext(const atext: msestring; const avoice: int32 = 0);
    procedure speaktext(const atext: stockcaptionty; const avoice: int32 = 0);
    procedure speakcharacter(const achar: char32; const avoice: int32 = 0);
@@ -673,6 +700,33 @@ begin
  end;
 end;
 
+function tassistivewidgetitem.getcaption(const sender: tassistivehandler;
+               const aintf: iassistiveclient): msestring;
+begin
+ result:= fcaption;
+ if canevent(tmethod(fongetcaption)) then begin
+  fongetcaption(self,sender,aintf,result);
+ end;
+end;
+
+function tassistivewidgetitem.gettext(const sender: tassistivehandler;
+               const aintf: iassistiveclient): msestring;
+begin
+ result:= ftext;
+ if canevent(tmethod(fongettext)) then begin
+  fongettext(self,sender,aintf,result);
+ end;
+end;
+
+function tassistivewidgetitem.gethint(const sender: tassistivehandler;
+               const aintf: iassistiveclient): msestring;
+begin
+ result:= fhint;
+ if canevent(tmethod(fongethint)) then begin
+  fongethint(self,sender,aintf,result);
+ end;
+end;
+
 { tassistivewidgetitemlist }
 
 function tassistivewidgetitemlist.getrecordsize(): int32;
@@ -778,8 +832,44 @@ end;
 
 function tassistivehandler.getcaptiontext(
                                  const sender: iassistiveclient): msestring;
+var
+ item1: tassistivewidgetitem;
 begin
- result:= getcaptiontext(sender.getassistivecaption());
+ result:= '';
+ if finditem(sender,item1) then begin
+  result:= item1.getcaption(self,sender);
+ end;
+ if result = '' then begin
+  result:= getcaptiontext(sender.getassistivecaption());
+ end;
+end;
+
+function tassistivehandler.gettexttext(
+              const sender: iassistiveclient): msestring;
+var
+ item1: tassistivewidgetitem;
+begin
+ result:= '';
+ if finditem(sender,item1) then begin
+  result:= item1.gettext(self,sender);
+ end;
+ if result = '' then begin
+  result:= sender.getassistivetext();
+ end;
+end;
+
+function tassistivehandler.gethinttext(
+              const sender: iassistiveclient): msestring;
+var
+ item1: tassistivewidgetitem;
+begin
+ result:= '';
+ if finditem(sender,item1) then begin
+  result:= item1.gethint(self,sender);
+ end;
+ if result = '' then begin
+  result:= sender.getassistivehint();
+ end;
 end;
 
 procedure tassistivehandler.speaktext(const atext: msestring;
@@ -824,9 +914,9 @@ begin
  end;
  s1:= s1 + getcaptiontext(sender);
  speaktext(s1,fvoicecaption);
- speaktext(sender.getassistivetext(),fvoicetext);
+ speaktext(gettexttext(sender),fvoicetext);
  if ahint then begin
-  speaktext(sender.getassistivehint(),fvoicecaption);
+  speaktext(gethinttext(sender),fvoicecaption);
  end;
 end;
 
@@ -834,8 +924,8 @@ procedure tassistivehandler.speakinput(const sender: iassistiveclientdata);
 begin
  startspeak();
  speaktext(sc_input,fvoicecaption);
- speaktext(getcaptiontext(sender.getassistivecaption()),fvoicecaption);
- speaktext(sender.getassistivetext(),fvoicetext);
+ speaktext(getcaptiontext(sender),fvoicecaption);
+ speaktext(gettexttext(sender),fvoicetext);
 end;
 
 procedure tassistivehandler.speakmenustart(const sender: iassistiveclient);
@@ -969,7 +1059,7 @@ begin
     startspeak();
  //   speaktext(sc_windowactivated,fvoicecaption);
     speaktext(getcaptiontext(sender),fvoicecaption);
-    speaktext(sender.getassistivetext(),fvoicetext);
+    speaktext(gettexttext(sender),fvoicetext);
    end;
   end;
  end;
@@ -1063,11 +1153,6 @@ begin
    if not b1 then begin
     fla1:= sender.getassistiveflags();
     if asf_menu in fla1 then begin
-    {
-     setstate([ass_menuactivated]);
-     speakmenustart(sender);
-     speaktext(getcaptiontext(sender),fvoicecaption);
-    }
     end
     else begin
      speakall(sender,ass_windowactivated in fstate,false);
@@ -1123,7 +1208,6 @@ begin
  if not (es_child in info.eventstate) then begin
   if (info.key = key_return) and 
                 (info.shiftstate*keyshiftstatesmask = []) then begin
-//   fla1:= sender.getassistiveflags();
    if info.serial <> fdataenteredkeyserial then begin
     speakall(sender,false,true);
    end;
