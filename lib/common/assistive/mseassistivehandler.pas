@@ -399,6 +399,7 @@ tassistivehandler = class(tmsecomponent,iassistiveserver)
    procedure speakall(const sender: iassistiveclient; const addtext: boolean);
    procedure speakinput(const sender: iassistiveclientdata);
    procedure speakmenustart(const sender: iassistiveclient);
+   procedure speakallmenu(const sender: iassistiveclientmenu);
    procedure setstate(const astate: assistiveserverstatesty);
    procedure removestate(const astate: assistiveserverstatesty);
    property state: assistiveserverstatesty read fstate;
@@ -462,9 +463,11 @@ tassistivehandler = class(tmsecomponent,iassistiveserver)
  
 implementation
 uses
- msekeyboard,sysutils,msesysutils,mserichstring;
+ msekeyboard,sysutils,msesysutils,mserichstring,msemenus;
 type
  twidget1 = class(twidget);
+ tpopupmenuwidget1 = class(tpopupmenuwidget);
+ tmenuitem1 = class(tmenuitem);
  
 { tassistivespeak }
 
@@ -800,12 +803,20 @@ procedure tassistivehandler.speakall(const sender: iassistiveclient;
 var
  fla1: assistiveflagsty;
  s1: msestring;
+ w1: tpopupmenuwidget1;
 begin
  fla1:= sender.getassistiveflags();
  if not addtext then begin
   startspeak();
  end;
  s1:= '';
+ if asf_menu in fla1 then begin
+  pointer(w1):= sender.getinstance();
+  if w1 is tpopupmenuwidget then begin
+   speakallmenu(tmenuitem1(w1.flayout.menu).getiassistiveclient());
+   exit;
+  end; 
+ end;
  if asf_button in fla1 then begin
   s1:= stockobjects.captions[sc_button] + ' ';
  end;
@@ -981,9 +992,11 @@ begin
   end;
  end;
  removestate([ass_windowactivated]);
+ {
  if asf_menu in sender.getassistiveflags() then begin
   removestate([ass_menuactivated]);
  end;
+ }
 end;
 
 procedure tassistivehandler.dowindowclosed(const sender: iassistiveclient);
@@ -1451,6 +1464,14 @@ begin
  end;
 end;
 
+procedure tassistivehandler.speakallmenu(const sender: iassistiveclientmenu);
+begin
+ startspeak();
+ speakmenustart(sender);
+ speaktext(getcaptiontext(sender.getassistiveselfcaption()),fvoicecaption);
+ speaktext(getcaptiontext(sender.getassistivecaption()),fvoicetext);
+end;
+
 procedure tassistivehandler.domenuactivated(const sender: iassistiveclientmenu);
 var
  b1: boolean;
@@ -1464,9 +1485,7 @@ begin
  end;
  if not b1 then begin
   setstate([ass_menuactivated]);
-  startspeak();
-  speakmenustart(sender);
-  speaktext(getcaptiontext(sender.getassistiveselfcaption()),fvoicecaption);
+  speakallmenu(sender);
  end;
  setstate([ass_menuactivated]);
 end;
@@ -1486,14 +1505,8 @@ begin
  if not b1 then begin
   if not (ass_menuactivated in fstate) then begin
    startspeak();
-  end;
-//   speakmenustart(sender);
-//   setstate([ass_menuactivated]);
-//  end;
-//  if aindex >= 0 then begin
    speaktext(getcaptiontext(iassistiveclient(sender)),fvoicetext);
-//   speaktext(items[aindex].buttoninfo.ca.caption.text,fvoicetext);
-//  end;
+  end;
  end;
  removestate([{ass_windowactivated,}ass_menuactivated]);
 end;

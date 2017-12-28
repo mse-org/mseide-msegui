@@ -176,7 +176,6 @@ type
    procedure readsc1(reader: treader);
    procedure writesc1(writer: twriter);
    procedure setcolorglyphactive(const avalue: colorty);
-   function getactiveitem(out aitem: tmenuitem): boolean;
   protected
    finfo: actioninfoty;
    fowner: tcustommenu;
@@ -184,6 +183,7 @@ type
    ffont: tmenufont;
    ffontactive: tmenufontactive;
    factiveitem: int32; //for iassistiveclient
+   function getactiveitem(out aitem: tmenuitem): boolean;
    procedure updatecaption;
    procedure defineproperties(filer: tfiler); override;
    procedure befexec;

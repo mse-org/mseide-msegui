@@ -74,9 +74,9 @@ const
   '&Tous',        //mr_all
   'A&ucun',       //mr_noall
   '&Ignorer',     //mr_ignore
-  '&Skip',        //mr_skip
-  'Skip &all',    //mr_skipall
-  'Co&ntinue'  //mr_continue
+  '&Passer',        //mr_skip
+  'Passer &tout',    //mr_skipall
+  'Co&ntinuer'  //mr_continue
   );
 
  fr_modalresulttextnoshortcut: defaultmodalresulttextty =
@@ -88,16 +88,16 @@ const
   '',           //mr_f10
   '',           //mr_exception
   'Effacer',    //mr_cancel
-  'Arr'#0234'er',//mr_abort
+  'Arr'#0234'ter',//mr_abort
   'Valider',    //mr_ok
   'Oui',        //mr_yes
   'Non',        //mr_no
   'Tous',       //mr_all
   'Aucun',      //mr_noall
   'Ignorer',    //mr_ignore
-  'Skip',      //mr_skip
-  'Skip all',   //mr_skipall
-  'Continue'  //mr_continue
+  'Passer',      //mr_skip
+  'Passer tout',   //mr_skipall
+  'Continuer'  //mr_continue
   );
 
  fr_stockcaption: stockcaptionaty = (
@@ -115,7 +115,7 @@ const
   '&Copier',                              //sc_Copy          // hotkeys  //
   'C&ouper',                              //sc_Cut           //          //
   'Co&ller',                              //sc_Paste         //          // hotkeys
-  '&Select all',                          //sc_Select_allhk ///          //
+  '&S'#0233'lectionner tout',                          //sc_Select_allhk ///          //
   '&Ins'#0233'rer ligne',                  //sc_insert_row ///           //
   '&Ajouter ligne',                       //sc_append_row   // hotkeys   //
   '&Supprimer ligne',                     //sc_delete_row  ///          ///
@@ -131,9 +131,9 @@ const
   'Ouvrir',                               //sc_open
   'Nom',                                  //sc_name1
   'Cr'#0233'er un nouveau r'#0233'pertoire',//sc_create_new_directory
-  'Back',                //sc_back
-  'Forward',             //sc_forward
-  'Up',                  //sc_up
+  'Arri'#0232're',                //sc_back
+  'Avant',             //sc_forward
+  'Dessus',                  //sc_up
   'Fichier',                              //sc_file
   'existe, Remplacer ?',                  //sc_exists_overwrite
   'modifi'#0233'. Enregistrer ?',          //sc_is_modified_save
@@ -142,10 +142,10 @@ const
   'Exception',                            //sc_exception
   'Syst'#0232'me',                         //sc_system
   'n'#8217'existe pas',                   //sc_does_not_exist
-  'PASSWORD',              //sc_passwordupper
-  'Enter password',        //sc_enterpassword
-  'Invalid password!',     //sc_invalidpassword
-  'Impossible lire r'#0233'pertoire',      //sc_can_not_read_directory
+  'MOT DE PASSE',              //sc_passwordupper
+  'Entrer le mot de passe',        //sc_enterpassword
+  'Mot de passe invalide!',     //sc_invalidpassword
+  'Impossible de lire le r'#0233'pertoire',      //sc_can_not_read_directory
   'Format graphique non support'#0233'',   //sc_graphic_not_supported
   'Erreur de format graphique',           //sc_graphic_format_error
   'Bitmap MS',                            //sc_MS_Icon
@@ -174,7 +174,7 @@ const
   #0201'dition Filtre',                    //sc_filter_filter
   #0201'dition Filtre Minimum',            //sc_edit_filter_min
   #0201'dition Filtre Maximum',            //sc_filter_edit_max
-  'Reset filter',       //sc_reset_filter
+  'R'#0233'initialiser le filtre',       //sc_reset_filter
   'Filtre actif',                         //sc_filter_on
   'Rechercher',                           //sc_search
   #0201'dition automatique',               //sc_autoedit
@@ -198,34 +198,34 @@ const
   'seulement un '#0233'l'#0233'ment',       //sc_Single_item_only 
   'Copier cellules',                      //sc_Copy_Cells
   'Coller cellules',                      //sc_Paste_Cells
-  'Close',               //sc_close
-  'Maximize',            //sc_maximize
-  'Normalize',           //sc_normalize
-  'Minimize',            //sc_minimize
-  'Fix size',            //sc_fix_size
-  'Float',               //sc_float
-  'Stay on top',         //sc_stay_on_top
-  'Stay in background',  //sc_stay_in_background
-  'Lock children',       //sc_lock_children
-  'No lock',             //sc_no_lock
-  'Input',               //sc_input
-  'Button',              //sc_button
-  'On',                  //sc_on
-  'Off',                 //sc_off
-  'Left border',         //sc_leftborder
-  'Top border',          //sc_topborder
-  'Right border',        //sc_rightborder
-  'Bottom border',       //sc_bottomborder
-  'Begin of text',       //sc_beginoftext
-  'End of text',         //sc_endoftext
-  'Inputmode',           //sc_inputmode
-  'Overwrite',           //sc_overwrite
-  'Deleted',             //sc_deleted
-  'Copied',              //sc_copied
-  'Inserted',            //sc_inserted
-  'Pasted',              //sc_pasted
-  'Withdrawn',           //sc_withdrawn
-  'Window activated',    //sc_windowactivated
+  'Fermer',               //sc_close
+  'Maximiser',            //sc_maximize
+  'Normaliser',           //sc_normalize
+  'Minimiser',            //sc_minimize
+  'Taille fixe',            //sc_fix_size
+  'Flottant',               //sc_float
+  'Rester en avant',         //sc_stay_on_top
+  'Rester en arri'#0232're',  //sc_stay_in_background
+  'Bloquer les descendants',       //sc_lock_children
+  'Ne pas bloquer',             //sc_no_lock
+  'Entr'#0233'e',               //sc_input
+  'Boutton',              //sc_button
+  'Allum'#0233'',           //sc_on
+   #0201'teint',                 //sc_off
+  'Bord gauche',         //sc_leftborder
+  'Bord haut',          //sc_topborder
+  'Bord droit',        //sc_rightborder
+  'Bord bas',       //sc_bottomborder
+  'D'#0233'but du texte',       //sc_beginoftext
+  'Fin du texte',         //sc_endoftext
+  'Mode entr'#0233'e',           //sc_inputmode
+   #0201'craser',           //sc_overwrite
+  'D'#0233'truit',             //sc_deleted
+  'Copie'#0233,              //sc_copied
+  'Inser'#0233,            //sc_inserted
+  'Coll'#0233,            //sc_pasted
+  'Retir'#0233,        //sc_withdrawn
+  'Fen'#0232'tre activ'#0233'e',    //sc_windowactivated
   'Menu'                 //sc_menu
 );
     

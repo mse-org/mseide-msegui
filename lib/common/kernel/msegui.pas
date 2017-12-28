@@ -13124,7 +13124,7 @@ var
  b1: boolean;
  w1: twidget;
 begin
- b1:= canassistive() and (ws_iswidget in widgetstate);
+ b1:= canassistive() {and (ws_iswidget in widgetstate)};
  if b1 then begin
   w1:= nil;
   setlinkedvar(self,tmsecomponent(w1)); //destroy check

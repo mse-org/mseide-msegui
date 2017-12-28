@@ -119,6 +119,8 @@ type
    class function classskininfo(): skininfoty; override;
    function getassistiveflags(): assistiveflagsty override;
    function getassistivecaption(): msestring override;
+   function getassistivetext(): msestring override;
+   function getassistivehint(): msestring override;
    function prevmenuitem(const info: menulayoutinfoty): integer;
    function nextmenuitem(const info: menulayoutinfoty): integer;
    procedure assistivemenuactivated();
@@ -1340,7 +1342,7 @@ var
  bo1: boolean;
  itembefore: integer;
 // int1: integer;
- pt1,pt2: pointty;
+ pt1: pointty;
 
  procedure resetmouseflag();
  begin
@@ -1381,6 +1383,7 @@ var
 
 var
  canmousemove1: boolean;
+ b1: boolean;
 begin
  if (csdesigning in componentstate) and (ws_iswidget in fwidgetstate) then begin
   inherited;
@@ -1411,12 +1414,20 @@ begin
                (aso_nomenumousemove in assistiveoptions) and
                                  not(csdesigning in componentstate) then begin
      invalidaterect(cells[activeitem].dimouter);
+     b1:= false;
      if eventkind = ek_buttonpress then begin
+      b1:= not fnextpopup.active();
       setmouseitem(fnextpopup,translatewidgetpoint(pos,self,fnextpopup));
       if fnextpopup.activeitem >= 0 then begin
        with fnextpopup,flayout,cells[activeitem],buttoninfo do begin
         include(state,shs_clicked);
        end;
+      end;
+     end;
+     if b1 then begin
+      with fnextpopup,flayout do begin
+       assistiveserver.doitementer(
+                  tmenuitem1(menu).getiassistiveclient(),cells,activeitem);
       end;
      end;
      fnextpopup.activatemenu(false,ss_left in info.shiftstate,true);
@@ -1446,7 +1457,12 @@ begin
       if mlo_childreninactive in options then begin
        exclude(options,mlo_childreninactive);
        activeitem:= -1;
-       mouseevent(info);
+       include(state,mls_assistivelocked);
+       try
+        mouseevent(info);
+       finally
+        exclude(state,mls_assistivelocked);
+       end;
        if (activeitem >= 0) and 
                       tmenuitem1(menu.items[activeitem]).canshowhint then begin
         application.hidehint;
@@ -1768,6 +1784,8 @@ procedure tpopupmenuwidget.dokeydown(var info: keyeventinfoty);
 var
  int1: integer;
  intf1: iassistiveclientmenu;
+ dir1: graphicdirectionty;
+ b1: boolean;
 begin
  with info,flayout do begin
   if (shiftstate*shiftstatesmask = []) then begin
@@ -1803,6 +1821,7 @@ begin
        end;
       end
       else begin
+       b1:= true;
        if rootpopup <> self then begin
         with rootpopup,flayout do begin
          if mlo_main in flayout.options then begin
@@ -1822,9 +1841,18 @@ begin
           end;
           swapkeys;
           include(eventstate,es_processed);
+          b1:= false;
          end;
         end;
        end;
+       if b1 and canassistive and 
+                      not (mls_assistivelocked in flayout.state) then begin
+        dir1:= gd_right;
+        if mlo_horz in options then begin
+         dir1:= gd_down;
+        end;
+        assistiveserver.donavigbordertouched(getiassistiveclient,dir1);
+       end;      
       end;
      end;
     end;
@@ -2026,9 +2054,25 @@ end;
 
 function tpopupmenuwidget.getassistivecaption(): msestring;
 begin
- result:= tmenuitem1(flayout.menu).finfo.captiontext;
+ result:= tmenuitem1(flayout.menu).getassistivecaption();
  if result = '' then begin
   result:= inherited getassistivecaption();
+ end;
+end;
+
+function tpopupmenuwidget.getassistivetext(): msestring;
+begin
+ result:= tmenuitem1(flayout.menu).getassistivetext();
+ if result = '' then begin
+  result:= inherited getassistivetext();
+ end;
+end;
+
+function tpopupmenuwidget.getassistivehint(): msestring;
+begin
+ result:= tmenuitem1(flayout.menu).getassistivehint();
+ if result = '' then begin
+  result:= inherited getassistivehint();
  end;
 end;
 
