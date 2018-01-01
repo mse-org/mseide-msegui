@@ -733,8 +733,8 @@ begin
 // {$ifdef mse_debugassistive}
 //   debugwriteln(inttostr(length(s1))+':'+s1);
 // {$endif}
-  checkerror(espeak_ng_synthesize(pchar(s1),length(s1),0,pos_character,0,
-                 f1,nil,nil));
+  checkerror(espeak_ng_synthesize(pchar(s1),length(s1)+1, //terminating #0
+                               0,pos_character,0,f1,nil,nil));
 end;
 
 procedure tcustomespeakng.lock();

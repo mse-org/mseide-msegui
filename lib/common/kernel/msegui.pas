@@ -12843,12 +12843,14 @@ end;
 function twidget.navigdistance(var info: naviginfoty;
                              const nowrap: boolean = false): integer;
 const
+ orthoweightingwrap = 300; //div
  wrapweighting = 1;
  orthoweighting = 30;
+ orthoweightingoverlap = 2;
 var
  dist: integer;
  srect,drect: rectty;
- send,dend: integer;
+ sstart,send,dstart,dend: integer;
  int1: integer;
 begin
  with info do begin
@@ -12856,6 +12858,8 @@ begin
   addpoint1(drect.pos,rootpos);
   srect:= startingrect;
   if direction in [gd_right,gd_left] then begin
+   sstart:= srect.y;
+   dstart:= drect.y;
    send:= srect.y + srect.cy;
    dend:= drect.y + drect.cy;
    result:= (drect.y + dend - srect.y - send) div 2;
@@ -12866,6 +12870,9 @@ begin
    dist:= drect.x - srect.x;
   end
   else begin
+   sstart:= srect.x;
+   send:= srect.x + srect.cx;
+   dstart:= drect.x;
    dend:= drect.x + drect.cx;
    result:= drect.x + srect.x;
    if (srect.x + 3 >= drect.x) and (srect.x < dend) then begin
@@ -12873,8 +12880,7 @@ begin
    end;
    dist:= (drect.y + drect.cy div 2) - (srect.y + srect.cy div 2);   
   end;
-  result:= abs(result);
-  result:= result * orthoweighting;
+  result:= abs(result)*orthoweightingwrap;
   if direction in [gd_left,gd_up] then begin
    dist:= -dist;
   end;
@@ -12883,6 +12889,7 @@ begin
     result:= bigint;
     exit;
    end;
+   result:= result div orthoweightingwrap;
    if direction in [gd_right,gd_left] then begin
     dist:= dist + wraprect.cx;
    end
@@ -12890,7 +12897,17 @@ begin
     dist:= dist + wraprect.cy;
    end;
    dist:= dist * wrapweighting;
+  end
+  else begin
+   if (dstart >= sstart) and (dend <= send) or 
+                     (sstart >= dstart) and (send <= dend) then begin
+    result:= result * orthoweightingoverlap;
+   end
+   else begin
+    result:= result * orthoweighting;
+   end;
   end;
+  dist:= dist * orthoweightingwrap;
   if dist < 0 then begin
    dist:= bigint div 2;
   end;
@@ -12914,6 +12931,7 @@ var
  int1,int2: integer;
  widget1,widget2: twidget;
  bo1: boolean;
+ rect1,rect2: rectty;
 begin
  with info do begin
   if not down and (ow_arrowfocusout in foptionswidget) and 
@@ -12943,6 +12961,24 @@ begin
      end;
     end;
     hastarget:= hastarget or bo1;
+   end;
+  end;
+  if nearest <> nil then begin
+   rect1:= nearest.navigrect();
+   translatewidgetpoint1(rect1.pos,nearest,nil);
+   rect2:= sender.navigrect();
+   translatewidgetpoint1(rect2.pos,sender,nil);
+   case direction of
+    gd_down,gd_up: begin
+     if rect1.y = rect2.y then begin
+      nearest:= nil;
+     end;
+    end;
+    gd_left,gd_right: begin
+     if rect1.x = rect2.x then begin
+      nearest:= nil;
+     end;
+    end;
    end;
   end;
  end;
