@@ -1846,9 +1846,6 @@ begin
   if ima.pixels <> nil then begin
    npixels:= ima.size.cx*ima.size.cy;
    int1:= 2 + npixels;
-   if maskima.pixels <> nil then begin
-    int1:= int1 + npixels;
-   end;
    setlength(ar1,int1);
    ar1[0]:= ima.size.cx;
    ar1[1]:= ima.size.cy;
