@@ -558,6 +558,7 @@ type
    procedure setfaceactivetab(const avalue: tfacecomp);
    function getfacetab: tfacecomp;
    function getfaceactivetab: tfacecomp;
+   function isvisiblestored: boolean;
   protected
    class function classskininfo: skininfoty; override;
    procedure changed;
@@ -616,7 +617,7 @@ type
                                                    write fongetsubform;
    property oninitsubform: initsubformeventty read foninitsubform
                                                    write foninitsubform;
-   property visible stored false default false;
+   property visible stored isvisiblestored default false;
    property optionsskin default defaulttabpageskinoptions;
  end;
 
@@ -3504,6 +3505,11 @@ end;
 function ttabpage.getfaceactivetab: tfacecomp;
 begin
  result:= ffaceactivetab;
+end;
+
+function ttabpage.isvisiblestored: boolean;
+begin
+ result:= not (fparentwidget is tcustomtabwidget);
 end;
 
 procedure ttabpage.registerchildwidget(const child: twidget);

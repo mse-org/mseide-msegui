@@ -6106,6 +6106,17 @@ eventrestart:
   end;
   buttonpress,buttonrelease: begin
    with xev.xbutton do begin
+   {$ifdef mse_debugmouse}
+    if xtype = buttonpress then begin
+     debugwrite('*X11buttonpress');
+    end
+    else begin
+     debugwrite('*X11buttonrelease');
+    end;
+    debugwriteln(' window '+hextostr(window,8)+
+       ' button:'+inttostr(button)+' x:'+inttostr(x)+' y:'+inttostr(y)+
+                                                     ' time:'+inttostr(time));
+   {$endif}
     lasteventtime:= time;
     button1:= xtomousebutton(button);
     shiftstate1:= xtoshiftstate(state,key_none,button1,xev.xtype=buttonrelease);
