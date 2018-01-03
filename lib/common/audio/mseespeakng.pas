@@ -28,7 +28,7 @@ const
  {$define wincall}
  espeaknglib: array[0..0] of filenamety = ('espeak-ng.dll');
 {$else}
- sqlite3lib: array[0..1] of filenamety = 
+ espeaknglib: array[0..1] of filenamety = 
                                ('libespeak-ng.so.1','libespeak-ng.so'); 
 {$endif}
 
@@ -424,7 +424,7 @@ const
  );
  errormessage = 'Can not load eSpeakNG library. ';
 begin
- initializedynlib(libinfo,sonames,sqlite3lib,funcs,[],errormessage,@ini,false,
+ initializedynlib(libinfo,sonames,espeaknglib,funcs,[],errormessage,@ini,false,
                                                       pointer(espeakdatapath));
 end;
 

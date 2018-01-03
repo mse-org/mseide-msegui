@@ -383,7 +383,7 @@ begin
  end;
 end;
 
-procedure initgdiplus;
+procedure initgdiplus(const data: pointer);
 var
  startupin: gdiplusstartupinput;
 // startupout: gdiplusstartupoutput;
@@ -394,7 +394,7 @@ begin
  gdipcheckerror(gdiplusstartup(@instance,@startupin,nil{@startupout}));
 end;
 
-procedure deinitgdiplus;
+procedure deinitgdiplus(const data: pointer);
 begin
  if instance <> nil then begin
   gdiplusshutdown(instance);
