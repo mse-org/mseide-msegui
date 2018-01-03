@@ -12843,9 +12843,9 @@ end;
 function twidget.navigdistance(var info: naviginfoty;
                              const nowrap: boolean = false): integer;
 const
- orthoweightingwrap = 300; //div
+ orthoweightingwrap = 50; //div
  wrapweighting = 1;
- orthoweighting = 30;
+ orthoweighting = 50;
  orthoweightingoverlap = 2;
 var
  dist: integer;
@@ -12864,9 +12864,9 @@ begin
    dend:= drect.y + drect.cy;
    result:= (drect.y + dend - srect.y - send) div 2;
    int1:= srect.y + srect.cy div 2;
-   if (int1 >= drect.y) and (int1 < drect.y + drect.cy) then begin
-    result:= 0;
-   end;
+//   if (int1 >= drect.y) and (int1 < drect.y + drect.cy) then begin
+//    result:= 0;
+//   end;
    dist:= drect.x - srect.x;
   end
   else begin
@@ -12874,10 +12874,10 @@ begin
    send:= srect.x + srect.cx;
    dstart:= drect.x;
    dend:= drect.x + drect.cx;
-   result:= drect.x + srect.x;
-   if (srect.x + 3 >= drect.x) and (srect.x < dend) then begin
-    result:= 0;
-   end;
+   result:= drect.x - srect.x;
+//   if (srect.x + 3 >= drect.x) and (srect.x < dend) then begin
+//    result:= 0;
+//   end;
    dist:= (drect.y + drect.cy div 2) - (srect.y + srect.cy div 2);   
   end;
   result:= abs(result)*orthoweightingwrap;
@@ -12892,6 +12892,9 @@ begin
    result:= result div orthoweightingwrap;
    if direction in [gd_right,gd_left] then begin
     dist:= dist + wraprect.cx;
+    if direction = gd_left then begin
+     dist:= dist-drect.cx
+    end;
    end
    else begin
     dist:= dist + wraprect.cy;
@@ -12899,8 +12902,12 @@ begin
    dist:= dist * wrapweighting;
   end
   else begin
-   if (dstart >= sstart) and (dend <= send) or 
-                     (sstart >= dstart) and (send <= dend) then begin
+//   if (dstart >= sstart) and (dend <= send) or 
+//                     (sstart >= dstart) and (send <= dend) then begin
+   if (dstart >= sstart) and (dstart < send) or 
+             (dend > sstart) and (dend <= send) or
+      (sstart >= dstart) and (sstart < dend) or
+             (send > dstart) and (send <= dend) then begin
     result:= result * orthoweightingoverlap;
    end
    else begin
@@ -12929,7 +12936,7 @@ procedure twidget.navigrequest(var info: naviginfoty;
                                            const nowrap: boolean = false);
 var
  int1,int2: integer;
- widget1,widget2: twidget;
+ widget1,widget2,wi3: twidget;
  bo1: boolean;
  rect1,rect2: rectty;
 begin
@@ -12942,6 +12949,7 @@ begin
    sender:= widget1;
   end;
   down:= true;
+  wi3:= nearest;
   for int1:= 0 to widgetcount - 1 do begin
    widget1:= twidget(fwidgets[int1]);
    if (widget1 <> info.sender) and (ow_arrowfocus in widget1.foptionswidget)
@@ -12963,7 +12971,7 @@ begin
     hastarget:= hastarget or bo1;
    end;
   end;
-  if nearest <> nil then begin
+  if (nearest <> wi3) and (nearest <> nil) then begin
    rect1:= nearest.navigrect();
    translatewidgetpoint1(rect1.pos,nearest,nil);
    rect2:= sender.navigrect();
@@ -12971,12 +12979,12 @@ begin
    case direction of
     gd_down,gd_up: begin
      if rect1.y = rect2.y then begin
-      nearest:= nil;
+      nearest:= wi3; //restore
      end;
     end;
     gd_left,gd_right: begin
      if rect1.x = rect2.x then begin
-      nearest:= nil;
+      nearest:= wi3; //restore
      end;
     end;
    end;
