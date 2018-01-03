@@ -295,7 +295,7 @@ How to run i18ndemo
 *******************
 - Start MSEide.
 - 'Project'-'Open'-'yourdirectory/msegui/apps/i18ndemo/i18ndemo.prj'.
-- 'Project'-'Make' to create the rst files.
+- 'Project'-'Make' to create the rsj files.
 - 'Project'-'Open'-'yourdirectory/msegui/tools/i18n/msei18n.prj'.
 - 'Target'-'Continue'.
 In MSEi18n:
