@@ -1,5 +1,5 @@
 unit main;
-{$ifdef FPC}{$mode objfpc}{$h+}{$endif}
+{$ifdef FPC}{$mode objfpc}{$h+}{$codepage utf8}{$endif}
 interface
 uses
  msegui,mseclasses,mseforms,msedispwidgets,msegraphedits,msesimplewidgets;
@@ -22,7 +22,7 @@ var
  mainfo: tmainfo;
 implementation
 uses
- main_mfm,msei18nutils;
+ main_mfm,msei18nutils,msestrings;
 
 resourcestring
  rs1 = 'This is the first resource text.';
@@ -35,8 +35,8 @@ end;
 
 procedure tmainfo.updatedisp;
 begin
- disp1.value:= rs1;
- disp2.value:= rs2;
+ disp1.value:= utf8tostring(rs1);
+ disp2.value:= utf8tostring(rs2);
 end;
 
 procedure tmainfo.defaultexe(const sender: TObject);

@@ -223,7 +223,9 @@ function loadlangunit(aname: string; const quiet: boolean = false): boolean;
             //true if ok
 var
  reglang: registerlangty;
+{$ifndef windows}
  fdir,fname: filenamety;
+{$endif}
 begin
  result:= false;
  try
