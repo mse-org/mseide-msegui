@@ -3,14 +3,14 @@ colcount=7
 [projectfo.impexpfiledialog]
 filenames=1
  /home/mse/proj/msegui/trunk/apps/i18ndemo/test.csv
-lastdir=/home/mse/proj/msegui/trunk/apps/i18ndemo/
-filefilterindex=0
-filefilter=*.csv
 filecolwidth=174
 x=0
 y=0
 cx=0
 cy=0
+lastdir=/home/mse/proj/msegui/trunk/apps/i18ndemo/
+filefilterindex=0
+filefilter=*.csv
 [projectfo.aftermake]
 value=
 [projectfo.beforemake]
@@ -20,7 +20,7 @@ value=
 [projectfo.makeon]
 value=1
 [projectfo.makecommand]
-value=${COMPILER} -Fu${MSELIBDIR}i18n ${LIBFILE}
+value=${COMPILER} -B -Cg -Fu${MSELIBDIR}i18n ${LIBFILE}
 [projectfo.grid2]
 propcolwidthref=581
 values0=2
@@ -34,23 +34,23 @@ values1=2
 [projectfo.datafilename]
 filenames=1
  i18ndemo.trd
-lastdir=
-filefilterindex=3
-filefilter=
 filecolwidth=174
 x=0
 y=0
 cx=0
 cy=0
+lastdir=
+filefilterindex=3
+filefilter=
 [projectfo.grid]
-propcolwidthref=413
+propcolwidthref=428
 values0=2
- main.rst
+ main.rsj
  mainfo
 width0=72
 sortdescend0=0
 values1=2
- main.rst
+ main.rsj
  main.mfm
 values2=2
  3
@@ -72,26 +72,38 @@ visible=0
 stackedunder=
 x=518
 y=230
-cx=425
-cy=221
+cx=724
+cy=264
 wsize=0
 active=1
 visible=1
 [mainfo.grid]
-propcolwidthref=314
-width0=97
+propcolwidthref=613
+width0=167
 sortdescend0=0
 width1=50
 sortdescend1=0
 width2=20
 sortdescend2=0
-width3=69
+width3=100
 sortdescend3=0
-width4=75
+width4=101
 sortdescend4=0
-width5=60
+values5=5
+ Das ist der erste Text
+ This ist der zweite Text
+ MSEi18n Demo
+ Text von resourcestring 1
+ Text von resourcestring 2
+width5=117
 sortdescend5=0
-width6=56
+values6=5
+ C'est le premier texte
+ C'est le deuxième texte
+ MSEi18n Demo
+ Texte du resourcestring 1
+ Texte du resourcestring 2
+width6=109
 sortdescend6=0
 width7=50
 sortdescend7=0
@@ -103,13 +115,16 @@ width10=50
 sortdescend10=0
 width11=50
 sortdescend11=0
-rowstate=2
+rowstate=5
+ 0 0
+ 0 0
+ 0 0
  0 0
  0 0
 [mainfo.flat]
-value=0
+value=1
 [mainfo.stringonly]
-value=0
+value=1
 [mainfo.nont]
 value=1
 [mainfo.ntonly]
