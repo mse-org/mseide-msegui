@@ -924,7 +924,7 @@ procedure tassistivehandler.speakinput(const sender: iassistiveclientdata);
 begin
  startspeak();
  speaktext(sc_input,fvoicecaption);
- speaktext(getcaptiontext(sender),fvoicecaption);
+ speaktext(getcaptiontext(iassistiveclient(sender)),fvoicecaption);
  speaktext(gettexttext(sender),fvoicetext);
 end;
 
