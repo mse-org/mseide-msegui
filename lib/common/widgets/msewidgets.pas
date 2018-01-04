@@ -2463,8 +2463,8 @@ end;
 function tactionsimplebutton.navigstartrect: rectty;
 begin
  result:= inherited navigstartrect;
- result.x:= result.x + result.cx div 2;
- result. cx:= 0;
+// result.x:= result.x + result.cx div 2;
+// result. cx:= 0;
 end;
 
 function tactionsimplebutton.getassistiveflags(): assistiveflagsty;
