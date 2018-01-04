@@ -2591,7 +2591,8 @@ begin
                                                    not readonly then begin
   if fgridintf = nil then begin
    result:= (newfocus = nil) and 
-               (not (des_isdb in fstate) or (des_dbnullcheck in fstate));
+               (not (des_isdb in fstate) or (des_dbnullcheck in fstate) or
+                    (oe_directdbnullcheck in optionsedit));
   end
   else begin
    result:= fgridintf.nullcheckneeded(newfocus);

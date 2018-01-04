@@ -3823,14 +3823,18 @@ procedure tcustomeditwidgetdatalink.nullcheckneeded(var avalue: boolean);
  end; //findactivedatalink
  
 begin
- avalue:= active and ((avalue or fintf.getedited and (oed_autopost in foptions) or
-              (fcanclosing > 0)) and 
-              ((dataset.state in [dsinsert,dsedit]) and
-                      (dataset.modified or 
-                       (dataset.state <> dsinsert) or 
-                       (fdscontroller <> nil) and fdscontroller.posting
-                      )
-              ));
+ avalue:= active and 
+          (
+           (avalue or fintf.getedited and (oed_autopost in foptions) or
+            (fcanclosing > 0)
+           ) and 
+           ((dataset.state in [dsinsert,dsedit]) and
+            (dataset.modified or 
+             (dataset.state <> dsinsert) or 
+             (fdscontroller <> nil) and fdscontroller.posting
+            )
+           )
+          );
  avalue:= avalue and (fintf.getwidget.window.active or not findactivedatalink);
 end;
 

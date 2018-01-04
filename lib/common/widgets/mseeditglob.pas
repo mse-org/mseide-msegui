@@ -52,7 +52,7 @@ type
                  oe_notnull,
                  oe_null, //accept empty value independent of min setting
                           //in trealedit
-                          
+                 oe_directdbnullcheck, //check null by canclose()         
                  oe_savevalue,oe_savestate,oe_saveoptions, //deprecated,
                  oe_checkvaluepaststatread           //moved to optionsedit1ty                 
                  
