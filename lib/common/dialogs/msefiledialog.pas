@@ -654,7 +654,7 @@ function filedialog1(dialog: tfiledialogfo; var afilenames: filenamearty;
            const oncheckfile: checkfileeventty
            ): modalresultty;
 var
- int1: integer;
+ i1: integer;
 begin
  with dialog do begin
   dir.checksubdir:= fdo_checksubdir in aoptions;
@@ -680,13 +680,12 @@ begin
   listview.ongetfileicon:= ongetfileicon;
   listview.oncheckfile:= oncheckfile;
   filter.dropdown.cols[0].count:= high(filtermask) + 1;
-  for int1:= 0 to high(filtermask) do begin
-   if (int1 <= high(filterdesc)) and (filterdesc[int1] <> '') then begin
-    filter.dropdown.cols[0][int1]:= filterdesc[int1] + ' ('+
-       filtermask[int1] + ')';
+  for i1:= 0 to high(filtermask) do begin
+   if (i1 <= high(filterdesc)) and (filterdesc[i1] <> '') then begin
+    filter.dropdown.cols[0][i1]:= filterdesc[i1] + ' ('+filtermask[i1] + ')';
    end
    else begin
-    filter.dropdown.cols[0][int1]:= filtermask[int1];
+    filter.dropdown.cols[0][i1]:= filtermask[i1];
    end;
   end;
   filter.dropdown.cols[1].assignopenarray(filtermask);
@@ -738,6 +737,11 @@ begin
   end;
   if result = mr_ok then begin
    afilenames:= filenames;
+   if fdo_sysfilename in aoptions then begin
+    for i1:= 0 to high(afilenames) do begin
+     tosysfilepath1(afilenames[i1]);
+    end;
+   end;
    if filterindex <> nil then begin
     filterindex^:= filter.dropdown.itemindex;
    end;
@@ -1827,7 +1831,8 @@ begin
   rectbefore:= fo.widgetrect;
   result:= filedialog1(fo,ffilenames,ara,arb,
         @ffilterindex,@ffilter,@fcolwidth,finclude,
-            fexclude,po1,fhistorymaxcount,acaption,aoptions,fdefaultext,
+            fexclude,po1,fhistorymaxcount,acaption,
+                                aoptions-[fdo_sysfilename],fdefaultext,
             fimagelist,fongetfileicon,foncheckfile);
   if not rectisequal(fo.widgetrect,rectbefore) then begin
    fwindowrect:= fo.widgetrect;
