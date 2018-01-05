@@ -73,6 +73,7 @@ type
                         dno_candefocuswindow);
  dbnavigatoroptionsty = set of dbnavigatoroptionty;
  optioneditdbty = (oed_autoedit,oed_noautoedit,oed_autopost,
+                   oed_nullcheckifunmodified,
                    oed_syncedittonavigator,oed_focusoninsert,
                    oed_nofilteredit,oed_nofilterminedit,
                    oed_nofiltermaxedit,oed_nofindedit,
@@ -3830,6 +3831,7 @@ begin
            ) and 
            ((dataset.state in [dsinsert,dsedit]) and
             (dataset.modified or 
+             avalue and (oed_nullcheckifunmodified in foptions) or
              (dataset.state <> dsinsert) or 
              (fdscontroller <> nil) and fdscontroller.posting
             )
