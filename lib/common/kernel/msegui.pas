@@ -12858,7 +12858,7 @@ var
  dist: integer;
  srect,drect: rectty;
  sstart,send,dstart,dend: integer;
- int1: integer;
+// int1: integer;
 begin
  with info do begin
   drect:= navigrect;
@@ -12870,7 +12870,7 @@ begin
    send:= srect.y + srect.cy;
    dend:= drect.y + drect.cy;
    result:= (drect.y + dend - srect.y - send) div 2;
-   int1:= srect.y + srect.cy div 2;
+//   int1:= srect.y + srect.cy div 2;
 //   if (int1 >= drect.y) and (int1 < drect.y + drect.cy) then begin
 //    result:= 0;
 //   end;
@@ -12988,13 +12988,23 @@ begin
    rect2:= sender.navigrect();
    translatewidgetpoint1(rect2.pos,sender,nil);
    case direction of
-    gd_down,gd_up: begin
+    gd_up: begin
      if rect1.y = rect2.y then begin
       nearest:= wi3; //restore
      end;
     end;
-    gd_left,gd_right: begin
+    gd_down: begin
+     if rect1.y + rect1.cy = rect2.y + rect2.cy then begin
+      nearest:= wi3; //restore
+     end;
+    end;
+    gd_right: begin
      if rect1.x = rect2.x then begin
+      nearest:= wi3; //restore
+     end;
+    end;
+    gd_left: begin
+     if rect1.x + rect1.cx = rect2.x + rect2.cx then begin
       nearest:= wi3; //restore
      end;
     end;
