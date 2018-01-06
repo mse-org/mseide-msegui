@@ -2249,7 +2249,8 @@ end;
 
 function tcustomedit.navigrect: rectty;
 begin
- result:= frameinnerrect;
+ result:= inherited navigrect();
+// result:= frameinnerrect;
 // result:= paintframerect;
 end;
 

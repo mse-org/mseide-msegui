@@ -685,6 +685,7 @@ type
    function innerframecy: int32;
    function outerframe: framety;
    function paintframe: framety;     
+   function paintframedelta: framety;   //paintframe-outerframe
    function innerframe: framety;     
    function cellframe: framety; //innerframe without paintframedelta
    function pointincaption(const point: pointty): boolean; virtual;
@@ -5859,6 +5860,11 @@ begin
  checkstate;
  result:= fpaintframe;
 // result:= addframe(fouterframe,fpaintframe);
+end;
+
+function tcustomframe.paintframedelta: framety;
+begin
+ result:= subframe(paintframe,fouterframe);
 end;
 
 function tcustomframe.innerframe: framety;
@@ -12843,10 +12849,11 @@ end;
 function twidget.navigdistance(var info: naviginfoty;
                              const nowrap: boolean = false): integer;
 const
- orthoweightingwrap = 50; //div
+ distweighting = 10;
  wrapweighting = 1;
- orthoweighting = 50;
- orthoweightingoverlap = 2;
+ orthoweightingwrap = 10;
+ orthoweighting = 100;
+ orthoweightingoverlap = 1;
 var
  dist: integer;
  srect,drect: rectty;
@@ -12880,11 +12887,11 @@ begin
 //   end;
    dist:= (drect.y + drect.cy div 2) - (srect.y + srect.cy div 2);   
   end;
-  result:= abs(result)*orthoweightingwrap;
+  result:= abs(result);
   if direction in [gd_left,gd_up] then begin
    dist:= -dist;
   end;
-  if dist < 0 then begin
+  if dist <= 0 then begin
    if nowrap then begin
     result:= bigint;
     exit;
@@ -12900,6 +12907,7 @@ begin
     dist:= dist + wraprect.cy;
    end;
    dist:= dist * wrapweighting;
+   result:= result*orthoweightingwrap;
   end
   else begin
 //   if (dstart >= sstart) and (dend <= send) or 
@@ -12914,7 +12922,7 @@ begin
     result:= result * orthoweighting;
    end;
   end;
-  dist:= dist * orthoweightingwrap;
+  dist:= dist * distweighting;
   if dist < 0 then begin
    dist:= bigint div 2;
   end;
@@ -12925,6 +12933,9 @@ end;
 function twidget.navigrect: rectty;       
 begin
  result:= paintrect;
+ if fframe <> nil then begin
+  inflaterect1(result,fframe.paintframedelta);
+ end;
 end;
 
 function twidget.navigstartrect: rectty;      
@@ -13110,16 +13121,16 @@ begin
           pt2:= nearest.rootpos;
           case direction of
            gd_left: begin
-            b1:= pt1.x < pt2.x;
+            b1:= pt1.x <= pt2.x;
            end;
            gd_up: begin
-            b1:= pt1.y < pt2.y;
+            b1:= pt1.y <= pt2.y;
            end;
            gd_right: begin
-            b1:= pt1.x > pt2.x;
+            b1:= pt1.x >= pt2.x;
            end;
            gd_down: begin
-            b1:= pt1.y > pt2.y;
+            b1:= pt1.y >= pt2.y;
            end;
           end;
           if b1 and (canassistive()) then begin
