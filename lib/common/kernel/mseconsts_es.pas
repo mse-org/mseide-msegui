@@ -188,7 +188,9 @@ const
   'Pegado',                  //sc_pasted
   'Retirado',                //sc_withdrawn
   'Ventana activada',        //sc_windowactivated
-  'Men'#0250                 //sc_menu
+  'Men'#0250,                //sc_menu
+  'Beginning of file',       //sc_bof
+  'End of file'              //sc_eof
 );
 
 function delete_n_selected_rows(const params: array of const): msestring;

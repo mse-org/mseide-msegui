@@ -226,7 +226,9 @@ const
   'Coll'#0233,            //sc_pasted
   'Retir'#0233,        //sc_withdrawn
   'Fen'#0232'tre activ'#0233'e',    //sc_windowactivated
-  'Menu'                 //sc_menu
+  'Menu',                //sc_menu
+  'Beginning of file',   //sc_bof
+  'End of file'          //sc_eof
 );
     
 function delete_n_selected_rows(const params: array of const): msestring;

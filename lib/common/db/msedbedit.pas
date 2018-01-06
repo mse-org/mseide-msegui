@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2017 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2018 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -21,7 +21,7 @@ interface
 uses
  mdb,classes,mclasses,mseguiglob,mseclasses,msegui,msetoolbar,mseeditglob,
  mseglob,msewidgetgrid,msearrayutils,msedatalist,mseinterfaces,
- msetypes,msegrids,msegraphics,mseevent,msekeyboard,
+ msetypes,msegrids,msegraphics,mseevent,msekeyboard,mseassistiveclient,
  msegraphedits,msestrings,msegraphutils,mselist,msedropdownlist,
  msescrollbar,msedataedits,msewidgets,msearrayprops,msedb,mselookupbuffer,
  msedialog,mseinplaceedit,msemenus,mseedit,msestat,msegridsglob,typinfo
@@ -119,16 +119,22 @@ type
   procedure updatereadonly(const force: boolean = false);
  end;
 
+ navigdatalinkstatety = (nds_prior,nds_next,nds_datasetscrolled);
+ navigdatalinkstatesty = set of navigdatalinkstatety;
+ 
  tnavigdatalink = class(tmsedatalink)
   private
-   fintf: idbnaviglink;
   protected
+   fintf: idbnaviglink;
+   fstate: navigdatalinkstatesty;
    procedure updatebuttonstate;
    procedure activechanged; override;
    procedure datasetchanged; override;
    procedure editingchanged; override;
    procedure recordchanged(Field: TField); override;
    procedure disabledstatechange; override;
+   procedure datasetscrolled(distance: integer) override;
+   function canassistive(out aintf: iassistiveclient): boolean;
   public
    constructor create(const intf: idbnaviglink);
    procedure execbutton(const abutton: dbnavigbuttonty);
@@ -367,6 +373,7 @@ type
    destructor destroy; override;
    procedure fixupproperties(filer: tfiler); //read moved properties
    procedure recordchanged(afield: tfield); override;
+   procedure datasetscrolled(distance: integer) override;
    procedure nullcheckneeded(var avalue: boolean);
    procedure setwidgetdatasource(const avalue: tdatasource);
    procedure griddatasourcechanged;
@@ -2615,7 +2622,7 @@ type
   protected
    function createdropdowncontroller: tcustomdropdowncontroller; override;
    function internaldatatotext(const data): msestring; override;
-  //ilbdropdownlist
+    //ilbdropdownlist
    procedure recordselected(const arecordnum: integer; const akey: keyty);
    function getlbkeydatakind: lbdatakindty;                     
   published
@@ -2628,6 +2635,7 @@ function encoderowstate(const color: integer = -1; const font: integer = -1;
 implementation
 uses
  msestockobjects,mseshapes,msereal,msebits,
+ mseassistiveserver,
  mseactions,mseact,rtlconsts,msedrawtext,sysutils,msedbdispwidgets;
 
 type
@@ -2850,6 +2858,7 @@ procedure tnavigdatalink.execbutton(const abutton: dbnavigbuttonty);
 var
  widget1: twidget;
  options1: dbnavigatoroptionsty;
+ intf1: iassistiveclient;
 begin
  if (datasource <> nil) and (datasource.State <> dsinactive) then begin
   widget1:= fintf.getwidget;
@@ -2870,8 +2879,26 @@ begin
   with datasource.dataset do begin
    case abutton of
     dbnb_first: first;
-    dbnb_prior: self.moveby(-1);
-    dbnb_next: self.moveby(1);
+    dbnb_prior: begin
+     include(fstate,nds_prior);
+     exclude(fstate,nds_datasetscrolled);
+     try
+      self.moveby(-1);
+      if not (nds_datasetscrolled in fstate) and canassistive(intf1) then begin
+       assistiveserver.dodatasetevent(intf1,adek_bof,dataset);
+      end;
+     finally
+      exclude(fstate,nds_prior);
+     end;
+    end;
+    dbnb_next: begin
+     include(fstate,nds_next);
+     try
+      self.moveby(1);
+     finally
+      exclude(fstate,nds_next);
+     end;
+    end;
     dbnb_last: last;
     dbnb_insert: begin
      if dno_append in options1 then begin
@@ -2945,6 +2972,42 @@ end;
 procedure tnavigdatalink.disabledstatechange;
 begin
  updatebuttonstate;
+end;
+
+function tnavigdatalink.canassistive(out aintf: iassistiveclient): boolean;
+var
+ wi1: twidget1;
+begin
+ result:= false;
+ aintf:= nil;
+ if (assistiveserver <> nil) and active then begin
+  wi1:= twidget1(fintf.getwidget());
+  result:= wi1.window.active;
+  if result then begin 
+   aintf:= wi1.getiassistiveclient();
+  end;
+ end;
+end;
+
+procedure tnavigdatalink.datasetscrolled(distance: integer);
+var
+ k1: assistivedbeventkindty;
+ intf1: iassistiveclient;
+begin
+ include(fstate,nds_datasetscrolled);
+ inherited;
+ if (distance = 0) and canassistive(intf1) then begin
+  k1:= adek_none;
+  if nds_prior in fstate then begin
+   k1:= adek_bof;
+  end;
+  if nds_next in fstate then begin
+   k1:= adek_eof;
+  end;
+  if k1 <> adek_none then begin
+   assistiveserver.dodatasetevent(intf1,k1,dataset);
+  end;
+ end;
 end;
 
 { tdbnavigator }
@@ -3219,7 +3282,8 @@ begin
  if not (csdesigning in componentstate) then begin
   for bu1:= low(dbnavigbuttonty) to dbnb_autoedit do begin
    if checkshortcutcode(fshortcuts[bu1],info) then begin
-    if buttons[ord(bu1)].enabled then begin
+    if buttons[ord(bu1)].enabled or 
+         (assistiveserver <> nil) and (bu1 in [dbnb_prior,dbnb_next]) then begin
      fdatalink.execbutton(bu1);
      include(info.eventstate,es_processed);
      break;
@@ -3710,6 +3774,9 @@ begin
 end;
 
 procedure tcustomeditwidgetdatalink.recordchanged(afield: tfield);
+var
+ wi1: twidget;
+ intf1: iassistiveclientdata;
 begin
  if (afield = nil) or (afield = field) then begin
   if (fbeginedit = 0) and (frecordchange = 0) then begin
@@ -3728,14 +3795,26 @@ begin
     else begin
      fintf.setnullvalue;
     end;
-    if fintf.getwidget.focused then begin
+    wi1:= fintf.getwidget;
+    if wi1.focused then begin
      fintf.initeditfocus;
+    end;
+    if (assistiveserver <> nil) and wi1.active and 
+        wi1.getcorbainterface(typeinfo(iassistiveclientdata),intf1) then begin
+     assistiveserver.dodbvaluechanged(intf1);
     end;
    finally
     dec(frecordchange);
    end;
   end;
   exclude(fstate,fds_modified);
+ end;
+end;
+
+procedure tcustomeditwidgetdatalink.datasetscrolled(distance: integer);
+begin
+ if distance <> 0 then begin
+  inherited;
  end;
 end;
 

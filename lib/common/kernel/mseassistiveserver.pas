@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 2015-2015 by Martin Schreiber
+{ MSEgui Copyright (c) 2015-2018 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -21,6 +21,7 @@ type
  assistiveoptionty = (aso_nodefaultbutton,aso_widgetnavig,aso_menunavig,
                       aso_noreturnkeymenuexecute,aso_nomenumousemove);
  assistiveoptionsty = set of assistiveoptionty;
+ assistivedbeventkindty = (adek_none,adek_bof,adek_eof);
 const
  defaultassistiveoptions = [aso_nodefaultbutton,aso_widgetnavig,
                             aso_menunavig,aso_noreturnkeymenuexecute,
@@ -42,6 +43,7 @@ type
   procedure dokeydown(const sender: iassistiveclient;
                                         const info: keyeventinfoty);
   procedure dochange(const sender: iassistiveclient);
+  procedure dodbvaluechanged(const sender: iassistiveclientdata);
   procedure dodataentered(const sender: iassistiveclientdata);
   procedure docellevent(const sender: iassistiveclientgrid; 
                                       const info: celleventinfoty);
@@ -66,6 +68,9 @@ type
   procedure domenuactivated(const sender: iassistiveclientmenu);
   procedure doitementer(const sender: iassistiveclientmenu;//sender can be nil
                          const items: menucellinfoarty; const aindex: integer);
+  procedure dodatasetevent(const sender: iassistiveclient; 
+                const akind: assistivedbeventkindty;
+                                  const adataset: pointer); //tdataset
 end;
 
 var

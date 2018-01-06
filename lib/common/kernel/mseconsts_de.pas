@@ -185,7 +185,9 @@ const
   'Eingef'#$00FC'gt',          //sc_pasted
   'R'#$00FC'ckg'#$00E4'ngig',  //sc_withdrawn
   'Fenster aktiviert',         //sc_windowactivated
-  'Men'#$00FC                  //sc_menu
+  'Men'#$00FC,                 //sc_menu
+  'Datei Beginn',               //sc_bof
+  'Datei Ende'                  //sc_eof
 );
     
 function delete_n_selected_rows(const params: array of const): msestring;

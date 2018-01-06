@@ -191,7 +191,9 @@ const
   'Pasted',              //sc_pasted
   'Withdrawn',           //sc_withdrawn
   'Window activated',    //sc_windowactivated
-  'Menu'                 //sc_menu
+  'Menu',                //sc_menu
+  'Beginning of file',   //sc_bof
+  'End of file'          //sc_eof
 );
     
 function delete_n_selected_rows(const params: array of const): msestring;
