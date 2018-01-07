@@ -250,6 +250,14 @@ type
    property items[const index: integer]: pointer read getitems write setitems; default;
  end;
 
+ tdynarrayarrayprop = class(tpointerarrayprop)
+  protected
+   procedure internalsetcount(const acount: int32) virtual abstract;
+   procedure setcount1(acount: integer; doinit: boolean); override;
+  public
+   destructor destroy(); override;
+ end;
+ 
  tpersistentarrayprop = class(tarrayprop,iobjectlink)
   private                     //same layout as tpointerarrayprop!
   protected
@@ -1459,6 +1467,21 @@ begin
  result:= apk_pointer;
 end;
 
+{ tdynarrayarrayprop }
+
+destructor tdynarrayarrayprop.destroy();
+begin
+ inherited;
+ internalsetcount(0);
+end;
+
+procedure tdynarrayarrayprop.setcount1(acount: integer; doinit: boolean);
+begin
+ checkcount(acount);
+ internalsetcount(acount);
+ inherited;
+end;
+
 { tpersistentarrayprop }
 
 constructor tpersistentarrayprop.create(aitemclasstype: virtualpersistentclassty);
@@ -2225,4 +2248,5 @@ begin
  result:= 'item';
 end;
 *)
+
 end.

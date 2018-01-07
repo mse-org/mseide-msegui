@@ -142,6 +142,18 @@ type
   public
  end;
 
+ tassistiveshortcutelementeditor = class(tarrayelementeditor)
+  public
+   function name: msestring; override;
+ end;
+ 
+ tassistiveshortcutspropertyeditor = class(tconstarraypropertyeditor)
+  protected
+   function geteditorclass: propertyeditorclassty; override;
+   function getelementeditorclass: elementeditorclassty; override;
+  public
+ end;
+
  tfacelocalpropseditor = class(temptysetpropertyeditor)
   protected
    function getinvisibleitems: tintegerset; override;
@@ -271,6 +283,8 @@ begin
                                     tneglevelarraypropertyeditor);
  registerpropertyeditor(typeinfo(tsysshortcuts),nil,'',
                                                  tsysshortcutspropertyeditor);
+ registerpropertyeditor(typeinfo(tassistiveshortcuts),nil,'',
+                                            tassistiveshortcutspropertyeditor);
  registerpropertyeditor(typeinfo(string),tfont,'name',tfontnamepropertyeditor);
  registerpropertyeditor(typeinfo(actionstatesty),nil,'',
                                                    tshapestatespropertyeditor);
@@ -461,6 +475,13 @@ begin
  modified;
 end;
 
+{ tsysshortcutelementeditor }
+
+function tsysshortcutelementeditor.name: msestring;
+begin
+ result:= msestring(getenumname(typeinfo(sysshortcutty),findex));
+end;
+
 { tsysshortcutspropertyeditor }
 
 function tsysshortcutspropertyeditor.geteditorclass: propertyeditorclassty;
@@ -471,6 +492,27 @@ end;
 function tsysshortcutspropertyeditor.getelementeditorclass: elementeditorclassty;
 begin
  result:= tsysshortcutelementeditor;
+end;
+
+{ tassistiveshortcutelementeditor }
+
+function tassistiveshortcutelementeditor.name: msestring;
+begin
+ result:= msestring(getenumname(typeinfo(assistiveshortcutty),findex));
+end;
+
+{ tassistiveshortcutspropertyeditor }
+
+function tassistiveshortcutspropertyeditor.geteditorclass():
+                                                  propertyeditorclassty;
+begin
+ result:= tshortcutarpropertyeditor;
+end;
+
+function tassistiveshortcutspropertyeditor.getelementeditorclass():
+                                                      elementeditorclassty;
+begin
+ result:= tassistiveshortcutelementeditor;
 end;
 
 { tshortcutactionpropertyeditor }
@@ -501,13 +543,6 @@ end;
 function tshortcutactionspropertyeditor.geteditorclass: propertyeditorclassty;
 begin
  result:= tshortcutactionpropertyeditor;
-end;
-
-{ tsysshortcutelementeditor }
-
-function tsysshortcutelementeditor.name: msestring;
-begin
- result:= msestring(getenumname(typeinfo(sysshortcutty),findex));
 end;
 
 { tlevelarraypropertyeditor }

@@ -346,6 +346,7 @@ type
  tshortcutpropertyeditor = class(tenumpropertyeditor)
   protected
    fsc1: boolean;
+   fscar: boolean;
    function getvaluetext(const avalue: shortcutty): msestring;
    function texttovalue(const atext: msestring): shortcutty;
   public
@@ -357,7 +358,15 @@ type
    function getvalue: msestring; override;
    function getvalues: msestringarty; override;
  end;
-
+ 
+ tshortcutarpropertyeditor = class(tshortcutpropertyeditor)
+  public
+   constructor create(const adesigner: idesigner;
+        const amodule: tmsecomponent; const acomponent: tcomponent;
+            const aobjectinspector: iobjectinspector;
+            const aprops: propinstancearty; atypeinfo: ptypeinfo); override;
+ end;
+ 
  tcolorpropertyeditor = class(tenumpropertyeditor)
   protected
    function getdefaultstate: propertystatesty; override;
@@ -5039,6 +5048,7 @@ var
  ar2: shortcutarty;
  int1: integer;
  intf1: iactionlink;
+ p1: pointer;
 begin
  ar1:= splitstring(value,widechar(' '));
  setlength(ar2,length(ar1));
@@ -5059,20 +5069,40 @@ begin
    modified;
   end
   else begin
-   if high(ar2) = 0 then begin
-    setordvalue(ar2[0]);
+   if fscar then begin
+    p1:= getpointervalue();
+    shortcutarty(p1):= ar2; //decref/incref
+    setpointervalue(p1);
    end
    else begin
-    setordvalue(int1,0);
+    if high(ar2) = 0 then begin
+     setordvalue(ar2[0]);
+    end
+    else begin
+     setordvalue(int1,0);
+    end;
    end;
   end;
  end;
 end;
 
 function tshortcutpropertyeditor.getvalue: msestring;
+
+ function getartext(const ashortcuts: shortcutarty): msestring;
+ var
+  i1: integer;
+ begin
+  result:= '';
+  for i1:= 0 to high(ashortcuts) do begin
+   result:= result + getvaluetext(ashortcuts[i1]) + ' ';
+  end;
+  if result <> '' then begin
+   setlength(result,length(result)-1);
+  end;
+ end; //getartext
+
 var
  ar1: shortcutarty;
- int1: integer;
  intf1: iactionlink;
 begin
  result:= '';
@@ -5084,16 +5114,17 @@ begin
    else begin
     ar1:= shortcut;
    end;
-   for int1:= 0 to high(ar1) do begin
-    result:= result + getvaluetext(ar1[int1]) + ' ';
-   end;
-   if result <> '' then begin
-    setlength(result,length(result)-1);
-   end;
+   result:= getartext(ar1);
   end;
  end
  else begin
-  result:= getvaluetext(getordvalue);
+  if fscar then begin
+   ar1:= shortcutarty(getpointervalue);
+   result:= getartext(ar1);
+  end
+  else begin
+   result:= getvaluetext(getordvalue);
+  end;
  end;
 end;
 
@@ -5110,11 +5141,13 @@ function tshortcutpropertyeditor.texttovalue(const atext: msestring): shortcutty
 var
  int1: integer;
  keys: integerarty;
+ s1: msestring;
  names: msestringarty;
 begin
  getshortcutlist(keys,names);
+ s1:= struppercase(atext);
  for int1:= 0 to high(names) do begin
-  if atext = names[int1] then begin
+  if s1 = struppercase(names[int1]) then begin
    result:= keys[int1];
    exit;
   end;
@@ -5132,6 +5165,17 @@ begin
  setordvalue(texttovalue(value));
 end;
 }
+{ tshortcutarpropertyeditor }
+
+constructor tshortcutarpropertyeditor.create(const adesigner: idesigner;
+               const amodule: tmsecomponent; const acomponent: tcomponent;
+               const aobjectinspector: iobjectinspector;
+               const aprops: propinstancearty; atypeinfo: ptypeinfo);
+begin
+ fscar:= true;
+ inherited;
+end;
+
  { tcolorpropertyeditorty}
 
 function tcolorpropertyeditor.getdefaultstate: propertystatesty;
