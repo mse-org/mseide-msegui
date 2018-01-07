@@ -22,10 +22,14 @@ uses
 type
  sysshortcutty = (sho_copy,sho_paste,sho_cut,sho_selectall,
                   sho_rowinsert,sho_rowappend,sho_rowdelete,
-                  sho_copycells,sho_pastecells,sho_groupundo,sho_groupredo);
- sysshortcutaty = array[sysshortcutty] of shortcutty;
+                  sho_copycells,sho_pastecells,sho_groupundo,sho_groupredo,
+                  sho_assspeakagain);
+ sysshortcutaty = array[sysshortcutty] of shortcutconstty;
  psysshortcutaty = ^sysshortcutaty;
- 
+const
+ lastsysshortcut = sho_groupredo;
+ firstassistiveshortcut = succ(lastsysshortcut);
+type
  taction = class(tcustomaction,iimagelistinfo,iactionlink)
   private
 //   fmultishortcut: integer; //0 = none, 1 = shortcut, 2 = shortcut1
@@ -277,6 +281,8 @@ procedure setsimpleshortcut(const avalue: shortcutty;
 procedure setsimpleshortcut(const avalue: shortcutty;
                                           var adest: actioninfoty); overload;
 procedure setsimpleshortcut1(const avalue: shortcutty; var adest: actioninfoty);
+procedure setsysshortcut(const avalue: shortcutconstty;
+                                          var adest: shortcutarty); overload;
 function checkshortcutconflict(const a,b: shortcutarty): boolean;
 
 procedure setactionshortcuts(const sender: iactionlink; 
@@ -307,8 +313,10 @@ function encodeshortcutname(const key: shortcutty): msestring; overload;
 function checkshortcutcode(const shortcut: shortcutty;
                     const info: keyeventinfoty;
                     const apreview: boolean = false): boolean; overload;
+function checkshortcutcode(const shortcut: shortcutconstty;
+          const info: keyeventinfoty): boolean;
 function checkshortcutcode(const shortcut: shortcutty;
-          const info: keyinfoty): boolean; overload;
+          const info: keyinfoty): boolean;
 function checkactionshortcut(var info: actioninfoty;
                         var keyinfo: keyeventinfoty): boolean; //true if done
 function doactionshortcut(const sender: tobject; var info: actioninfoty;
@@ -328,29 +336,35 @@ const
  modmask = shift or ctrl or alt or $1000 or pad;
 
  defaultsysshortcuts: sysshortcutaty = 
-//sho_copy,            sho_paste,                 sho_cut,         
- (ctrl+ord(key_c),     ctrl+ord(key_v),           ctrl+ord(key_x),
+//sho_copy,             sho_paste,            sho_cut,         
+ ((ctrl+ord(key_c),0,0),(ctrl+ord(key_v),0,0),(ctrl+ord(key_x),0,0),
 //sho_selectall
-  ctrl+ord(key_a),
-//sho_rowinsert,       sho_rowappend,             sho_rowdelete
-  ctrl+ord(key_insert),shift+ctrl+ord(key_insert),ctrl+ord(key_delete),
-//sho_copycells        sho_pastecells
-  (ctrl+shift+ord(key_c)),(ctrl+shift+ord(key_v)),
-//sho_groupundo,       sho_groupredo
-  ctrl+ord(key_z),      shift+ctrl+ord(key_z)
+  (ctrl+ord(key_a),0,0),
+//sho_rowinsert,             sho_rowappend,             
+  (ctrl+ord(key_insert),0,0),(shift+ctrl+ord(key_insert),0,0),
+//sho_rowdelete
+  (ctrl+ord(key_delete),0,0),
+//sho_copycells               sho_pastecells
+  (ctrl+shift+ord(key_c),0,0),(ctrl+shift+ord(key_v),0,0),
+//sho_groupundo,        sho_groupredo
+  (ctrl+ord(key_z),0,0),(shift+ctrl+ord(key_z),0,0),
+//sho_assspeakagain
+  (ctrl+ord(key_y),0,0)
   );
 
  defaultsysshortcuts1: sysshortcutaty = 
 //sho_copy,            sho_paste,                 sho_cut,   
- (ord(key_none),       shift+ord(key_insert),     shift+ord(key_delete),
+ ((ord(key_none),0,0),(shift+ord(key_insert),0,0),(shift+ord(key_delete),0,0),
 //sho_selectall
-  ord(key_none),
-//sho_rowinsert,       sho_rowappend,             sho_rowdelete
-  ord(key_none),       ord(key_none),             ord(key_none),
+  (ord(key_none),0,0),
+//sho_rowinsert,       sho_rowappend,      sho_rowdelete
+  (ord(key_none),0,0), (ord(key_none),0,0),(ord(key_none),0,0),
 //sho_copycells        sho_pastecells
-  ord(key_none),       ord(key_none),
+  (ord(key_none),0,0), (ord(key_none),0,0),
 //sho_groupundo,       sho_groupredo
-  ord(key_none),      ord(key_none)
+  (ord(key_none),0,0), (ord(key_none),0,0),
+//sho_assspeakagain
+  (ord(key_none),0,0)
   );
   
 var
@@ -622,7 +636,8 @@ const
  list: array[sysshortcutty] of stockcaptionty = (
         sc_Copy,sc_Paste,sc_cut,sc_select_all,
         sc_row_insert,sc_row_append,sc_row_delete,
-        sc_copy_cells,sc_paste_cells,sc_undo,sc_redo);
+        sc_copy_cells,sc_paste_cells,sc_undo,sc_redo,
+        sc_speakagain);
 
 begin
  result:= stockobjects.captions[list[aitem]];
@@ -853,6 +868,12 @@ begin
  end;
 end;
 
+procedure setsysshortcut(const avalue: shortcutconstty;
+                                          var adest: shortcutarty);
+begin
+ setsimpleshortcut(avalue[0],adest);
+end;
+
 function setsimpleshortcut(const avalue: shortcutty): shortcutarty;
 begin
  setsimpleshortcut(avalue,result);
@@ -1017,6 +1038,14 @@ begin
   end;
  end;
 end;
+
+function checkshortcutcode(const shortcut: shortcutconstty;
+          const info: keyeventinfoty): boolean;
+begin
+ result:= (shortcut[1] = 0) and (shortcut[2] = 0) and 
+                                    checkshortcutcode(shortcut[0],info);
+end;
+
 
 function checkshortcutcode(const shortcut: shortcutty;
           const info: keyinfoty): boolean;

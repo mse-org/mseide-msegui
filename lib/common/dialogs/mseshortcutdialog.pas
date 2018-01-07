@@ -99,7 +99,7 @@ function shortcutdialog(const acontroller: tshortcutcontroller): modalresultty;
 var
  fo1: tmseshortcutdialogfo;
  no: tshortcutitem;
- no1: tsysshortcutitem;
+ no1,no2: tsysshortcutitem;
  item1: tshortcutaction;
  int1,int2: integer;
  ss1: sysshortcutty;
@@ -107,9 +107,14 @@ begin
  fo1:= tmseshortcutdialogfo.create(nil);
  try
   no1:= tsysshortcutitem.create(stockobjects.captions[sc_system]);
-  for ss1:= low(ss1) to high(ss1) do begin
+  for ss1:= low(ss1) to lastsysshortcut do begin
    no1.add(tsysshortcutitem.create(acontroller,ss1));
   end;
+  no2:= tsysshortcutitem.create(stockobjects.captions[sc_voiceoutput]);
+  for ss1:= firstassistiveshortcut to high(ss1) do begin
+   no2.add(tsysshortcutitem.create(acontroller,ss1));
+  end;
+  no1.add(no2);
   fo1.sc.itemlist.add(no1);
   additem(pointerarty(fo1.frootnodes),no1);
   with acontroller.actions do begin
@@ -145,18 +150,25 @@ begin
   fo1.checkconflict;
   result:= fo1.show(true);
   if result = mr_ok then begin
+   fo1.sc.itemlist.expandall;
    acontroller.sysshortcuts.beginupdate;
    acontroller.sysshortcuts1.beginupdate;
-   for ss1:= low(ss1) to high(ss1) do begin
+   for ss1:= low(ss1) to lastsysshortcut do begin
     with tsysshortcutitem(no1[ord(ss1)]) do begin
+     acontroller.sysshortcuts[ss1]:= getsimpleshortcut(fshortcut);
+     acontroller.sysshortcuts1[ss1]:= getsimpleshortcut(fshortcut1);
+    end;
+   end;
+   for ss1:= firstassistiveshortcut to high(ss1) do begin
+    with tsysshortcutitem(no2[ord(ss1)-ord(firstassistiveshortcut)]) do begin
      acontroller.sysshortcuts[ss1]:= getsimpleshortcut(fshortcut);
      acontroller.sysshortcuts1[ss1]:= getsimpleshortcut(fshortcut1);
     end;
    end;
    acontroller.sysshortcuts.endupdate;
    acontroller.sysshortcuts1.endupdate;
-   fo1.sc.itemlist.expandall;
-   int2:= ord(high(ss1)) + 2;
+//   fo1.sc.itemlist.expandall;
+   int2:= ord(high(ss1)) + 3;
    for int1:= int2 to fo1.grid.rowhigh do begin
     with tshortcutitem(fo1.sc[int1]) do begin
      if not fisgroup then begin
