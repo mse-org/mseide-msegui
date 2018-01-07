@@ -94,15 +94,24 @@ type
    constructor create(const acontroller: tshortcutcontroller;
                       const aindex: sysshortcutty); overload;
  end;
+
+ tassistiveshortcutitem = class(tshortcutitem)
+  public
+   constructor create(const acaption: msestring); overload;
+   constructor create(const acontroller: tshortcutcontroller;
+                      const aindex: assistiveshortcutty); overload;
+ end;
   
 function shortcutdialog(const acontroller: tshortcutcontroller): modalresultty;
 var
  fo1: tmseshortcutdialogfo;
  no: tshortcutitem;
  no1: tsysshortcutitem;
+ no2: tassistiveshortcutitem;
  item1: tshortcutaction;
  int1,int2: integer;
  ss1: sysshortcutty;
+ as1: assistiveshortcutty;
 begin
  fo1:= tmseshortcutdialogfo.create(nil);
  try
@@ -110,8 +119,14 @@ begin
   for ss1:= low(ss1) to high(ss1) do begin
    no1.add(tsysshortcutitem.create(acontroller,ss1));
   end;
+  no2:= tassistiveshortcutitem.create(stockobjects.captions[sc_voiceoutput]);
+  for as1:= low(as1) to high(as1) do begin
+   no2.add(tassistiveshortcutitem.create(acontroller,as1));
+  end;
+  no1.add(no2);
   fo1.sc.itemlist.add(no1);
   additem(pointerarty(fo1.frootnodes),no1);
+  additem(pointerarty(fo1.frootnodes),no2);
   with acontroller.actions do begin
    if count > 0 then begin
     if items[0].action <> nil then begin
@@ -145,6 +160,7 @@ begin
   fo1.checkconflict;
   result:= fo1.show(true);
   if result = mr_ok then begin
+   fo1.sc.itemlist.expandall;
    acontroller.sysshortcuts.beginupdate;
    acontroller.sysshortcuts1.beginupdate;
    for ss1:= low(ss1) to high(ss1) do begin
@@ -155,8 +171,19 @@ begin
    end;
    acontroller.sysshortcuts.endupdate;
    acontroller.sysshortcuts1.endupdate;
-   fo1.sc.itemlist.expandall;
-   int2:= ord(high(ss1)) + 2;
+
+   acontroller.assistiveshortcuts.beginupdate();
+   acontroller.assistiveshortcuts1.beginupdate();
+   for as1:= low(as1) to high(as1) do begin
+    with tassistiveshortcutitem(no2[ord(as1)]) do begin
+     acontroller.assistiveshortcuts[as1]:= fshortcut;
+     acontroller.assistiveshortcuts1[as1]:= fshortcut1;
+    end;
+   end;
+   acontroller.assistiveshortcuts.endupdate();
+   acontroller.assistiveshortcuts1.endupdate();
+
+   int2:= ord(high(ss1))+ord(high(as1)) + 4;
    for int1:= int2 to fo1.grid.rowhigh do begin
     with tshortcutitem(fo1.sc[int1]) do begin
      if not fisgroup then begin
@@ -235,6 +262,43 @@ begin
   setsimpleshortcut(defaultsysshortcuts1[aindex],fshortcut1default);
  end;
 end;
+
+{ tassistiveshortcutitem }
+
+constructor tassistiveshortcutitem.create(const acaption: msestring);
+begin
+ inherited create(nil,nil);
+ caption:= acaption;
+ fisgroup:= true;
+end;
+
+constructor tassistiveshortcutitem.create(const acontroller: tshortcutcontroller;
+                                           const aindex: assistiveshortcutty);
+
+ procedure setdefault(const source: shortcutconstty; out dest: shortcutarty);
+ var
+  i1: int32;
+ begin
+  dest:= nil;
+  for i1:= 0 to high(source) do begin
+   if source[i1] = 0 then begin
+    break;
+   end;
+   additem(int16arty(dest),int16(source[i1]));
+  end;
+ end; //setdefault
+
+begin
+ inherited create(nil,nil);
+ caption:= getassistiveshortcutdispname(aindex);
+ with acontroller do begin
+  fshortcut:= assistiveshortcuts[aindex];
+  fshortcut1:= assistiveshortcuts1[aindex];
+  setdefault(defaultassistiveshortcuts[aindex],fshortcutdefault);
+  setdefault(defaultassistiveshortcuts1[aindex],fshortcut1default);
+ end;
+end;
+
 
 { tmseshortcutdialogfo }
  

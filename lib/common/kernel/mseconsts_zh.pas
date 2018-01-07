@@ -193,7 +193,9 @@ const
   'Window activated',    //sc_windowactivated
   'Menu',                //sc_menu
   'Beginning of file',   //sc_bof
-  'End of file'          //sc_eof
+  'End of file',         //sc_eof
+  'Voice output',        //sc_voiceoutput
+  'Speak again'          //sc_speakagain
 );
     
 function delete_n_selected_rows(const params: array of const): msestring;

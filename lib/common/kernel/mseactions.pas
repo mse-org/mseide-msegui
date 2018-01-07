@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2012 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2018 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -249,7 +249,7 @@ type
    procedure setassistiveshortcuts1(const avalue: tassistiveshortcuts);
   protected
    procedure updateaction(const aaction: taction); reintroduce;
-   //istatfile
+    //istatfile
    procedure dostatread(const reader: tstatreader); virtual;
    procedure dostatwrite(const writer: tstatwriter); virtual;
    procedure statreading;
@@ -346,6 +346,8 @@ function getshortcutname(const key: keyty;
                               const shiftstate: shiftstatesty): msestring;
 //function getshortcutname(key: shortcutarty): msestring;
 function getsysshortcutdispname(const aitem: sysshortcutty): msestring;
+function getassistiveshortcutdispname(
+                            const aitem: assistiveshortcutty): msestring;
 
 function isvalidshortcut(const ashortcut: shortcutty): boolean;
 function encodeshortcut(const akey: keyty;
@@ -670,17 +672,19 @@ end;
 //todo: internationalize
 function getsysshortcutdispname(const aitem: sysshortcutty): msestring;
 const
-{
- list: array[sysshortcutty] of msestring = (
-        'Copy','Paste','Cut','Select all',
-        'Row insert','Row append','Row delete',
-        'Copy cells','Paste cells','Undo','Redo');
-}
  list: array[sysshortcutty] of stockcaptionty = (
         sc_Copy,sc_Paste,sc_cut,sc_select_all,
         sc_row_insert,sc_row_append,sc_row_delete,
         sc_copy_cells,sc_paste_cells,sc_undo,sc_redo);
+begin
+ result:= stockobjects.captions[list[aitem]];
+end;
 
+function getassistiveshortcutdispname(
+                            const aitem: assistiveshortcutty): msestring;
+const
+ list: array[assistiveshortcutty] of stockcaptionty = (
+        sc_speakagain);
 begin
  result:= stockobjects.captions[list[aitem]];
 end;
@@ -1597,6 +1601,8 @@ begin
  if reader.candata then begin
   fsysshortcuts.dostatread('sysshortcuts',reader);
   fsysshortcuts1.dostatread('sysshortcuts1',reader);
+  fassistiveshortcuts.dostatread('assistiveshortcuts',reader);
+  fassistiveshortcuts1.dostatread('assistiveshortcuts1',reader);
   reader.readrecordarray('shortcuts',{$ifdef FPC}@{$endif}setactionreccount,
             {$ifdef FPC}@{$endif}setactionrecord);
  end;
@@ -1643,6 +1649,8 @@ begin
  if writer.candata then begin
   fsysshortcuts.dostatwrite('sysshortcuts',writer);
   fsysshortcuts1.dostatwrite('sysshortcuts1',writer);
+  fassistiveshortcuts.dostatwrite('assistiveshortcuts',writer);
+  fassistiveshortcuts1.dostatwrite('assistiveshortcuts1',writer);
   writer.writerecordarray('shortcuts',factions.count,
                                 {$ifdef FPC}@{$endif}getactionrecord);
  end;
@@ -2040,7 +2048,7 @@ begin
  for int1:= 0 to high(fshortcuts) do begin
   with fshortcuts[int1] do begin
 //   value:= translateshortcut(value);
-   int2:= getenumvalue(typeinfo(sysshortcutty),name);
+   int2:= getenumvalue(typeinfo(assistiveshortcutty),name);
    if int2 >= 0 then begin
     items[assistiveshortcutty(int2)]:= value;
    end;

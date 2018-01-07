@@ -5145,9 +5145,9 @@ var
  names: msestringarty;
 begin
  getshortcutlist(keys,names);
- s1:= struppercase(atext);
+ s1:= strlowercase(atext);
  for int1:= 0 to high(names) do begin
-  if s1 = struppercase(names[int1]) then begin
+  if s1 = strlowercase(names[int1]) then begin
    result:= keys[int1];
    exit;
   end;
