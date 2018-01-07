@@ -397,6 +397,8 @@ tassistivehandler = class(tmsecomponent,iassistiveserver)
    procedure unregisteritem(const aintf: iassistiveclient);
    function finditem(aintf: iassistiveclient;
                         out aitem: tassistivewidgetitem): boolean;
+   procedure doshortcut(const sender: twidget; var info: keyeventinfoty);
+   procedure dospeakagain(const sender: twidget);
       
     //iassistiveserver
    procedure doapplicationactivated();
@@ -525,7 +527,7 @@ tassistivehandler = class(tmsecomponent,iassistiveserver)
  
 implementation
 uses
- msekeyboard,sysutils,msesysutils,mserichstring,msemenus;
+ msekeyboard,sysutils,msesysutils,mserichstring,msemenus,mseactions;
 type
  twidget1 = class(twidget);
  tpopupmenuwidget1 = class(tpopupmenuwidget);
@@ -820,6 +822,7 @@ end;
 procedure tassistivehandler.activate();
 begin
  if not (csdesigning in componentstate) then begin
+  application.registeronshortcut(@doshortcut);
   fspeaker.active:= true;
   assistiveserver:= iassistiveserver(self);
   assistiveoptions:= options;
@@ -833,6 +836,7 @@ end;
 procedure tassistivehandler.deactivate();
 begin
  if not (csdesigning in componentstate) then begin
+  application.unregisteronshortcut(@doshortcut);
   assistiveserver:= nil;
   assistiveoptions:= [];
   fspeaker.active:= false;
@@ -1024,6 +1028,28 @@ begin
   aitem:= p1^ .data.item;
   result:= true;
  end;
+end;
+
+procedure tassistivehandler.doshortcut(const sender: twidget;
+               var info: keyeventinfoty);
+begin
+ if not (es_processed in info.eventstate) then begin
+  if checkactionshortcut(assistiveshortcuts[shoa_speakagain],info) then begin
+   dospeakagain(sender);
+  end
+  else begin
+   if not (es_processed in info.eventstate) then begin
+    if checkactionshortcut(assistiveshortcuts1[shoa_speakagain],info) then begin
+     dospeakagain(sender);
+    end;
+   end;
+  end;
+ end;
+end;
+
+procedure tassistivehandler.dospeakagain(const sender: twidget);
+begin
+ speakall(twidget1(sender).getiassistiveclient(),false,true);
 end;
 
 
@@ -1257,12 +1283,14 @@ begin
  debug('keydown',sender);
 {$endif}
  if not (es_child in info.eventstate) then begin
+ {
   if (info.key = key_return) and 
                 (info.shiftstate*keyshiftstatesmask = []) then begin
    if info.serial <> fdataenteredkeyserial then begin
     speakall(sender,false,true);
    end;
   end;
+ }
   fdataenteredkeyserial:= 0;
  end;
 end;

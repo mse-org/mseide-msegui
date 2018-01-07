@@ -359,6 +359,8 @@ function checkshortcutcode(const shortcut: shortcutty;
                     const apreview: boolean = false): boolean; overload;
 function checkshortcutcode(const shortcut: shortcutty;
           const info: keyinfoty): boolean; overload;
+function checkactionshortcut(const ashortcut: shortcutarty;
+                        var keyinfo: keyeventinfoty): boolean; //true if done
 function checkactionshortcut(var info: actioninfoty;
                         var keyinfo: keyeventinfoty): boolean; //true if done
 function doactionshortcut(const sender: tobject; var info: actioninfoty;
@@ -1156,89 +1158,94 @@ begin
 end;
 }
 
-function checkactionshortcut(var info: actioninfoty;
-                        var keyinfo: keyeventinfoty): boolean; //true if done
- function check(const anum: integer; out exec: boolean): boolean;
- var
-  ar1: shortcutarty;
-  int1,int2,int3: integer;
- begin
-  if anum = 2 then begin
-   ar1:= info.shortcut1;
-  end
-  else begin
-   ar1:= info.shortcut;
-  end;
-  result:= false;
-  exec:= false;
-  if (high(ar1) > 0) and (es_preview in keyinfo.eventstate) then begin
-   exec:= true;
-   for int1:= high(ar1) downto 0 do begin
-    if checkshortcutcode(ar1[int1],keyinfo,true) then begin
-     result:= true;
-     with application do begin
-      if high(keyhistory) >= int1-1 then begin
-       int3:= 0;
-       if int1 > 0 then begin       
-        for int2:= int1 - 1 downto 0 do begin
-         if not checkshortcutcode(ar1[int2],keyhistory[int3]) then begin
-          result:= false;
-          exec:= false;
-          break;
-         end;
-         inc(int3);
+function check(const ar1: shortcutarty; out exec: boolean;
+                          var keyinfo: keyeventinfoty): boolean;
+var
+ int1,int2,int3: integer;
+begin
+{
+ if anum = 2 then begin
+  ar1:= info.shortcut1;
+ end
+ else begin
+  ar1:= info.shortcut;
+ end;
+}
+ result:= false;
+ exec:= false;
+ if (high(ar1) > 0) and (es_preview in keyinfo.eventstate) then begin
+  exec:= true;
+  for int1:= high(ar1) downto 0 do begin
+   if checkshortcutcode(ar1[int1],keyinfo,true) then begin
+    result:= true;
+    with application do begin
+     if high(keyhistory) >= int1-1 then begin
+      int3:= 0;
+      if int1 > 0 then begin       
+       for int2:= int1 - 1 downto 0 do begin
+        if not checkshortcutcode(ar1[int2],keyhistory[int3]) then begin
+         result:= false;
+         exec:= false;
+         break;
         end;
-       end
-       else begin
-        exec:= false;
-       end;      
+        inc(int3);
+       end;
       end
       else begin
        exec:= false;
-       result:= false;
-      end;
+      end;      
+     end
+     else begin
+      exec:= false;
+      result:= false;
      end;
-     if exec then begin
-      break;
-     end;
-    end
-    else begin
-     exec:= false
     end;
+    if exec then begin
+     break;
+    end;
+   end
+   else begin
+    exec:= false
    end;
-   if exec then begin
-    application.clearkeyhistory;
-   end;
-  end
-  else begin
-   if high(ar1) >= 0 then begin
-    if checkshortcutcode(ar1[0],keyinfo,false) then begin
-     result:= true;
-     if high(ar1) = 0 then begin
-      exec:= true;
-     end;
+  end;
+  if exec then begin
+   application.clearkeyhistory;
+  end;
+ end
+ else begin
+  if high(ar1) >= 0 then begin
+   if checkshortcutcode(ar1[0],keyinfo,false) then begin
+    result:= true;
+    if high(ar1) = 0 then begin
+     exec:= true;
     end;
    end;
   end;
- end; //check
+ end;
+end; //check
 
+function checkactionshortcut(var info: actioninfoty;
+                        var keyinfo: keyeventinfoty): boolean; //true if done
 var
- bo1{,bo2}: boolean;
+ bo1: boolean;
 begin
- bo1:= check(1,result);
+ bo1:= check(info.shortcut,result,keyinfo);
  if not bo1 then begin
-  bo1:= check(2,result);
+  bo1:= check(info.shortcut1,result,keyinfo);
  end;
  if bo1 then begin
   include(keyinfo.eventstate,es_processed);
-  {
-  if result then begin
-   result:= doactionexecute1(sender,info,bo1,false,false);
-//   changed;
-  end;
-  }
  end;
 end;
+
+function checkactionshortcut(const ashortcut: shortcutarty;
+                        var keyinfo: keyeventinfoty): boolean; //true if done
+begin
+ if check(ashortcut,result,keyinfo) then begin
+  include(keyinfo.eventstate,es_processed);
+ end;
+end;
+
 
 function doactionshortcut(const sender: tobject; var info: actioninfoty;
                         var keyinfo: keyeventinfoty;
