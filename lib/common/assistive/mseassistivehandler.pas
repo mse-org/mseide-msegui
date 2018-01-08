@@ -21,12 +21,12 @@ uses
 
 type
  assistivehandlerstatety =
-  (ash_active,ash_windowactivated,ash_menuactivated,ash_menuactivatepending,
-   ash_dropdownlistclosed,ash_editcharenter,ash_dropdownpending,
-   ash_textblock,ash_textblock1);
+  (ahs_active,ahs_windowactivated,ahs_menuactivated,ahs_menuactivatepending,
+   ahs_dropdownlistclosed,ahs_editcharenter,ahs_dropdownpending,
+   ahs_textblock,ahs_textblock1);
  assistivehandlerstatesty = set of assistivehandlerstatety;
 const
- internalstates = [ash_active];
+ internalstates = [ahs_active];
 type
  tassistivespeak = class(tcustomespeakng)
   public
@@ -468,6 +468,8 @@ type
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy(); override;
+   procedure setstate(const astate: assistivehandlerstatesty);
+   procedure removestate(const astate: assistivehandlerstatesty);
    procedure wait();
    procedure cancel();
    function getcaptiontext(const acaption: msestring): msestring;
@@ -485,8 +487,6 @@ type
    procedure speakmenustart(const sender: iassistiveclient);
    procedure speakallmenu(const sender: iassistiveclientmenu;
                                                const ahint: boolean);
-   procedure setstate(const astate: assistivehandlerstatesty);
-   procedure removestate(const astate: assistivehandlerstatesty);
    property state: assistivehandlerstatesty read fstate;
   published
    property active: boolean read factive write setactive default false;
@@ -865,9 +865,7 @@ begin
   fspeaker.active:= true;
   assistiveserver:= iassistiveserver(self);
   assistiveoptions:= options;
-//  noassistivedefaultbutton:= true;
-//  assistivewidgetnavig:= true;
-  include(fstate,ash_active);
+  include(fstate,ahs_active);
   application.invalidate();
  end;
 end;
@@ -879,7 +877,7 @@ begin
   assistiveserver:= nil;
   assistiveoptions:= [];
   fspeaker.active:= false;
-  exclude(fstate,ash_active);
+  exclude(fstate,ahs_active);
   application.invalidate();
  end;
 end;
@@ -892,7 +890,7 @@ end;
 procedure tassistivehandler.setoptions(const avalue: assistiveoptionsty);
 begin
  foptions:= avalue;
- if ash_active in fstate then begin
+ if ahs_active in fstate then begin
   assistiveoptions:= foptions;
  end;
 end;
@@ -1161,7 +1159,7 @@ begin
 {$ifdef mse_debugassistive}
  debug('windowactivated',sender);
 {$endif}
- setstate([ash_windowactivated]);
+ setstate([ahs_windowactivated]);
  b1:= false;
  if finditem(sender,item1) then begin
   item1.dowindowactivated(self,sender,b1);
@@ -1182,7 +1180,7 @@ begin
    }
    end
    else begin
-    if fstate*[ash_dropdownlistclosed,ash_dropdownpending] = [] then begin
+    if fstate*[ahs_dropdownlistclosed,ahs_dropdownpending] = [] then begin
      startspeak();
   //   speaktext(sc_windowactivated,fvoicecaption);
      speaktext(getcaptiontext(sender),fvoicecaption);
@@ -1191,7 +1189,7 @@ begin
    end;
   end;
  end;
- removestate([ash_menuactivatepending,ash_dropdownpending]);
+ removestate([ahs_menuactivatepending,ahs_dropdownpending]);
 end;
 
 procedure tassistivehandler.dowindowdeactivated(const sender: iassistiveclient);
@@ -1202,6 +1200,10 @@ begin
 {$ifdef mse_debugassistive}
  debug('windowdeactivated',sender);
 {$endif}
+ if sender.getassistiveflags() * [asf_popup,asf_grid] = 
+                                     [asf_popup,asf_grid] then begin
+  setstate([ahs_dropdownlistclosed]);
+ end;
  b1:= false;
  if finditem(sender,item1) then begin
   item1.dowindowdeactivated(self,sender,b1);
@@ -1211,18 +1213,9 @@ begin
    fonwindowdeactivated(self,sender,b1);
   end;
   if not b1 then begin
-   if sender.getassistiveflags() * [asf_popup,asf_grid] = 
-                                       [asf_popup,asf_grid] then begin
-    setstate([ash_dropdownlistclosed]);
-   end;
   end;
  end;
- removestate([ash_windowactivated]);
- {
- if asf_menu in sender.getassistiveflags() then begin
-  removestate([ass_menuactivated]);
- end;
- }
+ removestate([ahs_windowactivated]);
 end;
 
 procedure tassistivehandler.dowindowclosed(const sender: iassistiveclient);
@@ -1252,6 +1245,12 @@ begin
 {$ifdef mse_debugassistive}
  debug('enter',sender);
 {$endif}
+ removestate([ahs_dropdownpending]);
+ if (ahs_editcharenter in fstate) and 
+           (sender.getassistiveflags*[asf_popup,asf_grid] = 
+                                  [asf_popup,asf_grid]) then begin
+  setstate([ahs_dropdownpending]);
+ end;
  b1:= false;
  if finditem(sender,item1) then begin
   item1.doenter(self,sender,b1);
@@ -1260,16 +1259,8 @@ begin
   if canevent(tmethod(fonenter)) then begin
    fonenter(self,sender,b1);
   end;
-  if not b1 then begin
-   removestate([ash_dropdownpending]);
-   if (ash_editcharenter in fstate) and 
-             (sender.getassistiveflags*[asf_popup,asf_grid] = 
-                                    [asf_popup,asf_grid]) then begin
-    setstate([ash_dropdownpending]);
-   end;
-   removestate([ash_editcharenter]);
-  end;
  end;
+ removestate([ahs_editcharenter]);
 end;
 
 procedure tassistivehandler.doactivate(const sender: iassistiveclient);
@@ -1301,15 +1292,15 @@ begin
                    tcustomgrid(sender.getassistivewidget()).focusedcell,true);
      end
      else begin
-      if not (ash_dropdownlistclosed in fstate) then begin
-       speakall(sender,ash_windowactivated in fstate,false);
+      if not (ahs_dropdownlistclosed in fstate) then begin
+       speakall(sender,ahs_windowactivated in fstate,false);
       end;
      end;
     end;
-    removestate([ash_windowactivated,ash_dropdownlistclosed]);
    end;
   end;
  end;
+ removestate([ahs_windowactivated,ahs_dropdownlistclosed]);
 end;
 
 procedure tassistivehandler.doclientmouseevent(const sender: iassistiveclient;
@@ -1534,7 +1525,7 @@ begin
 {$ifdef mse_debugassistive}
  debug('editcharenter',sender);
 {$endif}
- setstate([ash_editcharenter]);
+ setstate([ahs_editcharenter]);
  b1:= false;
  if finditem(sender,item1) then begin
   item1.doeditcharenter(self,sender,achar,b1);
@@ -1544,13 +1535,13 @@ begin
    foneditcharenter(self,sender,achar,b1);
   end;
   if not b1 then begin
-   if not (ash_textblock1 in fstate) then begin
+   if not (ahs_textblock1 in fstate) then begin
     startspeak();
    end
    else begin
     speaktext(sc_input,fvoicecaption);
    end;
-   exclude(fstate,ash_textblock1);
+   exclude(fstate,ahs_textblock1);
    if length(achar) = 1 then begin
     speakcharacter(getucs4char(achar,1),fvoicetext);
    end
@@ -1570,7 +1561,7 @@ begin
 {$ifdef mse_debugassistive}
  debug('editchardelete',sender);
 {$endif}
- include(fstate,ash_textblock);
+ include(fstate,ahs_textblock);
  b1:= false;
  if finditem(sender,item1) then begin
   item1.dochange(self,sender,b1);
@@ -1609,7 +1600,7 @@ begin
    foneditindexmoved(self,sender,aindex,b1);
   end;
   if not b1 then begin
-   if not (ash_textblock in fstate) then begin
+   if not (ahs_textblock in fstate) then begin
     startspeak();
    end;
    s1:= sender.getassistivetext();
@@ -1624,7 +1615,7 @@ begin
    end;
   end;
  end;
- exclude(fstate,ash_textblock);
+ exclude(fstate,ahs_textblock);
 end;
 
 procedure tassistivehandler.doeditwithdrawn(const sender: iassistiveclientedit);
@@ -1635,7 +1626,7 @@ begin
 {$ifdef mse_debugassistive}
  debug('editwithdrawn',sender);
 {$endif}
- include(fstate,ash_textblock);
+ include(fstate,ahs_textblock);
  b1:= false;
  if finditem(sender,item1) then begin
   item1.doeditwithdrawn(self,sender,b1);
@@ -1662,7 +1653,7 @@ begin
 {$ifdef mse_debugassistive}
  debug('edittextblock',sender);
 {$endif}
- fstate:= fstate + [ash_textblock,ash_textblock1];
+ fstate:= fstate + [ahs_textblock,ahs_textblock1];
  b1:= false;
  if finditem(sender,item1) then begin
   item1.doedittextblock(self,sender,amode,atext,b1);
@@ -1809,15 +1800,14 @@ begin
 {$ifdef mse_debugassistive}
  debug('menuactivated',sender);
 {$endif}
+ setstate([ahs_menuactivated]);
  b1:= false;
  if canevent(tmethod(fonmenuactivated)) then begin
   fonmenuactivated(self,sender,b1);
  end;
  if not b1 then begin
-  setstate([ash_menuactivated]);
   speakallmenu(sender,false);
  end;
- setstate([ash_menuactivated]);
 end;
 
 procedure tassistivehandler.doitementer(const sender: iassistiveclientmenu;
@@ -1833,12 +1823,12 @@ begin
   fonmenuitementer(self,sender,items,aindex,b1);
  end;
  if not b1 then begin
-  if not (ash_menuactivated in fstate) then begin
+  if not (ahs_menuactivated in fstate) then begin
    startspeak();
    speaktext(getcaptiontext(iassistiveclient(sender)),fvoicetext);
   end;
  end;
- removestate([{ass_windowactivated,}ash_menuactivated]);
+ removestate([ahs_menuactivated]);
 end;
 
 procedure tassistivehandler.dodatasetevent(const sender: iassistiveclient;

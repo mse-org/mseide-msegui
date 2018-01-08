@@ -1569,8 +1569,10 @@ type
    constructor create(const acontroller: tcustomdbdropdownlistcontroller;
                              acols: tdropdowncols);
    destructor destroy; override;
-   procedure rowup(const action: focuscellactionty = fca_focusin); override;
-   procedure rowdown(const action: focuscellactionty = fca_focusin); override;
+   procedure rowup(const action: focuscellactionty = fca_focusin;
+                                       const nowrap: boolean = false) override;
+   procedure rowdown(const action: focuscellactionty = fca_focusin;
+                                       const nowrap: boolean = false) override;
    procedure pageup(const action: focuscellactionty = fca_focusin); override;
    procedure pagedown(const action: focuscellactionty = fca_focusin); override;
    procedure wheelup(const action: focuscellactionty = fca_focusin); override;
@@ -1847,8 +1849,10 @@ type
          const ashowcell: cellpositionty = cep_nearest): boolean; override;
                                  //true if ok
    function canclose(const newfocus: twidget): boolean; override;
-   procedure rowup(const action: focuscellactionty = fca_focusin); override;
-   procedure rowdown(const action: focuscellactionty = fca_focusin); override;
+   procedure rowup(const action: focuscellactionty = fca_focusin;
+                                       const nowrap: boolean = false); override;
+   procedure rowdown(const action: focuscellactionty = fca_focusin;
+                                       const nowrap: boolean = false); override;
    procedure pageup(const action: focuscellactionty = fca_focusin); override;
    procedure pagedown(const action: focuscellactionty = fca_focusin); override;
    procedure wheelup(const action: focuscellactionty = fca_focusin); override;
@@ -2146,8 +2150,10 @@ type
                                  //true if ok
    procedure docellevent(var info: celleventinfoty); override;
    function canclose(const newfocus: twidget): boolean; override;
-   procedure rowup(const action: focuscellactionty = fca_focusin); override;
-   procedure rowdown(const action: focuscellactionty = fca_focusin); override;
+   procedure rowup(const action: focuscellactionty = fca_focusin;
+                                       const nowrap: boolean = false); override;
+   procedure rowdown(const action: focuscellactionty = fca_focusin;
+                                       const nowrap: boolean = false); override;
    procedure pageup(const action: focuscellactionty = fca_focusin); override;
    procedure pagedown(const action: focuscellactionty = fca_focusin); override;
    procedure wheelup(const action: focuscellactionty = fca_focusin); override;
@@ -2268,8 +2274,10 @@ type
   public
    constructor create(const acontroller: texterndatadropdownlistcontroller;
                              acols: tdropdowncols);
-   procedure rowup(const action: focuscellactionty = fca_focusin); override;
-   procedure rowdown(const action: focuscellactionty = fca_focusin); override;
+   procedure rowup(const action: focuscellactionty = fca_focusin;
+                                       const nowrap: boolean = false); override;
+   procedure rowdown(const action: focuscellactionty = fca_focusin;
+                                       const nowrap: boolean = false); override;
    procedure pageup(const action: focuscellactionty = fca_focusin); override;
    procedure pagedown(const action: focuscellactionty = fca_focusin); override;
    procedure wheelup(const action: focuscellactionty = fca_focusin); override;
@@ -6952,12 +6960,14 @@ begin
  fdatalink.MoveBy(-wheelheight);
 end;
 
-procedure tdbdropdownlist.rowdown(const action: focuscellactionty = fca_focusin);
+procedure tdbdropdownlist.rowdown(const action: focuscellactionty = fca_focusin;
+                                       const nowrap: boolean = false);
 begin
  fdatalink.MoveBy(1);
 end;
 
-procedure tdbdropdownlist.rowup(const action: focuscellactionty = fca_focusin);
+procedure tdbdropdownlist.rowup(const action: focuscellactionty = fca_focusin;
+                                       const nowrap: boolean = false);
 begin
  fdatalink.MoveBy(-1);
 end;
@@ -9434,12 +9444,14 @@ begin
  fdatalink.MoveBy(-wheelheight);
 end;
 
-procedure tcustomdbwidgetgrid.rowdown(const action: focuscellactionty = fca_focusin);
+procedure tcustomdbwidgetgrid.rowdown(
+  const action: focuscellactionty = fca_focusin; const nowrap: boolean = false);
 begin
  fdatalink.rowdown;
 end;
 
-procedure tcustomdbwidgetgrid.rowup(const action: focuscellactionty = fca_focusin);
+procedure tcustomdbwidgetgrid.rowup(
+  const action: focuscellactionty = fca_focusin;const nowrap: boolean = false);
 begin
  fdatalink.MoveBy(-1);
 end;
@@ -10353,12 +10365,14 @@ begin
  fdatalink.MoveBy(-wheelheight);
 end;
 
-procedure tcustomdbstringgrid.rowdown(const action: focuscellactionty = fca_focusin);
+procedure tcustomdbstringgrid.rowdown(
+  const action: focuscellactionty = fca_focusin; const nowrap: boolean = false);
 begin
  fdatalink.rowdown;
 end;
 
-procedure tcustomdbstringgrid.rowup(const action: focuscellactionty = fca_focusin);
+procedure tcustomdbstringgrid.rowup(
+  const action: focuscellactionty = fca_focusin; const nowrap: boolean = false);
 begin
  fdatalink.MoveBy(-1);
 end;
@@ -11914,12 +11928,14 @@ begin
  MoveBy(-wheelheight);
 end;
 
-procedure texterndatadropdownlist.rowdown(const action: focuscellactionty = fca_focusin);
+procedure texterndatadropdownlist.rowdown(
+  const action: focuscellactionty = fca_focusin; const nowrap: boolean = false);
 begin
  moveby(1);
 end;
 
-procedure texterndatadropdownlist.rowup(const action: focuscellactionty = fca_focusin);
+procedure texterndatadropdownlist.rowup(
+  const action: focuscellactionty = fca_focusin; const nowrap: boolean = false);
 begin
  moveby(-1);
 end;

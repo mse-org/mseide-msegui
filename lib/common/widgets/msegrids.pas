@@ -2269,9 +2269,9 @@ type
                  //acell.col = invalidaxis -> col unknown
 
    procedure rowup(const action: focuscellactionty = fca_focusin;
-                                       const nowrap: boolean=false) virtual;
+                                       const nowrap: boolean = false) virtual;
    procedure rowdown(const action: focuscellactionty = fca_focusin;
-                                       const nowrap: boolean=false) virtual;
+                                       const nowrap: boolean = false) virtual;
    procedure pageup(const action: focuscellactionty = fca_focusin); virtual;
    procedure pagedown(const action: focuscellactionty = fca_focusin); virtual;
    procedure wheelup(const action: focuscellactionty = fca_focusin); virtual;
