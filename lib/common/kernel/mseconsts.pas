@@ -253,8 +253,13 @@ const
   'Beginning of file',   //sc_bof
   'End of file',         //sc_eof
   'Voice output',        //sc_voiceoutput
-  'Speak again'          //sc_speakagain
- );
+  'Speak again',         //sc_speakagain
+  'First column',        //sc_firstcol
+  'First row',           //sc_firstrow
+  'Last column',         //sc_lastcol
+  'Last row',            //sc_lastrow
+  'Selection'            //sc_selection
+);
 
 function delete_n_selected_rows(const params: array of const): msestring;
 begin

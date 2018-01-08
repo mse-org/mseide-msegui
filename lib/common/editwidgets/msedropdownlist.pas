@@ -15,7 +15,7 @@ interface
 uses
  mseclasses,mseedit,mseevent,mseglob,mseguiglob,msegrids,msedatalist,msegui,
  mseinplaceedit,msearrayprops,classes,mclasses,msegraphics,msedrawtext,
- msegraphutils,
+ msegraphutils,mseassistiveclient,
  msetimer,{mseforms,}msetypes,msestrings,msestockobjects,msescrollbar,
  msekeyboard,msegridsglob,mseeditglob,msestat,msebitmap;
 
@@ -318,6 +318,7 @@ type
   protected
    fcontroller: tcustomdropdownlistcontroller;
    fdropdownrowcount: integer;
+   function getassistiveflags(): assistiveflagsty override;
    procedure setfiltertext(const Value: msestring); virtual;
    procedure updatewindowinfo(var info: windowinfoty); override;
    procedure createdatacol(const index: integer; out item: tdatacol); override;
@@ -2653,6 +2654,14 @@ begin
  fselectedindex:= index;
  fcontroller.fselectkey:= akey;
  window.modalresult:= mr_ok;
+end;
+
+function tdropdownlist.getassistiveflags(): assistiveflagsty;
+begin
+ result:= inherited getassistiveflags();
+ if ownswindow then begin
+  result:= result + [asf_popup];
+ end;
 end;
 
 procedure tdropdownlist.docellevent(var info: celleventinfoty);

@@ -19,12 +19,14 @@ type
  editinputmodety = (eim_insert,eim_overwrite);
  edittextblockmodety = (etbm_delete,etbm_cut,etbm_copy,etbm_insert,etbm_paste);
  assistiveoptionty = (aso_nodefaultbutton,aso_widgetnavig,aso_menunavig,
+                      aso_gridnavig,
                       aso_noreturnkeymenuexecute,aso_nomenumousemove);
  assistiveoptionsty = set of assistiveoptionty;
  assistivedbeventkindty = (adek_none,adek_bof,adek_eof);
 const
  defaultassistiveoptions = [aso_nodefaultbutton,aso_widgetnavig,
-                            aso_menunavig,aso_noreturnkeymenuexecute,
+                            aso_menunavig,aso_gridnavig,
+                            aso_noreturnkeymenuexecute,
                             aso_nomenumousemove];
  
 type
@@ -47,6 +49,9 @@ type
   procedure dodataentered(const sender: iassistiveclientdata);
   procedure docellevent(const sender: iassistiveclientgrid; 
                                       const info: celleventinfoty);
+  procedure dogridbordertouched(const sender: iassistiveclientgrid;
+                                       const adirection: graphicdirectionty);
+
   procedure doeditcharenter(const sender: iassistiveclientedit;
                                                 const achar: msestring);
   procedure doeditchardelete(const sender: iassistiveclientedit;

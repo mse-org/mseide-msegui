@@ -189,7 +189,12 @@ const
   'Datei Beginn',              //sc_bof
   'Datei Ende',                //sc_eof
   'Sprachausgabe',             //sc_voiceoutput
-  'Wiederhole Sprachausgabe'   //sc_speakagain
+  'Wiederhole Sprachausgabe',  //sc_speakagain
+  'Erste Spalte',              //sc_firstcol
+  'Erste Zeile',               //sc_firstrow
+  'Letzte Spalte',             //sc_lastcol
+  'Letzte Zeile',              //sc_lastrow
+  'Auswahl'                    //sc_selection
 );
     
 function delete_n_selected_rows(const params: array of const): msestring;

@@ -17,7 +17,7 @@ uses
  msestrings,mseglob,mseinterfaces,msetypes,mseificompglob;
 type
  assistiveflagty = (asf_embedded,asf_container,asf_grid,asf_gridcell,
-                    asf_datetime,asf_menu,asf_message,
+                    asf_datetime,asf_menu,asf_message,asf_popup,
                     asf_textedit,asf_graphicedit,asf_readonly,
                     asf_inplaceedit,asf_button);
  assistiveflagsty = set of assistiveflagty;
@@ -44,6 +44,7 @@ type
  end;
  
  iassistiveclientgrid = interface(iassistiveclient)[miid_iassistiveclientgrid]
+  function getassistivecellcaption(const acell: gridcoordty): msestring;
   function getassistivecelltext(const acell: gridcoordty): msestring;
   function getassistivegridinfo(): assistivegridinfoty;
  end;

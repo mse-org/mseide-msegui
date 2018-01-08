@@ -104,6 +104,12 @@ type
                 const handler: tassistivehandler; const intf: iassistiveclient;
                                      const adirection: graphicdirectionty;
                                                 var handled: boolean) of object;
+ assistivedirectiongrideventty = 
+  procedure(const sender: tassistivewidgetitem;
+                const handler: tassistivehandler;
+                       const intf: iassistiveclientgrid;
+                                     const adirection: graphicdirectionty;
+                                                var handled: boolean) of object;
  assistivestringeventty = 
   procedure(const sender: tassistivewidgetitem;
                 const handler: tassistivehandler;
@@ -143,6 +149,7 @@ type
    fhint: msestring;
    fondbvaluechanged: assistivedataeventty;
    fondatasetevent: assistivedataseteventty;
+   fongridbordertouched: assistivedirectiongrideventty;
    procedure sethandler(const avalue:tassistivehandler);
    procedure setwidget(const avalue: twidget);
   protected
@@ -175,6 +182,10 @@ type
    procedure docellevent(const sender:tassistivehandler;
                const aintf: iassistiveclientgrid; const info: celleventinfoty;
                                                         var handled: boolean);
+   procedure dogridbordertouched(const sender:tassistivehandler;
+                                         const aintf: iassistiveclientgrid;
+                                         const adirection: graphicdirectionty;
+                                                         var handled: boolean);
    procedure doeditcharenter(const sender:tassistivehandler;
                 const aintf: iassistiveclientedit; const achar: msestring;
                                                         var handled: boolean);
@@ -232,6 +243,8 @@ type
                                                         write fondbvaluechanged;
    property oncellevent: assistivecelleventty read foncellevent
                                                         write foncellevent;
+   property ongridbordertouched: assistivedirectiongrideventty
+                read fongridbordertouched write fongridbordertouched;
    property oneditcharenter: assistiveeditstringeventty read foneditcharenter
                                          write foneditcharenter;
    property oneditchardelete: assistiveeditstringeventty read foneditchardelete
@@ -316,6 +329,11 @@ type
                             const intf: iassistiveclient;
                                      const adirection: graphicdirectionty;
                                                 var handled: boolean) of object;
+ assistiveservergriddirectioneventty = 
+  procedure(const sender:tassistivehandler;
+                            const intf: iassistiveclientgrid;
+                                     const adirection: graphicdirectionty;
+                                                var handled: boolean) of object;
 
  assistiveserverfocuschangedeventty = 
   procedure(const sender:tassistivehandler;
@@ -345,7 +363,7 @@ type
                 const akind: assistivedbeventkindty; const adataset: tdataset;
                                                 var handled: boolean) of object;
  
-tassistivehandler = class(tmsecomponent,iassistiveserver)
+ tassistivehandler = class(tmsecomponent,iassistiveserver)
   private
    factive: boolean;
    fspeaker: tassistivespeak;
@@ -378,6 +396,7 @@ tassistivehandler = class(tmsecomponent,iassistiveserver)
    fonmenuactivated: assistiveservermenueventty;
    fondbvaluechanged: assistiveserverdataeventty;
    fondatasetevent: assistiveserverdataseteventty;
+   fongridbordertouched: assistiveservergriddirectioneventty;
    procedure setactive(const avalue: boolean);
    procedure setspeaker(const avalue: tassistivespeak);
    procedure setoptions(const avalue: assistiveoptionsty);
@@ -417,6 +436,9 @@ tassistivehandler = class(tmsecomponent,iassistiveserver)
    procedure dodbvaluechanged(const sender: iassistiveclientdata);
    procedure docellevent(const sender: iassistiveclientgrid; 
                                        const info: celleventinfoty);
+   procedure dogridbordertouched(const sender: iassistiveclientgrid;
+                                       const adirection: graphicdirectionty);
+
    procedure doeditcharenter(const sender: iassistiveclientedit;
                                                 const achar: msestring);
    procedure doeditchardelete(const sender: iassistiveclientedit;
@@ -456,6 +478,8 @@ tassistivehandler = class(tmsecomponent,iassistiveserver)
    procedure speakcharacter(const achar: char32; const avoice: int32 = 0);
    procedure speakall(const sender: iassistiveclient; const addtext: boolean;
                                                          const ahint: boolean);
+   procedure speakgridcell(const sender: iassistiveclientgrid;
+                  const acell: gridcoordty; const acaption: boolean);
    procedure speakinput(const sender: iassistiveclientdata);
    procedure speakmenustart(const sender: iassistiveclient);
    procedure speakallmenu(const sender: iassistiveclientmenu;
@@ -499,6 +523,8 @@ tassistivehandler = class(tmsecomponent,iassistiveserver)
                                                         write fondbvaluechanged;
    property oncellevent: assistiveservercelleventty read foncellevent
                                                         write foncellevent;
+   property ongridbordertouched: assistiveservergriddirectioneventty
+                        read fongridbordertouched write fongridbordertouched;
    property oneditcharenter: assistiveservereditstringeventty
                             read foneditcharenter write foneditcharenter;
    property oneditchardelete: assistiveservereditstringeventty 
@@ -527,7 +553,9 @@ tassistivehandler = class(tmsecomponent,iassistiveserver)
  
 implementation
 uses
- msekeyboard,sysutils,msesysutils,mserichstring,msemenus,mseactions;
+ msekeyboard,sysutils,msesysutils,mserichstring,msemenus,mseactions,
+ msegridsglob,mseeditglob;
+ 
 type
  twidget1 = class(twidget);
  tpopupmenuwidget1 = class(tpopupmenuwidget);
@@ -677,6 +705,16 @@ procedure tassistivewidgetitem.docellevent(const sender:tassistivehandler;
 begin
  if canevent(tmethod(foncellevent)) then begin
   foncellevent(self,sender,aintf,info,handled);
+ end;
+end;
+
+procedure tassistivewidgetitem.dogridbordertouched(
+              const sender: tassistivehandler;
+               const aintf: iassistiveclientgrid;
+               const adirection: graphicdirectionty; var handled: boolean);
+begin
+ if canevent(tmethod(fongridbordertouched)) then begin
+  fongridbordertouched(self,sender,aintf,adirection,handled);
  end;
 end;
 
@@ -975,6 +1013,16 @@ begin
  end;
 end;
 
+procedure tassistivehandler.speakgridcell(const sender: iassistiveclientgrid;
+               const acell: gridcoordty; const acaption: boolean);
+begin
+ if acaption then begin
+  speaktext(sender.getassistivecellcaption(
+                            mgc(acell.col,-1)),fvoicecaption);
+ end;
+ speaktext(sender.getassistivecelltext(acell),fvoicetext);
+end;
+
 procedure tassistivehandler.speakinput(const sender: iassistiveclientdata);
 begin
  startspeak();
@@ -1232,9 +1280,16 @@ begin
     if asf_menu in fla1 then begin
     end
     else begin
-     speakall(sender,ass_windowactivated in fstate,false);
-     removestate([ass_windowactivated]);
+     if fla1*[asf_grid,asf_popup] = [asf_grid,asf_popup] then begin
+      speaktext(sc_selection,fvoicecaption);
+      speakgridcell(iassistiveclientgrid(sender),
+                   tcustomgrid(sender.getassistivewidget()).focusedcell,true);
+     end
+     else begin
+      speakall(sender,ass_windowactivated in fstate,false);
+     end;
     end;
+    removestate([ass_windowactivated]);
    end;
   end;
  end;
@@ -1384,7 +1439,7 @@ var
  item1: tassistivewidgetitem;
 begin
 {$ifdef mse_debugassistive}
- debug('editcellevent',sender);
+ debug('cellevent',sender);
 {$endif}
  b1:= false;
  if finditem(sender,item1) then begin
@@ -1393,6 +1448,62 @@ begin
  if not b1 then begin
   if canevent(tmethod(foncellevent)) then begin
    foncellevent(self,sender,info,b1);
+  end;
+  if not b1 and twidget(sender.getassistivewidget()).active then begin
+   with info do begin
+    case eventkind of
+     cek_enter: begin
+      if (cellbefore.col <> cell.col) or 
+                         (cellbefore.row <> cell.row) then begin
+       startspeak();
+       speakgridcell(sender,cell,cellbefore.col <> cell.col);
+      end;
+     end;
+    end;
+   end;
+  end;
+ end;
+end;
+
+procedure tassistivehandler.dogridbordertouched(
+              const sender: iassistiveclientgrid;
+               const adirection: graphicdirectionty);
+var
+ b1: boolean;
+ item1: tassistivewidgetitem;
+ ca1: stockcaptionty;
+begin
+{$ifdef mse_debugassistive}
+ debug('gridbordertouched',sender);
+{$endif}
+ b1:= false;
+ if finditem(sender,item1) then begin
+  item1.dogridbordertouched(self,sender,adirection,b1);
+ end;
+ if not b1 then begin
+  if canevent(tmethod(fongridbordertouched)) then begin
+   fongridbordertouched(self,sender,adirection,b1);
+  end;
+  if not b1 and twidget(sender.getassistivewidget()).active then begin
+   case adirection of
+    gd_left: begin
+     ca1:= sc_firstcol;
+    end;
+    gd_up: begin
+     ca1:= sc_firstrow;
+    end;
+    gd_right: begin
+     ca1:= sc_lastcol;
+    end;
+    gd_down: begin
+     ca1:= sc_lastrow;
+    end;
+    else begin
+     exit;
+    end;
+   end;
+   startspeak();
+   speaktext(ca1,fvoicecaption);
   end;
  end;
 end;

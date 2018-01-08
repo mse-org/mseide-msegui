@@ -2242,7 +2242,8 @@ type
     //iassistiveclient
    function getassistiveflags(): assistiveflagsty; override;
     //iassistiveclientgrid
-   function getassistivecelltext(const acell: gridcoordty): msestring; virtual;  
+   function getassistivecellcaption(const acell: gridcoordty): msestring virtual;
+   function getassistivecelltext(const acell: gridcoordty): msestring virtual;
    function getassistivegridinfo(): assistivegridinfoty; virtual;
   public
    constructor create(aowner: tcomponent); override;
@@ -2267,8 +2268,10 @@ type
                                const count: integer = 1); overload;
                  //acell.col = invalidaxis -> col unknown
 
-   procedure rowup(const action: focuscellactionty = fca_focusin); virtual;
-   procedure rowdown(const action: focuscellactionty = fca_focusin); virtual;
+   procedure rowup(const action: focuscellactionty = fca_focusin;
+                                       const nowrap: boolean=false) virtual;
+   procedure rowdown(const action: focuscellactionty = fca_focusin;
+                                       const nowrap: boolean=false) virtual;
    procedure pageup(const action: focuscellactionty = fca_focusin); virtual;
    procedure pagedown(const action: focuscellactionty = fca_focusin); virtual;
    procedure wheelup(const action: focuscellactionty = fca_focusin); virtual;
@@ -13117,7 +13120,8 @@ begin
  end;
 end;
 
-procedure tcustomgrid.rowup(const action: focuscellactionty = fca_focusin);
+procedure tcustomgrid.rowup(const action: focuscellactionty = fca_focusin;
+                                       const nowrap: boolean=false);
 begin
  if ffocusedcell.row = 0 then begin
   checkmorerows(-1);
@@ -13128,7 +13132,7 @@ begin
     focusrow(visiblerowstep(ffocusedcell.row,-1,false),action,false);
    end
    else begin
-    if og_wraprow in foptionsgrid then begin
+    if not nowrap and (og_wraprow in foptionsgrid) then begin
      focusrow(visiblerowstep(frowcount-1,0,false),action,false);
     end;
    end;
@@ -13136,7 +13140,8 @@ begin
  end;
 end;
 
-procedure tcustomgrid.rowdown(const action: focuscellactionty = fca_focusin);
+procedure tcustomgrid.rowdown(const action: focuscellactionty = fca_focusin;
+                                       const nowrap: boolean=false);
 //var
 // int1: integer;
 begin
@@ -13151,7 +13156,7 @@ begin
                                                     action,false);
    end
    else begin
-    if og_wraprow in foptionsgrid then begin
+    if not nowrap and (og_wraprow in foptionsgrid) then begin
      focusrow(visiblerowstep(0,0,false),action,false);
     end;
    end;
@@ -13293,7 +13298,8 @@ var
    end;
   end;
  end;
-  
+var
+ gd1: graphicdirectionty;
 label
  checkwidgetexit;
 begin
@@ -13352,8 +13358,9 @@ begin
        exit;
       end
       else begin
-       rowup(action);
+       rowup(action,aso_gridnavig in assistiveoptions);
        checkselection;
+       gd1:= gd_up;
        goto checkwidgetexit;
       end;
      end;
@@ -13371,8 +13378,9 @@ begin
        exit;
       end
       else begin
-       rowdown(action);
+       rowdown(action,aso_gridnavig in assistiveoptions);
        checkselection;
+       gd1:= gd_down;
        goto checkwidgetexit;
       end;
      end;
@@ -13473,8 +13481,10 @@ begin
        exit;
       end
       else begin
-       colstep(actioncol,-1,false,not (og_wrapcol in foptionsgrid),false);
+       colstep(actioncol,-1,false,(aso_gridnavig in assistiveoptions) or
+                                       not (og_wrapcol in foptionsgrid),false);
        checkselection;
+       gd1:= gd_left;
        goto checkwidgetexit;
       end;
      end;
@@ -13492,8 +13502,10 @@ begin
        exit;
       end
       else begin
-       colstep(actioncol,1,false, not (og_wrapcol in foptionsgrid),false);
+       colstep(actioncol,1,false,(aso_gridnavig in assistiveoptions) or
+                                      not (og_wrapcol in foptionsgrid),false);
        checkselection;
+       gd1:= gd_right;
        goto checkwidgetexit;
       end;
      end;
@@ -13582,10 +13594,18 @@ begin
  exit;
  
 checkwidgetexit:
- if bo1 and  (row = cellbefore.row) and (col = cellbefore.col) then begin
-  exclude(info.eventstate,es_processed);
-  if es_child in info.eventstate then begin
-   dokeydownaftershortcut(info);
+ if (row = cellbefore.row) and (col = cellbefore.col) then begin
+  if bo1 then begin
+   exclude(info.eventstate,es_processed);
+   if es_child in info.eventstate then begin
+    dokeydownaftershortcut(info);
+   end;
+  end
+  else begin
+   if canassistive() then begin
+    assistiveserver.dogridbordertouched(
+              iassistiveclientgrid(getiassistiveclient),gd1);
+   end;
   end;
  end;
 end;
@@ -15635,7 +15655,8 @@ begin
  result:= inherited getassistiveflags() + [asf_grid];
 end;
 
-function tcustomgrid.getassistivecelltext(const acell: gridcoordty): msestring;
+function tcustomgrid.getassistivecellcaption(
+              const acell: gridcoordty): msestring;
 begin
  result:= '';
  if isvalidcell(acell) then begin
@@ -15654,6 +15675,11 @@ begin
    end;
   end;
  end;
+end;
+
+function tcustomgrid.getassistivecelltext(const acell: gridcoordty): msestring;
+begin
+ result:= '';
 end;
 
 function tcustomgrid.getassistivegridinfo(): assistivegridinfoty;

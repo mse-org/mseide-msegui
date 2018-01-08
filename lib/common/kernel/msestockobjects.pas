@@ -147,7 +147,9 @@ type
                     sc_deleted,sc_copied,sc_inserted,sc_pasted,sc_withdrawn,
                     sc_windowactivated,sc_menu,
                     sc_bof,sc_eof,
-                    sc_voiceoutput,sc_speakagain
+                    sc_voiceoutput,sc_speakagain,
+                    sc_firstcol,sc_firstrow,sc_lastcol,sc_lastrow,
+                    sc_selection
                     );
  textgeneratorfuncty = function(const params: array of const): msestring;
  textgeneratorty = (tg_delete_n_selected_rows);

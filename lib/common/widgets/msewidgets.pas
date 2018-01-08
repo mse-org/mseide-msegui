@@ -1265,6 +1265,7 @@ type
   private
    ftransientfor: twindow;
   protected
+   function getassistiveflags(): assistiveflagsty override;
    procedure updatewindowinfo(var info: windowinfoty); override;
    function internalshow(const modallevel: modallevelty;
            const transientfor: pwindow;
@@ -6008,6 +6009,14 @@ begin
 end;
 
 { tpopupwidget }
+
+function tpopupwidget.getassistiveflags(): assistiveflagsty;
+begin
+ result:= inherited getassistiveflags();
+ if ownswindow then begin
+  result:= result + [asf_popup];
+ end;
+end;
 
 constructor tpopupwidget.create(aowner: tcomponent; transientfor: twindow);
 begin
