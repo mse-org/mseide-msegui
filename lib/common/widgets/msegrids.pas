@@ -242,7 +242,8 @@ type
                  gs1_rowdeleting,gs1_autoappending,gs1_autoremoving,
                  gs1_focuscellonenterlock,gs1_mousecaptureendlock,
                  gs1_forcenullcheck,
-                 gs1_cellsizesyncing,gs1_userinput,gs1_autoappendlock);
+                 gs1_cellsizesyncing,gs1_userinput,gs1_autoappendlock,
+                 gs1_scrolllimit);
  gridstates1ty = set of gridstate1ty;
 
  cellkindty = (ck_invalid,ck_data,ck_fixcol,ck_fixrow,ck_fixcolrow);
@@ -13304,6 +13305,7 @@ label
  checkwidgetexit;
 begin
  actioncol:= fca_none;
+ exclude(fstate1,gs1_scrolllimit);
  if canevent(tmethod(fonkeydown)) then begin
   fonkeydown(self,info);
  end;
@@ -13602,7 +13604,8 @@ checkwidgetexit:
    end;
   end
   else begin
-   if canassistive() then begin
+   if canassistive() and (not (gs_isdb in fstate) or 
+                                 (gs1_scrolllimit in fstate1)) then begin
     assistiveserver.dogridbordertouched(
               iassistiveclientgrid(getiassistiveclient),gd1);
    end;
@@ -16720,7 +16723,7 @@ function tcustomstringgrid.getassistivecelltext(
                                        const acell: gridcoordty): msestring;
 begin
  if isdatacell(acell) then begin
-  result:= self[acell.col][acell.row];
+  result:= self[acell.col].getrowtext(acell.row);
  end
  else begin
   result:= inherited getassistivecelltext(acell);

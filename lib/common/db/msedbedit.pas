@@ -1555,6 +1555,7 @@ type
    function getdbindicatorcol: integer;
    procedure setnavigator(const avalue: tdbnavigator);
   protected
+   function getassistiveflags(): assistiveflagsty override;
    procedure internalcreateframe; override;
    procedure createdatacol(const index: integer; out item: tdatacol); override;
    procedure initcols(const acols: tdropdowncols); override;
@@ -1802,6 +1803,7 @@ type
    function getdatacols: tdbwidgetcols;
    procedure setdatacols(const avalue: tdbwidgetcols);
   protected
+   function getassistiveflags(): assistiveflagsty override;
    function createdatacols: tdatacols; override;
    procedure createdatacol(const index: integer; out item: tdatacol); override;
    function canautoappend: boolean; override;
@@ -2094,6 +2096,7 @@ type
    function getfixcols: tdbstringfixcols;
    procedure setfixcols(const avalue: tdbstringfixcols);
   protected
+   function getassistiveflags(): assistiveflagsty override;
    function canautoappend: boolean; override;
    procedure setupeditor(const acell: gridcoordty; const focusin: boolean); override;
 //   procedure doenter; override;
@@ -6963,13 +6966,17 @@ end;
 procedure tdbdropdownlist.rowdown(const action: focuscellactionty = fca_focusin;
                                        const nowrap: boolean = false);
 begin
- fdatalink.MoveBy(1);
+ if fdatalink.MoveBy(1) = 0 then begin
+  include(fstate1,gs1_scrolllimit);
+ end;
 end;
 
 procedure tdbdropdownlist.rowup(const action: focuscellactionty = fca_focusin;
                                        const nowrap: boolean = false);
 begin
- fdatalink.MoveBy(-1);
+ if fdatalink.MoveBy(-1) = 0 then begin
+  include(fstate1,gs1_scrolllimit);
+ end;
 end;
 
 procedure tdbdropdownlist.internalcreateframe;
@@ -7067,6 +7074,11 @@ end;
 procedure tdbdropdownlist.setnavigator(const avalue: tdbnavigator);
 begin
  //dummy
+end;
+
+function tdbdropdownlist.getassistiveflags(): assistiveflagsty;
+begin
+ result:= inherited getassistiveflags() + [asf_db];
 end;
 
 procedure tdbdropdownlist.setactiveitem(const aitemindex: integer);
@@ -9644,6 +9656,11 @@ procedure tcustomdbwidgetgrid.setdatacols(const avalue: tdbwidgetcols);
 begin
  inherited;
 end;
+
+function tcustomdbwidgetgrid.getassistiveflags(): assistiveflagsty;
+begin
+ result:= inherited getassistiveflags() + [asf_db];
+end;
 {
 procedure tcustomdbwidgetgrid.doenter;
 begin
@@ -10576,6 +10593,11 @@ end;
 procedure tcustomdbstringgrid.setfixcols(const avalue: tdbstringfixcols);
 begin
  inherited;
+end;
+
+function tcustomdbstringgrid.getassistiveflags(): assistiveflagsty;
+begin
+ result:= inherited getassistiveflags() + [asf_db];
 end;
 
 function tcustomdbstringgrid.getdbindicatorcol: integer;

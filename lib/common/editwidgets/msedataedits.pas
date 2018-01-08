@@ -166,8 +166,8 @@ type
    function getiassistiveclient(): iassistiveclient override;
    function getassistivecelltext(const arow: int32): msestring;
     //iassistiveclient
+   function getassistiveflags(): assistiveflagsty override;
    function getassistivetext(): msestring; override;
-   function getassistiveflags: assistiveflagsty; override;
    
    procedure drawcell(const canvas: tcanvas); virtual;
    procedure updateautocellsize(const canvas: tcanvas); virtual;
@@ -2272,6 +2272,9 @@ begin
  result:= inherited getassistiveflags;
  if fgridintf <> nil then begin
   include(result,asf_gridcell);
+ end;
+ if des_isdb in fstate then begin
+  include(result,asf_db);
  end;
 end;
 

@@ -1498,13 +1498,23 @@ begin
      ca1:= sc_firstcol;
     end;
     gd_up: begin
-     ca1:= sc_firstrow;
+     if asf_db in sender.getassistiveflags then begin
+      ca1:= sc_bof;
+     end
+     else begin
+      ca1:= sc_firstrow;
+     end;
     end;
     gd_right: begin
      ca1:= sc_lastcol;
     end;
     gd_down: begin
-     ca1:= sc_lastrow;
+     if asf_db in sender.getassistiveflags then begin
+      ca1:= sc_eof;
+     end
+     else begin
+      ca1:= sc_lastrow;
+     end;
     end;
     else begin
      exit;
