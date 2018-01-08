@@ -150,7 +150,7 @@ type
  shortcutrecarty = array of 
                     record 
                      name: string;
-                     value: integer;
+                     value: int32;
                     end;
 
  tshortcutcontroller = class;
@@ -1910,7 +1910,7 @@ end;
 
 procedure tsysshortcuts.setshortcutcount(const acount: integer);
 begin
- setlength(fshortcuts,count);
+ setlength(fshortcuts,acount);
 end;
 
 procedure tsysshortcuts.setshortcutrecord(const index: integer;
@@ -2013,7 +2013,7 @@ end;
 
 procedure tassistiveshortcuts.setshortcutcount(const acount: integer);
 begin
- setlength(fshortcuts,count);
+ setlength(fshortcuts,acount);
 end;
 
 procedure tassistiveshortcuts.setshortcutrecord(const index: integer;
