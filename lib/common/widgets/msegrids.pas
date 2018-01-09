@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2017 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2018 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -707,6 +707,7 @@ type
    function getcursor(const arow: integer; const actcellzone: cellzonety; 
                             const amousepos: pointty): cursorshapety; virtual;
    function getdatastatname: msestring;
+   function getstatsuffix(): msestring;
    procedure coloptionstoeditoptions(var dest: optionseditty;
                                                  var dest1: optionsedit1ty);
    procedure clean(const start,stop: integer); override;
@@ -6716,6 +6717,17 @@ begin
  end;
 end;
 
+function tdatacol.getstatsuffix(): msestring;
+begin
+ if fname <> '' then begin
+  result:= '_'+msestring(fname);
+ end
+ else begin
+  result:= inttostrmse(ident);
+ end;
+end;
+
+
 procedure tdatacol.coloptionstoeditoptions(var dest: optionseditty;
                                               var dest1: optionsedit1ty);
 begin
@@ -6734,7 +6746,7 @@ begin
   reader.readdatalist(getdatastatname,fdata);
  end;
  if (co_savestate in foptions) and reader.canstate then begin
-  mstr1:= inttostrmse(ident);
+  mstr1:= getstatsuffix();
   if not (co_fixwidth in foptions) and 
                    (og_colsizing in fcellinfo.grid.optionsgrid) then begin
    width:= reader.readinteger('width'+mstr1,fwidth,0);
@@ -6761,7 +6773,7 @@ begin
   writer.writedatalist(getdatastatname,fdata);
  end;
  if (co_savestate in foptions) and writer.canstate then begin
-  mstr1:= inttostrmse(ident);
+  mstr1:= getstatsuffix();
   if not (co_fixwidth in foptions) and 
                    (og_colsizing in fcellinfo.grid.optionsgrid) then begin
    writer.writeinteger('width'+mstr1,fwidth);

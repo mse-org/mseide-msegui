@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2017 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2018 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -515,6 +515,7 @@ type
    procedure loaded() override;
    procedure texttovalue(var accept: boolean; const quiet: boolean); override;
    procedure dohide; override;
+   function getassistiveflags(): assistiveflagsty override;
    {$ifdef mse_with_ifi}
    function getifidatalinkintf: iifidatalink; override;
     //iifidropdownlistdatalink
@@ -3817,6 +3818,14 @@ procedure tcustomdropdownedit.dohide;
 begin
  fdropdown.canceldropdown;
  inherited;
+end;
+
+function tcustomdropdownedit.getassistiveflags(): assistiveflagsty;
+begin
+ result:= inherited getassistiveflags();
+ if fdropdown.hasdropdown() then begin
+  include(result,asf_hasdropdown);
+ end;
 end;
 {
 procedure tcustomdropdownedit.updatereadonlystate;

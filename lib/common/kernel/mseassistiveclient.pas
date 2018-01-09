@@ -19,7 +19,8 @@ type
  assistiveflagty = (asf_embedded,asf_container,asf_grid,asf_gridcell,
                     asf_datetime,asf_menu,asf_message,asf_popup,
                     asf_textedit,asf_graphicedit,asf_readonly,
-                    asf_inplaceedit,asf_button,asf_db);
+                    asf_inplaceedit,asf_button,asf_db,
+                    asf_hasdropdown);
  assistiveflagsty = set of assistiveflagty;
  
  iassistiveclient = interface(inullinterface)[miid_iassistiveclient]

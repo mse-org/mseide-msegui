@@ -22,7 +22,8 @@ uses
 type
  assistivehandlerstatety =
   (ahs_active,ahs_windowactivated,ahs_menuactivated,ahs_menuactivatepending,
-   ahs_dropdownlistclosed,ahs_editcharenter,ahs_dropdownpending,
+   ahs_dropdownlistclosed,ahs_editcharenter,ahs_editchardelete,
+   ahs_locatepending,ahs_dropdownpending,
    ahs_textblock,ahs_textblock1);
  assistivehandlerstatesty = set of assistivehandlerstatety;
 const
@@ -419,6 +420,7 @@ type
                         out aitem: tassistivewidgetitem): boolean;
    procedure doshortcut(const sender: twidget; var info: keyeventinfoty);
    procedure dospeakagain(const sender: twidget);
+   procedure checklocatepending(const sender: iassistiveclient);
       
     //iassistiveserver
    procedure doapplicationactivated();
@@ -469,7 +471,7 @@ type
    constructor create(aowner: tcomponent); override;
    destructor destroy(); override;
    procedure setstate(const astate: assistivehandlerstatesty);
-   procedure removestate(const astate: assistivehandlerstatesty);
+   procedure resetstate(const astate: assistivehandlerstatesty);
    procedure wait();
    procedure cancel();
    function getcaptiontext(const acaption: msestring): msestring;
@@ -1040,7 +1042,7 @@ begin
  fstate:= fstate + (astate-internalstates);
 end;
 
-procedure tassistivehandler.removestate(const astate: assistivehandlerstatesty);
+procedure tassistivehandler.resetstate(const astate: assistivehandlerstatesty);
 begin
  fstate:= fstate - (astate-internalstates);
 end;
@@ -1097,6 +1099,13 @@ end;
 procedure tassistivehandler.dospeakagain(const sender: twidget);
 begin
  speakall(twidget1(sender).getiassistiveclient(),false,true);
+end;
+
+procedure tassistivehandler.checklocatepending(const sender: iassistiveclient);
+begin
+ if asf_hasdropdown in sender.getassistiveflags then begin
+  setstate([ahs_locatepending]);
+ end;
 end;
 
 
@@ -1189,7 +1198,7 @@ begin
    end;
   end;
  end;
- removestate([ahs_menuactivatepending,ahs_dropdownpending]);
+ resetstate([ahs_menuactivatepending,ahs_dropdownpending]);
 end;
 
 procedure tassistivehandler.dowindowdeactivated(const sender: iassistiveclient);
@@ -1215,7 +1224,7 @@ begin
   if not b1 then begin
   end;
  end;
- removestate([ahs_windowactivated]);
+ resetstate([ahs_windowactivated]);
 end;
 
 procedure tassistivehandler.dowindowclosed(const sender: iassistiveclient);
@@ -1245,7 +1254,7 @@ begin
 {$ifdef mse_debugassistive}
  debug('enter',sender);
 {$endif}
- removestate([ahs_dropdownpending]);
+ resetstate([ahs_dropdownpending]);
  if (ahs_editcharenter in fstate) and 
            (sender.getassistiveflags*[asf_popup,asf_grid] = 
                                   [asf_popup,asf_grid]) then begin
@@ -1260,7 +1269,7 @@ begin
    fonenter(self,sender,b1);
   end;
  end;
- removestate([ahs_editcharenter]);
+ resetstate([ahs_editcharenter]);
 end;
 
 procedure tassistivehandler.doactivate(const sender: iassistiveclient);
@@ -1300,7 +1309,7 @@ begin
    end;
   end;
  end;
- removestate([ahs_windowactivated,ahs_dropdownlistclosed]);
+ resetstate([ahs_windowactivated,ahs_dropdownlistclosed]);
 end;
 
 procedure tassistivehandler.doclientmouseevent(const sender: iassistiveclient;
@@ -1457,15 +1466,18 @@ begin
   if canevent(tmethod(foncellevent)) then begin
    foncellevent(self,sender,info,b1);
   end;
-  if not b1 and twidget(sender.getassistivewidget()).active then begin
+  if {not b1 and} twidget(sender.getassistivewidget()).active then begin
    with info do begin
     case eventkind of
      cek_enter: begin
-      if (cellbefore.col <> cell.col) or 
-                         (cellbefore.row <> cell.row) then begin
-       startspeak();
+      if not b1 and ((cellbefore.col <> cell.col) or 
+                         (cellbefore.row <> cell.row)) then begin
+       if not (ahs_locatepending in fstate) then begin
+        startspeak();
+       end;
        speakgridcell(sender,cell,cellbefore.col <> cell.col);
       end;
+      resetstate([ahs_locatepending]);
      end;
     end;
    end;
@@ -1560,6 +1572,7 @@ begin
    end;
   end;
  end;
+ checklocatepending(sender);
 end;
 
 procedure tassistivehandler.doeditchardelete(const sender: iassistiveclientedit;
@@ -1571,7 +1584,7 @@ begin
 {$ifdef mse_debugassistive}
  debug('editchardelete',sender);
 {$endif}
- include(fstate,ahs_textblock);
+ setstate([ahs_textblock,ahs_editchardelete]);
  b1:= false;
  if finditem(sender,item1) then begin
   item1.dochange(self,sender,b1);
@@ -1591,6 +1604,7 @@ begin
    speaktext(achar,fvoicetext);
   end;
  end;
+ checklocatepending(sender);
 end;
 
 procedure tassistivehandler.doeditindexmoved(const sender: iassistiveclientedit;
@@ -1840,7 +1854,7 @@ begin
    speaktext(getcaptiontext(iassistiveclient(sender)),fvoicetext);
   end;
  end;
- removestate([ahs_menuactivated]);
+ resetstate([ahs_menuactivated]);
 end;
 
 procedure tassistivehandler.dodatasetevent(const sender: iassistiveclient;

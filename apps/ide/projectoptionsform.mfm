@@ -1934,7 +1934,7 @@ object projectoptionsfo: tprojectoptionsfo
               frame.localprops1 = []
               taborder = 2
               bounds_x = 0
-              bounds_y = 74
+              bounds_y = 80
               bounds_cx = 754
               bounds_cy = 41
               anchors = [an_top]
@@ -2025,7 +2025,7 @@ object projectoptionsfo: tprojectoptionsfo
               hint = '"--tty DEVICE" to set target terminal'
               onshowhint = hintexpandedmacros
               bounds_x = 1
-              bounds_y = 115
+              bounds_y = 121
               bounds_cx = 752
               bounds_cy = 41
               anchors = [an_left, an_top, an_right]
@@ -2037,7 +2037,7 @@ object projectoptionsfo: tprojectoptionsfo
               frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive]
               taborder = 5
               bounds_x = 0
-              bounds_y = 200
+              bounds_y = 206
               bounds_cx = 754
               bounds_cy = 41
               anchors = [an_top]
@@ -2179,7 +2179,7 @@ object projectoptionsfo: tprojectoptionsfo
               frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive]
               taborder = 6
               bounds_x = 0
-              bounds_y = 229
+              bounds_y = 241
               bounds_cx = 754
               bounds_cy = 41
               anchors = [an_top]
@@ -2285,7 +2285,7 @@ object projectoptionsfo: tprojectoptionsfo
               frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive]
               taborder = 1
               bounds_x = 0
-              bounds_y = 39
+              bounds_y = 41
               bounds_cx = 754
               bounds_cy = 41
               anchors = [an_top]
@@ -2411,7 +2411,7 @@ object projectoptionsfo: tprojectoptionsfo
               frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive]
               taborder = 4
               bounds_x = 0
-              bounds_y = 159
+              bounds_y = 165
               bounds_cx = 556
               bounds_cy = 41
               optionsscale = [osc_expandx, osc_shrinkx, osc_expandy, osc_shrinky]
@@ -5646,7 +5646,7 @@ object projectoptionsfo: tprojectoptionsfo
               fixrows.items = <              
                 item
                   height = 18
-                  captions.count = 5
+                  captions.count = 6
                   captions.items = <                  
                     item
                       caption = 'Kind'
@@ -5659,18 +5659,22 @@ object projectoptionsfo: tprojectoptionsfo
                       caption = 'Namebase'
                     end                  
                     item
+                      caption = 'Formsuffix'
+                    end                  
+                    item
                       caption = 'Source File'
                     end                  
                     item
                       caption = 'Form File'
                     end>
                 end>
-              datacols.count = 5
+              datacols.count = 6
               datacols.options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
               datacols.items = <              
                 item[newfonames]
                   width = 96
                   options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
+                  name = 'newfonames'
                   onshowhint = colonshowhint
                   widgetname = 'newfonames'
                   dataclass = tgridmsestringdatalist
@@ -5678,26 +5682,37 @@ object projectoptionsfo: tprojectoptionsfo
                 item[newinheritedforms]
                   width = 13
                   options = [co_drawfocus, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_fixwidth, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
+                  name = 'newinheritedforms'
                   widgetname = 'newinheritedforms'
                   dataclass = tgridintegerdatalist
                 end              
                 item[newfonamebases]
                   width = 73
                   options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
+                  name = 'newfonamebases'
                   onshowhint = colonshowhint
                   widgetname = 'newfonamebases'
                   dataclass = tgridmsestringdatalist
                 end              
+                item[newfoformsuffixes]
+                  width = 69
+                  options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
+                  name = 'newfoformsuffix'
+                  widgetname = 'newfoformsuffixes'
+                  dataclass = tgridmsestringdatalist
+                end              
                 item[newfosources]
-                  width = 263
+                  width = 253
                   options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_proportional, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
+                  name = 'newfosources'
                   onshowhint = colonshowhint
                   widgetname = 'newfosources'
                   dataclass = tgridmsestringdatalist
                 end              
                 item[newfoforms]
-                  width = 276
+                  width = 216
                   options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_fill, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
+                  name = 'mewfoforms'
                   onshowhint = colonshowhint
                   widgetname = 'newfoforms'
                   dataclass = tgridmsestringdatalist
@@ -5760,9 +5775,9 @@ object projectoptionsfo: tprojectoptionsfo
                 taborder = 4
                 onshowhint = hintexpandedmacros
                 visible = False
-                bounds_x = 185
+                bounds_x = 255
                 bounds_y = 0
-                bounds_cx = 263
+                bounds_cx = 253
                 bounds_cy = 18
                 optionsedit1 = []
                 optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick]
@@ -5797,9 +5812,9 @@ object projectoptionsfo: tprojectoptionsfo
                 taborder = 5
                 onshowhint = hintexpandedmacros
                 visible = False
-                bounds_x = 449
+                bounds_x = 509
                 bounds_y = 0
-                bounds_cx = 276
+                bounds_cx = 216
                 bounds_cy = 18
                 optionsedit1 = []
                 optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick]
@@ -5814,6 +5829,20 @@ object projectoptionsfo: tprojectoptionsfo
                   )
                 )
                 controller.ongetfilename = expandfilename
+                reffontheight = 16
+              end
+              object newfoformsuffixes: tstringedit
+                optionswidget1 = [ow1_fontglyphheight]
+                optionsskin = [osk_framebuttononly]
+                taborder = 6
+                onshowhint = hintexpandedmacros
+                visible = False
+                bounds_x = 185
+                bounds_y = 0
+                bounds_cx = 69
+                bounds_cy = 18
+                optionsedit1 = []
+                optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick]
                 reffontheight = 16
               end
             end

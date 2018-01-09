@@ -441,6 +441,7 @@ type
   public
    constructor create(const intf: idropdown); reintroduce;
    destructor destroy; override;
+   function hasdropdown(): boolean;
    procedure dostatread(const reader: tstatreader); virtual;
    procedure dostatwrite(const writer: tstatwriter); virtual;
    procedure dropdown; virtual;
@@ -1348,6 +1349,11 @@ begin
            {$ifdef FPC}@{$endif}applicationactivechanged);
  getdropdownwidget.Free;
  inherited;
+end;
+
+function tcustomdropdowncontroller.hasdropdown(): boolean;
+begin
+ result:= getdropdownwidget() <> nil;
 end;
 
 procedure tcustomdropdowncontroller.dostatread(const reader: tstatreader);
