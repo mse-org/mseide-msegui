@@ -1201,11 +1201,11 @@ begin
  end;
  fstate:= fstate + [ies_touched,ies_edited];
  internalupdatecaret(true);
- invalidatetext(true,bo1);
- notify(ea_indexmoved);
  if twidget1(fwidget).canassistive() then begin
   assistiveserver.doeditchardelete(getiassistiveclient(),s1);
  end;
+ invalidatetext(true,bo1);
+ notify(ea_indexmoved);
 end;
 
 procedure tinplaceedit.deletechar;
@@ -2387,13 +2387,18 @@ begin
  begingroup;
  try
   deleteselection;
+  if twidget1(fwidget).canassistive() then begin
+   assistiveserver.doeditcharenter(getiassistiveclient(),chars);
+  end;
   inserttext(chars,false);
  finally
   endgroup;
  end;
+ {
  if twidget1(fwidget).canassistive() then begin
   assistiveserver.doeditcharenter(getiassistiveclient(),chars);
  end;
+ }
 end;
 
 procedure tinplaceedit.begingroup;

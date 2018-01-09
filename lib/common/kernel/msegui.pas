@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2017 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2018 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -27,7 +27,7 @@ uses
 
 const
  mseguiversiontext = '4.7';
- copyrighttext = 'Copyright 1999-2017';
+ copyrighttext = 'Copyright 1999-2018';
  
  defaultwidgetcolor = cl_default;
  defaulttoplevelwidgetcolor = cl_background;

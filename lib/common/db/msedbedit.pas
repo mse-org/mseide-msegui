@@ -6984,7 +6984,8 @@ begin
  tdbgridframe.create(iscrollframe(self),self,iautoscrollframe(self));
 end;
 
-procedure tdbdropdownlist.createdatacol(const index: integer; out item: tdatacol);
+procedure tdbdropdownlist.createdatacol(const index: integer;
+                                                     out item: tdatacol);
 begin
  item:= tdbdropdownstringcol.create(self,fdatacols);
 end;
@@ -7012,7 +7013,8 @@ begin
  fdatalink.cellevent(info);
 end;
 
-procedure tdbdropdownlist.scrollevent(sender: tcustomscrollbar; event: scrolleventty);
+procedure tdbdropdownlist.scrollevent(sender: tcustomscrollbar;
+                                                     event: scrolleventty);
 begin
  if not fdatalink.scrollevent(sender,event) then begin
   inherited;
@@ -8406,29 +8408,49 @@ end;
 procedure tgriddatalink.recordchanged(afield: tfield);
 var
  int1: integer;
+ i2: int32;
+ b1: boolean;
 begin
  int1:= frowexited;
- if tcustomgrid1(fgrid).fcellvaluechecking = 0 then begin
-  checkscroll;
- end;
- fgrid.invalidaterow(activerecord);
- tcustomgrid1(fgrid).beginnonullcheck;
- tcustomgrid1(fgrid).beginnocheckvalue;
- try
-  if (afield = nil) and (frowexited = int1) and (feditingbefore = editing) then begin
-   fgrid.row:= invalidaxis;
+ with tcustomgrid1(fgrid) do begin
+  i2:= row;
+  if fcellvaluechecking = 0 then begin
+//   b1:= gs1_nocellassistive in fstate1;
+//   try
+//    include(fstate1,gs1_nocellassistive);
+    checkscroll();
+//   finally
+//    if not b1 then begin
+//     exclude(fstate1,gs1_nocellassistive);
+//    end;
+//   end;
   end;
-  checkactiverecord;
- finally
-  tcustomgrid1(fgrid).endnonullcheck;
-  tcustomgrid1(fgrid).endnocheckvalue;
-  feditingbefore:= editing;
- end;
- fgrid.invalidaterow(factiverecordbefore);
- factiverecordbefore:= activerecord;
- if afield = nil then begin
-  updaterowcount;
-  checkscrollbar;
+  fgrid.invalidaterow(activerecord);
+  tcustomgrid1(fgrid).beginnonullcheck;
+  tcustomgrid1(fgrid).beginnocheckvalue;
+  try
+   b1:= gs1_nocellassistive in fstate1;
+   if row <> i2 then begin
+    include(fstate1,gs1_nocellassistive);
+   end;
+   if (afield = nil) and (frowexited = int1) and (feditingbefore = editing) then begin
+    fgrid.row:= invalidaxis;
+   end;
+   checkactiverecord;
+  finally
+   if not b1 then begin
+    exclude(fstate1,gs1_nocellassistive);
+   end;
+   tcustomgrid1(fgrid).endnonullcheck;
+   tcustomgrid1(fgrid).endnocheckvalue;
+   feditingbefore:= editing;
+  end;
+  fgrid.invalidaterow(factiverecordbefore);
+  factiverecordbefore:= activerecord;
+  if afield = nil then begin
+   updaterowcount;
+   checkscrollbar;
+  end;
  end;
  doupdaterowdata(activerecord);
 end;

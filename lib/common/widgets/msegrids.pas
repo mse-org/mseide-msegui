@@ -243,7 +243,7 @@ type
                  gs1_focuscellonenterlock,gs1_mousecaptureendlock,
                  gs1_forcenullcheck,
                  gs1_cellsizesyncing,gs1_userinput,gs1_autoappendlock,
-                 gs1_scrolllimit);
+                 gs1_scrolllimit,gs1_nocellassistive);
  gridstates1ty = set of gridstate1ty;
 
  cellkindty = (ck_invalid,ck_data,ck_fixcol,ck_fixrow,ck_fixcolrow);
@@ -11457,7 +11457,7 @@ begin
   if info.cell.col >= 0 then begin
    datacols[info.cell.col].docellevent(info);
   end;
-  if assistiveserver <> nil then begin
+  if canassistive() and not (gs1_nocellassistive in fstate1) then begin
    assistiveserver.docellevent(iassistiveclientgrid(getiassistiveclient()),
                                                                         info);
   end;
@@ -13604,8 +13604,8 @@ checkwidgetexit:
    end;
   end
   else begin
-   if canassistive() and (not (gs_isdb in fstate) or 
-                                 (gs1_scrolllimit in fstate1)) then begin
+   if canassistive() and ((gd1 in [gd_left,gd_right]) or
+           not (gs_isdb in fstate) or (gs1_scrolllimit in fstate1)) then begin
     assistiveserver.dogridbordertouched(
               iassistiveclientgrid(getiassistiveclient),gd1);
    end;

@@ -646,6 +646,7 @@ type
  tstringcol1 = class(tstringcol);
  tframebutton1 = class(tframebutton);
  tframebuttons1 = class(tframebuttons);
+ tinplaceedit1 = class(tinplaceedit);
  
  timagefixcol = class(tdropdownfixcol)
   private
@@ -2013,10 +2014,10 @@ end;
 
 procedure tcustomdropdownlistcontroller.dropdownkeydown(var info: keyeventinfoty);
 var
- editor1: tinplaceedit;
+ editor1: tinplaceedit1;
  str1: msestring;
 begin
- editor1:= fintf.geteditor;
+ editor1:= tinplaceedit1(fintf.geteditor);
  editor1.dokeydown(info);
  with info do begin
   if not (es_processed in eventstate) and (shiftstate*shiftstatesmask = []) then begin
@@ -2026,8 +2027,10 @@ begin
       if (row >= 0) then begin
        str1:= tstringcol1(fdropdownlist[fvaluecol]).getrowtext(row);
        if length(str1) > editor1.curindex then begin
-        editor1.text:= copy(str1,1,editor1.curindex+1);
-        editor1.curindex:= editor1.curindex + 1;
+        editor1.text:= copy(str1,1,editor1.curindex);
+        editor1.enterchars(copy(str1,editor1.curindex+1,1));
+//        editor1.text:= copy(str1,1,editor1.curindex+1);
+//        editor1.curindex:= editor1.curindex + 1;
         include(eventstate,es_processed);
        end;
       end;

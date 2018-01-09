@@ -1581,13 +1581,15 @@ begin
    fonchange(self,sender,b1);
   end;
  end;
- startspeak();
- speaktext(sc_deleted,fvoicecaption);
- if length(achar) = 1 then begin
-  speakcharacter(getucs4char(achar,1),fvoicetext);
- end
- else begin
-  speaktext(achar,fvoicetext);
+ if not b1 then begin
+  startspeak();
+  speaktext(sc_deleted,fvoicecaption);
+  if length(achar) = 1 then begin
+   speakcharacter(getucs4char(achar,1),fvoicetext);
+  end
+  else begin
+   speaktext(achar,fvoicetext);
+  end;
  end;
 end;
 
