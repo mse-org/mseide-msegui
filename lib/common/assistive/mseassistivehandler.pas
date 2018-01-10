@@ -404,6 +404,7 @@ type
    procedure setoptions(const avalue: assistiveoptionsty);
   protected
    fstate: assistivehandlerstatesty;
+   fspeaklock: int32;
    fdataenteredkeyserial: card32;
    fitems: tassistivewidgetitemlist;
   {$ifdef mse_debugassistive}
@@ -476,12 +477,10 @@ type
    destructor destroy(); override;
    procedure setstate(const astate: assistivehandlerstatesty);
    procedure resetstate(const astate: assistivehandlerstatesty);
+   procedure speakstop(const acancel: boolean = false);
+   procedure speakcontinue();
    procedure wait();
    procedure cancel();
-   function getcaptiontext(const acaption: msestring): msestring;
-   function getcaptiontext(const sender: iassistiveclient): msestring;
-   function gettexttext(const sender: iassistiveclient): msestring;
-   function gethinttext(const sender: iassistiveclient): msestring;
    procedure speaktext(const atext: msestring; const avoice: int32 = 0);
    procedure speaktext(const atext: stockcaptionty; const avoice: int32 = 0);
    procedure speakcharacter(const achar: char32; const avoice: int32 = 0);
@@ -493,6 +492,10 @@ type
    procedure speakmenustart(const sender: iassistiveclient);
    procedure speakallmenu(const sender: iassistiveclientmenu;
                                                const ahint: boolean);
+   function getcaptiontext(const acaption: msestring): msestring;
+   function getcaptiontext(const sender: iassistiveclient): msestring;
+   function gettexttext(const sender: iassistiveclient): msestring;
+   function gethinttext(const sender: iassistiveclient): msestring;
    property state: assistivehandlerstatesty read fstate;
   published
    property active: boolean read factive write setactive default false;
@@ -867,6 +870,7 @@ end;
 procedure tassistivehandler.activate();
 begin
  if not (csdesigning in componentstate) then begin
+  fspeaklock:= 0;
   application.registeronshortcut(@doshortcut);
   fspeaker.active:= true;
   assistiveserver:= iassistiveserver(self);
@@ -917,7 +921,9 @@ end;
 
 procedure tassistivehandler.cancel();
 begin
- fspeaker.cancel();
+ if fspeaklock <= 0 then begin
+  fspeaker.cancel();
+ end;
 end;
 
 function tassistivehandler.getcaptiontext(const acaption: msestring): msestring;
@@ -973,7 +979,9 @@ end;
 procedure tassistivehandler.speaktext(const atext: msestring;
                const avoice: int32 = 0);
 begin
- fspeaker.speak(atext,[so_endpause],avoice);
+ if fspeaklock <= 0 then begin
+  fspeaker.speak(atext,[so_endpause],avoice);
+ end;
 end;
 
 procedure tassistivehandler.speaktext(const atext: stockcaptionty;
@@ -985,7 +993,9 @@ end;
 procedure tassistivehandler.speakcharacter(const achar: char32;
                const avoice: int32 = 0);
 begin
- fspeaker.speakcharacter(achar,[so_endpause],avoice);
+ if fspeaklock <= 0 then begin
+  fspeaker.speakcharacter(achar,[so_endpause],avoice);
+ end;
 end;
 
 procedure tassistivehandler.speakall(const sender: iassistiveclient;
@@ -994,18 +1004,23 @@ var
  fla1: assistiveflagsty;
  s1: msestring;
  w1: tpopupmenuwidget1;
+ intf2: iassistiveclient;
 begin
  fla1:= sender.getassistiveflags();
+ pointer(w1):= sender.getinstance();
+ intf2:= sender.getassistiveparent();
  if not addtext then begin
   startspeak();
  end;
  s1:= '';
  if asf_menu in fla1 then begin
-  pointer(w1):= sender.getinstance();
   if w1 is tpopupmenuwidget then begin
    speakallmenu(tmenuitem1(w1.flayout.menu).getiassistiveclient(),ahint);
    exit;
   end; 
+ end;
+ if (intf2 <> nil) and (asf_message in intf2.getassistiveflags()) then begin
+  speakall(intf2,false,ahint);
  end;
  if fla1 * [asf_grid,asf_popup] = [asf_grid,asf_popup] then begin
   with iassistiveclientgrid(sender) do begin
@@ -1056,6 +1071,19 @@ end;
 procedure tassistivehandler.resetstate(const astate: assistivehandlerstatesty);
 begin
  fstate:= fstate - (astate-internalstates);
+end;
+
+procedure tassistivehandler.speakstop(const acancel: boolean = false);
+begin
+ if acancel then begin
+  cancel;
+ end;
+ inc(fspeaklock);
+end;
+
+procedure tassistivehandler.speakcontinue();
+begin
+ dec(fspeaklock);
 end;
 
 procedure tassistivehandler.startspeak();

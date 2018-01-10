@@ -191,6 +191,7 @@ type
 
    function getiassistiveclient(): iassistiveclientmenu virtual;
     //iassistiveclient
+   function getassistiveparent(): iassistiveclient;
    function getassistivewidget(): tobject;
    function getassistivename(): msestring; virtual;
    function getassistivecaption(): msestring; virtual;
@@ -1196,6 +1197,14 @@ end;
 function tmenuitem.getiassistiveclient(): iassistiveclientmenu;
 begin
  result:= iassistiveclientmenu(self);
+end;
+
+function tmenuitem.getassistiveparent(): iassistiveclient;
+begin
+ result:= nil;
+ if fparentmenu <> nil then begin
+  result:= fparentmenu.getiassistiveclient();
+ end;
 end;
 
 function tmenuitem.getassistivewidget(): tobject;

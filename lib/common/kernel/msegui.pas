@@ -2020,7 +2020,8 @@ type
    function getiassistiveclient(): iassistiveclient virtual;
    function canassistive(): boolean virtual;
     //iassistiveclient
-   function getassistivewidget: tobject virtual;
+   function getassistiveparent(): iassistiveclient virtual;
+   function getassistivewidget(): tobject virtual;
    function getassistivename(): msestring virtual;
    function getassistivecaption(): msestring virtual;
    function getassistivetext(): msestring virtual;
@@ -15527,6 +15528,14 @@ begin
  result:= (assistiveserver <> nil) and 
               not (ow1_noassistive in foptionswidget1) and 
                                     not (csdesigning in componentstate);
+end;
+
+function twidget.getassistiveparent(): iassistiveclient;
+begin
+ result:= nil;
+ if fparentwidget <> nil then begin
+  result:= fparentwidget.getiassistiveclient();
+ end;
 end;
 
 function twidget.getassistivewidget: tobject;

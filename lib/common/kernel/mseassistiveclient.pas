@@ -24,6 +24,7 @@ type
  assistiveflagsty = set of assistiveflagty;
  
  iassistiveclient = interface(inullinterface)[miid_iassistiveclient]
+  function getassistiveparent(): iassistiveclient;
   function getinstance: tobject;
   function getassistivewidget: tobject; //twidget, can be nil
   function getassistivename(): msestring;

@@ -153,6 +153,7 @@ type
    function cuttoclipboard(const buffer: clipboardbufferty): boolean; virtual;   //true if cut
    function getiassistiveclient(): iassistiveclientedit virtual;
     //iassistiveclient
+   function getassistiveparent(): iassistiveclient;
    function getinstance: tobject;
    function getassistivewidget(): tobject;
    function getassistivename(): msestring;
@@ -1940,6 +1941,11 @@ end;
 function tinplaceedit.getiassistiveclient(): iassistiveclientedit;
 begin
  result:= iassistiveclientedit(self);
+end;
+
+function tinplaceedit.getassistiveparent(): iassistiveclient;
+begin
+ result:= twidget1(fwidget).getassistiveparent();
 end;
 
 function tinplaceedit.getinstance: tobject;
