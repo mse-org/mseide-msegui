@@ -2568,7 +2568,8 @@ procedure tdropdownlist.mouseevent(var info: mouseeventinfoty);
 begin
  inherited;
  if (info.eventkind = ek_buttonpress) and
-      not pointinrect(translatewidgetpoint(info.pos,self,nil),fwidgetrect) then begin
+      not pointinrect(translatewidgetpoint(info.pos,self,nil),
+                                                  fwidgetrect) then begin
   canceldropdown;
  end;
 end;
@@ -2708,7 +2709,7 @@ end;
 
 procedure tdropdownlist.clientmouseevent(var info: mouseeventinfoty);
 begin
- if info.eventkind = ek_mousemove then begin
+ if (info.eventkind = ek_mousemove) and not canassistive() then begin
   if dls_mousemoved in fdropdownstate then begin
    if fobjectpicker.active then begin
     killrepeater();
