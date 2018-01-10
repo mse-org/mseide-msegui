@@ -21,7 +21,8 @@ uses
 
 type
  assistivehandlerstatety =
-  (ahs_active,ahs_windowactivated,ahs_menuactivated,ahs_menuactivatepending,
+  (ahs_active,ahs_nocut,
+   ahs_windowactivated,ahs_menuactivated,ahs_menuactivatepending,
    ahs_dropdownlistclosed,ahs_editcharenter,ahs_editchardelete,
    ahs_locatepending,ahs_dropdownpending,
    ahs_textblock,ahs_textblock1);
@@ -481,11 +482,14 @@ type
    procedure speakcontinue();
    procedure wait();
    procedure cancel();
-   procedure speaktext(const atext: msestring; const avoice: int32 = 0);
-   procedure speaktext(const atext: stockcaptionty; const avoice: int32 = 0);
-   procedure speakcharacter(const achar: char32; const avoice: int32 = 0);
+   procedure speaktext(const atext: msestring; const avoice: int32 = 0;
+                                                const nocut: boolean = false);
+   procedure speaktext(const atext: stockcaptionty; const avoice: int32 = 0;
+                                                const nocut: boolean = false);
+   procedure speakcharacter(const achar: char32; const avoice: int32 = 0;
+                                                const nocut: boolean = false);
    procedure speakall(const sender: iassistiveclient; const addtext: boolean;
-                                                         const ahint: boolean);
+                                 const ahint: boolean; const aparent: boolean);
    procedure speakgridcell(const sender: iassistiveclientgrid;
                   const acell: gridcoordty; const acaption: boolean);
    procedure speakinput(const sender: iassistiveclientdata);
@@ -875,7 +879,8 @@ begin
   fspeaker.active:= true;
   assistiveserver:= iassistiveserver(self);
   assistiveoptions:= options;
-  include(fstate,ahs_active);
+  fstate:= [ahs_active];
+//  include(fstate,ahs_active);
   application.invalidate();
  end;
 end;
@@ -921,8 +926,11 @@ end;
 
 procedure tassistivehandler.cancel();
 begin
- if fspeaklock <= 0 then begin
-  fspeaker.cancel();
+ if (fspeaklock <= 0) then begin
+  if not (ahs_nocut in fstate) then begin
+   fspeaker.cancel();
+  end;
+  exclude(fstate,ahs_nocut);
  end;
 end;
 
@@ -977,29 +985,36 @@ begin
 end;
 
 procedure tassistivehandler.speaktext(const atext: msestring;
-               const avoice: int32 = 0);
+               const avoice: int32 = 0; const nocut: boolean = false);
 begin
  if fspeaklock <= 0 then begin
+  if nocut then begin
+   include(fstate,ahs_nocut);
+  end;
   fspeaker.speak(atext,[so_endpause],avoice);
  end;
 end;
 
 procedure tassistivehandler.speaktext(const atext: stockcaptionty;
-               const avoice: int32 = 0);
+               const avoice: int32 = 0; const nocut: boolean = false);
 begin
- speaktext(stockobjects.captions[atext],avoice);
+ speaktext(stockobjects.captions[atext],avoice,nocut);
 end;
 
 procedure tassistivehandler.speakcharacter(const achar: char32;
-               const avoice: int32 = 0);
+               const avoice: int32 = 0; const nocut: boolean = false);
 begin
  if fspeaklock <= 0 then begin
+  if nocut then begin
+   include(fstate,ahs_nocut);
+  end;
   fspeaker.speakcharacter(achar,[so_endpause],avoice);
  end;
 end;
 
 procedure tassistivehandler.speakall(const sender: iassistiveclient;
-                             const addtext: boolean; const ahint: boolean);
+                           const addtext: boolean; const ahint: boolean;
+                                                     const aparent: boolean);
 var
  fla1: assistiveflagsty;
  s1: msestring;
@@ -1008,7 +1023,10 @@ var
 begin
  fla1:= sender.getassistiveflags();
  pointer(w1):= sender.getinstance();
- intf2:= sender.getassistiveparent();
+ intf2:= nil;
+ if aparent then begin
+  intf2:= sender.getassistiveparent();
+ end;
  if not addtext then begin
   startspeak();
  end;
@@ -1020,7 +1038,7 @@ begin
   end; 
  end;
  if (intf2 <> nil) and (asf_message in intf2.getassistiveflags()) then begin
-  speakall(intf2,false,ahint);
+  speakall(intf2,false,ahint,false);
  end;
  if fla1 * [asf_grid,asf_popup] = [asf_grid,asf_popup] then begin
   with iassistiveclientgrid(sender) do begin
@@ -1137,7 +1155,7 @@ end;
 
 procedure tassistivehandler.dospeakagain(const sender: twidget);
 begin
- speakall(twidget1(sender).getiassistiveclient(),false,true);
+ speakall(twidget1(sender).getiassistiveclient(),false,true,true);
 end;
 
 procedure tassistivehandler.checklocatepending(const sender: iassistiveclient);
@@ -1340,7 +1358,7 @@ begin
      end
      else begin
       if not (ahs_dropdownlistclosed in fstate) then begin
-       speakall(sender,ahs_windowactivated in fstate,false);
+       speakall(sender,ahs_windowactivated in fstate,false,false);
       end;
      end;
     end;
