@@ -406,6 +406,10 @@ type
    fstate: assistivehandlerstatesty;
    fdataenteredkeyserial: card32;
    fitems: tassistivewidgetitemlist;
+  {$ifdef mse_debugassistive}
+   procedure debug(const text: string;
+                                      const intf: iassistiveclient);
+  {$endif}
    procedure activate();
    procedure deactivate();
 
@@ -557,7 +561,7 @@ type
 implementation
 uses
  msekeyboard,sysutils,msesysutils,mserichstring,msemenus,mseactions,
- msegridsglob,mseeditglob;
+ msegridsglob,mseeditglob,typinfo;
  
 type
  twidget1 = class(twidget);
@@ -1003,6 +1007,13 @@ begin
    exit;
   end; 
  end;
+ if fla1 * [asf_grid,asf_popup] = [asf_grid,asf_popup] then begin
+  with iassistiveclientgrid(sender) do begin
+   speaktext(getassistivecellcaption(getassistivefocusedcell()),fvoicecaption);
+   speaktext(getassistivecelltext(getassistivefocusedcell()),fvoicetext);
+  end;
+  exit;
+ end;
  if asf_button in fla1 then begin
   s1:= stockobjects.captions[sc_button] + ' ';
  end;
@@ -1108,25 +1119,24 @@ begin
  end;
 end;
 
-
 {$ifdef mse_debugassistive}
-procedure debug(const text: string; const intf: iassistiveclient);
+procedure tassistivehandler.debug(const text: string;
+                                      const intf: iassistiveclient);
 var
  wi1: twidget;
 begin
- debugwrite('*'+text+':');
+ debugwrite('*'+text+settostring(ptypeinfo(typeinfo(assistivehandlerstatesty)),
+                                                       int32(fstate),true)+':');
  if intf <> nil then begin
   pointer(wi1):= intf.getassistivewidget();
   if wi1 <> nil then begin
-   debugwriteln(wi1.name);
+   debugwrite(wi1.name);
   end
   else begin
-   debugwriteln('NIL');
+   debugwrite('NIL');
   end;
- end
- else begin
-  debugwriteln('');
  end;
+ debugwriteln('');
 end;
 {$endif}
 
@@ -1309,7 +1319,9 @@ begin
    end;
   end;
  end;
- resetstate([ahs_windowactivated,ahs_dropdownlistclosed]);
+ if asf_focused in sender.getassistiveflags() then begin
+  resetstate([ahs_windowactivated,ahs_dropdownlistclosed]);
+ end;
 end;
 
 procedure tassistivehandler.doclientmouseevent(const sender: iassistiveclient;

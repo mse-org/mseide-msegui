@@ -2246,7 +2246,8 @@ type
     //iassistiveclientgrid
    function getassistivecellcaption(const acell: gridcoordty): msestring virtual;
    function getassistivecelltext(const acell: gridcoordty): msestring virtual;
-   function getassistivegridinfo(): assistivegridinfoty; virtual;
+   function getassistivefocusedcell(): gridcoordty;
+   function getassistivegridinfo(): assistivegridinfoty virtual;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -15695,6 +15696,11 @@ end;
 function tcustomgrid.getassistivecelltext(const acell: gridcoordty): msestring;
 begin
  result:= '';
+end;
+
+function tcustomgrid.getassistivefocusedcell(): gridcoordty;
+begin
+ result:= ffocusedcell;
 end;
 
 function tcustomgrid.getassistivegridinfo(): assistivegridinfoty;

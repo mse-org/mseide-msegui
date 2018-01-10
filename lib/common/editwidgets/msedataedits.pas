@@ -516,6 +516,8 @@ type
    procedure texttovalue(var accept: boolean; const quiet: boolean); override;
    procedure dohide; override;
    function getassistiveflags(): assistiveflagsty override;
+//   function getassistivecaption(): msestring override;
+//   function getassistivetext(): msestring override;
    {$ifdef mse_with_ifi}
    function getifidatalinkintf: iifidatalink; override;
     //iifidropdownlistdatalink
@@ -3827,6 +3829,35 @@ begin
   include(result,asf_hasdropdown);
  end;
 end;
+{
+function tcustomdropdownedit.getassistivecaption(): msestring;
+var
+ wi1: tcustomgrid;
+ intf1: iassistiveclientgrid;
+begin
+ if fdropdown.hasdropdown() then begin
+  wi1:= tcustomgrid(fdropdown.dropdownwidget);
+  result:= iassistiveclientgrid(wi1).getassistivecellcaption(wi1.focusedcell);
+ end
+ else begin
+  result:= inherited getassistivecaption();
+ end;
+end;
+
+function tcustomdropdownedit.getassistivetext(): msestring;
+var
+ wi1: tcustomgrid;
+ intf1: iassistiveclientgrid;
+begin
+ if fdropdown.hasdropdown() then begin
+  wi1:= tcustomgrid(fdropdown.dropdownwidget);
+  result:= iassistiveclientgrid(wi1).getassistivecelltext(wi1.focusedcell);
+ end
+ else begin
+  result:= inherited getassistivetext();
+ end;
+end;
+}
 {
 procedure tcustomdropdownedit.updatereadonlystate;
 begin

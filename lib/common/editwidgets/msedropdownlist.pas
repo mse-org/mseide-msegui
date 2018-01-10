@@ -442,6 +442,7 @@ type
    constructor create(const intf: idropdown); reintroduce;
    destructor destroy; override;
    function hasdropdown(): boolean;
+   property dropdownwidget: twidget read getdropdownwidget;
    procedure dostatread(const reader: tstatreader); virtual;
    procedure dostatwrite(const writer: tstatwriter); virtual;
    procedure dropdown; virtual;
@@ -1352,8 +1353,11 @@ begin
 end;
 
 function tcustomdropdowncontroller.hasdropdown(): boolean;
+var
+ wi1: twidget;
 begin
- result:= getdropdownwidget() <> nil;
+ wi1:= getdropdownwidget();
+ result:= (wi1 <> nil) and not wi1.releasing();
 end;
 
 procedure tcustomdropdowncontroller.dostatread(const reader: tstatreader);

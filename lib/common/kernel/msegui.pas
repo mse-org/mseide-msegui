@@ -15628,6 +15628,9 @@ begin
  if osk_container in foptionsskin then begin
   include(result,asf_container);
  end;
+ if focused then begin
+  include(result,asf_focused);
+ end;
 end;
 
 function twidget.getifidatalinkintf(): iifidatalink;

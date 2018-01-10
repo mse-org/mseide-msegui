@@ -20,7 +20,7 @@ type
                     asf_datetime,asf_menu,asf_message,asf_popup,
                     asf_textedit,asf_graphicedit,asf_readonly,
                     asf_inplaceedit,asf_button,asf_db,
-                    asf_hasdropdown);
+                    asf_focused,asf_hasdropdown);
  assistiveflagsty = set of assistiveflagty;
  
  iassistiveclient = interface(inullinterface)[miid_iassistiveclient]
@@ -47,6 +47,7 @@ type
  iassistiveclientgrid = interface(iassistiveclient)[miid_iassistiveclientgrid]
   function getassistivecellcaption(const acell: gridcoordty): msestring;
   function getassistivecelltext(const acell: gridcoordty): msestring;
+  function getassistivefocusedcell(): gridcoordty;
   function getassistivegridinfo(): assistivegridinfoty;
  end;
 
