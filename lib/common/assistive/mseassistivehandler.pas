@@ -365,6 +365,8 @@ type
   procedure(const handler: tassistivehandler; const intf: iassistiveclient;
                 const akind: assistivedbeventkindty; const adataset: tdataset;
                                                 var handled: boolean) of object;
+ speakoptionty = (spo_addtext,spo_hint,spo_parent);
+ speakoptionsty = set of speakoptionty;
  
  tassistivehandler = class(tmsecomponent,iassistiveserver)
   private
@@ -488,8 +490,8 @@ type
                                                 const nocut: boolean = false);
    procedure speakcharacter(const achar: char32; const avoice: int32 = 0;
                                                 const nocut: boolean = false);
-   procedure speakall(const sender: iassistiveclient; const addtext: boolean;
-                                 const ahint: boolean; const aparent: boolean);
+   procedure speakall(const sender: iassistiveclient;
+                                        const aoptions: speakoptionsty);
    procedure speakgridcell(const sender: iassistiveclientgrid;
                   const acell: gridcoordty; const acaption: boolean);
    procedure speakinput(const sender: iassistiveclientdata);
@@ -1013,8 +1015,7 @@ begin
 end;
 
 procedure tassistivehandler.speakall(const sender: iassistiveclient;
-                           const addtext: boolean; const ahint: boolean;
-                                                     const aparent: boolean);
+                                            const aoptions: speakoptionsty);
 var
  fla1: assistiveflagsty;
  s1: msestring;
@@ -1024,23 +1025,27 @@ begin
  fla1:= sender.getassistiveflags();
  pointer(w1):= sender.getinstance();
  intf2:= nil;
- if aparent then begin
+ if spo_parent in aoptions then begin
   intf2:= sender.getassistiveparent();
  end;
- if not addtext then begin
+ if not (spo_addtext in aoptions) then begin
   startspeak();
  end;
  s1:= '';
  if asf_menu in fla1 then begin
   if w1 is tpopupmenuwidget then begin
-   speakallmenu(tmenuitem1(w1.flayout.menu).getiassistiveclient(),ahint);
+   speakallmenu(tmenuitem1(w1.flayout.menu).getiassistiveclient(),
+                                                   spo_hint in aoptions);
    exit;
   end; 
  end;
  if (intf2 <> nil) and (asf_message in intf2.getassistiveflags()) then begin
-  speakall(intf2,false,ahint,false);
+  speakall(intf2,aoptions - [spo_addtext,spo_parent]);
  end;
  if fla1 * [asf_grid,asf_popup] = [asf_grid,asf_popup] then begin
+  if spo_parent in aoptions then begin
+   speaktext(sc_selection,fvoicecaption);
+  end;
   with iassistiveclientgrid(sender) do begin
    speaktext(getassistivecellcaption(getassistivefocusedcell()),fvoicecaption);
    speaktext(getassistivecelltext(getassistivefocusedcell()),fvoicetext);
@@ -1053,7 +1058,7 @@ begin
  s1:= s1 + getcaptiontext(sender);
  speaktext(s1,fvoicecaption);
  speaktext(gettexttext(sender),fvoicetext);
- if ahint then begin
+ if spo_hint in aoptions then begin
   speaktext(gethinttext(sender),fvoicecaption);
  end;
 end;
@@ -1155,7 +1160,7 @@ end;
 
 procedure tassistivehandler.dospeakagain(const sender: twidget);
 begin
- speakall(twidget1(sender).getiassistiveclient(),false,true,true);
+ speakall(twidget1(sender).getiassistiveclient(),[spo_hint,spo_parent]);
 end;
 
 procedure tassistivehandler.checklocatepending(const sender: iassistiveclient);
@@ -1333,6 +1338,7 @@ var
  b1: boolean;
  item1: tassistivewidgetitem;
  fla1: assistiveflagsty;
+ opt1: speakoptionsty;
 begin
 {$ifdef mse_debugassistive}
  debug('activate',sender);
@@ -1358,7 +1364,11 @@ begin
      end
      else begin
       if not (ahs_dropdownlistclosed in fstate) then begin
-       speakall(sender,ahs_windowactivated in fstate,false,false);
+       opt1:= [];
+       if ahs_windowactivated in fstate then begin
+        opt1:= [spo_addtext]
+       end;
+       speakall(sender,opt1);
       end;
      end;
     end;
@@ -1512,6 +1522,7 @@ procedure tassistivehandler.docellevent(const sender: iassistiveclientgrid;
 var
  b1: boolean;
  item1: tassistivewidgetitem;
+ f1: assistiveflagsty;
 begin
 {$ifdef mse_debugassistive}
  debug('cellevent',sender);
@@ -1528,8 +1539,10 @@ begin
    with info do begin
     case eventkind of
      cek_enter: begin
+      f1:= sender.getassistiveflags();
       if not b1 and ((cellbefore.col <> cell.col) or 
-                         (cellbefore.row <> cell.row)) then begin
+                         (cellbefore.row <> cell.row)) and 
+                                       not (asf_scrolllimit in f1) then begin
        if not (ahs_locatepending in fstate) then begin
         startspeak();
        end;

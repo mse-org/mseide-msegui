@@ -6775,18 +6775,24 @@ end;
 procedure tdropdownlistdatalink.setcurrentrecord(const avalue: integer;
                            const arowpos: rowpositionty);
 var
- int1{,int2}: integer;
+ int1,int2: integer;
 begin
  if active then begin
   if avalue <> fcurrentrecord then begin
-//   int2:= fcurrentrecord;
+   int2:= fcurrentrecord;
    fcurrentrecord:= avalue;
    if fcurrentrecord < 0 then begin
     fcurrentrecord:= 0;
+    if int2 = 0 then begin
+     include(tcustomgrid1(fgrid).fstate1,gs1_scrolllimit);
+    end;
    end;
    int1:= dataset.recordcount;
    if fcurrentrecord >= dataset.recordcount then begin
     fcurrentrecord:= int1 - 1;
+    if int2 = fcurrentrecord then begin
+     include(tcustomgrid1(fgrid).fstate1,gs1_scrolllimit);
+    end;
    end;
    updatedatawindow(arowpos);
   end;
@@ -6966,17 +6972,13 @@ end;
 procedure tdbdropdownlist.rowdown(const action: focuscellactionty = fca_focusin;
                                        const nowrap: boolean = false);
 begin
- if fdatalink.MoveBy(1) = 0 then begin
-  include(fstate1,gs1_scrolllimit);
- end;
+ fdatalink.MoveBy(1);
 end;
 
 procedure tdbdropdownlist.rowup(const action: focuscellactionty = fca_focusin;
                                        const nowrap: boolean = false);
 begin
- if fdatalink.MoveBy(-1) = 0 then begin
-  include(fstate1,gs1_scrolllimit);
- end;
+ fdatalink.MoveBy(-1);
 end;
 
 procedure tdbdropdownlist.internalcreateframe;

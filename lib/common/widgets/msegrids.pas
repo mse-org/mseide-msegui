@@ -13623,6 +13623,7 @@ checkwidgetexit:
     assistiveserver.dogridbordertouched(
               iassistiveclientgrid(getiassistiveclient),gd1);
    end;
+   exclude(fstate1,gs1_scrolllimit);
   end;
  end;
 end;
@@ -15670,6 +15671,9 @@ end;
 function tcustomgrid.getassistiveflags(): assistiveflagsty;
 begin
  result:= inherited getassistiveflags() + [asf_grid];
+ if gs1_scrolllimit in fstate1 then begin
+  include(result,asf_scrolllimit);
+ end;
 end;
 
 function tcustomgrid.getassistivecellcaption(
