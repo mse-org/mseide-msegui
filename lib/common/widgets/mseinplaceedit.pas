@@ -1213,6 +1213,7 @@ procedure tinplaceedit.deletechar;
 var
  bo1: boolean;
  ch1: msechar;
+ s1: msestring;
 begin
  if ies_emptytext in fstate then begin
   exit;
@@ -1227,13 +1228,18 @@ begin
  if (card16(ch1) and $fc00 = $d800) or 
           (ch1 = c_linefeed) and (fcurindex > 0) and
                                      (finfo.text.text = c_return) then begin
+  s1:= copy(finfo.text.text,fcurindex+1,2);
   richdelete(finfo.text,fcurindex+1,2);
  end
  else begin
+  s1:= copy(finfo.text.text,fcurindex+1,1);
   richdelete(finfo.text,fcurindex+1,1);
  end;
  fstate:= fstate + [ies_touched,ies_edited];
  invalidatetext(true,bo1);
+ if twidget1(fwidget).canassistive() then begin
+  assistiveserver.doeditchardelete(getiassistiveclient(),s1);
+ end;
 // if not bo1 then begin
   internalupdatecaret;
 // end;
