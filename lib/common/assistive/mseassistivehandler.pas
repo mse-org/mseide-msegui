@@ -402,6 +402,7 @@ type
    fondbvaluechanged: assistiveserverdataeventty;
    fondatasetevent: assistiveserverdataseteventty;
    fongridbordertouched: assistiveservergriddirectioneventty;
+   fvoicetextedit: int32;
    procedure setactive(const avalue: boolean);
    procedure setspeaker(const avalue: tassistivespeak);
    procedure setoptions(const avalue: assistiveoptionsty);
@@ -512,6 +513,8 @@ type
                                           write fvoicecaption default 0;
    property voicetext: int32 read fvoicetext 
                                           write fvoicetext default 0;
+   property voicetextedit: int32 read fvoicetextedit
+                                          write fvoicetextedit default 0;
    property onapplicationactivated: assistiveservereventty 
                  read fonapplicationactivated write fonapplicationactivated;
    property onapplicationdeactivated: assistiveservereventty
@@ -1021,8 +1024,13 @@ var
  s1: msestring;
  w1: tpopupmenuwidget1;
  intf2: iassistiveclient;
+ i1: int32;
 begin
  fla1:= sender.getassistiveflags();
+ i1:= fvoicetext;
+ if [asf_inplaceedit,asf_textedit] * fla1 <> [] then begin
+  i1:= fvoicetextedit;
+ end;
  pointer(w1):= sender.getinstance();
  intf2:= nil;
  if spo_parent in aoptions then begin
@@ -1048,7 +1056,7 @@ begin
   end;
   with iassistiveclientgrid(sender) do begin
    speaktext(getassistivecellcaption(getassistivefocusedcell()),fvoicecaption);
-   speaktext(getassistivecelltext(getassistivefocusedcell()),fvoicetext);
+   speaktext(getassistivecelltext(getassistivefocusedcell()),i1);
   end;
   exit;
  end;
@@ -1057,7 +1065,7 @@ begin
  end;
  s1:= s1 + getcaptiontext(sender);
  speaktext(s1,fvoicecaption);
- speaktext(gettexttext(sender),fvoicetext);
+ speaktext(gettexttext(sender),i1);
  if spo_hint in aoptions then begin
   speaktext(gethinttext(sender),fvoicecaption);
  end;
@@ -1078,7 +1086,7 @@ begin
  startspeak();
  speaktext(sc_input,fvoicecaption);
  speaktext(getcaptiontext(iassistiveclient(sender)),fvoicecaption);
- speaktext(gettexttext(sender),fvoicetext);
+ speaktext(gettexttext(sender),fvoicetextedit);
 end;
 
 procedure tassistivehandler.speakmenustart(const sender: iassistiveclient);
