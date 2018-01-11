@@ -357,7 +357,7 @@ Name            Value
 
 CROSSMSEDIR     <MSEide+MSEgui directory>
 CROSSFPCDIR     <your crossfpc directory>
-CROSSFPCVERSION 3.0.1
+CROSSFPCVERSION 3.0.3
 HOSTIP          <the IP of the host>
 REMOTEIP        <the IP of the remote target>
 REMOTEPORT      <the remote port, ex: 2345>
