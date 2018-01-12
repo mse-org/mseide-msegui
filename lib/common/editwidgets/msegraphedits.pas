@@ -4344,7 +4344,7 @@ end;
 procedure tcustomdatabutton.actionchanged;
 begin
  finfo.color:= fcolor;
- actioninfotoshapeinfo(self,factioninfo,finfo);
+ actioninfotoshapeinfo(self,factioninfo,finfo,foptions);
  inherited setcolor(finfo.color); 
  finfo.color:= cl_transparent;
 // if csdesigning in componentstate then begin

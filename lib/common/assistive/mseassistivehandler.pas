@@ -1071,7 +1071,12 @@ begin
   exit;
  end;
  if asf_button in fla1 then begin
-  s1:= stockobjects.captions[sc_button] + ' ';
+  if asf_disabled in fla1 then begin
+   s1:= stockobjects.captions[sc_disabledbutton] + ' ';
+  end
+  else begin
+   s1:= stockobjects.captions[sc_button] + ' ';
+  end;
  end;
  s1:= s1 + getcaptiontext(sender);
  speaktext(s1,fvoicecaption);

@@ -149,7 +149,7 @@ type
                     sc_bof,sc_eof,
                     sc_voiceoutput,sc_speakagain,
                     sc_firstcol,sc_firstrow,sc_lastcol,sc_lastrow,
-                    sc_selection,sc_speakpath
+                    sc_selection,sc_speakpath,sc_disabledbutton
                     );
  textgeneratorfuncty = function(const params: array of const): msestring;
  textgeneratorty = (tg_delete_n_selected_rows);

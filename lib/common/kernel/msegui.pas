@@ -2018,7 +2018,6 @@ type
    function canclose1: boolean; 
 
    function getiassistiveclient(): iassistiveclient virtual;
-   function canassistive(): boolean virtual;
     //iassistiveclient
    function getassistiveparent(): iassistiveclient virtual;
    function getassistivewidget(): tobject virtual;
@@ -2027,7 +2026,7 @@ type
    function getassistivetext(): msestring virtual;
    function getassistivecaretindex(): int32 virtual;
    function getassistivehint(): msestring virtual;
-   function getassistiveflags: assistiveflagsty virtual;
+   function getassistiveflags(): assistiveflagsty virtual;
   {$ifdef mse_with_ifi}
    function getifidatalinkintf(): iifidatalink virtual;
   {$endif}
@@ -2060,6 +2059,7 @@ type
    procedure beginupdate; //sets ws_loadlock and noinvalidate
    procedure endupdate;
    function canmouseinteract: boolean; //checks csdesigning and cssubcomponent
+   function canassistive(): boolean virtual;
    function widgetstate: widgetstatesty;                 //iframe
    property widgetstate1: widgetstates1ty read fwidgetstate1;
    function hasparent: boolean; override;               //tcomponent
@@ -15628,7 +15628,7 @@ begin
  result:= hint;
 end;
 
-function twidget.getassistiveflags: assistiveflagsty;
+function twidget.getassistiveflags(): assistiveflagsty;
 begin
  result:= [];
  if not (ws_iswidget in fwidgetstate) then begin
@@ -15639,6 +15639,9 @@ begin
  end;
  if focused then begin
   include(result,asf_focused);
+ end;
+ if not isenabled then begin
+  include(result,asf_disabled);
  end;
 end;
 

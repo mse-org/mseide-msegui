@@ -16,7 +16,33 @@ uses
  msegraphics,msegraphutils,mseguiglob,msegui,mseevent,mserichstring,msebitmap,
  msetypes,mseact,msestrings,msedrawtext;
 
+type
+ buttonoptionty = (bo_executeonclick,bo_executeonkey,bo_executeonshortcut,
+                   bo_executedefaultonenterkey,
+                   bo_asyncexecute,
+                   bo_focusonshortcut,bo_focusonactionshortcut,
+                                                        //for tcustombutton
+                   bo_updateonidle,
+                   bo_shortcutcaption,bo_altshortcut,
+                   {bo_flat,bo_noanim,bo_nofocusrect,bo_nodefaultrect,}
+                   bo_nodefaultframeactive,
+                   bo_coloractive,
+                   bo_ellipsemouse, //mouse area is elliptical
+                   bo_nocandefocus,bo_candefocuswindow, //check own window only
+                   bo_radioitem,  //for tdatabutton
+                   bo_radioitemcol,
+                   bo_cantoggle, //for tbooleaneditradio
+                   bo_resetcheckedonrowexit,
+                                 //used in tdatabutton
+                   bo_reversed,  //for tbooleanedit
+                   bo_noassistivedisabled
+                   );
+ buttonoptionsty = set of buttonoptionty;
+
 const
+ defaultbuttonoptions = [bo_executeonclick,bo_executeonkey,
+                         bo_executeonshortcut,bo_executedefaultonenterkey];
+
  menuarrowwidth = 8;
  menuarrowwidthhorz = 15;
  menucheckboxwidth = 13;
@@ -106,14 +132,16 @@ function updatewidgetshapestate(var info: shapeinfoty; const widget: twidget;
 //                    const ainvisible: boolean = false;
                     const aframe: tcustomframe = nil): boolean;
 function findshapeatpos(const infoar: shapeinfoarty; const apos: pointty;
-               const rejectstates: shapestatesty = [shs_disabled,shs_invisible]): integer;
+               const rejectstates: shapestatesty = 
+                                         [shs_disabled,shs_invisible]): integer;
 function pointinshape(const pos: pointty; const info: shapeinfoty): boolean;
 procedure initshapeinfo(var ainfo: shapeinfoty);
 
 procedure actioninfotoshapeinfo(var actioninfo: actioninfoty;
             var shapeinfo: shapeinfoty); overload;
-procedure actioninfotoshapeinfo(const sender: twidget; var actioninfo: actioninfoty;
-                                    var shapeinfo: shapeinfoty); overload;
+procedure actioninfotoshapeinfo(const sender: twidget;
+                 var actioninfo: actioninfoty; var shapeinfo: shapeinfoty;
+                                            const aoptions: buttonoptionsty);
 procedure frameskinoptionstoshapestate(const aframe: tcustomframe;
                                     var dest: shapeinfoty{shapestatesty});
 function shapestatetoframestate(const aindex: integer;
@@ -256,7 +284,8 @@ begin
 end;
 
 procedure actioninfotoshapeinfo(const sender: twidget;
-                  var actioninfo: actioninfoty; var shapeinfo: shapeinfoty);
+                  var actioninfo: actioninfoty; var shapeinfo: shapeinfoty;
+                  const aoptions: buttonoptionsty);
 var
  statebefore: actionstatesty;
 begin
@@ -264,14 +293,19 @@ begin
   with actioninfo do begin
    statebefore:= state;
    if (sender.enabled) <> not (as_disabled in state) then begin
-    sender.enabled:= not(as_disabled in state);
+    if not (as_disabled in state) or 
+       not (bo_noassistivedisabled in aoptions) or
+                      not sender.canassistive() then begin
+     sender.enabled:= not(as_disabled in state);
+    end;
    end;
    if (sender.visible) <> not (as_invisible in state) then begin
     sender.visible:= not(as_invisible in state);
    end;
    state:= statebefore; //restore localflag
    actioninfotoshapeinfo(actioninfo,shapeinfo);
-   updatewidgetshapestate(shapeinfo,sender,false,twidget1(sender).fframe);
+   updatewidgetshapestate(shapeinfo,sender,as_disabled in state,
+                                                 twidget1(sender).fframe);
                                    //update shs_disabled by isenabled
    sender.invalidate;
   end;

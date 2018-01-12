@@ -1316,31 +1316,6 @@ type
    function canclose(const newfocus: twidget): boolean; override;
  end;
 
- buttonoptionty = (bo_executeonclick,bo_executeonkey,bo_executeonshortcut,
-                   bo_executedefaultonenterkey,
-                   bo_asyncexecute,
-                   bo_focusonshortcut,bo_focusonactionshortcut,
-                                                        //for tcustombutton
-                   bo_updateonidle,
-                   bo_shortcutcaption,bo_altshortcut,
-                   {bo_flat,bo_noanim,bo_nofocusrect,bo_nodefaultrect,}
-                   bo_nodefaultframeactive,
-                   bo_coloractive,
-                   bo_ellipsemouse, //mouse area is elliptical
-                   bo_nocandefocus,bo_candefocuswindow, //check own window only
-                   bo_radioitem,  //for tdatabutton
-                   bo_radioitemcol,
-                   bo_cantoggle, //for tbooleaneditradio
-                   bo_resetcheckedonrowexit,
-                                 //used in tdatabutton
-                   bo_reversed   //for tbooleanedit
-                   );
- buttonoptionsty = set of buttonoptionty;
-
-const
- defaultbuttonoptions = [bo_executeonclick,bo_executeonkey,
-                         bo_executeonshortcut,bo_executedefaultonenterkey];
-
 type
  tactionsimplebutton = class(tactionpublishedwidget)
   private
@@ -1363,6 +1338,7 @@ type
    function getframestateflags: framestateflagsty; override;
    function navigstartrect: rectty; override;
    function getassistiveflags(): assistiveflagsty override;
+   function getdisabled(): boolean virtual;
   public
    constructor create(aowner: tcomponent); override;
    procedure execute;
@@ -2390,7 +2366,7 @@ procedure tactionsimplebutton.dokeydown(var info: keyeventinfoty);
 begin
 // inherited;
  with info do begin
-  if (shiftstate * singlekeyshiftstatesmask = []) and 
+  if not getdisabled() and (shiftstate * singlekeyshiftstatesmask = []) and 
                               (bo_executeonkey in foptions) then begin
    if (key = key_space) then begin
     include(info.eventstate,es_processed);
@@ -2414,7 +2390,7 @@ end;
 procedure tactionsimplebutton.dokeyup(var info: keyeventinfoty);
 begin
  inherited;
- if (info.key = key_space) and 
+ if not getdisabled() and (info.key = key_space) and 
                      releasebutton((info.shiftstate = []) and 
                      (bo_executeonkey in foptions)) then begin
   include(info.eventstate,es_processed);
@@ -2424,7 +2400,7 @@ end;
 procedure tactionsimplebutton.statechanged;
 begin
  inherited;
- updatewidgetshapestate(finfo,self,false,{false,}fframe);
+ updatewidgetshapestate(finfo,self,getdisabled(),{false,}fframe);
 end;
 
 procedure tactionsimplebutton.setcolorglyph(const value: colorty);
@@ -2471,6 +2447,14 @@ end;
 function tactionsimplebutton.getassistiveflags(): assistiveflagsty;
 begin
  result:= inherited getassistiveflags() + [asf_button];
+ if getdisabled() then begin
+  include(result,asf_disabled);
+ end;
+end;
+
+function tactionsimplebutton.getdisabled(): boolean;
+begin
+ result:= false;
 end;
 
 {

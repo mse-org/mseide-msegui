@@ -236,7 +236,8 @@ const
   'Last column',         //sc_lastcol
   'Last row',            //sc_lastrow
   'Selection',           //sc_selection
-  'Speak path'           //sc_speakpath
+  'Speak path',          //sc_speakpath
+  'Disabled button'      //sc_disabledbutton
 );
     
 function delete_n_selected_rows(const params: array of const): msestring;

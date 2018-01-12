@@ -14,7 +14,7 @@ uses
  classes,mclasses,mseclasses,msegui,msescrollbar,mseedit,
  msegraphics,msegraphutils,msebitmap,msestockobjects,
  msetabs,msetoolbar,msedataedits,msemenus,msearrayprops,msegraphedits,
- msesimplewidgets,
+ msesimplewidgets,mseshapes,
  msegrids,msewidgets,msetypes,mseglob,msestrings,msedrawtext,mseguiglob;
  
 type

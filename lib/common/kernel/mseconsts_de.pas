@@ -195,7 +195,8 @@ const
   'Letzte Spalte',             //sc_lastcol
   'Letzte Zeile',              //sc_lastrow
   'Auswahl',                   //sc_selection
-  'Spreche Pfad'               //sc_speakpath
+  'Spreche Pfad',              //sc_speakpath
+  'Inaktive Schaltfläche'      //sc_disabledbutton
 );
     
 function delete_n_selected_rows(const params: array of const): msestring;
