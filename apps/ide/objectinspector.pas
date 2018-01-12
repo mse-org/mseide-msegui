@@ -980,6 +980,9 @@ begin
      break;
     end;
    end;
+   if p1 = nil then begin
+    result:= false;
+   end;
    if result then begin
     grid.focuscell(makegridcoord(acol,p1^.findex));
    end;
