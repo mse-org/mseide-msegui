@@ -11407,7 +11407,7 @@ begin
        else begin
         if (shiftstate = []) and (cellkind = ck_data) and
            (co_mousemovefocus in fdatacols[fmousecell.col].foptions) and 
-                                                  not canassistive() then begin
+                       not (aso_nogridmousemove in assistiveoptions) then begin
          if gs_mouseentered in fstate then begin
           exclude(fstate,gs_mouseentered);
           fmouserefpos:= info.pos;
