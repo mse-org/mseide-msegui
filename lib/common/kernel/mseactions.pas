@@ -29,7 +29,7 @@ type
  psysshortcutaty = ^sysshortcutaty;
  
  shortcutconstty = array[0..2] of shortcutty;
- assistiveshortcutty = (shoa_speakagain);
+ assistiveshortcutty = (shoa_speakagain,shoa_speakpath);
  assistiveshortcutconstty = array[assistiveshortcutty] of shortcutconstty;
  assistiveshortcutaty = array[assistiveshortcutty] of shortcutarty;
  passistiveshortcutaty = ^assistiveshortcutaty;
@@ -406,11 +406,11 @@ const
   );
   
  defaultassistiveshortcuts: assistiveshortcutconstty =
-   //shoa_speakagain
-  ((ctrl+ord(key_space),0,0));
+   //shoa_speakagain,       shoa_speakpath
+  ((ctrl+ord(key_space),0,0),(ctrl+shift+ord(key_space),0,0));
  defaultassistiveshortcuts1: assistiveshortcutconstty =
-   //shoa_speakagain
-  ((ord(key_none),0,0));
+   //shoa_speakagain,  shoa_speakpath
+  ((ord(key_none),0,0),(ord(key_none),0,0));
 var
  sysshortcuts: sysshortcutaty;
  sysshortcuts1: sysshortcutaty;
@@ -686,7 +686,7 @@ function getassistiveshortcutdispname(
                             const aitem: assistiveshortcutty): msestring;
 const
  list: array[assistiveshortcutty] of stockcaptionty = (
-        sc_speakagain);
+        sc_speakagain,sc_speakpath);
 begin
  result:= stockobjects.captions[list[aitem]];
 end;

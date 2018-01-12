@@ -194,7 +194,8 @@ const
   'Erste Zeile',               //sc_firstrow
   'Letzte Spalte',             //sc_lastcol
   'Letzte Zeile',              //sc_lastrow
-  'Auswahl'                    //sc_selection
+  'Auswahl',                   //sc_selection
+  'Spreche Pfad'               //sc_speakpath
 );
     
 function delete_n_selected_rows(const params: array of const): msestring;

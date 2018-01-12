@@ -365,7 +365,7 @@ type
   procedure(const handler: tassistivehandler; const intf: iassistiveclient;
                 const akind: assistivedbeventkindty; const adataset: tdataset;
                                                 var handled: boolean) of object;
- speakoptionty = (spo_addtext,spo_hint,spo_parent);
+ speakoptionty = (spo_addtext,spo_hint,spo_parent,spo_path);
  speakoptionsty = set of speakoptionty;
  
  tassistivehandler = class(tmsecomponent,iassistiveserver)
@@ -429,6 +429,7 @@ type
                         out aitem: tassistivewidgetitem): boolean;
    procedure doshortcut(const sender: twidget; var info: keyeventinfoty);
    procedure dospeakagain(const sender: twidget);
+   procedure dospeakpath(const sender: twidget);
    procedure checklocatepending(const sender: iassistiveclient);
       
     //iassistiveserver
@@ -491,8 +492,7 @@ type
                                                 const nocut: boolean = false);
    procedure speakcharacter(const achar: char32; const avoice: int32 = 0;
                                                 const nocut: boolean = false);
-   procedure speakall(const sender: iassistiveclient;
-                                        const aoptions: speakoptionsty);
+   procedure speakall(const sender: iassistiveclient; aoptions: speakoptionsty);
    procedure speakgridcell(const sender: iassistiveclientgrid;
                   const acell: gridcoordty; const acaption: boolean);
    procedure speakinput(const sender: iassistiveclientdata);
@@ -1018,7 +1018,7 @@ begin
 end;
 
 procedure tassistivehandler.speakall(const sender: iassistiveclient;
-                                            const aoptions: speakoptionsty);
+                                                   aoptions: speakoptionsty);
 var
  fla1: assistiveflagsty;
  s1: msestring;
@@ -1026,16 +1026,26 @@ var
  intf2: iassistiveclient;
  i1: int32;
 begin
+ intf2:= sender.getassistiveparent();
+ if spo_path in aoptions then begin
+  exclude(aoptions,spo_parent);
+  if intf2 <> nil then begin
+   speakall(intf2,aoptions);
+   include(aoptions,spo_addtext);
+   intf2:= nil;
+  end;
+ end
+ else begin
+  if not (spo_parent in aoptions) then begin
+   intf2:= nil;
+  end;
+ end; 
  fla1:= sender.getassistiveflags();
  i1:= fvoicetext;
  if [asf_inplaceedit,asf_textedit] * fla1 <> [] then begin
   i1:= fvoicetextedit;
  end;
  pointer(w1):= sender.getinstance();
- intf2:= nil;
- if spo_parent in aoptions then begin
-  intf2:= sender.getassistiveparent();
- end;
  if not (spo_addtext in aoptions) then begin
   startspeak();
  end;
@@ -1160,6 +1170,21 @@ begin
    if not (es_processed in info.eventstate) then begin
     if checkactionshortcut(assistiveshortcuts1[shoa_speakagain],info) then begin
      dospeakagain(sender);
+    end
+    else begin
+     if not (es_processed in info.eventstate) then begin
+      if checkactionshortcut(assistiveshortcuts[shoa_speakpath],info) then begin
+       dospeakpath(sender);
+      end
+      else begin
+       if not (es_processed in info.eventstate) then begin
+        if checkactionshortcut(
+                assistiveshortcuts1[shoa_speakpath],info) then begin
+         dospeakpath(sender);
+        end;
+       end;
+      end;
+     end;
     end;
    end;
   end;
@@ -1169,6 +1194,11 @@ end;
 procedure tassistivehandler.dospeakagain(const sender: twidget);
 begin
  speakall(twidget1(sender).getiassistiveclient(),[spo_hint,spo_parent]);
+end;
+
+procedure tassistivehandler.dospeakpath(const sender: twidget);
+begin
+ speakall(twidget1(sender).getiassistiveclient(),[spo_hint,spo_path]);
 end;
 
 procedure tassistivehandler.checklocatepending(const sender: iassistiveclient);

@@ -239,7 +239,8 @@ const
   'First row',           //sc_firstrow
   'Last column',         //sc_lastcol
   'Last row',            //sc_lastrow
-  'Selection'            //sc_selection
+  'Selection',           //sc_selection
+  'Speak path'           //sc_speakpath
 );
     
 function delete_n_selected_rows(const params: array of const): msestring;
