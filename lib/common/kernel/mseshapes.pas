@@ -294,8 +294,9 @@ begin
    statebefore:= state;
    if (sender.enabled) <> not (as_disabled in state) then begin
     if not (as_disabled in state) or 
-       not (bo_noassistivedisabled in aoptions) or
-                      not sender.canassistive() then begin
+      not (as_syncdisabledlocked in state) and 
+       (not (bo_noassistivedisabled in aoptions) or not sender.canassistive())
+                                                                     then begin
      sender.enabled:= not(as_disabled in state);
     end;
    end;

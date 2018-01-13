@@ -57,7 +57,7 @@ type
                   as_localcolorglyph,as_localcolor,
                   as_localhint,as_localshortcut,as_localshortcut1,as_localtag,
                   as_localgroup,as_localonbeforeexecute,as_localonexecute,
-                  as_localonafterexecute);
+                  as_localonafterexecute,as_syncdisabledlocked);
  actionstatesty = set of actionstatety;
  actionstatesarty = array of actionstatesty;
 
@@ -511,9 +511,21 @@ begin
 end;
 
 procedure actionendload(const sender: iactionlink);
+var
+ p1: pactioninfoty;
+ b1: boolean;
 begin
+ p1:= sender.getactioninfopo();
+ b1:= as_syncdisabledlocked in p1^.state;
+ include(p1^.state,as_syncdisabledlocked);
+ try
 // exclude(sender.getactioninfopo^.options,mao_loading);
- sender.actionchanged;
+  sender.actionchanged;
+ finally
+  if not b1 then begin
+   exclude(p1^ .state,as_syncdisabledlocked);
+  end;
+ end;
 end;
 
 procedure linktoaction(const sender: iactionlink; const aaction: tcustomaction;

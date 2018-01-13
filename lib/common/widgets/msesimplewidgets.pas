@@ -228,6 +228,7 @@ type
    property disabled: boolean read getdisabled write setdisabled;
                              //sets as_disabled
   published
+   property options; //before state!
    property visible stored false;
    property enabled stored isenabledstored;
    property state: actionstatesty read getstate write setstate
@@ -254,7 +255,6 @@ type
    property imagedist1;
    property imagedist2;
    property colorglyph;
-   property options;
    property focusrectdist;
    property onupdate;
    property onexecute;
@@ -1316,7 +1316,7 @@ procedure tcustombutton.setstate(const value: actionstatesty);
 begin
  setactionstate(iactionlink(self),value);
  visible:= not (as_invisible in factioninfo.state);
- if (bo_noassistivedisabled in foptions) and canassistive() then begin
+ if (bo_noassistivedisabled in foptions){ and canassistive()} then begin
   if not disabled then begin
    enabled:= true;
   end;
