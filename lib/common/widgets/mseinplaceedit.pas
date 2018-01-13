@@ -123,6 +123,7 @@ type
    fcaretwidth: integer;
    frow: integer;
    fbackup: msestring;
+   function caretonreadonly(): boolean;
    function initactioninfo(aaction: editactionty): editnotificationinfoty;
    function updateindex(const avalue: int32): int32;
    procedure checkindexvalues;
@@ -708,6 +709,11 @@ begin
  end;
 end;
 
+function tinplaceedit.caretonreadonly(): boolean;
+begin
+ result:= (oe_caretonreadonly in fintf.getoptionsedit) or fwidget.canassistive;
+end;
+
 procedure tinplaceedit.internalupdatecaret(force: boolean = false; 
                        nocaret: boolean = false);
 var
@@ -720,7 +726,7 @@ var
  int1,int2: integer;
  posbefore: rectty;
  updatecaretcountref: integer;
- options1: optionseditty;
+// options1: optionseditty;
  haspasswordchar: boolean;
 
 begin
@@ -732,8 +738,8 @@ begin
  inc(fupdatecaretcount);
  updatecaretcountref:= fupdatecaretcount;
  posbefore:= finfo.dest;
- options1:= iedit(fintf).getoptionsedit;
- if not (canedit or (oe_caretonreadonly in options1)) then begin
+// options1:= fintf.getoptionsedit;
+ if not (canedit or caretonreadonly()) then begin
   nocaret:= true;
  end;
  actioninfo:= initactioninfo(ea_caretupdating);
@@ -1497,8 +1503,7 @@ begin
              ((fsellength = 0) or (shiftstate1 <> [ss_shift]) or
               (ies_istextedit in fstate)
              ) or
-          (opt1 * [oe_readonly,oe_caretonreadonly] =
-                   [oe_readonly]) then begin
+          (oe_readonly in opt1) and not caretonreadonly()then begin
         actioninfo.dir:= gd_left;
         if checkaction(actioninfo) then begin
          if not(oe_exitoncursor in opt1) then begin
@@ -1527,8 +1532,7 @@ begin
             (fsellength = length(finfo.text.text)) and
                      (oe_autoselect in opt1) and (shiftstate1 <> [ss_shift])
            ) or
-         (opt1 * [oe_readonly,oe_caretonreadonly] =
-                  [oe_readonly]) then begin
+         (oe_readonly in opt1) and not caretonreadonly() then begin
         actioninfo.dir:= gd_right;
         if checkaction(actioninfo) then begin
          if not(oe_exitoncursor in opt1) or

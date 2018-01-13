@@ -134,6 +134,7 @@ type
    procedure readsc1(reader: treader);
    procedure writesc1(writer: twriter);
    procedure setdisabled(const avalue: boolean);
+   function isenabledstored(): boolean;
   protected
    fexeccanceled: boolean;
    function getdisabled(): boolean override;
@@ -228,7 +229,7 @@ type
                              //sets as_disabled
   published
    property visible stored false;
-   property enabled stored false;
+   property enabled stored isenabledstored;
    property state: actionstatesty read getstate write setstate
             stored isstatestored  default [];
  end;
@@ -1096,6 +1097,11 @@ begin
  end;
 end;
 
+function tcustombutton.isenabledstored(): boolean;
+begin
+ result:= bo_noassistivedisabled in foptions;
+end;
+
 procedure tcustombutton.defineproperties(filer: tfiler);
 begin
  inherited;
@@ -1322,11 +1328,13 @@ end;
 
 procedure tcustombutton.setenabled(const avalue: boolean);
 begin
- if avalue then begin
-  setactionstate(iactionlink(self),state - [as_disabled]);
- end
- else begin
-  setactionstate(iactionlink(self),state + [as_disabled]);
+ if not isenabledstored then begin
+  if avalue then begin
+   setactionstate(iactionlink(self),state - [as_disabled]);
+  end
+  else begin
+   setactionstate(iactionlink(self),state + [as_disabled]);
+  end;
  end;
  inherited;
 end;
