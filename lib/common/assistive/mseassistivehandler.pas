@@ -403,6 +403,7 @@ type
    fondatasetevent: assistiveserverdataseteventty;
    fongridbordertouched: assistiveservergriddirectioneventty;
    fvoicetextedit: int32;
+   fvoicetextreadonly: int32;
    procedure setactive(const avalue: boolean);
    procedure setspeaker(const avalue: tassistivespeak);
    procedure setoptions(const avalue: assistiveoptionsty);
@@ -512,9 +513,11 @@ type
    property voicecaption: int32 read fvoicecaption 
                                           write fvoicecaption default 0;
    property voicetext: int32 read fvoicetext 
-                                          write fvoicetext default 0;
+                                          write fvoicetext default 1;
    property voicetextedit: int32 read fvoicetextedit
-                                          write fvoicetextedit default 0;
+                                          write fvoicetextedit default 2;
+   property voicetextreadonly: int32 read fvoicetextreadonly
+                                          write fvoicetextreadonly default 2;
    property onapplicationactivated: assistiveservereventty 
                  read fonapplicationactivated write fonapplicationactivated;
    property onapplicationdeactivated: assistiveservereventty
@@ -848,8 +851,22 @@ end;
 
 constructor tassistivehandler.create(aowner: tcomponent);
 begin
+ fvoicetext:= 1;
+ fvoicetextedit:= 2;
+ fvoicetextreadonly:= 2;
  foptions:= defaultassistiveoptions;
  fspeaker:= tassistivespeak.create(nil);
+ fspeaker.voices.count:= 3;
+ with fspeaker.voices[0] do begin
+  gender:= gen_male;
+ end;
+ with fspeaker.voices[1] do begin
+  gender:= gen_female;
+ end;
+ with fspeaker.voices[2] do begin
+  gender:= gen_female;
+  punctuation:= pu_all;
+ end;
  fitems:= tassistivewidgetitemlist.create();
  inherited;
 end;
@@ -1043,7 +1060,12 @@ begin
  fla1:= sender.getassistiveflags();
  i1:= fvoicetext;
  if [asf_inplaceedit,asf_textedit] * fla1 <> [] then begin
-  i1:= fvoicetextedit;
+  if asf_readonly in fla1 then begin
+   i1:= fvoicetextreadonly;
+  end
+  else begin
+   i1:= fvoicetextedit;
+  end;
  end;
  pointer(w1):= sender.getinstance();
  if not (spo_addtext in aoptions) then begin
