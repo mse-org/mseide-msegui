@@ -660,6 +660,8 @@ type
    function getselectedcells: integerarty;
    procedure setselectedcells(const avalue: integerarty);
    procedure setdata(const avalue: tdatalist);
+   function getsortdescend: boolean;
+   procedure setsortdescend(const avalue: boolean);
   protected
    fdata: tdatalist;
    fname: string;
@@ -741,6 +743,7 @@ type
    property visible: boolean read getvisible write setvisible;
    property enabled: boolean read getenabled write setenabled;
    property readonly: boolean read getreadonly write setreadonly;
+   property sortdescend: boolean read getsortdescend write setsortdescend;
   published
    property options default defaultdatacoloptions;
    property options1 default defaultdatacoloptions1;
@@ -6846,6 +6849,22 @@ begin
   options:= options - [co_readonly];
  end;
 end;
+
+function tdatacol.getsortdescend: boolean;
+begin
+ result:= co_sortdescend in foptions;
+end;
+
+procedure tdatacol.setsortdescend(const avalue: boolean);
+begin
+ if avalue then begin
+  options:= options + [co_sortdescend];
+ end
+ else begin
+  options:= options - [co_sortdescend];
+ end;
+end;
+
 
 function tdatacol.getdatapo(const arow: integer): pointer;
 begin
