@@ -1735,6 +1735,7 @@ type
     property Found: Boolean read FFound;
     property Modified: Boolean read FModified;
     procedure modify(); //set modified flag
+    procedure resetmodified(); //clears modified flag
     property IsUniDirectional: Boolean read FIsUniDirectional default False;
     property RecordCount: Longint read GetRecordCount;
     property RecNo: Longint read GetRecNo write SetRecNo;
@@ -4983,6 +4984,11 @@ begin
  if fstate in [dsedit,dsinsert] then begin
   setmodified(true);
  end;
+end;
+
+procedure TDataSet.resetmodified();
+begin
+ setmodified(false);
 end;
 
 Procedure TDataset.RemoveField (Field : TField);
