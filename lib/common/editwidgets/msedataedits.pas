@@ -47,7 +47,7 @@ type
                                       const atext: msestring) of object;
 
  tcustomdataedit = class(tcustomedit,igridwidget,istatfile,idragcontroller,
-                          iassistiveclientdata
+                          iassistiveclientgridwidget
                          {$ifdef mse_with_ifi},iifidatalink{$endif})
   private
    fontextchange: textchangeeventty;
@@ -168,6 +168,7 @@ type
     //iassistiveclient
    function getassistiveflags(): assistiveflagsty override;
    function getassistivetext(): msestring; override;
+   function getassistivecolumncaption(): msestring virtual;
    
    procedure drawcell(const canvas: tcanvas); virtual;
    procedure updateautocellsize(const canvas: tcanvas); virtual;
@@ -2250,7 +2251,7 @@ end;
 
 function tcustomdataedit.getiassistiveclient(): iassistiveclient;
 begin
- result:= iassistiveclientdata(self);
+ result:= iassistiveclientgridwidget(self);
 end;
 
 function tcustomdataedit.getassistivecelltext(const arow: int32): msestring;
@@ -2268,6 +2269,14 @@ end;
 function tcustomdataedit.getassistivetext(): msestring;
 begin
  result:= feditor.text;
+end;
+
+function tcustomdataedit.getassistivecolumncaption(): msestring;
+begin
+ result:= '';
+ if fgridintf <> nil then begin
+  result:= fgridintf.getcol.defaultcaption();
+ end;
 end;
 
 function tcustomdataedit.getassistiveflags: assistiveflagsty;

@@ -61,6 +61,11 @@ type
  iassistiveclientdata = interface(iassistiveclient)[miid_iassistiveclientdata]
  end;
  
+ iassistiveclientgridwidget = interface(iassistiveclientdata)
+                                              [miid_iassistiveclientgridwidget]
+  function getassistivecolumncaption(): msestring;
+ end;
+  
  iassistiveclientmenu = interface(iassistiveclient)[miid_iassistiveclientmenu]
   function getassistiveselfcaption(): msestring;
   function getassistiveselfname(): msestring;

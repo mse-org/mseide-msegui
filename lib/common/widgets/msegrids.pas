@@ -732,6 +732,7 @@ type
    procedure dostatread(const reader: tstatreader); override;
    procedure dostatwrite(const writer: tstatwriter); override;
    procedure clearselection;
+   function defaultcaption(): msestring;
    property merged;
    property selected[const row: integer]: boolean read getselected write setselected;
              //row < 0 -> whole col
@@ -6415,6 +6416,18 @@ end;
 procedure tdatacol.clearselection;
 begin
  setselected(-1,false);
+end;
+
+function tdatacol.defaultcaption(): msestring;
+begin
+ result:= '';
+ if fcellinfo.grid.ffixrows.count > 0 then begin
+  with tfixrow(fcellinfo.grid.fixrows.fitems[0]) do begin
+   if fcaptions.count > self.findex then begin
+    result:= tcolheader(fcaptions.fitems[self.findex]).caption;
+   end;
+  end;
+ end;
 end;
 
 procedure tdatacol.internaldoentercell(const cellbefore: gridcoordty;

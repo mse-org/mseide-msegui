@@ -66,7 +66,8 @@ min_iassistiveclientgrid,
 min_iassistiveclientmenu,
 min_irichstringprop,
 min_iassistiveclientedit,
-min_iassistiveclientdata);
+min_iassistiveclientdata,
+min_iassistiveclientgridwidget);
 
 const
  miid_iformdesigner =          'AA.mse';{0}
@@ -123,6 +124,7 @@ const
  miid_irichstringprop =        'zA.mse';{51}
  miid_iassistiveclientedit =   'LA.mse';{52}
  miid_iassistiveclientdata =   'rA.mse';{53}
-  
+ miid_iassistiveclientgridwidget =
+                               'bA.mse';{54}
 implementation
 end.

@@ -1125,6 +1125,9 @@ begin
    s1:= stockobjects.captions[sc_button] + ' ';
   end;
  end;
+ if (spo_path in aoptions) and (asf_widgetcell in fla1) then begin
+  s1:= s1+iassistiveclientgridwidget(sender).getassistivecolumncaption();
+ end;
  s1:= s1 + getcaptiontext(sender);
  speaktext(s1,fvoicecaption);
  speaktext(gettexttext(sender),i1);
