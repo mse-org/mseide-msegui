@@ -81,43 +81,45 @@ var
  
 const
  en_modalresulttext: defaultmodalresulttextty =
- ('',         //mr_none
-  '',         //mr_canclose
-  '',         //mr_windowclosed
-  '',         //mr_windowdestroyed
-  '',         //mr_escape
-  '',         //mr_f10
-  '',         //mr_exception
-  '&Cancel',  //mr_cancel
-  '&Abort',   //mr_abort
-  '&OK',      //mr_ok
-  '&Yes',     //mr_yes
-  '&No',      //mr_no
-  '&All',     //mr_all
-  'No all',   //mr_noall
-  '&Ignore',  //mr_ignore
-  '&Skip',    //mr_skip
+ ('',          //mr_none
+  '',          //mr_canclose
+  '',          //mr_windowclosed
+  '',          //mr_windowdestroyed
+  '',          //mr_escape
+  '',          //mr_f10
+  '',          //mr_exception
+  '&Cancel',   //mr_cancel
+  '&Abort',    //mr_abort
+  '&OK',       //mr_ok
+  '&Yes',      //mr_yes
+  '&No',       //mr_no
+  '&All',      //mr_all
+  'Yes &all',  //mr_yesall
+  'No all',    //mr_noall
+  '&Ignore',   //mr_ignore
+  '&Skip',     //mr_skip
   'Skip a&ll', //mr_skipall
   'Co&ntinue'  //mr_continue
   );
 
  en_modalresulttextnoshortcut: defaultmodalresulttextty =
- ('',        //mr_none
-  '',        //mr_canclose
-  '',        //mr_windowclosed
-  '',        //mr_windowdestroyed
+ ('',         //mr_none
+  '',         //mr_canclose
+  '',         //mr_windowclosed
+  '',         //mr_windowdestroyed
   '',         //mr_esc
   '',         //mr_f10
-  '',        //mr_exception
-  'Cancel',  //mr_cancel
-  'Abort',   //mr_abort
-  'OK',      //mr_ok
-  'Yes',     //mr_yes
-  'No',      //mr_no
-  'All',     //mr_all
-  'No all',  //mr_noall
-  'Ignore',  //mr_ignore
-  'Skip',    //mr_skip
+  '',         //mr_exception
+  'Cancel',   //mr_cancel
+  'Abort',    //mr_abort
+  'OK',       //mr_ok
+  'Yes',      //mr_yes
+  'No',       //mr_no
+  'All',      //mr_all
+  'Yes all',  //mr_yesall
+  'No all',   //mr_noall
+  'Ignore',   //mr_ignore
+  'Skip',     //mr_skip
   'Skip all', //mr_skipall
   'Continue'  //mr_continue
   );

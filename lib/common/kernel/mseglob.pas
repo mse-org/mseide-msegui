@@ -22,7 +22,8 @@ type
  modalresultty = (mr_none,mr_canclose,mr_windowclosed,mr_windowdestroyed,
                   mr_escape,mr_f10, 
                   mr_exception,
-                  mr_cancel,mr_abort,mr_ok,mr_yes,mr_no,mr_all,mr_noall,
+                  mr_cancel,mr_abort,mr_ok,mr_yes,mr_no,mr_all,
+                  mr_yesall,mr_noall,
                   mr_ignore,mr_skip,mr_skipall,mr_continue);
  pmodalresultty = ^modalresultty;
  modalresultsty = set of modalresultty;

@@ -70,6 +70,7 @@ const
   '&Arr'#0234'ter',//mr_abort
   '&Valider',     //mr_ok
   '&Oui',         //mr_yes
+  'Yes &all',     //mr_yesall
   '&Non',         //mr_no
   '&Tous',        //mr_all
   'A&ucun',       //mr_noall
@@ -91,6 +92,7 @@ const
   'Arr'#0234'ter',//mr_abort
   'Valider',    //mr_ok
   'Oui',        //mr_yes
+  'Yes all',    //mr_yesall
   'Non',        //mr_no
   'Tous',       //mr_all
   'Aucun',      //mr_noall
