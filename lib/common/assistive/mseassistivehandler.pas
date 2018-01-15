@@ -402,8 +402,9 @@ type
    fondbvaluechanged: assistiveserverdataeventty;
    fondatasetevent: assistiveserverdataseteventty;
    fongridbordertouched: assistiveservergriddirectioneventty;
+   fvoicetextmessage: int32;
    fvoicetextedit: int32;
-   fvoicetextreadonly: int32;
+   fvoicetexteditreadonly: int32;
    procedure setactive(const avalue: boolean);
    procedure setspeaker(const avalue: tassistivespeak);
    procedure setoptions(const avalue: assistiveoptionsty);
@@ -512,12 +513,14 @@ type
    property speaker: tassistivespeak read fspeaker write setspeaker;
    property voicecaption: int32 read fvoicecaption 
                                           write fvoicecaption default 0;
+   property voicetextmessage: int32 read fvoicetextmessage 
+                                          write fvoicetextmessage default 1;
    property voicetext: int32 read fvoicetext 
                                           write fvoicetext default 1;
    property voicetextedit: int32 read fvoicetextedit
-                                          write fvoicetextedit default 2;
-   property voicetextreadonly: int32 read fvoicetextreadonly
-                                          write fvoicetextreadonly default 2;
+                                        write fvoicetextedit default 2;
+   property voicetexteditreadonly: int32 read fvoicetexteditreadonly
+                                        write fvoicetexteditreadonly default 2;
    property onapplicationactivated: assistiveservereventty 
                  read fonapplicationactivated write fonapplicationactivated;
    property onapplicationdeactivated: assistiveservereventty
@@ -852,8 +855,9 @@ end;
 constructor tassistivehandler.create(aowner: tcomponent);
 begin
  fvoicetext:= 1;
+ fvoicetextmessage:= 1;
  fvoicetextedit:= 2;
- fvoicetextreadonly:= 2;
+ fvoicetexteditreadonly:= 2;
  foptions:= defaultassistiveoptions;
  fspeaker:= tassistivespeak.create(nil);
  fspeaker.voices.count:= 3;
@@ -1059,9 +1063,12 @@ begin
  end; 
  fla1:= sender.getassistiveflags();
  i1:= fvoicetext;
+ if asf_message in fla1 then begin
+  i1:= fvoicetextmessage;
+ end;
  if [asf_inplaceedit,asf_textedit] * fla1 <> [] then begin
   if asf_readonly in fla1 then begin
-   i1:= fvoicetextreadonly;
+   i1:= fvoicetexteditreadonly;
   end
   else begin
    i1:= fvoicetextedit;
