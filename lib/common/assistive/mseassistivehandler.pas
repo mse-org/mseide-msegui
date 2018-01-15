@@ -24,7 +24,8 @@ type
   (ahs_active,ahs_nocut,
    ahs_windowactivated,ahs_menuactivated,ahs_menuactivatepending,
    ahs_dropdownlistclosed,ahs_editcharenter,ahs_editchardelete,
-   ahs_locatepending,ahs_dropdownpending,
+   ahs_locatepending,ahs_dropdownpending,ahs_cellwidgetpending,
+   ahs_dbchangepending,
    ahs_textblock,ahs_textblock1);
  assistivehandlerstatesty = set of assistivehandlerstatety;
 const
@@ -132,6 +133,7 @@ type
    fonwindowclosed: assistiveeventty;
    fonenter: assistiveeventty;
    fonactivate: assistiveeventty;
+   fondeactivate: assistiveeventty;
    fonclientmouseevent: assistivemouseeventty;
    fonkeydown: assistivekeyeventty;
    fonchange: assistiveeventty;
@@ -169,6 +171,8 @@ type
    procedure doenter(const sender:tassistivehandler;
                           const aintf: iassistiveclient; var handled: boolean);
    procedure doactivate(const sender:tassistivehandler;
+                          const aintf: iassistiveclient; var handled: boolean);
+   procedure dodeactivate(const sender:tassistivehandler;
                           const aintf: iassistiveclient; var handled: boolean);
    procedure doclientmouseevent(const sender:tassistivehandler;
               const aintf: iassistiveclient; const info: mouseeventinfoty;
@@ -236,6 +240,8 @@ type
                                                       write fonwindowclosed;
    property onenter: assistiveeventty read fonenter write fonenter;
    property onactivate: assistiveeventty read fonactivate write fonactivate;
+   property ondeactivate: assistiveeventty read fondeactivate 
+                                                 write fondeactivate;
    property onclientmouseevent: assistivemouseeventty read fonclientmouseevent
                                                       write fonclientmouseevent;
    property onkeydown: assistivekeyeventty read fonkeydown write fonkeydown;
@@ -379,6 +385,7 @@ type
    fonwindowclosed: assistiveserverclienteventty;
    fonenter: assistiveserverclienteventty;
    fonactivate: assistiveserverclienteventty;
+   fondeactivate: assistiveserverclienteventty;
    fonclientmouseevent: assistiveservermouseeventty;
    fonfocuschanged: assistiveserverfocuschangedeventty;
    fonkeydown: assistiveserverkeyeventty;
@@ -442,6 +449,7 @@ type
    procedure dowindowclosed(const sender: iassistiveclient);
    procedure doenter(const sender: iassistiveclient);
    procedure doactivate(const sender: iassistiveclient);
+   procedure dodeactivate(const sender: iassistiveclient);
    procedure doclientmouseevent(const sender: iassistiveclient;
                                            const info: mouseeventinfoty);
    procedure dokeydown(const sender: iassistiveclient;
@@ -534,6 +542,8 @@ type
    property onenter: assistiveserverclienteventty read fonenter write fonenter;
    property onactivate: assistiveserverclienteventty read fonactivate 
                                                         write fonactivate;
+   property ondeactivate: assistiveserverclienteventty read fondeactivate 
+                                                        write fondeactivate;
    property onclientmouseevent: assistiveservermouseeventty 
                       read fonclientmouseevent write fonclientmouseevent;
    property onfocuschanged: assistiveserverfocuschangedeventty 
@@ -679,6 +689,14 @@ procedure tassistivewidgetitem.doactivate(const sender:tassistivehandler;
 begin
  if canevent(tmethod(fonactivate)) then begin
   fonactivate(self,sender,aintf,handled);
+ end;
+end;
+
+procedure tassistivewidgetitem.dodeactivate(const sender: tassistivehandler;
+               const aintf: iassistiveclient; var handled: boolean);
+begin
+ if canevent(tmethod(fondeactivate)) then begin
+  fondeactivate(self,sender,aintf,handled);
  end;
 end;
 
@@ -1248,16 +1266,19 @@ procedure tassistivehandler.debug(const text: string;
 var
  wi1: twidget;
 begin
- debugwrite('*'+text+settostring(ptypeinfo(typeinfo(assistivehandlerstatesty)),
-                                                       int32(fstate),true)+':');
+ debugwrite('*'+text+':'+
+        settostring(ptypeinfo(typeinfo(assistivehandlerstatesty)),
+                                                       int32(fstate),true));
  if intf <> nil then begin
   pointer(wi1):= intf.getassistivewidget();
   if wi1 <> nil then begin
-   debugwrite(wi1.name);
+   debugwriteln(':'+wi1.name);
   end
   else begin
-   debugwrite('NIL');
+   debugwriteln(':NIL');
   end;
+  debugwrite('  '+settostring(ptypeinfo(typeinfo(assistiveflagsty)),
+                                      int32(intf.getassistiveflags()),true));
  end;
  debugwriteln('');
 end;
@@ -1424,32 +1445,62 @@ begin
    fonactivate(self,sender,b1);
   end;
   if twidget(sender.getassistivewidget).focused then begin
-   if not b1 then begin
+   if not b1{ and not (ahs_cellwidgetpending in fstate)} then begin
     fla1:= sender.getassistiveflags();
-    if asf_menu in fla1 then begin
-    end
-    else begin
-     if fla1*[asf_grid,asf_popup] = [asf_grid,asf_popup] then begin
-      speaktext(sc_selection,fvoicecaption);
-      speakgridcell(iassistiveclientgrid(sender),
-                   tcustomgrid(sender.getassistivewidget()).focusedcell,true);
+    if not (asf_dummy in fla1) then begin
+     if asf_menu in fla1 then begin
      end
      else begin
-      if not (ahs_dropdownlistclosed in fstate) then begin
-       opt1:= [];
-       if ahs_windowactivated in fstate then begin
-        opt1:= [spo_addtext]
+      if fla1*[asf_grid,asf_popup] = [asf_grid,asf_popup] then begin
+       speaktext(sc_selection,fvoicecaption);
+       speakgridcell(iassistiveclientgrid(sender),
+                    tcustomgrid(sender.getassistivewidget()).focusedcell,true);
+      end
+      else begin
+       if not (ahs_dropdownlistclosed in fstate) and 
+                                       not (asf_scrolllimit in fla1) then begin
+        if asf_widgetcell in fla1 then begin
+         setstate([ahs_dbchangepending]);
+        end;
+        opt1:= [];
+        if fstate * [ahs_windowactivated,ahs_cellwidgetpending] <> [] then begin
+         opt1:= [spo_addtext]
+        end;
+        speakall(sender,opt1);
        end;
-       speakall(sender,opt1);
       end;
      end;
     end;
    end;
   end;
  end;
- if asf_focused in sender.getassistiveflags() then begin
-  resetstate([ahs_windowactivated,ahs_dropdownlistclosed]);
+ fla1:= sender.getassistiveflags();
+ if not (asf_dummy in fla1) then begin
+  resetstate([ahs_cellwidgetpending]);
+  if asf_focused in fla1 then begin
+   resetstate([ahs_windowactivated,ahs_dropdownlistclosed]);
+  end;
  end;
+end;
+
+procedure tassistivehandler.dodeactivate(const sender: iassistiveclient);
+var
+ item1: tassistivewidgetitem;
+ b1: boolean;
+begin
+{$ifdef mse_debugassistive}
+ debug('deactivate',sender);
+{$endif}
+ b1:= false;
+ if finditem(sender,item1) then begin
+  item1.dodeactivate(self,sender,b1);
+ end;
+ if not b1 then begin
+  if canevent(tmethod(fondeactivate)) then begin
+   fonactivate(self,sender,b1);
+  end;
+ end;
+ resetstate([ahs_dbchangepending]);
 end;
 
 procedure tassistivehandler.doclientmouseevent(const sender: iassistiveclient;
@@ -1572,7 +1623,7 @@ var
  item1: tassistivewidgetitem;
 begin
 {$ifdef mse_debugassistive}
- debug('change',sender);
+ debug('dbvaluechanged',sender);
 {$endif}
  b1:= false;
  if finditem(sender,item1) then begin
@@ -1582,11 +1633,12 @@ begin
   if canevent(tmethod(fondbvaluechanged)) then begin
    fondbvaluechanged(self,sender,b1);
   end;
-  if not b1 then begin
+  if not b1 and not (ahs_dbchangepending in fstate) then begin
    startspeak();
    speaktext(gettexttext(sender),fvoicetext);
   end;
  end;
+ resetstate([ahs_dbchangepending]);
 end;
 
 procedure tassistivehandler.docellevent(const sender: iassistiveclientgrid;
@@ -1597,7 +1649,8 @@ var
  f1: assistiveflagsty;
 begin
 {$ifdef mse_debugassistive}
- debug('cellevent',sender);
+ debug('cellevent '+
+          getenumname(typeinfo(celleventkindty),int32(info.eventkind)),sender);
 {$endif}
  b1:= false;
  if finditem(sender,item1) then begin
@@ -1612,6 +1665,9 @@ begin
     case eventkind of
      cek_enter: begin
       f1:= sender.getassistiveflags();
+      if asf_widgetcell in f1 then begin
+       setstate([ahs_cellwidgetpending]);
+      end;
       if not b1 and ((cellbefore.col <> cell.col) or 
                          (cellbefore.row <> cell.row)) and 
                                        not (asf_scrolllimit in f1) then begin

@@ -1367,6 +1367,7 @@ type
    fnavigator: tdbnavigator;
    fdescend: boolean;
    fsortdatalink: tfielddatalink;
+   fmovebydistance: int32;
    procedure checkzebraoffset;
    procedure checkscroll;
    procedure checkscrollbar; virtual;
@@ -8244,6 +8245,10 @@ end;
 
 procedure tgriddatalink.datasetscrolled(distance: integer);
 begin
+ if (fmovebydistance < 0) and bof or (fmovebydistance > 0) and eof then begin
+  include(tcustomgrid1(fgrid).fstate1,gs1_scrolllimit);
+ end;
+ fmovebydistance:= 0;
  ffirstrecordbefore:= firstrecord - distance;
  recordchanged(nil);
 end;
@@ -8411,7 +8416,7 @@ procedure tgriddatalink.recordchanged(afield: tfield);
 var
  int1: integer;
  i2: int32;
- b1: boolean;
+// b1: boolean;
 begin
  int1:= frowexited;
  with tcustomgrid1(fgrid) do begin
@@ -8431,18 +8436,19 @@ begin
   tcustomgrid1(fgrid).beginnonullcheck;
   tcustomgrid1(fgrid).beginnocheckvalue;
   try
-   b1:= gs1_nocellassistive in fstate1;
-   if row <> i2 then begin
-    include(fstate1,gs1_nocellassistive);
-   end;
-   if (afield = nil) and (frowexited = int1) and (feditingbefore = editing) then begin
+//   b1:= gs1_nocellassistive in fstate1;
+//   if row <> i2 then begin
+//    include(fstate1,gs1_nocellassistive);
+//   end;
+   if (row = i2) and (afield = nil) and (frowexited = int1) and 
+                                      (feditingbefore = editing) then begin
     fgrid.row:= invalidaxis;
    end;
    checkactiverecord;
   finally
-   if not b1 then begin
-    exclude(fstate1,gs1_nocellassistive);
-   end;
+//   if not b1 then begin
+//    exclude(fstate1,gs1_nocellassistive);
+//   end;
    tcustomgrid1(fgrid).endnonullcheck;
    tcustomgrid1(fgrid).endnocheckvalue;
    feditingbefore:= editing;
@@ -8759,6 +8765,7 @@ function tgriddatalink.domoveby(const distance: integer): integer;
 begin
  result:= 0;
  if active and (dataset.state <> dsfilter) then begin
+  fmovebydistance:= distance;
   result:= inherited moveby(distance);
  end;
 end;

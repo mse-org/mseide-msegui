@@ -2274,7 +2274,10 @@ function tcustomdataedit.getassistiveflags: assistiveflagsty;
 begin
  result:= inherited getassistiveflags;
  if fgridintf <> nil then begin
-  include(result,asf_gridcell);
+  result:= result + [asf_gridcell,asf_widgetcell];
+  if gs1_scrolllimit in tcustomwidgetgrid1(fgridintf.getgrid).fstate1 then begin
+   include(result,asf_scrolllimit);
+  end;
  end;
  if des_isdb in fstate then begin
   include(result,asf_db);

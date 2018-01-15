@@ -12547,6 +12547,9 @@ begin
  if ws_active in fwidgetstate then begin
   exclude(fwidgetstate,ws_active);
   dodeactivate;
+  if canassistive() then begin
+   assistiveserver.dodeactivate(getiassistiveclient());
+  end;
  end;
 end;
 
