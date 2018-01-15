@@ -3860,9 +3860,9 @@ begin
  include(result,asf_widgetgrid);
  if focusedcellvalid then begin
   w1:= twidget1(datacols[ffocusedcell.col].editwidget);
-  if w1 <> nil then begin
-   result:= result + 
-               w1.getiassistiveclient().getassistiveflags() * [asf_widgetcell];
+  if (w1 <> nil) and 
+    (asf_gridwidget in w1.getiassistiveclient().getassistiveflags()) then begin  
+   result:= result + [asf_widgetcell];
   end;
  end;
 end;

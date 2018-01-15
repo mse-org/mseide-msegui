@@ -18,7 +18,9 @@ uses
 type
  assistiveflagty = (asf_embedded,asf_container,asf_dummy,
                     asf_grid,asf_widgetgrid,
-                    asf_gridcell,asf_widgetcell,
+//                    asf_gridcell,
+                    asf_widgetcell,
+                    asf_gridwidget, //implies iassistiveclientgridwidget
                     asf_datetime,asf_menu,asf_message,asf_popup,
                     asf_textedit,asf_graphicedit,asf_readonly,
                     asf_inplaceedit,asf_button,asf_db,

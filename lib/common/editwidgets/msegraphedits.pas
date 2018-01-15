@@ -115,7 +115,7 @@ type
  end;
  
  tgraphdataedit = class(tactionpublishedwidget,igridwidget,istatfile,
-                         iassistiveclientdata
+                         iassistiveclientgridwidget
                   {$ifdef mse_with_ifi},iifidatalink{$endif})
   private
    fonchange: notifyeventty;
@@ -153,9 +153,10 @@ type
    function getgriddata: tdatalist;
    function getvalueprop: ppropinfo;
    function getiassistiveclient(): iassistiveclient override;
-    //iassistiveclient
+    //iassistiveclientgridwidget
    function getifidatalinkintf(): iifidatalink; override;
    function getassistiveflags: assistiveflagsty; override;
+   function getassistivecolumncaption(): msestring virtual;
 {$endif}
    function getedited: boolean; virtual;
    function geteditstate: dataeditstatesty;
@@ -2450,7 +2451,7 @@ end;
 
 function tgraphdataedit.getiassistiveclient(): iassistiveclient;
 begin
- result:= iassistiveclientdata(self);
+ result:= iassistiveclientgridwidget(self);
 end;
 
 function tgraphdataedit.getifidatalinkintf(): iifidatalink;
@@ -2466,7 +2467,15 @@ begin
   include(result,asf_readonly);
  end;
  if fgridintf <> nil then begin
-  include(result,asf_gridcell);
+  include(result,asf_gridwidget);
+ end;
+end;
+
+function tgraphdataedit.getassistivecolumncaption(): msestring;
+begin
+ result:= '';
+ if fgridintf <> nil then begin
+  result:= fgridintf.getcol.defaultcaption();
  end;
 end;
 

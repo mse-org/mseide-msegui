@@ -371,7 +371,7 @@ type
   procedure(const handler: tassistivehandler; const intf: iassistiveclient;
                 const akind: assistivedbeventkindty; const adataset: tdataset;
                                                 var handled: boolean) of object;
- speakoptionty = (spo_addtext,spo_hint,spo_parent,spo_path);
+ speakoptionty = (spo_addtext,spo_hint,spo_columncaption,spo_parent,spo_path);
  speakoptionsty = set of speakoptionty;
  
  tassistivehandler = class(tmsecomponent,iassistiveserver)
@@ -1068,6 +1068,7 @@ begin
  intf2:= sender.getassistiveparent();
  if spo_path in aoptions then begin
   exclude(aoptions,spo_parent);
+  include(aoptions,spo_columncaption);
   if intf2 <> nil then begin
    speakall(intf2,aoptions);
    include(aoptions,spo_addtext);
@@ -1125,7 +1126,7 @@ begin
    s1:= stockobjects.captions[sc_button] + ' ';
   end;
  end;
- if (spo_path in aoptions) and (asf_widgetcell in fla1) then begin
+ if (spo_columncaption in aoptions) and (asf_gridwidget in fla1) then begin
   s1:= s1+iassistiveclientgridwidget(sender).getassistivecolumncaption();
  end;
  s1:= s1 + getcaptiontext(sender);
@@ -1462,12 +1463,15 @@ begin
       else begin
        if not (ahs_dropdownlistclosed in fstate) and 
                                        not (asf_scrolllimit in fla1) then begin
-        if asf_widgetcell in fla1 then begin
-         setstate([ahs_dbchangepending]);
-        end;
         opt1:= [];
+        if asf_gridwidget in fla1 then begin
+         setstate([ahs_dbchangepending]);
+         if ahs_windowactivated in fstate then begin
+          include(opt1,spo_columncaption);
+         end;
+        end;
         if fstate * [ahs_windowactivated,ahs_cellwidgetpending] <> [] then begin
-         opt1:= [spo_addtext]
+         include(opt1,spo_addtext);
         end;
         speakall(sender,opt1);
        end;
