@@ -563,10 +563,10 @@ begin
       imagenrdisabled:= -2;
      end;
      if not (as_localcolorglyph in state) then begin
-      colorglyph:= cl_glyph;
+      colorglyph:= cl_default;
      end;
      if not (as_localcolor in state) then begin
-      color:= cl_transparent;
+      color:= cl_default;
      end;
      if not (as_localimagecheckedoffset in state) then begin
       imagecheckedoffset:= 0;
