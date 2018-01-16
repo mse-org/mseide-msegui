@@ -31,6 +31,7 @@ const
   '&Gagalkan',    //mr_abort
   '&OK',         //mr_ok
   '&Ya',      //mr_yes
+  'Yes &all',  //mr_yesall
   '&Tidak',         //mr_no
   '&Semua',       //mr_all
   'Tid&ak Semua',    //mr_noall
@@ -52,6 +53,7 @@ const
   'Batal',    //mr_abort
   'OK',         //mr_ok
   'Ya',      //mr_yes
+  'Yes all',  //mr_yesall
   'Tidak',         //mr_no
   'Semua',       //mr_all
   'Tidak Semua',    //mr_noall

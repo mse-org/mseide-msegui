@@ -31,32 +31,34 @@ const
   '&Ja',         //mr_yes
   '&Nein',       //mr_no
   'A&lle',       //mr_all
+  'Ja a&lle',    //mr_yesall
   'N&ein alle',  //mr_noall
   '&Ignorieren',  //mr_ignore
   #0220'bers&pringen',    //mr_skip
-  '&Alles '#0252'berspringen', //mr_skipall
+  'Alles '#0252'&berspringen', //mr_skipall
   '&Fortfahren'  //mr_continue
   );
 
  de_modalresulttextnoshortcut: defaultmodalresulttextty =
- ('',           //mr_none
-  '',           //mr_canclose
-  '',           //mr_windowclosed
-  '',           //mr_windowdestroyed
-  '',           //mr_escape
-  '',           //mr_f10
-  '',           //mr_exception
-  'Abbrechen',  //mr_cancel
-  'Abbrechen',  //mr_abort
-  'OK',         //mr_ok
-  'Ja',         //mr_yes
-  'Nein',       //mr_no
-  'Alle',       //mr_all
-  'Nein alle',  //mr_noall
-  'Ignorieren',  //mr_ignore
-  #0220'berspringen',    //mr_skip
+ ('',                         //mr_none
+  '',                         //mr_canclose
+  '',                         //mr_windowclosed
+  '',                         //mr_windowdestroyed
+  '',                         //mr_escape
+  '',                         //mr_f10
+  '',                         //mr_exception
+  'Abbrechen',                //mr_cancel
+  'Abbrechen',                //mr_abort
+  'OK',                       //mr_ok
+  'Ja',                       //mr_yes
+  'Nein',                     //mr_no
+  'Alle',                     //mr_all
+  'Ja alle',                  //mr_yesall
+  'Nein alle',                //mr_noall
+  'Ignorieren',               //mr_ignore
+  #0220'berspringen',         //mr_skip
   'Alles '#0252'berspringen', //mr_skipall
-  'Fortfahren'  //mr_continue
+  'Fortfahren'                //mr_continue
   );
 
  de_stockcaption: stockcaptionaty = (

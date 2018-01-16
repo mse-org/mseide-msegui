@@ -34,6 +34,7 @@ const
   '&Y'#26159,                //mr_yes
   '&N'#21542,                //mr_no
   '&l'#25152#26377,          //mr_all
+  'Yes &all',  //mr_yesall
   #21462#28040#25152#26377,  //mr_noall
   '&g'#24573#30053,           //mr_ignore
   '&Skip',    //mr_skip
@@ -55,6 +56,7 @@ const
   #26159,                   //mr_yes
   #21542,                   //mr_no
   #25152#26377,             //mr_all
+  'Yes all',  //mr_yesall
   #21462#28040#25152#26377, //mr_noall
   #24573#30053,              //mr_ignore
   'Skip',    //mr_skip

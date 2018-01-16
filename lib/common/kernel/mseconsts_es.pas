@@ -31,7 +31,8 @@ const
   '&Cancelar',   //mr_cancel
   '&Abortar',    //mr_abort
   '&OK',         //mr_ok
-  '&S'#0237,      //mr_yes
+  '&S'#0237,     //mr_yes
+  'Yes &all',    //mr_yesall
   '&No',         //mr_no
   '&Todo',       //mr_all
   'N&o todo',    //mr_noall
@@ -53,6 +54,7 @@ const
   'Abortar',    //mr_abort
   'OK',         //mr_ok
   'S'#0237,      //mr_yes
+  'Yes all',    //mr_yesall
   'No',         //mr_no
   'Todo',       //mr_all
   'No todo',    //mr_noall
