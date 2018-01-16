@@ -1148,6 +1148,8 @@ type
                 var avalue; var accept: boolean; const arow: integer); virtual;
    procedure dataentered(const sender: iificlient; 
                                                  const arow: integer); virtual;
+   procedure closequery(const sender: iificlient; 
+                             var amodalresult: modalresultty); virtual;
    procedure sendmodalresult(const sender: iificlient; 
                              const amodalresult: modalresultty); virtual;
    procedure updateoptionsedit(var avalue: optionseditty); virtual;
@@ -6586,6 +6588,12 @@ end;
 
 procedure tfieldsdatalink.dataentered(const sender: iificlient;
                const arow: integer);
+begin
+ //dummy
+end;
+
+procedure tfieldsdatalink.closequery(const sender: iificlient;
+               var amodalresult: modalresultty);
 begin
  //dummy
 end;

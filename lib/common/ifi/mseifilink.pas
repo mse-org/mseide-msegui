@@ -394,6 +394,8 @@ type
                      var avalue; var accept: boolean; const arow: integer);
    procedure dataentered(const sender: iificlient; const arow: integer);
    procedure updateoptionsedit(var avalue: optionseditty);
+   procedure closequery(const sender: iificlient; 
+                               var amodalresult: modalresultty);
    procedure sendmodalresult(const sender: iificlient; 
                                          const amodalresult: modalresultty); virtual;
   //imodulelink
@@ -2165,6 +2167,12 @@ begin
 end;
 
 procedure tcustommodulelink.updateoptionsedit(var avalue: optionseditty);
+begin
+ //dummy
+end;
+
+procedure tcustommodulelink.closequery(const sender: iificlient;
+               var amodalresult: modalresultty);
 begin
  //dummy
 end;
