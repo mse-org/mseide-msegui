@@ -73,7 +73,7 @@ type
  menuactionoptionsty = set of menuactionoptionty;
 
 const
-                    
+ invisibleactionstates = [ord(as_syncdisabledlocked)];
  actionstatesmask: actionstatesty = 
                             [as_disabled,as_checked,as_invisible,as_default,
                              as_repeatshortcut];

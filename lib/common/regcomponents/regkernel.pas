@@ -87,9 +87,10 @@ type
    function getelementeditorclass: elementeditorclassty; override;
  end;
   
- tshapestatespropertyeditor = class(tsetpropertyeditor)
+ tactionstatespropertyeditor = class(tsetpropertyeditor)
   protected
-   function getdefaultstate: propertystatesty; override;
+   function getdefaultstate: propertystatesty override;
+   function getinvisibleitems: tintegerset override;
  end;
 
  tbounds_xeditor = class(tordinalpropertyeditor)
@@ -287,7 +288,7 @@ begin
                                             tassistiveshortcutspropertyeditor);
  registerpropertyeditor(typeinfo(string),tfont,'name',tfontnamepropertyeditor);
  registerpropertyeditor(typeinfo(actionstatesty),nil,'',
-                                                   tshapestatespropertyeditor);
+                                                   tactionstatespropertyeditor);
  registerpropertyeditor(typeinfo(shortcutty),nil,'',tshortcutpropertyeditor);
  registerpropertyeditor(typeinfo(imagenrty),nil,'',timagenrpropertyeditor);
  registerpropertyeditor(typeinfo(facenrty),nil,'',tordinalpropertyeditor);
@@ -339,11 +340,16 @@ begin
  result:= inherited getdefaultstate + [ps_volatile];
 end;
 
-{ tshapestatespropertyeditor }
+{ tactionstatespropertyeditor }
 
-function tshapestatespropertyeditor.getdefaultstate: propertystatesty;
+function tactionstatespropertyeditor.getdefaultstate: propertystatesty;
 begin
  result:= inherited getdefaultstate + [ps_volatile,ps_refresh];
+end;
+
+function tactionstatespropertyeditor.getinvisibleitems: tintegerset;
+begin
+ result:= invisibleactionstates;
 end;
 
 { tbounds_xeditor }
