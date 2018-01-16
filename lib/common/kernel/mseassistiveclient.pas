@@ -25,7 +25,7 @@ type
                     asf_textedit,asf_graphicedit,asf_readonly,
                     asf_inplaceedit,asf_button,asf_db,
                     asf_scrolllimit,
-                    asf_focused,asf_disabled,asf_hasdropdown);
+                    asf_focused,asf_disabled,asf_hasdropdown,asf_async);
  assistiveflagsty = set of assistiveflagty;
  
  iassistiveclient = interface(inullinterface)[miid_iassistiveclient]

@@ -1505,6 +1505,7 @@ type
   placementrect: prectty; placement: captionposty;
   minwidth: integer; actions: array of notifyeventty;
   exttext: msestring;
+  async: boolean;
   result: modalresultty;
  end;
  pshowmessageinfoty = ^showmessageinfoty;
@@ -2043,7 +2044,8 @@ function internalshowmessage(const atext_,caption_: msestring;
                   noshortcut_: modalresultsty;
                   placementrect_: prectty; placement_: captionposty;
                   minwidth_: integer; actions_: array of notifyeventty;
-                  const exttext_: msestring): modalresultty;
+                  const exttext_: msestring;
+                  const async_: boolean = false): modalresultty;
 var
  info: showmessageinfoty;
 begin
@@ -2061,6 +2063,7 @@ begin
   move(actions_[0],actions[0],length(actions)*
                              sizeof({$ifndef FPC}@{$endif}actions[0]));
   exttext:= exttext_;
+  async:= async_;
  end;
  if application.ismainthread then  begin
   syncshowmessage(@info);
@@ -2171,8 +2174,12 @@ begin
 end;
 
 procedure tshowerrormessageevent.execute;
+var
+ rect1: rectty;
 begin
- showmessage(ftext,fcaption,fminwidth,fexttext);
+ internalshowmessage(ftext,fcaption,[mr_ok],mr_ok,
+          [],messagerect(mepo_default,rect1),cp_center,0,[],fexttext,true);
+// showmessage(ftext,fcaption,fminwidth,fexttext);
 end;
 
 procedure showerror(const atext: msestring; caption: msestring = 'ERROR';
@@ -2565,6 +2572,9 @@ end;
 function tshowmessagewidget.getassistiveflags(): assistiveflagsty;
 begin
  result:= inherited getassistiveflags + [asf_message];
+ if finfo^.async then begin
+  include(result,asf_async);
+ end;
 end;
 
 { tcustomcaptionframe }

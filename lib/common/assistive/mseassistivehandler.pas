@@ -1085,6 +1085,9 @@ begin
  if asf_message in fla1 then begin
   i1:= fvoicetextmessage;
  end;
+ if asf_async in fla1 then begin
+  include(aoptions,spo_addtext);
+ end;
  if [asf_inplaceedit,asf_textedit] * fla1 <> [] then begin
   if asf_readonly in fla1 then begin
    i1:= fvoicetexteditreadonly;
@@ -1348,7 +1351,9 @@ begin
    end
    else begin
     if fstate*[ahs_dropdownlistclosed,ahs_dropdownpending] = [] then begin
-     startspeak();
+     if not (asf_async in fla1) then begin
+      startspeak();
+     end;
   //   speaktext(sc_windowactivated,fvoicecaption);
      speaktext(getcaptiontext(sender),fvoicecaption);
      speaktext(gettexttext(sender),fvoicetext);
