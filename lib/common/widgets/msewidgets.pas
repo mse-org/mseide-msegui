@@ -1411,8 +1411,9 @@ procedure showmessage1(const atext: msestring; const caption: msestring);
             //for ps
 procedure showerror(const atext: msestring; caption: msestring = 'ERROR';
                      const minwidth: integer = 0;
-                     const exttext: msestring = ''); 
-                            //no wait if not in main thread                     
+                     const exttext: msestring = '';
+                     const async: boolean = false); 
+             //no wait if not in main thread or asnyc = true
 function askok(const atext: msestring; const caption: msestring = '';
                      const defaultbutton: modalresultty = mr_ok;  
                      const minwidth: integer = 0): boolean;
@@ -2176,12 +2177,13 @@ end;
 
 procedure showerror(const atext: msestring; caption: msestring = 'ERROR';
                     const minwidth: integer = 0;
-                    const exttext: msestring = '');
+                    const exttext: msestring = '';
+                    const async: boolean = false);
 begin
  if caption = 'ERROR' then begin
   caption:= sc(sc_errorupper);
  end;
- if not application.ismainthread then begin
+ if async or not application.ismainthread then begin
   tshowerrormessageevent.create(atext,caption,minwidth,exttext);
  end
  else begin
