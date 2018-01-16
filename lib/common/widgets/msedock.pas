@@ -1043,6 +1043,7 @@ begin
  ftab_textflags:= defaultcaptiontextflags;
  fcolortab:= cl_default;
  fcoloractivetab:= cl_default;
+ fmdistate:= mds_floating;
  inherited create(aintf);
 end;
 
