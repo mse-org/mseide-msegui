@@ -13075,8 +13075,8 @@ var
  naviginfo: naviginfoty;
  widget1: twidget;
  shiftstate1: shiftstatesty;
-// b1: boolean;
-// pt1,pt2: pointty;
+ b1: boolean;
+ pt1,pt2: pointty;
 begin
  with info do begin
   shiftstate1:= shiftstate * shiftstatesmask;
@@ -13127,12 +13127,14 @@ begin
          combinerect1(wraprect,widget1.rootwidgetrect);
         end;
         expandwraprect(wraprect,widget1);
-        fparentwidget.navigrequest(naviginfo,nowrap or 
-                                 (aso_widgetnavig in assistiveoptions));
+        fparentwidget.navigrequest(naviginfo,
+         nowrap or 
+          (assistiveoptions*[aso_widgetnavig,aso_nearestortho] = 
+                                [aso_widgetnavig,aso_nearestortho]));
         if nearest <> nil then begin
-        {
          b1:= false;
-         if aso_widgetnavig in assistiveoptions then begin
+         if assistiveoptions*[aso_widgetnavig,aso_nearestortho] = 
+                                                   [aso_widgetnavig] then begin
           pt1:= rootpos;
           pt2:= nearest.rootpos;
           case direction of
@@ -13155,9 +13157,8 @@ begin
           end;
          end;
          if not b1 then begin
-         }
           nearest.setfocus();
-//         end;
+         end;
         end
         else begin
          if canassistive() then begin
