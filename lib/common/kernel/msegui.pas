@@ -13098,9 +13098,16 @@ begin
       direction:= gd_none;
       case key of
        key_tab,key_backtab: begin
-        widget1:= nexttaborder(key = key_backtab,nowrap);
+        widget1:= nexttaborder(key = key_backtab,nowrap or 
+                                    (aso_tabnavig in assistiveoptions));
         if widget1 <> nil then begin
          widget1.setfocus;
+        end
+        else begin
+         if canassistive() then begin
+          assistiveserver.dotabordertouched(getiassistiveclient(),
+                                                   key = key_backtab);
+         end;
         end;
        end;
        key_right: direction:= gd_right;
