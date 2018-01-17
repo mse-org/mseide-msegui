@@ -201,7 +201,9 @@ const
   #0218'ltima fila',             //sc_lastrow
   'Selecci'#0243'n',             //sc_selection
   'Ruta de hablar',              //sc_speakpath
-  'Deshabilitar bot'#0243'n'     //sc_disabledbutton
+  'Deshabilitar bot'#0243'n',    //sc_disabledbutton
+  'First field',                 //sc_firstfield
+  'Last field'                   //sc_lastfield
 );
 
 function delete_n_selected_rows(const params: array of const): msestring;

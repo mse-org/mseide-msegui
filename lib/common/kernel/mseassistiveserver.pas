@@ -69,6 +69,8 @@ type
                     const amode: edittextblockmodety; const atext: msestring);
   procedure donavigbordertouched(const sender: iassistiveclient;
                                        const adirection: graphicdirectionty);
+  procedure dotabordertouched(const sender: iassistiveclient;
+                                                        const adown: boolean);
 
   procedure doactionexecute(const sender: iassistiveclient;//sender can be nil
                             const senderobj: tobject; const info: actioninfoty);

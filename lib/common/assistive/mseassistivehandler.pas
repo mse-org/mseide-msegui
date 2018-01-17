@@ -108,6 +108,11 @@ type
                 const handler: tassistivehandler; const intf: iassistiveclient;
                                      const adirection: graphicdirectionty;
                                                 var handled: boolean) of object;
+ assistivebooleaneventty = 
+  procedure(const sender: tassistivewidgetitem;
+                const handler: tassistivehandler; const intf: iassistiveclient;
+                                     const avalue: boolean;
+                                                var handled: boolean) of object;
  assistivedirectiongrideventty = 
   procedure(const sender: tassistivewidgetitem;
                 const handler: tassistivehandler;
@@ -146,6 +151,7 @@ type
    foneditinputmodeset: assistiveeditinputmodeeventty;
    fonedittextblock: assistiveedittextblockeventty;
    fonnavigbordertouched: assistivedirectioneventty;
+   fontabordertouched: assistivebooleaneventty;
    fongetcaption: assistivestringeventty;
    fcaption: msestring;
    fongettext: assistivestringeventty;
@@ -215,6 +221,10 @@ type
                                          const aintf: iassistiveclient;
                                          const adirection: graphicdirectionty;
                                                          var handled: boolean);
+   procedure dotabordertouched(const sender:tassistivehandler;
+                                         const aintf: iassistiveclient;
+                                         const adown: boolean;
+                                                         var handled: boolean);
    procedure dodatasetevent(const sender:tassistivehandler;
            const aintf: iassistiveclient; const akind: assistivedbeventkindty;
                                 const adataset: tdataset; var handled: boolean);
@@ -268,6 +278,8 @@ type
                                   read fonedittextblock write fonedittextblock;
    property onnavigbordertouched: assistivedirectioneventty
                 read fonnavigbordertouched write fonnavigbordertouched;
+   property ontabordertouched: assistivebooleaneventty
+                read fontabordertouched write fontabordertouched;
    property ondatasetevent: assistivedataseteventty
                         read fondatasetevent write fondatasetevent;
    property ongetcaption: assistivestringeventty read fongetcaption 
@@ -338,6 +350,11 @@ type
                             const intf: iassistiveclient;
                                      const adirection: graphicdirectionty;
                                                 var handled: boolean) of object;
+ assistiveserverbooleaneventty = 
+  procedure(const sender:tassistivehandler;
+                            const intf: iassistiveclient;
+                                     const avalue: boolean;
+                                                var handled: boolean) of object;
  assistiveservergriddirectioneventty = 
   procedure(const sender:tassistivehandler;
                             const intf: iassistiveclientgrid;
@@ -400,6 +417,7 @@ type
    foneditinputmodeset: assistiveservereditinputmodeeventty;
    fonedittextblock: assistiveserveredittextblockeventty;
    fonnavigbordertouched: assistiveserverdirectioneventty;
+   fontabordertouched: assistiveserverbooleaneventty;
    fonitementer: assistiveserveritemeventty;
    fonmenuitementer: assistiveservermenuitemeventty;
    fonactionexecute: assistiveserveractioneventty;
@@ -476,6 +494,8 @@ type
                                                 const amode: editinputmodety);
    procedure donavigbordertouched(const sender: iassistiveclient;
                                        const adirection: graphicdirectionty);
+   procedure dotabordertouched(const sender: iassistiveclient;
+                                                        const adown: boolean);
    procedure dofocuschanged(const sender: iassistiveclient;
                                 const oldwidget,newwidget: iassistiveclient);
    procedure doactionexecute(const sender: iassistiveclient;//sender can be nil
@@ -577,6 +597,8 @@ type
                                   read fonedittextblock write fonedittextblock;
    property onnavigbordertouched: assistiveserverdirectioneventty
                 read fonnavigbordertouched write fonnavigbordertouched;
+   property ontabordertouched: assistiveserverbooleaneventty
+                read fontabordertouched write fontabordertouched;
    property onactionexecute: assistiveserveractioneventty read fonactionexecute
                                                          write fonactionexecute;
    property onitementer: assistiveserveritemeventty read fonitementer 
@@ -827,6 +849,15 @@ begin
  end;
 end;
 
+procedure tassistivewidgetitem.dotabordertouched(
+              const sender: tassistivehandler; const aintf: iassistiveclient;
+               const adown: boolean; var handled: boolean);
+begin
+ if canevent(tmethod(fontabordertouched)) then begin
+  fontabordertouched(self,sender,aintf,adown,handled);
+ end;
+end;
+
 procedure tassistivewidgetitem.dodatasetevent(const sender: tassistivehandler;
                const aintf: iassistiveclient;
                const akind: assistivedbeventkindty; const adataset: tdataset;
@@ -1063,7 +1094,7 @@ procedure tassistivehandler.speakall(const sender: iassistiveclient;
                                                    aoptions: speakoptionsty);
 var
  fla1: assistiveflagsty;
- s1: msestring;
+ s1,s2: msestring;
  w1: tpopupmenuwidget1;
  intf2: iassistiveclient;
  i1: int32;
@@ -1124,12 +1155,13 @@ begin
   end;
   exit;
  end;
+ s2:= '';
  if asf_button in fla1 then begin
   if asf_disabled in fla1 then begin
-   s1:= stockobjects.captions[sc_disabledbutton] + ' ';
+   s2:= stockobjects.captions[sc_disabledbutton] + ' ';
   end
   else begin
-   s1:= stockobjects.captions[sc_button] + ' ';
+   s2:= stockobjects.captions[sc_button] + ' ';
   end;
  end;
  speaktext(s1,fvoicefixed);
@@ -1139,6 +1171,7 @@ begin
  end;
  s1:= s1 + getcaptiontext(sender);
  speaktext(s1,fvoicecaption);
+ speaktext(s2,fvoicefixed);
  speaktext(gettexttext(sender),i1);
  if spo_hint in aoptions then begin
   speaktext(gethinttext(sender),fvoicecaption);
@@ -1999,6 +2032,37 @@ begin
     else begin
      exit;
     end;
+   end;
+   startspeak();
+   speaktext(ca1,fvoicefixed);
+  end;
+ end;
+end;
+
+procedure tassistivehandler.dotabordertouched(const sender: iassistiveclient;
+               const adown: boolean);
+var
+ b1: boolean;
+ item1: tassistivewidgetitem;
+ ca1: stockcaptionty;
+begin
+{$ifdef mse_debugassistive}
+ debug('tabordertouched',sender);
+{$endif}
+ b1:= false;
+ if finditem(sender,item1) then begin
+  item1.dotabordertouched(self,sender,adown,b1);
+ end;
+ if not b1 then begin
+  if canevent(tmethod(fonnavigbordertouched)) then begin
+   fontabordertouched(self,sender,adown,b1);
+  end;
+  if not b1 then begin
+   if adown then begin
+    ca1:= sc_firstfield;
+   end
+   else begin
+    ca1:= sc_lastfield;
    end;
    startspeak();
    speaktext(ca1,fvoicefixed);
