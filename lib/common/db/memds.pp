@@ -164,6 +164,7 @@ type
     property OnEditError;
     property OnNewRecord;
     property OnPostError;
+    property onmodified;
     property OnFilterRecord;
   end;
 

@@ -394,6 +394,7 @@ type
    property OnFilterRecord;
    property OnNewRecord;
    property OnPostError;
+   property onmodified;
    property AutoCalcFields default false;
  end;
  
