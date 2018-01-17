@@ -264,7 +264,9 @@ const
   'Speak path',          //sc_speakpath
   'Disabled button',     //sc_disabledbutton
   'First field',         //sc_firstfield
-  'Last field'           //sc_lastfield
+  'Last field',          //sc_lastfield
+  'First element',       //sc_firstelement
+  'Last element'         //sc_lastelement
 );
 
 function delete_n_selected_rows(const params: array of const): msestring;

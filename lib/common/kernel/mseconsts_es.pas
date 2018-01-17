@@ -203,7 +203,9 @@ const
   'Ruta de hablar',              //sc_speakpath
   'Deshabilitar bot'#0243'n',    //sc_disabledbutton
   'First field',                 //sc_firstfield
-  'Last field'                   //sc_lastfield
+  'Last field',                  //sc_lastfield
+  'First element',       //sc_firstelement
+  'Last element'         //sc_lastelement
 );
 
 function delete_n_selected_rows(const params: array of const): msestring;

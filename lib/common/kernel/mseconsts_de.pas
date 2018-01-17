@@ -200,7 +200,9 @@ const
   'Spreche Pfad',              //sc_speakpath
   'Inaktive Schaltfläche',     //sc_disabledbutton
   'Erstes Feld',               //sc_firstfield
-  'Letztes Feld'               //sc_lastfield
+  'Letztes Feld',              //sc_lastfield
+  'Erstes Element',            //sc_firstelement
+  'Letztes Element'            //sc_lastelement
 );
     
 function delete_n_selected_rows(const params: array of const): msestring;
