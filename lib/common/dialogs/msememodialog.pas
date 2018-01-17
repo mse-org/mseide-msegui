@@ -223,6 +223,9 @@ constructor tmsememodialogfo.create(const aowner: tcomponent;
                const readonly: boolean);
 begin
  inherited create(aowner);
+ if readonly then begin
+  caption:= 'Memo text';
+ end;
  memo.readonly:= readonly;
 end;
 

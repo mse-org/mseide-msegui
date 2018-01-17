@@ -6651,17 +6651,6 @@ begin
   self.fdataintf:= fdataintf;
   self.ftextindex:= ftextindex;
   self.fkeyindex:= fkeyindex;
- {
-  if (ftextindex >= 0) and (fkeyindex >= 0) then begin
-   self.fdataintf:= fdataintf;
-   self.ftextindex:= ftextindex;
-   self.fkeyindex:= fkeyindex;
-  end
-  else begin
-   fkeyindex:= -1;
-   ftextindex:= -1;
-  end;
- }
  end;
  inherited create(aowner,aintf);
 end;

@@ -939,6 +939,7 @@ type
    procedure setcolor(const avalue: colorty); override;
    procedure objectchanged(const sender: tobject); override;
    function getassistiveflags(): assistiveflagsty override;
+   function getassistivecaption(): msestring override;
 
     //iactionlink
    function getactioninfopo: pactioninfoty;
@@ -4522,6 +4523,14 @@ end;
 function tcustomdatabutton.getassistiveflags(): assistiveflagsty;
 begin
  result:= inherited getassistiveflags() + [asf_button];
+end;
+
+function tcustomdatabutton.getassistivecaption(): msestring;
+begin
+ result:= factioninfo.captiontext;
+ if result = '' then begin
+  result:= inherited getassistivecaption();
+ end;
 end;
 
 procedure tcustomdatabutton.doupdate;
