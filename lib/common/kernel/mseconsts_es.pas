@@ -54,7 +54,7 @@ const
   'Abortar',    //mr_abort
   'OK',         //mr_ok
   'S'#0237,      //mr_yes
-  'Yes all',    //mr_yesall
+  'S'#$00ED' todo',    //mr_yesall
   'No',         //mr_no
   'Todo',       //mr_all
   'No todo',    //mr_noall
@@ -202,10 +202,10 @@ const
   'Selecci'#0243'n',             //sc_selection
   'Ruta de hablar',              //sc_speakpath
   'Deshabilitar bot'#0243'n',    //sc_disabledbutton
-  'First field',                 //sc_firstfield
-  'Last field',                  //sc_lastfield
-  'First element',       //sc_firstelement
-  'Last element'         //sc_lastelement
+  'Primer campo',                //sc_firstfield
+  #$00DA'ltimo campo',           //sc_lastfield
+  'First element',               //sc_firstelement
+  'Last element'                 //sc_lastelement
 );
 
 function delete_n_selected_rows(const params: array of const): msestring;
