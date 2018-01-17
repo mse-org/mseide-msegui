@@ -534,6 +534,8 @@ type
    function getcaptiontext(const sender: iassistiveclient): msestring;
    function gettexttext(const sender: iassistiveclient): msestring;
    function gethinttext(const sender: iassistiveclient): msestring;
+   procedure focusfirstelement(const awidget: twidget);
+   procedure focuslastelement(const awidget: twidget);
    property state: assistivehandlerstatesty read fstate;
   published
    property active: boolean read factive write setactive default false;
@@ -1062,6 +1064,30 @@ begin
  end;
 end;
 
+procedure tassistivehandler.focusfirstelement(const awidget: twidget);
+var
+ w1: twidget;
+begin
+ if awidget <> nil then begin
+  w1:= awidget.window.firstfocuswidget();
+  if w1 <> nil then begin
+   w1.activate();
+  end;
+ end;
+end;
+
+procedure tassistivehandler.focuslastelement(const awidget: twidget);
+var
+ w1: twidget;
+begin
+ if awidget <> nil then begin
+  w1:= awidget.window.lastfocuswidget();
+  if w1 <> nil then begin
+   w1.activate();
+  end;
+ end;
+end;
+
 procedure tassistivehandler.speaktext(const atext: msestring;
                const avoice: int32 = 0; const nocut: boolean = false);
 begin
@@ -1278,6 +1304,38 @@ begin
         if checkactionshortcut(
                 assistiveshortcuts1[shoa_speakpath],info) then begin
          dospeakpath(sender);
+        end
+        else begin
+         if not (es_processed in info.eventstate) then begin
+          if checkactionshortcut(
+                  assistiveshortcuts[shoa_firstelement],info) then begin
+           focusfirstelement(sender);
+          end
+          else begin
+           if not (es_processed in info.eventstate) then begin
+            if checkactionshortcut(
+                    assistiveshortcuts1[shoa_firstelement],info) then begin
+             focusfirstelement(sender);
+            end
+            else begin
+             if not (es_processed in info.eventstate) then begin
+              if checkactionshortcut(
+                      assistiveshortcuts[shoa_lastelement],info) then begin
+               focuslastelement(sender);
+              end;
+             end
+             else begin
+              if not (es_processed in info.eventstate) then begin
+               if checkactionshortcut(
+                       assistiveshortcuts1[shoa_lastelement],info) then begin
+                focuslastelement(sender);
+               end;
+              end;
+             end;
+            end;
+           end;
+          end;
+         end;
         end;
        end;
       end;

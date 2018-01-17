@@ -30,7 +30,7 @@ type
  
  shortcutconstty = array[0..2] of shortcutty;
  assistiveshortcutty = (shoa_speakagain,shoa_speakpath,
-                        shoa_fistelement,shoa_lastelement);
+                        shoa_firstelement,shoa_lastelement);
  assistiveshortcutconstty = array[assistiveshortcutty] of shortcutconstty;
  assistiveshortcutaty = array[assistiveshortcutty] of shortcutarty;
  passistiveshortcutaty = ^assistiveshortcutaty;

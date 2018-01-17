@@ -2673,6 +2673,8 @@ type
    function ispopup: boolean; {$ifdef FPC}inline;{$endif}
    property owner: twidget read fownerwidget;
    property focusedwidget: twidget read ffocusedwidget;
+   function firstfocuswidget(): twidget;
+   function lastfocuswidget(): twidget;
    property transientfor: twindow read ftransientfor;
    property modalfor: boolean read getmodalfor;
    property modalresult: modalresultty read fmodalresult write setmodalresult;
@@ -17714,6 +17716,56 @@ end;
 function twindow.ispopup: boolean;
 begin
  result:= wo_popup in foptions;
+end;
+
+function twindow.firstfocuswidget(): twidget;
+var
+ w1,w2: twidget;
+ i1,i2: int32;
+begin
+ result:= fownerwidget;
+ if result.canfocus then begin
+  while ow_subfocus in result.optionswidget do begin
+   w2:= nil;
+   i2:= bigint;
+   for i1:= 0 to high(result.fwidgets) do begin
+    w1:= result.fwidgets[i1];
+    if (w1.ftaborder < i2) and w1.canfocus then begin
+     w2:= w1;
+     i2:= w1.ftaborder;
+    end;
+   end;
+   if w2 = nil then begin
+    break;
+   end;
+   result:= w2;
+  end;
+ end;
+end;
+
+function twindow.lastfocuswidget(): twidget;
+var
+ w1,w2: twidget;
+ i1,i2: int32;
+begin
+ result:= fownerwidget;
+ if result.canfocus then begin
+  while ow_subfocus in result.optionswidget do begin
+   w2:= nil;
+   i2:= -1;
+   for i1:= high(result.fwidgets) downto 0 do begin
+    w1:= result.fwidgets[i1];
+    if (w1.ftaborder > i2) and w1.canfocus then begin
+     w2:= w1;
+     i2:= w1.ftaborder;
+    end;
+   end;
+   if w2 = nil then begin
+    break;
+   end;
+   result:= w2;
+  end;
+ end;
 end;
 
 procedure twindow.postkeyevent(const akey: keyty; 
