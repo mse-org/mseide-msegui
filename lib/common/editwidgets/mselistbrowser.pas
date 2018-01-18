@@ -6653,7 +6653,8 @@ procedure ttreeitemedit.doitembuttonpress(var info: mouseeventinfoty);
 var
  cellzone: cellzonety;
 begin
- if [teo_enteronimageclick,teo_enterondoubleclick]*foptions <> [] then begin
+ if (info.button = mb_left) and (info.shiftstate*keyshiftstatesmask = []) and
+  ([teo_enteronimageclick,teo_enterondoubleclick]*foptions <> []) then begin
   cellzone:= cz_none;
   with ttreelistedititem(fvalue) do begin
    updatecellzone(info.pos,cellzone);
