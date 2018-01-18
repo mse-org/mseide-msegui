@@ -17,7 +17,7 @@ uses
  classes,mclasses,mseclasses,mseassistiveserver,mseevent,
  mseguiglob,mseglob,msestrings,mseinterfaces,mseact,mseshapes,
  mseassistiveclient,msemenuwidgets,msegrids,msespeak,msetypes,
- msestockobjects,msegraphutils,msegui,msehash,mdb;
+ msestockobjects,msegraphutils,msegui,msehash,mdb,msestat,msestatfile;
 
 type
  assistivehandlerstatety =
@@ -391,7 +391,7 @@ type
  speakoptionty = (spo_addtext,spo_hint,spo_columncaption,spo_parent,spo_path);
  speakoptionsty = set of speakoptionty;
  
- tassistivehandler = class(tmsecomponent,iassistiveserver)
+ tassistivehandler = class(tmsecomponent,iassistiveserver,istatfile)
   private
    factive: boolean;
    fspeaker: tassistivespeak;
@@ -431,9 +431,13 @@ type
    fvoicetextmessage: int32;
    fvoicetextedit: int32;
    fvoicetexteditreadonly: int32;
+   fstatfile: tstatfile;
+   fstatvarname: msestring;
+   fstatpriority: int32;
    procedure setactive(const avalue: boolean);
    procedure setspeaker(const avalue: tassistivespeak);
    procedure setoptions(const avalue: assistiveoptionsty);
+   procedure setstatfile(const avalue: tstatfile);
   protected
    fstate: assistivehandlerstatesty;
    fspeaklock: int32;
@@ -508,6 +512,13 @@ type
    procedure dodatasetevent(const sender: iassistiveclient; 
                 const akind: assistivedbeventkindty;
                                   const adataset: pointer); //tdataset
+    //istatfile
+   procedure dostatread(const reader: tstatreader) virtual;
+   procedure dostatwrite(const writer: tstatwriter) virtual;
+   procedure statreading();
+   procedure statread();
+   function getstatvarname(): msestring;
+   function getstatpriority(): integer;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy(); override;
@@ -538,6 +549,10 @@ type
    procedure focuslastelement(const awidget: twidget);
    property state: assistivehandlerstatesty read fstate;
   published
+   property statfile: tstatfile read fstatfile write setstatfile;
+   property statvarname: msestring read fstatvarname write fstatvarname;
+   property statpriority: int32 read fstatpriority 
+                                       write fstatpriority default 0;
    property active: boolean read factive write setactive default false;
    property options: assistiveoptionsty read foptions 
                              write setoptions default defaultassistiveoptions;
@@ -988,6 +1003,11 @@ begin
  if ahs_active in fstate then begin
   assistiveoptions:= foptions;
  end;
+end;
+
+procedure tassistivehandler.setstatfile(const avalue: tstatfile);
+begin
+ setstatfilevar(istatfile(self),avalue,fstatfile);
 end;
 
 procedure tassistivehandler.loaded();
@@ -2231,6 +2251,61 @@ begin
    end;
   end;
  end;
+end;
+
+procedure tassistivehandler.dostatread(const reader: tstatreader);
+begin
+ if reader.canstate then begin
+  with fspeaker do begin
+   language:= reader.readmsestring('language',language);
+   gender:= genderty(reader.readinteger('gender',ord(gender),ord(low(gender)),
+                                                ord(high(gender))));
+   age:= reader.readinteger('age',age,0,100);
+   volume:= reader.readreal('volume',volume,0,2);
+   rate:= reader.readreal('rate',rate,0.1,10);
+   pitch:= reader.readreal('pitch',pitch,0.2,5);
+   range:= reader.readreal('range',pitch,0.2,5);
+   capitals:= reader.readinteger('capitals',capitals,0,300);
+   wordgap:= reader.readinteger('wordgap',wordgap,0,100);
+  end;
+ end;
+end;
+
+procedure tassistivehandler.dostatwrite(const writer: tstatwriter);
+begin
+ if writer.canstate then begin
+  with fspeaker do begin
+   writer.writemsestring('language',msestring(language));
+   writer.writeinteger('gender',ord(gender));
+   writer.writeinteger('age',age);
+   writer.writereal('volume',volume);
+   writer.writereal('rate',rate);
+   writer.writereal('pitch',pitch);
+   writer.writereal('range',pitch);
+   writer.writeinteger('capitals',capitals);
+   writer.writeinteger('wordgap',wordgap);
+  end;
+ end;
+end;
+
+procedure tassistivehandler.statreading();
+begin
+ //dummy
+end;
+
+procedure tassistivehandler.statread();
+begin
+ //dummy
+end;
+
+function tassistivehandler.getstatvarname(): msestring;
+begin
+ result:= fstatvarname;
+end;
+
+function tassistivehandler.getstatpriority(): integer;
+begin
+ result:= fstatpriority;
 end;
 
 end.
