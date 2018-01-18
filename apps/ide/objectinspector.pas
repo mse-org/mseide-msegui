@@ -977,6 +977,9 @@ begin
     end;
     if p1 = pe then begin
      result:= not exact;
+     if p1 <> nil then begin
+      dec(p1);
+     end;
      break;
     end;
    end;

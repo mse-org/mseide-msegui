@@ -1087,7 +1087,7 @@ type
  end;
 
  treeitemeditoptionty = (teo_treecolnavig,teo_treerownavig,teo_keyrowmoving,
-                         teo_enteronimageclick);
+                         teo_enteronimageclick,teo_enterondoubleclick);
  treeitemeditoptionsty = set of treeitemeditoptionty;
 
  checkmoveeventty = procedure(const curindex,newindex: integer; 
@@ -6653,12 +6653,14 @@ procedure ttreeitemedit.doitembuttonpress(var info: mouseeventinfoty);
 var
  cellzone: cellzonety;
 begin
- if (teo_enteronimageclick in foptions) then begin
+ if [teo_enteronimageclick,teo_enterondoubleclick]*foptions <> [] then begin
   cellzone:= cz_none;
   with ttreelistedititem(fvalue) do begin
    updatecellzone(info.pos,cellzone);
-   if cellzone = cz_image then begin
-    expanded:= true;
+   if (cellzone = cz_image) and (teo_enteronimageclick in foptions) or
+      (teo_enterondoubleclick in foptions) and 
+                   (ss_double in info.shiftstate) then begin
+    expanded:= not expanded;
     include(info.eventstate,es_processed);
    end;
   end;
