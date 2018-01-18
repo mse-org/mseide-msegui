@@ -266,7 +266,9 @@ const
   'First field',         //sc_firstfield
   'Last field',          //sc_lastfield
   'First element',       //sc_firstelement
-  'Last element'         //sc_lastelement
+  'Last element',        //sc_lastelement
+  'Slower',              //sc_slower
+  'Faster'               //sc_faster
 );
 
 function delete_n_selected_rows(const params: array of const): msestring;

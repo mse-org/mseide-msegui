@@ -1302,57 +1302,58 @@ begin
  end;
 end;
 
-procedure tassistivehandler.doshortcut(const sender: twidget;
-               var info: keyeventinfoty);
+function checkassistiveshortcut(const akind: assistiveshortcutty;
+                                        var info: keyeventinfoty): boolean;
 begin
+ result:= false;
  if not (es_processed in info.eventstate) then begin
-  if checkactionshortcut(assistiveshortcuts[shoa_speakagain],info) then begin
-   dospeakagain(sender);
+  if checkactionshortcut(assistiveshortcuts[akind],info) then begin
+   result:= true;
   end
   else begin
    if not (es_processed in info.eventstate) then begin
-    if checkactionshortcut(assistiveshortcuts1[shoa_speakagain],info) then begin
-     dospeakagain(sender);
-    end
-    else begin
-     if not (es_processed in info.eventstate) then begin
-      if checkactionshortcut(assistiveshortcuts[shoa_speakpath],info) then begin
-       dospeakpath(sender);
-      end
-      else begin
-       if not (es_processed in info.eventstate) then begin
-        if checkactionshortcut(
-                assistiveshortcuts1[shoa_speakpath],info) then begin
-         dospeakpath(sender);
-        end
-        else begin
-         if not (es_processed in info.eventstate) then begin
-          if checkactionshortcut(
-                  assistiveshortcuts[shoa_firstelement],info) then begin
-           focusfirstelement(sender);
-          end
-          else begin
-           if not (es_processed in info.eventstate) then begin
-            if checkactionshortcut(
-                    assistiveshortcuts1[shoa_firstelement],info) then begin
-             focusfirstelement(sender);
-            end
-            else begin
-             if not (es_processed in info.eventstate) then begin
-              if checkactionshortcut(
-                      assistiveshortcuts[shoa_lastelement],info) then begin
-               focuslastelement(sender);
-              end;
-             end
-             else begin
-              if not (es_processed in info.eventstate) then begin
-               if checkactionshortcut(
-                       assistiveshortcuts1[shoa_lastelement],info) then begin
-                focuslastelement(sender);
-               end;
-              end;
-             end;
-            end;
+    if checkactionshortcut(assistiveshortcuts1[akind],info) then begin
+     result:= true;
+    end;
+   end;
+  end;
+ end;
+end;
+
+procedure tassistivehandler.doshortcut(const sender: twidget;
+               var info: keyeventinfoty);
+begin
+ if checkassistiveshortcut(shoa_speakagain,info) then begin
+  dospeakagain(sender);
+ end
+ else begin
+  if not (es_processed in info.eventstate) then begin
+   if checkassistiveshortcut(shoa_speakpath,info) then begin
+    dospeakpath(sender);
+   end
+   else begin
+    if not (es_processed in info.eventstate) then begin
+     if checkassistiveshortcut(shoa_firstelement,info) then begin
+      focusfirstelement(sender);
+     end
+     else begin
+      if not (es_processed in info.eventstate) then begin
+       if checkassistiveshortcut(shoa_lastelement,info) then begin
+        focuslastelement(sender);
+       end
+       else begin
+        if not (es_processed in info.eventstate) then begin
+         if checkassistiveshortcut(shoa_slower,info) then begin
+          fspeaker.rate:= fspeaker.rate/1.1;
+          startspeak();
+          speaktext(sc_slower,voicetext);
+         end
+         else begin
+          if not (es_processed in info.eventstate) then begin
+           if checkassistiveshortcut(shoa_faster,info) then begin
+            fspeaker.rate:= fspeaker.rate*1.1;
+            startspeak();
+            speaktext(sc_faster,voicetext);
            end;
           end;
          end;
