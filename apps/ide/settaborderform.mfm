@@ -52,10 +52,10 @@ object settaborderfo: tsettaborderfo
         widgetname = 'windex'
         dataclass = tgridintegerdatalist
       end>
-    datarowheight = 17
+    datarowheight = 18
     onrowsmoved = gridonrowsmoved
     oncellevent = gridoncellevent
-    reffontheight = 14
+    reffontheight = 16
     object wname: tstringedit
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
       color = -1879048185
@@ -68,12 +68,13 @@ object settaborderfo: tsettaborderfo
       bounds_x = 0
       bounds_y = 0
       bounds_cx = 201
-      bounds_cy = 17
+      bounds_cy = 18
       optionsedit1 = [oe1_savevalue]
       optionsedit = [oe_readonly, oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter]
-      reffontheight = 14
+      reffontheight = 16
     end
     object windex: tintegeredit
+      optionswidget1 = [ow1_fontglyphheight]
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
       frame.levelo = 0
       frame.colorclient = -2147483646
@@ -84,9 +85,9 @@ object settaborderfo: tsettaborderfo
       bounds_x = 202
       bounds_y = 0
       bounds_cx = 50
-      bounds_cy = 17
+      bounds_cy = 18
       optionsedit1 = [oe1_savevalue]
-      reffontheight = 14
+      reffontheight = 16
     end
   end
   object ok: tbutton
@@ -120,9 +121,8 @@ object settaborderfo: tsettaborderfo
     bounds_x = 3
     bounds_y = 4
     bounds_cx = 60
-    bounds_cy = 18
     onsetvalue = mousetaborderonsetvalue
-    reffontheight = 14
+    reffontheight = 16
   end
   object start: tbutton
     taborder = 2
@@ -148,10 +148,10 @@ object settaborderfo: tsettaborderfo
     taborder = 6
     bounds_x = 176
     bounds_y = 5
-    bounds_cx = 72
-    bounds_cy = 14
+    bounds_cx = 63
+    bounds_cy = 16
     caption = 'Mouse click'
-    reffontheight = 14
+    reffontheight = 16
   end
   object statfile1: tstatfile
     filename = 'settaborderfo.sta'

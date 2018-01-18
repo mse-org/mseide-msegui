@@ -124,9 +124,53 @@ type
    property fontbar;
  end;  
 
+function encodegtin13(const avalue: int64): msestring; //'' on error
+function decodegtin13(const avalue: msestring): int64; //-1 on error
+
 implementation
 uses
- rtlconsts,msebits,msedrawtext;
+ rtlconsts,msebits,msedrawtext,mseformatstr;
+
+function gtin13checksum(const avalue: int64): int32;
+var
+ i1,i2,i3: int32;
+ i4: int64;
+begin
+ i2:= 0;
+ i4:= avalue;
+ for i1:= 0 to 11 do begin
+  i3:= i4 mod 10;
+  if odd(i1) then begin
+   i2:= i2 + i3;
+  end
+  else begin
+   i2:= i2 + i3*3;
+  end;
+  i4:= i4 div 10;
+ end;
+ result:= (10 - i2 mod 10) mod 10;
+end;
+
+function encodegtin13(const avalue: int64): msestring; //'' on error
+begin
+ result:= '';
+ if (avalue >= 0) and (avalue <= 999999999999) then begin
+  result:= inttostrmse(avalue*10+int64(gtin13checksum(avalue)));
+ end;
+end;
+
+function decodegtin13(const avalue: msestring): int64; //-1 on error
+var
+ i1,i2: int64;
+begin
+ result:= -1;
+ if trystrtoint64(avalue,i1) then begin
+  i2:= i1 div 10;
+  if gtin13checksum(i2) = i1 mod 10 then begin
+   result:= i2;
+  end;
+ end;
+end;
 
 type
   patterngtin13ty = (pgt13_l0,pgt13_l1,pgt13_r,pgt13_13);
@@ -168,7 +212,7 @@ const
 //0100111 0110011 0011011 0100001 0011101 0111001 0000101 0010001 0001001 0010111 _l1
   ($27,    $33,    $1b,    $21,    $1d,    $39,    $05,    $11,    $09,    $17),//_13 1
 //1110010 1100110 1101100 1000010 1011100 1001110 1010000 1000100 1001000 1110100 _r
-  ($72,    $66,    $6a,    $42,    $5c,    $4e,    $50,    $44,    $48,    $74),
+  ($72,    $66,    $6c,    $42,    $5c,    $4e,    $50,    $44,    $48,    $74),
 // 000000  001011  001101  001110  010011  011001  011100  010101  010110  011010 _13
   ($00,    $0b,    $0d,    $0e,    $13,    $19,    $1c,    $15,    $16,    $1a)
      );
@@ -591,7 +635,7 @@ begin
      end;
      by1:= (3*int3+int2) mod 10;
      if by1 <> 0 then begin
-      by1:= 10-by1;         //controllsum
+      by1:= (10-by1) mod 10;         //controllsum
      end;
      move((po1+1)^,po1^,12*sizeof(msechar));
      (po1+12)^:= msechar(by1+ord('0'));

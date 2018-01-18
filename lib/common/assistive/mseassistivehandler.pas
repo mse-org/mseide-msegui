@@ -530,8 +530,14 @@ type
    procedure cancel();
    procedure speaktext(const atext: msestring; const avoice: int32 = 0;
                                                 const nocut: boolean = false);
+   procedure speaktext1(const atext: msestring; const avoice: int32 = 0;
+                                                const nocut: boolean = false);
+                                                //with cancel
    procedure speaktext(const atext: stockcaptionty; const avoice: int32 = 0;
                                                 const nocut: boolean = false);
+   procedure speaktext1(const atext: stockcaptionty; const avoice: int32 = 0;
+                                                const nocut: boolean = false);
+                                                //with cancel
    procedure speakcharacter(const achar: char32; const avoice: int32 = 0;
                                                 const nocut: boolean = false);
    procedure speakall(const sender: iassistiveclient; aoptions: speakoptionsty);
@@ -1119,10 +1125,24 @@ begin
  end;
 end;
 
+procedure tassistivehandler.speaktext1(const atext: msestring;
+               const avoice: int32 = 0; const nocut: boolean = false);
+begin
+ cancel();
+ speaktext(atext,avoice,nocut);
+end;
+
 procedure tassistivehandler.speaktext(const atext: stockcaptionty;
                const avoice: int32 = 0; const nocut: boolean = false);
 begin
  speaktext(stockobjects.captions[atext],avoice,nocut);
+end;
+
+procedure tassistivehandler.speaktext1(const atext: stockcaptionty;
+               const avoice: int32 = 0; const nocut: boolean = false);
+begin
+ cancel();
+ speaktext(atext,avoice,nocut);
 end;
 
 procedure tassistivehandler.speakcharacter(const achar: char32;
