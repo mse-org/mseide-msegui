@@ -1814,16 +1814,17 @@ begin
     case eventkind of
      cek_enter: begin
       f1:= sender.getassistiveflags();
-      if asf_widgetcell in f1 then begin
-       setstate([ahs_cellwidgetpending]);
-      end;
       if not b1 and ((cellbefore.col <> cell.col) or 
                          (cellbefore.row <> cell.row)) and 
                                        not (asf_scrolllimit in f1) then begin
        if not (ahs_locatepending in fstate) then begin
         startspeak();
        end;
-       speakgridcell(sender,cell,cellbefore.col <> cell.col);
+       b1:= cellbefore.col <> cell.col;
+       speakgridcell(sender,cell,b1);
+       if b1 and (asf_widgetcell in f1) then begin
+        setstate([ahs_cellwidgetpending]);
+       end;
       end;
       resetstate([ahs_locatepending]);
      end;

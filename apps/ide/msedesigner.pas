@@ -496,7 +496,8 @@ type
    function selectedcomponents: componentarty;
    
       //idesigner
-   procedure componentmodified(const component: tobject);
+   procedure componentmodified(const component: tobject;
+                 const apropname: string = ''; const apropindex: int32 = -1);
    procedure selectcomponent(instance: tcomponent);
    procedure setselections(const list: idesignerselections);
    function createnewcomponent(const module: tmsecomponent;
@@ -2859,7 +2860,7 @@ begin
  fsubmodulelist:= tsubmodulelist.create(self);
  fdescendentinstancelist:= tdescendentinstancelist.create(self);
  fdesignfiles:= tindexedfilenamelist.create;
- ondesignchanged:= {$ifdef FPC}@{$endif}componentmodified;
+ ondesignchanged:= @componentmodified;
  onfreedesigncomponent:= {$ifdef FPC}@{$endif}deletecomponent;
  ondesignvalidaterename:= {$ifdef FPC}@{$endif}validaterename;
  ondesignexception:= @handledesignexception;
@@ -3732,9 +3733,13 @@ begin
  result:= aancestormodule <> nil;
 end;
 
-procedure tdesigner.componentmodified(const component: tobject);
+procedure tdesigner.componentmodified(const component: tobject;
+                 const apropname: string = ''; const apropindex: int32 = -1);
 begin
  if fformloadlocklevel = 0 then begin
+  if apropname <> '' then begin
+   objectinspectorfo.selectprop(component,apropname,apropindex);
+  end;   
   fallsaved:= false;
   if component <> nil then begin
    fmodules.componentmodified(component);

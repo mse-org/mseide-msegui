@@ -368,7 +368,6 @@ type
  treptabulators = class(tcustomtabulators)
   private
    finfo: drawtextinfoty;
-   fband: tcustomrecordband;
    fminsize: sizety;
    fsizevalid: boolean;
    flineinfos: tablineinfoarty;
@@ -426,6 +425,7 @@ type
    procedure setdistright(const avalue: real);
    procedure setlinksource(const avalue: tcustomrecordband);
   protected
+   fband: tcustomrecordband;
    class function getitemclass: tabulatoritemclassty; override;
    procedure paint(const acanvas: tcanvas; const adest: rectty);
    procedure checksize;
@@ -810,10 +810,12 @@ type
  tcustomrepvaluedisp = class(tcustomrecordband)
   private
    ftextflags: textflagsty;
+   ftextframe: int32;
    fformat: msestring;
    fongettext: getrepvaluetexteventty;
    procedure setformat(const avalue: msestring);
    procedure settextflags(const avalue: textflagsty);
+   procedure settextframe(const avalue: int32);
   protected
    function calcminscrollsize: sizety; override;
    procedure dopaintforeground(const acanvas: tcanvas); override;
@@ -824,6 +826,7 @@ type
    constructor create(aowner: tcomponent); override;
    property textflags: textflagsty read ftextflags write settextflags default
                                             defaultrepvaluedisptextflags;
+   property textframe: int32 read ftextframe write settextframe default 1;
    property format: msestring read fformat write setformat;
    property optionsscale default defaultrepvaluedispoptionsscale;
    property ongettext: getrepvaluetexteventty read fongettext write fongettext;
@@ -845,6 +848,7 @@ type
 //   property tabs;
 //   property datasource;
    property textflags;
+   property textframe;
    property options;
    property optionsshow;
    property optionsscale;
@@ -4119,15 +4123,22 @@ begin
   ar2:= ftabs.tabs;
 //  setlength(ar1,length(ar2));
   int2:= innerclientwidgetpos.x;
-  acanvas.dashes:= #2#2;
   for int1:= 0 to high(ar2) do begin
 //   with ar1[int1] do begin
    with ar2[int1] do begin
-    if treptabulatoritem(ftabs.fitems[index]).enabled then begin
-     col1:= cl_red;
-    end
-    else begin
-     col1:= cl_blue;
+    with treptabulatoritem(ftabs.fitems[index]) do begin
+     if enabled then begin
+      col1:= cl_red;
+     end
+     else begin
+      col1:= cl_blue;
+     end;
+     if tas_editactive in fstate then begin
+      acanvas.dashes:= '';
+     end
+     else begin
+      acanvas.dashes:= #2#2;
+     end
     end;
     a.x:= linepos+int2;
    end;
@@ -4550,9 +4561,10 @@ end;
 
 procedure tcustomrecordband.endpickmove(const sender: tobjectpicker);
 begin
- ftabs.linepos[sender.currentobjects[0]]:= ftabs.linepos[sender.currentobjects[0]] + 
-                                                        sender.pickoffset.x;
- designchanged;
+ ftabs.linepos[sender.currentobjects[0]]:= 
+          ftabs.linepos[sender.currentobjects[0]] + sender.pickoffset.x;
+//fitems[ftabs[index].index]
+ designchanged('tabs',ftabs.ftabs[sender.currentobjects[0]].index);
 end;
 
 procedure tcustomrecordband.paintxorpic(const sender: tobjectpicker; 
@@ -7241,6 +7253,7 @@ end;
 constructor tcustomrepvaluedisp.create(aowner: tcomponent);
 begin
  ftextflags:= defaultrepvaluedisptextflags;
+ ftextframe:= 1;
  foptionsscale:= defaultrepvaluedispoptionsscale;
  inherited;
  foptions:= defaultrepvaluedispoptions;
@@ -7249,9 +7262,15 @@ begin
 end;
 
 procedure tcustomrepvaluedisp.dopaintforeground(const acanvas: tcanvas);
+var
+ rect1: rectty;
 begin
  inherited;
- drawtext(acanvas,getdisptext,innerclientrect,ftextflags,font);
+ rect1:= innerclientrect();
+ if fframe = nil then begin
+  inflaterect1(rect1,-ftextframe);
+ end;
+ drawtext(acanvas,getdisptext,rect1,ftextflags,font);
 end;
 
 procedure tcustomrepvaluedisp.dogettext(var atext: msestring);
@@ -7284,6 +7303,14 @@ begin
  end;
 end;
 
+procedure tcustomrepvaluedisp.settextframe(const avalue: int32);
+begin
+ if ftextframe <> avalue then begin
+  ftextframe:= avalue;
+  minclientsizechanged();
+ end;
+end;
+
 function tcustomrepvaluedisp.calcminscrollsize: sizety;
 var
  size1: sizety;
@@ -7295,6 +7322,10 @@ begin
    size1.cx:= size1.cx + framei_left + framei_right;
    size1.cy:= size1.cy + framei_top + framei_bottom;
   end;
+ end
+ else begin
+  size1.cx:= size1.cx + 2*ftextframe;
+  size1.cy:= size1.cy + 2*ftextframe;
  end;
  if size1.cx > result.cx then begin
   result.cx:= size1.cx;

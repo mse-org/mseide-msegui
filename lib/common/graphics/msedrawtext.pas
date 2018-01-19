@@ -57,7 +57,9 @@ type
   cellwidth: integer;
  end;
  tabulatorarty = array of tabulatorty;
-
+ tabulatorstatety = (tas_editactive);
+ tabulatorstatesty = set of tabulatorstatety;
+ 
  ttabulatoritem = class(townedpersistent)
   private
    fkind: tabulatorkindty;
@@ -66,6 +68,7 @@ type
    procedure setdistleft(const avalue: real);
    procedure setdistright(const avalue: real);
   protected
+   fstate: tabulatorstatesty;
    fdistleft: real;
    fdistright: real;
    function getenabled(): boolean virtual;

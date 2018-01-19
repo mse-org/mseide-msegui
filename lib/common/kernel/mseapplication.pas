@@ -62,7 +62,8 @@ type
   protected
    factstate: actcomponentstatesty;
    fdesignchangedlock: integer;
-   procedure designchanged; //for designer notify
+   procedure designchanged(const apropname: string = '';
+                     const apropindex: int32 = -1); //for designer notify
    procedure loaded; override;
    procedure doactivated; virtual;
    procedure dodeactivated; virtual;
@@ -426,10 +427,12 @@ procedure designchanged(const acomponent: tcomponent); //for designer notify
 type
  validaterenameeventty = procedure(const acomponent: tcomponent;
                                 const curname, newname: string) of object;
+ propertynotifyeventty = procedure(const sender: tobject;
+                  const propname: string; const itemindex: int32) of object;
 var 
  onhandlesigchld: procedure;
        //designer hooks
- ondesignchanged: notifyeventty;
+ ondesignchanged: propertynotifyeventty;
  onfreedesigncomponent: componenteventty;
  ondesignvalidaterename: validaterenameeventty;
  ondesignexception: notifyeventty;
@@ -537,7 +540,7 @@ begin
  if assigned(ondesignchanged) and 
        (acomponent.componentstate*[csdesigning,csloading,csdestroying] =
                                                      [csdesigning]) then begin
-  ondesignchanged(acomponent);
+  ondesignchanged(acomponent,'',-1);
  end;
 end;
 
@@ -649,11 +652,12 @@ end;
 
 { tactcomponent }
 
-procedure tactcomponent.designchanged; //for designer notify
+procedure tactcomponent.designchanged(const apropname: string = '';
+                     const apropindex: int32 = -1); //for designer notify
 begin
  if assigned(ondesignchanged) and (fdesignchangedlock = 0) and
        (componentstate*[csdesigning,csloading] = [csdesigning]) then begin
-  ondesignchanged(self);
+  ondesignchanged(self,apropname,apropindex);
  end;
 end;
 

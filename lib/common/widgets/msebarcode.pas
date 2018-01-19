@@ -668,7 +668,7 @@ begin
   else begin
    ffontheight:= ffontbar.height;
   end;
-  fbarrect2.cy:= fbarrect2.cy - ffontheight;
+  fbarrect2.cy:= fbarrect2.cy - round(ffontbar.lineheight*1.2);
 
   case fkind of
    bk_gtin_13,bk_gtin_8: begin

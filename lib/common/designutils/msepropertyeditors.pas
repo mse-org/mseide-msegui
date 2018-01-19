@@ -188,6 +188,7 @@ type
                 var mouseinfo: mouseeventinfoty); virtual;
    procedure dokeydown(var ainfo: keyeventinfoty); virtual;
    procedure edit(); virtual;
+   procedure focused() virtual;
    procedure navigevent(); virtual;
    property typinfo: ptypeinfo read gettypinfo;
    property count: integer read getcount;
@@ -723,6 +724,7 @@ type
    function getvalue: msestring; override;
    function getvalues: msestringarty; override;
    procedure edit; override;
+   procedure focused() override;
    function name: msestring; override;
    function subproperties: propertyeditorarty; override;
    procedure dragbegin(var accept: boolean); override;
@@ -731,6 +733,7 @@ type
    procedure dopopup(var amenu: tpopupmenu; const atransientfor: twidget;
                           var mouseinfo: mouseeventinfoty); override;
    procedure dokeydown(var ainfo: keyeventinfoty); override;
+   property index:int32 read findex;
  end;
 
  elementeditorclassty = class of tarrayelementeditor;
@@ -759,6 +762,7 @@ type
    function itemgetvalues(
            const sender: tarrayelementeditor): msestringarty; virtual;
    procedure itemedit(const sender: tarrayelementeditor); virtual;
+   procedure itemfocused(const sender: tarrayelementeditor) virtual;
    function itemname(
               const sender: tarrayelementeditor): msestring; virtual;
    function itemsubproperties(
@@ -2205,6 +2209,11 @@ begin
 end;
 
 procedure tpropertyeditor.edit;
+begin
+ //dummy
+end;
+
+procedure tpropertyeditor.focused();
 begin
  //dummy
 end;
@@ -3664,6 +3673,11 @@ begin
  sender.feditor.edit();
 end;
 
+procedure tarraypropertyeditor.itemfocused(const sender: tarrayelementeditor);
+begin
+ sender.feditor.focused();
+end;
+
 function tarraypropertyeditor.itemname(
                 const sender: tarrayelementeditor): msestring;
 begin
@@ -3970,6 +3984,11 @@ end;
 procedure tarrayelementeditor.edit;
 begin
  tarraypropertyeditor(fparenteditor).itemedit(self);
+end;
+
+procedure tarrayelementeditor.focused();
+begin
+ tarraypropertyeditor(fparenteditor).itemfocused(self);
 end;
 
 function tarrayelementeditor.getdefaultstate: propertystatesty;
