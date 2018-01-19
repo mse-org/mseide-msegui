@@ -109,7 +109,7 @@ end;
 
 function tmemodialogcontroller.execute(var avalue: msestring): boolean;
 begin
- result:= memodialog(avalue,fowner.readonly) = mr_ok;
+ result:= memodialog(avalue,not fowner.editor.canedit) = mr_ok;
 end;
 
 { tmemodialogedit }

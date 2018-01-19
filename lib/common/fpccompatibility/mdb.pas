@@ -1799,6 +1799,7 @@ type
    function getreadonly: Boolean;
    function getactive: Boolean;
   protected
+   function datasourcereadonly(): boolean virtual;
    procedure updateactive();
     procedure ActiveChanged; virtual;
     procedure CheckBrowseMode; virtual;
@@ -9145,9 +9146,14 @@ begin
  else Result := False;
 end;
 
+function tdatalink.datasourcereadonly(): boolean;
+begin
+ result:= fdatasource.readonly;
+end;
+
 function TDataLink.getreadonly: Boolean;
 begin
- result:= freadonly or (fdatasource <> nil) and (fdatasource.readonly);
+ result:= freadonly or (fdatasource <> nil) and  datasourcereadonly();
 end;
 
 function TDataLink.getactive: Boolean;

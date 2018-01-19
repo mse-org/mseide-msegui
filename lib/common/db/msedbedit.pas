@@ -72,7 +72,8 @@ type
                         dno_postbeforedialog,dno_postoncanclose,
                         dno_candefocuswindow);
  dbnavigatoroptionsty = set of dbnavigatoroptionty;
- optioneditdbty = (oed_autoedit,oed_noautoedit,oed_autopost,
+ optioneditdbty = (oed_autoedit,oed_noautoedit,oed_readonly,oed_noreadonly,
+                   oed_autopost,
                    oed_nullcheckifunmodified,
                    oed_syncedittonavigator,oed_focusoninsert,
                    oed_nofilteredit,oed_nofilterminedit,
@@ -344,6 +345,7 @@ type
    fintf: idbeditfieldlink;
    foptions: optionseditdbty;
    fobjectlinker: tobjectlinker;
+   function datasourcereadonly(): boolean override;
    function getobjectlinker: tobjectlinker;
    function getdatasource1: tdatasource;
    procedure dataevent(event: tdataevent; info: ptrint); override;
@@ -3994,13 +3996,22 @@ begin
 end;
 
 procedure tcustomeditwidgetdatalink.setoptions(const avalue: optionseditdbty);
-const
- mask: optionseditdbty = [oed_autoedit,oed_noautoedit];
 begin
  foptions:= optionseditdbty(
-        setsinglebit({$ifdef FPC}longword{$else}word{$endif}(avalue),
-                      {$ifdef FPC}longword{$else}word{$endif}(foptions),
-                      {$ifdef FPC}longword{$else}word{$endif}(mask)));
+                setsinglebit(card32(avalue),
+                    card32(foptions),[card32([oed_autoedit,oed_noautoedit]),
+                                       card32([oed_readonly,oed_noreadonly])]));
+end;
+
+function tcustomeditwidgetdatalink.datasourcereadonly(): boolean;
+begin
+ result:= inherited datasourcereadonly();
+ if oed_readonly in foptions then begin
+  result:= true;
+ end;
+ if oed_noreadonly in foptions then begin
+  result:= false;
+ end;
 end;
 
 procedure tcustomeditwidgetdatalink.valuechanged(const sender: iificlient);
