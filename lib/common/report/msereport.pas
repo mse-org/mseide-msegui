@@ -609,6 +609,7 @@ type
    fonpaint: painteventty;
    fonafterpaint: painteventty;
    fstate: recordbandstatesty;
+   ftextframe: int32;
    ftabs: treptabulators;
    fupdating: integer;
    fdatalink: trecordbanddatalink;
@@ -635,6 +636,7 @@ type
    fzebra_step: integer;
    fzebra_counter: integer;
    fzebra_options: zebraoptionsty;
+   procedure settextframe(const avalue: int32);
    procedure settabs(const avalue: treptabulators);
    procedure setoptionsshow(const avalue: bandoptionshowsty);
    function getvisidatasource: tdatasource;
@@ -666,10 +668,12 @@ type
    procedure objectevent(const sender: tobject;
                           const event: objecteventty); override;
    procedure fontchanged; override;
+   procedure clientrectchanged() override;
    procedure inheritedpaint(const acanvas: tcanvas);
    procedure parentchanged; override; //update fparentintf
    function getminbandsize: sizety; virtual;
    function calcminscrollsize: sizety; override;
+   function textarea(): rectty;
    procedure render(const acanvas: tcanvas; var empty: boolean); virtual;
    procedure init; virtual;
    procedure initpage; virtual;
@@ -710,8 +714,8 @@ type
    destructor destroy; override;
    procedure paint(const canvas: tcanvas); override;
    function actualcolor: colorty; override;
-   procedure synctofontheight; override;
    procedure scale(const ascale: real); override;
+   procedure synctofontheight; override;
    procedure beginupdate;
    procedure endupdate;
    function remainingbands: integer;
@@ -724,6 +728,7 @@ type
    procedure restart;
    procedure resetzebra; virtual;
    
+   property textframe: int32 read ftextframe write settextframe default 0;
    property tabs: treptabulators read ftabs write settabs;
    property font: trepwidgetfont read getfont write setfont stored isfontstored;
    property datasource: tdatasource read getdatasource write setdatasource;
@@ -773,6 +778,7 @@ type
   published
    property font;
 //   property fontempty;
+   property textframe;
    property tabs;
    property datasource;
    property options;
@@ -810,12 +816,10 @@ type
  tcustomrepvaluedisp = class(tcustomrecordband)
   private
    ftextflags: textflagsty;
-   ftextframe: int32;
    fformat: msestring;
    fongettext: getrepvaluetexteventty;
    procedure setformat(const avalue: msestring);
    procedure settextflags(const avalue: textflagsty);
-   procedure settextframe(const avalue: int32);
   protected
    function calcminscrollsize: sizety; override;
    procedure dopaintforeground(const acanvas: tcanvas); override;
@@ -826,7 +830,7 @@ type
    constructor create(aowner: tcomponent); override;
    property textflags: textflagsty read ftextflags write settextflags default
                                             defaultrepvaluedisptextflags;
-   property textframe: int32 read ftextframe write settextframe default 1;
+   property textframe default 1;
    property format: msestring read fformat write setformat;
    property optionsscale default defaultrepvaluedispoptionsscale;
    property ongettext: getrepvaluetexteventty read fongettext write fongettext;
@@ -3029,7 +3033,7 @@ end;
 procedure treptabulators.checksize;
 begin
  if not fsizevalid then begin
-  processvalues(fband.getcanvas,fband.innerclientrect,false);
+  processvalues(fband.getcanvas,fband.textarea(),false);
  end;
 end;
 
@@ -4040,6 +4044,17 @@ begin
  end;
 end;
 
+procedure tcustomrecordband.settextframe(const avalue: int32);
+begin
+ if ftextframe <> avalue then begin
+  ftextframe:= avalue;
+  if fframe = nil then begin
+//   minclientsizechanged();
+   clientrectchanged();
+  end;
+ end;
+end;
+
 procedure tcustomrecordband.settabs(const avalue: treptabulators);
 begin
  ftabs.assign(avalue);
@@ -4123,6 +4138,9 @@ begin
   ar2:= ftabs.tabs;
 //  setlength(ar1,length(ar2));
   int2:= innerclientwidgetpos.x;
+  if fframe = nil then begin
+   int2:= int2 + ftextframe;
+  end;
   for int1:= 0 to high(ar2) do begin
 //   with ar1[int1] do begin
    with ar2[int1] do begin
@@ -4161,7 +4179,7 @@ begin
  end;
 }
  inherited;
- ftabs.paint(acanvas,innerclientrect);
+ ftabs.paint(acanvas,textarea());
 end;
 
 function tcustomrecordband.getminbandsize: sizety;
@@ -4177,7 +4195,14 @@ begin
  result:= inherited calcminscrollsize;
  size1:= getminbandsize;
  if fframe <> nil then begin
-  addsize1(size1,tcustomframe1(fframe).fi.innerframe.bottomright);
+  with tcustomframe1(fframe) do begin
+   size1.cx:= size1.cx + fi.innerframe.right;
+   size1.cy:= size1.cy + fi.innerframe.bottom;
+  end;
+ end
+ else begin
+  size1.cx:= size1.cx + ftextframe;
+  size1.cy:= size1.cy + ftextframe;
  end;
  with size1 do begin
   if cx > result.cx then begin
@@ -4186,6 +4211,14 @@ begin
   if cy > result.cy then begin
    result.cy:= cy
   end;
+ end;
+end;
+
+function tcustomrecordband.textarea(): rectty;
+begin
+ result:= innerclientrect;
+ if fframe = nil then begin
+  inflaterect1(result,-ftextframe);
  end;
 end;
 
@@ -4201,6 +4234,12 @@ begin
  ftabs.fsizevalid:= false;
  inherited;
  minclientsizechanged;
+end;
+
+procedure tcustomrecordband.clientrectchanged();
+begin
+ ftabs.fsizevalid:= false;
+ inherited;
 end;
 
 procedure tcustomrecordband.beginupdate;
@@ -4241,7 +4280,9 @@ end;
 
 procedure tcustomrecordband.synctofontheight;
 begin
- syncsinglelinefontheight(true);
+ inherited;
+ height:= calcminscrollsize().cy;
+// syncsinglelinefontheight(true);
 end;
 
 function tcustomrecordband.isfirstrecord: boolean;
@@ -4537,7 +4578,7 @@ begin
   int3:= arect.x - frame.framei_left;
  end
  else begin
-  int3:= arect.x;
+  int3:= arect.x - ftextframe;
  end;
  for int1:= 0 to ftabs.count - 1 do begin
   int2:= abs(int3 - ftabs.linepos[int1]);
@@ -4569,8 +4610,14 @@ end;
 
 procedure tcustomrecordband.paintxorpic(const sender: tobjectpicker; 
                                                  const acanvas: tcanvas);
+var
+ i1: int32;
 begin
- acanvas.fillxorrect(makerect(innerclientpos.x+sender.pickoffset.x + 
+ i1:= innerclientpos.x;
+ if fframe = nil then begin
+  i1:= i1 + ftextframe;
+ end;
+ acanvas.fillxorrect(makerect(i1+sender.pickoffset.x + 
        ftabs.linepos[sender.currentobjects[0]],0,1,clientheight));
 end;
 
@@ -7262,15 +7309,9 @@ begin
 end;
 
 procedure tcustomrepvaluedisp.dopaintforeground(const acanvas: tcanvas);
-var
- rect1: rectty;
 begin
  inherited;
- rect1:= innerclientrect();
- if fframe = nil then begin
-  inflaterect1(rect1,-ftextframe);
- end;
- drawtext(acanvas,getdisptext,rect1,ftextflags,font);
+ drawtext(acanvas,getdisptext,textarea,ftextflags,font);
 end;
 
 procedure tcustomrepvaluedisp.dogettext(var atext: msestring);
@@ -7300,14 +7341,6 @@ begin
  if ftextflags <> avalue then begin
   ftextflags:= avalue;
   minclientsizechanged;
- end;
-end;
-
-procedure tcustomrepvaluedisp.settextframe(const avalue: int32);
-begin
- if ftextframe <> avalue then begin
-  ftextframe:= avalue;
-  minclientsizechanged();
  end;
 end;
 
