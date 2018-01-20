@@ -598,9 +598,19 @@ type
  
  zebraoptionty = (zo_resetonpagestart,zo_resetparent);
  zebraoptionsty = set of zebraoptionty;
- 
+
+ trepwidgetframe = class(tcaptionframe)
+  public
+   constructor create(const aintf: icaptionframe);
+  published
+   property framei_left default 1;
+   property framei_top default 1;
+   property framei_right default 1;
+   property framei_bottom default 1;
+ end;
+  
  tcustomrecordband = class(tcustomscalingwidget,idbeditinfo,ireccontrol,
-                                iobjectpicker,ireportclient)
+                                iobjectpicker,ireportclient,icaptionframe)
   private
    frecbands: recordbandarty;
    fparentintf: ibandparent;
@@ -662,6 +672,7 @@ type
    function getfont: trepwidgetfont;
    function getfontclass: widgetfontclassty; override;
    
+   procedure internalcreateframe() override;
    procedure registerchildwidget(const child: twidget); override;
    procedure unregisterchildwidget(const child: twidget); override;
    procedure minclientsizechanged;
@@ -4279,9 +4290,26 @@ begin
 end;
 
 procedure tcustomrecordband.synctofontheight;
+var
+ i1: int32;
 begin
- inherited;
- height:= calcminscrollsize().cy;
+// inherited;
+ i1:= calcminscrollsize().cy;
+ if ftabs.count = 0 then begin
+  i1:= i1 + font.glyphheight;
+  if fframe <> nil then begin
+   with tcustomframe1(fframe) do begin
+    i1:= i1 + fi.innerframe.top;
+  end;
+  end
+  else begin
+   i1:= i1 + ftextframe;
+  end;
+ end;
+ if fframe <> nil then begin
+  i1:= i1 + fframe.paintframedim.cy
+ end;
+ height:=  i1;
 // syncsinglelinefontheight(true);
 end;
 
@@ -4652,6 +4680,11 @@ end;
 function tcustomrecordband.getfontclass: widgetfontclassty;
 begin
  result:= trepwidgetfont;
+end;
+
+procedure tcustomrecordband.internalcreateframe();
+begin
+ trepwidgetframe.create(icaptionframe(self));
 end;
 
 procedure tcustomrecordband.setnextband(const avalue: tcustomrecordband);
@@ -8586,6 +8619,15 @@ begin
   drawlines(canvas);
  end;
  inherited;
+end;
+
+{ trepwidgetframe }
+
+constructor trepwidgetframe.create(const aintf: icaptionframe);
+begin
+ inherited;
+ inflateframe1(fi.innerframe,1);
+ internalupdatestate;
 end;
 
 end.
