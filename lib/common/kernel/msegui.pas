@@ -14683,11 +14683,11 @@ end;
 
 procedure twidget.parentfontchanged;
 begin
- if fframe <> nil then begin
-  fframe.parentfontchanged;
- end;
  if ffont = nil then begin
   fontchanged;
+ end;
+ if fframe <> nil then begin
+  fframe.parentfontchanged;
  end;
 end;
 

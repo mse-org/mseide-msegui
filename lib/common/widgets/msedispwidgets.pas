@@ -535,6 +535,9 @@ begin
   fram1:= fframe.framei;
  end;
  if not (dwf_textrectvalid in fflags) then begin
+  if finfo.font = nil then begin
+   finfo.font:= getfont;
+  end;
   msedrawtext.textrect(getcanvas,finfo);
   include(fflags,dwf_textrectvalid);
  end;
@@ -547,9 +550,13 @@ begin
  inherited;
  if not (dwf_cleared in fflags) or (ftext <> '') then begin
   drawtext(canvas,finfo);
+  if finfo.text.text = '' then begin
+   finfo.res.cy:= finfo.font.glyphheight;
+  end;
  end
  else begin
-  finfo.res:= nullrect;
+  finfo.res.cx:= 0;
+  finfo.res.cy:= finfo.font.glyphheight;
  end;
  include(fflags,dwf_textrectvalid);
 end;

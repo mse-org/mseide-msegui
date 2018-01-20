@@ -728,7 +728,7 @@ type
    procedure restart;
    procedure resetzebra; virtual;
    
-   property textframe: int32 read ftextframe write settextframe default 0;
+   property textframe: int32 read ftextframe write settextframe default 1;
    property tabs: treptabulators read ftabs write settabs;
    property font: trepwidgetfont read getfont write setfont stored isfontstored;
    property datasource: tdatasource read getdatasource write setdatasource;
@@ -830,7 +830,6 @@ type
    constructor create(aowner: tcomponent); override;
    property textflags: textflagsty read ftextflags write settextflags default
                                             defaultrepvaluedisptextflags;
-   property textframe default 1;
    property format: msestring read fformat write setformat;
    property optionsscale default defaultrepvaluedispoptionsscale;
    property ongettext: getrepvaluetexteventty read fongettext write fongettext;
@@ -3765,6 +3764,7 @@ end;
 
 constructor tcustomrecordband.create(aowner: tcomponent);
 begin
+ ftextframe:= 1;
  ftabs:= treptabulators.create(self);
  fdatalink:= trecordbanddatalink.create;
  fvisidatalink:= tfielddatalink.create;
@@ -7300,7 +7300,6 @@ end;
 constructor tcustomrepvaluedisp.create(aowner: tcomponent);
 begin
  ftextflags:= defaultrepvaluedisptextflags;
- ftextframe:= 1;
  foptionsscale:= defaultrepvaluedispoptionsscale;
  inherited;
  foptions:= defaultrepvaluedispoptions;
