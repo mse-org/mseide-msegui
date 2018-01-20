@@ -523,7 +523,8 @@ type
    property defaultdist;
  end;
   
- recordbandstatety = (rbs_rendering,rbs_showed,rbs_pageshowed,rbs_finish,
+ recordbandstatety = (rbs_prepass,rbs_rendering,rbs_showed,rbs_pageshowed,
+                      rbs_finish,
                       rbs_notfirstrecord,rbs_lastrecord,rbs_visibilitychecked,
                       rbs_nextrecordpending);
  recordbandstatesty = set of recordbandstatety; 
@@ -618,7 +619,6 @@ type
    fonafterrender: recordbandeventty;
    fonpaint: painteventty;
    fonafterpaint: painteventty;
-   fstate: recordbandstatesty;
    ftextframe: int32;
    ftabs: treptabulators;
    fupdating: integer;
@@ -668,6 +668,7 @@ type
    procedure setnextbandifempty(const avalue: tcustomrecordband);
    procedure setnextbandiflast(const avalue: tcustomrecordband);
   protected
+   fstate: recordbandstatesty;
    procedure setfont(const avalue: trepwidgetfont);
    function getfont: trepwidgetfont;
    function getfontclass: widgetfontclassty; override;
@@ -3877,10 +3878,17 @@ var
  widget1: twidget;
  int1: integer;
 begin
+ exclude(fstate,rbs_prepass);
  widget1:= rootwidget;
- if (widget1 is tcustomreport) and 
-                       tcustomreport(widget1).canceled then begin
-  abort;
+ if (widget1 is tcustomreport) then begin
+  with tcustomreport(widget1) do begin
+   if canceled then begin
+    abort;
+   end;
+   if prepass then begin
+    include(self.fstate,rbs_prepass);
+   end;
+  end;
  end;
  application.checkoverload;
  if rbs_nextrecordpending in fstate then begin
