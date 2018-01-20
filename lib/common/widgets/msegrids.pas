@@ -8264,6 +8264,7 @@ begin
   fsortcol := avalue;
   checkindexrange;
   fgrid.sortchanged(true);
+  fgrid.sorted:= fsortcol >= 0;
  end;
 end;
 
