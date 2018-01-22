@@ -72,7 +72,7 @@ type
     fToken : char;
     fEofReached : boolean;
     fLastTokenStr : string;
-    fLastTokenWStr : widestring;
+    fLastTokenWStr : unicodestring;
     function GetTokenName(aTok : char) : string;
     procedure LoadBuffer;
     procedure CheckLoadBuffer; {$ifdef CLASSESINLINE} inline; {$endif CLASSESINLINE}
@@ -114,7 +114,7 @@ type
 {$endif}
     function TokenInt: Int64;
     function TokenString: string;
-    function TokenWideString: WideString;
+    function TokenWideString: unicodestring;
     function TokenSymbolIs(const S: string): Boolean;
     property FloatType: Char read fFloatType;
     property SourceLine: Integer read fSourceLine;
@@ -442,8 +442,11 @@ procedure ObjectBinaryToText1(Input, Output: TStream;
     vautf8string: begin
      oututf8str(readlstr);
     end;
-    vawstring,vaustring: begin
+    vawstring: begin
      outwstring(readwstr);
+    end;
+    vaustring: begin
+     outustring(readustr);
     end;
    end;
   end; //processstring
@@ -548,7 +551,7 @@ procedure ObjectBinaryToText1(Input, Output: TStream;
         {$ifdef FPC}
         vaUString:
           begin
-          OutWString(ReadWStr);
+          OutuString(ReaduStr);
           OutLn('');
           end;
         {$endif}
@@ -773,11 +776,11 @@ var
       Output.WriteBuffer(s[1], Length(s));
   end;
 
-  procedure WriteWString(Const s: WideString);
+  procedure WriteWString(Const s: unicodestring);
   var len : longword;
   {$IFDEF ENDIAN_BIG}
       i : integer;
-      ws : widestring;
+      ws : unicodestring;
   {$ENDIF}
   begin
     len:=Length(s);
@@ -817,8 +820,8 @@ var
   end;
 
 
-  procedure ProcessWideString(const left : widestring);
-  var ws : widestring;
+  procedure ProcessWideString(const left : unicodestring);
+  var ws : unicodestring;
   begin
     ws:=left+parser.TokenWideString;
     while parser.NextToken = '+' do
@@ -828,7 +831,7 @@ var
         parser.CheckToken(toWString);
       ws:=ws+parser.TokenWideString;
     end;
-    {$ifdef FPC}Output.{$endif}WriteByte(Ord(vaWstring));
+    {$ifdef FPC}Output.{$endif}WriteByte(Ord(vaustring));
     WriteWString(ws);
   end;
 
@@ -844,7 +847,7 @@ var
       s:= s + parser.TokenString;
      end;
      toWString: begin
-      ProcessWideString(widestring(s));
+      ProcessWideString(unicodestring(s));
       exit;
      end
      else begin
@@ -1398,7 +1401,7 @@ begin
           // to ansistring does not give the original ansistring.
           // See bug http://bugs.freepascal.org/view.php?id=15841
           s:=HandleQuotedString;
-          fLastTokenWStr:=fLastTokenWStr+widestring(s);
+          fLastTokenWStr:=fLastTokenWStr+unicodestring(s);
           fLastTokenStr:=fLastTokenStr+s;
         end;
       '#'  :
@@ -1611,12 +1614,12 @@ begin
   end;
 end;
 
-function TParser.TokenWideString: WideString;
+function TParser.TokenWideString: unicodestring;
 begin
   if fToken=toWString then
     Result:=fLastTokenWStr
   else
-    Result:= widestring(fLastTokenStr);
+    Result:= unicodestring(fLastTokenStr);
 end;
 
 function TParser.TokenSymbolIs(const S: string): Boolean;

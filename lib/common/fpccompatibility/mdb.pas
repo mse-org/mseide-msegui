@@ -292,7 +292,7 @@ type
 //    FDataSize : Word;
     FDataType : TFieldType;
     FDefaultExpression : String;
-    FDisplayLabel : String;
+    FDisplayLabel : utf8String;
     FDisplayWidth : Longint;
     FEditMask: TEditMask;
     FFieldKind : TFieldKind;
@@ -326,7 +326,8 @@ type
     function GetDisplayText: String;
     function GetEditText: String;
     procedure SetEditText(const AValue: string);
-    procedure SetDisplayLabel(const AValue: string);
+    function getdisplaylabel(): utf8string;
+    procedure SetDisplayLabel(const AValue: utf8string);
     procedure SetDisplayWidth(const AValue: Longint);
     function GetDisplayWidth: integer;
     procedure SetLookup(const AValue: Boolean);
@@ -497,7 +498,7 @@ type
                                                  write FConstraintErrorMessage;
     property DefaultExpression: string read FDefaultExpression 
                                                       write FDefaultExpression;
-    property DisplayLabel : string read GetDisplayName 
+    property DisplayLabel : utf8string read GetDisplaylabel 
                                   write SetDisplayLabel stored IsDisplayStored;
     property DisplayWidth: Longint read GetDisplayWidth write SetDisplayWidth;
     property FieldKind: TFieldKind read FFieldKind write FFieldKind;
@@ -6189,6 +6190,11 @@ begin
     SetText(AValue);
 end;
 
+function TField.getdisplaylabel(): utf8string;
+begin
+ result:= getdisplayname();
+end;
+
 function TField.GetEditText: String;
 begin
   SetLength(Result, 0);
@@ -6207,7 +6213,7 @@ begin
     GetText(Result, True);
 end;
 
-procedure TField.SetDisplayLabel(const AValue: string);
+procedure TField.SetDisplayLabel(const AValue: utf8string);
 begin
   if FDisplayLabel<>Avalue then
     begin
