@@ -116,7 +116,7 @@ begin
  fo1:= tmseshortcutdialogfo.create(nil);
  try
   no1:= tsysshortcutitem.create(stockobjects.captions[sc_system]);
-  for ss1:= low(ss1) to lastsysshortcut do begin
+  for ss1:= low(ss1) to high(ss1) do begin
    no1.add(tsysshortcutitem.create(acontroller,ss1));
   end;
   no2:= tassistiveshortcutitem.create(stockobjects.captions[sc_voiceoutput]);
@@ -163,14 +163,8 @@ begin
    fo1.sc.itemlist.expandall;
    acontroller.sysshortcuts.beginupdate;
    acontroller.sysshortcuts1.beginupdate;
-   for ss1:= low(ss1) to lastsysshortcut do begin
+   for ss1:= low(ss1) to high(ss1) do begin
     with tsysshortcutitem(no1[ord(ss1)]) do begin
-     acontroller.sysshortcuts[ss1]:= getsimpleshortcut(fshortcut);
-     acontroller.sysshortcuts1[ss1]:= getsimpleshortcut(fshortcut1);
-    end;
-   end;
-   for ss1:= firstassistiveshortcut to high(ss1) do begin
-    with tsysshortcutitem(no2[ord(ss1)-ord(firstassistiveshortcut)]) do begin
      acontroller.sysshortcuts[ss1]:= getsimpleshortcut(fshortcut);
      acontroller.sysshortcuts1[ss1]:= getsimpleshortcut(fshortcut1);
     end;

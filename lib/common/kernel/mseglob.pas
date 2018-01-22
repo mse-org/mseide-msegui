@@ -18,7 +18,6 @@ const
  
 type
  shortcutty = type word;
- shortcutconstty = array[0..2] of shortcutty;
  shortcutarty = array of shortcutty;
  modalresultty = (mr_none,mr_canclose,mr_windowclosed,mr_windowdestroyed,
                   mr_escape,mr_f10, 
