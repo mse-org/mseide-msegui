@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2014 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2018 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -73,6 +73,8 @@ type
   procedure setcurrencyvalue(const value: currency);
   function getstringvalue(const index: integer = 0): string;
   procedure setstringvalue(const value: string);
+  function getutf8stringvalue(const index: integer = 0):utf8string;
+  procedure setutf8stringvalue(const value: utf8string);
   function getmsestringvalue(const index: integer = 0;
                            const raw: boolean = false): msestring;
   procedure setmsestringvalue(const value: msestring;
@@ -136,6 +138,8 @@ type
    procedure setcurrencyvalue(const value: currency); virtual;
    function getstringvalue(const index: integer = 0): string; virtual;
    procedure setstringvalue(const value: string); virtual;
+   function getutf8stringvalue(const index: integer = 0): utf8string virtual;
+   procedure setutf8stringvalue(const value: utf8string) virtual;
    function getmsestringvalue(const index: integer = 0;
                             const raw: boolean = false): msestring; virtual;
    procedure setmsestringvalue(const value: msestring;
@@ -205,6 +209,15 @@ type
  propertyeditorclassty = class of tpropertyeditor;
 
  tstringpropertyeditor = class(tpropertyeditor)
+  protected
+   function getdefaultstate: propertystatesty; override;
+  public
+   function allequal: boolean; override;
+   procedure setvalue(const value: msestring); override;
+   function getvalue: msestring; override;
+ end;
+
+ tutf8stringpropertyeditor = class(tpropertyeditor)
   protected
    function getdefaultstate: propertystatesty; override;
   public
@@ -1938,6 +1951,48 @@ begin
  end;
 end;
 
+function tpropertyeditor.getutf8stringvalue(
+              const index: integer = 0): utf8string;
+begin
+ if fremote <> nil then begin
+  result:= fremote.getutf8stringvalue(index);
+ end
+ else begin
+  with fprops[index] do begin
+   result:= stringtoutf8(decodemsestring(
+                               msestring(GetstrProp(instance,propinfo))));
+  end;
+ end;
+end;
+
+procedure tpropertyeditor.setutf8stringvalue(const value: utf8string);
+var
+ int1: integer;
+ str1: utf8string;
+ ar1: objectarty;
+begin
+ if fremote <> nil then begin
+  fremote.setutf8stringvalue(value);
+ end
+ else begin
+  str1:= stringtoutf8(encodemsestring(msestring(value)));
+  ar1:= queryselectedpropinstances;
+  if ar1 = nil then begin
+   for int1:= 0 to high(fprops) do begin
+    with fprops[int1] do begin
+     SetstrProp(Instance, PropInfo, str1);
+    end;
+   end;
+  end
+  else begin
+   for int1:= 0 to high(ar1) do begin
+    SetstrProp(ar1[int1], fprops[0].propinfo, str1);
+   end;
+  end;
+  modified;
+ end;
+end;
+
 function tpropertyeditor.decodemsestring(const avalue: msestring): msestring;
 var
  int1: integer;
@@ -3367,6 +3422,41 @@ end;
 procedure tstringpropertyeditor.setvalue(const value: msestring);
 begin
  setstringvalue(ansistring(value));
+end;
+
+{ tutf8stringpropertyeditor }
+
+function tutf8stringpropertyeditor.getdefaultstate: propertystatesty;
+begin
+ result:= inherited getdefaultstate + [ps_isordprop];
+end;
+
+function tutf8stringpropertyeditor.allequal: boolean;
+var
+ int1: integer;
+ str1: utf8string;
+begin
+ result:= inherited allequal;
+ if not result then begin
+  result:= true;
+  str1:= getutf8stringvalue;
+  for int1:= 1 to high(fprops) do begin
+   if str1 <> getutf8stringvalue(int1) then begin
+    result:= false;
+    break;
+   end;
+  end;
+ end;
+end;
+
+function tutf8stringpropertyeditor.getvalue: msestring;
+begin
+ result:= utf8tostring(getutf8stringvalue(0));
+end;
+
+procedure tutf8stringpropertyeditor.setvalue(const value: msestring);
+begin
+ setutf8stringvalue(stringtoutf8(value));
 end;
 
 { tmsestringpropertyeditor }

@@ -588,21 +588,21 @@ type
 { TNumericField }
   TNumericField = class(TField)
   Private
-    FDisplayFormat : String;
-    FEditFormat : String;
+    FDisplayFormat : utf8String;
+    FEditFormat : utf8String;
   protected
     class procedure CheckTypeSize(AValue: Longint); override;
     procedure RangeError(AValue, Min, Max: Double);
-    procedure SetDisplayFormat(const AValue: string);
-    procedure SetEditFormat(const AValue: string);
+    procedure SetDisplayFormat(const AValue: utf8string);
+    procedure SetEditFormat(const AValue: utf8string);
     function  GetAsBoolean: Boolean; override;
     Procedure SetAsBoolean(AValue: Boolean); override;
   public
     constructor Create(AOwner: TComponent); override;
   published
     property Alignment default taRightJustify;
-    property DisplayFormat: string read FDisplayFormat write SetDisplayFormat;
-    property EditFormat: string read FEditFormat write SetEditFormat;
+    property DisplayFormat: utf8string read FDisplayFormat write SetDisplayFormat;
+    property EditFormat: utf8string read FEditFormat write SetEditFormat;
   end;
 
 { TLongintField }
@@ -6765,7 +6765,7 @@ begin
   DatabaseErrorFMT(SRangeError,[AValue,Min,Max,FieldName]);
 end;
 
-procedure TNumericField.SetDisplayFormat(const AValue: string);
+procedure TNumericField.SetDisplayFormat(const AValue: utf8string);
 
 begin
  If FDisplayFormat<>AValue then
@@ -6775,7 +6775,7 @@ begin
    end;
 end;
 
-procedure TNumericField.SetEditFormat(const AValue: string);
+procedure TNumericField.SetEditFormat(const AValue: utf8string);
 
 begin
   If FEDitFormat<>AValue then
