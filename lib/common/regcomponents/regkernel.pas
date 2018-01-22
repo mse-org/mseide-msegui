@@ -1,4 +1,4 @@
-{ MSEide Copyright (c) 1999-2017 by Martin Schreiber
+{ MSEide Copyright (c) 1999-2018 by Martin Schreiber
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -87,9 +87,10 @@ type
    function getelementeditorclass: elementeditorclassty; override;
  end;
   
- tshapestatespropertyeditor = class(tsetpropertyeditor)
+ tactionstatespropertyeditor = class(tsetpropertyeditor)
   protected
-   function getdefaultstate: propertystatesty; override;
+   function getdefaultstate: propertystatesty override;
+   function getinvisibleitems: tintegerset override;
  end;
 
  tbounds_xeditor = class(tordinalpropertyeditor)
@@ -136,6 +137,18 @@ type
  end;
  
  tsysshortcutspropertyeditor = class(tconstarraypropertyeditor)
+  protected
+   function geteditorclass: propertyeditorclassty; override;
+   function getelementeditorclass: elementeditorclassty; override;
+  public
+ end;
+
+ tassistiveshortcutelementeditor = class(tarrayelementeditor)
+  public
+   function name: msestring; override;
+ end;
+ 
+ tassistiveshortcutspropertyeditor = class(tconstarraypropertyeditor)
   protected
    function geteditorclass: propertyeditorclassty; override;
    function getelementeditorclass: elementeditorclassty; override;
@@ -271,9 +284,11 @@ begin
                                     tneglevelarraypropertyeditor);
  registerpropertyeditor(typeinfo(tsysshortcuts),nil,'',
                                                  tsysshortcutspropertyeditor);
+ registerpropertyeditor(typeinfo(tassistiveshortcuts),nil,'',
+                                            tassistiveshortcutspropertyeditor);
  registerpropertyeditor(typeinfo(string),tfont,'name',tfontnamepropertyeditor);
  registerpropertyeditor(typeinfo(actionstatesty),nil,'',
-                                                   tshapestatespropertyeditor);
+                                                   tactionstatespropertyeditor);
  registerpropertyeditor(typeinfo(shortcutty),nil,'',tshortcutpropertyeditor);
  registerpropertyeditor(typeinfo(imagenrty),nil,'',timagenrpropertyeditor);
  registerpropertyeditor(typeinfo(facenrty),nil,'',tordinalpropertyeditor);
@@ -325,11 +340,16 @@ begin
  result:= inherited getdefaultstate + [ps_volatile];
 end;
 
-{ tshapestatespropertyeditor }
+{ tactionstatespropertyeditor }
 
-function tshapestatespropertyeditor.getdefaultstate: propertystatesty;
+function tactionstatespropertyeditor.getdefaultstate: propertystatesty;
 begin
  result:= inherited getdefaultstate + [ps_volatile,ps_refresh];
+end;
+
+function tactionstatespropertyeditor.getinvisibleitems: tintegerset;
+begin
+ result:= invisibleactionstates;
 end;
 
 { tbounds_xeditor }
@@ -461,6 +481,13 @@ begin
  modified;
 end;
 
+{ tsysshortcutelementeditor }
+
+function tsysshortcutelementeditor.name: msestring;
+begin
+ result:= msestring(getenumname(typeinfo(sysshortcutty),findex));
+end;
+
 { tsysshortcutspropertyeditor }
 
 function tsysshortcutspropertyeditor.geteditorclass: propertyeditorclassty;
@@ -471,6 +498,27 @@ end;
 function tsysshortcutspropertyeditor.getelementeditorclass: elementeditorclassty;
 begin
  result:= tsysshortcutelementeditor;
+end;
+
+{ tassistiveshortcutelementeditor }
+
+function tassistiveshortcutelementeditor.name: msestring;
+begin
+ result:= msestring(getenumname(typeinfo(assistiveshortcutty),findex));
+end;
+
+{ tassistiveshortcutspropertyeditor }
+
+function tassistiveshortcutspropertyeditor.geteditorclass():
+                                                  propertyeditorclassty;
+begin
+ result:= tshortcutarpropertyeditor;
+end;
+
+function tassistiveshortcutspropertyeditor.getelementeditorclass():
+                                                      elementeditorclassty;
+begin
+ result:= tassistiveshortcutelementeditor;
 end;
 
 { tshortcutactionpropertyeditor }
@@ -501,13 +549,6 @@ end;
 function tshortcutactionspropertyeditor.geteditorclass: propertyeditorclassty;
 begin
  result:= tshortcutactionpropertyeditor;
-end;
-
-{ tsysshortcutelementeditor }
-
-function tsysshortcutelementeditor.name: msestring;
-begin
- result:= msestring(getenumname(typeinfo(sysshortcutty),findex));
 end;
 
 { tlevelarraypropertyeditor }

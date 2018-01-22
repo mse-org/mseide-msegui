@@ -31,7 +31,8 @@ const
   '&Cancelar',   //mr_cancel
   '&Abortar',    //mr_abort
   '&OK',         //mr_ok
-  '&S'#0237,      //mr_yes
+  '&S'#0237,     //mr_yes
+  '&S'#0237' &todo',    //mr_yesall
   '&No',         //mr_no
   '&Todo',       //mr_all
   'N&o todo',    //mr_noall
@@ -53,6 +54,7 @@ const
   'Abortar',    //mr_abort
   'OK',         //mr_ok
   'S'#0237,      //mr_yes
+  'S'#$00ED' todo',    //mr_yesall
   'No',         //mr_no
   'Todo',       //mr_all
   'No todo',    //mr_noall
@@ -189,8 +191,23 @@ const
   'Retirado',                //sc_withdrawn
   'Ventana activada',        //sc_windowactivated
   'Men'#0250,                //sc_menu
-  'Beginning of file',       //sc_bof
-  'End of file'              //sc_eof
+  'Principio del archivo',       //sc_bof
+  'Fin del archivo',             //sc_eof
+  'Salida de voz',               //sc_voiceoutput
+  'Hablar de nuevo',             //sc_speakagain
+  'Primera columna',             //sc_firstcol
+  'Primera fila',                //sc_firstrow
+  #0218'ltima columna',          //sc_lastcol
+  #0218'ltima fila',             //sc_lastrow
+  'Selecci'#0243'n',             //sc_selection
+  'Ruta de hablar',              //sc_speakpath
+  'Deshabilitar bot'#0243'n',    //sc_disabledbutton
+  'Primer campo',                //sc_firstfield
+  #$00DA'ltimo campo',           //sc_lastfield
+  'First element',               //sc_firstelement
+  'Last element',                //sc_lastelement
+  'Slower',                      //sc_slower
+  'Faster'                       //sc_faster
 );
 
 function delete_n_selected_rows(const params: array of const): msestring;

@@ -1285,23 +1285,25 @@ begin
    result:= false;
    exit;
   end;
+  if modres = mr_none then begin
+   modres:= mr_canclose;
+  end;
   if canevent(tmethod(fonclosequery)) then begin
-   if modres = mr_none then begin
-    modres:= mr_canclose;
-   end;
    fonclosequery(self,modres);
-   result:= modres <> mr_none;
-   if twindow1(window).fmodalresult <> mr_canclose then begin
-    twindow1(window).fmodalresult:= modres;
-   end;
+  end;
+ {$ifdef mse_with_ifi}
+  if fifiserverintf <> nil then begin
+   fifiserverintf.closequery(iificlient(self),modres);
+  end;
+ {$endif}
+  result:= modres <> mr_none;
+//  if twindow1(window).fmodalresult <> mr_canclose then begin
+  if modres <> mr_canclose then begin
+   twindow1(window).fmodalresult:= modres;
   end;
   if result and ((twindow1(window).fmodalresult <> mr_none) or 
     (application.terminating) or (ws1_forceclose in fwidgetstate1)) then begin
    doonclose;
-//   if (fstatfile <> nil) and (fo_autowritestat in foptions) and
-//                 not (csdesigning in componentstate) then begin
-//    fstatfile.writestat;
-//   end;
  {$ifdef mse_with_ifi}
    if fifiserverintf <> nil then begin
     fifiserverintf.sendmodalresult(iificlient(self),window.modalresult);

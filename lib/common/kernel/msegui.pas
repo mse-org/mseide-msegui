@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2017 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2018 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -27,7 +27,7 @@ uses
 
 const
  mseguiversiontext = '4.7';
- copyrighttext = 'Copyright 1999-2017';
+ copyrighttext = 'Copyright 1999-2018';
  
  defaultwidgetcolor = cl_default;
  defaulttoplevelwidgetcolor = cl_background;
@@ -2018,15 +2018,15 @@ type
    function canclose1: boolean; 
 
    function getiassistiveclient(): iassistiveclient virtual;
-   function canassistive(): boolean virtual;
     //iassistiveclient
-   function getassistivewidget: tobject virtual;
+   function getassistiveparent(): iassistiveclient virtual;
+   function getassistivewidget(): tobject virtual;
    function getassistivename(): msestring virtual;
    function getassistivecaption(): msestring virtual;
    function getassistivetext(): msestring virtual;
    function getassistivecaretindex(): int32 virtual;
    function getassistivehint(): msestring virtual;
-   function getassistiveflags: assistiveflagsty virtual;
+   function getassistiveflags(): assistiveflagsty virtual;
   {$ifdef mse_with_ifi}
    function getifidatalinkintf(): iifidatalink virtual;
   {$endif}
@@ -2059,6 +2059,7 @@ type
    procedure beginupdate; //sets ws_loadlock and noinvalidate
    procedure endupdate;
    function canmouseinteract: boolean; //checks csdesigning and cssubcomponent
+   function canassistive(): boolean virtual;
    function widgetstate: widgetstatesty;                 //iframe
    property widgetstate1: widgetstates1ty read fwidgetstate1;
    function hasparent: boolean; override;               //tcomponent
@@ -2672,6 +2673,8 @@ type
    function ispopup: boolean; {$ifdef FPC}inline;{$endif}
    property owner: twidget read fownerwidget;
    property focusedwidget: twidget read ffocusedwidget;
+   function firstfocuswidget(): twidget;
+   function lastfocuswidget(): twidget;
    property transientfor: twindow read ftransientfor;
    property modalfor: boolean read getmodalfor;
    property modalresult: modalresultty read fmodalresult write setmodalresult;
@@ -12546,6 +12549,9 @@ begin
  if ws_active in fwidgetstate then begin
   exclude(fwidgetstate,ws_active);
   dodeactivate;
+  if canassistive() then begin
+   assistiveserver.dodeactivate(getiassistiveclient());
+  end;
  end;
 end;
 
@@ -13094,9 +13100,16 @@ begin
       direction:= gd_none;
       case key of
        key_tab,key_backtab: begin
-        widget1:= nexttaborder(key = key_backtab,nowrap);
+        widget1:= nexttaborder(key = key_backtab,nowrap or 
+                                    (aso_tabnavig in assistiveoptions));
         if widget1 <> nil then begin
          widget1.setfocus;
+        end
+        else begin
+         if canassistive() then begin
+          assistiveserver.dotabordertouched(getiassistiveclient(),
+                                                   key = key_backtab);
+         end;
         end;
        end;
        key_right: direction:= gd_right;
@@ -13123,10 +13136,14 @@ begin
          combinerect1(wraprect,widget1.rootwidgetrect);
         end;
         expandwraprect(wraprect,widget1);
-        fparentwidget.navigrequest(naviginfo,nowrap);
+        fparentwidget.navigrequest(naviginfo,
+         nowrap or 
+          (assistiveoptions*[aso_widgetnavig,aso_nearestortho] = 
+                                [aso_widgetnavig,aso_nearestortho]));
         if nearest <> nil then begin
          b1:= false;
-         if aso_widgetnavig in assistiveoptions then begin
+         if assistiveoptions*[aso_widgetnavig,aso_nearestortho] = 
+                                                   [aso_widgetnavig] then begin
           pt1:= rootpos;
           pt2:= nearest.rootpos;
           case direction of
@@ -14666,11 +14683,11 @@ end;
 
 procedure twidget.parentfontchanged;
 begin
- if fframe <> nil then begin
-  fframe.parentfontchanged;
- end;
  if ffont = nil then begin
   fontchanged;
+ end;
+ if fframe <> nil then begin
+  fframe.parentfontchanged;
  end;
 end;
 
@@ -15529,6 +15546,14 @@ begin
                                     not (csdesigning in componentstate);
 end;
 
+function twidget.getassistiveparent(): iassistiveclient;
+begin
+ result:= nil;
+ if fparentwidget <> nil then begin
+  result:= fparentwidget.getiassistiveclient();
+ end;
+end;
+
 function twidget.getassistivewidget: tobject;
 begin
  result:= self;
@@ -15619,7 +15644,7 @@ begin
  result:= hint;
 end;
 
-function twidget.getassistiveflags: assistiveflagsty;
+function twidget.getassistiveflags(): assistiveflagsty;
 begin
  result:= [];
  if not (ws_iswidget in fwidgetstate) then begin
@@ -15627,6 +15652,12 @@ begin
  end;
  if osk_container in foptionsskin then begin
   include(result,asf_container);
+ end;
+ if focused then begin
+  include(result,asf_focused);
+ end;
+ if not isenabled then begin
+  include(result,asf_disabled);
  end;
 end;
 
@@ -17685,6 +17716,56 @@ end;
 function twindow.ispopup: boolean;
 begin
  result:= wo_popup in foptions;
+end;
+
+function twindow.firstfocuswidget(): twidget;
+var
+ w1,w2: twidget;
+ i1,i2: int32;
+begin
+ result:= fownerwidget;
+ if result.canfocus then begin
+  while ow_subfocus in result.optionswidget do begin
+   w2:= nil;
+   i2:= bigint;
+   for i1:= 0 to high(result.fwidgets) do begin
+    w1:= result.fwidgets[i1];
+    if (w1.ftaborder < i2) and w1.canfocus then begin
+     w2:= w1;
+     i2:= w1.ftaborder;
+    end;
+   end;
+   if w2 = nil then begin
+    break;
+   end;
+   result:= w2;
+  end;
+ end;
+end;
+
+function twindow.lastfocuswidget(): twidget;
+var
+ w1,w2: twidget;
+ i1,i2: int32;
+begin
+ result:= fownerwidget;
+ if result.canfocus then begin
+  while ow_subfocus in result.optionswidget do begin
+   w2:= nil;
+   i2:= -1;
+   for i1:= high(result.fwidgets) downto 0 do begin
+    w1:= result.fwidgets[i1];
+    if (w1.ftaborder > i2) and w1.canfocus then begin
+     w2:= w1;
+     i2:= w1.ftaborder;
+    end;
+   end;
+   if w2 = nil then begin
+    break;
+   end;
+   result:= w2;
+  end;
+ end;
 end;
 
 procedure twindow.postkeyevent(const akey: keyty; 

@@ -1739,7 +1739,7 @@ end;
 function tcustomedit.getassistiveflags(): assistiveflagsty;
 begin
  result:= inherited getassistiveflags + [asf_textedit];
- if readonly then begin
+ if oe_readonly in getoptionsedit() then begin
   include(result,asf_readonly);
  end;
 end;

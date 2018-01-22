@@ -57,7 +57,7 @@ type
                   as_localcolorglyph,as_localcolor,
                   as_localhint,as_localshortcut,as_localshortcut1,as_localtag,
                   as_localgroup,as_localonbeforeexecute,as_localonexecute,
-                  as_localonafterexecute);
+                  as_localonafterexecute,as_syncdisabledlocked);
  actionstatesty = set of actionstatety;
  actionstatesarty = array of actionstatesty;
 
@@ -73,7 +73,7 @@ type
  menuactionoptionsty = set of menuactionoptionty;
 
 const
-                    
+ invisibleactionstates = [ord(as_syncdisabledlocked)];
  actionstatesmask: actionstatesty = 
                             [as_disabled,as_checked,as_invisible,as_default,
                              as_repeatshortcut];
@@ -511,9 +511,21 @@ begin
 end;
 
 procedure actionendload(const sender: iactionlink);
+var
+ p1: pactioninfoty;
+ b1: boolean;
 begin
+ p1:= sender.getactioninfopo();
+ b1:= as_syncdisabledlocked in p1^.state;
+ include(p1^.state,as_syncdisabledlocked);
+ try
 // exclude(sender.getactioninfopo^.options,mao_loading);
- sender.actionchanged;
+  sender.actionchanged;
+ finally
+  if not b1 then begin
+   exclude(p1^ .state,as_syncdisabledlocked);
+  end;
+ end;
 end;
 
 procedure linktoaction(const sender: iactionlink; const aaction: tcustomaction;
@@ -551,10 +563,10 @@ begin
       imagenrdisabled:= -2;
      end;
      if not (as_localcolorglyph in state) then begin
-      colorglyph:= cl_glyph;
+      colorglyph:= cl_default;
      end;
      if not (as_localcolor in state) then begin
-      color:= cl_transparent;
+      color:= cl_default;
      end;
      if not (as_localimagecheckedoffset in state) then begin
       imagecheckedoffset:= 0;

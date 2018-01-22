@@ -127,6 +127,7 @@ type
    property OnFilterRecord;
    property OnNewRecord;
    property OnPostError;
+    property onmodified;
    property AutoCalcFields;
  end;
  

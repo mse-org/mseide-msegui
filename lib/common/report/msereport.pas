@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2017 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2018 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -185,7 +185,8 @@ type
 
  getrichstringeventty = procedure(const sender: tobject; 
                                    var avalue: richstringty) of object;
- reptabulatoritemoptionty = (rto_count,rto_sum,rto_average,rto_shownull,
+ reptabulatoritemoptionty = (rto_disabled,rto_count,rto_sum,rto_average,
+                             rto_shownull,
                              rto_nocurrentvalue,rto_noreset);
  reptabulatoritemoptionsty = set of reptabulatoritemoptionty;
 
@@ -275,7 +276,9 @@ type
    procedure initsum;
    procedure setoptions(const avalue: reptabulatoritemoptionsty);
    function getsumcount: integer;
+   procedure setenabled(const avalue: boolean);
   protected
+   function getenabled: boolean override;
    procedure setpos(const avalue: real); override;
    function xlineoffset: integer;
    procedure dobeforenextrecord(const adatasource: tdatasource);
@@ -290,6 +293,7 @@ type
    property sumasfloat: double read getsumasfloat;
    property sumascurrency: currency read getsumascurrency;
    property richvalue: richstringty read fvalue write setrichvalue;
+   property enabled: boolean read getenabled write setenabled;
   published
    property tag: integer read ftag write ftag default 0;
    property options: reptabulatoritemoptionsty read foptions 
@@ -364,7 +368,6 @@ type
  treptabulators = class(tcustomtabulators)
   private
    finfo: drawtextinfoty;
-   fband: tcustomrecordband;
    fminsize: sizety;
    fsizevalid: boolean;
    flineinfos: tablineinfoarty;
@@ -422,6 +425,7 @@ type
    procedure setdistright(const avalue: real);
    procedure setlinksource(const avalue: tcustomrecordband);
   protected
+   fband: tcustomrecordband;
    class function getitemclass: tabulatoritemclassty; override;
    procedure paint(const acanvas: tcanvas; const adest: rectty);
    procedure checksize;
@@ -519,7 +523,8 @@ type
    property defaultdist;
  end;
   
- recordbandstatety = (rbs_rendering,rbs_showed,rbs_pageshowed,rbs_finish,
+ recordbandstatety = (rbs_prepass,rbs_rendering,rbs_showed,rbs_pageshowed,
+                      rbs_finish,
                       rbs_notfirstrecord,rbs_lastrecord,rbs_visibilitychecked,
                       rbs_nextrecordpending);
  recordbandstatesty = set of recordbandstatety; 
@@ -594,9 +599,19 @@ type
  
  zebraoptionty = (zo_resetonpagestart,zo_resetparent);
  zebraoptionsty = set of zebraoptionty;
- 
+
+ trepwidgetframe = class(tcaptionframe)
+  public
+   constructor create(const aintf: icaptionframe);
+  published
+   property framei_left default 1;
+   property framei_top default 1;
+   property framei_right default 1;
+   property framei_bottom default 1;
+ end;
+  
  tcustomrecordband = class(tcustomscalingwidget,idbeditinfo,ireccontrol,
-                                iobjectpicker,ireportclient)
+                                iobjectpicker,ireportclient,icaptionframe)
   private
    frecbands: recordbandarty;
    fparentintf: ibandparent;
@@ -604,7 +619,7 @@ type
    fonafterrender: recordbandeventty;
    fonpaint: painteventty;
    fonafterpaint: painteventty;
-   fstate: recordbandstatesty;
+   ftextframe: int32;
    ftabs: treptabulators;
    fupdating: integer;
    fdatalink: trecordbanddatalink;
@@ -631,6 +646,7 @@ type
    fzebra_step: integer;
    fzebra_counter: integer;
    fzebra_options: zebraoptionsty;
+   procedure settextframe(const avalue: int32);
    procedure settabs(const avalue: treptabulators);
    procedure setoptionsshow(const avalue: bandoptionshowsty);
    function getvisidatasource: tdatasource;
@@ -652,20 +668,24 @@ type
    procedure setnextbandifempty(const avalue: tcustomrecordband);
    procedure setnextbandiflast(const avalue: tcustomrecordband);
   protected
+   fstate: recordbandstatesty;
    procedure setfont(const avalue: trepwidgetfont);
    function getfont: trepwidgetfont;
    function getfontclass: widgetfontclassty; override;
    
+   procedure internalcreateframe() override;
    procedure registerchildwidget(const child: twidget); override;
    procedure unregisterchildwidget(const child: twidget); override;
    procedure minclientsizechanged;
    procedure objectevent(const sender: tobject;
                           const event: objecteventty); override;
    procedure fontchanged; override;
+   procedure clientrectchanged() override;
    procedure inheritedpaint(const acanvas: tcanvas);
    procedure parentchanged; override; //update fparentintf
    function getminbandsize: sizety; virtual;
    function calcminscrollsize: sizety; override;
+   function textarea(): rectty;
    procedure render(const acanvas: tcanvas; var empty: boolean); virtual;
    procedure init; virtual;
    procedure initpage; virtual;
@@ -706,8 +726,8 @@ type
    destructor destroy; override;
    procedure paint(const canvas: tcanvas); override;
    function actualcolor: colorty; override;
-   procedure synctofontheight; override;
    procedure scale(const ascale: real); override;
+   procedure synctofontheight; override;
    procedure beginupdate;
    procedure endupdate;
    function remainingbands: integer;
@@ -720,6 +740,7 @@ type
    procedure restart;
    procedure resetzebra; virtual;
    
+   property textframe: int32 read ftextframe write settextframe default 1;
    property tabs: treptabulators read ftabs write settabs;
    property font: trepwidgetfont read getfont write setfont stored isfontstored;
    property datasource: tdatasource read getdatasource write setdatasource;
@@ -769,6 +790,7 @@ type
   published
    property font;
 //   property fontempty;
+   property textframe;
    property tabs;
    property datasource;
    property options;
@@ -841,6 +863,7 @@ type
 //   property tabs;
 //   property datasource;
    property textflags;
+   property textframe;
    property options;
    property optionsshow;
    property optionsscale;
@@ -2593,6 +2616,21 @@ begin
  end;
 end;
 
+function treptabulatoritem.getenabled: boolean;
+begin
+ result:= not (rto_disabled in foptions);
+end;
+
+procedure treptabulatoritem.setenabled(const avalue: boolean);
+begin
+ if avalue then begin
+  options:= options - [rto_disabled];
+ end
+ else begin
+  options:= options + [rto_disabled];
+ end;
+end;
+
 procedure treptabulatoritem.setoptions(const avalue: reptabulatoritemoptionsty);
 const
  mask: reptabulatoritemoptionsty = [rto_count,rto_sum,rto_average];
@@ -2754,7 +2792,7 @@ var
 // rect1: rectty;
  isdecimal: boolean;
  cellrect: rectty;
- 
+ tab1: treptabulatoritem; 
 begin
  fminsize:= nullsize;
  bandcx:= adest.cx;
@@ -2811,8 +2849,9 @@ begin
   checkuptodate;
   with finfo do begin
    for int1:= 0 to count - 1 do begin
-    with ftabs[int1] do begin
-     with treptabulatoritem(fitems[index]) do begin
+    tab1:= treptabulatoritem(fitems[ftabs[int1].index]);
+    if tab1.enabled then begin
+     with ftabs[int1],tab1 do begin
       text:= getdisptext;
       if apaint and (foptions*[rto_count,rto_sum,rto_average] <> []) and 
                         not (rto_noreset in foptions) then begin
@@ -2845,46 +2884,54 @@ begin
        end;
        acanvas.fillrect(cellrect,fcolor);
       end;
-     end;
-     isdecimal:= tabkind = tak_decimal;
-     case tabkind of 
-      tak_centered: begin
-       flags:= (flags - [tf_right]) + [tf_xcentered];
-       dec(dest.x,dest.cx div 2);
+      isdecimal:= tabkind = tak_decimal;
+      case tabkind of 
+       tak_centered: begin
+        flags:= (flags - [tf_right]) + [tf_xcentered];
+        dec(dest.x,dest.cx div 2);
+       end;
+       tak_right,tak_decimal: begin   
+        flags:= (flags - [tf_xcentered]) + [tf_right];
+        dec(dest.x,dest.cx);
+       end;
       end;
-      tak_right,tak_decimal: begin   
-       flags:= (flags - [tf_xcentered]) + [tf_right];
-       dec(dest.x,dest.cx);
-      end;
      end;
-    end;
-    if isdecimal then begin
-     int2:= findlastchar(text.text,defaultformatsettingsmse.decimalseparator);
-     if int2 > 0 then begin
-      rstr1:= text;
-      text:= richcopy(rstr1,1,int2-1);
-      if apaint then begin
-       drawtext(acanvas,finfo);
+     if isdecimal then begin
+      int2:= findlastchar(text.text,defaultformatsettingsmse.decimalseparator);
+      if int2 > 0 then begin
+       rstr1:= text;
+       text:= richcopy(rstr1,1,int2-1);
+       if apaint then begin
+        drawtext(acanvas,finfo);
+       end
+       else begin
+        textrect(acanvas,finfo);
+       end;
+       int3:= res.x;
+       int4:= res.cx;
+       text:= richcopy(rstr1,int2,bigint);
+       inc(dest.x,dest.cx);
+       exclude(flags,tf_right);
+       if apaint then begin
+        drawtext(acanvas,finfo);
+       end
+       else begin
+        textrect(acanvas,finfo);
+       end;
+       res.x:= int3;
+       res.cx:= res.cx + int4;
+       text:= rstr1;
       end
       else begin
-       textrect(acanvas,finfo);
+       if apaint then begin
+        drawtext(acanvas,finfo);
+       end
+       else begin
+        textrect(acanvas,finfo);
+       end;
       end;
-      int3:= res.x;
-      int4:= res.cx;
-      text:= richcopy(rstr1,int2,bigint);
-      inc(dest.x,dest.cx);
-      exclude(flags,tf_right);
-      if apaint then begin
-       drawtext(acanvas,finfo);
-      end
-      else begin
-       textrect(acanvas,finfo);
-      end;
-      res.x:= int3;
-      res.cx:= res.cx + int4;
-      text:= rstr1;
      end
-     else begin
+     else begin            //not decimal
       if apaint then begin
        drawtext(acanvas,finfo);
       end
@@ -2892,53 +2939,47 @@ begin
        textrect(acanvas,finfo);
       end;
      end;
-    end
-    else begin            //not decimal
-     if apaint then begin
-      drawtext(acanvas,finfo);
-     end
-     else begin
-      textrect(acanvas,finfo);
+     int2:= res.x + res.cx;
+     if int2 > fminsize.cx then begin
+      fminsize.cx:= int2;
      end;
-    end;
-    int2:= res.x + res.cx;
-    if int2 > fminsize.cx then begin
-     fminsize.cx:= int2;
-    end;
-    if res.cy = 0 then begin
-     res.cy:= font.lineheight;
-    end;
-    int2:= dest.y + res.cy;
-    if int2 > fminsize.cy then begin
-     fminsize.cy:= int2;
+     if res.cy = 0 then begin
+      res.cy:= font.lineheight;
+     end;
+     int2:= dest.y + res.cy;
+     if int2 > fminsize.cy then begin
+      fminsize.cy:= int2;
+     end;
     end;
    end;
   end;
   if apaint then begin
    for int1:= 0 to count - 1 do begin
     with treptabulatoritem(fitems[ftabs[int1].index]) do begin
-     with flineinfos[tlk_vert] do begin
-      if widthmm > 0 then begin
-       if visible * visiblemask <> [] then begin
-        checkinit(flineinfos[tlk_vert]);
-        with ftabs[int1] do begin
-         case kind of 
-          tak_left: begin
-           int2:= linepos - dist
-          end
-          else begin
-           int2:= linepos + dist;
+     if enabled then begin
+      with flineinfos[tlk_vert] do begin
+       if widthmm > 0 then begin
+        if visible * visiblemask <> [] then begin
+         checkinit(flineinfos[tlk_vert]);
+         with ftabs[int1] do begin
+          case kind of 
+           tak_left: begin
+            int2:= linepos - dist
+           end
+           else begin
+            int2:= linepos + dist;
+           end;
           end;
          end;
+         acanvas.drawline(makepoint(int2,fband.clientheight+libottom_dist),
+                                            makepoint(int2,-litop_dist),color);
         end;
-        acanvas.drawline(makepoint(int2,fband.clientheight+libottom_dist),
-                                              makepoint(int2,-litop_dist),color);
        end;
       end;
+      drawhorzline(int1,tlk_top);
+      drawhorzline(int1,tlk_bottom);
      end;
     end;
-    drawhorzline(int1,tlk_top);
-    drawhorzline(int1,tlk_bottom);
    end;
   end;
  end;
@@ -3003,7 +3044,7 @@ end;
 procedure treptabulators.checksize;
 begin
  if not fsizevalid then begin
-  processvalues(fband.getcanvas,fband.innerclientrect,false);
+  processvalues(fband.getcanvas,fband.textarea(),false);
  end;
 end;
 
@@ -3735,6 +3776,7 @@ end;
 
 constructor tcustomrecordband.create(aowner: tcomponent);
 begin
+ ftextframe:= 1;
  ftabs:= treptabulators.create(self);
  fdatalink:= trecordbanddatalink.create;
  fvisidatalink:= tfielddatalink.create;
@@ -3774,7 +3816,7 @@ end;
 procedure tcustomrecordband.dobeforerender(var empty: boolean);
 begin
  if not (not(rbs_showed in fstate) and (bo_once in foptions)) and 
-                                                   fdatalink.active then begin
+                     not(bo_once in foptions) and fdatalink.active then begin
   empty:= (rbs_finish in fstate) or fdatalink.dataset.eof;
  end;
  if canevent(tmethod(fonbeforerender)) then begin
@@ -3836,10 +3878,17 @@ var
  widget1: twidget;
  int1: integer;
 begin
+ exclude(fstate,rbs_prepass);
  widget1:= rootwidget;
- if (widget1 is tcustomreport) and 
-                       tcustomreport(widget1).canceled then begin
-  abort;
+ if (widget1 is tcustomreport) then begin
+  with tcustomreport(widget1) do begin
+   if canceled then begin
+    abort;
+   end;
+   if prepass then begin
+    include(self.fstate,rbs_prepass);
+   end;
+  end;
  end;
  application.checkoverload;
  if rbs_nextrecordpending in fstate then begin
@@ -3957,8 +4006,13 @@ begin
  if fdatalink.active then begin
   application.lock;
   try
-   fdatalink.dataset.first;
-   if checkislastrecord(fdatalink,{$ifdef FPC}@{$endif}dosyncnextrecord) then begin
+   if not (bo_once in foptions) then begin
+    fdatalink.dataset.first();
+    if checkislastrecord(fdatalink,@dosyncnextrecord) then begin
+     include(fstate,rbs_lastrecord);
+    end;
+   end
+   else begin
     include(fstate,rbs_lastrecord);
    end;
    recchanged;
@@ -4009,6 +4063,17 @@ begin
  end;
 end;
 
+procedure tcustomrecordband.settextframe(const avalue: int32);
+begin
+ if ftextframe <> avalue then begin
+  ftextframe:= avalue;
+  if fframe = nil then begin
+//   minclientsizechanged();
+   clientrectchanged();
+  end;
+ end;
+end;
+
 procedure tcustomrecordband.settabs(const avalue: treptabulators);
 begin
  ftabs.assign(avalue);
@@ -4051,7 +4116,7 @@ begin
    include(fstate,rbs_notfirstrecord);
    dobeforenextrecord(fdatalink.datasource);
   end;
-  if fdatalink.active then begin
+  if fdatalink.active and not (bo_once in foptions) then begin
    fdatalink.dataset.next;
    if setflag then begin
     if checkislastrecord(fdatalink,
@@ -4071,9 +4136,11 @@ end;
 
 procedure tcustomrecordband.doafterpaint(const acanvas: tcanvas);
 var
- ar1: segmentarty;
+// ar1: segmentarty;
  ar2: tabulatorarty;
  int1,int2: integer;
+ a,b: pointty;
+ col1: colorty;
 begin
  inherited;
  if (rbs_rendering in fstate) then begin
@@ -4088,18 +4155,37 @@ begin
  end;
  if csdesigning in componentstate then begin
   ar2:= ftabs.tabs;
-  setlength(ar1,length(ar2));
+//  setlength(ar1,length(ar2));
   int2:= innerclientwidgetpos.x;
-  for int1:= 0 to high(ar1) do begin
-   with ar1[int1] do begin
-    a.x:= ar2[int1].linepos+int2;
-    a.y:= 0;
-    b.x:= a.x;
-    b.y:= fwidgetrect.cy;
-   end;
+  if fframe = nil then begin
+   int2:= int2 + ftextframe;
   end;
-  acanvas.dashes:= #2#2;
-  acanvas.drawlinesegments(ar1,cl_red);
+  for int1:= 0 to high(ar2) do begin
+//   with ar1[int1] do begin
+   with ar2[int1] do begin
+    with treptabulatoritem(ftabs.fitems[index]) do begin
+     if enabled then begin
+      col1:= cl_red;
+     end
+     else begin
+      col1:= cl_blue;
+     end;
+     if tas_editactive in fstate then begin
+      acanvas.dashes:= '';
+     end
+     else begin
+      acanvas.dashes:= #2#2;
+     end
+    end;
+    a.x:= linepos+int2;
+   end;
+   a.y:= 0;
+   b.x:= a.x;
+   b.y:= fwidgetrect.cy;
+   acanvas.drawline(a,b,col1);
+//   end;
+  end;
+//  acanvas.drawlinesegments(ar1,cl_red);
   acanvas.dashes:= '';
  end;
 end;
@@ -4112,7 +4198,7 @@ begin
  end;
 }
  inherited;
- ftabs.paint(acanvas,innerclientrect);
+ ftabs.paint(acanvas,textarea());
 end;
 
 function tcustomrecordband.getminbandsize: sizety;
@@ -4128,7 +4214,14 @@ begin
  result:= inherited calcminscrollsize;
  size1:= getminbandsize;
  if fframe <> nil then begin
-  addsize1(size1,tcustomframe1(fframe).fi.innerframe.bottomright);
+  with tcustomframe1(fframe) do begin
+   size1.cx:= size1.cx + fi.innerframe.right;
+   size1.cy:= size1.cy + fi.innerframe.bottom;
+  end;
+ end
+ else begin
+  size1.cx:= size1.cx + ftextframe;
+  size1.cy:= size1.cy + ftextframe;
  end;
  with size1 do begin
   if cx > result.cx then begin
@@ -4137,6 +4230,14 @@ begin
   if cy > result.cy then begin
    result.cy:= cy
   end;
+ end;
+end;
+
+function tcustomrecordband.textarea(): rectty;
+begin
+ result:= innerclientrect;
+ if fframe = nil then begin
+  inflaterect1(result,-ftextframe);
  end;
 end;
 
@@ -4152,6 +4253,12 @@ begin
  ftabs.fsizevalid:= false;
  inherited;
  minclientsizechanged;
+end;
+
+procedure tcustomrecordband.clientrectchanged();
+begin
+ ftabs.fsizevalid:= false;
+ inherited;
 end;
 
 procedure tcustomrecordband.beginupdate;
@@ -4191,8 +4298,27 @@ begin
 end;
 
 procedure tcustomrecordband.synctofontheight;
+var
+ i1: int32;
 begin
- syncsinglelinefontheight(true);
+// inherited;
+ i1:= calcminscrollsize().cy;
+ if ftabs.count = 0 then begin
+  i1:= i1 + font.glyphheight;
+  if fframe <> nil then begin
+   with tcustomframe1(fframe) do begin
+    i1:= i1 + fi.innerframe.top;
+  end;
+  end
+  else begin
+   i1:= i1 + ftextframe;
+  end;
+ end;
+ if fframe <> nil then begin
+  i1:= i1 + fframe.paintframedim.cy
+ end;
+ height:=  i1;
+// syncsinglelinefontheight(true);
 end;
 
 function tcustomrecordband.isfirstrecord: boolean;
@@ -4488,7 +4614,7 @@ begin
   int3:= arect.x - frame.framei_left;
  end
  else begin
-  int3:= arect.x;
+  int3:= arect.x - ftextframe;
  end;
  for int1:= 0 to ftabs.count - 1 do begin
   int2:= abs(int3 - ftabs.linepos[int1]);
@@ -4512,15 +4638,22 @@ end;
 
 procedure tcustomrecordband.endpickmove(const sender: tobjectpicker);
 begin
- ftabs.linepos[sender.currentobjects[0]]:= ftabs.linepos[sender.currentobjects[0]] + 
-                                                        sender.pickoffset.x;
- designchanged;
+ ftabs.linepos[sender.currentobjects[0]]:= 
+          ftabs.linepos[sender.currentobjects[0]] + sender.pickoffset.x;
+//fitems[ftabs[index].index]
+ designchanged('tabs',ftabs.ftabs[sender.currentobjects[0]].index);
 end;
 
 procedure tcustomrecordband.paintxorpic(const sender: tobjectpicker; 
                                                  const acanvas: tcanvas);
+var
+ i1: int32;
 begin
- acanvas.fillxorrect(makerect(innerclientpos.x+sender.pickoffset.x + 
+ i1:= innerclientpos.x;
+ if fframe = nil then begin
+  i1:= i1 + ftextframe;
+ end;
+ acanvas.fillxorrect(makerect(i1+sender.pickoffset.x + 
        ftabs.linepos[sender.currentobjects[0]],0,1,clientheight));
 end;
 
@@ -4555,6 +4688,11 @@ end;
 function tcustomrecordband.getfontclass: widgetfontclassty;
 begin
  result:= trepwidgetfont;
+end;
+
+procedure tcustomrecordband.internalcreateframe();
+begin
+ trepwidgetframe.create(icaptionframe(self));
 end;
 
 procedure tcustomrecordband.setnextband(const avalue: tcustomrecordband);
@@ -6331,7 +6469,10 @@ var
       if active then begin
        if (recnos[int1] > 0) and (recnos[int1] <= recordcount) then begin
         try
-         recno:= recnos[int1];
+         if recno <> recnos[int1] then begin 
+                            //no checkbrowsemode if there was no scroll
+          recno:= recnos[int1];
+         end;
         except;
         end;
        end;
@@ -7210,7 +7351,7 @@ end;
 procedure tcustomrepvaluedisp.dopaintforeground(const acanvas: tcanvas);
 begin
  inherited;
- drawtext(acanvas,getdisptext,innerclientrect,ftextflags,font);
+ drawtext(acanvas,getdisptext,textarea,ftextflags,font);
 end;
 
 procedure tcustomrepvaluedisp.dogettext(var atext: msestring);
@@ -7254,6 +7395,10 @@ begin
    size1.cx:= size1.cx + framei_left + framei_right;
    size1.cy:= size1.cy + framei_top + framei_bottom;
   end;
+ end
+ else begin
+  size1.cx:= size1.cx + 2*ftextframe;
+  size1.cy:= size1.cy + 2*ftextframe;
  end;
  if size1.cx > result.cx then begin
   result.cx:= size1.cx;
@@ -8482,6 +8627,15 @@ begin
   drawlines(canvas);
  end;
  inherited;
+end;
+
+{ trepwidgetframe }
+
+constructor trepwidgetframe.create(const aintf: icaptionframe);
+begin
+ inherited;
+ inflateframe1(fi.innerframe,1);
+ internalupdatestate;
 end;
 
 end.

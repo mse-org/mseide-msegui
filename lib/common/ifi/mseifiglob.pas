@@ -40,6 +40,8 @@ type
   procedure setvalue(const sender: iificlient;
                      var avalue; var accept: boolean; const arow: integer);
   procedure dataentered(const sender: iificlient; const arow: integer);
+  procedure closequery(const sender: iificlient; 
+                                         var amodalresult: modalresultty);
   procedure sendmodalresult(const sender: iificlient; 
                                          const amodalresult: modalresultty);
   procedure updateoptionsedit(var avalue: optionseditty);

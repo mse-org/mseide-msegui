@@ -18,14 +18,19 @@ type
 
  editinputmodety = (eim_insert,eim_overwrite);
  edittextblockmodety = (etbm_delete,etbm_cut,etbm_copy,etbm_insert,etbm_paste);
- assistiveoptionty = (aso_nodefaultbutton,aso_widgetnavig,aso_menunavig,
-                      aso_noreturnkeymenuexecute,aso_nomenumousemove);
+ assistiveoptionty = (aso_nodefaultbutton,
+                      aso_tabnavig,aso_widgetnavig,aso_nearestortho,
+                      aso_menunavig,aso_gridnavig,
+                      aso_noreturnkeymenuexecute,aso_nomenumousemove,
+                      aso_nogridmousemove);
  assistiveoptionsty = set of assistiveoptionty;
  assistivedbeventkindty = (adek_none,adek_bof,adek_eof);
 const
- defaultassistiveoptions = [aso_nodefaultbutton,aso_widgetnavig,
-                            aso_menunavig,aso_noreturnkeymenuexecute,
-                            aso_nomenumousemove];
+ defaultassistiveoptions = [aso_nodefaultbutton,
+                            aso_tabnavig,aso_widgetnavig,
+                            aso_menunavig,aso_gridnavig,
+                            aso_noreturnkeymenuexecute,
+                            aso_nomenumousemove,aso_nogridmousemove];
  
 type
  iassistiveserver = interface(inullinterface)[miid_iassistiveserver]
@@ -36,6 +41,7 @@ type
   procedure dowindowclosed(const sender: iassistiveclient);
   procedure doenter(const sender: iassistiveclient);
   procedure doactivate(const sender: iassistiveclient);
+  procedure dodeactivate(const sender: iassistiveclient);
   procedure doclientmouseevent(const sender: iassistiveclient;
                                           const info: mouseeventinfoty);
   procedure dofocuschanged(const sender: iassistiveclient;
@@ -47,6 +53,9 @@ type
   procedure dodataentered(const sender: iassistiveclientdata);
   procedure docellevent(const sender: iassistiveclientgrid; 
                                       const info: celleventinfoty);
+  procedure dogridbordertouched(const sender: iassistiveclientgrid;
+                                       const adirection: graphicdirectionty);
+
   procedure doeditcharenter(const sender: iassistiveclientedit;
                                                 const achar: msestring);
   procedure doeditchardelete(const sender: iassistiveclientedit;
@@ -60,6 +69,8 @@ type
                     const amode: edittextblockmodety; const atext: msestring);
   procedure donavigbordertouched(const sender: iassistiveclient;
                                        const adirection: graphicdirectionty);
+  procedure dotabordertouched(const sender: iassistiveclient;
+                                                        const adown: boolean);
 
   procedure doactionexecute(const sender: iassistiveclient;//sender can be nil
                             const senderobj: tobject; const info: actioninfoty);

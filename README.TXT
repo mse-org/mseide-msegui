@@ -348,7 +348,7 @@ For Raspberry Pi:
 
 - On the i386-linux host install the scp program
 - download and extract 
-  http://sourceforge.net/projects/mseide-msegui/files/fpcrossarm/crossfpc-i386_linux-eabihf_3_0_1a.tar.gz
+  https://sourceforge.net/projects/mseide-msegui/files/fpcrossarm/crossfpc-i386_linux_eabihf_3_0_3_a.tar.gz
   to <your crossfpc directory>.
 
 - Start MSEide, in 'Settings'-'Configure MSEide'-'Global Macros' add:
@@ -357,7 +357,7 @@ Name            Value
 
 CROSSMSEDIR     <MSEide+MSEgui directory>
 CROSSFPCDIR     <your crossfpc directory>
-CROSSFPCVERSION 3.0.1
+CROSSFPCVERSION 3.0.3
 HOSTIP          <the IP of the host>
 REMOTEIP        <the IP of the remote target>
 REMOTEPORT      <the remote port, ex: 2345>
@@ -374,7 +374,7 @@ REMOTEUSER      pi
   <your crossfpc directory>/eabihf/lib
 
 Press F9 and hope the best. ;-)
-If there is a debugger timout at startup enlarge the 
+If there is a debugger timeout at startup enlarge the 
 'Project'-'Options'-'Target'-'Wait before connect' value.
 
 Have a lot of fun!

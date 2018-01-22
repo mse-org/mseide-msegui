@@ -455,6 +455,10 @@ procedure msestrtotvarrec(const value: msestring; out varrec: tvarrec);
 function tvarrectoansistring(const value: tvarrec): ansistring;
 function tvarrectomsestring(const value: tvarrec): msestring;
 
+function formatmse(const fmt: msestring; const args: array of const): msestring;
+function formatmse(const fmt: msestring; const args: array of const;
+                           const formatsettings: tformatsettingsmse): msestring;
+
 function formatmacros: tformatmacrolist;
 procedure clearformatmacros;
 
@@ -527,7 +531,8 @@ const
 implementation
 
 uses
- sysconst,msedate,msereal,Math,msefloattostr,msearrayutils,msesys,msebits;
+ sysconst,msedate,msereal,Math,msefloattostr,msearrayutils,msesys,msebits,
+ formatfunc;
 
 function lstring(const s: string; const minwidth: integer): string;
 var
@@ -557,6 +562,17 @@ end;
 
 var
  fformatmacros: tformatmacrolist;
+
+function formatmse(const fmt: msestring; const args: array of const;
+                           const formatsettings: tformatsettingsmse): msestring;
+begin
+ result:= formatfunc.unicodeformat(fmt,args,formatsettings);
+end;
+
+function formatmse(const fmt: msestring; const args: array of const): msestring;
+begin
+ result:= formatmse(fmt,args,defaultformatsettingsmse);
+end;
 
 function formatmacros: tformatmacrolist;
 begin

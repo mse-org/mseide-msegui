@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2017 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2018 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -133,8 +133,11 @@ type
    procedure writesc(writer: twriter);
    procedure readsc1(reader: treader);
    procedure writesc1(writer: twriter);
+   procedure setdisabled(const avalue: boolean);
+   function isenabledstored(): boolean;
   protected
    fexeccanceled: boolean;
+   function getdisabled(): boolean override;
    procedure defineproperties(filer: tfiler); override;
    procedure fontchanged; override;
    procedure setcolor(const avalue: colorty); override;
@@ -222,9 +225,12 @@ type
                                             write setautosize_cx default 0;
    property autosize_cy: integer read fautosize_cy
                                             write setautosize_cy default 0;
+   property disabled: boolean read getdisabled write setdisabled;
+                             //sets as_disabled
   published
+   property options; //before state!
    property visible stored false;
-   property enabled stored false;
+   property enabled stored isenabledstored;
    property state: actionstatesty read getstate write setstate
             stored isstatestored  default [];
  end;
@@ -249,7 +255,6 @@ type
    property imagedist1;
    property imagedist2;
    property colorglyph;
-   property options;
    property focusrectdist;
    property onupdate;
    property onexecute;
@@ -1013,6 +1018,9 @@ begin
   if not (es_processed in info.eventstate) then begin
    inherited;
   end;
+ end
+ else begin
+  inherited;
  end;
 end;
 
@@ -1035,7 +1043,7 @@ end;
 procedure tcustombutton.actionchanged;
 begin
  finfo.color:= fcolor;
- actioninfotoshapeinfo(self,factioninfo,finfo);
+ actioninfotoshapeinfo(self,factioninfo,finfo,foptions);
  inherited setcolor(finfo.color); 
  finfo.color:= cl_transparent;
 // if csdesigning in componentstate then begin
@@ -1077,6 +1085,21 @@ end;
 procedure tcustombutton.writesc1(writer: twriter);
 begin
  writeshortcutarty(writer,factioninfo.shortcut1);
+end;
+
+procedure tcustombutton.setdisabled(const avalue: boolean);
+begin
+ if avalue then begin
+  state:= state + [as_disabled];
+ end
+ else begin
+  state:= state - [as_disabled];
+ end;
+end;
+
+function tcustombutton.isenabledstored(): boolean;
+begin
+ result:= bo_noassistivedisabled in foptions;
 end;
 
 procedure tcustombutton.defineproperties(filer: tfiler);
@@ -1249,6 +1272,11 @@ begin
  end;
 end;
 
+function tcustombutton.getdisabled(): boolean;
+begin
+ result:= as_disabled in factioninfo.state;
+end;
+
 procedure tcustombutton.setshortcut(const avalue: shortcutty);
 begin
  setactionshortcut(iactionlink(self),avalue);
@@ -1288,16 +1316,25 @@ procedure tcustombutton.setstate(const value: actionstatesty);
 begin
  setactionstate(iactionlink(self),value);
  visible:= not (as_invisible in factioninfo.state);
- enabled:= not (as_disabled in factioninfo.state);
+ if (bo_noassistivedisabled in foptions){ and canassistive()} then begin
+  if not disabled then begin
+   enabled:= true;
+  end;
+ end
+ else begin
+  enabled:= not (as_disabled in factioninfo.state);
+ end;
 end;
 
 procedure tcustombutton.setenabled(const avalue: boolean);
 begin
- if avalue then begin
-  setactionstate(iactionlink(self),state - [as_disabled]);
- end
- else begin
-  setactionstate(iactionlink(self),state + [as_disabled]);
+ if not isenabledstored then begin
+  if avalue then begin
+   setactionstate(iactionlink(self),state - [as_disabled]);
+  end
+  else begin
+   setactionstate(iactionlink(self),state + [as_disabled]);
+  end;
  end;
  inherited;
 end;
@@ -1743,7 +1780,7 @@ procedure tcustomrichbutton.richcaptionchanged();
 begin
  if not (csloading in componentstate) then begin
   calccaptiontext(factioninfo);
-  actioninfotoshapeinfo(self,factioninfo,finfo);
+  actioninfotoshapeinfo(self,factioninfo,finfo,foptions);
   invalidate();
   checkautosize();
  end;

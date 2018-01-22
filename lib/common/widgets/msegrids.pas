@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2017 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2018 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -242,7 +242,8 @@ type
                  gs1_rowdeleting,gs1_autoappending,gs1_autoremoving,
                  gs1_focuscellonenterlock,gs1_mousecaptureendlock,
                  gs1_forcenullcheck,
-                 gs1_cellsizesyncing,gs1_userinput,gs1_autoappendlock);
+                 gs1_cellsizesyncing,gs1_userinput,gs1_autoappendlock,
+                 gs1_scrolllimit,gs1_nocellassistive);
  gridstates1ty = set of gridstate1ty;
 
  cellkindty = (ck_invalid,ck_data,ck_fixcol,ck_fixrow,ck_fixcolrow);
@@ -659,6 +660,8 @@ type
    function getselectedcells: integerarty;
    procedure setselectedcells(const avalue: integerarty);
    procedure setdata(const avalue: tdatalist);
+   function getsortdescend: boolean;
+   procedure setsortdescend(const avalue: boolean);
   protected
    fdata: tdatalist;
    fname: string;
@@ -706,6 +709,7 @@ type
    function getcursor(const arow: integer; const actcellzone: cellzonety; 
                             const amousepos: pointty): cursorshapety; virtual;
    function getdatastatname: msestring;
+   function getstatsuffix(): msestring;
    procedure coloptionstoeditoptions(var dest: optionseditty;
                                                  var dest1: optionsedit1ty);
    procedure clean(const start,stop: integer); override;
@@ -728,6 +732,7 @@ type
    procedure dostatread(const reader: tstatreader); override;
    procedure dostatwrite(const writer: tstatwriter); override;
    procedure clearselection;
+   function defaultcaption(): msestring;
    property merged;
    property selected[const row: integer]: boolean read getselected write setselected;
              //row < 0 -> whole col
@@ -739,6 +744,7 @@ type
    property visible: boolean read getvisible write setvisible;
    property enabled: boolean read getenabled write setenabled;
    property readonly: boolean read getreadonly write setreadonly;
+   property sortdescend: boolean read getsortdescend write setsortdescend;
   published
    property options default defaultdatacoloptions;
    property options1 default defaultdatacoloptions1;
@@ -2242,8 +2248,10 @@ type
     //iassistiveclient
    function getassistiveflags(): assistiveflagsty; override;
     //iassistiveclientgrid
-   function getassistivecelltext(const acell: gridcoordty): msestring; virtual;  
-   function getassistivegridinfo(): assistivegridinfoty; virtual;
+   function getassistivecellcaption(const acell: gridcoordty): msestring virtual;
+   function getassistivecelltext(const acell: gridcoordty): msestring virtual;
+   function getassistivefocusedcell(): gridcoordty;
+   function getassistivegridinfo(): assistivegridinfoty virtual;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -2267,8 +2275,10 @@ type
                                const count: integer = 1); overload;
                  //acell.col = invalidaxis -> col unknown
 
-   procedure rowup(const action: focuscellactionty = fca_focusin); virtual;
-   procedure rowdown(const action: focuscellactionty = fca_focusin); virtual;
+   procedure rowup(const action: focuscellactionty = fca_focusin;
+                                       const nowrap: boolean = false) virtual;
+   procedure rowdown(const action: focuscellactionty = fca_focusin;
+                                       const nowrap: boolean = false) virtual;
    procedure pageup(const action: focuscellactionty = fca_focusin); virtual;
    procedure pagedown(const action: focuscellactionty = fca_focusin); virtual;
    procedure wheelup(const action: focuscellactionty = fca_focusin); virtual;
@@ -6408,6 +6418,18 @@ begin
  setselected(-1,false);
 end;
 
+function tdatacol.defaultcaption(): msestring;
+begin
+ result:= '';
+ if fcellinfo.grid.ffixrows.count > 0 then begin
+  with tfixrow(fcellinfo.grid.fixrows.fitems[0]) do begin
+   if fcaptions.count > self.findex then begin
+    result:= tcolheader(fcaptions.fitems[self.findex]).caption;
+   end;
+  end;
+ end;
+end;
+
 procedure tdatacol.internaldoentercell(const cellbefore: gridcoordty;
                 var newcell: gridcoordty; const action: focuscellactionty);
 begin
@@ -6712,6 +6734,17 @@ begin
  end;
 end;
 
+function tdatacol.getstatsuffix(): msestring;
+begin
+ if fname <> '' then begin
+  result:= '_'+msestring(fname);
+ end
+ else begin
+  result:= inttostrmse(ident);
+ end;
+end;
+
+
 procedure tdatacol.coloptionstoeditoptions(var dest: optionseditty;
                                               var dest1: optionsedit1ty);
 begin
@@ -6730,7 +6763,7 @@ begin
   reader.readdatalist(getdatastatname,fdata);
  end;
  if (co_savestate in foptions) and reader.canstate then begin
-  mstr1:= inttostrmse(ident);
+  mstr1:= getstatsuffix();
   if not (co_fixwidth in foptions) and 
                    (og_colsizing in fcellinfo.grid.optionsgrid) then begin
    width:= reader.readinteger('width'+mstr1,fwidth,0);
@@ -6757,7 +6790,7 @@ begin
   writer.writedatalist(getdatastatname,fdata);
  end;
  if (co_savestate in foptions) and writer.canstate then begin
-  mstr1:= inttostrmse(ident);
+  mstr1:= getstatsuffix();
   if not (co_fixwidth in foptions) and 
                    (og_colsizing in fcellinfo.grid.optionsgrid) then begin
    writer.writeinteger('width'+mstr1,fwidth);
@@ -6829,6 +6862,22 @@ begin
   options:= options - [co_readonly];
  end;
 end;
+
+function tdatacol.getsortdescend: boolean;
+begin
+ result:= co_sortdescend in foptions;
+end;
+
+procedure tdatacol.setsortdescend(const avalue: boolean);
+begin
+ if avalue then begin
+  options:= options + [co_sortdescend];
+ end
+ else begin
+  options:= options - [co_sortdescend];
+ end;
+end;
+
 
 function tdatacol.getdatapo(const arow: integer): pointer;
 begin
@@ -11389,7 +11438,8 @@ begin
        end
        else begin
         if (shiftstate = []) and (cellkind = ck_data) and
-                 (co_mousemovefocus in fdatacols[fmousecell.col].foptions) then begin
+           (co_mousemovefocus in fdatacols[fmousecell.col].foptions) and 
+                       not (aso_nogridmousemove in assistiveoptions) then begin
          if gs_mouseentered in fstate then begin
           exclude(fstate,gs_mouseentered);
           fmouserefpos:= info.pos;
@@ -11453,7 +11503,7 @@ begin
   if info.cell.col >= 0 then begin
    datacols[info.cell.col].docellevent(info);
   end;
-  if assistiveserver <> nil then begin
+  if canassistive() and not (gs1_nocellassistive in fstate1) then begin
    assistiveserver.docellevent(iassistiveclientgrid(getiassistiveclient()),
                                                                         info);
   end;
@@ -13117,7 +13167,8 @@ begin
  end;
 end;
 
-procedure tcustomgrid.rowup(const action: focuscellactionty = fca_focusin);
+procedure tcustomgrid.rowup(const action: focuscellactionty = fca_focusin;
+                                       const nowrap: boolean=false);
 begin
  if ffocusedcell.row = 0 then begin
   checkmorerows(-1);
@@ -13128,7 +13179,7 @@ begin
     focusrow(visiblerowstep(ffocusedcell.row,-1,false),action,false);
    end
    else begin
-    if og_wraprow in foptionsgrid then begin
+    if not nowrap and (og_wraprow in foptionsgrid) then begin
      focusrow(visiblerowstep(frowcount-1,0,false),action,false);
     end;
    end;
@@ -13136,7 +13187,8 @@ begin
  end;
 end;
 
-procedure tcustomgrid.rowdown(const action: focuscellactionty = fca_focusin);
+procedure tcustomgrid.rowdown(const action: focuscellactionty = fca_focusin;
+                                       const nowrap: boolean=false);
 //var
 // int1: integer;
 begin
@@ -13151,7 +13203,7 @@ begin
                                                     action,false);
    end
    else begin
-    if og_wraprow in foptionsgrid then begin
+    if not nowrap and (og_wraprow in foptionsgrid) then begin
      focusrow(visiblerowstep(0,0,false),action,false);
     end;
    end;
@@ -13293,11 +13345,13 @@ var
    end;
   end;
  end;
-  
+var
+ gd1: graphicdirectionty;
 label
  checkwidgetexit;
 begin
  actioncol:= fca_none;
+ exclude(fstate1,gs1_scrolllimit);
  if canevent(tmethod(fonkeydown)) then begin
   fonkeydown(self,info);
  end;
@@ -13352,8 +13406,9 @@ begin
        exit;
       end
       else begin
-       rowup(action);
+       rowup(action,aso_gridnavig in assistiveoptions);
        checkselection;
+       gd1:= gd_up;
        goto checkwidgetexit;
       end;
      end;
@@ -13371,8 +13426,9 @@ begin
        exit;
       end
       else begin
-       rowdown(action);
+       rowdown(action,aso_gridnavig in assistiveoptions);
        checkselection;
+       gd1:= gd_down;
        goto checkwidgetexit;
       end;
      end;
@@ -13473,8 +13529,10 @@ begin
        exit;
       end
       else begin
-       colstep(actioncol,-1,false,not (og_wrapcol in foptionsgrid),false);
+       colstep(actioncol,-1,false,(aso_gridnavig in assistiveoptions) or
+                                       not (og_wrapcol in foptionsgrid),false);
        checkselection;
+       gd1:= gd_left;
        goto checkwidgetexit;
       end;
      end;
@@ -13492,8 +13550,10 @@ begin
        exit;
       end
       else begin
-       colstep(actioncol,1,false, not (og_wrapcol in foptionsgrid),false);
+       colstep(actioncol,1,false,(aso_gridnavig in assistiveoptions) or
+                                      not (og_wrapcol in foptionsgrid),false);
        checkselection;
+       gd1:= gd_right;
        goto checkwidgetexit;
       end;
      end;
@@ -13582,10 +13642,20 @@ begin
  exit;
  
 checkwidgetexit:
- if bo1 and  (row = cellbefore.row) and (col = cellbefore.col) then begin
-  exclude(info.eventstate,es_processed);
-  if es_child in info.eventstate then begin
-   dokeydownaftershortcut(info);
+ if (row = cellbefore.row) and (col = cellbefore.col) then begin
+  if bo1 then begin
+   exclude(info.eventstate,es_processed);
+   if es_child in info.eventstate then begin
+    dokeydownaftershortcut(info);
+   end;
+  end
+  else begin
+   if canassistive() and ((gd1 in [gd_left,gd_right]) or
+           not (gs_isdb in fstate) or (gs1_scrolllimit in fstate1)) then begin
+    assistiveserver.dogridbordertouched(
+              iassistiveclientgrid(getiassistiveclient),gd1);
+   end;
+   exclude(fstate1,gs1_scrolllimit);
   end;
  end;
 end;
@@ -15633,9 +15703,13 @@ end;
 function tcustomgrid.getassistiveflags(): assistiveflagsty;
 begin
  result:= inherited getassistiveflags() + [asf_grid];
+ if gs1_scrolllimit in fstate1 then begin
+  include(result,asf_scrolllimit);
+ end;
 end;
 
-function tcustomgrid.getassistivecelltext(const acell: gridcoordty): msestring;
+function tcustomgrid.getassistivecellcaption(
+              const acell: gridcoordty): msestring;
 begin
  result:= '';
  if isvalidcell(acell) then begin
@@ -15654,6 +15728,16 @@ begin
    end;
   end;
  end;
+end;
+
+function tcustomgrid.getassistivecelltext(const acell: gridcoordty): msestring;
+begin
+ result:= '';
+end;
+
+function tcustomgrid.getassistivefocusedcell(): gridcoordty;
+begin
+ result:= ffocusedcell;
 end;
 
 function tcustomgrid.getassistivegridinfo(): assistivegridinfoty;
@@ -16694,7 +16778,7 @@ function tcustomstringgrid.getassistivecelltext(
                                        const acell: gridcoordty): msestring;
 begin
  if isdatacell(acell) then begin
-  result:= self[acell.col][acell.row];
+  result:= self[acell.col].getrowtext(acell.row);
  end
  else begin
   result:= inherited getassistivecelltext(acell);

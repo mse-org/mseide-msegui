@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2014 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2018 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -73,6 +73,8 @@ type
   procedure setcurrencyvalue(const value: currency);
   function getstringvalue(const index: integer = 0): string;
   procedure setstringvalue(const value: string);
+  function getutf8stringvalue(const index: integer = 0):utf8string;
+  procedure setutf8stringvalue(const value: utf8string);
   function getmsestringvalue(const index: integer = 0;
                            const raw: boolean = false): msestring;
   procedure setmsestringvalue(const value: msestring;
@@ -136,6 +138,8 @@ type
    procedure setcurrencyvalue(const value: currency); virtual;
    function getstringvalue(const index: integer = 0): string; virtual;
    procedure setstringvalue(const value: string); virtual;
+   function getutf8stringvalue(const index: integer = 0): utf8string virtual;
+   procedure setutf8stringvalue(const value: utf8string) virtual;
    function getmsestringvalue(const index: integer = 0;
                             const raw: boolean = false): msestring; virtual;
    procedure setmsestringvalue(const value: msestring;
@@ -188,6 +192,7 @@ type
                 var mouseinfo: mouseeventinfoty); virtual;
    procedure dokeydown(var ainfo: keyeventinfoty); virtual;
    procedure edit(); virtual;
+   procedure focused() virtual;
    procedure navigevent(); virtual;
    property typinfo: ptypeinfo read gettypinfo;
    property count: integer read getcount;
@@ -204,6 +209,15 @@ type
  propertyeditorclassty = class of tpropertyeditor;
 
  tstringpropertyeditor = class(tpropertyeditor)
+  protected
+   function getdefaultstate: propertystatesty; override;
+  public
+   function allequal: boolean; override;
+   procedure setvalue(const value: msestring); override;
+   function getvalue: msestring; override;
+ end;
+
+ tutf8stringpropertyeditor = class(tpropertyeditor)
   protected
    function getdefaultstate: propertystatesty; override;
   public
@@ -346,6 +360,7 @@ type
  tshortcutpropertyeditor = class(tenumpropertyeditor)
   protected
    fsc1: boolean;
+   fscar: boolean;
    function getvaluetext(const avalue: shortcutty): msestring;
    function texttovalue(const atext: msestring): shortcutty;
   public
@@ -357,7 +372,15 @@ type
    function getvalue: msestring; override;
    function getvalues: msestringarty; override;
  end;
-
+ 
+ tshortcutarpropertyeditor = class(tshortcutpropertyeditor)
+  public
+   constructor create(const adesigner: idesigner;
+        const amodule: tmsecomponent; const acomponent: tcomponent;
+            const aobjectinspector: iobjectinspector;
+            const aprops: propinstancearty; atypeinfo: ptypeinfo); override;
+ end;
+ 
  tcolorpropertyeditor = class(tenumpropertyeditor)
   protected
    function getdefaultstate: propertystatesty; override;
@@ -714,6 +737,7 @@ type
    function getvalue: msestring; override;
    function getvalues: msestringarty; override;
    procedure edit; override;
+   procedure focused() override;
    function name: msestring; override;
    function subproperties: propertyeditorarty; override;
    procedure dragbegin(var accept: boolean); override;
@@ -722,6 +746,7 @@ type
    procedure dopopup(var amenu: tpopupmenu; const atransientfor: twidget;
                           var mouseinfo: mouseeventinfoty); override;
    procedure dokeydown(var ainfo: keyeventinfoty); override;
+   property index:int32 read findex;
  end;
 
  elementeditorclassty = class of tarrayelementeditor;
@@ -750,6 +775,7 @@ type
    function itemgetvalues(
            const sender: tarrayelementeditor): msestringarty; virtual;
    procedure itemedit(const sender: tarrayelementeditor); virtual;
+   procedure itemfocused(const sender: tarrayelementeditor) virtual;
    function itemname(
               const sender: tarrayelementeditor): msestring; virtual;
    function itemsubproperties(
@@ -1925,6 +1951,48 @@ begin
  end;
 end;
 
+function tpropertyeditor.getutf8stringvalue(
+              const index: integer = 0): utf8string;
+begin
+ if fremote <> nil then begin
+  result:= fremote.getutf8stringvalue(index);
+ end
+ else begin
+  with fprops[index] do begin
+   result:= stringtoutf8(decodemsestring(
+                               msestring(GetstrProp(instance,propinfo))));
+  end;
+ end;
+end;
+
+procedure tpropertyeditor.setutf8stringvalue(const value: utf8string);
+var
+ int1: integer;
+ str1: utf8string;
+ ar1: objectarty;
+begin
+ if fremote <> nil then begin
+  fremote.setutf8stringvalue(value);
+ end
+ else begin
+  str1:= stringtoutf8(encodemsestring(msestring(value)));
+  ar1:= queryselectedpropinstances;
+  if ar1 = nil then begin
+   for int1:= 0 to high(fprops) do begin
+    with fprops[int1] do begin
+     SetstrProp(Instance, PropInfo, str1);
+    end;
+   end;
+  end
+  else begin
+   for int1:= 0 to high(ar1) do begin
+    SetstrProp(ar1[int1], fprops[0].propinfo, str1);
+   end;
+  end;
+  modified;
+ end;
+end;
+
 function tpropertyeditor.decodemsestring(const avalue: msestring): msestring;
 var
  int1: integer;
@@ -2196,6 +2264,11 @@ begin
 end;
 
 procedure tpropertyeditor.edit;
+begin
+ //dummy
+end;
+
+procedure tpropertyeditor.focused();
 begin
  //dummy
 end;
@@ -3351,6 +3424,41 @@ begin
  setstringvalue(ansistring(value));
 end;
 
+{ tutf8stringpropertyeditor }
+
+function tutf8stringpropertyeditor.getdefaultstate: propertystatesty;
+begin
+ result:= inherited getdefaultstate + [ps_isordprop];
+end;
+
+function tutf8stringpropertyeditor.allequal: boolean;
+var
+ int1: integer;
+ str1: utf8string;
+begin
+ result:= inherited allequal;
+ if not result then begin
+  result:= true;
+  str1:= getutf8stringvalue;
+  for int1:= 1 to high(fprops) do begin
+   if str1 <> getutf8stringvalue(int1) then begin
+    result:= false;
+    break;
+   end;
+  end;
+ end;
+end;
+
+function tutf8stringpropertyeditor.getvalue: msestring;
+begin
+ result:= utf8tostring(getutf8stringvalue(0));
+end;
+
+procedure tutf8stringpropertyeditor.setvalue(const value: msestring);
+begin
+ setutf8stringvalue(stringtoutf8(value));
+end;
+
 { tmsestringpropertyeditor }
 
 function tmsestringpropertyeditor.getdefaultstate: propertystatesty;
@@ -3653,6 +3761,11 @@ procedure tarraypropertyeditor.itemedit(
                                     const sender: tarrayelementeditor);
 begin
  sender.feditor.edit();
+end;
+
+procedure tarraypropertyeditor.itemfocused(const sender: tarrayelementeditor);
+begin
+ sender.feditor.focused();
 end;
 
 function tarraypropertyeditor.itemname(
@@ -3961,6 +4074,11 @@ end;
 procedure tarrayelementeditor.edit;
 begin
  tarraypropertyeditor(fparenteditor).itemedit(self);
+end;
+
+procedure tarrayelementeditor.focused();
+begin
+ tarraypropertyeditor(fparenteditor).itemfocused(self);
 end;
 
 function tarrayelementeditor.getdefaultstate: propertystatesty;
@@ -5039,6 +5157,7 @@ var
  ar2: shortcutarty;
  int1: integer;
  intf1: iactionlink;
+ p1: pointer;
 begin
  ar1:= splitstring(value,widechar(' '));
  setlength(ar2,length(ar1));
@@ -5059,20 +5178,40 @@ begin
    modified;
   end
   else begin
-   if high(ar2) = 0 then begin
-    setordvalue(ar2[0]);
+   if fscar then begin
+    p1:= getpointervalue();
+    shortcutarty(p1):= ar2; //decref/incref
+    setpointervalue(p1);
    end
    else begin
-    setordvalue(int1,0);
+    if high(ar2) = 0 then begin
+     setordvalue(ar2[0]);
+    end
+    else begin
+     setordvalue(int1,0);
+    end;
    end;
   end;
  end;
 end;
 
 function tshortcutpropertyeditor.getvalue: msestring;
+
+ function getartext(const ashortcuts: shortcutarty): msestring;
+ var
+  i1: integer;
+ begin
+  result:= '';
+  for i1:= 0 to high(ashortcuts) do begin
+   result:= result + getvaluetext(ashortcuts[i1]) + ' ';
+  end;
+  if result <> '' then begin
+   setlength(result,length(result)-1);
+  end;
+ end; //getartext
+
 var
  ar1: shortcutarty;
- int1: integer;
  intf1: iactionlink;
 begin
  result:= '';
@@ -5084,16 +5223,17 @@ begin
    else begin
     ar1:= shortcut;
    end;
-   for int1:= 0 to high(ar1) do begin
-    result:= result + getvaluetext(ar1[int1]) + ' ';
-   end;
-   if result <> '' then begin
-    setlength(result,length(result)-1);
-   end;
+   result:= getartext(ar1);
   end;
  end
  else begin
-  result:= getvaluetext(getordvalue);
+  if fscar then begin
+   ar1:= shortcutarty(getpointervalue);
+   result:= getartext(ar1);
+  end
+  else begin
+   result:= getvaluetext(getordvalue);
+  end;
  end;
 end;
 
@@ -5110,11 +5250,13 @@ function tshortcutpropertyeditor.texttovalue(const atext: msestring): shortcutty
 var
  int1: integer;
  keys: integerarty;
+ s1: msestring;
  names: msestringarty;
 begin
  getshortcutlist(keys,names);
+ s1:= strlowercase(atext);
  for int1:= 0 to high(names) do begin
-  if atext = names[int1] then begin
+  if s1 = strlowercase(names[int1]) then begin
    result:= keys[int1];
    exit;
   end;
@@ -5132,6 +5274,17 @@ begin
  setordvalue(texttovalue(value));
 end;
 }
+{ tshortcutarpropertyeditor }
+
+constructor tshortcutarpropertyeditor.create(const adesigner: idesigner;
+               const amodule: tmsecomponent; const acomponent: tcomponent;
+               const aobjectinspector: iobjectinspector;
+               const aprops: propinstancearty; atypeinfo: ptypeinfo);
+begin
+ fscar:= true;
+ inherited;
+end;
+
  { tcolorpropertyeditorty}
 
 function tcolorpropertyeditor.getdefaultstate: propertystatesty;

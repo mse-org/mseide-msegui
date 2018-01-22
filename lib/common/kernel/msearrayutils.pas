@@ -78,6 +78,8 @@ function additem(var dest: lstringarty; const value: lstringty;
                              var count: integer): boolean; overload;
 function additem(var dest: lmsestringarty; const value: lmsestringty;
                              var count: integer): boolean; overload;
+function additem(var dest: int16arty; const value: int16;
+                             var count: integer): boolean; overload;
 function additem(var dest: integerarty; const value: integer;
                              var count: integer): boolean; overload;
 function additem(var dest: longwordarty; const value: longword;
@@ -99,6 +101,7 @@ procedure additem(var dest: doublemsestringarty;
                           const valuea,valueb: msestring); overload;
 procedure additem(var dest: msestringararty; 
                              const value: msestringarty); overload;
+procedure additem(var dest: int16arty; const value: int16); overload;
 procedure additem(var dest: integerarty; const value: integer); overload;
 procedure additem(var dest: int64arty; const value: int64); overload;
 procedure additem(var dest: longwordarty; const value: longword); overload;
@@ -722,6 +725,17 @@ begin
  dest[count]:= value;
  inc(count);
 end;
+function additem(var dest: int16arty; const value: int16;
+                             var count: integer): boolean; overload;
+begin
+ result:= false;
+ if length(dest) <= count then begin
+  setlength(dest,count+arrayminlenghtstep+2*length(dest));
+  result:= true;
+ end;
+ dest[count]:= value;
+ inc(count);
+end;
 
 function additem(var dest: integerarty; const value: integer;
                              var count: integer): boolean;
@@ -821,6 +835,12 @@ end;
 
 procedure additem(var dest: msestringararty;
                                    const value: msestringarty); overload;
+begin
+ setlength(dest,high(dest)+2);
+ dest[high(dest)]:= value;
+end;
+
+procedure additem(var dest: int16arty; const value: int16);
 begin
  setlength(dest,high(dest)+2);
  dest[high(dest)]:= value;

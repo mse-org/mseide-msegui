@@ -36,6 +36,7 @@ const
   '&'#1202#1072 ,                                 //mr_yes => &Da
   '&'#1049#1118#1082 ,                            //mr_no => &Net
   #1041#1072'&'#1088#1095#1072 ,                  //mr_all => &Vse
+   'Yes &all',  //mr_yesall
   #1202#1077'&'#1095' '#1073#1080#1088#1080 ,     //mr_noall =>  N&ikakie
   '&'#1052#1072#1085' '#1101#1090#1080#1096,       //mr_ignore => Neva&zhno
   '&Skip',    //mr_skip
@@ -57,6 +58,7 @@ const
   #1202#1072 ,                               //mr_yes => Da
   #1049#1118#1082 ,                          //mr_no => Net
   #1041#1072#1088#1095#1072 ,                //mr_all => Vse
+  'Yes all',  //mr_yesall
   #1202#1077#1095' '#1073#1080#1088#1080 ,   //mr_noall =>  Nikakie  
   #1052#1072#1085' '#1101#1090#1080#1096,	 //mr_ignore => Nevazhno
   'Skip',    //mr_skip
@@ -195,7 +197,22 @@ const
   'Window activated',    //sc_windowactivated
   'Menu',                //sc_menu
   'Beginning of file',   //sc_bof
-  'End of file'          //sc_eof
+  'End of file',         //sc_eof
+  'Voice output',        //sc_voiceoutput
+  'Speak again',         //sc_speakagain
+  'First column',        //sc_firstcol
+  'First row',           //sc_firstrow
+  'Last column',         //sc_lastcol
+  'Last row',            //sc_lastrow
+  'Selection',           //sc_selection
+  'Speak path',          //sc_speakpath
+  'Disabled button',     //sc_disabledbutton
+  'First field',         //sc_firstfield
+  'Last field',          //sc_lastfield
+  'First element',       //sc_firstelement
+  'Last element',        //sc_lastelement
+  'Slower',              //sc_slower
+  'Faster'               //sc_faster
 );
     
 function delete_n_selected_rows(const params: array of const): msestring;

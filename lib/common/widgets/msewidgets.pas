@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2017 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2018 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -1265,6 +1265,7 @@ type
   private
    ftransientfor: twindow;
   protected
+   function getassistiveflags(): assistiveflagsty override;
    procedure updatewindowinfo(var info: windowinfoty); override;
    function internalshow(const modallevel: modallevelty;
            const transientfor: pwindow;
@@ -1315,31 +1316,6 @@ type
    function canclose(const newfocus: twidget): boolean; override;
  end;
 
- buttonoptionty = (bo_executeonclick,bo_executeonkey,bo_executeonshortcut,
-                   bo_executedefaultonenterkey,
-                   bo_asyncexecute,
-                   bo_focusonshortcut,bo_focusonactionshortcut,
-                                                        //for tcustombutton
-                   bo_updateonidle,
-                   bo_shortcutcaption,bo_altshortcut,
-                   {bo_flat,bo_noanim,bo_nofocusrect,bo_nodefaultrect,}
-                   bo_nodefaultframeactive,
-                   bo_coloractive,
-                   bo_ellipsemouse, //mouse area is elliptical
-                   bo_nocandefocus,bo_candefocuswindow, //check own window only
-                   bo_radioitem,  //for tdatabutton
-                   bo_radioitemcol,
-                   bo_cantoggle, //for tbooleaneditradio
-                   bo_resetcheckedonrowexit,
-                                 //used in tdatabutton
-                   bo_reversed   //for tbooleanedit
-                   );
- buttonoptionsty = set of buttonoptionty;
-
-const
- defaultbuttonoptions = [bo_executeonclick,bo_executeonkey,
-                         bo_executeonshortcut,bo_executedefaultonenterkey];
-
 type
  tactionsimplebutton = class(tactionpublishedwidget)
   private
@@ -1362,6 +1338,7 @@ type
    function getframestateflags: framestateflagsty; override;
    function navigstartrect: rectty; override;
    function getassistiveflags(): assistiveflagsty override;
+   function getdisabled(): boolean virtual;
   public
    constructor create(aowner: tcomponent); override;
    procedure execute;
@@ -1434,8 +1411,9 @@ procedure showmessage1(const atext: msestring; const caption: msestring);
             //for ps
 procedure showerror(const atext: msestring; caption: msestring = 'ERROR';
                      const minwidth: integer = 0;
-                     const exttext: msestring = ''); 
-                            //no wait if not in main thread                     
+                     const exttext: msestring = '';
+                     const async: boolean = false); 
+             //no wait if not in main thread or asnyc = true
 function askok(const atext: msestring; const caption: msestring = '';
                      const defaultbutton: modalresultty = mr_ok;  
                      const minwidth: integer = 0): boolean;
@@ -1527,6 +1505,7 @@ type
   placementrect: prectty; placement: captionposty;
   minwidth: integer; actions: array of notifyeventty;
   exttext: msestring;
+  async: boolean;
   result: modalresultty;
  end;
  pshowmessageinfoty = ^showmessageinfoty;
@@ -2065,7 +2044,8 @@ function internalshowmessage(const atext_,caption_: msestring;
                   noshortcut_: modalresultsty;
                   placementrect_: prectty; placement_: captionposty;
                   minwidth_: integer; actions_: array of notifyeventty;
-                  const exttext_: msestring): modalresultty;
+                  const exttext_: msestring;
+                  const async_: boolean = false): modalresultty;
 var
  info: showmessageinfoty;
 begin
@@ -2083,6 +2063,7 @@ begin
   move(actions_[0],actions[0],length(actions)*
                              sizeof({$ifndef FPC}@{$endif}actions[0]));
   exttext:= exttext_;
+  async:= async_;
  end;
  if application.ismainthread then  begin
   syncshowmessage(@info);
@@ -2193,18 +2174,23 @@ begin
 end;
 
 procedure tshowerrormessageevent.execute;
+var
+ rect1: rectty;
 begin
- showmessage(ftext,fcaption,fminwidth,fexttext);
+ internalshowmessage(ftext,fcaption,[mr_ok],mr_ok,
+          [],messagerect(mepo_default,rect1),cp_center,0,[],fexttext,true);
+// showmessage(ftext,fcaption,fminwidth,fexttext);
 end;
 
 procedure showerror(const atext: msestring; caption: msestring = 'ERROR';
                     const minwidth: integer = 0;
-                    const exttext: msestring = '');
+                    const exttext: msestring = '';
+                    const async: boolean = false);
 begin
  if caption = 'ERROR' then begin
   caption:= sc(sc_errorupper);
  end;
- if not application.ismainthread then begin
+ if async or not application.ismainthread then begin
   tshowerrormessageevent.create(atext,caption,minwidth,exttext);
  end
  else begin
@@ -2389,7 +2375,7 @@ procedure tactionsimplebutton.dokeydown(var info: keyeventinfoty);
 begin
 // inherited;
  with info do begin
-  if (shiftstate * singlekeyshiftstatesmask = []) and 
+  if not getdisabled() and (shiftstate * singlekeyshiftstatesmask = []) and 
                               (bo_executeonkey in foptions) then begin
    if (key = key_space) then begin
     include(info.eventstate,es_processed);
@@ -2413,7 +2399,7 @@ end;
 procedure tactionsimplebutton.dokeyup(var info: keyeventinfoty);
 begin
  inherited;
- if (info.key = key_space) and 
+ if not getdisabled() and (info.key = key_space) and 
                      releasebutton((info.shiftstate = []) and 
                      (bo_executeonkey in foptions)) then begin
   include(info.eventstate,es_processed);
@@ -2423,7 +2409,7 @@ end;
 procedure tactionsimplebutton.statechanged;
 begin
  inherited;
- updatewidgetshapestate(finfo,self,false,{false,}fframe);
+ updatewidgetshapestate(finfo,self,getdisabled(),{false,}fframe);
 end;
 
 procedure tactionsimplebutton.setcolorglyph(const value: colorty);
@@ -2470,6 +2456,14 @@ end;
 function tactionsimplebutton.getassistiveflags(): assistiveflagsty;
 begin
  result:= inherited getassistiveflags() + [asf_button];
+ if getdisabled() then begin
+  include(result,asf_disabled);
+ end;
+end;
+
+function tactionsimplebutton.getdisabled(): boolean;
+begin
+ result:= false;
 end;
 
 {
@@ -2578,6 +2572,9 @@ end;
 function tshowmessagewidget.getassistiveflags(): assistiveflagsty;
 begin
  result:= inherited getassistiveflags + [asf_message];
+ if finfo^.async then begin
+  include(result,asf_async);
+ end;
 end;
 
 { tcustomcaptionframe }
@@ -2771,17 +2768,34 @@ begin
   finfo.dest.size:= icaptionframe(fintf).getwidgetrect.size;
   rect1:= deflaterect(makerect(nullpoint,finfo.dest.size),fouterframe);
   textrect(canvas,finfo);
-  finfo.flags:= flagsbefore;
+  finfo.flags:= flagsbefore-[tf_xcentered,tf_ycentered,tf_right,tf_bottom];
   finfo.dest:= finfo.res;
   bo1:= cfo_captiondistouter in foptions;
   bo2:= cfo_captionframecentered in foptions;
   rect2:= inflaterect(finfo.dest,captionmargin);
   with rect2 do begin
-   if fcaptionpos = cp_center then begin
+   if fcaptionpos = cp_center then begin //precision position for record
     x:= (rect1.x + rect1.x + rect1.cx - rect2.cx) div 2 + fcaptiondist;
     y:= (rect1.y + rect1.y + rect1.cy - rect2.cy) div 2 + fcaptionoffset;
+    finfo.flags:= finfo.flags + [tf_xcentered,tf_ycentered];
    end
    else begin
+    if fcaptionpos in [cp_left,cp_right] then begin
+     include(finfo.flags,tf_ycentered);
+    end
+    else begin
+     if fcaptionpos in [cp_top,cp_bottom] then begin
+      include(finfo.flags,tf_xcentered);
+     end;
+    end;
+    if fcaptionpos in [cp_left,cp_lefttop,cp_leftbottom] then begin
+     include(finfo.flags,tf_right);
+    end
+    else begin
+     if fcaptionpos in [cp_top,cp_topleft,cp_topright] then begin
+      include(finfo.flags,tf_bottom);
+     end;
+    end;
     case fcaptionpos of
      cp_lefttop,cp_left,cp_leftbottom: begin
       include(fstate,fs_cancaptionsyncx);
@@ -6008,6 +6022,14 @@ begin
 end;
 
 { tpopupwidget }
+
+function tpopupwidget.getassistiveflags(): assistiveflagsty;
+begin
+ result:= inherited getassistiveflags();
+ if ownswindow then begin
+  result:= result + [asf_popup];
+ end;
+end;
 
 constructor tpopupwidget.create(aowner: tcomponent; transientfor: twindow);
 begin

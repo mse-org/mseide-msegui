@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2006 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2018 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -70,8 +70,9 @@ const
   '&Arr'#0234'ter',//mr_abort
   '&Valider',     //mr_ok
   '&Oui',         //mr_yes
+  'Oui &tout',     //mr_yesall
   '&Non',         //mr_no
-  '&Tous',        //mr_all
+  '&Tout',        //mr_all
   'A&ucun',       //mr_noall
   '&Ignorer',     //mr_ignore
   '&Passer',        //mr_skip
@@ -91,8 +92,9 @@ const
   'Arr'#0234'ter',//mr_abort
   'Valider',    //mr_ok
   'Oui',        //mr_yes
+  'Oui tout',    //mr_yesall
   'Non',        //mr_no
-  'Tous',       //mr_all
+  'Tout',       //mr_all
   'Aucun',      //mr_noall
   'Ignorer',    //mr_ignore
   'Passer',      //mr_skip
@@ -227,8 +229,23 @@ const
   'Retir'#0233,        //sc_withdrawn
   'Fen'#0232'tre activ'#0233'e',    //sc_windowactivated
   'Menu',                //sc_menu
-  'Beginning of file',   //sc_bof
-  'End of file'          //sc_eof
+  'D'#0233'but du fichier',   //sc_bof
+  'Fin du fichier',         //sc_eof
+  'Sortie voix',        //sc_voiceoutput
+  'R'#0233'p'#0233'ter',         //sc_speakagain
+  'Premi'#0232're colonne',        //sc_firstcol
+  'Premi'#0232're ligne',           //sc_firstrow
+  'D'#0232'rni'#0232're colonne',         //sc_lastcol
+  'D'#0232'rni'#0232're ligne',            //sc_lastrow
+  'S'#0233'lection',           //sc_selection
+  'Chemin de speak',          //sc_speakpath
+  'D'#0233'sactiver le boutton',      //sc_disabledbutton
+  'Premier champ',         //sc_firstfield
+  'D'#0232'rnier champ',          //sc_lastfield
+  'First element',       //sc_firstelement
+  'Last element',        //sc_lastelement
+  'Slower',              //sc_slower
+  'Faster'               //sc_faster
 );
     
 function delete_n_selected_rows(const params: array of const): msestring;

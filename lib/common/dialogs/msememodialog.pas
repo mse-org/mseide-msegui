@@ -109,7 +109,7 @@ end;
 
 function tmemodialogcontroller.execute(var avalue: msestring): boolean;
 begin
- result:= memodialog(avalue,fowner.readonly) = mr_ok;
+ result:= memodialog(avalue,not fowner.editor.canedit) = mr_ok;
 end;
 
 { tmemodialogedit }
@@ -223,6 +223,9 @@ constructor tmsememodialogfo.create(const aowner: tcomponent;
                const readonly: boolean);
 begin
  inherited create(aowner);
+ if readonly then begin
+  caption:= 'Memo text';
+ end;
  memo.readonly:= readonly;
 end;
 

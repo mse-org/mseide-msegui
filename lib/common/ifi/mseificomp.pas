@@ -44,6 +44,10 @@ type
              procedure(const sender: tcustomificlientcontroller;
                        const aclient: iificlient; 
                        const amodalresult: modalresultty) of object;
+ ificlientclosequeryeventty = 
+             procedure(const sender: tcustomificlientcontroller;
+                       const aclient: iificlient; 
+                       var amodalresult: modalresultty) of object;
 
  ifivaluelinkstatety = (ivs_linking,ivs_valuesetting,ivs_loadedproc);
  ifivaluelinkstatesty = set of ifivaluelinkstatety;
@@ -62,6 +66,7 @@ type
    fstatpriority: integer;
    fonchangebefore: ifieventty;
    fonchangeafter: ifieventty;
+   fonclientclosequery: ificlientclosequeryeventty;
    function getintegerpro(const aname: string): integer;
    procedure setintegerpro(const aname: string; const avalue: integer);
    function getmsestringpro(const aname: string): msestring;
@@ -153,6 +158,8 @@ type
    procedure setvalue(const sender: iificlient; var avalue;
                      var accept: boolean; const arow: integer); virtual;
    procedure dataentered(const sender: iificlient; const arow: integer); virtual;
+   procedure closequery(const sender: iificlient; 
+                             var amodalresult: modalresultty); virtual;
    procedure sendmodalresult(const sender: iificlient; 
                              const amodalresult: modalresultty); virtual;
    procedure updateoptionsedit(var avalue: optionseditty); virtual;
@@ -192,6 +199,8 @@ type
                                                     write fonclientvaluechanged;
    property onclientstatechanged: ificlientstateeventty 
                      read fonclientstatechanged write fonclientstatechanged;
+   property onclientclosequery: ificlientclosequeryeventty 
+                     read fonclientclosequery write fonclientclosequery;
    property onclientmodalresult: ificlientmodalresulteventty 
                      read fonclientmodalresult write fonclientmodalresult;
    property onclientexecute: ificlienteventty read fonclientexecute 
@@ -209,6 +218,7 @@ type
    property onchangeafter;
    property onclientvaluechanged;
    property onclientstatechanged;
+   property onclientclosequery;
    property onclientmodalresult;
    property onclientexecute;
  end;
@@ -1475,6 +1485,15 @@ begin
   fwidgetstatebefore:= astate;
  end;
 end;
+
+procedure tcustomificlientcontroller.closequery(const sender: iificlient;
+               var amodalresult: modalresultty);
+begin
+ if fowner.canevent(tmethod(fonclientclosequery)) then begin
+  fonclientclosequery(self,sender,amodalresult);
+ end;
+end;
+
 
 procedure tcustomificlientcontroller.sendmodalresult(const sender: iificlient;
                const amodalresult: modalresultty);

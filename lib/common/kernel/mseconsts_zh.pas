@@ -34,6 +34,7 @@ const
   '&Y'#26159,                //mr_yes
   '&N'#21542,                //mr_no
   '&l'#25152#26377,          //mr_all
+  'Yes &all',  //mr_yesall
   #21462#28040#25152#26377,  //mr_noall
   '&g'#24573#30053,           //mr_ignore
   '&Skip',    //mr_skip
@@ -55,6 +56,7 @@ const
   #26159,                   //mr_yes
   #21542,                   //mr_no
   #25152#26377,             //mr_all
+  'Yes all',  //mr_yesall
   #21462#28040#25152#26377, //mr_noall
   #24573#30053,              //mr_ignore
   'Skip',    //mr_skip
@@ -193,7 +195,22 @@ const
   'Window activated',    //sc_windowactivated
   'Menu',                //sc_menu
   'Beginning of file',   //sc_bof
-  'End of file'          //sc_eof
+  'End of file',         //sc_eof
+  'Voice output',        //sc_voiceoutput
+  'Speak again',         //sc_speakagain
+  'First column',        //sc_firstcol
+  'First row',           //sc_firstrow
+  'Last column',         //sc_lastcol
+  'Last row',            //sc_lastrow
+  'Selection',           //sc_selection
+  'Speak path',          //sc_speakpath
+  'Disabled button',     //sc_disabledbutton
+  'First field',         //sc_firstfield
+  'Last field',          //sc_lastfield
+  'First element',       //sc_firstelement
+  'Last element',        //sc_lastelement
+  'Slower',              //sc_slower
+  'Faster'               //sc_faster
 );
     
 function delete_n_selected_rows(const params: array of const): msestring;

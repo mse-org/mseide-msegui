@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2017 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2018 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -47,7 +47,7 @@ type
                                       const atext: msestring) of object;
 
  tcustomdataedit = class(tcustomedit,igridwidget,istatfile,idragcontroller,
-                          iassistiveclientdata
+                          iassistiveclientgridwidget
                          {$ifdef mse_with_ifi},iifidatalink{$endif})
   private
    fontextchange: textchangeeventty;
@@ -166,8 +166,9 @@ type
    function getiassistiveclient(): iassistiveclient override;
    function getassistivecelltext(const arow: int32): msestring;
     //iassistiveclient
+   function getassistiveflags(): assistiveflagsty override;
    function getassistivetext(): msestring; override;
-   function getassistiveflags: assistiveflagsty; override;
+   function getassistivecolumncaption(): msestring virtual;
    
    procedure drawcell(const canvas: tcanvas); virtual;
    procedure updateautocellsize(const canvas: tcanvas); virtual;
@@ -515,6 +516,9 @@ type
    procedure loaded() override;
    procedure texttovalue(var accept: boolean; const quiet: boolean); override;
    procedure dohide; override;
+   function getassistiveflags(): assistiveflagsty override;
+//   function getassistivecaption(): msestring override;
+//   function getassistivetext(): msestring override;
    {$ifdef mse_with_ifi}
    function getifidatalinkintf: iifidatalink; override;
     //iifidropdownlistdatalink
@@ -2247,7 +2251,7 @@ end;
 
 function tcustomdataedit.getiassistiveclient(): iassistiveclient;
 begin
- result:= iassistiveclientdata(self);
+ result:= iassistiveclientgridwidget(self);
 end;
 
 function tcustomdataedit.getassistivecelltext(const arow: int32): msestring;
@@ -2267,11 +2271,25 @@ begin
  result:= feditor.text;
 end;
 
+function tcustomdataedit.getassistivecolumncaption(): msestring;
+begin
+ result:= '';
+ if fgridintf <> nil then begin
+  result:= fgridintf.getcol.defaultcaption();
+ end;
+end;
+
 function tcustomdataedit.getassistiveflags: assistiveflagsty;
 begin
  result:= inherited getassistiveflags;
  if fgridintf <> nil then begin
-  include(result,asf_gridcell);
+  result:= result + [{asf_gridcell,}asf_gridwidget];
+  if gs1_scrolllimit in tcustomwidgetgrid1(fgridintf.getgrid).fstate1 then begin
+   include(result,asf_scrolllimit);
+  end;
+ end;
+ if des_isdb in fstate then begin
+  include(result,asf_db);
  end;
 end;
 
@@ -3815,6 +3833,43 @@ begin
  fdropdown.canceldropdown;
  inherited;
 end;
+
+function tcustomdropdownedit.getassistiveflags(): assistiveflagsty;
+begin
+ result:= inherited getassistiveflags();
+ if fdropdown.hasdropdown() then begin
+  include(result,asf_hasdropdown);
+ end;
+end;
+{
+function tcustomdropdownedit.getassistivecaption(): msestring;
+var
+ wi1: tcustomgrid;
+ intf1: iassistiveclientgrid;
+begin
+ if fdropdown.hasdropdown() then begin
+  wi1:= tcustomgrid(fdropdown.dropdownwidget);
+  result:= iassistiveclientgrid(wi1).getassistivecellcaption(wi1.focusedcell);
+ end
+ else begin
+  result:= inherited getassistivecaption();
+ end;
+end;
+
+function tcustomdropdownedit.getassistivetext(): msestring;
+var
+ wi1: tcustomgrid;
+ intf1: iassistiveclientgrid;
+begin
+ if fdropdown.hasdropdown() then begin
+  wi1:= tcustomgrid(fdropdown.dropdownwidget);
+  result:= iassistiveclientgrid(wi1).getassistivecelltext(wi1.focusedcell);
+ end
+ else begin
+  result:= inherited getassistivetext();
+ end;
+end;
+}
 {
 procedure tcustomdropdownedit.updatereadonlystate;
 begin

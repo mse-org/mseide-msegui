@@ -57,7 +57,9 @@ type
   cellwidth: integer;
  end;
  tabulatorarty = array of tabulatorty;
-
+ tabulatorstatety = (tas_editactive);
+ tabulatorstatesty = set of tabulatorstatety;
+ 
  ttabulatoritem = class(townedpersistent)
   private
    fkind: tabulatorkindty;
@@ -66,8 +68,10 @@ type
    procedure setdistleft(const avalue: real);
    procedure setdistright(const avalue: real);
   protected
+   fstate: tabulatorstatesty;
    fdistleft: real;
    fdistright: real;
+   function getenabled(): boolean virtual;
    procedure setpos(const avalue: real); virtual;
    property distleft: real read fdistleft write setdistleft; //mm
    property distright: real read fdistright write setdistright; //mm
@@ -1579,6 +1583,11 @@ begin
  end;
 end;
 
+function ttabulatoritem.getenabled(): boolean;
+begin
+ result:= true;
+end;
+
 { tcustomtabulators }
 
 constructor tcustomtabulators.create;
@@ -1672,6 +1681,7 @@ end;
 procedure tcustomtabulators.checkuptodate;
 var
  int1: integer;
+ prevtab,nexttab: int32;
 begin
  if not fuptodate then begin
   setlength(ftabs,count);
@@ -1699,8 +1709,18 @@ begin
   sortarray(ftabs,sizeof(ftabs[0]),{$ifdef FPC}@{$endif}cmptab);
   for int1:= 0 to high(ftabs) do begin
    with ftabs[int1],ttabulatoritem(fitems[index]) do begin
-    if int1 < high(ftabs) then begin
-     cellwidth:= ftabs[int1+1].linepos - linepos;
+    prevtab:= int1-1;
+    while (prevtab >= 0) and 
+           not ttabulatoritem(fitems[ftabs[prevtab].index]).getenabled do begin
+     dec(prevtab);
+    end;
+    nexttab:= int1+2;
+    while (nexttab <= high(fitems)) and 
+           not ttabulatoritem(fitems[ftabs[nexttab].index]).getenabled do begin
+     inc(nexttab);
+    end;
+    if nexttab <= high(ftabs) then begin
+     cellwidth:= ftabs[nexttab].linepos - linepos;
     end
     else begin
      cellwidth:= 0;
@@ -1708,8 +1728,8 @@ begin
     case tabkind of 
      tak_right,tak_decimal: begin
       width:= -round(fdistleft*fppmm);
-      if int1 > 0 then begin
-       width:= textpos - ftabs[int1-1].linepos + width;
+      if prevtab >= 0 then begin
+       width:= textpos - ftabs[prevtab].linepos + width;
       end
       else begin
        width:= textpos + width;
@@ -1717,8 +1737,8 @@ begin
      end;
      tak_centered: begin
       width:= -round((fdistright+fdistleft)*fppmm);
-      if (int1 > 0) and (int1 < high(ftabs)) then begin
-       width:= ftabs[int1+1].linepos - ftabs[int1-1].linepos + width;
+      if (prevtab >= 0) and (nexttab <= high(ftabs)) then begin
+       width:= ftabs[nexttab].linepos - ftabs[prevtab].linepos + width;
       end
       else begin
        width:= 2 * linepos + width;
@@ -1726,8 +1746,8 @@ begin
      end;
      else begin //tak_left
       width:= -round((fdistright)*fppmm);
-      if int1 < high(ftabs) then begin
-       width:= ftabs[int1+1].linepos - textpos + width
+      if nexttab <= high(ftabs) then begin
+       width:= ftabs[nexttab].linepos - textpos + width
       end;
      end;
     end;

@@ -123,6 +123,7 @@ type
    fcaretwidth: integer;
    frow: integer;
    fbackup: msestring;
+   function caretonreadonly(): boolean;
    function initactioninfo(aaction: editactionty): editnotificationinfoty;
    function updateindex(const avalue: int32): int32;
    procedure checkindexvalues;
@@ -153,6 +154,7 @@ type
    function cuttoclipboard(const buffer: clipboardbufferty): boolean; virtual;   //true if cut
    function getiassistiveclient(): iassistiveclientedit virtual;
     //iassistiveclient
+   function getassistiveparent(): iassistiveclient;
    function getinstance: tobject;
    function getassistivewidget(): tobject;
    function getassistivename(): msestring;
@@ -707,6 +709,11 @@ begin
  end;
 end;
 
+function tinplaceedit.caretonreadonly(): boolean;
+begin
+ result:= (oe_caretonreadonly in fintf.getoptionsedit) or fwidget.canassistive;
+end;
+
 procedure tinplaceedit.internalupdatecaret(force: boolean = false; 
                        nocaret: boolean = false);
 var
@@ -719,7 +726,7 @@ var
  int1,int2: integer;
  posbefore: rectty;
  updatecaretcountref: integer;
- options1: optionseditty;
+// options1: optionseditty;
  haspasswordchar: boolean;
 
 begin
@@ -731,8 +738,8 @@ begin
  inc(fupdatecaretcount);
  updatecaretcountref:= fupdatecaretcount;
  posbefore:= finfo.dest;
- options1:= iedit(fintf).getoptionsedit;
- if not (canedit or (oe_caretonreadonly in options1)) then begin
+// options1:= fintf.getoptionsedit;
+ if not (canedit or caretonreadonly()) then begin
   nocaret:= true;
  end;
  actioninfo:= initactioninfo(ea_caretupdating);
@@ -1201,17 +1208,18 @@ begin
  end;
  fstate:= fstate + [ies_touched,ies_edited];
  internalupdatecaret(true);
- invalidatetext(true,bo1);
- notify(ea_indexmoved);
  if twidget1(fwidget).canassistive() then begin
   assistiveserver.doeditchardelete(getiassistiveclient(),s1);
  end;
+ invalidatetext(true,bo1);
+ notify(ea_indexmoved);
 end;
 
 procedure tinplaceedit.deletechar;
 var
  bo1: boolean;
  ch1: msechar;
+ s1: msestring;
 begin
  if ies_emptytext in fstate then begin
   exit;
@@ -1226,13 +1234,18 @@ begin
  if (card16(ch1) and $fc00 = $d800) or 
           (ch1 = c_linefeed) and (fcurindex > 0) and
                                      (finfo.text.text = c_return) then begin
+  s1:= copy(finfo.text.text,fcurindex+1,2);
   richdelete(finfo.text,fcurindex+1,2);
  end
  else begin
+  s1:= copy(finfo.text.text,fcurindex+1,1);
   richdelete(finfo.text,fcurindex+1,1);
  end;
  fstate:= fstate + [ies_touched,ies_edited];
  invalidatetext(true,bo1);
+ if twidget1(fwidget).canassistive() then begin
+  assistiveserver.doeditchardelete(getiassistiveclient(),s1);
+ end;
 // if not bo1 then begin
   internalupdatecaret;
 // end;
@@ -1490,8 +1503,7 @@ begin
              ((fsellength = 0) or (shiftstate1 <> [ss_shift]) or
               (ies_istextedit in fstate)
              ) or
-          (opt1 * [oe_readonly,oe_caretonreadonly] =
-                   [oe_readonly]) then begin
+          (oe_readonly in opt1) and not caretonreadonly()then begin
         actioninfo.dir:= gd_left;
         if checkaction(actioninfo) then begin
          if not(oe_exitoncursor in opt1) then begin
@@ -1520,8 +1532,7 @@ begin
             (fsellength = length(finfo.text.text)) and
                      (oe_autoselect in opt1) and (shiftstate1 <> [ss_shift])
            ) or
-         (opt1 * [oe_readonly,oe_caretonreadonly] =
-                  [oe_readonly]) then begin
+         (oe_readonly in opt1) and not caretonreadonly() then begin
         actioninfo.dir:= gd_right;
         if checkaction(actioninfo) then begin
          if not(oe_exitoncursor in opt1) or
@@ -1940,6 +1951,11 @@ end;
 function tinplaceedit.getiassistiveclient(): iassistiveclientedit;
 begin
  result:= iassistiveclientedit(self);
+end;
+
+function tinplaceedit.getassistiveparent(): iassistiveclient;
+begin
+ result:= twidget1(fwidget).getassistiveparent();
 end;
 
 function tinplaceedit.getinstance: tobject;
@@ -2387,13 +2403,18 @@ begin
  begingroup;
  try
   deleteselection;
+  if twidget1(fwidget).canassistive() then begin
+   assistiveserver.doeditcharenter(getiassistiveclient(),chars);
+  end;
   inserttext(chars,false);
  finally
   endgroup;
  end;
+ {
  if twidget1(fwidget).canassistive() then begin
   assistiveserver.doeditcharenter(getiassistiveclient(),chars);
  end;
+ }
 end;
 
 procedure tinplaceedit.begingroup;

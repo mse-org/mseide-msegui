@@ -72,7 +72,8 @@ type
                         dno_postbeforedialog,dno_postoncanclose,
                         dno_candefocuswindow);
  dbnavigatoroptionsty = set of dbnavigatoroptionty;
- optioneditdbty = (oed_autoedit,oed_noautoedit,oed_autopost,
+ optioneditdbty = (oed_autoedit,oed_noautoedit,oed_readonly,oed_noreadonly,
+                   oed_autopost,
                    oed_nullcheckifunmodified,
                    oed_syncedittonavigator,oed_focusoninsert,
                    oed_nofilteredit,oed_nofilterminedit,
@@ -344,6 +345,7 @@ type
    fintf: idbeditfieldlink;
    foptions: optionseditdbty;
    fobjectlinker: tobjectlinker;
+   function datasourcereadonly(): boolean override;
    function getobjectlinker: tobjectlinker;
    function getdatasource1: tdatasource;
    procedure dataevent(event: tdataevent; info: ptrint); override;
@@ -1367,6 +1369,7 @@ type
    fnavigator: tdbnavigator;
    fdescend: boolean;
    fsortdatalink: tfielddatalink;
+   fmovebydistance: int32;
    procedure checkzebraoffset;
    procedure checkscroll;
    procedure checkscrollbar; virtual;
@@ -1555,6 +1558,7 @@ type
    function getdbindicatorcol: integer;
    procedure setnavigator(const avalue: tdbnavigator);
   protected
+   function getassistiveflags(): assistiveflagsty override;
    procedure internalcreateframe; override;
    procedure createdatacol(const index: integer; out item: tdatacol); override;
    procedure initcols(const acols: tdropdowncols); override;
@@ -1569,8 +1573,10 @@ type
    constructor create(const acontroller: tcustomdbdropdownlistcontroller;
                              acols: tdropdowncols);
    destructor destroy; override;
-   procedure rowup(const action: focuscellactionty = fca_focusin); override;
-   procedure rowdown(const action: focuscellactionty = fca_focusin); override;
+   procedure rowup(const action: focuscellactionty = fca_focusin;
+                                       const nowrap: boolean = false) override;
+   procedure rowdown(const action: focuscellactionty = fca_focusin;
+                                       const nowrap: boolean = false) override;
    procedure pageup(const action: focuscellactionty = fca_focusin); override;
    procedure pagedown(const action: focuscellactionty = fca_focusin); override;
    procedure wheelup(const action: focuscellactionty = fca_focusin); override;
@@ -1800,6 +1806,7 @@ type
    function getdatacols: tdbwidgetcols;
    procedure setdatacols(const avalue: tdbwidgetcols);
   protected
+   function getassistiveflags(): assistiveflagsty override;
    function createdatacols: tdatacols; override;
    procedure createdatacol(const index: integer; out item: tdatacol); override;
    function canautoappend: boolean; override;
@@ -1847,8 +1854,10 @@ type
          const ashowcell: cellpositionty = cep_nearest): boolean; override;
                                  //true if ok
    function canclose(const newfocus: twidget): boolean; override;
-   procedure rowup(const action: focuscellactionty = fca_focusin); override;
-   procedure rowdown(const action: focuscellactionty = fca_focusin); override;
+   procedure rowup(const action: focuscellactionty = fca_focusin;
+                                       const nowrap: boolean = false); override;
+   procedure rowdown(const action: focuscellactionty = fca_focusin;
+                                       const nowrap: boolean = false); override;
    procedure pageup(const action: focuscellactionty = fca_focusin); override;
    procedure pagedown(const action: focuscellactionty = fca_focusin); override;
    procedure wheelup(const action: focuscellactionty = fca_focusin); override;
@@ -2090,6 +2099,7 @@ type
    function getfixcols: tdbstringfixcols;
    procedure setfixcols(const avalue: tdbstringfixcols);
   protected
+   function getassistiveflags(): assistiveflagsty override;
    function canautoappend: boolean; override;
    procedure setupeditor(const acell: gridcoordty; const focusin: boolean); override;
 //   procedure doenter; override;
@@ -2146,8 +2156,10 @@ type
                                  //true if ok
    procedure docellevent(var info: celleventinfoty); override;
    function canclose(const newfocus: twidget): boolean; override;
-   procedure rowup(const action: focuscellactionty = fca_focusin); override;
-   procedure rowdown(const action: focuscellactionty = fca_focusin); override;
+   procedure rowup(const action: focuscellactionty = fca_focusin;
+                                       const nowrap: boolean = false); override;
+   procedure rowdown(const action: focuscellactionty = fca_focusin;
+                                       const nowrap: boolean = false); override;
    procedure pageup(const action: focuscellactionty = fca_focusin); override;
    procedure pagedown(const action: focuscellactionty = fca_focusin); override;
    procedure wheelup(const action: focuscellactionty = fca_focusin); override;
@@ -2268,8 +2280,10 @@ type
   public
    constructor create(const acontroller: texterndatadropdownlistcontroller;
                              acols: tdropdowncols);
-   procedure rowup(const action: focuscellactionty = fca_focusin); override;
-   procedure rowdown(const action: focuscellactionty = fca_focusin); override;
+   procedure rowup(const action: focuscellactionty = fca_focusin;
+                                       const nowrap: boolean = false); override;
+   procedure rowdown(const action: focuscellactionty = fca_focusin;
+                                       const nowrap: boolean = false); override;
    procedure pageup(const action: focuscellactionty = fca_focusin); override;
    procedure pagedown(const action: focuscellactionty = fca_focusin); override;
    procedure wheelup(const action: focuscellactionty = fca_focusin); override;
@@ -3982,13 +3996,22 @@ begin
 end;
 
 procedure tcustomeditwidgetdatalink.setoptions(const avalue: optionseditdbty);
-const
- mask: optionseditdbty = [oed_autoedit,oed_noautoedit];
 begin
  foptions:= optionseditdbty(
-        setsinglebit({$ifdef FPC}longword{$else}word{$endif}(avalue),
-                      {$ifdef FPC}longword{$else}word{$endif}(foptions),
-                      {$ifdef FPC}longword{$else}word{$endif}(mask)));
+                setsinglebit(card32(avalue),
+                    card32(foptions),[card32([oed_autoedit,oed_noautoedit]),
+                                       card32([oed_readonly,oed_noreadonly])]));
+end;
+
+function tcustomeditwidgetdatalink.datasourcereadonly(): boolean;
+begin
+ result:= inherited datasourcereadonly();
+ if oed_readonly in foptions then begin
+  result:= true;
+ end;
+ if oed_noreadonly in foptions then begin
+  result:= false;
+ end;
 end;
 
 procedure tcustomeditwidgetdatalink.valuechanged(const sender: iificlient);
@@ -6639,17 +6662,6 @@ begin
   self.fdataintf:= fdataintf;
   self.ftextindex:= ftextindex;
   self.fkeyindex:= fkeyindex;
- {
-  if (ftextindex >= 0) and (fkeyindex >= 0) then begin
-   self.fdataintf:= fdataintf;
-   self.ftextindex:= ftextindex;
-   self.fkeyindex:= fkeyindex;
-  end
-  else begin
-   fkeyindex:= -1;
-   ftextindex:= -1;
-  end;
- }
  end;
  inherited create(aowner,aintf);
 end;
@@ -6764,18 +6776,24 @@ end;
 procedure tdropdownlistdatalink.setcurrentrecord(const avalue: integer;
                            const arowpos: rowpositionty);
 var
- int1{,int2}: integer;
+ int1,int2: integer;
 begin
  if active then begin
   if avalue <> fcurrentrecord then begin
-//   int2:= fcurrentrecord;
+   int2:= fcurrentrecord;
    fcurrentrecord:= avalue;
    if fcurrentrecord < 0 then begin
     fcurrentrecord:= 0;
+    if int2 = 0 then begin
+     include(tcustomgrid1(fgrid).fstate1,gs1_scrolllimit);
+    end;
    end;
    int1:= dataset.recordcount;
    if fcurrentrecord >= dataset.recordcount then begin
     fcurrentrecord:= int1 - 1;
+    if int2 = fcurrentrecord then begin
+     include(tcustomgrid1(fgrid).fstate1,gs1_scrolllimit);
+    end;
    end;
    updatedatawindow(arowpos);
   end;
@@ -6952,12 +6970,14 @@ begin
  fdatalink.MoveBy(-wheelheight);
 end;
 
-procedure tdbdropdownlist.rowdown(const action: focuscellactionty = fca_focusin);
+procedure tdbdropdownlist.rowdown(const action: focuscellactionty = fca_focusin;
+                                       const nowrap: boolean = false);
 begin
  fdatalink.MoveBy(1);
 end;
 
-procedure tdbdropdownlist.rowup(const action: focuscellactionty = fca_focusin);
+procedure tdbdropdownlist.rowup(const action: focuscellactionty = fca_focusin;
+                                       const nowrap: boolean = false);
 begin
  fdatalink.MoveBy(-1);
 end;
@@ -6967,7 +6987,8 @@ begin
  tdbgridframe.create(iscrollframe(self),self,iautoscrollframe(self));
 end;
 
-procedure tdbdropdownlist.createdatacol(const index: integer; out item: tdatacol);
+procedure tdbdropdownlist.createdatacol(const index: integer;
+                                                     out item: tdatacol);
 begin
  item:= tdbdropdownstringcol.create(self,fdatacols);
 end;
@@ -6995,7 +7016,8 @@ begin
  fdatalink.cellevent(info);
 end;
 
-procedure tdbdropdownlist.scrollevent(sender: tcustomscrollbar; event: scrolleventty);
+procedure tdbdropdownlist.scrollevent(sender: tcustomscrollbar;
+                                                     event: scrolleventty);
 begin
  if not fdatalink.scrollevent(sender,event) then begin
   inherited;
@@ -7057,6 +7079,11 @@ end;
 procedure tdbdropdownlist.setnavigator(const avalue: tdbnavigator);
 begin
  //dummy
+end;
+
+function tdbdropdownlist.getassistiveflags(): assistiveflagsty;
+begin
+ result:= inherited getassistiveflags() + [asf_db];
 end;
 
 procedure tdbdropdownlist.setactiveitem(const aitemindex: integer);
@@ -8218,6 +8245,10 @@ end;
 
 procedure tgriddatalink.datasetscrolled(distance: integer);
 begin
+ if (fmovebydistance < 0) and bof or (fmovebydistance > 0) and eof then begin
+  include(tcustomgrid1(fgrid).fstate1,gs1_scrolllimit);
+ end;
+ fmovebydistance:= 0;
  ffirstrecordbefore:= firstrecord - distance;
  recordchanged(nil);
 end;
@@ -8384,29 +8415,50 @@ end;
 procedure tgriddatalink.recordchanged(afield: tfield);
 var
  int1: integer;
+ i2: int32;
+// b1: boolean;
 begin
  int1:= frowexited;
- if tcustomgrid1(fgrid).fcellvaluechecking = 0 then begin
-  checkscroll;
- end;
- fgrid.invalidaterow(activerecord);
- tcustomgrid1(fgrid).beginnonullcheck;
- tcustomgrid1(fgrid).beginnocheckvalue;
- try
-  if (afield = nil) and (frowexited = int1) and (feditingbefore = editing) then begin
-   fgrid.row:= invalidaxis;
+ with tcustomgrid1(fgrid) do begin
+  i2:= row;
+  if fcellvaluechecking = 0 then begin
+//   b1:= gs1_nocellassistive in fstate1;
+//   try
+//    include(fstate1,gs1_nocellassistive);
+    checkscroll();
+//   finally
+//    if not b1 then begin
+//     exclude(fstate1,gs1_nocellassistive);
+//    end;
+//   end;
   end;
-  checkactiverecord;
- finally
-  tcustomgrid1(fgrid).endnonullcheck;
-  tcustomgrid1(fgrid).endnocheckvalue;
-  feditingbefore:= editing;
- end;
- fgrid.invalidaterow(factiverecordbefore);
- factiverecordbefore:= activerecord;
- if afield = nil then begin
-  updaterowcount;
-  checkscrollbar;
+  fgrid.invalidaterow(activerecord);
+  tcustomgrid1(fgrid).beginnonullcheck;
+  tcustomgrid1(fgrid).beginnocheckvalue;
+  try
+//   b1:= gs1_nocellassistive in fstate1;
+//   if row <> i2 then begin
+//    include(fstate1,gs1_nocellassistive);
+//   end;
+   if (row = i2) and (afield = nil) and (frowexited = int1) and 
+                                      (feditingbefore = editing) then begin
+    fgrid.row:= invalidaxis;
+   end;
+   checkactiverecord;
+  finally
+//   if not b1 then begin
+//    exclude(fstate1,gs1_nocellassistive);
+//   end;
+   tcustomgrid1(fgrid).endnonullcheck;
+   tcustomgrid1(fgrid).endnocheckvalue;
+   feditingbefore:= editing;
+  end;
+  fgrid.invalidaterow(factiverecordbefore);
+  factiverecordbefore:= activerecord;
+  if afield = nil then begin
+   updaterowcount;
+   checkscrollbar;
+  end;
  end;
  doupdaterowdata(activerecord);
 end;
@@ -8713,6 +8765,7 @@ function tgriddatalink.domoveby(const distance: integer): integer;
 begin
  result:= 0;
  if active and (dataset.state <> dsfilter) then begin
+  fmovebydistance:= distance;
   result:= inherited moveby(distance);
  end;
 end;
@@ -9434,12 +9487,14 @@ begin
  fdatalink.MoveBy(-wheelheight);
 end;
 
-procedure tcustomdbwidgetgrid.rowdown(const action: focuscellactionty = fca_focusin);
+procedure tcustomdbwidgetgrid.rowdown(
+  const action: focuscellactionty = fca_focusin; const nowrap: boolean = false);
 begin
  fdatalink.rowdown;
 end;
 
-procedure tcustomdbwidgetgrid.rowup(const action: focuscellactionty = fca_focusin);
+procedure tcustomdbwidgetgrid.rowup(
+  const action: focuscellactionty = fca_focusin;const nowrap: boolean = false);
 begin
  fdatalink.MoveBy(-1);
 end;
@@ -9631,6 +9686,11 @@ end;
 procedure tcustomdbwidgetgrid.setdatacols(const avalue: tdbwidgetcols);
 begin
  inherited;
+end;
+
+function tcustomdbwidgetgrid.getassistiveflags(): assistiveflagsty;
+begin
+ result:= inherited getassistiveflags() + [asf_db];
 end;
 {
 procedure tcustomdbwidgetgrid.doenter;
@@ -10353,12 +10413,14 @@ begin
  fdatalink.MoveBy(-wheelheight);
 end;
 
-procedure tcustomdbstringgrid.rowdown(const action: focuscellactionty = fca_focusin);
+procedure tcustomdbstringgrid.rowdown(
+  const action: focuscellactionty = fca_focusin; const nowrap: boolean = false);
 begin
  fdatalink.rowdown;
 end;
 
-procedure tcustomdbstringgrid.rowup(const action: focuscellactionty = fca_focusin);
+procedure tcustomdbstringgrid.rowup(
+  const action: focuscellactionty = fca_focusin; const nowrap: boolean = false);
 begin
  fdatalink.MoveBy(-1);
 end;
@@ -10562,6 +10624,11 @@ end;
 procedure tcustomdbstringgrid.setfixcols(const avalue: tdbstringfixcols);
 begin
  inherited;
+end;
+
+function tcustomdbstringgrid.getassistiveflags(): assistiveflagsty;
+begin
+ result:= inherited getassistiveflags() + [asf_db];
 end;
 
 function tcustomdbstringgrid.getdbindicatorcol: integer;
@@ -11914,12 +11981,14 @@ begin
  MoveBy(-wheelheight);
 end;
 
-procedure texterndatadropdownlist.rowdown(const action: focuscellactionty = fca_focusin);
+procedure texterndatadropdownlist.rowdown(
+  const action: focuscellactionty = fca_focusin; const nowrap: boolean = false);
 begin
  moveby(1);
 end;
 
-procedure texterndatadropdownlist.rowup(const action: focuscellactionty = fca_focusin);
+procedure texterndatadropdownlist.rowup(
+  const action: focuscellactionty = fca_focusin; const nowrap: boolean = false);
 begin
  moveby(-1);
 end;

@@ -21,7 +21,7 @@ interface
 implementation
 uses
  classes,mclasses,msereport,msedesignintf,formdesigner,reportdesigner,
- msepropertyeditors,mseformatstr,mserepps,
+ msepropertyeditors,mseformatstr,mserepps,msedrawtext,
  sysutils,msetypes{msestrings},regreport_bmp,regdb,mselookupbuffer;
 const
  reportintf: designmoduleintfty = 
@@ -36,6 +36,9 @@ const
    sourcetoform: nil);
 
 type
+ treptabulators1 = class(treptabulators);
+ treptabulatoritem1 = class(treptabulatoritem);
+ 
  treptabulatoreditor = class(tclasselementeditor)
   public
    function getvalue: msestring; override;
@@ -44,6 +47,10 @@ type
  treptabulatorseditor = class(tpersistentarraypropertyeditor)
   protected
    function geteditorclass: propertyeditorclassty; override;
+   procedure itemfocused(const sender: tarrayelementeditor) override;
+   procedure resetactivetab();
+  public
+   destructor destroy(); override;
  end;
    
 procedure Register;
@@ -121,9 +128,48 @@ end;
 
 { treptabulatorseditor }
 
+destructor treptabulatorseditor.destroy();
+begin
+ resetactivetab();
+ inherited;
+end;
+
+procedure treptabulatorseditor.resetactivetab();
+var
+ i1,i2: int32;
+ p1: treptabulators1;
+begin
+ for i1:= 0 to high(fprops) do begin
+  p1:= treptabulators1(getpointervalue(i1));
+  for i2:= 0 to p1.count - 1 do begin
+   with treptabulatoritem1(p1.fitems[i2]) do begin
+    exclude(fstate,tas_editactive);
+   end;
+  end;
+  p1.fband.invalidate();
+ end;
+end;
+
 function treptabulatorseditor.geteditorclass: propertyeditorclassty;
 begin
  result:= treptabulatoreditor;
+end;
+
+procedure treptabulatorseditor.itemfocused(const sender: tarrayelementeditor);
+var
+ i1: int32;
+ p1: treptabulators1;
+begin
+ resetactivetab();
+ for i1:= 0 to high(fprops) do begin
+  p1:= treptabulators1(getpointervalue(i1));
+  if p1.count > sender.index then begin
+   with treptabulatoritem1(p1.fitems[sender.index]) do begin
+    include(fstate,tas_editactive);
+   end;
+  end;
+ end;
+ inherited;
 end;
 
 initialization

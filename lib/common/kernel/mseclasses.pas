@@ -948,6 +948,10 @@ procedure readstringar(const reader: treader; out ar: stringarty); overload;
 procedure readstringar(const reader: treader; out ar: msestringarty); overload;
 procedure writestringar(const writer: twriter; const ar: stringarty); overload;
 procedure writestringar(const writer: twriter; const ar: msestringarty); overload;
+procedure readintar(const reader: treader; out ar: int32arty);
+procedure readintar(const reader: treader; out ar: int16arty);
+procedure writeintar(const writer: twriter; const ar: int32arty);
+procedure writeintar(const writer: twriter; const ar: int16arty);
 procedure readrecordar(const reader: treader; out ar; //array of type
           const typeinfo: pdynarraytypeinfo; const readproc: readrecordprocty);
 procedure writerecordar(const writer: twriter; const ar; //array of type
@@ -1681,6 +1685,56 @@ begin
  end;
  reader.readlistend;
  setlength(ar,int1);
+end;
+
+procedure readintar(const reader: treader; out ar: int32arty);
+var
+ i1: int32;
+begin
+ i1:= 0;
+ ar:= nil;
+ reader.readlistbegin;
+ while not reader.endoflist do begin
+  additem(ar,reader.readinteger,i1);
+ end;
+ reader.readlistend;
+ setlength(ar,i1);
+end;
+
+procedure readintar(const reader: treader; out ar: int16arty);
+var
+ i1: int32;
+begin
+ i1:= 0;
+ ar:= nil;
+ reader.readlistbegin;
+ while not reader.endoflist do begin
+  additem(ar,int16(reader.readinteger),i1);
+ end;
+ reader.readlistend;
+ setlength(ar,i1);
+end;
+
+procedure writeintar(const writer: twriter; const ar: int32arty);
+var
+ i1: int32;
+begin
+ writer.writelistbegin;
+ for i1:= 0 to high(ar) do begin
+  writer.writeinteger(ar[i1]);
+ end;
+ writer.writelistend;
+end;
+
+procedure writeintar(const writer: twriter; const ar: int16arty);
+var
+ i1: int32;
+begin
+ writer.writelistbegin;
+ for i1:= 0 to high(ar) do begin
+  writer.writeinteger(ar[i1]);
+ end;
+ writer.writelistend;
 end;
 
 procedure readrecordar(const reader: treader; out ar; 

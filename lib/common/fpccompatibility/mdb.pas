@@ -243,7 +243,7 @@ type
 {$pop}  
 
   optionfieldty = (of_readonly,of_required,of_visible,
-                 of_initinsert,of_initcopy,of_nocopyrecord,
+                 of_initinsert,of_initcopy,of_nocopyrecord,of_nomodified,
                  of_ininsert,of_inupdate,of_inwhere,of_inkey,of_hidden,
                  of_refreshinsert,of_refreshupdate);
   optionsfieldty = set of optionfieldty;
@@ -588,21 +588,21 @@ type
 { TNumericField }
   TNumericField = class(TField)
   Private
-    FDisplayFormat : String;
-    FEditFormat : String;
+    FDisplayFormat : utf8String;
+    FEditFormat : utf8String;
   protected
     class procedure CheckTypeSize(AValue: Longint); override;
     procedure RangeError(AValue, Min, Max: Double);
-    procedure SetDisplayFormat(const AValue: string);
-    procedure SetEditFormat(const AValue: string);
+    procedure SetDisplayFormat(const AValue: utf8string);
+    procedure SetEditFormat(const AValue: utf8string);
     function  GetAsBoolean: Boolean; override;
     Procedure SetAsBoolean(AValue: Boolean); override;
   public
     constructor Create(AOwner: TComponent); override;
   published
     property Alignment default taRightJustify;
-    property DisplayFormat: string read FDisplayFormat write SetDisplayFormat;
-    property EditFormat: string read FEditFormat write SetEditFormat;
+    property DisplayFormat: utf8string read FDisplayFormat write SetDisplayFormat;
+    property EditFormat: utf8string read FEditFormat write SetEditFormat;
   end;
 
 { TLongintField }
@@ -1512,6 +1512,7 @@ type
     FOnFilterRecord: TFilterRecordEvent;
     FOnNewRecord: TDataSetNotifyEvent;
     FOnPostError: TDataSetErrorEvent;
+    fonmodified: tdatasetnotifyevent;
     FRecordCount: Longint;
     FIsUniDirectional: Boolean;
     FState : TDataSetState;
@@ -1555,6 +1556,7 @@ type
     procedure DoBeforeRefresh; virtual;
     procedure DoOnCalcFields; virtual;
     procedure DoOnNewRecord; virtual;
+    procedure domodified virtual;
     function  FieldByNumber(FieldNo: Longint): TField;
     function  FindRecord(Restart, GoForward: Boolean): Boolean; virtual;
     procedure FreeFieldBuffers; virtual;
@@ -1734,7 +1736,8 @@ type
 //    property Fields[Index: Longint]: TField read GetField write SetField;
     property Found: Boolean read FFound;
     property Modified: Boolean read FModified;
-    procedure modify(); //set modified flag
+    procedure modify(const callmodified: boolean = true); //set modified flag
+    procedure resetmodified(); //clears modified flag
     property IsUniDirectional: Boolean read FIsUniDirectional default False;
     property RecordCount: Longint read GetRecordCount;
     property RecNo: Longint read GetRecNo write SetRecNo;
@@ -1772,6 +1775,7 @@ type
     property OnFilterRecord: TFilterRecordEvent read FOnFilterRecord write SetOnFilterRecord;
     property OnNewRecord: TDataSetNotifyEvent read FOnNewRecord write FOnNewRecord;
     property OnPostError: TDataSetErrorEvent read FOnPostError write FOnPostError;
+    property onmodified: tdatasetnotifyevent read fonmodified write fonmodified;
   end;
 
   TDataLink = class(TPersistent)
@@ -1795,6 +1799,7 @@ type
    function getreadonly: Boolean;
    function getactive: Boolean;
   protected
+   function datasourcereadonly(): boolean virtual;
    procedure updateactive();
     procedure ActiveChanged; virtual;
     procedure CheckBrowseMode; virtual;
@@ -3131,6 +3136,13 @@ begin
    FOnNewRecord(Self);
 end;
 
+procedure TDataSet.domodified;
+begin
+ if assigned(fonmodified) then begin
+  fonmodified(self);
+ end;
+end;
+
 Function TDataset.FieldByNumber(FieldNo: Longint): TField;
 
 begin
@@ -4036,6 +4048,9 @@ Procedure TDataset.SetModified(Value: Boolean);
 
 begin
   FModified := value;
+ if value and (fstate in [dsinsert,dsedit]) then begin
+  domodified();
+ end;
 end;
 
 Procedure TDataset.SetName(const Value: TComponentName);
@@ -4978,11 +4993,21 @@ begin
   Result:=usUnmodified;
 end;
 
-procedure TDataSet.modify();
+procedure TDataSet.modify(const callmodified: boolean = true);
 begin
  if fstate in [dsedit,dsinsert] then begin
-  setmodified(true);
+  if callmodified then begin
+   setmodified(true);
+  end
+  else begin
+   fmodified:= true;
+  end;
  end;
+end;
+
+procedure TDataSet.resetmodified();
+begin
+ setmodified(false);
 end;
 
 Procedure TDataset.RemoveField (Field : TField);
@@ -6740,7 +6765,7 @@ begin
   DatabaseErrorFMT(SRangeError,[AValue,Min,Max,FieldName]);
 end;
 
-procedure TNumericField.SetDisplayFormat(const AValue: string);
+procedure TNumericField.SetDisplayFormat(const AValue: utf8string);
 
 begin
  If FDisplayFormat<>AValue then
@@ -6750,7 +6775,7 @@ begin
    end;
 end;
 
-procedure TNumericField.SetEditFormat(const AValue: string);
+procedure TNumericField.SetEditFormat(const AValue: utf8string);
 
 begin
   If FEDitFormat<>AValue then
@@ -9121,9 +9146,14 @@ begin
  else Result := False;
 end;
 
+function tdatalink.datasourcereadonly(): boolean;
+begin
+ result:= fdatasource.readonly;
+end;
+
 function TDataLink.getreadonly: Boolean;
 begin
- result:= freadonly or (fdatasource <> nil) and (fdatasource.readonly);
+ result:= freadonly or (fdatasource <> nil) and  datasourcereadonly();
 end;
 
 function TDataLink.getactive: Boolean;

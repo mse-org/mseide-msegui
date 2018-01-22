@@ -17,15 +17,19 @@ uses
  classes,mclasses,mseclasses,mseassistiveserver,mseevent,
  mseguiglob,mseglob,msestrings,mseinterfaces,mseact,mseshapes,
  mseassistiveclient,msemenuwidgets,msegrids,msespeak,msetypes,
- msestockobjects,msegraphutils,msegui,msehash,mdb;
+ msestockobjects,msegraphutils,msegui,msehash,mdb,msestat,msestatfile;
 
 type
- assistiveserverstatety =
-  (ass_active,ass_windowactivated,ass_menuactivated,ass_menuactivatepending,
-                                              ass_textblock,ass_textblock1);
- assistiveserverstatesty = set of assistiveserverstatety;
+ assistivehandlerstatety =
+  (ahs_active,ahs_nocut,
+   ahs_windowactivated,ahs_menuactivated,ahs_menuactivatepending,
+   ahs_dropdownlistclosed,ahs_editcharenter,ahs_editchardelete,
+   ahs_locatepending,ahs_dropdownpending,ahs_cellwidgetpending,
+   ahs_dbchangepending,
+   ahs_textblock,ahs_textblock1);
+ assistivehandlerstatesty = set of assistivehandlerstatety;
 const
- internalstates = [ass_active];
+ internalstates = [ahs_active];
 type
  tassistivespeak = class(tcustomespeakng)
   public
@@ -104,6 +108,17 @@ type
                 const handler: tassistivehandler; const intf: iassistiveclient;
                                      const adirection: graphicdirectionty;
                                                 var handled: boolean) of object;
+ assistivebooleaneventty = 
+  procedure(const sender: tassistivewidgetitem;
+                const handler: tassistivehandler; const intf: iassistiveclient;
+                                     const avalue: boolean;
+                                                var handled: boolean) of object;
+ assistivedirectiongrideventty = 
+  procedure(const sender: tassistivewidgetitem;
+                const handler: tassistivehandler;
+                       const intf: iassistiveclientgrid;
+                                     const adirection: graphicdirectionty;
+                                                var handled: boolean) of object;
  assistivestringeventty = 
   procedure(const sender: tassistivewidgetitem;
                 const handler: tassistivehandler;
@@ -123,6 +138,7 @@ type
    fonwindowclosed: assistiveeventty;
    fonenter: assistiveeventty;
    fonactivate: assistiveeventty;
+   fondeactivate: assistiveeventty;
    fonclientmouseevent: assistivemouseeventty;
    fonkeydown: assistivekeyeventty;
    fonchange: assistiveeventty;
@@ -135,6 +151,7 @@ type
    foneditinputmodeset: assistiveeditinputmodeeventty;
    fonedittextblock: assistiveedittextblockeventty;
    fonnavigbordertouched: assistivedirectioneventty;
+   fontabordertouched: assistivebooleaneventty;
    fongetcaption: assistivestringeventty;
    fcaption: msestring;
    fongettext: assistivestringeventty;
@@ -143,6 +160,7 @@ type
    fhint: msestring;
    fondbvaluechanged: assistivedataeventty;
    fondatasetevent: assistivedataseteventty;
+   fongridbordertouched: assistivedirectiongrideventty;
    procedure sethandler(const avalue:tassistivehandler);
    procedure setwidget(const avalue: twidget);
   protected
@@ -160,6 +178,8 @@ type
                           const aintf: iassistiveclient; var handled: boolean);
    procedure doactivate(const sender:tassistivehandler;
                           const aintf: iassistiveclient; var handled: boolean);
+   procedure dodeactivate(const sender:tassistivehandler;
+                          const aintf: iassistiveclient; var handled: boolean);
    procedure doclientmouseevent(const sender:tassistivehandler;
               const aintf: iassistiveclient; const info: mouseeventinfoty;
                                                         var handled: boolean);
@@ -175,6 +195,10 @@ type
    procedure docellevent(const sender:tassistivehandler;
                const aintf: iassistiveclientgrid; const info: celleventinfoty;
                                                         var handled: boolean);
+   procedure dogridbordertouched(const sender:tassistivehandler;
+                                         const aintf: iassistiveclientgrid;
+                                         const adirection: graphicdirectionty;
+                                                         var handled: boolean);
    procedure doeditcharenter(const sender:tassistivehandler;
                 const aintf: iassistiveclientedit; const achar: msestring;
                                                         var handled: boolean);
@@ -196,6 +220,10 @@ type
    procedure donavigbordertouched(const sender:tassistivehandler;
                                          const aintf: iassistiveclient;
                                          const adirection: graphicdirectionty;
+                                                         var handled: boolean);
+   procedure dotabordertouched(const sender:tassistivehandler;
+                                         const aintf: iassistiveclient;
+                                         const adown: boolean;
                                                          var handled: boolean);
    procedure dodatasetevent(const sender:tassistivehandler;
            const aintf: iassistiveclient; const akind: assistivedbeventkindty;
@@ -222,6 +250,8 @@ type
                                                       write fonwindowclosed;
    property onenter: assistiveeventty read fonenter write fonenter;
    property onactivate: assistiveeventty read fonactivate write fonactivate;
+   property ondeactivate: assistiveeventty read fondeactivate 
+                                                 write fondeactivate;
    property onclientmouseevent: assistivemouseeventty read fonclientmouseevent
                                                       write fonclientmouseevent;
    property onkeydown: assistivekeyeventty read fonkeydown write fonkeydown;
@@ -232,6 +262,8 @@ type
                                                         write fondbvaluechanged;
    property oncellevent: assistivecelleventty read foncellevent
                                                         write foncellevent;
+   property ongridbordertouched: assistivedirectiongrideventty
+                read fongridbordertouched write fongridbordertouched;
    property oneditcharenter: assistiveeditstringeventty read foneditcharenter
                                          write foneditcharenter;
    property oneditchardelete: assistiveeditstringeventty read foneditchardelete
@@ -246,6 +278,8 @@ type
                                   read fonedittextblock write fonedittextblock;
    property onnavigbordertouched: assistivedirectioneventty
                 read fonnavigbordertouched write fonnavigbordertouched;
+   property ontabordertouched: assistivebooleaneventty
+                read fontabordertouched write fontabordertouched;
    property ondatasetevent: assistivedataseteventty
                         read fondatasetevent write fondatasetevent;
    property ongetcaption: assistivestringeventty read fongetcaption 
@@ -316,6 +350,16 @@ type
                             const intf: iassistiveclient;
                                      const adirection: graphicdirectionty;
                                                 var handled: boolean) of object;
+ assistiveserverbooleaneventty = 
+  procedure(const sender:tassistivehandler;
+                            const intf: iassistiveclient;
+                                     const avalue: boolean;
+                                                var handled: boolean) of object;
+ assistiveservergriddirectioneventty = 
+  procedure(const sender:tassistivehandler;
+                            const intf: iassistiveclientgrid;
+                                     const adirection: graphicdirectionty;
+                                                var handled: boolean) of object;
 
  assistiveserverfocuschangedeventty = 
   procedure(const sender:tassistivehandler;
@@ -344,11 +388,14 @@ type
   procedure(const handler: tassistivehandler; const intf: iassistiveclient;
                 const akind: assistivedbeventkindty; const adataset: tdataset;
                                                 var handled: boolean) of object;
+ speakoptionty = (spo_addtext,spo_hint,spo_columncaption,spo_parent,spo_path);
+ speakoptionsty = set of speakoptionty;
  
-tassistivehandler = class(tmsecomponent,iassistiveserver)
+ tassistivehandler = class(tmsecomponent,iassistiveserver,istatfile)
   private
    factive: boolean;
    fspeaker: tassistivespeak;
+   fvoicefixed: int32;
    fvoicecaption: int32;
    fvoicetext: int32;
    fonwindowactivated: assistiveserverclienteventty;
@@ -356,6 +403,7 @@ tassistivehandler = class(tmsecomponent,iassistiveserver)
    fonwindowclosed: assistiveserverclienteventty;
    fonenter: assistiveserverclienteventty;
    fonactivate: assistiveserverclienteventty;
+   fondeactivate: assistiveserverclienteventty;
    fonclientmouseevent: assistiveservermouseeventty;
    fonfocuschanged: assistiveserverfocuschangedeventty;
    fonkeydown: assistiveserverkeyeventty;
@@ -369,6 +417,7 @@ tassistivehandler = class(tmsecomponent,iassistiveserver)
    foneditinputmodeset: assistiveservereditinputmodeeventty;
    fonedittextblock: assistiveserveredittextblockeventty;
    fonnavigbordertouched: assistiveserverdirectioneventty;
+   fontabordertouched: assistiveserverbooleaneventty;
    fonitementer: assistiveserveritemeventty;
    fonmenuitementer: assistiveservermenuitemeventty;
    fonactionexecute: assistiveserveractioneventty;
@@ -378,13 +427,26 @@ tassistivehandler = class(tmsecomponent,iassistiveserver)
    fonmenuactivated: assistiveservermenueventty;
    fondbvaluechanged: assistiveserverdataeventty;
    fondatasetevent: assistiveserverdataseteventty;
+   fongridbordertouched: assistiveservergriddirectioneventty;
+   fvoicetextmessage: int32;
+   fvoicetextedit: int32;
+   fvoicetexteditreadonly: int32;
+   fstatfile: tstatfile;
+   fstatvarname: msestring;
+   fstatpriority: int32;
    procedure setactive(const avalue: boolean);
    procedure setspeaker(const avalue: tassistivespeak);
    procedure setoptions(const avalue: assistiveoptionsty);
+   procedure setstatfile(const avalue: tstatfile);
   protected
-   fstate: assistiveserverstatesty;
+   fstate: assistivehandlerstatesty;
+   fspeaklock: int32;
    fdataenteredkeyserial: card32;
    fitems: tassistivewidgetitemlist;
+  {$ifdef mse_debugassistive}
+   procedure debug(const text: string;
+                                      const intf: iassistiveclient);
+  {$endif}
    procedure activate();
    procedure deactivate();
 
@@ -397,6 +459,10 @@ tassistivehandler = class(tmsecomponent,iassistiveserver)
    procedure unregisteritem(const aintf: iassistiveclient);
    function finditem(aintf: iassistiveclient;
                         out aitem: tassistivewidgetitem): boolean;
+   procedure doshortcut(const sender: twidget; var info: keyeventinfoty);
+   procedure dospeakagain(const sender: twidget);
+   procedure dospeakpath(const sender: twidget);
+   procedure checklocatepending(const sender: iassistiveclient);
       
     //iassistiveserver
    procedure doapplicationactivated();
@@ -406,6 +472,7 @@ tassistivehandler = class(tmsecomponent,iassistiveserver)
    procedure dowindowclosed(const sender: iassistiveclient);
    procedure doenter(const sender: iassistiveclient);
    procedure doactivate(const sender: iassistiveclient);
+   procedure dodeactivate(const sender: iassistiveclient);
    procedure doclientmouseevent(const sender: iassistiveclient;
                                            const info: mouseeventinfoty);
    procedure dokeydown(const sender: iassistiveclient;
@@ -415,6 +482,9 @@ tassistivehandler = class(tmsecomponent,iassistiveserver)
    procedure dodbvaluechanged(const sender: iassistiveclientdata);
    procedure docellevent(const sender: iassistiveclientgrid; 
                                        const info: celleventinfoty);
+   procedure dogridbordertouched(const sender: iassistiveclientgrid;
+                                       const adirection: graphicdirectionty);
+
    procedure doeditcharenter(const sender: iassistiveclientedit;
                                                 const achar: msestring);
    procedure doeditchardelete(const sender: iassistiveclientedit;
@@ -428,6 +498,8 @@ tassistivehandler = class(tmsecomponent,iassistiveserver)
                                                 const amode: editinputmodety);
    procedure donavigbordertouched(const sender: iassistiveclient;
                                        const adirection: graphicdirectionty);
+   procedure dotabordertouched(const sender: iassistiveclient;
+                                                        const adown: boolean);
    procedure dofocuschanged(const sender: iassistiveclient;
                                 const oldwidget,newwidget: iassistiveclient);
    procedure doactionexecute(const sender: iassistiveclient;//sender can be nil
@@ -440,36 +512,69 @@ tassistivehandler = class(tmsecomponent,iassistiveserver)
    procedure dodatasetevent(const sender: iassistiveclient; 
                 const akind: assistivedbeventkindty;
                                   const adataset: pointer); //tdataset
+    //istatfile
+   procedure dostatread(const reader: tstatreader) virtual;
+   procedure dostatwrite(const writer: tstatwriter) virtual;
+   procedure statreading();
+   procedure statread();
+   function getstatvarname(): msestring;
+   function getstatpriority(): integer;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy(); override;
+   procedure setstate(const astate: assistivehandlerstatesty);
+   procedure resetstate(const astate: assistivehandlerstatesty);
+   procedure speakstop(const acancel: boolean = false);
+   procedure speakcontinue();
    procedure wait();
    procedure cancel();
-   function getcaptiontext(const acaption: msestring): msestring;
-   function getcaptiontext(const sender: iassistiveclient): msestring;
-   function gettexttext(const sender: iassistiveclient): msestring;
-   function gethinttext(const sender: iassistiveclient): msestring;
-   procedure speaktext(const atext: msestring; const avoice: int32 = 0);
-   procedure speaktext(const atext: stockcaptionty; const avoice: int32 = 0);
-   procedure speakcharacter(const achar: char32; const avoice: int32 = 0);
-   procedure speakall(const sender: iassistiveclient; const addtext: boolean;
-                                                         const ahint: boolean);
+   procedure speaktext(const atext: msestring; const avoice: int32 = 0;
+                                                const nocut: boolean = false);
+   procedure speaktext1(const atext: msestring; const avoice: int32 = 0;
+                                                const nocut: boolean = false);
+                                                //with cancel
+   procedure speaktext(const atext: stockcaptionty; const avoice: int32 = 0;
+                                                const nocut: boolean = false);
+   procedure speaktext1(const atext: stockcaptionty; const avoice: int32 = 0;
+                                                const nocut: boolean = false);
+                                                //with cancel
+   procedure speakcharacter(const achar: char32; const avoice: int32 = 0;
+                                                const nocut: boolean = false);
+   procedure speakall(const sender: iassistiveclient; aoptions: speakoptionsty);
+   procedure speakgridcell(const sender: iassistiveclientgrid;
+                  const acell: gridcoordty; const acaption: boolean);
    procedure speakinput(const sender: iassistiveclientdata);
    procedure speakmenustart(const sender: iassistiveclient);
    procedure speakallmenu(const sender: iassistiveclientmenu;
                                                const ahint: boolean);
-   procedure setstate(const astate: assistiveserverstatesty);
-   procedure removestate(const astate: assistiveserverstatesty);
-   property state: assistiveserverstatesty read fstate;
+   function getcaptiontext(const acaption: msestring): msestring;
+   function getcaptiontext(const sender: iassistiveclient): msestring;
+   function gettexttext(const sender: iassistiveclient): msestring;
+   function gethinttext(const sender: iassistiveclient): msestring;
+   procedure focusfirstelement(const awidget: twidget);
+   procedure focuslastelement(const awidget: twidget);
+   property state: assistivehandlerstatesty read fstate;
   published
+   property statfile: tstatfile read fstatfile write setstatfile;
+   property statvarname: msestring read fstatvarname write fstatvarname;
+   property statpriority: int32 read fstatpriority 
+                                       write fstatpriority default 0;
    property active: boolean read factive write setactive default false;
    property options: assistiveoptionsty read foptions 
                              write setoptions default defaultassistiveoptions;
    property speaker: tassistivespeak read fspeaker write setspeaker;
+   property voicefixed: int32 read fvoicefixed 
+                                          write fvoicefixed default 0;
    property voicecaption: int32 read fvoicecaption 
                                           write fvoicecaption default 0;
+   property voicetextmessage: int32 read fvoicetextmessage 
+                                          write fvoicetextmessage default 1;
    property voicetext: int32 read fvoicetext 
-                                          write fvoicetext default 0;
+                                          write fvoicetext default 1;
+   property voicetextedit: int32 read fvoicetextedit
+                                        write fvoicetextedit default 2;
+   property voicetexteditreadonly: int32 read fvoicetexteditreadonly
+                                        write fvoicetexteditreadonly default 2;
    property onapplicationactivated: assistiveservereventty 
                  read fonapplicationactivated write fonapplicationactivated;
    property onapplicationdeactivated: assistiveservereventty
@@ -483,6 +588,8 @@ tassistivehandler = class(tmsecomponent,iassistiveserver)
    property onenter: assistiveserverclienteventty read fonenter write fonenter;
    property onactivate: assistiveserverclienteventty read fonactivate 
                                                         write fonactivate;
+   property ondeactivate: assistiveserverclienteventty read fondeactivate 
+                                                        write fondeactivate;
    property onclientmouseevent: assistiveservermouseeventty 
                       read fonclientmouseevent write fonclientmouseevent;
    property onfocuschanged: assistiveserverfocuschangedeventty 
@@ -497,6 +604,8 @@ tassistivehandler = class(tmsecomponent,iassistiveserver)
                                                         write fondbvaluechanged;
    property oncellevent: assistiveservercelleventty read foncellevent
                                                         write foncellevent;
+   property ongridbordertouched: assistiveservergriddirectioneventty
+                        read fongridbordertouched write fongridbordertouched;
    property oneditcharenter: assistiveservereditstringeventty
                             read foneditcharenter write foneditcharenter;
    property oneditchardelete: assistiveservereditstringeventty 
@@ -511,6 +620,8 @@ tassistivehandler = class(tmsecomponent,iassistiveserver)
                                   read fonedittextblock write fonedittextblock;
    property onnavigbordertouched: assistiveserverdirectioneventty
                 read fonnavigbordertouched write fonnavigbordertouched;
+   property ontabordertouched: assistiveserverbooleaneventty
+                read fontabordertouched write fontabordertouched;
    property onactionexecute: assistiveserveractioneventty read fonactionexecute
                                                          write fonactionexecute;
    property onitementer: assistiveserveritemeventty read fonitementer 
@@ -525,7 +636,9 @@ tassistivehandler = class(tmsecomponent,iassistiveserver)
  
 implementation
 uses
- msekeyboard,sysutils,msesysutils,mserichstring,msemenus;
+ msekeyboard,sysutils,msesysutils,mserichstring,msemenus,mseactions,
+ msegridsglob,mseeditglob,typinfo;
+ 
 type
  twidget1 = class(twidget);
  tpopupmenuwidget1 = class(tpopupmenuwidget);
@@ -627,6 +740,14 @@ begin
  end;
 end;
 
+procedure tassistivewidgetitem.dodeactivate(const sender: tassistivehandler;
+               const aintf: iassistiveclient; var handled: boolean);
+begin
+ if canevent(tmethod(fondeactivate)) then begin
+  fondeactivate(self,sender,aintf,handled);
+ end;
+end;
+
 procedure tassistivewidgetitem.doclientmouseevent(
               const sender:tassistivehandler; const aintf: iassistiveclient;
                const info: mouseeventinfoty; var handled: boolean);
@@ -675,6 +796,16 @@ procedure tassistivewidgetitem.docellevent(const sender:tassistivehandler;
 begin
  if canevent(tmethod(foncellevent)) then begin
   foncellevent(self,sender,aintf,info,handled);
+ end;
+end;
+
+procedure tassistivewidgetitem.dogridbordertouched(
+              const sender: tassistivehandler;
+               const aintf: iassistiveclientgrid;
+               const adirection: graphicdirectionty; var handled: boolean);
+begin
+ if canevent(tmethod(fongridbordertouched)) then begin
+  fongridbordertouched(self,sender,aintf,adirection,handled);
  end;
 end;
 
@@ -741,6 +872,15 @@ begin
  end;
 end;
 
+procedure tassistivewidgetitem.dotabordertouched(
+              const sender: tassistivehandler; const aintf: iassistiveclient;
+               const adown: boolean; var handled: boolean);
+begin
+ if canevent(tmethod(fontabordertouched)) then begin
+  fontabordertouched(self,sender,aintf,adown,handled);
+ end;
+end;
+
 procedure tassistivewidgetitem.dodatasetevent(const sender: tassistivehandler;
                const aintf: iassistiveclient;
                const akind: assistivedbeventkindty; const adataset: tdataset;
@@ -789,8 +929,23 @@ end;
 
 constructor tassistivehandler.create(aowner: tcomponent);
 begin
+ fvoicetext:= 1;
+ fvoicetextmessage:= 1;
+ fvoicetextedit:= 2;
+ fvoicetexteditreadonly:= 2;
  foptions:= defaultassistiveoptions;
  fspeaker:= tassistivespeak.create(nil);
+ fspeaker.voices.count:= 3;
+ with fspeaker.voices[0] do begin
+  gender:= gen_male;
+ end;
+ with fspeaker.voices[1] do begin
+  gender:= gen_female;
+ end;
+ with fspeaker.voices[2] do begin
+  gender:= gen_female;
+  punctuation:= pu_all;
+ end;
  fitems:= tassistivewidgetitemlist.create();
  inherited;
 end;
@@ -820,12 +975,13 @@ end;
 procedure tassistivehandler.activate();
 begin
  if not (csdesigning in componentstate) then begin
+  fspeaklock:= 0;
+  application.registeronshortcut(@doshortcut);
   fspeaker.active:= true;
   assistiveserver:= iassistiveserver(self);
   assistiveoptions:= options;
-//  noassistivedefaultbutton:= true;
-//  assistivewidgetnavig:= true;
-  include(fstate,ass_active);
+  fstate:= [ahs_active];
+//  include(fstate,ahs_active);
   application.invalidate();
  end;
 end;
@@ -833,10 +989,11 @@ end;
 procedure tassistivehandler.deactivate();
 begin
  if not (csdesigning in componentstate) then begin
+  application.unregisteronshortcut(@doshortcut);
   assistiveserver:= nil;
   assistiveoptions:= [];
   fspeaker.active:= false;
-  exclude(fstate,ass_active);
+  exclude(fstate,ahs_active);
   application.invalidate();
  end;
 end;
@@ -849,9 +1006,14 @@ end;
 procedure tassistivehandler.setoptions(const avalue: assistiveoptionsty);
 begin
  foptions:= avalue;
- if ass_active in fstate then begin
+ if ahs_active in fstate then begin
   assistiveoptions:= foptions;
  end;
+end;
+
+procedure tassistivehandler.setstatfile(const avalue: tstatfile);
+begin
+ setstatfilevar(istatfile(self),avalue,fstatfile);
 end;
 
 procedure tassistivehandler.loaded();
@@ -870,7 +1032,12 @@ end;
 
 procedure tassistivehandler.cancel();
 begin
- fspeaker.cancel();
+ if (fspeaklock <= 0) then begin
+  if not (ahs_nocut in fstate) then begin
+   fspeaker.cancel();
+  end;
+  exclude(fstate,ahs_nocut);
+ end;
 end;
 
 function tassistivehandler.getcaptiontext(const acaption: msestring): msestring;
@@ -923,52 +1090,168 @@ begin
  end;
 end;
 
-procedure tassistivehandler.speaktext(const atext: msestring;
-               const avoice: int32 = 0);
+procedure tassistivehandler.focusfirstelement(const awidget: twidget);
+var
+ w1: twidget;
 begin
- fspeaker.speak(atext,[so_endpause],avoice);
+ if awidget <> nil then begin
+  w1:= awidget.window.firstfocuswidget();
+  if w1 <> nil then begin
+   w1.activate();
+  end;
+ end;
+end;
+
+procedure tassistivehandler.focuslastelement(const awidget: twidget);
+var
+ w1: twidget;
+begin
+ if awidget <> nil then begin
+  w1:= awidget.window.lastfocuswidget();
+  if w1 <> nil then begin
+   w1.activate();
+  end;
+ end;
+end;
+
+procedure tassistivehandler.speaktext(const atext: msestring;
+               const avoice: int32 = 0; const nocut: boolean = false);
+begin
+ if fspeaklock <= 0 then begin
+  if nocut then begin
+   include(fstate,ahs_nocut);
+  end;
+  fspeaker.speak(atext,[so_endpause],avoice);
+ end;
+end;
+
+procedure tassistivehandler.speaktext1(const atext: msestring;
+               const avoice: int32 = 0; const nocut: boolean = false);
+begin
+ cancel();
+ speaktext(atext,avoice,nocut);
 end;
 
 procedure tassistivehandler.speaktext(const atext: stockcaptionty;
-               const avoice: int32 = 0);
+               const avoice: int32 = 0; const nocut: boolean = false);
 begin
- speaktext(stockobjects.captions[atext],avoice);
+ speaktext(stockobjects.captions[atext],avoice,nocut);
+end;
+
+procedure tassistivehandler.speaktext1(const atext: stockcaptionty;
+               const avoice: int32 = 0; const nocut: boolean = false);
+begin
+ cancel();
+ speaktext(atext,avoice,nocut);
 end;
 
 procedure tassistivehandler.speakcharacter(const achar: char32;
-               const avoice: int32 = 0);
+               const avoice: int32 = 0; const nocut: boolean = false);
 begin
- fspeaker.speakcharacter(achar,[so_endpause],avoice);
+ if fspeaklock <= 0 then begin
+  if nocut then begin
+   include(fstate,ahs_nocut);
+  end;
+  fspeaker.speakcharacter(achar,[so_endpause],avoice);
+ end;
 end;
 
 procedure tassistivehandler.speakall(const sender: iassistiveclient;
-                             const addtext: boolean; const ahint: boolean);
+                                                   aoptions: speakoptionsty);
 var
  fla1: assistiveflagsty;
- s1: msestring;
+ s1,s2: msestring;
  w1: tpopupmenuwidget1;
+ intf2: iassistiveclient;
+ i1: int32;
 begin
+ intf2:= sender.getassistiveparent();
+ if spo_path in aoptions then begin
+  exclude(aoptions,spo_parent);
+  include(aoptions,spo_columncaption);
+  if intf2 <> nil then begin
+   speakall(intf2,aoptions);
+   include(aoptions,spo_addtext);
+   intf2:= nil;
+  end;
+ end
+ else begin
+  if not (spo_parent in aoptions) then begin
+   intf2:= nil;
+  end;
+ end; 
  fla1:= sender.getassistiveflags();
- if not addtext then begin
+ i1:= fvoicetext;
+ if asf_message in fla1 then begin
+  i1:= fvoicetextmessage;
+ end;
+ if asf_async in fla1 then begin
+  include(aoptions,spo_addtext);
+ end;
+ if [asf_inplaceedit,asf_textedit] * fla1 <> [] then begin
+  if asf_readonly in fla1 then begin
+   i1:= fvoicetexteditreadonly;
+  end
+  else begin
+   i1:= fvoicetextedit;
+  end;
+ end;
+ pointer(w1):= sender.getinstance();
+ if not (spo_addtext in aoptions) then begin
   startspeak();
  end;
  s1:= '';
  if asf_menu in fla1 then begin
-  pointer(w1):= sender.getinstance();
   if w1 is tpopupmenuwidget then begin
-   speakallmenu(tmenuitem1(w1.flayout.menu).getiassistiveclient(),ahint);
+   speakallmenu(tmenuitem1(w1.flayout.menu).getiassistiveclient(),
+                                                   spo_hint in aoptions);
    exit;
   end; 
  end;
+ if (intf2 <> nil) and (asf_message in intf2.getassistiveflags()) then begin
+  speakall(intf2,aoptions - [spo_addtext,spo_parent]);
+ end;
+ if fla1 * [asf_grid,asf_popup] = [asf_grid,asf_popup] then begin
+  if spo_parent in aoptions then begin
+   speaktext(sc_selection,fvoicefixed);
+  end;
+  with iassistiveclientgrid(sender) do begin
+   speaktext(getassistivecellcaption(getassistivefocusedcell()),fvoicecaption);
+   speaktext(getassistivecelltext(getassistivefocusedcell()),i1);
+  end;
+  exit;
+ end;
+ s2:= '';
  if asf_button in fla1 then begin
-  s1:= stockobjects.captions[sc_button] + ' ';
+  if asf_disabled in fla1 then begin
+   s2:= stockobjects.captions[sc_disabledbutton] + ' ';
+  end
+  else begin
+   s2:= stockobjects.captions[sc_button] + ' ';
+  end;
+ end;
+ speaktext(s1,fvoicefixed);
+ s1:= '';
+ if (spo_columncaption in aoptions) and (asf_gridwidget in fla1) then begin
+  s1:= s1+iassistiveclientgridwidget(sender).getassistivecolumncaption();
  end;
  s1:= s1 + getcaptiontext(sender);
  speaktext(s1,fvoicecaption);
- speaktext(gettexttext(sender),fvoicetext);
- if ahint then begin
+ speaktext(s2,fvoicefixed);
+ speaktext(gettexttext(sender),i1);
+ if spo_hint in aoptions then begin
   speaktext(gethinttext(sender),fvoicecaption);
  end;
+end;
+
+procedure tassistivehandler.speakgridcell(const sender: iassistiveclientgrid;
+               const acell: gridcoordty; const acaption: boolean);
+begin
+ if acaption then begin
+  speaktext(sender.getassistivecellcaption(
+                            mgc(acell.col,-1)),fvoicecaption);
+ end;
+ speaktext(sender.getassistivecelltext(acell),fvoicetext);
 end;
 
 procedure tassistivehandler.speakinput(const sender: iassistiveclientdata);
@@ -976,22 +1259,35 @@ begin
  startspeak();
  speaktext(sc_input,fvoicecaption);
  speaktext(getcaptiontext(iassistiveclient(sender)),fvoicecaption);
- speaktext(gettexttext(sender),fvoicetext);
+ speaktext(gettexttext(sender),fvoicetextedit);
 end;
 
 procedure tassistivehandler.speakmenustart(const sender: iassistiveclient);
 begin
- speaktext(sc_menu,fvoicecaption);
+ speaktext(sc_menu,fvoicefixed);
 end;
 
-procedure tassistivehandler.setstate(const astate: assistiveserverstatesty);
+procedure tassistivehandler.setstate(const astate: assistivehandlerstatesty);
 begin
  fstate:= fstate + (astate-internalstates);
 end;
 
-procedure tassistivehandler.removestate(const astate: assistiveserverstatesty);
+procedure tassistivehandler.resetstate(const astate: assistivehandlerstatesty);
 begin
  fstate:= fstate - (astate-internalstates);
+end;
+
+procedure tassistivehandler.speakstop(const acancel: boolean = false);
+begin
+ if acancel then begin
+  cancel;
+ end;
+ inc(fspeaklock);
+end;
+
+procedure tassistivehandler.speakcontinue();
+begin
+ dec(fspeaklock);
 end;
 
 procedure tassistivehandler.startspeak();
@@ -1026,25 +1322,109 @@ begin
  end;
 end;
 
+function checkassistiveshortcut(const akind: assistiveshortcutty;
+                                        var info: keyeventinfoty): boolean;
+begin
+ result:= false;
+ if not (es_processed in info.eventstate) then begin
+  if checkactionshortcut(assistiveshortcuts[akind],info) then begin
+   result:= true;
+  end
+  else begin
+   if not (es_processed in info.eventstate) then begin
+    if checkactionshortcut(assistiveshortcuts1[akind],info) then begin
+     result:= true;
+    end;
+   end;
+  end;
+ end;
+end;
+
+procedure tassistivehandler.doshortcut(const sender: twidget;
+               var info: keyeventinfoty);
+begin
+ if checkassistiveshortcut(shoa_speakagain,info) then begin
+  dospeakagain(sender);
+ end
+ else begin
+  if not (es_processed in info.eventstate) then begin
+   if checkassistiveshortcut(shoa_speakpath,info) then begin
+    dospeakpath(sender);
+   end
+   else begin
+    if not (es_processed in info.eventstate) then begin
+     if checkassistiveshortcut(shoa_firstelement,info) then begin
+      focusfirstelement(sender);
+     end
+     else begin
+      if not (es_processed in info.eventstate) then begin
+       if checkassistiveshortcut(shoa_lastelement,info) then begin
+        focuslastelement(sender);
+       end
+       else begin
+        if not (es_processed in info.eventstate) then begin
+         if checkassistiveshortcut(shoa_slower,info) then begin
+          fspeaker.rate:= fspeaker.rate/1.1;
+          startspeak();
+          speaktext(sc_slower,voicetext);
+         end
+         else begin
+          if not (es_processed in info.eventstate) then begin
+           if checkassistiveshortcut(shoa_faster,info) then begin
+            fspeaker.rate:= fspeaker.rate*1.1;
+            startspeak();
+            speaktext(sc_faster,voicetext);
+           end;
+          end;
+         end;
+        end;
+       end;
+      end;
+     end;
+    end;
+   end;
+  end;
+ end;
+end;
+
+procedure tassistivehandler.dospeakagain(const sender: twidget);
+begin
+ speakall(twidget1(sender).getiassistiveclient(),[spo_hint,spo_parent]);
+end;
+
+procedure tassistivehandler.dospeakpath(const sender: twidget);
+begin
+ speakall(twidget1(sender).getiassistiveclient(),[spo_hint,spo_path]);
+end;
+
+procedure tassistivehandler.checklocatepending(const sender: iassistiveclient);
+begin
+ if asf_hasdropdown in sender.getassistiveflags then begin
+  setstate([ahs_locatepending]);
+ end;
+end;
 
 {$ifdef mse_debugassistive}
-procedure debug(const text: string; const intf: iassistiveclient);
+procedure tassistivehandler.debug(const text: string;
+                                      const intf: iassistiveclient);
 var
  wi1: twidget;
 begin
- debugwrite('*'+text+':');
+ debugwrite('*'+text+':'+
+        settostring(ptypeinfo(typeinfo(assistivehandlerstatesty)),
+                                                       int32(fstate),true));
  if intf <> nil then begin
   pointer(wi1):= intf.getassistivewidget();
   if wi1 <> nil then begin
-   debugwriteln(wi1.name);
+   debugwriteln(':'+wi1.name);
   end
   else begin
-   debugwriteln('NIL');
+   debugwriteln(':NIL');
   end;
- end
- else begin
-  debugwriteln('');
+  debugwrite('  '+settostring(ptypeinfo(typeinfo(assistiveflagsty)),
+                                      int32(intf.getassistiveflags()),true));
  end;
+ debugwriteln('');
 end;
 {$endif}
 
@@ -1086,7 +1466,7 @@ begin
 {$ifdef mse_debugassistive}
  debug('windowactivated',sender);
 {$endif}
- setstate([ass_windowactivated]);
+ setstate([ahs_windowactivated]);
  b1:= false;
  if finditem(sender,item1) then begin
   item1.dowindowactivated(self,sender,b1);
@@ -1107,14 +1487,18 @@ begin
    }
    end
    else begin
-    startspeak();
- //   speaktext(sc_windowactivated,fvoicecaption);
-    speaktext(getcaptiontext(sender),fvoicecaption);
-    speaktext(gettexttext(sender),fvoicetext);
+    if fstate*[ahs_dropdownlistclosed,ahs_dropdownpending] = [] then begin
+     if not (asf_async in fla1) then begin
+      startspeak();
+     end;
+  //   speaktext(sc_windowactivated,fvoicecaption);
+     speaktext(getcaptiontext(sender),fvoicecaption);
+     speaktext(gettexttext(sender),fvoicetext);
+    end;
    end;
   end;
  end;
- removestate([ass_menuactivatepending]);
+ resetstate([ahs_menuactivatepending,ahs_dropdownpending]);
 end;
 
 procedure tassistivehandler.dowindowdeactivated(const sender: iassistiveclient);
@@ -1125,6 +1509,10 @@ begin
 {$ifdef mse_debugassistive}
  debug('windowdeactivated',sender);
 {$endif}
+ if sender.getassistiveflags() * [asf_popup,asf_grid] = 
+                                     [asf_popup,asf_grid] then begin
+  setstate([ahs_dropdownlistclosed]);
+ end;
  b1:= false;
  if finditem(sender,item1) then begin
   item1.dowindowdeactivated(self,sender,b1);
@@ -1134,15 +1522,9 @@ begin
    fonwindowdeactivated(self,sender,b1);
   end;
   if not b1 then begin
-//   cancel();
   end;
  end;
- removestate([ass_windowactivated]);
- {
- if asf_menu in sender.getassistiveflags() then begin
-  removestate([ass_menuactivated]);
- end;
- }
+ resetstate([ahs_windowactivated]);
 end;
 
 procedure tassistivehandler.dowindowclosed(const sender: iassistiveclient);
@@ -1172,6 +1554,12 @@ begin
 {$ifdef mse_debugassistive}
  debug('enter',sender);
 {$endif}
+ resetstate([ahs_dropdownpending]);
+ if (ahs_editcharenter in fstate) and 
+           (sender.getassistiveflags*[asf_popup,asf_grid] = 
+                                  [asf_popup,asf_grid]) then begin
+  setstate([ahs_dropdownpending]);
+ end;
  b1:= false;
  if finditem(sender,item1) then begin
   item1.doenter(self,sender,b1);
@@ -1181,6 +1569,7 @@ begin
    fonenter(self,sender,b1);
   end;
  end;
+ resetstate([ahs_editcharenter]);
 end;
 
 procedure tassistivehandler.doactivate(const sender: iassistiveclient);
@@ -1188,6 +1577,7 @@ var
  b1: boolean;
  item1: tassistivewidgetitem;
  fla1: assistiveflagsty;
+ opt1: speakoptionsty;
 begin
 {$ifdef mse_debugassistive}
  debug('activate',sender);
@@ -1201,17 +1591,65 @@ begin
    fonactivate(self,sender,b1);
   end;
   if twidget(sender.getassistivewidget).focused then begin
-   if not b1 then begin
+   if not b1{ and not (ahs_cellwidgetpending in fstate)} then begin
     fla1:= sender.getassistiveflags();
-    if asf_menu in fla1 then begin
-    end
-    else begin
-     speakall(sender,ass_windowactivated in fstate,false);
-     removestate([ass_windowactivated]);
+    if not (asf_dummy in fla1) then begin
+     if asf_menu in fla1 then begin
+     end
+     else begin
+      if fla1*[asf_grid,asf_popup] = [asf_grid,asf_popup] then begin
+       speaktext(sc_selection,fvoicefixed);
+       speakgridcell(iassistiveclientgrid(sender),
+                    tcustomgrid(sender.getassistivewidget()).focusedcell,true);
+      end
+      else begin
+       if not (ahs_dropdownlistclosed in fstate) and 
+                                       not (asf_scrolllimit in fla1) then begin
+        opt1:= [];
+        if asf_gridwidget in fla1 then begin
+         setstate([ahs_dbchangepending]);
+         if ahs_windowactivated in fstate then begin
+          include(opt1,spo_columncaption);
+         end;
+        end;
+        if fstate * [ahs_windowactivated,ahs_cellwidgetpending] <> [] then begin
+         include(opt1,spo_addtext);
+        end;
+        speakall(sender,opt1);
+       end;
+      end;
+     end;
     end;
    end;
   end;
  end;
+ fla1:= sender.getassistiveflags();
+ if not (asf_dummy in fla1) then begin
+  resetstate([ahs_cellwidgetpending]);
+  if asf_focused in fla1 then begin
+   resetstate([ahs_windowactivated,ahs_dropdownlistclosed]);
+  end;
+ end;
+end;
+
+procedure tassistivehandler.dodeactivate(const sender: iassistiveclient);
+var
+ item1: tassistivewidgetitem;
+ b1: boolean;
+begin
+{$ifdef mse_debugassistive}
+ debug('deactivate',sender);
+{$endif}
+ b1:= false;
+ if finditem(sender,item1) then begin
+  item1.dodeactivate(self,sender,b1);
+ end;
+ if not b1 then begin
+  if canevent(tmethod(fondeactivate)) then begin
+   fonactivate(self,sender,b1);
+  end;
+ end;
+ resetstate([ahs_dbchangepending]);
 end;
 
 procedure tassistivehandler.doclientmouseevent(const sender: iassistiveclient;
@@ -1257,12 +1695,14 @@ begin
  debug('keydown',sender);
 {$endif}
  if not (es_child in info.eventstate) then begin
+ {
   if (info.key = key_return) and 
                 (info.shiftstate*keyshiftstatesmask = []) then begin
    if info.serial <> fdataenteredkeyserial then begin
     speakall(sender,false,true);
    end;
   end;
+ }
   fdataenteredkeyserial:= 0;
  end;
 end;
@@ -1332,7 +1772,7 @@ var
  item1: tassistivewidgetitem;
 begin
 {$ifdef mse_debugassistive}
- debug('change',sender);
+ debug('dbvaluechanged',sender);
 {$endif}
  b1:= false;
  if finditem(sender,item1) then begin
@@ -1342,11 +1782,12 @@ begin
   if canevent(tmethod(fondbvaluechanged)) then begin
    fondbvaluechanged(self,sender,b1);
   end;
-  if not b1 then begin
+  if not b1 and not (ahs_dbchangepending in fstate) then begin
    startspeak();
    speaktext(gettexttext(sender),fvoicetext);
   end;
  end;
+ resetstate([ahs_dbchangepending]);
 end;
 
 procedure tassistivehandler.docellevent(const sender: iassistiveclientgrid;
@@ -1354,9 +1795,11 @@ procedure tassistivehandler.docellevent(const sender: iassistiveclientgrid;
 var
  b1: boolean;
  item1: tassistivewidgetitem;
+ f1: assistiveflagsty;
 begin
 {$ifdef mse_debugassistive}
- debug('editcellevent',sender);
+ debug('cellevent '+
+          getenumname(typeinfo(celleventkindty),int32(info.eventkind)),sender);
 {$endif}
  b1:= false;
  if finditem(sender,item1) then begin
@@ -1365,6 +1808,81 @@ begin
  if not b1 then begin
   if canevent(tmethod(foncellevent)) then begin
    foncellevent(self,sender,info,b1);
+  end;
+  if {not b1 and} twidget(sender.getassistivewidget()).active then begin
+   with info do begin
+    case eventkind of
+     cek_enter: begin
+      f1:= sender.getassistiveflags();
+      if not b1 and ((cellbefore.col <> cell.col) or 
+                         (cellbefore.row <> cell.row)) and 
+                                       not (asf_scrolllimit in f1) then begin
+       if not (ahs_locatepending in fstate) then begin
+        startspeak();
+       end;
+       b1:= cellbefore.col <> cell.col;
+       speakgridcell(sender,cell,b1);
+       if b1 and (asf_widgetcell in f1) then begin
+        setstate([ahs_cellwidgetpending]);
+       end;
+      end;
+      resetstate([ahs_locatepending]);
+     end;
+    end;
+   end;
+  end;
+ end;
+end;
+
+procedure tassistivehandler.dogridbordertouched(
+              const sender: iassistiveclientgrid;
+               const adirection: graphicdirectionty);
+var
+ b1: boolean;
+ item1: tassistivewidgetitem;
+ ca1: stockcaptionty;
+begin
+{$ifdef mse_debugassistive}
+ debug('gridbordertouched',sender);
+{$endif}
+ b1:= false;
+ if finditem(sender,item1) then begin
+  item1.dogridbordertouched(self,sender,adirection,b1);
+ end;
+ if not b1 then begin
+  if canevent(tmethod(fongridbordertouched)) then begin
+   fongridbordertouched(self,sender,adirection,b1);
+  end;
+  if not b1 and twidget(sender.getassistivewidget()).active then begin
+   case adirection of
+    gd_left: begin
+     ca1:= sc_firstcol;
+    end;
+    gd_up: begin
+     if asf_db in sender.getassistiveflags then begin
+      ca1:= sc_bof;
+     end
+     else begin
+      ca1:= sc_firstrow;
+     end;
+    end;
+    gd_right: begin
+     ca1:= sc_lastcol;
+    end;
+    gd_down: begin
+     if asf_db in sender.getassistiveflags then begin
+      ca1:= sc_eof;
+     end
+     else begin
+      ca1:= sc_lastrow;
+     end;
+    end;
+    else begin
+     exit;
+    end;
+   end;
+   startspeak();
+   speaktext(ca1,fvoicefixed);
   end;
  end;
 end;
@@ -1378,6 +1896,7 @@ begin
 {$ifdef mse_debugassistive}
  debug('editcharenter',sender);
 {$endif}
+ setstate([ahs_editcharenter]);
  b1:= false;
  if finditem(sender,item1) then begin
   item1.doeditcharenter(self,sender,achar,b1);
@@ -1387,13 +1906,13 @@ begin
    foneditcharenter(self,sender,achar,b1);
   end;
   if not b1 then begin
-   if not (ass_textblock1 in fstate) then begin
+   if not (ahs_textblock1 in fstate) then begin
     startspeak();
    end
    else begin
-    speaktext(sc_input,fvoicecaption);
+    speaktext(sc_input,fvoicefixed);
    end;
-   exclude(fstate,ass_textblock1);
+   exclude(fstate,ahs_textblock1);
    if length(achar) = 1 then begin
     speakcharacter(getucs4char(achar,1),fvoicetext);
    end
@@ -1402,6 +1921,7 @@ begin
    end;
   end;
  end;
+ checklocatepending(sender);
 end;
 
 procedure tassistivehandler.doeditchardelete(const sender: iassistiveclientedit;
@@ -1413,7 +1933,7 @@ begin
 {$ifdef mse_debugassistive}
  debug('editchardelete',sender);
 {$endif}
- include(fstate,ass_textblock);
+ setstate([ahs_textblock,ahs_editchardelete]);
  b1:= false;
  if finditem(sender,item1) then begin
   item1.dochange(self,sender,b1);
@@ -1423,14 +1943,17 @@ begin
    fonchange(self,sender,b1);
   end;
  end;
- startspeak();
- speaktext(sc_deleted,fvoicecaption);
- if length(achar) = 1 then begin
-  speakcharacter(getucs4char(achar,1),fvoicetext);
- end
- else begin
-  speaktext(achar,fvoicetext);
+ if not b1 then begin
+  startspeak();
+  speaktext(sc_deleted,fvoicefixed);
+  if length(achar) = 1 then begin
+   speakcharacter(getucs4char(achar,1),fvoicetext);
+  end
+  else begin
+   speaktext(achar,fvoicetext);
+  end;
  end;
+ checklocatepending(sender);
 end;
 
 procedure tassistivehandler.doeditindexmoved(const sender: iassistiveclientedit;
@@ -1452,22 +1975,22 @@ begin
    foneditindexmoved(self,sender,aindex,b1);
   end;
   if not b1 then begin
-   if not (ass_textblock in fstate) then begin
+   if not (ahs_textblock in fstate) then begin
     startspeak();
    end;
    s1:= sender.getassistivetext();
    if aindex < length(s1) then begin
     if aindex = 0 then begin
-     speaktext(sc_beginoftext,fvoicecaption);
+     speaktext(sc_beginoftext,fvoicefixed);
     end;
     speakcharacter(getucs4char(s1,aindex+1),fvoicetext);
    end
    else begin
-    speaktext(sc_endoftext,fvoicecaption);
+    speaktext(sc_endoftext,fvoicefixed);
    end;
   end;
  end;
- exclude(fstate,ass_textblock);
+ exclude(fstate,ahs_textblock);
 end;
 
 procedure tassistivehandler.doeditwithdrawn(const sender: iassistiveclientedit);
@@ -1478,7 +2001,7 @@ begin
 {$ifdef mse_debugassistive}
  debug('editwithdrawn',sender);
 {$endif}
- include(fstate,ass_textblock);
+ include(fstate,ahs_textblock);
  b1:= false;
  if finditem(sender,item1) then begin
   item1.doeditwithdrawn(self,sender,b1);
@@ -1489,7 +2012,7 @@ begin
   end;
   if not b1 then begin
    startspeak();
-   speaktext(sc_withdrawn,fvoicecaption);
+   speaktext(sc_withdrawn,fvoicefixed);
    speaktext(sender.getassistivetext(),fvoicetext);
   end;
  end;
@@ -1505,7 +2028,7 @@ begin
 {$ifdef mse_debugassistive}
  debug('edittextblock',sender);
 {$endif}
- fstate:= fstate + [ass_textblock,ass_textblock1];
+ fstate:= fstate + [ahs_textblock,ahs_textblock1];
  b1:= false;
  if finditem(sender,item1) then begin
   item1.doedittextblock(self,sender,amode,atext,b1);
@@ -1536,7 +2059,7 @@ begin
     end;
    end;
    startspeak();
-   speaktext(sc1,fvoicecaption);
+   speaktext(sc1,fvoicefixed);
    speaktext(atext,fvoicetext);
   end;
  end;
@@ -1561,7 +2084,7 @@ begin
   end;
   if not b1 then begin
    startspeak();
-   speaktext(sc_inputmode,fvoicecaption);
+   speaktext(sc_inputmode,fvoicefixed);
    case amode of
     eim_insert: begin
      speaktext(sc_insert,fvoicetext);
@@ -1611,7 +2134,38 @@ begin
     end;
    end;
    startspeak();
-   speaktext(ca1,fvoicecaption);
+   speaktext(ca1,fvoicefixed);
+  end;
+ end;
+end;
+
+procedure tassistivehandler.dotabordertouched(const sender: iassistiveclient;
+               const adown: boolean);
+var
+ b1: boolean;
+ item1: tassistivewidgetitem;
+ ca1: stockcaptionty;
+begin
+{$ifdef mse_debugassistive}
+ debug('tabordertouched',sender);
+{$endif}
+ b1:= false;
+ if finditem(sender,item1) then begin
+  item1.dotabordertouched(self,sender,adown,b1);
+ end;
+ if not b1 then begin
+  if canevent(tmethod(fonnavigbordertouched)) then begin
+   fontabordertouched(self,sender,adown,b1);
+  end;
+  if not b1 then begin
+   if adown then begin
+    ca1:= sc_firstelement;
+   end
+   else begin
+    ca1:= sc_lastelement;
+   end;
+   startspeak();
+   speaktext(ca1,fvoicefixed);
   end;
  end;
 end;
@@ -1652,15 +2206,14 @@ begin
 {$ifdef mse_debugassistive}
  debug('menuactivated',sender);
 {$endif}
+ setstate([ahs_menuactivated]);
  b1:= false;
  if canevent(tmethod(fonmenuactivated)) then begin
   fonmenuactivated(self,sender,b1);
  end;
  if not b1 then begin
-  setstate([ass_menuactivated]);
   speakallmenu(sender,false);
  end;
- setstate([ass_menuactivated]);
 end;
 
 procedure tassistivehandler.doitementer(const sender: iassistiveclientmenu;
@@ -1676,12 +2229,12 @@ begin
   fonmenuitementer(self,sender,items,aindex,b1);
  end;
  if not b1 then begin
-  if not (ass_menuactivated in fstate) then begin
+  if not (ahs_menuactivated in fstate) then begin
    startspeak();
    speaktext(getcaptiontext(iassistiveclient(sender)),fvoicetext);
   end;
  end;
- removestate([{ass_windowactivated,}ass_menuactivated]);
+ resetstate([ahs_menuactivated]);
 end;
 
 procedure tassistivehandler.dodatasetevent(const sender: iassistiveclient;
@@ -1716,10 +2269,65 @@ begin
    end;
    if sc1 <> sc_none then begin
     startspeak();
-    speaktext(sc1,fvoicecaption);
+    speaktext(sc1,fvoicefixed);
    end;
   end;
  end;
+end;
+
+procedure tassistivehandler.dostatread(const reader: tstatreader);
+begin
+ if reader.canstate then begin
+  with fspeaker do begin
+   language:= reader.readmsestring('language',language);
+   gender:= genderty(reader.readinteger('gender',ord(gender),ord(low(gender)),
+                                                ord(high(gender))));
+   age:= reader.readinteger('age',age,0,100);
+   volume:= reader.readreal('volume',volume,0,2);
+   rate:= reader.readreal('rate',rate,0.1,10);
+   pitch:= reader.readreal('pitch',pitch,0.2,5);
+   range:= reader.readreal('range',pitch,0.2,5);
+   capitals:= reader.readinteger('capitals',capitals,0,300);
+   wordgap:= reader.readinteger('wordgap',wordgap,0,100);
+  end;
+ end;
+end;
+
+procedure tassistivehandler.dostatwrite(const writer: tstatwriter);
+begin
+ if writer.canstate then begin
+  with fspeaker do begin
+   writer.writemsestring('language',msestring(language));
+   writer.writeinteger('gender',ord(gender));
+   writer.writeinteger('age',age);
+   writer.writereal('volume',volume);
+   writer.writereal('rate',rate);
+   writer.writereal('pitch',pitch);
+   writer.writereal('range',pitch);
+   writer.writeinteger('capitals',capitals);
+   writer.writeinteger('wordgap',wordgap);
+  end;
+ end;
+end;
+
+procedure tassistivehandler.statreading();
+begin
+ //dummy
+end;
+
+procedure tassistivehandler.statread();
+begin
+ //dummy
+end;
+
+function tassistivehandler.getstatvarname(): msestring;
+begin
+ result:= fstatvarname;
+end;
+
+function tassistivehandler.getstatpriority(): integer;
+begin
+ result:= fstatpriority;
 end;
 
 end.

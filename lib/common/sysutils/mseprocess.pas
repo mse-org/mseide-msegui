@@ -167,6 +167,18 @@ type
    property oncheckabort;
  end;
  
+function getprocessoutput(const filename: msestring; 
+                                  const aparams: msestringarty;
+                         const todata: string;
+                         out fromdata: string; out errordata: string;
+                         const atimeout: integer = -1;
+                         const aoptions: processoptionsty = 
+                            defaultgetprocessoutputoptions;
+                       const acheckabort: updatebooleaneventty = nil;
+                       const amaxdatalen: integer = 0): integer;
+                         //returns program exitcode, -1 in case of error
+                         //-2 in case of maxdatalen reached
+
 function getprocessoutput(const acommandline: msestring; const todata: string;
                          out fromdata: string; out errordata: string;
                          const atimeout: integer = -1;
@@ -234,7 +246,8 @@ type
  end;
  
 function getprocessoutput1(const prochandlepo: pprochandlety;
-               const acommandline: msestring; const todata: string;
+               const acommandline: msestring; const aparams: msestringarty;
+               const todata: string;
                out fromdata: string; out errordata: string;
                const atimeout: integer; const aoptions: processoptionsty;
                              const acheckabort: updatebooleaneventty;
@@ -243,12 +256,22 @@ function getprocessoutput1(const prochandlepo: pprochandlety;
                          //-2 in case of maxdatalen reached
 var
  proc1: tstringprocess;
+ i1: int32;
 begin
  result:= -1;
  proc1:= tstringprocess.create(amaxdatalen);
  try
   with proc1 do begin
-   commandline:= acommandline;
+   if aparams <> nil then begin
+    filename:= acommandline;
+    params.count:= length(aparams);
+    for i1:= 0 to high(aparams) do begin
+     params[i1]:= aparams[i1];
+    end;
+   end
+   else begin
+    commandline:= acommandline;
+   end;
    options:= aoptions + [pro_output,pro_erroroutput,pro_input];
    oncheckabort:= acheckabort;
    active:= true;
@@ -325,6 +348,22 @@ begin
  end;
 end;
 
+function getprocessoutput(const filename: msestring; 
+                                  const aparams: msestringarty;
+                         const todata: string;
+                         out fromdata: string; out errordata: string;
+                         const atimeout: integer = -1;
+                         const aoptions: processoptionsty = 
+                            defaultgetprocessoutputoptions;
+                       const acheckabort: updatebooleaneventty = nil;
+                       const amaxdatalen: integer = 0): integer;
+                         //returns program exitcode, -1 in case of error
+                         //-2 in case of maxdatalen reached
+begin
+ result:= getprocessoutput1(nil,filename,aparams,todata,fromdata,errordata,
+                                 atimeout,aoptions,acheckabort,amaxdatalen);
+end;
+
 function getprocessoutput(const acommandline: msestring; const todata: string;
                          out fromdata: string; out errordata: string;
                          const atimeout: integer = -1;
@@ -333,7 +372,7 @@ function getprocessoutput(const acommandline: msestring; const todata: string;
                        const acheckabort: updatebooleaneventty = nil;
                        const amaxdatalen: integer = 0): integer;
 begin
- result:= getprocessoutput1(nil,acommandline,todata,fromdata,errordata,
+ result:= getprocessoutput1(nil,acommandline,nil,todata,fromdata,errordata,
                                  atimeout,aoptions,acheckabort,amaxdatalen);
 end;
  
@@ -347,7 +386,7 @@ function getprocessoutput(const acommandline: msestring; const todata: string;
 var
  str1: string;
 begin
- result:= getprocessoutput1(nil,acommandline,todata,fromdata,str1,
+ result:= getprocessoutput1(nil,acommandline,nil,todata,fromdata,str1,
                                 atimeout,aoptions,acheckabort,amaxdatalen);
 end;
 
@@ -360,7 +399,7 @@ function getprocessoutput(out prochandle: prochandlety;
                        const acheckabort: updatebooleaneventty = nil;
                        const amaxdatalen: integer = 0): integer;
 begin
- result:= getprocessoutput1(@prochandle,acommandline,todata,fromdata,errordata,
+ result:= getprocessoutput1(@prochandle,acommandline,nil,todata,fromdata,errordata,
                                 atimeout,aoptions,acheckabort,amaxdatalen);
 end;
  
@@ -375,7 +414,7 @@ function getprocessoutput(out prochandle: prochandlety;
 var
  str1: string;
 begin
- result:= getprocessoutput1(@prochandle,acommandline,todata,fromdata,str1,
+ result:= getprocessoutput1(@prochandle,acommandline,nil,todata,fromdata,str1,
                                  atimeout,aoptions,acheckabort,amaxdatalen);
 end;
  

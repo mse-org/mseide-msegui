@@ -73,7 +73,8 @@ type
  texteditoptionty = (teeo_bom,teeo_nobom); //[] -> use loaded
  texteditoptionsty = set of texteditoptionty;
  
- tcustomtextedit = class(tcustomedit,igridwidget,istatfile)
+ tcustomtextedit = class(tcustomedit,igridwidget,istatfile,
+                                      iassistiveclientgridwidget)
   private
    fstatfile: tstatfile;
    fstatvarname: msestring;
@@ -164,6 +165,9 @@ type
                        out acellrect: rectty): boolean; virtual;
    function textclipped(const arow: integer): boolean;
 
+   function getiassistiveclient(): iassistiveclient override;
+    //iassistiveclientgridwidget
+   function getassistivecolumncaption(): msestring virtual;
     //igridwidget
    procedure setfirstclick(var ainfo: mouseeventinfoty);
    function createdatalist(const sender: twidgetcol): tdatalist; virtual;
@@ -1931,6 +1935,19 @@ begin
  result:= textclipped(arow,rect1);
 end;
 
+function tcustomtextedit.getiassistiveclient(): iassistiveclient;
+begin
+ result:= iassistiveclientgridwidget(self);
+end;
+
+function tcustomtextedit.getassistivecolumncaption(): msestring;
+begin
+ result:= '';
+ if fgridintf <> nil then begin
+  result:= fgridintf.getcol.defaultcaption();
+ end;
+end;
+
 procedure tcustomtextedit.docellevent(const ownedcol: boolean; 
                                                 var info: celleventinfoty);
 var
@@ -2067,7 +2084,7 @@ function tcustomtextedit.getassistiveflags: assistiveflagsty;
 begin
  result:= inherited getassistiveflags;
  if fgridintf <> nil then begin
-  include(result,asf_gridcell);
+  include(result,asf_gridwidget);
  end;
 end;
 

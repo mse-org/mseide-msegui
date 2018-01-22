@@ -1,4 +1,4 @@
-{ MSEide Copyright (c) 1999-2016 by Martin Schreiber
+{ MSEide Copyright (c) 1999-2018 by Martin Schreiber
    
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -116,6 +116,7 @@ type
    fnewfisources: filenamearty;
    fnewfonames: msestringarty;
    fnewfonamebases: msestringarty;
+   fnewfoformsuffixes: msestringarty;
    fnewfosources: msestringarty;
    fnewfoforms: msestringarty;
   published
@@ -136,6 +137,8 @@ type
    property newfonames: msestringarty read fnewfonames write fnewfonames;
    property newfonamebases: msestringarty read fnewfonamebases
                                                    write fnewfonamebases;
+   property newfoformsuffixes: msestringarty read fnewfoformsuffixes
+                                                   write fnewfoformsuffixes;
    property newfosources: msestringarty read fnewfosources 
                                         write fnewfosources;
    property newfoforms: msestringarty read fnewfoforms write fnewfoforms;
@@ -1068,6 +1071,7 @@ type
    settingsfontalias: tbooleanedit;
    makeoptpurpose: tstringedit;
    pairmaxrowcount: tintegeredit;
+   newfoformsuffixes: tstringedit;
    procedure acttiveselectondataentered(const sender: TObject);
    procedure colonshowhint(const sender: tdatacol; const arow: Integer; 
                       var info: hintinfoty);
@@ -1835,78 +1839,91 @@ begin
    
    setlength(fnewfonames,12);
    setlength(fnewfonamebases,12);
+   setlength(fnewfoformsuffixes,12);
    setlength(p.fnewinheritedforms,12);
    setlength(fnewfosources,12);
    setlength(fnewfoforms,12);
  
    newfonames[0]:= actionsmo.c[ord(ac_mainform)];
    newfonamebases[0]:= 'form';
+   newfoformsuffixes[0]:= 'fo';
    newinheritedforms[0]:= false;
    newfosources[0]:= '${TEMPLATEDIR}default/mainform.pas';
    newfoforms[0]:= '${TEMPLATEDIR}default/mainform.mfm';
   
    newfonames[1]:= actionsmo.c[ord(ac_simpleform)];
    newfonamebases[1]:= 'form';
+   newfoformsuffixes[1]:= 'fo';
    newinheritedforms[1]:= false;
    newfosources[1]:= '${TEMPLATEDIR}default/simpleform.pas';
    newfoforms[1]:= '${TEMPLATEDIR}default/simpleform.mfm';
   
    newfonames[2]:= actionsmo.c[ord(ac_dockingform)];
    newfonamebases[2]:= 'form';
+   newfoformsuffixes[2]:= 'fo';
    newinheritedforms[2]:= false;
    newfosources[2]:= '${TEMPLATEDIR}default/dockingform.pas';
    newfoforms[2]:= '${TEMPLATEDIR}default/dockingform.mfm';
   
    newfonames[3]:= actionsmo.c[ord(ac_sizingform)];
    newfonamebases[3]:= 'form';
+   newfoformsuffixes[3]:= 'fo';
    newinheritedforms[3]:= false;
    newfosources[3]:= '${TEMPLATEDIR}default/sizingform.pas';
    newfoforms[3]:= '${TEMPLATEDIR}default/sizingform.mfm';
   
    newfonames[4]:= actionsmo.c[ord(ac_datamodule)];
    newfonamebases[4]:= 'module';
+   newfoformsuffixes[4]:= 'mo';
    newinheritedforms[4]:= false;
    newfosources[4]:= '${TEMPLATEDIR}default/datamodule.pas';
    newfoforms[4]:= '${TEMPLATEDIR}default/datamodule.mfm';
   
    newfonames[5]:= actionsmo.c[ord(ac_subform)];
    newfonamebases[5]:= 'form';
+   newfoformsuffixes[5]:= 'fo';
    newinheritedforms[5]:= false;
    newfosources[5]:= '${TEMPLATEDIR}default/subform.pas';
    newfoforms[5]:= '${TEMPLATEDIR}default/subform.mfm';
  
    newfonames[6]:= actionsmo.c[ord(ac_scrollboxform)];
    newfonamebases[6]:= 'form';
+   newfoformsuffixes[6]:= 'fo';
    newinheritedforms[6]:= false;
    newfosources[6]:= '${TEMPLATEDIR}default/scrollboxform.pas';
    newfoforms[6]:= '${TEMPLATEDIR}default/scrollboxform.mfm';
  
    newfonames[7]:= actionsmo.c[ord(ac_tabform)];
    newfonamebases[7]:= 'form';
+   newfoformsuffixes[7]:= 'fo';
    newinheritedforms[7]:= false;
    newfosources[7]:= '${TEMPLATEDIR}default/tabform.pas';
    newfoforms[7]:= '${TEMPLATEDIR}default/tabform.mfm';
   
    newfonames[8]:= actionsmo.c[ord(ac_dockpanel)];
    newfonamebases[8]:= 'form';
+   newfoformsuffixes[8]:= 'fo';
    newinheritedforms[8]:= false;
    newfosources[8]:= '${TEMPLATEDIR}default/dockpanelform.pas';
    newfoforms[8]:= '${TEMPLATEDIR}default/dockpanelform.mfm';
  
    newfonames[9]:= actionsmo.c[ord(ac_report)];
    newfonamebases[9]:= 'report';
+   newfoformsuffixes[9]:= 're';
    newinheritedforms[9]:= false;
    newfosources[9]:= '${TEMPLATEDIR}default/report.pas';
    newfoforms[9]:= '${TEMPLATEDIR}default/report.mfm';
   
    newfonames[10]:= actionsmo.c[ord(ac_scriptform)];
    newfonamebases[10]:= 'script';
+   newfoformsuffixes[10]:= 'sc';
    newinheritedforms[10]:= false;
    newfosources[10]:= '${TEMPLATEDIR}default/pascform.pas';
    newfoforms[10]:= '${TEMPLATEDIR}default/pascform.mfm';
  
    newfonames[11]:= actionsmo.c[ord(ac_inheritedform)];
    newfonamebases[11]:= 'form';
+   newfoformsuffixes[11]:= 'fo';
    newinheritedforms[11]:= true;
    newfosources[11]:= '${TEMPLATEDIR}default/inheritedform.pas';
    newfoforms[11]:= '${TEMPLATEDIR}default/inheritedform.mfm';
@@ -1991,6 +2008,7 @@ procedure updateprojectsettings(const statfiler: tstatfiler;
                                     const disabledoptions: settinggroupsty);
 var
  int1: integer;
+ i2: int32;
 begin
  with statfiler,projectoptions,s,t do begin
   
@@ -2043,6 +2061,16 @@ begin
     if int1 > length(newfonamebases) then begin
      int1:= length(newfonamebases);
     end;
+    if high(newfoformsuffixes) <> high(newfonamebases) then begin
+                      //probably old statfile
+     setlength(fnewfoformsuffixes,length(newfonamebases));
+     for i2:= 0 to high(fnewfoformsuffixes) do begin
+      fnewfoformsuffixes[i2]:= copy(fnewfonamebases[i2],1,2)
+     end;
+    end;
+    if int1 > length(newfoformsuffixes) then begin
+     int1:= length(newfoformsuffixes);
+    end;
     if int1 > length(newinheritedforms) then begin
      int1:= length(newinheritedforms);
     end;
@@ -2054,6 +2082,7 @@ begin
     end;
     setlength(fnewfonames,int1);
     setlength(fnewfonamebases,int1);
+    setlength(fnewfoformsuffixes,int1);
     setlength(fnewinheritedforms,int1);
     setlength(fnewfosources,int1);
     setlength(fnewfoforms,int1);
@@ -3514,6 +3543,8 @@ begin
  fsettingsmake:= true;
  inherited;
 end;
+
+{ ttexttemplatesoptions }
 
 initialization
  codetemplates:= tcodetemplates.create;

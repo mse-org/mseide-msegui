@@ -118,8 +118,10 @@ var
  mat1,mat2: psmatrixty;
  f1,f2: flo64;
 begin
+ b1:= rbs_showed in fstate;
  inherited;
- if (fpsfile <> '') and (acanvas is tpostscriptcanvas) then begin
+ if visible and (fpsfile <> '') and not (rbs_prepass in fstate) and not b1 and 
+                              (acanvas is tpostscriptcanvas) then begin
   stream1:= ttextstream.create(fpsfile,fm_read);
   try
    with tpostscriptcanvas(acanvas) do begin

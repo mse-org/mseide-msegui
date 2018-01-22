@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2015 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2018 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -15,7 +15,7 @@ interface
 uses
  mseclasses,mseedit,mseevent,mseglob,mseguiglob,msegrids,msedatalist,msegui,
  mseinplaceedit,msearrayprops,classes,mclasses,msegraphics,msedrawtext,
- msegraphutils,
+ msegraphutils,mseassistiveclient,
  msetimer,{mseforms,}msetypes,msestrings,msestockobjects,msescrollbar,
  msekeyboard,msegridsglob,mseeditglob,msestat,msebitmap;
 
@@ -318,6 +318,7 @@ type
   protected
    fcontroller: tcustomdropdownlistcontroller;
    fdropdownrowcount: integer;
+   function getassistiveflags(): assistiveflagsty override;
    procedure setfiltertext(const Value: msestring); virtual;
    procedure updatewindowinfo(var info: windowinfoty); override;
    procedure createdatacol(const index: integer; out item: tdatacol); override;
@@ -440,6 +441,8 @@ type
   public
    constructor create(const intf: idropdown); reintroduce;
    destructor destroy; override;
+   function hasdropdown(): boolean;
+   property dropdownwidget: twidget read getdropdownwidget;
    procedure dostatread(const reader: tstatreader); virtual;
    procedure dostatwrite(const writer: tstatwriter); virtual;
    procedure dropdown; virtual;
@@ -645,6 +648,7 @@ type
  tstringcol1 = class(tstringcol);
  tframebutton1 = class(tframebutton);
  tframebuttons1 = class(tframebuttons);
+ tinplaceedit1 = class(tinplaceedit);
  
  timagefixcol = class(tdropdownfixcol)
   private
@@ -1348,6 +1352,14 @@ begin
  inherited;
 end;
 
+function tcustomdropdowncontroller.hasdropdown(): boolean;
+var
+ wi1: twidget;
+begin
+ wi1:= getdropdownwidget();
+ result:= (wi1 <> nil) and not wi1.releasing();
+end;
+
 procedure tcustomdropdowncontroller.dostatread(const reader: tstatreader);
 begin
  //dummy
@@ -2012,10 +2024,10 @@ end;
 
 procedure tcustomdropdownlistcontroller.dropdownkeydown(var info: keyeventinfoty);
 var
- editor1: tinplaceedit;
+ editor1: tinplaceedit1;
  str1: msestring;
 begin
- editor1:= fintf.geteditor;
+ editor1:= tinplaceedit1(fintf.geteditor);
  editor1.dokeydown(info);
  with info do begin
   if not (es_processed in eventstate) and (shiftstate*shiftstatesmask = []) then begin
@@ -2025,8 +2037,10 @@ begin
       if (row >= 0) then begin
        str1:= tstringcol1(fdropdownlist[fvaluecol]).getrowtext(row);
        if length(str1) > editor1.curindex then begin
-        editor1.text:= copy(str1,1,editor1.curindex+1);
-        editor1.curindex:= editor1.curindex + 1;
+        editor1.text:= copy(str1,1,editor1.curindex);
+        editor1.enterchars(copy(str1,editor1.curindex+1,1));
+//        editor1.text:= copy(str1,1,editor1.curindex+1);
+//        editor1.curindex:= editor1.curindex + 1;
         include(eventstate,es_processed);
        end;
       end;
@@ -2554,7 +2568,8 @@ procedure tdropdownlist.mouseevent(var info: mouseeventinfoty);
 begin
  inherited;
  if (info.eventkind = ek_buttonpress) and
-      not pointinrect(translatewidgetpoint(info.pos,self,nil),fwidgetrect) then begin
+      not pointinrect(translatewidgetpoint(info.pos,self,nil),
+                                                  fwidgetrect) then begin
   canceldropdown;
  end;
 end;
@@ -2655,6 +2670,14 @@ begin
  window.modalresult:= mr_ok;
 end;
 
+function tdropdownlist.getassistiveflags(): assistiveflagsty;
+begin
+ result:= inherited getassistiveflags();
+ if ownswindow then begin
+  result:= result + [asf_popup];
+ end;
+end;
+
 procedure tdropdownlist.docellevent(var info: celleventinfoty);
 var
  hintinfo: hintinfoty;
@@ -2686,7 +2709,7 @@ end;
 
 procedure tdropdownlist.clientmouseevent(var info: mouseeventinfoty);
 begin
- if info.eventkind = ek_mousemove then begin
+ if (info.eventkind = ek_mousemove) and not canassistive() then begin
   if dls_mousemoved in fdropdownstate then begin
    if fobjectpicker.active then begin
     killrepeater();

@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2012 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2018 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -17,9 +17,11 @@ unit mseactions;
 interface
 uses
  classes,mclasses,mseact,mseglob,mseguiglob,msegui,mseevent,mseclasses,msebitmap,
- msekeyboard,msetypes,msestrings,msearrayprops,msestatfile,msestat;
+ msekeyboard,msetypes,msestrings,msearrayprops,msestatfile,msestat,
+ mseinterfaces;
 
 type
+
  sysshortcutty = (sho_copy,sho_paste,sho_cut,sho_selectall,
                   sho_rowinsert,sho_rowappend,sho_rowdelete,
                   sho_copycells,sho_pastecells,sho_groupundo,sho_groupredo,
@@ -27,9 +29,14 @@ type
  sysshortcutaty = array[sysshortcutty] of shortcutconstty;
  psysshortcutaty = ^sysshortcutaty;
 const
- lastsysshortcut = sho_groupredo;
- firstassistiveshortcut = succ(lastsysshortcut);
-type
+ shortcutconstty = array[0..2] of shortcutty;
+ assistiveshortcutty = (shoa_speakagain,shoa_speakpath,
+                        shoa_firstelement,shoa_lastelement,
+                        shoa_slower,shoa_faster);
+ assistiveshortcutconstty = array[assistiveshortcutty] of shortcutconstty;
+ assistiveshortcutaty = array[assistiveshortcutty] of shortcutarty;
+ passistiveshortcutaty = ^assistiveshortcutaty;
+ 
  taction = class(tcustomaction,iimagelistinfo,iactionlink)
   private
 //   fmultishortcut: integer; //0 = none, 1 = shortcut, 2 = shortcut1
@@ -142,12 +149,12 @@ type
    property hint: msestring read finfo.hint write finfo.hint;
  end;
 
- type
-  shortcutrecarty = array of 
-                     record 
-                      name: string;
-                      value: integer;
-                     end;
+type
+ shortcutrecarty = array of 
+                    record 
+                     name: string;
+                     value: int32;
+                    end;
 
  tshortcutcontroller = class;
  tshortcutactions = class(townedeventpersistentarrayprop)
@@ -183,7 +190,37 @@ type
    property items[const index: sysshortcutty]: shortcutty read getitems 
                        write setitems; default;
  end;
- 
+
+ assistiveshortcutrecarty = array of 
+                             record 
+                              name: string;
+                              value: shortcutarty;
+                             end;
+
+ tassistiveshortcuts = class(tdynarrayarrayprop)
+  private
+   fowner: tcomponent;
+   fdatapo: passistiveshortcutaty;
+   fshortcuts: assistiveshortcutrecarty;
+   function getitems(const index: assistiveshortcutty): shortcutarty;
+   procedure setitems(const index: assistiveshortcutty; const avalue: shortcutarty);
+   function getshortcutrecord(const index: integer): msestring;
+   procedure setshortcutcount(const acount: integer);
+   procedure setshortcutrecord(const index: integer; const avalue: msestring);
+  protected
+   procedure internalsetcount(const acount: int32) override;
+   procedure setfixcount(const avalue: integer); override;
+   procedure dochange(const aindex: integer); override;
+   procedure dostatread(const varname: msestring; const reader: tstatreader);
+   procedure dostatwrite(const varname: msestring; const writer: tstatwriter);
+   procedure writeitem(const index: integer; writer: twriter); override;
+   procedure readitem(const index: integer; reader: treader); override;
+  public
+   constructor create(const aowner: tcomponent; const adatapo: passistiveshortcutaty);
+   property items[const index: assistiveshortcutty]: shortcutarty read getitems 
+                       write setitems; default;
+ end;
+  
  shortcutstatinfoty = record
   name: ansistring;
   shortcut: shortcutarty;
@@ -202,6 +239,8 @@ type
    fsysshortcuts1: tsysshortcuts;
    fonafterupdate: shortcutcontrollereventty;
    fstatpriority: integer;
+   fassistiveshortcuts: tassistiveshortcuts;
+   fassistiveshortcuts1: tassistiveshortcuts;
    procedure setactions(const avalue: tshortcutactions);
    procedure setstatfile(const avalue: tstatfile);
    function getactionrecord(const index: integer): msestring;
@@ -209,9 +248,11 @@ type
    procedure setactionrecord(const index: integer; const avalue: msestring);
    procedure setsysshortcuts(const avalue: tsysshortcuts);
    procedure setsysshortcuts1(const avalue: tsysshortcuts);
+   procedure setassistiveshortcuts(const avalue: tassistiveshortcuts);
+   procedure setassistiveshortcuts1(const avalue: tassistiveshortcuts);
   protected
    procedure updateaction(const aaction: taction); reintroduce;
-   //istatfile
+    //istatfile
    procedure dostatread(const reader: tstatreader); virtual;
    procedure dostatwrite(const writer: tstatwriter); virtual;
    procedure statreading;
@@ -224,8 +265,14 @@ type
    procedure doafterupdate;
   published
    property actions: tshortcutactions read factions write setactions;
-   property sysshortcuts: tsysshortcuts read fsysshortcuts write setsysshortcuts;
-   property sysshortcuts1: tsysshortcuts read fsysshortcuts1 write setsysshortcuts1;
+   property sysshortcuts: tsysshortcuts read fsysshortcuts 
+                                            write setsysshortcuts;
+   property sysshortcuts1: tsysshortcuts read fsysshortcuts1 
+                                            write setsysshortcuts1;
+   property assistiveshortcuts: tassistiveshortcuts read fassistiveshortcuts 
+                                                   write setassistiveshortcuts;
+   property assistiveshortcuts1: tassistiveshortcuts read fassistiveshortcuts1 
+                                                   write setassistiveshortcuts1;
    property statfile: tstatfile read fstatfile write setstatfile;
    property statvarname: msestring read getstatvarname write fstatvarname;
    property statpriority: integer read fstatpriority 
@@ -304,6 +351,8 @@ function getshortcutname(const key: keyty;
                               const shiftstate: shiftstatesty): msestring;
 //function getshortcutname(key: shortcutarty): msestring;
 function getsysshortcutdispname(const aitem: sysshortcutty): msestring;
+function getassistiveshortcutdispname(
+                            const aitem: assistiveshortcutty): msestring;
 
 function isvalidshortcut(const ashortcut: shortcutty): boolean;
 function encodeshortcut(const akey: keyty;
@@ -317,6 +366,8 @@ function checkshortcutcode(const shortcut: shortcutconstty;
           const info: keyeventinfoty): boolean;
 function checkshortcutcode(const shortcut: shortcutty;
           const info: keyinfoty): boolean;
+function checkactionshortcut(const ashortcut: shortcutarty;
+                        var keyinfo: keyeventinfoty): boolean; //true if done
 function checkactionshortcut(var info: actioninfoty;
                         var keyinfo: keyeventinfoty): boolean; //true if done
 function doactionshortcut(const sender: tobject; var info: actioninfoty;
@@ -333,7 +384,7 @@ const
  alt = ord(key_modalt);
  pad = ord(key_modpad);
  
- modmask = shift or ctrl or alt or $1000 or pad;
+ modmask = shift or ctrl or alt or $1000 or pad; // $1000 -> old format
 
  defaultsysshortcuts: sysshortcutaty = 
 //sho_copy,             sho_paste,            sho_cut,         
@@ -367,13 +418,32 @@ const
   (ord(key_none),0,0)
   );
   
+ defaultassistiveshortcuts: assistiveshortcutconstty =
+   //shoa_speakagain,         shoa_speakpath
+  ((ctrl+ord(key_space),0,0),(ctrl+shift+ord(key_space),0,0),
+   //shoa_firstelement,            shoa_lastelement
+   (ctrl+ord(key_y),ord(key_f),0),(ctrl+ord(key_y),ord(key_l),0),
+   //shoa_slower,                 shoa_faster
+   (pad+ctrl+ord(key_minus),0,0),(pad+ctrl+ord(key_plus),0,0)
+  );
+ defaultassistiveshortcuts1: assistiveshortcutconstty =
+   //shoa_speakagain,  shoa_speakpath
+  ((pad+ctrl+ord(key_return),0,0),(pad+ctrl+shift+ord(key_return),0,0),
+   //shoa_firstelement,      shoa_lastelement
+   (ord(key_none),0,0),(ord(key_none),0,0),
+   //shoa_slower,                 shoa_faster
+   (ord(key_none),0,0),(ord(key_none),0,0)
+  );
 var
  sysshortcuts: sysshortcutaty;
  sysshortcuts1: sysshortcutaty;
+ assistiveshortcuts: assistiveshortcutaty;
+ assistiveshortcuts1: assistiveshortcutaty;
+ 
 implementation
 uses
  sysutils,mserichstring,msestream,typinfo,mseformatstr,msestreaming,
- msestockobjects,mseassistiveserver;
+ msestockobjects,mseassistiveserver,msearrayutils;
 type
  twidget1 = class(twidget);
   
@@ -627,18 +697,20 @@ end;
 //todo: internationalize
 function getsysshortcutdispname(const aitem: sysshortcutty): msestring;
 const
-{
- list: array[sysshortcutty] of msestring = (
-        'Copy','Paste','Cut','Select all',
-        'Row insert','Row append','Row delete',
-        'Copy cells','Paste cells','Undo','Redo');
-}
  list: array[sysshortcutty] of stockcaptionty = (
         sc_Copy,sc_Paste,sc_cut,sc_select_all,
         sc_row_insert,sc_row_append,sc_row_delete,
         sc_copy_cells,sc_paste_cells,sc_undo,sc_redo,
-        sc_speakagain);
+begin
+ result:= stockobjects.captions[list[aitem]];
+end;
 
+function getassistiveshortcutdispname(
+                            const aitem: assistiveshortcutty): msestring;
+const
+ list: array[assistiveshortcutty] of stockcaptionty = (
+        sc_speakagain,sc_speakpath,sc_firstelement,sc_lastelement,
+        sc_slower,sc_faster);
 begin
  result:= stockobjects.captions[list[aitem]];
 end;
@@ -1124,89 +1196,94 @@ begin
 end;
 }
 
-function checkactionshortcut(var info: actioninfoty;
-                        var keyinfo: keyeventinfoty): boolean; //true if done
- function check(const anum: integer; out exec: boolean): boolean;
- var
-  ar1: shortcutarty;
-  int1,int2,int3: integer;
- begin
-  if anum = 2 then begin
-   ar1:= info.shortcut1;
-  end
-  else begin
-   ar1:= info.shortcut;
-  end;
-  result:= false;
-  exec:= false;
-  if (high(ar1) > 0) and (es_preview in keyinfo.eventstate) then begin
-   exec:= true;
-   for int1:= high(ar1) downto 0 do begin
-    if checkshortcutcode(ar1[int1],keyinfo,true) then begin
-     result:= true;
-     with application do begin
-      if high(keyhistory) >= int1-1 then begin
-       int3:= 0;
-       if int1 > 0 then begin       
-        for int2:= int1 - 1 downto 0 do begin
-         if not checkshortcutcode(ar1[int2],keyhistory[int3]) then begin
-          result:= false;
-          exec:= false;
-          break;
-         end;
-         inc(int3);
+function check(const ar1: shortcutarty; out exec: boolean;
+                          var keyinfo: keyeventinfoty): boolean;
+var
+ int1,int2,int3: integer;
+begin
+{
+ if anum = 2 then begin
+  ar1:= info.shortcut1;
+ end
+ else begin
+  ar1:= info.shortcut;
+ end;
+}
+ result:= false;
+ exec:= false;
+ if (high(ar1) > 0) and (es_preview in keyinfo.eventstate) then begin
+  exec:= true;
+  for int1:= high(ar1) downto 0 do begin
+   if checkshortcutcode(ar1[int1],keyinfo,true) then begin
+    result:= true;
+    with application do begin
+     if high(keyhistory) >= int1-1 then begin
+      int3:= 0;
+      if int1 > 0 then begin       
+       for int2:= int1 - 1 downto 0 do begin
+        if not checkshortcutcode(ar1[int2],keyhistory[int3]) then begin
+         result:= false;
+         exec:= false;
+         break;
         end;
-       end
-       else begin
-        exec:= false;
-       end;      
+        inc(int3);
+       end;
       end
       else begin
        exec:= false;
-       result:= false;
-      end;
+      end;      
+     end
+     else begin
+      exec:= false;
+      result:= false;
      end;
-     if exec then begin
-      break;
-     end;
-    end
-    else begin
-     exec:= false
     end;
+    if exec then begin
+     break;
+    end;
+   end
+   else begin
+    exec:= false
    end;
-   if exec then begin
-    application.clearkeyhistory;
-   end;
-  end
-  else begin
-   if high(ar1) >= 0 then begin
-    if checkshortcutcode(ar1[0],keyinfo,false) then begin
-     result:= true;
-     if high(ar1) = 0 then begin
-      exec:= true;
-     end;
+  end;
+  if exec then begin
+   application.clearkeyhistory;
+  end;
+ end
+ else begin
+  if high(ar1) >= 0 then begin
+   if checkshortcutcode(ar1[0],keyinfo,false) then begin
+    result:= true;
+    if high(ar1) = 0 then begin
+     exec:= true;
     end;
    end;
   end;
- end; //check
+ end;
+end; //check
 
+function checkactionshortcut(var info: actioninfoty;
+                        var keyinfo: keyeventinfoty): boolean; //true if done
 var
- bo1{,bo2}: boolean;
+ bo1: boolean;
 begin
- bo1:= check(1,result);
+ bo1:= check(info.shortcut,result,keyinfo);
  if not bo1 then begin
-  bo1:= check(2,result);
+  bo1:= check(info.shortcut1,result,keyinfo);
  end;
  if bo1 then begin
   include(keyinfo.eventstate,es_processed);
-  {
-  if result then begin
-   result:= doactionexecute1(sender,info,bo1,false,false);
-//   changed;
-  end;
-  }
  end;
 end;
+
+function checkactionshortcut(const ashortcut: shortcutarty;
+                        var keyinfo: keyeventinfoty): boolean; //true if done
+begin
+ if check(ashortcut,result,keyinfo) then begin
+  include(keyinfo.eventstate,es_processed);
+ end;
+end;
+
 
 function doactionshortcut(const sender: tobject; var info: actioninfoty;
                         var keyinfo: keyeventinfoty;
@@ -1495,6 +1572,10 @@ begin
  factions:= tshortcutactions.create(self);
  fsysshortcuts:= tsysshortcuts.create(self,@mseactions.sysshortcuts);
  fsysshortcuts1:= tsysshortcuts.create(self,@mseactions.sysshortcuts1);
+ fassistiveshortcuts:= tassistiveshortcuts.create(self,
+                                            @mseactions.assistiveshortcuts);
+ fassistiveshortcuts1:= tassistiveshortcuts.create(self,
+                                            @mseactions.assistiveshortcuts1);
  inherited;
 end;
 
@@ -1504,6 +1585,8 @@ begin
  factions.free;
  fsysshortcuts.free;
  fsysshortcuts1.free;
+ fassistiveshortcuts.free;
+ fassistiveshortcuts1.free;
 end;
 
 procedure tshortcutcontroller.setactions(const avalue: tshortcutactions);
@@ -1563,6 +1646,8 @@ begin
  if reader.candata then begin
   fsysshortcuts.dostatread('sysshortcuts',reader);
   fsysshortcuts1.dostatread('sysshortcuts1',reader);
+  fassistiveshortcuts.dostatread('assistiveshortcuts',reader);
+  fassistiveshortcuts1.dostatread('assistiveshortcuts1',reader);
   reader.readrecordarray('shortcuts',{$ifdef FPC}@{$endif}setactionreccount,
             {$ifdef FPC}@{$endif}setactionrecord);
  end;
@@ -1609,6 +1694,8 @@ begin
  if writer.candata then begin
   fsysshortcuts.dostatwrite('sysshortcuts',writer);
   fsysshortcuts1.dostatwrite('sysshortcuts1',writer);
+  fassistiveshortcuts.dostatwrite('assistiveshortcuts',writer);
+  fassistiveshortcuts1.dostatwrite('assistiveshortcuts1',writer);
   writer.writerecordarray('shortcuts',factions.count,
                                 {$ifdef FPC}@{$endif}getactionrecord);
  end;
@@ -1669,6 +1756,18 @@ end;
 procedure tshortcutcontroller.setsysshortcuts1(const avalue: tsysshortcuts);
 begin
  fsysshortcuts1.assign(avalue);
+end;
+
+procedure tshortcutcontroller.setassistiveshortcuts(
+              const avalue: tassistiveshortcuts);
+begin
+ fassistiveshortcuts.assign(avalue);
+end;
+
+procedure tshortcutcontroller.setassistiveshortcuts1(
+              const avalue: tassistiveshortcuts);
+begin
+ fassistiveshortcuts1.assign(avalue);
 end;
 
 function tshortcutcontroller.getstatpriority: integer;
@@ -1849,7 +1948,7 @@ end;
 
 procedure tsysshortcuts.setshortcutcount(const acount: integer);
 begin
- setlength(fshortcuts,count);
+ setlength(fshortcuts,acount);
 end;
 
 procedure tsysshortcuts.setshortcutrecord(const index: integer;
@@ -1896,6 +1995,149 @@ procedure tsysshortcuts.readitem(const index: integer; reader: treader);
 begin
  inherited;
  fitems[index]:= translateshortcut(fitems[index]);
+end;
+
+{ tassistiveshortcuts }
+
+constructor tassistiveshortcuts.create(const aowner: tcomponent;
+            const adatapo: passistiveshortcutaty);
+var
+ sc1: assistiveshortcutty;
+begin
+ inherited create;
+ inherited setfixcount(ord(high(assistiveshortcutty))+1);
+ fowner:= aowner;
+ fdatapo:= adatapo;
+ for sc1:= low(sc1) to high(sc1) do begin
+  shortcutarty(fitems[ord(sc1)]):= fdatapo^[sc1]; //init with current values
+ end;
+end;
+
+function tassistiveshortcuts.getitems(
+                 const index: assistiveshortcutty): shortcutarty;
+begin
+ result:= shortcutarty(inherited getitems(ord(index)));
+end;
+
+procedure tassistiveshortcuts.setitems(const index: assistiveshortcutty;
+               const avalue: shortcutarty);
+begin
+ checkindex(ord(index));
+ shortcutarty(fitems[ord(index)]):= avalue;
+ change(ord(index));
+end;
+
+procedure tassistiveshortcuts.setfixcount(const avalue: integer);
+begin
+ //dummy
+end;
+
+procedure tassistiveshortcuts.dochange(const aindex: integer);
+var
+ sc1: assistiveshortcutty;
+begin
+ inherited;
+ if (fowner <> nil) and not (csdesigning in fowner.componentstate) then begin
+  if aindex < 0 then begin
+   for sc1:= low(sc1) to high(sc1) do begin
+    fdatapo^[sc1]:= shortcutarty(fitems[ord(sc1)]);
+   end;
+  end
+  else begin
+   fdatapo^[assistiveshortcutty(aindex)]:= shortcutarty(fitems[aindex]);
+  end;
+ end;
+end;
+
+procedure tassistiveshortcuts.setshortcutcount(const acount: integer);
+begin
+ setlength(fshortcuts,acount);
+end;
+
+procedure tassistiveshortcuts.setshortcutrecord(const index: integer;
+               const avalue: msestring);
+var
+ s1: string;
+ ar1: stringarty;
+ ar2: shortcutarty;
+ c1: card32;
+ i1: int32;
+begin
+ with fshortcuts[index] do begin
+  decoderecord(avalue,[@name,@s1],'ss');
+  value:= nil;
+  ar1:= splitstring(s1,' ');
+  setlength(ar2,length(ar1));
+  for i1:= 0 to high(ar1) do begin
+   if not trystrtohex(ar1[i1],c1) then begin
+    exit;
+   end;
+   ar2[i1]:= c1;
+  end;
+  value:= ar2;
+ end;
+end;
+
+procedure tassistiveshortcuts.internalsetcount(const acount: int32);
+begin
+ setlength(int16ararty(fitems),acount);
+end;
+
+procedure tassistiveshortcuts.dostatread(const varname: msestring;
+               const reader: tstatreader);
+var
+ int1,int2: integer;
+begin
+ fshortcuts:= nil;
+ reader.readrecordarray(varname,@setshortcutcount,@setshortcutrecord);
+ for int1:= 0 to high(fshortcuts) do begin
+  with fshortcuts[int1] do begin
+//   value:= translateshortcut(value);
+   int2:= getenumvalue(typeinfo(assistiveshortcutty),name);
+   if int2 >= 0 then begin
+    items[assistiveshortcutty(int2)]:= value;
+   end;
+  end;
+ end;
+ fshortcuts:= nil;
+end;
+
+function tassistiveshortcuts.getshortcutrecord(const index: integer): msestring;
+var
+ s1: string;
+ i1: int32;
+ ar1: shortcutarty;
+begin
+ ar1:= shortcutarty(fitems[index]);
+ s1:= '';
+ for i1:= 0 to high(ar1) do begin
+  s1:= s1+hextostr(ar1[i1],4);
+  if i1 <> high(ar1) then begin
+   s1:= s1+' ';
+  end;
+ end;
+ result:= encoderecord([getenumname(typeinfo(assistiveshortcutty),index),s1]);
+end;
+
+procedure tassistiveshortcuts.dostatwrite(const varname: msestring;
+               const writer: tstatwriter);
+begin
+ writer.writerecordarray(varname,count,@getshortcutrecord);
+end;
+
+procedure tassistiveshortcuts.writeitem(const index: integer; writer: twriter);
+begin
+ writeintar(writer,int16arty(fitems[index]));
+end;
+
+procedure tassistiveshortcuts.readitem(const index: integer; reader: treader);
+var
+ ar1: int16arty;
+begin
+ readintar(reader,ar1);
+ int16arty(fitems[index]):= ar1;
+// inherited;
+// fitems[index]:= translateshortcut(fitems[index]);
 end;
 
 { tcustomhelpcontroller }
@@ -1974,8 +2216,33 @@ begin
  end;
 end;
 
-initialization
+procedure doinit();
+
+ procedure setdefault(const source: assistiveshortcutconstty;
+                            out dest: assistiveshortcutaty);
+ var
+  i1: int32;
+  sh1: assistiveshortcutty;
+ begin
+  for sh1:= low(sh1) to high(sh1) do begin
+   dest[sh1]:= nil;
+   for i1:= 0 to high(source[low(sh1)]) do begin
+    if source[sh1][i1] = 0 then begin
+     break;
+    end;
+    additem(int16arty(dest[sh1]),int16(source[sh1][i1]));
+   end;
+  end;
+ end; //setdefault
+ 
+begin
  sysshortcuts:= defaultsysshortcuts; 
  sysshortcuts1:= defaultsysshortcuts1;
+ setdefault(defaultassistiveshortcuts,assistiveshortcuts);
+ setdefault(defaultassistiveshortcuts1,assistiveshortcuts1);
  assistiveexechandler:= @handleassistiveexec;
+end;
+
+initialization
+ doinit();
 end.

@@ -104,7 +104,8 @@ type
  compfilterfuncty = function(const acomponent: tcomponent): boolean of object;
  
  idesigner = interface(inullinterface)
-  procedure componentmodified(const component: tobject);
+  procedure componentmodified(const component: tobject;
+                   const apropname: string = ''; const apropindex: int32 = -1);
   function createcurrentcomponent(const module: tmsecomponent): tcomponent;
   function hascurrentcomponent: boolean;
   procedure addcomponent(const module: tmsecomponent;

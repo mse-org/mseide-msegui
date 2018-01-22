@@ -178,9 +178,11 @@ type
    procedure showmethodsource(const aeditor: tmethodpropertyeditor);
    function selectprop(const anamepath: msestringarty;
                            const acol: int32; const exact: boolean): boolean;
+   function selectprop(const acomponent: tobject; const apropname: string;
+                                            const aitemindex: int32): boolean;
    procedure asyncactivate();
 
-   //idesignnotification
+    //idesignnotification
    procedure itemdeleted(const adesigner: idesigner;
                   const amodule: tmsecomponent;  const aitem: tcomponent);
    procedure iteminserted(const adesigner: idesigner;
@@ -245,7 +247,7 @@ var
 
 implementation
 uses
- objectinspector_mfm,sysutils,msearrayprops,actionsmodule,
+ objectinspector_mfm,sysutils,msearrayprops,actionsmodule,mseformatstr,
  msebitmap,msedrag,mseeditglob,msestockobjects,msedropdownlist,
  sourceupdate,sourceform,msekeyboard,main,msedatalist,msecolordialog;
 
@@ -977,13 +979,37 @@ begin
     end;
     if p1 = pe then begin
      result:= not exact;
+     if p1 <> nil then begin
+      dec(p1);
+     end;
      break;
     end;
+   end;
+   if p1 = nil then begin
+    result:= false;
    end;
    if result then begin
     grid.focuscell(makegridcoord(acol,p1^.findex));
    end;
   end;
+ end;
+end;
+
+function tobjectinspectorfo.selectprop(const acomponent: tobject;
+               const apropname: string; const aitemindex: int32): boolean;
+var
+ ar1: msestringarty;
+begin
+ result:= false;
+ if (apropname <> '') and  (factcomp = acomponent) then begin
+  setlength(ar1,1);
+  ar1[0]:= msestring(apropname);
+  if aitemindex >= 0 then begin
+   ar1[0]:= ar1[0]+'.count';
+   setlength(ar1,2);
+   ar1[1]:= 'Item '+inttostrmse(aitemindex); //todo: use correct propertyname
+  end;
+  result:= selectprop(ar1,0,true);
  end;
 end;
 
@@ -1426,6 +1452,7 @@ begin
   finally
    values.itemlist.decupdate;
   end;
+  tpropertyitem(props.item).feditor.focused();
 //  tpropertyvalue(values[info.cellbefore.row]).updatestate(false);
  end
  else begin
@@ -1597,6 +1624,7 @@ begin
  registerpropertyeditor(typeinfo(boolean),nil,'',tbooleanpropertyeditor); //for fpc
  {$endif}
  registerpropertyeditor(typeinfo(string),nil,'',tstringpropertyeditor);
+ registerpropertyeditor(typeinfo(utf8string),nil,'',tutf8stringpropertyeditor);
  registerpropertyeditor(typeinfo(string),tcomponent,'Name',tnamepropertyeditor);
  registerpropertyeditor(typeinfo(msestring),nil,'',tmsestringpropertyeditor);
  registerpropertyeditor(typeinfo(colorty),nil,'',tcolorpropertyeditor);

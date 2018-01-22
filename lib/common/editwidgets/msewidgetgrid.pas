@@ -21,6 +21,7 @@ uses
  mseclasses,msegrids,msegui,msegraphutils,mseglob,mseguiglob,mseeditglob,
  classes,mclasses,msemenus,msearrayutils,msedragglob,mseinterfaces,
  msegraphics,mseevent,msedatalist,msetypes,msepointer,msestrings,
+ mseassistiveclient,
  msegridsglob{$ifdef mse_with_ifi},mseificomp{$endif};
 
 //todo: simplify handling of changed column widgets in inherited grids
@@ -273,6 +274,8 @@ type
  end;
 
  tdummywidget = class(twidget)
+  protected
+   function getassistiveflags(): assistiveflagsty override;
   public
    constructor create(aowner: tcomponent); override;
    function setfocus(aactivate: boolean = true): boolean; override;
@@ -339,6 +342,7 @@ type
    procedure updatepopupmenu(var amenu: tpopupmenu; 
                          var mouseinfo: mouseeventinfoty); override;
     //iassistiveclientgrid
+   function getassistiveflags(): assistiveflagsty override;
    function getassistivecelltext(const acell: gridcoordty): msestring; override;
    function getassistivecaretindex(): int32; override;
   public
@@ -539,7 +543,7 @@ procedure defaultinitgridwidget(const awidget: twidget;
 implementation
 uses
  sysutils,msebits,msedataedits,msewidgets,mseshapes,msekeyboard,typinfo,
- msereal,mseapplication,msehash,msesumlist,mseassistiveclient;
+ msereal,mseapplication,msehash,msesumlist;
 
 type
  tdatalist1 = class(tdatalist);
@@ -2361,6 +2365,11 @@ begin
  size:= nullsize;
 end;
 
+function tdummywidget.getassistiveflags(): assistiveflagsty;
+begin
+ result:= inherited getassistiveflags() + [asf_dummy];
+end;
+
 function tdummywidget.setfocus(aactivate: boolean = true): boolean;
 begin
  if canfocus then begin
@@ -3841,6 +3850,21 @@ begin
   end;
  end;
  inherited;
+end;
+
+function tcustomwidgetgrid.getassistiveflags(): assistiveflagsty;
+var
+ w1: twidget1;
+begin
+ result:= inherited getassistiveflags();
+ include(result,asf_widgetgrid);
+ if focusedcellvalid then begin
+  w1:= twidget1(datacols[ffocusedcell.col].editwidget);
+  if (w1 <> nil) and 
+    (asf_gridwidget in w1.getiassistiveclient().getassistiveflags()) then begin  
+   result:= result + [asf_widgetcell];
+  end;
+ end;
 end;
 
 function tcustomwidgetgrid.getassistivecelltext(

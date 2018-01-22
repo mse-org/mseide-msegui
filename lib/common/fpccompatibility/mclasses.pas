@@ -397,6 +397,8 @@ type
     function ReadSet(EnumType: ptypeinfo): Integer; virtual; abstract;
     function ReadStr: String; virtual; abstract;
     function ReadString(StringType: TValueType): String; virtual; abstract;
+    function Readutf8String(StringType: TValueType): utf8String;
+                                                         virtual; abstract;
     function ReadWideString: WideString;virtual;abstract;
     function ReadUnicodeString: UnicodeString;virtual;abstract;
     procedure SkipComponent(SkipComponentInfos: Boolean); virtual; abstract;
@@ -451,6 +453,7 @@ type
     function ReadSet(EnumType: ptypeinfo): Integer; override;
     function ReadStr: String; override;
     function ReadString(StringType: TValueType): String; override;
+    function Readutf8String(StringType: TValueType): utf8String; override;
     function ReadWideString: WideString;override;
     function ReadUnicodeString: UnicodeString;override;
     procedure SkipComponent(SkipComponentInfos: Boolean); override;
@@ -542,6 +545,7 @@ type
     function ReadRootComponent(ARoot: tcomponent): tcomponent;
     function ReadVariant: Variant;
     function ReadString: string;
+    function Readutf8String: utf8string;
     function ReadWideString: WideString;
     function ReadUnicodeString: UnicodeString;
     
@@ -606,6 +610,7 @@ type
     procedure WriteMethodName(const Name: String); virtual; abstract;
     procedure WriteSet(Value: LongInt; SetType: Pointer); virtual; abstract;
     procedure WriteString(const Value: String); virtual; abstract;
+    procedure Writeutf8String(const Value: utf8String); virtual; abstract;
     procedure WriteWideString(const Value: WideString);virtual;abstract;
     procedure WriteUnicodeString(const Value: UnicodeString);virtual;abstract;
   end;
@@ -656,6 +661,7 @@ type
     procedure WriteSet(Value: LongInt; SetType: Pointer); override;
     procedure WriteStr(const Value: String);
     procedure WriteString(const Value: String); override;
+    procedure Writeutf8String(const Value: utf8String); override;
     procedure WriteWideString(const Value: WideString); override;
     procedure WriteUnicodeString(const Value: UnicodeString); override;
     procedure WriteVariant(const VarValue: Variant);override;
@@ -720,6 +726,7 @@ type
     procedure WriteListEnd;
     procedure WriteRootComponent(ARoot: tcomponent);
     procedure WriteString(const Value: string);
+    procedure Writeutf8String(const Value: utf8string);
     procedure WriteWideString(const Value: WideString);
     procedure WriteUnicodeString(const Value: UnicodeString);
     procedure WriteVariant(const VarValue: Variant);
@@ -4614,6 +4621,26 @@ begin
     Read(Pointer(@Result[1])^, i);
 end;
 
+function TBinaryObjectReader.Readutf8String(StringType: TValueType): utf8String;
+var
+  b: Byte;
+  i: Integer;
+begin
+  case StringType of
+    vaLString, vaUTF8String:
+      i:=ReadDWord;
+    else
+    //vaString:
+      begin
+        Read(b, 1);
+        i := b;
+      end;
+  end;
+  SetLength(Result, i);
+  if i > 0 then
+    Read(Pointer(@Result[1])^, i);
+end;
+
 
 function TBinaryObjectReader.ReadWideString: WideString;
 var
@@ -4713,7 +4740,7 @@ begin
       SkipBytes(10);
     vaString, vaIdent:
       ReadStr;
-    vaBinary, vaLString:
+    vaBinary, vaLString,vautf8string:
       begin
         Count:=LongInt(ReadDWord);
         SkipBytes(Count);
@@ -6564,6 +6591,7 @@ var
   Method: TMethod;
   Handled: Boolean;
   TmpStr: String;
+  TmpStr8: utf8String;
 begin
   if not Assigned(PPropInfo(PropInfo)^.SetProc) then
     raise EReadError.Create(SReadOnlyProperty);
@@ -6645,10 +6673,18 @@ begin
     tkString, tkLString:
     {$endif}
       begin
+       if proptype = typeinfo(utf8string) then begin
+        TmpStr8:=Readutf8String;
+        if Assigned(FOnReadStringProperty) then
+          FOnReadStringProperty(Self,Instance,PropInfo,TmpStr8);
+        SetStrProp(Instance, PropInfo, TmpStr8);
+       end
+       else begin
         TmpStr:=ReadString;
         if Assigned(FOnReadStringProperty) then
           FOnReadStringProperty(Self,Instance,PropInfo,TmpStr);
         SetStrProp(Instance, PropInfo, TmpStr);
+       end;
       end;
     {$ifdef FPC}
     tkUstring:
@@ -6803,7 +6839,6 @@ begin
   end;
 end;
 
-
 function TReader.ReadString: String;
 var
   StringType: TValueType;
@@ -6823,6 +6858,24 @@ begin
     raise EReadError.Create(SInvalidPropertyValue);
 end;
 
+function TReader.Readutf8String: utf8String;
+var
+  StringType: TValueType;
+begin
+  StringType := FDriver.ReadValue;
+  if StringType in [vaUTF8String] then
+   Result := FDriver.Readutf8String(StringType)
+  else if StringType in [vaString, vaLString] then
+    begin
+      Result := FDriver.ReadString(StringType);
+    end
+  else if StringType in [vaWString] then
+    Result:= ansistring(FDriver.ReadWidestring)
+  else if StringType in [vaUString] then
+    Result:= ansistring(FDriver.ReadUnicodeString)
+  else
+    raise EReadError.Create(SInvalidPropertyValue);
+end;
 
 function TReader.ReadWideString: WideString;
 var
@@ -7557,7 +7610,12 @@ begin
           Driver.BeginProperty(FPropPath + PPropInfo(PropInfo)^.Name);
           if Assigned(FOnWriteStringProperty) then
             FOnWriteStringProperty(Self,Instance,PropInfo,StrValue);
-          WriteString(StrValue);
+          if proptype = typeinfo(utf8string) then begin
+           writeutf8string(strvalue);
+          end
+          else begin
+           WriteString(StrValue);
+          end;
           Driver.EndProperty;
         end;
       end;
@@ -7768,6 +7826,11 @@ end;
 procedure TWriter.WriteString(const Value: String);
 begin
   Driver.WriteString(Value);
+end;
+
+procedure twriter.Writeutf8String(const Value: utf8string);
+begin
+  Driver.Writeutf8String(Value);
 end;
 
 procedure TWriter.WriteWideString(const Value: WideString);
@@ -8123,6 +8186,17 @@ begin
     WriteValue(vaLString);
     WriteDWord(longword(i));
   end;
+  if i > 0 then
+    Write(Value[1], i);
+end;
+
+procedure TBinaryObjectWriter.Writeutf8String(const Value: utf8String);
+var
+  i: Integer;
+begin
+  i := Length(Value);
+  WriteValue(vautf8String);
+  WriteDWord(longword(i));
   if i > 0 then
     Write(Value[1], i);
 end;

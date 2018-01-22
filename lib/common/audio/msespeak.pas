@@ -780,6 +780,8 @@ end;
 
 procedure tcustomespeakng.speak(const atext: msestring;
                const aoptions: speakoptionsty = []; const avoice: int32 = -1);
+var
+ c1: char16;
 begin
  if not (ss_connected in fstate) then begin
   exit;
@@ -788,10 +790,17 @@ begin
   cancel();
  end;
 {$ifdef mse_debugassistive}
- debugwriteln('**'+string(atext));
+ debugwriteln('** '+string(atext));
 {$endif}
  if atext <> '' then begin
-  postevent(tspeakevent.create(atext,aoptions,avoice));
+  c1:= atext[length(atext)];
+  if (c1 in ['.',',',':',';','?','!']) then begin
+   postevent(tspeakevent.create(atext+' ',aoptions,avoice));
+                        //last punctuation not spoken, espeak bug?
+  end
+  else begin
+   postevent(tspeakevent.create(atext,aoptions,avoice));
+  end;
  end;
  if so_wait in aoptions then begin
   wait();

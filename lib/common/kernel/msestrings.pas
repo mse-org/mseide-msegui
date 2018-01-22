@@ -564,6 +564,9 @@ function parsecommandline(const s: pmsechar): msestringarty; overload;
 function parsecommandline(const s: string): stringarty; overload;
 function parsecommandline(const s: msestring): msestringarty; overload;
 
+function rs(const resstring: ansistring): msestring;
+                 //converts resourcestring,
+                 // resourcesstring unit must be compiled with {$codepage utf8}
 function stringtoutf8(const value: msestring;
                            const options: utfoptionsty = []): utf8string;
 function stringtoutf8ansi(const value: msestring;
@@ -1083,6 +1086,14 @@ function utf8tostringansi(const value: ansistring;
 begin
  result:= utf8tostring(pointer(value),length(value),options);
 end;
+
+function rs(const resstring: ansistring): msestring;
+                 //converts resourcestring,
+                 // resourcesstring unit must be compiled with {$codepage utf8}
+begin
+ result:= utf8tostring(pointer(resstring),length(resstring),[]);
+end;
+
 
 function utf8tostring(const value: pchar;
                            const options: utfoptionsty = []): msestring;

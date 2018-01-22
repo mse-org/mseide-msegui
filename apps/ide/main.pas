@@ -269,6 +269,7 @@ type
                             const macrovalues: array of msestring): boolean;
                             //true if ok
    procedure createform(const aname: filenamety; const namebase: string;
+                        const formsuffix: string;
                         const ancestor: string);
    procedure removemodulemenuitem(const amodule: pmoduleinfoty);
    procedure uploadexe(const sender: tguiapplication; var again: boolean);
@@ -1825,29 +1826,30 @@ endlab:
  {$endif}
 end;
 
-function getmodulename(const aname,suffix: msestring): msestring;
+function getmodulename(const aname,suffix,formsuffix: msestring): msestring;
 var
  int1: integer;
 begin
  int1:= length(aname) - length(suffix);
  if (int1 >= 0) and 
             (msestringcomp(copy(aname,int1+1,bigint),suffix) = 0) then begin
-  result:= copy(aname,1,int1) + copy(suffix,1,2);
+  result:= copy(aname,1,int1) + formsuffix;
  end
  else begin
-  result:= aname+copy(suffix,1,2);
+  result:= aname + formsuffix;
  end;
 end;
 
 procedure tmainfo.createform(const aname: filenamety; const namebase: string;
-                        const ancestor: string);
+                            const formsuffix: string; const ancestor: string);
 var
  stream1: ttextstream;
  str1,str2,str3: msestring;
  po1: pmoduleinfoty;
 begin
   str3:= removefileext(filename(aname));
-  str2:= msestring(getmodulename(str3,msestring(namebase)));
+  str2:= msestring(getmodulename(str3,msestring(namebase),
+                                             msestring(formsuffix)));
   stream1:= ttextstream.create(aname,fm_create);
   try
    formskeleton(stream1,ansistring(filename(str3)),ansistring(str2),ancestor);
@@ -1981,7 +1983,7 @@ end;
 
 procedure tmainfo.newformonexecute(const sender: TObject);
 var
- str1,str2,str3,str4,str5: filenamety;
+ str1,str2,str3,str4,str5,str6: filenamety;
  dir,base,ext: filenamety;
  po1: pmoduleinfoty;
  ancestorclass,ancestorunit: msestring;
@@ -2007,6 +2009,7 @@ begin
                               ['"*.pas" "*.pp"'],'pas') = mr_ok then begin
   with projectoptions.p.texp do begin
    str4:= newfonamebases[tmenuitem(sender).tag];
+   str6:= newfoformsuffixes[tmenuitem(sender).tag];
    str2:= newfosources[tmenuitem(sender).tag];
    str3:= newfoforms[tmenuitem(sender).tag];
   end;
@@ -2018,7 +2021,7 @@ begin
     str3:= filepath(str3); //formsource
    end;
    splitfilepath(str1,dir,base,ext);
-   str4:= getmodulename(base,str4);
+   str4:= getmodulename(base,str4,str6);
    str5:= replacefileext(str1,'mfm');
    if str2 <> '' then begin
     copynewfile(str2,str1,false,true,
@@ -2043,7 +2046,7 @@ begin
   end
   else begin
 //   createform(str1,formkindty(tmenuitem(sender).tag));
-   createform(str1,'form','tmseform'); //default
+   createform(str1,'form','tmseform','fo'); //default
   end;
  end;
 end;
