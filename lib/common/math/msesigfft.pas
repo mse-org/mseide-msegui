@@ -403,6 +403,7 @@ var
  i1: int32;
  f1,f2: flo64;
  p1,p2,pe: pflo64;
+ ar1: realarty;
 begin
  inherited;
  if sso_fftmag in options then begin
@@ -416,7 +417,8 @@ begin
      f1:= faveragecount;
      f2:= faveragecount+1;
      p1:= @ffftbuffer[i1][0];
-     p2:= @ffft.outreal[0];
+     ar1:= ffft.outreal;
+     p2:= @ar1[0];
      pe:= p1 + length(ffftbuffer[i1]);
      while p1 < pe do begin
       p1^:= (p1^*f1+p2^)/f2;
