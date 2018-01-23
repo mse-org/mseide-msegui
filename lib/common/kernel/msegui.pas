@@ -12330,15 +12330,15 @@ begin
     dec(int1);
     with fparentwidget do begin
      if int1 < 0 then begin
-      if nowrap then begin
-       exit;
-      end;
       if (ow_parenttabfocus in foptionswidget) and 
                          (fparentwidget <> nil) then begin
        result:= nexttaborder(down);
        if result <> nil then begin
         goto doreturn;
        end;
+      end;
+      if nowrap then begin
+       exit;
       end;
       int1:= high(fwidgets);
      end;
@@ -12351,15 +12351,15 @@ begin
     inc(int1);
     with fparentwidget do begin
      if int1 >= widgetcount then begin
-      if nowrap then begin
-       exit;
-      end;
       if (ow_parenttabfocus in foptionswidget) and 
                          (fparentwidget <> nil) then begin
-       result:= nexttaborder(down);
+       result:= nexttaborder(down,nowrap);
        if result <> nil then begin
         goto doreturn;
        end;
+      end;
+      if nowrap then begin
+       exit;
       end;
       int1:= 0;
      end;
