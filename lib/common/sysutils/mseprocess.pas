@@ -171,7 +171,7 @@ function getprocessoutput(const filename: msestring;
                                   const aparams: msestringarty;
                          const todata: string;
                          out fromdata: string; out errordata: string;
-                         const atimeout: integer = -1;
+                         const atimeoutus: integer = -1;
                          const aoptions: processoptionsty = 
                             defaultgetprocessoutputoptions;
                        const acheckabort: updatebooleaneventty = nil;
@@ -181,7 +181,7 @@ function getprocessoutput(const filename: msestring;
 
 function getprocessoutput(const acommandline: msestring; const todata: string;
                          out fromdata: string; out errordata: string;
-                         const atimeout: integer = -1;
+                         const atimeoutus: integer = -1;
                          const aoptions: processoptionsty = 
                             defaultgetprocessoutputoptions;
                        const acheckabort: updatebooleaneventty = nil;
@@ -190,7 +190,7 @@ function getprocessoutput(const acommandline: msestring; const todata: string;
                          //-2 in case of maxdatalen reached
 function getprocessoutput(const acommandline: msestring; const todata: string;
                          out fromdata: string;
-                         const atimeout: integer = -1;
+                         const atimeoutus: integer = -1;
                     const aoptions: processoptionsty = 
                             defaultgetprocessoutputoptionserrorouttoout;
                        const acheckabort: updatebooleaneventty = nil;
@@ -200,7 +200,7 @@ function getprocessoutput(const acommandline: msestring; const todata: string;
 function getprocessoutput(out prochandle: prochandlety;
                          const acommandline: msestring; const todata: string;
                          out fromdata: string; out errordata: string;
-                         const atimeout: integer = -1;
+                         const atimeoutus: integer = -1;
                          const aoptions: processoptionsty = 
                             defaultgetprocessoutputoptions;
                        const acheckabort: updatebooleaneventty = nil;
@@ -210,7 +210,7 @@ function getprocessoutput(out prochandle: prochandlety;
 function getprocessoutput(out prochandle: prochandlety;
                          const acommandline: msestring; const todata: string;
                          out fromdata: string;
-                         const atimeout: integer = -1;
+                         const atimeoutus: integer = -1;
                     const aoptions: processoptionsty = 
                               defaultgetprocessoutputoptionserrorouttoout;
                        const acheckabort: updatebooleaneventty = nil;
@@ -219,7 +219,7 @@ function getprocessoutput(out prochandle: prochandlety;
                          //-2 in case of maxdatalen reached
 
 function startprocessandwait(const acommandline: msestring;
-                     const atimeout: integer = -1;
+                     const atimeoutus: integer = -1;
                      const aoptions: processoptionsty = 
                             defaultgetprocessoutputoptions;
                        const acheckabort: updatebooleaneventty = nil): integer;
@@ -317,7 +317,7 @@ begin
 end;
 
 function startprocessandwait(const acommandline: msestring;
-                         const atimeout: integer = -1;
+                         const atimeoutus: integer = -1;
                          const aoptions: processoptionsty = 
                                             defaultstartprocessoptions;
                        const acheckabort: updatebooleaneventty = nil): integer;
@@ -334,11 +334,11 @@ begin
    options:= aoptions - [pro_output,pro_erroroutput,pro_input];
    oncheckabort:= acheckabort;
    active:= true;
-   if atimeout < 0 then begin
+   if atimeoutus < 0 then begin
     result:= waitforprocess;
    end
    else begin
-    if waitforprocess(atimeout) then begin
+    if waitforprocess(atimeoutus) then begin
      result:= exitcode;
     end;
    end;
@@ -352,7 +352,7 @@ function getprocessoutput(const filename: msestring;
                                   const aparams: msestringarty;
                          const todata: string;
                          out fromdata: string; out errordata: string;
-                         const atimeout: integer = -1;
+                         const atimeoutus: integer = -1;
                          const aoptions: processoptionsty = 
                             defaultgetprocessoutputoptions;
                        const acheckabort: updatebooleaneventty = nil;
@@ -361,24 +361,24 @@ function getprocessoutput(const filename: msestring;
                          //-2 in case of maxdatalen reached
 begin
  result:= getprocessoutput1(nil,filename,aparams,todata,fromdata,errordata,
-                                 atimeout,aoptions,acheckabort,amaxdatalen);
+                                 atimeoutus,aoptions,acheckabort,amaxdatalen);
 end;
 
 function getprocessoutput(const acommandline: msestring; const todata: string;
                          out fromdata: string; out errordata: string;
-                         const atimeout: integer = -1;
+                         const atimeoutus: integer = -1;
                           const aoptions: processoptionsty = 
                             defaultgetprocessoutputoptions;
                        const acheckabort: updatebooleaneventty = nil;
                        const amaxdatalen: integer = 0): integer;
 begin
  result:= getprocessoutput1(nil,acommandline,nil,todata,fromdata,errordata,
-                                 atimeout,aoptions,acheckabort,amaxdatalen);
+                                 atimeoutus,aoptions,acheckabort,amaxdatalen);
 end;
  
 function getprocessoutput(const acommandline: msestring; const todata: string;
                          out fromdata: string;
-                         const atimeout: integer = -1;
+                         const atimeoutus: integer = -1;
                          const aoptions: processoptionsty = 
                       defaultgetprocessoutputoptionserrorouttoout;
                        const acheckabort: updatebooleaneventty = nil;
@@ -387,26 +387,26 @@ var
  str1: string;
 begin
  result:= getprocessoutput1(nil,acommandline,nil,todata,fromdata,str1,
-                                atimeout,aoptions,acheckabort,amaxdatalen);
+                                atimeoutus,aoptions,acheckabort,amaxdatalen);
 end;
 
 function getprocessoutput(out prochandle: prochandlety;
                          const acommandline: msestring; const todata: string;
                          out fromdata: string; out errordata: string;
-                         const atimeout: integer = -1;
+                         const atimeoutus: integer = -1;
                           const aoptions: processoptionsty = 
                             defaultgetprocessoutputoptions;
                        const acheckabort: updatebooleaneventty = nil;
                        const amaxdatalen: integer = 0): integer;
 begin
  result:= getprocessoutput1(@prochandle,acommandline,nil,todata,fromdata,errordata,
-                                atimeout,aoptions,acheckabort,amaxdatalen);
+                                atimeoutus,aoptions,acheckabort,amaxdatalen);
 end;
  
 function getprocessoutput(out prochandle: prochandlety;
                          const acommandline: msestring; const todata: string;
                          out fromdata: string;
-                         const atimeout: integer = -1;
+                         const atimeoutus: integer = -1;
                          const aoptions: processoptionsty = 
                           defaultgetprocessoutputoptionserrorouttoout;
                        const acheckabort: updatebooleaneventty = nil;
@@ -415,7 +415,7 @@ var
  str1: string;
 begin
  result:= getprocessoutput1(@prochandle,acommandline,nil,todata,fromdata,str1,
-                                 atimeout,aoptions,acheckabort,amaxdatalen);
+                                 atimeoutus,aoptions,acheckabort,amaxdatalen);
 end;
  
 { tcustommseprocess }

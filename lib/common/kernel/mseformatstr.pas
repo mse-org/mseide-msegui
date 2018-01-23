@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2015 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2018 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -98,11 +98,16 @@ function rstring(const s: string; const minwidth: integer): string;
        // ${THEMACRO} checks formatmacros, macro name case sensitive
 {$warnings on}
       
-function formatdatetimemse(formatstr: msestring; const datetime: tdatetime;
-            const formatsettings: tformatsettingsmse): msestring; overload;
+function formatdatetimemse(const formatstr: msestring; const datetime: tdatetime;
+            const formatsettings: tformatsettingsmse): msestring;
 //            'I' = ISO date, 'II' ISO datetime, 'III' ISO datetime + ms
 function formatdatetimemse(const formatstr: msestring;
-                          const datetime: tdatetime): msestring; overload;
+                          const datetime: tdatetime): msestring;
+function formatdatetimemse(const datetime: tdatetime; formatstr: msestring;
+            const formatsettings: tformatsettingsmse): msestring;
+//            'I' = ISO date, 'II' ISO datetime, 'III' ISO datetime + ms
+function formatdatetimemse(const datetime: tdatetime;
+                                        const formatstr: msestring): msestring;
 
 function formatfloatmse(value: double; format: msestring; 
                          const formatsettings: tformatsettingsmse;
@@ -444,6 +449,7 @@ function encodebase64(const abinary: string;
 function encodebase64(const abinary: pbyte; acount: integer;
       const maxlinelength: integer = defaultbase64linelength): string; overload;
 function decodebase64(const atext: string): string;
+function encodexmlstring(const value: msestring): msestring;
 
 {$ifndef FPC}
 function TryStrToQWord(const S: string; out Value: QWord): Boolean;
@@ -560,6 +566,80 @@ begin
  end;
 end;
 
+function encodexmlstring(const value: msestring): msestring;
+var
+ i1: int32;
+ ps,pe,pd,pde: pmsechar;
+
+ procedure checkgrow();
+ var
+  i1: ptrint;
+  p1: pmsechar;
+ begin
+  if pde - pd <= 5 then begin
+   p1:= pointer(result);
+   setlength(result,length(result) * 2);
+   i1:= pmsechar(pointer(result)) - p1;
+   pd:= pd+i1;
+   pde:= pde+i1;
+  end;
+ end; //checkgrow
+ 
+type
+ char4ty = array[0..3] of msechar;
+ pchar4ty = ^char4ty;
+ char5ty = array[0..4] of msechar;
+ pchar5ty = ^char5ty;
+ char6ty = array[0..5] of msechar;
+ pchar6ty = ^char6ty;
+
+begin
+ result:= '';
+ if value <> '' then begin
+  ps:= pointer(value);
+  i1:= length(value);
+  pe:= ps + i1;
+  setlength(result,i1);
+  pd:= pointer(result);
+  pde:= pd+i1;
+  while ps < pe do begin
+   case ps^ of
+    '"': begin
+     checkgrow();
+     pchar6ty(pd)^:= '&quot;';
+     inc(pd,5);
+    end;
+    '''': begin
+     checkgrow();
+     pchar6ty(pd)^:= '&apos;';
+     inc(pd,5);
+    end;
+    '<': begin
+     checkgrow();
+     pchar4ty(pd)^:= '&lt;';
+     inc(pd,3);
+    end;
+    '>': begin
+     checkgrow();
+     pchar4ty(pd)^:= '&gt;';
+     inc(pd,3);
+    end;
+    '&': begin
+     checkgrow();
+     pchar5ty(pd)^:= '&amp;';
+     inc(pd,4);
+    end;
+    else begin
+     pd^:= ps^;
+    end;
+   end;
+   inc(ps);
+   inc(pd);
+  end;
+  setlength(result,pd-pmsechar(pointer(result)));
+ end;
+end;
+
 var
  fformatmacros: tformatmacrolist;
 
@@ -609,7 +689,7 @@ end;
 
 //copied from FPC dati.inc
 
-function formatdatetimemse(formatstr: msestring; const datetime: tdatetime;
+function formatdatetimemse(const datetime: tdatetime; formatstr: msestring;
                   const formatsettings: tformatsettingsmse): msestring;
 var
    ResultLen: integer;
@@ -823,22 +903,40 @@ var
    end ;
 
 begin
+ result:= '';
+ if datetime = emptydatetime then begin
+  exit;
+ end;
+ 
  checkformatmacros(formatstr);
-  DecodeDateFully(DateTime, Year, Month, Day, DayOfWeek);
-  DecodeTime(DateTime, Hour, Minute, Second, MilliSecond);
-  ResultLen := 0;
-  ResultCurrent := @ResultBuffer[0];
-  StoreFormat(FormatStr);
+ DecodeDateFully(DateTime, Year, Month, Day, DayOfWeek);
+ DecodeTime(DateTime, Hour, Minute, Second, MilliSecond);
+ ResultLen := 0;
+ ResultCurrent := @ResultBuffer[0];
+ StoreFormat(FormatStr);
 //  ResultBuffer[ResultLen] := #0;
 //  result := StrPas(@ResultBuffer[0]);
-  setlength(result,resultlen);
-  move(resultbuffer,pointer(result)^,resultlen*sizeof(msechar));
+ setlength(result,resultlen);
+ move(resultbuffer,pointer(result)^,resultlen*sizeof(msechar));
+ 
 end ;
+
+function formatdatetimemse(const datetime: tdatetime;
+                                        const formatstr: msestring): msestring;
+begin
+ result:= formatdatetimemse(datetime,formatstr,defaultformatsettingsmse);
+end;
+
+function formatdatetimemse(const formatstr: msestring; const datetime: tdatetime;
+            const formatsettings: tformatsettingsmse): msestring;
+begin
+ result:= formatdatetimemse(datetime,formatstr,formatsettings);
+end;
 
 function formatdatetimemse(const formatstr: msestring;
                           const datetime: tdatetime): msestring;
 begin
- result:= formatdatetimemse(formatstr,datetime,defaultformatsettingsmse);
+ result:= formatdatetimemse(datetime,formatstr,defaultformatsettingsmse);
 end;
 
 (* 
@@ -2795,8 +2893,11 @@ var
  po3,po4: pmsechar;
 
 begin
- checkformatmacros(format);
  result:= '';
+ if value = emptyreal then begin
+  exit;
+ end;
+ checkformatmacros(format);
  ar1[0]:= 0;
  with formatsettings do begin
   if dot then begin
