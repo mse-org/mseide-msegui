@@ -6675,8 +6675,11 @@ begin
       begin
        if proptype = typeinfo(utf8string) then begin
         TmpStr8:=Readutf8String;
-        if Assigned(FOnReadStringProperty) then
-          FOnReadStringProperty(Self,Instance,PropInfo,TmpStr8);
+        if Assigned(FOnReadStringProperty) then begin
+          tmpstr:= tmpstr8;
+          FOnReadStringProperty(Self,Instance,PropInfo,TmpStr);
+          tmpstr8:= tmpstr;
+        end;
         SetStrProp(Instance, PropInfo, TmpStr8);
        end
        else begin
