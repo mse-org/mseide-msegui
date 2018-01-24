@@ -230,7 +230,7 @@ type
    property visiblebuttons: dbnavigbuttonsty read fvisiblebuttons 
                  write setvisiblebuttons default defaultvisibledbnavigbuttons;
    property colorglyph: colorty read getcolorglyph write setcolorglyph
-                                                             default cl_glyph;
+                                                             default cl_default;
    property buttonface: tface read getbuttonface write setbuttonface;
    property buttonwidth: integer read getbuttonwidth write setbuttonwidth
                                                                      default 0;

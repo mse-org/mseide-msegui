@@ -6336,7 +6336,7 @@ begin
   if (info.bookmark.recordpo <> nil) or (deletedrecord <> nil) then begin
    deletedrecord:= adeletedrecord;
    logging:= alogging;
-   if ruf_inupdate in info.flags then begin
+   if (ruf_inupdate in info.flags) and (info.updatekind = ukmodify) then begin
     kind:= uk_modifyinupdate;
    end
    else begin
