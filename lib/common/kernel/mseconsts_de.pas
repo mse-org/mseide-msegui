@@ -198,7 +198,7 @@ const
   'Letzte Zeile',              //sc_lastrow
   'Auswahl',                   //sc_selection
   'Spreche Pfad',              //sc_speakpath
-  'Inaktive Schaltfläche',     //sc_disabledbutton
+  'Deaktivierte Schaltfläche', //sc_disabledbutton
   'Erstes Feld',               //sc_firstfield
   'Letztes Feld',              //sc_lastfield
   'Erstes Element',            //sc_firstelement

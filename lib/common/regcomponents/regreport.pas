@@ -91,7 +91,12 @@ var
 begin
  with treptabulatoritem(getpointervalue) do begin
   if datafield = '' then begin
-   mstr1:= value;
+   if ifilink <> nil then begin
+    mstr1:= msestring(ifilink.name);
+   end
+   else begin
+    mstr1:= value;
+   end;
   end
   else begin
    mstr1:= '';

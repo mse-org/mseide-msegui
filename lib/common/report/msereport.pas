@@ -12,7 +12,7 @@ unit msereport;
 interface
 uses
  classes,mclasses,mseapplication,msegui,msegraphics,msetypes,msewidgets,
- msegraphutils,mseclasses,mseinterfaces,
+ msegraphutils,mseclasses,mseinterfaces,mseificomp,
  msetabs,mseprinter,msestream,msearrayprops,mseguiglob,msesimplewidgets,
  msedrawtext,msestrings,mserichstring,msedb,mdb,msethread,mseobjectpicker,
  msepointer,mseevent,msesplitter,msestatfile,mselookupbuffer,mseformatstr,
@@ -218,6 +218,7 @@ type
    ftag: integer;
    foptions: reptabulatoritemoptionsty;
    fsum: itemsumty;
+   fifilink: tifilinkcomp;
    procedure setvalue(const avalue: msestring);
    procedure setrichvalue(const avalue: richstringty);
    function getdisptext: richstringty;
@@ -277,6 +278,7 @@ type
    procedure setoptions(const avalue: reptabulatoritemoptionsty);
    function getsumcount: integer;
    procedure setenabled(const avalue: boolean);
+   procedure setifilink(const avalue: tifilinkcomp);
   protected
    function getenabled: boolean override;
    procedure setpos(const avalue: real); override;
@@ -287,6 +289,13 @@ type
    constructor create(aowner: tobject); override;
    destructor destroy; override;
    procedure resetsum(const skipcurrent: boolean);
+
+   procedure setintvalue(const avalue: int32);
+   procedure setint64value(const avalue: int64);
+   procedure setfloatvalue(const avalue: flo64);
+   procedure setdatetimevalue(const avalue: tdatetime);
+   procedure setcurrencyvalue(const avalue: currency);
+
    property sumcount: integer read getsumcount;
    property sumasinteger: integer read getsumasinteger;
    property sumaslargeint: int64 read getsumaslargeint;
@@ -303,6 +312,7 @@ type
    property color: colorty read fcolor write setcolor default cl_none;
    property textflags: textflagsty read ftextflags write settextflags 
                    default defaultreptabtextflags;
+   property ifilink: tifilinkcomp read fifilink write setifilink;
    property datafield: string read getdatafield write setdatafield;
    property datasource: tdatasource read getdatasource1 write setdatasource;
    property lookupbuffer: tcustomlookupbuffer read flookupbuffer 
@@ -1832,6 +1842,7 @@ type
  tmsecomponent1 = class(tmsecomponent);
  tdataset1 = class(tdataset);
  tcanvas1 = class(tcanvas);
+ tifilink1 = class(tifilinkcomp);
 
 function checkdashes(const avalue: string): string;
 var
@@ -2012,6 +2023,7 @@ end;
 destructor treptabulatoritem.destroy;
 begin
  lookupbuffer:= nil;
+ ifilink:= nil;
  inherited;
  ffont.free;
  fdatalink.free;
@@ -2157,6 +2169,7 @@ var
  skey: msestring;
  int1: integer;
  int641: int64;
+ cl1: customificlientcontrollerclassty;
  
 begin
  if fdatalink.fieldactive then begin
@@ -2311,7 +2324,39 @@ begin
    end
   end
   else begin
-   result:= fvalue;
+   if fifilink <> nil then begin
+    cl1:= tifilink1(fifilink).getcontrollerclass();
+    if cl1 = tstringclientcontroller then begin
+     result.text:= tstringclientcontroller(fifilink.c).value;
+    end
+    else begin
+     if cl1 = tintegerclientcontroller then begin
+      result.text:= realtytostring(
+                          tintegerclientcontroller(fifilink.c).value,fformat);
+     end
+     else begin
+      if cl1 = tint64clientcontroller then begin
+       result.text:= realtytostring(
+                           tint64clientcontroller(fifilink.c).value,fformat);
+      end
+      else begin
+       if cl1 = trealclientcontroller then begin
+        result.text:= realtytostring(
+                            trealclientcontroller(fifilink.c).value,fformat);
+       end
+       else begin
+        if cl1 = tdatetimeclientcontroller then begin
+         result.text:= mseformatstr.datetimetostring(
+                          tdatetimeclientcontroller(fifilink.c).value,fformat);
+        end;
+       end;
+      end;
+     end;
+    end;
+   end
+   else begin
+    result:= fvalue;
+   end;
   end;
  end;
  if treptabulators(fowner).fband.canevent(tmethod(fongetvalue)) then begin
@@ -2468,6 +2513,12 @@ begin
  changed;
 end;
 
+procedure treptabulatoritem.setifilink(const avalue: tifilinkcomp);
+begin
+ treptabulators(fowner).fband.setlinkedvar(avalue,tmsecomponent(fifilink));
+ changed();
+end;
+
 procedure treptabulatoritem.setlookupkeyfieldno(const avalue: integer);
 begin
  flookupkeyfieldno:= avalue;
@@ -2508,6 +2559,31 @@ begin
  fillchar(fsum,sizeof(fsum),0);
  fsum.resetpending:= skipcurrent;
  fsum.reset:= true;
+end;
+
+procedure treptabulatoritem.setintvalue(const avalue: int32);
+begin
+ value:= formatfloatmse(avalue,format);
+end;
+
+procedure treptabulatoritem.setint64value(const avalue: int64);
+begin
+ value:= formatfloatmse(avalue,format);
+end;
+
+procedure treptabulatoritem.setfloatvalue(const avalue: flo64);
+begin
+ value:= formatfloatmse(avalue,format);
+end;
+
+procedure treptabulatoritem.setdatetimevalue(const avalue: tdatetime);
+begin
+ value:= formatdatetimemse(avalue,format);
+end;
+
+procedure treptabulatoritem.setcurrencyvalue(const avalue: currency);
+begin
+ value:= formatfloatmse(avalue,format);
 end;
 
 procedure treptabulatoritem.initsum;

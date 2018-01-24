@@ -239,6 +239,18 @@ type
  end;
 
  tformclientcontroller = class(tificlientcontroller)
+  private
+   procedure setmodalresult(const avalue: modalresultty);
+  protected
+   fmodalresult: modalresultty;
+   function getifilinkkind: ptypeinfo; override;
+//   procedure execute(const sender: iificlient); overload; override;
+   procedure linkset(const alink: iificlient) override;
+   procedure valuestoclient(const alink: pointer) override;
+   procedure sendmodalresult(const sender: iificlient; 
+                             const amodalresult: modalresultty) override;
+  public
+   property modalresult: modalresultty read fmodalresult write setmodalresult;
  end;
 
  valarsetterty = procedure(const alink: pointer; var handled: boolean) of object; 
@@ -4892,6 +4904,36 @@ begin
  fitempo:= @result;
  tmsecomponent1(fowner).getobjectlinker.forfirst(
                                     {$ifdef FPC}@{$endif}canclose1,self);
+end;
+
+{ tformclientcontroller }
+
+procedure tformclientcontroller.setmodalresult(const avalue: modalresultty);
+begin
+ fmodalresult:= avalue;
+ change(nil);
+end;
+
+function tformclientcontroller.getifilinkkind: ptypeinfo;
+begin
+ result:= typeinfo(iififormlink);
+end;
+
+procedure tformclientcontroller.linkset(const alink: iificlient);
+begin
+ //do nothing
+end;
+
+procedure tformclientcontroller.valuestoclient(const alink: pointer);
+begin
+ iififormlink(alink).setmodalresult(fmodalresult);
+end;
+
+procedure tformclientcontroller.sendmodalresult(const sender: iificlient;
+               const amodalresult: modalresultty);
+begin
+ fmodalresult:= amodalresult;
+ inherited;
 end;
 
 end.

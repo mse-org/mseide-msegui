@@ -252,6 +252,8 @@ type
     //iificommand
    {$ifdef mse_with_ifi}
    procedure executeificommand(var acommand: ificommandcodety); override;
+    //iififormlink
+   procedure setmodalresult(const avalue: modalresultty);
    {$endif}
    
    procedure docreate(aowner: tcomponent); virtual;
@@ -1240,6 +1242,11 @@ begin
    application.postevent(tobjectevent.create(ek_closeform,ievent(self)));
   end;
  end;
+end;
+
+procedure tcustommseform.setmodalresult(const avalue: modalresultty);
+begin
+ window.modalresult:= avalue;
 end;
 
 function tcustommseform.getifilinkkind: ptypeinfo;

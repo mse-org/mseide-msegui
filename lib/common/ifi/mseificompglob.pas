@@ -41,6 +41,7 @@ type
  end;
 
  iififormlink = interface(iifilink)[miid_iififormlink]
+  procedure setmodalresult(const avalue: modalresultty);
  end;
 
  iifidialoglink = interface(iifilink)[miid_iifidialoglink]
