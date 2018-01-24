@@ -23,7 +23,7 @@ type
                     asf_gridwidget, //implies iassistiveclientgridwidget
                     asf_datetime,asf_menu,asf_message,asf_popup,
                     asf_textedit,asf_graphicedit,asf_readonly,
-                    asf_inplaceedit,asf_button,asf_db,
+                    asf_inplaceedit,asf_button,asf_dispwidget,asf_db,
                     asf_scrolllimit,
                     asf_focused,asf_disabled,asf_hasdropdown,asf_async);
  assistiveflagsty = set of assistiveflagty;

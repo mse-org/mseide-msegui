@@ -1236,9 +1236,14 @@ begin
   s1:= s1+iassistiveclientgridwidget(sender).getassistivecolumncaption();
  end;
  s1:= s1 + getcaptiontext(sender);
+ if aso_textfirst in foptions then begin
+  speaktext(gettexttext(sender),i1);
+ end;
  speaktext(s1,fvoicecaption);
  speaktext(s2,fvoicefixed);
- speaktext(gettexttext(sender),i1);
+ if not (aso_textfirst in foptions) then begin
+  speaktext(gettexttext(sender),i1);
+ end;
  if spo_hint in aoptions then begin
   speaktext(gethinttext(sender),fvoicecaption);
  end;
@@ -1257,9 +1262,14 @@ end;
 procedure tassistivehandler.speakinput(const sender: iassistiveclientdata);
 begin
  startspeak();
- speaktext(sc_input,fvoicecaption);
+ if aso_textfirst in foptions then begin
+  speaktext(gettexttext(sender),fvoicetextedit);
+ end;
+ speaktext(sc_input,fvoicefixed);
  speaktext(getcaptiontext(iassistiveclient(sender)),fvoicecaption);
- speaktext(gettexttext(sender),fvoicetextedit);
+ if not (aso_textfirst in foptions) then begin
+  speaktext(gettexttext(sender),fvoicetextedit);
+ end;
 end;
 
 procedure tassistivehandler.speakmenustart(const sender: iassistiveclient);
@@ -1491,9 +1501,13 @@ begin
      if not (asf_async in fla1) then begin
       startspeak();
      end;
-  //   speaktext(sc_windowactivated,fvoicecaption);
+     if aso_textfirst in foptions then begin
+      speaktext(gettexttext(sender),fvoicetext);
+     end;
      speaktext(getcaptiontext(sender),fvoicecaption);
-     speaktext(gettexttext(sender),fvoicetext);
+     if not (aso_textfirst in foptions) then begin
+      speaktext(gettexttext(sender),fvoicetext);
+     end;
     end;
    end;
   end;
@@ -1910,15 +1924,20 @@ begin
     startspeak();
    end
    else begin
-    speaktext(sc_input,fvoicefixed);
+//    if not(aso_textfirst in foptions) then begin
+//     speaktext(sc_input,fvoicefixed);
+//    end;
    end;
-   exclude(fstate,ahs_textblock1);
    if length(achar) = 1 then begin
     speakcharacter(getucs4char(achar,1),fvoicetext);
    end
    else begin
     speaktext(achar,fvoicetext);
    end;
+//   if (aso_textfirst in foptions) and (ahs_textblock1 in fstate) then begin
+//    speaktext(sc_input,fvoicefixed);
+//   end;
+   exclude(fstate,ahs_textblock1);
   end;
  end;
  checklocatepending(sender);
@@ -1945,12 +1964,17 @@ begin
  end;
  if not b1 then begin
   startspeak();
-  speaktext(sc_deleted,fvoicefixed);
+  if not(aso_textfirst in foptions) then begin
+   speaktext(sc_deleted,fvoicefixed);
+  end;
   if length(achar) = 1 then begin
    speakcharacter(getucs4char(achar,1),fvoicetext);
   end
   else begin
    speaktext(achar,fvoicetext);
+  end;
+  if aso_textfirst in foptions then begin
+   speaktext(sc_deleted,fvoicefixed);
   end;
  end;
  checklocatepending(sender);
@@ -2012,8 +2036,13 @@ begin
   end;
   if not b1 then begin
    startspeak();
-   speaktext(sc_withdrawn,fvoicefixed);
+   if not(aso_textfirst in foptions) then begin
+    speaktext(sc_withdrawn,fvoicefixed);
+   end;
    speaktext(sender.getassistivetext(),fvoicetext);
+   if aso_textfirst in foptions then begin
+    speaktext(sc_withdrawn,fvoicefixed);
+   end;
   end;
  end;
 end;
@@ -2059,8 +2088,13 @@ begin
     end;
    end;
    startspeak();
-   speaktext(sc1,fvoicefixed);
+   if not(aso_textfirst in foptions) then begin
+    speaktext(sc1,fvoicefixed);
+   end;
    speaktext(atext,fvoicetext);
+   if aso_textfirst in foptions then begin
+    speaktext(sc1,fvoicefixed);
+   end;
   end;
  end;
 end;
@@ -2084,7 +2118,9 @@ begin
   end;
   if not b1 then begin
    startspeak();
-   speaktext(sc_inputmode,fvoicefixed);
+   if not(aso_textfirst in foptions) then begin
+    speaktext(sc_inputmode,fvoicefixed);
+   end;
    case amode of
     eim_insert: begin
      speaktext(sc_insert,fvoicetext);
@@ -2092,6 +2128,9 @@ begin
     eim_overwrite: begin
      speaktext(sc_overwrite,fvoicetext);
     end;
+   end;
+   if aso_textfirst in foptions then begin
+    speaktext(sc_inputmode,fvoicefixed);
    end;
   end;
  end;

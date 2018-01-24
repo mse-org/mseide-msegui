@@ -19,7 +19,7 @@ unit msedispwidgets;
 interface
 uses
  msegraphics,classes,mclasses,msegui,mseguiglob,msewidgets,
- msedrawtext,msegraphutils,
+ msedrawtext,msegraphutils,mseassistiveclient,
  msemenus,msetypes,msestrings,mseformatstr,mseevent,mseclasses,mserichstring
  {$ifdef mse_with_ifi}
   ,mseificomp,mseifiglob,mseificompglob,typinfo,msedatalist
@@ -166,6 +166,9 @@ type
    procedure enabledchanged; override;
    function verticalfontheightdelta: boolean; override;
    class function classskininfo: skininfoty; override;
+    //iassistiveclient
+   function getassistivetext(): msestring override;
+   function getassistiveflags(): assistiveflagsty override;
   public
    constructor create(aowner: tcomponent); override;
    procedure initnewcomponent(const ascale: real); override;
@@ -498,6 +501,16 @@ class function tdispwidget.classskininfo: skininfoty;
 begin
  result:= inherited classskininfo;
  result.objectkind:= sok_dispwidget;
+end;
+
+function tdispwidget.getassistivetext(): msestring;
+begin
+ result:= disptext;
+end;
+
+function tdispwidget.getassistiveflags(): assistiveflagsty;
+begin
+ result:= inherited getassistiveflags() + [asf_dispwidget];
 end;
 
 procedure tdispwidget.initnewcomponent(const ascale: real);
