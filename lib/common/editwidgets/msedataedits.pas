@@ -1580,7 +1580,7 @@ begin
      if fparentintf <> nil then begin
       fparentintf.childdataentered(igridwidget(self));
      end;
-     if not quiet and canevent(tmethod(fondataentered)) then begin
+     if {not quiet and} canevent(tmethod(fondataentered)) then begin
       fondataentered(self);
      end;
     {$ifdef mse_with_ifi}
