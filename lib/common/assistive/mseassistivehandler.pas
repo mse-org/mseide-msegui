@@ -443,6 +443,9 @@ type
    fspeaklock: int32;
    fdataenteredkeyserial: card32;
    fitems: tassistivewidgetitemlist;
+   fgridintf: iassistiveclientgrid;
+   fnewcell: gridcoordty;
+   fnewcol: boolean;
   {$ifdef mse_debugassistive}
    procedure debug(const text: string;
                                       const intf: iassistiveclient);
@@ -1252,11 +1255,16 @@ end;
 procedure tassistivehandler.speakgridcell(const sender: iassistiveclientgrid;
                const acell: gridcoordty; const acaption: boolean);
 begin
+ if aso_textfirst in foptions then begin
+  speaktext(sender.getassistivecelltext(acell),fvoicetext);
+ end;
  if acaption then begin
   speaktext(sender.getassistivecellcaption(
                             mgc(acell.col,-1)),fvoicecaption);
  end;
- speaktext(sender.getassistivecelltext(acell),fvoicetext);
+ if not (aso_textfirst in foptions) then begin
+  speaktext(sender.getassistivecelltext(acell),fvoicetext);
+ end;
 end;
 
 procedure tassistivehandler.speakinput(const sender: iassistiveclientdata);
@@ -1630,6 +1638,10 @@ begin
          include(opt1,spo_addtext);
         end;
         speakall(sender,opt1);
+        if (aso_textfirst in foptions) and 
+                       (ahs_cellwidgetpending in fstate) then begin
+         speakgridcell(fgridintf,fnewcell,fnewcol);
+        end;
        end;
       end;
      end;
@@ -1835,9 +1847,17 @@ begin
         startspeak();
        end;
        b1:= cellbefore.col <> cell.col;
-       speakgridcell(sender,cell,b1);
        if b1 and (asf_widgetcell in f1) then begin
+        if not (aso_textfirst in foptions) then begin
+         speakgridcell(sender,cell,b1);
+        end;
+        fgridintf:= sender;
+        fnewcol:= b1;
+        fnewcell:= cell;
         setstate([ahs_cellwidgetpending]);
+       end
+       else begin
+        speakgridcell(sender,cell,b1);
        end;
       end;
       resetstate([ahs_locatepending]);
