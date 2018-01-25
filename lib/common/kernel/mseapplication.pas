@@ -1762,12 +1762,12 @@ begin
  lock();
  try
   doeventloop(true);
-  unlock();
  finally
 //  relockall(int1);
   if not bo1 then begin
    exclude(fstate,aps_processmessages);
   end;
+  unlock();
  end;
 end;
 
