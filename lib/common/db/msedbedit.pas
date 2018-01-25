@@ -2564,7 +2564,7 @@ type
   protected
    function createdropdowncontroller: tcustomdropdowncontroller; override;
    function internaldatatotext(const data): msestring; override;
-  //ilbdropdownlist
+    //ilbdropdownlist
    procedure recordselected(const arecordnum: integer; const akey: keyty);
   public
    property dropdown: tdbdropdownlistcontroller read getdropdown write setdropdown;
@@ -6353,6 +6353,7 @@ end;
 constructor tdropdowndatalink.create(
         const aowner: tcustomdbdropdownlistcontroller);
 begin
+ flastintegerkey:= -1;
  fowner:= aowner;
 end;
 
@@ -6446,6 +6447,7 @@ end;
 
 procedure tdropdowndatalink.activechanged;
 begin
+ flastintegerkey:= -1;
  updatefields;
  inherited;
  updatelookupvalue;
@@ -11197,7 +11199,8 @@ begin
  result:= tdbdropdownlistcontroller.create(idbdropdownlist(self),false);
 end;
 
-procedure tcustomenum64editdb.recordselected(const arecordnum: integer; const akey: keyty);
+procedure tcustomenum64editdb.recordselected(
+                   const arecordnum: integer; const akey: keyty);
 var
  bo1: boolean;
 begin
@@ -11211,6 +11214,7 @@ begin
  end
  else begin
   if arecordnum = -2 then begin
+   text:= '';
    bo1:= checkvalue; 
   end
   else begin

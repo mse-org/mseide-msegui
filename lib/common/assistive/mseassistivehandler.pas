@@ -1506,7 +1506,7 @@ begin
    end
    else begin
     if fstate*[ahs_dropdownlistclosed,ahs_dropdownpending] = [] then begin
-     if not (asf_async in fla1) then begin
+     if  fla1 * [asf_async,asf_message] <> [asf_async] then begin
       startspeak();
      end;
      if aso_textfirst in foptions then begin

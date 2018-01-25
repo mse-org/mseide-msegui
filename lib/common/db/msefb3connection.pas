@@ -262,9 +262,12 @@ type
  end;
  
  efberror = class(econnectionerror)
+  private
+   fgdscode: ptrint;
   public
    constructor create(const asender: tfb3connection;
                  const astatus: istatus; const aerrormessage: msestring);
+   property gdscode: ptrint read fgdscode;
  end;
 
 implementation
@@ -439,6 +442,9 @@ begin
  err1:= 0;
  if po1 <> nil then begin
   err1:= gds__sqlcode(po1);
+  if po1[0] = isc_arg_gds then begin
+   fgdscode:= po1[1];
+  end;
  end;
  if asender <> nil then begin
   asender.flasterrormessage:= msg1;

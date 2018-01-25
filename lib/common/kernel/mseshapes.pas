@@ -295,8 +295,9 @@ begin
    if (sender.enabled) <> not (as_disabled in state) then begin
     if not (as_disabled in state) or 
       not (as_syncdisabledlocked in state) and 
-       (not (bo_noassistivedisabled in aoptions) or not sender.canassistive())
-                                                                     then begin
+       (not (bo_noassistivedisabled in aoptions) or 
+         not sender.canassistive() and 
+           not (csdesigning in sender.componentstate)) then begin
      sender.enabled:= not(as_disabled in state);
     end;
    end;
