@@ -26,7 +26,9 @@ uses
 const
 {$ifdef mswindows}
  {$define wincall}
- espeaknglib: array[0..0] of filenamety = ('espeak-ng.dll');
+ espeaknglib: array[0..1] of filenamety = (
+   'libespeak-ngsync7.dll', //for windows 7
+   'libespeak-ngsync.dll');
 {$else}
  espeaknglib: array[0..1] of filenamety = 
                                ('libespeak-ng.so.1','libespeak-ng.so'); 
@@ -323,6 +325,9 @@ Return: EE_OK: operation achieved
 
  espeak_ng_Cancel:
   function(): espeak_ng_STATUS {$ifdef wincall}stdcall{$else}cdecl{$endif};
+ espeak_ng_SetCancelState: 
+  function(canceled: cint): espeak_ng_STATUS
+                               {$ifdef wincall}stdcall{$else}cdecl{$endif};
  espeak_ng_Synchronize:
   function(): espeak_ng_STATUS {$ifdef wincall}stdcall{$else}cdecl{$endif};
  espeak_ng_Terminate:
@@ -402,7 +407,7 @@ procedure initializeespeakng(const sonames: array of filenamety;
                           const espeakdatapath: string = '');
 
 const
- funcs: array[0..17] of funcinfoty = (
+ funcs: array[0..18] of funcinfoty = (
   (n: 'espeak_ng_ClearErrorContext'; d: @espeak_ng_ClearErrorContext),
   (n: 'espeak_ng_GetStatusCodeMessage'; d: @espeak_ng_GetStatusCodeMessage),
   (n: 'espeak_ng_InitializePath'; d: @ espeak_ng_InitializePath),
@@ -419,6 +424,7 @@ const
   (n: 'espeak_ng_SpeakCharacter'; d: @espeak_ng_SpeakCharacter),
   (n: 'espeak_IsPlaying'; d: @espeak_IsPlaying),
   (n: 'espeak_ng_Cancel'; d: @espeak_ng_Cancel),
+  (n: 'espeak_ng_SetCancelState'; d: @espeak_ng_SetCancelState),
   (n: 'espeak_ng_Synchronize'; d: @espeak_ng_Synchronize),
   (n: 'espeak_ng_Terminate'; d: @espeak_ng_Terminate)
  );

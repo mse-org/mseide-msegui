@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 2017 by Martin Schreiber
+{ MSEgui Copyright (c) 2017-2018 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -144,7 +144,7 @@ type
    procedure clearevents() override;
  end;
 }  
- speakstatety = (ss_voicevalid,{ss_punctuationvalid,}ss_connected,ss_idle);
+ speakstatety = (ss_voicevalid,ss_connected,ss_canceled,ss_idle);
  speakstatesty = set of speakstatety;
   
  tcustomespeakng = class(tmsecomponent)
@@ -277,7 +277,7 @@ type
 implementation
 uses
  msestrings,msefileutils,msectypes,mseapplication,msesysintf1,
- sysutils,msesysutils;
+ sysutils,msesysutils{$ifdef mswindows},activex{$endif};
 
 { tspeakevent }
 
@@ -497,10 +497,16 @@ function tcustomespeakng.speakexe(athread: tmsethread): int32;
 var
  ev1: tspeakevent;
 begin
+{$ifdef mswindows}
+ coinitialize(nil);
+{$endif}
  with teventthread(athread) do begin
   while not terminated do begin
    pointer(ev1):= waitevent();
    if ev1 is tspeakevent then begin
+    lock();
+    checkerror(espeak_ng_setcancelstate(0));
+    unlock();
     try
      case ev1.fmode of
       smo_text: begin
@@ -513,8 +519,10 @@ begin
        internalspeakkeyname(ev1.ftext,ev1.foptions,ev1.fvoice);
       end;
      end;
-     espeak_ng_synchronize();
+//     unlock();
+//     espeak_ng_synchronize();
     except
+//     unlock();
      application.handleexception();
     end;
    end;
@@ -527,6 +535,9 @@ begin
   end;
   postidle();
  end;
+{$ifdef mswindows}
+ couninitialize();
+{$endif}
  result:= 0;
 end;
 
@@ -544,10 +555,12 @@ var
  m1: espeak_ng_OUTPUT_MODE;
 begin
  if not (csdesigning in componentstate) then begin
+  include(fstate,ss_idle);
   sys_condcreate(fidlecond);
   voicechanged();
   initializeespeakng([],stringtoutf8(tosysfilepath(fdatapath)));
-  m1:= 0;//ENOUTPUT_MODE_SYNCHRONOUS; 
+  m1:= ENOUTPUT_MODE_SYNCHRONOUS; 
+//  m1:= 0;//ENOUTPUT_MODE_SYNCHRONOUS; 
              //espeak_ng_cancel() does not work in synchronous mode
   if not (eso_nospeakaudio in foptions) then begin
    m1:= m1 or ENOUTPUT_MODE_SPEAK_AUDIO;
@@ -571,7 +584,7 @@ end;
 
 procedure tcustomespeakng.checkerror(const astate: espeak_ng_status);
 begin
- if astate <> 0 then begin
+ if (astate <> 0) and (astate <> ENS_SPEECH_STOPPED) then begin
   componentexception(self,utf8tostring(espeakngerrormessage(astate)));
  end;
 end;
@@ -695,7 +708,7 @@ begin
    end;
   end;
  end;
- checkerror(espeak_ng_synchronize());
+// checkerror(espeak_ng_synchronize());
 end;
 
 procedure tcustomespeakng.cancel();
@@ -707,8 +720,11 @@ begin
  debugwriteln('---cancel');
 {$endif}
  fspeakthread.clearevents();
- checkerror(espeak_ng_cancel());
- postidle();
+ include(fstate,ss_canceled);
+// fspeakthread.lock();
+ checkerror(espeak_ng_setcancelstate(1));
+// fspeakthread.unlock();
+// postidle();
 end;
 
 procedure tcustomespeakng.internalspeak(const atext: msestring;
@@ -772,6 +788,10 @@ end;
 
 procedure tcustomespeakng.postevent(const aevent: tspeakevent);
 begin
+ if ss_canceled in fstate then begin
+  wait();
+  exclude(fstate,ss_canceled);
+ end;
  sys_condlock(fidlecond);
  exclude(fstate,ss_idle);
  fspeakthread.postevent(aevent);
@@ -790,7 +810,7 @@ begin
   cancel();
  end;
 {$ifdef mse_debugassistive}
- debugwriteln('** '+string(atext));
+ debugwriteln('**'+inttostr(avoice)+'   '+string(atext));
 {$endif}
  if atext <> '' then begin
   c1:= atext[length(atext)];
@@ -824,7 +844,7 @@ begin
   cancel();
  end;
 {$ifdef mse_debugassistive}
- debugwriteln('***'+string(unicodechar(achar)));
+ debugwriteln('***'+inttostr(avoice)+'  '+string(unicodechar(achar)));
 {$endif}
  postevent(tspeakevent.create(achar,aoptions,avoice));
  if so_wait in aoptions then begin
@@ -849,7 +869,7 @@ begin
   cancel();
  end;
 {$ifdef mse_debugassistive}
- debugwriteln('****'+string(akey));
+ debugwriteln('****'+inttostr(avoice)+' '+string(akey));
 {$endif}
  if akey <> '' then begin
   postevent(tspeakevent.createkey(akey,aoptions,avoice));
