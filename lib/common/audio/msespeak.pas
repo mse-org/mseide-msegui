@@ -169,6 +169,7 @@ type
    fage: card8;
    fvariant: card8;
    fcapitals: int32;
+   fvoicename: msestring;
    procedure setactive(const avalue: boolean);
    procedure setvoicedefault(avalue: int32);
    procedure setvoices(const avalue: tvoices);
@@ -184,6 +185,7 @@ type
    procedure setage(const avalue: card8);
    procedure setvariant(const avalue: card8);
    procedure setcapitals(const avalue: int32);
+   procedure setvoicename(const avalue: msestring);
   protected
    fstate: speakstatesty;
    flastvoice: int32;
@@ -235,6 +237,7 @@ type
                                    write setvoicedefault default 0;
    property voices: tvoices read fvoices write setvoices;
    property language: msestring read flanguage write setlanguage;
+   property voicename: msestring read fvoicename write setvoicename;
    property identifier: msestring read fidentifier write setidentifier;
    property gender: genderty read fgender write setgender default gen_none;
    property age: card8 read fage write setage default 0;
@@ -262,6 +265,7 @@ type
    property voicedefault;
    property voices;
    property language;
+   property voicename;
    property identifier;
    property gender;
    property age;
@@ -457,6 +461,15 @@ begin
  end;
 end;
 
+procedure tcustomespeakng.setvoicename(const avalue: msestring);
+begin
+ if fvoicename <> avalue then begin
+  beginchange();
+  fvoicename:= avalue;
+  endchange();
+ end;
+end;
+
 procedure tcustomespeakng.setgender(const avalue: genderty);
 begin
  if fgender <> avalue then begin
@@ -615,8 +628,6 @@ begin
    flastvoice:= avoice;
    fillchar(info1,sizeof(info1),0);
    with voices[avoice] do begin
-    s1:= stringtoutf8(voicename);
-    info1.name:= pointer(s1);
     if language <> '' then begin
      s2:= stringtoutf8(language);
     end
@@ -631,6 +642,13 @@ begin
      s3:= stringtoutf8(tosysfilepath(self.identifier));
     end;
     info1.identifier:= pointer(s3);
+    if voicename <> '' then begin
+     s1:= stringtoutf8(tosysfilepath(voicename));
+    end
+    else begin
+     s1:= stringtoutf8(tosysfilepath(self.voicename));
+    end;
+    info1.name:= pointer(s1);
     if gender <> gen_none then begin
      info1.gender:= ord(gender);
     end

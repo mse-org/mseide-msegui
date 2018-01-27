@@ -42,6 +42,7 @@ type
    property voicedefault;
    property voices;
    property language;
+   property voicename;
    property identifier;
    property gender;
    property age;
