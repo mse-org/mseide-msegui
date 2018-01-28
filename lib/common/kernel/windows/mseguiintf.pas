@@ -1796,7 +1796,7 @@ function winkeytokey(key: longword; lparam: longword;
 var
  second: boolean;
 begin
- second:= mapvirtualkey(key,mapvk_vk_to_vsc) <> (lparam shr 16) and $ff;
+ second:= mapvirtualkey(key,mapvk_vk_to_vsc) <> (lparam shr 16) and $1ff;
 
  case key of
   vk_back: result:= key_backspace;
@@ -1809,7 +1809,12 @@ begin
    end;
   end;
   vk_clear: result:= key_clear;
-  vk_return: result:= key_return;
+  vk_return: begin
+   result:= key_return;
+   if second then begin
+    include(shiftstate,ss_second);
+   end;
+  end;
   vk_shift: begin
    result:= key_shift;
    if second then begin
