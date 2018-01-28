@@ -510,7 +510,7 @@ end;
 
 function tdispwidget.getassistiveflags(): assistiveflagsty;
 begin
- result:= inherited getassistiveflags() + [asf_dispwidget];
+ result:= inherited getassistiveflags() + [asf_dispwidget,asf_readonly];
 end;
 
 procedure tdispwidget.initnewcomponent(const ascale: real);

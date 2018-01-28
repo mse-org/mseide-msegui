@@ -58,8 +58,8 @@ type
    procedure setvariant(const avalue: card8);
    procedure setpunctuationlist(const avalue: msestring);
   protected
-//   procedure beginchange();
-//   procedure endchange();
+   fid: string;
+   procedure change();
   public
    constructor create(aowner: tobject); override;
   published
@@ -144,7 +144,8 @@ type
    procedure clearevents() override;
  end;
 }  
- speakstatety = (ss_voicevalid,ss_connected,ss_canceled,ss_idle);
+ speakstatety = (ss_voicevalid,ss_connected,ss_disconnected,
+                 ss_canceled,ss_idle);
  speakstatesty = set of speakstatety;
   
  tcustomespeakng = class(tmsecomponent)
@@ -191,6 +192,7 @@ type
    flastvoice: int32;
    fspeakthread: teventthread;
    fidlecond: condty;
+   procedure doasyncevent(var atag: int32) override;
    function speakexe(athread: tmsethread): int32;
    procedure loaded() override;
    procedure connect();
@@ -282,7 +284,9 @@ implementation
 uses
  msestrings,msefileutils,msectypes,mseapplication,msesysintf1,
  sysutils,msesysutils{$ifdef mswindows},activex{$endif};
-
+const
+ disconnecttag = 5936727;
+ 
 { tspeakevent }
 
 constructor tspeakevent.create(const text: msestring;
@@ -470,6 +474,16 @@ begin
  end;
 end;
 
+procedure tcustomespeakng.doasyncevent(var atag: int32);
+begin
+ if atag = disconnecttag then begin
+  active:= false;
+ end
+ else begin
+  inherited;
+ end;
+end;
+
 procedure tcustomespeakng.setgender(const avalue: genderty);
 begin
  if fgender <> avalue then begin
@@ -509,6 +523,7 @@ end;
 function tcustomespeakng.speakexe(athread: tmsethread): int32;
 var
  ev1: tspeakevent;
+ b1: boolean;
 begin
 {$ifdef mswindows}
  coinitialize(nil);
@@ -518,25 +533,25 @@ begin
    pointer(ev1):= waitevent();
    if ev1 is tspeakevent then begin
     lock();
+    b1:= ss_disconnected in fstate;
     checkerror(espeak_ng_setcancelstate(0));
     unlock();
-    try
-     case ev1.fmode of
-      smo_text: begin
-       internalspeak(ev1.ftext,ev1.foptions,ev1.fvoice);
+    if not b1 then begin
+     try
+      case ev1.fmode of
+       smo_text: begin
+        internalspeak(ev1.ftext,ev1.foptions,ev1.fvoice);
+       end;
+       smo_char: begin
+        internalspeakcharacter(ev1.fchar,ev1.foptions,ev1.fvoice);
+       end;
+       smo_key: begin
+        internalspeakkeyname(ev1.ftext,ev1.foptions,ev1.fvoice);
+       end;
       end;
-      smo_char: begin
-       internalspeakcharacter(ev1.fchar,ev1.foptions,ev1.fvoice);
-      end;
-      smo_key: begin
-       internalspeakkeyname(ev1.ftext,ev1.foptions,ev1.fvoice);
-      end;
+     except
+      application.handleexception();
      end;
-//     unlock();
-//     espeak_ng_synchronize();
-    except
-//     unlock();
-     application.handleexception();
     end;
    end;
    ev1.free();
@@ -568,6 +583,7 @@ var
  m1: espeak_ng_OUTPUT_MODE;
 begin
  if not (csdesigning in componentstate) then begin
+  exclude(fstate,ss_disconnected);
   include(fstate,ss_idle);
   sys_condcreate(fidlecond);
   voicechanged();
@@ -610,10 +626,11 @@ end;
 procedure tcustomespeakng.checkvoice(avoice: int32);
 var
  info1: espeak_voice;
- s1,s2,s3: string;
+ s1,lang1,ident1: string;
  ms1: msestring;
  ar1: card32arty;
  i1: int32;
+ err1: espeak_ng_STATUS;
 begin
  lock();
  try
@@ -629,19 +646,19 @@ begin
    fillchar(info1,sizeof(info1),0);
    with voices[avoice] do begin
     if language <> '' then begin
-     s2:= stringtoutf8(language);
+     lang1:= stringtoutf8(language);
     end
     else begin
-     s2:= stringtoutf8(self.flanguage);
+     lang1:= stringtoutf8(self.flanguage);
     end;
-    info1.languages:= pointer(s2);
+    info1.languages:= pointer(lang1);
     if identifier <> '' then begin
-     s3:= stringtoutf8(tosysfilepath(identifier));
+     ident1:= stringtoutf8(tosysfilepath(identifier));
     end
     else begin
-     s3:= stringtoutf8(tosysfilepath(self.identifier));
+     ident1:= stringtoutf8(tosysfilepath(self.identifier));
     end;
-    info1.identifier:= pointer(s3);
+    info1.identifier:= pointer(ident1);
     if voicename <> '' then begin
      s1:= stringtoutf8(tosysfilepath(voicename));
     end
@@ -678,23 +695,42 @@ begin
      ar1[i1]:= ord(ms1[i1+1]);
     end;
     checkerror(espeak_ng_setpunctuationlist(pointer(ar1)));
-    checkerror(espeak_ng_setvoicebyproperties(@info1));
+    if fid <> '' then begin
+     err1:= espeak_ng_setvoicebyname(pchar(fid));
+    end
+    else begin
+     if ident1 <> '' then begin
+      err1:= espeak_ng_setvoicebyname(pchar(ident1));
+     end
+     else begin
+      err1:= espeak_ng_setvoicebyproperties(@info1);
+     end;
+     if err1 = ENS_OK then begin
+      fid:= espeak_getcurrentvoice()^.identifier;
+     end;
+    end;
+   {$ifdef mse_debugassistive}
+    debugwriteln(inttostr(avoice)+':'+fid);
+   {$endif}
+    if err1 <> ENS_OK then begin
+     include(fstate,ss_disconnected);
+     asyncevent(disconnecttag,[peo_local,peo_first]);
+     checkerror(err1);
+    end;
     checkerror(espeak_ng_setparameter(espeakRATE,round(rate*self.rate),0));
     checkerror(espeak_ng_setparameter(espeakVOLUME,
                                            round(volume*self.volume),0));
     checkerror(espeak_ng_setparameter(espeakPITCH,round(pitch*self.pitch),0));
     checkerror(espeak_ng_setparameter(espeakRANGE,round(range*self.range),0));
-    {checkerror(}espeak_ng_setparameter(espeakPUNCTUATION,
-                                                  ord(punctuation),0){)};
+    checkerror(espeak_ng_setparameter(espeakPUNCTUATION,
+                                                  ord(punctuation),0));
     if capitals < 0 then begin
      i1:= self.capitals;
     end
     else begin
      i1:= capitals;
     end;
-    {checkerror(}espeak_ng_setparameter(espeakCAPITALS,i1,0){)};
-      //bug in espeak:
-      //espeakPUNCTUATION and espeakCAPITALS return einval in syncronous mode
+    checkerror(espeak_ng_setparameter(espeakCAPITALS,i1,0));
     if wordgap < 0 then begin
      i1:= self.wordgap;
     end
@@ -924,6 +960,7 @@ end;
 procedure tvoice.setgender(const avalue: genderty);
 begin
  if avalue <> fgender then begin
+  change();
   tcustomespeakng(fowner).beginchange();
   fgender:= avalue;
   tcustomespeakng(fowner).endchange();
@@ -933,6 +970,7 @@ end;
 procedure tvoice.setpitch(const avalue: int32);
 begin
  if avalue <> fpitch then begin
+  change();
   tcustomespeakng(fowner).beginchange();
   fpitch:= avalue;
   tcustomespeakng(fowner).endchange();
@@ -942,6 +980,7 @@ end;
 procedure tvoice.setrate(const avalue: int32);
 begin
  if avalue <> frate then begin
+  change();
   tcustomespeakng(fowner).beginchange();
   frate:= avalue;
   tcustomespeakng(fowner).endchange();
@@ -951,6 +990,7 @@ end;
 procedure tvoice.setvolume(const avalue: int32);
 begin
  if avalue <> fvolume then begin
+  change();
   tcustomespeakng(fowner).beginchange();
   fvolume:= avalue;
   tcustomespeakng(fowner).endchange();
@@ -960,6 +1000,7 @@ end;
 procedure tvoice.setrange(const avalue: int32);
 begin
  if avalue <> frange then begin
+  change();
   tcustomespeakng(fowner).beginchange();
   frange:= avalue;
   tcustomespeakng(fowner).endchange();
@@ -969,6 +1010,7 @@ end;
 procedure tvoice.setpunctuation(const avalue: punctuationty);
 begin
  if avalue <> fpunctuation then begin
+  change();
   tcustomespeakng(fowner).beginchange();
   fpunctuation:= avalue;
   tcustomespeakng(fowner).endchange();
@@ -978,6 +1020,7 @@ end;
 procedure tvoice.setcapitals(const avalue: int32);
 begin
  if avalue <> fcapitals then begin
+  change();
   tcustomespeakng(fowner).beginchange();
   fcapitals:= avalue;
   tcustomespeakng(fowner).endchange();
@@ -987,6 +1030,7 @@ end;
 procedure tvoice.setwordgap(const avalue: int32);
 begin
  if avalue <> fwordgap then begin
+  change();
   tcustomespeakng(fowner).beginchange();
   fwordgap:= avalue;
   tcustomespeakng(fowner).endchange();
@@ -996,6 +1040,7 @@ end;
 procedure tvoice.setvoicename(const avalue: msestring);
 begin
  if avalue <> fvoicename then begin
+  change();
   tcustomespeakng(fowner).beginchange();
   fvoicename:= avalue;
   tcustomespeakng(fowner).endchange();
@@ -1005,6 +1050,7 @@ end;
 procedure tvoice.setlanguage(const avalue: msestring);
 begin
  if avalue <> flanguage then begin
+  change();
   tcustomespeakng(fowner).beginchange();
   flanguage:= avalue;
   tcustomespeakng(fowner).endchange();
@@ -1014,6 +1060,7 @@ end;
 procedure tvoice.setidentifier(const avalue: msestring);
 begin
  if avalue <> fidentifier then begin
+  change();
   tcustomespeakng(fowner).beginchange();
   fidentifier:= avalue;
   tcustomespeakng(fowner).endchange();
@@ -1023,6 +1070,7 @@ end;
 procedure tvoice.setage(const avalue: card8);
 begin
  if avalue <> fage then begin
+  change();
   tcustomespeakng(fowner).beginchange();
   fage:= avalue;
   tcustomespeakng(fowner).endchange();
@@ -1032,6 +1080,7 @@ end;
 procedure tvoice.setvariant(const avalue: card8);
 begin
  if avalue <> fvariant then begin
+  change();
   tcustomespeakng(fowner).beginchange();
   fvariant:= avalue;
   tcustomespeakng(fowner).endchange();
@@ -1041,10 +1090,16 @@ end;
 procedure tvoice.setpunctuationlist(const avalue: msestring);
 begin
  if avalue <> fpunctuationlist then begin
+  change();
   tcustomespeakng(fowner).beginchange();
   fpunctuationlist:= avalue;
   tcustomespeakng(fowner).endchange();
  end;
+end;
+
+procedure tvoice.change();
+begin
+ fid:= '';
 end;
 
 end.

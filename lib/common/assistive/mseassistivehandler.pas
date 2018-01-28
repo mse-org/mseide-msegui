@@ -1192,7 +1192,7 @@ begin
  if asf_async in fla1 then begin
   include(aoptions,spo_addtext);
  end;
- if [asf_inplaceedit,asf_textedit] * fla1 <> [] then begin
+ if [asf_inplaceedit,asf_textedit,asf_dispwidget] * fla1 <> [] then begin
   if asf_readonly in fla1 then begin
    i1:= fvoicetexteditreadonly;
   end

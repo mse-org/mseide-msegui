@@ -219,6 +219,13 @@ espeak_ng_PrintStatusCodeMessage(espeak_ng_STATUS status,
  espeak_ng_SetVoiceByProperties:
   function(voice_selector: pespeak_VOICE): espeak_ng_STATUS
                                {$ifdef wincall}stdcall{$else}cdecl{$endif};
+ espeak_GetCurrentVoice: function(): pespeak_VOICE
+                               {$ifdef wincall}stdcall{$else}cdecl{$endif};
+{/* Returns the espeak_VOICE data for the currently selected voice.
+   This is not affected by temporary voice changes caused by
+   SSML elements such as <voice> and <s>
+*/}
+
  espeak_ng_Synthesize:
   function(text: pointer; size: size_t;
                      position: cuint;
@@ -407,7 +414,7 @@ procedure initializeespeakng(const sonames: array of filenamety;
                           const espeakdatapath: string = '');
 
 const
- funcs: array[0..18] of funcinfoty = (
+ funcs: array[0..19] of funcinfoty = (
   (n: 'espeak_ng_ClearErrorContext'; d: @espeak_ng_ClearErrorContext),
   (n: 'espeak_ng_GetStatusCodeMessage'; d: @espeak_ng_GetStatusCodeMessage),
   (n: 'espeak_ng_InitializePath'; d: @ espeak_ng_InitializePath),
@@ -418,6 +425,7 @@ const
   (n: 'espeak_ng_SetPunctuationList'; d: @espeak_ng_SetPunctuationList),
   (n: 'espeak_ng_SetVoiceByName'; d: @espeak_ng_SetVoiceByName),
   (n: 'espeak_ng_SetVoiceByProperties'; d: @espeak_ng_SetVoiceByProperties),
+  (n: 'espeak_GetCurrentVoice'; d: @espeak_GetCurrentVoice),
   (n: 'espeak_ng_Synthesize'; d: @espeak_ng_Synthesize),
   (n: 'espeak_ng_SynthesizeMark'; d: @espeak_ng_SynthesizeMark),
   (n: 'espeak_ng_SpeakKeyName'; d: @espeak_ng_SpeakKeyName),
