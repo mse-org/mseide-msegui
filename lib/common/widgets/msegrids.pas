@@ -2249,7 +2249,8 @@ type
    function getassistiveflags(): assistiveflagsty; override;
     //iassistiveclientgrid
    function getassistivecellcaption(const acell: gridcoordty): msestring virtual;
-   function getassistivecelltext(const acell: gridcoordty): msestring virtual;
+   function getassistivecelltext(const acell: gridcoordty;
+                               out aflags: assistiveflagsty): msestring virtual;
    function getassistivefocusedcell(): gridcoordty;
    function getassistivegridinfo(): assistivegridinfoty virtual;
   public
@@ -2701,7 +2702,8 @@ type
     //iassistiveclient
    function getassistivecaretindex(): int32; override;
     //iassistiveclientgrid
-   function getassistivecelltext(const acell: gridcoordty): msestring; override;                         
+   function getassistivecelltext(const acell: gridcoordty;
+                       out aflags: assistiveflagsty): msestring; override;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -15730,9 +15732,16 @@ begin
  end;
 end;
 
-function tcustomgrid.getassistivecelltext(const acell: gridcoordty): msestring;
+function tcustomgrid.getassistivecelltext(const acell: gridcoordty;
+                                      out aflags: assistiveflagsty): msestring;
 begin
  result:= '';
+ aflags:= [asf_gridcell];
+ if (acell.col >= 0) and (acell.col < datacols.count) then begin
+  if tdatacol(fdatacols.fitems[acell.col]).readonly then begin
+   include(aflags,asf_readonly);
+  end;
+ end;
 end;
 
 function tcustomgrid.getassistivefocusedcell(): gridcoordty;
@@ -16774,14 +16783,13 @@ begin
  result:= feditor.curindex;
 end;
 
-function tcustomstringgrid.getassistivecelltext(
-                                       const acell: gridcoordty): msestring;
+function tcustomstringgrid.getassistivecelltext(const acell: gridcoordty;
+                                       out aflags: assistiveflagsty): msestring;
 begin
+ result:= inherited getassistivecelltext(acell,aflags);
+ include(aflags,asf_textedit);
  if isdatacell(acell) then begin
   result:= self[acell.col].getrowtext(acell.row);
- end
- else begin
-  result:= inherited getassistivecelltext(acell);
  end;
 end;
 

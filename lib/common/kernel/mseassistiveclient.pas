@@ -18,7 +18,7 @@ uses
 type
  assistiveflagty = (asf_embedded,asf_container,asf_dummy,
                     asf_grid,asf_widgetgrid,
-//                    asf_gridcell,
+                    asf_gridcell,
                     asf_widgetcell,
                     asf_gridwidget, //implies iassistiveclientgridwidget
                     asf_datetime,asf_menu,asf_message,asf_popup,
@@ -52,7 +52,8 @@ type
  
  iassistiveclientgrid = interface(iassistiveclient)[miid_iassistiveclientgrid]
   function getassistivecellcaption(const acell: gridcoordty): msestring;
-  function getassistivecelltext(const acell: gridcoordty): msestring;
+  function getassistivecelltext(const acell: gridcoordty;
+                                      out aflags: assistiveflagsty): msestring;
   function getassistivefocusedcell(): gridcoordty;
   function getassistivegridinfo(): assistivegridinfoty;
  end;

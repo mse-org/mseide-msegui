@@ -343,7 +343,8 @@ type
                          var mouseinfo: mouseeventinfoty); override;
     //iassistiveclientgrid
    function getassistiveflags(): assistiveflagsty override;
-   function getassistivecelltext(const acell: gridcoordty): msestring; override;
+   function getassistivecelltext(const acell: gridcoordty;
+                        out aflags: assistiveflagsty): msestring; override;
    function getassistivecaretindex(): int32; override;
   public
    constructor create(aowner: tcomponent); override;
@@ -3868,20 +3869,30 @@ begin
 end;
 
 function tcustomwidgetgrid.getassistivecelltext(
-              const acell: gridcoordty): msestring;
+           const acell: gridcoordty;  out aflags: assistiveflagsty): msestring;
+var
+ w1: twidget;
 begin
  if isdatacell(acell) then begin
   with datacols[acell.col] do begin
    if fintf <> nil then begin
     result:= fintf.getassistivecelltext(acell.row);
+    w1:= editwidget;
+    if w1 <> nil then begin
+     aflags:= twidget1(w1).getassistiveflags();
+    end
+    else begin
+     inherited getassistivecelltext(acell,aflags);
+    end;
    end
    else begin
-    result:= '';
+    result:= inherited getassistivecelltext(acell,aflags);
+//    result:= '';
    end;
   end;
  end
  else begin
-  result:= inherited getassistivecelltext(acell);
+  result:= inherited getassistivecelltext(acell,aflags);
  end;
 end;
 

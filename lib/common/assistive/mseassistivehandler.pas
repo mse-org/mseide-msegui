@@ -42,11 +42,12 @@ type
    property voicedefault;
    property voices;
    property language;
-   property voicename;
    property identifier;
+   property voicename;
+   property variant;
    property gender;
    property age;
-   property variant;
+   property variantnum;
    property volume;
    property rate;
    property pitch;
@@ -1192,7 +1193,7 @@ begin
  if asf_async in fla1 then begin
   include(aoptions,spo_addtext);
  end;
- if [asf_inplaceedit,asf_textedit,asf_dispwidget] * fla1 <> [] then begin
+ if [asf_inplaceedit,asf_textedit] * fla1 <> [] then begin
   if asf_readonly in fla1 then begin
    i1:= fvoicetexteditreadonly;
   end
@@ -1221,7 +1222,7 @@ begin
   end;
   with iassistiveclientgrid(sender) do begin
    speaktext(getassistivecellcaption(getassistivefocusedcell()),fvoicecaption);
-   speaktext(getassistivecelltext(getassistivefocusedcell()),i1);
+   speaktext(getassistivecelltext(getassistivefocusedcell(),fla1),i1);
   end;
   exit;
  end;
@@ -1255,16 +1256,28 @@ end;
 
 procedure tassistivehandler.speakgridcell(const sender: iassistiveclientgrid;
                const acell: gridcoordty; const acaption: boolean);
+var
+ i1: int32;
+ s1: msestring;
+ f1: assistiveflagsty;
 begin
+ s1:= sender.getassistivecelltext(acell,f1);
+ i1:= fvoicetext;
+ if asf_textedit in f1 then begin
+  i1:= fvoicetextedit;
+  if asf_readonly in f1 then begin
+   i1:= fvoicetexteditreadonly;
+  end;
+ end;
  if aso_textfirst in foptions then begin
-  speaktext(sender.getassistivecelltext(acell),fvoicetext);
+  speaktext(s1,i1);
  end;
  if acaption then begin
   speaktext(sender.getassistivecellcaption(
                             mgc(acell.col,-1)),fvoicecaption);
  end;
  if not (aso_textfirst in foptions) then begin
-  speaktext(sender.getassistivecelltext(acell),fvoicetext);
+  speaktext(s1,i1);
  end;
 end;
 
@@ -1950,10 +1963,10 @@ begin
 //    end;
    end;
    if length(achar) = 1 then begin
-    speakcharacter(getucs4char(achar,1),fvoicetext);
+    speakcharacter(getucs4char(achar,1),fvoicetextedit);
    end
    else begin
-    speaktext(achar,fvoicetext);
+    speaktext(achar,fvoicetextedit);
    end;
 //   if (aso_textfirst in foptions) and (ahs_textblock1 in fstate) then begin
 //    speaktext(sc_input,fvoicefixed);
@@ -1989,10 +2002,10 @@ begin
    speaktext(sc_deleted,fvoicefixed);
   end;
   if length(achar) = 1 then begin
-   speakcharacter(getucs4char(achar,1),fvoicetext);
+   speakcharacter(getucs4char(achar,1),fvoicetextedit);
   end
   else begin
-   speaktext(achar,fvoicetext);
+   speaktext(achar,fvoicetextedit);
   end;
   if aso_textfirst in foptions then begin
    speaktext(sc_deleted,fvoicefixed);
@@ -2060,7 +2073,7 @@ begin
    if not(aso_textfirst in foptions) then begin
     speaktext(sc_withdrawn,fvoicefixed);
    end;
-   speaktext(sender.getassistivetext(),fvoicetext);
+   speaktext(sender.getassistivetext(),fvoicetextedit);
    if aso_textfirst in foptions then begin
     speaktext(sc_withdrawn,fvoicefixed);
    end;
@@ -2074,6 +2087,8 @@ var
  b1: boolean;
  item1: tassistivewidgetitem;
  sc1: stockcaptionty;
+ f1: assistiveflagsty;
+ i1: int32;
 begin
 {$ifdef mse_debugassistive}
  debug('edittextblock',sender);
@@ -2109,10 +2124,15 @@ begin
     end;
    end;
    startspeak();
+   f1:= sender.getassistiveflags();
    if not(aso_textfirst in foptions) then begin
     speaktext(sc1,fvoicefixed);
    end;
-   speaktext(atext,fvoicetext);
+   i1:= fvoicetextedit;
+   if asf_readonly in f1 then begin
+    i1:= fvoicetexteditreadonly;
+   end;
+   speaktext(atext,i1);
    if aso_textfirst in foptions then begin
     speaktext(sc1,fvoicefixed);
    end;
@@ -2144,10 +2164,10 @@ begin
    end;
    case amode of
     eim_insert: begin
-     speaktext(sc_insert,fvoicetext);
+     speaktext(sc_insert,fvoicetextedit);
     end;
     eim_overwrite: begin
-     speaktext(sc_overwrite,fvoicetext);
+     speaktext(sc_overwrite,fvoicetextedit);
     end;
    end;
    if aso_textfirst in foptions then begin

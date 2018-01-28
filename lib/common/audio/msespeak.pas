@@ -37,11 +37,12 @@ type
    fpunctuation: punctuationty;
    fcapitals: int32;
    fwordgap: int32;
-   fvoicename: msestring;
    flanguage: msestring;
+   fvoicename: msestring;
    fidentifier: msestring;
+   fvariant: msestring;
    fage: card8;
-   fvariant: card8;
+   fvariantnum: card8;
    fpunctuationlist: msestring;
    procedure setgender(const avalue: genderty);
    procedure setpitch(const avalue: int32);
@@ -51,11 +52,12 @@ type
    procedure setpunctuation(const avalue: punctuationty);
    procedure setcapitals(const avalue: int32);
    procedure setwordgap(const avalue: int32);
-   procedure setvoicename(const avalue: msestring);
    procedure setlanguage(const avalue: msestring);
    procedure setidentifier(const avalue: msestring);
+   procedure setvoicename(const avalue: msestring);
+   procedure setvariant(const avalue: msestring);
    procedure setage(const avalue: card8);
-   procedure setvariant(const avalue: card8);
+   procedure setvariantnum(const avalue: card8);
    procedure setpunctuationlist(const avalue: msestring);
   protected
    fid: string;
@@ -63,17 +65,24 @@ type
   public
    constructor create(aowner: tobject); override;
   published
- //  property name: msestring read fname write setname;
-   property voicename: msestring read fvoicename write setvoicename;
-   property language: msestring read flanguage write setlanguage;
-                  //example: en-uk
-   property identifier: msestring read fidentifier write setidentifier;
+   property identifier: msestring read fidentifier write setidentifier; 
+    //voice selection 1. priority
                   // the filename for this voice within
                   //espeak-ng-data/voices
+   property voicename: msestring read fvoicename write setvoicename;
+    //voice selection used if identifier = '', example: de
+   property variant: msestring read fvariant write setvariant;
+    //appended to identifier or voicename, example: f3
+
+ 
+    //values below used for voice selection if identifier and voicename = ''
+   property language: msestring read flanguage write setlanguage;
+                  //example: en-uk
+   property variantnum: card8 read fvariantnum write setvariantnum default 0;
    property gender: genderty read fgender write setgender default gen_none;
    property age: card8 read fage write setage default 0;
-   property variant: card8 read fvariant write setvariant default 0;
 
+    //voice independent parameters
    property rate: int32 read frate write setrate default espeakRATE_NORMAL;
      {espeakRATE:    speaking speed in word per minute.  Values 80 to 450.}
    property volume: int32 read fvolume write setvolume default 100;
@@ -166,9 +175,10 @@ type
    fwordgap: int32;
    flanguage: msestring;
    fidentifier: msestring;
+   fvariant: msestring;
    fgender: genderty;
    fage: card8;
-   fvariant: card8;
+   fvariantnum: card8;
    fcapitals: int32;
    fvoicename: msestring;
    procedure setactive(const avalue: boolean);
@@ -182,9 +192,10 @@ type
    procedure setwordgap(const avalue: int32);
    procedure setlanguage(const avalue: msestring);
    procedure setidentifier(const avalue: msestring);
+   procedure setvariant(const avalue: msestring);
    procedure setgender(const avalue: genderty);
    procedure setage(const avalue: card8);
-   procedure setvariant(const avalue: card8);
+   procedure setvariantnum(const avalue: card8);
    procedure setcapitals(const avalue: int32);
    procedure setvoicename(const avalue: msestring);
   protected
@@ -238,12 +249,14 @@ type
    property voicedefault: int32 read fvoicedefault 
                                    write setvoicedefault default 0;
    property voices: tvoices read fvoices write setvoices;
-   property language: msestring read flanguage write setlanguage;
-   property voicename: msestring read fvoicename write setvoicename;
    property identifier: msestring read fidentifier write setidentifier;
+   property voicename: msestring read fvoicename write setvoicename;
+   property variant: msestring read fvariant write setvariant;
+
+   property language: msestring read flanguage write setlanguage;
    property gender: genderty read fgender write setgender default gen_none;
    property age: card8 read fage write setage default 0;
-   property variant: card8 read fvariant write setvariant default 0;
+   property variantnum: card8 read fvariantnum write setvariantnum default 0;
 
    property volume: flo64 read fvolume write setvolume;    //default 1.0
    property rate: flo64 read frate write setrate;          //default 1.0
@@ -267,11 +280,12 @@ type
    property voicedefault;
    property voices;
    property language;
-   property voicename;
    property identifier;
+   property voicename;
+   property variant;
    property gender;
    property age;
-   property variant;
+   property variantnum;
    property volume;
    property rate;
    property pitch;
@@ -465,6 +479,15 @@ begin
  end;
 end;
 
+procedure tcustomespeakng.setvariant(const avalue: msestring);
+begin
+ if fvariant <> avalue then begin
+  beginchange();
+  fvariant:= avalue;
+  endchange();
+ end;
+end;
+
 procedure tcustomespeakng.setvoicename(const avalue: msestring);
 begin
  if fvoicename <> avalue then begin
@@ -502,11 +525,11 @@ begin
  end;
 end;
 
-procedure tcustomespeakng.setvariant(const avalue: card8);
+procedure tcustomespeakng.setvariantnum(const avalue: card8);
 begin
- if fvariant <> avalue then begin
+ if fvariantnum <> avalue then begin
   beginchange();
-  fvariant:= avalue;
+  fvariantnum:= avalue;
   endchange();
  end;
 end;
@@ -626,11 +649,15 @@ end;
 procedure tcustomespeakng.checkvoice(avoice: int32);
 var
  info1: espeak_voice;
- s1,lang1,ident1: string;
+ name1,lang1,ident1,variant1: string;
+ s1: string;
  ms1: msestring;
  ar1: card32arty;
  i1: int32;
  err1: espeak_ng_STATUS;
+{$ifdef mse_debugassistive}
+ p1: pespeak_voice;
+{$endif}
 begin
  lock();
  try
@@ -660,12 +687,19 @@ begin
     end;
     info1.identifier:= pointer(ident1);
     if voicename <> '' then begin
-     s1:= stringtoutf8(tosysfilepath(voicename));
+     name1:= stringtoutf8(tosysfilepath(voicename));
     end
     else begin
-     s1:= stringtoutf8(tosysfilepath(self.voicename));
+     name1:= stringtoutf8(tosysfilepath(self.voicename));
     end;
-    info1.name:= pointer(s1);
+    info1.name:= pointer(name1);
+    if variant <> '' then begin
+     variant1:= stringtoutf8(tosysfilepath(variant));
+    end
+    else begin
+     variant1:= stringtoutf8(tosysfilepath(self.variant));
+    end;
+    info1.name:= pointer(name1);
     if gender <> gen_none then begin
      info1.gender:= ord(gender);
     end
@@ -678,11 +712,11 @@ begin
     else begin
      info1.age:= self.age;
     end;
-    if variant > 0 then begin
-     info1.variant:= variant;
+    if variantnum > 0 then begin
+     info1.variant:= variantnum;
     end
     else begin
-     info1.variant:= self.variant;
+     info1.variant:= self.variantnum;
     end;
     if punctuationlist <> '' then begin
      ms1:= punctuationlist;
@@ -699,8 +733,20 @@ begin
      err1:= espeak_ng_setvoicebyname(pchar(fid));
     end
     else begin
+     s1:= '';
      if ident1 <> '' then begin
-      err1:= espeak_ng_setvoicebyname(pchar(ident1));
+      s1:= ident1;
+     end
+     else begin
+      if name1 <> '' then begin
+       s1:= name1;
+      end;
+     end;
+     if s1 <> '' then begin
+      if variant1 <> '' then begin
+       s1:= s1+'+'+variant1;
+      end;
+      err1:= espeak_ng_setvoicebyname(pchar(s1));
      end
      else begin
       err1:= espeak_ng_setvoicebyproperties(@info1);
@@ -710,7 +756,8 @@ begin
      end;
     end;
    {$ifdef mse_debugassistive}
-    debugwriteln(inttostr(avoice)+':'+fid);
+    p1:= espeak_getcurrentvoice();
+    debugwriteln(inttostr(avoice)+':'+p1^.identifier+':'+p1^.name);
    {$endif}
     if err1 <> ENS_OK then begin
      include(fstate,ss_disconnected);
@@ -1047,6 +1094,16 @@ begin
  end;
 end;
 
+procedure tvoice.setvariant(const avalue: msestring);
+begin
+ if avalue <> fvariant then begin
+  change();
+  tcustomespeakng(fowner).beginchange();
+  fvariant:= avalue;
+  tcustomespeakng(fowner).endchange();
+ end;
+end;
+
 procedure tvoice.setlanguage(const avalue: msestring);
 begin
  if avalue <> flanguage then begin
@@ -1077,12 +1134,12 @@ begin
  end;
 end;
 
-procedure tvoice.setvariant(const avalue: card8);
+procedure tvoice.setvariantnum(const avalue: card8);
 begin
- if avalue <> fvariant then begin
+ if avalue <> fvariantnum then begin
   change();
   tcustomespeakng(fowner).beginchange();
-  fvariant:= avalue;
+  fvariantnum:= avalue;
   tcustomespeakng(fowner).endchange();
  end;
 end;
