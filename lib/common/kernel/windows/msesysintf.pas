@@ -676,7 +676,7 @@ begin
  end
  else begin
   if windows.movefileexw(pmsechar(winfilepath(oldname,'')),
-            pmsechar(winfilepath(newname,'')),movefile_replace_existing) then begin
+        pmsechar(winfilepath(newname,'')),movefile_replace_existing) then begin
    result:= sye_ok;
   end
   else begin

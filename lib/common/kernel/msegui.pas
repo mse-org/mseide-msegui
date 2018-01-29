@@ -15705,6 +15705,9 @@ begin
  if not isenabled then begin
   include(result,asf_disabled);
  end;
+ if ownswindow then begin
+  include(result,asf_toplevel);
+ end;
 end;
 
 function twidget.getifidatalinkintf(): iifidatalink;

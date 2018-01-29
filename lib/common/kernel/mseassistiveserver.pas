@@ -22,7 +22,12 @@ type
                       aso_tabnavig,aso_widgetnavig,aso_nearestortho,
                       aso_menunavig,aso_gridnavig,
                       aso_noreturnkeymenuexecute,aso_nomenumousemove,
-                      aso_nogridmousemove);
+                      aso_nogridmousemove,
+                      aso_saverate,aso_savevolume,
+                      aso_savelanguage,aso_savegender,aso_saveage,
+                      aso_savepitch,aso_saverange,
+                      aso_savecapitals,aso_savewordgap);
+
  assistiveoptionsty = set of assistiveoptionty;
  assistivedbeventkindty = (adek_none,adek_bof,adek_eof);
 const

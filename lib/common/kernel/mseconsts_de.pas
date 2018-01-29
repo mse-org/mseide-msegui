@@ -204,7 +204,8 @@ const
   'Erstes Element',            //sc_firstelement
   'Letztes Element',           //sc_lastelement
   'Langsamer',                 //sc_slower
-  'Schneller'                  //sc_faster
+  'Schneller',                 //sc_faster
+  'Fenster'                    //sc_window
 );
     
 function delete_n_selected_rows(const params: array of const): msestring;

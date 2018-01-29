@@ -1180,7 +1180,7 @@ procedure tassistivehandler.speakall(const sender: iassistiveclient;
                                                    aoptions: speakoptionsty);
 var
  fla1: assistiveflagsty;
- s1,s2: msestring;
+ s1,s2,s3: msestring;
  w1: tpopupmenuwidget1;
  intf2: iassistiveclient;
  i1: int32;
@@ -1244,7 +1244,18 @@ begin
  if (spo_columncaption in aoptions) and (asf_gridwidget in fla1) then begin
   s1:= s1+iassistiveclientgridwidget(sender).getassistivecolumncaption();
  end;
- s1:= s1 + getcaptiontext(sender);
+ s3:= getcaptiontext(sender);
+ if s3 <> '' then begin
+  if s1 <> '' then begin
+   s1:= s1 + ' ';
+  end;
+{
+  if asf_toplevel in fla1 then begin
+   s1:= s1 + sc(sc_window) + ' ';
+  end;
+}
+  s1:= s1 + s3;
+ end;
  if aso_textfirst in foptions then begin
   speaktext(gettexttext(sender),i1);
  end;
@@ -2392,16 +2403,34 @@ procedure tassistivehandler.dostatread(const reader: tstatreader);
 begin
  if reader.canstate then begin
   with fspeaker do begin
-   language:= reader.readmsestring('language',language);
-   gender:= genderty(reader.readinteger('gender',ord(gender),ord(low(gender)),
+   if aso_savelanguage in foptions then begin
+    language:= reader.readmsestring('language',language);
+   end;
+   if aso_savegender in foptions then begin
+    gender:= genderty(reader.readinteger('gender',ord(gender),ord(low(gender)),
                                                 ord(high(gender))));
-   age:= reader.readinteger('age',age,0,100);
-   volume:= reader.readreal('volume',volume,0,2);
-   rate:= reader.readreal('rate',rate,0.1,10);
-   pitch:= reader.readreal('pitch',pitch,0.2,5);
-   range:= reader.readreal('range',pitch,0.2,5);
-   capitals:= reader.readinteger('capitals',capitals,0,300);
-   wordgap:= reader.readinteger('wordgap',wordgap,0,100);
+   end;
+   if aso_saveage in foptions then begin
+    age:= reader.readinteger('age',age,0,100);
+   end;
+   if aso_savevolume in foptions then begin
+    volume:= reader.readreal('volume',volume,0,2);
+   end;
+   if aso_saverate in foptions then begin
+    rate:= reader.readreal('rate',rate,0.1,10);
+   end;
+   if aso_savepitch in foptions then begin
+    pitch:= reader.readreal('pitch',pitch,0.2,5);
+   end;
+   if aso_saverange in foptions then begin
+    range:= reader.readreal('range',pitch,0.2,5);
+   end;
+   if aso_savecapitals in foptions then begin
+    capitals:= reader.readinteger('capitals',capitals,0,300);
+   end;
+   if aso_savewordgap in foptions then begin
+    wordgap:= reader.readinteger('wordgap',wordgap,0,100);
+   end;
   end;
  end;
 end;
@@ -2410,15 +2439,33 @@ procedure tassistivehandler.dostatwrite(const writer: tstatwriter);
 begin
  if writer.canstate then begin
   with fspeaker do begin
-   writer.writemsestring('language',msestring(language));
-   writer.writeinteger('gender',ord(gender));
-   writer.writeinteger('age',age);
-   writer.writereal('volume',volume);
-   writer.writereal('rate',rate);
-   writer.writereal('pitch',pitch);
-   writer.writereal('range',pitch);
-   writer.writeinteger('capitals',capitals);
-   writer.writeinteger('wordgap',wordgap);
+   if aso_savelanguage in foptions then begin
+    writer.writemsestring('language',msestring(language));
+   end;
+   if aso_savegender in foptions then begin
+    writer.writeinteger('gender',ord(gender));
+   end;
+   if aso_saveage in foptions then begin
+    writer.writeinteger('age',age);
+   end;
+   if aso_savevolume in foptions then begin
+    writer.writereal('volume',volume);
+   end;
+   if aso_saverate in foptions then begin
+    writer.writereal('rate',rate);
+   end;
+   if aso_savepitch in foptions then begin
+    writer.writereal('pitch',pitch);
+   end;
+   if aso_saverange in foptions then begin
+    writer.writereal('range',pitch);
+   end;
+   if aso_savecapitals in foptions then begin
+    writer.writeinteger('capitals',capitals);
+   end;
+   if aso_savewordgap in foptions then begin
+    writer.writeinteger('wordgap',wordgap);
+   end;
   end;
  end;
 end;

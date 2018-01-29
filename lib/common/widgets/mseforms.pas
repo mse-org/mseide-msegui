@@ -20,7 +20,8 @@ uses
  msewidgets,msemenus,msegraphics,mseapplication,msegui,msegraphutils,mseevent,
  msetypes,msestrings,mseglob,mseguiglob,mseguiintf,msedragglob,msepointer,
  msemenuwidgets,msestat,msestatfile,mseclasses,classes,mclasses,msedock,
- msesimplewidgets,msebitmap,typinfo,msesplitter,mseobjectpicker,msetabs
+ msesimplewidgets,msebitmap,typinfo,msesplitter,mseobjectpicker,msetabs,
+ mseassistiveclient
  {$ifdef mse_with_ifi},mseifiglob,mseificompglob,mseificomp{$endif};
 
 {$if defined(FPC) and (fpc_fullversion >= 020403)}
@@ -71,6 +72,7 @@ type
    procedure clientrectchanged; override;
    procedure widgetregionchanged(const sender: twidget); override;
    procedure docheckautosize;
+   function getassistiveflags(): assistiveflagsty override;
   public
    constructor create(aowner: tcustommseform); reintroduce;
    procedure dolayout(const sender: twidget); override;
@@ -760,7 +762,7 @@ function createtabform(const aclass: tclass;
 
 implementation
 uses
- sysutils,mselist,msekeyboard,msebits,msestreaming;
+ sysutils,mselist,msekeyboard,msebits,msestreaming,msestockobjects;
 const
  containercommonflags: optionswidgetty = 
             [ow_arrowfocus,ow_arrowfocusin,ow_arrowfocusout,ow_destroywidgets,
@@ -915,6 +917,14 @@ begin
     checkautosize;
    end;
   end;
+ end;
+end;
+
+function tformscrollbox.getassistiveflags(): assistiveflagsty;
+begin
+ result:= inherited getassistiveflags();
+ if twidget(owner).ownswindow then begin
+  include(result,asf_toplevel);
  end;
 end;
 
@@ -2199,7 +2209,15 @@ end;
 
 function tcustommseform.getassistivecaption(): msestring;
 begin
- result:= caption;
+ result:= '';
+ if caption <> '' then begin
+  if ownswindow then begin
+   result:= sc(sc_window)+' '+caption;
+  end
+  else begin
+   result:= caption;
+  end;
+ end;
  if result = '' then begin
   result:= inherited getassistivecaption();
  end;
