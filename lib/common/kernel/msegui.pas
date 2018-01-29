@@ -3279,6 +3279,7 @@ procedure debugwindow(const atext: string; const awindow: twindow);
 procedure debugwindow(const atext: string; const aid: winidty);
 procedure debugwindow(const atext: string; const aid1,aid2: winidty);
 function checkwindowname(const aid: winidty; const aname: string): boolean;
+function debugwidgetname(const awidget: twidget; const atext: string): string;
 {$endif}
 
 implementation
@@ -12858,13 +12859,14 @@ const
  distweighting = 10;
  wrapweighting = 1;
  orthoweightingwrap = 10;
- orthoweighting = 100;
+ orthoweighting = 300;
  orthoweightingoverlap = 1;
 var
  dist: integer;
  srect,drect: rectty;
  sstart,send,dstart,dend: integer;
-// int1: integer;
+ i1: int32;
+
 begin
  with info do begin
   drect:= navigrect;
@@ -12876,11 +12878,23 @@ begin
    send:= srect.y + srect.cy;
    dend:= drect.y + drect.cy;
    result:= (drect.y + dend - srect.y - send) div 2;
-//   int1:= srect.y + srect.cy div 2;
-//   if (int1 >= drect.y) and (int1 < drect.y + drect.cy) then begin
-//    result:= 0;
-//   end;
    dist:= drect.x - srect.x;
+   if direction = gd_right then begin
+    if dist > 0 then begin
+     i1:= dist - srect.cx;
+     if (i1 > 0) and (i1 < dist) then begin
+      dist:= i1;
+     end;
+    end;
+   end
+   else begin //gd_left
+    if dist < 0 then begin
+     i1:= dist + drect.cx;
+     if (i1 < 0) and (i1 > dist) then begin
+      dist:= i1;
+     end;
+    end;
+   end;
   end
   else begin
    sstart:= srect.x;
@@ -12888,9 +12902,6 @@ begin
    dstart:= drect.x;
    dend:= drect.x + drect.cx;
    result:= drect.x - srect.x;
-//   if (srect.x + 3 >= drect.x) and (srect.x < dend) then begin
-//    result:= 0;
-//   end;
    dist:= (drect.y + drect.cy div 2) - (srect.y + srect.cy div 2);   
   end;
   result:= abs(result);
@@ -12949,6 +12960,11 @@ begin
  result:= navigrect;
 end;
 
+{$ifdef mse_debugnavigdistance}
+var
+ navigrequestlevel: int32;
+{$endif}
+
 procedure twidget.navigrequest(var info: naviginfoty;
                                            const nowrap: boolean = false);
 var
@@ -12956,7 +12972,17 @@ var
  widget1,widget2,wi3: twidget;
  bo1: boolean;
  rect1,rect2: rectty;
+{$ifdef mse_debugnavigdistance}
+ wi1: twidget;
+{$endif}
 begin
+{$ifdef mse_debugnavigdistance}
+ inc(navigrequestlevel);
+ debugwriteln(
+             debugwidgetname(self,charstring(' ',navigrequestlevel-1)+
+             inttostr(navigrequestlevel)+
+            '**navigrequest:')+ debugwidgetname(info.sender,' sender '));
+{$endif}
  with info do begin
   if not down and (ow_arrowfocusout in foptionswidget) and 
                                       (fparentwidget <> nil) then begin
@@ -12967,6 +12993,9 @@ begin
   end;
   down:= true;
   wi3:= nearest;
+ {$ifdef mse_debugnavigdistance}
+  wi1:= nearest;
+ {$endif}
   for int1:= 0 to widgetcount - 1 do begin
    widget1:= twidget(fwidgets[int1]);
    if (widget1 <> info.sender) and (ow_arrowfocus in widget1.foptionswidget)
@@ -12984,6 +13013,20 @@ begin
       nearest:= widget1;
       distance:= int2;
      end;
+    {$ifdef mse_debugnavigdistance}
+     if nearest <> wi1 then begin
+      debugwrite(' *');
+      wi1:= nearest;
+     end
+     else begin
+      debugwrite('  ');
+     end;
+     debugwriteln(inttostr(int1)+charstring(' ',navigrequestlevel-1)+
+       'navigdistance '+
+       inttostr(int2)+' '+inttostr(distance)+' '+
+       debugwidgetname(widget1,' ')+' '+
+       debugwidgetname(nearest,'nearest'));
+    {$endif}
     end;
     hastarget:= hastarget or bo1;
    end;
@@ -13020,6 +13063,9 @@ begin
  if canevent(tmethod(fonnavigrequest)) then begin
   fonnavigrequest(self,info);
  end;
+{$ifdef mse_debugnavigdistance}
+ dec(navigrequestlevel);
+{$endif}
 end;
 
 procedure twidget.dokeydown(var info: keyeventinfoty);
@@ -19265,6 +19311,20 @@ var
 begin
  result:= appinst.findwindow(aid,window1) and
               (window1.fownerwidget.name = aname);
+end;
+
+function debugwidgetname(const awidget: twidget; const atext: string): string;
+begin
+ result:= '';
+ if atext <> '' then begin
+  result:= atext+' ';
+ end;
+ if awidget <> nil then begin
+  result:= result + awidget.name;
+ end
+ else begin
+  result:= result + 'NIL';
+ end;
 end;
 
 {$endif}
