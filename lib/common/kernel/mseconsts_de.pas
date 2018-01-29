@@ -170,7 +170,7 @@ const
   'Blockiere Unterfenster',    //sc_lock_children
   'Kein Blockieren',           //sc_no_lock
   'Eingabe',                   //sc_input
-  'Schaltfläche',              //sc_button
+  'Schaltfeld',                //sc_button
   'Ein',                       //sc_on
   'Aus',                       //sc_off
   'Linker Rand',               //sc_leftborder
@@ -198,7 +198,7 @@ const
   'Letzte Zeile',              //sc_lastrow
   'Auswahl',                   //sc_selection
   'Spreche Pfad',              //sc_speakpath
-  'Deaktivierte Schaltfläche', //sc_disabledbutton
+  'Deaktiviertes Schaltfeld',  //sc_disabledbutton
   'Erstes Feld',               //sc_firstfield
   'Letztes Feld',              //sc_lastfield
   'Erstes Element',            //sc_firstelement
