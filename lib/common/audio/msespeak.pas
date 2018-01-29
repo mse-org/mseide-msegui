@@ -156,6 +156,8 @@ type
  speakstatety = (ss_voicevalid,ss_connected,ss_disconnected,
                  ss_canceled,ss_idle);
  speakstatesty = set of speakstatety;
+ 
+ espeakngeventty = procedure(const sender: tcustomespeakng) of object;
   
  tcustomespeakng = class(tmsecomponent)
   private
@@ -180,6 +182,7 @@ type
    fvariantnum: card8;
    fcapitals: int32;
    fvoicename: msestring;
+   fonbeforeconnect: espeakngeventty;
    procedure setactive(const avalue: boolean);
    procedure setvoicedefault(avalue: int32);
    procedure setvoices(const avalue: tvoices);
@@ -268,6 +271,8 @@ type
    property punctuationlist: msestring read fpunctuationlist
                                                  write setpunctuationlist;
                                           //for voice.punctuation pu_some
+   property onbeforeconnect: espeakngeventty read fonbeforeconnect 
+                                                      write fonbeforeconnect;
  end;
 
  tespeakng = class(tcustomespeakng)
@@ -292,6 +297,7 @@ type
    property range;
    property wordgap;
    property punctuationlist;
+   property onbeforeconnect;
  end;
 
 implementation
@@ -604,13 +610,19 @@ end;
 procedure tcustomespeakng.connect();
 var
  m1: espeak_ng_OUTPUT_MODE;
+ s1: string;
 begin
  if not (csdesigning in componentstate) then begin
+  if assigned(fonbeforeconnect) then begin
+   fonbeforeconnect(self);
+  end;
   exclude(fstate,ss_disconnected);
   include(fstate,ss_idle);
   sys_condcreate(fidlecond);
   voicechanged();
-  initializeespeakng([],stringtoutf8(tosysfilepath(fdatapath)));
+  s1:= stringtoutf8ansi(tosysfilepath(fdatapath));
+  initializeespeakng([],s1);
+  
   m1:= ENOUTPUT_MODE_SYNCHRONOUS; 
 //  m1:= 0;//ENOUTPUT_MODE_SYNCHRONOUS; 
              //espeak_ng_cancel() does not work in synchronous mode

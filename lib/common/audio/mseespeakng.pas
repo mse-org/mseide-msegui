@@ -438,8 +438,10 @@ const
  );
  errormessage = 'Can not load eSpeakNG library. ';
 begin
- initializedynlib(libinfo,sonames,espeaknglib,funcs,[],errormessage,@ini,false,
-                                                      pointer(espeakdatapath));
+ if not initializedynlib(libinfo,sonames,espeaknglib,funcs,[],
+                  errormessage,@ini,false,pointer(espeakdatapath)) then begin
+  espeak_ng_InitializePath(pointer(espeakdatapath)); //ini not called
+ end;;
 end;
 
 procedure releaseespeakng();

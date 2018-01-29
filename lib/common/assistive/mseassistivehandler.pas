@@ -28,8 +28,10 @@ type
    ahs_dbchangepending,
    ahs_textblock,ahs_textblock1);
  assistivehandlerstatesty = set of assistivehandlerstatety;
+
 const
  internalstates = [ahs_active];
+
 type
  tassistivespeak = class(tcustomespeakng)
   public
@@ -54,6 +56,7 @@ type
    property range;
    property wordgap;
    property punctuationlist;
+   property onbeforeconnect;
  end;
 
  tassistivehandler = class;
@@ -1427,7 +1430,8 @@ end;
 
 procedure tassistivehandler.dospeakagain(const sender: twidget);
 begin
- speakall(twidget1(sender).getiassistiveclient(),[spo_hint,spo_parent]);
+ speakall(twidget1(sender).getiassistiveclient(),[spo_hint,spo_parent,
+                                                         spo_columncaption]);
 end;
 
 procedure tassistivehandler.dospeakpath(const sender: twidget);
