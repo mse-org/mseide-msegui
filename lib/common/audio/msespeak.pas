@@ -164,7 +164,6 @@ type
    foptions: espeakoptionsty;
    fdevice: msestring;
    fbufferlength: int32;
-   fbufferlengt: int32;
    fvoicedefault: int32;
    fvoices: tvoices;
    fpunctuationlist: msestring;
@@ -244,7 +243,8 @@ type
    property datapath: filenamety read fdatapath write fdatapath;
    property options: espeakoptionsty read foptions write foptions default [];
    property device: msestring read fdevice write fdevice;
-   property bufferlength: int32 read fbufferlength write fbufferlengt default 0;
+   property bufferlength: int32 read fbufferlength 
+                                          write fbufferlength default 0;
                                            //ms, 0 -> 60ms
    property voicedefault: int32 read fvoicedefault 
                                    write setvoicedefault default 0;
@@ -617,7 +617,7 @@ begin
   if not (eso_nospeakaudio in foptions) then begin
    m1:= m1 or ENOUTPUT_MODE_SPEAK_AUDIO;
   end;
-  checkerror(espeak_ng_InitializeOutput(m1,0,nil));
+  checkerror(espeak_ng_InitializeOutput(m1,fbufferlength,nil));
   include(fstate,ss_connected);
   fspeakthread:= teventthread.create(@speakexe);
  end;
@@ -893,10 +893,12 @@ begin
   wait();
   exclude(fstate,ss_canceled);
  end;
+ fspeakthread.eventlist.lock();
  sys_condlock(fidlecond);
  exclude(fstate,ss_idle);
  fspeakthread.postevent(aevent);
  sys_condunlock(fidlecond);
+ fspeakthread.eventlist.unlock();
 end;
 
 procedure tcustomespeakng.speak(const atext: msestring;
