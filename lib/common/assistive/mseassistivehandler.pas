@@ -1184,12 +1184,15 @@ var
  w1: tpopupmenuwidget1;
  intf2: iassistiveclient;
  i1: int32;
+ b1: boolean;
 begin
+ fla1:= sender.getassistiveflags();
  intf2:= sender.getassistiveparent();
  if spo_path in aoptions then begin
   exclude(aoptions,spo_parent);
   include(aoptions,spo_columncaption);
   if intf2 <> nil then begin
+   exclude(fla1,asf_toplevel);
    speakall(intf2,aoptions);
    include(aoptions,spo_addtext);
    intf2:= nil;
@@ -1200,7 +1203,6 @@ begin
    intf2:= nil;
   end;
  end; 
- fla1:= sender.getassistiveflags();
  i1:= gettextvoice(fla1);
  if asf_async in fla1 then begin
   include(aoptions,spo_addtext);
@@ -1209,7 +1211,7 @@ begin
  if not (spo_addtext in aoptions) then begin
   startspeak();
  end;
- s1:= '';
+// s1:= '';
  if asf_menu in fla1 then begin
   if w1 is tpopupmenuwidget then begin
    speakallmenu(tmenuitem1(w1.flayout.menu).getiassistiveclient(),
@@ -1221,12 +1223,16 @@ begin
   speakall(intf2,aoptions - [spo_addtext,spo_parent]);
  end;
  if fla1 * [asf_grid,asf_popup] = [asf_grid,asf_popup] then begin
-  if spo_parent in aoptions then begin
+  b1:= aoptions * [spo_parent,spo_path] <> [];
+  if b1 and not(aso_textfirst in foptions)  then begin
    speaktext(sc_selection,fvoicefixed);
   end;
   with iassistiveclientgrid(sender) do begin
    speaktext(getassistivecellcaption(getassistivefocusedcell()),fvoicecaption);
    speaktext(getassistivecelltext(getassistivefocusedcell(),fla1),i1);
+  end;
+  if b1 and (aso_textfirst in foptions)  then begin
+   speaktext(sc_selection,fvoicefixed);
   end;
   exit;
  end;
@@ -1239,7 +1245,15 @@ begin
    s2:= stockobjects.captions[sc_button] + ' ';
   end;
  end;
- speaktext(s1,fvoicefixed);
+ if asf_toplevel in fla1 then begin
+  if s2 <> '' then begin
+   s2:= sc(sc_area)+' '+s2;
+  end
+  else begin
+   s2:= sc(sc_area);
+  end;
+ end;
+// speaktext(s1,fvoicefixed);
  s1:= '';
  if (spo_columncaption in aoptions) and (asf_gridwidget in fla1) then begin
   s1:= s1+iassistiveclientgridwidget(sender).getassistivecolumncaption();
@@ -1258,10 +1272,12 @@ begin
  end;
  if aso_textfirst in foptions then begin
   speaktext(gettexttext(sender),i1);
- end;
- speaktext(s1,fvoicecaption);
- speaktext(s2,fvoicefixed);
- if not (aso_textfirst in foptions) then begin
+  speaktext(s1,fvoicecaption);
+  speaktext(s2,fvoicefixed);
+ end
+ else begin
+  speaktext(s2,fvoicefixed);
+  speaktext(s1,fvoicecaption);
   speaktext(gettexttext(sender),i1);
  end;
  if spo_hint in aoptions then begin
@@ -1460,6 +1476,9 @@ end;
 function tassistivehandler.gettextvoice(const aflags: assistiveflagsty): int32;
 begin
  result:= fvoicetext;
+ if aflags * [asf_popup,asf_grid] = [asf_popup,asf_grid] then begin
+  result:= fvoicetexteditreadonly;
+ end;
  if asf_message in aflags then begin
   result:= fvoicetextmessage;
  end;
@@ -1567,9 +1586,12 @@ begin
      i1:= gettextvoice(fla1);
      if aso_textfirst in foptions then begin
       speaktext(gettexttext(sender),i1);
-     end;
-     speaktext(getcaptiontext(sender),fvoicecaption);
-     if not (aso_textfirst in foptions) then begin
+      speaktext(getcaptiontext(sender),fvoicecaption);
+      speaktext(sc(sc_areaactivated),fvoicefixed);
+     end
+     else begin
+      speaktext(getcaptiontext(sender),fvoicecaption);
+      speaktext(sc(sc_areaactivated),fvoicefixed);
       speaktext(gettexttext(sender),i1);
      end;
     end;
@@ -1676,9 +1698,14 @@ begin
      end
      else begin
       if fla1*[asf_grid,asf_popup] = [asf_grid,asf_popup] then begin
-       speaktext(sc_selection,fvoicefixed);
+       if not (aso_textfirst in foptions) then begin
+        speaktext(sc_selection,fvoicefixed);
+       end;
        speakgridcell(iassistiveclientgrid(sender),
                     tcustomgrid(sender.getassistivewidget()).focusedcell,true);
+       if aso_textfirst in foptions then begin
+        speaktext(sc_selection,fvoicefixed);
+       end;
       end
       else begin
        if not (ahs_dropdownlistclosed in fstate) and 

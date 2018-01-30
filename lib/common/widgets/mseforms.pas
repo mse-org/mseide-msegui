@@ -2209,6 +2209,7 @@ end;
 
 function tcustommseform.getassistivecaption(): msestring;
 begin
+{
  result:= '';
  if caption <> '' then begin
   if ownswindow then begin
@@ -2218,6 +2219,8 @@ begin
    result:= caption;
   end;
  end;
+}
+ result:= caption;
  if result = '' then begin
   result:= inherited getassistivecaption();
  end;
