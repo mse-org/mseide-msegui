@@ -2254,10 +2254,10 @@ begin
    end;
    case amode of
     eim_insert: begin
-     speaktext(sc_insert,fvoicetextedit);
+     speaktext(sc_insert,fvoicetexteditreadonly);
     end;
     eim_overwrite: begin
-     speaktext(sc_overwrite,fvoicetextedit);
+     speaktext(sc_overwrite,fvoicetexteditreadonly);
     end;
    end;
    if aso_textfirst in foptions then begin
