@@ -739,15 +739,24 @@ function gui_grabpointer(id: winidty): guierrorty;
 begin
  setcapture(id);
  if getcapture = id then begin
+{$ifdef mse_debugwindowfocus}
+  debugwindow('grabpointer OK ',id);
+{$endif}
   result:= gue_ok;
  end
  else begin
+{$ifdef mse_debugwindowfocus}
+  debugwindow('grabpointer error ',id);
+{$endif}
   result:= gue_capturemouse;
  end;
 end;
 
 function gui_ungrabpointer: guierrorty;
 begin
+{$ifdef mse_debugwindowfocus}
+  debugwriteln('ungrabpointer');
+{$endif}
  releasecapture;
  result:= gue_ok;
 end;
@@ -2353,6 +2362,7 @@ var
  shiftstate1: uint;
  imc: himc;
  imminfo: compositionform;
+ ev1: tmseevent;
 label
  nodefwindowproclab; 
 begin
@@ -2472,10 +2482,11 @@ begin
    end;
   end;
   wm_killfocus: begin
+   ev1:= twindowevent.create(ek_focusout,ahwnd);
+   eventlist.add(ev1);
   {$ifdef mse_debugwindowfocus}
-   debugwindow('wm_killfocus ',ahwnd);
+   debugwindow('wm_killfocus '+hextostr(ev1)+' ',ahwnd);
   {$endif}
-   eventlist.add(twindowevent.create(ek_focusout,ahwnd));
   end;
   wm_paint: begin
    if getupdaterect(ahwnd,trect(rect1),false) then begin
@@ -2523,9 +2534,15 @@ begin
   wm_windowposchanged: begin
    with pwindowpos(lparam)^ do begin
     if swp_hidewindow and flags <> 0 then begin
+    {$ifdef mse_debugwindowfocus}
+     debugwindow('wm_windowposchanged hide ',ahwnd);
+    {$endif}
      eventlist.add(twindowevent.create(ek_hide,ahwnd));
     end;
     if (swp_showwindow and flags <> 0) and (gui_getwindowsize(ahwnd) <> wsi_minimized) then begin
+    {$ifdef mse_debugwindowfocus}
+     debugwindow('wm_windowposchanged show ',ahwnd);
+    {$endif}
      eventlist.add(twindowevent.create(ek_show,ahwnd));
     end;
     if (((swp_nomove or swp_nosize) and flags <> (swp_nomove or swp_nosize)) or 

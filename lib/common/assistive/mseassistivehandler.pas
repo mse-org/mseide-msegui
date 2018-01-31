@@ -21,7 +21,10 @@ uses
 
 type
  assistivehandlerstatety =
-  (ahs_active,ahs_nocut,
+  (ahs_active,ahs_speaklocked,
+   ahs_activated, //set by dowindowactivated() and doapplicationactivated(),
+                  //reset by doapplicationdeactivated()
+   ahs_nocut,
    ahs_windowactivated,ahs_menuactivated,ahs_menuactivatepending,
    ahs_dropdownlistclosed,ahs_editcharenter,ahs_editchardelete,
    ahs_locatepending,ahs_dropdownpending,ahs_cellwidgetpending,
@@ -30,7 +33,7 @@ type
  assistivehandlerstatesty = set of assistivehandlerstatety;
 
 const
- internalstates = [ahs_active];
+ internalstates = [ahs_active,ahs_speaklocked,ahs_activated];
 
 type
  tassistivespeak = class(tcustomespeakng)
@@ -460,7 +463,8 @@ type
    procedure deactivate();
 
    procedure loaded() override;
-
+   
+   function canspeak(): boolean;
    procedure startspeak();
    
    procedure registeritem(const aintf: iassistiveclient;
@@ -1134,10 +1138,16 @@ begin
  end;
 end;
 
+function tassistivehandler.canspeak(): boolean;
+begin
+ result:= fstate * [ahs_active,ahs_speaklocked,ahs_activated] = 
+                                               [ahs_active,ahs_activated];
+end;
+
 procedure tassistivehandler.speaktext(const atext: msestring;
                const avoice: int32 = 0; const nocut: boolean = false);
 begin
- if fspeaklock <= 0 then begin
+ if canspeak() then begin
   if nocut then begin
    include(fstate,ahs_nocut);
   end;
@@ -1168,7 +1178,7 @@ end;
 procedure tassistivehandler.speakcharacter(const achar: char32;
                const avoice: int32 = 0; const nocut: boolean = false);
 begin
- if fspeaklock <= 0 then begin
+ if canspeak() then begin
   if nocut then begin
    include(fstate,ahs_nocut);
   end;
@@ -1351,11 +1361,17 @@ begin
   cancel;
  end;
  inc(fspeaklock);
+ if fspeaklock > 0 then begin
+  include(fstate,ahs_speaklocked);
+ end;
 end;
 
 procedure tassistivehandler.speakcontinue();
 begin
  dec(fspeaklock);
+ if fspeaklock <= 0 then begin
+  exclude(fstate,ahs_speaklocked);
+ end;
 end;
 
 procedure tassistivehandler.startspeak();
@@ -1523,6 +1539,7 @@ procedure tassistivehandler.doapplicationactivated();
 var
  b1: boolean;
 begin
+ include(fstate,ahs_activated);
 {$ifdef mse_debugassistive}
  debug('applicationactivated',nil);
 {$endif}
@@ -1536,6 +1553,7 @@ procedure tassistivehandler.doapplicationdeactivated();
 var
  b1: boolean;
 begin
+ fstate:= fstate - [ahs_activated,ahs_dropdownlistclosed,ahs_dropdownpending];
 {$ifdef mse_debugassistive}
  debug('applicationdeactivated',nil);
 {$endif}
@@ -1558,6 +1576,7 @@ begin
 {$ifdef mse_debugassistive}
  debug('windowactivated',sender);
 {$endif}
+ include(fstate,ahs_activated);
  setstate([ahs_windowactivated]);
  b1:= false;
  if finditem(sender,item1) then begin

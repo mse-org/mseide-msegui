@@ -2436,7 +2436,7 @@ type
  pwidget = ^twidget;
 
  windowstatety = (tws_posvalid,tws_sizevalid,tws_windowvisible,
-                  tws_windowshowpending,
+                  tws_focusoutpending,tws_windowshowpending,
                   {tws_modal,}tws_modalfor,tws_modalcalling,
                   tws_needsdefaultpos,
                   tws_closing,tws_painting,tws_activating,
@@ -13939,8 +13939,8 @@ end;
 procedure twidget.releasemouse(const grab: boolean = false);
 begin
  if (appinst <> nil) and (appinst.fmousecapturewidget = self) then begin
-  appinst.capturemouse(nil,grab);
   exclude(fwidgetstate,ws_mousecaptured);
+  appinst.capturemouse(nil,grab);
  end;
 end;
 
@@ -16579,6 +16579,7 @@ begin
     if appinst.active and not (aps_cancelloop in appinst.fstate) then begin
      fmodalwindow.activate;
     end;
+    exclude(fmodalwindow.fstate,tws_focusoutpending);
    end;
   finally
    setlinkedvar(nil,tmsecomponent(focusedwidgetbefore));
@@ -16860,6 +16861,7 @@ begin
       end;
      end;
      if (info.mouse.eventkind = ek_buttonpress) and ispopup and
+         self.fownerwidget.visible and
               (ow_mousefocus in self.fownerwidget.foptionswidget) and 
             not (csdestroying in self.fownerwidget.componentstate) and 
                  not (acs_releasing in self.fownerwidget.factstate) then begin
@@ -17467,7 +17469,8 @@ end;
 
 procedure twindow.activate(const force: boolean = false);
 begin
- if fownerwidget.visible and (force or not active) then begin
+ if fownerwidget.visible and (force or not active) and 
+                           not (tws_focusoutpending in fstate)then begin
   internalactivate(false);
  end;
 end;
@@ -18994,6 +18997,7 @@ begin
 {$ifdef mse_debugwindowfocus}
    debugwriteln('setwindowfocus '+window.fownerwidget.name+' '+hextostr(winid,8));
 {$endif}
+   exclude(window.fstate,tws_focusoutpending);
    if (fmodalwindow = nil) or (fmodalwindow = window) then begin
     if wo_noactivate in window.options then begin
      if window.transientfor <> nil then begin
@@ -19077,6 +19081,7 @@ begin
   debugwriteln('unsetwindowfocus '+window.fownerwidget.name+' '+
                                                             hextostr(winid,8));
 {$endif}
+  exclude(window.fstate,tws_focusoutpending);
   if (ffocuslockwindow <> nil) and (factivewindow <> nil) and 
          (window = ffocuslocktransientfor) then begin
    ffocuslockwindow:= nil;
@@ -19213,6 +19218,14 @@ var
  bo1: boolean;
 begin
  bo1:= (activewindow <> nil) or focusinpending;
+{$ifdef mse_debugwindowfocus}
+ if bo1 then begin
+  debugwriteln('checkapplicationactive true');
+ end
+ else begin
+  debugwriteln('checkapplicationactive false');
+ end;
+{$endif}
  if  bo1 xor (aps_active in fstate) then begin
   if bo1 then begin
    include(fstate,aps_active);
@@ -19588,11 +19601,12 @@ begin       //eventloop
               if (kind = ek_focusout) and 
                                 (fwinid = twindowevent(event).fwinid) then begin
               {$ifdef mse_debugwindowfocus}
-               debugwindow(' spurious ek_focusout deleted ',twindowevent(event).fwinid);
+               debugwindow(' spurious ek_focusout deleted ',
+                                                  twindowevent(event).fwinid);
               {$endif}
                bo1:= false;
                freeandnil(po1^); 
-                  //spurious focus, for instance minimize window group on windows
+                 //spurious focus, for instance minimize window group on windows
                if bo3 and (factivewindow <> nil) then begin
                 unsetwindowfocus(factivewindow.fwindow.id);
                 postevent(tmseevent.create(ek_checkapplicationactive));
@@ -19617,7 +19631,8 @@ begin       //eventloop
          end;
          ek_focusout: begin
          {$ifdef mse_debugwindowfocus}
-          debugwindow('ek_focusout ',twindowevent(event).fwinid);
+          debugwindow('ek_focusout '+hextostr(event)+' ',
+                                              twindowevent(event).fwinid);
          {$endif}
           getevents;
           po1:= pointer(@eventlist.datapo^[eventlist.count-1]);
@@ -19823,6 +19838,7 @@ var
  modalwidgetbefore,focusedwidgetbefore: twidget;
  modalinfo: modalinfoty;
  modalinfobefore: pmodalinfoty;
+ p1,pe: ^tmseevent;
 begin
  result:= false;
  exclude(fstate,aps_cancelloop);
@@ -19888,7 +19904,24 @@ begin
         focusedwidgetbefore.activate(true,false);
        end;
        if appinst.active and (appinst.fwantedactivewindow = nil) then begin
-        window1.activate;
+        p1:= pointer(eventlist.datapo);
+        pe:= p1 + eventlist.count;
+        while p1 < pe do begin
+         if p1^ <> nil then begin
+          with p1^ do begin
+           if (kind = ek_focusout) and 
+                  (window1.fwindow.id = twindowevent(p1^).fwinid) then begin
+            include(window1.fstate,tws_focusoutpending);
+           {$ifdef mse_debugwindowfocus}
+            debugwindow('focusoutpending ',window1);
+           {$endif}
+            break;
+           end;
+          end;
+         end;
+         inc(p1);
+        end;
+        window1.activate();
        end;
       end;
      finally
