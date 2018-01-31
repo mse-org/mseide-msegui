@@ -86,7 +86,7 @@ function quotelibnames(const libnames: array of filenamety): msestring;
 implementation
 
 uses
- msesysintf1{,msearrayutils};
+ msesysintf1{$ifdef linux},dl{$endif},msearrayutils,msestrings;
 
 function getprocaddresses(const lib: tlibhandle;
                           const procedures: array of funcinfoty;
@@ -186,9 +186,17 @@ function loadlib(const libnames: array of filenamety; out libname: filenamety;
                   const noexception: boolean = false): tlibhandle;
 var
  int1: integer;
+ s1: string;
+{$ifdef linux}
+ p1: pchar;
+ ar1: stringarty;
+{$endif}
 begin
  result:= 0;
  libname:= '';
+{$ifdef linux}
+ p1:= nil;
+{$endif}
  for int1:= 0 to high(libnames) do begin
  {$ifdef FPC}
   result:= loadlibrary(libnames[int1]);
@@ -199,10 +207,20 @@ begin
    libname:= libnames[int1];
    break;
   end;
+ {$ifdef linux}
+  p1:= dlerror();
+  additem(ar1,string(p1));
+ {$endif}
  end;
  if (result = 0) and not noexception then begin
-  raise exception.create(ansistring(errormessage+
-                   'Library '+quotelibnames(libnames)+' not found.'));
+  s1:= ansistring(errormessage+
+                   'Library '+quotelibnames(libnames)+' not found.');
+ {$ifdef linux}
+  if ar1 <> nil then begin
+   s1:= s1+lineend+concatstrings(ar1,lineend);
+  end;
+ {$endif}
+  raise exception.create(s1);
  end;
 end;
 

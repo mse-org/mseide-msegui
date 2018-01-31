@@ -31,7 +31,7 @@ const
    'libespeak-ngsync.dll');
 {$else}
  espeaknglib: array[0..1] of filenamety = 
-                               ('libespeak-ng.so.1','libespeak-ng.so'); 
+    ('libespeak-ngsync.so.1','libespeak-ngsync.so'); 
 {$endif}
 
  ENS_GROUP_MASK = $70000000;
@@ -145,7 +145,7 @@ type
 
  tespeakerror = class(exception)
   public
-   constructor create(const err: espeak_ng_STATUS);
+   constructor create(const err: espeak_ng_STATUS; const atext: string='');
  end;
  
 var
@@ -392,17 +392,19 @@ begin
  result:= string(pchar(@buf))
 end;
 
-procedure checkerror(const astate: espeak_ng_status);
+procedure checkerror(const astate: espeak_ng_status; const atext: string);
 begin
  if astate <> 0 then begin
-  raise tespeakerror.create(astate);
+  raise tespeakerror.create(astate,atext);
  end;
 end;
 
 procedure ini(const data: pointer);
 begin
  espeak_ng_InitializePath(data);
- checkerror(espeak_ng_Initialize(@err));
+ checkerror(espeak_ng_Initialize(@err),
+              lineend+'espeak-ng-data directory not found'+lineend+
+                                                     string(pchar(data)));
 end;
 
 procedure fini(const data: pointer);
@@ -451,9 +453,10 @@ end;
 
 { tespeakerror }
 
-constructor tespeakerror.create(const err: espeak_ng_STATUS);
+constructor tespeakerror.create(const err: espeak_ng_STATUS;
+                                               const atext: string='');
 begin
- inherited create('eSpeak error:'+lineend+espeakngerrormessage(err));
+ inherited create('eSpeak error:'+atext+lineend+espeakngerrormessage(err));
 end;
 
 initialization
