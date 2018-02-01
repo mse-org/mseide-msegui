@@ -20789,14 +20789,16 @@ procedure tguiapplication.showexception(e: exception;
 var
  mstr1: msestring;
 begin
- if not ismainthread then begin
-  showasyncexception(e,leadingtext);
- end
- else begin
-  mstr1:= leadingtext + e.Message;
-  showmessage(mstr1,sc(sc_exception){$ifdef FPC},0,lineend+
-              getexceptiontext(exceptobject,
-                            exceptaddr,exceptframecount,exceptframes){$endif});
+ if not (e is eabort) then begin
+  if not ismainthread then begin
+   showasyncexception(e,leadingtext);
+  end
+  else begin
+   mstr1:= leadingtext + e.Message;
+   showmessage(mstr1,sc(sc_exception){$ifdef FPC},0,lineend+
+               getexceptiontext(exceptobject,
+                             exceptaddr,exceptframecount,exceptframes){$endif});
+  end;
  end;
 end;
 
