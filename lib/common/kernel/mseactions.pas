@@ -31,7 +31,8 @@ type
  shortcutconstty = array[0..2] of shortcutty;
  assistiveshortcutty = (shoa_speakagain,shoa_speakpath,
                         shoa_firstelement,shoa_lastelement,
-                        shoa_slower,shoa_faster);
+                        shoa_cancelspeech,
+                        shoa_slower,shoa_faster,shoa_volumedown,shoa_volumeup);
  assistiveshortcutconstty = array[assistiveshortcutty] of shortcutconstty;
  assistiveshortcutaty = array[assistiveshortcutty] of shortcutarty;
  passistiveshortcutaty = ^assistiveshortcutaty;
@@ -412,15 +413,23 @@ const
   ((ctrl+ord(key_space),0,0),(ctrl+shift+ord(key_space),0,0),
    //shoa_firstelement,            shoa_lastelement
    (ctrl+ord(key_y),ord(key_f),0),(ctrl+ord(key_y),ord(key_l),0),
+   //shoa_cancelspeech
+   (ctrl+ord(key_y),ord(key_c),0),
    //shoa_slower,                 shoa_faster
-   (pad+ctrl+ord(key_minus),0,0),(pad+ctrl+ord(key_plus),0,0)
+   (pad+ctrl+ord(key_minus),0,0),(pad+ctrl+ord(key_plus),0,0),
+   //shoa_volumedown,                 shoa_volumeup
+   (pad+shift+ctrl+ord(key_minus),0,0),(pad+shift+ctrl+ord(key_plus),0,0)
   );
  defaultassistiveshortcuts1: assistiveshortcutconstty =
    //shoa_speakagain,  shoa_speakpath
   ((pad+ctrl+ord(key_return),0,0),(pad+ctrl+shift+ord(key_return),0,0),
    //shoa_firstelement,      shoa_lastelement
    (ord(key_none),0,0),(ord(key_none),0,0),
+   //shoa_cancelspeech
+   (ord(key_none),0,0),
    //shoa_slower,                 shoa_faster
+   (ord(key_none),0,0),(ord(key_none),0,0),
+   //shoa_volumedown,                 shoa_volumeup
    (ord(key_none),0,0),(ord(key_none),0,0)
   );
 var
@@ -699,7 +708,8 @@ function getassistiveshortcutdispname(
 const
  list: array[assistiveshortcutty] of stockcaptionty = (
         sc_speakagain,sc_speakpath,sc_firstelement,sc_lastelement,
-        sc_slower,sc_faster);
+        sc_cancelspeech,
+        sc_slower,sc_faster,sc_volumedown,sc_volumeup);
 begin
  result:= stockobjects.captions[list[aitem]];
 end;

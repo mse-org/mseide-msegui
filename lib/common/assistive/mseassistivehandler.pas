@@ -1426,45 +1426,66 @@ end;
 
 procedure tassistivehandler.doshortcut(const sender: twidget;
                var info: keyeventinfoty);
+var
+ sho1: assistiveshortcutty;
+ f1: flo64;
 begin
- if checkassistiveshortcut(shoa_speakagain,info) then begin
-  dospeakagain(sender);
- end
- else begin
-  if not (es_processed in info.eventstate) then begin
-   if checkassistiveshortcut(shoa_speakpath,info) then begin
-    dospeakpath(sender);
-   end
-   else begin
-    if not (es_processed in info.eventstate) then begin
-     if checkassistiveshortcut(shoa_firstelement,info) then begin
-      focusfirstelement(sender);
-     end
-     else begin
-      if not (es_processed in info.eventstate) then begin
-       if checkassistiveshortcut(shoa_lastelement,info) then begin
-        focuslastelement(sender);
-       end
-       else begin
-        if not (es_processed in info.eventstate) then begin
-         if checkassistiveshortcut(shoa_slower,info) then begin
-          fspeaker.rate:= fspeaker.rate/1.1;
-          startspeak();
-          speaktext(sc_slower,voicetext);
-         end
-         else begin
-          if not (es_processed in info.eventstate) then begin
-           if checkassistiveshortcut(shoa_faster,info) then begin
-            fspeaker.rate:= fspeaker.rate*1.1;
-            startspeak();
-            speaktext(sc_faster,voicetext);
-           end;
-          end;
-         end;
-        end;
-       end;
-      end;
+ for sho1:= low(sho1) to high(sho1) do begin
+  if es_processed in info.eventstate then begin
+   break;
+  end;
+  if checkassistiveshortcut(sho1,info) then begin
+   case sho1 of
+    shoa_speakagain: begin
+     dospeakagain(sender);
+    end;
+    shoa_speakpath: begin
+     dospeakpath(sender);
+    end;
+    shoa_firstelement: begin
+     focusfirstelement(sender);
+    end;
+    shoa_lastelement: begin
+     focuslastelement(sender);
+    end;
+    shoa_cancelspeech: begin
+     cancel();
+    end;
+    shoa_slower: begin
+     f1:= fspeaker.rate/1.1;
+     if f1 < 0.2 then begin
+      f1:= 0.2;
      end;
+     fspeaker.rate:= f1;
+     startspeak();
+     speaktext(sc_slower,voicetext);
+    end;
+    shoa_faster: begin
+     f1:= fspeaker.rate*1.1;
+     if f1 > 5 then begin
+      f1:= 5;
+     end;
+     fspeaker.rate:= f1;
+     startspeak();
+     speaktext(sc_faster,voicetext);
+    end;
+    shoa_volumedown: begin
+     f1:= fspeaker.volume/1.1;
+     if f1 < 0.2 then begin
+      f1:= 0.2;
+     end;
+     fspeaker.volume:= f1;
+     startspeak();
+     speaktext(sc_volumedown,voicetext);
+    end;
+    shoa_volumeup: begin
+     f1:= fspeaker.volume*1.1;
+     if f1 > 2 then begin
+      f1:= 2;
+     end;
+     fspeaker.volume:= f1;
+     startspeak();
+     speaktext(sc_volumeup,voicetext);
     end;
    end;
   end;
