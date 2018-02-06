@@ -26,9 +26,8 @@ uses
 const
 {$ifdef mswindows}
 // {$define wincall}
- espeaknglib: array[0..1] of filenamety = (
-   'libespeak-ngsync7.dll', //for windows 7
-   'libespeak-ngsync.dll');
+ espeaknglib: array[0..0] of filenamety = (
+   'libespeak-ngwo.dll');
 {$else}
  espeaknglib: array[0..1] of filenamety = 
     ('libespeak-ngsync.so.1','libespeak-ngsync.so'); 
