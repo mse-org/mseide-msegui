@@ -207,7 +207,10 @@ const
   'Schneller',                 //sc_faster
   'Fenster',                   //sc_window
   'Bereich',                   //sc_area
-  'Bereich aktiviert'          //sc_areaactivated
+  'Bereich aktiviert',         //sc_areaactivated
+  'Leiser',                    //sc_volumedown
+  'Lauter',                    //sc_volumeup
+  'Ansage abbrechen'           //sc_cancelspeech
 );
     
 function delete_n_selected_rows(const params: array of const): msestring;

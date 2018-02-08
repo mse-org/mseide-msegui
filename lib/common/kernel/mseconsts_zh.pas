@@ -213,7 +213,10 @@ const
   'Faster',              //sc_faster
   'Window',              //sc_window
   'Area',                //sc_area
-  'Area activated'       //sc_areaactivated
+  'Area activated',      //sc_areaactivated
+  'Volume down',         //sc_volumedown
+  'Volume up',           //sc_volumeup
+  'Cancel speech'        //sc_cancelspeech
 );
     
 function delete_n_selected_rows(const params: array of const): msestring;
