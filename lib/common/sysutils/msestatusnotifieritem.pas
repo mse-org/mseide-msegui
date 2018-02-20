@@ -138,7 +138,7 @@ uses
 type
  dbuspixelty = packed record a,r,g,b: card8 end; //in network byte order
  pdbuspixelty = ^dbuspixelty;
- 
+
 function bitmaptoiconpixmap(const abitmap: tmaskedbitmap): iconpixmapty;
 var
  p1: pdbuspixelty;

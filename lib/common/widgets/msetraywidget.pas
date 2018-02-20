@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2016 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2018 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -451,6 +451,11 @@ begin
  if ownswindow then begin
   window.caption:= fcaption;
  end;
+{$ifdef mse_usedbus}
+ if hasdbus then begin
+  fstatusnotifieritem.settitle(avalue);
+ end;
+{$endif}
 end;
 
 {$ifdef mse_usedbus}
