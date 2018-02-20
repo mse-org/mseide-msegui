@@ -453,7 +453,7 @@ begin
  end;
 {$ifdef mse_usedbus}
  if hasdbus then begin
-  fstatusnotifieritem.settitle(avalue);
+  fstatusnotifieritem.settitle(stringtoutf8ansi(avalue));
  end;
 {$endif}
 end;
