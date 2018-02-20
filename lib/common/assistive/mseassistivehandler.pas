@@ -2350,10 +2350,10 @@ begin
   end;
   if not b1 then begin
    if adown then begin
-    ca1:= sc_firstelement;
+    ca1:= sc_firstfield;
    end
    else begin
-    ca1:= sc_lastelement;
+    ca1:= sc_lastfield;
    end;
    startspeak();
    speaktext(ca1,fvoicefixed);
