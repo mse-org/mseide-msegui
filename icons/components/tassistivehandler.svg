@@ -16,7 +16,10 @@
    width="24"
    height="24"
    viewBox="0 0 24 24"
-   sodipodi:docname="tassistivehandler.svg">
+   sodipodi:docname="tassistivehandler.svg"
+   inkscape:export-filename="/home/mse/packs/standard/git/mseide-msegui/icons/components/tassistivehandler.png"
+   inkscape:export-xdpi="90"
+   inkscape:export-ydpi="90">
   <metadata
      id="metadata3412">
     <rdf:RDF>
@@ -25,7 +28,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
+        <dc:title />
       </cc:Work>
     </rdf:RDF>
   </metadata>
