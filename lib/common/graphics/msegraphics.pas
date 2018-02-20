@@ -1225,7 +1225,6 @@ type
    procedure switchtomonochrome;
    procedure setwidth(const avalue: integer);
    procedure setheight(const avalue: integer);
-   procedure updatescanline();
    {
    function getgrayscale: boolean;
    procedure setgrayscale(const avalue: boolean);
@@ -1246,6 +1245,7 @@ type
    fcolorbackground: colorty;
    fcolorforeground: colorty;
    fdefaultcliporigin: pointty;
+   procedure updatescanline();
    function createcanvas: tcanvas; virtual;
    procedure creategc;
    procedure internaldestroyhandle;

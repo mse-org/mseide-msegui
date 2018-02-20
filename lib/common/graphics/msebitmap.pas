@@ -679,6 +679,7 @@ begin
     end;
     self.fsize:= self.fimage.size;
     self.fkind:= fkind;
+    self.updatescanline();
     {
     if monochrome then begin
      include(self.fstate,pms_monochrome);
