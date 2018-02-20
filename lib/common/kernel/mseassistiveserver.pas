@@ -18,7 +18,7 @@ type
 
  editinputmodety = (eim_insert,eim_overwrite);
  edittextblockmodety = (etbm_delete,etbm_cut,etbm_copy,etbm_insert,etbm_paste);
- assistiveoptionty = (aso_textfirst,aso_nodefaultbutton,
+ assistiveoptionty = (aso_textfirst,aso_nodefaultbutton,aso_noreturnbutton,
                       aso_tabnavig,aso_widgetnavig,aso_nearestortho,
                       aso_menunavig,aso_gridnavig,
                       aso_noreturnkeymenuexecute,aso_nomenumousemove,

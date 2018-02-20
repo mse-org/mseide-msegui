@@ -1002,7 +1002,7 @@ begin
         ((info.shiftstate = []) or 
          (bo_executedefaultonenterkey in options) and 
          (info.shiftstate = [ss_second]))) and 
-                     not (aso_nodefaultbutton in assistiveoptions);
+            not (aso_nodefaultbutton in assistiveoptions);
                                    //no default button if assisted
    if bo1 then begin
     fexeccanceled:= false;
