@@ -298,11 +298,11 @@ begin
      bmp1.assign(ficon);
     end
     else begin
-//     bmp1.masked:= fimagelist.masked;
+     bmp1.options:= fimagelist.options;
      fimagelist.getimage(fimagenum,bmp1);
     end;
     invalidate;
-    bmp1.colormask:= false;
+//    bmp1.colormask:= false;
    {$ifdef mse_usedbus}
     if hasdbus then begin
      fstatusnotifieritem.seticonpixmap(bmp1);
