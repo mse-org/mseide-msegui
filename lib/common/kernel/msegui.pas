@@ -89,7 +89,8 @@ type
                    ow_mousetransparent,ow_mousewheel,
                    ow_noscroll,ow_nochildpaintclip,ow_nochildclipsiblings,
                    ow_destroywidgets,ow_nohidewidgets,
-                   ow_hinton,ow_hintoff,ow_disabledhint,ow_multiplehint,
+                   ow_hinton,ow_hintoff,ow_disabledhint,ow_appinactivehint,
+                   ow_multiplehint,
                    ow_timedhint
                    );
  optionswidgetty = set of optionwidgetty;
@@ -18640,7 +18641,8 @@ begin
       shiftstate:= fshiftstate - shift;
      end;
      pos:= fpos;
-     abspos:= addpoint(window.fownerwidget.fwidgetrect.pos,pos);
+     abspos:= addpoint(window.fownerwidget.screenpos,pos);
+ //    abspos:= addpoint(window.fownerwidget.fwidgetrect.pos,pos);
     end;
     
     if (fmodalwindow <> nil) and (window <> fmodalwindow) and 
@@ -21317,7 +21319,10 @@ end;
 procedure tguiapplication.activatehint;
 begin
  deactivatehint;
- if (fhintedwidget <> nil) and (factivewindow <> nil) then begin
+ if (fhintedwidget <> nil) and 
+              ((factivewindow <> nil) or 
+               (ow_appinactivehint in fhintedwidget.optionswidget) and
+                   (fhintedwidget.window.syscontainer <> sywi_none)) then begin
   inithintinfo(fhintinfo,fhintedwidget);
   fhintedwidget.showhint(fhintedid,fhintinfo);
   with fhintinfo do begin

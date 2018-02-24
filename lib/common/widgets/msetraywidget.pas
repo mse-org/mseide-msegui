@@ -20,6 +20,9 @@ uses
  msegui,
  mseevent,mseglob,msegraphics,msestrings,msetimer,msemenus,msegraphutils
  {$ifdef mse_usedbus},msestatusnotifieritem{$endif};
+
+const
+ trayoptionswidget = [ow_appinactivehint];
  
 type
  traywidgetoptionty = (two_usedbus);
@@ -87,6 +90,7 @@ type
    property imagelist: timagelist read fimagelist write setimagelist;
    property imagenum: integer read fimagenum write setimagenum default -1;
    property caption: msestring read fcaption write setcaption;
+   property optionswidget default defaultoptionswidget + trayoptionswidget;
    property options: traywidgetoptionsty read foptions 
                                           write setoptions default [];
    property ondbusactivate: notifyeventty read fondbusactivate write
@@ -115,6 +119,7 @@ begin
  ficon:= tcenteredbitmap.create(bmk_rgb{false});
  ficon.onchange:= {$ifdef FPC}@{$endif}iconchanged;
  inherited;
+ foptionswidget:= foptionswidget + trayoptionswidget;
 end;
 
 destructor ttraywidget.destroy;
