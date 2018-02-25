@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 2015 by Martin Schreiber
+{ MSEgui Copyright (c) 2015-2018 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -7,9 +7,7 @@
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 }
-//
-//under construction
-//
+
 unit msejson;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
