@@ -18,7 +18,10 @@ uses
  
 type
  ejsonerror = class(exception);
- 
+
+ jsonencodeoptionty = (jseo_tabindent);
+ jsonencodeoptionsty = set of jsonencodeoptionty;
+  
  jsondatatypty = (jot_null,jot_string,jot_boolean,jot_int32,jot_int64,
                   jot_flo64); //zero init -> null
  jsondataty = record
@@ -122,8 +125,8 @@ function jsonaddvalues(var jvalue: jsonvaluety;
              //[nil] -> null, returns the last added item or @jvalue
 
 function jsondecode(const adata: string; out avalue:jsonvaluety): boolean;
-function jsonencode(const avalue: jsonvaluety;
-                                    const adest: tstream): syserrorty; 
+function jsonencode(const avalue: jsonvaluety; const adest: tstream;
+                       const aoptions: jsonencodeoptionsty = []): syserrorty; 
 
 implementation
 uses
@@ -264,9 +267,48 @@ begin
  setlength(result,pd-pchar(pointer(result)));
 end;
 
-function jsonencode(const avalue: jsonvaluety; const adest: tstream): syserrorty;
- var
-  error: syserrorty;
+const
+ maxindent = 32;
+ indents: array[0..maxindent] of char8 = (
+  c_tab,c_tab,c_tab,c_tab,c_tab,c_tab,c_tab,c_tab, //8
+  c_tab,c_tab,c_tab,c_tab,c_tab,c_tab,c_tab,c_tab, //16
+  c_tab,c_tab,c_tab,c_tab,c_tab,c_tab,c_tab,c_tab, //24
+  c_tab,c_tab,c_tab,c_tab,c_tab,c_tab,c_tab,c_tab, //32
+  c_tab);
+  
+function jsonencode(const avalue: jsonvaluety; const adest: tstream;
+                       const aoptions: jsonencodeoptionsty = []): syserrorty;
+var
+ error: syserrorty;
+ indentlevel,indentcount: int32;
+ hasindent: boolean;
+
+ procedure incindent();
+ begin
+  if hasindent then begin
+   inc(indentlevel);
+   if indentlevel <= maxindent then begin
+    indentcount:= indentlevel;
+   end;
+  end;
+ end;
+
+ procedure decindent();
+ begin
+  if hasindent then begin
+   dec(indentlevel);
+   if indentlevel <= maxindent then begin
+    indentcount:= indentlevel;
+   end;
+  end;
+ end;
+   
+ procedure putindent();
+ begin
+  if (indentcount > 0) and (error = sye_ok) then begin
+   error:= adest.trywritebuffer(indents,indentcount);
+  end;
+ end;//putindent
 
  procedure put(const atext: string);
  begin
@@ -283,11 +325,13 @@ function jsonencode(const avalue: jsonvaluety; const adest: tstream): syserrorty
  begin
   case avalue.kind of
    jok_object: begin
-    put('{');
+    put('{'+c_linefeed);
+    incindent();
     pi:= avalue.obj;
     pe:= pi + dynarraylength(avalue.obj);
     if pe > pi then begin
      while error = sye_ok do begin
+      putindent();
       put(stringtojsonstringascii(pi^.name)+':');
       putvalue(pi^.value);
       inc(pi);
@@ -296,15 +340,23 @@ function jsonencode(const avalue: jsonvaluety; const adest: tstream): syserrorty
       end;
       put(','+c_linefeed);
      end;
+    end
+    else begin
+//     decindent(); //same indent as '{'
+     putindent();
+//     incindent()
     end;
-    put('}'+c_linefeed);
+    put('}');
+    decindent();
    end;
    jok_array: begin
-    put('[');
+    put('['+c_linefeed);
+    incindent();
     pv:= avalue.ar;
     pe:= pv + dynarraylength(avalue.ar);
     if pe > pv then begin
      while error = sye_ok do begin
+      putindent();
       putvalue(pv^);
       inc(pv);
       if pv >= pe then begin
@@ -312,8 +364,12 @@ function jsonencode(const avalue: jsonvaluety; const adest: tstream): syserrorty
       end;
       put(','+c_linefeed);
      end;
+    end
+    else begin
+     putindent();
     end;
-    put(']'+c_linefeed);
+    put(']');
+    decindent();
    end;
    jok_value: begin
     case avalue.val.typ of
@@ -347,6 +403,9 @@ function jsonencode(const avalue: jsonvaluety; const adest: tstream): syserrorty
 
 begin
  error:= sye_ok;
+ indentlevel:= 0;
+ indentcount:= 0;
+ hasindent:= jseo_tabindent in aoptions;
  putvalue(avalue);
  result:= error;
 end;
