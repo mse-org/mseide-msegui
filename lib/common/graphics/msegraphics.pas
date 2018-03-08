@@ -1363,6 +1363,7 @@ procedure deinit;
 
 procedure initdefaultvalues(var avalue: edgecolorinfoty);
 procedure initdefaultvalues(var avalue: edgecolorpairinfoty);
+procedure drawinfoinit(var info: drawinfoty);
 
 procedure gdi_lock();
 procedure gdi_unlock();
@@ -1451,6 +1452,13 @@ procedure initdefaultvalues(var avalue: edgecolorpairinfoty);
 begin
  initdefaultvalues(avalue.shadow);
  initdefaultvalues(avalue.light);
+end;
+
+procedure drawinfoinit(var info: drawinfoty);
+begin
+ if flushgdi then begin
+  fillchar(info.gc.platformdata,sizeof(info.gc.platformdata),0);
+ end;
 end;
         
 {$ifdef mse_debuggdisync}
@@ -2289,6 +2297,7 @@ begin
  if (fsize.cx > 0) and (fsize.cy > 0) then begin
   if fhandle = 0 then begin
 {$warnings off}
+   drawinfoinit(info);
    with info.createpixmap do begin
     size:= fsize;
 //    monochrome:= (pms_monochrome in fstate);

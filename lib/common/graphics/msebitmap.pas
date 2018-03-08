@@ -1072,6 +1072,7 @@ var
  info1: drawinfoty;
 begin
  checkimagebgr(fimage,false);
+ drawinfoinit(info1);
  with info1,pixmapimage do begin
   image:= fimage;
   gc.handle:= 0;

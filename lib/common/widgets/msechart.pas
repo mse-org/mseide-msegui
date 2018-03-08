@@ -634,6 +634,7 @@ type
    fchartframerect: rectty;
    procedure fontchanged; override;
    function checklayout: boolean; virtual; //true if changes made
+   function actualcolorchart(): colorty;
    procedure changed; virtual;
    procedure layoutchanged; virtual;
    procedure chartchange;
@@ -1613,7 +1614,7 @@ begin
      bmp1.masked:= fimli1.masked;
      fimli1.getimage(finfo.imagenr,bmp1);
      bmp1.colorforeground:= fco1;
-     bmp1.colorbackground:= tcuchart(fowner).colorchart;
+     bmp1.colorbackground:= tcuchart(fowner).actualcolorchart;
 //     bmp1.monochrome:= false;
      bmp1.kind:= bmk_rgb;
      bmp1.colormask:= true;
@@ -3495,6 +3496,7 @@ procedure tcuchart.setcolorchart(const avalue: colorty);
 begin
  if fcolorchart <> avalue then begin
   fcolorchart:= avalue;
+  exclude(fstate,chs_chartvalid); //for tchartrecorder
   changed;
  end;
 end;
@@ -3772,6 +3774,19 @@ begin
   end;
  end;
  include(fstate,chs_layoutvalid);
+end;
+
+function tcuchart.actualcolorchart(): colorty;
+begin
+ result:= fcolorchart;
+ if result = cl_default then begin
+  if fframe <> nil then begin
+   result:= fframe.colorclient;
+  end;
+ end;
+ if result = cl_default then begin
+  result:= actualcolor;
+ end;
 end;
 
 procedure tcuchart.setfitframe(const avalue: framety);
@@ -4265,7 +4280,7 @@ begin
    if cro_adddataright in foptions then begin
     include(fstate,chs_full);
    end;
-   init(fcolorchart);
+   init(actualcolorchart);
    canvas.capstyle:= cs_round;
    if masked then begin
     mask.init(cl_0);

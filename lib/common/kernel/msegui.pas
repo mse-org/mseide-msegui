@@ -4220,6 +4220,7 @@ procedure destroyregion(var region: gdiregionty);
 var
  info: drawinfoty;
 begin
+ drawinfoinit(info);
  with region do begin
   if region <> 0 then begin
    info.regionoperation.source:= region;
@@ -4234,6 +4235,7 @@ var
  info: drawinfoty;
 begin
 {$warnings off}
+ drawinfoinit(info);
  with info.regionoperation do begin
   gdi_call(gdf_createemptyregion,info,gdi);
   result.region:= dest;
@@ -4248,8 +4250,10 @@ var
  info: drawinfoty;
 begin
 {$warnings off}
+ drawinfoinit(info);
  with info.regionoperation do begin
   rect:= arect;
+  drawinfoinit(info);
   gdi_call(gdf_createrectregion,info,gdi);
   result.region:= dest;
   result.gdi:= gdi;
@@ -4263,6 +4267,7 @@ var
  info: drawinfoty;
 begin
 {$warnings off}
+ drawinfoinit(info);
  with info.regionoperation do begin
   rectscount:= length(rects);
   if rectscount > 0 then begin
@@ -4283,6 +4288,7 @@ var
  info: drawinfoty;
 begin
 {$warnings off}
+ drawinfoinit(info);
  with region,info.regionoperation do begin
   if region <> 0 then begin
    source:= region;
@@ -4298,6 +4304,7 @@ var
  info: drawinfoty;
 begin
 {$warnings off}
+ drawinfoinit(info);
  with region,info.regionoperation do begin
   if region <> 0 then begin
    source:= region;
@@ -4316,6 +4323,7 @@ var
  info: drawinfoty;
 begin
 {$warnings off}
+ drawinfoinit(info);
  with region,info.regionoperation do begin
   dest:= region;
   rect:= arect;
@@ -4329,6 +4337,7 @@ var
  info: drawinfoty;
 begin
 {$warnings off}
+ drawinfoinit(info);
  with region,info.regionoperation do begin
   dest:= region;
   rect:= arect;
