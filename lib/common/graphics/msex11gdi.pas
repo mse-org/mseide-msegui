@@ -1024,7 +1024,10 @@ begin
 {$endif} 
  result:= 0;
  if ahandle <> 0 then begin
-  attributes.component_alpha:= 1;
+  attributes.component_alpha:= 0;
+  if akind = bmk_rgb then begin
+   attributes.component_alpha:= 1;
+  end;
   result:= xrendercreatepicture(appdisp,ahandle,
                            renderformats[akind]^,cpcomponentalpha,@attributes);
  end;

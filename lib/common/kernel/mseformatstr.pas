@@ -438,7 +438,9 @@ function cstringtostringvar(var inp: pchar): string;
 function stringtocstring(const inp: msestring): string; overload;
 function stringtocstring(const inp: pmsechar;
                                const count: integer): string; overload;
-function stringtopascalstring(const value: msestring): string;
+function stringtopascalstring(const value: msestring;
+                                        const maxlinelength: int32 = 0): string;
+                                                 //0 -> no limit
 function pascalstringtostring(const value: string): msestring;
 function trypascalstringtostring(const value: string;
                                               out res: msestring ): boolean;
@@ -1600,22 +1602,67 @@ begin
  result:= stringtocstring(pmsechar(pointer(inp)),length(inp));
 end;
 
-function stringtopascalstring(const value: msestring): string;
+function stringtopascalstring(const value: msestring;
+                                        const maxlinelength: int32 = 0): string;
+const
+ reserve = 32;
 var
- int1,int2: integer;
- po1: pchar;
- str1: string;
+ int1,int2,mle: integer;
+ i1: ptrint;
+ po1,ps,pse,pe: pchar;
+ p0: pointer;
+ ln,str1: string;
  asciimode: boolean;
 begin
  if length(value) = 0 then begin
   result:= '''''';
  end
  else begin
+  ln:= lineend;
   asciimode:= false;
-  setlength(result,2+6*length(value)); // maxlength for single char: '#65535' = 2 + 6
+//  setlength(result,2+6*length(value)); 
+//              // maxlength for single char: '#65535' = 2 + 6
+  setlength(result,length(value)+reserve);
+  pe:= pointer(result)+length(result)-reserve;
   po1:= pchar(pointer(result));
+  ps:= po1;
+  mle:= maxlinelength-2;
+  if mle < 20 then begin
+   mle:= 20;
+  end;
+  pse:= ps+mle;
 //  int2:= 1;
   for int1:= 1 to length(value) do begin
+   if maxlinelength > 0 then begin
+    if po1 >= pse then begin
+     if asciimode then begin
+      po1^:= '''';
+     end
+     else begin
+      po1^:= ' ';
+     end;
+     inc(po1);
+     po1^:= '+';
+     inc(po1);
+     move(pointer(ln)^,po1^,length(ln));
+     inc(po1,length(ln));
+     if asciimode then begin
+      po1^:= '''';
+      inc(po1);
+     end;
+     ps:= po1;
+     pse:= ps+mle;
+    end;
+   end;
+   if po1 >= pe then begin
+    p0:= pointer(result);
+    setlength(result,length(result)*2+reserve);
+    i1:= pointer(result)-p0;
+    po1:= po1 + i1;
+    ps:= ps + i1;
+    pse:= pse + i1;
+    pe:= pointer(result)+length(result)-reserve;
+   end;
    int2:= ord(value[int1]);
    if (int2 >= 32) and (int2 < 127) then begin
     if not asciimode then begin

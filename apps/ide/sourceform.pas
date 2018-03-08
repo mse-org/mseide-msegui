@@ -1499,20 +1499,34 @@ var
   else begin
    result:= def;
   end;
+  if length(result) > 5*80 then begin
+   result:= copy(result,1,5*80)+'...';
+  end;
  end; //msessagestr
 
 var
  mstr1,mstr2,mstr3,mstr4: msestring;
  int1: integer;
+ maxlen: int32;
+const
+ liend = '+lineend+';
+ 
 begin
  with activepage.edit do begin
+  maxlen:= projectoptions.e.rightmarginchars;
+  if maxlen > 0 then begin //else unlimited
+   maxlen:= maxlen-length(liend);
+   if maxlen < 20 then begin
+    maxlen:= 20;
+   end;
+  end;
   mstr1:= selectedtext;
   ar1:= breaklines(mstr1);
   mstr3:= messagestr(mstr1);
   for int1:= 0 to high(ar1)-1 do begin
-   ar1[int1]:= msestring(stringtopascalstring(ar1[int1]))+'+lineend+';
+   ar1[int1]:= msestring(stringtopascalstring(ar1[int1],maxlen))+liend;
   end;
-  ar1[high(ar1)]:= msestring(stringtopascalstring(ar1[high(ar1)]));
+  ar1[high(ar1)]:= msestring(stringtopascalstring(ar1[high(ar1)],maxlen));
   mstr2:= concatstrings(ar1,lineend);
   mstr4:= messagestr(mstr2);
   if askyesno(c[ord(wishreplace)]+lineend+mstr3+lineend+c[ord(str_with)]+lineend+
