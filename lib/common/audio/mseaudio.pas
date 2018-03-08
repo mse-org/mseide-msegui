@@ -139,7 +139,9 @@ type
    destructor destroy; override;
 //   function lock: boolean;
 //   procedure unlock;
-
+   procedure flush();
+   procedure drain();
+   
    property active: boolean read factive write setactive default false;
    property server: msestring read fserver write fserver;
    property dev: msestring read fdev write fdev;
@@ -194,6 +196,20 @@ begin
  active:= false;
  inherited;
 // sys_mutexdestroy(fmutex);
+end;
+
+procedure tcustomaudioout.flush();
+begin
+ if fpulsestream <> nil then begin
+  pa_simple_flush(fpulsestream,nil);
+ end;
+end;
+
+procedure tcustomaudioout.drain();
+begin
+ if fpulsestream <> nil then begin
+  pa_simple_drain(fpulsestream,nil);
+ end;
 end;
 
 procedure tcustomaudioout.setactive(const avalue: boolean);
