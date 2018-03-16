@@ -28,6 +28,10 @@ type
  ifiwidgetstatety = ({iws_closed,}iws_loaded,iws_releasing,iws_destroying,
                      iws_visible,iws_enabled,iws_entered,iws_focused,iws_active); 
  ifiwidgetstatesty = set of ifiwidgetstatety;
+const
+ ifidatatypes = [dl_integer,dl_int64,dl_currency,dl_real,
+                 dl_msestring,dl_ansistring,dl_msestringint,
+                 dl_realint,dl_realsum];
  
 type
  iificlient = interface;
@@ -50,6 +54,7 @@ type
  iificlient = interface(iobjectlink)[miid_iificlient]
   procedure setifiserverintf(const aintf: iifiserver);
   function getdefaultifilink: iificlient;
+  function getifidatatype: listdatatypety;
  end;
  ificommandcodety = (icc_none,icc_close,icc_release);
  iificommand = interface(inullinterface)[miid_iificommand]

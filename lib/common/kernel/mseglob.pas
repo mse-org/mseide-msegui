@@ -17,6 +17,13 @@ const
  defaultbase64linelength = 76; //todo: find better place
  
 type
+ listdatatypety = (dl_none,dl_integer,dl_int64,dl_currency,
+    dl_real,dl_realint,dl_realsum,
+    dl_datetime,
+    dl_ansistring,dl_msestring,dl_doublemsestring,dl_msestringint,
+    dl_complex,dl_rowstate,dl_custom);
+ listdatatypesty = set of listdatatypety;
+
  shortcutty = type word;
  shortcutarty = array of shortcutty;
  modalresultty = (mr_none,mr_canclose,mr_windowclosed,mr_windowdestroyed,

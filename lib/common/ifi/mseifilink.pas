@@ -21,9 +21,6 @@ type
  formlinkoptionsty = set of formlinkoptionty;
 const
  defaultformlinkoptions = [flo_useclientchannel];
- ifidatatypes = [dl_integer,dl_int64,dl_currency,dl_real,
-                 dl_msestring,dl_ansistring,dl_msestringint,
-                 dl_realint,dl_realsum];
 type
  tmodulelinkarrayprop = class;
  

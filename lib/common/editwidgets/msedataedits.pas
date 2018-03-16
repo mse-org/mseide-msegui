@@ -77,6 +77,8 @@ type
    function getifidatalinkintf: iifidatalink; override;
    function getoptionsedit: optionseditty; override;
    procedure dochange; override;
+    //iificlient
+   function getifidatatype(): listdatatypety override;
     //iifidatalink
    procedure ifisetvalue(var avalue; var accept: boolean);
    function getifilinkkind: ptypeinfo; virtual;
@@ -2987,7 +2989,13 @@ begin
   end;
  end;
 end;
+
 {$endif mse_with_ifi}
+
+function tcustomdataedit.getifidatatype(): listdatatypety;
+begin
+ result:= getdatalistclass().datatype();
+end;
 
 procedure tcustomdataedit.sizechanged;
 begin

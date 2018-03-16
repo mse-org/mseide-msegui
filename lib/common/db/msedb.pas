@@ -266,6 +266,7 @@ type
 //   fproviderflags1: providerflags1ty;
 //   flookupinfo: lookupfieldinfoty;
   //ifieldcomponent
+   fonsetvalue: msestringfieldsetvalueeventty;
    procedure setdsintf(const avalue: idsfieldcontroller);
    function getinstance: tfield;
    function getdefaultexpression: msestring;
@@ -293,6 +294,8 @@ type
    procedure SetVarValue(const AValue: Variant); override;
    procedure change; override;
    procedure SetDataset(AValue : TDataset); override;
+   procedure dosetvalue(const sender: tobject; var avalue: msestring;
+                                                var accept: boolean) override;
   public
    destructor destroy; override;
    function HasParent: Boolean; override;
@@ -324,6 +327,8 @@ type
 //   property ReadOnly default false;
 //   property Required default false;
    property Transliterate default false;
+   property onsetvalue: msestringfieldsetvalueeventty 
+                                     read fonsetvalue write fonsetvalue;
  end;
 
  tmseguidfield = class(tmsefield,imsefield)
@@ -1191,6 +1196,10 @@ type
    procedure setfield(const value: tfield); virtual;
    procedure updatefields; override;
    function getsortfield: tfield; virtual;
+   procedure setvalue(const sender: iificlient;
+                var avalue; var accept: boolean; const arow: integer); override;
+   procedure dataentered(const sender: iificlient; 
+                                                 const arow: integer); override;
   public
    function assql: msestring;
    function fieldactive: boolean;
@@ -1889,6 +1898,7 @@ type
  tparam1 = class(tparam);
  tdatasource1 = class(tdatasource);
  tmsebufdataset1 = class(tmsebufdataset);
+ tfield1 = class(tfield);
 
 function dbtrystringtoguid(const value: string; out guid: tguid): boolean;
 var
@@ -3838,6 +3848,14 @@ begin
  end
  else begin
   inherited;
+ end;
+end;
+
+procedure tmsestringfield.dosetvalue(const sender: tobject;
+                               var avalue: msestring; var accept: boolean);
+begin
+ if assigned(fonsetvalue) then begin
+  fonsetvalue(self,sender,avalue,accept);
  end;
 end;
 
@@ -6912,6 +6930,43 @@ begin
   updatefields;
  end;
  result:= ffield;
+end;
+
+procedure tfielddatalink.setvalue(const sender: iificlient; var avalue;
+               var accept: boolean; const arow: integer);
+begin
+ inherited;
+ if ffield <> nil then begin
+  case sender.getifidatatype() of
+   dl_integer: begin
+    tfield1(ffield).dosetvalue(sender.getinstance,int32(avalue),accept);
+   end;
+   dl_int64: begin
+    tfield1(ffield).dosetvalue(sender.getinstance,int64(avalue),accept);
+   end;
+   dl_currency: begin
+    tfield1(ffield).dosetvalue(sender.getinstance,currency(avalue),accept);
+   end;
+   dl_real: begin
+    tfield1(ffield).dosetvalue(sender.getinstance,flo64(avalue),accept);
+   end;
+   dl_msestring: begin
+    tfield1(ffield).dosetvalue(sender.getinstance,msestring(avalue),accept);
+   end;
+   dl_ansistring: begin
+    tfield1(ffield).dosetvalue(sender.getinstance,ansistring(avalue),accept);
+   end;
+  end;
+ end;
+end;
+
+procedure tfielddatalink.dataentered(const sender: iificlient;
+               const arow: integer);
+begin
+ inherited;
+ if ffield <> nil then begin
+  tfield1(ffield).dodataentered(sender.getinstance);
+ end;
 end;
 
 { tpersistentfields }

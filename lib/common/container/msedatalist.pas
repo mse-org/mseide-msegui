@@ -24,12 +24,6 @@ uses
  mseclasses,mselist,mseglob,msearrayutils;
 
 type
- listdatatypety = (dl_none,dl_integer,dl_int64,dl_currency,
-    dl_real,dl_realint,dl_realsum,
-    dl_datetime,
-    dl_ansistring,dl_msestring,dl_doublemsestring,dl_msestringint,
-    dl_complex,dl_rowstate,dl_custom);
- listdatatypesty = set of listdatatypety;
  
  dataprocty = procedure(var data) of object;
 {
@@ -206,6 +200,8 @@ type
    procedure datamoved(const fromindex: integer; const toindex: integer;
                                   const acount: integer); virtual;
    procedure setitemselected(const row: integer; const value: boolean); virtual;
+    //iificlient
+   function getifidatatype(): listdatatypety virtual;
   public
    constructor create; override;
    destructor destroy; override;
@@ -3044,6 +3040,11 @@ end;
 procedure tdatalist.setitemselected(const row: integer; const value: boolean);
 begin
  //dummy
+end;
+
+function tdatalist.getifidatatype(): listdatatypety;
+begin
+ result:= datatype;
 end;
 
 { tintegerdatalist }

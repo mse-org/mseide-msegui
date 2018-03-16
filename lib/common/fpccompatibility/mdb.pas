@@ -281,6 +281,33 @@ type
 
   { TField }
 
+ fielddataenteredeventty = procedure(const sender: tfield;
+                                          const editobj: tobject) of object;
+ integerfieldsetvalueeventty = procedure(const sender: tfield;
+                     const editobj: tobject;
+                        var avalue: int32; var accept: boolean) of object;
+ int64fieldsetvalueeventty = procedure(const sender: tfield;
+                     const editobj: tobject;
+                        var avalue: int64; var accept: boolean) of object;
+ bcdfieldsetvalueeventty = procedure(const sender: tfield;
+                     const editobj: tobject;
+                        var avalue: currency; var accept: boolean) of object;
+ floatfieldsetvalueeventty = procedure(const sender: tfield;
+                     const editobj: tobject;
+                        var avalue: flo64; var accept: boolean) of object;
+ datetimefieldsetvalueeventty = procedure(const sender: tfield;
+                     const editobj: tobject;
+                        var avalue: tdatetime; var accept: boolean) of object;
+
+ booleanfieldsetvalueeventty = procedure(const sender: tfield;
+                     const editobj: tobject;
+                        var avalue: boolean; var accept: boolean) of object;
+ msestringfieldsetvalueeventty = procedure(const sender: tfield;
+                     const editobj: tobject;
+                        var avalue:  msestring; var accept: boolean) of object;
+ ansistringfieldsetvalueeventty = procedure(const sender: tfield;
+                     const editobj: tobject;
+                        var avalue:  ansistring; var accept: boolean) of object;
   TField = class(TComponent)
   private
     FAlignment : TAlignment;
@@ -319,6 +346,7 @@ type
 //    FVisible : Boolean;
 //    FProviderFlags : TProviderFlags;
    foptionsfield: optionsfieldty;
+   fondataentered: fielddataenteredeventty;
     function GetIndex : longint;
     function GetLookup: Boolean;
     procedure SetAlignment(const AValue: TAlignMent);
@@ -417,6 +445,19 @@ type
     function getasguid: tguid; virtual;
     procedure setasguid(const avalue: tguid); virtual;
     procedure defineproperties(filer: tfiler); override;
+    procedure dosetvalue(const sender: tobject; var avalue: int32;
+                                                 var accept: boolean) virtual;
+    procedure dosetvalue(const sender: tobject; var avalue: int64;
+                                                 var accept: boolean) virtual;
+    procedure dosetvalue(const sender: tobject; var avalue: currency;
+                                                 var accept: boolean) virtual;
+    procedure dosetvalue(const sender: tobject; var avalue: flo64;
+                                                 var accept: boolean) virtual;
+    procedure dosetvalue(const sender: tobject; var avalue: msestring;
+                                                 var accept: boolean) virtual;
+    procedure dosetvalue(const sender: tobject; var avalue: ansistring;
+                                                 var accept: boolean) virtual;
+    procedure dodataentered(const sender: tobject) virtual;
   public
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
@@ -522,6 +563,8 @@ type
     property OnGetText: TFieldGetTextEvent read FOnGetText write FOnGetText;
     property OnSetText: TFieldSetTextEvent read FOnSetText write FOnSetText;
     property OnValidate: TFieldNotifyEvent read FOnValidate write FOnValidate;
+    property ondataentered: fielddataenteredeventty read fondataentered write
+                                                                fondataentered;
   end;
 
 { TStringField }
@@ -530,6 +573,7 @@ type
   private
     FFixedChar     : boolean;
     FTransliterate : Boolean;
+   fonsetvalue: ansistringfieldsetvalueeventty;
   protected
     class procedure CheckTypeSize(AValue: Longint); override;
     function GetAsBoolean: Boolean; override;
@@ -548,6 +592,8 @@ type
     procedure SetAsLongint(AValue: Longint); override;
     procedure SetAsString(const AValue: string); override;
     procedure SetVarValue(const AValue: Variant); override;
+    procedure dosetvalue(const sender: tobject; var avalue: ansistring;
+                                                 var accept: boolean) override;
   public
     constructor Create(AOwner: TComponent); override;
     procedure SetFieldType(AValue: TFieldType); override;
@@ -557,6 +603,8 @@ type
   published
     property EditMask;
     property Size default 20;
+   property onsetvalue: ansistringfieldsetvalueeventty 
+                                     read fonsetvalue write fonsetvalue;
   end;
 
 { TWideStringField }
@@ -614,6 +662,7 @@ type
     FMaxValue,
     FMinRange,
     FMAxRange  : Longint;
+   fonsetvalue: integerfieldsetvalueeventty;
     Procedure SetMinValue (AValue : longint);
     Procedure SetMaxValue (AValue : longint);
   protected
@@ -630,6 +679,8 @@ type
     procedure SetVarValue(const AValue: Variant); override;
     function GetAsLargeint: Largeint; override;
     procedure SetAsLargeint(AValue: Largeint); override;
+    procedure dosetvalue(const sender: tobject; var avalue: int32;
+                                                 var accept: boolean) override;
   public
     constructor Create(AOwner: TComponent); override;
     Function CheckRange(AValue : longint) : Boolean;
@@ -637,6 +688,8 @@ type
   published
     property MaxValue: Longint read FMaxValue write SetMaxValue default 0;
     property MinValue: Longint read FMinValue write SetMinValue default 0;
+   property onsetvalue: integerfieldsetvalueeventty 
+                                     read fonsetvalue write fonsetvalue;
   end;
   TIntegerField = Class(TLongintField);
 
@@ -648,6 +701,7 @@ type
     FMaxValue,
     FMinRange,
     FMAxRange  : Largeint;
+   fonsetvalue: int64fieldsetvalueeventty;
     Procedure SetMinValue (AValue : Largeint);
     Procedure SetMaxValue (AValue : Largeint);
   protected
@@ -664,6 +718,8 @@ type
     procedure SetAsLargeint(AValue: Largeint); override;
     procedure SetAsString(const AValue: string); override;
     procedure SetVarValue(const AValue: Variant); override;
+    procedure dosetvalue(const sender: tobject; var avalue: int64;
+                                                 var accept: boolean) override;
   public
     constructor Create(AOwner: TComponent); override;
     Function CheckRange(AValue : largeint) : Boolean;
@@ -671,6 +727,8 @@ type
   published
     property MaxValue: Largeint read FMaxValue write SetMaxValue default 0;
     property MinValue: Largeint read FMinValue write SetMinValue default 0;
+   property onsetvalue: int64fieldsetvalueeventty 
+                                     read fonsetvalue write fonsetvalue;
   end;
 
 { TSmallintField }
@@ -708,6 +766,7 @@ type
     FMaxValue : Double;
     FMinValue : Double;
     FPrecision : Longint;
+   fonsetvalue: floatfieldsetvalueeventty;
     procedure SetCurrency(const AValue: Boolean);
     procedure SetPrecision(const AValue: Longint);
   protected
@@ -721,6 +780,8 @@ type
     procedure SetAsLongint(AValue: Longint); override;
     procedure SetAsString(const AValue: string); override;
     procedure SetVarValue(const AValue: Variant); override;
+    procedure dosetvalue(const sender: tobject; var avalue: flo64;
+                                                 var accept: boolean) override;
   public
     constructor Create(AOwner: TComponent); override;
     Function CheckRange(AValue : Double) : Boolean;
@@ -731,6 +792,8 @@ type
     property MaxValue: Double read FMaxValue write FMaxValue;
     property MinValue: Double read FMinValue write FMinValue;
     property Precision: Longint read FPrecision write SetPrecision default 15; // min 2 instellen, delphi compat
+   property onsetvalue: floatfieldsetvalueeventty 
+                                     read fonsetvalue write fonsetvalue;
   end;
 
 { TCurrencyField }
@@ -749,8 +812,11 @@ type
     FDisplayValues : String;
     // First byte indicates uppercase or not.
     FDisplays : Array[Boolean,Boolean] of string;
+   fonsetvalue: booleanfieldsetvalueeventty;
     Procedure SetDisplayValues(const AValue : String);
   protected
+    procedure dosetvalue(const sender: tobject; var avalue: int32;
+                                                 var accept: boolean) override;
     function GetAsBoolean: Boolean; override;
     function GetAsString: string; override;
     function GetAsVariant: variant; override;
@@ -766,6 +832,8 @@ type
     property Value: Boolean read GetAsBoolean write SetAsBoolean;
   published
     property DisplayValues: string read FDisplayValues write SetDisplayValues;
+   property onsetvalue: booleanfieldsetvalueeventty 
+                                     read fonsetvalue write fonsetvalue;
   end;
 
 { TDateTimeField }
@@ -773,6 +841,7 @@ type
   TDateTimeField = class(TField)
   private
     FDisplayFormat : String;
+   fonsetvalue: datetimefieldsetvalueeventty;
     procedure SetDisplayFormat(const AValue: string);
   protected
     function GetAsDateTime: TDateTime; override;
@@ -789,12 +858,16 @@ type
     procedure SetAsFloat(AValue: Double); override;
     procedure SetAsString(const AValue: string); override;
     procedure SetVarValue(const AValue: Variant); override;
+    procedure dosetvalue(const sender: tobject; var avalue: flo64;
+                                                 var accept: boolean) override;
   public
     constructor Create(AOwner: TComponent); override;
     property Value: TDateTime read GetAsDateTime write SetAsDateTime;
   published
     property DisplayFormat: string read FDisplayFormat write SetDisplayFormat;
     property EditMask;
+   property onsetvalue: datetimefieldsetvalueeventty 
+                                     read fonsetvalue write fonsetvalue;
   end;
 
 { TDateField }
@@ -858,6 +931,7 @@ type
     FMaxValue   : currency;
     FPrecision  : Longint;
     FCurrency   : boolean;
+   fonsetvalue: bcdfieldsetvalueeventty;
   protected
     class procedure CheckTypeSize(AValue: Longint); override;
     function GetAsCurrency: Currency; override;
@@ -874,6 +948,8 @@ type
     procedure SetAsString(const AValue: string); override;
     procedure SetAsCurrency(AValue: Currency); override;
     procedure SetVarValue(const AValue: Variant); override;
+    procedure dosetvalue(const sender: tobject; var avalue: flo64;
+                                                 var accept: boolean) override;
   public
     constructor Create(AOwner: TComponent); override;
     Function CheckRange(AValue : Currency) : Boolean;
@@ -884,6 +960,8 @@ type
     property MaxValue: Currency read FMaxValue write FMaxValue;
     property MinValue: Currency read FMinValue write FMinValue;
     property Size default 4;
+   property onsetvalue: bcdfieldsetvalueeventty 
+                                     read fonsetvalue write fonsetvalue;
   end;
 
 { TFMTBCDField }
@@ -6436,6 +6514,49 @@ begin
  filer.defineproperty('providerflags1',@readproviderflags1,nil,false);
 end;
 
+procedure TField.dosetvalue(const sender: tobject; var avalue: int32;
+               var accept: boolean);
+begin
+ //dummy
+end;
+
+procedure TField.dosetvalue(const sender: tobject; var avalue: int64;
+               var accept: boolean);
+begin
+ //dummy
+end;
+
+procedure TField.dosetvalue(const sender: tobject; var avalue: currency;
+               var accept: boolean);
+begin
+ //dummy
+end;
+
+procedure TField.dosetvalue(const sender: tobject; var avalue: flo64;
+               var accept: boolean);
+begin
+ //dummy
+end;
+
+procedure TField.dosetvalue(const sender: tobject; var avalue: msestring;
+                                                          var accept: boolean);
+begin
+ //dummy
+end;
+
+procedure TField.dosetvalue(const sender: tobject; var avalue: ansistring;
+               var accept: boolean);
+begin
+ //dummy
+end;
+
+procedure TField.dodataentered(const sender: tobject);
+begin
+ if assigned(fondataentered) then begin
+  fondataentered(self,sender);
+ end;
+end;
+
 { ---------------------------------------------------------------------
     TStringField
   ---------------------------------------------------------------------}
@@ -6636,6 +6757,14 @@ end;
 procedure TStringField.SetVarValue(const AValue: Variant);
 begin
   SetAsString(AValue);
+end;
+
+procedure TStringField.dosetvalue(const sender: tobject; var avalue: ansistring;
+               var accept: boolean);
+begin
+ if assigned(fonsetvalue) then begin
+  fonsetvalue(self,sender,avalue,accept);
+ end;
 end;
 
 { ---------------------------------------------------------------------
@@ -6907,6 +7036,14 @@ begin
     RangeError(AValue,FMinRange,FMaxRange);
 end;
 
+procedure TLongintField.dosetvalue(const sender: tobject; var avalue: int32;
+               var accept: boolean);
+begin
+ if assigned(fonsetvalue) then begin
+  fonsetvalue(self,sender,avalue,accept);
+ end;
+end;
+
 procedure TLongintField.SetAsFloat(AValue: Double);
 
 begin
@@ -7115,6 +7252,14 @@ end;
 procedure TLargeintField.SetVarValue(const AValue: Variant);
 begin
   SetAsLargeint(AValue);
+end;
+
+procedure TLargeintField.dosetvalue(const sender: tobject; var avalue: int64;
+               var accept: boolean);
+begin
+ if assigned(fonsetvalue) then begin
+  fonsetvalue(self,sender,avalue,accept);
+ end;
 end;
 
 Function TLargeintField.CheckRange(AValue : largeint) : Boolean;
@@ -7341,6 +7486,14 @@ begin
   SetAsFloat(Avalue);
 end;
 
+procedure TFloatField.dosetvalue(const sender: tobject; var avalue: flo64;
+               var accept: boolean);
+begin
+ if assigned(fonsetvalue) then begin
+  fonsetvalue(self,sender,avalue,accept);
+ end;
+end;
+
 constructor TFloatField.Create(AOwner: TComponent);
 
 begin
@@ -7490,6 +7643,23 @@ begin
     end;
 end;
 
+procedure TBooleanField.dosetvalue(const sender: tobject; var avalue: int32;
+               var accept: boolean);
+var
+ bo1: boolean;
+begin
+ if assigned(fonsetvalue) then begin
+  bo1:= avalue <> 0;
+  fonsetvalue(self,sender,bo1,accept);
+  if bo1 then begin
+   avalue:= 1;
+  end
+  else begin
+   avalue:= 0;
+  end;
+ end;
+end;
+
 { TDateTimeField }
 
 procedure TDateTimeField.SetDisplayFormat(const AValue: string);
@@ -7510,6 +7680,14 @@ end;
 procedure TDateTimeField.SetVarValue(const AValue: Variant);
 begin
   SetAsDateTime(AValue);
+end;
+
+procedure TDateTimeField.dosetvalue(const sender: tobject; var avalue: flo64;
+               var accept: boolean);
+begin
+ if assigned(fonsetvalue) then begin
+  fonsetvalue(self,sender,tdatetime(avalue),accept);
+ end;
 end;
 
 function TDateTimeField.GetAsVariant: Variant;
@@ -7947,6 +8125,18 @@ end;
 procedure TBCDField.SetVarValue(const AValue: Variant);
 begin
   SetAsCurrency(AValue);
+end;
+
+procedure TBCDField.dosetvalue(const sender: tobject; var avalue: flo64;
+               var accept: boolean);
+var
+ val1: currency;
+begin
+ if assigned(fonsetvalue) then begin
+  val1:= avalue;
+  fonsetvalue(self,sender,val1,accept);
+  value:= val1;
+ end;
 end;
 
 Function TBCDField.CheckRange(AValue : Currency) : Boolean;

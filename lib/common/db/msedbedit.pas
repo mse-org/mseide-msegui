@@ -19,7 +19,8 @@ unit msedbedit;
 
 interface
 uses
- mdb,classes,mclasses,mseguiglob,mseclasses,msegui,msetoolbar,mseeditglob,
+ mdb,classes,mclasses,mseguiglob,mseclasses,msegui,msetoolbar,
+ mseeditglob,
  mseglob,msewidgetgrid,msearrayutils,msedatalist,mseinterfaces,
  msetypes,msegrids,msegraphics,mseevent,msekeyboard,mseassistiveclient,
  msegraphedits,msestrings,msegraphutils,mselist,msedropdownlist,
@@ -1940,6 +1941,7 @@ type
     //iificlient
    procedure setifiserverintf(const aintf: iifiserver);
    function getdefaultifilink: iificlient; virtual;
+   function getifidatatype(): listdatatypety virtual;
 
     //idbeditinfo
    procedure getfieldtypes(out propertynames: stringarty;
@@ -10020,6 +10022,11 @@ end;
 function tdbstringcol.getdefaultifilink: iificlient;
 begin
  result:= iificlient(self);
+end;
+
+function tdbstringcol.getifidatatype(): listdatatypety;
+begin
+ result:= dl_msestring;
 end;
 
 {

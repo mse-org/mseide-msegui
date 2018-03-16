@@ -148,6 +148,8 @@ type
    function getifilinkkind: ptypeinfo;
    procedure setifilink(const avalue: tifilinkcomp);
    function getifilink: tifilinkcomp;
+    //iificlient
+   function getifidatatype(): listdatatypety override;
 //   function ifigriddata: tdatalist;
    procedure updateifigriddata(const sender: tobject; const alist: tdatalist);
    function getgriddata: tdatalist;
@@ -2407,6 +2409,11 @@ end;
 function tgraphdataedit.getifilink: tifilinkcomp;
 begin
  result:= fifilink;
+end;
+
+function tgraphdataedit.getifidatatype(): listdatatypety;
+begin
+ result:= getdatalistclass().datatype();
 end;
 
 procedure tgraphdataedit.setifilink(const avalue: tifilinkcomp);

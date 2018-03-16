@@ -11,7 +11,7 @@ unit msevaluenodesglob;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 uses
- msedatalist;
+ msedatalist,mseglob;
 type
  recvaluety = record
   datatype: listdatatypety;

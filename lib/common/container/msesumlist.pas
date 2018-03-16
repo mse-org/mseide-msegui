@@ -2,7 +2,7 @@ unit msesumlist;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 uses
- msedatalist,msetypes,msearrayprops,mseclasses;
+ msedatalist,msetypes,msearrayprops,mseclasses,mseglob;
 
 //todo: optimize!!!
 

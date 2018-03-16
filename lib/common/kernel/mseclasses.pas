@@ -477,6 +477,7 @@ type
     //iificlient
    procedure setifiserverintf(const aintf: iifiserver);
    function getdefaultifilink: iificlient; virtual;
+   function getifidatatype: listdatatypety virtual;
     //iificommand
    procedure executeificommand(var acommand: ificommandcodety); virtual;
 {$endif}   
@@ -5263,6 +5264,11 @@ end;
 function tmsecomponent.getdefaultifilink: iificlient;
 begin
  result:= iificlient(self);
+end;
+
+function tmsecomponent.getifidatatype: listdatatypety;
+begin
+ result:= dl_none;
 end;
 
 {$endif}
