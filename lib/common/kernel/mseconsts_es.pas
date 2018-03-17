@@ -204,16 +204,16 @@ const
   'Deshabilitar bot'#0243'n',    //sc_disabledbutton
   'Primer campo',                //sc_firstfield
   #$00DA'ltimo campo',           //sc_lastfield
-  'First element',               //sc_firstelement
-  'Last element',                //sc_lastelement
-  'Slower',                      //sc_slower
-  'Faster',                      //sc_faster
-  'Window',                      //sc_window
-  'Area',                        //sc_area
-  'Area activated',              //sc_areaactivated
-  'Volume down',                 //sc_volumedown
-  'Volume up',                   //sc_volumeup
-  'Cancel speech'                //sc_cancelspeech
+  'Primer elemento',             //sc_firstelement
+  #$00DA'ltimo elemento',        //sc_lastelement
+  'M'#$00E1's lento',            //sc_slower
+  'M'#$00E1's r'#$00E1'pido',    //sc_faster
+  'Ventana',                     //sc_window
+  #$00C1'rea',                   //sc_area
+  #$00C1'rea activada',          //sc_areaactivated
+  'Bajar volumen',               //sc_volumedown
+  'Subir volumen',               //sc_volumeup
+  'Cancelar habla'               //sc_cancelspeech
 );
 
 function delete_n_selected_rows(const params: array of const): msestring;
