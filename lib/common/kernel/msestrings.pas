@@ -32,7 +32,7 @@ unit msestrings;
 
 interface
 uses
- classes,mclasses,msetypes{$ifdef FPC},strings{$endif},typinfo;
+ classes,mclasses,msetypes{$ifdef FPC},strings{$endif},typinfo,sysutils;
 {$ifdef FPC}
  {$ifndef mse_nounicodestring}
   {$if defined(FPC) and (fpc_fullversion >= 020300)}
@@ -604,6 +604,8 @@ function getansichar(const source: msechar; out dest: char): boolean;
                                          {$ifdef FPC} inline; {$endif}
                     //true if valid;
 
+function ansistringof(const value: tbytes): ansistring;
+
 type
 // getkeystringfuncty = function (const index: integer;
 //        var astring: msestring): boolean of object;
@@ -629,7 +631,7 @@ procedure twriter_writemsestring(awriter: twriter; const avalue: msestring);
 
 implementation
 uses
- sysutils,msearrayutils{,msesysintf};
+ msearrayutils{,msesysintf};
 type
  tmemorystream1 = class(tmemorystream);
 
@@ -1274,6 +1276,12 @@ begin
   setlength(result,int1);
   move(start^,result[1],int1);
  end;
+end;
+
+function ansistringof(const value: tbytes): ansistring;
+begin
+ setlength(result,length(value));
+ move(pointer(value)^,pointer(result)^,length(result));
 end;
 
 function psubstr(const start,stop: pmsechar): msestring;

@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 2004-2017 by Martin Schreiber
+{ MSEgui Copyright (c) 2004-2018 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -2831,8 +2831,9 @@ function checkfieldcompatibility(const afield: tfield;
                      const adatatype: tfieldtype): boolean;
            //true if ok
 begin
- result:= (afield.datatype in fieldcompatibility[adatatype]){ or 
-                            (adatatype = ftunknown)};
+ result:= (afield.datatype in fieldcompatibility[adatatype]) or
+              (adatatype = ftguid) and (afield.datatype = ftbytes) and
+              (afield.size = 16);
 end;
 
 function vartorealty(const avalue: variant): realty;
