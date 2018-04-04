@@ -6116,7 +6116,7 @@ lab1:
        end;
       end
       else begin
-       if not (char(word(s^)) in ['c','s','u','r','g','K','J','i']) then begin
+       if not (char(word(s^)) in ['c','s','u','r','g','K','J','i','m']) then begin
         dec(s);
        end;
       end;
