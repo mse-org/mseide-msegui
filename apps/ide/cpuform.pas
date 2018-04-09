@@ -108,6 +108,7 @@ begin
    end;
   end;
  end;
+ cpufo.fregisternames:= nil;
 end;
 
 { tcpufo }

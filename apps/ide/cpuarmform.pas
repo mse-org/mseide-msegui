@@ -107,6 +107,7 @@ begin
    break;
   end;
  end;
+ cpsr.frame.caption:= cpsr.name;
 end;
 
 procedure tcpuarmfo.regsetvalue(const sender: TObject; var avalue: Integer;
