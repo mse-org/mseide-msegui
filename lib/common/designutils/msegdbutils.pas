@@ -4146,7 +4146,7 @@ var
  int1: integer;
 begin
  aresult:= nil;
- result:= synccommand('-data-list-register-values r');
+ result:= synccommand('-data-list-register-values r',2*defaultsynctimeout);
  if result = gdb_ok then begin
   result:= gdb_dataerror;
   if getarrayvalue(fsyncvalues,'register-values',false,ar1) then begin

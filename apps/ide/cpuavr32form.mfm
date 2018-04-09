@@ -24,9 +24,9 @@ inherited cpuavr32fo: tcpuavr32fo
     taborder = 2
     visible = True
     bounds_x = 0
-    bounds_y = 18
+    bounds_y = 20
     bounds_cx = 243
-    bounds_cy = 252
+    bounds_cy = 265
     optionsscale = [osc_expandx, osc_shrinkx, osc_expandy, osc_shrinky]
     linktop = stoptime
     object tbooleanedit16: tbooleanedit
@@ -39,14 +39,14 @@ inherited cpuavr32fo: tcpuavr32fo
       frame.localprops1 = []
       frame.outerframe = (
         0
-        17
+        19
         0
         0
       )
       bounds_x = 232
-      bounds_y = 8
+      bounds_y = 6
       bounds_cx = 11
-      bounds_cy = 28
+      bounds_cy = 30
       onsetvalue = flagssetvalue
     end
     object tbooleanedit17: tbooleanedit
@@ -60,15 +60,15 @@ inherited cpuavr32fo: tcpuavr32fo
       frame.localprops1 = []
       frame.outerframe = (
         0
-        17
+        19
         0
         0
       )
       taborder = 1
       bounds_x = 221
-      bounds_y = 8
+      bounds_y = 6
       bounds_cx = 11
-      bounds_cy = 28
+      bounds_cy = 30
       onsetvalue = flagssetvalue
     end
     object tbooleanedit18: tbooleanedit
@@ -82,15 +82,15 @@ inherited cpuavr32fo: tcpuavr32fo
       frame.localprops1 = []
       frame.outerframe = (
         0
-        17
+        19
         0
         0
       )
       taborder = 2
       bounds_x = 210
-      bounds_y = 8
+      bounds_y = 6
       bounds_cx = 11
-      bounds_cy = 28
+      bounds_cy = 30
       onsetvalue = flagssetvalue
     end
     object tbooleanedit19: tbooleanedit
@@ -104,15 +104,15 @@ inherited cpuavr32fo: tcpuavr32fo
       frame.localprops1 = []
       frame.outerframe = (
         0
-        17
+        19
         0
         0
       )
       taborder = 3
       bounds_x = 199
-      bounds_y = 8
+      bounds_y = 6
       bounds_cx = 11
-      bounds_cy = 28
+      bounds_cy = 30
       onsetvalue = flagssetvalue
     end
     object tbooleanedit20: tbooleanedit
@@ -126,15 +126,15 @@ inherited cpuavr32fo: tcpuavr32fo
       frame.localprops1 = []
       frame.outerframe = (
         0
-        17
+        19
         0
         0
       )
       taborder = 4
       bounds_x = 188
-      bounds_y = 8
+      bounds_y = 6
       bounds_cx = 11
-      bounds_cy = 28
+      bounds_cy = 30
       onsetvalue = flagssetvalue
     end
     object tbooleanedit12: tbooleanedit
@@ -148,15 +148,15 @@ inherited cpuavr32fo: tcpuavr32fo
       frame.localprops1 = []
       frame.outerframe = (
         0
-        17
+        19
         0
         0
       )
       taborder = 5
       bounds_x = 177
-      bounds_y = 8
+      bounds_y = 6
       bounds_cx = 11
-      bounds_cy = 28
+      bounds_cy = 30
       onsetvalue = flagssetvalue
     end
     object tbooleanedit14: tbooleanedit
@@ -170,15 +170,15 @@ inherited cpuavr32fo: tcpuavr32fo
       frame.localprops1 = []
       frame.outerframe = (
         0
-        17
+        19
         0
         0
       )
       taborder = 6
       bounds_x = 164
-      bounds_y = 8
+      bounds_y = 6
       bounds_cx = 11
-      bounds_cy = 28
+      bounds_cy = 30
       onsetvalue = flagssetvalue
     end
     object tbooleanedit11: tbooleanedit
@@ -192,15 +192,15 @@ inherited cpuavr32fo: tcpuavr32fo
       frame.localprops1 = []
       frame.outerframe = (
         0
-        17
+        19
         0
         0
       )
       taborder = 7
       bounds_x = 153
-      bounds_y = 8
+      bounds_y = 6
       bounds_cx = 11
-      bounds_cy = 28
+      bounds_cy = 30
       onsetvalue = flagssetvalue
     end
     object gm: tbooleanedit
@@ -214,15 +214,15 @@ inherited cpuavr32fo: tcpuavr32fo
       frame.localprops1 = []
       frame.outerframe = (
         0
-        17
+        19
         0
         0
       )
       taborder = 8
       bounds_x = 137
-      bounds_y = 8
+      bounds_y = 6
       bounds_cx = 11
-      bounds_cy = 28
+      bounds_cy = 30
       onsetvalue = flagssetvalue
     end
     object tbooleanedit15: tbooleanedit
@@ -236,15 +236,15 @@ inherited cpuavr32fo: tcpuavr32fo
       frame.localprops1 = []
       frame.outerframe = (
         0
-        17
+        19
         0
         0
       )
       taborder = 9
       bounds_x = 126
-      bounds_y = 8
+      bounds_y = 6
       bounds_cx = 11
-      bounds_cy = 28
+      bounds_cy = 30
       onsetvalue = flagssetvalue
     end
     object tbooleanedit7: tbooleanedit
@@ -258,15 +258,15 @@ inherited cpuavr32fo: tcpuavr32fo
       frame.localprops1 = []
       frame.outerframe = (
         0
-        17
+        19
         0
         0
       )
       taborder = 10
       bounds_x = 115
-      bounds_y = 8
+      bounds_y = 6
       bounds_cx = 11
-      bounds_cy = 28
+      bounds_cy = 30
       onsetvalue = flagssetvalue
     end
     object tbooleanedit8: tbooleanedit
@@ -280,15 +280,15 @@ inherited cpuavr32fo: tcpuavr32fo
       frame.localprops1 = []
       frame.outerframe = (
         0
-        17
+        19
         0
         0
       )
       taborder = 11
       bounds_x = 104
-      bounds_y = 8
+      bounds_y = 6
       bounds_cx = 11
-      bounds_cy = 28
+      bounds_cy = 30
       onsetvalue = flagssetvalue
     end
     object tbooleanedit21: tbooleanedit
@@ -302,15 +302,15 @@ inherited cpuavr32fo: tcpuavr32fo
       frame.localprops1 = []
       frame.outerframe = (
         0
-        17
+        19
         0
         0
       )
       taborder = 12
       bounds_x = 93
-      bounds_y = 8
+      bounds_y = 6
       bounds_cx = 11
-      bounds_cy = 28
+      bounds_cy = 30
       onsetvalue = flagssetvalue
     end
     object tbooleanedit9: tbooleanedit
@@ -324,15 +324,15 @@ inherited cpuavr32fo: tcpuavr32fo
       frame.localprops1 = []
       frame.outerframe = (
         0
-        17
+        19
         0
         0
       )
       taborder = 13
       bounds_x = 80
-      bounds_y = 8
+      bounds_y = 6
       bounds_cx = 11
-      bounds_cy = 28
+      bounds_cy = 30
       onsetvalue = flagssetvalue
     end
     object tbooleanedit10: tbooleanedit
@@ -346,15 +346,15 @@ inherited cpuavr32fo: tcpuavr32fo
       frame.localprops1 = []
       frame.outerframe = (
         0
-        17
+        19
         0
         0
       )
       taborder = 14
       bounds_x = 69
-      bounds_y = 8
+      bounds_y = 6
       bounds_cx = 11
-      bounds_cy = 28
+      bounds_cy = 30
       onsetvalue = flagssetvalue
     end
     object tbooleanedit6: tbooleanedit
@@ -368,15 +368,15 @@ inherited cpuavr32fo: tcpuavr32fo
       frame.localprops1 = []
       frame.outerframe = (
         0
-        17
+        19
         0
         0
       )
       taborder = 15
       bounds_x = 58
-      bounds_y = 8
+      bounds_y = 6
       bounds_cx = 11
-      bounds_cy = 28
+      bounds_cy = 30
       onsetvalue = flagssetvalue
     end
     object tbooleanedit5: tbooleanedit
@@ -390,15 +390,15 @@ inherited cpuavr32fo: tcpuavr32fo
       frame.localprops1 = []
       frame.outerframe = (
         0
-        17
+        19
         1
         0
       )
       taborder = 16
       bounds_x = 47
-      bounds_y = 8
+      bounds_y = 6
       bounds_cx = 12
-      bounds_cy = 28
+      bounds_cy = 30
       onsetvalue = flagssetvalue
     end
     object tbooleanedit4: tbooleanedit
@@ -412,15 +412,15 @@ inherited cpuavr32fo: tcpuavr32fo
       frame.localprops1 = []
       frame.outerframe = (
         0
-        17
+        19
         0
         0
       )
       taborder = 17
       bounds_x = 34
-      bounds_y = 8
+      bounds_y = 6
       bounds_cx = 11
-      bounds_cy = 28
+      bounds_cy = 30
       onsetvalue = flagssetvalue
     end
     object tbooleanedit3: tbooleanedit
@@ -434,15 +434,15 @@ inherited cpuavr32fo: tcpuavr32fo
       frame.localprops1 = []
       frame.outerframe = (
         0
-        17
+        19
         1
         0
       )
       taborder = 18
       bounds_x = 23
-      bounds_y = 8
+      bounds_y = 6
       bounds_cx = 12
-      bounds_cy = 28
+      bounds_cy = 30
       onsetvalue = flagssetvalue
     end
     object tbooleanedit2: tbooleanedit
@@ -456,15 +456,15 @@ inherited cpuavr32fo: tcpuavr32fo
       frame.localprops1 = []
       frame.outerframe = (
         0
-        17
+        19
         0
         0
       )
       taborder = 19
       bounds_x = 12
-      bounds_y = 8
+      bounds_y = 6
       bounds_cx = 11
-      bounds_cy = 28
+      bounds_cy = 30
       onsetvalue = flagssetvalue
     end
     object c: tbooleanedit
@@ -478,15 +478,15 @@ inherited cpuavr32fo: tcpuavr32fo
       frame.localprops1 = []
       frame.outerframe = (
         0
-        17
+        19
         0
         0
       )
       taborder = 20
       bounds_x = 1
-      bounds_y = 8
+      bounds_y = 6
       bounds_cx = 11
-      bounds_cy = 28
+      bounds_cy = 30
       onsetvalue = flagssetvalue
     end
     object irqoff: tbooleanedit
@@ -495,25 +495,25 @@ inherited cpuavr32fo: tcpuavr32fo
       frame.localprops1 = []
       frame.outerframe = (
         0
-        1
-        39
         2
+        38
+        3
       )
       taborder = 21
       hint = 'Set global interrupt mask while stepping'
       bounds_x = 17
-      bounds_y = 236
-      bounds_cx = 52
-      bounds_cy = 16
+      bounds_y = 235
+      bounds_cx = 51
+      bounds_cy = 18
       onsetvalue = irqoffset
     end
     object exceptstack: tbutton
       optionswidget1 = [ow1_autowidth, ow1_autoheight]
       taborder = 22
       bounds_x = 112
-      bounds_y = 225
-      bounds_cx = 128
-      bounds_cy = 20
+      bounds_y = 243
+      bounds_cx = 115
+      bounds_cy = 22
       state = [as_disabled, as_localdisabled, as_localcaption, as_localonexecute]
       caption = 'Check Exceptstack'
       onexecute = checkexcept
@@ -522,224 +522,240 @@ inherited cpuavr32fo: tcpuavr32fo
       frame.localprops = []
       frame.localprops1 = []
       taborder = 23
-      bounds_x = 114
+      bounds_x = 113
       bounds_y = 40
-      bounds_cx = 117
-      bounds_cy = 160
+      bounds_cx = 113
+      bounds_cy = 176
       optionsscale = [osc_expandx, osc_shrinkx, osc_expandy, osc_shrinky]
       font.name = 'stf_default'
       font.xscale = 1
       font.localprops = [flp_xscale]
-      dist_bottom = 3
       optionslayout = [lao_placey]
       place_maxdist = 0
       onafterlayout = afterla
+      dist_bottom = 3
       object r6: tintegeredit
         optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
         frame.levelo = -1
         frame.colorclient = -1879048185
         frame.caption = 'r6'
+        frame.captiontextflags = [tf_ycentered]
         frame.captionpos = cp_right
         frame.localprops = [frl_levelo, frl_colorclient]
         frame.localprops1 = []
         frame.outerframe = (
           0
           0
-          16
+          14
           0
         )
         bounds_x = 0
         bounds_y = 0
-        bounds_cx = 109
+        bounds_cx = 107
+        bounds_cy = 22
         font.height = 14
         font.name = 'stf_fixed'
         font.xscale = 1
         font.localprops = [flp_xscale]
         onsetvalue = regsetvalue
         base = nb_hex
-        max = -1
-        reffontheight = 16
+        valuemax = -1
+        reffontheight = 18
       end
       object r7: tintegeredit
         optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
         frame.levelo = -1
         frame.colorclient = -1879048185
         frame.caption = 'r7'
+        frame.captiontextflags = [tf_ycentered]
         frame.captionpos = cp_right
         frame.localprops = [frl_levelo, frl_colorclient]
         frame.localprops1 = []
         frame.outerframe = (
           0
           0
-          16
+          14
           0
         )
         taborder = 1
         bounds_x = 0
-        bounds_y = 20
-        bounds_cx = 109
+        bounds_y = 22
+        bounds_cx = 107
+        bounds_cy = 22
         font.height = 14
         font.name = 'stf_fixed'
         font.xscale = 1
         font.localprops = [flp_xscale]
         onsetvalue = regsetvalue
         base = nb_hex
-        max = -1
-        reffontheight = 16
+        valuemax = -1
+        reffontheight = 18
       end
       object r8: tintegeredit
         optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
         frame.levelo = -1
         frame.colorclient = -1879048185
         frame.caption = 'r8'
+        frame.captiontextflags = [tf_ycentered]
         frame.captionpos = cp_right
         frame.localprops = [frl_levelo, frl_colorclient]
         frame.localprops1 = []
         frame.outerframe = (
           0
           0
-          16
+          14
           0
         )
         taborder = 2
         bounds_x = 0
-        bounds_y = 40
-        bounds_cx = 109
+        bounds_y = 44
+        bounds_cx = 107
+        bounds_cy = 22
         font.height = 14
         font.name = 'stf_fixed'
         font.xscale = 1
         font.localprops = [flp_xscale]
         onsetvalue = regsetvalue
         base = nb_hex
-        max = -1
-        reffontheight = 16
+        valuemax = -1
+        reffontheight = 18
       end
       object r11: tintegeredit
         optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
         frame.levelo = -1
         frame.colorclient = -1879048185
         frame.caption = 'r11'
+        frame.captiontextflags = [tf_ycentered]
         frame.captionpos = cp_right
         frame.localprops = [frl_levelo, frl_colorclient]
         frame.localprops1 = []
         frame.outerframe = (
           0
           0
-          24
+          19
           0
         )
         taborder = 5
         bounds_x = 0
-        bounds_y = 100
-        bounds_cx = 117
+        bounds_y = 110
+        bounds_cx = 112
+        bounds_cy = 22
         font.height = 14
         font.name = 'stf_fixed'
         font.xscale = 1
         font.localprops = [flp_xscale]
         onsetvalue = regsetvalue
         base = nb_hex
-        max = -1
-        reffontheight = 16
+        valuemax = -1
+        reffontheight = 18
       end
       object r10: tintegeredit
         optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
         frame.levelo = -1
         frame.colorclient = -1879048185
         frame.caption = 'r10'
+        frame.captiontextflags = [tf_ycentered]
         frame.captionpos = cp_right
         frame.localprops = [frl_levelo, frl_colorclient]
         frame.localprops1 = []
         frame.outerframe = (
           0
           0
-          24
+          20
           0
         )
         taborder = 4
         bounds_x = 0
-        bounds_y = 80
-        bounds_cx = 117
+        bounds_y = 88
+        bounds_cx = 113
+        bounds_cy = 22
         font.height = 14
         font.name = 'stf_fixed'
         font.xscale = 1
         font.localprops = [flp_xscale]
         onsetvalue = regsetvalue
         base = nb_hex
-        max = -1
-        reffontheight = 16
+        valuemax = -1
+        reffontheight = 18
       end
       object r9: tintegeredit
         optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
         frame.levelo = -1
         frame.colorclient = -1879048185
         frame.caption = 'r9'
+        frame.captiontextflags = [tf_ycentered]
         frame.captionpos = cp_right
         frame.localprops = [frl_levelo, frl_colorclient]
         frame.localprops1 = []
         frame.outerframe = (
           0
           0
-          16
+          14
           0
         )
         taborder = 3
         bounds_x = 0
-        bounds_y = 60
-        bounds_cx = 109
+        bounds_y = 66
+        bounds_cx = 107
+        bounds_cy = 22
         font.height = 14
         font.name = 'stf_fixed'
         font.xscale = 1
         font.localprops = [flp_xscale]
         onsetvalue = regsetvalue
         base = nb_hex
-        max = -1
-        reffontheight = 16
+        valuemax = -1
+        reffontheight = 18
       end
       object r12: tintegeredit
         optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
         frame.levelo = -1
         frame.colorclient = -1879048185
         frame.caption = 'r12'
+        frame.captiontextflags = [tf_ycentered]
         frame.captionpos = cp_right
         frame.localprops = [frl_levelo, frl_colorclient]
         frame.localprops1 = []
         frame.outerframe = (
           0
           0
-          24
+          20
           0
         )
         taborder = 6
         bounds_x = 0
-        bounds_y = 120
-        bounds_cx = 117
+        bounds_y = 132
+        bounds_cx = 113
+        bounds_cy = 22
         font.height = 14
         font.name = 'stf_fixed'
         font.xscale = 1
         font.localprops = [flp_xscale]
         onsetvalue = regsetvalue
         base = nb_hex
-        max = -1
-        reffontheight = 16
+        valuemax = -1
+        reffontheight = 18
       end
       object sr: tintegeredit
         optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
         frame.levelo = -1
         frame.colorclient = -1879048185
         frame.caption = 'sr'
+        frame.captiontextflags = [tf_ycentered]
         frame.captionpos = cp_right
         frame.localprops = [frl_levelo, frl_colorclient]
         frame.localprops1 = []
         frame.outerframe = (
           0
           0
-          15
+          14
           0
         )
         taborder = 7
         bounds_x = 0
-        bounds_y = 140
-        bounds_cx = 108
+        bounds_y = 154
+        bounds_cx = 107
+        bounds_cy = 22
         font.height = 14
         font.name = 'stf_fixed'
         font.xscale = 1
@@ -747,8 +763,8 @@ inherited cpuavr32fo: tcpuavr32fo
         onchange = flagonchange
         onsetvalue = regsetvalue
         base = nb_hex
-        max = -1
-        reffontheight = 16
+        valuemax = -1
+        reffontheight = 18
       end
     end
     object tlayouter1: tlayouter
@@ -757,259 +773,277 @@ inherited cpuavr32fo: tcpuavr32fo
       taborder = 24
       bounds_x = 0
       bounds_y = 40
-      bounds_cx = 111
-      bounds_cy = 180
+      bounds_cx = 110
+      bounds_cy = 198
       optionsscale = [osc_expandx, osc_shrinkx, osc_expandy, osc_shrinky]
       font.name = 'stf_default'
       font.xscale = 1
       font.localprops = [flp_xscale]
+      optionslayout = [lao_placey]
+      place_maxdist = 0
       linkright = tlayouter2
       linkbottom = exceptstack
       dist_right = 3
       dist_bottom = 5
-      optionslayout = [lao_placey]
-      place_maxdist = 0
       object r1: tintegeredit
         optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
         frame.levelo = -1
         frame.colorclient = -1879048185
         frame.caption = 'r1'
+        frame.captiontextflags = [tf_ycentered]
         frame.captionpos = cp_right
         frame.localprops = [frl_levelo, frl_colorclient]
         frame.localprops1 = []
         frame.outerframe = (
           0
           0
-          16
+          13
           0
         )
         taborder = 1
         bounds_x = 0
-        bounds_y = 20
-        bounds_cx = 109
+        bounds_y = 22
+        bounds_cx = 106
+        bounds_cy = 22
         font.height = 14
         font.name = 'stf_fixed'
         font.xscale = 1
         font.localprops = [flp_xscale]
         onsetvalue = regsetvalue
         base = nb_hex
-        max = -1
-        reffontheight = 16
+        valuemax = -1
+        reffontheight = 18
       end
       object r0: tintegeredit
         optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
         frame.levelo = -1
         frame.colorclient = -1879048185
         frame.caption = 'r0'
+        frame.captiontextflags = [tf_ycentered]
         frame.captionpos = cp_right
         frame.localprops = [frl_levelo, frl_colorclient]
         frame.localprops1 = []
         frame.outerframe = (
           0
           0
-          16
+          14
           0
         )
         bounds_x = 0
         bounds_y = 0
-        bounds_cx = 109
+        bounds_cx = 107
+        bounds_cy = 22
         font.height = 14
         font.name = 'stf_fixed'
         font.xscale = 1
         font.localprops = [flp_xscale]
         onsetvalue = regsetvalue
         base = nb_hex
-        max = -1
-        reffontheight = 16
+        valuemax = -1
+        reffontheight = 18
       end
       object r4: tintegeredit
         optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
         frame.levelo = -1
         frame.colorclient = -1879048185
         frame.caption = 'r4'
+        frame.captiontextflags = [tf_ycentered]
         frame.captionpos = cp_right
         frame.localprops = [frl_levelo, frl_colorclient]
         frame.localprops1 = []
         frame.outerframe = (
           0
           0
-          16
+          14
           0
         )
         taborder = 4
         bounds_x = 0
-        bounds_y = 80
-        bounds_cx = 109
+        bounds_y = 88
+        bounds_cx = 107
+        bounds_cy = 22
         font.height = 14
         font.name = 'stf_fixed'
         font.xscale = 1
         font.localprops = [flp_xscale]
         onsetvalue = regsetvalue
         base = nb_hex
-        max = -1
-        reffontheight = 16
+        valuemax = -1
+        reffontheight = 18
       end
       object r3: tintegeredit
         optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
         frame.levelo = -1
         frame.colorclient = -1879048185
         frame.caption = 'r3'
+        frame.captiontextflags = [tf_ycentered]
         frame.captionpos = cp_right
         frame.localprops = [frl_levelo, frl_colorclient]
         frame.localprops1 = []
         frame.outerframe = (
           0
           0
-          16
+          14
           0
         )
         taborder = 3
         bounds_x = 0
-        bounds_y = 60
-        bounds_cx = 109
+        bounds_y = 66
+        bounds_cx = 107
+        bounds_cy = 22
         font.height = 14
         font.name = 'stf_fixed'
         font.xscale = 1
         font.localprops = [flp_xscale]
         onsetvalue = regsetvalue
         base = nb_hex
-        max = -1
-        reffontheight = 16
+        valuemax = -1
+        reffontheight = 18
       end
       object r2: tintegeredit
         optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
         frame.levelo = -1
         frame.colorclient = -1879048185
         frame.caption = 'r2'
+        frame.captiontextflags = [tf_ycentered]
         frame.captionpos = cp_right
         frame.localprops = [frl_levelo, frl_colorclient]
         frame.localprops1 = []
         frame.outerframe = (
           0
           0
-          16
+          14
           0
         )
         taborder = 2
         bounds_x = 0
-        bounds_y = 40
-        bounds_cx = 109
+        bounds_y = 44
+        bounds_cx = 107
+        bounds_cy = 22
         font.height = 14
         font.name = 'stf_fixed'
         font.xscale = 1
         font.localprops = [flp_xscale]
         onsetvalue = regsetvalue
         base = nb_hex
-        max = -1
-        reffontheight = 16
+        valuemax = -1
+        reffontheight = 18
       end
       object r5: tintegeredit
         optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
         frame.levelo = -1
         frame.colorclient = -1879048185
         frame.caption = 'r5'
+        frame.captiontextflags = [tf_ycentered]
         frame.captionpos = cp_right
         frame.localprops = [frl_levelo, frl_colorclient]
         frame.localprops1 = []
         frame.outerframe = (
           0
           0
-          16
+          14
           0
         )
         taborder = 5
         bounds_x = 0
-        bounds_y = 100
-        bounds_cx = 109
+        bounds_y = 110
+        bounds_cx = 107
+        bounds_cy = 22
         font.height = 14
         font.name = 'stf_fixed'
         font.xscale = 1
         font.localprops = [flp_xscale]
         onsetvalue = regsetvalue
         base = nb_hex
-        max = -1
-        reffontheight = 16
+        valuemax = -1
+        reffontheight = 18
       end
       object sp: tintegeredit
         optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
         frame.levelo = -1
         frame.colorclient = -1879048185
         frame.caption = 'sp'
+        frame.captiontextflags = [tf_ycentered]
         frame.captionpos = cp_right
         frame.localprops = [frl_levelo, frl_colorclient]
         frame.localprops1 = []
         frame.outerframe = (
           0
           0
-          18
+          17
           0
         )
         taborder = 6
         bounds_x = 0
-        bounds_y = 120
-        bounds_cx = 111
+        bounds_y = 132
+        bounds_cx = 110
+        bounds_cy = 22
         font.height = 14
         font.name = 'stf_fixed'
         font.xscale = 1
         font.localprops = [flp_xscale]
         onsetvalue = regsetvalue
         base = nb_hex
-        max = -1
-        reffontheight = 16
+        valuemax = -1
+        reffontheight = 18
       end
       object lr: tintegeredit
         optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
         frame.levelo = -1
         frame.colorclient = -1879048185
         frame.caption = 'lr'
+        frame.captiontextflags = [tf_ycentered]
         frame.captionpos = cp_right
         frame.localprops = [frl_levelo, frl_colorclient]
         frame.localprops1 = []
         frame.outerframe = (
           0
           0
-          11
+          10
           0
         )
         taborder = 7
         bounds_x = 0
-        bounds_y = 140
-        bounds_cx = 104
+        bounds_y = 154
+        bounds_cx = 103
+        bounds_cy = 22
         font.height = 14
         font.name = 'stf_fixed'
         font.xscale = 1
         font.localprops = [flp_xscale]
         onsetvalue = regsetvalue
         base = nb_hex
-        max = -1
-        reffontheight = 16
+        valuemax = -1
+        reffontheight = 18
       end
       object pc: tintegeredit
         optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
         frame.levelo = -1
         frame.colorclient = -1879048185
         frame.caption = 'pc'
+        frame.captiontextflags = [tf_ycentered]
         frame.captionpos = cp_right
         frame.localprops = [frl_levelo, frl_colorclient]
         frame.localprops1 = []
         frame.outerframe = (
           0
           0
-          18
+          17
           0
         )
         taborder = 8
         bounds_x = 0
-        bounds_y = 160
-        bounds_cx = 111
+        bounds_y = 176
+        bounds_cx = 110
+        bounds_cy = 22
         font.height = 14
         font.name = 'stf_fixed'
         font.xscale = 1
         font.localprops = [flp_xscale]
         onsetvalue = regsetvalue
         base = nb_hex
-        max = -1
-        reffontheight = 16
+        valuemax = -1
+        reffontheight = 18
       end
     end
   end

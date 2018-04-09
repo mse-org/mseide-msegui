@@ -1,13 +1,13 @@
 inherited cpuarmm3fo: tcpuarmm3fo
   bounds_x = 57
   bounds_y = 234
-  bounds_cx = 265
-  bounds_cy = 248
+  bounds_cx = 272
+  bounds_cy = 266
   container.bounds = (
     0
     0
-    255
-    248
+    262
+    266
   )
   caption = 'CPU ARM M3'
   oncreate = createexe
@@ -17,7 +17,7 @@ inherited cpuarmm3fo: tcpuarmm3fo
   inherited stoptime: tdatetimedisp
   end
   inherited tspacer1: tspacer
-    bounds_cx = 250
+    bounds_cx = 251
     inherited tlayouter1: tlayouter
       inherited r1: tintegeredit
       end
@@ -42,15 +42,15 @@ inherited cpuarmm3fo: tcpuarmm3fo
       frame.caption = 'ISR_NUMBER'
       frame.captionpos = cp_topright
       frame.outerframe = (
-        68
-        17
+        63
+        19
         0
         0
       )
-      bounds_x = 171
-      bounds_y = 8
-      bounds_cx = 79
-      bounds_cy = 28
+      bounds_x = 177
+      bounds_y = 6
+      bounds_cx = 74
+      bounds_cy = 30
     end
     inherited tbooleanedit17: tbooleanedit
       frame.caption = ''
@@ -60,7 +60,7 @@ inherited cpuarmm3fo: tcpuarmm3fo
         0
         0
       )
-      bounds_x = 228
+      bounds_x = 229
       bounds_y = 25
       bounds_cy = 11
     end
@@ -72,7 +72,7 @@ inherited cpuarmm3fo: tcpuarmm3fo
         0
         0
       )
-      bounds_x = 217
+      bounds_x = 218
       bounds_y = 25
       bounds_cy = 11
     end
@@ -84,7 +84,7 @@ inherited cpuarmm3fo: tcpuarmm3fo
         0
         0
       )
-      bounds_x = 206
+      bounds_x = 207
       bounds_y = 25
       bounds_cy = 11
     end
@@ -118,13 +118,13 @@ inherited cpuarmm3fo: tcpuarmm3fo
       frame.caption = 'ICI/IT'
       frame.captionpos = cp_topright
       frame.outerframe = (
+        22
         19
-        17
         0
         0
       )
-      bounds_x = 118
-      bounds_cx = 30
+      bounds_x = 115
+      bounds_cx = 33
     end
     inherited tbooleanedit13: tbooleanedit
       Tag = 12
@@ -221,7 +221,6 @@ inherited cpuarmm3fo: tcpuarmm3fo
       bounds_x = 2
     end
     inherited tlayouter2: tlayouter
-      bounds_cx = 122
       inherited r11: tintegeredit
       end
       inherited r10: tintegeredit
@@ -231,14 +230,6 @@ inherited cpuarmm3fo: tcpuarmm3fo
       inherited fps: tintegeredit
       end
       inherited cpsr: tintegeredit
-        frame.caption = 'xpsr'
-        frame.outerframe = (
-          0
-          0
-          29
-          0
-        )
-        bounds_cx = 122
       end
       inherited r12: tintegeredit
       end

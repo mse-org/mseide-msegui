@@ -23,9 +23,11 @@ procedure tcpuarmm3fo.createexe(const sender: TObject);
 var
  comp1: tintegeredit;
 begin
+{
  comp1:= cpsr;
  cpsr.name:= 'xpsr';
  cpsr:= comp1;
+}
 end;
 
 end.

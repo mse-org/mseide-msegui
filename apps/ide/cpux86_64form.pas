@@ -67,7 +67,7 @@ type
    procedure cpufoonchildscaled(const sender: TObject);
   public
    constructor create(aowner: tcomponent); override;
-   function flagedit(const aindex: integer): tcustombooleanedit; override;
+//   function flagedit(const aindex: integer): tcustombooleanedit; override;
  end;
 
 implementation
@@ -80,6 +80,7 @@ constructor tcpux86_64fo.create(aowner: tcomponent);
 begin
  inherited create(aowner);
  fflagswidget64:= eflags;
+ fflagscontainer:= tspacer1;
 end;
 
 procedure tcpux86_64fo.flagonchange(const sender: TObject);
@@ -124,10 +125,10 @@ begin
  placeyorder(eflags.bounds_y,[0],[eflags,rsp,rip]);
  placeyorder(rbp.bounds_y,[0],[r10,r11,r12,r13,r14,r15]);
 end;
-
+{
 function tcpux86_64fo.flagedit(const aindex: integer): tcustombooleanedit;
 begin
  result:= c.tagitem(aindex);
 end;
-
+}
 end.

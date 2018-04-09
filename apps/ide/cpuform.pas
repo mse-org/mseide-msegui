@@ -42,6 +42,7 @@ type
    fedits: array of tdataedit;
    irqoffvalue: boolean;
    fneedsrefresh: boolean;
+   fflagscontainer: twidget;
    procedure doregsetvalue(const sender: TObject; var avalue: Integer; var accept: Boolean);
    procedure doregset64value(const sender: TObject; var avalue: Int64; var accept: Boolean);
    procedure doflagsetvalue(const sender: TObject;
@@ -267,7 +268,8 @@ end;
 
 function tcpufo.flagedit(const aindex: integer): tcustombooleanedit;
 begin
- result:= nil;
+ result:= tcustombooleanedit(fflagscontainer.findtagchild(
+                                                  aindex,tcustombooleanedit));
 end;
 
 procedure tcpufo.doflagonchange(const sender: TObject);
@@ -297,7 +299,7 @@ begin
   if fflagswidget64 <> nil then begin
    ca1:= fflagswidget64.value;
    for int1:= 0 to 31 do begin
-    ed1:= on.tagitem(int1);
+    ed1:= flagedit(int1);
     if (ed1 <> nil) then begin
      bo1:= bits[int1] and ca1 <> 0;
      if ed1.value <> bo1 then begin
@@ -345,6 +347,7 @@ end;
 
 constructor tcpufo.create(aowner: tcomponent);
 begin
+ fflagscontainer:= container; //default
  inherited create(aowner);
 end;
 

@@ -106,7 +106,7 @@ type
    procedure flagsetvalue(const sender: TObject; var avalue: Boolean;
                    var accept: Boolean);
    procedure flagonchange(const sender: TObject);
-   function flagedit(const aindex: integer): tcustombooleanedit; override;
+//   function flagedit(const aindex: integer): tcustombooleanedit; override;
   public
    constructor create(aowner: tcomponent); override;
  end;
@@ -122,6 +122,7 @@ begin
  fneedsrefresh:= true;
  inherited;
  fflagswidget:= psw;
+ fflagscontainer:= tgroupbox1;
 end;
  
 procedure tcpurl78fo.regsetvalue(const sender: TObject; var avalue: Integer;
@@ -140,10 +141,10 @@ procedure tcpurl78fo.flagonchange(const sender: TObject);
 begin
  doflagonchange(sender);
 end;
-
+{
 function tcpurl78fo.flagedit(const aindex: integer): tcustombooleanedit;
 begin
  result:= z.tagitem(aindex);
 end;
-
+}
 end.

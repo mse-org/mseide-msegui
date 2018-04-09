@@ -74,7 +74,7 @@ type
    procedure flagonchange(const sender: TObject);
   public
    constructor create(aowner: tcomponent); override;
-   function flagedit(const aindex: integer): tcustombooleanedit; override;
+//   function flagedit(const aindex: integer): tcustombooleanedit; override;
  end;
 
 implementation
@@ -87,6 +87,7 @@ constructor tcpuarmfo.create(aowner: tcomponent);
 begin
  inherited create(aowner);
  fflagswidget:= cpsr;
+ fflagscontainer:= tspacer1;
 end;
 
 procedure tcpuarmfo.regsetvalue(const sender: TObject; var avalue: Integer;
@@ -105,10 +106,10 @@ procedure tcpuarmfo.flagonchange(const sender: TObject);
 begin
  doflagonchange(sender);
 end;
-
+{
 function tcpuarmfo.flagedit(const aindex: integer): tcustombooleanedit;
 begin
  result:= c.tagitem(aindex);
 end;
-
+}
 end.
