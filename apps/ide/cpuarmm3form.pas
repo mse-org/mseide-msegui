@@ -11,7 +11,7 @@ type
    tbooleanedit21: tbooleanedit;
    tbooleanedit22: tbooleanedit;
    tbooleanedit23: tbooleanedit;
-   procedure createexe(const sender: TObject);
+  protected
  end;
 var
  cpuarmm3fo: tcpuarmm3fo;
@@ -19,15 +19,4 @@ implementation
 uses
  cpuarmm3form_mfm,msedataedits;
  
-procedure tcpuarmm3fo.createexe(const sender: TObject);
-var
- comp1: tintegeredit;
-begin
-{
- comp1:= cpsr;
- cpsr.name:= 'xpsr';
- cpsr:= comp1;
-}
-end;
-
 end.

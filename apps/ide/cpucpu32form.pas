@@ -68,7 +68,7 @@ type
    procedure flagonchange(const sender: TObject);
   public
    constructor create(aowner: tcomponent); override;
-//   function flagedit(const aindex: integer): tcustombooleanedit; override;
+   function flagedit(const aindex: integer): tcustombooleanedit; override;
  end;
  
 var
@@ -82,7 +82,6 @@ constructor tcpucpu32fo.create(aowner: tcomponent);
 begin
  inherited create(aowner);
  fflagswidget:= ps;
- fflagscontainer:= tspacer1;
 end;
  
 procedure tcpucpu32fo.flagssetvalue(const sender: TObject; var avalue: Boolean;
@@ -101,10 +100,10 @@ procedure tcpucpu32fo.flagonchange(const sender: TObject);
 begin
  doflagonchange(sender);
 end;
-{
+
 function tcpucpu32fo.flagedit(const aindex: integer): tcustombooleanedit;
 begin
  result:= c.tagitem(aindex);
 end;
-}
+
 end.

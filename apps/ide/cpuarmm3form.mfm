@@ -10,7 +10,6 @@ inherited cpuarmm3fo: tcpuarmm3fo
     266
   )
   caption = 'CPU ARM M3'
-  oncreate = createexe
   moduleclassname = 'tcpuarmfo'
   inherited on: tbooleanedit
   end

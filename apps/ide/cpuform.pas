@@ -42,7 +42,6 @@ type
    fedits: array of tdataedit;
    irqoffvalue: boolean;
    fneedsrefresh: boolean;
-   fflagscontainer: twidget;
    procedure doregsetvalue(const sender: TObject; var avalue: Integer; var accept: Boolean);
    procedure doregset64value(const sender: TObject; var avalue: Int64; var accept: Boolean);
    procedure doflagsetvalue(const sender: TObject;
@@ -52,6 +51,7 @@ type
    procedure updatereadstatvalues; virtual;
    procedure updatewritestatvalues; virtual;
    procedure updatelayout(const dsender: twidget); override;
+   procedure updateregisternames() virtual;
   public
    constructor create(aowner: tcomponent); override;
    procedure refresh; virtual;
@@ -125,6 +125,7 @@ begin
   if mainfo.gdb.listregisternames(fregisternames) <> gdb_ok then begin
    exit;
   end;
+  updateregisternames();
   fedits:= nil;
   setlength(fedits,length(fregisternames));
   for int1:= 0 to high(fregisternames) do begin
@@ -268,8 +269,7 @@ end;
 
 function tcpufo.flagedit(const aindex: integer): tcustombooleanedit;
 begin
- result:= tcustombooleanedit(fflagscontainer.findtagchild(
-                                                  aindex,tcustombooleanedit));
+ result:= nil;
 end;
 
 procedure tcpufo.doflagonchange(const sender: TObject);
@@ -347,7 +347,6 @@ end;
 
 constructor tcpufo.create(aowner: tcomponent);
 begin
- fflagscontainer:= container; //default
  inherited create(aowner);
 end;
 
@@ -355,6 +354,11 @@ procedure tcpufo.updatelayout(const dsender: twidget);
 begin
  aligny(wam_center,[stoptime,on]);
  inherited;
+end;
+
+procedure tcpufo.updateregisternames();
+begin
+ //dummy
 end;
 
 procedure tcpufo.asynceventexe(const sender: TObject; var atag: Integer);

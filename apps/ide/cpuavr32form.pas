@@ -90,7 +90,7 @@ type
    procedure irqrestore;
   public
    constructor create(aowner: tcomponent); override;
-//   function flagedit(const aindex: integer): tcustombooleanedit; override;
+   function flagedit(const aindex: integer): tcustombooleanedit; override;
    procedure refresh; override;
    procedure beforecontinue; override;
  end;
@@ -115,7 +115,6 @@ constructor tcpuavr32fo.create(aowner: tcomponent);
 begin
  inherited create(aowner);
  fflagswidget:= sr;
- fflagscontainer:= tspacer1;
 end;
 
 procedure tcpuavr32fo.regsetvalue(const sender: TObject; var avalue: Integer;
@@ -297,10 +296,10 @@ begin
  irqoffvalue:= irqoff.value;
  inherited;
 end;
-{
+
 function tcpuavr32fo.flagedit(const aindex: integer): tcustombooleanedit;
 begin
  result:= c.tagitem(aindex);
 end;
-}
+
 end.
