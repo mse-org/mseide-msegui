@@ -98,15 +98,13 @@ var
 begin
  comp1:= cpsr;
  cpsr.name:= 'cpsr';
- cpsr:= comp1;
  for i1 := high(fregisternames) downto 0 do begin
   if fregisternames[i1] = 'xpsr' then begin //for segger j-link
-   comp1:= cpsr;
    cpsr.name:= 'xpsr';
-   cpsr:= comp1;
    break;
   end;
  end;
+ cpsr:= comp1;
  cpsr.frame.caption:= cpsr.name;
 end;
 
