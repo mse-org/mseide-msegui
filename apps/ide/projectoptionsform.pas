@@ -906,10 +906,6 @@ type
    toolmenus: tstringedit;
    toolfiles: tfilenameedit;
    toolparams: tstringedit;
-   serverla: tlayouter;
-   uploadcommand: tfilenameedit;
-   gdbservercommand: tfilenameedit;
-   gdbserverwait: trealedit;
    downloadalways: tbooleanedit;
    startupbkpt: tintegeredit;
    startupbkpton: tbooleanedit;
@@ -923,8 +919,6 @@ type
    newfonames: tstringedit;
    newfosources: tfilenameedit;
    newfoforms: tfilenameedit;
-   tlayouter2: tlayouter;
-   gdbservercommandattach: tfilenameedit;
    scriptbeforecopy: tfilenameedit;
    scriptaftercopy: tfilenameedit;
    newinheritedforms: tbooleanedit;
@@ -953,7 +947,6 @@ type
    aftmake3on: tbooleanedit;
    aftmake4on: tbooleanedit;
    aftcommand: tmemodialogedit;
-   nogdbserverexit: tbooleanedit;
    ttabpage20: ttabpage;
    settingseditor: tbooleanedit;
    settingsautoload: tbooleanedit;
@@ -968,12 +961,10 @@ type
    nodebugbeginend: tbooleanedit;
    toolmessages: tbooleanedit;
    settty: tbooleanedit;
-   gdbservertty: tbooleanedit;
    tsplitter9: tsplitter;
    beforerun: tfilenameedit;
    afterload: tfilenameedit;
    tsplitter10: tsplitter;
-   gdbserverstartonce: tbooleanedit;
    ttabpage21: ttabpage;
    formatmacrogrid: twidgetgrid;
    formatmacronames: tstringedit;
@@ -992,7 +983,6 @@ type
    runcommand: tfilenameedit;
    sourcebase: tfilenameedit;
    tspacer7: tspacer;
-   gdbloadtimeout: trealedit;
    toolshortcuts: tenumedit;
    toolsc: tstringedit;
    toolscalt: tstringedit;
@@ -1072,6 +1062,19 @@ type
    makeoptpurpose: tstringedit;
    pairmaxrowcount: tintegeredit;
    newfoformsuffixes: tstringedit;
+   downloadlayouter: tlayouter;
+   gdbservercommand: tfilenameedit;
+   gdbservercommandattach: tfilenameedit;
+   uploadcommand: tfilenameedit;
+   texpandingwidget1: texpandingwidget;
+   gdbloadtimeout: trealedit;
+   serverla: tlayouter;
+   gdbserverwait: trealedit;
+   gdbserverstartonce: tbooleanedit;
+   tlayouter2: tlayouter;
+   nogdbserverexit: tbooleanedit;
+   gdbservertty: tbooleanedit;
+   tstringedit1: tstringedit;
    procedure acttiveselectondataentered(const sender: TObject);
    procedure colonshowhint(const sender: tdatacol; const arow: Integer; 
                       var info: hintinfoty);
@@ -1120,6 +1123,7 @@ type
                    const acell: gridcoordty);
    procedure colorhint(const sender: TObject; var info: hintinfoty);
    procedure initeolstyleexe(const sender: tenumtypeedit);
+   procedure debugtargetlayoutev(const sender: TObject);
   private
    procedure activegroupchanged;
  end;
@@ -3254,6 +3258,11 @@ end;
 procedure tprojectoptionsfo.initeolstyleexe(const sender: tenumtypeedit);
 begin
  sender.typeinfopo:= typeinfo(eolstylety);
+end;
+
+procedure tprojectoptionsfo.debugtargetlayoutev(const sender: TObject);
+begin
+ serverla.width:= serverla.width + uploadcommand.width-gdbservercommand.width;
 end;
 (*
 { tprojectoptions }
