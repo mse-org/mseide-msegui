@@ -578,6 +578,7 @@ type
    procedure setisactivepage(const avalue: boolean);
    function nexttaborderoverride(const sender: twidget;
                                       const down: boolean): twidget override;
+   procedure readstate(reader: treader) override;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -1038,6 +1039,7 @@ type
  tmsecomponent1 = class(tmsecomponent);
  tcustomstepframe1 = class(tcustomstepframe);
  ttabframe1 = class(ttabframe);
+ ttaborderoverride1 = class(ttaborderoverride);
 
 procedure calctablayout(var layout: tabbarlayoutinfoty;
                      const canvas: tcanvas; const focused: boolean);
@@ -3587,6 +3589,12 @@ begin
  if result = nil then begin
   result:= inherited nexttaborderoverride(sender,down);
  end;
+end;
+
+procedure ttabpage.readstate(reader: treader);
+begin
+ inherited;
+ ttaborderoverride1(ftaborderoverride).endread(reader);
 end;
 
 function ttabpage.gettabindex: integer;

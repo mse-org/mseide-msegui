@@ -331,7 +331,6 @@ type
    ffontxscaleref: real;
    fonbeforelayout: layoutereventty;
    fonafterlayout: layoutereventty;
-   ftaborderoverride: ttaborderoverride;
    procedure setoptionslayout(const avalue: layoutoptionsty);
    procedure setalign_mode(const avalue: widgetalignmodety);
    procedure setalign_leader(const avalue: twidget);
@@ -340,7 +339,6 @@ type
    procedure setalign_glue(const avalue: widgetalignmodety);
    procedure setplace_mode(const avalue: widgetalignmodety);
    procedure setplace_options(avalue: placeoptionsty);
-   procedure settaborderoverride(const avalue: ttaborderoverride);
   protected
    procedure scalebasechanged(const sender: twidget); override;
    function scalesizeref: sizety;
@@ -360,8 +358,6 @@ type
    procedure readstate(reader: treader); override;
    procedure loaded; override;
    procedure fontchanged; override;
-   function nexttaborderoverride(const sender: twidget;
-                                      const down: boolean): twidget override;
    procedure widgetregionchanged(const sender: twidget); override;
    procedure childclientrectchanged(const sender: twidget); override;
    procedure childautosizechanged(const sender: twidget); override;
@@ -375,7 +371,6 @@ type
    procedure doasyncevent(var atag: integer); override;
   public
    constructor create(aowner: tcomponent); override;
-   destructor destroy(); override;
    property optionslayout: layoutoptionsty read foptionslayout write setoptionslayout
                            default defaultlayoutoptions;
    property align_mode: widgetalignmodety read falign_mode write setalign_mode
@@ -391,8 +386,6 @@ type
                                      default wam_start;
    property place_options: placeoptionsty read fplace_options 
                                      write setplace_options default [];
-   property taborderoverride: ttaborderoverride read ftaborderoverride 
-                                                  write settaborderoverride;
    property onbeforelayout: layoutereventty read fonbeforelayout 
                                                     write fonbeforelayout;
    property onafterlayout: layoutereventty read fonafterlayout 
@@ -404,7 +397,6 @@ type
 
  tlayouter = class(tcustomlayouter)
   published
-   property taborderoverride;
    property optionslayout;
    property align_mode;
    property align_leader;
@@ -1451,7 +1443,6 @@ end;
 
 constructor tcustomlayouter.create(aowner: tcomponent);
 begin
- ftaborderoverride:= ttaborderoverride.create(self);
  foptionslayout:= defaultlayoutoptions;
  falign_mode:= wam_center;
 // faligny_mode:= wam_center;
@@ -1461,12 +1452,6 @@ begin
  inherited;
  foptionswidget:= defaultgroupboxoptionswidget;
  include(fwidgetstate,ws_visible);
-end;
-
-destructor tcustomlayouter.destroy();
-begin
- inherited;
- ftaborderoverride.free();
 end;
 
 procedure tcustomlayouter.setoptionslayout(const avalue: layoutoptionsty);
@@ -2232,15 +2217,6 @@ begin
  end;
 end;
 
-function tcustomlayouter.nexttaborderoverride(const sender: twidget;
-               const down: boolean): twidget;
-begin
- result:= ftaborderoverride.nexttaborder(sender,down);
- if result = nil then begin
-  result:= inherited nexttaborderoverride(sender,down);
- end;
-end;
-
 procedure tcustomlayouter.childclientrectchanged(const sender: twidget);
 var
  int1: integer;
@@ -2348,10 +2324,6 @@ begin
   end;
   updatelayout();
  end;
-end;
-
-procedure tcustomlayouter.settaborderoverride(const avalue: ttaborderoverride);
-begin
 end;
 
 procedure tcustomlayouter.clientrectchanged;

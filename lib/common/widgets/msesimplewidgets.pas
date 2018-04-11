@@ -613,11 +613,13 @@ type
    fsizebefore: sizety;
    procedure setoptionsscale(const avalue: optionsscalety);
    procedure readonchildscaled(reader: treader);
+   procedure settaborderoverride(const avalue: ttaborderoverride);
   protected
    foptionsscale: optionsscalety;
+   ftaborderoverride: ttaborderoverride;
    procedure beginscaling;
    procedure endscaling;
-   procedure updateoptionsscale;
+   procedure updateoptionsscale();
    procedure dofontheightdelta(var delta: integer); override;
    procedure widgetregionchanged(const sender: twidget); override;
    procedure clientrectchanged; override;
@@ -625,15 +627,21 @@ type
    procedure sizechanged; override;
    procedure loaded; override;
    procedure visiblepropchanged; override;
-   function calcminshrinksize: sizety; override;
+   function calcminshrinksize(): sizety; override;
+   function nexttaborderoverride(const sender: twidget;
+                                      const down: boolean): twidget override;
    procedure defineproperties(filer: tfiler); override;
+   procedure readstate(reader: treader); override;
   public
    constructor create(aowner: tcomponent); override;
+   destructor destroy(); override;
    procedure writestate(writer: twriter); override;
    procedure dolayout(const sender: twidget); override;
    property onresize: notifyeventty read fonresize write fonresize;
    property onmove: notifyeventty read fonmove write fonmove;
   published
+   property taborderoverride: ttaborderoverride read ftaborderoverride 
+                                                  write settaborderoverride;
    property optionsscale: optionsscalety read foptionsscale write setoptionsscale
                   default defaultoptionsscale;
    property onfontheightdelta: fontheightdeltaeventty read fonfontheightdelta
@@ -660,22 +668,14 @@ type
  tgroupbox = class(tscalingwidget)
   private
    fonfocusedwidgetchanged: widgetchangeeventty;
-   ftaborderoverride: ttaborderoverride;
-   procedure settaborderoverride(const avalue: ttaborderoverride);
   protected
-   procedure readstate(reader: treader); override;
    procedure internalcreateframe; override;
    procedure dofocuschanged(const oldwidget,newwidget: twidget); override;
-   function nexttaborderoverride(const sender: twidget;
-                                      const down: boolean): twidget override;
    class function classskininfo: skininfoty; override;
   public
    constructor create(aowner: tcomponent); override;
-   destructor destroy(); override;
    procedure initnewcomponent(const ascale: real); override;
   published
-   property taborderoverride: ttaborderoverride read ftaborderoverride 
-                                                  write settaborderoverride;
    property optionswidget default defaultgroupboxoptionswidget;
    property onfocusedwidgetchanged: widgetchangeeventty 
                      read fonfocusedwidgetchanged write fonfocusedwidgetchanged;
@@ -2319,8 +2319,15 @@ end;
 
 constructor tcustomscalingwidget.create(aowner: tcomponent);
 begin
+ ftaborderoverride:= ttaborderoverride.create(self);
  inherited;
  foptionsscale:= defaultoptionsscale;
+end;
+
+destructor tcustomscalingwidget.destroy();
+begin
+ inherited;
+ ftaborderoverride.free();
 end;
 
 procedure tcustomscalingwidget.dolayout(const sender: twidget);
@@ -2349,7 +2356,7 @@ begin
  end;
 end;
 
-procedure tcustomscalingwidget.updateoptionsscale;
+procedure tcustomscalingwidget.updateoptionsscale();
 var
  size1,size2: sizety;
  rect1: rectty;
@@ -2454,7 +2461,7 @@ begin
  end;
 end;
 
-function tcustomscalingwidget.calcminshrinksize: sizety;
+function tcustomscalingwidget.calcminshrinksize(): sizety;
 var
  size1: sizety;
  box,boy: boolean;
@@ -2475,6 +2482,15 @@ begin
   if boy and (result.cy < size1.cy) then begin
    result.cy:= size1.cy;
   end;
+ end;
+end;
+
+function tcustomscalingwidget.nexttaborderoverride(const sender: twidget;
+               const down: boolean): twidget;
+begin
+ result:= ftaborderoverride.nexttaborder(sender,down);
+ if result = nil then begin
+  result:= inherited nexttaborderoverride(sender,down);
  end;
 end;
 
@@ -2545,6 +2561,18 @@ begin
  onlayout:= notifyeventty(readmethod(reader));
 end;
 
+procedure tcustomscalingwidget.settaborderoverride(
+              const avalue: ttaborderoverride);
+begin
+ ftaborderoverride.assign(avalue);
+end;
+
+procedure tcustomscalingwidget.readstate(reader: treader);
+begin
+ inherited;
+ ttaborderoverride1(ftaborderoverride).endread(reader);
+end;
+
 procedure tcustomscalingwidget.defineproperties(filer: tfiler);
 begin
  inherited;
@@ -2564,26 +2592,8 @@ end;
 
 constructor tgroupbox.create(aowner: tcomponent);
 begin
- ftaborderoverride:= ttaborderoverride.create(self);
  inherited;
  optionswidget:= defaultgroupboxoptionswidget;
-end;
-
-destructor tgroupbox.destroy();
-begin
- inherited;
- ftaborderoverride.free();
-end;
-
-procedure tgroupbox.settaborderoverride(const avalue: ttaborderoverride);
-begin
- ftaborderoverride.assign(avalue);
-end;
-
-procedure tgroupbox.readstate(reader: treader);
-begin
- inherited;
- ttaborderoverride1(ftaborderoverride).endread(reader);
 end;
 
 procedure tgroupbox.initnewcomponent(const ascale: real);
@@ -2606,15 +2616,6 @@ begin
   (checkdescendent(oldwidget) or checkdescendent(newwidget)) then begin
   fonfocusedwidgetchanged(oldwidget,newwidget);
  end; 
-end;
-
-function tgroupbox.nexttaborderoverride(const sender: twidget;
-               const down: boolean): twidget;
-begin
- result:= ftaborderoverride.nexttaborder(sender,down);
- if result = nil then begin
-  result:= inherited nexttaborderoverride(sender,down);
- end;
 end;
 
 class function tgroupbox.classskininfo: skininfoty;
