@@ -1330,38 +1330,49 @@ end;
 
 procedure tcustomspacer.updatespace;
 var
- po1: pointty;
  rect1: rectty;
+ pt1: pointty;
 begin
  if (componentstate * [csloading,csdestroying] = []) and 
     (fparentwidget <> nil) and (fupdating = 0) then begin
   inc(fupdating);
   try  
-   po1:= pos;
+   rect1:= fwidgetrect;
    if spao_glueright in foptions then begin
     if alive(flinkright) then begin
-     po1.x:= flinkright.bounds_x - bounds_cx - fdist_right;
+     if an_left in fanchors then begin
+      rect1.cx:= flinkright.bounds_x - bounds_x - fdist_right;
+     end
+     else begin
+      rect1.x:= flinkright.bounds_x - bounds_cx - fdist_right;
+     end;
     end;
    end
    else begin
     if alive(flinkleft) then begin
-     po1.x:= flinkleft.bounds_x + flinkleft.bounds_cx + fdist_left;
+     rect1.x:= flinkleft.bounds_x + flinkleft.bounds_cx + fdist_left;
     end;
    end;
    if spao_gluebottom in foptions then begin
     if alive(flinkbottom) then begin
-     po1.y:= flinkbottom.bounds_y - bounds_cy - fdist_bottom;
+     if an_top in fanchors then begin
+      rect1.cy:= flinkbottom.bounds_y - bounds_y - fdist_bottom;
+     end
+     else begin
+      rect1.y:= flinkbottom.bounds_y - bounds_cy - fdist_bottom;
+     end;
     end;
    end
    else begin
     if alive(flinktop) then begin
-     po1.y:= flinktop.bounds_y + flinktop.bounds_cy + fdist_top;
+     rect1.y:= flinktop.bounds_y + flinktop.bounds_cy + fdist_top;
     end;
    end;
-   pos:= po1;
-   addpoint1(po1,pointty(size));
-   po1.x:= po1.x + fdist_right;
-   po1.y:= po1.y + fdist_bottom;
+   widgetrect:= rect1;
+   pt1:= pos;
+   addpoint1(pt1,pointty(size));
+   pt1.x:= pt1.x + fdist_right;
+   pt1.y:= pt1.y + fdist_bottom;
    if spao_glueright in foptions then begin
     if alive(flinkleft) then begin
      rect1:= flinkleft.widgetrect;
@@ -1382,9 +1393,9 @@ begin
     if alive(flinkright) then begin
      rect1:= flinkright.widgetrect;
      if an_right in flinkright.anchors then begin
-      rect1.cx:= rect1.cx + (rect1.x - po1.x);
+      rect1.cx:= rect1.cx + (rect1.x - pt1.x);
      end;
-     rect1.pos.x:= po1.x;
+     rect1.pos.x:= pt1.x;
      flinkright.widgetrect:= rect1;
     end;
    end;
@@ -1408,9 +1419,9 @@ begin
     if alive(flinkbottom) then begin
      rect1:= flinkbottom.widgetrect;
      if an_bottom in flinkbottom.anchors then begin
-      rect1.cy:= rect1.cy + (rect1.y - po1.y);
+      rect1.cy:= rect1.cy + (rect1.y - pt1.y);
      end;
-     rect1.pos.y:= po1.y;
+     rect1.pos.y:= pt1.y;
      flinkbottom.widgetrect:= rect1;
     end;
    end;
@@ -2144,7 +2155,8 @@ begin
   if lao_alignx in foptionslayout then begin
    for int1:= 0 to high(fwidgets) do begin
     with fwidgets[int1] do begin
-     if isvisible then begin
+     if isvisible or 
+               (ow1_invisibleparentsizeextend in foptionswidget1) then begin
       with fwidgetrect do begin
        if x < int3 then begin
         int3:= x;
@@ -2172,7 +2184,8 @@ begin
   if lao_aligny in foptionslayout then begin
    for int1:= 0 to high(fwidgets) do begin
     with fwidgets[int1] do begin
-     if isvisible then begin
+     if isvisible or 
+               (ow1_invisibleparentsizeextend in foptionswidget1) then begin
       with fwidgetrect do begin
        if y < int3 then begin
         int3:= y;

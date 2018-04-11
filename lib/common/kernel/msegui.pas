@@ -107,6 +107,7 @@ type
                     ow1_autosizeanright,ow1_noautosizeanright,
                     ow1_autosizeanbottom,ow1_noautosizeanbottom,
                     ow1_noparentwidthextend,ow1_noparentheightextend,
+                    ow1_invisibleparentsizeextend,
                     ow1_canclosenil, //call canclose(nil) on exit
                     ow1_nocancloseifhidden,
                     ow1_modalcallonactivate,ow1_modalcallondeactivate,
@@ -10098,7 +10099,8 @@ begin
  end;
  for int1:= 0 to high(fwidgets) do begin
   with fwidgets[int1],fwidgetrect do begin
-   if visible and not(ws1_nominsize in fwidgetstate1) or 
+   if (visible or (ow1_invisibleparentsizeextend in foptionswidget1)) and 
+                            not(ws1_nominsize in fwidgetstate1) or 
                                   (csdesigning in componentstate) then begin
     pt1:= getminshrinkpos;
     minsi:= minshrinksize;
