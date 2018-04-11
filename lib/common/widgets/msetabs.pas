@@ -524,6 +524,7 @@ type
    foninitsubform: initsubformeventty;
    ffacetab: tfacecomp;
    ffaceactivetab: tfacecomp;
+   ftaborderoverride: ttaborderoverride;
    function getcaption: captionty;
    procedure setcaption(const Value: captionty);
    function gettabhint: msestring;
@@ -559,6 +560,7 @@ type
    function getfacetab: tfacecomp;
    function getfaceactivetab: tfacecomp;
    function isvisiblestored: boolean;
+   procedure settaborderoverride(const avalue: ttaborderoverride);
   protected
    class function classskininfo: skininfoty; override;
    procedure changed;
@@ -574,6 +576,8 @@ type
    procedure loaded; override;
    function getisactivepage: boolean;
    procedure setisactivepage(const avalue: boolean);
+   function nexttaborderoverride(const sender: twidget;
+                                      const down: boolean): twidget override;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -586,6 +590,9 @@ type
    property subform: twidget read fsubform;
   published
    property invisible: boolean read getinvisible write setinvisible default false;
+   property taborderoverride: ttaborderoverride read ftaborderoverride 
+                                                  write settaborderoverride;
+
    property caption: captionty read getcaption write setcaption;
    property tabhint: msestring read gettabhint write settabhint;
    property tabnoface: boolean read gettabnoface 
@@ -3376,6 +3383,7 @@ end;
 
 constructor ttabpage.create(aowner: tcomponent);
 begin
+ ftaborderoverride:= ttaborderoverride.create(self);
  inherited;
  fcolortab:= cl_default;
  fcoloractivetab:= cl_default;
@@ -3392,6 +3400,7 @@ begin
  inherited;
  freeandnil(ffonttab);
  freeandnil(ffontactivetab);
+ ftaborderoverride.free();
 end;
 
 class function ttabpage.classskininfo: skininfoty;
@@ -3512,6 +3521,11 @@ begin
  result:= not (fparentwidget is tcustomtabwidget);
 end;
 
+procedure ttabpage.settaborderoverride(const avalue: ttaborderoverride);
+begin
+ ftaborderoverride.assign(avalue);
+end;
+
 procedure ttabpage.registerchildwidget(const child: twidget);
 begin
  if child is ttabpage then begin
@@ -3563,6 +3577,15 @@ procedure ttabpage.setisactivepage(const avalue: boolean);
 begin
  if ftabwidget <> nil then begin
   ftabwidget.activepage:= self;
+ end;
+end;
+
+function ttabpage.nexttaborderoverride(const sender: twidget;
+               const down: boolean): twidget;
+begin
+ result:= ftaborderoverride.nexttaborder(sender,down);
+ if result = nil then begin
+  result:= inherited nexttaborderoverride(sender,down);
  end;
 end;
 
