@@ -56,7 +56,7 @@ scope macros macros
   '//' comment2
 
  endtokens
-  '"'
+  ''
  
 scope block
  keywords
