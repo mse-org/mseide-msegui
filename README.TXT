@@ -349,7 +349,7 @@ For Raspberry Pi:
 - On the i386/x84_64-linux host install the scp program
 - download and extract 
   https://sourceforge.net/projects/mseide-msegui/files/fpcrossarm/crossfpc-i386_linux_eabihf_3_0_5.tar.gz
-  (or crossfc-x86_64_linux_eabihf_3_0_5.tar.gz)
+  (or crossfpc-x86_64_linux_eabihf_3_0_5.tar.gz)
   to <your crossfpc directory>.
 
 - Start MSEide, in 'Settings'-'Configure MSEide'-'Global Macros' add:
@@ -359,8 +359,8 @@ Name            Value
 CROSSMSEDIR     <MSEide+MSEgui directory>
 CROSSFPCDIR     <your crossfpc directory>
 CROSSFPCVERSION 3.0.5
-HOSTIP          <the IP of the host>
-REMOTEIP        <the IP of the remote target>
+HOSTIP          <the IP address of the host>
+REMOTEIP        <the IP address of the remote target>
 REMOTEPORT      <the remote port, ex: 2345>
 REMOTEUSER      pi
 
