@@ -1902,6 +1902,18 @@ end;
 procedure tcustomedit.settext(const avalue: msestring);
 begin
  feditor.text:= avalue;
+ if avalue = '' then begin
+  if not (des_emptytext in fstate) then begin
+   include(fstate,des_emptytext);
+   updateemptytext();
+  end;
+ end
+ else begin
+  if des_emptytext in fstate then begin
+   exclude(fstate,des_emptytext);
+   updateemptytext();
+  end;
+ end;
 end;
 {
 procedure tcustomedit.setcurrenttext(const avalue: msestring);

@@ -1928,7 +1928,7 @@ begin
  else begin
   text:= avalue; //setcurrenttext(avalue);
   if docheckvalue then begin
-   result:= checkvalue;
+   result:= checkvalue();
    if not result then begin
     feditor.undo;
    end
@@ -1941,10 +1941,6 @@ begin
   else begin
    if not canceled then begin
     bo1:= true;
-    if des_emptytext in fstate then begin
-     exclude(fstate,des_emptytext);
-     updateemptytext();
-    end;
     texttovalue(bo1,true);
    end;
   end;
