@@ -190,7 +190,7 @@ type
    property time: flo64 read ftime write ftime;
    property down: boolean read getdown write setdown;
    property value: flo64 read getvalue;
-   property interval: flo64 read finterval write finterval;
+   property interval: flo64 read finterval write finterval; //seconds
    property timer: tanimtimer read ftimer write settimer;
    property ontick: animtickeventty read fontick write fontick;
    property onstart: notifyeventty read fonstart write fonstart;
@@ -266,7 +266,7 @@ type
   published
    property kind: animkindty read getkind write setkind default ank_single;
 //   property options: animoptionsty read getoptions write setoptions;
-   property interval: flo64 read getinterval write setinterval;
+   property interval: flo64 read getinterval write setinterval; //seconds
    property enabled: boolean read getenabled write setenabled default false;
    property timer: tanimtimer read gettimer write settimer;
    property tickus: int32 read gettickus write settickus default 0;

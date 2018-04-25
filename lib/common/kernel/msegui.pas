@@ -2505,7 +2505,7 @@ type
    fmodallevel: integer;
    fsysdragobject: tobject; //tsysmimedragobject;
    
-   fopacity: real;
+   fopacity: realty;
    procedure setcaption(const avalue: msestring);
    procedure widgetdestroyed(widget: twidget);
 
@@ -2567,7 +2567,7 @@ type
    function getscreenpos: pointty;
    procedure setscreenpos(const avalue: pointty);
    function getmodalfor: boolean;
-   procedure setopacity(const avalue: real);
+   procedure setopacity(const avalue: realty);
   protected
    fstate: windowstatesty;
    fgdi: pgdifunctionaty;
@@ -2707,7 +2707,7 @@ type
                                      write setdecoratedbounds_cx;
    property decoratedbounds_cy: integer read getdecoratedbounds_cy
                                      write setdecoratedbounds_cy;
-   property opacity: real read fopacity write setopacity; 
+   property opacity: realty read fopacity write setopacity; 
                       //default emptyreal -> undefined
  end;
 
@@ -18078,7 +18078,7 @@ begin
  result:= tws_modalfor in fstate;
 end;
 
-procedure twindow.setopacity(const avalue: real);
+procedure twindow.setopacity(const avalue: realty);
 begin
  if fopacity <> avalue then begin
   fopacity:= avalue;
