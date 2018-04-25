@@ -1680,6 +1680,11 @@ begin
  result:= gue_ok;
 end;
 
+function gui_setwindowopacity(id: winidty; const opacity: real): guierrorty;
+begin
+ result:= gue_notimplemented;
+end;
+
 function gui_setapplicationicon(const icon,mask: pixmapty): guierrorty;
 begin
  result:= gui_setwindowicon(applicationwindow,icon,mask);

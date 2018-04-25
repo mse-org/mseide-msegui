@@ -97,6 +97,8 @@ function gui_setwindowstate(id: winidty; size: windowsizety;
 function gui_setwindowcaption(id: winidty; 
                                    const caption: msestring): guierrorty;
 function gui_setwindowicon(id: winidty; const icon,mask: pixmapty): guierrorty;
+function gui_setwindowopacity(id: winidty; const opacity: real): guierrorty;
+                    //empytyreal -> undefined, 0.0-> transparent, 1.1 -> opaque
             
 function gui_setsizeconstraints(id: winidty; const min,max: sizety): guierrorty;
 function gui_reposwindow(id: winidty; const rect: rectty): guierrorty;

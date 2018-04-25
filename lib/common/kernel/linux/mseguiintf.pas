@@ -755,12 +755,17 @@ type
        net_request_frame_extents,
        net_system_tray_s0,net_system_tray_opcode,net_system_tray_message_data,
        xembed,xembed_info,motif_wm_hints,wm_normal_hints,
-       net_none);
+       //onlyifexist below
+       net_wm_window_opacity,
+
+       net_none //dummy
+);
  netwmstateoperationty = (nso_remove,nso_add,nso_toggle);
 const
  needednetatom = net_wm_state_maximized_horz;
  firstcheckedatom = net_workarea;
  lastcheckedatom = net_active_window;
+ firstonlyifexistatom = net_wm_window_opacity;
  netatomnames: array[netatomty] of string = 
       ('_NET_SUPPORTED','_NET_WORKAREA',
        '_NET_WM_STATE',
@@ -795,6 +800,7 @@ const
        '_NET_SYSTEM_TRAY_MESSAGE_DATA',
        '_XEMBED','_XEMBED_INFO',
        '_MOTIF_WM_HINTS','WM_NORMAL_HINTS',
+       '_NET_WM_WINDOW_OPACITY',
        '');
 // needednetatom = netatomty(ord(high(netatomty))-4);
 type
@@ -1976,6 +1982,33 @@ begin
   end;
  end;
  result:= gue_ok;
+end;
+
+function gui_setwindowopacity(id: winidty; const opacity: real): guierrorty;
+var
+ f1: flo64;
+ at1: atom;
+begin
+ result:= gue_notsupported;
+ at1:= netatoms[net_wm_window_opacity];
+ if at1 <> 0 then begin
+  if opacity = emptyreal then begin
+   xdeleteproperty(appdisp,id,at1);
+  end
+  else begin
+   f1:= opacity;
+   if (f1 < 0) then begin
+    f1:= 0;
+   end
+   else begin
+    if (f1 > 1) then begin
+     f1:= 1;
+    end;
+   end;
+   setlongproperty(id,at1,round($ffffffff*f1));
+  end;
+  result:= gue_ok;
+ end;
 end;
 
 function gui_setapplicationicon(const icon,mask: pixmapty): guierrorty;
@@ -6697,7 +6730,11 @@ begin
  
   fillchar(netatoms,sizeof(netatoms),0);               //check _net_
   xinternatoms(appdisp,@netatomnames[low(netatomty)],
-                     integer(high(netatomty)),false,@netatoms[low(netatomty)]);
+              integer(firstonlyifexistatom),false,@netatoms[low(netatomty)]);
+  xinternatoms(appdisp,@netatomnames[firstonlyifexistatom],
+              integer(high(netatomty))-integer(firstonlyifexistatom),
+                                       true,@netatoms[firstonlyifexistatom]);
+
   netsupported:= netsupportedatom <> 0;
   if netsupported then begin
    netsupported:= readatomproperty(rootid,netsupportedatom,atomar);
