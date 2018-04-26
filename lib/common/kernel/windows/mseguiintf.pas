@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2017 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2018 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -3369,7 +3369,7 @@ end;
 
 function gui_init: guierrorty;
 const
-// classstyle = cs_owndc;
+// classstyle = cs_owndc; //not possible with layered windows
  classstyle = 0;
  childclassstyle = 0;
 var
