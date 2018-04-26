@@ -21,6 +21,7 @@ object projectoptionsfo: tprojectoptionsfo
   options = [fo_closeonesc, fo_localshortcuts, fo_autoreadstat, fo_autowritestat, fo_savepos, fo_savezorder]
   statfile = statfile1
   caption = 'Project Options'
+  windowopacity = -Inf
   oncreate = createexe
   moduleclassname = 'tmseform'
   object tlayouter9: tlayouter
@@ -1414,7 +1415,7 @@ object projectoptionsfo: tprojectoptionsfo
           onshowhint = hintexpandedmacros
           bounds_x = 1
           bounds_y = 57
-          bounds_cx = 254
+          bounds_cx = 302
           bounds_cy = 37
           anchors = [an_left, an_top, an_right]
           controller.options = [fdo_quotesingle]
@@ -1444,9 +1445,9 @@ object projectoptionsfo: tprojectoptionsfo
           taborder = 2
           hint = '"--tty DEVICE" to set target terminal'
           onshowhint = hintexpandedmacros
-          bounds_x = 258
+          bounds_x = 306
           bounds_y = 57
-          bounds_cx = 571
+          bounds_cx = 523
           bounds_cy = 37
           anchors = [an_left, an_top, an_right]
           reffontheight = 14
@@ -2853,7 +2854,7 @@ object projectoptionsfo: tprojectoptionsfo
           onshowhint = hintexpandedmacros
           bounds_x = 1
           bounds_y = 104
-          bounds_cx = 254
+          bounds_cx = 302
           bounds_cy = 37
           anchors = [an_left, an_top, an_right]
           controller.options = []
@@ -2865,7 +2866,7 @@ object projectoptionsfo: tprojectoptionsfo
           color = -1879048189
           taborder = 7
           visible = False
-          bounds_x = 255
+          bounds_x = 303
           bounds_y = 109
           bounds_cx = 3
           bounds_cy = 34
@@ -2893,9 +2894,9 @@ object projectoptionsfo: tprojectoptionsfo
           taborder = 4
           onshowhint = hintexpandedmacros
           enabled = False
-          bounds_x = 258
+          bounds_x = 306
           bounds_y = 104
-          bounds_cx = 571
+          bounds_cx = 523
           bounds_cy = 37
           anchors = [an_top, an_right]
           onsetvalue = setxtermcommandexe
@@ -2905,7 +2906,7 @@ object projectoptionsfo: tprojectoptionsfo
           color = -1879048189
           taborder = 8
           visible = False
-          bounds_x = 255
+          bounds_x = 303
           bounds_y = 69
           bounds_cx = 3
           bounds_cy = 26
