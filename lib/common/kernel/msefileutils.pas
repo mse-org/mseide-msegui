@@ -174,6 +174,8 @@ function tomsefilepath(const path: filenamety;
 procedure tomsefilepath1(var path: filenamety; const quoted: boolean = false);
 function tosysfilepath(const path: filenamety;
                                 const quoted: boolean = false): filenamety;
+function tosysfilepath(const path: filenamearty;
+                                const quoted: boolean = false): filenamearty;
 procedure tosysfilepath1(var path: filenamety; const quoted: boolean = false);
 
 function searchfile(const filename: filenamety; dir: boolean = false; 
@@ -1410,6 +1412,17 @@ function tosysfilepath(const path: filenamety;
 begin
  result:= path;
  tosysfilepath1(result,quoted);
+end;
+
+function tosysfilepath(const path: filenamearty;
+                                  const quoted: boolean = false): filenamearty;
+var
+ i1: int32;
+begin
+ setlength(result,length(path));
+ for i1:= 0 to high(path) do begin
+  result[i1]:= tosysfilepath(path[i1],quoted);
+ end;
 end;
 
 procedure syncpathdelim(const source: filenamety; var dest: filenamety;
