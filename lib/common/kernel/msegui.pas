@@ -2505,6 +2505,7 @@ type
    fmodallevel: integer;
    fsysdragobject: tobject; //tsysmimedragobject;
    
+   fopacity: realty;
    procedure setcaption(const avalue: msestring);
    procedure widgetdestroyed(widget: twidget);
 
@@ -2566,6 +2567,7 @@ type
    function getscreenpos: pointty;
    procedure setscreenpos(const avalue: pointty);
    function getmodalfor: boolean;
+   procedure setopacity(const avalue: realty);
   protected
    fstate: windowstatesty;
    fgdi: pgdifunctionaty;
@@ -2705,6 +2707,8 @@ type
                                      write setdecoratedbounds_cx;
    property decoratedbounds_cy: integer read getdecoratedbounds_cy
                                      write setdecoratedbounds_cy;
+   property opacity: realty read fopacity write setopacity; 
+                      //default emptyreal -> undefined
  end;
 
  windowarty = array of twindow;
@@ -15740,6 +15744,7 @@ begin
  fcanvas:= creategdicanvas(fgdi,bmk_rgb,self,icanvas(self));
  fasynccanvas:= creategdicanvas(fgdi,bmk_rgb,self,icanvas(self));
  fscrollnotifylist:= tnotifylist.create;
+ fopacity:= emptyreal;
  inherited create;
  fownerwidget.rootchanged([rcf_windowset]); //nil all references
 end;
@@ -15873,6 +15878,9 @@ begin
   end;
   if fcaption <> '' then begin
    gui_setwindowcaption(fwindow.id,fcaption);
+  end;
+  if fopacity <> emptyreal then begin
+   gui_setwindowopacity(fwindow.id,fopacity);
   end;
   fownerwidget.windowcreated;
  end
@@ -18068,6 +18076,16 @@ end;
 function twindow.getmodalfor: boolean;
 begin
  result:= tws_modalfor in fstate;
+end;
+
+procedure twindow.setopacity(const avalue: realty);
+begin
+ if fopacity <> avalue then begin
+  fopacity:= avalue;
+  if fwindow.id <> 0 then begin
+   gui_setwindowopacity(fwindow.id,fopacity);
+  end;
+ end;
 end;
 
 function twindow.topmodaltransientfor: twindow;

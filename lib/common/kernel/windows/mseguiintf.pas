@@ -294,7 +294,17 @@ var
  ImmReleaseContext: function(_hwnd: HWND; _himc: HIMC): BOOL; stdcall;
  ImmSetCompositionWindow: function(_himc: HIMC; 
                           lpCompForm: LPCOMPOSITIONFORM): BOOL; stdcall;
-             
+
+ haslayeredwindows: boolean;
+ SetLayeredWindowAttributes: 
+  function(_hwnd: HWND; crKey: COLORREF; bAlpha: BYTE;
+                                dwFLAGS: DWORD): BOOL; stdcall;
+{
+ UpdateLayeredWindow:
+  function(_hwnd: HWND; hdcDst: HDC; pptDst: pPOINT; psize: pSIZE;
+              hdcSrc: HDC; pptSrc: pPOINT; crKey: COLORREF;
+              pblend: pBLENDFUNCTION; dwFlags: DWORD): BOOL; stdcall;
+} 
 function getapplicationwindow: hwnd;
 begin
  result:= applicationwindow;
@@ -1678,6 +1688,36 @@ begin
   destroyicon(ico1);
  end;
  result:= gue_ok;
+end;
+
+function gui_setwindowopacity(id: winidty; const opacity: real): guierrorty;
+var
+ lo1: LONG;
+ f1: flo64;
+begin
+ result:= gue_notsupported;
+ if haslayeredwindows then begin
+  lo1:= getwindowlong(id,gwl_exstyle);
+  if opacity = emptyreal then begin
+   lo1:= lo1 and not(ws_ex_layered);
+   setwindowlong(id,gwl_exstyle,lo1);
+  end
+  else begin
+   lo1:= lo1 or ws_ex_layered;
+   setwindowlong(id,gwl_exstyle,lo1);
+   f1:= opacity;
+   if f1 < 0 then begin
+    f1:= 0;
+   end
+   else begin
+    if f1 > 1 then begin
+     f1:= 1;
+    end;
+   end;
+   setlayeredwindowattributes(id,0,round(255*f1),LWA_ALPHA);
+  end;
+  result:= gue_ok;
+ end;
 end;
 
 function gui_setapplicationicon(const icon,mask: pixmapty): guierrorty;
@@ -3329,7 +3369,8 @@ end;
 
 function gui_init: guierrorty;
 const
- classstyle = cs_owndc;
+// classstyle = cs_owndc;
+ classstyle = 0;
  childclassstyle = 0;
 var
  classinfow: twndclassw;
@@ -3457,12 +3498,15 @@ end;
 procedure initlibs;
 begin
  hasimm32:= checkprocaddresses(['Imm32.dll'],
- ['ImmGetContext',
-  'ImmReleaseContext',
-  'ImmSetCompositionWindow'],
- [{$ifndef FPC}@{$endif}@ImmGetContext,
-  {$ifndef FPC}@{$endif}@ImmReleaseContext,
-  {$ifndef FPC}@{$endif}@ImmSetCompositionWindow]);
+  ['ImmGetContext',
+   'ImmReleaseContext',
+   'ImmSetCompositionWindow'],
+  [@ImmGetContext,
+   @ImmReleaseContext,
+   @ImmSetCompositionWindow]);
+ haslayeredwindows:= checkprocaddresses(['User32.dll'],
+  ['SetLayeredWindowAttributes'],
+  [@SetLayeredWindowAttributes]);
 end;
 
 initialization

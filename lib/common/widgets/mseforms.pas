@@ -145,6 +145,7 @@ type
    ftaborderoverride: ttaborderoverride;
 {$ifdef mse_with_ifi}
    fifilink: tififormlinkcomp;
+   fwindowopacity: realty;
    function getifilinkkind: ptypeinfo;
    procedure setifilink(const avalue: tififormlinkcomp);
 {$endif}
@@ -171,6 +172,7 @@ type
    procedure readonchildscaled(reader: treader);
    procedure setactivatortarget(const avalue: tactivator);
    procedure settaborderoverride(const avalue: ttaborderoverride);
+   procedure setwindowopacity(const avalue: realty);
   protected
    fformstate: formstatesty;
    fscrollbox: tformscrollbox; //needed to distinguish between scrolled and
@@ -295,6 +297,9 @@ type
 
    property caption: msestring read getcaption write setcaption;
    property icon: tmaskedbitmap read ficon write seticon;
+   property windowopacity: realty read fwindowopacity write setwindowopacity;
+                //emptyreal -> undefined, 0.0 -> trasparent, 1.0 -> opaque
+                //default = emptyreal
 
    property oncreate: notifyeventty read foncreate write foncreate;
    property oncreated: notifyeventty read foncreated write foncreated;
@@ -379,6 +384,7 @@ type
    property statpriority;
    property caption;
    property icon;
+   property windowopacity;
 
    property oncreate;
    property oncreated;
@@ -1018,6 +1024,7 @@ begin
  ftaborderoverride:= ttaborderoverride.create(self);
  ficon:= tmaskedbitmap.create(bmk_rgb);
  ficon.onchange:= {$ifdef FPC}@{$endif}iconchanged;
+ fwindowopacity:= emptyreal;
  fwidgetrect.x:= 100;
  fwidgetrect.y:= 100;
  foptions:= defaultformoptions;
@@ -1982,6 +1989,9 @@ begin
  if mstr1 <> '' then begin
   window.caption:= mstr1;
  end;
+ if fwindowopacity <> emptyreal then begin
+  window.opacity:= fwindowopacity;
+ end;
 // if fcaption <> '' then begin
 //  caption:= fcaption;                //set windowcaption
 // end;
@@ -2103,6 +2113,14 @@ end;
 procedure tcustommseform.seticon(const avalue: tmaskedbitmap);
 begin
  ficon.assign(avalue);
+end;
+
+procedure tcustommseform.setwindowopacity(const avalue: realty);
+begin
+ fwindowopacity:= avalue;
+ if ownswindow then begin
+  window.opacity:= avalue;
+ end; 
 end;
 
 procedure tcustommseform.iconchanged(const sender: tobject);

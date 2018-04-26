@@ -341,14 +341,15 @@ In order to install the Zeos components add the path to the Zeos source to
 There is a predefined IDE project apps/ide/mseide_zeos.prj, update 'Project'-
 'Options'-'Macros' according to your installation.
 
-Crosscompiling and remote debugging i386-linux -> arm-linux
+Crosscompiling and remote debugging i386/x84_64-linux -> arm-linux
 ***********************************************************
 For Raspberry Pi:
 - Establish a ssh login without password (public key authentication).
 
-- On the i386-linux host install the scp program
+- On the i386/x84_64-linux host install the scp program
 - download and extract 
-  https://sourceforge.net/projects/mseide-msegui/files/fpcrossarm/crossfpc-i386_linux_eabihf_3_0_3_a.tar.gz
+  https://sourceforge.net/projects/mseide-msegui/files/fpcrossarm/crossfpc-i386_linux_eabihf_3_0_5.tar.gz
+  (or crossfpc-x86_64_linux_eabihf_3_0_5.tar.gz)
   to <your crossfpc directory>.
 
 - Start MSEide, in 'Settings'-'Configure MSEide'-'Global Macros' add:
@@ -357,9 +358,9 @@ Name            Value
 
 CROSSMSEDIR     <MSEide+MSEgui directory>
 CROSSFPCDIR     <your crossfpc directory>
-CROSSFPCVERSION 3.0.3
-HOSTIP          <the IP of the host>
-REMOTEIP        <the IP of the remote target>
+CROSSFPCVERSION 3.0.5
+HOSTIP          <the IP address of the host>
+REMOTEIP        <the IP address of the remote target>
 REMOTEPORT      <the remote port, ex: 2345>
 REMOTEUSER      pi
 
