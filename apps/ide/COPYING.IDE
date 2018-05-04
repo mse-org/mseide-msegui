@@ -1,0 +1,17 @@
+This is the file COPYING.IDE, it applies to MSEide.
+
+The source code of the MSEide is
+distributed under the GNU General Public License (GPL)
+(see the file COPYING.GPL) with the following modification:
+
+As a special exception, the copyright holders of MSEide give you
+permission to link MSEide with non GPL runtime component unit modules by the
+-dmorecomponents mechanism described in README.TXT.
+Design time parts of the components and its unit modules must be GPL.
+
+If you didn't receive a copy of the file COPYING.GPL, contact:
+      Free Software Foundation
+      675 Mass Ave
+      Cambridge, MA  02139
+      USA
+

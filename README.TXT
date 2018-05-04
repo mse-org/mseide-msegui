@@ -285,6 +285,9 @@ If you wish to do it from scratch:
   a file named 'regcomponents.inc'.
 - Build the IDE with -dmorecomponents as option.
 
+Component units integrated by this mechanism don't need to be GPL, see 
+apps/ide/COPYING.IDE
+
 If you want to add custom icons to your components:
 
 - Convert 24*24 pixel BMP or PNG files with tools/bmp2pas to
