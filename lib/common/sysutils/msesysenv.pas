@@ -450,6 +450,9 @@ begin
    end;
   end;
   if seo_terminateonerror in foptions then begin
+   if ferrorcode <> 0 then begin
+    exitcode:= ferrorcode;
+   end;
    application.terminated:= true;
   end;
   if seo_haltonerror in foptions then begin
