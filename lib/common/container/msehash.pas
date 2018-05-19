@@ -250,6 +250,35 @@ type
    function prev: ptripleintegerhashdataty; //wraps to last after first
  end;
 
+ int32int32dataty = record
+  key: int32;
+  data: int32;
+ end;
+ pint32int32dataty = ^int32int32dataty;
+ int32int32hashdataty = record
+  header: hashheaderty;
+  data: int32int32dataty;
+ end;
+ pint32int32hashdataty = ^int32int32hashdataty;
+
+ int32int32iteratorprocty = 
+           procedure(const aitem: pint32int32hashdataty) of object;
+
+ tint32int32hashdatalist = class(tintegerhashdatalist)
+  protected
+   function getrecordsize(): int32 override;
+  public
+   procedure add(const akey: int32; const avalue: int32);
+   function addunique(const akey: int32; const avalue: int32): boolean;
+                   //true if found
+   function find(const akey: int32): int32; overload;
+   function find(const akey: int32; out avalue: int32): boolean; overload;
+   function first: pint32int32hashdataty;
+   function next: pint32int32hashdataty; //wraps to first after last
+   function last: pint32int32hashdataty;
+   function prev: pint32int32hashdataty; //wraps to last after first
+ end;
+
  pointerdataty = record
   key: pointer;
 //  data: record end;
@@ -279,6 +308,35 @@ type
    function next: ppointerhashdataty; //wraps to first after last
    function last: ppointerhashdataty;
    function prev: ppointerhashdataty; //wraps to last after first
+ end;
+
+ pointerint32dataty = record
+  key: pointer;
+  data: int32;
+ end;
+ ppointerint32dataty = ^pointerint32dataty;
+ pointerint32hashdataty = record
+  header: hashheaderty;
+  data: pointerint32dataty;
+ end;
+ ppointerint32hashdataty = ^pointerint32hashdataty;
+
+ pointerint32iteratorprocty = 
+           procedure(const aitem: ppointerint32hashdataty) of object;
+
+ tpointerint32hashdatalist = class(tpointerhashdatalist)
+  protected
+   function getrecordsize(): int32 override;
+  public
+   procedure add(const akey: pointer; const avalue: int32);
+   function addunique(const akey: pointer; const avalue: int32): boolean;
+                   //true if found
+   function find(const akey: pointer): int32; overload;
+   function find(const akey: pointer; out avalue: int32): boolean; overload;
+   function first: ppointerint32hashdataty;
+   function next: ppointerint32hashdataty; //wraps to first after last
+   function last: ppointerint32hashdataty;
+   function prev: ppointerint32hashdataty; //wraps to last after first
  end;
 
  ptruintdataty = record
@@ -1921,13 +1979,75 @@ begin
  result:= internaldelete(mtikey(akeya,akeyb,akeyc),all);
 end;
 
-{ tpointerhashdatalist }
-{
-constructor tpointerhashdatalist.create(const datasize: integer);
+{ tint32int32hashdatalist }
+
+procedure tint32int32hashdatalist.add(const akey: int32;
+                                       const avalue: int32);
 begin
- inherited create(datasize + sizeof(pointerdataty));
+ pint32int32hashdataty(inherited add(akey))^.data.data:= avalue;
 end;
-}
+
+function tint32int32hashdatalist.find(const akey: int32;
+                                            out avalue: int32): boolean;
+var
+ po1: pint32int32hashdataty;
+begin
+ po1:= pint32int32hashdataty(inherited find(akey));
+ result:= po1 <> nil;
+ if result then begin
+  avalue:= po1^.data.data;
+ end
+ else begin
+  avalue:= 0;
+ end;
+end;
+
+function tint32int32hashdatalist.addunique(const akey: int32;
+                                               const avalue: int32): boolean;
+var
+ po1: pint32int32hashdataty;
+begin
+ result:= true;
+ po1:= pint32int32hashdataty(inherited find(akey));
+ if po1 = nil then begin
+  result:= false;
+  po1:= pint32int32hashdataty(inherited add(akey));
+  po1^.data.data:= avalue;
+ end;
+end;
+
+function tint32int32hashdatalist.getrecordsize(): int32;
+begin
+ result:= sizeof(int32int32hashdataty);
+end;
+
+function tint32int32hashdatalist.find(const akey: int32): int32;
+begin
+ find(akey,result);
+end;
+
+function tint32int32hashdatalist.first: pint32int32hashdataty;
+begin
+ result:= pint32int32hashdataty(internalfirstx);
+end;
+
+function tint32int32hashdatalist.next: pint32int32hashdataty;
+begin
+ result:= pint32int32hashdataty(internalnextx);
+end;
+
+function tint32int32hashdatalist.last: pint32int32hashdataty;
+begin
+ result:= pint32int32hashdataty(internallastx);
+end;
+
+function tint32int32hashdatalist.prev: pint32int32hashdataty;
+begin
+ result:= pint32int32hashdataty(internalprevx);
+end;
+
+{ tpointerhashdatalist }
+
 function tpointerhashdatalist.hashkey(const akey): hashvaluety;
 begin
  result:= pointerhash(pointer(akey));
@@ -1988,6 +2108,73 @@ end;
 function tpointerhashdatalist.prev: ppointerhashdataty;
 begin
  result:= ppointerhashdataty(internalprevx);
+end;
+
+{ tpointerint32hashdatalist }
+
+procedure tpointerint32hashdatalist.add(const akey: pointer;
+                                       const avalue: int32);
+begin
+ ppointerint32hashdataty(inherited add(akey))^.data.data:= avalue;
+end;
+
+function tpointerint32hashdatalist.find(const akey: pointer;
+                                            out avalue: int32): boolean;
+var
+ po1: ppointerint32hashdataty;
+begin
+ po1:= ppointerint32hashdataty(inherited find(akey));
+ result:= po1 <> nil;
+ if result then begin
+  avalue:= po1^.data.data;
+ end
+ else begin
+  avalue:= 0;
+ end;
+end;
+
+function tpointerint32hashdatalist.addunique(const akey: pointer;
+                                               const avalue: int32): boolean;
+var
+ po1: ppointerint32hashdataty;
+begin
+ result:= true;
+ po1:= ppointerint32hashdataty(inherited find(akey));
+ if po1 = nil then begin
+  result:= false;
+  po1:= ppointerint32hashdataty(inherited add(akey));
+  po1^.data.data:= avalue;
+ end;
+end;
+
+function tpointerint32hashdatalist.getrecordsize(): int32;
+begin
+ result:= sizeof(pointerint32hashdataty);
+end;
+
+function tpointerint32hashdatalist.find(const akey: pointer): int32;
+begin
+ find(akey,result);
+end;
+
+function tpointerint32hashdatalist.first: ppointerint32hashdataty;
+begin
+ result:= ppointerint32hashdataty(internalfirstx);
+end;
+
+function tpointerint32hashdatalist.next: ppointerint32hashdataty;
+begin
+ result:= ppointerint32hashdataty(internalnextx);
+end;
+
+function tpointerint32hashdatalist.last: ppointerint32hashdataty;
+begin
+ result:= ppointerint32hashdataty(internallastx);
+end;
+
+function tpointerint32hashdatalist.prev: ppointerint32hashdataty;
+begin
+ result:= ppointerint32hashdataty(internalprevx);
 end;
 
 { tptruinthasdatalist }
@@ -2062,12 +2249,7 @@ begin
 end;
 
 { tpointerptruinthashdatalist }
-{
-constructor tpointerptruinthashdatalist.create;
-begin
- inherited create(sizeof(pointer));
-end;
-}
+
 procedure tpointerptruinthashdatalist.add(const akey: ptruint;
                                        const avalue: pointer);
 begin
