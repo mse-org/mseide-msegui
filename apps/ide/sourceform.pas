@@ -864,7 +864,7 @@ begin
  end
  else begin
   for int1:= 0 to count - 1 do begin
-   if issamefilename(items[int1].filepath,afilename) then begin
+   if issamefilename(items[int1].filename,afilename) then begin
     result:= items[int1];
     break;
    end;
