@@ -157,6 +157,7 @@ type
    {$endif}
    fdatabits: commdatabitsty;
    fcommname: filenamety;
+   fopenerror: int32;
    procedure updatebyteinfo;
    procedure Setbaud(const Value: commbaudratety);
    procedure Setcommnr(const Value: commnrty);
@@ -208,6 +209,7 @@ type
 
    function transmissiontime(const acount: integer): longword; //bringt uebertragungszeit in us
    property active: boolean read opened write setactive;
+   property openerror: int32 read fopenerror;
    property handle: ptruint read fhandle;
    property commnr: commnrty read Fcommnr write Setcommnr default cnr_1;
    property commname: filenamety read fcommname write setcommname;
@@ -855,6 +857,7 @@ begin
  {$endif}
  end;
  fhandle:= invalidfilehandle;
+ fopenerror:= 0;
 end;
 
 function tcustomrs232.opened: boolean;
@@ -1030,6 +1033,9 @@ begin       //open
  end;
  {$endif}
  result:= opened;
+ if not result then begin
+  fopenerror:= getlasterror();
+ end;
  if result and assigned(fonopen) then begin
   fonopen;
  end;

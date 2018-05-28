@@ -386,7 +386,8 @@ procedure connectcryptoio(const acryptoio: tcryptoio; const tx: tcommwriter;
  
 implementation
 uses
- msesys,msestream,msearrayutils,sysutils,msebits,msesysintf1,msestrings;
+ msesys,msestream,msearrayutils,sysutils,msebits,msesysintf1,msestrings,
+ msesysutils;
  
 procedure setcomcomp(const alink: icommclient;
                const acommcomp: tcustomcommcomp; var dest: tcustomcommcomp);
@@ -476,7 +477,9 @@ procedure tcustomsercommcomp.internalconnect;
 begin
  if not (csdesigning in componentstate) then begin
   if not fport.open then begin
-   componentexception(self,'Can not open comm port "'+fport.commpath+'".');
+   componentexception(self,
+    'Can not open comm port "'+fport.commpath+'":'+lineend+
+    msestring(syserrortext(sye_lasterror)));
   end;
   {$ifdef unix}
   setfilenonblock(fport.handle,sco_nopipe in foptions);
