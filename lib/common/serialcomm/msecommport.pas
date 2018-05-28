@@ -865,13 +865,13 @@ end;
 function tcustomrs232.commpath(): filenamety;
 begin
  if fcommname <> '' then begin
-  result:= ansistring(tosysfilepath(fcommname));
+  result:= tosysfilepath(fcommname);
  end
  else begin
  {$ifdef MSWINDOWS}
-  result:= msecommport.commname[fcommnr];
+  result:= msestring(msecommport.commname[fcommnr]);
  {$else}
-  result:= '/dev/'+msecommport.commname[fcommnr];
+  result:= msestring('/dev/'+msecommport.commname[fcommnr]);
  {$endif}
  end;
 end;
