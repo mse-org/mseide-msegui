@@ -476,7 +476,7 @@ procedure tcustomsercommcomp.internalconnect;
 begin
  if not (csdesigning in componentstate) then begin
   if not fport.open then begin
-   componentexception(self,'Can not open comm port.');
+   componentexception(self,'Can not open comm port "'+fport.commpath+'".');
   end;
   {$ifdef unix}
   setfilenonblock(fport.handle,sco_nopipe in foptions);

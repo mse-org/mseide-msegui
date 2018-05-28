@@ -212,6 +212,7 @@ type
    property commnr: commnrty read Fcommnr write Setcommnr default cnr_1;
    property commname: filenamety read fcommname write setcommname;
                          //overrides commnr
+   function commpath(): filenamety;
    property baud: commbaudratety read Fbaud write Setbaud default cbr_9600;
    property databits: commdatabitsty read fdatabits write setdatabits default cdb_8;
    property stopbit: commstopbitty read Fstopbit write Setstopbit default csb_1;
@@ -861,6 +862,20 @@ begin
  result:= fhandle <> invalidfilehandle;
 end;
 
+function tcustomrs232.commpath(): filenamety;
+begin
+ if fcommname <> '' then begin
+  result:= ansistring(tosysfilepath(fcommname));
+ end
+ else begin
+ {$ifdef MSWINDOWS}
+  result:= msecommport.commname[fcommnr];
+ {$else}
+  result:= '/dev/'+msecommport.commname[fcommnr];
+ {$endif}
+ end;
+end;
+
 function tcustomrs232.open: boolean;
 {$ifdef UNIX}
 const
@@ -935,16 +950,7 @@ var
  
 begin       //open
  close;
- if fcommname <> '' then begin
-  str1:= ansistring(tosysfilepath(fcommname));
- end
- else begin
- {$ifdef MSWINDOWS}
-  str1:= msecommport.commname[fcommnr];
- {$else}
-  str1:= '/dev/'+msecommport.commname[fcommnr];
- {$endif}
- end;
+ str1:= ansistring(commpath());
  {$ifdef UNIX}
  fhandle:= mselibc.open(PChar(str1),o_rdwr or o_nonblock{,FileAccessRights});
  if integer(fhandle) >= 0 then begin

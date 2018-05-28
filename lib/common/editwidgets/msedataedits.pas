@@ -1582,7 +1582,7 @@ begin
      if fparentintf <> nil then begin
       fparentintf.childdataentered(igridwidget(self));
      end;
-     if {not quiet and} canevent(tmethod(fondataentered)) then begin
+     if not quiet and canevent(tmethod(fondataentered)) then begin
       fondataentered(self);
      end;
     {$ifdef mse_with_ifi}
@@ -1596,7 +1596,8 @@ begin
      if focused then begin
       initfocus;
      end;
-     if canassistive() and not quiet then begin
+     if canassistive() and not quiet and 
+                          not (des_statreading in fstate) then begin
       assistiveserver.dodataentered(
                        iassistiveclientdata(getiassistiveclient()));
      end;
@@ -2139,7 +2140,8 @@ begin
   bo1:= des_statreading in fstate;
   include(fstate,des_statreading);
   try
-   checkvalue(true);
+//   checkvalue(true);
+   checkvalue();
   finally
    if not bo1 then begin
     exclude(fstate,des_statreading);
@@ -3791,7 +3793,8 @@ begin
  if (deo_selectonly in fdropdown.options) and 
                      not fdropdown.dataselected then begin
   if (text <> '') then begin
-   if not quiet and not (deo_autodropdown in fdropdown.options) then begin
+   if not quiet and not (des_statreading in fstate) and
+                   not (deo_autodropdown in fdropdown.options) then begin
     accept:= false;
     fdropdown.dropdown;
    end
