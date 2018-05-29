@@ -95,6 +95,8 @@ type
                    );
  optionswidgetty = set of optionwidgetty;
  optionwidget1ty = (
+                    ow1_clientcxmin,ow1_clientcymin,
+                    ow1_clientcxmax,ow1_clientcymax,
                     ow1_fontglyphheight,
                           //track font.glyphheight, 
                           //create fonthighdelta and childscaled events
@@ -1749,6 +1751,10 @@ type
    fdefaultfocuschild: twidget;
 
    procedure checksizes();
+   function widgetminsize1: sizety; 
+           //checks ws1_clientcxmin,ws1_clientcymin
+   function widgetmaxsize1: sizety; 
+           //checks ws1_clientcxmin,ws1_clientcymin
    function minclientsize: sizety;
    function isdesignwidget(): boolean; virtual;
    procedure setdesignwidget();
@@ -2270,6 +2276,11 @@ type
    property minsize: sizety read fminsize write setminsize;
    function widgetminsize: sizety; 
            //calls checkwidgetsize and frame.checkwidgetsize
+           //checks ws1_clientcxmin,ws1_clientcymin
+   function widgetmaxsize: sizety; 
+           //calls checkwidgetsize and frame.checkwidgetsize
+           //checks ws1_clientcxmin,ws1_clientcymin
+
    property maxsize: sizety read fmaxsize write setmaxsize;
    function maxclientsize: sizety; virtual;
    function minscrollsize: sizety; //uses cache
@@ -9293,18 +9304,30 @@ begin
 end;
 
 procedure twidget.checkwidgetsize(var size: sizety);
+var
+ si1: sizety;
 begin
- if (fminsize.cx > 0) and (size.cx < fminsize.cx) then begin
-  size.cx:= fminsize.cx;
+ si1:= widgetminsize1();
+ if si1.cx > 0 then begin
+  if size.cx < si1.cx then begin
+   size.cx:= si1.cx;
+  end;
  end;
- if (fminsize.cy > 0) and (size.cy < fminsize.cy) then begin
-  size.cy:= fminsize.cy;
+ if si1.cy > 0 then begin
+  if size.cy < si1.cy then begin
+   size.cy:= si1.cy;
+  end;
  end;
- if (fmaxsize.cx > 0) and (size.cx > fmaxsize.cx) then begin
-  size.cx:= fmaxsize.cx;
+ si1:= widgetmaxsize1();
+ if si1.cx > 0 then begin
+  if size.cx > si1.cx then begin
+   size.cx:= si1.cx;
+  end;
  end;
- if (fmaxsize.cy > 0) and (size.cy > fmaxsize.cy) then begin
-  size.cy:= fmaxsize.cy;
+ if si1.cy > 0 then begin
+  if size.cy > si1.cy then begin
+   size.cy:= si1.cy;
+  end;
  end;
 end;
 
@@ -9329,6 +9352,36 @@ begin
  end;
 end;
 
+function twidget.widgetminsize1: sizety;
+begin
+ result:= fminsize;
+ if fframe <> nil then begin
+  with fframe do begin
+   if ow1_clientcxmin in foptionswidget1 then begin
+    result.cx:= result.cx + fpaintframe.left + fpaintframe.right;
+   end;
+   if ow1_clientcymin in foptionswidget1 then begin
+    result.cy:= result.cy + fpaintframe.left + fpaintframe.right;
+   end;
+  end;
+ end;
+end;
+
+function twidget.widgetmaxsize1: sizety;
+begin
+ result:= fmaxsize;
+ if fframe <> nil then begin
+  with fframe do begin
+   if (fmaxsize.cx > 0) and (ow1_clientcxmax in foptionswidget1) then begin
+    result.cx:= result.cx + fpaintframe.left + fpaintframe.right;
+   end;
+   if (fmaxsize.cy > 0) and (ow1_clientcymax in foptionswidget1) then begin
+    result.cy:= result.cy + fpaintframe.left + fpaintframe.right;
+   end;
+  end;
+ end;
+end;
+
 function twidget.minclientsize: sizety;
 begin
  checksizes();
@@ -9349,7 +9402,7 @@ end;
 
 function twidget.calcminshrinksize: sizety;
 begin
- result:= fminsize;
+ result:= widgetminsize1();
 {
  if fframe <> nil then begin
   fframe.checkminshrinksize(result);
@@ -9472,8 +9525,8 @@ begin
    dec(value.y,value.cy-size2.cy);
   end;
   if ownswindow and windowevent and not (csloading in componentstate) then begin
-   simi:= fminsize;
-   sima:= fmaxsize;
+   simi:= widgetminsize1();
+   sima:= widgetmaxsize1();
    if ow1_autowidth in foptionswidget1 then begin
     simi.cx:= value.cx;
     sima.cx:= value.cx;
@@ -14517,6 +14570,15 @@ begin
   if delta * avalue * [ow1_autowidth,ow1_autoheight] <> [] then begin
    checkautosize;
   end;
+  if (delta * [ow1_clientcxmin,ow1_clientcxmax,
+              ow1_clientcymin,ow1_clientcymax] <> []) and 
+                             not (csloading in componentstate) then begin
+   exclude(fwidgetstate,ws_minclientsizevalid);
+   if ownswindow1 then begin
+    fwindow.sizeconstraintschanged();
+   end;
+   internalsetwidgetrect(fwidgetrect,false);
+  end;
  end;
 end;
 
@@ -15359,7 +15421,7 @@ begin
  painttowidgetsize(asize);
 end;
 
-procedure twidget.checkautosize;
+procedure twidget.checkautosize();
 begin
  if ([csloading,csdestroying] * componentstate = []) and 
                        not (ws1_autosizing in fwidgetstate1)then begin
@@ -15434,6 +15496,22 @@ begin
  checkwidgetsize(result);
  if fframe <> nil then begin
   fframe.checkwidgetsize(result);
+ end;
+end;
+
+function twidget.widgetmaxsize: sizety;
+begin
+ result.cx:= bigint;
+ result.cy:= bigint;
+ checkwidgetsize(result);
+ if fframe <> nil then begin
+  fframe.checkwidgetsize(result);
+ end;
+ if result.cx = bigint then begin
+  result.cx:= 0;
+ end;
+ if result.cy = bigint then begin
+  result.cy:= 0;
  end;
 end;
 
@@ -15794,7 +15872,8 @@ end;
 
 procedure twindow.sizeconstraintschanged;
 begin
- setsizeconstraints(fownerwidget.fminsize,fownerwidget.fmaxsize);
+ setsizeconstraints(fownerwidget.widgetminsize1(),
+                                   fownerwidget.widgetmaxsize1());
 end;
 
 function twindow.haswinid: boolean;
