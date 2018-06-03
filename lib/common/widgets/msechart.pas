@@ -369,6 +369,7 @@ type
    flegend_dist: integer;
    flegend_placement: tracelegendplacementty;
    flegend_fitdist: integer;
+   fstart: integer;
    procedure setitems(const index: integer; const avalue: ttrace);
    function getitems(const index: integer): ttrace;
    procedure setxserstart(const avalue: real);
@@ -377,6 +378,7 @@ type
    procedure setxserrange(const avalue: real);
    procedure setxrange(const avalue: real);
    procedure setyrange(const avalue: real);
+   procedure setstart(const avalue: integer);
    procedure setmaxcount(const avalue: integer);
    procedure setimage_list(const avalue: timagelist);
    procedure setimage_widthmm(const avalue: real);
@@ -437,12 +439,14 @@ type
                                      write setchartkind default tck_line;
    property options: charttraceoptionsty read foptions 
                                                 write setoptions default [];
+                //item default values
    property xserstart: real read fxserstart write setxserstart;
    property xstart: real read fxstart write setxstart;
    property ystart: real read fystart write setystart;
    property xrange: real read fxrange write setxrange;
    property xserrange: real read fxserrange write setxserrange;
    property yrange: real read fyrange write setyrange;
+   property start: integer read fstart write setstart default 0;
    property maxcount: integer read fmaxcount write setmaxcount default 0;
      //properties not used in asssign below
    property image_list: timagelist read fimage_list write setimage_list;
@@ -2904,7 +2908,7 @@ var
  int1: integer;
 begin
  fxserstart:= avalue;
- if not (csloading in tcuchart(fowner).componentstate) then begin
+ if not (csreading in tcuchart(fowner).componentstate) then begin
   for int1:= 0 to high(fitems) do begin
    ttrace(fitems[int1]).xserstart:= avalue;
   end;
@@ -2916,7 +2920,7 @@ var
  int1: integer;
 begin
  fxstart:= avalue;
- if not (csloading in tcuchart(fowner).componentstate) then begin
+ if not (csreading in tcuchart(fowner).componentstate) then begin
   for int1:= 0 to high(fitems) do begin
    ttrace(fitems[int1]).xstart:= avalue;
   end;
@@ -2928,7 +2932,7 @@ var
  int1: integer;
 begin
  fystart:= avalue;
- if not (csloading in tcuchart(fowner).componentstate) then begin
+ if not (csreading in tcuchart(fowner).componentstate) then begin
   for int1:= 0 to high(fitems) do begin
    ttrace(fitems[int1]).ystart:= avalue;
   end;
@@ -2940,7 +2944,7 @@ var
  int1: integer;
 begin
  fxserrange:= avalue;
- if not (csloading in tcuchart(fowner).componentstate) then begin
+ if not (csreading in tcuchart(fowner).componentstate) then begin
   for int1:= 0 to high(fitems) do begin
    ttrace(fitems[int1]).xserrange:= avalue;
   end;
@@ -2952,7 +2956,7 @@ var
  int1: integer;
 begin
  fxrange:= avalue;
- if not (csloading in tcuchart(fowner).componentstate) then begin
+ if not (csreading in tcuchart(fowner).componentstate) then begin
   for int1:= 0 to high(fitems) do begin
    ttrace(fitems[int1]).xrange:= avalue;
   end;
@@ -2964,9 +2968,21 @@ var
  int1: integer;
 begin
  fyrange:= avalue;
- if not (csloading in tcuchart(fowner).componentstate) then begin
+ if not (csreading in tcuchart(fowner).componentstate) then begin
   for int1:= 0 to high(fitems) do begin
    ttrace(fitems[int1]).yrange:= avalue;
+  end;
+ end;
+end;
+
+procedure ttraces.setstart(const avalue: integer);
+var
+ int1: integer;
+begin
+ fstart:= avalue;
+ if not (csreading in tcuchart(fowner).componentstate) then begin
+  for int1:= 0 to high(fitems) do begin
+   ttrace(fitems[int1]).start:= avalue;
   end;
  end;
 end;
@@ -2976,7 +2992,7 @@ var
  int1: integer;
 begin
  fmaxcount:= avalue;
- if not (csloading in tcuchart(fowner).componentstate) then begin
+ if not (csreading in tcuchart(fowner).componentstate) then begin
   for int1:= 0 to high(fitems) do begin
    ttrace(fitems[int1]).maxcount:= avalue;
   end;
@@ -2989,7 +3005,7 @@ var
 begin
  if fkind <> avalue then begin
   fkind:= avalue;
-  if not (csloading in tcuchart(fowner).componentstate) then begin
+  if not (csreading in tcuchart(fowner).componentstate) then begin
    for int1:= 0 to count - 1 do begin
     ttrace(fitems[int1]).kind:= avalue;
    end;
@@ -3003,7 +3019,7 @@ var
 begin
  if fchartkind <> avalue then begin
   fchartkind:= avalue;
-  if not (csloading in tcuchart(fowner).componentstate) then begin
+  if not (csreading in tcuchart(fowner).componentstate) then begin
    for int1:= 0 to count - 1 do begin
     ttrace(fitems[int1]).chartkind:= avalue;
    end;
@@ -3017,7 +3033,7 @@ var
 begin
  if fbar_width <> avalue then begin
   fbar_width:= avalue;
-  if not (csloading in tcuchart(fowner).componentstate) then begin
+  if not (csreading in tcuchart(fowner).componentstate) then begin
    for int1:= 0 to count - 1 do begin
     ttrace(fitems[int1]).bar_width:= avalue;
    end;
@@ -3031,7 +3047,7 @@ var
 begin
  if fbar_ref <> avalue then begin
   fbar_ref:= avalue;
-  if not (csloading in tcuchart(fowner).componentstate) then begin
+  if not (csreading in tcuchart(fowner).componentstate) then begin
    for int1:= 0 to count - 1 do begin
     ttrace(fitems[int1]).bar_ref:= avalue;
    end;
@@ -3048,7 +3064,7 @@ begin
   mask:= {$ifdef FPC}longword{$else}word{$endif}(avalue) xor
                  {$ifdef FPC}longword{$else}word{$endif}(foptions);
   foptions:= avalue;
-  if not (csloading in tcuchart(fowner).componentstate) then begin
+  if not (csreading in tcuchart(fowner).componentstate) then begin
    for int1:= 0 to count - 1 do begin
     ttrace(fitems[int1]).options:= charttraceoptionsty(replacebits(
                {$ifdef FPC}longword{$else}word{$endif}(foptions),
@@ -3074,6 +3090,7 @@ begin
   xserrange:= self.fxserrange;
   xrange:= self.fxrange;
   yrange:= self.fyrange;
+  start:= self.fstart;
   maxcount:= self.fmaxcount;
  end;
 end;
