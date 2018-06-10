@@ -41,6 +41,7 @@ const
  defaultprintfontsize = 35.2778; //10 point
  maxdefaultmake = $40-1;
  defaultxtermcommand = 'xterm -S${PTSN}/${PTSH}';
+ optaftermainfilemask = $40000000;
  
 type
  settinggroupty = (sg_editor,sg_debugger,sg_make,sg_templates,
@@ -1075,6 +1076,7 @@ type
    nogdbserverexit: tbooleanedit;
    gdbservertty: tbooleanedit;
    tstringedit1: tstringedit;
+   optafter: tbooleanedit;
    procedure acttiveselectondataentered(const sender: TObject);
    procedure colonshowhint(const sender: tdatacol; const arow: Integer; 
                       var info: hintinfoty);
@@ -2263,6 +2265,7 @@ procedure projectoptionstoform(fo: tprojectoptionsfo);
 var
  int1,int2: integer;
 begin
+ fo.optafter.tag:= optaftermainfilemask;
  with projectoptions do begin
   int1:= length(t.toolshortcuts);
   setlength(t.ftoolshortcuts,length(t.t.toolmenus));
@@ -2324,6 +2327,7 @@ begin
    fo.make2on.gridupdatetagvalue(int1,k.makeoptionson[int1]);
    fo.make3on.gridupdatetagvalue(int1,k.makeoptionson[int1]);
    fo.make4on.gridupdatetagvalue(int1,k.makeoptionson[int1]);
+   fo.optafter.gridupdatetagvalue(int1,k.makeoptionson[int1]);
   end;
 
   for int1:= 0 to fo.befcommandgrid.rowhigh do begin
@@ -2421,6 +2425,7 @@ begin
 {$ifdef mse_with_ifi}
  mainfo.statoptions.valuestoobj(fo);
 {$endif}
+ fo.optafter.tag:= optaftermainfilemask;
  with projectoptions do begin
   setlength(sigsettings,fo.signalgrid.rowcount);
   for int1:= 0 to high(sigsettings) do begin
@@ -2446,7 +2451,8 @@ begin
    k.fmakeoptionson[int1]:=
       fo.makeon.gridvaluetag(int1,0) or fo.buildon.gridvaluetag(int1,0) or
       fo.make1on.gridvaluetag(int1,0) or fo.make2on.gridvaluetag(int1,0) or
-      fo.make3on.gridvaluetag(int1,0) or fo.make4on.gridvaluetag(int1,0);
+      fo.make3on.gridvaluetag(int1,0) or fo.make4on.gridvaluetag(int1,0) or
+      fo.optafter.gridvaluetag(int1,0);
   end;
 
   setlength(k.fbefcommandon,fo.befcommandgrid.rowcount);

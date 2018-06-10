@@ -181,6 +181,7 @@ var
  int1,int2,step: integer;
  str1,str2,str3: msestring;
  ar1: filenamearty;
+ b1: boolean;
 // wstr1: filenamety;
 begin
  with projectoptions,k,texp do begin
@@ -233,12 +234,22 @@ begin
    inc(int1,step);
   end;
   for int1:= 0 to high(makeoptions) do begin
-   if (atag and makeoptionson[int1] <> 0) and
-         (makeoptions[int1] <> '') then begin
-    str1:= str1 + ' ' + makeoptions[int1];
+   if makeoptionson[int1] and optaftermainfilemask = 0 then begin
+    if (atag and makeoptionson[int1] <> 0) and
+          (makeoptions[int1] <> '') then begin
+     str1:= str1 + ' ' + makeoptions[int1];
+    end;
    end;
   end;
   str1:= str1 + ' ' + quotefilename(normalizename(mainfile));
+  for int1:= 0 to high(makeoptions) do begin
+   if makeoptionson[int1] and optaftermainfilemask <> 0 then begin
+    if (atag and makeoptionson[int1] <> 0) and
+          (makeoptions[int1] <> '') then begin
+     str1:= str1 + ' ' + makeoptions[int1];
+    end;
+   end;
+  end;
  end;
  result:= str1;
 end;
