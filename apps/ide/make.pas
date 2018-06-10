@@ -181,7 +181,6 @@ var
  int1,int2,step: integer;
  str1,str2,str3: msestring;
  ar1: filenamearty;
- b1: boolean;
 // wstr1: filenamety;
 begin
  with projectoptions,k,texp do begin
