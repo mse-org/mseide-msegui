@@ -506,7 +506,7 @@ uses
  msebits,msekeyboard,sysutils,msesysutils,msefileutils,msedatalist,msedragglob
  {$ifdef with_sm},sm,ice{$endif},msesonames,msegui,mseactions,msex11gdi,
  msearrayutils,msesysintf1,msesysdnd,classes,rtlconsts,mseclasses,
- mseglob,msetimer,mseprocess,mseprocmonitor
+ mseglob,msetimer,mseprocess,mseprocmonitor,typinfo
  {$ifdef mse_debug},mseformatstr{$endif};
 
 const
@@ -1520,6 +1520,14 @@ begin
  gdi_unlock;
 end;
 
+function windowmapped(const id: winidty): boolean;
+var
+ attributes: xwindowattributes;
+begin
+ xgetwindowattributes(appdisp,id,@attributes);
+ result:= attributes.map_state = isviewable;
+end;
+ 
 function getwmstate(id: winidty): wmstatety;
 type
  wmstatety = record
@@ -1735,10 +1743,19 @@ begin
 {$ifdef mse_debugshow}
   debugwindow('*gui_setwindowstate xmapwindow ',id);
 {$endif}
-  xmapwindow(appdisp,id);
+  if (getwmstate(id) = wms_iconic) and windowmapped(id) and 
+                                  (netatoms[net_active_window] <> 0)then begin
+                    //probably gnome mutter
+   sendnetrootcardinalmessage(netatoms[net_active_window],id,
+                                            [1,lasteventtime,lastfocuswindow]);
+  end
+  else begin
+   xmapwindow(appdisp,id);
+  end;
  end;
  if size in [wsi_fullscreen,wsi_fullscreenvirt] then begin
-  if not canfullscreen or not changenetwmstate(id,nso_add,net_wm_state_fullscreen) then begin
+  if not canfullscreen or 
+           not changenetwmstate(id,nso_add,net_wm_state_fullscreen) then begin
    fullscreen; //no windowmanager
   end;
  end
@@ -3119,7 +3136,9 @@ var
 begin
  gdi_lock;
  xgetwindowattributes(appdisp,id,@attributes);
- result:= attributes.map_state = isviewable;
+ result:= (attributes.map_state = isviewable) and 
+                                          (getwmstate(id) = wms_normal);
+                                          //gnome does not unmap iconic windows
  gdi_unlock;
 end;
 
@@ -5745,6 +5764,82 @@ begin
  end;
 end;
 
+{$ifdef mse_debugsysevent}
+
+function eventname(const event: int32): string;
+begin
+ case event of
+  2: result:= 'KeyPress';
+  3: result:= 'KeyRelease';
+  4: result:= 'ButtonPress';
+  5: result:= 'ButtonRelease';
+  6: result:= 'MotionNotify';
+  7: result:= 'EnterNotify';
+  8: result:= 'LeaveNotify';
+  9: result:= 'FocusIn';
+  10: result:= 'FocusOut';
+  11: result:= 'KeymapNotify';
+  12: result:= 'Expose';
+  13: result:= 'GraphicsExpose';
+  14: result:= 'NoExpose';
+  15: result:= 'VisibilityNotify';
+  16: result:= 'CreateNotify';
+  17: result:= 'DestroyNotify';
+  18: result:= 'UnmapNotify';
+  19: result:= 'MapNotify';
+  20: result:= 'MapRequest';
+  21: result:= 'ReparentNotify';
+  22: result:= 'ConfigureNotify';
+  23: result:= 'ConfigureRequest';
+  24: result:= 'GravityNotify';
+  25: result:= 'ResizeRequest';
+  26: result:= 'CirculateNotify';
+  27: result:= 'CirculateRequest';
+  28: result:= 'PropertyNotify';
+  29: result:= 'SelectionClear';
+  30: result:= 'SelectionRequest';
+  31: result:= 'SelectionNotify';
+  32: result:= 'ColormapNotify';
+  33: result:= 'ClientMessage';
+  34: result:= 'MappingNotify';
+  35: result:= 'GenericEvent';
+  else result:= '';
+ end;
+end;
+
+procedure debugevent(const aevent: xevent);
+var
+ atomar: atomarty;
+ i1: int32;
+begin
+ debugwrite(debugwindow1('sysevent ',aevent.xany.xwindow)+' '+
+             inttostr(aevent.xany.xtype)+' '+eventname(aevent.xany.xtype));
+ case aevent.xany.xtype of
+  propertynotify: begin
+   debugwrite(' '+xgetatomname(appdisp,aevent.xproperty.atom));
+   if aevent.xproperty.atom = wmstateatom then begin
+    debugwrite(' '+getenumname(typeinfo(wmstatety),
+                     ord(getwmstate(aevent.xproperty.xwindow))));
+   end
+   else begin
+    if aevent.xproperty.atom = netatoms[net_wm_state] then begin
+     readatomproperty(aevent.xproperty.xwindow,netatoms[net_wm_state],atomar);
+     debugwrite(':');
+     for i1:= 0 to high(atomar) do begin
+      debugwrite(' '+xgetatomname(appdisp,atomar[i1]));
+     end;
+    end;
+   end;
+  end;
+ end;
+ debugwriteln('');
+end;
+{$endif}
+
+var
+ hasminimizeunmapworkaround: boolean;     //for gnome
+ lastmapwindow: xid;
+
 function gui_getevent: tmseevent;
 
  function checkrepeatkey(const aevent: xevent): boolean;
@@ -5929,8 +6024,7 @@ eventrestart:
     end;
    end;
   {$ifdef mse_debugsysevent}
-   debugwriteln('sysevent '+inttostr(xev.xany.xtype)+' '+
-                                                inttostr(xev.xany.xwindow));
+   debugevent(xev);
   {$endif}
    if longint(xfilterevent(@xev,none)) = 0 then begin
     b1:= true;
@@ -6028,6 +6122,34 @@ eventrestart:
        end;
       {$endif}
        result:= handlexdnd(xev.xclient);
+      end;
+     end;
+    end;
+   end;
+  end;
+  propertynotify: begin
+   with xev.xproperty do begin
+    if atom = wmstateatom then begin //gnome workaround, missing unmap/map
+     case getwmstate(xwindow) of
+      wms_iconic: begin
+       if windowmapped(xwindow) then begin
+        result:= twindowevent.create(ek_hide,xwindow);
+        hasminimizeunmapworkaround:= true;
+        lastmapwindow:= 0;
+       {$ifdef mse_debugsysevent}
+        debugwriteln(' synthetic ek_hide');
+       {$endif}
+       end; 
+      end;
+      wms_normal: begin
+       if hasminimizeunmapworkaround and 
+                               (lastmapwindow <> xwindow) then begin
+        lastmapwindow:= 0;
+        result:= twindowevent.create(ek_show,xwindow);
+       {$ifdef mse_debugsysevent}
+        debugwriteln(' synthetic ek_show');
+       {$endif}
+       end; 
       end;
      end;
     end;
@@ -6178,6 +6300,7 @@ eventrestart:
   end;
   mapnotify: begin
    with xev.xmap do begin
+    lastmapwindow:= xwindow;
     result:= twindowevent.create(ek_show,xwindow);
     if application.findwindow(xwindow,window1) and 
              (wo_notaskbar in window1.options) then begin
@@ -6280,6 +6403,9 @@ eventrestart:
   end;
   destroynotify: begin
    with xev.xdestroywindow do begin
+    if xwindow = lastmapwindow then begin
+     lastmapwindow:= 0;
+    end;
     if (sysdndreader <> nil) and 
                 (sysdndreader.winid = xwindow) then begin
      freeandnil(sysdndreader);

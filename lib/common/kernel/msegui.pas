@@ -3294,6 +3294,7 @@ function combineframestateflags(
 {$ifdef mse_debug}
 procedure debugwindow(const atext: string; const awindow: twindow);
 procedure debugwindow(const atext: string; const aid: winidty);
+function debugwindow1(const atext: string; const aid: winidty): string;
 procedure debugwindow(const atext: string; const aid1,aid2: winidty);
 function checkwindowname(const aid: winidty; const aname: string): boolean;
 function debugwidgetname(const awidget: twidget; const atext: string): string;
@@ -17773,7 +17774,7 @@ var
 begin
  wpo1:= getwindowpos;
  if wpo1 <> value then begin
-  bo1:= (tws_windowvisible in fstate) {or (wpo1 = wp_minimized)};
+  bo1:= (tws_windowvisible in fstate) or (wpo1 = wp_minimized);
   window1:= nil;
   if value in [wp_screencentered,
                      wp_transientforcentered,wp_mainwindowcentered] then begin
@@ -19394,19 +19395,22 @@ begin
  debugwriteln(str1);
 end;
 
-procedure debugwindow(const atext: string; const aid: winidty);
+function debugwindow1(const atext: string; const aid: winidty): string;
 var
- str1: string;
  window1: twindow;
 begin
- str1:= atext+hextostr(aid)+' ';
+ result:= atext+hextostr(aid)+' ';
  if appinst.findwindow(aid,window1) then begin
-  str1:= str1+window1.owner.name;
+  result:= result+window1.owner.name;
  end
  else begin
-  str1:= str1+'NIL';
+  result:= result+'NIL';
  end;
- debugwriteln(str1);
+end;
+
+procedure debugwindow(const atext: string; const aid: winidty);
+begin
+ debugwriteln(debugwindow1(atext,aid));
 end;
 
 procedure debugwindow(const atext: string; const aid1,aid2: winidty);
