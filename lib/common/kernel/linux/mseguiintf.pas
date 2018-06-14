@@ -5840,6 +5840,14 @@ var
  hasminimizeunmapworkaround: boolean;     //for gnome
  lastmapwindow: xid;
 
+function windowdestroyed(const w: winidty): boolean;
+var
+ xev2: txevent;
+begin
+ xsync(appdisp,0);
+ result:= xchecktypedwindowevent(appdisp,w,destroynotify,@xev2);
+end;
+
 function gui_getevent: tmseevent;
 
  function checkrepeatkey(const aevent: xevent): boolean;
@@ -5860,7 +5868,7 @@ function gui_getevent: tmseevent;
 
 var
  xev,xev2: xevent;
- w: winidty;
+// w: winidty;
  eventkind: eventkindty;
  akey: keysym;
  buffer: string;
@@ -5885,6 +5893,8 @@ var
  allsig,sig1: sigset_t;
  timeout1: timespec;
  b1: boolean;
+ win1: twindow;
+ 
 type
  char_0_19 = array[0..19] of char;
  
@@ -6130,26 +6140,33 @@ eventrestart:
   propertynotify: begin
    with xev.xproperty do begin
     if atom = wmstateatom then begin //gnome workaround, missing unmap/map
-     case getwmstate(xwindow) of
-      wms_iconic: begin
-       if windowmapped(xwindow) then begin
-        result:= twindowevent.create(ek_hide,xwindow);
-        hasminimizeunmapworkaround:= true;
-        lastmapwindow:= 0;
-       {$ifdef mse_debugsysevent}
-        debugwriteln(' synthetic ek_hide');
-       {$endif}
-       end; 
-      end;
-      wms_normal: begin
-       if hasminimizeunmapworkaround and 
-                               (lastmapwindow <> xwindow) then begin
-        lastmapwindow:= 0;
-        result:= twindowevent.create(ek_show,xwindow);
-       {$ifdef mse_debugsysevent}
-        debugwriteln(' synthetic ek_show');
-       {$endif}
-       end; 
+     if application.findwindow(xwindow,win1) then begin
+      if windowdestroyed(xwindow) then begin
+       result:= twindowevent.create(ek_destroy,xwindow);
+      end
+      else begin
+       case getwmstate(xwindow) of
+        wms_iconic: begin
+         if windowmapped(xwindow) then begin
+          result:= twindowevent.create(ek_hide,xwindow);
+          hasminimizeunmapworkaround:= true;
+          lastmapwindow:= 0;
+         {$ifdef mse_debugsysevent}
+          debugwriteln(' synthetic ek_hide');
+         {$endif}
+         end; 
+        end;
+        wms_normal: begin
+         if hasminimizeunmapworkaround and 
+                                 (lastmapwindow <> xwindow) then begin
+          lastmapwindow:= 0;
+          result:= twindowevent.create(ek_show,xwindow);
+         {$ifdef mse_debugsysevent}
+          debugwriteln(' synthetic ek_show');
+         {$endif}
+         end; 
+        end;
+       end;
       end;
      end;
     end;
@@ -6347,10 +6364,7 @@ eventrestart:
   end;
   configurenotify: begin
    with xev.xconfigure do begin
-    w:= xwindow;
-    xsync(appdisp,0);
-    if tboolresult(xchecktypedwindowevent(
-                             appdisp,w,destroynotify,@xev2)) then begin
+    if windowdestroyed(xwindow) then begin
      result:= twindowevent.create(ek_destroy,xwindow);
     end
     else begin
@@ -6359,7 +6373,7 @@ eventrestart:
       rect1.y:= y;
       pt1:= nullpoint;
       if send_event = 0 then begin //from window manager?
-       getrootoffset(w,pt1); //no, map to screen origin
+       getrootoffset(xwindow,pt1); //no, map to screen origin
       end;
       rect1.cx:= width;
       rect1.cy:= height;
@@ -6368,9 +6382,9 @@ eventrestart:
                       inttostr(pt1.x)+' '+inttostr(pt1.y)+'|'+
                  inttostr(rect1.x)+' '+inttostr(rect1.y)+
                  ' '+inttostr(rect1.cx)+' '+inttostr(rect1.cy)+
-                 ' above:',above,w);
+                 ' above:',above,xwindow);
     {$endif}
-      result:= twindowrectevent.create(ek_configure,w,rect1,pt1);
+      result:= twindowrectevent.create(ek_configure,xwindow,rect1,pt1);
      end; 
 
 (* gnome bug workaround
