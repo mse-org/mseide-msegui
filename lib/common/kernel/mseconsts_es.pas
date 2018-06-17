@@ -32,9 +32,9 @@ const
   '&Abortar',    //mr_abort
   '&OK',         //mr_ok
   '&S'#0237,     //mr_yes
-  '&S'#0237' &todo',    //mr_yesall
   '&No',         //mr_no
   '&Todo',       //mr_all
+  '&S'#0237' &todo',    //mr_yesall  
   'N&o todo',    //mr_noall
   '&Ignorar',    //mr_ignore
   'O&mitir',     //mr_skip
@@ -54,9 +54,9 @@ const
   'Abortar',    //mr_abort
   'OK',         //mr_ok
   'S'#0237,      //mr_yes
-  'S'#$00ED' todo',    //mr_yesall
   'No',         //mr_no
   'Todo',       //mr_all
+  'S'#$00ED' todo',    //mr_yesall
   'No todo',    //mr_noall
   'Ignorar',    //mr_ignore
   'Omitir',     //mr_skip
@@ -70,8 +70,8 @@ const
   'Error de formato',           //sc_Format_error
   'Debe introducir un valor',   //sc_Value_is_required
   'Error',                      //sc_Error
-  'M'#0237'n.',                  //sc_Min
-  'M'#0225'x.',                  //sc_Max
+  'M'#0237'n.',                 //sc_Min
+  'M'#0225'x.',                 //sc_Max
   'Error de rango',             //sc_Range_error
 
   '&Deshacer',                  //sc_Undohk        ///         ///
@@ -81,7 +81,7 @@ const
   '&Pegar',                     //sc_Pastehk        //          // hotkeys
   '&Select all',                //sc_Select_allhk  ///          //
   '&Insertar fila',             //sc_insert_rowhk  ///          //
-  '&A'#0241'adir fila',          //sc_append_rowhk  // hotkeys  //
+  '&A'#0241'adir fila',         //sc_append_rowhk  // hotkeys  //
   '&Borrar fila',               //sc_delete_rowhk  ///         ///
 
   '&Carpetas',                    //sc_Dir               ///

@@ -59,6 +59,28 @@ uses
  msetypes{msestrings},sysutils,mseformatstr;
 const
  fr_modalresulttext: defaultmodalresulttextty =
+ ('',              //mr_none
+  '',              //mr_canclose
+  '',              //mr_windowclosed
+  '',              //mr_windowdestroyed
+  '',              //mr_escape
+  '',              //mr_f10
+  '',              //mr_exception
+  '&Effacer',      //mr_cancel
+  '&Arr'#0234'ter',//mr_abort
+  '&Valider',      //mr_ok
+  '&Oui',          //mr_yes
+  '&Non',          //mr_no
+  '&Tout',         //mr_all
+  'Oui &tout',     //mr_yesall
+  'A&ucun',        //mr_noall
+  '&Ignorer',      //mr_ignore
+  '&Passer',       //mr_skip
+  'Passer &tout',  //mr_skipall
+  'Co&ntinuer'     //mr_continue
+  );
+
+ fr_modalresulttextnoshortcut: defaultmodalresulttextty =
  ('',             //mr_none
   '',             //mr_canclose
   '',             //mr_windowclosed
@@ -66,40 +88,18 @@ const
   '',             //mr_escape
   '',             //mr_f10
   '',             //mr_exception
-  '&Effacer',     //mr_cancel
-  '&Arr'#0234'ter',//mr_abort
-  '&Valider',     //mr_ok
-  '&Oui',         //mr_yes
-  'Oui &tout',     //mr_yesall
-  '&Non',         //mr_no
-  '&Tout',        //mr_all
-  'A&ucun',       //mr_noall
-  '&Ignorer',     //mr_ignore
-  '&Passer',        //mr_skip
-  'Passer &tout',    //mr_skipall
-  'Co&ntinuer'  //mr_continue
-  );
-
- fr_modalresulttextnoshortcut: defaultmodalresulttextty =
- ('',           //mr_none
-  '',           //mr_canclose
-  '',           //mr_windowclosed
-  '',           //mr_windowdestroyed
-  '',           //mr_escape
-  '',           //mr_f10
-  '',           //mr_exception
-  'Effacer',    //mr_cancel
+  'Effacer',      //mr_cancel
   'Arr'#0234'ter',//mr_abort
-  'Valider',    //mr_ok
-  'Oui',        //mr_yes
-  'Oui tout',    //mr_yesall
-  'Non',        //mr_no
-  'Tout',       //mr_all
-  'Aucun',      //mr_noall
-  'Ignorer',    //mr_ignore
-  'Passer',      //mr_skip
-  'Passer tout',   //mr_skipall
-  'Continuer'  //mr_continue
+  'Valider',      //mr_ok
+  'Oui',          //mr_yes
+  'Non',          //mr_no
+  'Tout',         //mr_all
+  'Oui tout',     //mr_yesall
+  'Aucun',        //mr_noall
+  'Ignorer',      //mr_ignore
+  'Passer',       //mr_skip
+  'Passer tout',  //mr_skipall
+  'Continuer'     //mr_continue
   );
 
  fr_stockcaption: stockcaptionaty = (
