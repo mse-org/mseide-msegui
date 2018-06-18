@@ -1046,6 +1046,8 @@ begin
  result:= dofind1(aunitname+'.pas');
  if result <> '' then exit;
  result:= dofind1(aunitname+'.pp');
+ if result <> '' then exit;
+ result:= dofind1(aunitname+'.mla');
 end;
 
 function tsourceupdater.findmethodpos(const amethod: tmethod;
