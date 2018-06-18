@@ -59,28 +59,6 @@ uses
  msetypes{msestrings},sysutils,mseformatstr;
 const
  fr_modalresulttext: defaultmodalresulttextty =
- ('',              //mr_none
-  '',              //mr_canclose
-  '',              //mr_windowclosed
-  '',              //mr_windowdestroyed
-  '',              //mr_escape
-  '',              //mr_f10
-  '',              //mr_exception
-  '&Effacer',      //mr_cancel
-  '&Arr'#0234'ter',//mr_abort
-  '&Valider',      //mr_ok
-  '&Oui',          //mr_yes
-  '&Non',          //mr_no
-  '&Tout',         //mr_all
-  'Oui &tout',     //mr_yesall
-  'A&ucun',        //mr_noall
-  '&Ignorer',      //mr_ignore
-  '&Passer',       //mr_skip
-  'Passer &tout',  //mr_skipall
-  'Co&ntinuer'     //mr_continue
-  );
-
- fr_modalresulttextnoshortcut: defaultmodalresulttextty =
  ('',             //mr_none
   '',             //mr_canclose
   '',             //mr_windowclosed
@@ -88,18 +66,40 @@ const
   '',             //mr_escape
   '',             //mr_f10
   '',             //mr_exception
-  'Effacer',      //mr_cancel
+  '&Effacer',     //mr_cancel
+  '&Arr'#0234'ter',//mr_abort
+  '&Valider',     //mr_ok
+  '&Oui',         //mr_yes
+  '&Non',         //mr_no
+  '&Tout',        //mr_all
+  'Oui &tout',     //mr_yesall
+  'A&ucun',       //mr_noall
+  '&Ignorer',     //mr_ignore
+  '&Passer',        //mr_skip
+  'Passer &tout',    //mr_skipall
+  'Co&ntinuer'  //mr_continue
+  );
+
+ fr_modalresulttextnoshortcut: defaultmodalresulttextty =
+ ('',           //mr_none
+  '',           //mr_canclose
+  '',           //mr_windowclosed
+  '',           //mr_windowdestroyed
+  '',           //mr_escape
+  '',           //mr_f10
+  '',           //mr_exception
+  'Effacer',    //mr_cancel
   'Arr'#0234'ter',//mr_abort
-  'Valider',      //mr_ok
-  'Oui',          //mr_yes
-  'Non',          //mr_no
-  'Tout',         //mr_all
-  'Oui tout',     //mr_yesall
-  'Aucun',        //mr_noall
-  'Ignorer',      //mr_ignore
-  'Passer',       //mr_skip
-  'Passer tout',  //mr_skipall
-  'Continuer'     //mr_continue
+  'Valider',    //mr_ok
+  'Oui',        //mr_yes
+  'Non',        //mr_no
+  'Tout',       //mr_all
+  'Oui tout',    //mr_yesall
+  'Aucun',      //mr_noall
+  'Ignorer',    //mr_ignore
+  'Passer',      //mr_skip
+  'Passer tout',   //mr_skipall
+  'Continuer'  //mr_continue
   );
 
  fr_stockcaption: stockcaptionaty = (
@@ -242,16 +242,16 @@ const
   'D'#0233'sactiver le boutton',      //sc_disabledbutton
   'Premier champ',         //sc_firstfield
   'D'#0232'rnier champ',          //sc_lastfield
-  'First element',       //sc_firstelement
-  'Last element',        //sc_lastelement
-  'Slower',              //sc_slower
-  'Faster',              //sc_faster
-  'Window',              //sc_window
-  'Area',                //sc_area
-  'Area activated',      //sc_areaactivated
-  'Volume down',         //sc_volumedown
-  'Volume up',           //sc_volumeup
-  'Cancel speech'        //sc_cancelspeech
+  'Premier '#0233'lement',       //sc_firstelement
+  'D'#0232'rnier '#0233'lement',        //sc_lastelement
+  'Plus lent',              //sc_slower
+  'Plus rapide',              //sc_faster
+  'Fen'#0232'tre',              //sc_window
+  'Aire',                //sc_area
+  'Aire activ'#0233'e',      //sc_areaactivated
+  'Volume moins',         //sc_volumedown
+  'Volume plus',           //sc_volumeup
+  'Annuler speech'        //sc_cancelspeech
 );
     
 function delete_n_selected_rows(const params: array of const): msestring;
