@@ -233,8 +233,8 @@ If the popup widgets are showed behind the forms, try to start the
 MSEgui program with the option '--TOPLEVELRAISE'. Do *not* use this option
 if is not necessary (KDE, Gnome... work well without).
 
-Display problems with Linux radeon driver
-*****************************************
+Display problems with Linux radeon and other EXA drivers
+********************************************************
 If the display is distorted or slow add 
 Option "EXAPixmaps" "off"
 to 
@@ -242,6 +242,7 @@ Section "Device"
 of xorg.conf, see
 https://bugs.freedesktop.org/show_bug.cgi?id=69543
 https://bugs.freedesktop.org/show_bug.cgi?id=84253
+or use the proprietary video driver for your video chip.
 
 Flashing taskbar widgets in IceWM
 *********************************
