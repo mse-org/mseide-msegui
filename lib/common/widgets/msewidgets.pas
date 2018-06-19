@@ -1226,11 +1226,12 @@ type
    function calcminscrollsize: sizety; override;
    procedure setclientsize(const asize: sizety); override;
    procedure loaded; override;
-   procedure clampinview(const arect: rectty; const bottomright: boolean); override;
                 //origin paintpos
    procedure defineproperties(filer: tfiler); override;
  public
    constructor create(aowner: tcomponent); override;
+   procedure clampinview(const arect: rectty;
+                                  const bottomright: boolean = false); override;
    function maxclientsize: sizety; override;
    procedure writestate(writer: twriter); override;
    procedure dolayout(const sender: twidget); override;

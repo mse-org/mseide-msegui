@@ -1910,9 +1910,6 @@ type
    function trycancelmodal(const newactive: twindow): boolean; virtual;
               //called by twindow.internalactivate, true if accepted
    procedure sortzorder;
-   procedure clampinview(const arect: rectty; 
-                                      const bottomright: boolean); virtual;
-                    //origin paintpos
 
    function needsdesignframe: boolean; virtual;
    function getactface: tcustomface; virtual;
@@ -2138,6 +2135,10 @@ type
                                 scrollcaret: boolean); //origin = paintrect.pos
    procedure scroll(const dist: pointty);
                             //scrolls paintrect and widgets
+   procedure clampinview(const arect: rectty; 
+                            const bottomright: boolean = false); virtual;
+                    //origin paintpos
+
    procedure getcaret;
    procedure scrollcaret(const dist: pointty);
    function mousecaptured: boolean;

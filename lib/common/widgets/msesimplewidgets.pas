@@ -702,10 +702,11 @@ type
    procedure domousewheelevent(var info: mousewheeleventinfoty); override;
    procedure doscroll(const dist: pointty); override;
    procedure doscrolled(const dist: pointty); override;
-   procedure clampinview(const arect: rectty; const bottomright: boolean); override;
 //   procedure setclientpos(const avalue: pointty);
   public
    constructor create(aowner: tcomponent); override;
+   procedure clampinview(const arect: rectty;
+                           const bottomright: boolean = false); override;
   published
    property frame: tscrollboxframe read getframe write setframe;
    property onscroll: pointeventty read fonscroll write fonscroll;
