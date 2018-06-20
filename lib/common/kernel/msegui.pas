@@ -115,6 +115,7 @@ type
                     ow1_modalcallonactivate,ow1_modalcallondeactivate,
                                //used in tactionwidget
                     ow1_noautosizing, //used in tdockcontroller
+                    ow1_noclampinview, //used in doactivate()
                     ow1_noassistive
                     );
                                          
@@ -12891,7 +12892,8 @@ procedure twidget.doactivate;
 var
  rect1: rectty;
 begin
- if fparentwidget <> nil then begin
+ if (fparentwidget <> nil) and 
+                      not (ow1_noclampinview in foptionswidget1) then begin
   rect1:= getdisprect;
   if rect1.x < 0 then begin
    rect1.cx:= rect1.cx + rect1.x;
