@@ -155,7 +155,8 @@ const
 {$ifndef FPC}
  lsbrounding = 2.2517998136852482e015;
 {$else}
- lsbrounding = exp(51*ln(2));
+// lsbrounding = exp(51*ln(2));
+ lsbrounding = flo64($0008000000000000); //2^51
 {$endif}
  expo0max = 1-1/lsbrounding;
  expo1max = 10-10/lsbrounding;
@@ -168,7 +169,16 @@ const
  exp2to10 = ln(2)/ln(10);
 {$endif}
  exps: array[0..maxdigits] of double =
- (1e0,1e1,1e2,1e3,1e4,1e5,1e6,1e7,1e8,1e9,1e10,1e11,1e12,1e13,1e14,1e15,1e16,1e17);
+ (1e0,1e1,1e2,1e3,1e4,1e5,1e6,1e7,1e8,1e9,1e10,
+  1e11,1e12,1e13,1e14,1e15,1e16,1e17
+ );
+ lsbroundings: array[0..maxdigits] of double =
+  (1e0/lsbrounding,1e1/lsbrounding,1e2/lsbrounding,1e3/lsbrounding,
+   1e4/lsbrounding,1e5/lsbrounding,1e6/lsbrounding,1e7/lsbrounding,
+   1e8/lsbrounding,1e9/lsbrounding,1e10/lsbrounding,1e11/lsbrounding,
+   1e12/lsbrounding,1e13/lsbrounding,1e14/lsbrounding,1e15/lsbrounding,
+   1e16/lsbrounding,1e17/lsbrounding
+  );
 
 var
  buffer: bufferty;
@@ -485,11 +495,13 @@ begin
      checkcarry(int1,buffer);
      do1:= frac(do1)*10;       
     end;
-    do1:= do1 - 5 + exps[lastindex] / lsbrounding; //round up lsb
     msbcarry:= buffer[0] = '0';
-    if (do1 > 0) then begin
-     inc(buffer[lastindex]);
-     checkcarry(lastindex,buffer);
+    if do1 > 0 then begin //lastindex < maxdigits then begin
+     do1:= do1 - 5 + lsbroundings[lastindex]; //round up lsb
+     if (do1 > 0) then begin
+      inc(buffer[lastindex]);
+      checkcarry(lastindex,buffer);
+     end;
     end;
     msbcarry:= msbcarry and (buffer[0] <> '0');
     if  (precision < 0) or (defaultmode and (precision = 0)) then begin
