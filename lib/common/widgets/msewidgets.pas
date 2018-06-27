@@ -2756,20 +2756,20 @@ var
  rect1,rect2: rectty;
  bo1,bo2: boolean;
  widget1: twidget1;
- flagsbefore: textflagsty;
+// flagsbefore: textflagsty;
 begin
  inherited;
  fra1:= fouterframe;
  fstate:= fstate - [fs_cancaptionsyncx,fs_cancaptionsyncy];
  if finfo.text.text <> '' then begin
-  flagsbefore:= finfo.flags;
+//  flagsbefore:= finfo.flags;
   updatetextflags();
   canvas:= icaptionframe(fintf).getcanvas;
   canvas.font:= getfont;
   finfo.dest.size:= icaptionframe(fintf).getwidgetrect.size;
   rect1:= deflaterect(makerect(nullpoint,finfo.dest.size),fouterframe);
   textrect(canvas,finfo);
-  finfo.flags:= flagsbefore-[tf_xcentered,tf_ycentered,tf_right,tf_bottom];
+//  finfo.flags:= flagsbefore-[tf_xcentered,tf_ycentered,tf_right,tf_bottom];
   finfo.dest:= finfo.res;
   bo1:= cfo_captiondistouter in foptions;
   bo2:= cfo_captionframecentered in foptions;
@@ -2778,9 +2778,10 @@ begin
    if fcaptionpos = cp_center then begin //precision position for record
     x:= (rect1.x + rect1.x + rect1.cx - rect2.cx) div 2 + fcaptiondist;
     y:= (rect1.y + rect1.y + rect1.cy - rect2.cy) div 2 + fcaptionoffset;
-    finfo.flags:= finfo.flags + [tf_xcentered,tf_ycentered];
+//    finfo.flags:= finfo.flags + [tf_xcentered,tf_ycentered];
    end
    else begin
+   {
     if fcaptionpos in [cp_left,cp_right] then begin
      include(finfo.flags,tf_ycentered);
     end
@@ -2797,6 +2798,7 @@ begin
       include(finfo.flags,tf_bottom);
      end;
     end;
+    }
     case fcaptionpos of
      cp_lefttop,cp_left,cp_leftbottom: begin
       include(fstate,fs_cancaptionsyncx);
