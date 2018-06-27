@@ -16,6 +16,7 @@ object settingsfo: tsettingsfo
   options = [fo_closeonesc, fo_autoreadstat, fo_autowritestat, fo_savepos, fo_savestate]
   statfile = tstatfile1
   caption = 'Configure MSE environment'
+  windowopacity = -Inf
   oncreate = formoncreate
   moduleclassname = 'tmseform'
   object tsplitter1: tsplitter
@@ -82,7 +83,6 @@ object settingsfo: tsettingsfo
     end
   end
   object tlayouter1: tlayouter
-    optionswidget = [ow_tabfocus, ow_parenttabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_destroywidgets]
     bounds_x = 0
     bounds_y = 0
     bounds_cx = 348
@@ -92,7 +92,6 @@ object settingsfo: tsettingsfo
     optionslayout = [lao_placey]
     linkbottom = macrogrid
     object tspacer1: tlayouter
-      optionswidget = [ow_tabfocus, ow_parenttabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_destroywidgets]
       taborder = 9
       bounds_x = 8
       bounds_y = 333
@@ -366,7 +365,7 @@ object settingsfo: tsettingsfo
         0
       )
       taborder = 3
-      hint = 'Root directory of msegui library.'
+      hint = 'Root directory of MSEgui library.'
       bounds_x = 8
       bounds_y = 111
       bounds_cx = 330
@@ -396,7 +395,7 @@ object settingsfo: tsettingsfo
         0
       )
       taborder = 2
-      hint = 'Root directory of msegui.'
+      hint = 'Root directory of MSEgui.'
       bounds_x = 8
       bounds_y = 74
       bounds_cx = 330

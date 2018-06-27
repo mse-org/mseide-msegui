@@ -496,7 +496,7 @@ begin
      do1:= frac(do1)*10;       
     end;
     msbcarry:= buffer[0] = '0';
-    if do1 > 0 then begin //lastindex < maxdigits then begin
+    if do1 > 0 then begin
      do1:= do1 - 5 + lsbroundings[lastindex]; //round up lsb
      if (do1 > 0) then begin
       inc(buffer[lastindex]);
