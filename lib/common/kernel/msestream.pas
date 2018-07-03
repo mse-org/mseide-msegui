@@ -162,6 +162,7 @@ type
              const aopenmode: fileopenmodety = fm_read;
              const accessmode: fileaccessmodesty = [];
              const rights: filerightsty = defaultfilerights): syserrorty;
+   procedure releasehandle() override;
    function read(var buffer; count: longint): longint; override;
    function write(const buffer; count: longint): longint; override;
    function seek(const offset: int64; origin: tseekorigin): int64; override;
@@ -1082,6 +1083,12 @@ begin
  {$endif}
  *)
  end;
+end;
+
+procedure tmsefilestream.releasehandle();
+begin
+ flushbuffer();
+ inherited;
 end;
 
 constructor tmsefilestream.create(const afilename: filenamety;
