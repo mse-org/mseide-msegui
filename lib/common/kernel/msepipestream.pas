@@ -15,7 +15,8 @@ unit msepipestream;
 interface
 
 uses
- msestream,msethread,msesystypes,classes,mclasses,msebits,mseclasses;
+ msestream,msethread,msesystypes,classes,mclasses,msebits,mseclasses,
+ msetypes;
 
 type
 
@@ -35,7 +36,7 @@ type
    function Write(const Buffer; Count: Longint): Longint; override; overload;
 {$endif}
    procedure connect(const ahandle: integer); //does not own handle
-   function releasehandle: integer; virtual;
+//   function releasehandle: filehandlety; virtual;
    property handle: integer read gethandle write sethandle; //owns handle
  end;
 
@@ -83,7 +84,7 @@ type
    constructor create;
    destructor destroy; override;
 
-   function releasehandle: integer; override;
+   function releasehandle: filehandlety override;
    function Seek(const Offset: Int64; Origin: TSeekOrigin): Int64; override;
                    //no seek, result always 0
    function readdatastring: string; override;
@@ -218,12 +219,13 @@ begin
  inherited;
 end;
 }
-function tpipewriter.releasehandle: integer;
+{
+function tpipewriter.releasehandle: filehandlety;
 begin
  result:= handle;
  fhandle:= invalidfilehandle;
 end;
-
+}
 procedure tpipewriter.connect(const ahandle: integer);
 begin
  handle:= ahandle;
@@ -278,12 +280,12 @@ begin
  sys_conddestroy(finputcond);
 end;
 
-function tpipereader.releasehandle: integer;
+function tpipereader.releasehandle: filehandlety;
 begin
  terminateandwait(true);
  freeandnil(fthread);
  writehandle:= invalidfilehandle;
- result:= inherited releasehandle;
+ result:= inherited releasehandle();
 end;
 
 procedure tpipereader.sethandle(value: integer);

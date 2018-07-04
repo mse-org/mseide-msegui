@@ -971,7 +971,7 @@ TStringsEnumerator = class
     function Write(const Buffer; Count: Longint): Longint; override;
     function Seek(const Offset: Int64; Origin: TSeekOrigin): Int64; override;
     property Handle: filehandlety read FHandle;
-    procedure releasehandle(); virtual;
+    function releasehandle(): filehandlety virtual;
   end;
 
   TFileStream = class(THandleStream)
@@ -8546,8 +8546,9 @@ begin
   Result:=FileSeek(FHandle,Offset,ord(Origin));
 end;
 
-procedure THandleStream.releasehandle();
+function THandleStream.releasehandle(): filehandlety;
 begin
+ result:= fhandle;
  fhandle:= invalidfilehandle;
 end;
 
