@@ -624,7 +624,7 @@ end;
 procedure Tmainfo.doshowform(const sender: tobject);
 begin
  with tmenuitem(sender) do begin
-  designer.showformdesigner(pmoduleinfoty(tagpointer));
+  designer.showformdesigner(pmoduleinfoty(tagpo));
  end;
 end;
 
@@ -729,7 +729,7 @@ begin
  with mainmenu1.menu.itembyname('view') do begin
   for int1:= itembyname('formmenuitemstart').index+1 to count - 1 do begin
    with items[int1] do begin
-    with pmoduleinfoty(tagpointer)^ do begin
+    with pmoduleinfoty(tagpo)^ do begin
      if modified then begin
       caption:= '*'+msefileutils.filename(filename);
      end
@@ -1581,7 +1581,7 @@ var
 begin
  with mainmenu1.menu.itembyname('view') do begin
   for int1:= formmenuitemstart to submenu.count-1 do begin
-   if submenu[int1].tagpointer = amodule then begin
+   if submenu[int1].tagpo = amodule then begin
     exit;
    end;
   end;
@@ -1595,7 +1595,7 @@ begin
     caption:= msefileutils.filename(amodule^.filename);
    end;
    onexecute:= {$ifdef FPC}@{$endif}doshowform;
-   tagpointer:= amodule;
+   tagpo:= amodule;
    options:= options + [mao_asyncexecute];
   end;
   for int1:= formmenuitemstart to submenu.count-1 do begin
@@ -2057,7 +2057,7 @@ var
 begin
  with mainmenu1.menu.itembyname('view') do begin
   for int1:= itembyname('formmenuitemstart').index+1 to count - 1 do begin
-   if items[int1].tagpointer = amodule then begin
+   if items[int1].tagpo = amodule then begin
     submenu.delete(int1);
     break;
    end;

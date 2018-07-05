@@ -74,7 +74,7 @@ type
    procedure setshortcuts1(const avalue: shortcutarty);  
   protected
    ftag: integer;
-   ftagpointer: pointer;
+   ftagpo: pointer;
    procedure doexecute(const tag: integer; const info: mouseeventinfoty);
    procedure objectevent(const sender: tobject; const event: objecteventty); override;
    procedure defineproperties(filer: tfiler); override;
@@ -98,7 +98,6 @@ type
    property checked: boolean read getchecked write setchecked;
    property visible: boolean read getvisible write setvisible default true;
    property enabled: boolean read getenabled write setenabled default true;
-   property tagpointer: pointer read ftagpointer write ftagpointer;
    property shortcuts: shortcutarty read finfo.shortcut write setshortcuts;
    property shortcuts1: shortcutarty read finfo.shortcut1 write setshortcuts1;
    property imagelist: timagelist read getimagelist write setimagelist
@@ -123,11 +122,14 @@ type
                         stored isshortcutstored default 0;
    property shortcut1: shortcutty read getshortcut1 write setshortcut1
                         stored isshortcut1stored default 0;
-   property tag: integer read ftag write ftag default 0;
    property options: menuactionoptionsty read finfo.options 
                                                   write setoptions default [];
    property group: integer read finfo.group write setgroup
                              stored isgroupstored default 0;
+   property tag: integer read ftag write ftag default 0;
+   property tagpo: pointer read ftagpo write ftagpo;
+   property tagpointer: pointer read ftagpo write ftagpo;
+                                      deprecated 'Use tagpo instead';
    property onexecute: notifyeventty read finfo.onexecute write setonexecute
                                stored isonexecutestored;
    property onbeforeexecute: accepteventty read finfo.onbeforeexecute

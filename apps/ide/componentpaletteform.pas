@@ -66,12 +66,12 @@ procedure tcomponentpalettefo.componentpalettebuttonchanged(const sender: TObjec
 begin
  if not application.terminated then begin
   with registeredcomponents do begin
-   if tclass(button.tagpointer) = selectedclass then begin
+   if tclass(button.tagpo) = selectedclass then begin
     selectedclass:= nil;
    end;
    if as_checked in button.state then begin
     componentstorefo.resetselected;
-    selectedclass:= mclasses.tcomponentclass(button.tagpointer);
+    selectedclass:= mclasses.tcomponentclass(button.tagpo);
    end;
   end;
  end;
@@ -126,7 +126,7 @@ begin
        imagelist:= registeredcomponents.imagelist;
        imagenr:= icon;
        hint:= msestring(classtyp.classname);
-       tagpointer:= classtyp;
+       tagpo:= classtyp;
       end;
      end;
     end;

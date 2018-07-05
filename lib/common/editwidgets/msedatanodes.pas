@@ -187,7 +187,9 @@ type
    function getownerintf: iitemlist inline;
   public
    tag: integer;
-   tagpointer: pointer;
+   tagpo: pointer;
+   property tagpointer: pointer read tagpo write tagpo;
+                                             deprecated 'Use tagpo instead';
    constructor create(const aowner: tcustomitemlist); overload; virtual;
    constructor createassign(const aowner: tcustomitemlist; 
                                    const asource: tlistitem); overload;
@@ -742,7 +744,7 @@ procedure tlistitem.assign(const source: tlistitem);
 begin
  beginupdate;
  tag:= source.tag;
- tagpointer:= source.tagpointer;
+ tagpo:= source.tagpo;
  caption:= source.fcaption;
  state:= source.fstate;
  imagelist:= source.fimagelist;

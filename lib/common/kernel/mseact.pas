@@ -124,7 +124,7 @@ type
   imagelist: tobject; //timagelist
   hint: msestring;
   tag: integer;
-  tagpointer: pointer;
+  tagpo: pointer;
   onexecute: notifyeventty;
   onbeforeexecute: accepteventty;
   onafterexecute: notifyeventty;

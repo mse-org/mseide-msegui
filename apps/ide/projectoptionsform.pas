@@ -2159,7 +2159,7 @@ begin
     setlength(modulefiles1,int2);
 //    setlength(moduledock1,int2);
     for int1:= 0 to high(modulenames1) do begin
-     with pmoduleinfoty(submenu[int1+int3].tagpointer)^ do begin
+     with pmoduleinfoty(submenu[int1+int3].tagpo)^ do begin
       modulenames1[int1]:= msestring(struppercase(instance.name));
       moduletypes1[int1]:= msestring(struppercase(string(moduleclassname)));
       modulefiles1[int1]:= filename;

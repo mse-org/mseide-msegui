@@ -253,7 +253,9 @@ type
    property checked: boolean read getchecked write setchecked;
    property enabled: boolean read getenabled write setenabled;
    property visible: boolean read getvisible write setvisible;
-   property tagpointer: pointer read finfo.tagpointer write finfo.tagpointer;
+   property tagpo: pointer read finfo.tagpo write finfo.tagpo;
+   property tagpointer: pointer read finfo.tagpo write finfo.tagpo;
+                                      deprecated 'Use tagpo instead';
    property shortcuts: shortcutarty read finfo.shortcut write setshortcuts;
    property shortcuts1: shortcutarty read finfo.shortcut1 write setshortcuts1;
   published
