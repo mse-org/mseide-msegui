@@ -34,7 +34,8 @@ type
                          cfo_captiondistouter,cfo_captionframecentered,
                          cfo_captionnoclip,cfo_nofocusrect,cfo_forcefocusrect,
                          cfo_focusrect, //override template fso_nofocusrect
-                         cfo_captionfocus{,cfo_captionbackground});
+                         cfo_captionfocus,cfo_framerectfocus
+                         {,cfo_captionbackground});
  captionframeoptionsty = set of captionframeoptionty;
 
 const
@@ -3323,9 +3324,9 @@ procedure tcustomcaptionframe.updatemousestate(const sender: twidget;
         const info: mouseeventinfoty);
 begin
  inherited;
- if pointincaption(info.pos) then begin
-  with twidget1(sender) do begin
-   if not (ow_mousetransparent in foptionswidget) then begin
+ with twidget1(sender) do begin
+  if not (ow_mousetransparent in foptionswidget) then begin
+   if pointincaption(info.pos) then begin
     include(fwidgetstate,ws_wantmousebutton);    //for twidget.iswidgetclick
     if cfo_captionfocus in foptions then begin
      include(fwidgetstate,ws_wantmousefocus);
@@ -3333,6 +3334,10 @@ begin
     if fs_captionhint in fstate then begin
      include(fwidgetstate,ws_wantmousemove);
     end;
+   end;
+   if (cfo_framerectfocus in foptions) and 
+             pointinrect(info.pos,framerect) then begin
+    include(fwidgetstate,ws_wantmousefocus);
    end;
   end;
  end;
