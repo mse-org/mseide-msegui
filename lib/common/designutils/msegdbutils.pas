@@ -1023,7 +1023,9 @@ end;
 procedure tgdbmi.debugbegin; //calls GUI_DEBUGBEGIN in target
 begin
  if ftargetdebugbegin <> 0 then begin
-  clicommand('call '+inttostr(ftargetdebugbegin)+'()');
+  if clicommand('call GUI_DEBUGBEGIN()') <> gdb_ok then begin
+   clicommand('call '+inttostr(ftargetdebugbegin)+'()');
+  end;
  end;
 end;
 
@@ -1031,7 +1033,9 @@ procedure tgdbmi.debugend;   //calls GUI_DEBUGEND in target
 begin
  exclude(fstate,gs_stopped);
  if ftargetdebugend <> 0 then begin
-  clicommand('call '+inttostr(ftargetdebugend)+'()');
+  if clicommand('call GUI_DEBUGEND()') <> gdb_ok then begin
+   clicommand('call '+inttostr(ftargetdebugend)+'()');
+  end;
  end;
 end;
 
