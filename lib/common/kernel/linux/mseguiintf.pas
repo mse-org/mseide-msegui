@@ -7076,7 +7076,7 @@ end;
  
 var
  debugungrabbed: boolean;
- 
+
 procedure GUI_DEBUGBEGIN;
 var
  int1: integer;

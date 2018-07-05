@@ -11754,6 +11754,7 @@ begin
       doclientmouseevent;
       clientoffset:= getclientoffset;
      end;
+    {
      wi1:= self;
      repeat
       with wi1 do begin
@@ -11769,6 +11770,7 @@ begin
       end;
       wi1:= wi1.parentwidget;
      until wi1 = nil;
+    }
     end;
     ek_buttonrelease: begin
      if (button = mb_left) and (fframe <> nil) and 
@@ -11783,25 +11785,44 @@ begin
    end;
    addpoint1(pos,clientoffset);
   end;
-  if eventkind = ek_buttonrelease then begin
-   if button = mb_left then begin
-    exclude(fwidgetstate,ws_lclicked);
+  case eventkind of
+   ek_buttonpress: begin
+    wi1:= self;
+    repeat
+     with wi1 do begin
+      if wantmousefocus(info) then begin
+       if focused then begin
+        activate;
+       end
+       else begin
+        setfocus;
+       end;
+       break;
+      end;
+     end;
+     wi1:= wi1.parentwidget;
+    until wi1 = nil;
    end;
-   if button = mb_middle then begin
-    exclude(fwidgetstate,ws_mclicked);
-   end;
-   if button = mb_right then begin
-    exclude(fwidgetstate,ws_rclicked);
-   end;
-   if (appinst <> nil) and ((shiftstate - mousebuttontoshiftstate(button)) *
-                            mousebuttons = []) and
-                           (appinst.fmousecapturewidget = self) then begin
-    if not (ws_mousecaptured in fwidgetstate) then begin
-     appinst.capturemouse(nil,false);
-    end
-    else begin
-     fwidgetstate:= fwidgetstate - [ws_clientmousecaptured];
-//     appinst.ungrabpointer; ????
+   ek_buttonrelease: begin
+    if button = mb_left then begin
+     exclude(fwidgetstate,ws_lclicked);
+    end;
+    if button = mb_middle then begin
+     exclude(fwidgetstate,ws_mclicked);
+    end;
+    if button = mb_right then begin
+     exclude(fwidgetstate,ws_rclicked);
+    end;
+    if (appinst <> nil) and ((shiftstate - mousebuttontoshiftstate(button)) *
+                             mousebuttons = []) and
+                            (appinst.fmousecapturewidget = self) then begin
+     if not (ws_mousecaptured in fwidgetstate) then begin
+      appinst.capturemouse(nil,false);
+     end
+     else begin
+      fwidgetstate:= fwidgetstate - [ws_clientmousecaptured];
+ //     appinst.ungrabpointer; ????
+     end;
     end;
    end;
   end;
