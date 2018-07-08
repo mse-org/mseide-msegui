@@ -350,7 +350,8 @@ Crosscompiling and remote debugging i386/x84_64-linux -> arm-linux
 For Raspberry Pi:
 - Establish a ssh login without password (public key authentication).
 
-- On the i386/x84_64-linux host install the scp program
+On the i386/x84_64-linux host:
+- install the scp program
 - download and extract 
   https://sourceforge.net/projects/mseide-msegui/files/fpcrossarm/crossfpc-i386_linux_eabihf_3_0_5.tar.gz
   (or crossfpc-x86_64_linux_eabihf_3_0_5.tar.gz)
