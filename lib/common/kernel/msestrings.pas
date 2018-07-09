@@ -512,15 +512,16 @@ function charstring(ch: msechar; count: integer): msestring; overload;
 function countleadingchars(const str: msestring;  char: msechar): integer; overload;
 function countleadingchars(const str: string; char: char): integer; overload;
           //-1 = leer
-function breaklines(const source: string): stringarty; overload;
-function breaklines(const source: msestring): msestringarty; overload;
-function breaklines(const source: msestring;
-                       maxlength: integer): msestringarty; overload;
 function fitstring(const source: msestring; const len: integer;
                          const pos: stringposty = sp_left;
                          const cutchar: msechar = #0;
                          const padchar: msechar = ' '): msestring;
                   //cutchar = 0 -> no cutchar
+
+function breaklines(const source: string): stringarty; overload;
+function breaklines(const source: msestring): msestringarty; overload;
+function breaklines(const source: msestring;
+                       maxlength: integer): msestringarty; overload;
 
 procedure splitstring(source: string;
                      var dest: stringarty; separator: char = c_tab;
