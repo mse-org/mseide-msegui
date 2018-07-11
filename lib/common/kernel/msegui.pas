@@ -12481,6 +12481,14 @@ end;
 
 procedure twidget.internaldoenter;
 begin
+{$ifdef mse_debugwidgetfocus}
+ if not (ws_entered in fwidgetstate) then begin
+  debugwriteln(debugwidgetname(self,'!*+internaldoenter new '));
+ end
+ else begin
+  debugwriteln(debugwidgetname(self,'**+internaldoenter '));
+ end;
+{$endif}
  if not (ws_entered in fwidgetstate) then begin
   include(fwidgetstate,ws_entering);
   try
@@ -12513,6 +12521,14 @@ end;
 
 procedure twidget.internaldoexit;
 begin
+{$ifdef mse_debugwidgetfocus}
+ if (ws_entered in fwidgetstate) then begin
+  debugwriteln(debugwidgetname(self,'!*-internaldoexit new '));
+ end
+ else begin
+  debugwriteln(debugwidgetname(self,'**-internaldoexit '));
+ end;
+{$endif}
  if ws_entered in fwidgetstate then begin
   include(fwidgetstate,ws_exiting);
   try
@@ -12545,6 +12561,14 @@ var
  lwo1: longword;
  {$endif}
 begin
+{$ifdef mse_debugwidgetfocus}
+ if not (ws_focused in fwidgetstate) then begin
+  debugwriteln(debugwidgetname(self,'!***+internaldofocus new '));
+ end
+ else begin
+  debugwriteln(debugwidgetname(self,'****+internaldofocus '));
+ end;
+{$endif}
  if not (ws_focused in fwidgetstate) then begin
   include(fwidgetstate,ws_focused);
  {$ifdef mse_with_ifi}
@@ -12590,6 +12614,14 @@ var
  lwo1: longword;
  {$endif}
 begin
+{$ifdef mse_debugwidgetfocus}
+ if (ws_focused in fwidgetstate) then begin
+  debugwriteln(debugwidgetname(self,'!***-internaldodefocus new '));
+ end
+ else begin
+  debugwriteln(debugwidgetname(self,'****-internaldodefocus'));
+ end;
+{$endif}
  if ws_focused in fwidgetstate then begin
   exclude(fwidgetstate,ws_focused);
  {$ifdef mse_with_ifi}
@@ -12628,6 +12660,14 @@ end;
 
 procedure twidget.internaldoactivate;
 begin
+{$ifdef mse_debugwidgetfocus}
+ if not (ws_active in fwidgetstate) then begin
+  debugwriteln(debugwidgetname(self,'!**+internaldoactivate new '));
+ end
+ else begin
+  debugwriteln(debugwidgetname(self,'***+internaldoactivate '));
+ end;
+{$endif}
  if not (ws_active in fwidgetstate) then begin
   include(fwidgetstate,ws_active);
   doactivate;
@@ -12640,6 +12680,14 @@ end;
 
 procedure twidget.internaldodeactivate;
 begin
+{$ifdef mse_debugwidgetfocus}
+ if (ws_active in fwidgetstate) then begin
+  debugwriteln(debugwidgetname(self,'!**-internaldodeactivate new '));
+ end
+ else begin
+  debugwriteln(debugwidgetname(self,'***-internaldodeactivate '));
+ end;
+{$endif}
  if ws_active in fwidgetstate then begin
   exclude(fwidgetstate,ws_active);
   dodeactivate;
@@ -17073,7 +17121,7 @@ var
  focusedwidgetbefore: twidget;
  widget1: twidget;
  widgetar: widgetarty;
- int1,int2: integer;
+ int1,int2,int3: integer;
  bo1: boolean;
  ass1,ass2: iassistiveclient;
 begin
@@ -17137,6 +17185,8 @@ begin
    if widget <> nil then begin
     widgetar:= widget.getrootwidgetpath; //new focus
     int2:= length(widgetar);
+    int3:= int2;
+    bo1:= appinst.factivewindow = self;
     if widget1 <> nil then begin
      if widget1.checkancestor(fenteredwidget) then begin
       widget1:= fenteredwidget;
@@ -17147,18 +17197,28 @@ begin
        break;
       end;
      end;
-    end;
-    bo1:= appinst.factivewindow = self;
-    for int1:= int2-1 downto 0 do begin
-     fenteredwidget:= widgetar[int1];
-     fenteredwidget.internaldoenter;
-     if ffocuscount <> focuscountbefore then begin
-      exit;
+     if bo1 then begin
+      int3:= length(widgetar);
+      for int1:= int2 to high(widgetar) do begin
+       if widgetar[int1].active then begin
+        int3:= int1;
+        break;
+       end;
+      end;
      end;
-     if int1 = 0 then begin
-      widgetar[int1].internaldofocus();
+    end;
+    for int1:= int3-1 downto 0 do begin
+     if int1 < int2 then begin
+      fenteredwidget:= widgetar[int1];
+      fenteredwidget.internaldoenter;
       if ffocuscount <> focuscountbefore then begin
        exit;
+      end;
+      if int1 = 0 then begin
+       widgetar[int1].internaldofocus();
+       if ffocuscount <> focuscountbefore then begin
+        exit;
+       end;
       end;
      end;
      if bo1 then begin
