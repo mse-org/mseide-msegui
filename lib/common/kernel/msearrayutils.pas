@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2016 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2018 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -216,6 +216,7 @@ procedure splitcomplexar(const acomplex: complexarty; out re,im: realarty);
 function comparepointer(const l,r): integer;
 function compareinteger(const l,r): integer;
 function compareint64(const l,r): integer;
+function comparecard64(const l,r): integer;
 function comparerealty(const l,r): integer;
 function compareasciistring(const l,r): integer;
 function compareiasciistring(const l,r): integer;
@@ -1741,6 +1742,11 @@ end;
 function compareint64(const l,r): integer;
 begin
  result:= int64(l) - int64(r);
+end;
+
+function comparecard64(const l,r): integer;
+begin
+ result:= card64(l) - card64(r);
 end;
 
 procedure doquicksortpointer(const compare: pointercomparefuncty; 
