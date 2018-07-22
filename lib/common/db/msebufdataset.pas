@@ -56,7 +56,11 @@ type
   size: integer;   //size in buffer              //  checked by save/restore
   fieldtype:  tfieldtype;                        //
   dbfieldsize: integer; //maxsize of dbfield   ////
+ {$ifdef cpu64}
+  field: card32;
+ {$else}
   field: tfield; //last!
+ {$endif}
  end;
 
  fieldinfobasety = record
@@ -65,6 +69,8 @@ type
   fieldtype:  tfieldtype;                        //
   dbfieldsize: integer; //maxsize of dbfield   ////
  end;
+ pfieldinfobasety = ^fieldinfobasety;
+ 
  fieldinfoextty = record
   basetype: tfieldtype;
   field: tfield;
@@ -174,17 +180,36 @@ type
  tmsebufdataset = class;
  
  logflagty = (lf_end,lf_rec,lf_update,lf_cancel,lf_apply);
+ reclogheader32ty = record
+  kind: tupdatekind;
+  po: card32;
+ end;
  reclogheaderty = record
   kind: tupdatekind;
-  po: pointer;
+  po: card64; //pointer;
  end;
  updatekindty = (uk_modify=ord(ukmodify),uk_insert=ord(ukinsert),
                  uk_delete=ord(ukdelete),uk_modifyinupdate);
+ updatelogheader32ty = record
+  logging: boolean;
+  kind: updatekindty;
+  po: card32;
+  deletedrecord: card32;
+ end;
  updatelogheaderty = record
   logging: boolean;
   kind: updatekindty;
-  po: pointer;
-  deletedrecord: pintrecordty;
+  po: card64; //pointer;
+  deletedrecord: card64; //pintrecordty;
+ end;
+ logbufferheader32ty = record
+  case logflag: logflagty of
+   lf_rec: (
+    rec: reclogheader32ty;
+   );
+   lf_update,lf_cancel,lf_apply: (
+    update: updatelogheader32ty;
+   );
  end;
  logbufferheaderty = record
   case logflag: logflagty of
@@ -227,6 +252,8 @@ type
    fbuffer: array [0..bufstreambuffersize-1] of byte;
    fbuflen: integer;
    fbufindex: integer;
+  protected
+   f32to64: boolean;
   public
    constructor create(const aowner: tmsebufdataset; const astream: tstream);
    function read(out buffer; length: integer): integer;
@@ -1897,9 +1924,34 @@ end;
 
 function tbufstreamreader.readlogbufferheader(
                       out aheader: logbufferheaderty): boolean;
+var
+ rec1: logbufferheader32ty;
 begin
- result:= (read(aheader,sizeof(aheader)) = sizeof(aheader)) and 
-          (aheader.logflag <> lf_end);
+ if f32to64 then begin
+  result:= (read(rec1,sizeof(rec1)) = sizeof(rec1)) and 
+                                            (rec1.logflag <> lf_end);
+  if result then begin
+   aheader.logflag:= rec1.logflag;
+   if rec1.logflag = lf_rec then begin
+    with aheader.rec do begin
+     kind:= rec1.rec.kind;
+     po:= rec1.rec.po;
+    end;
+   end
+   else begin
+    with aheader.update do begin
+     logging:= rec1.update.logging;
+     kind:= rec1.update.kind;
+     po:= rec1.update.po;
+     deletedrecord:= rec1.update.deletedrecord;
+    end;
+   end;
+  end;
+ end
+ else begin
+  result:= (read(aheader,sizeof(aheader)) = sizeof(aheader)) and 
+           (aheader.logflag <> lf_end);
+ end;
 end;
 
 function tbufstreamreader.readpointer: pointer;
@@ -1911,7 +1963,8 @@ type
  bufdattagty = array[0..15]of char;
  tbsfheaderty = packed record
   tag: bufdattagty;
-  byteorder: byte;      //0 -> little endian, 1 - big endian
+  byteorder: byte;      //bit 0 0 -> little endian, 1 -> big endian
+                        //bit 2 0 -> 32 bit 1 -> 64 bit (version 2)
   version: integer;
   fieldcount: integer;
   fielddefcount: integer;
@@ -6333,8 +6386,8 @@ var
 begin
  header1.logflag:= alogmode;
  with abuffer,header1.update do begin
-  if (info.bookmark.recordpo <> nil) or (deletedrecord <> nil) then begin
-   deletedrecord:= adeletedrecord;
+  if (info.bookmark.recordpo <> nil) or (deletedrecord <> 0{nil}) then begin
+   deletedrecord:= ptruint(adeletedrecord);
    logging:= alogging;
    if (ruf_inupdate in info.flags) and (info.updatekind = ukmodify) then begin
     kind:= uk_modifyinupdate;
@@ -6342,11 +6395,11 @@ begin
    else begin
     kind:= updatekindty(info.updatekind);
    end;
-   po:= info.bookmark.recordpo;
+   po:= ptruint(info.bookmark.recordpo);
    awriter.writelogbufferheader(header1);
    if (alogmode = lf_update) and 
        ((kind in [uk_modify,uk_modifyinupdate]) or 
-              not logging and (kind = uk_delete) and (po <> nil)) then begin
+              not logging and (kind = uk_delete) and (po <> 0{nil})) then begin
     datapo:= @(oldvalues^.header);
     awriter.write(datapo^.fielddata,fnullmasksize);
     for int2:= 0 to high(ffieldinfos) do begin
@@ -6367,7 +6420,7 @@ begin
  header1.logflag:= lf_rec;
  with header1.rec do begin
   kind:= akind;
-  po:= abuffer;
+  po:= ptruint(abuffer);
  end;
  awriter.writelogbufferheader(header1);
  if akind in [ukmodify,ukinsert] then begin
@@ -6390,7 +6443,10 @@ begin
  with header do begin
   tag:= bufdattag;
   byteorder:= 0;
-  version:= 1;
+ {$ifdef cpu64}
+  byteorder:= byteorder + 2;
+ {$endif} 
+  version:= 2;
   fieldcount:= fieldco;
   fielddefcount:= fielddefs.count;
   recordcount:= self.recordcount;
@@ -6450,19 +6506,20 @@ var
  header: tbsfheaderty;
  reader: tbufstreamreader;
  fieldco: integer;
- ar2: pointerarty;
+ ar2: card64arty;//pointerarty;
  ar3: integerarty;
- appended: pointerarty;
+ appended: card64arty; //pointerarty;
  po1: pointer;
  
- function findrec(const oldpo: pointer; out newpo: pointer;
+ function findrec(const oldpo: card64{pointer}; out newpo: pointer;
                                 out aindex: integer;
                                 const delete: boolean = false): boolean;
            //returns new pointer
  var
   int1: integer;
  begin
-  result:= findarrayitem(oldpo,ar2,sizeof(pointer),@comparepointer,int1);
+  result:= findarrayitem(oldpo,ar2,sizeof(card64),@comparecard64,int1);
+//  result:= findarrayitem(oldpo,ar2,sizeof(pointer),@comparepointer,int1);
   if result then begin
    aindex:= ar3[int1];
    newpo:= findexes[0].ind[aindex];
@@ -6493,11 +6550,12 @@ var
 
 var
  actindexbefore: integer; 
- oldupdatepointers: pointerarty;
+ oldupdatepointers: card64arty; //pointerarty;
 // bo1: boolean;
  int1,int2,int3: integer;
  header1: logbufferheaderty;
  updabuf: recupdatebufferarty;
+ p2: pfieldinfobasety;
  
 begin
  initsavepoint;
@@ -6536,14 +6594,30 @@ begin
     else begin
      int1:= sizeof(fieldinfobasety);
     end;    
-    getmem(po1,int1*fieldco);
+    getmem(p2,int1*fieldco);
+    po1:= p2;
     try
-     reader.readbuffer(po1^,int1*fieldco);
+     reader.readbuffer(p2^,int1*fieldco);
      for int2:= 0 to fieldco-1 do begin
+      with ffieldinfos[int2].base do begin
+       if (p2^.fieldtype <> fieldtype) or 
+                        (p2^.dbfieldsize <> dbfieldsize) then begin
+        formaterror();
+       end;
+      {$ifdef cpu64}
+       if (header.version < 2) or 
+                        ((p2^.offset < offset) or (p2^.size < size)) then begin
+        reader.f32to64:= true;
+       end;
+      {$endif}
+       inc(p2);
+      end;
+{
       if not comparemem(pchar(po1)+int1*int2,@ffieldinfos[int2],
                                    sizeof(fieldinfobasety)) then begin
        formaterror;
       end;
+}
      end;
     finally
      freemem(po1);
@@ -6563,7 +6637,7 @@ begin
     if header.recordcount > 0 then begin
 //     allocuninitedarray(fbrecordcount,sizeof(pointer),ar1);
 //     move(pointer(findexes[0])^,pointer(ar1)^,fbrecordcount*sizeof(pointer));
-     sortarray(ar2,sizeof(pointer),@comparepointer,ar3);
+     sortarray(ar2,sizeof(card64),@comparecard64,ar3);
          //index of old pointers
     end
     else begin
@@ -6604,7 +6678,7 @@ begin
         end;
         oldupdatepointers[int2]:= po;
         int3:= -1;
-        if deletedrecord <> nil then begin
+        if deletedrecord <> 0{nil} then begin
          for int1:= 0 to int2 - 1 do begin
           if oldupdatepointers[int1] = deletedrecord then begin
            int3:= int1;
@@ -6618,7 +6692,7 @@ begin
                            not findrec(deletedrecord,po1,int1,true) then begin
            formaterror;
           end;
-          if po = nil then begin
+          if po = 0{nil} then begin
            info.bookmark.recordpo:= nil;   //deleting of inserted record
            intfreerecord(pintrecordty(po1));
           end
@@ -6690,7 +6764,7 @@ begin
          end;
         end;
         updabuf[int3].info.bookmark.recordpo:= nil;
-        oldupdatepointers[int3]:= nil;
+        oldupdatepointers[int3]:= 0{nil};
                     //inactive
        end;
       end;
@@ -6709,7 +6783,7 @@ begin
         with updabuf[int3] do begin
          intfreerecord(oldvalues);
          info.bookmark.recordpo:= nil;
-         oldupdatepointers[int3]:= nil;
+         oldupdatepointers[int3]:= 0{nil};
                     //inactive
         end;
        end;
@@ -6739,9 +6813,11 @@ begin
   end;
  finally
   reader.free;
-  factindex:= actindexbefore;
-  factindexpo:= @findexes[factindex];
-  checkindex(factindex);
+  if active then begin
+   factindex:= actindexbefore;
+   factindexpo:= @findexes[factindex];
+   checkindex(factindex);
+  end;
  end;
 end;
 
