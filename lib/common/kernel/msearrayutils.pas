@@ -104,6 +104,7 @@ procedure additem(var dest: msestringararty;
 procedure additem(var dest: int16arty; const value: int16); overload;
 procedure additem(var dest: integerarty; const value: integer); overload;
 procedure additem(var dest: int64arty; const value: int64); overload;
+procedure additem(var dest: card64arty; const value: card64); overload;
 procedure additem(var dest: longwordarty; const value: longword); overload;
 procedure additem(var dest: longboolarty; const value: longbool); overload;
 procedure additem(var dest: booleanarty; const value: boolean); overload;
@@ -114,6 +115,7 @@ procedure deleteitem(var dest: stringarty; index: integer); overload;
 procedure deleteitem(var dest: msestringarty; index: integer); overload;
 procedure deleteitem(var dest: integerarty; index: integer); overload;
 procedure deleteitem(var dest: int64arty; index: integer); overload;
+procedure deleteitem(var dest: card64arty; index: integer); overload;
 procedure deleteitem(var dest: booleanarty; index: integer); overload;
 procedure deleteitem(var dest: realarty; index: integer); overload;
 procedure deleteitem(var dest: complexarty; index: integer); overload;
@@ -859,6 +861,12 @@ begin
  dest[high(dest)]:= value;
 end;
 
+procedure additem(var dest: card64arty; const value: card64);
+begin
+ setlength(dest,high(dest)+2);
+ dest[high(dest)]:= value;
+end;
+
 procedure additem(var dest: longwordarty; const value: longword);
 begin
  setlength(dest,high(dest)+2);
@@ -927,6 +935,15 @@ begin
 end;
 
 procedure deleteitem(var dest: int64arty; index: integer);
+begin
+ if (index < 0) or (index > high(dest)) then begin
+  tlist.Error(SListIndexError, Index);
+ end;
+ move(dest[index+1],dest[index],sizeof(dest[0])*(high(dest)-index));
+ setlength(dest,high(dest));
+end;
+
+procedure deleteitem(var dest: card64arty; index: integer);
 begin
  if (index < 0) or (index > high(dest)) then begin
   tlist.Error(SListIndexError, Index);

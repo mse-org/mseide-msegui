@@ -6619,6 +6619,11 @@ begin
       end;
 }
      end;
+    {$ifndef cpu64}
+     if header.version < 2 then begin
+      reader.f32to64:= true;
+     end;
+    {$endif}
     finally
      freemem(po1);
     end;
