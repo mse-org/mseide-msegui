@@ -41,7 +41,7 @@ type
     function parseinterfacetype: boolean;
     function parserecord: boolean;
     function parseobject: boolean;
-    function parseprocparams(const akind: tmethodkind;
+    function parseprocparams(const akind: methodkindty;
                 var aflags: methodflagsty; var params: paraminfoarty;
                                 const acceptnameonly: boolean): boolean;
     function parseclassprocedureheader(atoken: pascalidentty;
@@ -350,7 +350,7 @@ begin
  end;
 end;
 
-function tpascaldesignparser.parseprocparams(const akind: tmethodkind;
+function tpascaldesignparser.parseprocparams(const akind: methodkindty;
                             var aflags: methodflagsty;
                             var params: paraminfoarty;
                             const acceptnameonly: boolean): boolean;
@@ -389,7 +389,7 @@ begin
  params:= nil;
  result:= false;
  if checkoperator(';') then begin
-  if not (akind in [mkfunction,mkclassfunction]) or acceptnameonly then begin
+  if not (akind in [mk_function,mk_classfunction]) or acceptnameonly then begin
    result:= true;   //no params
   end;
  end
@@ -461,7 +461,7 @@ begin
    result:= true;
   end;
   if result then begin
-   if (akind in [mkfunction,mkclassfunction]) then begin
+   if (akind in [mk_function,mk_classfunction]) then begin
     if checkoperator(':') then begin
      setlength(params,length(params)+1);
      with params[high(params)] do begin
@@ -500,10 +500,11 @@ begin
   skipwhitespace;
   intstartpos:= sourcepos;
   case atoken of
-   pid_function: params.kind:= mkfunction;
-   pid_constructor: params.kind:= mkconstructor;
-   pid_destructor: params.kind:= mkdestructor;
-   else params.kind:= mkprocedure;
+   pid_function: params.kind:= mk_function;
+   pid_method: params.kind:= mk_method;
+   pid_constructor: params.kind:= mk_constructor;
+   pid_destructor: params.kind:= mk_destructor;
+   else params.kind:= mk_procedure;
   end;
   name:= getorigname;
   result:= not checkoperator('.'); //interface proc definition?
@@ -587,10 +588,10 @@ var
 begin
  case atoken of
   pid_procedure,pid_method: begin
-   result:= parseprocparams(mkprocedure,flags1,ar1,false);
+   result:= parseprocparams(mk_procedure,flags1,ar1,false);
   end;
   pid_function: begin
-   result:= parseprocparams(mkfunction,flags1,ar1,false);
+   result:= parseprocparams(mk_function,flags1,ar1,false);
   end
   else begin
    result:= false;
@@ -1146,7 +1147,7 @@ procedure tpascaldesignparser.parseimplementation;
 var
  procnestinglevel: integer;
  
- procedure parseprocedure(const akind: tmethodkind);
+ procedure parseprocedure(const akind: methodkindty);
  var
   classname,procname: lstringty;
   po1: pclassinfoty;
@@ -1279,10 +1280,10 @@ var
          parselabel;
         end;
         pid_procedure,pid_method: begin
-         parseprocedure(mkprocedure);
+         parseprocedure(mk_procedure);
         end;
         pid_function: begin
-         parseprocedure(mkfunction);
+         parseprocedure(mk_function);
         end;
         pid_begin: begin
          parseprocedurebody;
@@ -1336,16 +1337,16 @@ begin
   if getident(aident) then begin;
    case pascalidentty(aident) of
     pid_procedure,pid_method: begin
-     parseprocedure(mkprocedure);
+     parseprocedure(mk_procedure);
     end;
     pid_function: begin
-     parseprocedure(mkfunction);
+     parseprocedure(mk_function);
     end;
     pid_constructor: begin
-     parseprocedure(mkconstructor);
+     parseprocedure(mk_constructor);
     end;
     pid_destructor: begin
-     parseprocedure(mkdestructor);
+     parseprocedure(mk_destructor);
     end;
     pid_type: begin
      parsetype;

@@ -107,9 +107,13 @@ type
                         mef_reintroduce,mef_overload{,mef_inline},
                         mef_brackets,mef_forward);
   methodflagsty = set of methodflagty;
+
+  methodkindty = (mk_none,mk_procedure,mk_function,mk_method,
+                  mk_constructor,mk_destructor,
+                  mk_classprocedure,mk_classfunction);
   
   methodparaminfoty = record
-   kind: tmethodkind;
+   kind: methodkindty;
    flags: methodflagsty;
    params: paraminfoarty; //last is functionresult
   end;
@@ -615,7 +619,18 @@ begin
  end;
 end;
 
-procedure getmethodparaminfo(const atype: ptypeinfo; var info: methodparaminfoty);
+const
+ tmethodkindtomethodkind: array[tmethodkind] of methodkindty = (
+  //mkProcedure, mkFunction, mkConstructor, mkDestructor,
+    mk_procedure,mk_function,mk_constructor,mk_destructor,
+  //mkClassProcedure, mkClassFunction, mkClassConstructor,
+    mk_classprocedure,mk_classfunction,mk_none,
+  //mkClassDestructor,mkOperatorOverload
+    mk_none,          mk_none
+ );
+ 
+procedure getmethodparaminfo(const atype: ptypeinfo; 
+                                         var info: methodparaminfoty);
 
   function getshortstring(var po: pchar): string;
   begin
@@ -637,11 +652,11 @@ var
  po1: pchar;
 begin
  with info do begin
-  kind:= tmethodkind(-1);
+  kind:= methodkindty(-1);
   params:= nil;
   if atype^.Kind = tkmethod then begin
    with gettypedata(atype)^ do begin
-    kind:= methodkind;
+    kind:= tmethodkindtomethodkind[methodkind];
     int1:= paramcount;
     isfunction:= methodkind = mkfunction;
     if isfunction then begin
@@ -706,7 +721,7 @@ begin
   for int1:= 0 to high(params) do begin
    result:= result + '$' + params[int1].typename;
   end;
-  if kind in [mkfunction,mkclassfunction] then begin
+  if kind in [mk_function,mk_classfunction] then begin
    result:= result+'$';
   end;
  end;
