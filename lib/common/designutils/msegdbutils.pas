@@ -2231,7 +2231,9 @@ var
  int1: integer;
 begin
  fpointersize:= 4;
- if (evaluateexpression('sizeof(void*)',str1) = gdb_ok) or 
+ if (evaluateexpression('sizeof($pc)',str1) = gdb_ok) or 
+
+  (evaluateexpression('sizeof(void*)',str1) = gdb_ok) or 
                           //does not work on gdb win64 7.9
        (evaluateexpression('sizeof(pointer)',str1) = gdb_ok) then begin
    //I know there is a gdbcommand for this, I could not find it
@@ -2602,6 +2604,9 @@ end;
 procedure tgdbmi.initinternalbkpts;
 begin
  fexceptionbkpt:= breakinsert('FPC_RAISEEXCEPTION');
+ if fexceptionbkpt < 0 then begin
+  fexceptionbkpt:= breakinsert('__mla__raise');
+ end;
  if not fstoponexception and (fexceptionbkpt > 0) then begin
   breakenable(fexceptionbkpt,false); //disable breakpoint
  end;
