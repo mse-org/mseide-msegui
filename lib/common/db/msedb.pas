@@ -208,7 +208,6 @@ type
     
  tmsefield = class(tfield,imsefield)
   private
-   ftagpo: pointer;
 //   fproviderflags1: providerflags1ty;
    fstate: fieldstatesty;
 //   flookupinfo: lookupfieldinfoty;
@@ -231,7 +230,6 @@ type
    function assql: msestring;
    function asoldsql: msestring;
 //   property asmsestring: msestring read getasmsestring write setasmsestring;
-   property tagpo: pointer read ftagpo write ftagpo;
   published
 //   property providerflags1: providerflags1ty read fproviderflags1 
 //                        write fproviderflags1 default [];
@@ -256,7 +254,6 @@ type
    fgetmsestringdata: getmsestringdataty;
    fsetmsestringdata: setmsestringdataty;
    fcharacterlength: integer;
-   ftagpo: pointer;
 //   fvaluebuffer: msestring;
 //   fvalidating: boolean;
    fisftwidestring: boolean;
@@ -312,7 +309,6 @@ type
    function curmsestring: msestring; overload;
 //   property value: msestring read getasmsestring write setasmsestring;
    property characterlength: integer read fcharacterlength;
-   property tagpo: pointer read ftagpo write ftagpo;
    property isftwidestring: boolean read fisftwidestring;
   published
    property defaultexpression: msestring read getdefaultexpression 
@@ -353,7 +349,6 @@ type
  tmsenumericfield = class(tnumericfield,imsefield)
   private
    fstate: fieldstatesty;
-   ftagpo: pointer;
 //   fproviderflags1: providerflags1ty;
 //   flookupinfo: lookupfieldinfoty;
 //   function getasmsestring: msestring;
@@ -375,7 +370,6 @@ type
    function assql: msestring;
    function asoldsql: msestring;
 //   property asmsestring: msestring read getasmsestring write setasmsestring;
-   property tagpo: pointer read ftagpo write ftagpo;
   published
 //   property providerflags1: providerflags1ty read fproviderflags1 
 //                        write fproviderflags1 default [];
@@ -390,7 +384,6 @@ type
  tmselongintfield = class(tlongintfield,imsefield)
   private
    fstate: fieldstatesty;
-   ftagpo: pointer;
 //   fproviderflags1: providerflags1ty;
 //   flookupinfo: lookupfieldinfoty;
 //   function getasmsestring: msestring;
@@ -423,7 +416,6 @@ type
 //   property asmsestring: msestring read getasmsestring write setasmsestring;
 //   property asid: integer read getasid write setasid; //-1 -> NULL
    property asenum: integer read getaslongint write setasenum;
-   property tagpo: pointer read ftagpo write ftagpo;
   published
 //   property providerflags1: providerflags1ty read fproviderflags1 
 //                        write fproviderflags1 default [];
@@ -439,7 +431,6 @@ type
  tmselargeintfield = class(tlargeintfield,imsefield)
   private
    fstate: fieldstatesty;
-   ftagpo: pointer;
 //   fproviderflags1: providerflags1ty;
 //   flookupinfo: lookupfieldinfoty;
 //   function getasmsestring: msestring;
@@ -470,7 +461,6 @@ type
 //   property asmsestring: msestring read getasmsestring write setasmsestring;
 //   property asid: int64 read getasid write setasid; //-1 -> NULL
    property Value: Largeint read GetAsLargeint write SetAsLargeint;
-   property tagpo: pointer read ftagpo write ftagpo;
   published
 //   property providerflags1: providerflags1ty read fproviderflags1 
 //                        write fproviderflags1 default [];
@@ -486,7 +476,6 @@ type
  tmsesmallintfield = class(tsmallintfield,imsefield)
   private
    fstate: fieldstatesty;
-   ftagpo: pointer;
 //   fproviderflags1: providerflags1ty;
 //   flookupinfo: lookupfieldinfoty;
 //   function getasmsestring: msestring;
@@ -514,7 +503,6 @@ type
    function assql: msestring;
    function asoldsql: msestring;
 //   property asmsestring: msestring read getasmsestring write setasmsestring;
-   property tagpo: pointer read ftagpo write ftagpo;
    property asid: integer read getasid write setasid; //-1 -> NULL
   published
 //   property providerflags1: providerflags1ty read fproviderflags1 
@@ -531,7 +519,6 @@ type
  tmsewordfield = class(twordfield,imsefield)
   private
    fstate: fieldstatesty;
-   ftagpo: pointer;
 //   fproviderflags1: providerflags1ty;
 //   flookupinfo: lookupfieldinfoty;
 //   function getasmsestring: msestring;
@@ -557,7 +544,6 @@ type
    function assql: msestring;
    function asoldsql: msestring;
 //   property asmsestring: msestring read getasmsestring write setasmsestring;
-   property tagpo: pointer read ftagpo write ftagpo;
   published
 //   property providerflags1: providerflags1ty read fproviderflags1 
 //                        write fproviderflags1 default [];
@@ -573,7 +559,6 @@ type
  tmseautoincfield = class(tautoincfield,imsefield)
   private
    fstate: fieldstatesty;
-   ftagpo: pointer;
 //   fproviderflags1: providerflags1ty;
 //   flookupinfo: lookupfieldinfoty;
 //   function getasmsestring: msestring;
@@ -595,7 +580,6 @@ type
    function assql: msestring;
    function asoldsql: msestring;
 //   property asmsestring: msestring read getasmsestring write setasmsestring;
-   property tagpo: pointer read ftagpo write ftagpo;
   published
 //   property providerflags1: providerflags1ty read fproviderflags1 
 //                        write fproviderflags1 default [];
@@ -611,7 +595,6 @@ type
  tmsefloatfield = class(tfloatfield,imsefield)
   private
    fstate: fieldstatesty;
-   ftagpo: pointer;
 //   fproviderflags1: providerflags1ty;
 //   flookupinfo: lookupfieldinfoty;
 //   function getasmsestring: msestring;
@@ -640,7 +623,6 @@ type
    function asoldsql: msestring;
    function sum: double;
 //   property asmsestring: msestring read getasmsestring write setasmsestring;
-   property tagpo: pointer read ftagpo write ftagpo;
   published
 //   property providerflags1: providerflags1ty read fproviderflags1 
 //                        write fproviderflags1 default [];
@@ -661,7 +643,6 @@ type
   private
    fstate: fieldstatesty;
    fdisplayvalues: msestring;
-   ftagpo: pointer;
 //   fproviderflags1: providerflags1ty;
 //   flookupinfo: lookupfieldinfoty;
    procedure setdisplayvalues(const avalue: msestring);
@@ -696,7 +677,6 @@ type
    function asoldsql: msestring;
    function sum: integer; //counts true values
 //   property asmsestring: msestring read getasmsestring write setasmsestring;
-   property tagpo: pointer read ftagpo write ftagpo;
   published
 //   property providerflags1: providerflags1ty read fproviderflags1 
 //                        write fproviderflags1 default [];
@@ -719,7 +699,6 @@ type
   private
    fstate: fieldstatesty;
    foptions: datetimefieldoptionsty;
-   ftagpo: pointer;
 //   fproviderflags1: providerflags1ty;
 //   flookupinfo: lookupfieldinfoty;
 //   function getasmsestring: msestring;
@@ -747,7 +726,6 @@ type
    function assql: msestring;
    function asoldsql: msestring;
 //   property asmsestring: msestring read getasmsestring write setasmsestring;
-   property tagpo: pointer read ftagpo write ftagpo;
   published
 //   property providerflags1: providerflags1ty read fproviderflags1 
 //                        write fproviderflags1 default [];
@@ -774,7 +752,6 @@ type
  tmsebinaryfield = class(tbinaryfield,imsefield)
   private
    fstate: fieldstatesty;
-   ftagpo: pointer;
 //   fproviderflags1: providerflags1ty;
 //   flookupinfo: lookupfieldinfoty;
     //imsefield
@@ -796,7 +773,6 @@ type
    function assql: msestring;
    function asoldsql: msestring;
 //   property asmsestring: msestring read getasmsestring write setasmsestring;
-   property tagpo: pointer read ftagpo write ftagpo;
   published
 //   property providerflags1: providerflags1ty read fproviderflags1 
 //                        write fproviderflags1 default [];
@@ -811,7 +787,6 @@ type
  tmsebytesfield = class(tbytesfield,imsefield)
   private
    fstate: fieldstatesty;
-   ftagpo: pointer;
 //   fproviderflags1: providerflags1ty;
 //   flookupinfo: lookupfieldinfoty;
     //imsefield
@@ -836,7 +811,6 @@ type
    function assql: msestring;
    function asoldsql: msestring;
 //   property asmsestring: msestring read getasmsestring write setasmsestring;
-   property tagpo: pointer read ftagpo write ftagpo;
   published
 //   property providerflags1: providerflags1ty read fproviderflags1 
 //                        write fproviderflags1 default [];
@@ -851,7 +825,6 @@ type
  tmsevarbytesfield = class(tvarbytesfield,imsefield)
   private
    fstate: fieldstatesty;
-   ftagpo: pointer;
 //   fproviderflags1: providerflags1ty;
 //   flookupinfo: lookupfieldinfoty;
     //imsefield
@@ -876,7 +849,6 @@ type
    function assql: msestring;
    function asoldsql: msestring;
 //   property asmsestring: msestring read getasmsestring write setasmsestring;
-   property tagpo: pointer read ftagpo write ftagpo;
   published
 //   property providerflags1: providerflags1ty read fproviderflags1 
 //                        write fproviderflags1 default [];
@@ -891,7 +863,6 @@ type
  tmsebcdfield = class(tbcdfield,imsefield)
   private
    fstate: fieldstatesty;
-   ftagpo: pointer;
 //   fproviderflags1: providerflags1ty;
 //   flookupinfo: lookupfieldinfoty;
 //   function getasmsestring: msestring;
@@ -908,7 +879,6 @@ type
    procedure setasfloat(avalue: double); override;
    procedure gettext(var thetext: string; adisplaytext: boolean); override;
    class procedure checktypesize(avalue: longint); override;
-   property tagpo: pointer read ftagpo write ftagpo;
    procedure change; override;
    procedure SetDataset(AValue : TDataset); override;
   public
@@ -964,7 +934,6 @@ type
  tmseblobfield = class(tblobfield,imsefield)
   private
    fcache: tblobcache;
-   ftagpo: pointer;
 //   fproviderflags1: providerflags1ty;
 //   flookupinfo: lookupfieldinfoty;
    procedure setcachekb(const avalue: integer);
@@ -999,7 +968,6 @@ type
    procedure LoadFromStream(Stream: TStream);
    procedure LoadFromFile(const FileName: filenamety);
    procedure SaveToFile(const FileName: filenamety);
-   property tagpo: pointer read ftagpo write ftagpo;
   published
 //   property providerflags1: providerflags1ty read fproviderflags1 
 //                        write fproviderflags1 default [];

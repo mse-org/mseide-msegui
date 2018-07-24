@@ -460,7 +460,6 @@ type
   private
    fonbeforeupdateskin: notifyeventty;
    fonafterupdateskin: notifyeventty;
-   ftagpo: pointer;
    procedure readmoduleclassname(reader: treader);
    procedure writemoduleclassname(writer: twriter);
    procedure beginread;// virtual;
@@ -578,7 +577,6 @@ type
    property moduleclassname: string read getmoduleclassname;
    property actualclassname: string read getactualclassname;
    property msecomponentstate: msecomponentstatesty read fmsecomponentstate;
-   property tagpo: pointer read ftagpo write ftagpo;
    property onbeforeupdateskin: notifyeventty read fonbeforeupdateskin 
                                    write fonbeforeupdateskin;
    property onafterupdateskin: notifyeventty read fonafterupdateskin 

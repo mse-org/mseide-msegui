@@ -111,6 +111,7 @@ type
     FDesignInfo: Longint;
     FVCLComObject: Pointer;
     FComponentStyle: TComponentStyle;
+    ftagpo: pointer;
 //    function GetComObject: IUnknown;
     function GetComponent(AIndex: Integer): tcomponent;
     function GetComponentCount: Integer;
@@ -212,6 +213,7 @@ type
     property DesignInfo: Longint read FDesignInfo write FDesignInfo;
     property Owner: tcomponent read FOwner;
     property VCLComObject: Pointer read FVCLComObject write FVCLComObject;
+    property tagpo: pointer read ftagpo write ftagpo;
   published
     property Name: TComponentName read FName write SetName stored False;
     property Tag: PtrInt read FTag write FTag default 0;

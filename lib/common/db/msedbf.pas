@@ -22,7 +22,6 @@ type
   private
    ffilepath: filenamety;
    fcontroller: tdscontroller;
-   ftagpo: pointer;
    procedure setfilepath(const avalue: filenamety);
    procedure setcontroller(const avalue: tdscontroller);
    function getcontroller: tdscontroller;
@@ -84,7 +83,6 @@ type
    function moveby(const distance: integer): integer;
    procedure cancel; override;
    procedure post; override;
-   property tagpo: pointer read ftagpo write ftagpo;
   published
    property FilePath: filenamety read ffilepath write setfilepath;
    property controller: tdscontroller read fcontroller write setcontroller;

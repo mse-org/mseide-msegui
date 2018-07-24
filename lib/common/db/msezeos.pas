@@ -14,7 +14,6 @@ type
                       igetdscontroller,isqlpropertyeditor,iactivatorclient)
    private
    fcontroller: tdscontroller;
-   ftagpo: pointer;
    procedure setcontroller(const avalue: tdscontroller);
    function getcontroller: tdscontroller;
    function isutf8: boolean;
@@ -78,7 +77,6 @@ type
    procedure cancel; override;
    procedure post; override;
    function moveby(const distance: integer): integer;
-   property tagpo: pointer read ftagpo write ftagpo;
   published
    property controller: tdscontroller read fcontroller write setcontroller;
    property Active: boolean read getactive write setactive default false;
@@ -89,7 +87,6 @@ type
                           isqlpropertyeditor,iactivatorclient)
    private
    fcontroller: tdscontroller;
-   ftagpo: pointer;
    procedure setcontroller(const avalue: tdscontroller);
    function getcontroller: tdscontroller;
    function isutf8: boolean;
@@ -153,7 +150,6 @@ type
    procedure cancel; override;
    procedure post; override;
    function moveby(const distance: integer): integer;
-   property tagpo: pointer read ftagpo write ftagpo;
   published
    property controller: tdscontroller read fcontroller write setcontroller;
    property Active: boolean read getactive write setactive default false;
@@ -164,7 +160,6 @@ type
                           igetdscontroller,iactivatorclient)
    private
    fcontroller: tdscontroller;
-   ftagpo: pointer;
    procedure setcontroller(const avalue: tdscontroller);
    function getcontroller: tdscontroller;
        //idscontroller
@@ -225,7 +220,6 @@ type
    procedure cancel; override;
    procedure post; override;
    function moveby(const distance: integer): integer;
-   property tagpo: pointer read ftagpo write ftagpo;
   published
    property controller: tdscontroller read fcontroller write setcontroller;
    property Active: boolean read getactive write setactive default false;
@@ -236,7 +230,6 @@ type
                        igetdscontroller,iactivatorclient)
    private
    fcontroller: tdscontroller;
-   ftagpo: pointer;
    procedure setcontroller(const avalue: tdscontroller);
    function getcontroller: tdscontroller;
        //idscontroller
@@ -297,7 +290,6 @@ type
    procedure cancel; override;
    procedure post; override;
    function moveby(const distance: integer): integer;
-   property tagpo: pointer read ftagpo write ftagpo;
   published
    property controller: tdscontroller read fcontroller write setcontroller;
    property Active: boolean read getactive write setactive default false;

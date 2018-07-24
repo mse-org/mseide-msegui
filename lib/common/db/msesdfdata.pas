@@ -18,7 +18,6 @@ type
   private
    ffilename: filenamety;
    fcontroller: tdscontroller;
-   ftagpo: pointer;
    procedure setfilename(const avalue: filenamety);
    procedure setcontroller(const avalue: tdscontroller);
    function getcontroller: tdscontroller;
@@ -80,7 +79,6 @@ type
    procedure cancel; override;
    procedure post; override;
    function moveby(const distance: integer): integer;
-   property tagpo: pointer read ftagpo write ftagpo;
   published
    property FileName: filenamety read ffilename write setfilename;
    property controller: tdscontroller read fcontroller write setcontroller;
@@ -95,7 +93,6 @@ type
   private
    ffilename: filenamety;
    fcontroller: tdscontroller;
-   ftagpo: pointer;
    procedure setfilename(const avalue: filenamety);
    procedure setcontroller(const avalue: tdscontroller);
    function getcontroller: tdscontroller;
@@ -157,7 +154,6 @@ type
    procedure cancel; override;
    procedure post; override;
    function moveby(const distance: integer): integer;
-   property tagpo: pointer read ftagpo write ftagpo;
   published
    property FileName: filenamety read ffilename write setfilename;
    property controller: tdscontroller read fcontroller write setcontroller;

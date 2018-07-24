@@ -32,7 +32,6 @@ type
                                iactivatorclient)
   private
 //   fcontroller: tdscontroller;
-//   ftagpo: pointer;
    procedure setcontroller(const avalue: tdscontroller);
    function getcontroller: tdscontroller;
        //idscontroller

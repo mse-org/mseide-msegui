@@ -77,7 +77,6 @@ type
     FOpenAfterRead : boolean;
 //    Function GetDataSetCount : Longint;
 //    Function GetDataset(Index : longint) : tmdbdataset;
-   ftagpo: pointer;
    fopencount: integer;
     procedure RegisterDataset (const DS: itransactionclient; const awrite: boolean);
     procedure UnRegisterDataset(const DS: itransactionclient; const awrite: boolean);
@@ -114,7 +113,6 @@ type
     Property DataBase : tmdatabase Read FDatabase Write SetDatabase;
     property datasets: itransactionclientarty read fdatasets;
     property writedatasets: itransactionclientarty read fdatasets;
-   property tagpo: pointer read ftagpo write ftagpo;
    property opencount: integer read fopencount; //increments on every open
   published
     property Active : boolean read FActive write setactive;
@@ -135,7 +133,6 @@ type
 //    procedure SetAfterDisconnect(const AValue: TNotifyEvent);
 //    procedure SetBeforeConnect(const AValue: TNotifyEvent);
 //    procedure SetBeforeDisconnect(const AValue: TNotifyEvent);
-   ftagpo: pointer;
    fwaitcursor: boolean;
    factioncount: integer;
    procedure setwaitcursor(const avalue: boolean);
@@ -158,7 +155,6 @@ type
     procedure afteraction;
 //    property DataSetCount: Longint read GetDataSetCount;
 //    property DataSets[Index: Longint]: TDataSet read GetDataSet;
-   property tagpo: pointer read ftagpo write ftagpo;
   published
    property Connected: Boolean read GetConnected write SetConnected;
    property waitcursor: boolean read fwaitcursor 
@@ -261,7 +257,6 @@ type
 
   tmdbdataset = Class(TDataset,idatabaseclient,itransactionclient)
    private
-    ftagpo: pointer;
    protected
     fdatabase : tmdatabase;
     ftransaction : tmdbtransaction;
@@ -284,7 +279,6 @@ type
     property transaction : tmdbtransaction read ftransaction write settransaction;
     property transactionwrite : tmdbtransaction read ftransactionwrite 
                            write settransactionwrite;
-    property tagpo: pointer read ftagpo write ftagpo;
   end;
 
  ttacontroller = class(tactivatorcontroller)
