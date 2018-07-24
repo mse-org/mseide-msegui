@@ -157,7 +157,7 @@ end;
 
 procedure tdisassfo.internalrefresh;
 begin
- if isvisible and gdb.cancommand then begin
+ if showing and gdb.cancommand then begin
   grid.beginupdate;
   try
    grid.rowcount:= 0;
