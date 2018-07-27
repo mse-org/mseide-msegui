@@ -1183,7 +1183,7 @@ begin
  result:= name;
  with info do begin
   int2:= high(params);
-  if kind = mk_function then begin
+  if kind in [mk_function,mk_procedurefunc,mk_methodfunc] then begin
    dec(int2);
   end;
   if int2 >= 0 then begin
@@ -1233,7 +1233,7 @@ begin
     result:= result + '()';
    end;
   end;
-  if kind = mk_function then begin
+  if kind in [mk_function,mk_procedurefunc,mk_methodfunc] then begin
    result:= result + ': ' + params[high(params)].typename;
   end;
   result:= result + ';';
@@ -1756,7 +1756,7 @@ begin
   mk_function: begin
    result:= result + 'function ';
   end;
-  mk_method: begin
+  mk_method,mk_methodfunc: begin
    result:= result + 'method ';
   end;
   mk_constructor: begin

@@ -41,7 +41,7 @@ type
     function parseinterfacetype: boolean;
     function parserecord: boolean;
     function parseobject: boolean;
-    function parseprocparams(const akind: methodkindty;
+    function parseprocparams(var akind: methodkindty;
                 var aflags: methodflagsty; var params: paraminfoarty;
                                 const acceptnameonly: boolean): boolean;
     function parseclassprocedureheader(atoken: pascalidentty;
@@ -350,7 +350,7 @@ begin
  end;
 end;
 
-function tpascaldesignparser.parseprocparams(const akind: methodkindty;
+function tpascaldesignparser.parseprocparams(var akind: methodkindty;
                             var aflags: methodflagsty;
                             var params: paraminfoarty;
                             const acceptnameonly: boolean): boolean;
@@ -461,18 +461,26 @@ begin
    result:= true;
   end;
   if result then begin
-   if (akind in [mk_function,mk_classfunction]) then begin
-    if checkoperator(':') then begin
-     setlength(params,length(params)+1);
-     with params[high(params)] do begin
-      name:= 'result';
-      flags:= [pfvar];
-      typename:= getorigname;
-      start:= apos;
-      stop:= sourcepos;
+   if checkoperator(':') then begin
+    setlength(params,length(params)+1);
+    with params[high(params)] do begin
+     name:= 'result';
+     flags:= [pfvar];
+     typename:= getorigname;
+     start:= apos;
+     stop:= sourcepos;
+    end;
+    case akind of
+     mk_procedure: begin
+      akind:= mk_procedurefunc;
      end;
-    end
-    else begin
+     mk_method: begin
+      akind:= mk_methodfunc;
+     end;
+    end;
+   end
+   else begin
+    if (akind in [mk_function,mk_classfunction]) then begin
      result:= acceptnameonly;
     end;
    end;
@@ -585,7 +593,18 @@ function tpascaldesignparser.skipprocedureparams(atoken: pascalidentty): boolean
 var
  ar1: paraminfoarty;
  flags1: methodflagsty;
+ kind1: methodkindty;
 begin
+ case atoken of
+  pid_procedure,pid_method,pid_function: begin
+   kind1:= mk_procedure;
+   result:= parseprocparams(kind1,flags1,ar1,false);
+  end;
+  else begin
+   result:= false;
+  end;
+ end;   
+{
  case atoken of
   pid_procedure,pid_method: begin
    result:= parseprocparams(mk_procedure,flags1,ar1,false);
@@ -597,6 +616,7 @@ begin
    result:= false;
   end;
  end;
+}
 end;
 
 function tpascaldesignparser.skipprocedureheader(atoken: pascalidentty): boolean;
@@ -1199,7 +1219,7 @@ var
     end;
     methodinfo.kind:= akind;
     methodinfo.flags:= [];
-    if parseprocparams(akind,methodinfo.flags,
+    if parseprocparams(methodinfo.kind,methodinfo.flags,
                             methodinfo.params,classname.po <> nil) then begin
      pos2:= sourcepos;
      if po1 <> nil then begin //class or object

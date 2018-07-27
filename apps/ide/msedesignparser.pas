@@ -108,7 +108,8 @@ type
                         mef_brackets,mef_forward);
   methodflagsty = set of methodflagty;
 
-  methodkindty = (mk_none,mk_procedure,mk_function,mk_method,
+  methodkindty = (mk_none,mk_procedure,mk_procedurefunc,mk_function,
+                  mk_method,mk_methodfunc,
                   mk_constructor,mk_destructor,
                   mk_classprocedure,mk_classfunction);
   
@@ -721,7 +722,8 @@ begin
   for int1:= 0 to high(params) do begin
    result:= result + '$' + params[int1].typename;
   end;
-  if kind in [mk_function,mk_classfunction] then begin
+  if kind in [mk_function,mk_classfunction,
+                       mk_procedurefunc,mk_methodfunc] then begin
    result:= result+'$';
   end;
  end;
