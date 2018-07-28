@@ -1356,8 +1356,11 @@ begin
  while not eof do begin
   if getident(aident) then begin;
    case pascalidentty(aident) of
-    pid_procedure,pid_method: begin
+    pid_procedure: begin
      parseprocedure(mk_procedure);
+    end;
+    pid_method: begin
+     parseprocedure(mk_method);
     end;
     pid_function: begin
      parseprocedure(mk_function);
