@@ -876,7 +876,7 @@ type
    property rowstate_foldissum: tifibooleanlinkcomp read getrowstate_foldissum 
                                                     write setrowstate_foldissum;
  end;
- 
+
  tifilinkcomp = class(tmsecomponent)
   private
    fcontroller: tcustomificlientcontroller;
@@ -1055,7 +1055,7 @@ type
    property controller: tgridclientcontroller read getcontroller
                                                          write setcontroller;
  end;
- 
+
  iififieldsource = interface(inullinterface)[miid_iififieldsource]
   function getfieldnames(const atypes: listdatatypesty): msestringarty;
  end;

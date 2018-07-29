@@ -93,7 +93,7 @@ begin
        tifienumlinkcomp,tifidropdownlistlinkcomp,
        tifiactionlinkcomp,tififormlinkcomp,
        tifidialoglinkcomp,tifidialog,
-       tifigridlinkcomp,
+       tifigridlinkcomp,tifiitemlinkcomp,tifitreeitemlinkcomp,
        tconnectedifidatasource{,tifisqldatasource,}
        {$ifndef mse_no_db}{$ifdef FPC},tifisqlresult{$endif}{$endif}]);
  registercomponenttabhints(['ifi'],

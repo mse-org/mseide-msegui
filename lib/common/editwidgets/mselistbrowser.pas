@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2017 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2018 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -23,7 +23,7 @@ uses
  msesys,msedrag,msestat,mseinplaceedit,msepointer,msegridsglob,
  mserichstring,msearrayprops,msevaluenodesglob
  {$ifdef mse_with_ifi}
- ,mseificomp,mseifiglob,mseificompglob
+ ,mseificomp,mseifiglob,mseificompglob,mseifigui
  {$endif}
  ;
 
@@ -470,7 +470,7 @@ type
    property onpastefromclipboard;
  end;
 
- titemedit = class;
+ tcustomitemedit = class;
 
  tcustomitemeditlist = class(tcustomitemlist,iimagelistinfo)
   private
@@ -478,7 +478,7 @@ type
    fcolorglyphactive: colorty;
    fcolorline: colorty;
    fcolorlineactive: colorty;
-   fowner: titemedit;
+   fowner: tcustomitemedit;
    fonitemnotification: nodenotificationeventty;
 //   fboxglyph_list: timagelist;
 //   fboxglyph_listactive: timagelist;
@@ -513,13 +513,13 @@ type
   public
    constructor create; overload; override;
    constructor create(const intf: iitemlist;
-                                 const owner: titemedit); reintroduce; overload;
+                         const owner: tcustomitemedit); reintroduce; overload;
    procedure assign(const aitems: listitemarty); reintroduce; overload;
    procedure insert(const aindex: integer; const anode: tlistitem);
    procedure add(const anode: tlistitem);
    procedure refreshitemvalues(aindex: integer = 0; //-1 = current grid row
                                acount: integer = -1); //-1 = all
-   property owner: titemedit read fowner;
+   property owner: tcustomitemedit read fowner;
    property colorglyph: colorty read fcolorglyph 
                                     write setcolorglyph default cl_glyph;
                       //for monochrome imagelist
@@ -634,7 +634,7 @@ type
 
  tvalueedits = class(townedpersistentarrayprop)
   public
-   constructor create(const aowner: titemedit); reintroduce;
+   constructor create(const aowner: tcustomitemedit); reintroduce;
    class function getitemclasstype: persistentclassty; override;
   published
  end;
@@ -647,7 +647,7 @@ type
  extendimageeventty = procedure(const sender: twidget;
                         const cellinfopo: pcellinfoty; //nil for non cell call
                                    var ainfo: extrainfoty) of object;
- titemedit = class(tdataedit,iitemlist,ibutton)
+ tcustomitemedit = class(tdataedit,iitemlist,ibutton)
   private
    fitemlist: tcustomitemeditlist;
    fonsetvalue: setstringeventty;
@@ -661,6 +661,9 @@ type
    fonextendimage: extendimageeventty;
 
    fvalueedits: tvalueedits;
+  {$ifdef mse_with_ifi}
+   fitemifilink: boolean;
+  {$endif}
    function getframe: tbuttonsframe;
    procedure setframe(const avalue: tbuttonsframe);                      
    function getitemlist: titemeditlist;
@@ -672,6 +675,10 @@ type
   {$ifdef mse_with_ifi}
    function getifilink: tifistringlinkcomp;
    procedure setifilink(const avalue: tifistringlinkcomp);
+   function getifilink1: tifilinkcomp;
+   procedure setifilink1(const avalue: tifilinkcomp);
+//   function getifiitemlink: tifiitemlinkcomp;
+//   procedure setifiitemlink(const avalue: tifiitemlinkcomp);
   {$endif}
    procedure setvalueedits(const avalue: tvalueedits);
   protected
@@ -790,6 +797,8 @@ type
                                        write setitemlist stored false;
 {$ifdef mse_with_ifi}
    property ifilink: tifistringlinkcomp read getifilink write setifilink;
+//   property ifiitemlink: tifiitemlinkcomp read getifiitemlink 
+//                                                      write setifiitemlink;
 {$endif}
    property onsetvalue: setstringeventty read fonsetvalue write fonsetvalue;
    property onclientmouseevent: mouseeventty read fonclientmouseevent 
@@ -820,6 +829,19 @@ type
                                                          write foncheckcanedit;
  end;
 
+ titemedit = class(tcustomitemedit)
+  private
+  {$ifdef mse_with_ifi}
+   function getifiitemlink: tifiitemlinkcomp;
+   procedure setifiitemlink(const avalue: tifiitemlinkcomp);
+  {$endif}
+  published
+{$ifdef mse_with_ifi}
+   property ifiitemlink: tifiitemlinkcomp read getifiitemlink 
+                                                      write setifiitemlink;
+{$endif}
+ end;
+ 
  tdropdownitemedit = class(titemedit,idropdownlist)
   private
    fdropdown: tcustomdropdownlistcontroller;
@@ -1104,7 +1126,7 @@ type
    constructor create(aowner: tcomponent); override;
  end;
  
- ttreeitemedit = class(titemedit,idragcontroller)
+ ttreeitemedit = class(tcustomitemedit,idragcontroller)
   private
    foptions: treeitemeditoptionsty;
    foncheckrowmove: checkmoveeventty;
@@ -1115,6 +1137,11 @@ type
    procedure setitems(const index: integer; const Value: ttreelistedititem);
    procedure expandedchanged(const avalue: boolean);
    procedure setfieldedit(const avalue: trecordfieldedit);
+  private
+  {$ifdef mse_with_ifi}
+   function getifiitemlink: tifitreeitemlinkcomp;
+   procedure setifiitemlink(const avalue: tifitreeitemlinkcomp);
+  {$endif}
   protected
    procedure doitembuttonpress(var info: mouseeventinfoty); override;
    function locatecount: integer; override;        //number of locate values
@@ -1154,6 +1181,10 @@ type
    property fieldedit: trecordfieldedit read ffieldedit write setfieldedit;
    property options: treeitemeditoptionsty read foptions 
                                                     write foptions default [];
+{$ifdef mse_with_ifi}
+   property ifiitemlink: tifitreeitemlinkcomp read getifiitemlink 
+                                                      write setifiitemlink;
+{$endif}
    property oncheckrowmove: checkmoveeventty read foncheckrowmove 
                                                         write foncheckrowmove;
  end;
@@ -2745,7 +2776,7 @@ begin
 end;
 
 constructor tcustomitemeditlist.create(const intf: iitemlist;
-                                                  const owner: titemedit);
+                                                  const owner: tcustomitemedit);
 begin
  fowner:= owner;
  inherited create(intf);
@@ -3089,7 +3120,7 @@ end;
 
 procedure tvalueedititem.changed;
 begin
- with titemedit(fowner) do begin
+ with tcustomitemedit(fowner) do begin
   if componentstate * [csloading,csdestroying] = [] then begin
    valueeditchanged();
   end;
@@ -3107,13 +3138,13 @@ begin
   if (finfo.editwidget <> nil) and (finfo.gridintf <> nil) then begin
    finfo.gridintf.setparentgridwidget(nil);
   end;
-  titemedit(fowner).setlinkedvar(avalue,tmsecomponent(finfo.editwidget));
+  tcustomitemedit(fowner).setlinkedvar(avalue,tmsecomponent(finfo.editwidget));
   if avalue = nil then begin
    finfo.gridintf:= nil;
    finfo.datatype:= dl_none;
   end
   else begin
-   finfo.gridintf.setparentgridwidget(igridwidget(titemedit(fowner)));
+   finfo.gridintf.setparentgridwidget(igridwidget(tcustomitemedit(fowner)));
    finfo.datatype:= finfo.gridintf.getdatalistclass().datatype();
   end;
   changed();
@@ -3130,7 +3161,7 @@ end;
 
 { tvalueedits }
 
-constructor tvalueedits.create(const aowner: titemedit);
+constructor tvalueedits.create(const aowner: tcustomitemedit);
 begin
  inherited create(aowner,tvalueedititem);
 end;
@@ -3140,9 +3171,9 @@ begin
  result:= tvalueedititem;
 end;
 
-{ titemedit }
+{ tcustomitemedit }
 
-constructor titemedit.create(aowner: tcomponent);
+constructor tcustomitemedit.create(aowner: tcomponent);
 begin
  fentryedge:= gd_none;
  fvalueedits:= tvalueedits.create(self);
@@ -3158,7 +3189,7 @@ begin
 // createframe;
 end;
 
-destructor titemedit.destroy;
+destructor tcustomitemedit.destroy;
 begin
  if fgridintf = nil then begin
   freeandnil(fitemlist);
@@ -3167,17 +3198,17 @@ begin
  inherited;
 end;
 
-function titemedit.createdatalist(const sender: twidgetcol): tdatalist;
+function tcustomitemedit.createdatalist(const sender: twidgetcol): tdatalist;
 begin
  result:= fitemlist;
 end;
 
-function titemedit.getdatalistclass: datalistclassty;
+function tcustomitemedit.getdatalistclass: datalistclassty;
 begin
  result:= titemeditlist;
 end;
 
-procedure titemedit.setgridintf(const intf: iwidgetgrid);
+procedure tcustomitemedit.setgridintf(const intf: iwidgetgrid);
 var
  li1: tcustomitemeditlist;
 begin
@@ -3207,12 +3238,12 @@ begin
  end;
 end;
 
-procedure titemedit.createnode(var item: tlistitem);
+procedure tcustomitemedit.createnode(var item: tlistitem);
 begin
  item:= tlistitem.create(fitemlist);
 end;
 
-function titemedit.getlayoutinfo(
+function tcustomitemedit.getlayoutinfo(
                        const acellinfo: pcellinfoty): plistitemlayoutinfoty;
 begin
  if (ws1_painting in fwidgetstate1) or (des_updatelayout in fstate) then begin
@@ -3251,7 +3282,7 @@ begin
  end;
 end;
 
-procedure titemedit.updateitemvalues(const index: integer; const count: integer);
+procedure tcustomitemedit.updateitemvalues(const index: integer; const count: integer);
 var
  int1,int2: integer;
  po1: plistitem;
@@ -3301,7 +3332,7 @@ begin
  end;
 end;
 
-procedure titemedit.updateitemvalues(); 
+procedure tcustomitemedit.updateitemvalues(); 
         //calls updateitemvalues for current grid row
 var
  int1: integer;
@@ -3314,7 +3345,7 @@ begin
  end;
 end;
 
-procedure titemedit.itemcountchanged;
+procedure tcustomitemedit.itemcountchanged;
 begin
  fvalue:= nil; //invalid
  if fgridintf <> nil then begin
@@ -3325,7 +3356,7 @@ begin
  end;
 end;
 
-procedure titemedit.getitemvalues;
+procedure tcustomitemedit.getitemvalues;
 begin
  if fvalue = nil then begin
   text:= '';
@@ -3337,7 +3368,7 @@ begin
  setupeditor;
 end;
 
-procedure titemedit.gridtovalue(arow: integer);
+procedure tcustomitemedit.gridtovalue(arow: integer);
 var
  int1: integer;
 begin
@@ -3355,7 +3386,7 @@ begin
  inherited;
 end;
 
-procedure titemedit.valuetogrid(arow: integer);
+procedure tcustomitemedit.valuetogrid(arow: integer);
 begin
  if arow >= 0 then begin
   fitemlist.incupdate;
@@ -3367,7 +3398,7 @@ begin
  end;
 end;
 
-function titemedit.finddataedits(aitem: tlistitem;
+function tcustomitemedit.finddataedits(aitem: tlistitem;
                           out ainfos: recvaluearty): boolean;
 var
  i1,i2: int32;
@@ -3416,7 +3447,7 @@ begin
  end;
 end;
 
-function titemedit.updateeditwidget(): boolean; 
+function tcustomitemedit.updateeditwidget(): boolean; 
                                         //true if editwidgetactivated
 var
  infos1: recvaluearty;
@@ -3488,7 +3519,7 @@ begin
  end;
 end;
 
-procedure titemedit.drawcell(const canvas: tcanvas);
+procedure tcustomitemedit.drawcell(const canvas: tcanvas);
 var
  databefore: pointer;
  infos1: recvaluearty;
@@ -3535,7 +3566,7 @@ begin
  paintimage(canvas);
 end;
 
-procedure titemedit.childdataentered(const sender: igridwidget);
+procedure tcustomitemedit.childdataentered(const sender: igridwidget);
 var
  intf1: irecordvaluefield;
 begin
@@ -3551,7 +3582,7 @@ begin
  end;
 end;
 
-procedure titemedit.childfocused(const sender: igridwidget);
+procedure tcustomitemedit.childfocused(const sender: igridwidget);
 var
  infos1: recvaluearty;
  i1: int32;
@@ -3579,7 +3610,7 @@ begin
  end;
 end;
 
-function titemedit.internaldatatotext(const data): msestring;
+function tcustomitemedit.internaldatatotext(const data): msestring;
 var
  po: plistitem;
 begin
@@ -3597,19 +3628,19 @@ begin
  end;
 end;
 
-procedure titemedit.dosetvalue(var avalue: msestring; var accept: boolean);
+procedure tcustomitemedit.dosetvalue(var avalue: msestring; var accept: boolean);
 begin
  if canevent(tmethod(fonsetvalue)) then begin
   fonsetvalue(self,avalue,accept);
  end;
 end;
 
-procedure titemedit.storevalue(var avalue: msestring);
+procedure tcustomitemedit.storevalue(var avalue: msestring);
 begin
  fvalue.caption:= avalue;
 end;
 
-procedure titemedit.texttovalue(var accept: boolean; const quiet: boolean);
+procedure tcustomitemedit.texttovalue(var accept: boolean; const quiet: boolean);
 var
  mstr1: msestring;
 begin
@@ -3626,7 +3657,7 @@ begin
  end;
 end;
 
-procedure titemedit.calclayout(const asize: sizety;
+procedure tcustomitemedit.calclayout(const asize: sizety;
                                            out alayout: listitemlayoutinfoty);
 begin
  if fframe <> nil then begin
@@ -3639,7 +3670,7 @@ begin
  alayout.textflags:= textflags;
 end;
 
-procedure titemedit.doupdatelayout(const nocolinvalidate: boolean);
+procedure tcustomitemedit.doupdatelayout(const nocolinvalidate: boolean);
 begin
  if (fgridintf <> nil) and (fitemlist <> nil) then begin
   calclayout(paintrect.size,flayoutinfofocused);
@@ -3650,19 +3681,19 @@ begin
  end;
 end;
 
-procedure titemedit.doupdatecelllayout;
+procedure tcustomitemedit.doupdatecelllayout;
 begin
  flayoutinfocell:= flayoutinfofocused;
  fcalcsize:= flayoutinfofocused.cellsize;
 end;
 
-procedure titemedit.updatelayout;
+procedure tcustomitemedit.updatelayout;
 begin
  doupdatelayout(false);
  doupdatecelllayout;
 end;
 
-procedure titemedit.clientrectchanged;
+procedure tcustomitemedit.clientrectchanged;
 var
  bo1: boolean;
 begin
@@ -3679,12 +3710,12 @@ begin
  end;
 end;
 
-procedure titemedit.doitembuttonpress(var info: mouseeventinfoty);
+procedure tcustomitemedit.doitembuttonpress(var info: mouseeventinfoty);
 begin
  //dummy
 end;
 
-procedure titemedit.clientmouseevent(var info: mouseeventinfoty);
+procedure tcustomitemedit.clientmouseevent(var info: mouseeventinfoty);
 var
  po1: pointty;
  zone1: cellzonety;
@@ -3723,13 +3754,13 @@ begin
  end;
 end;
 
-function titemedit.getitemclass: listitemclassty;
+function tcustomitemedit.getitemclass: listitemclassty;
 begin
 // result:= tlistitem;
  result:= listitemclassty(fitemlist.fitemclass);
 end;
 
-procedure titemedit.setupeditor;
+procedure tcustomitemedit.setupeditor;
 var
  bo1: boolean;
 begin
@@ -3752,7 +3783,7 @@ begin
  end;
 end;
 
-procedure titemedit.dopaintforeground(const acanvas: tcanvas);
+procedure tcustomitemedit.dopaintforeground(const acanvas: tcanvas);
 begin
  if fvalue <> nil then begin
   doextendimage(acanvas.drawinfopo,flayoutinfofocused.variable.extra);
@@ -3777,7 +3808,7 @@ begin
  end;
 end;
 
-procedure titemedit.itemchanged(const index: integer);
+procedure tcustomitemedit.itemchanged(const index: integer);
 begin
  if (fgridintf <> nil) then begin
   if (factiverow < 0) or (factiverow >= fitemlist.count) then begin
@@ -3788,17 +3819,17 @@ begin
  changed;
 end;
 
-function titemedit.getitemlist: titemeditlist;
+function tcustomitemedit.getitemlist: titemeditlist;
 begin
  result:= titemeditlist(fitemlist);
 end;
 
-procedure titemedit.setitemlist(const Value: titemeditlist);
+procedure tcustomitemedit.setitemlist(const Value: titemeditlist);
 begin
  fitemlist.Assign(Value);
 end;
 
-procedure titemedit.dokeydown(var info: keyeventinfoty);
+procedure tcustomitemedit.dokeydown(var info: keyeventinfoty);
 var
  widget1: twidget;
 begin
@@ -3853,7 +3884,7 @@ begin
  end;
 end;
 
-function titemedit.getvaluetext: msestring;
+function tcustomitemedit.getvaluetext: msestring;
 begin
  if (fvalue <> nil) then begin
   result:= fvalue.getvaluetext;
@@ -3863,35 +3894,57 @@ begin
  end;
 end;
 
-procedure titemedit.setvaluetext(var avalue: msestring);
+procedure tcustomitemedit.setvaluetext(var avalue: msestring);
 begin
  if (fvalue <> nil) then begin
   fvalue.setvaluetext(avalue);
  end;
 end;
 
-function titemedit.item: tlistitem;
+function tcustomitemedit.item: tlistitem;
 begin
  result:= fvalue;
 end;
 
-procedure titemedit.internalcreateframe;
+procedure tcustomitemedit.internalcreateframe;
 begin
  tbuttonsframe.create(iscrollframe(self),ibutton(self));
 end;
 
 {$ifdef mse_with_ifi}
-function titemedit.getifilink: tifistringlinkcomp;
+function tcustomitemedit.getifilink: tifistringlinkcomp;
 begin
- result:= tifistringlinkcomp(fifilink);
+ if fitemifilink then begin
+  result:= nil;
+ end
+ else begin
+  result:= tifistringlinkcomp(fifilink);
+ end;
 end;
 
-procedure titemedit.setifilink(const avalue: tifistringlinkcomp);
+procedure tcustomitemedit.setifilink(const avalue: tifistringlinkcomp);
 begin
+ fitemifilink:= false;
  inherited setifilink(avalue);
 end;
 
-procedure titemedit.updateifigriddata(const sender: tobject;
+function tcustomitemedit.getifilink1: tifilinkcomp;
+begin
+ if not fitemifilink then begin
+  result:= nil;
+ end
+ else begin
+  result:= fifilink;
+ end;
+end;
+
+procedure tcustomitemedit.setifilink1(const avalue: tifilinkcomp);
+begin
+ fitemifilink:= true;
+ inherited setifilink(avalue);
+end;
+
+procedure tcustomitemedit.updateifigriddata(const sender: tobject;
                const alist: tdatalist);
 begin
  //dummy, common datalist not possible
@@ -3899,12 +3952,12 @@ end;
 
 {$endif}
 
-function titemedit.isnull: boolean;
+function tcustomitemedit.isnull: boolean;
 begin
  result:= (item = nil) or (item.caption = '');
 end;
 
-procedure titemedit.buttonaction(var action: buttonactionty;
+procedure tcustomitemedit.buttonaction(var action: buttonactionty;
   const buttonindex: integer);
 begin
  if canevent(tmethod(fonbuttonaction)) then begin
@@ -3912,7 +3965,7 @@ begin
  end;
 end;
 
-procedure titemedit.mouseevent(var info: mouseeventinfoty);
+procedure tcustomitemedit.mouseevent(var info: mouseeventinfoty);
 begin
  if fframe <> nil then begin
   tcustombuttonframe(fframe).mouseevent(info);
@@ -3921,7 +3974,7 @@ begin
 end;
 
 {
-procedure titemedit.sortfunc(const l, r; var result: integer);
+procedure tcustomitemedit.sortfunc(const l, r; var result: integer);
 begin
  if oe_casesensitive in foptionsedit then begin
   result:= msecomparestr(tlistitem1(l).fcaption,tlistitem1(r).fcaption);
@@ -3931,33 +3984,33 @@ begin
  end;
 end;
 }
-function titemedit.getitems(const index: integer): tlistitem;
+function tcustomitemedit.getitems(const index: integer): tlistitem;
 begin
  result:= tlistitem(fitemlist[index]);
 end;
 
-procedure titemedit.setitems(const index: integer; const Value: tlistitem);
+procedure tcustomitemedit.setitems(const index: integer; const Value: tlistitem);
 begin
  fitemlist[index]:= value;
 end;
 
-function titemedit.locatecount: integer;        //number of locate values
+function tcustomitemedit.locatecount: integer;        //number of locate values
 begin
  result:= fitemlist.count;
 end;
 
-function titemedit.getkeystring(const index: integer): msestring;
+function tcustomitemedit.getkeystring(const index: integer): msestring;
 begin
  result:= fitemlist[index].caption;
 end;
 {
-function titemedit.islocating: boolean;
+function tcustomitemedit.islocating: boolean;
 begin
  result:= not editing and (oe_locate in foptionsedit)
 end;
 }
 (*
-procedure titemedit.setfiltertext(const value: msestring);
+procedure tcustomitemedit.setfiltertext(const value: msestring);
 var
  int1: integer;
  opt1: locatestringoptionsty;
@@ -3986,12 +4039,12 @@ begin
 end;
 *)
 {
-function titemedit.getcolorglyph: colorty;
+function tcustomitemedit.getcolorglyph: colorty;
 begin
  result:= fitemlist.fcolorglyph;
 end;
 }
-procedure titemedit.docellevent(const ownedcol: boolean;
+procedure tcustomitemedit.docellevent(const ownedcol: boolean;
                                             var info: celleventinfoty);
 begin
  with info do begin
@@ -4045,12 +4098,12 @@ begin
  inherited;
 end;
 
-function titemedit.getediting: boolean;
+function tcustomitemedit.getediting: boolean;
 begin
  result:= des_editing in fstate;
 end;
 
-procedure titemedit.setediting(const avalue: boolean);
+procedure tcustomitemedit.setediting(const avalue: boolean);
 begin
  if editing <> avalue then begin
   if avalue or (oe_locate in foptionsedit) then begin
@@ -4078,7 +4131,7 @@ begin
  end;
 end;
 
-function titemedit.getoptionsedit: optionseditty;
+function tcustomitemedit.getoptionsedit: optionseditty;
 begin
  result:= inherited getoptionsedit;
  if oe_readonly in result then begin
@@ -4089,17 +4142,17 @@ begin
  end;
 end;
 
-procedure titemedit.beginedit;
+procedure tcustomitemedit.beginedit;
 begin
  editing:= true;
 end;
 
-procedure titemedit.endedit;
+procedure tcustomitemedit.endedit;
 begin
  editing:= false;
 end;
 
-function titemedit.valuecanedit: boolean;
+function tcustomitemedit.valuecanedit: boolean;
 begin
  result:= (fvalue <> nil) and tlistitem1(fvalue).canvalueedit();
  if (fvalue <> nil) and canevent(tmethod(foncheckcanedit)) then begin
@@ -4107,7 +4160,7 @@ begin
  end;
 end;
 
-procedure titemedit.doextendimage(const cellinfopo: pcellinfoty; 
+procedure tcustomitemedit.doextendimage(const cellinfopo: pcellinfoty; 
                                                var ainfo: extrainfoty); 
 begin
  fillchar(ainfo,sizeof(ainfo),#0);
@@ -4116,7 +4169,7 @@ begin
  end;
 end;                                                                      
 
-procedure titemedit.getautopaintsize(var asize: sizety);
+procedure tcustomitemedit.getautopaintsize(var asize: sizety);
 begin
  inherited;
  if (fvalue <> nil) and (fvalue.owner <> nil) then begin
@@ -4139,7 +4192,7 @@ begin
  end;
 end;
 
-procedure titemedit.getautocellsize(const acanvas: tcanvas;
+procedure tcustomitemedit.getautocellsize(const acanvas: tcanvas;
                                       var asize: sizety);
 begin
  if fvalue <> nil then begin
@@ -4151,7 +4204,7 @@ begin
  end;
 end;
 
-function titemedit.getcellcursor(const arow: integer;
+function tcustomitemedit.getcellcursor(const arow: integer;
             const acellzone: cellzonety; const apos: pointty): cursorshapety;
 begin
  if acellzone = cz_child then begin
@@ -4187,7 +4240,7 @@ begin
  end;
 end;
 
-procedure titemedit.updatecellzone(const row: integer; const apos: pointty;
+procedure tcustomitemedit.updatecellzone(const row: integer; const apos: pointty;
                             var result: cellzonety);
 var
  ar1: recvaluearty;
@@ -4217,7 +4270,7 @@ begin
  end;
 end;
 
-function titemedit.getgrid: tcustomgrid;
+function tcustomitemedit.getgrid: tcustomgrid;
 begin
  result:= nil;
  if fgridintf <> nil then begin
@@ -4225,7 +4278,7 @@ begin
  end;
 end;
 
-function titemedit.selecteditems: listedititemarty;
+function tcustomitemedit.selecteditems: listedititemarty;
 var
  int1: integer;
  ar1: integerarty;
@@ -4246,12 +4299,12 @@ begin
  end;
 end;
 
-procedure titemedit.datalistdestroyed;
+procedure tcustomitemedit.datalistdestroyed;
 begin
  fitemlist:= nil;
 end;
 
-function titemedit.textclipped(const arow: integer;
+function tcustomitemedit.textclipped(const arow: integer;
                out acellrect: rectty): boolean;
 var
  cell1: gridcoordty;
@@ -4279,17 +4332,17 @@ begin
  end;
 end;
 
-function titemedit.getframe(): tbuttonsframe;
+function tcustomitemedit.getframe(): tbuttonsframe;
 begin
  result:= tbuttonsframe(inherited getframe());
 end;
 
-procedure titemedit.setframe(const avalue: tbuttonsframe);
+procedure tcustomitemedit.setframe(const avalue: tbuttonsframe);
 begin
  inherited setframe(avalue);
 end;
 
-procedure titemedit.insertwidget(const awidget: twidget; const apos: pointty);
+procedure tcustomitemedit.insertwidget(const awidget: twidget; const apos: pointty);
 var
  intf1: igridwidget;
 begin
@@ -4303,22 +4356,22 @@ begin
  end;
 end;
 
-procedure titemedit.setvalueedits(const avalue: tvalueedits);
+procedure tcustomitemedit.setvalueedits(const avalue: tvalueedits);
 begin
  fvalueedits.assign(avalue);
 end;
 
-procedure titemedit.valueeditchanged();
+procedure tcustomitemedit.valueeditchanged();
 begin
 end;
 
-procedure titemedit.loaded();
+procedure tcustomitemedit.loaded();
 begin
  inherited;
  valueeditchanged();
 end;
 
-procedure titemedit.setfirstclick(var ainfo: mouseeventinfoty);
+procedure tcustomitemedit.setfirstclick(var ainfo: mouseeventinfoty);
 begin
  if (factiveinfo.editwidget <> nil) and 
       pointinrect(ainfo.pos,factiveinfo.editwidget.paintparentrect) then begin
@@ -4329,7 +4382,7 @@ begin
  end;
 end;
 
-procedure titemedit.dofocus();
+procedure tcustomitemedit.dofocus();
 var
  widget1: twidget;
 begin
@@ -4347,7 +4400,7 @@ begin
  end;
 end;
 
-procedure titemedit.unregisterchildwidget(const child: twidget);
+procedure tcustomitemedit.unregisterchildwidget(const child: twidget);
 var
  i1: int32;
 begin
@@ -4371,7 +4424,7 @@ begin
 end;
 
 {
-function titemedit.actualcursor(const apos: pointty): cursorshapety;
+function tcustomitemedit.actualcursor(const apos: pointty): cursorshapety;
 var
  zone1: cellzonety;
  int1: integer;
@@ -4389,16 +4442,30 @@ begin
 end;
 }
 {
-procedure titemedit.dostatwrite(const writer: tstatwriter);
+procedure tcustomitemedit.dostatwrite(const writer: tstatwriter);
 begin
  fitemlist.statwrite(writer);
 end;
 
-procedure titemedit.dostatread(const reader: tstatreader);
+procedure tcustomitemedit.dostatread(const reader: tstatreader);
 begin
  fitemlist.statread(reader);
 end;
 }
+
+{ titemedit }
+
+function titemedit.getifiitemlink: tifiitemlinkcomp;
+begin
+ result:= tifiitemlinkcomp(getifilink1());
+end;
+
+procedure titemedit.setifiitemlink(const avalue: tifiitemlinkcomp);
+begin
+ setifilink1(avalue);
+// inherited setifilink(avalue);
+end;
+
 { tdropdownitemedit }
 
 constructor tdropdownitemedit.create(aowner: tcomponent);
@@ -6429,6 +6496,16 @@ begin
  if avalue <> nil then begin
   avalue.setlinkedvar(self,tmsecomponent(avalue.fitemedit));
  end;
+end;
+
+function ttreeitemedit.getifiitemlink: tifitreeitemlinkcomp;
+begin
+ result:= tifitreeitemlinkcomp(getifilink1());
+end;
+
+procedure ttreeitemedit.setifiitemlink(const avalue: tifitreeitemlinkcomp);
+begin
+ setifilink1(avalue);
 end;
 
 function ttreeitemedit.checkrowmove(const curindex,
