@@ -20,7 +20,7 @@ interface
 implementation
 uses
  mseglob,classes,mseificomp,msedesignintf,regifi_bmp,msepropertyeditors,
- mseclasses,
+ mseclasses,mselistbrowser,
  msecomponenteditors,mseificomponenteditors,msetypes{msestrings},msedatalist,
  {$ifndef mse_no_db}{$ifdef FPC}mseifidbcomp,{$endif}{$endif}
  mseifidialogcomp,mseifigui,mseifiendpoint,

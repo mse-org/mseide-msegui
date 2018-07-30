@@ -15027,6 +15027,11 @@ end;
 
 procedure tcustomgrid.dorowsinserting(var index, count: integer);
 begin
+ {$ifdef mse_with_ifi}
+  if fifilink <> nil then begin
+   fifilink.controller.dorowsinserting(index,count,userinput);
+  end;
+ {$endif}
  if canevent(tmethod(fonrowsinserting)) then begin
   fonrowsinserting(self,index,count);
  end;
@@ -15034,6 +15039,11 @@ end;
 
 procedure tcustomgrid.dorowsinserted(const index, count: integer);
 begin
+ {$ifdef mse_with_ifi}
+  if fifilink <> nil then begin
+   fifilink.controller.dorowsinserted(index,count,userinput);
+  end;
+ {$endif}
  if canevent(tmethod(fonrowsinserted)) then begin
   fonrowsinserted(self,index,count);
  end;
@@ -15048,13 +15058,18 @@ begin
  end;
  {$ifdef mse_with_ifi}
   if fifilink <> nil then begin
-   fifilink.controller.dorowsdeleting(index,count);
+   fifilink.controller.dorowsdeleting(index,count,userinput);
   end;
  {$endif}
 end;
 
 procedure tcustomgrid.dorowsdeleted(index, count: integer);
 begin
+ {$ifdef mse_with_ifi}
+  if fifilink <> nil then begin
+   fifilink.controller.dorowsdeleted(index,count,userinput);
+  end;
+ {$endif}
  if canevent(tmethod(fonrowsdeleted)) then begin
   fonrowsdeleted(self,index,count);
  end;

@@ -27,7 +27,7 @@ type
                ns_showparentnotchecked,
                ns_nosubnodestat,
                ns_casesensitive,ns_sorted,//ns_captionclipped,
-                   ns_res14,ns_res15,
+                   ns_drawemptyexpand,ns_res15,
                    ns_useri0,ns_useri1,ns_useri2,ns_useri3,
                           //with invalidate and statsave
                    ns_useri4,ns_useri5,ns_useri6,ns_useri7,
@@ -49,7 +49,7 @@ type
                 );
  nodestates1ty = set of nodestate1ty;
  
- nodeoptionty = (no_drawemptybox,no_solidline,no_checkbox,
+ nodeoptionty = (no_drawemptybox,no_drawemptyexpand,no_solidline,no_checkbox,
                  no_updatechildchecked, 
                          //track ns1_childchecked state, slow!
                  no_updatechildnotchecked, 
@@ -281,6 +281,8 @@ type
    function inccount: integer; //returns itemindex
    function getrootexpanded: boolean;
    procedure setrootexpanded(const avalue: boolean);
+   function getsubitems: boolean;
+   procedure setsubitems(const avalue: boolean);
   protected
    fparent: ttreelistitem;
    fparentindex: integer;
@@ -327,6 +329,7 @@ type
                                      var info: listitemlayoutinfoty); override;
 
    procedure releaseowner; override;
+   procedure releasechildren();
 
    procedure dostatread(const reader: tstatreader); override;
    procedure dostatwrite(const writer: tstatwriter); override;
@@ -347,6 +350,7 @@ type
    function isroot: boolean;
    function issinglerootrow: boolean; //keyrowmove can be used
    function islastnode: boolean;
+   property subitems: boolean read getsubitems write setsubitems;
    function findsibling(const asibling: ttreelistitem): ttreelistitem;
    function nextnode: ttreelistitem;       //node of next row
    function nextnodeparent: ttreelistitem;
@@ -2466,6 +2470,14 @@ begin
      Free;
     end;
    end;
+  end
+  else begin
+   for int1:= 0 to acount-1 do begin
+    with aitems[int1] do begin
+     fparent:= nil;
+     fparentindex:= -1;
+    end;
+   end;
   end;
   if not adestroying then begin
    exclude(fstate1,ns1_destroying);
@@ -3096,7 +3108,9 @@ begin
  nopaint:= (acanvas = nil) or alayoutinfo.variable.calcautocellsize;
  alayoutinfo.variable.treelevelshift:= levelshift;
  if not nopaint then begin //acanvas <> nil then begin
-  if (fcount = 0) and not (ns_subitems in fstate) then begin
+  if (fcount = 0) and not (ns_subitems in fstate) and
+   not ((ns_drawemptyexpand in fstate) or 
+                       (no_drawemptyexpand in fowner.foptions)) then begin
    if (ns_drawemptybox in fstate) or 
                        (no_drawemptybox in fowner.foptions) then begin
     box:= tib_empty;
@@ -3345,6 +3359,21 @@ begin
    n1.expanded:= false;
    n1:= n1.fparent;
   end;
+ end;
+end;
+
+function ttreelistitem.getsubitems: boolean;
+begin
+ result:= ns_subitems in fstate;
+end;
+
+procedure ttreelistitem.setsubitems(const avalue: boolean);
+begin
+ if avalue then begin
+  state:= state + [ns_subitems];
+ end
+ else begin
+  state:= state - [ns_subitems];
  end;
 end;
 
@@ -3740,6 +3769,12 @@ begin
   fitems[int1].releaseowner;
  end;
  inherited;
+end;
+
+procedure ttreelistitem.releasechildren();
+begin
+ include(fstate1,ns1_noowner);
+ clear();
 end;
 
 function ttreelistitem.parentorself: ttreelistitem;

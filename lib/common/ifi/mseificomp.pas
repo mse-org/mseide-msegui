@@ -692,7 +692,9 @@ type
  ificelleventty = procedure(const sender: tobject; 
                            var info: ificelleventinfoty) of object;
  ifibeforeblockeventty = procedure(const sender: tobject;
-                                var aindex,acount: integer) of object;
+               var aindex,acount: integer; const userinput: boolean) of object;
+ ifiafterblockeventty = procedure(const sender: tobject;
+             const aindex,acount: integer; const userinput: boolean) of object;
 
  tificolitem = class(tmsecomponentlinkitem)
   private
@@ -816,7 +818,10 @@ type
    frowstatefoldlevel: trowstatefoldlevelhandler;
    frowstatehidden: trowstatehiddenhandler;
    frowstatefoldissum: trowstatefoldissumhandler;
+   fonrowsinserting: ifibeforeblockeventty;
+   fonrowsinserted: ifiafterblockeventty;
    fonrowsdeleting: ifibeforeblockeventty;
+   fonrowsdeleted: ifiafterblockeventty;
    procedure setrowcount(const avalue: integer);
    procedure setdatacols(const avalue: tifilinkcomparrayprop);
    function getrowstate: tcustomrowstatelist;
@@ -849,7 +854,14 @@ type
    constructor create(const aowner: tmsecomponent); override;
    destructor destroy; override;
    procedure docellevent(var info: ificelleventinfoty);
-   procedure dorowsdeleting(var index,count: integer);
+   procedure dorowsinserting(var index,count: integer;
+                                               const userinput: boolean);
+   procedure dorowsinserted(const index,count: integer;
+                                               const userinput: boolean);
+   procedure dorowsdeleting(var index,count: integer;
+                                               const userinput: boolean);
+   procedure dorowsdeleted(const index,count: integer;
+                                               const userinput: boolean);
    procedure appendrow(const avalues: array of const;
                          const checkautoappend: boolean = false);
    function canclose: boolean;
@@ -858,8 +870,14 @@ type
   published
    property rowcount: integer read frowcount write setrowcount default 0;
    property oncellevent: ificelleventty read foncellevent write foncellevent;
+   property onrowsinserting: ifibeforeblockeventty read fonrowsinserting
+              write fonrowsinserting;
+   property onrowsinserted: ifiafterblockeventty read fonrowsinserted
+              write fonrowsinserted;
    property onrowsdeleting: ifibeforeblockeventty read fonrowsdeleting
               write fonrowsdeleting;
+   property onrowsdeleted: ifiafterblockeventty read fonrowsdeleted
+              write fonrowsdeleted;
 //  property onclientcellevent: celleventty read fclientcellevent 
 //                                                 write fclientcellevent;
    property datacols: tifilinkcomparrayprop read fdatacols write setdatacols;
@@ -2475,9 +2493,11 @@ begin
  if (vco_datalist in foptionsvalue) xor (fdatalist <> nil) then begin
   if vco_datalist in foptionsvalue then begin
    fdatalist:= createdatalist;
-   include(tdatalist1(fdatalist).fstate,dls_remote);
-   if not (csloading in fowner.componentstate) then begin
-    linkdatalist;
+   if fdatalist <> nil then begin
+    include(tdatalist1(fdatalist).fstate,dls_remote);
+    if not (csloading in fowner.componentstate) then begin
+     linkdatalist;
+    end;
    end;
   end
   else begin
@@ -4618,11 +4638,35 @@ begin
  end;
 end;
 
+procedure tgridclientcontroller.dorowsinserting(var index: integer;
+               var count: integer; const userinput: boolean);
+begin
+ if fowner.canevent(tmethod(fonrowsinserting)) then begin
+  fonrowsinserting(self,index,count,userinput);
+ end;
+end;
+
+procedure tgridclientcontroller.dorowsinserted(const index: integer;
+               const count: integer; const userinput: boolean);
+begin
+ if fowner.canevent(tmethod(fonrowsinserted)) then begin
+  fonrowsinserted(self,index,count,userinput);
+ end;
+end;
+
 procedure tgridclientcontroller.dorowsdeleting(var index: integer;
-               var count: integer);
+               var count: integer; const userinput: boolean);
 begin
  if fowner.canevent(tmethod(fonrowsdeleting)) then begin
-  fonrowsdeleting(self,index,count);
+  fonrowsdeleting(self,index,count,userinput);
+ end;
+end;
+
+procedure tgridclientcontroller.dorowsdeleted(const index: integer;
+               const count: integer; const userinput: boolean);
+begin
+ if fowner.canevent(tmethod(fonrowsdeleted)) then begin
+  fonrowsdeleted(self,index,count,userinput);
  end;
 end;
 

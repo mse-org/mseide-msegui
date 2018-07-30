@@ -262,6 +262,7 @@ type
    property edited: boolean read getedited write setedited;
    function actualcolor: colorty; override;
    function widgetcol: twidgetcol;
+   function grid: tcustomwidgetgrid;
    function gridrow: integer;
    function gridrowhigh: int32; //-1 if no grid
    function griddatarowhigh: int32; //-1 if no grid
@@ -2081,6 +2082,16 @@ begin
  end
  else begin
   result:= fgridintf.getcol;
+ end;
+end;
+
+function tgraphdataedit.grid: tcustomwidgetgrid;
+begin
+ if fgridintf = nil then begin
+  result:= nil;
+ end
+ else begin
+  result:= fgridintf.getgrid;
  end;
 end;
 

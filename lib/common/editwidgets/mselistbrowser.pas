@@ -780,7 +780,7 @@ type
    function getvaluetext: msestring;
    procedure setvaluetext(var avalue: msestring);
    function isnull: boolean; override;
-   function item: tlistitem;
+   function item: tlistedititem;
    property items[const index: integer]: tlistitem read getitems 
                                                     write setitems; default;
    function selecteditems: listedititemarty;
@@ -827,6 +827,38 @@ type
    property oncellevent: celleventty read foncellevent write foncellevent;
    property oncheckcanedit: itemcanediteventty read foncheckcanedit 
                                                          write foncheckcanedit;
+ end;
+
+ titemedit = class;
+ 
+ titemclientcontroller = class(tvalueclientcontroller)
+  private
+   fitemedit: tcustomitemedit;
+   function getitemlist(): titemeditlist;
+   function getitemedit: titemedit;
+  protected
+   function createdatalist: tdatalist override;
+   function getlistdatatypes: listdatatypesty override;
+   function getlistitem(): tlistedititem;
+   procedure linkset(const alink: iificlient); override;
+  public
+   property item: tlistedititem read getlistitem;
+   property itemlist: titemeditlist read getitemlist;
+   property itemedit: titemedit read getitemedit;
+ end;
+
+ tifiitemlinkcomp = class(tifivaluelinkcomp)
+  private
+   function getcontroller: titemclientcontroller;
+   procedure setcontroller(const avalue: titemclientcontroller);
+  protected
+   function getcontrollerclass: customificlientcontrollerclassty; override;
+  public
+   property c: titemclientcontroller read getcontroller
+                                                         write setcontroller;
+  published
+   property controller: titemclientcontroller read getcontroller
+                                                         write setcontroller;
  end;
 
  titemedit = class(tcustomitemedit)
@@ -1125,6 +1157,32 @@ type
   public
    constructor create(aowner: tcomponent); override;
  end;
+
+ ttreeitemclientcontroller = class(titemclientcontroller)
+  private
+  protected
+   function getlistitem(): ttreelistedititem;
+   function getitemlist(): ttreeitemeditlist;
+   function getitemedit(): ttreeitemedit;
+  public
+   property item: ttreelistedititem read getlistitem;
+   property itemlist: ttreeitemeditlist read getitemlist;
+   property itemedit: ttreeitemedit read getitemedit;
+ end;
+ 
+ tifitreeitemlinkcomp = class(tifivaluelinkcomp)
+  private
+   function getcontroller: ttreeitemclientcontroller;
+   procedure setcontroller(const avalue: ttreeitemclientcontroller);
+  protected
+   function getcontrollerclass: customificlientcontrollerclassty; override;
+  public
+   property c: ttreeitemclientcontroller read getcontroller
+                                                         write setcontroller;
+  published
+   property controller: ttreeitemclientcontroller read getcontroller
+                                                         write setcontroller;
+ end;
  
  ttreeitemedit = class(tcustomitemedit,idragcontroller)
   private
@@ -1163,7 +1221,7 @@ type
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
-   function item: ttreelistitem;
+   function item: ttreelistedititem;
    property items[const index: integer]: ttreelistedititem read getitems 
                                                  write setitems; default;
    function selecteditems: treelistedititemarty;
@@ -3901,9 +3959,9 @@ begin
  end;
 end;
 
-function tcustomitemedit.item: tlistitem;
+function tcustomitemedit.item: tlistedititem;
 begin
- result:= fvalue;
+ result:= tlistedititem(fvalue);
 end;
 
 procedure tcustomitemedit.internalcreateframe;
@@ -5436,6 +5494,8 @@ var
  int1,int2: integer;
  bo1: boolean;
  po2: ptreelistedititematy;
+ i1: int32;
+ g1: tcustomgrid;
  
 begin
  if ainfo.action = na_destroying then begin
@@ -5489,6 +5549,13 @@ begin
     if not updating then begin
      with ttreelistitem1(sender) do begin
       if ns_expanded in fstate then begin
+       g1:= nil;
+       if self.fowner <> nil then begin
+        g1:= self.fowner.grid;
+       end;
+       if g1 <> nil then begin
+        i1:= g1.row;
+       end;
        int1:= findex+1;
        if (findex < self.fcount-1)  then begin
         int2:= ainfo.treeheightbefore;
@@ -5503,6 +5570,10 @@ begin
           try
            bo1:= gs1_autoappendlock in fstate1;
            include(fstate1,gs1_autoappendlock);
+           if (g1 <> nil) and 
+                     (g1.row >= int1) and (g1.row > int1 + int2) then begin
+            g1.row:= invalidaxis;
+           end;
            deleterow(int1,int2);
           finally
            if not bo1 then begin
@@ -5514,6 +5585,9 @@ begin
         end;
        end;
        expand;
+       if g1 <> nil then begin
+        g1.row:= i1;
+       end;
       end;
      end;
     end
@@ -6406,9 +6480,9 @@ begin
  fitemlist.assign(value);
 end;
 
-function ttreeitemedit.item: ttreelistitem;
+function ttreeitemedit.item: ttreelistedititem;
 begin
- result:= ttreelistitem(fvalue);
+ result:= ttreelistedititem(fvalue);
 end;
 
 function ttreeitemedit.getitems(const index: integer): ttreelistedititem;
@@ -6980,6 +7054,103 @@ procedure trichlistedititem.setcaptionformat(const avalue: formatinfoarty);
 begin
  fformat:= avalue;
  change;
+end;
+
+{ titemclientcontroller }
+
+function titemclientcontroller.getitemlist(): titemeditlist;
+begin
+ result:= nil;
+ if fitemedit <> nil then begin
+  result:= tcustomitemedit(fitemedit).itemlist;
+ end;
+end;
+
+function titemclientcontroller.getitemedit: titemedit;
+begin
+ pointer(result):= fitemedit;
+end;
+
+function titemclientcontroller.createdatalist: tdatalist;
+begin
+ result:= nil;
+end;
+
+function titemclientcontroller.getlistdatatypes: listdatatypesty;
+begin
+ result:= [];
+end;
+
+function titemclientcontroller.getlistitem(): tlistedititem;
+begin
+ result:= nil;
+ if fitemedit <> nil then begin
+  result:= tcustomitemedit(fitemedit).item;
+ end;
+end;
+
+procedure titemclientcontroller.linkset(const alink: iificlient);
+var
+ obj1: tobject;
+begin
+ inherited;
+ obj1:= alink.getinstance;
+ if obj1 is tcustomitemedit then begin
+  setlinkedvar(tcustomitemedit(obj1),tmsecomponent(fitemedit));
+ end;
+end;
+
+{ ttreeitemclientcontroller }
+
+function ttreeitemclientcontroller.getlistitem(): ttreelistedititem;
+begin
+ pointer(result):= inherited getlistitem();
+end;
+
+function ttreeitemclientcontroller.getitemlist(): ttreeitemeditlist;
+begin
+ pointer(result):= inherited getitemlist();
+end;
+
+function ttreeitemclientcontroller.getitemedit(): ttreeitemedit;
+begin
+ pointer(result):= fitemedit;
+end;
+
+{ tifiitemlinkcomp }
+
+function tifiitemlinkcomp.getcontroller: titemclientcontroller;
+begin
+ result:= titemclientcontroller(inherited controller);
+end;
+
+procedure tifiitemlinkcomp.setcontroller(const avalue: titemclientcontroller);
+begin
+ inherited setcontroller(avalue);
+end;
+
+function tifiitemlinkcomp.getcontrollerclass: customificlientcontrollerclassty;
+begin
+ result:= titemclientcontroller;
+end;
+
+{ tifitreeitemlinkcomp }
+
+function tifitreeitemlinkcomp.getcontroller: ttreeitemclientcontroller;
+begin
+ result:= ttreeitemclientcontroller(inherited controller);
+end;
+
+procedure tifitreeitemlinkcomp.setcontroller(
+                                  const avalue: ttreeitemclientcontroller);
+begin
+ inherited setcontroller(avalue);
+end;
+
+function tifitreeitemlinkcomp.getcontrollerclass: 
+                                     customificlientcontrollerclassty;
+begin
+ result:= ttreeitemclientcontroller;
 end;
 
 initialization

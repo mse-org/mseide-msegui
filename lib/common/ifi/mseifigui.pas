@@ -12,7 +12,7 @@ unit mseifigui;
 interface
 uses
  classes,mclasses,mseclasses,mseguiglob,mseifiglob,mseifi,mseact,msegui,typinfo,
- msestrings,mseapplication,mseforms,msedatanodes,
+ msestrings,mseapplication,mseforms,msedatanodes,msedataedits,
  msearrayprops,mseglob,msetypes,mseifilink,msewidgetgrid,msemenus,
  mseevent,msegrids,msegraphutils,msedatalist,mseificomp,mseificompglob,
  mseifidialogcomp,msegraphics;
@@ -152,56 +152,9 @@ type
                  read fongetdialogclass write fongetdialogclass;
  end;
 
- titemclientcontroller = class(tvalueclientcontroller)
-  private
-  protected
-   function createdatalist: tdatalist override;
-   function getlistdatatypes: listdatatypesty override;
-   function getlistitem(): tlistitem;
-  public
-   property item: tlistitem read getlistitem;
- end;
-
- ttreeitemclientcontroller = class(titemclientcontroller)
-  private
-  protected
-   function getlistitem(): ttreelistitem;
-  public
-   property item: ttreelistitem read getlistitem;
- end;
- 
- tifiitemlinkcomp = class(tifivaluelinkcomp)
-  private
-   function getcontroller: titemclientcontroller;
-   procedure setcontroller(const avalue: titemclientcontroller);
-  protected
-   function getcontrollerclass: customificlientcontrollerclassty; override;
-  public
-   property c: titemclientcontroller read getcontroller
-                                                         write setcontroller;
-  published
-   property controller: titemclientcontroller read getcontroller
-                                                         write setcontroller;
- end;
-
- tifitreeitemlinkcomp = class(tifivaluelinkcomp)
-  private
-   function getcontroller: ttreeitemclientcontroller;
-   procedure setcontroller(const avalue: ttreeitemclientcontroller);
-  protected
-   function getcontrollerclass: customificlientcontrollerclassty; override;
-  public
-   property c: ttreeitemclientcontroller read getcontroller
-                                                         write setcontroller;
-  published
-   property controller: ttreeitemclientcontroller read getcontroller
-                                                         write setcontroller;
- end;
- 
-
 implementation
 uses
- sysutils,msestream,msesysutils,msetmpmodules,mseeditglob;
+ sysutils,msestream,msesysutils,msetmpmodules,mseeditglob,mselistbrowser;
 type
  tcustommodulelink1 = class(tcustommodulelink);
  tdatacols1 = class(tdatacols);
@@ -881,66 +834,6 @@ begin
    application.handleexception;
   end;
  end;
-end;
-
-{ titemclientcontroller }
-
-function titemclientcontroller.createdatalist: tdatalist;
-begin
- result:= nil;
-end;
-
-function titemclientcontroller.getlistdatatypes: listdatatypesty;
-begin
- result:= [];
-end;
-
-function titemclientcontroller.getlistitem(): tlistitem;
-begin
- result:= nil;
-end;
-
-{ ttreeitemclientcontroller }
-
-function ttreeitemclientcontroller.getlistitem(): ttreelistitem;
-begin
- result:= ttreelistitem(inherited getlistitem());
-end;
-
-{ tifiitemlinkcomp }
-
-function tifiitemlinkcomp.getcontroller: titemclientcontroller;
-begin
- result:= titemclientcontroller(inherited controller);
-end;
-
-procedure tifiitemlinkcomp.setcontroller(const avalue: titemclientcontroller);
-begin
- inherited setcontroller(avalue);
-end;
-
-function tifiitemlinkcomp.getcontrollerclass: customificlientcontrollerclassty;
-begin
- result:= titemclientcontroller;
-end;
-
-{ tifitreeitemlinkcomp }
-
-function tifitreeitemlinkcomp.getcontroller: ttreeitemclientcontroller;
-begin
- result:= ttreeitemclientcontroller(inherited controller);
-end;
-
-procedure tifitreeitemlinkcomp.setcontroller(
-                                  const avalue: ttreeitemclientcontroller);
-begin
- inherited setcontroller(avalue);
-end;
-
-function tifitreeitemlinkcomp.getcontrollerclass: 
-                                     customificlientcontrollerclassty;
-begin
- result:= ttreeitemclientcontroller;
 end;
 
 end.

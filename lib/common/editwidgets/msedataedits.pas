@@ -238,6 +238,7 @@ type
    function actualcolor: colorty; override;
    function actualcursor(const apos: pointty): cursorshapety; override;
    function widgetcol: twidgetcol;
+   function grid: tcustomwidgetgrid;
    property gridrow: integer read getgridrow write setgridrow;
                       //returns -1 if no grid, setting ignored if no grid
    function gridrowhigh: int32; //-1 if no grid
@@ -2466,6 +2467,16 @@ begin
  end
  else begin
   result:= fgridintf.getcol;
+ end;
+end;
+
+function tcustomdataedit.grid: tcustomwidgetgrid;
+begin
+ if fgridintf = nil then begin
+  result:= nil;
+ end
+ else begin
+  result:= fgridintf.getgrid();
  end;
 end;
 

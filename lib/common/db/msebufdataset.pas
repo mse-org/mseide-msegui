@@ -1168,9 +1168,10 @@ type
    property logging: boolean read getlogging;
    procedure savetostream(const astream: tstream);
    procedure loadfromstream(const astream: tstream);
-   procedure savetofile(const afilename: filenamety;
+   procedure savetofile(afilename: filenamety = ''; //''-> uselogfilename
                       const acryptohandler: tcustomcryptohandler = nil);
-   procedure loadfromfile(const afilename: filenamety;
+   procedure loadfromfile(afilename: filenamety = ''; 
+                                                   //''-> uselogfilename
                       const acryptohandler: tcustomcryptohandler = nil);
    function streamloading: boolean;
 
@@ -1278,6 +1279,7 @@ type
    procedure applyupdate; overload; virtual;
                    //applies current record
    function recapplying: boolean;
+   procedure dropupdates();
    procedure cancelupdates; virtual;
    procedure cancelupdate(const norecordcancel: boolean = false); virtual; 
                    //cancels current record,
@@ -2516,7 +2518,8 @@ begin
  if defaultfields then begin
   createfields;
  end;
- if (flogfilename <> '') and findfile(flogfilename) then begin
+ if (floadingstream = nil) and 
+                   (flogfilename <> '') and findfile(flogfilename) then begin
   floadingstream:= tmsefilestream.create(flogfilename,fm_read);
   tmsefilestream(floadingstream).cryptohandler:= fcryptohandler;
   bo1:= true;
@@ -2534,8 +2537,9 @@ begin
   dointernalopen;
   fallpacketsfetched:= true;
  end;
- if (flogfilename <> '') and not (csdesigning in componentstate) then begin
-  startlogger;   
+ if bo1 and (flogfilename <> '') and not (csdesigning in componentstate) then begin
+  dropupdates();
+  startlogger;   //drop old updates
  end;
 end;
 
@@ -2543,23 +2547,10 @@ procedure tmsebufdataset.dointernalclose;
 var 
  int1: integer;
  kind1: filtereditkindty;
- po1: precupdatebufferty;
 begin
  unregisteronidle();
  exclude(fbstate,bs_opening);
- for int1:= 0 to high(fupdatebuffer) do begin
-  po1:= @fupdatebuffer[int1];
-  with po1^ do begin
-   if info.bookmark.recordpo <> nil then begin
-    if ruf_applied in info.flags then begin
-     recupdatebufferapplied(po1);
-    end
-    else begin
-     intfreerecord(oldvalues);
-    end;
-   end;
-  end;
- end;
+ dropupdates();
  closelogger;
  frecno:= -1;
  resetblobcache;
@@ -2583,7 +2574,7 @@ begin
 //    end;
 //   end;
 //  end;
-  fupdatebuffer:= nil;
+//  fupdatebuffer:= nil;
  end;
  clearindex;
  fbrecordcount:= 0;
@@ -3637,6 +3628,27 @@ begin
   fupdatebuffer:= nil;
   resync([]);
  end;
+end;
+
+procedure tmsebufdataset.dropupdates();
+var
+ po1: precupdatebufferty;
+ i1: int32;
+begin
+ for i1:= 0 to high(fupdatebuffer) do begin
+  po1:= @fupdatebuffer[i1];
+  with po1^ do begin
+   if info.bookmark.recordpo <> nil then begin
+    if ruf_applied in info.flags then begin
+     recupdatebufferapplied(po1);
+    end
+    else begin
+     intfreerecord(oldvalues);
+    end;
+   end;
+  end;
+ end;
+ fupdatebuffer:= nil;
 end;
 
 procedure tmsebufdataset.SetOnUpdateError(const AValue: updateerroreventty);
@@ -6904,12 +6916,16 @@ begin
  end;
 end;
 
-procedure tmsebufdataset.savetofile(const afilename: filenamety;
+procedure tmsebufdataset.savetofile(afilename: filenamety = '';
                          const acryptohandler: tcustomcryptohandler = nil);
 var
  stream1: tmsefilestream;
 begin
- stream1:= tmsefilestream.create(afilename,fm_create);
+ if afilename = '' then begin
+  checklogfile();
+  afilename:= flogfilename;
+ end;
+ stream1:= tmsefilestream.createtransaction(afilename);
  try
   stream1.cryptohandler:= acryptohandler;
   savetostream(stream1);
@@ -6918,11 +6934,15 @@ begin
  end;
 end;
 
-procedure tmsebufdataset.loadfromfile(const afilename: filenamety;
+procedure tmsebufdataset.loadfromfile(afilename: filenamety = '';
                          const acryptohandler: tcustomcryptohandler = nil);
 var
  stream1: tmsefilestream;
 begin
+ if afilename = '' then begin
+  checklogfile();
+  afilename:= flogfilename;
+ end;
  stream1:= tmsefilestream.create(afilename,fm_read);
  try
   stream1.cryptohandler:= acryptohandler;
@@ -6942,13 +6962,13 @@ end;
 procedure tmsebufdataset.recover;
 begin
  checklogfile;
- if islocal then begin
-  active:= true;
- end
- else begin
+// if islocal then begin
+//  active:= true;
+// end
+// else begin
   loadfromfile(flogfilename,fcryptohandler);
   startlogger;
- end;
+// end;
 end;
 
 procedure tmsebufdataset.startlogger;
@@ -6956,6 +6976,9 @@ var
  stream1: tmsefilestream;
 begin
  if flogfilename <> '' then begin
+  if bdo_noapply in foptions then begin
+   databaseerror('Options bdo_noapply must not be set for logging.',self);
+  end;
   stream1:= tmsefilestream.create(flogfilename,fm_create);
   stream1.cryptohandler:= fcryptohandler;
   flogger:= tbufstreamwriter.create(self,stream1);
