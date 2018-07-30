@@ -2537,7 +2537,7 @@ begin
   dointernalopen;
   fallpacketsfetched:= true;
  end;
- if bo1 and (flogfilename <> '') and not (csdesigning in componentstate) then begin
+ if (flogfilename <> '') and not (csdesigning in componentstate) then begin
   dropupdates();
   startlogger;   //drop old updates
  end;

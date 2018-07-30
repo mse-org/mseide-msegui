@@ -6656,7 +6656,8 @@ begin
          end;
         end
         else begin
-         if ns_subitems in fstate then begin
+         if (fstate * [ns_subitems,ns_drawemptyexpand] <> []) or
+                         (no_drawemptyexpand in fitemlist.foptions) then begin
           expanded:= true;
           dec(cellbefore.col);//no processed reset
          end;
