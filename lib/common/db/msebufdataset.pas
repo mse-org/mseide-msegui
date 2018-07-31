@@ -743,6 +743,7 @@ type
    procedure deleterecord(const arecno: integer); overload;
    procedure deleterecord(const arecord: pintrecordty); overload;
    procedure getnewupdatebuffer;
+   procedure dropupdates1(const apply: boolean); //delete update info
    procedure setindexlocal(const avalue: tlocalindexes);
    function insertindexrefs(const arecord: pintrecordty): integer;
               //returns new recno of active index
@@ -1279,8 +1280,7 @@ type
    procedure applyupdate; overload; virtual;
                    //applies current record
    function recapplying: boolean;
-   procedure dropupdates();
-   procedure cancelupdates; virtual;
+   procedure cancelupdates; virtual; //revert changes
    procedure cancelupdate(const norecordcancel: boolean = false); virtual; 
                    //cancels current record,
                    //if norecordcancel no restoring of old values
@@ -1418,7 +1418,8 @@ procedure alignfieldpos(var avalue: integer);
 implementation
 uses
  rtlconsts,{$ifdef FPC}dbconst{$else}dbconst_del,classes_del{$endif},sysutils,
- mseformatstr,msereal,msesys,msefileutils,mseapplication,msesysutils,msebits;
+ mseformatstr,msereal,msesys,msefileutils,mseapplication,msesysutils,msebits,
+ typinfo;
  
 type
  tmsestringfield1 = class(tmsestringfield); 
@@ -1735,9 +1736,49 @@ begin
  end;
 end;
 
+{$ifdef mse_debuglogger}
+function logpo(const apo: card64): string;
+begin
+ if apo = 0 then begin
+  result:= '0';
+ end
+ else begin
+  result:= hextostr(apo);
+ end;
+end;
+
+procedure dumplogbufferheader(const aheader: logbufferheaderty);
+begin
+ with aheader do begin
+  debugwrite('*log '+getenumname(typeinfo(logflag),ord(logflag)));
+  case aheader.logflag of
+   lf_end: begin
+   end;
+   lf_rec: begin
+    with rec do begin
+     debugwriteln(' '+getenumname(typeinfo(kind),ord(kind))+' '+logpo(po));
+    end;
+   end;
+   else begin
+    with update do begin
+     if logging then begin
+      debugwrite(' logging');
+     end;
+     debugwriteln(' '+getenumname(typeinfo(kind),ord(kind))+' '+
+                                     logpo(po)+' '+logpo(deletedrecord));
+    end;
+   end;
+  end;
+ end;
+end;
+{$endif}
+
 procedure tbufstreamwriter.writelogbufferheader(
                                 const aheader: logbufferheaderty);
 begin
+{$ifdef mse_debuglogger}
+ dumplogbufferheader(aheader); 
+{$endif}
  write(aheader,sizeof(aheader));
 end;
 
@@ -1954,6 +1995,19 @@ begin
   result:= (read(aheader,sizeof(aheader)) = sizeof(aheader)) and 
            (aheader.logflag <> lf_end);
  end;
+{$ifdef mse_debuglogger}
+ if result then begin
+  dumplogbufferheader(aheader);
+ end
+ else begin
+  if aheader.logflag = lf_end then begin
+   debugwriteln('*log lf_end');
+  end
+  else begin
+   debugwriteln('*log header readerror*');
+  end;
+ end;
+{$endif}
 end;
 
 function tbufstreamreader.readpointer: pointer;
@@ -2538,7 +2592,7 @@ begin
   fallpacketsfetched:= true;
  end;
  if (flogfilename <> '') and not (csdesigning in componentstate) then begin
-  dropupdates();
+  dropupdates1(true);
   startlogger;   //drop old updates
  end;
 end;
@@ -2550,7 +2604,7 @@ var
 begin
  unregisteronidle();
  exclude(fbstate,bs_opening);
- dropupdates();
+ dropupdates1(false);
  closelogger;
  frecno:= -1;
  resetblobcache;
@@ -3630,7 +3684,7 @@ begin
  end;
 end;
 
-procedure tmsebufdataset.dropupdates();
+procedure tmsebufdataset.dropupdates1(const apply: boolean);
 var
  po1: precupdatebufferty;
  i1: int32;
@@ -3639,7 +3693,7 @@ begin
   po1:= @fupdatebuffer[i1];
   with po1^ do begin
    if info.bookmark.recordpo <> nil then begin
-    if ruf_applied in info.flags then begin
+    if apply or (ruf_applied in info.flags) then begin
      recupdatebufferapplied(po1);
     end
     else begin
@@ -6552,6 +6606,7 @@ var
      if delete then begin
 //      appended[int1]:= nil;
       deleteitem(appended,int1);
+      deleteitem(findexes[0].ind,aindex);
       dec(fbrecordcount);
      end;
      break;
@@ -6640,11 +6695,17 @@ begin
      freemem(po1);
     end;
     setlength(ar2,header.recordcount);
+   {$ifdef mse_debuglogger}
+    debugwriteln('**log read '+inttostr(header.recordcount)+' records');
+   {$endif}
     for int1:= 0 to high(ar2) do begin
      if not reader.readlogbufferheader(header1) or 
                                    (header1.logflag <> lf_rec) then begin
       formaterror;
      end;
+    {$ifdef mse_debuglogger}
+     debugwriteln(' '+inttostr(int1)+' '+hextostr(femptybuffer));
+    {$endif}
      ar2[int1]:= header1.rec.po;
      reader.readrecord(femptybuffer);
      appendrecord(femptybuffer);
@@ -6662,6 +6723,9 @@ begin
     end;
     int2:= 0;
     while reader.readlogbufferheader(header1) do begin
+    {$ifdef mse_debuglogger}
+     debugwrite(inttostr(int2));
+    {$endif}
      case header1.logflag of
       lf_rec: begin
        with header1.rec do begin
@@ -6669,12 +6733,18 @@ begin
          if kind <> ukinsert then begin
           formaterror;
          end;
+        {$ifdef mse_debuglogger}
+         debugwrite(' new   '+hextostr(femptybuffer));
+        {$endif}
          reader.readrecord(femptybuffer);
          appendrecord(femptybuffer);
          femptybuffer:= intallocrecord;
          additem(appended,po);
         end
         else begin
+        {$ifdef mse_debuglogger}
+         debugwrite(' found '+hextostr(po1));
+        {$endif}
          reader.readrecord(po1);
         end;
        end;        
@@ -6703,17 +6773,27 @@ begin
           end;
          end;
         end;
+       {$ifdef mse_debuglogger}
+        debugwrite(' '+inttostr(int3)+' '+getenumname(typeinfo(kind),ord(kind)));
+       {$endif}
         if kind = uk_delete then begin 
          if logging and (po <> deletedrecord) then begin
-          if (int3 < 0) or 
-                           not findrec(deletedrecord,po1,int1,true) then begin
+          if (int3 < 0) or not findrec(deletedrecord,po1,int1,true) then begin
            formaterror;
           end;
           if po = 0{nil} then begin
+          {$ifdef mse_debuglogger}
+           debugwrite(' inserted '+hextostr(po1));
+          {$endif}
            info.bookmark.recordpo:= nil;   //deleting of inserted record
            intfreerecord(pintrecordty(po1));
           end
           else begin                  //deleting of modified record
+          {$ifdef mse_debuglogger}
+           debugwrite(' modified '+
+                        hextostr(updabuf[int3].info.bookmark.recordpo)+
+                                   ' old '+hextostr(updabuf[int3].oldvalues));
+          {$endif}
            intfreerecord(updabuf[int3].info.bookmark.recordpo);
            info.bookmark.recordpo:= updabuf[int3].oldvalues;
            info.bookmark.recno:= 0;
@@ -6726,11 +6806,17 @@ begin
                                          info.bookmark.recno,true) then begin
             formaterror;
            end;
+           {$ifdef mse_debuglogger}
+            debugwrite(' found '+hextostr(info.bookmark.recordpo));
+           {$endif}
           end
           else begin
            info.bookmark.recno:= 0;
            info.bookmark.recordpo:= intallocrecord;
            reader.readrecord(info.bookmark.recordpo);
+           {$ifdef mse_debuglogger}
+            debugwrite(' new '+hextostr(info.bookmark.recordpo));
+           {$endif}
           end;
          end;
          oldvalues:= info.bookmark.recordpo;
@@ -6740,10 +6826,16 @@ begin
                                          info.bookmark.recno) then begin
           formaterror;        //old pointer not found
          end;
+        {$ifdef mse_debuglogger}
+         debugwrite(' found '+hextostr(info.bookmark.recordpo));
+        {$endif}
         end;
         if kind in [uk_modify,uk_modifyinupdate] then begin
          oldvalues:= intallocrecord;
          reader.readrecord(oldvalues);
+        {$ifdef mse_debuglogger}
+         debugwrite(' new oldvalues '+hextostr(oldvalues));
+        {$endif}
         end;
        end;
        inc(int2);
@@ -6809,6 +6901,9 @@ begin
        formaterror;
       end;
      end;
+    {$ifdef mse_debuglogger}
+     debugwriteln('');
+    {$endif}
     end; 
     setlength(updabuf,int2);
     setlength(fupdatebuffer,int2);   
@@ -6982,7 +7077,13 @@ begin
   stream1:= tmsefilestream.create(flogfilename,fm_create);
   stream1.cryptohandler:= fcryptohandler;
   flogger:= tbufstreamwriter.create(self,stream1);
+ {$ifdef mse_debuglogger}
+  debugwriteln('*****startlogger');
+ {$endif}
   savestate(flogger);
+ {$ifdef mse_debuglogger}
+  debugwriteln('-----startlogger');
+ {$endif}
   flogger.flushbuffer;
  end;
 end;
@@ -6996,6 +7097,9 @@ begin
   stream1:= flogger.fstream;
   freeandnil(flogger);
   stream1.free;
+ {$ifdef mse_debuglogger}
+  debugwriteln('*****endlogger');
+ {$endif}
  end;
 end;
 
