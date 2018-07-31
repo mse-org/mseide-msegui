@@ -179,7 +179,7 @@ type
 
  tmsebufdataset = class;
  
- logflagty = (lf_end,lf_rec,lf_update,lf_cancel,lf_apply);
+ logflagty = (lf_end,lf_rec,lf_update,lf_cancel,lf_apply,lf_drop);
  reclogheader32ty = record
   kind: tupdatekind;
   po: card32;
@@ -207,7 +207,7 @@ type
    lf_rec: (
     rec: reclogheader32ty;
    );
-   lf_update,lf_cancel,lf_apply: (
+   lf_update,lf_cancel,lf_apply,lf_drop: (
     update: updatelogheader32ty;
    );
  end;
@@ -216,7 +216,7 @@ type
    lf_rec: (
     rec: reclogheaderty;
    );
-   lf_update,lf_cancel,lf_apply: (
+   lf_update,lf_cancel,lf_apply,lf_drop: (
     update: updatelogheaderty;
    );
  end;
@@ -743,7 +743,7 @@ type
    procedure deleterecord(const arecno: integer); overload;
    procedure deleterecord(const arecord: pintrecordty); overload;
    procedure getnewupdatebuffer;
-   procedure dropupdates1(const apply: boolean); //delete update info
+   procedure dropupdates1(const apply: boolean);
    procedure setindexlocal(const avalue: tlocalindexes);
    function insertindexrefs(const arecord: pintrecordty): integer;
               //returns new recno of active index
@@ -989,6 +989,7 @@ type
    procedure restorerecupdatebuffer;
    procedure postrecupdatebuffer;
    procedure recupdatebufferapplied(const abuf: precupdatebufferty);
+   procedure recupdatebufferdropped(const abuf: precupdatebufferty);
    procedure editapplyerror(const arecupdatenum: integer);
    procedure internalapplyupdate(const maxerrors: integer;
                const cancelonerror: boolean;
@@ -1280,6 +1281,7 @@ type
    procedure applyupdate; overload; virtual;
                    //applies current record
    function recapplying: boolean;
+   procedure dropupdates();          //delete update info
    procedure cancelupdates; virtual; //revert changes
    procedure cancelupdate(const norecordcancel: boolean = false); virtual; 
                    //cancels current record,
@@ -3697,7 +3699,7 @@ begin
      recupdatebufferapplied(po1);
     end
     else begin
-     intfreerecord(oldvalues);
+     recupdatebufferdropped(po1);
     end;
    end;
   end;
@@ -3719,6 +3721,17 @@ begin
  end;
  intFreeRecord(abuf^.OldValues);
  abuf^.info.bookmark.recordpo:= nil;
+end;
+
+procedure tmsebufdataset.recupdatebufferdropped(const abuf: precupdatebufferty);
+begin
+ if flogger <> nil then begin
+  logupdatebuffer(flogger,abuf^,nil,true,lf_drop);
+  flogger.flushbuffer;
+ end;
+ with abuf^ do begin
+  intfreerecord(oldvalues);
+ end;
 end;
 
 procedure tmsebufdataset.packrecupdatebuffer;
@@ -6877,7 +6890,7 @@ begin
                     //inactive
        end;
       end;
-      lf_apply: begin
+      lf_apply,lf_drop: begin
        with header1.update do begin
         int3:= -1;
         for int1:= 0 to int2-1 do begin
@@ -8863,6 +8876,11 @@ end;
 function tmsebufdataset.recapplying: boolean;
 begin
  result:= bs_recapplying in fbstate;
+end;
+
+procedure tmsebufdataset.dropupdates();
+begin
+ dropupdates1(false);
 end;
 
 function tmsebufdataset.lookuptext(const indexnum: integer; const akey: integer;
