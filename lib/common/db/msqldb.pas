@@ -546,7 +546,7 @@ type
    constructor create(aowner: tcomponent); override;
    procedure execute(adatabase: tcustomsqlconnection = nil;
                         atransaction: tsqltransaction = nil); overload;
-   property statementnr: integer read fstatementnr; //null based
+   property statementnr: integer read fstatementnr; //zero based
    property statementcount: integer read fstatementcount;
 //   property fstatements: msestringarty read fstatements;
   published
