@@ -1,9 +1,11 @@
 object msesysenvmanagereditorfo: tmsesysenvmanagereditorfo
   visible = False
-  bounds_x = 51
-  bounds_y = 266
+  bounds_x = 57
+  bounds_y = 574
   bounds_cx = 861
   bounds_cy = 229
+  container.frame.localprops = []
+  container.frame.localprops1 = []
   container.bounds = (
     0
     0
@@ -13,16 +15,17 @@ object msesysenvmanagereditorfo: tmsesysenvmanagereditorfo
   options = [fo_freeonclose, fo_closeonesc, fo_autoreadstat, fo_autowritestat, fo_savepos, fo_savezorder, fo_savestate]
   statfile = statfile1
   caption = 'Edit tsysenvmanager'
+  windowopacity = -Inf
   moduleclassname = 'tmseform'
   object la2: tlayouter
     bounds_x = 0
     bounds_y = 200
-    bounds_cx = 0
+    bounds_cx = 861
     bounds_cy = 0
     anchors = [an_top]
     optionsscale = [osc_expandx, osc_shrinkx, osc_expandy, osc_shrinky]
-    dist_top = 4
     optionslayout = [lao_aligny]
+    dist_top = 4
   end
   object tlayouter2: tlayouter
     taborder = 1
@@ -32,10 +35,10 @@ object msesysenvmanagereditorfo: tmsesysenvmanagereditorfo
     bounds_cy = 21
     anchors = [an_right, an_bottom]
     optionsscale = [osc_expandx, osc_shrinkx, osc_expandy, osc_shrinky]
-    dist_top = 3
     optionslayout = [lao_placex]
     place_mindist = 5
     place_maxdist = 5
+    dist_top = 3
     object ok: tbutton
       optionswidget1 = [ow1_fontglyphheight, ow1_autoscale, ow1_autowidth]
       bounds_x = 0
@@ -63,6 +66,8 @@ object msesysenvmanagereditorfo: tmsesysenvmanagereditorfo
     end
   end
   object grid: twidgetgrid
+    frame.localprops = []
+    frame.localprops1 = []
     taborder = 2
     bounds_x = 0
     bounds_y = 0
@@ -80,7 +85,7 @@ object msesysenvmanagereditorfo: tmsesysenvmanagereditorfo
     fixrows.items = <    
       item
         height = 16
-        captions.count = 15
+        captions.count = 16
         captions.items = <        
           item
             caption = 'Kind'
@@ -112,6 +117,10 @@ object msesysenvmanagereditorfo: tmsesysenvmanagereditorfo
             hint = 'arf_statadval'
           end        
           item
+            caption = 'UQ'
+            hint = 'arf_unquote'
+          end        
+          item
             caption = 'IN'
             hint = 'arf_integer'
           end        
@@ -130,13 +139,12 @@ object msesysenvmanagereditorfo: tmsesysenvmanagereditorfo
           end        
           item
             caption = 'Before'
-            hint = 'arf_envdefined'
           end        
           item
             caption = 'After'
           end>
       end>
-    datacols.count = 15
+    datacols.count = 16
     datacols.options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_proportional, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
     datacols.items = <    
       item[kinded]
@@ -185,6 +193,12 @@ object msesysenvmanagereditorfo: tmsesysenvmanagereditorfo
         width = 17
         options = [co_drawfocus, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_fixwidth, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
         widgetname = 'stataddval'
+        dataclass = tgridintegerdatalist
+      end    
+      item[unquote]
+        width = 17
+        options = [co_drawfocus, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_fixwidth, co_proportional, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
+        widgetname = 'unquote'
         dataclass = tgridintegerdatalist
       end    
       item[integer]
@@ -237,7 +251,13 @@ object msesysenvmanagereditorfo: tmsesysenvmanagereditorfo
       frame.levelo = 0
       frame.colorclient = -2147483645
       frame.localprops = [frl_levelo, frl_leveli, frl_colorclient]
+      frame.localprops1 = []
       frame.button.color = -1879048187
+      frame.buttons.count = 1
+      frame.buttons.items = <      
+        item
+          color = -1879048187
+        end>
       taborder = 1
       visible = False
       bounds_x = 0
@@ -272,6 +292,13 @@ object msesysenvmanagereditorfo: tmsesysenvmanagereditorfo
       frame.levelo = 0
       frame.colorclient = -2147483645
       frame.localprops = [frl_levelo, frl_leveli, frl_colorclient]
+      frame.localprops1 = []
+      frame.buttons.count = 1
+      frame.buttons.items = <      
+        item
+          color = -1879048187
+          imagenr = 17
+        end>
       frame.button.color = -1879048187
       frame.button.imagenr = 17
       taborder = 3
@@ -349,7 +376,7 @@ object msesysenvmanagereditorfo: tmsesysenvmanagereditorfo
       visible = False
       group = 1
     end
-    object integer: tbooleanedit
+    object unquote: tbooleanedit
       Tag = 12
       optionswidget1 = []
       optionsskin = [osk_framebuttononly]
@@ -362,12 +389,25 @@ object msesysenvmanagereditorfo: tmsesysenvmanagereditorfo
       visible = False
       group = 1
     end
-    object help: tbooleanedit
+    object integer: tbooleanedit
       Tag = 13
       optionswidget1 = []
       optionsskin = [osk_framebuttononly]
       taborder = 10
       bounds_x = 368
+      bounds_y = 0
+      bounds_cx = 17
+      bounds_cy = 16
+      optionsedit1 = [oe1_autopopupmenu, oe1_keyexecute, oe1_savestate, oe1_checkvalueafterstatread]
+      visible = False
+      group = 1
+    end
+    object help: tbooleanedit
+      Tag = 14
+      optionswidget1 = []
+      optionsskin = [osk_framebuttononly]
+      taborder = 11
+      bounds_x = 386
       bounds_y = 0
       bounds_cx = 17
       bounds_cy = 16
@@ -381,11 +421,18 @@ object msesysenvmanagereditorfo: tmsesysenvmanagereditorfo
       frame.levelo = 0
       frame.colorclient = -2147483645
       frame.localprops = [frl_levelo, frl_leveli, frl_colorclient]
+      frame.localprops1 = []
+      frame.buttons.count = 1
+      frame.buttons.items = <      
+        item
+          color = -1879048187
+          imagenr = 17
+        end>
       frame.button.color = -1879048187
       frame.button.imagenr = 17
-      taborder = 11
+      taborder = 12
       visible = False
-      bounds_x = 386
+      bounds_x = 404
       bounds_y = 0
       bounds_cx = 121
       bounds_cy = 16
@@ -396,9 +443,9 @@ object msesysenvmanagereditorfo: tmsesysenvmanagereditorfo
     object argumented: tstringedit
       optionswidget1 = [ow1_fontglyphheight]
       optionsskin = [osk_framebuttononly]
-      taborder = 12
+      taborder = 13
       visible = False
-      bounds_x = 508
+      bounds_x = 526
       bounds_y = 0
       bounds_cx = 72
       bounds_cy = 16
@@ -412,11 +459,18 @@ object msesysenvmanagereditorfo: tmsesysenvmanagereditorfo
       frame.levelo = 0
       frame.colorclient = -2147483645
       frame.localprops = [frl_levelo, frl_leveli, frl_colorclient]
+      frame.localprops1 = []
+      frame.buttons.count = 1
+      frame.buttons.items = <      
+        item
+          color = -1879048187
+          imagenr = 17
+        end>
       frame.button.color = -1879048187
       frame.button.imagenr = 17
-      taborder = 13
+      taborder = 14
       visible = False
-      bounds_x = 581
+      bounds_x = 599
       bounds_y = 0
       bounds_cx = 102
       bounds_cy = 16
@@ -430,11 +484,18 @@ object msesysenvmanagereditorfo: tmsesysenvmanagereditorfo
       frame.levelo = 0
       frame.colorclient = -2147483645
       frame.localprops = [frl_levelo, frl_leveli, frl_colorclient]
+      frame.localprops1 = []
+      frame.buttons.count = 1
+      frame.buttons.items = <      
+        item
+          color = -1879048187
+          imagenr = 17
+        end>
       frame.button.color = -1879048187
       frame.button.imagenr = 17
-      taborder = 14
+      taborder = 15
       visible = False
-      bounds_x = 684
+      bounds_x = 702
       bounds_y = 0
       bounds_cx = 73
       bounds_cy = 16
@@ -448,11 +509,18 @@ object msesysenvmanagereditorfo: tmsesysenvmanagereditorfo
       frame.levelo = 0
       frame.colorclient = -2147483645
       frame.localprops = [frl_levelo, frl_leveli, frl_colorclient]
+      frame.localprops1 = []
+      frame.buttons.count = 1
+      frame.buttons.items = <      
+        item
+          color = -1879048187
+          imagenr = 17
+        end>
       frame.button.color = -1879048187
       frame.button.imagenr = 17
-      taborder = 15
+      taborder = 16
       visible = False
-      bounds_x = 758
+      bounds_x = 776
       bounds_y = 0
       bounds_cx = 73
       bounds_cy = 16

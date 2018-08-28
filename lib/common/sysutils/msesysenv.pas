@@ -46,19 +46,26 @@ const
   'Invalid parameter','Missed argument','Invalid argument','Ambiguous parameter',
   'Invalid integer','Parameter mandatory');
 type
- argumentflagty = (arf_envdefined,   // wert aus env. gesetzt
-                   arf_statdefined,  // wert aus statfile. gesetzt
-                   arf_setdefined,   // wert aus programm gesetzt
-                   arf_res1,arf_res2,arf_res3,arf_res4,
-                   arf_mandatory,    // obligatorisch
-                   arf_argopt,       // argument optional
-                   arf_filenames,    // argument wird durch pathsep gesplitted
-                   arf_statoverride, // wert wird durch statfile ueberschrieben
+ argumentflagty = (arf_envdefined,   // wert aus env. gesetzt           0
+                   arf_statdefined,  // wert aus statfile. gesetzt      1
+                   arf_setdefined,   // wert aus programm gesetzt       2
+                   arf_res1,                                          //3
+                   arf_res2,                                          //4
+                   arf_res3,                                          //5
+                   arf_res4,                                          //6
+                   arf_mandatory,    // obligatorisch                 //7
+                   arf_argopt,       // argument optional             //8
+                   arf_filenames,    // argument wird durch pathsep   //9
+                                     // gesplitted
+                   arf_statoverride, // wert wird durch statfile     //10
+                                     // ueberschrieben                 
                                      // ev. auch geloescht
-                   arf_stataddval,   // wert wird von statfile geschrieben falls
+                   arf_stataddval,   // wert wird von statfile       //11
+                                     // geschrieben falls
                                      // noch nicht gesetzt
-                   arf_integer,      //fuer arg und pararg
-                   arf_help          //print help and terminate
+                   arf_unquote,      //unquote argument value        //12
+                   arf_integer,      //fuer arg und pararg           //13
+                   arf_help          //print help and terminate      //14
                    );
 
  argumentflagsty = set of argumentflagty;
@@ -244,7 +251,7 @@ procedure defstoarguments(const defs: sysenvdefarty;
 implementation
 uses
  msesysutils,RTLConsts,msestream,msesys{$ifdef UNIX},mselibc{$endif},
- typinfo,mseapplication,msebits,msesysintf,mseformatstr;
+ typinfo,mseapplication,msebits,msesysintf,mseformatstr,msefileutils;
 
 procedure defstoarguments(const defs: sysenvdefarty; 
                  out arguments: argumentdefarty; out alias: msestringararty);
@@ -728,6 +735,7 @@ var
  strar1: msestringarty;
  int1,int2: integer;
  bo1: boolean;
+ i1: int32;
 begin
  result:= ern_io;
  if index >= 0 then begin
@@ -769,7 +777,13 @@ begin
       end;
      end;
      if result = ern_io then begin
+      i1:= length(values);
       stackarray(avalue,values);
+      if arf_unquote in flags then begin
+       for i1:= i1 to high(values) do begin
+        values[i1]:= unquotefilename(values[i1]);
+       end;
+      end;
      end;
     end;
    end;

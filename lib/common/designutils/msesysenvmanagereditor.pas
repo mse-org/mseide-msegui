@@ -14,7 +14,8 @@ uses
  mseglob,mseguiglob,mseguiintf,mseapplication,msestat,msemenus,msegui,
  msegraphics,msegraphutils,mseevent,mseclasses,mseforms,msesysenv,msesplitter,
  msesimplewidgets,msewidgets,msegraphedits,mseifiglob,msetypes,msedataedits,
- mseedit,msegrids,msestrings,msewidgetgrid,msememodialog,msestatfile;
+ mseedit,msegrids,msestrings,msewidgetgrid,msememodialog,msestatfile,mseificomp,
+ mseificompglob,msescrollbar;
 
 const
  sysenvmanagereditorstatname =  'sysenvmanagereditor.sta';
@@ -42,6 +43,7 @@ type
    argumented: tstringedit;
    beforeed: tmemodialogedit;
    aftered: tmemodialogedit;
+   unquote: tbooleanedit;
    procedure kindedinit(const sender: tenumtypeedit);
  end;
 
