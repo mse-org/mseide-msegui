@@ -1996,6 +1996,55 @@ object actionsmo: tactionsmo
       0
       0
     )
+    assistiveshortcuts.count = 9
+    assistiveshortcuts.items = (
+      (
+        16416
+      )
+      (
+        24608
+      )
+      (
+        16473
+        70
+      )
+      (
+        16473
+        76
+      )
+      (
+        16473
+        67
+      )
+      (
+        18477
+      )
+      (
+        18475
+      )
+      (
+        26669
+      )
+      (
+        26667
+      )
+    )
+    assistiveshortcuts1.count = 9
+    assistiveshortcuts1.items = (
+      (
+        18692
+      )
+      (
+        26884
+      )
+      (      )
+      (      )
+      (      )
+      (      )
+      (      )
+      (      )
+      (      )
+    )
     statfile = mainfo.mainstatfile
     onafterupdate = updateshortcuts
     left = 352

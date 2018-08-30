@@ -5,8 +5,8 @@ object mainfo: tmainfo
   frame.grip_size = 10
   frame.grip_options = [go_fixsizebutton, go_floatbutton, go_topbutton, go_backgroundbutton, go_lockbutton, go_nolockbutton, go_buttonhints]
   visible = False
-  bounds_x = 708
-  bounds_y = 111
+  bounds_x = 740
+  bounds_y = 149
   bounds_cx = 459
   bounds_cy = 149
   container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_subfocus, ow_mousetransparent, ow_destroywidgets]
@@ -21,9 +21,9 @@ object mainfo: tmainfo
   container.onlayout = onscale
   container.bounds = (
     0
-    16
+    18
     449
-    133
+    131
   )
   dragdock.optionsdock = [od_savepos, od_savezorder, od_canmove, od_cansize, od_canfloat, od_candock, od_captionhint, od_childicons]
   optionswindow = [wo_taskbar]
@@ -46,7 +46,7 @@ object mainfo: tmainfo
     bounds_x = 0
     bounds_y = 19
     bounds_cx = 449
-    bounds_cy = 114
+    bounds_cy = 112
     anchors = [an_top, an_bottom]
     dragdock.optionsdock = [od_acceptsdock, od_splitvert, od_splithorz, od_tabed, od_proportional, od_background, od_captionhint]
     statfile = projectstatfile
@@ -59,13 +59,12 @@ object mainfo: tmainfo
     bounds_x = 0
     bounds_y = 1
     bounds_cx = 449
-    bounds_cy = 18
     anchors = [an_top]
     font.name = 'stf_default'
     font.xscale = 1
     font.localprops = [flp_xscale]
     options = [dwo_hintclippedtext]
-    reffontheight = 14
+    reffontheight = 16
   end
   object gdb: tgdbmi
     guiintf = True

@@ -1648,6 +1648,9 @@ var
  targetoutp: boolean;
  
 begin
+//{$ifdef mse_debuggdb}
+// debugwriteln(line);
+//{$endif}
  resultar:= nil;
  po1:= pchar(line);
  po2:= po1;
@@ -2007,7 +2010,8 @@ begin
  end;
 end;
 
-function tgdbmi.micommand(const command: string; out values: resultinfoarty): gdbresultty;
+function tgdbmi.micommand(const command: string;
+                           out values: resultinfoarty): gdbresultty;
                   //values = nil on timeout
 begin
  result:= synccommand('-'+command);

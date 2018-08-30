@@ -213,6 +213,7 @@ type
    frunningprocess: prochandlety;
    flayoutloading: boolean;
    fstopinfo: stopinfoty;
+   fgdbdownloaded: boolean;
    procedure dorun;
    function runtarget: boolean; //true if run possible
    procedure newproject(const fromprogram,empty: boolean);
@@ -275,7 +276,7 @@ type
    procedure uploadexe(const sender: tguiapplication; var again: boolean);
    procedure uploadcancel(const sender: tobject);
    procedure gdbserverexe(const sender: tguiapplication; var again: boolean);
-   procedure terminategdbserver(const force: boolean);
+   function terminategdbserver(const force: boolean): boolean;
    procedure gdbservercancel(const sender: tobject);
    procedure updatetargetenvironment;
    function needsdownload: boolean;
@@ -411,7 +412,7 @@ end;
 
 destructor tmainfo.destroy;
 begin
- terminategdbserver(false);
+ terminategdbserver(true);
  inherited;
 end;
 
@@ -1052,12 +1053,14 @@ begin
  end;
 end;
 
-procedure tmainfo.terminategdbserver(const force: boolean);
+function tmainfo.terminategdbserver(const force: boolean): boolean;
 var
  int1: integer;
 begin
+ result:= false;
  if (fgdbserverprocid <> invalidprochandle) and 
         (not projectoptions.d.gdbserverstartonce or force) then begin
+  result:= true;
   try
    if (getprocessexitcode(fgdbserverprocid,int1) <> pee_ok) then begin
     killprocesstree(fgdbserverprocid);
@@ -1091,7 +1094,9 @@ begin
    mstr1:= gdbservercommand;
   end;
   if mstr1 <> '' then begin
-   terminategdbserver(false);
+   if terminategdbserver(false) then begin
+//    sleep(1000);
+   end;
    if d.gdbserverstartonce and gdb.tryconnect then begin
     result:= true;
     exit;
@@ -1225,6 +1230,12 @@ end;
 procedure tmainfo.downloaded;
 begin
  ftargetfilemodified:= false;
+ if fgdbdownloaded then begin
+  fgdbdownloaded:= false;
+  if projectoptions.d.restartgdbbeforeload then begin
+   mainfo.startgdb(false);
+  end;
+ end;
 end;
 
 procedure tmainfo.updatetargetenvironment;
@@ -1273,11 +1284,11 @@ begin
  end
  else begin
   if not gdb.execloaded or forcedownload then begin
-   if not gdb.active then begin
-    startgdb(false);
-   end;
-   str1:= gettargetfile;
    with projectoptions,d.texp do begin
+    if d.restartgdbbeforeload or not gdb.active then begin
+     startgdb(false);
+    end;
+    str1:= gettargetfile;
     if not d.gdbdownload and not d.gdbsimulator and (uploadcommand <> '') and 
                    (needsdownload or forcedownload) then begin
      dodownload;
@@ -1323,7 +1334,9 @@ begin
   startconsole();
   if forcedownload and projectoptions.d.gdbdownload then begin
    if startgdbconnection(false) then begin
-    gdb.download(false);
+    if checkgdberror(gdb.download(false)) then begin
+     fgdbdownloaded:= true;
+    end;
    end;
   end;
  end;
@@ -1437,7 +1450,7 @@ var
  bo1: boolean;
 begin
  with projectoptions,d.texp,actionsmo do begin
-  detachtarget.enabled:= gdb.execloaded;
+  detachtarget.enabled:= gdb.execloaded or gdb.attached;
   download.enabled:= not gdb.started and not gdb.downloading and 
                ((uploadcommand <> '') or d.gdbdownload);
   attachprocess.enabled:= not (gdb.execloaded or gdb.attached);
@@ -2213,7 +2226,7 @@ var
  
 begin
  gdb.abort;
- terminategdbserver(false);
+ terminategdbserver(true);
  result:= false;
  projectfilebefore:= projectoptions.projectfilename;
  projectdirbefore:= projectoptions.projectdir;
