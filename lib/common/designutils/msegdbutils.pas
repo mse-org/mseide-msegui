@@ -2386,9 +2386,7 @@ begin
    if synccommand('-gdb-set target-async 1') = gdb_ok then begin
     include(fstate,gs_async);
    end;
-   if result = gdb_ok then begin
-    result:= synccommand('-target-select '+ansistring(fremoteconnection));
-   end;
+   result:= synccommand('-target-select '+ansistring(fremoteconnection));
    if result <> gdb_ok then begin
     exit;
    end;
