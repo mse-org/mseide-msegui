@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2017 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2018 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -409,6 +409,8 @@ type
                      var info: breakpointinfoty; const full: boolean): boolean;
    procedure updatepascalexpression(var aexpression: string);
    procedure updatecurrentlanguage();
+   function setlangc(): string; //returns currentlang
+   function setlang(const alanguage: string): gdbresultty;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -564,12 +566,14 @@ type
                                            out aresult: longword): gdbresultty;
    function readmemorypointer(const address: qword;
                                               out aresult: qword): gdbresultty;
-   function writememorybyte(const address: qword;
-                                              const avalue: byte): gdbresultty;
-   function writememoryword(const address: qword;
-                                              const avalue: word): gdbresultty;
-   function writememorylongword(const address: qword;
-                                          const avalue: longword): gdbresultty;
+   function writememory8(const address: qword;
+                                              const avalue: card8): gdbresultty;
+   function writememory16(const address: qword;
+                                              const avalue: card16): gdbresultty;
+   function writememory32(const address: qword;
+                                          const avalue: card32): gdbresultty;
+   function writememory64(const address: qword;
+                                          const avalue: card64): gdbresultty;
 
    function readpascalvariable(varname: string; 
                                          out aresult: msestring): gdbresultty;
@@ -577,8 +581,8 @@ type
                 var aresult: string): gdbresultty;
    function executecommand(const acommand: string;
                                     out aresult: string): gdbresultty;
-   function evaluateexpression(expression: string;
-                                           out aresult: string): gdbresultty;
+   function evaluateexpression(expression: string; out aresult: string;
+                 const noupdatepascalexpression: boolean = false): gdbresultty;
    function symboltype(symbol: string;
                                      out aresult: ansistring): gdbresultty;
    function symboladdress(symbol: string;
@@ -3546,10 +3550,12 @@ begin
  end; 
 end;
 
-function tgdbmi.evaluateexpression(expression: string;
-                                        out aresult: string): gdbresultty;
+function tgdbmi.evaluateexpression(expression: string; out aresult: string;
+                 const noupdatepascalexpression: boolean = false): gdbresultty;
 begin
- updatepascalexpression(expression);
+ if not noupdatepascalexpression then begin
+  updatepascalexpression(expression);
+ end;
  aresult:= '';
  result:= synccommand('-data-evaluate-expression ' + '"'+expression+'"');
  case result of
@@ -3844,49 +3850,91 @@ begin //todo: endianess
  end;
 end;
 }
-function tgdbmi.writememorybyte(const address: qword;
-                                             const avalue: byte): gdbresultty;
-var
- str1,str2,str3: ansistring;
+function tgdbmi.setlangc(): string;
 begin
- str2:= hextocstr(address,fpointerhexdigits);
- str3:= hextocstr(avalue,2);
- if currentlang = 'pascal' then begin
-  result:= evaluateexpression('pbyte('+str2+')^:='+str3,str1);
- end
- else begin
-  result:= evaluateexpression('*((unsigned char*)'+str2+')='+str3,str1);
+ result:= currentlang();
+ if synccommand('set language c') <> gdb_ok then begin
+  result:= '';
  end;
 end;
 
-function tgdbmi.writememoryword(const address: qword; 
-                                            const avalue: word): gdbresultty;
+function tgdbmi.setlang(const alanguage: string): gdbresultty;
+begin
+ if alanguage <> '' then begin
+  result:= synccommand('set language '+alanguage);
+ end;
+end;
+
+function tgdbmi.writememory8(const address: qword;
+                                             const avalue: card8): gdbresultty;
 var
- str1,str2,str3: ansistring;
+ str1,str2,str3,str4: ansistring;
+begin
+ str2:= hextocstr(address,fpointerhexdigits);
+ str3:= hextocstr(avalue,2);
+ str4:= setlangc();
+ result:= evaluateexpression('{unsigned char} '+str2+'='+str3,str1,true);
+ setlang(str4);
+
+// if currentlang = 'pascal' then begin
+//  result:= evaluateexpression('pbyte('+str2+')^:='+str3,str1);
+// end
+// else begin
+//  result:= evaluateexpression('{char} '+str2+' = '+str3,str1);
+//  result:= evaluateexpression('*((unsigned char*)'+str2+') = '+str3,str1);
+// end;
+end;
+
+function tgdbmi.writememory16(const address: qword; 
+                                            const avalue: card16): gdbresultty;
+var
+ str1,str2,str3,str4: ansistring;
 begin
  str2:= hextocstr(address,fpointerhexdigits);
  str3:= hextocstr(avalue,4);
+ str4:= setlangc();
+ result:= evaluateexpression('{unsigned short} '+str2+'='+str3,str1,true);
+ setlang(str4);
+{
  if currentlang = 'pascal' then begin
   result:= evaluateexpression('pword('+str2+')^:='+str3,str1);
  end
  else begin
   result:= evaluateexpression('*((unsigned short*)'+str2+')='+str3,str1);
  end;
+}
 end;
 
-function tgdbmi.writememorylongword(const address: qword;
-                                            const avalue: longword): gdbresultty;
+function tgdbmi.writememory32(const address: qword;
+                                            const avalue: card32): gdbresultty;
 var
- str1,str2,str3: ansistring;
+ str1,str2,str3,str4: ansistring;
 begin
  str2:= hextocstr(address,fpointerhexdigits);
  str3:= hextocstr(avalue,8);
+ str4:= setlangc();
+ result:= evaluateexpression('{unsigned long} '+str2+'='+str3,str1,true);
+ setlang(str4);
+{
  if currentlang = 'pascal' then begin
   result:= evaluateexpression('plongword('+str2+')^:='+str3,str1);
  end
  else begin
   result:= evaluateexpression('*((unsigned long*)'+str2+')='+str3,str1);
  end;
+}
+end;
+
+function tgdbmi.writememory64(const address: qword;
+                                            const avalue: card64): gdbresultty;
+var
+ str1,str2,str3,str4: ansistring;
+begin
+ str2:= hextocstr(address,fpointerhexdigits);
+ str3:= hextocstr(avalue,16);
+ str4:= setlangc();
+ result:= evaluateexpression('{unsigned long long} '+str2+'='+str3,str1,true);
+ setlang(str4);
 end;
 
 function tgdbmi.infoline(const filename: filenamety; const line: integer;
@@ -4479,11 +4527,14 @@ var
  ar1: stringarty;
 // int1{,int2}: integer;
 begin
- result:= 'pascal'; //default
+// result:= 'pascal'; //default
+ result:= '';
  if getcliresult('show language',ar1) = gdb_ok then begin
   ar1:= splitstring(ar1[0],' ');
   ar1:= splitstring(ar1[high(ar1)],'"');
-  result:= ar1[0];
+  if high(ar1) >= 1 then begin
+   result:= ar1[1];
+  end;
  end;
 end;
 

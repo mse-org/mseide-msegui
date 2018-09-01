@@ -7,14 +7,14 @@ object memoryfo: tmemoryfo
   visible = False
   bounds_x = 100
   bounds_y = 100
-  bounds_cx = 453
+  bounds_cx = 465
   bounds_cy = 354
   container.frame.localprops = []
   container.frame.localprops1 = []
   container.bounds = (
     0
     0
-    443
+    455
     354
   )
   dragdock.optionsdock = [od_savepos, od_savezorder, od_canmove, od_cansize, od_canfloat, od_candock, od_propsize, od_captionhint, od_childicons]
@@ -68,10 +68,10 @@ object memoryfo: tmemoryfo
     BCBCBC01B2B2B20169696901A3A3A301FFFFFF017C7C7C01C0C0C0019D9D9D01
     7F7F7F01BEBEBE01A9A9A901E7E7E7018D8D8D01C7C7C701ABABAB01FFFFFF01
     A9A9A901FFFFFF01ABABAB01FFFFFF01ABABAB01FFFFFF01A9A9A901FFFFFF01
-    DADADA01C1C1C101A0A0A001ABABAB01FFFFFF017C7C7C01FFFFFF17FFFFFFFF
-    FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
-    FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
-    FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+    DADADA01C1C1C101A0A0A001ABABAB01FFFFFF017C7C7C01FFFFFF17FFFFFF00
+    FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00
+    FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00
+    FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00
   }
   onshow = formshow
   moduleclassname = 'tdockform'
@@ -79,9 +79,9 @@ object memoryfo: tmemoryfo
     frame.localprops = []
     frame.localprops1 = []
     bounds_x = 0
-    bounds_y = 35
-    bounds_cx = 443
-    bounds_cy = 319
+    bounds_y = 38
+    bounds_cx = 455
+    bounds_cy = 316
     anchors = [an_top, an_bottom]
     font.name = 'stf_fixed'
     font.xscale = 1
@@ -326,7 +326,7 @@ object memoryfo: tmemoryfo
     fixrows.count = 1
     fixrows.items = <    
       item
-        height = 16
+        height = 18
         captions.count = 16
         captions.items = <        
           item
@@ -379,26 +379,26 @@ object memoryfo: tmemoryfo
           end>
       end>
     rowcount = 5
-    datarowheight = 16
-    reffontheight = 14
+    datarowheight = 18
+    reffontheight = 16
   end
   object tlayouter1: tlayouter
-    optionswidget = [ow_tabfocus, ow_parenttabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_destroywidgets]
     frame.framei_left = 5
     frame.localprops = [frl_fileft]
     frame.localprops1 = []
     taborder = 1
     bounds_x = 0
     bounds_y = 0
-    bounds_cx = 382
-    bounds_cy = 28
+    bounds_cx = 433
+    bounds_cy = 31
     optionsscale = [osc_expandx, osc_shrinkx, osc_expandy, osc_shrinky]
     optionslayout = [lao_placex, lao_aligny]
     place_mindist = 5
     place_maxdist = 5
     linkbottom = grid
     dist_bottom = 7
-    object add: tintegeredit
+    object add: tint64edit
+      optionswidget1 = [ow1_fontglyphheight, ow1_autoscale, ow1_autowidth]
       frame.caption = 'Add'
       frame.captionpos = cp_right
       frame.localprops = []
@@ -406,20 +406,20 @@ object memoryfo: tmemoryfo
       frame.outerframe = (
         0
         0
-        22
+        25
         0
       )
       taborder = 3
       bounds_x = 5
       bounds_y = 9
-      bounds_cx = 106
-      bounds_cy = 19
+      bounds_cx = 143
+      bounds_cy = 22
       statfile = mainfo.projectstatfile
-      optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_forcereturncheckvalue, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_focusrectonreadonly]
+      optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_forcereturncheckvalue, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_focusrectonreadonly, oe_hintclippedtext]
       ondataentered = adent
       base = nb_hex
-      max = -1
-      reffontheight = 13
+      valuemax = -1
+      reffontheight = 16
     end
     object memon: tbooleanedit
       frame.caption = 'Memory &on'
@@ -427,14 +427,14 @@ object memoryfo: tmemoryfo
       frame.localprops1 = []
       frame.outerframe = (
         0
-        1
-        56
-        1
+        2
+        64
+        3
       )
-      bounds_x = 313
-      bounds_y = 11
-      bounds_cx = 69
-      bounds_cy = 15
+      bounds_x = 356
+      bounds_y = 12
+      bounds_cx = 77
+      bounds_cy = 18
       statfile = mainfo.projectstatfile
       ondataentered = adent
     end
@@ -452,14 +452,14 @@ object memoryfo: tmemoryfo
       frame.outerframe = (
         0
         0
-        31
+        35
         0
       )
       taborder = 1
-      bounds_x = 225
+      bounds_x = 264
       bounds_y = 9
-      bounds_cx = 83
-      bounds_cy = 19
+      bounds_cx = 87
+      bounds_cy = 22
       statfile = mainfo.projectstatfile
       textflags = [tf_xcentered, tf_ycentered, tf_noselect]
       ondataentered = updatelayoutexe
@@ -474,7 +474,7 @@ object memoryfo: tmemoryfo
           )
         end>
       value = 0
-      reffontheight = 13
+      reffontheight = 16
     end
     object cnt: tintegeredit
       frame.caption = 'Cnt'
@@ -484,18 +484,18 @@ object memoryfo: tmemoryfo
       frame.outerframe = (
         0
         0
-        20
+        22
         0
       )
       taborder = 2
-      bounds_x = 116
+      bounds_x = 153
       bounds_y = 9
-      bounds_cx = 104
-      bounds_cy = 19
+      bounds_cx = 106
+      bounds_cy = 22
       statfile = mainfo.projectstatfile
       ondataentered = adent
       base = nb_hex
-      reffontheight = 13
+      reffontheight = 16
     end
   end
 end
