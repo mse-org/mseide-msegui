@@ -4067,8 +4067,8 @@ procedure tcustomdropdownlistedit.imagelistchanged;
 begin
  if componentstate*[csloading,csdestroying] = [] then begin
   setupeditor;
-  formatchanged;
-  checkautosize;
+  formatchanged();
+//  checkautosize;
  end;
 end;
 

@@ -2058,7 +2058,7 @@ type
    procedure createface;
    procedure createfont;
    procedure createfontempty;
-   procedure checkautosize;
+   procedure checkautosize();
    procedure updatehotkeys() virtual;
 
    function isloading: boolean;      //checks ws_loadlock and csdestroing too

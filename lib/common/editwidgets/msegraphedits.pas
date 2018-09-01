@@ -182,7 +182,7 @@ type
    function docheckvalue(var avalue; const quiet: boolean): boolean; virtual;
    procedure valuechanged; virtual;
    procedure modified; virtual; //for dbwidgets
-   procedure formatchanged;
+   procedure formatchanged();
    procedure dopaintforeground(const canvas: tcanvas); override;
    function needsfocuspaint: boolean; override;
    procedure internalcheckvalue(var avalue; var accept: boolean);
@@ -2277,7 +2277,8 @@ begin
   if fgridintf <> nil then begin
    fgridintf.changed;
   end;
-  invalidate;
+  invalidate();
+  checkautosize();
  end;
 end;
 
@@ -4084,7 +4085,7 @@ begin
  if finfo.ca.textflags <> avalue then begin
   finfo.ca.textflags:= checktextflags(finfo.ca.textflags,avalue);
   invalidate;
-  checkautosize;
+  checkautosize();
  end;
 end;
 
@@ -4097,8 +4098,8 @@ procedure tcustomdatabutton.setcaptiondist(const avalue: integer);
 begin
  if avalue <> finfo.ca.captiondist then begin
   finfo.ca.captiondist:= avalue;
-  formatchanged;
-  checkautosize;
+  formatchanged();
+//  checkautosize();
  end;
 end;
 
@@ -4107,7 +4108,7 @@ begin
  if avalue <> finfo.ca.imagepos then begin
   finfo.ca.imagepos:= avalue;
   formatchanged;
-  checkautosize;
+//  checkautosize;
  end;
 end;
 
@@ -4284,7 +4285,7 @@ begin
  if avalue <> finfo.ca.imagedist then begin
   finfo.ca.imagedist:= avalue;
   formatchanged;
-  checkautosize;
+//  checkautosize;
  end;
 end;
 
@@ -4293,7 +4294,7 @@ begin
  if avalue <> finfo.ca.imagedist1 then begin
   finfo.ca.imagedist1:= avalue;
   formatchanged;
-  checkautosize;
+//  checkautosize;
  end;
 end;
 
@@ -4302,7 +4303,7 @@ begin
  if avalue <> finfo.ca.imagedist2 then begin
   finfo.ca.imagedist2:= avalue;
   formatchanged;
-  checkautosize;
+//  checkautosize;
  end;
 end;
 
@@ -4378,8 +4379,8 @@ begin
 // if csdesigning in componentstate then begin
   exclude(finfo.state,shs_invisible);
 // end;
- formatchanged;
- checkautosize;
+ formatchanged();
+// checkautosize;
 end;
 
 procedure tcustomdatabutton.setaction(const avalue: tcustomaction);

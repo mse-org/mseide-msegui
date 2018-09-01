@@ -1861,7 +1861,7 @@ procedure tcustomedit.fontchanged;
 begin
  inherited;
  setupeditor;
- checkautosize;
+ checkautosize();
 end;
 
 function tcustomedit.getmaxlength: integer;
@@ -2043,7 +2043,7 @@ end;
 
 procedure tcustomedit.dochange;
 begin
- checkautosize;
+ checkautosize();
  if not (ws_loadedproc in fwidgetstate) then begin
   if assistiveserver <> nil then begin
    assistiveserver.dochange(getiassistiveclient());
@@ -2064,7 +2064,8 @@ end;
 procedure tcustomedit.formatchanged();
 begin
  if not (csloading in componentstate) then begin
-  invalidate;
+  invalidate();
+  checkautosize();
  end;
 end;
 
