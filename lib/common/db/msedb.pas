@@ -1558,7 +1558,8 @@ type
 
  fieldeventty = procedure(const afield: tfield) of object;
  
- fieldlinkoptionty = (flo_onlyifnull,flo_notifunmodifiedinsert,flo_utc);
+ fieldlinkoptionty = (flo_disabled,flo_onlyifnull,flo_notifunmodifiedinsert,
+                      flo_utc);
  fieldlinkoptionsty = set of fieldlinkoptionty;
   
  tfieldlink = class(tmsecomponent,idbeditinfo)
@@ -1570,16 +1571,19 @@ type
    procedure setdestdataset(const avalue: tdataset);
    function getdestdatafield: string;
    procedure setdestdatafield(const avalue: string);
-   //idbeditinfo
+    //idbeditinfo
    procedure getfieldtypes(out propertynames: stringarty;
                           out fieldtypes: fieldtypesarty);
    function getdataset(const aindex: integer): tdataset;
+   function getenabled: boolean;
+   procedure setenabled(const avalue: boolean);
   protected
    procedure updatedata(const afield: tfield); virtual;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
    function field: tfield;
+   property enabled: boolean read getenabled write setenabled;
   published
    property destdataset: tdataset read getdestdataset write setdestdataset;
    property destdatafield: string read getdestdatafield write setdestdatafield;
@@ -1601,7 +1605,7 @@ type
    function getdatasource1(const aindex: integer): tdatasource;
    procedure setdatasource(const avalue: tdatasource);
    procedure readdatafield(reader: treader);
-   //idbeditinfo
+    //idbeditinfo
    procedure getfieldtypes(out propertynames: stringarty;
                           out fieldtypes: fieldtypesarty);
    function getdataset(const aindex: integer): tdataset;
@@ -8559,7 +8563,8 @@ end;
 procedure tfieldlinkdatalink.updatedata;
 begin
  if field <> nil then begin
-  if (not (flo_onlyifnull in fowner.foptions) or (field.isnull)) and 
+  if not (flo_disabled in fowner.options) and
+     (not (flo_onlyifnull in fowner.foptions) or (field.isnull)) and 
      (not (flo_notifunmodifiedinsert in fowner.foptions) or 
                        (datasource.dataset.modified)) then begin
    fowner.updatedata(field);
@@ -8620,8 +8625,24 @@ end;
 
 procedure tfieldlink.updatedata(const afield: tfield);
 begin
- if canevent(tmethod(fonupdatedata)) then begin
+ if not (flo_disabled in foptions) and
+                    canevent(tmethod(fonupdatedata)) then begin
   fonupdatedata(afield);
+ end;
+end;
+
+function tfieldlink.getenabled: boolean;
+begin
+ result:= not (flo_disabled in foptions);
+end;
+
+procedure tfieldlink.setenabled(const avalue: boolean);
+begin
+ if avalue then begin
+  exclude(foptions,flo_disabled);
+ end
+ else begin
+  include(foptions,flo_disabled);
  end;
 end;
 
@@ -8700,7 +8721,8 @@ end;
 
 procedure tfieldfieldlink.updatedata(const afield: tfield);
 begin
- if fsourcedatalink.field <> nil then begin
+ if not (flo_disabled in foptions) and
+    (fsourcedatalink.field <> nil) then begin
   field.value:= fsourcedatalink.field.value;
  end;
  inherited;

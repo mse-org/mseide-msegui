@@ -17,6 +17,7 @@ uses
 
 type
  fieldparamlinkoptionty = (
+              fplo_disabled,
               fplo_autorefresh,fplo_refreshifactiveonly,
               fplo_refreshifchangedonly,fplo_checkbrowsemodeonrefresh,
               fplo_restorerecno,
@@ -326,6 +327,8 @@ type
    procedure readdatafield(reader: treader);
    procedure setdestfields(const avalue: tdestfields);
    procedure setoptions(const avalue: fieldparamlinkoptionsty);
+   function getenabled: boolean;
+   procedure setenabled(const avalue: boolean);
   protected
    fcheckbrowsemodelock: int32;
    procedure loaded; override;
@@ -347,6 +350,7 @@ type
    procedure checkrefresh;
    procedure delayoff;
    procedure delayon;
+   property enabled: boolean read getenabled write setenabled;
   published
    property fieldname: string read getfieldname write setfieldname;
    property datasource: tdatasource read getdatasource write setdatasource;
@@ -1029,80 +1033,82 @@ begin
  if not (csloading in fownerlink.componentstate) then begin
   inherited;
 //  if frefreshlock = 0 then begin
-  if active and (field <> nil) and
-                ((afield = nil) or (afield = self.field)) then begin
-   if fchangelock <> 0 then begin
-    databaseerror('Recursive recordchanged.',fownerlink);
-   end;
-   inc(fchangelock);
-   try
-    with fownerlink do begin
-     if not (csdesigning in componentstate) then begin
-      fparamset:= true;
-      bo1:= false;
-      bo2:= not (fplo_refreshifchangedonly in foptions) or 
-                               (fdestdataset = nil) or not fdestdataset.active;
-      if not bo2 then begin
-       var1:= param.value;
-      end;
-      if assigned(fonsetparam) then begin
-       fonsetparam(fownerlink,bo1);
-      end;
-      if not bo1 and (dataset <> nil) then begin
-       if fparamname <> '' then begin
-        fieldtoparam(self.field,param);
+  if not (fplo_disabled in fownerlink.foptions) then begin
+   if active and (field <> nil) and
+                 ((afield = nil) or (afield = self.field)) then begin
+    if fchangelock <> 0 then begin
+     databaseerror('Recursive recordchanged.',fownerlink);
+    end;
+    inc(fchangelock);
+    try
+     with fownerlink do begin
+      if not (csdesigning in componentstate) then begin
+       fparamset:= true;
+       bo1:= false;
+       bo2:= not (fplo_refreshifchangedonly in foptions) or 
+                                (fdestdataset = nil) or not fdestdataset.active;
+       if not bo2 then begin
+        var1:= param.value;
        end;
-       with fdestparams do begin
-        for int1:= 0 to high(fitems) do begin
-         with tdestparam(fitems[int1]) do begin
-          if (fdatalink.field <> nil) and (fparamname <> '') then begin
-           fieldtoparam(fdatalink.field,param(fparamname));
+       if assigned(fonsetparam) then begin
+        fonsetparam(fownerlink,bo1);
+       end;
+       if not bo1 and (dataset <> nil) then begin
+        if fparamname <> '' then begin
+         fieldtoparam(self.field,param);
+        end;
+        with fdestparams do begin
+         for int1:= 0 to high(fitems) do begin
+          with tdestparam(fitems[int1]) do begin
+           if (fdatalink.field <> nil) and (fparamname <> '') then begin
+            fieldtoparam(fdatalink.field,param(fparamname));
+           end;
           end;
          end;
         end;
        end;
-      end;
-      if assigned(fonaftersetparam) then begin
-       fonaftersetparam(fownerlink);
-      end;
-      bo2:= bo2 or (var1 <> param.value);
-      if (frefreshlock = 0) and bo2 then begin
-       if (fplo_autorefresh in foptions) and 
-          (destdataset <> nil) and
-          (fdestdataset.active or 
-                    not (fplo_refreshifactiveonly in foptions)) and
-          not((fdestdataset.state = dsinsert) and 
-                  (dataset.state = dsinsert) and
-                          (fplo_syncmasterinsert in foptions)) and
-          not ((fplo_delayedsyncmasterpost in foptions) and
-                 (self.fdscontroller <> nil) and 
-                                     self.fdscontroller.posting1) then begin
-        if fdestdataset.active then begin
-         if fplo_checkbrowsemodeonrefresh in foptions then begin
-          fdestdataset.checkbrowsemode;
-         end
-         else begin
-          fdestdataset.cancel;
-         end;
-         if fdestcontroller <> nil then begin
-          fdestcontroller.refresh(fplo_restorerecno in foptions,truedelayus);
-         end
-         else begin
-          fdestdataset.refresh;
-         end;
-        end
-        else begin
-         fdestdataset.active:= true;
-        end;
+       if assigned(fonaftersetparam) then begin
+        fonaftersetparam(fownerlink);
        end;
-       if assigned(fonrefresh) then begin
-        fonrefresh(fownerlink);
+       bo2:= bo2 or (var1 <> param.value);
+       if (frefreshlock = 0) and bo2 then begin
+        if (fplo_autorefresh in foptions) and 
+           (destdataset <> nil) and
+           (fdestdataset.active or 
+                     not (fplo_refreshifactiveonly in foptions)) and
+           not((fdestdataset.state = dsinsert) and 
+                   (dataset.state = dsinsert) and
+                           (fplo_syncmasterinsert in foptions)) and
+           not ((fplo_delayedsyncmasterpost in foptions) and
+                  (self.fdscontroller <> nil) and 
+                                      self.fdscontroller.posting1) then begin
+         if fdestdataset.active then begin
+          if fplo_checkbrowsemodeonrefresh in foptions then begin
+           fdestdataset.checkbrowsemode;
+          end
+          else begin
+           fdestdataset.cancel;
+          end;
+          if fdestcontroller <> nil then begin
+           fdestcontroller.refresh(fplo_restorerecno in foptions,truedelayus);
+          end
+          else begin
+           fdestdataset.refresh;
+          end;
+         end
+         else begin
+          fdestdataset.active:= true;
+         end;
+        end;
+        if assigned(fonrefresh) then begin
+         fonrefresh(fownerlink);
+        end;
        end;
       end;
      end;
+    finally
+     dec(fchangelock);
     end;
-   finally
-    dec(fchangelock);
    end;
   end;
  end;
@@ -1121,51 +1127,53 @@ var
 begin
  inherited;
  with fownerlink do begin
-  b1:= (destdataset <> nil) and destdataset.active;
-  inc(frefreshlock);
-  try
-   case ord(event) of
-    ord(deupdatestate): begin
-     if b1 then begin
-      if (fplo_syncmasteredit in foptions) and (dataset.state = dsedit) and 
-                      not (fownerlink.destdataset.state = dsedit) then begin
-       destdataset.edit;
+  if not (fplo_disabled in foptions) then begin
+   b1:= (destdataset <> nil) and destdataset.active;
+   inc(frefreshlock);
+   try
+    case ord(event) of
+     ord(deupdatestate): begin
+      if b1 then begin
+       if (fplo_syncmasteredit in foptions) and (dataset.state = dsedit) and 
+                       not (fownerlink.destdataset.state = dsedit) then begin
+        destdataset.edit;
+       end;
+       if (fplo_syncmasterinsert in foptions) and(dataset.state = dsinsert) and
+                                    not (destdataset.state = dsinsert) then begin
+        destdataset.insert();
+       end;
       end;
-      if (fplo_syncmasterinsert in foptions) and(dataset.state = dsinsert) and
-                                   not (destdataset.state = dsinsert) then begin
-       destdataset.insert();
+     end;
+     de_afterdelete: begin
+      if b1 and (fplo_syncmasterdelete in foptions) and 
+                                   not destdataset.isempty then begin
+       destdataset.delete();
+      end;
+      if assigned(fonmasterdelete) then begin
+       fonmasterdelete(destdataset,dataset);
+      end;
+     end;
+     de_afterpost: begin
+      if b1 and (fplo_delayedsyncmasterpost in foptions) and
+                           (destdataset.state in [dsinsert,dsedit]) then begin
+       destdataset.post();
+      end;
+      if assigned(fonmasterpost) then begin
+       fonmasterpost(destdataset,dataset);
+      end;
+     end;
+     de_afterapplyupdate: begin
+      if b1 and (fplo_syncmasterapplyupdates in foptions) then begin
+       destdataset.applyupdates();
+      end;
+      if assigned(fonmasterapplyupdate) then begin
+       fonmasterapplyupdate(destdataset,dataset);
       end;
      end;
     end;
-    de_afterdelete: begin
-     if b1 and (fplo_syncmasterdelete in foptions) and 
-                                  not destdataset.isempty then begin
-      destdataset.delete();
-     end;
-     if assigned(fonmasterdelete) then begin
-      fonmasterdelete(destdataset,dataset);
-     end;
-    end;
-    de_afterpost: begin
-     if b1 and (fplo_delayedsyncmasterpost in foptions) and
-                          (destdataset.state in [dsinsert,dsedit]) then begin
-      destdataset.post();
-     end;
-     if assigned(fonmasterpost) then begin
-      fonmasterpost(destdataset,dataset);
-     end;
-    end;
-    de_afterapplyupdate: begin
-     if b1 and (fplo_syncmasterapplyupdates in foptions) then begin
-      destdataset.applyupdates();
-     end;
-     if assigned(fonmasterapplyupdate) then begin
-      fonmasterapplyupdate(destdataset,dataset);
-     end;
-    end;
+   finally
+    dec(frefreshlock);
    end;
-  finally
-   dec(frefreshlock);
   end;
  end;
 end;
@@ -1178,7 +1186,8 @@ var
  posted1: boolean;
 begin
  with fownerlink do begin
-  if (destdataset <> nil) and destdataset.active then begin
+  if not (fplo_disabled in foptions) and 
+                    (destdataset <> nil) and destdataset.active then begin
    inc(frefreshlock);
    try
     posted1:= false;
@@ -1272,55 +1281,57 @@ var
 begin
  inherited;
  with fownerlink do begin
-  b1:= cansync(sourceds);
-  case ord(event) of
-   ord(deupdatestate): begin
-    if b1 then begin
-     if (fplo_syncslaveedit in foptions) and (dataset.state = dsedit) and 
-                     not (sourceds.state = dsedit) then begin
-      sourceds.edit;
-     end;
-     if ([fplo_syncslaveinsert,fplo_syncslaveinserttoedit] * foptions <>
-                               []) and (dataset.state = dsinsert) then begin
-      inc(fcheckbrowsemodelock);
-      try
-       if (fplo_syncslaveinsert in foptions) and
-                                       (sourceds.state <> dsinsert) then begin
-        sourceds.insert();
-       end
-       else begin
-        if (fplo_syncslaveinserttoedit in foptions) and
-                                         (sourceds.state <> dsedit) then begin
-         sourceds.edit();
+  if not (fplo_disabled in foptions) then begin
+   b1:= cansync(sourceds);
+   case ord(event) of
+    ord(deupdatestate): begin
+     if b1 then begin
+      if (fplo_syncslaveedit in foptions) and (dataset.state = dsedit) and 
+                      not (sourceds.state = dsedit) then begin
+       sourceds.edit;
+      end;
+      if ([fplo_syncslaveinsert,fplo_syncslaveinserttoedit] * foptions <>
+                                []) and (dataset.state = dsinsert) then begin
+       inc(fcheckbrowsemodelock);
+       try
+        if (fplo_syncslaveinsert in foptions) and
+                                        (sourceds.state <> dsinsert) then begin
+         sourceds.insert();
+        end
+        else begin
+         if (fplo_syncslaveinserttoedit in foptions) and
+                                          (sourceds.state <> dsedit) then begin
+          sourceds.edit();
+         end;
         end;
+       finally
+        dec(fcheckbrowsemodelock);
        end;
-      finally
-       dec(fcheckbrowsemodelock);
       end;
      end;
     end;
-   end;
-   de_afterdelete: begin
-    if b1 then begin
-     if (fplo_syncslavedelete in foptions) and
-                                     not sourceds.isempty then begin
-      sourceds.delete;
+    de_afterdelete: begin
+     if b1 then begin
+      if (fplo_syncslavedelete in foptions) and
+                                      not sourceds.isempty then begin
+       sourceds.delete;
+      end;
+      if fplo_syncslavedeletetoedit in foptions then begin
+       sourceds.edit();
+      end;
      end;
-     if fplo_syncslavedeletetoedit in foptions then begin
-      sourceds.edit();
+     if assigned(fonslavedelete) then begin
+      fonslavedelete(destdataset,dataset);
      end;
     end;
-    if assigned(fonslavedelete) then begin
-     fonslavedelete(destdataset,dataset);
-    end;
-   end;
-   de_afterpost: begin
-    if b1 and (fplo_delayedsyncslavepost in foptions) and 
-                          (sourceds.state in [dsinsert,dsedit]) then begin
-     sourceds.checkbrowsemode();
-    end;
-    if assigned(fonslavepost) then begin
-     fonslavepost(destdataset,dataset);
+    de_afterpost: begin
+     if b1 and (fplo_delayedsyncslavepost in foptions) and 
+                           (sourceds.state in [dsinsert,dsedit]) then begin
+      sourceds.checkbrowsemode();
+     end;
+     if assigned(fonslavepost) then begin
+      fonslavepost(destdataset,dataset);
+     end;
     end;
    end;
   end;
@@ -1335,8 +1346,9 @@ var
  sourceds: tdataset;
  canceling: boolean;
 begin
- if cansync(sourceds) then begin
-  with fownerlink do begin
+ with fownerlink do begin
+  if not (fplo_disabled in foptions) and 
+                                  cansync(sourceds) then begin
    inc(fsourcedatalink.frefreshlock);
    try
     canceling:= mseclasses.getcorbainterface(
@@ -1384,28 +1396,30 @@ begin
    finally
     dec(fsourcedatalink.frefreshlock);
    end;
+  end
+  else begin
+   inherited;
   end;
- end
- else begin
-  inherited;
  end;
 end;
 
-procedure tparamdestdatalink.updatedata;
+procedure tparamdestdatalink.updatedata();
 var
  int1: integer;
  field1: tfield;
 begin
  with fownerlink do begin
-  with fdestfields do begin
-   for int1:= 0 to high(fitems) do begin
-    with tdestfield(fitems[int1]) do begin
-     if (fdatalink.field <> nil) and (fdestfieldname <> '') then begin
-      field1:= field(fdestfieldname);
-      if (not (dfo_onlyifnull in foptions) or (field1.isnull)) and 
-         (not (dfo_notifunmodifiedinsert in foptions) or 
-                           dataset.modified) then begin
-       field1.value:= fdatalink.field.value;
+  if not (fplo_disabled in foptions) then begin
+   with fdestfields do begin
+    for int1:= 0 to high(fitems) do begin
+     with tdestfield(fitems[int1]) do begin
+      if (fdatalink.field <> nil) and (fdestfieldname <> '') then begin
+       field1:= field(fdestfieldname);
+       if (not (dfo_onlyifnull in foptions) or (field1.isnull)) and 
+          (not (dfo_notifunmodifiedinsert in foptions) or 
+                            dataset.modified) then begin
+        field1.value:= fdatalink.field.value;
+       end;
       end;
      end;
     end;
@@ -1635,6 +1649,21 @@ begin
  end;
  if not (fplo_syncmastercancel in avalue) then begin
   foptions:= foptions - [fplo_syncmastercancelupdates];
+ end;
+end;
+
+function tfieldparamlink.getenabled: boolean;
+begin
+ result:= not (fplo_disabled in foptions);
+end;
+
+procedure tfieldparamlink.setenabled(const avalue: boolean);
+begin
+ if avalue then begin
+  exclude(foptions,fplo_disabled);
+ end
+ else begin
+  include(foptions,fplo_disabled);
  end;
 end;
 
