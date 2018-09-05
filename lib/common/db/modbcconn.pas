@@ -112,7 +112,7 @@ type
                  const acursor: tsqlcursor): TStream; override;
     // - UpdateIndexDefs
     procedure UpdateIndexDefs(var IndexDefs:TIndexDefs;
-                          const aTableName:string); override;
+               const aTableName:string; const acursor: tsqlcursor); override;
     // - Schema info
     function GetSchemaInfoSQL(SchemaType:TSchemaType; 
        SchemaObjectName, SchemaObjectPattern:msestring):msestring; override;
@@ -1488,7 +1488,7 @@ begin
 end;
 
 procedure TODBCConnection.UpdateIndexDefs(var IndexDefs: TIndexDefs;
-                    const aTableName: string);
+                       const aTableName: string; const acursor: tsqlcursor);
 var
   StmtHandle:SQLHSTMT;
   Res:SQLRETURN;

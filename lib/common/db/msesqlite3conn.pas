@@ -47,7 +47,9 @@ type
  end;
  
  sqliteoptionty = (slo_transactions,slo_designtransactions,
-                   slo_negboolean); //boolean true = -1 instead of 1
+                   slo_negboolean, //boolean true = -1 instead of 1
+                   slo_64bitprimarykey); 
+                            //use ftlargint for "integer" primarykeyfield
  sqliteoptionsty = set of sqliteoptionty;
  
  tsqlite3connection = class(tcustomsqlconnection,idbcontroller,iblobconnection)
@@ -94,8 +96,9 @@ type
 
    Function AllocateTransactionHandle : TSQLHandle; override;
 
-   procedure internalExecute(const cursor: TSQLCursor; const atransaction: tsqltransaction;
-                     const AParams : TmseParams; const autf8: boolean); override;
+   procedure internalExecute(const cursor: TSQLCursor;
+               const atransaction: tsqltransaction; const AParams : TmseParams;
+                                                const autf8: boolean); override;
 
    function GetTransactionHandle(trans : TSQLHandle): pointer; override;
    function Commit(trans : TSQLHandle) : boolean; override;
@@ -110,9 +113,9 @@ type
                        const acursor: tsqlcursor): TStream; override;
    procedure execsql(const asql: string);
    procedure UpdateIndexDefs(var IndexDefs : TIndexDefs;
-                               const aTableName : string); override;
+               const aTableName : string; const acursor: tsqlcursor); override;
    function getprimarykeyfield(const atablename: string;
-                                     const acursor: tsqlcursor): string; override;
+                                   const acursor: tsqlcursor): string; override;
    procedure updateprimarykeyfield(const afield: tfield;
                                  const atransaction: tsqltransaction); override;
    procedure beginupdate; override;
@@ -179,6 +182,7 @@ type
    fparambinding: tparambinding;
    fopen: boolean;
    fconnection: tsqlite3connection;
+   fprimarykeyfield: string;
   public
    constructor create(const aowner: icursorclient; const aname: ansistring; 
                        const aconnection: tsqlite3connection);
@@ -363,6 +367,9 @@ begin
    size1:= 0;
    if pos('INT',str2) = 1 then begin //or 'INTEGER'
     ft1:= ftinteger;
+    if (slo_64bitprimarykey in foptions) and (str1 = fprimarykeyfield) then begin
+     ft1:= ftlargeint;
+    end;
    end
    else begin
     if (str2 = 'LARGEINT') or (str2 = 'BIGINT') then begin
@@ -978,15 +985,16 @@ begin
   except
   end;
  end;
+ tsqlite3cursor(acursor).fprimarykeyfield:= result;
 end;
 
 procedure tsqlite3connection.UpdateIndexDefs(var IndexDefs: TIndexDefs;
-                              const aTableName: string);
+                         const aTableName: string; const acursor: tsqlcursor);
 var
  str1: string;
 begin
  try
-  str1:= getprimarykeyfield(atablename,nil);
+  str1:= getprimarykeyfield(atablename,acursor);
  except
   str1:= '';
  end;

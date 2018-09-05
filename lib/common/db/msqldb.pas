@@ -211,7 +211,7 @@ type
     function getint64currency: boolean; virtual;
 
     procedure UpdateIndexDefs(var IndexDefs : TIndexDefs;
-                                          const aTableName : string); virtual;
+                const aTableName : string; const acursor: tsqlcursor); virtual;
     function getprimarykeyfield(const atablename: string;
                              const acursor: tsqlcursor): string; virtual;
     function GetSchemaInfoSQL(SchemaType : TSchemaType;
@@ -1039,7 +1039,7 @@ end;
 
 
 procedure tcustomsqlconnection.UpdateIndexDefs(var IndexDefs : TIndexDefs;
-                                  const aTableName : string);
+                         const aTableName : string; const acursor: tsqlcursor);
 
 begin
  //dummy

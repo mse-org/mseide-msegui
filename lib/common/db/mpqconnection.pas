@@ -116,11 +116,12 @@ type
                 const AParams: tstringlist) : boolean; override;
    procedure internalRollBackRetaining(trans : TSQLHandle); override;
    procedure UpdateIndexDefs(var IndexDefs : TIndexDefs;
-                                 const aTableName : string); override;
+              const aTableName : string; const acursor: tsqlcursor); override;
    function GetSchemaInfoSQL(SchemaType : TSchemaType;
          SchemaObjectName, SchemaPattern : msestring) : msestring; override;
    procedure dopqexec(const asql: ansistring); overload;
-   procedure dopqexec(const asql: ansistring; const aconnection: ppgconn); overload;
+   procedure dopqexec(const asql: ansistring; 
+                                    const aconnection: ppgconn); overload;
 
    function CreateBlobStream(const Field: TField; const Mode: TBlobStreamMode;
                       const acursor: tsqlcursor): TStream; override;
@@ -1347,7 +1348,7 @@ begin
 end;
 
 procedure tpqconnection.updateindexdefs(var indexdefs : tindexdefs;
-                          const atablename : string);
+                         const atablename : string; const acursor: tsqlcursor);
 
 var
  qry : tsqlresult;

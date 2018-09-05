@@ -161,7 +161,7 @@ Type
     procedure internalCommitRetaining(trans : TSQLHandle); override;
     procedure internalRollBackRetaining(trans : TSQLHandle); override;
     procedure UpdateIndexDefs(var IndexDefs : TIndexDefs;
-                                          const aTableName : string); override;
+               const aTableName : string; const acursor: tsqlcursor); override;
 
    function getprimarykeyfield(const atablename: string;
                                  const acursor: tsqlcursor): string; override;
@@ -1706,7 +1706,7 @@ begin
 end;
 
 procedure tmysqlconnection.UpdateIndexDefs(var IndexDefs : TIndexDefs;
-                     const aTableName : string);
+                     const aTableName : string; const acursor: tsqlcursor);
 var 
  qry: tsqlresult;
  keynamef,{filednamef,}columnnamef,nonuniquef: tdbcol;

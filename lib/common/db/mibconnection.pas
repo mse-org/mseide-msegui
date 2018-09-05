@@ -156,7 +156,7 @@ type
    procedure internalCommitRetaining(trans : TSQLHandle); override;
    procedure internalRollBackRetaining(trans : TSQLHandle); override;
    procedure UpdateIndexDefs(var IndexDefs : TIndexDefs;
-                                          const aTableName : string); override;
+               const aTableName : string; const acursor: tsqlcursor); override;
    function GetSchemaInfoSQL(SchemaType : TSchemaType; SchemaObjectName,
                            SchemaPattern : msestring) : msestring; override;
    function CreateBlobStream(const Field: TField; const Mode: TBlobStreamMode;
@@ -1386,7 +1386,7 @@ begin
 end;
 
 procedure tibconnection.updateindexdefs(var indexdefs : tindexdefs;
-                               const atablename : string);
+                      const atablename : string; const acursor: tsqlcursor);
 begin
  fbupdateindexdefs(self,indexdefs,atablename);
 end;

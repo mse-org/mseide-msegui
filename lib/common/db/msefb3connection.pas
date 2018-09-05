@@ -181,7 +181,7 @@ type
                                     const aparams: tmseparams) override;
 }
    procedure updateindexdefs(var indexdefs : tindexdefs;
-                                          const atablename : string) override;
+               const atablename : string; const acursor: tsqlcursor) override;
    function getschemainfosql(schematype : tschematype;
               schemaobjectname, schemapattern : msestring) : msestring override;
 
@@ -1454,7 +1454,7 @@ begin
 end;
 
 procedure tfb3connection.updateindexdefs(var indexdefs: tindexdefs;
-               const atablename: string);
+               const atablename: string; const acursor: tsqlcursor);
 begin
  fbupdateindexdefs(self,indexdefs,atablename);
 end;

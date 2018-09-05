@@ -1478,7 +1478,7 @@ Procedure TSQLQuery.UpdateIndexDefs;
 begin
  findexdefs.clear;
  if assigned(DataBase) and (ftablename <> '') then begin
-  tcustomsqlconnection1(database).UpdateIndexDefs(FIndexDefs,FTableName);
+  tcustomsqlconnection1(database).UpdateIndexDefs(FIndexDefs,FTableName,fcursor);
  end;
 end;
 
