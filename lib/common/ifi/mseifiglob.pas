@@ -55,6 +55,11 @@ type
   procedure setifiserverintf(const aintf: iifiserver);
   function getdefaultifilink: iificlient;
   function getifidatatype: listdatatypety;
+{
+  procedure getpointerval(var avalue: pointer); 
+                        //pointer properties can not be published
+  procedure setpointerval(const avalue: pointer); 
+}
  end;
  ificommandcodety = (icc_none,icc_close,icc_release);
  iificommand = interface(inullinterface)[miid_iificommand]

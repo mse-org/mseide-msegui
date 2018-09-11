@@ -224,8 +224,10 @@ const
   trecordvaluelistedititem,trecordvaluelistedititem,
 //dl_real,               dl_realint,              dl_realsum,
   trealvaluelistedititem,trecordvaluelistedititem,trecordvaluelistedititem,
-//    dl_datetime,
+//dl_datetime,
   tdatetimevaluelistedititem,
+//dl_pointer
+  trecordvaluelistedititem,
 //dl_ansistring,           dl_msestring,
   trecordvaluelistedititem,tmsestringvaluelistedititem,
 //dl_doublemsestring,      dl_msestringint,

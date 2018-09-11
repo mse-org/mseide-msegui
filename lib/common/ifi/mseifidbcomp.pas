@@ -72,6 +72,8 @@ const
   realfcomp,realfcomp, realfcomp,
 //dl_datetime,
   datetimefcomp,
+//dl_pointer
+  [],
 //dl_ansistring,dl_msestring,dl_doublemsestring,dl_msestringint,
   stringfcomp,  stringfcomp, stringfcomp,       stringfcomp,
 //dl_complex,dl_rowstate,dl_custom

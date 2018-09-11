@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 2009-2014 by Martin Schreiber
+{ MSEgui Copyright (c) 2009-2018 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -129,6 +129,12 @@ type
                                     //true if found
    function getint64val(const alink: iificlient; const aname: string;
                                  var avalue: int64): boolean;
+                                    //true if found
+   function setpointerval(const alink: iificlient; const aname: string;
+                                 const avalue: pointer): boolean;
+                                    //true if found
+   function getpointerval(const alink: iificlient; const aname: string;
+                                 var avalue: pointer): boolean;
                                     //true if found
    function setbooleanval(const alink: iificlient; const aname: string;
                                  const avalue: boolean): boolean;
@@ -299,6 +305,10 @@ type
  setint64clienteventty = 
                  procedure(const sender: tcustomificlientcontroller;
                           const aclient: iificlient; var avalue: int64;
+                          var accept: boolean; const aindex: integer) of object; 
+ setpointerclienteventty = 
+                 procedure(const sender: tcustomificlientcontroller;
+                          const aclient: iificlient; var avalue: pointer;
                           var accept: boolean; const aindex: integer) of object; 
  setrealclienteventty = 
                  procedure(const sender: tcustomificlientcontroller;
@@ -540,6 +550,30 @@ type
    property valuemin: int64 read fvaluemin write setvaluemin default 0;
    property valuemax: int64 read fvaluemax write setvaluemax default maxint;
    property onclientsetvalue: setint64clienteventty 
+                read fonclientsetvalue write fonclientsetvalue;
+ end;
+
+ tifipointerdatalist = class;
+ 
+ tpointerclientcontroller = class(tvalueclientcontroller)
+  private
+   fvalue: pointer;
+   fonclientsetvalue: setpointerclienteventty;
+   procedure setvalue1(const avalue: pointer);
+   function getgriddata: tifipointerdatalist;
+  protected
+   procedure valuestoclient(const alink: pointer); override;
+   procedure clienttovalues(const alink: pointer); override;
+   procedure setvalue(const sender: iificlient;
+               var avalue; var accept: boolean; const arow: integer); override;
+   function createdatalist: tdatalist; override;
+   function getlistdatatypes: listdatatypesty; override;   
+  public
+   constructor create(const aowner: tmsecomponent); override;
+   property griddata: tifipointerdatalist read getgriddata;
+   property value: pointer read fvalue write setvalue1 default nil;
+  published
+   property onclientsetvalue: setpointerclienteventty 
                 read fonclientsetvalue write fonclientsetvalue;
  end;
 
@@ -976,6 +1010,20 @@ type
                                                          write setcontroller;
  end;
 
+ tifipointerlinkcomp = class(tifivaluelinkcomp)
+  private
+   function getcontroller: tpointerclientcontroller;
+   procedure setcontroller(const avalue: tpointerclientcontroller);
+  protected
+   function getcontrollerclass: customificlientcontrollerclassty; override;
+  public
+   property c: tpointerclientcontroller read getcontroller
+                                                         write setcontroller;
+  published
+   property controller: tpointerclientcontroller read getcontroller
+                                                         write setcontroller;
+ end;
+
  tifienumlinkcomp = class(tifiintegerlinkcomp)
   private
    function getcontroller: tenumclientcontroller;
@@ -1244,6 +1292,13 @@ end;
    function getdefault: pointer; override;
   public
    constructor create(const aowner: tint64clientcontroller); reintroduce;
+ end;
+
+ tifipointerdatalist = class(tpointerdatalist)
+  protected
+   fowner: tpointerclientcontroller;
+  public
+   constructor create(const aowner: tpointerclientcontroller); reintroduce;
  end;
 
  tifibooleandatalist = class(tbooleandatalist)
@@ -1740,6 +1795,38 @@ begin
  if result then begin
   avalue:= getordprop(inst,prop);
  end; 
+end;
+
+function tcustomificlientcontroller.setpointerval(const alink: iificlient;
+               const aname: string; const avalue: pointer): boolean;
+var
+ inst: tobject;
+ prop: ppropinfo;
+begin
+ inst:= alink.getinstance;
+ prop:= getpropinfo(inst,aname);
+ result:= (prop <> nil) and (prop^.proptype^.kind = tkint64);
+ if result then begin
+  setordprop(inst,prop,ptrint(avalue));
+ end; 
+end;
+
+function tcustomificlientcontroller.getpointerval(const alink: iificlient;
+               const aname: string; var avalue: pointer): boolean;
+var
+ inst: tobject;
+ prop: ppropinfo;
+ 
+begin
+ inst:= alink.getinstance;
+ prop:= getpropinfo(inst,aname);
+ result:= (prop <> nil) and (prop^.proptype^.kind = tkpointer);
+ if result then begin
+  avalue:= pointer(ptrint(getordprop(inst,prop)));
+ end
+ else begin
+///////////////////  alink.getpointerval(avalue);
+ end;
 end;
 
 function tcustomificlientcontroller.setbooleanval(const alink: iificlient;
@@ -2934,6 +3021,56 @@ begin
  result:= [dl_int64];
 end;
 
+{ tpointerclientcontroller }
+
+
+constructor tpointerclientcontroller.create(const aowner: tmsecomponent);
+begin
+ inherited create(aowner,tkpointer);
+end;
+
+procedure tpointerclientcontroller.setvalue1(const avalue: pointer);
+begin
+ fvalue:= avalue;
+ change;
+end;
+
+function tpointerclientcontroller.getgriddata: tifipointerdatalist;
+begin
+ result:= tifipointerdatalist(ifigriddata);
+end;
+
+procedure tpointerclientcontroller.valuestoclient(const alink: pointer);
+begin
+ setpointerval(iificlient(alink),'value',fvalue);
+ inherited;
+end;
+
+procedure tpointerclientcontroller.clienttovalues(const alink: pointer);
+begin
+ inherited;
+ getpointerval(iificlient(alink),'value',fvalue);
+end;
+
+procedure tpointerclientcontroller.setvalue(const sender: iificlient;
+               var avalue; var accept: boolean; const arow: integer);
+begin
+ if fowner.canevent(tmethod(fonclientsetvalue)) then begin
+  fonclientsetvalue(self,sender,pointer(avalue),accept,arow);
+ end;
+ inherited;
+end;
+
+function tpointerclientcontroller.createdatalist: tdatalist;
+begin
+ result:= tifipointerdatalist.create(self);
+end;
+
+function tpointerclientcontroller.getlistdatatypes: listdatatypesty;
+begin
+ result:= [dl_pointer];
+end;
+
 { tbooleanclientcontroller }
 
 constructor tbooleanclientcontroller.create(const aowner: tmsecomponent);
@@ -3396,6 +3533,24 @@ end;
 procedure tifiint64linkcomp.setcontroller(const avalue: tint64clientcontroller);
 begin
  inherited setcontroller(avalue);
+end;
+
+{ tifipointerlinkcomp }
+
+function tifipointerlinkcomp.getcontroller: tpointerclientcontroller;
+begin
+ result:= tpointerclientcontroller(inherited controller);
+end;
+
+procedure tifipointerlinkcomp.setcontroller(
+              const avalue: tpointerclientcontroller);
+begin
+ inherited setcontroller(avalue);
+end;
+
+function tifipointerlinkcomp.getcontrollerclass: customificlientcontrollerclassty;
+begin
+ result:= tpointerclientcontroller;
 end;
 
 { tifibooleanlinkcomp }
@@ -4189,6 +4344,14 @@ end;
 function tifiint64datalist.getdefault: pointer;
 begin
  result:= @fowner.valuedefault;
+end;
+
+{ tifipointerdatalist }
+
+constructor tifipointerdatalist.create(const aowner: tpointerclientcontroller);
+begin
+ fowner:= aowner;
+ inherited create;
 end;
 
 { tifibooleandatalist }

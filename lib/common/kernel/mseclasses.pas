@@ -119,6 +119,8 @@ type
                                         var avalue: integer) of object;
  updateint64eventty = procedure(const sender: tobject;
                                         var avalue: int64) of object;
+ updatepointereventty = procedure(const sender: tobject;
+                                        var avalue: pointer) of object;
  updatebooleaneventty = procedure(const sender: tobject; 
                                         var avalue: boolean) of object;
  updaterealeventty = procedure(const sender: tobject; 
@@ -477,6 +479,9 @@ type
    procedure setifiserverintf(const aintf: iifiserver);
    function getdefaultifilink: iificlient; virtual;
    function getifidatatype: listdatatypety virtual;
+   procedure getpointerval(var avalue: pointer) virtual;
+                        //pointer properties can not be published
+   procedure setpointerval(const avalue: pointer) virtual;
     //iificommand
    procedure executeificommand(var acommand: ificommandcodety); virtual;
 {$endif}   
@@ -5267,6 +5272,16 @@ end;
 function tmsecomponent.getifidatatype: listdatatypety;
 begin
  result:= dl_none;
+end;
+
+procedure tmsecomponent.getpointerval(var avalue: pointer);
+begin
+ //dummy
+end;
+
+procedure tmsecomponent.setpointerval(const avalue: pointer);
+begin
+ //dummy
 end;
 
 {$endif}

@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 2013 by Martin Schreiber
+{ MSEgui Copyright (c) 2013-2018 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -58,6 +58,21 @@ type
    property ifilink: tifiint64linkcomp read getifilink write setifilink;
    property value: int64 read fvalue write setvalue default 0;
    property ondatachange: updateint64eventty read fondatachange
+                                                      write fondatachange;
+ end;
+
+ tifipointerendpoint = class(tifidataendpoint)
+  private
+   fvalue: pointer;
+   fondatachange: updatepointereventty;
+   function getifilink: tifipointerlinkcomp;
+   procedure setifilink(const avalue: tifipointerlinkcomp);
+   procedure setvalue(const avalue: pointer);
+  public
+   property value: pointer read fvalue write setvalue default nil;
+  published
+   property ifilink: tifipointerlinkcomp read getifilink write setifilink;
+   property ondatachange: updatepointereventty read fondatachange
                                                       write fondatachange;
  end;
  
@@ -222,6 +237,27 @@ begin
 end;
 
 procedure tifiint64endpoint.setvalue(const avalue: int64);
+begin
+ fvalue:= avalue;
+ if canevent(tmethod(fondatachange)) then begin
+  fondatachange(self,fvalue);
+ end;
+ change;
+end;
+
+{ tifipointerendpoint }
+
+function tifipointerendpoint.getifilink: tifipointerlinkcomp;
+begin
+ result:= tifipointerlinkcomp(fifilink);
+end;
+
+procedure tifipointerendpoint.setifilink(const avalue: tifipointerlinkcomp);
+begin
+ inherited setifilink(avalue);
+end;
+
+procedure tifipointerendpoint.setvalue(const avalue: pointer);
 begin
  fvalue:= avalue;
  if canevent(tmethod(fondatachange)) then begin

@@ -20,6 +20,7 @@ type
  listdatatypety = (dl_none,dl_integer,dl_int64,dl_currency,
     dl_real,dl_realint,dl_realsum,
     dl_datetime,
+    dl_pointer,
     dl_ansistring,dl_msestring,dl_doublemsestring,dl_msestringint,
     dl_complex,dl_rowstate,dl_custom);
  listdatatypesty = set of listdatatypety;

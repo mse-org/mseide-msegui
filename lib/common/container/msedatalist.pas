@@ -1118,6 +1118,8 @@ var
  trealdatalist,trealintdatalist,nil,
 //dl_datetime,
  trealdatalist,
+//dl_pointer,
+ tpointerdatalist,
 //dl_ansistring,      dl_msestring,      dl_doublemsestring,
   tansistringdatalist,tmsestringdatalist,tdoublemsestringdatalist,
 //dl_msestringint

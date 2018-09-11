@@ -85,9 +85,10 @@ type
 procedure register;
 begin
  registercomponents('ifi',[tifiintegerendpoint,tifiint64endpoint,
+       tifipointerendpoint,
        tifibooleanendpoint,tifirealendpoint,tifidatetimeendpoint,
        tifistringendpoint,tifiactionendpoint,
-       tifiintegerlinkcomp,tifiint64linkcomp,
+       tifiintegerlinkcomp,tifiint64linkcomp,tifipointerlinkcomp,
        tifibooleanlinkcomp,
        tifireallinkcomp,tifidatetimelinkcomp,tifistringlinkcomp,
        tifienumlinkcomp,tifidropdownlistlinkcomp,
