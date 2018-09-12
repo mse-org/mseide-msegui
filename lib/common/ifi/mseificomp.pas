@@ -32,10 +32,32 @@ type
  tifilinkcomp = class;
  tifivaluelinkcomp = class;
  tcustomificlientcontroller = class;
+ tstringclientcontroller = class;
+ tintegerclientcontroller = class;
+ tint64clientcontroller = class;
+ tpointerclientcontroller = class;
+ tbooleanclientcontroller = class;
+ trealclientcontroller = class;
+ tdatetimeclientcontroller = class;
 
  ifieventty = procedure(const sender: tcustomificlientcontroller) of object;
  ificlienteventty = procedure(const sender: tcustomificlientcontroller;
                               const aclient: iificlient) of object;
+ ifistringclienteventty = procedure(const sender: tstringclientcontroller;
+                              const aclient: iifidatalink) of object;
+ ifiintegerclienteventty = procedure(const sender: tintegerclientcontroller;
+                              const aclient: iifidatalink) of object;
+ ifiint64clienteventty = procedure(const sender: tint64clientcontroller;
+                              const aclient: iifidatalink) of object;
+ ifipointerclienteventty = procedure(const sender: tpointerclientcontroller;
+                              const aclient: iifidatalink) of object;
+ ifibooleanclienteventty = procedure(const sender: tbooleanclientcontroller;
+                              const aclient: iifidatalink) of object;
+ ifirealclienteventty = procedure(const sender: trealclientcontroller;
+                              const aclient: iifidatalink) of object;
+ ifidatetimeclienteventty = procedure(const sender: tdatetimeclientcontroller;
+                              const aclient: iifidatalink) of object;
+
  ificlientstateeventty = procedure(const sender: tcustomificlientcontroller;
                            const aclient: iificlient;
                            const astate: ifiwidgetstatesty;
@@ -222,7 +244,9 @@ type
    property statpriority;
    property onchangebefore;
    property onchangeafter;
+  {
    property onclientvaluechanged;
+  }
    property onclientstatechanged;
    property onclientclosequery;
    property onclientmodalresult;
@@ -242,6 +266,7 @@ type
   published
    property optionsvalue: valueclientoptionsty read foptionsvalue
                                            write foptionsvalue default [];
+   property onclientvaluechanged;
  end;
 
  tformclientcontroller = class(tificlientcontroller)
@@ -257,6 +282,7 @@ type
                              const amodalresult: modalresultty) override;
   public
    property modalresult: modalresultty read fmodalresult write setmodalresult;
+   property onclientvaluechanged;
  end;
 
  valarsetterty = procedure(const alink: pointer; var handled: boolean) of object; 
@@ -386,6 +412,8 @@ type
    fonclientsetvalue: setstringclienteventty;
    procedure setvalue1(const avalue: msestring);
    function getgriddata: tifimsestringdatalist;
+   function getonclientvaluechanged: ifistringclienteventty;
+   procedure setonclientvaluechanged(const avalue: ifistringclienteventty);
   protected
    procedure valuestoclient(const alink: pointer); override;
    procedure clienttovalues(const alink: pointer); override;
@@ -407,6 +435,8 @@ type
    property valuedefault: msestring read fvaluedefault write fvaluedefault;
    property onclientsetvalue: setstringclienteventty 
                 read fonclientsetvalue write fonclientsetvalue;
+   property onclientvaluechanged: ifistringclienteventty
+                   read getonclientvaluechanged write setonclientvaluechanged;
  end;
 
  tifidropdowncol = class(tmsestringdatalist,iififieldinfo,iifidatasourceclient)
@@ -490,6 +520,8 @@ type
    function getgriddata: tifiintegerdatalist;
    procedure readmin(reader: treader);
    procedure readmax(reader: treader);
+   function getonclientvaluechanged: ifiintegerclienteventty;
+   procedure setonclientvaluechanged(const avalue: ifiintegerclienteventty);
   protected
    procedure defineproperties(filer: tfiler) override;
    procedure valuestoclient(const alink: pointer); override;
@@ -512,6 +544,8 @@ type
    property valuemax: integer read fvaluemax write setvaluemax default maxint;
    property onclientsetvalue: setintegerclienteventty 
                 read fonclientsetvalue write fonclientsetvalue;
+   property onclientvaluechanged: ifiintegerclienteventty
+                   read getonclientvaluechanged write setonclientvaluechanged;
  end;
 
  tifiint64datalist = class;
@@ -529,6 +563,8 @@ type
    function getgriddata: tifiint64datalist;
    procedure readmin(reader: treader);
    procedure readmax(reader: treader);
+   function getonclientvaluechanged: ifiint64clienteventty;
+   procedure setonclientvaluechanged(const avalue: ifiint64clienteventty);
   protected
    procedure defineproperties(filer: tfiler) override;
    procedure valuestoclient(const alink: pointer); override;
@@ -551,6 +587,8 @@ type
    property valuemax: int64 read fvaluemax write setvaluemax default maxint;
    property onclientsetvalue: setint64clienteventty 
                 read fonclientsetvalue write fonclientsetvalue;
+   property onclientvaluechanged: ifiint64clienteventty
+                   read getonclientvaluechanged write setonclientvaluechanged;
  end;
 
  tifipointerdatalist = class;
@@ -561,6 +599,8 @@ type
    fonclientsetvalue: setpointerclienteventty;
    procedure setvalue1(const avalue: pointer);
    function getgriddata: tifipointerdatalist;
+   function getonclientvaluechanged: ifipointerclienteventty;
+   procedure setonclientvaluechanged(const avalue: ifipointerclienteventty);
   protected
    procedure valuestoclient(const alink: pointer); override;
    procedure clienttovalues(const alink: pointer); override;
@@ -574,7 +614,9 @@ type
    property value: pointer read fvalue write setvalue1 default nil;
   published
    property onclientsetvalue: setpointerclienteventty 
-                read fonclientsetvalue write fonclientsetvalue;
+                   read fonclientsetvalue write fonclientsetvalue;
+   property onclientvaluechanged: ifipointerclienteventty
+                   read getonclientvaluechanged write setonclientvaluechanged;
  end;
 
  tenumclientcontroller = class(tintegerclientcontroller)
@@ -610,6 +652,8 @@ type
 //   function getgridvalue(const index: integer): boolean;
 //   procedure setgridvalue(const index: integer; const avalue: boolean);
    function getgriddata: tifibooleandatalist;
+   function getonclientvaluechanged: ifibooleanclienteventty;
+   procedure setonclientvaluechanged(const avalue: ifibooleanclienteventty);
   protected
    procedure valuestoclient(const alink: pointer); override;
    procedure clienttovalues(const alink: pointer); override;
@@ -632,6 +676,8 @@ type
                                                                 default false;
    property onclientsetvalue: setbooleanclienteventty 
                 read fonclientsetvalue write fonclientsetvalue;
+   property onclientvaluechanged: ifibooleanclienteventty
+                   read getonclientvaluechanged write setonclientvaluechanged;
  end;
 
  tifirealdatalist = class;
@@ -653,6 +699,8 @@ type
    function getgriddata: tifirealdatalist;
    procedure readmin(reader: treader);
    procedure readmax(reader: treader);
+   function getonclientvaluechanged: ifirealclienteventty;
+   procedure setonclientvaluechanged(const avalue: ifirealclienteventty);
   protected
    procedure valuestoclient(const alink: pointer); override;
    procedure clienttovalues(const alink: pointer); override;
@@ -678,6 +726,8 @@ type
    property valuemax: realty read fvaluemax write setvaluemax {stored false};
    property onclientsetvalue: setrealclienteventty 
                        read fonclientsetvalue write fonclientsetvalue;
+   property onclientvaluechanged: ifirealclienteventty
+                   read getonclientvaluechanged write setonclientvaluechanged;
  end;
 
  tifidatetimedatalist = class;
@@ -699,6 +749,8 @@ type
    function getgriddata: tifidatetimedatalist;
    procedure readmin(reader: treader);
    procedure readmax(reader: treader);
+   function getonclientvaluechanged: ifidatetimeclienteventty;
+   procedure setonclientvaluechanged(const avalue: ifidatetimeclienteventty);
   protected
    procedure valuestoclient(const alink: pointer); override;
    procedure clienttovalues(const alink: pointer); override;
@@ -721,6 +773,8 @@ type
    property valuemax: tdatetime read fvaluemax write setvaluemax {stored false};
    property onclientsetvalue: setdatetimeclienteventty 
                        read fonclientsetvalue write fonclientsetvalue;
+   property onclientvaluechanged: ifidatetimeclienteventty
+                   read getonclientvaluechanged write setonclientvaluechanged;
  end;
  
  ificelleventty = procedure(const sender: tobject; 
@@ -2774,6 +2828,18 @@ begin
  result:= tifimsestringdatalist(ifigriddata);
 end;
 
+function tstringclientcontroller.getonclientvaluechanged:
+                                            ifistringclienteventty;
+begin
+ result:= ifistringclienteventty(fonclientvaluechanged);
+end;
+
+procedure tstringclientcontroller.setonclientvaluechanged(
+              const avalue: ifistringclienteventty);
+begin
+ fonclientvaluechanged:= ificlienteventty(avalue);
+end;
+
 procedure tstringclientcontroller.statreadvalue(const reader: tstatreader);
 begin
  inherited;
@@ -2881,6 +2947,17 @@ end;
 procedure tintegerclientcontroller.readmax(reader: treader);
 begin
  valuemax:= reader.readinteger;
+end;
+
+function tintegerclientcontroller.getonclientvaluechanged: ifiintegerclienteventty;
+begin
+ result:= ifiintegerclienteventty(fonclientvaluechanged);
+end;
+
+procedure tintegerclientcontroller.setonclientvaluechanged(
+              const avalue: ifiintegerclienteventty);
+begin
+ fonclientvaluechanged:= ificlienteventty(avalue);
 end;
 
 procedure tintegerclientcontroller.defineproperties(filer: tfiler);
@@ -2999,6 +3076,17 @@ begin
  valuemax:= reader.readint64()
 end;
 
+function tint64clientcontroller.getonclientvaluechanged: ifiint64clienteventty;
+begin
+ result:= ifiint64clienteventty(fonclientvaluechanged);
+end;
+
+procedure tint64clientcontroller.setonclientvaluechanged(
+              const avalue: ifiint64clienteventty);
+begin
+ fonclientvaluechanged:= ificlienteventty(avalue);
+end;
+
 procedure tint64clientcontroller.defineproperties(filer: tfiler);
 begin
  inherited;
@@ -3045,6 +3133,18 @@ end;
 function tpointerclientcontroller.getgriddata: tifipointerdatalist;
 begin
  result:= tifipointerdatalist(ifigriddata);
+end;
+
+function tpointerclientcontroller.getonclientvaluechanged():
+                                               ifipointerclienteventty;
+begin
+ result:= ifipointerclienteventty(fonclientvaluechanged);
+end;
+
+procedure tpointerclientcontroller.setonclientvaluechanged(
+                                  const avalue: ifipointerclienteventty);
+begin
+ fonclientvaluechanged:= ificlienteventty(avalue);
 end;
 
 procedure tpointerclientcontroller.valuestoclient(const alink: pointer);
@@ -3148,6 +3248,18 @@ end;
 function tbooleanclientcontroller.getgriddata: tifibooleandatalist;
 begin
  result:= tifibooleandatalist(ifigriddata);
+end;
+
+function tbooleanclientcontroller.getonclientvaluechanged:
+                                            ifibooleanclienteventty;
+begin
+ result:= ifibooleanclienteventty(fonclientvaluechanged);
+end;
+
+procedure tbooleanclientcontroller.setonclientvaluechanged(
+              const avalue: ifibooleanclienteventty);
+begin
+ fonclientvaluechanged:= ificlienteventty(avalue);
 end;
 
 procedure tbooleanclientcontroller.statreadvalue(const reader: tstatreader);
@@ -3267,6 +3379,17 @@ end;
 procedure trealclientcontroller.readmax(reader: treader);
 begin
  valuemax:= reader.readfloat;
+end;
+
+function trealclientcontroller.getonclientvaluechanged: ifirealclienteventty;
+begin
+ result:= ifirealclienteventty(fonclientvaluechanged);
+end;
+
+procedure trealclientcontroller.setonclientvaluechanged(
+              const avalue: ifirealclienteventty);
+begin
+ fonclientvaluechanged:= ificlienteventty(avalue);
 end;
 
 procedure trealclientcontroller.defineproperties(filer: tfiler);
@@ -3409,6 +3532,18 @@ end;
 procedure tdatetimeclientcontroller.readmax(reader: treader);
 begin
  valuemax:= reader.readfloat();
+end;
+
+function tdatetimeclientcontroller.getonclientvaluechanged:
+                                            ifidatetimeclienteventty;
+begin
+ result:= ifidatetimeclienteventty(fonclientvaluechanged);
+end;
+
+procedure tdatetimeclientcontroller.setonclientvaluechanged(
+              const avalue: ifidatetimeclienteventty);
+begin
+ fonclientvaluechanged:= ificlienteventty(avalue);
 end;
 
 procedure tdatetimeclientcontroller.defineproperties(filer: tfiler);

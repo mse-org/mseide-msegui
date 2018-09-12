@@ -1,5 +1,7 @@
 MSEide+MSEgui breaking changes version history
 **********************************************
+2018-09-12
+ tifi*clientcontroller.onvaluchanged properties are value type specific.
 2017-12-22
  iassistiveserver.doactionexecute() has iassistiveclient parameter.
  iassistiveserver.dofocuschanged() has iassistiveclient parameter.
