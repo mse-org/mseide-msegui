@@ -14,7 +14,7 @@ unit mseterminal;
 interface
 uses
  msetypes,msegrids,classes,mclasses,msestream,mseclasses,msepipestream,mseevent,
- mseinplaceedit,
+ mseinplaceedit,mserichstring,
  msetextedit,msestrings,msesys,mseeditglob,msemenus,msegui,mseguiglob,
  mseprocess,msegridsglob,mseedit,mseglob,msewidgetgrid,msegraphics;
 type
@@ -179,7 +179,7 @@ implementation
 uses
  msesysutils,mseprocutils,msewidgets,mseprocmonitor,
  msekeyboard,sysutils,msesysintf,rtlconsts,msegraphutils,msearrayutils,
- msesysintf1,mserichstring,msedatalist
+ msesysintf1,msedatalist
  {$ifdef unix},mselibc{$endif};
 type
  tinplaceedit1 = class(tinplaceedit);

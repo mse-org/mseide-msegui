@@ -18,8 +18,8 @@ uses
 
 procedure dumpunitgr;
 const
- systypes: array[0..8] of string = ('Boolean','Integer','AnsiString',
-             'Pointer','LongInt','LongWord','Variant','Int64','QWord');
+ systypes: array[0..9] of string = ('Boolean','Integer','AnsiString',
+          'Pointer','LongInt','LongWord','Variant','Int64','QWord','Currency');
 type
  unitnamety = record
   name: string;

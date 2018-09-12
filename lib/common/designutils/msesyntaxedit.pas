@@ -14,7 +14,7 @@ unit msesyntaxedit;
 interface
 uses
  classes,mclasses,msetextedit,msesyntaxpainter,mseclasses,msegraphutils,
- mseglob,mseguiglob,msetypes,mseevent,
+ mseglob,mseguiglob,msetypes,mseevent,mserichstring,
  mseeditglob,msestrings,msewidgetgrid,msedatalist,msemenus,msegui,mseinplaceedit,
  msegrids,mseedit,msegraphics;
  
@@ -147,7 +147,7 @@ function checkbracketkind(const achar: msechar;
 
 implementation
 uses
- mserichstring,msekeyboard,msepointer;
+ msekeyboard,msepointer;
 const
  checkbrackettag = 84621847;
  
