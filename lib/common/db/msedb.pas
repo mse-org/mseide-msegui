@@ -22,7 +22,8 @@ interface
 uses
  classes,mclasses,mdb,mseclasses,mseglob,msestrings,msetypes,msearrayprops,
  mseapplication,mseinterfaces,
- sysutils,msebintree,mseact,msetimer,maskutils,mseifiglob,mseeditglob,
+ sysutils,msebintree,mseact,msetimer,maskutils,mseifiglob,
+ mseificompglob,mseeditglob,
  msevariants{$ifndef FPC},classes_del{$endif};
 
 const
@@ -1106,7 +1107,7 @@ type
                               fds_filtereditdisabled);
  fielddatalinkstatesty = set of fielddatalinkstatety;
 
- tfieldsdatalink = class(tmsedatalink,iifiserver)
+ tfieldsdatalink = class(tmsedatalink,iifidataserver)
   protected
    procedure activechanged; override;
    procedure layoutchanged; override;
@@ -1114,7 +1115,7 @@ type
    procedure fieldchanged; virtual;
     //iifiserver
    procedure execute(const sender: iificlient); virtual;
-   procedure valuechanged(const sender: iificlient); virtual;
+   procedure valuechanged(const sender: iifidatalink); virtual;
    procedure statechanged(const sender: iificlient;
                             const astate: ifiwidgetstatesty); virtual;
    procedure setvalue(const sender: iificlient;
@@ -6558,7 +6559,7 @@ procedure tfieldsdatalink.execute(const sender: iificlient);
 begin
 end;
 
-procedure tfieldsdatalink.valuechanged(const sender: iificlient);
+procedure tfieldsdatalink.valuechanged(const sender: iifidatalink);
 begin
  //dummy
 end;

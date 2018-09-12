@@ -14,9 +14,9 @@ unit msedbgraphics;
 interface
 uses
  classes,mclasses,mdb,mseimage,mseguiglob,msedataimage,msedbdispwidgets,msedb,
- msetypes,msedbedit,
+ msetypes,msedbedit,typinfo,
  msegrids,msewidgetgrid,msedatalist,msebitmap,msebintree,msegraphics,
- msemenus,mseevent,msegui,mseifiglob;
+ msemenus,mseevent,msegui,mseifiglob,mseificompglob;
 
 { add the needed graphic format units to your project:
  mseformatbmpicoread,
@@ -85,10 +85,18 @@ type
                          const aformat: string): string; //returns format
  end;
 
- tdbdataimage = class(tcustomdataimage,idbgraphicfieldlink,ireccontrol)
+ tdbdataimage = class(tcustomdataimage,idbgraphicfieldlink,
+                                                    ireccontrol,iifidatalink)
   private
    fdatalink: tgraphicdatalink;
 //   fvaluebuffer: string;
+    //iifidatalink
+   function getifilinkkind: ptypeinfo;
+   procedure updateifigriddata(const sender: tobject; const alist: tdatalist);
+   function getgriddata: tdatalist;
+   function getvalueprop: ppropinfo;
+   procedure getifivalue(var avalue); //for pointer property without RTTI
+   procedure setifivalue(const avalue); //for pointer property without RTTI
     //idbeditfieldlink
    function getgriddatasource: tdatasource;
    function getedited: boolean;
@@ -131,13 +139,44 @@ type
  
 implementation
 uses
- msestream,sysutils,msegraphicstream,typinfo;
+ msestream,sysutils,msegraphicstream;
  
 type
  tsimplebitmap1 = class(tsimplebitmap);
  treader1 = class(treader);
  
  { tdbdataimage }
+
+function tdbdataimage.getifilinkkind: ptypeinfo;
+begin
+ result:= typeinfo(iifidatalink);
+end;
+
+procedure tdbdataimage.updateifigriddata(const sender: tobject;
+               const alist: tdatalist);
+begin
+ //dummy
+end;
+
+function tdbdataimage.getgriddata: tdatalist;
+begin
+ result:= nil;
+end;
+
+function tdbdataimage.getvalueprop: ppropinfo;
+begin
+ result:= nil;
+end;
+
+procedure tdbdataimage.getifivalue(var avalue);
+begin
+ //dummy
+end;
+
+procedure tdbdataimage.setifivalue(const avalue);
+begin
+ //dummy
+end;
 
 constructor tdbdataimage.create(aowner: tcomponent);
 begin
@@ -289,7 +328,7 @@ begin
 // try
   fdatalink.modified;
   inherited;
-  fdatalink.valuechanged(iificlient(self));
+  fdatalink.valuechanged(iifidatalink(self));
 // finally
 //  fvaluebuffer:= bufferbefore;
 // end; 

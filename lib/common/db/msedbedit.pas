@@ -370,7 +370,7 @@ type
                                      out afieldtypes: fieldtypesarty); virtual;
     //iifiserver
    procedure updateoptionsedit(var avalue: optionseditty); override;
-   procedure valuechanged(const sender: iificlient); override;
+   procedure valuechanged(const sender: iifidatalink); override;
   public
    constructor create(const intf: idbeditfieldlink);
    destructor destroy; override;
@@ -1931,17 +1931,24 @@ type
    procedure layoutchanged; override;
  end;
 
- tdbstringcol = class(tcustomstringcol,idbeditfieldlink,idbeditinfo,iificlient)
+ tdbstringcol = class(tcustomstringcol,idbeditfieldlink,
+                                          idbeditinfo,iificlient,iifidatalink)
   private
    fdatalink: tstringcoldatalink;
    fmaxlength: integer;
    fifiserverintf: iifiserver;
    function getdatafield: string;
    procedure setdatafield(const avalue: string);
-    //iificlient
+    //iifidatalink
    procedure setifiserverintf(const aintf: iifiserver);
    function getdefaultifilink: iificlient; virtual;
+   function getifilinkkind: ptypeinfo;
    function getifidatatype(): listdatatypety virtual;
+   procedure updateifigriddata(const sender: tobject; const alist: tdatalist);
+   function getgriddata: tdatalist;
+   function getvalueprop: ppropinfo;
+   procedure getifivalue(var avalue); //for pointer property without RTTI
+   procedure setifivalue(const avalue); //for pointer property without RTTI
 
     //idbeditinfo
    procedure getfieldtypes(out propertynames: stringarty;
@@ -3488,7 +3495,7 @@ constructor tcustomeditwidgetdatalink.create(const intf: idbeditfieldlink);
 begin
  foptions:= defaulteditwidgetdatalinkoptions;
  fintf:= intf;
- fintf.setifiserverintf(iifiserver(self));
+ fintf.setifiserverintf(iifidataserver(self));
 // if getcorbainterface(intf.getwidget,typeinfo(iificlient),intf1) then begin
 //  intf1.setifiserverintf(iifiserver(self));
 // end;
@@ -4016,7 +4023,7 @@ begin
  end;
 end;
 
-procedure tcustomeditwidgetdatalink.valuechanged(const sender: iificlient);
+procedure tcustomeditwidgetdatalink.valuechanged(const sender: iifidatalink);
 var
  widget1: twidget;
  bo1,bo2: boolean;
@@ -7796,7 +7803,7 @@ begin
  fintf:= aintf;
  fgrid:= aowner;
  include(tcustomgrid1(fgrid).fstate,gs_isdb);
- iificlient(aowner).setifiserverintf(iifiserver(self));
+ iificlient(aowner).setifiserverintf(iifidataserver(self));
  inherited create;
  options:= defaultgriddatalinkoptions;
 // visualcontrol:= true; 
@@ -10024,9 +10031,40 @@ begin
  result:= iificlient(self);
 end;
 
+function tdbstringcol.getifilinkkind: ptypeinfo;
+begin
+ result:= typeinfo(iifidatalink);
+end;
+
 function tdbstringcol.getifidatatype(): listdatatypety;
 begin
  result:= dl_msestring;
+end;
+
+procedure tdbstringcol.updateifigriddata(const sender: tobject;
+               const alist: tdatalist);
+begin
+ //dummy
+end;
+
+function tdbstringcol.getgriddata: tdatalist;
+begin
+ result:= nil;
+end;
+
+function tdbstringcol.getvalueprop: ppropinfo;
+begin
+ result:= nil;
+end;
+
+procedure tdbstringcol.getifivalue(var avalue);
+begin
+ //dummy
+end;
+
+procedure tdbstringcol.setifivalue(const avalue);
+begin
+ //dummy
 end;
 
 {
@@ -10377,7 +10415,7 @@ begin
   with co1 do begin;
    if (fds_modified in fdatalink.fstate) and self.fdatalink.active then begin
 //    fdatalink.datachanged;
-    fdatalink.valuechanged(iificlient(co1));
+    fdatalink.valuechanged(iifidatalink(co1));
    end;
   end;
  end;
