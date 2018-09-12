@@ -38,6 +38,7 @@ type
 
  iifiexeclink = interface(iifilink)[miid_iifiexeclink]
   procedure execute(const force: boolean = false);
+  procedure ifisetenabled(const avalue: boolean);
  end;
 
  iififormlink = interface(iifilink)[miid_iififormlink]

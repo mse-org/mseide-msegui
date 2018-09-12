@@ -153,6 +153,7 @@ type
   public
     //iifiexeclink
    procedure execute(const force: boolean = false);
+   procedure ifisetenabled(const avalue: boolean);
   published
    property ifilink: tifiactionlinkcomp read fifilink write setifilink;
    property onexecute: notifyeventty read fonexecute write fonexecute;
@@ -402,6 +403,11 @@ begin
  if fifiserverintf <> nil then begin
   fifiserverintf.execute(iifiexeclink(self));
  end;
+end;
+
+procedure tifiactionendpoint.ifisetenabled(const avalue: boolean);
+begin
+ //dummy
 end;
 
 function tifiactionendpoint.getifilinkkind: ptypeinfo;

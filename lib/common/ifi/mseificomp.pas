@@ -255,17 +255,24 @@ type
                              
  texecclientcontroller = class(tificlientcontroller)
   private
+   fenabled: boolean;
+   procedure setenabled(const avalue: boolean);
   protected
    function getifilinkkind: ptypeinfo; override;
+   procedure setclientenabled(const alink: pointer);
    procedure valuestoclient(const alink: pointer); override;
-//   procedure execute(const sender: iificlient); overload; override;
+   procedure execute(const sender: iificlient) override;
    procedure linkset(const alink: iificlient); override;
+   procedure dostatread(const reader: tstatreader) override;
+   procedure dostatwrite(const writer: tstatwriter) override;
   public
+   constructor create(const aowner: tmsecomponent); override;
    function canconnect(const acomponent: tcomponent): boolean; override;
    procedure execute; reintroduce;
   published
    property optionsvalue: valueclientoptionsty read foptionsvalue
                                            write foptionsvalue default [];
+   property enabled: boolean read fenabled write setenabled default true;
    property onclientvaluechanged;
  end;
 
@@ -2970,7 +2977,7 @@ end;
 procedure tintegerclientcontroller.statreadvalue(const reader: tstatreader);
 begin
  inherited;
- value:= reader.readinteger(valuevarname,value);
+ value:= reader.readinteger(valuevarname,value,valuemin,valuemax);
 end;
 
 procedure tintegerclientcontroller.statwritevalue(const writer: tstatwriter);
@@ -3097,7 +3104,7 @@ end;
 procedure tint64clientcontroller.statreadvalue(const reader: tstatreader);
 begin
  inherited;
- value:= reader.readint64(valuevarname,value);
+ value:= reader.readint64(valuevarname,value,valuemin,valuemax);
 end;
 
 procedure tint64clientcontroller.statwritevalue(const writer: tstatwriter);
@@ -3413,7 +3420,7 @@ end;
 procedure trealclientcontroller.statreadvalue(const reader: tstatreader);
 begin
  inherited;
- value:= reader.readreal(valuevarname,value);
+ value:= reader.readreal(valuevarname,value,valuemin,valuemax);
 end;
 
 procedure trealclientcontroller.statwritevalue(const writer: tstatwriter);
@@ -3590,7 +3597,7 @@ end;
 procedure tdatetimeclientcontroller.statreadvalue(const reader: tstatreader);
 begin
  inherited;
- value:= reader.readreal(valuevarname,value);
+ value:= reader.readreal(valuevarname,value,valuemin,valuemax);
 end;
 
 procedure tdatetimeclientcontroller.statwritevalue(const writer: tstatwriter);
@@ -3789,6 +3796,27 @@ end;
 
 { texecclientcontroller }
 
+constructor texecclientcontroller.create(const aowner: tmsecomponent);
+begin
+ fenabled:= true;
+ inherited;
+end;
+
+procedure texecclientcontroller.setclientenabled(const alink: pointer);
+begin
+ iifiexeclink(alink).ifisetenabled(fenabled);
+end;
+
+procedure texecclientcontroller.setenabled(const avalue: boolean);
+begin
+ if fenabled <> avalue then begin
+  fenabled:= avalue;
+  if not (csloading in fowner.componentstate) then begin
+   tmsecomponent1(fowner).getobjectlinker.forall(@setclientenabled,self);
+  end;
+ end;
+end;
+
 function texecclientcontroller.canconnect(const acomponent: tcomponent): boolean;
 var
  po1: pointer;
@@ -3810,6 +3838,14 @@ begin
   iifiexeclink(alink).execute;
  end;
 end;
+
+procedure texecclientcontroller.execute(const sender: iificlient);
+begin
+ if fenabled then begin
+  inherited;
+ end;
+end;
+
 {
 procedure texecclientcontroller.execute(const sender: iificlient);
 begin
@@ -3819,13 +3855,31 @@ end;
 }
 procedure texecclientcontroller.execute;
 begin
- distribute(nil,true,true);
+ if enabled then begin
+  distribute(nil,true,true);
+ end;
 // dovaluechanged(nil,true); //distribute event
 end;
 
 procedure texecclientcontroller.linkset(const alink: iificlient);
 begin
  //do nothing
+end;
+
+procedure texecclientcontroller.dostatread(const reader: tstatreader);
+begin
+ inherited;
+ if reader.canstate then begin
+  enabled:= reader.readboolean('_enabled',fenabled);
+ end;
+end;
+
+procedure texecclientcontroller.dostatwrite(const writer: tstatwriter);
+begin
+ inherited;
+ if writer.canstate then begin
+  writer.writeboolean('_enabled',fenabled);
+ end;
 end;
 
 function texecclientcontroller.getifilinkkind: ptypeinfo;

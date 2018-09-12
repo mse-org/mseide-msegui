@@ -177,7 +177,8 @@ type
    procedure sethint(const Value: msestring);
    procedure settag(const Value: integer);
    function getenabled: boolean;
-   procedure setenabled(const Value: boolean);
+   procedure setenabled(const avalue: boolean);
+   procedure ifisetenabled(const avalue: boolean);
    procedure doupdateinfo(const info: linkinfoty);
    procedure dounlinkaction(const info: linkinfoty);
    function getchecked: boolean;
@@ -200,7 +201,7 @@ type
    procedure eventfired(const sender: tobject; const ainfo: actioninfoty);
    procedure doafterunlink; virtual;
 
-  //istatfile, saves state of as_checked
+    //istatfile, saves state of as_checked
    procedure dostatread(const reader: tstatreader);
    procedure dostatwrite(const writer: tstatwriter);
    procedure statreading;
@@ -1241,7 +1242,8 @@ procedure tcustomaction.changed;
 begin
  if not (csloading in componentstate) then begin
   if fobjectlinker <> nil then begin
-   fobjectlinker.forall({$ifdef FPC}@{$endif}doupdateinfo,typeinfo(iactionlink));
+   fobjectlinker.forall({$ifdef FPC}@{$endif}doupdateinfo,
+                                          typeinfo(iactionlink));
   end;
   if canevent(tmethod(fonchange)) then begin
    fonchange(self);
@@ -1299,13 +1301,20 @@ begin
  result:= not (as_disabled in finfo.state);
 end;
 
-procedure tcustomaction.setenabled(const Value: boolean);
+procedure tcustomaction.setenabled(const avalue: boolean);
 begin
- if value then begin
+ if avalue then begin
   state:= finfo.state - [as_disabled];
  end
  else begin
   state:= finfo.state + [as_disabled];
+ end;
+end;
+
+procedure tcustomaction.ifisetenabled(const avalue: boolean);
+begin
+ if not (as_localdisabled in finfo.state) then begin
+  setenabled(avalue);
  end;
 end;
 
@@ -1418,6 +1427,9 @@ end;
 procedure tcustomaction.setifilink(const avalue: tifiactionlinkcomp);
 begin
  mseificomp.setifilinkcomp(iifiexeclink(self),avalue,tifilinkcomp(fifilink));
+ if (fifilink <> nil) then  begin
+  ifisetenabled(fifilink.c.enabled);
+ end;
 end;
 {$endif}
 
