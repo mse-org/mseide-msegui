@@ -42,6 +42,7 @@ type
    procedure dostatupdate(const filer: tstatfiler); virtual;
    procedure dostatread(const reader: tstatreader); virtual;
    procedure dostatwrite(const writer: tstatwriter); virtual;
+   procedure change() virtual;
   public
    destructor destroy; override;
    procedure readstat(const reader: tstatreader; const prefix: string);
@@ -1292,6 +1293,7 @@ begin
  info1.prefix:= prefix;
  readobjectstat(reader,info1);
  dostatread(reader);
+ change();
 end;
 
 procedure toptions.writestat(const writer: tstatwriter;
@@ -1310,6 +1312,7 @@ procedure toptions.storevalues(const asource: tmsecomponent;
                const prefix: string = '');
 begin
  valuestoobject(asource,self,prefix);
+ change();
 end;
 
 procedure toptions.loadvalues(const adest: tmsecomponent;
@@ -1325,6 +1328,11 @@ begin
 end;
 
 procedure toptions.dostatwrite(const writer: tstatwriter);
+begin
+ //dummy
+end;
+
+procedure toptions.change();
 begin
  //dummy
 end;
