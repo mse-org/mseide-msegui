@@ -55,7 +55,7 @@ type
                                                   vco_readonly,vco_notnull);
  valueclientoptionsty = set of valueclientoptionty;
    
- tcustomificlientcontroller = class(tlinkedpersistent,iifiserver,istatfile)
+ tcustomificlientcontroller = class(tlinkedpersistent,iifidataserver,istatfile)
   private
    fonclientvaluechanged: ificlienteventty;
    fonclientexecute: ificlienteventty;
@@ -130,10 +130,10 @@ type
    function getint64val(const alink: iificlient; const aname: string;
                                  var avalue: int64): boolean;
                                     //true if found
-   function setpointerval(const alink: iificlient; const aname: string;
+   function setpointerval(const alink: iifidatalink; const aname: string;
                                  const avalue: pointer): boolean;
                                     //true if found
-   function getpointerval(const alink: iificlient; const aname: string;
+   function getpointerval(const alink: iifidatalink; const aname: string;
                                  var avalue: pointer): boolean;
                                     //true if found
    function setbooleanval(const alink: iificlient; const aname: string;
@@ -158,7 +158,7 @@ type
                             const local: boolean; const exec: boolean); virtual;
     //iifiserver
    procedure execute(const sender: iificlient); virtual;
-   procedure valuechanged(const sender: iificlient);
+   procedure valuechanged(const sender: iifidatalink);
    procedure statechanged(const sender: iificlient;
                             const astate: ifiwidgetstatesty); virtual;
    procedure setvalue(const sender: iificlient; var avalue;
@@ -766,7 +766,11 @@ type
    procedure setifiserverintf(const aintf: iifiserver);
    function getdefaultifilink: iificlient; virtual;
    procedure ifisetvalue(var avalue; var accept: boolean);
+   procedure getifivalue(var avalue);
+   procedure setifivalue(const avalue);
    function getifilinkkind: ptypeinfo;
+   procedure setvalue(const sender: iificlient;
+                     var avalue; var accept: boolean; const arow: integer);
    procedure updateifigriddata(const sender: tobject; const alist: tdatalist);
    function getgriddata: tdatalist; reintroduce; overload;
    function getvalueprop: ppropinfo;
@@ -1365,7 +1369,7 @@ begin
  end; 
  alink.getobjectlinker.setlinkedvar(alink,alinkcomp,tmsecomponent(dest),po1);
  if dest <> nil then begin
-  alink.setifiserverintf(iifiserver(dest.fcontroller));
+  alink.setifiserverintf(iifidataserver(dest.fcontroller));
   if (alinkcomp is tifivaluelinkcomp) and 
                         not (csloading in alinkcomp.componentstate) and
     (vco_datalist in 
@@ -1542,7 +1546,7 @@ begin
  end;
 end;
 *)
-procedure tcustomificlientcontroller.valuechanged(const sender: iificlient);
+procedure tcustomificlientcontroller.valuechanged(const sender: iifidatalink);
 begin
  distribute(sender,false,false);
 // dovaluechanged(sender,false);
@@ -1797,7 +1801,7 @@ begin
  end; 
 end;
 
-function tcustomificlientcontroller.setpointerval(const alink: iificlient;
+function tcustomificlientcontroller.setpointerval(const alink: iifidatalink;
                const aname: string; const avalue: pointer): boolean;
 var
  inst: tobject;
@@ -1808,10 +1812,13 @@ begin
  result:= (prop <> nil) and (prop^.proptype^.kind = tkint64);
  if result then begin
   setordprop(inst,prop,ptrint(avalue));
- end; 
+ end
+ else begin
+  alink.setifivalue(avalue);
+ end;
 end;
 
-function tcustomificlientcontroller.getpointerval(const alink: iificlient;
+function tcustomificlientcontroller.getpointerval(const alink: iifidatalink;
                const aname: string; var avalue: pointer): boolean;
 var
  inst: tobject;
@@ -1825,7 +1832,7 @@ begin
   avalue:= pointer(ptrint(getordprop(inst,prop)));
  end
  else begin
-///////////////////  alink.getpointerval(avalue);
+  alink.getifivalue(avalue);
  end;
 end;
 
@@ -3042,14 +3049,14 @@ end;
 
 procedure tpointerclientcontroller.valuestoclient(const alink: pointer);
 begin
- setpointerval(iificlient(alink),'value',fvalue);
+ setpointerval(iifidatalink(alink),'value',fvalue);
  inherited;
 end;
 
 procedure tpointerclientcontroller.clienttovalues(const alink: pointer);
 begin
  inherited;
- getpointerval(iificlient(alink),'value',fvalue);
+ getpointerval(iifidatalink(alink),'value',fvalue);
 end;
 
 procedure tpointerclientcontroller.setvalue(const sender: iificlient;
@@ -4436,9 +4443,25 @@ begin
  //dummy
 end;
 
+procedure trowstatehandler.getifivalue(var avalue);
+begin
+ //dummy
+end;
+
+procedure trowstatehandler.setifivalue(const avalue);
+begin
+ //dummy
+end;
+
 function trowstatehandler.getifilinkkind: ptypeinfo;
 begin
  result:= typeinfo(iifidatalink);
+end;
+
+procedure trowstatehandler.setvalue(const sender: iificlient; var avalue;
+               var accept: boolean; const arow: integer);
+begin
+ //dummy
 end;
 
 procedure trowstatehandler.updateifigriddata(const sender: tobject;

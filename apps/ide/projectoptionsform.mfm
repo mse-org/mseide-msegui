@@ -1,8 +1,8 @@
 object projectoptionsfo: tprojectoptionsfo
   optionswidget = [ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_destroywidgets, ow_hinton]
   visible = False
-  bounds_x = 28
-  bounds_y = 159
+  bounds_x = 821
+  bounds_y = 161
   bounds_cx = 832
   bounds_cy = 581
   container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_mousetransparent, ow_destroywidgets]
@@ -2394,7 +2394,7 @@ object projectoptionsfo: tprojectoptionsfo
               taborder = 4
               bounds_x = 1
               bounds_y = 1
-              bounds_cx = 639
+              bounds_cx = 637
               bounds_cy = 123
               anchors = [an_left, an_top, an_right]
               optionsscale = [osc_expandy, osc_shrinky, osc_expandshrinkx, osc_expandshrinky]
@@ -2430,7 +2430,7 @@ object projectoptionsfo: tprojectoptionsfo
                 onshowhint = hintexpandedmacros
                 bounds_x = 0
                 bounds_y = 82
-                bounds_cx = 639
+                bounds_cx = 637
                 bounds_cy = 41
                 anchors = [an_left, an_top, an_right]
                 textflags = [tf_ycentered, tf_noselect, tf_ellipseleft]
@@ -2464,7 +2464,7 @@ object projectoptionsfo: tprojectoptionsfo
                 onshowhint = hintexpandedmacros
                 bounds_x = 0
                 bounds_y = 41
-                bounds_cx = 639
+                bounds_cx = 637
                 bounds_cy = 41
                 anchors = [an_left, an_top, an_right]
                 textflags = [tf_ycentered, tf_noselect, tf_ellipseleft]
@@ -2500,7 +2500,7 @@ object projectoptionsfo: tprojectoptionsfo
                 onshowhint = hintexpandedmacros
                 bounds_x = 0
                 bounds_y = 0
-                bounds_cx = 639
+                bounds_cx = 637
                 bounds_cy = 41
                 anchors = [an_left, an_top, an_right]
                 textflags = [tf_ycentered, tf_noselect, tf_ellipseleft]

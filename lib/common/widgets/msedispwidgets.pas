@@ -149,6 +149,8 @@ type
    procedure updateifigriddata(const sender: tobject; const alist: tdatalist);
    function getgriddata: tdatalist;
    function getvalueprop: ppropinfo;
+   procedure getifivalue(var avalue) virtual;
+   procedure setifivalue(const avalue) virtual;
    procedure updatereadonlystate;
 {$endif}
    procedure invalidatetext;
@@ -613,7 +615,7 @@ begin
 {$ifdef mse_with_ifi}
  if not (ws_loadedproc in fwidgetstate) then begin
   if fifiserverintf <> nil then begin
-   fifiserverintf.valuechanged(iifidatalink(self));
+   iifidataserver(fifiserverintf).valuechanged(iifidatalink(self));
   end;
  end;
 {$endif}
@@ -652,6 +654,16 @@ end;
 function tdispwidget.getvalueprop: ppropinfo;
 begin
  result:= getpropinfo(self,'value');
+end;
+
+procedure tdispwidget.getifivalue(var avalue);
+begin
+ //dummy
+end;
+
+procedure tdispwidget.setifivalue(const avalue);
+begin
+ //dummy
 end;
 
 procedure tdispwidget.updatereadonlystate;

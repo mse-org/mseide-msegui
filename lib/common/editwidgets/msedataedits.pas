@@ -81,6 +81,8 @@ type
    function getifidatatype(): listdatatypety override;
     //iifidatalink
    procedure ifisetvalue(var avalue; var accept: boolean);
+   procedure getifivalue(var avalue) virtual;
+   procedure setifivalue(const avalue) virtual;
    function getifilinkkind: ptypeinfo; virtual;
    procedure setifilink(const avalue: tifilinkcomp);
    procedure updateifigriddata(const sender: tobject;
@@ -2980,8 +2982,19 @@ end;
 procedure tcustomdataedit.ifisetvalue(var avalue; var accept: boolean);
 begin
  if accept and (fifiserverintf <> nil) then begin
-  fifiserverintf.setvalue(getifidatalinkintf,avalue,accept,gridrow);
+  iifidataserver(fifiserverintf).setvalue(
+                                   getifidatalinkintf,avalue,accept,gridrow);
  end;
+end;
+
+procedure tcustomdataedit.getifivalue(var avalue);
+begin
+ //dummy
+end;
+
+procedure tcustomdataedit.setifivalue(const avalue);
+begin
+ //dummy
 end;
 
 function tcustomdataedit.getifilink: tifilinkcomp;
@@ -2994,7 +3007,7 @@ begin
  inherited;
  if not (ws_loadedproc in fwidgetstate) then begin
   if fifiserverintf <> nil then begin
-   fifiserverintf.valuechanged(getifidatalinkintf);
+   iifidataserver(fifiserverintf).valuechanged(getifidatalinkintf);
   end;
  end;
 end;

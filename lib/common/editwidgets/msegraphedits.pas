@@ -145,6 +145,8 @@ type
    fifilink: tifivaluelinkcomp;
    function getdefaultifilink: iifilink; override;
    procedure ifisetvalue(var avalue; var accept: boolean);
+   procedure getifivalue(var avalue) virtual;
+   procedure setifivalue(const avalue) virtual;
    function getifilinkkind: ptypeinfo;
    procedure setifilink(const avalue: tifilinkcomp);
    function getifilink: tifilinkcomp;
@@ -1790,7 +1792,7 @@ begin
   end;
 {$ifdef mse_with_ifi}
   if fifiserverintf <> nil then begin
-   fifiserverintf.valuechanged(iifidatalink(self));
+   iifidataserver(fifiserverintf).valuechanged(iifidatalink(self));
   end;
 {$endif}
  end;
@@ -2436,8 +2438,19 @@ end;
 procedure tgraphdataedit.ifisetvalue(var avalue; var accept: boolean);
 begin
  if accept and (fifiserverintf <> nil) then begin
-  fifiserverintf.setvalue(iifidatalink(self),avalue,accept,gridrow);
+  iifidataserver(fifiserverintf).setvalue(
+                         iifidatalink(self),avalue,accept,gridrow);
  end;
+end;
+
+procedure tgraphdataedit.getifivalue(var avalue);
+begin
+ //dummy
+end;
+
+procedure tgraphdataedit.setifivalue(const avalue);
+begin
+ //dummy
 end;
 {
 function tgraphdataedit.ifigriddata: tdatalist;

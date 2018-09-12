@@ -1404,6 +1404,8 @@ type
     //iifidatalink
    procedure updateifigriddata(const sender: tobject; const alist: tdatalist);
    procedure ifisetvalue(var avalue; var accept: boolean);   
+   procedure getifivalue(var avalue);
+   procedure setifivalue(const avalue);
    function getgriddata: tdatalist; reintroduce;
    function getvalueprop: ppropinfo;
    procedure updatereadonlystate;
@@ -1936,6 +1938,13 @@ type
    procedure ifirowchange;
    function getifilinkkind: ptypeinfo;
    procedure setifilink(const avalue: tifigridlinkcomp);
+    //iifidatalink
+   procedure updateifigriddata(const sender: tobject; const alist: tdatalist);
+   function getgriddata: tdatalist;
+   function getvalueprop: ppropinfo;
+   procedure getifivalue(var avalue);
+   procedure setifivalue(const avalue);
+   procedure updatereadonlystate;
     //iifigridlink
    function getrowstate: tcustomrowstatelist;
 {$endif}
@@ -14996,7 +15005,7 @@ begin
  {$ifdef mse_with_ifi}
   if bo1 and (fifiserverintf <> nil) and not(ws_loadedproc in fwidgetstate) and
          not (gs_emptyrowremoved in fstate) and not isautoappend then begin
-   fifiserverintf.valuechanged(iifigridlink(self));
+   iifidataserver(fifiserverintf).valuechanged(iifigridlink(self));
   end;
  {$endif}
   if (gs1_showcellinvalid in fstate1) then begin
@@ -16502,7 +16511,7 @@ procedure tcustomgrid.ifirowchange;
 begin
  if (fupdating = 0) and (fifiserverintf <> nil) and 
                               not(ws_loadedproc in fwidgetstate) then begin
-  fifiserverintf.valuechanged(iifigridlink(self));
+  iifidataserver(fifiserverintf).valuechanged(iifigridlink(self));
  end;
 end;
 
@@ -16519,6 +16528,37 @@ end;
 procedure tcustomgrid.setifilink(const avalue: tifigridlinkcomp);
 begin
  mseificomp.setifilinkcomp(iifigridlink(self),avalue,tifilinkcomp(fifilink));
+end;
+
+procedure tcustomgrid.updateifigriddata(const sender: tobject;
+               const alist: tdatalist);
+begin
+ //dummy
+end;
+
+function tcustomgrid.getgriddata: tdatalist;
+begin
+ result:= nil;
+end;
+
+function tcustomgrid.getvalueprop: ppropinfo;
+begin
+ result:= nil;
+end;
+
+procedure tcustomgrid.getifivalue(var avalue);
+begin
+ //dummy
+end;
+
+procedure tcustomgrid.setifivalue(const avalue);
+begin
+ //dummy
+end;
+
+procedure tcustomgrid.updatereadonlystate;
+begin
+ //dummy
 end;
 
 {$endif}
@@ -19232,6 +19272,16 @@ begin
 end;
 
 procedure trowstatelist.ifisetvalue(var avalue; var accept: boolean);
+begin
+ //dummy
+end;
+
+procedure trowstatelist.getifivalue(var avalue);
+begin
+ //dummy
+end;
+
+procedure trowstatelist.setifivalue(const avalue);
 begin
  //dummy
 end;

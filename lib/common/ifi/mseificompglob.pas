@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 2010 by Martin Schreiber
+{ MSEgui Copyright (c) 2010-2018 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -52,10 +52,12 @@ type
   procedure updateifigriddata(const sender: tobject; const alist: tdatalist);
   function getgriddata: tdatalist;
   function getvalueprop: ppropinfo;
+  procedure getifivalue(var avalue); //for pointer property without RTTI
+  procedure setifivalue(const avalue); //for pointer property without RTTI
   procedure updatereadonlystate;
  end;
  
- iifigridlink = interface(iifilink)[miid_iifigridlink]
+ iifigridlink = interface(iifidatalink)[miid_iifigridlink]
   function appendrow(const checkautoappend: boolean = false): integer;
   function getrowstate: tcustomrowstatelist;
   procedure rowchanged(const arow: integer);
@@ -64,6 +66,12 @@ type
   function canclose1: boolean;
  end;
 
+ iifidataserver = interface(iifiserver)
+  procedure valuechanged(const sender: iifidatalink);
+  procedure setvalue(const sender: iificlient;
+                     var avalue; var accept: boolean; const arow: integer);
+ end;
+ 
  iifigridserver = interface(iifiserver)
   
  end;

@@ -28,6 +28,8 @@ type
    procedure updateifigriddata(const sender: tobject; const alist: tdatalist);
    function getgriddata: tdatalist;
    function getvalueprop: ppropinfo;
+   procedure getifivalue(var avalue) virtual;
+   procedure setifivalue(const avalue) virtual;
    procedure updatereadonlystate;
   published
    property onchange: notifyeventty read fonchange write fonchange;
@@ -68,6 +70,9 @@ type
    function getifilink: tifipointerlinkcomp;
    procedure setifilink(const avalue: tifipointerlinkcomp);
    procedure setvalue(const avalue: pointer);
+  protected
+   procedure getifivalue(var avalue) override;
+   procedure setifivalue(const avalue) override;
   public
    property value: pointer read fvalue write setvalue default nil;
   published
@@ -188,6 +193,16 @@ begin
  result:= nil;
 end;
 
+procedure tifidataendpoint.getifivalue(var avalue);
+begin
+ //dummy
+end;
+
+procedure tifidataendpoint.setifivalue(const avalue);
+begin
+ //dummy
+end;
+
 procedure tifidataendpoint.updatereadonlystate;
 begin
  //dummy
@@ -199,7 +214,7 @@ begin
   fonchange(self);
  end;
  if fifiserverintf <> nil then begin
-  fifiserverintf.valuechanged(iifidatalink(self));
+  iifidataserver(fifiserverintf).valuechanged(iifidatalink(self));
  end;
 end;
 
@@ -264,6 +279,16 @@ begin
   fondatachange(self,fvalue);
  end;
  change;
+end;
+
+procedure tifipointerendpoint.getifivalue(var avalue);
+begin
+ pointer(avalue):= fvalue;
+end;
+
+procedure tifipointerendpoint.setifivalue(const avalue);
+begin
+ fvalue:= pointer(avalue);
 end;
 
 { tifibooleanendpoint }
