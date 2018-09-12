@@ -15,9 +15,9 @@
    id="svg2"
    sodipodi:version="0.32"
    inkscape:version="0.91 r13725"
-   sodipodi:docname="tifidatetimelinkcomp.svg"
+   sodipodi:docname="tifipointerendpoint.svg"
    version="1.0"
-   inkscape:export-filename="/home/mse/packs/standard/git/mseide-msegui/icons/components/tifidatetimelinkcomp.png"
+   inkscape:export-filename="/home/mse/packs/standard/git/mseide-msegui/icons/components/tifipointerendpoint.png"
    inkscape:export-xdpi="25.400002"
    inkscape:export-ydpi="25.400002"
    inkscape:output_extension="org.inkscape.output.svg.inkscape">
@@ -132,7 +132,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title />
+        <dc:title></dc:title>
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -203,29 +203,17 @@
          sodipodi:role="line"
          x="43.189774"
          y="53.149605"
-         id="tspan4002">D:T</tspan></text>
-    <path
-       style="fill:none;stroke:#000000;stroke-width:3.54330707;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;display:inline"
-       d="M 30.374612,19.635328 22.979797,12.56462 30.374612,5.4939131"
-       id="path3889"
-       inkscape:connector-curvature="0"
-       inkscape:export-xdpi="25.400002"
-       inkscape:export-ydpi="25.400002" />
+         id="tspan4002">Po</tspan></text>
     <path
        style="color:#000000;fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:#000000;stroke-width:3.54330707;stroke-opacity:1;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
-       d="m 60.244175,12.56462 -35.441025,0"
+       d="m 60.244175,12.320048 -35.441025,0"
        id="path3893"
        inkscape:connector-curvature="0"
-       sodipodi:nodetypes="cc"
-       inkscape:export-filename="/home/mse/packs/standard/git/mseide-msegui/icons/components/path3889-4.png"
-       inkscape:export-xdpi="25.400002"
-       inkscape:export-ydpi="25.400002" />
+       sodipodi:nodetypes="cc" />
     <path
        style="fill:none;stroke:#000000;stroke-width:3.54330707;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;display:inline"
-       d="M 54.805933,19.382802 62.200748,12.312094 54.805933,5.2413868"
+       d="M 51.523105,19.390756 58.91792,12.320047 51.523105,5.2493408"
        id="path3889-4"
-       inkscape:connector-curvature="0"
-       inkscape:export-xdpi="25.400002"
-       inkscape:export-ydpi="25.400002" />
+       inkscape:connector-curvature="0" />
   </g>
 </svg>

@@ -14,7 +14,7 @@
    height="24mm"
    id="svg2"
    sodipodi:version="0.32"
-   inkscape:version="0.48.3.1 r9886"
+   inkscape:version="0.91 r13725"
    sodipodi:docname="tifidatetimeendpoint.svg"
    version="1.0"
    inkscape:export-filename="/home/mse/packs/standard/git/mseide-msegui/icons/components/tifidatetimeendpoint.png"
@@ -95,8 +95,8 @@
      inkscape:pageopacity="0"
      inkscape:pageshadow="2"
      inkscape:zoom="3.96"
-     inkscape:cx="36.955765"
-     inkscape:cy="58.301146"
+     inkscape:cx="46.299199"
+     inkscape:cy="56.982391"
      inkscape:document-units="mm"
      inkscape:current-layer="layer5"
      inkscape:window-width="1016"
@@ -132,7 +132,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
+        <dc:title />
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -195,7 +195,7 @@
      inkscape:label="text">
     <text
        xml:space="preserve"
-       style="font-size:36px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:center;line-height:100%;writing-mode:lr-tb;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;display:inline;font-family:Sans;-inkscape-font-specification:Sans"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:36px;line-height:100%;font-family:Sans;-inkscape-font-specification:Sans;text-align:center;writing-mode:lr-tb;text-anchor:middle;display:inline;fill:#000000;fill-opacity:1;stroke:none"
        x="43.189774"
        y="53.149605"
        id="text3998"
@@ -203,7 +203,7 @@
          sodipodi:role="line"
          x="43.189774"
          y="53.149605"
-         id="tspan4002">D/T</tspan></text>
+         id="tspan4002">D:T</tspan></text>
     <path
        style="color:#000000;fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:#000000;stroke-width:3.54330707;stroke-opacity:1;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
        d="m 60.244175,12.320048 -35.441025,0"
