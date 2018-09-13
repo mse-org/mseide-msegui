@@ -1144,6 +1144,7 @@ begin
     end;
     if obj is toptions then begin
      toptions(obj).dostatread(reader);
+     toptions(obj).change();
     end;
    end;
   end;
