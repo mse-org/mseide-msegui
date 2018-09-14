@@ -2705,6 +2705,9 @@ begin
    widget1.activate;
   end;
   result:= floatdockcount = int1;
+  if result then begin
+   dolayoutchanged();
+  end;
  end;
 end;
 

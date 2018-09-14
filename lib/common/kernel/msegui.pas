@@ -2626,6 +2626,7 @@ type
                                                  //nil = platform default
    destructor destroy; override;
    procedure destroywindow;
+   procedure recreatewindow();
    procedure registeronscroll(const method: notifyeventty);
    procedure unregisteronscroll(const method: notifyeventty);
    
@@ -16071,6 +16072,18 @@ begin
 // end;
  fillchar(fwindow,sizeof(fwindow),0);
  exclude(fstate,tws_windowvisible);
+end;
+
+procedure twindow.recreatewindow();
+var
+ b1: boolean;
+begin
+ b1:= visible;
+ destroywindow();
+ createwindow();
+ if b1 then begin
+  show(false);
+ end;
 end;
 
 procedure twindow.windowdestroyed;

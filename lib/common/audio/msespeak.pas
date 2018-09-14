@@ -119,9 +119,9 @@ type
    procedure setitems(const index: int32; const avalue: tvoice);
   protected
    procedure setcount1(acount: integer; doinit: boolean); override;
-   class function getitemclasstype: persistentclassty; override;
   public
    constructor create(const aowner: tcustomespeakng); reintroduce;
+   class function getitemclasstype: persistentclassty; override;
    property items[const index: int32]: tvoice read getitems
                                                 write setitems; default;
  end;

@@ -181,6 +181,7 @@ type
    procedure iconchanged(const sender: tobject);
    procedure aftercreate; virtual;
    function createmainmenuwidget: tframemenuwidget; virtual;
+   function ismainwindow(): boolean virtual;
    procedure updateoptions; virtual;
    function getoptions: formoptionsty; virtual;
    procedure updatescrollboxrect;
@@ -466,11 +467,14 @@ type
  mainformclassty = class of tmainform;
  tcustomdockform = class;
 
- optiondockformty = (odf_main,odf_childicons,odf_mainchildicon);
+ optiondockformty = (odf_main,odf_childicons,odf_mainchildicon,odf_maintaskbar,
+                     odf_mainmainwindow); //is mainwindow if it contains
+                                          //an odf_main dock
  optionsdockformty = set of optiondockformty;
  
 const
- defaultoptionsdockform = [odf_childicons,odf_mainchildicon];
+ defaultoptionsdockform = [odf_childicons,odf_mainchildicon,odf_maintaskbar,
+                           odf_mainmainwindow];
 
 type
  tformdockcontroller = class(tnochildrendockcontroller)
@@ -480,13 +484,13 @@ type
    fowner: tcustomdockform;
    foptionsdockform: optionsdockformty;
    function hasmain(): boolean;
-   function childicon(): tmaskedbitmap override;
    procedure setoptionsdock(const avalue: optionsdockty); override;
    procedure dolayoutchanged(); override; 
    procedure childstatechanged(const sender: twidget;
                            const newstate,oldstate: widgetstatesty); override;
   public
    constructor create(const aowner: tcustomdockform);
+   function childicon(): tmaskedbitmap override;
   published
    property optionsdockform: optionsdockformty read foptionsdockform 
                      write setoptionsdockform default defaultoptionsdockform;
@@ -502,6 +506,10 @@ type
    procedure setdockingareacaption(const avalue: msestring);
   protected
    fdragdock: tformdockcontroller;
+   fhasdocktaskbaricon: boolean;
+   function ismainwindow(): boolean override;
+   function needsdocktaskbaricon(): boolean;
+   procedure updatewindowinfo(var info: windowinfoty) override;
    procedure internalcreateframe; override;
    function internalgeticon(): tmaskedbitmap; override;
    procedure updateoptions; override;
@@ -1607,13 +1615,18 @@ begin
  end;
 end;
 
+function tcustommseform.ismainwindow(): boolean;
+begin
+ result:= (fo_main in foptions) and not (csdesigning in componentstate);
+end;
+
 procedure tcustommseform.updateoptions;
 begin
  if (componentstate * [csloading,csdestroying,csdesigning] = []) and 
                                              (window.owner = self)  then begin
   fwindow.globalshortcuts:= fo_globalshortcuts in foptions;
   fwindow.localshortcuts:= fo_localshortcuts in foptions;
-  if (fo_main in foptions) and not (csdesigning in componentstate) then begin
+  if ismainwindow() then begin
    application.mainwindow:= fwindow;
   end;
   if fo_fullscreen in foptions then begin
@@ -2446,8 +2459,13 @@ function tformdockcontroller.childicon(): tmaskedbitmap;
 begin
  if (odf_mainchildicon in foptionsdockform) then begin
   result:= check(self);
-  if (result <> nil) and not result.hasimage then begin
-   result:= nil;
+  if result = nil then begin
+   result:= inherited childicon();
+  end
+  else begin
+   if not result.hasimage then begin
+    result:= nil;
+   end;
   end;
  end
  else begin
@@ -2518,8 +2536,6 @@ begin
 end;
 
 function tcustomdockform.internalgeticon(): tmaskedbitmap;
-var
- bmp1: tmaskedbitmap;
 begin
  result:= inherited internalgeticon();
  if (result = nil) or not result.hasimage() and 
@@ -2682,16 +2698,38 @@ begin
  result:= fdragdock.getfloatcaption;
 end;
 
+function tcustomdockform.ismainwindow(): boolean;
+begin
+ result:= inherited ismainwindow() or not(csdesigning in componentstate) and
+               (odf_mainmainwindow in fdragdock.foptionsdockform) and 
+                                                          fdragdock.hasmain();
+end;
+
 procedure tcustomdockform.dolayoutchanged(const sender: tdockcontroller);
 begin
  inherited;
- checkdockicon();
+ if not (csdestroying in componentstate) then begin
+  checkdockicon();
+  if (window.owner = self) then begin
+   if ismainwindow() then begin
+    application.mainwindow:= fwindow;
+   end
+   else begin
+    if application.mainwindow = fwindow then begin
+     application.mainwindow:= nil;
+    end;
+   end;
+  end;
+ end;
 end;
 
 procedure tcustomdockform.checkdockicon();
 begin
  if odf_childicons in fdragdock.optionsdockform then begin
   iconchanged(nil);
+ end;
+ if fhasdocktaskbaricon <> needsdocktaskbaricon() then begin
+  window.recreatewindow();
  end;
 end;
 
@@ -2725,6 +2763,21 @@ procedure tcustomdockform.setdockingareacaption(const avalue: msestring);
 begin
  fdockingareacaption:= avalue;
  invalidate;
+end;
+
+function tcustomdockform.needsdocktaskbaricon(): boolean;
+begin
+ result:= (odf_maintaskbar in fdragdock.foptionsdockform) and 
+                                                     fdragdock.hasmain();
+end;
+
+procedure tcustomdockform.updatewindowinfo(var info: windowinfoty);
+begin
+ inherited;
+ fhasdocktaskbaricon:= needsdocktaskbaricon();
+ if fhasdocktaskbaricon then begin
+  include(info.options,wo_taskbar);
+ end;
 end;
 
 { tdockform}
