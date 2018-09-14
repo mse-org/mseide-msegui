@@ -1,5 +1,7 @@
 MSEide+MSEgui breaking changes version history
 **********************************************
+2018-09-14
+ optiondockty od_childicons -> optionformty odf_childicons.
 2018-09-12
  tifi*clientcontroller.onvaluchanged properties are value type specific.
 2017-12-22

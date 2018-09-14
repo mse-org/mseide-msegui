@@ -465,16 +465,31 @@ type
 
  mainformclassty = class of tmainform;
  tcustomdockform = class;
+
+ optiondockformty = (odf_main,odf_childicons,odf_mainchildicon);
+ optionsdockformty = set of optiondockformty;
  
+const
+ defaultoptionsdockform = [odf_childicons,odf_mainchildicon];
+
+type
  tformdockcontroller = class(tnochildrendockcontroller)
+  private
+   procedure setoptionsdockform(const avalue: optionsdockformty);
   protected
    fowner: tcustomdockform;
+   foptionsdockform: optionsdockformty;
+   function hasmain(): boolean;
+   function childicon(): tmaskedbitmap override;
    procedure setoptionsdock(const avalue: optionsdockty); override;
    procedure dolayoutchanged(); override; 
    procedure childstatechanged(const sender: twidget;
                            const newstate,oldstate: widgetstatesty); override;
   public
    constructor create(const aowner: tcustomdockform);
+  published
+   property optionsdockform: optionsdockformty read foptionsdockform 
+                     write setoptionsdockform default defaultoptionsdockform;
  end;
 
  tcustomdockform = class(tcustommseform,idocktarget)
@@ -2351,9 +2366,11 @@ end;
 
 { tformdockcontroller }
 
+
 constructor tformdockcontroller.create(const aowner: tcustomdockform);
 begin
  fowner:= aowner;
+ foptionsdockform:= defaultoptionsdockform;
  inherited create(idockcontroller(aowner));
 end;
 
@@ -2366,10 +2383,82 @@ begin
                      ord(fo_savezorder),od_savezorder in foptionsdock);
 end;
 
+procedure tformdockcontroller.setoptionsdockform(
+                               const avalue: optionsdockformty);
+begin
+ if foptionsdockform <> avalue then begin
+  foptionsdockform:= avalue;
+  if fowner.componentstate * [csloading,csdestroying] = [] then begin
+   layoutchanged();
+  end;
+ end;
+end;
+
+function tformdockcontroller.hasmain(): boolean;
+var
+ ar1: widgetarty;
+ w1: twidget;
+ i1: int32;
+begin
+ result:= odf_main in foptionsdockform;
+ if not result then begin
+  ar1:= getitems();
+  for i1:= 0 to high(ar1) do begin
+   w1:= ar1[i1];
+   if w1 is tcustomdockform then begin
+    result:= tcustomdockform(w1).fdragdock.hasmain();
+    if result then begin
+     break;
+    end;
+   end;
+  end;
+ end;
+end;
+
+function tformdockcontroller.childicon(): tmaskedbitmap;
+
+ function check(const avalue: tformdockcontroller): tmaskedbitmap;
+ var
+  ar1: widgetarty;
+  w1: twidget;
+  i1: int32;
+ begin
+  with avalue do begin
+   if odf_main in foptionsdockform then begin
+    result:= fowner.ficon;
+   end
+   else begin
+    result:= nil;
+    ar1:= getitems();
+    for i1:= 0 to high(ar1) do begin
+     w1:= ar1[i1];
+     if w1 is tcustomdockform then begin
+      result:= check(tcustomdockform(w1).fdragdock);
+      if result <> nil then begin
+       break;
+      end;
+     end;
+    end;
+   end;
+  end;
+ end; //check
+
+begin
+ if (odf_mainchildicon in foptionsdockform) then begin
+  result:= check(self);
+  if (result <> nil) and not result.hasimage then begin
+   result:= nil;
+  end;
+ end
+ else begin
+  result:= inherited childicon;
+ end;
+end;
+
 procedure tformdockcontroller.dolayoutchanged();
 begin
  inherited;
- if od_childicons in foptionsdock then begin
+ if odf_childicons in foptionsdockform then begin
   fowner.iconchanged(nil);
  end;
 end;
@@ -2378,7 +2467,7 @@ procedure tformdockcontroller.childstatechanged(const sender: twidget;
              const newstate: widgetstatesty; const oldstate: widgetstatesty);
 begin
  inherited;
- if (od_childicons in foptionsdock) and (ws_entered in newstate) and 
+ if (odf_childicons in foptionsdockform) and (ws_entered in newstate) and 
                             not (ws_entered in oldstate) then begin
   fowner.iconchanged(nil);
  end;
@@ -2429,10 +2518,12 @@ begin
 end;
 
 function tcustomdockform.internalgeticon(): tmaskedbitmap;
+var
+ bmp1: tmaskedbitmap;
 begin
  result:= inherited internalgeticon();
  if (result = nil) or not result.hasimage() and 
-              (od_childicons in fdragdock.optionsdock) then begin
+              (odf_childicons in fdragdock.optionsdockform) then begin
   result:= fdragdock.childicon();
  end;
 end;
@@ -2599,7 +2690,7 @@ end;
 
 procedure tcustomdockform.checkdockicon();
 begin
- if od_childicons in fdragdock.optionsdock then begin
+ if odf_childicons in fdragdock.optionsdockform then begin
   iconchanged(nil);
  end;
 end;

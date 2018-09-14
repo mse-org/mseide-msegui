@@ -37,7 +37,7 @@ type
             od_alignbegin,od_aligncenter,od_alignend,
             od_nofit,od_banded,od_nosplitsize,od_nosplitmove,
             od_lock,od_nolock,od_thumbtrack,od_captionhint,{od_buttonhints,}
-            od_childicons); //for tformdockcontroller
+            od_childicons); //use odf_childicons instead
  optionsdockty = set of optiondockty;
 
  dockbuttonrectty = (dbr_none,dbr_handle,dbr_close,dbr_maximize,dbr_normalize,
@@ -45,8 +45,10 @@ type
                      dbr_top,dbr_background,dbr_lock,dbr_nolock);
 const
  defaultoptionsdock = [od_savepos,od_savezorder,od_savechildren,
-                       od_captionhint,od_childicons];
+                       od_captionhint];
  defaultoptionsdocknochildren = defaultoptionsdock - [od_savechildren];
+ deprecatedoptionsdock = [od_childicons];
+ 
  dbr_first = dbr_handle;
  dbr_last = dbr_nolock;
  dbr_firstbutton = dockbuttonrectty(ord(dbr_first)+1);
@@ -392,7 +394,7 @@ type
                      out acontroller: tdockcontroller): boolean; overload;
    function getparentcontroller: tdockcontroller; overload;
    function dockparentname(): string; //'' if none
-   function childicon(): tmaskedbitmap;
+   function childicon(): tmaskedbitmap virtual;
 
    property mdistate: mdistatety read fmdistate write setmdistate;
    property currentsplitdir: splitdirty read fsplitdir 
@@ -1772,8 +1774,8 @@ begin
        setsinglebit({$ifdef FPC}longword{$else}longword{$endif}(avalue),
        {$ifdef FPC}longword{$else}longword{$endif}(foptionsdock),
                           {$ifdef FPC}longword{$else}longword{$endif}(mask2)));
-  foptionsdock:= (avalue - (mask1+mask2{+mask3})) + val1*mask1 + val2*mask2 {+ 
-                                 val3*mask3};
+  foptionsdock:= ((avalue - (mask1+mask2)) + val1*mask1 + val2*mask2) - 
+                                                      deprecatedoptionsdock;
   if not (od_nofit in foptionsdock) then begin
    if not (od_banded in optbefore) and (od_banded in foptionsdock) then begin
     include(foptionsdock,od_nofit);

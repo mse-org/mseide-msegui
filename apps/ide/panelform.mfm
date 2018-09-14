@@ -27,7 +27,7 @@ object panelfo: tpanelfo
   dragdock.tab_options = [tabo_dragsource, tabo_dragdest, tabo_hintclippedtext]
   dragdock.tab_textflags = [tf_ycentered, tf_ellipseright]
   dragdock.tab_widthmax = 100
-  dragdock.optionsdock = [od_savepos, od_savezorder, od_canmove, od_canfloat, od_candock, od_acceptsdock, od_dockparent, od_splitvert, od_splithorz, od_tabed, od_proportional, od_propsize, od_captionhint, od_childicons]
+  dragdock.optionsdock = [od_savepos, od_savezorder, od_canmove, od_canfloat, od_candock, od_acceptsdock, od_dockparent, od_splitvert, od_splithorz, od_tabed, od_proportional, od_propsize, od_captionhint]
   dragdock.onlayoutchanged = panellayoutchanged
   dragdock.oncaptionchanged = panellayoutchanged
   options = [fo_savepos, fo_savezorder, fo_savestate]

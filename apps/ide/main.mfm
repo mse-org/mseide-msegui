@@ -25,7 +25,8 @@ object mainfo: tmainfo
     449
     131
   )
-  dragdock.optionsdock = [od_savepos, od_savezorder, od_canmove, od_cansize, od_canfloat, od_candock, od_captionhint, od_childicons]
+  dragdock.optionsdock = [od_savepos, od_savezorder, od_canmove, od_cansize, od_canfloat, od_candock, od_captionhint]
+  dragdock.optionsdockform = [odf_main, odf_childicons]
   optionswindow = [wo_taskbar]
   mainmenu = mainmenu1
   options = [fo_main, fo_terminateonclose, fo_globalshortcuts, fo_savepos, fo_savezorder, fo_savestate]

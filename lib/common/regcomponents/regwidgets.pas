@@ -162,6 +162,11 @@ type
   public
    procedure edit override;
  end;
+
+ toptionsdockeditor = class(tsetpropertyeditor)
+  protected
+   function getinvisibleitems: tintegerset; override;
+ end;
  
 const
  mseformintf: designmoduleintfty = 
@@ -292,6 +297,8 @@ begin
                                            
  registerpropertyeditor(typeinfo(ttaborderoverride),nil,'',
                                    ttaborderoverridepropertyeditor);
+ registerpropertyeditor(typeinfo(optionsdockty),nil,'',
+                                           toptionsdockeditor);
   
  registerunitgroup(['msegrids'],['msegui','msegraphutils','mseclasses']);
  registerunitgroup(['msewidgetgrid'],['msedataedits',
@@ -546,6 +553,13 @@ begin
    modified();
   end;
  end;
+end;
+
+{ toptionsdockeditor }
+
+function toptionsdockeditor.getinvisibleitems: tintegerset;
+begin
+ result:= tintegerset(card32(deprecatedoptionsdock));
 end;
 
 initialization
