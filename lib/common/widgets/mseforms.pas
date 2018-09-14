@@ -2413,15 +2413,19 @@ var
  w1: twidget;
  i1: int32;
 begin
- result:= odf_main in foptionsdockform;
- if not result then begin
-  ar1:= getitems();
-  for i1:= 0 to high(ar1) do begin
-   w1:= ar1[i1];
-   if w1 is tcustomdockform then begin
-    result:= tcustomdockform(w1).fdragdock.hasmain();
-    if result then begin
-     break;
+ result:= false;
+ if not (csdestroying in fowner.componentstate) then begin
+  result:= odf_main in foptionsdockform;
+  if not result then begin
+   ar1:= getitems();
+   for i1:= 0 to high(ar1) do begin
+    w1:= ar1[i1];
+    if not (csdestroying in w1.componentstate) and 
+                                   (w1 is tcustomdockform) then begin
+     result:= tcustomdockform(w1).fdragdock.hasmain();
+     if result then begin
+      break;
+     end;
     end;
    end;
   end;
@@ -2436,19 +2440,21 @@ function tformdockcontroller.childicon(): tmaskedbitmap;
   w1: twidget;
   i1: int32;
  begin
+  result:= nil;
   with avalue do begin
-   if odf_main in foptionsdockform then begin
-    result:= fowner.ficon;
-   end
-   else begin
-    result:= nil;
-    ar1:= getitems();
-    for i1:= 0 to high(ar1) do begin
-     w1:= ar1[i1];
-     if w1 is tcustomdockform then begin
-      result:= check(tcustomdockform(w1).fdragdock);
-      if result <> nil then begin
-       break;
+   if not (csdestroying in fowner.componentstate) then begin
+    if odf_main in foptionsdockform then begin
+     result:= fowner.ficon;
+    end
+    else begin
+     ar1:= getitems();
+     for i1:= 0 to high(ar1) do begin
+      w1:= ar1[i1];
+      if w1 is tcustomdockform then begin
+       result:= check(tcustomdockform(w1).fdragdock);
+       if result <> nil then begin
+        break;
+       end;
       end;
      end;
     end;
