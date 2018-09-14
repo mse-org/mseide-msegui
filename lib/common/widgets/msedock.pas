@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2017 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2018 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -5570,11 +5570,13 @@ begin
 end;
 
 function tgripframe.ishintarea(const apos: pointty; var aid: int32): boolean;
+                                      //widget origin
 begin
  result:= pointinrect(apos,fgriprect{frects[dbr_handle]});
  if result then begin
   if go_buttonhints in fgrip_options then begin
-   aid:= hintidframe - ord(fcontroller.checkbuttonarea(apos));
+   aid:= hintidframe - ord(fcontroller.checkbuttonarea(
+            subpoint(apos,fcontroller.getwidget.clientwidgetpos)));
    if not (od_captionhint in fcontroller.optionsdock) and 
                    (aid = hintidframe-ord(dbr_handle)) then begin
     result:= false;
