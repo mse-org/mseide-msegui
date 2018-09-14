@@ -290,7 +290,7 @@ procedure tdisassfo.addrcellevent(const sender: TObject;
                var info: celleventinfoty);
 begin
  with info do begin
-  if iscellclick(info,[ccr_buttonpress]) then begin
+  if iscellclick(info,[ccr_buttonpress,ccr_data]) then begin
    breakpointsfo.toggleaddrbreakpoint(
                     strtohex64(ansistring(self.grid[cell.col][cell.row])));
    grid.invalidatecell(cell);

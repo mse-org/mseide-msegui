@@ -2805,7 +2805,7 @@ type
  end;
 
  cellclickrestrictionty = (ccr_buttonpress,ccr_dblclick,
-                           ccr_nodefaultzone,ccr_nokeyreturn);
+                           ccr_nodefaultzone,ccr_nokeyreturn,ccr_data);
  cellclickrestrictionsty = set of cellclickrestrictionty;
 
 function gridcoordtotext(const coord: gridcoordty): string;
@@ -2883,41 +2883,44 @@ function iscellclick(const info: celleventinfoty;
 begin
  result:= false;
  with info do begin
-  case eventkind of
-   cek_keydown: begin
-    if not (ccr_nokeyreturn in restrictions) then begin
-     with info.keyeventinfopo^ do begin
-      if isenterkey(nil,key) and 
-                (shiftstate * shiftstatemustinclude = shiftstatemustinclude) and
-                (shiftstate * shiftstatemustnotinclude = []) then begin
-       result:= true;
-       include(eventstate,es_processed);
+  if not (ccr_data in restrictions) or 
+             (info.cell.col >= 0) and (info.cell.row >= 0) then begin
+   case eventkind of
+    cek_keydown: begin
+     if not (ccr_nokeyreturn in restrictions) then begin
+      with info.keyeventinfopo^ do begin
+       if isenterkey(nil,key) and 
+                 (shiftstate * shiftstatemustinclude = shiftstatemustinclude) and
+                 (shiftstate * shiftstatemustnotinclude = []) then begin
+        result:= true;
+        include(eventstate,es_processed);
+       end;
       end;
      end;
     end;
-   end;
-   cek_buttonpress,cek_buttonrelease: begin
-    if (zone <> cz_none) and not
-            ((zone = cz_default) and (ccr_nodefaultzone in restrictions)) then begin
-     with info.mouseeventinfopo^ do begin
-      if (button = mb_left) and not (es_objectpicking in eventstate) and
-                (shiftstate * shiftstatemustinclude = shiftstatemustinclude) and
-                (shiftstate * shiftstatemustnotinclude = []) then begin
-       if ((ccr_buttonpress in restrictions) and (eventkind = ek_buttonpress) or
-          not (ccr_buttonpress in restrictions) and
-                                     (eventkind = ek_buttonrelease)) then begin
-        if ccr_dblclick in restrictions then begin
-         result:= (ss_double in info.mouseeventinfopo^.shiftstate) and 
-                   (grid.fclickedcellbefore.row = cell.row) and 
-                   (grid.fclickedcellbefore.col = cell.col);
-        end
-        else begin
-         result:= true;
-        end;
-        if (eventkind = ek_buttonrelease) and 
-              ((grid.fclickedcell.row <> cell.row) or 
-               (grid.fclickedcell.col <> cell.col)) then begin
-         result:= false;
+    cek_buttonpress,cek_buttonrelease: begin
+     if (zone <> cz_none) and not
+             ((zone = cz_default) and (ccr_nodefaultzone in restrictions)) then begin
+      with info.mouseeventinfopo^ do begin
+       if (button = mb_left) and not (es_objectpicking in eventstate) and
+                 (shiftstate * shiftstatemustinclude = shiftstatemustinclude) and
+                 (shiftstate * shiftstatemustnotinclude = []) then begin
+        if ((ccr_buttonpress in restrictions) and (eventkind = ek_buttonpress) or
+           not (ccr_buttonpress in restrictions) and
+                                      (eventkind = ek_buttonrelease)) then begin
+         if ccr_dblclick in restrictions then begin
+          result:= (ss_double in info.mouseeventinfopo^.shiftstate) and 
+                    (grid.fclickedcellbefore.row = cell.row) and 
+                    (grid.fclickedcellbefore.col = cell.col);
+         end
+         else begin
+          result:= true;
+         end;
+         if (eventkind = ek_buttonrelease) and 
+               ((grid.fclickedcell.row <> cell.row) or 
+                (grid.fclickedcell.col <> cell.col)) then begin
+          result:= false;
+         end;
         end;
        end;
       end;
