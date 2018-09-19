@@ -393,14 +393,6 @@ type
   public
    constructor create(aowner: tobject); override;
    destructor destroy; override;
- {$ifndef FPC}
-   function findval(const avalues: array of const;
-               const aisnull: array of boolean;
-               out abookmark: bookmarkdataty;
-               const abigger: boolean = false;
-               const partialstring: boolean = false;
-               const nocheckbrowsemode: boolean = false): boolean; overload;
- {$endif}
    function find(const avalues: array of const;
                  //nil -> NULL field
                const aisnull: array of boolean;
@@ -410,7 +402,8 @@ type
                out abookmark: bookmarkdataty;
                const abigger: boolean = false;
                const partialstring: boolean = false;
-               const nocheckbrowsemode: boolean = false): boolean; overload;
+               const nocheckbrowsemode: boolean = false;
+               const filtered: boolean = false): boolean; overload;
                 //true if found else nearest lower or bigger,
                 //abookmark = '' if no lower or bigger found
                 //string values must be msestring
@@ -423,7 +416,8 @@ type
                out abookmark: bookmarkty;
                const abigger: boolean = false;
                const partialstring: boolean = false;
-               const nocheckbrowsemode: boolean = false): boolean; overload;
+               const nocheckbrowsemode: boolean = false;
+               const filtered: boolean = false): boolean; overload;
                 //true if found else nearest lower or bigger,
                 //abookmark = '' if no lower or bigger found
                 //string values must be msestring
@@ -431,7 +425,8 @@ type
                out abookmark: bookmarkty;
                const abigger: boolean = false;
                const partialstring: boolean = false;
-               const nocheckbrowsemode: boolean = false): boolean; overload;
+               const nocheckbrowsemode: boolean = false;
+               const filtered: boolean = false): boolean; overload;
                 //true if found else nearest lower or bigger,
                 //abookmark = '' if no lower or bigger found
                 //string values must be msestring
@@ -439,14 +434,16 @@ type
                out abookmark: bookmarkty;
                const abigger: boolean = false;
                const partialstring: boolean = false;
-               const nocheckbrowsemode: boolean = false): boolean; overload;
+               const nocheckbrowsemode: boolean = false;
+               const filtered: boolean = false): boolean; overload;
                 //true if found else nearest lower or bigger,
                 //abookmark = '' if no lower or bigger found
    function find(const avalues: array of tfield;
                out abookmark: bookmarkdataty;
                const abigger: boolean = false;
                const partialstring: boolean = false;
-               const nocheckbrowsemode: boolean = false): boolean; overload;
+               const nocheckbrowsemode: boolean = false;
+               const filtered: boolean = false): boolean; overload;
                 //true if found else nearest lower or bigger,
 
    function find(const avalues: array of const;
@@ -455,22 +452,25 @@ type
                  //itemcount of avalues and aisnull
                  //can be smaller than fields count in index
                  //itemcount of aisnull can be smaller than itemcount of avalues
-                const alast: boolean = false;
+                const abigger: boolean = false;
                 const partialstring: boolean = false;
                 const nocheckbrowsemode: boolean = false;
-                const exact: boolean = true): boolean; overload;
+                const exact: boolean = true;
+                const filtered: boolean = true): boolean; overload;
                 //sets dataset cursor if found
    function find(const avalues: array of tfield;
                const abigger: boolean = false;
                const partialstring: boolean = false;
                const nocheckbrowsemode: boolean = false;
-               const exact: boolean = true): boolean; overload;
+               const exact: boolean = true;
+               const filtered: boolean = true): boolean; overload;
                 //sets dataset cursor if found
    function findvariant(const avalue: array of variant;
                const abigger: boolean = false;
                const partialstring: boolean = false;
                const nocheckbrowsemode: boolean = false;
-               const exact: boolean = true): boolean; overload;
+               const exact: boolean = true;
+               const filtered: boolean = true): boolean; overload;
                 //sets dataset cursor if found
 
    function unique(const avalues: array of const): boolean;
@@ -10075,7 +10075,8 @@ function tlocalindex.find(const avalues: array of const;
              const aisnull: array of boolean; out abookmark: bookmarkdataty;
              const abigger: boolean = false;
              const partialstring: boolean = false;
-             const nocheckbrowsemode: boolean = false): boolean;
+             const nocheckbrowsemode: boolean = false;
+             const filtered: boolean = false): boolean;
 var
  int1: integer;
 // v: tvarrec;
@@ -10084,6 +10085,9 @@ var
  bo1: boolean;
  lastind: integer;
  calcfieldpo: pointer;
+ b1,b2: boolean;
+ state1: tdatasetstate;
+ 
 label
  endlab;
 begin
@@ -10107,6 +10111,7 @@ begin
 // po1:= tmsebufdataset(fowner).intallocrecord;
  po1:= allocmem(tmsebufdataset(fowner).fcalcrecordsize+intheadersize);
  calcfieldpo:= pointer(po1) + tmsebufdataset(fowner).frecordsize;
+ b1:= false;
  try
   for int1:= lastind downto 0 do begin
    with findexfieldinfos[int1],avalues[int1] do begin
@@ -10171,11 +10176,47 @@ begin
   result:= false;
   abookmark.recordpo:= nil;
   abookmark.recno:= -1;
+  b1:= filtered;
   with tmsebufdataset(fowner) do begin
+   b1:= b1 and filtered and assigned(fonfilterrecord);
+   if b1 then begin
+    state1:= settempstate(tdatasetstate(dscheckfilter));
+   end;
    with findexes[findexlocal.indexof(self) + 1] do begin
     if abigger then begin
      if int1 < 0 then begin
       goto endlab;
+     end;
+     if b1 then begin
+      dec(int1);
+      b2:= false;
+      while int1 >= 0 do begin //find next filtered record
+       if compare1a(po1,ind[int1],lastind,partialstring) <> 0 then begin
+        break;
+       end;
+       fcheckfilterbuffer:= ind[int1] - sizeof(dsheaderty);
+       b2:= true;
+       onfilterrecord(tmsebufdataset(fowner),b2);
+       if b2 then begin
+        break;
+       end;
+       dec(int1);
+      end;
+      inc(int1);
+      if not b2 then begin //no exact found
+       while int1 < fbrecordcount do begin
+        fcheckfilterbuffer:= ind[int1] - sizeof(dsheaderty);
+        b2:= true;
+        onfilterrecord(tmsebufdataset(fowner),b2);
+        if b2 then begin
+         break;
+        end;
+        inc(int1);
+       end;
+      end;
+      if not b2 then begin
+       goto endlab; //no bigger found
+      end;
      end;
      if (int1 > 0) and (compare1a(po1,ind[int1-1],lastind,false) = 0) then begin
       result:= true;
@@ -10183,6 +10224,37 @@ begin
      end;
     end
     else begin
+     if b1 then begin
+      inc(int1);
+      b2:= false;
+      while int1 < fbrecordcount do begin //find next filtered record
+       if compare1a(po1,ind[int1],lastind,partialstring) <> 0 then begin
+        break;
+       end;
+       fcheckfilterbuffer:= ind[int1] - sizeof(dsheaderty);
+       b2:= true;
+       onfilterrecord(tmsebufdataset(fowner),b2);
+       if b2 then begin
+        break;
+       end;
+       inc(int1);
+      end;
+      dec(int1);
+      if not b2 then begin //no exact found
+       while int1 >= 0 do begin
+        fcheckfilterbuffer:= ind[int1] - sizeof(dsheaderty);
+        b2:= true;
+        onfilterrecord(tmsebufdataset(fowner),b2);
+        if b2 then begin
+         break;
+        end;
+        dec(int1);
+       end;
+      end;
+      if not b2 then begin
+       goto endlab; //no lower found
+      end;
+     end;
      if int1 >= fbrecordcount - 1 then begin
       if partialstring and (int1 > 0) and (int1 = fbrecordcount - 1) then begin
        result:= compare1a(po1,ind[int1],lastind,true) = 0;
@@ -10235,13 +10307,24 @@ begin
        end;
       end;
      end;
-     abookmark.recno:= int1;
-     abookmark.recordpo:= ind[int1];
+     b2:= true;
+     if b1 then begin
+      fcheckfilterbuffer:= ind[int1] - sizeof(dsheaderty);
+      onfilterrecord(tmsebufdataset(fowner),b2);
+      result:= result and b2;
+     end;
+     if b2 then begin
+      abookmark.recno:= int1;
+      abookmark.recordpo:= ind[int1];
+     end;
     end;
    end;
   end;
 endlab:
  finally
+  if b1 then begin
+   tmsebufdataset(fowner).restorestate(state1);
+  end;
   freemem(po1);
  end;
 end;
@@ -10262,27 +10345,31 @@ function tlocalindex.find(const avalues: array of const; const aisnull: array of
                out abookmark: string;
                const abigger: boolean = false;
                const partialstring: boolean = false;
-               const nocheckbrowsemode: boolean = false): boolean;
+               const nocheckbrowsemode: boolean = false;
+               const filtered: boolean = false): boolean;
                 //true if found else nearest lower or bigger,
                 //abookmark = '' if no lower or bigger found
                 //string values must be msestring
 var
  bm1: bookmarkdataty;
 begin
- result:= find(avalues,aisnull,bm1,abigger,partialstring,nocheckbrowsemode);
+ result:= find(avalues,aisnull,bm1,abigger,partialstring,
+                                             nocheckbrowsemode,filtered);
  abookmark:=  tmsebufdataset(fowner).bookmarkdatatobookmark(bm1);
 end;
 
 function tlocalindex.find(const avalues: array of const;
     const aisnull: array of boolean;
-    const alast: boolean = false; const partialstring: boolean = false;
+    const abigger: boolean = false; const partialstring: boolean = false;
     const nocheckbrowsemode: boolean = false;
-    const exact: boolean = true): boolean;
+    const exact: boolean = true;
+    const filtered: boolean = true): boolean;
                 //sets dataset cursor if found
 var
  str1: string;
 begin
- result:= find(avalues,aisnull,str1,alast,partialstring,nocheckbrowsemode);
+ result:= find(avalues,aisnull,str1,abigger,partialstring,
+                                        nocheckbrowsemode,filtered);
  if result or not exact then begin
   tmsebufdataset(fowner).bookmark:= str1;
  end;
@@ -10292,12 +10379,14 @@ function tlocalindex.find(const avalues: array of tfield;
                const abigger: boolean = false;
                const partialstring: boolean = false;
                const nocheckbrowsemode: boolean = false;
-               const exact: boolean = true): boolean;
+               const exact: boolean = true;
+               const filtered: boolean = true): boolean;
                 //sets dataset cursor if found
 var
  str1: string;
 begin
- result:= find(avalues,str1,abigger,partialstring,nocheckbrowsemode);
+ result:= find(avalues,str1,abigger,partialstring,
+                                       nocheckbrowsemode,filtered);
  if result or not exact then begin
   tmsebufdataset(fowner).bookmark:= str1;
  end;
@@ -10311,7 +10400,8 @@ function tlocalindex.findvariant(const avalue: array of variant;
                out abookmark: string;
                const abigger: boolean = false;
                const partialstring: boolean = false;
-               const nocheckbrowsemode: boolean = false): boolean;
+               const nocheckbrowsemode: boolean = false;
+               const filtered: boolean = false): boolean;
                 //true if found else nearest lower or bigger,
                 //abookmark = '' if no lower or bigger found
                 //string values must be msestring
@@ -10375,19 +10465,21 @@ begin
    end;
   end;
  end;
- result:= find(ar1,[],abigger,partialstring,nocheckbrowsemode);
+ result:= find(ar1,[],abigger,partialstring,nocheckbrowsemode,filtered);
 end;
 
 function tlocalindex.findvariant(const avalue: array of variant;
                const abigger: boolean = false;
                const partialstring: boolean = false;
                const nocheckbrowsemode: boolean = false;
-               const exact: boolean = true): boolean;
+               const exact: boolean = true;
+               const filtered: boolean = true): boolean;
                 //sets dataset cursor if found
 var
  str1: string;
 begin
- result:= findvariant(avalue,str1,abigger,partialstring,nocheckbrowsemode);
+ result:= findvariant(avalue,str1,abigger,partialstring,
+                                              nocheckbrowsemode,filtered);
  if result or not exact then begin
   tmsebufdataset(fowner).bookmark:= str1;
  end;
@@ -10397,7 +10489,8 @@ function tlocalindex.find(const avalues: array of tfield;
                out abookmark: bookmarkdataty;
                const abigger: boolean = false;
                const partialstring: boolean = false;
-               const nocheckbrowsemode: boolean = false): boolean;
+               const nocheckbrowsemode: boolean = false;
+               const filtered: boolean = false): boolean;
                 //true if found else nearest lower or bigger,
                 //abookmark = '' if no lower or bigger found
 var
@@ -10474,21 +10567,22 @@ begin
    end;
   end;
  end; 
- result:= find(consts1,isnull1,abookmark,abigger,
-                              partialstring,nocheckbrowsemode);
+ result:= find(consts1,isnull1,abookmark,abigger,partialstring,
+                                             nocheckbrowsemode,filtered);
 end;
 
 function tlocalindex.find(const avalues: array of tfield;
                out abookmark: string;
                const abigger: boolean = false;
                const partialstring: boolean = false;
-               const nocheckbrowsemode: boolean = false): boolean;
+               const nocheckbrowsemode: boolean = false;
+               const filtered: boolean = false): boolean;
                 //true if found else nearest lower or bigger,
                 //abookmark = '' if no lower or bigger found
 var
  bm: bookmarkdataty;
 begin
- result:= find(avalues,bm,abigger,partialstring,nocheckbrowsemode);
+ result:= find(avalues,bm,abigger,partialstring,nocheckbrowsemode,filtered);
  abookmark:= tmsebufdataset(fowner).bookmarkdatatobookmark(bm);
 end;
 
