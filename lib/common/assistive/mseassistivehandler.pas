@@ -34,6 +34,10 @@ type
 
 const
  internalstates = [ahs_active,ahs_speaklocked,ahs_activated];
+ volumemin = 0.2;
+ volumemax = 2;
+ ratemin = 0.2;
+ ratemax = 5;
 
 type
  tassistivespeak = class(tcustomespeakng)
@@ -1453,8 +1457,8 @@ begin
     end;
     shoa_slower: begin
      f1:= fspeaker.rate/1.1;
-     if f1 < 0.2 then begin
-      f1:= 0.2;
+     if f1 < ratemin then begin
+      f1:= ratemin;
      end;
      fspeaker.rate:= f1;
      startspeak();
@@ -1462,8 +1466,8 @@ begin
     end;
     shoa_faster: begin
      f1:= fspeaker.rate*1.1;
-     if f1 > 5 then begin
-      f1:= 5;
+     if f1 > ratemax then begin
+      f1:= ratemax;
      end;
      fspeaker.rate:= f1;
      startspeak();
@@ -1471,8 +1475,8 @@ begin
     end;
     shoa_volumedown: begin
      f1:= fspeaker.volume/1.1;
-     if f1 < 0.2 then begin
-      f1:= 0.2;
+     if f1 < volumemin then begin
+      f1:= volumemin;
      end;
      fspeaker.volume:= f1;
      startspeak();
@@ -1480,8 +1484,8 @@ begin
     end;
     shoa_volumeup: begin
      f1:= fspeaker.volume*1.1;
-     if f1 > 2 then begin
-      f1:= 2;
+     if f1 > volumemax then begin
+      f1:= volumemax;
      end;
      fspeaker.volume:= f1;
      startspeak();
