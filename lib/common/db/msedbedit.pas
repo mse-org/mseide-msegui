@@ -8738,6 +8738,11 @@ end;
 procedure tgriddatalink.loaded;
 begin
  doupdaterowdata(-1);
+ with tcustomgrid1(fgrid) do begin
+  if fdatacols.sortcol >= 0 then begin
+   optionsgrid:= optionsgrid + [og_sorted];
+  end;
+ end;
 end;
 
 procedure tgriddatalink.doshortcut(var info: keyeventinfoty;
@@ -9164,7 +9169,8 @@ begin
  end;
 end;
 
-function tgriddatalink.updateoptionsgrid(const avalue: optionsgridty): optionsgridty;
+function tgriddatalink.updateoptionsgrid(
+                                 const avalue: optionsgridty): optionsgridty;
 begin
  result:= avalue - [og_sorted];
  with tcustomgrid1(fgrid) do begin

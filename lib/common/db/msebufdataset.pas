@@ -7082,9 +7082,9 @@ begin
   end;
  finally
   reader.free;
+  factindex:= actindexbefore;
+  factindexpo:= @findexes[factindex];
   if active then begin
-   factindex:= actindexbefore;
-   factindexpo:= @findexes[factindex];
    checkindex(factindex);
   end;
  end;
