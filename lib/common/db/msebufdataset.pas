@@ -659,6 +659,7 @@ const
                          bdo_offline, //disconnect database after open
                          bdo_local   //do not connect database on open
                          ];
+
 type 
  tmsebufdataset = class(tmdbdataset,iblobchache,idatasetsum,imasterlink,
                         idbdata,iobjectlink)
@@ -720,6 +721,8 @@ type
    fobjectlinker: tobjectlinker;   
    fcryptohandler: tcustomcryptohandler;
    fdelayedapplycount: integer;
+   fbeforefilterchanged: bufdataseteventty;
+   fafterfilterchanged: bufdataseteventty;
    procedure calcrecordsize;
    function loadbuffer(var buffer: recheaderty): tgetresult;
    function getfieldsize(const datatype: tfieldtype; const varsize: integer;
@@ -1024,6 +1027,7 @@ type
    procedure checkrecno(const avalue: integer);
    procedure setonfilterrecord(const value: tfilterrecordevent); override;
    procedure setfiltered(value: boolean); override;
+   procedure filterchanged1(const aloaded: boolean);
    procedure setactive(value: boolean); override;
 
    procedure CalculateFields(Buffer: PChar); override;
@@ -1246,11 +1250,23 @@ type
                                                     write ffiltereditkind;
    procedure beginfilteredit(const akind: filtereditkindty);
    procedure endfilteredit;
+   function beginfiltervalue(const akind: filtereditkindty): tdatasetstate;
+   procedure endfiltervalue(const astatebefore: tdatasetstate);
+   procedure filterchanged();
    function fieldfiltervalue(const afield: tfield;
                      const akind: filtereditkindty = fek_filter): variant;
    function fieldfiltervalueisnull(const afield: tfield;
                      const akind: filtereditkindty = fek_filter): boolean;
-   procedure filterchanged;
+   function checkfiltervalue(const afield: tfield;
+                     const akind: filtereditkindty = fek_filter;
+                           const acaseinsensitive: boolean = true): boolean;
+        //returns true if filter value is null or filter condition is fulfilled
+   function checkfiltervalues(const afield: tfield;
+                           const acaseinsensitive: boolean = true): boolean;
+        //calls checkfiltervalue() for all filtereditkinds
+   function checkfiltervalues(const acaseinsensitive: boolean = true): boolean;
+        //calls checkfiltervalue() for all fields and all filtereditkinds
+
    function locate(const afields: array of tfield;
        const akeys: array of const; const aisnull: array of boolean;
        const akeyoptions: array of locatekeyoptionsty;
@@ -1408,6 +1424,10 @@ type
                        read fbeforeendfilteredit write fbeforeendfilteredit;
    property afterendfilteredit: filterediteventty
                        read fafterendfilteredit write fafterendfilteredit;
+   property beforefilterchanged: bufdataseteventty
+                       read fbeforefilterchanged write fbeforefilterchanged;
+   property afterfilterchanged: bufdataseteventty
+                       read fafterfilterchanged write fafterfilterchanged;
    property Active default false;
 //   property AutocalcFields default false;
   end;
@@ -5820,13 +5840,28 @@ begin
  end;
 end;
 
-procedure tmsebufdataset.filterchanged;
+procedure tmsebufdataset.filterchanged1(const aloaded: boolean);
 begin
- exclude(fbstate,bs_visiblerecordcountvalid);
- if not (state in [dsinactive,dsfilter]) then begin
-  checkbrowsemode;
-  resync([]);
+ if not aloaded then begin
+  exclude(fbstate,bs_visiblerecordcountvalid);
  end;
+ if checkcanevent(self,tmethod(fbeforefilterchanged)) then begin
+  fbeforefilterchanged(self);
+ end;
+ if not aloaded then begin
+  if not (state in [dsinactive,dsfilter]) then begin
+   checkbrowsemode;
+   resync([]);
+  end;
+ end;
+ if checkcanevent(self,tmethod(fafterfilterchanged)) then begin
+  fafterfilterchanged(self);
+ end;
+end;
+
+procedure tmsebufdataset.filterchanged();
+begin
+ filterchanged1(false);
 end;
 
 function tmsebufdataset.locate(const afields: array of tfield;
@@ -5905,7 +5940,20 @@ begin
   if checkcanevent(self,tmethod(fafterendfilteredit)) then begin
    fafterendfilteredit(self,ffiltereditkind);
   end;
+  filterchanged1(true);
  end;
+end;
+
+function tmsebufdataset.beginfiltervalue(
+              const akind: filtereditkindty): tdatasetstate;
+begin
+ result:= settempstate(dsfilter);
+ ffiltereditkind:= akind;
+end;
+
+procedure tmsebufdataset.endfiltervalue(const astatebefore: tdatasetstate);
+begin
+ restorestate(astatebefore);
 end;
 
 function tmsebufdataset.fieldfiltervalue(const afield: tfield;
@@ -5936,6 +5984,100 @@ begin
  restorestate(statebefore);
 end;
 
+function tmsebufdataset.checkfiltervalue(const afield: tfield;
+                       const akind: filtereditkindty = fek_filter;
+                           const acaseinsensitive: boolean = true): boolean;
+var
+ i1: int32;
+ p1: precheaderty;
+ v1: variant;
+ b1: boolean;
+begin
+ if afield.dataset <> self then begin
+  databaseerror('Invalid field "'+afield.name+'"',self);
+ end;
+ result:= true; //default
+ i1:= afield.fieldno-1;
+ p1:= @ffilterbuffer[akind]^.header;
+ if i1 >= 0 then begin //data field
+  b1:= not getfieldflag(p1^.fielddata.nullmask,i1);
+ end
+ else begin //calc field
+  i1:= -2 - i1;
+  if i1 >= 0 then begin //calc field
+   b1:= not getfieldflag(pointer(p1)+frecordsize,i1);
+  end
+  else begin
+   exit;//invalid field
+  end;
+ end;
+ if not b1 then begin //filter not null
+  b1:= afield.isnull;
+  v1:= fieldfiltervalue(afield,akind);
+  if afield.datatype = ftstring then begin
+   if acaseinsensitive then begin
+    i1:= unicodecomparetext(afield.asmsestring,unicodestring(v1));
+   end
+   else begin
+    i1:= unicodecomparestr(afield.asmsestring,unicodestring(v1));
+   end;
+   case akind of
+    fek_filtermin: begin
+     result:= not b1 and (i1 >= 0);
+    end;
+    fek_filter: begin
+     result:= i1 = 0;
+    end;
+    fek_filtermax: begin
+     result:= b1 or (i1 <= 0);
+    end;
+   end;
+  end
+  else begin
+   case akind of
+    fek_filtermin: begin
+     result:= not b1 and (afield.value >= v1);
+    end;
+    fek_filter: begin
+     result:= afield.value = v1;
+    end;
+    fek_filtermax: begin
+     result:= b1 or (afield.value <= v1);
+    end;
+   end;
+  end;
+ end;
+end;
+
+function tmsebufdataset.checkfiltervalues(const afield: tfield;
+                           const acaseinsensitive: boolean = true): boolean;
+        //calls checkfiltervalue() for all filtereditkinds
+var
+ f1: filtereditkindty;
+begin
+ for f1:= low(f1) to fek_filtermax do begin
+  result:= checkfiltervalue(afield,f1,acaseinsensitive);
+  if not result then begin
+   break;
+  end;
+ end;
+end;
+
+function tmsebufdataset.checkfiltervalues(
+                          const acaseinsensitive: boolean = true): boolean;
+        //calls checkfiltervalue() for all fields and all filtereditkinds
+var
+ i1: int32;
+begin
+ result:= true;
+ for i1:= 0 to fields.count-1 do begin
+  result:= checkfiltervalues(fields[i1],acaseinsensitive);
+  if not result then begin
+   break;
+  end;
+ end;
+end;
+
 procedure tmsebufdataset.checkfilterstate;
 begin
  exclude(fbstate,bs_hasfilter);
@@ -5948,6 +6090,7 @@ procedure tmsebufdataset.loaded;
 begin
  inherited;
  checkfilterstate;
+ filterchanged1(true);
 end;
 
 procedure tmsebufdataset.readstreamingversion(reader: treader);
@@ -6109,6 +6252,7 @@ begin
     end;
    end;
    resync([]);
+   filterchanged1(true);
   end;
  finally
   filtereditkind:= kindbefore;
@@ -10465,7 +10609,8 @@ begin
    end;
   end;
  end;
- result:= find(ar1,[],abigger,partialstring,nocheckbrowsemode,filtered);
+ result:= find(ar1,[],abookmark,abigger,partialstring,
+                                           nocheckbrowsemode,filtered);
 end;
 
 function tlocalindex.findvariant(const avalue: array of variant;
@@ -10481,7 +10626,7 @@ begin
  result:= findvariant(avalue,str1,abigger,partialstring,
                                               nocheckbrowsemode,filtered);
  if result or not exact then begin
-  tmsebufdataset(fowner).bookmark:= str1;
+  tmsebufdataset(fowner).bookmark:= str1; //ignores ''
  end;
 end;
 
