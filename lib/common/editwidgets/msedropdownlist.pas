@@ -337,6 +337,7 @@ type
    procedure updatelayout; override;
    function dropdownheight: integer; virtual;
    procedure setactiveitem(const aitemindex: integer); virtual;
+   function getassistiveparent(): iassistiveclient override;
   public
    constructor create(const acontroller: tcustomdropdownlistcontroller;
               const acols: tdropdowncols;
@@ -2522,7 +2523,7 @@ end;
 procedure tdropdownlist.dokeydown(var info: keyeventinfoty);
 begin
  with info do begin
-   if shiftstate = [] then begin
+   if shiftstate*singlekeyshiftstatesmask = [] then begin
     include(eventstate,es_processed);
     case key of
      key_return,{key_enter,}key_tab: begin
@@ -2577,6 +2578,11 @@ end;
 procedure tdropdownlist.setactiveitem(const aitemindex: integer);
 begin
  focuscell(makegridcoord(0,aitemindex));
+end;
+
+function tdropdownlist.getassistiveparent(): iassistiveclient;
+begin
+ result:= twidget1(fcontroller.fintf.getwidget()).getiassistiveclient();
 end;
 
 function tdropdownlist.dropdownheight: integer;
@@ -2683,7 +2689,7 @@ var
  hintinfo: hintinfoty;
 begin
  with info do begin
-  if iscellclick(info,[ccr_buttonpress]) then begin
+  if iscellclick(info,[ccr_buttonpress],[],keyshiftstatesmask) then begin
    itemselected(cell.row,key_none);
   end
   else begin

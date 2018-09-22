@@ -1902,7 +1902,8 @@ end;
 procedure tcustomedit.settext(const avalue: msestring);
 begin
  feditor.text:= avalue;
- if avalue = '' then begin
+ if (avalue = '') and (not focused or 
+                         (eo_showfocused in fempty_options)) then begin
   if not (des_emptytext in fstate) then begin
    include(fstate,des_emptytext);
    updateemptytext();

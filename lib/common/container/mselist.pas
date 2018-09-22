@@ -136,6 +136,7 @@ type
    procedure clear; virtual;
    function datapo: ppointeraty;
    function add(const value: pointer): integer;
+   procedure add(const values: ppointer; const acount: int32);
    function remove(const item: pointer): integer;
    function delete(index: integer): pointer; virtual;
    procedure insert(index: integer; const value: pointer); virtual;
@@ -993,6 +994,19 @@ begin
  inccount;
  result:= fcount - 1;
  setitems(result,value);
+end;
+
+procedure tpointerlist.add(const values: ppointer; const acount: int32);
+var
+ i1: int32;
+begin
+ normalizering();
+ i1:= fcount;
+ fcount:= fcount + acount;
+ if fcount >= length(fitems) then begin
+  capacity:= fcount + fcount div 4 + 32;
+ end;
+ move(values^,fitems[i1],acount * sizeof(pointer));
 end;
 
 procedure tpointerlist.clear;

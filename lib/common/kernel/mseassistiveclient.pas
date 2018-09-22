@@ -16,7 +16,8 @@ interface
 uses
  msestrings,mseglob,mseinterfaces,msetypes,mseificompglob;
 type
- assistiveflagty = (asf_embedded,asf_container,asf_toplevel,asf_dummy,
+ assistiveflagty = (asf_embedded,asf_container,asf_toplevel,asf_mainwindow,
+                    asf_dummy,
                     asf_grid,asf_widgetgrid,
                     asf_gridcell,
                     asf_widgetcell,

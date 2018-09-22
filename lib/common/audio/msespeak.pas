@@ -11,14 +11,17 @@
 // under construction
 //
 unit msespeak;
-{$ifdef FPC}{$mode objfpc}{$h+}{$endif}
+{$ifdef FPC}{$mode objfpc}{$h+}{$goto on}{$endif}
 interface
 uses
  classes,mclasses,mseclasses,msetypes,mseespeakng,msearrayprops,
- msethread,mseevent,msesystypes;
+ msethread,mseevent,msesystypes,mselist;
 type
- espeakoptionty = (eso_nospeakaudio);
+ espeakoptionty = (eso_nospeakaudio,eso_speakonidle);
  espeakoptionsty = set of espeakoptionty;
+const
+ defaultespeakoptions = [eso_speakonidle];
+type
  speakoptionty = (so_cancel,so_wait,so_ssml,so_phonemes,so_endpause);
 
  speakoptionsty = set of speakoptionty;
@@ -155,6 +158,7 @@ type
  end;
 }  
  speakstatety = (ss_voicevalid,ss_connected,ss_disconnected,
+                 ss_connecting,ss_espeaknginitialized,
                  ss_canceled,ss_idle);
  speakstatesty = set of speakstatety;
  
@@ -204,6 +208,7 @@ type
   protected
    fstate: speakstatesty;
    flastvoice: int32;
+   fspeakqueue: tcustomeventqueue;
    fspeakthread: teventthread;
    fidlecond: condty;
    procedure doasyncevent(var atag: int32) override;
@@ -211,6 +216,7 @@ type
    procedure loaded() override;
    procedure connect();
    procedure disconnect();
+   procedure doidle(var again: boolean);
    procedure checkerror(const astate: espeak_ng_status);
    procedure voicechanged();
    procedure checkvoice(avoice: int32);
@@ -245,7 +251,8 @@ type
    procedure cancel();
    property active: boolean read factive write setactive default false;
    property datapath: filenamety read fdatapath write fdatapath;
-   property options: espeakoptionsty read foptions write foptions default [];
+   property options: espeakoptionsty read foptions write foptions 
+                                              default defaultespeakoptions;
    property device: msestring read fdevice write fdevice;
    property bufferlength: int32 read fbufferlength 
                                           write fbufferlength default 0;
@@ -380,7 +387,9 @@ begin
  frate:= 1;
  fpitch:= 1;
  frange:= 1;
+ foptions:= defaultespeakoptions;
  inherited;
+ fspeakqueue:= tcustomeventqueue.create(true);
  fvoices:= tvoices.create(self);
 end;
 
@@ -388,6 +397,7 @@ destructor tcustomespeakng.destroy();
 begin
  active:= false;
  fvoices.free();
+ fspeakqueue.free();
  inherited;
 end;
 
@@ -396,7 +406,12 @@ begin
  if avalue <> factive then begin
   if not(csloading in componentstate) then begin
    if avalue then begin
-    connect();
+    try
+     connect();
+    except
+     disconnect();
+     raise;
+    end;
    end
    else begin
     disconnect();
@@ -622,12 +637,15 @@ begin
   if assigned(fonbeforeconnect) then begin
    fonbeforeconnect(self);
   end;
+  include(fstate,ss_connecting);
+  application.registeronidle(@doidle);
   exclude(fstate,ss_disconnected);
   include(fstate,ss_idle);
   sys_condcreate(fidlecond);
   voicechanged();
   s1:= stringtoutf8ansi(tosysfilepath(fdatapath));
   initializeespeakng([],s1);
+  include(fstate,ss_espeaknginitialized);
   
   m1:= ENOUTPUT_MODE_SYNCHRONOUS; 
 //  m1:= 0;//ENOUTPUT_MODE_SYNCHRONOUS; 
@@ -643,12 +661,18 @@ end;
 
 procedure tcustomespeakng.disconnect();
 begin
- if not (csdesigning in componentstate) then begin
+ if not (csdesigning in componentstate) and 
+                           (ss_connecting in fstate) then begin
+  application.unregisteronidle(@doidle);
   cancel();
-  fspeakthread.free();
+  freeandnil(fspeakthread);
   sys_conddestroy(fidlecond);
   exclude(fstate,ss_connected);
-  releaseespeakng();
+  if ss_espeaknginitialized in fstate then begin
+   releaseespeakng();
+   exclude(fstate,ss_espeaknginitialized);
+  end;
+  exclude(fstate,ss_connecting);
  end;
 end;
 
@@ -811,10 +835,13 @@ begin
 end;
 
 procedure tcustomespeakng.wait();
+var
+ b1: boolean;
 begin
  if not (ss_connected in fstate) then begin
   exit;
  end;
+ doidle(b1);
  with fspeakthread do begin
   sys_condlock(fidlecond);
   while true do begin
@@ -838,6 +865,7 @@ begin
 {$ifdef mse_debugassistive}
  debugwriteln('---cancel');
 {$endif}
+ fspeakqueue.clear();
  fspeakthread.clearevents();
  include(fstate,ss_canceled);
 // fspeakthread.lock();
@@ -905,18 +933,35 @@ begin
  sys_condunlock(fidlecond);
 end;
 
+procedure tcustomespeakng.doidle(var again: boolean);
+begin
+ if fspeakqueue.count > 0 then begin
+  fspeakthread.eventlist.lock();
+  sys_condlock(fidlecond);
+  exclude(fstate,ss_idle);
+  fspeakthread.eventlist.post(fspeakqueue);
+  sys_condunlock(fidlecond);
+  fspeakthread.eventlist.unlock();
+ end;
+end;
+
 procedure tcustomespeakng.postevent(const aevent: tspeakevent);
 begin
  if ss_canceled in fstate then begin
   wait();
   exclude(fstate,ss_canceled);
  end;
- fspeakthread.eventlist.lock();
- sys_condlock(fidlecond);
- exclude(fstate,ss_idle);
- fspeakthread.postevent(aevent);
- sys_condunlock(fidlecond);
- fspeakthread.eventlist.unlock();
+ if eso_speakonidle in foptions then begin
+  fspeakqueue.add(aevent);
+ end
+ else begin
+  fspeakthread.eventlist.lock();
+  sys_condlock(fidlecond);
+  exclude(fstate,ss_idle);
+  fspeakthread.postevent(aevent);
+  sys_condunlock(fidlecond);
+  fspeakthread.eventlist.unlock();
+ end;
 end;
 
 procedure tcustomespeakng.speak(const atext: msestring;

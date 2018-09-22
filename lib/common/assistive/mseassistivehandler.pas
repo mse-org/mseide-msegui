@@ -14,7 +14,7 @@ unit mseassistivehandler;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 uses
- classes,mclasses,mseclasses,mseassistiveserver,mseevent,
+ classes,mclasses,mseclasses,mseassistiveserver,mseevent,mselist,
  mseguiglob,mseglob,msestrings,mseinterfaces,mseact,mseshapes,
  mseassistiveclient,msemenuwidgets,msegrids,msespeak,msetypes,
  msestockobjects,msegraphutils,msegui,msehash,mdb,msestat,msestatfile;
@@ -24,6 +24,8 @@ type
   (ahs_active,ahs_speaklocked,
    ahs_activated, //set by dowindowactivated() and doapplicationactivated(),
                   //reset by doapplicationdeactivated()
+   ahs_applicationactivated, //set by doapplicationactivated(),
+                             //consumed by dowindowactivated()
    ahs_nocut,
    ahs_windowactivated,ahs_menuactivated,ahs_menuactivatepending,
    ahs_dropdownlistclosed,ahs_editcharenter,ahs_editchardelete,
@@ -33,7 +35,8 @@ type
  assistivehandlerstatesty = set of assistivehandlerstatety;
 
 const
- internalstates = [ahs_active,ahs_speaklocked,ahs_activated];
+ internalstates = [ahs_active,ahs_speaklocked,ahs_activated,
+                   ahs_applicationactivated];
  volumemin = 0.2;
  volumemax = 2;
  ratemin = 0.2;
@@ -400,7 +403,9 @@ type
   procedure(const handler: tassistivehandler; const intf: iassistiveclient;
                 const akind: assistivedbeventkindty; const adataset: tdataset;
                                                 var handled: boolean) of object;
- speakoptionty = (spo_addtext,spo_hint,spo_columncaption,spo_parent,spo_path);
+ speakoptionty = (spo_addtext,spo_hint,spo_columncaption,spo_parent,spo_path,
+                  spo_notext,
+                  spo_maincaption);
  speakoptionsty = set of speakoptionty;
  
  tassistivehandler = class(tmsecomponent,iassistiveserver,istatfile)
@@ -447,6 +452,7 @@ type
    fstatfile: tstatfile;
    fstatvarname: msestring;
    fstatpriority: int32;
+   fmaincaption: msestring;
    procedure setactive(const avalue: boolean);
    procedure setspeaker(const avalue: tassistivespeak);
    procedure setoptions(const avalue: assistiveoptionsty);
@@ -586,6 +592,7 @@ type
    property speaker: tassistivespeak read fspeaker write setspeaker;
    property voicefixed: int32 read fvoicefixed 
                                           write fvoicefixed default 0;
+   property maincaption: msestring read fmaincaption write fmaincaption;
    property voicecaption: int32 read fvoicecaption 
                                           write fvoicecaption default 0;
    property voicetextmessage: int32 read fvoicetextmessage 
@@ -1204,11 +1211,12 @@ begin
  intf2:= sender.getassistiveparent();
  if spo_path in aoptions then begin
   exclude(aoptions,spo_parent);
-  include(aoptions,spo_columncaption);
+  aoptions:= aoptions + [spo_columncaption];
   if intf2 <> nil then begin
    exclude(fla1,asf_toplevel);
-   speakall(intf2,aoptions);
+   speakall(intf2,aoptions+[spo_notext]);
    include(aoptions,spo_addtext);
+   exclude(aoptions,spo_maincaption);
    intf2:= nil;
   end;
  end
@@ -1234,7 +1242,7 @@ begin
   end; 
  end;
  if (intf2 <> nil) and (asf_message in intf2.getassistiveflags()) then begin
-  speakall(intf2,aoptions - [spo_addtext,spo_parent]);
+  speakall(intf2,aoptions - [spo_addtext,spo_parent,spo_maincaption]);
  end;
  if fla1 * [asf_grid,asf_popup] = [asf_grid,asf_popup] then begin
   b1:= aoptions * [spo_parent,spo_path] <> [];
@@ -1242,7 +1250,8 @@ begin
    speaktext(sc_selection,fvoicefixed);
   end;
   with iassistiveclientgrid(sender) do begin
-   speaktext(getassistivecellcaption(getassistivefocusedcell()),fvoicecaption);
+   speaktext(getassistivecellcaption(mgc(getassistivefocusedcell().col,-1)),
+                                                                 fvoicecaption);
    speaktext(getassistivecelltext(getassistivefocusedcell(),fla1),i1);
   end;
   if b1 and (aso_textfirst in foptions)  then begin
@@ -1273,6 +1282,11 @@ begin
   s1:= s1+iassistiveclientgridwidget(sender).getassistivecolumncaption();
  end;
  s3:= getcaptiontext(sender);
+ if (spo_maincaption in aoptions) and (maincaption <> '') then begin
+  if not (asf_mainwindow in fla1) then begin
+   s3:= maincaption+' '+s3;
+  end;
+ end;
  if s3 <> '' then begin
   if s1 <> '' then begin
    s1:= s1 + ' ';
@@ -1284,15 +1298,22 @@ begin
 }
   s1:= s1 + s3;
  end;
+ if asf_message in fla1 then begin
+  exclude(aoptions,spo_notext);
+ end;
  if aso_textfirst in foptions then begin
-  speaktext(gettexttext(sender),i1);
+  if not (spo_notext in aoptions) then begin
+   speaktext(gettexttext(sender),i1);
+  end;
   speaktext(s1,fvoicecaption);
   speaktext(s2,fvoicefixed);
  end
  else begin
   speaktext(s2,fvoicefixed);
   speaktext(s1,fvoicecaption);
-  speaktext(gettexttext(sender),i1);
+  if not (spo_notext in aoptions) then begin
+   speaktext(gettexttext(sender),i1);
+  end;
  end;
  if spo_hint in aoptions then begin
   speaktext(gethinttext(sender),fvoicecaption);
@@ -1504,7 +1525,8 @@ end;
 
 procedure tassistivehandler.dospeakpath(const sender: twidget);
 begin
- speakall(twidget1(sender).getiassistiveclient(),[spo_hint,spo_path]);
+ speakall(twidget1(sender).getiassistiveclient(),
+                           [spo_hint,spo_path,spo_maincaption]);
 end;
 
 procedure tassistivehandler.checklocatepending(const sender: iassistiveclient);
@@ -1564,7 +1586,7 @@ procedure tassistivehandler.doapplicationactivated();
 var
  b1: boolean;
 begin
- include(fstate,ahs_activated);
+ fstate:= fstate + [ahs_activated,ahs_applicationactivated];
 {$ifdef mse_debugassistive}
  debug('applicationactivated',nil);
 {$endif}
@@ -1578,7 +1600,8 @@ procedure tassistivehandler.doapplicationdeactivated();
 var
  b1: boolean;
 begin
- fstate:= fstate - [ahs_activated,ahs_dropdownlistclosed,ahs_dropdownpending];
+ fstate:= fstate - [ahs_activated,ahs_applicationactivated,
+                    ahs_dropdownlistclosed,ahs_dropdownpending];
 {$ifdef mse_debugassistive}
  debug('applicationdeactivated',nil);
 {$endif}
@@ -1597,6 +1620,7 @@ var
  item1: tassistivewidgetitem;
  fla1: assistiveflagsty;
  i1: int32;
+ s1: msestring;
 begin
 {$ifdef mse_debugassistive}
  debug('windowactivated',sender);
@@ -1628,13 +1652,19 @@ begin
       startspeak();
      end;
      i1:= gettextvoice(fla1);
+     s1:= getcaptiontext(sender);
+     if (ahs_applicationactivated in fstate) and (fmaincaption <> '') and 
+                         (not (asf_mainwindow in fla1) or (s1 = '')) then begin
+      s1:= fmaincaption + ' ' + s1;
+     end;
+     exclude(fstate,ahs_applicationactivated);
      if aso_textfirst in foptions then begin
       speaktext(gettexttext(sender),i1);
-      speaktext(getcaptiontext(sender),fvoicecaption);
+      speaktext(s1,fvoicecaption);
       speaktext(sc(sc_areaactivated),fvoicefixed);
      end
      else begin
-      speaktext(getcaptiontext(sender),fvoicecaption);
+      speaktext(s1,fvoicecaption);
       speaktext(sc(sc_areaactivated),fvoicefixed);
       speaktext(gettexttext(sender),i1);
      end;

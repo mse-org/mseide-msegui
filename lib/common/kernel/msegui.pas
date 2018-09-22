@@ -2777,9 +2777,12 @@ type
    fchars: msestring;
    fbutton: mousebuttonty;
    fshiftstate: shiftstatesty;
+   fposted: boolean;
    constructor create(const winid: winidty; const release: boolean;
                   const key,keynomod: keyty; const shiftstate: shiftstatesty;
-                  const chars: msestring; const atimestamp: longword);
+                  const chars: msestring; const atimestamp: longword;
+                  const posted: boolean = false); 
+                     //do not dispatch if active window is not winid
    property timestamp: longword read ftimestamp; //usec
  end;
 
@@ -15876,6 +15879,9 @@ begin
  if ownswindow then begin
   include(result,asf_toplevel);
  end;
+ if window = application.mainwindow then begin
+  include(result,asf_mainwindow);
+ end;
 end;
 
 function twidget.getifidatalinkintf(): iifidatalink;
@@ -16191,7 +16197,7 @@ var
  activewindowbefore: twindow;
  widgetar: widgetarty;
  int1: integer;
- bo1: boolean;
+ b1,b2: boolean;
  window1: twindow;
  widget1: twidget;
  
@@ -16216,9 +16222,9 @@ begin
   show(windowevent);
   widgetar:= nil; //compilerwarning
   if activewindowbefore <> self then begin
-   bo1:= force or (appinst.fmodalwindow = nil) or (appinst.fmodalwindow = self) or 
+   b1:= force or (appinst.fmodalwindow = nil) or (appinst.fmodalwindow = self) or 
                          (ftransientfor = appinst.fmodalwindow);
-   if bo1 then begin
+   if b1 then begin
     if hastransientfor then begin
      window1:= topmodaltransientfor;
      if window1 <> nil then begin
@@ -16233,13 +16239,14 @@ begin
      end;
      exit;
     end;
-    if activewindowbefore <> nil then begin
-     bo1:= tws_activating in activewindowbefore.fstate;
+    b2:= activewindowbefore <> nil;
+    if b2 then begin
+     b1:= tws_activating in activewindowbefore.fstate;
      include(fstate,tws_activating);
      try
       activewindowbefore.deactivate;
      finally
-      if not bo1 and (activewindowbefore <> nil) then begin
+      if not b1 and (activewindowbefore <> nil) then begin
        exclude(activewindowbefore.fstate,tws_activating);
       end;
      end;
@@ -16250,10 +16257,11 @@ begin
       activecountbefore:= factivecount;
       appinst.factivewindow:= self;
       appinst.flastactivewindow:= self;
+      appinst.checkapplicationactive();
       if not (tws_activatelocked in fstate) then begin
        if fownerwidget.canassistive() then begin
         assistiveserver.dowindowactivated(
-                           self.fownerwidget.getiassistiveclient());
+                     self.fownerwidget.getiassistiveclient());
        end;
        if ffocusedwidget <> nil then begin
         widgetar:= ffocusedwidget.getrootwidgetpath;
@@ -18022,7 +18030,7 @@ procedure twindow.postkeyevent(const akey: keyty;
        const achars: msestring = '');
 begin
  application.postevent(tkeyevent.create(winid,release,akey,akey,
-             ashiftstate,achars,timestamp));
+             ashiftstate,achars,timestamp,true));
 end;
 
 procedure twindow.beginmoving;
@@ -18548,7 +18556,8 @@ end;
 
 constructor tkeyevent.create(const winid: winidty; const release: boolean;
                   const key,keynomod: keyty; const shiftstate: shiftstatesty;
-                  const chars: msestring; const atimestamp: longword);
+                  const chars: msestring; const atimestamp: longword;
+                  const posted: boolean = false);
 var
  eventkind1: eventkindty;
 begin
@@ -18564,6 +18573,7 @@ begin
  fchars:= chars;
  fshiftstate:= shiftstate;
  ftimestamp:= atimestamp;
+ fposted:= posted;
 end;
 
 { tinternalapplication }
@@ -19085,7 +19095,8 @@ begin
        if kind = ek_keypress then begin
         fonkeypresslist.dokeyevent(widget1,info);
        end;
-       if not (es_processed in eventstate) then begin
+       if not (es_processed in eventstate) and 
+               (not fposted or (fwinid = window1.winid)) then begin
         window1.dispatchkeyevent(kind,info);
        end;
       end;
@@ -19421,7 +19432,7 @@ begin
  end;
 end;
 
-procedure tinternalapplication.checkapplicationactive;
+procedure tinternalapplication.checkapplicationactive();
 var
  bo1: boolean;
 begin

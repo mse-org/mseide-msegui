@@ -150,8 +150,11 @@ type
    constructor create();
    procedure deliver(); virtual;
  end;
- 
- teventqueue = class(tobjectqueue)
+
+ tcustomeventqueue = class(tobjectqueue)
+ end;
+  
+ teventqueue = class(tcustomeventqueue)
   private
    fsem: semty;
    fmutex: mutexty;
@@ -163,8 +166,9 @@ type
    procedure unlock();
    procedure clear; override;
    procedure post(event: tmseevent);
+   procedure post(const events: tcustomeventqueue); //transfer items
    function wait(const timeoutus: integer = 0): tmseevent;
-                 // -1 infinite, 0 no block
+                 // -1 infinite, 0 no block, can return nil
  end;
 
 implementation
@@ -367,27 +371,44 @@ begin
  sys_sempost(fsem);
 end;
 
+procedure teventqueue.post(const events: tcustomeventqueue);
+begin
+ events.normalizering();
+ sys_mutexlock(fmutex);
+ if not fdestroying then begin
+  tpointerlist(self).add(ppointer(pointer(events.fitems)),events.fcount);
+ end;
+ events.fcount:= 0;
+ sys_mutexunlock(fmutex);
+ sys_sempost(fsem);
+end;
+
 function teventqueue.wait(const timeoutus: integer = 0): tmseevent;
 
- procedure get;
+ function get(out item: tmseevent): boolean;
  begin
   sys_mutexlock(fmutex);
-  if not fdestroying then begin
-   result:= tmseevent(getfirst);
+  item:= nil;
+  result:= not fdestroying;
+  if result then begin
+   if fcount > 0 then begin
+    item:= tmseevent(getfirst);
+   end;
   end;
   sys_mutexunlock(fmutex);
  end;
 
 begin
- result:= nil;
- if timeoutus = 0 then begin
-  if sys_semtrywait(fsem) then begin
-   get;
-  end;
- end
- else begin
-  if sys_semwait(fsem,0) = sye_ok then begin
-   get;
+ if get(result) and (result = nil) then begin
+  if timeoutus = 0 then begin
+   if sys_semtrywait(fsem) then begin
+    get(result);
+   end;
+  end
+  else begin
+   if sys_semwait(fsem,0) = sye_ok then begin
+    get(result);
+   end;
   end;
  end;
 end;
