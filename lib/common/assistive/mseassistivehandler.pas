@@ -1519,12 +1519,14 @@ end;
 
 procedure tassistivehandler.dospeakagain(const sender: twidget);
 begin
+ cancel();
  speakall(twidget1(sender).getiassistiveclient(),[spo_hint,spo_parent,
                                                          spo_columncaption]);
 end;
 
 procedure tassistivehandler.dospeakpath(const sender: twidget);
 begin
+ cancel();
  speakall(twidget1(sender).getiassistiveclient(),
                            [spo_hint,spo_path,spo_maincaption]);
 end;
