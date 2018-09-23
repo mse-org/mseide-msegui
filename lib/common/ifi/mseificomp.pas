@@ -14,8 +14,14 @@
  {$if defined(FPC) and (fpc_fullversion >= 020501)}
   {$define mse_fpc_2_6} 
  {$ifend}
+ {$if defined(FPC) and (fpc_fullversion >= 030000)}
+  {$define mse_fpc_3_0} 
+ {$ifend}
  {$ifdef mse_fpc_2_6}
   {$define mse_hasvtunicodestring}
+ {$endif}
+ {$ifdef mse_fpc_3_0}
+  {$define mse_hastkpointer}
  {$endif}
 {$endif}
 unit mseificomp;
@@ -1888,7 +1894,14 @@ var
 begin
  inst:= alink.getinstance;
  prop:= getpropinfo(inst,aname);
- result:= (prop <> nil) and (prop^.proptype^.kind = tkpointer);
+ result:= (prop <> nil) and
+  {$ifdef mse_hastkpointer}
+           (prop^.proptype^.kind = tkpointer)
+  {$else}
+           (prop^.proptype^.kind =
+                     {$ifdef cpu64}tkint64{$else}tkinteger{$endif})
+  {$endif}
+            ;
  if result then begin
   avalue:= pointer(ptrint(getordprop(inst,prop)));
  end
@@ -3128,7 +3141,11 @@ end;
 
 constructor tpointerclientcontroller.create(const aowner: tmsecomponent);
 begin
+{$ifdef mse_hastkpointer}
  inherited create(aowner,tkpointer);
+{$else}
+ inherited create(aowner,{$ifdef cpu64}tkint64{$else}tkinteger{$endif});
+{$endif}
 end;
 
 procedure tpointerclientcontroller.setvalue1(const avalue: pointer);
