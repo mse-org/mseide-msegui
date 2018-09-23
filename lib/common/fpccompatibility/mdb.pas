@@ -13,7 +13,7 @@
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
- Modified 2013-2017 by Martin Schreiber
+ Modified 2013-2018 by Martin Schreiber
 
  **********************************************************************}
 unit mdb;
@@ -242,7 +242,7 @@ type
   TProviderFlags = set of TProviderFlag deprecated;
 {$pop}  
 
-  optionfieldty = (of_readonly,of_required,of_visible,
+  optionfieldty = (of_readonly,of_required,of_visible,of_filter,of_find,
                  of_initinsert,of_initcopy,of_nocopyrecord,of_nomodified,
                  of_ininsert,of_inupdate,of_inwhere,of_inkey,of_hidden,
                  of_refreshinsert,of_refreshupdate);
