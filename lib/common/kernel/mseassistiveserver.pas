@@ -18,20 +18,27 @@ type
 
  editinputmodety = (eim_insert,eim_overwrite);
  edittextblockmodety = (etbm_delete,etbm_cut,etbm_copy,etbm_insert,etbm_paste);
- assistiveoptionty = (aso_textfirst,aso_nodefaultbutton,aso_noreturnbutton,
-                      aso_tabnavig,aso_widgetnavig,aso_nearestortho,
-                      aso_menunavig,aso_gridnavig,
-                      aso_noreturnkeymenuexecute,aso_nomenumousemove,
-                      aso_nogridmousemove,
-                      aso_saverate,aso_savevolume,
-                      aso_savelanguage,aso_savegender,aso_saveage,
-                      aso_savepitch,aso_saverange,
-                      aso_savecapitals,aso_savewordgap);
+ assistiveoptionty = (
+  aso_textfirst,
+  aso_nodefaultbutton,
+  aso_noreturnbutton,    //do not execute button by return key
+  aso_returntogglevalue, //ttogglegtraphdataedit togglevalue by return key
+  aso_tabnavig,aso_widgetnavig,aso_nearestortho,
+  aso_menunavig,aso_gridnavig,
+  aso_noreturnkeymenuexecute,
+  aso_nomenumousemove,
+  aso_nogridmousemove,
+  aso_saverate,aso_savevolume,
+  aso_savelanguage,aso_savegender,aso_saveage,
+  aso_savepitch,aso_saverange,
+  aso_savecapitals,aso_savewordgap
+ );
 
  assistiveoptionsty = set of assistiveoptionty;
  assistivedbeventkindty = (adek_none,adek_bof,adek_eof);
 const
  defaultassistiveoptions = [aso_textfirst,aso_nodefaultbutton,
+                            aso_returntogglevalue,
                             aso_tabnavig,aso_widgetnavig,
                             aso_menunavig,aso_gridnavig,
                             aso_noreturnkeymenuexecute,

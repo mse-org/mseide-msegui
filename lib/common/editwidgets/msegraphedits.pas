@@ -581,6 +581,7 @@ type
    procedure checkgridvalue(const index: integer) virtual abstract;
    function gridvaluechecked(const aindex: integer): boolean virtual abstract;
    procedure mouseevent(var info: mouseeventinfoty) override;
+   procedure dokeydown(var info: keyeventinfoty) override;
    procedure dokeyup(var info: keyeventinfoty) override;
    procedure doshortcut(var info: keyeventinfoty;
                                            const sender: twidget) override;
@@ -2567,11 +2568,24 @@ begin
  ttogglegrapheditframe.create(iscrollframe(self));
 end;
 
+procedure ttogglegraphdataedit.dokeydown(var info: keyeventinfoty);
+begin
+ with info do begin
+  if (aso_returntogglevalue in assistiveoptions) and 
+                       (shiftstate * keyshiftstatesmask = []) and
+            (bo_executeonkey in foptions) and (isenterkey(self,key)) then begin
+  include(eventstate,es_processed);
+  togglevalue(oe_readonly in getoptionsedit,false);
+  end;
+ end;
+ inherited;
+end;
+
 procedure ttogglegraphdataedit.dokeyup(var info: keyeventinfoty);
 begin
  with info do begin
-  if (key = key_space) and
-        (shiftstate = []) and (bo_executeonkey in foptions) then begin
+  if (key = key_space) and (shiftstate*keyshiftstatesmask = []) and 
+                                     (bo_executeonkey in foptions) then begin
    include(eventstate,es_processed);
    togglevalue(oe_readonly in getoptionsedit,false);
   end;
@@ -2579,7 +2593,8 @@ begin
  inherited;
 end;
 
-procedure ttogglegraphdataedit.doshortcut(var info: keyeventinfoty; const sender: twidget);
+procedure ttogglegraphdataedit.doshortcut(var info: keyeventinfoty;
+                                                      const sender: twidget);
 begin
  if (bo_executeonshortcut in foptions) and checkfocusshortcut(info) then begin
   include(info.eventstate,es_processed);

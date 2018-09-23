@@ -3915,7 +3915,7 @@ begin
     end
     else begin
      if (key = key_space) and 
-        (shiftstate * singlekeyshiftstatesmask = []) and 
+        (shiftstate * shiftstatesrepeatmask = []) and 
         not (es_processed in eventstate) and 
         (not editing)  and valuecanedit() and 
                    (ns_checkbox in fvalue.state) and

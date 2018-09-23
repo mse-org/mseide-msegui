@@ -2523,7 +2523,7 @@ end;
 procedure tdropdownlist.dokeydown(var info: keyeventinfoty);
 begin
  with info do begin
-   if shiftstate*singlekeyshiftstatesmask = [] then begin
+   if shiftstate*shiftstatesrepeatmask = [] then begin
     include(eventstate,es_processed);
     case key of
      key_return,{key_enter,}key_tab: begin

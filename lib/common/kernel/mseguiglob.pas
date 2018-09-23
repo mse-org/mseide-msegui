@@ -56,11 +56,11 @@ type
  shiftstatesty = set of shiftstatety;
  clipboardbufferty = (cbb_clipboard,cbb_primary);
 const
- keyshiftstatesmask: shiftstatesty = [ss_shift,ss_alt,ss_ctrl];
- buttonshiftstatesmask: shiftstatesty = 
-                         [ss_left,ss_right,ss_middle,ss_double,ss_triple];
+ keyshiftstatesmask = [ss_shift,ss_alt,ss_ctrl];
+ keyshiftstatesrepeatmask = keyshiftstatesmask + [ss_repeat];
+ buttonshiftstatesmask = [ss_left,ss_right,ss_middle,ss_double,ss_triple];
  shiftstatesmask = [ss_shift,ss_alt,ss_ctrl,ss_left,ss_right,ss_middle];
- singlekeyshiftstatesmask = shiftstatesmask + [ss_repeat];
+ shiftstatesrepeatmask = shiftstatesmask + [ss_repeat];
 
 type
  mouseeventinfoty = record //same layout as mousewheeleventinfoty!

@@ -2039,7 +2039,7 @@ begin
  inherited;
  with info do begin
   if not (es_processed in eventstate) and 
-    (shiftstate*singlekeyshiftstatesmask = []) and
+    (shiftstate * shiftstatesrepeatmask = []) and
     (not (fo_keycloseifwinonly in foptions) or (fparentwidget = nil)) and
     (((fo_closeonesc in foptions) or (fo_cancelonesc in foptions)) and 
       (key = key_escape) or

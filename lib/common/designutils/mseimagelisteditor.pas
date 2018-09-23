@@ -207,7 +207,7 @@ var
 begin
  if info.eventkind = cek_keydown then begin
   if (info.keyeventinfopo^.key = key_delete) and 
-      (info.keyeventinfopo^.shiftstate*singlekeyshiftstatesmask = []) then begin
+      (info.keyeventinfopo^.shiftstate * shiftstatesrepeatmask = []) then begin
    if currentversion = 0 then begin
     fcopyitems:= nil;
     imagelist.beginupdate;
