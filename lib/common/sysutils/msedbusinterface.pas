@@ -9,8 +9,8 @@
 }
 unit msedbusinterface;
 {$ifdef FPC}{$mode objfpc}{$h+}{$goto on}
- {$if FPC_FULLVERSION >= 30000} {$define mse_FPC_3_0} {$endif}
- {$if FPC_FULLVERSION >= 29000} {$define mse_FPC_3_2} {$endif}
+ {$if FPC_FULLVERSION >= 030000} {$define mse_fpc_3_0} {$endif}
+ {$if FPC_FULLVERSION >= 030100} {$define mse_fpc_3_2} {$endif}
 {$endif}
 
 {$ifdef mswindows}

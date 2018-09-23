@@ -1,4 +1,4 @@
-{ MSEide Copyright (c) 1999-2016 by Martin Schreiber
+{ MSEide Copyright (c) 1999-2018 by Martin Schreiber
    
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -16,6 +16,8 @@
 }
 unit msedesignparser;
 {$ifdef FPC}{$mode objfpc}{$h+}{$interfaces corba}{$endif}
+{$if FPC_FULLVERSION >= 030100} {$define mse_fpc_3_2} {$endif}
+
 interface
 uses
  mseglob,msedatalist,mselist,mseparser,msetypes,typinfo,msestrings,
@@ -668,8 +670,9 @@ begin
      po1:= @paramlist;
      for int1:= 0 to paramcount - 1 do begin
       with params[int1] do begin
-       flags:= tparamflags(byteset(pbyte(po1)^));
-       inc(po1,1);
+       flags:= tparamflags(
+         {$ifdef mse_fpc_3_2}wordset{$else}byteset{$endif}(pbyte(po1)^));
+       inc(po1,{$ifdef mse_fpc_3_2}2{$else}1{$endif});
 //       inc(po1,sizeof(paramrecty));
 //       inc(po1,sizeof(tparamflags));
 //       inc(po1,sizeof(byteset));

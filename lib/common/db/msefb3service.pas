@@ -1,7 +1,7 @@
 unit msefb3service;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 {$if fpc_fullversion >= 30000}
- {$define fpcv3}
+ {$define mse_fpc_3}
 {$endif}
 
 interface
@@ -1062,7 +1062,7 @@ begin
  end
  else begin
   widestringmanager.ansi2unicodemoveproc(buffer,
-                                  {$ifdef fpcv3}cp_acp,{$endif}res,i2);
+                                  {$ifdef mse_fpc_3}cp_acp,{$endif}res,i2);
  end;
  inc(buffer,i1);
 end;
@@ -1297,7 +1297,7 @@ var
   end
   else begin
    widestringmanager.ansi2unicodemoveproc(atext,
-                                   {$ifdef fpcv3}cp_acp,{$endif}mstr1,len);
+                                   {$ifdef mse_fpc_3}cp_acp,{$endif}mstr1,len);
   end;
   if (maxrowcount > 0) and (length(res) >= maxrowcount) then begin
    res[circindex]:= mstr1;

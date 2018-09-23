@@ -16,7 +16,7 @@
 
 {$define unicodeversion}
 {$if fpc_fullversion >= 30000}
- {$define fpcv3}
+ {$define mse_fpc_3}
 {$endif}
 {$if fpc_fullversion >= 30001}
  {$define hascompareoptions}
@@ -30,7 +30,7 @@ implementation
 
 interface
 uses
- msetypes,sysutils,msesetlocale,mselibc{$ifdef fpcv3},unixcp{$endif};
+ msetypes,sysutils,msesetlocale,mselibc{$ifdef mse_fpc_3},unixcp{$endif};
 type
  eiconv = class(econverterror)
  end;
@@ -153,7 +153,7 @@ begin
  interlockeddecrement(lockcount);
 end;
 
-{$ifdef fpcv3}
+{$ifdef mse_fpc_3}
 Type
   PAnsiRec = ^TAnsiRec;
   TAnsiRec = Record
@@ -183,7 +183,7 @@ procedure Wide2AnsiMove(source:pwidechar; var dest:ansistring; len:SizeInt);
     mynil : pchar;
     my0 : size_t;
   begin
-{$ifdef fpcv3}
+{$ifdef mse_fpc_3}
  if (cp = cp_utf8) or (cp = cp_acp) and 
                           (DefaultSystemCodePage = cp_utf8) then begin
   dest:= stringtoutf8(source,len);
@@ -236,15 +236,15 @@ procedure Wide2AnsiMove(source:pwidechar; var dest:ansistring; len:SizeInt);
     unlockiconv(lock_wide2ansi);
     // truncate string
     setlength(dest,length(dest)-outleft);
-   {$ifdef fpcv3}
+   {$ifdef mse_fpc_3}
     pansirec(pointer(dest)-sizeof(tansirec))^.codepage:= cp;
    {$endif}
-{$ifdef fpcv3}
+{$ifdef mse_fpc_3}
  end;
 {$endif}
 end;
 
-{$ifdef fpcv3}
+{$ifdef mse_fpc_3}
 procedure Ansi2WideMove(source:pchar;cp : TSystemCodePage;
                                           var dest:widestring;len:SizeInt);
                  //todo: codepages
@@ -260,7 +260,7 @@ procedure Ansi2WideMove(source:pchar;var dest:widestring;len:SizeInt);
     mynil : pchar;
     my0 : size_t;
   begin
-{$ifdef fpcv3}
+{$ifdef mse_fpc_3}
  if (cp = cp_utf8) or (cp = cp_acp) and 
                           (DefaultSystemCodePage = cp_utf8) then begin
   dest:= utf8tostring(source,len);
@@ -313,7 +313,7 @@ procedure Ansi2WideMove(source:pchar;var dest:widestring;len:SizeInt);
     unlockiconv(lock_ansi2wide);
     // truncate string
     setlength(dest,length(dest)-outleft div 2);
-{$ifdef fpcv3}
+{$ifdef mse_fpc_3}
  end;
 {$endif}
 end;
@@ -451,7 +451,7 @@ function StrCompAnsi(s1,s2 : PChar): PtrInt;
     result:=strcoll(s1,s2);
   end;
 
-{$ifdef fpcv3}
+{$ifdef mse_fpc_3}
 //copied from fpc rtl
 {$ifdef FPC_HAS_CPSTRING}
 
@@ -574,7 +574,7 @@ begin
   StrLowerAnsiStringProc
   StrUpperAnsiStringProc
   }
- {$ifdef fpcv3}
+ {$ifdef mse_fpc_3}
   GetStandardCodePageProc:=@GetStandardCodePage;
  {$endif}
  end;
@@ -590,7 +590,7 @@ initialization
  setlocale(LC_ALL,'');
   { init conversion tables }
   
-{$ifdef fpcv3}
+{$ifdef mse_fpc_3}
   { set the DefaultSystemCodePage }
   DefaultSystemCodePage:=GetStandardCodePage(scpAnsi);
   DefaultFileSystemCodePage:=GetStandardCodePage(scpFileSystemSingleByte);

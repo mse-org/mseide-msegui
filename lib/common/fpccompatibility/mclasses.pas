@@ -28,8 +28,8 @@ unit mclasses;
 {$if defined(FPC) and (fpc_fullversion >= 020601)}
  {$define mse_fpc_2_6_2}
 {$ifend}
-{$if fpc_fullversion >= 030000} {$define fpcv3} {$endif}
-{$if FPC_FULLVERSION >= 29000} {$define fpcv3_2} {$endif}
+{$if fpc_fullversion >= 030000} {$define mse_fpc_3} {$endif}
+{$if FPC_FULLVERSION >= 030100} {$define mse_fpc_3_2} {$endif}
 
 interface
 
@@ -51,7 +51,7 @@ type
 {$ifndef mse_fpc_2_6_2}
  tbytes = array of byte;
 {$endif}
-{$ifndef fpcv3}
+{$ifndef mse_fpc_3}
  RawByteString = ansistring;
 {$endif}
  tstrings = class;
@@ -5822,7 +5822,7 @@ type
   record
     Count: Word;
    {$ifdef FPC}
-    {$ifdef fpcv3_2}
+    {$ifdef mse_fpc_3_2}
     Entries: array[Word] of ^TPersistentClass;
     {$else}
     Entries: array[Word] of TPersistentClass;
@@ -5868,7 +5868,7 @@ begin
       for i := 0 to ClassTable^.Count - 1 do
       begin
       {$ifdef FPC}
-       {$ifdef fpcv3_2}
+       {$ifdef mse_fpc_3_2}
         Result := ClassTable^.Entries[i]^;
        {$else}
         Result := ClassTable^.Entries[i];
@@ -7047,7 +7047,7 @@ var
       if assigned(FieldClassTable) then begin
         for i:= 0 to FieldClassTable^.Count -1 do begin
         {$ifdef FPC}
-         {$ifdef fpcv3_2}
+         {$ifdef mse_fpc_3_2}
           Entry:= FieldClassTable^.Entries[i]^;
          {$else}
           Entry:= FieldClassTable^.Entries[i];
