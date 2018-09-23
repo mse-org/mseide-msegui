@@ -28,9 +28,9 @@ unit mclasses;
 {$if defined(FPC) and (fpc_fullversion >= 020601)}
  {$define mse_fpc_2_6_2}
 {$ifend}
-{$if fpc_fullversion >= 030000}
- {$define fpcv3}
-{$endif}
+{$if fpc_fullversion >= 030000} {$define fpcv3} {$endif}
+{$if FPC_FULLVERSION >= 29000} {$define fpcv3_2} {$endif}
+
 interface
 
 uses
@@ -5822,7 +5822,11 @@ type
   record
     Count: Word;
    {$ifdef FPC}
+    {$ifdef fpcv3_2}
+    Entries: array[Word] of ^TPersistentClass;
+    {$else}
     Entries: array[Word] of TPersistentClass;
+    {$endif}
    {$else}
     Entries: array[Word] of ^TPersistentClass;
    {$endif}
@@ -5864,7 +5868,11 @@ begin
       for i := 0 to ClassTable^.Count - 1 do
       begin
       {$ifdef FPC}
+       {$ifdef fpcv3_2}
+        Result := ClassTable^.Entries[i]^;
+       {$else}
         Result := ClassTable^.Entries[i];
+       {$endif}
       {$else}
         Result := ClassTable^.Entries[i]^;
       {$endif}
@@ -7038,11 +7046,15 @@ var
       fieldclasstable:= getfieldclasstable(componentclasstype);
       if assigned(FieldClassTable) then begin
         for i:= 0 to FieldClassTable^.Count -1 do begin
-         {$ifdef FPC}
-          Entry:= FieldClassTable^.Entries[i];
-         {$else}
+        {$ifdef FPC}
+         {$ifdef fpcv3_2}
           Entry:= FieldClassTable^.Entries[i]^;
+         {$else}
+          Entry:= FieldClassTable^.Entries[i];
          {$endif}
+        {$else}
+          Entry:= FieldClassTable^.Entries[i]^;
+        {$endif}
           //writeln(format('Looking for %s in field table of class %s. Found %s',
             //[AClassName, ComponentClassType.ClassName, Entry.ClassName]));
           if (UpperCase(Entry.ClassName) = UClassName) and
