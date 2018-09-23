@@ -1,4 +1,4 @@
- { MSEgui Copyright (c) 2016 by Martin Schreiber
+ { MSEgui Copyright (c) 2016-2018 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -10,6 +10,7 @@
 unit msedbusinterface;
 {$ifdef FPC}{$mode objfpc}{$h+}{$goto on}
  {$if FPC_FULLVERSION >= 30000} {$define mse_FPC_3_0} {$endif}
+ {$if FPC_FULLVERSION >= 29000} {$define mse_FPC_3_2} {$endif}
 {$endif}
 
 {$ifdef mswindows}
@@ -1086,7 +1087,12 @@ const
  //otSWord,                  otUWord,                   
    DBUS_TYPE_INT16_AS_STRING,DBUS_TYPE_UINT16_AS_STRING,
  //otSLong,                  otULong
-   DBUS_TYPE_INT32_AS_STRING,DBUS_TYPE_UINT32_AS_STRING);
+   DBUS_TYPE_INT32_AS_STRING,DBUS_TYPE_UINT32_AS_STRING
+{$ifdef mse_fpc_3_2}
+ //otSQWord,                 otUQWord
+   ,DBUS_TYPE_INT64_AS_STRING,DBUS_TYPE_UINT64_AS_STRING
+{$endif}   
+   );
 type
 {$ifdef mse_fpc_3_0}
  precordtypedata = ptypedata;
@@ -1208,7 +1214,12 @@ const
  //otSWord,  otUWord,                   
    dbt_int16,dbt_uint16,
  //otSLong,  otULong
-   dbt_int32,dbt_uint32);
+   dbt_int32,dbt_uint32
+{$ifdef mse_fpc_3_2}
+ //otSQWord, otUQWord
+   ,dbt_int64,dbt_uint64
+{$endif}   
+   );
 
 procedure stackarray(const source: dbusdatatyarty; var dest: dbusdatatyarty);
 var
