@@ -6020,17 +6020,29 @@ eventrestart:
   i1:= xpending(appdisp);
   if i1 > 0 then begin
    xnextevent(appdisp,@xev);
-   if (xev.xtype = keyrelease) and (i1 > 1) then begin
-    xpeekevent(appdisp,@xev2);
-    if (xev2.xtype = keypress) and 
-                 (xev.xkey.keycode = xev2.xkey.keycode) and
-                                    (xev.xkey.time = xev2.xkey.time) then begin
-     repeatkey:= xev.xkey.keycode;
-     repeatkeytime:= xev.xkey.time;
+   if (xev.xtype = keyrelease) then begin
+   {$ifdef mse_debugkey}
+    debugwriteln('repeatkey start pending:'+inttostr(i1));
+   {$endif}
+    if i1 < 2 then begin
+     xsync(appdisp,0);
+     i1:= xpending(appdisp) + 1;
     {$ifdef mse_debugkey}
-     debugwriteln('repeatkey key:'+inttostr(repeatkey)+
-                                      ' time:'+inttostr(repeatkeytime));
+     debugwriteln('repeatkey second pending:'+inttostr(i1));
     {$endif}
+    end;
+    if i1 > 1 then begin
+     xpeekevent(appdisp,@xev2);
+     if (xev2.xtype = keypress) and 
+                  (xev.xkey.keycode = xev2.xkey.keycode) and
+                                     (xev.xkey.time = xev2.xkey.time) then begin
+      repeatkey:= xev.xkey.keycode;
+      repeatkeytime:= xev.xkey.time;
+     {$ifdef mse_debugkey}
+      debugwriteln('repeatkey key:'+inttostr(repeatkey)+
+                                       ' time:'+inttostr(repeatkeytime));
+     {$endif}
+     end;
     end;
    end;
   {$ifdef mse_debugsysevent}
