@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 2011 by Martin Schreiber
+{ MSEgui Copyright (c) 2011-2018 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -13,7 +13,7 @@ unit mseglextglob;
 
 interface
 uses
- msesys,{$ifdef FPC}dynlibs,{$else}classes_del,{$endif}msedynload,
+ msedynload,{msegl,}msesys,{$ifdef FPC}dynlibs,{$else}classes_del,{$endif}
  msegraphics,msetypes;
  
 type
@@ -256,6 +256,8 @@ function mseglloadextensions(const extensions: array of glextensionty): boolean;
                   //true if ok
 var
  libgl: tlibhandle;
+
+procedure init(); //do not use, automatically called by msegl
  
 implementation
 uses
@@ -639,7 +641,13 @@ begin
  end;
 end;
 
-initialization
+procedure init();
+begin
  regglinit(@initglext);
  reggldeinit(@deinitglext);
+end;
+
+initialization
+// regglinit(@initglext);     //msegl not yet initialized
+// reggldeinit(@deinitglext);
 end.

@@ -34,7 +34,7 @@
 { Converted to Delphi by Tom Nuydens (tom@delphi3d.net)                        }
 {******************************************************************************}
 
-{ modified 2011 by Martin Schreiber }
+{ modified 2011-2018 by Martin Schreiber }
 
 
 {******************************************************************************}
@@ -57,8 +57,8 @@ unit msegl;
 interface
 
 uses
- SysUtils,msetypes,msestrings{$ifdef mswindows},windows{$endif},msedynload,
- mseglextglob;
+ SysUtils,msetypes,msestrings{$ifdef mswindows},windows{$endif},
+ msedynload,mseglextglob;
 
 const
 {$ifdef mswindows}
@@ -1571,7 +1571,8 @@ uses
 {$if defined(cpui386) or defined(cpux86_64)}
   math,
 {$ifend}
-  msesys,msedatalist{$ifdef mswindows}{$else}{$endif};
+  msesys,msedatalist{$ifdef mswindows}{$else}{$endif}{,
+  mseglextglob};
 
 {$ifdef mswindows}
 function WinChoosePixelFormat(DC: HDC; p2: PPixelFormatDescriptor): Integer;
@@ -1980,6 +1981,7 @@ end;
 
 initialization
  initializelibinfo(libinfo);
+ mseglextglob.init();
 finalization
  finalizelibinfo(libinfo);
 end.
