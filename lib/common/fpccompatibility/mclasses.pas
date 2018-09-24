@@ -1,4 +1,3 @@
-unit mclasses;
 {
     This file is part of the Free Component Library (FCL)
     Copyright (c) 1999-2000 by Michael Van Canneyt and Florian Klaempfl
@@ -15,6 +14,8 @@ unit mclasses;
  Modified 2013-2016 by Martin Schreiber
 
  **********************************************************************}
+
+unit mclasses;
 {$ifdef FPC}
  {$mode objfpc}
  {$h+}
@@ -32,6 +33,14 @@ unit mclasses;
 {$if FPC_FULLVERSION >= 030100} {$define mse_fpc_3_2} {$endif}
 
 interface
+{$ifndef mse_allwarnings}
+ {$if fpc_fullversion >= 030100}
+  {$warn 5089 off}
+  {$warn 5090 off}
+  {$warn 5093 off}
+  {$warn 6058 off}
+ {$endif}
+{$endif}
 
 uses
  classes,typinfo,sysutils,msetypes,msesystypes {$ifndef FPC},classes_del{$endif};
@@ -1149,7 +1158,6 @@ Const
 {$endif}
 
 implementation
-
 uses
  {$ifdef MSWINDOWS}windows,{$endif}rtlconsts,msesysintf,msesys;
 

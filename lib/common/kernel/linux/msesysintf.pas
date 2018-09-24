@@ -7,8 +7,7 @@
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 }
-unit msesysintf; //i386-linux
-
+unit msesysintf; //linux, freebsd
 {$ifdef FPC}{$mode objfpc}{$h+}{$interfaces corba}{$endif}
 
 {$ifdef mse_debuglock}
@@ -18,6 +17,15 @@ unit msesysintf; //i386-linux
  {$define mse_debugmutex}
 {$endif}
 interface
+{$ifndef mse_allwarnings}
+ {$if fpc_fullversion > 030100}
+  {$warn 5089 off}
+  {$warn 5090 off}
+  {$warn 5093 off}
+  {$warn 6058 off}
+ {$endif}
+{$endif}
+
 uses
  msesys,msesystypes,msesetlocale,{$ifdef FPC}cthreads,cwstring,{$endif}msetypes,
  mselibc,msectypes,

@@ -8,7 +8,6 @@
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 }
 unit msestrings; 
-
 {$ifdef FPC}
  {$if defined(FPC) and (fpc_fullversion >= 020501)}
   {$define mse_fpc_2_6} 
@@ -31,6 +30,15 @@ unit msestrings;
 {$ifdef FPC}{$mode objfpc}{$h+}{$interfaces corba}{$goto on}{$endif}
 
 interface
+{$ifndef mse_allwarnings}
+ {$if fpc_fullversion >= 030100}
+  {$warn 5089 off}
+  {$warn 5090 off}
+  {$warn 5093 off}
+  {$warn 6058 off}
+ {$endif}
+{$endif}
+
 uses
  classes,mclasses,msetypes{$ifdef FPC},strings{$endif},typinfo,sysutils;
 {$ifdef FPC}

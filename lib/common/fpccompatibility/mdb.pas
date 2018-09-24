@@ -20,7 +20,15 @@ unit mdb;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 
 interface
- 
+{$ifndef mse_allwarnings}
+ {$if fpc_fullversion >= 030100}
+  {$warn 5089 off}
+  {$warn 5090 off}
+  {$warn 5093 off}
+  {$warn 6058 off}
+ {$endif}
+{$endif}
+
 uses
  classes,mclasses,sysutils,variants,fmtbcd,maskutils,msetypes,mseifiglob,
  msestrings
@@ -2336,7 +2344,6 @@ function BuffersEqual(Buf1, Buf2: Pointer; Size: Integer): Boolean;
 function SkipComments(var p: PChar; EscapeSlash, EscapeRepeat : Boolean) : boolean;
 
 implementation
-
 uses
  {$ifdef FPC}dbconst{$else}dbconst_del{$endif},typinfo,msearrayutils;
 resourcestring

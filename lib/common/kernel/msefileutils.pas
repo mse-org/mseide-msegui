@@ -8,10 +8,18 @@
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 }
 unit msefileutils;
-
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 
 interface
+{$ifndef mse_allwarnings}
+ {$if fpc_fullversion >= 030100}
+  {$warn 5089 off}
+  {$warn 5090 off}
+  {$warn 5093 off}
+  {$warn 6058 off}
+ {$endif}
+{$endif}
+
 uses
  msesysintf,msearrayutils,msedatalist,msesystypes,msesys,msebits,msetypes,
  msestream,msestrings;
@@ -300,7 +308,6 @@ function msegettempdir: filenamety;
 function msegettempfilename(const aname: filenamety): filenamety;
 
 implementation
-
 uses
  sysutils,msedate,mseprocutils,mseformatstr;
 

@@ -8,7 +8,6 @@
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 }
 unit mseprocutils;
-
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 {$ifndef FPC}{$ifdef linux} {$define UNIX} {$endif}{$endif}
 {$if fpc_fullversion >= 30000}
@@ -16,6 +15,15 @@ unit mseprocutils;
 {$endif}
 
 interface
+{$ifndef mse_allwarnings}
+ {$if fpc_fullversion >= 030100}
+  {$warn 5089 off}
+  {$warn 5090 off}
+  {$warn 5093 off}
+  {$warn 6058 off}
+ {$endif}
+{$endif}
+
 uses
  {$ifdef mswindows}windows{$else}mselibc{$endif},
  msetypes,msestream,msepipestream,sysutils,msesysutils,msesystypes,msesys,

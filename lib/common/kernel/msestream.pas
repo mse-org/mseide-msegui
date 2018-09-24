@@ -20,8 +20,17 @@ unit msestream;
 {$ifdef FPC}{$mode objfpc}{$h+}{$goto on}{$endif}
 {$ifndef FPC}{$ifdef linux} {$define UNIX} {$endif}{$endif}
 
-// {$WARN SYMBOL_PLATFORM off}
+
 interface
+{$ifndef mse_allwarnings}
+ {$if fpc_fullversion >= 030100}
+  {$warn 5089 off}
+  {$warn 5090 off}
+  {$warn 5093 off}
+  {$warn 6058 off}
+ {$endif}
+{$endif}
+
 uses 
  classes,mclasses,sysutils,msestrings,msetypes,msethread,msesystypes,msesys,
  msereal,mseevent,mseclasses,mseglob{,mseformatstr};
@@ -529,7 +538,6 @@ function trywritefiledatastring(const afilename: filenamety;
                                     const adata: string): syserrorty;
 
 implementation
-
 uses
  msefileutils,msebits,{msegui,}sysconst,msesysutils,
  msesysintf1,msesysintf,mseformatstr,msefloattostr,

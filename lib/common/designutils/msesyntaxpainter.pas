@@ -8,7 +8,6 @@
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 }
 unit msesyntaxpainter;
-
 (*
 
 sdef file =
@@ -102,6 +101,14 @@ ENDTOKENS newline
 {$ifdef FPC}{$mode objfpc}{$h+}{$GOTO ON}{$endif}
 
 interface
+{$ifndef mse_allwarnings}
+ {$if fpc_fullversion >= 030100}
+  {$warn 5089 off}
+  {$warn 5090 off}
+  {$warn 5093 off}
+  {$warn 6058 off}
+ {$endif}
+{$endif}
 
 uses
  classes,mclasses,msestrings,mserichstring,msedatalist,

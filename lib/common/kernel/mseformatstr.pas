@@ -8,6 +8,14 @@
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 }
 unit mseformatstr;     //stringwandelroutinen 31.5.99 mse
+{$ifndef mse_allwarnings}
+ {$if fpc_fullversion >= 030100}
+  {$warn 5089 off}
+  {$warn 5090 off}
+  {$warn 5093 off}
+  {$warn 6058 off}
+ {$endif}
+{$endif}
 
 {$ifdef FPC}{$mode objfpc}{$h+}{$interfaces corba}{$goto on}{$endif}
 
@@ -538,7 +546,6 @@ const
  $ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff);//f0
 
 implementation
-
 uses
  sysconst,msedate,msereal,Math,msefloattostr,msearrayutils,msesys,msebits,
  formatfunc;

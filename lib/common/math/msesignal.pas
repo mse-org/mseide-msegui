@@ -16,6 +16,15 @@
 unit msesignal;
 {$ifdef FPC}{$mode objfpc}{$h+}{$interfaces corba}{$endif}
 interface
+{$ifndef mse_allwarnings}
+ {$if fpc_fullversion >= 030100}
+  {$warn 5089 off}
+  {$warn 5090 off}
+  {$warn 5093 off}
+  {$warn 6058 off}
+ {$endif}
+{$endif}
+
 uses
  msedatalist,mseclasses,classes,mclasses,msetypes,msearrayprops,mseevent,msehash,
  msesystypes,msereal,msetimer,mseglob;
