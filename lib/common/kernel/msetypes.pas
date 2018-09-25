@@ -433,7 +433,7 @@ type
  end;
 
 // winidty = cardinal;
- winidty = ptruint;
+ winidty = type ptruint; //used in published event properties
  winidarty = array of winidty;
  winidaty = array[0..0] of winidty;
  pwinidaty = ^winidaty;

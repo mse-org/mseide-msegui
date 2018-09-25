@@ -1,5 +1,9 @@
 MSEide+MSEgui breaking changes version history
 **********************************************
+2018-09-25
+ winidty = ptruint ->  winidty = type ptruint. Existing IDE generated 
+ eventhandlers with winidty parameter (createwinideventty, destroywinideventty)
+ must be updated (longword/qword -> winidty).
 2018-09-23
  singlekeyshiftstatesmask->shiftstatesrepeatmask.
 2018-09-14
