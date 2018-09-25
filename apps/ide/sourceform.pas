@@ -708,16 +708,47 @@ end;
 
 procedure tsourcefo.formonidle(var again: boolean);
 
+var
+ all: boolean;
+ noall: boolean;
+ 
  function ask(const filepath: filenamety; const modified: boolean): boolean;
  var
   mstr1: msestring;
  begin
-  mstr1:= c[ord(str_file)]+filepath+c[ord(haschanged)];
-  if modified then begin
-   mstr1:= mstr1 + ' '+ c[ord(modieditalso)];
+  if noall then begin
+   result:= false;
+  end
+  else begin
+   if all and not modified then begin
+    result:= true;
+   end
+   else begin
+    mstr1:= c[ord(str_file)]+filepath+c[ord(haschanged)];
+    if modified then begin
+     mstr1:= mstr1 + ' '+ c[ord(modieditalso)];
+     mstr1:= mstr1 + ' '+c[ord(wishreload)];
+     result:= askyesno(mstr1,c[ord(confirmation)]);
+    end
+    else begin
+     result:= false;
+     mstr1:= mstr1 + ' '+c[ord(wishreload)];
+     case showmessage(mstr1,c[ord(confirmation)],
+                     [mr_yes,mr_all,mr_no,mr_noall],mr_yes) of
+      mr_yes: begin
+       result:= true;
+      end;
+      mr_all: begin
+       result:= true;
+       all:= true;
+      end;
+      mr_noall: begin
+       noall:= true;
+      end;
+     end;
+    end;
+   end;
   end;
-  mstr1:= mstr1 + ' '+c[ord(wishreload)];
-  result:= askok(mstr1,c[ord(confirmation)]);
  end;
 
 var
@@ -733,6 +764,8 @@ begin
                (application.modallevel = 0) and 
                            (application.keyboardcapturewidget = nil) then begin
   fasking:= true;
+  all:= false;
+  noall:= false;
   try
    for int1:= 0 to count - 1 do begin
     with items[int1] do begin
@@ -781,6 +814,8 @@ begin
      end;
     end;
    end;
+   all:= false;
+   noall:= false;
    for int1:= 0 to designer.modules.count - 1 do begin
     po1:= designer.modules.itempo[int1];
     with po1^ do begin
