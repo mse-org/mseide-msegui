@@ -95,7 +95,7 @@ const
   '&No',       //mr_no
   '&All',      //mr_all
   'Yes &all',  //mr_yesall
-  'No all',    //mr_noall
+  'N&o all',   //mr_noall
   '&Ignore',   //mr_ignore
   '&Skip',     //mr_skip
   'Skip a&ll', //mr_skipall

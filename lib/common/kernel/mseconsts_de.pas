@@ -33,8 +33,8 @@ const
   'A&lle',       //mr_all
   'Ja a&lle',    //mr_yesall
   'N&ein alle',  //mr_noall
-  '&Ignorieren',  //mr_ignore
-  #0220'bers&pringen',    //mr_skip
+  '&Ignorieren', //mr_ignore
+  #0220'bers&pringen',         //mr_skip
   'Alles '#0252'&berspringen', //mr_skipall
   '&Fortfahren'  //mr_continue
   );
