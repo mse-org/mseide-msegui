@@ -188,8 +188,9 @@ type
    procedure internalsetwidgetrect(Value: rectty;
                        const windowevent: boolean); override;
    procedure clientrectchanged; override;
-   procedure updatewindowinfo(var info: windowinfoty); override;
+   procedure rootchanged(const aflags: rootchangeflagsty) override;
    procedure setparentwidget(const Value: twidget); override;
+   procedure updatewindowinfo(var info: windowinfoty); override;
    function isgroupleader: boolean; override;
 
    procedure readstate(reader: treader); override;
@@ -1894,8 +1895,23 @@ begin
  getwindowicon(ficon,info.icon,info.iconmask);
 end;
 
+procedure tcustommseform.rootchanged(const aflags: rootchangeflagsty);
+begin
+ inherited;
+ if (rcf_windowset in aflags) and 
+        (foptions * [fo_main,fo_globalshortcuts] = 
+                             [fo_main,fo_globalshortcuts]) then begin
+  window.globalshortcuts:= true;
+ end;
+end;
+
 procedure tcustommseform.setparentwidget(const Value: twidget);
 begin
+ if (value = nil) and (fparentwidget <> nil) and (fwindow <> nil) and
+        (foptions * [fo_main,fo_globalshortcuts] = 
+                             [fo_main,fo_globalshortcuts]) then begin
+  fwindow.globalshortcuts:= false; //restore
+ end;
  if fframe <> nil then begin
   exclude(tcustomframe1(fframe).fstate,fs_rectsvalid);
  end;
