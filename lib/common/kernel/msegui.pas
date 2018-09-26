@@ -17777,7 +17777,7 @@ end;
 
 function twindow.getlocalshortcuts: boolean;
 begin
- result:= tws_globalshortcuts in fstate;
+ result:= tws_localshortcuts in fstate;
 end;
 
 procedure twindow.setlocalshortcuts(const Value: boolean);
