@@ -1560,7 +1560,7 @@ begin
  p1:= pdbusitemhashdataty(add(key));
  p1^.data.data.kind:= dbk_watch;
  result:= @p1^.data.data.watch;
- msearrayutils.additem(fwatches,getdataoffs(result));
+ msearrayutils.additem(longwordarty(fwatches),getdataoffs(result));
  with result^ do begin
   flags:= [];
   watch:= key;
