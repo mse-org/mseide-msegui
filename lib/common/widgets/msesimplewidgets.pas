@@ -1520,6 +1520,7 @@ begin
   outertopaintsize(asize);
 //  innertopaintsize(asize);
  end;
+ inherited; //check min/max size
 end;
 
 procedure tcustombutton.clientrectchanged;

@@ -20,6 +20,7 @@ object stringenterfo: tstringenterfo
     70
   )
   options = [fo_screencentered, fo_closeonesc, fo_localshortcuts, fo_autoreadstat, fo_autowritestat]
+  windowopacity = -Inf
   onlayout = layoutexe
   moduleclassname = 'tmseform'
   object lab: tlabel
@@ -29,24 +30,22 @@ object stringenterfo: tstringenterfo
     bounds_x = 7
     bounds_y = 12
     bounds_cx = 384
-    bounds_cy = 14
+    bounds_cy = 16
     anchors = [an_left, an_top, an_right]
     caption = 'lab'
     textflags = [tf_ycentered, tf_wordbreak]
   end
   object tlayouter1: tlayouter
-    optionswidget = [ow_tabfocus, ow_parenttabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_destroywidgets]
     bounds_x = 8
-    bounds_y = 34
+    bounds_y = 36
     bounds_cx = 383
-    bounds_cy = 20
+    bounds_cy = 22
     anchors = [an_left, an_top, an_right]
     optionsscale = [osc_expandy, osc_shrinky, osc_expandshrinkx, osc_expandshrinky]
     optionslayout = [lao_placex, lao_aligny]
     align_glue = wam_start
     place_mindist = 8
     place_maxdist = 8
-    place_mode = wam_end
     place_options = [plo_endmargin]
     linktop = lab
     dist_top = 8
@@ -54,29 +53,29 @@ object stringenterfo: tstringenterfo
       optionswidget1 = [ow1_fontglyphheight, ow1_autoscale, ow1_autowidth, ow1_autosizeanright]
       optionswidget = [ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
       taborder = 2
-      bounds_x = 331
+      bounds_x = 333
       bounds_y = 0
-      bounds_cx = 52
-      bounds_cy = 20
+      bounds_cx = 50
+      bounds_cy = 22
       bounds_cxmin = 50
       state = [as_localcaption]
       caption = '&Cancel'
       modalresult = mr_cancel
-      reffontheight = 14
+      reffontheight = 16
     end
     object ok: tbutton
       optionswidget1 = [ow1_fontglyphheight, ow1_autoscale, ow1_autowidth]
       optionswidget = [ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
       taborder = 1
-      bounds_x = 273
+      bounds_x = 275
       bounds_y = 0
       bounds_cx = 50
-      bounds_cy = 20
+      bounds_cy = 22
       bounds_cxmin = 50
       state = [as_default, as_localdefault, as_localcaption]
       caption = '&OK'
       modalresult = mr_ok
-      reffontheight = 14
+      reffontheight = 16
     end
     object value: tstringedit
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
@@ -84,11 +83,12 @@ object stringenterfo: tstringenterfo
       frame.localprops1 = []
       bounds_x = 0
       bounds_y = 0
-      bounds_cx = 265
+      bounds_cx = 267
+      bounds_cy = 22
       anchors = [an_left, an_top, an_right]
       optionsedit1 = [oe1_autopopupmenu, oe1_keyexecute, oe1_savevalue, oe1_savestate]
       optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick]
-      reffontheight = 14
+      reffontheight = 16
     end
   end
 end

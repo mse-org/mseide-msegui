@@ -2384,6 +2384,7 @@ type
    procedure innertopaintsize(var asize: sizety);
    procedure outertopaintsize(var asize: sizety);
    procedure painttowidgetsize(var asize: sizety);
+   procedure widgettopaintsize(var asize: sizety);
 
    property frame: tcustomframe read getframe write setframe;
    property face: tcustomface read getface write setface;
@@ -8716,7 +8717,7 @@ begin
   bounds_cx:= int1;
  end;
 end;
- 
+
 procedure twidget.placexorder(const startx: integer; const dist: array of integer;
                 const awidgets: array of twidget; const endmargin: integer = minint);
                //origin = clientpos, endmargin by size adjust of widgets 
@@ -8728,6 +8729,9 @@ var
  ar1: integerarty;
  bo1: boolean;
 begin
+{$ifdef mse_debuglayout}
+ debugwriteln('**placexorder '+inttostr(bounds_cx)+' '+name);
+{$endif}
  if (high(awidgets) >= 0) then begin
   widget1:= awidgets[0].fparentwidget;
   if widget1 <> nil then begin
@@ -8747,6 +8751,12 @@ begin
      end;
     end;
     int2:= int2 + int5 + awidgets[int1].fwidgetrect.cx;
+   {$ifdef mse_debuglayout}
+    debugwriteln(' '+inttostr(ar1[int1])+' '+
+                 inttostr(awidgets[int1].bounds_cx)+' '+
+                 inttostr(ar1[int1]+awidgets[int1].bounds_cx)+' '+
+                                                   awidgets[int1].name);
+   {$endif}
    end;
    if endmargin <> minint then begin
     int2:= ar1[high(awidgets)] + awidgets[high(awidgets)].fwidgetrect.cx + 
@@ -8757,10 +8767,17 @@ begin
    end;
    int4:= 0;
    size1.cy:= 0;
+  {$ifdef mse_debuglayout}
+   debugwriteln(' marginsaldo '+inttostr(int2));
+  {$endif}
    for int1:= 0 to high(awidgets) do begin
     with awidgets[int1] do begin
      bo1:= ws1_layoutplacing in fwidgetstate1;
      try
+     {$ifdef mse_debuglayout}
+      debugwriteln(' a '+inttostr(bounds_x)+' '+inttostr(bounds_cx)+' '+
+                       inttostr(bounds_x+bounds_cx)+' '+name);
+     {$endif}
       include(fwidgetstate1,ws1_layoutplacing);
       bounds_x:= ar1[int1] + int4;
       if anchors * [an_left,an_right] = [an_left,an_right] then begin
@@ -8774,6 +8791,10 @@ begin
        int2:= int2 + int3;
        int4:= int4 + int3;
       end;
+     {$ifdef mse_debuglayout}
+      debugwriteln(' b '+inttostr(bounds_x)+' '+inttostr(bounds_cx)+' '+
+                       inttostr(bounds_x+bounds_cx)+' '+name);
+     {$endif}
      finally
       if not bo1 then begin
        exclude(fwidgetstate1,ws1_layoutplacing);
@@ -12163,6 +12184,17 @@ begin
  end; 
 end;
 
+procedure twidget.widgettopaintsize(var asize: sizety);
+begin
+ if fframe <> nil then begin
+  with fframe do begin
+   checkstate;
+   asize.cx:= asize.cx - (fpaintframe.left + fpaintframe.right);
+   asize.cy:= asize.cy - (fpaintframe.top + fpaintframe.bottom);
+  end;
+ end; 
+end;
+
 function twidget.clientparentpos: pointty;
         //origin = parentwidget.pos
 begin
@@ -15488,7 +15520,9 @@ end;
 
 procedure twidget.getautopaintsize(var asize: sizety);
 begin
- //default
+ painttowidgetsize(asize);
+ checkwidgetsize(asize);
+ widgettopaintsize(asize);
 end;
 
 procedure twidget.getautocellsize(const acanvas: tcanvas;
