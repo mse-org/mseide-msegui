@@ -242,10 +242,13 @@ type
   TProviderFlags = set of TProviderFlag deprecated;
 {$pop}  
 
-  optionfieldty = (of_readonly,of_required,of_visible,of_filter,of_find,
+  optionfieldty = (of_readonly,of_required,of_visible,
+                 of_filter,of_filtermin,of_filtermax,of_find,
                  of_initinsert,of_initcopy,of_nocopyrecord,of_nomodified,
                  of_ininsert,of_inupdate,of_inwhere,of_inkey,of_hidden,
-                 of_refreshinsert,of_refreshupdate);
+                 of_refreshinsert,of_refreshupdate,
+                 of_user0,of_user1,of_user2,of_user3,
+                 of_user4,of_user5,of_user6,of_user7);
   optionsfieldty = set of optionfieldty;
 const
  defaultoptionsfield = [of_visible,of_ininsert,of_inupdate,of_inwhere];
