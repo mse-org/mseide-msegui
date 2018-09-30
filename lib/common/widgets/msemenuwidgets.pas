@@ -408,6 +408,10 @@ begin
   checkboxheight:= menucheckboxheight;
   if checkboxframetemplate <> nil then begin
    with checkboxframetemplate do begin
+    if fso_flat in optionsskin then begin
+     dec(checkboxwidth,2);
+     dec(checkboxheight,2);
+    end;
     size1:= innerframedim();
     size1.cx:= size1.cx + frameo_left + frameo_right;
     size1.cy:= size1.cy + frameo_top + frameo_bottom;

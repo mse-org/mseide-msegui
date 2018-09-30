@@ -1510,6 +1510,10 @@ begin
   widthextend:= menucheckboxwidth;
   if info.checkboxframe <> nil then begin
    with info.checkboxframe do begin
+    if fso_flat in optionsskin then begin
+     dec(int1,2);
+     dec(widthextend,2);
+    end;
     size1:= innerframedim;
     widthextend:= widthextend + frameo_left + frameo_right + size1.cx;
     int1:= int1 + size1.cy + frameo_top + frameo_bottom;
