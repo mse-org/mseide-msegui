@@ -1500,18 +1500,22 @@ var
  co1: colorty;
  framestates: framestateflagsty;
  size1: sizety;
+ widthextend: int32;
 begin
  framestates:= [];
  result:= [shs_checkbox,shs_radiobutton] * info.state <> [];
  if result then begin
   rect1:= arect;
-  rect1.cx:= menucheckboxwidth;
   int1:= menucheckboxheight;
+  widthextend:= menucheckboxwidth;
   if info.checkboxframe <> nil then begin
-   size1:= info.checkboxframe.innerframedim;
-   rect1.cx:= rect1.cx + size1.cx;
-   int1:= int1 + size1.cy;
+   with info.checkboxframe do begin
+    size1:= innerframedim;
+    widthextend:= widthextend + frameo_left + frameo_right + size1.cx;
+    int1:= int1 + size1.cy + frameo_top + frameo_bottom;
+   end;
   end;
+  rect1.cx:= widthextend;
   if int1 < arect.cy then begin
    rect1.cy:= int1;
    rect1.y:= rect1.y + (arect.cy - int1) div 2;
@@ -1521,6 +1525,7 @@ begin
   end;
   if info.checkboxframe <> nil then begin
    framestates:= combineframestateflags(info.state);
+   deflaterect1(rect1,info.checkboxframe.frameo);
    info.checkboxframe.paintbackgroundframe(canvas,rect1,framestates);
    rect2:= deflaterect(rect1,info.checkboxframe.innerframe);
   end
@@ -1532,9 +1537,9 @@ begin
    draw3dframe(canvas,rect2,-1,defaultframecolors.edges,[]);
   end;
   if pos = ip_left then begin
-   inc(arect.x,menucheckboxwidth);
+   inc(arect.x,widthextend);
   end;
-  dec(arect.cx,menucheckboxwidth);
+  dec(arect.cx,widthextend);
   if shs_checked in info.state then begin
    if shs_disabled in info.state then begin
     align1:= [al_xcentered,al_ycentered,al_grayed];
