@@ -10,6 +10,14 @@
 unit mseifigui;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
+{$ifndef mse_allwarnings}
+ {$if fpc_fullversion >= 030100}
+  {$warn 5089 off}
+  {$warn 5090 off}
+  {$warn 5093 off}
+  {$warn 6058 off}
+ {$endif}
+{$endif}
 uses
  classes,mclasses,mseclasses,mseguiglob,mseifiglob,mseifi,mseact,msegui,typinfo,
  msestrings,mseapplication,mseforms,msedatanodes,msedataedits,
@@ -155,6 +163,15 @@ type
 implementation
 uses
  sysutils,msestream,msesysutils,msetmpmodules,mseeditglob,mselistbrowser;
+{$ifndef mse_allwarnings}
+ {$if fpc_fullversion >= 030100}
+  {$warn 5089 off}
+  {$warn 5090 off}
+  {$warn 5093 off}
+  {$warn 6058 off}
+ {$endif}
+{$endif}
+
 type
  tcustommodulelink1 = class(tcustommodulelink);
  tdatacols1 = class(tdatacols);

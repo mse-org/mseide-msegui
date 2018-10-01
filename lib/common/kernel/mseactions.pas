@@ -15,6 +15,14 @@ unit mseactions;
  {$define mse_with_ifi}
 {$endif}
 interface
+{$ifndef mse_allwarnings}
+ {$if fpc_fullversion >= 030100}
+  {$warn 5089 off}
+  {$warn 5090 off}
+  {$warn 5093 off}
+  {$warn 6058 off}
+ {$endif}
+{$endif}
 uses
  classes,mclasses,mseact,mseglob,mseguiglob,msegui,mseevent,mseclasses,msebitmap,
  msekeyboard,msetypes,msestrings,msearrayprops,msestatfile,msestat,
@@ -442,6 +450,15 @@ implementation
 uses
  sysutils,mserichstring,msestream,typinfo,mseformatstr,msestreaming,
  msestockobjects,mseassistiveserver,msearrayutils;
+{$ifndef mse_allwarnings}
+ {$if fpc_fullversion >= 030100}
+  {$warn 5089 off}
+  {$warn 5090 off}
+  {$warn 5093 off}
+  {$warn 6058 off}
+ {$endif}
+{$endif}
+
 type
  twidget1 = class(twidget);
   

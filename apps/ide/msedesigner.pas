@@ -19,6 +19,14 @@ unit msedesigner;
 {$ifdef FPC}{$mode objfpc}{$h+}{$interfaces corba}{$endif}
 
 interface
+{$ifndef mse_allwarnings}
+ {$if fpc_fullversion >= 030100}
+  {$warn 5089 off}
+  {$warn 5090 off}
+  {$warn 5093 off}
+  {$warn 6058 off}
+ {$endif}
+{$endif}
 uses
  classes,mclasses,msegraphutils,mseglob,mseguiglob,msedesignintf,
  mseforms,mselist,msearrayutils,msebitmap,msetypes,sysutils,msehash,mseclasses,
@@ -634,7 +642,6 @@ function isdatasubmodule(const acomponent: tobject;
                          const both: boolean = false): boolean;
 
 implementation
-
 uses
  msestream,msefileutils,
 // {$ifdef mswindows}windows{$else}mselibc{$endif},
@@ -643,6 +650,14 @@ uses
  pascaldesignparser,msearrayprops,rtlconsts,msedatamodules,
  msesimplewidgets,msesysutils,mseobjecttext,msestreaming,msedatanodes,main,
  actionsmodule,mseeditglob;
+{$ifndef mse_allwarnings}
+ {$if fpc_fullversion >= 030100}
+  {$warn 5089 off}
+  {$warn 5090 off}
+  {$warn 5093 off}
+  {$warn 6058 off}
+ {$endif}
+{$endif}
 
 const
  renewbackuptag = 0;

@@ -29,8 +29,15 @@ unit mmysqlconn;
 {$endif}
 
 interface
-
 uses
+{$ifndef mse_allwarnings}
+ {$if fpc_fullversion >= 030100}
+  {$warn 5089 off}
+  {$warn 5090 off}
+  {$warn 5093 off}
+  {$warn 6058 off}
+ {$endif}
+{$endif}
   classes,mclasses,SysUtils,msqldb,mdb,{$ifdef FPC}dynlibs,{$endif}msestrings,
   msedb,mysqldyn,msetypes,msectypes;
 
@@ -237,6 +244,15 @@ uses
  {$ifdef FPC}dbconst{$else}dbconst_del,classes_del{$endif},
  msebufdataset,typinfo,dateutils,msefileutils,msedatabase,msedynload,
  msesqlresult;
+{$ifndef mse_allwarnings}
+ {$if fpc_fullversion >= 030100}
+  {$warn 5089 off}
+  {$warn 5090 off}
+  {$warn 5093 off}
+  {$warn 6058 off}
+ {$endif}
+{$endif}
+
 type
  tmsebufdataset1 = class(tmsebufdataset);
 var

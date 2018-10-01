@@ -13,6 +13,14 @@ unit msegdbutils;
 {$ifndef FPC}{$ifdef linux} {$define UNIX} {$endif}{$endif}
 //{$define mse_usedebugbreakprocess}
 interface
+{$ifndef mse_allwarnings}
+ {$if fpc_fullversion >= 030100}
+  {$warn 5089 off}
+  {$warn 5090 off}
+  {$warn 5093 off}
+  {$warn 6058 off}
+ {$endif}
+{$endif}
 uses
  msestream,mseclasses,classes,mclasses,msetypes,mseevent,msehash,msepipestream,
  msestrings,mseapplication,msegui,msedatalist,msesystypes,mseprocess;
@@ -686,12 +694,20 @@ type
 procedure localizetext;
 
 implementation
-
 uses
  sysutils,mseformatstr,mseprocutils,msesysutils,msefileutils,msemacros,
  msebits,msesysintf,msesysintf1,mseguiintf,msearrayutils,msesys,msedate,
  actionsmodule
         {$ifdef UNIX},mselibc{$else},windows,msedynload{$endif};
+{$ifndef mse_allwarnings}
+ {$if fpc_fullversion >= 030100}
+  {$warn 5089 off}
+  {$warn 5090 off}
+  {$warn 5093 off}
+  {$warn 6058 off}
+ {$endif}
+{$endif}
+
 {$ifdef mswindows}
  {$ifdef mse_usedebugbreakprocess}
 var

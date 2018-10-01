@@ -13,6 +13,14 @@ unit msecommport;
 {$ifndef FPC}{$ifdef linux} {$define UNIX} {$endif}{$endif}
 
 interface
+{$ifndef mse_allwarnings}
+ {$if fpc_fullversion >= 030100}
+  {$warn 5089 off}
+  {$warn 5090 off}
+  {$warn 5093 off}
+  {$warn 6058 off}
+ {$endif}
+{$endif}
 uses {$ifdef mswindows} windows,{$ifndef FPC} mmsystem,{$endif}
      {$else} mselibc,
      {$endif}
@@ -466,6 +474,14 @@ uses
 // {$ifdef UNIX} {kernelioctl,}msesysbindings, {$endif}
  sysutils,mseapplication,msesysintf1,msesysintf,msesys,msesysutils,
  msepipestream,msefileutils,mseformatstr;
+{$ifndef mse_allwarnings}
+ {$if fpc_fullversion >= 030100}
+  {$warn 5089 off}
+  {$warn 5090 off}
+  {$warn 5093 off}
+  {$warn 6058 off}
+ {$endif}
+{$endif}
 
 const
  asciipufferlaenge = 255;

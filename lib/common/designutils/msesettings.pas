@@ -134,6 +134,14 @@ function editsettings(const acaption: msestring = '';
 implementation
 uses
  msesettings_mfm,classes,mclasses,msesysintf,msefileutils,mseshortcutdialog;
+{$ifndef mse_allwarnings}
+ {$if fpc_fullversion >= 030100}
+  {$warn 5089 off}
+  {$warn 5090 off}
+  {$warn 5093 off}
+  {$warn 6058 off}
+ {$endif}
+{$endif}
  
 function getsettingsmacros1(var amacros: settingsmacrosty): macroinfoarty;
 var

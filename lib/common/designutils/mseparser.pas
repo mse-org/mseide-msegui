@@ -467,6 +467,14 @@ implementation
 uses
  sysutils,mseformatstr,msedatalist,typinfo,msebits,msewidgets,
  msefileutils,msearrayutils,mseapplication;
+{$ifndef mse_allwarnings}
+ {$if fpc_fullversion >= 030100}
+  {$warn 5089 off}
+  {$warn 5090 off}
+  {$warn 5093 off}
+  {$warn 6058 off}
+ {$endif}
+{$endif}
 
 type
  treader1 = class(treader);

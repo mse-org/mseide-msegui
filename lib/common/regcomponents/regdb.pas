@@ -23,6 +23,14 @@ uses
  classes,mclasses,typinfo,msesqldb,msedbedit,msepropertyeditors,msedb,
  mseclasses,msetypes,msestrings,
  mseglob,mseguiglob,msegui,msedatabase,msesqlresult,msedesignintf;
+{$ifndef mse_allwarnings}
+ {$if fpc_fullversion >= 030100}
+  {$warn 5089 off}
+  {$warn 5090 off}
+  {$warn 5093 off}
+  {$warn 6058 off}
+ {$endif}
+{$endif}
  
 type
  tdbfieldnamepropertyeditor = class(tstringpropertyeditor)
@@ -152,6 +160,14 @@ uses
  msedbcalendardatetimeedit,msemacros,
  regwidgets,msebufdataset,msedbevents,msesqlite3conn,msqldb,msemysqlconn,
  msedblookup;
+{$ifndef mse_allwarnings}
+ {$if fpc_fullversion >= 030100}
+  {$warn 5089 off}
+  {$warn 5090 off}
+  {$warn 5093 off}
+  {$warn 6058 off}
+ {$endif}
+{$endif}
 
 type
  tpropertyeditor1 = class(tpropertyeditor);

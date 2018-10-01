@@ -26,7 +26,6 @@ interface
   {$warn 6058 off}
  {$endif}
 {$endif}
-
 uses
  mseforms,msewidgets,msegrids,msewidgetgrid,classes,mclasses,mseclasses,
  msepropertyeditors,mseglob,mseguiglob,msearrayutils,msedragglob,msegui,mseedit,
@@ -257,6 +256,15 @@ uses
  objectinspector_mfm,sysutils,msearrayprops,actionsmodule,mseformatstr,
  msebitmap,msedrag,mseeditglob,msestockobjects,msedropdownlist,
  sourceupdate,sourceform,msekeyboard,main,msedatalist,msecolordialog;
+
+{$ifndef mse_allwarnings}
+ {$if fpc_fullversion >= 030100}
+  {$warn 5089 off}
+  {$warn 5090 off}
+  {$warn 5093 off}
+  {$warn 6058 off}
+ {$endif}
+{$endif}
 
 const
  ado_rereadprops = 1;  //asyncevent codes

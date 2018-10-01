@@ -12,6 +12,14 @@ unit msebitmap;
 {$ifdef FPC}{$mode objfpc}{$h+}{$interfaces corba}{$endif}
 
 interface
+{$ifndef mse_allwarnings}
+ {$if fpc_fullversion >= 030100}
+  {$warn 5089 off}
+  {$warn 5090 off}
+  {$warn 5093 off}
+  {$warn 6058 off}
+ {$endif}
+{$endif}
 uses
  classes,mclasses,msegraphics,msetypes,msestrings,mseinterfaces,
  msegraphutils,mseclasses,mseglob,sysutils,mseguiglob;
@@ -592,6 +600,14 @@ uses
  mseguiintf,msebits,msestream,mseevent,msesys,msearrayutils,msegraphicstream,
  rtlconsts
  {$ifndef FPC},classes_del{$endif};
+{$ifndef mse_allwarnings}
+ {$if fpc_fullversion >= 030100}
+  {$warn 5089 off}
+  {$warn 5090 off}
+  {$warn 5093 off}
+  {$warn 6058 off}
+ {$endif}
+{$endif}
 
 type
  tsimplebitmap1 = class(tsimplebitmap);

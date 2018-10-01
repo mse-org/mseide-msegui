@@ -18,7 +18,14 @@ unit mpqconnection;
 {$Define LinkDynamically}
 
 interface
-
+{$ifndef mse_allwarnings}
+ {$if fpc_fullversion >= 030100}
+  {$warn 5089 off}
+  {$warn 5090 off}
+  {$warn 5093 off}
+  {$warn 6058 off}
+ {$endif}
+{$endif}
 uses
   classes,mclasses,SysUtils, msqldb, mdb,
   {$ifdef FPC}dbconst{$else}dbconst_del{$endif},
@@ -187,10 +194,17 @@ type
   end;
 
 implementation
-
 uses
  math,msestream,msedatalist,mseformatstr,msedatabase,msectypes,msestrings,
  variants,msevariants,msesqlresult{$ifndef FPC},classes_del{$endif};
+{$ifndef mse_allwarnings}
+ {$if fpc_fullversion >= 030100}
+  {$warn 5089 off}
+  {$warn 5090 off}
+  {$warn 5093 off}
+  {$warn 6058 off}
+ {$endif}
+{$endif}
 
 ResourceString
   SErrRollbackFailed = 'Rollback transaction failed';

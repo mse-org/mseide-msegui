@@ -24,6 +24,14 @@
 
 unit memds;
 interface
+{$ifndef mse_allwarnings}
+ {$if fpc_fullversion >= 030100}
+  {$warn 5089 off}
+  {$warn 5090 off}
+  {$warn 5093 off}
+  {$warn 6058 off}
+ {$endif}
+{$endif}
 uses
  sysutils,classes,mclasses,mdb,msetypes;
 const
@@ -169,6 +177,14 @@ type
   end;
 
 implementation
+{$ifndef mse_allwarnings}
+ {$if fpc_fullversion >= 030100}
+  {$warn 5089 off}
+  {$warn 5090 off}
+  {$warn 5093 off}
+  {$warn 6058 off}
+ {$endif}
+{$endif}
 
 ResourceString
   SErrFieldTypeNotSupported = 'Fieldtype of Field "%s" not supported.';

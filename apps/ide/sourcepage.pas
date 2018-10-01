@@ -19,7 +19,14 @@ unit sourcepage;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 
 interface
-
+{$ifndef mse_allwarnings}
+ {$if fpc_fullversion >= 030100}
+  {$warn 5089 off}
+  {$warn 5090 off}
+  {$warn 5093 off}
+  {$warn 6058 off}
+ {$endif}
+{$endif}
 uses
  msetextedit,msewidgetgrid,mseforms,classes,mclasses,msegdbutils,
  msegraphedits,mseevent,
@@ -166,7 +173,6 @@ function getpascalvarname(const edit: tsyntaxedit;
 procedure findintextedit(const edit: tcustomtextedit; var info: findinfoty;
               var findpos: gridcoordty; const backward: boolean = false);
 implementation
-
 uses
  sourcepage_mfm,msefileutils,sourceform,main,
  sysutils,msewidgets,finddialogform,replacedialogform,msekeyboard,
@@ -175,6 +181,14 @@ uses
  mseedit,msedrawtext,msebits,msearrayutils,msestream,msedesignintf,
  msesysutils,msedesignparser,msesyntaxpainter,msemacros,msecodetemplates,
  mselatex,msesystypes;
+{$ifndef mse_allwarnings}
+ {$if fpc_fullversion >= 030100}
+  {$warn 5089 off}
+  {$warn 5090 off}
+  {$warn 5093 off}
+  {$warn 6058 off}
+ {$endif}
+{$endif}
 
 const
  pascaldelims = msestring(' :;+-*/(){},=<>' + c_linefeed + c_return + c_tab);

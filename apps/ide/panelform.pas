@@ -19,6 +19,14 @@ unit panelform;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 
 interface
+{$ifndef mse_allwarnings}
+ {$if fpc_fullversion >= 030100}
+  {$warn 5089 off}
+  {$warn 5090 off}
+  {$warn 5093 off}
+  {$warn 6058 off}
+ {$endif}
+{$endif}
 uses
  classes,mclasses,msegui,mseclasses,mseforms,msemenus,msestat,
  msetypes{msestrings},
@@ -55,6 +63,14 @@ implementation
 uses
  panelform_mfm,main,sysutils,msekeyboard,mselist,msedatalist,
  msearrayutils,mseformatstr;
+{$ifndef mse_allwarnings}
+ {$if fpc_fullversion >= 030100}
+  {$warn 5089 off}
+  {$warn 5090 off}
+  {$warn 5093 off}
+  {$warn 6058 off}
+ {$endif}
+{$endif}
 
 var
  panellist: tpointerlist;

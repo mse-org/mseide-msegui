@@ -331,6 +331,15 @@ type
 implementation
 uses
  math,msearrayutils,sysutils;
+{$ifndef mse_allwarnings}
+ {$if fpc_fullversion >= 030100}
+  {$warn 5089 off}
+  {$warn 5090 off}
+  {$warn 5093 off}
+  {$warn 6058 off}
+ {$endif}
+{$endif}
+
 type
  tsigcontroller1 = class(tsigcontroller);
  tdoubleoutputconn1 = class(tdoubleoutputconn);

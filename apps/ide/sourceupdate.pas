@@ -19,6 +19,14 @@ unit sourceupdate;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 
 interface
+{$ifndef mse_allwarnings}
+ {$if fpc_fullversion >= 030100}
+  {$warn 5089 off}
+  {$warn 5090 off}
+  {$warn 5093 off}
+  {$warn 6058 off}
+ {$endif}
+{$endif}
 uses
  msedesigner,mseclasses,msedesignintf,classes,mclasses,typinfo,
  msetypes,msestrings,pascaldesignparser,cdesignparser,mseglob,
@@ -238,6 +246,14 @@ implementation
 uses
  sysutils,msesys,msefileutils,sourceform,sourcepage,projectoptionsform,
  msegui,msearrayutils,projecttreeform;
+{$ifndef mse_allwarnings}
+ {$if fpc_fullversion >= 030100}
+  {$warn 5089 off}
+  {$warn 5090 off}
+  {$warn 5093 off}
+  {$warn 6058 off}
+ {$endif}
+{$endif}
 
 function findprogramlanguage(const afilename: filenamety): proglangty;
 var

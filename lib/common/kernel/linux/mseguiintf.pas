@@ -13,6 +13,14 @@ unit mseguiintf; //X11
 {$ifndef FPC}{$ifdef linux} {$define UNIX} {$endif}{$endif}
 
 interface
+{$ifndef mse_allwarnings}
+ {$if fpc_fullversion >= 030100}
+  {$warn 5089 off}
+  {$warn 5090 off}
+  {$warn 5093 off}
+  {$warn 6058 off}
+ {$endif}
+{$endif}
 
 {$ifdef mse_debugwindowfocus}
  {$define mse_debug}
@@ -501,13 +509,20 @@ function Xutf8TextPropertyToTextList(para1:PDisplay; para2:PXTextProperty;
                      external sXlib name 'Xutf8TextPropertyToTextList';
 
 implementation
-
 uses
  msebits,msekeyboard,sysutils,msesysutils,msefileutils,msedatalist,msedragglob
  {$ifdef with_sm},sm,ice{$endif},msesonames,msegui,mseactions,msex11gdi,
  msearrayutils,msesysintf1,msesysdnd,classes,rtlconsts,mseclasses,
  mseglob,msetimer,mseprocess,mseprocmonitor,typinfo
  {$ifdef mse_debug},mseformatstr{$endif};
+{$ifndef mse_allwarnings}
+ {$if fpc_fullversion >= 030100}
+  {$warn 5089 off}
+  {$warn 5090 off}
+  {$warn 5093 off}
+  {$warn 6058 off}
+ {$endif}
+{$endif}
 
 const
  xdndprotocolversion = 4; 

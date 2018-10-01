@@ -10,6 +10,14 @@
 unit msevaluenodes;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
+{$ifndef mse_allwarnings}
+ {$if fpc_fullversion >= 030100}
+  {$warn 5089 off}
+  {$warn 5090 off}
+  {$warn 5093 off}
+  {$warn 6058 off}
+ {$endif}
+{$endif}
 uses
  mseglob,msestrings,msedatalist,msedatanodes,msebitmap,mselistbrowser,
  msetypes,msevaluenodesglob,mseinterfaces,msestat;
@@ -260,6 +268,14 @@ function buildvalueinfos(const afields: array of fieldinfoty;
 implementation
 uses
  msearrayutils;
+{$ifndef mse_allwarnings}
+ {$if fpc_fullversion >= 030100}
+  {$warn 5089 off}
+  {$warn 5090 off}
+  {$warn 5093 off}
+  {$warn 6058 off}
+ {$endif}
+{$endif}
 
 procedure initvalueinfo(out ainfo: recvaluety);
 begin

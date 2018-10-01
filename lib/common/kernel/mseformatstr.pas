@@ -8,6 +8,7 @@
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 }
 unit mseformatstr;     //stringwandelroutinen 31.5.99 mse
+
 {$ifndef mse_allwarnings}
  {$if fpc_fullversion >= 030100}
   {$warn 5089 off}
@@ -549,6 +550,14 @@ implementation
 uses
  sysconst,msedate,msereal,Math,msefloattostr,msearrayutils,msesys,msebits,
  formatfunc;
+{$ifndef mse_allwarnings}
+ {$if fpc_fullversion >= 030100}
+  {$warn 5089 off}
+  {$warn 5090 off}
+  {$warn 5093 off}
+  {$warn 6058 off}
+ {$endif}
+{$endif}
 
 function lstring(const s: string; const minwidth: integer): string;
 var

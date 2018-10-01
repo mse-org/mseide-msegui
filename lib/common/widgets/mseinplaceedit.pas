@@ -15,6 +15,14 @@ unit mseinplaceedit;
 {$endif}
 
 interface
+{$ifndef mse_allwarnings}
+ {$if fpc_fullversion >= 030100}
+  {$warn 5089 off}
+  {$warn 5090 off}
+  {$warn 5093 off}
+  {$warn 6058 off}
+ {$endif}
+{$endif}
 uses
  msegui,mseguiglob,msegraphics,msedrawtext,msegraphutils,
  mserichstring,msetimer,mseevent,msetypes,msestrings,mseeditglob,msedatalist,
@@ -375,6 +383,15 @@ implementation
 uses
  msekeyboard,sysutils,msesysutils,msebits,msewidgets,classes,msestockobjects,
  mseassistiveserver;
+{$ifndef mse_allwarnings}
+ {$if fpc_fullversion >= 030100}
+  {$warn 5089 off}
+  {$warn 5090 off}
+  {$warn 5093 off}
+  {$warn 6058 off}
+ {$endif}
+{$endif}
+
 type
  twidget1 = class(twidget);
   

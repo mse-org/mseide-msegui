@@ -18,6 +18,14 @@ unit msedb;
 {$ifdef FPC}{$mode objfpc}{$h+}{$interfaces corba}{$endif}
 
 interface
+{$ifndef mse_allwarnings}
+ {$if fpc_fullversion >= 030100}
+  {$warn 5089 off}
+  {$warn 5090 off}
+  {$warn 5093 off}
+  {$warn 6058 off}
+ {$endif}
+{$endif}
 
 uses
  classes,mclasses,mdb,mseclasses,mseglob,msestrings,msetypes,msearrayprops,
@@ -1843,6 +1851,14 @@ uses
  msearrayutils,mseformatstr,msebits,msefloattostr,msebufdataset,
  msereal,variants,msedate,msesys,sysconst
  {,msedbgraphics}{$ifdef unix},cwstring{$endif};
+{$ifndef mse_allwarnings}
+ {$if fpc_fullversion >= 030100}
+  {$warn 5089 off}
+  {$warn 5090 off}
+  {$warn 5093 off}
+  {$warn 6058 off}
+ {$endif}
+{$endif}
 const
  fieldnamedummy = ';%)(mse';
 var

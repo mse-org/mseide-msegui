@@ -3,6 +3,14 @@ unit dbf_dbffile;
 // Modified 2013 by Martin Schreiber
 
 interface
+{$ifndef mse_allwarnings}
+ {$if fpc_fullversion >= 030100}
+  {$warn 5089 off}
+  {$warn 5090 off}
+  {$warn 5093 off}
+  {$warn 6058 off}
+ {$endif}
+{$endif}
 
 {$I dbf_common.inc}
 
@@ -202,6 +210,14 @@ uses
   Math,
 {$endif}
   dbf_str, dbf_lang, mdbf_prssupp, mdbf_prsdef;
+{$ifndef mse_allwarnings}
+ {$if fpc_fullversion >= 030100}
+  {$warn 5089 off}
+  {$warn 5090 off}
+  {$warn 5093 off}
+  {$warn 6058 off}
+ {$endif}
+{$endif}
 
 const
   sDBF_DEC_SEP = '.';
@@ -1437,12 +1453,12 @@ var
 
   procedure CorrectYear(var wYear: Integer);
   var wD, wM, wY, CenturyBase: Word;
-
+(*
 {$ifndef DELPHI_5}
   // Delphi 3 standard-behavior no change possible
   const TwoDigitYearCenturyWindow= 0;
 {$endif}
-
+*)
   begin
      if wYear >= 100 then
        Exit;

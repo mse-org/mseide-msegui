@@ -27,6 +27,14 @@ unit main;
 {$endif}
 
 interface
+{$ifndef mse_allwarnings}
+ {$if fpc_fullversion >= 030100}
+  {$warn 5089 off}
+  {$warn 5090 off}
+  {$warn 5093 off}
+  {$warn 6058 off}
+ {$endif}
+{$endif}
 
 uses
  mseforms,msesimplewidgets,mseguiglob,msegui,msegdbutils,mseactions,
@@ -390,6 +398,15 @@ uses
  {$ifdef unix},mselibc {$endif}, //SIGRT*
  mseprocutils
  {$ifdef mse_dumpunitgroups},dumpunitgroups{$endif};
+
+{$ifndef mse_allwarnings}
+ {$if fpc_fullversion >= 030100}
+  {$warn 5089 off}
+  {$warn 5090 off}
+  {$warn 5093 off}
+  {$warn 6058 off}
+ {$endif}
+{$endif}
  
 procedure handleerror(const e: exception; const text: string);
 begin

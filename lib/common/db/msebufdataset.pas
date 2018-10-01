@@ -24,6 +24,14 @@ unit msebufdataset;
 {$endif}
 
 interface
+{$ifndef mse_allwarnings}
+ {$if fpc_fullversion >= 030100}
+  {$warn 5089 off}
+  {$warn 5090 off}
+  {$warn 5093 off}
+  {$warn 6058 off}
+ {$endif}
+{$endif}
 
 uses
  mdb,classes,mclasses,variants,msetypes,msearrayprops,mseclasses,mselist,
@@ -1442,6 +1450,14 @@ uses
  rtlconsts,{$ifdef FPC}dbconst{$else}dbconst_del,classes_del{$endif},sysutils,
  mseformatstr,msereal,msesys,msefileutils,mseapplication,msesysutils,msebits,
  typinfo;
+{$ifndef mse_allwarnings}
+ {$if fpc_fullversion >= 030100}
+  {$warn 5089 off}
+  {$warn 5090 off}
+  {$warn 5093 off}
+  {$warn 6058 off}
+ {$endif}
+{$endif}
  
 type
  tmsestringfield1 = class(tmsestringfield); 

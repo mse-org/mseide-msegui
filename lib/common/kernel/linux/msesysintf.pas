@@ -62,6 +62,14 @@ uses
  {$ifdef FPC},dateutils{$else},DateUtils,classes_del{$endif},msedate
  {$ifdef mse_debugmutex},mseapplication{$endif}
  {$ifdef freebsd},msedynload{$endif};
+{$ifndef mse_allwarnings}
+ {$if fpc_fullversion >= 030100}
+  {$warn 5089 off}
+  {$warn 5090 off}
+  {$warn 5093 off}
+  {$warn 6058 off}
+ {$endif}
+{$endif}
  
 function sigactionex(SigNum: Integer; var Action: TSigActionex;
                               OldAction: PSigAction): Integer;

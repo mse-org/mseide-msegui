@@ -17,6 +17,14 @@ unit msegrids;
 {$endif}
 
 interface
+{$ifndef mse_allwarnings}
+ {$if fpc_fullversion >= 030100}
+  {$warn 5089 off}
+  {$warn 5090 off}
+  {$warn 5093 off}
+  {$warn 6058 off}
+ {$endif}
+{$endif}
 uses
  classes,mclasses,sysutils,mseclasses,msegui,msedragglob,
  msegraphics,msetypes,msestrings,msegraphutils,msebitmap,mseassistiveclient,
@@ -2836,6 +2844,15 @@ implementation
 uses
  mseguiintf,msestockobjects,mseact,mseactions,rtlconsts,msegraphedits,
  mseassistiveserver,mseformatstr;
+{$ifndef mse_allwarnings}
+ {$if fpc_fullversion >= 030100}
+  {$warn 5089 off}
+  {$warn 5090 off}
+  {$warn 5093 off}
+  {$warn 6058 off}
+ {$endif}
+{$endif}
+
 type
  tframe1 = class(tcustomframe);
  tdatalist1 = class(tdatalist);

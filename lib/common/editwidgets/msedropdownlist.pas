@@ -648,6 +648,14 @@ type
 implementation
 uses
  sysutils,msewidgets,mseguiintf,rtlconsts,msebits;
+{$ifndef mse_allwarnings}
+ {$if fpc_fullversion >= 030100}
+  {$warn 5089 off}
+  {$warn 5090 off}
+  {$warn 5093 off}
+  {$warn 6058 off}
+ {$endif}
+{$endif}
 
 type
  tcustomframe1= class(tcustomframe);

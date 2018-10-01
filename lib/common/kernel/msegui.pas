@@ -17,6 +17,14 @@ unit msegui;
 {$endif}
 
 interface
+{$ifndef mse_allwarnings}
+ {$if fpc_fullversion >= 030100}
+  {$warn 5089 off}
+  {$warn 5090 off}
+  {$warn 5093 off}
+  {$warn 6058 off}
+ {$endif}
+{$endif}
 uses
  classes,mclasses,sysutils,msegraphics,msetypes,mseact,
  msestrings,mseerr,msegraphutils,mseapplication,msedragglob,
@@ -3308,12 +3316,19 @@ function debugwidgetname(const awidget: twidget; const atext: string): string;
 {$endif}
 
 implementation
-
 uses
  msesysintf,typinfo,msestreaming,msetimer,msebits,msewidgets,
  mseshapes,msestockobjects,msefileutils,msedatalist,Math,msesysutils,
  rtlconsts,{$ifndef FPC}classes_del,{$endif}mseformatstr,
  mseprocutils,msesys,msesysdnd,mseassistiveserver;
+{$ifndef mse_allwarnings}
+ {$if fpc_fullversion >= 030100}
+  {$warn 5089 off}
+  {$warn 5090 off}
+  {$warn 5093 off}
+  {$warn 6058 off}
+ {$endif}
+{$endif}
 
 const
  faceoptionsmask1: faceoptionsty = [fao_alphafadeimage,fao_alphafadenochildren,

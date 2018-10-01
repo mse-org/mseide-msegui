@@ -11,6 +11,14 @@ unit msesocketintf;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 
 interface
+{$ifndef mse_allwarnings}
+ {$if fpc_fullversion >= 030100}
+  {$warn 5089 off}
+  {$warn 5090 off}
+  {$warn 5093 off}
+  {$warn 6058 off}
+ {$endif}
+{$endif}
 uses
  msesystypes,msesys;
 {$ifdef FPC}
@@ -22,6 +30,14 @@ uses
 implementation
 uses
  mselibc,msefileutils,msesysintf1,msesysintf,msesysutils,sysutils;
+{$ifndef mse_allwarnings}
+ {$if fpc_fullversion >= 030100}
+  {$warn 5089 off}
+  {$warn 5090 off}
+  {$warn 5093 off}
+  {$warn 6058 off}
+ {$endif}
+{$endif}
  
 type
  datarecty = record

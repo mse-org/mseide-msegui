@@ -12,6 +12,14 @@ unit msesyntaxedit;
 {$ifdef FPC}{$mode objfpc}{$h+}{$goto on}{$endif}
 
 interface
+{$ifndef mse_allwarnings}
+ {$if fpc_fullversion >= 030100}
+  {$warn 5089 off}
+  {$warn 5090 off}
+  {$warn 5093 off}
+  {$warn 6058 off}
+ {$endif}
+{$endif}
 uses
  classes,mclasses,msetextedit,msesyntaxpainter,mseclasses,msegraphutils,
  mseglob,mseguiglob,msetypes,mseevent,mserichstring,
@@ -148,6 +156,15 @@ function checkbracketkind(const achar: msechar;
 implementation
 uses
  msekeyboard,msepointer;
+{$ifndef mse_allwarnings}
+ {$if fpc_fullversion >= 030100}
+  {$warn 5089 off}
+  {$warn 5090 off}
+  {$warn 5093 off}
+  {$warn 6058 off}
+ {$endif}
+{$endif}
+
 const
  checkbrackettag = 84621847;
  

@@ -129,6 +129,14 @@ How to Install
 }
 //-----------------------------------------------------------------------------
 interface
+{$ifndef mse_allwarnings}
+ {$if fpc_fullversion >= 030100}
+  {$warn 5089 off}
+  {$warn 5090 off}
+  {$warn 5093 off}
+  {$warn 6058 off}
+ {$endif}
+{$endif}
 
 uses
   mdb, classes,mclasses,SysUtils, DBConst;
@@ -280,6 +288,14 @@ type
 //procedure Register;
 
 implementation
+{$ifndef mse_allwarnings}
+ {$if fpc_fullversion >= 030100}
+  {$warn 5089 off}
+  {$warn 5090 off}
+  {$warn 5093 off}
+  {$warn 6058 off}
+ {$endif}
+{$endif}
 //{$R *.Res}
 
 //-----------------------------------------------------------------------------

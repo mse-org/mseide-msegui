@@ -19,6 +19,14 @@ unit msedesignparser;
 {$if FPC_FULLVERSION >= 030100} {$define mse_fpc_3_2} {$endif}
 
 interface
+{$ifndef mse_allwarnings}
+ {$if fpc_fullversion >= 030100}
+  {$warn 5089 off}
+  {$warn 5090 off}
+  {$warn 5093 off}
+  {$warn 6058 off}
+ {$endif}
+{$endif}
 uses
  mseglob,msedatalist,mselist,mseparser,msetypes,typinfo,msestrings,
  msearrayutils;
@@ -532,6 +540,14 @@ implementation
 uses
  {sourceupdate,}sysutils,cdesignparser;   
        //todo: remove cdesignparser, extract c+pascaldesignparser code
+{$ifndef mse_allwarnings}
+ {$if fpc_fullversion >= 030100}
+  {$warn 5089 off}
+  {$warn 5090 off}
+  {$warn 5093 off}
+  {$warn 6058 off}
+ {$endif}
+{$endif}
 {$ifdef FPC}{$goto on}{$endif}
 type
  tparser1 = class(tparser);

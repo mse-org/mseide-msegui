@@ -10,6 +10,14 @@
 unit mseifi;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
+{$ifndef mse_allwarnings}
+ {$if fpc_fullversion >= 030100}
+  {$warn 5089 off}
+  {$warn 5090 off}
+  {$warn 5093 off}
+  {$warn 6058 off}
+ {$endif}
+{$endif}
 uses
  classes,mclasses,mseapplication,mseclasses,msearrayprops,mseact,msestrings,
  msetypes,mseevent,
@@ -661,6 +669,15 @@ implementation
 uses
  sysutils,mseprocutils,msesysintf1,msesysintf,{mseforms,}msetmpmodules,
  msesysutils,variants,msesumlist {$ifndef FPC},classes_del{$endif};
+{$ifndef mse_allwarnings}
+ {$if fpc_fullversion >= 030100}
+  {$warn 5089 off}
+  {$warn 5090 off}
+  {$warn 5093 off}
+  {$warn 6058 off}
+ {$endif}
+{$endif}
+
 type
  tsocketreader1 = class(tsocketreader);
  tsocketwriter1 = class(tsocketwriter);

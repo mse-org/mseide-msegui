@@ -19,6 +19,14 @@ unit settaborderform;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 
 interface
+{$ifndef mse_allwarnings}
+ {$if fpc_fullversion >= 030100}
+  {$warn 5089 off}
+  {$warn 5090 off}
+  {$warn 5093 off}
+  {$warn 6058 off}
+ {$endif}
+{$endif}
 uses
  msetypes,mseforms,msegrids,msegui,msewidgetgrid,msedataedits,msesimplewidgets,
  msedesigner,
@@ -64,6 +72,15 @@ procedure settaborderdialog(const awidget: twidget;
 implementation
 uses
  settaborderform_mfm,msegraphutils;
+{$ifndef mse_allwarnings}
+ {$if fpc_fullversion >= 030100}
+  {$warn 5089 off}
+  {$warn 5090 off}
+  {$warn 5093 off}
+  {$warn 6058 off}
+ {$endif}
+{$endif}
+
 type
  twidget1 = class(twidget);
   

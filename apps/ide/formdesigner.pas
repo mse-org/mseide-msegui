@@ -26,7 +26,6 @@ interface
   {$warn 6058 off}
  {$endif}
 {$endif}
-
 uses
  msetypes,classes,mclasses,mseforms,mseguiglob,msegui,mseevent,msegraphutils,
  msegraphics,
@@ -440,6 +439,15 @@ uses
  msedatalist,objectinspector,projectoptionsform,main,msedatamodules,
  setcreateorderform,componentstore,msearrayutils,actionsmodule,msecomptree
  {$ifndef FPC},classes_del{$endif};
+
+{$ifndef mse_allwarnings}
+ {$if fpc_fullversion >= 030100}
+  {$warn 5089 off}
+  {$warn 5090 off}
+  {$warn 5093 off}
+  {$warn 6058 off}
+ {$endif}
+{$endif}
 
 type
  stringconsts = (

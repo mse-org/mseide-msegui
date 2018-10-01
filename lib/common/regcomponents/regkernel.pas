@@ -41,6 +41,14 @@ uses
  mseguithreadcomp,mseprocmonitorcomp,msefadepropedit,mseguiprocess,
  msearrayprops,msesumlist,mserttistat,msestockobjects,regglob,msearrayutils,
  msecryptohandler,msestringcontainer,mseformatstr;
+{$ifndef mse_allwarnings}
+ {$if fpc_fullversion >= 030100}
+  {$warn 5089 off}
+  {$warn 5090 off}
+  {$warn 5093 off}
+  {$warn 6058 off}
+ {$endif}
+{$endif}
 
 type
  twidget1 = class(twidget);

@@ -17,6 +17,14 @@
 unit mseififieldeditor;
 {$ifdef FPC}{$mode objfpc}{$h+}{$goto on}{$endif}
 interface
+{$ifndef mse_allwarnings}
+ {$if fpc_fullversion >= 030100}
+  {$warn 5089 off}
+  {$warn 5090 off}
+  {$warn 5093 off}
+  {$warn 6058 off}
+ {$endif}
+{$endif}
 uses
  mdb,msegui,mseclasses,mseforms,msedb,msestat,msestatfile,msesimplewidgets,
  msegrids,msewidgetgrid,msesplitter,msedataedits,msestrings,mseeditglob,
@@ -80,6 +88,14 @@ function editififields(const instance: tificonnectedfields): boolean;
 implementation
 uses
  mseififieldeditor_mfm,typinfo,msewidgets,sysutils,mseformatstr;
+{$ifndef mse_allwarnings}
+ {$if fpc_fullversion >= 030100}
+  {$warn 5089 off}
+  {$warn 5090 off}
+  {$warn 5093 off}
+  {$warn 6058 off}
+ {$endif}
+{$endif}
  
 type
  tificonnectedfields1 = class(tificonnectedfields);

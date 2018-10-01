@@ -865,6 +865,14 @@ function makexseriesdata(const value: real; const index: integer): xseriesdataty
 implementation
 uses
  sysutils,math,msebits,rtlconsts,msestockobjects,msearrayutils,mseformatstr;
+{$ifndef mse_allwarnings}
+ {$if fpc_fullversion >= 030100}
+  {$warn 5089 off}
+  {$warn 5090 off}
+  {$warn 5093 off}
+  {$warn 6058 off}
+ {$endif}
+{$endif}
 
 type
  tcustomdialcontroller1 = class(tcustomdialcontroller);

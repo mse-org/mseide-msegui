@@ -1116,6 +1116,14 @@ procedure setremotedatalist(const aintf: idatalistclient;
 implementation
 uses
  rtlconsts,msestreaming,msesys,msestat,msebits,msefloattostr,mseformatstr;
+{$ifndef mse_allwarnings}
+ {$if fpc_fullversion >= 030100}
+  {$warn 5089 off}
+  {$warn 5090 off}
+  {$warn 5093 off}
+  {$warn 6058 off}
+ {$endif}
+{$endif}
 
 var
  datalistclasses: array[listdatatypety] of datalistclassty =

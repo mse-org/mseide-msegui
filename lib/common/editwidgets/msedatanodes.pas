@@ -12,6 +12,14 @@ unit msedatanodes;
 {$ifdef FPC}{$mode objfpc}{$h+}{$interfaces corba}{$goto on}{$endif}
 
 interface
+{$ifndef mse_allwarnings}
+ {$if fpc_fullversion >= 030100}
+  {$warn 5089 off}
+  {$warn 5090 off}
+  {$warn 5093 off}
+  {$warn 6058 off}
+ {$endif}
+{$endif}
 uses
  classes,mclasses,msegraphutils,msedrawtext,msegraphics,msedatalist,mseglob,
  mseguiglob,msegui,msestockobjects,
@@ -660,10 +668,18 @@ type
  function copylistitems(const asource: listitemarty): listitemarty;
 
 implementation
-
 uses
  {$ifdef FPCc}rtlconst{$else}rtlconsts{$endif},
            sysutils,msebits,msesysintf;
+{$ifndef mse_allwarnings}
+ {$if fpc_fullversion >= 030100}
+  {$warn 5089 off}
+  {$warn 5090 off}
+  {$warn 5093 off}
+  {$warn 6058 off}
+ {$endif}
+{$endif}
+
 const
  imageextendcaptionpos = [cp_right,cp_righttop{,cp_rightcenter},cp_rightbottom];
 

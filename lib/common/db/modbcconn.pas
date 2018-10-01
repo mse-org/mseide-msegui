@@ -18,6 +18,14 @@ interface
 
 uses
  classes,mclasses,SysUtils, msqldb, mdb, odbcsqldyn,msetypes,msedb,msestrings;
+{$ifndef mse_allwarnings}
+ {$if fpc_fullversion >= 030100}
+  {$warn 5089 off}
+  {$warn 5090 off}
+  {$warn 5093 off}
+  {$warn 6058 off}
+ {$endif}
+{$endif}
 
 type
 
@@ -176,9 +184,16 @@ type
   end;
 
 implementation
-
 uses
   Math, {$ifdef FPC}DBConst{$else}dbconst_del{$endif},msedatabase;
+{$ifndef mse_allwarnings}
+ {$if fpc_fullversion >= 030100}
+  {$warn 5089 off}
+  {$warn 5090 off}
+  {$warn 5093 off}
+  {$warn 6058 off}
+ {$endif}
+{$endif}
   
 {$define ODBCVER3}
 

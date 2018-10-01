@@ -370,6 +370,14 @@ procedure copytoim(const source: realarty; var dest: complexarty);
 implementation
 uses
  rtlconsts,classes,sysutils,msereal,msesys{$ifndef FPC},classes_del{$endif};
+{$ifndef mse_allwarnings}
+ {$if fpc_fullversion >= 030100}
+  {$warn 5089 off}
+  {$warn 5090 off}
+  {$warn 5093 off}
+  {$warn 6058 off}
+ {$endif}
+{$endif}
 
 procedure splitcomplexar(const acomplex: complexarty; out re,im: realarty);
 var

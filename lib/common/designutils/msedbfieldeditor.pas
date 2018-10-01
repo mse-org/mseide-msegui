@@ -17,6 +17,14 @@
 unit msedbfieldeditor;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
+{$ifndef mse_allwarnings}
+ {$if fpc_fullversion >= 030100}
+  {$warn 5089 off}
+  {$warn 5090 off}
+  {$warn 5093 off}
+  {$warn 6058 off}
+ {$endif}
+{$endif}
 uses
  mdb,msegui,mseclasses,mseforms,msedb,msestat,msestatfile,msesimplewidgets,
  msegrids,msewidgetgrid,msesplitter,msedataedits,msetypes{msestrings},mseeditglob,
@@ -72,6 +80,14 @@ function editpersistentfields(const instance: tpersistentfields): boolean;
 implementation
 uses
  mseguiglob,msedbfieldeditor_mfm,typinfo,msewidgets,msestrings;
+{$ifndef mse_allwarnings}
+ {$if fpc_fullversion >= 030100}
+  {$warn 5089 off}
+  {$warn 5090 off}
+  {$warn 5093 off}
+  {$warn 6058 off}
+ {$endif}
+{$endif}
  
 type
  tpersistentfields1 = class(tpersistentfields);

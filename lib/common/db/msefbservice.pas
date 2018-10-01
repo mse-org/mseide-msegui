@@ -8,6 +8,14 @@ interface
 uses
  classes,mclasses,mseclasses,ibase60dyn,msetypes,mdb,msestrings,mibconnection,
  msethread,sysutils;
+{$ifndef mse_allwarnings}
+ {$if fpc_fullversion >= 030100}
+  {$warn 5089 off}
+  {$warn 5090 off}
+  {$warn 5093 off}
+  {$warn 6058 off}
+ {$endif}
+{$endif}
 
 const
  defaultinfotimeout = 60; //seconds
@@ -319,6 +327,15 @@ type
 implementation
 uses
  msebits,msearrayutils,mseapplication,msesysintf;
+{$ifndef mse_allwarnings}
+ {$if fpc_fullversion >= 030100}
+  {$warn 5089 off}
+  {$warn 5090 off}
+  {$warn 5093 off}
+  {$warn 6058 off}
+ {$endif}
+{$endif}
+
 const
  restoreconsts: array[restoreoptionty] of card32 = (isc_spb_res_deactivate_idx,
      isc_spb_res_no_shadow,isc_spb_res_no_validity,isc_spb_res_one_at_a_time,

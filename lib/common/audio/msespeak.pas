@@ -321,6 +321,14 @@ implementation
 uses
  msestrings,msefileutils,msectypes,mseapplication,msesysintf1,
  sysutils,msesysutils{$ifdef mswindows},activex{$endif};
+{$ifndef mse_allwarnings}
+ {$if fpc_fullversion >= 030100}
+  {$warn 5089 off}
+  {$warn 5090 off}
+  {$warn 5093 off}
+  {$warn 6058 off}
+ {$endif}
+{$endif}
 const
  disconnecttag = 5936727;
  

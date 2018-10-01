@@ -12,6 +12,14 @@ unit msedock;
 {$ifdef FPC}{$mode objfpc}{$h+}{$GOTO ON}{$interfaces corba}{$endif}
 
 interface
+{$ifndef mse_allwarnings}
+ {$if fpc_fullversion >= 030100}
+  {$warn 5089 off}
+  {$warn 5090 off}
+  {$warn 5093 off}
+  {$warn 6058 off}
+ {$endif}
+{$endif}
 uses
  msewidgets,classes,mclasses,msedrag,msegui,msegraphutils,mseevent,mseclasses,
  msegraphics,msestockobjects,mseglob,mseguiglob,msestat,msestatfile,msepointer,
@@ -729,6 +737,14 @@ implementation
 uses
  msearrayutils,sysutils,msebits,{msetabs,}mseguiintf,{mseforms,}msestream,
  mseformatstr,msekeyboard;
+{$ifndef mse_allwarnings}
+ {$if fpc_fullversion >= 030100}
+  {$warn 5089 off}
+  {$warn 5090 off}
+  {$warn 5093 off}
+  {$warn 6058 off}
+ {$endif}
+{$endif}
 
 type
  twidget1 = class(twidget);

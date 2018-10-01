@@ -10,6 +10,14 @@
 unit msereport;
 {$ifdef FPC}{$mode objfpc}{$h+}{$GOTO ON}{$interfaces corba}{$endif}
 interface
+{$ifndef mse_allwarnings}
+ {$if fpc_fullversion >= 030100}
+  {$warn 5089 off}
+  {$warn 5090 off}
+  {$warn 5093 off}
+  {$warn 6058 off}
+ {$endif}
+{$endif}
 uses
  classes,mclasses,mseapplication,msegui,msegraphics,msetypes,msewidgets,
  msegraphutils,mseclasses,mseinterfaces,mseificomp,
@@ -1834,6 +1842,14 @@ implementation
 uses
  msearrayutils,sysutils,msestreaming,msebits,msereal,math,msesysintf,msesys,
  msedate;
+{$ifndef mse_allwarnings}
+ {$if fpc_fullversion >= 030100}
+  {$warn 5089 off}
+  {$warn 5090 off}
+  {$warn 5093 off}
+  {$warn 6058 off}
+ {$endif}
+{$endif}
  
 type
  tcustomframe1 = class(tcustomframe);

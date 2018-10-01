@@ -12,6 +12,14 @@ unit msesplitter;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 
 interface
+{$ifndef mse_allwarnings}
+ {$if fpc_fullversion >= 030100}
+  {$warn 5089 off}
+  {$warn 5090 off}
+  {$warn 5093 off}
+  {$warn 6058 off}
+ {$endif}
+{$endif}
 uses
  msegui,msewidgets,mseobjectpicker,classes,mclasses,msegraphutils,
  msepointer,msetypes,
@@ -422,6 +430,15 @@ type
 implementation
 uses
  msebits,math;
+{$ifndef mse_allwarnings}
+ {$if fpc_fullversion >= 030100}
+  {$warn 5089 off}
+  {$warn 5090 off}
+  {$warn 5093 off}
+  {$warn 6058 off}
+ {$endif}
+{$endif}
+
 type
  twidget1 = class(twidget);
  tcustomframe1 = class(tcustomframe);

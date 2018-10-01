@@ -16,6 +16,14 @@ interface
 uses
  mseglob,mseificomp,msesqlresult,msqldb,mseclasses,classes,msedatalist,msestrings,mdb,
  msedb,msetypes,mseinterfaces;
+{$ifndef mse_allwarnings}
+ {$if fpc_fullversion >= 030100}
+  {$warn 5089 off}
+  {$warn 5090 off}
+  {$warn 5093 off}
+  {$warn 6058 off}
+ {$endif}
+{$endif}
 type
 { 
  tifisqldatasource = class;
@@ -101,6 +109,14 @@ const
  );
  
 implementation
+{$ifndef mse_allwarnings}
+ {$if fpc_fullversion >= 030100}
+  {$warn 5089 off}
+  {$warn 5090 off}
+  {$warn 5093 off}
+  {$warn 6058 off}
+ {$endif}
+{$endif}
 
 function matchfielddatatypes(const afielddefs: tfielddefs;
                           const atype: listdatatypety): msestringarty;

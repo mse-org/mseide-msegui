@@ -21,6 +21,14 @@ unit msqldb;
 {$endif}
 
 interface
+{$ifndef mse_allwarnings}
+ {$if fpc_fullversion >= 030100}
+  {$warn 5089 off}
+  {$warn 5090 off}
+  {$warn 5093 off}
+  {$warn 6058 off}
+ {$endif}
+{$endif}
 
 uses 
  sysutils,classes,mclasses,mdb,msebufdataset,msetypes,msedb,mseclasses,
@@ -647,6 +655,15 @@ implementation
 uses 
  {$ifdef FPC}dbconst{$else}dbconst_del{$endif},strutils,msereal,msestream,
  msebits,msefileutils,mseformatstr,typinfo,msesysutils,msesqlresult;
+{$ifndef mse_allwarnings}
+ {$if fpc_fullversion >= 030100}
+  {$warn 5089 off}
+  {$warn 5090 off}
+  {$warn 5093 off}
+  {$warn 6058 off}
+ {$endif}
+{$endif}
+
 type
  tdataset1 = class(tdataset);
  tmdatabase1 = class(tmdatabase);

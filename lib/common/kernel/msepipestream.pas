@@ -212,6 +212,14 @@ implementation
 uses
   {$ifdef UNIX}mselibc, {$else}windows, {$endif}
  mseapplication,msesysintf1,msesysintf,sysutils,msesysutils;
+{$ifndef mse_allwarnings}
+ {$if fpc_fullversion >= 030100}
+  {$warn 5089 off}
+  {$warn 5090 off}
+  {$warn 5093 off}
+  {$warn 6058 off}
+ {$endif}
+{$endif}
 
 { tpipewriter }
 

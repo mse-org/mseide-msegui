@@ -17,6 +17,14 @@ uses
  msearrayutils,msedatalist,
  msemenus,mseevent,msegui,mseglob,mseguiglob,
  mseclasses,mseforms,msegraphics,mserichstring;
+{$ifndef mse_allwarnings}
+ {$if fpc_fullversion >= 030100}
+  {$warn 5089 off}
+  {$warn 5090 off}
+  {$warn 5093 off}
+  {$warn 6058 off}
+ {$endif}
+{$endif}
 
 const
  bmpfiledialogstatname = 'bmpfile.sta';
@@ -1037,6 +1045,14 @@ uses
  mseformatpnmread,mseformattgaread,mseformatxpmread,mseformattiffread{$endif},
  msestat,msestatfile,msefileutils,
  msedesigner,variants,mseeditglob,msepropertyeditorsmodule,objectinspector;
+{$ifndef mse_allwarnings}
+ {$if fpc_fullversion >= 030100}
+  {$warn 5089 off}
+  {$warn 5090 off}
+  {$warn 5093 off}
+  {$warn 6058 off}
+ {$endif}
+{$endif}
 
 const
  methodsortlevel = 100;

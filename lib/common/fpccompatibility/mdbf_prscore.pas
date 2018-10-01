@@ -21,6 +21,14 @@ unit mdbf_prscore;
 |---------------------------------------------------------------}
 
 interface
+{$ifndef mse_allwarnings}
+ {$if fpc_fullversion >= 030100}
+  {$warn 5089 off}
+  {$warn 5090 off}
+  {$warn 5093 off}
+  {$warn 6058 off}
+ {$endif}
+{$endif}
 
 {$I dbf_common.inc}
 
@@ -251,6 +259,14 @@ var
   DbfWordsGeneralList: TExpressList;
 
 implementation
+{$ifndef mse_allwarnings}
+ {$if fpc_fullversion >= 030100}
+  {$warn 5089 off}
+  {$warn 5090 off}
+  {$warn 5093 off}
+  {$warn 6058 off}
+ {$endif}
+{$endif}
 
 procedure LinkVariable(ExprRec: PExpressionRec);
 begin

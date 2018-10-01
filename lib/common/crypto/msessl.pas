@@ -10,6 +10,14 @@
 unit msessl;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
+{$ifndef mse_allwarnings}
+ {$if fpc_fullversion >= 030100}
+  {$warn 5089 off}
+  {$warn 5090 off}
+  {$warn 5093 off}
+  {$warn 6058 off}
+ {$endif}
+{$endif}
 uses
  classes,mclasses,msecryptio,mseopenssl,mseopensslevp,mseopensslrand,
  msestrings,msesystypes,msecryptohandler,msetypes,msesys,
@@ -263,6 +271,14 @@ uses
  sysutils,msesysintf1,msefileutils,msesocketintf,mseopensslbio,mseopensslpem,
  mseopensslrsa,msebits,
  msesysintf,msectypes;
+{$ifndef mse_allwarnings}
+ {$if fpc_fullversion >= 030100}
+  {$warn 5089 off}
+  {$warn 5090 off}
+  {$warn 5093 off}
+  {$warn 6058 off}
+ {$endif}
+{$endif}
 
 procedure raisesslerror(const err: cryptoerrorty);
 const

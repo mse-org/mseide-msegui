@@ -17,6 +17,14 @@ unit msedataedits;
 {$endif}
 
 interface
+{$ifndef mse_allwarnings}
+ {$if fpc_fullversion >= 030100}
+  {$warn 5089 off}
+  {$warn 5090 off}
+  {$warn 5093 off}
+  {$warn 6058 off}
+ {$endif}
+{$endif}
 uses
  classes,mclasses,msegui,mseinplaceedit,mseeditglob,msegraphics,mseedit,
  msetypes,msestrings,msedatalist,mseglob,mseguiglob,msedragglob,
@@ -1497,6 +1505,14 @@ implementation
 uses
  sysutils,msereal,msebits,msestreaming,msestockobjects,msefloattostr,
  mseassistiveserver;
+{$ifndef mse_allwarnings}
+ {$if fpc_fullversion >= 030100}
+  {$warn 5089 off}
+  {$warn 5090 off}
+  {$warn 5093 off}
+  {$warn 6058 off}
+ {$endif}
+{$endif}
 
 type
  tdatalist1 = class(tdatalist);

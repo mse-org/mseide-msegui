@@ -126,6 +126,14 @@ procedure project(const matrix: projmatrixty; var points: complexarty); overload
 procedure realtointpoints(const source: complexarty; out dest: pointarty);
                          
 implementation
+{$ifndef mse_allwarnings}
+ {$if fpc_fullversion >= 030100}
+  {$warn 5089 off}
+  {$warn 5090 off}
+  {$warn 5093 off}
+  {$warn 6058 off}
+ {$endif}
+{$endif}
 
 const
  pi2 = 2*pi;

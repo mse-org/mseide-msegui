@@ -12,6 +12,14 @@ unit mseformdatatools;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 
 interface
+{$ifndef mse_allwarnings}
+ {$if fpc_fullversion >= 030100}
+  {$warn 5089 off}
+  {$warn 5090 off}
+  {$warn 5093 off}
+  {$warn 6058 off}
+ {$endif}
+{$endif}
 uses
  msetypes,msestrings,msestream,classes,mclasses,mseclasses;
 type
@@ -44,6 +52,15 @@ procedure writeconstdata(po1: pbyte; length: integer; const dataname: string;
 implementation
 uses
  msefileutils,sysutils,msesys,mseobjecttext;
+{$ifndef mse_allwarnings}
+ {$if fpc_fullversion >= 030100}
+  {$warn 5089 off}
+  {$warn 5090 off}
+  {$warn 5093 off}
+  {$warn 6058 off}
+ {$endif}
+{$endif}
+
 const
  formdataext = '_mfm';
  objdataname = 'objdata';

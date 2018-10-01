@@ -240,6 +240,14 @@ implementation
 uses
  strutils,msesysintf1,msebits,msefloattostr,msedatabase,msesqlresult,msefbutils
  {$ifndef FPC},classes_del{$ifdef mswindows},windows{$endif}{$endif};
+{$ifndef mse_allwarnings}
+ {$if fpc_fullversion >= 030100}
+  {$warn 5089 off}
+  {$warn 5090 off}
+  {$warn 5093 off}
+  {$warn 6058 off}
+ {$endif}
+{$endif}
 
 function clientversion: string;
 var

@@ -12,6 +12,14 @@ unit msedirtree;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 
 interface
+{$ifndef mse_allwarnings}
+ {$if fpc_fullversion >= 030100}
+  {$warn 5089 off}
+  {$warn 5090 off}
+  {$warn 5093 off}
+  {$warn 6058 off}
+ {$endif}
+{$endif}
 uses
  mseforms,msewidgetgrid,mselistbrowser,msedatanodes,msefileutils,msetypes,
  msestrings,msegui,mseglob,mseclasses,msegrids,msesys,msegridsglob,
@@ -112,6 +120,14 @@ implementation
 uses
  msedirtree_mfm,msesysintf,mseeditglob,msefiledialog,mseevent,
  classes,mclasses;
+{$ifndef mse_allwarnings}
+ {$if fpc_fullversion >= 030100}
+  {$warn 5089 off}
+  {$warn 5090 off}
+  {$warn 5093 off}
+  {$warn 6058 off}
+ {$endif}
+{$endif}
 
 { tdirlistitem }
 

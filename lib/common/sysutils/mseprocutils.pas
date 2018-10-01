@@ -212,6 +212,14 @@ implementation
 uses 
  msesysintf1,msesysintf,mseprocmonitor,msearrayutils,mseformatstr,
                                        mseapplication,msefileutils;
+{$ifndef mse_allwarnings}
+ {$if fpc_fullversion >= 030100}
+  {$warn 5089 off}
+  {$warn 5090 off}
+  {$warn 5093 off}
+  {$warn 6058 off}
+ {$endif}
+{$endif}
 
 procedure killprocesstree1(id: procidty);
 var

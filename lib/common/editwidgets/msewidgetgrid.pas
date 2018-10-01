@@ -553,6 +553,14 @@ implementation
 uses
  sysutils,msebits,msedataedits,msewidgets,mseshapes,msekeyboard,typinfo,
  msereal,mseapplication,msehash,msesumlist;
+{$ifndef mse_allwarnings}
+ {$if fpc_fullversion >= 030100}
+  {$warn 5089 off}
+  {$warn 5090 off}
+  {$warn 5093 off}
+  {$warn 6058 off}
+ {$endif}
+{$endif}
 
 type
  tdatalist1 = class(tdatalist);

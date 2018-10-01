@@ -220,6 +220,14 @@ implementation
 uses
  mseguiintf,msebits,msearrayutils,{$ifdef FPC}math{$else}Math{$endif},msereal,
  sysutils,msefont,mseformatstr;
+{$ifndef mse_allwarnings}
+ {$if fpc_fullversion >= 030100}
+  {$warn 5089 off}
+  {$warn 5090 off}
+  {$warn 5093 off}
+  {$warn 6058 off}
+ {$endif}
+{$endif}
 
 type
  tcanvas1 = class(tcanvas);

@@ -54,6 +54,14 @@ for param entry or if the template name can not be found.
 *)
 
 interface
+{$ifndef mse_allwarnings}
+ {$if fpc_fullversion >= 030100}
+  {$warn 5089 off}
+  {$warn 5090 off}
+  {$warn 5093 off}
+  {$warn 6058 off}
+ {$endif}
+{$endif}
 uses
  msestrings,msehash,msemacros,msetypes,mseforms;
  
@@ -101,6 +109,14 @@ implementation
 uses
  msefileutils,msesys,msestat,msestream,mseparamentryform,mseglob,msearrayutils,
  msetemplateselectform,msedataedits;
+{$ifndef mse_allwarnings}
+ {$if fpc_fullversion >= 030100}
+  {$warn 5089 off}
+  {$warn 5090 off}
+  {$warn 5093 off}
+  {$warn 6058 off}
+ {$endif}
+{$endif}
  
 { tcodetemplates }
 

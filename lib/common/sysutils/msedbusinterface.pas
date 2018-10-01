@@ -1,4 +1,4 @@
- { MSEgui Copyright (c) 2016-2018 by Martin Schreiber
+{ MSEgui Copyright (c) 2016-2018 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -559,11 +559,20 @@ function variantvalue(const avaluead: pointer; const atypeinfo: ptypeinfo;
                            const aflags: variantflagsty = []): variantvaluety;
 
 function itemtypeinfo(const dynartypeinfo: ptypeinfo): ptypeinfo;
+function dbusdatastring(const atypeinfo: ptypeinfo): string;
 
 implementation
 uses
  msestrings,msesysintf,mseguiintf,
  msefloattostr,mseapplication,msearrayutils;
+{$ifndef mse_allwarnings}
+ {$if fpc_fullversion >= 030100}
+  {$warn 5089 off}
+  {$warn 5090 off}
+  {$warn 5093 off}
+  {$warn 6058 off}
+ {$endif}
+{$endif}
 
 const
  lineend = c_linefeed;
@@ -1147,8 +1156,12 @@ begin
   end;
   tkrecord: begin
    result:= '(';
-   p2:= aligntoptr(pointer(@precordtypedata(p1)^.managedfldcount)+sizeof(precordtypedata(p1)^.managedfldcount));
-   pe:= p2+precordtypedata(p1)^.managedfldcount;
+   p2:= aligntoptr(pointer(@precordtypedata(p1)^.
+          {$ifdef mse_fpc_3_2}totalfieldcount{$else}managedfldcount{$endif})+
+           sizeof(precordtypedata(p1)^.
+           {$ifdef mse_fpc_3_2}totalfieldcount{$else}managedfldcount{$endif}));
+   pe:= p2+precordtypedata(p1)^.
+             {$ifdef mse_fpc_3_2}totalfieldcount{$else}managedfldcount{$endif};
    while p2 < pe do begin
     result:= result+dbusdatastring(p2^.typeref);
     inc(p2);
@@ -1253,8 +1266,12 @@ begin
   end;
   tkrecord: begin
    result[0]:= dbt_struct;
-   p2:= aligntoptr(pointer(@precordtypedata(p1)^.managedfldcount)+sizeof(precordtypedata(p1)^.managedfldcount));
-   pe:= p2+precordtypedata(p1)^.managedfldcount;
+   p2:= aligntoptr(pointer(@precordtypedata(p1)^.
+      {$ifdef mse_fpc_3_2}totalfieldcount{$else}managedfldcount{$endif})+
+      sizeof(precordtypedata(p1)^.
+      {$ifdef mse_fpc_3_2}totalfieldcount{$else}managedfldcount{$endif}));
+   pe:= p2+precordtypedata(p1)^.
+      {$ifdef mse_fpc_3_2}totalfieldcount{$else}managedfldcount{$endif};
    while p2 < pe do begin
     stackarray(dbusdatatypes(p2^.typeref),result);
     inc(p2);
@@ -1387,7 +1404,7 @@ begin
 end;
 
 function variantvalue(const avalue: card32;
-                                const aflags: variantflagsty = []): variantvaluety;
+                       const aflags: variantflagsty = []): variantvaluety;
 begin
  setvariantvalue(avalue,result,aflags);
 end;
@@ -1425,7 +1442,8 @@ var
 begin
 {$ifdef mse_debugvariant}
 inc(variantlevel);
-writeln('**setvariantvalue:',variantlevel,':',atypeinfo^.name,' ',atypeinfo^.kind);
+writeln('**setvariantvalue:',variantlevel,':',atypeinfo^.name,
+                                                  ' ',atypeinfo^.kind);
 {$endif}
 
  pt:= gettypedata(atypeinfo);
@@ -1474,11 +1492,14 @@ writeln('**setvariantvalue:',variantlevel,':',atypeinfo^.name,' ',atypeinfo^.kin
    tkrecord: begin
     kind:= vvk_record;
     vvariantar.data:= nil;
-    setlength(variantvaluearty(vvariantar.data),
-                         precordtypedata(pt)^.managedfldcount);
-    p1:= aligntoptr(pointer(@precordtypedata(pt)^.managedfldcount)+
-                               sizeof(precordtypedata(pt)^.managedfldcount));
-    pe:= p1+precordtypedata(pt)^.managedfldcount;
+    setlength(variantvaluearty(vvariantar.data),precordtypedata(pt)^.
+          {$ifdef mse_fpc_3_2}totalfieldcount{$else}managedfldcount{$endif});
+    p1:= aligntoptr(pointer(@precordtypedata(pt)^.
+       {$ifdef mse_fpc_3_2}totalfieldcount{$else}managedfldcount{$endif}) +
+          sizeof(precordtypedata(pt)^.
+          {$ifdef mse_fpc_3_2}totalfieldcount{$else}managedfldcount{$endif}));
+    pe:= p1+precordtypedata(pt)^.
+             {$ifdef mse_fpc_3_2}totalfieldcount{$else}managedfldcount{$endif};
     pvalue:= vvariantar.data;
 {$ifdef mse_debugvariant}
 writeln('*recordfieldcount:',variantlevel,':',pe-p1);
@@ -1507,7 +1528,7 @@ function variantvalue(const avaluead: pointer; const atypeinfo: ptypeinfo;
 begin
  setvariantvalue(avaluead,atypeinfo,result,aflags);
 end;
-{
+(*
 procedure setvariantrecordvalue(const avalue: pointer;
                     atypeinfo: ptypeinfo; var avariant: variantvaluety);
 var
@@ -1521,9 +1542,13 @@ begin
   vrecord.data:= nil;
 //  vrecord.typinfo:= atypeinfo;
   pt:= gettypedata(atypeinfo);
-  setlength(variantvaluearty(vrecord.data),pt^.managedfldcount);
-  p1:= aligntoptr(pointer(@pt^.managedfldcount)+sizeof(pt^.managedfldcount));
-  pe:= p1+pt^.managedfldcount;
+  setlength(variantvaluearty(vrecord.data),pt^.
+          {$ifdef mse_fpc_3_2}totalfieldcount{$else}managedfldcount{$endif});
+  p1:= aligntoptr(pointer(@pt^.
+          {$ifdef mse_fpc_3_2}totalfieldcount{$else}managedfldcount{$endif})+
+          sizeof(pt^.
+          {$ifdef mse_fpc_3_2}totalfieldcount{$else}managedfldcount{$endif}));
+  pe:= p1+pt^.{$ifdef mse_fpc_3_2}totalfieldcount{$else}managedfldcount{$endif};
   pvalue:= vrecord.data;
   while p1 < pe do begin
    setvariantvalue(avalue+p1^.fldoffset,p1^.typeref,pvalue^);
@@ -1538,7 +1563,7 @@ function variantrecordvalue(const avaluead: pointer;
 begin
  setvariantrecordvalue(avaluead,atypeinfo,result);
 end;
-}
+*)
 { tdbusitemhashdatalist }
 
 constructor tdbusitemhashdatalist.create(const aowner: tdbusservice);
@@ -3375,7 +3400,8 @@ var
  p1: ppropinfo;
  v1: variantvaluety;
 begin
- if fservice.dbusreadmessage(amessage,[dbt_string,dbt_string],[@s1,@s2]) then begin
+ if fservice.dbusreadmessage(amessage,
+                       [dbt_string,dbt_string],[@s1,@s2]) then begin
   if (s1 = '') or (s1 = getpropintf()) then begin
    v1.kind:= vvk_none;
    propertyget(amessage,s2,v1);
@@ -3389,7 +3415,7 @@ begin
     else begin
      if not getpropvalue(p1,v1) then begin
       fservice.dbuserror(amessage,
-                   'org.freedesktop.DBus.Error.PropertyWriteOnly', //unofficional
+             'org.freedesktop.DBus.Error.PropertyWriteOnly', //unofficional
                    'Property '+s2+' is write only');
      end;
     end;

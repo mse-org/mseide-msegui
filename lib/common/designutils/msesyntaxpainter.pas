@@ -344,6 +344,14 @@ type
 implementation
 uses
  sysutils,msefileutils,msesys,mseformatstr,msegraphics,mseglob,msearrayutils;
+{$ifndef mse_allwarnings}
+ {$if fpc_fullversion >= 030100}
+  {$warn 5089 off}
+  {$warn 5090 off}
+  {$warn 5093 off}
+  {$warn 6058 off}
+ {$endif}
+{$endif}
 
 procedure markstartchars(const str: msestring; var chars: charsty;
                           const caseinsensitive: boolean); overload;

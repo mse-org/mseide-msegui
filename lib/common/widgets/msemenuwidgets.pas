@@ -12,6 +12,14 @@ unit msemenuwidgets;
 {$ifdef FPC}{$mode objfpc}{$h+}{$goto on}{$endif}
 
 interface
+{$ifndef mse_allwarnings}
+ {$if fpc_fullversion >= 030100}
+  {$warn 5089 off}
+  {$warn 5090 off}
+  {$warn 5093 off}
+  {$warn 6058 off}
+ {$endif}
+{$endif}
 uses
  mseapplication,classes,mclasses,msewidgets,mseshapes,msemenus,msegraphutils,
  msegraphics,
@@ -239,6 +247,14 @@ implementation
 uses
  msedrawtext,mserichstring,msestockobjects,sysutils,msekeyboard,msebits,
  mseact,mseguiintf,msebitmap,msesysutils,mseassistiveserver;
+{$ifndef mse_allwarnings}
+ {$if fpc_fullversion >= 030100}
+  {$warn 5089 off}
+  {$warn 5090 off}
+  {$warn 5093 off}
+  {$warn 6058 off}
+ {$endif}
+{$endif}
 
 type
  tmenuitem1 = class(tmenuitem);

@@ -14,6 +14,15 @@ unit msesqlite3conn;
 interface
 uses
  classes,mclasses,msedb,msqldb,msestrings,mdb,sqlite3dyn,msetypes,msedatabase;
+{$ifndef mse_allwarnings}
+ {$if fpc_fullversion >= 030100}
+  {$warn 5089 off}
+  {$warn 5090 off}
+  {$warn 5093 off}
+  {$warn 6058 off}
+ {$endif}
+{$endif}
+
 { 
       Type name        SQLite storage class  Field type    Data type
 +--------------------+---------------------+-------------+-------------+
@@ -167,6 +176,15 @@ uses
  {$ifdef FPC}dbconst{$else}dbconst_del,classes_del{$endif},
  sysutils,typinfo,dateutils,msesysintf,msedate,
  msefileutils;
+{$ifndef mse_allwarnings}
+ {$if fpc_fullversion >= 030100}
+  {$warn 5089 off}
+  {$warn 5090 off}
+  {$warn 5093 off}
+  {$warn 6058 off}
+ {$endif}
+{$endif}
+
 const
  maxprecision = 18;
 type

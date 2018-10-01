@@ -517,6 +517,14 @@ implementation
 uses
  mseprocutils,msepipestream,msesysintf,msestockobjects,mseconsts,msesys,
  mseformatstr;
+{$ifndef mse_allwarnings}
+ {$if fpc_fullversion >= 030100}
+  {$warn 5089 off}
+  {$warn 5090 off}
+  {$warn 5093 off}
+  {$warn 6058 off}
+ {$endif}
+{$endif}
  
 type
  tfont1 = class(tfont);

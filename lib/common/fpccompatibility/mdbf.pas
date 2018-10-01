@@ -5,6 +5,14 @@ unit mdbf;
 { design info in dbf_reg.pas }
 
 interface
+{$ifndef mse_allwarnings}
+ {$if fpc_fullversion >= 030100}
+  {$warn 5089 off}
+  {$warn 5090 off}
+  {$warn 5093 off}
+  {$warn 6058 off}
+ {$endif}
+{$endif}
 
 {$I dbf_common.inc}
 
@@ -483,6 +491,14 @@ uses
   dbf_idxcur,
   dbf_memo,
   dbf_str;
+{$ifndef mse_allwarnings}
+ {$if fpc_fullversion >= 030100}
+  {$warn 5089 off}
+  {$warn 5090 off}
+  {$warn 5093 off}
+  {$warn 6058 off}
+ {$endif}
+{$endif}
 
 {$ifdef FPC}
 const
