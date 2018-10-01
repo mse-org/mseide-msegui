@@ -1082,6 +1082,7 @@ type
    function innerframedim: sizety;
    procedure createfont;
    property framei: framety read fi.ba.innerframe;
+   property frameo: framety read fi.ba.outerframe;
    property clientsizeextend: sizety read fclientsizeextend 
                                                 write fclientsizeextend;
   published

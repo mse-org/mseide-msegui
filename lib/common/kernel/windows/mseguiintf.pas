@@ -1732,7 +1732,7 @@ type
  end;
  ppidinfoty = ^pidinfoty;
 
-function checkproc(awinid: winidty; po: ptrint): bool; stdcall;
+function checkproc(awinid: hwnd; po: ptrint): bool; stdcall;
 var
  pid: integer;
  int1: integer;
@@ -3076,7 +3076,7 @@ function getchildren(child: hwnd; data: lparam): winbool; stdcall;
 begin
  with penumchildinfoty(data)^ do begin
   if gui_getparentwindow(child) = parent then begin
-   additem(childlist,child,count);
+   additem(childlist,winidty(child),count);
   end;
  end;
  result:= true;

@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2017 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2018 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -423,7 +423,15 @@ begin
   checkboxwidth:= menucheckboxwidth;
   checkboxheight:= menucheckboxheight;
   if checkboxframetemplate <> nil then begin
-   size1:= checkboxframetemplate.innerframedim();
+   with checkboxframetemplate do begin
+    if fso_flat in optionsskin then begin
+     dec(checkboxwidth,2);
+     dec(checkboxheight,2);
+    end;
+    size1:= innerframedim();
+    size1.cx:= size1.cx + frameo_left + frameo_right;
+    size1.cy:= size1.cy + frameo_top + frameo_bottom;
+   end;
    checkboxwidth:= checkboxwidth + size1.cx;
    checkboxheight:= checkboxheight + size1.cy;
   end;
