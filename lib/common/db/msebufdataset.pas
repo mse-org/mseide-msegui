@@ -192,10 +192,12 @@ type
   kind: tupdatekind;
   po: card32;
  end;
+{$packrecords 8}
  reclogheaderty = record
   kind: tupdatekind;
   po: card64; //pointer;
  end;
+{$packrecords default}
  updatekindty = (uk_modify=ord(ukmodify),uk_insert=ord(ukinsert),
                  uk_delete=ord(ukdelete),uk_modifyinupdate);
  updatelogheader32ty = record
@@ -204,12 +206,14 @@ type
   po: card32;
   deletedrecord: card32;
  end;
+{$packrecords 8}        //64 bit compatible
  updatelogheaderty = record
   logging: boolean;
   kind: updatekindty;
   po: card64; //pointer;
   deletedrecord: card64; //pintrecordty;
  end;
+{$packrecords default}
  logbufferheader32ty = record
   case logflag: logflagty of
    lf_rec: (
@@ -219,6 +223,7 @@ type
     update: updatelogheader32ty;
    );
  end;
+{$packrecords 8}        //64 bit compatible
  logbufferheaderty = record
   case logflag: logflagty of
    lf_rec: (
@@ -228,6 +233,7 @@ type
     update: updatelogheaderty;
    );
  end;
+{$packrecords default}
  
  tbufstreamwriter = class
   private
