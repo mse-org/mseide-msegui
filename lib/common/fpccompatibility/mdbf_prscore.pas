@@ -933,7 +933,7 @@ begin
 {$IFDEF ENG_NUMBERS}
           // we'll have to convert FDecimalSeparator into DecimalSeparator
           // otherwise the OS will not understand what we mean
-          W[DecSep] := DecimalSeparator;
+          W[DecSep] := DefaultFormatSettings.DecimalSeparator;
 {$ENDIF}
           TempWord := TFloatConstant.Create(W, W)
         end else begin
