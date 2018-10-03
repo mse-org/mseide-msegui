@@ -267,6 +267,7 @@ type
   end;
 
 procedure querytoupdateparams(const source: tsqlquery; const dest: tparams);
+function SkipComments(var p: PmseChar) : boolean;
 
 implementation
 uses
