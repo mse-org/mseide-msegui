@@ -766,8 +766,15 @@ type
  pdatacolaty = ^datacolaty;
 
  tcelldragobject = class(tdragobject)
+  private
+   fgrid: tcustomgrid;
+   fcell: gridcoordty;
   public 
    constructor create(const draginfo: draginfoty; const cellinfo: cellinfoty);
+   constructor create(const agrid: tcustomgrid;
+                              var ainstance: tdragobject; const apos: pointty);
+   property grid: tcustomgrid read fgrid;
+   property cell: gridcoordty read fcell;
  end;
  
  celldrageventty = procedure(const cellinfo: cellinfoty;
@@ -19390,9 +19397,19 @@ end;
 { tcelldragobject }
 
 constructor tcelldragobject.create(const draginfo: draginfoty;
-               const cellinfo: cellinfoty);
+                                            const cellinfo: cellinfoty);
 begin
+ fgrid:= cellinfo.grid;
+ fcell:= cellinfo.cell;
  inherited create(cellinfo.grid,draginfo.dragobjectpo^,draginfo.pickpos);
+end;
+
+constructor tcelldragobject.create(const agrid: tcustomgrid;
+                          var ainstance: tdragobject; const apos: pointty);
+begin
+ fgrid:= agrid;
+ fcell:= agrid.cellatpos(apos);
+ inherited create(agrid,ainstance,apos);
 end;
 
 end.
