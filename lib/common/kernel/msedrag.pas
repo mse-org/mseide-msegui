@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2014 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2018 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -72,7 +72,7 @@ type
 //  expiretime: longword;
  end;
 
- dragoptionty = (do_child,do_nocursorshape);
+ dragoptionty = (do_child,do_nocursorshape,do_nearstart,do_mousewidget);
  dragoptionsty = set of dragoptionty;
  
  tcustomdragcontroller = class(tlinkedpersistent,ievent)
@@ -256,12 +256,23 @@ var
  info: draginfoty;
 begin
  result:= nil;
+ window:= nil;
  pt1:= translateclientpoint(pos,fintf.getwidget,nil);
- window:= application.windowatpos(pt1);
+ if do_mousewidget in foptions then begin
+  result:= application.mousewidget;
+  if result <> nil then begin
+   window:= result.window;
+  end;
+ end
+ else begin
+  window:= application.windowatpos(pt1);
+  if window <> nil then begin
+   result:= window.owner.widgetatpos(translatewidgetpoint(pt1,nil,window.owner),
+           [ws_visible,ws_enabled]);
+  end;
+ end;
  if window <> nil then begin
   sysdndpending:= false;
-  result:= window.owner.widgetatpos(translatewidgetpoint(pt1,nil,window.owner),
-          [ws_visible,ws_enabled]);
   if (flastwidget <> result) then begin
    if (flastwidget <> nil) then begin
     initdraginfo(info,dek_leavewidget,
