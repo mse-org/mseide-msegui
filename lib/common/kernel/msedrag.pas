@@ -60,6 +60,8 @@ type
 const
  dragstates = [ds_clicked,ds_beginchecked,ds_haddragobject];
  sdndexpiretime = 5000000; //5s
+ dragmindist = 4;
+
 type
  drageventsty = record
   dragbegin: drageventty;
@@ -326,7 +328,15 @@ begin
   ek_buttonpress: begin
    if checkclickstate(info) then begin
     fpickpos:= info.pos;
-    fpickrect:= fintf.getdragrect(fpickpos);
+    if do_nearstart in foptions then begin
+     fpickrect.x:= info.pos.x - dragmindist;
+     fpickrect.y:= info.pos.y - dragmindist;
+     fpickrect.cx:= 2 * dragmindist;
+     fpickrect.cy:= 2 * dragmindist;
+    end
+    else begin
+     fpickrect:= fintf.getdragrect(fpickpos);
+    end;
     include(fstate,ds_clicked);
    end;
   end;

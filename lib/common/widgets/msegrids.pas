@@ -88,7 +88,6 @@ const
  defaultgridskinoptions = [osk_framebuttononly];
  sortglyphwidth = 11;
  defaultwheelscrollheight = 0;
- dragmindist = 4;
  
  rowstatefoldleveltag = 0;
  rowstateissumtag = 1;
@@ -16525,20 +16524,12 @@ function tcustomgrid.getdragrect(const apos: pointty): rectty;
 var
  cell1: gridcoordty;
 begin
- if do_nearstart in fdragcontroller.options then begin
-  result.x:= apos.x - dragmindist;
-  result.y:= apos.y - dragmindist;
-  result.cx:= 2 * dragmindist;
-  result.cy:= 2 * dragmindist;
+ cell1:= cellatpos(apos);
+ if isdatacell(cell1) then begin
+  result:= cellrect(cell1);
  end
  else begin
-  cell1:= cellatpos(apos);
-  if isdatacell(cell1) then begin
-   result:= cellrect(cell1);
-  end
-  else begin
-   result:= inherited getdragrect(apos);
-  end;
+  result:= inherited getdragrect(apos);
  end;
 end;
 
