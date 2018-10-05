@@ -72,7 +72,7 @@ type
 //  expiretime: longword;
  end;
 
- dragoptionty = (do_child);
+ dragoptionty = (do_child,do_nocursorshape);
  dragoptionsty = set of dragoptionty;
  
  tcustomdragcontroller = class(tlinkedpersistent,ievent)
@@ -231,7 +231,9 @@ begin
   end;
  end;
  if ds_haddragobject in fstate then begin
-  application.cursorshape:= cr_default;
+  if not (do_nocursorshape in foptions) then begin
+   application.cursorshape:= cr_default;
+  end;
  end;
  application.unregisteronkeypress(@dokeypress);
  fstate:= fstate - dragstates;
@@ -363,12 +365,16 @@ begin
      tdragobject1(fdragobject).feventintf:= ievent(self);
      include(info.eventstate,es_processed);
      if checkcandragdrop(info.pos,bo1) <> nil then begin
-      application.cursorshape:= cr_drag;
+      if not (do_nocursorshape in foptions) then begin
+       application.cursorshape:= cr_drag;
+      end;
       fdragobject.acepted(translateclientpoint(info.pos,owner,nil));
      end
      else begin
       if not bo1 then begin
-       application.cursorshape:= cr_forbidden;
+       if not (do_nocursorshape in foptions) then begin
+        application.cursorshape:= cr_forbidden;
+       end;
        fdragobject.refused(translateclientpoint(info.pos,owner,nil));
       end;
      end;
@@ -411,11 +417,13 @@ begin
  if (fdragobject <> nil) and (aevent is tsysdndstatusevent) then begin
   with tsysdndstatusevent(aevent) do begin
    if ds_beginchecked in fstate then begin
-    if accept then begin
-     application.cursorshape:= cr_drag;
-    end
-    else begin
-     application.cursorshape:= cr_forbidden;
+    if not (do_nocursorshape in foptions) then begin
+     if accept then begin
+      application.cursorshape:= cr_drag;
+     end
+     else begin
+      application.cursorshape:= cr_forbidden;
+     end;
     end;
    end;
   end;

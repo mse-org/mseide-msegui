@@ -74,8 +74,10 @@ constructor tdragobject.create(const asender: tobject; var instance: tdragobject
 begin
  fsender:= asender;
  finstancepo:= @instance;
- instance.Free;
- instance:= self;
+ if finstancepo <> nil then begin
+  instance.Free;
+  instance:= self;
+ end;
  fpickpos:= apickpos;
  factions:= aactions;
  tguiapplication1(application).dragstarted;
