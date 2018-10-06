@@ -27,6 +27,9 @@ type
  dragovereventty = procedure(const asender: tobject; const apos: pointty;
                var adragobject: tdragobject; var accept: boolean;
                                             var processed: boolean) of object;
+ dragendeventty = procedure(const asender: tobject; const apos: pointty;
+               var adragobject: tdragobject; const accepted: boolean;
+                                            var processed: boolean) of object;
 
  ttagdragobject = class(tdragobject)
   private
@@ -67,6 +70,7 @@ type
   dragbegin: drageventty;
   dragover: dragovereventty;
   dragdrop: drageventty;
+  dragend: dragendeventty;
  end;
 
  sysdndinfoty = record
@@ -137,12 +141,16 @@ type
                                   write fonbefore.dragover;
    property onbeforedragdrop: drageventty read fonbefore.dragdrop 
                                   write fonbefore.dragdrop;
+   property onbeforedragend: dragendeventty read fonbefore.dragend 
+                                  write fonbefore.dragend;
    property onafterdragbegin: drageventty read fonafter.dragbegin 
                                   write fonafter.dragbegin;
    property onafterdragover: dragovereventty read fonafter.dragover 
                                   write fonafter.dragover;
    property onafterdragdrop: drageventty read fonafter.dragdrop 
                                   write fonafter.dragdrop;
+   property onafterdragend: dragendeventty read fonafter.dragend 
+                                  write fonafter.dragend;
    property options;
  end;
  
@@ -201,9 +209,21 @@ end;
 procedure tcustomdragcontroller.enddrag;
 var
  int1,int2: integer;
+ draginfo: draginfoty;
+ owner: twidget;
+ po1: pointty;
 begin
 // checksysdnd(sdnda_finished,nullrect);
  if fdragobject <> nil then begin
+  owner:= fintf.getwidget();
+  if dos_dropped in fdragobject.state then begin
+   po1:= translateclientpoint(fdragobject.droppos,nil,owner);
+  end
+  else begin
+   po1:= fdragobject.pickpos;
+  end;
+  initdraginfo(draginfo,dek_end,po1);
+  owner.dragevent(draginfo);
   if dos_sysdroppending in tdragobject1(fdragobject).fstate then begin
    int2:= 0;
    for int1:= 0 to high(fsysdndobjects) do begin
@@ -305,6 +325,9 @@ begin
  info.clientpickpos:= fpickpos;
  info.pickpos:= translateclientpoint(fpickpos,fintf.getwidget,nil);
  info.dragobjectpo:= @fdragobject;
+ if (eventkind = dek_drop) and (fdragobject <> nil) then begin
+  include(tdragobject1(fdragobject).fstate,dos_dropped);
+ end;
 end;
 
 function tcustomdragcontroller.checkclickstate(
@@ -507,6 +530,12 @@ begin
    dek_drop: begin
     if assigned(dragdrop) then begin
      dragdrop(fintf.getwidget,pos,dragobjectpo^,result);
+    end;
+   end;
+   dek_end: begin
+    if assigned(dragend) then begin
+     dragend(fintf.getwidget,pos,dragobjectpo^,(dragobjectpo^ <> nil) and 
+                                  (dos_dropped in dragobjectpo^.state),result);
     end;
    end;
   end;
