@@ -1386,9 +1386,15 @@ function setwindowowner(id: hwnd; param: lparam): winbool; stdcall;
 
 begin
  with psetwindowownerinfoty(ptruint(param))^ do begin
+ {$ifdef cpu64}
+  if getwindowlongptr(id,gwlp_hwndparent) = oldowner then begin
+   setwindowlongptr(id,gwlp_hwndparent,newowner);
+  end;
+ {$else}
   if getwindowlong(id,gwl_hwndparent) = oldowner then begin
    setwindowlong(id,gwl_hwndparent,newowner);
-  end;  
+  end;
+ {$endif}
  end;
  result:= true;
 end;
@@ -1409,7 +1415,11 @@ begin
     destroyicon(ico1);
    end;
    info.oldowner:= id;
+  {$ifdef cpu64}
+   info.newowner:= getwindowlongptr(id,gwlp_hwndparent);
+  {$else}
    info.newowner:= getwindowlong(id,gwl_hwndparent);
+  {$endif}
    enumwindows(@setwindowowner,ptruint(@info)); 
                                       //do not destroy children   
    if windows.DestroyWindow(id) then begin
@@ -2892,11 +2902,17 @@ begin
  end;
 end;
 
-function gui_settransientfor(var awindow: windowty; const transientfor: winidty): guierrorty;
+function gui_settransientfor(var awindow: windowty;
+                           const transientfor: winidty): guierrorty;
 begin
  with awindow,win32windowty(platformdata).d do begin
   if not istaskbar then begin
+ {$ifdef cpu64}
+   setwindowlongptr(id,gwlp_hwndparent,transientfor);
+                                          //no taskbar widget if called!
+ {$else}
    setwindowlong(id,gwl_hwndparent,transientfor); //no taskbar widget if called!
+ {$endif}
 // transientfor can be destroyed
   end;
  end;
