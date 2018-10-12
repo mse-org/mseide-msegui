@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2014 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2018 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -26,6 +26,9 @@ type
                var adragobject: tdragobject; var processed: boolean) of object;
  dragovereventty = procedure(const asender: tobject; const apos: pointty;
                var adragobject: tdragobject; var accept: boolean;
+                                            var processed: boolean) of object;
+ dragendeventty = procedure(const asender: tobject; const apos: pointty;
+               var adragobject: tdragobject; const accepted: boolean;
                                             var processed: boolean) of object;
 
  ttagdragobject = class(tdragobject)
@@ -60,11 +63,14 @@ type
 const
  dragstates = [ds_clicked,ds_beginchecked,ds_haddragobject];
  sdndexpiretime = 5000000; //5s
+ dragmindist = 4;
+
 type
  drageventsty = record
   dragbegin: drageventty;
   dragover: dragovereventty;
   dragdrop: drageventty;
+  dragend: dragendeventty;
  end;
 
  sysdndinfoty = record
@@ -72,7 +78,7 @@ type
 //  expiretime: longword;
  end;
 
- dragoptionty = (do_child);
+ dragoptionty = (do_child,do_nocursorshape,do_nearstart,do_mousewidget);
  dragoptionsty = set of dragoptionty;
  
  tcustomdragcontroller = class(tlinkedpersistent,ievent)
@@ -135,12 +141,16 @@ type
                                   write fonbefore.dragover;
    property onbeforedragdrop: drageventty read fonbefore.dragdrop 
                                   write fonbefore.dragdrop;
+   property onbeforedragend: dragendeventty read fonbefore.dragend 
+                                  write fonbefore.dragend;
    property onafterdragbegin: drageventty read fonafter.dragbegin 
                                   write fonafter.dragbegin;
    property onafterdragover: dragovereventty read fonafter.dragover 
                                   write fonafter.dragover;
    property onafterdragdrop: drageventty read fonafter.dragdrop 
                                   write fonafter.dragdrop;
+   property onafterdragend: dragendeventty read fonafter.dragend 
+                                  write fonafter.dragend;
    property options;
  end;
  
@@ -199,9 +209,21 @@ end;
 procedure tcustomdragcontroller.enddrag;
 var
  int1,int2: integer;
+ draginfo: draginfoty;
+ owner: twidget;
+ po1: pointty;
 begin
 // checksysdnd(sdnda_finished,nullrect);
  if fdragobject <> nil then begin
+  owner:= fintf.getwidget();
+  if dos_dropped in fdragobject.state then begin
+   po1:= translateclientpoint(fdragobject.droppos,nil,owner);
+  end
+  else begin
+   po1:= fdragobject.pickpos;
+  end;
+  initdraginfo(draginfo,dek_end,po1);
+  owner.dragevent(draginfo);
   if dos_sysdroppending in tdragobject1(fdragobject).fstate then begin
    int2:= 0;
    for int1:= 0 to high(fsysdndobjects) do begin
@@ -231,7 +253,9 @@ begin
   end;
  end;
  if ds_haddragobject in fstate then begin
-  application.cursorshape:= cr_default;
+  if not (do_nocursorshape in foptions) then begin
+   application.cursorshape:= cr_default;
+  end;
  end;
  application.unregisteronkeypress(@dokeypress);
  fstate:= fstate - dragstates;
@@ -254,12 +278,23 @@ var
  info: draginfoty;
 begin
  result:= nil;
+ window:= nil;
  pt1:= translateclientpoint(pos,fintf.getwidget,nil);
- window:= application.windowatpos(pt1);
+ if do_mousewidget in foptions then begin
+  result:= application.mousewidget;
+  if result <> nil then begin
+   window:= result.window;
+  end;
+ end
+ else begin
+  window:= application.windowatpos(pt1);
+  if window <> nil then begin
+   result:= window.owner.widgetatpos(translatewidgetpoint(pt1,nil,window.owner),
+           [ws_visible,ws_enabled]);
+  end;
+ end;
  if window <> nil then begin
   sysdndpending:= false;
-  result:= window.owner.widgetatpos(translatewidgetpoint(pt1,nil,window.owner),
-          [ws_visible,ws_enabled]);
   if (flastwidget <> result) then begin
    if (flastwidget <> nil) then begin
     initdraginfo(info,dek_leavewidget,
@@ -290,6 +325,9 @@ begin
  info.clientpickpos:= fpickpos;
  info.pickpos:= translateclientpoint(fpickpos,fintf.getwidget,nil);
  info.dragobjectpo:= @fdragobject;
+ if (eventkind = dek_drop) and (fdragobject <> nil) then begin
+  include(tdragobject1(fdragobject).fstate,dos_dropped);
+ end;
 end;
 
 function tcustomdragcontroller.checkclickstate(
@@ -313,7 +351,15 @@ begin
   ek_buttonpress: begin
    if checkclickstate(info) then begin
     fpickpos:= info.pos;
-    fpickrect:= fintf.getdragrect(fpickpos);
+    if do_nearstart in foptions then begin
+     fpickrect.x:= info.pos.x - dragmindist;
+     fpickrect.y:= info.pos.y - dragmindist;
+     fpickrect.cx:= 2 * dragmindist;
+     fpickrect.cy:= 2 * dragmindist;
+    end
+    else begin
+     fpickrect:= fintf.getdragrect(fpickpos);
+    end;
     include(fstate,ds_clicked);
    end;
   end;
@@ -363,12 +409,16 @@ begin
      tdragobject1(fdragobject).feventintf:= ievent(self);
      include(info.eventstate,es_processed);
      if checkcandragdrop(info.pos,bo1) <> nil then begin
-      application.cursorshape:= cr_drag;
+      if not (do_nocursorshape in foptions) then begin
+       application.cursorshape:= cr_drag;
+      end;
       fdragobject.acepted(translateclientpoint(info.pos,owner,nil));
      end
      else begin
       if not bo1 then begin
-       application.cursorshape:= cr_forbidden;
+       if not (do_nocursorshape in foptions) then begin
+        application.cursorshape:= cr_forbidden;
+       end;
        fdragobject.refused(translateclientpoint(info.pos,owner,nil));
       end;
      end;
@@ -411,11 +461,13 @@ begin
  if (fdragobject <> nil) and (aevent is tsysdndstatusevent) then begin
   with tsysdndstatusevent(aevent) do begin
    if ds_beginchecked in fstate then begin
-    if accept then begin
-     application.cursorshape:= cr_drag;
-    end
-    else begin
-     application.cursorshape:= cr_forbidden;
+    if not (do_nocursorshape in foptions) then begin
+     if accept then begin
+      application.cursorshape:= cr_drag;
+     end
+     else begin
+      application.cursorshape:= cr_forbidden;
+     end;
     end;
    end;
   end;
@@ -478,6 +530,12 @@ begin
    dek_drop: begin
     if assigned(dragdrop) then begin
      dragdrop(fintf.getwidget,pos,dragobjectpo^,result);
+    end;
+   end;
+   dek_end: begin
+    if assigned(dragend) then begin
+     dragend(fintf.getwidget,pos,dragobjectpo^,(dragobjectpo^ <> nil) and 
+                                  (dos_dropped in dragobjectpo^.state),result);
     end;
    end;
   end;

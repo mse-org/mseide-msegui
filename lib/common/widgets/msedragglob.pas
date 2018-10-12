@@ -14,7 +14,7 @@ uses
  mseglob,msegraphutils,mseguiglob,mseevent;
  
 type
- dragobjstatety = (dos_sysdnd,dos_write,dos_sysdroppending);
+ dragobjstatety = (dos_dropped,dos_sysdnd,dos_write,dos_sysdroppending);
  dragobjstatesty = set of dragobjstatety;
  
  pdragobject = ^tdragobject;
@@ -22,6 +22,7 @@ type
   private
    fpickpos: pointty;
    fdroppos: pointty;
+   function getdropped: boolean;
   protected
    finstancepo: pdragobject;
    fsender: tobject;
@@ -35,20 +36,21 @@ type
    function geteventintf: ievent;
   public
    constructor create(const asender: tobject; var instance: tdragobject;
-                          const apickpos: pointty;
+                          const apickpos: pointty; //clientorigin
                           const aactions: dndactionsty = []);
    destructor destroy; override;
    function sender: tobject;
    procedure acepted(const apos: pointty); virtual;        //screenorigin
    procedure refused(const apos: pointty); virtual;        //screenorigin
-   property pickpos: pointty read fpickpos write fpickpos; //screenorigin
+   property pickpos: pointty read fpickpos write fpickpos; //clientorigin
    property droppos: pointty read fdroppos write fdroppos; //screenorigin
    property state: dragobjstatesty read fstate;
+   property dropped: boolean read getdropped;
    property actions: dndactionsty read factions write factions;
  end;
 
- drageventkindty = (dek_begin,dek_check,dek_drop,dek_leavesysdnd,
-                    dek_leavewidget);
+ drageventkindty = (dek_begin,dek_check,dek_drop,dek_end,
+                    dek_leavesysdnd,dek_leavewidget);
 
  draginfoty = record
   eventkind: drageventkindty;
@@ -74,8 +76,10 @@ constructor tdragobject.create(const asender: tobject; var instance: tdragobject
 begin
  fsender:= asender;
  finstancepo:= @instance;
- instance.Free;
- instance:= self;
+ if finstancepo <> nil then begin
+  instance.Free;
+  instance:= self;
+ end;
  fpickpos:= apickpos;
  factions:= aactions;
  tguiapplication1(application).dragstarted;
@@ -88,6 +92,11 @@ begin
   finstancepo^:= nil;
  end;
  inherited;
+end;
+
+function tdragobject.getdropped: boolean;
+begin
+ result:= dos_dropped in fstate;
 end;
 
 procedure tdragobject.acepted(const apos: pointty);

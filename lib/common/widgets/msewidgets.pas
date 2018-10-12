@@ -115,7 +115,7 @@ type
    procedure fontcanvaschanged; override;
    procedure visiblechanged; override;
 
-   procedure updatetextflags;
+   function updatetextflags(const aflags: textflagsty): textflagsty;
    procedure updaterects; override;
    procedure updatehotkeys() override;
    procedure dominsize(var asize: sizety);
@@ -2684,7 +2684,7 @@ begin
  end;
  if finfo.text.text <> '' then begin
   flagsbefore:= finfo.flags;
-  updatetextflags();
+  finfo.flags:= updatetextflags(finfo.flags);
   drawtext(canvas,finfo);
   finfo.flags:= flagsbefore;
  end;
@@ -2758,10 +2758,12 @@ begin
  end;
 end;
 
-procedure tcustomcaptionframe.updatetextflags;
+function tcustomcaptionframe.updatetextflags(
+                          const aflags: textflagsty): textflagsty;
 begin
+ result:= finfo.flags;
  if (fs_disabled in fstate) and not (cfo_captionnogray in foptions) then begin
-  include(finfo.flags,tf_grayed);
+  include(result,tf_grayed);
  end;
 end;
 
@@ -2772,19 +2774,20 @@ var
  rect1,rect2: rectty;
  bo1,bo2: boolean;
  widget1: twidget1;
-// flagsbefore: textflagsty;
+ flagsbefore: textflagsty;
 begin
  inherited;
  fra1:= fouterframe;
  fstate:= fstate - [fs_cancaptionsyncx,fs_cancaptionsyncy];
  if finfo.text.text <> '' then begin
-//  flagsbefore:= finfo.flags;
-  updatetextflags();
+  flagsbefore:= finfo.flags;
+  finfo.flags:= updatetextflags(finfo.flags);
   canvas:= icaptionframe(fintf).getcanvas;
   canvas.font:= getfont;
   finfo.dest.size:= icaptionframe(fintf).getwidgetrect.size;
   rect1:= deflaterect(makerect(nullpoint,finfo.dest.size),fouterframe);
   textrect(canvas,finfo);
+  finfo.flags:= flagsbefore;
 //  finfo.flags:= flagsbefore-[tf_xcentered,tf_ycentered,tf_right,tf_bottom];
   finfo.dest:= finfo.res;
   bo1:= cfo_captiondistouter in foptions;

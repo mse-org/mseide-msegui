@@ -60,7 +60,8 @@ type
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
-   property options: objectpickeroptionsty read getoptions write setoptions;
+   property options: objectpickeroptionsty read getoptions 
+                                                 write setoptions default [];
    property ongetcursorshape: getcursorshapeeventty read fongetcursorshape
                                 write fongetcursorshape;
    property ongetpickobjects: getpickobjectseventty read fongetpickobjects

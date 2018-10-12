@@ -300,7 +300,8 @@ begin
  registerpropertyeditor(typeinfo(optionsdockty),nil,'',
                                            toptionsdockeditor);
   
- registerunitgroup(['msegrids'],['msegui','msegraphutils','mseclasses']);
+ registerunitgroup(['msegrids'],['msegui','msegraphutils','mseclasses',
+                   'msegridsglob']);
  registerunitgroup(['msewidgetgrid'],['msedataedits',
                     'msegui','msegraphutils','mseclasses']);
                     

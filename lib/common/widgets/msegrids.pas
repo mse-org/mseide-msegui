@@ -100,6 +100,7 @@ const
  rowstatefoldleveltag = 0;
  rowstateissumtag = 1;
  rowstatefoldhiddentag = 2;
+ gridautosizetag = 3;
   
 type
  optiongridty = (og_colsizing,og_colmoving,og_keycolmoving,
@@ -248,6 +249,7 @@ type
                  gs1_sortmoving,gs1_sortchangelock,gs1_rowinserted,
                  gs1_gridsorted,gs1_dbsorted,gs1_customsort,
                  gs1_rowdeleting,gs1_autoappending,gs1_autoremoving,
+                 gs1_autosizepending,
                  gs1_focuscellonenterlock,gs1_mousecaptureendlock,
                  gs1_forcenullcheck,
                  gs1_cellsizesyncing,gs1_userinput,gs1_autoappendlock,
@@ -770,15 +772,41 @@ type
 
  datacolaty = array[0..0] of tdatacol;
  pdatacolaty = ^datacolaty;
+
+ tcelldragobject = class(tdragobject)
+  private
+   fgrid: tcustomgrid;
+   fcell: gridcoordty;
+  public 
+   constructor create(const draginfo: draginfoty; const cellinfo: cellinfoty);
+   constructor create(const agrid: tcustomgrid;
+                              var ainstance: tdragobject; const apos: pointty);
+   property grid: tcustomgrid read fgrid;
+   property cell: gridcoordty read fcell;
+ end;
  
+ celldrageventty = procedure(const cellinfo: cellinfoty;
+                    var draginfo: draginfoty; var dragobject: tcelldragobject;
+                      var accept: boolean; var processed: boolean) of object;
+
  tdrawcol = class(tdatacol)
   private
    fondrawcell: drawcelleventty;
+   fonbeforedragevent: celldrageventty;
+   fonafterdragevent: celldrageventty;
   protected
    procedure drawcell(const canvas: tcanvas); override;
+   procedure beforedragevent(var ainfo: draginfoty; const arow: integer;
+                                            var processed: boolean) override;
+   procedure afterdragevent(var ainfo: draginfoty; const arow: integer;
+                                            var processed: boolean) override;
   published
    property focusrectdist;
    property ondrawcell: drawcelleventty read fondrawcell write fondrawcell;
+   property onbeforedragevent: celldrageventty read fonbeforedragevent 
+                                                      write fonbeforedragevent;
+   property onafterdragevent: celldrageventty read fonafterdragevent 
+                                                      write fonafterdragevent;
    property font;
  end;
 
@@ -2172,12 +2200,14 @@ type
    procedure objectevent(const sender: tobject; 
                                  const event: objecteventty); override;
 
+   procedure doasyncevent(var atag: integer) override;
    procedure loaded; override;
    procedure doexit; override;
    procedure doenter; override;
    procedure doactivate; override;
    procedure dodeactivate; override;
    procedure activechanged; override;
+   procedure getautopaintsize(var asize: sizety) override;
    procedure mouseevent(var info: mouseeventinfoty); override;
    procedure clientmouseevent(var info: mouseeventinfoty); override;
    procedure domousewheelevent(var info: mousewheeleventinfoty); override;
@@ -5815,18 +5845,6 @@ begin
   ftotsize:= ftotsize + int2;
  end
  else begin  //datacols
- {
-  for int1:= count - 1 downto count - foppositecount do begin
-   with tgridprop(fitems[int1]) do begin
-    fend:= int3;
-    dec(int3,step);
-    inc(int2,step);
-    fstart:= int3;
-   end;
-  end;
-  ftotsize:= int2;
-  int2:= 0;
-  }
   with tdatacols(self) do begin
    int2:= 0;
    fscrollsize:= 0;
@@ -6994,6 +7012,32 @@ begin
  inherited;
  if assigned(fondrawcell) then begin
   fondrawcell(self,canvas,cellinfoty(canvas.drawinfopo^));
+ end;
+end;
+
+procedure tdrawcol.beforedragevent(var ainfo: draginfoty; const arow: integer;
+               var processed: boolean);
+begin
+ if not processed and assigned(fonbeforedragevent) then begin
+  fcellinfo.cell.row:= arow;
+  fonbeforedragevent(fcellinfo,ainfo,tcelldragobject(ainfo.dragobjectpo^),
+                                                       ainfo.accept,processed);
+ end;
+ if not processed then begin
+  inherited;
+ end;
+end;
+
+procedure tdrawcol.afterdragevent(var ainfo: draginfoty; const arow: integer;
+               var processed: boolean);
+begin
+ if not processed and assigned(fonafterdragevent) then begin
+  fcellinfo.cell.row:= arow;
+  fonafterdragevent(fcellinfo,ainfo,tcelldragobject(ainfo.dragobjectpo^),
+                                                      ainfo.accept,processed);
+ end;
+ if not processed then begin
+  inherited;
  end;
 end;
 
@@ -13895,6 +13939,37 @@ begin
  end;
 end;
 
+procedure tcustomgrid.doasyncevent(var atag: integer);
+begin
+ if atag = gridautosizetag then begin
+  exclude(fstate1,gs1_autosizepending);
+  checkautosize();
+  designchanged;
+ end
+ else begin
+  inherited;
+ end;
+end;
+
+procedure tcustomgrid.getautopaintsize(var asize: sizety);
+begin
+ if foptionswidget1 * [ow1_autowidth,ow1_autoheight] = [] then begin
+  inherited;
+ end
+ else begin
+  if fstate*[gs_updatelocked,gs_layoutupdating] <> [] then begin
+   if not (gs1_autosizepending in fstate1) then begin
+    include(fstate1,gs1_autosizepending);
+    asyncevent(gridautosizetag,[peo_local]);
+   end;
+  end
+  else begin
+   asize:= calcminscrollsize();
+  end;
+  inherited;
+ end;
+end;
+
 procedure tcustomgrid.getpickobjects(const sender: tobjectpicker;
                                                var objects: integerarty);
 var
@@ -19334,6 +19409,24 @@ procedure tstringgrid.initnewcomponent(const ascale: real);
 begin
  inherited;
  optionsgrid:= optionsgrid + newcomponentoptionsgridadd;
+end;
+
+{ tcelldragobject }
+
+constructor tcelldragobject.create(const draginfo: draginfoty;
+                                            const cellinfo: cellinfoty);
+begin
+ fgrid:= cellinfo.grid;
+ fcell:= cellinfo.cell;
+ inherited create(cellinfo.grid,draginfo.dragobjectpo^,draginfo.pickpos);
+end;
+
+constructor tcelldragobject.create(const agrid: tcustomgrid;
+                          var ainstance: tdragobject; const apos: pointty);
+begin
+ fgrid:= agrid;
+ fcell:= agrid.cellatpos(apos);
+ inherited create(agrid,ainstance,apos);
 end;
 
 end.
