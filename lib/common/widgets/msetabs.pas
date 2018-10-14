@@ -497,10 +497,12 @@ type
   public
    class function getinstancepo(owner: tobject): pfont; override;
  end;
- getsubformeventty = procedure(const sender: tobject;
+ 
+ ttabpage = class;
+ getsubformeventty = procedure(const sender: ttabpage;
                           var submoduleclass: widgetclassty;
                           var instancevarpo: pwidget) of object;
- initsubformeventty = procedure(const sender: tobject;
+ initsubformeventty = procedure(const sender: ttabpage;
                           const asubform: twidget) of object;
                           
  ttabpage = class(tscrollingwidget,itabpage,iimagelistinfo)
