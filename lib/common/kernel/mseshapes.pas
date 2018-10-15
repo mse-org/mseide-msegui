@@ -1445,7 +1445,7 @@ begin
    canvas.save();
    co1:= info.color;
    co2:= info.coloractive;
-   co3:= info.frame.colorclient;
+   co3:= tframe1(info.frame).actualcolorclient;
    if shs_active in info.state then begin
     co0:= co2;
     info.coloractive:= cl_transparent;

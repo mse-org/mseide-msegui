@@ -46,7 +46,8 @@ const
 type
  tgrapheditframe = class(tcustomcaptionframe)
   protected
-   function getdefaultcolorclient: colorty; virtual;
+//   function getdefaultcolorclient: colorty; virtual;
+//   function actualcolorclient(): colorty override;
   public
    constructor create(const aintf: icaptionframe);
   published
@@ -104,7 +105,7 @@ type
    property frameface_offsetactivemouse;
    property frameface_offsetactiveclicked;
 }
-   property colorclient default cl_transparent;
+   property colorclient {default cl_transparent};
    property caption;
    property captionpos default cp_right;
    property captiondist;
@@ -117,9 +118,9 @@ type
 
  ttogglegrapheditframe = class(tgrapheditframe)
   protected
-   function getdefaultcolorclient: colorty; override;
+   function actualcolorclient: colorty override;
   published
-   property colorclient default cl_foreground;
+   property colorclient {default cl_foreground};
  end;
  
  tgraphdataedit = class(tactionpublishedwidget,igridwidget,istatfile,
@@ -1243,24 +1244,40 @@ begin
  options:= defaultgrapheditframeoptions;
  fstate:= fstate + [fs_drawfocusrect,fs_captionfocus,fs_captionhint,
                      fs_paintrectfocus];
- fi.colorclient:= getdefaultcolorclient;
  fi.levelo:= -2;
  captionpos:= cp_right;
  internalupdatestate;
 end;
-
+{
+function tgrapheditframe.actualcolorclient(): colorty;
+begin
+ result:= fi.colorclient;
+ if result = cl_default then begin
+  result:= cl_transparent;
+ end;
+end;
+}
+{
 function tgrapheditframe.getdefaultcolorclient: colorty;
 begin
  result:= cl_transparent;
 end;
-
+}
 { ttogglegrapheditframe }
 
+function ttogglegrapheditframe.actualcolorclient: colorty;
+begin
+ result:= fi.colorclient;
+ if result = cl_default then begin
+  result:= cl_foreground;
+ end;
+end;
+{
 function ttogglegrapheditframe.getdefaultcolorclient: colorty;
 begin
  result:= cl_foreground;
 end;
-
+}
 { tsliderscrollbar }
 
 constructor tsliderscrollbar.create(intf: iscrollbar; org: originty;

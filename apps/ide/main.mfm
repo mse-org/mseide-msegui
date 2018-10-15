@@ -21,9 +21,9 @@ object mainfo: tmainfo
   container.onlayout = onscale
   container.bounds = (
     0
-    15
+    16
     449
-    134
+    133
   )
   dragdock.optionsdock = [od_savepos, od_savezorder, od_canmove, od_cansize, od_canfloat, od_candock, od_captionhint]
   dragdock.optionsdockform = [odf_main, odf_childicons]
@@ -47,26 +47,27 @@ object mainfo: tmainfo
     bounds_x = 0
     bounds_y = 19
     bounds_cx = 449
-    bounds_cy = 115
+    bounds_cy = 114
     anchors = [an_top, an_bottom]
     dragdock.optionsdock = [od_acceptsdock, od_splitvert, od_splithorz, od_tabed, od_proportional, od_background, od_captionhint]
     statfile = projectstatfile
   end
   object statdisp: tstringdisp
     optionswidget = [ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
-    frame.localprops = []
+    frame.colorclient = -2147483645
+    frame.localprops = [frl_colorclient]
     frame.localprops1 = []
     taborder = 1
     bounds_x = 0
     bounds_y = 1
     bounds_cx = 449
-    bounds_cy = 17
+    bounds_cy = 18
     anchors = [an_top]
     font.name = 'stf_default'
     font.xscale = 1
     font.localprops = [flp_xscale]
     options = [dwo_hintclippedtext]
-    reffontheight = 13
+    reffontheight = 14
   end
   object gdb: tgdbmi
     guiintf = True

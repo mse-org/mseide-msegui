@@ -1,5 +1,8 @@
 MSEide+MSEgui breaking changes version history
 **********************************************
+2018-10-15
+ tcustomframe.colorclient default value cl_transparent -> cl_default.
+ tdispframe default actualcolorclient() value cl_transparent -> cl_noedit.
 2018-10-14
  getsubformeventty and initsubformeventty sender parameter TObject->ttabpage.
 2018-09-25

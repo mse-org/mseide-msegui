@@ -586,6 +586,8 @@ type
  end;
 
  tchartframe = class(tscrollboxframe)
+  protected
+   function actualcolorclient(): colorty override;
   public
    constructor create(const aintf: iscrollframe; const owner: twidget);
   published
@@ -593,7 +595,7 @@ type
    property framei_top default 0;
    property framei_right default 1;
    property framei_bottom default 1;
-   property colorclient default cl_foreground;
+   property colorclient {default cl_foreground};
  end;
  
 const
@@ -3376,7 +3378,14 @@ begin
  fi.innerframe.top:= 0;
  fi.innerframe.right:= 1;
  fi.innerframe.bottom:= 1;
- fi.colorclient:= cl_foreground;
+end;
+
+function tchartframe.actualcolorclient(): colorty;
+begin
+ result:= fi.colorclient;
+ if result = cl_default then begin
+  result:= cl_foreground;
+ end;
 end;
 
 { tcuchart }

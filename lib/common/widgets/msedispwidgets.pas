@@ -38,6 +38,8 @@ const
 type
 
  tdispframe = class(tcustomcaptionframe)
+  protected
+   function actualcolorclient(): colorty override;
   public
    constructor create(const aintf: icaptionframe);
   published
@@ -484,6 +486,14 @@ begin
  fi.levelo:= -1;
  inflateframe1(fi.innerframe,1);
  internalupdatestate;
+end;
+
+function tdispframe.actualcolorclient(): colorty;
+begin
+ result:= fi.colorclient;
+ if result = cl_default then begin
+  result:= cl_noedit;
+ end;
 end;
 
 { tdispwidget }

@@ -1263,6 +1263,8 @@ type
  tspineditframe = class(tcustomstepframe)
   private
    procedure setbuttonsvisible(const avalue: stepkindsty);
+  protected
+   function actualcolorclient(): colorty override;
   public
    constructor create(const aintf: icaptionframe; const stepintf: istepbar);
    property buttonsinvisible default [];
@@ -1284,7 +1286,7 @@ type
    property colordkwidth;
    property colorhlwidth;
    property hiddenedges;
-   property colorclient default cl_foreground;
+   property colorclient {default cl_foreground};
    property colorbutton;
    property colorglyph;
    property framei_left default -1;
@@ -6043,12 +6045,19 @@ constructor tspineditframe.create(const aintf: icaptionframe;
 begin
  include(fstepstate,sfs_spinedit);
  inherited;
- fi.colorclient:= cl_foreground;
  fi.levelo:= -2;
  inflateframe1(fi.innerframe,1);
  fforcevisiblebuttons:= [sk_up,sk_down];
  fforceinvisiblebuttons:= [];
  internalupdatestate;
+end;
+
+function tspineditframe.actualcolorclient(): colorty;
+begin
+ result:= fi.colorclient;
+ if result = cl_default then begin
+  result:= cl_foreground;
+ end;
 end;
 
 procedure tspineditframe.setbuttonsvisible(const avalue: stepkindsty);

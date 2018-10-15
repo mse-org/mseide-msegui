@@ -1779,6 +1779,7 @@ type
  tgridframe = class(tcustomautoscrollframe)
   protected
    function getscrollbarclass(vert: boolean): framescrollbarclassty; override;
+   function actualcolorclient(): colorty override;
   public
    constructor create(const aintf: iscrollframe; const owner: twidget;
                              const autoscrollintf: iautoscrollframe);
@@ -1799,7 +1800,7 @@ type
    property colordkwidth;
    property colorhlwidth;
    property hiddenedges;
-   property colorclient default cl_foreground;
+   property colorclient {default cl_foreground};
    property framei_left default 0;
    property framei_top default 0;
    property framei_right default 0;
@@ -3103,7 +3104,14 @@ begin
  fi.innerframe.bottom:= 0;
  internalupdatestate;
  fi.levelo:= -2;
- fi.colorclient:= cl_foreground;
+end;
+
+function tgridframe.actualcolorclient(): colorty;
+begin
+ result:= fi.colorclient;
+ if result = cl_default then begin
+  result:= cl_foreground;
+ end;
 end;
 
 function tgridframe.getscrollbarclass(vert: boolean): framescrollbarclassty;
@@ -3597,7 +3605,7 @@ begin
   end;
  end
  else begin
-  result:= fcellinfo.grid.fframe.colorclient;
+  result:= tframe1(fcellinfo.grid.fframe).actualcolorclient;
  end;
 end;
 

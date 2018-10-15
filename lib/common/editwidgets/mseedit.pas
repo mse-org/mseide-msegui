@@ -42,6 +42,8 @@ const
 type
 
  teditframe = class(tcustomcaptionframe)
+  protected
+   function actualcolorclient(): colorty override;
   public
    constructor create(const aintf: icaptionframe);
   published
@@ -100,7 +102,7 @@ type
    property frameface_offsetactivemouse;
    property frameface_offsetactiveclicked;
 }
-   property colorclient default cl_foreground;
+   property colorclient {default cl_foreground};
    property caption;
    property captiontextflags;
    property captionpos;
@@ -118,6 +120,8 @@ type
  end;
  
  tscrolleditframe = class(tcustomthumbtrackscrollframe)
+  protected
+   function actualcolorclient(): colorty override;
   public
    constructor create(const aintf: iscrollframe; const scrollintf: iscrollbar);
   published
@@ -140,7 +144,7 @@ type
    property colordkwidth;
    property colorhlwidth;
    property hiddenedges;
-   property colorclient default cl_foreground;
+   property colorclient {default cl_foreground};
    property framei_left default 1;
    property framei_top default 1;
    property framei_right default 1;
@@ -199,6 +203,8 @@ type
  end;
 
  tscrollboxeditframe = class(tcustomscrollboxframe)
+  protected
+   function actualcolorclient(): colorty override;
   public
    constructor create(const aintf: iscrollframe; const owner: twidget);
   published
@@ -224,7 +230,7 @@ type
    property framei_bottom default 1;
    property sbhorz; 
    property sbvert;
-   property colorclient default cl_foreground;
+   property colorclient {default cl_foreground};
    property caption;
    property captiontextflags;
    property captionpos;
@@ -688,11 +694,19 @@ type
 constructor teditframe.create(const aintf: icaptionframe);
 begin
  inherited;
- fi.colorclient:= cl_foreground;
  fi.levelo:= -2;
  inflateframe1(fi.innerframe,1);
  internalupdatestate;
 end;
+
+function teditframe.actualcolorclient(): colorty;
+begin
+ result:= fi.colorclient;
+ if result = cl_default then begin
+  result:= cl_foreground;
+ end;
+end;
+
 
 { tscrolleditframe }
 
@@ -700,10 +714,17 @@ constructor tscrolleditframe.create(const aintf: iscrollframe;
                                              const scrollintf: iscrollbar);
 begin
  inherited;
- colorclient:= cl_foreground;
  fi.levelo:= -2;
  inflateframe1(fi.innerframe,1);
  internalupdatestate;
+end;
+
+function tscrolleditframe.actualcolorclient(): colorty;
+begin
+ result:= fi.colorclient;
+ if result = cl_default then begin
+  result:= cl_foreground;
+ end;
 end;
 
 { tscrollboxeditframe }
@@ -712,10 +733,17 @@ constructor tscrollboxeditframe.create(const aintf: iscrollframe;
                                                   const owner: twidget);
 begin
  inherited;
- colorclient:= cl_foreground;
  fi.levelo:= -2;
  inflateframe1(fi.innerframe,1);
  internalupdatestate;
+end;
+
+function tscrollboxeditframe.actualcolorclient(): colorty;
+begin
+ result:=  fi.colorclient;
+ if result = cl_default then begin
+  result:= cl_foreground;
+ end;
 end;
 
 { tframebutton }

@@ -661,6 +661,7 @@ type
    procedure paintframeface(const canvas: tcanvas; const arect: rectty);
    class procedure drawframe(const canvas: tcanvas; const rect2: rectty; 
            const afi: baseframeinfoty; const astate: framestateflagsty);
+   function actualcolorclient(): colorty virtual;
    procedure internalpaintbackground(const canvas: tcanvas;
                     const arect: rectty; const clip: boolean;
                                          const move: boolean) virtual;
@@ -868,7 +869,7 @@ type
                          write setimagedist2
                                    stored isimagedist2stored default 0;
    property colorclient: colorty read fi.colorclient write setcolorclient
-                    stored iscolorclientstored default cl_transparent;
+                    stored iscolorclientstored default cl_default;
    property localprops: framelocalpropsty read flocalprops 
                     write setlocalprops {default []}; 
    property localprops1: framelocalprops1ty read flocalprops1 
@@ -1202,7 +1203,7 @@ type
    property imagedist2: integer read fi.ba.imagedist2
                         write setimagedist2 default 0;
    property colorclient: colorty read fi.ba.colorclient write setcolorclient 
-                                            default cl_transparent;
+                                            default cl_default;
    property colordkshadow: colorty 
                       read fi.ba.framecolors.edges.shadow.effectcolor
                       write setcolordkshadow default cl_default;
@@ -4414,7 +4415,7 @@ end;
 procedure initframeinfo(var info: baseframeinfoty); overload;
 begin
  with info do begin
-  colorclient:= cl_transparent;
+  colorclient:= cl_default;
   colorframe:= cl_default;
   colorframeactive:= cl_default;
   colorframedisabled:= cl_default;
@@ -4718,10 +4719,19 @@ begin
  end;
 end;
 
+function tcustomframe.actualcolorclient(): colorty;
+begin
+ result:= fi.colorclient;
+ if result = cl_default then begin
+  result:= cl_transparent;
+ end;
+end;
+
 procedure tcustomframe.internalpaintbackground(const canvas: tcanvas;
                 const arect: rectty; const clip: boolean; const move: boolean);
 var
  rect1: rectty;
+ cl1: colorty;
 begin
  rect1:= deflaterect(arect,fpaintframe);
  if clip then begin
@@ -4732,8 +4742,9 @@ begin
                          deflaterect(arect,fouterframe),fi.hiddenedges);
   end;
  end;
- if fi.colorclient <> cl_transparent then begin
-  canvas.fillrect(rect1,fi.colorclient);
+ cl1:= actualcolorclient;
+ if cl1 <> cl_transparent then begin
+  canvas.fillrect(rect1,cl1);
  end;
  if not (fso_faceoverlay in optionsskin) then begin
   paintframeface(canvas,rect1);
@@ -14030,7 +14041,7 @@ end;
 
 function twidget.backgroundcolor: colorty;
 begin
- if (fframe = nil) or (fframe.fi.colorclient = cl_transparent) then begin
+ if (fframe = nil) or (fframe.actualcolorclient = cl_transparent) then begin
   if fparentwidget = nil then begin
    result:= actualopaquecolor;
   end
@@ -14045,7 +14056,7 @@ begin
   end;
  end
  else begin
-  result:= fframe.fi.colorclient;
+  result:= fframe.actualcolorclient();
  end;
 end;
  
