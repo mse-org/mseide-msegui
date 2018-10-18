@@ -1319,9 +1319,10 @@ type
    destructor destroy; override;
  end;
 
- igriddatalink = interface(inullinterface)
+ igriddatalink = interface(inullinterface)[miid_iggriddatalink]
   function getdbindicatorcol: integer;
   procedure setnavigator(const avalue: tdbnavigator);
+  function getdatalink(): tgriddatalink;
  end;
 
  gridrowinfoty = record
@@ -1566,6 +1567,7 @@ type
     //igriddatalink
    function getdbindicatorcol: integer;
    procedure setnavigator(const avalue: tdbnavigator);
+   function getdatalink(): tgriddatalink;
   protected
    function getassistiveflags(): assistiveflagsty override;
    procedure internalcreateframe; override;
@@ -1809,6 +1811,7 @@ type
    fdatalink: tgriddatalink;
 //   function getdatasource: tdatasource;
 //   procedure setdatasource(const Value: tdatasource);
+   function getdatalink: tgriddatalink;
    procedure setdatalink(const avalue: tgriddatalink);
    function getfixcols: tdbwidgetfixcols;
    procedure setfixcols(const avalue: tdbwidgetfixcols);
@@ -2112,6 +2115,7 @@ type
    procedure setoptions(const avalue: dbstringgridoptionsty);
    procedure checkautofields;
    procedure setfieldnamedisplayfixrow(const avalue: integer);
+   function getdatalink: tgriddatalink; //igriddatalink
    procedure setdatalink(const avalue: tstringgriddatalink);
    function getfixcols: tdbstringfixcols;
    procedure setfixcols(const avalue: tdbstringfixcols);
@@ -7108,6 +7112,11 @@ begin
  //dummy
 end;
 
+function tdbdropdownlist.getdatalink(): tgriddatalink;
+begin
+ result:= fdatalink;
+end;
+
 function tdbdropdownlist.getassistiveflags(): assistiveflagsty;
 begin
  result:= inherited getassistiveflags() + [asf_db];
@@ -9427,6 +9436,11 @@ begin
  fdatalink.free;
 end;
 
+function tcustomdbwidgetgrid.getdatalink: tgriddatalink;
+begin
+ result:= fdatalink;
+end;
+
 procedure tcustomdbwidgetgrid.setoptionsgrid(const avalue: optionsgridty);
 begin
  inherited setoptionsgrid(fdatalink.updateoptionsgrid(avalue));
@@ -10536,6 +10550,11 @@ begin
   end;
   checkautofields;
  end;
+end;
+
+function tcustomdbstringgrid.getdatalink: tgriddatalink;
+begin
+ result:= fdatalink;
 end;
 
 procedure tcustomdbstringgrid.setoptionsgrid(const avalue: optionsgridty);
