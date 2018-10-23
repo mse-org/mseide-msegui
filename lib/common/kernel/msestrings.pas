@@ -622,7 +622,8 @@ type
  getkeystringfuncty = function (const index: integer): msestring of object;
 
  locatestringoptionty = (lso_casesensitive,lso_posinsensitive,lso_exact,
-                         lso_nodown,lso_noup);
+                         lso_nodown,lso_noup,lso_noexact,
+                         lso_filterisuppercase);
  locatestringoptionsty = set of locatestringoptionty;
 
 function locatestring(const afilter: msestring;
@@ -792,11 +793,9 @@ begin
   with locateinfo do begin
    posinsensitive:= lso_posinsensitive in options;
    casesensitive:= lso_casesensitive in options;
-   if casesensitive then begin
-    filter:= afilter;
-   end
-   else begin
-    filter:= mseuppercase(afilter);
+   filter:= afilter;
+   if not casesensitive and not (lso_filterisuppercase in options) then begin
+    filter:= mseuppercase(filter);
    end;
    result:= false;
    int1:= aindex;
@@ -811,36 +810,39 @@ begin
     end;
    end;
    if int1 >= 0 then begin
-    exact:= true;
-    for int2:= int1 to count - 1 do begin
-     check(int2);
-     if result or (lso_noup in options) then begin
-      break;
-     end;
-    end;
-    if not result then begin
-     if not (lso_nodown in options) then begin
-      for int2:= int1-1 downto 0 do begin
-       check(int2);
-       if result then begin
-        break;
-       end;
+    if not (lso_noexact in options) then begin //search whole filtertext
+     exact:= true;
+     for int2:= int1 to count - 1 do begin
+      check(int2);
+      if result or (lso_noup in options) then begin
+       break;
       end;
      end;
-     if not result and not (lso_exact in options) then begin
-      exact:= false;
-      for int2:= int1 to count - 1 do begin
-       check(int2);
-       if result  or (lso_noup in options) then begin
-        break;
-       end;
-      end;
-      if not result and not (lso_nodown in options) then begin
-       for int2:= int1 - 1 downto 0 do begin
+     if not result then begin
+      if not (lso_nodown in options) then begin
+       for int2:= int1-1 downto 0 do begin
         check(int2);
         if result then begin
          break;
         end;
+       end;
+      end;
+     end;
+    end;
+    if not result and not (lso_exact in options) then begin 
+                                               //search partial filter text
+     exact:= false;
+     for int2:= int1 to count - 1 do begin
+      check(int2);
+      if result  or (lso_noup in options) then begin
+       break;
+      end;
+     end;
+     if not result and not (lso_nodown in options) then begin
+      for int2:= int1 - 1 downto 0 do begin
+       check(int2);
+       if result then begin
+        break;
        end;
       end;
      end;

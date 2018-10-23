@@ -337,6 +337,7 @@ type
    procedure dodeactivate; override;
    procedure docellevent(var info: celleventinfoty); override;
    function getkeystring(const aindex: integer): msestring;
+   function getkeystringnohidden(const aindex: integer): msestring;
    function locate(const filter: msestring): boolean; virtual;
    function updatevisiblerows(): integer; virtual;
                           //returns first visible row
@@ -2785,6 +2786,13 @@ begin
  end;
 end;
 
+function tdropdownlist.getkeystringnohidden(const aindex: integer): msestring;
+begin
+ with tstringcol(fdatacols[0]) do begin
+  result:= items[aindex];
+ end;
+end;
+
 function tdropdownlist.locate(const filter: msestring): boolean;
 var
  int1: integer;
@@ -2821,6 +2829,7 @@ var
  int1,int2,int3,count1: integer;
  opt1: locatestringoptionsty;
  bo1: boolean;
+ s1: msestring;
 begin
  result:= invalidaxis;
  if (rowcount > 0) and (fdatacols.count > 0) then begin
@@ -2831,9 +2840,14 @@ begin
    folded:= true;
    beginupdate;
    int1:= 0;
-   opt1:= [lso_nodown];
+   opt1:= [lso_nodown,lso_noexact];
    if dlo_casesensitive in foptions1 then begin
     include(opt1,lso_casesensitive);
+    s1:= ffiltertext;
+   end
+   else begin
+    include(opt1,lso_filterisuppercase);
+    s1:= mseuppercase(ffiltertext);
    end;
    if dlo_posinsensitive in foptions1 then begin
     include(opt1,lso_posinsensitive);
@@ -2841,8 +2855,8 @@ begin
    count1:= fdatacols[0].datalist.count;
    repeat
     int2:= int1;
-    bo1:= locatestring(ffiltertext,{$ifdef FPC}@{$endif}getkeystring,opt1,
-                                                                   count1,int1);
+    bo1:= locatestring(s1,{$ifdef FPC}@{$endif}getkeystringnohidden,
+                                    opt1,count1,int1);
     if not bo1 then begin
      int1:= fdatacols[0].datalist.count;
     end;
