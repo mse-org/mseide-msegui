@@ -3622,7 +3622,7 @@ var
  po1: pwidget;
  wi1: twidget;
 begin
- if canevent(tmethod(fongetsubform)) then begin
+ if assigned(fongetsubform) then begin
   if fsubform = nil then begin
    subformclass:= nil;
    fsubforminstancevarpo:= nil;
@@ -3639,14 +3639,14 @@ begin
 //    if fsubforminstancevarpo <> nil then begin
 //     fsubforminstancevarpo^:= fsubform;
 //    end;
-    if canevent(tmethod(foninitsubform)) then begin
+    if assigned(foninitsubform) then begin
      foninitsubform(self,fsubform);
     end;
     fsubform.visible:= true;
    end;
   end;
  end;
- if canevent(tmethod(fonselect)) then begin
+ if assigned(fonselect) then begin
   fonselect(self);
  end;
 end;
