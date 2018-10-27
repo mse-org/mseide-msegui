@@ -135,14 +135,20 @@ end;
 
 procedure tmainfo.pathdatentexe(const sender: TObject);
 begin
- if (start.value <> '') {and (dest.value <> '')} then begin
+ if (start.value <> '') or (dest.value <> '') then begin
   if dest.value = '' then begin
    pathdisp.value:= concatstrings(
                           flist.finddependnames(ansistring(start.value)),':');
   end
   else begin
-   pathdisp.value:= concatstrings(flist.findpath(ansistring(start.value),
+   if start.value = '' then begin
+    pathdisp.value:= concatstrings(
+                           flist.finddependnames(ansistring(dest.value)),':');
+   end
+   else begin
+    pathdisp.value:= concatstrings(flist.findpath(ansistring(start.value),
                                                ansistring(dest.value)),',');
+   end;
   end;
  end
  else begin
