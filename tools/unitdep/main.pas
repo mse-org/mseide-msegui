@@ -23,7 +23,7 @@ uses
  msedataedits,msedatanodes,mseedit,msefiledialog,msegrids,mseifiglob,
  mselistbrowser,msestrings,msesys,msetypes,msesimplewidgets,msewidgets,
  msewidgetgrid,mselist,classes,mclasses,mseificomp,mseificompglob,msedispwidgets,
- msesplitter,msevaluenodes;
+ msesplitter,msevaluenodes,msememodialog;
 
 type
  tdependencylist = class;
@@ -79,7 +79,7 @@ type
    dropdownunits: tifidropdownlistlinkcomp;
    start: tdropdownlistedit;
    dest: tdropdownlistedit;
-   pathdisp: tstringdisp;
+   pathdisp: tmemodialogedit;
    tsplitter1: tsplitter;
    procedure scanexe(const sender: TObject);
    procedure pathdatentexe(const sender: TObject);
@@ -191,6 +191,8 @@ var
  int1,int2: integer;
  info1: dependencyinfoty;
  name1{,depend1}: string;
+ b1: boolean;
+ i1: int32;
 begin
  stream1:= ttextstream.create(afilename);
  try
@@ -204,7 +206,16 @@ begin
       name1:= struppercase(copy(str1,2,int1-2));
       if (fapplication = '') and 
                      (name1 <> 'PROGRAM') and (name1 <> 'SYSTEM') then begin
-       fapplication:= name1;
+       b1:= false;
+       for i1:= 1 to high(name1) do begin
+        if (name1[i1] < '0') or (name1[i1] > '9') then begin
+         b1:= true;
+         break;
+        end;
+       end;
+       if b1 then begin 
+        fapplication:= name1;
+       end;
       end;
       if name1 = fapplication then begin
        int2:= posex(' Load from ',str1,int1);
