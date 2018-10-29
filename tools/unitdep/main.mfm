@@ -29,8 +29,8 @@ object mainfo: tmainfo
     frame.button.imagenr = 17
     hint = 'FPC -vu compiler message file'
     bounds_x = 1
-    bounds_y = 8
-    bounds_cx = 347
+    bounds_y = 6
+    bounds_cx = 344
     anchors = [an_left, an_top, an_right]
     statfile = tstatfile1
     textflags = [tf_ycentered, tf_noselect, tf_ellipseleft]
@@ -46,8 +46,8 @@ object mainfo: tmainfo
   end
   object tbutton1: tbutton
     taborder = 1
-    bounds_x = 352
-    bounds_y = 8
+    bounds_x = 349
+    bounds_y = 7
     bounds_cx = 50
     bounds_cy = 19
     anchors = [an_top, an_right]
@@ -60,8 +60,8 @@ object mainfo: tmainfo
     frame.localprops1 = []
     taborder = 2
     bounds_x = 1
-    bounds_y = 32
-    bounds_cx = 400
+    bounds_y = 31
+    bounds_cx = 401
     bounds_cy = 186
     anchors = [an_left, an_top, an_right, an_bottom]
     fixrows.count = 1
@@ -76,7 +76,7 @@ object mainfo: tmainfo
     datacols.count = 1
     datacols.items = <    
       item[treeedit]
-        width = 395
+        width = 396
         options = [co_readonly, co_fill, co_savevalue, co_savestate, co_mousescrollrow]
         widgetname = 'treeedit'
         dataclass = ttreeitemeditlist
@@ -94,7 +94,7 @@ object mainfo: tmainfo
       visible = False
       bounds_x = 0
       bounds_y = 0
-      bounds_cx = 395
+      bounds_cx = 396
       bounds_cy = 16
       optionsedit = [oe_readonly, oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_focusrectonreadonly, oe_locate]
       options = [teo_treecolnavig]
