@@ -1251,6 +1251,7 @@ type
    fcolorfocused: colorty;
    finnerframe: framety;
    fcursor: cursorshapety;
+   fcolor: colorty;
    procedure setlinewidth(const Value: integer);
    procedure setlinecolor(const Value: colorty);
    procedure setlinecolorfix(const Value: colorty);
@@ -1263,6 +1264,7 @@ type
    procedure setinnerframe_right(const avalue: integer);
    procedure setinnerframe_bottom(const avalue: integer);
    procedure setcursor(const avalue: cursorshapety);
+   procedure setcolor(const avalue: colorty);
   protected
    freversedorder: boolean;
    fgrid: tcustomgrid;
@@ -1295,6 +1297,8 @@ type
                 write setlinecolor;
    property linecolorfix: colorty read flinecolorfix
                 write setlinecolorfix default defaultfixlinecolor;
+   property color: colorty read fcolor write setcolor
+              default cl_default;
    property colorselect: colorty read fcolorselect write setcolorselect
               default cl_default;
    property coloractive: colorty read fcoloractive write setcoloractive
@@ -3132,7 +3136,7 @@ constructor tgridprop.create(const agrid: tcustomgrid;
                                  const aprop: tgridarrayprop);
 begin
  fcellinfo.grid:= agrid;
- fcolor:= cl_default;
+ fcolor:= aprop.fcolor;
  fcursor:= aprop.fcursor;
  fcolorselect:= aprop.fcolorselect;
  fcoloractive:= aprop.fcoloractive;
@@ -5645,6 +5649,7 @@ begin
  fgrid:= aowner;
  flinewidth:= defaultgridlinewidth;
  flinecolorfix:= defaultfixlinecolor;
+ fcolor:= cl_default;
  fcolorselect:= cl_default;
  fcoloractive:= cl_none;
  fcolorfocused:= cl_none;
@@ -5704,6 +5709,20 @@ begin
   if not (csloading in fgrid.componentstate) then begin
    for int1:= 0 to count - 1 do begin
     tgridprop(items[int1]).linecolorfix:= value;
+   end;
+  end;
+ end;
+end;
+
+procedure tgridarrayprop.setcolor(const avalue: colorty);
+var
+ int1: integer;
+begin
+ if fcolor <> avalue then begin
+  fcolor:= avalue;
+  if not (csloading in fgrid.componentstate) then begin
+   for int1:= 0 to count - 1 do begin
+    tgridprop(items[int1]).color:= avalue;
    end;
   end;
  end;
