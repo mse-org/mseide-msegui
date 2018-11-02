@@ -103,18 +103,27 @@ const
                 $03,$0b,$07,$0f,
                 $02,$0a,$06,$0e,
                 $04,$0c,$08,$10);
-{
- inverserops2: array[rasteropty] of byte =//for 1->foreground in monochromebitmaps
-                ($00,$04,$08,$0c,
-                 $01,$05,$09,$0d,
-                 $02,$06,$0a,$0e,
-                 $03,$07,$0b,$0f);
-}
- inverserops2: array[rasteropty] of byte =//for 1->foreground in monochromebitmaps
-                ($10,$0e,$0f,$0d,
-                 $08,$06,$07,$05,
-                 $0c,$0a,$0b,$09,
-                 $04,$02,$03,$01);
+
+{ inverse mono bitmap
+source dest 
+     rop2  $01 $02 $03 $04 $05 $06 $07 $08 $09 $0a $0b $0c $0d $0e $0f $10
+   0     0   1   1   1   1   1   1   1   1   0   0   0   0   0   0   0   0
+   0     1   1   1   1   1   0   0   0   0   1   1   1   1   0   0   0   0
+   1     0   1   1   0   0   1   1   0   0   1   1   0   0   1   1   0   0
+   1     1   1   0   1   0   1   0   1   0   1   0   1   0   1   0   1   0
+     rop3  $ff $ee $dd $cc $bb $aa $99 $88 $77 $66 $55 $44 $33 $22 $11 $00
+} 
+
+ inverserops2: array[rasteropty] of byte =
+                            //for 1->foreground in monochromebitmaps
+               //rop_clear,rop_and,rop_andnot,rop_copy,
+                ($10,      $0f,    $0e,       $0d,
+               //rop_notand,rop_nop,rop_xor,rop_or,
+                 $0c,       $0b,    $0a,    $09,
+               //rop_nor,rop_notxor,rop_not,rop_ornot,
+                 $08,    $07,       $06,    $05,
+               //rop_notcopy,rop_notor,rop_nand,rop_set);
+                 $04,        $03,      $02,     $01);
 
  firstrasterops2: array[rasteropty] of byte = //backgroudcolor = $ffffff,
                ($09,$09,$09,$09,              //textcolor = $000000, and
@@ -128,13 +137,76 @@ const
                 $0f,$0f,$0f,$0f,
                 $0f,$0f,$0f,$0f);
 
- rasterops3: array[rasteropty] of longword =
+type
+ rop3tabty = array[rasteropty] of longword;
+ prop3tabty = ^rop3tabty;
+const
+{ inverse mono bitmap
+P S D clear,and,andnot,copy,notand,nop,xor,or,
+x 1 1  1    0   1       0    1      0   1   0
+x 1 0  1    1   0       0    1      1   0   0
+x 0 1  1    1   1       1    0      0   0   0
+x 0 0  1    1   1       1    1      1   1   1
+      $f   $e  $d      $c   $b     $a  $9  $8
+P S D nor,notxor,not,ornot,notcopy,notor,nand,set
+x 1 1  1   0      1   0     1       0     1    0
+x 1 0  1   1      0   0     1       1     0    0
+x 0 1  1   1      1   1     0       0     0    0
+x 0 0  0   0      0   0     0       0     0    0
+      $7  $6     $5  $4    $3      $2    $1   $0
+} 
+ inverserops3: rop3tabty =
+                            //for 1->foreground in monochromebitmaps
+             // $ff     $ee     $dd     $cc
+               ($ff0062,$ee0086,$dd0228,$cc0020,
+             // $bb     $aa     $99     $88
+                $bb0226,$aa0029,$990066,$8800c6,
+             // $77     $66     $55     $44
+                $7700e6,$660046,$550009,$440328,
+             // $33     $22     $11     $00
+                $330008,$220326,$1100a6,$000042);
+
+ rasterops3: rop3tabty =
                ($000042,$8800c6,$440328,$cc0020,
                 $220326,$aa0029,$660046,$ee0086,
                 $1100a6,$990066,$550009,$dd0228,
                 $330008,$bb0226,$7700e6,$ff0062);
 
- patrops3: array[rasteropty] of longword =
+{ inverse mono bitmap
+P S D clear,and,andnot,copy,notand,nop,xor, or,
+1 x 1  1    0   1       0    1      0   1    0
+1 x 0  1    1   0       0    1      1   0    0
+1 x 1  1    0   1       0    1      0   1    0
+1 x 0  1    1   0       0    1      1   0    0
+0 x 1  1    1   1       1    0      0   0    0
+0 x 0  1    1   1       1    1      1   1    1
+0 x 1  1    1   1       1    0      0   0    0
+0 x 0  1    1   1       1    1      1   1    1
+     $ff  $fa $f5     $f0  $af    $aa  $a5 $a0
+P S D nor,notxor,not,ornot,notcopy,notor,nand,set
+1 x 1  1   0      1   0     1       0     1    0
+1 x 0  1   1      0   0     1       1     0    0
+1 x 1  1   0      1   0     1       0     1    0
+1 x 0  1   1      0   0     1       1     0    0
+0 x 1  1   1      1   1     0       0     0    0
+0 x 0  0   0      0   0     0       0     0    0
+0 x 1  1   1      1   1     0       0     0    0
+0 x 0  0   0      0   0     0       0     0    0
+     $5f $5a    $55 $50   $0f     $0a   $05  $00
+} 
+ inversepatrops3: rop3tabty =
+             // $ff     $fa     $f5     $f0
+               ($ff0062,$fa0089,$f50225,$f00021,
+             // $af     $aa     $a5     $a0
+                $af0229,$aa0029,$a50065,$a000c9,
+             // $5f     $5a     $55     $50
+                $5f00e9,$5a0049,$550009,$500325,
+             // $0f     $0a     $05     $00
+                $0f0001,$0a0329,$0500a9,$000042);
+
+
+
+ patrops3: rop3tabty =
                ($000042,$a000c9,$500325,$f00021,
                 $0a0329,$aa0029,$5a0049,$fa0089,
                 $0500a9,$a50065,$550009,$f50225,
@@ -1680,6 +1752,8 @@ procedure fill(var drawinfo: drawinfoty; shape: shapety);
 
 var
  xstart,ystart,xend,yend: integer; 
+ rop3tab: prop3tabty;
+ patrop3tab: prop3tabty;
  
  procedure fill1( adc: hdc; arop: rasteropty);
  begin
@@ -1706,7 +1780,8 @@ var
     fs_copyarea: begin
      with copyarea,sourcerect^ do begin
       if mask = nil then begin
-       bitblt(adc,destrect^.x,destrect^.y,cx,cy,tcanvas1(source).fdrawinfo.gc.handle,x,y,rasterops3[arop]);
+       bitblt(adc,destrect^.x,destrect^.y,cx,cy,
+                  tcanvas1(source).fdrawinfo.gc.handle,x,y,rop3tab^[arop]);
       end
       else begin
        if iswin95 or (win32gcty(gc.platformdata).d.kind = gck_printer) then begin
@@ -1722,14 +1797,14 @@ var
         maskblt(adc,destrect^.x,destrect^.y,cx,cy,
                     tcanvas1(source).fdrawinfo.gc.handle,
                     x,y,tsimplebitmap1(mask).handle,x,y,
-                    makerop4(rasterops3[rop_nop],rasterops3[arop]));
+                    makerop4(rop3tab^[rop_nop],rop3tab^[arop]));
        end;
       end;
      end;
     end;
     fs_rect: begin
      with prectty(buffer.buffer)^ do begin
-      windows.patblt(adc,x,y,cx,cy,patrops3[arop]);
+      windows.patblt(adc,x,y,cx,cy,patrop3tab^[arop]);
      end;
     end;
     fs_ellipse: begin
@@ -1767,6 +1842,15 @@ begin
  end;
  with drawinfo do begin
   with gc,win32gcty(platformdata).d do begin
+   if df_canvasismonochrome in gc.drawingflags then begin
+    rop3tab:= @inverserops3;
+    patrop3tab:= @inversepatrops3;
+   end
+   else begin
+    rop3tab:= @rasterops3;
+    patrop3tab:= @patrops3;
+   end;
+
    if (drawingflags * [df_monochrome,df_opaque,df_brush] = 
                                           [df_monochrome,df_brush]) then begin
     if shape <> fs_rect then begin
@@ -1870,7 +1954,7 @@ begin
         setbkcolor(handle,$00ffffff);
         fill1(handle,rop_and);         //erase pattern
         bitblt(handle,rect1.x,rect1.y,rect1.cx,rect1.cy,dc1,rect1.x,rect1.y,
-                    rasterops3[rop_or]); //combine
+                    rop3tab^[rop_or]); //combine
         deletedc(dc1);
        end;
        gui_freepixmap(bmp);
@@ -1895,7 +1979,7 @@ begin
        if (df_brush in drawingflags) then begin
         checkgc(gc,[gcf_colorbrushvalid,gcf_patternbrushvalid,
                              gcf_selectforegroundbrush]);
-        windows.patblt(handle,x,y,cx,cy,patrops3[rop]);
+        windows.patblt(handle,x,y,cx,cy,patrop3tab^[rop]);
        end
        else begin
         if  rop = rop_copy then begin
@@ -1908,7 +1992,7 @@ begin
         end
         else begin
          checkgc(gc,[gcf_colorbrushvalid,gcf_selectforegroundbrush]);
-         windows.patblt(handle,x,y,cx,cy,patrops3[rop]);
+         windows.patblt(handle,x,y,cx,cy,patrop3tab^[rop]);
         end;
        end;
       end;
@@ -2087,20 +2171,28 @@ var
   deleteobject(stretchedbmp);
  end;
 
- procedure transfer(double: boolean = false);
+ procedure transfer(double: boolean = false; inverserop: boolean = false);
+ var
+  rop3tab: prop3tabty;
  begin
+  if inverserop then begin
+   rop3tab:= @inverserops3;
+  end
+  else begin
+   rop3tab:= @rasterops3;
+  end;
   with drawinfo,copyarea,sourcerect^,gc,win32gcty(platformdata).d do begin
    if alignment * [al_stretchx,al_stretchy] = [] then begin
     if mask = nil then begin
      bitblt(handle,destrect^.x,destrect^.y,cx,cy,
                     tcanvas1(source).fdrawinfo.gc.handle,
-                    x,y,rasterops3[copymode]);
+                    x,y,rop3tab^[copymode]);
      if double then begin
       setbkcolor(handle,$000000);
       settextcolor(handle,foregroundcol);
       bitblt(handle,destrect^.x,destrect^.y,cx,cy,
                      tcanvas1(source).fdrawinfo.gc.handle,
-                     x,y,rasterops3[rop_or]);
+                     x,y,rop3tab^[rop_or]);
      end;
     end
     else begin
@@ -2117,7 +2209,7 @@ var
                     tcanvas1(source).fdrawinfo.gc.handle,
                     x,y,tsimplebitmap1(mask).handle,
                     maskpos.x,maskpos.y,
-                    makerop4(rasterops3[rop_nop],rasterops3[copymode]));
+                    makerop4(rop3tab^[rop_nop],rop3tab^[copymode]));
      end;
      if double then begin
       setbkcolor(handle,$000000);
@@ -2132,7 +2224,7 @@ var
        maskblt(handle,destrect^.x,destrect^.y,cx,cy,
                     tcanvas1(source).fdrawinfo.gc.handle,
                     maskpos.x,maskpos.y,tsimplebitmap1(mask).fhandle,x,y,
-                    makerop4(rasterops3[rop_nop],rasterops3[rop_or]));
+                    makerop4(rop3tab^[rop_nop],rop3tab^[rop_or]));
       end;
      end;
     end;
@@ -2141,13 +2233,13 @@ var
     if mask = nil then begin
      stretchblt(handle,destrect^.x,destrect^.y,destrect^.cx,destrect^.cy,
                     tcanvas1(source).fdrawinfo.gc.handle,
-                    x,y,cx,cy,rasterops3[copymode]);
+                    x,y,cx,cy,rop3tab^[copymode]);
      if double then begin
       setbkcolor(handle,$000000);
       settextcolor(handle,foregroundcol);
       stretchblt(handle,destrect^.x,destrect^.y,destrect^.cx,destrect^.cy,
                     tcanvas1(source).fdrawinfo.gc.handle,
-                    x,y,cx,cy,rasterops3[rop_or]);
+                    x,y,cx,cy,rop3tab^[rop_or]);
      end;
     end
     else begin
@@ -2158,8 +2250,8 @@ var
      end
      else begin
       maskblt(handle,rect1.x,rect1.y,rect1.cx,rect1.cy,destdc,
-                    0,0,maskbmp,0,0,makerop4(rasterops3[rop_nop],
-                                                      rasterops3[copymode]));
+                    0,0,maskbmp,0,0,makerop4(rop3tab^[rop_nop],
+                                                      rop3tab^[copymode]));
      end;
      if double then begin
       setbkcolor(handle,$000000);
@@ -2170,15 +2262,15 @@ var
       end
       else begin
        maskblt(handle,rect1.x,rect1.y,rect1.cx,rect1.cy,destdc,
-                    0,0,maskbmp,0,0,makerop4(rasterops3[rop_nop],
-                                                      rasterops3[rop_or]));
+                    0,0,maskbmp,0,0,makerop4(rop3tab^[rop_nop],
+                                                      rop3tab^[rop_or]));
       end;
      end;
      deletestretchedbmps;
     end;
    end;
   end;
- end;
+ end; //transfer
 
 var
  ropbefore: rasteropty;
@@ -2331,8 +2423,11 @@ begin
    if df_canvasismonochrome in drawingflags then begin
     setbkcolor(handle,$ffffff);
     settextcolor(handle,$000000);
+    transfer(false,true);
+   end
+   else begin
+    transfer(false,false);
    end;
-   transfer;
   end;
   if bufferbmp <> 0 then begin //alpha operation  //todo: optimze
    rect1.pos:= rect1posbefore;

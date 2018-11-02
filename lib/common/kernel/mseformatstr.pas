@@ -2114,7 +2114,8 @@ begin
  end;
 end;
 
-function datetimetostring(const avalue: tdatetime; const format: msestring = 'c'): msestring;
+function datetimetostring(const avalue: tdatetime;
+                                   const format: msestring = 'c'): msestring;
 begin
  if avalue = emptydatetime then begin
   result:= '';
