@@ -33,7 +33,8 @@ const
 {$endif}
 
 {$ifdef mswindows}
- freetypelib: array[0..1] of filenamety = ('libfreetype-6.dll','freetype6.dll');  
+ freetypelib: array[0..2] of filenamety = 
+                         ('libfreetype-6.dll','freetype6.dll','freetype.dll');  
 {$else}
  freetypelib: array[0..1] of filenamety = ('libfreetype.so.6','libfreetype.so'); 
 {$endif}

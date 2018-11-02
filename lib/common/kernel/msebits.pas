@@ -18,7 +18,7 @@ uses
 type
  bitnumty = 0..32;
 const
- twoexp32 = 4294967296.0;
+ twoexp32 = flo64(4294967296.0);
  bytebits: array[0..8] of byte = ($01,$02,$04,$08,$10,$20,$40,$80,$00);
  bytemask: array[0..8] of byte = ($00,$01,$03,$07,$0f,$1f,$3f,$7f,$ff);
  bytebitsreverse: array[0..8] of byte = ($80,$40,$20,$10,$08,$04,$02,$01,$00);
