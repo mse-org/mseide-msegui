@@ -1,7 +1,7 @@
 MSEide+MSEgui Pascal Cross Platform GUI Development System.
 
-2017-11-23 Version 4.6
-Copyright (c) 1999-2017 by Martin Schreiber
+2018-11-03 Version 4.6.2
+Copyright (c) 1999-2018 by Martin Schreiber
 
 - Compiles with FPC 3.0.2 or 3.0.4
 - For FreeBSD-x86_64, Linux-i386, Linux-x86_64, Linux-arm(Raspberry Pi),
@@ -35,12 +35,12 @@ Package maintainers may delete the files "apps/ide/COPYING.GPL",
 Installation:
 *************
 1. Download and install FPC 3.0.2 or 3.0.4, you can get it from 
-   http://www.freepascal.org/download.var
-2. Download mseide_msegui_src_4_6.zip and the mseide_* archive
+   https://www.freepascal.org/download.var
+2. Download mseide_msegui_src_4_6_2.zip and the mseide_* archive
    for your system.
-   http://sourceforge.net/projects/mseide-msegui/files/mseide-msegui/4.6/
+   https://sourceforge.net/projects/mseide-msegui/files/mseide-msegui/4.6.2/
 3. Extract them to a directory of your choice ('yourdirectory') .
-4. Run 'yourdirectory/bin/mseide' on linux and freebsed or 
+4. Run 'yourdirectory/bin/mseide' on Linux and FreeBSD or 
    'yourdirectory\bin\mseide.exe' on windows.
 5. In 'Settings'-'Configure MSEide'-'${MSEDIR}' select 'yourdirectory/msegui'.
 6. In 'Project'-'Open' select 'yourdirectory/msegui/apps/demo/demo.prj'.
@@ -49,6 +49,8 @@ Installation:
 If you get the error "/usr/bin/ld: cannot find -lX11" install the 
 libX11-devel or libX11-dev package or make a symbolic link
 /usr/lib/libX11.so -> /usr/lib/libX11.so.6
+see 
+https://bugs.freepascal.org/view.php?id=32367
 
 If you wish to to compile the IDE:
 
