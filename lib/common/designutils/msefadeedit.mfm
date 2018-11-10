@@ -17,6 +17,7 @@ object fadeeditfo: tfadeeditfo
   options = [fo_closeonesc, fo_autoreadstat, fo_autowritestat, fo_savepos, fo_savestate]
   statfile = formstatfile
   caption = 'Fade Edit'
+  windowopacity = -Inf
   oncreate = createev
   moduleclassname = 'tmseform'
   object cont2: tsimplewidget
@@ -47,7 +48,6 @@ object fadeeditfo: tfadeeditfo
         anchors = [an_top, an_right, an_bottom]
       end
       object gridlayout: tlayouter
-        optionswidget = [ow_tabfocus, ow_parenttabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_destroywidgets]
         bounds_x = 8
         bounds_y = 56
         bounds_cx = 431
@@ -128,8 +128,8 @@ object fadeeditfo: tfadeeditfo
             formatdisp = '0.000'
             valuerange = 1
             valuestart = 0
-            min = 0
-            max = 1
+            valuemin = 0
+            valuemax = 1
             reffontheight = 14
           end
           object opacolored: tcoloredit
@@ -139,6 +139,15 @@ object fadeeditfo: tfadeeditfo
             frame.localprops = [frl_levelo, frl_leveli, frl_colorclient]
             frame.localprops1 = []
             frame.button.color = -1879048187
+            frame.buttons.count = 2
+            frame.buttons.items = <            
+              item
+                color = -1879048187
+              end            
+              item
+                color = -1879048187
+                imagenr = 17
+              end>
             frame.buttonellipse.color = -1879048187
             frame.buttonellipse.imagenr = 17
             taborder = 2
@@ -242,8 +251,8 @@ object fadeeditfo: tfadeeditfo
             formatdisp = '0.000'
             valuerange = 1
             valuestart = 0
-            min = 0
-            max = 1
+            valuemin = 0
+            valuemax = 1
             reffontheight = 14
           end
           object colored: tcoloredit
@@ -253,6 +262,15 @@ object fadeeditfo: tfadeeditfo
             frame.localprops = [frl_levelo, frl_leveli, frl_colorclient]
             frame.localprops1 = []
             frame.button.color = -1879048187
+            frame.buttons.count = 2
+            frame.buttons.items = <            
+              item
+                color = -1879048187
+              end            
+              item
+                color = -1879048187
+                imagenr = 17
+              end>
             frame.buttonellipse.color = -1879048187
             frame.buttonellipse.imagenr = 17
             taborder = 2
@@ -274,6 +292,15 @@ object fadeeditfo: tfadeeditfo
             frame.localprops = [frl_levelo, frl_leveli, frl_colorclient]
             frame.localprops1 = []
             frame.button.color = -1879048187
+            frame.buttons.count = 2
+            frame.buttons.items = <            
+              item
+                color = -1879048187
+              end            
+              item
+                color = -1879048187
+                imagenr = 17
+              end>
             frame.buttonellipse.color = -1879048187
             frame.buttonellipse.imagenr = 17
             taborder = 3
@@ -317,7 +344,6 @@ object fadeeditfo: tfadeeditfo
         anchors = [an_left, an_top, an_right]
         onclientmouseevent = mouseev
         onresize = resizeev
-        options = []
         ongetcursorshape = getcursorshapeev
         ongetpickobjects = getpickobjectev
         onendpickmove = endpickev
@@ -403,7 +429,7 @@ object fadeeditfo: tfadeeditfo
         bounds_x = 444
         bounds_y = 56
         bounds_cx = 68
-        bounds_cy = 273
+        bounds_cy = 274
         anchors = [an_top, an_right, an_bottom]
       end
     end
@@ -432,7 +458,6 @@ object fadeeditfo: tfadeeditfo
       anchors = [an_left, an_top, an_right]
       onclientmouseevent = mouseev
       onresize = resizeev
-      options = []
       ongetcursorshape = getcursorshapeev
       ongetpickobjects = getpickobjectev
       onendpickmove = endpickev
@@ -451,11 +476,10 @@ object fadeeditfo: tfadeeditfo
     end
   end
   object bottomlayout: tlayouter
-    optionswidget = [ow_tabfocus, ow_parenttabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_destroywidgets]
     taborder = 1
     bounds_x = 8
     bounds_y = 407
-    bounds_cx = 506
+    bounds_cx = 504
     bounds_cy = 31
     anchors = [an_left, an_right, an_bottom]
     optionsscale = [osc_expandy, osc_shrinky, osc_expandshrinkx, osc_expandshrinky]
@@ -466,7 +490,6 @@ object fadeeditfo: tfadeeditfo
     dist_top = 5
     options = [spao_gluebottom]
     object switchlayout: tlayouter
-      optionswidget = [ow_tabfocus, ow_parenttabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_destroywidgets]
       bounds_x = 0
       bounds_y = 0
       bounds_cx = 142
@@ -510,9 +533,8 @@ object fadeeditfo: tfadeeditfo
       end
     end
     object buttonlayout: tlayouter
-      optionswidget = [ow_tabfocus, ow_parenttabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_destroywidgets]
       taborder = 1
-      bounds_x = 178
+      bounds_x = 176
       bounds_y = 0
       bounds_cx = 328
       bounds_cy = 31
