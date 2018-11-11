@@ -701,7 +701,6 @@ type
  
  tpoorstringdatalist = class(tdynamicpointerdatalist)
   private
-   feditcharindex: integer;
    function Getitems(index: integer): msestring;
    procedure Setitems(index: integer; const Value: msestring);
    function getasarray: msestringarty;
@@ -725,6 +724,7 @@ type
    function getnoparagraphs(index: integer): boolean; virtual;
    function textlength: integer;
   public
+   feditcharindex: integer;
    procedure assign(source: tpersistent); override;
    procedure assignopenarray(const data: array of msestring); overload;
 //   procedure assignarray(const data: stringarty); overload;

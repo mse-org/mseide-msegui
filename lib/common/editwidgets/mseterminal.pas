@@ -283,6 +283,7 @@ begin
     gridvalue[rowhigh]:= avalue + 
                           copy(gridvalue[rowhigh],finputcolindex+1,bigint);
     finputcolindex:= length(avalue);
+    flines.feditcharindex:= finputcolindex;
     if row = rowhigh then begin
      feditor.curindex:= bigint;
     end;
