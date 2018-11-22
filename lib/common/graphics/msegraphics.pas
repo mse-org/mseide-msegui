@@ -1918,10 +1918,15 @@ begin
   dec(map,7);
   if (map < cm_rgb) or (map > high(map)) or
        (longword(color) >= longword(mapcolorcounts[map])) then begin
+   result:= colortorgb(cl_invalid);
+{
    gdierror(gde_invalidcolor,
        hextostrmse(longword(color)+longword(map) shl speccolorshift,8));
+}
+  end
+  else begin
+   result:= rgbtriplety(gui_pixeltorgb(colormaps[map][longword(color)]));
   end;
-  result:= rgbtriplety(gui_pixeltorgb(colormaps[map][longword(color)]));
  end;
 end;
 
@@ -1938,10 +1943,15 @@ begin
   dec(map,7);
   if (map < cm_rgb) or (map > high(map)) or
        (longword(color) >= longword(mapcolorcounts[map])) then begin
+   result:= colortopixel(cl_invalid);
+{
    gdierror(gde_invalidcolor,
        hextostrmse(longword(color)+longword(map) shl speccolorshift,8));
+}
+  end
+  else begin
+   result:= colormaps[map][longword(color)];
   end;
-  result:= colormaps[map][longword(color)];
  end;
 end;
 
