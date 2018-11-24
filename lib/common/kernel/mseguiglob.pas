@@ -103,10 +103,18 @@ type
  end;
  pkeyeventinfoty = ^keyeventinfoty;
 
- stockfontty = (stf_default,stf_empty,stf_unicode,
-                stf_menu,stf_message,stf_hint,stf_report,
-                stf_proportional,stf_fixed,
-                stf_helvetica,stf_roman,stf_courier); //scaleable fonts
+ stockfontty = (stf_default,     //0 numbers used in tskincontroller
+                stf_empty,       //1
+                stf_unicode,     //2
+                stf_menu,        //3
+                stf_message,     //4
+                stf_hint,        //5
+                stf_report,      //6
+                stf_proportional,//7
+                stf_fixed,       //8
+                stf_helvetica,   //9
+                stf_roman,       //10
+                stf_courier);    //11
  defaultfontnamesty = array[stockfontty] of string;
  
 type

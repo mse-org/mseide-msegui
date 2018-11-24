@@ -519,17 +519,32 @@ type
    property ondeactivate: notifyeventty read fondeactivate write fondeactivate;
    property colors: tskincolors read fcolors write setcolors;
    property fontalias: tskinfontaliass read ffontalias write setfontalias;
-   property font_default: tskinfont index 0 read getskinfont write setskinfont;
-   property font_empty: tskinfont index 1 read getskinfont write setskinfont;
-   property font_unicode: tskinfont index 2 read getskinfont write setskinfont;
-   property font_menu: tskinfont index 3 read getskinfont write setskinfont;
-   property font_message: tskinfont index 4 read getskinfont write setskinfont;
-   property font_report: tskinfont index 5 read getskinfont write setskinfont;
-   property font_proportional: tskinfont index 6 read getskinfont write setskinfont;
-   property font_fixed: tskinfont index 7 read getskinfont write setskinfont;
-   property font_helvetica: tskinfont index 8 read getskinfont write setskinfont;
-   property font_roman: tskinfont index 9 read getskinfont write setskinfont;
-   property font_courier: tskinfont index 10 read getskinfont write setskinfont;
+
+   property font_default: tskinfont index ord(stf_default)           //0
+                         read getskinfont write setskinfont;
+   property font_empty: tskinfont index ord(stf_empty)               //1
+                         read getskinfont write setskinfont;
+   property font_unicode: tskinfont index ord(stf_unicode)           //2
+                         read getskinfont write setskinfont;
+   property font_menu: tskinfont index ord(stf_menu)                 //3 
+                         read getskinfont write setskinfont;
+   property font_message: tskinfont index ord(stf_message)           //4
+                         read getskinfont write setskinfont;
+   property font_hint: tskinfont index ord(stf_hint)                 //5
+                         read getskinfont write setskinfont;
+   property font_report: tskinfont index ord(stf_report)             //6
+                         read getskinfont write setskinfont;
+   property font_proportional: tskinfont index ord(stf_proportional) //7
+                         read getskinfont write setskinfont;
+   property font_fixed: tskinfont index ord(stf_fixed)               //8
+                         read getskinfont write setskinfont;
+   property font_helvetica: tskinfont index ord(stf_helvetica)       //9
+                         read getskinfont write setskinfont;
+   property font_roman: tskinfont index ord(stf_roman)               //10
+                         read getskinfont write setskinfont;
+   property font_courier: tskinfont index ord(stf_courier)           //11
+                         read getskinfont write setskinfont;
+
    property hotkey_fontstylesadd: fontstylesty read fhotkey_fontstylesadd
                             write sethotkey_fontstylesadd default [];
    property hotkey_fontstylesremove: fontstylesty read fhotkey_fontstylesremove
