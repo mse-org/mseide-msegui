@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 2008-2016 by Martin Schreiber
+{ MSEgui Copyright (c) 2008-2018 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -144,6 +144,10 @@ type
   svwidget: widgetskininfoty;
   svcolortab: colorty;
   svcoloractivetab: colorty;
+  svfacetab: tfacecomp;
+  svfaceactivetab: tfacecomp;
+  svfonttab: tfontcomp;
+  svfontactivetab: tfontcomp;
  end;
  menuskininfoty = record
   svface: tfacecomp;
@@ -694,7 +698,11 @@ type
    procedure settabbar_vertopo_tab_faceactive(const avalue: tfacecomp);
 
    procedure settabpage_face(const avalue: tfacecomp);
+   procedure settabpage_facetab(const avalue: tfacecomp);
+   procedure settabpage_faceactivetab(const avalue: tfacecomp);
    procedure settabpage_frame(const avalue: tframecomp);
+   procedure settabpage_fonttab(const avalue: tfontcomp);
+   procedure settabpage_fontactivetab(const avalue: tfontcomp);
 
    procedure settoolbar_horz_face(const avalue: tfacecomp);
    procedure settoolbar_horz_frame(const avalue: tframecomp);
@@ -1401,6 +1409,14 @@ type
                                write ftabpage.svcolortab default cl_default;
    property tabpage_coloractive: colorty read ftabpage.svcoloractivetab 
                            write ftabpage.svcoloractivetab default cl_default;
+   property tabpage_facetab: tfacecomp read ftabpage.svfacetab 
+                                                write settabpage_facetab;
+   property tabpage_faceactivetab: tfacecomp read ftabpage.svfaceactivetab 
+                                                write settabpage_faceactivetab;
+   property tabpage_fonttab: tfontcomp read ftabpage.svfonttab 
+                                                write settabpage_fonttab;
+   property tabpage_fontactivetab: tfontcomp read ftabpage.svfontactivetab 
+                                                write settabpage_fontactivetab;
 {
    property popupmenu_options: skinmenuoptionsty read fpopupmenu.options
                 write fpopupmenu.options default [];         
@@ -3390,9 +3406,29 @@ begin
  setlinkedvar(avalue,tmsecomponent(ftabpage.svwidget.svface));
 end;
 
+procedure tskincontroller.settabpage_facetab(const avalue: tfacecomp);
+begin
+ setlinkedvar(avalue,tmsecomponent(ftabpage.svfacetab));
+end;
+
+procedure tskincontroller.settabpage_faceactivetab(const avalue: tfacecomp);
+begin
+ setlinkedvar(avalue,tmsecomponent(ftabpage.svfaceactivetab));
+end;
+
 procedure tskincontroller.settabpage_frame(const avalue: tframecomp);
 begin
  setlinkedvar(avalue,tmsecomponent(ftabpage.svwidget.svframe));
+end;
+
+procedure tskincontroller.settabpage_fonttab(const avalue: tfontcomp);
+begin
+ setlinkedvar(avalue,tmsecomponent(ftabpage.svfonttab));
+end;
+
+procedure tskincontroller.settabpage_fontactivetab(const avalue: tfontcomp);
+begin
+ setlinkedvar(avalue,tmsecomponent(ftabpage.svfontactivetab));
 end;
 
 procedure tskincontroller.settoolbar_horz_face(const avalue: tfacecomp);
@@ -3914,8 +3950,8 @@ var
 begin
  handlewidget(ainfo);
  setwidgetskin(twidget(ainfo.instance),ftabpage.svwidget);
- if ((ftabpage.svcolortab <> cl_default) or 
-               (ftabpage.svcoloractivetab <> cl_default)) and
+ if {((ftabpage.svcolortab <> cl_default) or 
+               (ftabpage.svcoloractivetab <> cl_default)) and}
     twidget(ainfo.instance).getcorbainterface(typeinfo(itabpage),
                                                       intf1) then begin
   if (ftabpage.svcolortab <> cl_default) and 
@@ -3925,6 +3961,27 @@ begin
   if (ftabpage.svcoloractivetab <> cl_default) and 
                             (intf1.getcoloractivetab = cl_default) then begin
    intf1.setcoloractivetab(ftabpage.svcoloractivetab);
+  end;
+  with ttabpage(ainfo.instance) do begin
+   if (ftabpage.svfacetab <> nil) and (intf1.getfacetab() = nil) then begin
+    facetab:= ftabpage.svfacetab;
+   end;
+   if (ftabpage.svfaceactivetab <> nil) and 
+                             (intf1.getfaceactivetab() = nil) then begin
+    faceactivetab:= ftabpage.svfaceactivetab;
+   end;
+   if (ftabpage.svfonttab <> nil) then begin
+    createfonttab();
+    if fonttab.template = nil then begin
+     fonttab.template:= ftabpage.svfonttab;
+    end;
+   end;
+   if (ftabpage.svfontactivetab <> nil) then begin
+    createfontactivetab();
+    if fontactivetab.template = nil then begin
+     fontactivetab.template:= ftabpage.svfonttab;
+    end;
+   end;
   end;
  end;
 end;
