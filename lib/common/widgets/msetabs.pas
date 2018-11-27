@@ -484,6 +484,10 @@ type
   function getinvisible: boolean;
   procedure setcolortab(const avalue: colorty);
   procedure setcoloractivetab(const avalue: colorty);
+  procedure setfacetab(const avalue: tfacecomp);
+  procedure setfaceactivetab(const avalue: tfacecomp);
+  procedure setfonttab(const avalue: tfont);
+  procedure setfontactivetab(const avalue: tfont);
   procedure doselect;
   procedure dodeselect;
  end;
@@ -552,10 +556,12 @@ type
    function getfonttab: tfont;
    function getfontactivetab: tfont;
    function getfonttab1: ttabpagefonttab;
-   procedure setfonttab(const avalue: ttabpagefonttab);
+   procedure setfonttab1(const avalue: ttabpagefonttab);
+   procedure setfonttab(const avalue: tfont);
    function isfonttabstored: boolean;
    function getfontactivetab1: ttabpagefontactivetab;
-   procedure setfontactivetab(const avalue: ttabpagefontactivetab);
+   procedure setfontactivetab1(const avalue: ttabpagefontactivetab);
+   procedure setfontactivetab(const avalue: tfont);
    function isfontactivetabstored: boolean;
    procedure setfacetab(const avalue: tfacecomp);
    procedure setfaceactivetab(const avalue: tfacecomp);
@@ -592,7 +598,8 @@ type
    property isactivepage: boolean read getisactivepage write setisactivepage;
    property subform: twidget read fsubform;
   published
-   property invisible: boolean read getinvisible write setinvisible default false;
+   property invisible: boolean read getinvisible 
+                                       write setinvisible default false;
    property taborderoverride: ttaborderoverride read ftaborderoverride 
                                                   write settaborderoverride;
 
@@ -605,11 +612,12 @@ type
    property coloractivetab: colorty read getcoloractivetab
                   write setcoloractivetab default cl_default;
    property facetab: tfacecomp read getfacetab write setfacetab;
-   property faceactivetab: tfacecomp read getfaceactivetab write setfaceactivetab;
-   property fonttab: ttabpagefonttab read getfonttab1 write setfonttab
+   property faceactivetab: tfacecomp read getfaceactivetab 
+                                                 write setfaceactivetab;
+   property fonttab: ttabpagefonttab read getfonttab1 write setfonttab1
                                                         stored isfonttabstored;
    property fontactivetab: ttabpagefontactivetab read getfontactivetab1
-                                 write setfontactivetab stored isfontactivetabstored;
+                          write setfontactivetab1 stored isfontactivetabstored;
    property imagelist: timagelist read getimagelist write setimagelist;
    property imagenr: imagenrty read getimagenr write setimagenr default -1;
    property imagenrdisabled: imagenrty read getimagenrdisabled 
@@ -3792,13 +3800,18 @@ begin
  result:= ffonttab;
 end;
 
-procedure ttabpage.setfonttab(const avalue: ttabpagefonttab);
+procedure ttabpage.setfonttab1(const avalue: ttabpagefonttab);
 begin
  if avalue <> ffonttab then begin
   setoptionalobject(avalue,ffonttab,
                                        {$ifdef FPC}@{$endif}createfonttab);
   changed;
  end;
+end;
+
+procedure ttabpage.setfonttab(const avalue: tfont);
+begin
+ setfonttab1(ttabpagefonttab(avalue));
 end;
 
 function ttabpage.isfonttabstored: boolean;
@@ -3813,13 +3826,18 @@ begin
  result:= ffontactivetab;
 end;
 
-procedure ttabpage.setfontactivetab(const avalue: ttabpagefontactivetab);
+procedure ttabpage.setfontactivetab1(const avalue: ttabpagefontactivetab);
 begin
  if avalue <> ffontactivetab then begin
   setoptionalobject(avalue,ffontactivetab,
                                        {$ifdef FPC}@{$endif}createfontactivetab);
   changed;
  end;
+end;
+
+procedure ttabpage.setfontactivetab(const avalue: tfont);
+begin
+ setfontactivetab1(ttabpagefontactivetab(avalue));
 end;
 
 function ttabpage.isfontactivetabstored: boolean;

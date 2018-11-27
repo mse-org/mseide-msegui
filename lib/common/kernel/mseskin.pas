@@ -3947,6 +3947,7 @@ end;
 procedure tskincontroller.handletabpage(const ainfo: skininfoty);
 var
  intf1: itabpage;
+ font1: tfont;
 begin
  handlewidget(ainfo);
  setwidgetskin(twidget(ainfo.instance),ftabpage.svwidget);
@@ -3962,25 +3963,31 @@ begin
                             (intf1.getcoloractivetab = cl_default) then begin
    intf1.setcoloractivetab(ftabpage.svcoloractivetab);
   end;
-  with ttabpage(ainfo.instance) do begin
-   if (ftabpage.svfacetab <> nil) and (intf1.getfacetab() = nil) then begin
-    facetab:= ftabpage.svfacetab;
+  if (ftabpage.svfacetab <> nil) and (intf1.getfacetab() = nil) then begin
+   intf1.setfacetab(ftabpage.svfacetab);
+  end;
+  if (ftabpage.svfaceactivetab <> nil) and 
+                            (intf1.getfaceactivetab() = nil) then begin
+   intf1.setfaceactivetab(ftabpage.svfaceactivetab);
+  end;
+  if (ftabpage.svfonttab <> nil) then begin
+   font1:= intf1.getfonttab();
+   if font1 = nil then begin
+    intf1.setfonttab(tfont(pointer(1))); //create font
+    font1:= intf1.getfonttab();
    end;
-   if (ftabpage.svfaceactivetab <> nil) and 
-                             (intf1.getfaceactivetab() = nil) then begin
-    faceactivetab:= ftabpage.svfaceactivetab;
+   if font1.template = nil then begin
+    font1.template:= ftabpage.svfonttab;
    end;
-   if (ftabpage.svfonttab <> nil) then begin
-    createfonttab();
-    if fonttab.template = nil then begin
-     fonttab.template:= ftabpage.svfonttab;
-    end;
+  end;
+  if (ftabpage.svfontactivetab <> nil) then begin
+   font1:= intf1.getfontactivetab();
+   if font1 = nil then begin
+    intf1.setfontactivetab(tfont(pointer(1))); //create font
+    font1:= intf1.getfontactivetab();
    end;
-   if (ftabpage.svfontactivetab <> nil) then begin
-    createfontactivetab();
-    if fontactivetab.template = nil then begin
-     fontactivetab.template:= ftabpage.svfonttab;
-    end;
+   if font1.template = nil then begin
+    font1.template:= ftabpage.svfontactivetab;
    end;
   end;
  end;

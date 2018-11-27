@@ -718,10 +718,12 @@ type
    function getfonttab: tfont;
    function getfontactivetab: tfont;
    function getfonttab1: ttabformfonttab;
-   procedure setfonttab(const avalue: ttabformfonttab);
+   procedure setfonttab1(const avalue: ttabformfonttab);
+   procedure setfonttab(const avalue: tfont);
    function isfonttabstored: boolean;
    function getfontactivetab1: ttabformfontactivetab;
-   procedure setfontactivetab(const avalue: ttabformfontactivetab);
+   procedure setfontactivetab1(const avalue: ttabformfontactivetab);
+   procedure setfontactivetab(const avalue: tfont);
    function isfontactivetabstored: boolean;
    function getfacetab: tfacecomp;
    procedure setfacetab(const avalue: tfacecomp);
@@ -758,10 +760,10 @@ type
    property facetab: tfacecomp read getfacetab write setfacetab;
    property faceactivetab: tfacecomp read getfaceactivetab 
                                                 write setfaceactivetab;
-   property fonttab: ttabformfonttab read getfonttab1 write setfonttab
+   property fonttab: ttabformfonttab read getfonttab1 write setfonttab1
                                                         stored isfonttabstored;
    property fontactivetab: ttabformfontactivetab read getfontactivetab1 
-                                 write setfontactivetab stored isfontactivetabstored;
+                          write setfontactivetab1 stored isfontactivetabstored;
    property tabhint: msestring read gettabhint write settabhint;
    property tabnoface: boolean read gettabnoface 
                                       write settabnoface default false;
@@ -3197,13 +3199,18 @@ begin
  result:= ffonttab;
 end;
 
-procedure ttabform.setfonttab(const avalue: ttabformfonttab);
+procedure ttabform.setfonttab1(const avalue: ttabformfonttab);
 begin
  if avalue <> ffonttab then begin
   setoptionalobject(avalue,ffonttab,
                                        {$ifdef FPC}@{$endif}createfonttab);
   changed;
  end;
+end;
+
+procedure ttabform.setfonttab(const avalue: tfont);
+begin
+ setfonttab1(ttabformfonttab(avalue));
 end;
 
 function ttabform.isfonttabstored: boolean;
@@ -3218,13 +3225,18 @@ begin
  result:= ffontactivetab;
 end;
 
-procedure ttabform.setfontactivetab(const avalue: ttabformfontactivetab);
+procedure ttabform.setfontactivetab1(const avalue: ttabformfontactivetab);
 begin
  if avalue <> ffontactivetab then begin
   setoptionalobject(avalue,ffontactivetab,
                                        {$ifdef FPC}@{$endif}createfontactivetab);
   changed;
  end;
+end;
+
+procedure ttabform.setfontactivetab(const avalue: tfont);
+begin
+ setfontactivetab1(ttabformfontactivetab(avalue));
 end;
 
 function ttabform.isfontactivetabstored: boolean;
