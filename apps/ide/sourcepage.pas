@@ -637,6 +637,7 @@ var
  cellpos1: cellpositionty;
  
 begin
+
  if iscellclick(info,[ccr_nokeyreturn,ccr_dblclick]) and 
            (dataicon[info.cell.row] and integer($80000000) <> 0) and
            (info.mouseeventinfopo^.shiftstate = [ss_double]) then begin
@@ -1251,9 +1252,8 @@ begin
      end;
     end
     else begin
-     if edit.isdblclicked(info.mouseeventinfopo^) and
-       (info.mouseeventinfopo^.shiftstate*[ss_double,ss_shift,ss_left] = 
-                             [ss_double,ss_shift,ss_left]) then begin
+       if  (edit.isdblclicked(info.mouseeventinfopo^)) 
+     then begin
       if ss_triple in info.mouseeventinfopo^.shiftstate then begin
        edit.setselection(makegridcoord(0,edit.row),
                             makegridcoord(bigint,edit.row),true);
@@ -1263,8 +1263,8 @@ begin
       end;
       copytoclipboard(edit.selectedtext,cbb_primary);
       include(info.mouseeventinfopo^.eventstate,es_processed);
-     end;
-    end;
+     end; 
+    end; 
    end;
   end;
  end;
