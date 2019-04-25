@@ -11,6 +11,7 @@ unit msedispwidgets;
 
 {$ifdef FPC}
  {$mode objfpc}{$h+}
+ {$interfaces corba}
 {$endif}
 {$ifndef mse_no_ifi}
  {$define mse_with_ifi}
@@ -143,7 +144,7 @@ type
    fflags: dispwidgetflagsty;
 {$ifdef mse_with_ifi}
    fifilink: tifilinkcomp;
-   function getdefaultifilink: iifilink; override;
+   function getdefaultifilink: iificlient; override;
     //iifidatalink
    function getifilinkkind: ptypeinfo;
    procedure setifilink(const avalue: tifilinkcomp);
@@ -785,7 +786,7 @@ end;
 
 {$ifdef mse_with_ifi}
 
-function tdispwidget.getdefaultifilink: iifilink;
+function tdispwidget.getdefaultifilink: iificlient;
 begin
  result:= iifidatalink(self);
 end;

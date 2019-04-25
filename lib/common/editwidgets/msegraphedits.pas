@@ -10,6 +10,7 @@
 unit msegraphedits;
 {$ifdef FPC}
  {$mode objfpc}{$h+}
+ {$interfaces corba}
 {$endif}
 {$ifndef mse_no_ifi}
  {$define mse_with_ifi}
@@ -152,7 +153,7 @@ type
    fstate: dataeditstatesty;
 {$ifdef mse_with_ifi}
    fifilink: tifivaluelinkcomp;
-   function getdefaultifilink: iifilink; override;
+   function getdefaultifilink: iificlient; override;
    procedure ifisetvalue(var avalue; var accept: boolean);
    procedure getifivalue(var avalue) virtual;
    procedure setifivalue(const avalue) virtual;
@@ -2546,7 +2547,7 @@ begin
  end;
 end;
 
-function tgraphdataedit.getdefaultifilink: iifilink;
+function tgraphdataedit.getdefaultifilink: iificlient;
 begin
  result:= iifidatalink(self);
 end;

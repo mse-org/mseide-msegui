@@ -19,6 +19,15 @@ order16=0
 [projectoptions]
 projectdir=/home/fred/mseide-msegui/apps/ide
 projectfilename=/home/fred/mseide-msegui/apps/ide/mseide.prj
+finddialog=8
+ [finddialogfo.selectedonly]
+ value=0
+ [finddialogfo]
+ stackedunder=
+ x=319
+ y=205
+ cx=312
+ cy=114
 options=114
  [projectoptionsfo.toolshortcuts]
  dropdowncolwidths=3
@@ -106,7 +115,7 @@ options=114
  value=
  [projectoptionsfo.makegroupbox]
  firsttab=0
- index=2
+ index=0
  [projectoptionsfo.exceptionsgrid]
  propcolwidthref=790
  width0=47
@@ -386,12 +395,12 @@ makeoptionson=5
  36
  4095
 compilerusedon=29
- 4095
+ 4091
  0
  0
  0
  0
- 0
+ 4
  0
  0
  0
@@ -680,41 +689,55 @@ envvarons=0
 [edit]
 hintwidth=0
 hintheight=0
-finddtext=
-findhistory=0
+finddtext=getdefaultifilink
+findhistory=2
+ getdefaultifilink
+ fifilink
 findoptions=1
-editpos=3
- 17,6
+editpos=5
  0,-1073741823
- 0,75
+ 0,-1073741823
+ 0,0
+ 13,2543
+ 0,788
 bookmarks0=0
 bookmarks1=0
 bookmarks2=0
-sourcefiles=3
+bookmarks3=0
+bookmarks4=0
+sourcefiles=5
  ${PROJECTDIR}/main.mfm
  ${PROJECTDIR}/actionsmodule.mfm
  ${PROJECTDIR}/mseide.pas
-relpaths=3
+ /home/fred/mseide-msegui/lib/common/editwidgets/msegraphedits.pas
+ /home/fred/mseide-msegui/lib/common/widgets/msedispwidgets.pas
+relpaths=5
  main.mfm
  actionsmodule.mfm
  mseide.pas
-ismoduletexts=3
+ ../lib/common/editwidgets/msegraphedits.pas
+ ../lib/common/widgets/msedispwidgets.pas
+ismoduletexts=5
  -1
  -1
+ 0
+ 0
  0
 modules=0
 moduleoptions=0
 visiblemodules=0
 nomenumodules=0
 [sourcefo.files_tab]
-order=3
- 0
+order=5
  2
+ 0
  1
+ 3
+ 4
 firsttab=0
-index=1
+index=3
 [layout]
-windowlayout=551
+windowlayout=553
  [mainfo.basedock]
  splitdir=2
  useroptions=268450944
@@ -728,13 +751,13 @@ windowlayout=551
  ny=0
  ncx=0
  ncy=0
- x=0
+ x=3
  y=29
- cx=1366
+ cx=1360
  cy=706
  rcx=0
  rcy=0
- wsize=6
+ wsize=0
  active=1
  visible=1
  [targetconsolefo]
@@ -822,7 +845,7 @@ windowlayout=551
  [findinfilefo]
  splitdir=0
  useroptions=268451947
- stackedunder=mainfo
+ stackedunder=
  parent=
  mdistate=0
  nx=0
@@ -1054,7 +1077,7 @@ windowlayout=551
  ncy=0
  x=0
  y=578
- cx=1356
+ cx=1350
  cy=104
  rcx=0
  rcy=0
@@ -1154,7 +1177,7 @@ windowlayout=551
  ncy=0
  x=0
  y=0
- cx=1356
+ cx=1350
  cy=57
  rcx=0
  rcy=0
@@ -1166,11 +1189,11 @@ windowlayout=551
  mdistate=0
  nx=0
  ny=0
- ncx=1147
- ncy=53
+ ncx=1350
+ ncy=60
  x=0
  y=0
- cx=1356
+ cx=1350
  cy=60
  rcx=0
  rcy=0
@@ -1181,8 +1204,10 @@ windowlayout=551
  [debuggerfo.edit_compiler]
  value=Pascal
  [debuggerfo.file_history]
- value=/home/fred/mseide-msegui/apps/ide/mseide.pas
+ value=/home/fred/mseide-msegui/lib/common/editwidgets/msegraphedits.pas
  history=20
+  /home/fred/mseide-msegui/apps/ide/mseide.pas
+  /home/fred/mseide-msegui/apps/ide/actionsmodule.mfm
   /home/fred/mseide-msegui/apps/ide/main.mfm
   /home/fred/ideu/src/ideU.pas
   /home/fred/ideu/src/sourceform.pas
@@ -1201,8 +1226,6 @@ windowlayout=551
   /home/fred/mseide-msegui/apps/ide/lang/lang_es/mseide_i18n_win.trp
   /home/fred/mseide-msegui/apps/ide/lang/lang_es/mseide_i18n.trp
   /home/fred/mseide-msegui/apps/ide/lang/lang_en/mseide_i18n_win.trp
-  /home/fred/mseide-msegui/apps/ide/lang/lang_en/mseide_i18n.trp
-  /home/fred/mseide-msegui/apps/ide/lang/lang_de/mseide_i18n_win.trp
  [debuggerfo.project_options]
  value=1
  [debuggerfo.hints]
@@ -1219,17 +1242,19 @@ windowlayout=551
  ncy=0
  x=208
  y=0
- cx=1148
+ cx=1142
  cy=515
  rcx=0
  rcy=0
  [sourcefo.files_tab]
- order=3
-  0
+ order=5
   2
+  0
   1
+  3
+  4
  firsttab=0
- index=1
+ index=3
  [cpuc86_64fo]
  irqoff=0
  splitdir=0
@@ -1262,7 +1287,7 @@ windowlayout=551
  ncy=0
  x=0
  y=60
- cx=1356
+ cx=1350
  cy=515
  rcx=0
  rcy=0
