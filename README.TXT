@@ -384,7 +384,7 @@ REMOTEUSER      pi
 Press F9 and hope the best. ;-)
 
 If there is a debugger timeout at startup enlarge the 
-'Project'-'Options'-'Target'-'Debugger'-'Wait before connect' value.
+'Project'-'Options'-'Debugger'-'Target'-'Wait before connect' value.
 
 Have a lot of fun!
 
