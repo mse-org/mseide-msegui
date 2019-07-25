@@ -673,7 +673,7 @@ begin
  with info do begin
   kind:= methodkindty(-1);
   params:= nil;
-  if atype^.Kind = tkmethod then begin
+  if (atype^.Kind = tkmethod) then begin
    with gettypedata(atype)^ do begin
     kind:= tmethodkindtomethodkind[methodkind];
     int1:= paramcount;
@@ -721,8 +721,18 @@ end;
 function parametersmatch(const a: ptypeinfo; const b: methodparaminfoty): boolean;
 var
  a1: methodparaminfoty;
+ {$if FPC_FULLVERSION > 030200}
+ params1: paraminfoarty;
+ x : integer;
+ {$endif}
 begin
- getmethodparaminfo(a,a1);
+ getmethodparaminfo(a,a1); 
+ {$if FPC_FULLVERSION > 030200}
+ setlength(params1,length(a1.params)-1);
+ for x:=0 to length(params1) -1 do
+ params1[x] := a1.params[x+1];
+ a1.params := params1;
+ {$endif}
  result:= parametersmatch1(a1,b);
 end;
 

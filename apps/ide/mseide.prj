@@ -19,6 +19,63 @@ order16=0
 [projectoptions]
 projectdir=/home/fred/mseide-msegui/apps/ide
 projectfilename=/home/fred/mseide-msegui/apps/ide/mseide.prj
+findinfiledialog=56
+ [findinfileadialogfo.subdirs]
+ value=1
+ [findinfileadialogfo.incurrentfile]
+ value=0
+ [findinfileadialogfo.inopenfiles]
+ value=0
+ [findinfileadialogfo.wholeword]
+ value=0
+ [findinfileadialogfo.inprojectdir]
+ value=1
+ [findinfileadialogfo.casesensitive]
+ value=0
+ [findinfileadialogfo.indirectories]
+ value=0
+ [findinfileadialogfo.mask]
+ value="*.pas" "*.pp" "*.inc"
+ history=2
+  "*.pas" "*.pp" "*.inc"
+  "*.pas" "*.pp" "*.inc" "*.*"
+ [findinfileadialogfo.dir]
+ filenames=1
+  /usr/local/codetyphon/fpcsrc/
+ filecolwidth=174
+ x=0
+ y=0
+ cx=0
+ cy=0
+ filehistory=2
+  /usr/local/codetyphon/fpcsrc/
+  /home/fred/mseide-msegui/
+ filefilterindex=0
+ filefilter="*.pas" "*.pp" "*.inc"
+ [findinfileadialogfo.findtext]
+ value=FPC_FULLVERSION
+ history=15
+  FPC_FULLVERSION
+  parametersmatch
+  ptypeinfo
+  pfconst
+  getmethodparaminfo
+  paramlist
+  pid_const
+  pfVar
+  pfHidden
+  TParamFlags
+  TParamFlag
+  pfarray
+  hidden
+  tparam
+  
+ [findinfileadialogfo]
+ stackedunder=
+ x=268
+ y=415
+ cx=339
+ cy=275
 finddialog=8
  [finddialogfo.selectedonly]
  value=0
@@ -124,7 +181,7 @@ options=114
  sortdescend1=0
  [projectoptionsfo.ttabwidget1]
  firsttab=0
- index=5
+ index=0
  [projectoptionsfo.filefiltergrid]
  propcolwidthref=698
  width0=112
@@ -143,6 +200,15 @@ options=114
  y=57
  cx=839
  cy=634
+settings=8
+ [settings_form]
+ x=448
+ y=98
+ cx=469
+ cy=539
+ wsize=0
+ active=1
+ visible=1
 mainfile=mseide.pas
 targetfile=mseide${EXEEXT}
 messageoutputfile=
@@ -160,13 +226,15 @@ objpref=-Fo
 targpref=-o
 befcommand=0
 aftcommand=0
-makeoptions=5
+makeoptions=6
  -Xg -l -Mobjfpc -Sh -Fcutf8
  -gl -O-
  -B
  -O2 -XX -Xs -CX
+ -vi
  -FUunits
-makeoptpurpose=5
+makeoptpurpose=6
+ 
  
  
  
@@ -388,19 +456,20 @@ modulenames=0
 moduletypes=0
 modulefiles=0
 befcommandon=0
-makeoptionson=5
+makeoptionson=6
  63
- 27
- 38
- 36
+ 19
+ 46
+ 44
+ 4095
  4095
 compilerusedon=29
- 4091
+ 4087
  0
  0
  0
  0
- 4
+ 8
  0
  0
  0
@@ -425,12 +494,12 @@ compilerusedon=29
  0
  0
 debuggerusedon=6
- 4095
+ 4080
  0
  0
  0
  0
- 0
+ 15
 exeusedon=15
  4095
  0
@@ -689,37 +758,60 @@ envvarons=0
 [edit]
 hintwidth=0
 hintheight=0
-finddtext=getdefaultifilink
-findhistory=2
+finddtext=$self
+findhistory=15
+ $self
+ parametersmatch
+ mse_fpc_32
+ mse_fpc_3_2
+ getmethodparaminfo
+ tkmethod
+ typeinfo
+ self
+ Kind
+ ptypinf
+ paramlist
+ hidden
+ flags
  getdefaultifilink
  fifilink
 findoptions=1
-editpos=5
+editpos=7
  0,-1073741823
  0,-1073741823
- 0,0
- 13,2543
- 0,788
+ 0,-1073741823
+ 0,1248
+ 3,721
+ 0,-1073741823
+ 0,-1073741823
 bookmarks0=0
 bookmarks1=0
 bookmarks2=0
 bookmarks3=0
 bookmarks4=0
-sourcefiles=5
- ${PROJECTDIR}/main.mfm
- ${PROJECTDIR}/actionsmodule.mfm
+bookmarks5=0
+bookmarks6=0
+sourcefiles=7
  ${PROJECTDIR}/mseide.pas
- /home/fred/mseide-msegui/lib/common/editwidgets/msegraphedits.pas
- /home/fred/mseide-msegui/lib/common/widgets/msedispwidgets.pas
-relpaths=5
- main.mfm
- actionsmodule.mfm
+ ${PROJECTDIR}/pascaldesignparser.pas
+ /usr/local/codetyphon/fpcsrc/rtl/objpas/typinfo.pp
+ ${PROJECTDIR}/sourceupdate.pas
+ ${PROJECTDIR}/msedesignparser.pas
+ ${PROJECTDIR}/mseide.pas
+ ${PROJECTDIR}/mseide.pas
+relpaths=7
  mseide.pas
- ../lib/common/editwidgets/msegraphedits.pas
- ../lib/common/widgets/msedispwidgets.pas
-ismoduletexts=5
- -1
- -1
+ pascaldesignparser.pas
+ ../../../usr/local/codetyphon/fpcsrc/rtl/objpas/typinfo.pp
+ sourceupdate.pas
+ msedesignparser.pas
+ mseide.pas
+ mseide.pas
+ismoduletexts=7
+ 0
+ 0
+ 0
+ 0
  0
  0
  0
@@ -728,16 +820,10 @@ moduleoptions=0
 visiblemodules=0
 nomenumodules=0
 [sourcefo.files_tab]
-order=5
- 2
- 0
- 1
- 3
- 4
 firsttab=0
-index=3
+index=4
 [layout]
-windowlayout=553
+windowlayout=547
  [mainfo.basedock]
  splitdir=2
  useroptions=268450944
@@ -769,8 +855,8 @@ windowlayout=553
  ny=0
  ncx=0
  ncy=0
- x=493
- y=171
+ x=746
+ y=169
  cx=497
  cy=314
  rcx=0
@@ -854,7 +940,7 @@ windowlayout=553
  ncy=0
  x=239
  y=115
- cx=678
+ cx=1043
  cy=414
  rcx=0
  rcy=0
@@ -871,7 +957,7 @@ windowlayout=553
  x=0
  y=0
  cx=205
- cy=515
+ cy=521
  rcx=0
  rcy=0
  [projecttreefo.grid]
@@ -1178,7 +1264,7 @@ windowlayout=553
  x=0
  y=0
  cx=1350
- cy=57
+ cy=51
  rcx=0
  rcy=0
  [debuggerfo.basedock]
@@ -1190,11 +1276,11 @@ windowlayout=553
  nx=0
  ny=0
  ncx=1350
- ncy=60
+ ncy=54
  x=0
  y=0
  cx=1350
- cy=60
+ cy=54
  rcx=0
  rcy=0
  [debuggerfo.edit_options]
@@ -1204,11 +1290,17 @@ windowlayout=553
  [debuggerfo.edit_compiler]
  value=Pascal
  [debuggerfo.file_history]
- value=/home/fred/mseide-msegui/lib/common/editwidgets/msegraphedits.pas
+ value=/home/fred/mseide-msegui/apps/ide/msedesignparser.pas
  history=20
+  /home/fred/mseide-msegui/apps/ide/sourceupdate.pas
+  /home/fred/mseide-msegui/apps/ide/msedesignparser.pas
+  /home/fred/mseide-msegui/apps/ide/dumpunitgroups.pas
+  /home/fred/mseide-msegui/lib/common/fpccompatibility/mdb.pas
+  /home/fred/mseide-msegui/apps/ide/main.mfm
+  /home/fred/mseide-msegui/apps/ide/pascaldesignparser.pas
+  /home/fred/mseide-msegui/lib/common/editwidgets/msegraphedits.pas
   /home/fred/mseide-msegui/apps/ide/mseide.pas
   /home/fred/mseide-msegui/apps/ide/actionsmodule.mfm
-  /home/fred/mseide-msegui/apps/ide/main.mfm
   /home/fred/ideu/src/ideU.pas
   /home/fred/ideu/src/sourceform.pas
   /home/fred/uos/src/uos.pas
@@ -1220,14 +1312,8 @@ windowlayout=553
   /home/fred/mseide-msegui/apps/ide/projectoptionsform.pas
   /home/fred/mseide-msegui/tools/i18n/headerform.pas
   /home/fred/mseide-msegui/tools/i18n/mseresourceparser.pas
-  /home/fred/mseide-msegui/tools/i18n/main.pas
-  /home/fred/mseide-msegui/apps/ide/lang/lang_ru/mseide_i18n_win.trp
-  /home/fred/mseide-msegui/apps/ide/lang/lang_ru/mseide_i18n.trp
-  /home/fred/mseide-msegui/apps/ide/lang/lang_es/mseide_i18n_win.trp
-  /home/fred/mseide-msegui/apps/ide/lang/lang_es/mseide_i18n.trp
-  /home/fred/mseide-msegui/apps/ide/lang/lang_en/mseide_i18n_win.trp
  [debuggerfo.project_options]
- value=1
+ value=2
  [debuggerfo.hints]
  value=0
  [sourcefo]
@@ -1243,18 +1329,12 @@ windowlayout=553
  x=208
  y=0
  cx=1142
- cy=515
+ cy=521
  rcx=0
  rcy=0
  [sourcefo.files_tab]
- order=5
-  2
-  0
-  1
-  3
-  4
  firsttab=0
- index=3
+ index=4
  [cpuc86_64fo]
  irqoff=0
  splitdir=0
@@ -1286,9 +1366,9 @@ windowlayout=553
  ncx=0
  ncy=0
  x=0
- y=60
+ y=54
  cx=1350
- cy=515
+ cy=521
  rcx=0
  rcy=0
 [targetconsole]
