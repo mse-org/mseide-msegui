@@ -1195,15 +1195,9 @@ function tsourceupdater.composeproceduretext(const name: string;
 
 var
  int1,int2: integer;
- {$if FPC_FULLVERSION > 030200} 
- namemeth : string;
- {$endif}
  begin
  result:= name;
- {$if FPC_FULLVERSION > 030200} 
- namemeth := result;
- {$endif}
- with info do begin
+  with info do begin
   int2:= high(params);
   if kind in [mk_function,mk_procedurefunc,mk_methodfunc] then begin
    dec(int2);
@@ -1244,9 +1238,6 @@ var
        result:= result + ' = '+defaultvalue;
       end;
      end;
-      {$if FPC_FULLVERSION > 030200} 
-      if name = '$self' then result := namemeth + '(' else
-      {$endif}
       result:= result + '; ';
     end;
    end;

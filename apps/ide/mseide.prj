@@ -172,7 +172,7 @@ options=114
  value=
  [projectoptionsfo.makegroupbox]
  firsttab=0
- index=0
+ index=2
  [projectoptionsfo.exceptionsgrid]
  propcolwidthref=790
  width0=47
@@ -459,8 +459,8 @@ befcommandon=0
 makeoptionson=6
  63
  19
- 46
- 44
+ 38
+ 32
  4095
  4095
 compilerusedon=29
@@ -587,7 +587,7 @@ newinheritedforms=10
  0
  0
  0
- -1
+ 1
 uid=0
 sourcefilemasks=3
  "*.pas" "*.dpr" "*.lpr" "*.pp" "*.inc"
@@ -759,8 +759,9 @@ envvarons=0
 hintwidth=0
 hintheight=0
 finddtext=$self
-findhistory=15
+findhistory=16
  $self
+ FPC_FULLVERSION
  parametersmatch
  mse_fpc_32
  mse_fpc_3_2
@@ -780,8 +781,8 @@ editpos=7
  0,-1073741823
  0,-1073741823
  0,-1073741823
- 0,1248
- 3,721
+ 0,1038
+ 0,745
  0,-1073741823
  0,-1073741823
 bookmarks0=0
@@ -802,7 +803,7 @@ sourcefiles=7
 relpaths=7
  mseide.pas
  pascaldesignparser.pas
- ../../../usr/local/codetyphon/fpcsrc/rtl/objpas/typinfo.pp
+ usr/local/codetyphon/fpcsrc/rtl/objpas/typinfo.pp
  sourceupdate.pas
  msedesignparser.pas
  mseide.pas
@@ -1292,8 +1293,8 @@ windowlayout=547
  [debuggerfo.file_history]
  value=/home/fred/mseide-msegui/apps/ide/msedesignparser.pas
  history=20
-  /home/fred/mseide-msegui/apps/ide/sourceupdate.pas
   /home/fred/mseide-msegui/apps/ide/msedesignparser.pas
+  /home/fred/mseide-msegui/apps/ide/sourceupdate.pas
   /home/fred/mseide-msegui/apps/ide/dumpunitgroups.pas
   /home/fred/mseide-msegui/lib/common/fpccompatibility/mdb.pas
   /home/fred/mseide-msegui/apps/ide/main.mfm
