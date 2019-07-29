@@ -758,8 +758,9 @@ envvarons=0
 [edit]
 hintwidth=0
 hintheight=0
-finddtext=$self
-findhistory=16
+finddtext=030200
+findhistory=17
+ 030200
  $self
  FPC_FULLVERSION
  parametersmatch
@@ -781,8 +782,8 @@ editpos=7
  0,-1073741823
  0,-1073741823
  0,-1073741823
- 0,1038
- 0,745
+ 0,-1073741823
+ 0,671
  0,-1073741823
  0,-1073741823
 bookmarks0=0
@@ -1314,7 +1315,7 @@ windowlayout=547
   /home/fred/mseide-msegui/tools/i18n/headerform.pas
   /home/fred/mseide-msegui/tools/i18n/mseresourceparser.pas
  [debuggerfo.project_options]
- value=2
+ value=1
  [debuggerfo.hints]
  value=0
  [sourcefo]
