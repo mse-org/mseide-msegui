@@ -48,6 +48,7 @@ type
 
 const
  defaultcaptionframeoptions = [];
+ 
 type
  doublewidgetty = record 
                    a,b: twidget;

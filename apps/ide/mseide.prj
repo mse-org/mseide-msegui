@@ -19,7 +19,7 @@ order16=0
 [projectoptions]
 projectdir=/home/fred/mseide-msegui/apps/ide
 projectfilename=/home/fred/mseide-msegui/apps/ide/mseide.prj
-findinfiledialog=56
+findinfiledialog=60
  [findinfileadialogfo.subdirs]
  value=1
  [findinfileadialogfo.incurrentfile]
@@ -29,11 +29,11 @@ findinfiledialog=56
  [findinfileadialogfo.wholeword]
  value=0
  [findinfileadialogfo.inprojectdir]
- value=1
+ value=0
  [findinfileadialogfo.casesensitive]
  value=0
  [findinfileadialogfo.indirectories]
- value=0
+ value=1
  [findinfileadialogfo.mask]
  value="*.pas" "*.pp" "*.inc"
  history=2
@@ -41,20 +41,24 @@ findinfiledialog=56
   "*.pas" "*.pp" "*.inc" "*.*"
  [findinfileadialogfo.dir]
  filenames=1
-  /usr/local/codetyphon/fpcsrc/
+  /home/fred/mseide-msegui/
  filecolwidth=174
  x=0
  y=0
  cx=0
  cy=0
  filehistory=2
-  /usr/local/codetyphon/fpcsrc/
   /home/fred/mseide-msegui/
+  /usr/local/codetyphon/fpcsrc/
  filefilterindex=0
  filefilter="*.pas" "*.pp" "*.inc"
  [findinfileadialogfo.findtext]
- value=FPC_FULLVERSION
- history=15
+ value=defaultcaptionframeoptions
+ history=19
+  defaultcaptionframeoptions
+  tdbgridwidget
+  cfo_captionfocus
+  030100
   FPC_FULLVERSION
   parametersmatch
   ptypeinfo
@@ -758,8 +762,11 @@ envvarons=0
 [edit]
 hintwidth=0
 hintheight=0
-finddtext=030200
-findhistory=17
+finddtext=setoptions
+findhistory=20
+ setoptions
+ defaultgrapheditframeoptions
+ 030100
  030200
  $self
  FPC_FULLVERSION
@@ -778,41 +785,26 @@ findhistory=17
  getdefaultifilink
  fifilink
 findoptions=1
-editpos=7
+editpos=4
  0,-1073741823
- 0,-1073741823
- 0,-1073741823
- 0,-1073741823
- 0,671
- 0,-1073741823
+ 0,153
+ 0,44
  0,-1073741823
 bookmarks0=0
 bookmarks1=0
 bookmarks2=0
 bookmarks3=0
-bookmarks4=0
-bookmarks5=0
-bookmarks6=0
-sourcefiles=7
+sourcefiles=4
  ${PROJECTDIR}/mseide.pas
- ${PROJECTDIR}/pascaldesignparser.pas
- /usr/local/codetyphon/fpcsrc/rtl/objpas/typinfo.pp
- ${PROJECTDIR}/sourceupdate.pas
- ${PROJECTDIR}/msedesignparser.pas
- ${PROJECTDIR}/mseide.pas
- ${PROJECTDIR}/mseide.pas
-relpaths=7
+ /home/fred/mseide-msegui/lib/common/widgets/msewidgets.pas
+ /home/fred/mseide-msegui/lib/common/editwidgets/msegraphedits.pas
+ /home/fred/mseide-msegui/lib/common/widgets/msesimplewidgets.pas
+relpaths=4
  mseide.pas
- pascaldesignparser.pas
- usr/local/codetyphon/fpcsrc/rtl/objpas/typinfo.pp
- sourceupdate.pas
- msedesignparser.pas
- mseide.pas
- mseide.pas
-ismoduletexts=7
- 0
- 0
- 0
+ ../lib/common/widgets/msewidgets.pas
+ ../lib/common/editwidgets/msegraphedits.pas
+ lib/common/widgets/msesimplewidgets.pas
+ismoduletexts=4
  0
  0
  0
@@ -822,10 +814,15 @@ moduleoptions=0
 visiblemodules=0
 nomenumodules=0
 [sourcefo.files_tab]
+order=4
+ 1
+ 2
+ 0
+ 3
 firsttab=0
-index=4
+index=0
 [layout]
-windowlayout=547
+windowlayout=552
  [mainfo.basedock]
  splitdir=2
  useroptions=268450944
@@ -865,7 +862,7 @@ windowlayout=547
  rcy=0
  wsize=0
  active=0
- visible=1
+ visible=0
  [threadsfo]
  splitdir=0
  useroptions=268451945
@@ -933,7 +930,7 @@ windowlayout=547
  [findinfilefo]
  splitdir=0
  useroptions=268451947
- stackedunder=
+ stackedunder=mainfo
  parent=
  mdistate=0
  nx=0
@@ -1292,16 +1289,17 @@ windowlayout=547
  [debuggerfo.edit_compiler]
  value=Pascal
  [debuggerfo.file_history]
- value=/home/fred/mseide-msegui/apps/ide/msedesignparser.pas
+ value=/home/fred/mseide-msegui/lib/common/widgets/msewidgets.pas
  history=20
+  /home/fred/mseide-msegui/lib/common/editwidgets/msegraphedits.pas
+  /home/fred/mseide-msegui/apps/ide/sourceform.mfm
+  /home/fred/mseide-msegui/apps/ide/mseide.pas
   /home/fred/mseide-msegui/apps/ide/msedesignparser.pas
   /home/fred/mseide-msegui/apps/ide/sourceupdate.pas
   /home/fred/mseide-msegui/apps/ide/dumpunitgroups.pas
   /home/fred/mseide-msegui/lib/common/fpccompatibility/mdb.pas
   /home/fred/mseide-msegui/apps/ide/main.mfm
   /home/fred/mseide-msegui/apps/ide/pascaldesignparser.pas
-  /home/fred/mseide-msegui/lib/common/editwidgets/msegraphedits.pas
-  /home/fred/mseide-msegui/apps/ide/mseide.pas
   /home/fred/mseide-msegui/apps/ide/actionsmodule.mfm
   /home/fred/ideu/src/ideU.pas
   /home/fred/ideu/src/sourceform.pas
@@ -1313,7 +1311,6 @@ windowlayout=547
   /home/fred/ideu/src/ideusettings.pas
   /home/fred/mseide-msegui/apps/ide/projectoptionsform.pas
   /home/fred/mseide-msegui/tools/i18n/headerform.pas
-  /home/fred/mseide-msegui/tools/i18n/mseresourceparser.pas
  [debuggerfo.project_options]
  value=1
  [debuggerfo.hints]
@@ -1335,13 +1332,18 @@ windowlayout=547
  rcx=0
  rcy=0
  [sourcefo.files_tab]
+ order=4
+  1
+  2
+  0
+  3
  firsttab=0
- index=4
+ index=0
  [cpuc86_64fo]
  irqoff=0
  splitdir=0
  useroptions=268451947
- stackedunder=targetconsolefo
+ stackedunder=findinfilefo
  parent=
  mdistate=0
  nx=0
