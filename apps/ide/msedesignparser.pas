@@ -672,9 +672,6 @@ var
  {$if FPC_FULLVERSION > 030100}
  params1: paraminfoarty;
  x : integer;
-    {$if declared(AlignTParamFlags)} 
-    po2: pchar;
-   {$endif}
  {$endif}
  
 begin 

@@ -787,7 +787,7 @@ findhistory=20
 findoptions=1
 editpos=4
  0,-1073741823
- 0,153
+ 0,-1073741823
  0,44
  0,-1073741823
 bookmarks0=0
@@ -801,7 +801,7 @@ sourcefiles=4
  /home/fred/mseide-msegui/lib/common/widgets/msesimplewidgets.pas
 relpaths=4
  mseide.pas
- ../lib/common/widgets/msewidgets.pas
+ lib/common/widgets/msewidgets.pas
  ../lib/common/editwidgets/msegraphedits.pas
  lib/common/widgets/msesimplewidgets.pas
 ismoduletexts=4
@@ -815,9 +815,9 @@ visiblemodules=0
 nomenumodules=0
 [sourcefo.files_tab]
 order=4
- 1
  2
  0
+ 1
  3
 firsttab=0
 index=0
@@ -930,7 +930,7 @@ windowlayout=552
  [findinfilefo]
  splitdir=0
  useroptions=268451947
- stackedunder=mainfo
+ stackedunder=
  parent=
  mdistate=0
  nx=0
@@ -1289,7 +1289,7 @@ windowlayout=552
  [debuggerfo.edit_compiler]
  value=Pascal
  [debuggerfo.file_history]
- value=/home/fred/mseide-msegui/lib/common/widgets/msewidgets.pas
+ value=/home/fred/mseide-msegui/lib/common/editwidgets/msegraphedits.pas
  history=20
   /home/fred/mseide-msegui/lib/common/editwidgets/msegraphedits.pas
   /home/fred/mseide-msegui/apps/ide/sourceform.mfm
@@ -1333,9 +1333,9 @@ windowlayout=552
  rcy=0
  [sourcefo.files_tab]
  order=4
-  1
   2
   0
+  1
   3
  firsttab=0
  index=0
@@ -1343,7 +1343,7 @@ windowlayout=552
  irqoff=0
  splitdir=0
  useroptions=268451947
- stackedunder=findinfilefo
+ stackedunder=mainfo
  parent=
  mdistate=0
  nx=0
