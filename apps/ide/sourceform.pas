@@ -29,10 +29,9 @@ interface
 {$endif}
 
 uses
- msetextedit,msewidgetgrid,mseforms,classes,mclasses,msegdbutils,
- msegraphedits,mseevent,
- msehash,msebitmap,msetabs,sourcepage,mseglob,msetypes,msestrings,mseguiglob,
- msegui,msesyntaxpainter,msemenus,mseactions,msesyntaxedit,msestat,
+ msetextedit,msewidgetgrid,mseforms,classes,mclasses,msegdbutils,msegraphedits,
+ mseevent,msehash,msebitmap,msetabs,sourcepage,mseglob,msetypes,msestrings,
+ mseguiglob,msegui,msesyntaxpainter,msemenus,mseactions,msesyntaxedit,msestat,
  finddialogform,msestream,msefilechange,breakpointsform,mseparser,
  msesimplewidgets,msegrids,msegraphutils,mseact,msegridsglob,msestringcontainer;
 
@@ -79,13 +78,14 @@ type
    tpopupmenu1: tpopupmenu;
    tabwidget: ttabwidget;
    syntaxpainter: tsyntaxpainter;
-   imagelist: timagelist;
+   imagelist_old: timagelist;
    filechangenotifyer: tfilechangenotifyer;
    navigforwardact: taction;
    navigbackact: taction;
    tstockglyphbutton1: tstockglyphbutton;
    tstockglyphbutton2: tstockglyphbutton;
    c: tstringcontainer;
+   imagelist: timagelist;
    procedure formonidle(var again: boolean);
    procedure doselectpage(const sender: TObject);
 
