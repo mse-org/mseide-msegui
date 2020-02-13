@@ -1,0 +1,194 @@
+object procedurelistfo: tprocedurelistfo
+  bounds_x = 781
+  bounds_y = 392
+  bounds_cx = 574
+  bounds_cy = 326
+  container.frame.localprops = []
+  container.frame.localprops1 = []
+  container.bounds = (
+    0
+    0
+    574
+    326
+  )
+  optionswindow = [wo_dialog]
+  options = [fo_freeonclose, fo_cancelonesc, fo_autoreadstat, fo_autowritestat, fo_savepos, fo_savezorder, fo_savestate]
+  caption = 'Procedure List'
+  oncreated = formcreated
+  ondestroy = formdestroy
+  moduleclassname = 'tmseform'
+  object ttoolbar1: ttoolbar
+    frame.localprops = []
+    frame.localprops1 = []
+    bounds_x = 0
+    bounds_y = 0
+    bounds_cx = 572
+    bounds_cy = 32
+    anchors = [an_left, an_top, an_right]
+  end
+  object edtSearch: tedit
+    frame.caption = 'Search'
+    frame.captionpos = cp_left
+    frame.localprops = []
+    frame.localprops1 = []
+    frame.outerframe = (
+      45
+      0
+      0
+      0
+    )
+    taborder = 1
+    bounds_x = 19
+    bounds_y = 37
+    bounds_cx = 289
+    optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselectonfirstclick, oe_focusrectonreadonly]
+    ontextedited = FilterTextChanged
+    onkeydown = FilterTextKeyDown
+    reffontheight = 14
+  end
+  object grdProcedures: tstringgrid
+    frame.localprops = []
+    frame.localprops1 = []
+    taborder = 3
+    bounds_x = 8
+    bounds_y = 65
+    bounds_cx = 562
+    bounds_cy = 236
+    anchors = [an_left, an_top, an_right, an_bottom]
+    onkeydown = ResultGridKeyDown
+    optionsgrid = [og_colsizing, og_focuscellonenter, og_colchangeontabkey, og_wrapcol, og_autopopup, og_mousescrollcol]
+    datacols.count = 4
+    datacols.coloractive = 158
+    datacols.colorfocused = 8758271
+    datacols.fontactivenum = 0
+    datacols.options = [co_nofocus, co_rowselect, co_savevalue, co_savestate, co_mousescrollrow]
+    datacols.items = <    
+      item
+        coloractive = 158
+        colorfocused = 8758271
+        width = 30
+        fontactivenum = 0
+        options = [co_nofocus, co_rowselect, co_savevalue, co_savestate, co_mousescrollrow]
+        datalist.data = (
+          ''
+          ''
+          ''
+          ''
+          ''
+        )
+        valuefalse = '0'
+        valuetrue = '1'
+      end    
+      item
+        coloractive = 158
+        colorfocused = 8758271
+        width = 300
+        fontactivenum = 0
+        options = [co_nofocus, co_rowselect, co_savevalue, co_savestate, co_mousescrollrow]
+        datalist.data = (
+          ''
+          ''
+          ''
+          ''
+          ''
+        )
+        valuefalse = '0'
+        valuetrue = '1'
+      end    
+      item
+        coloractive = 158
+        colorfocused = 8758271
+        width = 130
+        fontactivenum = 0
+        options = [co_nofocus, co_rowselect, co_savevalue, co_savestate, co_mousescrollrow]
+        datalist.data = (
+          ''
+          ''
+          ''
+          ''
+          ''
+        )
+        valuefalse = '0'
+        valuetrue = '1'
+      end    
+      item
+        coloractive = 158
+        colorfocused = 8758271
+        width = 70
+        fontactivenum = 0
+        options = [co_nofocus, co_rowselect, co_savevalue, co_savestate, co_mousescrollrow]
+        datalist.data = (
+          ''
+          ''
+          ''
+          ''
+          ''
+        )
+        valuefalse = '0'
+        valuetrue = '1'
+      end>
+    fixrows.count = 1
+    fixrows.items = <    
+      item
+        height = 16
+        captions.count = 4
+        captions.items = <        
+          item
+          end        
+          item
+            caption = 'Procedure'
+          end        
+          item
+            caption = 'Type'
+          end        
+          item
+            caption = 'Line'
+          end>
+      end>
+    rowcount = 5
+    rowfonts.count = 1
+    rowfonts.items = <    
+      item
+        color = -1610612730
+        name = 'stf_default'
+        localprops = [flp_color]
+      end>
+    reffontheight = 14
+  end
+  object lblStatus: tstringdisp
+    frame.localprops = []
+    frame.localprops1 = []
+    taborder = 4
+    bounds_x = 8
+    bounds_y = 307
+    bounds_cx = 564
+    bounds_cy = 17
+    anchors = [an_left, an_right, an_bottom]
+    reffontheight = 14
+  end
+  object cbObjects: tdropdownlistedit
+    frame.caption = 'Objects'
+    frame.captionpos = cp_left
+    frame.localprops = []
+    frame.localprops1 = []
+    frame.buttons.count = 1
+    frame.buttons.items = <    
+      item
+      end>
+    frame.outerframe = (
+      48
+      0
+      0
+      0
+    )
+    taborder = 2
+    bounds_x = 344
+    bounds_y = 37
+    bounds_cx = 228
+    dropdown.cols.count = 1
+    dropdown.cols.items = <    
+      item
+      end>
+    reffontheight = 14
+  end
+end

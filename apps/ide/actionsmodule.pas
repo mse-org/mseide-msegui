@@ -1,5 +1,5 @@
 { MSEide Copyright (c) 1999-2014 by Martin Schreiber
-   
+
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation; either version 2 of the License, or
@@ -24,7 +24,7 @@ uses
  msedatamodules,mseglob,msestat,mseifiglob,msegraphics,msegraphutils,mseguiglob,
  msemenus,msesimplewidgets,msewidgets,projecttreeform,msestringcontainer,
  targetconsole,mseificomp,mseificompglob,mclasses;
- 
+
 type
  stringconsts = (
   ac_configuremseide, //0 Configure MSEide
@@ -223,6 +223,7 @@ type
    comment: taction;
    uncomment: taction;
    copyword: taction;
+   procedurelist: taction;
    selectall: taction;
    tabtospace: taction;
    findback: taction;
@@ -304,6 +305,7 @@ type
    procedure enablecomment(const sender: tcustomaction);
    procedure enableuncomment(const sender: tcustomaction);
    procedure selectwordactiononexecute(const sender: TObject);
+   procedure procedurelistonexecute(const sender: TObject);
    procedure tabtospaceexecute(const sender: TObject);
    procedure findbackonexecute(const sender: TObject);
   private
@@ -315,7 +317,7 @@ type
 
 var
  actionsmo: tactionsmo;
- 
+
 procedure configureide;
 
 implementation
@@ -323,8 +325,8 @@ uses
  main,make,actionsmodule_mfm,sourceform,msedesigner,msetypes,msefiledialog,
  projectoptionsform,findinfileform,breakpointsform,watchform,selecteditpageform,
  disassform,printform,msegdbutils,mseintegerenter,msesettings,
- componentstore,cpuform,sysutils,msecomptree,mseformatstr;
- 
+ componentstore,cpuform,sysutils,msecomptree,mseformatstr, procedurelistform;
+
 procedure configureide;
 begin
  disassfo.resetshortcuts();
@@ -550,7 +552,7 @@ end;
 
 procedure tactionsmo.enableonselect(const sender: tcustomaction);
 begin
- sender.enabled:= (sourcefo.activepage <> nil) and 
+ sender.enabled:= (sourcefo.activepage <> nil) and
                                       sourcefo.activepage.edit.hasselection;
 end;
 
@@ -803,7 +805,7 @@ end;
 
 procedure tactionsmo.setbmexec(const sender: TObject);
 begin
- sourcefo.setbmexec(sender); 
+ sourcefo.setbmexec(sender);
 end;
 
 procedure tactionsmo.findbmexec(const sender: TObject);
@@ -862,9 +864,9 @@ begin
   repeatfind.enabled:= projectoptions.targetconsolefindinfo.text <> ''
  end
  else begin
-  find.enabled:= (sourcefo.activepage <> nil) and 
+  find.enabled:= (sourcefo.activepage <> nil) and
         sourcefo.activepage.activeentered;
-  repeatfind.enabled:= find.enabled and 
+  repeatfind.enabled:= find.enabled and
            (projectoptions.findreplaceinfo.find.text <> '');
  end;
  findback.enabled:= repeatfind.enabled;
@@ -882,7 +884,7 @@ function tactionsmo.filterfindcomp(
                                  const acomponent: tcomponent): boolean;
 begin
  result:= not (cssubcomponent in acomponent.componentstyle) and
-          (not (acomponent is twidget) or 
+          (not (acomponent is twidget) or
                 (ws_iswidget in twidget(acomponent).widgetstate));
 end;
 
@@ -914,5 +916,11 @@ begin
   projectoptionsmodified();
  end;
 end;
+
+procedure tactionsmo.procedurelistonexecute(const sender: TObject);
+begin
+  doProcedureList;
+end;
+
 
 end.
