@@ -15,7 +15,7 @@ uses
  msegraphics,msegraphutils,mseclasses,mseforms,msetoolbar,mseevent,
  msesimplewidgets,mseedit,msestrings,sysutils,
  msedataedits,msegrids,pparser, pastree,
- Classes,msedispwidgets,mserichstring;
+ Classes,msedispwidgets,mserichstring,msegridsglob;
 
 type
 
@@ -68,6 +68,8 @@ type
    procedure ResultGridKeyDown(const sender: twidget;
                    var ainfo: keyeventinfoty);
    procedure JumpToSelectedLine;
+   procedure DoubleClickedSelection(const sender: TObject;
+                   var info: celleventinfoty);
  private
     FFilename: String;
     FLanguage: TSourceLanguage;
@@ -798,6 +800,18 @@ begin
   int1 := sourcefo.activepage.grid.rowwindowpos;
   sourcefo.activepage.grid.row := lGotoLine;
   sourcefo.activepage.grid.rowwindowpos := int1;
+end;
+
+procedure tprocedurelistfo.DoubleClickedSelection(const sender: TObject;
+               var info: celleventinfoty);
+begin
+  if info.eventkind = cek_buttonrelease then
+    if info.mouseeventinfopo^.shiftstate = [ss_double] then
+    begin
+      { Jump to the line of code for the procedure we selected. }
+      JumpToSelectedLine;
+      Close;
+    end;
 end;
 
 { TSimpleEngine }
