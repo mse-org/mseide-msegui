@@ -795,8 +795,9 @@ begin
   c.row := grdProcedures.Row;
   c.col := 3;
   lGotoLine := StrToInt(grdProcedures.Items[c]);
+  { record current cursor position relative to source editor. We will restore this after the jump. }
   int1 := sourcefo.activepage.grid.rowwindowpos;
-  sourcefo.activepage.grid.row := lGotoLine;
+  sourcefo.activepage.grid.row := lGotoLine-1;
   sourcefo.activepage.grid.rowwindowpos := int1;
 end;
 
