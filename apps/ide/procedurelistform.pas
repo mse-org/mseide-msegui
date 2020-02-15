@@ -757,12 +757,10 @@ begin
           JumpToSelectedLine;
           Close;
         end;
-{
    key_Escape:
         begin
           Close;
         end;
-}
      else
          begin
              exclude(ainfo.eventstate,es_processed); //unknown key
