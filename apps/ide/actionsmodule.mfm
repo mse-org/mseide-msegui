@@ -1,8 +1,8 @@
 object actionsmo: tactionsmo
-  bounds_cx = 543
+  bounds_cx = 603
   bounds_cy = 435
-  left = 7
-  top = 198
+  left = 185
+  top = 283
   moduleclassname = 'tmsedatamodule'
   object makeact: taction
     Tag = 1
@@ -1369,7 +1369,7 @@ object actionsmo: tactionsmo
     top = 152
   end
   object shortcuts: tshortcutcontroller
-    actions.count = 98
+    actions.count = 99
     actions.items = <    
       item
         dispname = 'File'
@@ -1463,6 +1463,14 @@ object actionsmo: tactionsmo
         sc = (
           1
           24646
+        )
+      end    
+      item
+        action = procedurelist
+        dispname = 'Proceduce List'
+        sc = (
+          1
+          16455
         )
       end    
       item
@@ -2600,6 +2608,16 @@ object actionsmo: tactionsmo
     sc = (
       1
       8498
+    )
+  end
+  object procedurelist: taction
+    caption = 'Procedure List'
+    onexecute = procedurelistonexecute
+    left = 472
+    top = 200
+    sc = (
+      1
+      16455
     )
   end
 end
