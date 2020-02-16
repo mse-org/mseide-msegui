@@ -5,6 +5,9 @@ styles
  comment 'i' cl_dkblue
  option 'b' cl_dkblue
  string '' cl_dkblue
+
+# COLORS font/paper/statement/pairmark/fontline/line/focusline/selected
+COLORS cl_default cl_default cl_default cl_ltyellow cl_dkgray cl_ltgray cl_white cl_ltblue
  
 keyworddefs llvm
  'RET' 'BR' 'SWITCH' 'INDIRECTBR' 'INVOKE' 'RESUME' 'UNREACHABLE'

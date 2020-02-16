@@ -5,6 +5,9 @@ styles
  macros 'b' cl_blue
  string '' cl_blue
 
+# COLORS font/paper/statement/pairmark/fontline/line/focusline/selected
+COLORS cl_default cl_default cl_default cl_ltyellow cl_dkgray cl_ltgray cl_white cl_ltblue
+
 keyworddefs glsl
  'and' 'attribute' 'bool' 'break' 'bvec2' 'bvec3' 'bvec4' 'case' 'centroid' words
  'const' 'continue' 'default' 'discard' 'dmat2' 'dmat2x2' 'dmat2x3' 'dmat2x4' words

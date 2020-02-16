@@ -6,6 +6,9 @@ styles
  option 'b' cl_dkblue
  string '' cl_dkblue
  
+# COLORS font/paper/statement/pairmark/fontline/line/focusline/selected
+COLORS cl_default cl_default cl_default cl_ltyellow cl_dkgray cl_ltgray cl_white cl_ltblue
+
 keyworddefs sql
  'ACTION' 'ACTIVE' 'ADD' 'ADMIN' 'AFTER' 'ALL' 'ALTER' 'AND' 'ANY' 'AS' 'ASC'
  'ASCENDING' 'AT' 'AUTO' 'AUTODDL'

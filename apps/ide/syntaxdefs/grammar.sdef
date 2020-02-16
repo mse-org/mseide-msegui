@@ -7,6 +7,9 @@ styles
  string '' cl_dkblue
  number '' cl_dkred
 
+# COLORS font/paper/statement/pairmark/fontline/line/focusline/selected
+COLORS cl_default cl_default cl_default cl_ltyellow cl_dkgray cl_ltgray cl_white cl_ltblue
+
 keyworddefs grammar
  
 scope comment2 comment

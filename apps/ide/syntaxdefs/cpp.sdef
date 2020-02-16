@@ -5,6 +5,9 @@ styles
  macros 'b' cl_blue
  string '' cl_blue
 
+# COLORS font/paper/statement/pairmark/fontline/line/focusline/selected
+COLORS cl_default cl_default cl_default cl_ltyellow cl_dkgray cl_ltgray cl_white cl_ltblue
+
 keyworddefs cpp
   '__asm' '_asm' 'asm' 'auto' 'break' 'case' 'catch' 'cdecl' 'char' 'class' 'const' words
   'continue' '__cs' '_cs' 'default' 'delete' 'do' 'double' '__ds' '_ds' 'else' words

@@ -1,5 +1,8 @@
 caseinsensitive
-colors cl_default cl_default cl_default cl_default
+
+# COLORS font/paper/statement/pairmark/fontline/line/focusline/selected
+COLORS cl_default cl_default cl_default cl_ltyellow cl_dkgray cl_ltgray cl_white cl_ltblue
+
 pairwords
  'BEGIN' 'CASE' 'TRY' 'RECORD' 'CLASS' 'OBJECT' 'INTERFACE' 'END'
  'REPEAT' 'UNTIL'

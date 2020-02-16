@@ -1,3 +1,5 @@
+# Done by FredvS, 2015.
+
 styles
  default ''
  words 'b'
@@ -5,6 +7,9 @@ styles
  comment 'i' cl_dkblue
  macros 'b' cl_dkred
  string '' cl_dkblue
+
+# COLORS font/paper/statement/pairmark/fontline/line/focusline/selected
+COLORS cl_default cl_default cl_default cl_ltyellow cl_dkgray cl_ltgray cl_white cl_ltblue
 
 keyworddefs java
   'abstract' 'assert' 'byte' 'break' 'case' 'catch' 'char' 'const' 
