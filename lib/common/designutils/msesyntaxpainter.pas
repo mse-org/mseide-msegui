@@ -50,9 +50,21 @@ KEYWORDDEFS keyworddefsname [stylename] newline
 keyword = 
 string
 
-editorcolors =
-COLORS [fontcolor [backgroundcolor [statementcolor [pairmarkbackgroundcolor]]]]
+editorcolors = 7 COLORS: 
+[fontcolor [backgroundcolor [statementcolor [pairmarkbackgroundcolor, 
+ [fontlinecolor [backgroundlinecolor [selectedcolor ]]]]]]]
+
 //   cl_default for MSEide project options settings
+
+font:= cl_default;
+   background:= cl_default;
+   statement:= cl_default;
+   pairmarkbackground:= cl_default;
+   // fred
+   fontline:= cl_default;
+   backgroundline:= cl_default;
+   selected:= cl_default;
+
 
 pairwords =
 PAIRWORDS newline
@@ -247,6 +259,9 @@ type
   background: colorty;
   statement: colorty;
   pairmarkbackground: colorty;
+  fontline: colorty;  // fred
+  backgroundline: colorty;
+  selected: colorty;
  end;
  
  pairwordsty = record
@@ -529,6 +544,10 @@ begin
    background:= cl_default;
    statement:= cl_default;
    pairmarkbackground:= cl_default;
+   // fred
+   fontline:= cl_default;
+   backgroundline:= cl_default;
+   selected:= cl_default;
   end;
  end;
 end;
@@ -1482,7 +1501,13 @@ begin
           if getcolor(lstr1,colors.background) then begin
            if getcolor(lstr1,colors.statement) then begin
             if getcolor(lstr1,colors.pairmarkbackground) then begin
-            end;
+             if getcolor(lstr1,colors.fontline) then begin
+              if getcolor(lstr1,colors.backgroundline) then begin
+               if getcolor(lstr1,colors.selected) then begin
+                 end;
+               end;
+              end;
+             end;
            end;
           end;
          end;

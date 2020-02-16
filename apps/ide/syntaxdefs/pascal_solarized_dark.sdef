@@ -4,8 +4,11 @@ pairwords
  'BEGIN' 'CASE' 'TRY' 'RECORD' 'CLASS' 'OBJECT' 'INTERFACE' 'END'
  'REPEAT' 'UNTIL'
 
-# COLORS font/paper
-COLORS $93a1a1 $002b36
+# [fontcolor [backgroundcolor [statementcolor [pairmarkbackgroundcolor, 
+# [fontlinecolor [backgroundlinecolor [selectedcolor ]]]]]]]
+
+# COLORS font/paper/statement/pairmark/fontcolline/colline/selected
+COLORS $93a1a1 $002b36 cl_default cl_default $93a1a1 $002b36 $5E0078
 
 # base03    $002b36
 # base01    $586e75

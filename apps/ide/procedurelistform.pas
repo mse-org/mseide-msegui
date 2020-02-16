@@ -790,15 +790,18 @@ procedure tprocedurelistfo.JumpToSelectedLine;
 var
   int1: int32;
   lGotoLine: integer;
-  c: gridcoordty;
+  c, c2: gridcoordty;
 begin
   c.row := grdProcedures.Row;
   c.col := 3;
   lGotoLine := StrToInt(grdProcedures.Items[c]);
+  c2.row := lGotoLine-1; // for color row selected
+  c2.col := 1; 
   { record current cursor position relative to source editor. We will restore this after the jump. }
   int1 := sourcefo.activepage.grid.rowwindowpos;
   sourcefo.activepage.grid.row := lGotoLine-1;
   sourcefo.activepage.grid.rowwindowpos := int1;
+  sourcefo.activepage.grid.selectcell(c2, csm_select, False); // color of row selected
 end;
 
 procedure tprocedurelistfo.DoubleClickedSelection(const sender: TObject;

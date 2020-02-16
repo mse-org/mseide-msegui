@@ -1415,6 +1415,16 @@ begin
      if (statement <> cl_default) and (grid.rowcolors[0] <> cl_none) then begin
       grid.rowcolors[0]:= statement;
      end;
+       if fontline <> cl_default then begin
+      grid.fixcols[-1].font.color := fontline;
+     end;
+     if backgroundline <> cl_default then begin
+      grid.fixcols[-1].color := backgroundline;
+     end;
+      if selected <> cl_default then begin
+      grid.datacols[1].colorselect := selected;
+     end;
+     
     end;
    end;
   end;
