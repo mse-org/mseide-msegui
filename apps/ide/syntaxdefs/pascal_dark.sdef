@@ -1,0 +1,122 @@
+#
+#   Dark Pascal Theme
+#   Created by Graeme Geldenhuys - 2010-05-20
+#
+
+caseinsensitive
+
+# COLORS [[[fontcolor [backgroundcolor [statementcolor]]]
+#                      cl_default for project options settings 
+
+# COLORS font/paper/statement/pairmark/fontline/line/focusline/selected
+COLORS cl_ltgray cl_black $202424 cl_default cl_ltgray cl_black $5E0078 $5E0078
+
+styles
+ default ''
+  # some mud color
+ words 'b' $AF7832
+  # dirty green
+ comment '' $8EC25C  
+  # aqua
+ option '' $00FFFF   
+  # pale blue
+ string '' $6897BB
+ symbol '' cl_red
+ 
+ beginend 'b' $4D006B
+
+keyworddefs pascal
+ 'ABSOLUTE' 'ABSTRACT' 'AND' 'ARRAY' 'AS' 'ASM' 'ASSEMBLER' 'BEGIN'
+ 'BREAK' 'CASE' 'CDECL' 'CLASS' 'CONST' 'CONSTREF' 'CONSTRUCTOR'
+ 'CONTINUE' 'DEFAULT' 'DEPRECATED' 'DESTRUCTOR' 'DISPOSE' 'DIV' 'DO' 'DOWNTO'
+ 'ELSE' 'END' 'EXCEPT' 'EXIT' 'EXPORT' 'EXPORTS' 'EXTERNAL' 'FAIL'
+ 'FALSE' 'FAR' 'FILE' 'FINALIZATION' 'FINALLY' 'FOR' 'FORWARD' 'FUNCTION' 'GOTO' 'IF'
+ 'IMPLEMENTATION' 'IMPLEMENTS' 'IN' 'INDEX' 'INHERITED'
+ 'INITIALIZATION' 'INLINE' 'INTERFACE' 'INTERRUPT' 'IS' 'LABEL' 'LIBRARY'
+ 'MESSAGE' 'MOD' 'NEW' 'NIL' 'NODEFAULT' 'NOT' 'OBJECT'
+ 'OF' 'ON' 'OPERATOR' 'OR' 'OUT' 'OTHERWISE' 'PACKED' 'POPSTACK' 'PRIVATE' 
+ 'PROCEDURE' 'PROGRAM' 'PROPERTY' 'PROTECTED'
+ 'PUBLIC' 'PUBLISHED' 'RAISE' 'READ' 'RECORD' 'REINTRODUCE' 'REPEAT' 
+ 'RESOURCESTRING'
+ 'SELF' 'SET' 'SHL' 'SHR'
+ 'STDCALL' 'STORED' 'THEN' 'THREADVAR' 'TO' 'TRUE' 'TRY' 'TYPE' 'UNIT' 'UNTIL'
+ 'USES' 'VAR' 'VIRTUAL' 'WHILE' 'WITH' 'WRITE' 'XOR'
+ 'OVERLOAD' 'OVERRIDE'
+
+
+# Scopes must be defined before they can be referenced
+
+
+scope option option
+ endtokens
+  '}'
+  
+scope comment1 comment
+ endtokens
+  '}'
+
+scope comment2 comment
+ endtokens
+  ''
+
+scope comment3 comment
+ endtokens
+  '*)'
+  
+scope string string
+ endtokens
+  '''' ''
+
+scope string1 string
+ jumptokens
+  '$' string1
+  '0' string1
+  '1' string1
+  '2' string1
+  '3' string1
+  '4' string1
+  '5' string1
+  '6' string1
+  '7' string1
+  '8' string1
+  '9' string1
+return
+
+scope symbol1 symbol
+
+ return
+
+# No endtokens, scope terminates immediately
+
+
+scope main
+
+ keywords words
+  pascal
+
+ calltokens
+  '{$' option
+  '{' comment1
+  '//' comment2
+  '(*' comment3
+  '''' string
+  '#' string1
+  ':' symbol1
+  '.' symbol1
+  ';' symbol1
+  ',' symbol1
+  '=' symbol1
+  '<>' symbol1
+  '<' symbol1
+  '>' symbol1
+  '(' symbol1
+  ')' symbol1
+  '+' symbol1
+  '-' symbol1
+  '/' symbol1
+  '*' symbol1
+  '[' symbol1
+  ']' symbol1
+  
+  
+

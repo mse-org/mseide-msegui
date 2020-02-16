@@ -812,7 +812,7 @@ editpos=13
  0,-1073741823
  0,-1073741823
  0,-1073741823
- 4,8
+ 0,549
  0,-1073741823
  0,-1073741823
  0,-1073741823
@@ -904,22 +904,22 @@ nomenumodules=6
 [sourcefo.files_tab]
 order=13
  0
- 10
+ 6
  7
  11
- 1
- 2
- 4
- 12
- 6
- 3
  8
+ 2
+ 10
+ 12
+ 1
+ 3
+ 4
  5
  9
 firsttab=0
 index=2
 [layout]
-windowlayout=620
+windowlayout=623
  [mainfo.basedock]
  splitdir=2
  useroptions=268450944
@@ -1145,7 +1145,7 @@ windowlayout=620
  [objectinspectorfo]
  splitdir=0
  useroptions=268451947
- stackedunder=_mse_sourcepage_mse_
+ stackedunder=
  parent=
  mdistate=0
  nx=0
@@ -1371,8 +1371,8 @@ windowlayout=620
  mdistate=0
  nx=0
  ny=0
- ncx=1111
- ncy=52
+ ncx=1147
+ ncy=53
  x=0
  y=0
  cx=1147
@@ -1387,7 +1387,10 @@ windowlayout=620
  value=Pascal
  [debuggerfo.file_history]
  value=/home/fred/mseide-msegui/apps/ide/main.pas
- history=1
+ history=4
+  /home/fred/mseide-msegui/apps/ide/main.pas
+  /home/fred/mseide-msegui/lib/common/widgets/msesimplewidgets.pas
+  /home/fred/mseide-msegui/apps/ide/procedurelistform.pas
   ${PROJECTDIR}/main.pas
  [debuggerfo.project_options]
  value=1
@@ -1412,16 +1415,16 @@ windowlayout=620
  [sourcefo.files_tab]
  order=13
   0
-  10
+  6
   7
   11
-  1
-  2
-  4
-  12
-  6
-  3
   8
+  2
+  10
+  12
+  1
+  3
+  4
   5
   9
  firsttab=0
@@ -1432,7 +1435,7 @@ windowlayout=620
  irqoff=0
  splitdir=0
  useroptions=268451947
- stackedunder=objectinspectorfo
+ stackedunder=_mse_sourcepage_mse_
  parent=
  mdistate=0
  nx=0
@@ -1448,6 +1451,22 @@ windowlayout=620
  wsize=0
  active=0
  visible=0
+ [mainfo.panel1]
+ splitdir=1
+ useroptions=302087659
+ parent=mainfo.basedock
+ visible=1
+ mdistate=0
+ nx=0
+ ny=0
+ ncx=0
+ ncy=0
+ x=0
+ y=53
+ cx=1147
+ cy=449
+ rcx=0
+ rcy=0
  [_mse_sourcepage_mse_]
  splitdir=0
  useroptions=268451963
@@ -1524,22 +1543,6 @@ windowlayout=620
  wsize=0
  active=0
  visible=1
- [mainfo.panel1]
- splitdir=1
- useroptions=302087659
- parent=mainfo.basedock
- visible=1
- mdistate=0
- nx=0
- ny=0
- ncx=0
- ncy=0
- x=0
- y=53
- cx=1147
- cy=449
- rcx=0
- rcy=0
 [targetconsole]
 finddtext=
 findhistory=0
