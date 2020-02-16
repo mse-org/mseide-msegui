@@ -1421,10 +1421,12 @@ begin
      if backgroundline <> cl_default then begin
       grid.fixcols[-1].color := backgroundline;
      end;
+      if focusline <> cl_default then begin
+      grid.fixcols[-1].colorfocused := focusline;
+     end;
       if selected <> cl_default then begin
       grid.datacols[1].colorselect := selected;
      end;
-     
     end;
    end;
   end;

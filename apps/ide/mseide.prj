@@ -808,11 +808,11 @@ editpos=13
  0,-1073741823
  0,-1073741823
  0,-1073741823
- 0,0
  0,-1073741823
  0,-1073741823
  0,-1073741823
  0,-1073741823
+ 4,8
  0,-1073741823
  0,-1073741823
  0,-1073741823
@@ -849,7 +849,7 @@ relpaths=13
  mseide.pas
  lib/common/widgets/msewidgets.pas
  lib/common/editwidgets/msegraphedits.pas
- ../lib/common/widgets/msesimplewidgets.pas
+ lib/common/widgets/msesimplewidgets.pas
  sourcepage.pas
  sourceform.pas
  actionsmodule.pas
@@ -904,22 +904,22 @@ nomenumodules=6
 [sourcefo.files_tab]
 order=13
  0
- 6
- 3
- 7
- 8
- 9
  10
+ 7
  11
  1
  2
  4
  12
+ 6
+ 3
+ 8
  5
+ 9
 firsttab=0
 index=2
 [layout]
-windowlayout=639
+windowlayout=620
  [mainfo.basedock]
  splitdir=2
  useroptions=268450944
@@ -939,7 +939,7 @@ windowlayout=639
  cy=621
  rcx=0
  rcy=0
- wsize=6
+ wsize=0
  active=1
  visible=1
  [targetconsolefo]
@@ -981,7 +981,7 @@ windowlayout=639
  [memoryfo]
  splitdir=0
  useroptions=268451963
- stackedunder=dialogfilesfo
+ stackedunder=beautyfo
  parent=
  mdistate=0
  nx=0
@@ -1053,7 +1053,7 @@ windowlayout=639
  x=0
  y=0
  cx=205
- cy=516
+ cy=449
  rcx=0
  rcy=0
  [projecttreefo.grid]
@@ -1145,7 +1145,7 @@ windowlayout=639
  [objectinspectorfo]
  splitdir=0
  useroptions=268451947
- stackedunder=
+ stackedunder=_mse_sourcepage_mse_
  parent=
  mdistate=0
  nx=0
@@ -1258,9 +1258,9 @@ windowlayout=639
  ncx=0
  ncy=0
  x=0
- y=580
- cx=1358
- cy=105
+ y=505
+ cx=1147
+ cy=91
  rcx=0
  rcy=0
  [componentstorefo]
@@ -1359,8 +1359,8 @@ windowlayout=639
  ncy=0
  x=0
  y=0
- cx=1358
- cy=58
+ cx=1147
+ cy=50
  rcx=0
  rcy=0
  [debuggerfo.basedock]
@@ -1371,12 +1371,12 @@ windowlayout=639
  mdistate=0
  nx=0
  ny=0
- ncx=1358
- ncy=61
+ ncx=1111
+ ncy=52
  x=0
  y=0
- cx=1358
- cy=61
+ cx=1147
+ cy=53
  rcx=0
  rcy=0
  [debuggerfo.edit_options]
@@ -1386,28 +1386,9 @@ windowlayout=639
  [debuggerfo.edit_compiler]
  value=Pascal
  [debuggerfo.file_history]
- value=/home/fred/mseide-msegui/lib/common/widgets/msesimplewidgets.pas
- history=20
-  /home/fred/mseide-msegui/lib/common/widgets/msesimplewidgets.pas
-  /home/fred/mseide-msegui/apps/ide/sourcepage.pas
-  /home/fred/mseide-msegui/lib/common/designutils/msesyntaxpainter.pas
-  /home/fred/ideu/src/procedurelistform.pas
-  /home/fred/ideu_bin/ideu_1.9.8_linux64/syntaxdefs/pascal_solarized_dark.sdef
-  /home/fred/mseide-msegui/apps/ide/syntaxdefs/pascal_solarized_dark.sdef
-  /home/fred/ideu/src/msesyntaxpainter.pas
-  /home/fred/ideu_bin/ideu_1.9.8_linux64/syntaxdefs/pascal.sdef
-  /home/fred/ideu/src/syntaxdefs/pascal.sdef
-  /home/fred/ideu_bin/ideu_1.9.8_linux64/syntaxdefs/pascal_ideu.sdef
-  /home/fred/ideu_bin/ideu_1.9.8_linux64/syntaxdefs/pascal_dark.sdef
-  /home/fred/ptoptest/sourcepage.pas
-  /home/fred/ideu/src/
-  /home/fred/ideu/src/beauty.pas
-  /home/fred/ideu/src/aboutform.pas
-  /home/fred/ideu_bin/ideu_1.9.8_linux64/plugin/ptop/ptop.cfg
-  /home/fred/ptoptest/main.pas
-  /home/fred/ideu/src/mPasLex.pas
-  /home/fred/fptop/src/ptop.cfg
-  /home/fred/fptop/src/test.java
+ value=/home/fred/mseide-msegui/apps/ide/main.pas
+ history=1
+  ${PROJECTDIR}/main.pas
  [debuggerfo.project_options]
  value=1
  [debuggerfo.hints]
@@ -1424,25 +1405,25 @@ windowlayout=639
  ncy=0
  x=208
  y=0
- cx=1150
- cy=516
+ cx=939
+ cy=449
  rcx=0
  rcy=0
  [sourcefo.files_tab]
  order=13
   0
-  6
-  3
-  7
-  8
-  9
   10
+  7
   11
   1
   2
   4
   12
+  6
+  3
+  8
   5
+  9
  firsttab=0
  index=2
  [confideufo.usedefaulteditoroptions]
@@ -1451,7 +1432,7 @@ windowlayout=639
  irqoff=0
  splitdir=0
  useroptions=268451947
- stackedunder=_mse_sourcepage_mse_
+ stackedunder=objectinspectorfo
  parent=
  mdistate=0
  nx=0
@@ -1467,22 +1448,6 @@ windowlayout=639
  wsize=0
  active=0
  visible=0
- [mainfo.panel1]
- splitdir=1
- useroptions=302087659
- parent=mainfo.basedock
- visible=1
- mdistate=0
- nx=0
- ny=0
- ncx=0
- ncy=0
- x=0
- y=61
- cx=1358
- cy=516
- rcx=0
- rcy=0
  [_mse_sourcepage_mse_]
  splitdir=0
  useroptions=268451963
@@ -1559,6 +1524,22 @@ windowlayout=639
  wsize=0
  active=0
  visible=1
+ [mainfo.panel1]
+ splitdir=1
+ useroptions=302087659
+ parent=mainfo.basedock
+ visible=1
+ mdistate=0
+ nx=0
+ ny=0
+ ncx=0
+ ncy=0
+ x=0
+ y=53
+ cx=1147
+ cy=449
+ rcx=0
+ rcy=0
 [targetconsole]
 finddtext=
 findhistory=0

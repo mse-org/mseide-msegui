@@ -5,10 +5,10 @@ pairwords
  'REPEAT' 'UNTIL'
 
 # [fontcolor [backgroundcolor [statementcolor [pairmarkbackgroundcolor, 
-# [fontlinecolor [backgroundlinecolor [selectedcolor ]]]]]]]
+# [fontlinecolor [backgroundlinecolor [focuslinecolor ] [selectedcolor ] ]]]]]]
 
-# COLORS font/paper/statement/pairmark/fontcolline/colline/selected
-COLORS $93a1a1 $002b36 cl_default cl_default $93a1a1 $002b36 $5E0078
+# COLORS font/paper/statement/pairmark/fontline/line/focusline/selected
+COLORS $93a1a1 $002b36 cl_default cl_default $93a1a1 $002b36 cl_black $5E0078
 
 # base03    $002b36
 # base01    $586e75
