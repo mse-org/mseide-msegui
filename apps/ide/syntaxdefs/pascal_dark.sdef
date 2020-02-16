@@ -12,7 +12,7 @@ pairwords
 #                      cl_default for project options settings 
 
 # COLORS font/paper/statement/pairmark/fontline/line/focusline/selected
-COLORS cl_ltgray cl_black $202424 cl_default cl_ltgray cl_black $5E0078 $5E0078
+COLORS cl_ltgray cl_black cl_black cl_default cl_ltgray cl_black $5E0078 $5E0078
 
 styles
  default ''

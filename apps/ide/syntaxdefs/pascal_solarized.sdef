@@ -5,7 +5,7 @@ pairwords
  'REPEAT' 'UNTIL'
 
 # COLORS font/paper
-COLORS $586e75 $fdf6e3 cl_default cl_ltyellow $586e75 $fdf6e3 cl_white cl_ltblue
+COLORS $586e75 $fdf6e3 $fdf6e3 cl_ltyellow $586e75 $fdf6e3 cl_white cl_ltblue
 
 # base03    $002b36
 # base01    $586e75
