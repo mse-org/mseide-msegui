@@ -812,12 +812,12 @@ editpos=13
  0,-1073741823
  0,-1073741823
  0,-1073741823
- 14,1420
  0,-1073741823
  0,-1073741823
  0,-1073741823
  0,-1073741823
  0,-1073741823
+ 0,0
 bookmarks0=0
 bookmarks1=0
 bookmarks2=0
@@ -844,7 +844,7 @@ sourcefiles=13
  ${PROJECTDIR}/main.pas
  ${PROJECTDIR}/projectoptionsform.pas
  ${PROJECTDIR}/sourcepage.pas
- ${PROJECTDIR}/procedurelistform.pas
+ /home/fred/mseide-msegui/apps/ide/procedurelistform.pas
 relpaths=13
  mseide.pas
  lib/common/widgets/msewidgets.pas
@@ -904,18 +904,18 @@ nomenumodules=6
 [sourcefo.files_tab]
 order=13
  0
- 8
- 7
- 11
- 10
- 2
- 1
- 12
  4
- 3
- 6
+ 12
  5
+ 6
+ 7
+ 8
  9
+ 10
+ 11
+ 1
+ 2
+ 3
 firsttab=0
 index=2
 [layout]
@@ -939,7 +939,7 @@ windowlayout=623
  cy=621
  rcx=0
  rcy=0
- wsize=0
+ wsize=6
  active=1
  visible=1
  [targetconsolefo]
@@ -981,7 +981,7 @@ windowlayout=623
  [memoryfo]
  splitdir=0
  useroptions=268451963
- stackedunder=beautyfo
+ stackedunder=dialogfilesfo
  parent=
  mdistate=0
  nx=0
@@ -1053,7 +1053,7 @@ windowlayout=623
  x=0
  y=0
  cx=205
- cy=449
+ cy=516
  rcx=0
  rcy=0
  [projecttreefo.grid]
@@ -1258,9 +1258,9 @@ windowlayout=623
  ncx=0
  ncy=0
  x=0
- y=505
- cx=1147
- cy=91
+ y=580
+ cx=1358
+ cy=105
  rcx=0
  rcy=0
  [componentstorefo]
@@ -1359,8 +1359,8 @@ windowlayout=623
  ncy=0
  x=0
  y=0
- cx=1147
- cy=50
+ cx=1358
+ cy=58
  rcx=0
  rcy=0
  [debuggerfo.basedock]
@@ -1375,8 +1375,8 @@ windowlayout=623
  ncy=53
  x=0
  y=0
- cx=1147
- cy=53
+ cx=1358
+ cy=61
  rcx=0
  rcy=0
  [debuggerfo.edit_options]
@@ -1386,11 +1386,11 @@ windowlayout=623
  [debuggerfo.edit_compiler]
  value=Pascal
  [debuggerfo.file_history]
- value=/home/fred/mseide-msegui/apps/ide/main.pas
+ value=/home/fred/mseide-msegui/apps/ide/procedurelistform.pas
  history=4
+  /home/fred/mseide-msegui/apps/ide/procedurelistform.pas
   /home/fred/mseide-msegui/apps/ide/main.pas
   /home/fred/mseide-msegui/lib/common/widgets/msesimplewidgets.pas
-  /home/fred/mseide-msegui/apps/ide/procedurelistform.pas
   ${PROJECTDIR}/main.pas
  [debuggerfo.project_options]
  value=1
@@ -1408,25 +1408,25 @@ windowlayout=623
  ncy=0
  x=208
  y=0
- cx=939
- cy=449
+ cx=1150
+ cy=516
  rcx=0
  rcy=0
  [sourcefo.files_tab]
  order=13
   0
-  8
-  7
-  11
-  10
-  2
-  1
-  12
   4
-  3
-  6
+  12
   5
+  6
+  7
+  8
   9
+  10
+  11
+  1
+  2
+  3
  firsttab=0
  index=2
  [confideufo.usedefaulteditoroptions]
@@ -1462,9 +1462,9 @@ windowlayout=623
  ncx=0
  ncy=0
  x=0
- y=53
- cx=1147
- cy=449
+ y=61
+ cx=1358
+ cy=516
  rcx=0
  rcy=0
  [_mse_sourcepage_mse_]

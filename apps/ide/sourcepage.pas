@@ -1413,7 +1413,7 @@ begin
       grid.frame.colorclient:= background;
      end;
      if (statement <> cl_default) and (grid.rowcolors[0] <> cl_none) then begin
-      grid.rowcolors[0]:= statement;
+      grid.datacols[0].color:= statement;
      end;
        if fontline <> cl_default then begin
       grid.fixcols[-1].font.color := fontline;
