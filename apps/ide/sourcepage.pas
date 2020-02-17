@@ -1414,7 +1414,7 @@ begin
      end;
      if (statement <> cl_default) and (grid.rowcolors[0] <> cl_none) then begin
       grid.datacols[0].color:= statement;
-     end;
+     end else grid.datacols[0].color:= grid.frame.colorclient;
        if fontline <> cl_default then begin
       grid.fixcols[-1].font.color := fontline;
      end;
