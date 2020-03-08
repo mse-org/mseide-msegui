@@ -8,7 +8,7 @@
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 }
 unit msedbusinterface;
-{$ifdef FPC}{$mode objfpc}{$h+}{$goto on}
+{$ifdef FPC}{$mode objfpc}{$h+}{$interfaces corba}{$goto on}
  {$if FPC_FULLVERSION >= 030000} {$define mse_fpc_3_0} {$endif}
  {$if FPC_FULLVERSION >= 030100} {$define mse_fpc_3_2} {$endif}
 {$endif}

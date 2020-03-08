@@ -1716,7 +1716,7 @@ begin
        end;
       end
       else begin             //use field
-       if fld1 is tblobfield and (self.fblobintf <> nil) then begin
+       if (fld1 is tblobfield) and (self.fblobintf <> nil) then begin
         if fld1.isnull then begin
          clear;
          datatype:= fld1.datatype;
