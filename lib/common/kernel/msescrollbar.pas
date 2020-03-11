@@ -426,7 +426,7 @@ begin
  fcolorpatternclicked:= cl_default;
  fdrawinfo.areas[sbbu_down].ca.colorglyph:= cl_default;
  fdrawinfo.areas[sbbu_up].ca.colorglyph:= cl_default;
- fclickedarea:= scrollbarareaty(sba_none);
+ fclickedarea:= sba_none;
  fbuttonminlength:= defaultbuttonminlength;
  fwidth:= defaultscrollbarwidth;
  fondimchanged:= ondimchanged;
@@ -637,7 +637,7 @@ function tcustomscrollbar.findarea(const point: pointty): scrollbarareaty;
 var
  ar1: scrollbarareaty;
 begin
- result:= scrollbarareaty(sba_none);
+ result:= sba_none;
  for ar1:= low(scrollbarareaty) to high(scrollbarareaty) do begin
   if pointinshape(point,fdrawinfo.areas[ar1]) then begin
    result:= ar1;
@@ -956,8 +956,8 @@ end;
 
 function tcustomscrollbar.wantmouseevent(const apos: pointty): boolean;
 begin
- result:= (fclickedarea <> scrollbarareaty(sba_none)) or
-                 (findarea(apos) <> scrollbarareaty(sba_none));
+ result:= (fclickedarea <> sba_none) or
+                 (findarea(apos) <> sba_none);
 end;
 
 function tcustomscrollbar.buttonmoving(): boolean;
@@ -983,7 +983,7 @@ procedure tcustomscrollbar.mouseevent(var info: mouseeventinfoty);
    fintf.scrollevent(self,sbe_thumbposition);
    dothumbevent(sbe_thumbposition);
   end;
-  fclickedarea:= scrollbarareaty(sba_none);
+  fclickedarea:= sba_none;
  end;
 
 var
@@ -1040,26 +1040,26 @@ begin
               (keyshiftstatesmask + [ss_middle,ss_right]) = []) and
       not (info.button in [mb_right,mb_middle]) then begin
   ar1:= findarea(info.pos);
-  if (ar1 = scrollbarareaty(sba_none)) and clickedareaisvalid then begin
+  if (ar1 = sba_none) and clickedareaisvalid then begin
    ar1:= scrollbarareaty(sba_clicked);
   end;
  end
  else begin
-  ar1:= scrollbarareaty(sba_none);
+  ar1:= sba_none;
  end;
- if ar1 <> scrollbarareaty(sba_none) then begin
+ if ar1 <> sba_none then begin
   include(info.eventstate,es_processed);
  end;
  if (info.eventkind = ek_clientmouseleave) and (forg = org_client) or
     (info.eventkind = ek_mouseleave) and (forg = org_widget) then begin
   releasebutton(true);
-  mousemove(scrollbarareaty(sba_none));
+  mousemove(sba_none);
  end
  else begin
   case info.eventkind of
    ek_mousemove,ek_mousepark: begin
     mousemove(ar1);
-    if fclickedarea = scrollbarareaty(sba_none) then begin
+    if fclickedarea = sba_none then begin
      exclude(info.eventstate,es_processed);
     end;
    end;
@@ -1655,7 +1655,7 @@ end;
 
 function tcustomscrollbar.clicked: boolean;
 begin
- result:= fclickedarea <> scrollbarareaty(sba_none);
+ result:= fclickedarea <> sba_none;
 end;
 
 procedure tcustomscrollbar.checktemplate(const sender: tobject);

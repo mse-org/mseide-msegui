@@ -55,7 +55,7 @@ const
 
 type
 
- tabulatorkindty = (tak_left,tak_right,tak_centered,tak_decimal,tak_none);
+ tabulatorkindty = (tak_left,tak_right,tak_centered,tak_decimal,tak_nil);
  tabulatorty = record
   index: integer;
   tabkind: tabulatorkindty;
@@ -259,7 +259,8 @@ begin
  setlength(dest,high(dest)+2);
  with dest[high(dest)] do begin
   index:= value;
-  kind:= tabulatorkindty(tak_none); //invalid
+  //kind:= tabulatorkindty(-1); //invalid
+  kind:= tak_nil;
  end;
 end;
 
@@ -1112,7 +1113,7 @@ var
         int2:= index;
         int5:= pos.y - font.ascent div 2;
         int6:= x - int3 div 2 + 1;
-        if (tf_showtabs in flags) and (kind <> tabulatorkindty(tak_none)) and
+        if (tf_showtabs in flags) and (kind <> tabulatorkindty(tak_nil)) and
                                     not xyswapped and not reversed then begin
          drawline(mp(int6 - 3,int5),mp(int6,int5),font.color);
          drawlines([mp(int6,int5-1),mp(int6+1,int5),
