@@ -26,7 +26,7 @@ addkeywordchars =
 ADDKEYWORDCHARS newline
 {{string} newline}
 
-string = 
+string =
 '{character}'
 
 character =
@@ -47,11 +47,11 @@ keyworddefs =
 KEYWORDDEFS keyworddefsname [stylename] newline
 {{keyword} newline}
 
-keyword = 
+keyword =
 string
 
-editorcolors = 8 COLORS: 
-[fontcolor [backgroundcolor [statementcolor [pairmarkbackgroundcolor, 
+editorcolors = 8 COLORS:
+[fontcolor [backgroundcolor [statementcolor [pairmarkbackgroundcolor,
  [fontlinecolor [backgroundlinecolor [focusedlinecolor [selectedcolor]]]]]]]
 
 //   cl_default for MSEide project options settings
@@ -65,7 +65,7 @@ font:= cl_default;
    backgroundline:= cl_default;
    focusline:= cl_default;
    selected:= cl_default;
-   
+
 
 
 pairwords =
@@ -89,7 +89,7 @@ KEYWORDS [style] newline //style used as default
 
 calltokens =
 CALLTOKENS newline
-{{[.|,]string}[.]} scopename newline} 
+{{[.|,]string}[.]} scopename newline}
 
  //. -> whitespace, example:
  //'begin' finds 'abeginz ...
@@ -97,7 +97,7 @@ CALLTOKENS newline
  //'begin'. finds 'abegin ', 'abegin'newline ...
  //.'begin'. finds newline'begin ',' begin ', ' begin'newline ...
  //, -> begin of line
- 
+
 jumptokens =
 JUMPTOKENS newline
 [{{[.]string}[.]}] scopename newline}
@@ -107,9 +107,9 @@ JUMPTOKENS newline
 endtokens =
 ENDTOKENS newline
 {{[.]string}[.]} [stylename] newline}
- 
+
  //'' -> end of line
- 
+
 *)
 
 {$ifdef FPC}{$mode objfpc}{$h+}{$GOTO ON}{$endif}
@@ -143,7 +143,7 @@ type
                end;
  ptokeninfoty = ^tokeninfoty;
  tokeninfoarty = array of tokeninfoty;
- 
+
 
  starttokenty = record
   token: tokeninfoty;
@@ -193,7 +193,7 @@ type
   public
    constructor create;
  end;
-   
+
  keywordarty = array of tkeywordlist;
 
  refreshinfoty = record
@@ -232,15 +232,15 @@ type
   len: int32;
  end;
  markitemarty = array of markitemty;
- 
+
  markinfoty = record
   backgroundcolor: colorty;
   items: markitemarty;
  end;
- 
+
 const
  emptymarkinfo: markinfoty = (backgroundcolor: cl_none; items: nil);
- 
+
 type
  clientinfoty = record
   client: tobject;
@@ -266,7 +266,7 @@ type
   focusline: colorty;
   selected: colorty;
   end;
- 
+
  pairwordsty = record
   upper: msestringararty;
   lower: msestringararty;
@@ -323,7 +323,7 @@ type
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
    procedure clear;
-   procedure paintsyntax(handle: integer; start,count: halfinteger; 
+   procedure paintsyntax(handle: integer; start,count: halfinteger;
                                               background: boolean = false);
                                //-1 = letzte in fscopeinfos
    function registerclient(sender: tobject; alist: trichstringdatalist;
@@ -340,7 +340,7 @@ type
    function linkdeffile(const sourcefilename: filenamety): integer;
                  //-1 if syntaxdef not found
    property defaultsyntax: integer read fdefaultsyntax;
-   property boldchars[index: integer]: markinfoty read getboldchars 
+   property boldchars[index: integer]: markinfoty read getboldchars
                                     write setboldchars;
    property colors[index: integer]: syntaxcolorinfoty read getcolors;
    property caseinsensitive[index: int32]: boolean read getcaseinsensitive;
@@ -387,7 +387,7 @@ begin
    end
    else begin
     include(chars,ch1);
-   end;    
+   end;
   end;
  end
 end;
@@ -425,7 +425,7 @@ begin
       end
       else begin
        include(chars,ch1);
-      end;    
+      end;
      end;
     end;
    end;
@@ -515,7 +515,7 @@ begin
  for int1:= 0 to high(fsyntaxdefs) do begin
   clearsyntaxdef(int1);
  end;
- sendchangeevent(oe_disconnect); 
+ sendchangeevent(oe_disconnect);
 end;
 
 procedure tsyntaxpainter.clearsyntaxdef(handle: integer);
@@ -552,12 +552,12 @@ begin
    backgroundline:= cl_default;
    focusline:= cl_default;
    selected:= cl_default;
-   
+
   end;
  end;
 end;
 
-function tsyntaxpainter.registerclient(sender: tobject; 
+function tsyntaxpainter.registerclient(sender: tobject;
        alist: trichstringdatalist; aonlinechanged: integerchangedeventty = nil;
                                        asyntaxdefhandle: integer = 0): integer;
 
@@ -662,7 +662,7 @@ var
    startscopenr:= scopenr;
   end;
  end;
- 
+
 var
  startpo: pmsechar;
  linestart: boolean;
@@ -702,7 +702,7 @@ var
 
 label
  endlab;
- 
+
 begin
 // ar1:= nil; //copilerwarning
  format:= nil; //copilerwarning
@@ -736,7 +736,7 @@ begin
       if length(scopestackcache) < scopestackcachepo then begin
        setlength(scopestackcache,scopestackcachepo);
       end;
-      scopestackcache[scopestackcachepo-1].stack:= 
+      scopestackcache[scopestackcachepo-1].stack:=
                                        copy(scopestack,0,scopestackpo+1);
       scopestackcache[scopestackcachepo-1].startscope:= startscopenr;
      end;
@@ -818,7 +818,7 @@ begin
            else begin
             if caseinsensitive and msestartsstrcaseinsensitive(
                                                pointer(token.name),wpo1) or
-                   not caseinsensitive and 
+                   not caseinsensitive and
                              msestartsstr(pointer(token.name),wpo1) then begin
              if checktokenwhitespace(token,wpo1) then begin
               bo1:= false;
@@ -869,10 +869,10 @@ begin
             else begin
              if (caseinsensitive and msestartsstrcaseinsensitive(
                                               pointer(token.name),wpo1) or
-                  not caseinsensitive and 
-                            msestartsstr(pointer(token.name),wpo1)) and 
+                  not caseinsensitive and
+                            msestartsstr(pointer(token.name),wpo1)) and
                                   checktokenwhitespace(token,wpo1)  then begin
-//             if msestartsstr(pointer(token.name),wpo1) and 
+//             if msestartsstr(pointer(token.name),wpo1) and
 //                              checktokenwhitespace(token,wpo1) then begin
               bo1:= false;
               int2:= length(token.name);
@@ -912,7 +912,7 @@ begin
                          charstyles[scopeinfopo^.fontinfonr]) or changed;
         end;
        end;
-       
+
        if bo1 then begin
         if (wpo1^ <> ' ') and (wpo1^ <> c_tab) then begin
          linestart:= false;
@@ -970,7 +970,7 @@ endlab:
                         list.richitemspo[row]^.format,col).fontstyle);
       bo2:= updatefontstyle1(list.richitemspo[row]^.format,col,len,fs_bold,bo1);
      end;
-     bo2:= (boldchars.backgroundcolor <> cl_none) and 
+     bo2:= (boldchars.backgroundcolor <> cl_none) and
         setcolorbackground1(list.richitemspo[row]^.format,col,len,
                                        boldchars.backgroundcolor) or bo2;
      if bo2 and assigned(onlinechanged) then begin
@@ -1099,7 +1099,7 @@ begin
  end;
 end;
 
-procedure checktokenchars(const ar1: tokeninfoarty; 
+procedure checktokenchars(const ar1: tokeninfoarty;
                             const caseinsensitive: boolean;
                      out hastokenchars: boolean; out tokenchars: tokencharsty);
 var
@@ -1198,7 +1198,7 @@ type
  tokennrty = (tn_styles,tn_caseinsensitive,tn_keywordchars,tn_addkeywordchars,
               tn_colors,tn_pairwords,tn_keyworddefs,
               tn_scope,tn_endtokens,tn_keywords,tn_jumptokens,tn_calltokens,
-              tn_return);
+              tn_return,tn_none);
 const
  tn_canmultiple = [tn_keyworddefs{,tn_jumptokens,tn_calltokens,tn_endtokens}];
 
@@ -1207,7 +1207,7 @@ const
        'STYLES','CASEINSENSITIVE','KEYWORDCHARS','ADDKEYWORDCHARS',
        'COLORS','PAIRWORDS','KEYWORDDEFS',
        'SCOPE','ENDTOKENS','KEYWORDS','JUMPTOKENS','CALLTOKENS',
-       'RETURN');
+       'RETURN','');
  tn_localstart = tn_scope;
 var
  linenr: integer;
@@ -1341,7 +1341,7 @@ var
   end;
   result:= true;
  end;
- 
+
  procedure addname(list: tpointeransistringhashdatalist;
                                  const name: lstringty; nummer: integer);
  var
@@ -1368,7 +1368,7 @@ var
 
 var
  lstr1: lstringty;
- 
+
  function nextline: boolean;
  begin
   if stream.eof then begin
@@ -1379,14 +1379,14 @@ var
   else begin
    stream.readln(line);
    inc(linenr);
-   result:= (strlnscan(pointer(line),' ',length(line)) <> nil) and 
+   result:= (strlnscan(pointer(line),' ',length(line)) <> nil) and
                                 (checkfirstchar(line,'#') = nil); //comment
-   if result then begin 
+   if result then begin
     stringtolstring(line,lstr1);
    end;
   end;
  end;
- 
+
  procedure addquotedtokens(var ar1: tokeninfoarty; out isnextline: boolean);
  var
   str1: string;
@@ -1431,13 +1431,13 @@ var
  wstrar1: msestringarty;
  bo1,bo2: boolean;
  aktkeywordfontinfonr: integer;
- ar1: tokeninfoarty; 
+ ar1: tokeninfoarty;
  ar2: msestringarty;
  tokenchars1: tokencharsty;
  isnextline: boolean;
  tf1: tokenflagsty;
  i5: int32;
- 
+
 begin
  result:= -1;
  for int1:= 0 to high(fsyntaxdefs) do begin
@@ -1462,7 +1462,7 @@ begin
   global:= true;
   linenr:= 0;
   flags:= [];
-  akttoken:= tokennrty(-1);
+  akttoken:= tokennrty(tn_none);
   aktkeywordfontinfonr:= 0;
   try
    isnextline:= false;
@@ -1497,7 +1497,7 @@ begin
          addname(keywordnames,lstr3,high(keywordar));
          nextword(lstr1,lstr4);
          if lstr4.len > 0 then begin
-          keywordar[high(keywordar)].fdefaultstyle:= 
+          keywordar[high(keywordar)].fdefaultstyle:=
                                   findname(stylenames,lstr4);
          end;
         end;
@@ -1563,7 +1563,7 @@ begin
             scopeinfos[aktscopeinfo].return:= true;
            end;
           end;
-         end; 
+         end;
         end;
         else begin
          invalidtoken;

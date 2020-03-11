@@ -14,7 +14,7 @@ interface
 uses
  classes,mclasses,mdb,msetimer,msebufdataset,msqldb,msedb,msestrings,
  msedatabase,mseclasses,msetypes,msesqlresult;
- 
+
 type
  tsqlquery = class;
  tsqlmasterparamsdatalink = class(tmasterparamsdatalink)
@@ -38,13 +38,13 @@ type
 //  published
 //   property delayus: integer read fdelayus write fdelayus default -1;
  end;
- 
+
  sqlquerystatety = (sqs_userapplyrecupdate,sqs_updateabort,sqs_updateerror);
  sqlquerystatesty = set of sqlquerystatety;
- 
+
  tupdatestringlist = class(tsqlstringlist)
  end;
- 
+
  tsqlquery = class (tmsebufdataset,isqlclient,icursorclient)
   private
    fcursor: tsqlcursor;
@@ -70,7 +70,7 @@ type
    fapplysql: array[tupdatekind] of tupdatestringlist;
 //   fupdateqry,fdeleteqry,finsertqry: tsqlquery;
    fupdaterowsaffected: integer;
-   fblobintf: iblobconnection;   
+   fblobintf: iblobconnection;
    fbeforeexecute: tcustomsqlstatement;
    faftercursorclose: tcustomsqlstatement;
    fmasterdelayus: integer;
@@ -113,13 +113,13 @@ type
    fmstate: sqlquerystatesty;
    FTableName: string;
    FReadOnly: boolean;
-   fprimarykeyfield: tfield;                   
+   fprimarykeyfield: tfield;
    futf8: boolean;
    foptionsmasterlink: optionsmasterlinkty;
    function getdatabase: tcustomconnection; //for isqlpropertyeditor
    procedure settransactionwrite(const avalue: tmdbtransaction); override;
    procedure checkpendingupdates; virtual;
-   procedure notification(acomponent: tcomponent; operation: toperation); override;   
+   procedure notification(acomponent: tcomponent; operation: toperation); override;
    // abstract & virtual methods of TBufDataset
    function Fetch : boolean; override;
    function getblobdatasize: integer; override;
@@ -149,7 +149,7 @@ type
    procedure dobeforeedit; override;
    procedure dobeforeinsert; override;
    procedure dataevent(event: tdataevent; info: ptrint); override;
-   
+
    function  getcanmodify: boolean; override;
    procedure updatewherepart(var sql_where : msestring; const afield: tfield);
    procedure internalapplyrecupdate(updatekind : tupdatekind);
@@ -160,7 +160,7 @@ type
    procedure SetFiltered(Value: Boolean); override;
    procedure SetFilterText(const Value: string); override;
    Function GetDataSource : TDatasource; override;
-   Procedure SetDataSource(AValue : TDatasource);    
+   Procedure SetDataSource(AValue : TDatasource);
     //icursorclient
    function stringmemo: boolean; virtual;
         //memo fields are text(0) fields
@@ -186,7 +186,7 @@ type
    procedure Prepare; virtual;
    procedure UnPrepare; virtual;
    procedure ExecSQL; virtual;
-   function executedirect(const asql: msestring): integer; 
+   function executedirect(const asql: msestring): integer;
              //uses writetransaction of tsqlquery
    function rowsreturned: integer; //-1 if not supported
    function rowsaffected: integer; //-1 if not supported
@@ -203,30 +203,30 @@ type
    property params : tmseparams read fparams write setparams;
                        //before SQL
    property SQL : tsqlstringlist read FSQL write setFSQL;
-   property SQLUpdate : tupdatestringlist read Fapplysql[ukmodify] 
+   property SQLUpdate : tupdatestringlist read Fapplysql[ukmodify]
                                                          write setFSQLUpdate;
-   property SQLInsert : tupdatestringlist read Fapplysql[ukinsert] 
+   property SQLInsert : tupdatestringlist read Fapplysql[ukinsert]
                                                          write setFSQLInsert;
    property SQLDelete : tupdatestringlist read Fapplysql[ukdelete]
                                                          write setFSQLDelete;
    property beforeexecute: tcustomsqlstatement read fbeforeexecute write setbeforeexecute;
-   property aftercursorclose: tcustomsqlstatement read faftercursorclose 
+   property aftercursorclose: tcustomsqlstatement read faftercursorclose
                                                 write setaftercursorclose;
    property IndexDefs : TIndexDefs read GetIndexDefs;
    property UpdateMode : TUpdateMode read FUpdateMode write SetUpdateMode;
    property UsePrimaryKeyAsKey : boolean read FUsePrimaryKeyAsKey write SetUsePrimaryKeyAsKey;
    property tablename: string read ftablename write settablename;
-   property StatementType : TStatementType read fstatementtype 
+   property StatementType : TStatementType read fstatementtype
                            write setstatementtype default stnone;
    Property DataSource : TDatasource Read GetDataSource Write SetDatasource;
    property masterdelayus: integer read fmasterdelayus
                                 write fmasterdelayus default -1;
-   property optionsmasterlink: optionsmasterlinkty read foptionsmasterlink 
+   property optionsmasterlink: optionsmasterlinkty read foptionsmasterlink
                                      write foptionsmasterlink default [];
- //   property masterlink: tsqlmasterparamsdatalink read fmasterlink 
+ //   property masterlink: tsqlmasterparamsdatalink read fmasterlink
  //                     write setmasterlink;
    property database: tcustomsqlconnection read getdatabase1 write setdatabase1;
-    
+
 //    property SchemaInfo : TSchemaInfo read FSchemaInfo default stNoSchema;
     // redeclared data set properties
    property Active;
@@ -272,14 +272,14 @@ function SkipComments(var p: PmseChar) : boolean;
 implementation
 uses
  sysutils,{$ifdef FPC}dbconst{$else}dbconst_del,classes_del{$endif},msearrayutils,typinfo;
- 
+
 type
  tcustomsqlconnection1 = class(tcustomsqlconnection);
  tcustomsqlstatement1 = class(tcustomsqlstatement);
  tsqltransaction1 = class(tsqltransaction);
  tsqlresult1 = class(tsqlresult);
  tdataset1 = class(tdataset);
-  
+
 function SkipComments(var p: PmseChar) : boolean;
 begin
   result := false;
@@ -369,7 +369,7 @@ begin
   end;
  end;
 end;
-   
+
 { tsqlmasterparamsdatalink }
 
 constructor tsqlmasterparamsdatalink.create(const aowner: tsqlquery);
@@ -386,7 +386,7 @@ end;
 
 procedure tsqlmasterparamsdatalink.dorefresh(const sender: tobject);
 begin
- if Assigned(Params) and Assigned(DetailDataset) and 
+ if Assigned(Params) and Assigned(DetailDataset) and
                                  DetailDataset.Active then begin
   detaildataset.refresh;
  end;
@@ -403,14 +403,14 @@ procedure tsqlmasterparamsdatalink.domasterchange;
 var
  intf: igetdscontroller;
 begin
- if (frefreshlock = 0) and 
+ if (frefreshlock = 0) and
     (not getcorbainterface(dataset,typeinfo(igetdscontroller),intf) or
       not intf.getcontroller.posting) then begin
   if assigned(onmasterchange) then begin
-   onmasterchange(self); 
+   onmasterchange(self);
   end;
-  if assigned(params) and assigned(detaildataset) and 
-                (detaildataset.state = dsbrowse) and 
+  if assigned(params) and assigned(detaildataset) and
+                (detaildataset.state = dsbrowse) and
                  not (mdlo_norefresh in fquery.foptionsmasterlink) then begin
    if fquery.masterdelayus < 0 then begin
     freeandnil(ftimer);
@@ -434,7 +434,7 @@ procedure tsqlmasterparamsdatalink.domasterdisable;
 var
  intf: imasterlink;
 begin
- if (dataset = nil) or 
+ if (dataset = nil) or
           not getcorbainterface(dataset,typeinfo(imasterlink),intf) or
           not intf.refreshing then begin
   if assigned(onmasterdisable) then begin
@@ -471,12 +471,12 @@ begin
       insert;
      end;
     end;
-    de_afterdelete: begin
+    ord(de_afterdelete): begin
      if (mdlo_syncdelete in foptionsmasterlink) then begin
       delete;
      end;
     end;
-    de_afterpost: begin
+    ord(de_afterpost): begin
      if (mdlo_delayeddetailpost in foptionsmasterlink) then begin
       if (mdlo_inserttoupdate in foptionsmasterlink) and
              (state = dsinsert) then begin
@@ -510,7 +510,7 @@ begin
   inc(frefreshlock);
   try
    detailoptions:= tsqlquery(detaildataset).foptionsmasterlink;
-   if detailoptions * 
+   if detailoptions *
          [mdlo_syncedit,mdlo_syncinsert] <> [] then begin
     if getcorbainterface(dataset,typeinfo(igetdscontroller),intf) and
                                        intf.getcontroller.canceling then begin
@@ -532,7 +532,7 @@ begin
    end;
    inherited;
   endlab:
-   if (dataset.state in [dsedit,dsinsert]) and 
+   if (dataset.state in [dsedit,dsinsert]) and
          (detailoptions * [mdlo_syncedit,mdlo_syncinsert] <> []) then begin
     dataset.updaterecord; //synchronize fields
    end;
@@ -689,7 +689,7 @@ begin
   {
   inherited setdatabase(value);
   with tcustomsqlconnection(value) do begin
-   if (value <> nil) and (self.Transaction = nil) and 
+   if (value <> nil) and (self.Transaction = nil) and
                    (Transaction <> nil) then begin
     self.transaction:= Transaction;
    end;
@@ -758,14 +758,14 @@ begin
  if (Filtered <> Value) then begin
   inherited setfiltered(Value);
   if active then begin
-   if filter <> '' then begin 
+   if filter <> '' then begin
     ApplyFilter;
    end
    else begin
     resync([]);
    end;
   end;
- end;   
+ end;
 end;
 
 procedure TSQLQuery.SetFilterText(const Value: string);
@@ -817,7 +817,7 @@ begin
    FCursor:= Db.AllocateCursorHandle(icursorclient(self),name);
   end;
   fcursor.ftrans:= sqltr.handle;
-  
+
   FSQLBuf:= TrimRight(FSQL.Text);
 
   if FSQLBuf = '' then begin
@@ -837,11 +837,11 @@ begin
 //  ftablename:= '';
   if (FCursor.FStatementType in datareturningtypes) then begin
    FCursor.FInitFieldDef := True;
-   fupdateable:= not readonly and 
+   fupdateable:= not readonly and
          (
          (sqs_userapplyrecupdate in fmstate) or
-         (fapplysql[ukmodify].count > 0) and 
-         (fapplysql[ukinsert].count > 0) and 
+         (fapplysql[ukmodify].count > 0) and
+         (fapplysql[ukinsert].count > 0) and
          (fapplysql[ukdelete].count > 0)
          );
    if fparsesql and (pos(',',FFromPart) <= 0) then begin
@@ -853,7 +853,7 @@ begin
     end;
 //    fupdateable:= not readonly;
    end;
-   fupdateable:= fupdateable or not readonly and (ftablename <> ''); 
+   fupdateable:= fupdateable or not readonly and (ftablename <> '');
   end;
  end;
 end;
@@ -1048,20 +1048,20 @@ begin
                                       (currentp^ = #0) then begin { if(2) }
 		strLength := CurrentP-PhraseP;
 		Setlength(S,strLength);
-		
+
 		if strLength > 0 then Move(PhraseP^,S[1],strLength*sizeof(msechar));
 		s := uppercase(s);
 
 		case ParsePart of
 		    ppStart  : begin
-			FCursor.FStatementType:= 
+			FCursor.FStatementType:=
 			 tcustomsqlconnection1(database).StrToStatementType(s);
-		
-			if FCursor.FStatementType = stSelect then 
+
+			if FCursor.FStatementType = stSelect then
 			    ParsePart := ppSelect
-			else 
+			else
 			    break;
-			    
+
 			if not FParseSQL then break;
 		        PStatementPart := CurrentP;
 		    end; {ppStart}
@@ -1073,7 +1073,7 @@ begin
 			end;
 		    end; {ppSelect}
 		    ppFrom   : begin
-			
+
 			if (s = 'WHERE') or (s = 'GROUP') or (s = 'ORDER') or (CurrentP^=#0) or (CurrentP^=';') then begin
 			    if (s = 'WHERE') then begin
 			        ParsePart := ppWhere;
@@ -1088,20 +1088,20 @@ begin
 			        ParsePart := ppBogus;
 			        StrLength := CurrentP-PStatementPart;
 			    end;
-			    
+
 			    Setlength(FFromPart,StrLength);
 			    Move(PStatementPart^,FFromPart[1],StrLength*sizeof(msechar));
 			    FFrompart := trim(FFrompart);
 			    FWhereStartPos := PStatementPart-PSQL+StrLength+1;
 			    PStatementPart := CurrentP;
 			end;
-			
+
 		    end; {ppFrom}
 		    ppWhere  : begin
 			if (s = 'GROUP') or (s = 'ORDER') or (CurrentP^=#0) or (CurrentP^=';') then begin
 			    ParsePart := ppBogus;
 			    FWhereStartPos := PStatementPart-PSQL;
-				
+
 			    if (s = 'GROUP') or (s = 'ORDER') then
 			        FWhereStopPos := PhraseP-PSQL+1
 			    else
@@ -1109,15 +1109,15 @@ begin
 			    end;
 			end;
 		    end; {ppWhere}
-		    
+
 		end; {case}
-		
+
 		PhraseP := CurrentP+1;
 	    end; { if(2) }
 	end; { if(1) }
     until CurrentP^=#0; {repeat}
 
- if (FWhereStartPos > 0) and (FWhereStopPos > 0) and 
+ if (FWhereStartPos > 0) and (FWhereStopPos > 0) and
               filtered and (filter <> '') then begin
  	system.insert('(',ASQL,FWhereStartPos+1);
  	inc(FWhereStopPos);
@@ -1233,7 +1233,7 @@ end;
 procedure TSQLQuery.InitUpdates(ASQL : string);
 begin
  if pos(',',FFromPart) > 0 then begin
-  FUpdateable:= (fsqlupdate.count > 0) and (fsqlinsert.count > 0) and 
+  FUpdateable:= (fsqlupdate.count > 0) and (fsqlinsert.count > 0) and
                          (fsqldelete.count > 0);
            // select-statements from more then one table are not updateable
  end
@@ -1243,7 +1243,7 @@ begin
  end;
 end;
 }
- 
+
 procedure tsqlquery.connect(const aexecute: boolean);
 var
  tel{,fieldc}: integer;
@@ -1253,19 +1253,19 @@ var
  IndexFields: stringarty;
  str1: string;
  int1: integer;
- k1: tupdatekind; 
+ k1: tupdatekind;
 begin
  if database <> nil then begin
   getcorbainterface(database,typeinfo(iblobconnection),fblobintf);
  end;
- if not streamloading then begin  
+ if not streamloading then begin
   try
    Prepare;
    if FCursor.FStatementType in datareturningtypes then begin
     indexfields:= nil;
     if FUpdateable then begin
      if FusePrimaryKeyAsKey and not (bs_refreshing in fbstate) then begin
-      UpdateIndexDefs;  //must be before execute because 
+      UpdateIndexDefs;  //must be before execute because
                         //of MS SQL ODBC one statement per connection limitation
       for tel := 0 to indexdefs.count-1 do  begin
        if ixPrimary in indexdefs[tel].options then begin
@@ -1397,7 +1397,7 @@ begin
   end;
  end;
 end;
- 
+
 procedure tsqlquery.internalrefresh;
 begin
  if bdo_refreshtransaction in foptions then begin
@@ -1496,10 +1496,10 @@ begin
  with afield do begin
   if (of_InKey in optionsfield) or
     ((FUpdateMode = upWhereAll) and (of_InWhere in optionsfield)) or
-    ((FUpdateMode = UpWhereChanged) and 
-    (of_InWhere in optionsfield) and 
+    ((FUpdateMode = UpWhereChanged) and
+    (of_InWhere in optionsfield) and
     (value <> oldvalue)) then begin
-   sql_where := sql_where + '(' + quotechar+msestring(FieldName)+quotechar+ 
+   sql_where := sql_where + '(' + quotechar+msestring(FieldName)+quotechar+
              '= :OLD_' + msestring(FieldName) + ') and ';
   end;
  end;
@@ -1516,10 +1516,10 @@ begin
  int2:= 0;
  for int1:= 0 to fields.count - 1 do begin
   field1:= fields[int1];
-  if (field1.fieldkind = fkdata) {and 
+  if (field1.fieldkind = fkdata) {and
     getcorbainterface(field1,typeinfo(imsefield),intf1)} then begin
 //   flags1:= intf1.getproviderflags1;
-   if (of_refreshupdate in field1.optionsfield) and update or 
+   if (of_refreshupdate in field1.optionsfield) and update or
       (of_refreshinsert in field1.optionsfield) and not update then begin
     if int2 = 0 then begin
      result:= ' returning ';
@@ -1562,7 +1562,7 @@ begin
 end;
 
 function tsqlquery.updaterecquery : msestring;
-var 
+var
  x: integer;
  sql_set: msestring;
  sql_where: msestring;
@@ -1579,7 +1579,7 @@ begin
    if fieldkind = fkdata then begin
     UpdateWherePart(sql_where,field1);
     if (of_InUpdate in optionsfield) then begin
-     sql_set:= sql_set + quotechar+msestring(FieldName)+quotechar + '=:' + 
+     sql_set:= sql_set + quotechar+msestring(FieldName)+quotechar + '=:' +
                msestring(FieldName) + ',';
     end;
    end;
@@ -1593,14 +1593,14 @@ begin
  end;
  setlength(sql_set,length(sql_set)-1);
  setlength(sql_where,length(sql_where)-5);
- result := 'update ' + msestring(FTableName) + ' set ' + sql_set + 
+ result := 'update ' + msestring(FTableName) + ' set ' + sql_set +
                                                    ' where ' + sql_where;
  result:= result + refreshrecquery(true);
 end;
 
 
 function tsqlquery.insertrecquery: msestring;
-var 
+var
  x: integer;
  sql_fields: msestring;
  sql_values: msestring;
@@ -1612,8 +1612,8 @@ begin
  sql_values := '';
  for x := 0 to Fields.Count -1 do begin
   with fields[x] do begin
-   if (fieldkind = fkdata) {and not IsNull} and 
-                          (of_InInsert in optionsfield) then begin 
+   if (fieldkind = fkdata) {and not IsNull} and
+                          (of_InInsert in optionsfield) then begin
     sql_fields:= sql_fields + quotechar+msestring(FieldName)+quotechar+ ',';
     sql_values:= sql_values + ':' + msestring(FieldName) + ',';
    end;
@@ -1630,7 +1630,7 @@ begin
 end;
 
 function tsqlquery.deleterecquery : msestring;
-var 
+var
  x: integer;
  sql_where: msestring;
  field1: tfield;
@@ -1663,7 +1663,7 @@ var
  statementtypebefore: tstatementtype;
  oldisnew: boolean;
  rowsaffected1: integer;
-    
+
 begin
  oldisnew:= (updatekind = ukinsert) and (bs_inserttoupdate in fbstate);
  if oldisnew then begin
@@ -1687,7 +1687,7 @@ begin
      sql.add(self.deleterecquery);
     end;
    end;
-  end;  
+  end;
   futf8:= self.isutf8;
   transaction.active:= true;
   freeblobar:= nil;
@@ -1749,9 +1749,9 @@ begin
     end;
    end;
 
-   if (updatekind = ukmodify) and 
+   if (updatekind = ukmodify) and
                           (bs_refreshupdate in self.fbstate) or
-      (updatekind = ukinsert) and 
+      (updatekind = ukinsert) and
                           (bs_refreshinsert in self.fbstate) then begin
     statementtypebefore:= statementtype;
     try
@@ -1767,7 +1767,7 @@ begin
      end;
      rowsaffected1:= fcursor.frowsaffected;
     finally
-     clear;  
+     clear;
      statementtype:= statementtypebefore;
     end;
    end
@@ -1776,7 +1776,7 @@ begin
     rowsaffected1:= fcursor.frowsaffected;
    end;
 
-   if not (bs_refreshinsert in fbstate) and (updatekind = ukinsert) and 
+   if not (bs_refreshinsert in fbstate) and (updatekind = ukinsert) and
                                       (self.fprimarykeyfield <> nil) then begin
     tcustomsqlconnection1(database).updateprimarykeyfield(
                    self.fprimarykeyfield,transaction);
@@ -1800,7 +1800,7 @@ begin
   finally
    for int1:= high(freeblobar) downto 0 do begin
     deleteblob(blobspo^,tfield(freeblobar[int1]),true);
-   end;  
+   end;
   end;
  end;
 end;
@@ -1889,7 +1889,7 @@ var
 var qry : TSQLQuery;
     x   : integer;
     Fld : TField;
-    
+
 begin
     case UpdateKind of
       ukModify : begin
@@ -1929,9 +1929,9 @@ begin
   result:= active and not freadonly;
  end
  else begin
-  if (fcursor <> nil) and 
+  if (fcursor <> nil) and
                      (FCursor.FStatementType in datareturningtypes) then begin
-   Result:= Active and 
+   Result:= Active and
         (FUpdateable or (bdo_noapply in foptions)) and (not FReadOnly)
   end
   else begin
@@ -1969,7 +1969,7 @@ end;
 }
 function TSQLQuery.CreateBlobStream(Field: TField; Mode: TBlobStreamMode): TStream;
 var
- info: blobcacheinfoty; 
+ info: blobcacheinfoty;
 // int1: integer;
  blob1: blobinfoty;
 begin
@@ -2038,12 +2038,12 @@ begin
    DS.RemoveFreeNotification(Self);
   end;
   If Assigned(AValue) then begin
-   AValue.FreeNotification(Self);  
+   AValue.FreeNotification(Self);
    FMasterLink:= TsqlMasterParamsDataLink.Create(Self);
    FMasterLink.Datasource:= AValue;
   end
   else begin
-   FreeAndNil(FMasterLink);  
+   FreeAndNil(FMasterLink);
   end;
  end;
 end;
@@ -2057,7 +2057,7 @@ begin
     Result:=Nil;
 end;
 
-procedure tsqlquery.notification(acomponent: tcomponent; operation: toperation); 
+procedure tsqlquery.notification(acomponent: tcomponent; operation: toperation);
 begin
  inherited;
  if operation = opremove then begin
@@ -2109,7 +2109,7 @@ end;
 function TSQLQuery.executedirect(const asql: msestring): integer;
 begin
  checkdatabase(name,fdatabase);
- result:= database.executedirect(asql,writetransaction); 
+ result:= database.executedirect(asql,writetransaction);
 end;
 
 procedure TSQLQuery.setparams(const avalue: TmseParams);

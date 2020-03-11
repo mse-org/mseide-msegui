@@ -58,12 +58,15 @@ type
 
   TDataSetState = (dsInactive, dsBrowse, dsEdit, dsInsert, dsSetKey,
     dsCalcFields, dsFilter, dsNewValue, dsOldValue, dsCurValue, dsBlockRead,
-    dsInternalCalc, dsOpening);
+    dsInternalCalc, dsOpening, dscheckfilter);
 
   TDataEvent = (deFieldChange, deRecordChange, deDataSetChange,
     deDataSetScroll, deLayoutChange, deUpdateRecord, deUpdateState,
     deCheckBrowseMode, dePropertyChange, deFieldListChange, deFocusControl,
-    deParentScroll,deConnectChange,deReconcileError,deDisabledStateChange);
+    deParentScroll,deConnectChange,deReconcileError,deDisabledStateChange,
+    de_modified, de_afterdelete, de_afterinsert, de_afterpost, de_hasactiveedit,
+    de_afterapplyupdate );
+
 
   TUpdateStatus = (usUnmodified, usModified, usInserted, usDeleted);
   TUpdateStatusSet = SET OF TUpdateStatus;
@@ -93,7 +96,7 @@ type
    public
     constructor create(const msg: string; const comp: tcomponent); overload;
   end;
-  
+
   EUpdateError   = class(EDatabaseError)
   private
     FContext           : String;
@@ -109,7 +112,7 @@ type
     property OriginalException : Exception read FOriginalException;
     property PreviousError : Integer read FPreviousError;
   end;
-  
+
 
 { TFieldDef }
 
@@ -156,7 +159,7 @@ type
   protected
     function GetDisplayName: string; override;
     procedure SetDisplayName(const AValue: string); override;
-  Public  
+  Public
     property DisplayName : string read GetDisplayName write SetDisplayName;
   published
     property Name : string read FName write SetDisplayName;
@@ -248,7 +251,7 @@ type
   TProviderFlag = (pfInUpdate, pfInWhere, pfInKey, pfHidden) deprecated;
 {$push}{$warnings off}
   TProviderFlags = set of TProviderFlag deprecated;
-{$pop}  
+{$pop}
 
   optionfieldty = (of_readonly,of_required,of_visible,
                  of_filter,of_filtermin,of_filtermax,of_find,
@@ -502,11 +505,11 @@ type
     property asid: int64 read getasid write setasid; //-1 -> NULL
     property AsInteger: Integer read GetAsInteger write SetAsInteger;
     property AsString: string read GetAsString write SetAsString;
-    property AsWideString: WideString read GetAsWideString 
+    property AsWideString: WideString read GetAsWideString
                                                         write SetAsWideString;
-    property asunicodestring: unicodestring read getasunicodestring 
+    property asunicodestring: unicodestring read getasunicodestring
                                                      write setasunicodestring;
-    property asmsestring: msestring read getasunicodestring 
+    property asmsestring: msestring read getasunicodestring
                                                      write setasunicodestring;
     property AsVariant: variant read GetAsVariant write SetAsVariant;
     property AttributeSet: string read FAttributeSet write FAttributeSet;
@@ -535,41 +538,41 @@ type
     property OldValue: variant read GetOldValue;
     property LookupList: TLookupList read GetLookupList;
 {$push}{$warnings off}
-    property ProviderFlags : TProviderFlags read getProviderFlags 
+    property ProviderFlags : TProviderFlags read getProviderFlags
                                     write setProviderFlags; deprecated;
 {$pop}
     property ReadOnly: Boolean read getReadOnly write SetReadOnly;
     property Required: Boolean read getRequired write setRequired;
     property Visible: Boolean read getVisible write SetVisible default True;
   published
-    property Alignment : TAlignment read FAlignment write SetAlignment 
+    property Alignment : TAlignment read FAlignment write SetAlignment
                                                          default taLeftJustify;
-    property CustomConstraint: string read FCustomConstraint 
+    property CustomConstraint: string read FCustomConstraint
                                                        write FCustomConstraint;
-    property ConstraintErrorMessage: string read FConstraintErrorMessage 
+    property ConstraintErrorMessage: string read FConstraintErrorMessage
                                                  write FConstraintErrorMessage;
-    property DefaultExpression: string read FDefaultExpression 
+    property DefaultExpression: string read FDefaultExpression
                                                       write FDefaultExpression;
-    property DisplayLabel : utf8string read GetDisplaylabel 
+    property DisplayLabel : utf8string read GetDisplaylabel
                                   write SetDisplayLabel stored IsDisplayStored;
     property DisplayWidth: Longint read GetDisplayWidth write SetDisplayWidth;
     property FieldKind: TFieldKind read FFieldKind write FFieldKind;
     property FieldName: string read FFieldName write FFieldName;
     property HasConstraints: Boolean read FHasConstraints;
     property Index: Longint read GetIndex write SetIndex;
-    property ImportedConstraint: string read FImportedConstraint 
+    property ImportedConstraint: string read FImportedConstraint
                                                    write FImportedConstraint;
     property KeyFields: string read FKeyFields write FKeyFields;
     property LookupCache: Boolean read FLookupCache write FLookupCache;
     property LookupDataSet: TDataSet read FLookupDataSet write setLookupDataSet;
-    property LookupKeyFields: string read FLookupKeyFields 
+    property LookupKeyFields: string read FLookupKeyFields
                                                     write FLookupKeyFields;
-    property LookupResultField: string read FLookupResultField 
+    property LookupResultField: string read FLookupResultField
                                                   write FLookupResultField;
     property Origin: string read FOrigin write FOrigin;
-    property optionsfield: optionsfieldty read foptionsfield 
+    property optionsfield: optionsfieldty read foptionsfield
                          write setoptionsfield default defaultoptionsfield;
-    
+
     property OnChange: TFieldNotifyEvent read FOnChange write FOnChange;
     property OnGetText: TFieldGetTextEvent read FOnGetText write FOnGetText;
     property OnSetText: TFieldSetTextEvent read FOnSetText write FOnSetText;
@@ -614,7 +617,7 @@ type
   published
     property EditMask;
     property Size default 20;
-   property onsetvalue: ansistringfieldsetvalueeventty 
+   property onsetvalue: ansistringfieldsetvalueeventty
                                      read fonsetvalue write fonsetvalue;
   end;
 
@@ -699,7 +702,7 @@ type
   published
     property MaxValue: Longint read FMaxValue write SetMaxValue default 0;
     property MinValue: Longint read FMinValue write SetMinValue default 0;
-   property onsetvalue: integerfieldsetvalueeventty 
+   property onsetvalue: integerfieldsetvalueeventty
                                      read fonsetvalue write fonsetvalue;
   end;
   TIntegerField = Class(TLongintField);
@@ -738,7 +741,7 @@ type
   published
     property MaxValue: Largeint read FMaxValue write SetMaxValue default 0;
     property MinValue: Largeint read FMinValue write SetMinValue default 0;
-   property onsetvalue: int64fieldsetvalueeventty 
+   property onsetvalue: int64fieldsetvalueeventty
                                      read fonsetvalue write fonsetvalue;
   end;
 
@@ -803,7 +806,7 @@ type
     property MaxValue: Double read FMaxValue write FMaxValue;
     property MinValue: Double read FMinValue write FMinValue;
     property Precision: Longint read FPrecision write SetPrecision default 15; // min 2 instellen, delphi compat
-   property onsetvalue: floatfieldsetvalueeventty 
+   property onsetvalue: floatfieldsetvalueeventty
                                      read fonsetvalue write fonsetvalue;
   end;
 
@@ -843,7 +846,7 @@ type
     property Value: Boolean read GetAsBoolean write SetAsBoolean;
   published
     property DisplayValues: string read FDisplayValues write SetDisplayValues;
-   property onsetvalue: booleanfieldsetvalueeventty 
+   property onsetvalue: booleanfieldsetvalueeventty
                                      read fonsetvalue write fonsetvalue;
   end;
 
@@ -877,7 +880,7 @@ type
   published
     property DisplayFormat: string read FDisplayFormat write SetDisplayFormat;
     property EditMask;
-   property onsetvalue: datetimefieldsetvalueeventty 
+   property onsetvalue: datetimefieldsetvalueeventty
                                      read fonsetvalue write fonsetvalue;
   end;
 
@@ -971,7 +974,7 @@ type
     property MaxValue: Currency read FMaxValue write FMaxValue;
     property MinValue: Currency read FMinValue write FMinValue;
     property Size default 4;
-   property onsetvalue: bcdfieldsetvalueeventty 
+   property onsetvalue: bcdfieldsetvalueeventty
                                      read fonsetvalue write fonsetvalue;
   end;
 
@@ -1377,15 +1380,15 @@ type
     Property Text : string read GetAsString write SetText;
     Property Value : Variant read GetAsVariant write SetAsVariant stored IsParamStored;
     property AsWideString: WideString read GetAsWideString write SetAsWideString;
-    property asunicodestring: unicodestring read getasunicodestring 
+    property asunicodestring: unicodestring read getasunicodestring
                                                        write setasunicodestring;
-    property asmsestring: msestring read getasunicodestring 
+    property asmsestring: msestring read getasunicodestring
                                                   write setasunicodestring;
-    property asnullmsestring: msestring read getasnullmsestring 
+    property asnullmsestring: msestring read getasnullmsestring
                                                   write setasnullmsestring;
                                                      //'' -> null
     property asid: int64 read getasid write setasid; //-1 -> null
-    property blobkind: blobkindty read fblobkind 
+    property blobkind: blobkindty read fblobkind
                                            write fblobkind default bk_none;
                                   //for blobid
   published
@@ -1435,7 +1438,7 @@ type
 { TDataSet }
 
   TBookmark = Pointer;
-  TBookmarkStr = string; 
+  TBookmarkStr = string;
 
   PBookmarkFlag = ^TBookmarkFlag;
   TBookmarkFlag = (bfCurrent, bfBOF, bfEOF, bfInserted);
@@ -1443,18 +1446,18 @@ type
 { These types are used by Delphi/Unicode to replace the ambiguous "pchar" buffer types.
   For now, they are just aliases to PAnsiChar, but in Delphi/Unicode it is pbyte. This will
   be changed later (2.8?), to allow a grace period for descendents to catch up.
-  
+
   Testing with TRecordBuffer=PByte will turn up typing problems. TRecordBuffer=pansichar is backwards
   compatible, even if overriden with "pchar" variants.
 }
-  TRecordBufferBaseType = AnsiChar; // must match TRecordBuffer. 
+  TRecordBufferBaseType = AnsiChar; // must match TRecordBuffer.
   TRecordBuffer = PAnsiChar;
   PBufferList = ^TBufferList;
   TBufferList = array[0..dsMaxBufferCount - 1] of TRecordBuffer;  // Dynamic array in Delphi.
   TBufferArray = ^TRecordBuffer;
   bufferaty = array[0..1] of trecordbuffer;
   pbufferaty = ^bufferaty;
-  
+
   TGetMode = (gmCurrent, gmNext, gmPrior);
 
   TGetResult = (grOK, grBOF, grEOF, grError);
@@ -1531,7 +1534,7 @@ type
  datasetinternalstatety = (dsis_checkingbrowsemode,dsis_refreshing,
                                                           dsis_recordcopy);
  datasetinternalstatesty = set of datasetinternalstatety;
- 
+
   TDataSet = class(TComponent)
   Private
     Procedure DoInsertAppend(DoAppend : Boolean);
@@ -2028,14 +2031,14 @@ type
     property readonly: boolean read freadonly write setreadonly default false;
     property priority: int32 read fpriority write fpriority default 0;
                          //highest priority handled first by dataset
-    property OnStateChange: TNotifyEvent read FOnStateChange 
+    property OnStateChange: TNotifyEvent read FOnStateChange
                                                       write FOnStateChange;
-    property onenabledchange: tnotifyevent read fonenabledchange 
+    property onenabledchange: tnotifyevent read fonenabledchange
                                                       write fonenabledchange;
     property OnDataChange: TDataChangeEvent read FOnDataChange
                                                           write FOnDataChange;
     property OnUpdateData: TNotifyEvent read FOnUpdateData write FOnUpdateData;
-    property onifistatechanged: ifistatechangedeventty 
+    property onifistatechanged: ifistatechangedeventty
                            read fonifistatechanged write fonifistatechanged;
 //    property onenter: datasourcelinkobjecteventty read fonenter write fonenter;
 //    property onexit: datasourcelinkobjecteventty read fonexit write fonexit;
@@ -2195,15 +2198,15 @@ type
   TMasterParamsDataLink = Class(TMasterDataLink)
   Private
     FParams : TParams;
-    Procedure SetParams(AVAlue : TParams);  
-  Protected  
+    Procedure SetParams(AVAlue : TParams);
+  Protected
     Procedure DoMasterDisable; override;
     Procedure DoMasterChange; override;
   Public
     constructor Create(ADataSet: TDataSet); override;
     Procedure RefreshParamNames; virtual;
     Procedure CopyParamsFromMaster(CopyBound : Boolean); virtual;
-    Property Params : TParams Read FParams Write SetParams;  
+    Property Params : TParams Read FParams Write SetParams;
   end;
 
 const
@@ -2408,7 +2411,7 @@ end;
 { EUpdateError }
 constructor EUpdateError.Create(NativeError, Context : String;
                                 ErrCode, PrevError : integer; E: Exception);
-                                
+
 begin
   Inherited CreateFmt(NativeError,[Context]);
   FContext := Context;
@@ -2792,7 +2795,7 @@ begin
     end;
 end;
 
-function BuffersEqual(Buf1, Buf2: Pointer; Size: Integer): Boolean; 
+function BuffersEqual(Buf1, Buf2: Pointer; Size: Integer): Boolean;
 
 begin
  {$ifdef FPC}
@@ -2817,7 +2820,7 @@ begin
   FFieldList:=TFields.Create(Self);
   FDataSources:=TList.Create;
   FConstraints:=TCheckConstraints.Create(Self);
-  
+
 // FBuffer must be allocated on create, to make Activebuffer return nil
   ReAllocMem(FBuffers,SizeOf(TRecordBuffer));
 //  pointer(FBuffers^) := nil;
@@ -2927,7 +2930,7 @@ var
   i: Integer;
   OldState: TDatasetState;
 begin
-  FCalcBuffer := Buffer; 
+  FCalcBuffer := Buffer;
   if not IsUniDirectional and (FState <> dsInternalCalc) then
   begin
     OldState := FState;
@@ -3018,7 +3021,7 @@ Procedure TDataset.DataEvent(Event: TDataEvent; Info: Ptrint);
   begin
     if aField.FieldKind in [fkData, fkInternalCalc] then
       SetModified(True);
-      
+
     if State <> dsSetKey then begin
       if aField.FieldKind = fkData then begin
         if FInternalCalcFields then
@@ -3026,11 +3029,11 @@ Procedure TDataset.DataEvent(Event: TDataEvent; Info: Ptrint);
         else if FAutoCalcFields and (FCalcFieldsSize <> 0) then
           CalculateFields(ActiveBuffer);
       end;
-      
+
       aField.Change;
     end;
   end;
-  
+
   procedure HandleScrollOrChange;
   begin
     if State <> dsInsert then
@@ -3044,7 +3047,7 @@ begin
     deFieldChange   : HandleFieldChange(TField(Info));
     deDataSetChange,
     deDataSetScroll : HandleScrollOrChange;
-    deLayoutChange  : FEnableControlsEvent:=deLayoutChange;    
+    deLayoutChange  : FEnableControlsEvent:=deLayoutChange;
   end;
   if not ControlsDisabled and (FState <> dsBlockRead) then begin
     for i := 0 to FDataSources.Count - 1 do
@@ -3527,10 +3530,10 @@ end;
 
 function TDataSet.GetIndexDefs(IndexDefs: TIndexDefs; IndexTypes: TIndexOptions
   ): TIndexDefs;
-  
+
 var i,f : integer;
     IndexFields : TStrings;
-    
+
 begin
   IndexDefs.Update;
   Result := TIndexDefs.Create(Self);
@@ -3682,15 +3685,15 @@ begin
   FBlockReadSize := AValue;
   if AValue > 0 then
   begin
-    CheckActive; 
+    CheckActive;
     SetState(dsBlockRead);
-  end	
+  end
   else
   begin
-    //update state only when in dsBlockRead 
+    //update state only when in dsBlockRead
     if FState = dsBlockRead then
       SetState(dsBrowse);
-  end;	
+  end;
 end;
 
 Procedure TDataSet.SetFieldDefs(AFieldDefs: TFieldDefs);
@@ -6023,7 +6026,7 @@ begin
   if not Assigned(FLookupDataSet) or (Length(FLookupKeyfields) = 0)
   or (Length(FLookupresultField) = 0) or (Length(FKeyFields) = 0) then
     Exit;
-    
+
   tmpActive := FLookupDataSet.Active;
   try
     FLookupDataSet.Active := True;
@@ -6361,7 +6364,7 @@ const
 function TField.getProviderFlags: TProviderFlags;
 begin
 {$push}{$warnings off}
- result:= tproviderflags(integer(foptionsfield) shr providerflagsshift) * 
+ result:= tproviderflags(integer(foptionsfield) shr providerflagsshift) *
                                                              allproviderflags;
 {$pop}
 end;
@@ -6423,7 +6426,7 @@ end;
 
 procedure TField.setProviderFlags(const avalue: TProviderFlags);
 begin
- foptionsfield:= (foptionsfield - allprovideroptions) + 
+ foptionsfield:= (foptionsfield - allprovideroptions) +
             optionsfieldty(integer(avalue) shl providerflagsshift);
  if pfinupdate in avalue then begin
   include(foptionsfield,of_ininsert);
@@ -6481,7 +6484,7 @@ end;
 procedure TField.readproviderflags(reader: treader);
 begin
 {$push}{$warnings off}
- providerflags:= tproviderflags(reader.readset(typeinfo(tproviderflags))); 
+ providerflags:= tproviderflags(reader.readset(typeinfo(tproviderflags)));
 {$pop}
 end;
 
@@ -6494,7 +6497,7 @@ var
  flags: providerflags1ty;
 begin
  flags:= providerflags1ty(reader.readset(typeinfo(providerflags1ty)));
- foptionsfield:= foptionsfield - 
+ foptionsfield:= foptionsfield -
              [of_refreshinsert,of_refreshupdate,of_nocopyrecord];
  if pf1_refreshinsert in flags then begin
   include(foptionsfield,of_refreshinsert);
@@ -6949,7 +6952,7 @@ begin
     SetAsLongint(1)
   else
     SetAsLongint(0);
-end; 
+end;
 
 { ---------------------------------------------------------------------
     TLongintField
@@ -7490,7 +7493,7 @@ Var R : Double;
 begin
   If (AValue='') then
     Clear
-  else  
+  else
     try
       R := StrToFloat(AValue);
       SetAsFloat(R);
@@ -8954,7 +8957,7 @@ Procedure TFields.Clear;
 var
   AField: TField;
 begin
-  while FFieldList.Count > 0 do 
+  while FFieldList.Count > 0 do
     begin
     AField := TField(FFieldList.Last);
     AField.FDataSet := Nil;
@@ -9102,7 +9105,7 @@ begin
   else if DataSource.DataSet.FActiveRecord < FFirstRecord + Index then
     Result := DataSource.DataSet.FActiveRecord - (FFirstRecord + Index)
   else Result := 0;
-  
+
   Inc(FFirstRecord, Index + Result);
 end;
 
@@ -9193,7 +9196,7 @@ begin
   If Assigned(Datasource) then
     Result:=DataSource.DataSet
   else
-    Result:=Nil;  
+    Result:=Nil;
 end;
 
 
@@ -9443,7 +9446,7 @@ begin
     if Active and (FFields.Count > 0) then
       DoMasterChange
     else
-      DoMasterDisable;  
+      DoMasterDisable;
 end;
 
 
@@ -9474,7 +9477,7 @@ begin
   if (DataSource.State <> dsSetKey) and FDetailDataSet.Active and
      (FFields.Count > 0) and ((Field = nil) or
      (FFields.IndexOf(Field) >= 0)) then
-    DoMasterChange;  
+    DoMasterChange;
 end;
 
 procedure TMasterDatalink.SetFieldNames(const Value: string);
@@ -9487,14 +9490,14 @@ begin
     end;
 end;
 
-Procedure TMasterDataLink.DoMasterDisable; 
+Procedure TMasterDataLink.DoMasterDisable;
 
 begin
-  if Assigned(FOnMasterDisable) then 
+  if Assigned(FOnMasterDisable) then
     FOnMasterDisable(Self);
 end;
 
-Procedure TMasterDataLink.DoMasterChange; 
+Procedure TMasterDataLink.DoMasterChange;
 
 begin
   If Assigned(FOnMasterChange) then
@@ -9517,11 +9520,11 @@ begin
     P:=TParams(GetObjectProp(ADataset,'Params',TParams));
     if (P<>Nil) then
       Params:=P;
-    end;  
+    end;
 end;
 
 
-Procedure TMasterParamsDataLink.SetParams(AVAlue : TParams);  
+Procedure TMasterParamsDataLink.SetParams(AVAlue : TParams);
 
 begin
   FParams:=AValue;
@@ -9529,7 +9532,7 @@ begin
     RefreshParamNames;
 end;
 
-Procedure TMasterParamsDataLink.RefreshParamNames; 
+Procedure TMasterParamsDataLink.RefreshParamNames;
 
 Var
   FN : String;
@@ -9551,11 +9554,11 @@ begin
         begin
         If (FN<>'') then
           FN:=FN+';';
-        FN:=FN+FParams[i].Name; 
+        FN:=FN+FParams[i].Name;
         end;
       end;
     end;
-  FieldNames:=FN;  
+  FieldNames:=FN;
 end;
 
 Procedure TMasterParamsDataLink.CopyParamsFromMaster(CopyBound : Boolean);
@@ -9565,7 +9568,7 @@ begin
     FParams.CopyParamValuesFromDataset(Dataset,CopyBound);
 end;
 
-Procedure TMasterParamsDataLink.DoMasterDisable; 
+Procedure TMasterParamsDataLink.DoMasterDisable;
 
 begin
   Inherited;
@@ -9573,7 +9576,7 @@ begin
     DetailDataset.Close;
 end;
 
-Procedure TMasterParamsDataLink.DoMasterChange; 
+Procedure TMasterParamsDataLink.DoMasterChange;
 
 begin
   Inherited;
@@ -9784,7 +9787,7 @@ end;
 procedure TDataSource.ifistatechanged(const sender: tdatalink;
                const aclient: iificlient; const astate: ifiwidgetstatesty);
 begin
- if assigned(fonifistatechanged) and 
+ if assigned(fonifistatechanged) and
              (componentstate * [csloading,csdestroying] = []) then begin
   fonifistatechanged(self,sender,aclient,astate);
  end;
@@ -9813,7 +9816,7 @@ end;
 {
 procedure TDataSource.doenter(const alink: tdatalink; const aobject: tobject);
 begin
- if assigned(fonenter) and 
+ if assigned(fonenter) and
              (componentstate * [csloading,csdestroying] = []) then begin
   fonenter(self,alink,aobject);
  end;
@@ -9821,7 +9824,7 @@ end;
 
 procedure TDataSource.doexit(const alink: tdatalink; const aobject: tobject);
 begin
- if assigned(fonexit) and 
+ if assigned(fonexit) and
              (componentstate * [csloading,csdestroying] = []) then begin
   fonexit(self,alink,aobject);
  end;
@@ -10792,7 +10795,7 @@ begin
   end
   else
     NewQuery:=SQL;
-    
+
   Result := NewQuery;
 end;
 
@@ -11526,7 +11529,7 @@ Var
   I : Integer;
   P : TParam;
   F : TField;
-  
+
 begin
   If (ADataSet<>Nil) then
     For I:=0 to Count-1 do

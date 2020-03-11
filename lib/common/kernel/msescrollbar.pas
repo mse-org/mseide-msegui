@@ -29,11 +29,11 @@ const
 
 type
 
- scrollbarareaty = (sbbu_down,sbbu_move,sbbu_up,sba_start,sba_end);
+ scrollbarareaty = (sbbu_down,sbbu_move,sbbu_up,sba_start,sba_end,sba_clicked,sba_none);
 // buttonareaty = (bbu_down,bbu_move,bbu_up);
-const
- scrollbarclicked = ord(sba_end) + 1;
-// areafrombuttonarea: array[buttonareaty] of scrollbarareaty = 
+//const
+// scrollbarclicked = ord(sba_end) + 1;
+// areafrombuttonarea: array[buttonareaty] of scrollbarareaty =
 //                                         (sbbu_down,sbbu_move,sbbu_up);
 
 type
@@ -82,7 +82,7 @@ type
               var akind: scrolleventty; var avalue: real) of object;
  scrollbareventty = procedure(const sender: tcustomscrollbar;
               const akind: scrolleventty; const avalue: real) of object;
-            //avalue = step or value              
+            //avalue = step or value
  tcustomscrollbar = class(tnullinterfacedpersistent,iframe,iface)
   private
    forg: originty;
@@ -193,7 +193,7 @@ type
    function getcomponentstate: tcomponentstate;
    function getmsecomponentstate: msecomponentstatesty;
    procedure invalidatewidget;
-   procedure invalidaterect(const rect: rectty; 
+   procedure invalidaterect(const rect: rectty;
              const org: originty = org_client; const noclip: boolean = false);
    function getwidget: twidget;
    function getwidgetrect: rectty;
@@ -241,9 +241,9 @@ type
    procedure keydown(var info: keyeventinfoty);
    procedure enter();
    procedure exit();
-   property focused: boolean read getfocused write setfocused; 
+   property focused: boolean read getfocused write setfocused;
                                 //does not invalidate
-   property disabled: boolean read getdisabled write setdisabled; 
+   property disabled: boolean read getdisabled write setdisabled;
                                 //does not invalidate
    function clicked: boolean;
    procedure activechanged;
@@ -268,10 +268,10 @@ type
                           default defaultscrollbaroptions;
    property stepsize: real read getstepsize write fstepsize stored false;
                     //default = 0 -> pagesize /10
-   property stepctrlfact: real read fstepctrlfact 
+   property stepctrlfact: real read fstepctrlfact
                                      write fstepctrlfact stored false;
                     //default = 0 -> no ctrl step
-   property stepshiftfact: real read fstepshiftfact 
+   property stepshiftfact: real read fstepshiftfact
                                           write fstepshiftfact stored false;
                     //default = 0 -> no shift step
    property pagesize: real read fpagesize write setpagesize stored false;
@@ -279,12 +279,12 @@ type
    property wheelsensitivity: real read fwheelsensitivity
                                      write fwheelsensitivity stored false;
                     //default = 1
-   property buttonlength: integer read fbuttonlength 
+   property buttonlength: integer read fbuttonlength
                                              write setbuttonlength default 0;
                      //0 -> proportional -1 -> square
    property buttonminlength: integer read fbuttonminlength
                  write setbuttonminlength default defaultbuttonminlength;
-   property buttonendlength: integer read fbuttonendlength 
+   property buttonendlength: integer read fbuttonendlength
                          write setbuttonendlength default 0;
                      //0 -> square, -1 -> no endbuttons
    property face: tface read getface write setface;
@@ -294,12 +294,12 @@ type
    property faceendbutton: tface read getfaceendbutton write setfaceendbutton;
    property frame: tframe read getframe write setframe;
    property framebutton: tframe read getframebutton write setframebutton;
-   property frameendbutton1: tframe read getframeendbutton1 
+   property frameendbutton1: tframe read getframeendbutton1
                                  write setframeendbutton1;
    property frameendbutton2: tframe read getframeendbutton2
                                  write setframeendbutton2;
    property color: colorty read fcolor write setcolor default cl_default;
-   property colorpattern: colorty read fcolorpattern 
+   property colorpattern: colorty read fcolorpattern
                    write setcolorpattern default cl_default;
                    //cl_none -> no pattern
    property colorpatternclicked: colorty read fcolorpatternclicked
@@ -308,9 +308,9 @@ type
    property colorglyph: colorty read fdrawinfo.areas[sbbu_down].ca.colorglyph
                    write setcolorglyph default cl_default;
                    //cl_none -> no no glyph
-   property onbeforeevent: beforescrollbareventty read fonbeforeevent 
+   property onbeforeevent: beforescrollbareventty read fonbeforeevent
                                                         write fonbeforeevent;
-   property onafterevent: scrollbareventty read fonafterevent 
+   property onafterevent: scrollbareventty read fonafterevent
                                                         write fonafterevent;
  end;
 
@@ -352,16 +352,16 @@ type
    property onbeforeevent;
    property onafterevent;
  end;
- 
+
  tscrollbar = class(tnopagesizescrollbar)
   public
    constructor create(intf: iscrollbar; org: originty = org_client;
                                ondimchanged: proceventty = nil); override;
   published
    property pagesize;
-   property stepsize;   
+   property stepsize;
  end;
- 
+
  tnomoveautonopagesizescrollbar = class(tcustomnomoveautoscrollbar)
   published
    property options;
@@ -408,9 +408,9 @@ type
  twidget1 = class(twidget);
 {
 const
- buttonareatoscrollbararea: array[buttonareaty] of scrollbarareaty = 
+ buttonareatoscrollbararea: array[buttonareaty] of scrollbarareaty =
                                            (sbbu_down,sbbu_move,sbbu_up);
-} 
+}
 { tcustomscrollbar }
 
 constructor tcustomscrollbar.create(intf: iscrollbar; org: originty = org_client;
@@ -426,7 +426,7 @@ begin
  fcolorpatternclicked:= cl_default;
  fdrawinfo.areas[sbbu_down].ca.colorglyph:= cl_default;
  fdrawinfo.areas[sbbu_up].ca.colorglyph:= cl_default;
- fclickedarea:= scrollbarareaty(-1);
+ fclickedarea:= scrollbarareaty(sba_none);
  fbuttonminlength:= defaultbuttonminlength;
  fwidth:= defaultscrollbarwidth;
  fondimchanged:= ondimchanged;
@@ -479,7 +479,7 @@ var
 }
 var
  i1: int32;
-  
+
 begin
  scrolllength:= 0;
  with fdrawinfo,dim do begin
@@ -586,7 +586,7 @@ begin
     areas[sbbu_up].ca.dim.x:= x + cx - endblen;
     areas[sbbu_move].ca.dim.x:= x + endblen + round(fvalue * fscrollrange);
     areas[sba_start].ca.dim.x:= x + endblen;
-    areas[sba_start].ca.dim.cx:= areas[sbbu_move].ca.dim.x - 
+    areas[sba_start].ca.dim.cx:= areas[sbbu_move].ca.dim.x -
                                        areas[sba_start].ca.dim.x;
     areas[sba_end].ca.dim.x:= areas[sbbu_move].ca.dim.x +
                                        areas[sbbu_move].ca.dim.cx;
@@ -595,14 +595,14 @@ begin
    gd_left: begin
     areas[sbbu_up].ca.dim.x:= x;
     areas[sbbu_down].ca.dim.x:= x + cx - endblen;
-    areas[sbbu_move].ca.dim.x:= x + cx - (endblen + round(fvalue * fscrollrange)) - 
+    areas[sbbu_move].ca.dim.x:= x + cx - (endblen + round(fvalue * fscrollrange)) -
                           buttonlength1;
-    areas[sba_start].ca.dim.x:= areas[sbbu_move].ca.dim.x + 
+    areas[sba_start].ca.dim.x:= areas[sbbu_move].ca.dim.x +
                                       areas[sbbu_move].ca.dim.cx;
     areas[sba_start].ca.dim.cx:= areas[sbbu_down].ca.dim.x -
                                       areas[sba_start].ca.dim.x;
     areas[sba_end].ca.dim.x:= x + endblen;
-    areas[sba_end].ca.dim.cx:= areas[sbbu_move].ca.dim.x - 
+    areas[sba_end].ca.dim.cx:= areas[sbbu_move].ca.dim.x -
                                       areas[sba_end].ca.dim.x;
    end;
    gd_down: begin
@@ -610,23 +610,23 @@ begin
     areas[sbbu_up].ca.dim.y:= y + cy - endblen;
     areas[sbbu_move].ca.dim.y:= y + endblen + round(fvalue * fscrollrange);
     areas[sba_start].ca.dim.y:= y + endblen;
-    areas[sba_start].ca.dim.cy:= areas[sbbu_move].ca.dim.y - 
+    areas[sba_start].ca.dim.cy:= areas[sbbu_move].ca.dim.y -
                                                  areas[sba_start].ca.dim.y;
-    areas[sba_end].ca.dim.y:= areas[sbbu_move].ca.dim.y + 
+    areas[sba_end].ca.dim.y:= areas[sbbu_move].ca.dim.y +
                                                  areas[sbbu_move].ca.dim.cy;
     areas[sba_end].ca.dim.cy:= areas[sbbu_up].ca.dim.y - areas[sba_end].ca.dim.y;
    end;
    gd_up: begin
     areas[sbbu_up].ca.dim.y:= y;
     areas[sbbu_down].ca.dim.y:= y + cy - endblen;
-    areas[sbbu_move].ca.dim.y:= y + cy - (endblen + round(fvalue * fscrollrange)) - 
+    areas[sbbu_move].ca.dim.y:= y + cy - (endblen + round(fvalue * fscrollrange)) -
                           buttonlength1;
-    areas[sba_start].ca.dim.y:= areas[sbbu_move].ca.dim.y + 
+    areas[sba_start].ca.dim.y:= areas[sbbu_move].ca.dim.y +
                                              areas[sbbu_move].ca.dim.cy;
-    areas[sba_start].ca.dim.cy:=  areas[sbbu_down].ca.dim.y - 
+    areas[sba_start].ca.dim.cy:=  areas[sbbu_down].ca.dim.y -
                                              areas[sba_start].ca.dim.y;
     areas[sba_end].ca.dim.y:= y + endblen;
-    areas[sba_end].ca.dim.cy:= areas[sbbu_move].ca.dim.y - 
+    areas[sba_end].ca.dim.cy:= areas[sbbu_move].ca.dim.y -
                                                     areas[sba_end].ca.dim.y;
    end;
   end;
@@ -637,7 +637,7 @@ function tcustomscrollbar.findarea(const point: pointty): scrollbarareaty;
 var
  ar1: scrollbarareaty;
 begin
- result:= scrollbarareaty(-1);
+ result:= scrollbarareaty(sba_none);
  for ar1:= low(scrollbarareaty) to high(scrollbarareaty) do begin
   if pointinshape(point,fdrawinfo.areas[ar1]) then begin
    result:= ar1;
@@ -661,7 +661,9 @@ end;
 function tcustomscrollbar.clickedareaisvalid: boolean;
 begin
  result:= (shortint(fclickedarea) >= 0) and
-              (shortint(fclickedarea) < scrollbarclicked);
+             // (shortint(fclickedarea) < scrollbarclicked);
+              (shortint(fclickedarea) < Ord(High(scrollbarareaty))-1);
+
 end;
 
 procedure tcustomscrollbar.invalidateclickedarea;
@@ -767,7 +769,7 @@ begin
  end;
 end;
 
-procedure tcustomscrollbar.paint(const canvas: tcanvas; 
+procedure tcustomscrollbar.paint(const canvas: tcanvas;
                                            const acolor: colorty = cl_none);
 var
  col1: colorty;
@@ -800,8 +802,8 @@ begin
    if acolor <> cl_none then begin
     with areas[fpaintedbutton] do begin
      statebefore:= state;
-     state:= state - [shs_mouse,shs_clicked];     
-    end; 
+     state:= state - [shs_mouse,shs_clicked];
+    end;
    end;
 //   fillrect(areas[fpaintedbutton].ca.dim,col1);
 //   areas[fpaintedbutton].color:= col1;
@@ -954,8 +956,8 @@ end;
 
 function tcustomscrollbar.wantmouseevent(const apos: pointty): boolean;
 begin
- result:= (fclickedarea <> scrollbarareaty(-1)) or
-                 (findarea(apos) <> scrollbarareaty(-1));
+ result:= (fclickedarea <> scrollbarareaty(sba_none)) or
+                 (findarea(apos) <> scrollbarareaty(sba_none));
 end;
 
 function tcustomscrollbar.buttonmoving(): boolean;
@@ -981,7 +983,7 @@ procedure tcustomscrollbar.mouseevent(var info: mouseeventinfoty);
    fintf.scrollevent(self,sbe_thumbposition);
    dothumbevent(sbe_thumbposition);
   end;
-  fclickedarea:= scrollbarareaty(-1);
+  fclickedarea:= scrollbarareaty(sba_none);
  end;
 
 var
@@ -995,11 +997,11 @@ var
    application.widgetcursorshape:= cr_arrow;
   end;
   if clickedareaisvalid then begin
-   if (ar1 <> fclickedarea) and (fclickedarea <> sbbu_move) and 
-        ((frepeater = nil) or 
+   if (ar1 <> fclickedarea) and (fclickedarea <> sbbu_move) and
+        ((frepeater = nil) or
                       not (fclickedarea in[sba_start,sba_end])) then begin
     releasebutton(false);
-    fclickedarea:= scrollbarareaty(scrollbarclicked);
+    fclickedarea:= scrollbarareaty(sba_clicked);
    end;
    if (fclickedarea = sbbu_move) then begin
     ar1:= sbbu_move;{scrollbarareaty(-1);}
@@ -1034,40 +1036,40 @@ var
 var
  ar1: scrollbarareaty;
 begin
- if (info.eventkind in mouseposevents) and (info.shiftstate * 
-              (keyshiftstatesmask + [ss_middle,ss_right]) = []) and 
+ if (info.eventkind in mouseposevents) and (info.shiftstate *
+              (keyshiftstatesmask + [ss_middle,ss_right]) = []) and
       not (info.button in [mb_right,mb_middle]) then begin
   ar1:= findarea(info.pos);
-  if (ar1 = scrollbarareaty(-1)) and clickedareaisvalid then begin
-   ar1:= scrollbarareaty(scrollbarclicked);
+  if (ar1 = scrollbarareaty(sba_none)) and clickedareaisvalid then begin
+   ar1:= scrollbarareaty(sba_clicked);
   end;
  end
  else begin
-  ar1:= scrollbarareaty(-1);
+  ar1:= scrollbarareaty(sba_none);
  end;
- if ar1 <> scrollbarareaty(-1) then begin
+ if ar1 <> scrollbarareaty(sba_none) then begin
   include(info.eventstate,es_processed);
  end;
  if (info.eventkind = ek_clientmouseleave) and (forg = org_client) or
     (info.eventkind = ek_mouseleave) and (forg = org_widget) then begin
   releasebutton(true);
-  mousemove(scrollbarareaty(-1));
+  mousemove(scrollbarareaty(sba_none));
  end
  else begin
   case info.eventkind of
    ek_mousemove,ek_mousepark: begin
     mousemove(ar1);
-    if fclickedarea = scrollbarareaty(-1) then begin
+    if fclickedarea = scrollbarareaty(sba_none) then begin
      exclude(info.eventstate,es_processed);
     end;
    end;
    ek_buttonpress: begin
-    if (info.button = mb_left) and 
-     (not(sbo_noreflectedclick in foptions) or 
+    if (info.button = mb_left) and
+     (not(sbo_noreflectedclick in foptions) or
                           not (es_reflected in info.eventstate)) then begin
 
-     isclicktovalue:= (ar1 in [sba_start,sba_end,sbbu_move]) and 
-                    ((info.shiftstate * keyshiftstatesmask = [ss_ctrl]) or 
+     isclicktovalue:= (ar1 in [sba_start,sba_end,sbbu_move]) and
+                    ((info.shiftstate * keyshiftstatesmask = [ss_ctrl]) or
                     (sbo_clicktovalue in foptions));
      if isclicktovalue then begin
       ar1:= sbbu_move;
@@ -1093,13 +1095,13 @@ begin
        if isclicktovalue then begin
         with fdrawinfo.areas[sbbu_move].ca.dim do begin
          case fdirection of
-          gd_right: fpickoffset:=-fdrawinfo.areas[sba_start].ca.dim.x - 
+          gd_right: fpickoffset:=-fdrawinfo.areas[sba_start].ca.dim.x -
                                                                     cx div 2;
           gd_up: fpickoffset:= fdrawinfo.areas[sba_start].ca.dim.cy + y +
                                                                     cy div 2;
           gd_left: fpickoffset:= fdrawinfo.areas[sba_start].ca.dim.cx + x +
                                                                     cx div 2;
-          gd_down: fpickoffset:= -fdrawinfo.areas[sba_start].ca.dim.y - 
+          gd_down: fpickoffset:= -fdrawinfo.areas[sba_start].ca.dim.y -
                                                                     cy div 2 ;
          end;
         end;
@@ -1107,13 +1109,13 @@ begin
        else begin
         with fdrawinfo.areas[sbbu_move].ca.dim do begin
          case fdirection of
-          gd_right: fpickoffset:= x - info.pos.x - 
+          gd_right: fpickoffset:= x - info.pos.x -
                                 fdrawinfo.areas[sba_start].ca.dim.x;
           gd_up: fpickoffset:= fdrawinfo.areas[sba_start].ca.dim.cy +
                                                                info.pos.y;
-          gd_left: fpickoffset:= fdrawinfo.areas[sba_start].ca.dim.cx + 
+          gd_left: fpickoffset:= fdrawinfo.areas[sba_start].ca.dim.cx +
                                                                info.pos.x;
-          gd_down: fpickoffset:= y - info.pos.y - 
+          gd_down: fpickoffset:= y - info.pos.y -
                                          fdrawinfo.areas[sba_start].ca.dim.y;
          end;
         end;
@@ -1135,7 +1137,7 @@ begin
 end;
 
 procedure tcustomscrollbar.mousewheelevent(var info: mousewheeleventinfoty;
-                                       const pagingreversed: boolean = false); 
+                                       const pagingreversed: boolean = false);
 begin
  with info do begin
   include(eventstate,es_processed);
@@ -1196,7 +1198,7 @@ begin
  result:= getshiftfact(ashiftstate,fact1);
  if result then begin
   dostep(sbe_stepup,stepsize*fact1);
- end;  
+ end;
 end; //dostepup
 
 function tcustomscrollbar.dostepdown(const ashiftstate: shiftstatesty): boolean;
@@ -1206,9 +1208,9 @@ begin
  result:= getshiftfact(ashiftstate,fact1);
  if result then begin
   dostep(sbe_stepdown,-stepsize*fact1);
- end;  
+ end;
 end;
-  
+
 procedure tcustomscrollbar.keydown(var info: keyeventinfoty);
 
  procedure dopageup;
@@ -1220,7 +1222,7 @@ procedure tcustomscrollbar.keydown(var info: keyeventinfoty);
    pageup;
   end;
  end; //dopageup
- 
+
  procedure dopagedown;
  begin
   if info.shiftstate * shiftstatesmask = [ss_ctrl] then begin
@@ -1237,7 +1239,7 @@ var
 begin
  with info do begin
   if not (es_processed in eventstate) then begin
-   if (not (sbo_noarrowkeys in foptions) or 
+   if (not (sbo_noarrowkeys in foptions) or
         (key <> key_left) and (key <> key_right) and
         (key <> key_up) and (key <> key_down)) and
       (not (sbo_nopagekeys in foptions) or
@@ -1252,7 +1254,7 @@ begin
       else begin
        bo1:= false;
       end;
-     end; 
+     end;
     end
     else begin
      case fdirection of
@@ -1653,7 +1655,7 @@ end;
 
 function tcustomscrollbar.clicked: boolean;
 begin
- result:= fclickedarea <> scrollbarareaty(-1);
+ result:= fclickedarea <> scrollbarareaty(sba_none);
 end;
 
 procedure tcustomscrollbar.checktemplate(const sender: tobject);
@@ -1745,14 +1747,14 @@ function tcustomscrollbar.getframestateflags: framestateflagsty;
 begin
  with fdrawinfo.areas[fpaintedbutton],fintf.getwidget do begin
   result:= combineframestateflags(not isenabled,focused,active,
-       shs_mouse in state, shs_clicked in state); 
+       shs_mouse in state, shs_clicked in state);
  end;
 end;
 
 procedure tcustomscrollbar.activechanged;
 begin
- if (fdrawinfo.areas[sbbu_down].frame <> nil) or 
-            (fdrawinfo.areas[sbbu_move].frame <> nil) or 
+ if (fdrawinfo.areas[sbbu_down].frame <> nil) or
+            (fdrawinfo.areas[sbbu_move].frame <> nil) or
                  (fdrawinfo.areas[sbbu_up].frame <> nil) then begin
   invalidate;
  end;
@@ -1812,26 +1814,26 @@ procedure tcustomscrollbar.defineproperties(filer: tfiler);
 begin
  inherited;
  filer.defineproperty('stepsize',@readstepsize,@writestepsize,
-                      (scs_streampagesize in fstate) and 
+                      (scs_streampagesize in fstate) and
                       ((filer.ancestor = nil) and (fstepsize <> 0) or
-                                              (filer.ancestor <> nil) and 
+                                              (filer.ancestor <> nil) and
       (tcustomscrollbar(filer.ancestor).fstepsize <> fstepsize)));
  filer.defineproperty('stepctrlfact',@readstepctrlfact,@writestepctrlfact,
                       (filer.ancestor = nil) and (fstepctrlfact <> 0) or
-   (filer.ancestor <> nil) and 
+   (filer.ancestor <> nil) and
       (tcustomscrollbar(filer.ancestor).fstepctrlfact <> fstepctrlfact));
  filer.defineproperty('stepshiftfact',@readstepshiftfact,@writestepshiftfact,
                       (filer.ancestor = nil) and (fstepshiftfact <> 0) or
-   (filer.ancestor <> nil) and 
+   (filer.ancestor <> nil) and
       (tcustomscrollbar(filer.ancestor).fstepshiftfact <> fstepshiftfact));
  filer.defineproperty('pagesize',@readpagesize,@writepagesize,
-                      (scs_streampagesize in fstate) and 
+                      (scs_streampagesize in fstate) and
                   ((filer.ancestor = nil) and (fpagesize <> defaultpagesize) or
-       (filer.ancestor <> nil) and 
+       (filer.ancestor <> nil) and
       (tcustomscrollbar(filer.ancestor).fpagesize <> fpagesize)));
  filer.defineproperty('wheelsensitivity',@readwheelsensitivity,@writewheelsensitivity,
                       (filer.ancestor = nil) and (fwheelsensitivity <> 1) or
-   (filer.ancestor <> nil) and 
+   (filer.ancestor <> nil) and
       (tcustomscrollbar(filer.ancestor).fwheelsensitivity <> fwheelsensitivity));
 end;
 

@@ -36,7 +36,7 @@ type
  end;
 
  captionframeoptionty = (cfo_fixleft,cfo_fixright,cfo_fixtop,cfo_fixbottom,
-                         cfo_autowidth,cfo_autoheight, 
+                         cfo_autowidth,cfo_autoheight,
                                //paint area as big as possible
                          cfo_captionnogray,
                          cfo_captiondistouter,cfo_captionframecentered,
@@ -48,16 +48,16 @@ type
 
 const
  defaultcaptionframeoptions = [];
- 
+
 type
- doublewidgetty = record 
+ doublewidgetty = record
                    a,b: twidget;
                   end;
  pdoublewidgetty = ^doublewidgetty;
  doublewidgetarty = array of doublewidgetty;
  ttaborderoverride = class;
  tabordereventty = procedure(const sender: ttaborderoverride;
-                     const current: twidget; const down: boolean; 
+                     const current: twidget; const down: boolean;
                                                   var next: twidget) of object;
  ttaborderoverride = class(tlinkedpersistent)
   private
@@ -82,7 +82,7 @@ type
   published
    property ontaborder: tabordereventty read fontaborder write fontaborder;
  end;
- 
+
  tcustomcaptionframe = class(tcustomframe)
   private
    fcaptionpos: captionposty;
@@ -135,7 +135,7 @@ type
 
     //iassistiveclient
    function getassistivecaption(): msestring; override;
-   
+
   public
    constructor create(const aintf: icaptionframe);
    destructor destroy; override;
@@ -146,18 +146,18 @@ type
    procedure checkwidgetsize(var asize: sizety); override;
                 //extends to minimal size
 
-   property options: captionframeoptionsty read foptions 
+   property options: captionframeoptionsty read foptions
                      write setoptions default defaultcaptionframeoptions;
    property caption: msestring read fcaption write setcaption;
    property captiontextflags: textflagsty read finfo.flags write
                                            setcaptiontextflags default [];
    property captionpos: captionposty read fcaptionpos
              write setcaptionpos default cp_topleft;
-   property captiondist: integer read fcaptiondist write setcaptiondist 
+   property captiondist: integer read fcaptiondist write setcaptiondist
                                   stored iscaptiondiststored default 1;
-   property captionoffset: integer read fcaptionoffset write setcaptionoffset 
+   property captionoffset: integer read fcaptionoffset write setcaptionoffset
                                   stored iscaptionoffsetstored default 0 ;
-   property font: tframefont read getfont 
+   property font: tframefont read getfont
                         write setfont stored isfontstored;
  end;
 
@@ -216,7 +216,7 @@ type
 {
    property frameface_offsetactivemouse;
    property frameface_offsetactiveclicked;
-}  
+}
    property optionsskin;
 
    property colorclient;
@@ -242,7 +242,7 @@ type
   published
    property levelo default -2;
  end;
- 
+
 const
  defaultscrollboxscrollbaroptions = [sbo_thumbtrack,sbo_moveauto,sbo_showauto];
  scrollbarframestates: framestatesty = [fs_sbleft,fs_sbtop,fs_sbright,fs_sbbottom];
@@ -275,7 +275,7 @@ type
   published
    property options default defaultthumbtrackscrollbaroptions;
  end;
- 
+
  framescrollbarclassty = class of tcustomscrollbar;
 
  optionscrollty = (oscr_drag,oscr_zoomwidth,oscr_zoomheight,
@@ -285,7 +285,7 @@ type
 const
  defaultoptionsscroll = [oscr_mousewheel];
  defaultdragbuttons = [ss_middle];
- 
+
 type
  tcustomscrollframe = class(tcustomcaptionframe)
   private
@@ -305,7 +305,7 @@ type
    procedure subscrollbarwidth(var asize: sizety) override;
    function getscrollbarclass(vert: boolean): framescrollbarclassty; virtual;
    procedure activechanged; override;
-   procedure updatemousestate(const sender: twidget; 
+   procedure updatemousestate(const sender: twidget;
                               const info: mouseeventinfoty); override;
    procedure internalpaintoverlay(const canvas: tcanvas;
                                          const arect: rectty) override;
@@ -317,9 +317,9 @@ type
    procedure mouseevent(var info: mouseeventinfoty); virtual;
    procedure domousewheelevent(var info: mousewheeleventinfoty;
                                    const pagingreversed: boolean); virtual;
-   property optionsscroll: optionsscrollty read foptionsscroll 
+   property optionsscroll: optionsscrollty read foptionsscroll
                              write foptionsscroll default defaultoptionsscroll;
-   property dragbuttons: shiftstatesty read fdragbuttons write setdragbuttons 
+   property dragbuttons: shiftstatesty read fdragbuttons write setdragbuttons
                                        default defaultdragbuttons;
    property state: framestatesty read fstate;
    property sbhorz: tcustomscrollbar read fhorz write setsbhorz;
@@ -387,7 +387,7 @@ type
 {
    property frameface_offsetactivemouse;
    property frameface_offsetactiveclicked;
-}  
+}
    property optionsskin;
 
    property sbhorz: tscrollbar read getsbhorz write setsbhorz;
@@ -413,12 +413,12 @@ type
   protected
    function getscrollbarclass(vert: boolean): framescrollbarclassty; override;
  end;
- 
+
  iscrollbox = interface(iscrollbar)
   function getscrollsize: sizety;
  end;
 
-type 
+type
  tcustomscrollboxframe = class(tcustomscrollframe,iscrollbox)
   private
    fscrolling: integer;
@@ -463,7 +463,7 @@ type
    procedure scrollpostoclientpos(var aclientrect: rectty); virtual;
    procedure checkminscrollsize(var asize: sizety); override;
    procedure checkminclientsize(var asize: sizety); override;
-   function isdragstart(const sender: twidget; 
+   function isdragstart(const sender: twidget;
                                   const info: mouseeventinfoty): boolean;
    procedure initinnerframe; virtual;
    function getscrollbarclass(vert: boolean): framescrollbarclassty; override;
@@ -489,7 +489,7 @@ type
    procedure domousewheelevent(var info: mousewheeleventinfoty;
                                    const pagingreversed: boolean); override;
    procedure updateclientrect; override;
-   procedure showrect(const arect: rectty; const bottomright: boolean); 
+   procedure showrect(const arect: rectty; const bottomright: boolean);
                            //origin paintpos
    property scrollpos: pointty read getclientpos write setscrollpos;
    property scrollpos_x: integer read getscrollpos_x write setscrollpos_x;
@@ -498,22 +498,22 @@ type
    property zoom: complexty read fzoom write setzoom; //default 1,1
    property zoomwidth: real read fzoom.re write setzoomwidth;   //default 1
    property zoomheight: real read fzoom.im write setzoomheight; //default 1
-   property zoomwidthstep: real read fzoomwidthstep 
+   property zoomwidthstep: real read fzoomwidthstep
                       write fzoomwidthstep stored false;
                                  //default 1
-   property zoomheightstep: real read fzoomheightstep 
+   property zoomheightstep: real read fzoomheightstep
                       write fzoomheightstep stored false;
                                  //default 1
    property zoomwheelsensitivity: real read fzoomwheelsensitivity
                       write fzoomwheelsensitivity stored false;
                                  //default 0
    property clientsize: sizety read fclientsize write setclientsize;
-   property clientwidth: integer read fclientsize.cx 
+   property clientwidth: integer read fclientsize.cx
                                      write setclientwidth default 0;
-   property clientheight: integer read fclientsize.cy 
+   property clientheight: integer read fclientsize.cy
                                      write setclientheight default 0;
    property clientsizemin: sizety read fclientsizemin write setclientsizemin;
-   property clientwidthmin: integer read fclientsizemin.cx 
+   property clientwidthmin: integer read fclientsizemin.cx
                                      write setclientwidthmin default 0;
    property clientheightmin: integer read fclientsizemin.cy
                                      write setclientheightmin default 0;
@@ -590,7 +590,7 @@ type
 {
    property frameface_offsetactivemouse;
    property frameface_offsetactiveclicked;
-}  
+}
    property optionsskin;
 
    property caption;
@@ -611,9 +611,9 @@ type
    property sbvert;
  end;
 
- stepkindty = (sk_right,sk_up,sk_left,sk_down,sk_first,sk_last);
+ stepkindty = (sk_right,sk_up,sk_left,sk_down,sk_first,sk_last,sk_none);
  stepkindsty = set of stepkindty;
-const 
+const
  allstepkinds = [sk_right,sk_up,sk_left,sk_down,sk_first,sk_last];
 type
  istepbar = interface(inullinterface)
@@ -621,7 +621,7 @@ type
   procedure invalidaterect(const rect: rectty; const org: originty;
                                const noclip: boolean = false);
   function dostep(const event: stepkindty; const adelta: real;
-                  ashiftstate: shiftstatesty): boolean; 
+                  ashiftstate: shiftstatesty): boolean;
                                                  //true on action
  end;
  stepbuttonposty = (sbp_right,sbp_top,sbp_left,sbp_bottom);
@@ -636,7 +636,7 @@ const
 type
  stepframestatety = (sfs_spinedit,sfs_canstep);
  stepframestatesty = set of stepframestatety;
- 
+
  tcustomstepframe = class(tcustomcaptionframe,iframe)
   private
    fstepintf: istepbar;
@@ -681,7 +681,7 @@ type
    procedure getpaintframe(var frame: framety); override;
    procedure updatelayout;
    procedure execute(const tag: integer; const info: mouseeventinfoty);
-   property neededbuttons: stepkindsty read fneededbuttons 
+   property neededbuttons: stepkindsty read fneededbuttons
                                                      write setneededbuttons;
     //iframe
    procedure setframeinstance(instance: tcustomframe);
@@ -694,7 +694,7 @@ type
    procedure clientrectchanged;
    procedure invalidate;
    procedure invalidatewidget;
-   procedure invalidaterect(const rect: rectty; 
+   procedure invalidaterect(const rect: rectty;
                const org: originty = org_client; const noclip: boolean = false);
    function getwidget: twidget;
    function getframestateflags: framestateflagsty; virtual;
@@ -705,38 +705,38 @@ type
    destructor destroy; override;
    procedure createbuttonface;
    procedure createbuttonframe;
-   
-   procedure updatemousestate(const sender: twidget; 
+
+   procedure updatemousestate(const sender: twidget;
                                    const info: mouseeventinfoty); override;
    procedure mouseevent(var info: mouseeventinfoty); virtual;
    procedure domousewheelevent(var info: mousewheeleventinfoty); virtual;
    procedure checktemplate(const sender: tobject); override;
    procedure updatebuttonstate(const first,delta,count: integer);
    function canstep: boolean;
-   function executestepevent(const event: stepkindty; 
+   function executestepevent(const event: stepkindty;
              const stepinfo: framestepinfoty; const aindex: integer): integer;
-   property buttonsize: integer read fbuttonsize write setbuttonsize 
+   property buttonsize: integer read fbuttonsize write setbuttonsize
                                                default defaultstepbuttonsize;
-   property colorbutton: colorty read fcolorbutton 
+   property colorbutton: colorty read fcolorbutton
                                       write setcolorbutton default cl_default;
                                        //cl_default maps to widget color
-   property colorglyph: colorty read fcolorglyph 
+   property colorglyph: colorty read fcolorglyph
                                       write setcolorglyph default cl_default;
                                        //cl_default maps to widget color
    property buttonface: tface read getbuttonface write setbuttonface;
    property buttonframe: tframe read getbuttonframe write setbuttonframe;
-   
+
    property disabledbuttons: stepkindsty read fdisabledbuttons
               write setdisabledbuttons default [];
    property buttonsinvisible: stepkindsty read fforceinvisiblebuttons
               write setbuttonsinvisible default [sk_first,sk_last];
    property buttonsvisible: stepkindsty read fforcevisiblebuttons
               write setbuttonsvisible default [];
-   property buttonpos: stepbuttonposty read fbuttonpos 
+   property buttonpos: stepbuttonposty read fbuttonpos
                                        write setbuttonpos default sbp_right;
-   property buttonslast: boolean read fbuttonslast 
+   property buttonslast: boolean read fbuttonslast
                                           write setbuttonslast default false;
-   property buttonsinline: boolean read fbuttonsinline 
+   property buttonsinline: boolean read fbuttonsinline
                                           write setbuttonsinline default false;
    property mousewheel: boolean read fmousewheel write fmousewheel default true;
  end;
@@ -799,9 +799,9 @@ type
 {
    property frameface_offsetactivemouse;
    property frameface_offsetactiveclicked;
-}   
+}
    property optionsskin;
- 
+
    property caption;
    property captiontextflags;
    property captionpos;
@@ -887,9 +887,9 @@ type
    procedure getpopuppos(var apos: pointty); virtual;
    procedure updatepopupmenu(var amenu: tpopupmenu;
                                    var mouseinfo: mouseeventinfoty); virtual;
-   procedure dopopup(var amenu: tpopupmenu; 
+   procedure dopopup(var amenu: tpopupmenu;
                                    var mouseinfo: mouseeventinfoty); virtual;
-   procedure doafterpopupmenu(var amenu: tpopupmenu; 
+   procedure doafterpopupmenu(var amenu: tpopupmenu;
                                    var mouseinfo: mouseeventinfoty); virtual;
 
    procedure poschanged; override;
@@ -900,7 +900,7 @@ type
    procedure doexit; override;
    procedure dofocus; override;
    procedure dodefocus; override;
-   procedure dofocuschanged(const oldwidget: twidget; 
+   procedure dofocuschanged(const oldwidget: twidget;
                                      const newwidget: twidget); override;
    procedure doactivate; override;
    procedure dodeactivate; override;
@@ -936,9 +936,9 @@ type
    property onmouseevent: mouseeventty read fonmouseevent write fonmouseevent;
    property onchildmouseevent: mouseeventty read fonchildmouseevent
                         write fonchildmouseevent;
-   property onclientmouseevent: mouseeventty read fonclientmouseevent 
+   property onclientmouseevent: mouseeventty read fonclientmouseevent
                                              write fonclientmouseevent;
-   property onmousewheelevent: mousewheeleventty read fonmousewheelevent 
+   property onmousewheelevent: mousewheeleventty read fonmousewheelevent
                                              write fonmousewheelevent;
 
    property onkeydown: keyeventty read fonkeydown write fonkeydown;
@@ -947,7 +947,7 @@ type
 
    property onloaded: notifyeventty read fonloaded write fonloaded;
 
-   property onbeforepaint: painteventty read fonbeforepaint 
+   property onbeforepaint: painteventty read fonbeforepaint
                                                       write fonbeforepaint;
    property onpaintbackground: painteventty read fonpaintbackground
                                                       write fonpaintbackground;
@@ -961,7 +961,7 @@ type
    property onclosequery: queryeventty read fonclosequery write fonclosequery;
 
    property onevent: eventeventty read fonevent write fonevent;
-   property oncomponentevent: componenteventeventty read foncomponentevent 
+   property oncomponentevent: componenteventeventty read foncomponentevent
                                                   write foncomponentevent;
    property onasyncevent: asynceventeventty read fonasyncevent write fonasyncevent;
   public
@@ -1032,7 +1032,7 @@ type
   published
    property visible default false;
  end;
- 
+
  tcustomeventwidgetnwr = class(tpublishedwidgetnwr)
  (*
   private
@@ -1078,15 +1078,15 @@ type
    procedure doasyncevent(var atag: integer); override;
   public
    function canclose(const newfocus: twidget): boolean; override;
-   property onfocusedwidgetchanged: focuschangeeventty 
+   property onfocusedwidgetchanged: focuschangeeventty
                      read fonfocusedwidgetchanged write fonfocusedwidgetchanged;
 
    property onmouseevent: mouseeventty read fonmouseevent write fonmouseevent;
    property onchildmouseevent: mouseeventty read fonchildmouseevent
                         write fonchildmouseevent;
-   property onclientmouseevent: mouseeventty read fonclientmouseevent 
+   property onclientmouseevent: mouseeventty read fonclientmouseevent
                                              write fonclientmouseevent;
-   property onmousewheelevent: mousewheeleventty read fonmousewheelevent 
+   property onmousewheelevent: mousewheeleventty read fonmousewheelevent
                                              write fonmousewheelevent;
 
    property onkeydown: keyeventty read fonkeydown write fonkeydown;
@@ -1206,7 +1206,7 @@ type
  tscrollingwidgetnwr = class;
  calcminscrollsizeeventty = procedure(const sender: tscrollingwidgetnwr;
                                   var asize: sizety) of object;
- 
+
  tscrollingwidgetnwr = class(tcustomeventwidgetnwr)
   private
    fonscroll: pointeventty;
@@ -1250,7 +1250,7 @@ type
    property onfontheightdelta: fontheightdeltaeventty read fonfontheightdelta
                      write fonfontheightdelta;
    property onlayout: notifyeventty read fonlayout write fonlayout;
-   property oncalcminscrollsize: calcminscrollsizeeventty 
+   property oncalcminscrollsize: calcminscrollsizeeventty
                    read foncalcminscrollsize write foncalcminscrollsize;
 //   property scrollpos: pointty read getclientpos write setclientpos;
   published
@@ -1271,7 +1271,7 @@ type
    property bounds_cymax;
    property anchors;
  end;
- 
+
  tpopupwidget = class(ttoplevelwidget)
   private
    ftransientfor: twindow;
@@ -1289,7 +1289,7 @@ type
 
  const
   defaultoptionshintwidget = defaultoptionstoplevelwidget + [ow_top];
-  
+
 type
  tcustomhintwidget = class(tpopupwidget)
   public
@@ -1299,7 +1299,7 @@ type
    property optionswidget default defaultoptionshintwidget;
  end;
  hintwidgetclassty = class of tcustomhintwidget;
- 
+
  thintwidget = class(tcustomhintwidget)
   private
    fcaption: captionty;
@@ -1360,7 +1360,7 @@ type
                  default defaultbuttonoptions;
    property colorglyph: colorty read finfo.ca.colorglyph write setcolorglyph
                     default cl_black;
-   property focusrectdist: integer read finfo.focusrectdist 
+   property focusrectdist: integer read finfo.focusrectdist
                 write finfo.focusrectdist default defaultshapefocusrectdist;
   published
    property optionswidget default defaultoptionswidget - [ow_mousefocus];
@@ -1383,7 +1383,7 @@ procedure synccaptiondistx(const awidgets: array of twidget);
 procedure synccaptiondisty(const awidgets: array of twidget);
                 //adjusts captiondist for equal distouter
                 //don't set cfo_captiondistouter!
-                
+
 function getmaxdropdownheight(const parent: twidget): integer;
 procedure getdropdownpos(const parent: twidget; const right: boolean;
                                             var rect: rectty);
@@ -1423,25 +1423,25 @@ procedure showmessage1(const atext: msestring; const caption: msestring);
 procedure showerror(const atext: msestring; caption: msestring = 'ERROR';
                      const minwidth: integer = 0;
                      const exttext: msestring = '';
-                     const async: boolean = false); 
+                     const async: boolean = false);
              //no wait if not in main thread or asnyc = true
 function askok(const atext: msestring; const caption: msestring = '';
-                     const defaultbutton: modalresultty = mr_ok;  
+                     const defaultbutton: modalresultty = mr_ok;
                      const minwidth: integer = 0): boolean;
                              //true if ok pressed
 function askyesno(const atext: msestring; const caption: msestring = '';
-                     const defaultbutton: modalresultty = mr_yes;  
+                     const defaultbutton: modalresultty = mr_yes;
                      const minwidth: integer = 0): boolean;
                             //true if yes pressed
 function askconfirmation(const atext: msestring;
-                     const defaultbutton: modalresultty = mr_yes;  
+                     const defaultbutton: modalresultty = mr_yes;
                      const minwidth: integer = 0): boolean;
                             //true if yes pressed
 function askconfirmationcancel(const atext: msestring;
-                     const defaultbutton: modalresultty = mr_yes;  
+                     const defaultbutton: modalresultty = mr_yes;
                      const minwidth: integer = 0): modalresultty;
 function askyesnocancel(const atext: msestring; const caption: msestring = '';
-                     const defaultbutton: modalresultty = mr_yes;  
+                     const defaultbutton: modalresultty = mr_yes;
                      const minwidth: integer = 0): modalresultty;
 function confirmsavechangedfile(const filename: filenamety;
                out modalresult: modalresultty; multiple: boolean = false): boolean;
@@ -1579,7 +1579,7 @@ begin
  int3:= 0;
  for int1:= 0 to high(awidgets) do begin
   with twidget1(awidgets[int1]) do begin
-   if (fframe <> nil) and 
+   if (fframe <> nil) and
               (fs_cancaptionsyncx in tcustomframe1(fframe).fstate) then begin
     with tcustomcaptionframe(fframe) do begin
      checkstate();
@@ -1603,7 +1603,7 @@ begin
  int3:= int3 + int2; //max outer dist
  for int1:= 0 to high(awidgets) do begin
   with twidget1(awidgets[int1]) do begin
-   if (fframe <> nil) and 
+   if (fframe <> nil) and
               (fs_cancaptionsyncx in tcustomframe1(fframe).fstate) then begin
     with tcustomcaptionframe(fframe) do begin
      if fcaptionpos in rightcaptionpos then begin
@@ -1628,7 +1628,7 @@ begin
  int3:= 0;
  for int1:= 0 to high(awidgets) do begin
   with twidget1(awidgets[int1]) do begin
-   if (fframe <> nil) and 
+   if (fframe <> nil) and
               (fs_cancaptionsyncy in tcustomframe1(fframe).fstate) then begin
     with tcustomcaptionframe(fframe) do begin
      checkstate();
@@ -1652,7 +1652,7 @@ begin
  int3:= int3 + int2; //max outer dist
  for int1:= 0 to high(awidgets) do begin
   with twidget1(awidgets[int1]) do begin
-   if (fframe <> nil) and 
+   if (fframe <> nil) and
             (fs_cancaptionsyncy in tcustomframe1(fframe).fstate) then begin
     with tcustomcaptionframe(fframe) do begin
      if fcaptionpos in bottomcaptionpos then begin
@@ -1771,7 +1771,7 @@ begin
   int1:= rect.y - workarea.y;
   if rect.cy > int1 then begin
    rect.cy:= int1;
-  end;   
+  end;
   dec(rect.y,rect.cy); //shift above
  end
  else begin
@@ -1873,7 +1873,7 @@ begin
  end;
 end;
 
-function messagerect(const position: messagepositionty; 
+function messagerect(const position: messagepositionty;
                                         out arect: rectty): prectty;
 var
  window1: twindow;
@@ -1883,8 +1883,8 @@ begin
   result:= nil;
   if position <> mepo_screencentered then begin
    window1:= application.unreleasedactivewindow;
-   if (window1 <> nil) and 
-          ((position = mepo_windowcentered) or 
+   if (window1 <> nil) and
+          ((position = mepo_windowcentered) or
            (wo_windowcentermessage in window1.options)) then begin
     arect:= window1.owner.widgetrect;
     result:= @arect;
@@ -1898,7 +1898,7 @@ begin
  end;
 end;
 
- 
+
 procedure syncshowmessage(const adata: pointer);
 const
  maxtextwidth = 500;
@@ -1916,22 +1916,22 @@ var
  acanvas: tcanvas;
  textoffset: integer;
  transientfor: twindow;
- 
+
 begin
  with pshowmessageinfoty(adata)^ do begin
   application.lockifnotmainthread;
   try
    transientfor:= application.unreleasedactivewindow;
-   widget1:= twidget.create(nil); 
+   widget1:= twidget.create(nil);
    widget1.visible:= false;
          //stays invisible, no wm_configured processing on win32
-   widget:= tshowmessagewidget.create(nil,(transientfor <> nil) and 
+   widget:= tshowmessagewidget.create(nil,(transientfor <> nil) and
                (transientfor.ispopup) and transientfor.owner.visible,
                high(actions) >= 0,exttext,pshowmessageinfoty(adata));
    widget.name:= '_showmessage'; //debug purpose
    widget.parentwidget:= widget1; //do not create window handle of widget
    try
-    acanvas:= widget1.getcanvas; 
+    acanvas:= widget1.getcanvas;
     buttonheight:= acanvas.font.glyphheight + 6;
     buttonwidth:= 50;
     for int1:= 0 to ord(high(buttons)) do begin
@@ -1976,10 +1976,10 @@ begin
      rect1.cx:= int2;         //width of buttons greater then text width
      widget.info.dest.cx:= int2;
     end;
-  
+
     inc(rect1.cx,2*horztextdist);
     inc(rect1.cy,2*verttextdist);
-    
+
     widget.parentwidget:= nil;  //remove dummy parent
     widget.clientsize:= rect1.size;
     if placementrect = nil then begin
@@ -1996,7 +1996,7 @@ begin
      widget.widgetrect:= placepopuprect(transientfor,
                                        placementrect^,placement,widget.size);
     end;
-  
+
     with widget.info.dest do begin
      rect1.x:= x + (cx - int2) div 2;
      rect1.y:= y + cy + verttextdist + widget.paintpos.y;
@@ -2009,7 +2009,7 @@ begin
       widgetrect:= rect1;
       parentwidget:= widget;
       if buttons[int1] in noshortcut then begin
-       caption:= 
+       caption:=
                 stockobjects.modalresulttextnoshortcut[buttons[int1]];
 {
        captiontorichstring(
@@ -2176,7 +2176,7 @@ type
    constructor create(const text: msestring; const caption: msestring;
               const minwidth: integer; const exttext: msestring);
  end;
- 
+
 { tshowerrormessageevent }
 
 constructor tshowerrormessageevent.create(const text: msestring;
@@ -2217,7 +2217,7 @@ begin
 end;
 
 function askok(const atext: msestring; const caption: msestring = '';
-               const defaultbutton: modalresultty = mr_ok;  
+               const defaultbutton: modalresultty = mr_ok;
                const minwidth: integer = 0): boolean;
                   //true if ok pressed
 begin
@@ -2226,7 +2226,7 @@ begin
 end;
 
 function askyesno(const atext: msestring; const caption: msestring = '';
-                    const defaultbutton: modalresultty = mr_yes;  
+                    const defaultbutton: modalresultty = mr_yes;
                     const minwidth: integer = 0): boolean;
                   //true if yes pressed
 begin
@@ -2235,7 +2235,7 @@ begin
 end;
 
 function askyesnocancel(const atext: msestring; const caption: msestring = '';
-                    const defaultbutton: modalresultty = mr_yes;  
+                    const defaultbutton: modalresultty = mr_yes;
                     const minwidth: integer = 0 ): modalresultty;
 begin
  result:= showmessage(atext,caption,[mr_yes,mr_no,mr_cancel],defaultbutton,[],
@@ -2246,7 +2246,7 @@ begin
 end;
 
 function askconfirmation(const atext: msestring;
-                    const defaultbutton: modalresultty = mr_yes;  
+                    const defaultbutton: modalresultty = mr_yes;
                     const minwidth: integer = 0): boolean;
                   //true if yes pressed
 begin
@@ -2255,7 +2255,7 @@ begin
 end;
 
 function askconfirmationcancel(const atext: msestring;
-                     const defaultbutton: modalresultty = mr_yes;  
+                     const defaultbutton: modalresultty = mr_yes;
                      const minwidth: integer = 0): modalresultty;
 begin
  result:= askyesnocancel(atext,sc(sc_confirmation),defaultbutton,minwidth);
@@ -2357,7 +2357,7 @@ end;
 procedure tactionsimplebutton.clientmouseevent(var info: mouseeventinfoty);
 begin
  inherited;
- if not (csdesigning in componentstate) and 
+ if not (csdesigning in componentstate) and
         not (es_processed in info.eventstate) then begin
   updatemouseshapestate(finfo,info,self,fframe,nil,bo_executeonclick in foptions);
  end;
@@ -2393,7 +2393,7 @@ procedure tactionsimplebutton.dokeydown(var info: keyeventinfoty);
 begin
 // inherited;
  with info do begin
-  if not getdisabled() and (shiftstate * shiftstatesrepeatmask = []) and 
+  if not getdisabled() and (shiftstate * shiftstatesrepeatmask = []) and
                               (bo_executeonkey in foptions) then begin
    if (key = key_space) then begin
     include(info.eventstate,es_processed);
@@ -2417,8 +2417,8 @@ end;
 procedure tactionsimplebutton.dokeyup(var info: keyeventinfoty);
 begin
  inherited;
- if not getdisabled() and (info.key = key_space) and 
-                     releasebutton((info.shiftstate = []) and 
+ if not getdisabled() and (info.key = key_space) and
+                     releasebutton((info.shiftstate = []) and
                      (bo_executeonkey in foptions)) then begin
   include(info.eventstate,es_processed);
  end;
@@ -2457,7 +2457,7 @@ function tactionsimplebutton.getframestateflags: framestateflagsty;
 begin
  result:= combineframestateflags(not isenabled,focused,active,
                      shs_mouse in finfo.state,shs_clicked in finfo.state);
- if not (bo_nodefaultframeactive in foptions) and 
+ if not (bo_nodefaultframeactive in foptions) and
                ((shs_default in finfo.state) or focused) then begin
   include(result,fsf_offset1);
   include(result,fsf_default);
@@ -2497,7 +2497,7 @@ end;
 
 function tactionsimplebutton.getframeactive: boolean;
 begin
- result:= not (bo_nodefaultframeactive in foptions) and 
+ result:= not (bo_nodefaultframeactive in foptions) and
                            (ss_default in finfo.state) or active;
 end;
 }
@@ -2918,7 +2918,7 @@ begin
 
  widget1:= twidget1(icaptionframe(fintf).getwidget);
 
- if (cfo_autowidth in foptions) or 
+ if (cfo_autowidth in foptions) or
         (widget1.anchors * [an_left,an_right] = [an_left,an_right]) then begin
   if fcaptionpos in [cp_topleft,cp_bottomleft,
                           cp_top,cp_bottom,cp_center] then begin
@@ -2929,7 +2929,7 @@ begin
    fouterframe.left:= 0;
   end;
  end;
- if (cfo_autoheight in foptions) or 
+ if (cfo_autoheight in foptions) or
         (widget1.anchors * [an_top,an_bottom] = [an_top,an_bottom]) then begin
   if fcaptionpos in [cp_lefttop,cp_righttop,
                           cp_left,cp_right,cp_center] then begin
@@ -2942,7 +2942,7 @@ begin
  end;
 
  if not isnullframe(fra1) then begin
-  if widget1.fwidgetstate1 * 
+  if widget1.fwidgetstate1 *
                         [ws1_anchorsizing,ws1_layoutplacing] = [] then begin
    subpoint1(finfo.dest.pos,pointty(fra1.topleft));
    if fupdating < 16 then begin
@@ -2972,7 +2972,7 @@ begin
        rect2.y:= rect1.y+rect1.cy-rect2.cy;
       end;
      end;
-     if (fupdating = 1) and 
+     if (fupdating = 1) and
            rectisequal(icaptionframe(fintf).getwidgetrect,rect2) then begin
       if widget1.fparentwidget <> nil then begin
        twidget1(widget1.fparentwidget).childautosizechanged(widget1);
@@ -3116,7 +3116,7 @@ begin
      (fintf.getcomponentstate * [csdesigning,csloading] = [csdesigning]) and
      (caption <> '') then begin
    size1.cy:= font.glyphheight + 2 * captionmargin;
-   size1.cx:= icaptionframe(fintf).getcanvas.getstringwidth(caption,getfont) + 
+   size1.cx:= icaptionframe(fintf).getcanvas.getstringwidth(caption,getfont) +
                         2 * captionmargin;
    case captionpos of
     cp_center: begin
@@ -3177,7 +3177,7 @@ begin
   if (fintf.getcomponentstate * [csdesigning,csloading] = [csdesigning]) and
                             (caption <> '') then begin
    size1.cy:= font.glyphheight + 2 * captionmargin;
-   size1.cx:= icaptionframe(fintf).getcanvas.getstringwidth(caption,getfont) + 
+   size1.cx:= icaptionframe(fintf).getcanvas.getstringwidth(caption,getfont) +
                         2 * captionmargin;
    case captionpos of
     cp_center: begin
@@ -3214,7 +3214,7 @@ begin
  if updatebit({$ifdef FPC}longword{$else}longword{$endif}(fstate),
        ord(fs_captionnoclip),avalue) then begin
   internalupdatestate;
- end;   
+ end;
 end;
 *)
 procedure tcustomcaptionframe.defineproperties(filer: tfiler);
@@ -3354,7 +3354,7 @@ begin
      include(fwidgetstate,ws_wantmousemove);
     end;
    end;
-   if (cfo_framerectfocus in foptions) and 
+   if (cfo_framerectfocus in foptions) and
              pointinrect(info.pos,framerect) then begin
     include(fwidgetstate,ws_wantmousefocus);
    end;
@@ -3377,10 +3377,10 @@ end;
 
 function tcustomcaptionframe.needsfocuspaint: boolean;
 begin
- result:= (inherited needsfocuspaint or 
-            (ftemplate <> nil) and 
-               (fso_forcefocusrect in ftemplate.template.optionsskin)) and 
-     not (cfo_nofocusrect in foptions) and 
+ result:= (inherited needsfocuspaint or
+            (ftemplate <> nil) and
+               (fso_forcefocusrect in ftemplate.template.optionsskin)) and
+     not (cfo_nofocusrect in foptions) and
      ((cfo_focusrect in foptions) or (ftemplate = nil) or
                        not (fso_nofocusrect in ftemplate.template.optionsskin));
  result:= result or (cfo_forcefocusrect in foptions);
@@ -3752,12 +3752,12 @@ end;
 procedure tcustomscrollframe.settemplateinfo(const ainfo: frameinfoty);
 begin
  inherited;
- if not (frl1_colorglyph in flocalprops1) and 
+ if not (frl1_colorglyph in flocalprops1) and
                           (ainfo.ba.colorglyph <> cl_default) then begin
   sbhorz.colorglyph:= ainfo.ba.colorglyph;
   sbvert.colorglyph:= ainfo.ba.colorglyph;
  end;
- if not (frl1_colorpattern in flocalprops1) and 
+ if not (frl1_colorpattern in flocalprops1) and
                           (ainfo.ba.colorpattern <> cl_default) then begin
   sbhorz.colorpattern:= ainfo.ba.colorpattern;
   sbvert.colorpattern:= ainfo.ba.colorpattern;
@@ -3794,7 +3794,7 @@ begin
  frepeatedbutton:= -1;
 end;
 
-procedure tcustomstepframe.execute(const tag: integer; 
+procedure tcustomstepframe.execute(const tag: integer;
                                       const info: mouseeventinfoty);
 begin
  if @info = nil then begin
@@ -3874,7 +3874,7 @@ begin
  end;
 end;
 
-procedure tcustomstepframe.internalpaintoverlay(const canvas: tcanvas; 
+procedure tcustomstepframe.internalpaintoverlay(const canvas: tcanvas;
                                                          const arect: rectty);
 var
  int1: integer;
@@ -3904,7 +3904,7 @@ begin
   include(disabled,sk_right);
   include(disabled,sk_down);
   {
-  if (frepeatedbutton >= 0) and 
+  if (frepeatedbutton >= 0) and
             (stepkindty(frepeatedbutton) in [sk_right,sk_down]) then begin
    killrepeater();
   end;
@@ -3934,7 +3934,7 @@ begin
     steps[sk_right]:= 0;
     if not (sk_right in disabledbuttons) then begin
      steps[sk_right]:= up;
-    end;    
+    end;
     steps[sk_left]:= down;
     steps[sk_up]:= pagedown;
     steps[sk_down]:= 0;
@@ -4055,46 +4055,46 @@ end;
 
 type
  buttonarty = array[stepkindty] of stepkindty;
- buttonposarty = array[boolean,stepbuttonposty] of buttonarty; 
+ buttonposarty = array[boolean,stepbuttonposty] of buttonarty;
 const
  buttonposstep: buttonposarty =
     (
      (                                   //not fbuttonsinline
-      (sk_left,sk_right,sk_up,sk_down,sk_first,sk_last),  //sbp_right
-      (sk_left,sk_up,sk_right,sk_down,sk_first,sk_last),  //sbp_top
-      (sk_left,sk_right,sk_up,sk_down,sk_first,sk_last),  //sbp_left
-      (sk_up,sk_left,sk_down,sk_right,sk_first,sk_last)   //sbp_bottom
+      (sk_left,sk_right,sk_up,sk_down,sk_first,sk_last,sk_none),  //sbp_right
+      (sk_left,sk_up,sk_right,sk_down,sk_first,sk_last,sk_none),  //sbp_top
+      (sk_left,sk_right,sk_up,sk_down,sk_first,sk_last,sk_none),  //sbp_left
+      (sk_up,sk_left,sk_down,sk_right,sk_first,sk_last,sk_none)   //sbp_bottom
      ),
      (                                   //fbuttonsinline
-      (sk_left,sk_right,sk_up,sk_down,sk_first,sk_last),  //sbp_right
-      (sk_up,sk_down,sk_left,sk_right,sk_first,sk_last),  //sbp_top
-      (sk_left,sk_right,sk_up,sk_down,sk_first,sk_last),  //sbp_left
-      (sk_up,sk_down,sk_left,sk_right,sk_first,sk_last)   //sbp_bottom
+      (sk_left,sk_right,sk_up,sk_down,sk_first,sk_last,sk_none),  //sbp_right
+      (sk_up,sk_down,sk_left,sk_right,sk_first,sk_last,sk_none),  //sbp_top
+      (sk_left,sk_right,sk_up,sk_down,sk_first,sk_last,sk_none),  //sbp_left
+      (sk_up,sk_down,sk_left,sk_right,sk_first,sk_last,sk_none)   //sbp_bottom
      )
     );
  buttonposspin: buttonposarty =
     (
      (                                   //not fbuttonsinline
-      (sk_left,sk_right,sk_up,sk_last,sk_down,sk_first),  //sbp_right
-      (sk_left,sk_up,sk_right,sk_down,sk_last,sk_first),  //sbp_top
-      (sk_left,sk_right,sk_up,sk_last,sk_down,sk_first),  //sbp_left
-      (sk_up,sk_left,sk_down,sk_right,sk_last,sk_first)   //sbp_bottom
+      (sk_left,sk_right,sk_up,sk_last,sk_down,sk_first,sk_none),  //sbp_right
+      (sk_left,sk_up,sk_right,sk_down,sk_last,sk_first,sk_none),  //sbp_top
+      (sk_left,sk_right,sk_up,sk_last,sk_down,sk_first,sk_none),  //sbp_left
+      (sk_up,sk_left,sk_down,sk_right,sk_last,sk_first,sk_none)   //sbp_bottom
      ),
      (                                   //fbuttonsinline
-      (sk_left,sk_right,sk_up,sk_down,sk_last,sk_first),  //sbp_right
-      (sk_up,sk_down,sk_left,sk_right,sk_first,sk_last),  //sbp_top
-      (sk_left,sk_right,sk_up,sk_down,sk_last,sk_first),  //sbp_left
-      (sk_up,sk_down,sk_left,sk_right,sk_first,sk_last)   //sbp_bottom
+      (sk_left,sk_right,sk_up,sk_down,sk_last,sk_first,sk_none),  //sbp_right
+      (sk_up,sk_down,sk_left,sk_right,sk_first,sk_last,sk_none),  //sbp_top
+      (sk_left,sk_right,sk_up,sk_down,sk_last,sk_first,sk_none),  //sbp_left
+      (sk_up,sk_down,sk_left,sk_right,sk_first,sk_last,sk_none)   //sbp_bottom
      )
     );
-    
+
  images: array[stepkindty] of stockglyphty =
   ( stg_arrowrightsmall,stg_arrowupsmall,stg_arrowleftsmall,stg_arrowdownsmall,
-    stg_arrowfirstsmall,stg_arrowlastsmall);
+    stg_arrowfirstsmall,stg_arrowlastsmall,stg_none);
  imagesedit: array[stepkindty] of stockglyphty =
   ( stg_arrowrightsmall,stg_arrowupsmall,stg_arrowleftsmall,stg_arrowdownsmall,
-    stg_arrowbottomsmall,stg_arrowtopsmall);
-    
+    stg_arrowbottomsmall,stg_arrowtopsmall,stg_none);
+
 procedure tcustomstepframe.updatelayout;
 var
  buttoncount: integer;
@@ -4141,7 +4141,7 @@ begin             //updatelayout
  else begin
   buttonpos1:= @buttonposstep;
  end;
- 
+
  setlength(fbuttons,ord(high(stepkindty)) + 1);
  buttoncount:= 0;
  a:= 0; //compilerwarning
@@ -4302,7 +4302,7 @@ procedure tcustomstepframe.domousewheelevent(var info: mousewheeleventinfoty);
 var
  sk1: stepkindty;
 begin
- if fmousewheel and (info.wheel <> mw_none) and 
+ if fmousewheel and (info.wheel <> mw_none) and
                        not (es_transientfor in info.eventstate)then begin
   if sfs_spinedit in fstepstate then begin
    sk1:= stepdirspin[info.wheel = mw_up];
@@ -4441,7 +4441,7 @@ function tcustomstepframe.getwidget: twidget;
 begin
  result:= fintf.getwidget
 end;
- 
+
 function tcustomstepframe.getframestateflags: framestateflagsty;
 begin
  result:= shapestatetoframestate(factbuttonindex,fbuttons);
@@ -4699,10 +4699,10 @@ begin
    rect1:= fclientrect;
    scrollpostoclientpos(rect1);
    setclientpos(rect1.pos);
-{   
+{
    po1:= fclientrect.pos;
    scrollpostoclientpos(fclientrect);
-   po1:= subpoint(fclientrect.pos,po1); 
+   po1:= subpoint(fclientrect.pos,po1);
    addpoint1(finnerclientrect.pos,po1);
    twidget1(fowner).scroll(po1);
 }
@@ -4713,9 +4713,9 @@ end;
 procedure tcustomscrollboxframe.dokeydown(var info: keyeventinfoty);
 begin
  with info do begin
-  if (oscr_key in foptionsscroll) and not (es_processed in info.eventstate) and 
+  if (oscr_key in foptionsscroll) and not (es_processed in info.eventstate) and
            (((shiftstate * shiftstatesmask) - [ss_ctrl]) = []) then begin
-   include(eventstate,es_processed); 
+   include(eventstate,es_processed);
    case key of
     key_pageup: begin
      if ss_ctrl in shiftstate then begin
@@ -4738,7 +4738,7 @@ begin
     end;
    end;
    if ss_ctrl in shiftstate then begin
-    include(eventstate,es_processed); 
+    include(eventstate,es_processed);
     case key of
      key_right: begin
       fhorz.stepup;
@@ -4766,7 +4766,7 @@ begin
  result:= fowner.translatecolor(acolor);
 end;
 
-procedure tcustomscrollboxframe.invalidaterect(const rect: rectty; 
+procedure tcustomscrollboxframe.invalidaterect(const rect: rectty;
                  const org: originty; const noclip: boolean = false);
 begin
  fowner.invalidaterect(rect,org,noclip);
@@ -4804,7 +4804,7 @@ end;
 
 procedure tcustomscrollboxframe.setclientsizemin(const avalue: sizety);
 begin
- if (fclientsizemin.cx <> avalue.cx) or 
+ if (fclientsizemin.cx <> avalue.cx) or
                              (fclientsizemin.cy <> avalue.cy) then begin
   fclientsizemin:= avalue;
   if fclientsizemin.cx < 0 then begin
@@ -4827,13 +4827,13 @@ begin
  setclientsizemin(ms(fclientsizemin.cx,avalue));
 end;
 
-procedure tcustomscrollboxframe.showrect(const arect: rectty; 
+procedure tcustomscrollboxframe.showrect(const arect: rectty;
                                      const bottomright: boolean);
 var
  scrollvalue: pointty;
 // po1: pointty;
  int1: integer;
- 
+
  procedure adjuststart;
  begin
   int1:= fclientrect.x + scrollvalue.x + arect.x;
@@ -4853,7 +4853,7 @@ var
    dec(scrollvalue.y,int1);
   end;
  end;
- 
+
  procedure adjustend;
  begin
   int1:= fclientrect.x + scrollvalue.x + arect.x + arect.cx - fpaintrect.cx;
@@ -4873,7 +4873,7 @@ var
    dec(scrollvalue.y,int1);
   end;
  end;
- 
+
 begin
  scrollvalue:= nullpoint;
  checkstate;
@@ -4930,9 +4930,9 @@ begin
   end
   else begin
    if (oscr_drag in foptionsscroll) and isdragstart(sender,info) then begin
-    include(fwidgetstate,ws_wantmousebutton);  
+    include(fwidgetstate,ws_wantmousebutton);
    end;
-  end;  
+  end;
  end;
 end;
 
@@ -4980,10 +4980,10 @@ var
 begin
  with info do begin
   ss1:= (shiftstate*buttonshiftstatesmask)*fdragbuttons;
-  result:= (oscr_drag in foptionsscroll) and 
+  result:= (oscr_drag in foptionsscroll) and
             (eventkind = ek_buttonpress) and (ss1 <> []) and
-             pointinrect(translatewidgetpoint(pos,sender,fowner),fpaintrect) and 
-               ((fclientrect.cx <> fpaintrect.cx) or 
+             pointinrect(translatewidgetpoint(pos,sender,fowner),fpaintrect) and
+               ((fclientrect.cx <> fpaintrect.cx) or
                      (fclientrect.cy <> fpaintrect.cy));
  end;
  if result and not ((ss1 = [ss_middle]) or (sender = fowner)) then begin
@@ -5029,7 +5029,7 @@ begin
  size1:= nullsize;
  with fpaintframedelta do begin
   if avalue.re > 1 then begin
-   size1.cx:= round((fpaintrect.cx+left+right)*avalue.re); 
+   size1.cx:= round((fpaintrect.cx+left+right)*avalue.re);
                                         //do not use scrollbarwidth
   end;
   if avalue.im > 1 then begin
@@ -5092,10 +5092,10 @@ begin
    if (oscr_mousewheel in foptionsscroll) and (ss_ctrl in shiftstate) and
              (foptionsscroll*[oscr_zoomwidth,oscr_zoomheight] <> []) then begin
     ma1:= shiftstatesmask - [ss_ctrl];
-    if foptionsscroll*[oscr_zoomwidth,oscr_zoomheight] = 
+    if foptionsscroll*[oscr_zoomwidth,oscr_zoomheight] =
                               [oscr_zoomwidth,oscr_zoomheight] then begin
      ma1:= ma1 - [ss_alt,ss_shift];
-    end;           
+    end;
     if shiftstate * ma1 = [] then begin
      include(eventstate,es_processed);
      size1:= fclientrect.size;
@@ -5103,8 +5103,8 @@ begin
      bo1:= false;
      rea1:= 1 + (abs(delta) - application.mousewheeldeltamin)*
                fzoomwheelsensitivity*application.mousewheeldeltamin;
-     if (fzoomwidthstep <> 1) and (fzoomwidthstep > 0) and 
-                          (oscr_zoomwidth in foptionsscroll) and 
+     if (fzoomwidthstep <> 1) and (fzoomwidthstep > 0) and
+                          (oscr_zoomwidth in foptionsscroll) and
           not (ss_shift in shiftstate) then begin
       bo1:= true;
       if wheel = mw_down then begin
@@ -5113,9 +5113,9 @@ begin
       else begin
        co1.re:= zoomwidth * (fzoomwidthstep*rea1);
       end;
-     end;     
-     if (fzoomheightstep <> 1) and (fzoomheightstep > 0) and 
-                          (oscr_zoomheight in foptionsscroll) and 
+     end;
+     if (fzoomheightstep <> 1) and (fzoomheightstep > 0) and
+                          (oscr_zoomheight in foptionsscroll) and
                                   not (ss_alt in shiftstate) then begin
       bo1:= true;
       if wheel = mw_down then begin
@@ -5226,16 +5226,16 @@ begin
  inherited;
  filer.defineproperty('zoomwidthstep',@readzoomwidthstep,@writezoomwidthstep,
                       (filer.ancestor = nil) and (fzoomwidthstep <> 1) or
-   (filer.ancestor <> nil) and 
+   (filer.ancestor <> nil) and
       (tcustomscrollboxframe(filer.ancestor).fzoomwidthstep <> fzoomwidthstep));
  filer.defineproperty('zoomheightstep',@readzoomheightstep,@writezoomheightstep,
                       (filer.ancestor = nil) and (fzoomheightstep <> 1) or
- (filer.ancestor <> nil) and 
+ (filer.ancestor <> nil) and
     (tcustomscrollboxframe(filer.ancestor).fzoomheightstep <> fzoomheightstep));
  filer.defineproperty('zoomwheelsensitivity',
      @readzoomwheelsensitivity,@writezoomwheelsensitivity,
          (filer.ancestor = nil) and (fzoomwheelsensitivity <> 0) or
-   (filer.ancestor <> nil) and 
+   (filer.ancestor <> nil) and
       (tcustomscrollboxframe(filer.ancestor).fzoomwheelsensitivity <>
                                         fzoomwheelsensitivity));
 end;
@@ -5380,7 +5380,7 @@ procedure tactionwidget.dopopup(var amenu: tpopupmenu;
    end;
   end;
  end; //doparent()
-  
+
 var
  menu1: tpopupmenu;
 
@@ -5393,7 +5393,7 @@ begin
   end;
   if not (es_parent in mouseinfo.eventstate) then begin
    doparent(false);
-   if (amenu <> nil) and 
+   if (amenu <> nil) and
               (mouseinfo.eventstate * [es_processed,es_child] = []) then begin
     amenu.show(self,mouseinfo);
     doafterpopupmenu(amenu,mouseinfo);
@@ -5671,17 +5671,17 @@ procedure tactionwidget.dofocuschanged(const oldwidget: twidget;
                const newwidget: twidget);
 begin
  inherited;
- if canevent(tmethod(fonfocusedwidgetchanged)) and 
+ if canevent(tmethod(fonfocusedwidgetchanged)) and
   (checkdescendent(oldwidget) or checkdescendent(newwidget)) then begin
   fonfocusedwidgetchanged(oldwidget,newwidget);
- end; 
+ end;
 end;
 
 procedure tactionwidget.doactivate;
 begin
  inherited;
- if canevent(tmethod(fonactivate)) and 
-         ((ow1_modalcallonactivate in foptionswidget1) or 
+ if canevent(tmethod(fonactivate)) and
+         ((ow1_modalcallonactivate in foptionswidget1) or
           not (tws_modalcalling in twindow1(window).fstate)) then begin
   fonactivate(self);
  end;
@@ -5690,8 +5690,8 @@ end;
 procedure tactionwidget.dodeactivate;
 begin
  inherited;
- if canevent(tmethod(fondeactivate)) and 
-         ((ow1_modalcallondeactivate in foptionswidget1) or 
+ if canevent(tmethod(fondeactivate)) and
+         ((ow1_modalcallondeactivate in foptionswidget1) or
           not (tws_modalcalling in twindow1(window).fstate)) then begin
   fondeactivate(self);
  end;
@@ -5853,7 +5853,7 @@ end;
 procedure tscrollingwidgetnwr.childmouseevent(const sender: twidget;
                               var info: mouseeventinfoty);
 //var
-// po1: pointty; 
+// po1: pointty;
 begin
  frame.childmouseevent(sender,info);
  if not (es_processed in info.eventstate) then begin
@@ -5888,7 +5888,7 @@ end;
 procedure tscrollingwidgetnwr.widgetregionchanged(const sender: twidget);
 begin
  inherited;
- if ((sender = nil) or 
+ if ((sender = nil) or
          not (ws1_anchorsizing in twidget1(sender).fwidgetstate1)) and
            not (ws_destroying in fwidgetstate) and
                       (componentstate*[csloading,csdestroying] = []) then begin
@@ -6091,7 +6091,7 @@ end;
 
 { tcustomhintwidget }
 
-constructor tcustomhintwidget.create(const aowner: tcomponent; 
+constructor tcustomhintwidget.create(const aowner: tcomponent;
                  const atransientfor: twindow;
                  var info: hintinfoty; const sender: tobject);
 var
@@ -6192,7 +6192,7 @@ begin
  end
  else begin
   inherited;
- end; 
+ end;
 end;
 
 procedure tmessagewidget.internalcreateframe;
@@ -6329,7 +6329,7 @@ begin
     while p1 < pe do begin
      if ((p1^.a = nil) <> (p2^.a = nil)) or
         ((p1^.b = nil) <> (p2^.b = nil)) or
-        (p1^.a <> nil) and (p1^.a.name <> p2^.a.name) or 
+        (p1^.a <> nil) and (p1^.a.name <> p2^.a.name) or
         (p1^.b <> nil) and (p1^.b.name <> p2^.b.name) then begin
                    //todo: better check for changed owner
       b1:= true;
@@ -6341,7 +6341,7 @@ begin
    end;
   end;
  end;
- filer.defineproperty('items',@readitems,@writeitems,b1); 
+ filer.defineproperty('items',@readitems,@writeitems,b1);
 end;
 
 procedure ttaborderoverride.objevent(const sender: iobjectlink;
@@ -6388,7 +6388,7 @@ begin
    inc(p1);
    compb:= findsubcomponentbynamepath(p1^,reader.root);
    inc(p1);
-   if ((compa = nil) or (compa is twidget)) and 
+   if ((compa = nil) or (compa is twidget)) and
                          ((compb = nil) or (compb is twidget)) then begin
     add(twidget(compa),twidget(compb));
    end;

@@ -1,5 +1,5 @@
 { MSEide Copyright (c) 1999-2018 by Martin Schreiber
-   
+
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation; either version 2 of the License, or
@@ -30,7 +30,7 @@ interface
 uses
  mseglob,mselist,mseparser,msetypes,typinfo,msestrings,
  msearrayutils;
- 
+
 type
  idesignparser = interface(inullinterface)
  end;
@@ -112,7 +112,7 @@ type
    start,stop: sourceposty;
   end;
   paraminfoarty = array of paraminfoty;
-  
+
   methodflagty = (mef_virtual,mef_abstract,mef_inherited,mef_override,
                         mef_reintroduce,mef_overload{,mef_inline},
                         mef_brackets,mef_forward);
@@ -122,7 +122,7 @@ type
                   mk_method,mk_methodfunc,
                   mk_constructor,mk_destructor,
                   mk_classprocedure,mk_classfunction);
-  
+
   methodparaminfoty = record
    kind: methodkindty;
    flags: methodflagsty;
@@ -181,7 +181,7 @@ type
     function finditembyuppername(const aname: lstringty): pinterfaceinfoty;
     property items[const index: integer]: pinterfaceinfoty read getitempo; default;
   end;
-  
+
   classinfoty = record
    b: browserlistitemty;
    deflist: tdeflist;
@@ -196,7 +196,7 @@ type
     //section if none
    managedend: sourceposty;
    privatestart: sourceposty; //start of first private segment
-   privatefieldend: sourceposty; 
+   privatefieldend: sourceposty;
          //before start of first procdef in first private segment
    privateend: sourceposty;   //end of first private segment
    procimpstart,procimpend: sourceposty;
@@ -247,7 +247,7 @@ type
     function getunitdeflist(const aunitname: string): trootdeflist; overload;
     property unitnames[const index: integer]: string read getunitnames;
   end;
-  
+
 // c parser
 
   functionheaderinfoty = record
@@ -303,7 +303,7 @@ type
 
   symbolflagty = (syf_global);
   symbolflagsty = set of symbolflagty;
-  
+
   definfoty = record
    name: string;      //'' -> statment
    pos,stop1: sourceposty;
@@ -393,18 +393,18 @@ type
     property infos: definfoarty read finfos;
     property infocount: integer read finfocount;
   end;
-  
+
   includestatementarty = array of includestatementty;
-  
-  proglangty = (pl_pascal,pl_c);      
+
+  proglangty = (pl_pascal,pl_c);
 
   tfunctionheaders = class;
   tfunctions = class;
-  
+
   cunitinfoty = record
    functionheaders: tfunctionheaders;
    functions: tfunctions;
-  end; 
+  end;
 
   pascalunitinfoty = record
    procedurelist: tprocedureinfolist;
@@ -459,11 +459,11 @@ type
                       const aclassinfo: pclassinfoty): tdeflist; overload;
     function add(const aname: string; const akind: symbolkindty;
                       const astart,astop: sourceposty): pdefinfoty; overload;
-    function add(const apos,astop: sourceposty; 
+    function add(const apos,astop: sourceposty;
                       const aprocinfo: pprocedureinfoty): pdefinfoty; overload;
-    function add(const apos,astop: sourceposty; 
+    function add(const apos,astop: sourceposty;
                       const afunctioninfo: pfunctioninfoty): pdefinfoty; overload;
-    function add(const apos,astop: sourceposty; 
+    function add(const apos,astop: sourceposty;
                       const afunctionheaderinfo: pfunctionheaderinfoty): pdefinfoty; overload;
     procedure deletenode;
     function finddef(const anamepath: stringarty; var scopes: deflistarty;
@@ -475,7 +475,7 @@ type
                //true if found
     function findparentclass(const adescendent: tdeflist;
                   var defs: definfopoarty): boolean;
-    
+
     property unitinfopo: punitinfoty read funitinfopo;
     property actnode: tdeflist read factnode;
   end;
@@ -490,7 +490,7 @@ type
     property items[const index: integer]: pfunctionheaderinfoty
                                                 read getitempo; default;
   end;
-  
+
   tfunctions = class(torderedrecordlist)
    private
     function getitempo(const index: integer): pfunctioninfoty;
@@ -502,10 +502,10 @@ type
     constructor create;
     procedure add(const aname: ansistring; const astart,astop: sourceposty);
     function find(const name: ansistring): pfunctioninfoty;
-    property items[const index: integer]: pfunctioninfoty 
+    property items[const index: integer]: pfunctioninfoty
                                                  read getitempo; default;
   end;
-  
+
  tunitinfo = class
   public
    info: unitinfoty;
@@ -513,7 +513,7 @@ type
    destructor destroy; override;
    function infopo: punitinfoty;
  end;
- 
+
  tpascalunitinfo = class(tunitinfo)
   public
    constructor create;
@@ -535,10 +535,10 @@ var
  updateunitinterface: function(const unitname: string): punitinfoty of object;
  gettype: function (const adef: pdefinfoty): stringarty of object;
  resetunitsearched: procedure of object;
- 
+
 implementation
 uses
- {sourceupdate,}sysutils,cdesignparser;   
+ {sourceupdate,}sysutils,cdesignparser;
        //todo: remove cdesignparser, extract c+pascaldesignparser code
 {$ifndef mse_allwarnings}
  {$if fpc_fullversion >= 030100}
@@ -565,7 +565,7 @@ begin
   end;
  end;
 end;
-  
+
 procedure initcompinfo(var info: unitinfoty);
 begin
  with info do begin
@@ -582,8 +582,8 @@ begin
     p.finalizationstart.filenum:= 0;
    end;
    pl_c: begin
-    c.functionheaders.clear;   
-    c.functions.clear;   
+    c.functionheaders.clear;
+    c.functions.clear;
    end;
   end;
   interfacecompiled:= false;
@@ -627,7 +627,7 @@ begin
  if result then begin
   for int1:= 0 to high(a.params) do begin
    with a.params[int1] do begin
-    if (flags*[pfvar,pfconst,pfout,pfarray] <> 
+    if (flags*[pfvar,pfconst,pfout,pfarray] <>
                 b.params[int1].flags*[pfvar,pfconst,pfout,pfarray]) or
            (stringicomp(typename,b.params[int1].typename) <> 0) then begin
      result:= false;
@@ -647,89 +647,89 @@ const
   //mkClassDestructor,mkOperatorOverload
     mk_none,          mk_none
  );
- 
-procedure getmethodparaminfo(const atype: ptypeinfo; 
-                                         var info: methodparaminfoty); 
 
-  function getshortstring(var po: pchar): string; 
-  begin 
-   setlength(result,byte(po^)); 
-   inc(po); 
-   move(po^,pointer(result)^,length(result)); 
-   inc(po,length(result)); 
-  end; 
+procedure getmethodparaminfo(const atype: ptypeinfo;
+                                         var info: methodparaminfoty);
 
-type 
- pparamflags = ^tparamflags; 
- paramrecty = record 
-               Flags : TParamFlags; 
+  function getshortstring(var po: pchar): string;
+  begin
+   setlength(result,byte(po^));
+   inc(po);
+   move(po^,pointer(result)^,length(result));
+   inc(po,length(result));
+  end;
 
-              end; 
-var 
- isfunction: boolean; 
- int1: integer; 
- po1: pchar; 
+type
+ pparamflags = ^tparamflags;
+ paramrecty = record
+               Flags : TParamFlags;
+
+              end;
+var
+ isfunction: boolean;
+ int1: integer;
+ po1: pchar;
  {$if FPC_FULLVERSION > 030100}
  params1: paraminfoarty;
  x : integer;
  {$endif}
- 
-begin 
- with info do begin 
-  kind:= methodkindty(-1); 
-  params:= nil; 
-  if (atype^.Kind = tkmethod) then begin 
-   with gettypedata(atype)^ do begin 
-    kind:= tmethodkindtomethodkind[methodkind]; 
-    int1:= paramcount; 
-    isfunction:= methodkind = mkfunction; 
-    if isfunction then begin 
-     inc(int1); 
-    end; 
-    if isfunction or (methodkind = mkprocedure) then begin 
-     setlength(params,int1); 
-     po1:= @paramlist; 
-     for int1:= 0 to paramcount - 1 do begin 
-     with params[int1] do begin 
-    
-     {$if FPC_FULLVERSION >= 030100} 
+
+begin
+ with info do begin
+  kind:= methodkindty(mk_none);
+  params:= nil;
+  if (atype^.Kind = tkmethod) then begin
+   with gettypedata(atype)^ do begin
+    kind:= tmethodkindtomethodkind[methodkind];
+    int1:= paramcount;
+    isfunction:= methodkind = mkfunction;
+    if isfunction then begin
+     inc(int1);
+    end;
+    if isfunction or (methodkind = mkprocedure) then begin
+     setlength(params,int1);
+     po1:= @paramlist;
+     for int1:= 0 to paramcount - 1 do begin
+     with params[int1] do begin
+
+     {$if FPC_FULLVERSION >= 030100}
      {$if declared(AlignTParamFlags)}po1 := AlignTParamFlags(po1);{$endif}
      {$endif}
-     
-     flags:= tparamflags( 
-         {$if FPC_FULLVERSION >= 030100} 
-       wordset{$else}byteset{$endif}(pbyte(po1)^)); 
 
-       inc(po1,{$if FPC_FULLVERSION >= 030100}2{$else}1{$endif}); 
+     flags:= tparamflags(
+         {$if FPC_FULLVERSION >= 030100}
+       wordset{$else}byteset{$endif}(pbyte(po1)^));
 
-       name:= getshortstring(po1); 
-       typename:= getshortstring(po1); 
-       if (typename = 'WideString') or (typename = 'UnicodeString') then 
-begin 
-        typename:= 'msestring'; 
-       end 
-       else begin 
-        if typename = 'LongInt' then begin 
-         typename:= 'Integer'; 
-        end 
-        else begin 
-         if typename = 'Double' then begin 
-          typename:= 'Real'; 
-         end; 
-        end; 
-       end; 
-     end; 
-     end; 
-     if isfunction then begin 
-      params[high(params)].typename:= getshortstring(po1); 
-     end; 
-    end; 
-   end; 
-  end; 
- end; 
- 
+       inc(po1,{$if FPC_FULLVERSION >= 030100}2{$else}1{$endif});
+
+       name:= getshortstring(po1);
+       typename:= getshortstring(po1);
+       if (typename = 'WideString') or (typename = 'UnicodeString') then
+begin
+        typename:= 'msestring';
+       end
+       else begin
+        if typename = 'LongInt' then begin
+         typename:= 'Integer';
+        end
+        else begin
+         if typename = 'Double' then begin
+          typename:= 'Real';
+         end;
+        end;
+       end;
+     end;
+     end;
+     if isfunction then begin
+      params[high(params)].typename:= getshortstring(po1);
+     end;
+    end;
+   end;
+  end;
+ end;
+
  // here filter of pfHidden in flags
- 
+
  {$if FPC_FULLVERSION > 030100}
   setlength(params1,0);
   for x:=0 to length(info.params) -1 do
@@ -740,8 +740,8 @@ begin
  end;
  info.params := params1;
  {$endif}
- 
-end; 
+
+end;
 
 function parametersmatch(const a: ptypeinfo; const b: methodparaminfoty): boolean;
 var
@@ -1064,7 +1064,7 @@ begin
  po1:= datapo;
  for int1:= 0 to fcount - 1 do begin
   if (po1^.params.kind = info.kind) and
-                 (lstringcomp(aname,po1^.uppername) = 0) and 
+                 (lstringcomp(aname,po1^.uppername) = 0) and
                  parametersmatch1(info,po1^.params) then begin
    result:= po1;
    break;
@@ -1558,16 +1558,16 @@ end;
 function isinrange(const apos: sourceposty; const start: sourceposty;
                    const stop: sourceposty): boolean;
 begin
- result:= not((apos.pos.row < start.pos.row) or 
+ result:= not((apos.pos.row < start.pos.row) or
               (apos.pos.row > stop.pos.row) or
-              (apos.pos.row = start.pos.row) and 
+              (apos.pos.row = start.pos.row) and
                 (apos.pos.col < start.pos.col) or
-              (apos.pos.row = stop.pos.row) and 
+              (apos.pos.row = stop.pos.row) and
                 (apos.pos.col > stop.pos.col)
              );
 end;
 
-function tdeflist.internalfinditem(const apos: sourceposty; 
+function tdeflist.internalfinditem(const apos: sourceposty;
          const firstidentuse,last: boolean; out scope: tdeflist): pdefinfoty;
 var
  int1,int2,lastmatching: integer;
@@ -1666,7 +1666,7 @@ begin
  end;
 end;
 
-function tdeflist.finditem(const apos: sourceposty; 
+function tdeflist.finditem(const apos: sourceposty;
          const firstidentuse: boolean; out scope: tdeflist): pdefinfoty;
 begin
  result:= internalfinditem(apos,firstidentuse,false,scope);
@@ -1882,7 +1882,7 @@ begin
  while pa <> nil do begin
   result:= pa.name + '.' + result;
   pa:= pa.parentscope;
- end; 
+ end;
 end;
 
 { trootdeflist}
@@ -1957,7 +1957,7 @@ begin
  result:= factnode.add(aname,akind,astart,astop);
 end;
 
-function trootdeflist.add(const apos,astop: sourceposty; 
+function trootdeflist.add(const apos,astop: sourceposty;
          const aprocinfo: pprocedureinfoty): pdefinfoty;
 begin
  result:= factnode.add(aprocinfo^.name+mangleprocparams(aprocinfo^.params),
@@ -1965,7 +1965,7 @@ begin
  result^.procindex:= aprocinfo^.b.index;
 end;
 
-function trootdeflist.add(const apos,astop: sourceposty; 
+function trootdeflist.add(const apos,astop: sourceposty;
          const afunctioninfo: pfunctioninfoty): pdefinfoty;
 begin
  result:= factnode.add(afunctioninfo^.name,syk_procimp,apos,astop);
@@ -1973,7 +1973,7 @@ begin
 // result^.procindex:= afunctioninfo^.b.index;
 end;
 
-function trootdeflist.add(const apos,astop: sourceposty; 
+function trootdeflist.add(const apos,astop: sourceposty;
          const afunctionheaderinfo: pfunctionheaderinfoty): pdefinfoty;
 begin
  result:= factnode.add(afunctionheaderinfo^.name,syk_procdef,apos,astop);
@@ -2065,7 +2065,7 @@ begin
       scopes:= nil;
       defs:= nil;
      end;
-     if (not result {or not first}) and (level in 
+     if (not result {or not first}) and (level in
                                            [dsl_normal,dsl_parent]) then begin
       po2:= cglobals.finddef(anamepath[high(anamepath)]);
       if po2 <> nil then begin
@@ -2079,7 +2079,7 @@ begin
  end;
 end;
 
-function trootdeflist.findparentclass(const adescendent: tdeflist; 
+function trootdeflist.findparentclass(const adescendent: tdeflist;
                                          var defs: definfopoarty): boolean;
 var
  ar1: stringarty;

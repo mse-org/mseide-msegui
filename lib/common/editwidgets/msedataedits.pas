@@ -40,10 +40,10 @@ uses
 const
  emptyinteger = minint;
  valuevarname = 'value';
- 
+
 type
  tcustomdataedit = class;
- 
+
  checkvalueeventty = procedure(const sender: tcustomdataedit;
                           const quiet: boolean; var accept: boolean) of object;
 
@@ -68,7 +68,7 @@ type
    fongettext: gettexteventty;
    fonsettext: settexteventty;
    fstatpriority: integer;
-   
+
    procedure setstatfile(const Value: tstatfile);
    function getgridrow: integer;
    procedure setgridrow(const avalue: integer);
@@ -106,7 +106,7 @@ type
    function getgridintf: iwidgetgrid;
    procedure checkgrid;
    function checkgriddata: tdatalist; overload;
-   function checkgriddata(var index: integer): tdatalist; overload; 
+   function checkgriddata(var index: integer): tdatalist; overload;
                         //index -1 -> grid.row, nil if no focused row
    procedure internalgetgridvalue(index: integer; var value);
    procedure internalsetgridvalue(index: integer; const Value);
@@ -160,7 +160,7 @@ type
    function getkeystring(const aindex: integer): msestring; override; //locate text
     //igridwidget
    procedure setfirstclick(var ainfo: mouseeventinfoty); virtual;
-   function createdatalist(const sender: twidgetcol): tdatalist; 
+   function createdatalist(const sender: twidgetcol): tdatalist;
                                                    virtual; abstract;
    procedure datalistdestroyed; virtual;
    function getdatalistclass: datalistclassty; virtual; abstract;
@@ -181,7 +181,7 @@ type
    function getassistiveflags(): assistiveflagsty override;
    function getassistivetext(): msestring; override;
    function getassistivecolumncaption(): msestring virtual;
-   
+
    procedure drawcell(const canvas: tcanvas); virtual;
    procedure updateautocellsize(const canvas: tcanvas); virtual;
    procedure beforecelldragevent(var ainfo: draginfoty; const arow: integer;
@@ -192,7 +192,7 @@ type
    procedure gridtovalue(row: integer); virtual;
    procedure setvaluedata(const source); virtual; abstract;
    procedure getvaluedata(out dest); virtual; abstract;
-   procedure docellevent(const ownedcol: boolean; 
+   procedure docellevent(const ownedcol: boolean;
                                        var info: celleventinfoty); virtual;
    function sortfunc(const l,r): integer; virtual;
    procedure gridvaluechanged(const index: integer); virtual;
@@ -212,7 +212,7 @@ type
    procedure formaterror(const quiet: boolean);
    procedure rangeerror(const min,max; const quiet: boolean);
    procedure notnullerror(const quiet: boolean);
-   
+
    procedure doafterpaint(const canvas: tcanvas); override;
    function needsfocuspaint: boolean; override;
 
@@ -240,7 +240,7 @@ type
    function getedited: boolean; override;
    procedure setedited(const avalue: boolean); virtual;
   public
-   
+
    procedure initnewwidget(const ascale: real); override;
    procedure initgridwidget; virtual;
    procedure paint(const canvas: tcanvas); override;
@@ -268,23 +268,23 @@ type
    function isnull: boolean; virtual;
 
    property disptext: msestring read getdisptext;
-   property dataeditstate: dataeditstatesty read fstate;   
+   property dataeditstate: dataeditstatesty read fstate;
    property statfile: tstatfile read fstatfile write setstatfile;
    property statvarname: msestring read getstatvarname write fstatvarname;
-   property statpriority: integer read fstatpriority 
+   property statpriority: integer read fstatpriority
                                        write fstatpriority default 0;
-   property oncheckvalue: checkvalueeventty read foncheckvalue 
+   property oncheckvalue: checkvalueeventty read foncheckvalue
                                                       write foncheckvalue;
-   property ondataentered: notifyeventty read fondataentered 
+   property ondataentered: notifyeventty read fondataentered
                                                       write fondataentered;
    property ongettext: gettexteventty read fongettext write fongettext;
    property onsettext: settexteventty read fonsettext write fonsettext;
-   property ontextchange: textchangeeventty read fontextchange 
+   property ontextchange: textchangeeventty read fontextchange
                                                      write fontextchange;
  end;
 
  dataediteventty = procedure(const sender: tcustomdataedit) of object;
- 
+
  tdataedit = class(tcustomdataedit)
   published
    property statfile;
@@ -315,14 +315,14 @@ type
    property onmousewheelevent;
    property oncopytoclipboard;
    property onpastefromclipboard;
-   
+
    property ontextedited;
    property oncheckvalue;
    property ondataentered;
    property ongettext;
    property onsettext;
  end;
- 
+
  tcustomstringedit = class(tdataedit)
   private
    fonsetvalue: setstringeventty;
@@ -385,18 +385,18 @@ type
    property ifilink;
 {$endif}
  end;
- 
+
 const
  defaultmemotextflags = (defaulttextflags - [tf_ycentered]) + [tf_wordbreak];
- defaultmemotextflagsactive = (defaulttextflagsactive - [tf_ycentered]) + 
+ defaultmemotextflagsactive = (defaulttextflagsactive - [tf_ycentered]) +
                               [tf_wordbreak];
- defaultmemooptionsedit = (defaultoptionsedit - 
+ defaultmemooptionsedit = (defaultoptionsedit -
          [oe_undoonesc,oe_exitoncursor,oe_shiftreturn,
           oe_endonenter,oe_homeonenter,
-          oe_autoselect,oe_autoselectonfirstclick]) + 
+          oe_autoselect,oe_autoselectonfirstclick]) +
           [oe_linebreak,oe_nofirstarrownavig];
  defaultmemooptionsedit1 = defaultoptionsedit1 + [oe1_multiline];
- 
+
 type
 
  tcustommemoedit = class(tcustomstringedit,iscrollbar)
@@ -443,7 +443,7 @@ type
    property ifilink;
 {$endif}
  end;
- 
+
  tcustomrichmemoedit = class(tcustommemoedit,irichstringprop)
   private
    procedure readrichvalue(reader: treader);
@@ -462,7 +462,7 @@ type
    property richvalue: richstringty read getrichvalue write setrichvalue;
    property formatvalue: formatinfoarty read fformat write setformat;
  end;
- 
+
  trichmemoedit = class(tcustomrichmemoedit)
   published
    property value;
@@ -475,7 +475,7 @@ type
    property ifilink;
 {$endif}
  end;
-  
+
  thexstringedit = class(tdataedit)
   private
    fonsetvalue: setansistringeventty;
@@ -509,7 +509,7 @@ type
    property value: ansistring read fvalue write setvalue;
    property onsetvalue: setansistringeventty read fonsetvalue write fonsetvalue;
  end;
- 
+
 const
  defaultenumdropdownoptions = [deo_selectonly,deo_autodropdown,deo_keydropdown];
  defaultkeystringdropdownoptions = [deo_selectonly,deo_autodropdown,deo_keydropdown];
@@ -565,7 +565,7 @@ type
                         out awidget: twidget); virtual; abstract;
    function getdropdowntext(const awidget: twidget): msestring; virtual; abstract;
   public
-   property dropdown: tdropdownwidgetcontroller read getdropdown 
+   property dropdown: tdropdownwidgetcontroller read getdropdown
                                                         write setdropdown;
  end;
 
@@ -605,7 +605,7 @@ type
     //idropdownlist
    function getdropdownitems: tdropdowndatacols; virtual;
    function createdropdowncontroller: tcustomdropdowncontroller; override;
-   procedure internalsort(const acol: integer; 
+   procedure internalsort(const acol: integer;
                           out sortlist: integerarty); virtual;
    function geteditframe: framety; override;
    procedure getautopaintsize(var asize: sizety); override;
@@ -753,7 +753,7 @@ type
    procedure assigncol(const value: tintegerdatalist);
    property onsetvalue: setintegereventty read fonsetvalue write fonsetvalue;
    property value: integer read fvalue write setvalue default 0;
-   property valuedefault: integer read fvaluedefault 
+   property valuedefault: integer read fvaluedefault
                                     write fvaluedefault default 0;
    property base: numbasety read fbase write setbase default nb_dec;
    property bitcount: integer read fbitcount write setbitcount default 32;
@@ -834,7 +834,7 @@ type
    property base: numbasety read fbase write setbase default nb_dec;
    property bitcount: integer read fbitcount write setbitcount default 64;
    property valuemin: int64 read fvaluemin write fvaluemin{setmin} default 0;
-   property valuemax: int64 read fvaluemax write fvaluemax{setmax}; 
+   property valuemax: int64 read fvaluemax write fvaluemax{setmax};
                              // {$ifdef FPC}default maxint64{$endif};
 
    property gridvalue[const index: integer]: int64
@@ -859,7 +859,7 @@ type
    property ifilink;
   {$endif}
  end;
- 
+
  tkeystringdropdowncontroller = class(tdropdownlistcontroller)
   protected
   public
@@ -870,7 +870,7 @@ type
    property options default defaultkeystringdropdownoptions;
    property valuecol default 1;
  end;
- 
+
  tcustomkeystringedit = class;
  keystringediteventty = procedure(const sender: tcustomkeystringedit) of object;
 
@@ -901,7 +901,7 @@ type
    property oninit: keystringediteventty read foninit write foninit;
  end;
 
- 
+
  tkeystringedit = class(tcustomkeystringedit)
   published
    property value;
@@ -915,7 +915,7 @@ type
    property onafterclosedropdown;
    property oninit;
  end;
-  
+
  tnocolsenumdropdowncontroller = class(tnocolsdropdownlistcontroller)
   private
    procedure readitemindex(reader: treader);
@@ -941,7 +941,7 @@ type
    property cols;
    property valuecol; //after cols
  end;
-  
+
  tcustomenuedit = class(tcustomdropdownlistedit)
   private
    fbitcount: integer;
@@ -1037,8 +1037,8 @@ type
    procedure loaded; override;
   public
    property oninit: enumediteventty read foninit write foninit;
- end; 
- 
+ end;
+
  tenumedit = class(tcustomenumedit)
   published
    property dropdown; //first
@@ -1058,7 +1058,7 @@ type
    property onafterclosedropdown;
    property oninit;
  end;
- 
+
  tenumtypeedit = class;
  enumtypeediteventty = procedure (const sender: tenumtypeedit) of object;
 
@@ -1211,12 +1211,12 @@ type
                     //returns minint for empty value
    property ascurrency: currency read getascurrency write setascurrency;
    property onsetvalue: setrealeventty read fonsetvalue write fonsetvalue;
-   property onsetintvalue: setintegereventty read fonsetintvalue 
+   property onsetintvalue: setintegereventty read fonsetintvalue
                                   write fonsetintvalue;
                     //overrides onsetvalue
    property value: realty read fvalue write setvalue {stored false};
    property intvalue: integer read getintvalue write setintvalue;
-   property valuedefault: realty read fvaluedefault 
+   property valuedefault: realty read fvaluedefault
                                     write fvaluedefault {stored false};
    property formatedit: msestring read fformatedit write setformatedit;
    property formatdisp: msestring read fformatdisp write setformatdisp;
@@ -1229,7 +1229,7 @@ type
    property gridintvalue[const index: integer]: integer
         read getgridintvalue write setgridintvalue;
    property gridvalues: realarty read getgridvalues write setgridvalues;
-   property gridintvalues: integerarty read getgridintvalues 
+   property gridintvalues: integerarty read getgridintvalues
                                                  write setgridintvalues;
    function griddata: tgridrealdatalist;
 {$ifdef mse_with_ifi}
@@ -1258,7 +1258,7 @@ type
 
 const
  spinstepbuttons = [sk_up,sk_down,sk_first,sk_last];
- 
+
 type
  tspineditframe = class(tcustomstepframe)
   private
@@ -1309,7 +1309,7 @@ type
 {
    property frameimage_offsetactivemouse;
    property frameimage_offsetactiveclicked;
-}  
+}
    property frameface_list;
    property frameface_offset;
    property frameface_offset1;
@@ -1323,7 +1323,7 @@ type
    property frameface_offsetactiveclicked;
 }
    property optionsskin;
- 
+
    property caption;
    property captionpos;
    property font;
@@ -1332,14 +1332,14 @@ type
    property template;
    property buttonface;
    property buttonframe;
-   property buttonsvisible read fforcevisiblebuttons write setbuttonsvisible 
+   property buttonsvisible read fforcevisiblebuttons write setbuttonsvisible
                                                     default [sk_up,sk_down];
    property buttonsize;
    property buttonpos;
    property buttonslast;
    property buttonsinline;
  end;
- 
+
  tcustomrealspinedit = class(tcustomrealedit,istepbar)
   private
    fstep: real;
@@ -1352,7 +1352,7 @@ type
    function getframe: tspineditframe;
    procedure setframe(const avalue: tspineditframe);
   protected
-   function gettextvalue(var accept: boolean; 
+   function gettextvalue(var accept: boolean;
                                       const quiet: boolean): realty; override;
    procedure internalcreateframe; override;
    procedure mouseevent(var info: mouseeventinfoty); override;
@@ -1371,12 +1371,12 @@ type
                     //default = 0 -> no ctrl step
    property stepshiftfact: real read fstepshiftfact write fstepshiftfact;
                     //default = 0 -> no shift step
-   property wheelsensitivity: real read fwheelsensitivity 
+   property wheelsensitivity: real read fwheelsensitivity
                                                write fwheelsensitivity;
   published
    property frame: tspineditframe read getframe write setframe;
  end;
- 
+
  trealspinedit = class(tcustomrealspinedit)
   published
    property onsetvalue;
@@ -1397,7 +1397,7 @@ type
 
  datetimeeditoptionty = (dteo_showlocal,dteo_showutc);
  datetimeeditoptionsty = set of datetimeeditoptionty;
- 
+
  tcustomdatetimeedit = class(tnumedit)
   private
    fonsetvalue: setdatetimeeventty;
@@ -1464,7 +1464,7 @@ type
    function isnull: boolean; override;
    property onsetvalue: setdatetimeeventty read fonsetvalue write fonsetvalue;
    property value: tdatetime read fvalue write setvalue {stored false};
-   property valuedefault: tdatetime read fvaluedefault 
+   property valuedefault: tdatetime read fvaluedefault
                                              write fvaluedefault {stored false};
    property formatedit: msestring read fformatedit write setformatedit;
    property formatdisp: msestring read fformatdisp write setformatdisp;
@@ -1475,7 +1475,7 @@ type
                                                                    default [];
    property showlocal: boolean read getshowlocal write setshowlocal;
    property showutc: boolean read getshowutc write setshowutc;
-   property gridvalue[const index: integer]: tdatetime 
+   property gridvalue[const index: integer]: tdatetime
                  read getgridvalue write setgridvalue; default;
    property gridvalues: datetimearty read getgridvalues write setgridvalues;
    function griddata: tgridrealdatalist;
@@ -1483,7 +1483,7 @@ type
    property ifilink: tifidatetimelinkcomp read getifilink write setifilink;
 {$endif}
  end;
- 
+
  tdatetimeedit = class(tcustomdatetimeedit)
   published
    property onsetvalue;
@@ -1501,7 +1501,7 @@ type
  end;
 
 function realtytoint(const avalue: realty): integer;
-function inttorealty(const avalue: integer): realty; 
+function inttorealty(const avalue: integer): realty;
 
 implementation
 uses
@@ -1541,7 +1541,7 @@ begin
  end;
 end;
 
-function inttorealty(const avalue: integer): realty; 
+function inttorealty(const avalue: integer): realty;
 begin
  if avalue = emptyinteger then begin
   result:= emptyreal;
@@ -1552,7 +1552,7 @@ begin
 end;
 
  { teditemptyfont }
-{ 
+{
 class function teditemptyfont.getinstancepo(owner: tobject): pfont;
 begin
  result:= @tcustomdataedit(owner).fempty_font;
@@ -1617,7 +1617,7 @@ begin
      if focused then begin
       initfocus;
      end;
-     if canassistive() and not quiet and 
+     if canassistive() and not quiet and
                           not (des_statreading in fstate) then begin
       assistiveserver.dodataentered(
                        iassistiveclientdata(getiassistiveclient()));
@@ -1635,11 +1635,11 @@ var
  widget1: twidget;
 begin
  result:= true;
- if not (csdesigning in componentstate) and 
+ if not (csdesigning in componentstate) and
                         (oe_closequery in foptionsedit) and isenabled then begin
-  if (oe_notnull in optionsedit) and (fnullchecking = 0) and 
+  if (oe_notnull in optionsedit) and (fnullchecking = 0) and
                  nullcheckneeded(newfocus) and isempty(text) and
-                 (not(ow1_nocancloseifhidden in foptionswidget1) or 
+                 (not(ow1_nocancloseifhidden in foptionswidget1) or
                                                     showing) then begin
    widget1:= window.focusedwidget;
    result:= checkvalue;
@@ -1670,7 +1670,7 @@ begin
   {$warnings off}
         tcustomgrid1(grid).endnullchecking;
   {$warnings on}
-       end;        
+       end;
       end;
      end;
     finally
@@ -1679,7 +1679,7 @@ begin
    end;
   end
   else begin
-   if focused and (des_edited in fstate) and 
+   if focused and (des_edited in fstate) and
        ((fgridintf = nil) or not fgridintf.nocheckvalue) then begin
     result:= checkvalue;
    end;
@@ -1712,7 +1712,7 @@ begin
 end;
 
 procedure tcustomdataedit.synctofontheight;
-begin 
+begin
  inherited;
  if (fgridintf <> nil) and not (tf_rotate90 in textflags) then begin
   fgridintf.getcol.grid.datarowheight:= bounds_cy;
@@ -1721,7 +1721,7 @@ end;
 
 function tcustomdataedit.actualcolor: colorty;
 begin
- if (fgridintf <> nil) and (fcolor = cl_default) and 
+ if (fgridintf <> nil) and (fcolor = cl_default) and
                               not (csdestroying in componentstate) then begin
   result:= fgridintf.getcol.rowcolor(fgridintf.getrow);
   if result = cl_transparent then begin
@@ -1816,7 +1816,7 @@ begin
  {$ifdef FPC} {$checkpointer off} {$endif}
  mstr1:= datatotext(nil^);
  {$ifdef FPC} {$checkpointer default} {$endif}
- if (not(des_isdb in fstate) and (mstr1 = '') or 
+ if (not(des_isdb in fstate) and (mstr1 = '') or
                                    (des_dbnull in fstate)) then begin
   mstr1:= empty_text;
  end;
@@ -2119,7 +2119,7 @@ end;
 
 procedure tcustomdataedit.dostatwrite(const writer: tstatwriter);
 begin
- if not (des_isdb in fstate) and (fgridintf = nil) and 
+ if not (des_isdb in fstate) and (fgridintf = nil) and
                         canstatvalue(optionsedit1,writer) then begin
   writestatvalue(writer);
  end;
@@ -2156,7 +2156,7 @@ procedure tcustomdataedit.statread;
 var
  bo1: boolean;
 begin
- if (oe1_checkvalueafterstatread in optionsedit1) and 
+ if (oe1_checkvalueafterstatread in optionsedit1) and
                       (des_valueread in fstate) then begin
   bo1:= des_statreading in fstate;
   include(fstate,des_statreading);
@@ -2245,7 +2245,7 @@ end;
 function tcustomdataedit.getcelltext(const datapo: pointer;
                                    out empty: boolean): msestring;
 var
- mstr1: msestring; 
+ mstr1: msestring;
       //avoid refcount 0 because of const param  in internaldatatotext()
 begin
  empty:= false;
@@ -2254,7 +2254,7 @@ begin
   if passwordchar <> #0 then begin
    mstr1:= charstring(passwordchar,length(mstr1));
   end;
-  if not (des_isdb in fstate) and (mstr1 = '') and 
+  if not (des_isdb in fstate) and (mstr1 = '') and
                                   (empty_text <> '') then begin
    empty:= true;
    mstr1:= empty_text;
@@ -2326,13 +2326,13 @@ var
  procedure cellpaint(const rect: rectty; const innerrect: rectty);
  begin
   if (rect.cx > 0) and (rect.cy > 0) then begin
-   if bo1 and (empty_color <> cl_none) and 
+   if bo1 and (empty_color <> cl_none) and
                                   not (des_grayed in fstate) then begin
     canvas.fillrect(rect,empty_color);
    end;
    paintimage(canvas);
    if mstr1 <> '' then begin
-    if bo1 then begin    
+    if bo1 then begin
      canvas.font:= getfontempty1{fempty_font};
      atextflags:= empty_textflags;
      if empty_textcolor <> cl_none then begin
@@ -2354,12 +2354,12 @@ var
 var
  outer1,inner1: rectty;
  pt1: pointty;
- 
+
 begin
  atextflags:= textflags;
  with cellinfoty(canvas.drawinfopo^) do begin
   mstr1:= getcelltext(datapo,bo1);
-  if bo1 then begin    
+  if bo1 then begin
    if empty_fontstyle <> [] then begin
     canvas.font.style:= empty_fontstyle;
    end;
@@ -2377,7 +2377,7 @@ begin
    end;
   end
   else begin
-   if (fgridintf = nil) and (fparentintf <> nil) and 
+   if (fgridintf = nil) and (fparentintf <> nil) and
                                   (oe1_nocellpaint in optionsedit1) then begin
     if (fwidgetrect.cx > 0) and (fwidgetrect.cy > 0) then begin
      paintbackground(canvas,fwidgetrect);
@@ -2536,7 +2536,7 @@ begin
   fgridintf.getcol.grid.row:= avalue;
  end;
 end;
- 
+
 function tcustomdataedit.gridcol: integer;
 begin
  if fgridintf = nil then begin
@@ -2602,22 +2602,22 @@ begin
  if ownedcol then begin
   if (info.eventkind = cek_enter) then begin
    setupeditor; //setrowfont
-   feditor.initfocus; 
+   feditor.initfocus;
   end;
-  if (oe_hintclippedtext in foptionsedit) and 
-         (info.eventkind = cek_firstmousepark) and application.active and 
-         textclipped(info.cell.row) and 
+  if (oe_hintclippedtext in foptionsedit) and
+         (info.eventkind = cek_firstmousepark) and application.active and
+         textclipped(info.cell.row) and
          ((info.grid.row <> info.cell.row) or (info.grid.col <> info.cell.col)) and
   {$warnings off}
          twidget1(info.grid).getshowhint then begin
   {$warnings on}
    application.inithintinfo(hintinfo,info.grid);
   {$warnings off}
-   hintinfo.caption:= 
+   hintinfo.caption:=
             datatotext(twidgetcol1(fgridintf.getcol).getdatapo(info.cell.row)^);
   {$warnings on}
    application.showhint(info.grid,hintinfo);
-  end; 
+  end;
  end;
 end;
 
@@ -2635,11 +2635,11 @@ function tcustomdataedit.nullcheckneeded(const newfocus: twidget): boolean;
 begin
  result:= false;
  if (newfocus <> self) and not (des_statreading in fstate) and
-                not ((oe_checkmrcancel in foptionsedit) and 
+                not ((oe_checkmrcancel in foptionsedit) and
                             (window.modalresult = mr_cancel)) and
                                                    not readonly then begin
   if fgridintf = nil then begin
-   result:= (newfocus = nil) and 
+   result:= (newfocus = nil) and
                (not (des_isdb in fstate) or (des_dbnullcheck in fstate) or
                     (oe_directdbnullcheck in optionsedit));
   end
@@ -2672,7 +2672,7 @@ begin
      if not focused then begin
       grid.setfocus;
      end;
-    end; 
+    end;
    end;
   end;
  end;
@@ -2699,7 +2699,7 @@ end;
 
 function tcustomdataedit.datatotext(const data): msestring;
 var
- mstr1: msestring; 
+ mstr1: msestring;
         //avoid refcount 0 because of const param in internaldatatotext()
 begin
  mstr1:= internaldatatotext(data);
@@ -2784,7 +2784,7 @@ var
  zone1: cellzonety;
  int1: integer;
 begin
- if (fgridintf <> nil) and not (des_actualcursor in fstate) then begin 
+ if (fgridintf <> nil) and not (des_actualcursor in fstate) then begin
   include(fstate,des_actualcursor);
   try
    zone1:= cz_default;
@@ -2802,7 +2802,7 @@ begin
  result:= inherited actualcursor(apos);
 end;
 
-function tcustomdataedit.getcellcursor(const arow: integer; 
+function tcustomdataedit.getcellcursor(const arow: integer;
               const acellzone: cellzonety; const apos: pointty): cursorshapety;
 var
  bo1: boolean;
@@ -2878,7 +2878,7 @@ begin
  case info.action of
   ea_textentered: begin
    bo1:= true;
-   if (des_edited in fstate) or 
+   if (des_edited in fstate) or
                        (oe_forcereturncheckvalue in foptionsedit) then begin
     bo1:= checkvalue;
     if not bo1 or (oe_eatreturn in foptionsedit) then begin
@@ -2886,9 +2886,9 @@ begin
     end;
    end;
    if bo1 then begin
-    if (fgridintf <> nil) and 
+    if (fgridintf <> nil) and
        (og_colchangeonreturnkey in fgridintf.getcol.grid.optionsgrid)then begin
-     info.action:= ea_none;    
+     info.action:= ea_none;
      fgridintf.getcol.grid.colstep(fca_focusin,1,true,false,true);
     end;
    end;
@@ -2960,7 +2960,7 @@ begin
  result:= fdatalist;
 end;
 }
-procedure tcustomdataedit.updateifigriddata(const sender: tobject; 
+procedure tcustomdataedit.updateifigriddata(const sender: tobject;
                                                       const alist: tdatalist);
 begin
  if fgridintf <> nil then begin
@@ -3045,7 +3045,7 @@ end;
 
 procedure tcustomdataedit.paint(const canvas: tcanvas);
 begin
- if (fgridintf = nil) or 
+ if (fgridintf = nil) or
                  not (twidgetcol1(fgridintf.getcol).checkautocolwidth) then begin
   inherited;
  end;
@@ -3159,7 +3159,7 @@ function tcustomstringedit.checkvalue(const quiet: boolean = false): boolean;
 // mstr1: msestring;
 begin
 {
- if optionsedit * 
+ if optionsedit *
          [oe_trimleft,oe_trimright,oe_uppercase,oe_lowercase] <> [] then begin
   mstr1:= getvaluetext;
   updateflagtext(mstr1);
@@ -3371,12 +3371,12 @@ begin
  inherited setframe(avalue);
 end;
 
-procedure tcustommemoedit.scrollevent(sender: tcustomscrollbar; 
+procedure tcustommemoedit.scrollevent(sender: tcustomscrollbar;
                                                       event: scrolleventty);
 var
  pagesize: integer;
  stepsize: integer;
- 
+
  procedure init;
  begin
   if sender = frame.sbvert then begin
@@ -3400,10 +3400,10 @@ var
   end;
  end;
 
-var 
+var
  int1: integer;
  size1: sizety;
- 
+
 begin
  int1:= 0;
  stepsize:= 0;
@@ -3452,9 +3452,9 @@ var
 begin
  rect1:= feditor.textrect;
  size1:= innerclientsize;
- if (ftextrectbefore.cx <> rect1.cx) or 
+ if (ftextrectbefore.cx <> rect1.cx) or
                 (ftextrectbefore.cy <> rect1.cy) or
-                (size1.cx <> fclientsizebefore.cx) or 
+                (size1.cx <> fclientsizebefore.cx) or
                 (size1.cy <> fclientsizebefore.cy) then begin
   ftextrectbefore:= rect1;
   fclientsizebefore:= size1;
@@ -3518,7 +3518,7 @@ begin
    ea_indexmoved: begin
     fxpos:= feditor.caretpos.x;
    end;
-  end; 
+  end;
  end;
 end;
 
@@ -3545,7 +3545,7 @@ begin
       int1:= - self.font.lineheight;
      end;
      key_down: begin
-      int1:= self.font.lineheight; 
+      int1:= self.font.lineheight;
      end;
      else begin
       exclude(info.eventstate,es_processed);
@@ -3585,7 +3585,7 @@ end;
 
 function tcustommemoedit.getnoscroll(): boolean;
 begin
- result:= inherited getnoscroll() or needsfocuspaintstate() and 
+ result:= inherited getnoscroll() or needsfocuspaintstate() and
                              (tcustomframe1(fframe).haspaintrectfocus());
                          //do not scroll focusrect
 end;
@@ -3726,7 +3726,7 @@ end;
 
 function thexstringedit.sortfunc(const l,r): integer;
 begin
- result:= stringcomp(ansistring(l),ansistring(r)); 
+ result:= stringcomp(ansistring(l),ansistring(r));
 end;
 
 procedure thexstringedit.setvalue(const Value: string);
@@ -3832,7 +3832,7 @@ end;
 procedure tcustomdropdownedit.texttovalue(var accept: boolean;
                        const quiet: boolean);
 begin
- if (deo_selectonly in fdropdown.options) and 
+ if (deo_selectonly in fdropdown.options) and
                      not fdropdown.dataselected then begin
   if (text <> '') then begin
    if not quiet and not (des_statreading in fstate) and
@@ -4007,7 +4007,7 @@ begin
  fdropdown.Assign(avalue);
 end;
 
-function tcustomdropdownlistedit.createdropdowncontroller: 
+function tcustomdropdownlistedit.createdropdowncontroller:
                                            tcustomdropdowncontroller;
 begin
  result:= tdropdownlistcontroller.create(idropdownlist(self));
@@ -4073,7 +4073,7 @@ begin
  if (fdropdown <> nil) and not(csdestroying in componentstate) and
      (tcustomdropdownlistcontroller(fdropdown).imagelist <> nil) then begin
   with tcustomdropdownlistcontroller1(fdropdown)do begin
-   result.left:= tcustomdropdownlistcontroller(fdropdown).imagelist.width + 
+   result.left:= tcustomdropdownlistcontroller(fdropdown).imagelist.width +
                 fimageframe.left + fimageframe.right;
   end;
  end;
@@ -4091,7 +4091,7 @@ begin
     asize.cy:= int1;
    end;
   end;
- end; 
+ end;
 end;
 
 procedure tcustomdropdownlistedit.imagelistchanged;
@@ -4345,7 +4345,7 @@ begin
  if accept then begin
   if not fisnull then begin
    if fvaluemax < fvaluemin then begin //unsigned
-    if (longword(int1) < longword(fvaluemin)) or 
+    if (longword(int1) < longword(fvaluemin)) or
                          (longword(int1) > longword(fvaluemax)) then begin
      rangeerror(fvaluemin,fvaluemax,quiet);
      accept:= false;
@@ -4505,7 +4505,7 @@ begin
   with tgridintegerdatalist(fdatalist) do begin
    min:= avalue;
   end;
- end;  
+ end;
 end;
 
 procedure tcustomintegeredit.setvaluemax(const avalue: integer);
@@ -4515,7 +4515,7 @@ begin
   with tgridintegerdatalist(fdatalist) do begin
    max:= avalue;
   end;
- end;  
+ end;
 end;
 
 
@@ -4623,7 +4623,7 @@ begin
  if accept then begin
   if not fisnull then begin
    if fvaluemax < fvaluemin then begin //unsigned
-    if (uint64(int1) < uint64(fvaluemin)) or 
+    if (uint64(int1) < uint64(fvaluemin)) or
                           (uint64(int1) > uint64(fvaluemax)) then begin
      rangeerror(fvaluemin,fvaluemax,quiet);
      accept:= false;
@@ -4732,7 +4732,7 @@ begin
  internalgetgridvalue(index,result);
 end;
 
-procedure tcustomint64edit.setgridvalue(const index: integer; 
+procedure tcustomint64edit.setgridvalue(const index: integer;
                       const Value: int64);
 begin
  internalsetgridvalue(index,value);
@@ -4950,7 +4950,7 @@ begin
    if int1 = -3 then begin
     int1:= getindex(fvalue1);
     tdropdowncols1(cols).fitemindex:= int1;
-   end;    
+   end;
   end
   else begin
    int1:= getindex(msestring(data));
@@ -5018,7 +5018,7 @@ begin
  inherited;
 end;
 
-function getindex1(const avalue: integer; 
+function getindex1(const avalue: integer;
                        const enums: integerarty; const offset: integer): integer;
 var
  int1: integer;
@@ -5131,7 +5131,7 @@ end;
 
 procedure tcustomenuedit.setvalue(const avalue: integer);
 begin
- tdropdowncols1(tcustomdropdownlistcontroller(fdropdown).cols).fitemindex:= 
+ tdropdowncols1(tcustomdropdownlistcontroller(fdropdown).cols).fitemindex:=
                          getindex(avalue);
  fvalue1:= avalue;
  valuechanged;
@@ -5175,7 +5175,7 @@ var
  int1: integer;
  mstr1: msestring;
 begin
- if (tdropdownlistcontroller(fdropdown).itemindex < 0) and 
+ if (tdropdownlistcontroller(fdropdown).itemindex < 0) and
                                 (trim(text) = '') then begin
   int1:= fvalueempty;
  end
@@ -5189,7 +5189,7 @@ begin
     int1:= int1 + fvalueoffset;
    end
    else begin
-    if not (deo_selectonly in fdropdown.options) and 
+    if not (deo_selectonly in fdropdown.options) and
                                    not (des_isdb in fstate) then begin
      try
       mstr1:= feditor.text;
@@ -5206,7 +5206,7 @@ begin
    end;
   end;
  end;
- if not ({(des_isdb in fstate) and} (int1 = fvalueempty)) and 
+ if not ({(des_isdb in fstate) and} (int1 = fvalueempty)) and
                             (int1 < fvaluemin) or (int1 > fvaluemax) then begin
   rangeerror(fvaluemin,fvaluemax,quiet);
   accept:= false;
@@ -5317,7 +5317,7 @@ begin
  end;
  if avalue <> fvalueoffset then begin
   fvalueoffset:= avalue;
-  value:= value; //update itemindex  
+  value:= value; //update itemindex
  end;
 end;
 
@@ -5383,7 +5383,7 @@ begin
  with tcustomdropdownlistcontroller1(fdropdown) do begin
   if imagelist <> nil then begin
    int1:= value;
-   if canvas.drawinfopo <> nil then begin   
+   if canvas.drawinfopo <> nil then begin
     with cellinfoty(canvas.drawinfopo^) do begin
      int1:= pinteger(datapo)^;
     end;
@@ -5408,7 +5408,7 @@ procedure tcustomenuedit.defineproperties(filer: tfiler);
 begin
  inherited;
  filer.defineproperty('min',@readmin,nil,false);
- filer.defineproperty('max',@readmax,nil,false); 
+ filer.defineproperty('max',@readmax,nil,false);
 end;
 
 function tcustomenuedit.getdropdown: tenumdropdowncontroller;
@@ -5525,7 +5525,7 @@ begin
  inherited;
  fdropdownenums:= copy(enums);
  getdropdowninfo(fdropdownenums,fdropdownitems);
- tdropdowncols1(dropdown.cols).fitemindex:= 
+ tdropdowncols1(dropdown.cols).fitemindex:=
                          getindex1(fvalue1,fdropdownenums,fvalueoffset);
 end;
 
@@ -5665,7 +5665,7 @@ begin
  valuechanged;
 end;
 
-function tcustomrealedit.gettextvalue(var accept: boolean; 
+function tcustomrealedit.gettextvalue(var accept: boolean;
                                              const quiet: boolean): realty;
 var
  mstr1: msestring;
@@ -5709,9 +5709,9 @@ begin
   end;
 }
   rea1:= reapplyrange(rea1,fvaluerange,fvaluestart);
-  if not (((des_isdb in fstate) or (oe_null in foptionsedit)) and 
+  if not (((des_isdb in fstate) or (oe_null in foptionsedit)) and
                                          (rea1 = emptyreal)) then begin
-   if (cmprealty(fvaluemin,rea1) > 0) or 
+   if (cmprealty(fvaluemin,rea1) > 0) or
                       (cmprealty(fvaluemax,rea1) < 0) then begin
     rangeerror(fvaluemin,fvaluemax,quiet);
     accept:= false;
@@ -5798,7 +5798,7 @@ procedure tcustomrealedit.defineproperties(filer: tfiler);
 // bo1,bo2{,bo3,bo4}: boolean;
 begin
  inherited;
- 
+
  filer.DefineProperty('val',
              {$ifdef FPC}@{$endif}readvalue,nil,false);
  filer.DefineProperty('mi',{$ifdef FPC}@{$endif}readmin1,nil,false);
@@ -6091,7 +6091,7 @@ function tcustomrealspinedit.gettextvalue(var accept: boolean;
    result:= fvaluemax;
   end;
  end;
- 
+
 label
  endlab,endlab1;
 begin
@@ -6121,7 +6121,7 @@ begin
   else begin
    result:= inherited gettextvalue(accept,quiet);
    goto endlab1;
-  end;   
+  end;
  end;
 endlab:
  if result < fvaluemin then begin
@@ -6131,7 +6131,7 @@ endlab:
   result:= fvaluemax;
  end;
 endlab1:
- fstepflag:= stepkindty(-1);
+ fstepflag:= stepkindty(sk_none);
 end;
 
 function tcustomrealspinedit.dostep(const event: stepkindty;
@@ -6224,7 +6224,7 @@ var
  shiftstate1: shiftstatesty;
 begin
  with info do begin
-  if ((shiftstate * keyshiftstatesmask) - [ss_shift,ss_alt,ss_ctrl] = []) and 
+  if ((shiftstate * keyshiftstatesmask) - [ss_shift,ss_alt,ss_ctrl] = []) and
         (ss_alt in shiftstate) and not readonly and
                                    not (es_processed in eventstate) then begin
    include(eventstate,es_processed);
@@ -6310,7 +6310,7 @@ begin
  end;
 end;
 
-function tcustomdatetimeedit.gettextvalue(var accept: boolean; 
+function tcustomdatetimeedit.gettextvalue(var accept: boolean;
                                              const quiet: boolean): tdatetime;
 var
  mstr1: msestring;
@@ -6343,7 +6343,7 @@ begin
  end;
 end;
 
-procedure tcustomdatetimeedit.texttovalue(var accept: boolean; 
+procedure tcustomdatetimeedit.texttovalue(var accept: boolean;
                                                  const quiet: boolean);
 var
  dat1: tdatetime;
@@ -6351,18 +6351,18 @@ var
 begin
  dat1:= gettextvalue(accept,quiet);
  if accept then begin
-  if not (((des_isdb in fstate) or (oe_null in foptionsedit)) and 
+  if not (((des_isdb in fstate) or (oe_null in foptionsedit)) and
                                         (dat1 = emptydatetime)) then begin
    if fkind = dtk_time then begin
     if (fvaluemax = emptydatetime) and not (dat1 = emptydatetime) or
-         not (fvaluemin = emptydatetime) and (dat1 < frac(fvaluemin)) or 
+         not (fvaluemin = emptydatetime) and (dat1 < frac(fvaluemin)) or
                     (dat1 > frac(fvaluemax)) then begin
      rangeerror(fvaluemin,fvaluemax,quiet);
      accept:= false;
     end;
    end
    else begin
-    if (cmprealty(fvaluemin,dat1) > 0) or 
+    if (cmprealty(fvaluemin,dat1) > 0) or
                       (cmprealty(fvaluemax,dat1) < 0) then begin
      rangeerror(fvaluemin,fvaluemax,quiet);
      accept:= false;
@@ -6432,7 +6432,7 @@ begin
  else begin
   mstr1:= fformatdisp;
  end;
- case fkind of 
+ case fkind of
   dtk_time: begin
    result:= mseformatstr.timetostring(dat1,mstr1);
   end;
@@ -6529,7 +6529,7 @@ end;
 procedure tcustomdatetimeedit.defineproperties(filer: tfiler);
 begin
  inherited;
- 
+
  filer.DefineProperty('val',
              {$ifdef FPC}@{$endif}readvalue,nil,false);
  filer.DefineProperty('mi',{$ifdef FPC}@{$endif}readmin1,nil,false);
@@ -6604,7 +6604,7 @@ begin
   with tgridrealdatalist(fdatalist) do begin
    min:= avalue;
   end;
- end; 
+ end;
 end;
 
 procedure tcustomdatetimeedit.setvaluemax(const avalue: tdatetime);
@@ -6614,7 +6614,7 @@ begin
   with tgridrealdatalist(fdatalist) do begin
    max:= avalue;
   end;
- end; 
+ end;
 end;
 
 procedure tcustomdatetimeedit.updatedatalist;

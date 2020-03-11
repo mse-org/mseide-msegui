@@ -25,7 +25,7 @@ uses
  msegraphics,msestockobjects,mseglob,mseguiglob,msestat,msestatfile,msepointer,
  msesplitter,msesimplewidgets,msetypes,msestrings,msebitmap,mseobjectpicker,
  msetabsglob,msemenus,msedrawtext,mseshapes,msedragglob,mseinterfaces,msetabs;
- 
+
 //todo: optimize
 
 const
@@ -56,13 +56,13 @@ const
                        od_captionhint];
  defaultoptionsdocknochildren = defaultoptionsdock - [od_savechildren];
  deprecatedoptionsdock = [od_childicons];
- 
+
  dbr_first = dbr_handle;
  dbr_last = dbr_nolock;
  dbr_firstbutton = dockbuttonrectty(ord(dbr_first)+1);
  dbr_lastbutton = dbr_last;
  defaulttaboptions= [tabo_dragdest,tabo_dragsource];
- 
+
 type
  twidgetdragobject = class(tdragobject)
   private
@@ -94,10 +94,10 @@ type
 
  idockcontroller = interface(idragcontroller)[miid_idockcontroller]
   function checkdock(var info: draginfoty): boolean;
-  function getbuttonrects(const index: dockbuttonrectty): rectty;  
+  function getbuttonrects(const index: dockbuttonrectty): rectty;
                                       //origin = clientrect.pos
   function getplacementrect: rectty;  //origin = container.pos
-  function getminimizedsize(out apos: captionposty): sizety;  
+  function getminimizedsize(out apos: captionposty): sizety;
                      //cx = 0 -> normalwidth, cy = 0 -> normalheight
   function getcaption: msestring;
   function getchildicon: tmaskedbitmap; //own or first icon of dockchildren,
@@ -156,8 +156,8 @@ type
  mdistatety = (mds_normal,mds_maximized,mds_minimized,mds_floating);
 
  dockcontrollereventty = procedure(const sender: tdockcontroller) of object;
- 
- docklayouteventty = procedure(const sender: twidget; 
+
+ docklayouteventty = procedure(const sender: twidget;
                                         const achildren: widgetarty) of object;
  mdistatechangedeventty = procedure(const sender: twidget;
                              const oldvalue,newvalue: mdistatety) of object;
@@ -169,9 +169,9 @@ type
   last: integer;
   size: integer;
  end;
- 
+
  bandinfoarty = array of bandinfoty;
- 
+
  tdockcontroller = class(tdragcontroller)
   private
    foncalclayout: docklayouteventty;
@@ -293,7 +293,7 @@ type
    fplacing: integer;
    fclickedbutton: dockbuttonrectty;
    fwidgetstate: widgetstatesty;
-   
+
    procedure checkdirection;
    procedure objectevent(const sender: tobject;
                                       const event: objecteventty) override;
@@ -305,7 +305,7 @@ type
    procedure endmouseop1();
    procedure endmouseop2();
    procedure cancelsizing();
-   
+
    function doclose(const awidget: twidget): boolean;
    procedure setmdistate(const avalue: mdistatety); virtual;
    procedure domdistatechanged(const oldstate,newstate: mdistatety); virtual;
@@ -315,7 +315,7 @@ type
    procedure dochildfloat(const awidget: twidget); virtual;
    function docheckdock(const info: draginfoty): boolean; virtual;
    function dockdrag(const dragobj: tdockdragobject): boolean;
-   procedure childstatechanged(const sender: twidget; 
+   procedure childstatechanged(const sender: twidget;
                          const newstate,oldstate: widgetstatesty); virtual;
 
    property useroptions: optionsdockty read fuseroptions write setuseroptions
@@ -337,7 +337,7 @@ type
    function ismdi: boolean;
    function isfloating: boolean;
    function canmdisize: boolean;
-   procedure dolayoutchanged; virtual; 
+   procedure dolayoutchanged; virtual;
    procedure doboundschanged;
    procedure docaptionchanged;
    function findbandpos(const apos: integer; out aindex: integer;
@@ -367,7 +367,7 @@ type
    procedure clientmouseevent(var info: mouseeventinfoty); override;
    procedure childormouseevent(const sender: twidget;
                                      var info: mouseeventinfoty); override;
-   procedure checkmouseactivate(const sender: twidget; 
+   procedure checkmouseactivate(const sender: twidget;
                                       var info: mouseeventinfoty);
    procedure dopaint(const acanvas: tcanvas);
                                        //canvasorigin = container.clientpos;
@@ -405,9 +405,9 @@ type
    function childicon(): tmaskedbitmap virtual;
 
    property mdistate: mdistatety read fmdistate write setmdistate;
-   property currentsplitdir: splitdirty read fsplitdir 
+   property currentsplitdir: splitdirty read fsplitdir
                                               write setcurrentsplitdir;
-   property dockrect: rectty read getdockrect; 
+   property dockrect: rectty read getdockrect;
                              //origin = getwidget.container.pos
    function close: boolean; //simulates mr_windowclosed for owner
    function closeactivewidget: boolean;
@@ -418,7 +418,7 @@ type
         //simulates dostatread, use in beginplacement()/endplacement()
   published
    property dockhandle: tdockhandle read fdockhandle write setdockhandle;
-   property splitter_size: integer read fsplitter_size 
+   property splitter_size: integer read fsplitter_size
                             write setsplitter_size default defaultsplittersize;
    property splitter_grip: stockbitmapty read fsplitter_grip
                         write setsplitter_setgrip default defaultsplittergrip;
@@ -426,63 +426,63 @@ type
                         write setsplitter_color default defaultsplittercolor;
    property splitter_colorgrip: colorty read fsplitter_colorgrip
                   write setsplitter_colorgrip default defaultsplittercolorgrip;
-   property tab_options: tabbaroptionsty read ftab_options write settab_options 
+   property tab_options: tabbaroptionsty read ftab_options write settab_options
                                    default defaulttaboptions;
    property tab_textflags: textflagsty read ftab_textflags write
                           settab_textflags default defaultcaptiontextflags;
    property tab_width: integer read ftab_width write settab_width default 0;
-   property tab_widthmin: integer read ftab_widthmin 
+   property tab_widthmin: integer read ftab_widthmin
                                                write settab_widthmin default 0;
-   property tab_widthmax: integer read ftab_widthmax 
+   property tab_widthmax: integer read ftab_widthmax
                                                write settab_widthmax default 0;
 
    property tab_frame: tframecomp read ftab_frame write settab_frame;
    property tab_face: tfacecomp read ftab_face write settab_face;
    property tab_color: colorty read ftab_color write settab_color
                                                default cl_default;
-   property tab_colortab: colorty read ftab_colortab 
+   property tab_colortab: colorty read ftab_colortab
                         write settab_colortab default cl_transparent;
-   property tab_coloractivetab: colorty read ftab_coloractivetab 
+   property tab_coloractivetab: colorty read ftab_coloractivetab
                         write settab_coloractivetab default cl_active;
    property tab_frametab: tframecomp read ftab_frametab write settab_frametab;
    property tab_facetab: tfacecomp read ftab_facetab write settab_facetab;
-   property tab_faceactivetab: tfacecomp read ftab_faceactivetab 
+   property tab_faceactivetab: tfacecomp read ftab_faceactivetab
                                                  write settab_faceactivetab;
    property tab_size: integer read ftab_size write settab_size default 0;
    property tab_sizemin: integer read ftab_sizemin write settab_sizemin
                             default defaulttabsizemin;
    property tab_sizemax: integer read ftab_sizemax write settab_sizemax
                             default defaulttabsizemax;
-   property colortab: colorty read fcolortab 
+   property colortab: colorty read fcolortab
                                      write setcolortab default cl_default;
-   property coloractivetab: colorty read fcoloractivetab 
+   property coloractivetab: colorty read fcoloractivetab
                                      write setcoloractivetab default cl_default;
    property facetab: tfacecomp read ffacetab write setfacetab;
    property faceactivetab: tfacecomp read ffaceactivetab write setfaceactivetab;
    property caption: msestring read fcaption write setcaption;
-   property splitdir: splitdirty read fdefaultsplitdir write setsplitdir 
+   property splitdir: splitdirty read fdefaultsplitdir write setsplitdir
                       default sd_none; //sets default and current splitdir,
                                        //returns default
    property optionsdock: optionsdockty read foptionsdock write setoptionsdock
                       default defaultoptionsdock;
    property bandgap: integer read fbandgap write setbandgap default 0;
-   
+
    property oncalclayout: docklayouteventty read foncalclayout
                                                           write foncalclayout;
-   property onlayoutchanged: dockcontrollereventty read fonlayoutchanged 
+   property onlayoutchanged: dockcontrollereventty read fonlayoutchanged
                                                        write fonlayoutchanged;
-   property onboundschanged: dockcontrollereventty read fonboundschanged 
+   property onboundschanged: dockcontrollereventty read fonboundschanged
                                                        write fonboundschanged;
-   property oncaptionchanged: dockcontrollereventty read foncaptionchanged 
+   property oncaptionchanged: dockcontrollereventty read foncaptionchanged
                                                        write foncaptionchanged;
-   property onbeforefloat: dockrecteventty read fonbeforefloat 
+   property onbeforefloat: dockrecteventty read fonbeforefloat
                                                      write fonbeforefloat;
    property onfloat: notifyeventty read fonfloat write fonfloat;
    property ondock: notifyeventty read fondock write fondock;
    property onchilddock: widgeteventty read fonchilddock write fonchilddock;
    property onchildfloat: widgeteventty read fonchildfloat write fonchildfloat;
    property oncheckdock: checkdockeventty read foncheckdock write foncheckdock;
-   property onmdistatechanged: mdistatechangedeventty read fonmdistatechanged 
+   property onmdistatechanged: mdistatechangedeventty read fonmdistatechanged
                               write fonmdistatechanged;
  end;
 
@@ -492,7 +492,7 @@ type
   published
    property optionsdock default defaultoptionsdocknochildren;
  end;
- 
+
  idocktarget = interface(inullinterface)[miid_idocktarget]
   function getdockcontroller: tdockcontroller;
  end;
@@ -515,11 +515,11 @@ const
  defaulttextflagsleft = [tf_ycentered,tf_rotate90,tf_clipo];
  defaulttextflagsbottom = [tf_ycentered,tf_clipo];
  defaulttextflagsright = [tf_ycentered,tf_rotate90,tf_clipo];
- 
+
 type
  gripstatety = (grps_sizevalid);
  gripstatesty = set of gripstatety;
- 
+
  tgripframe = class(tcaptionframe,iobjectpicker,iface)
   private
    fgrip_pos: captionposty;
@@ -571,7 +571,7 @@ type
    factgripsize: integer;
    fmousebutton: dockbuttonrectty;
    procedure checkgripsize;
-   procedure updatewidgetstate; override;   
+   procedure updatewidgetstate; override;
    procedure updaterects; override;
    procedure updatestate; override;
    procedure getpaintframe(var frame: framety); override;
@@ -579,14 +579,14 @@ type
    function calcsizingrect(const akind: sizingkindty;
                                 const offset: pointty): rectty;
    procedure drawgripbutton(const acanvas: tcanvas;
-                    const akind: dockbuttonrectty; const arect: rectty; 
+                    const akind: dockbuttonrectty; const arect: rectty;
                     const acolorglyph,acolorbutton: colorty;
                     const ahiddenedges: edgesty); virtual;
 
     //iface
    function getclientrect: rectty;
    procedure invalidatewidget();
-   procedure invalidaterect(const rect: rectty; 
+   procedure invalidaterect(const rect: rectty;
               const org: originty = org_client; const noclip: boolean = false);
    function translatecolor(const acolor: colorty): colorty;
    procedure setlinkedvar(const source: tmsecomponent; var dest: tmsecomponent;
@@ -607,7 +607,7 @@ type
    procedure paintxorpic(const sender: tobjectpicker; const canvas: tcanvas);
    procedure internalpaintoverlay(const canvas: tcanvas;
                                         const arect: rectty) override;
-   
+
   public
    constructor create(const aintf: icaptionframe;
                                      const acontroller: tdockcontroller);
@@ -620,31 +620,31 @@ type
    procedure updatemousestate(const sender: twidget;
                                   const info: mouseeventinfoty); override;
    procedure mouseevent(var info: mouseeventinfoty);
-   property buttonrects[const index:  dockbuttonrectty]: rectty 
+   property buttonrects[const index:  dockbuttonrectty]: rectty
                                                     read getbuttonrects;
                                                                 //client origin
    function getminimizedsize(out apos: captionposty): sizety;
    function griprect: rectty; //origin = pos
-  published                    
+  published
    property grip_size: integer read fgrip_size write setgrip_size stored true;
                                                           //for optionalclass
-   property grip_textflagstop: textflagsty read fgrip_textflagstop 
+   property grip_textflagstop: textflagsty read fgrip_textflagstop
                      write setgrip_textflagstop default defaulttextflagstop;
    property grip_textflagsleft: textflagsty read fgrip_textflagsleft
                      write setgrip_textflagsright default defaulttextflagsleft;
    property grip_textflagsbottom: textflagsty read fgrip_textflagsbottom
                   write setgrip_textflagsbottom default defaulttextflagsbottom;
-   property grip_textflagsright: textflagsty read fgrip_textflagsright 
+   property grip_textflagsright: textflagsty read fgrip_textflagsright
                     write setgrip_textflagsrright default defaulttextflagsright;
-   property grip_captiondist: integer read fgrip_captiondist 
-                                      write setgrip_captiondist default 1;         
-   property grip_captionoffset: integer read fgrip_captionoffset 
+   property grip_captiondist: integer read fgrip_captiondist
+                                      write setgrip_captiondist default 1;
+   property grip_captionoffset: integer read fgrip_captionoffset
                                       write setgrip_captionoffset default 0;
    property grip_grip: stockbitmapty read fgrip_grip write setgrip_grip
                                                        default defaultgripgrip;
    property grip_color: colorty read fgrip_color write setgrip_color
                                                        default defaultgripcolor;
-   property grip_coloractive: colorty read fgrip_coloractive 
+   property grip_coloractive: colorty read fgrip_coloractive
                       write setgrip_coloractive default defaultgripcoloractive;
    property grip_colorglyph: colorty read fgrip_colorglyph write
                  setgrip_colorglyph default cl_glyph;
@@ -657,7 +657,7 @@ type
    property grip_options: gripoptionsty read fgrip_options write setgrip_options
                                                      default defaultgripoptions;
    property grip_face: tface read getgrip_face write setgrip_face;
-   property grip_faceactive: tface read getgrip_faceactive 
+   property grip_faceactive: tface read getgrip_faceactive
                                             write setgrip_faceactive;
    property grip_hint: msestring read fgrip_hint write fgrip_hint;
  end;
@@ -718,15 +718,15 @@ type
   published
    property dragdock: tnochildrendockcontroller read fdragdock write setdragdock;
    property optionswidget default defaultdockpaneloptionswidget;
-   property optionswindow: windowoptionsty read foptionswindow 
+   property optionswindow: windowoptionsty read foptionswindow
                                                write foptionswindow default [];
    property frame: tgripframe read getframe write setframe;
    property statfile: tstatfile read fstatfile write setstatfile;
    property statvarname: msestring read fstatvarname write fstatvarname;
-   property statpriority: integer read fstatpriority 
+   property statpriority: integer read fstatpriority
                                        write fstatpriority default 0;
    property icon: tmaskedbitmap read ficon write seticon;
-   property dockingareacaption: msestring read fdockingareacaption 
+   property dockingareacaption: msestring read fdockingareacaption
                                                    write setdockingareacaption;
  end;
 
@@ -766,7 +766,7 @@ type
   public
    constructor create(const sender: tdockcontroller);
  end;
- 
+
  tdocktabwidget = class(ttabwidget)
   private
    fcontroller: tdockcontroller;
@@ -959,7 +959,7 @@ end;
 procedure tdocktabwidget.tabchanged(const synctabindex: boolean);
 begin
  inherited;
- if fcontroller.fintf.getwidget.componentstate * 
+ if fcontroller.fintf.getwidget.componentstate *
                                [csloading,csdestroying] = [] then begin
   fcontroller.dolayoutchanged();
  end;
@@ -980,7 +980,7 @@ begin
  if awidget.getcorbainterface(typeinfo(idocktarget),intf1) then begin
   intf1.getdockcontroller.updatetabpage(self);
 //  caption:= intf1.getdockcontroller.getdockcaption;
-  
+
  end
  else begin
   caption:= 'Page '+inttostrmse(atabwidget.count);
@@ -1030,7 +1030,7 @@ begin
     end;
    finally
     setlinkedvar(nil,tmsecomponent(focusedwidgetbefore));
-   end;   
+   end;
  end;
 end;
 
@@ -1086,7 +1086,7 @@ var
 // needspropref: boolean;
  dcont1: tdockcontroller;
  widget1: twidget;
- bo1: boolean; 
+ bo1: boolean;
 begin
  checkdirection;
  banded:= (od_banded in foptionsdock) and (fsplitdir in [sd_vert,sd_horz]);
@@ -1141,7 +1141,7 @@ begin
        opt1:= dcont1.foptionsdock;
 //       needspropref:= needspropref or not (dos_proprefvalid in dcont1.fdockstate);
        dcont1.fdockstate:= dcont1.fdockstate + [{dos_proprefvalid,}dos_showed];
-       bo1:= false; 
+       bo1:= false;
        if dos_sizing in fdockstate then begin
         if fsplitdir in [sd_vert,sd_horz] then begin
          int3:= fr^.si(dcont1.fhiddensizeref);
@@ -1159,7 +1159,7 @@ begin
         isfix[int2]:= true;
         inc(fixcount);
        end;
-       if not bo1 and ((od_propsize in opt1) and not (od_fixsize in opt1) or 
+       if not bo1 and ((od_propsize in opt1) and not (od_fixsize in opt1) or
                               fixedareprop and (od_fixsize in opt1)) then begin
         isprop[int2]:= true;
         propsize:= propsize + fw^.size(ar1[int1]);
@@ -1197,8 +1197,8 @@ begin
  setlength(result,int2);
  setlength(isprop,int2);
  setlength(isfix,int2);
- if (awidgets = nil) and not banded and (fsplitdir in [sd_vert,sd_horz]) and 
-       (high(result) > 0) and (fw^.pos(result[0]) = fw^.pos(result[1])) and 
+ if (awidgets = nil) and not banded and (fsplitdir in [sd_vert,sd_horz]) and
+       (high(result) > 0) and (fw^.pos(result[0]) = fw^.pos(result[1])) and
        (finditem(pointerarty(fwidgetsbefore),pointer(result[1])) < 0) then begin
   widget1:= result[0];        //probably revisible
   result[0]:= result[1];
@@ -1253,12 +1253,12 @@ var
  propsize: integer;
  banded: boolean;
  opt1: optionsdockty;
- 
+
  procedure calcsize;
  var
   int1: integer;
   rea1,rea2: real;
- begin 
+ begin
   int1:= fr^.size(fplacementrect) - high(ar1) * fsplitter_size - fixsize;
   if int1 < 0 then begin
    int1:= 0;
@@ -1300,7 +1300,7 @@ var
   end;
   rea1:= fr^.size(fplacementrect);
   if not nofit then begin
-         //adjust sizes for fit      
+         //adjust sizes for fit
    rea2:= rea1 - (rea2 + high(ar2) * fsplitter_size);
                //delta
    if rea2 < 0 then begin
@@ -1343,11 +1343,11 @@ var
 
 var
  minsize1: integer;
- 
+
  procedure calcpos;
- var  
+ var
   bandindex: integer;
-  
+
   procedure calcbandheight(const aindex: integer);
   var
    int2,int3,int4: integer;
@@ -1360,7 +1360,7 @@ var
      int3:= int4;       //find biggest widget
     end;
    end;
-   with fbands[high(fbands)] do begin 
+   with fbands[high(fbands)] do begin
     first:= bandindex;
     last:= aindex-1;
     size:= int3;
@@ -1376,7 +1376,7 @@ var
   ar3: rectarty;
   int2: integer;
   bandpos: integer;
-  
+
   procedure clipwidget;
   var
    int1: integer;
@@ -1415,7 +1415,7 @@ var
     rect1^:= fplacementrect;
     fr^.setpos(rect1^,round(rea2));
     fr^.setsize(rect1^,round(ar2[int1] - rea2 - rea1) - fsplitter_size);
-    if banded and 
+    if banded and
       (fr^.stop(rect1^) + fsplitter_size > fr^.stop(fplacementrect)) then begin
      if int1 > int2 then begin //next band
       calcbandheight(int1);
@@ -1426,7 +1426,7 @@ var
       rea2:= fr^.pos(rect1^);
       rea1:= rea1 - rea2;
      end
-     else begin  
+     else begin
       clipwidget;
      end;
     end;
@@ -1458,7 +1458,7 @@ var
          fr^.setopos(rect1^,bandpos + fr^.osize(rect1^));
         end;
        end;
-      end; 
+      end;
       ar1[int1].widgetrect:= rect1^;
      end;
      bandpos:= bandpos + size + fbandgap;
@@ -1470,7 +1470,7 @@ var
 var
  needsfixscale: boolean;
  hasparent1: boolean;
- 
+
  procedure updateplacement;
  var
   widget1: twidget;
@@ -1479,7 +1479,7 @@ var
   widget1:= fintf.getwidget;
   int1:= minsize1 - fr^.size(fplacementrect);
   if (int1 > 0) then begin       //extend placementrect
-   if not scalefixedalso and 
+   if not scalefixedalso and
               not (od_expandforfixsize in foptionsdock) then begin
     needsfixscale:= true;
    end
@@ -1492,7 +1492,7 @@ var
      end
      else begin
       if not fw^.anchboth(widget1) then begin //use setanchordsize?
-       widget1.parentwidget.clientsize:= 
+       widget1.parentwidget.clientsize:=
            addsize(widget1.parentwidget.clientsize,fr^.makesize(int1,0));
               //not async
 //      widget1.parentwidget.changeclientsize(fr^.makesize(int1,0));
@@ -1503,23 +1503,23 @@ var
    end;
   end
   else begin
-   if not nofit then begin      
+   if not nofit then begin
     fw^.setstop(ar1[high(ar1)],fr^.stop(fplacementrect));
    end;
   end;
- end;       
-          
+ end;
+
 var
  int1,int2: integer;
  widget1: twidget;
  widget2: twidget;
- 
+
 begin
  widget2:= fintf.getwidget;
  hasparent1:= widget2.parentwidget <> nil;
  widget1:= widget2.container;
  checkdirection;
- if (widget1 <> nil) and 
+ if (widget1 <> nil) and
         (widget1.ComponentState * [csloading,csdesigning] = []) then begin
   banded:= od_banded in foptionsdock;
   fplacementrect:= idockcontroller(fintf).getplacementrect;
@@ -1555,9 +1555,9 @@ begin
         updateplacement;
        end;
       end;
-     finally 
+     finally
       fdockstate:= fdockstate - [dos_updating1,dos_updating2,dos_sizing];
-      if (not (dos_layoutvalid in fdockstate) or needsfixscale) and 
+      if (not (dos_layoutvalid in fdockstate) or needsfixscale) and
                         (frecalclevel < 4) then begin
        try
         sizechanged(force or needsfixscale,needsfixscale);
@@ -1585,7 +1585,7 @@ begin
       fnormalrect:= widget2.widgetrect;
      end;
     end;
-   end;  
+   end;
   end;
  end;
  doboundschanged;
@@ -1654,7 +1654,7 @@ begin
      end;
     end
     else begin
-     if (asplitdir = sd_horz) or (asplitdir = sd_tabed) or 
+     if (asplitdir = sd_horz) or (asplitdir = sd_tabed) or
                                     (asplitdir = sd_none) then begin
       if go_opposite in fgrip_options then begin
        fgrip_pos:= cp_left;
@@ -1714,7 +1714,7 @@ begin
  for int1:= 0 to high(awidgets) do begin
   updategrip(sd1,awidgets[int1]);
  end;
- if (high(awidgets) >= 0) and (fsplitter_size > 0) and 
+ if (high(awidgets) >= 0) and (fsplitter_size > 0) and
      ((fsplitter_color <> cl_none) or (fsplitter_grip <> stb_none)) then begin
   fixend:= foptionsdock * [od_nofit] <> [];
   setlength(fsplitterrects,length(awidgets));
@@ -1768,7 +1768,7 @@ procedure tdockcontroller.setoptionsdock(const avalue: optionsdockty);
 const
  mask1: optionsdockty = [od_top,od_background];
  mask2: optionsdockty = [od_alignbegin,od_aligncenter,od_alignend];
-  
+
 var
  splitdirbefore: splitdirty;
  intf1: idocktarget;
@@ -1790,7 +1790,7 @@ begin
        setsinglebit({$ifdef FPC}longword{$else}longword{$endif}(avalue),
        {$ifdef FPC}longword{$else}longword{$endif}(foptionsdock),
                           {$ifdef FPC}longword{$else}longword{$endif}(mask2)));
-  foptionsdock:= ((avalue - (mask1+mask2)) + val1*mask1 + val2*mask2) - 
+  foptionsdock:= ((avalue - (mask1+mask2)) + val1*mask1 + val2*mask2) -
                                                       deprecatedoptionsdock;
   if not (od_nofit in foptionsdock) then begin
    if not (od_banded in optbefore) and (od_banded in foptionsdock) then begin
@@ -1843,7 +1843,7 @@ begin
      invalidate;
     end
     else begin
-     if (bo1 xor (od_fixsize in foptionsdock)) and 
+     if (bo1 xor (od_fixsize in foptionsdock)) and
                getparentcontroller(cont1) then begin
       cont1.updaterefsize;
      end;
@@ -1867,9 +1867,9 @@ procedure tdockcontroller.invalidategripsize;
   end;
   for int1:= 0 to awidget.widgetcount-1 do begin
    descend1(twidget1(awidget.widgets[int1]));
-  end;   
+  end;
  end;
- 
+
  procedure descend2(const awidget: twidget1);
  var
   int1: integer;
@@ -1881,7 +1881,7 @@ procedure tdockcontroller.invalidategripsize;
   end;
   for int1:= 0 to awidget.widgetcount-1 do begin
    descend2(twidget1(awidget.widgets[int1]));
-  end;   
+  end;
  end;
 var
  widget1: twidget;
@@ -1896,7 +1896,7 @@ end;
 }
 procedure tdockcontroller.setuseroptions(const avalue: optionsdockty);
 
- 
+
 var
  optbefore: optionsdockty;
  widget1: twidget1;
@@ -1966,7 +1966,7 @@ procedure tdockcontroller.updaterefsize;
 var
  int1: integer;
  ar1: widgetarty;
- ar2,ar3: booleanarty; 
+ ar2,ar3: booleanarty;
 begin
  if fsplitdir in [sd_vert,sd_horz] then begin
   ar1:= checksplit(frefsize,int1,ar2,ar3,false);
@@ -2093,7 +2093,7 @@ begin
     controller1.layoutchanged; //notify removing
    end;
    if (widget2 <> nil) and widget2.getcorbainterface(typeinfo(idocktarget),intf1) then begin
-    intf1.getdockcontroller.layoutchanged; 
+    intf1.getdockcontroller.layoutchanged;
    end;
   end;
  end
@@ -2207,7 +2207,7 @@ begin
  updatesplitterrects(ar1);
 endlab:
  widget1:= fintf.getwidget;
- if widget1.canevent(tmethod(foncalclayout)) and 
+ if widget1.canevent(tmethod(foncalclayout)) and
                              not application.terminated then begin
   foncalclayout(widget1,ar1);
  end;
@@ -2259,7 +2259,7 @@ begin
      maxsize:= fw^.osize(ar1[int1]);
     end
     else begin            //at least one widget
-     if bandlength > maxlength then begin  
+     if bandlength > maxlength then begin
       maxlength:= bandlength;
      end;
      bandsize:= bandsize + fw^.osize(ar1[int1]);
@@ -2306,7 +2306,7 @@ end;
 function tdockcontroller.dockdrag(const dragobj: tdockdragobject): boolean;
 var
  parentbefore: tdockcontroller;
-begin 
+begin
  dragobj.fdock.getparentcontroller(parentbefore);
  result:= false;
  if calclayout(tdockdragobject(dragobj),false) then begin
@@ -2346,18 +2346,18 @@ var
   ischild1:= false;
   result:= (info.dragobjectpo^ is tdockdragobject);
   if result then begin
-   ischild1:= 
+   ischild1:=
        (tdockdragobject(info.dragobjectpo^).fdock.getparentcontroller = self);
    result:= ischild1 or
-      (od_acceptsdock in foptionsdock) and 
+      (od_acceptsdock in foptionsdock) and
       (od_candock in tdockdragobject(info.dragobjectpo^).fdock.foptionsdock);
   end;
-  if result and not mouseinhandle and (od_dockparent in foptionsdock) and 
+  if result and not mouseinhandle and (od_dockparent in foptionsdock) and
      not widget1.checkdescendent(
-          tdockdragobject(info.dragobjectpo^).fdock.fintf.getwidget) then begin    
+          tdockdragobject(info.dragobjectpo^).fdock.fintf.getwidget) then begin
    widget2:= widget1.parentwidget;
    while widget2 <> nil do begin
-    if widget2.getcorbainterface(typeinfo(idocktarget),intf1) and 
+    if widget2.getcorbainterface(typeinfo(idocktarget),intf1) and
            (od_acceptsdock in intf1.getdockcontroller.foptionsdock) then begin
      result:= false;
      break;
@@ -2386,7 +2386,7 @@ var
    if fasplitdir = sd_none then begin
     fasplitdir:= fsplitdir;
    end;
-   if not widget.checkdescendent(widget1) and 
+   if not widget.checkdescendent(widget1) and
       idockcontroller(fintf).checkdock(info) and
                 docheckdock(info) then begin
     accept:= true;
@@ -2415,9 +2415,9 @@ var
       end
       else begin
        if (od_tabed in foptionsdock) and
-          (pt1.x > (size1.cx * 7) div 16) and 
+          (pt1.x > (size1.cx * 7) div 16) and
           (pt1.x < (size1.cx * 9) div 16) and
-          (pt1.y > (size1.cy * 7) div 16) and 
+          (pt1.y > (size1.cy * 7) div 16) and
           (pt1.y < (size1.cy * 9) div 16) then begin
         fasplitdir:= sd_tabed;
        end;
@@ -2425,13 +2425,13 @@ var
      end;
 //     size1:= container1.paintsize;
      size1:= fplacementrect.size;
-     if (widget.anchors * [an_left,an_right] = []) and 
+     if (widget.anchors * [an_left,an_right] = []) and
                                (fsplitdir = sd_none) then begin
       rect1.x:= container1.screenpos.x + fplacementrect.x;
                                             //container1.paintpos.x;
       rect1.cx:= size1.cx;
      end;
-     if (widget.anchors * [an_top,an_bottom] = []) and 
+     if (widget.anchors * [an_top,an_bottom] = []) and
                                (fsplitdir = sd_none) then begin
       rect1.y:= container1.screenpos.y + fplacementrect.y;
                                                  //container1.paintpos.y;
@@ -2529,7 +2529,7 @@ var
    end;
   end;
  end;
- 
+
  procedure dockwidget;
  begin
   with info,tdockdragobject(dragobjectpo^) do begin
@@ -2544,7 +2544,7 @@ var
        mdistate:= mds_normal;
       end;
      end;
-     translatewidgetpoint1(fsizingrect.pos,nil,container1); 
+     translatewidgetpoint1(fsizingrect.pos,nil,container1);
             //used incalclayout
     end;
     fsizes:= nil;
@@ -2559,7 +2559,7 @@ var
    end;
   end;
  end;
- 
+
 begin
  widget1:= fintf.getwidget;
  container1:= widget1.container;
@@ -2568,7 +2568,7 @@ begin
  if not(csdesigning in widget1.ComponentState) then begin
   with info do begin
    if fdockhandle <> nil then begin
-    mouseinhandle:= (fdockhandle <> nil) and 
+    mouseinhandle:= (fdockhandle <> nil) and
     pointinrect(translateclientpoint(info.pos,
       idockcontroller(fintf).getwidget,fdockhandle),fdockhandle.gethandlerect);
    end
@@ -2591,7 +2591,7 @@ begin
         result:= true;
        end
        else begin
-        if canfloat and not (dos_hasfloatbutton in fdockstate) and 
+        if canfloat and not (dos_hasfloatbutton in fdockstate) and
                         not(csdesigning in widget1.componentstate) then begin
          dofloat(nullpoint);
          result:= true;
@@ -2611,13 +2611,13 @@ begin
      end
     end;
     dek_check: begin
-     if checkaccept then begin        
+     if checkaccept then begin
       adjustdockrect;
      end;
     end;
     dek_drop: begin
-     if checkaccept and (not ischild1 or 
-             (tdockdragobject(info.dragobjectpo^).fdock.fmdistate <> 
+     if checkaccept and (not ischild1 or
+             (tdockdragobject(info.dragobjectpo^).fdock.fmdistate <>
                                                    mds_maximized)) then begin
       dockwidget;
      end;
@@ -2727,7 +2727,7 @@ begin
  end;
 end;
 
-function tdockcontroller.float(): boolean; 
+function tdockcontroller.float(): boolean;
                                   //false if canceled
 begin
  result:= dofloat(nullpoint);
@@ -2758,7 +2758,7 @@ end;
 
 function tdockcontroller.canfloat: boolean;
 begin
- result:= (od_canfloat in foptionsdock) and 
+ result:= (od_canfloat in foptionsdock) and
                not (ismdi and (mdistate = mds_minimized))
 end;
 
@@ -2766,8 +2766,8 @@ function tdockcontroller.nogrip: boolean;
 var
  parent: tdockcontroller;
 begin
- result:= (od_lock in foptionsdock) or 
-         not (od_nolock in foptionsdock) and getparentcontroller(parent) and 
+ result:= (od_lock in foptionsdock) or
+         not (od_nolock in foptionsdock) and getparentcontroller(parent) and
                                                                  parent.nogrip;
 end;
 
@@ -2964,7 +2964,7 @@ begin
   if not avisible then begin
    visible:= false;
   end;
-  if (aparent <> nil) and 
+  if (aparent <> nil) and
                aparent.getcorbainterface(typeinfo(idocktarget),
                                                           intf1) then begin
    intf1.getdockcontroller.frefsize:= 0; //invalid
@@ -3351,7 +3351,7 @@ end;
 
 function tdockcontroller.canbegindrag: boolean;
 begin
- result:= (fdockstate * [dos_moving,dos_sizing,dos_xorpic] = []) and 
+ result:= (fdockstate * [dos_moving,dos_sizing,dos_xorpic] = []) and
    not ((fmdistate = mds_maximized) and not (od_canfloat in foptionsdock));
 end;
 
@@ -3420,7 +3420,7 @@ begin
  endmouseop1();
  endmouseop2();
  fsizeindex:= -1;
- if (od_thumbtrack in foptionsdock) and 
+ if (od_thumbtrack in foptionsdock) and
           (high(fwidgetrectsbefore) = high(fwidgetsbefore)) then begin
   include(fdockstate,dos_updating1);
   try
@@ -3448,7 +3448,7 @@ var
  fixend: boolean;
 
  function checksizing(const move: boolean): integer;
- 
+
   function updatesizingrect: integer;
   var
    int1,int2: integer;
@@ -3495,7 +3495,7 @@ var
     end;
    end;
   end;
-  
+
  begin
   ar1:= nil; //compilerwarning
   result:= -1;
@@ -3557,7 +3557,7 @@ var
     start:= start + fsizeindex * fsplitter_size;
     stop:= stop - (high(ar1)-fsizeindex) * fsplitter_size;
    end
-   else begin 
+   else begin
     if dos_moving in fdockstate then begin
      movestart:= movestart + fsplitter_size;
      fmoveindex:= fsizeindex;
@@ -3567,7 +3567,7 @@ var
        fmoveindex:= last;
        for int1:= first to last do begin
         int2:= fw^.pos(ar1[int1]);
-        movestart:= movestart + int2 + fsplitter_size;      
+        movestart:= movestart + int2 + fsplitter_size;
         if movestart > int4 then begin
          fmoveindex:= int1;
          break;
@@ -3583,7 +3583,7 @@ var
      fr^.setpos(fsizingrect,fw^.pos(ar1[fmoveindex]));
     end
     else begin
-     start:= start + fw^.pos(ar1[fsizeindex]) - fr^.pos(fplacementrect) + 
+     start:= start + fw^.pos(ar1[fsizeindex]) - fr^.pos(fplacementrect) +
                            fw^.min(ar1[fsizeindex]);
      stop:= stop - fsplitter_size;
     end;
@@ -3638,7 +3638,7 @@ var
      int1:= fr^.opos(rect2)-fr^.opos(rect1);
      wi1:= ar1[fsizeindex];
      fw^.setopos(wi1,fw^.opos(wi1)+int1); //shift in new band;
-     deleteitem(pointerarty(ar1),fsizeindex);     
+     deleteitem(pointerarty(ar1),fsizeindex);
      insertitem(pointerarty(ar1),fmoveindex,wi1);
      int2:= 0;
      for int1:= 0 to high(ar1) do begin
@@ -3658,7 +3658,7 @@ var
 
 var
  canvas1: tcanvas;
- 
+
  procedure dosize;
  begin
   checksizeoffset;
@@ -3681,17 +3681,17 @@ var
       widget1.invalidaterect(frects[fmousebutton],org_widget);
      end;
     end;
-    if (abutton <> fclickedbutton) and 
+    if (abutton <> fclickedbutton) and
       (abutton >= dbr_first) and (abutton <= dbr_last) then begin
      widget1.invalidaterect(frects[abutton],org_widget);
-    end;     
-   end;   
+    end;
+   end;
   end;
   if (abutton <> fclickedbutton) then begin
    fclickedbutton:= dbr_none;
   end;
  end; //setmousebutton
- 
+
 var
  bu1: dockbuttonrectty;
  i1: int32;
@@ -3708,7 +3708,7 @@ begin
    case info.eventkind of
     ek_mouseleave,ek_clientmouseleave: begin
      setmousebutton(dbr_none);
-     if not (ds_clicked in fstate) or 
+     if not (ds_clicked in fstate) or
                                   (info.eventkind = ek_mouseleave) then begin
       restorepickshape;
       fsizeindex:= -1;
@@ -3725,7 +3725,7 @@ begin
       if not (csdesigning in widget1.componentstate) then begin
        setmousebutton(checkbuttonarea(pos));
       end;
-      checksizing((dos_moving in fdockstate) or 
+      checksizing((dos_moving in fdockstate) or
                                     (od_nosplitsize in foptionsdock));
      end
      else begin
@@ -3764,10 +3764,10 @@ begin
     ek_buttonpress: begin
      fsizeoffset:= 0;
      if shiftstate - [ss_left,ss_shift] = [] then begin
-      fsizeindex:= checksizing((ss_shift in shiftstate) or 
+      fsizeindex:= checksizing((ss_shift in shiftstate) or
                                 (od_nosplitsize in foptionsdock));
       if fsizeindex >= 0 then begin
-       if (ss_shift in shiftstate) or 
+       if (ss_shift in shiftstate) or
                   (od_nosplitsize in foptionsdock) then begin
         include(fdockstate,dos_moving);
        end
@@ -3800,7 +3800,7 @@ begin
       dosize();
       fsizeindex:= -1;
       fintf.getwidget.invalidate();
-      checksizing((dos_moving in fdockstate) or 
+      checksizing((dos_moving in fdockstate) or
                          (od_nosplitsize in foptionsdock));
      end
      else begin
@@ -3879,12 +3879,12 @@ begin
   if ismdi then begin
    widget1:= fintf.getwidget;
    widget1.bringtofront;
-   if ((sender = widget1) or (sender = widget1.container)) and 
-                  widget1.canfocus and 
+   if ((sender = widget1) or (sender = widget1.container)) and
+                  widget1.canfocus and
           not widget1.checkdescendent(widget1.window.focusedwidget)then begin
     pt1:= sender.pos;
     widget1.setfocus;
-    application.delayedmouseshift(subpoint(sender.pos,pt1)); 
+    application.delayedmouseshift(subpoint(sender.pos,pt1));
                //follow shift in view ???
    end;
   end;
@@ -3919,9 +3919,9 @@ begin
          (fdockstate * [dos_updating1,dos_updating2,dos_updating3,dos_updating4,
                        dos_updating5] = []) then begin
   with fintf.getwidget do begin
-   if (componentstate * [csloading,csdesigning] = []) and 
+   if (componentstate * [csloading,csdesigning] = []) and
                         not (ws_destroying in widgetstate) and
-     not (ow1_noautosizing in sender.optionswidget1) and 
+     not (ow1_noautosizing in sender.optionswidget1) and
                               not(dos_tabedending in fdockstate)then begin
     include(fdockstate,dos_updating3);
     try
@@ -3949,7 +3949,7 @@ begin
   end
   else begin
    if istabed and (widget1.parentwidget is tdocktabpage) then begin
-    tdocktabpage(widget1.parentwidget).caption:= value;    
+    tdocktabpage(widget1.parentwidget).caption:= value;
    end;
   end;
  end;
@@ -3978,7 +3978,7 @@ function tdockcontroller.isfullarea: boolean;
 var
  acontroller: tdockcontroller;
 begin
- result:= getparentcontroller(acontroller) and 
+ result:= getparentcontroller(acontroller) and
               (acontroller.fsplitdir <> sd_none);
 end;
 
@@ -3986,7 +3986,7 @@ function tdockcontroller.istabed: boolean;
 var
  acontroller: tdockcontroller;
 begin
- result:= getparentcontroller(acontroller) and 
+ result:= getparentcontroller(acontroller) and
               (acontroller.fsplitdir = sd_tabed);
 end;
 
@@ -3994,16 +3994,16 @@ function tdockcontroller.ismdi: boolean;
 var
  acontroller: tdockcontroller;
 begin
- result:= (fintf.getwidget.parentwidget <> nil) and 
-  (fmdistate <> mds_floating) and getparentcontroller(acontroller) and 
-        (acontroller.fsplitdir = sd_none) and 
+ result:= (fintf.getwidget.parentwidget <> nil) and
+  (fmdistate <> mds_floating) and getparentcontroller(acontroller) and
+        (acontroller.fsplitdir = sd_none) and
                  not (dos_tabedending in acontroller.fdockstate);
 end;
 
 function tdockcontroller.isfloating: boolean;
 begin
  with fintf.getwidget do begin
-  result:= (parentwidget = nil) or (csdesigning in componentstate) and 
+  result:= (parentwidget = nil) or (csdesigning in componentstate) and
                (parentwidget = owner);
  end;
 end;
@@ -4091,14 +4091,14 @@ begin
     end;
     if (fframe <> nil) then begin
      tcustomframe1(fframe).updatestate;
-    end;        
+    end;
     domdistatechanged(statebefore,fmdistate);
    end;
   end
   else begin
    fmdistate:= avalue;
   end;
- end;  
+ end;
 end;
 
 function tdockcontroller.placementrect: rectty;
@@ -4116,7 +4116,7 @@ end;
 procedure tdockcontroller.parentchanged(const sender: twidget);
 begin
  exclude(twidget1(sender).fwidgetstate1,ws1_nominsize);
- if not (csloading in sender.componentstate) and 
+ if not (csloading in sender.componentstate) and
             (twidget1(sender).fframe is tgripframe) then begin
   with tgripframe(twidget1(sender).fframe) do begin
    exclude(fgripstate,grps_sizevalid);
@@ -4130,7 +4130,7 @@ var
  pos1: captionposty;
  widget1: twidget;
 begin
- if ismdi then begin 
+ if ismdi then begin
   widget1:= fintf.getwidget;
   case fmdistate of
    mds_normal: begin
@@ -4155,7 +4155,7 @@ begin
     end;
    end;
   end;
- end; 
+ end;
 end;
 
 procedure tdockcontroller.statechanged(const astate: widgetstatesty);
@@ -4402,7 +4402,7 @@ begin
    break;
   end;
   widget1:= widget1.parentwidget;
- end;   
+ end;
 end;
 
 
@@ -4451,7 +4451,7 @@ function tdockcontroller.childicon(): tmaskedbitmap;
    end;
   end;
  end; //check
- 
+
 var
  ar1: widgetarty;
  i1: int32;
@@ -4502,7 +4502,7 @@ procedure tdockcontroller.setsplitdir(const avalue: splitdirty);
 begin
  if avalue <> fdefaultsplitdir then begin
   fdefaultsplitdir:= avalue;
-  if (avalue <> sd_none) and 
+  if (avalue <> sd_none) and
               not (csloading in fintf.getwidget.componentstate) then begin
    fasplitdir:= avalue;
    checksplitdir(fasplitdir);
@@ -4525,7 +4525,7 @@ function tdockcontroller.getdockrect: rectty;
 var
  w1: twidget;
 begin
- if (ftabwidget <> nil) and 
+ if (ftabwidget <> nil) and
                  (tdocktabwidget(ftabwidget).activepage <> nil) then begin
   w1:= tdocktabwidget(ftabwidget).activepage.container;
   result:= w1.paintrect;
@@ -4549,7 +4549,7 @@ begin
    for int1:= 0 to high(fchildren) do begin
     ar1[int1]:= widget1.findchild(fchildren[int1]);
    end;
-   if (ffocusedchild >= 0) and (ffocusedchild <= high(ar1)) and 
+   if (ffocusedchild >= 0) and (ffocusedchild <= high(ar1)) and
        (ar1[ffocusedchild] <> nil) and ar1[ffocusedchild].canfocus then begin
     ar1[ffocusedchild].setfocus(false);
    end;
@@ -4664,7 +4664,7 @@ procedure tgripframe.drawgripbutton(const acanvas: tcanvas;
 
 var
  hiddenedges1: edgesty;
-                
+
  function calclevel(const aoption: optiondockty): integer;
  begin
   if (ord(aoption) >= 0) and ((aoption in fcontroller.foptionsdock) or
@@ -4676,7 +4676,7 @@ var
    result:= 1;
   end;
  end;
- 
+
 var
  rect2: rectty;
  int1: integer;
@@ -4690,7 +4690,8 @@ begin
  end;
  with acanvas,arect do begin
   fillrect(arect,acolorbutton);
-  i1:= calclevel(optiondockty(-1));
+  // i1:= calclevel(optiondockty(-1));
+  i1:= 1;
   case akind of
    dbr_close: begin
     if factgripsize >= 8 then begin
@@ -4783,7 +4784,7 @@ begin
                                                                acolorglyph);
    end;
   end;
- end;  
+ end;
 end;
 
 procedure tgripframe.internalpaintoverlay(const canvas: tcanvas;
@@ -4821,7 +4822,7 @@ begin
    if isactive and (fgrip_faceactive <> nil) then begin
     face1:= tface1(fgrip_faceactive);
    end;
-   
+
    if face1 <> nil then begin
     bo1:= fgrip_pos in [cp_left,cp_right];
     if bo1 then begin
@@ -4837,7 +4838,7 @@ begin
      end;
     end;
    end;
-   canvas.save(); 
+   canvas.save();
    if isactive then begin
     colorbutton:= fgrip_colorbuttonactive;
     colorglyph:= fgrip_colorglyphactive;
@@ -4850,53 +4851,53 @@ begin
     drawgripbutton(canvas,dbr_close,frects[dbr_close],colorglyph,colorbutton,
                                     fedges[dbr_close]);
    end;
-   if (frects[dbr_maximize].cx > 0) and 
+   if (frects[dbr_maximize].cx > 0) and
            (go_maximizebutton in fgrip_options) then begin
     drawgripbutton(canvas,dbr_maximize,frects[dbr_maximize],colorglyph,
                            colorbutton,fedges[dbr_maximize]);
    end;
-   if (frects[dbr_normalize].cx > 0) and 
+   if (frects[dbr_normalize].cx > 0) and
                            (go_normalizebutton in fgrip_options) then begin
     drawgripbutton(canvas,dbr_normalize,frects[dbr_normalize],colorglyph,
                             colorbutton,fedges[dbr_normalize]);
    end;
-   if (frects[dbr_minimize].cx > 0) and 
+   if (frects[dbr_minimize].cx > 0) and
                            (go_minimizebutton in fgrip_options) then begin
     drawgripbutton(canvas,dbr_minimize,frects[dbr_minimize],colorglyph,
                            colorbutton,fedges[dbr_minimize]);
    end;
-   if (frects[dbr_fixsize].cx > 0) and 
+   if (frects[dbr_fixsize].cx > 0) and
                            (go_fixsizebutton in fgrip_options) then begin
     drawgripbutton(canvas,dbr_fixsize,frects[dbr_fixsize],colorglyph,
                           colorbutton,fedges[dbr_fixsize]);
    end;
-   if (frects[dbr_float].cx > 0) and 
+   if (frects[dbr_float].cx > 0) and
                            (go_floatbutton in fgrip_options) then begin
     drawgripbutton(canvas,dbr_float,frects[dbr_float],colorglyph,colorbutton,
                                     fedges[dbr_float]);
    end;
-   if (frects[dbr_top].cx > 0) and 
+   if (frects[dbr_top].cx > 0) and
                            (go_topbutton in fgrip_options)  then begin
     drawgripbutton(canvas,dbr_top,frects[dbr_top],colorglyph,colorbutton,
                                   fedges[dbr_top]);
    end;
-   if (frects[dbr_background].cx > 0) and 
+   if (frects[dbr_background].cx > 0) and
                            (go_backgroundbutton in fgrip_options) then begin
     drawgripbutton(canvas,dbr_background,frects[dbr_background],colorglyph,
                              colorbutton,fedges[dbr_background]);
    end;
-   if (frects[dbr_lock].cx > 0) and 
+   if (frects[dbr_lock].cx > 0) and
                            (go_lockbutton in fgrip_options) then begin
     drawgripbutton(canvas,dbr_lock,frects[dbr_lock],colorglyph,colorbutton,
                                    fedges[dbr_lock]);
    end;
-   if (frects[dbr_nolock].cx > 0) and 
+   if (frects[dbr_nolock].cx > 0) and
                            (go_nolockbutton in fgrip_options) then begin
     drawgripbutton(canvas,dbr_nolock,frects[dbr_nolock],colorglyph,
                          colorbutton,fedges[dbr_nolock]);
    end;
-   if (info1.text.text <> '') and 
-     (not floating and (go_showsplitcaption in fgrip_options) or 
+   if (info1.text.text <> '') and
+     (not floating and (go_showsplitcaption in fgrip_options) or
      floating and (go_showfloatcaption in fgrip_options) or
                                                 fcontroller.ismdi) then begin
     with info1 do begin
@@ -5171,8 +5172,8 @@ var
 begin
  if not (grps_sizevalid in fgripstate) then begin
   factgripsize:= fgrip_size;
-  if not (od_nolock in fcontroller.foptionsdock) and 
-              fcontroller.getparentcontroller(parentcontroller) and 
+  if not (od_nolock in fcontroller.foptionsdock) and
+              fcontroller.getparentcontroller(parentcontroller) and
                                          parentcontroller.nogrip then begin
    factgripsize:= 0;
   end;
@@ -5184,7 +5185,7 @@ procedure tgripframe.updaterects;
 
 var
  firstbu,lastbu: dockbuttonrectty;
-  
+
  procedure initrect(const index: dockbuttonrectty);
  begin
   if firstbu = dbr_none then begin
@@ -5220,7 +5221,7 @@ var
 var
  bo1,bo2,bo3,designing: boolean;
  parentcontroller: tdockcontroller;
-  
+
 begin         //widget origin
  inherited;
  firstbu:= dbr_none;
@@ -5265,11 +5266,11 @@ begin         //widget origin
    initrect(dbr_close);
   end;
   if fcontroller.ismdi or designing then begin
-   if (go_maximizebutton in fgrip_options) and 
+   if (go_maximizebutton in fgrip_options) and
              ((fcontroller.mdistate <> mds_maximized) or designing) then begin
     initrect(dbr_maximize);
    end;
-   if (go_normalizebutton in fgrip_options) and 
+   if (go_normalizebutton in fgrip_options) and
            ((fcontroller.mdistate <> mds_normal) or designing) then begin
     initrect(dbr_normalize);
    end;
@@ -5280,9 +5281,9 @@ begin         //widget origin
   end;
   if bo1{ or designing} then begin
    if (go_fixsizebutton in fgrip_options) then begin
-    if designing or 
+    if designing or
          bo3 and fcontroller.getparentcontroller(parentcontroller) and
-         not parentcontroller.nofit and 
+         not parentcontroller.nofit and
                   (parentcontroller.fsplitdir <> sd_tabed)  then begin
      initrect(dbr_fixsize);
     end;
@@ -5302,7 +5303,7 @@ begin         //widget origin
   if go_lockbutton in fgrip_options then begin
    initrect(dbr_lock);
   end;
-  if bo1 and (go_nolockbutton in fgrip_options) and 
+  if bo1 and (go_nolockbutton in fgrip_options) and
           ((fcontroller.getparentcontroller <> nil) or designing) then begin
    initrect(dbr_nolock);
   end;
@@ -5396,9 +5397,9 @@ begin
   with twidget1(sender) do begin
    fwidgetstate:= fwidgetstate + [ws_wantmousemove,ws_wantmousebutton];
   end;
- end;  
+ end;
 end;
- 
+
 procedure tgripframe.getpickobjects(const sender: tobjectpicker;
                                                   var objects: integerarty);
 var
@@ -5406,9 +5407,9 @@ var
  rect: rectty;
 begin
  rect:= sender.pickrect;
- if fcontroller.canmdisize and 
+ if fcontroller.canmdisize and
               (fcontroller.mdistate <> mds_minimized) and
-      (not pointinrect(rect.pos,fgriprect) or 
+      (not pointinrect(rect.pos,fgriprect) or
          pointinrect(rect.pos,frects[dbr_handle])) then begin
   with fintf.getwidget do begin
    kind1:= calcsizingkind(rect.pos,makerect(nullpoint,size));
@@ -5492,17 +5493,17 @@ begin
    if cxmin < int1 then begin
     cxmin:= int1;
    end;
-  end;  
+  end;
   result:= adjustsizingrect(widgetrect,akind,offset,
                    cxmin,bounds_cxmax,cymin,bounds_cymax);
   if parentwidget <> nil then begin
    with parentwidget do begin
-    intersectrect(result,makerect(clientwidgetpos,maxclientsize),result);   
+    intersectrect(result,makerect(clientwidgetpos,maxclientsize),result);
    end;
   end;
  end;
 end;
- 
+
 procedure tgripframe.endpickmove(const sender: tobjectpicker);
 var
  ar1: integerarty;
@@ -5598,7 +5599,7 @@ begin
   if go_buttonhints in fgrip_options then begin
    aid:= hintidframe - ord(fcontroller.checkbuttonarea(
             subpoint(apos,fcontroller.getwidget.clientwidgetpos)));
-   if not (od_captionhint in fcontroller.optionsdock) and 
+   if not (od_captionhint in fcontroller.optionsdock) and
                    (aid = hintidframe-ord(dbr_handle)) then begin
     result:= false;
    end;
@@ -5759,10 +5760,10 @@ end;
 function tdockhandle.gethint: msestring;
 begin
  result:= inherited gethint();
- if (result = '') and (fcontroller <> nil) and 
+ if (result = '') and (fcontroller <> nil) and
                       (od_captionhint in fcontroller.optionsdock) then begin
   result:= fcontroller.caption;
- end;  
+ end;
 end;
 
 { tdockpanel }
@@ -5793,7 +5794,7 @@ end;
 procedure tdockpanel.childmouseevent(const sender: twidget;
                var info: mouseeventinfoty);
 begin
- if not (es_processed in info.eventstate) then begin  
+ if not (es_processed in info.eventstate) then begin
   fdragdock.childormouseevent(sender,info);
   if not (es_processed in info.eventstate) then begin
    inherited;
