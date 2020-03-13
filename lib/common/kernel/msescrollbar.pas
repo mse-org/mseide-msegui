@@ -432,7 +432,8 @@ begin
  fondimchanged:= ondimchanged;
  fpagesize:= defaultpagesize;
  fwheelsensitivity:= 1;
- for bu1:= low(scrollbarareaty) to high(scrollbarareaty) do begin
+// for bu1:= low(scrollbarareaty) to (high(scrollbarareaty)) do begin
+  for bu1:= low(scrollbarareaty) to sba_end do begin
   fdrawinfo.areas[bu1].color:= cl_transparent;
  end;
 end;
@@ -517,7 +518,8 @@ begin
    scrollrect.y:= y;
    scrollrect.cx:= scrolllength;
    scrollrect.cy:= width1;
-   for bu1:= low(scrollbarareaty) to high(scrollbarareaty) do begin
+  // for bu1:= low(scrollbarareaty) to high(scrollbarareaty)  do begin
+   for bu1:= low(scrollbarareaty) to sba_end do begin
     areas[bu1].ca.dim.y:= y;
     areas[bu1].ca.dim.cy:= width1;
    end;
@@ -538,7 +540,8 @@ begin
    scrollrect.y:= y + endblen;
    scrollrect.cx:= width1;
    scrollrect.cy:= scrolllength;
-   for bu1:= low(scrollbarareaty) to high(scrollbarareaty) do begin
+   // for bu1:= low(scrollbarareaty) to high(scrollbarareaty) do begin
+   for bu1:= low(scrollbarareaty) to sba_end do begin
     areas[bu1].ca.dim.x:= x;
     areas[bu1].ca.dim.cx:= width1;
    end;
@@ -638,7 +641,8 @@ var
  ar1: scrollbarareaty;
 begin
  result:= sba_none;
- for ar1:= low(scrollbarareaty) to high(scrollbarareaty) do begin
+ //for ar1:= low(scrollbarareaty) to high(scrollbarareaty) do begin
+ for ar1:= low(scrollbarareaty) to sba_end do begin
   if pointinshape(point,fdrawinfo.areas[ar1]) then begin
    result:= ar1;
    break;

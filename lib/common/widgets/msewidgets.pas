@@ -4142,11 +4142,14 @@ begin             //updatelayout
   buttonpos1:= @buttonposstep;
  end;
 
- setlength(fbuttons,ord(high(stepkindty)) + 1);
+// setlength(fbuttons,ord(high(stepkindty)) + 1);
+ setlength(fbuttons,ord(high(stepkindty)));
  buttoncount:= 0;
  a:= 0; //compilerwarning
  b:= 0; //compilerwarning
- for akind:= low(stepkindty) to high(stepkindty) do begin
+// for akind:= low(stepkindty) to high(stepkindty) do begin
+ for akind:= low(stepkindty) to sk_last do begin
+
 //  if not (akind in finvisiblebuttons) or (akind in fvisiblebuttons) then begin
   if (akind in fforcevisiblebuttons) or
         not (akind in fforceinvisiblebuttons) and (akind in fneededbuttons) then begin
@@ -4238,7 +4241,8 @@ begin             //updatelayout
   fdim.y:= ay;
   bo1:= fbuttonpos in [sbp_left,sbp_right];
   buttoncount:= 0;
-  for akind:= low(stepkindty) to high(stepkindty) do begin
+ // for akind:= low(stepkindty) to high(stepkindty) do begin
+   for akind:= low(stepkindty) to sk_last do begin
    if bo2 then begin
     if not odd(buttoncount) and (akind <> low(stepkindty)) then begin
      if bo1 then begin
