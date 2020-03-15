@@ -1,5 +1,5 @@
 { MSEide Copyright (c) 2010 by Martin Schreiber
-   
+
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation; either version 2 of the License, or
@@ -28,14 +28,14 @@ interface
 
 uses
  mseclasses,msetypes,msefftw;
- 
+
 type
 
  fftstatety = (ffs_inited,ffs_windowvalid);
  fftstatesty = set of fftstatety;
 
- windowfuncty = (wf_rectangular,wf_hann,wf_hamming); 
- 
+ windowfuncty = (wf_rectangular,wf_hann,wf_hamming);
+
  tfft = class(tmsecomponent)
   private
    fplan: fftw_plan;
@@ -71,12 +71,12 @@ type
    property outreal: realarty read getoutreal;
    property outcomplex: complexarty read getoutcomplex;
   published
-   property windowfunc: windowfuncty read fwindowfunc 
+   property windowfunc: windowfuncty read fwindowfunc
                 write setwindowfunc default wf_rectangular;
-   property windowfuncpar0: double read fwindowfuncpar0 
-                                          write setwindowfuncpar0;   
-   property windowfuncpar1: double read fwindowfuncpar1 
-                                          write setwindowfuncpar1;   
+   property windowfuncpar0: double read fwindowfuncpar0
+                                          write setwindowfuncpar0;
+   property windowfuncpar1: double read fwindowfuncpar1
+                                          write setwindowfuncpar1;
  end;
 
 implementation
@@ -88,7 +88,7 @@ implementation
   {$warn 6058 off}
  {$endif}
 {$endif}
-	 
+
 { tfft }
 
 destructor tfft.destroy;
@@ -128,12 +128,12 @@ begin
    wf_hann: begin
     for int1:= 0 to high(fwindowdata) do begin
      fwindowdata[int1]:= 0.5 * (1-cos((2*pi*int1)/nminus1));
-    end;    
+    end;
    end;
    wf_hamming: begin
     for int1:= 0 to high(fwindowdata) do begin
      fwindowdata[int1]:= 0.54 - 0.46 * cos((2*pi*int1)/nminus1);
-    end;    
+    end;
    end;
    else begin
     for int1:= 0 to high(fwindowdata) do begin
@@ -199,7 +199,7 @@ begin
    setlength(result,fn div 2 + 1);
    po1:= foutcomplex;
    do1:= fn/2;
-   for int1:= 0 to high(result) do begin 
+   for int1:= 0 to high(result) do begin
     result[int1]:= sqrt(po1^.re*po1^.re+po1^.im*po1^.im)/do1;
     inc(po1);
    end;

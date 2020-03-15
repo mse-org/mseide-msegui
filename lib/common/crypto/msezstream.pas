@@ -17,11 +17,11 @@ uses
 const
  defaultzstreambuffersize = 16384;
  minzstreambuffersize = 256;
- 
+
 type
  zstreamstatety = (zs_inflate,zs_inited,zs_fileeof);
  zstreamstatesty = set of zstreamstatety;
- 
+
  zstreamhandlerdatadty = record
   strm: pz_stream;
   buf: pbyte;
@@ -29,7 +29,7 @@ type
   state: zstreamstatesty;
  end;
  pzstreamhandlerdatadty = ^zstreamhandlerdatadty;
- {$if sizeof(zstreamhandlerdatadty) > sizeof(cryptohandlerdataty)} 
+ {$if sizeof(zstreamhandlerdatadty) > sizeof(cryptohandlerdataty)}
   {$error 'buffer overflow'}
  {$ifend}
  zstreamhandlerdataty = record
@@ -68,17 +68,17 @@ type
    procedure flush(const astream: tmsefilestream;
                                const mode: integer = Z_SYNC_FLUSH); overload;
   published
-   property compressionlevel: integer read fcompressionlevel 
+   property compressionlevel: integer read fcompressionlevel
                   write fcompressionlevel default Z_DEFAULT_COMPRESSION;
    property buffersize: integer read fbuffersize write setbuffersize
                                    default defaultzstreambuffersize;
-                  
+
  end;
- 
+
 implementation
 uses
  msesys,mseapplication;
- 
+
 { tzstreamhandler }
 
 constructor tzstreamhandler.create(aowner: tcomponent);
@@ -123,7 +123,7 @@ begin
   with strm^ do begin
    zalloc:= nil;
    zfree:= nil;
-   opaque:= nil;   
+   opaque:= nil;
   end;
   if zs_inflate in state then begin
    inflateinit(strm);
@@ -135,7 +135,7 @@ begin
    deflateinit(strm,fcompressionlevel);
    include(state,zs_inited);
   end;
- end; 
+ end;
 end;
 
 procedure tzstreamhandler.close(var aclient: cryptoclientinfoty);
@@ -167,7 +167,7 @@ begin
    buf:= nil;
   end;
   state:= [];
- end; 
+ end;
  inherited;
 end;
 
@@ -272,7 +272,7 @@ begin
   end;
  end;
 end;
-                                              
+
 procedure tzstreamhandler.flush(var aclient: cryptoclientinfoty);
 begin
  internalflush(aclient,Z_SYNC_FLUSH);

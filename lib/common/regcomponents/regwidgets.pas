@@ -22,24 +22,24 @@ interface
 uses
  msetypes,msepropertyeditors,msestrings,sysutils;
 
-type 
+type
  tgridpropseditor = class(tpersistentarraypropertyeditor)
   protected
    procedure itemmoved(const source,dest: integer); override;
  end;
- 
+
  tdatacoleditor = class(tclasselementeditor)
   public
    function getvalue: msestring; override;
  end;
- 
+
  tdatacolseditor = class(tgridpropseditor)
   protected
-   function geteditorclass: propertyeditorclassty; override;  
+   function geteditorclass: propertyeditorclassty; override;
   public
    function itemprefix: msestring; override;
  end;
- 
+
 implementation
 uses
  classes,mclasses,msesimplewidgets,msegrids,msemenus,mseimage,msedispwidgets,
@@ -57,31 +57,31 @@ uses
 //   {$endif}
   {$endif}
  {$endif};
- 
+
 type
  tpropertyeditor1 = class(tpropertyeditor);
  tdatacols1 = class(tdatacols);
  tfixcols1 = class(tfixcols);
  tfixrows1 = class(tfixrows);
  ttaborderoverride1 = class(ttaborderoverride);
- 
- 
+
+
 type
  tfixgridpropeditor = class(tarrayelementeditor)
   public
    function name: msestring; override;
  end;
- 
+
  tfixgridpropseditor = class(tgridpropseditor)
   protected
    function getelementeditorclass: elementeditorclassty; override;
  end;
-   
+
  tfixrowseditor = class(tfixgridpropseditor)
   public
    function itemprefix: msestring; override;
  end;
- 
+
  tfixcolseditor = class(tfixgridpropseditor)
   public
    function itemprefix: msestring; override;
@@ -96,7 +96,7 @@ type
   protected
    function geteditorclass: propertyeditorclassty; override;
  end;
- 
+
  tfixcolheaderspropertyeditor = class(tpersistentarraypropertyeditor)
   protected
    function geteditorclass: propertyeditorclassty; override;
@@ -107,10 +107,10 @@ type
   public
    function getvalue: msestring; override;
  end;
- 
+
  ttraceseditor = class(tpersistentarraypropertyeditor)
   protected
-   function geteditorclass: propertyeditorclassty; override;  
+   function geteditorclass: propertyeditorclassty; override;
   public
  end;
 
@@ -118,10 +118,10 @@ type
   public
    function getvalue: msestring; override;
  end;
- 
+
  ttoolbuttonseditor = class(tpersistentarraypropertyeditor)
   protected
-   function geteditorclass: propertyeditorclassty; override;  
+   function geteditorclass: propertyeditorclassty; override;
   public
  end;
 
@@ -134,7 +134,7 @@ type
   protected
    function getinvisibleitems: tintegerset; override;
  end;
- 
+
  tframebuttoneditor = class(tclasspropertyeditor)
   protected
    function dispname: msestring; override;
@@ -144,10 +144,10 @@ type
   public
    function dispname: msestring; override;
  end;
- 
+
  tframebuttonseditor = class(tpersistentarraypropertyeditor)
   protected
-   function geteditorclass: propertyeditorclassty; override;  
+   function geteditorclass: propertyeditorclassty; override;
   public
  end;
 
@@ -167,27 +167,27 @@ type
   protected
    function getinvisibleitems: tintegerset; override;
  end;
- 
+
 const
- mseformintf: designmoduleintfty = 
+ mseformintf: designmoduleintfty =
   (createfunc: {$ifdef FPC}@{$endif}createmseform;
      initnewcomponent: nil; getscale: nil; sourcetoform: nil);
- sizingformintf: designmoduleintfty = 
+ sizingformintf: designmoduleintfty =
   (createfunc: {$ifdef FPC}@{$endif}createsizingform;
      initnewcomponent: nil; getscale: nil; sourcetoform: nil);
- mainformintf: designmoduleintfty = 
+ mainformintf: designmoduleintfty =
   (createfunc: {$ifdef FPC}@{$endif}createmainform;
      initnewcomponent: nil; getscale: nil; sourcetoform: nil);
- dockpanelformintf: designmoduleintfty = 
+ dockpanelformintf: designmoduleintfty =
   (createfunc: {$ifdef FPC}@{$endif}createdockpanelform;
      initnewcomponent: nil; getscale: nil; sourcetoform: nil);
- subformintf: designmoduleintfty = 
+ subformintf: designmoduleintfty =
   (createfunc: {$ifdef FPC}@{$endif}createsubform;
      initnewcomponent: nil; getscale: nil; sourcetoform: nil);
- scrollboxformintf: designmoduleintfty = 
+ scrollboxformintf: designmoduleintfty =
   (createfunc: {$ifdef FPC}@{$endif}createscrollboxform;
      initnewcomponent: nil; getscale: nil; sourcetoform: nil);
- tabformintf: designmoduleintfty = 
+ tabformintf: designmoduleintfty =
   (createfunc: {$ifdef FPC}@{$endif}createtabform;
      initnewcomponent: nil; getscale: nil; sourcetoform: nil);
 
@@ -199,7 +199,7 @@ begin
  registerclass(tdockpanelform);
  registerclass(tscrollboxform);
  registerclass(tsizingform);
- 
+
  registercomponents('Widget',[
   tlabel,ticon,
   tstringdisp,trichstringdisp,tintegerdisp,tint64disp,trealdisp,tdatetimedisp,
@@ -274,7 +274,7 @@ begin
  registerpropertyeditor(typeinfo(ttoolbuttons),nil,'',ttoolbuttonseditor);
  registerpropertyeditor(typeinfo(trealdatalist),ttrace,'',
                                 toptionaldatalistpropertyeditor);
- 
+
  registerpropertyeditor(typeinfo(boolean),tcustombutton,'visible',
                            trefreshbooleanpropertyeditor);
  registerpropertyeditor(typeinfo(boolean),tcustombutton,'enabled',
@@ -294,17 +294,17 @@ begin
 
  registerpropertyeditor(typeinfo(labeloptionsty),tcustomlabel,'',
                                            tvolatilesetpropertyeditor);
-                                           
+
  registerpropertyeditor(typeinfo(ttaborderoverride),nil,'',
                                    ttaborderoverridepropertyeditor);
  registerpropertyeditor(typeinfo(optionsdockty),nil,'',
                                            toptionsdockeditor);
-  
+
  registerunitgroup(['msegrids'],['msegui','msegraphutils','mseclasses',
                    'msegridsglob']);
  registerunitgroup(['msewidgetgrid'],['msedataedits',
                     'msegui','msegraphutils','mseclasses']);
-                    
+
  registerdesignmoduleclass(tmseform,@mseformintf);
  registerdesignmoduleclass(tsizingform,@sizingformintf);
  registerdesignmoduleclass(tmainform,@mainformintf);
@@ -372,7 +372,7 @@ begin
   with tdatacols1(getordvalue(int1)) do begin
    move(curindex,newindex);
 //   tfixrows1(fgrid.fixrows).movecol(curindex,newindex);
-  end;   
+  end;
  end;
  }
 end;

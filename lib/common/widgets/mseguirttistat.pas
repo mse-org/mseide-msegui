@@ -15,11 +15,11 @@ unit mseguirttistat;
 interface
 uses
  msegui,mserttistat,mseglob,mseclasses,msestat,msestatfile;
- 
+
 type
  rttistatoption = (rso_autowritestat);
  rttistatoptionsty = set of rttistatoption;
- 
+
  getwidgetclassprocty = procedure (const sender: tobject;
                                   var aclass: widgetclassty) of object;
  tguirttistat = class(trttistat)
@@ -38,16 +38,16 @@ type
    property editing: boolean read fediting;
   published
    property options: rttistatoptionsty read foptions write foptions default [];
-   property ongetdialogclass: getwidgetclassprocty read fongetdialogclass 
+   property ongetdialogclass: getwidgetclassprocty read fongetdialogclass
                                                        write fongetdialogclass;
    property onbeforeedit: notifyeventty read fonbeforeedit write fonbeforeedit;
    property onafteredit: notifyeventty read fonafteredit write fonafteredit;
  end;
- 
+
 implementation
 uses
  sysutils;
- 
+
 { tguirttistat }
 
 function tguirttistat.edit: modalresultty;

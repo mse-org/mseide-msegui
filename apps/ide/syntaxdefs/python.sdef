@@ -9,7 +9,7 @@ styles
 
 # COLORS font/paper/statement/pairmark/fontline/line/focusline/selected
 COLORS cl_default cl_default cl_default cl_ltyellow cl_dkgray cl_ltgray cl_white cl_ltblue
- 
+
 keyworddefs python
  'False' 'class' 'finally' 'is' 'return'
  'None' 'continue' 'for' 'lambda' 'try'
@@ -34,7 +34,7 @@ scope string3 string
 scope string4 string
  endtokens
   '"""'
-  
+
 scope main
 
  keywords words

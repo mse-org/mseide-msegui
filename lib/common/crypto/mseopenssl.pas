@@ -64,7 +64,7 @@ const
  SSL_FILETYPE_ASN1	= 2;
  SSL_FILETYPE_PEM = 1;
  EVP_PKEY_RSA = 6;
- 
+
 type
  sslsize_t = culong;
  SslPtr = Pointer;
@@ -121,14 +121,14 @@ type
  end;
 
  TProgressCallbackFunction = procedure(status: cint; progress: cint;
-                                                             data: pointer); 
+                                                             data: pointer);
 
  // Password ask callback for I/O function prototipe
  // It must fill buffer with password and return password length
  TPWCallbackFunction = function(buffer: pcuchar; length: cint;
                                 verify: cint; data: pointer): cint; cdecl;
 
-  
+
 var
  SSL_new: function(ctx: PSSL_CTX):PSSL; cdecl;
  SSL_free: procedure(ssl: PSSL); cdecl;
@@ -140,7 +140,7 @@ var
  SSL_set_cipher_list: function(arg0: PSSL_CTX; str: PChar):cint; cdecl;
 
  SSL_CTX_set_cipher_list: function(arg0: PSSL_CTX; str: PChar):cint; cdecl;
-//  SSL_CTX_set_cipher_list: function(arg0: PSSL_CTX; 
+//  SSL_CTX_set_cipher_list: function(arg0: PSSL_CTX;
 //                                    var str: String):cint; cdecl;
  SSL_CTX_new: function(meth: PSSL_METHOD):PSSL_CTX; cdecl;
  SSL_CTX_free: procedure(arg0: PSSL_CTX); cdecl;
@@ -270,7 +270,7 @@ implementation
 uses
  msesystypes,{$ifdef FPC}dynlibs,{$endif}msesysintf1,msesysintf
  {$ifndef FPC},classes_del{$endif};
-var 
+var
  libinfo,libinfoutil: dynlibinfoty;
 
 var
@@ -323,14 +323,14 @@ begin
   freelibrary(sslutillibhandle);
   sslutillibhandle:= 0;
  end;
-end; 
+end;
 }
 type
  mutexarty = array of mutexty;
 var
  locks: mutexarty;
 
-procedure lockingcallback(mode: cint; n: cint; afile: pchar; 
+procedure lockingcallback(mode: cint; n: cint; afile: pchar;
                        line: cint); cdecl;
 begin
  if mode and crypto_lock <> 0 then begin
@@ -469,7 +469,7 @@ end;
 
 var
  libloaded: boolean;
- 
+
 procedure initsslinterface; //calls initializeopenssl once
 begin
  if not libloaded then begin

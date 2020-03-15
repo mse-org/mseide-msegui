@@ -31,7 +31,7 @@ type
  tarrayprop = class;
  arrayproparrayty = array of tarrayprop;
 
- arraychangeeventty = procedure(const sender: tarrayprop; 
+ arraychangeeventty = procedure(const sender: tarrayprop;
                                        const index: integer) of object;
  arraysizechangeeventty = procedure(sender: tarrayprop) of object;
 
@@ -40,7 +40,7 @@ type
 
  arraypropkindty = (apk_none,apk_tpersistent,apk_integer,apk_colorty,apk_real,
                     apk_string,apk_msestring,apk_boolean,apk_pointer,apk_int64);
- 
+
  tarrayprop = class(tpersistent)
   private
    itemsread: boolean;
@@ -122,7 +122,7 @@ type
   public
    constructor create;
    function propkind: arraypropkindty; override;
-   property items[const index: integer]: colorty read getitems 
+   property items[const index: integer]: colorty read getitems
                                                 write setitems; default;
  end;
 
@@ -264,7 +264,7 @@ type
   public
    destructor destroy(); override;
  end;
- 
+
  tpersistentarrayprop = class(tarrayprop,iobjectlink)
   private                     //same layout as tpointerarrayprop!
   protected
@@ -282,7 +282,7 @@ type
    procedure unlink(const source,dest: iobjectlink; valuepo: pointer = nil);
    procedure objevent(const sender: iobjectlink; const event: objecteventty);
    function getinstance: tobject;
-   
+
    function getobjectlinker: tobjectlinker;
    procedure objectevent(const sender: tobject; const event: objecteventty); virtual;
    function getitems(const index: integer): tpersistent;{ virtual;}
@@ -322,7 +322,7 @@ type
  persistentarraypropclassty = class of tpersistentarrayprop;
 
  tmsecomponentlinkarrayprop = class;
- 
+
  tmsecomponentlinkitem = class(tvirtualpersistent)
   private
    fitem: tmsecomponent;
@@ -335,8 +335,8 @@ type
   published
  end;
 
- msecomponentlinkitemclassty = class of tmsecomponentlinkitem; 
- 
+ msecomponentlinkitemclassty = class of tmsecomponentlinkitem;
+
  tmsecomponentlinkarrayprop = class(tpersistentarrayprop)
   private
 //   function getitems(const index: integer): tmsecomponent;
@@ -346,7 +346,7 @@ type
   public
    constructor create(const aitemclasstype: msecomponentlinkitemclassty);
    class function getitemclasstype: persistentclassty; override;
-//   property items[const index: integer]: tmsecomponent read getitems 
+//   property items[const index: integer]: tmsecomponent read getitems
 //                                                   write setitems; default;
  end;
 
@@ -360,12 +360,12 @@ type
    procedure internalcreate(const aowner: tobject;
                            aclasstype: virtualpersistentclassty);
   public
-   constructor create(const aowner: tobject; 
+   constructor create(const aowner: tobject;
                      aclasstype: ownedpersistentclassty); virtual;
  end;
 
  tindexpersistentarrayprop = class;
- 
+
  ownedeventpersistentclassty = class of townedeventpersistent;
 
  townedeventpersistentarrayprop = class(tpersistentarrayprop)
@@ -437,7 +437,7 @@ type
    property idents: integerarty read getidents;
    property identmap: integerarty read getidentmap;
  end;
-{ 
+{
  tsubcomponentitem = class(tindexpersistent)
   protected
    fitem: tcomponent;
@@ -447,14 +447,14 @@ type
    constructor create(const aowner: tobject;
                            const aprop: tindexpersistentarrayprop); override;
    destructor destroy; override;
- end; 
+ end;
  subcomponentitemclassty = class of tsubcomponentitem;
- 
+
  tsubcomponentarrayprop = class(tindexpersistentarrayprop)
   protected
 //   procedure createitem(const index: integer; var item: tpersistent); override;
   public
-   constructor create(const aowner: tcomponent; 
+   constructor create(const aowner: tcomponent;
                 const aitemclasstype: subcomponentitemclassty); reintroduce;
  end;
 }
@@ -1315,7 +1315,7 @@ begin
  typedatapo:= gettypedata(ftypeinfo);
  typedatapo:= gettypedata(typedatapo^.comptype{$ifndef FPC}^{$endif});
 // fsize:= (typedatapo^.maxvalue - typedatapo^.minvalue) div 8 + 1;
- if (typedatapo^.maxvalue - typedatapo^.minvalue) div 8 + 1 > 
+ if (typedatapo^.maxvalue - typedatapo^.minvalue) div 8 + 1 >
                    sizeof(tintegerset) then begin
   raise earrayproperror.Create('set muss <= 32 sein!');
  end;
@@ -1609,7 +1609,7 @@ begin
    if nextvalue = vaident then begin
     str1:= readident;
     if str1 <> '' then begin
-     for int3:= 0 to count-1 do begin 
+     for int3:= 0 to count-1 do begin
       if getcollectionname(int3) = str1 then begin
        int2:= int3;
        break;
@@ -1655,7 +1655,7 @@ begin
     end;
     WriteListBegin;
     ancestor:= nil;
-    if ancestorbefore <> nil then begin 
+    if ancestorbefore <> nil then begin
      int2:= int1;
      if (str1 <> '') then begin
       int2:= bigint; //needs ancestor name
@@ -2032,7 +2032,7 @@ begin
   end;
  end;
 end;
- 
+
 function tindexpersistentarrayprop.readorder(
                                       const reader: tstatreader): integerarty;
 var
@@ -2161,7 +2161,7 @@ begin
  for int1:= 0 to fident - 1 do begin
   with tindexpersistent(fitems[int1]) do begin
    fident:= int1;
-  end;  
+  end;
  end;
 end;
 
@@ -2222,7 +2222,7 @@ procedure tmsecomponentlinkarrayprop.createitem(const index: integer;
                var item: tpersistent);
 begin
  inherited;
- tmsecomponentlinkitem(item).fprop:= self; 
+ tmsecomponentlinkitem(item).fprop:= self;
 end;
 
 class function tmsecomponentlinkarrayprop.getitemclasstype: persistentclassty;

@@ -100,78 +100,78 @@ object watchpointsfo: twatchpointsfo
     anchors = [an_top, an_bottom]
     optionsgrid = [og_colsizing, og_rowmoving, og_rowinserting, og_rowdeleting, og_focuscellonenter, og_autofirstrow, og_autoappend, og_colchangeontabkey, og_wrapcol, og_autopopup, og_mousescrollcol]
     fixcols.count = 1
-    fixcols.items = <    
+    fixcols.items = <
       item
         width = 20
         numstart = 1
         numstep = 1
       end>
     fixrows.count = 1
-    fixrows.items = <    
+    fixrows.items = <
       item
         height = 16
         captions.count = 7
-        captions.items = <        
+        captions.items = <
           item
             caption = 'on'
-          end        
+          end
           item
             caption = 'Kind'
-          end        
+          end
           item
             caption = 'Expression'
-          end        
+          end
           item
-          end        
+          end
           item
             caption = 'Count'
-          end        
+          end
           item
             caption = 'Ignore'
-          end        
+          end
           item
             caption = 'Condition'
           end>
       end>
     datacols.count = 7
-    datacols.items = <    
+    datacols.items = <
       item[wpton]
         width = 16
         options = [co_drawfocus, co_fixwidth, co_savestate]
         widgetname = 'wpton'
         dataclass = tgridintegerdatalist
-      end    
+      end
       item[wptkind]
         width = 33
         options = [co_savevalue, co_savestate]
         widgetname = 'wptkind'
         dataclass = tgridenumdatalist
-      end    
+      end
       item[wptexpression]
         width = 149
         options = [co_proportional, co_savevalue, co_savestate]
         widgetname = 'wptexpression'
         dataclass = tgridmsestringdatalist
-      end    
+      end
       item[wptno]
         width = 9
         options = [co_invisible]
         widgetname = 'wptno'
         dataclass = tgridintegerdatalist
-      end    
+      end
       item[wptcount]
         color = -1879048185
         width = 34
         options = [co_readonly, co_nofocus, co_savestate]
         widgetname = 'wptcount'
         dataclass = tgridintegerdatalist
-      end    
+      end
       item[wptignore]
         width = 38
         options = [co_savevalue, co_savestate]
         widgetname = 'wptignore'
         dataclass = tgridintegerdatalist
-      end    
+      end
       item[wptcondition]
         width = 162
         options = [co_fill, co_savevalue, co_savestate]
@@ -207,7 +207,7 @@ object watchpointsfo: twatchpointsfo
       frame.localprops1 = []
       frame.button.color = -2147483646
       frame.buttons.count = 1
-      frame.buttons.items = <      
+      frame.buttons.items = <
         item
           color = -2147483646
         end>
@@ -221,7 +221,7 @@ object watchpointsfo: twatchpointsfo
       textflags = [tf_xcentered, tf_ycentered, tf_noselect]
       ondataentered = wptondataentered
       dropdown.cols.count = 1
-      dropdown.cols.items = <      
+      dropdown.cols.items = <
         item
           data = (
             'W'
@@ -329,7 +329,7 @@ object watchpointsfo: twatchpointsfo
   end
   object gripopup: tpopupmenu
     menu.submenu.count = 1
-    menu.submenu.items = <    
+    menu.submenu.items = <
       item
         caption = 'Delete all'
         state = [as_localcaption, as_localonexecute]

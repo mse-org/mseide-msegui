@@ -28,10 +28,10 @@ interface
 
 uses
  mseformatstr,msetypes;
- 
+
 function unicodeformat (const fmt : unicodestring; const args : array of const;
          const formatsettings: tformatsettingsmse) : msestring;
-         
+
 implementation
 uses
  sysutils,sysconst,msefloattostr;

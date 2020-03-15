@@ -35,7 +35,7 @@ type
    constructor create(var indexlist: msestring; const imagelist: timagelist;
                           const facelist: tfacelist; out ok: boolean);
  end;
- 
+
 function editlookupindex(var indexlist: msestring; const imagelist: timagelist;
                                             const facelist: tfacelist): boolean;
 
@@ -49,7 +49,7 @@ begin
  tmseindexlookupeditorfo.create(indexlist,imagelist,facelist,result);
 end;
 
-{ tmseindexlookupeditorfo } 
+{ tmseindexlookupeditorfo }
 
 constructor tmseindexlookupeditorfo.create(var indexlist: msestring;
                const imagelist: timagelist; const facelist: tfacelist;

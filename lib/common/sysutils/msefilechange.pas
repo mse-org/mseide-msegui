@@ -159,8 +159,8 @@ end;
 
 const
  notifyflags = DN_MODIFY or DN_CREATE or DN_DELETE or DN_RENAME or DN_ATTRIB;
- 
-function adddir(const sender: tdirchangethread; 
+
+function adddir(const sender: tdirchangethread;
                                const name: filenamety): integer;
 var
 {$ifdef linux}
@@ -360,7 +360,7 @@ begin
     exit; //allready seen
    end;
    int1:= (int1 + 1) and sigpuffermask;
-  end; 
+  end;
   int1:= (fsiginpo + 1) and sigpuffermask;
   if int1 <> fsigoutpo then begin
    fsigqueue[fsiginpo]:= afd;
@@ -383,14 +383,14 @@ begin
  try
   if afd = -1 then begin
    for int1:= 0 to high(fdirs) do begin
-    fdirs[int1].changed;    
+    fdirs[int1].changed;
    end;
   end
   else begin
    for int1:= 0 to high(fdirs) do begin
     if (fdirs[int1].fdirhandle = afd) then begin
              //ev. unzuverlaessig bei wiederverwendetem fd?
-     fdirs[int1].changed;    
+     fdirs[int1].changed;
      break;
     end;
    end;

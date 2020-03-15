@@ -71,7 +71,7 @@ type
    procedure readbool(reader: treader);
    procedure writebool(writer: twriter);
    procedure setshortcuts(const avalue: shortcutarty);
-   procedure setshortcuts1(const avalue: shortcutarty);  
+   procedure setshortcuts1(const avalue: shortcutarty);
   protected
    ftag: integer;
    ftagpo: pointer;
@@ -86,7 +86,7 @@ type
    function loading: boolean;
    function shortcutseparator: msechar;
    procedure calccaptiontext(var ainfo: actioninfoty);
-   
+
   public
    constructor create(const aowner: tobject;
          const aprop: tindexpersistentarrayprop); overload; override;
@@ -104,12 +104,12 @@ type
                     stored isimageliststored;
    property imagenr: imagenrty read finfo.imagenr write setimagenr
                             stored isimagenrstored default -1;
-   property imagenrdisabled: imagenrty read finfo.imagenrdisabled 
+   property imagenrdisabled: imagenrty read finfo.imagenrdisabled
                                      write setimagenrdisabled
                                      stored isimagenrdisabledstored default -2;
-   property colorglyph: colorty read finfo.colorglyph write setcolorglyph 
+   property colorglyph: colorty read finfo.colorglyph write setcolorglyph
                        stored iscolorglyphstored default cl_default;
-   property color: colorty read finfo.color write setcolor 
+   property color: colorty read finfo.color write setcolor
                        stored iscolorstored default cl_default;
    property imagecheckedoffset: integer read finfo.imagecheckedoffset
               write setimagecheckedoffset
@@ -122,7 +122,7 @@ type
                         stored isshortcutstored default 0;
    property shortcut1: shortcutty read getshortcut1 write setshortcut1
                         stored isshortcut1stored default 0;
-   property options: menuactionoptionsty read finfo.options 
+   property options: menuactionoptionsty read finfo.options
                                                   write setoptions default [];
    property group: integer read finfo.group write setgroup
                              stored isgroupstored default 0;
@@ -138,7 +138,7 @@ type
                    write setonafterexecute  stored isonafterexecutestored;
 //   property onupdate: actioneventty read fonupdate write fonupdate;
  end;
- 
+
  ttoolbutton = class(tcustomtoolbutton)
   published
    property imagelist;
@@ -169,7 +169,7 @@ type
    constructor create(const aowner: tobject;
          const aprop: tindexpersistentarrayprop); overload; override;
  end;
- 
+
  tstockglyphtoolbutton = class(tcustomstockglyphtoolbutton)
   published
    property imagelist;
@@ -187,7 +187,7 @@ type
    property options;
    property group;
    property onexecute;
-   property onbeforeexecute; 
+   property onbeforeexecute;
    property onafterexecute;
  end;
 
@@ -202,18 +202,18 @@ type
   published
    property optionsskin default defaulttoolbuttonoptionsskin;
  end;
- 
+
  ttoolseparatorframe = class(ttoolbuttonframe)
   public
    constructor create(const aintf: iframe);
   published
    property optionsskin default defaulttoolseparatoroptionsskin;
  end;
-  
+
  toolbuttonsstatety = (tbs_nocandefocus);
  toolbuttonsstatesty = set of toolbuttonsstatety;
  toolbuttonclassty = class of tcustomtoolbutton;
- 
+
  tcustomtoolbuttons = class(tindexpersistentarrayprop)
   private
    fheight: integer;
@@ -266,13 +266,13 @@ type
    procedure resetradioitems(const group: integer);
    function getcheckedradioitem(const group: integer): tcustomtoolbutton;
    function add: tcustomtoolbutton;
-   property items[const index: integer]: tcustomtoolbutton 
+   property items[const index: integer]: tcustomtoolbutton
                                        read getitems write setitems; default;
   published
    property width: integer read fwidth write setwidth default 0;
    property height: integer read fheight write setheight default 0;
    property imagelist: timagelist read fimagelist write setimagelist;
-   property colorglyph: colorty read fcolorglyph 
+   property colorglyph: colorty read fcolorglyph
                                        write setcolorglyph default cl_default;
                                             //cl_default -> cl_glyph
    property color: colorty read fcolor write setcolor default cl_default;
@@ -281,9 +281,9 @@ type
    property facechecked: tface read getfacechecked write setfacechecked;
    property frame: tframe read getframe write setframe;
    property framechecked: tframe read getframechecked write setframechecked;
-   property framesephorz: tframe read getframesephorz 
+   property framesephorz: tframe read getframesephorz
                                               write setframesephorz;
-   property framesepvert: tframe read getframesepvert 
+   property framesepvert: tframe read getframesepvert
                                               write setframesepvert;
  end;
 
@@ -301,12 +301,12 @@ type
    property framesephorz;
    property framesepvert;
  end;
- 
+
  tstockglyphtoolbuttons = class(ttoolbuttons)
   protected
    class function getbuttonclass: toolbuttonclassty; override;
  end;
- 
+
  toolbaroptionty = (tbo_dragsource,tbo_dragdest,
                     tbo_dragsourceenabledonly,tbo_dragdestenabledonly,
                     tbo_nohorz,tbo_novert,
@@ -385,7 +385,7 @@ type
    property options: toolbaroptionsty read foptions write setoptions default [];
    property statfile: tstatfile read fstatfile write setstatfile;
    property statvarname: msestring read getstatvarname write fstatvarname;
-   property statpriority: integer read fstatpriority 
+   property statpriority: integer read fstatpriority
                                        write fstatpriority default 0;
 
    property onbuttonchanged: toolbuttoneventty read fonbuttonchanged write fonbuttonchanged;
@@ -412,13 +412,13 @@ type
 implementation
 uses
  sysutils,msebits,mseactions,msestockobjects;
- 
+
 const
  separatorwidth = 3;
 type
  tcustomstepframe1 = class(tcustomstepframe);
  twidget1 = class(twidget);
- 
+
 procedure drawtoolbuttons(const canvas: tcanvas;
            var layout: toolbarlayoutinfoty);
 var
@@ -762,7 +762,7 @@ end;
 
 function tcustomtoolbutton.loading: boolean;
 begin
- result:= (fowner is tcomponent) and 
+ result:= (fowner is tcomponent) and
                (csloading in tcomponent(fowner).componentstate);
 end;
 
@@ -1205,7 +1205,7 @@ var
  sepwidth1: integer;
 begin
  with flayout do begin
-  if (defaultsize.cx = 0) or (buttons.width = 0) or 
+  if (defaultsize.cx = 0) or (buttons.width = 0) or
            (defaultsize.cy = 0) or (buttons.height = 0) then begin
    size1:= asize;
    if fframe <> nil then begin
@@ -1260,7 +1260,7 @@ procedure tcustomtoolbar.updatelayout;
 var
  buttonsizecxy: integer;
  sepwidth1: integer;
- 
+
  function step(const index: integer): integer;
  begin
   result:= 0;
@@ -1283,7 +1283,7 @@ var
  endxy: integer;
 // bu1: stepbuttonposty;
  loopcount: integer;
- size1: sizety; 
+ size1: sizety;
  pageend: integer;
  bo1: boolean;
  bu1: stepkindsty;
@@ -1345,7 +1345,7 @@ begin
        lines:= 1;
       end;
      end;
-  
+
      setlength(cells,buttons.count);
      if vert then begin
       endxy:= rect2.y + rect2.cy;
@@ -1560,11 +1560,11 @@ begin
   if sender.checked and (mao_radiobutton in sender.options) then begin
    for int1:= 0 to buttons.count -1 do begin
     button1:= buttons[int1];
-    if (button1 <> sender) and (button1.checked) and 
+    if (button1 <> sender) and (button1.checked) and
          (button1.group = sender.group) then begin
      button1.checked:= false;
     end;
-   end; 
+   end;
   end;
   for int1:= 0 to buttons.count - 1 do begin
    button1:= buttons[int1];
@@ -1573,7 +1573,7 @@ begin
    end;
    if button1 = sender then begin
     with cells[int1] do begin
-     bo1:= (shs_invisible in state) xor (as_invisible in button1.finfo.state) or 
+     bo1:= (shs_invisible in state) xor (as_invisible in button1.finfo.state) or
          ((shs_separator in state) xor (mao_separator in button1.options)) or
          ((shs_checkbox in state) xor (mao_checkbox in button1.options)) or
          ((shs_radiobutton in state) xor (mao_radiobutton in button1.options));
@@ -1634,8 +1634,8 @@ begin
        {$ifdef FPC}longword{$else}byte{$endif}(value),
        {$ifdef FPC}longword{$else}byte{$endif}(foptions),
        {$ifdef FPC}longword{$else}byte{$endif}(mask)));
-  if ({$ifdef FPC}longword{$else}byte{$endif}(valbefore) xor 
-       {$ifdef FPC}longword{$else}byte{$endif}(foptions)) and 
+  if ({$ifdef FPC}longword{$else}byte{$endif}(valbefore) xor
+       {$ifdef FPC}longword{$else}byte{$endif}(foptions)) and
        {$ifdef FPC}longword{$else}byte{$endif}(mask) <> 0 then begin
    updatelayout;
   end;
@@ -1695,7 +1695,7 @@ end;
 procedure tcustomtoolbar.clientmouseevent(var info: mouseeventinfoty);
 begin
  inherited;
- if not (csdesigning in componentstate) or 
+ if not (csdesigning in componentstate) or
                             (ws1_designactive in fwidgetstate1) then begin
   with flayout do begin
    if updatemouseshapestate(cells,info,self,flayout.focusedbutton) then begin
@@ -1989,7 +1989,7 @@ end;
 
 function tcustomstockglyphtoolbutton.isimageliststored: boolean;
 begin
- result:= inherited isimageliststored and 
+ result:= inherited isimageliststored and
               (finfo.imagelist <> stockobjects.glyphs);
 end;
 
@@ -2000,7 +2000,7 @@ begin
  end
  else begin
   inherited setimagelist(value);
- end; 
+ end;
 end;
 
 { tstockglyphtoolbuttons }

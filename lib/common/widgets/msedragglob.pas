@@ -9,14 +9,14 @@
 }
 unit msedragglob;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
-interface 
+interface
 uses
  mseglob,msegraphutils,mseguiglob,mseevent;
- 
+
 type
  dragobjstatety = (dos_dropped,dos_sysdnd,dos_write,dos_sysdroppending);
  dragobjstatesty = set of dragobjstatety;
- 
+
  pdragobject = ^tdragobject;
  tdragobject = class(tnullinterfacedobject)
   private

@@ -16,7 +16,7 @@
 }
 unit regpascalscript;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
-interface 
+interface
 implementation
 uses
  classes,mclasses,msedesignintf,msepascalscript,msepascimport,
@@ -29,17 +29,17 @@ type
  tpascaleditor = class(ttextstringspropertyeditor)
   protected
    function getscript: tpasc; virtual;
-   function getsyntaxindex: integer; override;   
+   function getsyntaxindex: integer; override;
    procedure doafterclosequery(var amodalresult: modalresultty); override;
    function gettestbutton: boolean; override;
    function getcaption: msestring; override;
  end;
- 
+
  tpascformeditor = class(tpascaleditor)
   private
    fmoduleprefix: ansistring;
   protected
-   function getscript: tpasc; override;  
+   function getscript: tpasc; override;
    procedure doafterclosequery(var amodalresult: modalresultty); override;
    procedure updateline(var aline: ansistring); override;
   public
@@ -49,12 +49,12 @@ type
 function sourcetoformscript(const amodule: tmsecomponent;
                       const asource: trichstringdatalist): boolean; forward;
 const
- pascformintf: designmoduleintfty = 
+ pascformintf: designmoduleintfty =
   (createfunc: {$ifdef FPC}@{$endif}createpascform;
      initnewcomponent: nil; getscale: nil; sourcetoform: @sourcetoformscript);
- 
+
 procedure Register;
-begin          
+begin
  registerclass(tpascform);
  registercomponents('PaSc',[tpasc,tpascdllplugin,tpascimport_classes,
                             tpascimport_dateutils,tpascimportmsegui]);
@@ -151,7 +151,7 @@ const
 'scope option option'+lineend+
 ' endtokens'+lineend+
 '  ''}'''+lineend+
-  
+
 'scope comment1 comment'+lineend+
 ' endtokens'+lineend+
 '  ''}'''+lineend+
@@ -163,7 +163,7 @@ const
 'scope comment3 comment'+lineend+
 ' endtokens'+lineend+
 '  ''*)'''+lineend+
-  
+
 'scope string string'+lineend+
 ' endtokens'+lineend+
 '  '''''''' '''''+lineend+
@@ -263,7 +263,7 @@ procedure tpascformeditor.doafterclosequery(var amodalresult: modalresultty);
 begin
  if amodalresult in [mr_canclose,mr_ok] then begin
  end;
- inherited; 
+ inherited;
 end;
 
 procedure tpascformeditor.updateline(var aline: ansistring);

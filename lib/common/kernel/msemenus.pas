@@ -32,7 +32,7 @@ const
  defaultmenuoptions = [mo_shortcutright];
  defaultmainmenuoptions = defaultmenuoptions + [mo_updateonidle];
  defaultmenuactoptions = [mao_shortcutcaption];
- 
+
 type
  menuinfoarty = array of actioninfoty;
  tmenuitem = class;
@@ -56,11 +56,11 @@ type
    function hasvisibleitem: boolean;
    procedure sort;
    procedure assign(source: tpersistent); override;
-   function insert(const index: integer; 
+   function insert(const index: integer;
                                 const aitem: tmenuitem): integer overload;
       //aitem is owned, returns index of new item
                             //if index > count -> index:= count
-   function insert(const index: integer; 
+   function insert(const index: integer;
                               const aitems: tmenuitems): integer overload;
       //items are copied, returns index of first new item
                             //if index > count -> index:= count
@@ -73,7 +73,7 @@ type
    procedure insertseparator(const index: integer;
                                       const aoptional: boolean = false);
                             //if index > count -> index:= count
-   property items[index: integer]: tmenuitem read getmenuitems 
+   property items[index: integer]: tmenuitem read getmenuitems
                                              write setmenuitems; default;
    function itembyname(const name: ansistring): tmenuitem;
    function itemindexbyname(const name: ansistring): integer;
@@ -83,19 +83,19 @@ type
   public
    class function getinstancepo(owner: tobject): pfont; override;
  end;
- 
+
  tmenufontactive = class(tparentfont)
   public
    class function getinstancepo(owner: tobject): pfont; override;
  end;
- 
+
  tcustommenu = class;
 
  imenuitem = interface(ievent)
   procedure setstate(const avalue: actionstatesty);
-  function getstate: actionstatesty;  
+  function getstate: actionstatesty;
  end;
- 
+
  tmenuitem = class(teventpersistent,iactionlink,imenuitem,iimagelistinfo,
                    iassistiveclientmenu)
   private
@@ -127,7 +127,7 @@ type
    procedure setshortcut(const avalue: shortcutty);
    function isshortcut1stored: Boolean;
    procedure setshortcuts(const avalue: shortcutarty);
-   procedure setshortcuts1(const avalue: shortcutarty);  
+   procedure setshortcuts1(const avalue: shortcutarty);
    function getshortcut: shortcutty;
    function getshortcut1: shortcutty;
    procedure setshortcut1(const avalue: shortcutty);
@@ -211,7 +211,7 @@ type
    function loading: boolean;
    function shortcutseparator: msechar;
    procedure calccaptiontext(var ainfo: actioninfoty);
-   
+
    procedure objectevent(const sender: tobject;
                                      const event: objecteventty); override;
    procedure receiveevent(const event: tobjectevent); override;
@@ -265,33 +265,33 @@ type
                      stored iscaptionstored;
    property hint: msestring read finfo.hint write sethint stored ishintstored;
    property name: string read fname write fname;
-   property state: actionstatesty read finfo.state write setstate 
+   property state: actionstatesty read finfo.state write setstate
                      stored isstatestored default [];
-   property options: menuactionoptionsty read finfo.options 
+   property options: menuactionoptionsty read finfo.options
                    write setoptions default defaultmenuactoptions;
-   property shortcut: shortcutty read getshortcut write setshortcut 
+   property shortcut: shortcutty read getshortcut write setshortcut
                      stored false default 0;
-   property shortcut1: shortcutty read getshortcut1 write setshortcut1 
+   property shortcut1: shortcutty read getshortcut1 write setshortcut1
                      stored false default 0;
    property tag: integer read finfo.tag write settag stored istagstored default 0;
-   property group: integer read finfo.group write setgroup 
+   property group: integer read finfo.group write setgroup
                      stored isgroupstored default 0;
    property imagelist: timagelist read getimagelist write setimagelist
                      stored isimageliststored;
    property imagenr: imagenrty read finfo.imagenr write setimagenr
                             stored isimagenrstored default -1;
-   property imagenrdisabled: imagenrty read finfo.imagenrdisabled 
+   property imagenrdisabled: imagenrty read finfo.imagenrdisabled
                             write setimagenrdisabled
                             stored isimagenrdisabledstored default -2;
-   property color: colorty read finfo.color write setcolor 
+   property color: colorty read finfo.color write setcolor
                           stored iscolorstored default cl_default;
-   property coloractive: colorty read fcoloractive write setcoloractive 
+   property coloractive: colorty read fcoloractive write setcoloractive
                           default cl_default;
            //cl_default maps to cl_parent, cl_normal maps to color property
-   property colorglyph: colorty read finfo.colorglyph write setcolorglyph 
+   property colorglyph: colorty read finfo.colorglyph write setcolorglyph
                           stored iscolorglyphstored default cl_default;
                                 //cl_default maps to cl_glyph
-   property colorglyphactive: colorty read fcolorglyphactive 
+   property colorglyphactive: colorty read fcolorglyphactive
                                  write setcolorglyphactive default cl_default;
                                 //cl_default maps to cl_glyph
    property font: tmenufont read getfont write setfont stored isfontstored;
@@ -356,9 +356,9 @@ type
    procedure setexecitem(const avalue: tmenuitem);
    property execitem: tmenuitem write setexecitem;
    procedure assigntemplate(const source: tcustommenu);
-   procedure templateevent(const sender: tobject; 
+   procedure templateevent(const sender: tobject;
                    const event: objecteventty; var template: menutemplatety);
-   procedure objectevent(const sender: tobject; 
+   procedure objectevent(const sender: tobject;
                                 const event: objecteventty); override;
    function gettemplatefont(const sender: tmenuitem): tmenufont; virtual;
    function gettemplatefontactive(
@@ -381,21 +381,21 @@ type
    property menu: tmenuitem read fmenu write setmenu;
    property frametemplate: tframecomp read ftemplate.frame write setframetemplate;
    property facetemplate: tfacecomp read ftemplate.face write setfacetemplate;
-   property itemframetemplate: tframecomp read ftemplate.itemframe 
+   property itemframetemplate: tframecomp read ftemplate.itemframe
                             write setitemframetemplate;
-   property itemfacetemplate: tfacecomp read ftemplate.itemface 
+   property itemfacetemplate: tfacecomp read ftemplate.itemface
                             write setitemfacetemplate;
-   property itemframetemplateactive: tframecomp read ftemplate.itemframeactive 
+   property itemframetemplateactive: tframecomp read ftemplate.itemframeactive
                             write setitemframetemplateactive;
-   property itemfacetemplateactive: tfacecomp read ftemplate.itemfaceactive 
+   property itemfacetemplateactive: tfacecomp read ftemplate.itemfaceactive
                             write setitemfacetemplateactive;
-   property separatorframetemplate: tframecomp 
-                           read ftemplate.separatorframe 
+   property separatorframetemplate: tframecomp
+                           read ftemplate.separatorframe
                                         write setseparatorframetemplate;
-   property checkboxframetemplate: tframecomp read ftemplate.checkboxframe 
+   property checkboxframetemplate: tframecomp read ftemplate.checkboxframe
                             write setcheckboxframetemplate;
    property template: menutemplatety read ftemplate;
-   property options: menuoptionsty read foptions write setoptions 
+   property options: menuoptionsty read foptions write setoptions
                                                 default defaultmenuoptions;
    property onupdate: menueventty read fonupdate write fonupdate;
  end;
@@ -465,7 +465,7 @@ type
    function gettemplatefont(const sender: tmenuitem): tmenufont; override;
    function gettemplatefontactive(
                        const sender: tmenuitem): tmenufontactive; override;
-   procedure objectevent(const sender: tobject; 
+   procedure objectevent(const sender: tobject;
                                 const event: objecteventty); override;
   public
    constructor create(aowner: tcomponent); override;
@@ -485,14 +485,14 @@ type
                       write setpopupitemframetemplateactive;
    property popupitemfacetemplateactive: tfacecomp read fpopuptemplate.itemfaceactive
                       write setpopupitemfacetemplateactive;
-   property popupseparatorframetemplate: tframecomp 
-                      read fpopuptemplate.separatorframe 
+   property popupseparatorframetemplate: tframecomp
+                      read fpopuptemplate.separatorframe
                                 write setpopupseparatorframetemplate;
-   property popupcheckboxframetemplate: tframecomp 
-                      read fpopuptemplate.checkboxframe 
+   property popupcheckboxframetemplate: tframecomp
+                      read fpopuptemplate.checkboxframe
                                 write setpopupcheckboxframetemplate;
  end;
- 
+
  tmainmenu = class(tcustommainmenu)
   published
    property options;
@@ -540,7 +540,7 @@ type
    property popupseparatorframetemplate;
    property popupcheckboxframetemplate;
    property menu; //last
- end; 
+ end;
 procedure freetransientmenu(var amenu: tcustommenu);
 
 implementation
@@ -550,8 +550,8 @@ uses
 type
  tapplication1 = class(tguiapplication)
  end;
- 
-procedure freetransientmenu(var amenu: tcustommenu); 
+
+procedure freetransientmenu(var amenu: tcustommenu);
 begin
  if (amenu <> nil) and amenu.ftransient then begin
   freeandnil(amenu);
@@ -590,7 +590,7 @@ end;
 destructor tcustommenu.destroy;
 begin
  if mo_updateonidle in foptions then begin
-  application.unregisteronidle({$ifdef FPC}@{$endif}doidle); 
+  application.unregisteronidle({$ifdef FPC}@{$endif}doidle);
  end;
  fmenu.Free;
  inherited;
@@ -776,15 +776,15 @@ begin
  tapplication1(application).flastshowmenuwidget:= awidget;
 end;
 
-procedure tcustommenu.templateevent(const sender: tobject; 
+procedure tcustommenu.templateevent(const sender: tobject;
                    const event: objecteventty; var template: menutemplatety);
 begin
  case event of
   oe_changed,oe_destroyed: begin
-   if (sender = template.face) or (sender = ftemplate.frame) or 
-      (sender = template.itemface) or (sender = ftemplate.itemframe) or 
-      (sender = template.itemfaceactive) or 
-      (sender = template.itemframeactive) or 
+   if (sender = template.face) or (sender = ftemplate.frame) or
+      (sender = template.itemface) or (sender = ftemplate.itemframe) or
+      (sender = template.itemfaceactive) or
+      (sender = template.itemframeactive) or
       (sender = template.separatorframe) or
       (sender = template.checkboxframe) then begin
     if event = oe_destroyed then begin
@@ -816,7 +816,7 @@ begin
  end;
 end;
 
-procedure tcustommenu.objectevent(const sender: tobject; 
+procedure tcustommenu.objectevent(const sender: tobject;
                                           const event: objecteventty);
 begin
  templateevent(sender,event,ftemplate);
@@ -838,17 +838,17 @@ begin
   delta:= menuoptionsty(
         {$ifdef FPC}longword{$else}byte{$endif}(optionsbefore) xor
         {$ifdef FPC}longword{$else}byte{$endif}(foptions));
-  if not (csreading in componentstate) and 
+  if not (csreading in componentstate) and
        (mo_shortcutright in delta) then begin
    fmenu.updatecaption;
   end;
   if mo_updateonidle in delta then begin
-   if (mo_updateonidle in foptions) and 
+   if (mo_updateonidle in foptions) and
                             not (csdesigning in componentstate) then begin
-    application.registeronidle({$ifdef FPC}@{$endif}doidle); 
+    application.registeronidle({$ifdef FPC}@{$endif}doidle);
    end
    else begin
-    application.unregisteronidle({$ifdef FPC}@{$endif}doidle); 
+    application.unregisteronidle({$ifdef FPC}@{$endif}doidle);
    end;
   end;
   sendchangeevent;
@@ -1027,7 +1027,7 @@ begin
  setactionshortcuts(iactionlink(self),avalue);
 end;
 
-procedure tmenuitem.setshortcuts1(const avalue: shortcutarty);  
+procedure tmenuitem.setshortcuts1(const avalue: shortcutarty);
 begin
  setactionshortcuts1(iactionlink(self),avalue);
 end;
@@ -1454,7 +1454,7 @@ begin
   state1:= fsource.getstate;
   state1:= actionstatesty(
           replacebits(longword(state),longword(state1),longword(mask)));
-  fsource.setstate(state1);  
+  fsource.setstate(state1);
  end;
 end;
 
@@ -1708,14 +1708,14 @@ begin
                            {$ifdef FPC}@{$endif}writesc,
        isactionshortcutstored(finfo) and
        ((filer.ancestor = nil) and (finfo.shortcut <> nil) or
-       ((filer.ancestor <> nil) and 
+       ((filer.ancestor <> nil) and
          not issameshortcut(finfo.shortcut,
                   tmenuitem(filer.ancestor).shortcuts))));
  filer.defineproperty('sc1',{$ifdef FPC}@{$endif}readsc1,
                            {$ifdef FPC}@{$endif}writesc1,
        isactionshortcut1stored(finfo) and
        ((filer.ancestor = nil) and (finfo.shortcut1 <> nil) or
-       ((filer.ancestor <> nil) and 
+       ((filer.ancestor <> nil) and
          not issameshortcut(finfo.shortcut,
                   tmenuitem(filer.ancestor).shortcuts))));
 end;
@@ -1801,7 +1801,7 @@ begin
   with fparentmenu.fsubmenu do begin
    for int1:= 0 to high(fitems) do begin
     with tmenuitem(fitems[int1]) do begin
-     if (mao_radiobutton in finfo.options) and (finfo.group = self.finfo.group) and 
+     if (mao_radiobutton in finfo.options) and (finfo.group = self.finfo.group) and
                                                           checked then begin
       result:= finfo.tag;
       break;
@@ -1820,7 +1820,7 @@ begin
   with fparentmenu.fsubmenu do begin
    for int1:= 0 to high(fitems) do begin
     with tmenuitem(fitems[int1]) do begin
-     if (mao_radiobutton in finfo.options) and 
+     if (mao_radiobutton in finfo.options) and
                              (finfo.group = self.finfo.group) then begin
       if finfo.tag = avalue then begin
        checked:= true;
@@ -1838,11 +1838,11 @@ end;
 
 function tmenuitem.getactiveitem(out aitem: tmenuitem): boolean;
 begin
- result:= (factiveitem >= 0) and (fsubmenu <> nil) and 
+ result:= (factiveitem >= 0) and (fsubmenu <> nil) and
                                      (factiveitem < fsubmenu.count);
  if result then begin
   aitem:= fsubmenu[factiveitem];
- end;  
+ end;
 end;
 
 function tmenuitem.getassistivename: msestring;
@@ -1857,7 +1857,7 @@ begin
  end;
  if (result = '') and (fowner <> nil) then begin
   result:= msestring(fowner.name);
- end;  
+ end;
 end;
 
 function tmenuitem.getassistivecaption(): msestring;
@@ -2306,7 +2306,7 @@ begin
  inherited;
  include(foptions,mo_updateonidle);
  if not (csdesigning in componentstate) then begin
-  application.registeronidle({$ifdef FPC}@{$endif}doidle); 
+  application.registeronidle({$ifdef FPC}@{$endif}doidle);
  end;
  fmenu.onchange:= {$ifdef FPC}@{$endif}menuchanged;
 end;
@@ -2391,7 +2391,7 @@ end;
 
 function tcustommainmenu.gettemplatefont(const sender: tmenuitem): tmenufont;
 begin
- if (sender.fparentmenu <> nil) and (sender.fparentmenu <> fmenu) then begin 
+ if (sender.fparentmenu <> nil) and (sender.fparentmenu <> fmenu) then begin
                             //in popup
   result:= nil;
   if popupitemframetemplate <> nil then begin

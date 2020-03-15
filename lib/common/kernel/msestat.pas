@@ -49,7 +49,7 @@ type
  end;
  statfileroptionty = (sfro_nodata,sfro_nooptions,sfro_nostate);
  statfileroptionsty = set of statfileroptionty;
- 
+
  tstatfiler = class
   private
    fstream: ttextstream;
@@ -140,7 +140,7 @@ type
    destructor destroy; override;
    function sections: msestringarty;
    function hassection(const name: msestring): boolean; //true if found
-   function findsection(const name: msestring): boolean; 
+   function findsection(const name: msestring): boolean;
                              //switch section, true if found
    function checkvar(const name: msestring): boolean; //true if found
    function streamdata: string;    //returns data after [-]
@@ -200,10 +200,10 @@ type
   public
    constructor create(const astream: ttextstream;
                      const aencoding: charencodingty = ce_utf8); overload;
-   constructor create(const filename: filenamety; 
+   constructor create(const filename: filenamety;
                               const aencoding: charencodingty = ce_utf8;
                               const atransaction: boolean = true); overload;
- 
+
    procedure writesection(const name: msestring);
    procedure writeboolean(const name: msestring; const value: boolean);
    procedure writebyte(const name: msestring; const value: byte);
@@ -225,12 +225,12 @@ type
    procedure writearray(const name: msestring; const value: longboolarty); overload;
    procedure writearray(const name: msestring; const value: realarty); overload;
    procedure writearray(const name: msestring; const value: complexarty); overload;
- 
+
    procedure writelistitem(const value: msestring); overload;
    procedure writelistitem(const value: integer); overload;
    procedure writelistitem(const value: realty); overload;
    procedure writelistitem(const value: complexty); overload;
- 
+
    procedure writerecord(const name: msestring; const values: array of const);
    procedure writerecordarray(const name: msestring; const count: integer;
                   get: recgetrecordeventty); overload;
@@ -238,7 +238,7 @@ type
                   get: recgetrecordevent1ty); overload;
    function beginlist(const name: msestring = ''): boolean; override;
    function endlist: boolean; override;
- 
+
    procedure writevalue(const name: msestring; const intf: istatupdatevalue);
    procedure writestat(const intf: istatfile);
    procedure writememorystatstream(const name: msestring;
@@ -281,7 +281,7 @@ type
    procedure delete(const name: msestring);
    function findfiles(const aname: msestring): msestringarty;
  end;
- 
+
 procedure deletememorystatstream(const streamname: msestring);
 function memorystatstreams: tmemorystreams;
 
@@ -342,7 +342,7 @@ begin
  writer.writelistend;
 end;
 
-function writestat(const asource: array of statwriteeventty; 
+function writestat(const asource: array of statwriteeventty;
                                          const section: msestring): string;
 var
  stream1: ttextstringbufferstream;
@@ -419,7 +419,7 @@ begin
  end;
 end;
 
-{ tstatfiler }                                                          
+{ tstatfiler }
 
 constructor tstatfiler.create(const astream: ttextstream;
                               const aencoding: charencodingty = ce_utf8);
@@ -738,7 +738,7 @@ begin
      end;
     end;
    end;
-   if not fstream.eof then begin     
+   if not fstream.eof then begin
     int1:= findchar(str1,msechar(']'));
     if int1 > 0 then begin
      if int1 = 2 then begin
@@ -786,7 +786,7 @@ begin
  end;
 end;
 
-function tstatreader.findvar(const name: msestring; 
+function tstatreader.findvar(const name: msestring;
                                          var value: msestring): boolean;
 var
  int1,int2,int3: integer;
@@ -803,11 +803,11 @@ begin
      dec(factitem);
      value:= values[factitem];
      int1:= factitem+1;      //check multiline
-     while (int1 <= high(values)) and (values[int1] <> '') and 
+     while (int1 <= high(values)) and (values[int1] <> '') and
                        (values[int1][1] = '+') do begin
       value:= value+lineend+copy(values[int1],2,bigint);
       inc(int1);
-     end; 
+     end;
      result:= true;
     end;
    end
@@ -822,17 +822,17 @@ begin
       end;
       if ch1 <> ' ' then begin
        int2:= findchar(values[int1],msechar('='));
-       if (int2 = flistlevel+length(name)+1) and 
+       if (int2 = flistlevel+length(name)+1) and
              (msestrlcomp(pmsechar(values[int1])+flistlevel,
                           pmsechar(name),length(name)) = 0) then begin
         factitem:= int1;
         value:= copy(values[int1],int2+1,bigint);
         int3:= int1+1;  //check multiline
-        while (int3 <= high(values)) and (length(values[int1]) > flistlevel) and 
+        while (int3 <= high(values)) and (length(values[int1]) > flistlevel) and
                           (values[int3][flistlevel+1] = '+') do begin
          value:= value+lineend+copy(values[int3],flistlevel+2,bigint);
          inc(int3);
-        end; 
+        end;
         result:= true;
         break;
        end;
@@ -1026,7 +1026,7 @@ begin
  if not findvar(name,mstr1) then begin
   result:= default;
  end
- else begin 
+ else begin
   result:= decodebase64(ansistring(mstr1));
  end;
 end;
@@ -1092,7 +1092,7 @@ begin
  end;
 end;
 
-procedure tstatreader.readdatalist(const name: msestring; 
+procedure tstatreader.readdatalist(const name: msestring;
                                                   const value: tdatalist);
 var
  str1: msestring;
@@ -1312,7 +1312,7 @@ var
  str1: msestring;
  int1,int2: integer;
 begin
- if findvar(name,str1) and trystrtoint(str1,int2) then begin   
+ if findvar(name,str1) and trystrtoint(str1,int2) then begin
   setlength(result,int2);
   for int1:= 0 to int2-1 do begin
    if not decoderecord(
@@ -1918,7 +1918,7 @@ begin
 {$warnings off}
    tmemorystreamcracker(fmemorystream).fcapacity:= info.size;
 {$warnings on}
- {$endif} 
+ {$endif}
   end
   else begin
    freemem(info.data);

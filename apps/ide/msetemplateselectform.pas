@@ -48,10 +48,10 @@ type
 implementation
 uses
  msetemplateselectform_mfm,templateeditor,projectoptionsform;
- 
+
 type
  tcodetemplates1 = class(tcodetemplates);
- 
+
 constructor tmsetemplateselectfo.create(const atemplates: tcodetemplates);
 begin
  ftemplates:= atemplates;

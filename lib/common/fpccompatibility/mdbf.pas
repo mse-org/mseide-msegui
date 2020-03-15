@@ -173,9 +173,9 @@ type
     FFilterBuffer: TRecordBuffer;
     FTempBuffer: TRecordBuffer;
     FEditingRecNo: Integer;
-{$ifdef SUPPORT_VARIANTS}    
+{$ifdef SUPPORT_VARIANTS}
     FLocateRecNo: Integer;
-{$endif}    
+{$endif}
     FLanguageID: Byte;
     FTableLevel: Integer;
     FExclusive: Boolean;
@@ -450,10 +450,10 @@ type
     property AfterCancel;
     property BeforeDelete;
     property AfterDelete;
-{$ifdef SUPPORT_REFRESHEVENTS}    
+{$ifdef SUPPORT_REFRESHEVENTS}
     property BeforeRefresh;
     property AfterRefresh;
-{$endif}    
+{$endif}
     property BeforeScroll;
     property AfterScroll;
     property OnCalcFields;
@@ -481,7 +481,7 @@ uses
 {$else}
 {$ifdef KYLIX}
   Libc,
-{$endif}  
+{$endif}
   Types,
   dbf_wtil,
 {$endif}
@@ -1184,8 +1184,8 @@ begin
   FreeAndNil(FDbfFile);
 
   // does file not exist? -> create
-  if ((FStorage = stoFile) and 
-        not FileExists(FAbsolutePath + FTableName) and 
+  if ((FStorage = stoFile) and
+        not FileExists(FAbsolutePath + FTableName) and
         (FOpenMode in [omAutoCreate, omTemporary])) or
      ((FStorage = stoMemory) and (FUserStream = nil)) then
   begin
@@ -1203,10 +1203,10 @@ begin
   FDbfFile.Open;
 
   // fail open?
-{$ifndef FPC}  
+{$ifndef FPC}
   if FDbfFile.ForceClose then
     Abort;
-{$endif}    
+{$endif}
 
   // determine dbf version
   case FDbfFile.DbfVersion of
@@ -1604,7 +1604,7 @@ begin
     end else begin
 {$ifdef SUPPORT_FIELDDEF_TPERSISTENT}
       lPhysFieldDefs.Assign(DataSet.FieldDefs);
-{$endif}      
+{$endif}
       IndexDefs.Clear;
     end;
     // convert list of tfields into a list of tdbffielddefs
@@ -1620,7 +1620,7 @@ begin
           FieldName := lSrcField.FieldName;
         FieldType := lSrcField.DataType;
         Required := lSrcField.Required;
-        if (1 <= lSrcField.FieldNo) 
+        if (1 <= lSrcField.FieldNo)
             and (lSrcField.FieldNo <= lPhysFieldDefs.Count) then
         begin
           Size := lPhysFieldDefs.Items[lSrcField.FieldNo-1].Size;
@@ -1636,7 +1636,7 @@ begin
     FDbfFile.BufferAhead := true;
     if DataSet is TDbf then
       TDbf(DataSet).DbfFile.BufferAhead := true;
-{$endif}      
+{$endif}
     while not DataSet.EOF do
     begin
       Append;
@@ -1667,7 +1667,7 @@ begin
 {$ifdef USE_CACHE}
     if (DataSet is TDbf) and (TDbf(DataSet).DbfFile <> nil) then
       TDbf(DataSet).DbfFile.BufferAhead := false;
-{$endif}      
+{$endif}
     FInCopyFrom := false;
     lFieldDefs.Free;
     lPhysFieldDefs.Free;
@@ -1834,12 +1834,12 @@ begin
         lPhysRecNo := FCursor.PhysicalRecNo;
         if (lPhysRecNo = 0) or not FDbfFile.IsRecordPresent(lPhysRecNo) then
           break;
-        
+
         FDbfFile.ReadRecord(lPhysRecNo, @PDbfRecord(FFilterBuffer)^.DeletedFlag);
         Result := FShowDeleted or (PDbfRecord(FFilterBuffer)^.DeletedFlag <> '*');
         if Result and Filtered then
           DoFilterRecord(Result);
-        
+
         iIndex := 0;
         while Result and (iIndex < lstKeys.Count) Do
         begin
@@ -1914,7 +1914,7 @@ begin
   lSaveCursor := nil;
   lIndexFile := nil;
   lSaveIndexFile := FIndexFile;
-  if (FCursor is TIndexCursor) 
+  if (FCursor is TIndexCursor)
     and (TIndexCursor(FCursor).IndexFile.Expression = KeyFields) then
   begin
     lCursor := FCursor;
@@ -2161,7 +2161,7 @@ begin
 
   // check if FCursor open
   if FCursor = nil then
-    exit; 
+    exit;
 
   // store current position
   prevRecNo := FCursor.SequentialRecNo;
@@ -2333,7 +2333,7 @@ end;
 procedure TDbf.SetLanguageID(NewID: Byte);
 begin
   CheckInactive;
-  
+
   FLanguageID := NewID;
 end;
 
@@ -2543,7 +2543,7 @@ begin
       for I := 0 to Pred(FDbfFile.IndexFiles.Count) do
         Strings.Add(TPagedFile(FDbfFile.IndexFiles.Items[I]).FileName);
   end else
-    Strings.Add(IncludeTrailingPathDelimiter(FilePathFull) + TableName);   
+    Strings.Add(IncludeTrailingPathDelimiter(FilePathFull) + TableName);
 end;
 
 {$ifdef SUPPORT_DEFAULT_PARAMS}
@@ -2766,7 +2766,7 @@ begin
     Result := nil;
     exit;
   end;
-  
+
   Result := TIndexCursor(FCursor).IndexFile.PrepareKey(Buffer, BufferType);
 end;
 
@@ -2857,7 +2857,7 @@ begin
   // are not entirely classified in pchar<>trecordbuffer terms.
   // so we typecast for now.
   fieldsVal := TRecordBuffer(TIndexCursor(FCursor).IndexFile.PrepareKey((fieldsVal), FMasterLink.Parser.ResultType));
-  SetRangeBuffer(pansichar(fieldsVal), pansichar(fieldsVal)); 
+  SetRangeBuffer(pansichar(fieldsVal), pansichar(fieldsVal));
 end;
 
 procedure TDbf.MasterChanged(Sender: TObject);

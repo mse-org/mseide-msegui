@@ -31,7 +31,7 @@ uses
   {$warn 6058 off}
  {$endif}
 {$endif}
- 
+
 type
  tdbfieldnamepropertyeditor = class(tstringpropertyeditor)
   private
@@ -42,15 +42,15 @@ type
   public
    function getvalues: msestringarty; override;
  end;
- 
+
  tdbfieldnamenocalcpropertyeditor = class(tdbfieldnamepropertyeditor)
   public
    constructor create(const adesigner: idesigner;
         const amodule: tmsecomponent; const acomponent: tcomponent;
             const aobjectinspector: iobjectinspector;
-            const aprops: propinstancearty; atypeinfo: ptypeinfo); override;  
+            const aprops: propinstancearty; atypeinfo: ptypeinfo); override;
  end;
- 
+
  tdbcolnamepropertyeditor = class(tstringpropertyeditor)
   protected
    fdbcolinfointf: idbcolinfo;
@@ -58,13 +58,13 @@ type
   public
    function getvalues: msestringarty; override;
  end;
- 
+
  tdbcolnamearraypropertyeditor = class(tstringarraypropertyeditor)
   protected
    function geteditorclass: propertyeditorclassty; override;
  end;
 
- 
+
  tdbparampropertyeditor = class(tclasspropertyeditor)
   public
    function getvalue: msestring; override;
@@ -74,7 +74,7 @@ type
   public
    function getvalue: msestring; override;
  end;
-  
+
  tdbparamnamepropertyeditor = class(tstringpropertyeditor)
   protected
    fdbparaminfointf: idbparaminfo;
@@ -82,7 +82,7 @@ type
   public
    function getvalues: msestringarty; override;
  end;
- 
+
  tdbfieldnamearraypropertyeditor = class(tstringarraypropertyeditor)
   protected
    function geteditorclass: propertyeditorclassty; override;
@@ -108,7 +108,7 @@ type
   protected
    function ismsestring: boolean; override;
  end;
- 
+
  tsqlnocheckpropertyeditor = class(tsqlpropertyeditor)
   protected
    function nocheck: boolean; override;
@@ -123,10 +123,10 @@ type
   public
    function getvalue: msestring; override;
  end;
-} 
+}
  tlbdropdowncolseditor = class(tpersistentarraypropertyeditor)
   protected
-   function itemgetvalue(const sender: tarrayelementeditor): msestring; 
+   function itemgetvalue(const sender: tarrayelementeditor): msestring;
                                                                   override;
 //   function geteditorclass: propertyeditorclassty; override;
  end;
@@ -138,7 +138,7 @@ type
 }
  tdbdropdowncolseditor = class(tpersistentarraypropertyeditor)
   protected
-   function itemgetvalue(const sender: tarrayelementeditor): msestring; 
+   function itemgetvalue(const sender: tarrayelementeditor): msestring;
                                                                   override;
 //   function geteditorclass: propertyeditorclassty; override;
  end;
@@ -183,7 +183,7 @@ type
   public
    function getvalue: msestring; override;
  end;
-  
+
  tnolistdropdowncolpropertyeditor = class(tarraypropertyeditor)
   protected
    function geteditorclass: propertyeditorclassty; override;
@@ -193,7 +193,7 @@ type
   public
    function getvalue: msestring; override;
  end;
- 
+
  tpersistentfieldspropertyeditor = class(tpersistentarraypropertyeditor)
   protected
    function getdefaultstate: propertystatesty; override;
@@ -236,12 +236,12 @@ type
    function getdefaultstate: propertystatesty; override;
    procedure setvalue(const value: msestring); override;
  end;
- 
+
  tfielddefpropertyeditor = class(tclasspropertyeditor)
   public
    function getvalue: msestring; override;
  end;
- 
+
  tfielddefspropertyeditor = class(tcollectionpropertyeditor)
   public
    procedure setvalue(const value: msestring); override;
@@ -251,24 +251,24 @@ type
   public
    function getdefaultstate: propertystatesty; override;
  end;
-   
+
  tdbstringcoleditor = class(tdatacoleditor)
   public
    function getvalue: msestring; override;
  end;
- 
+
  tdbstringcolseditor = class(tdatacolseditor)
   protected
-   function geteditorclass: propertyeditorclassty; override;  
+   function geteditorclass: propertyeditorclassty; override;
  end;
 
  tindexfieldnamepropertyeditor = class(tstringpropertyeditor)
   protected
-   function getdefaultstate: propertystatesty; override;   
+   function getdefaultstate: propertystatesty; override;
   public
    function getvalues: msestringarty; override;
  end;
- 
+
  tindexfieldpropertyeditor = class(tclasselementeditor)
   protected
    function getdefaultstate: propertystatesty; override;
@@ -280,7 +280,7 @@ type
   protected
    function geteditorclass: propertyeditorclassty; override;
  end;
- 
+
  tlocalindexpropertyeditor = class(tclasselementeditor)
   protected
    function getdefaultstate: propertystatesty; override;
@@ -339,7 +339,7 @@ type
   public
    procedure setvalue(const value: msestring); override;
  end;
-  
+
  tlookupfieldnamepropertyeditor = class(tstringpropertyeditor)
   protected
    function getdefaultstate: propertystatesty; override;
@@ -352,7 +352,7 @@ type
    function getinvisibleitems: tintegerset; override;
   public
  end;
- 
+
  tsqlresconncolnamepropertyeditor = class(tstringpropertyeditor)
   protected
    function getdefaultstate: propertystatesty; override;
@@ -362,14 +362,14 @@ type
 
 procedure Register;
 begin
- registercomponents('DB',[     
+ registercomponents('DB',[
       tmseibconnection,tfbservice,tfb3service,tfb3connection,
       tmsepqconnection,tsqlite3connection,tmseodbcconnection,
       tmsemysqlconnection,
-      
+
       tmsesqltransaction,tmsesqlquery,
       tlocaldataset,
-      
+
       tmsedatasource,
 
       tsqlstatement,tmsesqlscript,tsqlresult,
@@ -388,7 +388,7 @@ begin
       tdbdatabutton,
       tdbdataicon,tdbdataimage,
       tdbprogressbar,tdbslider,
-      
+
       tdbdropdownlistedit,tdbdropdownlisteditdb,tdbdropdownlisteditlb,
 
       tdbenumedit,tdbenumeditdb,tdbenumeditlb,
@@ -404,7 +404,7 @@ begin
       tenumeditdb,tenumeditlb,
       tenum64editdb,tenum64editlb,
       tkeystringeditdb,tkeystringeditlb
-      
+
       ]);
  registercomponenttabhints(['DBe'],
                ['Data edit widgets, can be placed in tdbwidgetgrid']);
@@ -511,7 +511,7 @@ begin
         tmsesqlnocheckpropertyeditor);
  registerpropertyeditor(typeinfo(tsqlstringlist),nil,'SQLdelete',
         tmsesqlnocheckpropertyeditor);
-{        
+{
  registerpropertyeditor(typeinfo(tmsestringdatalist),nil,'SQL',
         tmsesqlpropertyeditor);
  registerpropertyeditor(typeinfo(tstringlist),tsqlquery,'SQLupdate',
@@ -532,7 +532,7 @@ begin
  registerpropertyeditor(typeinfo(tfielddefs),tdataset,'',
                               tfielddefspropertyeditor);
  registerpropertyeditor(typeinfo(boolean),tdataset,'Active',
-                                         tdatasetactivepropertyeditor);                              
+                                         tdatasetactivepropertyeditor);
  registerpropertyeditor(typeinfo(boolean),tsqlresult,'active',
                                          tdatasetactivepropertyeditor);
  registerpropertyeditor(typeinfo(string),tsqlresultconnector,'colname',
@@ -642,7 +642,7 @@ var
  ft: fieldtypesty;
  int1,int2: integer;
  ds: tdataset;
- 
+
 begin
  result:= nil;
  if (fdbeditinfointf <> nil) then begin
@@ -654,7 +654,7 @@ begin
      int2:= int1;
      break;
     end;
-   end; 
+   end;
   end;
   if int2 <= high(fieldtypes) then begin
    ft:= fieldtypes[int2];
@@ -724,7 +724,7 @@ begin
   if (sqlresult1 <> nil) {and (sqlresult1.active)}  then begin
    result:= result + [ps_valuelist,ps_sortlist];
   end;
- end; 
+ end;
 end;
 
 function tdbcolnamepropertyeditor.getvalues: msestringarty;
@@ -734,7 +734,7 @@ var
  ft: fieldtypesty;
  int1,int2: integer;
  sqlresult1: tsqlresult;
- 
+
 begin
  result:= nil;
  if (fdbcolinfointf <> nil) then begin
@@ -746,7 +746,7 @@ begin
      int2:= int1;
      break;
     end;
-   end; 
+   end;
   end;
   if int2 <= high(fieldtypes) then begin
    ft:= fieldtypes[int2];
@@ -871,12 +871,12 @@ begin
      end;
     end;
    end;
-  end; 
+  end;
   fclass:= tfield(fprops[0].instance).classtype;
   for int1:= 0 to high(ar1) do begin
-   if (ar1[int1] <> '') and 
-   (fclass.inheritsfrom(ds.fielddefs[int1].fieldclass) or 
-    (fclass.inheritsfrom(tmsebooleanfield)) and 
+   if (ar1[int1] <> '') and
+   (fclass.inheritsfrom(ds.fielddefs[int1].fieldclass) or
+    (fclass.inheritsfrom(tmsebooleanfield)) and
       (ds.fielddefs[int1].fieldclass.inheritsfrom(tlongintfield))) then begin
     additem(result,msestring(ar3[int1]));
    end;
@@ -909,11 +909,11 @@ begin
     raise exception.create('Field '''+str1+''' exists in '+name+'.');
    end;
   end;
- end;  
+ end;
 end;
 
 const
- sqlsyntax = 
+ sqlsyntax =
 'caseinsensitive'+lineend+
 'styles'+lineend+
 ' default '''''+lineend+
@@ -1032,7 +1032,7 @@ const
 
 var
  sqlindex: integer = -1;
- 
+
 { tsqlpropertyeditor }
 
 function tsqlpropertyeditor.getsyntaxindex: integer;
@@ -1071,7 +1071,7 @@ begin
  if not nocheck and getcorbainterface(fprops[0].instance,
                             typeinfo(isqlpropertyeditor),fintf) then begin
   factivebefore:= fintf.getactive;
-  fdbactivebefore:= (fintf.getdatabase() = nil) or 
+  fdbactivebefore:= (fintf.getdatabase() = nil) or
                                    fintf.getdatabase.connected;
  end
  else begin
@@ -1150,7 +1150,7 @@ procedure checkonfilter(const acontroller: tcustomlbdropdownlistcontroller;
                            const optbefore: optionslbty);
 begin
  with acontroller do begin
-  if (olb_copyitems in (optbefore >< optionslb)) and 
+  if (olb_copyitems in (optbefore >< optionslb)) and
       (tmethod(onfilter).data <> nil) then begin
    if olb_copyitems in optbefore then begin
     if buttonlength = 0 then begin
@@ -1219,7 +1219,7 @@ var
 begin
  for int1:= 0 to high(fprops) do begin
   tdataset(fprops[int1].instance).active:= false;
- end; 
+ end;
  inherited;
 end;
 
@@ -1268,7 +1268,7 @@ end;
 
 function tdbstringcoleditor.getvalue: msestring;
 begin
- result:= inherited getvalue + 
+ result:= inherited getvalue +
                  msestring('<'+tdbstringcol(getpointervalue).datafield+'>');
 end;
 
@@ -1296,7 +1296,7 @@ begin
    if active or (fields.count > 0) then begin
     for int1:= 0 to fields.count -1 do begin
      with fields[int1] do begin
-      if (datatype in indexfieldtypes) and 
+      if (datatype in indexfieldtypes) and
                   (fieldkind in [fkdata,fkinternalcalc,fklookup]) then begin
        additem(result,msestring(fieldname));
       end;
@@ -1313,7 +1313,7 @@ begin
     end;
    end;
   end;
- end;  
+ end;
 end;
 
 { tindexfieldpropertyeditor }
@@ -1495,7 +1495,7 @@ end;
 { tlbdropdowncolseditor }
 {
 function tlbdropdowncolseditor.geteditorclass: propertyeditorclassty;
-begin    
+begin
  result:= tlbdropdowncolitemeditor;
 end;
 }
@@ -1566,7 +1566,7 @@ begin
     setvariantvalue(value);
    end;
   end;
- end;   
+ end;
 end;
 
 { tslaveparampropertyeditor }

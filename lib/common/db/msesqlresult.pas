@@ -27,7 +27,7 @@ uses
  msetypes,mselookupbuffer,mseglob,msedatalist,msevariants,mseevent;
 type
  tsqlresult = class;
- 
+
  tdbcol = class(tvirtualpersistent)
   private
    function getassql1: msestring;
@@ -101,7 +101,7 @@ type
   public
    property value: msestring read getasmsestring;
  end;
- 
+
  tguiddbcol = class(tdbcol)
   private
   protected
@@ -119,14 +119,14 @@ type
    function getasstring: string; override;
    function getasmsestring: msestring; override;
  end;
- 
+
  tlongintdbcol = class(tnumericdbcol)
   protected
    function getasinteger: integer; override;
   public
    property value: integer read getasinteger;
  end;
- 
+
  tlargeintdbcol = class(tnumericdbcol)
   private
   protected
@@ -139,21 +139,21 @@ type
   public
    property value: largeint read getaslargeint;
  end;
- 
+
  tsmallintdbcol = class(tnumericdbcol)
   protected
    function getasinteger: integer; override;
   public
    property value: integer read getasinteger;
  end;
- 
+
  tworddbcol = class(tnumericdbcol)
   protected
    function getasinteger: integer; override;
   public
    property value: integer read getasinteger;
  end;
- 
+
 // tautoincdbcol = class(tdbcol);
 
  tfloatdbcol = class(tdbcol)
@@ -204,7 +204,7 @@ type
   public
    property value: tdatetime read getasdatetime;
  end;
-  
+
 // tdatedbcol = class(tdbcol);
 // ttimedbcol = class(tdbcol);
 // tbinarydbcol = class(tdbcol);
@@ -214,14 +214,14 @@ type
 
  tblobdbcol = class(tdbcol)
   private
-  protected 
+  protected
    function getasstring: ansistring; override;
    function getvariantvar: variant; override;
    function getassql: msestring; override;
   public
    property value: ansistring read getasstring;
  end;
- 
+
  tmemodbcol = class(tblobdbcol)
   private
   protected
@@ -238,13 +238,13 @@ type
   public
    property value: variant read getvariantvar;
  end;
-  
+
 // tgraphicdbcol = class(tdbcol);
 
  getnamefuncty = function:ansistring of object;
- 
+
  tdbcols = class(tpersistentarrayprop)
-  private 
+  private
    fgetname: getnamefuncty;
    function getitems(const index: integer): tdbcol;
    procedure initfields(const asqlresult: tsqlresult;
@@ -263,7 +263,7 @@ type
 // tsqlresultfielddef = class;
 
  dbcolnamety = string;
-  
+
  tsqlresultconnector = class(tmsecomponent)
   private
    fcol: tdbcol;
@@ -302,12 +302,12 @@ type
 //  public
 //   constructor create(const aowner: tsqlresult);
  end;
- 
+
  sqlresultoptionty = (sro_utf8);
  sqlresultoptionsty = set of sqlresultoptionty;
 
- sqlresulteventty = procedure(const sender: tsqlresult) of object;  
- 
+ sqlresulteventty = procedure(const sender: tsqlresult) of object;
+
  tsqlresult = class(tcursorsqlstatement,isqlpropertyeditor,
                      isqlclient,itransactionclient)
   private
@@ -385,8 +385,8 @@ type
    function rowsaffected: integer; //-1 if not supported
    function rowsreturned: integer; //-1 if not supported
 //   procedure asvariant(out avalue: variant); overload; //internal compiler error
-   function asvariant(const aclose: boolean = false): variant; 
-          //value of first field of first row, 
+   function asvariant(const aclose: boolean = false): variant;
+          //value of first field of first row,
           //empty variant returned for null fields
    function asvariantar(const aclose: boolean = false): variantarty;
           //first row, empty variant returned for null fields
@@ -404,7 +404,7 @@ type
    property beforeopen: tmsesqlscript read fbeforeopen write setbeforeopen;
    property afteropen: tmsesqlscript read fafteropen write setafteropen;
 //   property database: tcustomsqlconnection read fdatabase write setdatabase1;
-//   property transaction: tsqltransaction read getsqltransaction 
+//   property transaction: tsqltransaction read getsqltransaction
 //                                      write setsqltransaction;
    property active: boolean read getactive write setactive default false;
 //   property options: sqlresultoptionsty read foptions write foptions default [];
@@ -422,15 +422,15 @@ type
    property onafterexecute;
    property onerror;
  end;
- 
+
  idbcolinfo = interface(inullinterface)[miid_idbcolinfo]
   function getsqlresult(const aindex: integer): tsqlresult;
   procedure getfieldtypes(out apropertynames: stringarty;
                           out afieldtypes: fieldtypesarty);
  end;
- 
+
  getsqlresultfuncty = function(const aindex: integer): tsqlresult of object;
- 
+
  tdbcolnamearrayprop = class(tstringarrayprop,idbcolinfo)
   private
    ffieldtypes: fieldtypesty;
@@ -448,7 +448,7 @@ type
 
  lbsqoptionty = (olbsq_closesqlresult);
  lbsqoptionsty = set of lbsqoptionty;
- 
+
  tsqllookupbuffer = class(tdatalookupbuffer)
   private
    fsource: tsqlresult;
@@ -475,7 +475,7 @@ type
    procedure objectevent(const sender: tobject;
                        const event: objecteventty); override;
    procedure doloadbuffer; override;
-  public 
+  public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
    function fieldnamestext: stringarty; override;
@@ -552,9 +552,9 @@ const
 type
  tdatalist1 = class(tdatalist);
 // tcursorsqlstatement1 = class(tcursorsqlstatement);
- 
+
 function dogetsqlresult(const atransaction: tsqltransaction; const asql: msestring;
-                        const aparams: array of variant): tsqlresult;           
+                        const aparams: array of variant): tsqlresult;
 var
  int1: integer;
 begin
@@ -572,7 +572,7 @@ begin
   raise
  end;
 end;
-                        
+
 procedure getsqlresult(out avalue: variant; const atransaction: tsqltransaction;
                      const asql: msestring; const aparams: array of variant); overload;
            //first field of first row
@@ -632,27 +632,27 @@ begin
 end;
 
 function getsqlresultvar( const atransaction: tsqltransaction;
-                      const asql: msestring; 
+                      const asql: msestring;
                       const aparams: array of variant): variant;
 begin
  getsqlresult(result,atransaction,asql,aparams);
 end;
 
 function getsqlresultvarar( const atransaction: tsqltransaction;
-                      const asql: msestring; 
+                      const asql: msestring;
                       const aparams: array of variant): variantarty;
 begin
  getsqlresult(result,atransaction,asql,aparams);
 end;
 
 function getsqlresultvararar( const atransaction: tsqltransaction;
-                      const asql: msestring; 
+                      const asql: msestring;
                       const aparams: array of variant): variantararty;
 begin
  getsqlresult(result,atransaction,asql,aparams);
 end;
-                      
-                      
+
+
 { tdbcol }
 
 constructor tdbcol.create(const asqlresult: tsqlresult;
@@ -1109,7 +1109,7 @@ begin
     loadfield(pointer(result),int1);
    end;
    setlength(result,int1 div 2);
-  end;  
+  end;
  end
  else begin
   result:= inherited getasmsestring;
@@ -1285,7 +1285,7 @@ begin
  for int1:= 0 to high(fitems) do begin
   with tdbcol(fitems[int1]) do begin
    if fuppername = str1 then begin
-    result:= int1;   
+    result:= int1;
     exit;
    end;
   end;
@@ -1527,7 +1527,7 @@ begin
   end
   else begin
    foptions:= foptions - [sro_utf8];
-  end;  
+  end;
   checktransaction(name,ftransaction);
   str1:= trimright(fsql.text);
   if str1 = '' then begin
@@ -1542,7 +1542,7 @@ begin
   end;
   fcursor.ftrans:= trans.handle;
   fcursor.fstatementtype:= stselect;
-   
+
   Db.PrepareStatement(Fcursor,trans,str1,FParams);
   FCursor.FInitFieldDef:= True;
  end;
@@ -2258,7 +2258,7 @@ begin
        fcount:= int1;
       end;
      finally
-      if {not bo1 and} (olbsq_closesqlresult in foptionsdb) and 
+      if {not bo1 and} (olbsq_closesqlresult in foptionsdb) and
                            not (csdesigning in componentstate) then begin
        include(fstate,lbs_sourceclosed);
        fsource.active:= false;
@@ -2270,9 +2270,9 @@ begin
      end
      else begin
       raise;
-     end;        
+     end;
     end;
-   end;   
+   end;
   end;
   include(fstate,lbs_buffervalid);
  finally

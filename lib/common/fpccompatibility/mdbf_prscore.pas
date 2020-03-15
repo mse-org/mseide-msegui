@@ -641,7 +641,7 @@ begin
   end;
 end;
 
-function TCustomExpressionParser.MakeTree(Expr: TExprCollection; 
+function TCustomExpressionParser.MakeTree(Expr: TExprCollection;
   FirstItem, LastItem: Integer): PExpressionRec;
 
 {
@@ -674,7 +674,7 @@ begin
   begin
     case TExprWord(Expr.Items[I]).ResultType of
       etLeftBracket: Inc(brCount);
-      etRightBracket: 
+      etRightBracket:
         begin
           Dec(brCount);
           if brCount < IArg then
@@ -744,8 +744,8 @@ begin
     // recurse into right part if present
     if IEnd < LastItem then
       Result^.ArgList[IArg] := MakeTree(Expr, IEnd+1, LastItem);
-  end else 
-  if TExprWord(Expr.Items[FirstItem]).IsFunction then 
+  end else
+  if TExprWord(Expr.Items[FirstItem]).IsFunction then
   begin
     // save function
     Result^.ExprWord := TExprWord(Expr.Items[FirstItem]);
@@ -1354,7 +1354,7 @@ begin
       end;
     end else begin
       // convert to string
-      width := 
+      width :=
 {$ifdef SUPPORT_INT64}
         GetStrFromInt64
 {$else}

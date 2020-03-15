@@ -53,37 +53,37 @@ object doublestringlisteditor: tdoublestringlisteditor
     anchors = [an_left, an_top, an_right, an_bottom]
     optionsgrid = [og_colsizing, og_rowmoving, og_keyrowmoving, og_rowinserting, og_rowdeleting, og_focuscellonenter, og_autofirstrow, og_autoappend, og_wrapcol, og_autopopup, og_mousescrollcol]
     fixcols.count = 1
-    fixcols.items = <    
+    fixcols.items = <
       item
         width = 31
         numstep = 1
       end>
     fixrows.count = 1
-    fixrows.items = <    
+    fixrows.items = <
       item
         height = 16
         captions.count = 3
-        captions.items = <        
+        captions.items = <
           item
             caption = 'a'
             textflags = []
-          end        
+          end
           item
             caption = 'b'
             textflags = []
-          end        
+          end
           item
           end>
       end>
     datacols.count = 2
     datacols.options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savevalue, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
-    datacols.items = <    
+    datacols.items = <
       item[texta]
         width = 137
         options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_proportional, co_savevalue, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
         widgetname = 'texta'
         dataclass = tgridmsestringdatalist
-      end    
+      end
       item[textb]
         width = 145
         options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_fill, co_savevalue, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
@@ -101,7 +101,7 @@ object doublestringlisteditor: tdoublestringlisteditor
       frame.localprops = [frl_levelo, frl_leveli, frl_colorclient]
       frame.localprops1 = []
       frame.buttons.count = 1
-      frame.buttons.items = <      
+      frame.buttons.items = <
         item
           color = -1879048187
           imagenr = 17
@@ -126,7 +126,7 @@ object doublestringlisteditor: tdoublestringlisteditor
       frame.localprops = [frl_levelo, frl_leveli, frl_colorclient]
       frame.localprops1 = []
       frame.buttons.count = 1
-      frame.buttons.items = <      
+      frame.buttons.items = <
         item
           color = -1879048187
           imagenr = 17

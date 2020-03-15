@@ -34,7 +34,7 @@ type
  unitgrouparty = array of unitgroupty;
 var
  groupar: unitgrouparty;
- 
+
  function findgroup(const unitname: string): punitgroupty;
  var
   str1: string;
@@ -84,8 +84,8 @@ var
     end;
    end;
   end;
- end;     
- 
+ end;
+
 var
  classn: string;
  parsedclasses: classarty;
@@ -104,7 +104,7 @@ var
   additem(pointerarty(parsedclasses),aclass);
   result:= true;
  end;
-  
+
  procedure dumpclass(po2: ptypeinfo);
  var
   po4: punitinfoty;
@@ -195,14 +195,14 @@ var
  po1: pcomponentclassinfoty;
  po2: ptypeinfo;
 // po3: ptypedata;
- 
+
 begin
  parsedclasses:= nil;
  with registeredcomponents do begin
   if count > 0 then begin
    po1:= itempo(0);
    for int1:= 0 to count - 1 do begin
-    classn:= po1^.classtyp.classname; 
+    classn:= po1^.classtyp.classname;
 //    writeln(classn);
     po2:= po1^.classtyp.classinfo;
     if isnotparsed(po1^.classtyp) then begin

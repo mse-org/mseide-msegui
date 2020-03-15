@@ -40,15 +40,15 @@ type
    procedure errormessage(const amessage: msestring); override;
    procedure settimer(const us: integer); override;
  end;
- 
+
 function application: tnoguiapplication;
- 
+
 implementation
 uses
  msesysutils,msesysintf1,msetimer,msenoguiintf,msethread;
 var
  appinst: tnoguiapplication;
- 
+
 function application: tnoguiapplication;
 begin
  if appinst = nil then begin
@@ -175,14 +175,14 @@ end;
 
 procedure tnoguiapplication.internalinitialize;
 begin
- nogui_init(@feventsem); 
+ nogui_init(@feventsem);
  msetimer.init;
 end;
 
 procedure tnoguiapplication.internaldeinitialize;
 begin
  msetimer.deinit;
- nogui_deinit; 
+ nogui_deinit;
 end;
 
 procedure tnoguiapplication.destroymodules();

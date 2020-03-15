@@ -39,12 +39,12 @@ uses
    *
    * Author:  Keith Packard, SuSE, Inc.
     }
-                                       
+
   type
 
 {$ifndef FPC}
  txid = xid;
-{$endif}  
+{$endif}
      TBool = integer;
      dword = longword;
      Pdword = ^dword;
@@ -74,74 +74,74 @@ uses
      BadGlyph = 4;
      RenderNumberErrors = BadGlyph + 1;
      PictTypeIndexed = 0;
-     PictTypeDirect = 1;     
-     PictOpMinimum = 0;     
-     PictOpClear = 0;     
-     PictOpSrc = 1;     
-     PictOpDst = 2;     
-     PictOpOver = 3;     
-     PictOpOverReverse = 4;     
-     PictOpIn = 5;     
-     PictOpInReverse = 6;     
+     PictTypeDirect = 1;
+     PictOpMinimum = 0;
+     PictOpClear = 0;
+     PictOpSrc = 1;
+     PictOpDst = 2;
+     PictOpOver = 3;
+     PictOpOverReverse = 4;
+     PictOpIn = 5;
+     PictOpInReverse = 6;
      PictOpOut = 7;
      PictOpOutReverse = 8;
-     PictOpAtop = 9;     
-     PictOpAtopReverse = 10;     
-     PictOpXor = 11;     
-     PictOpAdd = 12;     
-     PictOpSaturate = 13;     
-     PictOpMaximum = 13;     
+     PictOpAtop = 9;
+     PictOpAtopReverse = 10;
+     PictOpXor = 11;
+     PictOpAdd = 12;
+     PictOpSaturate = 13;
+     PictOpMaximum = 13;
   {
    * Operators only available in version 0.2
     }
-     PictOpDisjointMinimum = $10;     
-     PictOpDisjointClear = $10;     
+     PictOpDisjointMinimum = $10;
+     PictOpDisjointClear = $10;
      PictOpDisjointSrc = $11;
-     PictOpDisjointDst = $12;     
-     PictOpDisjointOver = $13;     
-     PictOpDisjointOverReverse = $14;     
-     PictOpDisjointIn = $15;     
-     PictOpDisjointInReverse = $16;     
+     PictOpDisjointDst = $12;
+     PictOpDisjointOver = $13;
+     PictOpDisjointOverReverse = $14;
+     PictOpDisjointIn = $15;
+     PictOpDisjointInReverse = $16;
      PictOpDisjointOut = $17;
-     PictOpDisjointOutReverse = $18;     
-     PictOpDisjointAtop = $19;     
-     PictOpDisjointAtopReverse = $1a;     
-     PictOpDisjointXor = $1b;     
-     PictOpDisjointMaximum = $1b;     
+     PictOpDisjointOutReverse = $18;
+     PictOpDisjointAtop = $19;
+     PictOpDisjointAtopReverse = $1a;
+     PictOpDisjointXor = $1b;
+     PictOpDisjointMaximum = $1b;
      PictOpConjointMinimum = $20;
-     PictOpConjointClear = $20;     
-     PictOpConjointSrc = $21;     
-     PictOpConjointDst = $22;     
-     PictOpConjointOver = $23;     
-     PictOpConjointOverReverse = $24;     
-     PictOpConjointIn = $25;     
-     PictOpConjointInReverse = $26;     
-     PictOpConjointOut = $27;     
-     PictOpConjointOutReverse = $28;     
-     PictOpConjointAtop = $29;     
-     PictOpConjointAtopReverse = $2a;     
-     PictOpConjointXor = $2b;     
-     PictOpConjointMaximum = $2b;     
-     PolyEdgeSharp = 0;     
-     PolyEdgeSmooth = 1;     
-     PolyModePrecise = 0;     
+     PictOpConjointClear = $20;
+     PictOpConjointSrc = $21;
+     PictOpConjointDst = $22;
+     PictOpConjointOver = $23;
+     PictOpConjointOverReverse = $24;
+     PictOpConjointIn = $25;
+     PictOpConjointInReverse = $26;
+     PictOpConjointOut = $27;
+     PictOpConjointOutReverse = $28;
+     PictOpConjointAtop = $29;
+     PictOpConjointAtopReverse = $2a;
+     PictOpConjointXor = $2b;
+     PictOpConjointMaximum = $2b;
+     PolyEdgeSharp = 0;
+     PolyEdgeSmooth = 1;
+     PolyModePrecise = 0;
      PolyModeImprecise = 1;
-     CPRepeat = 1 shl 0;     
-     CPAlphaMap = 1 shl 1;     
-     CPAlphaXOrigin = 1 shl 2;     
-     CPAlphaYOrigin = 1 shl 3;     
-     CPClipXOrigin = 1 shl 4;     
+     CPRepeat = 1 shl 0;
+     CPAlphaMap = 1 shl 1;
+     CPAlphaXOrigin = 1 shl 2;
+     CPAlphaYOrigin = 1 shl 3;
+     CPClipXOrigin = 1 shl 4;
      CPClipYOrigin = 1 shl 5;
      CPClipMask = 1 shl 6;
-     CPGraphicsExposure = 1 shl 7;     
-     CPSubwindowMode = 1 shl 8;     
-     CPPolyEdge = 1 shl 9;     
-     CPPolyMode = 1 shl 10;     
-     CPDither = 1 shl 11;     
-     CPComponentAlpha = 1 shl 12;     
-     CPLastBit = 11;     
+     CPGraphicsExposure = 1 shl 7;
+     CPSubwindowMode = 1 shl 8;
+     CPPolyEdge = 1 shl 9;
+     CPPolyMode = 1 shl 10;
+     CPDither = 1 shl 11;
+     CPComponentAlpha = 1 shl 12;
+     CPLastBit = 11;
   { Filters included in 0.6  }
-     FilterNearest = 'nearest';     
+     FilterNearest = 'nearest';
      FilterBilinear = 'bilinear';
      FilterFast = 'fast';
      FilterGood = 'good';
@@ -324,7 +324,7 @@ type
           delay : culong;
        end;
      PXAnimCursor = ^TXAnimCursor;
-     
+
   const
      PictStandardARGB32 = 0;
      PictStandardRGB24 = 1;
@@ -463,7 +463,7 @@ procedure XRenderComposite(dpy:PDisplay; op:longint; src:TPicture; mask:TPicture
   procedure XRenderSetPictureFilter(dpy:PDisplay; picture:TPicture; filter:Pchar; params:PXFixed; nparams:longint);cdecl;external External_library name 'XRenderSetPictureFilter';
 
   function XRenderCreateAnimCursor(dpy:PDisplay; ncursor:longint; cursors:PXAnimCursor):TCursor;cdecl;external External_library name 'XRenderCreateAnimCursor';
-  
+
 {$endif staticxrender}
 
        //macros

@@ -95,95 +95,95 @@ object breakpointsfo: tbreakpointsfo
     anchors = [an_top, an_bottom]
     optionsgrid = [og_colsizing, og_rowmoving, og_keyrowmoving, og_rowinserting, og_rowdeleting, og_focuscellonenter, og_autofirstrow, og_autoappend, og_colchangeontabkey, og_wrapcol, og_autopopup]
     fixcols.count = 1
-    fixcols.items = <    
+    fixcols.items = <
       item
         width = 20
         numstart = 1
         numstep = 1
       end>
     fixrows.count = 1
-    fixrows.items = <    
+    fixrows.items = <
       item
         height = 16
         captions.count = 11
-        captions.items = <        
+        captions.items = <
           item
             caption = 'on'
-          end        
+          end
           item
             caption = 'File'
-          end        
+          end
           item
-          end        
+          end
           item
             caption = 'Line Nr.'
-          end        
+          end
           item
             caption = 'Address'
-          end        
+          end
           item
-          end        
+          end
           item
-          end        
+          end
           item
             caption = 'Count'
-          end        
+          end
           item
             caption = 'Ignore'
-          end        
+          end
           item
-          end        
+          end
           item
             caption = 'Condition'
           end>
       end>
     datacols.count = 13
-    datacols.items = <    
+    datacols.items = <
       item[bkpton]
         linecolorfix = -1610612733
         width = 16
         options = [co_drawfocus, co_fixwidth, co_savestate]
         widgetname = 'bkpton'
         dataclass = tgridintegerdatalist
-      end    
+      end
       item[filename]
         linecolorfix = -1610612733
         width = 158
         options = [co_savevalue, co_savestate]
         widgetname = 'filename'
         dataclass = tgridmsestringdatalist
-      end    
+      end
       item[path]
         linecolorfix = -1610612733
         options = [co_invisible, co_savevalue]
         widgetname = 'path'
         dataclass = tgridmsestringdatalist
-      end    
+      end
       item[line]
         linecolorfix = -1610612733
         options = [co_savevalue, co_savestate]
         widgetname = 'line'
         dataclass = tgridintegerdatalist
-      end    
+      end
       item[address]
         width = 61
         onbeforedrawcell = adbefdrawcell
         widgetname = 'address'
         dataclass = tgridint64datalist
-      end    
+      end
       item[addressbkpt]
         width = 6
         options = [co_invisible, co_drawfocus, co_savevalue, co_savestate, co_mousescrollrow]
         widgetname = 'addressbkpt'
         dataclass = tgridintegerdatalist
-      end    
+      end
       item[bkptno]
         linecolorfix = -1610612733
         width = 19
         options = [co_invisible, co_savevalue]
         widgetname = 'bkptno'
         dataclass = tgridintegerdatalist
-      end    
+      end
       item[count]
         color = -1879048185
         linecolorfix = -1610612733
@@ -191,14 +191,14 @@ object breakpointsfo: tbreakpointsfo
         options = [co_readonly, co_nofocus, co_savevalue, co_savestate]
         widgetname = 'count'
         dataclass = tgridintegerdatalist
-      end    
+      end
       item[ignore]
         linecolorfix = -1610612733
         width = 30
         options = [co_savevalue, co_savestate]
         widgetname = 'ignore'
         dataclass = tgridintegerdatalist
-      end    
+      end
       item[conderr]
         linecolorfix = -1610612733
         width = 7
@@ -206,7 +206,7 @@ object breakpointsfo: tbreakpointsfo
         onshowhint = errhint
         widgetname = 'conderr'
         dataclass = tgridintegerdatalist
-      end    
+      end
       item[condition]
         linecolorfix = -1610612733
         width = 124
@@ -214,13 +214,13 @@ object breakpointsfo: tbreakpointsfo
         widthmin = 0
         widgetname = 'condition'
         dataclass = tgridmsestringdatalist
-      end    
+      end
       item[errormessage]
         width = 19
         options = [co_invisible, co_mousescrollrow]
         widgetname = 'errormessage'
         dataclass = tgridmsestringdatalist
-      end    
+      end
       item[flags]
         width = 17
         options = [co_invisible, co_savevalue, co_savestate]
@@ -449,7 +449,7 @@ object breakpointsfo: tbreakpointsfo
   end
   object gripopup: tpopupmenu
     menu.submenu.count = 1
-    menu.submenu.items = <    
+    menu.submenu.items = <
       item
         caption = 'Delete all'
         state = [as_localcaption, as_localonexecute]

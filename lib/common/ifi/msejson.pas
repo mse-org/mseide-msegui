@@ -13,13 +13,13 @@ unit msejson;
 interface
 uses
  classes,mclasses,msestrings,msesystypes,msetypes,sysutils,mseformatstr;
- 
+
 type
  ejsonerror = class(exception);
 
  jsonencodeoptionty = (jseo_tabindent);
  jsonencodeoptionsty = set of jsonencodeoptionty;
-  
+
  jsondatatypty = (jot_null,jot_string,jot_boolean,jot_int32,jot_int64,
                   jot_flo64); //zero init -> null
  jsondataty = record
@@ -31,14 +31,14 @@ type
    jot_int64:   (vint64: int64);
    jot_flo64:   (vflo64: double);
  end;
-   
+
  jsonkindty = (jok_empty,jok_error,jok_value,jok_object,jok_array);
           //zero init -> empty
  jsonvaluety = record
   case kind: jsonkindty of
    jok_empty,jok_error: (err: record end);
    jok_object:(obj: pointer);        //jsonitemarty
-   jok_array: (ar: pointer);         //jsonvaluearty   
+   jok_array: (ar: pointer);         //jsonvaluearty
    jok_value: (val: jsondataty);
  end;
  pjsonvaluety = ^jsonvaluety;
@@ -53,12 +53,12 @@ type
 
  arraystartmethodty = procedure(var adata;
                                    const acount: int32) of object;
- arrayitemmethodty = procedure(var adata; 
+ arrayitemmethodty = procedure(var adata;
                       const aindex: int32; const aitem: jsonvaluety) of object;
 
  arraystartprocty = procedure(var adata;
                                    const acount: int32);
- arrayitemprocty = procedure(var adata; 
+ arrayitemprocty = procedure(var adata;
                       const aindex: int32; const aitem: jsonvaluety);
 
  tjsoncontainer = class
@@ -88,12 +88,12 @@ type
                     const startproc: arraystartprocty;
                                            const itemproc: arrayitemprocty);
  end;
- 
+
 procedure jsonvalueinit(var avalue: jsonvaluety); //inits to null value
-procedure jsonvaluefree(var avalue: jsonvaluety); 
+procedure jsonvaluefree(var avalue: jsonvaluety);
 
 function jsonfindvalue(const avalue: jsonvaluety;
-                          const names: array of msestring; 
+                          const names: array of msestring;
                          const raiseexception: boolean = false): pjsonvaluety;
 function jsonasstring(const avalue: jsonvaluety;
                                  const names: array of msestring): msestring;
@@ -124,7 +124,7 @@ function jsonaddvalues(var jvalue: jsonvaluety;
 
 function jsondecode(const adata: string; out avalue:jsonvaluety): boolean;
 function jsonencode(const avalue: jsonvaluety; const adest: tstream;
-                       const aoptions: jsonencodeoptionsty = []): syserrorty; 
+                       const aoptions: jsonencodeoptionsty = []): syserrorty;
 
 implementation
 uses
@@ -273,7 +273,7 @@ const
   c_tab,c_tab,c_tab,c_tab,c_tab,c_tab,c_tab,c_tab, //24
   c_tab,c_tab,c_tab,c_tab,c_tab,c_tab,c_tab,c_tab, //32
   c_tab);
-  
+
 function jsonencode(const avalue: jsonvaluety; const adest: tstream;
                        const aoptions: jsonencodeoptionsty = []): syserrorty;
 var
@@ -300,7 +300,7 @@ var
    end;
   end;
  end;
-   
+
  procedure putindent();
  begin
   if (indentcount > 0) and (error = sye_ok) then begin
@@ -314,7 +314,7 @@ var
    error:= adest.trywritebuffer(pointer(atext)^,length(atext));
   end;
  end;//put
- 
+
  procedure putvalue(const avalue: jsonvaluety);
  var
   pi: pjsonitemty;
@@ -537,20 +537,20 @@ var
      pc:= po2-1;
      i1:= po2-po1;
      if i1 = 4 then begin
-      if (po1^ = 't') and ((po1+1)^ = 'r') and ((po1+2)^ = 'u') and 
+      if (po1^ = 't') and ((po1+1)^ = 'r') and ((po1+2)^ = 'u') and
                                                     ((po1+3)^ = 'e') then begin
        avalue.val.typ:= jot_boolean;
        avalue.val.vboolean:= true;
        exit;
       end;
-      if (po1^ = 'n') and ((po1+1)^ = 'u') and ((po1+2)^ = 'l') and 
+      if (po1^ = 'n') and ((po1+1)^ = 'u') and ((po1+2)^ = 'l') and
                                                     ((po1+3)^ = 'l') then begin
        avalue.val.typ:= jot_null;
        exit;
       end;
      end
      else begin
-      if (i1 = 5) and (po1^ = 'f') and ((po1+1)^ = 'a') and ((po1+2)^ = 'l') and 
+      if (i1 = 5) and (po1^ = 'f') and ((po1+1)^ = 'a') and ((po1+2)^ = 'l') and
                                 ((po1+3)^ = 's') and ((po1+4)^ = 'e') then begin
        avalue.val.typ:= jot_boolean;
        avalue.val.vboolean:= true;
@@ -589,7 +589,7 @@ var
    end;
   end;
  end;//getvalue
- 
+
  procedure getarray(var avalue: jsonvaluety);
  var
   ar1: jsonvaluearty;
@@ -619,7 +619,7 @@ var
   arrayaddref(ar1);
   avalue.ar:= pointer(ar1);
  end;//getarray
-  
+
  procedure getobj(var avalue: jsonvaluety);
  var
   ar1: jsonitemarty;
@@ -657,7 +657,7 @@ var
   arrayaddref(ar1);
   avalue.obj:= pointer(ar1);
  end;//getobj
- 
+
 begin
  error:= false;
  if adata <> '' then begin
@@ -678,7 +678,7 @@ begin
 end;
 
 function jsonfindvalue(const avalue: jsonvaluety;
-                          const names: array of msestring; 
+                          const names: array of msestring;
                          const raiseexception: boolean = false): pjsonvaluety;
            //todo: use hash cache
 var
@@ -687,7 +687,7 @@ var
  pe: pointer;
  i1: int32;
  mstr1: msestring;
- 
+
  procedure nameerror();
  begin
   pv:= nil;
@@ -695,7 +695,7 @@ var
    nameserror(copy(opentodynarraym(names),0,i1+1));
   end;
  end;//nameerror
- 
+
 begin
  pv:= @avalue;
  if high(names) >= 0 then begin
@@ -728,7 +728,7 @@ begin
  result:= jsonfindvalue(avalue,names,true);
  if result^.kind <> jok_value then begin
   error('No value');
- end;  
+ end;
 end;
 
 function jsonasstring(const avalue: jsonvaluety;
@@ -752,16 +752,16 @@ begin
     result:= 'false';
    end;
   end;
-  jot_int32: begin 
+  jot_int32: begin
    result:= inttostrmse(po1^.val.vint32);
   end;
-  jot_int64: begin 
+  jot_int64: begin
    result:= inttostrmse(po1^.val.vint64);
   end;
   jot_flo64: begin
    result:= realtostrmse(po1^.val.vflo64);
   end;
- end;   
+ end;
 end;
 
 function jsonasint32(const avalue: jsonvaluety;
@@ -1121,7 +1121,7 @@ begin
  jsonvaluefree(fvalue);
 end;
 
-function tjsoncontainer.findvalue(const names: array of msestring; 
+function tjsoncontainer.findvalue(const names: array of msestring;
                          const raiseexception: boolean = false): pjsonvaluety;
            //todo: use hash cache
 begin

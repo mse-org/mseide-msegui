@@ -132,12 +132,12 @@ const
 {$endif  FPC_LITTLE_ENDIAN}
 
 type
- 
+
   piconv_t = ^iconv_t;
   iconv_t = pointer;
   nl_item = cint;
 
-function nl_langinfo(__item:nl_item):pchar cdecl 
+function nl_langinfo(__item:nl_item):pchar cdecl
                                 external libiconvname name 'nl_langinfo';
 function iconv_open(__tocode: pchar; __fromcode: pchar): iconv_t cdecl
                                 external libiconvname name prefix+'iconv_open';
@@ -152,7 +152,7 @@ var
 //  iconv_ucs42ansi,
   iconv_ansi2wide,
   iconv_wide2ansi : iconv_t;
-  
+
 //  lock_ansi2ucs4 : integer = -1;
 //  lock_ucs42ansi : integer = -1;
   lock_ansi2wide : integer = -1;
@@ -177,14 +177,14 @@ Type
   TAnsiRec = Record
     CodePage    : TSystemCodePage;
     ElementSize : Word;
-{$ifdef CPU64}	
+{$ifdef CPU64}
     { align fields  }
 	Dummy       : DWord;
 {$endif CPU64}
     Ref         : SizeInt;
     Len         : SizeInt;
   end;
-  
+
 procedure Wide2AnsiMove(source:pwidechar;var dest:RawByteString;
                                           cp : TSystemCodePage; len:SizeInt);
                             //todo: convert codepages
@@ -202,7 +202,7 @@ procedure Wide2AnsiMove(source:pwidechar; var dest:ansistring; len:SizeInt);
     my0 : size_t;
   begin
 {$ifdef mse_fpc_3}
- if (cp = cp_utf8) or (cp = cp_acp) and 
+ if (cp = cp_utf8) or (cp = cp_acp) and
                           (DefaultSystemCodePage = cp_utf8) then begin
   dest:= stringtoutf8(source,len);
  end
@@ -279,7 +279,7 @@ procedure Ansi2WideMove(source:pchar;var dest:widestring;len:SizeInt);
     my0 : size_t;
   begin
 {$ifdef mse_fpc_3}
- if (cp = cp_utf8) or (cp = cp_acp) and 
+ if (cp = cp_utf8) or (cp = cp_acp) and
                           (DefaultSystemCodePage = cp_utf8) then begin
   dest:= utf8tostring(source,len);
  end
@@ -607,7 +607,7 @@ end;
 initialization
  setlocale(LC_ALL,'');
   { init conversion tables }
-  
+
 {$ifdef mse_fpc_3}
   { set the DefaultSystemCodePage }
   DefaultSystemCodePage:=GetStandardCodePage(scpAnsi);

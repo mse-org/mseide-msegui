@@ -32,7 +32,7 @@ procedure componentstoobjsource(components: componentarty;
 
 procedure formtexttoobjsource(sourcefilename: filenamety;
                             formclass: string = '';
-                            unitname: string = ''; 
+                            unitname: string = '';
                             objformat: objformatty = of_default;
                             langmodule: boolean = false);
    //converts objecttext to linkdata,
@@ -64,7 +64,7 @@ uses
 const
  formdataext = '_mfm';
  objdataname = 'objdata';
- 
+
 procedure createlanglib(const libfilename: filenamety;
            const langmodules,resourcemodules: stringarty);
 var

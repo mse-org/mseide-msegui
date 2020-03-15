@@ -12,7 +12,7 @@ uses
   , Types, dbf_wtil
 {$ifdef KYLIX}
   , Libc
-{$endif}  
+{$endif}
 {$endif}
   ;
 
@@ -303,12 +303,12 @@ end;
 
 procedure SwapInt64BE(Value {EAX}, Result {EDX}: Pointer); register; assembler;
 asm
-  MOV ECX, dword ptr [EAX] 
-  MOV EAX, dword ptr [EAX + 4] 
-  BSWAP ECX 
-  BSWAP EAX 
-  MOV dword ptr [EDX+4], ECX 
-  MOV dword ptr [EDX], EAX 
+  MOV ECX, dword ptr [EAX]
+  MOV EAX, dword ptr [EAX + 4]
+  BSWAP ECX
+  BSWAP EAX
+  MOV dword ptr [EDX+4], ECX
+  MOV dword ptr [EDX], EAX
 end;
 
 {$else}

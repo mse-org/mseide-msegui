@@ -15,7 +15,7 @@ uses
  msegraphutils,mseevent,mseclasses,mseforms,msedataedits,mseedit,msestrings,
  msetypes,msestatfile,msesimplewidgets,msewidgets,msedialog,classes,mclasses,
  msedropdownlist,msesplitter,mserichstring,mseactions,mseact;
- 
+
 type
  trichstringeditorfo = class(tmseform)
    memo: trichmemoedit;
@@ -32,16 +32,16 @@ type
    constructor create(const aowner: tcomponent; const readonly: boolean);
                                                                   reintroduce;
  end;
-  
-function richstringdialog(var avalue: richstringty; 
+
+function richstringdialog(var avalue: richstringty;
                              const readonly: boolean): modalresultty;
- 
+
 implementation
 uses
  mserichstringeditor_mfm,mseeditglob,msekeyboard,msestockobjects,
                                                   msefontformatdialog;
- 
-function richstringdialog(var avalue: richstringty; 
+
+function richstringdialog(var avalue: richstringty;
                                 const readonly: boolean): modalresultty;
 var
  dia1: trichstringeditorfo;

@@ -30,11 +30,11 @@ type
    property DatabaseName: filenamety read getdatabasename write setdatabasename;
    property Connected: boolean read getconnected write setconnected default false;
  end;
- 
+
 implementation
 uses
  msefileutils,msesqldb,msebufdataset;
- 
+
 { tmsemysqlconnection }
 
 procedure tmsemysqlconnection.setdatabasename(const avalue: filenamety);

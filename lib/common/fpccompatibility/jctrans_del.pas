@@ -300,7 +300,7 @@ end;
 
 {METHODDEF}
 procedure start_pass_coef (cinfo : j_compress_ptr;
-                           pass_mode :  J_BUF_MODE); 
+                           pass_mode :  J_BUF_MODE);
 var
   coef : my_coef_ptr;
 begin
@@ -324,7 +324,7 @@ end;
 
 {METHODDEF}
 function compress_output (cinfo : j_compress_ptr;
-                          input_buf : JSAMPIMAGE) : boolean; 
+                          input_buf : JSAMPIMAGE) : boolean;
 var
   coef : my_coef_ptr;
   MCU_col_num : JDIMENSION;     { index of current MCU within row }

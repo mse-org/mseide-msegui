@@ -228,7 +228,7 @@ function tpanelfo.canclose(const newfocus: twidget): boolean;
   end;
   result:= true;
  end;
- 
+
 begin
  result:= inherited canclose(newfocus);
  {

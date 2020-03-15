@@ -14,7 +14,7 @@ interface
 uses
  mdb,classes,mclasses,mmysql41conn,msetypes{msestrings},
  msedb,msqldb,msedatabase;
- 
+
 type
  tmsemysql41connection = class(tmysql41connection,idbcontroller)
   private
@@ -32,11 +32,11 @@ type
    property DatabaseName: filenamety read getdatabasename write setdatabasename;
    property Connected: boolean read getconnected write setconnected default false;
  end;
- 
+
 implementation
 uses
  msefileutils,msesqldb,msebufdataset;
- 
+
 { tmsemysql41connection }
 
 procedure tmsemysql41connection.setdatabasename(const avalue: filenamety);

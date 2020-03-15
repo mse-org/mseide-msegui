@@ -106,7 +106,7 @@ type
   a matching multiplier table. }
 
 {METHODDEF}
-procedure start_pass (cinfo : j_decompress_ptr); 
+procedure start_pass (cinfo : j_decompress_ptr);
 var
   idct : my_idct_ptr;
   ci, i : int;

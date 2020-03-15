@@ -1,4 +1,4 @@
-unit main;  
+unit main;
 
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 
@@ -12,10 +12,10 @@ type
    tbutton1: tbutton;
    procedure exitonexecute(const sender: TObject);
  end;
- 
+
 var
  mainfo: tmainfo;
- 
+
 implementation
 uses
  main_mfm;

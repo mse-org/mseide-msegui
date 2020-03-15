@@ -92,7 +92,7 @@ type
  tcomponentevent = class;
  posteventoptionty = (peo_local,peo_first,peo_modaldefer);
  posteventoptionsty = set of posteventoptionty;
- 
+
  notifyeventty = procedure (const sender: tobject) of object;
  componenteventty = procedure (const acomponent: tcomponent) of object;
  checkeventty = function (const sender: tobject): boolean of object;
@@ -118,35 +118,35 @@ type
  getint64eventty = function: int64 of object;
  getmsestringeventty = function: msestring of object;
  getstringareventty = function: stringarty of object;
- 
- updatestringeventty = procedure(const sender: tobject; 
+
+ updatestringeventty = procedure(const sender: tobject;
                                  var avalue: msestring) of object;
- updateansistringeventty = procedure(const sender: tobject; 
+ updateansistringeventty = procedure(const sender: tobject;
                                  var avalue: ansistring) of object;
- updateintegereventty = procedure(const sender: tobject; 
+ updateintegereventty = procedure(const sender: tobject;
                                         var avalue: integer) of object;
  updateint64eventty = procedure(const sender: tobject;
                                         var avalue: int64) of object;
  updatepointereventty = procedure(const sender: tobject;
                                         var avalue: pointer) of object;
- updatebooleaneventty = procedure(const sender: tobject; 
+ updatebooleaneventty = procedure(const sender: tobject;
                                         var avalue: boolean) of object;
- updaterealeventty = procedure(const sender: tobject; 
+ updaterealeventty = procedure(const sender: tobject;
                                         var avalue: real) of object;
  updatedatetimeeventty = procedure(const sender: tobject;
                                         var avalue: tdatetime) of object;
- 
+
  setbooleaneventty = procedure(const sender: tobject; var avalue: boolean;
                           var accept: boolean) of object;
  setstringeventty = procedure(const sender: tobject; var avalue: msestring;
                           var accept: boolean) of object;
  setansistringeventty = procedure(const sender: tobject; var avalue: ansistring;
                           var accept: boolean) of object;
- setintegereventty = procedure(const sender: tobject; var avalue: integer; 
-                          var accept: boolean) of object; 
+ setintegereventty = procedure(const sender: tobject; var avalue: integer;
+                          var accept: boolean) of object;
                           //equal parameters as setcoloreventty for tcoloredit!
- setint64eventty = procedure(const sender: tobject; var avalue: int64; 
-                          var accept: boolean) of object; 
+ setint64eventty = procedure(const sender: tobject; var avalue: int64;
+                          var accept: boolean) of object;
  setrealeventty = procedure(const sender: tobject; var avalue: realty;
                           var accept: boolean) of object;
  setdatetimeeventty = procedure(const sender: tobject; var avalue: tdatetime;
@@ -158,11 +158,11 @@ type
                           var accept: boolean; const aindex: integer) of object;
  setansistringindexeventty = procedure(const sender: tobject; var avalue: ansistring;
                           var accept: boolean; const aindex: integer) of object;
- setintegerindexeventty = procedure(const sender: tobject; var avalue: integer; 
-                          var accept: boolean; const aindex: integer) of object; 
+ setintegerindexeventty = procedure(const sender: tobject; var avalue: integer;
+                          var accept: boolean; const aindex: integer) of object;
                           //equal parameters as setcoloreventty for tcoloredit!
  setint64indexeventty = procedure(const sender: tobject; var avalue: int64;
-                          var accept: boolean; const aindex: integer) of object; 
+                          var accept: boolean; const aindex: integer) of object;
  setrealindexeventty = procedure(const sender: tobject; var avalue: realty;
                           var accept: boolean; const aindex: integer) of object;
  setdatetimeindexeventty = procedure(const sender: tobject; var avalue: tdatetime;
@@ -173,11 +173,11 @@ type
 
  persistentarty = array of tpersistent;
  persistentclassty = class of tpersistent;
- 
+
  componentarty = array of tcomponent;
  componentaty = array[0..0] of tcomponent;
  pcomponentaty = ^componentaty;
- 
+
  componentclassty = class of tcomponent;
 
  propinfopoarty = array of ppropinfo;
@@ -253,7 +253,7 @@ type
    function linkedobjects: objectarty; overload;
    function linkedobjects(const ainterfacetype: pointer): objectarty; overload;
 
-   procedure setlinkedvar(const linkintf: iobjectlink; 
+   procedure setlinkedvar(const linkintf: iobjectlink;
                             const source: iobjectlink; var dest: iobjectlink;
                             const ainterfacetype: pointer = nil); overload;
    procedure setlinkedvar(const linkintf: iobjectlink;
@@ -263,21 +263,21 @@ type
                              const source: tlinkedpersistent;
                              var dest: tlinkedpersistent;
                              const ainterfacetype: pointer = nil); overload;
-   procedure setlinkedvar(const linkintf: iobjectlink; 
+   procedure setlinkedvar(const linkintf: iobjectlink;
                           const source: tmsecomponent; var dest: tmsecomponent;
                           const ainterfacetype: pointer = nil); overload;
 
-   procedure setlink(const linkintf: iobjectlink; 
+   procedure setlink(const linkintf: iobjectlink;
                           const source: tmsecomponent; var dest: tmsecomponent;
                           const ainterfacetype: pointer = nil); overload;
                                          //no automatic nil setting
    procedure sendevent(event: objecteventty);
    procedure objevent(const sender: iobjectlink; const event: objecteventty);
-   procedure forall(const proc: objectlinkprocty; 
+   procedure forall(const proc: objectlinkprocty;
                             const ainterfacetype: pointer); overload;
    procedure forall(const proc: objectlinkintfprocty;
                             const ainterfacetype: pointer); overload;
-   procedure forfirst(const proc: objectlinkfirstprocty; 
+   procedure forfirst(const proc: objectlinkfirstprocty;
                             const ainterfacetype: pointer); overload;
    procedure forfirst(const proc: objectlinkintffirstprocty;
                             const ainterfacetype: pointer); overload;
@@ -305,7 +305,7 @@ type
    destructor destroy; override;
 //   property objectlinker: tobjectlinker read getobjectlinker;
  end;
- 
+
  tlinkedrecordlist = class(trecordlist,iobjectlink)
   protected
    fobjectlinker: tobjectlinker;
@@ -326,11 +326,11 @@ type
  public
    destructor destroy; override;
  end;
- 
+
 (*
  tnullinterfacedobject = class(tobject,iunknown)
   protected
-   function _addref: integer; 
+   function _addref: integer;
                       {$ifdef mswindows}stdcall{$else} cdecl{$endif};
    function _release: integer;
                       {$ifdef mswindows}stdcall{$else} cdecl{$endif};
@@ -342,12 +342,12 @@ type
  tnullinterfacedpersistent = class(tvirtualpersistent,iunknown)
   protected
   {$ifdef FPC}
-   function _addref: integer; 
+   function _addref: integer;
                       {$ifdef mswindows}stdcall{$else} cdecl{$endif};
    function _release: integer;
                       {$ifdef mswindows}stdcall{$else} cdecl{$endif};
    function QueryInterface({$ifdef fpc_has_constref}constref{$else}const{$endif}
-                 IID: TGUID; out Obj): HResult; 
+                 IID: TGUID; out Obj): HResult;
                       {$ifdef mswindows}stdcall{$else} cdecl{$endif};
   {$endif}
  end;
@@ -366,7 +366,7 @@ type
   protected
    fobjectlinker: tobjectlinker;
    function getobjectlinker: tobjectlinker;
-   procedure objectevent(const sender: tobject; 
+   procedure objectevent(const sender: tobject;
                                 const event: objecteventty); virtual;
     //iobjectlink
    procedure link(const source,dest: iobjectlink; valuepo: pointer = nil;
@@ -384,7 +384,7 @@ type
               const linkintf: iobjectlink = nil); overload;
    procedure setlinkedvar(const source: tlinkedobject; var dest: tlinkedobject;
               const linkintf: iobjectlink = nil); overload;
-   procedure setlinkedvar(const source: tlinkedpersistent; 
+   procedure setlinkedvar(const source: tlinkedpersistent;
                                 var dest: tlinkedpersistent;
               const linkintf: iobjectlink = nil); overload;
  end;
@@ -397,7 +397,7 @@ type
    procedure defineproperties(filer : tfiler); override;
    function isoptional: boolean; virtual;
  end;
- 
+
  teventpersistent = class(tlinkedpersistent,ievent)
   protected
    procedure receiveevent(const event: tobjectevent); virtual;
@@ -436,7 +436,7 @@ type
  msecomponentstatety = (cs_ismodule,cs_beginreadproc,cs_endreadproc,
                        cs_loadedproc,
                         cs_inheritedloading,cs_noload,cs_tmpmodule,
-                        cs_subcompref, //subcomponent can be referenced 
+                        cs_subcompref, //subcomponent can be referenced
                                        //by component properties
                         cs_parentwidgetrect //info for designer, example ttabpage
 //                        cs_skinloaded
@@ -444,10 +444,10 @@ type
  msecomponentstatesty = set of msecomponentstatety;
 
  createprocty = procedure of object;
- 
+
  skinoptionty = (sko_container);
  skinoptionsty = set of skinoptionty;
- 
+
  skinobjectkindty = (sok_component,sok_widget,sok_groupbox,
                      sok_simplebutton,sok_databutton,sok_slider,
                      sok_tabbar,sok_tabpage,sok_toolbar,
@@ -455,7 +455,7 @@ type
                      sok_edit,sok_dataedit,sok_booleanedit,
                      sok_grid,
                      sok_mainmenu,sok_popupmenu,sok_mainmenuwidget,
-                     sok_user); 
+                     sok_user);
 
  skininfoty = record
   instance: tobject;
@@ -489,7 +489,7 @@ type
    function getifidatatype: listdatatypety virtual;
     //iificommand
    procedure executeificommand(var acommand: ificommandcodety); virtual;
-{$endif}   
+{$endif}
 
    function getancestorclassname: string;
    function getmsecomponentstate: msecomponentstatesty;
@@ -562,7 +562,7 @@ type
    function getcorbainterface(const aintf: ptypeinfo; out obj) : boolean;
 //   function getcorbainterface(const aintf: tguid; out obj) : boolean;
    procedure initnewcomponent(const ascale: real); virtual;
-   function checkowned(component: tcomponent): boolean; 
+   function checkowned(component: tcomponent): boolean;
                  //true if component is owned or self
    function checkowner(component: tcomponent): boolean;
                  //true if component is owner or self
@@ -572,7 +572,7 @@ type
    function linkedobjects: objectarty;
                  //returns items of objeclinker and free notify list
 
-   procedure sendcomponentevent(const event: tcomponentevent; 
+   procedure sendcomponentevent(const event: tcomponentevent;
                                         const destroyevent: boolean = true);
                   //event will be destroyed if not async
    procedure sendrootcomponentevent(const event: tcomponentevent;
@@ -587,9 +587,9 @@ type
    property moduleclassname: string read getmoduleclassname;
    property actualclassname: string read getactualclassname;
    property msecomponentstate: msecomponentstatesty read fmsecomponentstate;
-   property onbeforeupdateskin: notifyeventty read fonbeforeupdateskin 
+   property onbeforeupdateskin: notifyeventty read fonbeforeupdateskin
                                    write fonbeforeupdateskin;
-   property onafterupdateskin: notifyeventty read fonafterupdateskin 
+   property onafterupdateskin: notifyeventty read fonafterupdateskin
                                    write fonafterupdateskin;
   published
    property helpcontext: msestring read gethelpcontext write fhelpcontext;
@@ -729,7 +729,7 @@ type
  end;
 
  tnotifylist = class(tmethodlist)
-  public 
+  public
    procedure notify(const sender: tobject);
  end;
 
@@ -792,7 +792,7 @@ type
    constructor create(data: pobjectdataty);
    function Write(const Buffer; Count: Longint): Longint; override;
  end;
- 
+
  setsplitpairty = record
                    oldenum,newenum: string
                   end;
@@ -806,13 +806,13 @@ type
  readrecordprocty = procedure(const reader: treader; var data);
 
 function ownscomponent(const owner: tcomponent; const child: tcomponent): boolean;
-function ownernamepath(const acomponent: tcomponent): string; 
+function ownernamepath(const acomponent: tcomponent): string;
                      //namepath from root to acomponent separated by '.'
 function ownernamepath(const aroot: tcomponent;
-                                const acomponent: tcomponent): string; 
+                                const acomponent: tcomponent): string;
                      //namepath from aroot to acomponent separated by '.'
                      //excluding aroot
-function namepathowner(const acomponent: tcomponent): string; 
+function namepathowner(const acomponent: tcomponent): string;
                      //namepath from acomponent to root separated by '.'
 function getnumberedname(const acomp: tcomponent;
                                      const namebase: string): string;
@@ -823,7 +823,7 @@ function componentpathowner(const acomponent: tcomponent): componentarty;
 function rootcomponent(const acomponent: tcomponent): tcomponent;
 procedure setcomponentorder(const owner: tcomponent; const anames: msestringarty);
 function getcomponentchildren(const acomp: tcomponent;
-           const aroot: tcomponent; 
+           const aroot: tcomponent;
            const nestedowners: boolean = false;
            const nestedparents: boolean = false): componentarty;
 function getpropinfoar(const obj: tobject): propinfopoarty; overload;
@@ -853,9 +853,9 @@ procedure setlinkedcomponent(const sender: iobjectlink; const source: tmsecompon
 
 function createmodule(aowner: tcomponent; instanceclass: msecomponentclassty;
                                               var reference): tmsecomponent;
-procedure registerobjectdata(datapo: pobjectdataty; 
+procedure registerobjectdata(datapo: pobjectdataty;
                  objectclass: tpersistentclass; name: string = ''); overload;
-procedure registerobjectdata(datapo: pobjectdataty; 
+procedure registerobjectdata(datapo: pobjectdataty;
                  const objectclassname: string; const name: string = ''); overload;
                  //language overrides
 procedure unregisterobjectdata(const objectclassname: string; const name: string = '');
@@ -873,10 +873,10 @@ function initmsecomponent(instance: tmsecomponent; rootancestor: tclass;
                           //true if root and all inherited classes loaded
 function initmsecomponent1(instance: tcomponent; rootancestor: tclass): boolean;
                           //true if root and all inherited classes loaded
-function findancestorcomponent(const areader: treader; 
+function findancestorcomponent(const areader: treader;
                  const componentname: string): tcomponent;
 procedure loadmsemodule(const instance: tmsecomponent; const rootancestor: tclass);
-function findmoduledata(const aclassname: string; 
+function findmoduledata(const aclassname: string;
                             out aparentclassname: string): pobjectdataty;
 
 function getfproppath(const writer:twriter): string;
@@ -905,7 +905,7 @@ procedure refreshancestor(var deletedcomps: componentarty;
               const sourcemethodtab: pointer = nil;
               const destmethodtab: pointer = nil
              {$endif});
-             
+
 procedure initinline(const acomponent: tcomponent);
                  //sets inline, resets ancestor, sets ancestor of children
 procedure checkinline(const acomponent: tcomponent);
@@ -1012,7 +1012,7 @@ procedure dumptextstream(const stream: tstream; const atext: string);
 procedure dumpcomponent(const acomp: tcomponent; const atext: string = '');
 procedure dumpstreamcomponent(const acomp: tcomponent; const atext: string = '');
 procedure debugstreamout(const stream: tstream; const atext: string);
-procedure debugbinstreamout(const acomp,aancestor: tcomponent; 
+procedure debugbinstreamout(const acomp,aancestor: tcomponent;
              const aonfindancestor: tfindancestorevent; const atext: string);
 function debugstringarty(const astringar: stringarty): string;
 function debugcompname(const acomponent: tcomponent): string;
@@ -1087,7 +1087,7 @@ type
    procedure reloadchanged;
    procedure reloadall;
  end;
- 
+
  tloadedlist = class(tcomponent)
   protected
    procedure notification(acomponent: tcomponent; operation: toperation); override;
@@ -1096,7 +1096,7 @@ type
  trefreshwriter = class(twritermse)
   protected
  end;
- 
+
 var
  objectdatalist: tobjectdatainfolist;
  fmodules: tmodulelist;
@@ -1179,7 +1179,7 @@ end;
 procedure dumpcomponent(const acomp: tcomponent; const atext: string = '');
 var
  indent: string;
- 
+
  procedure dodump(const acomp: tcomponent);
  var
   int1: integer;
@@ -1194,7 +1194,7 @@ var
   end;
   setlength(indent,length(indent)-1);
  end;
- 
+
 begin
  if atext = '' then begin
   debugwriteln('*dumpcomp')
@@ -1265,7 +1265,7 @@ begin
  result:=p;
 {$endif FPC_REQUIRES_PROPER_ALIGNMENT}
 end;
- 
+
 procedure copyvarrec(const source: tvarrec; const dest: pointer);
 begin
  with source do begin
@@ -1353,10 +1353,10 @@ begin
  end;
 end;
 
-function alive(const acomponent: tcomponent): boolean; 
+function alive(const acomponent: tcomponent): boolean;
                                                 {$ifdef FPC}inline;{$endif}
 begin
- result:= (acomponent <> nil) and 
+ result:= (acomponent <> nil) and
            not (csdestroying in acomponent.componentstate);
 end;
 
@@ -1416,7 +1416,7 @@ type
  end;
 var
  pastedcomps: array of pastedcompinfoty;
- 
+
 procedure clearpastedcomponents;
 begin
  pastedcomps:= nil;
@@ -1471,7 +1471,7 @@ begin
   end;
  end;
 end;
-                    
+
 procedure clearinline(const acomponent: tcomponent);
 var
  int1: integer;
@@ -1493,8 +1493,8 @@ begin
  with tcomponent1(acomponent) do begin
 {$warnings on}
   exclude(fcomponentstate,csancestor);
-  include(fcomponentstate,csinline);   
- end; 
+  include(fcomponentstate,csinline);
+ end;
  for int1:= 0 to acomponent.componentcount - 1 do begin
   comp1:= acomponent.components[int1];
   tcomponent1(comp1).setancestor(true);
@@ -1532,7 +1532,7 @@ begin
  tcomponent1(acomponent).setancestor(true);
 end;
 
-function swapmethodtable(const instance: tobject; const newtable: pointer): pointer;		
+function swapmethodtable(const instance: tobject; const newtable: pointer): pointer;
 var
  {$ifdef mswindows}
  ca1: longword;
@@ -1581,7 +1581,7 @@ begin
  end;
 end;
 
-procedure writeenum(const writer: twriter; const value: integer; 
+procedure writeenum(const writer: twriter; const value: integer;
                                               const atypeinfo: ptypeinfo);
 begin
  writer.writeident(getenumname(atypeinfo,value));
@@ -1754,7 +1754,7 @@ begin
  writer.writelistend;
 end;
 
-procedure readrecordar(const reader: treader; out ar; 
+procedure readrecordar(const reader: treader; out ar;
      const typeinfo: pdynarraytypeinfo; const readproc: readrecordprocty);
 var
  int1: integer;
@@ -1847,7 +1847,7 @@ begin
 end;
 
 function ownernamepath(const aroot: tcomponent;
-                                const acomponent: tcomponent): string; 
+                                const acomponent: tcomponent): string;
                      //namepath from aroot to acomponent separated by '.'
                      //excluding aroot
 var
@@ -1870,7 +1870,7 @@ begin
  end;
 end;
 
-function namepathowner(const acomponent: tcomponent): string; 
+function namepathowner(const acomponent: tcomponent): string;
                      //namepath from acomponent to root separated by '.'
 var
  comp: tcomponent;
@@ -1954,7 +1954,7 @@ begin
    remove(comp1);
    add(comp1);
   end;
- end; 
+ end;
 end;
 
 { trefreshwriter }
@@ -2027,7 +2027,7 @@ function getcomponentchildren(const acomp: tcomponent;
                 const nestedparents: boolean = false): componentarty;
 var
  obj: tgetcomponentchildren;
-// ev1: getchildreneventty; 
+// ev1: getchildreneventty;
 begin
 // ev1:= onstreaminggetchildren;
 // try
@@ -2107,7 +2107,7 @@ begin
   po1:= getpropinfo(instance,apropname);
   if (po1 <> nil) then begin
    po2:= po1^.proptype;
-   if (po2^.kind = tkclass) and 
+   if (po2^.kind = tkclass) and
               (gettypedata(po2)^.classtype.inheritsfrom(aclass)) then begin
  {$ifdef cpu64}
     result:= tobject(ptruint(getint64prop(instance,po1)));
@@ -2170,7 +2170,7 @@ begin
  end;
  inherited;
 end;
- 
+
 procedure freecomponents(const acomponents: componentarty);
                     //uses freenotification
 begin
@@ -2202,7 +2202,7 @@ function copycomponent(const source: tcomponent; const aowner: tcomponent = nil;
    end;
   end;
  end; //copyflags
- 
+
 var
  stream: tmemorystream;
  writer: twritermse;
@@ -2302,9 +2302,9 @@ function fixupsetchildorder(const sender: tcomponent;
                                  //true if handled
 begin
  result:= false;
- if (csloading in child.componentstate) and 
+ if (csloading in child.componentstate) and
     (child.getparentcomponent = nil) and ownscomponent(sender,child) and
-    (child.owner.componentstate*[csreading,csinline] = [csreading,csinline]) and 
+    (child.owner.componentstate*[csreading,csinline] = [csreading,csinline]) and
     (child.owner <> sender) then begin
    //treader set root as parent istead of lookuproot.
   tcomponent1(child.owner).setchildorder(child,order);
@@ -2319,7 +2319,7 @@ var
 begin
  instance := tmsecomponent(instanceclass.newinstance);
  additem(pointerarty(fmodulestoregister),instance);
-// fmodules.add(instance); //not before completely loaded, 
+// fmodules.add(instance); //not before completely loaded,
                         //submodules call globalfixupreferences
  if @reference <> nil then begin
   tmsecomponent(reference):= instance;
@@ -2336,7 +2336,7 @@ begin
 end;
 
 
-function findmoduledata(const aclassname: string; 
+function findmoduledata(const aclassname: string;
                   out aparentclassname: string): pobjectdataty;
 var
  po1: pobjectdatainfoty;
@@ -2389,8 +2389,8 @@ end;
 
 const
  skipmark = 'h71%z/ur';
- 
-type 
+
+type
  trefresheventhandler = class(tcomponent)
   private
    fcomponentar: componentarty;
@@ -2400,14 +2400,14 @@ type
                    componentclass: tpersistentclass; var component: tcomponent);
   protected
    procedure notification(acomponent: tcomponent; operation: toperation);
-                               override;        
+                               override;
   public
    destructor destroy; override;
  end;
 
  trefreshexception = class(exception)
  end;
-  
+
 destructor trefresheventhandler.destroy;
 var
  int1: integer;
@@ -2434,7 +2434,7 @@ begin
  end;
 end;
 
-procedure trefresheventhandler.onsetname(reader: treader; 
+procedure trefresheventhandler.onsetname(reader: treader;
                                     component: tcomponent; var aname: string);
 begin
 exit;
@@ -2500,7 +2500,7 @@ begin
   end;
  end;
 end;
- 
+
 procedure tcomponentdeleter.notification(acomponent: tcomponent;
                operation: toperation);
 var
@@ -2525,9 +2525,9 @@ type
    procedure setchildancestor(child: tcomponent);
    procedure setancestors(const acomponent: tcomponent);
    procedure notification(acomponent: tcomponent; operation: toperation);
-                               override;  
+                               override;
  end;
- 
+
 procedure trefreshancestoreventhandler.notification(acomponent: tcomponent;
                                                      operation: toperation);
 begin
@@ -2553,7 +2553,7 @@ end;
 
 procedure refreshancestor(var deletedcomps: componentarty;
               const descendent,newancestor,oldancestor: tcomponent;
-              const revert: boolean; 
+              const revert: boolean;
               const onfindancestor: tfindancestorevent = nil;
               const onfindcomponentclass: tfindcomponentclassevent = nil;
               const oncreatecomponent: tcreatecomponentevent = nil;
@@ -2572,7 +2572,7 @@ var
  newancestorroot: tcomponent;
  oldancestorroot: tcomponent;
  eventhandler: trefreshancestoreventhandler;
-  
+
  procedure deletecomps(const adescendent,anewancestor,aoldancestor: tcomponent);
  var
   deleter: tcomponentdeleter;
@@ -2585,7 +2585,7 @@ var
                    //nested components
   deleter:= tcomponentdeleter.create(descendentar);
   try
-   newancestorar:= getcomponentchildren(anewancestor,newancestorroot,true);    
+   newancestorar:= getcomponentchildren(anewancestor,newancestorroot,true);
    if not revert then begin
     oldancestorar:= getcomponentchildren(aoldancestor,oldancestorroot,true);
    end;
@@ -2608,7 +2608,7 @@ var
        end;
       end;
      end;
-     if ((comp1 = nil) or (finditem(pointerarty(deletedcomps),comp1) >= 0)) and 
+     if ((comp1 = nil) or (finditem(pointerarty(deletedcomps),comp1) >= 0)) and
                                      (revert or (comp2 <> nil)) then begin
       additem(pointerarty(deletedcomps),pointer(descendentar[int1]));
 //      freedesigncomponent(descendentar[int1]);
@@ -2655,7 +2655,7 @@ var
  comp1: tcomponent;
  stream3: ttextstream;
  {$endif}
- 
+
 begin
  descendentroot:= rootcomponent(descendent);
  newancestorroot:= rootcomponent(newancestor);
@@ -2745,7 +2745,7 @@ begin
 
   try
    writer.OnFindAncestor:= onfindancestor;
-   writer.WriteDescendent(newancestor,descendent); 
+   writer.WriteDescendent(newancestor,descendent);
                                        //new state before deactivate
    writer.free;
   {$ifdef mse_debugrefresh}
@@ -2765,7 +2765,7 @@ begin
      intf1.setactive(false);
     end;
    end;
- 
+
    writer:= twritermse.Create(stream4,4096,false,true);
   {$ifdef mse_nomethodswap}
    writer.onwritemethodproperty:= onwritemethodproperty;
@@ -2800,7 +2800,7 @@ begin
   end;
  {$endif}
   try
-   reader:= tasinheritedreader.create(stream2,4096,inl{false});  
+   reader:= tasinheritedreader.create(stream2,4096,inl{false});
                     //new state before deactivate
    reader.OnFindComponentClass:= onfindcomponentclass;
    reader.OnCreateComponent:= oncreatecomponent;
@@ -2809,7 +2809,7 @@ begin
   {$else}
    reader.onfindmethod:= onfindmethod;
   {$endif}
-   reader.onancestornotfound:= 
+   reader.onancestornotfound:=
                 {$ifdef FPC}@{$endif}eventhandler.doancestornotfound;
  {$ifdef mse_debugrefresh}
     writeln('**reading changes newancestor->descendent before deactivate');
@@ -2820,7 +2820,7 @@ begin
    end;
    reader.free;
 
-   reader:= tasinheritedreader.create(stream4,4096,inl{false});  
+   reader:= tasinheritedreader.create(stream4,4096,inl{false});
                     //new state after deactivate
    reader.OnFindComponentClass:= onfindcomponentclass;
    reader.OnCreateComponent:= oncreatecomponent;
@@ -2829,13 +2829,13 @@ begin
   {$else}
    reader.onfindmethod:= onfindmethod;
   {$endif}
-   reader.onancestornotfound:= 
+   reader.onancestornotfound:=
                 {$ifdef FPC}@{$endif}eventhandler.doancestornotfound;
  {$ifdef mse_debugrefresh}
     writeln('**reading changes newancestor->descendent after deactivate');
  {$endif}
    reader.ReadRootComponent(descendent); //changes
-  
+
    if not revert then begin
     reader.free;
     reader:= tasinheritedreader.create(stream1,4096,false);  //restore old changes
@@ -2848,7 +2848,7 @@ begin
    {$endif}
     reader.onsetname:= {$ifdef FPC}@{$endif}eventhandler.onsetname;
     reader.onerror:= {$ifdef FPC}@{$endif}eventhandler.onerror;
-    reader.onancestornotfound:= 
+    reader.onancestornotfound:=
                 {$ifdef FPC}@{$endif}eventhandler.doancestornotfound;
  {$ifdef mse_debugrefresh}
     writeln('**reading changes descendent->oldancestor');
@@ -2860,7 +2860,7 @@ begin
    debugwriteln('**deleteldcomps before delete '+
                         debugcomprootnames(deletedcomps));
   {$endif}
-  
+
   finally
   {$ifndef mse_nomethodswap}
    if destmethodtab <> nil then begin
@@ -2884,7 +2884,7 @@ begin
    stream1.Free;
    stream2.Free;
    stream4.Free;
- 
+
   {$ifdef mse_debugrefresh}
    stream3.free;
   {$endif}
@@ -2901,7 +2901,7 @@ type
   modulecount: integer;
  end;
  globalloadinfoarty = array of globalloadinfoty;
- 
+
  tloadmoduletracker = class(tlinkedobject)
   private
    fgloballoadings: globalloadinfoarty;
@@ -2917,7 +2917,7 @@ type
    procedure endglobal;
    procedure notifyloading;
  end;
- 
+
 { tloadmoduletracker }
 
 constructor tloadmoduletracker.create;
@@ -3012,7 +3012,7 @@ var
  moduleloadlevel: integer;
  globalloadlevel: integer;
  loadmoduletracker: tloadmoduletracker;
- 
+
 procedure msebegingloballoading;
 begin
  inc(globalloadlevel);
@@ -3207,15 +3207,15 @@ begin
   end;
 end;
 *)
-procedure loadmsemodule(const instance: tmsecomponent; 
+procedure loadmsemodule(const instance: tmsecomponent;
                                            const rootancestor: tclass);
 var
  needsloading: boolean;
-   
+
 begin
                  //try mse moduleloading
  if not initmsecomponent(instance,rootancestor,needsloading) then begin
-  if needsloading {or not 
+  if needsloading {or not
                        initinheritedcomponent(instance,needsloading)} then begin
                  //try FPC module loading
    mseerror(mse_resnotfound,instance);
@@ -3224,7 +3224,7 @@ begin
  {$ifdef FPC} {$checkpointer default} {$endif}
 end;
 
-function findancestorcomponent(const areader: treader; 
+function findancestorcomponent(const areader: treader;
                  const componentname: string): tcomponent;
 var
  comp1: tcomponent;
@@ -3350,7 +3350,7 @@ var
 begin
  aname:= uppercase(aname);
  result:= pobjectdatainfoty(fdata);
- for int1:= 0 to fcount -1 do begin                           
+ for int1:= 0 to fcount -1 do begin
   if (result^.objectclass = aclass) and ((aname = '') or (result^.name = aname)) then begin
    exit;
   end;
@@ -3366,8 +3366,8 @@ begin
  aname:= uppercase(aname);
  aclassname:= uppercase(aclassname);
  result:= pobjectdatainfoty(fdata);
- for int1:= 0 to fcount -1 do begin                           
-  if (stringicompupper(result^.objectclass.classname,aclassname) = 0) and 
+ for int1:= 0 to fcount -1 do begin
+  if (stringicompupper(result^.objectclass.classname,aclassname) = 0) and
                        ((aname = '') or (result^.name = aname)) then begin
    exit;
   end;
@@ -3424,7 +3424,7 @@ begin
     for int2:= 0 to fmodules.count - 1 do begin
      comp1:= fmodules[int2];
      with comp1 do begin
-      if (classtype = po1^.objectclass) and (po1^.name = '') or 
+      if (classtype = po1^.objectclass) and (po1^.name = '') or
                 (stringicompupper(name,po1^.name) = 0) then begin
        comp1.name:= '';
        loadmodule(comp1,po1,true);
@@ -3448,7 +3448,7 @@ begin
  reload(true);
 end;
 
-procedure registerobjectdata(datapo: pobjectdataty; 
+procedure registerobjectdata(datapo: pobjectdataty;
             objectclass: tpersistentclass; name: string = '');
 var
  info: objectdatainfoty;
@@ -3464,7 +3464,7 @@ begin
  mclasses.registerclass(objectclass);
 end;
 
-procedure registerobjectdata(datapo: pobjectdataty; 
+procedure registerobjectdata(datapo: pobjectdataty;
                  const objectclassname: string; const name: string = '');
 var
  po1: pobjectdatainfoty;
@@ -3772,7 +3772,7 @@ begin
  for int1:= 0 to count - 1 do begin
   with po1^ do begin
    if (dest <> nil) and (dest = item.dest) and
-        (destroyed or 
+        (destroyed or
                (valuepo = item.valuepo) and (source = item.source)) then begin
     if (refcount = 0) or destroyed then begin
      dest:= nil;
@@ -3883,7 +3883,7 @@ begin
  end;
 end;
 
-procedure tobjectlinker.setlinkedvar(const linkintf: iobjectlink; 
+procedure tobjectlinker.setlinkedvar(const linkintf: iobjectlink;
                   const source: tlinkedobject; var dest: tlinkedobject;
                   const ainterfacetype: pointer = nil);
 var
@@ -3901,7 +3901,7 @@ begin
  end;
 end;
 
-procedure tobjectlinker.setlinkedvar(const linkintf: iobjectlink; 
+procedure tobjectlinker.setlinkedvar(const linkintf: iobjectlink;
                const source: tlinkedpersistent; var dest: tlinkedpersistent;
                const ainterfacetype: pointer = nil);
 var
@@ -3919,7 +3919,7 @@ begin
  end;
 end;
 
-procedure tobjectlinker.setlinkedvar(const linkintf: iobjectlink; 
+procedure tobjectlinker.setlinkedvar(const linkintf: iobjectlink;
               const source: tmsecomponent; var dest: tmsecomponent;
               const ainterfacetype: pointer = nil);
 var
@@ -3937,7 +3937,7 @@ begin
  end;
 end;
 
-procedure tobjectlinker.setlink(const linkintf: iobjectlink; 
+procedure tobjectlinker.setlink(const linkintf: iobjectlink;
                           const source: tmsecomponent; var dest: tmsecomponent;
                           const ainterfacetype: pointer = nil); overload;
                                          //no automatic nil setting
@@ -3969,7 +3969,7 @@ var
  info: linkinfoty;
 begin
  if event = oe_destroyed then begin
-  inc(fnopack); 
+  inc(fnopack);
   info.dest:= pointer(sender);
   info.valuepo:= nil;
   removelink(info,true);
@@ -3978,12 +3978,12 @@ begin
   fonevent(sender.getinstance,event);
  end;
  if event = oe_destroyed then begin
-  dec(fnopack); 
+  dec(fnopack);
   dopack;
  end;
 end;
 
-procedure tobjectlinker.forall(const proc: objectlinkprocty; 
+procedure tobjectlinker.forall(const proc: objectlinkprocty;
                                               const ainterfacetype: pointer);
 var
  po1: plinkinfoty;
@@ -3993,7 +3993,7 @@ begin
  try
   for int1:= 0 to fcount - 1 do begin
    po1:= @plinkinfoaty(fdata)^[int1];
-   if (po1^.dest <> nil) and odd(ptruint(po1^.source)) and 
+   if (po1^.dest <> nil) and odd(ptruint(po1^.source)) and
                              (ainterfacetype = po1^.interfacetype) then begin
     proc(po1^);
    end;
@@ -4003,7 +4003,7 @@ begin
  end;
 end;
 
-procedure tobjectlinker.forall(const proc: objectlinkintfprocty; 
+procedure tobjectlinker.forall(const proc: objectlinkintfprocty;
                                               const ainterfacetype: pointer);
 var
  po1: plinkinfoty;
@@ -4013,7 +4013,7 @@ begin
  try
   for int1:= 0 to fcount - 1 do begin
    po1:= @plinkinfoaty(fdata)^[int1];
-   if (po1^.dest <> nil) and odd(ptruint(po1^.source)) and 
+   if (po1^.dest <> nil) and odd(ptruint(po1^.source)) and
                              (ainterfacetype = po1^.interfacetype) then begin
     proc(po1^.dest);
    end;
@@ -4023,7 +4023,7 @@ begin
  end;
 end;
 
-procedure tobjectlinker.forfirst(const proc: objectlinkfirstprocty; 
+procedure tobjectlinker.forfirst(const proc: objectlinkfirstprocty;
                                               const ainterfacetype: pointer);
 var
  po1: plinkinfoty;
@@ -4035,7 +4035,7 @@ begin
   bo1:= false;
   for int1:= 0 to fcount - 1 do begin
    po1:= @plinkinfoaty(fdata)^[int1];
-   if (po1^.dest <> nil) and odd(ptruint(po1^.source)) and 
+   if (po1^.dest <> nil) and odd(ptruint(po1^.source)) and
                              (ainterfacetype = po1^.interfacetype) then begin
     proc(po1^,bo1);
     if bo1 then begin
@@ -4048,7 +4048,7 @@ begin
  end;
 end;
 
-procedure tobjectlinker.forfirst(const proc: objectlinkintffirstprocty; 
+procedure tobjectlinker.forfirst(const proc: objectlinkintffirstprocty;
                                               const ainterfacetype: pointer);
 var
  po1: plinkinfoty;
@@ -4060,7 +4060,7 @@ begin
   bo1:= false;
   for int1:= 0 to fcount - 1 do begin
    po1:= @plinkinfoaty(fdata)^[int1];
-   if (po1^.dest <> nil) and odd(ptruint(po1^.source)) and 
+   if (po1^.dest <> nil) and odd(ptruint(po1^.source)) and
                              (ainterfacetype = po1^.interfacetype) then begin
     proc(po1^.dest,bo1);
     if bo1 then begin
@@ -4098,7 +4098,7 @@ begin
  result:= nil;
  po1:= plinkinfoty(fdata);
  for int1:= 0 to fcount - 1 do begin
-  if (po1^.dest <> nil) and odd(ptruint(po1^.source)) and 
+  if (po1^.dest <> nil) and odd(ptruint(po1^.source)) and
                       (po1^.interfacetype = ainterfacetype) then begin
    additem(pointerarty(result),iobjectlink(po1^.dest).getinstance);
   end;
@@ -4121,7 +4121,7 @@ begin
  result:= fobjectlinker;
 end;
 
-procedure tlinkedobject.objectevent(const sender: tobject; 
+procedure tlinkedobject.objectevent(const sender: tobject;
                                                     const event: objecteventty);
 begin
  //dummy
@@ -4139,7 +4139,7 @@ begin
  end;
 end;
 
-procedure tlinkedobject.setlinkedvar(const source: tlinkedobject; 
+procedure tlinkedobject.setlinkedvar(const source: tlinkedobject;
                                                         var dest: tlinkedobject;
               const linkintf: iobjectlink = nil);
 begin
@@ -4189,13 +4189,13 @@ begin
  result:= fobjectlinker;
 end;
 
-procedure tlinkedrecordlist.objectevent(const sender: tobject; 
+procedure tlinkedrecordlist.objectevent(const sender: tobject;
                                            const event: objecteventty);
 begin
  //dummy
 end;
 
-procedure tlinkedrecordlist.setlinkedvar(const source: tmsecomponent; 
+procedure tlinkedrecordlist.setlinkedvar(const source: tmsecomponent;
                     var dest: tmsecomponent; const linkintf: iobjectlink = nil);
 begin
  if linkintf = nil then begin
@@ -4749,7 +4749,7 @@ procedure checkcorbainterface(const sender: tcomponent;
 begin
  if not getcorbainterface(avalue,ainterface,obj) then begin
   nosupportfor(sender,avalue,ainterface);
- end;  
+ end;
 end;
 
 //function tmsecomponent.getcorbainterface(const aintf: tguid; out obj) : boolean;
@@ -4900,7 +4900,7 @@ begin
  end;
 end;
 
-procedure tmsecomponent.getoptionalobject(const instance: tobject; 
+procedure tmsecomponent.getoptionalobject(const instance: tobject;
                                createproc: createprocty);
 begin
  if not (cs_endreadproc in fmsecomponentstate) then begin
@@ -4908,7 +4908,7 @@ begin
  end;
 end;
 
-procedure tmsecomponent.setoptionalobject(const value: tpersistent; 
+procedure tmsecomponent.setoptionalobject(const value: tpersistent;
               var instance; createproc: createprocty);
 begin
  mseclasses.setoptionalobject(componentstate,value,instance,createproc);
@@ -4935,14 +4935,14 @@ begin
   dobeginread;
   for int1:= 0 to componentcount - 1 do begin
    comp1:= components[int1];
-   if (cssubcomponent in comp1.componentstyle) and 
+   if (cssubcomponent in comp1.componentstyle) and
              (comp1 is tmsecomponent) then begin
     tmsecomponent(comp1).beginread;
    end;
   end;
  finally
   exclude(fmsecomponentstate,cs_beginreadproc);
- end;  
+ end;
 end;
 
 procedure tmsecomponent.endread;
@@ -4955,14 +4955,14 @@ begin
   doendread;
   for int1:= 0 to componentcount - 1 do begin
    comp1:= components[int1];
-   if (cssubcomponent in comp1.componentstyle) and 
+   if (cssubcomponent in comp1.componentstyle) and
              (comp1 is tmsecomponent) then begin
     tmsecomponent(comp1).endread;
    end;
   end;
  finally
   exclude(fmsecomponentstate,cs_endreadproc);
- end;  
+ end;
 end;
 
 procedure tmsecomponent.readstate(reader: treader);
@@ -5017,8 +5017,8 @@ begin
            {$ifdef FPC}@{$endif}readmoduleclassname,
            {$ifdef FPC}@{$endif}writemoduleclassname,
            (cs_ismodule in fmsecomponentstate) and (filer.Root = self) and
-            ((filer.ancestor = nil) or 
-               (tmsecomponent(filer.ancestor).getancestorclassname <> 
+            ((filer.ancestor = nil) or
+               (tmsecomponent(filer.ancestor).getancestorclassname <>
                                                      getancestorclassname)));
 end;
 
@@ -5139,7 +5139,7 @@ end;
 
 procedure tmsecomponent.getchildren(proc: tgetchildproc; root: tcomponent);
 var
- ev1: getchildreneventty; 
+ ev1: getchildreneventty;
 begin
  ev1:= onstreaminggetchildren;
  if assigned(ev1) then begin
@@ -5183,7 +5183,7 @@ begin
 //   include(fmsecomponentstate,cs_skinloaded);
    if assigned(fonbeforeupdateskin) then begin
     fonafterupdateskin(tobject(tmethod(methodpo^).data));
-   end;   
+   end;
   end;
  end;
 end;
@@ -5230,7 +5230,7 @@ procedure tmsecomponent.validaterename(acomponent: tcomponent;
                const curname: string; const newname: string);
 begin
  inherited;
- if componentstate * [csdesigning,csreading,csloading,csdestroying] = 
+ if componentstate * [csdesigning,csreading,csloading,csdestroying] =
                                                     [csdesigning] then begin
   if acomponent = nil then begin
    acomponent:= self;
@@ -5256,7 +5256,7 @@ begin
    if int2 = order then begin
     child.componentindex:= int1;
     break;
-   end;    
+   end;
   end;
  end;
 end;
@@ -5911,9 +5911,9 @@ Var
   I : Integer;
   ancestorlookuplevelbefore: integer;
   rootrootancestorbefore: tcomponent;
-  
+
 begin
- // Write children list. 
+ // Write children list.
  // While writing children, the ancestor environment must be saved
  // This is recursive...
  SRoot:=FRoot;
@@ -5949,7 +5949,7 @@ begin
        For I:=0 to FAncestors.Count-1 do
          FAncestors.Objects[i].Free;
      FreeAndNil(FAncestors);
-   end;    
+   end;
  finally
   FAncestors:=Slist;
   FRoot:=SRoot;
@@ -5997,7 +5997,7 @@ begin
  if aroot = rootancestor then begin
   comp2:= frootrootancestor;
   int1:= fancestorlookuplevel;
-  try 
+  try
    while (comp1 <> nil) and (fancestorlookuplevel >= 0) do begin
     tmsecomponent(sender).getchildren1(proc,comp1);
     comp1:= comp1.owner;
@@ -6031,7 +6031,7 @@ begin
  if aroot = rootancestor then begin
   comp2:= frootrootancestor;
   int1:= fancestorlookuplevel;
-  try 
+  try
    while (comp1 <> nil) and (fancestorlookuplevel >= 0) do begin
     tcomponent1(acomp).getchildren(proc,comp1);
     comp1:= comp1.owner;

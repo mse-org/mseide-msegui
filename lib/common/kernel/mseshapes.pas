@@ -55,7 +55,7 @@ const
 type
  buttonedgety =  (bedg_none,bedg_right,bedg_top,bedg_left,bedg_bottom);
 
- tagmouseprocty = procedure (const tag: integer; 
+ tagmouseprocty = procedure (const tag: integer;
                                      const info: mouseeventinfoty) of object;
 
  captioninfoty = record
@@ -73,7 +73,7 @@ type
   imagedist2: integer; //right or bottom
   captionclipped: boolean;
  end;
- 
+
  shapeinfoty = record
   ca: captioninfoty;
   focusrectdist: integer;
@@ -96,14 +96,14 @@ type
 
  shapeinfoarty = array of shapeinfoty;
  pshapeinfoarty = ^shapeinfoarty;
- 
+
  getbuttonhintty = function(const aindex: integer): msestring of object;
  getbuttonhintposty = function(const aindex: integer): rectty of object;
 
 procedure updateedgerect(var arect: rectty; const awidth: integer;
                                     const hiddenedges: edgesty);
 procedure draw3dframe(const canvas: tcanvas; const arect: rectty;
-                      level: integer; colorinfo: edgecolorpairinfoty; 
+                      level: integer; colorinfo: edgecolorpairinfoty;
                       const hiddenedges: edgesty);
 procedure drawimageframe(const canvas: tcanvas; const imagelist: timagelist;
                          const imageoffs: int32; const dest: rectty;
@@ -132,7 +132,7 @@ function updatewidgetshapestate(var info: shapeinfoty; const widget: twidget;
 //                    const ainvisible: boolean = false;
                     const aframe: tcustomframe = nil): boolean;
 function findshapeatpos(const infoar: shapeinfoarty; const apos: pointty;
-               const rejectstates: shapestatesty = 
+               const rejectstates: shapestatesty =
                                          [shs_disabled,shs_invisible]): integer;
 function pointinshape(const pos: pointty; const info: shapeinfoty): boolean;
 procedure initshapeinfo(var ainfo: shapeinfoty);
@@ -149,17 +149,17 @@ function shapestatetoframestate(const aindex: integer;
 
 procedure checkbuttonhint(const awidget: twidget; info: mouseeventinfoty;
     var hintedbutton: integer; const cells: shapeinfoarty;
-     const getbuttonhint: getbuttonhintty; 
+     const getbuttonhint: getbuttonhintty;
      const gethintpos: getbuttonhintposty);
 
 procedure drawcaption(const acanvas: tcanvas; var ainfo: captioninfoty);
 procedure initcaptioninfo(var ainfo: captioninfoty);
-function calccaptionsize(const acanvas: tcanvas; const ainfo: captioninfoty; 
+function calccaptionsize(const acanvas: tcanvas; const ainfo: captioninfoty;
                                   const captionframe: pframety = nil): sizety;
 
 //var
 // animatemouseenter: boolean = true;
- 
+
 implementation
 uses
  classes,msestockobjects,msebits,sysutils,mseassistiveserver;
@@ -200,15 +200,15 @@ begin
  else begin
   dest.state:= (dest.state - [shs_flat,shs_noanimation,shs_nomouseanimation,
                   shs_noclickanimation,shs_nofocusanimation,
-                  shs_noinnerrect]) + 
+                  shs_noinnerrect]) +
                   [shs_showfocusrect,shs_showdefaultrect];
   dest.mouseframe:= nullframe;
- end; 
+ end;
 end;
 
 procedure checkbuttonhint(const awidget: twidget; info: mouseeventinfoty;
                    var hintedbutton: integer; const cells: shapeinfoarty;
-                   const getbuttonhint: getbuttonhintty; 
+                   const getbuttonhint: getbuttonhintty;
                    const gethintpos: getbuttonhintposty);
 var
  int1: integer;
@@ -234,11 +234,11 @@ begin
   end;
   exit;
  end;
- if (info.eventkind in [ek_mousemove,ek_mousepark]) and 
+ if (info.eventkind in [ek_mousemove,ek_mousepark]) and
                      not (csdesigning in awidget.componentstate) then begin
   if (int1 >= 0) then begin
    if (int1 <> hintedbutton) and (-(int1+3) <> hintedbutton) then begin
-    if twidget1(awidget).getshowhint and ((info.eventkind = ek_mousepark) or 
+    if twidget1(awidget).getshowhint and ((info.eventkind = ek_mousepark) or
                (hintedbutton >= 0))
                 {(application.activehintedwidget = awidget)} then begin
      if cells[int1].state * [shs_separator,shs_clicked] = [] then begin
@@ -293,10 +293,10 @@ begin
   with actioninfo do begin
    statebefore:= state;
    if (sender.enabled) <> not (as_disabled in state) then begin
-    if not (as_disabled in state) or 
-      not (as_syncdisabledlocked in state) and 
-       (not (bo_noassistivedisabled in aoptions) or 
-         not sender.canassistive() and 
+    if not (as_disabled in state) or
+      not (as_syncdisabledlocked in state) and
+       (not (bo_noassistivedisabled in aoptions) or
+         not sender.canassistive() and
            not (csdesigning in sender.componentstate)) then begin
      sender.enabled:= not(as_disabled in state);
     end;
@@ -322,7 +322,7 @@ begin
 //  textflags:= [tf_default];
  end;
 end;
- 
+
 procedure initshapeinfo(var ainfo: shapeinfoty);
 begin
  with ainfo do begin
@@ -442,15 +442,15 @@ begin
       if button = mb_left then begin
        updateshapemoveclick(infoarpo,false);
        exclude(state,shs_moveclick);
-       if not (shs_disabled in state) or 
+       if not (shs_disabled in state) or
          (widget <> nil) and (csdesigning in widget.componentstate) then begin
-        if state * [shs_clicked,shs_checkbox,shs_radiobutton] = 
+        if state * [shs_clicked,shs_checkbox,shs_radiobutton] =
                                       [shs_clicked,shs_checkbox] then begin
          setchecked(info,not (shs_checked in state),widget);
         end;
-        if state * [shs_clicked,shs_radiobutton] = 
+        if state * [shs_clicked,shs_radiobutton] =
                                [shs_clicked,shs_radiobutton] then begin
-         if [shs_checked,shs_checkbox] * state = 
+         if [shs_checked,shs_checkbox] * state =
                                [shs_checked,shs_checkbox] then begin
           setchecked(info,false,widget);
          end
@@ -488,10 +488,10 @@ begin
       end;
      end;
      ek_buttonpress: begin
-      if canclick and (button = mb_left) and 
-      (not(shs_disabled in state) or 
+      if canclick and (button = mb_left) and
+      (not(shs_disabled in state) or
              (widget <> nil) and (csdesigning in widget.componentstate) and
-             not (ws1_nodisabledclick in twidget1(widget).fwidgetstate1)) 
+             not (ws1_nodisabledclick in twidget1(widget).fwidgetstate1))
              and pointinshape(pos,info) then begin
        state:= state + [shs_clicked,shs_moveclick];
        updateshapemoveclick(infoarpo,true);
@@ -559,7 +559,7 @@ begin
 end;
 
 function findshapeatpos(const infoar: shapeinfoarty; const apos: pointty;
-               const rejectstates: shapestatesty = 
+               const rejectstates: shapestatesty =
                                    [shs_disabled,shs_invisible]): integer;
 var
  int1: integer;
@@ -617,7 +617,7 @@ begin
  end;
 end;
 
-procedure draw3dframe(const canvas: tcanvas; 
+procedure draw3dframe(const canvas: tcanvas;
                 const arect: rectty; level: integer;
                  colorinfo: edgecolorpairinfoty; const hiddenedges: edgesty);
 //todo: optimize
@@ -704,7 +704,7 @@ var
     poly[3]:= poly[4];
    end;
   end; //calculatepoly
- 
+
  begin
   with canvas,cornerinfo do begin
    calculatepoly(w1);
@@ -823,7 +823,7 @@ begin
    poly[1]:= pos;
    poly[2].x:= x + cx;
    poly[2].y:= y;
- 
+
    if down then begin              //topleft
     po1:= @shadowcorner;
    end
@@ -835,8 +835,8 @@ begin
     end;
    end;
    drawcorner(po1^,edg_left in hiddenedges,edg_top in hiddenedges,
-                   edg_bottom in hiddenedges,edg_right in hiddenedges,true); 
-   if not down and (level > 2) and 
+                   edg_bottom in hiddenedges,edg_right in hiddenedges,true);
+   if not down and (level > 2) and
                           (hiddenedges * [edg_left,edg_top] = []) then begin
     canvas.drawline(pos,makepoint(pos.x+level-1,pos.y+level-1),
                  colorinfo.light.effectcolor);
@@ -849,7 +849,7 @@ begin
    poly[1].y:= y + cy - level;
    poly[2].x:= x + level;
    poly[2].y:= poly[1].y;
- 
+
    if down then begin           //bottomright
     po1:= @lightcorner;
    end
@@ -857,7 +857,7 @@ begin
     po1:= @shadowcorner;
    end;
    drawcorner(po1^,edg_right in hiddenedges,edg_bottom in hiddenedges,
-                   edg_top in hiddenedges,edg_left in hiddenedges,false);   
+                   edg_top in hiddenedges,edg_left in hiddenedges,false);
   end;
  end;
 end;
@@ -905,7 +905,7 @@ begin
    rect1.cy:= dest.cy - imagesize1.cy - imagesize1.cy;
    imagelist.paintlookup(canvas,imageoffs+5,rect1,[al_stretchy]); //right
    if edg_top in hiddenedges then begin
-    imagelist.paintlookup(canvas,imageoffs+6,mp(rect1.x,dest.y)); 
+    imagelist.paintlookup(canvas,imageoffs+6,mp(rect1.x,dest.y));
                                                             //topright
    end;
   end;
@@ -931,8 +931,8 @@ begin
 end;
 
 function drawbuttonframe(const canvas: tcanvas; const info: shapeinfoty;
-        out clientrect: rectty; 
-                     const hiddenedges: edgesty = []): boolean; 
+        out clientrect: rectty;
+                     const hiddenedges: edgesty = []): boolean;
                                                //true if clientrect not empty
 var
  level: integer;
@@ -956,21 +956,21 @@ begin
    if not (shs_noanimation in state) then begin
     if not (shs_nomouseanimation in state) and
                      (shs_mouse in state) and not (shs_disabled in state) or
-           (state * [shs_nofocusanimation,shs_focused,shs_focusanimation] = 
+           (state * [shs_nofocusanimation,shs_focused,shs_focusanimation] =
                                    [shs_focused,shs_focusanimation]) then begin
      inc(level);
     end;
     if not (shs_noclickanimation in state) and (shs_clicked in state) or
-         (state * [shs_checked,shs_checkbutton] = 
+         (state * [shs_checked,shs_checkbutton] =
                                    [shs_checked,shs_checkbutton])  then begin
      level:= -1;
     end;
    end;
    clientrect:= ca.dim;
-   if (state * [shs_focused,shs_showdefaultrect] = 
+   if (state * [shs_focused,shs_showdefaultrect] =
                            [shs_focused,shs_showdefaultrect]) or
           (state * [shs_disabled,shs_default] = [shs_default]) then begin
-    if not (aso_nodefaultbutton in assistiveoptions) then begin 
+    if not (aso_nodefaultbutton in assistiveoptions) then begin
                                                //no default button if assisted
      canvas.drawframe(clientrect,-1,cl_buttondefaultrect);
      inflaterect1(clientrect,-1);
@@ -1108,7 +1108,7 @@ begin
     dec(arect.cy,i2);
    end;
   end;
-  if (tf_glueimage in info.textflags) and 
+  if (tf_glueimage in info.textflags) and
                           not (pos in [ip_center,ip_centervert]) then begin
    rect1:= arect;
    if pos in (vertimagepos) then begin
@@ -1200,7 +1200,7 @@ begin
    if (shs_checked in state) and (int1 >= 0) then begin
     inc(int1,imagecheckedoffset);
    end;
-   if state*[shs_focuscolor,shs_focused] = 
+   if state*[shs_focuscolor,shs_focused] =
                 [shs_focuscolor,shs_focused] then begin
     canvas.fillrect(rect1,cl_selectedtextbackground);
     co1:= cl_selectedtext;
@@ -1287,19 +1287,19 @@ begin
   end;
  end;
 end;
- 
+
 procedure drawbutton(const canvas: tcanvas; const info: shapeinfoty);
 var
  rect1,rect2: rectty;
 // pos: captionposty;
  pos1: imageposty;
 begin
- if not (shs_invisible in info.state) and 
+ if not (shs_invisible in info.state) and
                         drawbuttonframe(canvas,info,rect1) then begin
   rect2:= rect1;
   drawbuttonimage(canvas,info,rect1);
   with canvas,info do begin
-   if state * [shs_focused,shs_showfocusrect] = 
+   if state * [shs_focused,shs_showfocusrect] =
                    [shs_focused,shs_showfocusrect] then begin
     drawfocusrect(canvas,inflaterect(rect2,-focusrectdist));
    end;
@@ -1309,7 +1309,7 @@ begin
      pos1:= ip_right;
     end
     else begin
-     if (tf_left in ca.textflags) or 
+     if (tf_left in ca.textflags) or
                 (info.ca.textflags * [tf_xcentered,tf_xjustify] = []) then begin
       pos1:= ip_left;
      end
@@ -1318,7 +1318,7 @@ begin
        pos1:= ip_bottom;
       end
       else begin
-       if (tf_top in info.ca.textflags) or 
+       if (tf_top in info.ca.textflags) or
                         (info.ca.textflags * [tf_ycentered] = []) then begin
         pos1:= ip_top;
        end;
@@ -1390,7 +1390,7 @@ begin
   if vertdist then begin
    inc(result.cy,captiondist);
   end
-  else begin  
+  else begin
    inc(result.cx,captiondist);
   end;
   if imagelist <> nil then begin
@@ -1437,10 +1437,10 @@ var
  rect1: rectty;
  frame1: framety;
  co0,co1,co2,co3: colorty;
-begin 
+begin
  if not (shs_invisible in info.state) then begin
 //  frameskinoptionstoshapestate(info.frame,info);
-  if info.frame <> nil then begin 
+  if info.frame <> nil then begin
    frameskinoptionstoshapestate(info.frame,info);
    canvas.save();
    co1:= info.color;
@@ -1487,7 +1487,7 @@ begin
     info.coloractive:= co2;
     tframe1(info.frame).fi.colorclient:= co3;
    end;
-  end; 
+  end;
  end;
 end;
 
@@ -1536,7 +1536,7 @@ begin
   else begin
    rect2:= rect1;
   end;
-  if (info.checkboxframe = nil) or 
+  if (info.checkboxframe = nil) or
                not (fso_flat in info.checkboxframe.optionsskin) then begin
    draw3dframe(canvas,rect2,-1,defaultframecolors.edges,[]);
   end;
@@ -1558,7 +1558,7 @@ begin
     int1:= ord(stg_checked);
    end;
    co1:= info.ca.colorglyph;
-   if (info.checkboxframe <> nil) and 
+   if (info.checkboxframe <> nil) and
            (info.checkboxframe.colorglyph <> cl_default) then begin
     co1:= info.checkboxframe.colorglyph;
    end;
@@ -1607,7 +1607,7 @@ procedure drawmenubutton(const canvas: tcanvas; var info: shapeinfoty;
 var
  rect1: rectty;
 begin
- if not (shs_invisible in info.state) and 
+ if not (shs_invisible in info.state) and
               drawbuttonframe(canvas,info,rect1) then begin
   info.ca.imagepos:= ip_left;
   drawbuttonimage(canvas,info,rect1{,cp_left});
@@ -1623,18 +1623,18 @@ begin
  end;
 end;
 
-procedure drawtab(const canvas: tcanvas; var info: shapeinfoty; 
+procedure drawtab(const canvas: tcanvas; var info: shapeinfoty;
                                    const innerframe: pframety = nil);
 var
  rect1,rect2,rect3: rectty;
  pos1: imageposty;
  frame1: framety;
  edges1: edgesty;
- 
+
 begin
  with canvas,info do begin
   if not (shs_invisible in state) then begin
-   if frame <> nil then begin 
+   if frame <> nil then begin
     //todo: optimize, move settings to tcustomstepframe updatestate
     rect3:= ca.dim;
     if not (fso_noinnerrect in frame.optionsskin) then begin
@@ -1645,7 +1645,7 @@ begin
     frame1:= frame.paintframe;
     deflaterect1(ca.dim,frame1);
     frameskinoptionstoshapestate(frame,info);
-   end;     
+   end;
    if shs_opposite in state then begin
     if shs_vert in state then begin
      edges1:= [edg_left];
@@ -1672,7 +1672,7 @@ begin
     rect2:= rect1;
     drawbuttonimage(canvas,info,rect1);
     drawbuttoncheckbox(canvas,info,rect1,pos1);
-    if state * [shs_focused,shs_showfocusrect] = 
+    if state * [shs_focused,shs_showfocusrect] =
                           [shs_focused,shs_showfocusrect] then begin
      drawfocusrect(canvas,inflaterect(rect2,-focusrectdist));
     end;
@@ -1687,7 +1687,7 @@ begin
     inflaterect1(info.ca.dim,frame1);
     frame.paintoverlay(canvas,info.ca.dim);
     ca.dim:= rect3;
-   end; 
+   end;
   end;
  end;
 end;

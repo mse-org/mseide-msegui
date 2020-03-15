@@ -177,9 +177,9 @@ object fontformatdialogfo: tfontformatdialogfo
         frame.localprops = []
         frame.localprops1 = []
         frame.buttons.count = 2
-        frame.buttons.items = <        
+        frame.buttons.items = <
           item
-          end        
+          end
           item
             imagenr = 17
           end>
@@ -202,9 +202,9 @@ object fontformatdialogfo: tfontformatdialogfo
         frame.localprops = []
         frame.localprops1 = []
         frame.buttons.count = 2
-        frame.buttons.items = <        
+        frame.buttons.items = <
           item
-          end        
+          end
           item
             imagenr = 17
           end>

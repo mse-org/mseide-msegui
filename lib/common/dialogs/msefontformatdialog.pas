@@ -33,15 +33,15 @@ type
    backgroundcolored: tcoloredit;
    fontcolored: tcoloredit;
  end;
- 
-function editfontformat(const avalue: formatinfoarty; 
+
+function editfontformat(const avalue: formatinfoarty;
                                     const start,count: int32): formatinfoarty;
 
 implementation
 uses
  msefontformatdialog_mfm;
 
-function editfontformat(const avalue: formatinfoarty; 
+function editfontformat(const avalue: formatinfoarty;
                                     const start,count: int32): formatinfoarty;
 var
  style1: charstylety;

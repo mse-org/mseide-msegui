@@ -13,18 +13,18 @@ interface
 uses
  msetypes,mseclasses,msesystypes,mseevent,mseprocmonitor,mseprocutils,
                                                                  msestrings;
- 
+
 type
  proclisteninfoty = record
   prochandle: prochandlety;
   data: pointer;
  end;
  proclisteninfoarty = array of proclisteninfoty;
- 
+
  childdiedeventty = procedure(const sender: tobject;
                      const prochandle: prochandlety; const execresult: integer;
                      const data: pointer) of object;
-                               
+
  tprocessmonitor = class(tmsecomponent,iprocmonitor)
   private
    fonchilddied: childdiedeventty;
@@ -42,9 +42,9 @@ type
                                  const adata: pointer = nil): boolean;
           //does nothing and returns false if aprochandle = invalidprochandle
    procedure unlistentoprocess(const aprochandle: prochandlety);
-   function exec(const acommandline: msestring; 
+   function exec(const acommandline: msestring;
                  const aoptions: execoptionsty = []
-//                       const inactive: boolean = true; 
+//                       const inactive: boolean = true;
                           //windows only
 //                       const nostdhandle: boolean = false
                           //windows only
@@ -52,11 +52,11 @@ type
   published
    property onchilddied: childdiedeventty read fonchilddied write fonchilddied;
  end;
- 
+
 implementation
 uses
  msedatalist,mseapplication,msearrayutils;
- 
+
 { tprocessmonitor }
 
 destructor tprocessmonitor.destroy;
@@ -90,7 +90,7 @@ var
 begin
  for int1:= high(finfos) downto 0 do begin
   with finfos[int1] do begin
-   if prochandle = aprochandle then begin 
+   if prochandle = aprochandle then begin
     if not internal then begin
      pro_unlistentoprocess(aprochandle,iprocmonitor(self));
     end;
@@ -109,7 +109,7 @@ end;
 
 procedure tprocessmonitor.receiveevent(const event: tobjectevent);
 begin
- if (event.kind = ek_childproc) then begin 
+ if (event.kind = ek_childproc) then begin
   with tchildprocevent(event) do begin
    if canevent(tmethod(fonchilddied)) then begin
      fonchilddied(self,prochandle,execresult,data);
@@ -139,7 +139,7 @@ begin
   listentoprocess(result);
  finally
   application.unlock;
- end; 
+ end;
 end;
 
 end.

@@ -18,7 +18,7 @@ uses
  msewindowwidget,msegraphics,mseopengl,classes,mclasses,mseclasses,
  msegraphutils,
  msegui,msemenus,mseguiglob,msetypes;
- 
+
 type
 
  topenglwidgetcanvas = class(topenglcanvas)
@@ -39,14 +39,14 @@ type
 
    property linewidth;
    property linewidthmm;
-   
+
    property dashes;
      //last byte 0 -> opaque dash  //todo: dashoffset
    property capstyle;
    property joinstyle;
    property lineoptions;
 
-   property ppmm; 
+   property ppmm;
                    //used for linewidth mm, value not saved/restored
   }
  end;
@@ -111,14 +111,14 @@ type
    property onwindowmousewheelevent;
    property ondestroy;
  end;
- 
+
 implementation
 uses
  mseopenglgdi,msegl;
- 
+
 type
  topenglcanvas1 = class(topenglcanvas);
- 
+
 { topenglcanvaswidget }
 
 constructor topenglcanvaswidget.create(aowner: tcomponent);
@@ -212,7 +212,7 @@ begin
   inherited;
  finally
   fcanvas.afterread;
- end; 
+ end;
 end;
 
 { topenglwidgetcanvas }

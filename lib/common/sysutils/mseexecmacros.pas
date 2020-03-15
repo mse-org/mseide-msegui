@@ -28,7 +28,7 @@ begin
  result:= fexecmacros;
 end;
 
-function exec_out(const sender: tmacrolist; 
+function exec_out(const sender: tmacrolist;
                            const params: msestringarty): msestring;
 const
  defaulttimeout = 1000000; //1 second

@@ -91,7 +91,7 @@ const
  ZLIB_VER_REVISION = 7;
  ZLIB_VER_SUBREVISION = 0;
 
-{$ifdef FPC} 
+{$ifdef FPC}
  {$packrecords c}
 {$else}
  {$ALIGN 4}
@@ -123,19 +123,19 @@ type
   next_in: pBytef;     {/* next input byte */}
   avail_in: uInt;      {/* number of bytes available at next_in */}
   total_in: uLong;     {/* total number of input bytes read so far */}
- 
+
   next_out: pBytef;    {/* next output byte should be put there */}
   avail_out: uInt;     {/* remaining free space at next_out */}
   total_out: uLong;    {/* total number of bytes output so far */}
- 
+
   msg: pchar;          {/* last error message, NULL if no error */}
-  internal_state: pinternal_state; 
+  internal_state: pinternal_state;
                        {/* not visible by applications */}
- 
+
   zalloc: alloc_func;  {/* used to allocate the internal state */}
   zfree: free_func;    {/* used to free the internal state */}
   opaque: pointer;     {/* private data object passed to zalloc and zfree */}
- 
+
   data_type: int;      {/* best guess about the data type: binary or text */}
   adler: uLong;        {/* adler32 value of the uncompressed data */}
   reserved: uLong;     {/* reserved for future use */}
@@ -672,7 +672,7 @@ procedure releasezlib;
 implementation
 uses
  msesystypes,{$ifdef FPC}dynlibs,{$endif}msesysintf1,msesysintf;
-var 
+var
  libinfo: dynlibinfoty;
 
 function deflateInit(strm: pz_stream; level: int): int;
@@ -712,7 +712,7 @@ const
   (n: 'inflate'; d: {$ifndef FPC}@{$endif}@inflate),
   (n: 'inflateEnd'; d: {$ifndef FPC}@{$endif}@inflateEnd)
  );
- 
+
 begin
  initializedynlib(libinfo,sonames,zliblib,funcs,[],errormessage);
 end;
@@ -724,7 +724,7 @@ end;
 
 var
  libloaded: boolean;
- 
+
 procedure initzlib; //calls initializezlib once
 begin
  if not libloaded then begin

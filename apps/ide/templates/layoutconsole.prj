@@ -58,15 +58,15 @@ newfinames=3
 newfifilters=3
  "*.pas" "*.pp"
  "*.pas" "*.pp"
- 
+
 newfiexts=3
  pas
  pas
- 
+
 newfisources=3
  ${TEMPLATEDIR}default/program.pas
  ${TEMPLATEDIR}default/unit.pas
- 
+
 newfonames=11
  Mainform
  Simple Form

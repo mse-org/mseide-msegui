@@ -12,7 +12,7 @@ unit mseopensslx509;
 interface
 uses
  mseopenssl,msectypes;
- 
+
 type
  pEVP_PKEY = SslPtr; //todo
  pASN1_OBJECT = SslPtr;
@@ -59,7 +59,7 @@ const
   //The application is not happy
   X509_V_ERR_APPLICATION_VERIFICATION = 50;
 
-type 
+type
   pX509_NAME_ENTRY = ^X509_NAME_ENTRY;
   X509_NAME_ENTRY = record
     obj: pASN1_OBJECT;
@@ -118,7 +118,7 @@ type
   end;
 
   pX509V3_CTX = pointer;
-  
+
   pX509_REQ = ^X509_REQ;
   pX509_REQ_INFO = ^X509_REQ_INFO;
   X509_REQ_INFO = record
@@ -149,7 +149,7 @@ type
   pSTACK_OFX509_EXTENSION = pointer;
 
   pX509_CRL = pointer;
-  
+
   pX509_SIG = ^X509_SIG;
   X509_SIG = record
      algor: Pointer; // X509_ALGOR *algor;
@@ -159,7 +159,7 @@ type
   pX509_STORE_CTX = pointer;
   // Certificate verification callback
   TCertificateVerifyFunction = function(ok: cint; ctx: pX509_STORE_CTX): cint; cdecl;
-  
+
   pSTACK_OFX509 = pointer;
   pX509_STORE = ^X509_STORE;
   pX509_LOOKUP = pointer;
@@ -179,7 +179,7 @@ type
 var
   X509_new: function(): PX509; cdecl;
   X509_free: procedure(x: PX509); cdecl;
-  X509_NAME_oneline: function(a: PX509_NAME; 
+  X509_NAME_oneline: function(a: PX509_NAME;
                  buf: pchar; size: cint): pchar; cdecl;
   X509_Get_Subject_Name: function(a: PX509):PX509_NAME; cdecl;
   X509_Get_Issuer_Name: function(a: PX509):PX509_NAME; cdecl;
@@ -229,7 +229,7 @@ var
  X509V3_EXT_conf_nid: function(conf: pointer; ctx: pointer;
     ext_nid: cint; value: PCharacter): pX509_EXTENSION; cdecl;
  X509_set_subject_name: function(x: pX509; name: pX509_NAME): cint; cdecl;
- X509V3_set_ctx: procedure(ctx: pX509V3_CTX; issuer: pX509; 
+ X509V3_set_ctx: procedure(ctx: pX509V3_CTX; issuer: pX509;
                  subject: pX509; req: pX509_REQ; crl: pX509_CRL; flags: cint);
  X509_SIG_free: procedure(a: pX509_SIG); cdecl;
  X509_PUBKEY_get: function(key: pointer): pEVP_PKEY; cdecl;
@@ -238,7 +238,7 @@ var
  X509_REQ_set_version: function(req: pX509_REQ; version: clong): cint; cdecl;
  X509_REQ_set_subject_name: function(req: pX509_REQ;
                                                name: pX509_NAME): cint; cdecl;
- X509_REQ_add1_attr_by_txt: function(req: pX509_REQ; attrname: PCharacter; 
+ X509_REQ_add1_attr_by_txt: function(req: pX509_REQ; attrname: PCharacter;
                        asn1_type: cint; bytes: pointer; len: cint): cint; cdecl;
  X509_REQ_add_extensions: function(req: pX509_REQ;
                                    exts: pSTACK_OFX509_EXTENSION): cint; cdecl;
@@ -254,7 +254,7 @@ var
                                   m: pX509_LOOKUP_METHOD): pX509_LOOKUP; cdecl;
  X509_STORE_CTX_new: function: pX509_STORE_CTX; cdecl;
  X509_STORE_CTX_free: procedure(ctx: pX509_STORE); cdecl;
- X509_STORE_CTX_init: procedure(ctx: pX509_STORE_CTX; 
+ X509_STORE_CTX_init: procedure(ctx: pX509_STORE_CTX;
                 store: pX509_STORE; x509: pX509; chain: pSTACK_OFX509); cdecl;
  X509_STORE_CTX_get_current_cert: function(ctx: pX509_STORE_CTX): pX509; cdecl;
  X509_STORE_CTX_get_error: function(ctx: pX509_STORE_CTX): cint; cdecl;
@@ -278,7 +278,7 @@ function X509_REQ_get_subject_name(req: pX509_REQ): pX509_NAME;
 implementation
 uses
  msedynload,mseopensslasn;
- 
+
 function X509_get_version(x: pX509): cint;
 begin
   result := ASN1_INTEGER_get(x^.cert_info^.version);

@@ -9,7 +9,7 @@ pairwords
  'REPEAT' 'UNTIL'
 
 # COLORS [[[fontcolor [backgroundcolor [statementcolor]]]
-#                      cl_default for project options settings 
+#                      cl_default for project options settings
 
 # COLORS font/paper/statement/pairmark/fontline/line/focusline/selected
 COLORS cl_ltgray cl_black cl_black cl_default cl_ltgray cl_black $5E0078 $5E0078
@@ -19,13 +19,13 @@ styles
   # some mud color
  words 'b' $AF7832
   # dirty green
- comment '' $8EC25C  
+ comment '' $8EC25C
   # aqua
- option '' $00FFFF   
+ option '' $00FFFF
   # pale blue
  string '' $6897BB
  symbol '' cl_red
- 
+
  beginend 'b' $4D006B
 
 keyworddefs pascal
@@ -37,9 +37,9 @@ keyworddefs pascal
  'IMPLEMENTATION' 'IMPLEMENTS' 'IN' 'INDEX' 'INHERITED'
  'INITIALIZATION' 'INLINE' 'INTERFACE' 'INTERRUPT' 'IS' 'LABEL' 'LIBRARY'
  'MESSAGE' 'MOD' 'NEW' 'NIL' 'NODEFAULT' 'NOT' 'OBJECT'
- 'OF' 'ON' 'OPERATOR' 'OR' 'OUT' 'OTHERWISE' 'PACKED' 'POPSTACK' 'PRIVATE' 
+ 'OF' 'ON' 'OPERATOR' 'OR' 'OUT' 'OTHERWISE' 'PACKED' 'POPSTACK' 'PRIVATE'
  'PROCEDURE' 'PROGRAM' 'PROPERTY' 'PROTECTED'
- 'PUBLIC' 'PUBLISHED' 'RAISE' 'READ' 'RECORD' 'REINTRODUCE' 'REPEAT' 
+ 'PUBLIC' 'PUBLISHED' 'RAISE' 'READ' 'RECORD' 'REINTRODUCE' 'REPEAT'
  'RESOURCESTRING'
  'SELF' 'SET' 'SHL' 'SHR'
  'STDCALL' 'STORED' 'THEN' 'THREADVAR' 'TO' 'TRUE' 'TRY' 'TYPE' 'UNIT' 'UNTIL'
@@ -53,7 +53,7 @@ keyworddefs pascal
 scope option option
  endtokens
   '}'
-  
+
 scope comment1 comment
  endtokens
   '}'
@@ -65,7 +65,7 @@ scope comment2 comment
 scope comment3 comment
  endtokens
   '*)'
-  
+
 scope string string
  endtokens
   '''' ''
@@ -120,6 +120,6 @@ scope main
   '*' symbol1
   '[' symbol1
   ']' symbol1
-  
-  
+
+
 

@@ -43,7 +43,7 @@ object projectfo: tprojectfo
     min = 0
     max = 2
     dropdown.cols.count = 1
-    dropdown.cols.items = <    
+    dropdown.cols.items = <
       item
       end>
     oninit = impexpencinit
@@ -61,38 +61,38 @@ object projectfo: tprojectfo
     anchors = [an_top]
     optionsgrid = [og_colsizing, og_rowmoving, og_keyrowmoving, og_rowinserting, og_rowdeleting, og_focuscellonenter, og_autofirstrow, og_autoappend, og_colchangeontabkey, og_wrapcol, og_autopopup]
     fixrows.count = 1
-    fixrows.items = <    
+    fixrows.items = <
       item
         height = 15
         captions.count = 3
-        captions.items = <        
+        captions.items = <
           item
             caption = 'Rootname'
             textflags = []
-          end        
+          end
           item
             caption = 'File'
             textflags = []
-          end        
+          end
           item
             caption = 'Kind'
             textflags = []
           end>
       end>
     datacols.count = 3
-    datacols.items = <    
+    datacols.items = <
       item[rootname]
         width = 71
         options = [co_readonly, co_savevalue, co_savestate]
         widgetname = 'rootname'
         dataclass = tgridmsestringdatalist
-      end    
+      end
       item[filename]
         width = 479
         options = [co_fill, co_savevalue]
         widgetname = 'filename'
         dataclass = tgridmsestringdatalist
-      end    
+      end
       item[filekind]
         width = 126
         widgetname = 'filekind'
@@ -124,7 +124,7 @@ object projectfo: tprojectfo
       frame.localprops = [frl_levelo, frl_colorclient]
       frame.localprops1 = []
       frame.buttons.count = 1
-      frame.buttons.items = <      
+      frame.buttons.items = <
         item
           color = -2147483646
           imagenr = 17
@@ -156,7 +156,7 @@ object projectfo: tprojectfo
       bounds_cx = 126
       bounds_cy = 15
       dropdown.cols.count = 1
-      dropdown.cols.items = <      
+      dropdown.cols.items = <
         item
         end>
       oninit = filekindoninit
@@ -168,7 +168,7 @@ object projectfo: tprojectfo
     frame.localprops = []
     frame.localprops1 = []
     frame.buttons.count = 1
-    frame.buttons.items = <    
+    frame.buttons.items = <
       item
         color = -2147483646
         imagenr = 17
@@ -214,27 +214,27 @@ object projectfo: tprojectfo
     anchors = [an_top, an_bottom]
     optionsgrid = [og_colsizing, og_rowmoving, og_keyrowmoving, og_rowinserting, og_rowdeleting, og_focuscellonenter, og_autofirstrow, og_autoappend, og_wrapcol, og_autopopup]
     fixrows.count = 1
-    fixrows.items = <    
+    fixrows.items = <
       item
         height = 15
         captions.count = 2
-        captions.items = <        
+        captions.items = <
           item
             caption = 'Language'
             textflags = []
-          end        
+          end
           item
             caption = 'Directory'
             textflags = []
           end>
       end>
     datacols.count = 2
-    datacols.items = <    
+    datacols.items = <
       item[lang]
         width = 94
         widgetname = 'lang'
         dataclass = tgridmsestringdatalist
-      end    
+      end
       item[dir]
         width = 583
         options = [co_fill, co_savevalue]
@@ -291,7 +291,7 @@ object projectfo: tprojectfo
     frame.localprops = []
     frame.localprops1 = []
     frame.buttons.count = 1
-    frame.buttons.items = <    
+    frame.buttons.items = <
       item
         imagenr = 17
       end>
@@ -379,7 +379,7 @@ object projectfo: tprojectfo
     frame.localprops = []
     frame.localprops1 = []
     frame.buttons.count = 1
-    frame.buttons.items = <    
+    frame.buttons.items = <
       item
         imagenr = 17
       end>
@@ -405,7 +405,7 @@ object projectfo: tprojectfo
     frame.localprops = []
     frame.localprops1 = []
     frame.buttons.count = 1
-    frame.buttons.items = <    
+    frame.buttons.items = <
       item
         imagenr = 17
       end>

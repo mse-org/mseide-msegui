@@ -17,19 +17,19 @@
 unit regreport;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
- 
+
 implementation
 uses
  classes,mclasses,msereport,msedesignintf,formdesigner,reportdesigner,
  msepropertyeditors,mseformatstr,mserepps,msedrawtext,
  sysutils,msetypes{msestrings},regreport_bmp,regdb,mselookupbuffer;
 const
- reportintf: designmoduleintfty = 
+ reportintf: designmoduleintfty =
   (createfunc: {$ifdef FPC}@{$endif}createreport;
    initnewcomponent: {$ifdef FPC}@{$endif}initreportcomponent;
    getscale: {$ifdef FPC}@{$endif}getreportscale;
    sourcetoform: nil);
- reppageformintf: designmoduleintfty = 
+ reppageformintf: designmoduleintfty =
   (createfunc: @createreppageform;
    initnewcomponent: nil;
    getscale: @getreppageformscale;
@@ -38,12 +38,12 @@ const
 type
  treptabulators1 = class(treptabulators);
  treptabulatoritem1 = class(treptabulatoritem);
- 
+
  treptabulatoreditor = class(tclasselementeditor)
   public
    function getvalue: msestring; override;
  end;
- 
+
  treptabulatorseditor = class(tpersistentarraypropertyeditor)
   protected
    function geteditorclass: propertyeditorclassty; override;
@@ -52,7 +52,7 @@ type
   public
    destructor destroy(); override;
  end;
-   
+
 procedure Register;
 begin
  registerclass(treport);
@@ -63,7 +63,7 @@ begin
                     trepvaluedisp,treppagenumdisp,trepprintdatedisp,
                     {trepstringdisplb,trepintegerdisplb,treprealdisplb,
                     trepdatetimedisplb,}
-                    trepspacer,treppsdisp]); 
+                    trepspacer,treppsdisp]);
  registercomponenttabhints(['Rep'],['Report components']);
 
  registerdesignmoduleclass(treport,@reportintf,treportdesignerfo);
@@ -104,7 +104,7 @@ begin
     mstr1:= msestring(datasource.name+'.');
    end;
    mstr1:= mstr1+msestring(datafield);
-   if (lookupbuffer <> nil) and (lookupbuffer is tdblookupbuffer) and 
+   if (lookupbuffer <> nil) and (lookupbuffer is tdblookupbuffer) and
     (lookupvaluefieldno >= 0) then begin
     with tdblookupbuffer(lookupbuffer) do begin
      case lookupkind of

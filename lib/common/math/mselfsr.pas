@@ -13,7 +13,7 @@ interface
 uses
  msetypes;
 
-//32 bit lfsr x^32+x^30+x^26+x^25+1 
+//32 bit lfsr x^32+x^30+x^26+x^25+1
 
 function lfsr32(var sr: card32): card32;
 procedure lfsr321(var sr: card32);
@@ -30,7 +30,7 @@ const
   1,0,0,1,1,0,0,1,1,0,0,1,1,0,0,1,1,0,0,1,1,0,0,1,1,0,0,1,1,0,0,1,
   0,1,1,0,0,1,1,0,0,1,1,0,0,1,1,0,0,1,1,0,0,1,1,0,0,1,1,0,0,1,1,0
  );
- 
+
 function lfsr32(var sr: card32): card32;
 begin
  sr:= feedbacktable[sr shr 24] + (sr shl 1);

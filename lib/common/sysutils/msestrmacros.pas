@@ -28,7 +28,7 @@ begin
  result:= fstrmacros;
 end;
 
-function str_trim(const sender: tmacrolist; 
+function str_trim(const sender: tmacrolist;
                            const params: msestringarty): msestring;
 begin
  result:= '';
@@ -37,7 +37,7 @@ begin
  end;
 end;
 
-function str_trimleft(const sender: tmacrolist; 
+function str_trimleft(const sender: tmacrolist;
                            const params: msestringarty): msestring;
 begin
  result:= '';
@@ -46,7 +46,7 @@ begin
  end;
 end;
 
-function str_trimright(const sender: tmacrolist; 
+function str_trimright(const sender: tmacrolist;
                            const params: msestringarty): msestring;
 begin
  result:= '';
@@ -55,7 +55,7 @@ begin
  end;
 end;
 
-function str_coalesce(const sender: tmacrolist; 
+function str_coalesce(const sender: tmacrolist;
                            const params: msestringarty): msestring;
 var
  i1: int32;

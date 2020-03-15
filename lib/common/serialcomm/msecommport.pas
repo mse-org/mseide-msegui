@@ -64,7 +64,7 @@ const
  cpf_error =               7;
  cpf_bufferoverflow =      8;
  cpf_canceled =            9;
- 
+
  cpf_unknown =            10;     //asciiprot errors
  cpf_command =            11;
  cpf_parameter =          12;
@@ -112,11 +112,11 @@ type
 const
  {$ifdef UNIX}
 
- commname: array[commnrty] of string = 
+ commname: array[commnrty] of string =
            ('','ttyS0','ttyS1','ttyS2','ttyS3','ttyS4','ttyS5',
                                         'ttyS6','ttyS7','ttyS8'{,'ttyS9'});
  {
- commname: array[commnrty] of string = 
+ commname: array[commnrty] of string =
            ('ttys0','ttys1','ttys2','ttys3','ttys4','ttys5',
                                         'ttys6','ttys7','ttys8');
  }
@@ -131,16 +131,16 @@ const
  commdatabitflags: array[commdatabitsty] of integer = (cs5,cs6,cs7,cs8);
  {$else}
  commname: array[commnrty] of string = ('','COM1','COM2','COM3','COM4','COM5',
-                                        'COM6','COM7','COM8','COM9');  
+                                        'COM6','COM7','COM8','COM9');
  invalidfilehandle = INVALID_HANDLE_VALUE;
  infinitemse = INFINITE;
  {$endif}
- commbittime: array[commbaudratety] of real = 
+ commbittime: array[commbaudratety] of real =
           (1/50,1/75,1/110,1/134,1/150,1/200,1/300,1/600,
            1/1200,1/1800,1/2400,1/4800,1/9600,1/19200,
            1/38400,1/57600,1/115200);
  commbaudrates: array[commbaudratety] of integer = (
-           50,75,110,134,150,200,300,600,  
+           50,75,110,134,150,200,300,600,
            1200,1800,2400,4800,9600,19200,
            38400,57600,115200);
 
@@ -238,7 +238,7 @@ type
 
  trs232 = class(tcustomrs232)
  end;
- 
+
  tcommevent = class;
  commeventty = procedure(const sender: tcommevent) of object;
  tcommthread = class;
@@ -381,7 +381,7 @@ type
    property active: boolean read factive write setactive default false;
    property statfile: tstatfile read fstatfile write setstatfile;
    property statvarname: msestring read getstatvarname write fstatvarname;
-   property statpriority: integer read fstatpriority 
+   property statpriority: integer read fstatpriority
                                        write fstatpriority default 0;
  end;
 
@@ -395,7 +395,7 @@ type
  end;
 
  asciicommeventclassty = class of tasciicommevent;
- 
+
  tasciicommthread = class(tcommthread)
   private
    puffer: string;
@@ -438,12 +438,12 @@ type
  end;
 
  asciiproterrorty = (ape_unknown,ape_command,ape_parameter,ape_busy);
- 
+
 const
  errorchar = '*';
- errorcodes: array[asciiproterrorty] of integer = 
+ errorcodes: array[asciiproterrorty] of integer =
   (cpf_unknown,cpf_command,cpf_parameter,cpf_busy);
-  
+
 type
  tasciiprotevent = class(tasciicommevent)
   private
@@ -460,8 +460,8 @@ type
    function send(const commandstring: string; out answer: string;
             atimeout: integer = 0; aadress: integer = -1): integer;
                                      //-1: no address
- end; 
- 
+ end;
+
 function checkcommport(commnr: commnrty): boolean;  //true wenn comport zur verfuegung
 function crc16(const data; len: integer): word;
 function bintoascii(const bytes: string): string; overload;
@@ -544,32 +544,32 @@ $00, $C1, $81, $40, $01, $C0, $80, $41, $00, $C1,
 $81, $40, $00, $C1, $81, $40, $01, $C0, $80, $41,
 $00, $C1, $81, $40, $01, $C0, $80, $41, $01, $C0,
 $80, $41, $00, $C1, $81, $40, $00, $C1, $81, $40,
-$01, $C0, $80, $41, $01, $C0, $80, $41, $00, $C1, 
+$01, $C0, $80, $41, $01, $C0, $80, $41, $00, $C1,
 $81, $40, $01, $C0, $80, $41, $00, $C1, $81, $40,
-$00, $C1, $81, $40, $01, $C0, $80, $41, $01, $C0, 
+$00, $C1, $81, $40, $01, $C0, $80, $41, $01, $C0,
 $80, $41, $00, $C1, $81, $40, $00, $C1, $81, $40,
 $01, $C0, $80, $41, $00, $C1, $81, $40, $01, $C0,
-$80, $41, $01, $C0, $80, $41, $00, $C1, $81, $40, 
-$00, $C1, $81, $40, $01, $C0, $80, $41, $01, $C0, 
-$80, $41, $00, $C1, $81, $40, $01, $C0, $80, $41, 
-$00, $C1, $81, $40, $00, $C1, $81, $40, $01, $C0, 
-$80, $41, $00, $C1, $81, $40, $01, $C0, $80, $41, 
-$01, $C0, $80, $41, $00, $C1, $81, $40, $01, $C0, 
+$80, $41, $01, $C0, $80, $41, $00, $C1, $81, $40,
+$00, $C1, $81, $40, $01, $C0, $80, $41, $01, $C0,
+$80, $41, $00, $C1, $81, $40, $01, $C0, $80, $41,
+$00, $C1, $81, $40, $00, $C1, $81, $40, $01, $C0,
+$80, $41, $00, $C1, $81, $40, $01, $C0, $80, $41,
+$01, $C0, $80, $41, $00, $C1, $81, $40, $01, $C0,
 $80, $41, $00, $C1, $81, $40, $00, $C1, $81, $40,
-$01, $C0, $80, $41, $01, $C0, $80, $41, $00, $C1, 
+$01, $C0, $80, $41, $01, $C0, $80, $41, $00, $C1,
 $81, $40, $00, $C1, $81, $40, $01, $C0, $80, $41,
 $00, $C1, $81, $40, $01, $C0, $80, $41, $01, $C0,
 $80, $41, $00, $C1, $81, $40
 ) ;
  auchCRCLo: array[0..255] of byte = (
 $00, $C0, $C1, $01, $C3, $03, $02, $C2, $C6, $06,
-$07, $C7, $05, $C5, $C4, $04, $CC, $0C, $0D, $CD, 
-$0F, $CF, $CE, $0E, $0A, $CA, $CB, $0B, $C9, $09, 
+$07, $C7, $05, $C5, $C4, $04, $CC, $0C, $0D, $CD,
+$0F, $CF, $CE, $0E, $0A, $CA, $CB, $0B, $C9, $09,
 $08, $C8, $D8, $18, $19, $D9, $1B, $DB, $DA, $1A,
 $1E, $DE, $DF, $1F, $DD, $1D, $1C, $DC, $14, $D4,
 $D5, $15, $D7, $17, $16, $D6, $D2, $12, $13, $D3,
-$11, $D1, $D0, $10, $F0, $30, $31, $F1, $33, $F3, 
-$F2, $32, $36, $F6, $F7, $37, $F5, $35, $34, $F4, 
+$11, $D1, $D0, $10, $F0, $30, $31, $F1, $33, $F3,
+$F2, $32, $36, $F6, $F7, $37, $F5, $35, $34, $F4,
 $3C, $FC, $FD, $3D, $FF, $3F, $3E, $FE, $FA, $3A,
 $3B, $FB, $39, $F9, $F8, $38, $28, $E8, $E9, $29,
 $EB, $2B, $2A, $EA, $EE, $2E, $2F, $EF, $2D, $ED,
@@ -784,7 +784,7 @@ begin
  if fcommname <> avalue then begin
   fcommname:= avalue;
   updatebyteinfo;
- end; 
+ end;
 end;
 
 procedure tcustomrs232.Setparity(const Value: commparityty);
@@ -968,7 +968,7 @@ const           // fuer tdcb.flags
  end;
 var
  str1: string;
- 
+
 begin       //open
  close;
  str1:= ansistring(commpath());
@@ -1007,7 +1007,7 @@ begin       //open
  fillchar(overlappedtx,sizeof(overlappedtx),0);
  overlappedrx.hevent:= createevent(nil,true,false,nil);
  overlappedtx.hevent:= createevent(nil,true,false,nil);
- 
+
  repeat
   fhandle:= createfile(pchar(str1),GENERIC_READ or GENERIC_WRITE, 0,
                                     nil,OPEN_EXISTING,FILE_FLAG_OVERLAPPED,0);
@@ -1448,13 +1448,13 @@ begin
  result:= true;
  if anonblocked then begin
   if commtimeouts.readintervaltimeout <> maxdword then begin
-   commtimeouts.readintervaltimeout:= maxdword;  
+   commtimeouts.readintervaltimeout:= maxdword;
    result:= setcommtimeouts(fhandle,commtimeouts);
   end;
  end
- else begin  
+ else begin
   if commtimeouts.readintervaltimeout <> 0 then begin
-   commtimeouts.readintervaltimeout:= 0;  
+   commtimeouts.readintervaltimeout:= 0;
    result:= setcommtimeouts(fhandle,commtimeouts);
   end;
  end;
@@ -1492,7 +1492,7 @@ begin
     bo1:= getoverlappedresult(fhandle,overlappedrx,w1,true);
    end;
    if bo1 and (acount > 1) then begin
-    bo1:= setreadnonblocked(true) and 
+    bo1:= setreadnonblocked(true) and
         windows.readfile(fhandle,(pchar(@buf)+1)^,acount-1,w1,@overlappedrx);
     if not bo1 and (getlasterror = ERROR_IO_PENDING) then begin
      bo1:= getoverlappedresult(fhandle,overlappedrx,w1,true);
@@ -1502,7 +1502,7 @@ begin
     end;
    end;
   end;
- end;  
+ end;
  if not bo1 then begin
   readcount:= 0;
  end
@@ -2230,7 +2230,7 @@ begin
    end
    else begin
     int1:= ord(resultstring[2]) - ord('A')+1;
-    if (int1 < ord(ape_command)) or 
+    if (int1 < ord(ape_command)) or
           (int1 > ord(high(asciiproterrorty))) then begin
      int1:= ord(ape_unknown);
     end;
@@ -2242,7 +2242,7 @@ begin
 end;
 
 { asciiprotport }
- 
+
 function tasciiprotport.geteventclass: asciicommeventclassty;
 begin
  result:= tasciiprotevent;

@@ -1,5 +1,5 @@
 { MSEide Copyright (c) 1999-2013 by Martin Schreiber
-   
+
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation; either version 2 of the License, or
@@ -250,7 +250,7 @@ function tpanelfo.canclose(const newfocus: twidget): boolean;
   end;
   result:= true;
  end;
- 
+
 begin
  result:= inherited canclose(newfocus);
  {

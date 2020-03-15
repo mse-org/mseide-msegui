@@ -2,7 +2,7 @@
     This file is part of the Free Pascal run time library.
     Copyright (c) 1999-2000 by Michael Van Canneyt, member of the
     Free Pascal development team
-    
+
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -14,7 +14,7 @@
   Modified 2007-2013 by Martin Schreiber
 
  **********************************************************************}
- 
+
 unit msedatabase;
 {$ifdef FPC}{$mode objfpc}{$h+}{$interfaces corba}{$endif}
 interface
@@ -23,16 +23,16 @@ uses
  mseapplication,mseinterfaces;
 
 type
- databaseoptionty = 
+ databaseoptionty =
       (dbo_utf8,dbo_noutf8,dbo_utf8message,
        dbo_bcdtofloatif //use ftFloat for scale > 4 instead ftBCD
       );
  databaseoptionsty = set of databaseoptionty;
- 
+
  tmdbdataset = class;
  tmdatabase = class;
  tmdbtransaction = class;
- 
+
  idbclient = interface(inullinterface)
   function getcomponentinstance: tcomponent;
   function getname: ansistring;
@@ -44,11 +44,11 @@ type
   procedure disablecontrols;
   procedure enablecontrols;
   function moveby(distance: longint): longint;
- end; 
- 
+ end;
+
  savepointeventkindty = (spek_begin,spek_release,spek_rollback,
                          spek_committrans,spek_rollbacktrans);
-  
+
  itransactionclient = interface(idbclient)
   procedure settransaction(const avalue: tmdbtransaction);
   procedure settransactionwrite(const avalue: tmdbtransaction);
@@ -62,13 +62,13 @@ type
  end;
  itransactionclientarty = array of itransactionclient;
  pitransactionclientarty = ^itransactionclientarty;
- 
+
  idatabaseclient = interface(idbclient)
   procedure setdatabase(const sender: tmdatabase);
 ///  procedure setactive(avalue: boolean);
  end;
  idatabaseclientarty = array of idatabaseclient;
- 
+
 // tmdbtransactionClass = class of tmdbtransaction;
  tmdbtransaction = class(TComponent)
   Private
@@ -107,7 +107,7 @@ type
     constructor Create(AOwner: TComponent); override;
     Destructor destroy; override;
     procedure CloseDataSets;
-    procedure refreshdatasets(const awrite: boolean = true; 
+    procedure refreshdatasets(const awrite: boolean = true;
                                   const aread: boolean = true);
 //    procedure refresh; //closes transaction and reopens datasets
     Property DataBase : tmdatabase Read FDatabase Write SetDatabase;
@@ -157,7 +157,7 @@ type
 //    property DataSets[Index: Longint]: TDataSet read GetDataSet;
   published
    property Connected: Boolean read GetConnected write SetConnected;
-   property waitcursor: boolean read fwaitcursor 
+   property waitcursor: boolean read fwaitcursor
                                      write setwaitcursor default false;
 //    property LoginPrompt: Boolean read FLoginPrompt write FLoginPrompt;
 //    property Streamedconnected: Boolean read FStreamedConnected write FStreamedConnected;
@@ -174,12 +174,12 @@ type
   function getactive: boolean;
   function getdatabase: tcustomconnection;
   function isutf8: boolean;
- end; 
+ end;
 
  databaseeventty = procedure(const sender: tmdatabase) of object;
  databaseerroreventty = procedure(const sender: tmdatabase;
              const aexception: exception; var handled: boolean) of object;
-             
+
  // tmdatabaseClass = Class Of tmdatabase;
   tmdatabase = class(TCustomConnection)
   private
@@ -238,19 +238,19 @@ type
   published
    property Connected: Boolean read FConnected write SetConnected default false;
    property DatabaseName: msestring read FDatabaseName write FDatabaseName;
-   property KeepConnection: Boolean read FKeepConnection 
+   property KeepConnection: Boolean read FKeepConnection
                               write FKeepConnection default false;
    property Params : TStringlist read FParams Write setparams;
    property onbeforeconnect: databaseeventty read fonbeforeconnect
-                                   write fonbeforeconnect;  
-   property onafterconnect: databaseeventty read fonafterconnect 
-                                   write fonafterconnect;  
-   property onconnecterror: databaseerroreventty read fonconnecterror 
-                                   write fonconnecterror; 
-   property onbeforedisconnect: databaseeventty read fonbeforedisconnect 
-                                   write fonbeforedisconnect; 
-   property onafterdisconnect: databaseeventty read fonafterdisconnect 
-                                   write fonafterdisconnect; 
+                                   write fonbeforeconnect;
+   property onafterconnect: databaseeventty read fonafterconnect
+                                   write fonafterconnect;
+   property onconnecterror: databaseerroreventty read fonconnecterror
+                                   write fonconnecterror;
+   property onbeforedisconnect: databaseeventty read fonbeforedisconnect
+                                   write fonbeforedisconnect;
+   property onafterdisconnect: databaseeventty read fonafterdisconnect
+                                   write fonafterdisconnect;
   end;
 
   tmdbdatasetClass = Class of tmdbdataset;
@@ -277,7 +277,7 @@ type
     destructor destroy; override;
     property database : tmdatabase read fdatabase write setdatabase;
     property transaction : tmdbtransaction read ftransaction write settransaction;
-    property transactionwrite : tmdbtransaction read ftransactionwrite 
+    property transactionwrite : tmdbtransaction read ftransactionwrite
                            write settransactionwrite;
   end;
 
@@ -285,7 +285,7 @@ type
   protected
    procedure setowneractive(const avalue: boolean); override;
   public
-   constructor create(const aowner: tmdbtransaction; 
+   constructor create(const aowner: tmdbtransaction;
                                     const aintf: iactivatorclient);
  end;
 
@@ -326,7 +326,7 @@ begin
   raise edatabaseerror.create(aname+': Component is active.');
  end;
 end;
- 
+
 procedure checkactive(const active: boolean; const aname: ansistring);
 begin
  if not active then begin
@@ -352,7 +352,7 @@ begin
  end;
 end;
 
-procedure dosettransaction(const sender: itransactionclient; 
+procedure dosettransaction(const sender: itransactionclient;
         const avalue: tmdbtransaction; var dest: tmdbtransaction;
         const awrite: boolean);
 begin
@@ -577,7 +577,7 @@ begin
     except
     end;
     finalizetransaction;
-   end; 
+   end;
   end;
  end;
 end;
@@ -856,7 +856,7 @@ begin
 // end;
 end;
 
-procedure tmdbtransaction.refreshdatasets(const awrite: boolean = true; 
+procedure tmdbtransaction.refreshdatasets(const awrite: boolean = true;
                           const aread: boolean = true);
 var
  int1: integer;
@@ -892,7 +892,7 @@ begin
 end;
 
 procedure tmdbtransaction.RemoveDataSets;
-var 
+var
  int1: integer;
 begin
  for int1:= high(fwritedatasets) downto 0 do begin

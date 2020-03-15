@@ -20,7 +20,7 @@ interface
 implementation
 uses
  msedesignintf,msetraywidget;
- 
+
 procedure Register;
 begin
 // registercomponents('Exp',[]);

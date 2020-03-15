@@ -43,7 +43,7 @@ const
                             aso_menunavig,aso_gridnavig,
                             aso_noreturnkeymenuexecute,
                             aso_nomenumousemove,aso_nogridmousemove];
- 
+
 type
  iassistiveserver = interface(inullinterface)[miid_iassistiveserver]
   procedure doapplicationactivated();
@@ -63,7 +63,7 @@ type
   procedure dochange(const sender: iassistiveclient);
   procedure dodbvaluechanged(const sender: iassistiveclientdata);
   procedure dodataentered(const sender: iassistiveclientdata);
-  procedure docellevent(const sender: iassistiveclientgrid; 
+  procedure docellevent(const sender: iassistiveclientgrid;
                                       const info: celleventinfoty);
   procedure dogridbordertouched(const sender: iassistiveclientgrid;
                                        const adirection: graphicdirectionty);
@@ -91,7 +91,7 @@ type
   procedure domenuactivated(const sender: iassistiveclientmenu);
   procedure doitementer(const sender: iassistiveclientmenu;//sender can be nil
                          const items: menucellinfoarty; const aindex: integer);
-  procedure dodatasetevent(const sender: iassistiveclient; 
+  procedure dodatasetevent(const sender: iassistiveclient;
                 const akind: assistivedbeventkindty;
                                   const adataset: pointer); //tdataset
 end;
@@ -99,6 +99,6 @@ end;
 var
  assistiveserver: iassistiveserver;
  assistiveoptions: assistiveoptionsty;
- 
+
 implementation
 end.

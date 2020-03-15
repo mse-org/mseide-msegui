@@ -22,13 +22,13 @@ interface
 uses
  msestrings,mselist,msearrayutils,msetypes,msestat,msedatalist,mclasses,
  mseclasses,msearrayprops;
- 
+
 type
  tmacrolist = class;
  macrohandlerty = function(const sender: tmacrolist;
                                       const params: msestringarty): msestring;
  macrohandlerarty = array of macrohandlerty;
- 
+
  macroinfoty = record
   name,value: msestring;
   handler: macrohandlerty;
@@ -41,7 +41,7 @@ type
 
  macrooptionty = (mao_caseinsensitive,mao_curlybraceonly,mao_removeunknown);
  macrooptionsty = set of macrooptionty;
- 
+
  tmacrolist = class(torderedrecordlist,istatupdatevalue)
   private
    foptions: macrooptionsty;
@@ -92,7 +92,7 @@ type
    procedure setasarray(const names,values: msestringarty;
                           const handler: macrohandlerarty);
    property options: macrooptionsty read foptions write foptions;
-   
+
    procedure setpredefined(const avalue: array of macroinfoty);
    procedure setpredefined(const avalue: array of macroinfoarty);
    property predefined: macroinfoarty read fpredefined write fpredefined;
@@ -121,7 +121,7 @@ type
  end;
 
  tstringlistmacroitem = class;
- 
+
  tstringlistmacro = class(tmacrostringlist)
   private
    fowner: tmacrostringlist;
@@ -130,7 +130,7 @@ type
   public
    constructor create(const aowner: tmacrostringlist); reintroduce;
  end;
- 
+
  tstringlistmacroitem = class(townedpersistent)
   private
    fname: msestring;
@@ -148,25 +148,25 @@ type
    property value: tstringlistmacro read fvalue write setvalue;
    property active: boolean read factive write setactive default true;
  end;
-  
+
  tmacroproperty = class(townedpersistentarrayprop)
   private
    foptions: macrooptionsty;
    function getitems(const aindex: integer): tstringlistmacroitem;
-   procedure setitems(const aindex: integer; 
+   procedure setitems(const aindex: integer;
                                   const avalue: tstringlistmacroitem);
   protected
    procedure dochange(const aindex: integer); override;
   public
    constructor create(const aowner: tmacrostringlist); reintroduce;
-   property items[const aindex: integer]: tstringlistmacroitem read getitems 
+   property items[const aindex: integer]: tstringlistmacroitem read getitems
                      write setitems; default;
    function itembyname(const aname: msestring): tstringlistmacroitem;
    function itembynames(const anames: array of msestring): tstringlistmacroitem;
    class function getitemclasstype: persistentclassty; override;
                //used in dumpunitgroups
   published
-   property options: macrooptionsty read foptions write foptions 
+   property options: macrooptionsty read foptions write foptions
                                            default [mao_caseinsensitive];
  end;
 
@@ -181,14 +181,14 @@ function initmacros(const amacros: array of macroinfoarty): macroinfoarty;
 
 function expandmacros(const value: msestring; const macros: macroinfoarty;
    const options: macrooptionsty = [mao_caseinsensitive]): msestring;
-function expandmacros(const value: msestring; 
+function expandmacros(const value: msestring;
                const anames,avalues: array of msestring;
    const options: macrooptionsty = [mao_caseinsensitive]): msestring;
-function expandmacros1(const value: msestring; 
+function expandmacros1(const value: msestring;
                const anames,avalues: array of msestring;
    const options: macrooptionsty = [mao_caseinsensitive]): msestring;
 
-function expandmacros2(const value: msestring; 
+function expandmacros2(const value: msestring;
                const anames,avalues: array of msestring;
                const ahandler: array of macrohandlerty;
    const options: macrooptionsty = [mao_caseinsensitive]): msestring;
@@ -214,7 +214,7 @@ begin
   result[int1]:= amacros[int1];
  end;
 end;
- 
+
 function initmacros(const anames,avalues: array of msestring;
                     const ahandler: array of macrohandlerty): macroinfoarty;
 var
@@ -293,21 +293,21 @@ begin
  end;
 end;
 
-function expandmacros(const value: msestring; 
+function expandmacros(const value: msestring;
                const anames,avalues: array of msestring;
    const options: macrooptionsty = [mao_caseinsensitive]): msestring;
 begin
  result:= expandmacros(value,initmacros(anames,avalues,[]),options);
 end;
 
-function expandmacros1(const value: msestring; 
+function expandmacros1(const value: msestring;
                const anames,avalues: array of msestring;
    const options: macrooptionsty = [mao_caseinsensitive]): msestring;
 begin
  result:= expandmacros(value,initmacros(anames,avalues,[]),options);
 end;
 
-function expandmacros2(const value: msestring; 
+function expandmacros2(const value: msestring;
                const anames,avalues: array of msestring;
                const ahandler: array of macrohandlerty;
    const options: macrooptionsty = [mao_caseinsensitive]): msestring;
@@ -316,14 +316,14 @@ begin
 end;
 
 {
-function expandmacrosstr(const value: msestring; 
+function expandmacrosstr(const value: msestring;
                const anames,avalues: array of msestring;
    const options: macrooptionsty = [mao_caseinsensitive]): msestring;
 begin
  result:= expandmacros(value,initmacros(anames,avalues,[]),options);
 end;
 }
-{ 
+{
 function expandmacros(const value: msestring; const macros:macroinfoarty;
                  const caseinsensitive: boolean = true): msestring;
 var
@@ -418,7 +418,7 @@ begin
  end;
 end;
 
-function tmacrolist.getvalue(const aname: msestring; 
+function tmacrolist.getvalue(const aname: msestring;
                         var aexpandlevel: integer;
                         out found: pmacroinfoty): msestring;
 var
@@ -446,7 +446,7 @@ begin
  end;
 end;
 
-function tmacrolist.find(const aname: msestring; 
+function tmacrolist.find(const aname: msestring;
                                 out item: pmacroinfoty): boolean;
                 //true if found;
 var
@@ -475,7 +475,7 @@ begin
  end;
 end;
 
-function tmacrolist.callhandler(const aname: msestring; 
+function tmacrolist.callhandler(const aname: msestring;
            const aparams: msestringarty; var aexpandlevel: integer;
            out found: pmacroinfoty): msestring;
 
@@ -537,13 +537,13 @@ procedure tmacrolist.finalizerecord(var item);
 begin
  finalize(macroinfoty(item));
 end;
- 
-procedure tmacrolist.internalexpandmacros(var avalue: msestring; 
+
+procedure tmacrolist.internalexpandmacros(var avalue: msestring;
                      expandlevel: integer; var refindex: integerarty);
 
 var
  start: pmsechar;
-                      
+
  function checkmacrostart(po: pmsechar): pmsechar;
  begin
   if mao_curlybraceonly in foptions then begin
@@ -567,14 +567,14 @@ var
    result:= msestrscan(po,msechar('$'))
   end;
  end; //checkmacrostart
- 
+
 var
  int1,int2,int3,int4: integer;
  po1,po2,po3,po4,po5: pmsechar;
  str1,str2,str3: msestring;
  ar1: msestringarty;
  found: pmacroinfoty;
- 
+
 begin
  if avalue <> '' then begin
   found:= nil;
@@ -613,7 +613,7 @@ begin
        end;
       end;
       inc(po2);
-     end; 
+     end;
      if po2^ <> #0 then begin
       po3:= po1+2;
       str2:= stringsegment(po3,po2);
@@ -878,7 +878,7 @@ begin
 //     value:= po3^.b;
     end;
 //    inc(po3);
-   end;    
+   end;
    result:= msemacros.expandmacros(result,ar1,fmacros.foptions);
   end;
 end;

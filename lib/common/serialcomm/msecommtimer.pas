@@ -94,7 +94,7 @@ procedure unlocktimer();
 begin
  sys_mutexunlock(timerlock);
 end;
- 
+
 procedure mmtimerevent(uTimerID, uMessage: UINT;
     dwUser, dw1, dw2: DWORD); stdcall;
 var

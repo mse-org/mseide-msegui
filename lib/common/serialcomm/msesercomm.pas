@@ -14,11 +14,11 @@ interface
 uses
  classes,mclasses,msecommport,mseclasses,mseglob,msepipestream,msetypes,
  msecryptio,msethread,mseevent,mseapplication,msesystypes,msetimer;
- 
+
 const
  closepipestag = 836915;
  closeconnectiontag = closepipestag + 1;
- 
+
 type
  tcustomcommpipes = class;
  tcommreader = class;
@@ -32,7 +32,7 @@ type
   procedure dorxchange(const areader: tcommreader);
  end;
  icommclientarty = array of icommclient;
-  
+
  tcommreader = class(tpipereader)
   private
    ftimeoutms: integer;
@@ -67,12 +67,12 @@ type
    constructor create(const aowner: tcustomcommpipes);
    property timeoutms: integer read ftimeoutms write settimeoutms;
  end;
-  
+
  tsercommwriter = class(tcommwriter)
   protected
    function internalwrite(const buffer; count: longint): longint; override;
  end;
- 
+
  tsercommreader = class(tcommreader)
   protected
    function internalread(var buf; const acount: integer; out readcount: integer;
@@ -83,7 +83,7 @@ type
 
  commpipesstatety = (cps_open,cps_closing,cps_detached,cps_releasing);
  commpipesstatesty = set of commpipesstatety;
-    
+
  tcustomcommpipes = class(tlinkedpersistent,ievent)
   private
    foninputavailable: commpipeseventty;
@@ -99,7 +99,7 @@ type
    procedure setoverloadsleepus(const avalue: integer);
    procedure setoninputavailable(const avalue: commpipeseventty);
    procedure doinputavailable(const sender: tpipereader);
-   procedure dopipebroken(const sender: tpipereader);   
+   procedure dopipebroken(const sender: tpipereader);
    procedure internalclose;
    function getoptionsreader: pipereaderoptionsty;
    procedure setoptionsreader(const avalue: pipereaderoptionsty);
@@ -119,7 +119,7 @@ type
    procedure dothreadterminate;
    procedure setcryptoio(const acryptoio: tcryptoio);
    procedure receiveevent(const event: tobjectevent);
-   property oncommbroken: commpipeseventty read foncommbroken 
+   property oncommbroken: commpipeseventty read foncommbroken
                                                       write foncommbroken;
   public
    constructor create(const aowner: tcustomcommcomp;
@@ -136,22 +136,22 @@ type
    property tx: tcommwriter read ftx;
    property rxtimeoutms: integer read getrxtimeoutms write setrxtimeoutms;
    property txtimeoutms: integer read gettxtimeoutms write settxtimeoutms;
-   
-   property overloadsleepus: integer read getoverloadsleepus 
+
+   property overloadsleepus: integer read getoverloadsleepus
                   write setoverloadsleepus default -1;
             //checks application.checkoverload before calling oninputavaliable
             //if >= 0
-   property optionsreader: pipereaderoptionsty read getoptionsreader 
+   property optionsreader: pipereaderoptionsty read getoptionsreader
                                  write setoptionsreader default [];
-   property onbeforeconnect: commpipeseventty read fonbeforeconnect 
+   property onbeforeconnect: commpipeseventty read fonbeforeconnect
                                                       write fonbeforeconnect;
-   property onafterconnect: commpipeseventty read fonafterconnect 
+   property onafterconnect: commpipeseventty read fonafterconnect
                                                       write fonafterconnect;
-   property onbeforedisconnect: commpipeseventty read fonbeforedisconnect 
+   property onbeforedisconnect: commpipeseventty read fonbeforedisconnect
                                                       write fonbeforedisconnect;
-   property onafterdisconnect: commpipeseventty read fonafterdisconnect 
+   property onafterdisconnect: commpipeseventty read fonafterdisconnect
                                                       write fonafterdisconnect;
-   property oninputavailable: commpipeseventty read foninputavailable 
+   property oninputavailable: commpipeseventty read foninputavailable
                                                    write setoninputavailable;
  end;
 
@@ -165,8 +165,8 @@ type
    property oncommbroken;
  end;
 
- commcompeventty = procedure(sender: tcustomcommcomp) of object;  
- 
+ commcompeventty = procedure(sender: tcustomcommcomp) of object;
+
  tcustomcommcomp = class(tactcomponent,icommserver)
   private
    fclients: icommclientarty;
@@ -201,20 +201,20 @@ type
                     //us, 0 if not supported
    property active: boolean read factive write setactive default false;
    property cryptoio: tcryptoio read fcryptoio write setcryptoio;
-   
-   property onbeforeconnect: commcompeventty read fonbeforeconnect 
+
+   property onbeforeconnect: commcompeventty read fonbeforeconnect
                                                 write fonbeforeconnect;
-   property onafterconnect: commcompeventty read fonafterconnect 
+   property onafterconnect: commcompeventty read fonafterconnect
                                                 write fonafterconnect;
-   property onbeforedisconnect: commcompeventty read fonbeforedisconnect 
+   property onbeforedisconnect: commcompeventty read fonbeforedisconnect
                                                 write fonbeforedisconnect;
-   property onafterdisconnect: commcompeventty read fonafterdisconnect 
+   property onafterdisconnect: commcompeventty read fonafterdisconnect
                                                 write fonafterdisconnect;
  end;
 
  tasyncserport = class(tcustomrs232)
   protected
-   
+
   public
    constructor create(const aowner: tmsecomponent;  //aowner can be nil
                                   const aoncheckabort: checkeventty = nil);
@@ -229,7 +229,7 @@ type
 
  sercommoptionty = (sco_halfduplex,sco_nopipe);
  sercommoptionsty = set of sercommoptionty;
-  
+
  tcustomsercommcomp = class(tcustomcommcomp)
   private
    foptions: sercommoptionsty;
@@ -258,7 +258,7 @@ type
    property options: sercommoptionsty read foptions
                                         write setoptions default [];
  end;
- 
+
  tsercommcomp = class(tcustomsercommcomp)
   published
    property pipes;
@@ -272,7 +272,7 @@ type
    property onbeforedisconnect;
    property onafterdisconnect;
  end;
- 
+
  commresponseflagty = (crf_error,crf_timeout,crf_eof,crf_trunc,crf_writeerror);
  commresponseflagsty = set of commresponseflagty;
  tcustomsercommchannel = class;
@@ -280,7 +280,7 @@ type
                 var adata: string; var aflags: commresponseflagsty) of object;
  sercommchannelstatety = (sccs_pending,sccs_sync,sccs_eor);
  sercommchannelstatesty = set of sercommchannelstatety;
- 
+
  tcustomsercommchannel = class(tmsecomponent,icommclient)
   private
    fsercomm: tcustomcommcomp;
@@ -311,21 +311,21 @@ type
    destructor destroy; override;
    procedure clear;
    function transmit(const adata: string; const aresponselength: integer;
-            const atimeoutus: integer = -1): syserrorty; virtual; overload; 
+            const atimeoutus: integer = -1): syserrorty; virtual; overload;
                                                                  //threadsafe
      //async, answer by onresponse
                       //0 -> timeoutus property,
                       //-1 -> timeoutus + guessed transmission time,
                       //-2 unlimited
    function transmiteor(const adata: string; const aresponselength: integer = 0;
-            const atimeoutus: integer = -1): syserrorty; virtual; overload; 
+            const atimeoutus: integer = -1): syserrorty; virtual; overload;
                   //use EOR, async
    function transmit(const adata: string; const aresponselength: integer;
                                                        out aresult: string;
       const atimeoutus: integer = -1): commresponseflagsty; virtual; overload;
                         //synchronous, threadsafe
    function transmiteor(const adata: string; out aresult: string;
-      const aresponselength: integer = 0; 
+      const aresponselength: integer = 0;
       const atimeoutus: integer = -1): commresponseflagsty; virtual; overload;
                         //use EOR, synchronous, threadsafe
    property sercomm: tcustomcommcomp read fsercomm write setsercomm;
@@ -375,7 +375,7 @@ type
    property connected: boolean read fconnected write setconnected
                                                            default false;
  end;
- 
+
 procedure setcomcomp(const alink: icommclient; const acommcomp: tcustomcommcomp;
                                    var dest: tcustomcommcomp);
 procedure connectcryptoio(const acryptoio: tcryptoio; const tx: tcommwriter;
@@ -383,12 +383,12 @@ procedure connectcryptoio(const acryptoio: tcryptoio; const tx: tcommwriter;
                          var cryptoioinfo: cryptoioinfoty;
                          txfd: integer = invalidfilehandle;
                          rxfd: integer = invalidfilehandle);
- 
+
 implementation
 uses
  msesys,msestream,msearrayutils,sysutils,msebits,msesysintf1,msestrings,
  msesysutils;
- 
+
 procedure setcomcomp(const alink: icommclient;
                const acommcomp: tcustomcommcomp; var dest: tcustomcommcomp);
 begin
@@ -460,7 +460,7 @@ end;
 
 procedure tcustomsercommcomp.doportopen;
 begin
- if (fpipes.handle = invalidfilehandle) and 
+ if (fpipes.handle = invalidfilehandle) and
                not (sco_nopipe in foptions) then begin
   fpipes.handle:= fport.handle;
  end;
@@ -562,7 +562,7 @@ end;
 
 { tcustomcommpipes }
 
-constructor tcustomcommpipes.create(const aowner: tcustomcommcomp; 
+constructor tcustomcommpipes.create(const aowner: tcustomcommcomp;
                                               const acryptkind: cryptoiokindty);
 begin
  fowner:= aowner;
@@ -602,7 +602,7 @@ begin
  connectcryptoio(fcryptoio,ftx,frx,fcryptoioinfo);
  if assigned(fonafterconnect) then begin
   fonafterconnect(self);
- end;  
+ end;
 end;
 
 procedure tcustomcommpipes.dothreadterminate;
@@ -710,7 +710,7 @@ begin
    internalclose;
    if fowner.canevent(tmethod(fonafterdisconnect)) then begin
     fonafterdisconnect(self);
-   end; 
+   end;
   finally
    fstate:= fstate - [cps_closing,cps_open];
   end;
@@ -786,7 +786,7 @@ begin
  for int1:= 0 to high(fclients) do begin
   fclients[int1].setcommserverintf(nil);
  end;
- fclients:= nil; 
+ fclients:= nil;
  inherited;
 end;
 
@@ -842,7 +842,7 @@ begin
   finally
    application.unlock;
   end;
- end; 
+ end;
 end;
 
 procedure tcustomcommcomp.connect;
@@ -861,7 +861,7 @@ begin
  internaldisconnect;
  if canevent(tmethod(fonafterdisconnect)) then begin
   fonafterdisconnect(self);
- end; 
+ end;
 end;
 
 procedure tcustomcommcomp.setcryptoio(const avalue: tcryptoio);
@@ -909,7 +909,7 @@ end;
 function tcommreader.execthread(thread: tmsethread): integer;
 var
  bo1: boolean;
-begin                          
+begin
 {$ifdef mse_debugsockets}
  debugout(self,'socketreader execthread');
 {$endif}
@@ -919,7 +919,7 @@ begin
    try
     fonafterconnect;
    except
-    include(fstate,tss_error);   
+    include(fstate,tss_error);
     include(fstate,tss_eof);
     doinputavailable;
     raise;
@@ -980,7 +980,7 @@ begin
    readcount:= 0;
   end;
  end
- else begin  
+ else begin
   result:= internalread(buf,acount,readcount,nonblocked);
  end;
 end;
@@ -1146,7 +1146,7 @@ begin
     result:= application.semwait(fsem,int1);
     exclude(fstate, sccs_pending);
    end
-   else begin  
+   else begin
     if int1 > 0 then begin
      ftimer.interval:= int1;
      ftimer.enabled:= true;
@@ -1159,7 +1159,7 @@ begin
 end;
 
 function tcustomsercommchannel.transmit(const adata: string;
-                  const aresponselength: integer; 
+                  const aresponselength: integer;
                   const atimeoutus: integer = -1): syserrorty;
 begin
  result:= internaltransmit(adata,aresponselength,atimeoutus,false,false);
@@ -1178,7 +1178,7 @@ begin
   sye_write: begin
    result:= [crf_writeerror];
   end;
-  else begin  
+  else begin
    result:= [crf_timeout];
   end;
  end;
@@ -1192,7 +1192,7 @@ begin
  end;
  if not fsercomm.active then begin
   componentexception(self,'sercomm inactive.');
- end;  
+ end;
 end;
 
 procedure tcustomsercommchannel.clear;
@@ -1220,7 +1220,7 @@ begin
   sye_write: begin
    result:= [crf_writeerror];
   end;
-  else begin  
+  else begin
    result:= [crf_timeout];
   end;
  end;

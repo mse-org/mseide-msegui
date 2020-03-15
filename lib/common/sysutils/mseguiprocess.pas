@@ -41,11 +41,11 @@ type
    property optionsgui: guiprocessoptionsty read foptionsgui
                                             write foptionsgui default [];
  end;
- 
+
 implementation
 uses
  msegui;
- 
+
 { tguiprocess }
 
 function tguiprocess.getcancontinue: boolean;

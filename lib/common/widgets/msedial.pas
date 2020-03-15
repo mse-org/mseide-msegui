@@ -17,7 +17,7 @@ uses
 
 const
  defaultdialcolor = cl_dkgray;
-  
+
 type
  rectsidety = (rs_left,rs_top,rs_right,rs_bottom);
  rectsidesty = set of rectsidety;
@@ -32,19 +32,19 @@ type
   angle: real;
  end;
  tickcaptionarty = array of tickcaptionty;
-  
+
  tdialpropfont = class(tparentfont)
   public
    class function getinstancepo(owner: tobject): pfont; override;
  end;
- 
+
  tdialfont = class(tparentfont)
   public
    class function getinstancepo(owner: tobject): pfont; override;
  end;
 
  dialdatakindty = (dtk_real,dtk_datetime);
- 
+
  diallineinfoty = record
   color: colorty;
   widthmm: real;
@@ -62,9 +62,9 @@ type
 
  dialtickoptionty =  (dto_invisible,dto_opposite,dto_rotatetext,
                       dto_multiplecaptions,
-                      dto_alignstart,dto_aligncenter,dto_alignend); 
+                      dto_alignstart,dto_aligncenter,dto_alignend);
                       //allow captions of different ticks at same position
-                                    
+
  dialtickoptionsty = set of dialtickoptionty;
 
  dialtickinfoty = record
@@ -102,7 +102,7 @@ type
    function actualcolor: colorty;
    function actualwidthmm: real;
   public
-   constructor create(aowner: tobject); override;   
+   constructor create(aowner: tobject); override;
    destructor destroy; override;
    procedure createfont;
   published
@@ -111,9 +111,9 @@ type
    property widthmm: real read fli.widthmm write setwidthmm;
                            //0 -> withmm of dialcontroller
    property dashes: string read fli.dashes write setdashes;
-   property indent: integer read fli.indent 
+   property indent: integer read fli.indent
                      write setindent default 0;
-   property length: integer read fli.length 
+   property length: integer read fli.length
                      write setlength default 0;
                       //0 -> whole innerclientrect
    property caption: msestring read fli.caption write setcaption;
@@ -158,7 +158,7 @@ type
 
 const
  defaultmarkerwidth = 3;
- 
+
 type
  tdialmarker = class(tdialprop,iframe,iface)
   private
@@ -190,7 +190,7 @@ type
    function getmsecomponentstate: msecomponentstatesty;
    procedure invalidate;
    procedure invalidatewidget;
-   procedure invalidaterect(const rect: rectty; 
+   procedure invalidaterect(const rect: rectty;
                const org: originty = org_client; const noclip: boolean = false);
    function getwidget: twidget;
    function getwidgetrect: rectty;
@@ -213,15 +213,15 @@ type
    property limited: boolean read finfo.limited;
   published
    property value: realty read finfo.value write setvalue {stored false};
-   property options: dialmarkeroptionsty read finfo.options 
+   property options: dialmarkeroptionsty read finfo.options
                           write setoptions default [];
    property hintcaption: msestring read fhintcaption
                                  write fhintcaption;
-   property bar_color: colorty read finfo.bar_color 
+   property bar_color: colorty read finfo.bar_color
                                          write setbar_color default cl_none;
-   property bar_width: integer read finfo.bar_width write setbar_width 
+   property bar_width: integer read finfo.bar_width write setbar_width
                                         default defaultmarkerwidth;
-   property bar_shift: integer read finfo.bar_shift write setbar_shift 
+   property bar_shift: integer read finfo.bar_shift write setbar_shift
                                         default 0;
    property bar_frame: tframe read getbar_frame write setbar_frame;
    property bar_face: tface read getbar_face write setbar_face;
@@ -260,16 +260,16 @@ type
   public
    property visible: boolean read getvisible write setvisible;
   published
-   property intervalcount: real read getintervalcount write setintervalcount 
+   property intervalcount: real read getintervalcount write setintervalcount
                                        stored isintervalcountstored;
                       //0 -> off
    property interval: real read getinterval write setinterval
                                        stored isintervalstored;
                       //0 -> off
-   property options: dialtickoptionsty read finfo.options 
+   property options: dialtickoptionsty read finfo.options
                           write setoptions default [];
  end;
- 
+
  tdialticks = class(townedpersistentarrayprop)
   private
    function getitems(const aindex: integer): tdialtick;
@@ -283,7 +283,7 @@ type
    class function getitemclasstype: persistentclassty; override;
    property items[const index: integer]: tdialtick read getitems; default;
  end;
- 
+
  dialoptionty = (do_invisible,do_opposite,do_sideline,do_boxline,do_log,
                  do_front,do_smooth,do_scrollwithdata,do_shiftwithdata,
                  do_savestate);
@@ -296,7 +296,7 @@ type
   function getdialrect: rectty;
   function getlimitrect: rectty;
  end;
- 
+
  tcustomdialcontroller = class(tvirtualpersistent)
   private
    fdirection: graphicdirectionty;
@@ -363,7 +363,7 @@ type
    procedure setdirection(const avalue: graphicdirectionty); virtual;
    procedure layoutchanged;
    procedure changed;
-   procedure calclineend(const ainfo: diallineinfoty; const aopposite: boolean; 
+   procedure calclineend(const ainfo: diallineinfoty; const aopposite: boolean;
                    const arect: rectty; out linestart,lineend: integer;
                    out linedirection: graphicdirectionty;
                    out adim: rectextty);
@@ -384,7 +384,7 @@ type
    procedure createfont;
    procedure paint(const acanvas: tcanvas);
    procedure afterpaint(const acanvas: tcanvas);
-   property options: dialoptionsty read foptions write setoptions default []; 
+   property options: dialoptionsty read foptions write setoptions default [];
                 //first!
    property visible: boolean read getvisible write setvisible;
    property opposite: boolean read getopposite write setopposite;
@@ -405,14 +405,14 @@ type
    property markers: tdialmarkers read fmarkers write setmarkers;
    property ticks: tdialticks read fticks write setticks;
    property color: colorty read fcolor write setcolor default defaultdialcolor;
-   property widthmm: real read fwidthmm write setwidthmm; 
+   property widthmm: real read fwidthmm write setwidthmm;
                 //linewidth, default 0.3
    property font: tdialfont read getfont write setfont stored isfontstored;
    property angle: real read fangle write setangle; //0 -linear, 1 -> 360 grad
  end;
 
  dialcontrollerclassty = class of tcustomdialcontroller;
- 
+
  tcustomdialcontrollers = class(tpersistentarrayprop)
   private
    fstart: real;
@@ -432,11 +432,11 @@ type
    property start: real read fstart write setstart;
    property range: real read frange write setrange;
  end;
- 
+
 const
  defaultdialcontrolleroptions = [do_opposite];
 
-type 
+type
  tdialcontroller = class(tcustomdialcontroller)
   public
    constructor create(const aintf: idialcontroller); override;
@@ -469,7 +469,7 @@ const
 type
  dialwidgetstatety = (dws_layoutvalid);
  dialwidgetstatesty = set of dialwidgetstatety;
- 
+
  tcustomdial = class(tpublishedwidget,idialcontroller)
   private
    fdial: tdialcontroller;
@@ -497,7 +497,7 @@ type
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
    procedure paint(const acanvas: tcanvas); override;
-   function fit(const asides: rectsidesty = allrectsides): boolean; 
+   function fit(const asides: rectsidesty = allrectsides): boolean;
            //adjust fitframe for extents of dial
            //returns true if changes made
    property dial: tdialcontroller read fdial write setdial;
@@ -510,13 +510,13 @@ type
                           write setfitframe_right default 0;
    property fitframe_bottom: integer read ffitframe.bottom
                           write setfitframe_bottom default 0;
-   property options: optionsdialty read foptions write setoptions 
+   property options: optionsdialty read foptions write setoptions
                                                  default defaultoptionsdial;
   published
    property color default cl_transparent;
    property optionswidget default defaultoptionswidgetnofocus;
  end;
- 
+
  tdial = class(tcustomdial)
   published
    property dial;
@@ -533,7 +533,7 @@ procedure checknullrange(const avalue: real);
 function chartln(const avalue: real): real;
                 //big neg value for avalue <= 0
 function chartround(const avalue: real): integer; //limit to +-bigint
- 
+
 implementation
 uses
  sysutils,msereal,msestreaming,mseformatstr,math,msebits;
@@ -600,7 +600,7 @@ end;
 class function tdialpropfont.getinstancepo(owner: tobject): pfont;
 begin
  result:= @tdialprop(owner).fli.font;
-end;  
+end;
 
 { tdialfont }
 
@@ -649,7 +649,7 @@ end;
 procedure tdialprop.setdashes(const avalue: string);
 begin
  fli.dashes:= avalue;
- tcustomdialcontroller(fowner).invalidate; 
+ tcustomdialcontroller(fowner).invalidate;
 end;
 
 procedure tdialprop.setindent(const avalue: integer);
@@ -881,7 +881,7 @@ end;
 procedure tdialmarker.updatemarker;
 var
  rect1: rectty;
- 
+
  function snap(const avalue: real): integer;
             //snap to ticks
  var
@@ -916,7 +916,7 @@ var
    end;
   end;
  end;
- 
+
 var
  linestart,lineend: integer;
  dir1: graphicdirectionty;
@@ -926,7 +926,7 @@ var
  pt1: pointty;
  rectext1: rectextty;
  int1: integer;
-  
+
 begin
  stop1:= 0;
  start1:= 0;
@@ -1138,7 +1138,7 @@ begin
  end
  else begin
   options:= options + [dmo_invisible];
- end; 
+ end;
 end;
 
 function tdialmarker.pos: integer;
@@ -1360,7 +1360,7 @@ var
 begin
  for int1:= 0 to high(fitems) do begin
   tdialmarker(fitems[int1]).flayoutvalid:= false;
- end; 
+ end;
 end;
 
 procedure tdialmarkers.dosizechanged;
@@ -1391,7 +1391,7 @@ end;
 
 function tdialtick.getintervalcount: real;
 begin
- if (finfo.intervalco <> 0) or 
+ if (finfo.intervalco <> 0) or
             (do_log in tcustomdialcontroller(fowner).foptions) then begin
   result:= finfo.intervalco;
  end
@@ -1421,7 +1421,7 @@ end;
 
 function tdialtick.getinterval: real;
 begin
- if (finfo.interval <> 0) or 
+ if (finfo.interval <> 0) or
             (do_log in tcustomdialcontroller(fowner).foptions) then begin
   result:= finfo.interval;
  end
@@ -1448,7 +1448,7 @@ end;
 
 function tdialtick.isintervalcountstored: boolean;
 begin
- result:= (do_log in tcustomdialcontroller(fowner).foptions) or 
+ result:= (do_log in tcustomdialcontroller(fowner).foptions) or
                            (finfo.intervalco <> 0);
 end;
 
@@ -1470,7 +1470,7 @@ begin
  end
  else begin
   options:= options + [dto_invisible];
- end; 
+ end;
 end;
 
 { tdialticks }
@@ -1512,7 +1512,7 @@ var
 begin
  for int1:= 0 to high(fitems) do begin
   tdialtick(fitems[int1]).flayoutvalid:= false;
- end; 
+ end;
 end;
 
 { tcustomdialcontroller }
@@ -1548,7 +1548,7 @@ begin
   end;
   dir2:= fdirection;
   changed;
-  if fintf.getwidget.componentstate * 
+  if fintf.getwidget.componentstate *
                         [csreading,csdesigning] = [csdesigning] then begin
    with fmarkers do begin
     for int1:= 0 to high(fitems) do begin
@@ -1660,7 +1660,7 @@ procedure tcustomdialcontroller.transform(var apoint: pointty);
   p1:= fa*((pxy-foffsp)*fscalep);
   pxy:= round(r1*sin(p1)) + foffsp;
   ryx:= round(r1*(1-cos(p1))) + ryx;
- end; 
+ end;
 begin
  if dis_needstransform in fstate then begin
   case fdirection of
@@ -1709,10 +1709,10 @@ procedure tcustomdialcontroller.adjustcaption(const dir: graphicdirectionty;
    end;
   end;
  end;
- 
+
 begin
  with ainfo,pos do begin
-  case dir of 
+  case dir of
    gd_right: begin
     y:= y + captiondist;
     x:= x + captionoffset;
@@ -1767,14 +1767,14 @@ procedure tcustomdialcontroller.checklayout;
 
 const
  tolerance = 0.000001;
- 
+
  function getico(const interval: real; const intervalcount: integer): integer;
  begin
-  result:= intervalcount - 
-         floor((1/interval) * intervalcount * (1 + tolerance)); 
+  result:= intervalcount -
+         floor((1/interval) * intervalcount * (1 + tolerance));
                       //ticks below decade
  end;
- 
+
  function getlogval(const avalue: integer; const interval: real;
                             const intervalcount: integer): real;
  var
@@ -1799,7 +1799,7 @@ const
    end;
   end;
  end;
- 
+
  function getlogn(const avalue: real; const interval: real;
                             const intervalcount: integer): integer;
  var
@@ -1820,7 +1820,7 @@ const
 
 var
  asc,desc: integer;
-  
+
 var
  rect1: rectty;
  canvas1: tcanvas;
@@ -1843,7 +1843,7 @@ var
  ar2: booleanarty;
  pt1: pointty;
  rectext1: rectextty;
- 
+
 begin
  if not (dis_layoutvalid in fstate) then begin
   intervalcount1:= 0;
@@ -1903,13 +1903,13 @@ begin
      fr:= fr/sin(fa);
     end;
     farcscale:= int1/(fa*2);
-   end;    
+   end;
    int1:= round(abs(fr));   //radius to direction
    if int1 < 30000 then begin
     int2:= round(2*abs(fr)); //diameter
     int3:= 0;             //perpendicular to direction
     if (fangle < 0) xor (direction in [gd_down,gd_left]) then begin
-     int3:= -int2; 
+     int3:= -int2;
     end;
     if (do_opposite in foptions) then begin
      po1:= @fsidearc;
@@ -2017,10 +2017,10 @@ begin
     farcang:= 2*pi*fangle;
    end;
   end;
-  
+
   with rect1 do begin
    if horz1 then begin
-    boxlines[0].a.x:= x;         
+    boxlines[0].a.x:= x;
     boxlines[0].b.x:= x + cx;
     boxlines[1].a.x:= boxlines[0].a.x;
     boxlines[1].b.x:= boxlines[0].b.x;
@@ -2031,7 +2031,7 @@ begin
     boxlines[1].b.y:= y;
    end
    else begin
-    boxlines[0].a.y:= y;         
+    boxlines[0].a.y:= y;
     boxlines[0].b.y:= y + cy;
     boxlines[1].a.y:= boxlines[0].a.y;
     boxlines[1].b.y:= boxlines[0].b.y;
@@ -2188,7 +2188,7 @@ begin
           end;
          end;
         end;
-        if (po3 <> nil) and (not bo1 or ar2[int1]) then begin 
+        if (po3 <> nil) and (not bo1 or ar2[int1]) then begin
                                               //else check more captions
          break;
         end;
@@ -2253,7 +2253,7 @@ begin
          captions[int1].caption:= '';
         end
         else begin
-         if (captionunit <> '') and (int1 = high(captions) - 1) and 
+         if (captionunit <> '') and (int1 = high(captions) - 1) and
                                                         (int1 > 0) then begin
           captions[int1].caption:= captionunit;
          end
@@ -2280,7 +2280,7 @@ begin
           end;
          end;
          angle:= ticksreal[int1] * rea2 + rea3;
-         extenddim(width,asc,desc,pos,fticks.fdim);        
+         extenddim(width,asc,desc,pos,fticks.fdim);
         end;
        end;
        if options * [dto_alignstart,dto_aligncenter,dto_alignend] <> [] then begin
@@ -2333,7 +2333,7 @@ begin
        end;
        //todo: variable unitcaption pos.
       end;
-     end;  
+     end;
     end;
    end;
   end;
@@ -2675,7 +2675,7 @@ begin
  end
  else begin
   options:= options + [do_invisible];
- end; 
+ end;
 end;
 
 function tcustomdialcontroller.getopposite: boolean;
@@ -2690,7 +2690,7 @@ begin
  end
  else begin
   options:= options - [do_opposite];
- end; 
+ end;
 end;
 
 function tcustomdialcontroller.getsideline: boolean;
@@ -2705,7 +2705,7 @@ begin
  end
  else begin
   options:= options - [do_sideline];
- end; 
+ end;
 end;
 
 function tcustomdialcontroller.getboxline: boolean;
@@ -2720,7 +2720,7 @@ begin
  end
  else begin
   options:= options - [do_boxline];
- end; 
+ end;
 end;
 
 function tcustomdialcontroller.getfront: boolean;
@@ -2735,7 +2735,7 @@ begin
  end
  else begin
   options:= options - [do_front];
- end; 
+ end;
 end;
 
 { tcustomdial }
@@ -2765,9 +2765,9 @@ procedure tcustomdial.directionchanged(const dir,dirbefore: graphicdirectionty);
 begin
  if not (csloading in componentstate) then begin
   if fframe <> nil then begin
-   rotateframe1(tcustomframe1(fframe).fi.innerframe,dirbefore,dir);    
+   rotateframe1(tcustomframe1(fframe).fi.innerframe,dirbefore,dir);
   end;
-  rotateframe1(ffitframe,dirbefore,dir);    
+  rotateframe1(ffitframe,dirbefore,dir);
   widgetrect:= changerectdirection(widgetrect,dirbefore,dir);
  end;
 end;
@@ -2886,7 +2886,7 @@ begin
  if fframe <> nil then begin
   inflaterectext1(ext1,tcustomframe1(fframe).fi.innerframe);
  end;
- 
+
  if rs_left in asides then begin
   fra1.left:= fra1.left - ext1.left;
  end;
@@ -2975,7 +2975,7 @@ begin
    for int2:= 0 to markers.count - 1 do begin
     with markers[int2] do begin
      if dmo_savevalue in options then begin
-      value:= reader.readreal(mstr1+inttostrmse(int2),value);      
+      value:= reader.readreal(mstr1+inttostrmse(int2),value);
      end;
     end;
    end;
@@ -2999,7 +2999,7 @@ begin
    for int2:= 0 to markers.count - 1 do begin
     with markers[int2] do begin
      if dmo_savevalue in options then begin
-      writer.writereal(mstr1+inttostrmse(int2),value);      
+      writer.writereal(mstr1+inttostrmse(int2),value);
      end;
     end;
    end;

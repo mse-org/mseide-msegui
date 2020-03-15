@@ -12,13 +12,13 @@ unit mseifidialogcomp;
 interface
 uses
  mseificompglob,mseificomp,mseapplication,mseclasses,mseglob,mseact,mserttistat;
- 
+
 type
 
- beforedialogeventty = procedure(const sender: tobject; 
+ beforedialogeventty = procedure(const sender: tobject;
                              const adialog: tactcomponent) of object;
- afterdialogeventty = procedure(const sender: tobject; 
-                             const adialog: tactcomponent; 
+ afterdialogeventty = procedure(const sender: tobject;
+                             const adialog: tactcomponent;
                              const amodalresult: modalresultty) of object;
 
  ifidialoginfoty = record
@@ -26,7 +26,7 @@ type
   dialog: tactcomponent;
  end;
  pifidialoginfoty = ^ifidialoginfoty;
- 
+
  tdialogclientcontroller = class(tcustomificlientcontroller)
   private
    fonbeforedialog: beforedialogeventty;
@@ -34,24 +34,24 @@ type
    finfopo: pifidialoginfoty;
    faction: tcustomaction;
    frttistat: tcustomrttistat;
-   procedure execdialog(const alink: pointer; var handled: boolean); 
+   procedure execdialog(const alink: pointer; var handled: boolean);
    procedure setaction(const avalue: tcustomaction);
    procedure setrttistat(const avalue: tcustomrttistat);
   protected
    procedure beforedialog(const adialog: tactcomponent);
-   procedure objectevent(const sender: tobject; 
+   procedure objectevent(const sender: tobject;
                                 const event: objecteventty); override;
   public
    function execute: modalresultty; reintroduce;
   published
-   property onbeforedialog: beforedialogeventty read fonbeforedialog 
+   property onbeforedialog: beforedialogeventty read fonbeforedialog
                                                       write fonbeforedialog;
-   property onafterdialog: afterdialogeventty read fonafterdialog 
+   property onafterdialog: afterdialogeventty read fonafterdialog
                                                       write fonafterdialog;
    property action: tcustomaction read faction write setaction;
    property rttistat: tcustomrttistat read frttistat write setrttistat;
  end;
- 
+
  tifidialoglinkcomp = class(tifilinkcomp)
   private
    function getcontroller: tdialogclientcontroller;
@@ -66,7 +66,7 @@ type
 implementation
 type
  tmsecomponent1 = class(tmsecomponent);
- 
+
 { tdialogclientcontroller }
 
 procedure tdialogclientcontroller.beforedialog(const adialog: tactcomponent);
@@ -133,7 +133,7 @@ end;
 
 { tifidialoglinkcomp }
 
-function tifidialoglinkcomp.getcontrollerclass: 
+function tifidialoglinkcomp.getcontrollerclass:
                                   customificlientcontrollerclassty;
 begin
  result:= tdialogclientcontroller;

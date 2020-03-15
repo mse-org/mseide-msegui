@@ -27,7 +27,7 @@ type
    property framei_right default 0;
    property framei_bottom default 0;
  end;
- 
+
  timage = class(tscrollingwidget)
   private
    fbitmap: tmaskedbitmap;
@@ -70,7 +70,7 @@ end;
 implementation
 uses
  mseguiintf,msebits,msekeyboard;
- 
+
 { timage }
 
 constructor timage.create(aowner: tcomponent);
@@ -115,7 +115,7 @@ procedure timage.dopaintforeground(const canvas: tcanvas);
 begin
  inherited;
 // paintbmp(canvas,fbitmap,makerect(nullpoint,clientsize));
- paintbmp(canvas,fbitmap,innerclientrect); 
+ paintbmp(canvas,fbitmap,innerclientrect);
 end;
 
 procedure timage.setbitmap(const Value: tmaskedbitmap);

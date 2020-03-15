@@ -28,7 +28,7 @@ begin
  result:= fmacmacros;
 end;
 
-function mac_ifdef(const sender: tmacrolist; 
+function mac_ifdef(const sender: tmacrolist;
                                       const params: msestringarty): msestring;
                                       //name,[ifndef value[,ifdef value]]
 var

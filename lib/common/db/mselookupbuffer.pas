@@ -20,25 +20,25 @@ const
 type
  tcustomlookupbuffer = class;
  tcustomdblookupbuffer = class;
- 
+
  lookupbufferfieldnoty = type integer;
  lbdatakindty = (lbdk_none,lbdk_integer,lbdk_int64,lbdk_float,lbdk_text);
 
  ilookupbufferfieldinfo = interface(inullinterface)[miid_ilookupbufferfieldinfo]
   function getlbdatakind(const apropname: string): lbdatakindty;
   function getlookupbuffer: tcustomlookupbuffer;
- end; 
- 
- lbfiltereventty = procedure(const sender: tcustomlookupbuffer; 
+ end;
+
+ lbfiltereventty = procedure(const sender: tcustomlookupbuffer;
                     const physindex: integer; var valid: boolean) of object;
-                    
+
  tlookupbufferdatalink = class(tmsedatalink)
   private
    fowner: tcustomlookupbuffer;
   public
    constructor create(const aowner: tcustomlookupbuffer);
  end;
- 
+
  tlookupbufferfieldsdatalink = class(tlookupbufferdatalink)
   private
    procedure datachanged;
@@ -49,31 +49,31 @@ type
   public
    constructor create(const aowner: tcustomdblookupbuffer);
  end;
- 
+
  tlookupbuffermemodatalink = class(tlookupbufferdatalink)
   protected
    procedure recordchanged(field: tfield); override;
  end;
- 
+
  stringindexinfoty = record
   indexcasesensitive: integerarty;
   indexcaseinsensitive: integerarty;
   data: msestringarty;
  end;
  stringindexinfoarty = array of stringindexinfoty;
- 
+
  integerindexinfoty = record
   index: integerarty;
   data: integerarty;
  end;
  integerindexinfoarty = array of integerindexinfoty;
- 
+
  int64indexinfoty = record
   index: integerarty;
   data: int64arty;
  end;
  int64indexinfoarty = array of int64indexinfoty;
- 
+
  floatindexinfoty = record
   index: integerarty;
   data: realarty;
@@ -84,7 +84,7 @@ type
                          lbs_sourceclosed);
  lookupbufferstatesty = set of lookupbufferstatety;
  lookupbuffereventty = procedure(const sender: tcustomlookupbuffer) of object;
- 
+
  tcustomlookupbuffer = class(tactcomponent)
   private
  //  fbuffervalid: boolean;
@@ -119,7 +119,7 @@ type
    procedure doasyncevent(var atag: integer); override;
    procedure setcount(const avalue: integer);
    procedure loaded; override;
-   function checkfilter(const filter: lbfiltereventty; 
+   function checkfilter(const filter: lbfiltereventty;
                      const index: integerarty; var aindex: integer): boolean;
    procedure checkindexar(var aitem: integerindexinfoty); overload;
    procedure checkindexar(var aitem: floatindexinfoty); overload;
@@ -176,7 +176,7 @@ type
               //logical -> physical index
    function integerindexar(const fieldno: integer): integerarty;
    function integerar(const fieldno: integer): integerarty;
-   
+
    function floatvaluephys(const fieldno,aindex: integer): realty;
               //physical index
    function floatvaluelog(const fieldno,aindex: integer): realty;
@@ -194,7 +194,7 @@ type
               //logical -> physical index
    function int64indexar(const fieldno: integer): integerarty;
    function int64ar(const fieldno: integer): int64arty;
-   
+
    function textvaluephys(const fieldno,aindex: integer): msestring;
               //physical index
    function textvaluelog(const fieldno,aindex: integer;
@@ -206,7 +206,7 @@ type
    function textindexar(const fieldno: integer;
                             const caseinsensitive: boolean): integerarty;
    function textar(const fieldno: integer): msestringarty;
-   
+
    function lookupinteger(const integerkeyfieldno,integerfieldno,
                             keyvalue: integer;
                             const adefault: integer = 0): integer; overload;
@@ -242,7 +242,7 @@ type
    function lookupfloat(const stringkeyfieldno,floatfieldno: integer;
                               const keyvalue: msestring;
                               const adefault: realty = emptyreal): realty; overload;
-                           
+
    function count: integer; virtual;
    procedure addrow(const integervalues: array of integer;
                     const textvalues: array of msestring;
@@ -252,27 +252,27 @@ type
                     const textvalues: array of msestringarty;
                     const floatvalues: array of realarty;
                     const int64values: array of int64arty);
-   
+
    function fieldnamestext: stringarty; virtual;
    function fieldnamesfloat: stringarty; virtual;
    function fieldnamesinteger: stringarty; virtual;
    function fieldnamesint64: stringarty; virtual;
-   
+
    property fieldcounttext: integer read getfieldcounttext
                                         write setfieldcounttext default 0;
    property fieldcountfloat: integer read getfieldcountfloat
                                         write setfieldcountfloat default 0;
-   property fieldcountinteger: integer read getfieldcountinteger 
+   property fieldcountinteger: integer read getfieldcountinteger
                                         write setfieldcountinteger default 0;
-   property fieldcountint64: integer read getfieldcountint64 
+   property fieldcountint64: integer read getfieldcountint64
                                         write setfieldcountint64 default 0;
-   property integervalue[const fieldno,aindex: integer]: integer 
+   property integervalue[const fieldno,aindex: integer]: integer
                                    read integervaluephys;
-   property floatvalue[const fieldno,aindex: integer]: realty 
+   property floatvalue[const fieldno,aindex: integer]: realty
                                    read floatvaluephys;
-   property int64value[const fieldno,aindex: integer]: int64 
+   property int64value[const fieldno,aindex: integer]: int64
                                    read int64valuephys;
-   property textvalue[const fieldno,aindex: integer]: msestring 
+   property textvalue[const fieldno,aindex: integer]: msestring
                                    read textvaluephys;
    property beforeload: lookupbuffereventty read fbeforeload write fbeforeload;
    property afterload: lookupbuffereventty read fafterload write fafterload;
@@ -316,10 +316,10 @@ type
    property afterload;
    property onchange;
  end;
-  
+
  lbdboptionty = (olbdb_closedataset,olbdb_invalidateifmodified);
- lbdboptionsty = set of lbdboptionty; 
- 
+ lbdboptionsty = set of lbdboptionty;
+
  tcustomdblookupbuffer = class(tdatalookupbuffer)
   private
    fdatalink: tlookupbufferdatalink;
@@ -358,7 +358,7 @@ type
    property int64fields: tdbfieldnamearrayprop read fint64fields write setint64fields;
    property optionsdb: lbdboptionsty read foptionsdb write foptionsdb default [];
  end;
-   
+
  tdblookupbuffer = class(tcustomdblookupbuffer)
   protected
    procedure doloadbuffer; override;
@@ -372,7 +372,7 @@ type
    property floatfields;
    property optionsdb;
  end;
-  
+
  tdbmemolookupbuffer = class(tcustomdblookupbuffer)
   protected
    procedure doloadbuffer; override;
@@ -384,14 +384,14 @@ type
    property integerfields;
    property floatfields;
  end;
-  
+
 implementation
 uses
  rtlconsts,sysutils,{msereal,}mseformatstr;
- 
-type 
+
+type
  tarrayprop1 = class(tarrayprop);
- 
+
 { tcustomlookupbuffer }
 
 constructor tcustomlookupbuffer.create(aowner: tcomponent);
@@ -452,7 +452,7 @@ begin
 end;
 
 procedure tcustomlookupbuffer.doloadbuffer();
-begin 
+begin
  include(fstate,lbs_buffervalid);
 // fbuffervalid:= true;
 end;
@@ -481,7 +481,7 @@ begin
  end;
 end;
 
-function tcustomlookupbuffer.checkfilter(const filter: lbfiltereventty; 
+function tcustomlookupbuffer.checkfilter(const filter: lbfiltereventty;
           const index: integerarty; var aindex: integer): boolean;
 var
  int1: integer;
@@ -655,7 +655,7 @@ begin
  checkarrayindex(ftextdata,fieldno);
  checkindexar(ftextdata[fieldno],caseinsensitive);
  with ftextdata[fieldno] do begin
-  if caseinsensitive then begin  
+  if caseinsensitive then begin
    result:= internalfind(avalue,indexcaseinsensitive,data,sizeof(msestring),
                          @compareimsestring,filter,aindex);
   end
@@ -734,7 +734,7 @@ procedure tcustomlookupbuffer.checkindex(const index: integer);
 begin
  if (index < 0) or (index >= fcount) then begin
   tlist.Error(SListIndexError, Index);
- end;  
+ end;
 end;
 
 function tcustomlookupbuffer.integervaluephys(const fieldno,aindex: integer): integer;
@@ -1031,7 +1031,7 @@ begin
     indexcasesensitive:= nil;
     indexcaseinsensitive:= nil;
    end;
-  end; 
+  end;
   for int1:= 0 to high(ffloatdata) do begin
    with ffloatdata[int1] do begin
     setlength(data,avalue);
@@ -1653,8 +1653,8 @@ end;
 procedure tlookupbufferfieldsdatalink.datachanged;
 begin
  with tcustomdblookupbuffer(fowner) do begin
-  if active or 
-    not active and (lbs_buffervalid in fstate) and 
+  if active or
+    not active and (lbs_buffervalid in fstate) and
                        not (olbdb_closedataset in foptionsdb) then begin
    exclude(fstate,lbs_buffervalid);
    asyncchanged;
@@ -1679,8 +1679,8 @@ end;
 procedure tlookupbufferfieldsdatalink.dataevent(event: tdataevent; info: ptrint);
 begin
  inherited;
- if (event = tdataevent(de_modified)) and 
-           (olbdb_invalidateifmodified in 
+ if (event = tdataevent(de_modified)) and
+           (olbdb_invalidateifmodified in
                        tcustomdblookupbuffer(fowner).foptionsdb) then begin
   datachanged;
  end;
@@ -1715,10 +1715,10 @@ begin
   clearbuffer;
 }
   datas:= fdatalink.dataset;
-  if (datas <> nil) and 
-       (datas.active or 
+  if (datas <> nil) and
+       (datas.active or
         (olbdb_closedataset in foptionsdb) and
-                    (lbs_sourceclosed in fstate) and 
+                    (lbs_sourceclosed in fstate) and
                          not (csloading in datas.componentstate)) then begin
    utf8:= fdatalink.utf8;
    bo1:= fdatalink.active;
@@ -1829,7 +1829,7 @@ begin
        end;
       end;
      finally
-      if {not bo1 and} (olbdb_closedataset in foptionsdb) and 
+      if {not bo1 and} (olbdb_closedataset in foptionsdb) and
                        not (csdesigning in componentstate)then begin
        include(fstate,lbs_sourceclosed);
        datas.active:= false;

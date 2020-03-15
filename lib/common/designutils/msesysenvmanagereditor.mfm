@@ -76,167 +76,167 @@ object msesysenvmanagereditorfo: tmsesysenvmanagereditorfo
     anchors = [an_top, an_bottom]
     optionsgrid = [og_colsizing, og_rowmoving, og_keyrowmoving, og_rowinserting, og_rowdeleting, og_focuscellonenter, og_autofirstrow, og_autoappend, og_colchangeontabkey, og_wrapcol, og_autopopup, og_mousescrollcol]
     fixcols.count = 1
-    fixcols.items = <    
+    fixcols.items = <
       item
         width = 24
         numstep = 1
       end>
     fixrows.count = 1
-    fixrows.items = <    
+    fixrows.items = <
       item
         height = 16
         captions.count = 16
-        captions.items = <        
+        captions.items = <
           item
             caption = 'Kind'
-          end        
+          end
           item
             caption = 'Name'
-          end        
+          end
           item
             caption = 'Alias'
-          end        
+          end
           item
             caption = 'MA'
             hint = 'arf_mandatory'
-          end        
+          end
           item
             caption = 'AO'
             hint = 'arf_argopt'
-          end        
+          end
           item
             caption = 'FN'
             hint = 'arf_filenames'
-          end        
+          end
           item
             caption = 'SO'
             hint = 'arf_statoverride'
-          end        
+          end
           item
             caption = 'SA'
             hint = 'arf_statadval'
-          end        
+          end
           item
             caption = 'UQ'
             hint = 'arf_unquote'
-          end        
+          end
           item
             caption = 'IN'
             hint = 'arf_integer'
-          end        
+          end
           item
             caption = 'HE'
             hint = 'arf_help'
-          end        
+          end
           item
             caption = 'Initvalue'
-          end        
+          end
           item
             caption = 'Argument'
-          end        
+          end
           item
             caption = 'Help'
-          end        
+          end
           item
             caption = 'Before'
-          end        
+          end
           item
             caption = 'After'
           end>
       end>
     datacols.count = 16
     datacols.options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_proportional, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
-    datacols.items = <    
+    datacols.items = <
       item[kinded]
         width = 72
         options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_proportional, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
         widgetname = 'kinded'
         dataclass = tgridenumdatalist
-      end    
+      end
       item[nameed]
         width = 68
         options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_proportional, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
         widgetname = 'nameed'
         dataclass = tgridmsestringdatalist
-      end    
+      end
       item[aliased]
         width = 117
         options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_proportional, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
         widgetname = 'aliased'
         dataclass = tgridmsestringdatalist
-      end    
+      end
       item[mandatory]
         width = 17
         options = [co_drawfocus, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_fixwidth, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
         widgetname = 'mandatory'
         dataclass = tgridintegerdatalist
-      end    
+      end
       item[argopt]
         width = 17
         options = [co_drawfocus, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_fixwidth, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
         widgetname = 'argopt'
         dataclass = tgridintegerdatalist
-      end    
+      end
       item[filenames]
         width = 17
         options = [co_drawfocus, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_fixwidth, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
         widgetname = 'filenames'
         dataclass = tgridintegerdatalist
-      end    
+      end
       item[statoverride]
         width = 17
         options = [co_drawfocus, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_fixwidth, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
         widgetname = 'statoverride'
         dataclass = tgridintegerdatalist
-      end    
+      end
       item[stataddval]
         width = 17
         options = [co_drawfocus, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_fixwidth, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
         widgetname = 'stataddval'
         dataclass = tgridintegerdatalist
-      end    
+      end
       item[unquote]
         width = 17
         options = [co_drawfocus, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_fixwidth, co_proportional, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
         widgetname = 'unquote'
         dataclass = tgridintegerdatalist
-      end    
+      end
       item[integer]
         width = 17
         options = [co_drawfocus, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_fixwidth, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
         widgetname = 'integer'
         dataclass = tgridintegerdatalist
-      end    
+      end
       item[help]
         width = 17
         options = [co_drawfocus, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_fixwidth, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
         widgetname = 'help'
         dataclass = tgridintegerdatalist
-      end    
+      end
       item[initvalueed]
         width = 121
         options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
         widgetname = 'initvalueed'
         dataclass = tgridmsestringdatalist
-      end    
+      end
       item[argumented]
         width = 72
         options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_proportional, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
         widgetname = 'argumented'
         dataclass = tgridmsestringdatalist
-      end    
+      end
       item[helped]
         width = 102
         options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_proportional, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
         widgetname = 'helped'
         dataclass = tgridmsestringdatalist
-      end    
+      end
       item[beforeed]
         width = 73
         options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_proportional, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
         widgetname = 'beforeed'
         dataclass = tgridmsestringdatalist
-      end    
+      end
       item[aftered]
         width = 73
         options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_proportional, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
@@ -254,7 +254,7 @@ object msesysenvmanagereditorfo: tmsesysenvmanagereditorfo
       frame.localprops1 = []
       frame.button.color = -1879048187
       frame.buttons.count = 1
-      frame.buttons.items = <      
+      frame.buttons.items = <
         item
           color = -1879048187
         end>
@@ -267,7 +267,7 @@ object msesysenvmanagereditorfo: tmsesysenvmanagereditorfo
       optionsedit1 = []
       optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_focusrectonreadonly, oe_hintclippedtext]
       dropdown.cols.count = 1
-      dropdown.cols.items = <      
+      dropdown.cols.items = <
         item
         end>
       oninit = kindedinit
@@ -294,7 +294,7 @@ object msesysenvmanagereditorfo: tmsesysenvmanagereditorfo
       frame.localprops = [frl_levelo, frl_leveli, frl_colorclient]
       frame.localprops1 = []
       frame.buttons.count = 1
-      frame.buttons.items = <      
+      frame.buttons.items = <
         item
           color = -1879048187
           imagenr = 17
@@ -423,7 +423,7 @@ object msesysenvmanagereditorfo: tmsesysenvmanagereditorfo
       frame.localprops = [frl_levelo, frl_leveli, frl_colorclient]
       frame.localprops1 = []
       frame.buttons.count = 1
-      frame.buttons.items = <      
+      frame.buttons.items = <
         item
           color = -1879048187
           imagenr = 17
@@ -461,7 +461,7 @@ object msesysenvmanagereditorfo: tmsesysenvmanagereditorfo
       frame.localprops = [frl_levelo, frl_leveli, frl_colorclient]
       frame.localprops1 = []
       frame.buttons.count = 1
-      frame.buttons.items = <      
+      frame.buttons.items = <
         item
           color = -1879048187
           imagenr = 17
@@ -486,7 +486,7 @@ object msesysenvmanagereditorfo: tmsesysenvmanagereditorfo
       frame.localprops = [frl_levelo, frl_leveli, frl_colorclient]
       frame.localprops1 = []
       frame.buttons.count = 1
-      frame.buttons.items = <      
+      frame.buttons.items = <
         item
           color = -1879048187
           imagenr = 17
@@ -511,7 +511,7 @@ object msesysenvmanagereditorfo: tmsesysenvmanagereditorfo
       frame.localprops = [frl_levelo, frl_leveli, frl_colorclient]
       frame.localprops1 = []
       frame.buttons.count = 1
-      frame.buttons.items = <      
+      frame.buttons.items = <
         item
           color = -1879048187
           imagenr = 17

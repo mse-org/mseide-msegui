@@ -14,7 +14,7 @@ uses
  msetypes;
 {$ifdef mswindows}
 //const
-// sqlite3lib: array[0..0] of filenamety = ('sqlite3.dll');  
+// sqlite3lib: array[0..0] of filenamety = ('sqlite3.dll');
 // postgreslib: array[0..0] of filenamety = ('libpq.dll');
 // mysqllib: array[0..0] of filenamety = ('libmysql.dll');
 // sslnames: array[0..1] of filenamety = ('ssleay32.dll','libssl32.dll');
@@ -28,8 +28,8 @@ const
  xftnames: array[0..1] of filenamety = ('libXft.so.2','libXft.so');
  icenames: array[0..1] of filenamety = ('libICE.so.6','libICE.so');
  smnames: array[0..1] of filenamety = ('libSM.so.6','libSM.so');
- 
-// sqlite3lib: array[0..1] of filenamety = ('libsqlite3.so.0','libsqlite3.so'); 
+
+// sqlite3lib: array[0..1] of filenamety = ('libsqlite3.so.0','libsqlite3.so');
 // postgreslib: array[0..2] of filenamety = ('libpq.so.5.1','libpq.so.5','libpq.so');
 // mysqllib: array[0..2] of filenamety = ('libmysqlclient.so.16',
 //         'libmysqlclient.so.15','libmysqlclient.so');
@@ -38,7 +38,7 @@ const
 //           'libssl.so');
 // sslutilnames: array[0..4] of filenamety = (
 //           'libcrypto.so.1.0.0','libcrypto.so.0.9.8','libcrypto.so.0.9.7','libcrypto.so.0.9.6',
-//           'libcrypto.so');  
+//           'libcrypto.so');
 // fbembedlib: array[0..2] of filenamety = ('libfbembed.so.2','libfbembed.so.1',
 //                                          'libfbembed.so');
 // fbcgdslib: array[0..3] of filenamety = ('libfbclient.so.2','libfbclient.so.1',

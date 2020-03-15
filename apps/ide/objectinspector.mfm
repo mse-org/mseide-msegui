@@ -105,7 +105,7 @@ object objectinspectorfo: tobjectinspectorfo
     frame.localprops1 = []
     frame.button.color = -2147483646
     frame.buttons.count = 1
-    frame.buttons.items = <    
+    frame.buttons.items = <
       item
         color = -2147483646
       end>
@@ -118,7 +118,7 @@ object objectinspectorfo: tobjectinspectorfo
     onsetvalue = compselectoronsetvalue
     dropdown.options = [deo_selectonly, deo_autodropdown, deo_keydropdown]
     dropdown.cols.count = 1
-    dropdown.cols.items = <    
+    dropdown.cols.items = <
       item
       end>
     onbeforedropdown = compselectorbeforedropdown
@@ -141,36 +141,36 @@ object objectinspectorfo: tobjectinspectorfo
       16777202
     )
     rowfonts.count = 6
-    rowfonts.items = <    
+    rowfonts.items = <
       item
         name = 'stf_default'
         xscale = 1
         localprops = [flp_xscale]
-      end    
+      end
       item
         color = 32768
         name = 'stf_default'
         xscale = 1
         localprops = [flp_color, flp_xscale]
-      end    
+      end
       item
         color = 32768
         name = 'stf_default'
         xscale = 1
         localprops = [flp_color, flp_xscale]
-      end    
+      end
       item
         color = -1610612723
         name = 'stf_default'
         xscale = 1
         localprops = [flp_color, flp_xscale]
-      end    
+      end
       item
         style = [fs_bold]
         name = 'stf_default'
         xscale = 1
         localprops = [flp_style, flp_xscale]
-      end    
+      end
       item
         style = [fs_bold]
         name = 'stf_default'
@@ -178,7 +178,7 @@ object objectinspectorfo: tobjectinspectorfo
         localprops = [flp_style, flp_xscale]
       end>
     datacols.count = 2
-    datacols.items = <    
+    datacols.items = <
       item[props]
         linecolor = -1610612731
         linecolorfix = -1610612733
@@ -193,7 +193,7 @@ object objectinspectorfo: tobjectinspectorfo
         onselectionchanged = selchanged
         widgetname = 'props'
         dataclass = ttreeitemeditlist
-      end    
+      end
       item[values]
         linecolorfix = -1610612733
         width = 148
@@ -248,11 +248,11 @@ object objectinspectorfo: tobjectinspectorfo
       frame.button.width = 15
       frame.button.color = -1879048187
       frame.buttons.count = 2
-      frame.buttons.items = <      
+      frame.buttons.items = <
         item
           width = 15
           color = -1879048187
-        end      
+        end
         item
           width = 15
           color = -1879048187
@@ -280,7 +280,7 @@ object objectinspectorfo: tobjectinspectorfo
       dropdown.options = [deo_autodropdown, deo_keydropdown, deo_cliphint]
       dropdown.dropdownrowcount = 16
       dropdown.cols.count = 1
-      dropdown.cols.items = <      
+      dropdown.cols.items = <
         item
         end>
       onbeforedropdown = valuesbeforedropdown
@@ -332,18 +332,18 @@ object objectinspectorfo: tobjectinspectorfo
   object gridpopup: tpopupmenu
     onupdate = popupupdate
     menu.submenu.count = 3
-    menu.submenu.items = <    
+    menu.submenu.items = <
       item
         caption = 'Collapse tree'
         state = [as_localcaption, as_localonexecute]
         onexecute = collapseexe
-      end    
+      end
       item
         caption = 'Revert to inherited'
         name = 'revert'
         state = [as_localcaption, as_localonexecute]
         onexecute = revertexe
-      end    
+      end
       item
         caption = 'Clear Selection'
         name = 'clearselect'
@@ -356,7 +356,7 @@ object objectinspectorfo: tobjectinspectorfo
   object mainpopup: tpopupmenu
     options = [mo_insertfirst, mo_shortcutright]
     menu.submenu.count = 1
-    menu.submenu.items = <    
+    menu.submenu.items = <
       item
         action = actionsmo.findcompallact
       end>

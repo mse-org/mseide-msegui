@@ -1,5 +1,5 @@
 { MSEide Copyright (c) 1999-2016 by Martin Schreiber
-   
+
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation; either version 2 of the License, or
@@ -40,13 +40,13 @@ uses
 
 type
  sourcepageasynctagty = (spat_showasform,{spat_checkbracket,}spat_showsource);
- 
+
  bookmarkty = record
   row: integer;
   bookmarknum: integer;
  end;
  bookmarkarty = array of bookmarkty;
- 
+
  tsourcepage = class(ttabform)
    grid: twidgetgrid;
    edit: tsyntaxedit;
@@ -58,11 +58,11 @@ type
    procedure sourcefoondestroy(const sender: tobject);
    procedure editoncellevent(const sender: TObject; var info: celleventinfoty);
    procedure editonmodifiedchanged(const sender: tobject; const value: boolean);
-   procedure editontextmouseevent(const sender: tobject; 
+   procedure editontextmouseevent(const sender: tobject;
                                               var info: textmouseeventinfoty);
-   procedure editoneditnotification(const sender: tobject; 
+   procedure editoneditnotification(const sender: tobject;
                                               var info: editnotificationinfoty);
-   procedure gridonrowsdeleted(const sender: tcustomgrid; 
+   procedure gridonrowsdeleted(const sender: tcustomgrid;
                                               const index,count: integer);
    procedure gridonrowsinserted(const sender: tcustomgrid;
                                               const index,count: integer);
@@ -158,7 +158,7 @@ type
                      //arow -1 -> current row, bookmarknum < 1 -> clear
    procedure clearbookmark(const bookmarknum: integer);
    function getbookmarks: bookmarkarty;
-   
+
    property activerow: integer read factiverow write setactiverow;
    property gdb: tgdbmi write setgdb;
    property filename: filenamety read getfilename;
@@ -208,7 +208,7 @@ begin
  if (result = '') and (pos.col > 0) then begin
   dec(pos.col);
   startpos:= edit.wordatpos(pos,result,pascaldelims,nodelimstrings);
- end; 
+ end;
  if result <> '' then begin
   for int1:= pos.col - startpos.col + 1 to length(result) do begin
    if (result[int1] = '.') or (result[int1] = '-') and (result[int1+1] = '>') then begin
@@ -408,7 +408,7 @@ begin
   edit.editpos:= finitialeditpos;
   for int1:= 0 to high(finitialbookmarks) do begin
    with finitialbookmarks[int1] do begin
-    if (row >= 0) and (bookmarknum >= 0) and (row < grid.rowcount) and 
+    if (row >= 0) and (bookmarknum >= 0) and (row < grid.rowcount) and
              (bookmarknum < 10) then begin
      setbookmark(row,bookmarknum);
     end;
@@ -553,7 +553,7 @@ begin
      frame.levelo:= 0;
      frame.framewidth:= 1;
      frame.colorframe:= cl_dkgray;
-     
+
      optionsedit:= optionsedit + [oe_readonly];
      textflags:= [tf_wordbreak,tf_noselect];
      textflagsactive:= [tf_wordbreak];
@@ -612,7 +612,7 @@ begin
  showsourcehint(apos,ar1);
 end;
 
-procedure tsourcepage.editoncellevent(const sender: TObject; 
+procedure tsourcepage.editoncellevent(const sender: TObject;
                                                     var info: celleventinfoty);
 
  procedure checklink;
@@ -636,12 +636,12 @@ var
  shiftstate1: shiftstatesty;
  bo1: boolean;
  cellpos1: cellpositionty;
- 
+
 begin
 
-  if (iscellclick(info,[ccr_nokeyreturn,ccr_dblclick])) and 
+  if (iscellclick(info,[ccr_nokeyreturn,ccr_dblclick])) and
      (dataicon[info.cell.row] and integer($80000000) <> 0) and
-    (info.mouseeventinfopo^.shiftstate*[ss_double,ss_shift,ss_left] = 
+    (info.mouseeventinfopo^.shiftstate*[ss_double,ss_shift,ss_left] =
     [ss_double,ss_shift,ss_left]) then  begin
       include(info.mouseeventinfopo^.eventstate,es_processed);
       breakpointsfo.showbreakpoint(filepath,info.cell.row + 1,true);
@@ -658,7 +658,7 @@ begin
    with info.keyeventinfopo^ do begin
     shiftstate1:= shiftstate * shiftstatesmask;
     if not (es_processed in eventstate) then begin
-     if ((shiftstate1 = [ss_shift,ss_ctrl]) or 
+     if ((shiftstate1 = [ss_shift,ss_ctrl]) or
                          (shiftstate1 = [ss_ctrl])) then begin
       include(eventstate,es_processed);
       pos1.pos:= edit.editpos;
@@ -777,11 +777,11 @@ begin
  if (arow >= 0) and (arow < grid.rowcount) then begin
   case astate of
    bkpts_none: dataicon[arow]:= dataicon[arow] and not integer($00000007);
-   bkpts_normal: dataicon[arow]:= dataicon[arow] and not integer($00000007) or 
+   bkpts_normal: dataicon[arow]:= dataicon[arow] and not integer($00000007) or
                                      integer($80000001);
-   bkpts_disabled: dataicon[arow]:= dataicon[arow] and not integer($00000007) or 
+   bkpts_disabled: dataicon[arow]:= dataicon[arow] and not integer($00000007) or
                                      integer($80000002);
-   bkpts_error: dataicon[arow]:= dataicon[arow] and not integer($00000007) or 
+   bkpts_error: dataicon[arow]:= dataicon[arow] and not integer($00000007) or
                                      integer($80000005);
   end;
  end;
@@ -808,7 +808,7 @@ begin
   end
   else begin
    breakpointsfo.deletebreakpoint(bpinfo);
-   setbreakpointstate(bkpts_none,grid.row); 
+   setbreakpointstate(bkpts_none,grid.row);
          //if breakpointinfo is not synchronized
   end;
  end;
@@ -877,7 +877,7 @@ function tsourcepage.checksave(noconfirm,multiple: boolean): modalresultty;
 begin
  result:= mr_none;
  if not sourcefo.allsaved then begin
-  if edit.modified and (noconfirm or 
+  if edit.modified and (noconfirm or
               confirmsavechangedfile(edit.filename,result,multiple)) then begin
    save('');
   end;
@@ -916,7 +916,7 @@ begin
   try
    po1:= edit.datalist.datapo;
    for i1:= 0 to edit.datalist.count - 1 do begin
-    trimright1(po1^.text); 
+    trimright1(po1^.text);
     inc(po1);
    end;
   finally
@@ -994,8 +994,8 @@ begin
    end;
    if not edit.find(text,options,findpos,pt1,true,findshowpos) then begin
     if (edit.linecount = 0) or
-          isback and (findpos.row = edit.linecount-1) and 
-                  (findpos.col = length(edit.gridvalue[edit.linecount-1])) or 
+          isback and (findpos.row = edit.linecount-1) and
+                  (findpos.col = length(edit.gridvalue[edit.linecount-1])) or
              not isback and (findpos.row = 0) and (findpos.col = 0) then begin
      textnotfound(info);
     end
@@ -1063,13 +1063,13 @@ procedure tsourcepage.replace(all: boolean);
    beginupdate;
   end;
  end;
- 
+
 var
  pos1: gridcoordty;
  res1: modalresultty;
  rect1: rectty;
  updatedisabled: boolean;
- 
+
 begin
  with projectoptions.findreplaceinfo,find do begin
   updatedisabled:= false;
@@ -1123,7 +1123,7 @@ begin
        exit;
       end;
      end;
-    until not all or 
+    until not all or
               not edit.find(text,options,ffindpos,pos1,true,findshowpos) or
               updatedisabled and checkescape;
    end;
@@ -1254,7 +1254,7 @@ begin
      end;
     end
     else begin
-       if  (edit.isdblclicked(info.mouseeventinfopo^)) 
+       if  (edit.isdblclicked(info.mouseeventinfopo^))
      then begin
       if ss_triple in info.mouseeventinfopo^.shiftstate then begin
        edit.setselection(makegridcoord(0,edit.row),
@@ -1265,8 +1265,8 @@ begin
       end;
       copytoclipboard(edit.selectedtext,cbb_primary);
       include(info.mouseeventinfopo^.eventstate,es_processed);
-     end; 
-    end; 
+     end;
+    end;
    end;
   end;
  end;
@@ -1443,7 +1443,7 @@ begin
  sourcefo.hidesourcehint;
 end;
 
-procedure tsourcepage.gridoncellevent(const sender: TObject; 
+procedure tsourcepage.gridoncellevent(const sender: TObject;
              var info: celleventinfoty);
 //var
 // shiftstate1: shiftstatesty;
@@ -1452,19 +1452,19 @@ begin
  if (info.eventkind = cek_keydown) then begin
   with info.keyeventinfopo^ do begin
    shiftstate1:= shiftstate * shiftstatesmask;
-   if (shiftstate1 = [ss_ctrl]) and 
+   if (shiftstate1 = [ss_ctrl]) and
         (key >= key_0) and (key <= key_9) then begin
-    if sourcefo.findbookmark(ord(key) - ord(key_0)) then begin 
+    if sourcefo.findbookmark(ord(key) - ord(key_0)) then begin
      include(eventstate,es_processed);
-    end;    
+    end;
    end
    else begin
-    if (shiftstate1 = [ss_ctrl,ss_shift]) and 
+    if (shiftstate1 = [ss_ctrl,ss_shift]) and
          (keynomod >= key_0) and (keynomod <= key_9) then begin
      sourcefo.setbookmark(self,info.cell.row,ord(keynomod) - ord(key_0));
      include(eventstate,es_processed);
     end;
-   end;     
+   end;
   end;
  end;
 }
@@ -1513,7 +1513,7 @@ begin
    dataicon[arow]:= dataicon[arow] and not bmbitmask;
    removebookmark(bookmarknum);
   end
-  else begin   
+  else begin
    dataicon[arow]:= replacebits(longword(1 shl (bookmarknum + bmbitshift)),
                                 longword(dataicon[arow]),longword(bmbitmask));
    setlength(finitialbookmarks,high(finitialbookmarks)+2);
@@ -1573,7 +1573,7 @@ procedure tsourcepage.editonkeydown(const sender: twidget;
                                                    var info: keyeventinfoty);
 begin
  with info,tsyntaxedit(sender).editor,projectoptions do begin
-  if e.spacetabs and (e.tabstops > 0) and (shiftstate = []) and 
+  if e.spacetabs and (e.tabstops > 0) and (shiftstate = []) and
                                              (key = key_tab) then begin
    chars:= charstring(msechar(' '),
                         (curindex div e.tabstops + 1) * e.tabstops - curindex);
@@ -1602,7 +1602,7 @@ begin
   finally
    dec(fbracketsetting);
   end;
- end;  
+ end;
 end;
 
 procedure tsourcepage.checkbrackets;
@@ -1753,7 +1753,7 @@ end;
 
 function tsourcepage.cancomment(): boolean;
 begin
- result:= edit.hasselection and (edit.selectstart.col = 0) and 
+ result:= edit.hasselection and (edit.selectstart.col = 0) and
                                                   (edit.selectend.col = 0);
 end;
 
@@ -1768,7 +1768,7 @@ begin
   po1:= edit.datalist.getitempo(start);
   pe:= po1 + stop - start;
   while po1 <= pe do begin
-   if (length(po1^.text) < 2) or (po1^.text[1] <> '/') or 
+   if (length(po1^.text) < 2) or (po1^.text[1] <> '/') or
                                             (po1^.text[2] <> '/') then begin
     result:= false;
     break;
@@ -1799,7 +1799,7 @@ begin
     if mstr1[i1] = #0 then begin
      break;
     end;
-    insert('//',mstr1,i1);    
+    insert('//',mstr1,i1);
    end;
    inc(i1);
   end;

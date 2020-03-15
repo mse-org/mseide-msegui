@@ -24,7 +24,7 @@ type
 
  edynload = class(ecrashstatfile)
  end;
-  
+
 procedure initializelibinfo(var info: dynlibinfoty);
 procedure finalizelibinfo(var info: dynlibinfoty);
 
@@ -53,7 +53,7 @@ procedure dynloadunlock;
 function loadlib(const libnames: array of filenamety; out libname: filenamety;
                         const errormessage: msestring = '';
                   const noexception: boolean = false): tlibhandle;
-              
+
 function getprocaddresses(const lib: tlibhandle;
                        const procedures: array of funcinfoty;
                        const noexception: boolean = false;
@@ -72,14 +72,14 @@ function getprocaddresses(const libinfo: dynlibinfoty;
                const anames: array of string;
                const adest: array of ppointer;
                const noexception: boolean = false): boolean; overload;
-function getprocaddresses(const libnames: array of filenamety; 
-                             const anames: array of string; 
+function getprocaddresses(const libnames: array of filenamety;
+                             const anames: array of string;
                              const adest: array of ppointer;
                              const noexception: boolean = false): tlibhandle; overload;
-function checkprocaddresses(const libnames: array of filenamety; 
-                             const anames: array of string; 
+function checkprocaddresses(const libnames: array of filenamety;
+                             const anames: array of string;
                              const adest: array of ppointer): boolean;
-function checkprocaddresses(const libnames: array of filenamety; 
+function checkprocaddresses(const libnames: array of filenamety;
                              const procedures: array of funcinfoty): boolean;
 function quotelibnames(const libnames: array of filenamety): msestring;
 
@@ -119,7 +119,7 @@ begin
  end;
 end;
 
-function getprocaddresses(const lib: tlibhandle; const anames: array of string; 
+function getprocaddresses(const lib: tlibhandle; const anames: array of string;
              const adest: array of ppointer;
              const noexception: boolean = false;
                                 const libname: msestring = ''): boolean;
@@ -181,7 +181,7 @@ begin
  end;
 end;
 
-function loadlib(const libnames: array of filenamety; out libname: filenamety; 
+function loadlib(const libnames: array of filenamety; out libname: filenamety;
                  const errormessage: msestring = '';
                   const noexception: boolean = false): tlibhandle;
 var
@@ -234,8 +234,8 @@ begin
  getprocaddresses(result,anames,adest,noexception);
 end;
 
-function checkprocaddresses(const libnames: array of filenamety; 
-                             const anames: array of string; 
+function checkprocaddresses(const libnames: array of filenamety;
+                             const anames: array of string;
                              const adest: array of ppointer): boolean;
 var
  int1: integer;
@@ -258,7 +258,7 @@ begin
  end;
 end;
 
-function checkprocaddresses(const libnames: array of filenamety; 
+function checkprocaddresses(const libnames: array of filenamety;
                              const procedures: array of funcinfoty): boolean;
 var
  int1: integer;
@@ -282,13 +282,13 @@ begin
 end;
 
 function quotelibnames(const libnames: array of filenamety): msestring;
-var 
+var
  int1: integer;
 begin
  result:= '';
  for int1:= 0 to high(libnames) do begin
   result:= result+'"'+libnames[int1]+'",';
- end;  
+ end;
  if length(result) > 0 then begin
   setlength(result,length(result)-1);
  end;
@@ -297,7 +297,7 @@ end;
 {$ifndef FPC}
 const
  nilhandle = 0;
- 
+
 Function UnloadLibrary(Lib : TLibHandle) : Boolean;
 begin
  result:= freelibrary(lib);
@@ -455,7 +455,7 @@ begin
    end;
   finally
    sys_mutexunlock(lock);
-  end;  
+  end;
  end;
 end;
 

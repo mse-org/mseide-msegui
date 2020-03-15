@@ -25,7 +25,7 @@ function unixtodatetime(const value: longword): tdatetime;
 implementation
 uses
  msesysintf1,msesysintf;
- 
+
 function nowutc: tdatetime;
 begin
  result:= sys_getutctime;

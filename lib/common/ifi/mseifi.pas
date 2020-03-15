@@ -27,9 +27,9 @@ uses
 //todo: use icommclient instead of oninputavailable
 
 type
- 
+
  sequencety = longword;
- 
+
  ifireckindty = (ik_none,ik_data,ik_itemheader,ik_actionfired,ik_propertychanged,
                  ik_widgetcommand,ik_widgetproperties,ik_requestmodule,
                  ik_moduledata,
@@ -43,9 +43,9 @@ const
                  ik_widgetproperties,ik_requestmodule,ik_moduledata,
                  ik_modulecommand];
  ifiasynckinds = [ik_moduledata];
-// mainloopifikinds = [ik_moduledata]; 
- 
-type 
+// mainloopifikinds = [ik_moduledata];
+
+type
  ifinamety = array[0..0] of char; //null terminated
  pifinamety = ^ifinamety;
 
@@ -57,7 +57,7 @@ type
                   idk_rowstaterowheight,
                   idk_selection);
  pifidatakindty = ^ifidatakindty;
-  
+
  datarecty = record //dummy
  end;
 
@@ -66,7 +66,7 @@ type
   int: integer;
  end;
  pifirealintty = ^ifirealintty;
- 
+
  ifimsestringintty = record
   int: integer;
   mstr: ifinamety;
@@ -79,7 +79,7 @@ type
   select: boolean;
  end;
  pselectdataty = ^selectdataty;
-   
+
  ifibytesty = record
   length: integer;
   data: datarecty;
@@ -88,14 +88,14 @@ type
 
  ifidataheaderty = record
   kind: ifidatakindty;
- end;   
+ end;
  ifidataty = record
   header: ifidataheaderty;
   data: datarecty; //variable length
  end;
  pifidataty = ^ifidataty;
- 
- itemheaderty = record  
+
+ itemheaderty = record
   tag: integer;
   name: ifinamety;
  end;
@@ -103,14 +103,14 @@ type
 
  modulecommanddataty = record
   command: ificommandcodety;
- end;  
+ end;
  pmodulecommanddataty = ^modulecommanddataty;
  modulecommandty = record
   header: itemheaderty;
   data: modulecommanddataty;
  end;
  pmodulecommandty = ^modulecommandty;
- 
+
  actionfiredty = record
   header: itemheaderty;
  end;
@@ -139,14 +139,14 @@ type
   header: itemheaderty;
   moduleclassname: ifinamety;
  end;
- 
+
  moduledatadataty = record
 //  sequence: sequencety;
   parentclass: ifinamety;
   data: ifibytesty;
  end;
  pmoduledatadataty = ^moduledatadataty;
- 
+
  moduledataty = record
   header: itemheaderty;
   data: moduledatadataty;
@@ -154,30 +154,30 @@ type
 
  requestfielddefsty = record
   header: itemheaderty;
- end;   
+ end;
  fielddefsdatadataty = record
   data: datarecty; //dummy
  end;
  pfielddefsdatadataty = ^fielddefsdatadataty;
- 
+
  fielddefsdataty = record
   header: itemheaderty;
   data: fielddefsdatadataty;
  end;
 
  postresultcodety = (pc_none,pc_ok,pc_error);
- 
+
  postresultdataty = record
   code: postresultcodety;
-  message: ifinamety; 
+  message: ifinamety;
  end;
  ppostresultdataty = ^postresultdataty;
- 
+
  postresultty = record
   header: itemheaderty;
   data: postresultdataty;
  end;
- 
+
  fielddataheaderty = record
   index: integer;
  end;
@@ -189,19 +189,19 @@ type
 
  requestopenty = record
   header: itemheaderty;
- end;   
- fieldreckindty = (frk_edit,frk_insert,frk_delete);  
+ end;
+ fieldreckindty = (frk_edit,frk_insert,frk_delete);
  fieldrecheaderty = record
   kind: fieldreckindty;
   rowindex: integer; //null based
-  count: integer; 
+  count: integer;
  end;
  fieldrecdataty = record
   header: fieldrecheaderty;
   data: datarecty; //dummy, array[count] of fielddataty
  end;
  pfieldrecdataty = ^fieldrecdataty;
- 
+
  fieldrecty = record
   header: itemheaderty;
   data: fieldrecdataty;
@@ -220,7 +220,7 @@ type
  selectiondataty = record
   data: ifidataty; //idk_selection
  end;
-  
+
  colitemheaderty = record
   row: integer;
   name: ifinamety;
@@ -230,7 +230,7 @@ type
   data: ifidataty;
  end;
  pcolitemdataty = ^colitemdataty;
- 
+
  coldataty = record
   kind: listdatatypety;
   name: ifinamety;
@@ -264,21 +264,21 @@ type
 
  recdataheaderty = record
   count: integer; //recordcount
- end;  
+ end;
  recdataty = record
   header: recdataheaderty;
-  data: datarecty; //dummy, array[count] of 
+  data: datarecty; //dummy, array[count] of
                             //array[fielddef count] of ifidataty
  end;
  precdataty = ^recdataty;
- 
+
  dsdataty = record
   header: itemheaderty;
   fileddefs: fielddefsdatadataty;
   recdata: recdataty;
  end;
- 
-type 
+
+type
  ifirecstatety = (irs_async);
  ifirecstatesty = set of ifirecstatety;
  ifiheaderty = record
@@ -289,7 +289,7 @@ type
   state: ifirecstatesty;
  end;
  pifiheaderty = ^ifiheaderty;
- 
+
  ifirecty = record
   header: ifiheaderty;
   case ifireckindty of
@@ -337,7 +337,7 @@ type
    );
  end;
  pifirecty = ^ifirecty;
-  
+
  twaitingclient = class(tintegeravlnode)
   private
    fsem: semty;
@@ -350,10 +350,10 @@ type
 
  tiosynchronizer = class;
  stringdataprocty = procedure(var adata: string) of object;
-  
+
  tiosynchronizer = class(teventthread)
   private
-   fwaitingclients: tintegeravltree; //todo: use hashlist  
+   fwaitingclients: tintegeravltree; //todo: use hashlist
    fondatareceived: stringdataprocty;
   protected
    procedure datareceived(const adata: string);
@@ -364,7 +364,7 @@ type
    destructor destroy; override;
    procedure answerreceived(const asequence: sequencety);
    function preparewait(const asequence: sequencety): twaitingclient;
-   function waitforanswer(const aclient: twaitingclient; 
+   function waitforanswer(const aclient: twaitingclient;
                    const waitus: integer): boolean; //false on timeout
  end;
 
@@ -375,7 +375,7 @@ type
  iochannelstatety = (iocs_connecting,iocs_disconnecting,
                      iocs_localsetting);
  iochannelstatesty = set of iochannelstatety;
-   
+
  tcustomiochannel = class(tactcomponent)
   private
    frxdata: string;
@@ -414,7 +414,7 @@ type
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
    function checkconnection: boolean;
-   procedure senddata(const adata: ansistring);   
+   procedure senddata(const adata: ansistring);
    function sequence: sequencety;
    procedure asyncrx; //posts current rxdata to application queue
    property synchronizer: tiosynchronizer read fsynchronizer;
@@ -423,19 +423,19 @@ type
    property localconn: tcustomiochannel read flocalconn write setlocalconn;
   published
    property optionsio: optionsiochty read foptionsio write foptionsio default [];
-   property onbeforeconnect: iochanneleventty read fonbeforeconnect 
+   property onbeforeconnect: iochanneleventty read fonbeforeconnect
                                               write fonbeforeconnect;
-   property onafterconnect: iochanneleventty read fonafterconnect 
+   property onafterconnect: iochanneleventty read fonafterconnect
                                               write fonafterconnect;
-   property onbeforedisconnect: iochanneleventty read fonbeforedisconnect 
+   property onbeforedisconnect: iochanneleventty read fonbeforedisconnect
                                               write fonbeforedisconnect;
-   property onafterdisconnect: iochanneleventty read fonafterdisconnect 
+   property onafterdisconnect: iochanneleventty read fonafterdisconnect
                                               write fonafterdisconnect;
  end;
 
  pipeiostatety = (pis_rxstarted);
  pipeiostatesty = set of pipeiostatety;
- 
+
  tstuffediochannel = class(tcustomiochannel)
   private
    fbuffer: string;
@@ -448,7 +448,7 @@ type
    procedure addata(const adata: string);
    procedure receivelocaldata(const adata: string); override;
  end;
-  
+
  tcustompipeiochannel = class(tstuffediochannel)
   private
    frx: tpipereader;
@@ -457,7 +457,7 @@ type
    fprochandle: integer;
   protected
    procedure internalconnect; override;
-   procedure internaldisconnect; override;   
+   procedure internaldisconnect; override;
    function commio: boolean; override;
    procedure localsenddata(const adata: ansistring); override;
    procedure internalsenddata(const adata: ansistring); override;
@@ -490,7 +490,7 @@ type
   public
    constructor create(aowner: tcomponent); override;
   published
-   property active;   
+   property active;
    property activator;
    property cryptoio: tcryptoio read fcryptoio write setcryptoio;
    property cryptoiokindt: cryptoiokindty read fcryptoioinfo.kind
@@ -500,20 +500,20 @@ type
  tifisocketclient = class(tcustomsocketclient)
   published
    property pipes;
-   property cryptoio;   
+   property cryptoio;
 
    property kind;
    property url;
    property port;
  end;
- 
+
  tsocketclientiochannel = class(tstuffediochannel)
   private
    fsocket: tifisocketclient;
    procedure setsocket(const avalue: tifisocketclient);
   protected
    procedure internalconnect; override;
-   procedure internaldisconnect; override;   
+   procedure internaldisconnect; override;
    function commio: boolean; override;
    procedure localsenddata(const adata: ansistring); override;
    procedure internalsenddata(const adata: ansistring); override;
@@ -535,7 +535,7 @@ type
    funlinking: integer;
   protected
    procedure internalconnect; override;
-   procedure internaldisconnect; override;   
+   procedure internaldisconnect; override;
    function commio: boolean; override;
    procedure localsenddata(const adata: ansistring); override;
    procedure internalsenddata(const adata: ansistring); override;
@@ -553,7 +553,7 @@ type
   published
    property localconn;
  end;
- 
+
  tifiiolinkcomponent = class(tmsecomponent)
   private
    procedure setchannel(const avalue: tcustomiochannel);
@@ -562,11 +562,11 @@ type
   published
    property channel: tcustomiochannel read fchannel write setchannel;
  end;
- 
-procedure initifirec(out arec: string; const akind: ifireckindty; 
+
+procedure initifirec(out arec: string; const akind: ifireckindty;
       const asequence: sequencety; const datalength: integer; out datapo: pchar);
-procedure inititemheader(const atag: integer; const aname: string; 
-       out arec: string; const akind: ifireckindty; 
+procedure inititemheader(const atag: integer; const aname: string;
+       out arec: string; const akind: ifireckindty;
         const asequence: sequencety; const datasize: integer; out datapo: pchar);
 function ifinametostring(const source: pifinamety; out dest: string): integer;
 function stringtoifiname(const source: string; const dest: pifinamety): integer;
@@ -580,29 +580,29 @@ function encodeifidata(const avalue: int64;
                        const headersize: integer = 0): string; overload;
 function encodeifidata(const avalue: currency;
                        const headersize: integer = 0): string; overload;
-function encodeifidata(const avalue: real; 
+function encodeifidata(const avalue: real;
                        const headersize: integer = 0): string; overload;
 {$ifndef FPC}
-function encodeifidatareal(const avalue: real; 
+function encodeifidatareal(const avalue: real;
                        const headersize: integer = 0): string; overload;
 {$endif}
-function encodeifidata(const avalue: realintty; 
+function encodeifidata(const avalue: realintty;
                        const headersize: integer = 0): string; overload;
-function encodeifidata(const avalue: msestring; 
+function encodeifidata(const avalue: msestring;
                        const headersize: integer = 0): string; overload;
-function encodeifidata(const avalue: msestringintty; 
+function encodeifidata(const avalue: msestringintty;
                        const headersize: integer = 0): string; overload;
-function encodeifidata(const avalue: ansistring; 
+function encodeifidata(const avalue: ansistring;
                        const headersize: integer = 0): string; overload;
 function encodeifidata(const alist: tdatalist; const aindex: integer;
                        const headersize: integer = 0): string; overload;
-function encodeifidata(const avalue: rowstatety; 
+function encodeifidata(const avalue: rowstatety;
                        const headersize: integer = 0): string; overload;
-function encodeifidata(const avalue: rowstatecolmergety; 
+function encodeifidata(const avalue: rowstatecolmergety;
                        const headersize: integer = 0): string; overload;
-function encodeifidata(const avalue: rowstaterowheightty; 
+function encodeifidata(const avalue: rowstaterowheightty;
                        const headersize: integer = 0): string; overload;
-function encodeifidata(const avalue: selectdataty; 
+function encodeifidata(const avalue: selectdataty;
                        const headersize: integer = 0): string; overload;
 
 function skipifidata(const source: pifidataty): integer;
@@ -642,7 +642,7 @@ function decodeifidata(const source: pifidataty; out dest: rowstaterowheightty):
 function decodeifidata(const source: pifidataty; out dest: selectdataty): integer;
                                                         overload;
 
-procedure addifiintegervalue(var adata: ansistring; var adatapo: pchar; 
+procedure addifiintegervalue(var adata: ansistring; var adatapo: pchar;
                                      const avalue: integer);
 function readifivariant(const adata: pifirecty; var adatapo: pchar): variant;
 function setifibytes(const source: pointer; const size: integer;
@@ -681,7 +681,7 @@ uses
 type
  tsocketreader1 = class(tsocketreader);
  tsocketwriter1 = class(tsocketwriter);
- 
+
 const
  headersizes: array[ifireckindty] of integer = (
   sizeof(ifiheaderty),                            //ik_none
@@ -741,12 +741,12 @@ begin
  inc(result,sizeof(ifidataheaderty));
 end;
 
-function encodeifinull(const headersize: integer = 0): string;               
+function encodeifinull(const headersize: integer = 0): string;
 begin
  initdataheader(headersize,idk_null,0,result)
 end;
 
-function encodeifidata(const avalue: boolean; 
+function encodeifidata(const avalue: boolean;
                        const headersize: integer = 0): string; overload;
 var
  int1: integer;
@@ -758,14 +758,14 @@ begin
  pinteger(initdataheader(headersize,idk_integer,0,result))^:= int1;
 end;
 
-function encodeifidata(const avalue: integer; 
+function encodeifidata(const avalue: integer;
                        const headersize: integer = 0): string; overload;
 begin
  pinteger(initdataheader(headersize,idk_integer,0,result))^:= avalue;
 // result:= encodeifidata(int64(avalue),headersize);
 end;
 
-function encodeifidata(const avalue: int64; 
+function encodeifidata(const avalue: int64;
                        const headersize: integer = 0): string; overload;
 begin
  pint64(initdataheader(headersize,idk_int64,0,result))^:= avalue;
@@ -800,7 +800,7 @@ begin
  end;
 end;
 
-function encodeifidata(const avalue: msestring; 
+function encodeifidata(const avalue: msestring;
                        const headersize: integer = 0): string; overload;
 var
  str1: string;
@@ -810,7 +810,7 @@ begin
       initdataheader(headersize,idk_msestring,length(str1),result)));
 end;
 
-function encodeifidata(const avalue: msestringintty; 
+function encodeifidata(const avalue: msestringintty;
                        const headersize: integer = 0): string; overload;
 var
  str1: string;
@@ -823,11 +823,11 @@ begin
  stringtoifiname(str1,@po1^.mstr);
 end;
 
-function encodeifidata(const avalue: ansistring; 
+function encodeifidata(const avalue: ansistring;
                        const headersize: integer = 0): string; overload;
 begin
  setifibytes(avalue,pifibytesty(
-        initdataheader(headersize,idk_bytes,length(avalue),result))); 
+        initdataheader(headersize,idk_bytes,length(avalue),result)));
 end;
 
 function encodeifidata(const alist: tdatalist; const aindex: integer;
@@ -860,28 +860,28 @@ begin
  end;
 end;
 
-function encodeifidata(const avalue: rowstatety; 
+function encodeifidata(const avalue: rowstatety;
                        const headersize: integer = 0): string; overload;
 begin
  prowstatety(initdataheader(headersize,
                                  idk_rowstate,0,result))^:= avalue;
 end;
 
-function encodeifidata(const avalue: rowstatecolmergety; 
+function encodeifidata(const avalue: rowstatecolmergety;
                        const headersize: integer = 0): string; overload;
 begin
  prowstatecolmergety(initdataheader(headersize,
                                  idk_rowstatecolmerge,0,result))^:= avalue;
 end;
 
-function encodeifidata(const avalue: rowstaterowheightty; 
+function encodeifidata(const avalue: rowstaterowheightty;
                        const headersize: integer = 0): string; overload;
 begin
  prowstaterowheightty(initdataheader(headersize,
                                  idk_rowstatecolmerge,0,result))^:= avalue;
 end;
 
-function encodeifidata(const avalue: selectdataty; 
+function encodeifidata(const avalue: selectdataty;
                        const headersize: integer = 0): string; overload;
 begin
  pselectdataty(initdataheader(headersize,idk_selection,0,result))^:= avalue;
@@ -1032,7 +1032,7 @@ begin
  result:= datarecsizes[idk_currency];
 end;
 
-function decodeifidata(const source: pifidataty; 
+function decodeifidata(const source: pifidataty;
                                  out dest: msestringintty): integer; overload;
 var
  str1: string;
@@ -1060,7 +1060,7 @@ begin
  case source^.header.kind of
   idk_null: begin
    dest:= null;
-   result:= sizeof(ifidataty);   
+   result:= sizeof(ifidataty);
   end;
   idk_integer: begin
    result:= decodeifidata(source,integer1);
@@ -1139,7 +1139,7 @@ begin
        result:= decodeifidata(source,mstr1);
        tmsestringdatalist(list)[aindex]:= mstr1;
       end;
-     end;    
+     end;
      idk_real: begin
       if list.datatype in [dl_real,dl_realsum] then begin
        result:= decodeifidata(source,rea1);
@@ -1180,15 +1180,15 @@ end;
 
 function decodeifidata(const source: pifidataty; out dest: rowstatety): integer;
 begin
- if not (source^.header.kind in 
+ if not (source^.header.kind in
         [idk_rowstate,idk_rowstatecolmerge,idk_rowstaterowheight]) then begin
   datakinderror;
  end;
  dest:= prowstatety(@source^.data)^;
  result:= datarecsizes[source^.header.kind];
-end;                                                       
-                        
-function decodeifidata(const source: pifidataty; 
+end;
+
+function decodeifidata(const source: pifidataty;
                                     out dest: rowstatecolmergety): integer;
 begin
  case source^.header.kind of
@@ -1204,9 +1204,9 @@ begin
   end;
  end;
  result:= datarecsizes[source^.header.kind];
-end;                                                       
-                        
-function decodeifidata(const source: pifidataty; 
+end;
+
+function decodeifidata(const source: pifidataty;
                                    out dest: rowstaterowheightty): integer;
 begin
  case source^.header.kind of
@@ -1226,8 +1226,8 @@ begin
   end;
  end;
  result:= datarecsizes[source^.header.kind];
-end;                                                       
-                        
+end;
+
 function decodeifidata(const source: pifidataty; out dest: selectdataty): integer;
 begin
  if source^.header.kind <> idk_selection then begin
@@ -1235,13 +1235,13 @@ begin
  end;
  dest:= pselectdataty(@source^.data)^;
  result:= datarecsizes[idk_selection];
-end;                                                       
-                        
+end;
+
 {
 function decodecolitemdata(const source: pcolitemdataty;
                                  const alist: tdatalist): integer;
 begin
- result:= sizeof(colitemheaderty) + 
+ result:= sizeof(colitemheaderty) +
        decodeifidata(@source^.data,alist,source^.header.row);
 end;
 }
@@ -1294,11 +1294,11 @@ begin
  end;
 end;
 }
-procedure inititemheader(const atag: integer; const aname: string; 
+procedure inititemheader(const atag: integer; const aname: string;
        out arec: string; const akind: ifireckindty;  const asequence: sequencety;
        const datasize: integer; out datapo: pchar);
 var
- po1: pchar; 
+ po1: pchar;
 begin
  initifirec(arec,akind,asequence,datasize+length(aname),po1);
  with pitemheaderty(po1)^ do begin
@@ -1472,7 +1472,7 @@ begin
  if canevent(tmethod(fonafterdisconnect)) then begin
   fonafterdisconnect(self);
  end;
- if (oic_releaseondisconnect in foptionsio) and 
+ if (oic_releaseondisconnect in foptionsio) and
   not (csdesigning in componentstate) and (owner is tactcomponent) then begin
   tactcomponent(owner).release;
  end;
@@ -1547,7 +1547,7 @@ begin
    end;
    if flocalconn <> nil then begin
     flocalconn.localconn:= nil;
-   end;    
+   end;
    flocalconn:= avalue;
    if avalue <> nil then begin
     avalue.localconn:= self;
@@ -1563,7 +1563,7 @@ end;
 procedure tstuffediochannel.resetrxbuffer;
 begin
  fbuffer:= '';
- exclude(fpipestate,pis_rxstarted); 
+ exclude(fpipestate,pis_rxstarted);
  frxcheckedindex:= 0;
 end;
 
@@ -1705,12 +1705,12 @@ begin
   int1:= fprochandle;
   fprochandle:= invalidprochandle;
   killprocess(int1);
- end; 
+ end;
 end;
 
 function tcustompipeiochannel.commio: boolean;
 begin
- result:= inherited commio or 
+ result:= inherited commio or
                 ((fserverapp = '') or (fprochandle <> invalidprochandle))
                      and frx.active;
 end;
@@ -1742,7 +1742,7 @@ begin
  end
  else begin
   inherited;
- end; 
+ end;
 end;
 
 { tpipeifichannel }
@@ -1835,7 +1835,7 @@ begin
    except
     application.handleexception(self);
    end;
-   application.unlock;   
+   application.unlock;
   end;
  end;
 end;
@@ -1961,7 +1961,7 @@ begin
  setlinkedvar(apipes,tlinkedpersistent(fpipes));
  fpipes.onbeforedisconnect:= {$ifdef FPC}@{$endif}dobeforedisconnect;
  fpipes.rx.oninputavailable:= {$ifdef FPC}@{$endif}doinputavailable;
- doafterconnect; 
+ doafterconnect;
 end;
 
 procedure tcustomsocketserveriochannel.unlink;

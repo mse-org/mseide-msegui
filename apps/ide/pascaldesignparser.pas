@@ -1,5 +1,5 @@
 { MSEide Copyright (c) 1999-2018 by Martin Schreiber
-   
+
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation; either version 2 of the License, or
@@ -55,7 +55,7 @@ type
                const afilelist: tmseindexednamelist;
                const getincludefile: getincludefileeventty;
                 const ainterfaceonly: boolean); overload;
-    constructor create(const afilelist: tmseindexednamelist; 
+    constructor create(const afilelist: tmseindexednamelist;
                  const atext: string); overload;
     procedure parse; override;
     function dogetincludefile(const afilename: filenamety;
@@ -64,7 +64,7 @@ type
                    procedureinfopo: pprocedureinfoty): boolean;
   end;
 
-function findclassinfobyinstance(const ainstance: tmsecomponent; 
+function findclassinfobyinstance(const ainstance: tmsecomponent;
                                  const infopo: punitinfoty): pclassinfoty;
 function isemptysourcepos(const apos: sourceposty): boolean;
 function isinrowrange(const apos,startpos,endpos: sourceposty): boolean;
@@ -77,7 +77,7 @@ uses
 type
  tdeflist1 = class(tdeflist);
  tusesinfolist1 = class(tusesinfolist);
- 
+
 procedure parsepascaldef(const adef: pdefinfoty; out atext: string;
                                                            out scope: tdeflist);
 var
@@ -145,7 +145,7 @@ var
    until eof or testident(ord(pid_end));
   end;
  end;
- 
+
  procedure parsetypedef;
  var
   ident1: pascalidentty;
@@ -222,7 +222,7 @@ begin
      end;
      if checkoperator(':') then begin
       doaddidents;
-     end;       
+     end;
     end
     else begin
 //     ident1:= getident;
@@ -243,8 +243,8 @@ begin
         end;
        end;
        syk_classdef: begin
-        if checkoperator('=') and 
-               (checkident([ord(pid_class),ord(pid_object)])  >= 0) and 
+        if checkoperator('=') and
+               (checkident([ord(pid_class),ord(pid_object)])  >= 0) and
                                                checkoperator('(') then begin
          scope.addidents(parser,',','.');
 //         doaddidents;
@@ -308,7 +308,7 @@ begin
  ongetincludefile:= getincludefile;
 end;
 
-constructor tpascaldesignparser.create(const afilelist: tmseindexednamelist; 
+constructor tpascaldesignparser.create(const afilelist: tmseindexednamelist;
                  const atext: string);
 begin
  fnoautoparse:= true;
@@ -603,7 +603,7 @@ begin
   else begin
    result:= false;
   end;
- end;   
+ end;
 {
  case atoken of
   pid_procedure,pid_method: begin
@@ -683,7 +683,7 @@ var
 begin
  ar1:= nil; //compiler warning
  token1:= acttoken;
- result:= getorignamenoident(value) and checkoperator('=') and 
+ result:= getorignamenoident(value) and checkoperator('=') and
                   (checkident([integer(pid_class),integer(pid_object)]) >= 0);
  if result then begin
   if checkoperator(';') then begin
@@ -738,7 +738,7 @@ begin
          end;
         end
         else begin
-         if not isemptysourcepos(privatestart) and 
+         if not isemptysourcepos(privatestart) and
                             isemptysourcepos(privateend) then begin
           privateend:= lasttokenpos;
           if isemptysourcepos(privatefieldend) then begin
@@ -752,8 +752,8 @@ begin
        end;
        pid_class,pid_procedure,pid_method,pid_function,
                  pid_constructor,pid_destructor: begin
-        if isemptysourcepos(privatefieldend) and 
-                     not isemptysourcepos(privatestart) and 
+        if isemptysourcepos(privatefieldend) and
+                     not isemptysourcepos(privatestart) and
                      isemptysourcepos(privateend) then begin
          privatefieldend:= lasttokenpos;
         end;
@@ -799,7 +799,7 @@ begin
             pc1^.name:= lstringtostring(ar1[int1]);
             pc1^.uppername:= uppercase(pc1^.name);
            end;
-          end;         
+          end;
          end
          else begin
           if ident1 = pid_property then begin
@@ -820,7 +820,7 @@ begin
            end;
            for int1:= 1 to high(ar1) do begin
             funitinfopo^.deflist.add(lstringtostring(ar1[int1]),
-                      syk_vardef,pos1,sourcepos)            
+                      syk_vardef,pos1,sourcepos)
            end;
           end;
          end;
@@ -1099,7 +1099,7 @@ procedure tpascaldesignparser.parseprocedurebody;
    end
    else begin
     funitinfopo^.deflist.actnode.addemptyident(self);
-   end; 
+   end;
   end;
   if checkoperator('(') then begin
    mark;
@@ -1166,7 +1166,7 @@ procedure tpascaldesignparser.parseimplementation;
 
 var
  procnestinglevel: integer;
- 
+
  procedure parseprocedure(const akind: methodkindty);
  var
   classname,procname: lstringty;
@@ -1176,7 +1176,7 @@ var
   methodinfo: methodparaminfoty;
   aident: integer;
   deflist1: tdeflist1;
-  
+
    procedure setprocinfo(const ainfo: pprocedureinfoty);
    var
     lstr1: lstringty;
@@ -1346,7 +1346,7 @@ var
 
 var
  aident: integer;
- 
+
 begin
  finterface:= false;
  fimplementation:= true;
@@ -1383,7 +1383,7 @@ begin
       add(getorignamelist);
       fendpos:= sourcepos;
      end;
-     checkoperator(';');     
+     checkoperator(';');
      checknewline;
      funitinfopo^.p.implementationbodystart:= sourcepos;
     end;

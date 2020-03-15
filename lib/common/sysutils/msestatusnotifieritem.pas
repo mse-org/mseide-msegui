@@ -24,14 +24,14 @@ type
   data: bytearty;
  end;
  iconpixmaparty = array of iconpixmapty;
- 
+
  tooltipinfoty = record
   iconname: string;
   iconpixmap: array of iconpixmapty;
   title: string;
   text: string;
  end;
- tooltipinfoarty = array of tooltipinfoty; 
+ tooltipinfoarty = array of tooltipinfoty;
                        //workaround in order to get item typeinfo
 
  statusnotifiercategoryty = (snc_applicationstatus,snc_communications,
@@ -109,11 +109,11 @@ type
    procedure setAtentionIconPixmap(const avalue: iconpixmaparty);
    procedure setAtentionMovieName(const avalue: string);
    property ToolTip: tooltipinfoty read ftooltip;
-   property oncontextmenu: statusnotifierposprocty read foncontextmenu 
+   property oncontextmenu: statusnotifierposprocty read foncontextmenu
                                                         write foncontextmenu;
-   property onactivate: statusnotifierposprocty read fonactivate 
+   property onactivate: statusnotifierposprocty read fonactivate
                                                         write fonactivate;
-   property onsecondaryactivate: statusnotifierposprocty 
+   property onsecondaryactivate: statusnotifierposprocty
                         read fonsecondaryactivate write fonsecondaryactivate;
   published
    property Category: string read getcategory;
@@ -273,7 +273,7 @@ const
 const
  interfacestart: array[desktopkindty] of string = (
   '','org.freedesktop.','org.kde.');
-  
+
 constructor tstatusnotifieritem.create();
 begin
  inherited create(nil);
@@ -327,7 +327,7 @@ end;
 const
  categorynames: array[statusnotifiercategoryty] of string = (
   //snc_applicationstatus,snc_communications,snc_systemservices,snc_hardware
-       'ApplicationStatus',  'Communications',  'SystemServices',  'Hardware');  
+       'ApplicationStatus',  'Communications',  'SystemServices',  'Hardware');
 
 function tstatusnotifieritem.getcategory: string;
 begin
@@ -395,7 +395,7 @@ end;
 
 function tstatusnotifieritem.getintrospectitems(): string;
 begin
- result:= inherited getintrospectitems() + 
+ result:= inherited getintrospectitems() +
  datadef1+getpropintf()+datadef2;
 end;
 

@@ -189,7 +189,7 @@ type
    property font: tfont read ffont write setfont;
    property fontstyle: fontstylesty read ffontstyle write ffontstyle default [];
    property fontcolor: colorty read ffontcolor write ffontcolor default cl_none;
-   property fontcolorbackground: colorty read ffontcolor write 
+   property fontcolorbackground: colorty read ffontcolor write
                                      ffontcolorbackground default cl_none;
 
    property widget: twidget read fwidget;
@@ -200,15 +200,15 @@ type
    procedure endgroup; virtual;
    procedure scroll(const dist: pointty; const scrollcaret: boolean = true);
    procedure beginupdate; //no caret update by index change
-   procedure endupdate; 
+   procedure endupdate;
    function updating: boolean;
-   
+
    procedure updatecaret;
 
    procedure dokeydown(var kinfo: keyeventinfoty);
    procedure mouseevent(var minfo: mouseeventinfoty);
    procedure updatepopupmenu(var amenu: tpopupmenu; const popupmenu: tpopupmenu;
-                     var mouseinfo: mouseeventinfoty; 
+                     var mouseinfo: mouseeventinfoty;
                      const hasselection: boolean);
    procedure setfirstclick(var ainfo: mouseeventinfoty);
    procedure doactivate;
@@ -254,10 +254,10 @@ type
    function mousepostotextindex(const apos: pointty): integer;
    function textindextomousepos(const aindex: integer): pointty;
 
-   property optionsedit1: optionsedit1ty read foptionsedit1 
+   property optionsedit1: optionsedit1ty read foptionsedit1
                         write foptionsedit1 default defaultoptionsedit1;
    property textflags: textflagsty read ftextflags write settextflags;
-   property textflagsactive: textflagsty read ftextflagsactive 
+   property textflagsactive: textflagsty read ftextflagsactive
                                                  write settextflagsactive;
    property passwordchar: msechar read fpasswordchar
                                          write setpasswordchar default #0;
@@ -370,7 +370,7 @@ type
    procedure redo; override;
    procedure moveindex(newindex: integer; shift: boolean = false;
             donotify: boolean = true); override;
-                     
+
    property undolist: ttextundolist read fundolist;
  end;
 
@@ -394,7 +394,7 @@ uses
 
 type
  twidget1 = class(twidget);
-  
+
 var
  overwrite: boolean; //insertstate
 
@@ -465,7 +465,7 @@ begin
  selectall();
 end;
 
-procedure tinplaceedit.updatepopupmenu(var amenu: tpopupmenu; 
+procedure tinplaceedit.updatepopupmenu(var amenu: tpopupmenu;
                 const popupmenu: tpopupmenu; var mouseinfo: mouseeventinfoty;
                 const hasselection{, cangridcopy}: boolean);
 var
@@ -607,7 +607,7 @@ end;
 
 function tinplaceedit.locating: boolean;
 begin
- result:= iedit(fintf).getoptionsedit * [oe_locate,oe_readonly] = 
+ result:= iedit(fintf).getoptionsedit * [oe_locate,oe_readonly] =
                                            [oe_locate,oe_readonly];
 end;
 
@@ -731,7 +731,7 @@ begin
  result:= (oe_caretonreadonly in fintf.getoptionsedit) or fwidget.canassistive;
 end;
 
-procedure tinplaceedit.internalupdatecaret(force: boolean = false; 
+procedure tinplaceedit.internalupdatecaret(force: boolean = false;
                        nocaret: boolean = false);
 var
  wstr1: msestring;
@@ -767,8 +767,8 @@ begin
    wstr1:= finfo.text.text;
    finfo.text.text:= stringfromchar(fpasswordchar,length(wstr1));
   end;
-//  fcaretpos:= textindextopos(canvas,finfo,fcurindex); 
-  fcaretpos:= textindextomousepos(fcurindex); 
+//  fcaretpos:= textindextopos(canvas,finfo,fcurindex);
+  fcaretpos:= textindextomousepos(fcurindex);
              //updates finfo.res
   include(fstate,ies_caretposvalid);
   fscrollsum:= nullpoint;
@@ -790,8 +790,8 @@ begin
    end;
    finfo.dest.y:= int1;
   end;
-  fcaretpos.x:= fcaretpos.x + finfo.dest.x - posbefore.x; 
-  fcaretpos.y:= fcaretpos.y + finfo.dest.y - posbefore.y; 
+  fcaretpos.x:= fcaretpos.x + finfo.dest.x - posbefore.x;
+  fcaretpos.y:= fcaretpos.y + finfo.dest.y - posbefore.y;
              //add shift
 
   if haspasswordchar then begin
@@ -826,7 +826,7 @@ begin
     end
     else begin
      metrics:= canvas.getfontmetrics('o',font1);
-    end;             
+    end;
     font1.Free;
     caretrect.cx:= metrics.width;
     if caretrect.cx < int1 then begin
@@ -931,7 +931,7 @@ begin
    if updatecaretcountref <> fupdatecaretcount then begin
     exit;
    end;
-   if (fwidget.activefocused or (ies_forcecaret in fstate)) and 
+   if (fwidget.activefocused or (ies_forcecaret in fstate)) and
                                                          not nocaret then begin
     fwidget.getcaret;
     with application.caret do begin
@@ -946,8 +946,8 @@ begin
    end;
   end;
  end;
- if (finfo.dest.x <> posbefore.x) or (finfo.dest.y <> posbefore.y) or 
-                 (finfo.dest.cx <> posbefore.cx) or 
+ if (finfo.dest.x <> posbefore.x) or (finfo.dest.y <> posbefore.y) or
+                 (finfo.dest.cx <> posbefore.cx) or
                                  (finfo.dest.cy <> posbefore.cy) then begin
   invalidatetextrect(minint,bigint);
  end;
@@ -1038,7 +1038,7 @@ end;
 function tinplaceedit.nofullinvalidateneeded: boolean;
 begin
  result:= finfo.flags * [tf_wordbreak,tf_xcentered,tf_right] = [];
-             
+
 end;
 
 function tinplaceedit.getinsertstate: boolean;
@@ -1073,7 +1073,7 @@ end;
 
 function tinplaceedit.canundo: boolean;
 begin
- result:= (ies_edited in fstate) or not (ies_emptytext in fstate) and 
+ result:= (ies_edited in fstate) or not (ies_emptytext in fstate) and
                                (fbackup <> finfo.text.text) or fintf.getedited;
 end;
 
@@ -1210,9 +1210,9 @@ begin
   ch1:= #0;
  end;
  bo1:= nofullinvalidateneeded and (ch1 <> c_return) and (ch1 <> c_linefeed);
- if (fcurindex > 1) and 
-                ((card16(ch1) and $fc00 = $dc00) or 
-                 (finfo.text.text[fcurindex-1] = c_return) and 
+ if (fcurindex > 1) and
+                ((card16(ch1) and $fc00 = $dc00) or
+                 (finfo.text.text[fcurindex-1] = c_return) and
                               (ch1 = c_linefeed)) then begin
   s1:= copy(finfo.text.text,fcurindex-1,2);
   richdelete(finfo.text,fcurindex-1,2);
@@ -1248,7 +1248,7 @@ begin
   ch1:= #0;
  end;
  bo1:= nofullinvalidateneeded and (ch1 <> c_return) and (ch1 <> c_linefeed);
- if (card16(ch1) and $fc00 = $d800) or 
+ if (card16(ch1) and $fc00 = $d800) or
           (ch1 = c_linefeed) and (fcurindex > 0) and
                                      (finfo.text.text = c_return) then begin
   s1:= copy(finfo.text.text,fcurindex+1,2);
@@ -1296,7 +1296,7 @@ begin
   end;
   nochars:= true;
   finished:= true;
-  if not(oe1_noselectall in foptionsedit1) and 
+  if not(oe1_noselectall in foptionsedit1) and
                                issysshortcut(sho_selectall,kinfo) then begin
    selectall;
   end
@@ -1307,7 +1307,7 @@ begin
     end
     else begin
      finished:= false;
-    end; 
+    end;
    end
    else begin
     if issysshortcut(sho_paste,kinfo) then begin
@@ -1352,7 +1352,7 @@ begin
   if finished then begin
    exit;
   end;
-  ismultilinectrl:= (oe1_multiline in foptionsedit1) and 
+  ismultilinectrl:= (oe1_multiline in foptionsedit1) and
                                     ((key = key_end) or (key = key_home));
   if (shiftstate1 <> [ss_ctrl]) or ismultilinectrl then begin
    finished:= true;
@@ -1360,7 +1360,7 @@ begin
    if (key = key_return) {or (key = key_enter)} then  begin
     removechar1(chars,c_return);
     removechar1(chars,c_linefeed);
-    if (shiftstate1 - [ss_shift] = []) and (oe_linebreak in opt1) and 
+    if (shiftstate1 - [ss_shift] = []) and (oe_linebreak in opt1) and
           ((oe_shiftreturn in opt1) xor (shiftstate1 = []))then begin
      finished:= false;
      nochars:= false;
@@ -1378,7 +1378,7 @@ begin
        end;
       end;
       key_escape: begin
-       if canundo and (oe_undoonesc in opt1) and 
+       if canundo and (oe_undoonesc in opt1) and
                         not (ies_cangroupundo in fstate) then begin
         undo;
        end
@@ -1485,7 +1485,7 @@ begin
         filtertext:= '';
        end
        else begin
-        if not (oe1_multiline in foptionsedit1) or 
+        if not (oe1_multiline in foptionsedit1) or
                                  (ss_ctrl in shiftstate1) then begin
          moveindex1(0,ss_shift in shiftstate1);
         end
@@ -1500,7 +1500,7 @@ begin
         filtertext:= finfo.text.text;
        end
        else begin
-        if not (oe1_multiline in foptionsedit1) or 
+        if not (oe1_multiline in foptionsedit1) or
                                  (ss_ctrl in shiftstate1) then begin
          moveindex1(length(finfo.text.text),ss_shift in shiftstate1);
         end
@@ -1512,11 +1512,11 @@ begin
       end;
       key_left: begin
        if not(oe_nofirstarrownavig in opt1) and (shiftstate1 <> [ss_shift]) and
-             ((fsellength = length(finfo.text.text)) or 
-              not(ies_touched in fstate) and 
+             ((fsellength = length(finfo.text.text)) or
+              not(ies_touched in fstate) and
               (fcurindex = length(finfo.text.text))
              ) or
-          (fcurindex = 0) and 
+          (fcurindex = 0) and
              ((fsellength = 0) or (shiftstate1 <> [ss_shift]) or
               (ies_istextedit in fstate)
              ) or
@@ -1539,12 +1539,12 @@ begin
       end;
       key_right: begin
        if not(oe_nofirstarrownavig in opt1) and (shiftstate1 <> [ss_shift]) and
-              ((fsellength = length(finfo.text.text)) or 
-               not(ies_touched in fstate) and 
+              ((fsellength = length(finfo.text.text)) or
+               not(ies_touched in fstate) and
                (fcurindex = 0)
               ) or
-         (fcurindex = length(finfo.text.text)) and 
-           ((shiftstate1 <> [ss_shift]) or (fsellength = 0) or 
+         (fcurindex = length(finfo.text.text)) and
+           ((shiftstate1 <> [ss_shift]) or (fsellength = 0) or
             (ies_istextedit in fstate) or
             (fsellength = length(finfo.text.text)) and
                      (oe_autoselect in opt1) and (shiftstate1 <> [ss_shift])
@@ -1553,8 +1553,8 @@ begin
         actioninfo.dir:= gd_right;
         if checkaction(actioninfo) then begin
          if not(oe_exitoncursor in opt1) or
-             ((fsellength = length(finfo.text.text)) and (fsellength <> 0)) and 
-             (shiftstate1 <> [ss_shift]) and 
+             ((fsellength = length(finfo.text.text)) and (fsellength <> 0)) and
+             (shiftstate1 <> [ss_shift]) and
              (oe_nofirstarrownavig in opt1) then begin
           if shiftstate1 <> [ss_shift] then begin
            sellength:= 0;
@@ -1577,7 +1577,7 @@ begin
     end
     else begin
      finished:= false;
-     if (shiftstate1 = [ss_ctrl,ss_alt]) and 
+     if (shiftstate1 = [ss_ctrl,ss_alt]) and
                               not (ss_second in shiftstate) then begin
       nochars:= false;
      end;
@@ -1623,14 +1623,14 @@ begin
   end
   else begin
    opt1:= fintf.getoptionsedit;
-   autoselect1:= (oe_autoselectonfirstclick in opt1) and 
+   autoselect1:= (oe_autoselectonfirstclick in opt1) and
                (opt1 * [oe_locate,oe_readonly] <> [oe_locate,oe_readonly]);
    case eventkind of
     ek_buttonpress: begin
-     if pointinrect(pos,finfo.clip) and 
-      (minfo.button = mb_left) or (minfo.button = mb_middle) and 
+     if pointinrect(pos,finfo.clip) and
+      (minfo.button = mb_left) or (minfo.button = mb_middle) and
                                     not (oe_readonly in opt1) then begin
-      if not ((minfo.button = mb_middle) and 
+      if not ((minfo.button = mb_middle) and
                 (minfo.shiftstate * shiftstatesmask <> [ss_middle])) then begin
        if not fwidget.focused and fwidget.canfocus and
                   (ow_mousefocus in fwidget.optionswidget) then begin
@@ -1674,7 +1674,7 @@ begin
         end;
         subpoint1(po1,textindextomousepos(int1));
        end;
-       if (minfo.button = mb_middle) and 
+       if (minfo.button = mb_middle) and
                not (oe_readonly in fintf.getoptionsedit) then begin
                          //cold be changed by moveindex
         addpoint1(po1,textindextomousepos(int1));
@@ -1806,7 +1806,7 @@ begin
   end;
  end;
  if finfo.text.text <> '' then begin
-  if (newindex < fcurindex) and 
+  if (newindex < fcurindex) and
            (card16(finfo.text.text[newindex]) and $fc00 = $d800) then begin
    dec(newindex); //surrogate pair
   end
@@ -1891,7 +1891,7 @@ begin
    result:= 0;
   end;
  end;
- if (finfo.text.text <> '') and 
+ if (finfo.text.text <> '') and
              (card16(finfo.text.text[result]) and $fc00 = $d800) then begin
   inc(result); //surrogate pair
  end;
@@ -2256,7 +2256,7 @@ var
  info: editnotificationinfoty;
 begin
  include(fstate,ies_textrectvalid);
- if (ftextrectbefore.cx <> finfo.res.cx) or 
+ if (ftextrectbefore.cx <> finfo.res.cx) or
                         (ftextrectbefore.cy <> finfo.res.cy) then begin
   info:= initactioninfo(ea_textsizechanged);
   info.sizebefore:= ftextrectbefore.size;
@@ -2386,7 +2386,7 @@ end;
 function tinplaceedit.getcaretpos: pointty;
 begin
  if not (ies_caretposvalid in fstate) then begin
-  fcaretpos:= textindextomousepos(fcurindex); 
+  fcaretpos:= textindextomousepos(fcurindex);
   include(fstate,ies_caretposvalid);
   fscrollsum:= nullpoint;
  end;
@@ -2475,7 +2475,7 @@ begin
     inc(finfo.dest.x,int1);
     inc(fscrollsum.x,int1);
    end;
-  end;   
+  end;
  end
  else begin
   if rect1.cy > 0 then begin
@@ -2485,7 +2485,7 @@ begin
     inc(finfo.dest.y,int1);
     inc(fscrollsum.y,int1);
    end;
-  end;   
+  end;
  end;
 end;
 
@@ -2556,7 +2556,7 @@ begin
     fselstart:= 0;
     fsellength:= length(ffiltertext);
     curindex:= fselstart+fsellength;
-    updateselect;    
+    updateselect;
    end;
   end;
  end
@@ -2565,7 +2565,7 @@ begin
   fselstart:= 0;
   fsellength:= 0;
   curindex:= 0;
-  updateselect;    
+  updateselect;
  end;
 end;
 

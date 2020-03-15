@@ -44,36 +44,36 @@ object msetemplateselectfo: tmsetemplateselectfo
     anchors = [an_top, an_bottom]
     optionsgrid = [og_colsizing, og_focuscellonenter, og_colchangeontabkey, og_wrapcol, og_autopopup, og_mousescrollcol]
     fixcols.count = 1
-    fixcols.items = <    
+    fixcols.items = <
       item
         width = 25
         numstart = 1
         numstep = 1
       end>
     fixrows.count = 1
-    fixrows.items = <    
+    fixrows.items = <
       item
         height = 16
         captions.count = 7
-        captions.items = <        
+        captions.items = <
           item
             caption = 'Name'
-          end        
+          end
           item
             caption = 'Comment'
-          end        
+          end
           item
             caption = 'Par1'
-          end        
+          end
           item
             caption = 'Par2'
-          end        
+          end
           item
             caption = 'Par3'
-          end        
+          end
           item
             caption = 'Par4'
-          end        
+          end
           item
             caption = 'ed'
           end>
@@ -82,7 +82,7 @@ object msetemplateselectfo: tmsetemplateselectfo
     datacols.colorfocused = -1879048185
     datacols.options = [co_nofocus, co_drawfocus, co_proportional, co_savestate, co_mousescrollrow]
     datacols.options1 = [co1_rowfont, co1_rowcolor, co1_zebracolor, co1_rowcolorfocused]
-    datacols.items = <    
+    datacols.items = <
       item[templatename]
         colorfocused = -1879048185
         width = 60
@@ -90,7 +90,7 @@ object msetemplateselectfo: tmsetemplateselectfo
         options1 = [co1_rowfont, co1_rowcolor, co1_zebracolor, co1_rowcolorfocused]
         widgetname = 'templatename'
         dataclass = tgridmsestringdatalist
-      end    
+      end
       item[comment]
         colorfocused = -1879048185
         width = 252
@@ -98,7 +98,7 @@ object msetemplateselectfo: tmsetemplateselectfo
         options1 = [co1_rowfont, co1_rowcolor, co1_zebracolor, co1_rowcolorfocused]
         widgetname = 'comment'
         dataclass = tgridmsestringdatalist
-      end    
+      end
       item[par1]
         colorfocused = -1879048185
         width = 51
@@ -106,7 +106,7 @@ object msetemplateselectfo: tmsetemplateselectfo
         options1 = [co1_rowfont, co1_rowcolor, co1_zebracolor, co1_rowcolorfocused]
         widgetname = 'par1'
         dataclass = tgridmsestringdatalist
-      end    
+      end
       item[par2]
         colorfocused = -1879048185
         width = 51
@@ -114,7 +114,7 @@ object msetemplateselectfo: tmsetemplateselectfo
         options1 = [co1_rowfont, co1_rowcolor, co1_zebracolor, co1_rowcolorfocused]
         widgetname = 'par2'
         dataclass = tgridmsestringdatalist
-      end    
+      end
       item[par3]
         colorfocused = -1879048185
         width = 51
@@ -122,7 +122,7 @@ object msetemplateselectfo: tmsetemplateselectfo
         options1 = [co1_rowfont, co1_rowcolor, co1_zebracolor, co1_rowcolorfocused]
         widgetname = 'par3'
         dataclass = tgridmsestringdatalist
-      end    
+      end
       item[par4]
         colorfocused = -1879048185
         width = 51
@@ -130,7 +130,7 @@ object msetemplateselectfo: tmsetemplateselectfo
         options1 = [co1_rowfont, co1_rowcolor, co1_zebracolor, co1_rowcolorfocused]
         widgetname = 'par4'
         dataclass = tgridmsestringdatalist
-      end    
+      end
       item[tstockglyphdatabutton1]
         color = -2147483646
         colorfocused = -1879048185

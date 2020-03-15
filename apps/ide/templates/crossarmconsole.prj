@@ -180,36 +180,36 @@ usercolors=30
  0
  0
 usercolorcomment=30
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 formatmacronames=0
 formatmacrovalues=0
 settingsfile=
@@ -395,25 +395,25 @@ macrovalues=22
  ${PROJECTNAME}${EXEEXT}
  ${TARGETDIR}/${TARGETEXE}
  xterm -e ${TEMPLATEDIR}copytarget.sh ${TARGETEXE} ${REMOTEUSER}@${REMOTEIP}:${TARGETDIR}/${TARGETEXE}
- 
+
  xterm -e ${TEMPLATEDIR}runsshgdbserver.sh ${HOSTIP} ${REMOTEIP} ${REMOTEPORT} ${REMOTEUSER} "${TARGETENV}" ${TARGETPATH} ${TARGETPARAMS}
- 
+
  remote ${REMOTEIP}:${REMOTEPORT}
- 
+
  ${CROSSFPCDIR}/${ABI}
  ${CROSSFPC}/bin/gdb
  ${CROSSFPC}/lib/fpc/${CROSSFPCVERSION}/ppcrossarm
  -n -Xd -viwn -e${CROSSFPC}/bin -Fl${CROSSFPC}/lib -Fu${CROSSFPC}/lib/fpc/${CROSSFPCVERSION}/units/arm-linux/*
  ${FPCOPTIONS}
  ${FPCOPTIONS} -CpARMV6 -CfVFPV2
- 
+
 groupcomments=6
  Local
  Remote eabi
  Remote eabihf (Raspberry Pi)
- 
- 
- 
+
+
+
 toolmenus=0
 toolfiles=0
 toolparams=0
@@ -435,15 +435,15 @@ newfinames=3
 newfifilters=3
  "*.pas" "*.pp"
  "*.pas" "*.pp"
- 
+
 newfiexts=3
  pas
  pas
- 
+
 newfisources=3
  ${TEMPLATEDIR}default/program.pas
  ${TEMPLATEDIR}default/unit.pas
- 
+
 newfonames=11
  Mainform
  Simple Form

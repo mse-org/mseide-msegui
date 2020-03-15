@@ -17,11 +17,11 @@ uses
 const
  defaultpythonprocoptions = defaultprocessoptions + [pro_input];
  pyboolstrings: array[boolean] of msestring = ('False','True');
- 
+
 type
  tpythonstringlist = class(tmacrostringlist)
  end;
- 
+
  tpythonstringlistitem = class(townedpersistent)
   private
    fname: msestring;
@@ -38,14 +38,14 @@ type
    property name: msestring read fname write fname;
    property script: tpythonstringlist read fscript write setscript;
  end;
- 
+
  tpythonscript = class;
- 
+
  tpythonscripts = class(townedpersistentarrayprop)
   private
    fdummylist: tmacrostringlist;
    function getitems(const aindex: integer): tpythonstringlistitem;
-   procedure setitems(const aindex: integer; 
+   procedure setitems(const aindex: integer;
                                   const avalue: tpythonstringlistitem);
    procedure setmacros(const avalue: tmacroproperty);
    function getmacros: tmacroproperty;
@@ -53,7 +53,7 @@ type
   public
    constructor create(const aowner: tpythonscript); reintroduce;
    destructor destroy(); override;
-   property items[const aindex: integer]: tpythonstringlistitem read getitems 
+   property items[const aindex: integer]: tpythonstringlistitem read getitems
                      write setitems; default;
    function itembyname(const aname: msestring): tpythonstringlistitem;
    class function getitemclasstype: persistentclassty; override;
@@ -61,7 +61,7 @@ type
   published
    property macros: tmacroproperty read getmacros write setmacros;
  end;
- 
+
  tpythonscript = class(tcustommseprocess)
   private
    fscripts: tpythonscripts;
@@ -92,7 +92,7 @@ type
  end;
 
 function pyboolean(const avalue: boolean): msestring;
- 
+
 implementation
 uses
  sysutils,mseapplication;
@@ -114,7 +114,7 @@ begin
  end;
 }
 end;
- 
+
 { tpythonscript }
 
 constructor tpythonscript.create(aowner: tcomponent);
@@ -141,7 +141,7 @@ begin
  inherited;
  if not (pro_input in foptions) then begin
   inherited setoptions(foptions + [pro_noshell]);
-     //bash -c only supports a single commandstring -> 
+     //bash -c only supports a single commandstring ->
      //python -c can not be used with bash and paramlist
  end;
 end;

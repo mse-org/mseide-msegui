@@ -34,11 +34,11 @@ uses
 const
  defaultactionstates = [];
 type
- shapestatety = (shs_disabled,shs_invisible,shs_checked,shs_default, 
+ shapestatety = (shs_disabled,shs_invisible,shs_checked,shs_default,
                                                            //actionstatesty
 
                  shs_separator,shs_optional, //for menu separators
-                 shs_checkbox,shs_radiobutton, 
+                 shs_checkbox,shs_radiobutton,
                                     //menuactionoptionty
 
                  shs_clicked,shs_mouse,shs_moveclick,shs_focused,shs_active,
@@ -47,7 +47,7 @@ type
                  shs_widgetorg,shs_showfocusrect,shs_showdefaultrect,
                  shs_flat,shs_noanimation,shs_nomouseanimation,
                  shs_noclickanimation,shs_nofocusanimation,shs_focusanimation,
-                 shs_focuscolor, 
+                 shs_focuscolor,
                       //use cl_selectedtext and cl_selecetetextbackground
                       //if focused
                  shs_checkbutton,shs_menuarrow,shs_noinnerrect);
@@ -72,7 +72,7 @@ type
                        mao_optional, //suppress separators without adjacent
                                      //visible normal items
                        mao_checkbox,mao_radiobutton,
-                       
+
                        mao_shortcutcaption,
                        mao_asyncexecute,mao_singleregion,
                        mao_showhint,mao_noshowhint,
@@ -81,12 +81,12 @@ type
 
 const
  invisibleactionstates = [ord(as_syncdisabledlocked)];
- actionstatesmask: actionstatesty = 
+ actionstatesmask: actionstatesty =
                             [as_disabled,as_checked,as_invisible,as_default,
                              as_repeatshortcut];
  actionshapestatesconst = [as_disabled,as_invisible,as_checked,as_default];
  actionshapestates: actionstatesty = actionshapestatesconst;
- actionoptionshapestates: menuactionoptionsty = 
+ actionoptionshapestates: menuactionoptionsty =
                   [mao_separator,mao_optional,mao_checkbox,mao_radiobutton];
  actionoptionshapelshift = ord(shs_separator);
 
@@ -145,7 +145,7 @@ type
   function shortcutseparator: msechar;
   procedure calccaptiontext(var ainfo: actioninfoty);
   procedure setshortcuts(const avalue: shortcutarty);
-  procedure setshortcuts1(const avalue: shortcutarty);  
+  procedure setshortcuts1(const avalue: shortcutarty);
  end;
 
  asynceventty = procedure(const sender: tobject; var atag: integer) of object;
@@ -234,18 +234,18 @@ type
    property imagenr: imagenrty read finfo.imagenr write setimagenr default -1;
    property imagenrdisabled: imagenrty read finfo.imagenrdisabled
                       write setimagenrdisabled default -2;
-   property colorglyph: colorty read finfo.colorglyph 
+   property colorglyph: colorty read finfo.colorglyph
                               write setcolorglyph default cl_default;
    property color: colorty read finfo.color write setcolor default cl_default;
-   property imagecheckedoffset: integer read finfo.imagecheckedoffset 
+   property imagecheckedoffset: integer read finfo.imagecheckedoffset
                                       write setimagecheckedoffset default 0;
    property hint: msestring read finfo.hint write sethint;
    property tagaction: integer read finfo.tag write settag default 0;
-   property options: actionoptionsty read foptions write setoptions 
+   property options: actionoptionsty read foptions write setoptions
                                                 default defaultactionoptions;
    property statfile: tstatfile read fstatfile write setstatfile;
    property statvarname: msestring read getstatvarname write fstatvarname;
-   property statpriority: integer read fstatpriority 
+   property statpriority: integer read fstatpriority
                                        write fstatpriority default 0;
 {$ifdef mse_with_ifi}
    property ifilink: tifiactionlinkcomp read fifilink write setifilink;
@@ -254,7 +254,7 @@ type
    property onexecute: notifyeventty read finfo.onexecute write setonexecute;
    property onbeforeexecute: accepteventty read finfo.onbeforeexecute
                        write setonbeforeexecute;
-   property onafterexecute: notifyeventty read finfo.onafterexecute 
+   property onafterexecute: notifyeventty read finfo.onafterexecute
                        write setonafterexecute;
    property onexecuteaction: actioneventty read fonexecuteaction write fonexecuteaction;
    property onupdate: actioneventty read fonupdate write fonupdate;
@@ -360,7 +360,7 @@ procedure shapestatestoactionstates(source: shapestatesty;
                 var dest: actionstatesty;
                         const mask: actionstatesty = actionshapestatesconst);
 function translateshortcut(const akey: shortcutty): shortcutty;
-procedure translateshortcut1(var akey: shortcutty); 
+procedure translateshortcut1(var akey: shortcutty);
            //update for new modifier layout
 
 var
@@ -405,7 +405,7 @@ begin
  changed:= false;
  with info do begin
   if not (as_disabled in state) or force then begin
-   if not nocandefocus and 
+   if not nocandefocus and
      ((action = nil) or not(ao_nocandefocus in action.options)) then begin
     if not application.candefocus then begin
      exit;
@@ -438,7 +438,7 @@ begin
         setbit1(longword(info.state),ord(as_checked));
         changed:= true;
        end;
-      end;       
+      end;
      end;
     end;
    end;
@@ -452,7 +452,7 @@ begin
     info.onexecute(sender);
    end;
    if info.action <> nil then begin
-    info.action.eventfired(sender,info); 
+    info.action.eventfired(sender,info);
    end;
    if checkcanevent(tmethod(info.onafterexecute)) then begin
     info.onafterexecute(sender);
@@ -871,7 +871,7 @@ begin
                          {$ifdef FPC}longword{$else}word{$endif}(options),
                          {$ifdef FPC}longword{$else}word{$endif}(optionsbefore),
                          {$ifdef FPC}longword{$else}word{$endif}(mask2)));
-  if optionsbefore * [mao_shortcutcaption] <> options * 
+  if optionsbefore * [mao_shortcutcaption] <> options *
                                      [mao_shortcutcaption] then begin
    sender.calccaptiontext(po1^);
   end;
@@ -923,8 +923,8 @@ function isactiononexecutestored(const info: actioninfoty): boolean;
 begin
  with info do begin
   result:= (as_localonexecute in state) and
-                  not ((action = nil) and 
-                       (tmethod(info.onexecute).code = nil) and 
+                  not ((action = nil) and
+                       (tmethod(info.onexecute).code = nil) and
                        (tmethod(info.onexecute).data = nil));
  end;
 end;
@@ -967,8 +967,8 @@ function isactiononafterexecutestored(const info: actioninfoty): boolean;
 begin
  with info do begin
   result:= (as_localonafterexecute in state) and
-                  not ((action = nil) and 
-                       (tmethod(info.onafterexecute).code = nil) and 
+                  not ((action = nil) and
+                       (tmethod(info.onafterexecute).code = nil) and
                        (tmethod(info.onafterexecute).data = nil));
  end;
 end;
@@ -1280,7 +1280,7 @@ end;
 
 procedure tcustomaction.execute(const force: boolean = false);
 begin
- if (componentstate*[csloading,csdesigning,csdestroying] = []) and 
+ if (componentstate*[csloading,csdesigning,csdestroying] = []) and
                   doactionexecute(self,finfo,false,false,nil,force) then begin
   changed;
  end;
@@ -1358,7 +1358,7 @@ begin
   foptions := Value;
   if not (csdesigning in componentstate) then begin
    if ao_updateonidle in delta then begin
-    if (ao_updateonidle in value) and 
+    if (ao_updateonidle in value) and
                           not (csdesigning in componentstate) then begin
      application.registeronidle({$ifdef FPC}@{$endif}doidle);
     end

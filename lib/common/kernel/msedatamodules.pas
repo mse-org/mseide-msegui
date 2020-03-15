@@ -14,14 +14,14 @@ unit msedatamodules;
 interface
 uses
  classes,mclasses,mseclasses,msetypes,msegraphutils,msestatfile,mseevent,mseapplication;
- 
+
 type
  datamoduleoptionty = (dmo_autoreadstat,dmo_delayedreadstat,
                                               dmo_autowritestat,dmo_iconic);
  datamoduleoptionsty = set of datamoduleoptionty;
 const
  defaultdatamoduleoptions = [dmo_autoreadstat,dmo_autowritestat];
- 
+
 type
  tmsedatamodule = class(tactcomponent)
   private
@@ -78,7 +78,7 @@ type
    procedure doeventloopstart; virtual;
    procedure doidle(var again: boolean); virtual;
    procedure receiveevent(const event: tobjectevent); override;
-   procedure doapplicationevent(var aevent: tmseevent; 
+   procedure doapplicationevent(var aevent: tmseevent;
                                        var handled: boolean) virtual;
   public
    constructor create(aowner: tcomponent); overload; override;
@@ -86,34 +86,34 @@ type
    destructor destroy; override;
    procedure afterconstruction; override;
    procedure reload;
-   function hasparent: boolean; override;               
+   function hasparent: boolean; override;
    function getparentcomponent: tcomponent; override;
    procedure beforedestruction; override;
    procedure freeinstance override;
    property size: sizety read fsize write setsize;
   published
-   property activatortarget: tactivator read factivatortarget 
+   property activatortarget: tactivator read factivatortarget
                                               write setactivatortarget;
-   property options: datamoduleoptionsty read foptions write setoptions 
+   property options: datamoduleoptionsty read foptions write setoptions
                            default defaultdatamoduleoptions;
    property bounds_x: integer read getbounds_x write setbounds_x stored false;
    property bounds_y: integer read getbounds_y write setbounds_y stored false;
    property bounds_cx: integer read fsize.cx write setbounds_cx;
    property bounds_cy: integer read fsize.cy write setbounds_cy;
-   
+
    property statfile: tstatfile read fstatfile write setstatfile;
    property oncreate: notifyeventty read foncreate write foncreate;
    property oncreated: notifyeventty read foncreated write foncreated;
    property onloaded: notifyeventty read fonloaded write fonloaded;
-   property oneventloopstart: notifyeventty read foneventloopstart 
+   property oneventloopstart: notifyeventty read foneventloopstart
                                    write foneventloopstart;
    property ondestroy: notifyeventty read fondestroy write fondestroy;
    property ondestroyed: notifyeventty read fondestroyed write fondestroyed;
    property onevent: eventeventty read fonevent write fonevent;
    property onasyncevent: asynceventeventty read fonasyncevent write fonasyncevent;
-   property onterminatequery: terminatequeryeventty read fonterminatequery 
+   property onterminatequery: terminatequeryeventty read fonterminatequery
                  write fonterminatequery;
-   property onterminated: notifyeventty read fonterminated 
+   property onterminated: notifyeventty read fonterminated
                  write fonterminated;
    property onidle: idleeventty read fonidle write fonidle;
    property onapplicationevent: applicationeventeventty
@@ -121,16 +121,16 @@ type
  end;
  datamoduleclassty = class of tmsedatamodule;
  msedatamodulearty = array of tmsedatamodule;
- 
+
 function createmsedatamodule(const aclass: tclass;
                      const aclassname: pshortstring): tmsecomponent;
 implementation
 uses
  sysutils;
-  
+
 type
  tmsecomponent1 = class(tmsecomponent);
-  
+
 function createmsedatamodule(const aclass: tclass;
                      const aclassname: pshortstring): tmsecomponent;
 begin
@@ -173,7 +173,7 @@ begin
  application.unregisteronterminated({$ifdef FPC}@{$endif}doterminated);
  application.unregisteronterminate({$ifdef FPC}@{$endif}doterminatequery);
  application.unregisteronidle({$ifdef FPC}@{$endif}doidle);
- if not (csdesigning in componentstate) and 
+ if not (csdesigning in componentstate) and
                                  assigned(fonapplicationevent) then begin
   application.unregisterapplicationeventhandler(@doapplicationevent);
  end;
@@ -224,8 +224,8 @@ end;
 procedure tmsedatamodule.doafterload;
 begin
  inherited;
-// if (fstatfile <> nil) and 
-//      (foptions*[dmo_autoreadstat,dmo_delayedreadstat] = 
+// if (fstatfile <> nil) and
+//      (foptions*[dmo_autoreadstat,dmo_delayedreadstat] =
 //                                               [dmo_autoreadstat]) then begin
 //  fstatfile.readstat;
 // end;
@@ -353,7 +353,7 @@ end;
 procedure tmsedatamodule.doeventloopstart;
 begin
  if (fstatfile <> nil) and not (csdesigning in componentstate) and
-       (foptions*[dmo_autoreadstat,dmo_delayedreadstat] = 
+       (foptions*[dmo_autoreadstat,dmo_delayedreadstat] =
         [dmo_autoreadstat,dmo_delayedreadstat]) then begin
   fstatfile.readstat;
  end;
@@ -479,7 +479,7 @@ end;
 procedure tmsedatamodule.autoreadstat;
 begin
  if (fstatfile <> nil) and not (csdesigning in componentstate) and
-       (foptions*[dmo_autoreadstat,dmo_delayedreadstat] = 
+       (foptions*[dmo_autoreadstat,dmo_delayedreadstat] =
                                            [dmo_autoreadstat]) then begin
   fstatfile.readstat;
  end;

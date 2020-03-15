@@ -18,5 +18,5 @@ type
 implementation
 uses
  msefircoeffeditor_mfm;
- 
+
 end.

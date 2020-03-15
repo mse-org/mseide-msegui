@@ -12,7 +12,7 @@ unit mseopensslbignum;
 interface
 uses
  mseopenssl,msectypes;
- 
+
 type
   pBN_ULONG = ^BN_ULONG;
   BN_ULONG = culong; // system dependent, consider it as a opaque pointer
@@ -26,7 +26,7 @@ type
 	neg: cint;	// one if the number is negative
 	flags: cint;
   end;
-  
+
   pBN_CTX = ^BN_CTX;
   BN_CTX = record
 	tos: cint;
@@ -96,7 +96,7 @@ var
   BN_from_montgomery: function(r, a: pBIGNUM; m_ctx: pBN_MONT_CTX;
                                                 ctx: pBN_CTX): cint; cdecl;
   BN_RECP_CTX_init: procedure(recp: pBN_RECP_CTX); cdecl;
-  BN_RECP_CTX_set: function(recp: pBN_RECP_CTX; const rdiv: pBIGNUM; 
+  BN_RECP_CTX_set: function(recp: pBN_RECP_CTX; const rdiv: pBIGNUM;
                                              ctx: pBN_CTX): cint; cdecl;
   BN_RECP_CTX_new: function: pBN_RECP_CTX; cdecl;
   BN_RECP_CTX_free: procedure(recp: pBN_RECP_CTX); cdecl;
@@ -152,7 +152,7 @@ var
   BN_nnmod: function(rem: pBIGNUM; const a: pBIGNUM;
                              const m: pBIGNUM; ctx: pBN_CTX): cint; cdecl;
   // BN_mod_add requires OpenSSL >= 0.9.7
-  BN_mod_add: function(r: pBIGNUM; a: pBIGNUM; b: pBIGNUM; 
+  BN_mod_add: function(r: pBIGNUM; a: pBIGNUM; b: pBIGNUM;
                                 const m: pBIGNUM; ctx: pBN_CTX): cint;cdecl;
   // BN_mod_sub requires OpenSSL >= 0.9.7
   BN_mod_sub: function(r: pBIGNUM; a: pBIGNUM; b: pBIGNUM;
@@ -176,19 +176,19 @@ var
                                            ctx: pBN_CTX): cint; cdecl;
   BN_mod_inverse: function(ret, a: pBIGNUM; const n: pBIGNUM;
                                              ctx: pBN_CTX): pBIGNUM; cdecl;
-  BN_add_word: function (a: pBIGNUM; w: BN_ULONG): cint; cdecl; 
+  BN_add_word: function (a: pBIGNUM; w: BN_ULONG): cint; cdecl;
                                          // Adds w to a ("a+=w").
   BN_sub_word: function(a: pBIGNUM; w: BN_ULONG): cint; cdecl;
                                          // Subtracts w from a ("a-=w").
   BN_mul_word: function(a: pBIGNUM; w: BN_ULONG): cint; cdecl;
                                        // Multiplies a and w ("a*=b").
-  BN_div_word: function(a: pBIGNUM; w: BN_ULONG): BN_ULONG; cdecl; 
+  BN_div_word: function(a: pBIGNUM; w: BN_ULONG): BN_ULONG; cdecl;
                     // Divides a by w ("a/=w") and returns the remainder.
   BN_mod_word: function(const a: pBIGNUM; w: BN_ULONG): BN_ULONG; cdecl;
     // Returns the remainder of a divided by w ("a%m").
   bn_mul_words: function(rp, ap: pBN_ULONG; num: cint;
                                           w: BN_ULONG): BN_ULONG; cdecl;
-  bn_mul_add_words: function(rp, ap: pBN_ULONG; num: cint; 
+  bn_mul_add_words: function(rp, ap: pBN_ULONG; num: cint;
                                            w: BN_ULONG): BN_ULONG; cdecl;
   bn_sqr_words: procedure(rp, ap: pBN_ULONG; num: cint); cdecl;
   bn_div_words: function(h, l, d: BN_ULONG): BN_ULONG; cdecl;
@@ -207,7 +207,7 @@ var
                           add, rem: pBIGNUM;
                            progress: TProgressCallbackFunction;
                                    cb_arg: pointer): pBIGNUM; cdecl;
-  BN_is_prime: function(const a: pBIGNUM; checks: cint; 
+  BN_is_prime: function(const a: pBIGNUM; checks: cint;
                        progress: TProgressCallbackFunction; ctx: pBN_CTX;
                                             cb_arg: pointer): cint; cdecl;
   BN_is_prime_fasttest: function(const a: pBIGNUM; checks: cint;
@@ -237,7 +237,7 @@ function BN_mod(rem: pBIGNUM; const a, m: pBIGNUM; ctx: pBN_CTX): cint;
 implementation
 uses
  msedynload;
- 
+
 function BN_to_montgomery(r, a: pBIGNUM; m_ctx: pBN_MONT_CTX;
                                                   ctx: pBN_CTX): cint;
 begin

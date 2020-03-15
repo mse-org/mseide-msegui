@@ -28,13 +28,13 @@ uses
  {$ifdef mswindows}windows{$else}mselibc{$endif},
  msetypes,msestream,msepipestream,sysutils,msesysutils,msesystypes,msesys,
  msestrings;
- 
+
 type
  pipedescriptorty = record
  {$ifdef mswindows}
   readdes: ptrint;
   writedes: ptrint;
- {$else} 
+ {$else}
   readdes: integer;
   writedes: integer;
  {$endif}
@@ -50,20 +50,20 @@ type
                  exo_sessionleader,            //linux only
                  exo_settty,                   //linux only
                  exo_tty,exo_echo,exo_icanon,  //linux only
-                 exo_usepipewritehandles,exo_winpipewritehandles                 
-                 );         
+                 exo_usepipewritehandles,exo_winpipewritehandles
+                 );
  execoptionsty = set of execoptionty;
 const
  pipewritehandlemask = [exo_usepipewritehandles
                   {$ifdef mswindows},exo_winpipewritehandles{$endif}];
 type
- processexiterrorty = (pee_ok,pee_signaled,pee_timeout,pee_error);                    
+ processexiterrorty = (pee_ok,pee_signaled,pee_timeout,pee_error);
 
 function getprocessexitcode(prochandle: prochandlety; out exitcode: integer;
                              const timeoutus: integer = 0): processexiterrorty;
                   //<0 -> no timeout, closes handle
                   //exicode = -signum - 256 by pee_signaled (unix only)
-                 
+
 function waitforprocess(prochandle: prochandlety): integer;
 
 function execmse(const commandline: msestring; //sys format
@@ -73,7 +73,7 @@ function execmse(const commandline: msestring; //sys format
                  const envvars: msestringarty = nil): boolean;
 //starts program, true if OK
 
-function execmse4(const commandline: msestring; //sys format 
+function execmse4(const commandline: msestring; //sys format
                   const  options: execoptionsty = [];
                   const workingdirectory: filenamety = '';
                   const params: msestringarty = nil;
@@ -139,13 +139,13 @@ function terminateprocess(handle: prochandlety): integer;
 procedure killprocessid(id: procidty);
 procedure killprocesstreeid(id: procidty);
 
-function getpid: procidty; 
-           
+function getpid: procidty;
+
 function getprocesstree: procitemarty;
 function getprocesschildren(const pid: procidty): procidarty;
 function getallprocesschildren(const pid: procidty): procidarty;
 {moved to msegui
-function activateprocesswindow(const procid: integer; 
+function activateprocesswindow(const procid: integer;
                     const araise: boolean = true): boolean;
          //true if ok
 }
@@ -209,7 +209,7 @@ type
  end;
 
 implementation
-uses 
+uses
  msesysintf1,msesysintf,mseprocmonitor,msearrayutils,mseformatstr,
                                        mseapplication,msefileutils;
 {$ifndef mse_allwarnings}
@@ -325,7 +325,7 @@ end;
 function getallprocesschildren(const pid: procidty): procidarty;
 var
  ar1: procitemarty;
- 
+
  procedure addproc(const pid: integer);
  var
   int1,int2: integer;
@@ -338,7 +338,7 @@ var
    end;
   end;
  end;
-  
+
 begin
  ar1:= getprocesstree;
  setlength(result,1);
@@ -452,7 +452,7 @@ function execmse0(const commandline: msestring; topipe: pinteger = nil;
              errorpipewritehandle: pinteger = nil;
              const workingdirectory: msestring = '';
              const params: msestringarty = nil;
-             const envvars: msestringarty = nil             
+             const envvars: msestringarty = nil
              ): prochandlety;
 //startet programm, bringt processhandle, execerror wenn misslungen
 //closehandle nicht vergessen!
@@ -553,7 +553,7 @@ begin
  if exo_detached in options then begin
   creationflags:= creationflags or detached_process;
  end;
- if (exo_allowsetforegroundwindow in options) and 
+ if (exo_allowsetforegroundwindow in options) and
         assigned(allowsetforegroundwindow) then begin
   allowsetforegroundwindow(asfw_any);
  end;
@@ -597,7 +597,7 @@ begin
  if exo_shell in options then begin
   cmd1:= 'cmd.exe /q /c'+cmd1;
  end;
- if iswin95 then begin 
+ if iswin95 then begin
   bo1:= createprocessa(nil,pchar(ansistring(cmd1)),nil,nil,true,creationflags,
                pointer(ansistring(env1)),
                pointer(ansistring(wd1)),
@@ -609,7 +609,7 @@ begin
                pointer(env1),
                pointer(wd1),startupinfo,processinfo);
  end;
- 
+
  if bo1 then begin
   if topipehandles.readdes <> invalidfilehandle then begin
    closehandle(topipehandles.readdes);
@@ -665,7 +665,7 @@ function getprocessexitcode(prochandle: prochandlety; out exitcode: integer;
 var
  dwo1: longword;
  cancel: boolean;
-  
+
  function check(const apid: integer): boolean;
  begin
   result:= false;
@@ -696,7 +696,7 @@ var
 
 var
  i1: int32;
- 
+
 begin
  result:= pee_error;
  cancel:= false;
@@ -711,7 +711,7 @@ begin
     result:= pee_timeout;
    end;
   end;
-   
+
   if (result = pee_timeout) and (timeoutus <> 0) then begin
    if timeoutus < 0 then begin
     repeat
@@ -813,7 +813,7 @@ begin
  if ptsname_r(result,@buffer,buflen) < 0 then begin
   syserror(sye_lasterror);
  end;
- name:= buffer; 
+ name:= buffer;
 end;
 
 function execmse0(const commandline: msestring; topipe: pinteger = nil;
@@ -839,7 +839,7 @@ var
  ptyerr: integer;// = -1;
  ptynameout: namebufferty;
  ptynameerr: namebufferty;
- 
+
  procedure execerr;
  var
   errorbefore: integer;
@@ -861,7 +861,7 @@ var
    pty:= -1;
   end; //ptyerror
  var
-  ios: termios;  
+  ios: termios;
  begin
   if pty < 0 then begin
    pty:= getpt;
@@ -903,7 +903,7 @@ var
   end;
   result:= pty;
  end; //dogetpt
-  
+
  procedure openpipe(var pipehandles: tpipedescriptors);
  begin
   if exo_tty in options then begin
@@ -1094,15 +1094,15 @@ begin
 
   if (exo_settty in options) then begin
    bo1:= false;        //search posssible controlling TTY
-   if (topipehandles.writedes <> invalidfilehandle) and 
+   if (topipehandles.writedes <> invalidfilehandle) and
                        (isatty(0) <> 0) then begin
     bo1:= ioctl(0,TIOCSCTTY,[]) <> -1;
    end;
-   if not bo1 and (frompipehandles.writedes <> invalidfilehandle) and 
+   if not bo1 and (frompipehandles.writedes <> invalidfilehandle) and
                            (isatty(1) <> 0) then begin
      bo1:= ioctl(1,TIOCSCTTY,[]) <> -1;
    end;
-   if not bo1 and (errorpipehandles.writedes <> invalidfilehandle) and 
+   if not bo1 and (errorpipehandles.writedes <> invalidfilehandle) and
                           (isatty(2) <> 0) then begin
     bo1:= ioctl(2,TIOCSCTTY,[]) <> -1;
    end;
@@ -1183,9 +1183,9 @@ begin
   int1:= kill(handle,sigterm);
   if (int1 <> 0) and (errno <> esrch) then begin
    exit; //sigterm nicht moeglich
-//   raise eoserror.create(''); 
+//   raise eoserror.create('');
   end;
-              
+
   while waitpid(handle,@result,0) = -1 do begin
    if sys_getlasterror <> eintr then begin
     break;
@@ -1322,7 +1322,7 @@ end;
 
 {$endif}
 
-function execmse(const commandline: msestring; 
+function execmse(const commandline: msestring;
                  const options: execoptionsty = [];
                  const workingdirectory: filenamety = '';
                  const params: msestringarty = nil;

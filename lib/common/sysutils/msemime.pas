@@ -13,18 +13,18 @@ interface
 uses
  msegui,msedrag,msestrings,msetypes,msegraphutils,mseglob,mseguiglob,mseclasses,
  msedragglob;
- 
+
 type
 
  tmimedragobject = class;
- 
+
  imimesource = interface(iobjectlink)
    procedure convertmimedata(const sender: tmimedragobject;
                         var adata: string; const atypeindex: integer);
    procedure convertmimetext(const sender: tmimedragobject;
                         var adata: msestring; const atypeindex: integer);
  end;
-  
+
  tmimedragobject = class(tdragobject,iobjectlink)
   private
    fdata: string;
@@ -62,10 +62,10 @@ type
    function checkformat(const awanted: array of msestring): boolean;
    property formats: msestringarty read fformats;         //do not modify
    property formatistext: booleanarty read fformatistext; //do not modify
-   property formatindex: integer read fformatindex 
+   property formatindex: integer read fformatindex
                                write setformatindex default -1;
                        //-1 -> none selected
-   property wantedformatindex: integer read fwantedformatindex 
+   property wantedformatindex: integer read fwantedformatindex
                                write fwantedformatindex default -1;
                        //-1 -> none selected
    property data: string read getdata write setdata;
@@ -77,7 +77,7 @@ type
 implementation
 uses
  msearrayutils;
- 
+
 { tmimedragobject }
 
 constructor tmimedragobject.create(const asender: tobject;

@@ -115,7 +115,7 @@ object threadsfo: tthreadsfo
     datacols.count = 3
     datacols.options = [co_readonly, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savestate, co_cancopy]
     datacols.optionsedit = [scoe_eatreturn, scoe_hintclippedtext]
-    datacols.items = <    
+    datacols.items = <
       item
         options = [co_readonly, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savestate, co_cancopy]
         textflags = [tf_right, tf_ycentered]
@@ -123,7 +123,7 @@ object threadsfo: tthreadsfo
         optionsedit = [scoe_undoonesc, scoe_eatreturn, scoe_exitoncursor, scoe_autoselect, scoe_autoselectonfirstclick, scoe_hintclippedtext]
         valuefalse = '0'
         valuetrue = '1'
-      end    
+      end
       item
         width = 56
         options = [co_readonly, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savestate, co_cancopy]
@@ -131,7 +131,7 @@ object threadsfo: tthreadsfo
         optionsedit = [scoe_undoonesc, scoe_eatreturn, scoe_exitoncursor, scoe_autoselect, scoe_autoselectonfirstclick, scoe_hintclippedtext]
         valuefalse = '0'
         valuetrue = '1'
-      end    
+      end
       item
         width = 201
         options = [co_readonly, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_fill, co_savestate, co_cancopy]
@@ -140,24 +140,24 @@ object threadsfo: tthreadsfo
         valuetrue = '1'
       end>
     fixcols.count = 1
-    fixcols.items = <    
+    fixcols.items = <
       item
         width = 24
         numstart = 1
         numstep = 1
       end>
     fixrows.count = 1
-    fixrows.items = <    
+    fixrows.items = <
       item
         height = 15
         captions.count = 3
-        captions.items = <        
+        captions.items = <
           item
             caption = 'ID'
-          end        
+          end
           item
             caption = 'State'
-          end        
+          end
           item
             caption = 'Location'
             textflags = [tf_ycentered]
@@ -169,7 +169,7 @@ object threadsfo: tthreadsfo
   end
   object tpopupmenu1: tpopupmenu
     menu.submenu.count = 1
-    menu.submenu.items = <    
+    menu.submenu.items = <
       item
         caption = 'Copy to Clipboard'
         state = [as_localcaption, as_localonexecute]

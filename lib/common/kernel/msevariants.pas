@@ -27,7 +27,7 @@ type
  variantararty = array of variantarty;
  vardataaty = array[0..0] of tvardata;
  pvardataaty = ^vardataaty;
- 
+
 function mseVarTypeIsValidArrayType(const aVarType: TVarType): Boolean;
 function mseVarArrayCreate(const Bounds: PVarArrayBoundArray; Dims : SizeInt;
                                                   aVarType: TVarType): Variant;
@@ -65,7 +65,7 @@ function mseVarTypeIsValidArrayType(const aVarType: TVarType): Boolean;
       varVariant,varUnknown,varShortInt,varByte,varWord,varLongWord,
       varint64];
   end;
- 
+
 function mseVarArrayCreate(const Bounds: PVarArrayBoundArray;
                              Dims : SizeInt; aVarType: TVarType): Variant;
   var

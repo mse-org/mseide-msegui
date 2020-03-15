@@ -43,7 +43,7 @@ type
 
  tdataeditcontroller = class(teventpersistent)
  end;
- 
+
  tdialogcontroller = class(tdataeditcontroller,ibutton,idataeditcontroller)
   protected
    fowner: tcustomdataedit;
@@ -65,7 +65,7 @@ type
 
  stringdialogexeceventty = procedure(const sender: tcustomdataedit;
             var avalue:msestring; var modresult: modalresultty) of object;
-                                       //default mr_ok 
+                                       //default mr_ok
  tstringdialogcontroller = class(tdialogcontroller)
   protected
    fonexecute: stringdialogexeceventty;
@@ -115,10 +115,10 @@ type
   published
    property onexecute;
  end;
- 
+
  realdialogexeceventty = procedure(const sender: tcustomdataedit;
             var avalue: realty; var modresult: modalresultty) of object;
-                                       //default mr_ok 
+                                       //default mr_ok
  trealdialogcontroller = class(tdialogcontroller)
   private
   protected
@@ -144,13 +144,13 @@ type
    destructor destroy; override;
   published
    property frame: tellipsebuttonframe read getframe write setframe;
-   property onexecute: realdialogexeceventty read getonexecute 
+   property onexecute: realdialogexeceventty read getonexecute
                                                         write setonexecute;
  end;
 
  datetimedialogexeceventty = procedure(const sender: tcustomdataedit;
                   var avalue: tdatetime; var modresult: modalresultty) of object;
-                                       //default mr_ok 
+                                       //default mr_ok
  tdatetimedialogcontroller = class(tdialogcontroller)
   private
   protected
@@ -176,13 +176,13 @@ type
    destructor destroy; override;
   published
    property frame: tellipsebuttonframe read getframe write setframe;
-   property onexecute: datetimedialogexeceventty read getonexecute 
+   property onexecute: datetimedialogexeceventty read getonexecute
                                                         write setonexecute;
  end;
 
  integerdialogexeceventty = procedure(const sender: tcustomdataedit;
             var avalue: integer; var modresult: modalresultty) of object;
-                                       //default mr_ok 
+                                       //default mr_ok
  tintegerdialogcontroller = class(tdialogcontroller)
   private
   protected
@@ -208,11 +208,11 @@ type
    destructor destroy; override;
   published
    property frame: tellipsebuttonframe read getframe write setframe;
-   property onexecute: integerdialogexeceventty read getonexecute 
+   property onexecute: integerdialogexeceventty read getonexecute
                                                         write setonexecute;
  end;
 
- 
+
 implementation
 uses
  msestockobjects,msekeyboard,mseformatstr,msereal,sysutils;
@@ -223,7 +223,7 @@ type
  tcustomdatetimeedit1 = class(tcustomdatetimeedit);
  tcustomintegeredit1 = class(tcustomintegeredit);
  tcustomstringedit1 = class(tcustomstringedit);
- 
+
 { tdialogform }
 
 procedure tdialogform.updatewindowinfo(var info: windowinfoty);
@@ -295,8 +295,8 @@ end;
 function tdialogcontroller.iskeyexecute(const info: keyeventinfoty): boolean;
 begin
  with fowner,info do begin
-  result:= (not readonly or (oe1_readonlydialog in optionsedit1)) and 
-                (oe1_keyexecute in optionsedit1) and (key = key_down) and 
+  result:= (not readonly or (oe1_readonlydialog in optionsedit1)) and
+                (oe1_keyexecute in optionsedit1) and (key = key_down) and
            (shiftstate = [ss_alt]);
  end;
 end;
@@ -307,11 +307,11 @@ begin
   if fframe <> nil then begin
    with tcustombuttonframe(fframe) do begin
     if buttons.count > 0 then begin
-     buttons[0].enabled:= not (oe_readonly in getoptionsedit) or 
+     buttons[0].enabled:= not (oe_readonly in getoptionsedit) or
                      (oe1_readonlydialog in optionsedit1);
     end;
    end;
-  end;  
+  end;
  end;
 end;
 
@@ -541,7 +541,7 @@ end;
 procedure tdatetimedialogcontroller.setexecresult(var avalue: tdatetime);
 begin
  with tcustomdatetimeedit(fowner) do begin
-  case kind of 
+  case kind of
    dtk_time: begin
     text:= mseformatstr.timetostring(avalue,formatedit);
    end;

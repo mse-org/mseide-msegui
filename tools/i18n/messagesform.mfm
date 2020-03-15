@@ -25,7 +25,7 @@ object messagesfo: tmessagesfo
     anchors = []
     datacols.count = 1
     datacols.options = [co_fill, co_savestate]
-    datacols.items = <    
+    datacols.items = <
       item[messages]
         width = 1024
         options = [co_fill, co_savestate]

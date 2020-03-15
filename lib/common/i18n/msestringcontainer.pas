@@ -12,7 +12,7 @@ unit msestringcontainer;
 interface
 uses
  msetypes,mseclasses,msedatalist,classes,mclasses,msehash,msestrings;
- 
+
 type
  tstringcontainer = class;
 
@@ -28,10 +28,10 @@ type
    procedure doasyncevent(var atag: integer); override;
   published
    property onreadstate: notifyeventty read fonreadstate write fonreadstate;
-   property oneventloopstart: notifyeventty read foneventloopstart 
+   property oneventloopstart: notifyeventty read foneventloopstart
                                                     write foneventloopstart;
  end;
- 
+
  tstringcontainer = class(tcustomstringcontainer)
   private
    fstrings: tmsestringdatalist;
@@ -50,7 +50,7 @@ type
 
  tkeystringdatalist = class(tdoublemsestringdatalist)
  end;
- 
+
  tkeystringcontainer = class(tcustomstringcontainer)
   private
    fstrings: tkeystringdatalist;
@@ -69,10 +69,10 @@ type
                    //a = strings, b = keys
    property ongetstring: getstringeventty read fongetstring write fongetstring;
  end;
- 
+
 implementation
 
-{ tcustomstringcontainer } 
+{ tcustomstringcontainer }
 
 procedure tcustomstringcontainer.readstate(reader: treader);
 begin

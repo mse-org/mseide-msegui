@@ -28,7 +28,7 @@ const
 const
  glpixelshift = -0.5;
  gltopshift = -1;
- 
+
 type
  contextattributesty = record
   buffersize: integer;
@@ -59,7 +59,7 @@ type
  pcontextinfoty = ^contextinfoty;
 
  oglgcstatety = (ogcs_hastexture,ogcs_needsblend,ogcs_hasclipreg);
- oglgcstatesty = set of oglgcstatety; 
+ oglgcstatesty = set of oglgcstatety;
  oglgcdty = record
   fkind: gckindty;
   {$ifdef unix}
@@ -97,8 +97,8 @@ type
    1: (_bufferspace: gcpty;);
  end;
  poglgcty = ^oglgcty;
- 
-{ 
+
+{
 function createrendercontext(const aparent: winidty; const windowrect: rectty;
                                    const ainfo: contextinfoty;
                                    var gc: gcty; out aid: winidty): guierrorty;
@@ -119,7 +119,7 @@ uses
  mseformatstr,msefontcache,mseftfontcache,mseopengl,msebits;
 type
  tcanvas1 = class(tcanvas);
- 
+
  gluvertexty = packed record
   x: double;
   y: double;
@@ -127,7 +127,7 @@ type
  end;
  pgluvertexty = ^gluvertexty;
  ppgluvertexty = ^pgluvertexty;
-{ 
+{
  ftglfontty = record
   handle: pftglfont;
  end;
@@ -152,7 +152,7 @@ type
    procedure drawstring16(var drawinfo: drawinfoty;
                                     const afont: fontty); override;
  end;
-   
+
 var
  ffontcache: tglftfontcache;
 // stockgc: gcty;
@@ -167,7 +167,7 @@ begin
   until glgeterror() = gl_no_error;
  end;
 end;
- 
+
 function fontcache: tglftfontcache;
 begin
  if ffontcache = nil then begin
@@ -191,7 +191,7 @@ begin
   ar1[index]:= atag;
   inc(index);
  end;
-end; 
+end;
 
 procedure putvalue(var ar1: integerarty; var index: integer;
                              const atag,avalue,defaultvalue: integer);
@@ -242,7 +242,7 @@ end;
 procedure initcontext(const winid: winidty; var gc: gcty;
               const sourceviewport: rectty);
 begin
- gc.gdifuncs:= openglgetgdifuncs; 
+ gc.gdifuncs:= openglgetgdifuncs;
  if winid <> 0 then begin
   with oglgcty(gc.platformdata).d do begin
  //  pd:= winid;
@@ -258,7 +258,7 @@ begin
   end;
  end;
 end;
- 
+
 var
  gccount: integer;
 
@@ -321,7 +321,7 @@ begin
 {$endif}
  end;
 end;
-(* 
+(*
 {$ifdef unix}
 
 function createrendercontext(const aparent: winidty; const windowrect: rectty;
@@ -330,7 +330,7 @@ function createrendercontext(const aparent: winidty; const windowrect: rectty;
 var
  attributes: txsetwindowattributes;
  err: gdierrorty;
- 
+
 begin
  result:= gue_ok;
  with oglgcty(gc.platformdata).d do begin
@@ -382,7 +382,7 @@ function createrendercontext(const aparent: winidty; const windowrect: rectty;
                                    var gc: gcty; out aid: winidty): guierrorty;
 var
  pixeldesc: tpixelformatdescriptor;
- int1: integer; 
+ int1: integer;
  options1: internalwindowoptionsty;
  wi1: windowty;
 begin
@@ -436,7 +436,7 @@ procedure sendrect(const drawinfo: drawinfoty; const arect: rectty);
 var
  startx,starty,endx,endy: real;
  texstartx,texstarty,texendx,texendy: real;
- 
+
 begin
  with drawinfo,oglgcty(gc.platformdata).d,arect do begin
   startx:= (x+origin.x)+glpixelshift;
@@ -515,12 +515,12 @@ begin
    biclrused:= 0;
    biclrimportant:= 0;
   end;
-  dc:= getdc(0);    
+  dc:= getdc(0);
 //  pixmap:= createdibsection(dc,info,dib_rgb_colors,po1,0,0);
   pixmap:= createdibitmap(dc,info.bmiheader,0,nil,info,dib_rgb_colors);
   releasedc(0,dc);
  {$else}
-  pixmap:= gui_createpixmap(size,0,bmk_rgb{false},copyfrom); 
+  pixmap:= gui_createpixmap(size,0,bmk_rgb{false},copyfrom);
          //depht 1 not supported by glx ???
   {$endif}
  end;
@@ -528,12 +528,12 @@ end;
 
 procedure gdi_creategc(var drawinfo: drawinfoty); //gdifunc
 var
- device1: ptruint; //used for extension query 
+ device1: ptruint; //used for extension query
 {$ifdef unix}
  attributes: txsetwindowattributes;
 {$else}
  pixeldesc: tpixelformatdescriptor;
- int1: integer; 
+ int1: integer;
  options1: internalwindowoptionsty;
  wi1: windowty;
 {$endif}
@@ -755,7 +755,7 @@ begin
   colortogl(drawinfo.color.color,co1);
   glclearcolor(co1.r,co1.g,co1.b,co1.a);
   glclear(gl_color_buffer_bit);
-  
+
  end;
 end;
 
@@ -772,7 +772,7 @@ const
  //rop_notcopy,      rop_notor,      rop_nand, rop_set
    gl_copy_inverted, gl_or_inverted, gl_nand,   gl_set
  );
-   
+
 procedure setlogicop(const rasterop: rasteropty; const gc: gcty);
 begin
  if rasterop = rop_copy then begin
@@ -815,13 +815,13 @@ begin
    size.cx:= nextpowerof2(source.image.size.cx);
    size.cy:= nextpowerof2(source.image.size.cy);
    result:= (source.mask.pixels <> nil) and (source.mask.kind <> bmk_mono)
-                    or (size.cx <> source.image.size.cx) or 
+                    or (size.cx <> source.image.size.cx) or
                                        (size.cy <> source.image.size.cy);
    if result then begin
     dcx:= size.cx;
     dcy:= size.cy;
     scx:= source.image.size.cx;
-    scy:= source.image.size.cy;    
+    scy:= source.image.size.cy;
     allocimage(dest,source.image.size,source.image.kind);
     scxw:= dest.linelength;
     {
@@ -863,7 +863,7 @@ begin
      end;
     end
     else begin
-     if source.image.kind = bmk_mono then begin  
+     if source.image.kind = bmk_mono then begin
                              //mask in monochrome not supported
       for int1:= dcy-1 downto 0 do begin
        xintp:= dcx;
@@ -1035,15 +1035,15 @@ begin
   if gvm_brushorigin in mask then begin
    gcbrushorigin:= brushorigin;
   end;
-  if drawingflagsty((longword(drawingflags) xor 
+  if drawingflagsty((longword(drawingflags) xor
      longword(gcdrawingflags))) * [df_brush]{fillmodeinfoflags} <> [] then begin
    updatebit1(longword(gcstate),ord(ogcs_hastexture),
-                                (df_brush in drawingflags) and 
+                                (df_brush in drawingflags) and
                               (brushsize.cx > 0) and (brushsize.cy > 0));
   end;
   gcdrawingflags:= drawingflags;
   if gvm_options in mask then begin
-   if (cao_smooth in options) xor 
+   if (cao_smooth in options) xor
                 (cao_smooth in gcoptions) then begin
     if cao_smooth in options then begin
      glenable(gl_line_smooth);
@@ -1080,7 +1080,7 @@ begin
      if rectcount > 0 then begin
       glbegin(gl_quads);
       y1:= top-(stripestart+cliporigin.y);
-      po1:= datapo;      
+      po1:= datapo;
       for int1:= stripecount-1 downto 0 do begin
        int3:= y1;
        x1:= cliporigin.x;
@@ -1223,7 +1223,7 @@ begin
 end;
 
 procedure gdi_fillrect(var drawinfo: drawinfoty);
-begin 
+begin
  glbegin(gl_quads);
  sendrect(drawinfo,drawinfo.rect.rect^);
  glend;
@@ -1280,12 +1280,12 @@ begin
   glxdestroycontext(msedisplay,stockpixmapgc);
  end;
  }
-end; 
+end;
 {
 procedure checkstockpixmapgc;
 begin
  if stockpixmapgc = 0 then begin
-  
+
   fillchar(stockgc,sizeof(stockgc),0);
   fillchar(info,sizeof(drawinfoty),0);
   with info.creategc do begin
@@ -1397,7 +1397,7 @@ end;
 
 procedure copyareagl(var drawinfo: drawinfoty);
 //todo: use persistent pixmap or texture buffer
-//suse 11.4 crashes with dri shared buffers and does 
+//suse 11.4 crashes with dri shared buffers and does
 //not support non dri shared buffers...
 //suse 11.1 crashes with dri pixmaps...
 
@@ -1447,7 +1447,7 @@ begin
   end;
   glpushattrib(int1);
   if df_colorconvert in drawinfo.gc.drawingflags then begin
-   if df_canvasismonochrome in 
+   if df_canvasismonochrome in
                         tcanvas1(source).fdrawinfo.gc.drawingflags then begin
     glpixeltransferf(gl_red_bias,glcolorbackground.red/255);
     glpixeltransferf(gl_red_scale,
@@ -1468,8 +1468,8 @@ begin
      end
      else begin
       plongwordaty(po1)^[int1]:= pixelty(co1);
-     end;     
-    end;    
+     end;
+    end;
    end;
   end;
   if mask <> nil then begin
@@ -1517,7 +1517,7 @@ begin
    gldrawpixels(cx,cy,gl_bgra,gl_unsigned_byte,nil);
   end;
   glbindbuffer(gl_pixel_unpack_buffer,0);
-  
+
   glpopclientattrib;
   glpopattrib;
   gldeletebuffers(1,@buf);
@@ -1540,15 +1540,15 @@ var
  int1: integer;
  wo1: word;
 // lwo1: longword;
- 
+
 begin
  with drawinfo.copyarea,oglgcty(drawinfo.gc.platformdata).d do begin
   if copymode <> gcrasterop then begin
    setlogicop(copymode,drawinfo.gc);
   end;
  end;
- 
- if tcanvas1(drawinfo.copyarea.source).fdrawinfo.gc.handle = 
+
+ if tcanvas1(drawinfo.copyarea.source).fdrawinfo.gc.handle =
                                               drawinfo.gc.handle then begin
   copyareaself(drawinfo);
  end
@@ -1569,7 +1569,7 @@ begin
      exit;
     end;
     glpushclientattrib(gl_client_pixel_store_bit);
-    glpushattrib(gl_pixel_mode_bit or gl_color_buffer_bit or 
+    glpushattrib(gl_pixel_mode_bit or gl_color_buffer_bit or
                       gl_stencil_buffer_bit);
     wo1:= word(opacity.red)+opacity.blue+opacity.red+opacity.blue;
     if wo1 = 3*255 then begin
@@ -1689,7 +1689,7 @@ begin
 end;
 
 procedure getimage(var drawinfo: drawinfoty; var image: imagety);
- 
+
 //todo: optimize
 var
  int1,int2,int3: integer;
@@ -1733,7 +1733,7 @@ begin
    end
    else begin
     glpushattrib(gl_pixel_mode_bit);
-    
+
     glpixeltransferf(gl_alpha_scale,0);
     glpixeltransferf(gl_alpha_bias,0);
     datatype:= gl_unsigned_byte;
@@ -1748,7 +1748,7 @@ begin
      glpushclientattrib(gl_client_pixel_store_bit);
      glpixelstorei(gl_pack_invert_mesa,1);
      glreadpixels(0,0,size.cx,size.cy,mode,datatype,pixels);
-     glpopclientattrib;    
+     glpopclientattrib;
     end
     else begin
      getmem(po1,length*sizeof(rgbtriplety));
@@ -1790,7 +1790,7 @@ end;
 
 procedure gdi_imagetopixmap(var drawinfo: drawinfoty); //gdifunc
 var
- im1: imagety; 
+ im1: imagety;
  ps1,pd1: plongword;
  int1,int2: integer;
  lwo1: longword;
@@ -1824,11 +1824,11 @@ begin
      end;
     end;
    end;
-   error:= gui_imagetopixmap(im1,pixmap,0);  
+   error:= gui_imagetopixmap(im1,pixmap,0);
    gui_freeimagemem(im1.pixels);
   end
   else begin
-   error:= gui_imagetopixmap(image,pixmap,0);  
+   error:= gui_imagetopixmap(image,pixmap,0);
   end;
  end;
 end;
@@ -1927,7 +1927,7 @@ end;
 procedure tglftfontcache.drawglyph(var drawinfo: drawinfoty; const pos: pointty;
                const bitmap: pbitmapdataty);
 begin
- setrasterpos(drawinfo.gc,pos); 
+ setrasterpos(drawinfo.gc,pos);
  with bitmap^ do begin
   gldrawpixels(width,height,gl_alpha,gl_unsigned_byte,@data);
  end;

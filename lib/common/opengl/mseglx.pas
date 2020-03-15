@@ -123,7 +123,7 @@ type
   GLXPixmap = TXID;
   GLXDrawable = TXID;
   GLXContextID = TXID;
-  
+
   TXPixmap = XPixmap;
   TXFont = XFont;
   TXColormap = XColormap;
@@ -175,7 +175,7 @@ function load_glx_mesa: boolean;
 implementation
 {$ifdef FPC}{$LINKLIB m}{$endif}
 
-uses 
+uses
  msegl,msedynload,msesys{$ifdef FPC},dynlibs{$endif};
 
 function load_glx: boolean;

@@ -20,7 +20,7 @@ object mainfo: tmainfo
     frame.localprops = []
     frame.localprops1 = []
     frame.buttons.count = 1
-    frame.buttons.items = <    
+    frame.buttons.items = <
       item
         color = -2147483646
         imagenr = 17
@@ -65,16 +65,16 @@ object mainfo: tmainfo
     bounds_cy = 186
     anchors = [an_left, an_top, an_right, an_bottom]
     fixrows.count = 1
-    fixrows.items = <    
+    fixrows.items = <
       item
         height = 16
         captions.count = 1
-        captions.items = <        
+        captions.items = <
           item
           end>
       end>
     datacols.count = 1
-    datacols.items = <    
+    datacols.items = <
       item[treeedit]
         width = 396
         options = [co_readonly, co_fill, co_savevalue, co_savestate, co_mousescrollrow]
@@ -107,7 +107,7 @@ object mainfo: tmainfo
     frame.localprops1 = []
     frame.button.color = -2147483646
     frame.buttons.count = 1
-    frame.buttons.items = <    
+    frame.buttons.items = <
       item
         color = -2147483646
       end>
@@ -129,7 +129,7 @@ object mainfo: tmainfo
     ifilink = dropdownunits
     dropdown.options = [deo_selectonly, deo_autodropdown, deo_keydropdown, deo_cliphint]
     dropdown.cols.count = 1
-    dropdown.cols.items = <    
+    dropdown.cols.items = <
       item
       end>
     reffontheight = 14
@@ -140,7 +140,7 @@ object mainfo: tmainfo
     frame.localprops1 = []
     frame.button.color = -2147483646
     frame.buttons.count = 1
-    frame.buttons.items = <    
+    frame.buttons.items = <
       item
         color = -2147483646
       end>
@@ -162,7 +162,7 @@ object mainfo: tmainfo
     ifilink = dropdownunits
     dropdown.options = [deo_selectonly, deo_autodropdown, deo_keydropdown, deo_cliphint]
     dropdown.cols.count = 1
-    dropdown.cols.items = <    
+    dropdown.cols.items = <
       item
       end>
     reffontheight = 14
@@ -173,7 +173,7 @@ object mainfo: tmainfo
     frame.localprops = [frl_levelo, frl_colorclient]
     frame.localprops1 = []
     frame.buttons.count = 1
-    frame.buttons.items = <    
+    frame.buttons.items = <
       item
         imagenr = 17
       end>
@@ -210,7 +210,7 @@ object mainfo: tmainfo
   object dropdownunits: tifidropdownlistlinkcomp
     controller.optionsvalue = [vco_nosync]
     controller.dropdown.cols.count = 1
-    controller.dropdown.cols.items = <    
+    controller.dropdown.cols.items = <
       item
       end>
     left = 32

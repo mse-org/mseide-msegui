@@ -14,12 +14,12 @@ unit msesysintf; //i386-win32
 interface
 uses
  msesys,{msethread,}msetypes,msesystypes,msestrings,windows,msectypes;
- 
+
 {$include ..\msesysintf.inc}
 
 type
  NTSTATUS = longword;
- 
+
 const
  ASFW_ANY = dword(-1);
          //PROCESSINFOCLASS
@@ -28,7 +28,7 @@ const
  ProcessWow64Information = 26;
  ProcessImageFileName = 27;
  ProcessBreakOnTermination = 29;
- 
+
 var
  AllowSetForegroundWindow: function(dwProcessId: DWORD):WINBOOL; stdcall;
 
@@ -41,7 +41,7 @@ uses
 
 //todo: correct unicode implementation, long filepaths, stubs for win95
 type
-{$packrecords c} 
+{$packrecords c}
  PROCESS_BASIC_INFORMATION = record
      Reserved1: PVOID;
      PebBaseAddress: pointer;//PPEB;
@@ -64,7 +64,7 @@ var
                   ProcessInformationLength: cULONG;
                   ReturnLength: PULONG): NTSTATUS; stdcall;
  GetProcessId: function(Process: HANDLE): DWORD; stdcall;
-                 
+
 function procidfromprochandle(const ahandle: prochandlety): procidty;
 var
  info: PROCESS_BASIC_INFORMATION;
@@ -108,7 +108,7 @@ const
 type
  win32threadinfoty = record                //64bit
   handle: thandle;                         //8
-  platformdata: array[1..3] of pointer;   
+  platformdata: array[1..3] of pointer;
  end;
 
  winfileinfoty = record
@@ -162,13 +162,13 @@ type
   platformdata: array[4..7] of pointer;
  {$endif}
  end;
- 
+
 const
  TH32CS_SNAPHEAPLIST = $00000001;
  TH32CS_SNAPPROCESS  = $00000002;
  TH32CS_SNAPTHREAD   = $00000004;
  TH32CS_SNAPMODULE   = $00000008;
- TH32CS_SNAPALL      = TH32CS_SNAPHEAPLIST or TH32CS_SNAPPROCESS or 
+ TH32CS_SNAPALL      = TH32CS_SNAPHEAPLIST or TH32CS_SNAPPROCESS or
                        TH32CS_SNAPTHREAD or TH32CS_SNAPMODULE;
  TH32CS_INHERIT      = $80000000;
 type
@@ -188,21 +188,21 @@ type
   szExeFile: array[0..MAX_PATH-1] of char;
  end;
  PPROCESSENTRY32 = ^PROCESSENTRY32;
- 
+
 function CreateToolhelp32Snapshot(dwFlags: dword; th32ProcessId: dword): thandle;
               stdcall; external kernel32 name 'CreateToolhelp32Snapshot';
 function Process32First(hSnapshot: thandle; lppe: PPROCESSENTRY32): BOOL;
               stdcall; external kernel32 name 'Process32First';
 function Process32Next(hSnapshot: thandle; lppe: PPROCESSENTRY32): BOOL;
               stdcall; external kernel32 name 'Process32Next';
-function GetFileInformationByHandle(hFile: THandle; 
-                    var lpFileInformation: By_Handle_File_Information): BOOL; 
+function GetFileInformationByHandle(hFile: THandle;
+                    var lpFileInformation: By_Handle_File_Information): BOOL;
               stdcall; external 'kernel32' name 'GetFileInformationByHandle';
 
 var
  GetLongPathNameW: function(lpszShortPath: LPCWSTR; lpszLongPath: LPCWSTR;
-                                           cchBuffer: DWORD):DWORD; stdcall;              
- 
+                                           cchBuffer: DWORD):DWORD; stdcall;
+
 function sys_getpid: procidty;
 begin
  result:= getcurrentprocessid;
@@ -658,7 +658,7 @@ end;
 function sys_renamefile(const oldname,newname: filenamety): syserrorty;
 var
  str1,str2: string;
-begin 
+begin
  if iswin95 then begin
   str1:= ansistring(winfilepath(oldname,''));
   str2:= ansistring(winfilepath(newname,''));
@@ -681,7 +681,7 @@ begin
   end
   else begin
    result:= syelasterror;
-  end;  
+  end;
  end;
 end;
 
@@ -741,12 +741,12 @@ var
 begin
  if iswin95 then begin
   str1:= ansistring(winfilepath(path,''));
-  bo1:= windows.createdirectorya(pchar(str1),nil); 
+  bo1:= windows.createdirectorya(pchar(str1),nil);
                            //todo: rights -> securityattributes
  end
  else begin
   str2:= winfilepath(path,'');
-  bo1:= windows.createdirectoryw(pmsechar(str2),nil); 
+  bo1:= windows.createdirectoryw(pmsechar(str2),nil);
                            //todo: rights -> securityattributes
  end;
  if bo1 then begin
@@ -879,19 +879,19 @@ begin
  getsystemtimeasfiletime(ft1);
  result:= filetimetotime(ft1);
 end;
- 
+
 var
  lastlocaltime: integer;
  gmtoff: real;
 
 function sys_localtimeoffset: tdatetime;
-var                                  
+var
  tinfo: time_zone_information;
  int1: integer;
 begin
  with tinfo do begin
   {$ifdef FPC}
-  case gettimezoneinformation(@tinfo) of 
+  case gettimezoneinformation(@tinfo) of
   {$else}
   case gettimezoneinformation(tinfo) of
   {$endif}
@@ -930,7 +930,7 @@ var
 begin
  getlocaltime(ti1);
  result:= systemtimetodatetime(ti1);
-end; 
+end;
 }
 (*
 function sys_localtimeoffset: tdatetime;
@@ -963,7 +963,7 @@ end;
 }
 function sys_getlangname: string;
 type
- langty = 
+ langty =
  (L_AFRIKAANS,L_ALBANIAN,L_ARABIC,L_ARMENIAN,L_ASSAMESE,
   L_AZERI,L_BASQUE,L_BELARUSIAN,L_BENGALI,L_BULGARIAN,
   L_CATALAN,L_CHINESE,L_CROATIAN,L_CZECH,L_DANISH,
@@ -979,7 +979,7 @@ type
   L_SINDHI,L_SLOVAK,L_SLOVENIAN,L_SPANISH,L_SWAHILI,
   L_SWEDISH,L_SYRIAC,L_TAMIL,L_TATAR,L_TELUGU,L_THAI,
   L_TURKISH,L_UKRAINIAN,L_URDU,L_UZBEK,L_VIETNAMESE);
-  
+
  langinfoty = record
   lang: word; name: string;
  end;
@@ -1390,7 +1390,7 @@ begin
        wo1:= wnetopenenum(resource_globalnet,resourcetype_disk,0,
                     pnetresource(finddatapo),handle);
        if wo1 <> no_error then begin
-        result:= networkerror(wo1);       
+        result:= networkerror(wo1);
        end;
        freemem(finddatapo);
       end;
@@ -1656,7 +1656,7 @@ begin
  end;
 end;
 
-function sys_setfdrights(const fd: longint; 
+function sys_setfdrights(const fd: longint;
                          const rights: filerightsty;
                          const filename: filenamety = ''): syserrorty;
 var                           //todo: use security attributes
@@ -1668,12 +1668,12 @@ var                           //todo: use security attributes
  pmem: pointer;
  abuf: array[0..max_path] of char;
  wbuf: array[0..max_path] of widechar;
- dwo1: dword; 
+ dwo1: dword;
  }
 begin
  if getfileinformationbyhandle(fd,info1) then begin
   if s_iwusr in rights then begin
-   info1.winfo.dwfileattributes:= info1.winfo.dwfileattributes and 
+   info1.winfo.dwfileattributes:= info1.winfo.dwfileattributes and
                                                 not file_attribute_readonly;
   end
   else begin
@@ -1701,7 +1701,7 @@ begin
      result:= syelasterror();
     end
     else begin
-     
+
     end;
     unmapviewoffile(pmem);
    end;
@@ -1728,7 +1728,7 @@ begin
  end;
 end;
 
-function sys_access(const path: filenamety; 
+function sys_access(const path: filenamety;
                                 const accessmodes: accessmodesty): syserrorty;
 begin
  result:= sye_notimplemented;
@@ -1748,7 +1748,7 @@ begin
  else begin
   dwo1:= getfileattributesw(pwidechar(fname));
  end;
- if dwo1 = 0 then begin 
+ if dwo1 = 0 then begin
   result:= syelasterror();
  end
  else begin
@@ -1944,13 +1944,13 @@ begin
  po1:= nil; //compiler warning
  libhandle:= loadlibrary('shell32.dll');
  if libhandle <> 0 then begin
-  {$ifdef FPC}pointer(po1){$else}po1{$endif}:= 
+  {$ifdef FPC}pointer(po1){$else}po1{$endif}:=
                              getprocaddress(libhandle,'SHGetFolderPathW');
   if not assigned(po1) then begin
    freelibrary(libhandle);
    libhandle:= loadlibrary('shfolder.dll');
    if libhandle <> 0 then begin
-      {$ifdef FPC}pointer(po1){$else}po1{$endif}:= 
+      {$ifdef FPC}pointer(po1){$else}po1{$endif}:=
                              getprocaddress(libhandle,'SHGetFolderPathW');
    end;
   end;

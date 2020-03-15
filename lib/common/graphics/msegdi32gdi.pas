@@ -15,13 +15,13 @@ uses
  msegraphics,msetypes,windows,msestrings,mseguiglob;
 
 procedure init;
-procedure deinit; 
+procedure deinit;
 
 function gdi32getgdifuncs: pgdifunctionaty;
 //function gdi32getgdinum: integer;
 procedure gdi32initdefaultfont;
 function gdi32getdefaultfontnames: defaultfontnamesty;
-//function gdi32creategc(paintdevice: paintdevicety; const akind: gckindty; 
+//function gdi32creategc(paintdevice: paintdevicety; const akind: gckindty;
 //              var gc: gcty; const aprintername: msestring): guierrorty;
 
 {$ifdef FPC}
@@ -105,14 +105,14 @@ const
                 $04,$0c,$08,$10);
 
 { inverse mono bitmap
-source dest 
+source dest
      rop2  $01 $02 $03 $04 $05 $06 $07 $08 $09 $0a $0b $0c $0d $0e $0f $10
    0     0   1   1   1   1   1   1   1   1   0   0   0   0   0   0   0   0
    0     1   1   1   1   1   0   0   0   0   1   1   1   1   0   0   0   0
    1     0   1   1   0   0   1   1   0   0   1   1   0   0   1   1   0   0
    1     1   1   0   1   0   1   0   1   0   1   0   1   0   1   0   1   0
      rop3  $ff $ee $dd $cc $bb $aa $99 $88 $77 $66 $55 $44 $33 $22 $11 $00
-} 
+}
 
  inverserops2: array[rasteropty] of byte =
                             //for 1->foreground in monochromebitmaps
@@ -154,7 +154,7 @@ x 1 0  1   1      0   0     1       1     0    0
 x 0 1  1   1      1   1     0       0     0    0
 x 0 0  0   0      0   0     0       0     0    0
       $7  $6     $5  $4    $3      $2    $1   $0
-} 
+}
  inverserops3: rop3tabty =
                             //for 1->foreground in monochromebitmaps
              // $ff     $ee     $dd     $cc
@@ -193,7 +193,7 @@ P S D nor,notxor,not,ornot,notcopy,notor,nand,set
 0 x 1  1   1      1   1     0       0     0    0
 0 x 0  0   0      0   0     0       0     0    0
      $5f $5a    $55 $50   $0f     $0a   $05  $00
-} 
+}
  inversepatrops3: rop3tabty =
              // $ff     $fa     $f5     $f0
                ($ff0062,$fa0089,$f50225,$f00021,
@@ -215,7 +215,7 @@ P S D nor,notxor,not,ornot,notcopy,notor,nand,set
 implementation
 uses
  mseguiintf,msegraphutils,msesysintf1,sysutils,msegdiplus;
- 
+
 type
  shapety = (fs_copyarea,fs_rect,fs_ellipse,fs_arc,fs_polygon);
 
@@ -289,7 +289,7 @@ type
    1: (_bufferspace: gcpty;);
  end;
  pwin32gcty = ^win32gcty;
- 
+
  charwidthsty = array[0..255] of integer;
  pcharwidthsty = ^charwidthsty;
  win32fontdataty = record
@@ -298,7 +298,7 @@ type
   xwidth: integer;
   local: array[{$ifdef cpu64}2{$else}3{$endif}..15] of pointer; //plattform dependent
  end;
- 
+
 type
  tsimplebitmap1 = class(tsimplebitmap);
  tcanvas1 = class(tcanvas);
@@ -353,11 +353,11 @@ var
        (ps_endcap_flat,ps_endcap_round,ps_endcap_square);
  joinstyles: array[joinstylety] of longword =
        (ps_join_miter,ps_join_round,ps_join_bevel);
-       
+
 const
  highresfontshift = 6;  //64
  highresfontfakt = 1 shl highresfontshift;
- highresfontmask = highresfontfakt - 1; 
+ highresfontmask = highresfontfakt - 1;
  CLEARTYPE_QUALITY = ANTIALIASED_QUALITY+1;
 
  defaultfontname = 'Tahoma';
@@ -396,7 +396,7 @@ begin
  end;
 end;
 
-//function gdi32creategc(paintdevice: paintdevicety; const akind: gckindty; 
+//function gdi32creategc(paintdevice: paintdevicety; const akind: gckindty;
 //              var gc: gcty; const aprintername: msestring): guierrorty;
 procedure gdi_creategc(var drawinfo: drawinfoty);
 var
@@ -454,7 +454,7 @@ begin
      gcpo^.handle:= createenhmetafilew(gcpo^.refgc,nil,@wrect1,nil); //memory
     end
     else begin
-     gcpo^.handle:= createenhmetafilew(gcpo^.refgc,pmsechar(printernamepo^),@wrect1,nil); 
+     gcpo^.handle:= createenhmetafilew(gcpo^.refgc,pmsechar(printernamepo^),@wrect1,nil);
                                                     //file
     end;
     setmapperflags(gcpo^.handle,1); //match font-device aspectratio
@@ -749,9 +749,9 @@ begin
       lbStyle:= bs_solid;
       lbColor:= backgroundcol;
      end;
-     foregroundpen:= extcreatepen(astyle and 
+     foregroundpen:= extcreatepen(astyle and
          not(ps_userstyle or ps_dot or ps_alternate),awidth,brushinfo,
-                    0,nil);         
+                    0,nil);
     end;
    end;
   end;
@@ -818,7 +818,7 @@ const
 
 function gpcolor(const apixel: pixelty): pixelty; inline;
 begin
- result:= apixel and $0000ff00 or 
+ result:= apixel and $0000ff00 or
                 (apixel and $00ff0000 shr 16) or
                 (apixel and $000000ff shl 16) or alphamax;
 end;
@@ -826,11 +826,11 @@ end;
 //todo: optimize, update invalid values only
 
 const
- gpcaps: array[capstylety] of gplinecap = 
+ gpcaps: array[capstylety] of gplinecap =
                  (linecapflat,linecapround,linecapsquare);
- gpdashcaps: array[capstylety] of gpdashcap = 
+ gpdashcaps: array[capstylety] of gpdashcap =
                  (dashcapflat,dashcapround,dashcaptriangle);
- gpjoins: array[joinstylety] of gplinejoin = 
+ gpjoins: array[joinstylety] of gplinejoin =
                  (linejoinmiterclipped,linejoinround,linejoinbevel);
 const
  gpstartflags = [gcf_patternbrushvalid,gcf_gpbrushoriginvalid,gcf_gpregionvalid,
@@ -846,7 +846,7 @@ procedure checkgpgc(var gc: gcty; aflags: gcflagsty);
   procedure updatepalette;
   begin
    with gc,win32gcty(platformdata).d do begin
-    if gcf_gpmonochromebrush in gpflags then begin       
+    if gcf_gpmonochromebrush in gpflags then begin
      with gppalettedata do begin
       longword(val0):= gpcolor(foregroundcol) or $ff000000;
       if df_opaque in drawingflags then begin
@@ -863,7 +863,7 @@ procedure checkgpgc(var gc: gcty; aflags: gcflagsty);
    end;
   end; //checkgpgc
 var
- newtexture: boolean;  
+ newtexture: boolean;
  begin
   result:= false;
   with gc,win32gcty(platformdata).d do begin
@@ -990,7 +990,7 @@ begin
   if gcf_selectforegroundbrush in aflags then begin
    checkbrushorcolor;
   end;
-  if (gcf_selectforegroundpen in aflags) xor 
+  if (gcf_selectforegroundpen in aflags) xor
                               (gcf_gppenmode in gpflags) then begin
    if (gcf_selectforegroundpen in aflags) then begin
     if gcf_gpshiftpen in gpflags then begin
@@ -1040,7 +1040,7 @@ begin
   recttowinrect(rect1);
   lptodp(gc.handle,
      {$ifdef FPC}lppoint(@{$endif}rect1{$ifdef FPC}){$endif},2);
-  result:= createrectrgnindirect(trect(rect1));   
+  result:= createrectrgnindirect(trect(rect1));
  end
  else begin
   recttowinrect(rect);
@@ -1243,7 +1243,7 @@ end;
 var
  fgdipluschecked: boolean;
  fhasgdiplus: boolean;
-  
+
 procedure gdi_destroygc(var drawinfo: drawinfoty);
 begin
  with drawinfo,gc,win32gcty(platformdata).d do begin
@@ -1445,7 +1445,7 @@ end;
 procedure gdi_movewindowrect(var drawinfo: drawinfoty); //gdifunc
 begin
  with drawinfo.moverect do begin
-  gui_movewindowrect(drawinfo.paintdevice,dist^,rect^);  
+  gui_movewindowrect(drawinfo.paintdevice,dist^,rect^);
  end;
 end;
 
@@ -1480,7 +1480,7 @@ begin
    else begin
     bo1:= checkgc(gc,[gcf_foregroundpenvalid,gcf_selectforegroundpen]);
     if ((win32gcty(gc.platformdata).d.peninfo.width <= 1) or
-            (win32gcty(gc.platformdata).d.peninfo.capstyle = cs_butt)) and 
+            (win32gcty(gc.platformdata).d.peninfo.capstyle = cs_butt)) and
             (count > 0) then begin
      po1:= @pointarty(buffer.buffer)[count-1]; //endpoint
      if (po1^.x <> pointarty(buffer.buffer)[0].x) or
@@ -1573,7 +1573,7 @@ begin
  end;
 end;
 
-procedure getarcinfo(const info: drawinfoty; 
+procedure getarcinfo(const info: drawinfoty;
                     out xstart,ystart,xend,yend: integer);
 var
  stopang: real;
@@ -1595,7 +1595,7 @@ type
   rect: rectty;
   startang,extentang: real;
  end;
- 
+
 procedure adjustgparc(const drawinfo: drawinfoty; out ainfo: gparcinfoty);
 begin
  with drawinfo,arc,rect^ do begin
@@ -1615,7 +1615,7 @@ begin
   }
  end;
 end;
- 
+
 procedure gdi_drawarc(var drawinfo: drawinfoty);
 var                         //todo: optimize
  bo1: boolean;
@@ -1636,7 +1636,7 @@ begin
    if (xstart = xend) and (ystart = yend) and (abs(extentang) < 1) then begin
     checkgc(gc,[gcf_foregroundpenvalid,gcf_selectforegroundpen,gcf_selectnullbrush]);
     movetoex(gc.handle,xstart,ystart,nil);
-    if (win32gcty(gc.platformdata).d.peninfo.width = 0) {and 
+    if (win32gcty(gc.platformdata).d.peninfo.width = 0) {and
             (win32gcty(gc.platformdata).peninfo.capstyle <> cs_butt)} then begin
      inc(xstart);
     end;
@@ -1751,10 +1751,10 @@ end;
 procedure fill(var drawinfo: drawinfoty; shape: shapety);
 
 var
- xstart,ystart,xend,yend: integer; 
+ xstart,ystart,xend,yend: integer;
  rop3tab: prop3tabty;
  patrop3tab: prop3tabty;
- 
+
  procedure fill1( adc: hdc; arop: rasteropty);
  begin
   with drawinfo do begin
@@ -1851,7 +1851,7 @@ begin
     patrop3tab:= @patrops3;
    end;
 
-   if (drawingflags * [df_monochrome,df_opaque,df_brush] = 
+   if (drawingflags * [df_monochrome,df_opaque,df_brush] =
                                           [df_monochrome,df_brush]) then begin
     if shape <> fs_rect then begin
      if shape <> fs_copyarea then begin
@@ -2076,7 +2076,7 @@ begin
   if gcf_smooth in flags then begin
    checkgpgc(drawinfo.gc,gpfillflags);
    gdipfillpolygon2i(gpgraphic,gpbrush,drawinfo.buffer.buffer,
-                                                    drawinfo.points.count);   
+                                                    drawinfo.points.count);
   end
   else begin
    fill(drawinfo,fs_polygon);
@@ -2119,7 +2119,7 @@ var
    end;
   end;
  end;
- 
+
  procedure getstretchedbmps;
  var
   po1: pointty;
@@ -2303,7 +2303,7 @@ begin
   if not intersectrect(destrect^,rect1,rect1) then begin
    exit;
   end;
-  
+
   nomaskblt:= iswin95 or (kind = gck_printer);
   setintpolmode(handle);
   maskbefore:= mask;
@@ -2340,7 +2340,7 @@ begin
     transfer;
    end
    else begin
-    if df_canvasismonochrome in 
+    if df_canvasismonochrome in
           tcanvas1(source).fdrawinfo.gc.drawingflags
                                {source.kind = bmk_mono} then begin
                 //convert from monochrome
@@ -2387,7 +2387,7 @@ begin
         inc(plongword(pd));
        until po1 >= pe;
        ps:= ps + scanstep;
-      end;      
+      end;
      end
      else begin //color to gray
       for int1:= 0 to sourcerect^.cy - 1 do begin
@@ -2395,13 +2395,13 @@ begin
        pe:= po1 + sourcerect^.cx;
        repeat
         lwo1:= plongword(ps)^;
-        pbyte(po1)^:= ((lwo1 and $ff) + ((lwo1 and $ff00) shr 8) + 
+        pbyte(po1)^:= ((lwo1 and $ff) + ((lwo1 and $ff00) shr 8) +
                                         ((lwo1 and $ff0000) shr 16)) div 3;
         inc(po1);
         inc(plongword(ps));
        until po1 >= pe;
        pd:= pd + scanstep;
-      end;      
+      end;
      end;
      ddcbefore:= tcanvas1(source).fdrawinfo.gc.handle;
      tcanvas1(source).fdrawinfo.gc.handle:= ddc;
@@ -2592,15 +2592,15 @@ begin
        {
         for int1:= 0 to destimage.length - 1 do begin
          with rgbtriplety(destimage.pixels[int1]) do begin
-          red:=   (byte(256 - 
+          red:=   (byte(256 -
                    rgbtriplety(colormaskimage.pixels^[int1]).red) * red +
                    rgbtriplety(colormaskimage.pixels^[int1]).red *
                    rgbtriplety(sourceimage.pixels^[int1]).red) div 256);
-          green:= (byte(255 - 
+          green:= (byte(255 -
                    rgbtriplety(colormaskimage.pixels^[int1]).green) * green +
                    rgbtriplety(colormaskimage.pixels^[int1]).green *
                    rgbtriplety(sourceimage.pixels^[int1]).green) div byte(255);
-          blue:=  (byte(255 - 
+          blue:=  (byte(255 -
                    rgbtriplety(colormaskimage.pixels^[int1]).blue) * blue +
                    rgbtriplety(colormaskimage.pixels^[int1]).blue *
                    rgbtriplety(sourceimage.pixels^[int1]).blue) div byte(255);
@@ -2730,7 +2730,7 @@ const
   (name: 'RUSSIAN'; code: 204),
   (name: 'MAC'; code: 77),
   (name: 'BALTIC'; code: 186));
-  
+
 type
  pboolean = ^boolean;
 
@@ -2785,7 +2785,7 @@ var
    end;
   end;
  end;
-  
+
 var
  fontinfo1: logfont;
 // textmetricsw: ttextmetricw;
@@ -2798,7 +2798,7 @@ var
 
 label
  endlab;
-  
+
 begin
  result:= false;
  with drawinfo.getfont.fontdata^ do begin
@@ -2895,7 +2895,7 @@ begin
     lfheight:= lfheight * highresfontfakt;
     lfwidth:= lfwidth * highresfontfakt;
    end;
-   
+
    font1:= createfontindirect({$ifdef FPC}@{$endif}fontinfo1);
   end;
   if font1 = 0 then begin
@@ -2927,13 +2927,13 @@ begin
      end
      else begin
       xwidth:= round(h.d.xscale * textmetricsa.tmavecharwidth*10);
-      h.d.width:= xwidth shl fontsizeshift; 
+      h.d.width:= xwidth shl fontsizeshift;
       h.d.xscale:= 1.0;
       result:= dogetfont(drawinfo,false);
      end;
     end;
     h.d.width:= int1;  //restore
-    h.d.xscale:= rea1; 
+    h.d.xscale:= rea1;
     exit;
    end;
    with win32fontdataty(platformdata) do begin
@@ -2996,7 +2996,7 @@ endlab:
   inc(fontcount);
  end;
 {$endif}
- closedc; 
+ closedc;
 end;
 
 procedure gdi_getfonthighres(var drawinfo: drawinfoty);
@@ -3103,7 +3103,7 @@ begin
 endlab:
   if fh1 <> 0 then begin
    selectobject(gc1,fh1);
-  end; 
+  end;
   if drawinfo.gc.handle = invalidgchandle then begin
    releasedc(0,gc1);
   end;
@@ -3128,7 +3128,7 @@ var
 begin
 // result:= gde_fontmetrics;
  with drawinfo.getchar16widths do begin
-  hires:= (df_highresfont in drawinfo.gc.drawingflags) and 
+  hires:= (df_highresfont in drawinfo.gc.drawingflags) and
                           (fontdata^.fonthighres <> 0);
   if (drawinfo.gc.handle = invalidgchandle) or hires then begin
    gc1:= getdc(0);  //use default dc
@@ -3164,7 +3164,7 @@ begin
      end;
     end;
     int1:= count - gcpresults.nglyphs;
-    if int1 > 0 then begin //has surrogate pairs, 
+    if int1 > 0 then begin //has surrogate pairs,
                          //insert dummy 0's for low pair part
                          //not tested!
      po1:= text;

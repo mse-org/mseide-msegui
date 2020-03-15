@@ -18,9 +18,9 @@ uses
 
 const
  defaultmaxconnections = 16;
-  
+
 type
- 
+
  tsocketreader = class(tcommreader)
   protected
    procedure settimeoutms(const avalue: integer); override;
@@ -38,14 +38,14 @@ type
    procedure closehandle(const ahandle: integer); override;
    function internalwrite(const buffer; count: longint): longint; override;
  end;
- 
+
  tcustomsocketclient = class;
 
  tcustomsocketpipes = class(tcustomcommpipes)
   protected
    procedure createpipes; override;
  end;
- 
+
  tsocketpipes = class(tcustomsocketpipes)
   published
    property optionsreader;
@@ -53,13 +53,13 @@ type
    property oninputavailable;
    property oncommbroken;
  end;
-{ 
+{
  tclientsocketpipes = class(tsocketpipes)
   protected
    procedure doafterconnect; override;
  end;
- 
-  
+
+
  tserversocketpipes = class(tcustomsocketpipes)
   protected
    procedure doafterconnect; override;
@@ -71,18 +71,18 @@ type
 
  tcustomsocketcomp = class(tcustomcommcomp)
  end;
- 
+
  tsocketcomp = class(tcustomsocketcomp)
   published
    property active;
    property activator;
-   property cryptoio;   
+   property cryptoio;
    property onbeforeconnect;
    property onafterconnect;
    property onbeforedisconnect;
    property onafterdisconnect;
  end;
- 
+
  tcustomurlsocketcomp = class(tcustomsocketcomp)
   private
    fkind: socketkindty;
@@ -100,7 +100,7 @@ type
   published
    property active;
    property activator;
-   property cryptoio;   
+   property cryptoio;
    property onbeforeconnect;
    property onafterconnect;
    property onbeforedisconnect;
@@ -110,7 +110,7 @@ type
    property url;
    property port;
  end;
-  
+
  tcustomsocketclient = class(tcustomurlsocketcomp)
   private
    procedure setpipes(const avalue: tsocketpipes);
@@ -132,7 +132,7 @@ type
    property pipes;
    property active;
    property activator;
-   property cryptoio;   
+   property cryptoio;
    property onbeforeconnect;
    property onafterconnect;
    property onbeforedisconnect;
@@ -142,7 +142,7 @@ type
    property url;
    property port;
  end;
- 
+
  tsocketstdio = class(tsocketcomp)
   private
    procedure setpipes(const avalue: tsocketpipes);
@@ -159,11 +159,11 @@ type
    destructor destroy; override;
   published
    property pipes: tsocketpipes read fpipes write setpipes;
-   property cryptiokind: cryptoiokindty read getcryptoiokind 
+   property cryptiokind: cryptoiokindty read getcryptoiokind
                         write setcryptoiokind default cyk_none;
  end;
- 
-  
+
+
  socketaccepteventty = procedure(const sender: tcustomsocketserver;
                      const asocket: integer;
                      const addr: socketaddrty; var accept: boolean) of object;
@@ -172,7 +172,7 @@ type
 
  socketserverstatety = (sss_closepipespending);
  socketserverstatesty = set of socketserverstatety;
- 
+
  tcustomsocketserver = class(tcustomurlsocketcomp)
   private
    fstate: socketserverstatesty;
@@ -205,13 +205,13 @@ type
    procedure runhandlerapp(const asocket: integer; const acommandline: filenamety);
    property connectioncount: integer read fconnectioncount;
   published
-   property maxconnections: integer read fmaxconnections write fmaxconnections 
+   property maxconnections: integer read fmaxconnections write fmaxconnections
                              default defaultmaxconnections;
-   property accepttimeoutms: integer read faccepttimeoutms 
+   property accepttimeoutms: integer read faccepttimeoutms
                              write faccepttimeoutms default 0;
    property rxtimeoutms: integer read frxtimeoutms write frxtimeoutms default 0;
    property txtimeoutms: integer read ftxtimeoutms write ftxtimeoutms default 0;
-   
+
    property onaccept: socketaccepteventty read fonaccept write fonaccept;
    property onbeforechconnect: socketserverconnecteventty read fonbeforechconnect
                                write fonbeforechconnect;
@@ -221,15 +221,15 @@ type
                                write fonbeforechdisconnect;
    property onafterchdisconnect: socketserverconnecteventty read fonafterchdisconnect
                                write fonafterchdisconnect;
-   property overloadsleepus: integer read foverloadsleepus 
+   property overloadsleepus: integer read foverloadsleepus
                   write foverloadsleepus default -1;
             //checks application.checkoverload before calling oninputavaliable
             //if >= 0
    property optionsreader: pipereaderoptionsty read foptionsreader
                                write foptionsreader default [];
-   property oninputavailable: commpipeseventty read foninputavailable 
+   property oninputavailable: commpipeseventty read foninputavailable
                                  write foninputavailable;
-   property onsocketbroken: commpipeseventty read fonsocketbroken 
+   property onsocketbroken: commpipeseventty read fonsocketbroken
                                  write fonsocketbroken;
  end;
 
@@ -239,7 +239,7 @@ type
   published
    property active;
    property activator;
-   property cryptoio;   
+   property cryptoio;
    property onbeforeconnect;
    property onafterconnect;
    property onbeforedisconnect;
@@ -254,11 +254,11 @@ type
   protected
    procedure internalconnect; override;
   public
-   constructor create(aowner: tcomponent); override;  
+   constructor create(aowner: tcomponent); override;
   published
    property active;
  end;
-     
+
 procedure checksyserror(const aresult: integer);
 
 procedure socketerror(const error: syserrorty; const text: string = '');
@@ -270,7 +270,7 @@ uses
 
 type
  tcustompipes1 = class(tcustomcommpipes);
- 
+
 procedure socketerror(const error: syserrorty; const text: string = '');
 begin
  case error of
@@ -287,7 +287,7 @@ begin
   end;
  end;
 end;
-  
+
 procedure checksyserror(const aresult: integer);
 begin
  if aresult <> 0 then begin
@@ -318,7 +318,7 @@ begin
     socketerror(soc_urltoaddr(result));
    end;
   end;
- end;  
+ end;
 end;
 
 { tsocketstdio }
@@ -626,10 +626,10 @@ var
  int1: integer;
 begin
  for int1:= 0 to high(fpipes) do begin
-  if (fpipes[int1] <> nil) and 
+  if (fpipes[int1] <> nil) and
               (fpipes[int1].tx.handle = invalidfilehandle) then begin
    fpipes[int1].release;
-   if not (csdestroying in application.componentstate) and 
+   if not (csdestroying in application.componentstate) and
                 not application.terminated then begin
     fpipes[int1]:= nil;     //destroying can be delayed
    end;
@@ -639,7 +639,7 @@ end;
 
 procedure tcustomsocketserver.closepipes(const sender: tcustomcommpipes);
 begin
- if (sender.rx.handle <> invalidfilehandle) or 
+ if (sender.rx.handle <> invalidfilehandle) or
              (cps_detached in tcustompipes1(sender).fstate) then begin
   exclude(tcustompipes1(sender).fstate,cps_detached);
   if canevent(tmethod(fonbeforechdisconnect)) then begin
@@ -656,7 +656,7 @@ begin
   end
   else begin
    if not (sss_closepipespending in fstate) then begin
-    include(fstate,sss_closepipespending);  
+    include(fstate,sss_closepipespending);
     asyncevent(closepipestag);
    end;
   end;

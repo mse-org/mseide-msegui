@@ -1,5 +1,5 @@
 { MSEide Copyright (c) 2010 by Martin Schreiber
-   
+
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation; either version 2 of the License, or
@@ -41,7 +41,7 @@ type
   protected
    procedure checksymbol(const aindex: integer);
   public
-   procedure updatesymbols;   
+   procedure updatesymbols;
  end;
 var
  symbolfo: tsymbolfo;
@@ -54,7 +54,7 @@ type
   gdbnotactive,      //0 GDB not active.
   deleteall          //1 Do you wish to delete all symbols?
  );
- 
+
 procedure tsymbolfo.checksymbol(const aindex: integer);
 var
  str1,str2: msestring;
@@ -91,9 +91,9 @@ begin
     if mainfo.gdb.infoline(ad1,mstr1,int1,ad2,ad3) = gdb_ok then begin
      path[aindex]:= mstr1;
      line[aindex]:= int1;
-     str1:= mstr1+':'+inttostrmse(int1);     
+     str1:= mstr1+':'+inttostrmse(int1);
     end;
-   end;    
+   end;
   end;
   symaddr[aindex]:= trim(removelinebreaks(str1));
  end;

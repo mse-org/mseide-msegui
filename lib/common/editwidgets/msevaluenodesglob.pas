@@ -21,6 +21,6 @@ type
  end;
  precvaluety = ^recvaluety;
  recvaluearty = array of recvaluety;
- 
+
 implementation
 end.

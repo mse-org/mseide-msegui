@@ -60,14 +60,14 @@ object msedbfieldeditorfo: tmsedbfieldeditorfo
     optionsgrid = [og_colsizing, og_focuscellonenter, og_colchangeontabkey, og_wrapcol, og_autopopup]
     datacols.count = 2
     datacols.options = [co_readonly, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savestate]
-    datacols.items = <    
+    datacols.items = <
       item
         width = 123
         options = [co_readonly, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_fill, co_savestate]
         optionsedit = [scoe_eatreturn]
         valuefalse = '0'
         valuetrue = '1'
-      end    
+      end
       item
         width = 129
         options = [co_readonly, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_proportional, co_savestate]
@@ -76,20 +76,20 @@ object msedbfieldeditorfo: tmsedbfieldeditorfo
         valuetrue = '1'
       end>
     fixrows.count = 1
-    fixrows.items = <    
+    fixrows.items = <
       item
         height = 16
         captions.count = 2
-        captions.items = <        
+        captions.items = <
           item
             caption = 'Name'
-          end        
+          end
           item
             caption = 'Type'
           end>
       end>
     rowfonts.count = 1
-    rowfonts.items = <    
+    rowfonts.items = <
       item
         color = -1610612732
         name = 'stf_default'
@@ -120,33 +120,33 @@ object msedbfieldeditorfo: tmsedbfieldeditorfo
     anchors = [an_left, an_top, an_bottom]
     optionsgrid = [og_colsizing, og_rowmoving, og_keyrowmoving, og_rowinserting, og_rowdeleting, og_focuscellonenter, og_autofirstrow, og_autoappend, og_sorted, og_colchangeontabkey, og_wrapcol, og_autopopup]
     fixcols.count = 1
-    fixcols.items = <    
+    fixcols.items = <
       item
         width = 15
         numstep = 1
       end>
     fixrows.count = 1
-    fixrows.items = <    
+    fixrows.items = <
       item
         height = 16
         captions.count = 5
-        captions.items = <        
+        captions.items = <
           item
-          end        
+          end
           item
-          end        
+          end
           item
             caption = 'Name'
-          end        
+          end
           item
             caption = 'Class type'
-          end        
+          end
           item
             caption = 'Field kind'
           end>
       end>
     rowfonts.count = 1
-    rowfonts.items = <    
+    rowfonts.items = <
       item
         color = -1610612732
         name = 'stf_default'
@@ -155,31 +155,31 @@ object msedbfieldeditorfo: tmsedbfieldeditorfo
       end>
     datacols.count = 5
     datacols.options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savestate]
-    datacols.items = <    
+    datacols.items = <
       item[index]
         width = 13
         options = [co_invisible, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savevalue, co_savestate]
         widgetname = 'index'
         dataclass = tgridintegerdatalist
-      end    
+      end
       item[fieldpo]
         width = 12
         options = [co_invisible, co_drawfocus, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savestate]
         widgetname = 'fieldpo'
         dataclass = tgridpointerdatalist
-      end    
+      end
       item[fieldname]
         width = 97
         options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_fill, co_savevalue, co_savestate]
         widgetname = 'fieldname'
         dataclass = tgridmsestringdatalist
-      end    
+      end
       item[classty]
         width = 92
         options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_proportional, co_savevalue, co_savestate]
         widgetname = 'classty'
         dataclass = tgridenumdatalist
-      end    
+      end
       item[fieldkind]
         width = 84
         options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_proportional, co_savevalue, co_savestate]
@@ -248,7 +248,7 @@ object msedbfieldeditorfo: tmsedbfieldeditorfo
       valuedefault = 0
       min = 0
       dropdown.cols.count = 1
-      dropdown.cols.items = <      
+      dropdown.cols.items = <
         item
         end>
       oninit = initcla
@@ -274,7 +274,7 @@ object msedbfieldeditorfo: tmsedbfieldeditorfo
       valuedefault = 0
       min = 0
       dropdown.cols.count = 1
-      dropdown.cols.items = <      
+      dropdown.cols.items = <
         item
         end>
       oninit = initfieldkind

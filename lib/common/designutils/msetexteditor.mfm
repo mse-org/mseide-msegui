@@ -51,7 +51,7 @@ object msetexteditorfo: tmsetexteditorfo
     anchors = [an_top, an_bottom]
     optionsgrid = [og_focuscellonenter, og_autofirstrow, og_autoappend, og_colchangeontabkey, og_wrapcol, og_autopopup]
     fixcols.count = 1
-    fixcols.items = <    
+    fixcols.items = <
       item
         linewidth = 0
         width = 40
@@ -59,7 +59,7 @@ object msetexteditorfo: tmsetexteditorfo
         numstep = 1
       end>
     datacols.count = 1
-    datacols.items = <    
+    datacols.items = <
       item[textedit]
         width = 2000
         options = [co_leftbuttonfocusonly, co_savevalue, co_savestate, co_mousescrollrow]
@@ -113,15 +113,15 @@ object msetexteditorfo: tmsetexteditorfo
   object tpopupmenu1: tpopupmenu
     onupdate = popupuponupdate
     menu.submenu.count = 8
-    menu.submenu.items = <    
+    menu.submenu.items = <
       item
         action = undoact
         name = 'undo'
-      end    
+      end
       item
         action = redoact
         name = 'redo'
-      end    
+      end
       item
         caption = '&Copy'
         name = 'copy'
@@ -131,7 +131,7 @@ object msetexteditorfo: tmsetexteditorfo
           1
           16451
         )
-      end    
+      end
       item
         caption = 'Cu&t'
         name = 'cut'
@@ -141,7 +141,7 @@ object msetexteditorfo: tmsetexteditorfo
           1
           16472
         )
-      end    
+      end
       item
         caption = '&Paste'
         name = 'paste'
@@ -151,15 +151,15 @@ object msetexteditorfo: tmsetexteditorfo
           1
           16470
         )
-      end    
+      end
       item
         options = [mao_separator, mao_shortcutcaption]
-      end    
+      end
       item
         caption = '&Load file'
         state = [as_localcaption, as_localonexecute]
         onexecute = loadfileexe
-      end    
+      end
       item
         caption = '&Save file'
         state = [as_localcaption, as_localonexecute]

@@ -113,7 +113,7 @@ type
        //nil if index < 0
        //will be invalid after capacity change!
    procedure sort(const aindexnum: integer);
-   function internalfind(const aindexnum: integer; const item; 
+   function internalfind(const aindexnum: integer; const item;
                             out aindex: integer; out adata: pointer): boolean;
            //true if exact else next bigger
            //for comp: l is item, r are tablevalues
@@ -124,7 +124,7 @@ type
                      const aoptions: recordliststatesty = []);
    property order: integer read forder write setorder default -1;
  end;
- 
+
  tpointerlist = class(tnullinterfacedobject)
   private
    fringpointer: integer; //for queue
@@ -149,12 +149,12 @@ type
    procedure insert(index: integer; const value: pointer); virtual;
    function indexof(const item: pointer): integer;
    function extract(const item: pointer): pointer;
-   
+
    procedure order(const sourceorderlist: integerarty);
    procedure reorder(const destorderlist: integerarty);
    procedure sort(compare: arraysortcomparety); overload;
    procedure sort(compare: arraysortcomparety; out indexlist: integerarty); overload;
-   
+
    property items[index: integer]: pointer read getitems write setitems; default;
    property count: integer read fcount;
    property capacity: integer read getcapacity write setcapacity;
@@ -233,7 +233,7 @@ type
    function getlast: tobject;
    property items[index: integer]: tobject read getitems write setitems;
  end;
- 
+
  nameidty = integer;
 
  indexednameinfoty = record
@@ -295,7 +295,7 @@ type
  end;
 
  bufferoffsetty = ptrint;
-  
+
  bufferheaderty = record
   size: bufferoffsetty;
   data: record
@@ -304,7 +304,7 @@ type
  pbufferheaderty = ^bufferheaderty;
 
  bufferdataliststatety = (bdls_destroying);
- bufferdataliststatesty = set of bufferdataliststatety; 
+ bufferdataliststatesty = set of bufferdataliststatety;
  tbufferdatalist = class
   private
    fbuffer: pointer;
@@ -340,7 +340,7 @@ type
    property items[index: integer]: pointer read getitems;
    property count: int32 read fcount;
  end;
- 
+
 implementation
 uses
  rtlconsts,msebits,msedatalist,msesysintf1,msesysintf;
@@ -450,7 +450,7 @@ end;
 
 { trecordlist }
 
-constructor trecordlist.create(const arecordsize: integer; 
+constructor trecordlist.create(const arecordsize: integer;
                                 const aoptions: recordliststatesty = []);
 begin
  frecordsize:= arecordsize;

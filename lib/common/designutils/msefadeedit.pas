@@ -68,9 +68,9 @@ type
    procedure getpickobjectev(const sender: tcustompickwidget;
                              const picker: tobjectpicker;
                              var objects: integerarty);
-   procedure paintxorev(const sender: tcustompickwidget; 
+   procedure paintxorev(const sender: tcustompickwidget;
                           const picker: tobjectpicker; const canvas: tcanvas);
-   procedure endpickev(const sender: tcustompickwidget; 
+   procedure endpickev(const sender: tcustompickwidget;
                              const picker: tobjectpicker);
    procedure resizeev(const sender: TObject);
    procedure dataenteterev(const sender: TObject);
@@ -98,7 +98,7 @@ type
    fopasynced: boolean;
    procedure movemarker(const atag: integer; apos: integer);
    function findmarker(const atag: integer; const apos: pointty): integer;
-                                                           //-1 if not found    
+                                                           //-1 if not found
    function limitmarkerpos(const atag: integer; const index: integer;
                                       const aoffset: integer): integer;
    procedure setopasynced(const avalue: boolean);
@@ -110,7 +110,7 @@ type
    property opasynced: boolean read fopasynced write setopasynced;
  end;
 
- 
+
 function editfade(var fadedirection: graphicdirectionty; const opa: boolean;
                const fadepos,fadeopapos: trealarrayprop;
                const fadecolor,fadeopacolor: tcolorarrayprop): modalresultty;
@@ -125,7 +125,7 @@ type
   sc_withcolor,          //1
   sc_removeopacity       //2
  );
-  
+
 function editfade(var fadedirection: graphicdirectionty; const opa: boolean;
                const fadepos,fadeopapos: trealarrayprop;
                const fadecolor,fadeopacolor: tcolorarrayprop): modalresultty;
@@ -219,7 +219,7 @@ begin
  end;
 end;
 
-{ 
+{
 procedure editfacefade(const aproperty: tpropertyeditor; const trans: boolean);
 var
  form1: tfadeeditfo;
@@ -235,7 +235,7 @@ begin
     for int1:= 0 to form1.grid.rowhigh do begin
      form1.posed[int1]:= fade_transpos[int1];
      form1.colored[int1]:= fade_transcolor[int1];
-    end;    
+    end;
    end
    else begin
     bo1:= fade_pos.count = fade_transpos.count;
@@ -287,7 +287,7 @@ begin
        fade_pos.assign(form1.fadedisp.face.fade_pos);
        fade_color.assign(form1.fadedisp.face.fade_color);
       end;
-     end; 
+     end;
     end;
     modified;
    end;
@@ -322,7 +322,7 @@ begin
      form1.posed[int1]:= fade_pos[int1];
      form1.colored[int1]:= fade_color[int1];
     end;
-   end;   
+   end;
    form1.change;
   end;
   if form1.show(true) = mr_ok then begin
@@ -357,7 +357,7 @@ begin
        fade_pos.assign(form1.fadedisp.face.fade_pos);
        fade_color.assign(form1.fadedisp.face.fade_color);
       end;
-     end; 
+     end;
     end;
     modified;
    end;
@@ -371,8 +371,8 @@ end;
 
 const
  markerhalfwidth = 2;
- markerheight = markerhalfwidth+1; 
- 
+ markerheight = markerhalfwidth+1;
+
 procedure tfadeeditfo.mouseev(const sender: twidget; var info: mouseeventinfoty);
 var
  ar1: integerarty;
@@ -473,7 +473,7 @@ begin
 end;
 
 procedure tfadeeditfo.movemarker(const atag: integer; apos: integer);
-begin 
+begin
  if reverse.value then begin
   apos:= posedit.paintsize.cx - apos;
  end;
@@ -612,7 +612,7 @@ begin
  end;
 end;
 
-function tfadeeditfo.findmarker(const atag: integer; 
+function tfadeeditfo.findmarker(const atag: integer;
                                        const apos: pointty): integer;
 var
  rect1: rectty;
@@ -634,7 +634,7 @@ begin
    int2:= xpos - markerhalfwidth;
    int3:= int2 + 2 * markerhalfwidth + 1;
    for int1:= 0 to int4 do begin
-    if (nodepos[int1] >= int2) and (nodepos[int1] <= int3) and 
+    if (nodepos[int1] >= int2) and (nodepos[int1] <= int3) and
          not ((int1 < int4) and (nodepos[int1+1] = rect1.x)) then begin
      result:= int1;
      break;
@@ -648,7 +648,7 @@ function tfadeeditfo.limitmarkerpos(const atag: integer; const index: integer;
                                                const aoffset: integer): integer;
 var
  rect1: rectty;
- 
+
 begin
  with nodeinfo(atag)^ do begin
   if reverse.value then begin
@@ -873,7 +873,7 @@ function tfadeeditfo.syncexe: boolean;
    end;
   end;
  end; //scale
-          
+
 var
  int1,int2: integer;
 begin
@@ -920,12 +920,12 @@ begin
      end;
      else begin
       if int2 >= fadedisp.face.fade_opacolor.count then begin
-       opaed[int1]:= 
+       opaed[int1]:=
               fadedisp.face.fade_opacolor[fadedisp.face.fade_opacolor.count-1];
       end
       else begin
        if int2 = 0 then begin
-        opaed[int1]:= 
+        opaed[int1]:=
               fadedisp.face.fade_opacolor[0];
        end
        else begin
@@ -952,7 +952,7 @@ procedure tfadeeditfo.clearopaexe(const sender: TObject);
 begin
  if askconfirmation(c[ord(sc_removeopacity)]) then begin
   fopacitycleared:= true;
-  opasynced:= true;  
+  opasynced:= true;
   grid.datacols[3].visible:= false;
   change;
   clearbu.enabled:= false;
@@ -974,11 +974,11 @@ begin
  if fopasynced then begin
   splitter.linktop:= nil;
   grid.height:= gridlayout.height;
-  cont1.top:= 4;  
+  cont1.top:= 4;
  end
  else begin
   fopacitycleared:= false;
-  cont1.top:= opaedit.bottom+4;  
+  cont1.top:= opaedit.bottom+4;
   splitter.linktop:= grid;
   opagrid.rowcount:= fadedisp.face.fade_opapos.count;
   for int1:= 0 to opagrid.rowhigh do begin

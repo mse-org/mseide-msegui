@@ -21,7 +21,7 @@ interface
 
 uses
  msetypes,msestrings,mseerr;
- 
+
 const
  redmask = $ff0000;
  redshift = 16;
@@ -29,7 +29,7 @@ const
  greenshift = 8;
  bluemask = $0000ff;
  blueshift = 0;
- 
+
 type
  imagenrty = type integer; //for timagelist
  facenrty = type integer;  //for tfacelist
@@ -40,7 +40,7 @@ type
  colorty = type longword;
  pcolorty = ^colorty;
  colorarty = array of colorty;
- 
+
  rgbtriplety = packed record
   blue: byte;
   green: byte;
@@ -54,14 +54,14 @@ type
 
  colormapsty = (cm_rgb,cm_functional,cm_mapped,cm_namedrgb,cm_user);
  colormapty = array[colormapsty] of longwordarty;
- 
+
  colorinfoty = record
                 name: string;
                 rgb: rgbtriplety;
                end;
  pcolorinfoty = ^colorinfoty;
  colorinfoarty = array of colorinfoty;
- 
+
 const
  maxopacity = $00ffffff;
  speccolormask =         $f0000000;
@@ -71,7 +71,7 @@ const
  cl_namedrgb =   colorty($a0000000);
  cl_user =       colorty($b0000000);
 
- cl_invalid =                  cl_functional + 0; 
+ cl_invalid =                  cl_functional + 0;
                  //can not be used as default value
  cl_default =                  cl_functional + 1;
  cl_parent =                   cl_functional + 2;
@@ -104,7 +104,7 @@ const
  cl_zebra =                    cl_mapped + 18;
  cl_grayed =                   cl_mapped + 19;
  cl_grayedshadow =             cl_mapped + 20;
- 
+
  cl_gridactive =               cl_mapped + 21;
  cl_gridfocus =                cl_mapped + 22;
  cl_gridselect =               cl_mapped + 23;
@@ -149,7 +149,7 @@ const
  cl_ltyellow =                 cl_namedrgb + 24;
 
  cl_lastnamedrgb =             cl_namedrgb + 25;
- 
+
  cl_user0 =                    cl_user     + 0;
  cl_user1 =                    cl_user     + 1;
  cl_user2 =                    cl_user     + 2;
@@ -180,7 +180,7 @@ const
  cl_fade7 =                    cl_user     + 27;
  cl_fade8 =                    cl_user     + 28;
  cl_fade9 =                    cl_user     + 29;
- 
+
  cl_lastuser =               cl_user     + 30;
 
  functionalcolorcount = integer(cl_lastfunctional)-integer(cl_functional);
@@ -319,7 +319,7 @@ const
     (name: 'cl_fade8';   rgb:                (blue: $00; green: $00; red: $00; res: $00)), //28
     (name: 'cl_fade9';   rgb:                (blue: $00; green: $00; red: $00; res: $00))  //29
    );
-   
+
 type
  graphicdirectionty = (gd_right,gd_up,gd_left,gd_down,gd_none);
  pgraphicdirectionty = ^graphicdirectionty;
@@ -339,7 +339,7 @@ type
 
  edgety = (edg_right,edg_top,edg_left,edg_bottom);
  edgesty = set of edgety;
- 
+
  fontstylety = (fs_bold,fs_italic,
                 fs_underline,fs_strikeout,fs_selected,fs_blank,
                 fs_force);
@@ -440,7 +440,7 @@ type
                gde_noglx,gde_novisual,gde_rendercontext,gde_glxpixmap,
                gde_createwindow
               );
-              
+
  egdi = class(eerror)
   private
    ferror1: gdierrorty;
@@ -458,7 +458,7 @@ type
  getsizeintty = function(const asize: sizety): integer;
  setpointintty = procedure(var apoint: pointty; const avalue: integer);
  setsizeintty = procedure(var asize: sizety; const avalue: integer);
- 
+
  rectaccessty = record
   pos,size,stop,opos,osize,ostop: getrectintegerty;
   setpos,setsize,setstop,setopos,setosize,setostop: setrectintegerty;
@@ -470,7 +470,7 @@ type
   setsi,setosi: setsizeintty;
  end;
  prectaccessty = ^rectaccessty;
-  
+
 function rx(const arect: rectty): integer;
 function ry(const arect: rectty): integer;
 function rcx(const arect: rectty): integer;
@@ -553,7 +553,7 @@ const
 procedure gdierror(error: gdierrorty; const text: msestring = ''); overload;
 procedure gdierror(error: gdierrorty; sender: tobject;
                                             text: msestring = ''); overload;
- 
+
 function stringtocolor(const text: string): colorty;
 function trystringtocolor(text: string; out value: colorty): boolean;
 function colortostring(value: colorty): string;
@@ -573,7 +573,7 @@ function makeframe(const left,top,right,bottom: integer): framety;
 
 function mp(const x,y: integer): pointty; {$ifdef FPC}inline;{$endif}
 function ms(const cx,cy: integer): sizety; {$ifdef FPC}inline;{$endif}
-function mr(const x,y,cx,cy: integer): rectty; overload; 
+function mr(const x,y,cx,cy: integer): rectty; overload;
                                {$ifdef FPC}inline;{$endif}
 function mr(const pos: pointty; const size: sizety): rectty; overload;
                                {$ifdef FPC}inline;{$endif}
@@ -658,7 +658,7 @@ function rotateframe(const aframe: framety; const olddirection,
                   newdirection: graphicdirectionty): framety;
 procedure rotateframe1(var aframe: framety; const olddirection,
                   newdirection: graphicdirectionty);
-                
+
 function intersectrect(const a,b: rectty; out dest: rectty): boolean; overload;
 function intersectrect(const a,b: rectty): rectty; overload;
 procedure intersectrect1(var dest: rectty; const source: rectty);
@@ -672,7 +672,7 @@ function clipinrect(const rect: rectty;
                                 const boundsrect: rectty): rectty; overload;
 function clipinrect1(var point: pointty;
                                 const boundsrect: rectty): boolean; overload;
-function clipinrect1(var rect: rectty; 
+function clipinrect1(var rect: rectty;
                               const boundsrect: rectty): boolean; overload;
             //true if changed
 function calcrectalignment(const dest: rectty; source: rectty;
@@ -812,8 +812,8 @@ function calcrectalignment(const dest: rectty; source: rectty;
                                  const alignment: alignmentsty): rectty;
 begin
  result:= dest;
- if (al_tiled in alignment) or 
-    (al_thumbnail in alignment) and 
+ if (al_tiled in alignment) or
+    (al_thumbnail in alignment) and
          ((dest.cx < source.cx) or (dest.cy < source.cy)) then begin
   exit;
  end;
@@ -923,7 +923,7 @@ end;
 function stringtocolor(const text: string): colorty;
 begin
  if not trystringtocolor(text,result) then begin
-  gdierror(gde_invalidcolor);  
+  gdierror(gde_invalidcolor);
  end;
 end;
 
@@ -985,7 +985,7 @@ var
   18,//cl_zebra =                    cl_mapped + 18;
   19,//cl_grayed =                   cl_mapped + 19;
   20,//cl_grayedshadow =             cl_mapped + 20;
-  
+
   21,//cl_gridactive =               cl_mapped + 21;
   22,//cl_gridfocus =                cl_mapped + 22;
   23,//cl_gridselect =               cl_mapped + 23;
@@ -998,7 +998,7 @@ var
   31,//cl_treeline =                 cl_mapped + 31;
   32 //cl_treelineactive =           cl_mapped + 32;
  );
- 
+
 function getcolornames: msestringarty;
 var
  int1,int2: integer;
@@ -1138,7 +1138,7 @@ function changerectdirection(const arect: rectty;
                 const olddirction,newdirection: graphicdirectionty): rectty;
 begin
  result.pos:= arect.pos;
- if (olddirction in [gd_left,gd_right]) xor 
+ if (olddirction in [gd_left,gd_right]) xor
                 (newdirection in [gd_left,gd_right]) then begin
   result.cx:= arect.cy;
   result.cy:= arect.cx;

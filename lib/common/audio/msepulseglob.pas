@@ -109,7 +109,7 @@ type
  uint8_t = byte;
  size_t = ptruint;
  pa_usec_t = uint64;
- 
+
 //** The direction of a pa_stream object */
  pa_stream_direction_t = (
   PA_STREAM_NODIRECTION,   //**< Invalid direction */
@@ -136,7 +136,7 @@ type
     PA_SAMPLE_S24_32BE,//**< Signed 24 Bit PCM in LSB of 32 Bit words, big endian. \since 0.9.15 */
     PA_SAMPLE_MAX//**< Upper limit of valid sample types */
  );
- 
+
 const
 {$ifdef endian_big}
  PA_SAMPLE_S16NE = PA_SAMPLE_S16BE;
@@ -190,7 +190,7 @@ type
     PA_CHANNEL_MAP_DEF_MAX
  );
  ppa_channel_map_def = ^pa_channel_map_def;
- 
+
 const
  PA_CHANNEL_MAP_DEFAULT = PA_CHANNEL_MAP_AIFF; //**< The default channel map */
 
@@ -258,7 +258,7 @@ const
  PA_CHANNEL_POSITION_RIGHT = PA_CHANNEL_POSITION_FRONT_RIGHT;
  PA_CHANNEL_POSITION_CENTER = PA_CHANNEL_POSITION_FRONT_CENTER;
  PA_CHANNEL_POSITION_SUBWOOFER = PA_CHANNEL_POSITION_LFE;
- 
+
 type
  pa_channel_position_aty = array[0..PA_CHANNELS_MAX-1] of pa_channel_position_t;
 
@@ -273,7 +273,7 @@ type
 
 //** Playback and record buffer metrics */
  pa_buffer_attr = record
-    maxlength: uint32_t; 
+    maxlength: uint32_t;
     //**< Maximum length of the buffer. Setting this to (uint32_t) -1
      //* will initialize this to the maximum value supported by server,
      //* which is recommended. */

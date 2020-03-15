@@ -19,7 +19,7 @@ unit regglob;
 interface
 uses
  msepropertyeditors,typinfo,msebitmap,msetypes{msestrings};
- 
+
 type
  tstockglypheditor = class(tenumpropertyeditor)
   protected
@@ -49,7 +49,7 @@ type
 implementation
 uses
  msestockobjects,mseimageselectorform,mseclasses,mseformatstr;
- 
+
 { tstockglypharraypropertyeditor }
 
 function tstockglypharraypropertyeditor.geteditorclass: propertyeditorclassty;
@@ -124,7 +124,7 @@ end;
 function timagenrpropertyeditor.getdefaultstate: propertystatesty;
 begin
  result:= inherited getdefaultstate;
- if getcorbainterface(fprops[0].instance,typeinfo(iimagelistinfo),fintf) and 
+ if getcorbainterface(fprops[0].instance,typeinfo(iimagelistinfo),fintf) and
                      (fintf.getimagelist <> nil) then begin
   result:= result + [ps_dialog];
  end;

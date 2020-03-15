@@ -254,9 +254,9 @@ type
    function getorigname: string; overload;           //'' if none
    function getnamenoident(out value: lstringty): boolean;
    function getorignamenoident(out value: lstringty): boolean;
-   
+
    function testname(const atoken: tokenty; const aname: string): boolean;
-   function testnames(const atoken: tokenty; 
+   function testnames(const atoken: tokenty;
                                      const anames: array of string): integer;
 
    function getoperator: char;                   //#0 if none
@@ -285,7 +285,7 @@ type
    {$endif}
 
    procedure mark; //set mark in tokenstak
-   function back: boolean; 
+   function back: boolean;
        //restore tokenstack to last mark, mark must be in same file, true if ok
    procedure pop;  //remove mark from tokenstack
    procedure setidents(idents: array of string);
@@ -305,15 +305,15 @@ type
    function includefile(const filename: filenamety;
               const statementstart,statementend: sourceposty): integer;
      //-1 on error, scanner index otherwise
-   procedure callincludefile(const filename: filenamety; 
+   procedure callincludefile(const filename: filenamety;
                        const startpos: sourceposty; const anum: integer);
    function origoffset: integer;
    property scanner: tscanner read getscanner write setscanner;
-   property recursivecomment: boolean read frecursivecomment 
+   property recursivecomment: boolean read frecursivecomment
                           write frecursivecomment default false;
-   property ongetincludefile: getincludefileeventty read fongetincludefile 
+   property ongetincludefile: getincludefileeventty read fongetincludefile
                           write fongetincludefile;
-   property includefiledirs: filenamearty read fincludefiledirs 
+   property includefiledirs: filenamearty read fincludefiledirs
                           write fincludefiledirs;
    property startdefines: stringarty read fstartdefines write fstartdefines;
  end;
@@ -339,9 +339,9 @@ type
 
   pid_abstract,pid_inherited,pid_override,pid_reintroduce,pid_virtual,
   pid_private,pid_protected,pid_public,pid_published,pid_automated,
-  
+
   pid_read,pid_write,pid_stored,pid_default,pid_nodefault);
-  
+
  const
   firstpascalident = pid_and;
   lastpascalnormalident = integer(pid_xor);
@@ -362,15 +362,15 @@ type
 
   'abstract','inherited','override','reintroduce','virtual',     //class
   'private','protected','public','published','automated',
-  
+
   'read','write','stored','default','nodefault');
 
 type
- 
+
  tpascalparser = class(tparser)
   protected
    fnoautoparse: boolean;
-   function getscannerclass: scannerclassty; override;  
+   function getscannerclass: scannerclassty; override;
   public
    constructor create(const afilelist: tmseindexednamelist); override;
    destructor destroy; override;
@@ -380,7 +380,7 @@ type
    function skipcomment: boolean; override; //does not skip whitespace
    procedure parsecompilerswitch;
    function getpascalstring(var value: string): boolean; //true if ok
-   function concatpascalstring(var value: string): boolean; 
+   function concatpascalstring(var value: string): boolean;
          //concats <pascalstring>+<pascalstring>... true if ok
    function concatpascalname(var value: string): boolean;
                //returns <name>.<name>..., true if ok
@@ -413,8 +413,8 @@ type
    {'int','long',}'register',{'short',}'signed','static',
    'struct','typedef','union','unsigned','volatile'
   );
-  
- type             
+
+ type
  tcparser = class(tparser)
   protected
    fincomment: integer;
@@ -457,7 +457,7 @@ type
    constructor create(const afilelist: tmseindexednamelist); override;
    procedure getconsts(var ar: constinfoarty);
  end;
- 
+
 
 function isemptysourcepos(const value: sourceposty): boolean;
 function issamesourcepos(const a,b: sourceposty): boolean;
@@ -577,7 +577,7 @@ begin
   if akind <> tk_whitespace then begin
    ffirstofline:= false;
   end;
- end;  
+ end;
  inc(ftokencount);
  fscto^.kind:= akind;
  fscto^.value.po:= fpo;
@@ -855,7 +855,7 @@ begin
  end;
 end;
 
-procedure tparser.callincludefile(const filename: filenamety; 
+procedure tparser.callincludefile(const filename: filenamety;
                        const startpos: sourceposty; const anum: integer);
 var
  int1,int2: integer;
@@ -1413,7 +1413,7 @@ begin
  end;
 end;
 
-function tparser.skipnamelist: boolean; 
+function tparser.skipnamelist: boolean;
  //skips [,]{<name>,} false if no name found
 begin
  result:= false;
@@ -1866,10 +1866,10 @@ type
  pskwordty = (pskw_i,pskw_include,pskw_define,pskw_undef,pskw_ifdef,pskw_ifndef,
               pskw_else,pskw_endif);
 const
- pskwords: array[pskwordty] of string = 
+ pskwords: array[pskwordty] of string =
                   ('I','INCLUDE','DEFINE','UNDEF','IFDEF','IFNDEF',
                    'ELSE','ENDIF');
-                  
+
 constructor tpascalparser.create(const afilelist: tmseindexednamelist);
 begin
  inherited;
@@ -1905,7 +1905,7 @@ procedure tpascalparser.parsecompilerswitch;
   end;
   nexttoken; //skip '}'
  end;
- 
+
  procedure skipskip;
  begin
   repeat
@@ -1914,7 +1914,7 @@ procedure tpascalparser.parsecompilerswitch;
    end;
   until (fto^.kind = tk_fileend) or (fdefstate <> def_skip);
  end;
- 
+
 var
  int1{,int2}: integer;
  str1: string;
@@ -1933,8 +1933,8 @@ begin
    pskw_ifdef,pskw_ifndef: begin
     additem(fdefstates,integer(fdefstate),fdefstatecount);
     if fdefstate <> def_skip then begin
-     if not (getname(lstr1) and 
-                       ((fdefines.find(lstr1) <> nil) xor 
+     if not (getname(lstr1) and
+                       ((fdefines.find(lstr1) <> nil) xor
                         (pskwordty(int1) = pskw_ifndef))) then begin
       fdefstate:= def_skip;
       skiprest;
@@ -1951,7 +1951,7 @@ begin
    pskw_else: begin
     skiprest;
     if fdefstate = def_skip then begin
-     if (fdefstatecount = 0) or 
+     if (fdefstatecount = 0) or
              (defstatety(fdefstates[fdefstatecount-1]) <> def_skip) then begin
       fdefstate:= def_none;
      end;
@@ -1971,7 +1971,7 @@ begin
     skiprest;
    end;
    else begin
-    if fdefstate <> def_skip then begin 
+    if fdefstate <> def_skip then begin
      case pskwordty(int1) of
       pskw_i,pskw_include: begin
        startpos:= sourcepos;
@@ -2033,7 +2033,7 @@ var
  first: boolean;
 begin
  result:= false;
- if (fto^.kind = tk_operator) and (fto^.op = '/') and 
+ if (fto^.kind = tk_operator) and (fto^.op = '/') and
                                              checknextoperator('/') then begin
   result:= true;
   while not ((fto^.kind = tk_newline) or (fto^.kind = tk_fileend)) do begin
@@ -2145,7 +2145,7 @@ begin
  end;
 end;
 
-function tpascalparser.concatpascalstring(var value: string): boolean; 
+function tpascalparser.concatpascalstring(var value: string): boolean;
 var
  str1: string;
 begin
@@ -2231,7 +2231,7 @@ type
  cskwordty = (cskw_if,cskw_include,cskw_define,cskw_undef,cskw_ifdef,cskw_ifndef,
               cskw_else,cskw_endif);
 const
- cskwords: array[cskwordty] of string = 
+ cskwords: array[cskwordty] of string =
                   ('if','include','define','undef','ifdef','ifndef',
                    'else','endif');
 
@@ -2315,7 +2315,7 @@ procedure tcparser.parsepreprocdef;
    nexttoken;
   end;
  end;
- 
+
  procedure skipskip;
  begin
   repeat
@@ -2345,8 +2345,8 @@ begin
   cskw_ifdef,cskw_ifndef: begin
    additem(fdefstates,integer(fdefstate),fdefstatecount);
    if fdefstate <> def_skip then begin
-    if not (getname(lstr1) and 
-                      ((fdefines.find(lstr1) <> nil) xor 
+    if not (getname(lstr1) and
+                      ((fdefines.find(lstr1) <> nil) xor
                        (cskwordty(int1) = cskw_ifndef))) then begin
      fdefstate:= def_skip;
      skiprest;
@@ -2358,7 +2358,7 @@ begin
   cskw_else: begin
    skiprest;
    if fdefstate = def_skip then begin
-    if (fdefstatecount = 0) or 
+    if (fdefstatecount = 0) or
             (defstatety(fdefstates[fdefstatecount-1]) <> def_skip) then begin
      fdefstate:= def_none;
     end;
@@ -2420,7 +2420,7 @@ begin
       end;
      end;
     end;
-   end;   
+   end;
   end;
  end;
  skiprest;
@@ -2553,7 +2553,7 @@ begin
     mark;
     if getident >= 0 then begin
      pop;
-     lasttoken; 
+     lasttoken;
      break;
     end;
     str1:= getname;
@@ -2595,7 +2595,7 @@ begin
  end;
  setlength(ar,count);
 end;
- 
+
 { tfpcresstringparser }
 
 procedure tfpcresstringparser.getconsts(var ar: constinfoarty);
@@ -2606,7 +2606,7 @@ var
  mstr1: msestring;
  po1: pchar;
  i1: int32;
- 
+
 begin
  ar:= nil;
  count:= 0;

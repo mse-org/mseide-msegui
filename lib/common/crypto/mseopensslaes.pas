@@ -12,7 +12,7 @@ unit mseopensslaes;
 interface
 uses
  mseopenssl,msectypes;
- 
+
 var
  AES_set_decrypt_key: function(userKey: PCharacter; bits: cint;
                                              key: pAES_KEY): cint; cdecl;
@@ -22,7 +22,7 @@ var
 implementation
 uses
  msedynload;
- 
+
 procedure init(const info: dynlibinfoty);
 const
  funcs: array[0..1] of funcinfoty = (

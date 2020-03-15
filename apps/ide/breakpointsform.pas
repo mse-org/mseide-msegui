@@ -1,5 +1,5 @@
 { MSEide Copyright (c) 1999-2013 by Martin Schreiber
-   
+
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation; either version 2 of the License, or
@@ -103,7 +103,7 @@ type
                                withcondition,witherrormessage: boolean);
   public
    gdb: tgdbmi;
-   
+
    breakpointpaths: msestringarty;
    breakpointlines: integerarty;
    breakpointaddress: int64arty;
@@ -111,7 +111,7 @@ type
    breakpointons: longboolarty;
    breakpointignore: integerarty;
    breakpointconditions: msestringarty;
-   
+
    procedure clear;
    procedure refresh;
    procedure updatestat(const statfiler: tstatfiler);
@@ -123,7 +123,7 @@ type
    function getbreakpointlines(const filepath: filenamety): bkptlineinfoarty;
    procedure sourcelinesinserted(const filepath: filenamety;
                                                const aindex,acount: integer);
-   procedure sourcelinesdeleted(const filepath: filenamety; 
+   procedure sourcelinesdeleted(const filepath: filenamety;
                                                const aindex,acount: integer);
 
    procedure updatebreakpoints; //transfer breakpoints to gdb
@@ -160,7 +160,7 @@ type
   delbr,                 //2 Do you wish to delete all breakpoints?
   confirmation           //3 Confirmation
  );
-  
+
 { tbreakpointsfo }
 
 procedure tbreakpointsfo.updatestat(const statfiler: tstatfiler);
@@ -428,7 +428,7 @@ begin
   result:= true;
  end;
  if result then begin
-  if (grid.rowcount = 0) or 
+  if (grid.rowcount = 0) or
                      not grid.datacols.rowempty(grid.rowcount - 1) then begin
    int1:= grid.appendrow;
   end
@@ -497,7 +497,7 @@ begin
     else begin
      conderr[int1]:= -1;
      gdb.evaluateexpression(str1,str2);
-     if not (str2 = 'true') or trystrtoptruint(str2,ptrint1) and 
+     if not (str2 = 'true') or trystrtoptruint(str2,ptrint1) and
                                                    (ptrint1 <> 0) then begin
       flags[int1]:= 2; //count has to be decremented
       result:= true;
@@ -564,7 +564,7 @@ begin
   if (line[int1] = info.line) and (filename[int1] = wstr1) then begin
    bkpton[int1]:= info.bkpton;
    if gdb.execloaded then begin
-    result:= gdb.breakenable(bkptno[int1],info.bkpton and 
+    result:= gdb.breakenable(bkptno[int1],info.bkpton and
                                                 bkptson.value) = gdb_ok;
    end;
    if conderr[int1] >= 0 then begin

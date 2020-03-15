@@ -34,10 +34,10 @@ const
  defaultconnectorname = 'midiconn';
  channelmaxcount = 16;
  channelmask = channelmaxcount - 1;
- 
-type  
+
+type
  tsigmidisource = class;
- 
+
  tsigmidiconnector = class(tsigeventconnector)
   private
    ffrequout: tdoubleoutputconn;
@@ -88,15 +88,15 @@ type
    destructor destroy; override;
    procedure midievent(const ainfo: midieventinfoty);
    property frequout: tdoubleoutputconn read ffrequout write setfrequout;
-   property frequoutlin: tdoubleoutputconn read ffrequoutlin 
+   property frequoutlin: tdoubleoutputconn read ffrequoutlin
                                                    write setfrequoutlin;
    property trigout: tdoubleoutputconn read ftrigout write settrigout;
    property attackout: tdoubleoutputconn read fattackout write setattackout;
-   property attackoutlin: tdoubleoutputconn read fattackoutlin 
+   property attackoutlin: tdoubleoutputconn read fattackoutlin
                                          write setattackoutlin;
-   property pressureout: tdoubleoutputconn read fpressureout 
+   property pressureout: tdoubleoutputconn read fpressureout
                                                 write setpressureout;
-   property pressureoutlin: tdoubleoutputconn read fpressureoutlin 
+   property pressureoutlin: tdoubleoutputconn read fpressureoutlin
                                                 write setpressureoutlin;
    property releaseout: tdoubleoutputconn read freleaseout write setreleaseout;
    property releaseoutlin: tdoubleoutputconn read freleaseoutlin
@@ -105,17 +105,17 @@ type
    property frequ_min: double read ffrequ_min write ffrequ_min;
    property attack_min: double read fattack.min write setattack_min;
    property attack_max: double read fattack.max write setattack_max;
-   property attack_options: valuescaleoptionsty read fattack.options 
+   property attack_options: valuescaleoptionsty read fattack.options
               write setattack_options default defaultmidiattackvalueoptions;
 
    property pressure_min: double read fpressure.min write setpressure_min;
    property pressure_max: double read fpressure.max write setpressure_max;
-   property pressure_options: valuescaleoptionsty read fpressure.options 
+   property pressure_options: valuescaleoptionsty read fpressure.options
              write setpressure_options default defaultmidipressurevalueoptions;
 
    property release_min: double read frelease.min write setrelease_min;
    property release_max: double read frelease.max write setrelease_max;
-   property release_options: valuescaleoptionsty read frelease.options 
+   property release_options: valuescaleoptionsty read frelease.options
             write setrelease_options default defaultmidireleasevalueoptions;
 
    property source: tsigmidisource read fsource write setsource;
@@ -124,7 +124,7 @@ type
  sigmidiconnectorarty = array of tsigmidiconnector;
 
  channelinfoty = record
-  
+
  end;
 
  sigmidisourcestatety = (smss_patchvalid);
@@ -139,12 +139,12 @@ type
   active: boolean;
  end;
  connectioninfoarty = array of connectioninfoty;
-  
+
  sigchannelinfoty = record
   connections: connectioninfoarty;
-  first,last: pconnectioninfoty;  
+  first,last: pconnectioninfoty;
  end;
-   
+
  sigchannelinfoarty = array of sigchannelinfoty;
 
  patchinfoty = record
@@ -170,7 +170,7 @@ type
   data: patchdataty;
  end;
  ppatchhashdataty = ^patchhashdataty;
- 
+
  tmidipatch = class(townedpersistent)
   private
    finfo: patchinfoty;
@@ -187,12 +187,12 @@ type
    property channel: integer read finfo.channel write setchannel default 0;
    property track: integer read finfo.track write settrack default -1;
                           //-1 -> all
-   property midichannel: midichannelty read finfo.midichannel 
+   property midichannel: midichannelty read finfo.midichannel
                                      write setmidichannel default mic_0;
    property notemin: integer read finfo.notemin write setnotemin default 0;
    property notemax: integer read finfo.notemax write setnotemax default 127;
  end;
- 
+
  tmidipatches = class(townedpersistentarrayprop)
   protected
   public
@@ -200,7 +200,7 @@ type
    class function getitemclasstype: persistentclassty; override;
                //used in dumpunitgroups
  end;
- 
+
  tpatchinfolist = class(tptruinthashdatalist)
   private
    findexresult: integer;
@@ -214,9 +214,9 @@ type
    function add(const apatch: tmidipatch): ppatchhashdataty;
    function geteventindex(const aevent: midieventinfoty): integer;
  end;
-  
+
  mididecodestatety = (mds_start,mds_readbytes,mds_eventcomplete);
- 
+
  tsigmidisource = class(tmidisource,icommclient)
   private
    fconnections: sigmidiconnectorarty;
@@ -265,17 +265,17 @@ type
    destructor destroy; override;
    property inputs: tdoubleinpconnarrayprop read finputs;
  end;
- 
+
  tmidiconnoutputarrayprop = class(tdoubleoutconnarrayprop)
   private
    function getitems(const index: integer): tdoubleoutmultiinpconn;
   protected
    procedure createitem(const index: integer; var item: tpersistent); override;
   public
-   property items[const index: integer]: tdoubleoutmultiinpconn 
+   property items[const index: integer]: tdoubleoutmultiinpconn
                                               read getitems; default;
  end;
- 
+
  tsigmidimulticonnector = class(tdoublesigcomp,isigclient)
   private
    fongetvoiceclass: getvoiceclasseventty;
@@ -312,22 +312,22 @@ type
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
-   property items[const index: integer]: tmsedatamodule read getitems 
+   property items[const index: integer]: tmsedatamodule read getitems
                                                      write setitems; default;
    property outputs: tmidiconnoutputarrayprop read foutputs;
   published
    property inputcount: integer read finputcount write setinputcount default 0;
-   property outputcount: integer read getoutputcount 
+   property outputcount: integer read getoutputcount
                                              write setoutputcount default 0;
-   property source: tsigmidisource read fsource write setsource;   
+   property source: tsigmidisource read fsource write setsource;
    property channel: integer read fchannel write setchannel default 0;
    property connectorname: string read fconnectorname write fconnectorname;
                                 //'' -> defaultconnectorname
-   property ongetvoiceclass: getvoiceclasseventty read fongetvoiceclass 
+   property ongetvoiceclass: getvoiceclasseventty read fongetvoiceclass
                                                   write fongetvoiceclass;
    property oninitvoice: initvoiceeventty read foninitvoice write foninitvoice;
  end;
-  
+
 implementation
 uses
  math,msearrayutils,sysutils;
@@ -344,7 +344,7 @@ type
  tsigcontroller1 = class(tsigcontroller);
  tdoubleoutputconn1 = class(tdoubleoutputconn);
  tdoubleinputconn1 = class(tdoubleinputconn);
- 
+
 { tsigmidiconnector }
 
 constructor tsigmidiconnector.create(aowner: tcomponent);
@@ -433,7 +433,7 @@ begin
     end;
     mmk_noteon: begin
      tdoubleoutputconn1(ffrequoutlin).fvalue:= par1*paramscale;
-     tdoubleoutputconn1(ffrequout).fvalue:= intpower(2.0,par1 div 12) * 
+     tdoubleoutputconn1(ffrequout).fvalue:= intpower(2.0,par1 div 12) *
                           chromaticscale[par1 mod 12] * ffrequ_min;
      if par2 = 0 then begin
       ftrigvalue:= -1;
@@ -670,7 +670,7 @@ begin
       end;
      end;
      po1^.key:= by1;
-     po1^.active:= (ftrackevent.event.kind = mmk_noteon) and 
+     po1^.active:= (ftrackevent.event.kind = mmk_noteon) and
                              (ftrackevent.event.par2 <> 0) or
                       (ftrackevent.event.kind = mmk_notepressure);
      po1^.dest.midievent(ftrackevent.event);
@@ -706,7 +706,7 @@ begin
   end;
  end;
  for int1:= 0 to fpatches.count - 1 do begin
-  patch1:= tmidipatch(fpatches.fitems[int1]);  
+  patch1:= tmidipatch(fpatches.fitems[int1]);
   if destlist.find(patch1.channel,po2) then begin
    fpatchpanel.add(patch1)^.data.data.index:= ptrint(po2);
   end;
@@ -798,7 +798,7 @@ begin
         readbytes(midiparcount[kind],mds_eventcomplete);
        end
        else begin
-       end;             
+       end;
        areader.skip(1);
       end
       else begin
@@ -808,7 +808,7 @@ begin
      mds_eventcomplete: begin
       ftrackevent.event.par1:= fbytebuffer[0];
       ftrackevent.event.par2:= fbytebuffer[1];
-      readbytes(midiparcount[kind],mds_eventcomplete); 
+      readbytes(midiparcount[kind],mds_eventcomplete);
                     //prepare for next event with same state
       dotrackevent;
      end;
@@ -904,7 +904,7 @@ var
  voice1: tmsedatamodule;
  conn1: tcomponent;
 begin
- if finputcount <> avalue then begin  
+ if finputcount <> avalue then begin
   if csloading in componentstate then begin
    fpendinginputcount:= avalue;
   end
@@ -952,7 +952,7 @@ begin
         inc(finputcount);
         doinitvoice(int1);
        end;
-      end;  
+      end;
      end;
     finally
      setlength(fvoices,finputcount);
@@ -1194,7 +1194,7 @@ begin
  result:= findexresult;
 end;
 
-procedure tpatchinfolist.checkeventindex(const aitem: phashdataty; 
+procedure tpatchinfolist.checkeventindex(const aitem: phashdataty;
                                                             var accept: boolean);
 var
  int1: integer;

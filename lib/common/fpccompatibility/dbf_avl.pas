@@ -301,10 +301,10 @@ end;
 
 function TAvlTree.InternalInsert(X: PNode; var P: PNode): boolean;
 begin
-  if P = nil then 
-  begin 
-    P := X; 
-    Inc(FCount); 
+  if P = nil then
+  begin
+    P := X;
+    Inc(FCount);
     FHeightChange := true;
     Result := true;
   end else begin

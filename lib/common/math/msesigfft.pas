@@ -25,13 +25,13 @@ uses
   {$warn 6058 off}
  {$endif}
 {$endif}
- 
+
 type
 
  tbufferdoublesigcomp = class;
- 
+
  sigbuffereventty = procedure of object;
- 
+
  tbufferdoubleoutputconn = class(tdoubleoutputconn)
   private
    fonoutputburst: sigoutbursteventty;
@@ -41,16 +41,16 @@ type
    fsamplecount: integer;
    findex: integer;
    procedure clear;
-   property samplecount: integer read fsamplecount 
+   property samplecount: integer read fsamplecount
                                            write setsamplecount default 1;
   public
    constructor create(const aowner: tcomponent;
           const asigintf: isigclient; const aeventdriven: boolean); override;
   published
-   property onoutputburst: sigoutbursteventty read fonoutputburst 
+   property onoutputburst: sigoutbursteventty read fonoutputburst
                                               write fonoutputburst;
  end;
-  
+
  tbufferdoubleinputconn = class(tdoubleinputconn)
   private
    fonsigbufferfull: sigbuffereventty;
@@ -89,10 +89,10 @@ type
    property output: tbufferdoubleoutputconn read foutput write setoutput;
   published
    property input: tbufferdoubleinputconn read finput write setinput;
-   property onoutputburst: sigoutbursteventty read getonoutputburst 
+   property onoutputburst: sigoutbursteventty read getonoutputburst
                                               write setonoutputburst;
  end;
- 
+
  tsigfft = class(tbufferdoublesigcomp)
   private
    ffft: tfft;
@@ -110,14 +110,14 @@ type
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
   published
-   property samplecount: integer read fsamplecount 
+   property samplecount: integer read fsamplecount
                                           write setsamplecount default 256;
-   property windowfunc: windowfuncty read getwindowfunc 
+   property windowfunc: windowfuncty read getwindowfunc
                 write setwindowfunc default wf_rectangular;
-   property windowfuncpar0: double read getwindowfuncpar0 
-                                          write setwindowfuncpar0;   
-   property windowfuncpar1: double read getwindowfuncpar1 
-                                          write setwindowfuncpar1;   
+   property windowfuncpar0: double read getwindowfuncpar0
+                                          write setwindowfuncpar0;
+   property windowfuncpar1: double read getwindowfuncpar1
+                                          write setwindowfuncpar1;
  end;
 
  tsigsamplerfft = class;
@@ -148,15 +148,15 @@ type
    procedure clearaverage();
    property averagecount: int32 read faveragecount;
   published
-   property windowfunc: windowfuncty read getwindowfunc 
+   property windowfunc: windowfuncty read getwindowfunc
                 write setwindowfunc default wf_rectangular;
-   property windowfuncpar0: double read getwindowfuncpar0 
-                                          write setwindowfuncpar0;   
-   property windowfuncpar1: double read getwindowfuncpar1 
-                                          write setwindowfuncpar1;   
+   property windowfuncpar0: double read getwindowfuncpar0
+                                          write setwindowfuncpar0;
+   property windowfuncpar1: double read getwindowfuncpar1
+                                          write setwindowfuncpar1;
    property onfft: samplerffteventty read fonfft write fonfft;
  end;
-  
+
 implementation
 {$ifndef mse_allwarnings}
  {$if fpc_fullversion >= 030100}

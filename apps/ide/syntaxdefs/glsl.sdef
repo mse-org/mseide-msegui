@@ -60,7 +60,7 @@ scope macros macros
 
  endtokens
   ''
- 
+
 scope block
  keywords
   glsl

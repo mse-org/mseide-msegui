@@ -9,7 +9,7 @@ uses
 {$ifdef FPC}
   BaseUnix,
 {$else}
-  Libc, 
+  Libc,
 {$endif}
   Types, SysUtils, Classes;
 
@@ -202,9 +202,9 @@ const
 *)
 {$ifdef FPC}
   ERROR_LOCK_VIOLATION = ESysEACCES;
-{$else}  
+{$else}
   ERROR_LOCK_VIOLATION = EACCES;
-{$endif}  
+{$endif}
 
 { MBCS and Unicode Translation Flags. }
   MB_PRECOMPOSED = 1; { use precomposed chars }

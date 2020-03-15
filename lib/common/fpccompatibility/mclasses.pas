@@ -230,7 +230,7 @@ type
   pcomponent = ^tcomponent;
 
   tcollection = class;
-  
+
   TCollectionItem = class(TPersistent)
   private
     FCollection: TCollection;
@@ -424,14 +424,14 @@ type
     FBufPos: Integer;
     FBufEnd: Integer;
 
-    function ReadWord : word; 
+    function ReadWord : word;
                          {$ifdef CLASSESINLINE}inline;{$endif CLASSESINLINE}
-    function ReadDWord : longword; 
+    function ReadDWord : longword;
                          {$ifdef CLASSESINLINE}inline;{$endif CLASSESINLINE}
-    function ReadQWord : qword; 
+    function ReadQWord : qword;
                          {$ifdef CLASSESINLINE}inline;{$endif CLASSESINLINE}
 {$ifndef FPUNONE}
-    function ReadExtended : extended; 
+    function ReadExtended : extended;
                          {$ifdef CLASSESINLINE}inline;{$endif CLASSESINLINE}
 {$endif}
     procedure SkipProperty;
@@ -559,29 +559,29 @@ type
     function Readutf8String: utf8string;
     function ReadWideString: WideString;
     function ReadUnicodeString: UnicodeString;
-    
+
     function ReadValue: TValueType;
     procedure CopyValue(Writer: twriter);
     property Driver: TAbstractObjectReader read FDriver;
     property Owner: tcomponent read FOwner write FOwner;
     property Parent: tcomponent read FParent write FParent;
     property OnError: TReaderError read FOnError write FOnError;
-    property OnPropertyNotFound: TPropertyNotFoundEvent 
+    property OnPropertyNotFound: TPropertyNotFoundEvent
                             read FOnPropertyNotFound write FOnPropertyNotFound;
-    property OnFindMethod: TFindMethodEvent read FOnFindMethod 
+    property OnFindMethod: TFindMethodEvent read FOnFindMethod
                                                            write FOnFindMethod;
-    property OnSetMethodProperty: TSetMethodPropertyEvent 
+    property OnSetMethodProperty: TSetMethodPropertyEvent
                            read FOnSetMethodProperty write FOnSetMethodProperty;
     property OnSetName: TSetNameEvent read FOnSetName write FOnSetName;
-    property OnReferenceName: TReferenceNameEvent read FOnReferenceName 
+    property OnReferenceName: TReferenceNameEvent read FOnReferenceName
                                                       write FOnReferenceName;
-    property OnAncestorNotFound: TAncestorNotFoundEvent 
+    property OnAncestorNotFound: TAncestorNotFoundEvent
                           read FOnAncestorNotFound write FOnAncestorNotFound;
-    property OnCreateComponent: TCreateComponentEvent 
+    property OnCreateComponent: TCreateComponentEvent
                            read FOnCreateComponent write FOnCreateComponent;
-    property OnFindComponentClass: TFindComponentClassEvent 
+    property OnFindComponentClass: TFindComponentClassEvent
                         read FOnFindComponentClass write FOnFindComponentClass;
-    property OnReadStringProperty: TReadWriteStringPropertyEvent 
+    property OnReadStringProperty: TReadWriteStringPropertyEvent
                         read FOnReadStringProperty write FOnReadStringProperty;
     property onenumerror: enumerroreventty read fonenumerror write fonenumerror;
     property onseterror: seterroreventty read fonseterror write fonseterror;
@@ -929,14 +929,14 @@ TStringsEnumerator = class
   public
     function Read(var Buffer; Count: Longint): Longint; virtual; overload;
     function Write(const Buffer; Count: Longint): Longint; virtual; overload;
-    function read(var buffer; const count: longint; 
+    function read(var buffer; const count: longint;
                           out acount: longint): syserrorty; virtual; overload;
     function write(const buffer; const count: longint;
                           out acount: longint): syserrorty; virtual; overload;
     function Seek(Offset: Longint; Origin: Word): Longint; overload; virtual;
     function Seek(const Offset: Int64; Origin: TSeekOrigin): Int64;
                                              overload; virtual;
-    function seek(const offset: int64; const origin: tseekorigin; 
+    function seek(const offset: int64; const origin: tseekorigin;
                             out newpos: int64): syserrorty; overload; virtual;
     procedure ReadBuffer(var Buffer; Count: Longint);
     function tryreadbuffer(var buffer; count: longint): syserrorty;
@@ -1485,7 +1485,7 @@ begin
     if op = opInsert then
       comp.FreeNotification(Self)
     else
-      comp.RemoveFreeNotification(Self); 
+      comp.RemoveFreeNotification(Self);
    end;
 end;
 }
@@ -1980,7 +1980,7 @@ begin
  result:= nil;
  for i1:= 0 to componentcount - 1 do begin
   comp1:= components[i1];
-  if (comp1.tag = atag) and 
+  if (comp1.tag = atag) and
          ((aclass = nil) or (comp1 is aclass)) then begin
    result:= comp1;
    exit;
@@ -2295,13 +2295,13 @@ Var
   p : pchar;
   c : set of char;
   S : String;
-  
+
 begin
   CheckSpecialChars;
   result:='';
   if StrictDelimiter then
     c:=[#0,Delimiter]
-  else  
+  else
     c:=[#0..' ',QuoteChar,Delimiter];
   For i:=0 to count-1 do
     begin
@@ -2314,7 +2314,7 @@ begin
       Result:=Result+QuoteString(S,QuoteChar)
     else
       Result:=Result+S;
-    if I<Count-1 then 
+    if I<Count-1 then
       Result:=Result+Delimiter;
     end;
   If (Length(Result)=0) and (Count=1) then
@@ -2436,9 +2436,9 @@ begin
       Inc(i);
       end;
     If (Length(AValue)>0) then
-      Add(Copy(AValue,J,I-J));  
+      Add(Copy(AValue,J,I-J));
     end
-  else 
+  else
     begin
     while i<=length(AValue) do begin
      // skip delimiter
@@ -2446,7 +2446,7 @@ begin
 
      // skip spaces
      while (i<=length(AValue)) and (Ord(AValue[i])<=Ord(' ')) do inc(i);
-    
+
      // read next string
      if i<=length(AValue) then begin
       if AValue[i]=FQuoteChar then begin
@@ -2653,10 +2653,10 @@ end;
 
 Function GetNextLine (Const Value : String; Var S : String; Var P : Integer) : Boolean;
 
-Var 
+Var
   PS : PChar;
   IP,L : Integer;
-  
+
 begin
   L:=Length(Value);
   S:='';
@@ -2672,14 +2672,14 @@ begin
     End;
   PS:=PChar(Value)+P-1;
   IP:=P;
-  While ((L-P)>=0) and (not (PS^ in [#10,#13])) do 
+  While ((L-P)>=0) and (not (PS^ in [#10,#13])) do
     begin
     P:=P+1;
     Inc(PS);
     end;
   SetLength (S,P-IP);
   System.Move (Value[IP],Pointer(S)^,P-IP);
-  If (P<=L) and (Value[P]=#13) then 
+  If (P<=L) and (Value[P]=#13) then
     Inc(P);
   If (P<=L) and (Value[P]=#10) then
     Inc(P); // Point to character after #10(#13)
@@ -3036,7 +3036,7 @@ begin
     S:=StrPas(TheText)
   else
     S:='';
-  SetTextStr(S);  
+  SetTextStr(S);
 end;
 
 
@@ -3661,7 +3661,7 @@ end;
       Result:=Seek(longint(Offset),ord(Origin));
     end;
 
-function tstream.seek(const offset: int64; const origin: tseekorigin; 
+function tstream.seek(const offset: int64; const origin: tseekorigin;
                             out newpos: int64): syserrorty;
 begin
  newpos:= seek(offset,origin);
@@ -3708,7 +3708,7 @@ end;
 
 procedure TStream.ReadBuffer(var Buffer; Count: Longint);
 begin
- if tryreadbuffer(buffer,count) <> sye_ok then begin 
+ if tryreadbuffer(buffer,count) <> sye_ok then begin
   Raise EReadError.Create(SReadError);
  end;
 end;
@@ -4307,7 +4307,7 @@ begin
   mant:=LEtoN(mant);
   exp:=LEtoN(word(exp));
   sign:=(exp and $8000)<>0;
-  if sign then begin 
+  if sign then begin
    exp:=exp and $7FFF;
   end;
   case exp of
@@ -5163,18 +5163,18 @@ type
     constructor create; reintroduce;
     function newreference(const aprop: ppropinfo): TUnResolvedReference;
   end;
-  
+
   TLocalUnResolvedReference = class(TUnresolvedReference)
     Finstance : TPersistent;
   end;
- 
+
   tlocalfixups = class(tlinkedlist)
    public
     constructor create; reintroduce;
     function newreference(const ainstance: tpersistent;
                        const aprop: ppropinfo): TLocalUnResolvedReference;
   end;
-  // Linked list of TPersistent items that have unresolved properties.  
+  // Linked list of TPersistent items that have unresolved properties.
 
   { TUnResolvedInstance }
 
@@ -5193,12 +5193,12 @@ type
     Procedure Add(Item : TlinkedListItem); // Add TUnResolvedInstance item to list. Create list if needed
     Destructor Destroy; override; // All elements in list (if any) are removed from the global list.
   end;
-  
+
   // Visitor used to try and resolve instances in the global list
   TResolveReferenceVisitor = Class(TBuildListVisitor)
     Function Visit(Item : TLinkedListItem) : Boolean; override;
   end;
-  
+
   // Visitor used to remove all references to a certain component.
   TRemoveReferenceVisitor = Class(TBuildListVisitor)
     FRef : String;
@@ -5215,7 +5215,7 @@ type
     Constructor Create(ARoot : TComponent;AList : TStrings);
   end;
 
-  // Visitor used to collect instance names.  
+  // Visitor used to collect instance names.
   TReferenceInstancesVisitor = Class(TLinkedListVisitor)
     FList : TStrings;
     FRef  : String;
@@ -5223,7 +5223,7 @@ type
     Function Visit(Item : TLinkedListItem) : Boolean; override;
     Constructor Create(ARoot : TComponent;Const ARef : String; AList : TStrings);
   end;
-  
+
   // Visitor used to redirect links to another root component.
   TRedirectReferenceVisitor = Class(TLinkedListVisitor)
     FOld,
@@ -5233,7 +5233,7 @@ type
     Constructor Create(ARoot : TComponent;Const AOld,ANew : String);
   end;
 
-  
+
 var
   NeedResolving : TLinkedList;
   ResolveSection : TRTLCriticalSection;
@@ -5255,7 +5255,7 @@ begin
     If Result then
       SetObjectProp(Instance, FPropInfo,C);
     end;
-end; 
+end;
 
 Function TUnresolvedReference.RootMatches(ARoot : TComponent) : Boolean; {$ifdef CLASSESINLINE} inline; {$endif CLASSESINLINE}
 
@@ -5329,7 +5329,7 @@ begin
   Result.FRoot:=ARoot;
 end;
 
-Function TUnResolvedInstance.RootUnresolved : TUnresolvedReference; 
+Function TUnResolvedInstance.RootUnresolved : TUnresolvedReference;
 
 begin
   Result:=Nil;
@@ -5373,7 +5373,7 @@ begin
   While (R<>Nil) do
     begin
     If R.RootMatches(FRoot) then
-      If (FList.IndexOf(R.FGlobal)=-1) then 
+      If (FList.IndexOf(R.FGlobal)=-1) then
         FList.Add(R.FGlobal);
     R:=R.NextRef;
     end;
@@ -5449,7 +5449,7 @@ Var
   UI : TUnResolvedInstance;
   R : TUnresolvedReference;
   L : TFPList;
-  
+
 begin
   UI:=TUnResolvedInstance(Item);
   R:=UI.RootUnresolved;
@@ -5493,7 +5493,7 @@ begin
   If (List=Nil) then
     List:=TFPList.Create;
   List.Add(Item);
-end;  
+end;
 
 Destructor TBuildListVisitor.Destroy;
 
@@ -5510,12 +5510,12 @@ end;
 
 { TResolveReferenceVisitor }
 
-Function TResolveReferenceVisitor.Visit(Item : TLinkedListItem) : Boolean; 
+Function TResolveReferenceVisitor.Visit(Item : TLinkedListItem) : Boolean;
 
 begin
   If TUnResolvedInstance(Item).ResolveReferences then
     Add(Item);
-  Result:=True;  
+  Result:=True;
 end;
 
 // Add an instance to the global list of instances which need resolving.
@@ -5554,7 +5554,7 @@ begin
     end;
 end;
 
-// Walk through the global list of instances to be resolved.  
+// Walk through the global list of instances to be resolved.
 
 Procedure VisitResolveList(V : TLinkedListVisitor);
 
@@ -5565,16 +5565,16 @@ begin
       NeedResolving.Foreach(V);
     Finally
       FreeAndNil(V);
-    end;  
+    end;
   Finally
     LeaveCriticalSection(ResolveSection);
-  end;  
+  end;
 end;
 
 procedure GlobalFixupReferences;
 
 begin
-  If (NeedResolving=Nil) then 
+  If (NeedResolving=Nil) then
     Exit;
   GlobalNameSpace.BeginWrite;
   try
@@ -5587,7 +5587,7 @@ end;
 procedure GetFixupReferenceNames(Root: TComponent; Names: TStrings);
 
 begin
-  If (NeedResolving=Nil) then 
+  If (NeedResolving=Nil) then
     Exit;
   VisitResolveList(TReferenceNamesVisitor.Create(Root,Names));
 end;
@@ -5644,11 +5644,11 @@ end;
 Function FindNestedComponent(Root : TComponent; APath : String; CStyle : Boolean = True) : TComponent;
 
   Function GetNextName : String; {$ifdef CLASSESINLINE} inline; {$endif CLASSESINLINE}
-  
+
   Var
     P : Integer;
     CM : Boolean;
-    
+
   begin
     P:=Pos('.',APath);
     CM:=False;
@@ -5694,7 +5694,7 @@ type
    procedure beginsuspend;
    procedure endsuspend;
  end;
- 
+
 threadvar
   GlobalLoaded: tglobloadlist;
   GlobalLists: TFpList;
@@ -6020,7 +6020,7 @@ Var
   C : TComponent;
   P : integer;
   L : TLinkedList;
-  
+
 begin
   If Assigned(FFixups) then
     begin
@@ -6106,7 +6106,7 @@ function TReader.ReadWideChar: WideChar;
 
 var
   W: WideString;
-  
+
 begin
   W := ReadWideString;
   if Length(W) = 1 then
@@ -6114,12 +6114,12 @@ begin
   else
     raise EReadError.Create(SInvalidPropertyValue);
 end;
-            
+
 function TReader.ReadUnicodeChar: UnicodeChar;
 
 var
   U: UnicodeString;
-  
+
 begin
   U := ReadUnicodeString;
   if Length(U) = 1 then
@@ -6127,7 +6127,7 @@ begin
   else
     raise EReadError.Create(SInvalidPropertyValue);
 end;
-            
+
 procedure TReader.ReadCollection(Collection: TCollection);
 var
   Item: TCollectionItem;
@@ -6296,7 +6296,7 @@ end;
 procedure TReader.ReadData(Instance: TComponent);
 var
   SavedOwner, SavedParent: TComponent;
-  
+
 begin
   { Read properties }
   while not EndOfList do
@@ -6405,13 +6405,13 @@ begin
     Result := ReadInteger;
 end;
 
-function treader.readset(settype: ptypeinfo): longword; 
+function treader.readset(settype: ptypeinfo): longword;
 begin
  if fdriver.nextvalue = vaset then begin
   fdriver.readvalue;
   result:= fdriver.readset(
                  gettypedata(settype)^.comptype{$ifndef FPC}^{$endif});
- end 
+ end
  else begin
   result:= readinteger;
  end;
@@ -6656,7 +6656,7 @@ begin
          fonenumerror(self,proptype,ident,value);
         end;
        end;
-       if Value = -1 then begin        
+       if Value = -1 then begin
         raise EReadError.Create(SInvalidPropertyValue);
        end;
        SetOrdProp(Instance, PropInfo, Value);
@@ -6802,7 +6802,7 @@ begin
 
       FRoot := Result;
       FLookupRoot := Result;
-      localloaded:= not (Assigned(GlobalLoaded) and 
+      localloaded:= not (Assigned(GlobalLoaded) and
                                       (globalloaded.fsuspended <= 0));
       if localloaded then begin
        FLoaded:= TFpList.Create;
@@ -7087,14 +7087,14 @@ var
 
 begin
   Result := nil;
-  if not (csdesigning in root.fcomponentstate) or 
+  if not (csdesigning in root.fcomponentstate) or
                                    not (ffinline in aflags) then begin
    UClassName:=UpperCase(AClassName);
    FindInFieldTable(Root);
- 
+
    if (Result=nil) and assigned(LookupRoot) and (LookupRoot<>Root) then
      FindInFieldTable(LookupRoot);
- 
+
    if (Result=nil) then begin
      PersistentClass := GetClass(AClassName);
      if {$ifndef FPC}(persistentclass <> nil) and{$endif}
@@ -7341,9 +7341,9 @@ Var
   SList : TStringList;
   SPos : Integer;
   I : Integer;
-  
+
 begin
-  // Write children list. 
+  // Write children list.
   // While writing children, the ancestor environment must be saved
   // This is recursive...
   SRoot:=FRoot;
@@ -7369,10 +7369,10 @@ begin
       Component.GetChildren({$ifdef FPC}@{$endif}WriteComponent, FRoot);
     Finally
       If Assigned(Fancestors) then
-        For I:=0 to FAncestors.Count-1 do 
+        For I:=0 to FAncestors.Count-1 do
           FAncestors.Objects[i].Free;
       FreeAndNil(FAncestors);
-    end;    
+    end;
   finally
     FAncestors:=Slist;
     FRoot:=SRoot;
@@ -7383,7 +7383,7 @@ begin
 end;
 
 procedure TWriter.WriteComponentData(Instance: TComponent);
-var 
+var
   Flags: TFilerFlags;
 begin
   Flags := [];
@@ -7455,14 +7455,14 @@ begin
   Driver.WriteInteger(Value);
 end;
 
-procedure twriter.writeset(value: longword; settype: ptypeinfo); 
+procedure twriter.writeset(value: longword; settype: ptypeinfo);
 
 begin
  driver.writeset(value,
                  gettypedata(settype)^.comptype{$ifndef FPC}^{$endif});
 end;
 
-procedure twriter.writeenum(value: longint; enumtype: ptypeinfo); 
+procedure twriter.writeenum(value: longint; enumtype: ptypeinfo);
 
 begin
  driver.writeident(getenumname(enumtype,value));
@@ -7488,12 +7488,12 @@ var PropCount,i : integer;
     PropList  : PPropList;
 begin
   PropCount:=GetPropList(Instance,PropList);
-  if PropCount>0 then 
+  if PropCount>0 then
     try
       for i := 0 to PropCount-1 do
         if IsStoredProp(Instance,PropList^[i]) then
           WriteProperty(Instance,PropList^[i]);
-    Finally    
+    Finally
       Freemem(PropList);
     end;
   Instance.DefineProperties(Self);
@@ -7745,8 +7745,8 @@ begin
           begin
           { Subcomponents are streamed the same way as persistents }
           if ObjValue.InheritsFrom(TComponent)
-            and ((not (csSubComponent in TComponent(ObjValue).ComponentStyle)) 
-                 or ((TComponent(ObjValue).Owner<>Instance) and 
+            and ((not (csSubComponent in TComponent(ObjValue).ComponentStyle))
+                 or ((TComponent(ObjValue).Owner<>Instance) and
                                 (TComponent(ObjValue).Owner<>Nil))) then
             begin
             Component := TComponent(ObjValue);
@@ -7772,7 +7772,7 @@ begin
                 Name:=C.Name + Name;
                 C:= C.Owner;
                 end;
-              if (C=nil) and (Component.Owner=nil) then 
+              if (C=nil) and (Component.Owner=nil) then
                 if (Name<>'') then              //foreign root
                   Name:=Name+'.Owner';
               if Length(Name) > 0 then
@@ -7925,7 +7925,7 @@ end;
 {$ENDIF}
 {$endif}
 
-procedure TBinaryObjectWriter.WriteWord(w : word); 
+procedure TBinaryObjectWriter.WriteWord(w : word);
                      {$ifdef CLASSESINLINE}inline;{$endif CLASSESINLINE}
 begin
   w:=NtoLE(w);
@@ -8013,7 +8013,7 @@ begin
   if fwriter <> nil then begin
    WriteStr(fwriter.getclassname(Component));
   end
-  else begin   
+  else begin
    WriteStr(Component.ClassName);
   end;
   WriteStr(Component.Name);
@@ -8257,7 +8257,7 @@ begin
     {$ENDIF}
   end;
 end;
-                      
+
 procedure TBinaryObjectWriter.WriteUnicodeString(const Value: UnicodeString);
 var len : longword;
 {$IFDEF ENDIAN_BIG}
@@ -8401,11 +8401,11 @@ begin
   end;
  {
   if classlist = nil then begin
-   classlist:= tthreadlist.create; 
+   classlist:= tthreadlist.create;
          //initialization order sometimes wrong in FPC
   end;
   if classaliaslist = nil then begin
-   classaliaslist:= tstringlist.create; 
+   classaliaslist:= tstringlist.create;
          //initialization order sometimes wrong in FPC
   end;
  }
@@ -8962,7 +8962,7 @@ begin
 end;
 
 
-{$ifdef mse_fpc_2_6_2} 
+{$ifdef mse_fpc_2_6_2}
 procedure TCollection.RemoveItem(Item: TCollectionItem);
 Var
  I : Integer;
@@ -9014,7 +9014,7 @@ function TCollection.GetNamePath: string;
 var o : TPersistent;
 begin
   o:=getowner;
-  if assigned(o) and (propname<>'') then 
+  if assigned(o) and (propname<>'') then
      result:=o.getnamepath+'.'+propname
    else
      result:=classname;
@@ -9105,7 +9105,7 @@ begin
     DoClear;
   finally
     EndUpdate;
-  end;    
+  end;
 end;
 
 
@@ -9326,7 +9326,7 @@ begin
  // ComponentPages.Free;
   FreeAndNil(NeedResolving);
   globalnamespace.endwrite;
-  
+
   { GlobalNameSpace is an interface so this is enough }
 //  GlobalNameSpace:=nil;
 

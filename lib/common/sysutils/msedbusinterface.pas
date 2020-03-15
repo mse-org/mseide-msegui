@@ -33,7 +33,7 @@ uses
 
 const
  msebusname = 'mse.msegui.app';
- 
+
 type
  dbusdataty = (
   dbt_INVALID,
@@ -87,14 +87,14 @@ type
  end;
  pvariantvaluety = ^variantvaluety;
  variantvaluearty = array of variantvaluety;
-   
+
  dictentryty = record
   name: string;
   value: variantvaluety;
  end;
  pdictentryty = ^dictentryty;
  dictentryarty = array of dictentryty;
- 
+
  edbus = class(exception)
  end;
 
@@ -104,7 +104,7 @@ type
   procedure replied(const serial: card32; const amessage: pdbusmessage{;
                                                const auser_data: pointer});
  end;
- 
+
 const
  dbusdatasizes: array[dbusdataty] of int32 = (
   0,                   //dbt_INVALID,
@@ -133,7 +133,7 @@ const
  signalmatchid = strid1;
  signalhandlerid = strid1;
  separatorid = strid3;
-  
+
 var
  arraytypes: array[dbusdataty] of pdynarraytypeinfo;
 const
@@ -169,7 +169,7 @@ const
   DBUS_TYPE_INVALID,  //vvk_record
   DBUS_TYPE_INVALID   //vvk_variantar
  );
- 
+
  dbusdatastrings: array[dbusdataty] of string = (
   DBUS_TYPE_INVALID_AS_STRING,
   DBUS_TYPE_BYTE_AS_STRING,
@@ -192,16 +192,16 @@ const
   '', //dbt_msevariant
   ''  //dbt_structend
  );
- 
+
 type
  messageeventty = procedure(const amessage: pdbusmessage;
                                   var handled: boolean) of object;
- messagedataeventty = procedure(const amessage: pdbusmessage; 
+ messagedataeventty = procedure(const amessage: pdbusmessage;
                       const data: pointer; var handled: boolean) of object;
                                                //default false
-  
+
  idbusservice = interface;
- 
+
  idbusobject = interface(inullinterface)
   function getinstance: tobject;
   procedure registeritems(const sender: idbusservice);
@@ -251,7 +251,7 @@ type
   pendingoffs: hashoffsetty; //chain
  end;
  plinkinfoty = ^linkinfoty;
- 
+
  objinfoty = record
   prev: hashoffsetty;
   next: hashoffsetty;
@@ -261,9 +261,9 @@ type
   handlers: pointer; //hashoffsetarty
  end;
  pobjinfoty = ^objinfoty;
- 
+
  itemkindty = (dbk_watch,dbk_timeout,dbk_pending,dbk_link,dbk_obj);
- 
+
  dbusinfoty = record
   case kind: itemkindty of
    dbk_watch: (watch: watchinfoty);
@@ -285,7 +285,7 @@ type
  pdbusitemhashdataty = ^dbusitemhashdataty;
 
  tdbusservice = class;
- 
+
  tdbusitemhashdatalist = class(tpointerhashdatalist,iobjectlink)
   private
    fwatches: card32arty;
@@ -341,7 +341,7 @@ type
   refcount: int32;
  end;
 
- handlerdataty = record 
+ handlerdataty = record
   case kind: handlerkindty of
    hk_match:
     (match: handlermatchdataty);
@@ -353,20 +353,20 @@ type
   data: handlerdataty;
  end;
  phandlerhashdataty = ^handlerhashdataty;
- 
+
  thandlerhashdatalist = class(thashtree)
   private
    fstringidents: tstringidents;
    femptystringid: identty;
-  protected  
+  protected
    fowner: tdbusservice;
    function getrecordsize(): int32 override;
    procedure finalizeitem(const aitem: phashdataty) override;
-   
+
   public
    constructor create(const aowner: tdbusservice);
    destructor destroy(); override;
-   function scanpath(var avec: identvecty; 
+   function scanpath(var avec: identvecty;
                      const apath: pchar; const aseparator: char): boolean;
                                         //true if ok, too many levels otherwise
    function addmethod(const aobject,ainterface,amember,asignature: string;
@@ -379,7 +379,7 @@ type
    function findsignal(const asender,apath,ainterface,amember,
                                        asignature: pchar): phandlerhashdataty;
  end;
-  
+
  tdbusservice = class(tlinkedobject,idbusservice,idbusobject)
   private
    fconn: pdbusconnection;
@@ -463,9 +463,9 @@ type
                const resulttypes: array of dbusdataty;
                const results: array of pointer;
                const timeout: int32 = -1): boolean; //blocking, true if ok
-   function dbusreply(const amessage: pdbusmessage; 
+   function dbusreply(const amessage: pdbusmessage;
                             const params: array of variantvaluety): boolean;
-   function dbuserror(const amessage: pdbusmessage; 
+   function dbuserror(const amessage: pdbusmessage;
                          const aname: string; const atext: string): boolean;
    function dbussignal(const path,iface,name: string;
                                const params: array of variantvaluety): boolean;
@@ -507,7 +507,7 @@ type
    destructor destroy(); override;
  end;
 {$typeinfo off}
-  
+
 var
  dbuslasterror: string;
 {
@@ -530,7 +530,7 @@ function dbuscallmethod(const bus_name,path,iface,method: string;
                const resulttypes: array of dbusdataty;
                const results: array of pointer;
                const timeout: int32 = -1): boolean; //blocking, true if ok
-procedure dbusreply(const amessage: pdbusmessage; 
+procedure dbusreply(const amessage: pdbusmessage;
                      const paramtypes: array of dbusdataty;
                                   const params: array of pointer);
 }
@@ -543,7 +543,7 @@ procedure additem(var dest: variantvaluearty; const value: variantvaluety);
 
 procedure setvariantvalue(const avalue: string; var avariant: variantvaluety;
                               const aflags: variantflagsty = []);
-function variantvalue(const avalue: string; 
+function variantvalue(const avalue: string;
                   const aflags: variantflagsty = []): variantvaluety;
 procedure setvariantvalue(const avalue: int32; var avariant: variantvaluety;
                                 const aflags: variantflagsty = []);
@@ -628,7 +628,7 @@ var
  nextidnumber: card16;
 // userdatacache: linklistty;
  dbusalignments: array[dbusdataty] of int32;
- 
+
 function initdbuslib(): boolean;
 begin
  result:= true;
@@ -774,7 +774,7 @@ end;
 function dbusdumpmessage(const amessage: pdbusmessage): string;
 var
  level: int32;
- 
+
  function nilstr(const astr: pcchar): string;
  begin
   if astr = nil then begin
@@ -784,7 +784,7 @@ var
    result:= string(astr);
   end;
  end; //nilstr
- 
+
  function dumptype(const t: int32): string;
  begin
   case t of
@@ -821,7 +821,7 @@ var
   c64: card64;
   f64: flo64;
   pc1: pcchar;
-  
+
  begin
   result:= '';
   case t of
@@ -837,7 +837,7 @@ var
    DBUS_TYPE_INT16: begin;
     dbus_message_iter_get_basic(iterpo,@i16);
     result:= inttostr(i16);
-   end; 
+   end;
    DBUS_TYPE_UINT16: begin
     dbus_message_iter_get_basic(iterpo,@c16);
     result:= inttostr(c16);
@@ -875,7 +875,7 @@ var
    DBUS_TYPE_DICT_ENTRY:  begin end;
   end;
  end;
- 
+
  function readvalue(var aiter: dbusmessageiter): string;
  var
   i1,i2: int32;
@@ -884,7 +884,7 @@ var
   first: boolean;
   s1,s2: string;
  label
-  endlab;  
+  endlab;
  begin
   inc(level);
   s2:= charstring(' ',level);
@@ -895,7 +895,7 @@ var
    goto endlab;
   end;
   if i1 = DBUS_TYPE_VARIANT then begin
-   dbus_message_iter_recurse(@aiter,@iter3);   
+   dbus_message_iter_recurse(@aiter,@iter3);
    iterpo:= @iter3;
    i1:= dbus_message_iter_get_arg_type(iterpo); //nested variants?
   end;
@@ -925,10 +925,10 @@ var
 // DBUS_TYPE_DICT_ENTRY
    else begin
     result:= result+dumptype(i1)+' '+dumpdata(i1,iterpo);
-   end;     
+   end;
   end;
   dbus_message_iter_next(@aiter);
-  
+
 endlab:
   if result <> s2 then begin
    result:= result+lineend;
@@ -977,7 +977,7 @@ begin
   until s1 = '';
  end;
 end;
-{$endif} 
+{$endif}
 (*
 function dbusreadmessage(const amessage: pdbusmessage;
                const resulttypes: array of dbusdataty;
@@ -1003,7 +1003,7 @@ begin
  end;
 end;
 
-procedure dbusreply(const amessage: pdbusmessage; 
+procedure dbusreply(const amessage: pdbusmessage;
                      const paramtypes: array of dbusdataty;
                                   const params: array of pointer);
 begin
@@ -1100,22 +1100,22 @@ end;
 
 const
  inttypestrings: array[tordtype] of string = (
- //otSByte,                 otUByte,                 
+ //otSByte,                 otUByte,
    DBUS_TYPE_BYTE_AS_STRING,DBUS_TYPE_BYTE_AS_STRING,
- //otSWord,                  otUWord,                   
+ //otSWord,                  otUWord,
    DBUS_TYPE_INT16_AS_STRING,DBUS_TYPE_UINT16_AS_STRING,
  //otSLong,                  otULong
    DBUS_TYPE_INT32_AS_STRING,DBUS_TYPE_UINT32_AS_STRING
 {$ifdef mse_fpc_3_2}
  //otSQWord,                 otUQWord
    ,DBUS_TYPE_INT64_AS_STRING,DBUS_TYPE_UINT64_AS_STRING
-{$endif}   
+{$endif}
    );
 type
 {$ifdef mse_fpc_3_0}
  precordtypedata = ptypedata;
 {$else}
- recordtypedata = 
+ recordtypedata =
  {$ifndef FPC_REQUIRES_PROPER_ALIGNMENT}
  packed
  {$endif}
@@ -1231,16 +1231,16 @@ end;
 
 const
  inttypes: array[tordtype] of dbusdataty = (
- //otSByte, otUByte,                 
+ //otSByte, otUByte,
    dbt_byte,dbt_byte,
- //otSWord,  otUWord,                   
+ //otSWord,  otUWord,
    dbt_int16,dbt_uint16,
  //otSLong,  otULong
    dbt_int32,dbt_uint32
 {$ifdef mse_fpc_3_2}
  //otSQWord, otUQWord
    ,dbt_int64,dbt_uint64
-{$endif}   
+{$endif}
    );
 
 procedure stackarray(const source: dbusdatatyarty; var dest: dbusdatatyarty);
@@ -1371,12 +1371,12 @@ begin
  end;
 end;
 
-function variantvalue(const avalue: string; 
+function variantvalue(const avalue: string;
                   const aflags: variantflagsty = []): variantvaluety;
 begin
  setvariantvalue(avalue,result,aflags);
 end;
- 
+
 procedure setvariantvalue(const avalue: int32; var avariant: variantvaluety;
                                 const aflags: variantflagsty = []);
 begin
@@ -1558,7 +1558,7 @@ begin
  end;
 end;
 
-function variantrecordvalue(const avaluead: pointer; 
+function variantrecordvalue(const avaluead: pointer;
                 const atypeinfo: ptypeinfo): variantvaluety;
 begin
  setvariantrecordvalue(avaluead,atypeinfo,result);
@@ -1752,7 +1752,7 @@ var
  p1: pdbusitemhashdataty;
 begin
  p1:= pdbusitemhashdataty(find(adata));
- if (p1 <> nil) and (p1^.data.data.kind = dbk_watch) then begin 
+ if (p1 <> nil) and (p1^.data.data.kind = dbk_watch) then begin
                              //throw no exception
 {$ifdef mse_debugdbus}
   if p1^.data.data.watch.flags <> aflags then begin
@@ -1840,7 +1840,7 @@ const
   DBUS_WATCH_HANGUP,   //pf_hup, //POLLHUP =  $010;
   0                    //pf_nval //POLLNVAL = $020;
  );
- 
+
 procedure tdbusitemhashdatalist.handlewatches();
 var
  i1: int32;
@@ -1859,7 +1859,7 @@ begin
     dbus_watch_handle(watch,c1);
    end;
   end;
- end; 
+ end;
 end;
 
 { tdbusservice }
@@ -1951,7 +1951,7 @@ procedure tdbusservice.setupmessage(const amessage: pdbusmessage;
     p1:= @pc1;
     pc1:= pchar(pansistring(pd^)^);
    end;
-   
+
 // dbt_UNIX_FD,
    dbt_ARRAY: begin
     inc(pt);
@@ -1962,7 +1962,7 @@ procedure tdbusservice.setupmessage(const amessage: pdbusmessage;
     end;
 }
     pdynar:= pd^; //pointer to dynarinfoty
-    ptypda:= gettypedata(pdynar^.typinfo);  
+    ptypda:= gettypedata(pdynar^.typinfo);
     i1:= ptypda^.elsize;
     s1:= dbusdatastrings[pt^];
     if s1 = '' then begin
@@ -2141,7 +2141,7 @@ var
  iter1: dbusmessageiter;
  pt: pdbusdataty;
  pte: pdbusdataty;
- 
+
  pd: ppointer;
  pd1: pointer;
 
@@ -2425,7 +2425,7 @@ begin
  result:= dbus_connection_send(fconn,m1,nil) <> 0;
  dbus_message_unref(m1);
 end;
- 
+
 
 function tdbusservice.methodcall(const bus_name,path,iface,method: string;
                            const params: array of variantvaluety): pdbusmessage;
@@ -2494,8 +2494,8 @@ end;
 {
 const
  dbuscallbackvtable: DBusObjectPathVTable = (
-  unregister_function: @unregisterobjectpath; 
-  message_function: @objectpathhandlertrampoline; 
+  unregister_function: @unregisterobjectpath;
+  message_function: @objectpathhandlertrampoline;
   dbus_internal_pad1: nil;
   dbus_internal_pad2: nil;
   dbus_internal_pad3: nil;
@@ -2522,7 +2522,7 @@ begin
  end;
 end;
 }
-{ 
+{
 procedure tdbusservice.registeritem(const ainterface: string;
                            const apath: string; const asignature: string;
                                                const ahandler: messageeventty);
@@ -2656,7 +2656,7 @@ begin
  po1:= aobj^.handlers;
  poe:= po1 + length(hashoffsetarty(aobj^.handlers));
  while po1 < poe do begin
-  fhandlers.delete(po1^);  
+  fhandlers.delete(po1^);
   inc(po1);
  end;
 end;
@@ -2687,7 +2687,7 @@ var
    p1:= fhandlers.getdatapoornil(p1^.data.handler.signal.next);
   end;
  end;
- 
+
 begin
 {$ifdef mse_dumpdbus}
  write(dbusdumpmessage(amessage));
@@ -2789,7 +2789,7 @@ function tdbusservice.dbuscallmethod(const returnedto: idbusresponse;
 var
  pend1: pdbuspendingcall;
  m1: pdbusmessage;
- 
+
 label
  errorlab;
 begin
@@ -2818,7 +2818,7 @@ function tdbusservice.dbuscallmethod(const bus_name: string;
                const timeout: int32 = -1): boolean;
 var
  m1,m2: pdbusmessage;
- 
+
 label
  errorlab;
 begin
@@ -2854,12 +2854,12 @@ end;
 function tdbusservice.dbusreadmessage(const amessage: pdbusmessage;
                   const resulttypes: array of dbusdataty;
                              const results: array of pointer;
-                                  const apartial: boolean = false): boolean; 
+                                  const apartial: boolean = false): boolean;
                                      //true if ok
 var
  pte: pdbusdataty;
 
- function readvalue(var aiter: dbusmessageiter; 
+ function readvalue(var aiter: dbusmessageiter;
                                  var pt: pdbusdataty; var pd: ppointer): boolean;
  var
   i1,i2,i3: int32;
@@ -2874,7 +2874,7 @@ var
   t1: dbusdataty;
   iter2,iter3: dbusmessageiter;
   iterpo: pdbusmessageiter;
-  
+
  label
   oklab;
  begin
@@ -2892,7 +2892,7 @@ var
    exit;
   end;
   if i1 = DBUS_TYPE_VARIANT then begin
-   dbus_message_iter_recurse(@aiter,@iter3);   
+   dbus_message_iter_recurse(@aiter,@iter3);
    iterpo:= @iter3;
    i1:= dbus_message_iter_get_arg_type(iterpo); //nested variants?
   end;
@@ -2928,7 +2928,7 @@ var
     isstring:= true;
     p1:= @pc1;
    end;
-   
+
 // DBUS_TYPE_UNIX_FD,
    DBUS_TYPE_ARRAY: begin
     inc(pt);
@@ -2970,7 +2970,7 @@ var
    else begin
     error('dbuscallmethod() invalid returned value');
     exit;
-   end;     
+   end;
   end;
   dbus_message_iter_get_basic(iterpo,p1);
   p1:= pd^;
@@ -3036,7 +3036,7 @@ begin
      goto errorlab;
     end;
    end;
-   if not apartial and (dbus_message_iter_get_arg_type(@iter1) <> 
+   if not apartial and (dbus_message_iter_get_arg_type(@iter1) <>
                                                 DBUS_TYPE_INVALID) then begin
     error('dbuscallmethod() wrong returned param count');
     goto errorlab;
@@ -3600,7 +3600,7 @@ begin
  fstringidents.free();
 end;
 
-function thandlerhashdatalist.scanpath(var avec: identvecty; 
+function thandlerhashdatalist.scanpath(var avec: identvecty;
                      const apath: pchar; const aseparator: char): boolean;
 var
  p1,p2: pchar;
@@ -3642,7 +3642,7 @@ function thandlerhashdatalist.addmethod(
  begin
   raiseerror('Too many path elements');
  end;//pathlenerror
- 
+
 var
  vec1: identvecty;
 begin
@@ -3691,7 +3691,7 @@ function thandlerhashdatalist.addsignal(
  begin
   raiseerror('Too many path elements');
  end;//pathlenerror
- 
+
 var
  vec1: identvecty;
  p1: phandlerhashdataty;
@@ -3729,8 +3729,8 @@ begin
   signal.match:= o1;
   signal.prev:= 0;
   if o2 <> 0 then begin
-   phandlerhashdataty(getdatapo(o2))^.data.handler.signal.prev:= result; 
-                                                 
+   phandlerhashdataty(getdatapo(o2))^.data.handler.signal.prev:= result;
+
    signal.next:= o2;
   end
   else begin
@@ -3788,7 +3788,7 @@ var
  p1: phandlerhashdataty;
 begin
  with phandlerhashdataty(aitem)^ do begin
-  case data.kind of 
+  case data.kind of
    hk_match: begin
     if fowner.fconn <> nil then begin
      dbus_bus_remove_match(fowner.fconn,
@@ -3820,7 +3820,7 @@ var
  card32rec: record b: byte; v: card32 end;
 const
  card32align: int32 = (@card32rec.v - @card32rec.b);
- 
+
  dbusalignments: array[dbusdataty] of int32 = (
   0,                   //dbt_INVALID,
   sizeof(byte),        //dbt_BYTE,

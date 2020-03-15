@@ -107,7 +107,7 @@ type
       out ExtraSamples: PWord; out ExtraSampleCnt: DWord;
       out SampleBits: PWord; out SampleBitsPerPixel: DWord);
     procedure ReadImgValue(BitCount: Word; var Run: Pointer; x: dword;
-      Predictor: word; var LastValue: word; out Value: Word); 
+      Predictor: word; var LastValue: word; out Value: Word);
                 {$ifdef FPC}inline;{$endif}
     function FixEndian(w: Word): Word; {$ifdef FPC}inline;{$endif} overload;
     function FixEndian(d: DWord): DWord; {$ifdef FPC}inline;{$endif} overload;
@@ -187,7 +187,7 @@ end;
 type
  worda4ty = array[0..3] of word;
  pworda4ty = ^worda4ty;
-{$warnings off} 
+{$warnings off}
 procedure TFPReaderTiff.ReadImageProperties(out RedBits, GreenBits, BlueBits,
   GrayBits, AlphaBits: Word; out ExtraSamples: PWord; out
   ExtraSampleCnt: DWord; out SampleBits: PWord; out SampleBitsPerPixel: DWord);
@@ -379,7 +379,7 @@ begin
 end;
 
 procedure TFPReaderTiff.ReadImgValue(BitCount: Word; var Run: Pointer; x: dword;
-  Predictor: word; var LastValue: word; out Value: Word); 
+  Predictor: word; var LastValue: word; out Value: Word);
                                         {$ifdef FPC}inline;{$endif}
 begin
   if BitCount=8 then begin
@@ -1543,7 +1543,7 @@ begin
       p:=nil;
       if FReverseEndian then
         for i:=0 to Count-1 do
-          plongwordaty(Buffer)^[i]:= 
+          plongwordaty(Buffer)^[i]:=
                           FixEndian(plongwordaty(PDWord(Buffer))^[i]);
     end else
       TiffError('only short or long allowed');
@@ -2177,7 +2177,7 @@ var
   begin
     Result:=Code<258+TableCount;
   end;
-  
+
   procedure WriteStringFromCode(Code: integer; AddFirstChar: boolean = false);
   var
     s: TLZWString;

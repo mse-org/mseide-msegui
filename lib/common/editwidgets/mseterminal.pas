@@ -18,9 +18,9 @@ uses
  msetextedit,msestrings,msesys,mseeditglob,msemenus,msegui,mseguiglob,
  mseprocess,msegridsglob,mseedit,mseglob,msewidgetgrid,msegraphics;
 type
- sendtexteventty = procedure(const sender: tobject; 
+ sendtexteventty = procedure(const sender: tobject;
                        var atext: msestring; var donotsend: boolean) of object;
- receivetexteventty = procedure(const sender: tobject; 
+ receivetexteventty = procedure(const sender: tobject;
                   var atext: ansistring; const errorinput: boolean) of object;
  terminaloptionty = (teo_readonly,teo_bufferchunks,teo_stripescsequence,
                                                                       teo_utf8);
@@ -31,11 +31,11 @@ const
  defaultterminaloptions = [{teo_tty}];
  defaultoptionsprocess = [pro_output,pro_errorouttoout,pro_input,
                         pro_winpipewritehandles,pro_inactive,pro_tty,pro_ctrlc];
-type 
+type
 // terminalstatety = ({ts_running,}ts_listening);
 // terminalstatesty = set of terminalstatety;
- 
- 
+
+
  tterminal = class(tcustomtextedit,igridwidget)
   private
    foninputpipebroken: notifyeventty;
@@ -84,7 +84,7 @@ type
    procedure echoon(const avalue: boolean);
    procedure dokeydown(var info: keyeventinfoty); override;
    procedure editnotification(var info: editnotificationinfoty); override;
-   procedure docellevent(const ownedcol: boolean; 
+   procedure docellevent(const ownedcol: boolean;
                                      var info: celleventinfoty); override;
    procedure updateeditpos;
 //   function stripescapesequences(avalue: msestring): msestring;
@@ -94,7 +94,7 @@ type
    function prochandle: integer;
    function execprog(const acommandline: msestring;
                     const aworkingdirectory: filenamety = '';
-                    const aparams: msestringarty = nil; 
+                    const aparams: msestringarty = nil;
                     const aenvvars: msestringarty = nil): integer;
      //returns prochandle
    procedure terminateprocess;
@@ -113,7 +113,7 @@ type
    procedure endupdate;  override;
    property prompt: msestring read getprompt write setprompt;
    property command: msestring read getcommand write setcommand;
-   property commandhistory: msestringarty read fcommandhistory 
+   property commandhistory: msestringarty read fcommandhistory
                                                     write fcommandhistory;
    property inputcolindex: integer read finputcolindex write finputcolindex;
   published
@@ -125,7 +125,7 @@ type
    property font;
    property cursorreadonly;
    property maxchars: integer read fmaxchars write fmaxchars default 0;
-   property maxcommandhistory: integer read fmaxcommandhistory 
+   property maxcommandhistory: integer read fmaxcommandhistory
                                      write setmaxcommandhistory default 0;
    property tabulators;
 
@@ -144,7 +144,7 @@ type
    property oncopytoclipboard;
    property onpastefromclipboard;
 
-   property statfile;   
+   property statfile;
    property statvarname;
    property statpriority;
    property encoding;
@@ -157,19 +157,19 @@ type
    property ondrawtext;
    property onsetupeditor;
 
-   property oninputpipebroken: notifyeventty read foninputpipebroken 
+   property oninputpipebroken: notifyeventty read foninputpipebroken
                                                    write foninputpipebroken;
-   property onerrorpipebroken: notifyeventty read fonerrorpipebroken 
+   property onerrorpipebroken: notifyeventty read fonerrorpipebroken
                                                    write fonerrorpipebroken;
-   property onprocfinished: notifyeventty 
+   property onprocfinished: notifyeventty
                   read fonprocfinished write fonprocfinished;
-   
+
    property onsendtext: sendtexteventty read fonsendtext write fonsendtext;
-   property onreceivetext: receivetexteventty read fonreceivetext 
+   property onreceivetext: receivetexteventty read fonreceivetext
                                                       write fonreceivetext;
-   property options: terminaloptionsty read foptions write setoptions 
+   property options: terminaloptionsty read foptions write setoptions
                           default defaultterminaloptions;
-   property optionsprocess: processoptionsty read getoptionsprocess 
+   property optionsprocess: processoptionsty read getoptionsprocess
                             write setoptionsprocess default defaultoptionsprocess;
    property pipewaitus: integer read getpipewaitus write setpipewaitus
                                    default defaultpipewaitus;
@@ -183,7 +183,7 @@ uses
  {$ifdef unix},mselibc{$endif};
 type
  tinplaceedit1 = class(tinplaceedit);
- 
+
 { tterminal }
 
 constructor tterminal.create(aowner: tcomponent);
@@ -243,12 +243,12 @@ begin
  end;
 end;
 
-procedure tterminal.docellevent(const ownedcol: boolean; 
+procedure tterminal.docellevent(const ownedcol: boolean;
                                            var info: celleventinfoty);
 begin
  case info.eventkind of
   cek_enter: begin
-   if (info.newcell.row = fgridintf.getcol.grid.rowhigh) and 
+   if (info.newcell.row = fgridintf.getcol.grid.rowhigh) and
              not (teo_readonly in foptions) then begin
     optionsedit:= optionsedit - [oe_readonly];
    end
@@ -280,7 +280,7 @@ begin
  if fgridintf <> nil then begin
   with fgridintf.getcol.grid do begin
    if rowhigh >= 0 then begin
-    gridvalue[rowhigh]:= avalue + 
+    gridvalue[rowhigh]:= avalue +
                           copy(gridvalue[rowhigh],finputcolindex+1,bigint);
     finputcolindex:= length(avalue);
     flines.feditcharindex:= finputcolindex;
@@ -446,7 +446,7 @@ begin
  if (pro_echo in curprocess.options) and running and
         (msetcgetattr(outputfd,terminfo) = 0) then begin
   result:= terminfo.c_lflag and echo = 0;
- end; 
+ end;
 {$endif}
 end;
 
@@ -469,8 +469,8 @@ begin
    terminfo.c_lflag:= terminfo.c_lflag and not echo;
    msetcsetattr(outputfd,tcsadrain,terminfo);
   end;
- end; 
-{$endif} 
+ end;
+{$endif}
 end;
 
 procedure tterminal.echoon(const avalue: boolean);
@@ -486,14 +486,14 @@ begin
   usleep(0); //why is this necessary? no tcdrain without
   msetcsetattr(outputfd,tcsadrain,terminfo);
  end;
-{$endif} 
+{$endif}
 end;
 
 procedure tterminal.dokeydown(var info: keyeventinfoty);
 begin
  if fgridintf <> nil then begin
   with info do begin
-   if (key = key_c) and (shiftstate = [ss_ctrl]) and 
+   if (key = key_c) and (shiftstate = [ss_ctrl]) and
               (pro_ctrlc in optionsprocess) and running then begin
     command:= '^C';
     finputcolindex:= finputcolindex + 2;
@@ -507,7 +507,7 @@ begin
    else begin
     if shiftstate - [ss_shift] = [] then begin
      if (chars <> '') and
-      ((editpos.row < datalist.count - 1) or 
+      ((editpos.row < datalist.count - 1) or
                    (editpos.col < finputcolindex)) then begin
       editpos:= makegridcoord(bigint,bigint);
      end
@@ -516,7 +516,7 @@ begin
        editor.moveindex(finputcolindex,ss_shift in shiftstate);
        include(eventstate,es_processed);
       end;
-     end; 
+     end;
     end;
     if not (es_processed in info.eventstate) then begin
      if (fmaxcommandhistory > 0) and not running then begin
@@ -557,7 +557,7 @@ begin
      inherited;
     end;
    end;
-  end;  
+  end;
  end;
 end;
 
@@ -613,10 +613,10 @@ begin
  if fgridintf <> nil then begin
   if datalist.count > 0 then begin
    mstr1:= datalist[datalist.count-1];
-   if length(mstr1) > finputcolindex then begin   
-    datalist[datalist.count-1]:= copy(mstr1,1,finputcolindex); 
+   if length(mstr1) > finputcolindex then begin
+    datalist[datalist.count-1]:= copy(mstr1,1,finputcolindex);
                                           //remove entered characters
-   end; 
+   end;
   end;
   if teo_stripescsequence in foptions then begin
    mstr1:= stripescapesequences(avalue);
@@ -666,7 +666,7 @@ end;
 
 function tterminal.execprog(const acommandline: msestring;
                             const aworkingdirectory: filenamety = '';
-                    const aparams: msestringarty = nil; 
+                    const aparams: msestringarty = nil;
                     const aenvvars: msestringarty = nil): integer;
 begin
  with curprocess do begin

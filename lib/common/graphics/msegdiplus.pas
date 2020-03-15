@@ -12,7 +12,7 @@ unit msegdiplus;
 interface
 uses
  windows,msestrings,msectypes,sysutils,msetypes;
- 
+
 const
  gdipluslib: array[0..0] of filenamety = ('gdiplus.dll');
 
@@ -42,7 +42,7 @@ type
     PropertyNotFound = 19,
     PropertyNotSupported = 20
   );
-  
+
 const
  gdipluserrormessages: array[GpStatus] of string = (
     'Ok',
@@ -78,7 +78,7 @@ type
    DebugEventLevelWarning
   );
 
- DebugEventProc = procedure(level: DebugEventLevel; 
+ DebugEventProc = procedure(level: DebugEventLevel;
                                               message: pchar); stdcall;
  GdiplusStartupInput = record
   GdiplusVersion: cUINT32;
@@ -87,10 +87,10 @@ type
   SuppressExternalCodecs: BOOL;
  end;
  pGdiplusStartupinput = ^GdiplusStartupinput;
- 
+
  NotificationHookProc = function(token: ppointer): GpStatus; stdcall;
  NotificationUnhookProc = procedure(token: pointer); stdcall;
- 
+
  GdiplusStartupOutput = record
   NotificationHook: NotificationHookProc;
   NotificationUnhook: NotificationUnhookProc;
@@ -117,7 +117,7 @@ const
  PaletteFlagsHasAlpha    = $0001;
  PaletteFlagsGrayScale   = $0002;
  PaletteFlagsHalftone    = $0004;
- 
+
 type
  ColorPalette = record
   Flags: UINT;                        // Palette flags
@@ -127,10 +127,10 @@ type
  pColorPalette = ^ColorPalette;
 
  GpImage = record end;
- pGpImage = ^GpImage; 
+ pGpImage = ^GpImage;
  GpBitmap = record end;
- pGpBitmap = ^GpBitmap; 
- ppGpBitmap = ^pGpBitmap; 
+ pGpBitmap = ^GpBitmap;
+ ppGpBitmap = ^pGpBitmap;
  GpTexture = record end;
  pGpTexture = ^GpTexture;
  ppGpTexture = ^pGpTexture;
@@ -251,7 +251,7 @@ type
   FlushIntentionSync = 1          // Flush all batched rendering operations
                                   // and wait for them to complete
  );
- 
+
  GpPixelOffsetMode = (
   PixelOffsetModeInvalid     = ord(QualityModeInvalid),
   PixelOffsetModeDefault     = ord(QualityModeDefault),
@@ -304,7 +304,7 @@ var
  GdipCreatePen1: function(color: ARGB; width: REAL; unit_: GpUnit;
                                     pen: ppGpPen): GpStatus; stdcall;
  GdipDeletePen: function(pen: pGpPen): GpStatus; stdcall;
- GdipSetPenMode: function(pen: pGpPen; 
+ GdipSetPenMode: function(pen: pGpPen;
                            penMode: GpPenAlignment): GpStatus; stdcall;
  GdipSetPenWidth: function(pen: pGpPen; width: REAL): GpStatus; stdcall;
  GdipGetPenWidth: function(pen: pGpPen; width: pREAL): GpStatus; stdcall;
@@ -318,7 +318,7 @@ var
  GdipSetPenDashArray: function(pen: pGpPen; dash: pREAL;
                                          count: INT): GpStatus; stdcall;
  GdipSetPenDashOffset: function(pen: pGpPen; offset: REAL): GpStatus; stdcall;
- GdipSetPenDashStyle: function(pen: pGpPen; 
+ GdipSetPenDashStyle: function(pen: pGpPen;
                                   dashstyle: GpDashStyle): GpStatus;  stdcall;
 
  GdipDrawLinesI: function(graphics: pGpGraphics; pen: pGpPen;
@@ -335,7 +335,7 @@ var
  GdipFillPieI: function(graphics: pGpGraphics; brush: pGpBrush; x: INT; y: INT;
                               width: INT; height: INT; startAngle: REAL;
                                    sweepAngle: REAL): GpStatus; stdcall;
- GdipCreatePath: function(brushMode: GpFillMode; 
+ GdipCreatePath: function(brushMode: GpFillMode;
                                      path: ppGpPath): GpStatus; stdcall;
  GdipDeletePath: function(path: pGpPath): GpStatus; stdcall;
  GdipStartPathFigure: function(path: pGpPath): GpStatus; stdcall;
@@ -367,7 +367,7 @@ function initializegdiplus(const sonames: array of filenamety;
            //false if not available
 procedure releasegdiplus;
 function gdipcheckerror(const aerror: gpstatus): boolean; //true if ok
- 
+
 implementation
 uses
  msesys,msedynload;

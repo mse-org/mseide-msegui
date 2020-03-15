@@ -138,7 +138,7 @@ type
  ASN1_TYPE = record      //todo
  end;
  pASN1_TYPE = ^ASN1_TYPE;
- 
+
  pEVP_CIPHER_CTX = ^EVP_CIPHER_CTX;
  EVP_CIPHER = record
 	 nid: cint;
@@ -196,18 +196,18 @@ type
   	iv: ivty;	   //* working iv */
   	buf: array[0..EVP_MAX_BLOCK_LENGTH-1] of byte; //* saved partial block */
   	num: cint;				                       //* used by cfb/ofb mode */
-  
+
   	app_data: pointer;        		//* application stuff */
   	key_len: cint;		            //* May change for variable length cipher */
   	flags: culong;	                //* Various flags */
   	cipher_data: pointer;           //* per EVP data */
   	final_used: cint;
   	block_mask: cint;
-  	final: array[0..EVP_MAX_BLOCK_LENGTH-1] of byte; 
+  	final: array[0..EVP_MAX_BLOCK_LENGTH-1] of byte;
 	                                //* possible final block */
   end;
 //  pEVP_CIPHER_CTX = ^EVP_CIPHER_CTX;
-   
+
 var
   EVP_cleanup: procedure; cdecl;
   EVP_CIPHER_CTX_init: procedure(ctx: pEVP_CIPHER_CTX); cdecl;
@@ -218,7 +218,7 @@ var
                                                 keylen: cint): cint; cdecl;
   EVP_get_digestbyname: function(Name: pcchar): pEVP_MD; cdecl;
   EVP_get_cipherbyname: function(name: pcchar): pEVP_CIPHER; cdecl;
-  
+
   EVP_CipherInit: function(ctc: pEVP_CIPHER_CTX; cipher: pEVP_CIPHER;
              		       key: pcuchar; iv: pcuchar; enc: cint): cint; cdecl;
  	EVP_CipherInit_ex: function(ctx: pEVP_CIPHER_CTX; cipher: pEVP_CIPHER;
@@ -240,7 +240,7 @@ var
                                                 var outl: cint): cint; cdecl;
   EVP_EncryptFinal_ex: function(ctx: pEVP_CIPHER_CTX; _out: pcuchar;
                                                  var outl: cint): cint; cdecl;
-  
+
   EVP_DecryptInit: function(ctx: pEVP_CIPHER_CTX; cipher: pEVP_CIPHER;
               	                  key: pcuchar; iv: pcuchar): cint; cdecl;
   EVP_DecryptInit_ex: function(ctx: pEVP_CIPHER_CTX; cipher: pEVP_CIPHER;
@@ -334,7 +334,7 @@ var
   i2d_PUBKEY_bio: function(bp: pBIO; pkey: pEVP_PKEY): cint; cdecl;
 
   EVP_MD_type: function(const md: pEVP_MD): cint; cdecl;
-  EVP_MD_pkey_type: function(const md: pEVP_MD): cint; cdecl;	
+  EVP_MD_pkey_type: function(const md: pEVP_MD): cint; cdecl;
   EVP_MD_block_size: function(const md: pEVP_MD): cint; cdecl;
   EVP_MD_flags: function(const md: pEVP_MD): cardinal; cdecl; //openssl 1.0 +
   EVP_MD_CTX_md: function(const ctx: pEVP_MD_CTX): pEVP_MD;cdecl;
@@ -379,7 +379,7 @@ function decryptsymkeyrsa(key: pcuchar; ek: pcuchar; ekl: integer;
 implementation
 uses
  msedynload,mseopensslrsa;
- 
+
 function encryptsymkeyrsa(ek: pcuchar; key: pcuchar; key_len: cint;
                            	                     pubk: pEVP_PKEY): cint;
 begin
@@ -405,7 +405,7 @@ function EVP_SealUpdate(ctx: pEVP_CIPHER_CTX; _out: pcuchar;
 begin
  result:= evp_encryptupdate(ctx,_out,outl,_in,inl);
 end;
- 
+
 function EVP_OpenUpdate(ctx: pEVP_CIPHER_CTX; _out: pcuchar;
                  var outl: cint; _in: pcuchar; inl: cint): cint;
 begin
@@ -552,7 +552,7 @@ begin
  getprocaddresses(info,funcs);
  getprocaddresses(info,funcsopt,true);
 end;
-  
+
 procedure deinit(const info: dynlibinfoty);
 begin
  evp_cleanup;

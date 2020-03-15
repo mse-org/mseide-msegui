@@ -7,7 +7,7 @@
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 }
-unit msedblookup; 
+unit msedblookup;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 uses
@@ -25,21 +25,21 @@ type
   procedure formatchanged;
   procedure refreshfieldvalue;
  end;
- 
+
  idblookuplbdispfieldlink = interface(idblookupdispfieldlink)
   procedure setlookupvalue(const aindex: integer);
   function lookuptext(const aindex: integer): msestring;
   function getdatalbdatakind: lbdatakindty;
  end;
- 
+
  idblookupdbdispfieldlink = interface(idblookupdispfieldlink)
   procedure setlookupvalue(const aindex: bookmarkdataty);
   function lookuptext(const aindex: bookmarkdataty): msestring;
   function getlookupvaluefieldtypes: fieldtypesty;
  end;
- 
+
  tdblookup32lb = class;
- 
+
  tlookupdispfielddatalink = class(tdispfielddatalink)
   private
    function getdatasource1: tdatasource;
@@ -53,7 +53,7 @@ type
    function datatotext(const data): msestring; virtual; abstract;
    procedure updatelookupvalue; virtual; abstract;
    procedure fieldtovalue; virtual; abstract;
-   function getrowdatapo(const alink: tgriddatalink; 
+   function getrowdatapo(const alink: tgriddatalink;
                                const arow: integer): pointer; virtual; abstract;
   public
    constructor create(const aowner: tcustomdataedit;
@@ -66,7 +66,7 @@ type
  end;
 
  tlookupdbdispfielddatalink = class;
-  
+
  tlookupdatalink = class(tfielddatalink)
   private
    fkeyfield: tfield;
@@ -80,7 +80,7 @@ type
    procedure dataevent(event: tdataevent; info: ptrint); override;
    procedure fieldchanged; override;
  end;
- 
+
  tlookupdbdispfielddatalink = class(tlookupdispfielddatalink)
   private
    flookupdatalink: tlookupdatalink;
@@ -95,7 +95,7 @@ type
    function getstringlookupvalue(const abm: bookmarkdataty): msestring;
    function getfloatlookupvalue(const abm: bookmarkdataty): double;
    function getdataset(const aindex: integer): tdataset; override;
-   procedure getfieldtypes(out apropertynames: stringarty; 
+   procedure getfieldtypes(out apropertynames: stringarty;
                                      out afieldtypes: fieldtypesarty); override;
   public
    constructor create(const aowner: tcustomdataedit;
@@ -105,9 +105,9 @@ type
   published
    property lookupdatasource: tdatasource read getlookupdatasource
                                                 write setlookupdatasource;
-   property lookupkeyfield: string read getlookupkeyfield 
+   property lookupkeyfield: string read getlookupkeyfield
                                             write setlookupkeyfield;
-   property lookupvaluefield: string read getlookupvaluefield 
+   property lookupvaluefield: string read getlookupvaluefield
                                             write setlookupvaluefield;
  end;
 
@@ -116,7 +116,7 @@ type
   private
    flookupbuffer: tcustomlookupbuffer;
    flookupkeyfieldno: lookupbufferfieldnoty;
-   flookupvaluefieldno: lookupbufferfieldnoty;   
+   flookupvaluefieldno: lookupbufferfieldnoty;
    fobjectlinker: tobjectlinker;
    procedure setlookupbuffer(const avalue: tcustomlookupbuffer);
    procedure setlookupkeyfieldno(const avalue: lookupbufferfieldnoty);
@@ -134,19 +134,19 @@ type
    function getlbdatakind(const apropname: string): lbdatakindty;
    function getlookupbuffer: tcustomlookupbuffer;
   public
-   constructor create(const aowner: tcustomdataedit; 
+   constructor create(const aowner: tcustomdataedit;
                            const adatatype: lookupdatatypety;
                                     const intf: idblookuplbdispfieldlink);
    destructor destroy; override;
   published
-   property lookupbuffer: tcustomlookupbuffer read flookupbuffer 
+   property lookupbuffer: tcustomlookupbuffer read flookupbuffer
                                             write setlookupbuffer;
-   property lookupkeyfieldno: lookupbufferfieldnoty read flookupkeyfieldno 
+   property lookupkeyfieldno: lookupbufferfieldnoty read flookupkeyfieldno
                                             write setlookupkeyfieldno default 0;
    property lookupvaluefieldno: lookupbufferfieldnoty read flookupvaluefieldno
                                             write setlookupvaluefieldno default 0;
  end;
- 
+
  tlookup32lbdispfielddatalink = class(tlookuplbdispfielddatalink)
   protected
    fkey: integer;
@@ -154,10 +154,10 @@ type
    procedure updatelookupvalue; override;
    function datatotext(const data): msestring; override;
    procedure fieldtovalue; override;
-   function getrowdatapo(const alink: tgriddatalink; 
+   function getrowdatapo(const alink: tgriddatalink;
                            const arow: integer): pointer; override;
  end;
- 
+
  tlookup64lbdispfielddatalink = class(tlookuplbdispfielddatalink)
   protected
    fkey: int64;
@@ -165,10 +165,10 @@ type
    procedure updatelookupvalue; override;
    function datatotext(const data): msestring; override;
    procedure fieldtovalue; override;
-   function getrowdatapo(const alink: tgriddatalink; 
+   function getrowdatapo(const alink: tgriddatalink;
                                const arow: integer): pointer; override;
  end;
- 
+
  tlookupstrlbdispfielddatalink = class(tlookuplbdispfielddatalink)
   protected
    fkey: msestring;
@@ -176,7 +176,7 @@ type
    procedure updatelookupvalue; override;
    function datatotext(const data): msestring; override;
    procedure fieldtovalue; override;
-   function getrowdatapo(const alink: tgriddatalink; 
+   function getrowdatapo(const alink: tgriddatalink;
                             const arow: integer): pointer; override;
  end;
 
@@ -186,7 +186,7 @@ type
    procedure updatelookupvalue; override;
    procedure fieldtovalue; override;
    function datatotext(const data): msestring; override;
-   function getrowdatapo(const alink: tgriddatalink; 
+   function getrowdatapo(const alink: tgriddatalink;
                              const arow: integer): pointer; override;
  end;
 
@@ -196,20 +196,20 @@ type
    procedure updatelookupvalue; override;
    procedure fieldtovalue; override;
    function datatotext(const data): msestring; override;
-   function getrowdatapo(const alink: tgriddatalink; 
+   function getrowdatapo(const alink: tgriddatalink;
                              const arow: integer): pointer; override;
  end;
- 
+
  tlookupstrdbdispfielddatalink = class(tlookupdbdispfielddatalink)
   protected
    fkey: msestring;
    procedure updatelookupvalue; override;
    procedure fieldtovalue; override;
    function datatotext(const data): msestring; override;
-   function getrowdatapo(const alink: tgriddatalink; 
+   function getrowdatapo(const alink: tgriddatalink;
                              const arow: integer): pointer; override;
  end;
- 
+
  tdblookup1 = class(tcustomdataedit,idblookupdispfieldlink,idbdispfieldlink)
   private
    fdatalink: tlookupdispfielddatalink;
@@ -218,7 +218,7 @@ type
   protected
    function createdatalink: tlookupdispfielddatalink; virtual; abstract;
    procedure dochange; override;
-   
+
    function getdatalistclass: datalistclassty; override;
    procedure valuetogrid(row: integer); override;
    procedure griddatasourcechanged; override;
@@ -229,7 +229,7 @@ type
 
    function internaldatatotext(const data): msestring; override;
    function getrowdatapo(const arow: integer): pointer; override;
- 
+
     //idispfieldlink
    function getfieldlink: tdispfielddatalink;
    procedure fieldtovalue;
@@ -269,7 +269,7 @@ type
   published
    property datalink: tlookupdispfielddatalink read fdatalink write setdatalink;
  end;
- 
+
  tdblookupdb = class(tdblookup,idblookupdbdispfieldlink)
   private
    function getdatalink: tlookupdbdispfielddatalink;
@@ -280,28 +280,28 @@ type
    function getlookupvaluefieldtypes: fieldtypesty; virtual; abstract;
   public
   published
-   property datalink: tlookupdbdispfielddatalink read getdatalink 
+   property datalink: tlookupdbdispfielddatalink read getdatalink
                                                     write setdatalink;
  end;
- 
+
  tdblookup32db = class(tdblookupdb,ireccontrol)
-  protected  
-   function createdatalink: tlookupdispfielddatalink; override;  
+  protected
+   function createdatalink: tlookupdispfielddatalink; override;
    procedure getfieldtypes(var afieldtypes: fieldtypesty); override;
  end;
 
  tdblookup64db = class(tdblookupdb,ireccontrol)
-  protected  
-   function createdatalink: tlookupdispfielddatalink; override;  
+  protected
+   function createdatalink: tlookupdispfielddatalink; override;
    procedure getfieldtypes(var afieldtypes: fieldtypesty); override;
  end;
- 
+
  tdblookupstrdb = class(tdblookupdb,ireccontrol)
-  protected  
-   function createdatalink: tlookupdispfielddatalink; override;  
+  protected
+   function createdatalink: tlookupdispfielddatalink; override;
    procedure getfieldtypes(var afieldtypes: fieldtypesty); override;
  end;
- 
+
  tdblookuplb = class(tdblookup,idblookuplbdispfieldlink)
   private
    procedure readlookupkeyfieldno(reader: treader);
@@ -318,7 +318,7 @@ type
    function lookuptext(const aindex: integer): msestring; virtual; abstract;
   public
   published
-   property datalink: tlookuplbdispfielddatalink read getdatalink 
+   property datalink: tlookuplbdispfielddatalink read getdatalink
                                                        write setdatalink;
 {
    property lookupbuffer: tcustomlookupbuffer read getlookupbuffer
@@ -326,17 +326,17 @@ type
                   //use datalink.lookupbuffer
 }
  end;
-  
+
  tdblookup32lb = class(tdblookuplb,ireccontrol)
   protected
-   function createdatalink: tlookupdispfielddatalink; override;  
+   function createdatalink: tlookupdispfielddatalink; override;
    procedure getfieldtypes(var afieldtypes: fieldtypesty); override;
   public
  end;
 
  tdblookup64lb = class(tdblookuplb,ireccontrol)
   protected
-   function createdatalink: tlookupdispfielddatalink; override;  
+   function createdatalink: tlookupdispfielddatalink; override;
     //idbeditfieldlink
    procedure getfieldtypes(var afieldtypes: fieldtypesty); override;
   public
@@ -344,7 +344,7 @@ type
 
  tdblookupstrlb = class(tdblookuplb,ireccontrol)
   protected
-   function createdatalink: tlookupdispfielddatalink; override;  
+   function createdatalink: tlookupdispfielddatalink; override;
     //idbeditfieldlink
    procedure getfieldtypes(var afieldtypes: fieldtypesty); override;
   public
@@ -684,7 +684,7 @@ type
    property format: msestring read fformat write setformat;
    property value: tdatetime read fvalue;
  end;
- 
+
  tdbdatetimelookup64lb = class(tdblookup64lb)
   private
    fformat: msestring;
@@ -720,7 +720,7 @@ type
    property kind: datetimekindty read fkind write setkind default dtk_date;
    property format: msestring read fformat write setformat;
  end;
- 
+
  tdbdatetimelookupdb = class(tdblookup32db)
   private
    fformat: msestring;
@@ -737,7 +737,7 @@ type
    property format: msestring read fformat write setformat;
    property value: tdatetime read fvalue;
  end;
- 
+
  tdbdatetimelookup64db = class(tdblookup64db)
   private
    fformat: msestring;
@@ -754,7 +754,7 @@ type
    property format: msestring read fformat write setformat;
    property value: tdatetime read fvalue;
  end;
- 
+
  tdbdatetimelookupstrdb = class(tdblookupstrdb)
   private
    fformat: msestring;
@@ -771,13 +771,13 @@ type
    property format: msestring read fformat write setformat;
    property value: tdatetime read fvalue;
  end;
- 
+
 implementation
 uses
  msereal,sysutils;
 type
  tcustomdataedit1 = class(tcustomdataedit);
-  
+
 { tlookupdispfielddatalink }
 
 constructor tlookupdispfielddatalink.create(const aowner: tcustomdataedit;
@@ -792,7 +792,7 @@ end;
 
 procedure tlookupdispfielddatalink.setwidgetdatasource(const avalue: tdatasource);
 begin
- if not ((csloading in fowner.componentstate) and datasourcefixed or 
+ if not ((csloading in fowner.componentstate) and datasourcefixed or
                   (fowner.gridintf <> nil)) then begin
   inherited datasource:= avalue;
  end;
@@ -817,7 +817,7 @@ end;
 
 procedure tlookupdispfielddatalink.lookupchange;
 begin
- if not (csloading in fowner.componentstate) and active and 
+ if not (csloading in fowner.componentstate) and active and
                                             (field <> nil) then begin
   idblookupdispfieldlink(fintf).formatchanged;
   idblookupdispfieldlink(fintf).fieldtovalue;
@@ -1686,7 +1686,7 @@ function tdbstringlookup64lb.lookuptext(const aindex: integer): msestring;
 begin
  with tlookuplbdispfielddatalink(fdatalink) do begin
   result:= flookupbuffer.textvaluephys(flookupvaluefieldno,aindex);
- end; 
+ end;
 end;
 
 function tdbstringlookup64lb.getdatalbdatakind: lbdatakindty;
@@ -2075,7 +2075,7 @@ begin
    with tmsebufdataset(dataset).indexlocal do begin
     for int1:= 0 to count-1 do begin
      with items[int1] do begin
-      if (fields.count > 0) and 
+      if (fields.count > 0) and
              sametext(fields[0].fieldname,fkeyfieldname) then begin
        flookupindexnum:= int1;
        break;
@@ -2083,7 +2083,7 @@ begin
      end;
     end;
    end;
-  end;  
+  end;
   if flookupindexnum < 0 then begin
    databaseerror(dataset.name+': no loookup index for keyfield "'+
                          fkeyfield.fieldname+'".');
@@ -2318,7 +2318,7 @@ begin
  idblookupdbdispfieldlink(fintf).setlookupvalue(bm1);
 end;
 
-function tlookup32dbdispfielddatalink.getrowdatapo(const alink: tgriddatalink; 
+function tlookup32dbdispfielddatalink.getrowdatapo(const alink: tgriddatalink;
                                                 const arow: integer): pointer;
 begin
  result:= alink.getintegerbuffer(field,arow);
@@ -2347,7 +2347,7 @@ function tlookup64dbdispfielddatalink.datatotext(const data): msestring;
    end;
   end;
  end; //lookup
-  
+
 begin
  result:= '';
  if (@data = nil) and fisnull then begin
@@ -2378,7 +2378,7 @@ begin
  idblookupdbdispfieldlink(fintf).setlookupvalue(bm1);
 end;
 
-function tlookup64dbdispfielddatalink.getrowdatapo(const alink: tgriddatalink; 
+function tlookup64dbdispfielddatalink.getrowdatapo(const alink: tgriddatalink;
                                                 const arow: integer): pointer;
 begin
  result:= alink.getint64buffer(field,arow);
@@ -2407,7 +2407,7 @@ function tlookupstrdbdispfielddatalink.datatotext(const data): msestring;
    end;
   end;
  end; //lookup
-  
+
 begin
  result:= '';
  if (@data = nil) and fisnull then begin
@@ -2438,7 +2438,7 @@ begin
  idblookupdbdispfieldlink(fintf).setlookupvalue(bm1);
 end;
 
-function tlookupstrdbdispfielddatalink.getrowdatapo(const alink: tgriddatalink; 
+function tlookupstrdbdispfielddatalink.getrowdatapo(const alink: tgriddatalink;
                                                 const arow: integer): pointer;
 begin
  result:= alink.getstringbuffer(field,arow);
@@ -2566,7 +2566,7 @@ function tlookup32lbdispfielddatalink.datatotext(const data): msestring;
    end;
   end;
  end; //lookup
-  
+
 begin
  result:= '';
  if (@data = nil) and fisnull then begin
@@ -2592,7 +2592,7 @@ begin
  fkey:= field.asinteger;
 end;
 
-function tlookup32lbdispfielddatalink.getrowdatapo(const alink: tgriddatalink; 
+function tlookup32lbdispfielddatalink.getrowdatapo(const alink: tgriddatalink;
                                                  const arow: integer): pointer;
 begin
  result:= alink.getintegerbuffer(field,arow);
@@ -2624,7 +2624,7 @@ function tlookup64lbdispfielddatalink.datatotext(const data): msestring;
    end;
   end;
  end; //lookup
-  
+
 begin
  result:= '';
  if (@data = nil) and fisnull then begin
@@ -2650,7 +2650,7 @@ begin
  fkey:= field.aslargeint;
 end;
 
-function tlookup64lbdispfielddatalink.getrowdatapo(const alink: tgriddatalink; 
+function tlookup64lbdispfielddatalink.getrowdatapo(const alink: tgriddatalink;
                                         const arow: integer): pointer;
 begin
  result:= alink.getint64buffer(field,arow);
@@ -2682,7 +2682,7 @@ function tlookupstrlbdispfielddatalink.datatotext(const data): msestring;
    end;
   end;
  end; //lookup
-  
+
 begin
  result:= '';
  if (@data = nil) and fisnull then begin
@@ -2708,7 +2708,7 @@ begin
  fkey:= asmsestring;
 end;
 
-function tlookupstrlbdispfielddatalink.getrowdatapo(const alink: tgriddatalink; 
+function tlookupstrlbdispfielddatalink.getrowdatapo(const alink: tgriddatalink;
                                                   const arow: integer): pointer;
 begin
  result:= alink.getstringbuffer(field,arow);

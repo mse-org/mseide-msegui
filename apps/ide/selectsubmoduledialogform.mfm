@@ -42,7 +42,7 @@ object selectsubmoduledialogfo: tselectsubmoduledialogfo
     anchors = [an_left, an_top, an_right]
     dropdown.options = [deo_selectonly, deo_autodropdown, deo_keydropdown, deo_sorted]
     dropdown.cols.count = 1
-    dropdown.cols.items = <    
+    dropdown.cols.items = <
       item
         textflags = [tf_ycentered, tf_noselect, tf_ellipseleft]
       end>

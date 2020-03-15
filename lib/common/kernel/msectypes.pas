@@ -18,7 +18,7 @@ type
  __U32_TYPE = longword;
  __S64_TYPE = int64;
  __U64_TYPE = uint64;
- 
+
 {$ifndef CPU64}
  __ULONGLONGWORD_TYPE = uint64;
  __SLONGLONGWORD_TYPE = int64;
@@ -83,7 +83,7 @@ type
 
  cbool = cint;
  pcbool = pcint;
- 
+
  cfloat = single;
  pcfloat = ^cfloat;
  cdouble = double;
@@ -112,6 +112,6 @@ type
  pssize_t = ^ssize_t;
  pclock_t = ^clock_t;
  ptime_t = ^time_t;
-  
+
 implementation
 end.

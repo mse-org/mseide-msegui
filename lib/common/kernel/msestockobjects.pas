@@ -33,7 +33,7 @@ type
 const
  stb_block1 = stb_dens50;
 
-type             
+type
  stockglyphty = (        //order fix!
  //  0         1               2
   stg_none,stg_checked,stg_checkedradio,
@@ -41,13 +41,13 @@ type
   stg_box,stg_boxexpanded,stg_boxexpand,
  //   6             7              8            9
   stg_arrowright,stg_arrowup,stg_arrowleft,stg_arrowdown,
- //  10         
+ //  10
   stg_ellipse,
  //        11               12                 13                14
   stg_arrowrightsmall,stg_arrowupsmall,stg_arrowleftsmall,stg_arrowdownsmall,
  //       15                16
   stg_arrowfirstsmall,stg_arrowlastsmall,
- //       17           
+ //       17
   stg_ellipsesmall,
  //     18         19         20         21         22
   stg_dbfirst,stg_dbprior,stg_dbnext,stg_dblast,stg_dbinsert,
@@ -57,7 +57,7 @@ type
   stg_dbfilter,stg_dbfiltermin,stg_dbfiltermax,stg_dbfilteron,stg_dbfind,
  //     33              34              35            36
   stg_dbfilteroff,stg_dbindbrowse,stg_dbindedit,stg_dbindinsert,
- //  37        38           39                    40 
+ //  37        38           39                    40
   stg_dot,stg_dotsmall,stg_arrowtopsmall,stg_arrowbottomsmall,
  //    41               42                      43               44
   stg_checkbox,stg_checkboxchecked,stg_checkboxchildchecked,stg_checkboxradio,
@@ -75,14 +75,14 @@ type
   stg_triasmall,stg_tria,stg_triabig,
  //    63             64          65
   stg_triatopsmall,stg_triatop,stg_triatopbig,
- // add by Alexandre Minoshi 
+ // add by Alexandre Minoshi
  //    66             67          68      69               70
   stg_mmprev, stg_mmnext, stg_mmplay, stg_mmpause, stg_mmplayandpause,
  //    71
   stg_mmclear,
  //    72         73
   stg_sound, stg_soundoff,
- //    74             75           76        77         78          79  
+ //    74             75           76        77         78          79
   stg_fullscreen, stg_settings, stg_save, stg_rename, stg_list, stg_listbold,
  //    80          81                82
   stg_doublesquare,stg_dbfilterclear,stg_checkboxparentnotchecked,
@@ -93,7 +93,7 @@ type
 const
  firsttracesymbol = stg_circlesmall;
  lasttracesymbol = stg_triatopbig;
- 
+
 type
  stockcaptionty = (sc_none,sc_is_invalid,sc_Format_error,sc_Value_is_required,
                     sc_Error,sc_Min,sc_Max,sc_Range_error,
@@ -157,7 +157,7 @@ type
                     );
  textgeneratorfuncty = function(const params: array of const): msestring;
  textgeneratorty = (tg_delete_n_selected_rows);
-  
+
  tstockobjects = class
   private
    fbitmaps: array[stockbitmapty] of tbitmap;
@@ -185,12 +185,12 @@ type
               aalignment: alignmentsty = [al_ycentered,al_xcentered]);
    property bitmaps[index: stockbitmapty]: tbitmap read getbitmaps;
    property fonts[index: stockfontty]: twidgetfont read getfonts;
-   property modalresulttext[index: modalresultty]: msestring 
+   property modalresulttext[index: modalresultty]: msestring
                                                read getmodalresulttext;
-   property modalresulttextnoshortcut[index: modalresultty]: msestring 
+   property modalresulttextnoshortcut[index: modalresultty]: msestring
                                             read getmodalresulttextnoshortcut;
    property captions[index: stockcaptionty]: msestring read getcaptions;
-   property textgenerators[index: textgeneratorty]: textgeneratorfuncty 
+   property textgenerators[index: textgeneratorty]: textgeneratorfuncty
                                                        read gettextgenerator;
    property glyphs: timagelist read getglyphs;
    property mseicon: tmaskedbitmap read getmseicon write setmseicon;
@@ -525,7 +525,7 @@ begin
  result:= stocktextgenerators(index);
 end;
 
-procedure tstockobjects.paintglyph(const canvas: tcanvas; 
+procedure tstockobjects.paintglyph(const canvas: tcanvas;
      const glyph: stockglyphty; const rect: rectty;
      const grayed: boolean = false;  const color: colorty = cl_glyph;
      aalignment: alignmentsty = [al_ycentered,al_xcentered]);

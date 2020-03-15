@@ -4,7 +4,7 @@ interface
 uses
  msesumlist,msedataedits,msewidgetgrid,msedatalist,msestrings,mseeditglob,
  msegrids,msegui,msemenus,msetypes,mseevent,mseguiglob,mseedit,msegraphics;
- 
+
 type
 
  tgridrealsumlist = class(trealsumlist)
@@ -38,10 +38,10 @@ type
    function internaldatatotext(const data): msestring; override;
   public
    function griddata: tgridrealsumlist;
-   property gridsumlevel[index: integer]: integer read getsumlevel 
+   property gridsumlevel[index: integer]: integer read getsumlevel
                               write setsumlevel;
  end;
- 
+
 implementation
 
 { tgridrealsumlist }
@@ -83,7 +83,7 @@ begin
  if foptions <> avalue then begin
   optionsbefore:= foptions;
   inherited;
-  if osu_foldsum in 
+  if osu_foldsum in
          optionssumty({$ifdef FPC}longword{$else}byte{$endif}(avalue) xor
          {$ifdef FPC}longword{$else}byte{$endif}(optionsbefore)) then begin
    fowner.sourcenamechanged(sumleveltag);
@@ -95,9 +95,9 @@ end;
 procedure tgridrealsumlist.linksource(const source: tdatalist;
                const atag: integer);
 begin
- if {(source = nil) and} (atag = sumleveltag) and 
+ if {(source = nil) and} (atag = sumleveltag) and
                                       (osu_foldsum in options) then begin
-  inherited linksource(fowner.grid.datacols.rowstate,atag);  
+  inherited linksource(fowner.grid.datacols.rowstate,atag);
  end
  else begin
   inherited;
@@ -151,18 +151,18 @@ function trealsumedit.internaldatatotext(const data): msestring;
 var
  po1: prealsumty;
 begin
- if (fdatalist <> nil) and ([osu_sumsonly,osu_valuesonly] * 
+ if (fdatalist <> nil) and ([osu_sumsonly,osu_valuesonly] *
                    tgridrealsumlist(fdatalist).options <> []) then begin
   po1:= @data;
   if (po1 = nil) then begin
    po1:= fgridintf.getrowdatapo;
-  end;   
-  if (po1 <> nil) and ((po1^.data.int = 0) xor 
+  end;
+  if (po1 <> nil) and ((po1^.data.int = 0) xor
              (osu_valuesonly in tgridrealsumlist(fdatalist).options)) then begin
    result:= '';
    exit;
   end;
- end; 
+ end;
  result:= inherited internaldatatotext(data);
 end;
 

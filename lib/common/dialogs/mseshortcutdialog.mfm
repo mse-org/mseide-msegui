@@ -109,23 +109,23 @@ object mseshortcutdialogfo: tmseshortcutdialogfo
     anchors = [an_top, an_bottom]
     optionsgrid = [og_colsizing, og_focuscellonenter, og_colchangeontabkey, og_wrapcol, og_autopopup, og_mousescrollcol]
     fixrows.count = 1
-    fixrows.items = <    
+    fixrows.items = <
       item
         height = 16
         captions.count = 3
-        captions.items = <        
+        captions.items = <
           item
             caption = 'Action'
             font.name = 'stf_default'
             font.xscale = 1
             font.dummy = 0
-          end        
+          end
           item
             caption = 'Shortcut'
             font.name = 'stf_default'
             font.xscale = 1
             font.dummy = 0
-          end        
+          end
           item
             caption = 'Alternate'
             font.name = 'stf_default'
@@ -135,21 +135,21 @@ object mseshortcutdialogfo: tmseshortcutdialogfo
       end>
     datacols.count = 3
     datacols.options = [co_focusselect, co_rowselect, co_savevalue, co_savestate, co_mousescrollrow]
-    datacols.items = <    
+    datacols.items = <
       item[sc]
         width = 338
         onbeforedrawcell = beforedrawnode
         options = [co_readonly, co_drawfocus, co_focusselect, co_rowselect, co_fill, co_savevalue, co_savestate, co_mousescrollrow]
         widgetname = 'sc'
         dataclass = ttreeitemeditlist
-      end    
+      end
       item[scdi]
         width = 125
         onbeforedrawcell = beforedraw
         options = [co_readonly, co_nofocus, co_focusselect, co_rowselect, co_savevalue, co_savestate, co_mousescrollrow]
         widgetname = 'scdi'
         dataclass = tgridmsestringdatalist
-      end    
+      end
       item[sc1di]
         width = 125
         onbeforedrawcell = beforedraw1
@@ -290,12 +290,12 @@ object mseshortcutdialogfo: tmseshortcutdialogfo
   end
   object tpopupmenu1: tpopupmenu
     menu.submenu.count = 2
-    menu.submenu.items = <    
+    menu.submenu.items = <
       item
         caption = 'Expand all'
         state = [as_localcaption, as_localonexecute]
         onexecute = expandall
-      end    
+      end
       item
         caption = 'Collapse all'
         state = [as_localcaption, as_localonexecute]

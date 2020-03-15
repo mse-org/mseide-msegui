@@ -16,6 +16,6 @@ uses
 type
  tblockcipher = class(tcryptio)
  end;
- 
+
 implementation
 end.

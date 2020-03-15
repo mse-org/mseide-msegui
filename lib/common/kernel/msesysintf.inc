@@ -26,7 +26,7 @@ function sys_getcommandlinearguments: msestringarty;
 procedure sys_getenvvars(out names: msestringarty; out values: msestringarty);
 function sys_getenv(const aname: msestring; out avalue: msestring): boolean;
                           //true if found
-function sys_setenv(const aname: msestring; 
+function sys_setenv(const aname: msestring;
                                 const avalue: msestring): syserrorty;
 function sys_unsetenv(const aname: msestring): syserrorty;
 
@@ -55,7 +55,7 @@ function sys_flushfile(const handle: integer): syserrorty;
 function sys_dup(const source: integer; out dest: integer): syserrorty;
 function sys_truncatefile(const handle: integer; const size: int64): syserrorty;
 
-function sys_access(const path: filenamety; 
+function sys_access(const path: filenamety;
                                 const accessmodes: accessmodesty): syserrorty;
 function sys_setfilerights(const path: filenamety;
                               const rights: filerightsty): syserrorty;

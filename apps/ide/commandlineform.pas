@@ -1,5 +1,5 @@
 { MSEide Copyright (c) 1999-2006 by Martin Schreiber
-   
+
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation; either version 2 of the License, or
@@ -21,12 +21,12 @@ unit commandlineform;
 interface
 uses
  msegui,mseclasses,mseforms,msedataedits,msestringcontainer,msestrings;
- 
+
 type
  stringconsts = (
  makedisabled //0 Make disabled by Default make col!
  );
- 
+
  tcommandlinefo = class(tmseform)
    disp: tmemoedit;
    c: tstringcontainer;
@@ -56,4 +56,4 @@ begin
  end;
 end;
 
-end.                                                                    
+end.

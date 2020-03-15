@@ -52,7 +52,7 @@ object stringlisteditor: tstringlisteditor
     anchors = [an_top, an_bottom]
     optionsgrid = [og_rowmoving, og_keyrowmoving, og_rowinserting, og_rowdeleting, og_focuscellonenter, og_autofirstrow, og_wrapcol, og_autopopup]
     fixcols.count = 1
-    fixcols.items = <    
+    fixcols.items = <
       item
         width = 24
         numstep = 1
@@ -60,7 +60,7 @@ object stringlisteditor: tstringlisteditor
     zebra_start = 1
     zebra_height = 1
     datacols.count = 1
-    datacols.items = <    
+    datacols.items = <
       item[valueedit]
         width = 245
         options = [co_fill, co_savestate, co_mousescrollrow]

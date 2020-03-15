@@ -86,7 +86,7 @@ var
 implementation
 uses
  msedynload;
- 
+
 procedure init(const info: dynlibinfoty);
 const
  funcs: array[0..19] of funcinfoty = (

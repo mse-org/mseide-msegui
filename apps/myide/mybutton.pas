@@ -5,10 +5,10 @@ interface
 uses
  msesimplewidgets,mseevent,msegraphics,classes,mclasses,msegraphutils,mseact,
  mseguiglob;
- 
+
 const
  defaultcolorclicked = cl_red;
- 
+
 type
  tmybutton = class(tbutton)
   private
@@ -22,14 +22,14 @@ type
   public
    constructor create(aowner: tcomponent); override;
   published
-   property colorclicked: colorty read fcolorclicked 
+   property colorclicked: colorty read fcolorclicked
                   write setcolorclicked default defaultcolorclicked;
  end;
-  
+
 implementation
 uses
  mseshapes;
- 
+
 { tmybutton }
 
 constructor tmybutton.create(aowner: tcomponent);

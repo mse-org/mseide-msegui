@@ -56,13 +56,13 @@ type
  //                ns1_irecordvaluefield  //irecordvaluefield
                 );
  nodestates1ty = set of nodestate1ty;
- 
+
  nodeoptionty = (no_drawemptybox,no_drawemptyexpand,no_solidline,no_checkbox,
-                 no_updatechildchecked, 
+                 no_updatechildchecked,
                          //track ns1_childchecked state, slow!
-                 no_updatechildnotchecked, 
+                 no_updatechildnotchecked,
                          //track ns1_childnotchecked state, slow!
-                 no_updateparentnotchecked, 
+                 no_updateparentnotchecked,
                          //track ns1_parentnotchecked state, slow!
                  no_cellitemselect,     //copy cell select state to item select
                  no_nofreeitems,        //do not free items for removed rows
@@ -140,7 +140,7 @@ type
     treeheightbefore: integer;
    );
  end;
-  
+
  tlistitem = class;
 
  iitemlist = interface(inullinterface)
@@ -199,7 +199,7 @@ type
    property tagpointer: pointer read tagpo write tagpo;
                                              deprecated 'Use tagpo instead';
    constructor create(const aowner: tcustomitemlist); overload; virtual;
-   constructor createassign(const aowner: tcustomitemlist; 
+   constructor createassign(const aowner: tcustomitemlist;
                                    const asource: tlistitem); overload;
    destructor destroy; override;
    class procedure calcitemlayout(const asize: sizety;
@@ -284,7 +284,7 @@ type
    procedure unsetitem(const aindex: integer);
    procedure internalcheckitems(const checkdelete: checktreelistitemprocty);
    procedure setdestroying;
-   procedure setnotbyownerdestroying; 
+   procedure setnotbyownerdestroying;
                         //destroyed by parentitem with owner = nil
    function inccount: integer; //returns itemindex
    function getrootexpanded: boolean;
@@ -333,7 +333,7 @@ type
               const aparent: ttreelistitem = nil); reintroduce; virtual;
    destructor destroy; override;
    class procedure calcitemlayout(const asize: sizety;
-                const ainnerframe: framety; const list: tcustomitemlist; 
+                const ainnerframe: framety; const list: tcustomitemlist;
                                      var info: listitemlayoutinfoty); override;
 
    procedure releaseowner; override;
@@ -395,7 +395,7 @@ type
                       var alayoutinfo: listitemlayoutinfoty) override;
    procedure addchildren(const aitem: ttreelistitem);
                    //transfers children
-   function add(const aitem: ttreelistitem): integer; overload; 
+   function add(const aitem: ttreelistitem): integer; overload;
                    //returns index, nil ignored
    procedure add(const aitems: treelistitemarty); overload;
    function add(const itemclass: treelistitemclassty = nil):
@@ -410,7 +410,7 @@ type
    procedure swap(const a,b: integer);
    procedure clear; virtual;
 
-   function getnodes(const must: nodestatesty; 
+   function getnodes(const must: nodestatesty;
                         const mustnot: nodestatesty;
                         const amode: getnodemodety = gno_matching;
                         const addself: boolean = false): treelistitemarty;
@@ -448,7 +448,7 @@ type
    constructor create();
    class function getitemclasstype: persistentclassty; override;
                          //used in dumpunitgroups
-   property items[const index: integer]: tfont read getitems 
+   property items[const index: integer]: tfont read getitems
                                                    write setitems; default;
  end;
 
@@ -519,7 +519,7 @@ type
    procedure objectevent(const sender: tobject;
                           const event: objecteventty); override;
    function getitems1(const index: integer): tlistitem;
-   procedure setitems(const index: integer; const Value: tlistitem); 
+   procedure setitems(const index: integer; const Value: tlistitem);
    procedure setcount(const value: integer); override;
    procedure freedata(var data); override;
    procedure removeitem(const aindex: integer); //no free item
@@ -536,14 +536,14 @@ type
                                      out item: tlistitem); virtual;
    procedure statreaditem(const reader: tstatreader;
                     var aitem: tlistitem); virtual;
-   procedure statreadtreeitem(const reader: tstatreader; 
+   procedure statreadtreeitem(const reader: tstatreader;
                const parent: ttreelistitem; var aitem: ttreelistitem); virtual;
    procedure statwriteitem(const writer: tstatwriter;
                     const aitem: tlistitem); virtual;
    procedure statwritetreeitem(const writer: tstatwriter;
                     const aitem: ttreelistitem); virtual;
 
-   procedure dostatread(const reader: tstatreader; 
+   procedure dostatread(const reader: tstatreader;
                                         const name: msestring); virtual;
    procedure dostatwrite(const writer: tstatwriter;
                                         const name: msestring); virtual;
@@ -569,9 +569,9 @@ type
    function empty(const index: integer): boolean; override;
    function indexof(const aitem: tlistitem): integer;
    function nodezone(const point: pointty): cellzonety;
-   function getitems(const must: nodestatesty; 
+   function getitems(const must: nodestatesty;
                         const mustnot: nodestatesty): listitemarty;
-   function getindexes(const must: nodestatesty; 
+   function getindexes(const must: nodestatesty;
                         const mustnot: nodestatesty): integerarty;
    function getselecteditems: listitemarty;
    function getselectedindexes: integerarty;
@@ -581,7 +581,7 @@ type
    property items[const index: integer]: tlistitem read getitems1 write setitems;
                     default;
    property imnr_base: integer read fimnr_base write setimnr_base default 0;
-   property imnr_expanded: integer read fimnr_expanded 
+   property imnr_expanded: integer read fimnr_expanded
                                               write setimnr_expanded default 0;
    property imnr_selected: integer read fimnr_selected
                                               write setimnr_selected default 0;
@@ -589,39 +589,39 @@ type
                                               write setimnr_readonly default 0;
    property imnr_checked: integer read fimnr_checked
                                                write setimnr_checked default 0;
-   property imnr_subitems: integer read fimnr_subitems 
+   property imnr_subitems: integer read fimnr_subitems
                                               write setimnr_subitems default 0;
-   property imnr_focused: integer read fimnr_focused 
+   property imnr_focused: integer read fimnr_focused
                                               write setimnr_focused default 0;
-   property imnr_active: integer read fimnr_active 
+   property imnr_active: integer read fimnr_active
                                               write setimnr_active default 0;
    property imagelist: timagelist read fimagelist write setimagelist;
-   property imagewidth: integer read fimagesize.cx 
+   property imagewidth: integer read fimagesize.cx
                                                  write setimagewidth default 0;
-   property imageheight: integer read fimagesize.cy 
+   property imageheight: integer read fimagesize.cy
                                                 write setimageheight default 0;
    property imagesize: sizety read fimagesize write setimagesize;
-   property imagealignment: alignmentsty read fimagealignment 
-                   write setimagealignment default [al_xcentered,al_ycentered]; 
+   property imagealignment: alignmentsty read fimagealignment
+                   write setimagealignment default [al_xcentered,al_ycentered];
    property options: nodeoptionsty read foptions write setoptions default [];
    property captionpos: captionposty read fcaptionpos write setcaptionpos
                                                               default cp_right;
    property fonts: tfontarrayprop read ffonts write setfonts;
    property levelstep: integer read flevelstep write setlevelstep
                                                     default defaultlevelstep;
-   property defaultnodestate: nodestatesty read fdefaultnodestate 
+   property defaultnodestate: nodestatesty read fdefaultnodestate
                                             write fdefaultnodestate default [];
 
    property onstatreaditem: statreaditemeventty read fonstatreaditem
                             write fonstatreaditem;
-   property onstatreadtreeitem: statreadtreeitemeventty 
+   property onstatreadtreeitem: statreadtreeitemeventty
                             read fonstatreadtreeitem write fonstatreadtreeitem;
    property onstatwriteitem: statwriteitemeventty read fonstatwriteitem
                             write fonstatwriteitem;
-   property onstatwritetreeitem: statwritetreeitemeventty 
+   property onstatwritetreeitem: statwritetreeitemeventty
                            read fonstatwritetreeitem write fonstatwritetreeitem;
 
-   property onstatwrite: statwriteitemlisteventty read fonstatwrite 
+   property onstatwrite: statwriteitemlisteventty read fonstatwrite
                                 write fonstatwrite; //called before items
    property onstatread: statreaditemlisteventty read fonstatread
                                 write fonstatread; //called before items
@@ -637,7 +637,7 @@ type
   private
    procedure setcount(const value: integer);
    procedure checkindex(const index: integer);
-   procedure convertflat(const listitem: ttreelistitem; 
+   procedure convertflat(const listitem: ttreelistitem;
                                        const filterfunc: treenodefilterfuncty);
    function converttree(const filterfunc: treenodefilterfuncty): ttreelistitem;
   protected
@@ -655,7 +655,7 @@ type
    function count: integer;
    function add(const anode: ttreenode): integer;
    procedure iterate(const event: nodeeventty);
-   function converttotreelistitem(flat: boolean = false; 
+   function converttotreelistitem(flat: boolean = false;
                                         withrootnode: boolean =  false;
                 filterfunc: treenodefilterfuncty = nil): ttreelistitem;
    property items[const index: integer]: ttreenode read getitems
@@ -740,7 +740,7 @@ begin
  end;
 end;
 
-constructor tlistitem.createassign(const aowner: tcustomitemlist; 
+constructor tlistitem.createassign(const aowner: tcustomitemlist;
                                    const asource: tlistitem);
 begin
  create(aowner);
@@ -845,7 +845,7 @@ begin
   end;
   captioninnerrect:= deflaterect(captionrect,ainnerframe);
   checkboxrect.y:= imagerect.y + (imagerect.cy - checkboxrect.cy) div 2;
-  checkboxrect.x:= imagerect.x;   
+  checkboxrect.x:= imagerect.x;
   if no_checkbox in list.foptions then begin
    imagerect.x:= imagerect.x + checkboxrect.cx;
    imagerect.cx:= imagerect.cx - checkboxrect.cx;
@@ -875,19 +875,19 @@ begin
     glyphno:= boxids[tib_checkbox];
     if ns_checked in self.fstate then begin
      glyphno:= boxids[tib_checkboxchecked];
-     if (ns_showparentnotchecked in self.fstate) and 
+     if (ns_showparentnotchecked in self.fstate) and
                        (ns1_parentnotchecked in self.fstate1) then begin
       glyphno:= boxids[tib_checkboxparentnotchecked];
      end
      else begin
-      if (ns_showchildnotchecked in self.fstate) and 
+      if (ns_showchildnotchecked in self.fstate) and
                         (ns1_childnotchecked in self.fstate1) then begin
        glyphno:= boxids[tib_checkboxchildnotchecked];
       end;
      end;
     end
     else begin
-     if (ns_showchildchecked in self.fstate) and 
+     if (ns_showchildchecked in self.fstate) and
                        (ns1_childchecked in self.fstate1) then begin
       glyphno:= boxids[tib_checkboxchildchecked];
      end;
@@ -898,8 +898,8 @@ begin
    end;
   end;
   if aimagelist <> nil then begin
-   if fowner.captionpos in imageextendcaptionpos then begin 
-    variable.imageextend.cx:= aimagelist.size.cx + variable.extra.image.cx - 
+   if fowner.captionpos in imageextendcaptionpos then begin
+    variable.imageextend.cx:= aimagelist.size.cx + variable.extra.image.cx -
                                                                   imagerect.cx;
    end;
    if not nopaint then begin //acanvas <> nil then begin
@@ -915,7 +915,7 @@ begin
    end;
   end
   else begin
-   if fowner.captionpos in imageextendcaptionpos then begin 
+   if fowner.captionpos in imageextendcaptionpos then begin
     variable.imageextend.cx:= variable.extra.image.cx - imagerect.cx;
    end;
   end;
@@ -933,7 +933,7 @@ begin
   ainfo.dest.cx:= ainfo.dest.cx - variable.treelevelshift;
   ainfo.clip.cx:= ainfo.clip.cx - variable.treelevelshift;
 //  if fimagelist <> nil then begin
-  if (variable.imageextend.cx <> 0) and 
+  if (variable.imageextend.cx <> 0) and
             (fowner.captionpos in imageextendcaptionpos) then begin
    int1:= variable.imageextend.cx;
    with ainfo.dest do begin
@@ -1074,7 +1074,7 @@ begin
     text.text:= editor.text;
    end;
    flags:= textflags;
-   
+
    updatecaption(editor.getfontcanvas(),po1^,info1);
    editor.setup(text.text,editor.curindex,false,dest,clip,text.format,nil,font);
   end;
@@ -1155,7 +1155,7 @@ begin
     end
     else begin
      if (eventkind = ek_buttonpress) and
-              (shiftstate * keyshiftstatesmask = []) and 
+              (shiftstate * keyshiftstatesmask = []) and
                                 (button = mb_left) then begin
       include(fstate1,ns1_checkboxclicked);
      end;
@@ -1568,14 +1568,14 @@ begin
  if fimagelist <> value then begin
   imagelistbefore:= fimagelist;
   setlinkedcomponent(iobjectlink(self),value,tmsecomponent(fimagelist));
-  if (fimagelist <> nil) and 
-             (fintf.getcomponentstate * [csdesigning,csloading] = 
+  if (fimagelist <> nil) and
+             (fintf.getcomponentstate * [csdesigning,csloading] =
                                                      [csdesigning]) then begin
-   if (imagelistbefore = nil) or 
+   if (imagelistbefore = nil) or
                    (imagelistbefore.width = fimagesize.cx) then begin
     fimagesize.cx:= fimagelist.width;
    end;
-   if (imagelistbefore = nil) or 
+   if (imagelistbefore = nil) or
                    (imagelistbefore.height = fimagesize.cy) then begin
     fimagesize.cy:= fimagelist.height;
    end;
@@ -1787,7 +1787,7 @@ var
  po1: plistitematy;
  int1: integer;
 begin
- if (no_cellitemselect in foptions) and 
+ if (no_cellitemselect in foptions) and
                    not (dls_selectsetting in fstate) then begin
   if row >= 0 then begin
    with items[row] do begin
@@ -1817,7 +1817,7 @@ end;
 
 procedure tcustomitemlist.freedata(var data);
 begin
- if not (no_nofreeitems in foptions) and (tlistitem(data) <> nil) and 
+ if not (no_nofreeitems in foptions) and (tlistitem(data) <> nil) and
                not (ns1_destroying in tlistitem(data).fstate1) then begin
   inherited;
  end;
@@ -1967,7 +1967,7 @@ begin
  end;
 end;
 
-function tcustomitemlist.getitems(const must: nodestatesty; 
+function tcustomitemlist.getitems(const must: nodestatesty;
                         const mustnot: nodestatesty): listitemarty;
 var
  int1: integer;
@@ -2052,7 +2052,7 @@ begin
  result:= fintf.getlayoutinfo(nil);
 end;
 
-procedure tcustomitemlist.dostatread(const reader: tstatreader; 
+procedure tcustomitemlist.dostatread(const reader: tstatreader;
                                                      const name: msestring);
 begin
  if assigned(fonstatread) then begin
@@ -2060,7 +2060,7 @@ begin
  end;
 end;
 
-procedure tcustomitemlist.dostatwrite(const writer: tstatwriter; 
+procedure tcustomitemlist.dostatwrite(const writer: tstatwriter;
                                                     const name: msestring);
 begin
  if assigned(fonstatwrite) then begin
@@ -2347,7 +2347,7 @@ end;
 
 function ttreelistitem.createsubnode: ttreelistitem;
 begin
- result:= treelistitemclassty(classtype).create(fowner); 
+ result:= treelistitemclassty(classtype).create(fowner);
                                 //child class = parent class
 end;
 
@@ -2479,7 +2479,7 @@ begin
   if not (ns1_noowner in fstate1) then begin
    for int1:= 0 to acount-1 do begin
     with aitems[int1] do begin
-     if not adestroying or 
+     if not adestroying or
           (ns1_notbyownerdestroying in fstate1) and (fowner <> nil) then begin
       setowner(nil);
      end;
@@ -2526,7 +2526,7 @@ procedure ttreelistitem.internalgetnodes(var aresult: treelistitemarty;
 
 var
  first: boolean;
- 
+
  procedure check(anode: ttreelistitem);
  var
   int1: integer;
@@ -2565,14 +2565,14 @@ var
    end;
   end;
  end; //check
- 
+
 begin
  first:= not addself;
  check(self);
 end;
 
-function ttreelistitem.getnodes(const must: nodestatesty; 
-                  const mustnot: nodestatesty; 
+function ttreelistitem.getnodes(const must: nodestatesty;
+                  const mustnot: nodestatesty;
                   const amode: getnodemodety = gno_matching;
                   const addself: boolean = false): treelistitemarty;
 var
@@ -2846,7 +2846,7 @@ begin
   end;
  end;
  checkaction(na_aftersort);
- change; 
+ change;
 end;
 
 procedure ttreelistitem.checksort;
@@ -2927,7 +2927,7 @@ begin
     with node1 do begin
      for i1:= 0 to fcount-1 do begin
       with fitems[i1] do begin
-       if not (ns_checked in fstate) or 
+       if not (ns_checked in fstate) or
                            (ns1_childnotchecked in fstate1) then begin
         exit;
        end;
@@ -3003,14 +3003,14 @@ procedure ttreelistitem.doupdateparentnotcheckedstate(const aset: boolean);
     if ns_checked in fstate then begin
      doclear(fitems[int1]);
     end;
-   end;   
+   end;
    change();
   end;
  end;
- 
+
 var
  int1: integer;
- 
+
 begin
  if aset then begin
   for int1:= 0 to fcount-1 do begin
@@ -3026,7 +3026,7 @@ end;
 
 procedure ttreelistitem.updateparentnotcheckedstate();
 begin
- doupdateparentnotcheckedstate(not (ns_checked in fstate) or 
+ doupdateparentnotcheckedstate(not (ns_checked in fstate) or
                                      (ns1_parentnotchecked in fstate1));
 end;
 
@@ -3046,13 +3046,13 @@ procedure ttreelistitem.updateparentnotcheckedtree();
    avalue:= avalue or not checked;
    for int1:= 0 to fcount-1 do begin
     doupdate(fitems[int1],avalue);
-   end;   
+   end;
   end;
  end;
 
 var
  int1: integer;
- bo1: boolean; 
+ bo1: boolean;
 begin
  bo1:= not (ns_checked in fstate);
  for int1:= 0 to fcount-1 do begin
@@ -3088,7 +3088,7 @@ procedure ttreelistitem.drawimage(const acanvas: tcanvas;
                                      var alayoutinfo: listitemlayoutinfoty);
 var
  po1,poend: ptreelistitem;
- 
+
  function isnotlast(const aitem: ttreelistitem): boolean;
  begin
   if po1 = nil then begin
@@ -3105,7 +3105,7 @@ var
    end;
   end;
  end;
- 
+
 var
  box: treeitemboxty;
  int1: integer;
@@ -3119,15 +3119,15 @@ var
  cellheight{,boxy}: integer;
  nopaint: boolean;
 // drawinfo: treeitemdrawinfoty;
- 
+
 begin
  nopaint:= (acanvas = nil) or alayoutinfo.variable.calcautocellsize;
  alayoutinfo.variable.treelevelshift:= levelshift;
  if not nopaint then begin //acanvas <> nil then begin
   if (fcount = 0) and not (ns_subitems in fstate) and
-   not ((ns_drawemptyexpand in fstate) or 
+   not ((ns_drawemptyexpand in fstate) or
                        (no_drawemptyexpand in fowner.foptions)) then begin
-   if (ns_drawemptybox in fstate) or 
+   if (ns_drawemptybox in fstate) or
                        (no_drawemptybox in fowner.foptions) then begin
     box:= tib_empty;
    end
@@ -3167,7 +3167,7 @@ begin
     poend:= @ppointeraty(po1)[fowner.count-1];
     po1:= @ppointeraty(po1)[variable.rowindex + 1];
    end;
-   bo1:= (fparent = nil) or isnotlast(self); 
+   bo1:= (fparent = nil) or isnotlast(self);
            //bo1 not used if parent = nil
    while item1.fparent <> nil do begin
     if (int1 = 0) or isnotlast(item1) then begin
@@ -3190,7 +3190,7 @@ begin
       end;
       inc(int1);
      end;
-    end 
+    end
     else begin //last vert.
      if box <> tib_none then begin
       lines[0].b.y:= expandboxrect.y-1; //to top of box
@@ -3275,7 +3275,7 @@ begin
  end;
 end;
 
-class procedure ttreelistitem.calcitemlayout(const asize: sizety; 
+class procedure ttreelistitem.calcitemlayout(const asize: sizety;
                   const ainnerframe: framety; const list: tcustomitemlist;
                                               var info: listitemlayoutinfoty);
 var
@@ -3575,7 +3575,7 @@ end;
 function ttreelistitem.issinglerootrow: boolean;
 begin
  result:= (treelevel = 0) and (not expanded or (count = 0));
-end; 
+end;
 
 function ttreelistitem.nextnode: ttreelistitem;
 var

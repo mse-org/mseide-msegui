@@ -28,7 +28,7 @@ interface
 uses
  msedatalist,mseclasses,classes,mclasses,msetypes,msearrayprops,mseevent,msehash,
  msesystypes,msereal,msetimer,mseglob;
- 
+
 const
  defaultsamplefrequ = 44100; //Hz
  defaultstepcount = 4096;
@@ -82,15 +82,15 @@ type
  end;
 
  tsigcomp = class(tcustomsigcomp)
-  
+
  end;
 
  tdoubleinputconn = class;
  tdoubleoutputconn = class;
- 
+
  inputconnarty = array of tdoubleinputconn;
  outputconnarty = array of tdoubleoutputconn;
- 
+
  psighandlerinfoty = ^sighandlerinfoty;
  sighandlerprocty = procedure(const ainfo: psighandlerinfoty) of object;
 
@@ -102,7 +102,7 @@ type
 
  sigclientoptionty = (sco_tick,sco_fulltick);
  sigclientoptionsty = set of sigclientoptionty;
-   
+
  isigclient = interface(ievent)
   procedure initmodel;
   procedure clear;
@@ -133,8 +133,8 @@ type
    procedure loaded; override;
    procedure lock;
    procedure unlock;
-   
-    //isigclient  
+
+    //isigclient
    procedure initmodel; virtual;
    procedure sigtick; virtual;
    function getinputar: inputconnarty; virtual;
@@ -154,13 +154,13 @@ type
   published
    property controller: tsigcontroller read fcontroller write setcontroller;
  end;
- 
+
  tsigconn = class(tmsecomponent)
         //no solution found to link to streamed tpersistent or tobject,
         //fork of classes.pp necessary. :-(
  end;
- 
- tdoubleconn = class(tsigconn) 
+
+ tdoubleconn = class(tsigconn)
   protected
    fsigintf: isigclient;
    function getcontroller: tsigcontroller;
@@ -181,12 +181,12 @@ type
   options: valuescaleoptionsty;
   gain,offset: double;
  end;
- 
+
  doubleinputconnarty = array of tdoubleinputconn;
 
  outputconnstatety = (ocs_eventdriven);
  outputconnstatesty = set of outputconnstatety;
-  
+
  tdoubleoutputconn = class(tdoubleconn)
   private
    function geteventdriven: boolean;
@@ -198,15 +198,15 @@ type
    property eventdriven: boolean read geteventdriven write seteventdriven;
   public
    constructor create(const aowner: tcomponent;
-         const asigintf: isigclient; const aeventdriven: boolean); 
+         const asigintf: isigclient; const aeventdriven: boolean);
                                                        reintroduce; virtual;
    property value: double read fvalue write fvalue;
- end; 
+ end;
 
 // siginpoptionty = (sio_exp);
 // siginpoptionsty = set of siginpoptionty;
 
- inpscaleinfoty = record  
+ inpscaleinfoty = record
   offset: double;
   gain: double;
   hasscale: boolean;
@@ -221,7 +221,7 @@ type
  end;
  psigvaluety = ^sigvaluety;
  sigvaluepoarty = array of psigvaluety;
- 
+
  tdoubleinputconn = class(tdoubleconn)
   private
    fsource: tdoubleoutputconn;
@@ -255,7 +255,7 @@ type
    property max: realty read fmax write setmax;
    property expstart: realty read fexpstart write setexpstart;
    property expend: realty read fexpend write setexpend;
-   property value: double read fv.value write setvalue;  
+   property value: double read fv.value write setvalue;
 //   property options: siginpoptionsty read foptions write setoptions;
  end;
 
@@ -265,7 +265,7 @@ type
                      const asigintf: isigclient); override;
     //deafault min = 0, default max = 1
  end;
- 
+
  tchangedoubleinputconn = class(tdoubleinputconn)
   private
    fonchange: notifyeventty;
@@ -275,7 +275,7 @@ type
    constructor create(const aowner: tcomponent; const asigintf: isigclient;
                       const aonchange: notifyeventty); reintroduce;
  end;
- 
+
  sighandlerinfoty = record
 //  dest: pdouble;
   discard: boolean;
@@ -283,28 +283,28 @@ type
 
  siginfopoarty = array of psiginfoty;
  signahdlerprocty = procedure(siginfo: psiginfoty);
- 
+
  siginfostatety = (sis_checked,sis_eventchecked,sis_touched,
                    sis_input,sis_output,
                    sis_eventoutput,sis_eventinput,sis_fulltick,sis_sighandler);
  siginfostatesty = set of siginfostatety;
- 
+
  inputstatety = (ins_checked,ins_recursive);
  inputstatesty = set of inputstatety;
- 
+
  inputinfoty = record
   input: tdoubleinputconn;
   source: psiginfoty;
   state: inputstatesty;
  end;
  inputinfoarty = array of inputinfoty;
- 
+
  sigdestinfoty = record
   outputindex: integer;
   destinput: tdoubleinputconn;
  end;
  sigdestinfoarty = array of sigdestinfoty;
- 
+
  siginfoty = record
   intf: isigclient;
   options: sigclientoptionsty;
@@ -329,7 +329,7 @@ type
   sca: inpscaleinfoty;
  end;
  destinfoarty = array of destinfoty;
- 
+
  sighandlernodeinfoty = record
   handlerinfo: sighandlerinfoty;
   handler: sighandlerprocty;
@@ -339,18 +339,18 @@ type
  end;
  psighandlernodeinfoty = ^sighandlernodeinfoty;
  sighandlernodeinfoarty = array of sighandlernodeinfoty;
-   
+
  tsigconnection = class(tdoublesigcomp)
  end;
- 
+
  sigineventty = procedure(const sender: tobject;
-                               var sig: real) of object; 
+                               var sig: real) of object;
  siginbursteventty = procedure(const sender: tobject;
-                               var sig: realarty) of object; 
+                               var sig: realarty) of object;
  sigincomplexeventty = procedure(const sender: tobject;
-                               var sig: complexty) of object; 
+                               var sig: complexty) of object;
  sigincomplexbursteventty = procedure(const sender: tobject;
-                               var sig: complexarty) of object; 
+                               var sig: complexarty) of object;
 
  tsigin = class(tsigconnection)
   private
@@ -381,9 +381,9 @@ type
  end;
 
  sigouteventty = procedure(const sender: tobject;
-                               const sig: real) of object; 
+                               const sig: real) of object;
  sigoutbursteventty = procedure(const sender: tobject;
-                               const sig: realarty) of object; 
+                               const sig: realarty) of object;
 
  tsigout = class(tsigconnection)
   private
@@ -413,20 +413,20 @@ type
    property value: double read getvalue;
   published
    property input: tdoubleinputconn read getinput write setinput;
-   property buffersize: integer read fbuffersize 
+   property buffersize: integer read fbuffersize
                                               write setbuffersize default 0;
    property onoutput: sigouteventty read fonoutput write fonoutput;
-   property onoutputburst: sigoutbursteventty read fonoutputburst 
+   property onoutputburst: sigoutbursteventty read fonoutputburst
                                               write fonoutputburst;
  end;
- 
+
  trealcoeff = class(trealdatalist)
   protected
    fowner: tcustomsigcomp;
    procedure doitemchange(const aindex: integer); override;
   public
    constructor create(const aowner: tcustomsigcomp); reintroduce;
- end; 
+ end;
 
  tcomplexcoeff = class(tcomplexdatalist)
   protected
@@ -434,7 +434,7 @@ type
    procedure doitemchange(const aindex: integer); override;
   public
    constructor create(const aowner: tcustomsigcomp); reintroduce;
- end; 
+ end;
 
  tdoublezcomp = class(tdoublesigcomp) //single input, single output
   private
@@ -559,19 +559,19 @@ type
    procedure clear; override;
    procedure start;
   published
-   property bufferlength: integer read fbufferlength 
+   property bufferlength: integer read fbufferlength
                           write setbufferlength default defaultsamplecount;
    property trigger: tchangedoubleinputconn read ftrigger write settrigger;
-   property triggerlevel: tchangedoubleinputconn read ftriggerlevel 
+   property triggerlevel: tchangedoubleinputconn read ftriggerlevel
                                               write settriggerlevel;
-   property options: sigsampleroptionsty read foptions 
+   property options: sigsampleroptionsty read foptions
                           write setoptions default defaultsigsampleroptions;
-   property onbufferfull: samplerbufferfulleventty read fonbufferfull 
+   property onbufferfull: samplerbufferfulleventty read fonbufferfull
                                                          write fonbufferfull;
    property refreshus: integer read frefreshus write setrefreshus default -1;
                           //micro seconds, -1 -> off, 0 -> on idle
  end;
- 
+
  tsigmultiinpout = class(tsigmultiinp)
   private
     //local variables
@@ -588,7 +588,7 @@ type
 //   destructor destroy; override;
    property output: tdoubleoutputconn read foutput write setoutput;
  end;
- 
+
  tsigadd = class(tsigmultiinpout)
   protected
 //   procedure processinout(const acount: integer;
@@ -628,12 +628,12 @@ type
    constructor create(aowner: tcomponent); override;
    procedure clear; override;
  end;
- 
+
  tsigdelayn = class(tcustomsigdelay)
   published
    property delay;
  end;
- 
+
  tsigdelayvar = class(tcustomsigdelay)
   private
    fdelayinp: tdoubleinputconn;
@@ -653,7 +653,7 @@ type
    property delaymax: integer read getdelaymax write setdelaymax default 1;
    property delay: tdoubleinputconn read fdelayinp write setdelayinp;
  end;
- 
+
  tdoublesigoutcomp = class(tdoublesigcomp)
   private
    procedure setoutput(const avalue: tdoubleoutputconn);
@@ -697,10 +697,10 @@ type
 
  tsigeventconnector = class(tdoublesigcomp)
  end;
- 
+
  sigwavetableoptionty = (siwto_intpol);
  sigwavetableoptionsty = set of sigwavetableoptionty;
- 
+
  tsigwavetable = class(tdoublesigoutcomp)
   private
    ffrequency: tdoubleinputconn;
@@ -745,7 +745,7 @@ type
    property phase: tdoubleinputconn read fphase write setphase;
    property amplitude: tdoubleinputconn read famplitude write setamplitude;
    property oninittable: siginbursteventty read foninittable write foninittable;
-   property options: sigwavetableoptionsty read foptions 
+   property options: sigwavetableoptionsty read foptions
                                            write setoptions default [];
  end;
 
@@ -761,7 +761,7 @@ type
  end;
  pfunctionsegmentty = ^functionsegmentty;
  functionsegmentsty = array[0..functionsegmentcount-1] of functionsegmentty;
- 
+
  tsigfuncttable = class(tsigmultiinpout)
   private
    famplitude: tdoubleinputconn;
@@ -793,10 +793,10 @@ type
   published
    property master: tsigfuncttable read fmaster write setmaster;
    property amplitude: tdoubleinputconn read famplitude write setamplitude;
-   property oninittable: sigincomplexbursteventty read foninittable 
+   property oninittable: sigincomplexbursteventty read foninittable
                                                         write foninittable;
  end;
- 
+
  tsigmult = class(tsigmultiinpout)
   protected
 //   procedure processinout(const acount: integer;
@@ -808,7 +808,7 @@ type
 
  sigenveloperangeoptionty = (sero_exp,sero_mix);
  sigenveloperangeoptionsty = set of sigenveloperangeoptionty;
- 
+
  sigenvelopeoptionty = (seo_eventoutput,seo_negtrig,seo_nozero);
  sigenvelopeoptionsty = set of sigenvelopeoptionty;
  envproginfoty = record
@@ -837,7 +837,7 @@ type
   findex: integer;
   findexhigh: integer;
   fdest: double;
-  
+
   fcurrval: double;
   fcurrvalbefore: double;
   fcurrisexp: boolean;
@@ -849,15 +849,15 @@ type
   floopindex: integer;
   floopval: double;
   floopramp: double;
- end;   
- 
+ end;
+
  tsigenvelope = class(tdoublesigoutcomp)
   private
    ftrigger: tchangedoubleinputconn;
    famplitudepo: psigvaluety;
    fmixpo: psigvaluety;
 
-   fhasmix: boolean;   
+   fhasmix: boolean;
    ftime: integer;
    foptions: sigenvelopeoptionsty;
    ftimescale: real;
@@ -906,7 +906,7 @@ type
    fsamplecount: integer;
    feventtime: integer;
    fmaxeventdelay: integer;
-   procedure sighandler(const ainfo: psighandlerinfoty);   
+   procedure sighandler(const ainfo: psighandlerinfoty);
    procedure updatevalues(var ainfo: envelopeinfoty);
    procedure updatevalueindex(const aindex: integer);
    procedure updatevaluesx;
@@ -926,13 +926,13 @@ type
    constructor create(aowner: tcomponent); override;
    procedure start;
    procedure stop;
-   property attack_values[const index: integer]: complexarty 
+   property attack_values[const index: integer]: complexarty
                         read getattack_values  write setattack_values;
-   property decay_values[const index: integer]: complexarty 
+   property decay_values[const index: integer]: complexarty
                         read getdecay_values write setdecay_values;
-   property release_values[const index: integer]: complexarty 
+   property release_values[const index: integer]: complexarty
                         read getrelease_values write setrelease_values;
-   property loopstart[const index: integer]: real 
+   property loopstart[const index: integer]: real
                         read getloopstart write setloopstart;
                      //<0 -> inactive
   published
@@ -941,31 +941,31 @@ type
                          //1 -> start, -1 -> stop
    property amplitude: tdoubleinputconn read famplitude write setamplitude;
    property mix: tlimitinputconn read fmix write setmix;
-   property options: sigenvelopeoptionsty read foptions 
+   property options: sigenvelopeoptionsty read foptions
                                                 write setoptions default [];
    property timescale: real read ftimescale write ftimescale; //default 1s
-   property subsampling: integer read fsubsampling write setsubsampling 
+   property subsampling: integer read fsubsampling write setsubsampling
                                           default defaultenvelopesubsampling;
    property min: real read fmin write setmin;
    property max: real read fmax write setmax;
    property eventthreshold: real read feventthreshold write feventthreshold;
-   property attack_options: sigenveloperangeoptionsty read fattack_options 
+   property attack_options: sigenveloperangeoptionsty read fattack_options
                                          write setattack_options default [];
-   property attack_maxeventtime: real read fattack_maxeventtime 
+   property attack_maxeventtime: real read fattack_maxeventtime
                                  write fattack_maxeventtime; //default 0
-   property decay_options: sigenveloperangeoptionsty read fdecay_options 
+   property decay_options: sigenveloperangeoptionsty read fdecay_options
                                  write setdecay_options default [sero_exp];
-   property decay_maxeventtime: real read fdecay_maxeventtime 
+   property decay_maxeventtime: real read fdecay_maxeventtime
                                  write fdecay_maxeventtime; //default 0
-   property release_options: sigenveloperangeoptionsty read frelease_options 
+   property release_options: sigenveloperangeoptionsty read frelease_options
                                  write setrelease_options default [sero_exp];
-   property release_maxeventtime: real read frelease_maxeventtime 
+   property release_maxeventtime: real read frelease_maxeventtime
                                  write frelease_maxeventtime; //default 0
  end;
- 
+
  sigcontrollerstatety = (scs_modelvalid,scs_hastick);
  sigcontrollerstatesty = set of sigcontrollerstatety;
- 
+
  tsiginfohash = class(tpointerptruinthashdatalist)
  end;
 
@@ -975,7 +975,7 @@ type
                                const acount: integer) of object;
  sigcontrolleroptionty = (sico_freerun,sico_autorun);
  sigcontrolleroptionsty = set of sigcontrolleroptionty;
- 
+
  tsigcontroller = class(tmsecomponent)
   private
    finphash: tsiginfohash;
@@ -1052,41 +1052,41 @@ type
    property freerun: boolean read getfreerun write setfreerun;
    property autorun: boolean read getautorun write setautorun;
   published
-   property options: sigcontrolleroptionsty read foptions 
+   property options: sigcontrolleroptionsty read foptions
                                            write setoptions default [];
-   property stepcount: integer read fstepcount 
+   property stepcount: integer read fstepcount
                                 write setstepcount default defaultstepcount;
    property samplefrequ: real read fsamplefrequ write setsamplefrequ;
                                 //default 44100
-   property tickdiv: integer read ftickdiv write settickdiv 
+   property tickdiv: integer read ftickdiv write settickdiv
                                             default defaulttickdiv;
-   property onbeforetick: notifyeventty read fonbeforetick 
+   property onbeforetick: notifyeventty read fonbeforetick
                                                       write setonbeforetick;
-   property onaftertick: notifyeventty read fonaftertick 
+   property onaftertick: notifyeventty read fonaftertick
                                                       write setonaftertick;
-   property onbeforestep: beforestepeventty read fonbeforestep 
+   property onbeforestep: beforestepeventty read fonbeforestep
                                                          write fonbeforestep;
-   property onafterstep: afterstepeventty read fonafterstep 
+   property onafterstep: afterstepeventty read fonafterstep
                                                          write fonafterstep;
 
-   property onbeforeupdatemodel: notifyeventty read fonbeforeupdatemodel 
+   property onbeforeupdatemodel: notifyeventty read fonbeforeupdatemodel
                                write fonbeforeupdatemodel; //application.locked
-   property onafterupdatemodel: notifyeventty read fonafterupdatemodel 
+   property onafterupdatemodel: notifyeventty read fonafterupdatemodel
                                write fonafterupdatemodel;  //application.locked
  end;
- 
+
 procedure createsigbuffer(var abuffer: doublearty; const asize: integer);
 procedure createsigarray(out abuffer: doublearty; const asize: integer);
 procedure setsourceconn(const sender: tmsecomponent;
               const avalue: tdoubleoutputconn; var dest: tdoubleoutputconn);
-procedure setsigcontroller(const linker: tobjectlinker; 
-          const intf: isigclient; 
+procedure setsigcontroller(const linker: tobjectlinker;
+          const intf: isigclient;
           const source: tsigcontroller; var dest: tsigcontroller);
 procedure initscale(const amin,amax: double; const aoptions: valuescaleoptionsty;
                                             out ainfo: doublescaleinfoty);
 procedure updatescale(var ainfo: doublescaleinfoty);
 function scalevalue(const ainfo: doublescaleinfoty): double;
- 
+
 implementation
 uses
  sysutils,mseformatstr,msesysutils,msesysintf1,mseapplication,msearrayutils,
@@ -1099,7 +1099,7 @@ uses
   {$warn 6058 off}
  {$endif}
 {$endif}
- 
+
 type
  tmsecomponent1 = class(tmsecomponent);
 
@@ -1142,10 +1142,10 @@ begin
   end;
  end;
 end;
-  
+
 procedure createsigbuffer(var abuffer: doublearty; const asize: integer);
 begin
- if (length(abuffer) < asize) or 
+ if (length(abuffer) < asize) or
          (psizeint(pchar(pointer(abuffer))-2*sizeof(sizeint))^ > 1) then begin
   abuffer:= nil;
   allocuninitedarray(asize,sizeof(double),abuffer);
@@ -1275,7 +1275,7 @@ constructor tdoubleoutputconn.create(const aowner: tcomponent;
                      const asigintf: isigclient; const aeventdriven: boolean);
 begin
  inherited create(aowner,asigintf);
- if aeventdriven then begin 
+ if aeventdriven then begin
   include(fstate,ocs_eventdriven);
  end;
  include (fmsecomponentstate,cs_subcompref);
@@ -1424,7 +1424,7 @@ constructor tdoublesigcomp.create(aowner: tcomponent);
 begin
  inherited;
 end;
- 
+
 destructor tdoublesigcomp.destroy;
 begin
  controller:= nil;
@@ -1449,8 +1449,8 @@ begin
  //dummy
 end;
 *)
-procedure setsigcontroller(const linker: tobjectlinker; 
-          const intf: isigclient; 
+procedure setsigcontroller(const linker: tobjectlinker;
+          const intf: isigclient;
           const source: tsigcontroller; var dest: tsigcontroller);
 begin
  if dest <> nil then begin
@@ -1581,7 +1581,7 @@ begin
  fdoubleinputdata:= nil;
  finputindex:= 0;
  fillchar(pointer(fdoublez)^,fzcount*sizeof(double),0);
- fzindex:= 0; 
+ fzindex:= 0;
 end;
 {
 procedure tdoublezcomp.setsig(const source: doublearty);
@@ -1617,7 +1617,7 @@ begin
  for int1:= 0 to finputindex-1 do begin
   po1:= pointer(fdoubleinputdata[int1]);
   processinout(length(fdoubleinputdata[int1]),po1,po2);
- end;  
+ end;
  for int1:= 0 to finputindex-1 do begin
   fdoubleinputdata[int1]:= nil;
  end;
@@ -1831,7 +1831,7 @@ begin
     if psizeint(pchar(po1)+1*sizeof(sizeint))^ < foutpindex then begin
    {$endif}
      freemem(po1);  //new buffer
-     getmem(po1,foutpindex * sizeof(double) + 2 * sizeof(sizeint)); 
+     getmem(po1,foutpindex * sizeof(double) + 2 * sizeof(sizeint));
      po1^:= 1; //referencount;
      inc(po1);
     {$ifdef FPC}
@@ -1853,7 +1853,7 @@ begin
      end;
     end;
    end
-   else begin 
+   else begin
     getmem(po1,foutpindex * sizeof(double) + 2 * sizeof(sizeint)); //new buffer
     po1^:= 1; //referencount;
     inc(po1);
@@ -2555,9 +2555,9 @@ begin
   str1:= '<NIL>';
  end
  else begin
-  str1:= getnodenamepath(anode^.intf) + 
+  str1:= getnodenamepath(anode^.intf) +
              ' conncount: '+inttostr(anode^.connectedcount);
- end; 
+ end;
  debugwriteln(atext+str1);
 end;
 
@@ -2589,7 +2589,7 @@ var
 {$endif}
 
  procedure resetchecked;
- var 
+ var
   int1,int2: integer;
  begin
   for int1:= 0 to high(finfos) do begin
@@ -2604,7 +2604,7 @@ var
 
 var
  visited: pointerarty;
- 
+
  procedure checkrecursion(const anode: psiginfoty);
  var
   int1,int2: integer;
@@ -2618,7 +2618,7 @@ var
   indentbefore:= indent;
   indent:= indent+' ';
   debugnodeinfo(indent+'node ',anode);
- {$endif}  
+ {$endif}
   additem(visited,anode);
   visitedbefore:= visited;
   with anode^ do begin
@@ -2646,13 +2646,13 @@ var
   visited:= visitedbefore;
  {$ifdef mse_debugsignal}
   indent:= indentbefore;
- {$endif}  
+ {$endif}
  end; //checkrecursion
 
 var
  execorder: siginfopoarty;
  execindex: integer;
- 
+
  procedure processcalcorder(const anode: psiginfoty);
  var
   int1: integer;
@@ -2665,7 +2665,7 @@ var
   indentbefore:= indent;
   indent:= indent+' ';
   debugnodeinfo(inttostr(execindex)+indent+'calcnode ',anode);
- {$endif}   
+ {$endif}
   if execindex > high(execorder) then begin
    internalerror('SIG20100916-0');
   end;
@@ -2677,7 +2677,7 @@ var
     po1:= next[int1];
    {$ifdef mse_debugsignal}
     debugnodeinfo(indent+' dest '+booltostr(sis_checked in po1^.state)+' ',po1);
-   {$endif}   
+   {$endif}
     if not (sis_checked in po1^.state) then begin
      if not (ins_recursive in po1^.inputs[findinplink(po1,anode)].state) then begin
       dec(po1^.connectedcount);
@@ -2690,7 +2690,7 @@ var
   end;
  {$ifdef mse_debugsignal}
   indent:= indentbefore;
- {$endif}  
+ {$endif}
  end; //processcalcorder()
 
  procedure updatesca(const ainput: tdoubleinputconn; var sca: inpscaleinfoty);
@@ -2701,7 +2701,7 @@ var
   sca.gain:= ainput.gain;
   sca.hasmin:= not (ainput.min = emptyreal);
   sca.hasmax:= not (ainput.max = emptyreal);
-  sca.isexp:= (ainput.expstart > 0) and (ainput.expend > 0) and 
+  sca.isexp:= (ainput.expstart > 0) and (ainput.expend > 0) and
                    (ainput.expend > ainput.expstart);
   if sca.isexp then begin
    b:= ln(ainput.expstart);
@@ -2762,7 +2762,7 @@ var
    end;
   end;
  end;
- 
+
  function isopenoutput(const aoutputs: outputconnarty): boolean;
  var
   int1: integer;
@@ -2777,7 +2777,7 @@ var
    end;
   end;
  end;
-  
+
 var
  int1,int2,int3,int4: integer;
  po1,po2: psiginfoty;
@@ -2863,7 +2863,7 @@ begin
      for int4:= 0 to high(fdestinations) do begin
       with po1^.destinations[int3+int4] do begin
        outputindex:= int2;
-       destinput:= fdestinations[int4];       
+       destinput:= fdestinations[int4];
       end;
      end;
 //     stackarray(pointerarty(fdestinations),pointerarty(po1^.destinations));
@@ -2876,7 +2876,7 @@ begin
    end;
   end;
  end;
-  
+
 {$ifdef mse_debugsignal}
   debugwriteln('*link items');
 {$endif}
@@ -2925,10 +2925,10 @@ begin
        end;
       end;
      end;
-    end;      
+    end;
    end;
   end;
- end; 
+ end;
 
 {$ifdef mse_debugsignal}
  debugwriteln('*check input/output');
@@ -2960,7 +2960,7 @@ begin
      inc(notconnectedcount);
     {$ifdef mse_debugsignal}
      debugnodeinfo(' not connected node ',po1);
-    {$endif}     
+    {$endif}
     end;
    end;
   end;
@@ -2987,7 +2987,7 @@ begin
            'Recursive event connection: '+self.name+ ', Node: '+
                       getnodenamepath(finfos[int1].intf) +
                   ', Dest: '+getnodenamepath(po2^.intf)+'.');
-        end; 
+        end;
         adduniqueitem(pointerarty(eventdestinations),po2);
         include(po2^.state,sis_eventinput);
         include(state,sis_eventchecked);
@@ -2998,7 +2998,7 @@ begin
    end;
   end;
  end;
-  
+
 {$ifdef mse_debugsignal}
  debugwriteln('*check recursive without inputs');
 {$endif}
@@ -3013,7 +3013,7 @@ begin
     touchnode(po1);
    end
    else begin
-    if (state * [sis_input,sis_output,sis_touched] = []) and 
+    if (state * [sis_input,sis_output,sis_touched] = []) and
                                       (sco_fulltick in options) then begin
      include(state,sis_fulltick);
      additem(pointerarty(finputnodes),po1,inputnodecount);
@@ -3026,7 +3026,7 @@ begin
    end;
   end;
  end;
- 
+
  setlength(finputnodes,inputnodecount);
 
 {$ifdef mse_debugsignal}
@@ -3044,14 +3044,14 @@ begin
  end;
 
 {$ifdef mse_debugsignal}
- debugwriteln('*processcalcorder');  
+ debugwriteln('*processcalcorder');
 {$endif}
  setlength(execorder,length(finfos));
  execindex:= 0;
 // resetchecked;
  for int1:= 0 to high(finputnodes) do begin
  {$ifdef mse_debugsignal}
-  debugnodeinfo('input ',finputnodes[int1]);  
+  debugnodeinfo('input ',finputnodes[int1]);
  {$endif}
   resetchecked;
   processcalcorder(finputnodes[int1]);
@@ -3100,7 +3100,7 @@ begin
                       //setup hasscale
     if (int3 = 0) and (desthigh < 0) or not firstdest.sca.hasscale then begin
      handlerinfo.dest:= @po1^.destinations[0].destinput.fv.value;
-    end;    
+    end;
     if int3 = 0 then begin                //setup again with correct dest
      updatedestinfo(po1^.destinations[0].destinput,handlerinfo.dest,firstdest);
     end
@@ -3108,7 +3108,7 @@ begin
      updatedestinfo(po1^.destinations[0].destinput,
                                          @po1^.outputs[int3].fvalue,firstdest);
     end;
-       
+
     setlength(dest,desthigh+1);
     for int2:= 0 to desthigh do begin
      int3:= po1^.destinations[int2+1].outputindex;
@@ -3141,7 +3141,7 @@ begin
    internalexecevent(po1);
   end;
   inc(po1);
- end; 
+ end;
  if assigned(fonafterupdatemodel) then begin
   application.lock;
   try
@@ -3193,14 +3193,14 @@ begin
        dest^:= max;
       end;
      end;
-    end;    
+    end;
    end;
   end;
   inc(po1);
  end;
 end;
 
-procedure tsigcontroller.step(acount: integer);    
+procedure tsigcontroller.step(acount: integer);
 var
  int1: integer;
  bo1: boolean;
@@ -3500,7 +3500,7 @@ end;
 
 procedure tsigcontroller.doautotick(const sender: tobject);
 begin
- step(fstepcount); 
+ step(fstepcount);
 end;
 
 procedure tsigcontroller.doidle(var again: boolean);
@@ -3579,8 +3579,8 @@ begin
  if int1 < 0 then begin
   int1:= int1 + ftablelength;
  end;
- foutputpo^:= (ftable[int1] + 
-                 (ftable[(int1+1) mod ftablelength] - ftable[int1]) * 
+ foutputpo^:= (ftable[int1] +
+                 (ftable[(int1+1) mod ftablelength] - ftable[int1]) *
                  ((do1-int1)/ftablelength)
                 ) * famplitudepo^.value;
  ftime:= frac(ftime+ffrequencypo^.value*ffrequfactpo^.value);
@@ -3770,7 +3770,7 @@ begin
       foutputpo^:= (offs + do1 * ramp)*famplitudepo^.value;
      end;
     end
-    else begin   
+    else begin
      with defaultnode do begin
       foutputpo^:= (offs + do1 * ramp)*famplitudepo^.value;
      end;
@@ -3803,7 +3803,7 @@ end;
 
 procedure tsigfuncttable.checktable;
  procedure calc(const index: integer; out node: functionnodety);
- var 
+ var
  den1: double;
  begin
   if index = high(ftable) then begin
@@ -3950,7 +3950,7 @@ constructor tsigenvelope.create(aowner: tcomponent);
    floopstart:= -1;
   end;
  end; //initinfo()
- 
+
 begin
 // feventdriven:= true;
  fsubsampling:= defaultenvelopesubsampling;
@@ -4018,7 +4018,7 @@ var
 // var
 //  do1: double;
  begin
-  with ainfo.fprog[progindex] do begin   
+  with ainfo.fprog[progindex] do begin
    isexp:= sero_exp in options;
    if isexp then begin
     if (fmin > 0) and (fmax > 0) then begin
@@ -4044,7 +4044,7 @@ var
    isexpbeforeset:= true;
   end;
  end; //setscale
- 
+
  procedure setend(const options: sigenveloperangeoptionsty;
                       var progindex: integer; var ti: integer; var sta: double);
  begin
@@ -4082,7 +4082,7 @@ var
   inc(progindex);
  end; //calc
 
- 
+
 var
  int1,int2,int3: integer;
  ti: integer;
@@ -4091,7 +4091,7 @@ var
  aftertrigvalues: complexarty;
  decaystart: double;
  opt1: sigenveloperangeoptionsty;
-  
+
 begin
  if fupdating > 0 then begin
   exit;
@@ -4125,7 +4125,7 @@ begin
      release_valuespo:= @finfos[0].frelease_values;
     end;
    end;
-   
+
    int1:= high(attack_valuespo^);
    allocuninitedarray(int1+high(decay_valuespo^)+2,sizeof(complexty),
                                                         aftertrigvalues);
@@ -4161,7 +4161,7 @@ begin
    freleaseindex:= -1;
    freleaseval:= 0;
    freleaseramp:= 0;
-   
+
    int1:= high(aftertrigvalues) + 2; //+ enditem
    if floopstart >= 0 then begin
     for int2:= 0 to high(decay_valuespo^) do begin
@@ -4176,7 +4176,7 @@ begin
     fattackval:= aftertrigvalues[0].im;
     freleasestart:= aftertrigvalues[high(aftertrigvalues)].re;
    end;
-  
+
    if high(release_valuespo^) >= 0 then begin
     int1:= int1 + high(release_valuespo^) + 2; //+enditem
     freleaseval:= release_valuespo^[0].im;
@@ -4213,7 +4213,7 @@ begin
     end;
     setend(opt1,int1,ti,sta);
    end;
-   if high(release_valuespo^) >= 0 then begin  
+   if high(release_valuespo^) >= 0 then begin
     ti:= 0;
     freleaseindex:= int1; //prog index
     for int2:= 0 to high(release_valuespo^) do begin
@@ -4244,7 +4244,7 @@ begin
 end;
 }
 procedure tsigenvelope.sighandler(const ainfo: psighandlerinfoty);
- 
+
  procedure startattack(var ainfo: envelopeinfoty);
  begin
   with ainfo do begin
@@ -4292,7 +4292,7 @@ procedure tsigenvelope.sighandler(const ainfo: psighandlerinfoty);
    end;
   end;
  end; //startrelease()
- 
+
  procedure calc(var ainfo: envelopeinfoty);
  begin
   with ainfo do begin
@@ -4325,9 +4325,9 @@ procedure tsigenvelope.sighandler(const ainfo: psighandlerinfoty);
    end;
   end;
  end; //calc()
- 
+
 var
- bo1: boolean; 
+ bo1: boolean;
  int1: integer;
 begin
  if fattackpending or (ftrigger.fv.value = 1) then begin
@@ -4359,11 +4359,11 @@ begin
       if int1 < fmaxeventdelay then begin
        fmaxeventdelay:= int1;
       end;
-      bo1:= (feventtime >= fmaxeventdelay) or 
+      bo1:= (feventtime >= fmaxeventdelay) or
                       (abs(fcurrval-fcurrvalbefore) > feventthreshold);
      end;
     end;
-    bo1:= bo1 or (feventtime >= fmaxeventdelay) or 
+    bo1:= bo1 or (feventtime >= fmaxeventdelay) or
                     (abs(fcurrval-fcurrvalbefore) > feventthreshold);
     if bo1 then begin
      fcurrvalbefore:= fcurrval;
@@ -4374,7 +4374,7 @@ begin
     with finfos[1] do begin
      if bo1 then begin
       fcurrvalbefore:= fcurrval;
-      foutputpo^:= finfos[1].fdest * fmixpo^.value + 
+      foutputpo^:= finfos[1].fdest * fmixpo^.value +
                      finfos[0].fdest * (1-fmixpo^.value);
      end;
     end;
@@ -4397,7 +4397,7 @@ begin
    if fhasmix then begin
     calc(finfos[1]);
     ffinished:= ffinished and (finfos[1].findex = finfos[1].findexhigh);
-    foutputpo^:= finfos[1].fdest * fmixpo^.value + 
+    foutputpo^:= finfos[1].fdest * fmixpo^.value +
                       finfos[0].fdest * (1-fmixpo^.value);
    end
    else begin
@@ -4613,7 +4613,7 @@ procedure tsigenvelope.dosync;
   release_values[aindex]:= master.release_values[aindex];
   loopstart[aindex]:= master.loopstart[aindex];
  end; //setval()
- 
+
 begin
  beginupdate;
  setval(0);
@@ -4667,7 +4667,7 @@ end;
 function tsigenvelope.getsigoptions: sigclientoptionsty;
 begin
  result:= inherited getsigoptions;
- if feventdriven then begin 
+ if feventdriven then begin
   result:= result + [sco_fulltick];
  end;
 end;
@@ -4859,7 +4859,7 @@ end;
 
 procedure tsigsampler.checkautostart;
 begin
- if (sso_autorun in foptions) and (frefreshus < 0) and 
+ if (sso_autorun in foptions) and (frefreshus < 0) and
               (componentstate * [csloading,csdesigning] = []) then begin
   start;
  end;

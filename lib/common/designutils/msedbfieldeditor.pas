@@ -1,5 +1,5 @@
 { MSEide Copyright (c) 1999-2011 by Martin Schreiber
-   
+
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation; either version 2 of the License, or
@@ -88,13 +88,13 @@ uses
   {$warn 6058 off}
  {$endif}
 {$endif}
- 
+
 type
  tpersistentfields1 = class(tpersistentfields);
  stringconststy = (
   str_dataset            //0 Dataset
  );
- 
+
 function editpersistentfields(const instance: tpersistentfields): boolean;
 var
  fo: tmsedbfieldeditorfo;
@@ -251,7 +251,7 @@ procedure tmsedbfieldeditorfo.defscellevent(const sender: TObject;
          var info: celleventinfoty);
 begin
  with info do begin
-  if (eventkind = cek_select) and selected and 
+  if (eventkind = cek_select) and selected and
           (fielddefli.rowfontstate[cell.row] <> -1) then begin
    accept:= false;
   end;
@@ -277,7 +277,7 @@ begin
    break;
   end;
  end;
-end; 
+end;
 
 procedure tmsedbfieldeditorfo.checkfielddefs;
 var
@@ -327,7 +327,7 @@ begin
    fields.appendrow(true);
    try
     fields.row:= fields.rowhigh;
-    fieldpo[fields.rowhigh]:= 
+    fieldpo[fields.rowhigh]:=
                ffields.dataset.fielddefs[ar1[int1]].createfield(nil);
     tfield(fieldpo[fields.rowhigh]).dataset:= nil;
     fieldname[fields.rowhigh]:= fielddefli[0][ar1[int1]];
@@ -343,7 +343,7 @@ begin
    fielddefli.datacols.clearselection;
   end;
   setlength(ar2,int2);
-  fields.datacols.selectedrows:= ar2; 
+  fields.datacols.selectedrows:= ar2;
   fields.endupdate;
  // fields.sort;
   checkfielddefs;
@@ -409,7 +409,7 @@ end;
 
 procedure tmsedbfieldeditorfo.fieldselectioncha(const sender: TObject);
 begin
- fieldtodef.enabled:= fields.datacols.hasselection and 
+ fieldtodef.enabled:= fields.datacols.hasselection and
                             (length(fields.datacols.selectedrows) > 0);
 end;
 

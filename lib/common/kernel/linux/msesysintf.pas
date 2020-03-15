@@ -30,7 +30,7 @@ uses
  msesys,msesystypes,msesetlocale,{$ifdef FPC}cthreads,cwstring,{$endif}msetypes,
  mselibc,msectypes,
  msestrings,msestream;
- 
+
 var
  thread1: threadty;
  filenameutfoptions: utfoptionsty;
@@ -70,7 +70,7 @@ uses
   {$warn 6058 off}
  {$endif}
 {$endif}
- 
+
 function sigactionex(SigNum: Integer; var Action: TSigActionex;
                               OldAction: PSigAction): Integer;
 begin
@@ -111,7 +111,7 @@ const
                                 s_ifchr,s_ifreg,s_iflnk,s_ifsock,s_ififo);
 // timeoffset = 0.0;
 // o_cloexec = $080000;
- 
+
 type
  dirstreamlinuxdty = record
   dir: pdirectorystream;
@@ -119,7 +119,7 @@ type
   needsstat: boolean;
   needstype: boolean;
  end;
- {$if sizeof(dirstreamlinuxdty) > sizeof(dirstreampty)} 
+ {$if sizeof(dirstreamlinuxdty) > sizeof(dirstreampty)}
   {$error 'buffer overflow'}
  {$ifend}
  dirstreamlinuxty = record
@@ -223,8 +223,8 @@ type
  vmspace = record
  end;
  pvmspace = ^vmspace;
- 
- kinfo_proc = record 
+
+ kinfo_proc = record
   ki_structsize: cint;      //* size of this structure */
   ki_layout: cint;          //* reserved: layout identifier */
   ki_args: ppargs;  //* address of command arguments */
@@ -358,10 +358,10 @@ const
  KERN_PROC_UMASK = 39; //* process umask */
  KERN_PROC_OSREL = 40; //* osreldate for process binary */
  KERN_PROC_SIGTRAMP = 41; //* signal trampoline location */
- 
+
 var
  haslibprocstat: boolean;
- procstat_open_sysctl: function(): pprocstat; cdecl; 
+ procstat_open_sysctl: function(): pprocstat; cdecl;
  procstat_close: procedure(procstat: pprocstat); cdecl;
  procstat_getprocs: function(procstat: pprocstat; what: cint; arg: cint;
                                            count: pcuint): pkinfo_proc; cdecl;
@@ -422,7 +422,7 @@ begin
     end;
    end;
   end;
- end; 
+ end;
  filelist.free;
  setlength(result,int2);
 end;
@@ -560,10 +560,10 @@ var
 begin
  gettimeofday(@ti,nil);
 {$ifdef FPC}
- result:= ti.tv_sec / (double(24.0)*60.0*60.0) + 
+ result:= ti.tv_sec / (double(24.0)*60.0*60.0) +
           ti.tv_usec / (double(24.0)*60.0*60.0*1e6) - unidatetimeoffset;
 {$else}
- result:= ti.tv_sec / (24.0*60.0*60.0) + 
+ result:= ti.tv_sec / (24.0*60.0*60.0) +
           ti.tv_usec / (24.0*60.0*60.0*1e6) - unidatetimeoffset;
 {$endif}
 end;
@@ -574,10 +574,10 @@ var
 begin
  gettimeofday(@ti,nil);
 {$ifdef FPC}
- result:= ti.tv_sec / (double(24.0)*60.0*60.0) + 
+ result:= ti.tv_sec / (double(24.0)*60.0*60.0) +
           ti.tv_usec / (double(24.0)*60.0*60.0*1e6) - unidatetimeoffset;
 {$else}
- result:= ti.tv_sec / (24.0*60.0*60.0) + 
+ result:= ti.tv_sec / (24.0*60.0*60.0) +
           ti.tv_usec / (24.0*60.0*60.0*1e6) - unidatetimeoffset;
 {$endif}
  if ti.tv_sec = lastlocaltime then begin
@@ -657,7 +657,7 @@ procedure setcloexec(const fd: integer);
 var
  flags: integer;
 begin
- flags:= fcntl(fd,f_getfd); 
+ flags:= fcntl(fd,f_getfd);
  if flags <> -1 then begin
   flags:= flags or fd_cloexec;
   fcntl(fd,f_setfd,[flags])
@@ -672,15 +672,15 @@ var
  str2: msestring;
  stat1: _stat;
 const
- defaultopenflags = o_cloexec; 
+ defaultopenflags = o_cloexec;
 begin
  str2:= path;
  sys_tosysfilepath(str2);
  str1:= tosys(str2);
- handle:= Integer(mselibc.open(PChar(str1), openmodes[openmode] or 
+ handle:= Integer(mselibc.open(PChar(str1), openmodes[openmode] or
                             defaultopenflags,[getfilerights(rights)]));
  if handle >= 0 then begin
-  if fstat(handle,@stat1) = 0 then begin  
+  if fstat(handle,@stat1) = 0 then begin
    if s_isdir(stat1.st_mode) then begin
     mselibc.__close(handle);
     handle:= -1;
@@ -689,7 +689,7 @@ begin
    else begin
     setcloexec(handle);
     result:= sye_ok;
-   end;    
+   end;
   end
   else begin
    mselibc.__close(handle);
@@ -797,7 +797,7 @@ var
  time1: timeval;
  time2: timespec;
 begin
- if ({$ifndef FPC}@{$endif}clock_gettime = nil) or 
+ if ({$ifndef FPC}@{$endif}clock_gettime = nil) or
                   (clock_gettime(clock_monotonic,@time2) <> 0) then begin
   gettimeofday(@time1,ptimezone(nil));
   result:= time1.tv_sec * 1000000 + time1.tv_usec;
@@ -1072,13 +1072,13 @@ end;
 
 function filetimetodatetime(const value: timespec): tdatetime;
 begin
- result:= value.tv_sec / (double(24.0)*60.0*60.0) + 
+ result:= value.tv_sec / (double(24.0)*60.0*60.0) +
           value.tv_nsec / (double(24.0)*60.0*60.0*1e9) - unidatetimeoffset;
 end;
 
 function filetimetodatetime(const sec,nsec: culong): tdatetime;
 begin
- result:= sec / (double(24.0)*60.0*60.0) + 
+ result:= sec / (double(24.0)*60.0*60.0) +
           nsec / (double(24.0)*60.0*60.0*1e9) - unidatetimeoffset;
 end;
 
@@ -1138,7 +1138,7 @@ begin
     else begin
      break; //error
     end;
-   end; 
+   end;
   end;
  end
  else begin
@@ -1185,7 +1185,7 @@ end;
 const
  nameattributes = [fa_hidden];
  typeattributes = nameattributes + [fa_dir];
- 
+
 function sys_opendirstream(var stream: dirstreamty): syserrorty;
 var
  str1: string;
@@ -1206,10 +1206,10 @@ begin
     str1:= str1 + '/';
    end;
    string(d.dirpath):= str1; //for stat
-   d.needsstat:= (infolevel >= fil_ext1) or 
+   d.needsstat:= (infolevel >= fil_ext1) or
               not (fa_all in include) and (include-typeattributes <> []) or
                                                  (exclude-typeattributes <> []);
-   d.needstype:= not d.needsstat and 
+   d.needstype:= not d.needsstat and
        ((infolevel >= fil_type) or
              not (fa_all in include) and (include-nameattributes <> []) or
                                                  (exclude-nameattributes <> []));
@@ -1252,7 +1252,7 @@ begin
       str1:= dirent.d_name;
       name:= fromsys(str1);
       if checkfilename(info.name,stream) then begin
-       if d.needsstat or d.needstype and 
+       if d.needsstat or d.needstype and
        ((dirent.d_type = dt_unknown) or (dirent.d_type = dt_lnk)) then begin
         error:= stat64(pchar(string(d.dirpath)+str1),@statbuffer) <> 0;
        end
@@ -1350,7 +1350,7 @@ begin
  end;
 end;
 
-function sys_access(const path: filenamety; 
+function sys_access(const path: filenamety;
                                const accessmodes: accessmodesty): syserrorty;
 var
  str1: filenamety;

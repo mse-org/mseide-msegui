@@ -26,7 +26,7 @@ const
  valuenodetypename = 't';
  valuenodeindexname = 'i';
  valuenodevaluename = 'v';
-  
+
 type
  irecordfield = interface(inullinterface) [miid_irecordfield]
   function getfieldtext(const afieldindex: integer): msestring;
@@ -41,7 +41,7 @@ type
   procedure setvalue(const atype: listdatatypety;
                const aindex: int32; const getvaluemethod: getvaluemethodty);
  end;
-  
+
  trecordfielditem = class(ttreelistitem)
   private
    ffieldindex: integer;
@@ -96,7 +96,7 @@ type
   public
  end;
 
- trecordtreelistedititem = class(ttreelistedititem,irecordvaluefield)   
+ trecordtreelistedititem = class(ttreelistedititem,irecordvaluefield)
                                           //does not statsave subitems
   protected
     //irecordvaluefield
@@ -112,7 +112,7 @@ type
               const aparent: ttreelistitem = nil); override;
  end;
 
-{ 
+{
  trecordtreelistedititem = class(tlistedititem,irecordvaluefield)
   private
   protected
@@ -153,7 +153,7 @@ type
                              //-1 -> any
  end;
  recordvaluelistedititemty = class of trecordvaluelistedititem;
-  
+
  tintegervaluelistedititem = class(trecordvaluelistedititem)
   private
    fvalue: int32;
@@ -169,7 +169,7 @@ type
    procedure dostatwrite(const writer: tstatwriter); override;
    property value: int32 read fvalue write setvalue;
  end;
-  
+
  tbooleanvaluelistedititem = class(tintegervaluelistedititem)
   private
    procedure setvalue(const avalue: boolean); reintroduce;
@@ -243,7 +243,7 @@ const
 //dl_complex,              dl_rowstate,             dl_custom
   trecordvaluelistedititem,trecordvaluelistedititem,trecordvaluelistedititem
   );
- 
+
 procedure initvalueinfo(out ainfo: recvaluety);
 procedure initvalueinfo(const aindex: int32; var avalue: int32;
                                                   out ainfo: recvaluety);
@@ -261,10 +261,10 @@ function valuefield(var avalue: real): fieldinfoty;
 function valuefield(var avalue: realty): fieldinfoty;
 function valuefield(var avalue: tdatetime): fieldinfoty;
 function valuefield(var avalue: msestring): fieldinfoty;
-function buildvalueinfos(const afields: array of fieldinfoty; 
+function buildvalueinfos(const afields: array of fieldinfoty;
                             const aindex: int32): recvaluearty;
                                  //-1 -> all
- 
+
 implementation
 uses
  msearrayutils;
@@ -377,7 +377,7 @@ function buildvalueinfos(
  end;//setup
 
 var
- i1: int32;                           
+ i1: int32;
 begin
  if aindex < 0 then begin
   setlength(result,length(afields));

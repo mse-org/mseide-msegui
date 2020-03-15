@@ -1,5 +1,5 @@
 { MSEide Copyright (c) 1999-2016 by Martin Schreiber
-   
+
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation; either version 2 of the License, or
@@ -34,7 +34,7 @@ uses
 
 const
  procheaderbreakchars = '(;';
-type  
+type
  unitinfoaty = array[0..0] of tunitinfo;
  punitinfoaty = ^unitinfoaty;
 // unitinfopoarty = array of punitinfoty;
@@ -190,7 +190,7 @@ type
 
    function gettext(const infopo: punitinfoty;
                           const startpos,endpos: sourceposty): msestring;
-   procedure replacetext(const infopo: punitinfoty; 
+   procedure replacetext(const infopo: punitinfoty;
               const startpos,endpos: sourceposty; const newtext: msestring);
 
    function getmatchingmethods(const amodule: tmsecomponent;
@@ -213,7 +213,7 @@ type
                    const typename: string): pdefinfoty; overload;
    function getitemtext(const aitem: sourceitemty): string;
    function getdefinfotext(const adef: pdefinfoty): string;
-   property maxlinelength: integer read fmaxlinelength 
+   property maxlinelength: integer read fmaxlinelength
                                     write fmaxlinelength default 80;
  end;
 
@@ -238,7 +238,7 @@ function listsourceitems(const filename: filenamety;
                      const maxcount: integer = 100): boolean;
    //true if found
 function completeclass(const filename: filenamety; var pos: sourceposty): boolean;
-   //true if source changed 
+   //true if source changed
 function getimplementationtext(const amodule: tmsecomponent; out aunit: punitinfoty;
                 out start,stop: sourceposty; out adest: msestring): boolean;
                 //false if not found
@@ -302,7 +302,7 @@ begin
   result:= ar1[0];
   linelength:= length(result) + startoffset;
   for int1:= 1 to high(ar1) do begin
-   if (ar1[int1] <> '') and 
+   if (ar1[int1] <> '') and
              (length(ar1[int1]) + linelength > maxlength) then begin
     result:= result + lineend + charstring(msechar(' '),indent) + ar1[int1];
     linelength:= indent + length(ar1[int1]);
@@ -364,7 +364,7 @@ begin
  end;
 end;
 
-function getimplementationtext(const amodule: tmsecomponent; 
+function getimplementationtext(const amodule: tmsecomponent;
               out aunit: punitinfoty;
               out start,stop: sourceposty; out adest: msestring): boolean;
                 //false if not found
@@ -847,7 +847,7 @@ function tsourceupdater.getidentpath(const infopo: punitinfoty;
      for int1:= 0 to int2 do begin
       infile.position:= apo^.pos.offset;
       int3:= apo^.identlen;
-      if not((int1 = int2) and (apos.pos.col <= apo^.pos.pos.col) or 
+      if not((int1 = int2) and (apos.pos.col <= apo^.pos.pos.col) or
                               (apos.pos.row < apo^.pos.pos.row)) then begin
        setlength(result[int1],int3);
        infile.ReadBuffer(result[int1][1],int3);
@@ -940,7 +940,7 @@ begin
  scope:= infopo^.deflist;
  if scope.finddef(ar1,scopes,defs,true,dsl_normal,syk_nopars) then begin
   result:= defs[0];
- end; 
+ end;
 end;
 
 function tsourceupdater.listprocheaders(const infopo: punitinfoty;
@@ -1117,7 +1117,7 @@ begin
 end;
 
 function tsourceupdater.switchheaderimplementation(const infopo: punitinfoty;
-                        var headerstart,headerstop: sourceposty; 
+                        var headerstart,headerstop: sourceposty;
                                       out isimplementation: boolean): boolean;
 var
  po1,po2: pdefinfoty;
@@ -1151,7 +1151,7 @@ begin
     end;
    end
    else begin
-    while (scope <> nil) and 
+    while (scope <> nil) and
               not (scope.kind in [syk_root,syk_classdef]) do begin
      po1:= scope.definfopo;
      scope:= scope.parentscope;
@@ -1189,7 +1189,7 @@ type
   setter: string;
  end;
  propinfoarty = array of propinfoty;
- 
+
 function tsourceupdater.composeproceduretext(const name: string;
              const info: methodparaminfoty; const withdefault: boolean): string;
 
@@ -1343,7 +1343,7 @@ var
  parser: tpascalparser;
  po1: pchar;
  ar1: propinfoarty;
- 
+
  procedure insertprivate(const isfield: boolean; const atext: string);
  var
   int1: integer;
@@ -1364,7 +1364,7 @@ var
    privateend.pos.col:= 0;
   end;
  end;
- 
+
  procedure checkfield(const name: string; const propinfo: propinfoty);
  var
   scope1: tdeflist;
@@ -1375,12 +1375,12 @@ var
  end;
 
  procedure checkproc(const issetter: boolean; const propinfo: propinfoty);
- 
+
   function breakline(const atext: msestring): msestring;
   begin
    result:= limitlinelength(atext,fmaxlinelength,procheaderbreakchars,18);
   end;
-  
+
  var
   scope1: tdeflist;
  begin                     //checkproc
@@ -1431,15 +1431,15 @@ var
    inc(po1);
   end;
  end; //checklineinsert
- 
+
 var
- po2: pdefinfoty;   
+ po2: pdefinfoty;
  atstart: boolean;
  classindex1: integer;
  str2: string;
  i2: int32;
  insertpos: sourceposty;
- 
+
 begin                        //completeclass
  result:= false;
  with infopo^ do begin
@@ -1460,7 +1460,7 @@ begin                        //completeclass
     for int1:= 0 to high(scope.infos) do begin
      with scope.infos[int1] do begin
       if (kind = syk_vardef) and (vf_property in varflags) then begin
-       str2:= getdefinfotext(@scope.infos[int1]);     
+       str2:= getdefinfotext(@scope.infos[int1]);
        if str2 <> '' then begin
         parser:= tpascalparser.create(designer.designfiles,str2);
         try
@@ -1468,7 +1468,7 @@ begin                        //completeclass
           setlength(ar1,high(ar1)+2);
           with ar1[high(ar1)] do begin
            skipwhitespace;
-           nexttoken; //skip name 
+           nexttoken; //skip name
            if checkoperator('[') then begin
             po1:= token^.value.po;
             if findoperator(']') then begin
@@ -1541,15 +1541,15 @@ begin                        //completeclass
         end;
        end;
       end;
-     end;    
+     end;
     end;
     if result then begin
      updateunit(infopo,false);
     end;
    end;
-   cpo:= infopo^.p.classinfolist[classindex1]; 
+   cpo:= infopo^.p.classinfolist[classindex1];
                                      //cpo is invalid after updateunit
-   with cpo^ do begin                     
+   with cpo^ do begin
     if isemptysourcepos(procimpstart) then begin
      procimpstart:= infopo^.p.implementationend;
      replacetext(infopo,procimpstart,procimpstart,
@@ -1768,7 +1768,7 @@ begin
  if classproc then begin
   result:= 'class ';
  end;
- case info.kind of 
+ case info.kind of
   mk_function: begin
    result:= result + 'function ';
   end;
@@ -1963,7 +1963,7 @@ begin
  str1:= msestring(uppercase(aitem.Name));
  pos1:= emptysourcepos;
  if po2 <> nil then begin
-  if (csinline in aitem.componentstate) and 
+  if (csinline in aitem.componentstate) and
            designer.checksubmodule(aitem,po3) then begin
    classna:= po3^.moduleclassname;
    po4:= updatemodule(po3^.instance);
@@ -1984,7 +1984,7 @@ begin
   end;
   with po1^.p.interfaceuses do begin
    if (unitna <> '') then begin
-    if (startpos.filenum = endpos.filenum) and 
+    if (startpos.filenum = endpos.filenum) and
            not isemptysourcepos(startpos) then begin
      str2:= gettext(po1,startpos,endpos);
      ar2:= unitgroups.getneededunits(unitna);
@@ -2043,13 +2043,13 @@ begin
 end;
 
 
-procedure tsourceupdater.showobjecttext(const adesigner: idesigner; 
+procedure tsourceupdater.showobjecttext(const adesigner: idesigner;
               const afilename: filenamety; const backupcreated: boolean);
 begin
  //dummy
 end;
 
-procedure tsourceupdater.closeobjecttext(const adesigner: idesigner; 
+procedure tsourceupdater.closeobjecttext(const adesigner: idesigner;
                            const afilename: filenamety; var cancel: boolean);
 begin
  //dummy
@@ -2096,7 +2096,7 @@ begin
  end;
 end;
 
-procedure tsourceupdater.updatepascalunit(const infopo: punitinfoty; 
+procedure tsourceupdater.updatepascalunit(const infopo: punitinfoty;
                                              const interfaceonly: boolean);
 var
  scanner: tpascalscanner;
@@ -2159,7 +2159,7 @@ begin
 // end;
 end;
 
-procedure tsourceupdater.updatecunit(const infopo: punitinfoty; 
+procedure tsourceupdater.updatecunit(const infopo: punitinfoty;
                                              const interfaceonly: boolean);
 var
  scanner: tcscanner;
@@ -2210,7 +2210,7 @@ begin
 // end;
 end;
 
-procedure tsourceupdater.updateunit(const infopo: punitinfoty; 
+procedure tsourceupdater.updateunit(const infopo: punitinfoty;
                                              const interfaceonly: boolean);
 begin
  if not infopo^.interfacecompiled or

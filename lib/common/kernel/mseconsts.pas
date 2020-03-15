@@ -13,7 +13,7 @@ interface
 
 uses
  msestockobjects,mseglob,msestrings,mseapplication,msetypes;
- 
+
 type
  stockcaptionaty = array[stockcaptionty] of msestring;
  pstockcaptionaty = ^stockcaptionaty;
@@ -21,10 +21,10 @@ type
  pdefaultmodalresulttextty = ^defaultmodalresulttextty;
  defaultgeneratortextty = array[textgeneratorty] of textgeneratorfuncty;
  pdefaultgeneratortextty = ^defaultgeneratortextty;
- 
+
  langty = (la_none,la_en,la_de,la_ru,la_es,la_uzcyr,la_id,la_zh,
            la_fr);
- 
+
 const
  langnames: array[langty] of string = (
             '','en','de','ru','es','uz_cyr','id','zh',
@@ -50,14 +50,14 @@ const
                  //called by setlangconsts automatically
 type
  langchangeprocty = procedure(const langname: ansistring);
-  
- procedure registerlangchangeproc(const aproc: langchangeprocty); 
- procedure unregisterlangchangeproc(const aproc: langchangeprocty); 
- 
+
+ procedure registerlangchangeproc(const aproc: langchangeprocty);
+ procedure unregisterlangchangeproc(const aproc: langchangeprocty);
+
 implementation
 uses
  sysutils,msesysintf,msearrayutils,mseformatstr;
- 
+
 type
  langinfoty = record
   name: string;
@@ -70,7 +70,7 @@ type
   name: string;
   caption: msestringarty;
  end;
- 
+
 var
  langs: array of langinfoty;
  lang: langinfoty;
@@ -78,7 +78,7 @@ var
  userlangs: array of userlanginfoty;
  userlang: userlanginfoty;
  langchangeprocs: array of langchangeprocty;
- 
+
 const
  en_modalresulttext: defaultmodalresulttextty =
  ('',          //mr_none
@@ -132,7 +132,7 @@ const
   'Error',              //sc_Error
   'Min',                //sc_Min
   'Max',                //sc_Max
-  'Range error',        //sc_Range_error  
+  'Range error',        //sc_Range_error
 
   '&Undo',              //sc_Undohk       ///         ///
   '&Redo',              //sc_Redohk        //          //
@@ -144,14 +144,14 @@ const
   '&Append Row',        //sc_append_rowhk  // hotkeys  //
   '&Delete Row',        //sc_delete_rowhk ///         ///
 
-  '&Dir',               //sc_Dirhk               /// 
+  '&Dir',               //sc_Dirhk               ///
   '&Home',              //sc_homehk               //
   '&Up',                //sc_Uphk                 //
   '&New dir',           //sc_New_dirhk            // hotkeys
   '&Name',              //sc_Namehk               //
   '&Show hidden files', //sc_Show_hidden_fileshk  //
-  '&Filter',            //sc_Filterhk            /// 
-  'Save',               //sc_save 
+  '&Filter',            //sc_Filterhk            ///
+  'Save',               //sc_save
   'Open',               //sc_open
   'Name',                //sc_name
   'Create new directory',//sc_create_new_directory
@@ -174,7 +174,7 @@ const
   'Graphic format error', //sc_graphic_format_error
   'MS Bitmap',          //sc_MS_Bitmap
   'MS Icon',            //sc_MS_Icon
-  'JPEG Image',         //sc_JPEG_Image 
+  'JPEG Image',         //sc_JPEG_Image
   'PNG Image',          //sc_PNG_Image
   'XPM Image',          //sc_XPM_Image
   'PNM Image',          //sc_PNM_Image
@@ -214,7 +214,7 @@ const
   'Redo',               //sc_redo
   'Cut',                //sc_cut
   'Select all',         //sc_select_all
-  
+
   'Filter off',         //sc_filter_off
   'Portrait',           //sc_portrait print orientation
   'Landscape',          //sc_landscape print orientation
@@ -313,8 +313,8 @@ procedure registerlangconsts(const name: string;
             const modalresulttextpo: pdefaultmodalresulttextty;
             const modalresulttextnoshortcutpo: pdefaultmodalresulttextty;
             const textgeneratorpo: pdefaultgeneratortextty);
-            
- 
+
+
 var
  int1: integer;
 begin
@@ -330,7 +330,7 @@ begin
                                modalresulttextnoshortcutpo,textgeneratorpo);
 end;
 
-procedure registeruserlangconsts(name: string; 
+procedure registeruserlangconsts(name: string;
                                       const caption: array of msestring);
  procedure setitem(var item: userlanginfoty);
  var
@@ -342,7 +342,7 @@ procedure registeruserlangconsts(name: string;
    item.caption[int1]:= caption[int1];
   end;
  end;
- 
+
 var
  int1: integer;
 begin
@@ -395,7 +395,7 @@ begin
    str1:= langnames[la_en];
   end;
  end
- else begin  
+ else begin
   str1:= lowercase(name);
  end;
  setuserlangconsts(str1);
@@ -417,7 +417,7 @@ begin
     with lang do begin
      name:= langnames[la_en];
      stockcaption:= @en_stockcaption;
-     modalresulttext:= @en_modalresulttext;  
+     modalresulttext:= @en_modalresulttext;
      modalresulttextnoshortcut:= @en_modalresulttextnoshortcut;
      textgenerator:= @en_textgenerator;
     end;
@@ -439,7 +439,7 @@ begin
   setlangconsts('');
  end;
 end;
-  
+
 function uc(const index: integer): msestring;
 begin
  if userlang.name = '' then begin
@@ -475,7 +475,7 @@ begin
  result:= lang.stockcaption^[index];
 end;
 
-procedure registerlangchangeproc(const aproc: langchangeprocty); 
+procedure registerlangchangeproc(const aproc: langchangeprocty);
 begin
  additem(pointerarty(langchangeprocs),{$ifndef FPC}@{$endif}aproc);
 end;

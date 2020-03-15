@@ -26,7 +26,7 @@ type
  strinconsts = (
   codetemplate   //0 Code Template "
  );
- 
+
  tmseparamentryfo = class(tmseform)
    grid: twidgetgrid;
    macroname: tstringedit;

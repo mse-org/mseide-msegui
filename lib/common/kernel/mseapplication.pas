@@ -35,7 +35,7 @@ uses
  classes,mclasses,mseclasses,mseevent,mseglob,sysutils,msetypes,mselist,
      msethread,msesystypes,msesys,{msethreadcomp,}msestrings,mseinterfaces
      {$ifdef mse_with_ifi},mseifiglob{$endif};
- 
+
 type
  activatoroptionty = (avo_activateonloaded,avo_activatedelayed,
                 avo_deactivateonterminated,avo_deactivatebottomup,
@@ -47,7 +47,7 @@ type
 
 const
  defaultactivatoroptions = [avo_handleexceptions,avo_quietexceptions];
- 
+
 type
  iactivator = interface(inullinterface)
  end;
@@ -56,8 +56,8 @@ type
  end;
 
  tactivator = class;
- 
- activateerroreventty = procedure(const sender: tactivator; 
+
+ activateerroreventty = procedure(const sender: tactivator;
                  const aclient: tobject; const aexception: exception;
                  var handled: boolean) of object;
 
@@ -94,7 +94,7 @@ type
 
  applicationeventeventty = procedure(const sender: tactcomponent;
                     var aevent: tmseevent; var handled: boolean) of object;
- 
+
  activatoraborteventty = procedure(const sender: tactivator;
                           var aaction: activatorabortactionty) of object;
  tactivator = class(tactcomponent)
@@ -132,11 +132,11 @@ type
                                    valuepo: pointer = nil); override;
    procedure objevent(const sender: iobjectlink;
                          const event: objecteventty); override;
-   procedure doterminated(const sender: tobject);   
+   procedure doterminated(const sender: tobject);
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
-   class procedure addclient(const aactivator: tactivator; 
+   class procedure addclient(const aactivator: tactivator;
               const aclient: iobjectlink; var dest: tactivator);
    procedure activaterecursive; //increments activecount
    procedure deactivaterecursive; //decrements activecount
@@ -144,33 +144,33 @@ type
    procedure deactivateclients;
    property activated: boolean read factivated;
    property activecount: integer read factivecount;
-   property clientinstances[const index: integer]: tobject 
+   property clientinstances[const index: integer]: tobject
                                             read getclientinstances;
    property clientinterfaces[const index: integer]: iobjectlink
                                             read getclientinterfaces;
    property clientcount: integer read getclients;
   published
-   property clients: integer read getclients write setclients; 
+   property clients: integer read getclients write setclients;
                                   //hook for object inspector
-   property options: activatoroptionsty read foptions write setoptions 
+   property options: activatoroptionsty read foptions write setoptions
                     default defaultactivatoroptions;
    property active: boolean read factive write setactive default false;
-   property abortaction: activatorabortactionty read fabortaction 
+   property abortaction: activatorabortactionty read fabortaction
                            write fabortaction default aaa_abortexception;
    property onbeforeactivate: notifyeventty read fonbeforeactivate
                            write fonbeforeactivate;
-   property onactivateerror: activateerroreventty read fonactivateerror 
-                                   write fonactivateerror;                              
+   property onactivateerror: activateerroreventty read fonactivateerror
+                                   write fonactivateerror;
    property onabort: activatoraborteventty read fonabort write fonabort;
-   property onafteractivate: notifyeventty read fonafteractivate 
+   property onafteractivate: notifyeventty read fonafteractivate
                            write fonafteractivate;
-   property onbeforedeactivate: notifyeventty read fonbeforedeactivate 
+   property onbeforedeactivate: notifyeventty read fonbeforedeactivate
                             write fonbeforedeactivate;
-   property onafterdeactivate: notifyeventty read fonafterdeactivate 
+   property onafterdeactivate: notifyeventty read fonafterdeactivate
                             write fonafterdeactivate;
    property activator;
  end;
- 
+
  tactivatorcontroller = class(tlinkedpersistent)
   private
    factive: boolean;
@@ -188,23 +188,23 @@ type
    constructor create(const aowner: tcomponent; const aintf: iactivatorclient); reintroduce;
    function setactive (const value : boolean): boolean;
    procedure loaded;
-  published 
+  published
    property activator: tactivator read factivator write setactivator;
  end;
- 
+
  exceptioneventty = procedure (const sender: tobject; const e: exception;
                                const leadingtext: msestring; var handled: boolean) of object;
-                               
+
  terminatequeryeventty = procedure (var terminate: boolean) of object;
  idleeventty = procedure (var again: boolean) of object;
- 
+
  tonterminatequerylist = class(tmethodlist)
   protected
   public
    function doterminatequery: boolean;
            //true if accepted
  end;
- 
+
  tonidlelist = class(tmethodlist)
   protected
   public
@@ -212,7 +212,7 @@ type
   public
  end;
 
- applicationstatety = 
+ applicationstatety =
         (aps_inited,aps_running,aps_terminated,aps_mousecaptured,
          aps_invalidated,aps_zordervalid,aps_needsupdatewindowstack,
          aps_focused,aps_activewindowchecked,aps_restorelocktransientfor,
@@ -223,7 +223,7 @@ type
          aps_waitstarted,aps_waitcanceled,aps_waitterminated,aps_waitok,
          aps_waitidlelock,aps_eventflushing,aps_processmessages);
  applicationstatesty = set of applicationstatety;
- 
+
  synchronizeprocty = procedure(const adata: pointer);
  synchronizeeventty = procedure(const adata: pointer) of object;
 
@@ -242,7 +242,7 @@ type
 
  applicationoptionty = (apo_terminateonexception,apo_noautodestroymodules);
  applicationoptionsty = set of applicationoptionty;
- 
+
  tcustomapplication = class(tmsecomponent)
   private
    fapplicationname: filenamety;
@@ -302,14 +302,14 @@ type
   {$endif}
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
-   
+
    procedure beforedestruction() override;
    procedure initialize;
    procedure deinitialize;
    procedure beginhighrestimer;
    procedure endhighrestimer;
    property highrestimer: boolean read gethighrestimer;
-   
+
    function procid: procidty;
    function getserial(): card32;
    function createdatamodule(instanceclass: msecomponentclassty;
@@ -322,7 +322,7 @@ type
                                                     //0 single loop stack
    property applicationname: msestring read fapplicationname
                                                  write fapplicationname;
-   
+
    procedure postevent(event: tmseevent;
                    const aoptions: posteventoptionsty = []);
                             //peo_local -> direcly to the internal queue
@@ -331,7 +331,7 @@ type
    function checkoverload(const asleepus: integer = 100000): boolean;
               //true if never idle since last call,
               // unlocks application and calls sleep if not mainthread and asleepus >= 0
-   procedure handleexception(sender: tobject = nil; 
+   procedure handleexception(sender: tobject = nil;
                                        const leadingtext: msestring = '');
    procedure showexception(e: exception; const leadingtext: msestring = '');
                                   virtual; abstract;
@@ -350,7 +350,7 @@ type
    procedure settimer(const us: integer); virtual;
 
    function islockedthread: boolean; //true if calling thread holds the lock
-   function islockedmainthread: boolean; 
+   function islockedmainthread: boolean;
             //true if calling thread holds the lock and is mainthread
    function trylock: boolean;
    function lock: boolean;
@@ -367,7 +367,7 @@ type
    procedure lockifnotmainthread;
    procedure unlockifnotmainthread;
 
-   function synchronize(const proc: proceventty; const quiet: boolean = false; 
+   function synchronize(const proc: proceventty; const quiet: boolean = false;
                 const aoptions: posteventoptionsty = []): boolean;
    function synchronize(const proc: synchronizeeventty; const data: pointer;
                         const quiet: boolean = false;
@@ -387,7 +387,7 @@ type
    procedure releaseobject(const aobject: tobject);
    function ismainthread: boolean;
    function islockthread: boolean;
-   procedure waitforthread(athread: tmsethread); 
+   procedure waitforthread(athread: tmsethread);
                         //does unlock-relock for waiting
    function semwait(var sem: semty;  timeoutusec: integer): syserrorty;
     //does unlock-relock for waiting
@@ -413,7 +413,7 @@ type
    property onexception: exceptioneventty read fonexception write fonexception;
  end;
  applicationclassty = class of tcustomapplication;
- 
+
 function application: tcustomapplication;
 function applicationallocated: boolean;
 function applicationdestroyed: boolean;
@@ -438,7 +438,7 @@ type
                                 const curname, newname: string) of object;
  propertynotifyeventty = procedure(const sender: tobject;
                   const propname: string; const itemindex: int32) of object;
-var 
+var
  onhandlesigchld: procedure;
        //designer hooks
  ondesignchanged: propertynotifyeventty;
@@ -447,7 +447,7 @@ var
  ondesignexception: notifyeventty;
 
 procedure releaseandnil(var acomponent: tactcomponent);
- 
+
 implementation
 uses
  msebits,msesysintf1,msesysintf,msesysutils,msefileutils,msedatalist,
@@ -470,16 +470,16 @@ type
 
  tappasyncevent = class(tasyncqueueevent)
   private
-   fproc: proceventty; 
+   fproc: proceventty;
   protected
    procedure execute(); override;
   public
    constructor create(const aproc: proceventty);
  end;
- 
+
  tappasyncdataevent = class(tasyncqueueevent)
   private
-   fproc: synchronizeeventty; 
+   fproc: synchronizeeventty;
    fdata: pointer;
   protected
    procedure execute(); override;
@@ -489,7 +489,7 @@ type
 
  tappasyncprocevent = class(tasyncqueueevent)
   private
-   fproc: synchronizeprocty; 
+   fproc: synchronizeprocty;
    fdata: pointer;
   protected
    procedure execute(); override;
@@ -499,7 +499,7 @@ type
 
  tappsynchronizeevent = class(tsynchronizeevent)
   private
-   fproc: proceventty; 
+   fproc: proceventty;
   protected
    procedure execute; override;
   public
@@ -508,7 +508,7 @@ type
 
  tappsynchronizedataevent = class(tsynchronizeevent)
   private
-   fproc: synchronizeeventty; 
+   fproc: synchronizeeventty;
    fdata: pointer;
   protected
    procedure execute; override;
@@ -519,7 +519,7 @@ type
 
  tappsynchronizeprocevent = class(tsynchronizeevent)
   private
-   fproc: synchronizeprocty; 
+   fproc: synchronizeprocty;
    fdata: pointer;
   protected
    procedure execute; override;
@@ -527,19 +527,19 @@ type
    constructor create(const aproc: synchronizeprocty; const adata: pointer;
                               const aquiet: boolean);
  end;
- 
+
  treleaseevent = class(tobjectevent)
-  private 
+  private
    fobject: tobject;
   public
    constructor create(const dest: ievent; const aobject: tobject);
  end;
- 
+
 var
  appinst: tcustomapplication;
  appclass: applicationclassty;
  fapplicationdestroyed: boolean;
- 
+
 threadvar
  exceptionactive: integer;
 
@@ -551,10 +551,10 @@ begin
  end;
 end;
 
- 
+
 procedure designchanged(const acomponent: tcomponent); //for designer notify
 begin
- if assigned(ondesignchanged) and 
+ if assigned(ondesignchanged) and
        (acomponent.componentstate*[csdesigning,csloading,csdestroying] =
                                                      [csdesigning]) then begin
   ondesignchanged(acomponent,'',-1);
@@ -569,7 +569,7 @@ begin
  {
   with tcomponent(avalue) do begin
    if owner <> nil then begin
-    if not (csdesigning in componentstate) or 
+    if not (csdesigning in componentstate) or
              ((owner.owner <> nil) and (owner.owner.owner = nil)) then begin
      result:= owner.name+'.'+name;
     end
@@ -701,7 +701,7 @@ begin
  //dummy;
 end;
 
-procedure tactcomponent.objectevent(const sender: tobject; 
+procedure tactcomponent.objectevent(const sender: tobject;
                                const event: objecteventty);
 begin
  inherited;
@@ -719,7 +719,7 @@ end;
 
 procedure tactcomponent.release(const nomodaldefer: boolean = false);
 begin
- if not (acs_releasing in factstate) and 
+ if not (acs_releasing in factstate) and
                        not (csdestroying in componentstate) then begin
   appinst.postevent(tobjectevent.create(ek_release,ievent(self),
                                                     not nomodaldefer));
@@ -756,7 +756,7 @@ begin
 end;
 
 procedure tactcomponent.deactivate(const achildren: boolean = true);
- procedure deactivateall(const acomp: tcomponent); 
+ procedure deactivateall(const acomp: tcomponent);
  var
   intf1: iactivatorclient;
   int1: integer;
@@ -787,7 +787,7 @@ end;
 procedure tactcomponent.executeificommand(var acommand: ificommandcodety);
 begin
  inherited;
- case acommand of 
+ case acommand of
   icc_release: begin
    release;
   end;
@@ -811,7 +811,7 @@ begin
  inherited;
 end;
 
-class procedure tactivator.addclient(const aactivator: tactivator; 
+class procedure tactivator.addclient(const aactivator: tactivator;
                     const aclient: iobjectlink; var dest: tactivator);
 var
  act1: tactivator;
@@ -822,7 +822,7 @@ begin
  if aactivator <> nil then begin
   act1:= tactivator(aclient.getinstance);
   if act1 is tactivator then begin
-   repeat  
+   repeat
     if act1 = aactivator then begin
      raise exception.create('Circular reference.');
     end;
@@ -882,7 +882,7 @@ procedure tactivator.loaded;
 begin
  inherited;
  if not (csdesigning in componentstate) or factive then begin
-  if avo_activateonloaded in foptions then begin   
+  if avo_activateonloaded in foptions then begin
    if csdesigning in componentstate then begin
     try
      activateclients;
@@ -893,7 +893,7 @@ begin
    end
    else begin
     activateclients;
-   end;   
+   end;
   end;
   if avo_activatedelayed in foptions then begin
    asyncevent;
@@ -915,7 +915,7 @@ begin
  if avalue is tcomponent then begin
   with tcomponent(avalue) do begin
    if owner <> nil then begin
-    if not (csdesigning in componentstate) or 
+    if not (csdesigning in componentstate) or
              ((owner.owner <> nil) and (owner.owner.owner = nil)) then begin
      result:= owner.name+'.'+name;
     end
@@ -938,7 +938,7 @@ var
  int1: integer;
 begin
  setlength(result,length(fclients));
- for int1:= 0 to high(result) do begin 
+ for int1:= 0 to high(result) do begin
   result[int1]:= getclientname(iobjectlink(fclients[int1]).getinstance,int1);
  end;
 end;
@@ -1014,7 +1014,7 @@ begin
        fonactivateerror(self,iobjectlink(fclients[int1]).getinstance,e,bo1);
       end;
       if not bo1 then begin
-       if (avo_handleexceptions in foptions) and 
+       if (avo_handleexceptions in foptions) and
                       not (csdesigning in componentstate) then begin
         if not (avo_quietexceptions in foptions) then begin
          application.showexception(e);
@@ -1106,7 +1106,7 @@ begin
 end;
 
 procedure tactivator.setoptions(const avalue: activatoroptionsty);
-const 
+const
  mask: activatoroptionsty = [avo_activateonloaded,avo_activatedelayed];
 begin
  foptions:= activatoroptionsty(setsinglebit(
@@ -1290,13 +1290,13 @@ end;
 procedure tcustomapplication.registerapplicationeventhandler(
               const method: applicationeventhandlereventty);
 begin
- fonapplicationeventlist.add(tmethod(method)); 
+ fonapplicationeventlist.add(tmethod(method));
 end;
 
 procedure tcustomapplication.unregisterapplicationeventhandler(
               const method: applicationeventhandlereventty);
 begin
- fonapplicationeventlist.remove(tmethod(method)); 
+ fonapplicationeventlist.remove(tmethod(method));
 end;
 
 function tcustomapplication.dolock: boolean;
@@ -1327,13 +1327,13 @@ begin
  result:= dolock;
 end;
 
-function tcustomapplication.islockedthread: boolean; 
+function tcustomapplication.islockedthread: boolean;
                        //true if calling thread holds the lock
 begin
  result:= (flockcount > 0) and (flockthread = sys_getcurrentthread());
 end;
 
-function tcustomapplication.islockedmainthread: boolean; 
+function tcustomapplication.islockedmainthread: boolean;
 var
  id: threadty;
 begin
@@ -1630,7 +1630,7 @@ function tcustomapplication.checkoverload(const asleepus: integer = 100000): boo
 var
  int1: integer;
 begin
- result:= (fidlecount = 0) and not (aps_waiting in fstate) and 
+ result:= (fidlecount = 0) and not (aps_waiting in fstate) and
                                                  (fcheckoverloadlock = 0);
  fidlecount:= 0;
  if result and (asleepus >= 0) and not ismainthread then begin
@@ -1659,14 +1659,14 @@ begin
  end
  else begin
   exclude(fstate,aps_terminated);
- end;  
+ end;
 end;
 
 procedure tcustomapplication.wakeupmainthread;
 begin
- if fstate * [aps_running,aps_waiting,aps_woken] = 
+ if fstate * [aps_running,aps_waiting,aps_woken] =
                         [aps_running,aps_waiting] then begin
-  include(fstate,aps_woken);      
+  include(fstate,aps_woken);
   postevent(tmseevent.create(ek_wakeup));
  end;
 end;
@@ -1889,7 +1889,7 @@ begin
    dec(finiting);
   end;
   include(fstate,aps_inited);
- end;   
+ end;
 end;
 
 procedure tcustomapplication.deinitialize;
@@ -1962,7 +1962,7 @@ end;
 procedure tcustomapplication.receiveevent(const event: tobjectevent);
 begin
  inherited;
- if (event.kind = ek_releaseobject) and 
+ if (event.kind = ek_releaseobject) and
                           (event is treleaseevent) then begin
   treleaseevent(event).fobject.free;
  end;

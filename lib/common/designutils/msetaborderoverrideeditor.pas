@@ -132,13 +132,13 @@ begin
   end;
  end;
 end;
- 
+
 function tmsetaborderoverrideeditorfo.filterwidgets(
                                         const acomponent: tcomponent): boolean;
 begin
  result:= ws_iswidget in twidget(acomponent).widgetstate;
 end;
- 
+
 procedure tmsetaborderoverrideeditorfo.dialogexev(const sender: TObject);
 var
  w1: tdropdownlistedit;

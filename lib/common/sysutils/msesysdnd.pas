@@ -15,14 +15,14 @@ interface
 uses
  mseevent,msetypes,msegraphutils,mseguiglob,msedragglob,msedrag,msestrings,
  msemime,mseglob,msegui;
- 
+
 type
 
  tsysdndevent = class(twindowevent)
   private
   public
-   fformats: msestringarty;   
-   fformatistext: booleanarty;   
+   fformats: msestringarty;
+   fformatistext: booleanarty;
    fpos: pointty;
    fshiftstate: shiftstatesty;
    fscroll: boolean;
@@ -43,7 +43,7 @@ type
    constructor create(const aintf: ievent; const aaccept: boolean);
    property accept: boolean read faccept;
  end;
- 
+
  tsysmimedragobject = class(tmimedragobject,isysdnd)
   private
   protected

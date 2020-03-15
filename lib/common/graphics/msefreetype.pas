@@ -2,7 +2,7 @@
     This file is part of the Free Pascal run time library.
     Copyright (c) 2003 by the Free Pascal development team
 
- 
+
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
 
@@ -11,7 +11,7 @@
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
  modified 2011 by Martin Schreiber
- 
+
  **********************************************************************}
 {$mode objfpc} {$h+}
 unit msefreetype;
@@ -22,7 +22,7 @@ unit msefreetype;
 interface
 uses
  msetypes,sysutils,msectypes;
- 
+
 const
 
 {$ifdef FPC}
@@ -33,15 +33,15 @@ const
 {$endif}
 
 {$ifdef mswindows}
- freetypelib: array[0..2] of filenamety = 
-                         ('libfreetype-6.dll','freetype6.dll','freetype.dll');  
+ freetypelib: array[0..2] of filenamety =
+                         ('libfreetype-6.dll','freetype6.dll','freetype.dll');
 {$else}
- freetypelib: array[0..1] of filenamety = ('libfreetype.so.6','libfreetype.so'); 
+ freetypelib: array[0..1] of filenamety = ('libfreetype.so.6','libfreetype.so');
 {$endif}
 
 type
   FT_Encoding = array[0..3] of char;
-  
+
   efreetype = class(exception)
   end;
 
@@ -342,7 +342,7 @@ type
   end;
 
  function FT_IS_SCALABLE(face: PFT_Face): boolean;
- 
+
 var
  ftlib: pft_library;
 //Base Interface
@@ -368,7 +368,7 @@ var
                                                     delta: PFT_Vector); cdecl;
 
 //Outline Processing
- FT_Outline_Decompose: function(outline: PFT_Outline; 
+ FT_Outline_Decompose: function(outline: PFT_Outline;
         const func_interface: PFT_Outline_Funcs; user: Pointer): integer; cdecl;
 
 //FreeType Version
@@ -404,7 +404,7 @@ const
  ftposshift = 6;
  ftposscale = 64; //2^6
  ftposhalf = (1 shl ftposshift) div 2;
- 
+
 function ftpostopixel(const apos: ft_pos): integer; inline;
 begin
  result:= (apos + ftposhalf) div ftposscale;

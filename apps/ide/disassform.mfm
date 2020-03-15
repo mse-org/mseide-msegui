@@ -106,7 +106,7 @@ object disassfo: tdisassfo
     optionsgrid = [og_colsizing, og_colchangeontabkey, og_wrapcol, og_autopopup]
     datacols.count = 4
     datacols.options = [co_readonly, co_drawfocus, co_savestate]
-    datacols.items = <    
+    datacols.items = <
       item
         width = 76
         onbeforedrawcell = befdrawcell
@@ -120,7 +120,7 @@ object disassfo: tdisassfo
         font.localprops = [flp_xscale]
         valuefalse = '0'
         valuetrue = '1'
-      end    
+      end
       item
         width = 355
         options = [co_readonly, co_drawfocus, co_fill, co_savestate]
@@ -129,12 +129,12 @@ object disassfo: tdisassfo
         optionsedit = [scoe_eatreturn, scoe_hintclippedtext]
         valuefalse = '0'
         valuetrue = '1'
-      end    
+      end
       item
         options = [co_readonly, co_invisible, co_drawfocus, co_savestate]
         valuefalse = '0'
         valuetrue = '1'
-      end    
+      end
       item
         options = [co_readonly, co_invisible, co_drawfocus, co_savestate]
         valuefalse = '0'
@@ -153,7 +153,7 @@ object disassfo: tdisassfo
   object popupmen: tpopupmenu
     onupdate = popupupdate
     menu.submenu.count = 1
-    menu.submenu.items = <    
+    menu.submenu.items = <
       item
         caption = 'Show &Breakpoint'
         name = 'showbreak'

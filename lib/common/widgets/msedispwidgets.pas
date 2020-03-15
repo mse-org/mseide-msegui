@@ -97,7 +97,7 @@ type
 {
    property frameface_offsetactivemouse;
    property frameface_offsetactiveclicked;
-}   
+}
    property optionsskin;
 
    property colorclient;
@@ -128,7 +128,7 @@ type
  dispwidgetoptionsty = set of dispwidgetoptionty;
  dispwidgetflagty = (dwf_textrectvalid,dwf_cleared);
  dispwidgetflagsty = set of dispwidgetflagty;
- 
+
  tdispwidget = class(tpublishedwidget{$ifdef mse_with_ifi},iifidatalink{$endif})
   private
    finfo: drawtextinfoty;
@@ -191,7 +191,7 @@ type
                 default defaultdisptextflags;
    property optionswidget default defaultdispwidgetoptions;
    property optionswidget1 default defaultdispwidgetoptions1;
-   property options: dispwidgetoptionsty read foptions 
+   property options: dispwidgetoptionsty read foptions
                                              write setoptions default [];
    property onchange: notifyeventty read fonchange write fonchange;
    property onshowhint;
@@ -222,10 +222,10 @@ type
    procedure clear; override;
    property value: msestring read fvalue write setvalue;
   published
-   property ondatachange: updatestringeventty read fondatachange 
+   property ondatachange: updatestringeventty read fondatachange
                                                     write fondatachange;
  end;
- 
+
  tstringdisp = class(tcustomstringdisp)
   published
    property value;
@@ -260,7 +260,7 @@ type
   published
    property value;
  end;
-  
+
  tbytestringdisp = class(tdispwidget)
   private
    fvalue: string;
@@ -276,7 +276,7 @@ type
    procedure clear; override;
   published
    property value: string read fvalue write setvalue;
-   property ondatachange: updateansistringeventty read fondatachange 
+   property ondatachange: updateansistringeventty read fondatachange
                                                        write fondatachange;
    property base: numbasety read fbase write setbase default nb_hex;
  end;
@@ -327,7 +327,7 @@ type
   published
    property value;
  end;
- 
+
  tcustomint64disp = class(tnumdisp)
   private
    fvalue: int64;
@@ -362,7 +362,7 @@ type
   published
    property value;
  end;
- 
+
  tcustomrealdisp = class(tnumdisp)
   private
    fvalue: realty;
@@ -393,7 +393,7 @@ type
    property valuerange: real read fvaluerange write setvaluerange;
    property valuestart: real read fvaluestart write setvaluestart;
    property format: msestring read fformat write setformat;
-   property ondatachange: updaterealeventty read fondatachange 
+   property ondatachange: updaterealeventty read fondatachange
                                                     write fondatachange;
 {$ifdef mse_with_ifi}
    property ifilink: tifireallinkcomp read getifilink write setifilink;
@@ -404,7 +404,7 @@ type
   published
    property value{stored false};
  end;
- 
+
  tcustomdatetimedisp = class(tnumdisp)
   private
    fvalue: tdatetime;
@@ -432,7 +432,7 @@ type
    property value: tdatetime read fvalue write setvalue;
   published
    property format: msestring read fformat write setformat;
-   property ondatachange: updatedatetimeeventty read fondatachange 
+   property ondatachange: updatedatetimeeventty read fondatachange
                                                          write fondatachange;
    property kind: datetimekindty read fkind write setkind default dtk_date;
 {$ifdef mse_with_ifi}
@@ -444,7 +444,7 @@ type
   published
    property value{ stored false};
  end;
-  
+
  tcustombooleandisp = class(tdispwidget)
   private
    fvalue: boolean;
@@ -463,12 +463,12 @@ type
    property value: boolean read fvalue write setvalue default false;
   published
    property textflags default defaultdisptextflags + [tf_xcentered];
-   property ondatachange: updatebooleaneventty read fondatachange 
+   property ondatachange: updatebooleaneventty read fondatachange
                                                        write fondatachange;
    property text_false: msestring read ftext_false write settext_false;
    property text_true: msestring read ftext_true write settext_true;
  end;
- 
+
  tbooleandisp = class(tcustombooleandisp)
   published
    property value;
@@ -614,7 +614,7 @@ end;
 
 procedure tdispwidget.valuechanged();
 begin
- if not (dwo_blank in foptions) or 
+ if not (dwo_blank in foptions) or
           (componentstate*[csreading,csdesigning] = []) and
                       not (ws_loadedproc in widgetstate) then begin
   exclude(fflags,dwf_cleared);
@@ -651,7 +651,7 @@ begin
  result:= nil;
 end;
 
-procedure tdispwidget.updateifigriddata(const sender: tobject; 
+procedure tdispwidget.updateifigriddata(const sender: tobject;
                                                 const alist: tdatalist);
 begin
  //dummy
@@ -700,7 +700,7 @@ end;
 
 procedure tdispwidget.showhint(const aid: int32; var info: hintinfoty);
 begin
- if (dwo_hintclippedtext in foptions) and getshowhint and 
+ if (dwo_hintclippedtext in foptions) and getshowhint and
                                    textclipped(getcanvas,finfo) then begin
   info.caption:= finfo.text.text;
  end;
@@ -920,7 +920,7 @@ end;
 
 constructor tbytestringdisp.create(aowner: tcomponent);
 begin
- fbase:= nb_hex; 
+ fbase:= nb_hex;
  inherited;
 end;
 
@@ -1255,7 +1255,7 @@ var
 begin
  dt1:= fvalue;
  checkdatereconvert(fconvert,dt1);
- case fkind of 
+ case fkind of
   dtk_time: begin
    result:= mseformatstr.timetostring(dt1,fformat);
   end;

@@ -26,7 +26,7 @@ object compnametreefo: tcompnametreefo
     bounds_cy = 203
     anchors = []
     datacols.count = 1
-    datacols.items = <    
+    datacols.items = <
       item[treeitem]
         width = 299
         options = [co_readonly, co_fill, co_savevalue]

@@ -91,17 +91,17 @@ const
  fixcoloptionsmask: coloptions1ty =
                  [co1_rowfont,co1_rowcolor,co1_zebracolor{,
                   co1_rowcoloractive,co1_rowcolorfocus}];
-  
+
  defaultfixcoloptions = [];
  defaultgridskinoptions = [osk_framebuttononly];
  sortglyphwidth = 11;
  defaultwheelscrollheight = 0;
- 
+
  rowstatefoldleveltag = 0;
  rowstateissumtag = 1;
  rowstatefoldhiddentag = 2;
  gridautosizetag = 3;
-  
+
 type
  optiongridty = (og_colsizing,og_colmoving,og_keycolmoving,
                  og_rowsizing,og_rowmoving,og_keyrowmoving,
@@ -121,11 +121,11 @@ type
                  );
  optionsgridty = set of optiongridty;
  optiongrid1ty = (og1_norowdeletequery,og1_swaprowinsertappend,//for Ctrl+Insert
-                  og1_forcerowsmodified, 
+                  og1_forcerowsmodified,
                      //onrowsmodified fired by doremoveappinsrow() and
                      //appinsrow
                   og1_focusmorerows,og1_scrollmorerows,
-                  og1_noresetselect,og1_pasteinselection); 
+                  og1_noresetselect,og1_pasteinselection);
  optionsgrid1ty = set of optiongrid1ty;
 
 const
@@ -134,7 +134,7 @@ const
  invisibleoptionsgrid = [{ord(og_noresetselect)}];
  newcomponentoptionsgridadd = [og_rowinserting,og_rowdeleting,
                                       og_autofirstrow,og_autoappend];
- 
+
 type
  pickobjectkindty = (pok_none,pok_fixcolsize,pok_fixcol,pok_datacolsize,pok_datacol,
                    pok_fixrowsize,pok_fixrow,pok_datarowsize,pok_datarow);
@@ -155,11 +155,11 @@ type
                     scoe_trimright,
                     scoe_trimleft,
                     scoe_uppercase,
-                    scoe_lowercase,                    
-                    scoe_hintclippedtext,                    
+                    scoe_lowercase,
+                    scoe_hintclippedtext,
                     scoe_locate,
                     scoe_casesensitive,
-                    
+
                     scoe_checkbox
                           );
 
@@ -182,14 +182,14 @@ const
                     oe_hintclippedtext,
                     oe_locate,
                     oe_casesensitive];
- stringcoloptionseditshift = ord(oe_exitoncursor) - 
+ stringcoloptionseditshift = ord(oe_exitoncursor) -
                             ord(scoe_exitoncursor);
 
  gridvaluevarname = 'values';
  pickobjectstep = integer(high(pickobjectkindty)) + 1;
  layoutchangedcoloptions: coloptionsty = [co_fill,co_proportional,co_invisible,
                               co_nohscroll{,co_rowcoloractive}];
- layoutchangedcoloptions1: coloptions1ty = 
+ layoutchangedcoloptions1: coloptions1ty =
          [co1_rowcoloractive,co1_rowcolorfocused,
           co1_autorowheight,co1_autocolwidth,co1_autoheaderwidth];
  notfixcoloptions = [co_fixwidth,co_fixpos,co_fill,co_proportional,co_nohscroll,
@@ -221,9 +221,9 @@ const
  slowrepeat = 200000; //us
  fastrepeat = 100000; //us
 
- defaultgridwidgetoptions = defaultoptionswidgetmousewheel + 
+ defaultgridwidgetoptions = defaultoptionswidgetmousewheel +
                                         [ow_focusbackonesc{,ow_fontglyphheight}];
- defaultgridwidgetoptions1 = defaultoptionswidget1 + 
+ defaultgridwidgetoptions1 = defaultoptionswidget1 +
                                         [ow1_fontglyphheight];
 
 type
@@ -300,7 +300,7 @@ type
 
  tfixcellframe = class(tcellframe)
  end;
- 
+
  tcellface = class(tface)
  end;
 
@@ -322,7 +322,7 @@ type
  celldrawstatety = (cds_selected,cds_readonly,cds_focused,cds_active,cds_notext,
                     cds_usecoloractive,cds_ismousecell);
  celldrawstatesty = set of celldrawstatety;
- 
+
  cellinfoty = record
   grid: tcustomgrid;
   cell: gridcoordty;
@@ -433,7 +433,7 @@ type
    procedure fontchanged(const sender: tobject); virtual;
    property font: tgridpropfont read getfont write setfont stored isfontstored;
   public
-   constructor create(const agrid: tcustomgrid; 
+   constructor create(const agrid: tcustomgrid;
                const aprop: tgridarrayprop); reintroduce; virtual;
    destructor destroy; override;
    procedure createfont;
@@ -449,10 +449,10 @@ type
    property cursor: cursorshapety read fcursor write fcursor default cr_default;
    property frame: tcellframe read getframe write setframe;
    property face: tcellface read getface write setface;
-   property linewidth: integer read flinewidth write setlinewidth 
+   property linewidth: integer read flinewidth write setlinewidth
                                        default defaultgridlinewidth;
    property linecolor: colorty read flinecolor write setlinecolor;
-   property linecolorfix: colorty read flinecolorfix write setlinecolorfix 
+   property linecolorfix: colorty read flinecolorfix write setlinecolorfix
                                        default defaultfixlinecolor;
    property colorselect: colorty read fcolorselect write setcolorselect
                                        default cl_default;
@@ -501,7 +501,7 @@ type
  end;
 
  tcol = class;
- 
+
  celleventty = procedure(const sender: tobject;
                                          var info: celleventinfoty) of object;
  drawcelleventty = procedure(const sender: tcol; const canvas: tcanvas;
@@ -571,7 +571,7 @@ type
    class function defaultstep(width: integer): integer; virtual;
    function step(getscrollable: boolean = true): integer; override;
    function scrollable: boolean; override;
-   procedure dobeforedrawcell(const acanvas: tcanvas; 
+   procedure dobeforedrawcell(const acanvas: tcanvas;
                           var processed: boolean); virtual;
    procedure doafterdrawcell(const acanvas: tcanvas); virtual;
 
@@ -591,9 +591,9 @@ type
                                         default 0;
    function getmerged(const row: integer): boolean; virtual;
    procedure setmerged(const row: integer; const avalue: boolean); virtual;
-   property merged[const row: integer]: boolean read getmerged write setmerged;   
+   property merged[const row: integer]: boolean read getmerged write setmerged;
   public
-   constructor create(const agrid: tcustomgrid; 
+   constructor create(const agrid: tcustomgrid;
                         const aowner: tgridarrayprop); override;
    destructor destroy; override;
    procedure invalidate;
@@ -614,22 +614,22 @@ type
    property enabled: boolean read getenabled write setenabled;
    property readonly: boolean read getreadonly write setreadonly;
   published
-   property width: integer read fwidth write setwidth 
+   property width: integer read fwidth write setwidth
                                          default griddefaultcolwidth;
-   property rowcoloroffset: integer read frowcoloroffset 
+   property rowcoloroffset: integer read frowcoloroffset
                                write setrowcoloroffset default 0;
    property rowcoloroffsetselect: integer read frowcoloroffsetselect
                                write setrowcoloroffsetselect default 0;
-   property rowfontoffset: integer read frowfontoffset write 
+   property rowfontoffset: integer read frowfontoffset write
                                setrowfontoffset default 0;
-   property rowfontoffsetselect: integer read frowfontoffsetselect write 
+   property rowfontoffsetselect: integer read frowfontoffsetselect write
                                setrowfontoffsetselect default 0;
    property fontselect: tcolselectfont read getfontselect write
                      setfontselect stored isfontselectstored;
-   property fontactivenum: integer read ffontactivenum 
+   property fontactivenum: integer read ffontactivenum
                                 write setfontactivenum default -1;
              //index in grid.rowfonts
-   property fontfocusednum: integer read ffontfocusednum 
+   property fontfocusednum: integer read ffontfocusednum
                                 write setfontfocusednum default -1;
              //index in grid.rowfonts
    property onbeforedrawcell: beforedrawcelleventty read fonbeforedrawcell
@@ -698,7 +698,7 @@ type
                const selectaction: focuscellactionty); virtual;
    procedure doactivate; virtual;
    procedure dodeactivate; virtual;
-   procedure clientmouseevent(const acell: gridcoordty; 
+   procedure clientmouseevent(const acell: gridcoordty;
                                           var info: mouseeventinfoty); virtual;
    procedure dokeyevent(var info: keyeventinfoty; up: boolean); virtual;
    procedure checkdirtyautorowheight(aindex: integer);
@@ -716,7 +716,7 @@ type
                          const index1,index2: integer): integer; virtual;
    function isempty(const aindex: integer): boolean; virtual;
    procedure docellevent(var info: celleventinfoty); virtual;
-   function getcursor(const arow: integer; const actcellzone: cellzonety; 
+   function getcursor(const arow: integer; const actcellzone: cellzonety;
                             const amousepos: pointty): cursorshapety; virtual;
    function getdatastatname: msestring;
    function getstatsuffix(): msestring;
@@ -746,7 +746,7 @@ type
    property merged;
    property selected[const row: integer]: boolean read getselected write setselected;
              //row < 0 -> whole col
-   property selectedcells: integerarty read getselectedcells 
+   property selectedcells: integerarty read getselectedcells
                                                 write setselectedcells;
 //   function selectedcellcount: integer;
    property selectedcellcount: int32 read fselectedrowcount;
@@ -777,14 +777,14 @@ type
   private
    fgrid: tcustomgrid;
    fcell: gridcoordty;
-  public 
+  public
    constructor create(const draginfo: draginfoty; const cellinfo: cellinfoty);
    constructor create(const agrid: tcustomgrid;
                               var ainstance: tdragobject; const apos: pointty);
    property grid: tcustomgrid read fgrid;
    property cell: gridcoordty read fcell;
  end;
- 
+
  celldrageventty = procedure(const cellinfo: cellinfoty;
                     var draginfo: draginfoty; var dragobject: tcelldragobject;
                       var accept: boolean; var processed: boolean) of object;
@@ -803,9 +803,9 @@ type
   published
    property focusrectdist;
    property ondrawcell: drawcelleventty read fondrawcell write fondrawcell;
-   property onbeforedragevent: celldrageventty read fonbeforedragevent 
+   property onbeforedragevent: celldrageventty read fonbeforedragevent
                                                       write fonbeforedragevent;
-   property onafterdragevent: celldrageventty read fonafterdragevent 
+   property onafterdragevent: celldrageventty read fonafterdragevent
                                                       write fonafterdragevent;
    property font;
  end;
@@ -821,16 +821,16 @@ type
    function getdefault: pointer; override;
   public
    constructor create(const agrid: tcustomgrid); reintroduce;
-   function add(const avalue: msestring; const anoparagraph: boolean): integer; 
+   function add(const avalue: msestring; const anoparagraph: boolean): integer;
                                                               override;
    function empty(const index: integer): boolean; override;   //true wenn leer
    function getparagraph(const index: integer;
-                               const aseparator: msestring = ''): msestring;   
+                               const aseparator: msestring = ''): msestring;
    property noparagraph[index: integer]: boolean read getnoparagraphs;
   published
    property facultative;
  end;
- 
+
  tcustomstringcol = class(tdatacol)
   private
    ftextflagsactive: textflagsty;
@@ -883,16 +883,16 @@ type
    procedure checkcellvalue(var avalue: msestring; var accept: boolean);
    function defaultrowheight(): integer; override;
   public
-   constructor create(const agrid: tcustomgrid; 
+   constructor create(const agrid: tcustomgrid;
                          const aowner: tgridarrayprop); override;
    destructor destroy; override;
    function edited: boolean;
-   function readpipe(const pipe: tpipereader; 
+   function readpipe(const pipe: tpipereader;
                   const aoptions: addcharoptionsty = [aco_processeditchars];
 //                      const processeditchars: boolean = false;
                       const maxchars: integer = 0): integer; overload;
       //returns added rowcount
-   function readpipe(const text: string; 
+   function readpipe(const text: string;
                   const aoptions: addcharoptionsty = [aco_processeditchars];
 //                      const processeditchars: boolean = false;
                       const maxchars: integer = 0): integer; overload;
@@ -907,11 +907,11 @@ type
                           default defaultcoltextflags;
    property textflagsactive: textflagsty read ftextflagsactive
              write settextflagsactive default defaultactivecoltextflags;
-   property optionsedit: stringcoleditoptionsty read foptionsedit 
+   property optionsedit: stringcoleditoptionsty read foptionsedit
                write foptionsedit default defaultstringcoleditoptions;
    property optionsedit1: optionsedit1ty read foptionsedit1
                              write foptionsedit1 default defaultoptionsedit1;
-   property passwordchar: msechar read fpasswordchar 
+   property passwordchar: msechar read fpasswordchar
                                     write setpasswordchar default #0;
    property font;
    property datalist: tstringcoldatalist read getdatalist write setdatalist;
@@ -925,11 +925,11 @@ type
                                   //sender is tcustomstringcol
    property ondataentered: notifyeventty read fondataentered write fondataentered;
                                   //sender is tcustomstringcol
-   property oncopytoclipboard: updatestringeventty read foncopytoclipboard 
+   property oncopytoclipboard: updatestringeventty read foncopytoclipboard
                   write foncopytoclipboard;
                                   //sender is tcustomstringcol
-   property onpastefromclipboard: updatestringeventty read fonpastefromclipboard 
-                  write fonpastefromclipboard;       
+   property onpastefromclipboard: updatestringeventty read fonpastefromclipboard
+                  write fonpastefromclipboard;
                                   //sender is tcustomstringcol
    property ondrawcell: drawcelleventty read fondrawcell write fondrawcell;
  end;
@@ -954,9 +954,9 @@ type
    property onpastefromclipboard;
    property ondrawcell;
  end;
- 
+
  stringcolclassty = class of tcustomstringcol;
- 
+
  tfixcol = class(tcol)
   private
    fnumstart: integer;
@@ -997,12 +997,12 @@ type
    property captions: tmsestringdatalist
               read getcaptions write setcaptions stored iscaptionsstored;
    property color default cl_parent;
-   property options: fixcoloptionsty read foptionsfix write setoptionsfix 
+   property options: fixcoloptionsty read foptionsfix write setoptionsfix
                        default defaultfixcoloptions;
    property font;
  end;
  fixcolclassty = class of tfixcol;
- 
+
  tcolheaderfont = class(tparentfont)
   public
    class function getinstancepo(owner: tobject): pfont; override;
@@ -1010,7 +1010,7 @@ type
 
  cellmergeflagty = (cmf_h,cmf_v,cmf_rline);
  cellmergeflagsty = set of cellmergeflagty;
- 
+
  tcolheader = class(tindexpersistent,iframe,iface,iimagelistinfo)
   private
    finfo: captioninfoty;
@@ -1077,11 +1077,11 @@ type
    procedure widgetregioninvalid;
    function translatecolor(const acolor: colorty): colorty;
     //iimagelistinfo
-   function getimagelist: timagelist;   
+   function getimagelist: timagelist;
   public
    constructor create(const aowner: tobject;
          const aprop: tindexpersistentarrayprop); override;
-   destructor destroy; override;   
+   destructor destroy; override;
    procedure createfont;
    procedure createframe;
    procedure createface;
@@ -1106,7 +1106,7 @@ type
                                             default 0;
    property captiondist: integer read finfo.captiondist write setcaptiondist
                                      default defaultshapecaptiondist;
-   property imagepos: imageposty read finfo.imagepos write setimagepos 
+   property imagepos: imageposty read finfo.imagepos write setimagepos
                                                      default ip_center;
    property colorglyph: colorty read finfo.colorglyph
                    write setcolorglyph default cl_glyph;
@@ -1131,7 +1131,7 @@ type
    property options: datacolheaderoptionsty read foptions write setoptions
                             default [dco_hintclippedtext];
  end;
- 
+
  tcolheaders = class(tindexpersistentarrayprop)
   private
    fgridprop: tgridprop;
@@ -1166,13 +1166,13 @@ type
    property items[const index: integer]: tdatacolheader read getitems
                  write setitems; default;
  end;
- 
+
  tfixrow = class;
  beforefixdrawcelleventty = procedure(const sender: tfixrow; const canvas: tcanvas;
                           var cellinfo: cellinfoty; var processed: boolean) of object;
  drawfixcelleventty = procedure(const sender: tfixrow; const canvas: tcanvas;
                           const cellinfo: cellinfoty) of object;
- 
+
  tfixrows = class;
  tfixrow = class(tgridprop)
   private
@@ -1213,7 +1213,7 @@ type
    procedure orderdatacols(const oldorder: integerarty);
    procedure buttoncellevent(var info: celleventinfoty);
   public
-   constructor create(const agrid: tcustomgrid; 
+   constructor create(const agrid: tcustomgrid;
                         const aowner: tgridarrayprop); override;
    destructor destroy; override;
    procedure synctofontheight;
@@ -1229,7 +1229,7 @@ type
    property captionsfix: tfixcolheaders read fcaptionsfix write setcaptionsfix;
    property font;
    property linecolor default defaultfixlinecolor;
-   property options: fixrowoptionsty read foptionsfix 
+   property options: fixrowoptionsty read foptionsfix
                        write setoptionsfix default [];
    property onbeforedrawcell: beforefixdrawcelleventty read fonbeforedrawcell
                                 write fonbeforedrawcell;
@@ -1279,7 +1279,7 @@ type
    procedure dochange(const aindex: integer); override;
    procedure getindexrange(startpos,length: integer;
                  out range: cellaxisrangety; ascrollables: boolean = true);
-   function itematpos(const pos: integer; 
+   function itematpos(const pos: integer;
                const getscrollable: boolean = true): integer; //-1 if none
    procedure createitem(const index: integer; var item: tpersistent); override;
    procedure fontchanged;
@@ -1305,13 +1305,13 @@ type
               default cl_none;
    property colorfocused: colorty read fcolorfocused write setcolorfocused
               default cl_none;
-   property innerframe_left: integer read finnerframe.left 
+   property innerframe_left: integer read finnerframe.left
                               write setinnerframe_left default 1;
-   property innerframe_top: integer read finnerframe.top 
+   property innerframe_top: integer read finnerframe.top
                               write setinnerframe_top default 1;
-   property innerframe_right: integer read finnerframe.right 
+   property innerframe_right: integer read finnerframe.right
                               write setinnerframe_right default 1;
-   property innerframe_bottom: integer read finnerframe.bottom 
+   property innerframe_bottom: integer read finnerframe.bottom
                               write setinnerframe_bottom default 1;
  end;
 
@@ -1324,7 +1324,7 @@ type
   public
    class function getinstancepo(owner: tobject): pfont; override;
  end;
- 
+
  tcols = class(tgridarrayprop)
   private
    fwidth: integer;
@@ -1382,19 +1382,19 @@ type
    function mergedwidth(const acol: integer; const amerged: longword): integer;
                     //returns additional width
    property cols[const index: integer]: tcol read getcols; default;
-   property focusrectdist: integer read ffocusrectdist 
+   property focusrectdist: integer read ffocusrectdist
                                 write setfocusrectdist default 0;
-   property fontselect: tcolsfontselect read getfontselect 
+   property fontselect: tcolsfontselect read getfontselect
                     write setfontselect stored isfontselectstored;
-   property font: tcolsfont read getfont 
+   property font: tcolsfont read getfont
                     write setfont stored isfontstored;
   published
    property width: integer read fwidth
                 write setwidth default griddefaultcolwidth;
-   property fontactivenum: integer read ffontactivenum 
+   property fontactivenum: integer read ffontactivenum
                                 write setfontactivenum default -1;
              //index in grid.rowfonts
-   property fontfocusednum: integer read ffontfocusednum 
+   property fontfocusednum: integer read ffontfocusednum
                                 write setfontfocusednum default -1;
              //index in grid.rowfonts
  end;
@@ -1443,7 +1443,7 @@ type
 
     //iifidatalink
    procedure updateifigriddata(const sender: tobject; const alist: tdatalist);
-   procedure ifisetvalue(var avalue; var accept: boolean);   
+   procedure ifisetvalue(var avalue; var accept: boolean);
    procedure getifivalue(var avalue);
    procedure setifivalue(const avalue);
    function getgriddata: tdatalist; reintroduce;
@@ -1465,7 +1465,7 @@ type
 
    function totchildrencount(const aindex: integer;
                                    const acount: integer): integer;
-   procedure movegrouptoparent(const aindex: integer; const acount: integer); 
+   procedure movegrouptoparent(const aindex: integer; const acount: integer);
                  //called before deleting of rows
    procedure updatedeletedrows(const index: integer; const acount: integer);
    procedure internalshow(var aindex: integer);
@@ -1501,13 +1501,13 @@ type
    function getsourcecount: integer; override;
    function getsourceinfo(const atag: integer): plistlinkinfoty; override;
    procedure linksource(const source: tdatalist; const atag: integer); override;
-   procedure sourcechange(const sender: tdatalist; 
+   procedure sourcechange(const sender: tdatalist;
                                          const index: integer); override;
    procedure foldleveltosource(const index: integer; const acount: integer);
 
-   procedure clearmemberitem(const subitem: integer; 
+   procedure clearmemberitem(const subitem: integer;
                                     const index: integer); override;
-   procedure setmemberitem(const subitem: integer; 
+   procedure setmemberitem(const subitem: integer;
                          const index: integer; const avalue: integer); override;
 
    procedure change(const index: integer); override;
@@ -1523,20 +1523,20 @@ type
                             const autoappend: boolean): integer;
    function rowhidden(const arow: integer): boolean;
    function nearestvisiblerow(const arow: integer): integer;
-   procedure getfoldstate(const arow: integer; out aisvisible: boolean; 
+   procedure getfoldstate(const arow: integer; out aisvisible: boolean;
                 out afoldlevel: byte; out ahaschildren,aisopen: boolean);
    procedure hidechildren(const arow: integer);
    procedure showchildren(const arow: integer);
    property folded: boolean read ffolded write setfolded;
    procedure setupfoldinfo(asource: pbyte; const acount: integer);
    property hidden[const index: integer]: boolean read gethidden write sethidden;
-   property foldlevel[const index: integer]: byte read getfoldlevel 
+   property foldlevel[const index: integer]: byte read getfoldlevel
                                                   write setfoldlevel; //0..63
-   property foldissum[const index: integer]: boolean read getfoldissum 
+   property foldissum[const index: integer]: boolean read getfoldissum
                                                   write setfoldissum;
-   property height[const index: integer]: integer read getheight 
+   property height[const index: integer]: integer read getheight
                                                             write setheight;
-   property linewidth[const index: integer]: rowlinewidthty 
+   property linewidth[const index: integer]: rowlinewidthty
                                        read getlinewidth write setlinewidth;
                          //-1 = default
    function currentrowheight(const index: integer): integer;
@@ -1545,11 +1545,11 @@ type
    procedure fillfoldlevel(const index: integer; const acount: integer;
                                                             const avalue: byte);
   published
-   property sourcefoldhidden: string read flinkfoldhidden.name 
+   property sourcefoldhidden: string read flinkfoldhidden.name
                                             write setsourcefoldhidden;
-   property sourcefoldlevel: string read flinkfoldlevel.name 
+   property sourcefoldlevel: string read flinkfoldlevel.name
                                             write setsourcefoldlevel;
-   property sourceissum: string read flinkissum.name 
+   property sourceissum: string read flinkissum.name
                                             write setsourceissum;
  end;
 
@@ -1615,11 +1615,11 @@ type
 
    function hassortstat: boolean;
    function hasdatastat: boolean;
-   procedure dostatread(const reader: tstatreader; 
+   procedure dostatread(const reader: tstatreader;
                                           const aorder: boolean); virtual;
    procedure dostatwrite(const writer: tstatwriter;
                                           const aorder: boolean); virtual;
-   
+
    function cancopy: boolean;
    function canpaste: boolean;
    procedure updatedatastate(var accepted: boolean); overload; virtual;
@@ -1642,17 +1642,17 @@ type
                   //name is case sensitive
    function datalistbyname(const aname: string): tdatalist; //can be nil
    function colsubdatainfo(const aname: string): subdatainfoty;
-   
+
    procedure clearselection;
    function hasselection: boolean;
    property selectedrowcount: int32 read fselectedrowcount;
    function selectedcellcount: integer;
    function hascolselection: boolean;
-   property selectedcells: gridcoordarty read getselectedcells 
+   property selectedcells: gridcoordarty read getselectedcells
                                          write setselectedcells;
-   property selectedrows: integerarty read getselectedrows 
+   property selectedrows: integerarty read getselectedrows
                                          write setselectedrows;
-   property rowselected[const index: integer]: boolean read getrowselected 
+   property rowselected[const index: integer]: boolean read getrowselected
                                          write setrowselected;
    property selected[const cell: gridcoordty]: boolean read Getselected write Setselected;
                //col < 0 and row < 0 -> whole grid, col < 0 -> whole col,
@@ -1664,7 +1664,7 @@ type
                     const value: boolean;
                     const calldoselectcell: boolean = false;
                     const checkmultiselect: boolean = false); overload; virtual;
-   procedure mergecols(const arow: integer; const astart: longword = 0; 
+   procedure mergecols(const arow: integer; const astart: longword = 0;
                                               const acount: longword = bigint);
    procedure unmergecols(const arow: integer = invalidaxis);
                      //invalidaxis = all
@@ -1674,7 +1674,7 @@ type
   published
    property sortcol: integer read fsortcol write setsortcol default -1;
                                       //-1 -> all
-   property sortcoldefault: integer read fsortcoldefault 
+   property sortcoldefault: integer read fsortcoldefault
                                      write setsortcoldefault default -1;
                                       //-1 -> no
    property newrowcol: integer read fnewrowcol write setnewrowcol default -1;
@@ -1720,7 +1720,7 @@ type
    property cols[const index: integer]: tstringcol read getcols; default; //last!
   published
    property focusrectdist;
-   property textflags: textflagsty read ftextflags write settextflags 
+   property textflags: textflagsty read ftextflags write settextflags
                                                    default defaultcoltextflags;
    property textflagsactive: textflagsty read ftextflagsactive
              write settextflagsactive default defaultactivecoltextflags;
@@ -1837,7 +1837,7 @@ type
 {
    property frameface_offsetactivemouse;
    property frameface_offsetactiveclicked;
-}   
+}
    property options;
    property optionsskin;
 
@@ -1865,39 +1865,39 @@ type
    constructor create(const aowner: tcustomgrid);
    class function getitemclasstype: persistentclassty; override;
                          //used in dumpunitgroups
-   property items[const index: integer]: tfont read getitems 
+   property items[const index: integer]: tfont read getitems
                                                    write setitems; default;
  end;
 
  cellinnerlevelty = (cil_all,cil_noline,cil_paint,cil_inner);
  cellselectmodety = (csm_select,csm_deselect,csm_reverse);
  selectcellmodety = (scm_cell,scm_row,scm_col);
- 
+
  optionfoldty = (of_insertsamelevel,of_deletetree,of_shiftdeltoparent,
                  of_shiftchildren,of_validatelevel);
  optionsfoldty = set of optionfoldty;
 
  gridnotifyeventty = procedure(const sender: tcustomgrid) of object;
- griddataeventty = procedure(const sender: tcustomgrid; 
+ griddataeventty = procedure(const sender: tcustomgrid;
                              const acell: gridcoordty) of object;
- griddatablockeventty = procedure(const sender: tcustomgrid; 
+ griddatablockeventty = procedure(const sender: tcustomgrid;
                   const acell: gridcoordty; const acount: integer) of object;
- gridblockmovingeventty = procedure(const sender: tcustomgrid; 
+ gridblockmovingeventty = procedure(const sender: tcustomgrid;
                   var fromindex,toindex,acount: integer) of object;
- gridblockmovedeventty = procedure(const sender: tcustomgrid; 
+ gridblockmovedeventty = procedure(const sender: tcustomgrid;
                   const fromindex,toindex,acount: integer) of object;
  gridbeforeblockeventty = procedure(const sender: tcustomgrid;
                                 var aindex,acount: integer) of object;
- gridblockeventty = procedure(const sender: tcustomgrid; 
+ gridblockeventty = procedure(const sender: tcustomgrid;
                   const aindex: integer; const acount: integer) of object;
  gridsorteventty = procedure(const sender: tcustomgrid;
                         const lindex,rindex: integer;
                                     var aresult: integer) of object;
  gridmorerowseventty = procedure(const sender: tcustomgrid;
-                               const count: integer) of object; 
+                               const count: integer) of object;
                                //negative -> before row 0
  gridscrolleventty = procedure(const sender: tcustomgrid;
-                                     var step: integer) of object; 
+                                     var step: integer) of object;
  copyselectioneventty = procedure(const sender: tcustomgrid;
                                         var handled: boolean) of object;
  pasteselectioneventty = procedure(const sender: tcustomgrid;
@@ -1916,7 +1916,7 @@ type
    fvisiblerows: integerarty;
    fvisiblerowfoldinfo: rowfoldinfoarty;
    fvisiblerowsbase: integer; //number of visible rows below scrollwindow
-   
+
    flayoutupdating: integer;
    fvisiblerowsupdating: integer;
    fnullchecking: integer;
@@ -2004,7 +2004,7 @@ type
    procedure killrepeater;
    procedure startrepeater(state: gridstatety; time: integer);
    procedure repeatproc(const sender: tobject);
-   
+
    procedure calcpropcolwidthref;
    procedure updatevisiblerows;
    procedure setdatarowlinewidth(const Value: integer);
@@ -2088,7 +2088,7 @@ type
           //origin = clientrect.pos
    frootbrushorigin: pointty;
    fbrushorigin: pointty;
-          //origin windowpos   
+          //origin windowpos
    fdragcontroller: tdragcontroller;
    fobjectpicker: tobjectpicker;
    fpickkind: pickobjectkindty;
@@ -2099,7 +2099,7 @@ type
    flastcellpos: pointty;
    flastcellzone: cellzonety;
    class function classskininfo: skininfoty; override;
-   
+
    function checkrowindex(var aindex: integer): boolean;
    procedure setselected(const cell: gridcoordty;
                                        const avalue: boolean); virtual;
@@ -2160,7 +2160,7 @@ type
    function createfixrows: tfixrows; virtual;
    procedure initcellinfo(var info: cellinfoty); virtual;
    function cellhasfocus: boolean; virtual;
-   
+
    procedure colchanged(const sender: tcol);
    procedure cellchanged(const sender: tcol; const row: integer);
    procedure focusedcellchanged; virtual;
@@ -2182,7 +2182,7 @@ type
    procedure dorowsdeleted(index,count: integer); virtual;
    procedure dorowsmodified;
    procedure doedited();
-   procedure dorowsdatachanged(const acell: gridcoordty; 
+   procedure dorowsdatachanged(const acell: gridcoordty;
                                            const acount: integer); virtual;
    procedure dorowcountchanged(const countbefore,newcount: integer); virtual;
    procedure docellevent(var info: celleventinfoty); virtual;
@@ -2197,12 +2197,12 @@ type
                                   const auserinput: boolean); virtual;
    procedure internaldeleterow(var aindex: integer; var acount: integer;
                                   const auserinput: boolean); virtual;
-   function internalsort(const sortfunc:  indexsortcomparemethodty; 
+   function internalsort(const sortfunc:  indexsortcomparemethodty;
                                  var refindex: integer): boolean;
                               //true if moved
    procedure updaterowdata; virtual;
-   
-   procedure objectevent(const sender: tobject; 
+
+   procedure objectevent(const sender: tobject;
                                  const event: objecteventty); override;
 
    procedure doasyncevent(var atag: integer) override;
@@ -2231,9 +2231,9 @@ type
    function candeleterow: boolean; virtual;
    function canmoverow: boolean; virtual;
 
-   procedure updatepopupmenu(var amenu: tpopupmenu; 
+   procedure updatepopupmenu(var amenu: tpopupmenu;
                          var mouseinfo: mouseeventinfoty); override;
-   function rowatpos(y: integer): integer; 
+   function rowatpos(y: integer): integer;
             //0..rowcount-1, invalidaxis if invalid, client origin
    function rowpos(arow: integer): integer;
             //client origin
@@ -2241,9 +2241,9 @@ type
    function mergestart(const acol: integer; const arow: integer): integer;
    function mergeend(const acol: integer; const arow: integer): integer;
    function getmerged(const arow: integer): longword;
-   function nextfocusablecol(const acol: integer; const aleft: boolean; 
+   function nextfocusablecol(const acol: integer; const aleft: boolean;
                       const arow: integer; const noreadonly: boolean): integer;
-   procedure checkcellvalue(var accept: boolean); virtual; 
+   procedure checkcellvalue(var accept: boolean); virtual;
                    //store edited value to grid
    procedure checkmorerows(const acount: integer);
    procedure beforefocuscell(const cell: gridcoordty;
@@ -2251,17 +2251,17 @@ type
    procedure afterfocuscell(const cellbefore: gridcoordty;
                              const selectaction: focuscellactionty); virtual;
    function wheelheight: integer;
-   function calcshowshift(const rect: rectty; 
+   function calcshowshift(const rect: rectty;
                                    const position: cellpositionty): pointty;
    procedure focusrow(const arow: integer; const action: focuscellactionty;
-                      const noreadonly: boolean; 
+                      const noreadonly: boolean;
                       const selectmode: selectcellmodety = scm_cell);
    function doremoveappinsrow(const oldrow,newrow: integer): boolean;
                     //true if removed
    function hassort: boolean;
    function canautoappend: boolean; virtual;
 
-   
+
     //idragcontroller
    function getdragrect(const apos: pointty): rectty; override;
     //iscrollbar
@@ -2278,7 +2278,7 @@ type
    procedure endpickmove(const sender: tobjectpicker);
    procedure cancelpickmove(const sender: tobjectpicker);
    procedure paintxorpic(const sender: tobjectpicker; const canvas: tcanvas);
-                                   
+
     //istatfile
    procedure dostatread(const reader: tstatreader); virtual;
    procedure dostatwrite(const writer: tstatwriter); virtual;
@@ -2286,7 +2286,7 @@ type
    procedure statread;
    function getstatvarname: msestring;
    function getstatpriority: integer;
-   
+
    procedure beginnullchecking;
    procedure endnullchecking;
    procedure beginnonullcheck;
@@ -2295,7 +2295,7 @@ type
    procedure endnocheckvalue;
    function nocheckvalue: boolean;
    procedure reorderrow;
-   
+
    function getiassistiveclient(): iassistiveclient; override;
     //iassistiveclient
    function getassistiveflags(): assistiveflagsty; override;
@@ -2376,9 +2376,9 @@ type
    procedure invalidatefocusedcell;
    procedure invalidaterow(const arow: integer);
 
-   function selectcell(const cell: gridcoordty; 
+   function selectcell(const cell: gridcoordty;
                           const amode: cellselectmodety;
-                          const checkmultiselect: boolean = false): boolean; 
+                          const checkmultiselect: boolean = false): boolean;
                           //true if accepted
    function getselectedrange: gridrectty; //selected by focuscell()
 //   function getselectedrows: integerarty;
@@ -2404,17 +2404,17 @@ type
                                     //returns shifted amount
    function showcaretrect(const arect: rectty;
                                const aframe: tcustomframe): pointty; overload;
-   function showcaretrect(const arect: rectty; 
+   function showcaretrect(const arect: rectty;
                        const aframe: framety): pointty; overload;
    function showcellrect(const rect: rectty;
                    const origin: cellinnerlevelty = cil_paint): pointty;
-   procedure showcell(const cell: gridcoordty; 
+   procedure showcell(const cell: gridcoordty;
                       const position: cellpositionty = cep_nearest;
-                      const force: boolean = false); 
+                      const force: boolean = false);
                //scrolls cell into view, force true -> if scrollbar clicked also
-   procedure showrow(const arow: integer; 
+   procedure showrow(const arow: integer;
                       const position: cellpositionty = cep_nearest;
-                      const force: boolean = false); 
+                      const force: boolean = false);
    procedure showlastrow;
    procedure scrollrows(step: integer);
    procedure scrollleft;
@@ -2423,7 +2423,7 @@ type
    procedure scrollpageright;
 
                 //distance of active cell topleft to datarect topleft
-   property cellwindowpos: pointty read getcellwindowpos 
+   property cellwindowpos: pointty read getcellwindowpos
                                                   write setcellwindowpos;
    property rowwindowpos: int32 read getrowwindowpos write setrowwindowpos;
    property colwindowpos: int32 read getcolwindowpos write setcolwindowpos;
@@ -2438,31 +2438,31 @@ type
                                   //returns index of first row;
    procedure deleterow(aindex: integer; acount: integer = 1;
                                   const auserinput: boolean = false);
-   function appinsrow(aindex: integer;const auserinput: boolean = false): int32; 
+   function appinsrow(aindex: integer;const auserinput: boolean = false): int32;
            //insert or append empty row, set focused row to index
            //empty row removed by exit row if og_noinsertempty
            //returns insert index
-   function isinsertempty: boolean; 
+   function isinsertempty: boolean;
          //true if row will be removed by og_noinsertempty
    function isautoappend: boolean; //true if last row is auto appended
    function autoappending: boolean; //empty row appending by focuscell
    function checkreautoappend: boolean; //true if row appended
-   procedure removeappendedrow; 
+   procedure removeappendedrow;
    function autoremoving: boolean; //removing empty row
 
    procedure clear; //sets rowcount to 0
-   function appendrow(const checkautoappend: boolean = false): integer; 
+   function appendrow(const checkautoappend: boolean = false): integer;
     //returns index of new row, does not call change events, calls updatelayout.
     //use for single visible append,
     //do not use for multiple row append in a block.
-   function appenddatarow: integer; 
+   function appenddatarow: integer;
     //returns index of new row, use it in a beginupdate/endupdate block
-   
-   procedure sortinvalid(const acol: integer = invalidaxis; 
+
+   procedure sortinvalid(const acol: integer = invalidaxis;
                                        const arow: integer = invalidaxis);
-   function checksort: boolean; //true if sortchanged called  
+   function checksort: boolean; //true if sortchanged called
    procedure sort;
-   
+
    function copyselection: boolean; virtual;  //false if no copy
    function pasteselection: boolean; virtual; //false if no paste
 
@@ -2470,12 +2470,12 @@ type
                 default defaultoptionsgrid; //first!
    property optionsgrid1: optionsgrid1ty read foptionsgrid1 write foptionsgrid1
                 default [];
-   property optionsfold: optionsfoldty read foptionsfold 
+   property optionsfold: optionsfoldty read foptionsfold
                                            write foptionsfold default [];
    property norowedit: boolean read fnorowedit write fnorowedit;
    property sorted: boolean read getsorted write setsorted;
    property folded: boolean read getfolded write setfolded;
-   
+
    property datarowlinewidth: integer read fdatarowlinewidth
                 write setdatarowlinewidth default defaultgridlinewidth;
    property datarowlinecolorfix: colorty read fdatarowlinecolorfix
@@ -2503,37 +2503,37 @@ type
    property firstvisiblerow: integer read ffirstvisiblerow;
    property lastvisiblerow: integer read flastvisiblerow;
    property visiblerows: integerarty read fvisiblerows;
-   
+
 
    property focusedcell: gridcoordty read ffocusedcell;
                               //col,row = invalidaxis if none
    property col: integer read ffocusedcell.col write setcol;
    property row: integer read ffocusedcell.row write setrow;
    property mousecell: gridcoordty read fmousecell;
-   
-//   property gridframewidth: integer read fgridframewidth 
+
+//   property gridframewidth: integer read fgridframewidth
 //                        write setgridframewidth default 0;
-   property gridframecolor: colorty read fgridframecolor 
+   property gridframecolor: colorty read fgridframecolor
                         write setgridframecolor default cl_gridframe;
 
                       //rowproperties index = -1 -> focused row
    property rowcolors: tcolorarrayprop read frowcolors write setrowcolors;
-   property rowcolorstate[index: integer]: rowstatenumty read getrowcolorstate 
+   property rowcolorstate[index: integer]: rowstatenumty read getrowcolorstate
 
                         write setrowcolorstate; //default = -1
-   property rowlinecolorstate[index: integer]: rowstatenumty read getrowlinecolorstate 
-                        write setrowlinecolorstate; 
+   property rowlinecolorstate[index: integer]: rowstatenumty read getrowlinecolorstate
+                        write setrowlinecolorstate;
                                //default = -1, og_rowheight must be set
-   property rowlinecolorfixstate[index: integer]: rowstatenumty 
-                        read getrowlinecolorfixstate 
-                        write setrowlinecolorfixstate; 
+   property rowlinecolorfixstate[index: integer]: rowstatenumty
+                        read getrowlinecolorfixstate
+                        write setrowlinecolorfixstate;
                                //default = -1, og_rowheight must be set
-   property rowlinewidth[index: integer]: rowlinewidthty read getrowlinewidth 
+   property rowlinewidth[index: integer]: rowlinewidthty read getrowlinewidth
                                        write setrowlinewidth;
                                //default = -1, og_rowheight must be set
 
    property rowfonts: trowfontarrayprop read frowfonts write setrowfonts;
-   property rowfontstate[index: integer]: rowstatenumty read getrowfontstate 
+   property rowfontstate[index: integer]: rowstatenumty read getrowfontstate
                         write setrowfontstate;  //default = -1
    property rowreadonlystate[index: integer]: boolean read getrowreadonlystate
                         write setrowreadonlystate;
@@ -2547,13 +2547,13 @@ type
    property rowheight[index: integer]: integer read getrowheight
                                                           write setrowheight;
                                 //og_rowheight must be set
-   property rowstatelist: trowstatelist read getrowstatelist 
+   property rowstatelist: trowstatelist read getrowstatelist
                                                write setrowstatelist;
 {$ifdef mse_with_ifi}
    property ifilink: tifigridlinkcomp read fifilink write setifilink;
 {$endif}
-                        
-   property zebra_color: colorty read fzebra_color write setzebra_color 
+
+   property zebra_color: colorty read fzebra_color write setzebra_color
                                                               default cl_zebra;
    property zebra_start: integer read fzebra_start write setzebra_start default 0;
    property zebra_height: integer read fzebra_height write setzebra_height default 0;
@@ -2561,10 +2561,10 @@ type
 
    property statfile: tstatfile read fstatfile write setstatfile;
    property statvarname: msestring read getstatvarname write fstatvarname;
-   property statpriority: integer read fstatpriority 
+   property statpriority: integer read fstatpriority
                                        write fstatpriority default 0;
 
-   property onbeforeupdatelayout: gridnotifyeventty 
+   property onbeforeupdatelayout: gridnotifyeventty
                 read fonbeforeupdatelayout write fonbeforeupdatelayout;
    property onlayoutchanged: gridnotifyeventty read fonlayoutchanged
               write fonlayoutchanged;
@@ -2582,7 +2582,7 @@ type
               write fonrowsmoving;
    property onrowsmoved: gridblockmovedeventty read fonrowsmoved
               write fonrowsmoved;
-   property onscrollrows: gridscrolleventty read fonscrollrows 
+   property onscrollrows: gridscrolleventty read fonscrollrows
                                                    write fonscrollrows;
    property ongetmorerows: gridmorerowseventty read fongetmorerows
                                                    write fongetmorerows;
@@ -2596,13 +2596,13 @@ type
               write fonrowsdeleting;
    property onrowsdeleted: gridblockeventty read fonrowsdeleted
               write fonrowsdeleted;
-   property onrowsmodified: notifyeventty read fonrowsmodified 
+   property onrowsmodified: notifyeventty read fonrowsmodified
                                               write fonrowsmodified;
              //called if user deletes, inserts or moves rows
    property onedited: notifyeventty read fonedited write fonedited;
              //called if user types celltext or chages a cell value
    property onsort: gridsorteventty read fonsort write fonsort;
-   property onsortchanged: gridnotifyeventty read fonsortchanged 
+   property onsortchanged: gridnotifyeventty read fonsortchanged
                                                    write fonsortchanged;
 
    property oncellevent: celleventty read foncellevent write foncellevent;
@@ -2618,7 +2618,7 @@ type
   published
    property frame: tgridframe read getframe write setframe;
    property font: twidgetfont read getfont write setfont stored isfontstored;
-   property fontempty: twidgetfontempty read getfontempty 
+   property fontempty: twidgetfontempty read getfontempty
                        write setfontempty stored isfontemptystored;
    property onkeydown: keyeventty read fonkeydown write fonkeydown;
    property wheelscrollheight: integer read fwheelscrollheight write
@@ -2632,7 +2632,7 @@ type
   protected
    procedure clientmouseevent(var info: mouseeventinfoty); override;
  end;
- 
+
  tdrawgrid = class(tcellgrid)
   private
    function getdatacols: tdrawcols;
@@ -2716,7 +2716,7 @@ type
    procedure checkcellvalue(var accept: boolean); override;
    procedure rootchanged(const aflags: rootchangeflagsty); override;
    procedure updatelayout; override;
-   procedure firstcellclick(const cell: gridcoordty; 
+   procedure firstcellclick(const cell: gridcoordty;
                       var info: mouseeventinfoty); override;
    function createdatacols: tdatacols; override;
    procedure docellevent(var info: celleventinfoty); override;
@@ -2749,7 +2749,7 @@ type
    procedure dodeactivate; override;
 
    procedure doselectionchanged; override;
-   procedure updatepopupmenu(var amenu: tpopupmenu; 
+   procedure updatepopupmenu(var amenu: tpopupmenu;
                          var mouseinfo: mouseeventinfoty); override;
     //iassistiveclient
    function getassistivecaretindex(): int32; override;
@@ -2765,7 +2765,7 @@ type
    function textclipped(const acell: gridcoordty;
                  out acellrect: rectty): boolean; overload;
    function textclipped(const acell: gridcoordty): boolean; overload;
-   
+
    function appendrow(const value: array of msestring;
                         const ashowlastrow: boolean = false): integer; overload;
    function appendrow(const value: msestringarty;
@@ -2778,12 +2778,12 @@ type
    function appenddatarow(const value: msestringarty): integer; overload;
    function appenddatarow(const value: msestring): integer; overload;
         //for multiple data append in a beginupdate/endupdate block
-   
+
    function copyselection: boolean; override;
    function pasteselection: boolean; override;
    property items[const cell: gridcoordty]: msestring read getitems write setitems;
    property datacols: tstringcols read getdatacols write setdatacols;
-   property caretwidth: integer read getcaretwidth write setcaretwidth 
+   property caretwidth: integer read getcaretwidth write setcaretwidth
                                                     default defaultcaretwidth;
  end;
 
@@ -2904,7 +2904,7 @@ const
   'Invalid col index',
   'Invalid widget'
  );
- 
+
 //var
 // coloptionssplitinfo: setsplitinfoty;
 
@@ -2935,13 +2935,13 @@ function iscellclick(const info: celleventinfoty;
 begin
  result:= false;
  with info do begin
-  if not (ccr_data in restrictions) or 
+  if not (ccr_data in restrictions) or
              (info.cell.col >= 0) and (info.cell.row >= 0) then begin
    case eventkind of
     cek_keydown: begin
      if not (ccr_nokeyreturn in restrictions) then begin
       with info.keyeventinfopo^ do begin
-       if isenterkey(nil,key) and 
+       if isenterkey(nil,key) and
                  (shiftstate * shiftstatemustinclude = shiftstatemustinclude) and
                  (shiftstate * shiftstatemustnotinclude = []) then begin
         result:= true;
@@ -2961,15 +2961,15 @@ begin
            not (ccr_buttonpress in restrictions) and
                                       (eventkind = ek_buttonrelease)) then begin
          if ccr_dblclick in restrictions then begin
-          result:= (ss_double in info.mouseeventinfopo^.shiftstate) and 
-                    (grid.fclickedcellbefore.row = cell.row) and 
+          result:= (ss_double in info.mouseeventinfopo^.shiftstate) and
+                    (grid.fclickedcellbefore.row = cell.row) and
                     (grid.fclickedcellbefore.col = cell.col);
          end
          else begin
           result:= true;
          end;
-         if (eventkind = ek_buttonrelease) and 
-               ((grid.fclickedcell.row <> cell.row) or 
+         if (eventkind = ek_buttonrelease) and
+               ((grid.fclickedcell.row <> cell.row) or
                 (grid.fclickedcell.col <> cell.col)) then begin
           result:= false;
          end;
@@ -2987,7 +2987,7 @@ function isrowenter(const info: celleventinfoty;
                      const noentergrid: boolean = false): boolean;
 begin
  with info do begin
-  result:= (eventkind = cek_enter) and 
+  result:= (eventkind = cek_enter) and
   ((cellbefore.row <> newcell.row) or (selectaction = fca_focusinforce)) and
                   (not noentergrid or (selectaction <> fca_entergrid));
  end;
@@ -3047,7 +3047,7 @@ begin
  result:= (a.col = b.col) and (a.row = b.row);
 end;
 
-procedure stringcoltooptionsedit(const source: stringcoleditoptionsty; 
+procedure stringcoltooptionsedit(const source: stringcoleditoptionsty;
                                     var dest: optionseditty);
 begin
  if scoe_undoonesc in source then begin
@@ -3132,7 +3132,7 @@ end;
 
 { tgridprop }
 
-constructor tgridprop.create(const agrid: tcustomgrid; 
+constructor tgridprop.create(const agrid: tcustomgrid;
                                  const aprop: tgridarrayprop);
 begin
  fcellinfo.grid:= agrid;
@@ -3350,7 +3350,7 @@ begin
  getwidget.invalidatewidget;
 end;
 
-procedure tgridprop.invalidaterect(const rect: rectty; 
+procedure tgridprop.invalidaterect(const rect: rectty;
                const org: originty = org_client; const noclip: boolean = false);
 begin
  getwidget.invalidaterect(rect,org,noclip);
@@ -3618,21 +3618,21 @@ begin
  result:= actualcolor <> cl_transparent;
 end;
 
-function tcol.checkactivecolor(const aindex: integer): boolean; 
+function tcol.checkactivecolor(const aindex: integer): boolean;
          //true if coloractive and fontactivenum active
 begin
  result:= (fcellinfo.grid.entered {or (co1_active in foptions1)}) and
-          (aindex = fcellinfo.grid.ffocusedcell.row) and 
-          ((gps_fix in fstate) or (co1_rowcoloractive in foptions1) or 
+          (aindex = fcellinfo.grid.ffocusedcell.row) and
+          ((gps_fix in fstate) or (co1_rowcoloractive in foptions1) or
                                (findex = fcellinfo.grid.ffocusedcell.col))
 end;
 
-function tcol.checkfocusedcolor(const aindex: integer): boolean; 
+function tcol.checkfocusedcolor(const aindex: integer): boolean;
          //true if colorfocus and fontfocusnum active
 begin
- result:= //(fgrid.entered {or (co1_active in {tcols(prop).}foptions1)}) and 
-          (aindex = fcellinfo.grid.ffocusedcell.row) and 
-          ((gps_fix in fstate) or (co1_rowcolorfocused in foptions1) or 
+ result:= //(fgrid.entered {or (co1_active in {tcols(prop).}foptions1)}) and
+          (aindex = fcellinfo.grid.ffocusedcell.row) and
+          ((gps_fix in fstate) or (co1_rowcolorfocused in foptions1) or
                                (findex = fcellinfo.grid.ffocusedcell.col))
 end;
 
@@ -3742,14 +3742,14 @@ begin
   end;
  end;
  if result = nil then begin
-  if (ffontactivenum >= 0) and 
+  if (ffontactivenum >= 0) and
                 (ffontactivenum < fcellinfo.grid.frowfonts.count) then begin
    if checkactivecolor(aindex) then begin
     result:= tfont(fcellinfo.grid.frowfonts.fitems[ffontactivenum]);
    end;
   end;
   if result = nil then begin
-   if (ffontfocusednum >= 0) and 
+   if (ffontfocusednum >= 0) and
                  (ffontfocusednum < fcellinfo.grid.frowfonts.count) then begin
     if checkfocusedcolor(aindex) then begin
      result:= tfont(fcellinfo.grid.frowfonts.fitems[ffontfocusednum]);
@@ -3772,8 +3772,8 @@ var
  int1: integer;
 begin
  result:= false;
- if (co1_autocolwidth in foptions1) and 
-                    not (gps_autosizevalid in fstate) and 
+ if (co1_autocolwidth in foptions1) and
+                    not (gps_autosizevalid in fstate) and
               not (csdesigning in fcellinfo.grid.componentstate) then begin
   include(fstate,gps_autosizevalid);
   int1:= width;
@@ -3784,7 +3784,7 @@ begin
  end;
 end;
 
-procedure tcol.dobeforedrawcell(const acanvas: tcanvas; 
+procedure tcol.dobeforedrawcell(const acanvas: tcanvas;
                                        var processed: boolean);
 begin
  fonbeforedrawcell(self,acanvas,fcellinfo,processed);
@@ -3822,7 +3822,7 @@ var
  endy: integer;
  framedim1: sizety;
 begin
- if (not (co_invisible in foptions) or 
+ if (not (co_invisible in foptions) or
          (csdesigning in fcellinfo.grid.componentstate)) then begin
   if not info.calcautocellsize and checkautocolwidth then begin
    exit;
@@ -3837,7 +3837,7 @@ begin
    fcellinfo.autocellsize:= subsize(autocellsize,framedim1);
    fcellinfo.grid.fbrushorigin.x:= fcellinfo.grid.frootbrushorigin.x;
    if not (co_nohscroll in foptions) then begin
-    fcellinfo.grid.fbrushorigin.x:= 
+    fcellinfo.grid.fbrushorigin.x:=
                 fcellinfo.grid.fbrushorigin.x + fcellinfo.grid.fscrollrect.x;
    end;
    fcellinfo.font:= nil;
@@ -3872,9 +3872,9 @@ begin
      if hasrowheight then begin
       with fcellinfo do begin
        heightextend:= rowstatelist.internalheight(row1) - fcellinfo.grid.fdatarowheight;//rect.cy;
-       inc(fcellrect.cy,heightextend);      
-       inc(rect.cy,heightextend);      
-       inc(innerrect.cy,heightextend);      
+       inc(fcellrect.cy,heightextend);
+       inc(rect.cy,heightextend);
+       inc(innerrect.cy,heightextend);
        inc(frameinnerrect.cy,heightextend);
       end;
      end;
@@ -3893,9 +3893,9 @@ begin
        end;
       end;
       with fcellinfo do begin
-       inc(fcellrect.cx,widthextend);      
-       inc(rect.cx,widthextend);      
-       inc(innerrect.cx,widthextend);      
+       inc(fcellrect.cx,widthextend);
+       inc(rect.cx,widthextend);
+       inc(innerrect.cx,widthextend);
        inc(frameinnerrect.cx,widthextend);
       end;
      end;
@@ -3922,13 +3922,13 @@ begin
       if isfocusedcell then begin
        include(fcellinfo.drawstate,cds_active);
       end;
-      if isfocusedcell or (co1_rowcoloractive in foptions1) and 
+      if isfocusedcell or (co1_rowcoloractive in foptions1) and
                             (row1 = fcellinfo.grid.ffocusedcell.row) then begin
        include(fcellinfo.drawstate,cds_usecoloractive);
       end;
-       
+
 //      fcellinfo.notext:= false;
-      if  (fcellinfo.grid.fmousecell.col = fcellinfo.cell.col) and 
+      if  (fcellinfo.grid.fmousecell.col = fcellinfo.cell.col) and
                               (fcellinfo.grid.fmousecell.row = row1) then begin
        include(fcellinfo.drawstate,cds_ismousecell);
       end;
@@ -3962,7 +3962,7 @@ begin
       if not bo2 then begin
        drawcelloverlay(canvas,fframe);
       end;
-      if isfocusedcol and (row1 = fcellinfo.grid.ffocusedcell.row) and 
+      if isfocusedcol and (row1 = fcellinfo.grid.ffocusedcell.row) and
                 needsfocusrect and
               fcellinfo.grid.cellhasfocus and fcellinfo.grid.active then begin
        if fframe <> nil then begin
@@ -3976,17 +3976,17 @@ begin
      finally
       if heightextend <> 0 then begin
        with fcellinfo do begin  //restore original values
-        dec(fcellrect.cy,heightextend);      
-        dec(rect.cy,heightextend);      
-        dec(innerrect.cy,heightextend);      
+        dec(fcellrect.cy,heightextend);
+        dec(rect.cy,heightextend);
+        dec(innerrect.cy,heightextend);
         dec(frameinnerrect.cy,heightextend);
        end;
       end;
       if widthextend <> 0 then begin
        with fcellinfo do begin  //restore original values
-        dec(fcellrect.cx,widthextend);      
-        dec(rect.cx,widthextend);      
-        dec(innerrect.cx,widthextend);      
+        dec(fcellrect.cx,widthextend);
+        dec(rect.cx,widthextend);
+        dec(innerrect.cx,widthextend);
         dec(frameinnerrect.cx,widthextend);
        end;
       end;
@@ -4027,7 +4027,7 @@ begin
      bo1:= false; //line started
      bo2:= false; //line stopped
      for int1:= startrow to endrow do begin
-      if (int2 > high(hiddenlines)) or 
+      if (int2 > high(hiddenlines)) or
                               (rows[int1] <> hiddenlines[int2]) then begin
        if not bo1 then begin      //start line
         bo1:= true;
@@ -4082,7 +4082,7 @@ procedure tcol.updatepropwidth;
 var
  int1: integer;
 begin
- if not (csloading in fcellinfo.grid.componentstate) and 
+ if not (csloading in fcellinfo.grid.componentstate) and
                  not (gs_updatelocked in fcellinfo.grid.fstate) then begin
 //  int1:= tgridframe(fgrid.fframe).fpaintrect.cx;
   int1:= fcellinfo.grid.fpropcolwidthref;
@@ -4104,7 +4104,7 @@ begin
   updatewidth(fwidth);
   updatepropwidth;
   fcellinfo.grid.layoutchanged;
-  if (gps_needsrowheight in fstate) and 
+  if (gps_needsrowheight in fstate) and
         not (csloading in fcellinfo.grid.componentstate) then begin
 //   updatecellrect(fframe);
    fcellinfo.grid.updatelayout;
@@ -4123,7 +4123,7 @@ function tcol.step(getscrollable: boolean = true): integer;
 begin
  result:= 0;
  if (getscrollable xor (co_nohscroll in foptions)) and
- (not (co_invisible in foptions) or 
+ (not (co_invisible in foptions) or
            (csdesigning in fcellinfo.grid.ComponentState)) then begin
   result:= fwidth + flinewidth;
  end;
@@ -4169,7 +4169,7 @@ begin
    for int1:= 0 to high(fitems) do begin
     tcol(fitems[int1]).fpropwidth:= 0;
    end;
-  end;     
+  end;
   }
  end;
 end;
@@ -4211,7 +4211,7 @@ begin
   end
   else begin
    exclude(fstate,gps_needsrowheight);
-  end; 
+  end;
   fcellinfo.grid.checkneedsrowheight;
  end;
  if opt1 * layoutchangedcoloptions1 <> [] then begin
@@ -4243,8 +4243,8 @@ begin
  fcellrect.size.cx:= fwidth;
  fcellrect.y:= 0;
  bo1:= fcellinfo.cell.col < 0;
- if bo1 and (fcellinfo.cell.col <= tgridarrayprop(prop).ffirstopposite) or 
-   not bo1 and 
+ if bo1 and (fcellinfo.cell.col <= tgridarrayprop(prop).ffirstopposite) or
+   not bo1 and
         (fcellinfo.cell.col >= tgridarrayprop(prop).ffirstopposite) then begin
   flinepos:= -((flinewidth+1) div 2);
   fcellrect.x:= flinewidth;
@@ -4382,7 +4382,7 @@ begin
  end
  else begin
   options:= options + [co_invisible];
- end; 
+ end;
 end;
 
 function tcol.getenabled: boolean;
@@ -4397,7 +4397,7 @@ begin
  end
  else begin
   options:= options + [co_disabled];
- end; 
+ end;
 end;
 
 function tcol.getreadonly: boolean;
@@ -4412,7 +4412,7 @@ begin
  end
  else begin
   options:= options - [co_readonly];
- end; 
+ end;
 end;
 
 procedure tcol.updatecolwidth(const arow,acount: integer;
@@ -4426,7 +4426,7 @@ begin
   calcautocellsize:= true;
   autocellsize.cx:= acolwidth;
   autocellsize.cy:= fcellinfo.grid.datarowheight;
-  canvas:= fcellinfo.grid.getcanvas;  
+  canvas:= fcellinfo.grid.getcanvas;
   allocuninitedarray(acount,sizeof(rows[0]),rows); //including invisible rows
   i2:= arow;
   startrow:= arow;
@@ -4458,7 +4458,7 @@ end;
 
 procedure tcol.checkmaxwidth;
 begin
- if not (gps_maxsizevalid in fstate) then begin  
+ if not (gps_maxsizevalid in fstate) then begin
   include(fstate,gps_maxsizevalid);
   fmaxwidth:= 0;
   updatecolwidth(0,fcellinfo.grid.rowcount,fmaxwidth);
@@ -4674,7 +4674,7 @@ begin
 // getwidget.invalidatewidget;
 end;
 
-procedure tcolheader.invalidaterect(const rect: rectty; 
+procedure tcolheader.invalidaterect(const rect: rectty;
         const org: originty = org_client; const noclip: boolean = false);
 begin
  changed;
@@ -4752,7 +4752,7 @@ begin
  if fmergecols <> avalue then begin
   fmergecols:= avalue;
   fgrid.layoutchanged;
-  if fgrid.componentstate * [csloading,csdesigning,csdestroying] = 
+  if fgrid.componentstate * [csloading,csdesigning,csdestroying] =
                             [csdesigning] then begin
    fgrid.updatelayout; //check colheaders.count
   end;
@@ -4764,7 +4764,7 @@ begin
  if fmergerows <> avalue then begin
   fmergerows:= avalue;
   fgrid.layoutchanged;
-  if fgrid.componentstate * [csloading,csdesigning,csdestroying] = 
+  if fgrid.componentstate * [csloading,csdesigning,csdestroying] =
                             [csdesigning] then begin
    fgrid.updatelayout; //check colheaders.count
   end;
@@ -4861,9 +4861,9 @@ begin
     int1:= ord(stg_arrowdownsmall);
    end;
    if not (fgrid.hassort) or
-     (co_nosort in options) or 
-     (fgrid.datacols.sortcol >= 0) and (fgrid.datacols.sortcol <> index) or 
-     (fgrid.datacols.sortcol < 0) and 
+     (co_nosort in options) or
+     (fgrid.datacols.sortcol >= 0) and (fgrid.datacols.sortcol <> index) or
+     (fgrid.datacols.sortcol < 0) and
                            (og_nodefaultsort in fgrid.foptionsgrid) then begin
     if dco_nodisabledsortindicator in self.foptions then begin
      int1:= -1;
@@ -4987,9 +4987,9 @@ begin
     fmergedcx:= 0;
     fmergedx:= 0;
    end;
-   if not ffixcol and (mergedcxbefore <> fmergedcx) and 
+   if not ffixcol and (mergedcxbefore <> fmergedcx) and
           not (dco_noautowidth in tdatacolheader(fitems[int1]).options) and
-        (int1 < cols.count) and 
+        (int1 < cols.count) and
           (co1_autoheaderwidth in tcol(cols.fitems[int1]).options1) then begin
     tfixrow(fgridprop).invalidatemaxsize(int1);
    end;
@@ -5005,7 +5005,7 @@ begin
     if lastmergedcol < int1 then begin
      lastmergedcol:= int1;
     end;
-    bo1:= fgridprop.index >= fgrid.ffixrows.count - 
+    bo1:= fgridprop.index >= fgrid.ffixrows.count -
                                           fgrid.ffixrows.foppositecount;
     for int2:= fgridprop.index + 1 to lastmergedrow do begin
      with tfixrow(fgrid.ffixrows.fitems[int2]) do begin
@@ -5122,7 +5122,7 @@ end;
 
 { tfixrow }
 
-constructor tfixrow.create(const agrid: tcustomgrid; 
+constructor tfixrow.create(const agrid: tcustomgrid;
                                             const aowner: tgridarrayprop);
 begin
  ftextinfo.flags:= defaultfixcoltextflags;
@@ -5183,7 +5183,7 @@ procedure tfixrow.synctofontheight;
 begin
  if fframe <> nil then begin
   fframe.checkstate;
-  height:= {height + }font.glyphheight + fframe.finnerframe.top + 
+  height:= {height + }font.glyphheight + fframe.finnerframe.top +
                                      fframe.finnerframe.bottom;
  end
  else begin
@@ -5234,7 +5234,7 @@ begin
    headers1:= fcaptionsfix;
    int1:= -cell.col-1;
   end;
- 
+
   frame1:= fframe;
   face1:= fface;
   pt1:= nullpoint;
@@ -5245,7 +5245,7 @@ begin
     linemerged:= cmf_rline in fmergeflags;
     if fmergeflags * [cmf_v,cmf_h] <> [] then begin
      goto endlab;
-    end;     
+    end;
     if fcolor <> cl_parent then begin
      fcellinfo.color:= fcolor;
     end;
@@ -5318,7 +5318,7 @@ var
  linewidthbefore: integer;
  color1: colorty;
  canbeforedrawcell,canafterdrawcell: boolean;
- 
+
  procedure paintcols(const range: rangety);
  var
   int1,int2,int3: integer;
@@ -5344,7 +5344,7 @@ var
    for int1:= int2 to range.endindex do begin
     with tcol(cols.fitems[int1]) do begin
      bo1:= (colrange.scrollables xor (co_nohscroll in foptions)) and
-        (not (co_invisible in foptions) or 
+        (not (co_invisible in foptions) or
                    (csdesigning in fcellinfo.grid.componentstate));
      if bo1 then begin
       self.fcellrect.cx:= fwidth;
@@ -5359,7 +5359,7 @@ var
      end
      else begin
       fcellinfo.cell.col:= int1;
-      if (fcolorselect <> cl_none) and 
+      if (fcolorselect <> cl_none) and
             (gps_selected in fcellinfo.grid.fdatacols[int1].fstate) then begin
        if fcolorselect <> cl_default then begin
         fcellinfo.color:= fcolorselect;
@@ -5386,7 +5386,7 @@ var
  end;
 
 begin
- if (not (co_invisible in foptions) or info.calcautocellsize) or 
+ if (not (co_invisible in foptions) or info.calcautocellsize) or
                      (csdesigning in fcellinfo.grid.ComponentState) then begin
   with info do begin
    fcellinfo.calcautocellsize:= calcautocellsize;
@@ -5445,7 +5445,7 @@ end;
 
 function tfixrow.step(getscrollable: boolean = true): integer;
 begin
- if (not (co_invisible in foptions) or 
+ if (not (co_invisible in foptions) or
   (csdesigning in fcellinfo.grid.ComponentState)) then begin
   result:= fheight+flinewidth;
  end
@@ -5571,7 +5571,7 @@ begin
   end
   else begin
    foptions:= foptions - [co_invisible];
-  end;  
+  end;
   fcellinfo.grid.layoutchanged;
  end;
 end;
@@ -5597,19 +5597,19 @@ var
 begin
  if (info.cell.col >= 0) and (info.cell.col < fcaptions.count) then begin
   opt1:= fcaptions[info.cell.col].options;
-  if (dco_colsort in opt1) and 
+  if (dco_colsort in opt1) and
            iscellclick(info,[ccr_nokeyreturn]{,[ss_ctrl]}) then begin
    with fcellinfo.grid.datacols[info.cell.col] do begin
     if ((opt1 * [dco_wholecellsortclick,dco_nodisabledsortindicator] <> []) and
-                                           (info.mouseeventinfopo^.pos.x > 0) or 
-                         (info.mouseeventinfopo^.pos.x > fwidth - 15)) and    
+                                           (info.mouseeventinfopo^.pos.x > 0) or
+                         (info.mouseeventinfopo^.pos.x > fwidth - 15)) and
                   //button click of merged cells not supported
                                        not (co_nosort in foptions) then begin
-     if (fcellinfo.grid.datacols.sortcol = info.cell.col) and 
+     if (fcellinfo.grid.datacols.sortcol = info.cell.col) and
                                             fcellinfo.grid.hassort then begin
       if ss_ctrl in info.mouseeventinfopo^.shiftstate then begin
        if fcellinfo.grid.datacols.sortcoldefault >= 0 then begin
-        fcellinfo.grid.datacols.sortcol:= 
+        fcellinfo.grid.datacols.sortcol:=
                                        fcellinfo.grid.datacols.sortcoldefault;
        end
        else begin
@@ -5637,7 +5637,7 @@ begin
     end;
    end;
   end;
- end;  
+ end;
 end;
 
 { tgridarrayprop }
@@ -5950,7 +5950,7 @@ procedure tgridarrayprop.getindexrange(startpos, length: integer;
      if startindex > endindex then begin
       int1:= startindex;
       startindex:= endindex;
-      endindex:= int1; 
+      endindex:= int1;
      end;
     end;
    end;
@@ -5974,7 +5974,7 @@ begin
  result:= invalidaxis;
  for int1:= 0 to count - 1 do begin
   with geoitems(int1) do begin
-   if (not (co_invisible in foptions) or 
+   if (not (co_invisible in foptions) or
            (csdesigning in fgrid.componentstate)) and
           (getscrollable xor (co_nohscroll in foptions)) then begin
     if (pos >= fstart) and (pos < fend) then begin
@@ -6104,10 +6104,10 @@ begin
  fcellinfo.grid.internalupdatelayout;
  result.x:= fstart + flinewidth + fcellrect.x;
  if not (co_nohscroll in foptions) then begin
-  result.x:= result.x + fcellinfo.grid.fdatarect.x + 
+  result.x:= result.x + fcellinfo.grid.fdatarect.x +
                                     fcellinfo.grid.fscrollrect.x;
  end;
- result.y:= fcellrect.y + fcellinfo.grid.fdatarect.y + 
+ result.y:= fcellrect.y + fcellinfo.grid.fdatarect.y +
                                      fcellinfo.grid.fscrollrect.y;
 end;
 
@@ -6147,7 +6147,7 @@ begin
   exit;
  end;
 }
- bo1:= (gs_hasactiverowcolor in fcellinfo.grid.fstate) and 
+ bo1:= (gs_hasactiverowcolor in fcellinfo.grid.fstate) and
                                          (newcell.row <> cellbefore.row);
  if enter then begin
   fcellinfo.grid.factiverow:= newcell.row;
@@ -6155,7 +6155,7 @@ begin
    fcellinfo.grid.invalidaterow(newcell.row);
   end
   else begin
-   if (co_drawfocus in foptions) or (fcoloractive <> cl_none) or 
+   if (co_drawfocus in foptions) or (fcoloractive <> cl_none) or
                                        (fcolorfocused <> cl_none) then begin
     invalidatecell(newcell.row);
    end;
@@ -6216,7 +6216,7 @@ begin
  end;
 end;
 
-procedure tdatacol.clientmouseevent(const acell: gridcoordty; 
+procedure tdatacol.clientmouseevent(const acell: gridcoordty;
                                               var info: mouseeventinfoty);
 var
  cellinfo: celleventinfoty;
@@ -6509,7 +6509,7 @@ end;
 procedure tdatacol.internaldoentercell(const cellbefore: gridcoordty;
                 var newcell: gridcoordty; const action: focuscellactionty);
 begin
- if not (gs_cellentered in fcellinfo.grid.fstate) or 
+ if not (gs_cellentered in fcellinfo.grid.fstate) or
                                       (action = fca_entergrid) then begin
   include(fcellinfo.grid.fstate,gs_cellentered);
 //  include(fgrid.fstate1,gs1_focusedcellchanged);
@@ -6527,7 +6527,7 @@ begin
  end
  else begin
   if ((co1_rowcoloractive in foptions1) or (co1_rowcolorfocused in foptions1) or
-      (ffontactivenum >= 0) or (ffontfocusednum >= 0)) and 
+      (ffontactivenum >= 0) or (ffontfocusednum >= 0)) and
                                         (cellbefore.row >= 0) then begin
    invalidatecell(cellbefore.row);
   end;
@@ -6548,7 +6548,7 @@ end;
 
 procedure tdatacol.datachange(const arow: integer);
 begin
- if (datalist = nil) and not (gps_noinvalidate in fstate) and 
+ if (datalist = nil) and not (gps_noinvalidate in fstate) and
                      not (csloading in fcellinfo.grid.componentstate) then begin
   checkdirtyautorowheight(arow);
  end;
@@ -6573,7 +6573,7 @@ begin
    end;
   end;
  end;
- if not (gps_noinvalidate in fstate) and 
+ if not (gps_noinvalidate in fstate) and
                      not (csloading in fcellinfo.grid.componentstate) then begin
   checkdirtyautorowheight(aindex);
   if aindex < 0 then begin
@@ -6582,7 +6582,7 @@ begin
   else begin
    cellchanged(aindex);
   end;
-  if (co_rowdatachange in foptions) and 
+  if (co_rowdatachange in foptions) and
                                (fcellinfo.grid.frowdatachanging = 0) then begin
                                            //no recursion
    coord1.col:= index;
@@ -6600,7 +6600,7 @@ begin
   fcellinfo.grid.sortinvalid(index,aindex);
  end;
  invalidatemaxsize(aindex);
- if not (gps_changelock in fstate) and 
+ if not (gps_changelock in fstate) and
                    fcellinfo.grid.canevent(tmethod(fonchange)) then begin
   fonchange(self,aindex);
  end;
@@ -6703,20 +6703,20 @@ begin
          {$ifdef FPC}longword{$else}longword{$endif}(value),
          {$ifdef FPC}longword{$else}longword{$endif}(foptions),
          {$ifdef FPC}longword{$else}longword{$endif}(mask))));
- if coloptionsty(longword(optionsbefore) xor longword(foptions)) * 
+ if coloptionsty(longword(optionsbefore) xor longword(foptions)) *
           [co_nosort,co_sortdescend,co_sortcaseinsensitive] <> [] then begin
   fcellinfo.grid.sortinvalid(index,-1);
   fcellinfo.grid.checksort;
  end;
- optionsplusdelta:= coloptionsty((longword(optionsbefore) xor longword(foptions)) and 
+ optionsplusdelta:= coloptionsty((longword(optionsbefore) xor longword(foptions)) and
                                                     longword(value));
  if (co_focusselect in optionsplusdelta) and
-   (fcellinfo.grid.ffocusedcell.col = findex) and 
+   (fcellinfo.grid.ffocusedcell.col = findex) and
                 (fcellinfo.grid.ffocusedcell.row >= 0) then begin
   fcellinfo.grid.selectcell(
              makegridcoord(findex,fcellinfo.grid.ffocusedcell.row),csm_select);
  end;
- if (co_disabled in optionsplusdelta) and 
+ if (co_disabled in optionsplusdelta) and
                     (fcellinfo.grid.ffocusedcell.col = colindex) then begin
   fcellinfo.grid.colstep(fca_focusin,1,false,false,false);
  end;
@@ -6730,7 +6730,7 @@ begin
  canrowfocus:= ((abutton = mb_left) or (abutton = mb_none) or
                      not (co_leftbuttonfocusonly in foptions) or
           (abutton = mb_middle) and (co_middlebuttonfocus in foptions)) and
-               ((ashiftstate*[ss_ctrl] = []) or 
+               ((ashiftstate*[ss_ctrl] = []) or
                             not (co_noctrlmousefocus in foptions));
  result:= (foptions * [co_invisible,co_disabled,co_nofocus] = []) and
              canrowfocus and (not noreadonly or not(co_readonly in options));
@@ -6785,7 +6785,7 @@ begin
   foncellevent(self,info);
  end;
  if (info.eventkind = cek_firstmousepark) and
-          fcellinfo.grid.canevent(tmethod(fonshowhint)) and 
+          fcellinfo.grid.canevent(tmethod(fonshowhint)) and
                                           application.active then begin
   application.inithintinfo(hintinfo,fcellinfo.grid);
   fonshowhint(self,info.cell.row,hintinfo);
@@ -6834,13 +6834,13 @@ var
  mstr1: msestring;
 begin
  if (fdata <> nil) and not (dls_remote in fdata.state) and
-                                (co_savevalue in foptions) and 
+                                (co_savevalue in foptions) and
           not (gs_isdb in fcellinfo.grid.fstate) and reader.candata then begin
   reader.readdatalist(getdatastatname,fdata);
  end;
  if (co_savestate in foptions) and reader.canstate then begin
   mstr1:= getstatsuffix();
-  if not (co_fixwidth in foptions) and 
+  if not (co_fixwidth in foptions) and
                    (og_colsizing in fcellinfo.grid.optionsgrid) then begin
    width:= reader.readinteger('width'+mstr1,fwidth,0);
   end;
@@ -6860,14 +6860,14 @@ var
 begin
  inherited;
  if (fdata <> nil) and not (dls_remote in fdata.state) and
-                         (co_savevalue in foptions) and 
+                         (co_savevalue in foptions) and
                          not (gs_isdb in fcellinfo.grid.fstate) and
                          writer.candata then begin
   writer.writedatalist(getdatastatname,fdata);
  end;
  if (co_savestate in foptions) and writer.canstate then begin
   mstr1:= getstatsuffix();
-  if not (co_fixwidth in foptions) and 
+  if not (co_fixwidth in foptions) and
                    (og_colsizing in fcellinfo.grid.optionsgrid) then begin
    writer.writeinteger('width'+mstr1,fwidth);
   end;
@@ -6979,7 +6979,7 @@ begin
  with fcellinfo.rowstate^ do begin
   result:= merged <> 0;
   if result then begin
-   result:= (index <> 0) and  
+   result:= (index <> 0) and
     ((merged = mergedcolall) or (index < mergedcolmax) and
     (merged and bits[index] <> 0));
   end;
@@ -7000,8 +7000,8 @@ end;
 
 function tdatacol.isreadonly: boolean;
 begin
- result:= (co1_rowreadonly in foptions1) and 
-                 (gs_rowreadonly in fcellinfo.grid.fstate) or 
+ result:= (co1_rowreadonly in foptions1) and
+                 (gs_rowreadonly in fcellinfo.grid.fstate) or
                   (co_readonly in foptions);
 end;
 
@@ -7019,7 +7019,7 @@ end;
 
 procedure tdatacol.autocellheightchanged(const aindex: integer);
 begin
- checkdirtyautorowheight(aindex); 
+ checkdirtyautorowheight(aindex);
 end;
 
 procedure tdatacol.autocellwidthchanged(const aindex: integer);
@@ -7123,7 +7123,7 @@ begin
    if not flag1[int1] then begin
     break;
    end;
-   result:= result + aseparator + self.items[int1]; 
+   result:= result + aseparator + self.items[int1];
   end;
  end;
 end;
@@ -7150,7 +7150,7 @@ end;
 
 { tcustomstringcol }
 
-constructor tcustomstringcol.create(const agrid: tcustomgrid; 
+constructor tcustomstringcol.create(const agrid: tcustomgrid;
                        const aowner: tgridarrayprop);
 begin
  fvaluetrue:= '1';
@@ -7168,7 +7168,7 @@ begin
  inherited;
 end;
 
-procedure tcustomstringcol.settextflags(const avalue: textflagsty);	
+procedure tcustomstringcol.settextflags(const avalue: textflagsty);
 begin
  if ftextinfo.flags <> avalue then begin
   ftextinfo.flags:= checktextflags(ftextinfo.flags,avalue);
@@ -7219,7 +7219,7 @@ begin
  if fcellinfo.grid.canevent(tmethod(fonsetvalue)) then begin
   fonsetvalue(self,avalue,accept);
  end;
- if accept then begin                
+ if accept then begin
   items[fcellinfo.grid.ffocusedcell.row]:= avalue;
   if fcellinfo.grid.canevent(tmethod(fondataentered)) then begin
    fondataentered(self);
@@ -7473,8 +7473,8 @@ end;
 
 function tcustomstringcol.needsfocusrect: boolean;
 begin
- result:= inherited needsfocusrect or 
-             (scoe_focusrectonreadonly in foptionsedit) and 
+ result:= inherited needsfocusrect or
+             (scoe_focusrectonreadonly in foptionsedit) and
                 ((co_readonly in foptions) or (oe_readonly in getoptionsedit));
 end;
 
@@ -7486,8 +7486,8 @@ var
 begin
  if scoe_checkbox in foptionsedit then begin
   if not isreadonly and (info.cell.row >= 0) then begin
-   if iscellclick(info) or (info.eventkind = cek_keyup) and 
-        (info.keyeventinfopo^.key = key_space) and 
+   if iscellclick(info) or (info.eventkind = cek_keyup) and
+        (info.keyeventinfopo^.key = key_space) and
         (info.keyeventinfopo^.shiftstate = []) then begin
     if checked[info.cell.row] then begin
      mstr1:= fvaluefalse;
@@ -7501,8 +7501,8 @@ begin
   end;
  end
  else begin
-  if (scoe_hintclippedtext in foptionsedit) and 
-         (info.eventkind = cek_firstmousepark) and application.active and 
+  if (scoe_hintclippedtext in foptionsedit) and
+         (info.eventkind = cek_firstmousepark) and application.active and
           fcellinfo.grid.getshowhint and
           tcustomstringgrid(fcellinfo.grid).textclipped(info.cell) then begin
    application.inithintinfo(hintinfo,fcellinfo.grid);
@@ -7548,7 +7548,7 @@ end;
 
 { tfixcol }
 
-constructor tfixcol.create(const agrid: tcustomgrid; 
+constructor tfixcol.create(const agrid: tcustomgrid;
                                const aowner: tgridarrayprop);
 begin
  foptionsfix:= defaultfixcoloptions;
@@ -7615,7 +7615,7 @@ begin
    end
    else begin
     if fnumstep <> 0 then begin
-     ftextinfo.text.text:= 
+     ftextinfo.text.text:=
                inttostrmse(fcellinfo.grid.fnumoffset+fnumstart+fnumstep*cell.row);
      drawtext(canvas,ftextinfo);
     end;
@@ -7763,8 +7763,8 @@ end;
 destructor tcols.destroy;
 begin
  inherited;
- ffont.free; 
- ffontselect.free; 
+ ffont.free;
+ ffontselect.free;
 end;
 
 function tcols.mergedwidth(const acol: integer; const amerged: longword): integer;
@@ -7840,8 +7840,8 @@ begin
   end;
   for int1:= 0 to count-1 do begin
    with tcol(fitems[int1]) do begin
-    if (scrollables xor (co_nohscroll in foptions)) and 
-     (calcautocellsize or not ((startx < fstart) and (endx <= fstart) or 
+    if (scrollables xor (co_nohscroll in foptions)) and
+     (calcautocellsize or not ((startx < fstart) and (endx <= fstart) or
           (startx >= ar1[int1]) and (endx > ar1[int1]))) then begin
      pt2.x:= fstart + pt1.x;
      canvas.origin:= pt2;
@@ -7862,7 +7862,7 @@ begin
   calcautocellsize:= true;
   autocellsize.cx:= 0;
   autocellsize.cy:= arowheight;
-  canvas:= fgrid.getcanvas;  
+  canvas:= fgrid.getcanvas;
   setlength(rows,1);
   rows[0]:= arow; //startrow = endrow = 0
   paint(info,true);
@@ -8198,7 +8198,7 @@ begin
  result:= tdatacol(items[index]);
 end;
 
-function tdatacols.colatpos(const x: integer; 
+function tdatacols.colatpos(const x: integer;
              const getscrollable: boolean = true): integer;
 begin
  result:= itematpos(x,getscrollable);
@@ -8290,7 +8290,7 @@ begin
  end;
  with frowstate do begin
   if folded and (newcount < count) then begin
-   updatedeletedrows(newcount,count-newcount);   
+   updatedeletedrows(newcount,count-newcount);
   end;
   count:= newcount;
   if fvisiblerowmap <> nil then begin
@@ -8453,7 +8453,7 @@ begin
     exclude(fstate,gps_changelock);
    end;
   end;
-  if fgrid.componentstate * 
+  if fgrid.componentstate *
                   [csloading,csdesigning,csdestroying] = [] then begin
    for int1:= 0 to count - 1 do begin
     col1:= tdatacol(fitems[int1]);
@@ -8488,7 +8488,7 @@ begin
  end
  else begin
   if cell.row >= 0 then begin
-   result:= (frowstate.getitempo(cell.row)^.selected and 
+   result:= (frowstate.getitempo(cell.row)^.selected and
                                               wholerowselectedmask <> 0);
   end
   else begin
@@ -8510,7 +8510,7 @@ var
  ca1: longword;
  bo1: boolean;
  rowstatesize: integer;
- 
+
 begin
  fgrid.setselected(cell,value);
 // if not (gs_isdb in fgrid.fstate) then begin
@@ -8641,7 +8641,7 @@ begin
  rect.pos:= start;
  rect.colcount:= stop.col - start.col;
  rect.rowcount:= stop.row - start.row;
- normalizerect1(rectty(rect)); 
+ normalizerect1(rectty(rect));
  if calldoselectcell then begin
   if value then begin
    mo1:= csm_select;
@@ -8650,7 +8650,7 @@ begin
    mo1:= csm_deselect;
   end;
   for int1:= rect.col to rect.col + rect.colcount - 1 do begin
-   cols[int1].beginselect;   
+   cols[int1].beginselect;
    for int2:= rect.row to rect.row + rect.rowcount - 1 do begin
     fgrid.selectcell(makegridcoord(int1,int2),mo1,checkmultiselect);
    end;
@@ -8667,7 +8667,7 @@ begin
   for int1:= rect.col to rect.col + rect.colcount - 1 do begin
    with cols[int1] do begin
     beginselect;
-    if not value or not checkmultiselect or 
+    if not value or not checkmultiselect or
                              (co_multiselect in options) then begin
      for int2:= rect.row to rect.row + rect.rowcount - 1 do begin
       selected[int2]:= value;
@@ -8711,7 +8711,7 @@ begin
  end;
 end;
 
-procedure tdatacols.mergecols(const arow: integer; const astart: longword = 0; 
+procedure tdatacols.mergecols(const arow: integer; const astart: longword = 0;
                        const acount: longword = bigint);
 begin
  if frowstate.mergecols(arow,astart,acount) then begin
@@ -9109,7 +9109,7 @@ procedure tdatacols.move(const curindex: integer; const newindex: integer);
    end;
   end;
  end; //domove
- 
+
 begin
  inherited;
  domove(fnewrowcol);
@@ -9248,7 +9248,7 @@ begin
      end;
     end;
    end;
-   if result then begin 
+   if result then begin
     break;
    end;
   end;
@@ -9597,23 +9597,23 @@ begin
    end
    else begin
     with fgrid.fdatacols do begin
-     int3:= fgrid.fdatarecty.cx - 
-            fgrid.ffixcols.ftotsize + fgrid.ffixcols.ffirstsize - 
+     int3:= fgrid.fdatarecty.cx -
+            fgrid.ffixcols.ftotsize + fgrid.ffixcols.ffirstsize -
             ftotsize + ffirstsize;
      if colrange.scrollables then begin
-      int3:= int3 - fgrid.fscrollrect.x; 
+      int3:= int3 - fgrid.fscrollrect.x;
      end;
      int4:= ffirstopposite;
     end;
    end;
    for int1:= 0 to cols.count - 1 do begin
     with cols[int1] do begin
-     if (flinewidth > 0) and (colrange.scrollables xor 
+     if (flinewidth > 0) and (colrange.scrollables xor
          (co_nohscroll in foptions)) and
-         (not(co_invisible in foptions) or 
+         (not(co_invisible in foptions) or
               (csdesigning in fgrid.componentstate)) then begin
       int2:= fstart + flinepos + fcellrect.x;
-      if (index >= int4) or 
+      if (index >= int4) or
              (int2 < int3) then begin
                      //not overlapped by right side columns
        linewidthbefore:= canvas.linewidth;
@@ -9635,8 +9635,8 @@ begin
    end;
    canvas.clipregion:= reg;
       //todo: should be on top because of overwriting
-      //overlapping co_nohscroll grid lines 
-      
+      //overlapping co_nohscroll grid lines
+
    po1:= canvas.origin;
    po2.x:= po1.x;
    paintrows(rowrange.range1);
@@ -9916,7 +9916,7 @@ function tcustomgrid.calcminscrollsize: sizety;
 begin
  internalupdatelayout;
  if not (gs_updatelocked in fstate) then begin
-  result.cx:= fdatacols.fscrollsize + fdatacols.ftotsize + 
+  result.cx:= fdatacols.fscrollsize + fdatacols.ftotsize +
               ffixcols.ftotsize +
               tgridframe(fframe).fi.innerframe.left +
               tgridframe(fframe).fi.innerframe.right;
@@ -9943,7 +9943,7 @@ begin
   fpropcolwidthref:= self.fwidgetrect.cx -
                      fouterframe.left - fouterframe.right -
                      2*(fi.levelo+fi.framewidth+fi.leveli) -
-                     finnerframe.left - finnerframe.right{ - 
+                     finnerframe.left - finnerframe.right{ -
                      2 * gridframewidth};
  end;
  int3:= 0;
@@ -9970,7 +9970,7 @@ begin
    if not (fco_invisible in options) then begin
     fpropcolwidthref:= fpropcolwidthref - width;
    end;
-  end;   
+  end;
  end;
  if fpropcolwidthref < int3 then begin
   fpropcolwidthref:= int3;
@@ -9991,7 +9991,7 @@ begin
  if focusedcellvalid then begin
   bo1:= gs_updatelocked in fstate;
   include(fstate,gs_updatelocked);
-  reshowfocusedcell:= not 
+  reshowfocusedcell:= not
             rectisequal(clippedcellrect(ffocusedcell,cil_paint),nullrect);
   if not bo1 then begin
    exclude(fstate,gs_updatelocked);
@@ -10008,7 +10008,7 @@ begin
    if numstep <> 0 then begin
     include(self.fstate,gs_needszebraoffset);
    end;
-   if (coloractive <> cl_none) or (colorfocused <> cl_none) or 
+   if (coloractive <> cl_none) or (colorfocused <> cl_none) or
          (fontactivenum >= 0) or (fontfocusednum >= 0) then begin
     include(self.fstate,gs_hasactiverowcolor);
    end;
@@ -10017,9 +10017,9 @@ begin
  if not (gs_hasactiverowcolor in fstate) then begin
   for int1:= 0 to fdatacols.count -1 do begin
    with tdatacol(fdatacols.items[int1]) do begin
-    if ((fcoloractive <> cl_none)  or (fontactivenum >= 0)) and 
-                            (co1_rowcoloractive in foptions1) or 
-       ((fcolorfocused <> cl_none)  or (fontfocusednum >= 0)) and 
+    if ((fcoloractive <> cl_none)  or (fontactivenum >= 0)) and
+                            (co1_rowcoloractive in foptions1) or
+       ((fcolorfocused <> cl_none)  or (fontfocusednum >= 0)) and
                             (co1_rowcolorfocused in foptions1) then begin
      include(self.fstate,gs_hasactiverowcolor);
      break;
@@ -10105,7 +10105,7 @@ begin
      end;
     end;
     }
-    cx:= fpaintrect.cx - x - ftotsize + ffirstsize - 
+    cx:= fpaintrect.cx - x - ftotsize + ffirstsize -
                      fdatacols.ftotsize + fdatacols.ffirstsize -
                      fi.innerframe.right;
     {
@@ -10139,8 +10139,8 @@ begin
   updatevisiblerows; //scroll needs valid visiblerows
   tgridframe(fframe).updatestate;
   inc(loopcount);
- until not propcolwidthrefchanged and 
-       (frame.state * scrollbarframestates = 
+ until not propcolwidthrefchanged and
+       (frame.state * scrollbarframestates =
                        scrollstate * scrollbarframestates) or (loopcount > 40);
 
  if bo1 then begin
@@ -10170,8 +10170,8 @@ procedure tcustomgrid.internalupdatelayout(const force: boolean);
 var
  bo1: boolean;
 begin
- if (fstate * [gs_layoutvalid,gs_updatelocked] = []) and 
-             not (csdestroying in componentstate) and 
+ if (fstate * [gs_layoutvalid,gs_updatelocked] = []) and
+             not (csdestroying in componentstate) and
              (force or (fupdating = 0)) then begin
   bo1:= not (gs_layoutupdating in fstate);
   if bo1 and canevent(tmethod(fonbeforeupdatelayout)) then begin
@@ -10314,11 +10314,11 @@ begin
       startrow:= rect1.y div ystep - fvisiblerowsbase;
       if startrow < 0 then begin
        startrow:= 0;
-      end; 
+      end;
       ystart:= (startrow + fvisiblerowsbase) * ystep;
       endrow:= (rect1.y + rect1.cy - 1) div ystep - fvisiblerowsbase;
      end;
-     rows:= fvisiblerows; 
+     rows:= fvisiblerows;
      foldinfo:= fvisiblerowfoldinfo;
      if endrow > high(fvisiblerows) then begin
       endrow:= high(fvisiblerows);
@@ -10413,7 +10413,7 @@ begin
       fdatacols.paint(colinfo,false);     //draw fix datacols
 
       acanvas.intersectcliprect(dataclip);
-      int1:= fscrollrect.x + fdatacols.fscrollsize + 
+      int1:= fscrollrect.x + fdatacols.fscrollsize +
                       fdatarect.x - tframe1(fframe).fi.innerframe.left;
       int2:= fdatarect.x + fdatarect.cx - tframe1(fframe).fi.innerframe.left;
       if int1 < int2 then begin
@@ -10475,7 +10475,7 @@ begin
   acanvas.drawframe(clientrect,innerframe,fgridframecolor);
  end;
 end;
- 
+
 procedure tcustomgrid.setstatfile(const Value: tstatfile);
 begin
  setstatfilevar(istatfile(self),value,fstatfile);
@@ -10500,7 +10500,7 @@ begin
   if reader.canstate then begin
    fpropcolwidthref:= reader.readinteger('propcolwidthref',fpropcolwidthref,0);
   end;
-  fdatacols.dostatread(reader,foptionsgrid * [og_savestate,og_colmoving] = 
+  fdatacols.dostatread(reader,foptionsgrid * [og_savestate,og_colmoving] =
                                                    [og_savestate,og_colmoving]);
   if (og_savestate in foptionsgrid) and reader.canstate then begin
    sorted:= reader.readboolean('sorted',sorted);
@@ -10538,7 +10538,7 @@ begin
  if writer.canstate then begin
   writer.writeinteger('propcolwidthref',fpropcolwidthref);
  end;
- fdatacols.dostatwrite(writer,foptionsgrid * [og_savestate,og_colmoving] = 
+ fdatacols.dostatwrite(writer,foptionsgrid * [og_savestate,og_colmoving] =
                                                    [og_savestate,og_colmoving]);
  row:= int1;
  if (og_savestate in foptionsgrid) and writer.canstate then begin
@@ -10738,7 +10738,7 @@ begin
  result:= not fnorowedit;
 end;
 
-procedure tcustomgrid.updatepopupmenu(var amenu: tpopupmenu; 
+procedure tcustomgrid.updatepopupmenu(var amenu: tpopupmenu;
                                     var mouseinfo: mouseeventinfoty);
 
  function menustates(const aenabled: boolean): actionstatesarty;
@@ -10751,7 +10751,7 @@ procedure tcustomgrid.updatepopupmenu(var amenu: tpopupmenu;
    result[0]:= [as_disabled]
   end;
  end; //menustates
- 
+
 var
  bo1: boolean;
  state1: actionstatesty;
@@ -10791,7 +10791,7 @@ begin
                  [],[state1],[{$ifdef FPC}@{$endif}dopastecells],not bo1);
    bo1:= true;
   end;
-  
+
   if og_rowinserting in foptionsgrid then begin
    tpopupmenu.additems(amenu,self,mouseinfo,[
               stockobjects.captions[sc_insert_rowhk]+sepchar+
@@ -10903,7 +10903,7 @@ begin
     fdatarowheight:= value;
    end;
   end;
-  rowstatelist.change(-1);  
+  rowstatelist.change(-1);
   layoutchanged;
  end;
 end;
@@ -10926,7 +10926,7 @@ begin
  end;
 end;
 
-procedure tcustomgrid.dorowsdatachanged(const acell: gridcoordty; 
+procedure tcustomgrid.dorowsdatachanged(const acell: gridcoordty;
                                          const acount: integer);
 var
  int1: integer;
@@ -10947,8 +10947,8 @@ end;
 procedure tcustomgrid.invalidatecell(const cell: gridcoordty);
 begin
  internalupdatelayout;
- if (cell.row < 0) or 
-                (cell.row >= ffirstvisiblerow) and 
+ if (cell.row < 0) or
+                (cell.row >= ffirstvisiblerow) and
                                 (cell.row <= flastvisiblerow) then begin
   invalidaterect(cellrect(cell));
  end;
@@ -11175,7 +11175,7 @@ begin
    exit;
   end;
  end;
-  
+
  with fmousecell do begin
   if (row >= 0) and (col >= 0) and (col < datacols.count) then begin
    result:= datacols[fmousecell.col].getcursor(fmousecell.row,flastcellzone,
@@ -11208,7 +11208,7 @@ var
  cellkind: cellkindty;
 
  procedure checkfocuscell;
- 
+
  function getfocusact(const canselect: boolean): focuscellactionty;
  begin
   result:= fca_focusin;
@@ -11223,7 +11223,7 @@ var
    end;
   end;
  end;
- 
+
  var
   po1: pointty;
   action: focuscellactionty;
@@ -11243,9 +11243,9 @@ var
                                                                      rowfocus);
      if not bo2 then begin
       if rowfocus then begin
-       cell1.col:= mergestart(ffocusedcell.col,cell1.row); 
+       cell1.col:= mergestart(ffocusedcell.col,cell1.row);
                                            //try to focus mouse row
-       if (cell1.col < 0) or 
+       if (cell1.col < 0) or
                        (co_nofocus in fdatacols[cell1.col].options) then begin
         cell1.col:= nextfocusablecol(0,false,cell1.row,false);
        end;
@@ -11254,7 +11254,7 @@ var
        cell1.col:= invalidaxis;
       end;
      end;
-     if (cell1.col >= 0) and 
+     if (cell1.col >= 0) and
          fdatacols[cell1.col].canfocus(info.button,
                              info.shiftstate,false,bo1) then begin
       bo1:= not gridcoordisequal(cell1,ffocusedcell);
@@ -11304,14 +11304,14 @@ var
    ck_fixcol: begin
     with fixcols[fmousecell.col] do begin
      if (fco_mousefocus in options) then begin
-      if (fmousecell.row <> ffocusedcell.row) or 
+      if (fmousecell.row <> ffocusedcell.row) or
                              (info.eventkind = ek_buttonpress) then begin
        focusrow(fmousecell.row,getfocusact(fco_mouseselect in options),
                                                             true,scm_row);
       end;
      end
      else begin
-      if (info.eventkind = ek_buttonpress) and 
+      if (info.eventkind = ek_buttonpress) and
            (fco_mouseselect in fixcols[fmousecell.col].options) then begin
        fdatacols.selected[fmousecell]:= not fdatacols.selected[fmousecell];
       end;
@@ -11322,14 +11322,14 @@ var
    ck_fixrow: begin
     with fixrows[fmousecell.row] do begin
      if (fro_mousefocus in options) then begin
-      if (fmousecell.col <> ffocusedcell.col) or 
+      if (fmousecell.col <> ffocusedcell.col) or
                    (info.eventkind = ek_buttonpress) then begin
        focuscell(makegridcoord(fmousecell.col,row),
                             getfocusact(fro_mouseselect in options),scm_col);
       end;
      end
      else begin
-      if (info.eventkind = ek_buttonpress) and 
+      if (info.eventkind = ek_buttonpress) and
          (fro_mouseselect in fixrows[fmousecell.row].options) then begin
        fdatacols.selected[fmousecell]:= not fdatacols.selected[fmousecell];
       end;
@@ -11338,7 +11338,7 @@ var
     end;
    end;
    ck_fixcolrow: begin
-    if (info.eventkind = ek_buttonpress) and 
+    if (info.eventkind = ek_buttonpress) and
          (fro_mouseselect in fixrows[fmousecell.row].options) and
      (fco_mouseselect in fixcols[fmousecell.col].options) then begin
      fdatacols.selected[fmousecell]:= not fdatacols.selected[fmousecell];
@@ -11352,7 +11352,7 @@ var
  procedure checkrepeater(const drag: boolean);
  var
   bo1: boolean;
- begin     
+ begin
   with info do begin
    if gs_cellclicked in fstate then begin
     if drag then begin
@@ -11379,14 +11379,14 @@ var
     end
     else begin
      if pos.y - mousescrolldist >= fdatarect.y + fdatarect.cy then begin
-      if (ffocusedcell.col >= 0) and 
+      if (ffocusedcell.col >= 0) and
               (co_mousescrollrow in datacols[ffocusedcell.col].options) then begin
        startrepeater(gs_scrollup,fastrepeat);
       end;
      end
      else begin
-      bo1:= not ((focusedcell.col >= 0) and 
-          (co_nohscroll in 
+      bo1:= not ((focusedcell.col >= 0) and
+          (co_nohscroll in
                   tcol(fdatacols.fitems[ffocusedcell.col]).options));
       if bo1 and (pos.x < fdatarect.x - mousescrolldist) then begin
        if og_mousescrollcol in foptionsgrid then begin
@@ -11394,7 +11394,7 @@ var
        end;
       end
       else begin
-       if bo1 and (pos.x - mousescrolldist >= 
+       if bo1 and (pos.x - mousescrolldist >=
                                     fdatarect.x + fdatarect.cx) then begin
         if og_mousescrollcol in foptionsgrid then begin
          startrepeater(gs_scrollright,slowrepeat);
@@ -11422,10 +11422,10 @@ begin
  bo1:= es_processed in info.eventstate;
  if not bo1 then begin
   fobjectpicker.mouseevent(info);
-  if (info.eventkind = ek_buttonpress) and 
+  if (info.eventkind = ek_buttonpress) and
              not(csdesigning in componentstate) and
             (fobjectpicker.currentobjects <> nil) and
-            (pickobjectkindty(fobjectpicker.currentobjects[0] mod pickobjectstep) in 
+            (pickobjectkindty(fobjectpicker.currentobjects[0] mod pickobjectstep) in
                                       [pok_datacol,pok_datarow]) then begin
    exclude(info.eventstate,es_processed); //allow mouse row selecting
   end;
@@ -11442,7 +11442,7 @@ begin
     cellmouseevent(fmousecell,info);
    end;
   end
-  else begin                           
+  else begin
    with info do begin
     if eventkind = ek_buttonpress then begin
      checkreautoappend;
@@ -11450,17 +11450,17 @@ begin
     if eventkind in mouseposevents then  begin
      coord1:= fmousecell;
      cellkind:= cellatpos(pos,fmousecell);
-     if (coord1.col <> fmousecell.col) or 
+     if (coord1.col <> fmousecell.col) or
              (coord1.row <> fmousecell.row) then begin
       if isvalidcell(coord1) then begin
        cellmouseevent(coord1,info,nil,cek_mouseleave);
       end;
-      if (fmousecell.row <> invalidaxis) and 
+      if (fmousecell.row <> invalidaxis) and
                                     (fmousecell.col <> invalidaxis) then begin
        cellmouseevent(fmousecell,info,nil,cek_mouseenter);
       end;
      end;
-     if (fmousecell.row <> fmouseparkcell.row) or 
+     if (fmousecell.row <> fmouseparkcell.row) or
                                (fmousecell.col <> fmouseparkcell.col) then begin
       fmouseparkcell:= invalidcell;
      end;
@@ -11482,7 +11482,7 @@ begin
      ek_buttonpress: begin
       mousewidgetbefore:= application.mousewidget;
       checkfocuscell;
-      if (mousewidgetbefore = application.mousewidget) and 
+      if (mousewidgetbefore = application.mousewidget) and
                        //not interrupted by beginmodal
                                       (button = mb_left) then begin
        fclickedcellbefore:= fclickedcell;
@@ -11490,20 +11490,20 @@ begin
        if isdatacell(fmousecell) then begin
         include(fstate,gs_cellclicked);
        end;
-      end;                
+      end;
      end;
      ek_mousemove,ek_mousepark: begin
       if not (es_child in info.eventstate) then begin
        if cellkind = ck_data then begin
-        application.widgetcursorshape:= 
+        application.widgetcursorshape:=
               datacols[fmousecell.col].getcursor(fmousecell.row,
                               flastcellzone,subpoint(info.pos,flastcellpos));
        end
        else begin
         application.widgetcursorshape:= cr_default;
-        if (eventkind = ek_mousepark) and 
-                             (cellkind in [ck_fixrow,ck_fixcolrow]) and 
-               ((fmousecell.row <> fmouseparkcell.row) or 
+        if (eventkind = ek_mousepark) and
+                             (cellkind in [ck_fixrow,ck_fixcolrow]) and
+               ((fmousecell.row <> fmouseparkcell.row) or
                 (fmousecell.col <> fmouseparkcell.col)) then begin
          fmouseparkcell:= fmousecell;
          str1:= '';
@@ -11540,7 +11540,7 @@ begin
        end
        else begin
         if (shiftstate = []) and (cellkind = ck_data) and
-           (co_mousemovefocus in fdatacols[fmousecell.col].foptions) and 
+           (co_mousemovefocus in fdatacols[fmousecell.col].foptions) and
                        not (aso_nogridmousemove in assistiveoptions) then begin
          if gs_mouseentered in fstate then begin
           exclude(fstate,gs_mouseentered);
@@ -11567,7 +11567,7 @@ begin
       mouseleavecol;
      end;
      fmouseeventcol:= fmousecell.col;
-     if not (es_processed in info.eventstate) and 
+     if not (es_processed in info.eventstate) and
                (fmousecell.col >= 0) then begin //ek_clientmouseleave otherwise
       coord1:= ffocusedcell;
       fdatacols[fmousecell.col].clientmouseevent(fmousecell,info);
@@ -11585,8 +11585,8 @@ begin
    end;
   end;
  end;
- if (info.eventkind = ek_buttonrelease) or 
-          (info.eventkind = ek_mousecaptureend) and 
+ if (info.eventkind = ek_buttonrelease) or
+          (info.eventkind = ek_mousecaptureend) and
                     not (gs1_mousecaptureendlock in fstate1) then begin
   if gs_cellclicked in fstate then begin
    killrepeater;
@@ -11627,7 +11627,7 @@ begin
  end;
 end;
 
-procedure tcustomgrid.cellmouseevent(const acell: gridcoordty; 
+procedure tcustomgrid.cellmouseevent(const acell: gridcoordty;
                            var info: mouseeventinfoty;
                            const acellinfopo: pcelleventinfoty = nil;
                            const aeventkind: celleventkindty = cek_none);
@@ -11662,14 +11662,14 @@ begin
    flastcellpos:= cellrect(cellinfo.cell).pos;
    try
     subpoint1(info.pos,flastcellpos);
-    if (eventkind = cek_buttonrelease) and (cell.row < 0) and 
+    if (eventkind = cek_buttonrelease) and (cell.row < 0) and
                                   (cell.row <> invalidaxis) then begin
      docellevent(cellinfopo^);
      if not (es_processed in mouseeventinfopo^.eventstate) then begin
       fixrows[cell.row].buttoncellevent(cellinfopo^);
      end;
     end
-    else begin     
+    else begin
      docellevent(cellinfopo^);
     end;
    finally
@@ -11705,7 +11705,7 @@ var
 begin
  initeventinfo(cell,cek_select,info);
  info.accept:= true;
- case amode of 
+ case amode of
   csm_reverse: begin
    info.selected:= not fdatacols.selected[cell];
   end;
@@ -11716,8 +11716,8 @@ begin
    info.selected:= false;
   end;
  end;
- if (amode = csm_reverse) or 
-               (cell.row = invalidaxis) or (cell.col = invalidaxis) or 
+ if (amode = csm_reverse) or
+               (cell.row = invalidaxis) or (cell.col = invalidaxis) or
                (info.selected <> fdatacols.selected[cell]) then begin
   bo1:= info.selected;
   docellevent(info);
@@ -11729,7 +11729,7 @@ begin
    end;
    try
     if bo1 then begin
-     if fdatacols.foptions * 
+     if fdatacols.foptions *
                [co_multiselect,co_rowselect] = [co_rowselect] then begin
       if fdatacols.fselectedrow >= 0 then begin
        fdatacols.rowselected[fdatacols.fselectedrow]:= false;
@@ -11739,7 +11739,7 @@ begin
         fdatacols.rowselected[invalidaxis]:= false;
        end;
       end;
-     end;       
+     end;
      for int1:= 0 to fdatacols.count - 1 do begin
       with tdatacol(fdatacols.fitems[int1]) do begin
        if not (co_multiselect in foptions) then begin
@@ -11748,7 +11748,7 @@ begin
       end;
      end;
     end;
-    if (cell.col >= 0) and 
+    if (cell.col >= 0) and
                (co_rowselect in fdatacols[cell.col].foptions) then begin
 //     fdatacols.selected[makegridcoord(invalidaxis,cell.row)]:= info.selected;
      fdatacols.rowselected[cell.row]:= info.selected;
@@ -11792,7 +11792,7 @@ end;
 procedure tcustomgrid.beforefocuscell(const cell: gridcoordty;
                              const selectaction: focuscellactionty);
 begin
- if (og1_focusmorerows in foptionsgrid1) and 
+ if (og1_focusmorerows in foptionsgrid1) and
                     (cell.row <> invalidaxis) then begin
   if cell.row >= frowcount then begin
    checkmorerows(cell.row - frowcount + 1);
@@ -11800,7 +11800,7 @@ begin
   else begin
    if cell.row < 0 then begin
     checkmorerows(cell.row);
-   end;   
+   end;
   end;
  end;
 end;
@@ -11824,13 +11824,13 @@ function tcustomgrid.focuscell(cell: gridcoordty;
 
  function isappend(const arow: integer): boolean;
  begin
-  result:= canappendrow and 
+  result:= canappendrow and
    (not (gs_isdb in fstate) and  not (gs1_autoappendlock in fstate1) and
-      ((og_autoappend in foptionsgrid) and  
+      ((og_autoappend in foptionsgrid) and
                        (arow >= frowcount) and (frowcount <> 0) or
        (arow = 0) and (frowcount = 0) and (og_autofirstrow in foptionsgrid)));
  end;
- 
+
  procedure doselectaction;
 
   procedure startanchors;
@@ -11892,7 +11892,7 @@ function tcustomgrid.focuscell(cell: gridcoordty;
     end;
    end;
   end;
-  
+
   procedure doselectcell(const mode: cellselectmodety);
   begin
    case selectmode of
@@ -11905,14 +11905,14 @@ function tcustomgrid.focuscell(cell: gridcoordty;
     else begin
      selectcell(cell,mode,true);
     end;
-   end;      
+   end;
   end;
 
  var
   cells,celle: gridcoordty;
   rect1: gridrectty;
   int1: integer;
- 
+
  begin //doselectaction
   beginupdate;
   try
@@ -11969,9 +11969,9 @@ function tcustomgrid.focuscell(cell: gridcoordty;
         fdatacols.changeselectedrange(fstartanchor,fendanchor,cell,true);
        end
        else begin //todo: optimize for selectmode <> scm_cell
-        if (selectmode <> scm_cell) or ((cell.col >= fstartanchor.col) xor 
+        if (selectmode <> scm_cell) or ((cell.col >= fstartanchor.col) xor
                     (fendanchor.col >= fstartanchor.col)) or
-                                     ((cell.row >= fstartanchor.row) xor 
+                                     ((cell.row >= fstartanchor.row) xor
                    (fendanchor.row >= fstartanchor.row)) then begin
          rect1:= makegridrect(celle,cells);
          fdatacols.selected[invalidcell]:= false;
@@ -11983,7 +11983,7 @@ function tcustomgrid.focuscell(cell: gridcoordty;
            for int1:= rect1.rowcount - 1 downto 0 do begin
             fdatacols.selected[rect1.pos]:= true;
             inc(rect1.row);
-           end;  
+           end;
            endupdate;
           end;
           scm_col: begin
@@ -11992,7 +11992,7 @@ function tcustomgrid.focuscell(cell: gridcoordty;
            for int1:= rect1.colcount - 1 downto 0 do begin
             fdatacols.selected[rect1.pos]:= true;
             inc(rect1.col);
-           end;  
+           end;
            endupdate;
           end;
          end;
@@ -12031,7 +12031,7 @@ function tcustomgrid.focuscell(cell: gridcoordty;
 
 var
  sortchecked: boolean;
- 
+
  procedure dosortcheck(const isappend: boolean); //follow sort order
  var
   int1: integer;
@@ -12073,7 +12073,7 @@ var
  cellbefore: gridcoordty;
  rowcountbefore: integer;
  autorowappended: boolean;
- 
+
 begin     //focuscell
  if selectaction <> fca_exitgrid then begin
   if (cell.row > invalidaxis) and (cell.col > invalidaxis) then begin
@@ -12116,24 +12116,24 @@ begin     //focuscell
  try
   if (fnocheckvalue = 0) and not (gs_rowremoving in fstate) then begin
    int1:= ffocusedcell.row;
-   if ((cell.row <> ffocusedcell.row) or (cell.col <> ffocusedcell.col) or 
-           (selectaction = fca_focusinforce)) and           
+   if ((cell.row <> ffocusedcell.row) or (cell.col <> ffocusedcell.col) or
+           (selectaction = fca_focusinforce)) and
            not docheckcellvalue or (focuscount <> ffocuscount) then begin
     exit;
    end;
    if cell.row = int1 then begin
     cell.row:= ffocusedcell.row;       //follow possible change by sort
    end;
-   if ((cell.row <> ffocusedcell.row) or (selectaction = fca_focusinforce)) and 
+   if ((cell.row <> ffocusedcell.row) or (selectaction = fca_focusinforce)) and
                      (ffocusedcell.row >= 0) and container.entered and
-            not ((gs1_rowdeleting in fstate1) or  
+            not ((gs1_rowdeleting in fstate1) or
                            container.canclose(window.focusedwidget)) then begin
                                //for notnull check in twidgetgrid
 
-    exit;        
+    exit;
    end;
   end;
-  if (selectaction in [fca_focusin,fca_focusinrepeater,fca_focusinforce]) and 
+  if (selectaction in [fca_focusin,fca_focusinrepeater,fca_focusinforce]) and
       ((cell.col < 0) or (cell.col >= fdatacols.count) or
         not fdatacols[cell.col].canfocus(mb_none,[],false,bo1)) then begin
    selectaction:= fca_setfocusedcell;
@@ -12176,10 +12176,10 @@ begin     //focuscell
    end;
    cell.col:= mergestart(cell.col,cell.row);
   end;
-  bo1:= ((cell.col <> invalidaxis) or (cell.row <> invalidaxis)) and 
+  bo1:= ((cell.col <> invalidaxis) or (cell.row <> invalidaxis)) and
                                                     (ashowcell <> cep_none);
   if (cell.col <> ffocusedcell.col) or (cell.row <> ffocusedcell.row) or
-        (selectaction in [fca_entergrid,fca_focusinforce]) or 
+        (selectaction in [fca_entergrid,fca_focusinforce]) or
         (gs_restorerow in fstate) then begin
    exclude(fstate,gs_restorerow);
    coord1:= ffocusedcell;
@@ -12239,12 +12239,12 @@ begin     //focuscell
     end;
    end;
 //   end;
-   cellbefore:= ffocusedcell; 
-   if (selectaction = fca_exitgrid) or 
+   cellbefore:= ffocusedcell;
+   if (selectaction = fca_exitgrid) or
       ((cell.row <> ffocusedcell.row) and
        (coord1.row >= 0) and
        ((coord1.row >= frowcount-1) and (cell.row < coord1.row) or
-        not autorowappended and 
+        not autorowappended and
          ((cell.row <= rowcountbefore{-1}) and not (gs_restorerow in fstate) or
           (cell.row < frowcount)
          )
@@ -12263,8 +12263,8 @@ begin     //focuscell
     if int1 >= frowcount then begin
      int1:= frowcount-1;
     end;
-    if (int1 >= 0) and not ((selectaction = fca_exitgrid) and 
-               (gs_rowremoving in fstate)) and 
+    if (int1 >= 0) and not ((selectaction = fca_exitgrid) and
+               (gs_rowremoving in fstate)) and
            ((cell.row >= 0) or (selectaction = fca_exitgrid)) then begin
      ffocusedcell.row:= int1;
 //     if bo2 and (cell.row = cell.row) then begin
@@ -12276,7 +12276,7 @@ begin     //focuscell
     end;
    end;
    dosortcheck(false);
-   
+
    if not (selectaction in [fca_exitgrid,fca_entergrid]) then begin
     ffocusedcell:= invalidcell;
    end;
@@ -12312,7 +12312,7 @@ begin     //focuscell
      exit;
     end;
    end;
-   if (gs_hasactiverowcolor in fstate) and 
+   if (gs_hasactiverowcolor in fstate) and
             (ffocusedcell.row <> cellbefore.row) then begin
     if cellbefore.row >= 0 then begin
      invalidaterow(cellbefore.row);
@@ -12338,7 +12338,7 @@ begin     //focuscell
   end;
  end;
  factiverow:= ffocusedcell.row;
- afterfocuscell(cellbefore,selectaction); 
+ afterfocuscell(cellbefore,selectaction);
  flastcol:= ffocusedcell.col;
  result:= true;
 end;
@@ -12355,7 +12355,7 @@ end;
 
 function tcustomgrid.focusedcellvalid: boolean;
 begin
- result:= (ffocusedcell.col >= 0) and (ffocusedcell.row >= 0) and 
+ result:= (ffocusedcell.col >= 0) and (ffocusedcell.row >= 0) and
             not (gs_cellexiting in fstate);
 end;
 
@@ -12383,18 +12383,18 @@ begin
  result:= gs_cellexiting in fstate;
 end;
 
-function tcustomgrid.isinsertempty: boolean; 
+function tcustomgrid.isinsertempty: boolean;
 begin
- result:= (gs1_rowinserted in fstate1) and 
+ result:= (gs1_rowinserted in fstate1) and
            (og_noinsertempty in foptionsgrid) and
      (ffocusedcell.row >= 0) and fdatacols.rowempty(ffocusedcell.row);
 end;
 
-function tcustomgrid.isautoappend: boolean; 
+function tcustomgrid.isautoappend: boolean;
       //true if last row is auto appended
       //todo: simplify, use gs1_rowinserted
 begin
- result:= not (gs_isdb in fstate) and (frowcount > 0) and 
+ result:= not (gs_isdb in fstate) and (frowcount > 0) and
  ((frowcount = 1) and (og_autofirstrow in foptionsgrid) or
       (foptionsgrid * [og_autoappend,og_appendempty] = [og_autoappend])
      ) and fdatacols.rowempty(frowcount - 1);
@@ -12445,7 +12445,7 @@ begin
       if newrow = frowcount-1 then begin
        exclude(fstate1,gs1_rowsortinvalid);
       end;
-      if not (gs_rowremoving in fstate) and 
+      if not (gs_rowremoving in fstate) and
                              not (og_appendempty in optionsgrid) then begin
        result:= true;
        deleterow(frowcount-1,1,og1_forcerowsmodified in foptionsgrid1);
@@ -12831,9 +12831,9 @@ function tcustomgrid.showcaretrect(const arect: rectty;
 var
  rect1: rectty;
 begin
- if not window.activating and 
-   ([gs_cellexiting,gs_layoutupdating] * fstate =[]) and 
-   (fnoshowcaretrect = 0) and 
+ if not window.activating and
+   ([gs_cellexiting,gs_layoutupdating] * fstate =[]) and
+   (fnoshowcaretrect = 0) and
    not (frame.sbhorz.clicked or frame.sbvert.clicked) and
    intersectrect(inflaterect(arect,aframe),cellrect(ffocusedcell),rect1) then begin
   result:= showrect(rect1,cep_nearest,noscrollingcol);
@@ -12912,9 +12912,9 @@ begin
  end;
 end;
 
-procedure tcustomgrid.showrow(const arow: integer; 
+procedure tcustomgrid.showrow(const arow: integer;
                       const position: cellpositionty = cep_nearest;
-                      const force: boolean = false); 
+                      const force: boolean = false);
 begin
  showcell(mgc(invalidaxis,arow),position,force);
 end;
@@ -12964,12 +12964,12 @@ function tcustomgrid.cellrect(const cell: gridcoordty;
    end;
   end;
  end;
- 
+
 var
  isfixr: boolean;
- int1,int2: integer; 
+ int1,int2: integer;
  po1: prowstatecolmergety;
- 
+
 begin  //cellrect
  result:= nullrect;
  if (cell.col >= fdatacols.count) or (cell.row >= frowcount) and
@@ -13070,7 +13070,7 @@ begin  //cellrect
     end;
     if innerlevel > cil_all then begin
      int2:= fdatarowlinewidth;
-     if (og_rowheight in foptionsgrid) and 
+     if (og_rowheight in foptionsgrid) and
                          (row >= 0) and (row < frowcount) then begin
       with prowstaterowheightty(
                      fdatacols.frowstate.getitempo(row))^.rowheight do begin
@@ -13098,7 +13098,7 @@ begin  //cellrect
       x:= x + fstart;
      end;
      cx:= cx + fend - fstart;
-     if (innerlevel = cil_noline) or isfixr and 
+     if (innerlevel = cil_noline) or isfixr and
                                     (innerlevel >= cil_noline) then begin
       dec(cx,flinewidth);
       if -cell.col > ffixcols.count - ffixcols.oppositecount then begin
@@ -13127,10 +13127,10 @@ begin  //cellrect
                                                               fscrollrect.x;
      end;
     end;
-    if (innerlevel >= cil_noline) or 
+    if (innerlevel >= cil_noline) or
                             isfixr and (innerlevel >= cil_noline) then begin
      dec(cx,flinewidth);
-     if (co_nohscroll in foptions) and 
+     if (co_nohscroll in foptions) and
                             (index >= fdatacols.ffirsthscrollindex) then begin
       inc(x,flinewidth);
      end;
@@ -13143,8 +13143,8 @@ begin  //cellrect
        po1:= fdatacols.frowstate.getitempocolmerge(row);
        if po1^.colmerge.merged <> 0 then begin //has merged cols
         for int1:= col to fdatacols.flastvisiblecol-1 do begin
-         if (po1^.colmerge.merged = mergedcolall) or 
-          (int1 < mergedcolmax) and (po1^.colmerge.merged and 
+         if (po1^.colmerge.merged = mergedcolall) or
+          (int1 < mergedcolmax) and (po1^.colmerge.merged and
                                                 bits[int1] <> 0) then begin
           with tdatacol(fdatacols.fitems[int1+1]) do begin
            if not (co_invisible in foptions) then begin
@@ -13252,7 +13252,7 @@ begin
  result:= fdatarect.cy div ystep;
 end;
 
-procedure tcustomgrid.focusrow(const arow: integer; 
+procedure tcustomgrid.focusrow(const arow: integer;
                  const action: focuscellactionty;
                  const noreadonly: boolean;
                  const selectmode: selectcellmodety = scm_cell);
@@ -13299,7 +13299,7 @@ begin
  end;
  with fdatacols.frowstate do begin
   if visiblerowcount > 0 then begin
-   if not (og_wraprow in foptionsgrid) or 
+   if not (og_wraprow in foptionsgrid) or
                 (visiblerow(ffocusedcell.row) < visiblerowcount - 1) then begin
     focusrow(visiblerowstep(ffocusedcell.row,1,og_autoappend in foptionsgrid),
                                                     action,false);
@@ -13411,7 +13411,7 @@ end;
 
 function tcustomgrid.checkreautoappend: boolean;
 begin
- result:= (og_focuscellonenter in foptionsgrid) and 
+ result:= (og_focuscellonenter in foptionsgrid) and
                               canautoappend and entered and (row < 0);
  if result then begin
   row:= 0;
@@ -13428,7 +13428,7 @@ var
  bo1: boolean;
  shiftstate: shiftstatesty;
 
- procedure checkselection; 
+ procedure checkselection;
  begin
   if (es_processed in info.eventstate) then begin
    if not checkreautoappend and (ffocusedcell.col >= 0) then begin
@@ -13583,12 +13583,12 @@ begin
      end;
     end;
    end;
-   if not(es_processed in info.eventstate) and 
+   if not(es_processed in info.eventstate) and
                                 (ffocusedcell.col >= 0) then begin
     include(info.eventstate,es_processed);
     case info.key of
      key_return: begin
-      if (og_colchangeonreturnkey in foptionsgrid) and 
+      if (og_colchangeonreturnkey in foptionsgrid) and
                  (shiftstate = []) then begin
        colstep(fca_focusin,1,true,false,true);
       end
@@ -13641,7 +13641,7 @@ begin
      key_right: begin
       if shiftstate = [ss_ctrl] then begin
        if og_keycolmoving in foptionsgrid then begin
-        if (ffocusedcell.col >= 0) and 
+        if (ffocusedcell.col >= 0) and
                         (ffocusedcell.col < fdatacols.count-1) then begin
          moverow(ffocusedcell.col,ffocusedcell.col + 1);
         end;
@@ -13682,19 +13682,19 @@ begin
    end;
   end;
   if not (es_processed in info.eventstate) then begin
-   if {issysshortcut(sho_copy,info) or} 
-        issysshortcut(sho_copycells,info) and 
+   if {issysshortcut(sho_copy,info) or}
+        issysshortcut(sho_copycells,info) and
           (fdatacols.cancopy  or canevent(tmethod(foncopyselection))) and
                                                     copyselection then begin
     include(info.eventstate,es_processed);
    end
    else begin
-    if issysshortcut(sho_pastecells,info) and 
+    if issysshortcut(sho_pastecells,info) and
          (fdatacols.canpaste or canevent(tmethod(fonpasteselection))) and
                                                     pasteselection then begin
      include(info.eventstate,es_processed);
     end;
-   end;    
+   end;
   end;
   if not (es_processed in info.eventstate) then begin
    if og_rowinserting in foptionsgrid then begin
@@ -13728,7 +13728,7 @@ begin
     end;
    end;
    if not (es_processed in info.eventstate) then begin
-    if (og_rowdeleting in foptionsgrid) and 
+    if (og_rowdeleting in foptionsgrid) and
                          issysshortcut(sho_rowdelete,info) then begin
      if candeleterow then begin
       dodeleterows(nil);
@@ -13742,7 +13742,7 @@ begin
   end;
  end;
  exit;
- 
+
 checkwidgetexit:
  if (row = cellbefore.row) and (col = cellbefore.col) then begin
   if bo1 then begin
@@ -13858,7 +13858,7 @@ begin
  end;
 //  finally
 //   exclude(fstate,gs_visiblerowsupdating);
-//  end; 
+//  end;
 // end;
 end;
 
@@ -13888,8 +13888,8 @@ end;
 procedure tcustomgrid.doenter;
 begin
  inherited;
- if ((og_focuscellonenter in foptionsgrid) or 
-          (ffocusedcell.col >= 0) and (ffocusedcell.row >= 0)) and 
+ if ((og_focuscellonenter in foptionsgrid) or
+          (ffocusedcell.col >= 0) and (ffocusedcell.row >= 0)) and
                not (gs1_focuscellonenterlock in fstate1)then begin
   focuscell(ffocusedcell,fca_entergrid);
  end;
@@ -14006,16 +14006,16 @@ var
 
  function cancolsizing(col: integer): boolean;
  begin
-  result:= (col <> invalidaxis) and ((csdesigning in componentstate) or 
+  result:= (col <> invalidaxis) and ((csdesigning in componentstate) or
     (col >= 0) and
-       (og_colsizing in foptionsgrid) and 
+       (og_colsizing in foptionsgrid) and
        not (co_fixwidth in fdatacols[col].foptions));
  end;
 
  function cancolmoving: boolean;
  begin
   result:= (csdesigning in componentstate) or
-    (og_colmoving in foptionsgrid) and 
+    (og_colmoving in foptionsgrid) and
                         not (co_fixpos in fdatacols[cell.col].foptions);
  end;
 
@@ -14026,7 +14026,7 @@ var
 
  function canrowmoving: boolean;
  begin
-  result:= (csdesigning in componentstate) or 
+  result:= (csdesigning in componentstate) or
            ((og_rowmoving in foptionsgrid) and canmoverow);
  end;
 
@@ -14132,7 +14132,7 @@ var
          objects[0]:= -pickobjectstep * (cell.row) + integer(pok_fixrowsize);
         end;
        end
-       else begin        
+       else begin
         if not (gs_child in fstate) then begin
          objects[0]:= pickobjectstep * cell.col + integer(pok_datacol);
          result:= true;
@@ -14143,9 +14143,9 @@ var
      else begin
       if cancolmoving and not nofixed  and not (gs_child in fstate) then begin
        with fixrows[cell.row] do begin
-        if (cell.col >= fcaptions.count) or 
+        if (cell.col >= fcaptions.count) or
             not (dco_colsort in fcaptions[cell.col].options) or
-            (pos.x < rect1.x + rect1.cx - sortglyphwidth) or 
+            (pos.x < rect1.x + rect1.cx - sortglyphwidth) or
             (csdesigning in componentstate) then begin
          objects[0]:= pickobjectstep * cell.col + integer(pok_datacol);
          result:= true;
@@ -14159,7 +14159,7 @@ var
  end;
 
 begin
- if ((sender.shiftstate * shiftstatesmask) - [ss_left] <> []) or 
+ if ((sender.shiftstate * shiftstatesmask) - [ss_left] <> []) or
                                            (gs_child in fstate) then begin
   exit;
  end;
@@ -14286,13 +14286,13 @@ begin
   apos:= sender.pos;
   case kind of
    pok_datacolsize,pok_fixcolsize: begin
-    if (ss_double in sender.mouseeventinfopo^.shiftstate) and 
+    if (ss_double in sender.mouseeventinfopo^.shiftstate) and
                           not(co1_noautocolwidth in col1.foptions1) then begin
      col1.width:= col1.maxwidth;
     end
     else begin
-     if (kind = pok_fixcolsize) and (cell.col <= fixcols.ffirstopposite) or 
-        (kind = pok_datacolsize) and 
+     if (kind = pok_fixcolsize) and (cell.col <= fixcols.ffirstopposite) or
+        (kind = pok_datacolsize) and
                               (cell.col >= fdatacols.ffirstopposite) then begin
       col1.width:= col1.width - offset.x;
      end
@@ -14311,7 +14311,7 @@ begin
          end;
         end
         else begin
-         if (fwidthmax <> 0) and 
+         if (fwidthmax <> 0) and
                          (width + int1 > fwidthmax) then begin
           int1:= fwidthmax - width;
          end;
@@ -14365,10 +14365,10 @@ begin
     end;
    end;
    pok_datacol: begin
-    //cellkind:= 
+    //cellkind:=
     cellatpos(makepoint(apos.x,fdatarect.y),cell1);
-    if (cell1.col >= 0) and (cell.col <> cell1.col) and not 
-      ((co_nohscroll in tdatacol(fdatacols.fitems[cell1.col]).options) xor 
+    if (cell1.col >= 0) and (cell.col <> cell1.col) and not
+      ((co_nohscroll in tdatacol(fdatacols.fitems[cell1.col]).options) xor
       (co_nohscroll in tdatacol(fdatacols.fitems[cell.col]).options)) then begin
      movecol(cell.col,cell1.col);
     end
@@ -14376,7 +14376,7 @@ begin
     end;
    end;
    pok_datarow: begin
- //   cellkind:= 
+ //   cellkind:=
     cellatpos(makepoint(fdatarect.x,apos.y),cell1);
     if (cell1.row >= 0) and (cell.row <> cell1.row) then begin
      moverow(cell.row,cell1.row,1,true);
@@ -14441,7 +14441,7 @@ begin
  with rect1 do begin
   case kind of
    pok_datacolsize,pok_fixcolsize: begin
-    if (kind = pok_fixcolsize) and (cell.col <= fixcols.ffirstopposite) or 
+    if (kind = pok_fixcolsize) and (cell.col <= fixcols.ffirstopposite) or
        (kind = pok_datacolsize) and (cell.col >=
                                            fdatacols.ffirstopposite) then begin
      int1:= offset.x+x;
@@ -14604,8 +14604,8 @@ begin
   else begin
    if gs_scrollleft in fstate then begin
     if bo1 then begin
-     if (ffocusedcell.col < 0) or (ffocusedcell.col > 0) and 
-        not (co_nohscroll in 
+     if (ffocusedcell.col < 0) or (ffocusedcell.col > 0) and
+        not (co_nohscroll in
           tcol(fdatacols.fitems[ffocusedcell.col-1]).options) then begin
       colstep(frepeataction,-1,false,false,false);
      end;
@@ -14618,7 +14618,7 @@ begin
     if gs_scrollright in fstate then begin
      if bo1 then begin
       if (ffocusedcell.col < 0) or (ffocusedcell.col < fdatacols.count - 1) and
-        not (co_nohscroll in 
+        not (co_nohscroll in
           tcol(fdatacols.fitems[ffocusedcell.col+1]).options) then begin
        colstep(frepeataction,1,false,false,false);
       end;
@@ -14706,7 +14706,7 @@ begin
    if (newindex < 0) or (newindex >= rowcount) then begin
     tlist.Error(SListIndexError,newindex);
    end;
- 
+
    rowbefore:= ffocusedcell.row;
    beginupdate;
    if curindex >= 0 then begin //datarows
@@ -14857,8 +14857,8 @@ begin
       if not fdatacols.roworderinvalid then begin
        exit;
       end;
-      if (fclickedcell.row >= 0) and 
-         (aindex <= fclickedcell.row) and 
+      if (fclickedcell.row >= 0) and
+         (aindex <= fclickedcell.row) and
                                (fclickedcell.row < aindex + acount) then begin
        exclude(fstate,gs_cellclicked);
       end;
@@ -14965,7 +14965,7 @@ var
  po1: pointty;
  statebefore: framestatesty;
  scrollheightbefore: integer;
- 
+
  procedure updatelayout1;
  begin
   fupdating:= 0;
@@ -14975,14 +14975,14 @@ var
 
 var
  canscroll: boolean;
-  
+
 begin
  if checkautoappend and isautoappend then begin
   result:= rowhigh;
  end
  else begin
   statebefore:= tgridframe(fframe).fstate;
-  scrollheightbefore:= 
+  scrollheightbefore:=
    tcustomscrollbar1(tgridframe(fframe).fvert).fdrawinfo.areas[sbbu_move].ca.dim.cy;
   noinvalidatebefore:= fnoinvalidate;
   updatingbefore:= fupdating;
@@ -15017,13 +15017,13 @@ begin
     rowchanged(frowcount-1);
    end;
    result:= frowcount-1;
-   if statebefore * scrollbarframestates <> 
+   if statebefore * scrollbarframestates <>
                      tgridframe(fframe).fstate * scrollbarframestates then begin
     invalidatewidget;
    end
    else begin
     if tcustomscrollbar1(tgridframe(fframe).fvert).
-              fdrawinfo.areas[sbbu_move].ca.dim.cy <> 
+              fdrawinfo.areas[sbbu_move].ca.dim.cy <>
                                          scrollheightbefore then begin
      tcustomscrollbar1(tgridframe(fframe).fvert).invalidate;
     end;
@@ -15076,7 +15076,7 @@ begin
  inc(fupdating);
 end;
 
-procedure tcustomgrid.endupdate(const nosort: boolean = false; 
+procedure tcustomgrid.endupdate(const nosort: boolean = false;
                                      const invalidrowstart: int32 = 0);
 var
  int1,int2: integer;
@@ -15087,7 +15087,7 @@ begin
  dec(fupdating);
  if fupdating = 0 then begin
 {$ifdef mse_with_ifi}
-  bo1:= fstate * 
+  bo1:= fstate *
          [gs_rowcountinvalid,gs_rowdatachanged,gs_selectionchanged] <> [];
 {$endif}
   if gs_rowcountinvalid in fstate then begin
@@ -15120,7 +15120,7 @@ begin
    end;
 //   rowdatachanged(makegridcoord(invalidaxis,invalidrowstart),
 //                                               frowcount-invalidrowstart);
-  end; 
+  end;
   if gs_selectionchanged in fstate then begin
    internalselectionchanged;
   end;
@@ -15134,7 +15134,7 @@ begin
    showcell(fshowcell,fshowcellmode);
    exclude(fstate1,gs1_showcellinvalid);
   end;
-  if (gs_focusedcellchanged in fstate) and 
+  if (gs_focusedcellchanged in fstate) and
                  (ffocusedcell.col >= 0) and (ffocusedcell.row >= 0) then begin
    focusedcellchanged;
   end;
@@ -15226,14 +15226,14 @@ begin
     include(foptionsgrid1,og1_noresetselect);
    end;
   end;
-}   
+}
   optionsbefore:= foptionsgrid;
   foptionsgrid:= avalue;
 //  foptionsgrid:= optionsgridty(
 //                           setsinglebit(card32(avalue),card32(foptionsgrid),
 //                                         card32([og_customsorted,og_sorted])));
 //  foptionsgrid:= avalue-deprecatedoptionsgrid;
-  if (longword(avalue) xor longword(optionsbefore)) 
+  if (longword(avalue) xor longword(optionsbefore))
                                           and longword(mask1) <> 0 then begin
    fdatacols.frowstate.free;
    fdatacols.frowstate:= trowstatelist.create(self);
@@ -15309,7 +15309,7 @@ end;
 
 function tcustomgrid.getdisprect: rectty;
 begin
- if (ffocusedcell.row = invalidaxis) and 
+ if (ffocusedcell.row = invalidaxis) and
                               (ffocusedcell.col = invalidaxis) then begin
   result:= inherited getdisprect;
  end
@@ -15374,7 +15374,7 @@ end;
 function tcustomgrid.getmerged(const arow: integer): longword;
 begin
  result:= 0;
- if (og_colmerged in foptionsgrid) and (arow >= 0) and 
+ if (og_colmerged in foptionsgrid) and (arow >= 0) and
                                   (arow < frowcount) then begin
   result:= fdatacols.frowstate.getitempocolmerge(arow)^.colmerge.merged;
  end;
@@ -15420,7 +15420,7 @@ begin
     result:= fdatacols.count;
    end
    else begin
-    if (acol < mergedcolmax) and 
+    if (acol < mergedcolmax) and
                ((acol = 0) or (merged1 and bits[acol-1] <> 0)) then begin
      result:= fdatacols.count;
      int2:= fdatacols.count - 1;
@@ -15605,7 +15605,7 @@ end;
 function tcustomgrid.docheckcellvalue: boolean;
 begin
  result:= true;
- if focusedcellvalid and (fnullchecking = 0) and 
+ if focusedcellvalid and (fnullchecking = 0) and
                      not(gs1_rowdeleting in fstate1) then begin
   inc(fcellvaluechecking);
   try
@@ -15626,7 +15626,7 @@ begin
  result:= false;
  int1:= frowcount;
  if int1 > 0 then begin
-  bo1:= not (gs_isdb in fstate) and (og_autoappend in foptionsgrid) and 
+  bo1:= not (gs_isdb in fstate) and (og_autoappend in foptionsgrid) and
                     fdatacols.rowempty(int1-1);
   if bo1 then begin
    dec(int1); //do not sort last row
@@ -15716,7 +15716,7 @@ begin
  bewegt:= false;
  int1:= frowcount;
  if int1 > 0 then begin
-  bo1:= not (gs_isdb in fstate) and (og_autoappend in foptionsgrid) and 
+  bo1:= not (gs_isdb in fstate) and (og_autoappend in foptionsgrid) and
                     fdatacols.rowempty(int1-1);
   if bo1 then begin
    dec(int1); //do not sort last row
@@ -15795,7 +15795,7 @@ begin
    end;
    if not bo1 then begin   //position changed
     lo:= 0;
-    hi:= rowhigh;    
+    hi:= rowhigh;
     if check(hi,row) < 0 then begin   //last?
      lo:= hi;
     end
@@ -15825,7 +15825,7 @@ begin
     end;
     bo1:= gs1_sortmoving in fstate1;
     include(fstate1,gs1_sortmoving);
-    try 
+    try
      if row < lo then begin
       moverow(row,lo);
      end
@@ -15967,8 +15967,8 @@ end;
 
 function tcustomgrid.hascolumnsort: boolean;
 begin
- result:= (og_sorted in foptionsgrid) and 
-          (assigned(fonsort) or (fdatacols.fsortcol >= 0) or 
+ result:= (og_sorted in foptionsgrid) and
+          (assigned(fonsort) or (fdatacols.fsortcol >= 0) or
                                     not (og_nodefaultsort in foptionsgrid));
 end;
 
@@ -15979,7 +15979,7 @@ begin
    fonsortchanged(self);
   end;
   if hascolumnsort and not (gs1_customsort in fstate1) then begin
-   if not all and (gs1_sortvalid in fstate1) and 
+   if not all and (gs1_sortvalid in fstate1) and
            (ffocusedcell.row >= 0) then begin
     reorderrow;
    end
@@ -15998,9 +15998,9 @@ end;
 procedure tcustomgrid.sortinvalid(const acol: integer; const arow: integer);
 begin
  if not (gs1_sortchangelock in fstate1) and
-       ((acol < 0) or (fdatacols.fsortcol < 0) or 
-        (acol = fdatacols.fsortcol) or 
-        (acol = fdatacols.fsortcoldefault) or 
+       ((acol < 0) or (fdatacols.fsortcol < 0) or
+        (acol = fdatacols.fsortcol) or
+        (acol = fdatacols.fsortcoldefault) or
          assigned(fonsort)) then begin
   if ((arow < 0) or (arow <> ffocusedcell.row)) then begin
    exclude(fstate1,gs1_sortvalid);
@@ -16014,7 +16014,7 @@ end;
 function tcustomgrid.checksort: boolean;
 begin
  result:= false;
- if (fstate1 * [gs1_sortvalid,gs1_rowsortinvalid] <> [gs1_sortvalid]) and 
+ if (fstate1 * [gs1_sortvalid,gs1_rowsortinvalid] <> [gs1_sortvalid]) and
             not (gs1_sortchangelock in fstate1) and (fupdating = 0) then begin
   sortchanged(false);
   result:= true;
@@ -16038,7 +16038,7 @@ begin
    aindex:= ffocusedcell.row;
   end;
  end;
- result:= aindex >= 0; 
+ result:= aindex >= 0;
 end;
 
 function tcustomgrid.getrowcolorstate(index: integer): rowstatenumty;
@@ -16109,7 +16109,7 @@ begin
  end;
 end;
 
-procedure tcustomgrid.setrowlinewidth(index: integer; 
+procedure tcustomgrid.setrowlinewidth(index: integer;
                                            const avalue: rowlinewidthty);
 begin
  if checkrowindex(index) then begin
@@ -16223,19 +16223,19 @@ end;
 procedure tcustomgrid.setrowheight(index: integer; avalue: integer);
 begin
  if checkrowindex(index) then begin
-  if (avalue <> 0) and (avalue < fdatarowheightmin) then begin 
+  if (avalue <> 0) and (avalue < fdatarowheightmin) then begin
    avalue:= fdatarowheightmin;
   end
   else begin
    if avalue > fdatarowheightmax then begin
     avalue:= fdatarowheightmax;
    end;
-  end; 
+  end;
   fdatacols.frowstate.height[index]:= avalue;
  end;
 end;
 
-function tcustomgrid.rowfoldinfo: prowfoldinfoty; 
+function tcustomgrid.rowfoldinfo: prowfoldinfoty;
          //nil if focused row not visible
 var
  int1: integer;
@@ -16243,7 +16243,7 @@ begin                 //todo: optimize
  result:= nil;
  if row >= 0 then begin
   internalupdatelayout;
-  if (fvisiblerowfoldinfo <> nil) and (row >= fvisiblerows[0]) and 
+  if (fvisiblerowfoldinfo <> nil) and (row >= fvisiblerows[0]) and
                (row <= fvisiblerows[high(fvisiblerows)]) then begin
    for int1:= 0 to high(fvisiblerows) do begin
     if fvisiblerows[int1] = row then begin
@@ -16279,11 +16279,11 @@ begin
      include(self.fstate,gs_needsrowheight);
      if not bo1 and (frowcount > 0) then begin
       fdatacols.rowstate.change(-1);
-     end;     
+     end;
      break;
     end;
    end;
-  end;   
+  end;
  end;
 end;
 
@@ -16348,7 +16348,7 @@ begin
   end;
   if aindex > rowcount then begin
    aindex:= rowcount;
-  end;  
+  end;
   bo1:= gs1_sortchangelock in fstate1;
   include(fstate1,gs1_sortchangelock);
   try
@@ -16437,7 +16437,7 @@ end;
 
 procedure tcustomgrid.dodeleterows(const sender: tobject);
 begin
- if (og_selectedrowsdeleting in foptionsgrid) and 
+ if (og_selectedrowsdeleting in foptionsgrid) and
             (high(fdatacols.getselectedrows) >= 0) then begin
   dodeleteselectedrows(sender);
  end
@@ -16523,7 +16523,7 @@ begin
   if int1 < ffixcols.count then begin
    result:= tfixcol(ffixcols.fitems[int1]).visible;
   end;
- end; 
+ end;
  if result then begin
   if acell.row < 0 then begin
    int1:= -acell.row - 1;
@@ -16631,7 +16631,7 @@ end;
 
 procedure tcustomgrid.ifirowchange;
 begin
- if (fupdating = 0) and (fifiserverintf <> nil) and 
+ if (fupdating = 0) and (fifiserverintf <> nil) and
                               not(ws_loadedproc in fwidgetstate) then begin
   iifidataserver(fifiserverintf).valuechanged(iifigridlink(self));
  end;
@@ -16944,7 +16944,7 @@ begin
  inherited;
 end;
 
-procedure tcustomstringgrid.updatepopupmenu(var amenu: tpopupmenu; 
+procedure tcustomstringgrid.updatepopupmenu(var amenu: tpopupmenu;
                          var mouseinfo: mouseeventinfoty);
 begin
  if isdatacell(ffocusedcell) and (oe1_autopopupmenu in
@@ -17089,11 +17089,11 @@ end;
 
 procedure tcustomstringgrid.doactivate;
 begin
- if focusedcellvalid and 
+ if focusedcellvalid and
           not (scoe_checkbox in tcustomstringcol(
-                  fdatacols.fitems[ffocusedcell.col]).optionsedit) then begin 
+                  fdatacols.fitems[ffocusedcell.col]).optionsedit) then begin
   feditor.doactivate;
-  
+
  end;
  inherited;
 end;
@@ -17198,7 +17198,7 @@ begin
      if high(ar4) >= rowcount - int5 then begin
       setlength(ar4,rowcount-int5);
      end;
- //    for int2:= int1 to int1 + high(ar4) do begin 
+ //    for int2:= int1 to int1 + high(ar4) do begin
  //    end;
      for int1:= 0 to high(ar4) do begin
       if bo2 then begin
@@ -17245,7 +17245,7 @@ begin
     end;
     ea_textentered: begin
      bo1:= true;
-     if (gps_edited in fstate) or 
+     if (gps_edited in fstate) or
            (scoe_forcereturncheckvalue in foptionsedit) then begin
       include(fstate,gps_edited);
       bo1:= docheckcellvalue;
@@ -17253,7 +17253,7 @@ begin
        info.action:= ea_none;
       end;
      end;
-     if bo1 and 
+     if bo1 and
             (og_colchangeonreturnkey in fcellinfo.grid.optionsgrid) then begin
       info.action:= ea_none;
       self.colstep(fca_focusin,1,true,false,true);
@@ -17285,7 +17285,7 @@ begin
  inherited;
  if ow1_autoscale in foptionswidget1 then begin
   datarowheight:= datarowheight + delta;
- end; 
+ end;
 end;
 
 procedure tcustomstringgrid.checkcellvalue(var accept: boolean);
@@ -17293,7 +17293,7 @@ var
  mstr1: msestring;
  strcol: tcustomstringcol;
 begin
- if  isdatacell(ffocusedcell) 
+ if  isdatacell(ffocusedcell)
                   and not (oe_readonly in feditor.optionsedit) then begin
   strcol:= datacols[ffocusedcell.col];
   if gps_edited in strcol.fstate then begin
@@ -17566,7 +17566,7 @@ end;
 
 function tcustomstringgrid.getkeystring(const aindex: integer): msestring;
 var
- list1: tmsestringdatalist; 
+ list1: tmsestringdatalist;
 begin
  result:= '';
  list1:= currentdatalist;
@@ -17647,7 +17647,7 @@ var
  by1: byte;
 begin
  if arow < fdirtyrow then begin
-  result:= prowstatety(inherited getitempo(arow))^.fold and 
+  result:= prowstatety(inherited getitempo(arow))^.fold and
                                          currentfoldhiddenmask = 0;
  end
  else begin
@@ -17664,7 +17664,7 @@ begin
     break;
    end;
    dec(pchar(po2),fsize);
-  end;  
+  end;
  end;
 end;
 
@@ -17695,7 +17695,7 @@ begin
    inc(aindex);
    inc(pchar(po1),fsize);
   end;
- end;  
+ end;
 end;
 
 procedure trowstatelist.recalchidden;
@@ -17757,7 +17757,7 @@ begin
  if (int1 < count) then begin
   po1:= datapo;
   inc(pchar(po1),fsize*aindex);
-  if (prowstatety(pchar(po1)+fsize)^.fold and foldlevelmask) > 
+  if (prowstatety(pchar(po1)+fsize)^.fold and foldlevelmask) >
                             (po1^.fold and foldlevelmask) then begin
    int2:= fhiddencount;
    counthidden(int1);
@@ -17778,7 +17778,7 @@ end;
 
 procedure trowstatelist.internalhide(var aindex: integer);
 var
- int1: integer; 
+ int1: integer;
  po1: prowstatety;
 begin
  inc(fhiddencount);
@@ -17786,7 +17786,7 @@ begin
  if (int1 < count) then begin
   po1:= datapo;
   inc(pchar(po1),int1*fsize);
-  if (po1^.fold and foldlevelmask) > 
+  if (po1^.fold and foldlevelmask) >
              (prowstatety(pchar(po1)-fsize)^.fold and foldlevelmask) then begin
    counthidden(int1);
   end;
@@ -17798,14 +17798,14 @@ procedure trowstatelist.hide(const aindex: integer);
 var
  int1: integer;
 begin
- int1:= aindex; 
+ int1:= aindex;
  internalhide(int1);
  checkdirty(aindex);
 end;
 
 procedure trowstatelist.hidechildren(const arow: integer);
 var
- int1{,int2}: integer; 
+ int1{,int2}: integer;
  po0: pchar;
  po1: prowstatety;
  level1,level2: byte;
@@ -17849,7 +17849,7 @@ end;
 
 procedure trowstatelist.showchildren(const arow: integer);
 var
- int1,int2: integer; 
+ int1,int2: integer;
  po0: pchar;
  po1: prowstatety;
  level1,level2: byte;
@@ -17904,7 +17904,7 @@ begin
   po1:= getitempo(index);
   bo1:= isvisible(index);
   if updatebit(po1^.fold,foldhiddenbit,avalue) then begin
-   if avalue then begin        
+   if avalue then begin
     if bo1 then begin
      hide(index);
     end;
@@ -17950,12 +17950,12 @@ begin
    end;
   end;
  end;  //bo1 -> avalue modified
- 
+
  if of_shiftchildren in fgrid.foptionsfold then begin
   normalizering;
   po1:= getitempo(index);
   po2:= po1;
-  by1:= po1^.fold and foldlevelmask;  
+  by1:= po1^.fold and foldlevelmask;
   delta:= integer(avalue) - integer(by1);
   if delta <> 0 then begin
    for int1:= index to fcount-1 do begin
@@ -18145,7 +18145,7 @@ begin
  end;
 end;
 
-procedure trowstatelist.fillfoldlevel(const index: integer; 
+procedure trowstatelist.fillfoldlevel(const index: integer;
                              const acount: integer; const avalue: byte);
 var
  po1: prowstatety;
@@ -18184,7 +18184,7 @@ begin
    freeandnil(fvisiblerowmap);
    fhiddencount:= 0;
   end;
-  checkdirty(0); 
+  checkdirty(0);
  end;
 end;
 
@@ -18270,7 +18270,7 @@ begin
    fdirtyautorowheight:= arow;
    bo1:= true;
   end;
- end;   
+ end;
  if bo1 then begin
   fgrid.layoutchanged;
  end;
@@ -18349,7 +18349,7 @@ begin                  //todo: optimize
    inc(pchar(rowstat1),fsize);
    inc(visirow1);
    inc(int2);
-   while (int2 <= arow) and 
+   while (int2 <= arow) and
                      (rowstat1^.fold and foldlevelmask > level1) do begin
     visirow1^:= int1;
     rowstat1^.fold:= rowstat1^.fold or currentfoldhiddenmask;
@@ -18410,7 +18410,7 @@ end;
 
 procedure trowstatelist.cleanrowheight(const aindex: integer);
 
-//todo: optimize cleaning with co1_autorowheight 
+//todo: optimize cleaning with co1_autorowheight
 
 var
  int1,int2,int3,int4,int5: integer;
@@ -18420,7 +18420,7 @@ begin
  if aindex >= fdirtyrowheight then begin
   ftopypos:= 0;
   if count > 0 then begin
-   needsrowheightupdate:= gs_needsrowheight in fgrid.fstate;  
+   needsrowheightupdate:= gs_needsrowheight in fgrid.fstate;
    po1:= dataporowheight;
    inc(pchar(po1),fdirtyrowheight*fsize);
    if fdirtyrowheight = 0 then begin
@@ -18461,7 +18461,7 @@ begin
      end;
     end;
     inc(pchar(po1),fsize);
-   end; 
+   end;
    if aindex >= count-1 then begin
     ftopypos:= int3;
    end
@@ -18574,7 +18574,7 @@ begin
   for int1:= high(infos) - 1 downto 0 do begin
    with infos[int1] do begin
     for int2:= 0 to high(nolines) do begin
-     nolines[int2]:= (int2 > high(po3^.nolines)) or 
+     nolines[int2]:= (int2 > high(po3^.nolines)) or
            (int2 < high(po3^.nolines)) and po3^.nolines[int2];
     end;
    end;
@@ -18758,7 +18758,7 @@ begin
  end;
 end;
 
-procedure trowstatelist.getfoldstate(const arow: integer; 
+procedure trowstatelist.getfoldstate(const arow: integer;
                        out aisvisible: boolean; out afoldlevel: byte;
                        out ahaschildren,aisopen: boolean);
 var
@@ -18794,7 +18794,7 @@ begin
   if finfolevel >= ril_colmerge then begin
    result:= result + ' ' + inttostrmse(colmerge.merged);
   end;
-  if (finfolevel >= ril_rowheight) and 
+  if (finfolevel >= ril_rowheight) and
                       (og_savestate in fgrid.foptionsgrid) then begin
    int1:= rowheight.height;
    if int1 < 0 then begin
@@ -18825,7 +18825,7 @@ begin
     if (rowheight.height < 0) then begin
      rowheight.height:= 0;
     end;
-    if (rowheight.height > 0) and 
+    if (rowheight.height > 0) and
                       (rowheight.height < fgrid.fdatarowheightmin) then begin
      rowheight.height:= fgrid.fdatarowheightmin;
     end;
@@ -19091,7 +19091,7 @@ begin
    ind1:= aindex - int1 + acount-1
   end;
   inc(pbyte(po1),fsize);
- end; 
+ end;
  po1:= getitempo(ind1);
  for int1:= ind1+1 to fcount-1 do begin
   inc(pbyte(po1),fsize);
@@ -19176,7 +19176,7 @@ begin
     by1:= po2^.fold and foldlevelmask;
     if by1 <= lev2 then begin
      break;
-    end;    
+    end;
     replacebits1(byte(po2^.fold),by1-1,byte(foldlevelmask));
     po3:= po2;
     if po4 = nil then begin

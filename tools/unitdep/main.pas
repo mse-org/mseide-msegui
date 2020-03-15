@@ -1,5 +1,5 @@
 { MSEide Copyright (c) 2011-2013 by Martin Schreiber
-   
+
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation; either version 2 of the License, or
@@ -37,7 +37,7 @@ type
   public
    constructor create(const alist: tdependencylist);
  end;
- 
+
  dependencyinfoty = record
   name: string;
   depend: string;
@@ -46,7 +46,7 @@ type
  pdependencyinfoty = ^dependencyinfoty;
  dependencyinfoaty = array [0..0] of dependencyinfoty;
  pdependencyinfoaty = ^dependencyinfoaty;
- 
+
  tdependencylist = class(trecordmap)
   private
    fapplication: string;
@@ -54,7 +54,7 @@ type
    function comparename(const l,r): integer;
    function comparedep(const l,r): integer;
    procedure finalizerecord(var item); override;
-   procedure copyrecord(var item); override;  
+   procedure copyrecord(var item); override;
    procedure resetchecked();
   public
    constructor create;
@@ -69,7 +69,7 @@ type
                          //dest = '' -> find first start
    function finddependnames(const aname: string): msestringarty;
  end;
- 
+
  tmainfo = class(tmainform)
    tstatfile1: tstatfile;
    filename: tfilenameedit;
@@ -101,7 +101,7 @@ uses
  main_mfm,msestream,strutils,msedatalist,msearrayutils;
 type
  ttreelistitem1 = class(ttreelistitem);
- 
+
 constructor tmainfo.create(aowner: tcomponent);
 begin
  flist:= tdependencylist.create;
@@ -204,7 +204,7 @@ begin
      int1:= pos(')',str1);
      if int1 > 0 then begin
       name1:= struppercase(copy(str1,2,int1-2));
-      if (fapplication = '') and 
+      if (fapplication = '') and
                      (name1 <> 'PROGRAM') and (name1 <> 'SYSTEM') then begin
        b1:= false;
        for i1:= 1 to high(name1) do begin
@@ -213,7 +213,7 @@ begin
          break;
         end;
        end;
-       if b1 then begin 
+       if b1 then begin
         fapplication:= name1;
        end;
       end;
@@ -225,12 +225,12 @@ begin
         add(info1);
        end;
       end
-      else begin      
+      else begin
        int2:= posex(' Load from ',str1,int1);
        if int2 >= int1+1 then begin
         info1.name:= name1;
         info1.depend:= copy(str1,findlastchar(str1,' ')+1,bigint);
-        if stringicomp(info1.name,info1.depend) <> 0 then begin 
+        if stringicomp(info1.name,info1.depend) <> 0 then begin
          add(info1);
         end;
        end
@@ -286,7 +286,7 @@ end;
 function tdependencylist.getdependencytree: ttreelistedititem;
 var
  pend: pdependencyinfoty;
- 
+
  procedure loadnode(const aparent: ttreelistedititem;
                               start: pdependencyinfoty;
                                out aend: pdependencyinfoty);
@@ -309,7 +309,7 @@ var
    if (n1 <> nil) and (n1.parent <> nil) then begin
     n2.frecursion:= n1.parent.caption;
    end
-   else begin  
+   else begin
     while (start < pend) and (start^.name = str1) do begin
      loadnode(n2,find(start^.depend),aend);
      inc(start);
@@ -318,9 +318,9 @@ var
   end;
   aend:= start;
  end;
- 
+
 var
- po1: pdependencyinfoty; 
+ po1: pdependencyinfoty;
 begin
  result:= ttreelistedititem.create;
  po1:= datapo;
@@ -493,7 +493,7 @@ var
  destar1: stringarty;
  maxlevel: integer;
  maxlevelfound: boolean;
- 
+
  function find1(const aname: string; const alevel: integer): boolean;
  var
 //  po1: pdependencyinfoty;
@@ -521,13 +521,13 @@ var
      end;
     end;
    end;
-  end;  
+  end;
   if result then begin
    additem(destar1,aname);
   end;
  end;
 var
- int1,int2: integer; 
+ int1,int2: integer;
 begin
  result:= nil;
  maxlevel:= 0;
@@ -552,7 +552,7 @@ end;
 constructor tunitdependencynode.create(const alist: tdependencylist);
 begin
  flist:= alist;
- inherited create; 
+ inherited create;
  include(fstate,ns_subitems);
 end;
 

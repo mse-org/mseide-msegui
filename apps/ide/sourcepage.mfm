@@ -34,7 +34,7 @@ object sourcepage: tsourcepage
     anchors = [an_top, an_bottom]
     optionsgrid = [og_focuscellonenter, og_autofirstrow, og_wrapcol, og_visiblerowpagestep]
     fixcols.count = 1
-    fixcols.items = <    
+    fixcols.items = <
       item
         color = -1610612731
         linewidth = 0
@@ -55,7 +55,7 @@ object sourcepage: tsourcepage
       -2147483646
     )
     datacols.count = 2
-    datacols.items = <    
+    datacols.items = <
       item[dataicon]
         linecolor = -1610612732
         width = 15
@@ -63,7 +63,7 @@ object sourcepage: tsourcepage
         oncellevent = icononcellevent
         widgetname = 'dataicon'
         dataclass = tgridintegerdatalist
-      end    
+      end
       item[edit]
         width = 2000
         options = [co_leftbuttonfocusonly, co_middlebuttonfocus, co_savestate, co_mousescrollrow]

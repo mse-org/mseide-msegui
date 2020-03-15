@@ -7,11 +7,11 @@
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 }
-unit msetraywidget; 
+unit msetraywidget;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 {$ifndef mswindows}
  {$ifndef mse_no_dbus}
-  {$define mse_usedbus} 
+  {$define mse_usedbus}
  {$endif}
 {$endif}
 interface
@@ -23,11 +23,11 @@ uses
 
 const
  trayoptionswidget = [ow_appinactivehint];
- 
+
 type
  traywidgetoptionty = (two_usedbus);
  traywidgetoptionsty = set of traywidgetoptionty;
- 
+
  ttraywidget = class(teventwidget)
   private
    ficon: tmaskedbitmap;
@@ -54,7 +54,7 @@ type
                                                const apos: pointty);
    procedure dbusdosecondaryactivate(const sender: tstatusnotifieritem;
                                                const apos: pointty);
-  {$endif} 
+  {$endif}
   {$ifdef mswindows}
    procedure showhint(const aid: int32; var info: hintinfoty); override;
   {$endif}
@@ -73,7 +73,7 @@ type
    procedure setvisible(const avalue: boolean); override;
    procedure loaded; override;
    procedure updatewindowinfo(var info: windowinfoty) override;
-   procedure dopopup(var amenu: tpopupmenu; 
+   procedure dopopup(var amenu: tpopupmenu;
                     var mouseinfo: mouseeventinfoty); override;
 
   public
@@ -91,14 +91,14 @@ type
    property imagenum: integer read fimagenum write setimagenum default -1;
    property caption: msestring read fcaption write setcaption;
    property optionswidget default defaultoptionswidget + trayoptionswidget;
-   property options: traywidgetoptionsty read foptions 
+   property options: traywidgetoptionsty read foptions
                                           write setoptions default [];
    property ondbusactivate: notifyeventty read fondbusactivate write
                                                              fondbusactivate;
-   property ondbussecondaryactivate: notifyeventty 
+   property ondbussecondaryactivate: notifyeventty
                  read fondbussecondaryactivate write fondbussecondaryactivate;
  end;
- 
+
 implementation
 uses
  mseguiintf,sysutils,msewidgets;
@@ -113,7 +113,7 @@ begin
   fstatusnotifieritem:= tstatusnotifieritem.create();
   fstatusnotifieritem.oncontextmenu:= @dbusdocontextmenu;
  end;
- {$endif} 
+ {$endif}
 *)
  fimagenum:= -1;
  ficon:= tcenteredbitmap.create(bmk_rgb{false});
@@ -131,7 +131,7 @@ begin
  inherited;
 {$ifdef mse_usedbus}
  fstatusnotifieritem.free();
-{$endif} 
+{$endif}
 end;
 
 procedure ttraywidget.setoptions(const avalue: traywidgetoptionsty);
@@ -190,7 +190,7 @@ end;
 {$ifdef mse_usedbus}
 function ttraywidget.hasdbus(): boolean;
 begin
- result:= (fstatusnotifieritem <> nil) and 
+ result:= (fstatusnotifieritem <> nil) and
                                      fstatusnotifieritem.checkdesktop();
 end;
 {$endif}
@@ -198,11 +198,11 @@ end;
 procedure ttraywidget.setvisible(const avalue: boolean);
 begin
 {$ifdef mse_usedbus}
- if (componentstate * [csdesigning,csloading] = []) and 
+ if (componentstate * [csdesigning,csloading] = []) and
   (hasdbus and (avalue <> fstatusnotifieritem.active) or
     not hasdbus and (avalue <> visible)) then begin
 {$else}
- if (componentstate * [csdesigning,csloading] = []) and 
+ if (componentstate * [csdesigning,csloading] = []) and
                                            (avalue <> visible) then begin
 {$endif}
   if avalue then begin
@@ -215,7 +215,7 @@ begin
      fstatusnotifieritem.active:= true;
     end
     else begin
-   {$endif} 
+   {$endif}
      inherited;
    {$ifdef mse_usedbus}
     end;
@@ -298,7 +298,7 @@ begin
    inc(ficonchanging);
    bmp1:= tmaskedbitmap.create(bmk_rgb{false});
    try
-    if (fimagelist = nil) or (fimagenum < 0) or 
+    if (fimagelist = nil) or (fimagenum < 0) or
                          (fimagenum >= fimagelist.count) then begin
      bmp1.assign(ficon);
     end
@@ -313,7 +313,7 @@ begin
      fstatusnotifieritem.seticonpixmap(bmp1);
     end
     else begin
-   {$endif} 
+   {$endif}
      if ownswindow and not (csdesigning in componentstate) then begin
       getwindowicon(bmp1,icon1,mask1,true);
       gui_settrayicon(windowpo^,icon1,mask1);
@@ -322,7 +322,7 @@ begin
     end;
    {$endif}
    finally
-    dec(ficonchanging); 
+    dec(ficonchanging);
     bmp1.free;
    end;
   end;

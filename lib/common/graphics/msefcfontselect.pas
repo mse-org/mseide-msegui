@@ -16,7 +16,7 @@ uses
 const
  highresfontshift = 6;  //64
  highresfontfakt = 1 shl highresfontshift;
- highresfontmask = highresfontfakt - 1; 
+ highresfontmask = highresfontfakt - 1;
 
 type
  fontnamety = (
@@ -25,10 +25,10 @@ type
       fn_resolution_y,fn_spacing,fn_average_width,fn_charset_registry,
       fn_encoding);
  fontinfoty = array[fontnamety] of string;
- 
+
 procedure setupfontinfo(const fontdata: fontdataty; var fontinfo: fontinfoty);
 procedure setfontinfoname(const aname: string; var ainfo: fontinfoty);
-function buildxftpat(const fontdata: fontdataty; 
+function buildxftpat(const fontdata: fontdataty;
                const fontinfo: fontinfoty; const highres: boolean): pfcpattern;
 function getfcfontfile(const ainfo: getfontinfoty; out filename: string;
                           out index: integer; out height: integer): boolean;
@@ -37,8 +37,8 @@ var
  defaultfontinfo: fontinfoty;
  simpledefaultfont: boolean;
  hasdefaultfontarg: boolean;//true if -fn
- noxft: boolean; 
- 
+ noxft: boolean;
+
 implementation
 uses
  sysutils,msestrings,msegraphutils,msectypes;
@@ -56,7 +56,7 @@ begin
   ainfo[fn_family_name]:= aname;
  end;
 end;
- 
+
 procedure setupfontinfo(const fontdata: fontdataty; var fontinfo: fontinfoty);
 var
  ar1: stringarty;
@@ -64,7 +64,7 @@ var
 begin
 {$ifdef mse_debuggdisync}
  checkgdilock;
-{$endif} 
+{$endif}
  ar1:= nil; //compiler warning;
  fontinfo:= defaultfontinfo;
  with pfontdataty(@fontdata)^ do begin
@@ -97,7 +97,7 @@ begin
  end;
 end;
 
-function buildxftpat(const fontdata: fontdataty; 
+function buildxftpat(const fontdata: fontdataty;
                   const fontinfo: fontinfoty; const highres: boolean): pfcpattern;
 var
  int1: integer;
@@ -107,7 +107,7 @@ var
 begin
 {$ifdef mse_debuggdisync}
  checkgdilock;
-{$endif} 
+{$endif}
  with fontdata do begin
 //  if fontinfo[fn_charset_registry] <> '*' then begin
 //   str1:= fontinfo[fn_charset_registry];
@@ -156,7 +156,7 @@ begin
     if highres then begin
      rea1:= rea1 * highresfontfakt;
     end;
-//    fcpatternadddouble(result,fc_pixel_size,rea1); 
+//    fcpatternadddouble(result,fc_pixel_size,rea1);
                               //double does not work on raspberry pi
     fcpatternaddinteger(result,fc_pixel_size,round(rea1));
    end;

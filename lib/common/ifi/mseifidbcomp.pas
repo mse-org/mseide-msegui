@@ -25,7 +25,7 @@ uses
  {$endif}
 {$endif}
 type
-{ 
+{
  tifisqldatasource = class;
  tifisqlfieldlinks = class(tififieldlinks)
   protected
@@ -33,7 +33,7 @@ type
    function getfieldnames(
                    const adatatype: listdatatypety): msestringarty; override;
  end;
- 
+
  tifisqldatasource = class(tifidatasource)
   private
    fsource: tsqlresult;
@@ -53,15 +53,15 @@ type
   datatype: tfieldtype;
  end;
  dbfieldinfoarty = array of dbfieldinfoty;
- 
+
  iifidbdataconnection = interface(iifidataconnection)[miid_iifidbdataconnection]
   function getfieldinfos: dbfieldinfoarty;
  end;
- 
+
  tifisqlresult = class(tsqlresult,iifidataconnection,iifidbdataconnection)
   protected
     //iifidataconnection
-   procedure fetchdata(const acolnames: array of string; 
+   procedure fetchdata(const acolnames: array of string;
                                                   acols: array of tdatalist);
    function getfieldnames(const adatatype: listdatatypety): msestringarty;
    function getdatatype(const aname: ansistring): listdatatypety;
@@ -70,7 +70,7 @@ type
    function getfieldinfos: dbfieldinfoarty;
   public
  end;
-  
+
 const
  listtypecompatibledbtypes: array[listdatatypety] of fieldtypesty =
   (
@@ -85,12 +85,12 @@ const
 //dl_ansistring,dl_msestring,dl_doublemsestring,dl_msestringint,
   stringfcomp,  stringfcomp, stringfcomp,       stringfcomp,
 //dl_complex,dl_rowstate,dl_custom
-   [],        [],         []);       
+   [],        [],         []);
 
  compatiblelisttypes: array[tfieldtype] of listdatatypety = (
   //ftUnknown,ftString,     ftSmallint,ftInteger, ftWord,
     dl_none,  dl_msestring,dl_integer,dl_integer,dl_integer,
-  //  ftBoolean,ftFloat,ftCurrency,ftBCD, 
+  //  ftBoolean,ftFloat,ftCurrency,ftBCD,
     dl_integer, dl_real,dl_real,   dl_currency,
   //ftDate,     ftTime,     ftDateTime,
     dl_datetime,dl_datetime,dl_datetime,
@@ -107,7 +107,7 @@ const
   //ftIDispatch,ftGuid, ftTimeStamp,ftFMTBcd,ftFixedWideChar,ftWideMemo);
     dl_none,    dl_none,dl_datetime,dl_real, dl_msestring,   dl_msestring
  );
- 
+
 implementation
 {$ifndef mse_allwarnings}
  {$if fpc_fullversion >= 030100}
@@ -129,7 +129,7 @@ begin
   setlength(result,afielddefs.count);
   for int1:= 0 to afielddefs.count-1 do begin
    with afielddefs[int1] do begin
-    if (atype = dl_none) or 
+    if (atype = dl_none) or
               (datatype in listtypecompatibledbtypes[atype]) then begin
      result[int2]:= msestring(name);
      inc(int2);

@@ -33,7 +33,7 @@ object replacedialogfo: treplacedialogfo
     bounds_cy = 37
     anchors = [an_left, an_top, an_right]
     dropdown.cols.count = 1
-    dropdown.cols.items = <    
+    dropdown.cols.items = <
       item
       end>
     reffontheight = 14
@@ -57,7 +57,7 @@ object replacedialogfo: treplacedialogfo
     anchors = [an_left, an_top, an_right]
     statfile = statfile1
     dropdown.cols.count = 1
-    dropdown.cols.items = <    
+    dropdown.cols.items = <
       item
       end>
     reffontheight = 14

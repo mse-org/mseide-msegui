@@ -22,9 +22,9 @@ const
 {$endif}
 
 {$packrecords c}
- 
+
 type
- 
+
 //from bits/typesizes.h
 
 {$ifdef linux}
@@ -182,7 +182,7 @@ type
 
  TTimeSpec = timespec;
  PTimeSpec = ^TTimeSpec;
- 
+
 //ioctrl
 const
    TCGETS = $5401;
@@ -227,7 +227,7 @@ const
    TIOCSBRK = $5427;
    TIOCCBRK = $5428;
    TIOCGSID = $5429;
-   
+
 const
    FIONCLEX = $5450;
    FIOCLEX = $5451;
@@ -382,7 +382,7 @@ const
    EMEDIUMTYPE = 124;
 
    {$else}
-   
+
    EPERM =          1;               //* Operation not permitted */
    ENOENT =         2;               //* No such file or directory */
    ESRCH =          3;               //* No such process */
@@ -524,7 +524,7 @@ const
 {$endif}
 
 
-{$ifdef linux}   
+{$ifdef linux}
    O_ACCMODE  = $00003;
    O_RDONLY   = $00000;
    O_WRONLY   = $00001;
@@ -646,7 +646,7 @@ const
    F_RDLCK = 1;           //* shared or read lock */
    F_UNLCK = 2;           //* unlock */
    F_WRLCK = 3;           //* exclusive or write lock */
-   F_UNLCKSYS = 4;        //* purge locks for a given system ID */ 
+   F_UNLCKSYS = 4;        //* purge locks for a given system ID */
    F_CANCEL = 5;          //* cancel an async lock request */
    F_WAIT = $010;        //* Wait until lock is granted */
    F_FLOCK = $020;       //* Use flock(2) semantics for lock */
@@ -732,10 +732,10 @@ type
   udata: pointer;    //* opaque user data identifier */
  end;
  pkevent_t = ^kevent_t;
-   
+
    function kqueue(): cint; cdecl; external clib name 'kqueue';
    function kevent(kq: cint; changelist: pkevent_t; nchanges: cint;
-              eventlist: pkevent_t; nevents: cint; timeout: ptimespec): cint; 
+              eventlist: pkevent_t; nevents: cint; timeout: ptimespec): cint;
                                            cdecl; external clib name 'kevent';
  const
 {$endif}
@@ -757,7 +757,7 @@ type
    DN_RENAME = $00000010;
    DN_ATTRIB = $00000020;
    DN_MULTISHOT = $80000000;
-   
+
   __S_ISUID       = $800;
   __S_ISGID       = $400;
   __S_ISVTX       = $200;
@@ -819,7 +819,7 @@ type
   st_dev: culong;
   st_ino: culong;
   st_nlink: culong;
-  
+
   st_mode: cuint;
   st_uid: cuint;
   st_gid: cuint;
@@ -828,7 +828,7 @@ type
   st_size: clong;
   st_blksize: clong;
   st_blocks: clong; //* Number 512-byte blocks allocated. */
-  
+
   st_atime: culong;
   st_atime_nsec: culong;
   st_mtime: culong;
@@ -848,7 +848,7 @@ type
  blkcnt_t = cint64;
  blksize_t = cuint32;
  fflags_t = cuint32;
- 
+
  _stat = packed record
   st_dev: __dev_t;          //* inode's device */
   st_ino: ino_t;            //* inode's number */
@@ -891,7 +891,7 @@ type
 
  P_stat64 = ^_stat64;
  Pstat64 = ^_stat64;
- _stat64 = _stat; 
+ _stat64 = _stat;
 {$else} //cpu32
 
  P_stat = ^_stat;
@@ -958,7 +958,7 @@ type
  blkcnt_t = cint64;
  blksize_t = cuint32;
  fflags_t = cuint32;
- 
+
  _stat = packed record
   st_dev: __dev_t;          //* inode's device */
   st_ino: ino_t;            //* inode's number */
@@ -1020,7 +1020,7 @@ type
  st_ctime_nsec: cuint;
  __unused4: cuint;
  __unused5: cuint;
- end;   
+ end;
 {$endif} //cpuarm
 {$endif} //cpu32
 
@@ -1030,13 +1030,13 @@ type
   TFdSet = __fd_set;
   PFdSet = ^TFdSet;
 
- 
+
 Const
   stdin   = 0;
   stdout  = 1;
   stderr  = 2;
-           
-  
+
+
 Type
 
   u_char = __u_char;
@@ -1667,7 +1667,7 @@ const
  ALTMON_11 = 68;
  ALTMON_12 = 69;
 
-{$endif} 
+{$endif}
 type
  Pnl_item = ^nl_item;
  nl_item = longint;
@@ -1729,7 +1729,7 @@ type
     __spinlock : longint;
   end;
   Ppthread_mutexattr_t = ^pthread_mutexattr_t;
-  
+
   pthread_mutexattr_t = record
    case integer of
     0:( __mutexkind : longint);
@@ -1781,7 +1781,7 @@ type
   sigval_t = sigval;
   Psigval_t = ^sigval_t;
 
-const 
+const
  __SI_MAX_SIZE = 128;
  {$ifdef CPU64}
  __SI_PAD_SIZE = ((__SI_MAX_SIZE div sizeof (cint)) - 4);
@@ -1799,17 +1799,17 @@ type
     si_utime: __clock_t;
     si_stime: __clock_t;
  end;
-                       
+
  _si_kill =  record
    si_pid: __pid_t;
    si_uid: __uid_t;
  end;
 
  _si_sigfault = record
-   si_addr: Pointer; 
+   si_addr: Pointer;
  end;
  _si_sigpoll = record
-   si_band: clong; 
+   si_band: clong;
    si_fd: cint;
  end;
  _si_timer = record
@@ -1826,7 +1826,7 @@ type
       si_signo : cint;
       si_errno : cint;
       si_code : cint;
-      Case integer of 
+      Case integer of
         0: (_pad: _si_pad);
         1: (_kill: _si_kill);
         2: (_timer: _si_timer);
@@ -1880,7 +1880,7 @@ type
   Psigset_t = ^sigset_t;
   TSigset = __sigset_t;
   PSigset = ^TSigset;
-  
+
  TSigActionEx = packed record
                 sa_sigaction: TSigActionHandlerEx;
                 sa_mask: __sigset_t;
@@ -1904,7 +1904,7 @@ type
   TSigAction = _sigaction;
   PSigAction = ^TSigAction;
    __sigaction = _sigaction;
-  TSigActionHandler = procedure(Signal: Integer); cdecl; 
+  TSigActionHandler = procedure(Signal: Integer); cdecl;
 
 const
   __S_IFMT        = $F000;
@@ -1971,7 +1971,7 @@ type
 
   P__timezone_ptr_t = ^__timezone_ptr_t;
   __timezone_ptr_t = ^timezone;
- 
+
  passwd = record
   pw_name: pcchar;   //* user name */
   pw_passwd: pcchar; //* encrypted password */
@@ -1987,7 +1987,7 @@ type
  end;
  ppasswd = ^passwd;
  pppasswd = ^ppasswd;
- 
+
 function getpid:__pid_t;cdecl;external clib name 'getpid';
 function getuid(): uid_t cdecl;external clib name 'getuid';
 function geteuid(): uid_t cdecl;external clib name 'geteuid';
@@ -2064,7 +2064,7 @@ type
 {$endif}
 
  PPDirEnt64 = ^PDirEnt64;
-  
+
    time_t = __time_t;
    Ptime_t = ^time_t;
 
@@ -2079,7 +2079,7 @@ type
         tm_wday : longint;
         tm_yday : longint;
         tm_isdst : longint;
-        case boolean of 
+        case boolean of
          false : (tm_gmtoff : longint;tm_zone : Pchar);
          true  : (__tm_gmtoff : longint;__tm_zone : Pchar);
    end;
@@ -2095,16 +2095,16 @@ function fcntl(__fd: cint; __cmd: cint; args: array of const): cint;
                    cdecl; external clib name 'fcntl'; overload;
 function fcntl(__fd: cint; __cmd: cint): cint;
                    cdecl; varargs; external clib name 'fcntl'; overload;
-function open(__file:Pchar; __oflag: cint; args:array of const): cint; 
+function open(__file:Pchar; __oflag: cint; args:array of const): cint;
                                 cdecl; external clib name 'open'; overload;
 function open(__file:Pchar; __oflag: cint): cint;
                     cdecl; varargs; external clib name 'open'; overload;
 function __close(Handle: cint): cint; cdecl;external clib name 'close';
 {$ifdef linux}
-function ftruncate64(handle: cint; size: cint64): cint; cdecl; 
+function ftruncate64(handle: cint; size: cint64): cint; cdecl;
                                      external clib name 'ftruncate64';
 {$else}
-function ftruncate64(handle: cint; size: cint64): cint; cdecl; 
+function ftruncate64(handle: cint; size: cint64): cint; cdecl;
                                      external clib name 'ftruncate';
 {$endif}
 //from unistd.h
@@ -2117,7 +2117,7 @@ const
  F_OK = 0;  //* Test for existence.  */
 
 //* Test for access to NAME using the real UID and real GID.  */
-function access(__name: pchar; __type: cint): cint; 
+function access(__name: pchar; __type: cint): cint;
                                         cdecl; external clib name 'access';
 
 function fsync(__fd: cint): cint; cdecl; external clib name 'fsync';
@@ -2162,7 +2162,7 @@ Const
   RECURSIVE     = 1;
  {$else}
   RECURSIVE     = 2;
- {$endif} 
+ {$endif}
 
 function pthread_setcanceltype(__type:longint; var __oldtype:longint):longint;
                           cdecl; external threadslib; overload;
@@ -2184,7 +2184,7 @@ const
  _STAT_VER_LINUX = 3;
 {$endif}
  _STAT_VER = _STAT_VER_LINUX;
-   
+
 {$ifdef linux}
 
 function __fxstat(__ver:longint; __fildes:longint; __stat_buf:Pstat):longint;
@@ -2200,7 +2200,7 @@ function __xstat64(__ver:longint; __filename:Pchar; __stat_buf:Pstat64):longint;
                              cdecl;external clib name '__xstat64';
 function __lxstat64(__ver:longint; __filename:Pchar; __stat_buf:Pstat64):longint;
                              cdecl;external clib name '__lxstat64';
-{$endif}                                   
+{$endif}
 function stat(__file:Pchar; __buf:Pstat):longint;
 function fstat(__fd:longint; __buf:Pstat):longint;
 
@@ -2245,7 +2245,7 @@ function closedir(__dirp:PDIR):longint;cdecl;external clib name 'closedir';
 
 var
  environ : ppchar; cvar; external;
- 
+
 type
   TUnixTime = tm;
   PUnixTime = ^TUnixTime;
@@ -2259,7 +2259,7 @@ function setlocale(__category:longint; __locale:Pchar):Pchar;cdecl;
                                                external clib name 'setlocale';
 var
  clock_gettime: function(clk_id: cint; tp: ptimespec): cint; cdecl;
- 
+
 const
 {$ifdef linux}
    CLOCK_REALTIME = 0;
@@ -2370,7 +2370,7 @@ const
 type
    Psighandler_t = ^sighandler_t;
    sighandler_t = __sighandler_t;
-   
+
   __itimer_which = (
    ITIMER_REAL,   // := 0,
    ITIMER_VIRTUAL,// := 1,
@@ -2429,7 +2429,7 @@ type
 function poll(__fds: Ppollfd; __nfds:nfds_t; __timeout:longint): cint
                                               cdecl external clib name 'poll';
 function ppoll (__fds: ppollfd;__nfds: nfds_t; __timeout: ptimespec;
-                                                __ss: p__sigset_t): cint 
+                                                __ss: p__sigset_t): cint
                                               cdecl external clib name 'ppoll';
 const
 {$ifdef linux}
@@ -2682,7 +2682,7 @@ const
    N_HDLC = 13;
    N_SYNC_PPP = 14;
    N_HCI = 15;
-   
+
 function gettimeofday(var __tv: timeval; var _tz: timezone):longint;
                           cdecl;external clib name 'gettimeofday'; overload;
 function gettimeofday(var __tv: timeval; __tz:__timezone_ptr_t):longint;
@@ -2715,14 +2715,14 @@ type
 
   TPipes = Array[0..1] of longint;
   PPipes = ^TPipes;
-  
+
 function pipe(var __pipedes: TPipes):longint;
                    cdecl; external clib name 'pipe'; overload;
 function pipe(var PipeDes: TPipeDescriptors): Integer; cdecl;
                                external clib name 'pipe'; overload;
 function pipe2(var PipeDes: TPipeDescriptors; flags: cint): Integer; cdecl;
                                external clib name 'pipe2';
-                               
+
 function vfork: __pid_t; cdecl; external clib name 'vfork';
 function fork: __pid_t; cdecl; external clib name 'fork';
 function setsid: __pid_t; cdecl; external clib name 'setsid';
@@ -2795,7 +2795,7 @@ type
         sin_zero: packed array[0..7] of Byte);
   end;
   {$endif}
-  
+
   TSockAddr = sockaddr;
   PSockAddr = ^TSockAddr;
 
@@ -3111,7 +3111,7 @@ const
 
 function shm_open(name: pcchar; oflag: cint; mode: mode_t): cint; cdecl;
                                                 external shmlib name 'shm_open';
-function shm_unlink(name: pcchar): cint; cdecl; 
+function shm_unlink(name: pcchar): cint; cdecl;
                                               external shmlib name 'shm_unlink';
 function mmap(addr: pointer; lengthint: size_t; prot: cint; flags: cint;
                                fd: cint; offset: off_t): pointer; cdecl;
@@ -3254,7 +3254,7 @@ const
    (n: 'clock_gettime'; d: @clock_gettime), //0
    (n: 'getpwuid_r'; d: @getpwuid_r),       //1
    (n: 'cuserid'; d: @cuserid)              //2
-   );    
+   );
 begin
  try
   initializedynlib(rtlibinfo,['librt.so.1','librt.so','libc.so.6'],[],
@@ -3265,7 +3265,7 @@ end;
 
 var
  inited: boolean;
- 
+
 procedure initlibc();
 begin
  if not inited then begin

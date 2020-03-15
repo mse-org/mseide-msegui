@@ -50,12 +50,12 @@ const
  defaultmaxfontcachecount = 64;
 var
  maxfontcachecount: integer = defaultmaxfontcachecount;
- 
+
 implementation
 uses
  mselist,sysutils,mseguiintf,msegraphutils,msetypes,msesys,
  msestrings,mseformatstr,msehash,mseglob;
- 
+
 type
  fontnumdataty = record
   num: integer;
@@ -77,7 +77,7 @@ type
    procedure add(const afont: fontnumty);
    procedure delete(const afont: fontnumty);
  end;
- 
+
  fontdatarecty = record
   refcount: integer;
   data: pfontdataty;
@@ -150,7 +150,7 @@ begin
 end;
 
 function realfontname(const aliasname: string): string;
-var                            
+var
  int1: integer;
  str1: string;
 begin
@@ -274,7 +274,7 @@ type
    0: (d: x11fontdatadty;);
    1: (_bufferspace: fontdatapty;);
  end;
- 
+
 function registerfont(var fontdata: fontdataty): fontnumty;
 
  procedure reusefont(startindex: integer);
@@ -351,7 +351,7 @@ begin
    gdi_lock;
 //   gdi_getfonthighres(drawinfo);
    h.d.gdifuncs^[gdf_getfonthighres](drawinfo);
-   gdi_unlock;   
+   gdi_unlock;
    drawinfo.getfont:= fontinfobefore;
   end;
  end;
@@ -381,7 +381,7 @@ begin
      (d.h.d.pitchoptions = s.baseinfo.options * fontpitchmask) and
      (d.h.d.familyoptions = s.baseinfo.options * fontfamilymask) and
      (d.h.d.antialiasedoptions = s.baseinfo.options * fontantialiasedmask) and
-     ({$ifdef FPC}longword{$else}byte{$endif}(d.h.d.style) xor 
+     ({$ifdef FPC}longword{$else}byte{$endif}(d.h.d.style) xor
       {$ifdef FPC}longword{$else}byte{$endif}(s.baseinfo.style) and
                                           fontstylehandlemask = 0) and
      (d.h.name = s.baseinfo.name) and
@@ -401,7 +401,7 @@ end;
 function tfonthashlist.hashkey(const akey): hashvaluety;
 begin
  with fontdataty(akey) do begin
-  result:= stringhash(h.name) xor stringhash(h.charset) xor 
+  result:= stringhash(h.name) xor stringhash(h.charset) xor
               datahash(h.d,sizeof(h.d));
  end;
 end;
@@ -414,7 +414,7 @@ begin
  with fontdataty(akey) do begin
   result:= comparemem(@po1^.h.d,@h.d,sizeof(h.d)) and
                       (po1^.h.name = h.name) and (po1^.h.charset = h.charset);
- end;           
+ end;
 end;
 
 function tfonthashlist.getrecordsize(): int32;
@@ -468,7 +468,7 @@ function getfontnum(const fontinfo: fontinfoty; var drawinfo: drawinfoty;
                   getfont: getfontfuncty; var atemplate: tfontcomp): fontnumty;
 var
  int1: integer;
- data1: fontdataty; 
+ data1: fontdataty;
 begin
  gdi_lock;
  with fontinfo do begin
@@ -515,13 +515,13 @@ var
  int1: integer;
 begin
  result:= 0;
- info.fonthasglyph.unichar:= glyph;  
+ info.fonthasglyph.unichar:= glyph;
  gdi_lock;
  for int1:= 0 to high(fonts) do begin
   with fonts[int1],data^ do begin
    if (refcount >= 0) and (basefont = abasefont) then begin
     info.fonthasglyph.font:= font;
-    getdefaultgdifuncs^[gdf_fonthasglyph](info);    
+    getdefaultgdifuncs^[gdf_fonthasglyph](info);
     if info.fonthasglyph.hasglyph then begin
      result:= int1 + 1;
     end;
@@ -547,7 +547,7 @@ begin
 end;
 
 procedure initfontalias;
-//format aliasdef: 
+//format aliasdef:
 //--FONTALIAS=<alias>,<fontname>[,<fontheight>[,<fontwidth>[,<options>[,<xscale>]
 //                    [,<ancestor>]]]
 const
@@ -606,7 +606,7 @@ begin
        str1:= defaultfontalias;
       end;
      end;
-     
+
      fontaliaslist.registeralias(ansistring(ar2[0]),ansistring(ar2[1]),
                          fam_overwrite,ar3[0],ar3[1],options1,xscale1,str1);
      deletecommandlineargument(int3);
@@ -677,7 +677,7 @@ begin
  end;
 end;
 
-procedure tfontaliaslist.updatefontdata(var info: fontdataty; 
+procedure tfontaliaslist.updatefontdata(var info: fontdataty;
                                                var atemplate: tfontcomp);
 var
  int1: integer;
@@ -705,15 +705,15 @@ begin
    if (xscale <> 1) and (info.h.d.xscale = 1) then begin
     info.h.d.xscale:= xscale;
    end;
-   if (options * fontpitchmask <> []) and 
+   if (options * fontpitchmask <> []) and
       (info.h.d.pitchoptions * fontpitchmask = []) then begin
     info.h.d.pitchoptions:= options * fontpitchmask;
    end;
-   if (options * fontfamilymask <> []) and 
+   if (options * fontfamilymask <> []) and
       (info.h.d.pitchoptions * fontfamilymask = []) then begin
     info.h.d.familyoptions:= options * fontfamilymask;
    end;
-   if (options * fontantialiasedmask <> []) and 
+   if (options * fontantialiasedmask <> []) and
       (info.h.d.pitchoptions * fontantialiasedmask = []) then begin
     info.h.d.antialiasedoptions:= options * fontantialiasedmask;
    end;

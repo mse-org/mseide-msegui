@@ -25,7 +25,7 @@ type
   public
    constructor create(var indexlist: msestring; out ok: boolean);
  end;
- 
+
 function editcornermask(var indexlist: msestring): boolean;
 
 implementation
@@ -37,7 +37,7 @@ begin
  tmsecornermaskeditorfo.create(indexlist,result);
 end;
 
-{ tmsecornermaskeditorfo } 
+{ tmsecornermaskeditorfo }
 
 constructor tmsecornermaskeditorfo.create(var indexlist: msestring;
                                                            out ok: boolean);

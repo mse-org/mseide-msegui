@@ -25,7 +25,7 @@ type
   lparam: lparam;
   lresult: lresult;
  end;
-  
+
 const
 // pixel0 = $000000;
 // pixel1 = $ffffff;
@@ -70,7 +70,7 @@ uses
 type
 
  trayinfoty = record
- end; 
+ end;
  win32windowdty = record
   trayinfo: trayinfoty;
   istaskbar: boolean;
@@ -98,11 +98,11 @@ const
 // toffs =           3*sizeof(integer);
 // roffs =           4*sizeof(integer);
 // boffs =           5*sizeof(integer);
- 
+
  widgetclassname = 'msetoplevelwidget';
  childwidgetclassname = 'msechildwidget';
  wndextrabytes = sizeof(wndextrainfoty);
-  
+
  mouseidletime = 100; //milliseconds
  {
   cursorshapety = (cr_default,cr_none,cr_arrow,cr_cross,cr_wait,cr_ibeam,
@@ -178,7 +178,7 @@ const
  SM_YVIRTUALSCREEN = 77;
  SM_CXVIRTUALSCREEN = 78;
  SM_CYVIRTUALSCREEN = 79;
- 
+
 type
  hmonitor = thandle;
  tMONITORINFO = record
@@ -188,7 +188,7 @@ type
   dwFlags: DWORD;
  end;
  pmonitorinfo = ^tmonitorinfo;
- 
+
 {$ifdef FPC}
 type
   TKeyboardState = array[0..255] of Byte;
@@ -240,7 +240,7 @@ type
   col0: longword;
   col1: longword;
  end;
- 
+
 {$ifdef FPC}
 function GetNextWindow(hWnd: HWND; uCmd: UINT): HWND; stdcall;
              external user32 name 'GetWindow';
@@ -287,16 +287,16 @@ const
       CFS_FORCE_POSITION              = $0020;
       CFS_CANDIDATEPOS                = $0040;
       CFS_EXCLUDE                     = $0080;
-      
+
 var
  hasimm32: boolean;
  ImmGetContext: function(_hwnd: HWND): HIMC; stdcall;
  ImmReleaseContext: function(_hwnd: HWND; _himc: HIMC): BOOL; stdcall;
- ImmSetCompositionWindow: function(_himc: HIMC; 
+ ImmSetCompositionWindow: function(_himc: HIMC;
                           lpCompForm: LPCOMPOSITIONFORM): BOOL; stdcall;
 
  haslayeredwindows: boolean;
- SetLayeredWindowAttributes: 
+ SetLayeredWindowAttributes:
   function(_hwnd: HWND; crKey: COLORREF; bAlpha: BYTE;
                                 dwFLAGS: DWORD): BOOL; stdcall;
 {
@@ -304,7 +304,7 @@ var
   function(_hwnd: HWND; hdcDst: HDC; pptDst: pPOINT; psize: pSIZE;
               hdcSrc: HDC; pptSrc: pPOINT; crKey: COLORREF;
               pblend: pBLENDFUNCTION; dwFlags: DWORD): BOOL; stdcall;
-} 
+}
 function getapplicationwindow: hwnd;
 begin
  result:= applicationwindow;
@@ -341,7 +341,7 @@ type
      PNotifyIconDataA = ^TNotifyIconDataA;
      PNotifyIconDataW = ^TNotifyIconDataW;
      PNotifyIconData = PNotifyIconDataA;
-     
+
 function Shell_NotifyIconA(dwMessage: DWORD; lpData: PNotifyIconDataA): BOOL;
                  external 'shell32.dll' name 'Shell_NotifyIconA';
 function Shell_NotifyIconW(dwMessage: DWORD; lpData: PNotifyIconDataW): BOOL;
@@ -351,10 +351,10 @@ function Shell_NotifyIconW(dwMessage: DWORD; lpData: PNotifyIconDataW): BOOL;
 var
  Shell_NotifyIconA: function (dwMessage: DWORD; lpData: PNotifyIconDataA): BOOL;
  Shell_NotifyIconW: function (dwMessage: DWORD; lpData: PNotifyIconDataW): BOOL;
- 
+
  shellinterfaceerror: guierrorty = gue_noshelllib;
  shellinterfacechecked: boolean;
- 
+
 function checkshellinterface: guierrorty;
 var
  bo1: boolean;
@@ -660,7 +660,7 @@ begin
  int1:= getwindowlong(id,flagsoffs);
  int2:= 0;
  if size in [wsi_fullscreen,wsi_fullscreenvirt] then begin
-  case size of 
+  case size of
    wsi_fullscreen: int2:= 1;
    wsi_fullscreenvirt: int2:= 2;
   end;
@@ -669,14 +669,14 @@ begin
    if int1 = 0 then begin
     wo1:= getwindowlong(id,gwl_style);
     setwindowlong(id,stylebackupoffs,wo1);
-    wo1:= wo1 and not 
+    wo1:= wo1 and not
      (ws_border or ws_dlgframe or ws_overlapped or ws_thickframe) or (ws_popup);
     setwindowlong(id,gwl_style,wo1);
    end;
    if size = wsi_fullscreen then begin
     setwindowpos(id,0,0,0,getsystemmetrics(sm_cxscreen),
                       getsystemmetrics(sm_cyscreen),
-                      swp_framechanged {or swp_nomove or swp_nosize} 
+                      swp_framechanged {or swp_nomove or swp_nosize}
                       or swp_nozorder or swp_noownerzorder or swp_noactivate);
    end
    else begin
@@ -684,9 +684,9 @@ begin
                       getsystemmetrics(sm_yvirtualscreen),
                       getsystemmetrics(sm_cxvirtualscreen),
                       getsystemmetrics(sm_cyvirtualscreen),
-                      swp_framechanged {or swp_nomove or swp_nosize} 
+                      swp_framechanged {or swp_nomove or swp_nosize}
                       or swp_nozorder or swp_noownerzorder or swp_noactivate);
-   end;   
+   end;
   end;
   if visible then begin
    showwindow(id,sw_shownoactivate);
@@ -700,7 +700,7 @@ begin
            swp_framechanged or swp_nomove or swp_nosize or swp_nozorder or
            swp_noownerzorder or swp_noactivate);
    setwindowlong(id,flagsoffs,int2);
-  end;   
+  end;
   case size of
    wsi_maximized: begin
     int1:= sw_maximize;
@@ -864,7 +864,7 @@ begin
     bibitcount:= 8;
     if setpalette then begin
      for lwo1:= 0 to high(bitmapinfo.bmicolors) do begin
-      bitmapinfo.bmicolors[lwo1]:= 
+      bitmapinfo.bmicolors[lwo1]:=
                   rgbquad(lwo1 or (lwo1 shl 8) or (lwo1 shl 16));
      end;
     end
@@ -996,9 +996,9 @@ begin
  }
 end;
 
-var 
+var
  imagememalloc: integer;
- 
+
 function gui_allocimagemem(length: integer): plongwordaty;
 begin
  if length = 0 then begin
@@ -1050,7 +1050,7 @@ begin
  result:= gui_getpixmapinfo(info);
  if result = gde_ok then begin
   result:= gde_image;
-  case info.depth of  
+  case info.depth of
    1: begin
     kind1:= bmk_mono;
    end;
@@ -1350,7 +1350,7 @@ begin
  end;
 end;
 {
-function gui_creategc(paintdevice: paintdevicety; const akind: gckindty; 
+function gui_creategc(paintdevice: paintdevicety; const akind: gckindty;
               var gc: gcty; const aprintername: msestring = ''): guierrorty;
 begin
  result:= gdi32creategc(paintdevice,akind,gc,aprintername);
@@ -1420,8 +1420,8 @@ begin
   {$else}
    info.newowner:= getwindowlong(id,gwl_hwndparent);
   {$endif}
-   enumwindows(@setwindowowner,ptruint(@info)); 
-                                      //do not destroy children   
+   enumwindows(@setwindowowner,ptruint(@info));
+                                      //do not destroy children
    if windows.DestroyWindow(id) then begin
 {$ifdef mse_debuggdi}
     dec(windowcount);
@@ -1453,7 +1453,7 @@ begin
  result:= gue_ok;
 end;
 
-function gui_raisewindow(id: winidty; 
+function gui_raisewindow(id: winidty;
                         const topmost: boolean = false): guierrorty;
 var
  w1: hwnd;
@@ -1748,7 +1748,7 @@ var
  int1: integer;
 begin
  result:= true;
- if getwindowlong(awinid,gwl_style) and windows.ws_visible <> 0 then begin 
+ if getwindowlong(awinid,gwl_style) and windows.ws_visible <> 0 then begin
   getwindowthreadprocessid(awinid,@pid);
   with ppidinfoty(po)^ do begin
    for int1:= 0 to high(pids) do begin
@@ -2198,7 +2198,7 @@ end;
 
 var
  configuredwindow: winidty;
- 
+
 procedure postconfigureevent(const id: winidty);
 var
  rect1: rectty;
@@ -2268,7 +2268,7 @@ begin
  end;
 end;
 
-function gui_setdecoratedwindowrect(id: winidty; const rect: rectty; 
+function gui_setdecoratedwindowrect(id: winidty; const rect: rectty;
                                     out clientrect: rectty): guierrorty;
 //var
 // rect1: rectty;
@@ -2301,7 +2301,7 @@ function nestedwindowproc(): boolean; //window frame clicked
 begin
  result:= eventlooping > 0;
 end;
- 
+
 procedure gui_wakeup;
 begin
  windows.postmessage(applicationwindow,wakeupmessage,0,0);
@@ -2357,7 +2357,7 @@ function WindowProc(ahWnd: HWND; Msg: UINT; wParam: WPARAM; lParam: LPARAM): LRE
    wm_rbuttondown,wm_rbuttonup: result:= mb_right;
   end;
  end;
- 
+
  procedure inittraycallback(const reposition: boolean; out cursorpos: pointty;
                             out shiftstate: uint);
  var
@@ -2380,10 +2380,10 @@ function WindowProc(ahWnd: HWND; Msg: UINT; wParam: WPARAM; lParam: LPARAM): LRE
   if getkeystate(vk_rbutton) < 0 then begin
    shiftstate:= shiftstate or mk_rbutton;
   end;
-  
+
   windows.getcursorpos(tpoint(pt1));
   gui_getwindowrect(ahwnd,rect1);
- {$ifdef mse_debugconfigure} 
+ {$ifdef mse_debugconfigure}
   debugwindow('*inittraycallback ',ahwnd);
   debugwriteln('  cursor x:'+inttostr(pt1.x)+' y:'+inttostr(pt1.y));
  {$endif}
@@ -2414,7 +2414,7 @@ var
  imminfo: compositionform;
  ev1: tmseevent;
 label
- nodefwindowproclab; 
+ nodefwindowproclab;
 begin
  if application.ismainthread then begin
   sysevent.hwnd:= ahwnd;
@@ -2454,14 +2454,14 @@ begin
      windowproc(ahwnd,lparam and $ffff,shiftstate1,pointtowinmousepos(pt1));
     end;
    end;
-  end;     
+  end;
   wm_ime_char: begin
    if iswin95 then begin
     str1:= char(wparam);
     if wparam and $ff00 <> 0 then begin
      str1:= char(wparam shr 8) + str1;
     end;
-    charbuffer:= charbuffer + msestring(str1);    
+    charbuffer:= charbuffer + msestring(str1);
    end
    else begin
     charbuffer:= charbuffer + ucs4tostring(wparam);
@@ -2595,11 +2595,11 @@ begin
     {$endif}
      eventlist.add(twindowevent.create(ek_show,ahwnd));
     end;
-    if (((swp_nomove or swp_nosize) and flags <> (swp_nomove or swp_nosize)) or 
+    if (((swp_nomove or swp_nosize) and flags <> (swp_nomove or swp_nosize)) or
                 (flags and swp_nozorder = 0)) and
                                            windowvisible(ahwnd) then begin
      postconfigureevent(ahwnd);
-//     getwindowrectpa(ahwnd,rect1,pt1); 
+//     getwindowrectpa(ahwnd,rect1,pt1);
 //     eventlist.add(twindowrectevent.create(ek_configure,ahwnd,rect1,pt1));
      result:= 0;
      exit;
@@ -2666,7 +2666,7 @@ begin
    eventlist.add(tkeyevent.create(ahwnd,true,key1,key1,shiftstate,'',timestamp));
   end;
   wm_ime_startcomposition: begin
-   if hasimm32 and (application.activewidget <> nil) and 
+   if hasimm32 and (application.activewidget <> nil) and
                             application.activewidget.hascaret then begin
     imc:= immgetcontext(ahwnd);
     fillchar(imminfo,sizeof(imminfo),0);
@@ -2736,7 +2736,7 @@ end;
 
 var
  sdndthread: threadty;
- 
+
 procedure beginsdndwrite(const athread: threadty);
 begin
  application.lock;
@@ -2881,7 +2881,7 @@ var
 begin
  str1:= ansistring(application.applicationname);
  id:= windows.CreateWindow(widgetclassname,pchar(str1),
-             WS_POPUP or WS_CAPTION or WS_CLIPSIBLINGS or 
+             WS_POPUP or WS_CAPTION or WS_CLIPSIBLINGS or
              WS_SYSMENU or WS_MINIMIZEBOX,0,0,0,0,0,0,hinstance,nil);
 {$ifdef mse_debugwindowdestroy}
  debugwindow('ceateapphandle ',id);
@@ -2891,7 +2891,7 @@ begin
  deletemenu(menu1,sc_size,mf_bycommand);
  deletemenu(menu1,sc_move,mf_bycommand);
  showwindow(id,sw_shownoactivate);
-  
+
 // id:= windows.CreateWindowex(ws_ex_appwindow,widgetclassname,pchar(str1),
 //        ws_overlappedwindow,0,0,0,0,0,0,hinstance,nil);
  if id = 0 then begin
@@ -2954,7 +2954,7 @@ begin
  }
   if wo_notaskbar in options then begin
    showwindow(applicationwindow,sw_hide);
-  end;    
+  end;
   if options * noframewindowtypes <> [] then begin
    windowstyle:= ws_popup;
 //   windowstyleex:= windowstyleex or ws_ex_toolwindow;
@@ -2997,7 +2997,7 @@ begin
 {$ifdef mse_debugzorder}
     debugwriteln('gui_createwindow hwnd_top '+hextostr(id));
 {$endif}
-    setwindowpos(id,hwnd_top,0,0,0,0,swp_noactivate or swp_nomove or 
+    setwindowpos(id,hwnd_top,0,0,0,0,swp_noactivate or swp_nomove or
                                             swp_nosize or swp_noownerzorder);
    end;
   end
@@ -3154,7 +3154,7 @@ begin
   winrecttorect(result);
  end
  else begin
-  result:= nullrect;                            
+  result:= nullrect;
  end;
 end;
 
@@ -3170,7 +3170,7 @@ begin
   appmmwidth:= getdevicecaps(dc,logpixelsx) / 25.4;
   appmmheight:= getdevicecaps(dc,logpixelsy) / 25.4;
   releasedc(id,dc);
- end; 
+ end;
 end;
 
 const
@@ -3219,7 +3219,7 @@ type
   dwInfoFlags: DWORD;
  end;
 
-function traycommand(var child: windowty; 
+function traycommand(var child: windowty;
                        const command: integer; const flags: integer = 0;
                              const CallbackMessage: UINT = 0;
                              const Icon: HICON = 0;
@@ -3244,7 +3244,7 @@ function traycommand(var child: windowty;
   end;
   move(source[1],dest,int1*sizeof(widechar));
  end;
- 
+
 var
 // dataa: notifyicondataa;
  dataw: notifyicondataw_2;
@@ -3393,7 +3393,7 @@ var
  classinfoa: twndclassa;
 // hres1: hresult;
 
-begin  
+begin
  mousewindow:= 0;
  mousecursor:= 0;
  applicationwindow:= 0;
@@ -3476,7 +3476,7 @@ begin
  freeandnil(eventlist);
  unregisterclass(widgetclassname,hinstance);
  widgetclass:= 0;
- 
+
  msegdi32gdi.deinit;
 
  result:= gue_ok;

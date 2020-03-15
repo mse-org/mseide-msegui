@@ -15,7 +15,7 @@ unit msefontcache;
 interface
 uses
  msehash,msegraphics,mseguiglob;
- 
+
 type
  fontcachedataty = record
 //  h: fontcachehdataty;
@@ -28,7 +28,7 @@ type
   descent: integer;
   linespacing: integer;
   caretshift: integer;
-  
+
   font: ptruint;
 //  handle: pcachefontty;
  end;
@@ -38,15 +38,15 @@ type
   data: fontcachedataty;
  end;
  pfontcachehashdataty = ^fontcachehashdataty;
- 
+
  pfontcache = ^tfontcache;
- 
+
  tfontcache = class(thashdatalist)
   private
    finstancepo: pfontcache;
   protected
    function hashkey(const akey): hashvaluety; override;
-   function checkkey(const akey; 
+   function checkkey(const akey;
                        const aitem: phashdataty): boolean; override;
    procedure finalizeitem(const aitem: phashdataty); override;
    function find(const afont: fontdataty): pfontcachehashdataty;
@@ -59,7 +59,7 @@ type
    function getdataoffsfont(const afont: fontty): hashoffsetty; virtual; abstract;
    function getrecordsize(): int32 override;
    public
-   constructor create(var ainstance: tfontcache); 
+   constructor create(var ainstance: tfontcache);
    procedure getfont(var drawinfo: drawinfoty);
    procedure freefontdata(var drawinfo: drawinfoty);
    procedure gettext16width(var drawinfo: drawinfoty); virtual; abstract;
@@ -72,7 +72,7 @@ type
 implementation
 uses
  sysutils,msedynload; //release dynload needed in finalization
- 
+
 { tfontcache }
 
 constructor tfontcache.create(var ainstance: tfontcache);
@@ -115,7 +115,7 @@ begin
  with drawinfo.getfont do begin
   ok:= true;
   po1:= find(fontdata^);
-  with fontdata^ do begin 
+  with fontdata^ do begin
    if po1 = nil then begin
     if not internalgetfont(drawinfo.getfont,h1) then begin
      font:= 0;
@@ -149,7 +149,7 @@ begin
  with drawinfo.getfont do begin
   ok:= true;
   po1:= find(fontdata^);
-  with fontdata^ do begin 
+  with fontdata^ do begin
    getmem(pointer(font),ffontdatasize);
    with pftglfontty(font)^ do begin
     if po1 = nil then begin

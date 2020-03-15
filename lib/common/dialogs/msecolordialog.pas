@@ -21,13 +21,13 @@ uses
 
 const
  colordialogstatname = 'colordialog.sta';
- 
+
 type
 
- coloreventty = procedure(const sender: tobject; 
+ coloreventty = procedure(const sender: tobject;
                                             const avalue: colorty) of object;
  setcoloreventty = procedure(const sender: tobject; var avalue: colorty;
-                          var accept: boolean) of object;               
+                          var accept: boolean) of object;
 
  tellipsedropdownbuttonframe = class(tdropdownmultibuttonframe)
   private
@@ -35,18 +35,18 @@ type
    procedure setbuttonellipse(const avalue: tdropdownbutton);
   public
    constructor create(const aintf: icaptionframe;
-                                     const buttonintf: ibutton); override;                                                  
+                                     const buttonintf: ibutton); override;
   published
-   property buttonellipse: tdropdownbutton read getbuttonellipse 
+   property buttonellipse: tdropdownbutton read getbuttonellipse
                                                     write setbuttonellipse;
  end;
 
  colordialogoptionty = (cdo_rgbtext);
  colordialogoptionsty = set of colordialogoptionty;
- 
+
  coloreditoptionty = (ceo_rgbtext);
  coloreditoptionsty = set of coloreditoptionty;
-                           
+
  tcustomcoloredit = class(tcustomenumedit)
   private
    foncolorchange: coloreventty;
@@ -55,7 +55,7 @@ type
    procedure setvalue(avalue: colorty);
    function getvaluedefault: colorty;
    procedure setvaluedefault(avalue: colorty);
-   
+
    function getonsetvalue: setcoloreventty;
    procedure setonsetvalue(const avalue: setcoloreventty);
    function getframe: tellipsedropdownbuttonframe;
@@ -85,15 +85,15 @@ type
    property value: colorty read getvalue write setvalue default cl_none;
    property valuedefault: colorty read getvaluedefault
                      write setvaluedefault default cl_none;
-   property options: coloreditoptionsty read foptions 
+   property options: coloreditoptionsty read foptions
                                             write setoptions default [];
    property frame: tellipsedropdownbuttonframe read getframe write setframe;
    property gridvalue[const index: integer]: colorty
         read getgridvalue write setgridvalue; default;
    property gridvalues: colorarty read getgridvalues write setgridvalues;
    property onsetvalue: setcoloreventty read getonsetvalue write setonsetvalue;
-   property oncolorchange: coloreventty read foncolorchange 
-                                                    write foncolorchange; 
+   property oncolorchange: coloreventty read foncolorchange
+                                                    write foncolorchange;
                       //sender is tcolordialogfo or tcustomcoloredit
  end;
 
@@ -110,7 +110,7 @@ type
    property oncolorchange;
    property frame;
  end;
-  
+
  tcolordialogfo = class(tmseform)
    tstatfile1: tstatfile;
    tlayouter1: tlayouter;
@@ -147,7 +147,7 @@ type
                                                          var accept: Boolean);
    procedure greenonsetvalue(const sender: TObject; var avalue: realty;
                                                          var accept: Boolean);
-   procedure blueonsetvalue(const sender: TObject; var avalue: realty; 
+   procedure blueonsetvalue(const sender: TObject; var avalue: realty;
                                                          var accept: Boolean);
    procedure rgbchange(const sender: TObject);
    procedure componentsdataentered(const sender: TObject);
@@ -171,7 +171,7 @@ type
    procedure endcolorpick();
    procedure dochange();
   published
-   property oncolorchange: coloreventty read foncolorchange 
+   property oncolorchange: coloreventty read foncolorchange
                                                   write foncolorchange;
  end;
 
@@ -185,7 +185,7 @@ type
   published
    property options default defaultautodropdownoptions;
  end;
- 
+
 function colordialog(var acolor: colorty;
                       const aoncolorchange: coloreventty = nil;
                      const aoptions: colordialogoptionsty = []): modalresultty;
@@ -201,7 +201,7 @@ uses
  msekeyboard,mseguiintf,mseeditglob;
 type
  twidget1 = class(twidget);
- 
+
  tcolorfixcol = class(tdropdownfixcol)
   protected
    ficonrect: rectty;
@@ -211,7 +211,7 @@ type
               const aowner: tgridarrayprop;
                 const acontroller: tcustomdropdownlistcontroller); override;
  end;
- 
+
 function colordialog(var acolor: colorty;
                       const aoncolorchange: coloreventty = nil;
                       const aoptions: colordialogoptionsty = []): modalresultty;
@@ -385,7 +385,7 @@ end;
 
 procedure tcustomcoloredit.colorenter(const acolor: colorty);
 begin
- tcolordropdowncontroller(fdropdown).resetselection; 
+ tcolordropdowncontroller(fdropdown).resetselection;
  text:= msestring(colortostring(acolor));
  checkvalue();
 end;
@@ -492,7 +492,7 @@ end;
 procedure tcustomcoloredit.setgridvalue(const index: integer;
                                                const avalue: colorty);
 begin
- inherited gridvalue[index]:= avalue; 
+ inherited gridvalue[index]:= avalue;
 end;
 
 function tcustomcoloredit.getgridvalues: colorarty;
@@ -886,7 +886,7 @@ begin
   color:= cl_red;
   shadow_color:= cl_white;
  end;
- fcolorpicking:= true; 
+ fcolorpicking:= true;
 end;
 
 procedure tcolordialogfo.endcolorpick();

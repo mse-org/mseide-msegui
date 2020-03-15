@@ -1,5 +1,5 @@
 { MSEide Copyright (c) 1999-2013 by Martin Schreiber
-   
+
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation; either version 2 of the License, or
@@ -94,7 +94,7 @@ type
    procedure refresh; override;
    procedure beforecontinue; override;
  end;
- 
+
 implementation
 uses
  cpuavr32form_mfm,main,msegdbutils,sourceform,mseformatstr,sysutils,
@@ -104,13 +104,13 @@ type
   retad,          //0 Return address:
   exceptreturn    //1 Exception return
  );
- 
+
 const
  modebits =   $01c00000;
  gmmask =     $00010000;
  exceptmode = $00800000; //irq level 0
 { tcpuavr32fo }
- 
+
 constructor tcpuavr32fo.create(aowner: tcomponent);
 begin
  inherited create(aowner);
@@ -219,7 +219,7 @@ begin
  //     if getregistervalue('sp',longint(lwo3)) = gdb_ok then begin
       if (getregistervalue('sp',lwo3) = gdb_ok) then begin
        if selectstackpointer(lwo3) = gdb_ok then begin
-        mainfo.refreshframe;       
+        mainfo.refreshframe;
        end;
       end;
      end;

@@ -16,14 +16,14 @@ uses
  mclasses,
  msegraphics,mseeditglob,msetypes,msedropdownlist,msetimer,msesimplewidgets,
  mseinplaceedit,mseevent,mseguiglob,msegridsglob,msestrings;
- 
+
 const
  popupcalendarwidth = 233;
- 
+
 type
  idropdowncalendar = interface(idropdownwidget)
  end;
- 
+
  tcalendarcontroller = class(tdropdownwidgetcontroller)
   private
    ffirstdayofweek: dayofweekty;
@@ -35,12 +35,12 @@ type
    procedure editnotification(var info: editnotificationinfoty); override;
   published
    property bounds_cx default popupcalendarwidth;
-   property firstdayofweek: dayofweekty read ffirstdayofweek 
+   property firstdayofweek: dayofweekty read ffirstdayofweek
                                         write ffirstdayofweek default dw_mon;
-   property reddayofweek: dayofweekty read freddayofweek 
+   property reddayofweek: dayofweekty read freddayofweek
                                         write freddayofweek default dw_sun;
  end;
- 
+
  tpopupcalendarfo = class(tmseform)
    grid: tdrawgrid;
    monthdisp: tdatetimedisp;
@@ -149,7 +149,7 @@ begin
    ea_textedited: begin
     if trystringtodate(fintf.geteditor.text,dt1) then begin
      tpopupcalendarfo(fdropdownwidget).value:= dt1;
-    end;    
+    end;
    end
   end;
  end;
@@ -181,7 +181,7 @@ begin
  with grid.fixrows[-1] do begin
   int2:= ord(fcontroller.ffirstdayofweek);
   for int1:= 0 to 6 do begin
-   captions[int1].caption:= 
+   captions[int1].caption:=
      defaultformatsettingsmse.shortdaynames[((int1+int2) mod 7)+1];
   end;
   {
@@ -238,7 +238,7 @@ end;
 
 function tpopupcalendarfo.isinvalidcell(const acell: gridcoordty): boolean;
 begin
- result:= (acell.row = 0) and (acell.col < ffirstcol) or 
+ result:= (acell.row = 0) and (acell.col < ffirstcol) or
      (acell.row > flastrow) or
      (acell.row >= flastrow) and (acell.col > flastcol);
 end;
@@ -262,7 +262,7 @@ begin
 end;
 
 procedure tpopupcalendarfo.cellevent(const sender: TObject;
-               var info: celleventinfoty); 
+               var info: celleventinfoty);
  procedure setcellvalue;
  begin
   if (fvalueupdating = 0) then begin
@@ -271,7 +271,7 @@ procedure tpopupcalendarfo.cellevent(const sender: TObject;
    end;
   end;
  end;
- 
+
 begin
  if (fcontroller <> nil) and iscellclick(info,[ccr_buttonpress]) then begin
   setcellvalue;
@@ -308,7 +308,7 @@ begin
         end
         else begin
          modown(nil);
-        end;        
+        end;
        end;
        key_up: begin
         if cell.row = 0 then begin
@@ -341,18 +341,18 @@ procedure tpopupcalendarfo.mousewheelevent(var info: mousewheeleventinfoty);
  function bigstep: boolean;
  begin
   with info do begin
-   result:= (shiftstate = [ss_ctrl]) or 
+   result:= (shiftstate = [ss_ctrl]) or
                  pointinrect(pos,yeardisp.widgetrect) or
                  pointinrect(pos,buup.widgetrect) or
                  pointinrect(pos,budo.widgetrect);
   end;
  end;
- 
+
 begin
  with info do begin
   if not (es_processed in eventstate) then begin
    include(eventstate,es_processed);
-   case wheel of 
+   case wheel of
     mw_up: begin
      if bigstep then begin
       yearup(nil);
@@ -397,7 +397,7 @@ end;
 procedure tpopupcalendarfo.dokeydown(var info: keyeventinfoty);
 begin
  inherited;
- if not (es_processed in info.eventstate) then begin 
+ if not (es_processed in info.eventstate) then begin
   fcontroller.dropdownkeydown(info);
  end;
 end;

@@ -24,9 +24,9 @@ uses
  msearrayprops,mseglob,msetypes,mseifilink,msewidgetgrid,msemenus,
  mseevent,msegrids,msegraphutils,msedatalist,mseificomp,mseificompglob,
  mseifidialogcomp,msegraphics;
- 
+
 type
- 
+
  ifiwidgetlinkoptionty = (iwlo_sendvalue,iwlo_sendmodalresult,
       iwlo_sendhide,iwlo_sendshow,
       iwlo_sendfocus,iwlo_senddefocus,iwlo_sendactivate,iwlo_senddeactivate);
@@ -34,7 +34,7 @@ type
 const
  widgetstateoptionsty = [iwlo_sendhide,iwlo_sendshow,iwlo_sendfocus,
       iwlo_senddefocus,iwlo_sendactivate,iwlo_senddeactivate];
-type  
+type
 
  tvaluewidgetlink = class(tcustomvaluecomponentlink)
   private
@@ -44,19 +44,19 @@ type
    procedure setwidget(const avalue: twidget);
   published
    property widget: twidget read getwidget write setwidget;
-   property options: ifiwidgetlinkoptionsty read foptions 
+   property options: ifiwidgetlinkoptionsty read foptions
                                                  write foptions default [];
  end;
- 
- tvaluewidgetlinks = class(tvaluelinks) 
+
+ tvaluewidgetlinks = class(tvaluelinks)
   private
    function getitems(const index: integer): tvaluewidgetlink;
   protected
-   function getitemclass: modulelinkpropclassty; override;  
+   function getitemclass: modulelinkpropclassty; override;
   public
    class function getitemclasstype: persistentclassty; override;
    function byname(const aname: string): tvaluewidgetlink;
-   property items[const index: integer]: tvaluewidgetlink read getitems; default;   
+   property items[const index: integer]: tvaluewidgetlink read getitems; default;
  end;
 
  tformlink = class(tcustommodulelink)
@@ -73,13 +73,13 @@ type
    procedure valuechanged(const sender: iificlient); override;
    procedure statechanged(const sender: iificlient;
                              const astate: ifiwidgetstatesty); override;
-   procedure sendmodalresult(const sender: iificlient; 
+   procedure sendmodalresult(const sender: iificlient;
                               const amodalresult: modalresultty); override;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
   published
-   property valuewidgets: tvaluewidgetlinks read getvaluewidgets 
+   property valuewidgets: tvaluewidgetlinks read getvaluewidgets
                                                       write setvaluewidgets;
    property valuecomponents;
    property linkname;
@@ -92,14 +92,14 @@ type
  end;
 
  trxwidgetgrid = class;
-  
+
  tifiwidgetgridcontroller = class(tifigridcontroller)
   protected
    procedure processdata(const adata: pifirecty; var adatapo: pchar); override;
    procedure setowneractive(const avalue: boolean); override;
    function encodegriddata(const asequence: sequencety): ansistring; override;
   public
-   constructor create(const aowner: trxwidgetgrid; 
+   constructor create(const aowner: trxwidgetgrid;
                                const aintf: iactivatorclient);
  end;
 
@@ -108,10 +108,10 @@ type
    procedure datachange(const arow: integer); override;
  end;
  ifiwidgetcolarty = array of tifiwidgetcol;
-  
- rxwidgetstatety = ({rws_openpending,}rws_datareceived,rws_commandsending); 
+
+ rxwidgetstatety = ({rws_openpending,}rws_datareceived,rws_commandsending);
  rxwidgetstatesty = set of rxwidgetstatety;
- 
+
  trxwidgetgrid = class(twidgetgrid,iifimodulelink)
   private
    factive: boolean;
@@ -145,7 +145,7 @@ type
 
  getdialogclasseventty = procedure(const sender: tobject;
                             var adialogclass: custommseformclassty) of object;
- 
+
  tifidialog = class(tmsecomponent,iifidialoglink)
   private
    fifilink: tifidialoglinkcomp;
@@ -156,7 +156,7 @@ type
    function showdialog(out adialog: tactcomponent): modalresultty; virtual;
   published
    property ifilink: tifidialoglinkcomp read fifilink write setifilink;
-   property ongetdialogclass: getdialogclasseventty 
+   property ongetdialogclass: getdialogclasseventty
                  read fongetdialogclass write fongetdialogclass;
  end;
 
@@ -176,7 +176,7 @@ type
  tcustommodulelink1 = class(tcustommodulelink);
  tdatacols1 = class(tdatacols);
  tdialogclientcontroller1 = class(tdialogclientcontroller);
- 
+
 // tlinkdata1 = class(tlinkdata);
 
 { tvaluewidgetlink }
@@ -193,7 +193,7 @@ begin
  intf1:= nil;
  fwidgetstatebefore:= [];
  fvalueproperty:= nil;
- if (avalue <> nil) and 
+ if (avalue <> nil) and
     not getcorbainterface(avalue,typeinfo(iificlient),intf1) then begin
   raise exception.create(avalue.name+': No ifiwidget.');
  end;
@@ -255,7 +255,7 @@ begin
  fvalues.assign(avalue);
 end;
 
-function tformlink.processdataitem(const adata: pifirecty; 
+function tformlink.processdataitem(const adata: pifirecty;
            var adatapo: pchar; const atag: integer; const aname: string): boolean;
 var
  command1: ifiwidgetcommandty;
@@ -267,7 +267,7 @@ begin
     result:= widgetcommandreceived(atag,aname,command1);
    end;
    ik_widgetproperties: begin
-    result:= widgetpropertiesreceived(atag,aname,pifibytesty(adatapo));     
+    result:= widgetpropertiesreceived(atag,aname,pifibytesty(adatapo));
    end;
    else begin
     result:= inherited processdataitem(adata,adatapo,atag,aname);
@@ -300,7 +300,7 @@ begin
     end;
    end;
   end;
- end;    
+ end;
 end;
 
 function tformlink.widgetpropertiesreceived(const atag: integer;
@@ -343,7 +343,7 @@ begin
  end;
 end;
 
-procedure tformlink.sendmodalresult(const sender: iificlient; 
+procedure tformlink.sendmodalresult(const sender: iificlient;
                                          const amodalresult: modalresultty);
 var
  int1: integer;
@@ -381,13 +381,13 @@ begin
        states1:= ifiwidgetstatesty(
        {$ifdef FPC}longword{$else}byte{$endif}(fwidgetstatebefore) xor
                             {$ifdef FPC}longword{$else}byte{$endif}(astate));
-       if (iws_visible in states1) and 
+       if (iws_visible in states1) and
            ((iwlo_sendshow in options) and (iws_visible in astate) or
              (iwlo_sendhide in options) and not (iws_visible in astate)) or
-          (iws_focused in states1) and 
+          (iws_focused in states1) and
            ((iwlo_sendfocus in options) and (iws_focused in astate) or
-             (iwlo_senddefocus in options) and not(iws_focused in astate)) or           
-          (iws_active in states1) and 
+             (iwlo_senddefocus in options) and not(iws_focused in astate)) or
+          (iws_active in states1) and
            ((iwlo_sendactivate in options) and (iws_active in astate) or
              (iwlo_senddeactivate in options) and not(iws_active in astate))
                                                                      then begin
@@ -429,11 +429,11 @@ begin
   int3:= 0;
   for int1:= 0 to datacols.count - 1 do begin
    with datacols[int1] do begin
-    ar1[int1]:= (name <> '') and (datalist <> nil) and 
+    ar1[int1]:= (name <> '') and (datalist <> nil) and
                                (datalist.datatype in ifidatatypes);
     if ar1[int1] then begin
      inc(int3);
-     int2:= int2 + (sizeof(listdatatypety)+1) + length(name) + 
+     int2:= int2 + (sizeof(listdatatypety)+1) + length(name) +
                        datalisttoifidata(datalist);
     end;
    end;
@@ -451,7 +451,7 @@ begin
      with datacols[int1] do begin
       with pcoldataty(po1)^ do begin
        kind:= datalist.datatype;
-       po1:= @name;   
+       po1:= @name;
       end;
       inc(po1,stringtoifiname(name,pifinamety(po1)));
       datalisttoifidata(datalist,po1);
@@ -487,7 +487,7 @@ begin
     senddata(encodegriddata(sequence));
    end;
    ik_griddata: begin
-    if (igo_state in foptionsrx) or 
+    if (igo_state in foptionsrx) or
         (answersequence <> 0) and (answersequence = fdatasequence) then begin
      with trxwidgetgrid(fowner) do begin
       beginupdate;
@@ -526,17 +526,17 @@ begin
       case ckind1 of
        gck_insertrow: begin
         if igo_rowinsert in foptionsrx then begin
-         insertrow(dest1,count1);       
+         insertrow(dest1,count1);
         end;
        end;
        gck_deleterow: begin
         if igo_rowdelete in foptionsrx then begin
-         deleterow(dest1,count1);       
+         deleterow(dest1,count1);
         end;
        end;
        gck_moverow: begin
         if igo_rowmove in foptionsrx then begin
-         moverow(source1,dest1,count1);       
+         moverow(source1,dest1,count1);
         end;
        end;
        gck_rowenter: begin
@@ -575,7 +575,7 @@ begin
       inc(adatapo,sizeof(rowstateheaderty));
       ifikind1:= pifidataty(adatapo)^.header.kind;
       case ifikind1 of
-       idk_rowstatecolmerge: begin       
+       idk_rowstatecolmerge: begin
         inc(adatapo,decodeifidata(pifidataty(adatapo),
                       prowstatecolmergety(@rowstate1)^));
        end;
@@ -602,7 +602,7 @@ begin
         po3:= prowstaterowheightty(fdatacols.rowstate.getitempo(int1));
         if po3^.colmerge.merged <> rowstate1.colmerge.merged then begin
          po3^.colmerge.merged:= rowstate1.colmerge.merged;
-         tdatacols1(fdatacols).mergechanged(int1);         
+         tdatacols1(fdatacols).mergechanged(int1);
         end;
         if ifikind1 >= idk_rowstaterowheight then begin
          rowheight[int1]:= rowstate1.rowheight.height;
@@ -636,11 +636,11 @@ end;
 procedure tifiwidgetcol.datachange(const arow: integer);
 begin
  with trxwidgetgrid(fcellinfo.grid).fifi do begin
-  if (self.name <> '') and (arow >= 0) and cancommandsend(igo_coldata) and 
+  if (self.name <> '') and (arow >= 0) and cancommandsend(igo_coldata) and
                                             (fdata <> nil) then begin
    senditem(ik_coldatachange,[encodecolchangedata(self.name,arow,fdata)]);
   end;
- end;  
+ end;
 end;
 
 { trxwidgetgrid }
@@ -697,7 +697,7 @@ begin
  with fifi do begin
   if cansend then begin
    inititemheader(str1,ik_requestopen,0,0,po1);
-   if senddataandwait(str1,fdatasequence) and 
+   if senddataandwait(str1,fdatasequence) and
               (rws_datareceived in fistate) then begin
    end
    else begin

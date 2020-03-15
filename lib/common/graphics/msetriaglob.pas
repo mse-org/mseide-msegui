@@ -27,7 +27,7 @@ const
                   [trf_joinmiter],[trf_joinround],[trf_joinbevel]);
  triacapmask = [trf_capbutt,trf_capround,trf_capprojecting];
  triajoinmask = [trf_joinmiter,trf_joinround,trf_joinbevel];
- 
+
 type
  triainfoty = record
   linewidth: integer;
@@ -40,12 +40,12 @@ type
 //  joinstyle: joinstylety;
 //  zerowidth: boolean;
  end;
- 
+
  triagcty = record
   case integer of
    0: (d: triainfoty;);
    1: (_bufferspace: gcpty;);
  end;
- 
+
 implementation
 end.

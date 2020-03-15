@@ -96,13 +96,13 @@ type
                    //no seek, result always 0
    function readdatastring: string; override;
    procedure appenddatastring(var adata: string; var acount: sizeint);
-   
+
    function readbuffer: string; //does not try to get additional data
    function readuln(var value: string): boolean;
    function readuln(var value: string; out hasmoredata: boolean): boolean;
            //bringt auch unvollstaendige zeilen, false wenn unvollstaendig
            //no decoding
-   function readstrln(var value: string): boolean; override; 
+   function readstrln(var value: string): boolean; override;
            //bringt nur vollstaendige zeilen, sonst false
            //no decoding
    procedure clear; override;
@@ -116,15 +116,15 @@ type
    property responseflag: boolean read getresponseflag write setresponseflag;
    property text: string read fpipebuffer;
    property writehandle: integer read fwritehandle write setwritehandle;
-   property overloadsleepus: integer read foverloadsleepus 
+   property overloadsleepus: integer read foverloadsleepus
                  write foverloadsleepus default -1;
            //checks application.checkoverload before calling oninputavaliable
            //if >= 0
-   property options: pipereaderoptionsty read foptions 
+   property options: pipereaderoptionsty read foptions
                                              write foptions default [];
-   property oninputavailable: pipereadereventty read foninputavailable 
+   property oninputavailable: pipereadereventty read foninputavailable
                                                       write foninputavailable;
-   property onpipebroken: pipereadereventty read fonpipebroken 
+   property onpipebroken: pipereadereventty read fonpipebroken
                                                            write fonpipebroken;
    property owner: tmsecomponent read fowner;
 end;
@@ -147,11 +147,11 @@ end;
    destructor destroy; override;
    property pipereader: tpipereader read fpipereader;
   published
-   property options: pipereaderoptionsty read getopions 
+   property options: pipereaderoptionsty read getopions
                                         write setoptions default [];
-   property encoding: charencodingty read getencoding write setencoding 
+   property encoding: charencodingty read getencoding write setencoding
                                                          default ce_locale;
-   property overloadsleepus: integer read getoverloadsleepus 
+   property overloadsleepus: integer read getoverloadsleepus
                   write setoverloadsleepus default -1;
             //checks application.checkoverload before calling oninputavaliable
             //if >= 0
@@ -177,11 +177,11 @@ end;
    destructor destroy; override;
    property pipereader: tpipereader read fpipereader;
   published
-   property options: pipereaderoptionsty read getopions 
+   property options: pipereaderoptionsty read getopions
                                         write setoptions default [];
-   property encoding: charencodingty read getencoding write setencoding 
+   property encoding: charencodingty read getencoding write setencoding
                                                          default ce_locale;
-   property overloadsleepus: integer read getoverloadsleepus 
+   property overloadsleepus: integer read getoverloadsleepus
                   write setoverloadsleepus default -1;
             //checks application.checkoverload before calling oninputavaliable
             //if >= 0
@@ -199,10 +199,10 @@ end;
    destructor destroy; override;
    property pipewriter: tpipewriter read fpipewriter;
   published
-   property encoding: charencodingty read getencoding write setencoding 
+   property encoding: charencodingty read getencoding write setencoding
                                                          default ce_locale;
  end;
- 
+
 {$ifdef UNIX}
 function readfilenonblock(const handle: thandle; var buf; const acount: integer;
                      const nonblocked: boolean): integer; //-1 on error
@@ -387,12 +387,12 @@ begin
  end;
  result:= sys_read(handle,@buf,acount);
  if nonblocked then begin
-  if (result < 0) and (sys_getlasterror = EAGAIN) then begin 
+  if (result < 0) and (sys_getlasterror = EAGAIN) then begin
    result:= 0;
   end;
   setfilenonblock(handle,false);
  end;
-end; 
+end;
 {$endif}
 
 function tpipereader.doread(var buf; const acount: integer;
@@ -421,7 +421,7 @@ var
  {$ifdef unix}
  info: pollfd;
  {$endif}
-begin                          
+begin
  fthread:= tsemthread(thread);
  {$ifdef unix}
  info.fd:= handle;
@@ -468,7 +468,7 @@ procedure tpipereader.doinputavailable;
 var
  needslock: boolean;
 begin
- if (tss_haslink in fstate) or 
+ if (tss_haslink in fstate) or
          assigned(foninputavailable) or assigned(fonpipebroken) then begin
   if foverloadsleepus >= 0 then begin
    while not fthread.terminated and application.checkoverload(-1) do begin
@@ -508,7 +508,7 @@ begin
 end;
 
 function tpipereader.readbytes(var buf): integer;
- 
+
  procedure getmorebytes;
 {$ifdef mswindows}
  var
@@ -540,7 +540,7 @@ function tpipereader.readbytes(var buf): integer;
    include(fstate,tss_pipeactive);
   end;
  end;
- 
+
 begin
  result:= fmsbufcount;
  if result > 0 then begin
@@ -644,7 +644,7 @@ begin
   if peeknamedpipe(handle,nil,0,nil,@i1,nil) and (i1 > 0) then begin
    if len1+i1 > length(adata) then begin
     setlength(adata,2*(len1+i1));
-   end;   
+   end;
    if not doread((pointer(adata)+len1)^,i1,i1) then begin
     fstate:= fstate + [tss_error,tss_eof];
    end;
@@ -676,7 +676,7 @@ var
  str1: string;
  bo1: boolean;
 begin
- if not (tss_error in fstate) and 
+ if not (tss_error in fstate) and
           ((bufend <> bufoffset) or (tss_pipeactive in fstate) or
                              (sys_getcurrentthread = fthread.id)) then begin
   bo1:= inherited readstrln(str1);

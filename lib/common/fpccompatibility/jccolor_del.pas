@@ -3,7 +3,7 @@ Unit jccolor_del;
 {  This file contains input colorspace conversion routines. }
 
 { Original : jccolor.c ;  Copyright (C) 1991-1996, Thomas G. Lane. }
-  
+
 //modified 2013 by Martin Schreiber
 
 interface
@@ -94,7 +94,7 @@ const
 { Initialize for RGB->YCC colorspace conversion. }
 
 {METHODDEF}
-procedure rgb_ycc_start (cinfo : j_compress_ptr); 
+procedure rgb_ycc_start (cinfo : j_compress_ptr);
 const
   FIX_0_29900 = INT32(Round (0.29900 * (1 shl SCALEBITS)) );
   FIX_0_58700 = INT32(Round (0.58700 * (1 shl SCALEBITS)) );
@@ -153,7 +153,7 @@ procedure rgb_ycc_convert (cinfo : j_compress_ptr;
                            input_buf : JSAMPARRAY;
                            output_buf :  JSAMPIMAGE;
                            output_row : JDIMENSION;
-                           num_rows : int); 
+                           num_rows : int);
 var
   cconvert : my_cconvert_ptr;
   {register} r, g, b : int;
@@ -217,7 +217,7 @@ procedure rgb_gray_convert (cinfo : j_compress_ptr;
                             input_buf : JSAMPARRAY;
                             output_buf : JSAMPIMAGE;
                             output_row : JDIMENSION;
-                            num_rows : int); 
+                            num_rows : int);
 var
   cconvert : my_cconvert_ptr;
   {register} r, g, b : int;
@@ -264,7 +264,7 @@ procedure cmyk_ycck_convert (cinfo : j_compress_ptr;
                              input_buf : JSAMPARRAY;
                              output_buf : JSAMPIMAGE;
                              output_row : JDIMENSION;
-                             num_rows : int); 
+                             num_rows : int);
 var
   cconvert : my_cconvert_ptr;
   {register} r, g, b : int;
@@ -327,7 +327,7 @@ procedure grayscale_convert (cinfo : j_compress_ptr;
                             input_buf : JSAMPARRAY;
                             output_buf : JSAMPIMAGE;
                             output_row : JDIMENSION;
-                            num_rows: int); 
+                            num_rows: int);
 var
   {register} inptr : JSAMPROW;
   {register} outptr : JSAMPROW;
@@ -363,7 +363,7 @@ procedure null_convert (cinfo : j_compress_ptr;
                         input_buf : JSAMPARRAY;
                         output_buf : JSAMPIMAGE;
                         output_row : JDIMENSION;
-                        num_rows : int); 
+                        num_rows : int);
 var
   {register} inptr : JSAMPROW;
   {register} outptr : JSAMPROW;
@@ -398,7 +398,7 @@ end;
 { Empty method for start_pass. }
 
 {METHODDEF}
-procedure null_method (cinfo : j_compress_ptr); 
+procedure null_method (cinfo : j_compress_ptr);
 begin
   { no work needed }
 end;

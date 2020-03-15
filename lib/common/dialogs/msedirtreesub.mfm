@@ -10,7 +10,7 @@ inherited dirtreesubfo: tdirtreesubfo
   inherited grid: twidgetgrid
     frame.levelo = -2
     frame.framewidth = 0
-    datacols.items = <    
+    datacols.items = <
       item[treeitem]
         width = 296
       end>

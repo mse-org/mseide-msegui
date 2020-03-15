@@ -1,5 +1,5 @@
 { MSEide Copyright (c) 1999-2013 by Martin Schreiber
-   
+
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation; either version 2 of the License, or
@@ -45,12 +45,12 @@ type
    procedure repeatfind;
    procedure findback;
  end;
- 
+
 var
  targetconsolefo: ttargetconsolefo;
 
 procedure updatestat(const statfiler: tstatfiler);
- 
+
 implementation
 uses
  targetconsole_mfm,msegdbutils,main,finddialogform,projectoptionsform,

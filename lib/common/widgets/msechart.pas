@@ -38,7 +38,7 @@ const
 type
  chartstatety = (chs_nocolorchart,chs_hasdialscroll,chs_hasdialshift,
                  chs_started,chs_full,chs_chartvalid, //for tchartrecorder
-                 chs_layoutvalid); 
+                 chs_layoutvalid);
  chartstatesty = set of chartstatety;
  charttraceoptionty = (cto_invisible,cto_smooth,cto_stockglyphs,cto_adddataright,
                        cto_xordered, //optimize for big data quantity
@@ -75,7 +75,7 @@ type
  datapointarty = array of datapointty;
 
  barrefty = (br_zero,br_top,br_bottom);
-  
+
  ttracefont = class(tparentfont)
   public
    class function getinstancepo(owner: tobject): pfont; override;
@@ -138,7 +138,7 @@ type
    constructor create(const aowner: ttrace); reintroduce;
    property defaultzero default true;
  end;
- 
+
  ttrace = class(townedeventpersistent,iimagelistinfo,iframe,iface)
   private
    finfo: traceinfoty;
@@ -225,7 +225,7 @@ type
    function getyitempo(const aindex: integer): preal;
    procedure getdatapo(out xpo,ypo: preal; //xpo nil for xseries
                    out xcount,ycount,xstep,ystep: integer);
-                
+
    procedure checkgraphic;
    procedure clip2(const acanvas: tcanvas);
    procedure paint(const acanvas: tcanvas);
@@ -245,7 +245,7 @@ type
    function getmsecomponentstate: msecomponentstatesty;
    procedure invalidate;
    procedure invalidatewidget;
-   procedure invalidaterect(const rect: rectty; 
+   procedure invalidaterect(const rect: rectty;
                const org: originty = org_client; const noclip: boolean = false);
    function getwidget: twidget;
    function getwidgetrect: rectty;
@@ -263,7 +263,7 @@ type
    procedure createbar_frame;
    procedure createbar_face;
    procedure createfont;
-   
+
    procedure clear;
    procedure deletedata(const aindex: integer); overload;
    procedure deletedata(const aindexar: integerarty); overload;
@@ -300,12 +300,12 @@ type
    property logy: boolean read getlogy write setlogy;
    property visible: boolean read getvisible write setvisible;
    property smooth: boolean read getsmooth write setsmooth;
-   
+
   published
    property xdatalist: trealdatalist read getxdatalist write setxdatalist;
    property ydatalist: trealdatalist read getydatalist write setydatalist;
    property color: colorty read finfo.color write setcolor default cl_black;
-   property colorimage: colorty read finfo.colorimage 
+   property colorimage: colorty read finfo.colorimage
                       write setcolorimage default cl_default;
    property widthmm: real read finfo.widthmm write setwidthmm;   //default 0.3
    property dashes: string read finfo.dashes write setdashes;
@@ -320,22 +320,22 @@ type
    property start: integer read finfo.start write setstart default 0;
    property maxcount: integer read finfo.maxcount write setmaxcount default 0;
                       //0-> data count
-   property chartkind: tracechartkindty read finfo.chartkind write setchartkind 
+   property chartkind: tracechartkindty read finfo.chartkind write setchartkind
                                                              default tck_line;
-   property options: charttraceoptionsty read finfo.options 
+   property options: charttraceoptionsty read finfo.options
                                              write setoptions default [];
-   property bar_offset: integer read finfo.bar_offset 
+   property bar_offset: integer read finfo.bar_offset
                                   write setbar_offset default 0;
-   property bar_width: integer read finfo.bar_width 
+   property bar_width: integer read finfo.bar_width
                                   write setbar_width default 0; //0 -> bar line
    property bar_frame: tframe read getbar_frame write setbar_frame;
    property bar_face: tface read getbar_face write setbar_face;
    property bar_ref: barrefty read finfo.bar_ref write setbar_ref default br_zero;
-   
+
    property imagenr: imagenrty read finfo.imagenr write setimagenr default -1;
    property name: string read finfo.name write finfo.name;
    property legend_caption: msestring read finfo.legend write setlegend_caption;
-   property legend_font: ttracefont read getlegend_font 
+   property legend_font: ttracefont read getlegend_font
                                 write setlegend_font stored isfontstored;
    property hint_captionx: msestring read fhint_captionx
                                  write fhint_captionx;
@@ -345,7 +345,7 @@ type
 
  traceaty = array[0..0] of ttrace;
  ptraceaty = ^traceaty;
- 
+
  tracesstatety = (trss_graphicvalid);
  tracesstatesty = set of tracesstatety;
 
@@ -353,7 +353,7 @@ type
   public
    class function getinstancepo(owner: tobject): pfont; override;
  end;
-   
+
  ttraces = class(townedeventpersistentarrayprop)
   private
    ftracestate: tracesstatesty;
@@ -438,14 +438,14 @@ type
    procedure setdata(const adata: complexararty); overload;
    property logx: boolean read getlogx write setlogx;
    property logy: boolean read getlogy write setlogy;
-   property items[const index: integer]: ttrace read getitems 
+   property items[const index: integer]: ttrace read getitems
                                                    write setitems; default;
    property legend_pos: complexty read flegend_pos write setlegend_pos;
   published
    property kind: tracekindty read fkind write setkind default trk_xseries;
-   property chartkind: tracechartkindty read fchartkind 
+   property chartkind: tracechartkindty read fchartkind
                                      write setchartkind default tck_line;
-   property options: charttraceoptionsty read foptions 
+   property options: charttraceoptionsty read foptions
                                                 write setoptions default [];
                 //item default values
    property xserstart: real read fxserstart write setxserstart;
@@ -460,7 +460,7 @@ type
    property image_list: timagelist read fimage_list write setimage_list;
    property image_widthmm: real read fimage_widthmm write setimage_widthmm;
    property image_heighthmm: real read fimage_heightmm write setimage_heightmm;
-   property bar_width: integer read fbar_width 
+   property bar_width: integer read fbar_width
                                   write setbar_width default 0; //0 -> bar line
    property bar_ref: barrefty read fbar_ref write setbar_ref default br_zero;
    property font: ttracesfont read getfont write setfont stored isfontstored;
@@ -468,7 +468,7 @@ type
    property legend_y: real read flegend_pos.im write setlegend_y;
    property legend_dist: integer read flegend_dist write setlegend_dist default
                                          defaultlegenddist;
-   property legend_fitdist: integer read flegend_fitdist 
+   property legend_fitdist: integer read flegend_fitdist
                   write setlegend_fitdist default defaultlegenddist;
    property legend_placement: tracelegendplacementty read flegend_placement
                                 write setlegend_placement default tlp_xy;
@@ -484,7 +484,7 @@ type
    property kind default trk_xy;
    property options default defaultxytraceoptions;
  end;
- 
+
  txytraces = class(ttraces)
   protected
    fxordered: boolean;
@@ -504,7 +504,7 @@ type
   function getxrange: real;
   function getyrange: real;
  end;
- 
+
  tchartdialvert = class(tcustomdialcontroller)
   protected
    procedure setdirection(const avalue: graphicdirectionty); override;
@@ -524,7 +524,7 @@ type
    property markers;
    property ticks;
  end;
- 
+
  tchartdialhorz = class(tcustomdialcontroller)
   protected
    procedure setdirection(const avalue: graphicdirectionty); override;
@@ -559,7 +559,7 @@ type
    property items[const aindex: integer]: tcustomdialcontroller read getitems
                                                         write setitems; default;
  end;
- 
+
  tchartdialshorz = class(tchartdials)
   private
    function getitems(const aindex: integer): tchartdialhorz;
@@ -597,9 +597,9 @@ type
    property framei_bottom default 1;
    property colorclient {default cl_foreground};
  end;
- 
+
 const
- defaultchartoptionswidget = defaultscrollboxoptionswidget - 
+ defaultchartoptionswidget = defaultscrollboxoptionswidget -
                           [ow_mousefocus,ow_tabfocus,ow_arrowfocus];
 type
  tcuchart = class(tscrollbox,ichartdialcontroller,istatfile,iframe)
@@ -682,13 +682,13 @@ type
    procedure paint(const acanvas: tcanvas); override;
    procedure createfacechart;
    procedure createframechart;
-   function fit(const asides: rectsidesty = allrectsides): boolean; 
+   function fit(const asides: rectsidesty = allrectsides): boolean;
            //adjust fitframe for extents of dials
            //returns true if changes made
 
    property optionschart: optionschartty read foptionschart
                             write setoptionschart default defaultoptionschart;
-   property colorchart: colorty read fcolorchart write setcolorchart 
+   property colorchart: colorty read fcolorchart write setcolorchart
                               default cl_default;
    property facechart: tface read getfacechart write setfacechart;
    property framechart: tframe read getframechart write setframechart;
@@ -696,12 +696,12 @@ type
    property ystart: real read getystart write setystart;
    property xrange: real read getxrange write setxrange; //default 1
    property yrange: real read getyrange write setyrange; //default 1
-      
+
    property xdials: tchartdialshorz read fxdials write setxdials;
    property ydials: tchartdialsvert read fydials write setydials;
    property statfile: tstatfile read fstatfile write setstatfile;
    property statvarname: msestring read getstatvarname write fstatvarname;
-   property statpriority: integer read fstatpriority 
+   property statpriority: integer read fstatpriority
                                        write fstatpriority default 0;
    property fitframe: framety read ffitframe write setfitframe;
    property fitframe_left: integer read ffitframe.left
@@ -779,7 +779,7 @@ type
    property onpaint;
    property onafterpaint;
  end;
- 
+
  trecordertrace = class(tvirtualpersistent)
   private
    fybefore: integer;
@@ -802,10 +802,10 @@ type
    constructor create;
    class function getitemclasstype: persistentclassty; override;
  end;
-  
+
  chartrecorderoptionty = (cro_adddataright);
  chartrecorderoptionsty = set of chartrecorderoptionty;
- 
+
  tchartrecorder = class(tcuchart)
   private
    fchart: tmaskedbitmap;
@@ -829,12 +829,12 @@ type
    procedure addsample(const asamples: array of real);
    procedure clear;
   published
-   property options: chartrecorderoptionsty read foptions write foptions 
+   property options: chartrecorderoptionsty read foptions write foptions
                                                                    default [];
-   property samplecount: integer read fsamplecount write setsamplecount 
+   property samplecount: integer read fsamplecount write setsamplecount
                                 default 100;
    property traces: trecordertraces read ftraces write settraces;
-   
+
    property optionschart;
    property colorchart;
    property facechart;
@@ -924,7 +924,7 @@ begin
   result:= -result;
  end;
 end;
-  
+
 { ttracefont }
 
 class function ttracefont.getinstancepo(owner: tobject): pfont;
@@ -1057,7 +1057,7 @@ begin
     include(finfo.state,trs_ownsxdatalist);
    end;
    if (ptruint(pointer(avalue)) <> 1) then begin
-    finfo.xdatalist.assign(avalue);   
+    finfo.xdatalist.assign(avalue);
    end;
   end;
  end
@@ -1086,7 +1086,7 @@ begin
     include(finfo.state,trs_ownsydatalist);
    end;
    if (ptruint(pointer(avalue)) <> 1) then begin
-    finfo.ydatalist.assign(avalue);   
+    finfo.ydatalist.assign(avalue);
    end;
   end;
  end
@@ -1128,7 +1128,7 @@ end;
 
 function ttrace.getxdatalist: trealdatalist;
 begin
- if (finfo.xdatalist = nil) and 
+ if (finfo.xdatalist = nil) and
            (csreading in tcustomchart(fowner).componentstate) then begin
   finfo.xdatalist:= ttracedatalist.create(self);
   include(finfo.state,trs_ownsxdatalist);
@@ -1138,7 +1138,7 @@ end;
 
 function ttrace.getydatalist: trealdatalist;
 begin
- if (finfo.ydatalist = nil) and 
+ if (finfo.ydatalist = nil) and
            (csreading in tcustomchart(fowner).componentstate) then begin
   finfo.ydatalist:= ttracedatalist.create(self);
   include(finfo.state,trs_ownsydatalist);
@@ -1162,7 +1162,7 @@ procedure ttrace.checkgraphic;
    end;
   end;
  end;
-  
+
 var
  pox,poy: pchar;
  intx,inty: integer;
@@ -1198,7 +1198,7 @@ var
  isxseries: boolean;
  dpcounty1: integer;
  islogx,islogy: boolean;
- 
+
 begin
  if not (trs_datapointsvalid in finfo.state) and visible then begin
   dpcounty1:= 0;
@@ -1256,7 +1256,7 @@ begin
    ys:= -tcustomchart(fowner).traces.fscaley / finfo.yrange;
   end;
   case finfo.kind of
-   trk_xy,trk_xseries: begin     
+   trk_xy,trk_xseries: begin
     lxo:= 0;
     lxs:= 1;
     if isxseries then begin
@@ -1264,9 +1264,9 @@ begin
      rea1:= 0;
      if maxcount > 1 then begin
       int2:= maxcount - 1;
-      if (int2 > dpcounty1) and 
+      if (int2 > dpcounty1) and
                        (cto_adddataright in finfo.options) then begin
-       rea1:= {$ifdef FPC}real({$endif}1.0{$ifdef FPC}){$endif} - 
+       rea1:= {$ifdef FPC}real({$endif}1.0{$ifdef FPC}){$endif} -
                                                 dpcounty1 / int2;
       end;
      end
@@ -1301,7 +1301,7 @@ begin
     else begin
      if cto_logx in options then begin
       xo:= -chartln(finfo.xstart);
-      xs:= tcustomchart(fowner).traces.fscalex / 
+      xs:= tcustomchart(fowner).traces.fscalex /
                                      (chartln(finfo.xrange+finfo.xstart)+xo);
      end
      else begin
@@ -1310,12 +1310,12 @@ begin
      end;
     end;
     checkrange(dpcountxy);
-    if isxseries and (cto_seriescentered in finfo.options) and 
+    if isxseries and (cto_seriescentered in finfo.options) and
                                              (dpcounty > 0) then begin
      xs:= xs*(dpcounty1/dpcounty);
      xo:= xo + 0.5;
     end;
-    
+
     if (cto_xordered in finfo.options) or isxseries then begin
      int4:= tcustomchart(fowner).traces.fsize.cx+3;//2; //cx + 1
      setlength(ar1,int4);
@@ -1419,21 +1419,21 @@ begin
      end;
      setlength(finfo.datapoints,int2);
      if chartkind = tck_line then begin
-      with finfo do begin //adjust boundary values 
+      with finfo do begin //adjust boundary values
                           //todo: extend window for image size
        barlines:= nil;
        if int2 > 1 then begin
         if ar1[0].used then begin
          bottommargin:= 1;
-         datapoints[0].y:= pkround(datapoints[0].y + 
-               (datapoints[1].y - datapoints[0].y) * 
+         datapoints[0].y:= pkround(datapoints[0].y +
+               (datapoints[1].y - datapoints[0].y) *
                  (-1-xbottom)/
                  (datapoints[1].x-xbottom));
         end;
         if ar1[high(ar1)].used then begin
          topmargin:= 1;
-         datapoints[int2-1].y:= pkround(datapoints[int2-1].y + 
-               (datapoints[int2-2].y - datapoints[int2-1].y) * 
+         datapoints[int2-1].y:= pkround(datapoints[int2-1].y +
+               (datapoints[int2-2].y - datapoints[int2-1].y) *
                  (length(ar1)-xtop)/
                  (datapoints[int2-2].x-xtop));
         end;
@@ -1447,7 +1447,7 @@ begin
         br_top: begin
          int2:= -1;
         end;
-        br_bottom: begin 
+        br_bottom: begin
          int2:= tcustomchart(fowner).traces.fsize.cy+1;
         end;
         else begin //br_zero
@@ -1616,7 +1616,7 @@ begin
  fimagealignment:= imagealignment;
  with ftraces do begin
   fimli1:= actualimagelist;
-  if (fimli1 <> nil) and (finfo.imagenr >= 0) and 
+  if (fimli1 <> nil) and (finfo.imagenr >= 0) and
                                     (finfo.imagenr < fimli1.count) then begin
    pt1:= pointty(imagesize);
    pt1.x:= pt1.x div 2;
@@ -1627,7 +1627,7 @@ begin
    if fco1 = cl_default then begin
     fco1:= finfo.color;
    end;
-   if not acanvas.highresdevice and 
+   if not acanvas.highresdevice and
                (imagealignment * [al_stretchx,al_stretchy] <> []) then begin
     bmp1:= tmaskedbitmap.create(fimli1.kind{fimli1.monochrome});
     fbmp2.free; //in case of previous exception
@@ -1642,7 +1642,7 @@ begin
      bmp1.colormask:= true;
      fbmp2.size:= imagesize;
      bmp1.stretch(fbmp2);
-     for int1:= finfo.bottommargin to high(finfo.datapoints) - 
+     for int1:= finfo.bottommargin to high(finfo.datapoints) -
                                                 finfo.topmargin do begin
       fbmp2.paint(acanvas,finfo.datapoints[int1],[],fco1);
      end;
@@ -1652,7 +1652,7 @@ begin
     end;
    end
    else begin
-    for int1:= finfo.bottommargin to high(finfo.datapoints) - 
+    for int1:= finfo.bottommargin to high(finfo.datapoints) -
                                                  finfo.topmargin do begin
      frect1.pos:= finfo.datapoints[int1];
      fimli1.paint(acanvas,finfo.imagenr,frect1,imagealignment,fco1);
@@ -1993,11 +1993,11 @@ begin
     with xydata[high(xydata)] do begin
      re:= x;
      im:= y;
-    end;   
+    end;
    end;
   end
   else begin
-   if (xdata <> nil) then begin   
+   if (xdata <> nil) then begin
     if cto_xordered in options then begin
      int2:= 0;
      for int1:= high(xdata) downto 0 do begin
@@ -2018,7 +2018,7 @@ begin
     end;
    end
    else begin
-    if (ydata <> nil) then begin   
+    if (ydata <> nil) then begin
      if cto_xordered in options then begin
      end
      else begin
@@ -2036,7 +2036,7 @@ begin
      end;
     end;
    end;
-  end; 
+  end;
  end;
  datachange;
 end;
@@ -2548,7 +2548,7 @@ end;
 procedure ttrace.autoscalex(const astartmargin: real = 0;
                                              const aendmargin: real = 0);
 var
- min,max: real; 
+ min,max: real;
 begin
  minmaxx(min,max);
  xrange:= calctracerange(min,max,cto_logx in options,astartmargin,aendmargin);
@@ -2558,7 +2558,7 @@ end;
 procedure ttrace.autoscaley(const astartmargin: real = 0;
                                              const aendmargin: real = 0);
 var
- min,max: real; 
+ min,max: real;
 begin
  minmaxy(min,max);
  yrange:= calctracerange(min,max,cto_logy in options,astartmargin,aendmargin);
@@ -2661,7 +2661,7 @@ begin
 end;
 
 procedure ttraces.change;
-begin 
+begin
  exclude(ftracestate,trss_graphicvalid);
  tcuchart(fowner).invalidate;
 end;
@@ -2770,7 +2770,7 @@ begin
   end;
   fscalex:= fsize.cx;
   fscaley:= fsize.cy;
- 
+
   x1:= 0;
   y1:= 0;
   for int1:= 0 to high(fitems) do begin
@@ -2789,7 +2789,7 @@ begin
     else begin
      finfo.legendrect:= nullrect;
     end;
-   end;    
+   end;
   end;
   case flegend_placement of
    tlp_xy: begin
@@ -2809,7 +2809,7 @@ begin
     if y2 < flegend_dist then begin
      y2:= flegend_dist;
     end;
-  
+
     x2:= x2 + rect1.x;
     y2:= y2 + rect1.y;
     for int1:= 0 to high(fitems) do begin
@@ -2885,7 +2885,7 @@ end;
 
 procedure ttraces.checkgraphic;
 var
- int1: integer;       
+ int1: integer;
 begin
  if not (trss_graphicvalid in ftracestate) then begin
   calclegendrect;
@@ -3293,7 +3293,7 @@ end;
 procedure ttraces.setlegend_pos(const avalue: complexty);
 begin
  if (flegend_pos.re <> avalue.re) or (flegend_pos.im <> avalue.im) then begin
-  flegend_pos:= avalue;  
+  flegend_pos:= avalue;
   change;
  end;
 end;
@@ -3773,9 +3773,9 @@ begin
  if fframechart <> nil then begin
   inflaterectext1(ext1,fframechart.framei);
  end;
- 
+
  fra1:= ffitframe;
- 
+
  if rs_left in asides then begin
   fra1.left:= fra1.left - ext1.left;
  end;
@@ -3928,7 +3928,7 @@ begin
  addframe1(result,ffitframe);
  if fframechart <> nil then begin
   addframe1(result,fframechart.innerframe);
- end; 
+ end;
 end;
 
 function tcuchart.getstatpriority: integer;
@@ -4139,7 +4139,7 @@ procedure tcustomchart.autoscalex(const astartmargin: real = 0;
                                              const aendmargin: real = 0);
 var
  rea1,rea2: real;
- min,max,ra: real; 
+ min,max,ra: real;
  int1: integer;
 begin
  min:= bigreal;
@@ -4165,7 +4165,7 @@ procedure tcustomchart.autoscaley(const astartmargin: real = 0;
                                              const aendmargin: real = 0);
 var
  rea1,rea2: real;
- min,max,ra: real; 
+ min,max,ra: real;
  int1: integer;
 begin
  min:= bigreal;
@@ -4228,7 +4228,7 @@ begin
    end;
   end;
  }
- end; 
+ end;
 end;
 
 { trecordertraces }
@@ -4287,7 +4287,7 @@ var
  int1: integer;
  bo1: boolean;
 begin
- if not (csloading in componentstate) and 
+ if not (csloading in componentstate) and
                      not (chs_chartvalid in fstate) then begin
   fstate:= fstate - chartrecorderstatesmask;
 //  fstarted:= false;
@@ -4314,8 +4314,8 @@ begin
    fchartwindowrect.size:= fchartclientrect.size;
    fchartrect.cx:= fchartclientrect.cx + 10; //room for linewidth
    fchartrect.cy:= fchartclientrect.cy;
-   size:= fchartrect.size; 
-   fstep:= {$ifdef FPC}real({$endif}fchartwindowrect.cx{$ifdef FPC}){$endif} / 
+   size:= fchartrect.size;
+   fstep:= {$ifdef FPC}real({$endif}fchartwindowrect.cx{$ifdef FPC}){$endif} /
                                                                   fsamplecount;
    fstepsum:= 0;
    fxref:= fchartwindowrect.x;
@@ -4348,14 +4348,14 @@ begin
    fsamplecount:=  1;
   end;
   chartchange;
- end;  
+ end;
 end;
 
 procedure tchartrecorder.addsample(const asamples: array of real);
 var
  acanvas,mcanvas: tcanvas;
  amasked: boolean;
- 
+
   procedure shift(const adist: integer);
   begin
    fshiftsum:= fshiftsum+adist;

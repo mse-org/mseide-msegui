@@ -12,21 +12,21 @@ unit mselatex;
 interface
 uses
  msestrings,mserichstring,msetypes;
- 
+
 function richstringtolatex(const source: richstringty): msestring;
 
 implementation
 uses
  msegraphutils,msearrayutils,msegraphics,sysutils,mseformatstr;
- 
+
 const
  escchars = ['#','$','%','&','{','}','_'];
- 
+
 function richstringtolatex(const source: richstringty): msestring;
 
 var
  d: pmsechar;
-  
+
  procedure add(const astr: msestring);
  var
   i1: integer;
@@ -35,7 +35,7 @@ var
   move(pointer(astr)^,d^,i1*sizeof(msechar));
   inc(d,i1);
  end;
- 
+
 const
  maxitemlen = 200; //maxlen of escape code + format code
 var

@@ -47,17 +47,17 @@ const
                        fo_savepos,fo_savezorder,fo_savestate];
  defaultmainformoptions = defaultformoptions + [fo_main,fo_terminateonclose];
  defaultmainformoptionswindow = [wo_groupleader,wo_taskbar];
- 
- defaultformwidgetoptions = (defaultoptionswidgetmousewheel - 
+
+ defaultformwidgetoptions = (defaultoptionswidgetmousewheel -
                  [{ow_mousefocus}{,ow_tabfocus}]) + [ow_subfocus,ow_hinton];
- defaultcontaineroptionswidget = defaultoptionswidgetmousewheel + 
+ defaultcontaineroptionswidget = defaultoptionswidgetmousewheel +
                                         [ow_subfocus,ow_mousetransparent];
 
 type
  tcustommseform = class;
  closequeryeventty = procedure(const sender: tcustommseform;
                                var amodalresult: modalresultty) of object;
-  
+
  tformscrollbox = class(tscrollingwidgetnwr)
           //for internal use only
   private
@@ -100,7 +100,7 @@ type
  formstatesty = set of formstatety;
  optionsizingty = (osi_left,osi_top,osi_right,osi_bottom);
  optionssizingty = set of optionsizingty;
-                               
+
  tcustommseform = class(tcustomeventwidget,istatfile,idockcontroller
                                  {$ifdef mse_with_ifi},iififormlink{$endif})
   private
@@ -216,9 +216,9 @@ type
    procedure doapplicationactivechanged(const avalue: boolean); virtual;
    procedure dosysevent(const awindow: winidty; var aevent: syseventty;
                             var handled: boolean); virtual;
-   procedure doapplicationevent(var aevent: tmseevent; 
+   procedure doapplicationevent(var aevent: tmseevent;
                                        var handled: boolean) virtual;
-   procedure objectevent(const sender: tobject; 
+   procedure objectevent(const sender: tobject;
                                        const event: objecteventty); override;
    procedure receiveevent(const event: tobjectevent); override;
    procedure dokeydown(var info: keyeventinfoty); override;
@@ -245,13 +245,13 @@ type
     //idockcontroller
    function getchildicon: tmaskedbitmap; virtual;
    function checkdock(var info: draginfoty): boolean;
-   function getbuttonrects(const index: dockbuttonrectty): rectty;  
+   function getbuttonrects(const index: dockbuttonrectty): rectty;
    function getplacementrect: rectty;
    function getminimizedsize(out apos: captionposty): sizety;
    procedure dolayoutchanged(const sender: tdockcontroller); virtual;
    procedure dodockcaptionchanged(const sender: tdockcontroller); virtual;
 
-   procedure updatelayout(const sender: twidget); virtual; 
+   procedure updatelayout(const sender: twidget); virtual;
                                //called from scrollbox.dolayout
     //iassistiveclient
    function getassistivecaption(): msestring override;
@@ -261,7 +261,7 @@ type
     //iififormlink
    procedure setmodalresult(const avalue: modalresultty);
    {$endif}
-   
+
    procedure docreate(aowner: tcomponent); virtual;
   public
    constructor create(aowner: tcomponent); overload; override;
@@ -271,7 +271,7 @@ type
    procedure freeinstance override;
    procedure reload(const callafterload: boolean = false);
    procedure writestate(writer: twriter); override;
-   
+
    procedure insertwidget(const widget: twidget; const apos: pointty); override;
    procedure dolayout(const sender: twidget); override;
    function childrencount: integer; override;
@@ -279,22 +279,22 @@ type
    procedure beforeclosequery(var amodalresult: modalresultty); override;
    procedure doonclose; virtual;
    function canclose(const newfocus: twidget): boolean; override;
-   function close(const amodalresult: modalresultty = mr_windowclosed): boolean; 
+   function close(const amodalresult: modalresultty = mr_windowclosed): boolean;
               //true if ok
    procedure beforedestruction; override;
    property optionswidget default defaultformwidgetoptions;
-   property optionswindow: windowoptionsty read foptionswindow 
+   property optionswindow: windowoptionsty read foptionswindow
                                           write setoptionswindow default [];
    property mainmenu: tmainmenu read fmainmenu write setmainmenu;
    property font: twidgetfont read getfont write setfont stored isfontstored;
-   property fontempty: twidgetfontempty read getfontempty 
+   property fontempty: twidgetfontempty read getfontempty
                   write setfontempty stored isfontemptystored;
    property options: formoptionsty read getoptions write setoptions
                          default defaultformoptions;
 
    property statfile: tstatfile read fstatfile write setstatfile;
    property statvarname: msestring read getstatvarname write fstatvarname;
-   property statpriority: integer read fstatpriority 
+   property statpriority: integer read fstatpriority
                                        write fstatpriority default 0;
 
    property caption: msestring read getcaption write setcaption;
@@ -306,54 +306,54 @@ type
    property oncreate: notifyeventty read foncreate write foncreate;
    property oncreated: notifyeventty read foncreated write foncreated;
    property onloaded: notifyeventty read fonloaded write fonloaded;
-   property oneventloopstart: notifyeventty read foneventloopstart 
+   property oneventloopstart: notifyeventty read foneventloopstart
                                    write foneventloopstart;
    property ondestroy: notifyeventty read fondestroy write fondestroy;
    property ondestroyed: notifyeventty read fondestroyed write fondestroyed;
-   property onbeforeclosequery: closequeryeventty read fonbeforeclosequery 
+   property onbeforeclosequery: closequeryeventty read fonbeforeclosequery
                                         write fonbeforeclosequery;
-   property onclosequery: closequeryeventty read fonclosequery 
+   property onclosequery: closequeryeventty read fonclosequery
                                         write fonclosequery;
    property onclose: notifyeventty read fonclose write fonclose;
    property onidle: idleeventty read fonidle write fonidle;
-   property onterminatequery: terminatequeryeventty read fonterminatequery 
+   property onterminatequery: terminatequeryeventty read fonterminatequery
                  write fonterminatequery;
-   property onterminated: notifyeventty read fonterminated 
+   property onterminated: notifyeventty read fonterminated
                  write fonterminated;
 
    property onbeforepaint: painteventty read getonbeforepaint
                                                         write setonbeforepaint;
    property onpaint: painteventty read getonpaint write setonpaint;
-   property onafterpaint: painteventty read getonafterpaint 
+   property onafterpaint: painteventty read getonafterpaint
                                                           write setonafterpaint;
 
-   property onstatupdate: statupdateeventty read fonstatupdate 
+   property onstatupdate: statupdateeventty read fonstatupdate
                                                            write fonstatupdate;
    property onstatread: statreadeventty read fonstatread write fonstatread;
-   property onstatbeforeread: notifyeventty read fonstatbeforeread 
+   property onstatbeforeread: notifyeventty read fonstatbeforeread
                                                        write fonstatbeforeread;
-   property onstatafterread: notifyeventty read fonstatafterread 
+   property onstatafterread: notifyeventty read fonstatafterread
                                                        write fonstatafterread;
    property onstatwrite: statwriteeventty read fonstatwrite write fonstatwrite;
-   property onstatbeforewrite: notifyeventty read fonstatbeforewrite 
+   property onstatbeforewrite: notifyeventty read fonstatbeforewrite
                                                write fonstatbeforewrite;
-   property onstatafterwrite: notifyeventty read fonstatafterwrite 
+   property onstatafterwrite: notifyeventty read fonstatafterwrite
                                                write fonstatafterwrite;
 
-   property onwidgetactivechanged: widgetchangeeventty 
+   property onwidgetactivechanged: widgetchangeeventty
                      read fonwidgetactivechanged write fonwidgetactivechanged;
-   property onwindowactivechanged: windowchangeeventty 
+   property onwindowactivechanged: windowchangeeventty
                       read fonwindowactivechanged write fonwindowactivechanged;
-   property onwindowdestroyed: windoweventty read fonwindowdestroyed 
+   property onwindowdestroyed: windoweventty read fonwindowdestroyed
                                                       write fonwindowdestroyed;
-   property onapplicationactivechanged: booleaneventty 
+   property onapplicationactivechanged: booleaneventty
             read fonapplicationactivechanged write fonapplicationactivechanged;
 
    property onfontheightdelta: fontheightdeltaeventty read fonfontheightdelta
                      write fonfontheightdelta;
    property onlayout: notifyeventty read getonlayout write setonlayout;
    property onsysevent: syseventeventty read fonsysevent write setonsysevent;
-   property onsyswindowevent: syseventeventty read fonsyswindowevent 
+   property onsyswindowevent: syseventeventty read fonsyswindowevent
                                          write setonsyswindowevent;
    property onapplicationevent: applicationeventeventty
                          read fonapplicationevent write setonapplicationevent;
@@ -362,9 +362,9 @@ type
 {$ifdef mse_with_ifi}
    property ifilink: tififormlinkcomp read fifilink write setifilink;
 {$endif}
-   property activatortarget: tactivator read factivatortarget 
+   property activatortarget: tactivator read factivatortarget
                                              write setactivatortarget;
-   property taborderoverride: ttaborderoverride read ftaborderoverride 
+   property taborderoverride: ttaborderoverride read ftaborderoverride
                                                   write settaborderoverride;
    property onshortcut;
  end;
@@ -440,7 +440,7 @@ type
 
    property onfontheightdelta;
    property onlayout;
-   
+
    property onsysevent;
    property onsyswindowevent;
    property onapplicationevent;
@@ -453,7 +453,7 @@ type
   public
    constructor create(aowner: tcomponent; load: boolean); override;
  end;
- 
+
  tmainform = class(tmseform)
   protected
    class function getmoduleclassname: string; override;
@@ -472,7 +472,7 @@ type
                      odf_mainmainwindow); //is mainwindow if it contains
                                           //an odf_main dock
  optionsdockformty = set of optiondockformty;
- 
+
 const
  defaultoptionsdockform = [odf_childicons,odf_mainchildicon,odf_maintaskbar,
                            odf_mainmainwindow];
@@ -486,14 +486,14 @@ type
    foptionsdockform: optionsdockformty;
    function hasmain(): boolean;
    procedure setoptionsdock(const avalue: optionsdockty); override;
-   procedure dolayoutchanged(); override; 
+   procedure dolayoutchanged(); override;
    procedure childstatechanged(const sender: twidget;
                            const newstate,oldstate: widgetstatesty); override;
   public
    constructor create(const aowner: tcustomdockform);
    function childicon(): tmaskedbitmap override;
   published
-   property optionsdockform: optionsdockformty read foptionsdockform 
+   property optionsdockform: optionsdockformty read foptionsdockform
                      write setoptionsdockform default defaultoptionsdockform;
  end;
 
@@ -541,7 +541,7 @@ type
                                const aforce: boolean = false); override;
    function canfocus: boolean; override;
    procedure dragevent(var info: draginfoty); override;
-   property dockingareacaption: msestring read fdockingareacaption 
+   property dockingareacaption: msestring read fdockingareacaption
                                                    write setdockingareacaption;
   published
    property dragdock: tformdockcontroller read fdragdock write setdragdock;
@@ -649,7 +649,7 @@ type
    procedure getchildren(proc: tgetchildproc; root: tcomponent); override;
   public
    constructor create(aowner: tcomponent); overload; override;
-   constructor create(aowner: tcomponent; load: boolean); 
+   constructor create(aowner: tcomponent; load: boolean);
                                      reintroduce; overload; virtual;
   published
    property onloaded;
@@ -664,22 +664,22 @@ type
    procedure getchildren(proc: tgetchildproc; root: tcomponent); override;
   public
    constructor create(aowner: tcomponent); overload; override;
-   constructor create(aowner: tcomponent; load: boolean); 
+   constructor create(aowner: tcomponent; load: boolean);
                                      reintroduce; overload; virtual;
  end;
- 
+
  scrollboxformclassty = class of tscrollboxform;
 
  ttabformfonttab = class(tparentfont)
   public
    class function getinstancepo(owner: tobject): pfont; override;
  end;
- 
+
  ttabformfontactivetab = class(tparentfont)
   public
    class function getinstancepo(owner: tobject): pfont; override;
  end;
- 
+
  ttabform = class(tmseform,itabpage,iimagelistinfo)
   private
    ftabwidget: tcustomtabwidget;
@@ -758,14 +758,14 @@ type
    property coloractivetab: colorty read getcoloractivetab
                                     write setcoloractivetab default cl_default;
    property facetab: tfacecomp read getfacetab write setfacetab;
-   property faceactivetab: tfacecomp read getfaceactivetab 
+   property faceactivetab: tfacecomp read getfaceactivetab
                                                 write setfaceactivetab;
    property fonttab: ttabformfonttab read getfonttab1 write setfonttab1
                                                         stored isfonttabstored;
-   property fontactivetab: ttabformfontactivetab read getfontactivetab1 
+   property fontactivetab: ttabformfontactivetab read getfontactivetab1
                           write setfontactivetab1 stored isfontactivetabstored;
    property tabhint: msestring read gettabhint write settabhint;
-   property tabnoface: boolean read gettabnoface 
+   property tabnoface: boolean read gettabnoface
                                       write settabnoface default false;
    property imagelist: timagelist read getimagelist write setimagelist;
    property imagenr: imagenrty read getimagenr write setimagenr default -1;
@@ -781,26 +781,26 @@ type
 
  tabformclassty = class of ttabform;
 
-function createmseform(const aclass: tclass; 
+function createmseform(const aclass: tclass;
                    const aclassname: pshortstring): tmsecomponent;
-function createmainform(const aclass: tclass; 
+function createmainform(const aclass: tclass;
                    const aclassname: pshortstring): tmsecomponent;
-function createsubform(const aclass: tclass; 
+function createsubform(const aclass: tclass;
                    const aclassname: pshortstring): tmsecomponent;
-function createscrollboxform(const aclass: tclass; 
+function createscrollboxform(const aclass: tclass;
                    const aclassname: pshortstring): tmsecomponent;
-function createtabform(const aclass: tclass; 
+function createtabform(const aclass: tclass;
                    const aclassname: pshortstring): tmsecomponent;
 
 implementation
 uses
  sysutils,mselist,msekeyboard,msebits,msestreaming,msestockobjects;
 const
- containercommonflags: optionswidgetty = 
+ containercommonflags: optionswidgetty =
             [ow_arrowfocus,ow_arrowfocusin,ow_arrowfocusout,ow_destroywidgets,
              ow_parenttabfocus,ow_mousewheel{,
              ow_subfocus,ow_mousefocus,ow_tabfocus}];
- 
+
 type
  tcomponent1 = class(tcomponent);
  tmsecomponent1 = class(tmsecomponent);
@@ -813,7 +813,7 @@ type
  ttaborderoverride1 = class(ttaborderoverride);
 
 
-function createmseform(const aclass: tclass; 
+function createmseform(const aclass: tclass;
                     const aclassname: pshortstring): tmsecomponent;
 
 begin
@@ -821,7 +821,7 @@ begin
  tmsecomponent1(result).factualclassname:= aclassname;
 end;
 
-function createmainform(const aclass: tclass; 
+function createmainform(const aclass: tclass;
                     const aclassname: pshortstring): tmsecomponent;
 
 begin
@@ -833,21 +833,21 @@ begin
  tmsecomponent1(result).factualclassname:= aclassname;
 end;
 
-function createsubform(const aclass: tclass; 
+function createsubform(const aclass: tclass;
                     const aclassname: pshortstring): tmsecomponent;
 begin
  result:= subformclassty(aclass).create(nil,false);
  tmsecomponent1(result).factualclassname:= aclassname;
 end;
 
-function createscrollboxform(const aclass: tclass; 
+function createscrollboxform(const aclass: tclass;
                     const aclassname: pshortstring): tmsecomponent;
 begin
  result:= scrollboxformclassty(aclass).create(nil,false);
  tmsecomponent1(result).factualclassname:= aclassname;
 end;
 
-function createtabform(const aclass: tclass; 
+function createtabform(const aclass: tclass;
                    const aclassname: pshortstring): tmsecomponent;
 begin
  result:= tabformclassty(aclass).create(nil,false);
@@ -897,7 +897,7 @@ begin
  rect1.y:= reader.readinteger;
  rect1.cx:= reader.readinteger;
  rect1.cy:= reader.readinteger;
- reader.readlistend; 
+ reader.readlistend;
  widgetrect:= rect1;
  fboundsread:= true;
 end;
@@ -909,7 +909,7 @@ begin
  writer.writeinteger(fwidgetrect.y);
  writer.writeinteger(fwidgetrect.cx);
  writer.writeinteger(fwidgetrect.cy);
- writer.writelistend; 
+ writer.writelistend;
 end;
 
 procedure tformscrollbox.defineproperties(filer: tfiler);
@@ -944,7 +944,7 @@ end;
 procedure tformscrollbox.docheckautosize;
 begin
  if owner <> nil then begin
-  with tcustommseform(owner) do begin 
+  with tcustommseform(owner) do begin
    if optionswidget1 * [ow1_autowidth,ow1_autoheight] <> [] then begin
     checkautosize;
    end;
@@ -993,7 +993,7 @@ end;
 procedure tdockformscrollbox.widgetregionchanged(const sender: twidget);
 begin
  inherited;
- if not (ws_loadlock in fwidgetstate) and 
+ if not (ws_loadlock in fwidgetstate) and
                not (ws1_updateopaque in twidget1(sender).fwidgetstate1) then begin
   tcustomdockform(owner).fdragdock.widgetregionchanged(sender);
  end;
@@ -1068,7 +1068,7 @@ begin
 //  autoreadstat;
   doafterload;
  end;
- if (fo_createmodal in foptions) and 
+ if (fo_createmodal in foptions) and
          (componentstate*[csdesigning,csdestroying,csloading] = []){ and
                                                            showing} then begin
   show(true);
@@ -1128,11 +1128,11 @@ begin
                                        {$ifdef FPC}@{$endif}dowindowdestroyed);
  application.unregisteronapplicationactivechanged(
        {$ifdef FPC}@{$endif}doapplicationactivechanged);
- if not (csdesigning in componentstate) and 
+ if not (csdesigning in componentstate) and
             (assigned(fonsysevent) or assigned(fonsyswindowevent)) then begin
   application.unregistersyseventhandler({$ifdef FPC}@{$endif}dosysevent);
  end;
- if not (csdesigning in componentstate) and 
+ if not (csdesigning in componentstate) and
                                  assigned(fonapplicationevent) then begin
   application.unregisterapplicationeventhandler(@doapplicationevent);
  end;
@@ -1151,7 +1151,7 @@ begin
  application.registeronapplicationactivechanged(
        {$ifdef FPC}@{$endif}doapplicationactivechanged);
 end;
- 
+
 procedure tcustommseform.dooncreate;
 begin
  if not (cs_inheritedloading in msecomponentstate) then begin
@@ -1178,7 +1178,7 @@ end;
 
 procedure tcustommseform.loaded;
 begin
- if (factivatortarget <> nil)  and 
+ if (factivatortarget <> nil)  and
                                 not (csdesigning in componentstate) then begin
   factivatortarget.activaterecursive();
  end;
@@ -1205,7 +1205,7 @@ end;
 
 procedure tcustommseform.freeinstance;
 begin
- if (factivatortarget <> nil)  and 
+ if (factivatortarget <> nil)  and
                                 not (csdesigning in componentstate) then begin
   try
    factivatortarget.deactivaterecursive;
@@ -1310,7 +1310,7 @@ begin
  if canevent(tmethod(fonbeforeclosequery)) then begin
   fonbeforeclosequery(self,amodalresult);
  end;
- if (amodalresult = mr_windowclosed) and 
+ if (amodalresult = mr_windowclosed) and
                               (fo_windowclosecancel in foptions) then begin
   amodalresult:= mr_cancel;
  end;
@@ -1328,7 +1328,7 @@ var
  modres: modalresultty;
 begin
  result:= inherited canclose(newfocus);
- if result and (newfocus = nil) and ((fwindow = nil) or 
+ if result and (newfocus = nil) and ((fwindow = nil) or
                   not (tws_candefocus in fwindow.state)) then begin
   modres:= twindow1(window).fmodalresult;
   if (modres = mr_windowclosed) and (fo_nowindowclose in foptions) then begin
@@ -1351,7 +1351,7 @@ begin
   if modres <> mr_canclose then begin
    twindow1(window).fmodalresult:= modres;
   end;
-  if result and ((twindow1(window).fmodalresult <> mr_none) or 
+  if result and ((twindow1(window).fmodalresult <> mr_none) or
     (application.terminating) or (ws1_forceclose in fwidgetstate1)) then begin
    doonclose;
  {$ifdef mse_with_ifi}
@@ -1367,7 +1367,7 @@ begin
                                not (csdesigning in componentstate) then begin
     fstatfile.writestat;
    end;
-   if result and (fo_freeonclose in foptions) and 
+   if result and (fo_freeonclose in foptions) and
              not (csdesigning in componentstate) then begin
     release;
    end;
@@ -1376,7 +1376,7 @@ begin
 end;
 
 function tcustommseform.close(
-        const amodalresult: modalresultty = mr_windowclosed): boolean; 
+        const amodalresult: modalresultty = mr_windowclosed): boolean;
                 //simulates mr_windowclose, true if ok
 begin
  if ownswindow then begin
@@ -1464,7 +1464,7 @@ end;
 procedure tcustommseform.doeventloopstart;
 begin
  if (fstatfile <> nil) and not (csdesigning in componentstate) and
-       (foptions*[fo_autoreadstat,fo_delayedreadstat] = 
+       (foptions*[fo_autoreadstat,fo_delayedreadstat] =
         [fo_autoreadstat,fo_delayedreadstat]) then begin
   fstatfile.readstat;
  end;
@@ -1481,7 +1481,7 @@ begin
  case event.kind of
   ek_loaded: begin
    doeventloopstart;
-   if (fo_modal in foptions) and 
+   if (fo_modal in foptions) and
           (componentstate*[csloading,csdesigning] = []){ and showing}  then begin
     show(true);
    end;
@@ -1544,7 +1544,7 @@ begin
  end;
 end;
 
-procedure tcustommseform.objectevent(const sender: tobject; 
+procedure tcustommseform.objectevent(const sender: tobject;
                                          const event: objecteventty);
 begin
  if sender = fmainmenu then begin
@@ -1625,7 +1625,7 @@ end;
 
 procedure tcustommseform.updateoptions;
 begin
- if (componentstate * [csloading,csdestroying,csdesigning] = []) and 
+ if (componentstate * [csloading,csdestroying,csdesigning] = []) and
                                              (window.owner = self)  then begin
   fwindow.globalshortcuts:= fo_globalshortcuts in foptions;
   fwindow.localshortcuts:= fo_localshortcuts in foptions;
@@ -1840,8 +1840,8 @@ procedure tcustommseform.updatescrollboxrect;
 var
  rect1: rectty;
 begin
- if not (ws_destroying in fwidgetstate) and 
-                       (not (csloading in componentstate) or 
+ if not (ws_destroying in fwidgetstate) and
+                       (not (csloading in componentstate) or
                         not fscrollbox.fboundsread) then begin
   rect1:= innerwidgetrect;
   if fmainmenuwidget <> nil then begin
@@ -1888,7 +1888,7 @@ begin
   if fo_minimized in foptions then begin
    info.initialwindowpos:= wp_minimized;
   end
-  else begin   
+  else begin
    if fo_defaultpos in foptions then begin
     info.initialwindowpos:= wp_default;
    end;
@@ -1900,8 +1900,8 @@ end;
 procedure tcustommseform.rootchanged(const aflags: rootchangeflagsty);
 begin
  inherited;
- if (rcf_windowset in aflags) and 
-        (foptions * [fo_main,fo_globalshortcuts] = 
+ if (rcf_windowset in aflags) and
+        (foptions * [fo_main,fo_globalshortcuts] =
                              [fo_main,fo_globalshortcuts]) then begin
   window.globalshortcuts:= true;
  end;
@@ -1910,7 +1910,7 @@ end;
 procedure tcustommseform.setparentwidget(const Value: twidget);
 begin
  if (value = nil) and (fparentwidget <> nil) and (fwindow <> nil) and
-        (foptions * [fo_main,fo_globalshortcuts] = 
+        (foptions * [fo_main,fo_globalshortcuts] =
                              [fo_main,fo_globalshortcuts]) then begin
   fwindow.globalshortcuts:= false; //restore
  end;
@@ -1964,7 +1964,7 @@ begin
  result:= true;
 end;
 
-function tcustommseform.getbuttonrects(const index: dockbuttonrectty): rectty;  
+function tcustommseform.getbuttonrects(const index: dockbuttonrectty): rectty;
 begin
  if fframe = nil then begin
   if index = dbr_handle then begin
@@ -2056,10 +2056,10 @@ var
 begin
  inherited;
  with info do begin
-  if not (es_processed in eventstate) and 
+  if not (es_processed in eventstate) and
     (shiftstate * shiftstatesrepeatmask = []) and
     (not (fo_keycloseifwinonly in foptions) or (fparentwidget = nil)) and
-    (((fo_closeonesc in foptions) or (fo_cancelonesc in foptions)) and 
+    (((fo_closeonesc in foptions) or (fo_cancelonesc in foptions)) and
       (key = key_escape) or
       (fo_closeonf10 in foptions) and (key = key_f10) or
       (fo_closeonenter in foptions) and isenterkey(self,key))  then begin
@@ -2166,7 +2166,7 @@ begin
  fwindowopacity:= avalue;
  if ownswindow then begin
   window.opacity:= avalue;
- end; 
+ end;
 end;
 
 procedure tcustommseform.iconchanged(const sender: tobject);
@@ -2182,7 +2182,7 @@ begin
     gui_setapplicationicon(icon1,mask1);
    end;
   end;
-  dec(ficonchanging); 
+  dec(ficonchanging);
  end;
 end;
 
@@ -2252,7 +2252,7 @@ begin
  if assigned(fonsysevent) then begin
   fonsysevent(self,aevent,handled);
  end;
- if assigned(fonsyswindowevent) and not handled and 
+ if assigned(fonsyswindowevent) and not handled and
          (awindow <> 0) and (twindow1(window).fwindow.id = awindow) then begin
   fonsyswindowevent(self,aevent,handled);
  end;
@@ -2315,7 +2315,7 @@ end;
 procedure tcustommseform.autoreadstat;
 begin
  if (fstatfile <> nil) and not (csdesigning in componentstate) and
-       (foptions*[fo_autoreadstat,fo_delayedreadstat] = 
+       (foptions*[fo_autoreadstat,fo_delayedreadstat] =
                                            [fo_autoreadstat]) then begin
   fstatfile.readstat;
  end;
@@ -2438,7 +2438,7 @@ begin
    ar1:= getitems();
    for i1:= 0 to high(ar1) do begin
     w1:= ar1[i1];
-    if not (csdestroying in w1.componentstate) and 
+    if not (csdestroying in w1.componentstate) and
                                    (w1 is tcustomdockform) then begin
      result:= tcustomdockform(w1).fdragdock.hasmain();
      if result then begin
@@ -2509,7 +2509,7 @@ procedure tformdockcontroller.childstatechanged(const sender: twidget;
              const newstate: widgetstatesty; const oldstate: widgetstatesty);
 begin
  inherited;
- if (odf_childicons in foptionsdockform) and (ws_entered in newstate) and 
+ if (odf_childicons in foptionsdockform) and (ws_entered in newstate) and
                             not (ws_entered in oldstate) then begin
   fowner.iconchanged(nil);
  end;
@@ -2562,7 +2562,7 @@ end;
 function tcustomdockform.internalgeticon(): tmaskedbitmap;
 begin
  result:= inherited internalgeticon();
- if (result = nil) or not result.hasimage() and 
+ if (result = nil) or not result.hasimage() and
               (odf_childicons in fdragdock.optionsdockform) then begin
   result:= fdragdock.childicon();
  end;
@@ -2649,7 +2649,7 @@ begin
  bo1:= info.eventkind = ek_buttonrelease;
  if not (es_processed in info.eventstate) and bo1 then begin
   fdragdock.mouseevent(info);
- end; 
+ end;
  inherited;
  if not (es_processed in info.eventstate) and not bo1 then begin
   fdragdock.mouseevent(info);
@@ -2660,7 +2660,7 @@ end;
 procedure tcustomdockform.childmouseevent(const sender: twidget;
                var info: mouseeventinfoty);
 begin
- if not (es_processed in info.eventstate) then begin  
+ if not (es_processed in info.eventstate) then begin
   fdragdock.childormouseevent(sender,info);
   if not (es_processed in info.eventstate) then begin
    inherited;
@@ -2725,7 +2725,7 @@ end;
 function tcustomdockform.ismainwindow(): boolean;
 begin
  result:= inherited ismainwindow() or not(csdesigning in componentstate) and
-               (odf_mainmainwindow in fdragdock.foptionsdockform) and 
+               (odf_mainmainwindow in fdragdock.foptionsdockform) and
                                                           fdragdock.hasmain();
 end;
 
@@ -2791,7 +2791,7 @@ end;
 
 function tcustomdockform.needsdocktaskbaricon(): boolean;
 begin
- result:= (odf_maintaskbar in fdragdock.foptionsdockform) and 
+ result:= (odf_maintaskbar in fdragdock.foptionsdockform) and
                                                      fdragdock.hasmain();
 end;
 
@@ -2943,7 +2943,7 @@ begin
  if ffonttab = nil then begin
   ffonttab:= ttabformfonttab.create;
   ffonttab.onchange:= {$ifdef FPC}@{$endif}fontchanged1;
- end; 
+ end;
 end;
 
 procedure ttabform.createfontactivetab;
@@ -2951,7 +2951,7 @@ begin
  if ffontactivetab = nil then begin
   ffontactivetab:= ttabformfontactivetab.create;
   ffontactivetab.onchange:= {$ifdef FPC}@{$endif}fontchanged1;
- end; 
+ end;
 end;
 
 procedure ttabform.loaded;

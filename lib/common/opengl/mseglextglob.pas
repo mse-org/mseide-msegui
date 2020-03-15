@@ -15,7 +15,7 @@ interface
 uses
  msedynload,{msegl,}msesys,{$ifdef FPC}dynlibs,{$else}classes_del,{$endif}
  msegraphics,msetypes;
- 
+
 type
  glextensionty = (
   {$ifdef mswindows}
@@ -258,16 +258,16 @@ var
  libgl: tlibhandle;
 
 procedure init(); //do not use, automatically called by msegl
- 
+
 implementation
 uses
  msegl,mseglext,msestrings{$ifdef mswindows}{$else},
                                           mseglx,mseguiintf{$endif},
  mseglu;
- 
+
 type
  glextloaderty = function: boolean;
- 
+
  glextensioninfoty = record
   name: string;
   loader: glextloaderty;
@@ -293,7 +293,7 @@ begin
  end;
 {$endif}
 end;
- 
+
 procedure initglext(const ainfo: dynlibinfoty);
 begin
  libgl:= ainfo.libhandle;
@@ -596,7 +596,7 @@ const
    (name: 'GL_version_4_0'; loader: {$ifdef FPC}@{$endif}l_GL_version_4_0)
    );
 
-function mseglparseextensions(const astr: pchar): glextensionsty; 
+function mseglparseextensions(const astr: pchar): glextensionsty;
 var
  ar1: stringarty;
  int1: integer;

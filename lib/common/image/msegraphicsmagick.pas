@@ -12,23 +12,23 @@ unit msegraphicsmagick;
 interface
 uses
  msetypes{msestrings},msectypes,msedynload;
- 
+
 const
 {$ifdef mswindows}
- graphicsmagiclib: array[0..0] of filenamety = ('CORE_RL_magick_.dll');  
- graphicsmagicwandlib: array[0..0] of filenamety = ('CORE_RL_wand_.dll');  
+ graphicsmagiclib: array[0..0] of filenamety = ('CORE_RL_magick_.dll');
+ graphicsmagicwandlib: array[0..0] of filenamety = ('CORE_RL_wand_.dll');
 {$else}
- graphicsmagicwandlib: array[0..1] of filenamety = 
-           ('libGraphicsMagickWand.so.2','libGraphicsMagickWand.so'); 
- graphicsmagiclib: array[0..1] of filenamety = 
-           ('libGraphicsMagick.so.3','libGraphicsMagick.so'); 
+ graphicsmagicwandlib: array[0..1] of filenamety =
+           ('libGraphicsMagickWand.so.2','libGraphicsMagickWand.so');
+ graphicsmagiclib: array[0..1] of filenamety =
+           ('libGraphicsMagick.so.3','libGraphicsMagick.so');
 {$endif}
 
 {$packrecords c}
 
 type
  quantumdepthty = (qd_8,qd_16,qd_32);
- 
+
  MagickBool = cuint;
 const
  MagickTrue = 1;
@@ -301,11 +301,11 @@ type
  Quantum8 = cuchar;
  Quantum16 = cushort;
  Quantum32 = cuint;
- 
+
  PixelPacket8 = record
  {$ifdef WORDS_BIGENDIAN}
   //* RGBA */
-  {$define MAGICK_PIXELS_RGBA}  
+  {$define MAGICK_PIXELS_RGBA}
   red: Quantum8;
   green: Quantum8;
   blue: Quantum8;
@@ -324,7 +324,7 @@ type
  PixelPacket16 = record
  {$ifdef WORDS_BIGENDIAN}
   //* RGBA */
-  {$define MAGICK_PIXELS_RGBA}  
+  {$define MAGICK_PIXELS_RGBA}
   red: Quantum16;
   green: Quantum16;
   blue: Quantum16;
@@ -343,7 +343,7 @@ type
  PixelPacket32 = record
  {$ifdef WORDS_BIGENDIAN}
   //* RGBA */
-  {$define MAGICK_PIXELS_RGBA}  
+  {$define MAGICK_PIXELS_RGBA}
   red: Quantum32;
   green: Quantum32;
   blue: Quantum32;
@@ -364,7 +364,7 @@ type
  pFILE = ^_FILE;
  _CacheInfoPtr_ = pointer;
  _BlobInfoPtr_ = pointer;
-  
+
  MaxTextExtent = 0..2052; //???
 
  const              //ExceptionBaseType
@@ -543,7 +543,7 @@ type
   z: cdouble;
  end;
 
- ChromaticityInfo = record  
+ ChromaticityInfo = record
   red_primary: PrimaryInfo;
   green_primary: PrimaryInfo;
   blue_primary: PrimaryInfo;
@@ -580,13 +580,13 @@ type
  _ImageAttributePtr_ = pointer;
  _Ascii85InfoPtr_ = pointer;
  _SemaphoreInfoPtr_ = pointer;
-   
- Imagea = record  
+
+ Imagea = record
   storage_class: ClassType;   //* DirectClass (TrueColor) or PseudoClass (colormapped) */
   colorspace: ColorspaceType; //* Current image colorspace/model */
   compression: CompressionType; //* Compression algorithm to use when encoding image */
   dither: MagickBool; //* True if image is to be dithered */
-  matte: MagickBool;  //* True if image has an opacity (alpha) channel */ 
+  matte: MagickBool;  //* True if image has an opacity (alpha) channel */
   columns: culong; //* Number of image columns */
   rows: culong;    //* Number of image rows */
   colors: cuint; //* Current number of colors in PseudoClass colormap */
@@ -707,7 +707,7 @@ type
   c: Imagec;
  end;
  pImage32 = ^Image32;
- 
+
 
  ImageInfoa = record
   compression: CompressionType; //* Image compression to use while decoding */
@@ -753,7 +753,7 @@ type
  ImageInfoc = record
   dither: MagickBool;            //* If true, dither image while writing */
   monochrome: MagickBool;        //* If true, use monochrome format */
-  progress: MagickBool;          //* If true, show progress indication */  
+  progress: MagickBool;          //* If true, show progress indication */
   colorspace: ColorspaceType;    //* Colorspace representations of image pixels */
   _type: ImageType;      //* Desired image type (used while reading or writing) */
   group: clong;          //* X11 window group ID */
@@ -768,7 +768,7 @@ type
   filename: array[MaxTextExtent] of cchar; //* File name to read */
 
   //  Only private members appear past this point
-  
+
   cache: _CacheInfoPtr_;//* Private. Used to pass image via open cache */
   definitions: pointer; //* Private. Map of coder specific options passed by user.
                         //Use AddDefinitions, RemoveDefinitions, & AccessDefinition
@@ -776,7 +776,7 @@ type
   attributes: pointer{pImage}; //* Private. Image attribute list */
   ping: MagickBool; //* Private, if true, read file header only */
   preview_type: PreviewType; //* Private, used by PreviewImage */
-  affirm: MagickBool;  //* Private, when true do not intuit image format */  
+  affirm: MagickBool;  //* Private, when true do not intuit image format */
   blob: _BlobInfoPtr_;   //* Private, used to pass in open blob */
   length: size_t;   //* Private, used to pass in open blob length */
   unique: array[MaxTextExtent] of cchar;   //* Private, passes temporary filename to TranslateText */
@@ -789,14 +789,14 @@ type
   c:ImageInfoc
  end;
  pImageInfo8 = ^ImageInfo8;
- 
+
  ImageInfo16 = record
   a: ImageInfoa;
   b: ImageInfob16;
   c:ImageInfoc
  end;
  pImageInfo16 = ^ImageInfo16;
- 
+
  ImageInfo32 = record
   a: ImageInfoa;
   b: ImageInfob32;
@@ -806,19 +806,19 @@ type
 
 // pExportPixelAreaOptions = ^ExportPixelAreaOptions;
 
- ExportPixelAreaOptions = record  
+ ExportPixelAreaOptions = record
   sample_type: QuantumSampleType; //* Quantum sample type */
-  double_minvalue: cdouble;      
+  double_minvalue: cdouble;
      //* Minimum value (default 0.0) for linear floating point samples */
-  double_maxvalue: cdouble;      
+  double_maxvalue: cdouble;
      //* Maximum value (default 1.0) for linear floating point samples */
-  grayscale_miniswhite: MagickBool; 
+  grayscale_miniswhite: MagickBool;
      //* Grayscale minimum value is white rather than black */
-  pad_bytes: culong;            
+  pad_bytes: culong;
      //* Number of pad bytes to output after pixel data */
-  pad_value: cuchar;            
+  pad_value: cuchar;
      //* Value to use when padding end of pixel data */
-  endian: EndianType;               
+  endian: EndianType;
      //* Endian orientation for 16/32/64 bit types (default MSBEndian) */
   signature: culong;
  end;
@@ -826,13 +826,13 @@ type
 
  ImportPixelAreaOptions = record
   sample_type: QuantumSampleType; //* Quantum sample type */
-  double_minvalue: cdouble;      
+  double_minvalue: cdouble;
   //* Minimum value (default 0.0) for linear floating point samples */
-  double_maxvalue: cdouble;      
+  double_maxvalue: cdouble;
           //* Maximum value (default 1.0) for linear floating point samples */
-  grayscale_miniswhite: MagickBool; 
+  grayscale_miniswhite: MagickBool;
                //* Grayscale minimum value is white rather than black */
-  endian: EndianType;    //* Endian orientation for 16/32/64 bit types 
+  endian: EndianType;    //* Endian orientation for 16/32/64 bit types
                          //(default MSBEndian) */
   signature: culong;
  end;
@@ -842,7 +842,7 @@ type
   bytes_exported: size_t;       //* Number of bytes which were exported */
  end;
  pExportPixelAreaInfo = ^ExportPixelAreaInfo;
- 
+
  ImportPixelAreaInfo = record
   bytes_imported: size_t;       //* Number of bytes which were imported */
  end;
@@ -851,7 +851,7 @@ type
  MagickWand = record
  end;
  pMagickWand = ^MagickWand;
- 
+
 var
  InitializeMagick: procedure(path: pcchar);
                                {$ifdef wincall}stdcall{$else}cdecl{$endif};
@@ -861,7 +861,7 @@ var
                                {$ifdef wincall}stdcall{$else}cdecl{$endif};
  MagickFree: procedure(memory: pointer);
                                {$ifdef wincall}stdcall{$else}cdecl{$endif};
- 
+
  MagickGetVersion: function(version: pculong): pcchar;
                               {$ifdef wincall}stdcall{$else}cdecl{$endif};
  MagickGetQuantumDepth: function(depth: pculong): pchar;
@@ -879,12 +879,12 @@ var
  DestroyImageInfo: procedure(image_info: pointer{pImageInfo});
                               {$ifdef wincall}stdcall{$else}cdecl{$endif};
 
- AllocateImage: function(image_info: pointer{pImageInfo}): pointer{pImage}; 
+ AllocateImage: function(image_info: pointer{pImageInfo}): pointer{pImage};
                               {$ifdef wincall}stdcall{$else}cdecl{$endif};
  PingImage: function(image_info: pointer{pImageInfo};
                             exception: pExceptionInfo):pointer{pImage};
                               {$ifdef wincall}stdcall{$else}cdecl{$endif};
- ReadImage: function(image_info: pointer{pImageInfo}; 
+ ReadImage: function(image_info: pointer{pImageInfo};
                            exception: pExceptionInfo): pointer{pImage};
                              {$ifdef wincall}stdcall{$else}cdecl{$endif};
  PingBlob: function(imageinfo: pointer{pImageInfo}; blob: pointer;
@@ -927,7 +927,7 @@ var
                              {$ifdef wincall}stdcall{$else}cdecl{$endif};
  ImportPixelAreaOptionsInit: procedure(options: pImportPixelAreaOptions);
                              {$ifdef wincall}stdcall{$else}cdecl{$endif};
- ExportPixelAreaOptionsInit: procedure(options: pExportPixelAreaOptions); 
+ ExportPixelAreaOptionsInit: procedure(options: pExportPixelAreaOptions);
                              {$ifdef wincall}stdcall{$else}cdecl{$endif};
  GetImagePixels: function(image: pointer{pImage}; x: clong; y: clong;
                        columns: culong; rows: culong): pointer{pPixelPacket};
@@ -941,10 +941,10 @@ var
                              {$ifdef wincall}stdcall{$else}cdecl{$endif};
 
  SampleImage: function(image: pointer{pImage}; columns: culong;
-                rows: culong; exception: pExceptionInfo): pointer{pImage}; 
+                rows: culong; exception: pExceptionInfo): pointer{pImage};
                              {$ifdef wincall}stdcall{$else}cdecl{$endif};
  ScaleImage: function(image: pointer{pImage}; columns: culong;
-                   rows: culong; exception: pExceptionInfo): pointer{pImage}; 
+                   rows: culong; exception: pExceptionInfo): pointer{pImage};
                              {$ifdef wincall}stdcall{$else}cdecl{$endif};
  ResizeImage: function(image: pointer{pImage}; columns: culong; rows: culong;
                     filter: FilterTypes; blur: cdouble;
@@ -957,7 +957,7 @@ var
                               {$ifdef wincall}stdcall{$else}cdecl{$endif};
  DestroyMagickWand: procedure(wand: pMagickWand);
                               {$ifdef wincall}stdcall{$else}cdecl{$endif};
-                              
+
  MagickReadImage: function(wand: pMagickWand; filename: pcchar): cuint;
                              {$ifdef wincall}stdcall{$else}cdecl{$endif};
  MagickReadImageBlob: function(wand: pMagickWand; blob: pcuchar;
@@ -989,10 +989,10 @@ procedure reggmwanddeinit(const deinitproc: dynlibprocty);
 implementation
 uses
  mseapplication;
- 
+
 var
- libinfo: dynlibinfoty;                              
- libinfowand: dynlibinfoty;                              
+ libinfo: dynlibinfoty;
+ libinfowand: dynlibinfoty;
  qdepth: quantumdepthty;
 
 procedure reggminit(const initproc: dynlibprocty);
@@ -1014,12 +1014,12 @@ procedure reggmwanddeinit(const deinitproc: dynlibprocty);
 begin
  regdynlibdeinit(libinfowand,deinitproc);
 end;
- 
+
 function quantumdepth: quantumdepthty;
 begin
  result:= qdepth;
 end;
-  
+
 procedure init(const data: pointer);
 var
  l1: culong;
@@ -1046,7 +1046,7 @@ end;
 
 procedure initializegraphicsmagick(const sonames,
                          sonameswand: array of filenamety);
-                                                 //[] = default 
+                                                 //[] = default
 const
  funcs: array[0..29] of funcinfoty = (
 //    (n: ''; d: {$ifndef FPC}@{$endif}@),
@@ -1102,7 +1102,7 @@ const
     (n: 'MagickSetFormat'; d: {$ifndef FPC}@{$endif}@MagickSetFormat)
  );
  errormessagewand = 'Can not load GraphicsMagickWand library. ';
- 
+
 begin
  initializedynlib(libinfo,sonames,graphicsmagiclib,funcs,[],errormessage,nil);
  initializedynlib(libinfowand,sonameswand,graphicsmagicwandlib,funcswand,

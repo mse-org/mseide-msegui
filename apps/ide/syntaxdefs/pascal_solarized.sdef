@@ -28,7 +28,7 @@ styles
  symbol '' $dc322f
  number '' $2aa198
 
-keyworddefs pascal 
+keyworddefs pascal
  'ABSOLUTE' 'ABSTRACT' 'AND' 'ARRAY' 'AS' 'ASM' 'ASSEMBLER' 'BEGIN'
  'BREAK' 'CASE' 'CDECL' 'CLASS' 'CONST' 'CONSTREF' 'CONSTRUCTOR'
  'CONTINUE' 'DEFAULT' 'DEPRECATED' 'DESTRUCTOR' 'DISPOSE' 'DIV' 'DO' 'DOWNTO'
@@ -37,22 +37,22 @@ keyworddefs pascal
  'IF' 'IMPLEMENTATION' 'IMPLEMENTS' 'IN' 'INHERITED'
  'INITIALIZATION' 'INLINE' 'INTERFACE' 'INTERRUPT' 'IS' 'LABEL' 'LIBRARY'
  'MOD' 'NEW' 'NIL' 'NODEFAULT' 'NOT' 'OBJECT'
- 'OF' 'ON' 'OPERATOR' 'OR' 'OUT' 'OTHERWISE' 'OVERLOAD' 'OVERRIDE' 
- 'PACKED' 'POPSTACK' 'PRIVATE' 
+ 'OF' 'ON' 'OPERATOR' 'OR' 'OUT' 'OTHERWISE' 'OVERLOAD' 'OVERRIDE'
+ 'PACKED' 'POPSTACK' 'PRIVATE'
  'PROCEDURE' 'PROGRAM' 'PROTECTED'
- 'PUBLIC' 'PUBLISHED' 'RAISE' 'RECORD' 'REINTRODUCE' 'REPEAT' 
+ 'PUBLIC' 'PUBLISHED' 'RAISE' 'RECORD' 'REINTRODUCE' 'REPEAT'
  'RESOURCESTRING'
  'SELF' 'SET' 'SHL' 'SHR'
  'STDCALL' 'THEN' 'THREADVAR' 'TO' 'TRUE' 'TRY' 'TYPE' 'UNIT' 'UNTIL'
  'USES' 'VAR' 'VIRTUAL' 'WHILE' 'WITH' 'XOR'
- 
+
 keyworddefs property
  'DEFAULT' 'INDEX' 'READ' 'STORED' 'WRITE'
- 
+
 scope option option
  endtokens
   '}'
-  
+
 scope comment1 comment
  calltokens
   '{' comment1
@@ -66,7 +66,7 @@ scope comment2 comment
 scope comment3 comment
  endtokens
   '*)'
-  
+
 scope string string
  endtokens
   '''' ''
@@ -87,8 +87,8 @@ scope symbol1 symbol
 
 scope word
  jumptokens
-  '0' '1' '2' '3' '4' '5' '6' '7' '8' '9' 
-  'A' 'B' 'C' 'D' 'E' 'F' 'G' 'H' 'I' 'J' 'K' 'L' 'M' 'N' 'O' 'P' 
+  '0' '1' '2' '3' '4' '5' '6' '7' '8' '9'
+  'A' 'B' 'C' 'D' 'E' 'F' 'G' 'H' 'I' 'J' 'K' 'L' 'M' 'N' 'O' 'P'
   'Q' 'R' 'S' 'T' 'U' 'V' 'W' 'X' 'Y' 'Z' '_' word
  return
 
@@ -100,7 +100,7 @@ scope property1 default
   property
  jumptokens
   ';' property2
- calltokens  
+ calltokens
   '{$' option
   '{' comment1
   '//' comment2
@@ -122,7 +122,7 @@ scope property1 default
   '*' symbol1
   '[' symbol1
   ']' symbol1
-  
+
   '$' hexnumber number
   '0' '1' '2' '3' '4' '5' '6' '7' '8' '9' number number
   'A' 'B' 'C' 'D' 'E' 'F' 'G' 'H' 'I' 'J' 'K' 'L' 'M' 'N' 'O' 'P'
@@ -131,14 +131,14 @@ scope property1 default
 scope property words
  jumptokens
   property1
-  
-   
+
+
 scope main
 
  keywords words
   pascal
 
- calltokens  
+ calltokens
   '{$' option
   '{' comment1
   '//' comment2
@@ -162,9 +162,9 @@ scope main
   '[' symbol1
   ']' symbol1
   .'property'. property
-  
+
   '$' hexnumber number
   '0' '1' '2' '3' '4' '5' '6' '7' '8' '9' number number
   'A' 'B' 'C' 'D' 'E' 'F' 'G' 'H' 'I' 'J' 'K' 'L' 'M' 'N' 'O' 'P'
   'Q' 'R' 'S' 'T' 'U' 'V' 'W' 'X' 'Y' 'Z' '_' word
-  
+

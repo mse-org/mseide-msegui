@@ -28,7 +28,7 @@ type
                     asf_scrolllimit,
                     asf_focused,asf_disabled,asf_hasdropdown,asf_async);
  assistiveflagsty = set of assistiveflagty;
- 
+
  iassistiveclient = interface(inullinterface)[miid_iassistiveclient]
   function getassistiveparent(): iassistiveclient;
   function getinstance: tobject;
@@ -50,7 +50,7 @@ type
   rowmin: int32;
   rowmax: int32;
  end;
- 
+
  iassistiveclientgrid = interface(iassistiveclient)[miid_iassistiveclientgrid]
   function getassistivecellcaption(const acell: gridcoordty): msestring;
   function getassistivecelltext(const acell: gridcoordty;
@@ -64,12 +64,12 @@ type
 
  iassistiveclientdata = interface(iassistiveclient)[miid_iassistiveclientdata]
  end;
- 
+
  iassistiveclientgridwidget = interface(iassistiveclientdata)
                                               [miid_iassistiveclientgridwidget]
   function getassistivecolumncaption(): msestring;
  end;
-  
+
  iassistiveclientmenu = interface(iassistiveclient)[miid_iassistiveclientmenu]
   function getassistiveselfcaption(): msestring;
   function getassistiveselfname(): msestring;

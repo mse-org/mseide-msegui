@@ -67,7 +67,7 @@ object messagefo: tmessagefo
     font.localprops = [flp_xscale]
     datacols.count = 1
     datacols.linewidth = 0
-    datacols.items = <    
+    datacols.items = <
       item
         linecolorfix = -1610612733
         width = 3000
@@ -90,7 +90,7 @@ object messagefo: tmessagefo
   end
   object tpopupmenu1: tpopupmenu
     menu.submenu.count = 1
-    menu.submenu.items = <    
+    menu.submenu.items = <
       item
         caption = 'Copy to clipboard'
         state = [as_localcaption, as_localonexecute]

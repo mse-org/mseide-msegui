@@ -18,7 +18,7 @@ uses
 const
  emptyrealstring = '';   //stringsymbol for empty realty
  bigreal = 1e38;
- 
+
 function cmprealty(const a,b: realty): integer;
 //function emptyreal: realty;
 function isemptyreal(const val: realty): boolean; {$ifdef FPC}inline;{$endif}
@@ -75,7 +75,7 @@ begin
  end
  else begin
   result:= (avalue-astart) / arange;
- end;  
+ end;
 end;
 
 function addrealty(const a,b: realty): realty; //result = a - b

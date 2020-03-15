@@ -1,5 +1,5 @@
 { MSEide Copyright (c) 1999-2014 by Martin Schreiber
-   
+
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation; either version 2 of the License, or
@@ -37,7 +37,7 @@ type
    procedure addtext(const atext: string);
    procedure updateprojectoptions;
  end;
- 
+
 var
  messagefo: tmessagefo;
 
@@ -50,7 +50,7 @@ begin
  fcolorrow:= -1;
  inherited create(aowner);
 end;
- 
+
 procedure tmessagefo.messagesoncellevent(const sender: tobject;
   var info: celleventinfoty);
 var
@@ -93,7 +93,7 @@ var
 
 var
  opt1: addcharoptionsty;
-  
+
 begin
  with messages do begin
   opt1:= [aco_processeditchars];
@@ -127,7 +127,7 @@ begin
    end;
   end;
   showlastrow;
- end;  
+ end;
 end;
 
 procedure tmessagefo.updateprojectoptions;

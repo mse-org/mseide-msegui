@@ -13,7 +13,7 @@ interface
 uses
  classes,mclasses,mseclasses,msepipestream,msestrings,msestatfile,msestat,
  msesystypes,mseevent,msetypes,mseprocmonitor,mseapplication,msedatalist;
-const 
+const
  defaultpipewaitus = 0;
 type
  processstatety = (prs_listening,prs_waitcursor);
@@ -39,16 +39,16 @@ type
  processoptionsty = set of processoptionty;
 const
  defaultprocessoptions = [pro_winpipewritehandles];
-             //there is no other way on win32 to 
+             //there is no other way on win32 to
              //terminate read on a hanging process
  defaultgetprocessoutputoptions = defaultprocessoptions + [pro_inactive];
- defaultgetprocessoutputoptionserrorouttoout = 
+ defaultgetprocessoutputoptionserrorouttoout =
                     defaultprocessoptions + [pro_inactive,pro_errorouttoout];
  defaultstartprocessoptions = defaultprocessoptions + [pro_inactive];
- 
-type   
+
+type
  tcustommseprocess = class;
- 
+
  tcustommseprocess = class(tactcomponent,istatfile,iprocmonitor)
   private
    finput: tpipewriterpers;
@@ -124,26 +124,26 @@ type
 
    property filename: filenamety read ffilename write ffilename;
    property parameter: msestring read fparameter write fparameter;
-   property workingdirectory: filenamety read fworkingdirectory 
+   property workingdirectory: filenamety read fworkingdirectory
                                                 write fworkingdirectory;
    property params: tmsestringdatalist read fparams write setparams;
    property envvars: tmsestringdatalist read fenvvars write setenvvars;
    property active: boolean read getactive write setactive default false;
-   property options: processoptionsty read foptions write setoptions 
+   property options: processoptionsty read foptions write setoptions
                                                 default defaultprocessoptions;
-   property pipewaitus: integer read fpipewaitus write fpipewaitus 
+   property pipewaitus: integer read fpipewaitus write fpipewaitus
                                                  default defaultpipewaitus;
                                                 //0 -> infinite
    property statfile: tstatfile read fstatfile write setstatfile;
    property statvarname: msestring read getstatvarname write fstatvarname;
-   property statpriority: integer read fstatpriority 
+   property statpriority: integer read fstatpriority
                                        write fstatpriority default 0;
    property input: tpipewriterpers read finput write setinput;
    property output: tpipereaderpers read foutput write setoutput;
    property erroroutput: tpipereaderpers read ferroroutput write seterroroutput;
-   property onprocfinished: notifyeventty read fonprocfinished 
+   property onprocfinished: notifyeventty read fonprocfinished
                                                      write fonprocfinished;
-   property oncheckabort: updatebooleaneventty 
+   property oncheckabort: updatebooleaneventty
                           read foncheckabort write foncheckabort;
  end;
 
@@ -166,13 +166,13 @@ type
    property onprocfinished;
    property oncheckabort;
  end;
- 
-function getprocessoutput(const filename: msestring; 
+
+function getprocessoutput(const filename: msestring;
                                   const aparams: msestringarty;
                          const todata: string;
                          out fromdata: string; out errordata: string;
                          const atimeoutus: integer = -1;
-                         const aoptions: processoptionsty = 
+                         const aoptions: processoptionsty =
                             defaultgetprocessoutputoptions;
                        const acheckabort: updatebooleaneventty = nil;
                        const amaxdatalen: integer = 0): integer;
@@ -182,7 +182,7 @@ function getprocessoutput(const filename: msestring;
 function getprocessoutput(const acommandline: msestring; const todata: string;
                          out fromdata: string; out errordata: string;
                          const atimeoutus: integer = -1;
-                         const aoptions: processoptionsty = 
+                         const aoptions: processoptionsty =
                             defaultgetprocessoutputoptions;
                        const acheckabort: updatebooleaneventty = nil;
                        const amaxdatalen: integer = 0): integer;
@@ -191,7 +191,7 @@ function getprocessoutput(const acommandline: msestring; const todata: string;
 function getprocessoutput(const acommandline: msestring; const todata: string;
                          out fromdata: string;
                          const atimeoutus: integer = -1;
-                    const aoptions: processoptionsty = 
+                    const aoptions: processoptionsty =
                             defaultgetprocessoutputoptionserrorouttoout;
                        const acheckabort: updatebooleaneventty = nil;
                        const amaxdatalen: integer = 0): integer;
@@ -201,7 +201,7 @@ function getprocessoutput(out prochandle: prochandlety;
                          const acommandline: msestring; const todata: string;
                          out fromdata: string; out errordata: string;
                          const atimeoutus: integer = -1;
-                         const aoptions: processoptionsty = 
+                         const aoptions: processoptionsty =
                             defaultgetprocessoutputoptions;
                        const acheckabort: updatebooleaneventty = nil;
                        const amaxdatalen: integer = 0): integer;
@@ -211,7 +211,7 @@ function getprocessoutput(out prochandle: prochandlety;
                          const acommandline: msestring; const todata: string;
                          out fromdata: string;
                          const atimeoutus: integer = -1;
-                    const aoptions: processoptionsty = 
+                    const aoptions: processoptionsty =
                               defaultgetprocessoutputoptionserrorouttoout;
                        const acheckabort: updatebooleaneventty = nil;
                        const amaxdatalen: integer = 0): integer;
@@ -220,7 +220,7 @@ function getprocessoutput(out prochandle: prochandlety;
 
 function startprocessandwait(const acommandline: msestring;
                      const atimeoutus: integer = -1;
-                     const aoptions: processoptionsty = 
+                     const aoptions: processoptionsty =
                             defaultgetprocessoutputoptions;
                        const acheckabort: updatebooleaneventty = nil): integer;
                          //returns program exitcode, -1 in case of error
@@ -244,7 +244,7 @@ type
   public
    constructor create(const amaxdatalen: sizeint = 0); reintroduce;
  end;
- 
+
 function getprocessoutput1(const prochandlepo: pprochandlety;
                const acommandline: msestring; const aparams: msestringarty;
                const todata: string;
@@ -318,7 +318,7 @@ end;
 
 function startprocessandwait(const acommandline: msestring;
                          const atimeoutus: integer = -1;
-                         const aoptions: processoptionsty = 
+                         const aoptions: processoptionsty =
                                             defaultstartprocessoptions;
                        const acheckabort: updatebooleaneventty = nil): integer;
                          //returns program exitcode, -1 in case of error
@@ -348,12 +348,12 @@ begin
  end;
 end;
 
-function getprocessoutput(const filename: msestring; 
+function getprocessoutput(const filename: msestring;
                                   const aparams: msestringarty;
                          const todata: string;
                          out fromdata: string; out errordata: string;
                          const atimeoutus: integer = -1;
-                         const aoptions: processoptionsty = 
+                         const aoptions: processoptionsty =
                             defaultgetprocessoutputoptions;
                        const acheckabort: updatebooleaneventty = nil;
                        const amaxdatalen: integer = 0): integer;
@@ -367,7 +367,7 @@ end;
 function getprocessoutput(const acommandline: msestring; const todata: string;
                          out fromdata: string; out errordata: string;
                          const atimeoutus: integer = -1;
-                          const aoptions: processoptionsty = 
+                          const aoptions: processoptionsty =
                             defaultgetprocessoutputoptions;
                        const acheckabort: updatebooleaneventty = nil;
                        const amaxdatalen: integer = 0): integer;
@@ -375,11 +375,11 @@ begin
  result:= getprocessoutput1(nil,acommandline,nil,todata,fromdata,errordata,
                                  atimeoutus,aoptions,acheckabort,amaxdatalen);
 end;
- 
+
 function getprocessoutput(const acommandline: msestring; const todata: string;
                          out fromdata: string;
                          const atimeoutus: integer = -1;
-                         const aoptions: processoptionsty = 
+                         const aoptions: processoptionsty =
                       defaultgetprocessoutputoptionserrorouttoout;
                        const acheckabort: updatebooleaneventty = nil;
                        const amaxdatalen: integer = 0): integer;
@@ -394,7 +394,7 @@ function getprocessoutput(out prochandle: prochandlety;
                          const acommandline: msestring; const todata: string;
                          out fromdata: string; out errordata: string;
                          const atimeoutus: integer = -1;
-                          const aoptions: processoptionsty = 
+                          const aoptions: processoptionsty =
                             defaultgetprocessoutputoptions;
                        const acheckabort: updatebooleaneventty = nil;
                        const amaxdatalen: integer = 0): integer;
@@ -402,12 +402,12 @@ begin
  result:= getprocessoutput1(@prochandle,acommandline,nil,todata,fromdata,errordata,
                                 atimeoutus,aoptions,acheckabort,amaxdatalen);
 end;
- 
+
 function getprocessoutput(out prochandle: prochandlety;
                          const acommandline: msestring; const todata: string;
                          out fromdata: string;
                          const atimeoutus: integer = -1;
-                         const aoptions: processoptionsty = 
+                         const aoptions: processoptionsty =
                           defaultgetprocessoutputoptionserrorouttoout;
                        const acheckabort: updatebooleaneventty = nil;
                        const amaxdatalen: integer = 0): integer;
@@ -417,7 +417,7 @@ begin
  result:= getprocessoutput1(@prochandle,acommandline,nil,todata,fromdata,str1,
                                  atimeoutus,aoptions,acheckabort,amaxdatalen);
 end;
- 
+
 { tcustommseprocess }
 
 constructor tcustommseprocess.create(aowner: tcomponent);
@@ -436,7 +436,7 @@ end;
 destructor tcustommseprocess.destroy;
 begin
  finalizeexec();
- finput.free();    
+ finput.free();
  foutput.free();         //calls application.unlockall
  ferroroutput.free();    //calls application.unlockall
  fparams.free();
@@ -481,7 +481,7 @@ begin
 end;
 
 procedure tcustommseprocess.procend;
-begin  
+begin
  fprochandle:= invalidprochandle;
  foutput.pipereader.writehandle:= invalidfilehandle;
  ferroroutput.pipereader.writehandle:= invalidfilehandle;
@@ -636,7 +636,7 @@ end;
 
 procedure tcustommseprocess.receiveevent(const event: tobjectevent);
 begin
- if (event.kind = ek_childproc) then begin 
+ if (event.kind = ek_childproc) then begin
   with tchildprocevent(event) do begin
    if data = pointer(flistenid) then begin
     procend;
@@ -663,7 +663,7 @@ begin
  unlisten;
  if bo1 then begin
   int1:= application.unlockall;
-  if (foptions*[pro_checkescape,pro_processmessages] <> []) or 
+  if (foptions*[pro_checkescape,pro_processmessages] <> []) or
               assigned(foncheckabort) then begin
    ts1:= timestep(atimeoutus);
    i2:= 100000;
@@ -685,7 +685,7 @@ begin
      if assigned(foncheckabort) then begin
       foncheckabort(self,bo1);
      end;
-    end; 
+    end;
    until bo1;
    result:= procerr in [pee_ok,pee_signaled];
    if not result then begin
@@ -761,7 +761,7 @@ end;
 procedure tcustommseprocess.listen;
 begin
  application.lock;
- if not (prs_listening in fstate) and 
+ if not (prs_listening in fstate) and
                       (fprochandle <> invalidprochandle) then begin
   pro_listentoprocess(fprochandle,iprocmonitor(self),pointer(flistenid));
   include(fstate,prs_listening);
@@ -775,7 +775,7 @@ begin
  try
   inc(flistenid);
   if prs_listening in fstate then begin
-   pro_unlistentoprocess(fprochandle,iprocmonitor(self));   
+   pro_unlistentoprocess(fprochandle,iprocmonitor(self));
   end;
   exclude(fstate,prs_listening);
  finally
@@ -813,7 +813,7 @@ begin
   lwo1:= timestep(fpipewaitus);
 //  sleepus(0); //shed_yield
   sys_schedyield();
-  while not (foutput.pipereader.eof and ferroroutput.pipereader.eof) and 
+  while not (foutput.pipereader.eof and ferroroutput.pipereader.eof) and
                             ((fpipewaitus = 0) or not timeout(lwo1)) do begin
    sleepus(1000); //wait for last chars
   end;

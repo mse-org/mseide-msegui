@@ -1,5 +1,5 @@
 { MSEide Copyright (c) 2008-2013 by Martin Schreiber
-   
+
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation; either version 2 of the License, or
@@ -35,7 +35,7 @@ type
   storedir: filenamety;
  end;
  pstoredcomponentinfoty = ^storedcomponentinfoty;
- 
+
  tstoredcomponent = class(ttreelistedititem)
   private
    finfo: storedcomponentinfoty;
@@ -55,7 +55,7 @@ type
    constructor create(const isnode: boolean); overload;
    property info: storedcomponentinfoty read finfo write setinfo;
    property compclass: ansistring read finfo.compclass write finfo.compclass;
-   property componentname: ansistring read finfo.componentname write 
+   property componentname: ansistring read finfo.componentname write
                            finfo.componentname;
    property compname: msestring read finfo.compname write setcompname;
    property compdesc: msestring read finfo.compdesc write setcompdesc;
@@ -67,9 +67,9 @@ type
    procedure dostatread(const reader: tstatreader); override;
    procedure dostatwrite(const writer: tstatwriter); override;
  end;
- 
+
  storedcomponentarty = array of tstoredcomponent;
- 
+
  tcomponentstorefo = class(tdockform)
    grid: twidgetgrid;
    node: ttreeitemedit;
@@ -161,7 +161,7 @@ type
 
 var
  componentstorefo: tcomponentstorefo;
- 
+
 implementation
 uses
  componentstore_mfm,msestream,storedcomponentinfodialog,msedatalist,msefileutils,
@@ -184,7 +184,7 @@ type
   doesnotexist,       //12 " does not exist, do you want to create it?
   savecompstore       //13 Save Component Store Group
  );
-  
+
 function getstoredir: filenamety;
 begin
  result:= filepath(expandprmacros('${COMPSTOREDIR}'),fk_dir);
@@ -341,7 +341,7 @@ begin
    end;
    str1:= ansistring(str2);
   end
-  else begin 
+  else begin
    if compfiledialog.execute <> mr_ok then begin
     exit;
    end;
@@ -352,7 +352,7 @@ begin
     stream2.free;
    end;
   end;
-   
+
   stream1:= tstringcopystream.create(str1);
   stream2:= ttextstream.create;
   try
@@ -362,7 +362,7 @@ begin
    with info,treader1(reader1) do begin
     driver.beginrootcomponent;
     driver.begincomponent(flags,int1,compclass,componentname);
-   end;    
+   end;
   except
    if not apaste then begin
     showerror(c[ord(compreaderror)]);
@@ -381,7 +381,7 @@ begin
    stream3:= ttextstream.create(info.filepath,fm_create);
    node1:= tstoredcomponent.create(false);
    node1.info:= info;
-   node.item.add(node1);    
+   node.item.add(node1);
    node1.statechanged;
    stream3.writedatastring(str1);
    storechanged;
@@ -392,7 +392,7 @@ begin
   stream1.free;
   stream2.free;
   stream3.free;
- end; 
+ end;
 end;
 
 procedure tcomponentstorefo.dopastecomponent(const sender: TObject);
@@ -496,7 +496,7 @@ begin
  end;
 end;
 
-procedure tcomponentstorefo.dosetstorerec(const index: integer; 
+procedure tcomponentstorefo.dosetstorerec(const index: integer;
                                                 const avalue: msestring);
 var
  mstr1,mstr2,mstr3: msestring;
@@ -520,7 +520,7 @@ begin
  with aitem do begin
   reader1:= tstatreader.create(finfo.filepath,ce_utf8);
   try
-   reader1.setsection('store'); 
+   reader1.setsection('store');
    aitem.dostatread(reader1);
   finally
    reader1.free;
@@ -556,13 +556,13 @@ begin
       if isstatechanged then begin
        writer1:= tstatwriter.create(finfo.filepath,ce_utf8,true);
        try
-        writer1.writesection('store'); 
+        writer1.writesection('store');
         far1[int1].dostatwrite(writer1);
        finally
         writer1.free;
        end;
       end;
-     end; 
+     end;
     end;
 //   except
 //    application.handleexception(self);
@@ -646,7 +646,7 @@ begin
  end
  else begin
   with tstatreader(afiler) do begin
-   setsection('componentstore'); 
+   setsection('componentstore');
    fstoredir:= readmsestring('storedir',getstoredir);
    storefiledialog.controller.filename:= fstoredir;
    groupfiledialog.controller.filename:= fstoredir;
@@ -716,7 +716,7 @@ begin
  sender.menu.submenu.itembyname('addnode').enabled:= bo1;
  sender.menu.submenu.itembyname('pastenode').enabled:= bo1;
  sender.menu.submenu.itembyname('updatenode').enabled:= bo2;
- sender.menu.submenu.itembyname('removestore').enabled:= bo1 and 
+ sender.menu.submenu.itembyname('removestore').enabled:= bo1 and
                                       node.item.isroot;
  sender.menu.submenu.itembyname('removecomp').enabled:= bo2;
  bo1:= isnode and not node.item.isroot;
@@ -815,7 +815,7 @@ begin
   if askyesno(c[ord(wantremove)]+compname+c[ord(branch)]) then begin
    tstoredcomponent(node.item).free;
    storechanged;
-  end; 
+  end;
  end;
 end;
 
@@ -825,13 +825,13 @@ begin
   if askyesno(c[ord(wantremove)]+compname+c[ord(qm)]) then begin
    tstoredcomponent(node.item).free;
    storechanged;
-  end; 
+  end;
  end;
 end;
 
 const
  nodecopysig = '{DEA80549-4F45-4117-B182-A0EF49C4A097}';
- 
+
 procedure tcomponentstorefo.copynodeex(const sender: TObject);
 var
  stream1: ttextstream;
@@ -866,11 +866,11 @@ begin
    stream1:= ttextstream.createdata(stringtoutf8ansi(mstr1));
 //   stream1.encoding:= ce_utf8n;
    reader1:= tstatreader.create(stream1,ce_utf8);
-   if reader1.findsection('nodecopy') and 
+   if reader1.findsection('nodecopy') and
         (reader1.readmsestring('signature','') = nodecopysig) then begin
     node1:= tstoredcomponent.create(true);
     node1.fpasting:= true;
-    node1.dostatread(reader1);   
+    node1.dostatread(reader1);
     node1.fpasting:= false;
     with node.item do begin
      expanded:= true;
@@ -899,9 +899,9 @@ procedure tcomponentstorefo.drago(const sender: ttreeitemedit;
                var dragobject: ttreeitemdragobject; var accept: Boolean;
                var processed: Boolean);
 begin
- accept:= not dest.checkancestor(source) and 
-             not ((source.parent = nil) and (dest.parent <> nil)) and 
-             not (tstoredcomponent(source).isnode and 
+ accept:= not dest.checkancestor(source) and
+             not ((source.parent = nil) and (dest.parent <> nil)) and
+             not (tstoredcomponent(source).isnode and
                   not tstoredcomponent(dest).isnode);
 end;
 
@@ -976,7 +976,7 @@ begin
     end
     else begin
      readstoregroup(filename);
-    end; 
+    end;
    end;
   end;
  end;

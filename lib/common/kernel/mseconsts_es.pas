@@ -34,7 +34,7 @@ const
   '&S'#0237,     //mr_yes
   '&No',         //mr_no
   '&Todo',       //mr_all
-  '&S'#0237' &todo',    //mr_yesall  
+  '&S'#0237' &todo',    //mr_yesall
   'N&o todo',    //mr_noall
   '&Ignorar',    //mr_ignore
   'O&mitir',     //mr_skip

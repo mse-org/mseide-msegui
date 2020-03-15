@@ -1,5 +1,5 @@
 { MSEide Copyright (c) 1999-2013 by Martin Schreiber
-   
+
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation; either version 2 of the License, or
@@ -66,7 +66,7 @@ type
                                            const awidgetorder: boolean);
  end;
 
-procedure settaborderdialog(const awidget: twidget; 
+procedure settaborderdialog(const awidget: twidget;
                                            const awidgetorder: boolean);
 
 implementation
@@ -83,8 +83,8 @@ uses
 
 type
  twidget1 = class(twidget);
-  
-procedure settaborderdialog(const awidget: twidget; 
+
+procedure settaborderdialog(const awidget: twidget;
                                            const awidgetorder: boolean);
 var
  fo: tsettaborderfo;
@@ -98,8 +98,8 @@ begin
 end;
 
  {tsettaborderfo}
- 
-constructor tsettaborderfo.create(awidget: twidget; adesigner: tdesigner; 
+
+constructor tsettaborderfo.create(awidget: twidget; adesigner: tdesigner;
                                            const awidgetorder: boolean);
 begin
  fwidget:= awidget;
@@ -123,7 +123,7 @@ begin
 //    stopexecute(nil);
    end
    else begin
-    if stop.enabled and (button = mb_left) and 
+    if stop.enabled and (button = mb_left) and
                        (shiftstate * keyshiftstatesmask = []) then begin
      widget1:= fparent.childatpos(translatewidgetpoint(pos,self,fparent),false);
      if widget1 <> nil then begin
@@ -170,7 +170,7 @@ begin
    end;
    with twidget1(fparent.container) do begin
     fwidgets:= ar1;
-    widgetregionchanged(nil);    
+    widgetregionchanged(nil);
    end;
   end
   else begin
@@ -216,7 +216,7 @@ begin
  window.releasemouse;
 end;
 
-procedure tsettaborderfo.gridoncellevent(const sender: TObject; 
+procedure tsettaborderfo.gridoncellevent(const sender: TObject;
                                                  var info: celleventinfoty);
 var
  w1: twidget;

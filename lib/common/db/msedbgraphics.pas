@@ -40,7 +40,7 @@ type
    destructor destroy; override;
    property format: string read fformat write fformat;
  end;
- 
+
  timagecache = class(tcacheavltree)
   protected
    ffindnode: timagecachenode;
@@ -50,7 +50,7 @@ type
    function find(const akey: blobidty; out anode: timagecachenode): boolean;
                            overload;
  end;
-  
+
  tmsegraphicfield = class(tmseblobfield)
   private
    fformat: string;
@@ -71,7 +71,7 @@ type
    procedure clearcache; override;
   published
    property format: string read fformat write fformat;
-   property imagecachekb: integer read getimagecachekb 
+   property imagecachekb: integer read getimagecachekb
                            write setimagecachekb default 0;
                 //cachesize in kilo bytes, 0 -> no cache
  end;
@@ -113,7 +113,7 @@ type
     //ireccontrol
    procedure recchanged;
    procedure setdatalink(const avalue: tgraphicdatalink);
-  protected   
+  protected
 //   procedure doenter; override;
 //   procedure doexit; override;
    procedure griddatasourcechanged; override;
@@ -123,7 +123,7 @@ type
    procedure defineproperties(filer: tfiler); override;
    procedure setvalue(const avalue: string); override;
    procedure gridtovalue(row: integer); override;
-   procedure doshortcut(var info: keyeventinfoty; 
+   procedure doshortcut(var info: keyeventinfoty;
                                       const sender: twidget); override;
   public
    constructor create(aowner: tcomponent); override;
@@ -136,15 +136,15 @@ type
    property onpaint;
    property onafterpaint;
  end;
- 
+
 implementation
 uses
  msestream,sysutils,msegraphicstream;
- 
+
 type
  tsimplebitmap1 = class(tsimplebitmap);
  treader1 = class(treader);
- 
+
  { tdbdataimage }
 
 function tdbdataimage.getifilinkkind: ptypeinfo;
@@ -256,7 +256,7 @@ end;
 
 function tdbdataimage.getrowdatapo(const arow: integer): pointer;
 begin
- if (fgriddatalink <> nil) and not 
+ if (fgriddatalink <> nil) and not
     tgriddatalink(fgriddatalink).getrowfieldisnull(
                                    fdatalink.field,arow) then begin
   result:= tgriddatalink(fgriddatalink).getdummystringbuffer;
@@ -331,7 +331,7 @@ begin
   fdatalink.valuechanged(iifidatalink(self));
 // finally
 //  fvaluebuffer:= bufferbefore;
-// end; 
+// end;
 end;
 
 procedure tdbdataimage.setmaxlength(const avalue: integer);
@@ -358,7 +358,7 @@ begin
  inherited;
 end;
 
-function tmsegraphicfield.loadbitmap(const adest: tmaskedbitmap; 
+function tmsegraphicfield.loadbitmap(const adest: tmaskedbitmap;
                                             aformat: string = ''): string;
 var
  stream1: tstringcopystream;
@@ -406,7 +406,7 @@ begin
  end;
 end;
 
-procedure tmsegraphicfield.storebitmap(const asource: tmaskedbitmap; 
+procedure tmsegraphicfield.storebitmap(const asource: tmaskedbitmap;
                          aformat: string; const params: array of const);
 var
  stream1: tmsefilestream;
@@ -424,10 +424,10 @@ begin
  end;
 end;
 
-procedure tmsegraphicfield.storebitmap(const asource: tmaskedbitmap; 
+procedure tmsegraphicfield.storebitmap(const asource: tmaskedbitmap;
                          aformat: string = '');
 begin
- storebitmap(asource,aformat,[]); 
+ storebitmap(asource,aformat,[]);
 end;
 
 function tmsegraphicfield.getimagecachekb: integer;
@@ -463,7 +463,7 @@ end;
 
 procedure tmsegraphicfield.removecache(const aid: blobidty);
 var
- n1: timagecachenode; 
+ n1: timagecachenode;
 begin
  if fimagecache <> nil then begin
   if fimagecache.find(aid,n1) then begin
@@ -538,7 +538,7 @@ function compareblobid(const left,right: tavlnode): integer;
 var
  lint1: int64;
 begin
- result:= integer(timagecachenode(left).flocal) - 
+ result:= integer(timagecachenode(left).flocal) -
                  integer(timagecachenode(right).flocal);
  if result = 0 then begin
   lint1:= timagecachenode(left).fkey - timagecachenode(right).fkey;

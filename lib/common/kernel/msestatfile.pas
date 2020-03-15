@@ -13,13 +13,13 @@ interface
 uses
  classes,mclasses,msestat,mseapplication,msetypes,msestrings,mseclasses,msestream,
  mseglob,msearrayprops;
- 
+
 type
  statupdateeventty = procedure(const sender: tobject;
                                   const filer: tstatfiler) of object;
  statreadeventty = procedure(const sender: tobject;
                                   const reader: tstatreader) of object;
- statwriteeventty = procedure(const sender: tobject; 
+ statwriteeventty = procedure(const sender: tobject;
                                   const writer: tstatwriter) of object;
 
  statfileoptionty = (sfo_memory,sfo_deletememorydata, //delete after read
@@ -31,14 +31,14 @@ type
  statfileoptionsty = set of statfileoptionty;
 const
  defaultstatfileoptions = [sfo_activatorread,sfo_activatorwrite,sfo_transaction];
- 
+
 type
  tstatfile = class;
- statfilemissingeventty = procedure (const sender: tstatfile; 
+ statfilemissingeventty = procedure (const sender: tstatfile;
                   const afilename: filenamety;
                   var astream: ttextstream; var aretry: boolean) of object;
  statfilemodety = (sfm_inactive,sfm_reading,sfm_writing);
- 
+
  statclientinfoty = record
   intf: istatfile;
   priority: integer;
@@ -48,7 +48,7 @@ type
 
  statfilestatety = (stfs_reading);
  statfilestatesty = set of statfilestatety;
-  
+
  tstatfile = class(tactcomponent,istatfile)
   private
    ffilename: filenamety;
@@ -96,7 +96,7 @@ type
                           const event: objecteventty); override;
    procedure updateoptions(const afiler: tstatfiler);
    function defaultfile(const adirs: filenamearty): filenamety;
-   
+
    //istatfile
    procedure dostatread(const reader: tstatreader);
    procedure dostatwrite(const writer: tstatwriter);
@@ -122,17 +122,17 @@ type
    property filedir: filenamety read ffiledir write setfiledir;
    property encoding: charencodingty read fencoding write fencoding
                                                            default ce_utf8;
-   property options: statfileoptionsty read foptions write foptions 
+   property options: statfileoptionsty read foptions write foptions
                               default defaultstatfileoptions;
    property statfile: tstatfile read fstatfile write setstatfile;
             //filename is stored in linked statfile, dostatread and dostatwrite are
             //called by linked statfile
    property savedmemoryfiles: msestring read fsavedmemoryfiles write
                            fsavedmemoryfiles;
-            //use quotes for several filenames '"file1.sta" "file2.sta*"', 
+            //use quotes for several filenames '"file1.sta" "file2.sta*"',
             //'*' and '?' wildcards supported.
    property statvarname: msestring read getstatvarname write fstatvarname;
-   property statpriority: integer read fstatpriority 
+   property statpriority: integer read fstatpriority
                                        write fstatpriority default 0;
    property cryptohandler: tcustomcryptohandler read fcryptohandler
                                      write setcryptohandler;
@@ -141,7 +141,7 @@ type
    property onstatupdate: statupdateeventty read fonstatupdate write fonstatupdate;
    property onstatread: statreadeventty read fonstatread write fonstatread;
    property onstatwrite: statwriteeventty read fonstatwrite write fonstatwrite;
-   property onstatbeforewrite: notifyeventty read fonstatbeforewrite 
+   property onstatbeforewrite: notifyeventty read fonstatbeforewrite
                                                     write fonstatbeforewrite;
    property onstatafterwrite: notifyeventty read fonstatafterwrite
                                                     write fonstatafterwrite;
@@ -149,7 +149,7 @@ type
                                                     write fonstatbeforeread;
    property onstatafterread: notifyeventty read fonstatafterread
                                                     write fonstatafterread;
-   property onfilemissing: statfilemissingeventty read fonfilemissing 
+   property onfilemissing: statfilemissingeventty read fonfilemissing
                                                     write fonfilemissing;
  end;
 
@@ -160,11 +160,11 @@ type
   published
    property statfile: tstatfile read getstatfile write setstatfile;
  end;
- 
+
  tstatfilearrayprop = class(tmsecomponentlinkarrayprop)
   private
    function getitems(const index: integer): tstatfileitem;
-  public 
+  public
    constructor create;
    class function getitemclasstype: persistentclassty; override;
    property items[const index: integer]: tstatfileitem read getitems; default;
@@ -175,7 +175,7 @@ procedure setstatfilevar(const sender: istatfile; const source: tstatfile;
 implementation
 uses
  msesystypes,msesys,msefileutils,sysutils,msearrayutils;
- 
+
 procedure setstatfilevar(const sender: istatfile; const source: tstatfile;
               var instance: tstatfile);
 var
@@ -250,7 +250,7 @@ begin
     ar1:= reader.readarray('data',ar2);
     stream1:= memorystatstreams.open(ffilename,fm_create);
     try
-     stream1.writestrings(ar1);     
+     stream1.writestrings(ar1);
     finally
      stream1.free;
     end;
@@ -308,7 +308,7 @@ begin
     end;
     stream1:= memorystatstreams.open(ffilename,fm_read);
     try
-     ar1:= stream1.readstrings;     
+     ar1:= stream1.readstrings;
     finally
      stream1.free;
     end;
@@ -492,7 +492,7 @@ begin
   end;
   if (fcryptohandler <> nil) and (stream1 <> nil) then begin
    stream1.cryptohandler:= fcryptohandler;
-  end;   
+  end;
   areader:= tstatreader.create(stream1,fencoding);
   updateoptions(areader);
   try
@@ -504,7 +504,7 @@ begin
  finally
   if stream = nil then begin
    stream1.Free;
-   if (stream1 <> nil) and (foptions * [sfo_memory,sfo_deletememorydata] = 
+   if (stream1 <> nil) and (foptions * [sfo_memory,sfo_deletememorydata] =
          [sfo_memory,sfo_deletememorydata]) then begin
     memorystatstreams.delete(ffilename);
    end;
@@ -529,7 +529,7 @@ var
 begin
  stream1:= ttextstream.create(afilename,fm_read);
  try
-  stream1.encoding:= fencoding; 
+  stream1.encoding:= fencoding;
   readstat(stream1);
  finally
   stream1.free;
@@ -549,7 +549,7 @@ begin
   stream1:= ttextstream.create(fname1,fm_create);
  end;
  try
-  stream1.encoding:= fencoding; 
+  stream1.encoding:= fencoding;
   writestat(stream1);
  finally
   stream1.free;
@@ -573,7 +573,7 @@ end;
 
 procedure tstatfile.internalwritestat;
 begin
- if assigned(fonstatwrite) or assigned(fonstatupdate) or 
+ if assigned(fonstatwrite) or assigned(fonstatupdate) or
                                   (fsavedmemoryfiles <> '') then begin
   awriter.writestat(istatfile(self));
  end;
@@ -635,7 +635,7 @@ begin
   updateoptions(awriter);
   bo1:= false;
   try
-   if (stream1.handle <> invalidfilehandle) and 
+   if (stream1.handle <> invalidfilehandle) and
                                   not stream1.usewritebuffer then begin
     bo1:= true;
     stream1.usewritebuffer:= true;
@@ -759,7 +759,7 @@ begin
  end;
 end;
 
-procedure tstatfile.updatestat(const aname: msestring; 
+procedure tstatfile.updatestat(const aname: msestring;
                                         const statfiler: tstatfiler);
 begin
  if statfiler.iswriter then begin

@@ -65,7 +65,7 @@ type
 
  richflagty = (rf_noparagraph);
  richflagsty = set of richflagty;
- 
+
  richstringty = record
   text: msestring;
   format: formatinfoarty;
@@ -78,7 +78,7 @@ type
  richstringaty = array[0..0] of richstringty;
  prichstringaty = ^richstringaty;
 
- updaterichstringeventty = procedure(const sender: tobject; 
+ updaterichstringeventty = procedure(const sender: tobject;
                                         var avalue: richstringty) of object;
 
  irichstringprop = interface(inullinterface)[miid_irichstringprop]
@@ -110,7 +110,7 @@ type
    constructor create; override;
    procedure insert(const index: integer; const item: msestring); override;
    function add(const value: msestring): integer; override;
-   function add(const avalue: msestring; 
+   function add(const avalue: msestring;
                     const anoparagraph: boolean): integer; override;
    function nextword(out value: lmsestringty): boolean;
               //true bei new line
@@ -153,10 +153,10 @@ const
 function charstyletocolor(const color: colorty): colorty;
 function colortocharstyle(const color: colorty): colorty;
 
-function setfontcolor1(var formats: formatinfoarty; aindex: integer; 
+function setfontcolor1(var formats: formatinfoarty; aindex: integer;
                        len: halfinteger; color: colorty): boolean;
                                  //true if changed
-function setfontcolor(const formats: formatinfoarty; aindex: integer; 
+function setfontcolor(const formats: formatinfoarty; aindex: integer;
                        len: halfinteger; color: colorty): formatinfoarty;
 function setcolorbackground1(var formats: formatinfoarty; aindex: integer;
                               len: halfinteger;
@@ -218,7 +218,7 @@ procedure richconcat1(var dest: richstringty; const b: msestring;
               const fontstyle: fontstylesty = [];
               const fontcolor: colorty = cl_none;
               const colorbackground: colorty = cl_none); overload;
-                                                         
+
 
 procedure additem(const value: richstringty; var dest: richstringarty;
                              var count: integer; step: integer = 32); overload;
@@ -265,8 +265,8 @@ uses
 
 type
  tpoorstringdatalist1 = class(tpoorstringdatalist);
- 
-{$ifdef FPC} 
+
+{$ifdef FPC}
 function richformatinfotostring(const aformat: formatinfoty): ansistring;
 begin
  with aformat do begin
@@ -392,7 +392,7 @@ var
    end;
   end;
  end;//sethotstyle
- 
+
 begin
  with dest do begin
   setlength(text,length(caption)); //max
@@ -431,11 +431,11 @@ function richstringtocaption(const caption: richstringty): captionty;
   result:= (astyle.fontstyle * hotkeyfontstylesadd = hotkeyfontstylesadd) and
             (astyle.fontstyle * hotkeyfontstylesremove = []) and
             ((hotkeycolor = cl_none) or (astyle.fontcolor = hotkeycolor)) and
-            ((hotkeycolorbackground = cl_none) or 
+            ((hotkeycolorbackground = cl_none) or
                      (astyle.colorbackground = hotkeycolorbackground));
             ;
  end;//checkhotkey
- 
+
 var
  int1: integer;
  po1: pmsechar;
@@ -1075,7 +1075,7 @@ function richconcat(const a: richstringty; const b: msestring;
 var
  rstr1: richstringty;
 begin
- if (fontstyle <> []) or (fontcolor <> cl_none) or 
+ if (fontstyle <> []) or (fontcolor <> cl_none) or
                        (colorbackground <> cl_none) then begin
   setlength(rstr1.format,1);
   with rstr1.format[0] do begin
@@ -1108,7 +1108,7 @@ function richconcat(const a: msestring; const b: richstringty;
 var
  rstr1: richstringty;
 begin
- if (fontstyle <> []) or (fontcolor <> cl_none) or 
+ if (fontstyle <> []) or (fontcolor <> cl_none) or
                        (colorbackground <> cl_none) then begin
   setlength(rstr1.format,1);
   with rstr1.format[0] do begin
@@ -1339,7 +1339,7 @@ begin
  result:= adddata(ristr1);
 end;
 
-function trichstringdatalist.add(const avalue: msestring; 
+function trichstringdatalist.add(const avalue: msestring;
                                            const anoparagraph: boolean): integer;
 begin
  result:= inherited add(avalue,anoparagraph);
@@ -1369,7 +1369,7 @@ begin
  result:= @prichstringty(fdatapo+index*sizeof(richstringty))^.format;
 end;
 
-function trichstringdatalist.getparagraph(const index: integer; 
+function trichstringdatalist.getparagraph(const index: integer;
                           const aseparator: msestring = ''): msestring;
 var
  int1,int2: integer;
@@ -1379,7 +1379,7 @@ begin
  while start >= 0 do begin
   int2:= start;
   checkindex(int2);
-  if not (rf_noparagraph in 
+  if not (rf_noparagraph in
            prichstringty(fdatapo+int2*sizeof(richstringty))^.flags) then begin
    break;
   end;
@@ -1395,7 +1395,7 @@ begin
    if not (rf_noparagraph in flags) then begin
     break;
    end;
-   result:= result + aseparator + text; 
+   result:= result + aseparator + text;
   end;
  end;
 end;
@@ -1417,7 +1417,7 @@ end;
 function trichstringdatalist.getnoparagraphs(index: integer): boolean;
 begin
  checkindex(index);
- result:= rf_noparagraph in 
+ result:= rf_noparagraph in
                 prichstringty(fdatapo+index*sizeof(richstringty))^.flags;
 end;
 

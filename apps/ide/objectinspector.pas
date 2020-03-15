@@ -1,5 +1,5 @@
 { MSEide Copyright (c) 1999-2013 by Martin Schreiber
-   
+
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation; either version 2 of the License, or
@@ -88,7 +88,7 @@ type
    compedit: trichbutton;
    findbu: tstockglyphbutton;
    mainpopup: tpopupmenu;
-   procedure propsoncheckrowmove(const curindex: Integer; 
+   procedure propsoncheckrowmove(const curindex: Integer;
                   const newindex: Integer; var accept: Boolean);
    procedure createexe(const sender: TObject);
    procedure gridrowsdatachanged(const sender: tcustomgrid;
@@ -424,7 +424,7 @@ begin
  inherited create;
 end;
 
-procedure tobjectinspectorselections.compselectoronsetvalue(const sender: TObject; 
+procedure tobjectinspectorselections.compselectoronsetvalue(const sender: TObject;
               var avalue: Integer; var accept: Boolean);
 begin
 end;
@@ -519,7 +519,7 @@ begin
  prop1:= self;
  result:= '';
  while prop1 <> nil do begin
-  if (prop1.feditor is tarrayelementeditor) or 
+  if (prop1.feditor is tarrayelementeditor) or
               (prop1.feditor is tcollectionitemeditor) then begin
    result:= '[]'+result;
   end
@@ -541,8 +541,8 @@ end;
 procedure tpropertyvalue.updatestate(const exitrow: boolean = false);
 begin
  with feditor do begin
-  if allequal or 
-            (not exitrow and (objectinspectorfo.values.item = self) and 
+  if allequal or
+            (not exitrow and (objectinspectorfo.values.item = self) and
                 (objectinspectorfo.grid.col = 1)) then begin
    caption:= removelinebreaks(getvalue);
   end
@@ -606,7 +606,7 @@ begin
  end;
 end;
 
-procedure tobjectinspectorfo.valuesonmouseevent(const sender: twidget; 
+procedure tobjectinspectorfo.valuesonmouseevent(const sender: twidget;
               var info: mouseeventinfoty);
 begin
  if sender.isdblclick(info) then begin
@@ -686,14 +686,14 @@ end;
 
 procedure tobjectinspectorfo.valuesenterexe(const sender: TObject);
 begin
- tpropertyvalue(values.item).updatestate; 
+ tpropertyvalue(values.item).updatestate;
 end;
 
 procedure tobjectinspectorfo.moduleactivated(const adesigner: idesigner;
                   const amodule: tmsecomponent);
 begin
  factmodule:= amodule;
- caption:= actionsmo.c[ord(ac_objectinspector)] + ' (' + 
+ caption:= actionsmo.c[ord(ac_objectinspector)] + ' (' +
                                         msestring(amodule.Name)+')';
  updatecomponentname;
 // clear;
@@ -1192,7 +1192,7 @@ procedure tobjectinspectorfo.propertymodified(const sender: tpropertyeditor);
    dec(fchanging);
   end;
  end;
- 
+
 var
  po1,po2: tpropertyvalue;
  int1,int2,int3: integer;
@@ -1210,7 +1210,7 @@ begin
   else begin
 //  designer.begincomponentmodify;
 //  try
-   if (props.item <> nil) and 
+   if (props.item <> nil) and
                     (tpropertyvalue(values.item).feditor = sender) then begin
     po1:= tpropertyvalue(values.item);
    end
@@ -1290,7 +1290,7 @@ function tobjectinspectorfo.componentdispname(
 begin
  result:= '';
  if instance <> nil then begin
-  if (factmodule <> nil) and not factmodule.checkowned(instance) and 
+  if (factmodule <> nil) and not factmodule.checkowned(instance) and
           (factmodule <> instance) and (instance.owner <> nil) then begin
    result:=  msestring(instance.owner.name)+'.';
   end;
@@ -1317,7 +1317,7 @@ begin
     cols[0].count:= po1^.components.count;
     for int1:= 0 to cols[0].count-1 do begin
      with fcomponentnames[int1] do begin
-      cols[0][int1]:= msestring(dispname) + ' (' + 
+      cols[0][int1]:= msestring(dispname) + ' (' +
                              msestring(designer.getclassname(instance))+')';
       if cols[0][int1] = str1 then begin
        int2:= int1;
@@ -1471,14 +1471,14 @@ begin
 //  tpropertyvalue(values[info.cellbefore.row]).updatestate(false);
  end
  else begin
-  if not frereadprops and isrowexit(info,true) and 
+  if not frereadprops and isrowexit(info,true) and
                       (info.cellbefore.row < grid.rowcount) then begin
    tpropertyvalue(values[info.cellbefore.row]).updatestate(true);
   end;
  end;
 end;
 
-procedure tobjectinspectorfo.valuesbuttonaction(const sender: tobject; 
+procedure tobjectinspectorfo.valuesbuttonaction(const sender: tobject;
               var action: buttonactionty; const buttonindex: Integer);
 begin
  with titemedit(sender) do begin
@@ -1557,7 +1557,7 @@ type
  fontmarksty = set of fontmarkty;
 var
  mark: fontmarksty;
-const 
+const
  marktable: array[0..7] of integer = (
                      //issubbroperty iscomponent modified
              -1,     //         0            0        0
@@ -1819,13 +1819,13 @@ begin
  //dummy
 end;
 
-procedure tobjectinspectorfo.showobjecttext(const adesigner: idesigner; 
+procedure tobjectinspectorfo.showobjecttext(const adesigner: idesigner;
           const afilename: filenamety; const backupcreated: boolean);
 begin
  //dummy
 end;
 
-procedure tobjectinspectorfo.closeobjecttext(const adesigner: idesigner; 
+procedure tobjectinspectorfo.closeobjecttext(const adesigner: idesigner;
                            const afilename: filenamety; var cancel: boolean);
 begin
  //dummy
@@ -1886,7 +1886,7 @@ begin
   enabled:= (props.item <> nil) and (tpropertyitem(props.item).feditor <> nil) and
                              tpropertyitem(props.item).feditor.canrevert;
  end;
- sender.menu.itembyname('clearselect').enabled:= 
+ sender.menu.itembyname('clearselect').enabled:=
                              grid.datacols[0].selectedcellcount > 0;
 end;
 
@@ -1929,7 +1929,7 @@ procedure tobjectinspectorfo.clearselectedprops(const aprop: tpropertyitem);
   end;
  end;
 var
- int1: integer; 
+ int1: integer;
 begin
  for int1:= 0 to grid.rowhigh do begin
   if props[int1].parent = nil then begin
@@ -1992,7 +1992,7 @@ end;
 var
  wascolorprop: boolean;
  propcolor: colorty;
- 
+
 function iscolorprop(const sender: twidget; const cellinfopo: pcellinfoty;
                                               out acolor: colorty): boolean;
 
@@ -2005,7 +2005,7 @@ begin
  else begin
   pointer(propval):= ppointer(cellinfopo^.datapo)^;
  end;
- result:= (propval.feditor.typinfo = typeinfo(colorty)) and 
+ result:= (propval.feditor.typinfo = typeinfo(colorty)) and
                                       propval.feditor.allequal;
  if result then begin
   acolor:= tpropertyeditor1(propval.feditor).getordvalue;

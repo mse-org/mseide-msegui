@@ -63,12 +63,12 @@ type
  ptrapnodeinfoty = ^trapnodeinfoty;
 
  trapinfoty = record
-  top,bottom: ppointty;  
+  top,bottom: ppointty;
   left,right: pseginfoty;
   node: ptrapnodeinfoty;
   above,abover,below,belowr: ptrapinfoty; //above,below = single or left
  end;
- 
+
  segflagty = (sf_pointhandled,sf_reverse); //sf_reverse -> b below a
  segflagsty = set of segflagty;
  ppseginfoty = ^pseginfoty;
@@ -85,7 +85,7 @@ type
   splitseg: pseginfoty;   //segment for horizontal split at b
   diags: array[0..2] of pseginfoty;
  end;
- 
+
  trapnodeinfoty = record
   p,l,r: ptrapnodeinfoty; //parent,left,right
   case kind: trapnodekindty of
@@ -97,7 +97,7 @@ type
  pmountainpointty = ^mountainpointty;
  mountainpointty = record
   p: ppointty;
-  prev: pmountainpointty; 
+  prev: pmountainpointty;
   next: pmountainpointty;
  end;
 const
@@ -142,11 +142,11 @@ begin
    result:= h.b^.x + (y - h.b^.y) * dx div dy;
   end;
  end;
-end; 
+end;
 {$endif}
 
 {$ifdef mse_debugpolytria}
-type 
+type
  trapdumpinfoty = record
   t: ptrapinfoty;
   index: integer;
@@ -202,7 +202,7 @@ begin
     result:= 1;
    end
    else begin
-    result:= calcx(trapdumpinfoty(l).t^.left,y) - 
+    result:= calcx(trapdumpinfoty(l).t^.left,y) -
                       calcx(trapdumpinfoty(r).t^.left,y);
     if result = 0 then begin
      if trapdumpinfoty(r).t^.right = nil then begin
@@ -211,7 +211,7 @@ begin
      if trapdumpinfoty(l).t^.right = nil then begin
       inc(result);
      end;
-    end;     
+    end;
    end;
   end;
  end;
@@ -255,10 +255,10 @@ end; //pointval
 function pointval(const apoint: ppointty): string;
 begin
  result:= intvalx(apoint^.x)+':'+intvaly(apoint^.y)+' ';
-end; //pointval 
+end; //pointval
 
 
-procedure dumpnodes(const anodes: ptrapnodeinfoty; 
+procedure dumpnodes(const anodes: ptrapnodeinfoty;
                        const atraps: ptrapinfoty; const asegments: pseginfoty);
 type
  levelsty = array[0..255] of boolean;
@@ -378,8 +378,8 @@ var
 
 type
  pointposty = (pp_none,pp_left,pp_right,pp_both);
- 
- function pointpos(const p: ppointty; 
+
+ function pointpos(const p: ppointty;
                          const left,right: ppointty): pointposty;
  begin
   result:= pp_none;
@@ -395,7 +395,7 @@ type
    end;
   end;
  end; //pointpos
- 
+
  function pointpostop(const trap: ptrapinfoty): pointposty;
  var
   lefttop,leftbottom,righttop,rightbottom: ppointty;
@@ -427,7 +427,7 @@ var
    error:= true;
   end;
  end;
-  
+
 var
  int1: integer;
  lt,lb,rt,rb,t,b: integer;
@@ -466,14 +466,14 @@ begin
    if right <> nil then begin
     rt:= calcx(right,t);
     rb:= calcx(right,b);
-   end;   
+   end;
    debugwrite(rstring(inttostr(ar1[int1].index),3)+' '+
         intvaly(t)+' '+intvaly(b)+' '+
         intvalx(lt)+' '+intvalx(rt)+' '+intvalx(lb)+' '+intvalx(rb)+' '+
         trapval(above)+' '+trapval(abover)+' '+
         trapval(below)+' '+trapval(belowr));
    error:= false;
-     
+
    if above <> nil then begin
     case pointpostop(trap1) of
      pp_left: begin
@@ -543,7 +543,7 @@ begin
      seterror;
     end;
    end;
-   
+
    if below <> nil then begin
     case pointposbottom(trap1) of
      pp_left: begin
@@ -610,14 +610,14 @@ begin
       else begin
        seterror;
       end;
-     end; 
+     end;
     end;
    end
    else begin
     if belowr <> nil then begin
      seterror;
     end;
-   end; 
+   end;
    if error then begin
     debugwriteln(' *');
     toterror:= true;
@@ -669,7 +669,7 @@ var
   result^.belowr:= nil;
   result^.node:= nil;
  end;
- 
+
  function newnode: ptrapnodeinfoty;
  begin
   result:= newnodes;
@@ -688,7 +688,7 @@ var
    result:= int1 >= 0;
   end;
  end; //isbelow
- 
+
  function xdist(const point: ppointty; ref: pseginfoty): integer;
  var
   int1: integer;
@@ -731,7 +731,7 @@ var
  // result:= xpos(point,ref) = xp_right;
   result:= xdist(point,ref) >= 0;
  end;
- 
+
  function segdirdown(const seg,ref: pseginfoty): segdirty;
  var
   segcommon: pseginfoty;
@@ -801,9 +801,9 @@ var
        end;
       end
       else begin
-       if (seg^.dx*ref^.dy < ref^.dx*seg^.dy) xor 
-        not((sf_reverse in ref^.flags) xor (sf_reverse in seg^.flags)) then begin 
-   //                not((ref^.dy < 0) xor (seg^.dy < 0)) then begin 
+       if (seg^.dx*ref^.dy < ref^.dx*seg^.dy) xor
+        not((sf_reverse in ref^.flags) xor (sf_reverse in seg^.flags)) then begin
+   //                not((ref^.dy < 0) xor (seg^.dy < 0)) then begin
                            //direction of one segment reversed
         result:= sd_right;
        end;
@@ -818,14 +818,14 @@ var
      //>0 -> ccw, a.y <= b.y <= c.y
  var
   dx1,dy1,dx2,dy2: integer;
- 
+
   procedure calctandiff;
   begin
    dy1:= b.y - a.y;
    dy2:= c.y - b.y;
    result:= dx2*dy1 - dx1*dy2; //y is top-down
   end; //calctandiff
- 
+
  begin
   result:= 0;
   dx1:= b.x - a.x;
@@ -860,27 +860,27 @@ var
 
 var
  toptrap: ptrapinfoty = nil;
- 
+
  procedure finddiags;
- 
-   function checkdiag(const atrap: ptrapinfoty; const up: boolean): boolean; 
+
+   function checkdiag(const atrap: ptrapinfoty; const up: boolean): boolean;
                 //false if error or triangle
    var
     topseg,bottomseg,lefta,righta: pseginfoty;
    begin
     result:= true;
     with atrap^ do begin
-     if (atrap = nil) or (left = nil) or (right = nil) or 
+     if (atrap = nil) or (left = nil) or (right = nil) or
               (top = nil) or (bottom = nil) then begin //segment crossing
       result:= false;
       exit;
      end;
      lefta:= left^.h.previous;
      righta:= right^.h.previous;
-     if (left = righta) and (up xor (left^.h.b = bottom)) or 
+     if (left = righta) and (up xor (left^.h.b = bottom)) or
         (right = lefta) and (up xor (right^.h.b = bottom)) then begin //triangle
       result:= false;
-     end;   
+     end;
      if not((top = left^.h.b) and (bottom = lefta^.h.b) or
             (bottom = left^.h.b) and (top = lefta^.h.b) or
             (top = right^.h.b) and (bottom = righta^.h.b) or
@@ -916,9 +916,9 @@ var
      end;
     end;
    end; //checkdiag
- 
+
   procedure findup(const atrap: ptrapinfoty); forward;
-  
+
    procedure finddown(const atrap: ptrapinfoty);
    var
     tr1: ptrapinfoty;
@@ -939,9 +939,9 @@ var
       end;
       tr1:= below;
      end;
-    end;  
+    end;
    end; //finddown
- 
+
   procedure findup(const atrap: ptrapinfoty);
   var
    tr1: ptrapinfoty;
@@ -950,7 +950,7 @@ var
    while checkdiag(tr1,true) do begin
     with tr1^ do begin
      if abover <> nil then begin
-      findup(abover);     
+      findup(abover);
      end;
      if above^.below = tr1 then begin
       if above^.belowr <> nil then begin
@@ -962,14 +962,14 @@ var
      end;
      tr1:= above;
     end;
-   end;  
+   end;
   end; //findup
-   
+
  begin
   finddown(toptrap);
  end; //finddiags
 
- function newnode(const atrap: ptrapinfoty; 
+ function newnode(const atrap: ptrapinfoty;
                      const aparent: ptrapnodeinfoty): ptrapnodeinfoty;
  begin
   result:= newnodes;
@@ -979,7 +979,7 @@ var
   result^.p:= aparent;
   atrap^.node:= result;
  end; //newnode
-   
+
  function findtrap(const apoint,second: ppointty): ptrapinfoty;
                      //second used if apoint is on edge
  var
@@ -1057,7 +1057,7 @@ var
   tpupper^.below:= tplower;
   tpupper^.belowr:= nil;            //no split segment
   seg^.trap:= tplower;
-  
+
   no1:= tpupper^.node;         //old leaf
   nol:= newnode(tpupper,no1);  //new leaf
   nor:= newnode(tplower,no1);  //new leaf
@@ -1065,13 +1065,13 @@ var
   no1^.r:= nor;
   no1^.kind:= tnk_y;
   no1^.y:= ppt1;
-  
+
   include(seg^.flags,sf_pointhandled);
  end; //handlepoint
 
 var
  segcounter: integer;
- 
+
  procedure handlesegment(const aseg: pseginfoty);
 
   procedure splitnode(const newright: boolean; const ltrap,rtrap: ptrapinfoty);
@@ -1134,10 +1134,10 @@ var
      trold^.belowr:= nil;
      trnew^.belowr:= nil;
     end
-    else begin      
+    else begin
      if trold^.below^.abover <> nil then begin     //existing segment above
       trnew^.below:= trold^.below;
-      if (trold^.below^.above = trold) xor newright then begin 
+      if (trold^.below^.above = trold) xor newright then begin
              //existing trap is not on new side
        if newright then begin
         trold^.below^.abover:= trnew;
@@ -1215,7 +1215,7 @@ var
     end;
    end;
   end; //updatebelow
-    
+
   procedure splittrap(const newright: boolean; const old: ptrapinfoty;
                               var left,right,trnew: ptrapinfoty);
   var
@@ -1267,13 +1267,13 @@ var
    end;
    splitnode(newright,left,right);
   end; //splittrap
-  
+
  var
   sd1: segdirty;
   sega,segb: pseginfoty;
   trap1,trap2,trap1l,trap1r,trbelow,trbelowr,exttrap: ptrapinfoty;
   isright1{,bo2}: boolean;
-  
+
  begin
   if sf_reverse in aseg^.flags then begin
    sega:= aseg;
@@ -1331,17 +1331,17 @@ var
    trap2:= trap1^.below;
    if trap2^.top = bottompoint then begin
     break;
-   end; 
+   end;
 
-   isright1:= isright(trap2^.top,aseg); //point right of segment   
+   isright1:= isright(trap2^.top,aseg); //point right of segment
    if (trap1^.belowr <> nil) and not isright1 then begin
     trap2:= trap1^.belowr;
    end;
    trbelow:= trap2^.below;
    trbelowr:= trap2^.belowr;
-   
+
                                //split crossed lines by segment
-   if isright1 then begin                 
+   if isright1 then begin
     exttrap:= trap1l;
     trap2^.left:= aseg;               //move edge to right
     if trap2^.above = exttrap then begin
@@ -1390,10 +1390,10 @@ var
  bo1: boolean;
  newmountain: pmountainpointty;
  triangles,newtriangle: ptrianglety;
- 
+
  procedure findmountains(const aseg: pseginfoty; const first: boolean);
  var
-  seg1,seg2: pseginfoty; 
+  seg1,seg2: pseginfoty;
   int1: integer;
   start: pmountainpointty;
   rightside,bottomup: boolean;
@@ -1466,7 +1466,7 @@ var
     pttop:= pt1;
    end;
    pt1:= pt1^.next;
-  until pt1 = nil;   
+  until pt1 = nil;
   start^.prev:= newmountain;
   newmountain^.next:= start;
   if ptbottom^.next = pttop then begin
@@ -1544,7 +1544,7 @@ var
  end; //findmountains
 
 var
- noisestate: mwcinfoty;   
+ noisestate: mwcinfoty;
  pt1,pt2: ppointty;
 begin
  noisestate.fw:= defaultmwcseedw; //"random" seed
@@ -1555,9 +1555,9 @@ begin
   trianglecount:= 0;
   exit;
  end;
- 
+
  points:= drawinfo.points.points;
- 
+
  sizetraps:= npoints*trapsize;
  sizenodes:= npoints*trapnodesize;
  allocbuffer(drawinfo.buffer,npoints*(sizeof(pointty)+sizeof(seginfoty)+
@@ -1595,7 +1595,7 @@ begin
    diags[0]:= nil;
    diags[1]:= nil;
    diags[2]:= nil;
-   
+
    h.b:= ppt1;
    dx:= ppt2^.x-ppt1^.x; //b->a slope
    dy:= ppt2^.y-ppt1^.y; //b->a slope
@@ -1607,7 +1607,7 @@ begin
    else begin
     if dy > 0 then begin
      include(flags,sf_reverse);
-    end;      
+    end;
    end;
    ppt2:= ppt1;
    inc(ppt1);
@@ -1625,7 +1625,7 @@ begin
 
  newtraps:= traps;      //init memory sources
  newnodes:= nodes;
- 
+
  with newnode^ do begin //init root node
   kind:= tnk_trap;
   trap:= traps;
@@ -1673,17 +1673,17 @@ begin
    dump(traps,newtraps-traps,segments,npoints,nodes,'point B',false);
   {$endif}
   end;
-  
+
  {$ifdef mse_debugpolytria}
  end;
   debugwriteln('----------------');
   dumpseg(seg1,segments,npoints,traps);
-  if (segcounter = debugstop) and 
+  if (segcounter = debugstop) and
                           (debugnoseg or debugnoa or debugnob) then begin
    break;
   end;
  {$endif}
- 
+
   handlesegment(seg1);
  {$ifdef mse_debugpolytria}
   debugwriteln('----------------');
@@ -1763,7 +1763,7 @@ begin
   end;
  end;
 {$endif}
- 
+
  finddiags;
  newmountain:= pointer(traps); //traps not used anymore
  triangles:= pointer(newmountain)+npoints*mountainsize;

@@ -18,7 +18,7 @@ unit msei18nutils;
 
 {$if fpc_fullversion >= 30000}
  {$define mse_fpc_3}
-{$endif} 
+{$endif}
 
 (*
 {$ifdef FPC}
@@ -34,7 +34,7 @@ uses
 //todo: optimize resourcestring loading
 //      wide resourcestrings
 
-function loadlangunit(aname: string; 
+function loadlangunit(aname: string;
                              const quiet: boolean = false): boolean;
             //'' -> reset to builtin
             //true if ok
@@ -53,14 +53,14 @@ implementation
 uses
  {$ifdef FPC}dynlibs,{$ifdef UNIX}dl,{$endif}{$endif}sysutils,mseclasses,
                mselist,msearrayutils,msestrings,mseapplication,msesysintf;
- 
+
 type
  resourcestringinfoty = record
   name: string;
   value: msestring;
  end;
  presourcestringinfoty = ^resourcestringinfoty;
- 
+
  tresourcestringlist = class(torderedrecordlist)
   protected
    function getcomparefunc: sortcomparemethodty; override;
@@ -97,7 +97,7 @@ Type          //copied from objpas.pp
 
 
 Var
-  ResourceStringTable : TResourceTablelist; 
+  ResourceStringTable : TResourceTablelist;
                 {$ifdef FPC} External Name 'FPC_RESOURCESTRINGTABLES';{$endif}
                 //todo: fix for delphi
 {$endif}
@@ -266,7 +266,7 @@ begin
    end
    else begin
     if not quiet then begin
-    {$ifdef FPC} 
+    {$ifdef FPC}
      {$ifdef UNIX}
      raise exception.create(dlerror);
      {$else}

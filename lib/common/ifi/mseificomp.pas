@@ -12,10 +12,10 @@
 }
 {$ifdef FPC}
  {$if defined(FPC) and (fpc_fullversion >= 020501)}
-  {$define mse_fpc_2_6} 
+  {$define mse_fpc_2_6}
  {$ifend}
  {$if defined(FPC) and (fpc_fullversion >= 030000)}
-  {$define mse_fpc_3_0} 
+  {$define mse_fpc_3_0}
  {$ifend}
  {$ifdef mse_fpc_2_6}
   {$define mse_hasvtunicodestring}
@@ -77,13 +77,13 @@ type
                            const aclient: iificlient;
                            const astate: ifiwidgetstatesty;
                            const achangedstate: ifiwidgetstatesty) of object;
- ificlientmodalresulteventty = 
+ ificlientmodalresulteventty =
              procedure(const sender: tcustomificlientcontroller;
-                       const aclient: iificlient; 
+                       const aclient: iificlient;
                        const amodalresult: modalresultty) of object;
- ificlientclosequeryeventty = 
+ ificlientclosequeryeventty =
              procedure(const sender: tcustomificlientcontroller;
-                       const aclient: iificlient; 
+                       const aclient: iificlient;
                        var amodalresult: modalresultty) of object;
 
  ifivaluelinkstatety = (ivs_linking,ivs_valuesetting,ivs_loadedproc);
@@ -91,7 +91,7 @@ type
  valueclientoptionty = (vco_datalist,vco_nosync,vco_novaluetoclient,
                                                   vco_readonly,vco_notnull);
  valueclientoptionsty = set of valueclientoptionty;
-   
+
  tcustomificlientcontroller = class(tlinkedpersistent,iifidataserver,istatfile)
   private
    fonclientvaluechanged: ificlienteventty;
@@ -123,7 +123,7 @@ type
    fwidgetstate: ifiwidgetstatesty;
    fwidgetstatebefore: ifiwidgetstatesty;
    fchangedclient: pointer;
-   
+
    fapropname: string;
    fapropkind: ttypekind;
    fapropvalue: pointer;
@@ -142,13 +142,13 @@ type
    function getifilinkkind: ptypeinfo; virtual;
    function checkcomponent(const aintf: iifilink): pointer; virtual;
               //returns interface info, exception if link invalid
-   procedure valuestootherclient(const alink: pointer); 
-   procedure valuestoclient(const alink: pointer); virtual; 
+   procedure valuestootherclient(const alink: pointer);
+   procedure valuestoclient(const alink: pointer); virtual;
    procedure clienttovalues(const alink: pointer); virtual;
    procedure change(const alink: iificlient = nil);
 //   procedure change();
    procedure linkset(const alink: iificlient); virtual;
-   
+
    function setmsestringval(const alink: iificlient; const aname: string;
                                  const avalue: msestring): boolean;
                                     //true if found
@@ -201,9 +201,9 @@ type
    procedure setvalue(const sender: iificlient; var avalue;
                      var accept: boolean; const arow: integer); virtual;
    procedure dataentered(const sender: iificlient; const arow: integer); virtual;
-   procedure closequery(const sender: iificlient; 
+   procedure closequery(const sender: iificlient;
                              var amodalresult: modalresultty); virtual;
-   procedure sendmodalresult(const sender: iificlient; 
+   procedure sendmodalresult(const sender: iificlient;
                              const amodalresult: modalresultty); virtual;
    procedure updateoptionsedit(var avalue: optionseditty); virtual;
     //istatfile
@@ -219,34 +219,34 @@ type
    constructor create(const aowner: tmsecomponent); overload; virtual;
    function canconnect(const acomponent: tcomponent): boolean; virtual;
 
-   property msestringprop[const aname: string]: msestring read getmsestringpro 
+   property msestringprop[const aname: string]: msestring read getmsestringpro
                                                        write setmsestringpro;
-   property integerprop[const aname: string]: integer read getintegerpro 
+   property integerprop[const aname: string]: integer read getintegerpro
                                                        write setintegerpro;
-   property booleanprop[const aname: string]: boolean read getbooleanpro 
+   property booleanprop[const aname: string]: boolean read getbooleanpro
                                                        write setbooleanpro;
    property realtyprop[const aname: string]: realty read getrealtypro
                                                        write setrealtypro;
-   property datetimeprop[const aname: string]: tdatetime read getdatetimepro 
+   property datetimeprop[const aname: string]: tdatetime read getdatetimepro
                                                        write setdatetimepro;
    property statfile: tstatfile read fstatfile write setstatfile;
    property statvarname: msestring read fstatvarname write fstatvarname;
-   property statpriority: integer read fstatpriority 
+   property statpriority: integer read fstatpriority
                                        write fstatpriority default 0;
-   property onchangebefore: ifieventty read fonchangebefore 
+   property onchangebefore: ifieventty read fonchangebefore
                                                      write fonchangebefore;
                   //for data change and execute
    property onchangeafter: ifieventty read fonchangeafter write fonchangeafter;
                   //for data change and execute
-   property onclientvaluechanged: ificlienteventty read fonclientvaluechanged 
+   property onclientvaluechanged: ificlienteventty read fonclientvaluechanged
                                                     write fonclientvaluechanged;
-   property onclientstatechanged: ificlientstateeventty 
+   property onclientstatechanged: ificlientstateeventty
                      read fonclientstatechanged write fonclientstatechanged;
-   property onclientclosequery: ificlientclosequeryeventty 
+   property onclientclosequery: ificlientclosequeryeventty
                      read fonclientclosequery write fonclientclosequery;
-   property onclientmodalresult: ificlientmodalresulteventty 
+   property onclientmodalresult: ificlientmodalresulteventty
                      read fonclientmodalresult write fonclientmodalresult;
-   property onclientexecute: ificlienteventty read fonclientexecute 
+   property onclientexecute: ificlienteventty read fonclientexecute
                      write fonclientexecute;
  end;
 
@@ -267,7 +267,7 @@ type
    property onclientmodalresult;
    property onclientexecute;
  end;
-                             
+
  texecclientcontroller = class(tificlientcontroller)
   private
    fenabled: boolean;
@@ -300,25 +300,25 @@ type
 //   procedure execute(const sender: iificlient); overload; override;
    procedure linkset(const alink: iificlient) override;
    procedure valuestoclient(const alink: pointer) override;
-   procedure sendmodalresult(const sender: iificlient; 
+   procedure sendmodalresult(const sender: iificlient;
                              const amodalresult: modalresultty) override;
   public
    property modalresult: modalresultty read fmodalresult write setmodalresult;
    property onclientvaluechanged;
  end;
 
- valarsetterty = procedure(const alink: pointer; var handled: boolean) of object; 
+ valarsetterty = procedure(const alink: pointer; var handled: boolean) of object;
  valargetterty = procedure(const alink: pointer; var handled: boolean) of object;
 
- itemsetterty = procedure(const alink: pointer; var handled: boolean) of object; 
+ itemsetterty = procedure(const alink: pointer; var handled: boolean) of object;
  itemgetterty = procedure(const alink: pointer; var handled: boolean) of object;
 
  tifidatasource = class;
  ififieldnamety = type ansistring;       //type for property editor
  ifisourcefieldnamety = type ansistring; //type for property editor
- 
+
  iififieldinfo = interface(inullinterface)[miid_iififieldinfo]
-  procedure getfieldinfo(const apropname: ififieldnamety; 
+  procedure getfieldinfo(const apropname: ififieldnamety;
                          var adatasource: tifidatasource;
                          var atypes: listdatatypesty);
  end;
@@ -329,7 +329,7 @@ type
   function ifigriddata: tdatalist;
   function ififieldname: string;
  end;
- 
+
  indexeventty = procedure(const sender: tcustomificlientcontroller;
                     const aclient: iificlient; const aindex: integer) of object;
 
@@ -337,7 +337,7 @@ type
                  procedure(const sender: tcustomificlientcontroller;
                      const aclient: iificlient; var avalue: boolean;
                           var accept: boolean; const aindex: integer) of object;
- setstringclienteventty = 
+ setstringclienteventty =
                  procedure(const sender: tcustomificlientcontroller;
                   const aclient: iificlient; var avalue: msestring;
                           var accept: boolean; const aindex: integer) of object;
@@ -345,24 +345,24 @@ type
                           const sender: tcustomificlientcontroller;
                           var avalue: ansistring;
                           var accept: boolean; const aindex: integer) of object;
- setintegerclienteventty = 
+ setintegerclienteventty =
                  procedure(const sender: tobject; const aclient: iificlient;
-                          var avalue: integer; 
-                          var accept: boolean; const aindex: integer) of object; 
+                          var avalue: integer;
+                          var accept: boolean; const aindex: integer) of object;
                           //equal parameters as setcoloreventty for tcoloredit!
- setint64clienteventty = 
+ setint64clienteventty =
                  procedure(const sender: tcustomificlientcontroller;
                           const aclient: iificlient; var avalue: int64;
-                          var accept: boolean; const aindex: integer) of object; 
- setpointerclienteventty = 
+                          var accept: boolean; const aindex: integer) of object;
+ setpointerclienteventty =
                  procedure(const sender: tcustomificlientcontroller;
                           const aclient: iificlient; var avalue: pointer;
-                          var accept: boolean; const aindex: integer) of object; 
- setrealclienteventty = 
+                          var accept: boolean; const aindex: integer) of object;
+ setrealclienteventty =
                  procedure(const sender: tcustomificlientcontroller;
                           const aclient: iificlient; var avalue: realty;
                           var accept: boolean; const aindex: integer) of object;
- setdatetimeclienteventty = 
+ setdatetimeclienteventty =
                  procedure(const sender: tcustomificlientcontroller;
                           const aclient: iificlient; var avalue: tdatetime;
                           var accept: boolean; const aindex: integer) of object;
@@ -409,7 +409,7 @@ type
    function ifigriddata: tdatalist;
    function ififieldname: string;
     //iififieldinfo
-   procedure getfieldinfo(const apropname: ififieldnamety; 
+   procedure getfieldinfo(const apropname: ififieldnamety;
                          var adatasource: tifidatasource;
                          var atypes: listdatatypesty);
   public
@@ -424,9 +424,9 @@ type
    property datasource: tifidatasource read fdatasource write setdatasource;
    property fieldname: ififieldnamety read ffieldname write setfieldname;
  end;
- 
+
  tifimsestringdatalist = class;
-  
+
  tstringclientcontroller = class(tvalueclientcontroller)
   private
    fvalue: msestring;
@@ -450,12 +450,12 @@ type
    constructor create(const aowner: tmsecomponent); override;
    property griddata: tifimsestringdatalist read getgriddata;
 //   property gridvalues: msestringarty read getgridvalues write setgridvalues;
-//   property gridvalue[const index: integer]: msestring read getgridvalue 
+//   property gridvalue[const index: integer]: msestring read getgridvalue
 //                                                             write setgridvalue;
   published
    property value: msestring read fvalue write setvalue1;
    property valuedefault: msestring read fvaluedefault write fvaluedefault;
-   property onclientsetvalue: setstringclienteventty 
+   property onclientsetvalue: setstringclienteventty
                 read fonclientsetvalue write fonclientsetvalue;
    property onclientvaluechanged: ifistringclienteventty
                    read getonclientvaluechanged write setonclientvaluechanged;
@@ -473,7 +473,7 @@ type
    function ifigriddata: tdatalist;
    function ififieldname: string;
     //iififieldinfo
-   procedure getfieldinfo(const apropname: ififieldnamety; 
+   procedure getfieldinfo(const apropname: ififieldnamety;
                          var adatasource: tifidatasource;
                          var atypes: listdatatypesty);
   published
@@ -482,7 +482,7 @@ type
  end;
 
  tifidropdownlistcontroller = class;
- 
+
  tifidropdowncols = class(townedpersistentarrayprop)
   private
    function getitems(const index: integer): tifidropdowncol;
@@ -499,7 +499,7 @@ type
  iifidropdownlistdatalink = interface(iifidatalink)
   procedure ifidropdownlistchanged(const acols: tifidropdowncols);
  end;
-  
+
  tifidropdownlistcontroller = class(teventpersistent)
   private
    fcols: tifidropdowncols;
@@ -512,7 +512,7 @@ type
   published
    property cols: tifidropdowncols read fcols write setcols;
  end;
- 
+
  tdropdownlistclientcontroller = class(tstringclientcontroller)
   private
    fdropdown: tifidropdownlistcontroller;
@@ -526,7 +526,7 @@ type
   published
    property dropdown: tifidropdownlistcontroller read fdropdown write setdropdown;
  end;
- 
+
  tifiintegerdatalist = class;
 
  tintegerclientcontroller = class(tvalueclientcontroller)
@@ -551,7 +551,7 @@ type
    procedure setvalue(const sender: iificlient;
                var avalue; var accept: boolean; const arow: integer); override;
    function createdatalist: tdatalist; override;
-   function getlistdatatypes: listdatatypesty; override;   
+   function getlistdatatypes: listdatatypesty; override;
     //istatfile
    procedure statreadvalue(const reader: tstatreader); override;
    procedure statwritevalue(const writer: tstatwriter); override;
@@ -560,11 +560,11 @@ type
    property griddata: tifiintegerdatalist read getgriddata;
   published
    property value: integer read fvalue write setvalue1 default 0;
-   property valuedefault: integer read fvaluedefault 
+   property valuedefault: integer read fvaluedefault
                                         write fvaluedefault default 0;
    property valuemin: integer read fvaluemin write setvaluemin default 0;
    property valuemax: integer read fvaluemax write setvaluemax default maxint;
-   property onclientsetvalue: setintegerclienteventty 
+   property onclientsetvalue: setintegerclienteventty
                 read fonclientsetvalue write fonclientsetvalue;
    property onclientvaluechanged: ifiintegerclienteventty
                    read getonclientvaluechanged write setonclientvaluechanged;
@@ -594,7 +594,7 @@ type
    procedure setvalue(const sender: iificlient;
                var avalue; var accept: boolean; const arow: integer); override;
    function createdatalist: tdatalist; override;
-   function getlistdatatypes: listdatatypesty; override;   
+   function getlistdatatypes: listdatatypesty; override;
     //istatfile
    procedure statreadvalue(const reader: tstatreader); override;
    procedure statwritevalue(const writer: tstatwriter); override;
@@ -603,18 +603,18 @@ type
    property griddata: tifiint64datalist read getgriddata;
   published
    property value: int64 read fvalue write setvalue1 default 0;
-   property valuedefault: int64 read fvaluedefault 
+   property valuedefault: int64 read fvaluedefault
                                         write fvaluedefault default 0;
    property valuemin: int64 read fvaluemin write setvaluemin default 0;
    property valuemax: int64 read fvaluemax write setvaluemax default maxint;
-   property onclientsetvalue: setint64clienteventty 
+   property onclientsetvalue: setint64clienteventty
                 read fonclientsetvalue write fonclientsetvalue;
    property onclientvaluechanged: ifiint64clienteventty
                    read getonclientvaluechanged write setonclientvaluechanged;
  end;
 
  tifipointerdatalist = class;
- 
+
  tpointerclientcontroller = class(tvalueclientcontroller)
   private
    fvalue: pointer;
@@ -629,13 +629,13 @@ type
    procedure setvalue(const sender: iificlient;
                var avalue; var accept: boolean; const arow: integer); override;
    function createdatalist: tdatalist; override;
-   function getlistdatatypes: listdatatypesty; override;   
+   function getlistdatatypes: listdatatypesty; override;
   public
    constructor create(const aowner: tmsecomponent); override;
    property griddata: tifipointerdatalist read getgriddata;
    property value: pointer read fvalue write setvalue1 default nil;
   published
-   property onclientsetvalue: setpointerclienteventty 
+   property onclientsetvalue: setpointerclienteventty
                    read fonclientsetvalue write fonclientsetvalue;
    property onclientvaluechanged: ifipointerclienteventty
                    read getonclientvaluechanged write setonclientvaluechanged;
@@ -659,7 +659,7 @@ type
  end;
 
  tifibooleandatalist = class;
-  
+
  tbooleanclientcontroller = class(tvalueclientcontroller)
   private
    fvalue: longbool;
@@ -690,20 +690,20 @@ type
    constructor create(const aowner: tmsecomponent); override;
    property griddata: tifibooleandatalist read getgriddata;
 //   property gridvalues: longboolarty read getgridvalues write setgridvalues;
-//   property gridvalue[const index: integer]: boolean read getgridvalue 
+//   property gridvalue[const index: integer]: boolean read getgridvalue
 //                                                             write setgridvalue;
   published
    property value: boolean read getvalue write setvalue1 default false;
-   property valuedefault: boolean read getvaluedefault write setvaluedefault 
+   property valuedefault: boolean read getvaluedefault write setvaluedefault
                                                                 default false;
-   property onclientsetvalue: setbooleanclienteventty 
+   property onclientsetvalue: setbooleanclienteventty
                 read fonclientsetvalue write fonclientsetvalue;
    property onclientvaluechanged: ifibooleanclienteventty
                    read getonclientvaluechanged write setonclientvaluechanged;
  end;
 
  tifirealdatalist = class;
- 
+
  trealclientcontroller = class(tvalueclientcontroller)
   private
    fvalue: realty;
@@ -738,7 +738,7 @@ type
    constructor create(const aowner: tmsecomponent); override;
    property griddata: tifirealdatalist read getgriddata;
 //   property gridvalues: realarty read getgridvalues write setgridvalues;
-//   property gridvalue[const index: integer]: real read getgridvalue 
+//   property gridvalue[const index: integer]: real read getgridvalue
 //                                                             write setgridvalue;
   published
    property value: realty read fvalue write setvalue1 {stored false};
@@ -746,7 +746,7 @@ type
                                           write fvaluedefault {stored false};
    property valuemin: realty read fvaluemin write setvaluemin {stored false};
    property valuemax: realty read fvaluemax write setvaluemax {stored false};
-   property onclientsetvalue: setrealclienteventty 
+   property onclientsetvalue: setrealclienteventty
                        read fonclientsetvalue write fonclientsetvalue;
    property onclientvaluechanged: ifirealclienteventty
                    read getonclientvaluechanged write setonclientvaluechanged;
@@ -789,17 +789,17 @@ type
    property griddata: tifidatetimedatalist read getgriddata;
   published
    property value: tdatetime read fvalue write setvalue1 {stored false};
-   property valuedefault: tdatetime read fvaluedefault 
+   property valuedefault: tdatetime read fvaluedefault
                                              write fvaluedefault {stored false};
    property valuemin: tdatetime read fvaluemin write setvaluemin {stored false};
    property valuemax: tdatetime read fvaluemax write setvaluemax {stored false};
-   property onclientsetvalue: setdatetimeclienteventty 
+   property onclientsetvalue: setdatetimeclienteventty
                        read fonclientsetvalue write fonclientsetvalue;
    property onclientvaluechanged: ifidatetimeclienteventty
                    read getonclientvaluechanged write setonclientvaluechanged;
  end;
- 
- ificelleventty = procedure(const sender: tobject; 
+
+ ificelleventty = procedure(const sender: tobject;
                            var info: ificelleventinfoty) of object;
  ifibeforeblockeventty = procedure(const sender: tobject;
                var aindex,acount: integer; const userinput: boolean) of object;
@@ -813,11 +813,11 @@ type
   published
    property link: tifivaluelinkcomp read getlink write setlink;
  end;
- 
+
  tifilinkcomparrayprop = class(tmsecomponentlinkarrayprop)
   private
    function getitems(const index: integer): tificolitem;
-  public 
+  public
    constructor create;
    class function getitemclasstype: persistentclassty; override;
    property items[const index: integer]: tificolitem read getitems; default;
@@ -834,7 +834,7 @@ type
   protected
    fowner: tgridclientcontroller;
    procedure updateclient(const alink: pointer); virtual; abstract;
-   procedure updateremote(const sender: tcustomrowstatelist; 
+   procedure updateremote(const sender: tcustomrowstatelist;
                                     const aindex: integer); virtual; abstract;
    procedure itemchanged(const sender: tcustomrowstatelist;
                                             const aindex: integer);
@@ -873,7 +873,7 @@ type
  end;
 
  tifibooleanlinkcomp = class;
- 
+
  trowstatebooleanhandler = class(trowstatehandler)
   private
    function getifilink: tifibooleanlinkcomp;
@@ -881,25 +881,25 @@ type
   public
    property ifilink: tifibooleanlinkcomp read getifilink write setifilink;
  end;
-  
+
  trowstatecolorhandler = class(trowstateintegerhandler)
   protected
    procedure updateclient(const alink: pointer); override;
-   procedure updateremote(const sender: tcustomrowstatelist; 
+   procedure updateremote(const sender: tcustomrowstatelist;
                                     const aindex: integer); override;
  end;
 
  trowstatefonthandler = class(trowstateintegerhandler)
   protected
    procedure updateclient(const alink: pointer); override;
-   procedure updateremote(const sender: tcustomrowstatelist; 
+   procedure updateremote(const sender: tcustomrowstatelist;
                                     const aindex: integer); override;
  end;
 
  trowstatefoldlevelhandler = class(trowstateintegerhandler)
   protected
    procedure updateclient(const alink: pointer); override;
-   procedure updateremote(const sender: tcustomrowstatelist; 
+   procedure updateremote(const sender: tcustomrowstatelist;
                                     const aindex: integer); override;
  end;
 
@@ -909,17 +909,17 @@ type
    procedure updateremote(const sender: tcustomrowstatelist;
                                     const aindex: integer); override;
  end;
- 
+
  trowstatefoldissumhandler = class(trowstatebooleanhandler)
   protected
    procedure updateclient(const alink: pointer); override;
-   procedure updateremote(const sender: tcustomrowstatelist; 
+   procedure updateremote(const sender: tcustomrowstatelist;
                                     const aindex: integer); override;
  end;
- 
+
  gridclientstatety = (gcs_itemchangelock);
  gridclientstatesty = set of gridclientstatety;
-  
+
  tgridclientcontroller = class(tificlientcontroller,idatalistclient)
   private
    frowcount: integer;
@@ -992,20 +992,20 @@ type
               write fonrowsdeleting;
    property onrowsdeleted: ifiafterblockeventty read fonrowsdeleted
               write fonrowsdeleted;
-//  property onclientcellevent: celleventty read fclientcellevent 
+//  property onclientcellevent: celleventty read fclientcellevent
 //                                                 write fclientcellevent;
    property datacols: tifilinkcomparrayprop read fdatacols write setdatacols;
 //   property rowstate_font: tintegerlinkcomp read frowstate_font
 //                                                    write setrowstate_font;
-   property rowstate_color: tifiintegerlinkcomp read getrowstate_color 
+   property rowstate_color: tifiintegerlinkcomp read getrowstate_color
                                                     write setrowstate_color;
-   property rowstate_font: tifiintegerlinkcomp read getrowstate_font 
+   property rowstate_font: tifiintegerlinkcomp read getrowstate_font
                                                     write setrowstate_font;
-   property rowstate_foldlevel: tifiintegerlinkcomp read getrowstate_foldlevel 
+   property rowstate_foldlevel: tifiintegerlinkcomp read getrowstate_foldlevel
                                                     write setrowstate_foldlevel;
-   property rowstate_hidden: tifibooleanlinkcomp read getrowstate_hidden 
+   property rowstate_hidden: tifibooleanlinkcomp read getrowstate_hidden
                                                     write setrowstate_hidden;
-   property rowstate_foldissum: tifibooleanlinkcomp read getrowstate_foldissum 
+   property rowstate_foldissum: tifibooleanlinkcomp read getrowstate_foldissum
                                                     write setrowstate_foldissum;
  end;
 
@@ -1019,13 +1019,13 @@ type
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
-   property c: tcustomificlientcontroller read fcontroller 
+   property c: tcustomificlientcontroller read fcontroller
                                                          write setcontroller;
-   property controller: tcustomificlientcontroller read fcontroller 
+   property controller: tcustomificlientcontroller read fcontroller
                                                          write setcontroller;
   published
  end;
- 
+
  tifivaluelinkcomp = class(tifilinkcomp)
   private
    function getcontroller: tvalueclientcontroller;
@@ -1033,7 +1033,7 @@ type
    property c: tvalueclientcontroller read getcontroller;
    property controller: tvalueclientcontroller read getcontroller;
  end;
- 
+
  tifistringlinkcomp = class(tifivaluelinkcomp)
   private
    function getcontroller: tstringclientcontroller;
@@ -1061,7 +1061,7 @@ type
    property controller: tdropdownlistclientcontroller read getcontroller
                                                          write setcontroller;
  end;
- 
+
  tifiintegerlinkcomp = class(tifivaluelinkcomp)
   private
    function getcontroller: tintegerclientcontroller;
@@ -1210,7 +1210,7 @@ type
   function getfieldnames(const apropname: ifisourcefieldnamety): msestringarty;
   procedure setdesignsourcefieldname(const aname: ifisourcefieldnamety);
  end;
-  
+
  tififield = class(tvirtualpersistent)
   private
    ffieldname: ansistring;
@@ -1221,7 +1221,7 @@ type
    property datatype: listdatatypety read fdatatype write fdatatype;
  end;
  ififieldclassty = class of tififield;
- 
+
  tififields = class(tpersistentarrayprop,iififieldsource)
   protected
    function getififieldclass: ififieldclassty; virtual;
@@ -1234,7 +1234,7 @@ type
  end;
 
  tififieldlinks = class;
- 
+
  tififieldlink = class(tififield,iififieldlinksource)
   private
    fsourcefieldname: ifisourcefieldnamety;
@@ -1255,7 +1255,7 @@ type
                                                      write fsourcefieldname;
  end;
  ififieldlinkclassty = class of tififieldlink;
- 
+
  tififieldlinks = class(tififields)
   protected
    function getififieldclass: ififieldlinkclassty; reintroduce; virtual;
@@ -1268,13 +1268,13 @@ type
 end;
 
  iifidataconnection = interface(inullinterface)[miid_iifidataconnection]
-  procedure fetchdata(const acolnames: array of string; 
+  procedure fetchdata(const acolnames: array of string;
                                                   acols: array of tdatalist);
   function getfieldnames(const adatatype: listdatatypety): msestringarty;
   function getdatatype(const aname: ansistring): listdatatypety;
                            //dl_none if not found
  end;
- 
+
 //{$define usedelegation} not working in FPC 2.4
  tifidatasource = class(tactcomponent,iififieldsource)
   private
@@ -1291,11 +1291,11 @@ end;
    ftimer: tsimpletimer;
    procedure setfields(const avalue: tififields);
   {$ifdef usedelegation}
-   property fieldsurceintf: iififieldsource read ffieldsourceintf 
+   property fieldsurceintf: iififieldsource read ffieldsourceintf
                                               implements iififieldsource;
          //not working in FPC 2.4
   {$endif}
-   procedure getbindinginfo(const alink: pointer); 
+   procedure getbindinginfo(const alink: pointer);
   protected
    factive: boolean;
    frefreshing: boolean;
@@ -1338,7 +1338,7 @@ end;
    constructor create(const aowner: tconnectedifidatasource);
    function sourcefieldtype(const afieldname: string): listdatatypety override;
  end;
-  
+
  tconnectedifidatasource = class(tifidatasource)
   private
    fconnection: tmsecomponent;
@@ -1389,7 +1389,7 @@ end;
   public
    constructor create(const aowner: tbooleanclientcontroller); reintroduce;
  end;
-   
+
  tifirealdatalist = class(trealdatalist)
   protected
    fowner: trealclientcontroller;
@@ -1440,7 +1440,7 @@ const
 type
  tmsecomponent1 = class(tmsecomponent);
  tdatalist1 = class(tdatalist);
- 
+
 procedure setifilinkcomp(const alink: iifilink;
                       const alinkcomp: tifilinkcomp; var dest: tifilinkcomp);
 var
@@ -1450,13 +1450,13 @@ begin
  po1:= nil;
  if alinkcomp <> nil then begin
   po1:= alinkcomp.fcontroller.checkcomponent(alink);
- end; 
+ end;
  alink.getobjectlinker.setlinkedvar(alink,alinkcomp,tmsecomponent(dest),po1);
  if dest <> nil then begin
   alink.setifiserverintf(iifidataserver(dest.fcontroller));
-  if (alinkcomp is tifivaluelinkcomp) and 
+  if (alinkcomp is tifivaluelinkcomp) and
                         not (csloading in alinkcomp.componentstate) and
-    (vco_datalist in 
+    (vco_datalist in
              tifivaluelinkcomp(alinkcomp).controller.optionsvalue) then begin
    iifidatalink(alink).updateifigriddata(alinkcomp,
         tifivaluelinkcomp(alinkcomp).controller.fdatalist);
@@ -1476,7 +1476,7 @@ end;
 
 { tcustomificlientcontroller}
 
-constructor tcustomificlientcontroller.create(const aowner: tmsecomponent; 
+constructor tcustomificlientcontroller.create(const aowner: tmsecomponent;
                                const akind: ttypekind);
 begin
  fowner:= aowner;
@@ -1551,7 +1551,7 @@ end;
 procedure tcustomificlientcontroller.distribute(const sender: iificlient;
                             const local: boolean; const exec: boolean);
 begin
- if not (ivs_valuesetting in fstate) and 
+ if not (ivs_valuesetting in fstate) and
                not(csloading in fowner.componentstate) then begin
   include(fstate,ivs_valuesetting);
   try
@@ -1605,7 +1605,7 @@ end;
 (*
 procedure tcustomificlientcontroller.change(const alink: iificlient);
 begin
- if {(fvalueproperty <> nil) and} not (ivs_valuesetting in fstate) and 
+ if {(fvalueproperty <> nil) and} not (ivs_valuesetting in fstate) and
             not (csloading in fowner.componentstate) then begin
   include(fstate,ivs_valuesetting);
   try
@@ -1686,8 +1686,8 @@ procedure tcustomificlientcontroller.valuestoclient(const alink: pointer);
 var
  obj: tobject;
 begin
- if not (ivs_loadedproc in fstate) and 
-      (fowner.componentstate * [csdesigning,csloading,csdestroying] = 
+ if not (ivs_loadedproc in fstate) and
+      (fowner.componentstate * [csdesigning,csloading,csdestroying] =
                                                 [csdesigning]) then begin
   obj:= iobjectlink(alink).getinstance;
   if (obj is tcomponent) and (tcomponent(obj).owner <> fowner.owner) then begin
@@ -1728,7 +1728,7 @@ var
  intf1: iifilink;
 begin
  intf1:= nil;
- if (avalue <> nil) and 
+ if (avalue <> nil) and
        not getcorbainterface(avalue,typeinfo(iifilink),intf1) then begin
   raise exception.create(avalue.name + ' is no IfI data widget.');
  end;
@@ -1794,14 +1794,14 @@ function tcustomificlientcontroller.setmsestringval(const alink: iificlient;
 var
  inst: tobject;
  prop: ppropinfo;
- 
+
 begin
  inst:= alink.getinstance;
  prop:= getpropinfo(inst,aname);
  result:= (prop <> nil) and (prop^.proptype^.kind = msestringtypekind);
  if result then begin
   setmsestringprop(inst,prop,avalue);
- end; 
+ end;
 end;
 
 function tcustomificlientcontroller.getmsestringval(
@@ -1811,14 +1811,14 @@ function tcustomificlientcontroller.getmsestringval(
 var
  inst: tobject;
  prop: ppropinfo;
- 
+
 begin
  inst:= alink.getinstance;
  prop:= getpropinfo(inst,aname);
  result:= (prop <> nil) and (prop^.proptype^.kind = msestringtypekind);
  if result then begin
   avalue:= getmsestringprop(inst,prop);
- end; 
+ end;
 end;
 
 function tcustomificlientcontroller.setintegerval(const alink: iificlient;
@@ -1826,14 +1826,14 @@ function tcustomificlientcontroller.setintegerval(const alink: iificlient;
 var
  inst: tobject;
  prop: ppropinfo;
- 
+
 begin
  inst:= alink.getinstance;
  prop:= getpropinfo(inst,aname);
  result:= (prop <> nil) and (prop^.proptype^.kind = tkinteger);
  if result then begin
   setordprop(inst,prop,avalue);
- end; 
+ end;
 end;
 
 function tcustomificlientcontroller.getintegerval(
@@ -1843,14 +1843,14 @@ function tcustomificlientcontroller.getintegerval(
 var
  inst: tobject;
  prop: ppropinfo;
- 
+
 begin
  inst:= alink.getinstance;
  prop:= getpropinfo(inst,aname);
  result:= (prop <> nil) and (prop^.proptype^.kind = tkinteger);
  if result then begin
   avalue:= getordprop(inst,prop);
- end; 
+ end;
 end;
 
 function tcustomificlientcontroller.setint64val(const alink: iificlient;
@@ -1858,14 +1858,14 @@ function tcustomificlientcontroller.setint64val(const alink: iificlient;
 var
  inst: tobject;
  prop: ppropinfo;
- 
+
 begin
  inst:= alink.getinstance;
  prop:= getpropinfo(inst,aname);
  result:= (prop <> nil) and (prop^.proptype^.kind = tkint64);
  if result then begin
   setordprop(inst,prop,avalue);
- end; 
+ end;
 end;
 
 function tcustomificlientcontroller.getint64val(
@@ -1875,14 +1875,14 @@ function tcustomificlientcontroller.getint64val(
 var
  inst: tobject;
  prop: ppropinfo;
- 
+
 begin
  inst:= alink.getinstance;
  prop:= getpropinfo(inst,aname);
  result:= (prop <> nil) and (prop^.proptype^.kind = tkint64);
  if result then begin
   avalue:= getordprop(inst,prop);
- end; 
+ end;
 end;
 
 function tcustomificlientcontroller.setpointerval(const alink: iifidatalink;
@@ -1907,7 +1907,7 @@ function tcustomificlientcontroller.getpointerval(const alink: iifidatalink;
 var
  inst: tobject;
  prop: ppropinfo;
- 
+
 begin
  inst:= alink.getinstance;
  prop:= getpropinfo(inst,aname);
@@ -1932,14 +1932,14 @@ function tcustomificlientcontroller.setbooleanval(const alink: iificlient;
 var
  inst: tobject;
  prop: ppropinfo;
- 
+
 begin
  inst:= alink.getinstance;
  prop:= getpropinfo(inst,aname);
  result:= (prop <> nil) and (prop^.proptype^.kind in boolprops);
  if result then begin
   setordprop(inst,prop,ord(avalue));
- end; 
+ end;
 end;
 
 function tcustomificlientcontroller.getbooleanval(
@@ -1949,14 +1949,14 @@ function tcustomificlientcontroller.getbooleanval(
 var
  inst: tobject;
  prop: ppropinfo;
- 
+
 begin
  inst:= alink.getinstance;
  prop:= getpropinfo(inst,aname);
  result:= (prop <> nil) and (prop^.proptype^.kind in boolprops);
  if result then begin
   avalue:= getordprop(inst,prop) <> 0;
- end; 
+ end;
 end;
 
 function tcustomificlientcontroller.setrealtyval(const alink: iificlient;
@@ -1964,14 +1964,14 @@ function tcustomificlientcontroller.setrealtyval(const alink: iificlient;
 var
  inst: tobject;
  prop: ppropinfo;
- 
+
 begin
  inst:= alink.getinstance;
  prop:= getpropinfo(inst,aname);
  result:= (prop <> nil) and (prop^.proptype^.kind = tkfloat);
  if result then begin
   setfloatprop(inst,prop,avalue);
- end; 
+ end;
 end;
 
 function tcustomificlientcontroller.getrealtyval(
@@ -1981,14 +1981,14 @@ function tcustomificlientcontroller.getrealtyval(
 var
  inst: tobject;
  prop: ppropinfo;
- 
+
 begin
  inst:= alink.getinstance;
  prop:= getpropinfo(inst,aname);
  result:= (prop <> nil) and (prop^.proptype^.kind = tkfloat);
  if result then begin
   avalue:= getfloatprop(inst,prop);
- end; 
+ end;
 end;
 
 function tcustomificlientcontroller.setdatetimeval(const alink: iificlient;
@@ -1996,14 +1996,14 @@ function tcustomificlientcontroller.setdatetimeval(const alink: iificlient;
 var
  inst: tobject;
  prop: ppropinfo;
- 
+
 begin
  inst:= alink.getinstance;
  prop:= getpropinfo(inst,aname);
  result:= (prop <> nil) and (prop^.proptype^.kind = tkfloat);
  if result then begin
   setfloatprop(inst,prop,avalue);
- end; 
+ end;
 end;
 
 function tcustomificlientcontroller.getdatetimeval(
@@ -2013,14 +2013,14 @@ function tcustomificlientcontroller.getdatetimeval(
 var
  inst: tobject;
  prop: ppropinfo;
- 
+
 begin
  inst:= alink.getinstance;
  prop:= getpropinfo(inst,aname);
  result:= (prop <> nil) and (prop^.proptype^.kind = tkfloat);
  if result then begin
   avalue:= getfloatprop(inst,prop);
- end; 
+ end;
 end;
 
 procedure tcustomificlientcontroller.loaded;
@@ -2033,7 +2033,7 @@ begin
  end;
 end;
 
-procedure tcustomificlientcontroller.dogetprop(const alink: pointer); 
+procedure tcustomificlientcontroller.dogetprop(const alink: pointer);
 begin
  case fapropkind of
   tkinteger: begin
@@ -2188,7 +2188,7 @@ begin
  if fstatvarname = '' then begin
   result:= msestring(ownernamepath(fowner));
   if result = '' then begin
-   result:= '.'; //dummy, statfiler can not get componentname because 
+   result:= '.'; //dummy, statfiler can not get componentname because
                  //self is no tcomponent
   end;
  end
@@ -2280,7 +2280,7 @@ begin
  if result = nil then begin
   fitempo:= @result;
   tmsecomponent1(fowner).getobjectlinker.forfirst(@getdatalist1,
-                                  self); 
+                                  self);
   if result = nil then begin
    raise exception.create('No datalist.');
   end;
@@ -2420,14 +2420,14 @@ procedure tvalueclientcontroller.getvalar(const agetter: valargetterty;
                        var avalue);
 begin
  fvalarpo:= @avalue;
- tmsecomponent1(fowner).getobjectlinker.forfirst(agetter,self); 
+ tmsecomponent1(fowner).getobjectlinker.forfirst(agetter,self);
 end;
 
 procedure tvalueclientcontroller.setvalar(const asetter: valarsetterty;
                         const avalue);
 begin
  fvalarpo:= @avalue;
- tmsecomponent1(fowner).getobjectlinker.forfirst(asetter,self); 
+ tmsecomponent1(fowner).getobjectlinker.forfirst(asetter,self);
 end;
 
 procedure tvalueclientcontroller.setmsestringitem(const alink: pointer;
@@ -2580,20 +2580,20 @@ begin
  end;
 end;
 
-procedure tvalueclientcontroller.getitem(const index: integer; 
+procedure tvalueclientcontroller.getitem(const index: integer;
                                    const agetter: itemgetterty; var avalue);
 begin
  fitempo:= @avalue;
  fitemindex:= index;
- tmsecomponent1(fowner).getobjectlinker.forfirst(agetter,self); 
+ tmsecomponent1(fowner).getobjectlinker.forfirst(agetter,self);
 end;
 
-procedure tvalueclientcontroller.setitem(const index: integer; 
+procedure tvalueclientcontroller.setitem(const index: integer;
                                const asetter: itemsetterty; const avalue);
 begin
  fitempo:= @avalue;
  fitemindex:= index;
- tmsecomponent1(fowner).getobjectlinker.forfirst(asetter,self); 
+ tmsecomponent1(fowner).getobjectlinker.forfirst(asetter,self);
 end;
 }
 procedure tvalueclientcontroller.statreadlist(const alink: pointer);
@@ -2696,7 +2696,7 @@ end;
 
 procedure tvalueclientcontroller.loaded;
 begin
- if fdatalist <> nil then begin 
+ if fdatalist <> nil then begin
   linkdatalist;
  end;
  updatereadonlystate;
@@ -3436,7 +3436,7 @@ end;
 procedure trealclientcontroller.defineproperties(filer: tfiler);
 begin
  inherited;
- 
+
  filer.DefineProperty('val',
              {$ifdef FPC}@{$endif}readvalue,nil,false);
  filer.DefineProperty('mi',{$ifdef FPC}@{$endif}readmin1,nil,false);
@@ -3590,7 +3590,7 @@ end;
 procedure tdatetimeclientcontroller.defineproperties(filer: tfiler);
 begin
  inherited;
- 
+
  filer.DefineProperty('val',
              {$ifdef FPC}@{$endif}readvalue,nil,false);
  filer.DefineProperty('mi',{$ifdef FPC}@{$endif}readmin1,nil,false);
@@ -3647,7 +3647,7 @@ end;
 
 { tifistringlinkcomp }
 
-function tifistringlinkcomp.getcontrollerclass: 
+function tifistringlinkcomp.getcontrollerclass:
                                 customificlientcontrollerclassty;
 begin
  result:= tstringclientcontroller;
@@ -3676,7 +3676,7 @@ begin
  inherited setcontroller(avalue);
 end;
 
-function tifidropdownlistlinkcomp.getcontrollerclass: 
+function tifidropdownlistlinkcomp.getcontrollerclass:
                                    customificlientcontrollerclassty;
 begin
  result:= tdropdownlistclientcontroller;
@@ -3684,7 +3684,7 @@ end;
 
 { tifiintegerlinkcomp }
 
-function tifiintegerlinkcomp.getcontrollerclass: 
+function tifiintegerlinkcomp.getcontrollerclass:
                                        customificlientcontrollerclassty;
 begin
  result:= tintegerclientcontroller;
@@ -3702,7 +3702,7 @@ end;
 
 { tifiint64linkcomp }
 
-function tifiint64linkcomp.getcontrollerclass: 
+function tifiint64linkcomp.getcontrollerclass:
                            customificlientcontrollerclassty;
 begin
  result:= tint64clientcontroller;
@@ -3738,7 +3738,7 @@ end;
 
 { tifibooleanlinkcomp }
 
-function tifibooleanlinkcomp.getcontrollerclass: 
+function tifibooleanlinkcomp.getcontrollerclass:
                               customificlientcontrollerclassty;
 begin
  result:= tbooleanclientcontroller;
@@ -3756,7 +3756,7 @@ end;
 
 { tifireallinkcomp }
 
-function tifireallinkcomp.getcontrollerclass: 
+function tifireallinkcomp.getcontrollerclass:
                                    customificlientcontrollerclassty;
 begin
  result:= trealclientcontroller;
@@ -3774,7 +3774,7 @@ end;
 
 { tifidatetimelinkcomp }
 
-function tifidatetimelinkcomp.getcontrollerclass: 
+function tifidatetimelinkcomp.getcontrollerclass:
                                        customificlientcontrollerclassty;
 begin
  result:= tdatetimeclientcontroller;
@@ -3812,7 +3812,7 @@ end;
 
 { tififormlinkcomp }
 
-function tififormlinkcomp.getcontrollerclass: 
+function tififormlinkcomp.getcontrollerclass:
                                customificlientcontrollerclassty;
 begin
  result:= tformclientcontroller;
@@ -3923,7 +3923,7 @@ end;
 
 { tifigridlinkcomp }
 
-function tifigridlinkcomp.getcontrollerclass: 
+function tifigridlinkcomp.getcontrollerclass:
                                  customificlientcontrollerclassty;
 begin
  result:= tgridclientcontroller;
@@ -4006,7 +4006,7 @@ end;
 
 procedure tifidropdowncols.dochange(const index: integer);
 begin
- tifidropdownlistcontroller(fowner).fowner.change(nil); 
+ tifidropdownlistcontroller(fowner).fowner.change(nil);
 end;
 
 { tifidropdownlistcontroller }
@@ -4119,7 +4119,7 @@ begin
 end;
 
 { tifidropdowncol }
- 
+
 procedure tifidropdowncol.setdatasource(const avalue: tifidatasource);
 begin
  if avalue <> fdatasource then begin
@@ -4309,7 +4309,7 @@ begin
  inc(findex);
 end;
 
-procedure tifidatasource.destdatalists(out names: stringarty; 
+procedure tifidatasource.destdatalists(out names: stringarty;
                                                  out lists: datalistarty);
 var
  int1,int2,int3: integer;
@@ -4323,7 +4323,7 @@ begin
   forall({$ifdef FPC}@{$endif}getbindinginfo,typeinfo(iifidatasourceclient));
  end;
  int3:= 0;
- with ffields do begin 
+ with ffields do begin
 //  result:= nil;
 //  setlength(result,count);
   for int1:= 0 to high(fnamear) do begin
@@ -5015,7 +5015,7 @@ begin
      dostatwrite(writer);
 //     fitempo:= writer;
 //     tmsecomponent1(fowner).getobjectlinker.forfirst(
-//                                        @statwritelist,lico.controller); 
+//                                        @statwritelist,lico.controller);
     end;
    end;
   end;

@@ -12,7 +12,7 @@ unit mseconsts_de;
 interface
 uses
  mseconsts;
- 
+
 implementation
 uses
  msetypes{msestrings},sysutils,mseformatstr;
@@ -69,7 +69,7 @@ const
   'Fehler',                  //sc_Error
   'Min',                     //sc_Min
   'Max',                     //sc_Max
-  'Bereichs Fehler',         //sc_Range_error  
+  'Bereichs Fehler',         //sc_Range_error
 
   '&R'#0252'ckg'#0228'ngig', //sc_Undohk       ///         ///
   '&Redo',                   //sc_Redohk        //          //
@@ -81,14 +81,14 @@ const
   'Zeile a&nf'#0252'gen',    //sc_append_rowhk  // hotkeys  //
   'Zeile &l'#0246'schen',    //sc_delete_rowhk ///         ///
 
-  '&Dir',                 //sc_Dirhk               /// 
+  '&Dir',                 //sc_Dirhk               ///
   '&Home',                //sc_homehk               //
   '&Auf',                 //sc_Uphk                 //
   'Dir &neu',             //sc_New_dirhk            // hotkeys
   'N&ame',                //sc_Namehk               //
   '&Verst.Dat.anzeigen',  //sc_Show_hidden_fileshk  //
-  '&Filter',              //sc_Filterhk            ///   
-  'Speichern',            //sc_save 
+  '&Filter',              //sc_Filterhk            ///
+  'Speichern',            //sc_save
   #0214'ffnen',            //sc_open
   'Name',                 //sc_name
   'Verzeichnis erstellen',//sc_create_new_directory
@@ -111,7 +111,7 @@ const
   'Grafik Format Fehler', //sc_graphic_format_error
   'MS Bitmap',            //sc_MS_Icon
   'MS Icon',              //sc_MS_Icon
-  'JPEG Bild',            //sc_JPEG_Image 
+  'JPEG Bild',            //sc_JPEG_Image
   'PNG Bild',             //sc_PNG_Image
   'XPM Bild',             //sc_XPM_Image
   'PNM Bild',             //sc_PNM_Image
@@ -156,7 +156,7 @@ const
   'Querformat',               //sc_landscape print orientation
   'Zeile l'#0246'schen?',      //sc_Delete_row_question
   'gew'#0228'hlte Zeilen',      //sc_selected_rows
-  'Nur Einzeleintrag erlaubt', //sc_Single_item_only 
+  'Nur Einzeleintrag erlaubt', //sc_Single_item_only
   'Zellen kopieren',           //sc_Copy_Cells
   'Zellen einf'#0252'gen',      //sc_Paste_Cells
   'Schliessen',                //sc_close
@@ -212,7 +212,7 @@ const
   'Lauter',                    //sc_volumeup
   'Ansage abbrechen'           //sc_cancelspeech
 );
-    
+
 function delete_n_selected_rows(const params: array of const): msestring;
 begin
  with params[0] do begin
@@ -223,7 +223,7 @@ begin
    result:= inttostrmse(vinteger)+
      widestring(' gew'#0228'hlte Zeilen l'#0246'schen?');
   end;
- end;    
+ end;
 end;
 
 const

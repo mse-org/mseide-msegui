@@ -37,9 +37,9 @@ type
    fpath: msestring;
    function filtercomponent(const acomponent: tcomponent): boolean;
  end;
- 
+
 function editificlient(const acomponent: tifilinkcomp): modalresultty;
- 
+
 implementation
 uses
  mseificlienteditor_mfm,msepropertyeditors,msedesignintf,msedesigner,
@@ -56,7 +56,7 @@ begin
   result:= msestring(aobject.classname);
  end;
 end;
- 
+
 function editificlient(const acomponent: tifilinkcomp): modalresultty;
 var
  edfo: tmseificlienteditorfo;
@@ -87,7 +87,7 @@ begin
     end;
    end;
    for int1:= 0 to high(ar2) do begin //add linked
-    if (ar2[int1] <> nil) and 
+    if (ar2[int1] <> nil) and
                  (finditem(pointerarty(ar1),ar2[int1]) < 0) then begin
      setobjectprop(tobject(ar2[int1]),'ifilink',acomponent);
      designer.componentmodified(tcomponent(ar2[int1]));
@@ -116,9 +116,9 @@ begin
   po1:=  getpropinfo(acomponent,'ifilink');
   result:= (po1 <> nil) and (po1^.proptype^.kind = tkclass) and
                (fcomp is gettypedata(po1^.proptype{$ifndef FPC}^{$endif})^.classtype);
- end; 
+ end;
 end;
- 
+
 procedure tmseificlienteditorfo.befdrop(const sender: TObject);
 begin
  finstances:= po.griddata.datapo;
@@ -191,7 +191,7 @@ begin
  if isenterkey(nil,ainfo.key) and (ainfo.shiftstate = []) and
                             not na.edited then begin
   include(ainfo.eventstate,es_processed);
-  editexe(nil);  
+  editexe(nil);
  end;
 end;
 

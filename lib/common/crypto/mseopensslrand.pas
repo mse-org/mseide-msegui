@@ -12,7 +12,7 @@ unit mseopensslrand;
 interface
 uses
  mseopenssl,msectypes;
- 
+
 var
  // pseudo-random number generator (PRNG) functions
  RAND_seed: procedure(const buf: pointer; num: cint); cdecl;
@@ -27,7 +27,7 @@ var
 
  RAND_bytes: function(buf: pbyte; num: cint): cint; cdecl;
  RAND_pseudo_bytes: function(buf: pbyte; num: cint): cint; cdecl;
- 
+
  RAND_egd: function(path: pchar): cint; cdecl;
 
  RAND_set_rand_method: procedure(meth: pRAND_METHOD); cdecl;
@@ -35,7 +35,7 @@ var
  RAND_SSLeay: function(): pRAND_METHOD; cdecl;
 
  RAND_cleanup: procedure(); cdecl;
- 
+
 implementation
 uses
  msedynload;

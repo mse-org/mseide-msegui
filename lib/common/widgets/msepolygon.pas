@@ -22,18 +22,18 @@ interface
 uses
  msegui,mseguiglob,msewidgets,msegraphutils,msegraphics,classes,mclasses,
  msetypes,msebitmap,msesimplewidgets,msemenus,mseevent;
- 
+
 type
  polygonstatety = (pos_geometryvalid);
  polygonstatesty = set of polygonstatety;
- 
+
  polygoninfoty = record
   dim: rectty;
   ppmm: real;
   edgecount: integer;
   edgeradiusmm: real;
   edgeradiusvertexcount: integer;
-  rotation: real; 
+  rotation: real;
   vertex: pointarty;
   color: colorty;
   colorline: colorty;
@@ -45,10 +45,10 @@ type
   brushoffset: pointty;
   smooth: boolean;
  end;
- 
+
  projvectty = array[0..1] of real;
  projmatrixty = array[0..2] of projvectty; //[row][col]
- 
+
  tpolygon = class(tpaintbox)
   private
    finfo: polygoninfoty;
@@ -77,22 +77,22 @@ type
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
   published
-   property poly_edgecount: integer read finfo.edgecount 
+   property poly_edgecount: integer read finfo.edgecount
                                   write setpoly_edgecount default 0;
-                                 //0 -> circle                    
-   property poly_edgeradiusmm: real read finfo.edgeradiusmm 
+                                 //0 -> circle
+   property poly_edgeradiusmm: real read finfo.edgeradiusmm
                          write setpoly_edgeradiusmm;
    property poly_edgeradiusvertexcount: integer read finfo.edgeradiusvertexcount
                          write setpoly_edgeradiusvertexcount default 2;
    property poly_rotation: real read finfo.rotation write setpoly_rotation;
                                  //0..1 -> 0..360° CCW
-   property poly_color: colorty read finfo.color write setpoly_color 
+   property poly_color: colorty read finfo.color write setpoly_color
                                                           default cl_white;
-   property poly_colorline: colorty read finfo.colorline write setpoly_colorline 
+   property poly_colorline: colorty read finfo.colorline write setpoly_colorline
                                                           default cl_black;
    property poly_colorlinegap: colorty read finfo.colorlinegap
                      write setpoly_colorlinegap default cl_transparent;
-   property poly_linewidthmm: real read finfo.linewidthmm 
+   property poly_linewidthmm: real read finfo.linewidthmm
                                                     write setpoly_linewidthmm;
    property poly_dashes: ansistring read finfo.dashes write setpoly_dashes;
    property poly_joinstyle: joinstylety read finfo.joinstyle
@@ -102,7 +102,7 @@ type
                         setpoly_brushoffset_x;
    property poly_brushoffset_y: integer read finfo.brushoffset.y write
                         setpoly_brushoffset_y;
-   property poly_smooth: boolean read finfo.smooth 
+   property poly_smooth: boolean read finfo.smooth
                                       write setpolysmooth default false;
  end;
 
@@ -124,7 +124,7 @@ procedure project(const matrix: projmatrixty; var point: pointty); overload;
 procedure project(const matrix: projmatrixty; var point: complexty); overload;
 procedure project(const matrix: projmatrixty; var points: complexarty); overload;
 procedure realtointpoints(const source: complexarty; out dest: pointarty);
-                         
+
 implementation
 {$ifndef mse_allwarnings}
  {$if fpc_fullversion >= 030100}
@@ -139,7 +139,7 @@ const
  pi2 = 2*pi;
  pid2 = pi/2;
  pi3d2 = 3*pi/2;
- 
+
 procedure realtointpoints(const source: complexarty; out dest: pointarty);
 var
  int1: integer;
@@ -184,7 +184,7 @@ procedure projtranslate(var matrix: projmatrixty; const tx,ty: real);
 begin
  if (tx <> 0) or (ty <> 0) then begin
   matrix[2,0]:= matrix[2,0] + tx;
-  matrix[2,1]:= matrix[2,1] + ty;  
+  matrix[2,1]:= matrix[2,1] + ty;
  end;
 end;
 
@@ -226,7 +226,7 @@ var
  o00,o01,
  o10,o11,
  o20,o21: real;
- 
+
 begin
  o00:= a[0,0]*b[0,0] + a[0,1]*b[1,0] {+ a[0,2]*b[2,0]};
  o01:= a[0,0]*b[0,1] + a[0,1]*b[1,1] {+ a[0,2]*b[2,1]};
@@ -481,7 +481,7 @@ var
  ptpo1,ptpo2,ptpo3: pcomplexty;
  ang1,ang2: real;
  pt1: complexty;
- 
+
 begin
  if not (pos_geometryvalid in fstate) or (finfo.ppmm <> appmm) then begin
   include(fstate,pos_geometryvalid);
@@ -536,14 +536,14 @@ begin
     else begin
      setlength(ar1,edgecount);
      rea1:= 2*pi/(edgecount);
-     rea2:= (pid2+rea1/2); 
+     rea2:= (pid2+rea1/2);
      for int1:= 0 to high(ar1) do begin
       rea3:= int1*rea1+rea2; //edge at bottom
-      ar1[int1].im:= sin(rea3);          
+      ar1[int1].im:= sin(rea3);
       ar1[int1].re:= cos(rea3);
      end;
      ma:= unityprojmatrix;
-     projrotate(ma,rotation*pi2); 
+     projrotate(ma,rotation*pi2);
      project(ma,ar1);
      minx:= 0;
      miny:= 0;
@@ -583,7 +583,7 @@ begin
        ang2:= angle(ptpo2^,ptpo3^);
        rea2:= halfangle(ang2,ang1); //angle of center -> vertex, center -> tangent
        rea3:= arcangle(ang2,ang1)/2;
-       pt1:= movepoint(ptpo2^,rea2,rea1/sin(rea3));  
+       pt1:= movepoint(ptpo2^,rea2,rea1/sin(rea3));
        arc(pt1,rea1,ang1+pid2,ang2-pid2,edgeradiusvertexcount,
                                             @ar2[int1*edgeradiusvertexcount]);
                                     //center of circle

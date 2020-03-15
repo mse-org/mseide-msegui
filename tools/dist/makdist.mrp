@@ -255,7 +255,7 @@ macronames=10
  FPCFLAGS
  FPC
 macrovalues=10
- 
+
  ppc386
  ppcx64
  /home/mse/packs/standard/git/
@@ -280,10 +280,10 @@ macrogroup=0
 groupcomment=6
  386
  x64
- 
- 
- 
- 
+
+
+
+
 [mainfo]
 stackedunder=
 x=129

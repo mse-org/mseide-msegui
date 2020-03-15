@@ -87,7 +87,7 @@ procedure post_process_2pass(cinfo : j_decompress_ptr;
 
 {METHODDEF}
 procedure start_pass_dpost (cinfo : j_decompress_ptr;
-                            pass_mode : J_BUF_MODE); 
+                            pass_mode : J_BUF_MODE);
 var
   post : my_post_ptr;
 begin

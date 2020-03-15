@@ -12,7 +12,7 @@ type
   procedure processdied(const aprochandle: prochandlety;
                  const aexecresult: integer; const adata: pointer);
  end;
- 
+
 function pro_listentoprocess(const aprochandle: prochandlety;
                              const adest: iprocmonitor; const adata: pointer): boolean;
              //false on error, limited to 63 items on windows

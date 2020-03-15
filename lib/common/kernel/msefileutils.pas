@@ -40,7 +40,7 @@ type
                                      //default true
  pathrelocateoptionty = (pro_preferenew,pro_onlynew,pro_rootpath);
  pathrelocateoptionsty = set of pathrelocateoptionty;
- 
+
 const
  sortflags: filelistoptionsty = [flo_sortname,flo_sorttime,flo_sortsize];
  intermediatefileextension = '.tmp';
@@ -115,13 +115,13 @@ function quotefilename(const name: filenamety): filenamety; overload;
 function quotefilename(const directory,name: filenamety): filenamety; overload;
 function quotefilename(const names: filenamearty): filenamety; overload;
 function quotefilename(const names: array of filenamety): filenamety; overload;
-procedure unquotefilename(const names: filenamety; 
+procedure unquotefilename(const names: filenamety;
                                var result: filenamearty); overload;
 function unquotefilename(const name: filenamety): filenamety; overload;
 function extractrootpath(var names: filenamearty): filenamety;
-function combinerootpath(const rootpath: filenamety; 
+function combinerootpath(const rootpath: filenamety;
                                const names: filenamearty): filenamearty; overload;
-function combinerootpath(const rootpaths: filenamearty; 
+function combinerootpath(const rootpaths: filenamearty;
                                const name: filenamety): filenamearty; overload;
 
 function syscommandline(const acommandline: filenamety): filenamety;
@@ -132,15 +132,15 @@ function filepath({const} directory: filenamety; {const} filename: filenamety;
  //directory ignored if filename starts with root
  //"~/....." expands to sys_getuserhomedir()/.....
  //"^/....." expands to sys_getapphomedir()/.....
- 
+
 function filepath({const} path: filenamety;
                         kind: filekindty = fk_default;
                         relative: boolean = false): filenamety; overload;
 function relativepath(const path: filenamety; const root: filenamety = '';
                         const kind: filekindty = fk_default): filenamety;
        //root = '' -> currentdir
-function relocatepath(const olddir,newdir: filenamety; 
-          var apath: filenamety; 
+function relocatepath(const olddir,newdir: filenamety;
+          var apath: filenamety;
                      const options: pathrelocateoptionsty = []): boolean;
 //searches file in newdir relative to olddir or in original position,
 //updates apath, returns true if found
@@ -151,7 +151,7 @@ function getlastpathsection(const path: filenamety): filenamety;
 function removelastdir(path: filenamety; var newpath: filenamety): filenamety;
 procedure splitfilepath(const path: filenamety;
                             out directory,filename: filenamety); overload;
-procedure splitfilepath(const path: filenamety; 
+procedure splitfilepath(const path: filenamety;
                             out directory,filename,fileext: filenamety); overload;
 function splitfilepath(const path: filenamety): filenamearty;
 function splitrootpath(const path: filenamety): filenamearty;
@@ -162,7 +162,7 @@ function checkfilename(const filename,mask: filenamety;
           //true if filename fits mask, maskchars: '*','?'
 function checkfilename(const filename: filenamety; const mask: filenamearty;
                           casesensitive: boolean = false): boolean; overload;
-function checkfilename(const filename: filenamety; 
+function checkfilename(const filename: filenamety;
                         const dirstream: dirstreamty): boolean; overload;
 function hasmaskchars(const filename: filenamety): boolean;
 function issamefilename(const a,b: filenamety): boolean;
@@ -186,7 +186,7 @@ function tosysfilepath(const path: filenamearty;
                                 const quoted: boolean = false): filenamearty;
 procedure tosysfilepath1(var path: filenamety; const quoted: boolean = false);
 
-function searchfile(const filename: filenamety; dir: boolean = false; 
+function searchfile(const filename: filenamety; dir: boolean = false;
                      const aoptions: dirstreamoptionsty = []): filenamety; overload;
            //returns rootpath if file exists, '' otherwise
 function searchfile(const afilename: filenamety;
@@ -215,7 +215,7 @@ function searchfiles(const afilename: filenamety;
               const aexclude: fileattributesty = [];
               const aoptions: dirstreamoptionsty = []): filenamearty; overload;
            //returns filepaths
-           //afilename can be path or quoted list of paths 
+           //afilename can be path or quoted list of paths
            //and can have wildchars ('?','*') example: '"a/*.pas" "b/*.pp"',
            //adirnames can have wildchars ('?','*','**','***')
 function searchfiles(const afilename: filenamety;
@@ -227,7 +227,7 @@ function searchfiles(const afilename: filenamety;
          //afilename must be simple filename or quoted list of simple filenames
          //and can have wildchars ('?','*') example: '"*.pp" "*.pas"',
          //adirname can have wildchars ('?','*','**','***')
-            
+
 function searchfilenames(const afilename: filenamety; const adirname: filenamety;
                       const ainclude: fileattributesty = [fa_all];
                       const aexclude: fileattributesty = [];
@@ -236,7 +236,7 @@ function searchfilenames(const afilename: filenamety; const adirname: filenamety
            //afilename must be simple filename or quoted list of simple filenames
            //and can have wildchars ('?','*') example: '"*.pp" "*.pas"',
            //empty -> all
-           
+
 function dirhasentries(const adirname: filenamety;
                          const ainclude: fileattributesty = [fa_all];
                          const aexclude: fileattributesty = []): boolean;
@@ -259,26 +259,26 @@ function uniquefilename(const path: filenamety): filenamety;
                              //adds numbers if necessary
 
 function isrootpath(const path: filenamety): boolean;
-function copyfile(const oldfile,newfile: filenamety; 
+function copyfile(const oldfile,newfile: filenamety;
                                 const canoverwrite: boolean = true): boolean;
                       //false if newfile exists and not canoverwrite
-function trycopyfile(const oldfile,newfile: filenamety; 
+function trycopyfile(const oldfile,newfile: filenamety;
                                 const canoverwrite: boolean = true): boolean;
                       //false on error or newfile exists and not canoverwrite
-function renamefile(const oldname,newname: filenamety; 
+function renamefile(const oldname,newname: filenamety;
                                 const canoverwrite: boolean = true): boolean;
                       //false if newname exists and not canoverwrite
 function deletefile(const filename: filenamety): boolean;
                       //false if not existing
 function trydeletefile(const filename: filenamety): boolean;
                       //false if not existing or not deleted
-procedure createdir(const path: filenamety; 
+procedure createdir(const path: filenamety;
                                  const rights: filerightsty = defaultdirrights);
-procedure createdirpath(const path: filenamety; 
+procedure createdirpath(const path: filenamety;
                                  const rights: filerightsty = defaultdirrights);
-function deletedir(const path: filenamety): boolean; 
+function deletedir(const path: filenamety): boolean;
            //deletes files and directories recursively, false if not existing
-function trydeletedir(const path: filenamety): boolean; 
+function trydeletedir(const path: filenamety): boolean;
      //deletes files and directories recursively,
      // false if not existing or not deleted
 function getcurrentdir: filenamety; deprecated;
@@ -294,7 +294,7 @@ procedure initdirfileinfo(var info: fileinfoty; const aname: filenamety;
                                                         open: boolean = false);
 function getfileinfo(const path: filenamety; var info: fileinfoty): boolean;
                   //false if not found
-function getfilemodtime(const path: filenamety): tdatetime; 
+function getfilemodtime(const path: filenamety): tdatetime;
            //empty date if not found
 
 function filesystemiscaseinsensitive: boolean;
@@ -423,7 +423,7 @@ begin
  result:= sys_getfileinfo(path,info);
 end;
 
-function getfilemodtime(const path: filenamety): tdatetime; 
+function getfilemodtime(const path: filenamety): tdatetime;
            //empty date if not found
 var
  info1: fileinfoty;
@@ -436,7 +436,7 @@ begin
  end;
 end;
 
-function copyfile(const oldfile,newfile: filenamety; 
+function copyfile(const oldfile,newfile: filenamety;
                                 const canoverwrite: boolean = true): boolean;
                       //false if dest exists and not canoverwrite
  //todo: remove race condition
@@ -451,7 +451,7 @@ begin
  end;
 end;
 
-function trycopyfile(const oldfile,newfile: filenamety; 
+function trycopyfile(const oldfile,newfile: filenamety;
                                 const canoverwrite: boolean = true): boolean;
                       //false if dest exists and not canoverwrite
 begin
@@ -464,7 +464,7 @@ begin
  end;
 end;
 
-function renamefile(const oldname,newname: filenamety; 
+function renamefile(const oldname,newname: filenamety;
                                 const canoverwrite: boolean = true): boolean;
                       //false if newname exists and not canoverwrite
 begin
@@ -518,7 +518,7 @@ begin
  result:= sys_deletedir(path);
 end;
 
-function deletedir(const path: filenamety): boolean; 
+function deletedir(const path: filenamety): boolean;
            //deletes files and directories recursively, false if not existing
 var
  err: syserrorty;
@@ -530,21 +530,21 @@ begin
  end;
 end;
 
-function trydeletedir(const path: filenamety): boolean; 
+function trydeletedir(const path: filenamety): boolean;
      //deletes files and directories recursively,
      // false if not existing or not deleted
 begin
  result:= deletefilesanddir(path) = sye_ok;
 end;
 
-procedure createdir(const path: filenamety; 
+procedure createdir(const path: filenamety;
                                const rights: filerightsty = defaultdirrights);
 begin
 // syserror(sys_createdir(tosysfilepath(path)));
  syserror(sys_createdir(path,rights));
 end;
 
-procedure createdirpath(const path: filenamety; 
+procedure createdirpath(const path: filenamety;
                                  const rights: filerightsty = defaultdirrights);
 var
  ar1: filenamearty;
@@ -740,7 +740,7 @@ begin
  end;
 end;
 
-function checkfilename(const filename: filenamety; 
+function checkfilename(const filename: filenamety;
                         const dirstream: dirstreamty): boolean;
                           //mask must be uppercase if case sensitive
 var
@@ -809,7 +809,7 @@ function searchfile(const filename: filenamety;dir: boolean = false;
            //returns rootpath if file exists, '' otherwise
 begin
  result:= filepath(filename);
- if not (dir and finddir(result) or 
+ if not (dir and finddir(result) or
                  not dir and findfile(result)) then begin
   result:= '';
  end;
@@ -906,7 +906,7 @@ begin
  end;
 end;
 
-function searchfile(const afilename: filenamety; 
+function searchfile(const afilename: filenamety;
                          const adirnames: array of filenamety;
                          const ainclude: fileattributesty = [fa_all];
                          const aexclude: fileattributesty = [];
@@ -1019,7 +1019,7 @@ begin
    end;
    int2:= 0;
    while sys_readdirstream(dirstream,fileinfo) do begin
-    if (fileinfo.extinfo1.filetype <> ft_dir) or 
+    if (fileinfo.extinfo1.filetype <> ft_dir) or
                   (fileinfo.name <> dotchar) and (fileinfo.name <> '..') then begin
      if high(result) < int2 then begin
       setlength(result,int2*2+16);
@@ -1061,7 +1061,7 @@ begin
   end;
   int2:= 0;
   while sys_readdirstream(dirstream,fileinfo) do begin
-   if (fileinfo.extinfo1.filetype <> ft_dir) or 
+   if (fileinfo.extinfo1.filetype <> ft_dir) or
                  (fileinfo.name <> dotchar) and (fileinfo.name <> '..') then begin
     if high(result) < int2 then begin
      setlength(result,int2*2+16);
@@ -1075,7 +1075,7 @@ begin
  end;
 end;
 
-function searchfiles(const afilename: filenamety; 
+function searchfiles(const afilename: filenamety;
                       const adirnames: array of filenamety;
                       const ainclude: fileattributesty = [fa_all];
                       const aexclude: fileattributesty = [];
@@ -1106,7 +1106,7 @@ begin
      stackarray(searchfiles(file1,dir1,ainclude,aexclude,aoptions),result);
     end;
    end;
-  end;   
+  end;
  end;
 end;
 
@@ -1372,11 +1372,11 @@ procedure tomsefilepath1(var path: filenamety; const quoted: boolean = false);
   end;
   requote(path,str1);
  end;
- 
+
 var
  ar1: filenamearty;
  int1: integer;
- 
+
 begin //tomsefilepath1
  path:= trim(path);
  if findchar(path,quotechar) <> 0 then begin
@@ -1444,7 +1444,7 @@ procedure syncpathdelim(const source: filenamety; var dest: filenamety;
               kind: filekindty);
 begin
  if length(dest) > 0 then begin
-  if (length(dest) >= 3) and (length(dest) <= 4) and 
+  if (length(dest) >= 3) and (length(dest) <= 4) and
                        (dest[1] = slashchar) and (dest[3] = ':') then begin
    kind:= fk_dir;      // /a:  -> /a:/
                        // /a:/ -> /a:/
@@ -1544,7 +1544,7 @@ begin
    bo1:= true;
   end;
  end;
- if relative and ((mstr1 = dotchar) or msestartsstr('./',mstr1)) and 
+ if relative and ((mstr1 = dotchar) or msestartsstr('./',mstr1)) and
            not msestartsstr('../',result) then begin
   result:= './' + result;
  end;
@@ -1598,7 +1598,7 @@ begin
   end;
  end;
  if int1 > 1 then begin //quoted
-  result:= quotechar+tosysfilepath(copy(acommandline,int1,int2-int1)) + 
+  result:= quotechar+tosysfilepath(copy(acommandline,int1,int2-int1)) +
                                     quotechar+ copy(acommandline,int3,bigint);
  end
  else begin
@@ -1662,7 +1662,7 @@ begin
  syncpathdelim(str1,result,kind);
 end;
 
-function relocatepath(const olddir,newdir: filenamety; 
+function relocatepath(const olddir,newdir: filenamety;
                       var apath: filenamety;
                       const options: pathrelocateoptionsty = []): boolean;
 //searches file in newdir relative to olddir if apath not found, updates
@@ -1730,7 +1730,7 @@ begin
  end;
 end;
 
-procedure splitfilepath(const path: filenamety; 
+procedure splitfilepath(const path: filenamety;
                             out directory,filename,fileext: filenamety);
 var
  fstr1: filenamety;
@@ -1880,7 +1880,7 @@ end;
 function uniquefilename(const path: filenamety): filenamety;
                              //adds numbers if necessary
 var
- int1: integer; 
+ int1: integer;
  dir,name,ext: filenamety;
 begin
  result:= path;
@@ -1936,7 +1936,7 @@ begin
    dec(int2);
   end;
   if (int2 <= 1) or (int2 = 2) and (fna1[1] = slashchar) then begin //UNC
-   result:= copy(fna1,1,int1); //all without trailing slash   
+   result:= copy(fna1,1,int1); //all without trailing slash
    exit;
   end;
   result:= copy(fna1,int2+1,int1-int2);

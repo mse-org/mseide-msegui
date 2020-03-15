@@ -23,17 +23,17 @@ const
  defaultbuttonwidth = 50;
  defaultbuttonheight = 20;
  defaultlabeltextflags = [tf_ycentered];
- defaultlabeloptionswidget = (defaultoptionswidget {+ 
-                            [ow_fontglyphheight]}) - 
+ defaultlabeloptionswidget = (defaultoptionswidget {+
+                            [ow_fontglyphheight]}) -
               [ow_mousefocus,ow_tabfocus,ow_arrowfocus];
- defaultlabeloptionswidget1 = defaultoptionswidget1 + 
+ defaultlabeloptionswidget1 = defaultoptionswidget1 +
                   [ow1_autowidth,ow1_autoheight,ow1_fontglyphheight];
  defaultlabelwidgetwidth = 100;
  defaultlabelwidgetheight = 20;
 
- defaulticonoptionswidget = defaultoptionswidget - 
+ defaulticonoptionswidget = defaultoptionswidget -
                                 [ow_mousefocus,ow_tabfocus,ow_arrowfocus];
- defaulticonoptionswidget1 = defaultoptionswidget1 + 
+ defaulticonoptionswidget1 = defaultoptionswidget1 +
                                 [ow1_autowidth,ow1_autoheight];
  defaulticonwidgetwidth = 16;
  defaulticonwidgetheight = 16;
@@ -78,7 +78,7 @@ type
 
  tcustombutton = class;
  buttoneventty = procedure(const sender: tcustombutton) of object;
- 
+
  tcustombutton = class(tactionsimplebutton,iactionlink,iimagelistinfo)
   private
    fmodalresult: modalresultty;
@@ -126,7 +126,7 @@ type
    procedure readcaptionpos(reader: treader);
    procedure settextflags(const avalue: textflagsty);
    procedure setshortcuts(const avalue: shortcutarty);
-   procedure setshortcuts1(const avalue: shortcutarty);  
+   procedure setshortcuts1(const avalue: shortcutarty);
    procedure readshortcut(reader: treader);
    procedure readshortcut1(reader: treader);
    procedure readsc(reader: treader);
@@ -147,7 +147,7 @@ type
    function shortcutseparator: msechar;
    procedure calccaptiontext(var ainfo: actioninfoty) virtual;
    procedure actionchanged;
-   
+
    procedure setoptions(const avalue: buttonoptionsty); override;
    function gethint: msestring; override;
    procedure sethint(const Value: msestring); override;
@@ -183,9 +183,9 @@ type
    property font: twidgetfont read getfont write setfont stored isfontstored;
    property modalresult: modalresultty read fmodalresult write fmodalresult
                                 default mr_none;
-   property action: tcustomaction read factioninfo.action write setaction;   
+   property action: tcustomaction read factioninfo.action write setaction;
    property caption: captionty read getcaption write setcaption stored iscaptionstored;
-   property textflags: textflagsty read finfo.ca.textflags 
+   property textflags: textflagsty read finfo.ca.textflags
                          write settextflags default defaultcaptiontextflags;
    property imagepos: imageposty read finfo.ca.imagepos write setimagepos
                               default ip_center;
@@ -199,25 +199,25 @@ type
                               write setimagenrdisabled
                             stored isimagenrdisabledstored default -2;
 
-   property imagedist: integer read finfo.ca.imagedist 
+   property imagedist: integer read finfo.ca.imagedist
                                               write setimagedist default 0;
-   property imagedist1: integer read finfo.ca.imagedist1 
+   property imagedist1: integer read finfo.ca.imagedist1
                                          write setimagedist1 default 0;
    property imagedist2: integer read finfo.ca.imagedist2
                                          write setimagedist2 default 0;
    property colorglyph: colorty read factioninfo.colorglyph write setcolorglyph
                                    stored iscolorglyphstored default cl_default;
-   property shortcut: shortcutty read getshortcut write setshortcut 
+   property shortcut: shortcutty read getshortcut write setshortcut
                                     stored false default 0;
-   property shortcut1: shortcutty read getshortcut1 write setshortcut1 
+   property shortcut1: shortcutty read getshortcut1 write setshortcut1
                                     stored false default 0;
    property shortcuts: shortcutarty read factioninfo.shortcut write setshortcuts;
-   property shortcuts1: shortcutarty read factioninfo.shortcut1 
+   property shortcuts1: shortcutarty read factioninfo.shortcut1
                                                         write setshortcuts1;
    property onupdate: buttoneventty read fonupdate write fonupdate;
    property onexecute: notifyeventty read factioninfo.onexecute
               write setonexecute stored isonexecutestored;
-   property onbeforeexecute: accepteventty read factioninfo.onbeforeexecute 
+   property onbeforeexecute: accepteventty read factioninfo.onbeforeexecute
               write setonbeforeexecute stored isonbeforeexecutestored;
    property onafterexecute: notifyeventty read factioninfo.onafterexecute
               write setonafterexecute stored isonafterexecutestored;
@@ -337,11 +337,11 @@ type
    property facemouse: tcustomface read getfacemouse write setfacemouse;
    property faceclicked: tcustomface read getfaceclicked write setfaceclicked;
    property facedisabled: tcustomface read getfacedisabled write setfacedisabled;
-   property imagenrmouse: imagenrty read fimagenrmouse 
+   property imagenrmouse: imagenrty read fimagenrmouse
                                         write setimagenrmouse default -1;
    property imagenrclicked: imagenrty read fimagenrclicked
                                         write setimagenrclicked default -1;
-   property captionrich: msestring read fcaptionrich 
+   property captionrich: msestring read fcaptionrich
                                    write setcaptionrich stored false;
    property richcaption: richstringty read finfo.ca.caption write setrichvalue;
   published
@@ -438,11 +438,11 @@ type
    property onbeforeexecute;
    property onafterexecute;
  end;
-   
+
  labeloptionty = (lao_nogray,lao_nounderline);
  labeloptionsty = set of labeloptionty;
- 
-type 
+
+type
  tcustomlabel = class(tpublishedwidget)
   private
    frichcaption: richstringty;
@@ -470,9 +470,9 @@ type
    procedure initnewcomponent(const ascale: real); override;
    property caption: msestring read fcaption write setcaption;
    property font: twidgetfont read getfont write setfont stored isfontstored;
-   property fontempty: twidgetfontempty read getfontempty 
+   property fontempty: twidgetfontempty read getfontempty
                             write setfontempty stored isfontemptystored;
-   property textflags: textflagsty read ftextflags write settextflags default 
+   property textflags: textflagsty read ftextflags write settextflags default
                              defaultlabeltextflags;
    property options: labeloptionsty read foptions write setoptions default [];
   published
@@ -492,7 +492,7 @@ type
 
  animationoptionty = (ano_singleshot,ano_designactive);
  animationoptionsty = set of animationoptionty;
- 
+
  tcustomicon = class(tpublishedwidget)
   private
    fimagelist: timagelist;
@@ -538,21 +538,21 @@ type
    destructor destroy(); override;
    property imagelist: timagelist read fimagelist write setimagelist;
    property imagenum: integer read fimagenum write setimagenum default -1;
-   property colorglyph: colorty read fcolorglyph 
+   property colorglyph: colorty read fcolorglyph
                            write setcolorglyph default cl_default;
-   property colorbackground: colorty read fcolorbackground 
+   property colorbackground: colorty read fcolorbackground
                            write setcolorbackground default cl_default;
-   property opacity: colorty read fopacity 
+   property opacity: colorty read fopacity
                            write setopacity default cl_default;
-   property alignment: alignmentsty read falignment 
+   property alignment: alignmentsty read falignment
                         write setalignment default [al_xcentered,al_ycentered];
-   property currentanimoffset: int32 read fcurrentanimoffset 
+   property currentanimoffset: int32 read fcurrentanimoffset
                                              write setcurrentanimoffset;
    procedure animrestart();
-   property anim_intervalus: int32 read fanim_intervalus 
-                                 write setanim_intervalus default 0; 
+   property anim_intervalus: int32 read fanim_intervalus
+                                 write setanim_intervalus default 0;
                          //micro seconds, 0 = animation off
-   property anim_count: int32 read fanim_count write setanim_count default 0; 
+   property anim_count: int32 read fanim_count write setanim_count default 0;
                          //starts from imagenum, < 2 -> animation off
    property anim_enabled: boolean read fanim_enabled write
                                       setanim_enabled default false;
@@ -573,12 +573,12 @@ type
    property colorbackground;
    property opacity;
    property alignment;
-   property anim_intervalus; 
+   property anim_intervalus;
    property anim_count;
    property anim_enabled;
    property anim_options;
  end;
-  
+
  tgroupboxframe = class(tcaptionframe)
   public
    constructor create(const aintf: icaptionframe);
@@ -590,19 +590,19 @@ type
    property levelo default -1;
    property leveli default 1;
    property captiondist default 0;
-   property options 
+   property options
            default defaultcaptionframeoptions + [cfo_captionframecentered];
    property captionoffset default 4;
  end;
 
  optionscalety = (osc_expandx,osc_shrinkx,osc_expandy,osc_shrinky,
                   osc_invisishrinkx,osc_invisishrinky,
-                  osc_expandshrinkx,osc_expandshrinky); 
+                  osc_expandshrinkx,osc_expandshrinky);
                    //expand minshrinksize to minscrollsize
  optionsscalety = set of optionscalety;
 const
  defaultoptionsscale = [osc_expandshrinkx,osc_expandshrinky];
-type 
+type
  tcustomscalingwidget = class(tpublishedwidget)
   private
    fonfontheightdelta: fontheightdeltaeventty;
@@ -640,7 +640,7 @@ type
    property onresize: notifyeventty read fonresize write fonresize;
    property onmove: notifyeventty read fonmove write fonmove;
   published
-   property taborderoverride: ttaborderoverride read ftaborderoverride 
+   property taborderoverride: ttaborderoverride read ftaborderoverride
                                                   write settaborderoverride;
    property optionsscale: optionsscalety read foptionsscale write setoptionsscale
                   default defaultoptionsscale;
@@ -648,7 +648,7 @@ type
                      write fonfontheightdelta;
    property onlayout: notifyeventty read fonlayout write fonlayout;
  end;
- 
+
  tscalingwidget = class(tcustomscalingwidget)
   published
    property font: twidgetfont read getfont write setfont stored isfontstored;
@@ -658,12 +658,12 @@ type
    property onresize;
    property onmove;
  end;
- 
+
 const
- defaultgroupboxoptionswidget = (defaultoptionswidget + 
+ defaultgroupboxoptionswidget = (defaultoptionswidget +
         [ow_arrowfocusin,ow_arrowfocusout,ow_parenttabfocus,ow_subfocus])-
         [ow_mousefocus];
- 
+
 type
  tgroupbox = class(tscalingwidget)
   private
@@ -677,7 +677,7 @@ type
    procedure initnewcomponent(const ascale: real); override;
   published
    property optionswidget default defaultgroupboxoptionswidget;
-   property onfocusedwidgetchanged: widgetchangeeventty 
+   property onfocusedwidgetchanged: widgetchangeeventty
                      read fonfocusedwidgetchanged write fonfocusedwidgetchanged;
  end;
 
@@ -685,7 +685,7 @@ const
  defaultscrollboxoptionsscale =
         defaultoptionsscale - [osc_expandshrinkx,osc_expandshrinky];
  defaultscrollboxoptionswidget = defaultoptionswidgetmousewheel + [ow_subfocus];
- 
+
 type
  tscrollbox = class(tscalingwidget)
   private
@@ -795,7 +795,7 @@ type
 {
    property frameface_offsetactivemouse;
    property frameface_offsetactiveclicked;
-}   
+}
    property optionsskin;
 
    property options;
@@ -827,7 +827,7 @@ type
   published
    property mousewheel;
  end;
- 
+
  stepdirty = (sd_right,sd_up,sd_left,sd_down);
 
  stepeventty = procedure (const sender: tobject; const stepkind: stepkindty;
@@ -867,7 +867,7 @@ uses
 type
  tcustomframe1 = class(tcustomframe);
  ttaborderoverride1 = class(ttaborderoverride);
- 
+
 { tcustombutton }
 
 constructor tcustombutton.create(aowner: tcomponent);
@@ -883,7 +883,7 @@ end;
 destructor tcustombutton.destroy;
 begin
  if bo_updateonidle in foptions then begin
-  application.unregisteronidle({$ifdef FPC}@{$endif}doidle); 
+  application.unregisteronidle({$ifdef FPC}@{$endif}doidle);
  end;
  inherited;
 end;
@@ -897,12 +897,12 @@ begin
         {$ifdef FPC}longword{$else}longword{$endif}(foptions) xor
         {$ifdef FPC}longword{$else}longword{$endif}(avalue));
   if bo_updateonidle in delta then begin
-   if (bo_updateonidle in avalue) and 
+   if (bo_updateonidle in avalue) and
                             not (csdesigning in componentstate) then begin
-    application.registeronidle({$ifdef FPC}@{$endif}doidle); 
+    application.registeronidle({$ifdef FPC}@{$endif}doidle);
    end
    else begin
-    application.unregisteronidle({$ifdef FPC}@{$endif}doidle); 
+    application.unregisteronidle({$ifdef FPC}@{$endif}doidle);
    end;
   end;
  end;
@@ -941,11 +941,11 @@ procedure tcustombutton.doexecute;
 var
  b1: boolean;
 begin
- if (fmodalresult <> mr_none) or 
+ if (fmodalresult <> mr_none) or
   (options * [bo_nocandefocus,bo_candefocuswindow] <> [bo_candefocuswindow]) or
                                             rootwidget.canparentclose then begin
   fexeccanceled:= not doactionexecute1(
-         self,factioninfo,b1,false,(fmodalresult <> mr_none) or 
+         self,factioninfo,b1,false,(fmodalresult <> mr_none) or
                   (options * [bo_nocandefocus,bo_candefocuswindow] <> []));
  end
  else begin
@@ -954,7 +954,7 @@ begin
  if fmodalresult <> mr_none then begin
   window.modalresult:= fmodalresult;
  end;
-end;                                           
+end;
 
 procedure tcustombutton.dopaintforeground(const canvas: tcanvas);
 begin
@@ -974,8 +974,8 @@ procedure tcustombutton.doshortcut(var info: keyeventinfoty; const sender: twidg
 var
  bo1,bo2: boolean;
 begin
- if not (es_processed in info.eventstate) and 
-               not (csdesigning in componentstate) and 
+ if not (es_processed in info.eventstate) and
+               not (csdesigning in componentstate) and
                             not (shs_disabled in finfo.state) then begin
 {
   if checkfocusshortcut(info) then begin
@@ -1000,9 +1000,9 @@ begin
    bo1:= (bo_executeonshortcut in options) and bo2 or
    ((finfo.state * [shs_invisible,shs_disabled,shs_default] = [shs_default]) and
        (info.key = key_return) and
-        ((info.shiftstate = []) or 
-         (bo_executedefaultonenterkey in options) and 
-         (info.shiftstate = [ss_second]))) and 
+        ((info.shiftstate = []) or
+         (bo_executedefaultonenterkey in options) and
+         (info.shiftstate = [ss_second]))) and
             not (aso_nodefaultbutton in assistiveoptions);
                                    //no default button if assisted
    if bo1 then begin
@@ -1045,7 +1045,7 @@ procedure tcustombutton.actionchanged;
 begin
  finfo.color:= fcolor;
  actioninfotoshapeinfo(self,factioninfo,finfo,foptions);
- inherited setcolor(finfo.color); 
+ inherited setcolor(finfo.color);
  finfo.color:= cl_transparent;
 // if csdesigning in componentstate then begin
   exclude(finfo.state,shs_invisible);
@@ -1114,14 +1114,14 @@ begin
                            {$ifdef FPC}@{$endif}writesc,
        isactionshortcutstored(factioninfo) and
        ((filer.ancestor = nil) and (factioninfo.shortcut <> nil) or
-       ((filer.ancestor <> nil) and 
+       ((filer.ancestor <> nil) and
          not issameshortcut(factioninfo.shortcut,
                   tcustombutton(filer.ancestor).shortcuts))));
  filer.defineproperty('sc1',{$ifdef FPC}@{$endif}readsc1,
                            {$ifdef FPC}@{$endif}writesc1,
        isactionshortcut1stored(factioninfo) and
        ((filer.ancestor = nil) and (factioninfo.shortcut1 <> nil) or
-       ((filer.ancestor <> nil) and 
+       ((filer.ancestor <> nil) and
          not issameshortcut(factioninfo.shortcut,
                   tcustombutton(filer.ancestor).shortcuts))));
 end;
@@ -2262,7 +2262,7 @@ procedure tcustomicon.updateanim;
 begin
  if not (csloading in componentstate) then begin
   if (fanim_intervalus > 0) and (fanim_count > 1) and
-          (not (csdesigning in componentstate) or 
+          (not (csdesigning in componentstate) or
                           (ano_designactive in fanim_options)) then begin
    if fanim_enabled  then begin
     if ftimer = nil then begin
@@ -2369,7 +2369,7 @@ begin
                     osc_shrinkx,osc_shrinky,
                     osc_invisishrinkx,osc_invisishrinky] <> [] then begin
   if (componentstate * [csloading,csdestroying] = []) then begin
-   if fscaling <> 0 then begin    
+   if fscaling <> 0 then begin
     include(fwidgetstate1,ws1_scaled);
    end
    else begin
@@ -2390,7 +2390,7 @@ begin
       end
       else begin
        if fsizebefore.cx <> 0 then begin
-        if foptionsscale * [osc_shrinkx,osc_expandx] <> 
+        if foptionsscale * [osc_shrinkx,osc_expandx] <>
                                          [osc_shrinkx,osc_expandx] then begin
          size1.cx:= fsizebefore.cx;
         end;
@@ -2408,7 +2408,7 @@ begin
       end
       else begin
        if fsizebefore.cy <> 0 then begin
-        if foptionsscale * [osc_shrinky,osc_expandy] <> 
+        if foptionsscale * [osc_shrinky,osc_expandy] <>
                                          [osc_shrinky,osc_expandy] then begin
          size1.cy:= fsizebefore.cy;
         end;
@@ -2469,12 +2469,12 @@ var
  box,boy: boolean;
 begin
  result:= inherited calcminshrinksize;
- box:= (fanchors * [an_left,an_right] = [an_left,an_right]) and 
-            (osc_expandshrinkx in foptionsscale) or 
+ box:= (fanchors * [an_left,an_right] = [an_left,an_right]) and
+            (osc_expandshrinkx in foptionsscale) or
                                             (osc_expandx in foptionsscale);
- boy:= (fanchors * [an_top,an_bottom] = [an_top,an_bottom]) and 
-            (osc_expandshrinky in foptionsscale) or 
-                                            (osc_expandy in foptionsscale); 
+ boy:= (fanchors * [an_top,an_bottom] = [an_top,an_bottom]) and
+            (osc_expandshrinky in foptionsscale) or
+                                            (osc_expandy in foptionsscale);
  if box or boy then begin
   size1:= minscrollsize;
   addsize1(size1,framedim);
@@ -2614,10 +2614,10 @@ procedure tgroupbox.dofocuschanged(const oldwidget: twidget;
                const newwidget: twidget);
 begin
  inherited;
- if canevent(tmethod(fonfocusedwidgetchanged)) and 
+ if canevent(tmethod(fonfocusedwidgetchanged)) and
   (checkdescendent(oldwidget) or checkdescendent(newwidget)) then begin
   fonfocusedwidgetchanged(oldwidget,newwidget);
- end; 
+ end;
 end;
 
 class function tgroupbox.classskininfo: skininfoty;

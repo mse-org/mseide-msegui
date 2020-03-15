@@ -16,7 +16,7 @@ type
    add: tint64edit;
    procedure adent(const sender: TObject);
    procedure drawfixcol(const sender: tcol; const canvas: tcanvas;
-                                               var cellinfo: cellinfoty); 
+                                               var cellinfo: cellinfoty);
    procedure updatelayoutexe(const sender: TObject);
    procedure formshow(const sender: TObject);
    procedure cellsetvalue(const sender: TObject; var avalue: msestring;
@@ -33,10 +33,10 @@ var
 implementation
 uses
  memoryform_mfm,mseformatstr,msedrawtext,main,msegdbutils,msewidgets;
- 
+
 type
- bitwidthty = (bw_8,bw_16,bw_32,bw_64); 
- 
+ bitwidthty = (bw_8,bw_16,bw_32,bw_64);
+
 procedure tmemoryfo.adent(const sender: TObject);
 begin
  updatelayoutexe(nil);
@@ -212,7 +212,7 @@ begin
  int1:= getcanvas.getstringwidth(mstr1,grid.font);
  grid.datacols.width:= int1+4;
  updatecolwidth();
- refresh; 
+ refresh;
 end;
 
 procedure tmemoryfo.formshow(const sender: TObject);

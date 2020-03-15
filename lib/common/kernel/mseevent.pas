@@ -46,14 +46,14 @@ const
                       ek_clientmouseenter,ek_clientmouseleave];
  mouseposevents = [ek_buttonpress,ek_buttonrelease,ek_mousemove,ek_mousepark];
  waitignoreevents = [ek_keypress,ek_buttonpress,ek_mousewheel];
- 
+
 type
  eventstatety = (es_processed,es_child,es_parent,es_preview,es_client,
                  es_transientfor, //mousewheel from upper modal window
                  es_local,es_broadcast,es_modal,es_drag,es_objectpicking,
                  es_reflected,es_nofocus,es_designcall);
  eventstatesty = set of eventstatety;
- 
+
  tmseevent = class(tnullinterfacedobject)
   private
   protected
@@ -76,7 +76,7 @@ type
    constructor create(const adata: string);
    property data: ansistring read fdata write fdata;
  end;
-  
+
  tobjectevent = class;
 
  ievent = interface(iobjectlink)
@@ -85,7 +85,7 @@ type
 
  objeventstatety = (oes_islinked,oes_modaldeferred);
  objeventstatesty = set of objeventstatety;
- 
+
  tobjectevent = class(tmseevent,iobjectlink)
   private
    finterface: pointer; //ievent;
@@ -111,7 +111,7 @@ type
    execresult: integer;
    data: pointer;
    constructor create(const dest: ievent; const aprochandle: prochandlety;
-                      const aexecresult: integer; const adata: pointer);   
+                      const aexecresult: integer; const adata: pointer);
  end;
 
  tstringobjectevent = class(tobjectevent)
@@ -129,7 +129,7 @@ type
    constructor create(const adata: pointty; const dest: ievent);
  //  property data: pointty read fdata write fdata;
  end;
- 
+
  tuserevent = class(tobjectevent)
    ftag: integer;
   public
@@ -153,7 +153,7 @@ type
 
  tcustomeventqueue = class(tobjectqueue)
  end;
-  
+
  teventqueue = class(tcustomeventqueue)
   private
    fsem: semty;
@@ -176,7 +176,7 @@ uses
  msesysintf1,mseapplication;
 type
  tapplication1 = class(tcustomapplication);
- 
+
 { tmseevent }
 
 constructor tmseevent.create(const akind: eventkindty);

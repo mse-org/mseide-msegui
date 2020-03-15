@@ -30,7 +30,7 @@ uses
 const
  defaultmoduleclassname = 'tmseform';
 type
- initcomponentprocty = 
+ initcomponentprocty =
   procedure(const acomponent: tcomponent; const aparent: tcomponent) of object;
 
  componentclassinfoty = record
@@ -46,7 +46,7 @@ type
   hint: msestring;
  end;
  comppagearty = array of comppagety;
- 
+
  tcomponentclasslist = class(torderedrecordlist)
   private
    fselectedclass: tcomponentclass;
@@ -110,7 +110,7 @@ type
  end;
 
  compfilterfuncty = function(const acomponent: tcomponent): boolean of object;
- 
+
  idesigner = interface(inullinterface)
   procedure componentmodified(const component: tobject;
                    const apropname: string = ''; const apropindex: int32 = -1);
@@ -216,7 +216,7 @@ type
   instance: tcomponent;
  end;
  pselectedinfoty = ^selectedinfoty;
- 
+
  objinfoty = record
   owner: tcomponent;
   parent: twidget;
@@ -263,9 +263,9 @@ type
    function GetCount: Integer;
    function getarray: componentarty;
 
-   function getobjinfoar: objinfoarty;   
+   function getobjinfoar: objinfoarty;
    function getobjecttext: string;
-   function pastefromobjecttext(const aobjecttext: string; 
+   function pastefromobjecttext(const aobjecttext: string;
                                        aowner,aparent: tcomponent;
                                initproc: initcomponentprocty): componentarty;
    procedure copytoclipboard;
@@ -313,24 +313,24 @@ type
                           const newname,oldname: string; const atypeinfo: ptypeinfo);
    procedure showobjecttext(const adesigner: idesigner;
                const afilename: filenamety; const backupcreated: boolean);
-   procedure closeobjecttext(const adesigner: idesigner; 
+   procedure closeobjecttext(const adesigner: idesigner;
                  const afilename: filenamety; out cancel: boolean);
    procedure beforefilesave(const adesigner: idesigner;
                                  const afilename: filenamety);
    procedure beforemake(const adesigner: idesigner; const maketag: integer;
                          var abort: boolean);
    procedure aftermake(const adesigner: idesigner; const exitcode: integer);
-   
+
    procedure Registernotification(const DesignNotification: IDesignNotification);
    procedure Unregisternotification(const DesignNotification: IDesignNotification);
  end;
- 
+
  unitgroupinfoty = record
   dependents: stringarty;
   group: stringarty;
  end;
  punitgroupinfoty = ^unitgroupinfoty;
- 
+
  tunitgroups = class(trecordlist)
   protected
    procedure finalizerecord(var item); override;
@@ -341,14 +341,14 @@ type
                                       const agroup: array of string);
    function getneededunits(const aunitname: string): stringarty;
  end;
- 
+
  createdesignmodulefuncty = function(const aclass: tclass;
                                  const aclassname: pshortstring): tmsecomponent;
- initdesigncomponentprocty = procedure(const amodule: tcomponent; 
+ initdesigncomponentprocty = procedure(const amodule: tcomponent;
                                                 const acomponent: tcomponent);
  getdesignscalefuncty = function(const amodule: tcomponent): real;
  sourcetoformfuncty = function(const amodule: tmsecomponent;
-                                 const source: trichstringdatalist): boolean; 
+                                 const source: trichstringdatalist): boolean;
                           //true if ok
  designmoduleintfty = record
   createfunc: createdesignmodulefuncty;
@@ -357,7 +357,7 @@ type
   sourcetoform: sourcetoformfuncty;
  end;
  pdesignmoduleintfty = ^designmoduleintfty;
- 
+
 procedure registercomponents(const page: msestring;
                           const componentclasses: array of tcomponentclass);
 procedure registercomponenttabhints(const pages: array of msestring;
@@ -384,10 +384,10 @@ uses
   {$warn 6058 off}
  {$endif}
 {$endif}
- 
+
 type
  treader1 = class(treader);
- twriter1 = class(twriter);  
+ twriter1 = class(twriter);
  tcomponent1 = class(tcomponent);
 
 var
@@ -523,7 +523,7 @@ begin
    fimagelist.addimage(bitmap.bitmap);
   end;
   with info do begin
-   for int1:= 0 to high(componentclasses) do begin               
+   for int1:= 0 to high(componentclasses) do begin
     classtyp:= componentclasses[int1];
     page:= pagenr;
     icon:= 0;
@@ -684,7 +684,7 @@ begin
 end;
 
 function tcomponentclasslist.compare(const l, r): integer;
-begin 
+begin
  if fdefaultorder then begin
   result:= componentclassinfoty(l).defaultindex -
               componentclassinfoty(r).defaultindex;
@@ -924,7 +924,7 @@ begin
      comp1:= tcomponent.create(nil);
      try
      {$ifdef mse_nomethodswap}
-      writer.onwritemethodproperty:= 
+      writer.onwritemethodproperty:=
                {$ifdef FPC}@{$endif}designer.writedesignmethod;
      {$else}
       modulepo:= designer.modules.findmodulebycomponent(component);
@@ -935,14 +935,14 @@ begin
      {$endif}
       try
        writer.Root:= component.Owner;
-       designer.descendentinstancelist.beginstreaming(nil); 
+       designer.descendentinstancelist.beginstreaming(nil);
        comp2:= designer.descendentinstancelist.findancestor(component);
        writer.ancestor:= comp2;
        writer.rootancestor:= comp2;
        writer.onfindancestor:= {$ifdef FPC}@{$endif}designer.findancestor;
        writer.writecomponent(component);
       finally
-       designer.descendentinstancelist.endstreaming; 
+       designer.descendentinstancelist.endstreaming;
       {$ifndef mse_nomethodswap}
        designer.doswapmethodpointers(component,true);
        swapmethodtable(comp1,po1);
@@ -970,7 +970,7 @@ end;
 
 function tdesignerselections.getobjinfoar: objinfoarty;
 var
- int1: integer;   
+ int1: integer;
  co1: tcomponent;
  binstream: tmemorystream;
  textstream: ttextstream;
@@ -1017,10 +1017,10 @@ begin
      writer.free;
      binstream.free;
      textstream.free;
-    end;   
+    end;
    end;
   end;
- end; 
+ end;
 end;
 
 procedure tdesignerselections.copytoclipboard;
@@ -1046,7 +1046,7 @@ end;
 var
  pastingmodulepo: pmoduleinfoty;
 
-{$ifdef mse_nomethodswap} 
+{$ifdef mse_nomethodswap}
 procedure tdesignerselections.setpastemethodproperty(reader: treader;
                         instance: tpersistent;
                         propinfo: ppropinfo; const themethodname: string;
@@ -1088,9 +1088,9 @@ procedure tdesignerselections.referencepastename(reader: treader; var name: stri
 begin
  if (reader.root = fpasteroot) and (fpasteroot.findcomponent(name) = nil) and
         (fpasteowner.findcomponent(name+pastenametrailer) <> nil) then begin
-  name:= name + pastenametrailer; 
-            //this is dangerous, there could be a component with the same name 
-            //but another class type, no possibility found to access the 
+  name:= name + pastenametrailer;
+            //this is dangerous, there could be a component with the same name
+            //but another class type, no possibility found to access the
             //propertyinfo of the resolving items :-(
  end;
 end;
@@ -1106,7 +1106,7 @@ type
   private
    fowner: tdesignerselections;
   protected
-   procedure notification(acomponent: tcomponent; 
+   procedure notification(acomponent: tcomponent;
                             operation: toperation); override;
   public
    constructor create(const aowner: tdesignerselections); reintroduce;
@@ -1142,8 +1142,8 @@ begin
   inherited;
  end;
 end;
- 
-function tdesignerselections.pastefromobjecttext(const aobjecttext: string; 
+
+function tdesignerselections.pastefromobjecttext(const aobjecttext: string;
    aowner,aparent: tcomponent; initproc: initcomponentprocty): componentarty;
                   //returns count of added components
 var
@@ -1155,12 +1155,12 @@ var
  comp1,comp2: tcomponent;
  listend: tvaluetype;
  validaterenamebefore: validaterenameeventty;
-  
+
 begin
  result:= nil;
  if aobjecttext = '' then begin
   exit;
- end; 
+ end;
  if aowner is tmsecomponent then begin
   pastingmodulepo:= designer.modules.findmodule(tmsecomponent(aowner));
  end
@@ -1199,7 +1199,7 @@ begin
       reader.onfindmethod:= {$ifdef FPC}@{$endif}findpastemethod;
      {$endif}
       reader.onancestornotfound:= {$ifdef FPC}@{$endif}designer.ancestornotfound;
-      reader.onfindcomponentclass:= 
+      reader.onfindcomponentclass:=
                            {$ifdef FPC}@{$endif}designer.findcomponentclass;
       reader.oncreatecomponent:= designer.createcomponent();
       factcomp:= nil;
@@ -1219,7 +1219,7 @@ begin
        finally
         for int1:= 0 to aowner.componentcount - 1 do begin
          comp2:= aowner.components[int1];
-         comp2.name:= copy(comp2.name,1,length(comp2.name) - 
+         comp2.name:= copy(comp2.name,1,length(comp2.name) -
                                               length(pastenametrailer));
                                  //restore original name
         end;
@@ -1242,14 +1242,14 @@ begin
       clearpastedcomponents;
       if assigned(initproc) then begin
        for int1:= comp1.componentcount - 1 downto aowner.componentcount do begin
-        comp2:= comp1.components[int1]; 
+        comp2:= comp1.components[int1];
         if (comp2.getparentcomponent = nil) or (comp2 is tmsedatamodule) then begin
          initproc(comp2,aparent);
         end;
        end;
       end;
       if pastingmodulepo <> nil then begin
-       designer.checkmethodtypes(pastingmodulepo,false{,comp1});  
+       designer.checkmethodtypes(pastingmodulepo,false{,comp1});
       end;
       notifygloballoading;
      finally
@@ -1429,7 +1429,7 @@ begin
  end;
 end;
 
-procedure tdesignnotifications.showobjecttext(const adesigner: idesigner; 
+procedure tdesignnotifications.showobjecttext(const adesigner: idesigner;
               const afilename: filenamety; const backupcreated: boolean);
 var
  int1: integer;
@@ -1504,7 +1504,7 @@ var
  int1: integer;
 begin
  for int1:= 0 to count - 1 do begin
-  if abort then begin 
+  if abort then begin
    break;
   end;
   idesignnotification(fitems[int1]).beforemake(adesigner,maketag,abort);
@@ -1528,7 +1528,7 @@ begin
  inherited create(sizeof(unitgroupinfoty),[rels_needsfinalize,rels_needscopy]);
 end;
 
-procedure tunitgroups.registergroups(const adependents: array of string; 
+procedure tunitgroups.registergroups(const adependents: array of string;
                                                 const agroup: array of string);
 var
  info: unitgroupinfoty;
@@ -1590,7 +1590,7 @@ function tunitgroups.getneededunits(const aunitname: string): stringarty;
    resupper[int1]:= struppercase(resnormal[int1]);
   end;
  end;
- 
+
 var
  ar1,ar2: stringarty;
  ar3: integerarty;
@@ -1599,7 +1599,7 @@ var
  str1: string;
  level: integer;
  highbefore: integer;
- 
+
 begin
  setlength(ar4,1);
  ar4[0]:= struppercase(aunitname);

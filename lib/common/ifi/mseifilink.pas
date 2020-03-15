@@ -31,7 +31,7 @@ const
  defaultformlinkoptions = [flo_useclientchannel];
 type
  tmodulelinkarrayprop = class;
- 
+
  tmodulelinkprop = class(townedeventpersistent)
   private
    fprop: tmodulelinkarrayprop;
@@ -63,8 +63,8 @@ type
    function finditem(const aname: string): tmodulelinkprop;
    function byname(const aname: string): tmodulelinkprop;
    property owner: tcustommodulelink read fowner;
- end; 
- 
+ end;
+
  tlinkaction = class(tmodulelinkprop)
   private
    faction: tcustomaction;
@@ -77,10 +77,10 @@ type
  end;
 
  trxlinkaction = class;
-  
+
  ifiexecuteeventty = procedure(const sender: trxlinkaction; const atag: integer;
                                  const aparams: variant) of object;
-                                 
+
  trxlinkaction = class(tlinkaction)
   private
    fonexecute: ifiexecuteeventty;
@@ -91,7 +91,7 @@ type
 
  iifitxaction = interface(inullinterface)[miid_iifitxaction]
   procedure txactionfired(var adata: ansistring; var adatapo: pchar);
- end; 
+ end;
 
  ttxlinkaction = class(tlinkaction)
   private
@@ -106,7 +106,7 @@ type
   published
    property ificomp: tcomponent read fificomp write setificomp;
  end;
- 
+
  tlinkactions = class(tmodulelinkarrayprop)
   private
   protected
@@ -118,7 +118,7 @@ type
    fonexecute: ifiexecuteeventty;
    function getitems(const index: integer): trxlinkaction;
   protected
-   function getitemclass: modulelinkpropclassty; override;  
+   function getitemclass: modulelinkpropclassty; override;
   public
    constructor create(const aowner: tcustommodulelink);
    class function getitemclasstype: persistentclassty; override;
@@ -130,7 +130,7 @@ type
  end;
 
  ttxlinkactions = class;
- 
+
  ttxactiondestroyhandler = class(tcomponent)
   private
    fowneractions: ttxlinkactions;
@@ -146,7 +146,7 @@ type
    fdestroyhandler: ttxactiondestroyhandler;
    function getitems(const index: integer): ttxlinkaction;
   protected
-   function getitemclass: modulelinkpropclassty; override;  
+   function getitemclass: modulelinkpropclassty; override;
   public
    constructor create(const aowner: tcustommodulelink);
    destructor destroy; override;
@@ -157,7 +157,7 @@ type
 
  tlinkmodule = class(tmodulelinkprop)
  end;
- 
+
  ttxlinkmodule = class(tlinkmodule)
   private
    fmoduleclassname: string;
@@ -167,20 +167,20 @@ type
    procedure close;
   published
    property moduleclassname: string read fmoduleclassname write fmoduleclassname;
-   property moduleparentclassname: string read fmoduleparentclassname 
+   property moduleparentclassname: string read fmoduleparentclassname
                             write fmoduleparentclassname;
  end;
-  
+
  ttxlinkmodules = class(tmodulelinkarrayprop)
   private
    function getitems(const index: integer): ttxlinkmodule;
   protected
-   function getitemclass: modulelinkpropclassty; override;  
+   function getitemclass: modulelinkpropclassty; override;
   public
    constructor create(const aowner: tcustommodulelink);
    class function getitemclasstype: persistentclassty; override;
    function byname(const aname: string): ttxlinkmodule;
-   property items[const index: integer]: ttxlinkmodule read getitems; default;   
+   property items[const index: integer]: ttxlinkmodule read getitems; default;
  end;
 
  trxlinkmodule = class;
@@ -188,7 +188,7 @@ type
 
  rxlinkoptionty = (rlo_closeconnonfree);
  rxlinkoptionsty = set of rxlinkoptionty;
- 
+
  trxlinkmodule = class(tlinkaction)
   private
    fmodule: tmsecomponent;
@@ -206,26 +206,26 @@ type
    procedure requestmodule;
    property module: tmsecomponent read fmodule;
   published
-   property onmodulereceived: rxlinkmoduleeventty read fonmodulereceived 
+   property onmodulereceived: rxlinkmoduleeventty read fonmodulereceived
                          write fonmodulereceived;
    property options: rxlinkoptionsty read foptions write foptions default [];
  end;
-  
+
  trxlinkmodules = class(tmodulelinkarrayprop)
   private
    function getitems(const index: integer): trxlinkmodule;
   protected
    function finditem(const asequence: sequencety): trxlinkmodule; overload;
-   function getitemclass: modulelinkpropclassty; override;  
+   function getitemclass: modulelinkpropclassty; override;
   public
    constructor create(const aowner: tcustommodulelink);
    class function getitemclasstype: persistentclassty; override;
    function byname(const aname: string): trxlinkmodule;
-   property items[const index: integer]: trxlinkmodule read getitems; default;   
+   property items[const index: integer]: trxlinkmodule read getitems; default;
  end;
 
  tvaluelink = class;
- 
+
  propertychangedeventty = procedure(const sender: tvaluelink;
                  const atag: integer; const apropertyname: string) of object;
  widgetstatechangedeventty = procedure(const sender: tvaluelink;
@@ -285,19 +285,19 @@ type
    property enabled: boolean write setenabled;
    property visible: boolean write setvisible;
   published
-   property onpropertychanged: propertychangedeventty read fonpropertychanged 
+   property onpropertychanged: propertychangedeventty read fonpropertychanged
                                      write fonpropertychanged;
    property onwidgetstatechanged: widgetstatechangedeventty
                         read fonwidgetstatechanged write fonwidgetstatechanged;
-   property onmodalresult: modalresulteventty read fonmodalresult 
+   property onmodalresult: modalresulteventty read fonmodalresult
                         write fonmodalresult;
  end;
 
- tvaluelinks = class(tmodulelinkarrayprop) 
+ tvaluelinks = class(tmodulelinkarrayprop)
   private
    function getitems(const index: integer): tvaluelink;
   protected
-   function getitemclass: modulelinkpropclassty; override;  
+   function getitemclass: modulelinkpropclassty; override;
   public
    class function getitemclasstype: persistentclassty; override;
    function byname(const aname: string): tvaluelink;
@@ -321,28 +321,28 @@ type
    procedure sendvalue(const aname: string; const avalue: colorty); overload;
    procedure sendproperties;
    property component: tmsecomponent read fcomponent write setcomponent;
- end; 
+ end;
 
  tvaluecomponentlink = class(tcustomvaluecomponentlink)
   published
    property component;
  end;
- 
+
  tvaluecomponentlinks = class(tvaluelinks)
   private
    function getitems(const index: integer): tvaluecomponentlink;
   protected
-   function getitemclass: modulelinkpropclassty; override;  
+   function getitemclass: modulelinkpropclassty; override;
   public
    class function getitemclasstype: persistentclassty; override;
    function byname(const aname: string): tvaluecomponentlink;
-   property items[const index: integer]: tvaluecomponentlink read getitems; default;   
+   property items[const index: integer]: tvaluecomponentlink read getitems; default;
  end;
 
  iifimodulelink = interface(inullinterface)[miid_iifimodulelink]
   procedure connectmodule(const sender: tcustommodulelink);
  end;
- 
+
  tcustommodulelink = class(tifiiolinkcomponent,iifiserver,iifimodulelink)
   private
    factionsrx: trxlinkactions;
@@ -366,7 +366,7 @@ type
    procedure closemodule(const atag: integer; const aname: string);
    function encodeactionfired(const atag: integer; const aname: string;
                                   out adatapo: pchar): string;
-   procedure actionfired(const sender: tlinkaction; 
+   procedure actionfired(const sender: tlinkaction;
                           const acompintf: iifitxaction); virtual;
    function actionreceived(const adata: pifirecty; var adatapo: pchar;
                   const atag: integer; const aname: string):boolean;
@@ -399,9 +399,9 @@ type
                      var avalue; var accept: boolean; const arow: integer);
    procedure dataentered(const sender: iificlient; const arow: integer);
    procedure updateoptionsedit(var avalue: optionseditty);
-   procedure closequery(const sender: iificlient; 
+   procedure closequery(const sender: iificlient;
                                var amodalresult: modalresultty);
-   procedure sendmodalresult(const sender: iificlient; 
+   procedure sendmodalresult(const sender: iificlient;
                                          const amodalresult: modalresultty); virtual;
   //imodulelink
    procedure connectmodule(const sender: tcustommodulelink);
@@ -415,7 +415,7 @@ type
    property actionstx: ttxlinkactions read factionstx write setactionstx;
    property modulesrx: trxlinkmodules read fmodulesrx write setmodulesrx;
    property modulestx: ttxlinkmodules read fmodulestx write setmodulestx;
-   property valuecomponents: tvaluecomponentlinks read fvaluecomponents 
+   property valuecomponents: tvaluecomponentlinks read fvaluecomponents
                                                      write setvaluecomponents;
    property values: tvaluelinks read fvalues write setvalues;
    property options: formlinkoptionsty read foptions write foptions
@@ -435,14 +435,14 @@ type
    property options;
  end;
 
- ifirxoptionty = (irxo_useclientchannel,irxo_postecho); 
+ ifirxoptionty = (irxo_useclientchannel,irxo_postecho);
  ifirxoptionsty = set of ifirxoptionty;
 
-const 
+const
  defaultifirxoptions = [irxo_useclientchannel];
  defaultifirxtimeout = 10000000; //10 second
 
-type 
+type
  tificontroller = class(tactivatorcontroller,iifimodulelink)
   private
    fchannel: tcustomiochannel;
@@ -453,18 +453,18 @@ type
   protected
    foptions: ifirxoptionsty;
    procedure objectevent(const sender: tobject; const event: objecteventty);
-                                                        override;   
-   function senddata(const adata: ansistring; 
+                                                        override;
+   function senddata(const adata: ansistring;
                          const asequence: sequencety = 0): sequencety;
    function senddataandwait(const adata: ansistring;
             out asequence: sequencety; atimeoutus: integer = 0): boolean;
-   function senditem(const kind: ifireckindty; 
+   function senditem(const kind: ifireckindty;
                                const data: array of ansistring): sequencety;
                 //returns sequence number
    procedure inititemheader(out arec: string;
                const akind: ifireckindty; const asequence: sequencety;
                 const datasize: integer; out datapo: pchar);
-   procedure processdata(const adata: pifirecty; var adatapo: pchar); 
+   procedure processdata(const adata: pifirecty; var adatapo: pchar);
                                     virtual; abstract;
    function getifireckinds: ifireckindsty; virtual;
    //iifimodulelink
@@ -476,9 +476,9 @@ type
    property channel: tcustomiochannel read fchannel write setchannel;
    property linkname: string read flinkname write flinkname;
    property tag: integer read ftag write ftag default 0;
-   property options: ifirxoptionsty read foptions write foptions 
+   property options: ifirxoptionsty read foptions write foptions
                                        default defaultifirxoptions;
-   property timeoutus: integer read fdefaulttimeout write fdefaulttimeout 
+   property timeoutus: integer read fdefaulttimeout write fdefaulttimeout
                        default defaultifirxtimeout;
  end;
 {
@@ -488,13 +488,13 @@ type
  end;
 }
  tifidatacol = class;
- 
+
  ifidatacolchangeeventty = procedure(const sender: tifidatacol;
                                       const aindex: integer) of object;
 
  ifidatacolstatety = (icos_selected);
  ifidatacolstatesty = set of ifidatacolstatety;
- 
+
  tifidatacol = class(tindexpersistent)
   private
    fdata: tdatalist;
@@ -548,16 +548,16 @@ type
          const aprop: tindexpersistentarrayprop); override;
    destructor destroy; override;
    property datalist: tdatalist read getdatalist;
-   
-   property asinteger[const aindex: integer]: integer read getasinteger 
+
+   property asinteger[const aindex: integer]: integer read getasinteger
                                write setasinteger;
-   property asint64[const aindex: integer]: int64 read getasint64 
+   property asint64[const aindex: integer]: int64 read getasint64
                                write setasint64;
-   property ascurrency[const aindex: integer]: currency read getascurrency 
+   property ascurrency[const aindex: integer]: currency read getascurrency
                                write setascurrency;
    property asreal[const aindex: integer]: real read getasreal
                                write setasreal;
-   property asmsestring[const aindex: integer]: msestring read getasmsestring 
+   property asmsestring[const aindex: integer]: msestring read getasmsestring
                                write setasmsestring;
    property asmsestringint[const aindex: integer]: msestringintty
                          read getasmsestringint write setasmsestringint;
@@ -571,17 +571,17 @@ type
                          setasrealintr;
    property asrealinti[const aindex: integer]: integer read getasrealinti write
                          setasrealinti;
-   property asbytes[const aindex: integer]: ansistring read getasbytes 
+   property asbytes[const aindex: integer]: ansistring read getasbytes
                                write setasbytes;
    property merged[const row: integer]: boolean read getmerged write setmerged;
    property selected[row: integer]: boolean read getselected write setselected;
   published
-   property datakind: ifidatakindty read fdatakind write setdatakind 
+   property datakind: ifidatakindty read fdatakind write setdatakind
                          default idk_none;
    property name: ansistring read fname write fname;
    property onchange: ifidatacolchangeeventty read fonchange write fonchange;
  end;
-  
+
  ttxdatagrid = class;
  tifirowstatelist = class(tcustomrowstatelist)
   protected
@@ -590,12 +590,12 @@ type
    procedure setfoldissum(const index: integer; const avalue: boolean); override;
   public
    property hidden[const index: integer]: boolean read gethidden write sethidden;
-   property foldlevel[const index: integer]: byte read getfoldlevel 
+   property foldlevel[const index: integer]: byte read getfoldlevel
                                   write setfoldlevel;   //0..63
-   property foldissum[const index: integer]: boolean read getfoldissum 
+   property foldissum[const index: integer]: boolean read getfoldissum
                                   write setfoldissum;
  end;
-    
+
  tifidatacols = class(tindexpersistentarrayprop)
   private
    frowstate: tifirowstatelist;
@@ -608,7 +608,7 @@ type
    procedure Setselected(const cell: gridcoordty; const avalue: boolean);
    procedure beginselect;
    procedure endselect;
-  public 
+  public
    constructor create(const aowner: ttxdatagrid); reintroduce;
    destructor destroy; override;
    class function getitemclasstype: persistentclassty; override;
@@ -627,7 +627,7 @@ type
    procedure setselectedrange(const start,stop: gridcoordty;
                     const value: boolean); overload;
 
-   procedure mergecols(const arow: integer; const astart: longword = 0; 
+   procedure mergecols(const arow: integer; const astart: longword = 0;
                                               const acount: longword = bigint);
    procedure unmergecols(const arow: integer = invalidaxis);
                      //invalidaxis = all
@@ -651,7 +651,7 @@ type
    foptionsrx: ifigridoptionsty;
    fdatasequence: sequencety;
    fcommandlock: integer;
-   function encodegriddata(const asequence: sequencety): ansistring; 
+   function encodegriddata(const asequence: sequencety): ansistring;
                                                      virtual; abstract;
    function getifireckinds: ifireckindsty; override;
   public
@@ -666,13 +666,13 @@ type
                                            write foptionsrx default[];
 
  end;
- 
+
  ttxdatagridcontroller = class(tifigridcontroller)
   private
   protected
 //   function getifireckinds: ifireckindsty; override;
    procedure setowneractive(const avalue: boolean); override;
-   procedure processdata(const adata: pifirecty; var adatapo: pchar); 
+   procedure processdata(const adata: pifirecty; var adatapo: pchar);
                                     override;
    function encodegriddata(const asequence: sequencety): ansistring; override;
   public
@@ -681,9 +681,9 @@ type
 
  ifigriditemeventty = procedure(const sender: ttxdatagrid;
                                     const aindex: integer) of object;
- ifigridblockeventty = procedure(const sender: ttxdatagrid; 
+ ifigridblockeventty = procedure(const sender: ttxdatagrid;
                   const aindex: integer; const acount: integer) of object;
- ifigridblockmovedeventty = procedure(const sender: ttxdatagrid; 
+ ifigridblockmovedeventty = procedure(const sender: ttxdatagrid;
                   const fromindex,toindex,acount: integer) of object;
  ifigrideventty = procedure(const sender: ttxdatagrid) of object;
 
@@ -724,42 +724,42 @@ type
    destructor destroy; override;
 
    procedure beginupdate;
-   procedure endupdate;   
+   procedure endupdate;
    procedure clear;
    procedure moverow(const curindex,newindex: integer; const count: integer = 1);
    procedure insertrow(index: integer; count: integer = 1);
    procedure deleterow(index: integer; count: integer = 1);
    property rowhigh: integer read getrowhigh;
    property row: integer read frow write setrow;
-   property rowcolorstate[index: integer]: rowstatenumty read getrowcolorstate 
+   property rowcolorstate[index: integer]: rowstatenumty read getrowcolorstate
                         write setrowcolorstate; //default = -1
-   property rowfontstate[index: integer]: rowstatenumty read getrowfontstate 
+   property rowfontstate[index: integer]: rowstatenumty read getrowfontstate
                         write setrowfontstate;  //default = -1
    property rowreadonlystate[const index: integer]: boolean read getrowreadonlystate
                         write setrowreadonlystate;
-   property rowhidden[const index: integer]: boolean read getrowhidden 
+   property rowhidden[const index: integer]: boolean read getrowhidden
                         write setrowhidden;
    property rowfoldlevel[const index: integer]: byte read getrowfoldlevel
                         write setrowfoldlevel;
-   property rowfoldissum[const index: integer]: boolean read getrowfoldissum 
+   property rowfoldissum[const index: integer]: boolean read getrowfoldissum
                         write setrowfoldissum;
   published
    property ifi: ttxdatagridcontroller read fifi write setifi;
    property datacols: tifidatacols read fdatacols write setdatacols;
    property rowcount: integer read frowcount write setrowcount default 0;
-   property onrowsdeleted: ifigridblockeventty read fonrowsdeleted 
+   property onrowsdeleted: ifigridblockeventty read fonrowsdeleted
                            write fonrowsdeleted;
-   property onrowsinserted: ifigridblockeventty read fonrowsinserted 
+   property onrowsinserted: ifigridblockeventty read fonrowsinserted
                            write fonrowsinserted;
    property onrowsmoved: ifigridblockmovedeventty read fonrowsmoved
                            write fonrowsmoved;
-   property onrowindexchanged: ifigrideventty read fonrowindexchanged 
+   property onrowindexchanged: ifigrideventty read fonrowindexchanged
                            write fonrowindexchanged;
-   property onrowstatechanged: ifigriditemeventty read fonrowstatechanged 
+   property onrowstatechanged: ifigriditemeventty read fonrowstatechanged
                            write fonrowstatechanged;
    property onbeforeopen: ifigrideventty read fonbeforeopen write fonbeforeopen;
  end;
-   
+
 function ifidatatodatalist(const akind: listdatatypety; const arowcount: integer;
         const adata: pchar; const adatalist: tdatalist): integer; overload;
        //returns datasize
@@ -779,7 +779,7 @@ function encodecolchangedata(const acolname: string; const arow: integer;
 function encodecolchangedata(const acolname: string; const arow: integer;
                             const alist: tcustomrowstatelist;
                             const subindex: rowstatememberty): string; overload;
-function encoderowstatedata(const arow: integer; 
+function encoderowstatedata(const arow: integer;
                       const astate: rowstatety): string; overload;
 function encoderowstatedata(const arow: integer;
                       const astate: rowstatecolmergety): string; overload;
@@ -803,7 +803,7 @@ uses
 
 type
  tcustomrowstatelist1 = class(tcustomrowstatelist);
- 
+
  tmoduledataevent = class(tstringobjectevent)
   protected
    fmodulelink: trxlinkmodule;
@@ -898,7 +898,7 @@ begin
  end;
 end;
 
-function encoderowstatedata(const arow: integer; 
+function encoderowstatedata(const arow: integer;
                                const astate: rowstatety): string;
 begin
  result:= encodeifidata(astate,sizeof(rowstateheaderty));
@@ -907,7 +907,7 @@ begin
  end;
 end;
 
-function encoderowstatedata(const arow: integer; 
+function encoderowstatedata(const arow: integer;
                                const astate: rowstatecolmergety): string;
 begin
  result:= encodeifidata(astate,sizeof(rowstateheaderty));
@@ -916,7 +916,7 @@ begin
  end;
 end;
 
-function encoderowstatedata(const arow: integer; 
+function encoderowstatedata(const arow: integer;
                                const astate: rowstaterowheightty): string;
 begin
  result:= encodeifidata(astate,sizeof(rowstateheaderty));
@@ -925,7 +925,7 @@ begin
  end;
 end;
 
-function encodeselectiondata(const acell: gridcoordty; 
+function encodeselectiondata(const acell: gridcoordty;
                                             const avalue: boolean): string;
 var
  sel1: selectdataty;
@@ -940,7 +940,7 @@ end;
 { tmodulelinkprop }
 
 procedure tmodulelinkprop.inititemheader(out arec: string;
-               const akind: ifireckindty; const asequence: sequencety; 
+               const akind: ifireckindty; const asequence: sequencety;
                const datasize: integer; out datapo: pchar);
 begin
  mseifi.inititemheader(ftag,fname,arec,akind,asequence,datasize,datapo);
@@ -962,7 +962,7 @@ end;
 { trxlinkaction }
 
 { ttxlinkaction }
- 
+
 procedure ttxlinkaction.execute;
 begin
  tcustommodulelink(fowner).actionfired(self,fificompintf);
@@ -1076,7 +1076,7 @@ begin
       fificompintf:= nil;
      end;
     end;
-   end;    
+   end;
   end;
  end;
 end;
@@ -1158,7 +1158,7 @@ procedure trxlinkmodule.objevent(const sender: iobjectlink;
 var
  conn1: tcustomiochannel;
 begin
- if (event = oe_destroyed) and (rlo_closeconnonfree in foptions) and 
+ if (event = oe_destroyed) and (rlo_closeconnonfree in foptions) and
                                     (sender.getinstance = fmodule) then begin
   conn1:= tcustommodulelink(fowner).channel;
   if conn1 <> nil then begin
@@ -1230,7 +1230,7 @@ var
  str1: string;
  po1: pchar;
 begin
- initpropertyrecord(str1,aname,idk_int64,0,po1); 
+ initpropertyrecord(str1,aname,idk_int64,0,po1);
  pint64(po1)^:= avalue;
  tcustommodulelink(fowner).senddata(str1);
 end;
@@ -1275,11 +1275,11 @@ procedure tvaluelink.initpropertyrecord(out arec: string;
           const apropertyname: string; const akind: ifidatakindty;
           const datasize: integer; out datapo: pchar);
 var
- po1: pchar; 
+ po1: pchar;
 begin
  inititemheader(arec,ik_propertychanged,0,datarecsizes[akind]+
                 length(apropertyname)+datasize,po1);
-       
+
  inc(po1,stringtoifiname(apropertyname,pifinamety(po1)));
  pifidataty(po1)^.header.kind:= akind;
  datapo:= po1 + sizeof(ifidataheaderty);
@@ -1497,7 +1497,7 @@ begin
  end;
 end;
 
-function getnestedpropinfo(var ainstance: tobject; 
+function getnestedpropinfo(var ainstance: tobject;
                             apropname: pchar; out aindex: integer;
                             out arraypropkind: arraypropkindty): ppropinfo;
 var
@@ -1534,14 +1534,14 @@ begin
   if result <> nil then begin
    if result^.proptype^.kind = tkclass then begin
     ptruint(ainstance):= ptruint(getordprop(ainstance,result));
-    prop1:= result;    
+    prop1:= result;
     result:= nil;
     if ainstance <> nil then begin
      if index1 >= 0 then begin
       if ainstance is tarrayprop then begin
        with tarrayprop(ainstance) do begin
         if index1 < count then begin
-         arraypropkind:= propkind; 
+         arraypropkind:= propkind;
          if arraypropkind = apk_tpersistent then begin
           ainstance:= tpersistentarrayprop(ainstance)[index1];
           if po2^ = '.' then begin
@@ -1570,7 +1570,7 @@ begin
  aindex:= index1;
 end;
 
-procedure tcustomvaluecomponentlink.setdata(const adata: pifidataty; 
+procedure tcustomvaluecomponentlink.setdata(const adata: pifidataty;
                                                const aname: ansistring);
 var
  aproperty: ppropinfo;
@@ -1877,7 +1877,7 @@ begin
  end;
 end;
 
-function tcustommodulelink.processdataitem(const adata: pifirecty; 
+function tcustommodulelink.processdataitem(const adata: pifirecty;
            var adatapo: pchar; const atag: integer; const aname: string): boolean;
 var
  str2: string;
@@ -1895,7 +1895,7 @@ begin
     end;
    end;
    ik_requestmodule: begin
-    result:= requestmodulereceived(atag,aname,adata^.header.sequence);          
+    result:= requestmodulereceived(atag,aname,adata^.header.sequence);
    end;
    ik_moduledata: begin
     result:= moduledatareceived(atag,aname,header.answersequence,
@@ -1910,16 +1910,16 @@ end;
 
 function tcustommodulelink.processdata(const adata: pifirecty): boolean;
          //todo: optimize link name check
-var 
+var
  tag1: integer;
  str1: string;
  po1: pchar;
  ar1: stringarty;
-begin 
+begin
  result:= false;
  with adata^ do begin
   if header.kind in ifiitemkinds then begin
-   with itemheader do begin 
+   with itemheader do begin
     tag1:= tag;
     po1:= @name;
    end;
@@ -1948,7 +1948,7 @@ var
 begin
  if event.kind = ek_objectdata then begin
   if event is tmoduledataevent then begin
-   with tmoduledataevent(event) do begin    
+   with tmoduledataevent(event) do begin
     po1:= @fmoduledata^.parentclass;
     inc(po1,ifinametostring(pifinamety(po1),str1));
     with fmodulelink do begin
@@ -2062,7 +2062,7 @@ begin
  end;
 end;
 
-function tcustommodulelink.modulecommandreceived(const atag: integer; 
+function tcustommodulelink.modulecommandreceived(const atag: integer;
                   const aname: string; const adata: pmodulecommanddataty): boolean;
 var
  mo1: trxlinkmodule;
@@ -2123,7 +2123,7 @@ end;
 function tcustommodulelink.propertychangereceived(const atag: integer;
                      const aname: string; const apropertyname: string;
                      const adata: pifidataty): boolean;
-                     
+
  procedure check(const alinks: tvaluelinks);
  var
   wi1: tvaluelink;
@@ -2152,9 +2152,9 @@ function tcustommodulelink.propertychangereceived(const atag: integer;
      end;
     end;
    end;
-  end;    
+  end;
  end; //check
- 
+
 begin
  result:= false;
  check(fvalues);
@@ -2202,7 +2202,7 @@ begin
  //dummy
 end;
 
-procedure tcustommodulelink.sendmodalresult(const sender: iificlient; 
+procedure tcustommodulelink.sendmodalresult(const sender: iificlient;
                                          const amodalresult: modalresultty);
 begin
  //dummy
@@ -2286,7 +2286,7 @@ begin
 end;
 
 procedure tificontroller.inititemheader(out arec: string;
-               const akind: ifireckindty; const asequence: sequencety; 
+               const akind: ifireckindty; const asequence: sequencety;
                 const datasize: integer; out datapo: pchar);
 begin
  mseifi.inititemheader(tag,flinkname,arec,akind,asequence,datasize,datapo);
@@ -2297,7 +2297,7 @@ begin
  setlinkedvar(avalue,tmsecomponent(fchannel));
 end;
 
-function tificontroller.senddata(const adata: ansistring; 
+function tificontroller.senddata(const adata: ansistring;
                          const asequence: sequencety = 0): sequencety;
 begin
  if fchannel = nil then begin
@@ -2320,7 +2320,7 @@ var
 begin
  if fchannel = nil then begin
   raise exception.create(fowner.name+': No IO channel assigned.');
- end;             
+ end;
  asequence:= fchannel.sequence;
  client1:= fchannel.synchronizer.preparewait(asequence);
  senddata(adata,asequence);
@@ -2333,7 +2333,7 @@ begin
  end;
 end;
 
-function tificontroller.senditem(const kind: ifireckindty; 
+function tificontroller.senditem(const kind: ifireckindty;
                             const data: array of ansistring): sequencety;
                 //returns sequence number
 var
@@ -2351,7 +2351,7 @@ begin
   int2:= length(data[int1]);
   move(pointer(data[int1])^,po1^,int2);
   inc(po1,int2);
- end; 
+ end;
  result:= senddata(str1);
 end;
 
@@ -2371,7 +2371,7 @@ begin
     po1:= pifirecty(rxdata);
     with po1^,header do begin
      if (size = length(rxdata)) and (kind in getifireckinds) then begin
-      with itemheader do begin 
+      with itemheader do begin
 //       tag1:= tag;
        po2:= @name;
       end;
@@ -2400,8 +2400,8 @@ end;
 
 function tificontroller.cansend: boolean;
 begin
- result:= (channel <> nil) or 
-             not ((csdesigning in fowner.componentstate) and 
+ result:= (channel <> nil) or
+             not ((csdesigning in fowner.componentstate) and
                   (irxo_useclientchannel in foptions));
 end;
 
@@ -2498,7 +2498,7 @@ end;
 procedure tifidatacol.datachange(const aindex: integer);
 begin
  with ttxdatagrid(fowner).fifi do begin
-  if (self.name <> '') and cancommandsend(igo_coldata) and 
+  if (self.name <> '') and cancommandsend(igo_coldata) and
                                             (fdata <> nil) then begin
    senditem(ik_coldatachange,[encodecolchangedata(self.name,aindex,fdata)]);
   end;
@@ -2680,7 +2680,7 @@ begin
    result:= tifidatacols(prop).frowstate.getitempocolmerge(row)^.colmerge.merged = mergedcolall;
   end
   else begin
-   result:= tifidatacols(prop).frowstate.getitempocolmerge(row)^.colmerge.merged and 
+   result:= tifidatacols(prop).frowstate.getitempocolmerge(row)^.colmerge.merged and
                                                           bits[index-1] <> 0;
   end;
  end;
@@ -2763,7 +2763,7 @@ begin
      po1:= tifidatacols(prop).frowstate.datapo;
      ca1:= not (bits[ident] {or wholerowselectedmask});
      if fselectedrow >= 0 then begin
-      prowstateaty(po1)^[fselectedrow].selected:= 
+      prowstateaty(po1)^[fselectedrow].selected:=
                prowstateaty(po1)^[fselectedrow].selected and ca1;
 //      invalidatecell(fselectedrow);
 //      cellchanged(fselectedrow);
@@ -3055,9 +3055,9 @@ begin
  rect.pos:= start;
  rect.colcount:= stop.col - start.col;
  rect.rowcount:= stop.row - start.row;
- normalizerect1(rectty(rect)); 
+ normalizerect1(rectty(rect));
  for int1:= rect.col to rect.col + rect.colcount - 1 do begin
-  cols[int1].beginselect;   
+  cols[int1].beginselect;
   for int2:= rect.row to rect.row + rect.rowcount - 1 do begin
    selected[makegridcoord(int1,int2)]:= value;
   end;
@@ -3246,7 +3246,7 @@ begin
  end;
  if canevent(tmethod(fonrowsmoved)) then begin
   fonrowsmoved(self,curindex,newindex,count);
- end;  
+ end;
  with fifi do begin
   if cancommandsend(igo_rowmove) then begin
    senditem(ik_gridcommand,[
@@ -3271,7 +3271,7 @@ begin
  end;
  if canevent(tmethod(fonrowsinserted)) then begin
   fonrowsinserted(self,index,count);
- end;  
+ end;
  with fifi do begin
   if cancommandsend(igo_rowinsert) then begin
    senditem(ik_gridcommand,[
@@ -3296,7 +3296,7 @@ begin
  end;
  if canevent(tmethod(fonrowsdeleted)) then begin
   fonrowsdeleted(self,index,count);
- end;  
+ end;
  with fifi do begin
   if cancommandsend(igo_rowdelete) then begin
    senditem(ik_gridcommand,[
@@ -3368,14 +3368,14 @@ end;
 function tifigridcontroller.cancommandsend(
           const akind: ifigridoptionty): boolean;
 begin
- result:= (akind in foptionstx) and (fcommandlock = 0) and 
+ result:= (akind in foptionstx) and (fcommandlock = 0) and
                                         (fupdating = 0) and cansend;
 end;
 
 procedure tifigridcontroller.sendstate;
 begin
  if cansend then begin
-  senddata(encodegriddata(0));  
+  senddata(encodegriddata(0));
  end;
 end;
 
@@ -3428,7 +3428,7 @@ begin
       finally
        dec(fcommandlock);
        dec(fupdating);
-      end;      
+      end;
      end;
     end;
     senddata(encodegriddata(sequence));
@@ -3462,17 +3462,17 @@ begin
       case ckind1 of
        gck_insertrow: begin
         if igo_rowinsert in foptionsrx then begin
-         insertrow(dest1,count1);       
+         insertrow(dest1,count1);
         end;
        end;
        gck_deleterow: begin
         if igo_rowdelete in foptionsrx then begin
-         deleterow(dest1,count1);       
+         deleterow(dest1,count1);
         end;
        end;
        gck_moverow: begin
         if igo_rowmove in foptionsrx then begin
-         moverow(source1,dest1,count1);       
+         moverow(source1,dest1,count1);
         end;
        end;
        gck_rowenter: begin
@@ -3570,13 +3570,13 @@ var
  int1,int2: integer;
  posource,podest: pchar;
  movesize,sourcestep,deststep: integer;
- po1: pmsestring; 
+ po1: pmsestring;
  po2: pinteger;
  po3: pansistring;
  po4: pmsestringintty;
 begin
  with adatalist do begin
-  if (list <> nil) and (list.datatype <> akind) and 
+  if (list <> nil) and (list.datatype <> akind) and
       not((akind = dl_realint) and (list.datatype = dl_realsum)) then begin
    raise exception.create('Datakinds do not match.');
   end;
@@ -3629,7 +3629,7 @@ begin
       inc(po2);
       inc(pchar(pointer(po2)),int2);
      end;
-    end;    
+    end;
    end;
    dl_msestringint: begin
     po2:= pinteger(adata);
@@ -3672,7 +3672,7 @@ begin
     result:= arowcount * sourcestep;
     if list <> nil then begin
  //    tcustomrowstatelist1(adatalist).initdirty;
-     if tcustomrowstatelist(list).infolevel = 
+     if tcustomrowstatelist(list).infolevel =
                   rowinfolevelty(int1) then begin
       move(posource^,list.datapo^,result);
      end
@@ -3716,7 +3716,7 @@ begin
       inc(po2);
       inc(pchar(pointer(po2)),int2);
      end;
-    end;    
+    end;
    end;
    else begin
     raise exception.create('Invalid datakind.');
@@ -3884,7 +3884,7 @@ begin
     checkdatalist;
     ar1[int1]:= (name <> '') and (datalist.datatype in ifidatatypes);
     if ar1[int1] then begin
-     int2:= int2 + (sizeof(listdatatypety)+1) + length(name) + 
+     int2:= int2 + (sizeof(listdatatypety)+1) + length(name) +
                        datalisttoifidata(datalist);
     end;
    end;
@@ -3900,7 +3900,7 @@ begin
      with datacols[int1] do begin
       with pcoldataty(po1)^ do begin
        kind:= datalist.datatype;
-       po1:= @name;   
+       po1:= @name;
       end;
       inc(po1,stringtoifiname(name,pifinamety(po1)));
       datalisttoifidata(datalist,po1);

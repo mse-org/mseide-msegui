@@ -1,5 +1,5 @@
 { MSEide Copyright (c) 1999-2016 by Martin Schreiber
-   
+
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation; either version 2 of the License, or
@@ -24,7 +24,7 @@ uses
  msethreadcomp,findinfileform,msesimplewidgets,msedispwidgets,msestrings,
  classes,mclasses,msestringcontainer;
 
-type 
+type
 
  tfindinfilepagefo = class(ttabform)
    cancel: tbutton;
@@ -52,11 +52,11 @@ type
    procedure addfoundline(const text: string; const linenr: integer; col: integer);
    procedure startfile(const afilename: filenamety);
   public
-   constructor create(const aowner: tcomponent; 
+   constructor create(const aowner: tcomponent;
                      const findinfo: findinfileinfoty); reintroduce;
    procedure cancelsearch;
  end;
- 
+
 implementation
 uses
  findinfilepage_mfm,sourcepage,sourceform,mseeditglob,sysutils,mserichstring,
@@ -68,10 +68,10 @@ type
   canceled,           //0 *** CANCELED ***
   finished            //1 FINISHED
  );
- 
+
 { tfindinfilepagefo}
- 
-constructor tfindinfilepagefo.create(const aowner: tcomponent; 
+
+constructor tfindinfilepagefo.create(const aowner: tcomponent;
                               const findinfo: findinfileinfoty);
 begin
  finfo:= findinfo;
@@ -163,7 +163,7 @@ procedure tfindinfilepagefo.threadonexecute(const sender: tthreadcomp);
    end;
    2: begin
     stream.encoding:= ce_iso8859_1;
-   end;   
+   end;
   end;
   with sender,tfindinfilepagefo(datapo),finfo do begin
    stream.buflen:= 4096;
@@ -251,7 +251,7 @@ var
  stream1: ttextstream;
  bo1: boolean;
  mstr1: filenamety;
-  
+
 begin
  if finfo.source in [fs_inopenfiles,fs_incurrentfile] then begin
   int1:= 0;
@@ -267,7 +267,7 @@ begin
       with sourcefo.items[int1] do begin
        if fileloaded then begin
         stream1:= ttextstream.create; //memorystream
-        edit.savetostream(stream1,false);        
+        edit.savetostream(stream1,false);
        end
        else begin
         stream1:= ttextstream.create(filepath);
@@ -344,7 +344,7 @@ begin
 end;
 
 procedure tfindinfilepagefo.dorun;
-begin 
+begin
  caption:= finfo.findinfo.text;
  foundlist.clear;
  foundcount.value:= 0;

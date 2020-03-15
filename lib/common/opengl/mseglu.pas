@@ -85,9 +85,9 @@ uses
 
 const
 {$ifdef mswindows}
- glulib: array[0..0] of filenamety = ('glu32.dll');  
+ glulib: array[0..0] of filenamety = ('glu32.dll');
 {$else}
- glulib: array[0..1] of filenamety = ('libGLU.so.1','libGLU.so.'); 
+ glulib: array[0..1] of filenamety = ('libGLU.so.1','libGLU.so.');
 {$endif}
 
 type

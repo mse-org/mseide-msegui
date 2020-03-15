@@ -1,6 +1,6 @@
 unit msdfdata;
 
-// 
+//
 {$mode objfpc}
 {$h+}
 
@@ -1099,7 +1099,7 @@ begin
        Str := StringReplace(Str, #10, '', [rfReplaceAll]);
        Str := StringReplace(Str, #13, '', [rfReplaceAll]);
       end;
-    // Check for any delimiters or quotes occurring in field text  
+    // Check for any delimiters or quotes occurring in field text
     if (not QuoteMe) then
 	  if (StrScan(PChar(Str), FDelimiter) <> nil) or
 	    (StrScan(PChar(Str), QuoteDelimiter) <> nil) then QuoteMe:=true;

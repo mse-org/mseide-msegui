@@ -69,11 +69,11 @@ const
   BIO_CTRL_WPENDING = 13;  // opt - number of bytes still to write
 
   BIO_C_GET_MD_CTX = 120;
-{  
+{
 type
   PBIO_METHOD = SslPtr;
   PBIO = SslPtr;
-} 
+}
 var
  // BIO functions
  BIO_new: function(b: PBIO_METHOD): PBIO; cdecl;
@@ -106,7 +106,7 @@ var
  BIO_set_mem_buf: procedure(b: pBIO; bm: pBUF_MEM; c: cint); cdecl;
  BIO_get_mem_ptr: procedure(b: pBIO; var pp: pBUF_MEM); cdecl;
  BIO_new_mem_buf: function(buf: pointer; len: cint): pBIO; cdecl;
- 
+
 function BIO_flush(b: pBIO): cint;
 function BIO_get_mem_data(b: pBIO; var pp: PCharacter): clong;
 function BIO_get_md_ctx(bp: pBIO; mdcp: Pointer): clong;
@@ -127,7 +127,7 @@ function BIO_get_fd(bp: pBIO; var c: cint): cint;
 implementation
 uses
  {$ifdef FPC}dynlibs,{$endif}msedynload;
- 
+
 function BIO_flush(b: pBIO): cint;
 begin
   result := BIO_ctrl(b, BIO_CTRL_FLUSH, 0, nil);
@@ -187,7 +187,7 @@ end;
 
 function BIO_append_filename(bp: pBIO; filename: PCharacter): cint;
 begin
-  result := BIO_ctrl(bp, BIO_C_SET_FILENAME, BIO_CLOSE or 
+  result := BIO_ctrl(bp, BIO_C_SET_FILENAME, BIO_CLOSE or
                                                   BIO_FP_APPEND, filename);
 end;
 
@@ -237,7 +237,7 @@ const
    (n: 'BIO_get_mem_ptr'; d: {$ifndef FPC}@{$endif}@BIO_get_mem_ptr),
    (n: 'BIO_new_mem_buf'; d: {$ifndef FPC}@{$endif}@BIO_new_mem_buf)
   );
-   
+
 begin
  getprocaddresses(info,funcs);
  getprocaddresses(info,funcsopt,true);

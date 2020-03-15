@@ -169,11 +169,11 @@ object imagelisteditorfo: timagelisteditorfo
         frame.button.width = 13
         frame.button.color = -2147483646
         frame.buttons.count = 2
-        frame.buttons.items = <        
+        frame.buttons.items = <
           item
             width = 13
             color = -2147483646
-          end        
+          end
           item
             width = 13
             color = -2147483646
@@ -220,7 +220,7 @@ object imagelisteditorfo: timagelisteditorfo
         frame.localprops = []
         frame.localprops1 = []
         frame.buttons.count = 1
-        frame.buttons.items = <        
+        frame.buttons.items = <
           item
           end>
         frame.outerframe = (
@@ -238,7 +238,7 @@ object imagelisteditorfo: timagelisteditorfo
         optionsedit1 = [oe1_autopopupmenu, oe1_keyexecute, oe1_savevalue, oe1_savestate]
         ondataentered = versiondatentev
         dropdown.cols.count = 1
-        dropdown.cols.items = <        
+        dropdown.cols.items = <
           item
           end>
         value = 0
@@ -269,12 +269,12 @@ object imagelisteditorfo: timagelisteditorfo
   object popup: tpopupmenu
     onupdate = updatemenuexe
     menu.submenu.count = 2
-    menu.submenu.items = <    
+    menu.submenu.items = <
       item
         caption = 'Copy Items'
         state = [as_localcaption, as_localonexecute]
         onexecute = copyexe
-      end    
+      end
       item
         caption = 'Paste Items'
         state = [as_localcaption, as_localonexecute]

@@ -41,7 +41,7 @@ type
 
  foldeditoptionty = (feo_menulevel,feo_menuissum);
  foldeditoptionsty = set of foldeditoptionty;
- 
+
  tfoldedit = class(tstringedit)
   private
    foncellevent: celleventty;
@@ -55,7 +55,7 @@ type
    fimnr_subitems: integer;
    fimagelist: timagelist;
    fdefault: msestringintty;
-   
+
    fimnr_value: integer;
    fimnr_valuebase: integer;
    fimnr_valueexpanded: integer;
@@ -114,7 +114,7 @@ type
    procedure valuetogrid(arow: integer); override;
    procedure writestatvalue(const writer: tstatwriter); override;
    procedure readstatvalue(const reader: tstatreader); override;
-   procedure updatepopupmenu(var amenu: tpopupmenu; 
+   procedure updatepopupmenu(var amenu: tpopupmenu;
                                 var mouseinfo: mouseeventinfoty); override;
   public
    constructor create(aowner: tcomponent); override;
@@ -126,30 +126,30 @@ type
   published
    property options: foldeditoptionsty read foptions write foptions default [];
    property oncellevent: celleventty read foncellevent write foncellevent;
-   property onclientmouseevent: mouseeventty read fonclientmouseevent 
+   property onclientmouseevent: mouseeventty read fonclientmouseevent
                            write fonclientmouseevent;
    property levelstep: integer read flevelstep write setlevelstep default 10;
 
    property imnr_base: integer read fimnr_base write setimnr_base default 0;
-   property imnr_expanded: integer read fimnr_expanded 
+   property imnr_expanded: integer read fimnr_expanded
                                          write setimnr_expanded default 0;
-   property imnr_selected: integer read fimnr_selected 
+   property imnr_selected: integer read fimnr_selected
                                          write setimnr_selected default 0;
-   property imnr_readonly: integer read fimnr_readonly 
+   property imnr_readonly: integer read fimnr_readonly
                                          write setimnr_readonly default 0;
-   property imnr_subitems: integer read fimnr_subitems 
+   property imnr_subitems: integer read fimnr_subitems
                                          write setimnr_subitems default 0;
-                      
-                      
+
+
    property imnr_value: integer read fimnr_value write setimnr_value default -1;
              //-1 -> use imagelist, imnr_base, imnr_expanded, imnr_selected
              //imnr_readonly, imnr_subitems
              //-2 none
              // >= 0 use imagelistvalue, imnr_value + imnr_base, imnr_expanded, imnr_selected
              //imnr_readonly, imnr_subitems
-   property imnr_valuebase: integer read fimnr_valuebase 
+   property imnr_valuebase: integer read fimnr_valuebase
                                        write setimnr_valuebase default 0;
-   property imnr_valueexpanded: integer read fimnr_valueexpanded 
+   property imnr_valueexpanded: integer read fimnr_valueexpanded
                                        write setimnr_valueexpanded default 0;
    property imnr_valueselected: integer read fimnr_valueselected
                                        write setimnr_valueselected default 0;
@@ -167,7 +167,7 @@ type
    property textflagsactive default defaultfoldedittextflagsactive;
 //   property cursor default cr_default;
  end;
- 
+
 implementation
 uses
  msestockobjects,msesumlist,mseact;
@@ -201,7 +201,7 @@ begin
   end;
  end;
 end;
-  
+
 { tfoldedit }
 
 constructor tfoldedit.create(aowner: tcomponent);
@@ -215,7 +215,7 @@ begin
  textflagsactive:=  defaultfoldedittextflagsactive;
 end;
 
-procedure tfoldedit.drawimage(const acanvas: tcanvas; 
+procedure tfoldedit.drawimage(const acanvas: tcanvas;
                   const ainfo: prowfoldinfoty; var arect: rectty;
                   const isselected,isreadonly: boolean;
                   const datapo: pmsestringintty);
@@ -290,7 +290,7 @@ begin
         b.y:= arect.cy;
        end;
       end;
-     end;  
+     end;
      inc(int4);
     end;
    end;
@@ -315,7 +315,7 @@ begin
    end;
    if int1 <> -1 then begin
     if fimagelistvalue <> nil then begin
-     imli1:= fimagelistvalue;     
+     imli1:= fimagelistvalue;
      inc(int1,fimnr_valuebase);
      if isopen then begin
       inc(int1,fimnr_valueexpanded);
@@ -421,7 +421,7 @@ procedure tfoldedit.clientmouseevent(var ainfo: mouseeventinfoty);
 var
  isvisible1,haschildren1,isopen1: boolean;
  foldlevel1: byte;
- zone1: cellzonety; 
+ zone1: cellzonety;
  row1: integer;
 begin
  if canevent(tmethod(fonclientmouseevent)) then begin
@@ -438,7 +438,7 @@ begin
       getfoldstate(row1,isvisible1,foldlevel1,haschildren1,isopen1);
       zone1:= cz_default;
       updatelevelcellzone(foldlevel1,ainfo.pos,zone1);
-      if (zone1 = cz_default) and 
+      if (zone1 = cz_default) and
                          (ainfo.pos.x >= foldlevel1 * flevelstep) then begin
        if isopen1 then begin
         hidechildren(row1);
@@ -449,7 +449,7 @@ begin
       end;
      end;
     end;
-   end;  
+   end;
   end;
   if not (es_processed in ainfo.eventstate) then begin
    inherited;
@@ -472,7 +472,7 @@ begin
    end;
   end;
 {
-  if (info.eventkind = cek_enter) or 
+  if (info.eventkind = cek_enter) or
                     (info.eventkind = cek_exit) then begin
    if oe_locate in foptionsedit then begin
     editing:= false;

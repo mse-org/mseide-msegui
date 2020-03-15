@@ -15,7 +15,7 @@
 }
 {
   Contains the TMysqlConnection for MySQL 4.0
-  
+
   temporary backwards compatibility for Lazarus
 }
 

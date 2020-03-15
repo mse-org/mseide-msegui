@@ -12,7 +12,7 @@ unit mseftglyphs;
 interface
 uses
  msefreetype,msestrings,msebitmap,msetypes,msegraphutils;
- 
+
 type
  tftglyphs = class
   private
@@ -27,10 +27,10 @@ type
    flinespacing: int32;
    function internalgetglyph(const abitmap: tmaskedbitmap;
                        const achar: card32; const arot: real;
-                       const aframe: framety; const acolor: colorty; 
+                       const aframe: framety; const acolor: colorty;
                                                  const acell: boolean): boolean;
   public
-   constructor create(const afontfile: filenamety; const afontindex: int32; 
+   constructor create(const afontfile: filenamety; const afontindex: int32;
                                         const aheight: int32); //pixels
    destructor destroy(); override;
 
@@ -68,7 +68,7 @@ type
 implementation
 uses
  msefileutils,sysutils,math;
- 
+
 { tftglyphs }
 
 constructor tftglyphs.create(const afontfile: filenamety;
@@ -190,11 +190,11 @@ begin
      else begin
       destsize:= sourcesize;
       deststart:= pointty(aframe.topleft);
-     end; 
+     end;
      destsize.cx:= destsize.cx + aframe.left + aframe.right;
      destsize.cy:= destsize.cy + aframe.top + aframe.bottom;
-     if (destsize.cx > 0) and (destsize.cx > 0) and 
-                         (deststart.x < destsize.cx) and 
+     if (destsize.cx > 0) and (destsize.cx > 0) and
+                         (deststart.x < destsize.cx) and
                                    (deststart.y < destsize.cy) then begin
       abitmap.size:= destsize;
       sourcestart.x:= 0;

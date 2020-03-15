@@ -12,7 +12,7 @@ unit mseellipsetria;
 interface
 uses
  msegraphics,msegraphutils,msetriaglob;
- 
+
 procedure fillellipsetria(var drawinfo: drawinfoty; out apoints: ppointty;
                                          out apointcount: integer);
                  //returns trifan
@@ -25,12 +25,12 @@ function arctria(var drawinfo: drawinfoty; out apoints: ppointty;
 function ellipsetria(var drawinfo: drawinfoty; out apoints: ppointty;
                                          out apointcount: integer): boolean;
            //true if triangles, tristrip otherwise
-                 
+
 
 implementation
 uses
  mselinetria;
- 
+
 procedure adjustellipsecenter(const drawinfo: drawinfoty;
                                         var center: pointty);
 begin
@@ -89,7 +89,7 @@ begin
   if cx > cy then begin
    f:= cy/cx;
    sx:= cx*(65536/2);
-   sy:= 0;    
+   sy:= 0;
    for int1:= int1-1 downto 0 do begin
     y1:= round(sy*f);
     x1:= round(sx);
@@ -115,7 +115,7 @@ begin
   else begin
    f:= cx/cy;
    sy:= cy*(65536/2);
-   sx:= 0;    
+   sx:= 0;
    for int1:= int1-1 downto 0 do begin
     x1:= round(sx*f);
     y1:= round(sy);
@@ -194,7 +194,7 @@ begin
     center.y:= (q0^.y + y) div 2;
    end;
   end;
-  ppointty(buffer.buffer)^:= center;   
+  ppointty(buffer.buffer)^:= center;
   apoints:= buffer.buffer;
   apointcount:= npoints;
  end;
@@ -461,7 +461,7 @@ begin
   cxw:= cx1*w;
   cyw:= cy1*w;
   sx:= 1;
-  sy:= 0;    
+  sy:= 0;
   for int1:= int1-1 downto 0 do begin
    x1:= round(cx1*sx);
    y1:= round(cy1*sy);

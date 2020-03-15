@@ -1,5 +1,5 @@
 { MSEide Copyright (c) 1999-2017 by Martin Schreiber
-   
+
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation; either version 2 of the License, or
@@ -64,7 +64,7 @@ type
   procedure setmodulepos_y(const avalue: integer);
   function getdockcontroller(): tdockcontroller;
  end;
- 
+
  methodinfoty = record
   name: string;
   address: pointer;
@@ -84,7 +84,7 @@ type
   data: methodsdataty;
  end;
  pmethodshashdataty = ^methodshashdataty;
- 
+
  tmethods = class(tptruinthashdatalist)
   private
    fdesigner: tdesigner;
@@ -114,7 +114,7 @@ type
  tmethodnames = class(tansistringptruinthashdatalist)
   public
  end;
- 
+
  tcomponents = class;
 
  tcomponentslink = class(tcomponent)
@@ -169,7 +169,7 @@ type
   data: componentsdataty;
  end;
  pcomponentshashdataty = ^componentshashdataty;
-  
+
  tcomponents = class(tptruinthashdatalist)
   private
    fdesigner: tdesigner;
@@ -261,7 +261,7 @@ type
   desc,anc: string;
  end;
  ancestornameinfoarty = array of ancestornameinfoty;
- 
+
  tancestorlist = class(tobjectlinkrecordlist)
   private
    fstreaming: integer;
@@ -323,11 +323,11 @@ type
    procedure onerror(reader: treader; const message: string; var handled: boolean);
   protected
    procedure notification(acomponent: tcomponent; operation: toperation);
-                               override;        
+                               override;
   public
-   destructor destroy; override;   
+   destructor destroy; override;
  end;
- 
+
  tdescendentinstancelist = class(tdesignerancestorlist)
   private
    fdelcomps:componentarty;
@@ -371,9 +371,9 @@ type
                              const aname: string; var action: modalresultty) of object;
                                       //mr_ignore,mr_ok, cancel otherwise
  getmoduletypeeventty = procedure(const atypename: string) of object;
- propprocty = procedure(const ainstance: tobject; const data: pointer; 
+ propprocty = procedure(const ainstance: tobject; const data: pointer;
                 const apropinfo: ppropinfo);
- 
+
  forallmethpropinfoty = record
   root: tcomponent;
   dat: pointer;
@@ -383,7 +383,7 @@ type
 
  designerstatety = (des_pasting,des_inheritednewmodule,des_skipall);
  designerstatesty = set of designerstatety;
-  
+
  tdesigner = class(tactcomponent,idesigner)
   private
    fselections: tdesignerselections;
@@ -467,7 +467,7 @@ type
    procedure endcomponentmodify;
    procedure beginpasting;
    procedure endpasting;
-   
+
    function beforemake: boolean; //true if ok
    procedure modulechanged(const amodule: pmoduleinfoty);
    procedure touch(const amodule: tmsecomponent);
@@ -475,7 +475,7 @@ type
    function changemodulename(const filename: msestring; const avalue: string): string;
    function changemoduleclassname(const filename: msestring; const avalue: string): string;
    function changeinstancevarname(const filename: msestring; const avalue: string): string;
-   function checksubmodule(const ainstance: tcomponent; 
+   function checksubmodule(const ainstance: tcomponent;
               out aancestormodule: pmoduleinfoty): boolean;
    function getreferencingmodulenames(const amodule: pmoduleinfoty): stringarty;
    function checkmethodtypes(const amodule: pmoduleinfoty;
@@ -502,7 +502,7 @@ type
                    var component: tcomponent);
    function createcomponent: tcreatecomponentevent;
    function selectedcomponents: componentarty;
-   
+
       //idesigner
    procedure componentmodified(const component: tobject;
                  const apropname: string = ''; const apropindex: int32 = -1);
@@ -528,7 +528,7 @@ type
                                  const atype: ptypeinfo): tmethod;
    procedure checkmethod(const method: tmethod; const aname: string;
                          const module: tmsecomponent; const atype: ptypeinfo);
-   
+
    function getcomponentname(const comp: tcomponent): string;
                    //returns qualified name for foreign modules
    function getcomponentdispname(const comp: tcomponent): string;
@@ -537,7 +537,7 @@ type
                       const curname, newname: string); reintroduce;
    function getclassname(const comp: tcomponent): string;
                    //returns submoduleclassname if appropriate
-   function getcomponent(const aname: string; 
+   function getcomponent(const aname: string;
                                const aroot: tcomponent): tcomponent;
                    //handles qualified names for foreign forms
    function getcomponent(const apath: string;
@@ -568,7 +568,7 @@ type
                           const arootwidget: twidget;
                            const filter: compfilterfuncty = nil): msestringarty;
    function getwidgetnametree(const rootwidget: twidget): tcompnameitem;
-   
+
    function getancestorclassinfo(const ainstance: tcomponent;
                  const interfaceonly: boolean): classinfopoarty;
                                                   overload;
@@ -576,14 +576,14 @@ type
                  const interfaceonly: boolean;
                                  out aunits: unitinfopoarty): classinfopoarty;
                                                   overload;
-                                                          
+
    function getmodulex(const amodule: tmsecomponent): integer;
    procedure setmodulex(const amodule: tmsecomponent; avalue: integer);
    function getmoduley(const amodule: tmsecomponent): integer;
    procedure setmoduley(const amodule: tmsecomponent; avalue: integer);
    procedure modulesizechanged(const amodule: tmsecomponent);
 
-   function isownedmethod(const root: tcomponent; 
+   function isownedmethod(const root: tcomponent;
                                              const method: tmethod): boolean;
    procedure getmethodinfo(const method: tmethod; out moduleinfo: pmoduleinfoty;
                       out methodinfo: pmethodinfoty);
@@ -619,7 +619,7 @@ type
    function checkcanclose(const amodule: pmoduleinfoty; out references:  string): boolean;
 
    property modules: tmodulelist read getmodules;
-   property descendentinstancelist: tdescendentinstancelist read 
+   property descendentinstancelist: tdescendentinstancelist read
                                                   fdescendentinstancelist;
    property selections: tdesignerselections read fselections;
                  //do not modify!
@@ -635,7 +635,7 @@ type
 
 procedure createbackupfile(const newname,origname: filenamety;
                       var backupcreated: boolean; const backupcount: integer);
-           
+
 function designer: tdesigner;
 function isdatasubmodule(const acomponent: tobject;
                          const iconified: boolean = false;
@@ -661,7 +661,7 @@ uses
 
 const
  renewbackuptag = 0;
- 
+
 type
  tcomponent1 = class(tcomponent);
  tmsecomponent1 = class(tmsecomponent);
@@ -686,7 +686,7 @@ end;
 
 function isnosubcomp(const acomp: tcomponent): boolean;
 begin
- result:= (cssubcomponent in acomp.componentstyle) and 
+ result:= (cssubcomponent in acomp.componentstyle) and
            (acomp is tmsecomponent) and
             not(cs_subcompref in tmsecomponent1(acomp).fmsecomponentstate);
 end;
@@ -695,7 +695,7 @@ function isdatasubmodule(const acomponent: tobject;
                          const iconified: boolean = false;
                          const both: boolean = false): boolean;
 begin
- result:= (acomponent <> nil) and (acomponent is tmsedatamodule) and 
+ result:= (acomponent <> nil) and (acomponent is tmsedatamodule) and
             (csinline in tmsedatamodule(acomponent).componentstate) and
             (both or
             (iconified = (dmo_iconic in tmsedatamodule(acomponent).options)));
@@ -703,10 +703,10 @@ end;
 
 function issubprop(const obj1: tobject): boolean;
 begin
- result:= (obj1 <> nil) and (not (obj1 is tcomponent) or 
+ result:= (obj1 <> nil) and (not (obj1 is tcomponent) or
             (cssubcomponent in tcomponent(obj1).componentstyle) and
-             ((tcomponent(obj1).owner = nil) or 
-               (obj1 is tmsecomponent) and 
+             ((tcomponent(obj1).owner = nil) or
+               (obj1 is tmsecomponent) and
                 not(cs_subcompref in tmsecomponent1(obj1).fmsecomponentstate)));
 end;
 
@@ -933,7 +933,7 @@ begin
  result:= nil;
  po1:= datapo;
  for int1:= 0 to count - 1 do begin
-  if (namepathowner(po1^.descendent) = ainfo.desc) and 
+  if (namepathowner(po1^.descendent) = ainfo.desc) and
        (namepathowner(po1^.ancestor) = ainfo.anc) then begin
    result:= po1;
    break;
@@ -1010,8 +1010,8 @@ begin
      po1^.ancestor:= nil;
      if comp <> nil then begin
       removefixupreferences(comp,'');
-     end;  
-     comp.Free;  
+     end;
+     comp.Free;
     {$ifdef mse_debugcopycomponent}
      debugwriteln('***renewbackup before copy '+amodule.name);
      dumpcomponent(amodule,'source:');
@@ -1035,7 +1035,7 @@ end;
 
 procedure tsubmodulelist.receiveevent(const event: tobjectevent);
 begin
- if (event is tasyncevent) and 
+ if (event is tasyncevent) and
                       (tasyncevent(event).tag = renewbackuptag) then begin
   dorenewbackup;
  end;
@@ -1076,11 +1076,11 @@ end;
 
 const
  skipmark = '1w%f62*7/*+z';
- 
+
 type
  trefreshexception = class(exception)
  end;
- 
+
 { treaderrorhandler }
 
 destructor treaderrorhandler.destroy;
@@ -1111,13 +1111,13 @@ begin
 end;
 
 procedure treaderrorhandler.doraise(const acomponent: tcomponent);
-begin  
+begin
  if acomponent <> nil then begin
   additem(pointerarty(fcomponentar),acomponent);
   acomponent.freenotification(self);
  end;
  raise trefreshexception.create(skipmark);
-end;  
+end;
 
 procedure treaderrorhandler.ancestornotfound(Reader: TReader;
                    const ComponentName: string;
@@ -1130,7 +1130,7 @@ begin
  end;
 end;
 
-procedure treaderrorhandler.onsetname(reader: treader; 
+procedure treaderrorhandler.onsetname(reader: treader;
                                     component: tcomponent; var aname: string);
 begin
 // if (component.owner <> nil) and (csinline in component.owner.componentstate) and
@@ -1163,7 +1163,7 @@ type
   protected
    procedure notification(acomponent: tcomponent; operation: toperation); override;
  end;
- 
+
 procedure tdelcomp.notification(acomponent: tcomponent; operation: toperation);
 var
  int1: integer;
@@ -1182,7 +1182,7 @@ end;
 procedure tdescendentinstancelist.revert(const info: pancestorinfoty;
             const module: pmoduleinfoty; out anewinstance: tmsecomponent;
             const norootposition: boolean = false;
-            const initflags: boolean = true); 
+            const initflags: boolean = true);
 var
  comp1,comp2: tmsecomponent;
  decomp: tdelcomp;
@@ -1242,7 +1242,7 @@ begin
 // fobjectlinker.unlink(comp1);
  fdelcomps:= nil;
  froot:= comp1.owner;
- if ismodule(comp1) then begin 
+ if ismodule(comp1) then begin
   froot:= comp1;
  end;
  delcomp(comp1);
@@ -1251,7 +1251,7 @@ begin
   decomp.fdelcomps:= fdelcomps;
   for int1:= high(fdelcomps) downto 0 do begin
    fdelcomps[int1].freenotification(decomp);
-  end;  
+  end;
   for int1:= high(fdelcomps) downto 0 do begin
    fdelcomps[int1].free;
   end;
@@ -1344,12 +1344,12 @@ begin
   inc(po1);
  end;
 {$endif}
-end;         
+end;
 *)
 
 function tdescendentinstancelist.getancestors(
                                const adescendent: tcomponent): componentarty;
-                               
+
  procedure addancestors(const adescendent: tcomponent);
  var
   po1: pointer;
@@ -1367,7 +1367,7 @@ function tdescendentinstancelist.getancestors(
    end;
   end;
  end;
- 
+
 begin
  result:= nil;
  addancestors(adescendent);
@@ -1398,7 +1398,7 @@ function tdescendentinstancelist.getdescendents(
                                  const aancestor: tcomponent): componentarty;
 var
  recursionlevel: integer;
- 
+
  procedure adddescendent(const aancestor: tcomponent);
  var
   int1: integer;
@@ -1414,11 +1414,11 @@ var
       adddescendent(descendent);
      end;
     end;
-   end;      
+   end;
   end;
   inc(recursionlevel);
  end;
- 
+
 begin
  result:= nil;
  recursionlevel:= 32; //max
@@ -1480,8 +1480,8 @@ var
  dependentmodules: moduleinfopoarty;
  dependentmod: moduleinfopoarty;
  comp1: tmsecomponent;
- newancestor0: tmsecomponent; 
- oldancestor0: tmsecomponent; 
+ newancestor0: tmsecomponent;
+ oldancestor0: tmsecomponent;
  descendent1,newancestor1,oldancestor1: tmsecomponent;
  int1,int2,int3,int4: integer;
 // str1: string;
@@ -1492,9 +1492,9 @@ var
  pt1: pointty;
  taborderbefore: integer;
  depmodcomps: array of stringarty;
- dependentcomponents: array of msecomponentarty; 
- newancestorcomponents: array of msecomponentarty; 
- oldancestorcomponents: array of msecomponentarty; 
+ dependentcomponents: array of msecomponentarty;
+ newancestorcomponents: array of msecomponentarty;
+ oldancestorcomponents: array of msecomponentarty;
 // sourcemethodtab: pointer;
 
 begin
@@ -1528,14 +1528,14 @@ begin
   {$endif}
 
    newancestor0:= amodule^.instance;
-   oldancestor0:= fdesigner.fsubmodulelist.findoldancestor(amodule^.instance); 
+   oldancestor0:= fdesigner.fsubmodulelist.findoldancestor(amodule^.instance);
    po1:= datapo;
    int2:= 0;
    setlength(dependentmod,fcount); //max
    for int1:= 0 to fcount - 1 do begin
     if po1^.ancestor = amodule^.instance then begin
  //    dependentcomponents[int2]:= po1^.descendent;
-     if ismodule(po1^.descendent) then begin  //inherited form        
+     if ismodule(po1^.descendent) then begin  //inherited form
       comp1:= po1^.descendent;
       destname:= 'OWNER';
      end
@@ -1549,7 +1549,7 @@ begin
     {$ifdef mse_debugsubmodule}
      debugwriteln(' item ancestor: '+po1^.ancestor.name+ ' descendent: '+
               po1^.descendent.name + ' module: '+po2^.instance.name);
-    {$endif}               
+    {$endif}
      int3:= finditem(pointerarty(dependentmodules),po2);
      if int3 < 0 then begin
       int3:= high(dependentmodules)+2;
@@ -1580,7 +1580,7 @@ begin
     inc(po1);
    end;
    setlength(dependentmod,int2);
- 
+
    if int2 > 0 then begin
    {$ifdef mse_debugsubmodule}
     debugwriteln('*descendents:');
@@ -1656,10 +1656,10 @@ begin
         if destcompnames <> nil then begin
          int3:= int2 mod length(destcompnames);
          newancestor1:= newancestorcomps[int3];
-         oldancestor1:= oldancestorcomps[int3];        
+         oldancestor1:= oldancestorcomps[int3];
         end;
-        bo3:= (csinline in descendent1.componentstate) and 
-                                         (descendent1.owner <> nil); 
+        bo3:= (csinline in descendent1.componentstate) and
+                                         (descendent1.owner <> nil);
                             //whole submodule
         bo1:= false;
         bo2:= false;
@@ -1786,7 +1786,7 @@ var
  reclevel: integer;
  namepath: string;
  newpath: string;
- 
+
  procedure donamechange(aancestor: pmoduleinfoty);
  var
   int1: integer;
@@ -1814,7 +1814,7 @@ var
    dec(reclevel);
   end;
  end;
- 
+
  procedure docheckname(aancestor: pmoduleinfoty);
  var
   int1: integer;
@@ -1846,7 +1846,7 @@ var
  end;
 
 var
- ar1: componentarty; 
+ ar1: componentarty;
  int1: integer;
 begin
  if not fcomponentnamechanging then begin
@@ -1929,7 +1929,7 @@ var
 begin
  po1:= datapo;
  for int1:= 0 to fcount - 1 do begin
-  if (po1^.descendent is twidget) and 
+  if (po1^.descendent is twidget) and
                       twidget(po1^.descendent).checkancestor(aroot) then begin
    twidget1(po1^.ancestor).fwidgetrect.pos:= nullpoint;
   end;
@@ -1996,7 +1996,7 @@ type
      addr : pointer;
   end;
   pmethodtableentryty = ^tmethodnamerec;
-  
+
   tmethodnametable = packed record
     count : dword;
     entries : packed array[0..0] of tmethodnamerec;
@@ -2219,7 +2219,7 @@ procedure tcomponents.doadd(component: tcomponent);
 var
  root: tcomponent;
 begin
- if not(component is twidget) or 
+ if not(component is twidget) or
          (ws_iswidget in twidget1(component).fwidgetstate) then begin
   add(component);
  end;
@@ -2237,7 +2237,7 @@ procedure tcomponents.assigncomps(const module: tmsecomponent);
   ar1: componentarty;
   int1: integer;
  begin
-  if not(acomp is twidget) or 
+  if not(acomp is twidget) or
           (ws_iswidget in twidget1(acomp).fwidgetstate) then begin
    add(acomp);
   end;
@@ -2246,7 +2246,7 @@ procedure tcomponents.assigncomps(const module: tmsecomponent);
    addcomp(ar1[int1]);
   end;
  end;
- 
+
 begin
  clear;
  if module <> nil then begin
@@ -2630,8 +2630,8 @@ begin
  end;
 end;
 
-function tmodulelist.findmethodbyname(const name: string; 
-                                      const atype: ptypeinfo; 
+function tmodulelist.findmethodbyname(const name: string;
+                                      const atype: ptypeinfo;
                                       const amodule: tmsecomponent): tmethod;
 
  procedure getmethod(ainfo: pmoduleinfoty; aname: string);
@@ -2792,7 +2792,7 @@ begin
 //  end
 //  else begin
 //   comp1:= nil;
-//  end; 
+//  end;
 // end;
 end;
 
@@ -2898,7 +2898,7 @@ begin
  //dummy
 end;
 
-procedure tdesigner.addcomponent(const module: tmsecomponent; 
+procedure tdesigner.addcomponent(const module: tmsecomponent;
                            const acomponent: tcomponent);
 var
  int1,int2: integer;
@@ -2906,7 +2906,7 @@ var
  bo1: boolean;
  classna: string;
  ar1: componentarty;
- 
+
 begin
  if (des_pasting in fstate) and (acomponent.name <> '') then begin
   addpastedcomponentname(acomponent);
@@ -3182,7 +3182,7 @@ begin
   ar1:= nil;
   result:= nil;
   comp1:= acomponent;
-  while (comp1.owner <> nil) and 
+  while (comp1.owner <> nil) and
         (comp1.componentstate * [csinline,csancestor] <> [csinline]) do begin
    if comp1.name = '' then begin
     exit;
@@ -3190,7 +3190,7 @@ begin
    additem(ar1,comp1.name);
    comp1:= comp1.owner;
   end;
-  if (comp1.owner <> nil) and 
+  if (comp1.owner <> nil) and
                      (csancestor in comp1.owner.componentstate) then begin
      //inherited submodule
    additem(ar1,comp1.name);
@@ -3198,7 +3198,7 @@ begin
   end;
   result:= descendentinstancelist.findancestor(comp1);
   for int1:= high(ar1) downto 0 do begin
-   if result = nil then begin 
+   if result = nil then begin
     exit;
    end;
    result:= result.findcomponent(ar1[int1]);
@@ -3266,13 +3266,13 @@ procedure tdesigner.docopymethods(const source,dest: tcomponent;
     tkmethod: begin
      method1:= getmethodprop(source,ar1[int1]);
      if {force or }(method1.code <> nil) or (method1.data <> nil) then begin
-      setmethodprop(dest,ar1[int1],method1); 
+      setmethodprop(dest,ar1[int1],method1);
      end;
     end;
     {
     tkclass: begin
      obj1:= getobjectprop(source,ar1[int1]);
-     if (obj1 <> nil) and (not (obj1 is tcomponent) or 
+     if (obj1 <> nil) and (not (obj1 is tcomponent) or
                (cssubcomponent in tcomponent(obj1).componentstyle)) then begin
       obj2:= getobjectprop(dest,ar1[int1]);
       if obj2 <> nil then begin
@@ -3294,18 +3294,18 @@ procedure tdesigner.docopymethods(const source,dest: tcomponent;
    end;
   end;
  end;
- 
-var 
+
+var
  comp1,comp2: tcomponent;
  int1: integer;
  bo1: boolean;
 begin
  bo1:= setloading(dest,true);
- try 
+ try
   doprops(source,dest);
  finally
   setloading(dest,bo1);
- end; 
+ end;
  for int1:= 0 to source.componentcount - 1 do begin
   comp1:= source.components[int1];
   comp2:= dest.findcomponent(comp1.name);
@@ -3317,7 +3317,7 @@ begin
 end;
 {$endif}
 {
-procedure tdesigner.docopymethods(const source, dest: tcomponent; 
+procedure tdesigner.docopymethods(const source, dest: tcomponent;
                            const force: boolean);
 var
  propar: propinfopoarty;
@@ -3363,7 +3363,7 @@ procedure tdesigner.dorefreshmethods(const descendent,newancestor,
     tkmethod: begin
      method2:= getmethodprop(newan,ar1[int1]);
      if (method2.code <> nil) or (method2.data <> nil) then begin
-      setmethodprop(desc,ar1[int1],method2); 
+      setmethodprop(desc,ar1[int1],method2);
           //refresh ancestor value, it is not possible to override methods
      end;
     end;
@@ -3371,7 +3371,7 @@ procedure tdesigner.dorefreshmethods(const descendent,newancestor,
      obj1:= getobjectprop(desc,ar1[int1]);
      obj2:= getobjectprop(newan,ar1[int1]);
      obj3:= getobjectprop(oldan,ar1[int1]);
-     if (obj1 <> nil) and (not (obj1 is tcomponent) or 
+     if (obj1 <> nil) and (not (obj1 is tcomponent) or
                (cssubcomponent in tcomponent(obj1).componentstyle)) then begin
       doprops(obj1,obj2,obj3);
       if obj1 is tpersistentarrayprop then begin
@@ -3393,8 +3393,8 @@ procedure tdesigner.dorefreshmethods(const descendent,newancestor,
    end;
   end;
  end;
- 
-var 
+
+var
  comp1,comp2,comp3: tcomponent;
  int1: integer;
 begin
@@ -3415,8 +3415,8 @@ end;
 procedure tdesigner.forallmethprop(child: tcomponent);
 begin
  with fforallmethpropsinfo do begin
-  forallmethodproperties(child,dat,proc,dochi);  
- end; 
+  forallmethodproperties(child,dat,proc,dochi);
+ end;
 end;
 }
 
@@ -3686,7 +3686,7 @@ begin
  end;
 end;
 
-function tdesigner.changemodulename(const filename: msestring; 
+function tdesigner.changemodulename(const filename: msestring;
                                                   const avalue: string): string;
 var
  po1: pmoduleinfoty;
@@ -3705,7 +3705,7 @@ function tdesigner.componentcanedit: boolean;
 begin
  result:= (fcomponenteditor <> nil) and (cs_canedit in fcomponenteditor.state);
 end;
-  
+
 procedure tdesigner.checkident(const aname: string);
 begin
  if not isvalidident(aname) or (aname = '') then begin
@@ -3740,7 +3740,7 @@ begin
  modulechanged(po1);
 end;
 
-function tdesigner.checksubmodule(const ainstance: tcomponent; 
+function tdesigner.checksubmodule(const ainstance: tcomponent;
               out aancestormodule: pmoduleinfoty): boolean;
 begin
  aancestormodule:= modules.findmodule(
@@ -3754,7 +3754,7 @@ begin
  if fformloadlocklevel = 0 then begin
   if apropname <> '' then begin
    objectinspectorfo.selectprop(component,apropname,apropindex);
-  end;   
+  end;
   fallsaved:= false;
   if component <> nil then begin
    fmodules.componentmodified(component);
@@ -3834,7 +3834,7 @@ begin
  for int1:= 0 to high(ar1)-1 do begin
   doswapmethodpointers(ar1[int1],false);
  end;
-{$endif}  
+{$endif}
  try
   if not noloading then begin
    begingloballoading;
@@ -3884,7 +3884,7 @@ begin
     end;
     try
     {$ifdef mse_nomethodswap}
-     reader.onsetmethodproperty:= 
+     reader.onsetmethodproperty:=
         {$ifdef FPC}@{$endif}fdescendentinstancelist.setrefreshmethod;
     {$endif}
      reader.onfindcomponentclass:= {$ifdef FPC}@{$endif}findcomponentclass;
@@ -3903,7 +3903,7 @@ begin
   finally
    stream1.free;
   end;
-  tmsecomponent1(result).factualclassname:= 
+  tmsecomponent1(result).factualclassname:=
                                tmsecomponent1(source).factualclassname;
   (*
   result:= tmsecomponent(mseclasses.copycomponent(source,nil,
@@ -4098,7 +4098,7 @@ begin
      break;
     end;
     str1:= comp1.name+'.'+str1;
-    comp1:= comp1.owner;     
+    comp1:= comp1.owner;
    end;
    if comp1 <> nil then begin
     comp1:= fdescendentinstancelist.findancestor(comp1);
@@ -4109,11 +4109,11 @@ begin
   end;
  end
  else begin
-  if not (csinline in component.componentstate) and 
+  if not (csinline in component.componentstate) and
    (component.owner <> nil) and (csancestor in component.owner.componentstate) then begin
    ancestor:= nil; //has name duplicate
   end;
- end; 
+ end;
 end;
 
 procedure tdesigner.getmethodinfo(const method: tmethod; out moduleinfo: pmoduleinfoty;
@@ -4208,7 +4208,7 @@ begin
  end;
 end;
 
-procedure tdesigner.checkmethod(const method: tmethod; const aname: string; 
+procedure tdesigner.checkmethod(const method: tmethod; const aname: string;
                 const module: tmsecomponent; const atype: ptypeinfo);
 var
  po1: pmethodinfoty;
@@ -4301,7 +4301,7 @@ end;
 procedure swapmethodpointer(const ainstance: tobject; const data: pointer;
                              const apropinfo: ppropinfo);
 var
- method1: tmethod;                             
+ method1: tmethod;
 begin
  method1:= getmethodprop(ainstance,apropinfo);
  if method1.data <> nil then begin
@@ -4314,7 +4314,7 @@ end;
 procedure swapinitmethodpointer(const ainstance: tobject; const data: pointer;
                              const apropinfo: ppropinfo);
 var
- method1: tmethod;                             
+ method1: tmethod;
 begin
  method1:= getmethodprop(ainstance,apropinfo);
  if method1.code <> nil then begin
@@ -4355,7 +4355,7 @@ begin
 end;
 {$endif}
 
-{$ifdef mse_nomethodswap} 
+{$ifdef mse_nomethodswap}
 procedure tdesigner.writedesignmethod(writer: twriter; instance: tpersistent;
                propinfo: ppropinfo; const methodvalue: tmethod;
                const defmethodvalue: tmethod; var handled: boolean);
@@ -4371,7 +4371,7 @@ begin
     writevalue(vanil);
    end
    else begin
-    str1:= fmodules.fmethodnames.find(ptruint(methodvalue.data));        
+    str1:= fmodules.fmethodnames.find(ptruint(methodvalue.data));
     if str1 = '' then begin
      writevalue(vanil);
     end
@@ -4443,13 +4443,13 @@ begin
    end;
   end;
  end;
- result:= classinfopoarty(packarray(pointerarty(ar2))); 
+ result:= classinfopoarty(packarray(pointerarty(ar2)));
 end;
 
 function tdesigner.getancestorclassinfo(const ainstance: tcomponent;
                 const interfaceonly: boolean;
                                  out aunits: unitinfopoarty): classinfopoarty;
-                                                  
+
 var
  ar1: componentarty;
  ar2: classinfopoarty;
@@ -4480,7 +4480,7 @@ function tdesigner.checkmethodtypes(const amodule: pmoduleinfoty;
 var
  classinfar: classinfopoarty;
  comp1: tcomponent;
- 
+
  procedure doinit(const instance: tobject);
  var
   ar1: propinfopoarty;
@@ -4633,7 +4633,7 @@ begin
  end;
 end;
 
-procedure tdesigner.readerenumerror(const reader: treader; 
+procedure tdesigner.readerenumerror(const reader: treader;
          const atype: ptypeinfo; const aitemname: string; var avalue: longword);
 begin
  if atype = typeinfo(charencodingty) then begin
@@ -4644,25 +4644,25 @@ begin
  end;
 end;
 
-procedure tdesigner.readerseterror(const reader: treader; 
+procedure tdesigner.readerseterror(const reader: treader;
          const atype: ptypeinfo; const aitemname: string; var avalue: integer);
 begin
  if atype = typeinfo(optioneditty) then begin
-  if (aitemname = 'oe_autopopupmenu') or 
+  if (aitemname = 'oe_autopopupmenu') or
             (aitemname = 'oe_keyexecute') then begin
    avalue:= -2; //skip
    floadingmodulepo^.readermodified:= true;
   end;
  end;
  if atype = typeinfo(framelocalpropty) then begin
-  if (aitemname = 'frl_frameimageoffsetactivemouse') or 
+  if (aitemname = 'frl_frameimageoffsetactivemouse') or
             (aitemname = 'frl_frameimageoffsetactiveclicked') then begin
    avalue:= -2; //skip
    floadingmodulepo^.readermodified:= true;
   end;
  end;
  if atype = typeinfo(framelocalprop1ty) then begin
-  if (aitemname = 'frl1_framefaceoffsetactivemouse') or 
+  if (aitemname = 'frl1_framefaceoffsetactivemouse') or
             (aitemname = 'frl1_framefaceoffsetactiveclicked') then begin
    avalue:= -2; //skip
    floadingmodulepo^.readermodified:= true;
@@ -4676,7 +4676,7 @@ var
  module: tmsecomponent;
  loadedsubmodulesindex: integer;
  moduleinfo: tmoduleinfo;
-  
+
  procedure dodelete;
  var
   int1: integer;
@@ -4690,11 +4690,11 @@ var
   moduleinfo.free; //frees module by designform
   if desfo = nil then begin
    module.Free;
-  end;           
+  end;
   module:= nil;
   result:= nil;
  end;
- 
+
 var
  moduleclassname1,modulename,
  designmoduleclassname: string;
@@ -4820,7 +4820,7 @@ begin //loadformfile
           getfixupreferencenames(module,rootnames);
           for int1:= rootnames.count - 1 downto 0 do begin
            comp1:= fmodules.findmoduleinstancebyname(rootnames[int1]);
-           if (comp1 <> nil) and (comp1 <> module) and 
+           if (comp1 <> nil) and (comp1 <> module) and
                                 (csloading in comp1.componentstate) then begin
             deletefixups:= false;
             additem(pointerarty(fcheckfixups),result);
@@ -4933,7 +4933,7 @@ begin //loadformfile
         designnotifications.showobjecttext(
                                   idesigner(self),filename,backupcreated);
         if exp1 = nil then begin
-         rootinstancenames.clear;      
+         rootinstancenames.clear;
          getfixupinstancenames(instance,rootnames[0],rootinstancenames);
          if rootinstancenames.count > 0 then begin
           str1:= '.'+rootinstancenames[0];
@@ -4989,7 +4989,7 @@ var
  mstr1: filenamety;
  mstr2: filenamety;
 begin
- if (backupcount > 0) and not backupcreated and 
+ if (backupcount > 0) and not backupcreated and
       issamefilename(newname,origname) and findfile(origname) then begin
   backupcreated:= true;
   mstr1:= origname + backupext;
@@ -5006,7 +5006,7 @@ begin
   end;
   msefileutils.copyfile(origname,mstr1);
  end;
-end;  
+end;
 
 function tdesigner.getancestormethods(const amodule: pmoduleinfoty): methodsarty;
 var
@@ -5109,9 +5109,9 @@ function tdesigner.saveformfile(const modulepo: pmoduleinfoty;
 var
  stream1: tmemorystream;
  stream2: tbufstream;
- info: fileinfoty; 
+ info: fileinfoty;
 begin
- if createdatafile and projectoptions.s.checkmethods 
+ if createdatafile and projectoptions.s.checkmethods
                        and not checkmethodtypes(modulepo,false{,nil}) then begin
   result:= false;
   exit;
@@ -5182,15 +5182,15 @@ begin
      exit;
     end;
    end;
-   if modified and (result <> mr_noall) and 
-     (noconfirm or 
+   if modified and (result <> mr_noall) and
+     (noconfirm or
       (result = mr_all) or
       not fallsaved and confirmsavechangedfile(filename,result,true)) then begin
     if not saveformfile(po1,filename,createdatafile) then begin
      result:= mr_cancel;
     end;
    end;
-   case result of 
+   case result of
     mr_cancel: begin
      exit;
     end;
@@ -5207,7 +5207,7 @@ function tdesigner.closemodule(const amodule: pmoduleinfoty;
                              const checksave: boolean): boolean; //true if closed
 var
  closingmodules: moduleinfopoarty;
- 
+
  procedure dochecksave(const amodule: pmoduleinfoty);
  var
   modalresult: modalresultty;
@@ -5244,10 +5244,10 @@ var
    end;
   end;
  end;
- 
+
 var
  int1: integer;
- 
+
 begin //closemodule
  result:= false;
  closingmodules:= nil;
@@ -5333,7 +5333,7 @@ end;
 }
 procedure tdesigner.showobjectinspector;
 begin
-// asyncevent(showobjectinspectortag);  
+// asyncevent(showobjectinspectortag);
                //use async because of window stacking problems
  objectinspectorfo.activate;
 end;
@@ -5379,7 +5379,7 @@ var
 begin
  result:= '';
  if comp <> nil then begin
-  if (floadingmodulepo <> nil) and  
+  if (floadingmodulepo <> nil) and
            (comp.Owner = floadingmodulepo^.instance) then begin  //???
    result:= comp.name;
   end
@@ -5437,7 +5437,7 @@ begin
  end;
 end;
 
-function tdesigner.getcomponent(const aname: string; 
+function tdesigner.getcomponent(const aname: string;
                       const aroot: tcomponent): tcomponent;
 var
  ar1,ar2: stringarty;
@@ -5516,8 +5516,8 @@ var
 
  procedure check(const acomp: tcomponent);
  begin
-  if acomp.InheritsFrom(acomponentclass) and 
-       (({$ifndef FPC}@{$endif}filter = nil) or filter(acomp)) and 
+  if acomp.InheritsFrom(acomponentclass) and
+       (({$ifndef FPC}@{$endif}filter = nil) or filter(acomp)) and
        not isnosubcomp(acomp) then begin
    additem(pointerarty(result),acomp,acount);
   end;
@@ -5544,10 +5544,10 @@ var
    end;
   end;
  end;
- 
+
 var
- int1: integer;  
- 
+ int1: integer;
+
 begin
  acount:= 0;
  if allmodules then begin
@@ -5598,23 +5598,23 @@ var
   int3: integer;
   comp2: tcomponent;
  begin
-  if comp1.InheritsFrom(acomponentclass) and 
+  if comp1.InheritsFrom(acomponentclass) and
           (({$ifndef FPC}@{$endif}filter = nil) or filter(comp1)) then begin
-   if ((aowner = nil) or (aowner = comp1.owner)) and 
-            (includeinherited or 
+   if ((aowner = nil) or (aowner = comp1.owner)) and
+            (includeinherited or
             (comp1.componentstate * [csinline,csancestor] = [])) then begin
     additem(result,str1+msestring(getcomponentdispname(comp1)),acount);
    end;
   end;
   for int3:= 0 to comp1.componentcount - 1  do begin
    comp2:= comp1.components[int3];
-   if (cssubcomponent in comp2.componentstyle){ and 
+   if (cssubcomponent in comp2.componentstyle){ and
                                     not isnosubcomp(comp2)} then begin
     check(comp2);
    end;
   end;
  end;
- 
+
 var
  int1,int2{,int3}: integer;
  comp1{,comp2}: tcomponent;
@@ -5663,7 +5663,7 @@ var
    check(comp1,prefix+msestring(comp1.name));
   end;
  end;
- 
+
 begin
  result:= nil;
  acount:= 0;
@@ -5686,7 +5686,7 @@ var
    prefix:= '';
   end
   else begin
-   if ((awidgetclass = nil) or (awidget is awidgetclass)) and 
+   if ((awidgetclass = nil) or (awidget is awidgetclass)) and
                                               filter(awidget) then begin
     additem(result,prefix+msestring(awidget.name),acount);
    end;
@@ -5698,7 +5698,7 @@ var
    check(awidget.widgets[i1],prefix);
   end;
  end;
- 
+
 begin
  result:= nil;
  acount:= 0;
@@ -5724,7 +5724,7 @@ begin
    else begin
     result[int2]:= msestring('z'+co1.name + '.');
    end;
-   result[int2]:= result[int2] + 
+   result[int2]:= result[int2] +
                    msestring(getcomponentdispname(acomponents[int1]));
    inc(int2);
   end;
@@ -5769,7 +5769,7 @@ begin
  end;
 end;
 
- 
+
 function tdesigner.getcomponentnametree(const acomponentclass: tcomponentclass;
                          const includeinherited: boolean;
                          const findmode: boolean;
@@ -5784,10 +5784,10 @@ function tdesigner.getcomponentnametree(const acomponentclass: tcomponentclass;
   node1,node2,node3: tdesigncompnameitem;
   ar1: componentarty;
  begin
-  if ((acomponentclass = nil) or acomp.InheritsFrom(acomponentclass)) and 
+  if ((acomponentclass = nil) or acomp.InheritsFrom(acomponentclass)) and
           ((@filter = nil) or filter(acomp)) then begin
-   if ((aowner = nil) or (aowner = acomp.owner)) and 
-            (includeinherited or 
+   if ((aowner = nil) or (aowner = acomp.owner)) and
+            (includeinherited or
             (acomp.componentstate * [csinline,csancestor] = [])) then begin
     node1:= tdesigncompnameitem.create(acomp,true);
     node1.imagenr:= 4;
@@ -5812,7 +5812,7 @@ function tdesigner.getcomponentnametree(const acomponentclass: tcomponentclass;
   end;
   for int3:= 0 to acomp.componentcount - 1  do begin
    comp2:= acomp.components[int3];
-   if (cssubcomponent in comp2.componentstyle) xor findmode{ and 
+   if (cssubcomponent in comp2.componentstyle) xor findmode{ and
                                     not isnosubcomp(comp2)} then begin
 //    node1:= anode.findcomp(comp2);
 //    if node1 = nil then begin
@@ -5822,7 +5822,7 @@ function tdesigner.getcomponentnametree(const acomponentclass: tcomponentclass;
    end;
   end;
  end;
- 
+
 var
  int1,int2{,int3}: integer;
  comp1{,comp2}: tcomponent;
@@ -5876,7 +5876,7 @@ function tdesigner.getwidgetnametree(const rootwidget: twidget): tcompnameitem;
    end;
   end;
  end;
- 
+
 begin
  result:= tdesigncompnameitem.create(nil,false);
  check(result,nil);
@@ -5927,7 +5927,7 @@ begin
     end;
     po1^.components.namechanged(acomponent,newname);
     fdescendentinstancelist.componentnamechanged(po1,acomponent,newname);
-    
+
     designnotifications.componentnamechanging(idesigner(self),po1^.instance,
                                        acomponent,newname);
     if acomponent is tmsecomponent then begin
@@ -5998,7 +5998,7 @@ end;
 function tdesigner.selectedcomponents: componentarty;
 begin
  setlength(result,fselections.count);
- move(fselections.datapo^,result[0],length(result)*sizeof(pointer)); 
+ move(fselections.datapo^,result[0],length(result)*sizeof(pointer));
 end;
 
 function tdesigner.clickedcomp: tcomponent;

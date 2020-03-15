@@ -61,7 +61,7 @@ type
   function reset: hresult; stdcall;
   function clone(out penum: ienumformatetc): hresult; stdcall;
  end;
- 
+
  idataobject = interface (iunknown) ['{0000010e-0000-0000-c000-000000000046}']
   function getdata(const formatetcin: formatetc;
                        out medium: stgmedium): hresult; stdcall;
@@ -100,12 +100,12 @@ function DoDragDrop(pDataObj: IDataObject; pDropSource: IDropSource;
                stdcall; external 'ole32.dll' name 'DoDragDrop';
 procedure ReleaseStgMedium(var _para1:STGMEDIUM);stdcall;
                              external 'ole32.dll' name 'ReleaseStgMedium';
- 
+
 procedure regsysdndwindow(const awindow: winidty);
 procedure windnddeinit;
 function sysdnd(const action: sysdndactionty;
                const aintf: isysdnd;  const arect: rectty;
-                            out aresult: boolean): guierrorty;  
+                            out aresult: boolean): guierrorty;
 function sysdndreaddata(var adata: string;
                               const typeindex: integer): guierrorty;
 function sysdndreadtext(var atext: msestring;
@@ -119,7 +119,7 @@ type
  sdndeventkindty = (sdndk_regwindow,sdndk_unregwindow,sdndk_reject,sdndk_accept,
                     sdndk_finished,sdndk_readdataortext,
                     sdndk_writebegin,sdndk_writecheck,sdndk_writeend);
- 
+
  tsdndevent = class(tmseevent)
   private
    fsdndkind: sdndeventkindty;
@@ -187,7 +187,7 @@ type
 
  writestatety = (ws_active,{ws_cancel,ws_drop,}ws_checking);
  writestatesty = set of writestatety;
- 
+
  oleformatarty = array of tformatetc;
  tsysdndhandler = class(teventthread,idroptarget)
   protected
@@ -239,9 +239,9 @@ type
   public
    constructor create(const adataobj: tdataobject);
  end;
- 
+
 const
- timeout = 500000; //us  
+ timeout = 500000; //us
  predefclipboardnames: array[1..16] of msestring = (
      'CF_TEXT',        //1
      'CF_BITMAP',      //2
@@ -339,10 +339,10 @@ begin
      postevent(tsdndevent.create(sdndk_reject),false);
     end;
     sdnda_accept: begin
-     postevent(tsdndevent.create(sdndk_accept,0,act1),false);     
+     postevent(tsdndevent.create(sdndk_accept,0,act1),false);
     end;
     sdnda_finished: begin
-     postevent(tsdndevent.create(sdndk_finished),true);     
+     postevent(tsdndevent.create(sdndk_finished),true);
     end;
     sdnda_begin: begin
      postevent(tsdndevent.create(sdndk_writebegin,0,act1,aintf),true);
@@ -400,7 +400,7 @@ begin
   end;
  end;
 end;
- 
+
 procedure regsysdndwindow(const awindow: winidty);
 begin
  if (sysdndhandler = nil) and not cannotole then begin
@@ -596,7 +596,7 @@ begin
   else begin
    result:= dogetdata(medium);
   end;
- end; 
+ end;
 end;
 
 function tdataobject.getdatahere(const pformatetc: formatetc;
@@ -816,7 +816,7 @@ begin
         clearformats;
        end;
        sdndk_readdataortext: begin
-        if (ev1.findex >= 0) and (ev1.findex <= high(foleformats)) and 
+        if (ev1.findex >= 0) and (ev1.findex <= high(foleformats)) and
                                           (fdataobject <> nil) then begin
          fillchar(medium,sizeof(medium),0);
          with medium do begin
@@ -869,11 +869,11 @@ begin
 //           end;
 //          finally
 //           application.unlock;
-//          end;         
+//          end;
          end;
         end;
        end;
-      end;     
+      end;
       ev1.free;
      end;
     until (ev1 = nil) or terminated;
@@ -951,7 +951,7 @@ begin
       fformats[int1]:= buffer;
      end
      else begin
-      if (cfformat >= low(predefclipboardnames)) and 
+      if (cfformat >= low(predefclipboardnames)) and
                     (cfformat <= high(predefclipboardnames)) then begin
        fformats[int1]:= predefclipboardnames[cfformat];
       end;

@@ -33,19 +33,19 @@ type
   protected
    function getlinksource: tcomponent; override;
   public
-   function getvalue: msestring; override;  
+   function getvalue: msestring; override;
  end;
- 
+
  tinputconnarraypropertyeditor = class(tpersistentarraypropertyeditor)
   protected
    function geteditorclass: propertyeditorclassty; override;
  end;
- 
+
  toutputconnpropertyeditor = class(tcomponentpropertyeditor)
   protected
    function filtercomponent(const acomponent: tcomponent): boolean; override;
  end;
- 
+
  tiircoeffpropertyeditor = class(tdatalistpropertyeditor)
   public
    procedure edit; override;
@@ -55,7 +55,7 @@ type
   public
    procedure edit; override;
  end;
-  
+
 procedure register;
 begin
  registercomponents('Math',[tsigcontroller,tsigout,tsigin,
@@ -160,7 +160,7 @@ begin
    self.modified();
   end;
   free;
- end; 
+ end;
 end;
 
 { tfircoeffpropertyeditor }
@@ -191,7 +191,7 @@ begin
    self.modified();
   end;
   free;
- end; 
+ end;
 end;
 
 initialization

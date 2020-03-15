@@ -72,30 +72,30 @@ object symbolfo: tsymbolfo
     anchors = []
     optionsgrid = [og_colsizing, og_rowmoving, og_keyrowmoving, og_rowinserting, og_rowdeleting, og_focuscellonenter, og_autofirstrow, og_autoappend, og_wrapcol, og_autopopup]
     fixcols.count = 1
-    fixcols.items = <    
+    fixcols.items = <
       item
         width = 18
         numstart = 1
         numstep = 1
       end>
     fixrows.count = 1
-    fixrows.items = <    
+    fixrows.items = <
       item
         height = 15
         captions.count = 3
-        captions.items = <        
+        captions.items = <
           item
             caption = 'Symbol'
-          end        
+          end
           item
             caption = 'Address'
-          end        
+          end
           item
             caption = 'Info'
           end>
       end>
     rowfonts.count = 1
-    rowfonts.items = <    
+    rowfonts.items = <
       item
         color = -1610612729
         name = 'stf_default'
@@ -104,7 +104,7 @@ object symbolfo: tsymbolfo
       end>
     datacols.count = 5
     datacols.options = [co_savevalue, co_savestate, co_cancopy, co_mousescrollrow]
-    datacols.items = <    
+    datacols.items = <
       item[symbol]
         width = 111
         options = [co_savevalue, co_savestate, co_cancopy, co_canpaste]
@@ -112,26 +112,26 @@ object symbolfo: tsymbolfo
         onchange = symbolcha
         widgetname = 'symbol'
         dataclass = tgridmsestringdatalist
-      end    
+      end
       item[symaddr]
         width = 200
         options = [co_readonly, co_drawfocus, co_fill, co_savestate, co_cancopy, co_mousescrollrow]
         widgetname = 'symaddr'
         dataclass = tgridmsestringdatalist
-      end    
+      end
       item[syminfo]
         width = 131
         options = [co_readonly, co_drawfocus, co_proportional, co_cancopy]
         widthmin = 0
         widgetname = 'syminfo'
         dataclass = tgridmsestringdatalist
-      end    
+      end
       item[path]
         width = 15
         options = [co_invisible, co_cancopy, co_mousescrollrow]
         widgetname = 'path'
         dataclass = tgridmsestringdatalist
-      end    
+      end
       item[line]
         width = 11
         options = [co_invisible, co_cancopy, co_mousescrollrow]
@@ -215,7 +215,7 @@ object symbolfo: tsymbolfo
   end
   object tpopupmenu1: tpopupmenu
     menu.submenu.count = 1
-    menu.submenu.items = <    
+    menu.submenu.items = <
       item
         caption = 'Delete all'
         state = [as_localcaption, as_localonexecute]

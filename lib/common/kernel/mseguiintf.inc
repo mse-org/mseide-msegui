@@ -53,7 +53,7 @@ function gui_getchildren(const id: winidty; out children: winidarty): guierrorty
 function gui_showsysdock(var awindow: windowty): guierrorty;
 function gui_hidesysdock(var awindow: windowty): guierrorty;
 
-function gui_docktosyswindow(var child: windowty; 
+function gui_docktosyswindow(var child: windowty;
                                    const akind: syswindowty): guierrorty;
                     //hides window
 //function gui_undockfromsyswindow(var child: windowty): guierrorty;
@@ -94,16 +94,16 @@ function gui_getwindowdesktop(const id: winidty): integer;
 function gui_windowvisible(id: winidty): boolean;
 function gui_setwindowstate(id: winidty; size: windowsizety;
                                            visible: boolean): guierrorty;
-function gui_setwindowcaption(id: winidty; 
+function gui_setwindowcaption(id: winidty;
                                    const caption: msestring): guierrorty;
 function gui_setwindowicon(id: winidty; const icon,mask: pixmapty): guierrorty;
 function gui_setwindowopacity(id: winidty; const opacity: real): guierrorty;
                     //empytyreal -> undefined, 0.0-> transparent, 1.1 -> opaque
-            
+
 function gui_setsizeconstraints(id: winidty; const min,max: sizety): guierrorty;
 function gui_reposwindow(id: winidty; const rect: rectty): guierrorty;
 function gui_getdecoratedwindowrect(id: winidty; out arect: rectty): guierrorty;
-function gui_setdecoratedwindowrect(id: winidty; const rect: rectty; 
+function gui_setdecoratedwindowrect(id: winidty; const rect: rectty;
                                     out clientrect: rectty): guierrorty;
 function gui_setembeddedwindowrect(id: winidty; const rect: rectty): guierrorty;
 function gui_setwindowfocus(id: winidty): guierrorty;
@@ -116,9 +116,9 @@ function gui_windowloosefocus(var awindow: windowty): guierrorty;
 function gui_setappfocus(id: winidty): guierrorty;
 function gui_minimizeapplication: guierrorty;
 function gui_setwindowgroup(id: winidty; group: winidty): guierrorty;
-function gui_settransientfor(var awindow: windowty; 
+function gui_settransientfor(var awindow: windowty;
                                   const transientfor: winidty): guierrorty;
-function gui_movewindowrect(id: winidty; const dist: pointty; 
+function gui_movewindowrect(id: winidty; const dist: pointty;
                                          const rect: rectty): guierrorty;
 function gui_windowatpos(const pos: pointty): winidty;
 function gui_getscreenrect(const id: winidty): rectty; //0 -> virtual screen
@@ -181,14 +181,14 @@ function gui_canpastefromclipboard(const buffer: clipboardbufferty): boolean;
 function gui_sysdnd(const action: sysdndactionty;
                      const aintf: isysdnd; const arect: rectty;
                                out aresult: boolean): guierrorty;
-                               //aintf = nil for read actions 
+                               //aintf = nil for read actions
 function gui_sysdndreaddata(var adata: string;
                               const typeindex: integer): guierrorty;
 function gui_sysdndreadtext(var atext: msestring;
                               const typeindex: integer): guierrorty;
 
 function gui_getgdifuncs: pgdifunctionaty;
-                 
+
 (*
 procedure gdi_creategc(var drawinfo: drawinfoty);
 procedure gdi_destroygc(var drawinfo: drawinfoty);

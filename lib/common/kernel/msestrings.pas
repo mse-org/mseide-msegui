@@ -7,13 +7,13 @@
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 }
-unit msestrings; 
+unit msestrings;
 {$ifdef FPC}
  {$if defined(FPC) and (fpc_fullversion >= 020501)}
-  {$define mse_fpc_2_6} 
+  {$define mse_fpc_2_6}
  {$ifend}
  {$if defined(FPC) and (fpc_fullversion >= 020300)}
-  {$define mse_fpc_2_3} 
+  {$define mse_fpc_2_3}
  {$ifend}
 
  {$ifdef mse_fpc_2_6}
@@ -65,13 +65,13 @@ type
 
 const
  utf16privatebase = $f800; //used to store invalid utf8 chars in filenamety
- utf16private = utf16privatebase + 0; 
+ utf16private = utf16privatebase + 0;
     //prefix for private area codepoint, following word is low byte
  utf16invalid = utf16privatebase + 1;
     //prefix for invalid utf8 byte, following word is data byte
- 
+
  utferrorchar = char('?'); //single byte only
- 
+
  {$ifdef mse_unicodestring}
  msestringtypekind = tkustring;
  {$else}
@@ -94,8 +94,8 @@ type
  doublemsestringarty = array of doublemsestringty;
  doublemsestringaty = array[0..0] of doublemsestringty;
  pdoublemsestringaty = ^doublemsestringaty;
-  
-const 
+
+const
  upperchars: array[char] of char = (
   #$00,#$01,#$02,#$03,#$04,#$05,#$06,#$07,#$08,#$09,#$0a,#$0b,#$0c,#$0d,#$0e,#$0f,
   #$10,#$11,#$12,#$13,#$14,#$15,#$16,#$17,#$18,#$19,#$1a,#$1b,#$1c,#$1d,#$1e,#$1f,
@@ -144,7 +144,7 @@ type
   len: integer;
  end;
  plmsestringty = ^lmsestringty;
- 
+
  lstringarty = array of lstringty;
  lmsestringarty = array of lmsestringty;
 
@@ -167,7 +167,7 @@ const
  emptywstring: lmsestringty = (po: nil; len: 0);
 
 type
- tmemorystringstream = class(tmemorystream) 
+ tmemorystringstream = class(tmemorystream)
         //has room for stringheader
   protected
    procedure SetCapacity(NewCapacity: PtrInt) override;
@@ -182,7 +182,7 @@ type
    procedure destroyasstring(out data: string);
     //calls destroy, not possible to use as destructor in FPC
  end;
- 
+
  searchoptionty = (so_caseinsensitive,so_wholeword,so_wordstart,so_backward);
  searchoptionsty = set of searchoptionty;
 
@@ -194,11 +194,11 @@ function removechar(const source: msestring; a: msechar): msestring; overload;
 procedure removechar1(var dest: string; a: char); overload;
 procedure removechar1(var dest: msestring; a: msechar); overload;
   //removes all a
-function printableascii(const source: string): string; overload; 
+function printableascii(const source: string): string; overload;
                 //removes all nonprintablechars and ' '
 function printableascii(const source: msestring): msestring; overload;
                 //removes all nonprintablechars and ' '
-                
+
 function replacechar(const source: string; old,new: char): string; overload;
 function replacechar(const source: msestring; old,new: msechar): msestring; overload;
 procedure replacechar1(var dest: string; old,new: char); overload;
@@ -211,7 +211,7 @@ function replacetext(const source: string; index: integer;
                                       a: string): string; overload;
 function replacetext(const source: msestring; index: integer;
                                       a: msestring): msestring; overload;
-procedure replacetext1(var dest: string; index: integer; 
+procedure replacetext1(var dest: string; index: integer;
                                       const a: string); overload;
 procedure replacetext1(var dest: msestring; index: integer; const a: msestring); overload;
 
@@ -226,9 +226,9 @@ function lstringtostring(const value: pmsechar;
 function lstringtostring(const value: lstringty): string; overload;
 function lstringtostring(const value: pchar;
                                     const len: integer): string; overload;
-procedure stringtolstring(const value: string; 
+procedure stringtolstring(const value: string;
                var{out} res: lstringty); inline;  //todo!!!!! fpbug 3221
-procedure stringtolstring(const value: msestring; 
+procedure stringtolstring(const value: msestring;
                              var{out} res: lmsestringty); inline;
 function stringtolstring(const value: string): lstringty; inline;
 function stringtolstring(const value: msestring): lmsestringty; inline;
@@ -353,7 +353,7 @@ function countchars(const str: msestring; achar: msechar): integer; overload;
 function getcharpos(const str: msestring; achar: msechar): integerarty;
 
 function strscan(const Str: PChar; Chr: Char): PChar; overload;
-//function strscan(const str: string; chr: char): integer; overload; 
+//function strscan(const str: string; chr: char): integer; overload;
            //use findchar()
 function strscan(const str: lmsestringty; const chr: msechar): pmsechar; overload;
 function msestrscan(const Str: PmseChar; Chr: mseChar): PmseChar; overload;
@@ -379,7 +379,7 @@ function mseStrLRScan(const Str: PmseChar; Chr: mseChar; len: integer): PmseChar
 function mseStrLNRScan(const Str: PmseChar; Chr: mseChar; len: integer): PmseChar;
 
 function StrLComp(const Str1, Str2: PChar; len: integer): Integer;
- 
+
 function mseStrComp(const Str1, Str2: PmseChar): Integer;
 function mseStrLComp(const Str1, Str2: PmseChar; len: integer): Integer;
 function mseStrLIComp(const Str1, upstr: PmseChar; len: integer): Integer;
@@ -562,7 +562,7 @@ function concatstrings(const source: msestringarty;
                         const separator: msestring = ' ';
                    const quotechar: msechar = #0; //#0 -> no quote
                    const force: boolean = false): msestring; overload;
-                                   
+
 function concatstrings(const source: stringarty;
               const separator: string = ' ';
                            const quotechar: char = #0; //#0 -> no quote
@@ -657,9 +657,9 @@ function getmsestringprop(const ainstance: tobject;
                                     const apropinfo: ppropinfo): msestring;
 begin
 {$ifdef mse_unicodestring}
- result:= GetunicodestrProp(ainstance,apropinfo);     
+ result:= GetunicodestrProp(ainstance,apropinfo);
 {$else}
- result:= GetwidestrProp(ainstance,apropinfo);     
+ result:= GetwidestrProp(ainstance,apropinfo);
 {$endif}
 end;
 
@@ -829,7 +829,7 @@ begin
       end;
      end;
     end;
-    if not result and not (lso_exact in options) then begin 
+    if not result and not (lso_exact in options) then begin
                                                //search partial filter text
      exact:= false;
      for int2:= int1 to count - 1 do begin
@@ -860,7 +860,7 @@ var
  ps,pe: pcard16;
  pd: pcard8;
  ca1: card16;
- 
+
  procedure store3(); inline;
  begin
   pd^:= (ca1 shr 12) or $e0;
@@ -869,7 +869,7 @@ var
   inc(pd);
   pd^:= ca1 and $3f or $80;
  end; //store3
- 
+
 begin
  pd:= dest;
  ps:= pointer(value);
@@ -994,8 +994,8 @@ var
  pc,pe: pcard8;
  pd,pde: pcard16;
  storeinvalid: boolean;
- p1: pointer; 
-  
+ p1: pointer;
+
  procedure seterror(); inline;
  begin
   if storeinvalid then begin
@@ -1007,7 +1007,7 @@ var
    pd^:= card16(utferrorchar);
   end;
  end;
- 
+
 begin
  storeinvalid:= uto_storeinvalid in options;
  setlength(result,alength); //max
@@ -1023,9 +1023,9 @@ begin
   end
   else begin
    if by1 < $e0 then begin //2 byte
-    if (pc < pe) and (pc^ and $c0 = $80) then begin 
+    if (pc < pe) and (pc^ and $c0 = $80) then begin
      wo1:= ((by1 and $1f) shl word(6)) or (pc^ and $3f);
-     if storeinvalid and (wo1 >= utf16privatebase) and 
+     if storeinvalid and (wo1 >= utf16privatebase) and
                            (wo1 < utf16privatebase + 256) then begin
       pd^:= utf16private;
       wo1:= wo1 and $00ff;
@@ -1043,9 +1043,9 @@ begin
    end
    else begin
     if (by1 < $f0) then begin //3byte
-     if (pe - pc >= 1) and (pc^ and $c0 = $80) and 
-                                         ((pc+1)^ and $c0 = $80) then begin 
-      pd^:= (by1 shl word(12)) or 
+     if (pe - pc >= 1) and (pc^ and $c0 = $80) and
+                                         ((pc+1)^ and $c0 = $80) then begin
+      pd^:= (by1 shl word(12)) or
             (pc^ and $3f) shl word(6) or ((pc+1)^ and $3f);
       if pd^ < $0800 then begin
        seterror(); //overlong
@@ -1058,18 +1058,18 @@ begin
     end
     else begin
      if (by1 < $f8) then begin //4byte
-      if (pe - pc >= 2) and (pc^ and $c0 = $80) and ((pc+1)^ and $c0 = $80) and 
+      if (pe - pc >= 2) and (pc^ and $c0 = $80) and ((pc+1)^ and $c0 = $80) and
                               ((pc+2)^ and $c0 = $80) then begin
        if ((by1 <= $e0) and (pc^ < $90)) then begin //overlong
         seterror(); //overlong;
        end
-       else begin                                     
-        pd^:= (((by1 and $07) shl word(8)) or 
+       else begin
+        pd^:= (((by1 and $07) shl word(8)) or
                ((pc^ and $3f) shl word(2)) or
-               ((pc+1)^ and $30 shr word(4))) + 
+               ((pc+1)^ and $30 shr word(4))) +
                          (word($d800) - word($10000 shr 10));
         inc(pd);
-        pd^:= (((pc+1)^ and $0f) shl word(6)) or 
+        pd^:= (((pc+1)^ and $0f) shl word(6)) or
                                          ((pc+2)^ and $3f) or word($dc00);
        end;
        inc(pc,3);
@@ -1084,7 +1084,7 @@ begin
     end;
    end;
   end;
-  if (pd >= pde) and (pc < pe) then begin //pd should never be bigger than pde, 
+  if (pd >= pde) and (pc < pe) then begin //pd should never be bigger than pde,
                                           //there is at most one inc(pd) in loop
    p1:= pointer(result);
    setlength(result,length(result) + length(result) div 3 + 16);
@@ -1138,7 +1138,7 @@ begin
   po1:= value;
   while po1^ <> $00 do begin
    if po1^ >= $80 then begin //2 bytes
-    if po1^ < $e0 then begin 
+    if po1^ < $e0 then begin
      if po1^ and $1e = 0 then begin
       result:= false; //overlong
       exit;
@@ -1221,7 +1221,7 @@ var
 begin
  setlength(result,length(value));
  for int1:= 0 to length(result)-1 do begin
-  (pchar(pointer(result))+int1)^:= 
+  (pchar(pointer(result))+int1)^:=
                   char(word((pmsechar(pointer(value))+int1)^));
  end;
 end;
@@ -1232,7 +1232,7 @@ var
 begin
  setlength(result,length(value));
  for int1:= 0 to length(result)-1 do begin
-  (pmsechar(pointer(result))+int1)^:= 
+  (pmsechar(pointer(result))+int1)^:=
           msechar(byte((pchar(pointer(value))+int1)^));
  end;
 end;
@@ -1246,7 +1246,7 @@ begin
  else begin
   setlength(result,2);
   achar:= achar - $10000;
-  pmsechar(pointer(result))^:= 
+  pmsechar(pointer(result))^:=
                         msechar(word((achar shr 10) and $3ff or $d800));
   (pmsechar(pointer(result))+1)^:= msechar(word(achar) and $3ff or $dc00);
  end;
@@ -1318,7 +1318,7 @@ begin
 end;
 
 function singleline(const start: pchar): string;
-var 
+var
  po1: pchar;
 begin
  if start = nil then begin
@@ -1337,7 +1337,7 @@ begin
 end;
 
 function singleline(const start: pmsechar): msestring;
-var 
+var
  po1: pmsechar;
 begin
  if start = nil then begin
@@ -1376,7 +1376,7 @@ begin
    sepchar:= pmsechar(separator)^;
    result:= quotestring(source[0],quotechar,force);
    for int1:= 1 to high(source) do begin
-    result:= result + separator + 
+    result:= result + separator +
                       quotestring(source[int1],quotechar,force,sepchar);
    end;
   end;
@@ -1404,7 +1404,7 @@ begin
    sepchar:= pchar(separator)^;
    result:= quotestring(source[0],quotechar,force);
    for int1:= 1 to high(source) do begin
-    result:= result + separator + 
+    result:= result + separator +
              quotestring(source[int1],quotechar,force,sepchar);
    end;
   end;
@@ -1740,7 +1740,7 @@ begin
      charindex:= int1;
      break;
     end;
-    if (int2 <= maxlength) and ((mch1 = c_softhyphen) or (mch1 = '-') or 
+    if (int2 <= maxlength) and ((mch1 = c_softhyphen) or (mch1 = '-') or
        (mch1 = ' ') or  (mch1 = c_tab)) then begin
      lastbreak:= int1;
     end;
@@ -1792,7 +1792,7 @@ begin
     setlength(result[rowindex],po1-pmsechar(result[rowindex]));
    end;
    inc(rowindex);
-  end;  
+  end;
   setlength(result,rowindex);
  end;
 end;
@@ -1816,10 +1816,10 @@ function fitstring(const source: msestring; const len: integer;
    {$endif}
   end;
  end;
- 
+
 var
  copylen,padlen: integer;
- int1: integer; 
+ int1: integer;
 begin //fitstring
  if (length(source) > len) and (cutchar <> #0) then begin
   result:= charstring(cutchar,len);
@@ -1839,7 +1839,7 @@ begin //fitstring
      move((pmsechar(pointer(source))+(length(source)-copylen) div 2)^,
              (pmsechar(pointer(result))+int1)^,copylen*sizeof(msechar));
      pad(pointer(result),int1);
-     pad(pmsechar(pointer(result))+int1+copylen,len-copylen-int1);     
+     pad(pmsechar(pointer(result))+int1+copylen,len-copylen-int1);
     end;
     sp_right: begin
      move((pmsechar(pointer(source))+length(source)-copylen)^,
@@ -1854,7 +1854,7 @@ begin //fitstring
   end;
  end;
 end;
- 
+
 procedure splitstring(source: string;
                      var dest: stringarty; separator: char = c_tab;
                      trim: boolean = false);
@@ -2297,7 +2297,7 @@ begin
  end;
 end;
 
-function printableascii(const source: string): string; 
+function printableascii(const source: string): string;
                 //removes all nonprintablechars and ' '
 var
  int1,int2: integer;
@@ -2315,7 +2315,7 @@ begin
  setlength(result,int2);
 end;
 
-function printableascii(const source: msestring): msestring; 
+function printableascii(const source: msestring): msestring;
                 //removes all nonprintablechars and ' '
 var
  int1,int2: integer;
@@ -3281,7 +3281,7 @@ function quotestring(value: string; quotechar: char;
 var
  ps,pd,pe: pchar;
 begin
- if force or (findchar(value,quotechar) > 0) or 
+ if force or (findchar(value,quotechar) > 0) or
                (separator <> #0) and (findchar(value,separator) > 0)then begin
   setlength(result,length(value)*2+2); //max
   pd:= pchar(pointer(result));
@@ -3315,7 +3315,7 @@ function quotestring(value: msestring; quotechar: msechar;
 var
  ps,pd,pe: pmsechar;
 begin
- if force or (findchar(value,quotechar) > 0) or 
+ if force or (findchar(value,quotechar) > 0) or
               (separator <> #0) and (findchar(value,separator) > 0) then begin
   setlength(result,length(value)*2+2); //max
   pd:= pmsechar(pointer(result));
@@ -3397,7 +3397,7 @@ end;
 
 const
  escapechar = '\';
- 
+
 function quoteescapedstring(value: string; quotechar: char;
                                       const force: boolean = true;
                                       const separator: char = ' '): string;
@@ -3595,7 +3595,7 @@ procedure wordatindex(const value: msestring; const index: integer;
    end;
   end;
  end;
- 
+
 var
  int1: integer;
  po1: pmsechar;
@@ -3715,7 +3715,7 @@ end;
 
 //todo: optimise
 function msestringsearch(const substring,s: msestring; start: integer;
-                              const options: searchoptionsty; 
+                              const options: searchoptionsty;
                               const substringupcase: msestring = ''): integer;
 var
  int1,int2: integer;
@@ -3911,7 +3911,7 @@ end;
 
 //todo: optimise
 function stringsearch(const substring,s: ansistring; start: integer;
-                              const options: searchoptionsty; 
+                              const options: searchoptionsty;
                               const substringupcase: ansistring = ''): integer;
 var
  int1,int2: integer;
@@ -4152,7 +4152,7 @@ begin
      break;
     end;
    end;
-   bo1:= bo1 and (bo2 or 
+   bo1:= bo1 and (bo2 or
              (bo3 or not isnamechar((po1+length(oldsub))^)) and
               ((po1=pointer(s)) or not isnamechar((po1-1)^)));
    if bo1 then begin
@@ -4231,7 +4231,7 @@ begin
      break;
     end;
    end;
-   bo1:= bo1 and (bo2 or 
+   bo1:= bo1 and (bo2 or
              (bo3 or not isnamechar((po1+length(oldsub))^)) and
               ((po1=pointer(s)) or not isnamechar((po1-1)^)));
    if bo1 then begin
@@ -4415,7 +4415,7 @@ begin
  end;
 end;
 
-procedure addeditchars(const source: msestring; var buffer: msestring; 
+procedure addeditchars(const source: msestring; var buffer: msestring;
                                   var cursorpos: integer);
                                   //cursorpos nullbased
 var
@@ -4470,10 +4470,10 @@ begin
    end;
   end;
   inc(s);
- end; 
+ end;
  setlength(buffer,len1);
  if hasreturn then begin
-  removereturn(buffer,i);  
+  removereturn(buffer,i);
  end;
  cursorpos:= i;
 end;
@@ -4519,8 +4519,8 @@ begin
  end;
  setlength(str1,int3-1);
  if hasreturn then begin
-  int1:= -1;  
-  removereturn(str1,int1);  
+  int1:= -1;
+  removereturn(str1,int1);
  end;
  result:= int2;
  value:= str1;
@@ -5649,7 +5649,7 @@ begin
     break;
    end;
   end;
- end; 
+ end;
 end;
 
 function isnumber(const s: msestring): boolean;
@@ -5669,7 +5669,7 @@ begin
     break;
    end;
   end;
- end; 
+ end;
 end;
 
 function startsstr(substring: pchar; s: pchar): boolean;
@@ -5788,7 +5788,7 @@ begin
 //  result:= comparestr(s1,s2);
 // end
 // else begin
-//  result:= unicodecomparestr(s1,s2); 
+//  result:= unicodecomparestr(s1,s2);
 // end;
 // {$else}
 //  result:= unicodecomparestr(s1,s2);
@@ -5929,7 +5929,7 @@ begin
  mstr1:= copy(s2,1,length(s1));
  result:= msecomparestr(s1,mstr1);
  if (result <> 0) and (length(s2) > length(s1)) then begin
-  if msecomparestr(s1+'A',mstr1+'Z') < 
+  if msecomparestr(s1+'A',mstr1+'Z') <
                      msecomparestr(s1+'Z',mstr1+'A') then begin
    result:= 0;
   end;
@@ -5943,7 +5943,7 @@ begin
  mstr1:= copy(s2,1,length(s1));
  result:= msecomparetext(s1,mstr1);
  if (result <> 0) and (length(s2) > length(s1)) then begin
-  if msecomparetext(s1+'A',mstr1+'Z') < 
+  if msecomparetext(s1+'A',mstr1+'Z') <
                      msecomparetext(s1+'Z',mstr1+'A') then begin
    result:= 0;
   end;
@@ -5992,13 +5992,13 @@ begin
 //  result:= lowercase(s);
 // end
 // else begin
-//  result:= unicodelowercase(s);    
+//  result:= unicodelowercase(s);
 // end;
 // {$else}
- result:= unicodelowercase(s);    
+ result:= unicodelowercase(s);
 // {$endif}
 {$else}
- result:= widelowercase(s);    
+ result:= widelowercase(s);
 {$endif}
 end;
 
@@ -6010,13 +6010,13 @@ begin
 //  result:= ansiuppercase(s);
 // end
 // else begin
-//  result:= unicodeuppercase(s);    
+//  result:= unicodeuppercase(s);
 // end;
 // {$else}
- result:= unicodeuppercase(s);    
+ result:= unicodeuppercase(s);
 // {$endif}
 {$else}
- result:= wideuppercase(s);    
+ result:= wideuppercase(s);
 {$endif}
 end;
 
@@ -6116,7 +6116,7 @@ begin
   while s < e do begin
    if s^ = c_esc then begin
     inc(s);
-    case s^ of 
+    case s^ of
      '[': begin
       inc(s);
       if (s^ >= '0') and (s^ <= '9') then begin
@@ -6164,7 +6164,7 @@ end;
 { tmemorystringstream }
 const
  stringheadersize = sizeof(stringheaderty);
- 
+
 constructor tmemorystringstream.create;
 //var
 // header: stringheaderty;

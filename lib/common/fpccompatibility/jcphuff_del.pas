@@ -112,7 +112,7 @@ procedure finish_pass_gather_phuff (cinfo : j_compress_ptr);  forward;
 
 {METHODDEF}
 procedure start_pass_phuff (cinfo : j_compress_ptr;
-                            gather_statistics : boolean); 
+                            gather_statistics : boolean);
 var
   entropy : phuff_entropy_ptr;
   is_DC_band : boolean;

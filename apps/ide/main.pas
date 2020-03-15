@@ -1,5 +1,5 @@
 { MSEide Copyright (c) 1999-2017 by Martin Schreiber
- 
+
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation; either version 2 of the License, or
@@ -180,7 +180,7 @@ type
    procedure viewfindresults(const sender: TObject);
    procedure aboutonexecute(const sender: TObject);
    procedure configureexecute(const sender: TObject);
-   
+
     //debugger
    procedure restartgdbonexecute(const sender: tobject);
    procedure runexec(const sender: tobject);
@@ -226,7 +226,7 @@ type
    function runtarget: boolean; //true if run possible
    procedure newproject(const fromprogram,empty: boolean);
    procedure doshowform(const sender: tobject);
-   procedure setprojectname(aname: filenamety); 
+   procedure setprojectname(aname: filenamety);
             //not const because of not refcounted widestrings
    procedure dofindmodulebyname(const amodule: pmoduleinfoty; const aname: string;
                          var action: modalresultty);
@@ -330,13 +330,13 @@ type
                         const aactivate: boolean = true;
                         const currentnode: tprojectnode = nil): boolean;
             //true if filedialog not canceled
-   function openformfile(const filename: filenamety; 
+   function openformfile(const filename: filenamety;
                 const ashow,aactivate,showsource,createmenu,
                                 skipexisting: boolean): pmoduleinfoty;
-   procedure createmodulemenuitem(const amodule: pmoduleinfoty);   
+   procedure createmodulemenuitem(const amodule: pmoduleinfoty);
    function formmenuitemstart: integer;
    procedure loadformbysource(const sourcefilename: filenamety);
-   procedure loadsourcebyform(const formfilename: filenamety; 
+   procedure loadsourcebyform(const formfilename: filenamety;
                                  const aactivate: boolean = false);
    procedure checkbluedots;
    procedure updatesigsettings;
@@ -407,7 +407,7 @@ uses
   {$warn 6058 off}
  {$endif}
 {$endif}
- 
+
 procedure handleerror(const e: exception; const text: string);
 begin
  if text <> '' then begin
@@ -448,7 +448,7 @@ begin
  watchpointsfo.gdb:= gdb;
  stackfo.gdb:= gdb;
  threadsfo.gdb:= gdb;
- disassfo.gdb:= gdb; 
+ disassfo.gdb:= gdb;
  initprojectoptions;
  sourceupdate.init(designer);
 {$ifndef mse_with_pascalscript}
@@ -488,7 +488,7 @@ var
                             projectoptions.d.texp.sourcedirs,wstr1) then begin
       try
        po1:= openformfile(wstr1,false,false,false,false,false);
-       result:= (po1 <> nil) and 
+       result:= (po1 <> nil) and
                       (msestring(struppercase(po1^.instancevarname)) = wstr2);
       except
        application.handleexception;
@@ -515,7 +515,7 @@ begin
  with projectoptions do begin
   bo1:= dofind(s.modulenames,s.modulefiles);
  end;
- if not bo1 and 
+ if not bo1 and
            projecttree.units.findformbyname(ansistring(wstr2),mstr1) then begin
   bo1:= dofind([wstr2],[mstr1]);
  end;
@@ -553,7 +553,7 @@ var
  wstr2: msestring;
  int1: integer;
  po1: pmoduleinfoty;
- 
+
  procedure checkmodule(fname: filenamety);
  var
   wstr1: filenamety;
@@ -575,11 +575,11 @@ var
    end;
   end;
  end;
- 
+
 var
 // ar1: msestringarty;
  mstr1: filenamety;
-  
+
 begin
 // ar1:= nil; //compilerwarning
  if fcheckmodulelevel >= 16 then begin
@@ -614,17 +614,17 @@ begin
    end;
    }
   end;
-  if (po1 = nil) or 
+  if (po1 = nil) or
              (stringicomp(po1^.moduleclassname,atypename) <> 0) then begin
    if showmessage(c[ord(str_classtype)]+' '+msestring(atypename)+
                          ' '+c[ord(notfound)]+lineend+
                          ' '+c[ord(wishsearch)],c[ord(warning)],
                          [mr_yes,mr_cancel]) = mr_yes then begin
     wstr2:= '';
-//    if filedialog(wstr2,[fdo_checkexist],c[ord(formfile)]+' '+ 
+//    if filedialog(wstr2,[fdo_checkexist],c[ord(formfile)]+' '+
 //               msestring(atypename),
 //                   [c[ord(formfiles)]],['*.mfm']) = mr_ok then begin
-    if openform.controller.execute(wstr2,fdk_open,c[ord(formfile)]+' '+ 
+    if openform.controller.execute(wstr2,fdk_open,c[ord(formfile)]+' '+
                        msestring(atypename),[fdo_checkexist]) then begin
      openformfile(wstr2,false,false,false,false,false);
     end;
@@ -736,7 +736,7 @@ begin
    end;
   end;
  end;
-  
+
  checksavecancel(result);
 end;
 
@@ -853,7 +853,7 @@ begin
     else begin
      page1:= sourcefo.findsourcepage(str1);
      if page1 = nil then begin //mfm not loaded in editor
-      po1:= designer.loadformfile(str1,false);      
+      po1:= designer.loadformfile(str1,false);
       if po1 <> nil then begin
        createmodulemenuitem(po1);
        po1^.designform.activate(true);
@@ -888,7 +888,7 @@ begin
  end;
 end;
 
-procedure tmainfo.setstattext(const atext: msestring; 
+procedure tmainfo.setstattext(const atext: msestring;
                    const akind: messagetextkindty = mtk_info);
 begin
  with statdisp do begin
@@ -944,9 +944,9 @@ begin
    end;
    sr_error: begin
     setstattext(msestring(messagetext),mtk_error);
-   end; 
+   end;
    sr_exception: begin
-   end; 
+   end;
    else begin
     setstattext(msestring(messagetext),mtk_finished);
    end;
@@ -1025,7 +1025,7 @@ begin
   end;
   gek_running: begin
    resetdebugdisp;
-   setstattext(c[ord(running)],mtk_running);   
+   setstattext(c[ord(running)],mtk_running);
   end;
   gek_error,gek_writeerror,gek_gdbdied: begin
    setstattext('GDB: '+msestring(stopinfo.messagetext),mtk_error);
@@ -1045,7 +1045,7 @@ begin
    if sender.downloaded then begin
     downloaded;
     setstattext(c[ord(str_downloaded)]+' '+formatfloatmse(
-                        stopinfo.totalsent/1024,'0.00,')+'kB',mtk_finished);      
+                        stopinfo.totalsent/1024,'0.00,')+'kB',mtk_finished);
 //    sender.abort;
    end;
   end;
@@ -1055,11 +1055,11 @@ begin
  end;
 end;
 
-procedure tmainfo.gdbserverexe(const sender: tguiapplication; 
+procedure tmainfo.gdbserverexe(const sender: tguiapplication;
                                                     var again: boolean);
 begin
  sys_schedyield;
- if timeout(fgdbservertimeout) and 
+ if timeout(fgdbservertimeout) and
  ((getprocessexitcode(fgdbserverprocid,fgdbserverexitcode,100000) = pee_ok) or
       projectoptions.d.nogdbserverexit) then begin
   sender.terminatewait;
@@ -1075,7 +1075,7 @@ var
  int1: integer;
 begin
  result:= false;
- if (fgdbserverprocid <> invalidprochandle) and 
+ if (fgdbserverprocid <> invalidprochandle) and
         (not projectoptions.d.gdbserverstartonce or force) then begin
   result:= true;
   try
@@ -1132,8 +1132,8 @@ begin
                            mstr1+c[ord(running2)],c[ord(startgdbserver)],
               {$ifdef FPC}@{$endif}gdbservercancel,nil,
               {$ifdef FPC}@{$endif}gdbserverexe) then begin
-     if (fgdbserverexitcode <> 0) and 
-                     not (projectoptions.d.nogdbserverexit and 
+     if (fgdbserverexitcode <> 0) and
+                     not (projectoptions.d.nogdbserverexit and
                                (fgdbserverexitcode = -1)) then begin
       setstattext(c[ord(gdbserverstarterror)]+' '+
                             inttostrmse(fgdbserverexitcode)+'.',mtk_error);
@@ -1143,7 +1143,7 @@ begin
     else begin
      setstattext(c[ord(gdbservercanceled)],mtk_error);
      exit;
-    end;                
+    end;
    end
    else begin
     setstattext(c[ord(cannotrunstartgdb)],mtk_error);
@@ -1225,7 +1225,7 @@ begin
  else begin
   sender.idlesleep(100000);
   again:= true;
- end; 
+ end;
 end;
 
 procedure tmainfo.uploadcancel(const sender: tobject);
@@ -1265,7 +1265,7 @@ begin
   gdb.workingdirectory:= progworkingdirectory;
   gdb.clearenvvars;
   for int1:= 0 to high(envvarons) do begin
-   if (int1 > high(envvarnames)) or 
+   if (int1 > high(envvarnames)) or
                     (int1 > high(envvarnames)) then begin
     break;
    end;
@@ -1287,7 +1287,7 @@ begin
  end;
 end;
 
-function tmainfo.loadexec(isattach: boolean; 
+function tmainfo.loadexec(isattach: boolean;
                          const forcedownload: boolean): boolean;
 var
  str1: filenamety;
@@ -1306,7 +1306,7 @@ begin
      startgdb(false);
     end;
     str1:= gettargetfile;
-    if not d.gdbdownload and not d.gdbsimulator and (uploadcommand <> '') and 
+    if not d.gdbdownload and not d.gdbsimulator and (uploadcommand <> '') and
                    (needsdownload or forcedownload) then begin
      dodownload;
      if application.waitdialog(nil,c[ord(str_uploadcommand)]+uploadcommand+
@@ -1329,7 +1329,7 @@ begin
      else begin
       setstattext(c[ord(downloadcanceled)],mtk_error);
       exit;
-     end;                
+     end;
     end
    end;
    mainfo.setstattext(actionsmo.c[ord(ac_loading)]+'.',mtk_running);
@@ -1383,9 +1383,9 @@ begin
   gdb.simulator:= d.gdbsimulator;
   gdb.processorname:= ansistring(gdbprocessor);
   gdb.guiintf:= not d.nodebugbeginend;
-  gdb.beforeconnect:= beforeconnect;  
+  gdb.beforeconnect:= beforeconnect;
   gdb.afterconnect:= afterconnect;
-  gdb.beforeload:= beforeload;  
+  gdb.beforeload:= beforeload;
   gdb.afterload:= afterload;
   gdb.beforerun:= beforerun;
   gdb.startupbkpt:= d.startupbkpt;
@@ -1468,7 +1468,7 @@ var
 begin
  with projectoptions,d.texp,actionsmo do begin
   detachtarget.enabled:= gdb.execloaded or gdb.attached;
-  download.enabled:= not gdb.started and not gdb.downloading and 
+  download.enabled:= not gdb.started and not gdb.downloading and
                ((uploadcommand <> '') or d.gdbdownload);
   attachprocess.enabled:= not (gdb.execloaded or gdb.attached);
   attachtarget.enabled:= attachprocess.enabled;
@@ -1479,7 +1479,7 @@ begin
   next.enabled:= not gdb.running and not gdb.downloading and bo1;
   nexti.enabled:= not gdb.running and not gdb.downloading and bo1;
   finish.enabled:= not gdb.running and gdb.started and bo1;
-  continue.enabled:= not gdb.running and not gdb.downloading and 
+  continue.enabled:= not gdb.running and not gdb.downloading and
                       (bo1 or (frunningprocess = invalidprochandle));
   interrupt.enabled:= gdb.running and not gdb.downloading and bo1;
   reset.enabled:= (gdb.started or gdb.attached or gdb.downloading) or
@@ -1495,7 +1495,7 @@ begin
                                                   projectoptions.modified;
   actionsmo.toggleformunit.enabled:= (flastform <> nil) or
                                             (designer.modules.count > 0);
-  if (sourcefo.activepage <> nil) and 
+  if (sourcefo.activepage <> nil) and
                                 sourcefo.activepage.activeentered then begin
    setbm0.enabled:= true;
    setbm1.enabled:= true;
@@ -1537,7 +1537,7 @@ begin
 //    find.enabled:= true;
     replace.enabled:= true;
     copyword.enabled:= true;
-//    actionsmo.repeatfind.enabled:= find.enabled and 
+//    actionsmo.repeatfind.enabled:= find.enabled and
 //           (projectoptions.findreplaceinfo.find.text <> '');
    end;
   end
@@ -1593,7 +1593,7 @@ begin
   end;
   closeall.enabled:= (sourcefo.count > 0) or (designer.modules.count > 0);
   saveas.enabled:= (factivedesignmodule <> nil) or (sourcefo.activepage <> nil);
-  mainmenu1.menu.itembyname('project').itembyname('close').enabled:= 
+  mainmenu1.menu.itembyname('project').itembyname('close').enabled:=
                                                                fprojectloaded;
  end;
 end;
@@ -1731,7 +1731,7 @@ var
  page: tsourcepage;
  str1: filenamety;
  po1: pmoduleinfoty;
- 
+
 begin //opensourceactonexecute
  result:= openfile.execute = mr_ok;
  if result then begin
@@ -1861,7 +1861,7 @@ var
  int1: integer;
 begin
  int1:= length(aname) - length(suffix);
- if (int1 >= 0) and 
+ if (int1 >= 0) and
             (msestringcomp(copy(aname,int1+1,bigint),suffix) = 0) then begin
   result:= copy(aname,1,int1) + formsuffix;
  end
@@ -1925,9 +1925,9 @@ begin
 end;
 
 function tmainfo.copynewfile(const aname,newname: filenamety;
-                const autoincrement: boolean; 
+                const autoincrement: boolean;
                 const canoverwrite: boolean;
-                const macronames: array of msestring; 
+                const macronames: array of msestring;
                 const macrovalues: array of msestring): boolean;
                  //true if ok
 var
@@ -1937,7 +1937,7 @@ var
  macrolist: tmacrolist;
  instream,outstream: ttextstream;
  text: msestringarty;
- 
+
 begin
  result:= false;
  path1:= searchfile(aname);
@@ -2017,7 +2017,7 @@ var
  dir,base,ext: filenamety;
  po1: pmoduleinfoty;
  ancestorclass,ancestorunit: msestring;
- 
+
 begin
 // if formkindty(tmenuitem(sender).tag) = fok_inherited then begin
  if projectoptions.p.newinheritedforms[tmenuitem(sender).tag] then begin
@@ -2056,7 +2056,7 @@ begin
    if str2 <> '' then begin
     copynewfile(str2,str1,false,true,
              ['%UNITNAME%','%FORMNAME%','%ANCESTORUNIT%','%ANCESTORCLASS%'],
-            ['${%FILENAMEBASE%}',str4,ancestorunit,ancestorclass]); //source 
+            ['${%FILENAMEBASE%}',str4,ancestorunit,ancestorclass]); //source
    end;
    if str3 <> '' then begin
     copynewfile(str3,str5,false,true,
@@ -2095,8 +2095,8 @@ begin
  end;
 end;
 
-function tmainfo.closemodule(const amodule: pmoduleinfoty; 
-                            const achecksave: boolean; 
+function tmainfo.closemodule(const amodule: pmoduleinfoty;
+                            const achecksave: boolean;
                             nocheckclose: boolean = false): boolean;
 var
  str1: string;
@@ -2139,7 +2139,7 @@ function tmainfo.closeall(const nosave: boolean): boolean;
 begin
  result:= nosave or (checksavecancel(sourcefo.saveall(false)) <> mr_cancel);
  if result then begin
-  result:= nosave or 
+  result:= nosave or
          (checksavecancel(designer.saveall(false,true)) <> mr_cancel);
   if result then begin
    sourcefo.closeall(true);
@@ -2171,7 +2171,7 @@ begin
  end;
 end;
 {
-procedure tmainfo.mainfoonclosequery(const sender: tcustommseform; 
+procedure tmainfo.mainfoonclosequery(const sender: tcustommseform;
             var modalresult: modalresultty);
 begin
  if checksave = mr_cancel then begin
@@ -2235,12 +2235,12 @@ function tmainfo.openproject(const aname: filenamety;
   cleardebugdisp;
   designer.savecanceled(); //reset saveall flag
  end;
- 
+
 var
  namebefore: msestring;
  projectfilebefore: msestring;
  projectdirbefore: msestring;
- 
+
 begin
  gdb.abort;
  terminategdbserver(true);
@@ -2306,7 +2306,7 @@ var
  copiedfiles: filenamearty;
  bo1: boolean;
 label
- endlab;  
+ endlab;
 begin
  mstr2:= projecttemplatedir; //use macros of current project
  if fromprogram then begin
@@ -2365,7 +2365,7 @@ begin
     end;
     inc(i1);
    end;
-   if high(projecthistory) >= 
+   if high(projecthistory) >=
              projectfiledia.controller.historymaxcount then begin
     setlength(projecthistory,projectfiledia.controller.historymaxcount);
    end;
@@ -2375,7 +2375,7 @@ begin
      projectfilename:= aname;
      projectdir:= curdir;
      expandprojectmacros;
-     with p.texp do begin  
+     with p.texp do begin
       setlength(copiedfiles,length(newprojectfiles));
       macrolist:= tmacrolist.create([mao_curlybraceonly]);
       try
@@ -2403,7 +2403,7 @@ begin
          end;
          copiedfiles[i1]:= dest;
          if newprojectfiles[i1] <> '' then begin
-          if (i1 <= high(p.expandprojectfilemacros)) and 
+          if (i1 <= high(p.expandprojectfilemacros)) and
                              p.expandprojectfilemacros[i1] then begin
            copynewfile(source,dest,false,false,['%PROJECTNAME%','%PROJECTDIR%'],
                                        [mstr1,curdir]);
@@ -2517,7 +2517,7 @@ begin
  filer.updatevalue('projecthistory',projecthistory);
  filer.updatevalue('windowlayoutfile',windowlayoutfile);
  filer.updatevalue('windowlayouthistory',windowlayouthistory);
- 
+
  if not filer.iswriter then begin
   if guitemplatesmo.sysenv.defined[ord(env_storeglobalmacros)] then begin
    ar2:= guitemplatesmo.sysenv.getcommandlinemacros(ord(env_macrodef));
@@ -2574,7 +2574,7 @@ begin
    end;
   end;
  end;
- if not filer.iswriter and (mstr1 <> '') and 
+ if not filer.iswriter and (mstr1 <> '') and
            not guitemplatesmo.sysenv.defined[ord(env_np)] then begin
   openproject(mstr1);
  end;
@@ -2588,7 +2588,7 @@ end;
 procedure tmainfo.domake(atag: integer);
 begin
  unloadexec;
- if designer.beforemake and 
+ if designer.beforemake and
          (checksavecancel(sourcefo.saveall(true)) <> mr_cancel) and
          (checksavecancel(designer.saveall(true,true)) <> mr_cancel) then begin
   updatemodifiedforms;
@@ -2667,7 +2667,7 @@ function tmainfo.runtarget: boolean;
 begin
  result:= true;
  if not gdb.attached then begin
-  if (projectoptions.d.texp.runcommand = '') and 
+  if (projectoptions.d.texp.runcommand = '') and
          (projectoptions.d.t.debugcommand <> '') then begin
    if not gdb.started then begin
     if loadexec(false,false) then begin
@@ -2699,7 +2699,7 @@ begin
  end;
  if not gdb.attached then begin
   if (not gdb.started or not fnoremakecheck) and not fcurrent then begin
-   if (projectoptions.defaultmake <= maxdefaultmake) and 
+   if (projectoptions.defaultmake <= maxdefaultmake) and
       (not gdb.started or askconfirmation(c[ord(str_sourcechanged)])) then begin
     result:= false;
     watchpointsfo.clear;
@@ -2813,7 +2813,7 @@ begin
  end;
 end;
 
-procedure tmainfo.closeobjecttext(const adesigner: idesigner; 
+procedure tmainfo.closeobjecttext(const adesigner: idesigner;
                            const afilename: filenamety; var cancel: boolean);
 begin
  cancel:= not sourcefo.closepage(afilename);
@@ -2890,7 +2890,7 @@ var
  spos1: sourceposty;
  ar1: componentarty;
  propit: tpropertyitem;
- opt1: execoptionsty; 
+ opt1: execoptionsty;
 begin
  with tmenuitem(sender),projectoptions,t,texp do begin
   str1:= tosysfilepath(toolfiles[index]);
@@ -2943,7 +2943,7 @@ begin
     mstr1:= toolparams[index];
     if mstr1 <> '' then begin
      macrolist:= tmacrolist.create([mao_caseinsensitive]);
-     macrolist.add(getprojectmacros);     
+     macrolist.add(getprojectmacros);
      macrolist.add(['CURSOURCEFILE','CURMODULEFILE',
                     'CURSSELECTION','CURSWORD','CURSDEFINITION',
                     'CURCOMPONENTCLASS','CURPROPERTY'],
@@ -3024,7 +3024,7 @@ var
  opt1: statfileoptionsty;
 begin
  opt1:= projectstatfile.options;
- projectstatfile.options:= mainfo.projectstatfile.options + 
+ projectstatfile.options:= mainfo.projectstatfile.options +
                                         [sfo_nodata,sfo_nooptions];
  awriter.setsection('breakpoints');
  beginpanelplacement();
@@ -3057,7 +3057,7 @@ begin
   areader.setsection('breakpoints');
   panelform.updatestat(areader);
   areader.setsection('layout');
-  projectstatfile.options:= projectstatfile.options + 
+  projectstatfile.options:= projectstatfile.options +
                                           [sfo_nodata,sfo_nooptions];
   flayoutloading:= true;
   projectstatfile.readstat('windowlayout',areader);

@@ -22,19 +22,19 @@ object mseificlienteditorfo: tmseificlienteditorfo
     anchors = [an_top, an_bottom]
     optionsgrid = [og_rowinserting, og_rowdeleting, og_focuscellonenter, og_autofirstrow, og_autoappend, og_colchangeontabkey, og_wrapcol, og_autopopup, og_mousescrollcol]
     fixcols.count = 1
-    fixcols.items = <    
+    fixcols.items = <
       item
         width = 24
         numstep = 1
       end>
     datacols.count = 2
     datacols.options = [co_savestate, co_mousescrollrow]
-    datacols.items = <    
+    datacols.items = <
       item[po]
         options = [co_invisible, co_drawfocus, co_savestate, co_mousescrollrow]
         widgetname = 'po'
         dataclass = tgridpointerdatalist
-      end    
+      end
       item[na]
         width = 203
         options = [co_fill, co_savestate, co_mousescrollrow]
@@ -62,10 +62,10 @@ object mseificlienteditorfo: tmseificlienteditorfo
       frame.localprops = [frl_levelo, frl_leveli, frl_colorclient]
       frame.button.color = -1879048187
       frame.buttons.count = 2
-      frame.buttons.items = <      
+      frame.buttons.items = <
         item
           color = -1879048187
-        end      
+        end
         item
           imagenr = 17
           onexecute = editexe
@@ -81,7 +81,7 @@ object mseificlienteditorfo: tmseificlienteditorfo
       onsetvalue = setval
       dropdown.options = [deo_selectonly, deo_autodropdown, deo_keydropdown]
       dropdown.cols.count = 1
-      dropdown.cols.items = <      
+      dropdown.cols.items = <
         item
         end>
       onbeforedropdown = befdrop

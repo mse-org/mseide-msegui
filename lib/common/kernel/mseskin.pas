@@ -24,7 +24,7 @@ uses
  msetabs,msetoolbar,msedataedits,msemenus,msearrayprops,msegraphedits,
  msesimplewidgets,mseshapes,
  msegrids,msewidgets,msetypes,mseglob,msestrings,msedrawtext,mseguiglob;
- 
+
 type
  scrollbarskininfoty = record
   svwidth: int32;        //-2 -> default
@@ -87,25 +87,25 @@ type
   svfixrows: gridpropskininfoty;
   svfixcols: gridpropskininfoty;
   svdatacols: gridpropskininfoty;
- end;  
+ end;
  buttonskininfoty = record
   svcolor: colorty;
   svwidget: widgetskininfoty;
   svfont: toptionalfont;
   svoptionsadd: buttonoptionsty;
   svoptionsremove: buttonoptionsty;
- end;  
+ end;
  sliderskininfoty = record
   svcolor: colorty;
   svwidget: widgetskininfoty;
   svsb_vert: scrollbarskininfoty;
   svsb_horz: scrollbarskininfoty;
- end;  
+ end;
  stepbuttonskininfoty = record
   svcolor: colorty;
   svface: tfacecomp;
   svframe: tframecomp;
- end; 
+ end;
  framebuttonskininfoty = record
   svcolor: colorty;
   svcolorglyph: colorty;
@@ -161,7 +161,7 @@ type
   svseparatorframe: tframecomp;
   svcheckboxframe: tframecomp;
 //  options: skinmenuoptionsty;
- end;  
+ end;
  mainmenuskininfoty = record
   svmain: menuskininfoty;
   svpopup: menuskininfoty;
@@ -201,7 +201,7 @@ type
   svgrip: stockbitmapty;
  end;
 
- 
+
  tskincolor = class(tvirtualpersistent)
   private
    fcolor: colorty;
@@ -214,7 +214,7 @@ type
    property color: colorty read fcolor write setcolor default cl_none;
    property rgb: colorty read frgb write frgb;
  end;
- 
+
  tskincolors = class(tpersistentarrayprop)
   private
    fframecolors: framecolorinfoty;
@@ -247,7 +247,7 @@ type
               write feditfontcolors.textbackground default cl_default;
    property editselectedtext: colorty read feditfontcolors.selectedtext
               write feditfontcolors.selectedtext default cl_default;
-   property editselectedtextbackground: colorty 
+   property editselectedtextbackground: colorty
                read feditfontcolors.selectedtextbackground
              write feditfontcolors.selectedtextbackground default cl_default;
  end;
@@ -280,8 +280,8 @@ type
  end;
 
  tcustomskincontroller = class;
- 
- tskinfontaliass = class(townedpersistentarrayprop)   
+
+ tskinfontaliass = class(townedpersistentarrayprop)
   public
    constructor create(const aowner: tcustomskincontroller); reintroduce;
    class function getitemclasstype: persistentclassty; override;
@@ -290,11 +290,11 @@ type
 
  createprocty = procedure of object;
 
- beforeskinupdateeventty = procedure(const sender: tcustomskincontroller; 
+ beforeskinupdateeventty = procedure(const sender: tcustomskincontroller;
                 const ainfo: skininfoty; var handled: boolean) of object;
- skincontrollereventty = procedure(const sender: tcustomskincontroller; 
+ skincontrollereventty = procedure(const sender: tcustomskincontroller;
                                   const ainfo: skininfoty) of object;
-                
+
  tskinextender = class(tmsecomponent)
   private
    fmaster: tcustomskincontroller;
@@ -339,7 +339,7 @@ type
   published
   {
    property color: colorty read fcolor write fcolor default cl_default;
-   property colorbackground: colorty read fcolorbackground 
+   property colorbackground: colorty read fcolorbackground
                            write fcolorbackground default cl_default;
    property shadow_color: colorty read fshadow_color
                                 write fshadow_color default cl_default;
@@ -375,7 +375,7 @@ type
                 max: integer;
                end;
  groupinfoarty = array of groupinfoty;
-                    
+
  tcustomskincontroller = class(tmsecomponent)
   private
    fonbeforeupdate: beforeskinupdateeventty;
@@ -463,7 +463,7 @@ type
    procedure setwidgetcolor(const instance: twidget; const acolor: colorty);
    function setwidgetcolorcaptionframe(
                    const awidget: twidget; const acolor: colorty): boolean;
-   procedure setscrollbarskin(const instance: tcustomscrollbar; 
+   procedure setscrollbarskin(const instance: tcustomscrollbar;
                 const ainfo: scrollbarskininfoty);
    procedure setstepbuttonskin(const instance: tcustomstepframe;
                                           const ainfo: stepbuttonskininfoty);
@@ -507,10 +507,10 @@ type
    property order: integer read forder write forder default 0; //first!
               //higher order executed first
    property active: boolean read factive write setactive default false;
-//   property activedesign: boolean read factivedesign 
+//   property activedesign: boolean read factivedesign
 //                                         write setactivedesign default false;
          //removed, too dangerous
-   property extenders: integer read getextenders write setextenders; 
+   property extenders: integer read getextenders write setextenders;
                                   //hook for object inspector
    property groups: string read fgroups write setgroups;
               //format [<group>[..<groupmax>]{,<group>[..<groupmax>]}]
@@ -530,7 +530,7 @@ type
                          read getskinfont write setskinfont;
    property font_unicode: tskinfont index ord(stf_unicode)           //2
                          read getskinfont write setskinfont;
-   property font_menu: tskinfont index ord(stf_menu)                 //3 
+   property font_menu: tskinfont index ord(stf_menu)                 //3
                          read getskinfont write setskinfont;
    property font_message: tskinfont index ord(stf_message)           //4
                          read getskinfont write setskinfont;
@@ -553,9 +553,9 @@ type
                             write sethotkey_fontstylesadd default [];
    property hotkey_fontstylesremove: fontstylesty read fhotkey_fontstylesremove
                             write sethotkey_fontstylesremove default [];
-   property hotkey_color: colorty read fhotkey_color write sethotkey_color 
+   property hotkey_color: colorty read fhotkey_color write sethotkey_color
                                                           default cl_default;
-   property hotkey_colorbackground: colorty read fhotkey_colorbackground 
+   property hotkey_colorbackground: colorty read fhotkey_colorbackground
                              write sethotkey_colorbackground default cl_default;
  end;
 
@@ -584,7 +584,7 @@ type
    fdataedit: dataeditskininfoty;
    fbooleanedit: booleaneditskininfoty;
    fsplitter: splitterskininfoty;
-   
+
    procedure setsb_vert_face(const avalue: tfacecomp);
    procedure setsb_vert_face1(const avalue: tfacecomp);
    procedure setsb_vert_face2(const avalue: tfacecomp);
@@ -719,7 +719,7 @@ type
    procedure settoolbar_vert_buttonframechecked(const avalue: tframecomp);
    procedure settoolbar_vert_buttonframesep(const avalue: tframecomp);
 
-   
+
    procedure setpopupmenu_face(const avalue: tfacecomp);
    procedure setpopupmenu_frame(const avalue: tframecomp);
    procedure setpopupmenu_itemface(const avalue: tfacecomp);
@@ -730,7 +730,7 @@ type
    procedure setpopupmenu_fontactive(const avalue: tfontcomp);
    procedure setpopupmenu_separatorframe(const avalue: tframecomp);
    procedure setpopupmenu_checkboxframe(const avalue: tframecomp);
-   
+
    procedure setmainmenu_face(const avalue: tfacecomp);
    procedure setmainmenu_frame(const avalue: tframecomp);
    procedure setmainmenu_itemface(const avalue: tfacecomp);
@@ -800,43 +800,43 @@ type
   published
    property sb_horz_width: int32 read fsb_horz.svwidth
                                  write fsb_horz.svwidth default -2;
-   property sb_horz_color: colorty 
+   property sb_horz_color: colorty
                       read fsb_horz.svcolor
                     write fsb_horz.svcolor default cl_default;
-   property sb_horz_colorpattern: colorty 
-                      read fsb_horz.svcolorpattern 
+   property sb_horz_colorpattern: colorty
+                      read fsb_horz.svcolorpattern
                     write fsb_horz.svcolorpattern default cl_default;
-   property sb_horz_colorpatternclicked: colorty 
+   property sb_horz_colorpatternclicked: colorty
                       read fsb_horz.svcolorpatternclicked
                     write fsb_horz.svcolorpatternclicked default cl_default;
-   property sb_horz_colorglyph: colorty 
-                        read fsb_horz.svcolorglyph 
+   property sb_horz_colorglyph: colorty
+                        read fsb_horz.svcolorglyph
                       write fsb_horz.svcolorglyph default cl_default;
-   property sb_horz_buttonendlength: int32 read fsb_horz.svbuttonendlength 
+   property sb_horz_buttonendlength: int32 read fsb_horz.svbuttonendlength
                                  write fsb_horz.svbuttonendlength default -2;
-   property sb_horz_buttonlength: int32 read fsb_horz.svbuttonlength 
+   property sb_horz_buttonlength: int32 read fsb_horz.svbuttonlength
                                  write fsb_horz.svbuttonlength default -2;
-   property sb_horz_buttonminlength: int32 read fsb_horz.svbuttonminlength 
+   property sb_horz_buttonminlength: int32 read fsb_horz.svbuttonminlength
                                  write fsb_horz.svbuttonminlength default -2;
-   property sb_horz_indentstart: int32 read fsb_horz.svindentstart 
+   property sb_horz_indentstart: int32 read fsb_horz.svindentstart
                                   write fsb_horz.svindentstart default 0;
    property sb_horz_indentend: int32 read fsb_horz.svindentend
                                   write fsb_horz.svindentend default 0;
-   property sb_horz_face: tfacecomp read fsb_horz.svface 
+   property sb_horz_face: tfacecomp read fsb_horz.svface
                         write setsb_horz_face;
    property sb_horz_face1: tfacecomp read fsb_horz.svface1
                         write setsb_horz_face1;
    property sb_horz_face2: tfacecomp read fsb_horz.svface2
                         write setsb_horz_face2;
-   property sb_horz_facebutton: tfacecomp read fsb_horz.svfacebu 
+   property sb_horz_facebutton: tfacecomp read fsb_horz.svfacebu
                         write setsb_horz_facebutton;
-   property sb_horz_faceendbutton: tfacecomp read fsb_horz.svfaceendbu 
+   property sb_horz_faceendbutton: tfacecomp read fsb_horz.svfaceendbu
                         write setsb_horz_faceendbutton;
-   property sb_horz_frame: tframecomp read fsb_horz.svframe 
+   property sb_horz_frame: tframecomp read fsb_horz.svframe
                         write setsb_horz_frame;
    property sb_horz_framebutton: tframecomp read fsb_horz.svframebu
                         write setsb_horz_framebutton;
-   property sb_horz_frameendbutton1: tframecomp read fsb_horz.svframeendbu1 
+   property sb_horz_frameendbutton1: tframecomp read fsb_horz.svframeendbu1
                         write setsb_horz_frameendbutton1;
    property sb_horz_frameendbutton2: tframecomp read fsb_horz.svframeendbu2
                         write setsb_horz_frameendbutton2;
@@ -845,25 +845,25 @@ type
                                  write fsb_vert.svwidth default -2;
    property sb_vert_color: colorty read fsb_vert.svcolor
                     write fsb_vert.svcolor default cl_default;
-   property sb_vert_colorpattern: colorty read fsb_vert.svcolorpattern 
+   property sb_vert_colorpattern: colorty read fsb_vert.svcolorpattern
                     write fsb_vert.svcolorpattern default cl_default;
-   property sb_vert_colorpatternclicked: colorty 
+   property sb_vert_colorpatternclicked: colorty
                     read fsb_vert.svcolorpatternclicked
                     write fsb_vert.svcolorpatternclicked default cl_default;
-   property sb_vert_colorglyph: colorty 
-                        read fsb_vert.svcolorglyph 
+   property sb_vert_colorglyph: colorty
+                        read fsb_vert.svcolorglyph
                       write fsb_vert.svcolorglyph default cl_default;
-   property sb_vert_buttonendlength: int32 read fsb_vert.svbuttonendlength 
+   property sb_vert_buttonendlength: int32 read fsb_vert.svbuttonendlength
                                  write fsb_vert.svbuttonendlength default -2;
-   property sb_vert_buttonlength: int32 read fsb_vert.svbuttonlength 
+   property sb_vert_buttonlength: int32 read fsb_vert.svbuttonlength
                                  write fsb_vert.svbuttonlength default -2;
-   property sb_vert_buttonminlength: int32 read fsb_vert.svbuttonminlength 
+   property sb_vert_buttonminlength: int32 read fsb_vert.svbuttonminlength
                                  write fsb_vert.svbuttonminlength default -2;
-   property sb_vert_indentstart: int32 read fsb_vert.svindentstart 
+   property sb_vert_indentstart: int32 read fsb_vert.svindentstart
                                   write fsb_vert.svindentstart default 0;
    property sb_vert_indentend: int32 read fsb_vert.svindentend
                                   write fsb_vert.svindentend default 0;
-   property sb_vert_face: tfacecomp read fsb_vert.svface 
+   property sb_vert_face: tfacecomp read fsb_vert.svface
                         write setsb_vert_face;
    property sb_vert_face1: tfacecomp read fsb_vert.svface1
                         write setsb_vert_face1;
@@ -871,35 +871,35 @@ type
                         write setsb_vert_face2;
    property sb_vert_facebutton: tfacecomp read fsb_vert.svfacebu
                         write setsb_vert_facebutton;
-   property sb_vert_faceendbutton: tfacecomp read fsb_vert.svfaceendbu 
+   property sb_vert_faceendbutton: tfacecomp read fsb_vert.svfaceendbu
                         write setsb_vert_faceendbutton;
-   property sb_vert_frame: tframecomp read fsb_vert.svframe 
+   property sb_vert_frame: tframecomp read fsb_vert.svframe
                         write setsb_vert_frame;
-   property sb_vert_framebutton: tframecomp read fsb_vert.svframebu 
+   property sb_vert_framebutton: tframecomp read fsb_vert.svframebu
                         write setsb_vert_framebutton;
-   property sb_vert_frameendbutton1: tframecomp read fsb_vert.svframeendbu1 
+   property sb_vert_frameendbutton1: tframecomp read fsb_vert.svframeendbu1
                         write setsb_vert_frameendbutton1;
-   property sb_vert_frameendbutton2: tframecomp read fsb_vert.svframeendbu2 
+   property sb_vert_frameendbutton2: tframecomp read fsb_vert.svframeendbu2
                         write setsb_vert_frameendbutton2;
 
-   property stepbutton_color: colorty read fstepbutton.svcolor 
+   property stepbutton_color: colorty read fstepbutton.svcolor
                         write fstepbutton.svcolor default cl_default;
-   property stepbutton_frame: tframecomp read fstepbutton.svframe 
+   property stepbutton_frame: tframecomp read fstepbutton.svframe
                         write setstepbutton_frame;
    property stepbutton_face: tfacecomp read fstepbutton.svface
                         write setstepbutton_face;
-                        
+
    property widget_color: colorty read fwidgetcolor.svcolor
                         write fwidgetcolor.svcolor default cl_default;
-   property widget_colorcaptionframe: colorty 
-                        read fwidgetcolor.svcolorcaptionframe 
+   property widget_colorcaptionframe: colorty
+                        read fwidgetcolor.svcolorcaptionframe
                  write fwidgetcolor.svcolorcaptionframe default cl_default;
                         //overrides widget_color for widgets with frame caption
 
    property splitter_color: colorty read fsplitter.svcolor.svcolor
                          write fsplitter.svcolor.svcolor default cl_default;
-   property splitter_colorcaptionframe: colorty 
-                         read fsplitter.svcolor.svcolorcaptionframe 
+   property splitter_colorcaptionframe: colorty
+                         read fsplitter.svcolor.svcolorcaptionframe
               write fsplitter.svcolor.svcolorcaptionframe default cl_default;
                         //overrides widget_color for widgets with frame caption
    property splitter_colorgrip: colorty read fsplitter.svcolorgrip
@@ -908,78 +908,78 @@ type
                          write fsplitter.svgrip default stb_default;
    property splitter_face: tfacecomp read fsplitter.svwidget.svface
                                             write setsplitter_face;
-   property splitter_frame: tframecomp read fsplitter.svwidget.svframe 
+   property splitter_frame: tframecomp read fsplitter.svwidget.svframe
                                             write setsplitter_frame;
 
    property dispwidget_color: colorty read fdispwidget.svcolor.svcolor
                          write fdispwidget.svcolor.svcolor default cl_default;
-   property dispwidget_colorcaptionframe: colorty 
-                         read fdispwidget.svcolor.svcolorcaptionframe 
+   property dispwidget_colorcaptionframe: colorty
+                         read fdispwidget.svcolor.svcolorcaptionframe
               write fdispwidget.svcolor.svcolorcaptionframe default cl_default;
                         //overrides widget_color for widgets with frame caption
    property dispwidget_face: tfacecomp read fdispwidget.svwidget.svface
                                             write setdispwidget_face;
-   property dispwidget_frame: tframecomp read fdispwidget.svwidget.svframe 
+   property dispwidget_frame: tframecomp read fdispwidget.svwidget.svframe
                                             write setdispwidget_frame;
 
    property dataedit_face: tfacecomp read fdataedit.svedit.svwidget.svface
                                                  write setdataedit_face;
-   property dataedit_frame: tframecomp read fdataedit.svedit.svwidget.svframe 
+   property dataedit_frame: tframecomp read fdataedit.svedit.svwidget.svframe
                                                     write setdataedit_frame;
-   property dataedit_empty_text: msestring read fdataedit.svedit.svempty_text 
+   property dataedit_empty_text: msestring read fdataedit.svedit.svempty_text
                                            write fdataedit.svedit.svempty_text;
    property dataedit_empty_color: colorty read fdataedit.svedit.svempty_color
                        write fdataedit.svedit.svempty_color default cl_default;
-   property dataedit_empty_fontstyle: fontstylesty 
-                        read fdataedit.svedit.svempty_fontstyle 
+   property dataedit_empty_fontstyle: fontstylesty
+                        read fdataedit.svedit.svempty_fontstyle
                           write fdataedit.svedit.svempty_fontstyle default [];
-   property dataedit_empty_textflags: textflagsty 
-                  read fdataedit.svedit.svempty_textflags 
+   property dataedit_empty_textflags: textflagsty
+                  read fdataedit.svedit.svempty_textflags
                            write fdataedit.svedit.svempty_textflags default [];
-   property dataedit_empty_textcolor: colorty 
-                          read fdataedit.svedit.svempty_textcolor 
+   property dataedit_empty_textcolor: colorty
+                          read fdataedit.svedit.svempty_textcolor
                    write fdataedit.svedit.svempty_textcolor default cl_default;
-   property dataedit_empty_textcolorbackground: colorty 
-                     read fdataedit.svedit.svempty_textcolorbackground 
+   property dataedit_empty_textcolorbackground: colorty
+                     read fdataedit.svedit.svempty_textcolorbackground
         write fdataedit.svedit.svempty_textcolorbackground default cl_default;
 
    property edit_face: tfacecomp read fedit.svwidget.svface
                                                  write setedit_face;
-   property edit_frame: tframecomp read fedit.svwidget.svframe 
+   property edit_frame: tframecomp read fedit.svwidget.svframe
                                                     write setedit_frame;
-   property edit_empty_text: msestring read fedit.svempty_text 
+   property edit_empty_text: msestring read fedit.svempty_text
                                            write fedit.svempty_text;
    property edit_empty_color: colorty read fedit.svempty_color
                        write fedit.svempty_color default cl_default;
-   property edit_empty_fontstyle: fontstylesty 
-                        read fedit.svempty_fontstyle 
+   property edit_empty_fontstyle: fontstylesty
+                        read fedit.svempty_fontstyle
                           write fedit.svempty_fontstyle default [];
-   property edit_empty_textflags: textflagsty 
-                  read fedit.svempty_textflags 
+   property edit_empty_textflags: textflagsty
+                  read fedit.svempty_textflags
                            write fedit.svempty_textflags default [];
-   property edit_empty_textcolor: colorty 
-                          read fedit.svempty_textcolor 
+   property edit_empty_textcolor: colorty
+                          read fedit.svempty_textcolor
                    write fedit.svempty_textcolor default cl_default;
-   property edit_empty_textcolorbackground: colorty 
-                     read fedit.svempty_textcolorbackground 
+   property edit_empty_textcolorbackground: colorty
+                     read fedit.svempty_textcolorbackground
         write fedit.svempty_textcolorbackground default cl_default;
-                        
-   property booleanedit_face: tfacecomp 
-             read fbooleanedit.svgraphdataedit.svwidget.svface 
+
+   property booleanedit_face: tfacecomp
+             read fbooleanedit.svgraphdataedit.svwidget.svface
                                                    write setbooleanedit_face;
-   property booleanedit_frame: tframecomp 
-                read fbooleanedit.svgraphdataedit.svwidget.svframe 
+   property booleanedit_frame: tframecomp
+                read fbooleanedit.svgraphdataedit.svwidget.svframe
                                                 write setbooleanedit_frame;
-   property booleanedit_optionsadd: buttonoptionsty 
-                        read fbooleanedit.svoptionsadd 
+   property booleanedit_optionsadd: buttonoptionsty
+                        read fbooleanedit.svoptionsadd
                                 write fbooleanedit.svoptionsadd default[];
-   property booleanedit_optionsremove: buttonoptionsty 
+   property booleanedit_optionsremove: buttonoptionsty
                        read fbooleanedit.svoptionsremove
                                 write fbooleanedit.svoptionsremove default[];
 
-   property container_face: tfacecomp read fcontainer.svwidget.svface 
+   property container_face: tfacecomp read fcontainer.svwidget.svface
                                               write setcontainer_face;
-   property container_frame: tframecomp read fcontainer.svwidget.svframe 
+   property container_frame: tframecomp read fcontainer.svwidget.svframe
                                               write setcontainer_frame;
    property groupbox_face: tfacecomp read fgroupbox.svwidget.svface
                                                   write setgroupbox_face;
@@ -989,19 +989,19 @@ type
    property grid_face: tfacecomp read fgrid.svwidget.svface write setgrid_face;
    property grid_frame: tframecomp read fgrid.svwidget.svframe
                                                    write setgrid_frame;
-   property grid_fixrows_face: tfacecomp read fgrid.svfixrows.svface 
+   property grid_fixrows_face: tfacecomp read fgrid.svfixrows.svface
                             write setgrid_fixrows_face;
    property grid_fixrows_frame: tframecomp read fgrid.svfixrows.svframe
                             write setgrid_fixrows_frame;
-   property grid_fixcols_face: tfacecomp read fgrid.svfixcols.svface 
+   property grid_fixcols_face: tfacecomp read fgrid.svfixcols.svface
                             write setgrid_fixcols_face;
    property grid_fixcols_frame: tframecomp read fgrid.svfixcols.svframe
                             write setgrid_fixcols_frame;
-   property grid_datacols_face: tfacecomp read fgrid.svdatacols.svface 
+   property grid_datacols_face: tfacecomp read fgrid.svdatacols.svface
                             write setgrid_datacols_face;
    property grid_datacols_frame: tframecomp read fgrid.svdatacols.svframe
                             write setgrid_datacols_frame;
-   
+
    property button_color: colorty read fbutton.svcolor write fbutton.svcolor
                                                   default cl_default;
    property button_face: tfacecomp read fbutton.svwidget.svface
@@ -1009,151 +1009,151 @@ type
    property button_frame: tframecomp read fbutton.svwidget.svframe
                                                  write setbutton_frame;
    property button_font: toptionalfont read getbutton_font write setbutton_font;
-   property button_optionsadd: buttonoptionsty read fbutton.svoptionsadd 
+   property button_optionsadd: buttonoptionsty read fbutton.svoptionsadd
                                 write fbutton.svoptionsadd default[];
    property button_optionsremove: buttonoptionsty read fbutton.svoptionsremove
                                 write fbutton.svoptionsremove default[];
 
-   property databutton_color: colorty read fdatabutton.svcolor 
+   property databutton_color: colorty read fdatabutton.svcolor
                                   write fdatabutton.svcolor default cl_default;
-   property databutton_face: tfacecomp read fdatabutton.svwidget.svface 
+   property databutton_face: tfacecomp read fdatabutton.svwidget.svface
                                               write setdatabutton_face;
-   property databutton_frame: tframecomp read fdatabutton.svwidget.svframe 
+   property databutton_frame: tframecomp read fdatabutton.svwidget.svframe
                                               write setdatabutton_frame;
-   property databutton_font: toptionalfont read getdatabutton_font 
+   property databutton_font: toptionalfont read getdatabutton_font
                                               write setdatabutton_font;
-   property databutton_optionsadd: buttonoptionsty 
-                               read fdatabutton.svoptionsadd 
+   property databutton_optionsadd: buttonoptionsty
+                               read fdatabutton.svoptionsadd
                                 write fdatabutton.svoptionsadd default[];
-   property databutton_optionsremove: buttonoptionsty 
+   property databutton_optionsremove: buttonoptionsty
                        read fbooleanedit.svoptionsremove
                                 write fdatabutton.svoptionsremove default[];
 
-   property slider_color: colorty read fslider.svcolor 
+   property slider_color: colorty read fslider.svcolor
                                   write fslider.svcolor default cl_default;
-   property slider_face: tfacecomp read fslider.svwidget.svface 
+   property slider_face: tfacecomp read fslider.svwidget.svface
                                               write setslider_face;
-   property slider_frame: tframecomp read fslider.svwidget.svframe 
+   property slider_frame: tframecomp read fslider.svwidget.svframe
                                                       write setslider_frame;
 
    property slider_sb_horz_width: int32 read fslider.svsb_horz.svwidth
                                  write fslider.svsb_horz.svwidth default -2;
-   property slider_sb_horz_color: colorty 
-                      read fslider.svsb_horz.svcolor 
+   property slider_sb_horz_color: colorty
+                      read fslider.svsb_horz.svcolor
                     write fslider.svsb_horz.svcolor default cl_default;
-   property slider_sb_horz_colorpattern: colorty 
-                      read fslider.svsb_horz.svcolorpattern 
+   property slider_sb_horz_colorpattern: colorty
+                      read fslider.svsb_horz.svcolorpattern
                     write fslider.svsb_horz.svcolorpattern default cl_default;
-   property slider_sb_horz_colorpatternclicked: colorty 
+   property slider_sb_horz_colorpatternclicked: colorty
                       read fslider.svsb_horz.svcolorpatternclicked
              write fslider.svsb_horz.svcolorpatternclicked default cl_default;
-   property slider_sb_horz_colorglyph: colorty 
-                        read fslider.svsb_horz.svcolorglyph 
+   property slider_sb_horz_colorglyph: colorty
+                        read fslider.svsb_horz.svcolorglyph
                       write fslider.svsb_horz.svcolorglyph default cl_default;
-   property slider_sb_horz_buttonendlength: int32 
-                         read fslider.svsb_horz.svbuttonendlength 
+   property slider_sb_horz_buttonendlength: int32
+                         read fslider.svsb_horz.svbuttonendlength
                            write fslider.svsb_horz.svbuttonendlength default -2;
-   property slider_sb_horz_buttonlength: int32 
-                   read fslider.svsb_horz.svbuttonlength 
+   property slider_sb_horz_buttonlength: int32
+                   read fslider.svsb_horz.svbuttonlength
                              write fslider.svsb_horz.svbuttonlength default -2;
-   property slider_sb_horz_buttonminlength: int32 
-                   read fslider.svsb_horz.svbuttonminlength 
+   property slider_sb_horz_buttonminlength: int32
+                   read fslider.svsb_horz.svbuttonminlength
                           write fslider.svsb_horz.svbuttonminlength default -2;
-   property slider_sb_horz_indentstart: int32 
-                        read fslider.svsb_horz.svindentstart 
+   property slider_sb_horz_indentstart: int32
+                        read fslider.svsb_horz.svindentstart
                                write fslider.svsb_horz.svindentstart default 0;
    property slider_sb_horz_indentend: int32 read fslider.svsb_horz.svindentend
                                   write fslider.svsb_horz.svindentend default 0;
-   property slider_sb_horz_face: tfacecomp 
-                        read fslider.svsb_horz.svface 
+   property slider_sb_horz_face: tfacecomp
+                        read fslider.svsb_horz.svface
                         write setssb_horz_face;
-   property slider_sb_horz_face1: tfacecomp 
+   property slider_sb_horz_face1: tfacecomp
                         read fslider.svsb_horz.svface1
                         write setssb_horz_face1;
-   property slider_sb_horz_face2: tfacecomp 
+   property slider_sb_horz_face2: tfacecomp
                         read fslider.svsb_horz.svface2
                         write setssb_horz_face2;
-   property slider_sb_horz_facebutton: tfacecomp 
-                        read fslider.svsb_horz.svfacebu 
+   property slider_sb_horz_facebutton: tfacecomp
+                        read fslider.svsb_horz.svfacebu
                         write setssb_horz_facebutton;
-   property slider_sb_horz_faceendbutton: tfacecomp 
-                        read fslider.svsb_horz.svfaceendbu 
+   property slider_sb_horz_faceendbutton: tfacecomp
+                        read fslider.svsb_horz.svfaceendbu
                         write setssb_horz_faceendbutton;
-   property slider_sb_horz_frame: tframecomp 
+   property slider_sb_horz_frame: tframecomp
                         read fslider.svsb_horz.svframe
                         write setssb_horz_frame;
-   property slider_sb_horz_framebutton: tframecomp 
+   property slider_sb_horz_framebutton: tframecomp
                         read fslider.svsb_horz.svframebu
                         write setssb_horz_framebutton;
-   property slider_sb_horz_frameendbutton1: tframecomp 
-                        read fslider.svsb_horz.svframeendbu1 
+   property slider_sb_horz_frameendbutton1: tframecomp
+                        read fslider.svsb_horz.svframeendbu1
                         write setssb_horz_frameendbutton1;
-   property slider_sb_horz_frameendbutton2: tframecomp 
+   property slider_sb_horz_frameendbutton2: tframecomp
                         read fslider.svsb_horz.svframeendbu2
                         write setssb_horz_frameendbutton2;
 
    property slider_sb_vert_width: int32 read fslider.svsb_vert.svwidth
                                  write fslider.svsb_vert.svwidth default -2;
-   property slider_sb_vert_color: colorty 
+   property slider_sb_vert_color: colorty
                       read fslider.svsb_vert.svcolor
                           write fslider.svsb_vert.svcolor default cl_default;
-   property slider_sb_vert_colorpattern: colorty 
-                      read fslider.svsb_vert.svcolorpattern 
+   property slider_sb_vert_colorpattern: colorty
+                      read fslider.svsb_vert.svcolorpattern
                     write fslider.svsb_vert.svcolorpattern default cl_default;
-   property slider_sb_vert_colorpatternclicked: colorty 
+   property slider_sb_vert_colorpatternclicked: colorty
                       read fslider.svsb_vert.svcolorpatternclicked
               write fslider.svsb_vert.svcolorpatternclicked default cl_default;
-   property slider_sb_vert_colorglyph: colorty 
-                        read fslider.svsb_vert.svcolorglyph 
+   property slider_sb_vert_colorglyph: colorty
+                        read fslider.svsb_vert.svcolorglyph
                       write fslider.svsb_vert.svcolorglyph default cl_default;
-   property slider_sb_vert_buttonendlength: int32 
-                 read fslider.svsb_vert.svbuttonendlength 
+   property slider_sb_vert_buttonendlength: int32
+                 read fslider.svsb_vert.svbuttonendlength
                           write fslider.svsb_vert.svbuttonendlength default -2;
-   property slider_sb_vert_buttonlength: int32 
-                   read fslider.svsb_vert.svbuttonlength 
+   property slider_sb_vert_buttonlength: int32
+                   read fslider.svsb_vert.svbuttonlength
                              write fslider.svsb_vert.svbuttonlength default -2;
-   property slider_sb_vert_buttonminlength: int32 
-                   read fslider.svsb_vert.svbuttonminlength 
+   property slider_sb_vert_buttonminlength: int32
+                   read fslider.svsb_vert.svbuttonminlength
                           write fslider.svsb_vert.svbuttonminlength default -2;
-   property slider_sb_vert_indentstart: int32 
-                        read fslider.svsb_vert.svindentstart 
+   property slider_sb_vert_indentstart: int32
+                        read fslider.svsb_vert.svindentstart
                                write fslider.svsb_horz.svindentstart default 0;
    property slider_sb_vert_indentend: int32 read fslider.svsb_vert.svindentend
                                   write fslider.svsb_vert.svindentend default 0;
-   property slider_sb_vert_face: tfacecomp 
+   property slider_sb_vert_face: tfacecomp
                         read fslider.svsb_vert.svface
                         write setssb_vert_face;
-   property slider_sb_vert_face1: tfacecomp 
+   property slider_sb_vert_face1: tfacecomp
                         read fslider.svsb_vert.svface1
                         write setssb_vert_face1;
-   property slider_sb_vert_face2: tfacecomp 
+   property slider_sb_vert_face2: tfacecomp
                         read fslider.svsb_vert.svface2
                         write setssb_vert_face2;
-   property slider_sb_vert_facebutton: tfacecomp 
+   property slider_sb_vert_facebutton: tfacecomp
                         read fslider.svsb_vert.svfacebu
                         write setssb_vert_facebutton;
-   property slider_sb_vert_faceendbutton: tfacecomp 
-                        read fslider.svsb_vert.svfaceendbu 
+   property slider_sb_vert_faceendbutton: tfacecomp
+                        read fslider.svsb_vert.svfaceendbu
                         write setssb_vert_faceendbutton;
-   property slider_sb_vert_frame: tframecomp 
-                        read fslider.svsb_vert.svframe 
+   property slider_sb_vert_frame: tframecomp
+                        read fslider.svsb_vert.svframe
                         write setssb_vert_frame;
-   property slider_sb_vert_framebutton: tframecomp 
-                        read fslider.svsb_vert.svframebu 
+   property slider_sb_vert_framebutton: tframecomp
+                        read fslider.svsb_vert.svframebu
                         write setssb_vert_framebutton;
-   property slider_sb_vert_frameendbutton1: tframecomp 
-                        read fslider.svsb_vert.svframeendbu1 
+   property slider_sb_vert_frameendbutton1: tframecomp
+                        read fslider.svsb_vert.svframeendbu1
                         write setssb_vert_frameendbutton1;
-   property slider_sb_vert_frameendbutton2: tframecomp 
-                        read fslider.svsb_vert.svframeendbu2 
+   property slider_sb_vert_frameendbutton2: tframecomp
+                        read fslider.svsb_vert.svframeendbu2
                         write setssb_vert_frameendbutton2;
 
 
-   property framebutton_color: colorty read fframebutton.svcolor 
+   property framebutton_color: colorty read fframebutton.svcolor
                            write fframebutton.svcolor default cl_default;
-   property framebutton_colorglyph: colorty read fframebutton.svcolorglyph 
+   property framebutton_colorglyph: colorty read fframebutton.svcolorglyph
                            write fframebutton.svcolorglyph default cl_default;
-   property framebutton_face: tfacecomp read fframebutton.svface 
+   property framebutton_face: tfacecomp read fframebutton.svface
                                               write setframebutton_face;
    property framebutton_frame: tframecomp read fframebutton.svframe
                                               write setframebutton_frame;
@@ -1162,21 +1162,21 @@ type
                                             write settabbar_horz_face;
    property tabbar_horz_frame: tframecomp read ftabbar.svwidgethorz.svframe
                                             write settabbar_horz_frame;
-   property tabbar_horz_tab_color: colorty read ftabbar.svtabhorz.svcolor 
+   property tabbar_horz_tab_color: colorty read ftabbar.svtabhorz.svcolor
                              write ftabbar.svtabhorz.svcolor default cl_default;
-   property tabbar_horz_tab_coloractive: colorty 
-                   read ftabbar.svtabhorz.svcoloractive 
+   property tabbar_horz_tab_coloractive: colorty
+                   read ftabbar.svtabhorz.svcoloractive
                    write ftabbar.svtabhorz.svcoloractive default cl_default;
    property tabbar_horz_tab_frame: tframecomp read ftabbar.svtabhorz.svframe
                                write settabbar_horz_tab_frame;
    property tabbar_horz_tab_face: tfacecomp read ftabbar.svtabhorz.svface
                                write settabbar_horz_tab_face;
-   property tabbar_horz_tab_faceactive: tfacecomp 
+   property tabbar_horz_tab_faceactive: tfacecomp
                                read ftabbar.svtabhorz.svfaceactive
                                write settabbar_horz_tab_faceactive;
    property tabbar_horz_tab_shift: integer read ftabbar.svtabhorz.svshift
                      write ftabbar.svtabhorz.svshift default defaulttabshift;
-   property tabbar_horz_tab_edge_level: int32 
+   property tabbar_horz_tab_edge_level: int32
               read ftabbar.svtabhorz.svsedge_level
            write ftabbar.svtabhorz.svsedge_level default defaultedgelevel;
                        //defaultedgelevel (-100) -> -1
@@ -1200,8 +1200,8 @@ type
               read ftabbar.svtabhorz.svsedge_colorhlwidth
               write ftabbar.svtabhorz.svsedge_colorhlwidth default -1;
                                   //-1 = default
-   property tabbar_horz_tab_edge_imagelist: timagelist 
-              read ftabbar.svtabhorz.svsedge_imagelist 
+   property tabbar_horz_tab_edge_imagelist: timagelist
+              read ftabbar.svtabhorz.svsedge_imagelist
               write settabbar_horz_tab_edge_imagelist;
                    //imagenr 0 -> startpoint, 1 -> edge, imagenr 2 -> endpoint
    property tabbar_horz_tab_edge_imageoffset: int32
@@ -1213,25 +1213,25 @@ type
 
    property tabbar_horzopo_face: tfacecomp read ftabbar.svwidgethorzopo.svface
                                             write settabbar_horzopo_face;
-   property tabbar_horzopo_frame: tframecomp 
-                  read ftabbar.svwidgethorzopo.svframe 
+   property tabbar_horzopo_frame: tframecomp
+                  read ftabbar.svwidgethorzopo.svframe
                                             write settabbar_horzopo_frame;
-   property tabbar_horzopo_tab_color: colorty read ftabbar.svtabhorzopo.svcolor 
+   property tabbar_horzopo_tab_color: colorty read ftabbar.svtabhorzopo.svcolor
                       write ftabbar.svtabhorzopo.svcolor default cl_default;
-   property tabbar_horzopo_tab_coloractive: colorty 
-                     read ftabbar.svtabhorzopo.svcoloractive 
+   property tabbar_horzopo_tab_coloractive: colorty
+                     read ftabbar.svtabhorzopo.svcoloractive
                     write ftabbar.svtabhorzopo.svcoloractive default cl_default;
-   property tabbar_horzopo_tab_frame: tframecomp 
+   property tabbar_horzopo_tab_frame: tframecomp
                              read ftabbar.svtabhorzopo.svframe
                                write settabbar_horzopo_tab_frame;
    property tabbar_horzopo_tab_face: tfacecomp read ftabbar.svtabhorzopo.svface
                                write settabbar_horzopo_tab_face;
-   property tabbar_horzopo_tab_faceactive: tfacecomp 
+   property tabbar_horzopo_tab_faceactive: tfacecomp
                                read ftabbar.svtabhorzopo.svfaceactive
                                write settabbar_horzopo_tab_faceactive;
    property tabbar_horzopo_tab_shift: integer read ftabbar.svtabhorzopo.svshift
                   write ftabbar.svtabhorzopo.svshift default defaulttabshift;
-   property tabbar_horzopo_tab_edge_level: int32 
+   property tabbar_horzopo_tab_edge_level: int32
               read ftabbar.svtabhorzopo.svsedge_level
            write ftabbar.svtabhorzopo.svsedge_level default defaultedgelevel;
                        //defaultedgelevel (-100) -> -1
@@ -1255,8 +1255,8 @@ type
               read ftabbar.svtabhorzopo.svsedge_colorhlwidth
               write ftabbar.svtabhorzopo.svsedge_colorhlwidth default -1;
                                   //-1 = default
-   property tabbar_horzopo_tab_edge_imagelist: timagelist 
-              read ftabbar.svtabhorzopo.svsedge_imagelist 
+   property tabbar_horzopo_tab_edge_imagelist: timagelist
+              read ftabbar.svtabhorzopo.svsedge_imagelist
               write settabbar_horzopo_tab_edge_imagelist;
                    //imagenr 0 -> startpoint, 1 -> edge, imagenr 2 -> endpoint
    property tabbar_horzopo_tab_edge_imageoffset: int32
@@ -1270,22 +1270,22 @@ type
                                write settabbar_vert_face;
    property tabbar_vert_frame: tframecomp read ftabbar.svwidgetvert.svframe
                                write settabbar_vert_frame;
-   property tabbar_vert_tab_color: colorty read ftabbar.svtabvert.svcolor 
-                               write ftabbar.svtabvert.svcolor 
+   property tabbar_vert_tab_color: colorty read ftabbar.svtabvert.svcolor
+                               write ftabbar.svtabvert.svcolor
                                default cl_default;
-   property tabbar_vert_tab_coloractive: colorty 
-                               read ftabbar.svtabvert.svcoloractive 
+   property tabbar_vert_tab_coloractive: colorty
+                               read ftabbar.svtabvert.svcoloractive
                  write ftabbar.svtabvert.svcoloractive default cl_default;
    property tabbar_vert_tab_frame: tframecomp read ftabbar.svtabvert.svframe
                                write settabbar_vert_tab_frame;
    property tabbar_vert_tab_face: tfacecomp read ftabbar.svtabvert.svface
                                write settabbar_vert_tab_face;
-   property tabbar_vert_tab_faceactive: tfacecomp 
+   property tabbar_vert_tab_faceactive: tfacecomp
                              read ftabbar.svtabvert.svfaceactive
                                write settabbar_vert_tab_faceactive;
    property tabbar_vert_tab_shift: integer read ftabbar.svtabvert.svshift
                       write ftabbar.svtabvert.svshift default defaulttabshift;
-   property tabbar_vert_tab_edge_level: int32 
+   property tabbar_vert_tab_edge_level: int32
               read ftabbar.svtabvert.svsedge_level
            write ftabbar.svtabvert.svsedge_level default defaultedgelevel;
                        //defaultedgelevel (-100) -> -1
@@ -1309,8 +1309,8 @@ type
               read ftabbar.svtabvert.svsedge_colorhlwidth
               write ftabbar.svtabvert.svsedge_colorhlwidth default -1;
                                   //-1 = default
-   property tabbar_vert_tab_edge_imagelist: timagelist 
-              read ftabbar.svtabvert.svsedge_imagelist 
+   property tabbar_vert_tab_edge_imagelist: timagelist
+              read ftabbar.svtabvert.svsedge_imagelist
               write settabbar_vert_tab_edge_imagelist;
                    //imagenr 0 -> startpoint, 1 -> edge, imagenr 2 -> endpoint
    property tabbar_vert_tab_edge_imageoffset: int32
@@ -1322,26 +1322,26 @@ type
 
    property tabbar_vertopo_face: tfacecomp read ftabbar.svwidgetvertopo.svface
                                write settabbar_vertopo_face;
-   property tabbar_vertopo_frame: tframecomp 
+   property tabbar_vertopo_frame: tframecomp
                  read ftabbar.svwidgetvertopo.svframe
                                write settabbar_vertopo_frame;
-   property tabbar_vertopo_tab_color: colorty read ftabbar.svtabvertopo.svcolor 
+   property tabbar_vertopo_tab_color: colorty read ftabbar.svtabvertopo.svcolor
                          write ftabbar.svtabvertopo.svcolor default cl_default;
-   property tabbar_vertopo_tab_coloractive: colorty 
-                         read ftabbar.svtabvertopo.svcoloractive 
+   property tabbar_vertopo_tab_coloractive: colorty
+                         read ftabbar.svtabvertopo.svcoloractive
                    write ftabbar.svtabvertopo.svcoloractive default cl_default;
-   property tabbar_vertopo_tab_frame: tframecomp 
+   property tabbar_vertopo_tab_frame: tframecomp
                      read ftabbar.svtabvertopo.svframe
                                write settabbar_vertopo_tab_frame;
-   property tabbar_vertopo_tab_face: tfacecomp 
+   property tabbar_vertopo_tab_face: tfacecomp
                        read ftabbar.svtabvertopo.svface
                          write settabbar_vertopo_tab_face;
-   property tabbar_vertopo_tab_faceactive: tfacecomp 
+   property tabbar_vertopo_tab_faceactive: tfacecomp
                          read ftabbar.svtabvertopo.svfaceactive
                          write settabbar_vertopo_tab_faceactive;
    property tabbar_vertopo_tab_shift: integer read ftabbar.svtabvertopo.svshift
                 write ftabbar.svtabvertopo.svshift default defaulttabshift;
-   property tabbar_vertopo_tab_edge_level: int32 
+   property tabbar_vertopo_tab_edge_level: int32
               read ftabbar.svtabvertopo.svsedge_level
            write ftabbar.svtabvertopo.svsedge_level default defaultedgelevel;
                        //defaultedgelevel (-100) -> -1
@@ -1365,8 +1365,8 @@ type
               read ftabbar.svtabvertopo.svsedge_colorhlwidth
               write ftabbar.svtabvertopo.svsedge_colorhlwidth default -1;
                                   //-1 = default
-   property tabbar_vertopo_tab_edge_imagelist: timagelist 
-              read ftabbar.svtabvertopo.svsedge_imagelist 
+   property tabbar_vertopo_tab_edge_imagelist: timagelist
+              read ftabbar.svtabvertopo.svsedge_imagelist
               write settabbar_vertopo_tab_edge_imagelist;
                    //imagenr 0 -> startpoint, 1 -> edge, imagenr 2 -> endpoint
    property tabbar_vertopo_tab_edge_imageoffset: int32
@@ -1380,175 +1380,175 @@ type
                                         write settoolbar_horz_face;
    property toolbar_horz_frame: tframecomp read ftoolbar_horz.svwidget.svframe
                                         write settoolbar_horz_frame;
-   property toolbar_horz_buttonface: tfacecomp read ftoolbar_horz.svbuttonface 
+   property toolbar_horz_buttonface: tfacecomp read ftoolbar_horz.svbuttonface
                             write settoolbar_horz_buttonface;
-   property toolbar_horz_buttonframe: tframecomp 
+   property toolbar_horz_buttonframe: tframecomp
                         read ftoolbar_horz.svbuttonframe
                             write settoolbar_horz_buttonframe;
-   property toolbar_horz_buttonframesep: tframecomp 
+   property toolbar_horz_buttonframesep: tframecomp
                         read ftoolbar_horz.svbuttonframesep
                             write settoolbar_horz_buttonframesep;
-   property toolbar_vert_face: tfacecomp read ftoolbar_vert.svwidget.svface 
+   property toolbar_vert_face: tfacecomp read ftoolbar_vert.svwidget.svface
                             write settoolbar_vert_face;
    property toolbar_vert_frame: tframecomp read ftoolbar_vert.svwidget.svframe
                             write settoolbar_vert_frame;
-   property toolbar_vert_buttonface: tfacecomp read ftoolbar_vert.svbuttonface 
+   property toolbar_vert_buttonface: tfacecomp read ftoolbar_vert.svbuttonface
                             write settoolbar_vert_buttonface;
-   property toolbar_vert_buttonframe: tframecomp 
+   property toolbar_vert_buttonframe: tframecomp
                         read ftoolbar_vert.svbuttonframe
                             write settoolbar_vert_buttonframe;
-   property toolbar_vert_buttonframesep: tframecomp 
+   property toolbar_vert_buttonframesep: tframecomp
                         read ftoolbar_vert.svbuttonframesep
                             write settoolbar_vert_buttonframesep;
 
-   property tabpage_face: tfacecomp read ftabpage.svwidget.svface 
+   property tabpage_face: tfacecomp read ftabpage.svwidget.svface
                                                 write settabpage_face;
    property tabpage_frame: tframecomp read ftabpage.svwidget.svframe
                                                  write settabpage_frame;
-   property tabpage_colortab: colorty read ftabpage.svcolortab 
+   property tabpage_colortab: colorty read ftabpage.svcolortab
                                write ftabpage.svcolortab default cl_default;
-   property tabpage_coloractive: colorty read ftabpage.svcoloractivetab 
+   property tabpage_coloractive: colorty read ftabpage.svcoloractivetab
                            write ftabpage.svcoloractivetab default cl_default;
-   property tabpage_facetab: tfacecomp read ftabpage.svfacetab 
+   property tabpage_facetab: tfacecomp read ftabpage.svfacetab
                                                 write settabpage_facetab;
-   property tabpage_faceactivetab: tfacecomp read ftabpage.svfaceactivetab 
+   property tabpage_faceactivetab: tfacecomp read ftabpage.svfaceactivetab
                                                 write settabpage_faceactivetab;
-   property tabpage_fonttab: tfontcomp read ftabpage.svfonttab 
+   property tabpage_fonttab: tfontcomp read ftabpage.svfonttab
                                                 write settabpage_fonttab;
-   property tabpage_fontactivetab: tfontcomp read ftabpage.svfontactivetab 
+   property tabpage_fontactivetab: tfontcomp read ftabpage.svfontactivetab
                                                 write settabpage_fontactivetab;
 {
    property popupmenu_options: skinmenuoptionsty read fpopupmenu.options
-                write fpopupmenu.options default [];         
+                write fpopupmenu.options default [];
 }
-   property popupmenu_face: tfacecomp read fpopupmenu.svface 
+   property popupmenu_face: tfacecomp read fpopupmenu.svface
                                write setpopupmenu_face;
-   property popupmenu_frame: tframecomp read fpopupmenu.svframe 
+   property popupmenu_frame: tframecomp read fpopupmenu.svframe
                                       write setpopupmenu_frame;
-   property popupmenu_itemface: tfacecomp read fpopupmenu.svitemface 
+   property popupmenu_itemface: tfacecomp read fpopupmenu.svitemface
                                       write setpopupmenu_itemface;
-   property popupmenu_itemframe: tframecomp read fpopupmenu.svitemframe 
+   property popupmenu_itemframe: tframecomp read fpopupmenu.svitemframe
                                       write setpopupmenu_itemframe;
-   property popupmenu_itemfaceactive: tfacecomp read fpopupmenu.svitemfaceactive 
+   property popupmenu_itemfaceactive: tfacecomp read fpopupmenu.svitemfaceactive
                                       write setpopupmenu_itemfaceactive;
-   property popupmenu_itemframeactive: tframecomp 
+   property popupmenu_itemframeactive: tframecomp
            read fpopupmenu.svitemframeactive write setpopupmenu_itemframeactive;
-   property popupmenu_font: tfontcomp read fpopupmenu.svfont 
+   property popupmenu_font: tfontcomp read fpopupmenu.svfont
                                  write setpopupmenu_font;
-   property popupmenu_fontactive: tfontcomp 
+   property popupmenu_fontactive: tfontcomp
                                  read fpopupmenu.svfontactive
                                  write setpopupmenu_fontactive;
-   property popupmenu_separatorframe: tframecomp read 
+   property popupmenu_separatorframe: tframecomp read
                  fpopupmenu.svseparatorframe write setpopupmenu_separatorframe;
-   property popupmenu_checkboxframe: tframecomp read fpopupmenu.svcheckboxframe 
+   property popupmenu_checkboxframe: tframecomp read fpopupmenu.svcheckboxframe
                                  write setpopupmenu_checkboxframe;
-{            
+{
    property mainmenu_options: skinmenuoptionsty read fmainmenu.ma.options
-                write fmainmenu.ma.options default [];         
+                write fmainmenu.ma.options default [];
 }
-   property mainmenu_face: tfacecomp read fmainmenu.svmain.svface 
+   property mainmenu_face: tfacecomp read fmainmenu.svmain.svface
                                  write setmainmenu_face;
-   property mainmenu_frame: tframecomp read fmainmenu.svmain.svframe 
+   property mainmenu_frame: tframecomp read fmainmenu.svmain.svframe
                                  write setmainmenu_frame;
-   property mainmenu_itemface: tfacecomp read fmainmenu.svmain.svitemface 
+   property mainmenu_itemface: tfacecomp read fmainmenu.svmain.svitemface
                                  write setmainmenu_itemface;
-   property mainmenu_itemframe: tframecomp read fmainmenu.svmain.svitemframe 
+   property mainmenu_itemframe: tframecomp read fmainmenu.svmain.svitemframe
                                  write setmainmenu_itemframe;
-   property mainmenu_itemfaceactive: tfacecomp 
+   property mainmenu_itemfaceactive: tfacecomp
                                  read fmainmenu.svmain.svitemfaceactive
                                  write setmainmenu_itemfaceactive;
-   property mainmenu_itemframeactive: tframecomp 
-                                 read fmainmenu.svmain.svitemframeactive 
+   property mainmenu_itemframeactive: tframecomp
+                                 read fmainmenu.svmain.svitemframeactive
                                  write setmainmenu_itemframeactive;
-   property mainmenu_font: tfontcomp read fmainmenu.svmain.svfont 
+   property mainmenu_font: tfontcomp read fmainmenu.svmain.svfont
                                  write setmainmenu_font;
    property mainmenu_fontactive: tfontcomp read fmainmenu.svmain.svfontactive
-                                 write setmainmenu_fontactive;                         
-   property mainmenu_separatorframe: tframecomp 
-                                 read fmainmenu.svmain.svseparatorframe 
+                                 write setmainmenu_fontactive;
+   property mainmenu_separatorframe: tframecomp
+                                 read fmainmenu.svmain.svseparatorframe
                                  write setmainmenu_separatorframe;
-   property mainmenu_checkboxframe: tframecomp 
-                                 read fmainmenu.svmain.svcheckboxframe 
+   property mainmenu_checkboxframe: tframecomp
+                                 read fmainmenu.svmain.svcheckboxframe
                                  write setmainmenu_checkboxframe;
 
-   property mainmenu_popupface: tfacecomp read fmainmenu.svpopup.svface 
+   property mainmenu_popupface: tfacecomp read fmainmenu.svpopup.svface
                                  write setmainmenu_popupface;
-   property mainmenu_popupframe: tframecomp read fmainmenu.svpopup.svframe 
+   property mainmenu_popupframe: tframecomp read fmainmenu.svpopup.svframe
                                  write setmainmenu_popupframe;
-   property mainmenu_popupitemface: tfacecomp read fmainmenu.svpopup.svitemface 
+   property mainmenu_popupitemface: tfacecomp read fmainmenu.svpopup.svitemface
                                  write setmainmenu_popupitemface;
-   property mainmenu_popupitemframe: tframecomp 
-                                 read fmainmenu.svpopup.svitemframe 
+   property mainmenu_popupitemframe: tframecomp
+                                 read fmainmenu.svpopup.svitemframe
                                  write setmainmenu_popupitemframe;
-   property mainmenu_popupitemfaceactive: tfacecomp 
+   property mainmenu_popupitemfaceactive: tfacecomp
                                  read fmainmenu.svpopup.svitemfaceactive
                                  write setmainmenu_popupitemfaceactive;
-   property mainmenu_popupitemframeactive: tframecomp 
-                                 read fmainmenu.svpopup.svitemframeactive 
+   property mainmenu_popupitemframeactive: tframecomp
+                                 read fmainmenu.svpopup.svitemframeactive
                                  write setmainmenu_popupitemframeactive;
-   property mainmenu_popupfont: tfontcomp read fmainmenu.svpopup.svfont 
+   property mainmenu_popupfont: tfontcomp read fmainmenu.svpopup.svfont
                                  write setmainmenu_popupfont;
-   property mainmenu_popupfontactive: tfontcomp 
+   property mainmenu_popupfontactive: tfontcomp
                                  read fmainmenu.svpopup.svfontactive
                                  write setmainmenu_popupfontactive;
-   property mainmenu_popupseparatorframe: tframecomp 
-                                 read fmainmenu.svpopup.svseparatorframe 
+   property mainmenu_popupseparatorframe: tframecomp
+                                 read fmainmenu.svpopup.svseparatorframe
                                  write setmainmenu_popupseparatorframe;
-   property mainmenu_popupcheckboxframe: tframecomp 
-                                 read fmainmenu.svpopup.svcheckboxframe 
+   property mainmenu_popupcheckboxframe: tframecomp
+                                 read fmainmenu.svpopup.svcheckboxframe
                                  write setmainmenu_popupcheckboxframe;
 
    property mainmenuwidget_face: tfacecomp read fmainmenuwidget.svwidget.svface
                                             write setmainmenuwidget_face;
-   property mainmenuwidget_frame: tframecomp 
-                         read fmainmenuwidget.svwidget.svframe 
+   property mainmenuwidget_frame: tframecomp
+                         read fmainmenuwidget.svwidget.svframe
                                             write setmainmenuwidget_frame;
-   property mainmenuwidget_itemface: tfacecomp read fmainmenuwidget.svmenu.svmain.svitemface 
+   property mainmenuwidget_itemface: tfacecomp read fmainmenuwidget.svmenu.svmain.svitemface
                                  write setmainmenuwidget_itemface;
-   property mainmenuwidget_itemframe: tframecomp read fmainmenuwidget.svmenu.svmain.svitemframe 
+   property mainmenuwidget_itemframe: tframecomp read fmainmenuwidget.svmenu.svmain.svitemframe
                                  write setmainmenuwidget_itemframe;
-   property mainmenuwidget_itemfaceactive: tfacecomp 
+   property mainmenuwidget_itemfaceactive: tfacecomp
                                  read fmainmenuwidget.svmenu.svmain.svitemfaceactive
                                  write setmainmenuwidget_itemfaceactive;
-   property mainmenuwidget_itemframeactive: tframecomp 
-                                 read fmainmenuwidget.svmenu.svmain.svitemframeactive 
+   property mainmenuwidget_itemframeactive: tframecomp
+                                 read fmainmenuwidget.svmenu.svmain.svitemframeactive
                                  write setmainmenuwidget_itemframeactive;
-   property mainmenuwidget_font: tfontcomp read fmainmenuwidget.svmenu.svmain.svfont 
+   property mainmenuwidget_font: tfontcomp read fmainmenuwidget.svmenu.svmain.svfont
                                  write setmainmenuwidget_font;
    property mainmenuwidget_fontactive: tfontcomp read fmainmenuwidget.svmenu.svmain.svfontactive
-                                 write setmainmenuwidget_fontactive;                         
-   property mainmenuwidget_separatorframe: tframecomp 
-                                 read fmainmenuwidget.svmenu.svmain.svseparatorframe 
+                                 write setmainmenuwidget_fontactive;
+   property mainmenuwidget_separatorframe: tframecomp
+                                 read fmainmenuwidget.svmenu.svmain.svseparatorframe
                                  write setmainmenuwidget_separatorframe;
-   property mainmenuwidget_checkboxframe: tframecomp 
-                                 read fmainmenuwidget.svmenu.svmain.svcheckboxframe 
+   property mainmenuwidget_checkboxframe: tframecomp
+                                 read fmainmenuwidget.svmenu.svmain.svcheckboxframe
                                  write setmainmenuwidget_checkboxframe;
 
-   property mainmenuwidget_popupface: tfacecomp read fmainmenuwidget.svmenu.svpopup.svface 
+   property mainmenuwidget_popupface: tfacecomp read fmainmenuwidget.svmenu.svpopup.svface
                                  write setmainmenuwidget_popupface;
-   property mainmenuwidget_popupframe: tframecomp read fmainmenuwidget.svmenu.svpopup.svframe 
+   property mainmenuwidget_popupframe: tframecomp read fmainmenuwidget.svmenu.svpopup.svframe
                                  write setmainmenuwidget_popupframe;
-   property mainmenuwidget_popupitemface: tfacecomp read fmainmenuwidget.svmenu.svpopup.svitemface 
+   property mainmenuwidget_popupitemface: tfacecomp read fmainmenuwidget.svmenu.svpopup.svitemface
                                  write setmainmenuwidget_popupitemface;
-   property mainmenuwidget_popupitemframe: tframecomp 
-                                 read fmainmenuwidget.svmenu.svpopup.svitemframe 
+   property mainmenuwidget_popupitemframe: tframecomp
+                                 read fmainmenuwidget.svmenu.svpopup.svitemframe
                                  write setmainmenuwidget_popupitemframe;
-   property mainmenuwidget_popupitemfaceactive: tfacecomp 
+   property mainmenuwidget_popupitemfaceactive: tfacecomp
                                  read fmainmenuwidget.svmenu.svpopup.svitemfaceactive
                                  write setmainmenuwidget_popupitemfaceactive;
-   property mainmenuwidget_popupitemframeactive: tframecomp 
-                                 read fmainmenuwidget.svmenu.svpopup.svitemframeactive 
+   property mainmenuwidget_popupitemframeactive: tframecomp
+                                 read fmainmenuwidget.svmenu.svpopup.svitemframeactive
                                  write setmainmenuwidget_popupitemframeactive;
-   property mainmenuwidget_popupfont: tfontcomp read fmainmenuwidget.svmenu.svpopup.svfont 
+   property mainmenuwidget_popupfont: tfontcomp read fmainmenuwidget.svmenu.svpopup.svfont
                                  write setmainmenuwidget_popupfont;
-   property mainmenuwidget_popupfontactive: tfontcomp 
+   property mainmenuwidget_popupfontactive: tfontcomp
                                  read fmainmenuwidget.svmenu.svpopup.svfontactive
                                  write setmainmenuwidget_popupfontactive;
-   property mainmenuwidget_popupseparatorframe: tframecomp 
-                                 read fmainmenuwidget.svmenu.svpopup.svseparatorframe 
+   property mainmenuwidget_popupseparatorframe: tframecomp
+                                 read fmainmenuwidget.svmenu.svpopup.svseparatorframe
                                  write setmainmenuwidget_popupseparatorframe;
-   property mainmenuwidget_popupcheckboxframe: tframecomp 
-                                 read fmainmenuwidget.svmenu.svpopup.svcheckboxframe 
+   property mainmenuwidget_popupcheckboxframe: tframecomp
+                                 read fmainmenuwidget.svmenu.svpopup.svcheckboxframe
                                  write setmainmenuwidget_popupcheckboxframe;
  end;
 
@@ -1571,7 +1571,7 @@ type
    procedure updateskin(const ainfo: skininfoty);
 //   procedure removeskin(const ainfo: skininfoty);
  end;
-  
+
 //function activeskincontroller: skincontrollerarty;
 //function activeskincontrollerdesign: skincontrollerarty;
 procedure setskinhandler(const avalue: tskinhandler);
@@ -1588,7 +1588,7 @@ uses
   {$warn 6058 off}
  {$endif}
 {$endif}
- 
+
 type
  twidget1 = class(twidget);
  tframe1 = class(tcustomframe);
@@ -1608,12 +1608,12 @@ function activeskincontroller: skincontrollerarty;
 begin
  result:= factiveskincontroller;
 end;
-   
+
 function activeskincontrollerdesign: skincontrollerarty;
 begin
  result:= factiveskincontrollerdesign;
 end;
-}  
+}
 { tskincolor }
 
 constructor tskincolor.create;
@@ -1703,7 +1703,7 @@ begin
   defaulteditfontcolors.selectedtext:= feditfontcolors.selectedtext;
  end;
  if feditfontcolors.selectedtextbackground <> cl_default then begin
-  defaulteditfontcolors.selectedtextbackground:= 
+  defaulteditfontcolors.selectedtextbackground:=
                           feditfontcolors.selectedtextbackground;
  end;
 end;
@@ -1792,7 +1792,7 @@ begin
  end;
  checkhotkey();
  if canevent(tmethod(fonactivate)) then begin
-  fonactivate(self);   
+  fonactivate(self);
  end;
  updateorder;
  for int1:= 0 to high(fextenders) do begin
@@ -1805,7 +1805,7 @@ var
  int1: integer;
 begin
  if canevent(tmethod(fondeactivate)) then begin
-  fondeactivate(self);   
+  fondeactivate(self);
  end;
  updateorder;
  for int1:= 0 to high(fextenders) do begin
@@ -1871,7 +1871,7 @@ end;
 procedure tcustomskincontroller.checkhotkey();
 begin
  fhashotkey:= false;
- if factive and 
+ if factive and
             (factivedesign or not (csdesigning in componentstate)) then begin
   if fhotkey_fontstylesadd <> [] then begin
    hotkeyfontstylesadd:= fhotkey_fontstylesadd;
@@ -1895,13 +1895,13 @@ end;
 procedure tcustomskincontroller.setactive(const avalue: boolean);
 begin
  factive:= avalue;
- checkactive; 
+ checkactive;
 end;
 {
 procedure tcustomskincontroller.setactivedesign(const avalue: boolean);
 begin
  factivedesign:= avalue;
- checkactive; 
+ checkactive;
 end;
 }
 procedure tcustomskincontroller.updateskin1(const ainfo: skininfoty;
@@ -1989,7 +1989,7 @@ begin
      handleuserobject(ainfo);
     end;
    end;
-   if (sko_container in ainfo.options) and 
+   if (sko_container in ainfo.options) and
                               (ainfo.instance is twidget) then begin
     handlecontainer(ainfo);
    end;
@@ -2018,7 +2018,7 @@ begin
 end;
 
 procedure tcustomskincontroller.setfacetemplate(const face: tfacecomp;
-                  const dest: tcustomface);   
+                  const dest: tcustomface);
 begin
  if (face <> nil) and (dest.template = nil) then begin
   dest.template:= face;
@@ -2026,7 +2026,7 @@ begin
 end;
 
 procedure tcustomskincontroller.setframetemplate(const frame: tframecomp;
-                  const dest: tcustomframe);   
+                  const dest: tcustomframe);
 begin
  if (frame <> nil) and (dest.template = nil) then begin
   dest.template:= frame;
@@ -2037,7 +2037,7 @@ procedure tcustomskincontroller.setwidgetface(const instance: twidget;
                const aface: tfacecomp);
 begin
  with instance do begin
-  if (aface <> nil) and (optionsskin * 
+  if (aface <> nil) and (optionsskin *
                        [osk_framebuttononly,osk_noface] = []) then begin
    createface;
    if face.template = nil then begin
@@ -2067,7 +2067,7 @@ var
  opt1: frameskincontrolleroptionsty;
 begin
  with twidget1(instance) do begin
-  if (aframe <> nil) and (optionsskin * 
+  if (aframe <> nil) and (optionsskin *
                        [osk_framebuttononly,osk_noframe] = []) then begin
    if fframe = nil then begin
     createframe;
@@ -2108,7 +2108,7 @@ begin
     size1.cx:= size1.cx - left - right;
     size1.cy:= size1.cy - top - bottom;
    end;
-   if not (osk_noclientsize in optionsskin) and 
+   if not (osk_noclientsize in optionsskin) and
                          not (fsco_noclientsize in opt1) then begin
     clientsize:= size1;      //same clientsize as before
    end;
@@ -2207,27 +2207,27 @@ procedure tcustomskincontroller.seteditskin(const instance: tcustomedit;
 begin
  setwidgetskin(instance,ainfo.svwidget);
  with instance do begin
-  if (ainfo.svempty_text <> '') and (empty_text = '') and 
+  if (ainfo.svempty_text <> '') and (empty_text = '') and
          (eo_defaulttext in empty_options) then begin
    empty_text:= ainfo.svempty_text;
   end;
-  if (ainfo.svempty_textflags <> []) and 
+  if (ainfo.svempty_textflags <> []) and
                         not(tf_force in empty_textflags) then begin
    empty_textflags:= ainfo.svempty_textflags;
   end;
-  if (ainfo.svempty_textcolor <> cl_default) and 
+  if (ainfo.svempty_textcolor <> cl_default) and
                                (empty_textcolor = cl_none) then begin
    empty_textcolor:= ainfo.svempty_textcolor;
   end;
-  if (ainfo.svempty_textcolorbackground <> cl_default) and 
+  if (ainfo.svempty_textcolorbackground <> cl_default) and
                          (empty_textcolorbackground = cl_none) then begin
    empty_textcolorbackground:= ainfo.svempty_textcolor;
   end;
-  if (ainfo.svempty_fontstyle <> []) and 
+  if (ainfo.svempty_fontstyle <> []) and
                         not(fs_force in empty_fontstyle) then begin
    empty_fontstyle:= ainfo.svempty_fontstyle;
   end;
-  if (ainfo.svempty_color <> cl_default) and 
+  if (ainfo.svempty_color <> cl_default) and
                                (empty_color = cl_none) then begin
    empty_color:= ainfo.svempty_color;
   end;
@@ -2264,9 +2264,9 @@ end;
 procedure tcustomskincontroller.setwidgetcolor(const instance: twidget;
                const acolor: colorty);
 begin
- if (acolor <> cl_default) and 
+ if (acolor <> cl_default) and
        not (osk_framebuttononly in instance.optionsskin) and
-           (instance.color = cl_default) then begin 
+           (instance.color = cl_default) then begin
   instance.color:= acolor;
  end;
 end;
@@ -2276,9 +2276,9 @@ function tcustomskincontroller.setwidgetcolorcaptionframe(
 begin
  result:= false;
  with twidget1(awidget) do begin
-  if (osk_colorcaptionframe in optionsskin) or 
+  if (osk_colorcaptionframe in optionsskin) or
        not (osk_nocolorcaptionframe in optionsskin) and
-         (fframe is tcustomcaptionframe) and 
+         (fframe is tcustomcaptionframe) and
        (tcustomcaptionframe(fframe).caption <> '') then begin
    setwidgetcolor(awidget,acolor);
    result:= true;
@@ -2291,7 +2291,7 @@ procedure tcustomskincontroller.setstepbuttonskin(
                         const ainfo: stepbuttonskininfoty);
 begin
  with instance,ainfo do begin
-  if (colorbutton = cl_default) and 
+  if (colorbutton = cl_default) and
                 (svcolor <> cl_default) then begin
    colorbutton:= svcolor;
   end;
@@ -2343,7 +2343,7 @@ begin
   if (svcolorpattern <> cl_default) and (colorpattern = cl_default) then begin
    colorpattern:= svcolorpattern;
   end;
-  if (svcolorpatternclicked <> cl_default) and 
+  if (svcolorpatternclicked <> cl_default) and
                          (colorpatternclicked = cl_default) then begin
    colorpatternclicked:= svcolorpatternclicked;
   end;
@@ -2419,47 +2419,47 @@ begin
   inc(fskinupdating);
   beginupdate;
   try
-   if (ainfo.svshift <> defaulttabshift) and 
+   if (ainfo.svshift <> defaulttabshift) and
                                (shift = defaulttabshift) then begin
     shift:= ainfo.svshift;
    end;
-   if (ainfo.svsedge_level <> defaultedgelevel) and 
+   if (ainfo.svsedge_level <> defaultedgelevel) and
                   (edge_level = defaultedgelevel) then begin
     edge_level:= ainfo.svsedge_level;
    end;
-   if (ainfo.svsedge_colordkshadow <> cl_default) and 
+   if (ainfo.svsedge_colordkshadow <> cl_default) and
                   (edge_colordkshadow = cl_default) then begin
     edge_colordkshadow:= ainfo.svsedge_colordkshadow;
    end;
-   if (ainfo.svsedge_colorshadow <> cl_default) and 
+   if (ainfo.svsedge_colorshadow <> cl_default) and
                   (edge_colorshadow = cl_default) then begin
     edge_colorshadow:= ainfo.svsedge_colorshadow;
    end;
-   if (ainfo.svsedge_colorlight <> cl_default) and 
+   if (ainfo.svsedge_colorlight <> cl_default) and
                   (edge_colorlight = cl_default) then begin
     edge_colorlight:= ainfo.svsedge_colorlight;
    end;
-   if (ainfo.svsedge_colorhighlight <> cl_default) and 
+   if (ainfo.svsedge_colorhighlight <> cl_default) and
                   (edge_colorhighlight = cl_default) then begin
     edge_colorhighlight:= ainfo.svsedge_colorhighlight;
    end;
-   if (ainfo.svsedge_colordkwidth <> -1) and 
+   if (ainfo.svsedge_colordkwidth <> -1) and
                   (edge_colordkwidth = -1) then begin
     edge_colordkwidth:= ainfo.svsedge_colordkwidth;
    end;
-   if (ainfo.svsedge_colorhlwidth <> -1) and 
+   if (ainfo.svsedge_colorhlwidth <> -1) and
                   (edge_colorhlwidth = -1) then begin
     edge_colorhlwidth:= ainfo.svsedge_colorhlwidth;
    end;
-   if (ainfo.svsedge_imagelist <> nil) and 
+   if (ainfo.svsedge_imagelist <> nil) and
                   (edge_imagelist = nil) then begin
     edge_imagelist:= ainfo.svsedge_imagelist;
    end;
-   if (ainfo.svsedge_imageoffset <> 0) and 
+   if (ainfo.svsedge_imageoffset <> 0) and
                   (edge_imageoffset = -1) then begin
     edge_imageoffset:= ainfo.svsedge_imageoffset;
    end;
-   if (ainfo.svsedge_imagepaintshift <> 0) and 
+   if (ainfo.svsedge_imagepaintshift <> 0) and
                   (edge_imagepaintshift = 0) then begin
     edge_imagepaintshift:= ainfo.svsedge_imagepaintshift;
    end;
@@ -2484,7 +2484,7 @@ begin
      if (ainfo.svcolor <> cl_default) and (color = cl_default) then begin
       color:= ainfo.svcolor;
      end;
-     if (ainfo.svcoloractive <> cl_default) and 
+     if (ainfo.svcoloractive <> cl_default) and
                                      (coloractive = cl_default) then begin
       coloractive:= ainfo.svcoloractive;
      end;
@@ -2521,7 +2521,7 @@ begin
   if (ainfo.svitemframe <> nil) and (itemframetemplate = nil) then begin
    itemframetemplate:= ainfo.svitemframe;
   end;
-  if (ainfo.svitemfaceactive <> nil) and 
+  if (ainfo.svitemfaceactive <> nil) and
                  (itemfacetemplateactive = nil) then begin
    itemfacetemplateactive:= ainfo.svitemfaceactive;
   end;
@@ -2578,7 +2578,7 @@ begin
   if (svpopup.svitemframe <> nil) and (popupitemframetemplate = nil) then begin
    popupitemframetemplate:= svpopup.svitemframe;
   end;
-  if (svpopup.svitemfaceactive <> nil) and 
+  if (svpopup.svitemfaceactive <> nil) and
                  (popupitemfacetemplateactive = nil) then begin
    popupitemfacetemplateactive:= svpopup.svitemfaceactive;
   end;
@@ -2890,7 +2890,7 @@ begin
 
  fdispwidget.svcolor.svcolor:= cl_default;
  fdispwidget.svcolor.svcolorcaptionframe:= cl_default;
- 
+
  fedit.svempty_color:= cl_default;
  fedit.svempty_textcolor:= cl_default;
  fedit.svempty_textcolorbackground:= cl_default;
@@ -3804,8 +3804,8 @@ begin
      if fframe is tcustomstepframe then begin
       setstepbuttonskin(tcustomstepframe(fframe),fstepbutton);
      end;
-    end; 
-   end; 
+    end;
+   end;
   end;
   if not setwidgetcolorcaptionframe(wi1,co2) then begin
    setwidgetcolor(wi1,co1);
@@ -3951,22 +3951,22 @@ var
 begin
  handlewidget(ainfo);
  setwidgetskin(twidget(ainfo.instance),ftabpage.svwidget);
- if {((ftabpage.svcolortab <> cl_default) or 
+ if {((ftabpage.svcolortab <> cl_default) or
                (ftabpage.svcoloractivetab <> cl_default)) and}
     twidget(ainfo.instance).getcorbainterface(typeinfo(itabpage),
                                                       intf1) then begin
-  if (ftabpage.svcolortab <> cl_default) and 
+  if (ftabpage.svcolortab <> cl_default) and
                             (intf1.getcolortab = cl_default) then begin
    intf1.setcolortab(ftabpage.svcolortab);
   end;
-  if (ftabpage.svcoloractivetab <> cl_default) and 
+  if (ftabpage.svcoloractivetab <> cl_default) and
                             (intf1.getcoloractivetab = cl_default) then begin
    intf1.setcoloractivetab(ftabpage.svcoloractivetab);
   end;
   if (ftabpage.svfacetab <> nil) and (intf1.getfacetab() = nil) then begin
    intf1.setfacetab(ftabpage.svfacetab);
   end;
-  if (ftabpage.svfaceactivetab <> nil) and 
+  if (ftabpage.svfaceactivetab <> nil) and
                             (intf1.getfaceactivetab() = nil) then begin
    intf1.setfaceactivetab(ftabpage.svfaceactivetab);
   end;
@@ -4357,7 +4357,7 @@ begin
   else begin
    handlevar:= nil;
 //   removevar:= nil;
-  end;  
+  end;
  end;
 end;
 

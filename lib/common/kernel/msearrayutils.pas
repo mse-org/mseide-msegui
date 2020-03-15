@@ -23,10 +23,10 @@ uses
  msetypes,msestrings;
 const
  arrayminlenghtstep = 32;
- 
+
 type
  stringsortmodety = (sms_none,sms_upascii,sms_upiascii,sms_up,sms_upi);
- pointercomparemethodty = function(l,r:pointer): integer of object; 
+ pointercomparemethodty = function(l,r:pointer): integer of object;
  pointercomparefuncty = function(l,r:pointer): integer;
 
  arraysortcomparety = function (const l,r): integer;
@@ -35,12 +35,12 @@ type
  indexsortcomparemethodty = function (const l,r: integer): integer of object;
 
  tvarrecarty = array of tvarrec;
- 
+
 procedure deleteitem(var value; const typeinfo: pdynarraytypeinfo;
                           const aindex: integer); overload;
   //value = array of type which needs no finalize
 procedure arrayaddref(var dynamicarray);
-procedure arraydecref(var dynamicarray); 
+procedure arraydecref(var dynamicarray);
                  //no finalize and freemem if refcount = 0
 procedure allocuninitedarray(count,itemsize: integer; out dynamicarray);
                  //does not init memory, dynamicarray must be nil!
@@ -57,16 +57,16 @@ function dynarraylength(const value: pointer): sizeint; inline;
 function incrementarraylength(var value: pointer; typeinfo: pdynarraytypeinfo;
                              increment: integer = 1): sizeint; overload;
   //returns new length
-  
-function additem(var value; const typeinfo: pdynarraytypeinfo; 
+
+function additem(var value; const typeinfo: pdynarraytypeinfo;
                                   //typeinfo of dynarray
                 var count: integer): boolean; overload;
   //value = array of type, returns true if extended
-function additemindex(var value; const typeinfo: pdynarraytypeinfo; 
+function additemindex(var value; const typeinfo: pdynarraytypeinfo;
                                   //typeinfo of dynarray
                 var count: integer): integer; overload;
   //value = array of type, returns true if extended
-function additempo(var value; const typeinfo: pdynarraytypeinfo; 
+function additempo(var value; const typeinfo: pdynarraytypeinfo;
                                   //typeinfo of dynarray
                 var count: integer): pointer; overload;
                //returns adress of new item
@@ -108,7 +108,7 @@ procedure additem(var dest: stringarty; const value: string); overload;
 procedure additem(var dest: msestringarty; const value: msestring); overload;
 procedure additem(var dest: doublemsestringarty;
                           const valuea,valueb: msestring); overload;
-procedure additem(var dest: msestringararty; 
+procedure additem(var dest: msestringararty;
                              const value: msestringarty); overload;
 procedure additem(var dest: int16arty; const value: int16); overload;
 procedure additem(var dest: integerarty; const value: integer); overload;
@@ -130,11 +130,11 @@ procedure deleteitem(var dest: realarty; index: integer); overload;
 procedure deleteitem(var dest: complexarty; index: integer); overload;
 procedure deleteitem(var dest: pointerarty; index: integer); overload;
 procedure deleteitem(var dest: winidarty; index: integer); overload;
-procedure insertitem(var dest: integerarty; index: integer; 
+procedure insertitem(var dest: integerarty; index: integer;
                                               value: integer); overload;
-procedure insertitem(var dest: int64arty; index: integer; 
+procedure insertitem(var dest: int64arty; index: integer;
                                               value: int64); overload;
-procedure insertitem(var dest: booleanarty; index: integer; 
+procedure insertitem(var dest: booleanarty; index: integer;
                                               value: boolean); overload;
 procedure insertitem(var dest: longwordarty; index: integer;
                                               value: longword); overload;
@@ -153,7 +153,7 @@ procedure removeitems(var dest: pointerarty; const aitem: pointer);
 function removeitem(var dest: pointerarty; const aitem: pointer): integer;
                                                 overload;
                             //returns removed index, -1 if none
-                            
+
 function finditem(const ar: pointerarty; const aitem: pointer): integer;
                                                 overload;
                            //-1 if none
@@ -186,7 +186,7 @@ function removeitem(var dest: integerarty; const aitem: integer): integer;
                                             overload;
                         //returns removed index, -1 if none
 function finditem(const ar: integerarty; const aitem: integer): integer;
-                                            overload; //-1 if none  
+                                            overload; //-1 if none
 procedure moveitem(var dest: integerarty; const sourceindex: integer;
                        destindex: integer); overload;
 
@@ -239,7 +239,7 @@ function compareimsestring(const l,r): integer;
 function findarrayvalue(const item; const items; const itemsize: integer;
                const count: integer; const compare: arraysortcomparety;
                out foundindex: integer): boolean; overload;
-function findarrayvalue(const item; const items; const itemsize: integer; 
+function findarrayvalue(const item; const items; const itemsize: integer;
                const index: integerarty; const compare: arraysortcomparety;
                out foundindex: integer): boolean; overload;
            //true if exact else next bigger
@@ -249,7 +249,7 @@ function findarrayvalue(const item; const items; const itemsize: integer;
 procedure quicksortpointer(const adata: ppointer; //-> array of pointer
                    const alength: int32; const acompare: pointercomparefuncty);
                                //position stable
-                               
+
 procedure mergesortarray(var asortlist; const aitemsize,alength: integer;
                             const acompare: arraysortcomparety;
                             out aindexlist: integerarty; const order: boolean);
@@ -263,14 +263,14 @@ procedure mergesort(var adata: pointer; const aitemsize,acount: integer;
 procedure mergesort(const adata: pointer; const aitemsize,acount: integer;
                             const acompare: sortcomparemethodty;
                             out aindexlist: integerarty); overload;
-procedure mergesort(const adata: pointer; const asize,acount: integer; 
+procedure mergesort(const adata: pointer; const asize,acount: integer;
                           const acompare: sortcomparemethodty;
                           out aindexlist: integerarty;
                         var refindex: integer; out moved: boolean); overload;
-procedure mergesort(const acount: integer; 
+procedure mergesort(const acount: integer;
           const acompare: indexsortcomparemethodty;
                           out aindexlist: integerarty); overload;
-procedure mergesort(const acount: integer; 
+procedure mergesort(const acount: integer;
           const acompare: indexsortcomparemethodty; out aindexlist: integerarty;
           var refindex: integer; out moved: boolean); overload;
 procedure mergesortoffset(const adata: pointer; const asize,acount: integer;
@@ -296,7 +296,7 @@ function findarrayitem(const item; const ar: pointerarty;
 procedure sortarray(var sortlist; const itemsize: integer;
            const compare: arraysortcomparety); overload;
          //sortlist = array of type
-procedure sortarray(var sortlist; const itemsize: integer; 
+procedure sortarray(var sortlist; const itemsize: integer;
                   const compare: arraysortcomparety;
                   out indexlist: integerarty); overload;
          //sortlist = array of type
@@ -318,9 +318,9 @@ procedure sortarray(var dest: stringarty; const compare: arraysortcomparety); ov
 procedure sortarray(var dest: stringarty; const compare: arraysortcomparety;
                     out indexlist: integerarty); overload;
 
-procedure sortarray(var dest: msestringarty; 
+procedure sortarray(var dest: msestringarty;
                        const sortmode: stringsortmodety = sms_up); overload;
-procedure sortarray(var dest: msestringarty; const sortmode: stringsortmodety; 
+procedure sortarray(var dest: msestringarty; const sortmode: stringsortmodety;
                                           out indexlist: integerarty); overload;
 procedure sortarray(var dest: stringarty;
                     const sortmode: stringsortmodety = sms_upascii); overload;
@@ -329,9 +329,9 @@ procedure sortarray(var dest: stringarty;
 
 procedure orderarray(const sourceorderlist: integerarty; var sortlist; size: integer); overload;
          //sortlist = array of type
-procedure orderarray(const sourceorderlist: integerarty; 
+procedure orderarray(const sourceorderlist: integerarty;
                              var sortlist: pointerarty); overload;
-procedure orderarray(const sourceorderlist: integerarty; 
+procedure orderarray(const sourceorderlist: integerarty;
                              var sortlist: integerarty); overload;
 procedure orderarray(const sourceorderlist: integerarty;
                              var sortlist: msestringarty); overload;
@@ -339,17 +339,17 @@ procedure orderarray(const sourceorderlist: integerarty;
                              var sortlist: msestringararty); overload;
 procedure orderarray(const sourceorderlist: integerarty;
                              var sortlist: stringarty); overload;
-                             
-procedure reorderarray(const destorderlist: integerarty; 
+
+procedure reorderarray(const destorderlist: integerarty;
                              var sortlist; size: integer); overload;
          //sortlist = array of type
-procedure reorderarray(const destorderlist: integerarty; 
+procedure reorderarray(const destorderlist: integerarty;
                              var sortlist: pointerarty); overload;
-procedure reorderarray(const destorderlist: integerarty; 
+procedure reorderarray(const destorderlist: integerarty;
                              var sortlist: integerarty); overload;
-procedure reorderarray(const destorderlist: integerarty; 
+procedure reorderarray(const destorderlist: integerarty;
                              var sortlist: msestringarty); overload;
-procedure reorderarray(const destorderlist: integerarty; 
+procedure reorderarray(const destorderlist: integerarty;
                              var sortlist: stringarty); overload;
 
 function cmparray(const a,b: msestringarty): boolean;
@@ -404,7 +404,7 @@ begin
  result:=p;
 {$endif FPC_REQUIRES_PROPER_ALIGNMENT}
 end;
- 
+
 function DynArraySize(a: Pointer): sizeint;
 {$ifdef FPC}
 begin
@@ -501,7 +501,7 @@ begin
  inc(count);
 end;
 
-function additempo(var value; const typeinfo: pdynarraytypeinfo; 
+function additempo(var value; const typeinfo: pdynarraytypeinfo;
                                   //typeinfo of dynarray
                                  var count: integer): pointer; overload;
                //returns adress of new item
@@ -1028,7 +1028,7 @@ begin
  dest[index]:= value;
 end;
 
-procedure insertitem(var dest: booleanarty; index: integer; 
+procedure insertitem(var dest: booleanarty; index: integer;
                                               value: boolean);
 begin
  setlength(dest,high(dest) + 2);
@@ -1573,7 +1573,7 @@ procedure checkarrayindex(const value; const index: integer);
           //value = dynamic array, exception bei ungueltigem index
 begin
  if (index < 0) or (index > high(bytearty(value))) then begin
-  raise exception.Create('Invalid arrayindex: '+inttostr(index)+ ' max: ' + 
+  raise exception.Create('Invalid arrayindex: '+inttostr(index)+ ' max: ' +
                    inttostr(high(bytearty(value)))+'.');
  end;
 end;
@@ -1581,7 +1581,7 @@ end;
 procedure checkarrayindexcount(const count: int32; const index: int32);
 begin
  if (index < 0) or (index >= count) then begin
-  raise exception.Create('Invalid arrayindex: '+inttostr(index)+ ' max: ' + 
+  raise exception.Create('Invalid arrayindex: '+inttostr(index)+ ' max: ' +
                    inttostr(count-1)+'.');
  end;
 end;
@@ -1594,7 +1594,7 @@ type
   size: integer;
  end;
 
-function findarrayvalue(const item; const items; 
+function findarrayvalue(const item; const items;
                const itemsize: integer; const count: integer;
                const compare: arraysortcomparety;
                out foundindex: integer): boolean;
@@ -1656,7 +1656,7 @@ end;
 
 function findarrayvalue(const item; const items; const itemsize: integer;
                const index: integerarty;
-               const compare: arraysortcomparety; 
+               const compare: arraysortcomparety;
                out foundindex: integer): boolean;
            //true if exact else next bigger
            //for compare: l is item, r are tablevalues
@@ -1783,7 +1783,7 @@ begin
  result:= card64(l) - card64(r);
 end;
 
-procedure doquicksortpointer(const compare: pointercomparefuncty; 
+procedure doquicksortpointer(const compare: pointercomparefuncty;
                                                         l, r: ppointer);
 var
   poi, poj: ppointer;
@@ -1923,7 +1923,7 @@ begin
        inc(l);
       end;
       goto endstep;
-     end; 
+     end;
     end;
    end;
 endstep:
@@ -2025,7 +2025,7 @@ begin
        inc(l);
       end;
       goto endstep;
-     end; 
+     end;
     end;
    end;
 endstep:
@@ -2137,7 +2137,7 @@ begin
        inc(l);
       end;
       goto endstep;
-     end; 
+     end;
     end;
    end;
 endstep:
@@ -2260,7 +2260,7 @@ begin
        inc(l);
       end;
       goto endstep;
-     end; 
+     end;
     end;
    end;
 endstep:
@@ -2383,7 +2383,7 @@ begin
        inc(l);
       end;
       goto endstep;
-     end; 
+     end;
     end;
    end;
 endstep:
@@ -2554,7 +2554,7 @@ begin
        inc(l);
       end;
       goto endstep;
-     end; 
+     end;
     end;
    end;
 endstep:
@@ -2599,7 +2599,7 @@ endstep:
  end;
 end;
 
-procedure mergesort(const acount: integer; 
+procedure mergesort(const acount: integer;
           const acompare: indexsortcomparemethodty; out aindexlist: integerarty;
           var refindex: integer; out moved: boolean); overload;
 begin
@@ -2670,7 +2670,7 @@ begin
        inc(l);
       end;
       goto endstep;
-     end; 
+     end;
     end;
    end;
 endstep:
@@ -2989,7 +2989,7 @@ begin
        inc(l);
       end;
       goto endstep;
-     end; 
+     end;
     end;
    end;
 endstep:
@@ -3068,7 +3068,7 @@ var
 begin
  sortarray(dest,compare,indexlist);
 end;
-                    
+
 procedure sortarray(var dest: pointerarty);
 begin
  sortarray(dest,sizeof(pointer),{$ifdef FPC}@{$endif}comparepointer);
@@ -3267,7 +3267,7 @@ begin
  end;
 end;
 
-procedure sortarray(var dest: stringarty; 
+procedure sortarray(var dest: stringarty;
                          const sortmode: stringsortmodety = sms_upascii);
 begin
  setlength(dest,length(dest)); //refcount1

@@ -1,5 +1,5 @@
 { MSEide Copyright (c) 1999-2006 by Martin Schreiber
-   
+
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation; either version 2 of the License, or
@@ -40,7 +40,7 @@ type
    procedure valuestoinfo(out info: replaceinfoty);
    procedure infotovalues(const info: replaceinfoty);
  end;
- 
+
 function replacedialogexecute(var info: replaceinfoty): modalresultty;
 
 implementation
@@ -64,7 +64,7 @@ begin
 end;
 
 { treplacedialogfo }
- 
+
 procedure treplacedialogfo.valuestoinfo(out info: replaceinfoty);
 begin
 {$warnings off}

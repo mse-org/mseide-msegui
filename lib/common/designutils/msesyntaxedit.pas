@@ -25,10 +25,10 @@ uses
  mseglob,mseguiglob,msetypes,mseevent,mserichstring,
  mseeditglob,msestrings,msewidgetgrid,msedatalist,msemenus,msegui,mseinplaceedit,
  msegrids,mseedit,msegraphics;
- 
+
 type
  bracketkindty = (bki_none,bki_round,bki_square,bki_curly);
- 
+
 const
  openbrackets: array[bracketkindty] of msechar = (#0,'(','[','{');
  closebrackets: array[bracketkindty] of msechar = (#0,')',']','}');
@@ -38,7 +38,7 @@ type
  syntaxeditoptionty = (seo_autoindent,seo_markbrackets,seo_markpairwords,
                                         seo_caseinsensitive,seo_defaultsyntax);
  syntaxeditoptionsty = set of syntaxeditoptionty;
- 
+
  tsyntaxedit = class(tundotextedit)
   private
    fsyntaxpainter: tsyntaxpainter;
@@ -105,11 +105,11 @@ type
               const nodelimstrings: array of msestring;
               const leftofcursor: boolean = false): gridcoordty; overload;
    function wordatpos(const apos: gridcoordty; out start: gridcoordty;
-              const delimchars: msestring; 
+              const delimchars: msestring;
               const nodelimstrings: array of msestring;
               const leftofcursor: boolean = false): msestring; overload;
    function wordatpos(const apos: gridcoordty;
-              const delimchars: msestring; 
+              const delimchars: msestring;
               const nodelimstrings: array of msestring;
               const leftofcursor: boolean = false): msestring; overload;
    procedure indent(const acount: integer; const atabs: boolean);
@@ -132,21 +132,21 @@ type
    property autoindent: boolean read getautoindent write setautoindent;
    property markbrackets: boolean read getmarkbrackets write setmarkbrackets;
    property markpairwords: boolean read getmarkpairwords write setmarkpairwords;
-   property caseinsensitive: boolean read getcaseinsensitive 
+   property caseinsensitive: boolean read getcaseinsensitive
                                                       write setcaseinsensitive;
   published
    property syntaxpainter: tsyntaxpainter read fsyntaxpainter
                                                     write setsyntaxpainter;
-//   property defaultsyntax: boolean read fdefaultsyntax 
+//   property defaultsyntax: boolean read fdefaultsyntax
 //                             write setdefaultsyntax default false;
-   property options: syntaxeditoptionsty read foptions write setoptions 
+   property options: syntaxeditoptionsty read foptions write setoptions
                                                                   default [];
-   property pairmarkbkgcolor: colorty read fpairmarkbkgcolor 
+   property pairmarkbkgcolor: colorty read fpairmarkbkgcolor
                                  write fpairmarkbkgcolor default cl_none;
         //cl_none -> force none,
         //cl_default -> use syntaxpainter value if defined else cl_none
         //otherwise use syntaxpainter value if defined
-   property pairmaxrowcount: int32 read fpairmaxrowcount 
+   property pairmaxrowcount: int32 read fpairmaxrowcount
                         write fpairmaxrowcount default defaultpairmaxrowcount;
  end;
 
@@ -167,7 +167,7 @@ uses
 
 const
  checkbrackettag = 84621847;
- 
+
 type
  tundoinplaceedit1 = class(tundoinplaceedit);
  ttextundolist1 = class(ttextundolist);
@@ -184,7 +184,7 @@ begin
   end;
  end;
  result:= bki_none;
- open:= false; 
+ open:= false;
  for br1:= bki_round to high(bracketkindty) do begin
   if closebrackets[br1] = achar then begin
    result:= br1;
@@ -196,9 +196,9 @@ end;
 { tsyntaxedit }
 
 const
- invalidmark: markitemty = (bold: false; 
+ invalidmark: markitemty = (bold: false;
                           pos: (col: invalidaxis; row: invalidaxis); len: 0);
- 
+
 constructor tsyntaxedit.create(aowner: tcomponent);
 begin
  fsyntaxpainterhandle:= -1;
@@ -255,8 +255,8 @@ end;
 
 procedure tsyntaxedit.checkdefaultsyntax;
 begin
- if (seo_defaultsyntax in foptions) and not (csloading in componentstate) and 
-       (fsyntaxpainter <> nil) and (flines <> nil) and 
+ if (seo_defaultsyntax in foptions) and not (csloading in componentstate) and
+       (fsyntaxpainter <> nil) and (flines <> nil) and
             (fsyntaxpainterhandle < 0) then begin
   setsyntaxdef(fsyntaxpainter.defaultsyntax);
  end;
@@ -313,7 +313,7 @@ end;
 procedure tsyntaxedit.syntaxchanged(const sender: tobject;
   const index: integer);
 begin
- if (index < 0) and (fsyntaxpainterhandle >= 0) and 
+ if (index < 0) and (fsyntaxpainterhandle >= 0) and
                   (sender <> nil) and (sender = fsyntaxpainter) then begin
   initsyntaxparams();
  end;
@@ -353,7 +353,7 @@ function tsyntaxedit.charatpos(const apos: gridcoordty): msechar;
 var
  stringpo: pmsestring;
 begin
- result:= #0; 
+ result:= #0;
  if (apos.col >= 0) and (apos.row >= 0) and (apos.row < flines.count) then begin
   stringpo:= pmsestring(flines.getitempo(apos.row));
   if apos.col < length(stringpo^) then begin
@@ -370,7 +370,7 @@ begin
   result:= charbeforepos(makegridcoord(bigint,apos.row-1));
  end
  else begin
-  result:= #0; 
+  result:= #0;
   if (apos.row >= 0) and (apos.row < flines.count) and (apos.col >= 0) then begin
    stringpo:= pmsestring(flines.getitempo(apos.row));
    if stringpo^ <> '' then begin
@@ -433,7 +433,7 @@ begin
 end;
 
 function tsyntaxedit.wordatpos(const apos: gridcoordty; out start: gridcoordty;
-              const delimchars: msestring; 
+              const delimchars: msestring;
               const nodelimstrings: array of msestring;
               const leftofcursor: boolean = false): msestring;
 begin
@@ -617,7 +617,7 @@ end;
 function tsyntaxedit.matchbracket(const apos: gridcoordty;
                   const akind: bracketkindty;
                  const open: boolean; maxrows: integer = -1): gridcoordty;
-                 
+
 var
  level: integer;
  strpo: pmsestring;
@@ -656,7 +656,7 @@ begin
    x:= 0;
    dec(maxrows);
    inc(y);
-  end; 
+  end;
  end
  else begin
   strpo:= pmsestring(flines.getitempo(y));
@@ -683,7 +683,7 @@ begin
    end;
    strpo:= pmsestring(flines.getitempo(y));
    x:= length(strpo^)-1;
-  end; 
+  end;
  end;
 end;
 
@@ -708,7 +708,7 @@ begin
   mstr1:= '';
   if (apos.row >= 0) and (apos.row < flines.count) then begin
    mstr2:= flines.items[apos.row];
-   if (mstr2 <> '') and (apos.col >= 0) and 
+   if (mstr2 <> '') and (apos.col >= 0) and
                                        (apos.col <= length(mstr2)) then begin
     pe:= pmsechar(pointer(mstr2))+apos.col;
     po1:= pe-1;
@@ -801,7 +801,7 @@ lab1:
      end;
     end
     else begin //backward
-     
+
      level1:= 1;
      pe:= pointer(strpo^.text);
      po1:= pe + apos.col - 1;
@@ -827,7 +827,7 @@ lab1:
             dec(pa);
             dec(pal);
             dec(po2);
-            if (pa < pae) and 
+            if (pa < pae) and
                      ((po2 < pe) or not isnamechar(po2^)) then begin //match
              if i1 = high(par1^) then begin //end
               inc(level1);
@@ -852,7 +852,7 @@ lab1:
           dec(po1);
          end;
          dec(po1);
-        end;         
+        end;
        until po1 < pe;
       end;
       dec(strpo);
@@ -873,7 +873,7 @@ end;
 
 const
  noboldchars: markinfoty = (backgroundcolor: cl_none; items: nil);
- 
+
 procedure tsyntaxedit.clearpairmarks();
 var
  style1: fontstylety;
@@ -899,7 +899,7 @@ begin
   finally
    dec(fbracketsetting);
   end;
- end;  
+ end;
 end;
 
 procedure tsyntaxedit.checkpairmarks();
@@ -965,9 +965,9 @@ begin
    setlength(ar1,2);
    ar1[0]:= fmark1;
    ar1[1]:= fmark2;
-   boldinfo1.backgroundcolor:= 
+   boldinfo1.backgroundcolor:=
             syntaxpainter.colors[syntaxpainterhandle].pairmarkbackground;
-   if (boldinfo1.backgroundcolor = cl_default) or 
+   if (boldinfo1.backgroundcolor = cl_default) or
                                (fpairmarkbkgcolor = cl_none) then begin
     if fpairmarkbkgcolor = cl_default then begin
      boldinfo1.backgroundcolor:= cl_none;
@@ -1000,14 +1000,14 @@ begin
     setfontstyle(pt1,makegridcoord(pt1.col+fmark1.len,pt1.row),fs_force,false,
                                           cl_default,boldinfo1.backgroundcolor);
     setfontstyle(pt2,makegridcoord(pt2.col+fmark2.len,pt2.row),fs_force,false,
-                                        cl_default,boldinfo1.backgroundcolor);    
+                                        cl_default,boldinfo1.backgroundcolor);
    end;
   finally
    dec(fbracketsetting);
   end;
  end;
 end;
- 
+
 procedure tsyntaxedit.insertlinebreak;
 var
  mstr1: msestring;
@@ -1045,14 +1045,14 @@ end;
 const
  stopchars = [' ',c_tab,'=',':',';',',','.','''','-','+','/','*','^',
               '[',']','(',')','{','}'];
- 
+
 procedure tsyntaxedit.dokeydown(var info: keyeventinfoty);
 
  function isstopchar(const avalue: msechar): boolean;
  begin
   result:= (word(avalue) < $100) and (char(byte(avalue)) in stopchars)
  end;
- 
+
 var
  int1,int2: integer;
  co1: gridcoordty;
@@ -1147,7 +1147,7 @@ begin
         co1.row:= editpos.row - 1;
         co1.col:= bigint;
         seteditpos(co1,ss_shift in shiftstate1);
-        if (length(feditor.text) > 0) and 
+        if (length(feditor.text) > 0) and
            not isstopchar(feditor.text[length(feditor.text)]) then begin
          int2:= length(feditor.text);
         end;
@@ -1194,7 +1194,7 @@ begin
         co1.row:= editpos.row + 1;
         co1.col:= 0;
         seteditpos(co1,ss_shift in shiftstate1);
-        if (length(feditor.text) > 0) and 
+        if (length(feditor.text) > 0) and
                     not isstopchar(feditor.text[1]) then begin
          int2:= 0;
         end;
@@ -1289,7 +1289,7 @@ begin
     asyncevent(checkbrackettag);
    end;
   end;
- end; 
+ end;
 end;
 
 procedure tsyntaxedit.doasyncevent(var atag: integer);

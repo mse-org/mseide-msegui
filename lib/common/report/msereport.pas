@@ -34,18 +34,18 @@ const
  defaultrepfontname = 'stf_report';
  tabpickthreshold = 3;
  endrendertag = 49125363;
- 
+
  defaultreptabtextflags = [tf_ycentered];
  defaultbandanchors = [an_top];
  defaultbandoptionswidget = defaultoptionswidget;
-               {(defaultoptionswidget + [ow_fontlineheight]) - 
+               {(defaultoptionswidget + [ow_fontlineheight]) -
                                     [ow_fontglyphheight];}
- 
+
  defaultrepvaluedisptextflags = [tf_ycentered];
- defaultrepvaluedispoptionsscale = 
+ defaultrepvaluedispoptionsscale =
                [osc_expandx,osc_shrinkx,osc_expandy,osc_shrinky];
  defaultrepfontcolor = cl_black;
-  
+
 type
  lookupkindty = (lk_text,lk_integer,lk_int64,lk_float,lk_date,lk_time,lk_datetime);
  linevisiblety = (lv_topofpage,lv_nottopofpage,
@@ -61,7 +61,7 @@ type
   capstyle: capstylety;
   dashes: string;
   dist: integer;
-  visible: linevisiblesty; 
+  visible: linevisiblesty;
  end;
  tablinekindty = (tlk_top,tlk_vert,tlk_bottom);
  tablineinfoarty = array[tablinekindty] of tablineinfoty;
@@ -74,7 +74,7 @@ const
  defaulttablinedist = 0;
  defaulttablinevisible = [lv_topofpage,lv_nottopofpage,
                           lv_firstofpage,lv_normal,lv_lastofpage,
-                          lv_firstofgroup,lv_lastofgroup,    
+                          lv_firstofgroup,lv_lastofgroup,
                           lv_firstrecord,lv_lastrecord];
  defaulttablineinfo: tablineinfoty = (widthmm: defaulttablinewidth;
          color: defaulttablinecolor; colorgap: defaulttablinecolorgap;
@@ -170,7 +170,7 @@ type
   published
    property color default defaultrepfontcolor;
  end;
- 
+
  trepfont = class(tfont)
   protected
    procedure setname(const avalue: string); override;
@@ -179,9 +179,9 @@ type
   published
    property color default defaultrepfontcolor;
  end;
- 
+
  treptabulatoritem = class;
- 
+
  treptabitemdatalink = class(tfielddatalink)
   private
    fowner: treptabulatoritem;
@@ -191,7 +191,7 @@ type
    constructor create(const aowner: treptabulatoritem);
  end;
 
- getrichstringeventty = procedure(const sender: tobject; 
+ getrichstringeventty = procedure(const sender: tobject;
                                    var avalue: richstringty) of object;
  reptabulatoritemoptionty = (rto_disabled,rto_count,rto_sum,rto_average,
                              rto_shownull,
@@ -208,7 +208,7 @@ type
    ftfloat: (floatvalue: double);
    ftbcd: (bcdvalue: currency);
  end;
-  
+
  treptabulatoritem = class(ttabulatoritem,idbeditinfo)
   private
    fvalue: richstringty;
@@ -277,7 +277,7 @@ type
    procedure setlookupkind(const avalue: lookupkindty);
    procedure setformat(const avalue: msestring);
    procedure setcolor(avalue: colorty);
-   
+
    function getsumasinteger: integer;
    function getsumaslargeint: int64;
    function getsumasfloat: double;
@@ -293,7 +293,7 @@ type
    function xlineoffset: integer;
    procedure dobeforenextrecord(const adatasource: tdatasource);
    procedure scale(const ascale: real);
-  public 
+  public
    constructor create(aowner: tobject); override;
    destructor destroy; override;
    procedure resetsum(const skipcurrent: boolean);
@@ -313,23 +313,23 @@ type
    property enabled: boolean read getenabled write setenabled;
   published
    property tag: integer read ftag write ftag default 0;
-   property options: reptabulatoritemoptionsty read foptions 
+   property options: reptabulatoritemoptionsty read foptions
                                              write setoptions default [];
    property value: msestring read fvalue.text write setvalue;
    property font: treptabfont read getfont write setfont stored isfontstored;
    property color: colorty read fcolor write setcolor default cl_none;
-   property textflags: textflagsty read ftextflags write settextflags 
+   property textflags: textflagsty read ftextflags write settextflags
                    default defaultreptabtextflags;
    property ifilink: tifilinkcomp read fifilink write setifilink;
    property datafield: string read getdatafield write setdatafield;
    property datasource: tdatasource read getdatasource1 write setdatasource;
-   property lookupbuffer: tcustomlookupbuffer read flookupbuffer 
+   property lookupbuffer: tcustomlookupbuffer read flookupbuffer
                                       write setlookupbuffer;
-   property lookupkeyfieldno: integer read flookupkeyfieldno 
+   property lookupkeyfieldno: integer read flookupkeyfieldno
                                       write setlookupkeyfieldno default 0;
-   property lookupvaluefieldno: integer read flookupvaluefieldno 
+   property lookupvaluefieldno: integer read flookupvaluefieldno
                                       write setlookupvaluefieldno default 0;
-   property lookupkind: lookupkindty read flookupkind 
+   property lookupkind: lookupkindty read flookupkind
                                       write setlookupkind default lk_text;
    property format: msestring read fformat write setformat;
 
@@ -362,7 +362,7 @@ type
                              setlivert_dist default defaulttablinedist;
    property livert_visible: linevisiblesty read flineinfos[tlk_vert].visible write
                  setlivert_visible default defaulttablinevisible;
-                 
+
    property libottom_widthmm: real read flineinfos[tlk_bottom].widthmm write
                  setlibottom_widthmm;
    property libottom_color: colorty read flineinfos[tlk_bottom].color write
@@ -381,8 +381,8 @@ type
    property ongetvalue: getrichstringeventty read fongetvalue write fongetvalue;
    property distleft; //mm
    property distright; //mm
- end; 
-                 
+ end;
+
  treptabulators = class(tcustomtabulators)
   private
    finfo: drawtextinfoty;
@@ -457,10 +457,10 @@ type
   public
    constructor create(const aowner: tcustomrecordband);
    procedure resetsums(const skipcurrent: boolean);
-   property items[const index: integer]: treptabulatoritem read getitems 
+   property items[const index: integer]: treptabulatoritem read getitems
                        write setitems; default;
  published
-                 
+
    property litop_widthmm: real read flineinfos[tlk_top].widthmm write
                  setlitop_widthmm;
    property litop_color: colorty read flineinfos[tlk_top].color write
@@ -505,7 +505,7 @@ type
                  setlivert_dist default defaulttablinedist;
    property livert_visible: linevisiblesty read flineinfos[tlk_vert].visible write
                  setlivert_visible default defaulttablinevisible;
-                 
+
    property liright_widthmm: real read fliright.widthmm write
                  setliright_widthmm;
    property liright_color: colorty read fliright.color write
@@ -534,19 +534,19 @@ type
    property libottom_dist: integer read flineinfos[tlk_bottom].dist write
                  setlibottom_dist default defaulttablinedist;
    property libottom_visible: linevisiblesty read flineinfos[tlk_bottom].visible
-               write setlibottom_visible default defaulttablinevisible;               
+               write setlibottom_visible default defaulttablinevisible;
    property distleft: real read fdistleft write setdistleft; //mm
    property distright: real read fdistright write setdistright; //mm
    property linksource: tcustomrecordband read flinksource write setlinksource;
    property defaultdist;
  end;
-  
+
  recordbandstatety = (rbs_prepass,rbs_rendering,rbs_showed,rbs_pageshowed,
                       rbs_finish,
                       rbs_notfirstrecord,rbs_lastrecord,rbs_visibilitychecked,
                       rbs_nextrecordpending);
- recordbandstatesty = set of recordbandstatety; 
- 
+ recordbandstatesty = set of recordbandstatety;
+
  ireportclient = interface(inullinterface)
   function getwidget: twidget;
   procedure updatevisibility;
@@ -558,14 +558,14 @@ type
   procedure setppmm(const avalue: real);
  end;
  ireportclientarty = array of ireportclient;
- 
+
  ibandparent = interface(inullinterface)[miid_ibandparent]
   procedure registerclient(const aclient: ireportclient);
   procedure unregisterclient(const aclient: ireportclient);
   function beginband(const acanvas: tcanvas;
                               const sender: tcustomrecordband): boolean;
                    //true if area full
-  procedure endband(const acanvas: tcanvas; const sender: tcustomrecordband);  
+  procedure endband(const acanvas: tcanvas; const sender: tcustomrecordband);
   function istopband: boolean;
   function isfirstband: boolean;
   function islastband(const addheight: integer = 0): boolean;
@@ -593,7 +593,7 @@ type
 
  trepspacer = class(tlayouter,ireportclient)
   private
-   foptionsrep: bandoptionshowsty;   
+   foptionsrep: bandoptionshowsty;
    fparentintf: ibandparent;
    procedure setoptionsrep(const avalue: bandoptionshowsty);
   protected
@@ -606,15 +606,15 @@ type
    procedure resetzebra;
    procedure setppmm(const avalue: real);
   published
-   property optionsrep: bandoptionshowsty read foptionsrep 
+   property optionsrep: bandoptionshowsty read foptionsrep
                                         write setoptionsrep default [];
  end;
- 
+
  bandareaarty = array of tbasebandarea;
 
  recordbandarty = array of tcustomrecordband;
- recordbandeventty = procedure(const sender: tcustomrecordband) of object; 
- 
+ recordbandeventty = procedure(const sender: tcustomrecordband) of object;
+
  zebraoptionty = (zo_resetonpagestart,zo_resetparent);
  zebraoptionsty = set of zebraoptionty;
 
@@ -627,7 +627,7 @@ type
    property framei_right default 1;
    property framei_bottom default 1;
  end;
-  
+
  tcustomrecordband = class(tcustomscalingwidget,idbeditinfo,ireccontrol,
                                 iobjectpicker,ireportclient,icaptionframe)
   private
@@ -690,7 +690,7 @@ type
    procedure setfont(const avalue: trepwidgetfont);
    function getfont: trepwidgetfont;
    function getfontclass: widgetfontclassty; override;
-   
+
    procedure internalcreateframe() override;
    procedure registerchildwidget(const child: twidget); override;
    procedure unregisterchildwidget(const child: twidget); override;
@@ -715,7 +715,7 @@ type
    procedure doafterpaint(const acanvas: tcanvas); override;
    procedure dobeforenextrecord(const adatasource: tdatasource); virtual;
    procedure dosyncnextrecord; virtual;
-   
+
    procedure nextrecord(const setflag: boolean = true);
    function rendering: boolean;
    function bandheight: integer;
@@ -757,12 +757,12 @@ type
    function islastofgroup: boolean;
    procedure restart;
    procedure resetzebra; virtual;
-   
+
    property textframe: int32 read ftextframe write settextframe default 1;
    property tabs: treptabulators read ftabs write settabs;
    property font: trepwidgetfont read getfont write setfont stored isfontstored;
    property datasource: tdatasource read getdatasource write setdatasource;
-   property visidatasource: tdatasource read getvisidatasource 
+   property visidatasource: tdatasource read getvisidatasource
                           write setvisidatasource;
    property visidatafield: string read getvisidatafield write setvisidatafield;
                //controls visibility not null -> visible
@@ -771,13 +771,13 @@ type
    property optionsshow: bandoptionshowsty read foptionsshow write setoptionsshow default [];
    property nextband: tcustomrecordband read fnextband write setnextband;
                        //used by tcustombandarea
-   property nextbandiflastofarea: tcustomrecordband read fnextbandiflastofarea 
+   property nextbandiflastofarea: tcustomrecordband read fnextbandiflastofarea
                                        write setnextbandiflastofarea;
                        //used by tcustombandarea
-   property nextbandifempty: tcustomrecordband read fnextbandifempty 
+   property nextbandifempty: tcustomrecordband read fnextbandifempty
                                        write setnextbandifempty;
                        //used by tcustombandarea
-   property nextbandiflast: tcustomrecordband read fnextbandiflast 
+   property nextbandiflast: tcustomrecordband read fnextbandiflast
                                        write setnextbandiflast;
                        //used by tcustombandarea
    property zebra_counter: integer read fzebra_counter write fzebra_counter;
@@ -785,19 +785,19 @@ type
    property zebra_start: integer read fzebra_start write fzebra_start default 0;
    property zebra_height: integer read fzebra_height write fzebra_height default 0;
    property zebra_step: integer read fzebra_step write fzebra_step default 2;
-   property zebra_options: zebraoptionsty read fzebra_options 
+   property zebra_options: zebraoptionsty read fzebra_options
                                          write fzebra_options default [];
-   
+
    property onbeforerender: beforerenderrecordeventty read fonbeforerender
                                write fonbeforerender;
 //   property onbeforepaint: painteventty read fonbeforepaint write fonbeforepaint;
    property onpaint: painteventty read fonpaint write fonpaint;
    property onafterpaint: painteventty read fonafterpaint write fonafterpaint;
-   property onafterrender: recordbandeventty read fonafterrender 
+   property onafterrender: recordbandeventty read fonafterrender
                                    write fonafterrender;
-   property onbeforenextrecord: notifyeventty read fonbeforenextrecord 
+   property onbeforenextrecord: notifyeventty read fonbeforenextrecord
                                                  write fonbeforenextrecord;
-   property onafternextrecord: notifyeventty read fonafternextrecord 
+   property onafternextrecord: notifyeventty read fonafternextrecord
                                                  write fonafternextrecord;
   published
    property anchors default defaultbandanchors;
@@ -821,7 +821,7 @@ type
    property nextbandiflastofarea;
    property nextbandifempty;
    property nextbandiflast;
-   
+
    property zebra_color;
    property zebra_start;
    property zebra_height;
@@ -839,10 +839,10 @@ type
    property onafternextrecord;
   end;
 
- tcustomrepvaluedisp = class; 
- getrepvaluetexteventty = procedure(const sender: tcustomrepvaluedisp; 
+ tcustomrepvaluedisp = class;
+ getrepvaluetexteventty = procedure(const sender: tcustomrepvaluedisp;
                                           var atext: msestring) of object;
-                                          
+
  tcustomrepvaluedisp = class(tcustomrecordband)
   private
    ftextflags: textflagsty;
@@ -867,7 +867,7 @@ type
   published
    property anchors default [an_left,an_top];
  end;
- 
+
  trepvaluedisp = class(tcustomrepvaluedisp)
   private
    fvalue: msestring;
@@ -927,7 +927,7 @@ type
   published
    property format;
  end;
- 
+
  tcustombandgroup = class(tcustomrecordband,ibandparent)
   private
    procedure setdatasource(const avalue: tdatasource); override;
@@ -937,7 +937,7 @@ type
    function beginband(const acanvas: tcanvas;
                               const sender: tcustomrecordband): boolean;
                    //true if area full
-   procedure endband(const acanvas: tcanvas; const sender: tcustomrecordband);  
+   procedure endband(const acanvas: tcanvas; const sender: tcustomrecordband);
    function istopband: boolean;
    function isfirstband: boolean;
    function islastband(const addheight: integer = 0): boolean;
@@ -955,7 +955,7 @@ type
    procedure dobeforenextrecord(const adatasource: tdatasource); override;
    procedure dosyncnextrecord; override;
    function getppmm: real;
-   procedure setparentwidget(const avalue: twidget); override;   
+   procedure setparentwidget(const avalue: twidget); override;
    procedure registerchildwidget(const child: twidget); override;
    procedure unregisterchildwidget(const child: twidget); override;
    procedure dobeforerender(var empty: boolean); override;
@@ -1004,17 +1004,17 @@ type
    property onafterpaint;
    property onafterrender;
  end;
- 
+
  bandareastatety = (bas_inited,bas_backgroundrendered,bas_areafull,
                     bas_rendering,
                     bas_top,bas_notfirstband,bas_lastband,bas_bandstarted,
                     bas_activebandchanged,bas_finished);
- bandareastatesty = set of bandareastatety; 
-   
+ bandareastatesty = set of bandareastatety;
+
  bandareaeventty = procedure(const sender: tbasebandarea) of object;
  bandareapainteventty = procedure(const sender: tbasebandarea;
                               const acanvas: tcanvas) of object;
-                              
+
  tbasebandarea = class(tpublishedwidget,ibandparent)
   private
    fareabands: recordbandarty;
@@ -1034,7 +1034,7 @@ type
   protected
    procedure registerchildwidget(const child: twidget); override;
    procedure unregisterchildwidget(const child: twidget); override;
-   procedure setparentwidget(const avalue: twidget); override;   
+   procedure setparentwidget(const avalue: twidget); override;
    procedure renderbackground(const acanvas: tcanvas);
    function render(const acanvas: tcanvas): boolean; virtual;
           //true if finished
@@ -1061,8 +1061,8 @@ type
    function beginband(const acanvas: tcanvas;
                                const sender: tcustomrecordband): boolean; virtual;
                     //true if area full
-   procedure endband(const acanvas: tcanvas; 
-                      const sender: tcustomrecordband); virtual;  
+   procedure endband(const acanvas: tcanvas;
+                      const sender: tcustomrecordband); virtual;
    procedure updatevisible;
    function getlastpagepagecount: integer;
    function getlastreppagecount: integer;
@@ -1086,7 +1086,7 @@ type
 
    procedure restart; virtual;
    procedure resetzebra;
-      
+
    property font: trepwidgetfont read getfont write setfont stored isfontstored;
    property onfirstarea: bandareaeventty read fonfirstarea write fonfirstarea;
    property onlastarea: bandareaeventty read fonlastarea write fonlastarea;
@@ -1096,11 +1096,11 @@ type
                                write fonafterrender;
    property onpaint: bandareapainteventty read fonpaint write fonpaint;
    property onafterpaint: bandareapainteventty read fonafterpaint write fonafterpaint;
- end; 
+ end;
 
  bandareaoptionty = (bao_nopagerestart);
  bandareaoptionsty = set of bandareaoptionty;
- 
+
  tcustombandarea = class(tbasebandarea)
   private
    factiveband: integer;
@@ -1118,8 +1118,8 @@ type
    function beginband(const acanvas: tcanvas;
                       const sender: tcustomrecordband): boolean; override;
                     //true if area full
-   procedure endband(const acanvas: tcanvas; 
-                      const sender: tcustomrecordband); override;  
+   procedure endband(const acanvas: tcanvas;
+                      const sender: tcustomrecordband); override;
   public
    function isfirstband: boolean; override;
    function islastband(const addheight: integer = 0): boolean; override;
@@ -1130,7 +1130,7 @@ type
    property areafull: boolean read getareafull write setareafull;
    property options: bandareaoptionsty read foptions write foptions default [];
  end;
-  
+
  tbandarea = class(tcustombandarea)
   published
    property font;
@@ -1146,7 +1146,7 @@ type
 
  tileareaoptionty = (tao_vertical);
  tileareaoptionsty = set of tileareaoptionty;
- 
+
  tcustomtilearea = class(tbasebandarea)
   private
    fcolcount: integer;
@@ -1211,14 +1211,14 @@ type
           //true if finished
    function beginband(const acanvas: tcanvas;
                                const sender: tcustomrecordband): boolean; override;
-   procedure endband(const acanvas: tcanvas; const sender: tcustomrecordband); override;  
+   procedure endband(const acanvas: tcanvas; const sender: tcustomrecordband); override;
   public
    constructor create(aowner: tcomponent); override;
    function cellwidthmm: real;
    function cellheightmm: real;
    function cellsize: sizety;
    function cellrect: rectty;
-   
+
    property colcount: integer read fcolcount write setcolcount default 2;
    property rowcount: integer read frowcount write setrowcount default 2;
 
@@ -1256,9 +1256,9 @@ type
                  setlileft_dashes;
    property lileft_dist: integer read flileft.dist write
                  setlileft_dist default defaulttablinedist;
-                 
+
    property litop_widthmm: real read flitop.widthmm write
-                 setlitop_widthmm;                 
+                 setlitop_widthmm;
    property litop_color: colorty read flitop.color write
                  setlitop_color default defaulttablinecolor;
    property litop_colorgap: colorty read flitop.colorgap write
@@ -1322,8 +1322,8 @@ type
    property lileft_capstyle;
    property lileft_dashes;
    property lileft_dist;
-                 
-   property litop_widthmm;                 
+
+   property litop_widthmm;
    property litop_color;
    property litop_colorgap;
    property litop_capstyle;
@@ -1345,7 +1345,7 @@ type
    property libottom_dist;
 
    property options;
-   
+
    property font;
 //   property fontempty;
    property onfirstarea;
@@ -1355,16 +1355,16 @@ type
    property onpaint;
    property onafterpaint;
  end;
- 
+
  reportpagestatety = (rpps_inited,rpps_sizesetting,rpps_rendering,
                       rpps_backgroundrendered,
                       rpps_restart,
                       rpps_showed,rpps_finish,rpps_notfirstrecord,rpps_lastrecord,
                       rpps_nextrecordpending);
  reportpagestatesty = set of reportpagestatety;
- 
+
  tcustomreport = class;
-   
+
  treportpagedatalink = class(tmsedatalink)
  end;
 
@@ -1379,7 +1379,7 @@ type
  beforerenderpageeventty = procedure(const sender: tcustomreportpage;
                                           var empty: boolean) of object;
  reppageorientationty = (rpo_default,rpo_portrait,rpo_landscape);
- 
+
  tcustomreportpage = class(twidget,ibandparent)
   private
    fbands: recordbandarty;
@@ -1424,7 +1424,7 @@ type
    freport: tcustomreport;
    procedure registerchildwidget(const child: twidget); override;
    procedure unregisterchildwidget(const child: twidget); override;
-   procedure setparentwidget(const avalue: twidget); override;   
+   procedure setparentwidget(const avalue: twidget); override;
    procedure sizechanged; override;
 
    procedure setfont(const avalue: trepwidgetfont);
@@ -1445,7 +1445,7 @@ type
    procedure dobeforenextrecord(const adatasource: tdatasource);
    procedure dosyncnextrecord;
    property ppmm: real read fppmm write setppmm; //pixel per mm
-   
+
    procedure init; virtual;
    procedure nextrecord;
    function render(const acanvas: tcanvas): boolean;
@@ -1462,7 +1462,7 @@ type
    function isfirstband: boolean;
    function islastband(const addheight: integer = 0): boolean;
    procedure setareafull(const avalue: boolean);
-   
+
    procedure updatevisible;
    function remainingheight: integer;
    function pagepagenum: integer; //null based
@@ -1472,7 +1472,7 @@ type
    function getreppage: tcustomreportpage;
    function getlastpagepagecount: integer;
    function getlastreppagecount: integer;
-  
+
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -1481,9 +1481,9 @@ type
    function islastrecord: boolean;
    procedure insertwidget(const awidget: twidget; const apos: pointty); override;
 
-   procedure recordchanged;   
+   procedure recordchanged;
    property report: tcustomreport read freport;
-   property pagenum: integer read fpagenum write fpagenum; 
+   property pagenum: integer read fpagenum write fpagenum;
                  //null-based, local to this page
    property lastpagecount: integer read getlastpagepagecount write flastpagecount;
                  //local to this page
@@ -1493,27 +1493,27 @@ type
    procedure finish;
    procedure restart;
    procedure resetzebra;
-   
+
    property pagewidth: real read fpagewidth write setpagewidth;
                     //mm, 0 -> use report value
    property pageheight: real read fpageheight write setpageheight;
                     //mm, 0 -> use report value
    function getpagewidth: real; //actual value
    function getpageheight: real; //actual value
-      
+
    property font: trepwidgetfont read getfont write setfont stored isfontstored;
    property nextpage: tcustomreportpage read fnextpage write setnextpage;
-   property nextpageifempty: tcustomreportpage read fnextpageifempty write 
+   property nextpageifempty: tcustomreportpage read fnextpageifempty write
                           setnextpageifempty;
-   property nextpageiflast: tcustomreportpage read fnextpageiflast write 
+   property nextpageiflast: tcustomreportpage read fnextpageiflast write
                           setnextpageiflast;
    property datasource: tdatasource read getdatasource write setdatasource;
    property options: reportpageoptionsty read foptions write setoptions
                                                  default [];
-   property printorientation: reppageorientationty read fprintorientation 
-                write fprintorientation default rpo_default;   
+   property printorientation: reppageorientationty read fprintorientation
+                write fprintorientation default rpo_default;
                       //default --> printer.canvas value
-   
+
    property onfirstpage: reportpageeventty read fonfirstpage
                                write fonfirstpage;
    property onbeforerender: beforerenderpageeventty read fonbeforerender
@@ -1521,18 +1521,18 @@ type
    property onafterrender: reportpageeventty read fonafterrender
                                write fonafterrender;
    property onpaint: reportpagepainteventty read fonpaint write fonpaint;
-   property onafterpaint: reportpagepainteventty read fonafterpaint 
+   property onafterpaint: reportpagepainteventty read fonafterpaint
                         write fonafterpaint;
-   property onbeforenextrecord: notifyeventty read fonbeforenextrecord 
+   property onbeforenextrecord: notifyeventty read fonbeforenextrecord
                                                  write fonbeforenextrecord;
-   property onafternextrecord: notifyeventty read fonafternextrecord 
+   property onafternextrecord: notifyeventty read fonafternextrecord
                                                  write fonafternextrecord;
    property onafterlastpage: reportpageeventty read fonafterlastpage
                                write fonafterlastpage;
  end;
- 
+
  reportpagearty = array of tcustomreportpage;
- 
+
  treportpage = class(tcustomreportpage)
   published
    property pagewidth;
@@ -1550,7 +1550,7 @@ type
    property datasource;
    property options;
    property printorientation;
- 
+
    property onfirstpage;
    property onbeforerender;
    property onafterrender;
@@ -1586,27 +1586,27 @@ type
    procedure defineproperties(filer: tfiler) override;
   public
    constructor create(aowner: tcomponent); overload; override;
-   constructor create(aowner: tcomponent; load: boolean); 
+   constructor create(aowner: tcomponent; load: boolean);
                                      overload; virtual;
   published
-   property grid_show: boolean read frepdesigninfo.showgrid 
+   property grid_show: boolean read frepdesigninfo.showgrid
                                              write setgrid_show default true;
-   property grid_snap: boolean read frepdesigninfo.snaptogrid 
+   property grid_snap: boolean read frepdesigninfo.snaptogrid
                                              write setgrid_snap default true;
-   property grid_size: real read frepdesigninfo.gridsize write setgrid_size;   
+   property grid_size: real read frepdesigninfo.gridsize write setgrid_size;
    property ppmm;
    property color default cl_transparent;
  end;
 
  reppageformclassty = class of treppageform;
-   
+
  repstatety = (rs_activepageset,rs_finish,rs_restart,rs_running,rs_endpass,
                rs_dummypage);
  repstatesty = set of repstatety;
 
  reporteventty = procedure(const sender: tcustomreport) of object;
  preambleeventty = procedure(const sender: tcustomreport; var apreamble: string) of object;
- 
+
  tcustomreport = class(twidget)
   private
    fppmm: real;
@@ -1614,7 +1614,7 @@ type
    fonbeforerender: reporteventty;
    fonafterrender: reporteventty;
    fonreportfinished: notifyeventty;
-   fprinter: tcustomprinter; //preliminary 
+   fprinter: tcustomprinter; //preliminary
    fstream: ttextstream;
    fstreamset: boolean;
    fcommand: msestring;
@@ -1673,7 +1673,7 @@ type
                               const acanvas: tcanvas);
    procedure dopageafterpaint(const sender: tcustomreportpage;
                               const acanvas: tcanvas);
-   
+
    procedure internalrender(const acanvas: tcanvas; const aprinter: tcustomprinter;
                   const acommand: msestring; const astream: ttextstream;
                   const anilstream: boolean; const onafterrender: reporteventty);
@@ -1684,7 +1684,7 @@ type
    procedure nextpage(const acanvas: tcanvas);
    procedure doprogress;
    procedure doasyncevent(var atag: integer); override;
-   procedure notification(acomponent: tcomponent; 
+   procedure notification(acomponent: tcomponent;
                                         operation: toperation); override;
    procedure setfont(const avalue: trepfont);
    function getfont: trepfont;
@@ -1695,7 +1695,7 @@ type
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
-   
+
    procedure insertwidget(const awidget: twidget; const apos: pointty) override;
    function add(const apage: tcustomreportpage;
                                aindex: int32 = bigint): tcustomreportpage;
@@ -1703,7 +1703,7 @@ type
    procedure delete(const aindex: int32);
    procedure clear();
    procedure movepage(const curindex,newindex: int32);
-   
+
    procedure render(const acanvas: tcanvas;
                         const onafterrender: reporteventty = nil); overload;
    procedure render(const aprinter: tstreamprinter;
@@ -1717,57 +1717,57 @@ type
    procedure waitfor;         //returns before calling of onafterrender
    function prepass: boolean; //true if in prepass render state
    procedure restart;
-   procedure recordchanged;  
+   procedure recordchanged;
      //calls recordchanged of active page
-   
+
    property ppmm: real read fppmm write setppmm; //pixel per mm
-   property pagewidth: real read fpagewidth write setpagewidth; 
-                   //mm, default 190 
+   property pagewidth: real read fpagewidth write setpagewidth;
+                   //mm, default 190
    property pageheight: real read fpageheight write setpageheight;
                    //mm, default 270
 
    function reppagecount: integer;
-   property reppages[index: integer]: tcustomreportpage read getreppages 
+   property reppages[index: integer]: tcustomreportpage read getreppages
                                                 write setreppages; default;
-   property pagenum: integer read fpagenum {write fpagenum}; 
+   property pagenum: integer read fpagenum {write fpagenum};
                             //null-based
    property lastpagecount: integer read flastpagecount write flastpagecount;
    property activepage: integer read factivepage write setactivepage;
    procedure finish;
-   property printstarttime: tdatetime read fprintstarttime 
+   property printstarttime: tdatetime read fprintstarttime
                                                     write fprintstarttime;
    property nilstream: boolean read fnilstream;
                            //true if reder called with nil stream
 
    property font: trepfont read getfont write setfont;
    property color default cl_transparent;
-   property grid_show: boolean read frepdesigninfo.showgrid 
+   property grid_show: boolean read frepdesigninfo.showgrid
                                              write setgrid_show default true;
-   property grid_snap: boolean read frepdesigninfo.snaptogrid 
+   property grid_snap: boolean read frepdesigninfo.snaptogrid
                                              write setgrid_snap default true;
-   property grid_size: real read frepdesigninfo.gridsize write setgrid_size;   
+   property grid_size: real read frepdesigninfo.gridsize write setgrid_size;
    property canceled: boolean read getcanceled write setcanceled;
    property running: boolean read getrunning;
-   property options: reportoptionsty read foptions write foptions 
+   property options: reportoptionsty read foptions write foptions
                                   default defaultreportoptions;
    property dialogtext: msestring read fdialogtext write fdialogtext;
    property dialogcaption: msestring read fdialogcaption write fdialogcaption;
 
    property onpreamble: preambleeventty read fonpreamble write fonpreamble;
-   property onreportstart: reporteventty read fonreportstart 
+   property onreportstart: reporteventty read fonreportstart
                                                          write fonreportstart;
    property onbeforerender: reporteventty read fonbeforerender
                                write fonbeforerender;
    property onafterrender: reporteventty read fonafterrender
                                write fonafterrender;
-   property onreportfinished: notifyeventty read fonreportfinished 
+   property onreportfinished: notifyeventty read fonreportfinished
                                                      write fonreportfinished;
         //executed in main thread context
-   property onpagebeforerender: beforerenderpageeventty 
+   property onpagebeforerender: beforerenderpageeventty
                     read fonpagebeforerender write fonpagebeforerender;
-   property onpagepaint: reportpagepainteventty read fonpagepaint 
+   property onpagepaint: reportpagepainteventty read fonpagepaint
                         write fonpagepaint;
-   property onpageafterpaint: reportpagepainteventty read fonpageafterpaint 
+   property onpageafterpaint: reportpagepainteventty read fonpageafterpaint
                         write fonpageafterpaint;
    property onprogress: notifyeventty read fonprogress write fonprogress;
 //   property onloaded: notifyeventty read fonloaded write fonloaded;
@@ -1791,13 +1791,13 @@ type
    procedure autoreadstat;
   public
    constructor create(aowner: tcomponent); overload; override;
-   constructor create(aowner: tcomponent; load: boolean); 
-                                     overload; virtual;   
+   constructor create(aowner: tcomponent; load: boolean);
+                                     overload; virtual;
    destructor destroy; override;
    procedure beforedestruction; override;
    procedure reload;
    procedure afterconstruction; override;
-  published    
+  published
    property statfile: tstatfile read fstatfile write setstatfile;
    property color;
    property ppmm;
@@ -1828,13 +1828,13 @@ type
  end;
 
  reportclassty = class of treport;
-  
-function createreport(const aclass: tclass; 
+
+function createreport(const aclass: tclass;
                    const aclassname: pshortstring): tmsecomponent;
-procedure initreportcomponent(const amodule: tcomponent; 
+procedure initreportcomponent(const amodule: tcomponent;
                                          const acomponent: tcomponent);
 function getreportscale(const amodule: tcomponent): real;
-function createreppageform(const aclass: tclass; 
+function createreppageform(const aclass: tclass;
                    const aclassname: pshortstring): tmsecomponent;
 function getreppageformscale(const amodule: tcomponent): real;
 
@@ -1850,7 +1850,7 @@ uses
   {$warn 6058 off}
  {$endif}
 {$endif}
- 
+
 type
  tcustomframe1 = class(tcustomframe);
  twidget1 = class(twidget);
@@ -1902,14 +1902,14 @@ begin
  end;
 end;
 }
-function checkislastrecord(const adatalink: tmsedatalink; 
+function checkislastrecord(const adatalink: tmsedatalink;
                                const syncproc: synceventty): boolean;
 var
 // bm: string;
  int1: integer;
-begin                     
+begin
  result:= false;
- with adatalink do begin          //todo: optimize   
+ with adatalink do begin          //todo: optimize
   if active then begin
    if dataset.eof then begin
     result:= true;
@@ -1919,7 +1919,7 @@ begin
      result:= dscontroller.islastrecord;
     end
     else begin
-     int1:= dataset.recno; 
+     int1:= dataset.recno;
      tdataset1(dataset).settempstate(dataset.state); //disable controls
      try
       dataset.next;
@@ -1937,7 +1937,7 @@ begin
  end;
 end;
 
-function createreport(const aclass: tclass; 
+function createreport(const aclass: tclass;
                    const aclassname: pshortstring): tmsecomponent;
 begin
  result:= reportclassty(aclass).create(nil,false);
@@ -1957,7 +1957,7 @@ begin
 // end;
 end;
 
-function createreppageform(const aclass: tclass; 
+function createreppageform(const aclass: tclass;
                    const aclassname: pshortstring): tmsecomponent;
 begin
  result:= reppageformclassty(aclass).create(nil,false);
@@ -2098,7 +2098,7 @@ procedure treptabulatoritem.changed;
 begin
  with treptabulators(fowner),fband do begin
   fsizevalid:= false;
-  if rendering or ([csdesigning,csdestroying] * componentstate = 
+  if rendering or ([csdesigning,csdestroying] * componentstate =
                                                    [csdesigning]) then begin
    minclientsizechanged;
 //   change(-1);
@@ -2109,7 +2109,7 @@ end;
 procedure treptabulatoritem.setpos(const avalue: real);
 begin
  inherited;
- treptabulators(fowner).fband.sendchangeevent(oe_designchanged);  
+ treptabulators(fowner).fband.sendchangeevent(oe_designchanged);
          //syncronize linked tabs
 end;
 
@@ -2186,7 +2186,7 @@ var
  int1: integer;
  int641: int64;
  cl1: customificlientcontrollerclassty;
- 
+
 begin
  if fdatalink.fieldactive then begin
   result.format:= nil;
@@ -2270,9 +2270,9 @@ begin
   else begin
    if foptions * [rto_sum,rto_count,rto_average] <> [] then begin
     with fdatalink.field do begin
-     if not (rto_shownull in foptions) and 
-      ((rto_nocurrentvalue in foptions) or fsum.resetpending or 
-                   isnull and not (rto_count in foptions)) and 
+     if not (rto_shownull in foptions) and
+      ((rto_nocurrentvalue in foptions) or fsum.resetpending or
+                   isnull and not (rto_count in foptions)) and
                                                (fsum.count = 0) then begin
       result.text:= '';
      end
@@ -2287,7 +2287,7 @@ begin
          result.text:= realtytostring(0,fformat);
         end
         else begin
-         case datatype of 
+         case datatype of
           ftinteger,ftword,ftsmallint,ftboolean: begin
            result.text:= realtytostring(sumasinteger/int1,fformat);
           end;
@@ -2304,7 +2304,7 @@ begin
         end;
        end
        else begin
-        case datatype of 
+        case datatype of
          ftinteger,ftword,ftsmallint,ftboolean: begin
           result.text:= realtytostring(sumasinteger,fformat);
          end;
@@ -2330,8 +2330,8 @@ begin
  end
  else begin
   if rto_count in foptions then begin
-   if not (rto_shownull in foptions) and 
-        ((rto_nocurrentvalue in foptions) or fsum.resetpending) and 
+   if not (rto_shownull in foptions) and
+        ((rto_nocurrentvalue in foptions) or fsum.resetpending) and
                                                (fsum.count = 0) then begin
     result.text:= '';
    end
@@ -2515,7 +2515,7 @@ begin
   else begin
    result:= dist;
   end;
- end; 
+ end;
 end;
 
 procedure treptabulatoritem.recchanged;
@@ -2566,7 +2566,7 @@ begin
  end;
  if fcolor <> avalue then begin
   fcolor:= avalue;
-  treptabulators(fowner).fband.invalidate;  
+  treptabulators(fowner).fband.invalidate;
  end
 end;
 
@@ -2609,7 +2609,7 @@ end;
 
 procedure treptabulatoritem.dobeforenextrecord(const adatasource: tdatasource);
 begin
- if (foptions * [rto_count,rto_sum,rto_average] <>  []) and 
+ if (foptions * [rto_count,rto_sum,rto_average] <>  []) and
           (fdatalink.datasource = adatasource) then begin
   if fdatalink.active then begin
    if fdatalink.field = nil then begin
@@ -2780,7 +2780,7 @@ var
  saved: boolean;
  bandcx: integer;
  visiblemask: linevisiblesty;
- 
+
  procedure checkinit(const ainfo: tablineinfoty);
  var
   rect1: rectty;
@@ -2817,7 +2817,7 @@ var
    end;
   end;
  end;
- 
+
  procedure drawhorzline(const aindex: integer; const akind: tablinekindty);
   function nextx: integer;
   begin
@@ -2830,7 +2830,7 @@ var
     result:= bandcx;
    end;
   end;
-  
+
  var
   startx,endx,y: integer;
  begin
@@ -2839,7 +2839,7 @@ var
     if widthmm > 0 then begin
      if visible * visiblemask <> [] then begin
       checkinit(flineinfos[akind]);
-      with ftabs[aindex] do begin     
+      with ftabs[aindex] do begin
        case kind of
         tak_left: begin
          startx:=linepos + xlineoffset;
@@ -2867,7 +2867,7 @@ var
        y:= - flineinfos[tlk_top].dist;
       end
       else begin
-       y:= treptabulators(fowner).fband.clientheight + 
+       y:= treptabulators(fowner).fband.clientheight +
                       flineinfos[tlk_bottom].dist;
       end;
       acanvas.drawline(makepoint(startx,y),makepoint(endx,y),color);
@@ -2876,7 +2876,7 @@ var
    end;
   end;
  end;
- 
+
 var
  int1,int2,int3,int4: integer;
  moved: boolean;
@@ -2884,24 +2884,24 @@ var
 // rect1: rectty;
  isdecimal: boolean;
  cellrect: rectty;
- tab1: treptabulatoritem; 
+ tab1: treptabulatoritem;
 begin
  fminsize:= nullsize;
  bandcx:= adest.cx;
  saved:= false;
  moved:= false;
  visiblemask:= [];
- if apaint then begin  
+ if apaint then begin
   with fband do begin
    cellrect:= adest;
-   if not rendering or (fparentintf = nil) then begin 
+   if not rendering or (fparentintf = nil) then begin
     visiblemask:= [lv_topofpage,lv_nottopofpage,
                    lv_firstofpage,lv_normal,lv_lastofpage,
                    lv_firstofgroup,lv_lastofgroup,
                    lv_firstrecord,lv_lastrecord];
    end
    else begin
-    visiblemask:= [lv_normal];    
+    visiblemask:= [lv_normal];
     with fparentintf do begin
      if istopband then begin
       include(visiblemask,lv_topofpage);
@@ -2945,7 +2945,7 @@ begin
     if tab1.enabled then begin
      with ftabs[int1],tab1 do begin
       text:= getdisptext;
-      if apaint and (foptions*[rto_count,rto_sum,rto_average] <> []) and 
+      if apaint and (foptions*[rto_count,rto_sum,rto_average] <> []) and
                         not (rto_noreset in foptions) then begin
        fsum.resetpending:= true;
       end;
@@ -2977,12 +2977,12 @@ begin
        acanvas.fillrect(cellrect,fcolor);
       end;
       isdecimal:= tabkind = tak_decimal;
-      case tabkind of 
+      case tabkind of
        tak_centered: begin
         flags:= (flags - [tf_right]) + [tf_xcentered];
         dec(dest.x,dest.cx div 2);
        end;
-       tak_right,tak_decimal: begin   
+       tak_right,tak_decimal: begin
         flags:= (flags - [tf_xcentered]) + [tf_right];
         dec(dest.x,dest.cx);
        end;
@@ -3054,7 +3054,7 @@ begin
         if visible * visiblemask <> [] then begin
          checkinit(flineinfos[tlk_vert]);
          with ftabs[int1] do begin
-          case kind of 
+          case kind of
            tak_left: begin
             int2:= linepos - dist
            end
@@ -3340,7 +3340,7 @@ procedure treptabulators.setlivert_visible(const avalue: linevisiblesty);
 var
  int1: integer;
 begin
-// if (avalue <> flineinfos[tlk_vert].visible) and 
+// if (avalue <> flineinfos[tlk_vert].visible) and
 //              not (csloading in fband.componentstate) then begin
   flineinfos[tlk_vert].visible:= avalue;
   if not (csloading in fband.componentstate) then begin
@@ -3521,7 +3521,7 @@ procedure treptabulators.sourcechanged;
 var
  int1: integer;
 begin
- if (flinksource <> nil) and 
+ if (flinksource <> nil) and
                    not (csloading in flinksource.componentstate) then begin
   beginupdate;
   try
@@ -3541,7 +3541,7 @@ procedure treptabulators.dochange(const aindex: integer);
 begin
  fsizevalid:= false;
  inherited;
-// fband.sendchangeevent(oe_designchanged); 
+// fband.sendchangeevent(oe_designchanged);
 end;
 
 procedure treptabulators.setcount1(acount: integer; doinit: boolean);
@@ -3564,7 +3564,7 @@ begin
    end;
    inherited;
    for int1:= countbefore to count - 1 do begin
-    items[int1].pos:= int2 / ppmm;    
+    items[int1].pos:= int2 / ppmm;
     inc(int2,step); //offset
    end;
   end
@@ -3757,13 +3757,13 @@ begin
       show:= false;
      end;
     end;
-   end;   
+   end;
   end;
  end;
  result:= true;
 endlab:
 end;
- 
+
 procedure updateparentintf(const sender: ireportclient;
                                  var fparentintf: ibandparent);
 var
@@ -3775,10 +3775,10 @@ begin
     fparentintf.unregisterclient(sender);
    end;
    widget1:= fparentwidget;
-   while (widget1 <> nil) and 
+   while (widget1 <> nil) and
      not widget1.getcorbainterface(typeinfo(ibandparent),fparentintf) do begin
     widget1:= widget1.parentwidget;
-   end; 
+   end;
    if fparentintf <> nil then begin
     fparentintf.registerclient(sender);
     sender.setppmm(fparentintf.getppmm);
@@ -3814,15 +3814,15 @@ const
                  bos_showevenpage,bos_hideevenpage,
                  bos_showoddpage,bos_hideoddpage,
                  bos_showfirstofpage,bos_hidefirstofpage,
-                 bos_shownormalofpage,bos_hidenormalofpage,                 
+                 bos_shownormalofpage,bos_hidenormalofpage,
                  bos_showlastofpage,bos_hidelastofpage
- //                bo_showfirstrecord,bo_hidefirstrecord, 
+ //                bo_showfirstrecord,bo_hidefirstrecord,
  //                bo_shownormalrecord,bo_hidenormalrecord,
  //                bo_showlastrecord,bo_hidelastrecord,
             //todo: check first-last record
  //                bo_localvalue
                  ];
-                 
+
 
 begin
  setbandoptionsshow(avalue * spacerbandoptions,foptionsrep);
@@ -3907,7 +3907,7 @@ end;
 
 procedure tcustomrecordband.dobeforerender(var empty: boolean);
 begin
- if not (not(rbs_showed in fstate) and (bo_once in foptions)) and 
+ if not (not(rbs_showed in fstate) and (bo_once in foptions)) and
                      not(bo_once in foptions) and fdatalink.active then begin
   empty:= (rbs_finish in fstate) or fdatalink.dataset.eof;
  end;
@@ -3919,7 +3919,7 @@ begin
    application.unlock;
   end;
  end;
- if not empty and visible and (bo_topofarea in foptions) and 
+ if not empty and visible and (bo_topofarea in foptions) and
          (fparentintf <> nil) and not fparentintf.istopband
                                     {fparentintf.isfirstband}  then begin
   fparentintf.setareafull(true);
@@ -4111,7 +4111,7 @@ begin
   finally
    application.unlock;
   end;
- end; 
+ end;
  for int1:= 0 to high(fareas) do begin
   fareas[int1].beginrender(arestart);
  end;
@@ -4214,7 +4214,7 @@ begin
     if checkislastrecord(fdatalink,
                            {$ifdef FPC}@{$endif}dosyncnextrecord) then begin
      include(fstate,rbs_lastrecord);
-    end; 
+    end;
     fparentintf.getreppage.recordchanged;
    end;
   end;
@@ -4371,7 +4371,7 @@ var
  int1: integer;
 begin
  fdatalink.datasource:= avalue;
- if (componentstate*[csdesigning,csloading] = [csdesigning]) and 
+ if (componentstate*[csdesigning,csloading] = [csdesigning]) and
                            (avalue <> nil) then begin
   for int1:= 0 to ftabs.count - 1 do begin
    ftabs[int1].datasource:= avalue;
@@ -4446,11 +4446,11 @@ end;
 function tcustomrecordband.isfirstofgroup: boolean;
 begin
  if fvisigrouplink.isstringfield then begin
-  result:= fvisigrouplink.fieldactive and (isfirstrecord or 
+  result:= fvisigrouplink.fieldactive and (isfirstrecord or
                    (fvisigrouplink.asmsestring <> fgroupstring));
  end
  else begin
-  result:= fvisigrouplink.fieldactive and (isfirstrecord or 
+  result:= fvisigrouplink.fieldactive and (isfirstrecord or
                    (fvisigrouplink.field.aslargeint <> fgroupnum));
  end;
 end;
@@ -4458,11 +4458,11 @@ end;
 function tcustomrecordband.islastofgroup: boolean;
 begin
  if fvisigrouplink.isstringfield then begin
-  result:= fvisigrouplink.fieldactive and (islastrecord or 
+  result:= fvisigrouplink.fieldactive and (islastrecord or
                    (fvisigrouplink.asmsestring <> fnextgroupstring));
  end
  else begin
-  result:= fvisigrouplink.fieldactive and (islastrecord or 
+  result:= fvisigrouplink.fieldactive and (islastrecord or
                    (fvisigrouplink.field.aslargeint <> fnextgroupnum));
  end;
 end;
@@ -4479,13 +4479,13 @@ begin
  lastrecord:= islastrecord;
  if fvisigrouplink.fieldactive then begin
   if fvisigrouplink.isstringfield then begin
-   if (bo_visigroupfirst in foptions) and (firstrecord or 
+   if (bo_visigroupfirst in foptions) and (firstrecord or
                    (fvisigrouplink.asmsestring <> fgroupstring)) or
-          (bo_visigrouplast in foptions) and (lastrecord or 
-                   (fvisigrouplink.asmsestring <> fnextgroupstring)) or 
-          (bo_visigroupnotfirst in foptions) and not (firstrecord or 
+          (bo_visigrouplast in foptions) and (lastrecord or
+                   (fvisigrouplink.asmsestring <> fnextgroupstring)) or
+          (bo_visigroupnotfirst in foptions) and not (firstrecord or
                    (fvisigrouplink.asmsestring <> fgroupstring)) or
-          (bo_visigroupnotlast in foptions) and not(lastrecord or 
+          (bo_visigroupnotlast in foptions) and not(lastrecord or
                    (fvisigrouplink.asmsestring <> fnextgroupstring)) then begin
     result:= true;
    end
@@ -4494,13 +4494,13 @@ begin
    end;
   end
   else begin
-   if (bo_visigroupfirst in foptions) and (firstrecord or 
+   if (bo_visigroupfirst in foptions) and (firstrecord or
                    (fvisigrouplink.field.aslargeint <> fgroupnum)) or
-          (bo_visigrouplast in foptions) and (lastrecord or 
-                   (fvisigrouplink.field.aslargeint <> fnextgroupnum)) or 
-          (bo_visigroupnotfirst in foptions) and not (firstrecord or 
+          (bo_visigrouplast in foptions) and (lastrecord or
+                   (fvisigrouplink.field.aslargeint <> fnextgroupnum)) or
+          (bo_visigroupnotfirst in foptions) and not (firstrecord or
                    (fvisigrouplink.field.aslargeint <> fgroupnum)) or
-          (bo_visigroupnotlast in foptions) and not(lastrecord or 
+          (bo_visigroupnotlast in foptions) and not(lastrecord or
                    (fvisigrouplink.field.aslargeint <> fnextgroupnum)) then begin
     result:= true;
    end
@@ -4508,7 +4508,7 @@ begin
     result:= false;
    end;
   end;
- end; 
+ end;
  if fvisidatalink.fieldactive then begin
   if fvisidatalink.field.isnull then begin
    result:= false;
@@ -4730,13 +4730,13 @@ end;
 
 procedure tcustomrecordband.endpickmove(const sender: tobjectpicker);
 begin
- ftabs.linepos[sender.currentobjects[0]]:= 
+ ftabs.linepos[sender.currentobjects[0]]:=
           ftabs.linepos[sender.currentobjects[0]] + sender.pickoffset.x;
 //fitems[ftabs[index].index]
  designchanged('tabs',ftabs.ftabs[sender.currentobjects[0]].index);
 end;
 
-procedure tcustomrecordband.paintxorpic(const sender: tobjectpicker; 
+procedure tcustomrecordband.paintxorpic(const sender: tobjectpicker;
                                                  const acanvas: tcanvas);
 var
  i1: int32;
@@ -4745,7 +4745,7 @@ begin
  if fframe = nil then begin
   i1:= i1 + ftextframe;
  end;
- acanvas.fillxorrect(makerect(i1+sender.pickoffset.x + 
+ acanvas.fillxorrect(makerect(i1+sender.pickoffset.x +
        ftabs.linepos[sender.currentobjects[0]],0,1,clientheight));
 end;
 
@@ -4927,7 +4927,7 @@ var
  int1,int2: integer;
 begin
  inherited;
- if (componentstate*[csdesigning,csloading] = [csdesigning]) and 
+ if (componentstate*[csdesigning,csloading] = [csdesigning]) and
                                                (avalue <> nil) then begin
   for int1:= 0 to high(frecbands) do begin
    with frecbands[int1] do begin
@@ -4938,7 +4938,7 @@ begin
     end;
    end;
   end;
- end; 
+ end;
 end;
 
 procedure tcustombandgroup.setparentwidget(const avalue: twidget);
@@ -4996,7 +4996,7 @@ begin
   int2:= innerclientframewidth.cy;
   for int1:= 0 to high(frecbands) do begin
    with frecbands[int1] do begin
-    if bandisvisible(false) and not (bos_hidelastofpage in foptionsshow) or 
+    if bandisvisible(false) and not (bos_hidelastofpage in foptionsshow) or
            (bos_showlastofpage in foptionsshow) then begin
      int2:= int2 + bounds_cy;
     end;
@@ -5603,7 +5603,7 @@ begin
  fwidgetstate1:= fwidgetstate1 + [{ws1_nodesignvisible,}ws1_nodesignmove
                                 {,ws1_nodesignhandles,ws1_nodesigndelete}];
 // fpagewidth:= defaultreppagewidth;
-// fpageheight:= defaultreppageheight; 
+// fpageheight:= defaultreppageheight;
  fppmm:= defaultrepppmm;
  with fwidgetrect do begin
   cx:= round(defaultreppagewidth*defaultrepppmm);
@@ -5714,7 +5714,7 @@ begin
   fdatalink.dataset.next;
   if checkislastrecord(fdatalink,{$ifdef FPC}@{$endif}dosyncnextrecord) then begin
    include(fstate,rpps_lastrecord);
-  end; 
+  end;
   if canevent(tmethod(fonafternextrecord)) then begin
    fonafternextrecord(self);
   end;
@@ -5731,15 +5731,15 @@ var
  customdataempty: boolean;
  backgroundrendered: boolean;
 // hascustomdata: boolean;
- 
+
  procedure renderband(const aband: tcustomrecordband);
  begin
   with aband do begin
-   bo4:= (not customdataempty or backgroundrendered) and 
-          (bo2 and (bo_oddpage in foptions) or 
+   bo4:= (not customdataempty or backgroundrendered) and
+          (bo2 and (bo_oddpage in foptions) or
            not bo2 and (bo_evenpage in foptions)); //has data
    bo4:= not(bo4 or ((bo_once in foptions) and not (rbs_showed in fstate)));
-                //empty  
+                //empty
    render(acanvas,bo4);
    bo1:= bo1 and bo4;
   end;
@@ -5754,13 +5754,13 @@ begin
  end;
  fprintstarttime:= nowlocal;
  bo1:= odd(reppagenum);
- if bo1 and (rpo_firsteven in foptions) or not bo1 and 
+ if bo1 and (rpo_firsteven in foptions) or not bo1 and
                          (rpo_firstodd in foptions) then begin
-  freport.nextpage(acanvas);  
+  freport.nextpage(acanvas);
   with freport do begin
    if fpagenum = 0 then begin
     include(fstate,rs_dummypage);
-   end; 
+   end;
    inc(fpagenum);
   end;
  end;
@@ -5824,9 +5824,9 @@ begin
     end;
    end;
    if not (rpps_backgroundrendered in fstate) and not customdataempty then begin
-    renderbackground(acanvas);  
+    renderbackground(acanvas);
    end;
-               
+
    if rpps_backgroundrendered in fstate then begin
     doafterpaint1(acanvas);
     if canevent(tmethod(fonafterrender)) then begin
@@ -5848,7 +5848,7 @@ begin
    freport.doprogress;
   end;
   result:= result and bo1;
-  if bo1 or (fnextpage <> nil) or (rpps_finish in fstate) then begin 
+  if bo1 or (fnextpage <> nil) or (rpps_finish in fstate) then begin
                         //next page
    exclude(fstate,rpps_restart);
    doafterlastpage;
@@ -6104,7 +6104,7 @@ begin
  end
  else begin
   inherited;
- end;  
+ end;
 end;
 
 procedure tcustomreportpage.dofirstpage;
@@ -6391,13 +6391,13 @@ begin
 end;
 
 { tcustomreport }
- 
+
 constructor tcustomreport.create(aowner: tcomponent);
 begin
  fprintstarttime:= nowlocal;
  fppmm:= defaultrepppmm;
  fpagewidth:= defaultreppagewidth;
- fpageheight:= defaultreppageheight; 
+ fpageheight:= defaultreppageheight;
  foptions:= defaultreportoptions;
  initrepdesigninfo(frepdesigninfo);
  inherited;
@@ -6509,9 +6509,9 @@ function tcustomreport.exec(thread: tmsethread): integer;
  begin
   result:= (thread <> nil) and thread.terminated or fcanceled;
  end;
- 
+
  procedure fakevisible(const awidget: twidget; const aset: boolean);
- var 
+ var
   int1: integer;
  begin
   with twidget1(awidget) do begin
@@ -6529,10 +6529,10 @@ function tcustomreport.exec(thread: tmsethread): integer;
  end;
 
 var
- terminated1: boolean; 
+ terminated1: boolean;
  recnos: integerarty;
  renderbegin: boolean;
- 
+
  procedure dofinish(const islast: boolean);
  var
   int1: integer;
@@ -6561,7 +6561,7 @@ var
       if active then begin
        if (recnos[int1] > 0) and (recnos[int1] <= recordcount) then begin
         try
-         if recno <> recnos[int1] then begin 
+         if recno <> recnos[int1] then begin
                             //no checkbrowsemode if there was no scroll
           recno:= recnos[int1];
          end;
@@ -6584,17 +6584,17 @@ var
   end;
  end;
 
-var               
+var
  int1: integer;
  bo1: boolean;
  page1: tcustomreportpage;
  stream1: ttextstream;
  str1: string;
  restarted: boolean;
- 
+
 begin
  fstate:= [rs_running];
- result:= 0; 
+ result:= 0;
  fdefaultprintorientation:= pao_portrait;
  if fprinter <> nil then begin
   fdefaultprintorientation:= fprinter.canvas.printorientation;
@@ -6668,7 +6668,7 @@ begin
        fprinter.beginprint(true);
       end;
      end;
-    end;   
+    end;
     if canevent(tmethod(fonreportstart)) then begin
      application.lock;
      try
@@ -6804,7 +6804,7 @@ begin
  include(fstate,rs_running);
  fnilstream:= anilstream;
  fonrenderfinish:= onafterrender;
- if assigned(fonrenderfinish) and 
+ if assigned(fonrenderfinish) and
          (tobject(tmethod(fonrenderfinish).data) is tcomponent) then begin
   tcomponent(tmethod(fonrenderfinish).data).freenotification(self);
  end;
@@ -6878,7 +6878,7 @@ var
 begin
  for int1:= 0 to high(freppages) do begin
   comp1:= freppages[int1];
-  if (comp1.owner = root) and 
+  if (comp1.owner = root) and
            not (cssubcomponent in comp1.componentstyle) then begin
    proc(comp1);
   end;
@@ -6998,8 +6998,8 @@ end;
 
 function tcustomreport.getcanceled: boolean;
 begin
- result:= (fthread <> nil) and 
-                (fthread.terminated or ((reo_waitdialog in foptions) and 
+ result:= (fthread <> nil) and
+                (fthread.terminated or ((reo_waitdialog in foptions) and
                             application.waitcanceled)) or fcanceled;
 end;
 
@@ -7052,7 +7052,7 @@ begin
   finally
    application.unlock;
   end;
- end;  
+ end;
  if (fthread = nil) and (reo_waitdialog in foptions) and not canceled then begin
   application.processmessages;
  end;
@@ -7074,7 +7074,7 @@ begin
    if reo_autorelease in foptions then begin
     release;
    end;
-  end; 
+  end;
  end;
 end;
 
@@ -7082,7 +7082,7 @@ procedure tcustomreport.notification(acomponent: tcomponent;
                operation: toperation);
 begin
  inherited;
- if assigned(fonrenderfinish) and 
+ if assigned(fonrenderfinish) and
            (tmethod(fonrenderfinish).data = pointer(acomponent)) then begin
   fonrenderfinish:= nil;
  end;
@@ -7234,7 +7234,7 @@ begin
 end;
 }
  {treport}
- 
+
 constructor treport.create(aowner: tcomponent);
 begin
  create(aowner,true);
@@ -7339,7 +7339,7 @@ end;
 procedure treport.autoreadstat;
 begin
  if (fstatfile <> nil) and not (csdesigning in componentstate) and
-       (foptions*[reo_autoreadstat,reo_delayedreadstat] = 
+       (foptions*[reo_autoreadstat,reo_delayedreadstat] =
                                            [reo_autoreadstat]) then begin
   fstatfile.readstat;
  end;
@@ -7545,7 +7545,7 @@ end;
 function treppagenumdisp.getdisptext: msestring;
 var
  int1,int2: integer;
- mstr1: msestring; 
+ mstr1: msestring;
  squote,dquote: boolean;
 begin
  if fparentintf <> nil then  begin
@@ -7952,7 +7952,7 @@ begin
    activebandhaddata:= false;
    while (factiveband <= high(fareabands)) and not areafull do begin
     exclude(fstate,bas_bandstarted);
-    while (factiveband <= high(fareabands)) and 
+    while (factiveband <= high(fareabands)) and
                             not fareabands[factiveband].visible do begin
      inc(factiveband);
     end;
@@ -7961,14 +7961,14 @@ begin
      with fareabands[factiveband] do begin
       if not (bas_finished in self.fstate) then begin
        bo2:= odd(fparentintf.reppagenum);
-       bo2:= bo2 and (bo_oddpage in foptions) or 
+       bo2:= bo2 and (bo_oddpage in foptions) or
              not bo2 and (bo_evenpage in foptions); //has data
       end
       else begin
        bo2:= false;
       end;
       bo1:= ((rbs_showed in fstate) or not(bo_once in foptions)) and
-            ((rbs_pageshowed in fstate) or not bo2);   //empty    
+            ((rbs_pageshowed in fstate) or not bo2);   //empty
       render(acanvas,bo1);
       activebandhaddata:= activebandhaddata or not bo1;
       if bas_activebandchanged in self.fstate then begin
@@ -7999,7 +7999,7 @@ begin
           end;
           factiveband:= int1-1;
           break;
-         end;         
+         end;
         end;
        end;
        repeat
@@ -8015,9 +8015,9 @@ begin
         end;
        end
        else begin
-        if (fnextband <> nil) and 
+        if (fnextband <> nil) and
                    not (fdatalink.active and fdatalink.dataset.eof) then begin
-         band1:= fnextband;       
+         band1:= fnextband;
         end;
        end;
        if band1 <> nil then begin
@@ -8027,13 +8027,13 @@ begin
            exclude(fareabands[int2].fstate,rbs_showed);
           end;
           factiveband:= int1;
-          while (factiveband <= high(fareabands)) and 
+          while (factiveband <= high(fareabands)) and
                           not fareabands[factiveband].visible do begin
            inc(factiveband);
           end;
           activebandhaddata:= false;
           break;
-         end;         
+         end;
         end;
        end;
       end;
@@ -8105,11 +8105,11 @@ begin
   initareapage;
  end;
 end;
-    
-procedure tcustombandarea.endband(const acanvas: tcanvas; 
+
+procedure tcustombandarea.endband(const acanvas: tcanvas;
                       const sender: tcustomrecordband);
 begin
- acanvas.restore(fsaveindex); 
+ acanvas.restore(fsaveindex);
  include(fstate,bas_notfirstband);
  exclude(fstate,bas_top);
  sender.fstate:= sender.fstate + [rbs_showed,rbs_pageshowed];
@@ -8144,7 +8144,7 @@ end;
 
 function tcustombandarea.isfirstband: boolean;
 begin
- result:= (factiveband <= high(fareabands)) and 
+ result:= (factiveband <= high(fareabands)) and
                     not (rbs_pageshowed in fareabands[factiveband].fstate);
 // result:= not (bas_notfirstband in fstate);
 end;
@@ -8234,14 +8234,14 @@ begin
      if visible then begin
       if not (bas_finished in self.fstate) then begin
        bo2:= odd(fparentintf.reppagenum);
-       bo2:= bo2 and (bo_oddpage in foptions) or 
+       bo2:= bo2 and (bo_oddpage in foptions) or
              not bo2 and (bo_evenpage in foptions); //has data
       end
       else begin
        bo2:= false; //has no autodata
       end;
       bo1:= ((rbs_showed in fstate) or not(bo_once in foptions)) and
-            ((rbs_pageshowed in fstate) or not bo2);   //empty    
+            ((rbs_pageshowed in fstate) or not bo2);   //empty
       render(acanvas,bo1);
       if not bo2 then begin
        isfinished:= isfinished and bo1;
@@ -8360,7 +8360,7 @@ end;
 procedure tcustomtilearea.endband(const acanvas: tcanvas;
                const sender: tcustomrecordband);
 begin
- acanvas.restore(fsaveindex); 
+ acanvas.restore(fsaveindex);
  include(fstate,bas_notfirstband);
  exclude(fstate,bas_top);
  sender.fstate:= sender.fstate + [rbs_showed,rbs_pageshowed];
@@ -8667,8 +8667,8 @@ procedure tcustomtilearea.drawlines(const acanvas: tcanvas);
 var
  rect1: rectty;
  pt1,pt2: pointty;
- int1: integer; 
- cellh,cellv: real; 
+ int1: integer;
+ cellh,cellv: real;
 begin
  acanvas.save;
  acanvas.addcliprect(inflaterect(widgetsizerect,1000));
@@ -8692,8 +8692,8 @@ begin
    pt2.y:= pt1.y;
    drawline(acanvas,flihorz,pt1,pt2);
   end;
-  
-  pt1.y:= y - flitop.dist;  
+
+  pt1.y:= y - flitop.dist;
   pt2.y:= pt1.y;
   drawline(acanvas,flitop,pt1,pt2);
   pt1.y:= y + cy + flibottom.dist;
@@ -8702,7 +8702,7 @@ begin
 
   pt1.y:= y - flitop.dist;
   pt2.y:= y + cy + flibottom.dist;
-  pt1.x:= x - flileft.dist;  
+  pt1.x:= x - flileft.dist;
   pt2.x:= pt1.x;
   drawline(acanvas,flileft,pt1,pt2);
   pt1.x:= x + cx + fliright.dist;

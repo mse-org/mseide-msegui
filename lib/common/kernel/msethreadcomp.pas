@@ -20,7 +20,7 @@ type
  threadcompeventty = procedure(const sender: tthreadcomp) of object;
  threadcompoption = (tco_autorelease);
  threadcompoptionsty = set of threadcompoption;
- 
+
  tthreadcomp = class(tactcomponent)
   private
    fthread: teventthread;

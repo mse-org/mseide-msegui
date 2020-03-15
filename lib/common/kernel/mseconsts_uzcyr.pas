@@ -6,9 +6,9 @@
     This program is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-    
+
     Uzbek-Cyrillic translation by IvankoB.
-    
+
 }
 
 
@@ -17,7 +17,7 @@ unit mseconsts_uzcyr;
 interface
 uses
  mseconsts;
- 
+
 implementation
 uses
  msetypes{msestrings},sysutils,mseformatstr;
@@ -59,7 +59,7 @@ const
   #1049#1118#1082 ,                          //mr_no => Net
   #1041#1072#1088#1095#1072 ,                //mr_all => Vse
   'Yes all',  //mr_yesall
-  #1202#1077#1095' '#1073#1080#1088#1080 ,   //mr_noall =>  Nikakie  
+  #1202#1077#1095' '#1073#1080#1088#1080 ,   //mr_noall =>  Nikakie
   #1052#1072#1085' '#1101#1090#1080#1096,	 //mr_ignore => Nevazhno
   'Skip',    //mr_skip
   'Skip all', //mr_skipall
@@ -69,14 +69,14 @@ const
  uzcyr_stockcaption: stockcaptionaty = (
   '',                                        //sc_none
   '- '#1085#1086#1072#1085#1080#1179 ,       //sc_is_invalid => - neverno
-  #1060#1086#1088#1084#1072#1090' '#1085#1086#1090#1118#1171#1088#1080 ,   
+  #1060#1086#1088#1084#1072#1090' '#1085#1086#1090#1118#1171#1088#1080 ,
                               //sc_Format_error => Nesootvetstvie formatu
-  #1202#1077#1095' '#1085#1072#1088#1089#1072' '#1082#1077#1088#1072#1082' '#1101#1084#1072#1089 , 
+  #1202#1077#1095' '#1085#1072#1088#1089#1072' '#1082#1077#1088#1072#1082' '#1101#1084#1072#1089 ,
                              //sc_Value_is_required => Trebuetsya znachenie
   #1053#1086#1090#1118#1171#1088#1080 ,           //sc_Error    => Oshibka
   #1052#1080#1085'.' ,                            //sc_Min      => Min.
   #1052#1072#1082#1089'.' ,                       //sc_Max      => Maks.
-  #1053#1086#1090#1118#1171#1088#1080' '#1076#1080#1072#1087#1072#1079#1086#1085 , 
+  #1053#1086#1090#1118#1171#1088#1080' '#1076#1080#1072#1087#1072#1079#1086#1085 ,
                              //sc_Range_error => Nesootvetstvie diapazonu
 
   #1054#1083#1076#1080#1085#1075#1080 ,           //sc_Undohk     => Vernut`
@@ -119,7 +119,7 @@ const
   #1053#1086#1090#1118#1171#1088#1080' '#1075#1088#1072#1092#1080#1082' '#1092#1086#1088#1084#1072#1090#1080 ,         //sc_graphic_format_error
   'BMP-'#1088#1072#1089#1084#1080 ,          //sc_MS_Bitmap
   'ICO-'#1088#1072#1089#1084#1080 ,            //sc_MS_Icon
-  'JPEG-'#1088#1072#1089#1084#1080 ,         //sc_JPEG_Image 
+  'JPEG-'#1088#1072#1089#1084#1080 ,         //sc_JPEG_Image
   'PNG-'#1088#1072#1089#1084#1080 ,          //sc_PNG_Image
   'XPM-'#1088#1072#1089#1084#1080 ,          //sc_XPM_Image
   'PNM-'#1088#1072#1089#1084#1080 ,          //sc_PNM_Image
@@ -164,7 +164,7 @@ const
   'Landscape',          //sc_landscape print orientation
   'Delete row?',        //sc_Delete_row_question
   'selected rows?',     //sc_selected_rows
-  'Single item only',    //sc_Single_item_only 
+  'Single item only',    //sc_Single_item_only
   'Copy Cells',          //sc_Copy_Cells
   'Paste Cells',         //sc_Paste_Cells
   'Close',               //sc_close
@@ -220,7 +220,7 @@ const
   'Volume up',           //sc_volumeup
   'Cancel speech'        //sc_cancelspeech
 );
-    
+
 function delete_n_selected_rows(const params: array of const): msestring;
 begin
  with params[0] do begin

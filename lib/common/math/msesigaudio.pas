@@ -12,27 +12,27 @@ unit msesigaudio;
 interface
 uses
  mseaudio,msesignal,classes,mclasses,msethread,msetypes,msestrings;
- 
-const 
+
+const
  defaultblocksize = 1000;
- 
+
 type
  tsigoutaudio = class;
- 
+
  tsigaudioout = class(tcustomaudioout)
   private
   protected
    fsigout: tsigoutaudio;
    fblocksize: integer;
    fbuffer: bytearty;
-   function threadproc(sender: tmsethread): integer; override;   
+   function threadproc(sender: tmsethread): integer; override;
    procedure run; override;
    procedure stop; override;
    procedure initnames; override;
   public
    constructor create(const aowner: tsigoutaudio); reintroduce;
   published
-   property blocksize: integer read fblocksize write fblocksize 
+   property blocksize: integer read fblocksize write fblocksize
                                                   default defaultblocksize;
    property active;
    property server;
@@ -46,7 +46,7 @@ type
    property stacksizekb;
 //   property onsend;
 //   property onerror;
-   
+
  end;
 
  tsigoutaudio = class(tsigmultiinp)
@@ -69,7 +69,7 @@ type
 implementation
 uses
  msesysintf,msepulsesimple,sysutils{$ifndef FPC},classes_del{$endif};
- 
+
 { tsigaudioout }
 
 constructor tsigaudioout.create(const aowner: tsigoutaudio);
@@ -436,7 +436,7 @@ begin
  int1:= fsigout.inputs.count;
  channels:= int1;
  setlength(fsigout.fbuffer,int1*fblocksize);
- inherited; 
+ inherited;
 end;
 
 procedure tsigaudioout.stop;

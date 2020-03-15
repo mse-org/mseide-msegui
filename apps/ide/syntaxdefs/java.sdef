@@ -12,16 +12,16 @@ styles
 COLORS cl_default cl_default cl_default cl_ltyellow cl_dkgray cl_ltgray cl_white cl_ltblue
 
 keyworddefs java
-  'abstract' 'assert' 'byte' 'break' 'case' 'catch' 'char' 'const' 
-  'continue' 'default' 'delete' 'do' 'double' 'else' 
-  'enum' 'extends' 'instanceof' 'fastcall' 'finally' 
+  'abstract' 'assert' 'byte' 'break' 'case' 'catch' 'char' 'const'
+  'continue' 'default' 'delete' 'do' 'double' 'else'
+  'enum' 'extends' 'instanceof' 'fastcall' 'finally'
   'for' 'false' 'goto' 'if' 'import' 'inline' 'interface'
-  'implements' 'interrupt' 'long' 'near' 'new' 'null' 'protected' 
+  'implements' 'interrupt' 'long' 'near' 'new' 'null' 'protected'
   'strictfp' 'return' 'synchronized' 'this' 'throw' 'throws' 'try' 'transient' 'volatile' 'while'
 
 keyworddefs javaplus
   'void' 'public' 'package' 'private' 'final' 'class' 'static' 'boolean' 'int' 'native' 'float'
- 
+
 scope escapechar string
  endtokens
 # return on any char
@@ -60,7 +60,7 @@ scope macros macros
 scope block
  keywords
   java
-  javaplus type  
+  javaplus type
 
  calltokens
   '/*' comment1
@@ -86,5 +86,5 @@ scope main
   '#' macros
   '"' string
   '''' string1
-  
+
 

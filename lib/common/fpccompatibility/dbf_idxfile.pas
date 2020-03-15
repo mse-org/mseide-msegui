@@ -89,7 +89,7 @@ type
 
   TDbfIndexParser = class(TDbfParser)
   protected
-    FResultLen: Integer; 
+    FResultLen: Integer;
 
     procedure ValidateExpression(AExpression: string); override;
   public
@@ -314,7 +314,7 @@ type
     procedure WalkLast;
     function  WalkPrev: boolean;
     function  WalkNext: boolean;
-    
+
     function  CompareKeysNumericNDX(Key1, Key2: PChar): Integer;
     function  CompareKeysNumericMDX(Key1, Key2: PChar): Integer;
     function  CompareKeysString(Key1, Key2: PChar): Integer;
@@ -1508,7 +1508,7 @@ end;
 function TNdxPage.GetEntry(AEntryNo: Integer): Pointer;
 begin
   // get base + offset
-  Result := PChar(@PNdxPage(PageBuffer)^.FirstEntry) + 
+  Result := PChar(@PNdxPage(PageBuffer)^.FirstEntry) +
     (SwapWordLE(PIndexHdr(FIndexFile.IndexHeader)^.KeyRecLen) * AEntryNo);
 end;
 
@@ -2075,7 +2075,7 @@ begin
     DecodeDate(Now, year, month, day);
     if FIndexVersion = xBaseVII then
       PMdxHdr(Header)^.MdxVersion := 3
-    else  
+    else
       PMdxHdr(Header)^.MdxVersion := 2;
     PMdxHdr(Header)^.Year := year - 1900;
     PMdxHdr(Header)^.Month := month;
@@ -2171,7 +2171,7 @@ begin
   // now adjust keylen to align on DWORD boundaries
   PIndexHdr(FIndexHeader)^.KeyRecLen := SwapWordLE((SwapWordLE(
     PIndexHdr(FIndexHeader)^.KeyLen) + FEntryHeaderSize + 3) and not 3);
-  PIndexHdr(FIndexHeader)^.NumKeys := SwapWordLE((RecordSize - FPageHeaderSize) div 
+  PIndexHdr(FIndexHeader)^.NumKeys := SwapWordLE((RecordSize - FPageHeaderSize) div
     SwapWordLE(PIndexHdr(FIndexHeader)^.KeyRecLen));
 end;
 
@@ -2346,7 +2346,7 @@ var
 
   procedure CheckHeaderIntegrity;
   begin
-    if integer(SwapWordLE(PIndexHdr(FIndexHeader)^.NumKeys) * 
+    if integer(SwapWordLE(PIndexHdr(FIndexHeader)^.NumKeys) *
         SwapWordLE(PIndexHdr(FIndexHeader)^.KeyRecLen)) > RecordSize then
     begin
       // adjust index header so that integrity is correct
@@ -2941,7 +2941,7 @@ begin
       // DB4 MDX
       NumDecimals := 0;
       case ResultType of
-        etInteger: 
+        etInteger:
           begin
             IntSrc := PInteger(Result)^;
             // handle zero differently: no decimals
@@ -3598,7 +3598,7 @@ begin
 
   // we now know cursor position, resync possible range
   ResyncRange(false);
-  
+
   // go to cursor position
   case action of
     0: WalkFirst;

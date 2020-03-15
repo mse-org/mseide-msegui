@@ -4,7 +4,7 @@ interface
 
 uses
  msetypes,msestrings;
- 
+
 type
  unicodepagety = (ucp_00,ucp_01,ucp_02,ucp_03,ucp_04,ucp_05,ucp_06,
                   ucp_1e,
@@ -15,7 +15,7 @@ type
   glyphnames: string;
  end;
  encodingsty = array[unicodepagety] of encodingty;
- 
+
 const
  nl = lineend;
  encodings: encodingsty = (
@@ -203,7 +203,7 @@ const
 '/uni04E8 /uni04E9 /uni04EA /uni04EB /uni04EC /uni04ED /uni04EE /uni04EF '+nl+ //E8
 '/uni04F0 /uni04F1 /uni04F2 /uni04F3 /uni04F4 /uni04F5 /uni04F6 /uni04F7 '+nl+ //F0
 '/uni04F8 /uni04F9 /uni04FA /uni04FB /uni04FC /uni04FD /uni04FE /uni04FF '+nl //F8
-   ),                                                                                     
+   ),
   (
   codepage: $05;
   name: 'E05';         //cyrillic supplement
@@ -240,7 +240,7 @@ const
 '/afii57688 /afii57689 /afii57690 /uni05EB /uni05EC /uni05ED /uni05EE /uni05EF '+nl+ //E8
 '/afii57716 /afii57717 /afii57718 /uni05F3 /uni05F4 /uni05F5 /uni05F6 /uni05F7 '+nl+ //F0
 '/uni05F8 /uni05F9 /uni05FA /uni05FB /uni05FC /uni05FD /uni05FE /uni05FF '+nl //F8
-   ),                                                                                     
+   ),
   (
   codepage: $06;
   name: 'E06';         //arabic
@@ -277,7 +277,7 @@ const
 '/uni06E8 /uni06E9 /uni06EA /uni06EB /uni06EC /uni06ED /uni06EE /uni06EF '+nl+ //E8
 '/uni06F0 /uni06F1 /uni06F2 /uni06F3 /uni06F4 /uni06F5 /uni06F6 /uni06F7 '+nl+ //F0
 '/uni06F8 /uni06F9 /uni06FA /uni06FB /uni06FC /uni06FD /uni06FE /uni06FF '+nl //F8
-   ),                                                                                     
+   ),
   (
   codepage: $1E;
   name: 'E1E';         //latin extended additional
@@ -538,42 +538,42 @@ const
 '/uni26F8 /uni26F9 /uni26FA /uni26FB /uni26FC /uni26FD /uni26FE /uni26FF '+nl //F8
   )
  );
-{   
+{
  undefmap: encodingty = (
   codepage: -1;
   name: 'Exx';
   glyphnames:
-'/.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef '+nl+      //00 
+'/.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef '+nl+      //00
 '/.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef '+nl+      //08
-'/.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef '+nl+      //10 
+'/.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef '+nl+      //10
 '/.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef '+nl+      //18
-'/.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef '+nl+      //20 
+'/.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef '+nl+      //20
 '/.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef '+nl+      //28
-'/.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef '+nl+      //30 
+'/.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef '+nl+      //30
 '/.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef '+nl+      //38
-'/.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef '+nl+      //40 
+'/.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef '+nl+      //40
 '/.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef '+nl+      //48
-'/.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef '+nl+      //50 
+'/.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef '+nl+      //50
 '/.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef '+nl+      //58
-'/.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef '+nl+      //60 
+'/.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef '+nl+      //60
 '/.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef '+nl+      //68
-'/.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef '+nl+      //70 
+'/.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef '+nl+      //70
 '/.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef '+nl+      //78
-'/.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef '+nl+      //80 
+'/.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef '+nl+      //80
 '/.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef '+nl+      //88
-'/.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef '+nl+      //90 
+'/.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef '+nl+      //90
 '/.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef '+nl+      //98
-'/.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef '+nl+      //a0 
+'/.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef '+nl+      //a0
 '/.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef '+nl+      //a8
-'/.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef '+nl+      //b0 
+'/.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef '+nl+      //b0
 '/.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef '+nl+      //b8
-'/.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef '+nl+      //c0 
+'/.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef '+nl+      //c0
 '/.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef '+nl+      //c8
-'/.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef '+nl+      //d0 
+'/.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef '+nl+      //d0
 '/.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef '+nl+      //d8
-'/.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef '+nl+      //e0 
+'/.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef '+nl+      //e0
 '/.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef '+nl+      //e8
-'/.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef '+nl+      //f0 
+'/.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef '+nl+      //f0
 '/.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef '+nl       //f8
  );
 }

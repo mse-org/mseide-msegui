@@ -8,7 +8,7 @@ styles
 
 # COLORS font/paper/statement/pairmark/fontline/line/focusline/selected
 COLORS cl_default cl_default cl_default cl_ltyellow cl_dkgray cl_ltgray cl_white cl_ltblue
- 
+
 keyworddefs llvm
  'RET' 'BR' 'SWITCH' 'INDIRECTBR' 'INVOKE' 'RESUME' 'UNREACHABLE'
  'ADD' 'FADD' 'SUB' 'FSUB' 'MUL' 'FMUL' 'UDIV' 'SDIV'
@@ -25,20 +25,20 @@ keyworddefs llvm
  'CLEAR_CACHE' 'INSTRPROF_INCREMENT'
  'MEMCPY' 'MEMMOVE' 'MEMSET' 'SQRT' 'POWI' 'SIN' 'COS' 'POW' 'EXP' 'EXP2'
  'LOG' 'LOG10' 'LOG2' 'FMA' 'FABS' 'MINNUM' 'MAXNUM' 'COPYSIGN' 'FLOOR' 'CEIL'
- 'TRUNC' 'RINT' 'NEARBYINT' 'ROUND' 
+ 'TRUNC' 'RINT' 'NEARBYINT' 'ROUND'
  'BSWAP' 'CTPOP' 'CTLZ' 'CTTZ'
  'WITH' 'OVERFLOW' 'SADD' 'UADD' 'SSUB' 'USUB' 'SMUL' 'UMUL'
  'FMULADD'
- 'CONVERT' 'FROM' 'FP16' 
+ 'CONVERT' 'FROM' 'FP16'
  'INIT' 'TRAMPOLINE' 'ADJUST'
  'LIFETIME' 'START' 'END' 'INVARIANT'
- 'VAR' 'ANNOTATION' 'PTR' 'TRAP' 'DEBUGTRAP' 'STACKPROTECTOR' 
+ 'VAR' 'ANNOTATION' 'PTR' 'TRAP' 'DEBUGTRAP' 'STACKPROTECTOR'
  'STACKPROTECTORCHECK' 'OBJECTSIZE' 'EXPECT' 'ASSUME' 'DONOTHING'
- 
+
 scope comment1 comment
  endtokens
   ''
-  
+
 scope main
 
  keywords words

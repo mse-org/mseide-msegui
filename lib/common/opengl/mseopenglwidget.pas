@@ -16,7 +16,7 @@ uses
  {$ifdef unix}mseglx,{$ifdef FPC}x,{$endif}xlib,{$else}windows,{$endif}
  mseguiintf,msetypes,mseguiglob,mseclasses,msemenus,mseevent,msegui,msegraphics,
  msegraphutils;
- 
+
 {$ifdef unix}
 {$ifdef FPC}
  {$macro on}
@@ -43,7 +43,7 @@ uses
  {$define xtextproperty:= txtextproperty}
 {$endif}
 const
-  defaultvisualattributes: array[0..8] of integer = 
+  defaultvisualattributes: array[0..8] of integer =
   (GLX_RGBA,GLX_RED_SIZE,8,GLX_GREEN_SIZE,8,GLX_BLUE_SIZE,8,
    GLX_DOUBLEBUFFER,none);
 {$endif}
@@ -53,7 +53,7 @@ type
  openglwidgeteventty = procedure(const sender: tcustomopenglwidget) of object;
  openglrendereventty = procedure(const sender: tcustomopenglwidget;
                  const aupdaterect: rectty) of object;
- 
+
  tcustomopenglwidget = class(tcustomwindowwidget)
   private
    {$ifdef unix}
@@ -99,44 +99,44 @@ type
   public
    constructor create(aowner: tcomponent); override;
    {$ifdef unix}
-   property visualattributes: integerarty read fvisualattributes 
-                                                   write fvisualattributes;   
+   property visualattributes: integerarty read fvisualattributes
+                                                   write fvisualattributes;
    {$endif}
   published
    property onrender: openglrendereventty read fonrender write fonrender;
-   property attrib_buffersize: integer read fattrib_buffersize 
+   property attrib_buffersize: integer read fattrib_buffersize
                   write fattrib_buffersize default -1;
-   property attrib_level: integer read fattrib_level 
+   property attrib_level: integer read fattrib_level
                   write fattrib_level default 0;
-   property attrib_rgba: boolean read fattrib_rgba 
+   property attrib_rgba: boolean read fattrib_rgba
                   write fattrib_rgba default true;
-   property attrib_doublebuffer: boolean read fattrib_doublebuffer 
+   property attrib_doublebuffer: boolean read fattrib_doublebuffer
                   write fattrib_doublebuffer default true;
-   property attrib_dri: boolean read fattrib_dri 
+   property attrib_dri: boolean read fattrib_dri
                   write fattrib_dri default true;
-   property attrib_stereo: boolean read fattrib_stereo 
+   property attrib_stereo: boolean read fattrib_stereo
                   write fattrib_stereo default false;
    property attrib_auxbuffers: integer read fattrib_auxbuffers
                   write fattrib_auxbuffers default -1;
-   property attrib_redsize: integer read fattrib_redsize 
+   property attrib_redsize: integer read fattrib_redsize
                   write fattrib_redsize default 8;
-   property attrib_greensize: integer read fattrib_greensize 
+   property attrib_greensize: integer read fattrib_greensize
                   write fattrib_greensize default 8;
-   property attrib_bluesize: integer read fattrib_bluesize 
+   property attrib_bluesize: integer read fattrib_bluesize
                   write fattrib_bluesize default 8;
-   property attrib_alphasize: integer read fattrib_alphasize 
+   property attrib_alphasize: integer read fattrib_alphasize
                   write fattrib_alphasize default -1;
-   property attrib_depthsize: integer read fattrib_depthsize 
+   property attrib_depthsize: integer read fattrib_depthsize
                   write fattrib_depthsize default -1;
-   property attrib_stencilsize: integer read fattrib_stencilsize 
+   property attrib_stencilsize: integer read fattrib_stencilsize
                   write fattrib_stencilsize default -1;
-   property attrib_accumredsize: integer read fattrib_accumredsize 
+   property attrib_accumredsize: integer read fattrib_accumredsize
                   write fattrib_accumredsize default -1;
-   property attrib_accumgreensize: integer read fattrib_accumgreensize 
+   property attrib_accumgreensize: integer read fattrib_accumgreensize
                   write fattrib_accumgreensize default -1;
-   property attrib_accumbluesize: integer read fattrib_accumbluesize 
+   property attrib_accumbluesize: integer read fattrib_accumbluesize
                   write fattrib_accumbluesize default -1;
-   property attrib_accumalphasize: integer read fattrib_accumalphasize 
+   property attrib_accumalphasize: integer read fattrib_accumalphasize
                   write fattrib_accumalphasize default -1;
  end;
 
@@ -174,11 +174,11 @@ type
    property onwindowmousewheelevent;
    property ondestroy;
  end;
-  
+
 implementation
 uses
  sysutils{$ifdef unix}{$ifdef FPC},xutil{$endif}{$endif},mseglextglob;
- 
+
 { tcustomopenglwidget }
 
 constructor tcustomopenglwidget.create(aowner: tcomponent);
@@ -246,8 +246,8 @@ var
    ar1[index]:= atag;
    inc(index);
   end;
- end; 
- 
+ end;
+
  procedure putvalue(const atag,avalue,defaultvalue: integer);
  begin
   if index > high(ar1) then begin
@@ -260,12 +260,12 @@ var
    inc(index);
   end;
  end;
- 
+
 var
  int1,int2: integer;
  visinfo: pxvisualinfo;
  attributes: xsetwindowattributes;
- 
+
 begin
  fdpy:= msedisplay;
  fscreen:= xdefaultscreen(fdpy);
@@ -317,7 +317,7 @@ begin
 {$else}
 var
  pixeldesc: tpixelformatdescriptor;
- int1: integer; 
+ int1: integer;
 begin
  initializeopengl([]);
  aid:= createchildwindow;
@@ -367,7 +367,7 @@ procedure tcustomopenglwidget.updateviewport(const arect: rectty);
 begin
  if setcurrent then begin
   with arect do begin
-   glviewport(x,y,cx,cy);  
+   glviewport(x,y,cx,cy);
   end;
  end;
 end;
@@ -404,4 +404,3 @@ begin
 end;
 
 end.
- 

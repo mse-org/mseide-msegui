@@ -8,7 +8,7 @@ Version 4.6.2
 2018-10-14
  getsubformeventty and initsubformeventty sender parameter TObject->ttabpage.
 2018-09-25
- winidty = ptruint ->  winidty = type ptruint. Existing IDE generated 
+ winidty = ptruint ->  winidty = type ptruint. Existing IDE generated
  eventhandlers with winidty parameter (createwinideventty, destroywinideventty)
  must be updated (longword/qword -> winidty).
 2018-09-23
@@ -39,18 +39,18 @@ Version 4.6
  Definition of the inner active area of buttons is made with
  the new tframe property frameo_* instead of framei_*,
  framei_* is used in order to adjust the caption rect.
- ttabs.captionframe_* replaced by tframe.framei_*. 
+ ttabs.captionframe_* replaced by tframe.framei_*.
 2017-07-13
  Definition of "msestring" moved from "msestrings" to "msetypes".
 2017-04-14
  cellinfoty boolean flags replaced by celldrawstatesty set.
- 
+
 Version 4.4.2
 2017-04-08
 2017-04-03
  cl_defaultrect -> cl_buttondefaultrect.
 2017-03-30
- Changed parameter clipandmove -> clip, move in 
+ Changed parameter clipandmove -> clip, move in
  beforeframepaintbackgroundeventty and beforeframepaintbackgroundeventty.
 2017-02-20
  dno_append removed from tdbnavigator default options.
@@ -109,17 +109,17 @@ Version 4.0
   frameface_offsetactiveclicked removed. The resulting offset is now the sum
   of all active offsets.
 2015-10-24
- tslider.scrollbar.face moved to tcustomscrollbar, 
+ tslider.scrollbar.face moved to tcustomscrollbar,
   disable tslider.scrollbar.face in order to show the pattern.
- 
+
 Version 4.0beta1
-2015-09-30 
+2015-09-30
  tfiledialog statvalues lastdir, filehistory, filefilter and fielefilterindext
   moved to oe1_saveoptions section.
 2015-09-27
  charencodingty ce_utf8n -> ce_utf8, please load broken forms into MSEide
   in order to fix the *.mfm files.
-2015-09-15 
+2015-09-15
  Internal character encoding is utf-16 instead of UCS2.
 2015-08-09
  applyrecupdateeventty asql parameter is msestring.
@@ -137,7 +137,7 @@ Version 3.8
  tdscontroller.recnonullbased -> recnozerobased.
 2014-12-26
  tskinfont has template property instead of individual properties.
- 
+
 Version 3.6
 2014-11-25
 2014-11-19
@@ -146,7 +146,7 @@ Version 3.6
   oe1_saveoptions,oe1_checkvalueafterstatread.
  tfiledialog.optionseedit -> optionsedit1.
 2014-11-16
- Type of "onshortcut" is "shortcuteventty" with an additional "origin" 
+ Type of "onshortcut" is "shortcuteventty" with an additional "origin"
   parameter.
 2014-10-14
  Dropdowncols fontcoloractive -> fontacitve.
@@ -160,9 +160,9 @@ Version 3.4a
 Version 3.4
 2014-08-15
 2014-07-15
- tpoorstringdatalist.addchars() processeditchars: boolean -> 
+ tpoorstringdatalist.addchars() processeditchars: boolean ->
   aoptions: addcharoptionsty.
- tcustomstringcol.addchars() processeditchars: boolean -> 
+ tcustomstringcol.addchars() processeditchars: boolean ->
   aoptions: addcharoptionsty.
 2014-06-26
  TField.ProviderFlags pfInInsert and pfInitInsert removed.
@@ -175,7 +175,7 @@ Version 3.4
  t*bitmap.monochrome removed, use t*bitmap.kind instead.
 2014-02-26
  params parameter for tmaskedbitmap.loadfrom*().
- 
+
 Version 3.2
 2014-01-30
 2014-01-27
@@ -185,11 +185,11 @@ Version 3.2
 Version 3.0
 2013-09-27
 2013-07-14
- No #0 for last byte in tcanvas.dashes, 
+ No #0 for last byte in tcanvas.dashes,
   use cl_transparent colorbackground instead.
 2013-07-02
  tcanvas.lineoptions -> tcanvas.options
- 
+
 Version 3.0beta1
 2013-06-29
 2013-05-02
@@ -216,7 +216,7 @@ Version 3.0beta1
  Forking of classes.pp. Add "mclasses" after "classes" in uses.
 2013-01-19
  Forking of db.pas. Change "db" -> "mdb" in uses.
- 
+
 Version 2.8.6
 2012-12-31
  lib/common/kernel/i386-linux -> lib/common/kernel/linux.
@@ -267,7 +267,7 @@ Version 2.8.4
 2012-04-13
  mopenssl -> mseopenssl, uses dynlibinfoty, stadardised with other lib bindings.
  BIO functions -> mseopensslbio.
- 
+
 Version 2.8.2
 2012-04-01
 2012-02-01
@@ -276,7 +276,7 @@ Version 2.8.2
 2012-01-27
  optionwidget ow_fontglyphheight,ow_fontlineheight,ow_autoscale ->
   optionwidget1 ow1_fontglyphheight,ow1_fontlineheight,ow1_autoscale.
- 
+
 Version 2.8
 2012-01-11
 2011-12-31
@@ -288,7 +288,7 @@ Version 2.8
 2011-12-20
  Statfile multi line string values format unified.
  rttistat ansi string value stored in binary.
- 
+
 Version 2.8rc1
 2011-12-12
 2011-11-28
@@ -343,7 +343,7 @@ Version 2.8rc1
  tmse*field.providerflags1 pf1_refresh -> pf1_refreshinsert, pf1_refreshupdate.
 2011-02-28
  Font handling functions moved to graphics/msefont.pas.
- 
+
 Version 2.6
 2011-02-26
 2011-02-13
@@ -354,7 +354,7 @@ Version 2.6
  Changed iobjectpicker and tpickwidget event properties.
 2010-11-2
  No negative ttimer values for single shot, use options to_single instead.
- 
+
 Version 2.4
 2010-11-01
 2010-10-22
@@ -370,13 +370,13 @@ Version 2.4
 2010-09-01
  tapplication.create() calls lock().
 2010-08-27
- Read versions of image format units have suffix "read", 
+ Read versions of image format units have suffix "read",
  example mseformatpng -> mseformatpngread.
 2010-08-18
  DB single key locate() replaced by multi key version.
 2010-06-5
  application.screensize -> application.screenrect.
- 
+
 Version 2.4rc1
 2010-06-03
 2010-05-21
@@ -430,7 +430,7 @@ Version 2.4rc1
  dialoptionty do_rotatetext -> dialmarkeroptionty dmo_rotatetext and
  dialtickoptionty dto_rotatetext.
  tcustomdialcontroller.offset -> start.
- 
+
 Version 2.2beta2
 2009-11-18
 2009-11-09
@@ -439,10 +439,10 @@ Version 2.2beta2
  tfont.colorshadow -> shadow_color.
 2009-10-19
  twidget.optionswidget ow_autosize, ow_autosizeanright, ow_autosizeanleft moved
- to optionswidget1 ow1_autowidth, ow1_autoheight, ow1_autosizeanright, 
+ to optionswidget1 ow1_autowidth, ow1_autoheight, ow1_autosizeanright,
  ow1_autosizeanbottom.
  Changed signature of endpickmoveeventty.
-2009-09-16 
+2009-09-16
  trichbutton has no stockglyph, use trichstockglyphbutton.
 2009-08-05
  datatypty -> listdatatypety.
@@ -450,7 +450,7 @@ Version 2.2beta2
  optiongridty og_merged -> og_colmerged.
 2009-06-27
  tmsesqlquery.refresh does not restore recno, use controller.refresh(true).
- 
+
 Version 2.2beta1
 2009-06-23
 2009-06-17
@@ -468,39 +468,39 @@ Version 2.2beta1
  Event handlers must be in "managed" area of the class
  definition, between "class" and the first "private", "protected",
  "public" or "published".
-2009-03-02 
+2009-03-02
  const modifiers for indexeventty parameters (datalist.pas).
 2009-02-13
  titemedit.onmouseevent -> onclientmouseevent.
 2009-02-12
- optiongridty og_rotaterow -> og_wraprow, additional og_wrapcol, 
- must be activated in existing projects. 
+ optiongridty og_rotaterow -> og_wraprow, additional og_wrapcol,
+ must be activated in existing projects.
 2009-02-06
  checkvalueeventty, settexteventty, gettexteventty tdataedit -> tcustomdataedit.
 2009-02-04
  tdatacol.onchange -> datacolchangeeventty.
- 
+
 Version 2.0rc1
 2009-02-02
 2009-01-28
  tdb*grid.datasourec moved to tdb*grid.datalink.
 2009-01-17
- mouseeventinfoty, mousewheeleventinfoty, keyeventinfoty moved to 
+ mouseeventinfoty, mousewheeleventinfoty, keyeventinfoty moved to
  mseguiglob.pas.
 2009-01-12
- tdb*editwidget.datasource, optionsdb  and datafield moved to 
+ tdb*editwidget.datasource, optionsdb  and datafield moved to
  tdb*editwidget.datalink.
 2008-12-16
  tmseform descendants without resources (no *.mfm file) must override
  class function hasresource() and return false.
-  
+
 Version 2.0beta2
 2008-12-15
 2008-10-25
  int64 parameter for tlookupbuffer.addrow and tlookupbuffer.addrows.
 2008-10-16
  tcustomrealedit.asinteger returns minint for empty value.
- 
+
 Version 2.0beta1
 2008-10-15
 2008-10-09
@@ -514,7 +514,7 @@ Version 2.0beta1
  tthreadcomp.runwithwaitdialog moved to tguithreadcomp.
 2008-05-31
  optioneditty oe_returntaborder -> optionwidgetty ow_keyreturntaborder
- 
+
 Version 1.8rc1
 2008-05-24
 2008-05-14
@@ -523,9 +523,9 @@ Version 1.8rc1
  treport.onbeforerender -> reporteventty.
  treport.onafterrender -> onreportfinished.
 2008-03-26
- tbuttonframe.options fbo_flat, fbo_noanim -> 
+ tbuttonframe.options fbo_flat, fbo_noanim ->
  tcustomframe.optionsskin fso_flat, fso_noanim.
- 
+
 Version 1.8beta1
 2008-03-20
  gridcoordty parameter for griddataeventty.
@@ -562,7 +562,7 @@ Version 1.8beta1
 2007-12-01
  tcoloredit.buttonellipse moved to frame.
  tframebutton.visible,enabled and left no more published, use options.
- 
+
 Version 1.6
 2007-11-19
 2007-10-29
@@ -570,8 +570,8 @@ Version 1.6
  modalresultty moved to mseglob.
  Action basics moved to mseact.
  tactivator moved to mseapplication.
- 
-2007-09-29 
+
+2007-09-29
  sqlscripteventty -> sqlstatementeventty
  sqlscripterroreventty -> sqlstatementerroreventty
 2007-09-27 menuoptinonsty mo_flat -> mo_noanim.
@@ -581,11 +581,11 @@ Version 1.4
  Default value of tdbnaviagator.options = [dno_confirmdelete,dno_append].
  tcustomrecordband.options bo_show*/bo_hide* -> optionsshow bos_show*/bos_hide*
 2007-08-29 Defaultvalue of tmsebufdataset.packetrecords = -1.
-2007-08-25 
+2007-08-25
  tfieldlink.dataset -> destdataset.
  tfieldlink.datafield -> destdatafield.
  tfieldfiledlink.sourcedatafield -> datafield.
- 
+
 Version 1.4beta1
 2007-08-07 Modified type of tmsebufdataset.onupdateerror.
 2007-08-01 TDatabase -> tmdatabase, moved to msedatabase.pas.
@@ -606,11 +606,11 @@ Version 1.2beta2
 2007-03-18 tgripframe.grip_colorbutton -> grip_colorglyph.
 2007-02-23 Published properties tcolordropdownlistcontroller.cols, valuecol
  and itemindex removed.
-2007-02-21 tprintercanvas.firstpage, lastpage replaced by 
+2007-02-21 tprintercanvas.firstpage, lastpage replaced by
  tprintercanvas.pages.
 
 Version 1.2beta1
-2007-02-15 TSQLQuery.UpdateSQL,InsertSQL and DeleteSQL renamed to 
+2007-02-15 TSQLQuery.UpdateSQL,InsertSQL and DeleteSQL renamed to
  SQLUpdate,SQLInsert and SQLDelete.
 2007-02-06 tstockobjects.paintglyph order of parameters changed.
 2007-02-06 timagelist.paint order of parameters changed.
@@ -625,7 +625,7 @@ Version 1.2beta1
 Version 1.0rc1
 2006-10-19 oldb_invalidateonupdatedata -> olbdb_invalidateonupdatedata.
 2006-10-18 Blob suport for tmibconnection and tmpqconnection.
-2006-10-17 Calculated fields for tmbufdataset. 
+2006-10-17 Calculated fields for tmbufdataset.
 2006-10-16 tdbimage.
 2006-10-15 tfieldfieldlink.
 2006-09-27 tmsecomponent.linkedobjects, tobjeclinker.linkedobjects.
@@ -662,10 +662,10 @@ Version 0.9b
 Version 0.9a
 2006-07-08 tcustomedit.onkeydown.
 2006-07-07 Field keyeventty.keynomod, holds unmodified key.
-2006-07-06 property tgriddatalink.datafield, sets tcustomgrid.rowcolorstate and 
+2006-07-06 property tgriddatalink.datafield, sets tcustomgrid.rowcolorstate and
  rowfontstate according to tgriddadalink.field.asinteger.
 2006-07-05 tinplaceedit.lasttextclipped.
-2006-07-05 Default of tgroupbox.optionswidget + 
+2006-07-05 Default of tgroupbox.optionswidget +
  [ow_arrrowfocusin,ow_arrowfocusout,ow_parenttabfocus,ow_subfocus].
 2006-07-05 Flag twidget.optionswidget ow_parenttabfocus.
 2006-07-04 tdbcalendardatetimeedit.

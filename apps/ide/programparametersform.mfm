@@ -23,7 +23,7 @@ object programparametersfo: tprogramparametersfo
     frame.localprops = []
     frame.localprops1 = []
     frame.buttons.count = 1
-    frame.buttons.items = <    
+    frame.buttons.items = <
       item
         color = -2147483646
         imagenr = 17
@@ -76,10 +76,10 @@ object programparametersfo: tprogramparametersfo
     frame.localprops1 = []
     frame.button.color = -2147483646
     frame.buttons.count = 2
-    frame.buttons.items = <    
+    frame.buttons.items = <
       item
         color = -2147483646
-      end    
+      end
       item
         color = -2147483646
         imagenr = 17
@@ -101,7 +101,7 @@ object programparametersfo: tprogramparametersfo
     anchors = [an_left, an_top, an_right]
     dropdown.options = [deo_keydropdown, deo_autosavehistory, deo_cliphint]
     dropdown.cols.count = 1
-    dropdown.cols.items = <    
+    dropdown.cols.items = <
       item
       end>
     reffontheight = 14
@@ -125,36 +125,36 @@ object programparametersfo: tprogramparametersfo
     anchors = [an_left, an_top, an_right, an_bottom]
     optionsgrid = [og_colsizing, og_keyrowmoving, og_rowinserting, og_rowdeleting, og_focuscellonenter, og_autofirstrow, og_autoappend, og_savestate, og_colchangeontabkey, og_wrapcol, og_autopopup]
     fixrows.count = 1
-    fixrows.items = <    
+    fixrows.items = <
       item
         height = 16
         captions.count = 3
-        captions.items = <        
+        captions.items = <
           item
             caption = 'on'
-          end        
+          end
           item
             caption = 'Name'
-          end        
+          end
           item
             caption = 'Value'
           end>
       end>
     datacols.count = 3
     datacols.options = [co_savestate]
-    datacols.items = <    
+    datacols.items = <
       item[envvaron]
         width = 20
         options = [co_drawfocus, co_savestate]
         widgetname = 'envvaron'
         dataclass = tgridintegerdatalist
-      end    
+      end
       item[envvarname]
         width = 103
         options = [co_proportional, co_savestate]
         widgetname = 'envvarname'
         dataclass = tgridmsestringdatalist
-      end    
+      end
       item[envvarvalue]
         width = 194
         options = [co_fill, co_savestate]
@@ -202,7 +202,7 @@ object programparametersfo: tprogramparametersfo
       frame.localprops = [frl_levelo, frl_colorclient]
       frame.localprops1 = []
       frame.buttons.count = 1
-      frame.buttons.items = <      
+      frame.buttons.items = <
         item
           color = -2147483646
           imagenr = 17

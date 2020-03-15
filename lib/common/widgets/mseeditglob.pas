@@ -18,14 +18,14 @@ uses
 
 type
               //used in MSEifi
- optioneditty = (oe_readonly,oe_undoonesc,            
+ optioneditty = (oe_readonly,oe_undoonesc,
                  oe_closequery,oe_checkmrcancel,
                  oe_nogray,
-                 oe_linebreak, 
+                 oe_linebreak,
                     // if oe_shiftreturn -> shift key_return inserts linebreak
                     // else         -> key_return inserts linebreak
                  oe_shiftreturn,
-                 oe_forcereturncheckvalue, 
+                 oe_forcereturncheckvalue,
                     //call checkvalue unconditionally by key_return
                  oe_eatreturn,
            //      oe_returntaborder, //key_return selects next widget in taborder
@@ -48,16 +48,16 @@ type
                  oe_hintclippedtext,
                  oe_locate,
                  oe_casesensitive,
-                 
+
                  oe_notnull,
                  oe_null, //accept empty value independent of min setting
                           //in trealedit
-                 oe_directdbnullcheck, //check null by canclose()         
+                 oe_directdbnullcheck, //check null by canclose()
                  oe_savevalue,oe_savestate,oe_saveoptions, //deprecated,
-                 oe_checkvaluepaststatread           //moved to optionsedit1ty                 
-                 
+                 oe_checkvaluepaststatread           //moved to optionsedit1ty
+
 //                 oe_autopopupmenu, //deprecated, moved to optionsedit1ty
-//                 oe_keyexecute 
+//                 oe_keyexecute
                  );
  optionseditty = set of optioneditty;
 const
@@ -65,10 +65,10 @@ const
                           oe_saveoptions,oe_checkvaluepaststatread];
  invisibleoptionsedit = [ord(oe_savevalue),ord(oe_savestate),
                          ord(oe_saveoptions),ord(oe_checkvaluepaststatread)];
- 
+
 type
  optionedit1ty = (oe1_noselectall,oe1_multiline,
-                  oe1_autopopupmenu, 
+                  oe1_autopopupmenu,
                   oe1_keyexecute,    //alt+down-key starts dialog
                   oe1_readonlydialog,
                   oe1_savevalue,oe1_savestate,oe1_saveoptions,
@@ -127,7 +127,7 @@ type
   procedure domousewheelevent(var info: mousewheeleventinfoty);
   procedure editnotification(var info: editnotificationinfoty);
  end;
-  
+
 const
  defaultoptionsedit = [oe_undoonesc,oe_closequery,oe_exitoncursor,
                        oe_focusrectonreadonly,
@@ -138,7 +138,7 @@ const
                        oe_checkmrcancel];
  defaultoptionsedit1 = [oe1_autopopupmenu,oe1_keyexecute,
                oe1_checkvalueafterstatread,oe1_savevalue,oe1_savestate];
- 
+
  nullcoord: gridcoordty = (col: 0; row: 0);
  invalidcell: gridcoordty = (col: invalidaxis; row: invalidaxis);
  bigcoord: gridcoordty = (col: bigint; row: bigint);
@@ -163,14 +163,14 @@ function mgr(const start,stop: gridcoordty): gridrectty;  overload;
 function gridcoordisequal(const a,b: gridcoordty): boolean;
 
 procedure transferoptionsedit(const sender: tcomponent;
-                 const source: optionseditty; var dest: optionseditty; 
+                 const source: optionseditty; var dest: optionseditty;
                                               var dest1: optionsedit1ty);
                  //move deprecated flags
-                 
+
 implementation
 uses
  msebits;
- 
+
 function makegridcoord(col: integer; row: integer): gridcoordty;
 begin
  result.col:= col;
@@ -253,11 +253,11 @@ begin
 end;
 
 procedure transferoptionsedit(const sender: tcomponent;
-                 const source: optionseditty; var dest: optionseditty; 
+                 const source: optionseditty; var dest: optionseditty;
                                               var dest1: optionsedit1ty);
 begin
   dest:= source - deprecatedoptionsedit;
-  if (csreading in sender.componentstate) and 
+  if (csreading in sender.componentstate) and
                            (source * deprecatedoptionsedit <> []) then begin
    updatebit(longword(dest1),ord(oe1_savevalue),
                                            oe_savevalue in source);

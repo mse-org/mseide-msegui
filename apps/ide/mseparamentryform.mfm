@@ -21,27 +21,27 @@ object mseparamentryfo: tmseparamentryfo
     anchors = [an_top]
     optionsgrid = [og_colsizing, og_focuscellonenter, og_colchangeontabkey, og_wrapcol, og_autopopup, og_mousescrollcol]
     fixrows.count = 1
-    fixrows.items = <    
+    fixrows.items = <
       item
         height = 16
         captions.count = 2
-        captions.items = <        
+        captions.items = <
           item
             caption = 'Macro'
-          end        
+          end
           item
             caption = 'Value'
           end>
       end>
     datacols.count = 2
     datacols.options = [co_proportional, co_savestate, co_mousescrollrow]
-    datacols.items = <    
+    datacols.items = <
       item[macroname]
         width = 89
         options = [co_readonly, co_nofocus, co_proportional, co_savestate, co_mousescrollrow]
         widgetname = 'macroname'
         dataclass = tgridmsestringdatalist
-      end    
+      end
       item[macrovalue]
         width = 276
         options = [co_fill, co_savestate, co_mousescrollrow]

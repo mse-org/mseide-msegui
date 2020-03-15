@@ -1,5 +1,5 @@
 { MSEide Copyright (c) 1999-2013 by Martin Schreiber
-   
+
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation; either version 2 of the License, or
@@ -21,7 +21,7 @@ unit make;
 interface
 uses
  msetypes,msestrings,msepipestream,msesystypes;
- 
+
 procedure domake(atag: integer);
 procedure abortmake;
 function making: boolean;
@@ -44,7 +44,7 @@ uses
  mseprocmonitor,mseevent,
  classes,mclasses,mseclasses,mseapplication,msestream,
  msegui,actionsmodule;
- 
+
 type
  tprogrunner = class(tactcomponent)
   private
@@ -98,7 +98,7 @@ type
   public
    constructor create(atag: integer); reintroduce;
  end;
-  
+
  tloader = class(tprogrunner)
   protected
    procedure dofinished; override;
@@ -106,7 +106,7 @@ type
   public
    constructor create(aowner: tcomponent);
  end;
- 
+
 var
  maker: tmaker;
  loader: tloader;
@@ -171,12 +171,12 @@ begin
 end;
 
 function buildmakecommandline(const atag: integer): msestring;
- 
+
  function normalizename(const aname: filenamety): filenamety;
  begin
   result:= tosysfilepath(filepath(trim(aname),fk_file,true));
  end;
- 
+
 var
  int1,int2,step: integer;
  str1,str2,str3: msestring;
@@ -280,7 +280,7 @@ end;
 
 { tprogrunner }
 
-constructor tprogrunner.create(const aowner: tcomponent; 
+constructor tprogrunner.create(const aowner: tcomponent;
                               const clearscreen,setmakedir: boolean);
 begin
  inherited create(aowner);
@@ -323,7 +323,7 @@ begin
   fmessagefinished:= true;
   ffinished:= true;
   exit;
- end; 
+ end;
  fexitcode:= 1; //defaulterror
  fmessagefinished:= false;
  ffinished:= false;
@@ -443,7 +443,7 @@ begin
  with projectoptions,k do begin
   if fstep = maks_before then begin
    while fscriptnum <= high(befcommandon) do begin
-    if (befcommandon[fscriptnum] and fmaketag <> 0) and 
+    if (befcommandon[fscriptnum] and fmaketag <> 0) and
                            (fscriptnum <= high(texp.befcommand)) then begin
      result:= k.texp.befcommand[fscriptnum];
      break;
@@ -466,7 +466,7 @@ begin
   end;
   if fstep = maks_after then begin
    while fscriptnum <= high(aftcommandon) do begin
-    if (aftcommandon[fscriptnum] and fmaketag <> 0) and 
+    if (aftcommandon[fscriptnum] and fmaketag <> 0) and
                            (fscriptnum <= high(k.texp.aftcommand)) then begin
      result:= k.texp.aftcommand[fscriptnum];
      break;

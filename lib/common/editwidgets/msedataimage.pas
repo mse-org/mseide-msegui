@@ -31,7 +31,7 @@ uses
  msetypes{msestrings},
  msepointer,msegridsglob{$ifdef mse_with_ifi},mseificomp,mseifiglob{$endif},
  mseglob,msehash;
- 
+
 type
  imagecachedataty = record
   data: pointer;
@@ -65,7 +65,7 @@ type
    procedure delete(const adata: string);
    property maxsize: int32 read fmaxsize write fmaxsize;
  end;
- 
+
  tcustomdataimage = class(timage,igridwidget)
   private
    fonchange: notifyeventty;
@@ -114,7 +114,7 @@ type
                             var result: cellzonety);
    function getnulltext: msestring;
    function getassistivecelltext(const arow: int32): msestring;
-   procedure loadcellbmp(const acanvas: tcanvas; 
+   procedure loadcellbmp(const acanvas: tcanvas;
                                         const abmp: tmaskedbitmap); virtual;
    procedure drawcell(const canvas: tcanvas);
    procedure updateautocellsize(const canvas: tcanvas);
@@ -155,7 +155,7 @@ type
    property gridvalue[index: integer]: string read getgridvalue
                              write setgridvalue; default;
    property format: string read fformat write setformat;
-   property cachesize: int32 read getcachesize 
+   property cachesize: int32 read getcachesize
                                write setcachesize default 0;
                                        //kibibyte
    property onchange: notifyeventty read fonchange write fonchange;
@@ -171,7 +171,7 @@ type
    property onpaint;
    property onafterpaint;
  end;
-   
+
 implementation
 uses
  msestream,sysutils,mseformatstr;
@@ -187,7 +187,7 @@ uses
 type
  tsimplebitmap1 = class(tsimplebitmap);
  tcustomwidgetgrid1 = class(tcustomwidgetgrid);
- 
+
 { timagecache }
 
 constructor timagecache.create();
@@ -229,7 +229,7 @@ begin
  result:= pointer(akey) = pimagecachehashdataty(aitem)^.data.data;
 end;
 
-function timagecache.find(const adata: string; 
+function timagecache.find(const adata: string;
                                     out aimage: maskedimagety): boolean;
 var
  p1: pimagecachehashdataty;
@@ -292,7 +292,7 @@ begin
    if i1 = flast then begin
     flast:= p1^.data.prev;
    end;
-   fimagedatasize:= fimagedatasize - 
+   fimagedatasize:= fimagedatasize -
                    (p1^.data.image.image.length+p1^.data.image.mask.length)*4;
    internaldeleteitem(phashdataty(p1));
   end;
@@ -324,7 +324,7 @@ begin
  if pointer(fvalue) <> pointer(avalue) then begin
  {
   if pointer(avalue) <> pointer(fvalue) then begin
-   fcache.delete(fvalue); 
+   fcache.delete(fvalue);
   end;
  }
   fvalue:= avalue;
@@ -334,13 +334,13 @@ begin
    fcurformat:= '';
    bitmap.clear;
   end;
-  if (fgridintf <> nil) and not (csdesigning in componentstate) and 
+  if (fgridintf <> nil) and not (csdesigning in componentstate) and
                                                   (fgridsettingx = 0) then begin
    int1:= fgridintf.getrow();
    fgridintf.getdata(int1,str1);
    fgridintf.setdata(int1,avalue,false);
    if pointer(avalue) <> pointer(str1) then begin
-    fcache.delete(str1); 
+    fcache.delete(str1);
    end;
   end;
  end;
@@ -376,7 +376,7 @@ begin
  end;
  changed;
  if pointer(avalue) <> pointer(str1) then begin
-  fcache.delete(str1); 
+  fcache.delete(str1);
  end;
 end;
 }
@@ -394,7 +394,7 @@ begin
     if not focused then begin
      grid.setfocus;
     end;
-   end; 
+   end;
   end;
  end;
  result:= focused;
@@ -505,7 +505,7 @@ begin
  end;
 end;
 
-procedure tcustomdataimage.internaldrawcell(const canvas: tcanvas; 
+procedure tcustomdataimage.internaldrawcell(const canvas: tcanvas;
                                                          const dest: rectty);
 var
  bmp: tmaskedbitmap;
@@ -728,7 +728,7 @@ var
  str1: string;
  int1: integer;
 begin
- stream.readbuffer(int1,sizeof(integer)); 
+ stream.readbuffer(int1,sizeof(integer));
  setlength(str1,int1);
  stream.readbuffer(pointer(str1)^,int1);
  value:= str1;
@@ -739,7 +739,7 @@ var
  int1: integer;
 begin
  int1:= length(fvalue);
- stream.writebuffer(int1,sizeof(integer)); 
+ stream.writebuffer(int1,sizeof(integer));
  stream.writebuffer(pointer(fvalue)^,int1);
 end;
 
@@ -777,8 +777,8 @@ begin
  inherited;
  filer.definebinaryproperty('valuedata',{$ifdef FPC}@{$endif}readvalue,
             {$ifdef FPC}@{$endif}writevalue,
-             (filer.ancestor = nil) and (fvalue <> '') or 
-             (filer.ancestor <> nil) and 
+             (filer.ancestor = nil) and (fvalue <> '') or
+             (filer.ancestor <> nil) and
                        (tcustomdataimage(filer.ancestor).fvalue <> fvalue));
 end;
 
@@ -810,7 +810,7 @@ begin
   result:= loadfromstream(stream1);
  finally
   stream1.free;
- end; 
+ end;
 end;
 
 procedure tcustomdataimage.storeimage(const aformat: string;

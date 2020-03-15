@@ -8,12 +8,12 @@
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
     Indonesia translation by Wahono.
-    
-} 
+
+}
 unit mseconsts_id;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
- 
+
 implementation
 uses
  mseconsts,msetypes{msestrings},sysutils,mseformatstr;
@@ -71,7 +71,7 @@ const
   'Salah',                 //sc_Error
   'Min',                   //sc_Min
   'Max',                   //sc_Max
-  'Range salah',           //sc_Range_error  
+  'Range salah',           //sc_Range_error
   '&Batal',                //sc_Undohk       ///
   '&Redo',                 //sc_Redohk        //          //
   '&Salin',                //sc_Copyhk        // hotkeys
@@ -81,14 +81,14 @@ const
   '&Sisipkan Baris',       //sc_insert_rowhk
   '&Tambah Baris',         //sc_append_rowhk
   '&Hapus Baris',          //sc_delete_rowhk
-  '&Direktori',            //sc_Dirhk               /// 
+  '&Direktori',            //sc_Dirhk               ///
   '&Home',                 //sc_homehk               //
   '&Naik',                 //sc_Uphk                 //
   'Dir &Baru',             //sc_New_dirhk            // hotkeys
   '&Nama File',            //sc_Namehk               //
   '&File tersembunyi',     //sc_Show_hidden_fileshk  //
-  '&Filter',               //sc_Filterhk            /// 
-  'Simpan',                //sc_save 
+  '&Filter',               //sc_Filterhk            ///
+  'Simpan',                //sc_save
   'Buka',                  //sc_open
   'Nama',                  //sc_name
   'Buat Direktori Baru',   //sc_create_new_directory
@@ -111,7 +111,7 @@ const
   'Format grafik salah',  //sc_graphic_format_error
   'MS Bitmap',            //sc_MS_Bitmap
   'MS Icon',              //sc_MS_Icon
-  'JPEG Image',           //sc_JPEG_Image 
+  'JPEG Image',           //sc_JPEG_Image
   'PNG Image',            //sc_PNG_Image
   'XPM Image',            //sc_XPM_Image
   'PNM Image',            //sc_PNM_Image
@@ -158,7 +158,7 @@ const
   'baris yang terpilih?',        //sc_selected_rows
   'Hanya satu item',     //sc_Single_item_only,
   'Salin Cell',          //sc_Copy_Cells
-  'Tempel Cell',         //sc_Paste_Cells 
+  'Tempel Cell',         //sc_Paste_Cells
   'Close',               //sc_close
   'Maximize',            //sc_maximize
   'Normalize',           //sc_normalize
@@ -212,7 +212,7 @@ const
   'Volume up',           //sc_volumeup
   'Cancel speech'        //sc_cancelspeech
 );
-    
+
 function delete_n_selected_rows(const params: array of const): msestring;
 begin
  with params[0] do begin

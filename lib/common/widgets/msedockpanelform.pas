@@ -26,18 +26,18 @@ uses
  msestrings,msestatfile;
 
 const
- defaultdockpanelgripoptions = defaultgripoptions + 
+ defaultdockpanelgripoptions = defaultgripoptions +
              [go_fixsizebutton,go_topbutton,go_backgroundbutton,go_lockbutton];
  defaultdockpaneloptionsdock = defaultoptionsdock +
        [od_canmove,od_canfloat,od_candock,od_acceptsdock,od_dockparent,
         od_splitvert,od_splithorz,od_tabed,od_proportional,od_propsize];
  defaultdockpanelwidth = 350;
  defaultdockpanelheight = 200;
- defaultdockpaneloptions = 
-                (defaultformoptions - [fo_autoreadstat,fo_autowritestat]) + 
+ defaultdockpaneloptions =
+                (defaultformoptions - [fo_autoreadstat,fo_autowritestat]) +
                 [fo_globalshortcuts,fo_screencentered];
  defaultdockpaneloptionswidget =
-                (defaultformwidgetoptions - [ow_destroywidgets]) + 
+                (defaultformwidgetoptions - [ow_destroywidgets]) +
                 [ow_mousefocus,ow_arrowfocusin,ow_arrowfocusout];
  defaultdockstatprio = 256;
 type
@@ -57,7 +57,7 @@ type
    fdockingareacaption: msestring;
    procedure dopaintbackground(const canvas: tcanvas) override;
  end;
-  
+
  tdockpanelform = class(tdockformwidget)
   private
    fmenuitem: tdockpanelformmenuitem;
@@ -91,22 +91,22 @@ type
  end;
 
  panelfoclassty = class of tdockpanelform;
- 
- dockpanelupdatecaptioneventty = 
+
+ dockpanelupdatecaptioneventty =
      procedure(const sender: tdockpanelformcontroller; const apanel: tdockpanelform;
                                   var avalue: msestring) of object;
- dockpanelupdatemenueventty = 
+ dockpanelupdatemenueventty =
      procedure(const sender: tdockpanelformcontroller; const apanel: tdockpanelform;
                                   const avalue: tmenuitem) of object;
  createpaneleventty =
-     procedure(const sender: tdockpanelformcontroller; 
+     procedure(const sender: tdockpanelformcontroller;
                                   var apanel: tdockpanelform) of object;
 { getpanelclasseventty =
-     procedure(const sender: tdockpanelcontroller; 
+     procedure(const sender: tdockpanelcontroller;
                                   var aclass: panelfoclassty) of object;
 }
  createdynamiccompeventty =
-     procedure(const sender: tdockpanelformcontroller; 
+     procedure(const sender: tdockpanelformcontroller;
                   const aclassname: string;
                   const aname: string; var acomponent: tmsecomponent) of object;
  dynamiccompeventty = procedure(const sender: tdockpanelformcontroller;
@@ -167,37 +167,37 @@ type
    property menu: tcustommenu read fmenu write setmenu;
    property statfile: tstatfile read fstatfile write setstatfile;
    property statvarname: msestring read getstatvarname write fstatvarname;
-   property statpriority: integer read fstatpriority 
+   property statpriority: integer read fstatpriority
                write fstatpriority default defaultdockstatprio;
    property statfileclients: tstatfilearrayprop read fstatfileclients
                    write setstatfileclients; //called before statfileclient
-   property statfileclient: tstatfile read fstatfileclient 
+   property statfileclient: tstatfile read fstatfileclient
                          write setstatfileclient; //last called
-                                                     
+
    property menunamepath: string read fmenunamepath write fmenunamepath;
                       //delimiter = '.'
    property caption: msestring read fcaption write fcaption;
-   property dockingareacaption: msestring read fdockingareacaption 
+   property dockingareacaption: msestring read fdockingareacaption
                                                    write fdockingareacaption;
    property optionsdock: optionsdockty read foptionsdock
                    write foptionsdock default defaultdockpaneloptionsdock;
-   property optionsgrip: gripoptionsty read foptionsgrip 
+   property optionsgrip: gripoptionsty read foptionsgrip
                    write foptionsgrip default defaultdockpanelgripoptions;
-   property onupdatecaption: dockpanelupdatecaptioneventty 
+   property onupdatecaption: dockpanelupdatecaptioneventty
                      read fonupdatecaption write fonupdatecaption;
-   property onupdatemenu: dockpanelupdatemenueventty 
+   property onupdatemenu: dockpanelupdatemenueventty
                      read fonupdatemenu write fonupdatemenu;
-   property oncreatepanel: createpaneleventty read foncreatepanel 
+   property oncreatepanel: createpaneleventty read foncreatepanel
                                                       write foncreatepanel;
-   property oncreatedynamiccomp: createdynamiccompeventty 
+   property oncreatedynamiccomp: createdynamiccompeventty
                        read foncreatedynamiccomp write foncreatedynamiccomp;
-   property onregisterdynamiccomp: dynamiccompeventty 
+   property onregisterdynamiccomp: dynamiccompeventty
            read fonregisterdynamiccomp write fonregisterdynamiccomp;
-   property onunregisterdynamiccomp: dynamiccompeventty 
+   property onunregisterdynamiccomp: dynamiccompeventty
            read fonunregisterdynamiccomp write fonunregisterdynamiccomp;
  end;
- 
-function createdockpanelform(const aclass: tclass; 
+
+function createdockpanelform(const aclass: tclass;
                     const aclassname: pshortstring): tmsecomponent;
 
 implementation
@@ -216,7 +216,7 @@ uses
 type
  tcomponent1 = class(tcomponent);
  tmsecomponent1 = class(tmsecomponent);
- 
+
  pdockpanelform = ^tdockpanelform;
 
  tpanelformdockcontroller = class(tformdockcontroller)
@@ -226,8 +226,8 @@ type
   published
    property optionsdock default defaultoptionsdock;
  end;
- 
-function createdockpanelform(const aclass: tclass; 
+
+function createdockpanelform(const aclass: tclass;
                     const aclassname: pshortstring): tmsecomponent;
 
 begin
@@ -374,7 +374,7 @@ begin
    statfile:= self.fstatfileclient;
   end;
  end;
- 
+
  int1:= int2 + 1;
  if aname = '' then begin
   aname:= 'panel'+inttostr(int1);
@@ -481,7 +481,7 @@ procedure tdockpanelformcontroller.removepanels;
 begin
  while fpanellist.count > 0 do begin
   tobject(fpanellist.items[fpanellist.count-1]).free;
- end; 
+ end;
 end;
 
 function tdockpanelformcontroller.createdynamiccomp(
@@ -618,9 +618,9 @@ begin
  optionswidget:= defaultdockpaneloptionswidget;
  {
  createframe;
- options:= (options - [fo_autoreadstat,fo_autowritestat]) + 
+ options:= (options - [fo_autoreadstat,fo_autowritestat]) +
                       [fo_globalshortcuts,fo_screencentered];
- optionswidget:= (optionswidget - [ow_destroywidgets]) + 
+ optionswidget:= (optionswidget - [ow_destroywidgets]) +
                   [ow_mousefocus,ow_arrowfocusin,ow_arrowfocusout];
  dragdock.optionsdock:= defaultdockpaneloptionsdock;
  frame.grip_options:= defaultdockpanelgripoptions;
@@ -640,7 +640,7 @@ begin
     fpanellist.remove(self);
    end;
    if (fmenuitem <> nil) then begin
-    if (fmenuitem.owner <> nil) and 
+    if (fmenuitem.owner <> nil) and
              not (csdestroying in fmenuitem.owner.componentstate) then begin
      fmenuitem.parentmenu.submenu.delete(fmenuitem.index);
     end
@@ -677,7 +677,7 @@ begin
     shortcut:= 0;
    end;
    caption:= menucapt;
-   if (fcontroller <> nil) and 
+   if (fcontroller <> nil) and
                   fcontroller.canevent(tmethod(fcontroller.fonupdatemenu)) then begin
     fcontroller.fonupdatemenu(fcontroller,self,fmenuitem);
    end;
@@ -689,7 +689,7 @@ begin
  else begin
   acaption:= acaption+' '+inttostrmse(fnameindex+1);
  end;
- if (fcontroller <> nil) and 
+ if (fcontroller <> nil) and
            fcontroller.canevent(tmethod(fcontroller.fonupdatecaption)) then begin
   fcontroller.fonupdatecaption(fcontroller,self,acaption);
  end;
@@ -717,7 +717,7 @@ function tdockpanelform.canclose(const newfocus: twidget): boolean;
   end;
   result:= true;
  end;
- 
+
 begin
  result:= inherited canclose(newfocus);
  {

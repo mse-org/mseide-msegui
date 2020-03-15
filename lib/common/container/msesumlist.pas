@@ -10,9 +10,9 @@ const
 // foldlevelsumname = '#foldlevel';
  sumleveltag = 1;
  sumissumtag = 2;
- 
+
 type
- 
+
  realsumty = record
   data: realintty;
   sumup: realty;
@@ -32,8 +32,8 @@ type
  optionsumty = (osu_sumsonly,osu_valuesonly,
                 osu_foldsum{,osu_foldsumdown,osu_folddefaultsum});
  optionssumty = set of optionsumty;
- 
- 
+
+
  tsumarrayprop = class(tindexpersistentarrayprop)
   private
   protected
@@ -45,10 +45,10 @@ type
 
  tsumuparrayprop = class(tsumarrayprop)
  end;
- 
+
  tsumdownarrayprop = class(tsumarrayprop)
  end;
- 
+
  trealsumlist = class(trealintdatalist)
   private
    fsumsup: tsumuparrayprop;
@@ -83,27 +83,27 @@ type
    procedure clean(const start,stop: integer); override;
    procedure change(const index: integer); override;
    class function datatype: listdatatypety; override;
-   procedure sourcechange(const sender: tdatalist; 
+   procedure sourcechange(const sender: tdatalist;
                                          const index: integer); override;
    function getsourcecount: integer; override;
    function getsourceinfo(const atag: integer): plistlinkinfoty; override;
    procedure linksource(const source: tdatalist; const atag: integer); override;
 
-   procedure clearmemberitem(const subitem: integer; 
+   procedure clearmemberitem(const subitem: integer;
                                     const index: integer); override;
-   procedure setmemberitem(const subitem: integer; 
+   procedure setmemberitem(const subitem: integer;
                          const index: integer; const avalue: integer); override;
-   property sumlevel[index: integer]: integer read getsumlevel 
+   property sumlevel[index: integer]: integer read getsumlevel
                             write setsumlevel;
              //0 -> no sum > 0 top down, < 0 bottom up, not used for osu_foldsum
-   property isfoldsum[index: integer]: boolean read getisfoldsum 
+   property isfoldsum[index: integer]: boolean read getisfoldsum
                             write setisfoldsum;
              //for osu_foldsum only
-   property sourcevalue: string read flinkvalue.name 
+   property sourcevalue: string read flinkvalue.name
                                             write setsourcevalue;
-   property sourcelevel: string read flinklevel.name 
+   property sourcelevel: string read flinklevel.name
                                             write setsourcelevel;
-   property sourceissum: string read flinkissum.name 
+   property sourceissum: string read flinkissum.name
                                             write setsourceissum;
             //for osu_foldsum only
   published
@@ -111,12 +111,12 @@ type
    property sumsdown: tsumdownarrayprop read fsumsdown write setsumsdown;
    property options: optionssumty read foptions write setoptions
                                                      default [];
-end; 
- 
+end;
+
 implementation
 uses
  msereal,msebits;
- 
+
 { trealsumlist }
 
 constructor trealsumlist.create;
@@ -213,7 +213,7 @@ begin
      end;
     end;
     sourcechange(flinkvalue.source,int1); //restore value
-    change(-1); 
+    change(-1);
    end;
   end;
  end;
@@ -247,7 +247,7 @@ begin
    end;
    sourcechange(flinklevel.source,int1); //restore sumlevel
    sourcechange(flinkvalue.source,int1); //restore value
-   change(-1); 
+   change(-1);
   end;
  end;
 end;
@@ -401,13 +401,13 @@ begin
  end
  else begin
   with fsumsup do begin
-   if (fitems <> nil) and 
+   if (fitems <> nil) and
             (tsumprop(fitems[high(fitems)]).fsumindex <= index) then begin
     fdirtyup:= 0;
    end;
   end;
   with fsumsdown do begin
-   if (fitems <> nil) and 
+   if (fitems <> nil) and
             (tsumprop(fitems[high(fitems)]).fsumindex >= index) then begin
     fdirtydown:= self.count-1;
    end;
@@ -436,7 +436,7 @@ begin
  end;
 end;
 
-procedure trealsumlist.sourcechange(const sender: tdatalist; 
+procedure trealsumlist.sourcechange(const sender: tdatalist;
                                                 const index: integer);
 begin
  inherited;
@@ -520,7 +520,7 @@ begin
    internallinksource(source,atag,flinklevel.source);
   end;
   sumissumtag: begin
-   if internallinksource(source,atag,flinkissum.source) and 
+   if internallinksource(source,atag,flinkissum.source) and
                                    (flinklevel.source <> nil)then begin
     sourcechange(flinklevel.source,-1); //sum level invalid
    end;

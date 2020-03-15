@@ -33,9 +33,9 @@ const
    (kind: ak_envvar; name: 'TARGETOSDIR'; anames: nil; flags: []; initvalue: ''),
    (kind: ak_arg; name: ''; anames: nil; flags: []; initvalue: ''));
 }
- firstenvvarmacro = env_fpcdir;   
- lastenvvarmacro = env_target;   
- 
+ firstenvvarmacro = env_fpcdir;
+ lastenvvarmacro = env_target;
+
 type
  tguitemplatesmo = class(tmsedatamodule)
    fadevertkonvex: tfacecomp;
@@ -48,7 +48,7 @@ type
    sysenv: tsysenvmanager;
    procedure loadedexe(const sender: TObject);
  end;
- 
+
 function getcommandlinemacros: macroinfoarty;
 
 var
@@ -56,7 +56,7 @@ var
 implementation
 uses
  guitemplates_mfm;
- 
+
 function getcommandlinemacros: macroinfoarty;
 begin
  result:= guitemplatesmo.sysenv.getcommandlinemacros(
@@ -88,7 +88,7 @@ begin
    if ar2 <> nil then begin
     int3:= length(result);
     int4:= (high(ar2)+2) div 2; //pair count
-    setlength(result,int3+int4); 
+    setlength(result,int3+int4);
     for int2:= 0 to int4-1 do begin
      with result[int2+int3] do begin
       int4:= int2 * 2;

@@ -33,7 +33,7 @@ type
 
  sigflagty = (sfl_internal,sfl_stop,sfl_handle);
  sigflagsty = set of sigflagty;
- 
+
  processorty = (pro_i386,pro_x86_64,pro_arm,pro_armm3,
                 pro_cpu32,pro_avr32,pro_rl78);
  languagety = (lan_none,lan_undef,lan_pascal);
@@ -43,10 +43,10 @@ const
           ('','Error','Timeout','Data error','Message','Target running',
            'Write error','gdb not active');
  niltext = 'nil';
- processornames: array[processorty] of ansistring = 
+ processornames: array[processorty] of ansistring =
           ('i386','x86_64','arm','armm3','cpu32','avr32','rl78');
  simulatorprocessors = [pro_arm,pro_armm3,pro_rl78];
- 
+
 type
  gdbstatety = (gs_syncget,gs_syncack,gs_clicommand,gs_clilist,
                gs_canstop,gs_started,gs_startup,gs_attaching,
@@ -57,7 +57,7 @@ type
                gs_closing,gs_gdbdied);
  gdbstatesty = set of gdbstatety;
 
- recordclassty = 
+ recordclassty =
           (rec_done,rec_running,rec_connected,rec_error,rec_exit,
            rec_stopped,rec_download,
            rec_threadcreated,rec_threadexited,rec_threadgroupexited,
@@ -70,7 +70,7 @@ const
  recordclassnames: array[recordclassty] of string =
          ('done', 'running',  'connected',   'error',   'exit',
           'stopped', 'download',
-          'thread-created','thread-exited', 'thread-group-exited', 
+          'thread-created','thread-exited', 'thread-group-exited',
           'thread-selected',
           'library-loaded','library-unloaded',
           'thread-group-added','thread-group-started','breakpoint-modified');
@@ -230,7 +230,7 @@ type
    stopinfo: stopinfoty;
    constructor create(const dest: ievent);
  end;
- 
+
  setnumprocty = procedure(var dataarray; const index: integer; const text: string);
  setlenprocty = procedure(var dataarray; const len: integer);
 
@@ -263,7 +263,7 @@ type
    property output: tpipewriter read foutput;
    property outecho: boolean read getoutecho write setoutecho;
  end;
-{$endif} 
+{$endif}
 
  envvarinfoty = record
   name: string;
@@ -271,7 +271,7 @@ type
   unset: boolean;
  end;
  envvararty = array of envvarinfoty;
- 
+
  tgdbmi = class(tactcomponent)
   private
    fgdbto: tpipewriter;
@@ -374,11 +374,11 @@ type
    procedure updateenvvars();
    procedure dorun;
    function internalcommand(acommand: string): boolean;
-   function synccommand(const acommand: string; 
+   function synccommand(const acommand: string;
                          atimeout: integer = defaultsynctimeout): gdbresultty;
    function clicommand(const acommand: string; list: boolean = false;
                            timeout: integer = defaultsynctimeout): gdbresultty;
-   function getcliresult(const acommand: string; 
+   function getcliresult(const acommand: string;
                                        var aresult: stringarty): gdbresultty;
    function getcliresultstring(const acommand: string;
                                        var aresult: string): gdbresultty;
@@ -396,8 +396,8 @@ type
                               const expression: string): msestring;
    function getpcharvar(address: qword): string;
    function getpmsecharvar(address: qword): msestring;
-   function getnumarrayvalue(const response: resultinfoarty; 
-                  const aname: string; var avalue; setnumproc: setnumprocty; 
+   function getnumarrayvalue(const response: resultinfoarty;
+                  const aname: string; var avalue; setnumproc: setnumprocty;
                                             setlenproc: setlenprocty): boolean;
    function getpascalvalue(const avalue: string): string;
    function getbkptid: integer;
@@ -447,14 +447,14 @@ type
    function breakinsert(const funcname: string): integer; overload;
                 //returns bkpt id, -1 on error
    function breakinsert(const address: qword): integer; overload;
-   function breaklist(var list: breakpointinfoarty; 
+   function breaklist(var list: breakpointinfoarty;
                                            const full: boolean): gdbresultty;
                //full = false -> only bkptno, address and passcount
    function breakdelete(bkptnum: integer): gdbresultty; //bkptnum = 0 -> all
-   function breakenable(bkptnum: integer; value: boolean): gdbresultty; 
+   function breakenable(bkptnum: integer; value: boolean): gdbresultty;
                                                          //bkptnum = 0 -> all
    function breakafter(bkptnum: integer; const passcount: integer): gdbresultty;
-   function breakcondition(bkptnum: integer; 
+   function breakcondition(bkptnum: integer;
                                           const condition: string): gdbresultty;
    function infobreakpoint(var info: breakpointinfoty;
                                const full: boolean = true): gdbresultty;
@@ -488,7 +488,7 @@ type
                  var avalue: integer): boolean; overload;
    function getintegervalue(const response: resultinfoty; const aname: string;
                  var avalue: integer): boolean; overload;
-   function getinteger64value(const response: resultinfoarty; 
+   function getinteger64value(const response: resultinfoarty;
                                                            const aname: string;
                  var avalue: int64): boolean; overload;
    function getinteger64value(const response: resultinfoty; const aname: string;
@@ -512,9 +512,9 @@ type
                     const aname: string; var avalue: bytearty): boolean;
    function getwordarrayvalue(const response: resultinfoarty;
            const aname: string; var avalue: wordarty): boolean;
-   function getlongwordarrayvalue(const response: resultinfoarty; 
+   function getlongwordarrayvalue(const response: resultinfoarty;
                   const aname: string; var avalue: longwordarty): boolean;
-   function getqwordarrayvalue(const response: resultinfoarty; 
+   function getqwordarrayvalue(const response: resultinfoarty;
                       const aname: string; var avalue: card64arty): boolean;
 
    function fileexec(const filename: filenamety;
@@ -539,13 +539,13 @@ type
    procedure stepi;
    procedure interrupt;
    procedure abort;
-   procedure targetwriteln(const avalue: string); 
+   procedure targetwriteln(const avalue: string);
                //sends text to target if running
 
    procedure debugbegin; //calls GUI_DEBUGBEGIN in target
    procedure debugend;   //calls GUI_DEBUGEND in target,
                          //automatically on every target start
-   
+
    function active: boolean;  //gdb running
    function cancommand: boolean; //active and target not running
    function started: boolean; //target active, run command applied or attached
@@ -553,7 +553,7 @@ type
    function downloading: boolean;
    function downloaded: boolean;
 
-   function threadselect(const aid: integer; out filename: filenamety; 
+   function threadselect(const aid: integer; out filename: filenamety;
                                              out line: integer): gdbresultty;
    function getthreadidlist(out idlist: integerarty): gdbresultty;
    function getthreadinfolist(out infolist: threadinfoarty): gdbresultty;
@@ -568,9 +568,9 @@ type
                  var aresult: card64arty): gdbresultty;
    function readmemorybyte(const address: qword;
                                                out aresult: byte): gdbresultty;
-   function readmemoryword(const address: qword; 
+   function readmemoryword(const address: qword;
                                                out aresult: word): gdbresultty;
-   function readmemorylongword(const address: qword; 
+   function readmemorylongword(const address: qword;
                                            out aresult: longword): gdbresultty;
    function readmemorypointer(const address: qword;
                                               out aresult: qword): gdbresultty;
@@ -583,7 +583,7 @@ type
    function writememory64(const address: qword;
                                           const avalue: card64): gdbresultty;
 
-   function readpascalvariable(varname: string; 
+   function readpascalvariable(varname: string;
                                          out aresult: msestring): gdbresultty;
    function writepascalvariable(varname: string; const value: string;
                 var aresult: string): gdbresultty;
@@ -640,7 +640,7 @@ type
 
    property execloaded: boolean read getexecloaded;
    property attached: boolean read getattached;
-   property stoponexception: boolean read fstoponexception 
+   property stoponexception: boolean read fstoponexception
                                        write setstoponexception default false;
    property ignoreexceptionclasses: stringarty read fignoreexceptionclasses
                                                write setignoreexceptionclasses;
@@ -649,25 +649,25 @@ type
    property stoptime: tdatetime read fstoptime;
 
    property progparameters: string read fprogparameters write fprogparameters;
-   property workingdirectory: filenamety read fworkingdirectory 
+   property workingdirectory: filenamety read fworkingdirectory
                                                       write fworkingdirectory;
    property loadtimeoutus: integer read floadtimeoutus write floadtimeoutus;
                              //0 -> default
 //   {$ifdef mswindows}
    property newconsole: boolean read fnewconsole write fnewconsole;
 //   {$endif}
-   property processorname: ansistring read getprocessorname 
+   property processorname: ansistring read getprocessorname
                                                         write setprocessorname;
    property currentlanguage: languagety read fcurrentlanguage;
   published
    property guiintf: boolean read fguiintf write fguiintf default false;
                    //call GUI_DEBUGBEGIN/END
-   property remoteconnection: msestring read fremoteconnection 
+   property remoteconnection: msestring read fremoteconnection
                                                     write fremoteconnection;
    property gdbdownload: boolean read fgdbdownload write fgdbdownload;
    property settty: boolean read fsettty write fsettty default true;
    property simulator: boolean read fsimulator write fsimulator;
-   property processor: processorty read fprocessor 
+   property processor: processorty read fprocessor
                                              write fprocessor default pro_i386;
    property beforeconnect: filenamety read fbeforeconnect write fbeforeconnect;
    property afterconnect: filenamety read fafterconnect write fafterconnect;
@@ -679,9 +679,9 @@ type
    property startupbkpton: boolean read fstartupbkpton write fstartupbkpton;
    property onevent: gdbeventty read fonevent write fonevent;
    property onerror: gdbeventty read fonerror write fonerror;
-   property overloadsleepus: integer read foverloadsleepus 
+   property overloadsleepus: integer read foverloadsleepus
                                  write setoverloadsleepus default -1;
-   {$warnings off}   
+   {$warnings off}
    property xtermcommand: filenamety read fxtermcommand write fxtermcommand;
                    //${PTS} expands to tty pts path
                    //${PTSN} expands to tty pts number
@@ -717,8 +717,8 @@ var
 
 type
  tpypereader1 = class(tpipereader);
-const                                      
- stopreasons: array[stopreasonty] of string = 
+const
+ stopreasons: array[stopreasonty] of string =
            //sr_none sr_unknown, sr_error sr_startup sr_exception sr_gdbdied
              ('',     '',          '',     '',          '',           '',
               'breakpoint-hit','watchpoint-trigger','read-watchpoint-trigger',
@@ -987,7 +987,7 @@ begin
  flastbreakpoint:= 0;
  haslang:= sys_getenv(lcmessages,langbefore);
  sys_setenv(lcmessages,'C');
-  
+
  fgdb:= execmse2(syscommandline(commandline)+' --interpreter=mi --nx',
                 fgdbto,fgdbfrom,fgdbfrom,-1,
                 [exo_inactive,exo_tty,exo_winpipewritehandles]);
@@ -1010,7 +1010,7 @@ begin
   clicommand('set width 0');
   {$ifdef UNIX}
   {
-  bo1:= true;  
+  bo1:= true;
   if synccommand('-gdb-show inferior-tty') = gdb_ok then begin
    if getstringvalue(fsyncvalues,'value',str1) and (str1 <> '') then begin
     bo1:= false;
@@ -1084,7 +1084,7 @@ end;
 
 var
  workaround: string;
- 
+
 procedure tgdbmi.setignoreexceptionclasses(const avalue: stringarty);
 var
  int1: integer;
@@ -1092,7 +1092,7 @@ begin
  setlength(fignoreexceptionclasses,length(avalue));
  for int1:= 0 to high(avalue) do begin
   workaround:= uppercase(avalue[int1]); //see FPC Mantis 11290
-  fignoreexceptionclasses[int1]:= workaround; 
+  fignoreexceptionclasses[int1]:= workaround;
 //  fignoreexceptionclasses[int1]:= uppercase(avalue[int1]);
  end;
 end;
@@ -1143,8 +1143,8 @@ begin
  ar2:= nil;
  if getcliresult('info program',ar1) = gdb_ok then begin
   for int1:= 0 to high(ar1) do begin
-   if (pos('child thread',ar1[int1]) > 0) or 
-      (pos('attached thread',ar1[int1]) > 0) or 
+   if (pos('child thread',ar1[int1]) > 0) or
+      (pos('attached thread',ar1[int1]) > 0) or
       (pos('attached LWP',ar1[int1]) > 0) then begin
     splitstring(ar1[int1],ar2,' ');
     if high(ar2) > 0 then begin
@@ -1182,7 +1182,7 @@ begin
      break;
     end
     else begin
-     if (pos('child process',ar1[int1]) > 0) or 
+     if (pos('child process',ar1[int1]) > 0) or
              (pos('attached process',ar1[int1]) > 0) then begin
       splitstring(ar1[int1],ar2,' ');
       if high(ar2) > 0 then begin
@@ -1321,7 +1321,7 @@ const
   '($eax^+12)^','ppointer(ppointer($rax)^+24)^','($r0^+12)^','($r0^+12)^',
 //pro_cpu32,pro_avr32,pro_rl78
   '',       '',       '');
- 
+
 procedure tgdbmi.receiveevent(const event: tobjectevent);
 var
  stopinfo: stopinfoty;
@@ -1354,11 +1354,11 @@ begin
      stopinfo.reason:= sr_gdbdied;
      stopinfo.messagetext:= 'Process died.';
      if getprocessexitcode(fgdb,int1,2000000) = pee_ok then begin
-      stopinfo.messagetext:= stopinfo.messagetext + 
+      stopinfo.messagetext:= stopinfo.messagetext +
                                          ' Exitcode: '+inttostr(int1)+'.';
       fgdb:= invalidprochandle;
      end;
-     closegdb;      
+     closegdb;
     end;
     gek_stopped: begin
      exclude(self.fstate,gs_running);
@@ -1400,7 +1400,7 @@ begin
       end;
      {$endif mswindows}
       if fthreadid <> -1 then begin
-       threadselect(fthreadid,mstr1,int1); 
+       threadselect(fthreadid,mstr1,int1);
                 //there was an breakpoint in other thread
       end;
       bo1:= getstopinfo(values,flastconsoleoutput,stopinfo);
@@ -1409,9 +1409,9 @@ begin
                                                       stopinfo.messagetext;
       end
       else begin
-       if (stopinfo.reason = sr_breakpoint_hit) and 
+       if (stopinfo.reason = sr_breakpoint_hit) and
         (stopinfo.bkptno = fexceptionbkpt) then begin
-        if (getexceptionname[processor] <> '') and 
+        if (getexceptionname[processor] <> '') and
                 getshortstring(getexceptionname[processor],str1) then begin
          str2:= uppercase(str1);
          bo1:= false;
@@ -1500,14 +1500,14 @@ begin
     end;
    end;
    try
-    if assigned(fonevent) and 
+    if assigned(fonevent) and
       not((eventkind = gek_stopped) and (stopinfo.reason = sr_none)) then begin
      fonevent(self,eventkind,values,stopinfo);
     end;
     if (eventkind = gek_error) and assigned(fonerror) then begin
      fonerror(self,eventkind,values,stopinfo);
     end;
-    if (eventkind = gek_done) and 
+    if (eventkind = gek_done) and
              (self.fstate * [gs_downloading,gs_runafterload] =
                     [gs_downloading,gs_runafterload]) then begin
      exclude(self.fstate,gs_downloading);
@@ -1566,7 +1566,7 @@ begin
   else begin
    if assigned(fonevent) and (eventkind = gek_writeerror) or
       not ((eventkind = gek_stopped) and (gs_interrupted in fstate)) and
-      not ((eventkind = gek_running) and 
+      not ((eventkind = gek_running) and
          ([gs_attaching,gs_restarted] * fstate <> [])) and
       not ((eventkind = gek_error) and (fsyncsequence <> 0) and
            (integer(token-fsyncsequence) < 0)) and
@@ -1666,7 +1666,7 @@ var
 
 var
  targetoutp: boolean;
- 
+
 begin
 //{$ifdef mse_debuggdb}
 // debugwriteln(line);
@@ -1718,7 +1718,7 @@ begin
        doevent(token,gek_connected,resultar);
       end;
       rec_running: begin
-       if not (gs_stopped in fstate) then begin 
+       if not (gs_stopped in fstate) then begin
                 //no breakpoint while GUI_DEBUGBEGIN
         doevent(token,gek_running,resultar);
        end;
@@ -1819,7 +1819,7 @@ begin
  repeat
  (*
   if gs_syncget in fstate then begin
-   bo1:= fgdbfrom.readstrln(str1); 
+   bo1:= fgdbfrom.readstrln(str1);
          //does not post pipereader semaphore in case of timeout
   {$ifdef mse_debuggdb}
    if bo1 then begin
@@ -1890,7 +1890,7 @@ begin
   ptsn:= '';
   ftargetterminal.outecho:= true;
   pts:= msestring(ftargetterminal.devicename);
-  ar1:= splitstring(ftargetterminal.devicename,'/'); 
+  ar1:= splitstring(ftargetterminal.devicename,'/');
   if ar1 <> nil then begin
    ptsn:= msestring(ar1[high(ar1)]);
   end;
@@ -1957,7 +1957,7 @@ begin
                        ansistring(quotefilename(tosysfilepath(afilename))));
 end;
 
-function tgdbmi.synccommand(const acommand: string; 
+function tgdbmi.synccommand(const acommand: string;
                      atimeout: integer = defaultsynctimeout): gdbresultty;
 var
  timestamp: longword;
@@ -2197,7 +2197,7 @@ begin
   end;
   initinternalbkpts;
   initproginfo;
- end; 
+ end;
  if result <> gdb_ok then begin
   if result = gdb_message then begin
    info.messagetext:= errormessage;
@@ -2255,9 +2255,9 @@ var
  int1: integer;
 begin
  fpointersize:= 4;
- if (evaluateexpression('sizeof($pc)',str1) = gdb_ok) or 
+ if (evaluateexpression('sizeof($pc)',str1) = gdb_ok) or
 
-  (evaluateexpression('sizeof(void*)',str1) = gdb_ok) or 
+  (evaluateexpression('sizeof(void*)',str1) = gdb_ok) or
                           //does not work on gdb win64 7.9
        (evaluateexpression('sizeof(pointer)',str1) = gdb_ok) then begin
    //I know there is a gdbcommand for this, I could not find it
@@ -2266,7 +2266,7 @@ begin
   end;
  end
  else begin
-  if (clicommand('show architecture') = gdb_ok) and 
+  if (clicommand('show architecture') = gdb_ok) and
                       (pos('x86-64',fclivalues) > 0) then begin
    fpointersize:= 8;
   end;
@@ -2319,10 +2319,10 @@ begin
  checkpointersize;
  str1:= '';
  if fstartupbkpton then begin
-  fstartupbreakpoint:= breakinsert(fstartupbkpt);  
+  fstartupbreakpoint:= breakinsert(fstartupbkpt);
  end
  else begin
-  if (gs_remote in fstate) and 
+  if (gs_remote in fstate) and
           (stacklistframes(frames1,0,1) = gdb_ok) then begin
                                        //already started by gdbserver
    ev:= tgdbstartupevent.create(ievent(self));
@@ -2339,7 +2339,7 @@ begin
    include(fstate,gs_started);
    application.postevent(ev);
    exit;
-  end; 
+  end;
   if getcliresult('info file',ar1) = gdb_ok then begin
    for int1:= 0 to high(ar1) do begin
     if startsstr('Entry point',ar1[int1]) then begin
@@ -2369,9 +2369,9 @@ begin
   end;
  end;
  synccommand('-exec-arguments '+ fprogparameters);
- synccommand('-environment-cd '+ 
+ synccommand('-environment-cd '+
                        ansistring(tosysfilepath(filepath(fworkingdirectory))));
- updateenvvars();   
+ updateenvvars();
         //for remote gdbserver too late, process has already been created
  {$ifdef mswindows}
  if fnewconsole then begin
@@ -2429,7 +2429,7 @@ end;
 function tgdbmi.tryconnect: boolean;
 begin
  result:= fremoteconnection = '';
- result:= result or 
+ result:= result or
        (synccommand('-target-select '+ansistring(fremoteconnection)) = gdb_ok);
 end;
 
@@ -2556,9 +2556,9 @@ begin
   end
   else begin
   {$ifdef unix}     //how to do on windows?
-   kill(fgdb,sigint); 
+   kill(fgdb,sigint);
   {$else}
-   internalcommand('-exec-interrupt'); //probably no success because 
+   internalcommand('-exec-interrupt'); //probably no success because
                                        //not in async mode
   {$endif}
   end;
@@ -2702,7 +2702,7 @@ begin
  else begin
   str1:= str1 + ' pass';
  end;
- result:= clicommand('handle '+signame+' '+str1); 
+ result:= clicommand('handle '+signame+' '+str1);
 end;
 
 function tgdbmi.breakinsert(var info: breakpointinfoty): gdbresultty;
@@ -3327,7 +3327,7 @@ begin
  end;
 end;
 
-function tgdbmi.getsourcename(out path: filenamety; 
+function tgdbmi.getsourcename(out path: filenamety;
               out language: languagety;frame: integer = 0): gdbresultty;
 var
  strar1: stringarty;
@@ -3412,7 +3412,7 @@ begin
   end;
  end;
 end;
-                        
+
 function tgdbmi.getstopinfo(const response: resultinfoarty;
                             const lastconsoleoutput: ansistring;
                             out info: stopinfoty): boolean;
@@ -3444,7 +3444,7 @@ begin
     if res1 = gdb_message then begin
      info.messagetext:= errormessage;
     end
-   end;   
+   end;
   end
   else begin
    if getenumvalue(response,'reason',stopreasons,int1) then begin
@@ -3457,11 +3457,11 @@ begin
    end;
    if reason = sr_breakpoint_hit then begin
     getintegervalue(response,'bkptno',info.bkptno);
-    if (info.bkptno = fstartupbreakpoint) or 
+    if (info.bkptno = fstartupbreakpoint) or
                        (info.bkptno = fstartupbreakpoint1) then begin
      reason:= sr_startup;
      result:= false;
-    end; 
+    end;
    end;
    if reason = sr_signal_received then begin
     getstringvalue(response,'signal-name',signalname);
@@ -3563,7 +3563,7 @@ begin
   else begin
    aresult:= gdberrortexts[result];
   end;
- end; 
+ end;
 end;
 
 function tgdbmi.evaluateexpression(expression: string; out aresult: string;
@@ -3608,14 +3608,14 @@ begin
  end;
 end;
 
-function tgdbmi.symboladdress(symbol: ansistring; 
+function tgdbmi.symboladdress(symbol: ansistring;
                                     out aresult: ansistring): gdbresultty;
 begin
  updatepascalexpression(symbol);
  result:= evaluateexpression('@('+symbol+')',aresult);
 end;
 
-function tgdbmi.threadselect(const aid: integer; out filename: filenamety; 
+function tgdbmi.threadselect(const aid: integer; out filename: filenamety;
                                              out line: integer): gdbresultty;
 var
  str1: string;
@@ -3630,7 +3630,7 @@ begin
   end;
   if getstringvalue(ar1,'file',str1) then begin
    filename:= msestring(str1);
-  end;  
+  end;
   getintegervalue(ar1,'line',line);
  end;
 end;
@@ -3711,12 +3711,12 @@ begin
          if high(ar2) > 0 then begin
           stackframeindex:= 1;
           trystrtohex64(ar2[1],threadid);
-         end;         
+         end;
         end;
        end;
       end;
      end;
-     
+
      if high(ar1) >= stackframeindex then begin
       stackframe:= ar1[stackframeindex];
       for int3:= stackframeindex + 1 to high(ar1) do begin
@@ -3757,7 +3757,7 @@ var
  ar1,ar2: resultinfoarty;
 begin
  aresult:= nil;
- result:= synccommand('-data-read-memory '+ 
+ result:= synccommand('-data-read-memory '+
             hextocstr(address,fpointerhexdigits) + ' u 2 1 ' + inttostr(count));
  if result = gdb_ok then begin
   result:= gdb_dataerror;
@@ -3797,7 +3797,7 @@ var
  ar1,ar2: resultinfoarty;
 begin
  aresult:= nil;
- result:= synccommand('-data-read-memory '+ 
+ result:= synccommand('-data-read-memory '+
             hextocstr(address,fpointerhexdigits) + ' u 8 1 ' + inttostr(count));
  if result = gdb_ok then begin
   result:= gdb_dataerror;
@@ -3901,7 +3901,7 @@ begin
 // end;
 end;
 
-function tgdbmi.writememory16(const address: qword; 
+function tgdbmi.writememory16(const address: qword;
                                             const avalue: card16): gdbresultty;
 var
  str1,str2,str3,str4: ansistring;
@@ -4564,7 +4564,7 @@ begin
  end;
 end;
 
-function tgdbmi.readpascalvariable(varname: string; 
+function tgdbmi.readpascalvariable(varname: string;
                                           out aresult: msestring): gdbresultty;
 var
  str1,str2,str3: string;
@@ -4623,7 +4623,7 @@ end;
 function tgdbmi.writepascalvariable(varname: string; const value: string;
                         var aresult: string): gdbresultty;
 var
- int1: integer; 
+ int1: integer;
  mstr1: msestring;
 begin
  if getsysregnum(varname,int1) then begin
@@ -4714,7 +4714,7 @@ function tgdbmi.getcliinteger(const aname: string; const response: string; out a
 var
  str1: string;
 begin
- result:= getclistring(aname,response,str1) and 
+ result:= getclistring(aname,response,str1) and
                   trystrtointvalue(str1,longword(aresult));
 end;
 
@@ -4723,7 +4723,7 @@ function tgdbmi.getcliint64(const aname: string; const response: string;
 var
  str1: string;
 begin
- result:= getclistring(aname,response,str1) and 
+ result:= getclistring(aname,response,str1) and
                              trystrtointvalue64(str1,qword(aresult));
 end;
 
@@ -4893,7 +4893,7 @@ begin
                                          //no register name
   if ffpcworkaround then begin
 //  if not startsstr('self.',aexpression) and (aexpression <> 'self') then begin
-   aexpression:= uppercase(aexpression); 
+   aexpression:= uppercase(aexpression);
            //workaround for gdb bug with class fields
 //  end;
   end;
@@ -4918,13 +4918,13 @@ constructor tpseudoterminal.create;
   fpty:= invalidfilehandle;
   syserror(syelasterror,'Can not create pseudoterminal:');
  end;
- 
+
 const
  buflen = 100;
-  
+
 var
  ios: termios{ty};
- 
+
 begin
  fpty:= invalidfilehandle;
  fpty:= getpt;
@@ -5027,7 +5027,7 @@ begin
 end;
 
 initialization
- stopreasontext:= defaultstopreasontext; 
+ stopreasontext:= defaultstopreasontext;
 {$ifdef mswindows}
  {$ifdef mse_usedebugbreakprocess}
  checkprocaddresses(['Kernel32.dll'],

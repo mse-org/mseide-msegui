@@ -41,7 +41,7 @@ const
                               (0,1),  //0 1 0
                               (0,0)); //0 0 1
 
-type                 
+type
  tpostscriptcanvas = class;
 
  tpostscriptprinter = class(tstreamprinter,icanvas)
@@ -59,14 +59,14 @@ type
  end;
 
  psfontinfoty = record
-  handle: fontnumty;  
+  handle: fontnumty;
   namenum: integer;
   size: integer;
   scalestring1: ansistring;
   scalestringfull: ansistring;
   rotated: boolean;
   codepages: integerarty;
- end; 
+ end;
  psfontinfoarty = array of psfontinfoty;
 
  psalignty = (pa_center,pa_lefttop,pa_top,pa_righttop,pa_right,
@@ -85,7 +85,7 @@ type
   maskstatestamp: longword;
  end;
  imagecachearty = array of imagecachety;
- 
+
  tpostscriptcanvas = class(tstreamprintercanvas)
   private
    ffonts: psfontinfoarty;
@@ -110,13 +110,13 @@ type
    procedure touchimagecache(const index: integer);
    function getimagecache(const akind: imagecachekindty; const asource: tcanvas;
                           const asourcerect: rectty; out varname: string{;
-                          out arowbytes: integer}): boolean; 
+                          out arowbytes: integer}): boolean;
                                        //true if found
    function setimagecache(const akind: imagecachekindty;
                const asource: tcanvas;
                const asourcerect: rectty; out varname: string;
                const bytes: bytearty; {const arowbytes: integer;}
-               const amask: tcanvas = nil): boolean; 
+               const amask: tcanvas = nil): boolean;
                                        //true if stored
 
    function getgdifuncs: pgdifunctionaty; override;
@@ -134,10 +134,10 @@ type
    procedure definefont(const adata: fontnumty; const acodepage: integer);
    procedure setpslinewidth(const avalue: integer);
    function strokestr: string;
-   function rectscalestring(const arect: rectty): string; 
+   function rectscalestring(const arect: rectty): string;
                  //transform unity cell to arect
    function imagematrixstring(const asize: sizety): string;
-   
+
    function getcolorstring(const acolor: colorty): string;
    function setcolorstring(const acolor: colorty): string;
    procedure writebinhex(const data: bytearty);
@@ -147,7 +147,7 @@ type
                    const acolor: colorty = cl_none;
                    const acolorbackground: colorty = cl_none;
                    const fontstyle: fontstylesty = []): string;
-   function createpattern(const sourcerect,destrect: rectty; 
+   function createpattern(const sourcerect,destrect: rectty;
                    const acolorbackground,acolorforeground: colorty;
                    const acanvas: tcanvas;
 //                   const pixmap: pixmapty; const agchandle: ptruint;
@@ -163,7 +163,7 @@ type
    procedure ps_changegc;
    procedure ps_drawlines;
    procedure ps_drawlinesegments;
-   
+
    procedure ps_fillpolygon;
    procedure ps_fillarc;
    procedure ps_fillrect;
@@ -175,17 +175,17 @@ type
    procedure beginpage; override;
    procedure endpage; override;
    function registermap(const acodepage: integer): string;
-                 //returns mapname ('E00' for latin 1)  
+                 //returns mapname ('E00' for latin 1)
    procedure checkmap(const acodepage: integer);
    function gcposstring(const apos: pointty): string;
   public
    constructor create(const user: tprinter; const intf: icanvas);
 
    function devpos(const apos: pointty): pspointty;
-   function posstring(const apos: pointty): string;  
+   function posstring(const apos: pointty): string;
    function matrixstring(const mat: psmatrixty): string;
    function transrotate(const sourcecenter,destcenter: pointty;
-                                                const angle: real): string;  
+                                                const angle: real): string;
    function diststring(const adist: integer): string;
    function rectsizestring(const asize: sizety): string;
    function sizestring(const asize: sizety): string;
@@ -193,17 +193,17 @@ type
    procedure pscommandbegin();
    procedure pscommandwrite(const atext: string);
    procedure pscommandend();
-   procedure pscommand(const atext: string); 
+   procedure pscommand(const atext: string);
                     // writes atext to postscript stream
   published
    property pslevel: pslevelty read fpslevel write fpslevel default psl_3;
-   property imagecachesize: integer read fimagecachesize write setimagecachesize 
+   property imagecachesize: integer read fimagecachesize write setimagecachesize
                                                   default defaultimagecachesize;
-   property imagecachemaxitemsize: integer read fimagecachemaxitemsize 
-                                   write setimagecachemaxitemsize 
+   property imagecachemaxitemsize: integer read fimagecachemaxitemsize
+                                   write setimagecachemaxitemsize
                                            default defaultimagecachemaxitemsize;
  end;
- 
+
 function psrealtostr(const avalue: real): string;
 procedure pstranslate(var mat: psmatrixty; const dist: pspointty);
 procedure psretranslate(var mat: psmatrixty; const dist: pspointty);
@@ -220,7 +220,7 @@ function psdist(const source,dest: pspointty): pspointty; overload;
 //function psdist(const source,dest: pointty): pspointty; overload;
 function pspoint(const apoint: pointty): pspointty;
 procedure psnormalizerect(var ll,ur: pspointty);
- 
+
 implementation
 uses
  msegui,msesys,sysutils,msedatalist,mseformatstr,mseunicodeps,
@@ -235,11 +235,11 @@ uses
 {$endif}
 
 type
- tsimplebitmap1 = class(tsimplebitmap); 
+ tsimplebitmap1 = class(tsimplebitmap);
  tcanvas1 = class(tcanvas);
 var
  gdifuncs: pgdifunctionaty;
- 
+
 procedure pstranslate(var mat: psmatrixty; const dist: pspointty);
 begin
  mat[2,0]:= mat[2,0] + dist.x;
@@ -355,13 +355,13 @@ end;
 
 const
  pageorientations: array[pageorientationty] of string = ('Portrait','Landscape');
- 
+
  imagepatname = 'impat';
  patpatname = 'pat';
  radtodeg = 360/(2*pi);
- nl = lineend;  
+ nl = lineend;
  maxlinecharcount = 80;
- preamble = 
+ preamble =
 '/rf {'+nl+        //register font: alias,encoding,origname->
 'findfont'+nl+         //alias,encoding,font
 'dup length dict '+    //alias,encoding,font,dict
@@ -372,12 +372,12 @@ const
   'ifelse'+nl+
  '} forall'+nl+           //alias,encoding
  '/Encoding exch def'+nl+ //alias
- 'currentdict'+nl+        //alias,dict 
+ 'currentdict'+nl+        //alias,dict
 'end'+nl+                 //alias,dict       dict is removed from dictstack
-'definefont '+            //dict 
+'definefont '+            //dict
 'pop'+nl+                 //
 '} bind def'+nl+
-                             //                    
+                             //
 '/sf {'+nl+         //select font:    |-> optional
                     //[alias,scale(x),scaley,rotation,underline,stroke]->
 'dup'+              //[bak],[alias,scale(x),scaley,rotation]
@@ -398,7 +398,7 @@ const
  ' 3 get'+           //[bak],smatrix,rotation
  ' matrix rotate'+   //[bak],smatrix,rmatrix
  ' matrix concatmatrix}'+
-' if'+nl+   
+' if'+nl+
 
 '1 index'+             //[bak],rmatrix,[alias,scale(x),scaley,rotation,underline,stroke]
 ' dup length 5 ge'   + //[bak],rmatrix,
@@ -416,7 +416,7 @@ const
 ' 0 get'+              //matrix,alias
 ' findfont'+           //matrix,font
 ' exch makefont'+            //font
-' dup /FontMatrix get exch'+ //matrix,font 
+' dup /FontMatrix get exch'+ //matrix,font
 ' dup /FontBBox get'+nl+
                        //matrix,font,bbox
 'aload pop'+ //matrix,font,llx,lly,urx,ury
@@ -464,12 +464,12 @@ const
                            //[text,[font],color,colorbackground]
     ' 0 2 getinterval'+    //[bak],
                            //[text,[font]]     remove color
-   ' } if'+nl+  
+   ' } if'+nl+
   ' dup length 2 eq'+ //array,arraylength = 5
   ' {aload pop sf}'+  //[bak],text
   ' {aload pop}'+     //[bak],text
   ' ifelse '+nl+
-  
+
   ' exch dup length 4 eq'+ //text,[bak],length = 4
   ' {'+ //text,[text,[font],color,colorbackground]
    ' [currentcolor] exch'+ //text,[colbackup],[text,[font],color,colorbackground]
@@ -477,15 +477,15 @@ const
    ' aload pop setcolor exch'+   //[colbackup],text
    ' dup stringwidth pop'+nl+//[colbackup],text,width
    ' currentpoint currentpoint asc add'+nl+ //[colbackup],text,width,x,y,x,y+asc
-   ' newpath moveto'+                    //[colbackup],text,width,x,y    
+   ' newpath moveto'+                    //[colbackup],text,width,x,y
    ' 2 index 0 rlineto'+
    ' 0 0 asc sub desc sub rlineto'+
    ' 0 3 index sub 0 rlineto'+nl+
    ' closepath fill'+                    //[colbackup],text,width,x,y
-   ' moveto'+                            //[colbackup],text,width 
+   ' moveto'+                            //[colbackup],text,width
    ' pop'+                               //[colbackup],text
-   ' exch aload pop setcolor'+           //text 
-   ' show'+         
+   ' exch aload pop setcolor'+           //text
+   ' show'+
   ' }'+nl+
   ' {'+    //text,[text,font,rot,scalex,scaley,color]
    ' pop'+ //text
@@ -507,7 +507,7 @@ const
 
 '/cy {'+nl+      //center y text,llx,lly,urx,ury-> text,llx,lly,urx,centeredy
 ' 2 index sub'+  //text,llx,lly,urx,ury-lly
-' dup 0 eq'+nl+  //text,llx,lly,urx,ury-lly,bool 
+' dup 0 eq'+nl+  //text,llx,lly,urx,ury-lly,bool
 
 ' {pop 1 index}'+nl+  //text,llx,lly,urx,lly
 
@@ -519,7 +519,7 @@ const
 '} bind def'+nl+
 
 '/sl {'+nl+     //print left text,llx,lly,urx,ury
-' cy'+          //text,llx,lly,urx,centeredy 
+' cy'+          //text,llx,lly,urx,centeredy
 ' 3 index exch'+ //text,llx,lly,urx,llx,ury-lly-asc-desc/2+lly+desc
 ' moveto '+nl+
 //' currentpoint /ay exch def /ax exch def'+ //backup for underline
@@ -528,7 +528,7 @@ const
 '} bind def'+nl+
 
 '/sr {'+ //print right text: text,llx,lly,urx,ury->
-' cy'+          //text,llx,lly,urx,centeredy 
+' cy'+          //text,llx,lly,urx,centeredy
 ' exch'+             //text,llx,lly,newy,urx
 ' 4 index'+nl+       //text,llx,lly,newy,urx,text
 ' w'+            //text,llx,lly,newy,urx,cx
@@ -539,13 +539,13 @@ const
 '} bind def'+nl+
 
 '/sc {'+nl+     //print center text: text,llx,lly,urx,ury ->
-' cy'+          //text,llx,lly,urx,centeredy 
+' cy'+          //text,llx,lly,urx,centeredy
 ' 4 index'+     //text,llx,lly,urx,centeredy,text
 ' w'+           //text,llx,lly,urx,centeredy,cx
 ' 4 index'+     //text,llx,lly,urx,centeredy,cx,llx
 ' 3 index'+     //text,llx,lly,urx,centeredy,cx,llx,urx
 ' exch sub'+    //text,llx,lly,urx,centeredy,cx,urx-llx
-' exch sub'+    //text,llx,lly,urx,centeredy,urx-llx-cx 
+' exch sub'+    //text,llx,lly,urx,centeredy,urx-llx-cx
 ' 2 div'+       //text,llx,lly,urx,centeredy,(urx-llx-cx)/2
 ' 4 index add'+nl+ //text,llx,lly,urx,centeredy,(urx-llx-cx)/2+llx
 ' exch'+        //text,llx,lly,urx,newx,centeredy
@@ -588,14 +588,14 @@ const
 //' currentpoint /ay exch def /ax exch def'+ //text,llx,lly,urx
 ' pop pop pop s'+
 '} bind def'+nl+
- 
+
 '/st {'+nl+     //print top text: text,llx,lly,urx,ury ->
 ' 4 index'+     //text,llx,lly,urx,ury,text
 ' w'+           //text,llx,lly,urx,ury,cx
 ' 4 index'+     //text,llx,lly,urx,ury,cx,llx
 ' 3 index'+     //text,llx,lly,urx,ury,cx,llx,urx
 ' exch sub'+    //text,llx,lly,urx,ury,cx,urx-llx
-' exch sub'+    //text,llx,lly,urx,ury,urx-llx-cx 
+' exch sub'+    //text,llx,lly,urx,ury,urx-llx-cx
 ' 2 div'+       //text,llx,lly,urx,ury,(urx-llx-cx)/2
 ' 4 index add'+nl+//text,llx,lly,urx,ury,(urx-llx-cx)/2+llx
 ' exch'+        //text,llx,lly,urx,newx,ury
@@ -611,7 +611,7 @@ const
 ' 4 index'+     //text,llx,lly,urx,ury,cx,llx
 ' 3 index'+     //text,llx,lly,urx,ury,cx,llx,urx
 ' exch sub'+    //text,llx,lly,urx,ury,cx,urx-llx
-' exch sub'+    //text,llx,lly,urx,ury,urx-llx-cx 
+' exch sub'+    //text,llx,lly,urx,ury,urx-llx-cx
 ' 2 div'+       //text,llx,lly,urx,ury,(urx-llx-cx)/2
 ' 4 index add'+nl+ //text,llx,lly,urx,ury,(urx-llx-cx)/2+llx
 ' 3 index'+     //text,llx,lly,urx,ury,newx,lly
@@ -629,7 +629,7 @@ const
 ' currentpoint'+    //x,y
 ' desc 2 div sub'+nl+  //x,y-desc/2
 ' dup'+             //x,newy,newy
-' 2 index exch'+    //x,newy,x,newy  
+' 2 index exch'+    //x,newy,x,newy
 ' moveto'+          //x,newy
 ' ax exch'+         //x,ax,newy
 ' lineto stroke'+   //x
@@ -645,7 +645,7 @@ const
 ' currentpoint'+nl+  //x,y
 ' asc desc add 2 div add desc sub'+ //x,y+asc+desc/2-desc
 ' dup'+             //x,newy,newy
-' 2 index exch'+    //x,newy,x,newy  
+' 2 index exch'+    //x,newy,x,newy
 ' moveto'+          //x,newy
 ' ax exch'+         //x,ax,newy
 ' lineto stroke'+   //x
@@ -662,18 +662,18 @@ const
 ' mul add'+nl+        //tabbedx
 '} bind def'+nl+
  nl;
- 
+
  alignmentsubs: array[psalignty] of string = (
  //pa_center,pa_lefttop,pa_top,pa_righttop,pa_right,
     'sc',     'slt',     'st',  'srt',      'sr',
  //pa_rightbottom,pa_bottom,pa_leftbottom,pa_left
     'srb',         'sb',     'slb',        'sl');
- 
+
  tftopa: array [0..15] of psalignty = (//tf_xcentered,tf_right,tf_ycentered,tf_bottom,
-  pa_lefttop,                          //   0            0        0            0 
+  pa_lefttop,                          //   0            0        0            0
   pa_top,                              //   1            0        0            0
-  pa_righttop,                         //   0            1        0            0  
-  pa_center, //invalid                 //   1            1        0            0 
+  pa_righttop,                         //   0            1        0            0
+  pa_center, //invalid                 //   1            1        0            0
   pa_left,                             //   0            0        1            0
   pa_center,                           //   1            0        1            0
   pa_right,                            //   0            1        1            0
@@ -699,7 +699,7 @@ type
 //  res: array[1..23] of longword;
  end;
 
- 
+
 procedure gdi_destroygc(var drawinfo: drawinfoty);
 begin
  try
@@ -707,7 +707,7 @@ begin
  except //trap for stream write errors
  end;
 end;
- 
+
 procedure gdi_changegc(var drawinfo: drawinfoty);
 begin
  postscriptgcty(drawinfo.gc.platformdata).d.canvas.ps_changegc;
@@ -772,7 +772,7 @@ end;
 
 var
  gdifunctions: gdifunctionaty;
- 
+
 function psrealtostr(const avalue: real): string;
 begin
 // result:= replacechar(formatfloat('0.###',avalue),decimalseparator,'.');
@@ -947,7 +947,7 @@ begin
    end;
    str1:= ' ' + psrealtostr(d.rotation*radtodeg);
    scalestringfull:= scalestringfull + str1;
-   if d.rotation <> 0 then begin 
+   if d.rotation <> 0 then begin
     scalestring1:= scalestring1 + str1;
    end;
   end;
@@ -1053,7 +1053,7 @@ begin
    str1:= str1+'] 0 setdash'+nl;
    streamwrite(str1);
   end;
-  if (self.brush <> nil) and 
+  if (self.brush <> nil) and
             ([gvm_brush,gvm_brushorigin] * mask <> []) then begin
    with tsimplebitmap1(self.brush) do begin
     rect1:= makerect(nullpoint,size);
@@ -1119,7 +1119,7 @@ end;
 
 function tpostscriptcanvas.gcposstring(const apos: pointty): string;
 begin
- result:= 
+ result:=
   psrealtostr(apos.x*fgcscale+fgcoffsetx)+' '+
   psrealtostr(fgcoffsety-apos.y*fgcscale);
 end;
@@ -1178,7 +1178,7 @@ end;
 function tpostscriptcanvas.rectstring(const arect: rectty): string;
 begin
  with arect do begin
-  result:= 
+  result:=
    psrealtostr(x*fgcscale+foriginx)+' '+
    psrealtostr(foriginy-y*fgcscale)+' '+
    psrealtostr(cx*fgcscale)+' '+psrealtostr(-cy*fgcscale)
@@ -1225,7 +1225,7 @@ begin
     dec(int2);        //remove zeroes
    end
    else begin
-    (po1+int2)^:= '\';             //octal  
+    (po1+int2)^:= '\';             //octal
     (po1+int2+3)^:= char((byte(ch1) and $07) + ord('0'));
     ch1:= char(byte(ch1) shr 3);
     (po1+int2+2)^:= char((byte(ch1) and $07) + ord('0'));
@@ -1233,7 +1233,7 @@ begin
     (po1+int2+1)^:= char((byte(ch1) and $03) + ord('0'));
     inc(int2,3);
    end;
-  end 
+  end
   else begin
    case ch1 of
     '\','(',')': begin
@@ -1251,8 +1251,8 @@ begin
  setlength(result,int2);
 end;
 
-function tpostscriptcanvas.getshowstring(const avalue: pmsechar; 
-          const count: integer; fontneeded: boolean = false; 
+function tpostscriptcanvas.getshowstring(const avalue: pmsechar;
+          const count: integer; fontneeded: boolean = false;
           const acolor: colorty = cl_none;
           const acolorbackground: colorty = cl_none;
           const fontstyle: fontstylesty = []): string;
@@ -1261,14 +1261,14 @@ var
  wo1,wo2: word;
  po1,po2: pchar;
  colback: colorty;
- 
+
  procedure pushsubstring;
  begin
   result:= result + '[('+psencode(po2,po1-po2)+')';
   if fontneeded then begin
    with ffonts[factfont] do begin
 //    result:= result + ' ['+encodefontname(namenum,factcodepage) + scalestring1+']';
-    result:= result + ' ['+encodefontname(namenum,factcodepage) + 
+    result:= result + ' ['+encodefontname(namenum,factcodepage) +
                                              getscalestring(fontstyle)+']';
    end;
   end;
@@ -1284,7 +1284,7 @@ var
   result:= result +']';
   po1:= po2;
  end;
- 
+
 begin
  if acolorbackground <> cl_none then begin
   colback:= acolorbackground;
@@ -1339,7 +1339,7 @@ var
  style1: fontstylesty;
  lastbreak: integer;
  rect1: rectty;
- 
+
  procedure addstring(const astring: ansistring);
  begin
   if (length(str1) - lastbreak) + length(astring) > maxlinecharcount then begin
@@ -1349,7 +1349,7 @@ var
   str1:= str1+astring;
  end;
 var
- pt1: pointty; 
+ pt1: pointty;
  rea1: real;
 begin
  if not active {or (text.text = '')} then begin
@@ -1378,7 +1378,7 @@ begin
   str1:= str1+transrotate(dest.pos,pt1,rea1)+nl;
  end;
  lastbreak:= 0;
- str1:= str1+'['; 
+ str1:= str1+'[';
  if (text.format = nil) or (text.text = '') then begin
   addstring(getshowstring(pmsechar(text.text),length(text.text),
                 true,cl_none,cl_none,font.style)+'] ');
@@ -1439,7 +1439,7 @@ begin
      addstring(getshowstring(pmsechar(pointer(text.text))+index,int2,true,co1,co2,
                                style1));
     end;
-   end;   
+   end;
   end;
   str1:= str1 + '] ';
  end;
@@ -1469,7 +1469,7 @@ begin
    psrealtostr(foriginy-(rect1.y)*fgcscale)+' '; //llx,lly,urx,ury
  end;
  int1:= (longword(flags*mask1) shr 1) or
-        (longword(flags*mask2) shr 3); 
+        (longword(flags*mask2) shr 3);
         //remove tf_left, tf_xjustify and tf_top
  str1:= str1+alignmentsubs[tftopa[int1]];
 {
@@ -1514,17 +1514,17 @@ end;
 
 function tpostscriptcanvas.strokestr: string;
 begin
- if (length(dashes) > 0) and (df_opaque in fdrawinfo.gc.drawingflags) then begin 
+ if (length(dashes) > 0) and (df_opaque in fdrawinfo.gc.drawingflags) then begin
                                     //(dashes[length(dashes)] = #0) then begin
   result:= 'gsave [] 0 setdash ' + setcolorstring(fdrawinfo.acolorbackground) +
-           ' stroke grestore stroke'; //draw background 
+           ' stroke grestore stroke'; //draw background
  end
  else begin
   result:= 'stroke';
  end;
 end;
 
-procedure tpostscriptcanvas.handlepoly(const points: ppointty; 
+procedure tpostscriptcanvas.handlepoly(const points: ppointty;
              const lastpoint: integer; const closed: boolean; const fill: boolean);
 var
  int1: integer;
@@ -1697,12 +1697,12 @@ begin
  until int2 <= 0;
 end;
 
-function tpostscriptcanvas.rectscalestring(const arect: rectty): string; 
+function tpostscriptcanvas.rectscalestring(const arect: rectty): string;
                  //transform unity cell to arect
 begin
  with arect do begin
   result:= psrealtostr(x*fgcscale+foriginx)+' '+
-           psrealtostr(foriginy-(y+cy{-1})*fgcscale)+' translate '+ 
+           psrealtostr(foriginy-(y+cy{-1})*fgcscale)+' translate '+
            psrealtostr(cx*fgcscale)+' '+psrealtostr(cy*fgcscale)+' scale';
  end;
 end;
@@ -1719,7 +1719,7 @@ end;
 
 const
  unityrectpath = 'newpath 0 0 moveto 1 0 lineto 1 1 lineto 0 1 lineto closepath';
- 
+
 procedure convertrgb(const sourcerect: rectty; const image: imagety;
                      out data: bytearty; out rowbytes: integer);
 var
@@ -1974,12 +1974,12 @@ begin
   str1:= 'pop pop ';
  end;
  str1:= str1+'gsave '+rectscalestring(destrect)+nl+
-'<< /PatternType 1 /PaintType 1 /TilingType 1 /BBox [0 0 1 1] /XStep 1 /YStep 1'+nl+ 
+'<< /PatternType 1 /PaintType 1 /TilingType 1 /BBox [0 0 1 1] /XStep 1 /YStep 1'+nl+
 '/PaintProc {' + nl;
  if acanvas.kind = bmk_mono then begin
   if acolorbackground <> cl_transparent then begin
-   str1:= str1 + unityrectpath + nl + 
-         setcolorstring(acolorbackground) + ' fill ';   
+   str1:= str1 + unityrectpath + nl +
+         setcolorstring(acolorbackground) + ' fill ';
   end;
   str1:= str1 + setcolorstring(acolorforeground) + nl;
  end;
@@ -2006,7 +2006,7 @@ begin
  str1:= str1+' } bind >> matrix makepattern grestore'+nl;
  streamwrite(str1);
 end;
-  
+
 procedure tpostscriptcanvas.checkcolorspace;
 begin
  if not (cs_acolorforeground in fstate) then begin
@@ -2020,7 +2020,7 @@ var
  mono: boolean;
  cached: boolean;
  varname: string;
- 
+
  function imagedict: string;
  begin
   with fdrawinfo.copyarea.sourcerect^ do begin
@@ -2059,7 +2059,7 @@ var
   result:= result + '>>'+nl;
  end;
 
-var 
+var
  ar1,ar2,ar3: bytearty;
  str1: string;
 // components: integer;
@@ -2106,7 +2106,7 @@ begin
        gdi_lock;
        if gui_pixmaptoimage(tsimplebitmap1(mask).handle,image,
                                      mask.canvas.gchandle) <> gde_ok then begin
-        goto endlab;   
+        goto endlab;
        end;
        gdi_unlock;
        if mask.kind = bmk_mono then begin
@@ -2195,7 +2195,7 @@ begin
      cached:= not maskcopy and getimagecache(ick_2,mask.canvas,sourcerect^,varname);
      gdi_lock;
      if not (createpattern(sourcerect^,destrect^,acolorbackground,acolorforeground,
-          source,imagepatname) and 
+          source,imagepatname) and
            (cached or (gui_pixmaptoimage(tsimplebitmap1(mask).handle,image,
                                     mask.canvas.gchandle) = gde_ok))) then begin
       goto endlab;
@@ -2215,7 +2215,7 @@ begin
       str1:= str1 + ' /picstr ' + inttostr(rowbytes) + ' string def ';
      end;
      str1:= str1 + rectscalestring(destrect^) + nl;
-     str1:= str1 + inttostr(sourcerect^.size.cx) + ' ' + 
+     str1:= str1 + inttostr(sourcerect^.size.cx) + ' ' +
                    inttostr(sourcerect^.size.cy);
      str1:= str1 + ' true ';
      str1:= str1 + imagematrixstring(sourcerect^.size)+nl;
@@ -2273,8 +2273,8 @@ begin
     str1:= str1 + rectscalestring(destrect^) + nl;
     if mono{image.monochrome} then begin
      if acolorbackground <> cl_transparent then begin
-      str1:= str1 + unityrectpath + nl + 
-            setcolorstring(acolorbackground) + ' fill ';   
+      str1:= str1 + unityrectpath + nl +
+            setcolorstring(acolorbackground) + ' fill ';
      end;
     end;
     if fpslevel >= psl_2 then begin
@@ -2389,7 +2389,7 @@ function tpostscriptcanvas.registermap(const acodepage: integer): string;
  begin
   streamwrite('/'+result+' ['+nl+glyphnames+'] def'+nl,true);
  end;
- 
+
 var
  map1: unicodepagety;
  str1: string;
@@ -2515,10 +2515,10 @@ begin
  result:= false;
  for int1:= 0 to high(fimagecache) do begin
   with fimagecache[int1] do begin
-   if (kind = akind) and (source = asource) and 
+   if (kind = akind) and (source = asource) and
                                  rectisequal(sourcerect,asourcerect) then begin
     varname:= 'picstr'+inttostr(int1);
-    result:= (statestamp = asource.statestamp) and 
+    result:= (statestamp = asource.statestamp) and
               ((mask = nil) or (maskstatestamp = mask.statestamp));
     if not result then begin
      freeimagecache(int1);
@@ -2530,7 +2530,7 @@ begin
   end;
  end;
 end;
- 
+
 function tpostscriptcanvas.setimagecache(const akind: imagecachekindty;
                const asource: tcanvas;
                const asourcerect: rectty; out varname: string;

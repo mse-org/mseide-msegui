@@ -31,12 +31,12 @@ const
  fontsizeshift = 16;
  fontsizeroundvalue = $8000;
  defaultfontalias = 'stf_default';
- 
+
  invalidgchandle = ptruint(-1);
- 
+
 type
  gckindty = (gck_screen,gck_pixmap,gck_printer,gck_metafile);
- 
+
  drawingflagty = (df_canvasispixmap,df_canvasismonochrome,df_highresfont,
                   df_doublebuffer,df_smooth,
                   df_colorconvert,
@@ -62,7 +62,7 @@ type
                  foo_roman,            // 'R'
                  foo_script,           // 'S'
                  foo_decorative,       // 'D'
-                 foo_antialiased,      // 'A' 
+                 foo_antialiased,      // 'A'
                  foo_antialiased2,     // 'B' cleartype on windows
                  foo_nonantialiased    // 'a'
 //                 foo_xcore,            // 'C'  //seems not to work with xft2
@@ -92,14 +92,14 @@ const
 
 const
  fontstylehandlemask = 3; //[fs_bold,fs_italic]
- fontstylesmamask: fontstylesty = 
+ fontstylesmamask: fontstylesty =
            [fs_bold,fs_italic,fs_underline,fs_strikeout,fs_selected];
 
 type
  pgdifunctionaty = ^gdifunctionaty;
 
  fontdatapty = array[0..15] of pointer;
- 
+
  fonthashdty = record       //hashed by byteshash
   glyph: unicharty;
   gdifuncs: pgdifunctionaty;   //gdi framework
@@ -113,10 +113,10 @@ type
 
  fonthashdataty = record
   d: fonthashdty;
-  name: string;      
+  name: string;
   charset: string;
  end;
-  
+
  fontdataty = record
   h: fonthashdataty;
   realfont: fonthashdataty;
@@ -197,7 +197,7 @@ type
   flp_options
  );
  fontlocalpropsty = set of fontlocalpropty;
- 
+
  fontinfoty = record
   handles: array[0..fontstylehandlemask] of fontnumty;
   baseinfo: basefontinfoty;
@@ -208,7 +208,7 @@ type
  pfontinfoty = ^fontinfoty;
 
  bitmapkindty = (bmk_mono,bmk_gray,bmk_rgb);
- 
+
  imagety = record
   kind: bitmapkindty;
   bgr: boolean;
@@ -224,7 +224,7 @@ type
   image: imagety;
   mask: imagety;
  end;
- 
+
  icanvas = interface(inullinterface)
   procedure gcneeded(const sender: tcanvas);
   function getkind: bitmapkindty;
@@ -232,8 +232,8 @@ type
   procedure getcanvasimage(const bgr: boolean; var aimage: maskedimagety);
  end;
 
- canvasclassty = class of tcanvas; 
- 
+ canvasclassty = class of tcanvas;
+
  gcpty = array[0..63] of pointer;
  gcty = record
   handle: ptruint;//cardinal;
@@ -343,13 +343,13 @@ type
   copyfrom: pixmapty;
   pixmap: pixmapty;
  end;
- 
+
  pixmapimageinfoty = record
   pixmap: pixmapty;
   image: imagety;
   error: gdierrorty;
  end;
-  
+
  creategcinfoty = record
   paintdevice: paintdevicety;
   kind: gckindty;
@@ -361,22 +361,22 @@ type
   createpaintdevice: boolean;
   error: gdierrorty;
  end;
- 
+
  getimageinfoty = record
   error: gdierrorty;
   image: maskedimagety;
  end;
- 
+
  getcanvasclassinfoty = record
   canvasclass: canvasclassty;
   kind: bitmapkindty;//monochrome: boolean;
  end;
- 
+
  moverectinfoty = record
   dist: ppointty;
   rect: prectty;
  end;
-  
+
  gcvaluemaskty = (gvm_clipregion,gvm_colorbackground,gvm_colorforeground,
                   gvm_dashes,gvm_linewidth,gvm_capstyle,gvm_joinstyle,
                   gvm_options,
@@ -394,7 +394,7 @@ type
 
  canvasoptionty = (cao_smooth);
  canvasoptionsty = set of canvasoptionty;
- 
+
  gcvaluesty = record
   mask: gcvaluemasksty;
   clipregion: regionty;
@@ -410,7 +410,7 @@ type
   options: canvasoptionsty;
  end;
  pgcvaluesty = ^gcvaluesty;
- 
+
  drawinfoty = record
   buffer: bufferty;
   gc: gcty;
@@ -462,7 +462,7 @@ type
    procedure setgrayed_shiftx(const avalue: integer);
    procedure setgrayed_shifty(const avalue: integer);
    procedure setstyle(const avalue: fontstylesty);
-   procedure setxscale(const avalue: real);   
+   procedure setxscale(const avalue: real);
    procedure setheight(const avalue: integer);
    procedure setwidth(const avalue: integer);
    procedure setextraspace(const avalue: integer);
@@ -485,7 +485,7 @@ type
    property colorselect: colorty read fi.colorselect
              write setcolorselect default cl_default;  //cl_selectedtext
    property colorselectbackground: colorty read fi.colorselectbackground
-             write setcolorselectbackground default cl_default; 
+             write setcolorselectbackground default cl_default;
                                                //cl_selectedtextbackground
 
    property shadow_color: colorty read fi.shadow_color
@@ -505,7 +505,7 @@ type
    property grayed_color: colorty read fi.grayed_color
                  write setgrayed_color default cl_default; //cl_grayed
    property grayed_colorshadow: colorty read fi.grayed_colorshadow
-                 write setgrayed_colorshadow default cl_default; 
+                 write setgrayed_colorshadow default cl_default;
                                                            //cl_grayedshadow;
    property grayed_shiftx: integer read fi.grayed_shiftx write
                 setgrayed_shiftx default 1;
@@ -516,7 +516,7 @@ type
                   //pixel
    property width: integer read fi.width write setwidth default 0;
                   //avg. character width in 1/10 pixel, 0 = default
-   property extraspace: integer read fi.extraspace write setextraspace 
+   property extraspace: integer read fi.extraspace write setextraspace
                                                                  default 0;
    property style: fontstylesty read fi.style write setstyle default [];
    property name: string read fi.name write setname;
@@ -536,8 +536,8 @@ type
   public
   published
    property template: tfonttemplate read gettemplate write settemplate;
- end; 
- 
+ end;
+
  getfontfuncty = function (var drawinfo: drawinfoty): boolean of object;
 
  tfont = class(tlinkedoptionalpersistent,icanvas)
@@ -604,7 +604,7 @@ type
    procedure setrotation(const avalue: real);
    function getxscale: real;
    procedure setxscale(const avalue: real);
-   
+
    procedure readcolorshadow(reader: treader);
    function getlinewidth: integer;
 
@@ -644,7 +644,7 @@ type
   protected
    finfo: fontinfoty;
    fhandlepo: ^fontnumty;
-   procedure dochanged(const changed: canvasstatesty; 
+   procedure dochanged(const changed: canvasstatesty;
                                     const nochange: boolean); virtual;
    function getfont(var drawinfo: drawinfoty): boolean; virtual;
    procedure setname(const Value: string); virtual;
@@ -652,11 +652,11 @@ type
    function getdatapo: pfontdataty;
    procedure assignproperties(const source: tfont;
                                       const ahandles: boolean); virtual;
-   property rotation: real read getrotation write setrotation; 
+   property rotation: real read getrotation write setrotation;
                                  //0..2*pi-> 0degree..360degree CCW
    procedure defineproperties(filer: tfiler); override;
    procedure settemplateinfo(const ainfo: basefontinfoty);
-   procedure objectevent(const sender: tobject; 
+   procedure objectevent(const sender: tobject;
                         const event: objecteventty); override;
    function isheightstored(): boolean;
    function iswidthstored(): boolean;
@@ -679,11 +679,11 @@ type
    property linewidth: integer read getlinewidth;
    property caretshift: integer read getcaretshift;
    property onchange: notifyeventty read fonchange write fonchange;
-   
+
    property bold: boolean read getbold write setbold;
    property italic: boolean read getitalic write setitalic;
    property underline: boolean read getunderline write setunderline;
-   property strikeout: boolean read getstrikeout write setstrikeout;   
+   property strikeout: boolean read getstrikeout write setstrikeout;
    property heightflo: flo64 read getheightflo write setheightflo;
                   //pixel, 0 = default
 
@@ -691,56 +691,56 @@ type
    property color: colorty read getcolor write setcolor
                   stored iscolorstored default cl_default;    //cl_text
    property colorbackground: colorty read getcolorbackground
-                 write setcolorbackground stored iscolorbackgroundstored 
+                 write setcolorbackground stored iscolorbackgroundstored
                                           default cl_default; //cl_transparent
    property colorselect: colorty read getcolorselect write setcolorselect
              stored iscolorselectstored default cl_default;    //cl_selectedtext
    property colorselectbackground: colorty read getcolorselectbackground
-        write setcolorselectbackground stored iscolorselectbackgroundstored 
+        write setcolorselectbackground stored iscolorselectbackgroundstored
                                default cl_default; //cl_selectedtextbackground
    property shadow_color: colorty read getshadow_color write setshadow_color
                                     stored isshadow_colorstored default cl_none;
-   property shadow_shiftx: integer read getshadow_shiftx write setshadow_shiftx 
+   property shadow_shiftx: integer read getshadow_shiftx write setshadow_shiftx
                                          stored isshadow_shiftxstored default 1;
-   property shadow_shifty: integer read getshadow_shifty write setshadow_shifty 
+   property shadow_shifty: integer read getshadow_shifty write setshadow_shifty
                                          stored isshadow_shiftystored default 1;
 
    property gloss_color: colorty read getgloss_color
-                 write setgloss_color 
+                 write setgloss_color
                   stored isgloss_colorstored default cl_none;
-   property gloss_shiftx: integer read getgloss_shiftx write setgloss_shiftx 
+   property gloss_shiftx: integer read getgloss_shiftx write setgloss_shiftx
                   stored isgloss_shiftxstored default -1;
-   property gloss_shifty: integer read getgloss_shifty write setgloss_shifty 
+   property gloss_shifty: integer read getgloss_shifty write setgloss_shifty
                   stored isgloss_shiftystored default -1;
 
    property grayed_color: colorty read getgrayed_color
-                 write setgrayed_color 
+                 write setgrayed_color
                   stored isgrayed_colorstored default cl_default;//cl_grayed
    property grayed_colorshadow: colorty read getgrayed_colorshadow
-                 write setgrayed_colorshadow 
+                 write setgrayed_colorshadow
                   stored isgrayed_colorshadowstored default cl_default;
                                                              //cl_grayedshadow
    property grayed_shiftx: integer read getgrayed_shiftx write
-                setgrayed_shiftx 
+                setgrayed_shiftx
                   stored isgrayed_shiftxstored default 1;
    property grayed_shifty: integer read getgrayed_shifty write
-                setgrayed_shifty 
+                setgrayed_shifty
                   stored isgrayed_shiftystored default 1;
 
-   property height: integer read getheight write setheight 
+   property height: integer read getheight write setheight
                                       stored isheightstored default 0;
                   //pixel, 0 = default
-   property width: integer read getwidth write setwidth 
+   property width: integer read getwidth write setwidth
                                       stored iswidthstored default 0;
                   //avg. character width in 1/10 pixel, 0 = default
-   property extraspace: integer read getextraspace write setextraspace 
+   property extraspace: integer read getextraspace write setextraspace
                                      stored isextraspacestored default 0;
-   property style: fontstylesty read getstyle write setstyle 
+   property style: fontstylesty read getstyle write setstyle
                               stored isstylestored default [];
    property name: string read getname write setname stored isnamestored;
-   property charset: string read getcharset write setcharset 
+   property charset: string read getcharset write setcharset
                                                     stored ischarsetstored;
-   property options: fontoptionsty read getoptions write setoptions 
+   property options: fontoptionsty read getoptions write setoptions
                                            stored isoptionsstored default [];
    property xscale: real read getxscale write setxscale stored isxscalestored;
                                  //default 1.0
@@ -752,10 +752,10 @@ type
  end;
  pfont = ^tfont;
  fontarty = array of tfont;
- 
+
  toptionalfont = class(tfont)
  end;
- 
+
  tparentfont = class(tfont)
   public
    class function getinstancepo(owner: tobject): pfont; virtual; abstract;
@@ -764,7 +764,7 @@ type
 
  tcanvasfont = class(tfont)
   private
-  protected   
+  protected
    fcanvas: tcanvas;
    fgdifuncs: pgdifunctionaty;
    procedure dochanged(const changed: canvasstatesty;
@@ -841,7 +841,7 @@ type
 
  gdiintffuncty = procedure (func: gdifuncty; var drawinfo: drawinfoty);
  canvasarty = array of tcanvas;
- 
+
  tcanvas = class(tpersistent)
   private
    fvaluestack: canvasvaluestackty;
@@ -912,7 +912,7 @@ type
    procedure registergclink(const dest: tcanvas);
    procedure unregistergclink(const dest: tcanvas);
    procedure gcdestroyed(const sender: tcanvas); virtual;
-   
+
    procedure setppmm(avalue: real); virtual;
    function getfitrect: rectty; virtual;
    procedure valuechanged(value: canvasstatety); inline;
@@ -935,7 +935,7 @@ type
               const adestrect: rectty; acopymode: rasteropty;
               atransparentcolor: colorty;
               amask: tsimplebitmap; const amaskpos: pointty;
-              aalignment: alignmentsty; 
+              aalignment: alignmentsty;
               //only al_stretchx, al_stretchy and al_tiled used
               const atileorigin: pointty;
               const aopacity: colorty); //cl_none -> opaque);
@@ -945,15 +945,15 @@ type
    function getgchandle: ptruint;
    function getcanvasimage(const abgr: boolean = false): imagety;
    function getimage(const bgr: boolean): maskedimagety;
-   
-   procedure fillarc(const def: rectty; const startang,extentang: real; 
+
+   procedure fillarc(const def: rectty; const startang,extentang: real;
                               const acolor: colorty; const pieslice: boolean);
    procedure getarcinfo(out startpo,endpo: pointty);
    procedure internaldrawtext(var info); virtual;
                        //info = drawtextinfoty
    function createfont: tcanvasfont; virtual;
-   procedure drawfontline(const startpoint,endpoint: pointty); 
-                           //draws line with font color 
+   procedure drawfontline(const startpoint,endpoint: pointty);
+                           //draws line with font color
    procedure nextpage; virtual; //used by tcustomprintercanvas
    function getcontextinfopo: pointer; virtual;
    procedure updatesize(const asize: sizety); virtual;
@@ -1007,7 +1007,7 @@ type
               const aopacity: colorty = cl_none); overload;
 
    procedure drawpoint(const point: pointty; const acolor: colorty = cl_default);
-   procedure drawpoints(const apoints: array of pointty; 
+   procedure drawpoints(const apoints: array of pointty;
                           const acolor: colorty = cl_default;
                           first: integer = 0; acount: integer = -1); //-1 -> all
 
@@ -1029,7 +1029,7 @@ type
                        const acolor: colorty = cl_default;
               const first: integer = 0; const acount: integer = -1); overload;
 
-   procedure drawvect(const startpoint: pointty; 
+   procedure drawvect(const startpoint: pointty;
                    const direction: graphicdirectionty;
                    const length: integer; const acolor: colorty = cl_default);
                                                            overload;
@@ -1037,7 +1037,7 @@ type
                       const direction: graphicdirectionty;
                       const length: integer; out endpoint: pointty;
                       const acolor: colorty = cl_default); overload;
-                      
+
    procedure drawrect(const arect: rectty; const acolor: colorty = cl_default);
    procedure drawcross(const arect: rectty; const acolor: colorty = cl_default;
                    const alignment: alignmentsty = [al_xcentered,al_ycentered]);
@@ -1048,15 +1048,15 @@ type
                              //def.pos = topleft
    procedure drawcircle(const center: pointty; const radius: integer;
                                                const acolor: colorty = cl_default);
-   procedure drawarc(const def: rectty; const startang,extentang: real; 
+   procedure drawarc(const def: rectty; const startang,extentang: real;
                               const acolor: colorty = cl_default); overload;
                              //def.pos = center, def.cx = width, def.cy = height
                              //startang,extentang in radiant (2*pi = 360deg CCW)
-   procedure drawarc1(const def: rectty; const startang,extentang: real; 
+   procedure drawarc1(const def: rectty; const startang,extentang: real;
                               const acolor: colorty = cl_default);
                              //def.pos = topleft
    procedure drawarc(const center: pointty; const radius: integer;
-                              const startang,extentang: real; 
+                              const startang,extentang: real;
                               const acolor: colorty = cl_default); overload;
 
    procedure fillrect(const arect: rectty; const acolor: colorty = cl_default;
@@ -1070,36 +1070,36 @@ type
    procedure fillcircle(const center: pointty; const radius: integer;
                         const acolor: colorty = cl_default;
                         const linecolor: colorty = cl_none);
-   procedure fillarcchord(const def: rectty; const startang,extentang: real; 
+   procedure fillarcchord(const def: rectty; const startang,extentang: real;
                               const acolor: colorty = cl_default;
                               const linecolor: colorty = cl_none); overload;
                              //def.pos = center, def.cx = width, def.cy = height
                              //startang,extentang in radiant (2*pi = 360deg CCW)
-   procedure fillarcchord1(const def: rectty; const startang,extentang: real; 
+   procedure fillarcchord1(const def: rectty; const startang,extentang: real;
                               const acolor: colorty = cl_default;
                               const linecolor: colorty = cl_none);
                              //def.pos = topleft
    procedure fillarcchord(const center: pointty; const radius: integer;
-                              const startang,extentang: real; 
+                              const startang,extentang: real;
                               const acolor: colorty = cl_default;
                               const linecolor: colorty = cl_none); overload;
-   procedure fillarcpieslice(const def: rectty; const startang,extentang: real; 
+   procedure fillarcpieslice(const def: rectty; const startang,extentang: real;
                             const acolor: colorty = cl_default;
                             const linecolor: colorty = cl_none); overload;
                              //def.pos = center, def.cx = width, def.cy = height
                              //startang,extentang in radiant (2*pi = 360deg CCW)
-   procedure fillarcpieslice1(const def: rectty; const startang,extentang: real; 
+   procedure fillarcpieslice1(const def: rectty; const startang,extentang: real;
                             const acolor: colorty = cl_default;
                             const linecolor: colorty = cl_none); overload;
                              //def.pos = topleft
    procedure fillarcpieslice(const center: pointty; const radius: integer;
-                            const startang,extentang: real; 
+                            const startang,extentang: real;
                             const acolor: colorty = cl_default;
                             const linecolor: colorty = cl_none); overload;
-   procedure fillpolygon(const apoints: array of pointty; 
+   procedure fillpolygon(const apoints: array of pointty;
                          const acolor: colorty = cl_default;
                          const linecolor: colorty = cl_none);
-                         
+
    procedure drawframe(const arect: rectty; awidth: integer = -1;
                    const acolor: colorty = cl_default;
                    const hiddenedges: edgesty = []); overload;
@@ -1125,7 +1125,7 @@ type
    procedure drawstring(const atext: pmsechar; const acount: integer; const apos: pointty;
                         const afont: tfont = nil; const grayed: boolean = false;
                         const arotation: real = 0); overload;
-   function getstringwidth(const atext: msestring; 
+   function getstringwidth(const atext: msestring;
                                  const afont: tfont = nil): integer; overload;
    function getstringwidth(const atext: pmsechar; const acount: integer;
                                  const afont: tfont = nil): integer; overload;
@@ -1191,12 +1191,12 @@ type
    property brushorigin: pointty read getbrushorigin write setbrushorigin;
    property rootbrushorigin: pointty read getrootbrushorigin write setrootbrushorigin;
                    //origin = paintdevice top left
-   procedure adjustbrushorigin(const arect: rectty; 
+   procedure adjustbrushorigin(const arect: rectty;
                                                const alignment: alignmentsty);
 
    property linewidth: integer read getlinewidth write setlinewidth default 0;
    property linewidthmm: real read getlinewidthmm write setlinewidthmm;
-   
+
    property dashes: dashesstringty read getdashes write setdashes;
      //todo: dashoffset
    property capstyle: capstylety read getcapstyle write setcapstyle
@@ -1209,12 +1209,12 @@ type
 
    property paintdevice: paintdevicety read fdrawinfo.paintdevice;
    property gchandle: ptruint read getgchandle;
-   property ppmm: real read fdrawinfo.gc.ppmm write setppmm; 
+   property ppmm: real read fdrawinfo.gc.ppmm write setppmm;
                    //used for linewidth mm, value not saved/restored
-   property statestamp: longword read fdrawinfo.statestamp; 
+   property statestamp: longword read fdrawinfo.statestamp;
                  //incremented by drawing operations
  end;
- 
+
  pixmapstatety = ({pms_monochrome,}pms_ownshandle,pms_maskvalid,pms_nosave,
                   pms_staticcanvas);
  pixmapstatesty = set of pixmapstatety;
@@ -1293,7 +1293,7 @@ type
    procedure copyarea(const asource: tsimplebitmap; const asourcerect: rectty;
               const adestpoint: pointty; const acopymode: rasteropty = rop_copy;
               const masked: boolean = true;
-              const acolorforeground: colorty = cl_default; 
+              const acolorforeground: colorty = cl_default;
                     //cl_default -> asource.colorforeground
                     //used for monochrome -> color conversion
               const acolorbackground: colorty = cl_default;
@@ -1305,7 +1305,7 @@ type
               const adestrect: rectty; const aalignment: alignmentsty = [];
               const acopymode: rasteropty = rop_copy;
               const masked: boolean = true;
-              const acolorforeground: colorty = cl_default; 
+              const acolorforeground: colorty = cl_default;
                     //cl_default -> asource.colorforeground
                     //used for monochrome -> color conversion
               const acolorbackground: colorty = cl_default;
@@ -1314,7 +1314,7 @@ type
                     //colorbackground for color -> monochrome conversion
               const aopacity: colorty = cl_none); overload;
 
-   property kind: bitmapkindty read fkind write setkind;   
+   property kind: bitmapkindty read fkind write setkind;
    {
    property monochrome: boolean read getmonochrome write setmonochrome;
    property grayscale: boolean read getgrayscale write setgrayscale;
@@ -1347,9 +1347,9 @@ type
   text: colorty;
   textbackground: colorty;
   selectedtext: colorty;
-  selectedtextbackground: colorty;  
+  selectedtextbackground: colorty;
  end;
- 
+
 var
  defaultframecolors: framecolorinfoty =
   (edges:(light: (color: cl_light; effectcolor: cl_highlight; effectwidth: 1);
@@ -1365,7 +1365,7 @@ var
   selectedtext: cl_selectedtext;
   selectedtextbackground: cl_selectedtextbackground;
  );
- 
+
 procedure init;
 procedure deinit;
 
@@ -1476,7 +1476,7 @@ begin
   fillchar(info.gc.platformdata,sizeof(info.gc.platformdata),0);
  end;
 end;
-        
+
 {$ifdef mse_debuggdisync}
 procedure gdilockerror(const text: msestring);
 var
@@ -1614,7 +1614,7 @@ begin
     for int1:= size.cy - 1 downto 0 do begin
      po1^:= po1^ and mask;   //mask padding
      inc(po1,step);
-    end; 
+    end;
    end;
   end;
  end;
@@ -1649,8 +1649,8 @@ begin
  end;
  result:= gdifuncs[0];
 end;
- 
-function registergdi(const agdifuncs: pgdifunctionaty): integer; 
+
+function registergdi(const agdifuncs: pgdifunctionaty): integer;
                          //returns unique number
 var
  int1: integer;
@@ -1757,7 +1757,7 @@ var
  int1: integer;
 // int2: integer;
  {$endif}
-begin                         
+begin
  acanvas.save;
  acanvas.color:= colorline;
  acanvas.brush:= stockobjects.bitmaps[stb_dens50];
@@ -1820,7 +1820,7 @@ begin
          setsinglebit({$ifdef FPC}longword{$else}word{$endif}(new),
                       {$ifdef FPC}longword{$else}word{$endif}(old),
                       {$ifdef FPC}longword{$else}word{$endif}(mask3)));
-(*                      
+(*
   value4:= fontoptionsty(
          setsinglebit({$ifdef FPC}longword{$else}byte{$endif}(new),
                       {$ifdef FPC}longword{$else}byte{$endif}(old),
@@ -1868,7 +1868,7 @@ function replacebuffer(var buffer: bufferty; size: integer): pointer;
 begin
  result:= buffer.buffer;
  getmem(buffer.buffer,size);
- buffer.size:= size; 
+ buffer.size:= size;
 end;
 
 procedure gdierrorlocked(error: gdierrorty; const text: msestring = ''); overload;
@@ -2018,9 +2018,9 @@ begin
   end;
  {$ifdef FPC} {$checkpointer default} {$endif}
  end;
- colormaps[cm_namedrgb,integer(longword(cl_0)-longword(cl_namedrgb))]:= 
+ colormaps[cm_namedrgb,integer(longword(cl_0)-longword(cl_namedrgb))]:=
                                                               mseguiintf.pixel0;
- colormaps[cm_namedrgb,integer(longword(cl_1)-longword(cl_namedrgb))]:= 
+ colormaps[cm_namedrgb,integer(longword(cl_1)-longword(cl_namedrgb))]:=
                                                               mseguiintf.pixel1;
  gui_initcolormap;
 end;
@@ -2334,7 +2334,7 @@ begin
     fhandle:= pixmap;
    end;
 //   gdi_lock;
-//   fhandle:= gui_createpixmap(fsize,0,(pms_monochrome in fstate) and 
+//   fhandle:= gui_createpixmap(fsize,0,(pms_monochrome in fstate) and
 //                  (fcanvasclass = nil,copyfrom);
 //   gdi_unlock;
    if fhandle = 0 then begin
@@ -2553,7 +2553,7 @@ procedure tsimplebitmap.copyarea(const asource: tsimplebitmap;
               const adestrect: rectty; const aalignment: alignmentsty = [];
               const acopymode: rasteropty = rop_copy;
               const masked: boolean = true;
-              const acolorforeground: colorty = cl_default; 
+              const acolorforeground: colorty = cl_default;
                     //cl_default -> asource.colorforeground
                     //used for monochrome -> color conversion
               const acolorbackground: colorty = cl_default;
@@ -2898,7 +2898,7 @@ end;
 
 function tfont.gethandleforcanvas(const canvas: tcanvas): fontnumty;
 begin
- if (fhandlepo^ <> 0) and 
+ if (fhandlepo^ <> 0) and
            (finfopo^.gdifuncs <> canvas.fdrawinfo.gc.gdifuncs) then begin
   releasehandles(true);
  end;
@@ -3230,7 +3230,7 @@ begin
    baseinfo.colorbackground:= finfopo^.baseinfo.colorbackground;
    include(changed,cs_fontcolorbackground);
   end;
-  if baseinfo.colorselectbackground <> 
+  if baseinfo.colorselectbackground <>
              finfopo^.baseinfo.colorselectbackground then begin
    baseinfo.colorselectbackground:= finfopo^.baseinfo.colorselectbackground;
    include(changed,cs_fonteffect);
@@ -3248,7 +3248,7 @@ begin
    baseinfo.shadow_shifty:= finfopo^.baseinfo.shadow_shifty;
    include(changed,cs_fonteffect);
   end;
-  
+
   if baseinfo.gloss_color <> finfopo^.baseinfo.gloss_color then begin
    baseinfo.gloss_color:= finfopo^.baseinfo.gloss_color;
    include(changed,cs_fonteffect);
@@ -3278,7 +3278,7 @@ begin
    baseinfo.grayed_shifty:= finfopo^.baseinfo.grayed_shifty;
    include(changed,cs_fonteffect);
   end;
-  
+
   if baseinfo.color <> finfopo^.baseinfo.color then begin
    baseinfo.color:= finfopo^.baseinfo.color;
    include(changed,cs_fontcolor);
@@ -3518,7 +3518,7 @@ procedure tfont.setoptions(const avalue: fontoptionsty);
 begin
  include(flocalprops,flp_options);
  if finfopo^.baseinfo.options <> avalue then begin
-  finfopo^.baseinfo.options:= 
+  finfopo^.baseinfo.options:=
                            checkfontoptions(avalue,finfopo^.baseinfo.options);
   releasehandles;
  end;
@@ -3739,7 +3739,7 @@ begin
     include(changed1,cs_fonteffect);
    end;
   end;
-   
+
   if not (flp_grayed_color in flocalprops) then begin
    if grayed_color <> ainfo.grayed_color then begin
     grayed_color:= ainfo.grayed_color;
@@ -3775,49 +3775,49 @@ begin
     style:= ainfo.style;
     updatehandlepo();
     include(changed1,cs_font);
-   end;  
+   end;
   end;
 
   if not (flp_height in flocalprops) then begin
-   if (ainfo.height <> 0) and (height <> 
+   if (ainfo.height <> 0) and (height <>
                           (ainfo.height shl fontsizeshift)) then begin
     height:= ainfo.height shl fontsizeshift;
     include(changed1,cs_fonthandle);
-   end;  
+   end;
   end;
 
   if not (flp_width in flocalprops) then begin
-   if (ainfo.width <> 0) and (width <> 
+   if (ainfo.width <> 0) and (width <>
                              (ainfo.width shl fontsizeshift)) then begin
     width:= ainfo.width shl fontsizeshift;
     include(changed1,cs_fonthandle);
-   end;  
+   end;
   end;
   if not (flp_extraspace in flocalprops) then begin
    if extraspace <> ainfo.extraspace then begin
     extraspace:= ainfo.extraspace;
     include(changed1,cs_font);
-   end;  
+   end;
   end;
   if not (flp_name in flocalprops) then begin
    if (ainfo.name <> '') and (name <> ainfo.name) then begin
     name:= ainfo.name;
     include(changed1,cs_fonthandle);
-   end;  
+   end;
   end;
   if not (flp_charset in flocalprops) then begin
    if charset <> ainfo.charset then begin
     charset:= ainfo.charset;
     include(changed1,cs_fonthandle);
-   end;  
+   end;
   end;
   if not (flp_options in flocalprops) then begin
    if (ainfo.options <> []) and (options <> ainfo.options) then begin
     options:= ainfo.options;
     include(changed1,cs_fonthandle);
-   end;  
+   end;
   end;
-  
+
   if changed1 <> [] then begin
    if cs_fonthandle in changed1 then begin
     releasehandles(true);
@@ -3830,153 +3830,153 @@ end;
 
 function tfont.iscolorstored: boolean;
 begin
- result:= (ftemplate = nil) and (finfopo^.baseinfo.color <> cl_default) or 
+ result:= (ftemplate = nil) and (finfopo^.baseinfo.color <> cl_default) or
                                            (flp_color in flocalprops);
 end;
 
 function tfont.iscolorbackgroundstored: boolean;
 begin
- result:= (ftemplate = nil) and 
-          (finfopo^.baseinfo.colorbackground <> cl_default) or 
+ result:= (ftemplate = nil) and
+          (finfopo^.baseinfo.colorbackground <> cl_default) or
                                          (flp_colorbackground in flocalprops);
 end;
 
 function tfont.iscolorselectstored: boolean;
 begin
- result:= (ftemplate = nil) and (finfopo^.baseinfo.colorselect <> cl_default) or 
+ result:= (ftemplate = nil) and (finfopo^.baseinfo.colorselect <> cl_default) or
                                            (flp_colorselect in flocalprops);
 end;
 
 function tfont.iscolorselectbackgroundstored: boolean;
 begin
- result:= (ftemplate = nil) and 
-          (finfopo^.baseinfo.colorselectbackground <> cl_default) or 
+ result:= (ftemplate = nil) and
+          (finfopo^.baseinfo.colorselectbackground <> cl_default) or
                                     (flp_colorselectbackground in flocalprops);
 end;
 
 function tfont.isshadow_colorstored: boolean;
 begin
- result:= (ftemplate = nil) and 
-          (finfopo^.baseinfo.shadow_color <> cl_none) or 
+ result:= (ftemplate = nil) and
+          (finfopo^.baseinfo.shadow_color <> cl_none) or
                                            (flp_shadow_color in flocalprops);
 end;
 
 function tfont.isshadow_shiftxstored: boolean;
 begin
- result:= (ftemplate = nil) and 
-          (finfopo^.baseinfo.shadow_shiftx <> 1) or 
+ result:= (ftemplate = nil) and
+          (finfopo^.baseinfo.shadow_shiftx <> 1) or
                                            (flp_shadow_shiftx in flocalprops);
 end;
 
 function tfont.isshadow_shiftystored: boolean;
 begin
- result:= (ftemplate = nil) and 
-          (finfopo^.baseinfo.shadow_shifty <> 1) or 
+ result:= (ftemplate = nil) and
+          (finfopo^.baseinfo.shadow_shifty <> 1) or
                                            (flp_shadow_shifty in flocalprops);
 end;
 
 function tfont.isgloss_colorstored: boolean;
 begin
- result:= (ftemplate = nil) and 
-          (finfopo^.baseinfo.gloss_color <> cl_none) or 
+ result:= (ftemplate = nil) and
+          (finfopo^.baseinfo.gloss_color <> cl_none) or
                                            (flp_gloss_color in flocalprops);
 end;
 
 function tfont.isgloss_shiftxstored: boolean;
 begin
- result:= (ftemplate = nil) and 
-          (finfopo^.baseinfo.gloss_shiftx <> -1) or 
+ result:= (ftemplate = nil) and
+          (finfopo^.baseinfo.gloss_shiftx <> -1) or
                                            (flp_gloss_shiftx in flocalprops);
 end;
 
 function tfont.isgloss_shiftystored: boolean;
 begin
- result:= (ftemplate = nil) and 
-          (finfopo^.baseinfo.gloss_shifty <> -1) or 
+ result:= (ftemplate = nil) and
+          (finfopo^.baseinfo.gloss_shifty <> -1) or
                                            (flp_gloss_shifty in flocalprops);
 end;
 
 function tfont.isgrayed_colorstored: boolean;
 begin
- result:= (ftemplate = nil) and 
-          (finfopo^.baseinfo.grayed_color <> cl_grayed) or 
+ result:= (ftemplate = nil) and
+          (finfopo^.baseinfo.grayed_color <> cl_grayed) or
                                            (flp_grayed_color in flocalprops);
 end;
 
 function tfont.isgrayed_colorshadowstored: boolean;
 begin
- result:= (ftemplate = nil) and 
-          (finfopo^.baseinfo.grayed_colorshadow <> cl_grayedshadow) or 
+ result:= (ftemplate = nil) and
+          (finfopo^.baseinfo.grayed_colorshadow <> cl_grayedshadow) or
                                       (flp_grayed_colorshadow in flocalprops);
 end;
 
 function tfont.isgrayed_shiftxstored: boolean;
 begin
- result:= (ftemplate = nil) and 
-          (finfopo^.baseinfo.grayed_shifty <> 1) or 
+ result:= (ftemplate = nil) and
+          (finfopo^.baseinfo.grayed_shifty <> 1) or
                                            (flp_grayed_shifty in flocalprops);
 end;
 
 function tfont.isgrayed_shiftystored: boolean;
 begin
- result:= (ftemplate = nil) and 
-          (finfopo^.baseinfo.grayed_shifty <> 1) or 
+ result:= (ftemplate = nil) and
+          (finfopo^.baseinfo.grayed_shifty <> 1) or
                                            (flp_grayed_shifty in flocalprops);
 end;
 
 function tfont.isxscalestored: boolean;
 begin
- result:= (ftemplate = nil) and 
+ result:= (ftemplate = nil) and
           (finfopo^.baseinfo.xscale <> 1) or (flp_xscale in flocalprops);
 end;
 
 function tfont.isstylestored: boolean;
 begin
- result:= (ftemplate = nil) and 
+ result:= (ftemplate = nil) and
           (finfopo^.baseinfo.style <> []) or (flp_style in flocalprops);
 end;
 
 function tfont.isheightstored: boolean;
 begin
- result:= (ftemplate = nil) and 
+ result:= (ftemplate = nil) and
           (finfopo^.baseinfo.height <> 0) or (flp_height in flocalprops);
 end;
 
 function tfont.iswidthstored: boolean;
 begin
- result:= (ftemplate = nil) and 
+ result:= (ftemplate = nil) and
           (finfopo^.baseinfo.width <> 0) or (flp_width in flocalprops);
 end;
 
 function tfont.isextraspacestored: boolean;
 begin
- result:= (ftemplate = nil) and 
-          (finfopo^.baseinfo.extraspace <> 0) or 
+ result:= (ftemplate = nil) and
+          (finfopo^.baseinfo.extraspace <> 0) or
                                     (flp_extraspace in flocalprops);
 end;
 
 function tfont.isnamestored: boolean;
 begin
- result:= (ftemplate = nil) and 
+ result:= (ftemplate = nil) and
           (finfopo^.baseinfo.name <> '') or (flp_name in flocalprops);
 end;
 
 function tfont.ischarsetstored: boolean;
 begin
- result:= (ftemplate = nil) and 
+ result:= (ftemplate = nil) and
           (finfopo^.baseinfo.charset <> '') or (flp_charset in flocalprops);
 end;
 
 function tfont.isoptionsstored: boolean;
 begin
- result:= (ftemplate = nil) and 
+ result:= (ftemplate = nil) and
           (finfopo^.baseinfo.options <> []) or (flp_options in flocalprops);
 end;
 
 procedure tfont.objectevent(const sender: tobject; const event: objecteventty);
 begin
  inherited;
- if (event = oe_changed) and (ftemplate <> nil) and 
+ if (event = oe_changed) and (ftemplate <> nil) and
                                      (ftemplate = sender) then begin
   settemplateinfo(tfontcomp(sender).template.fi);
   dochanged([],false);
@@ -4012,7 +4012,7 @@ end;
 procedure tcanvasfont.assignproperties(const source: tfont;
                const ahandles: boolean);
 begin
- inherited assignproperties(source,ahandles and 
+ inherited assignproperties(source,ahandles and
                            (source.finfopo^.gdifuncs = fgdifuncs));
 end;
 
@@ -4188,7 +4188,7 @@ end;
 
 //var
 // gcident: longword;
- 
+
 procedure tcanvas.linktopaintdevice(apaintdevice: paintdevicety;
                const gc: gcty; const cliporigin: pointty);
 var
@@ -4279,7 +4279,7 @@ procedure tcanvas.init;
 
 begin
  fdrawinfo.gc.ppmm:= defaultppmm;
- restore(0); 
+ restore(0);
 // reset;
  initvalues(fvaluestack.stack[0]);
  initvalues(fvaluestack.stack[1]);
@@ -4547,7 +4547,7 @@ begin
    if (afonthandle1 <> gcfonthandle1) then begin
     include(values.mask,gvm_font);
     values.fontnum:= afonthandle1;
-    po1:= getfontdata(afonthandle1); 
+    po1:= getfontdata(afonthandle1);
     values.fontdata:= po1;
     with po1^ do begin
      values.font:= font;
@@ -4662,7 +4662,7 @@ var
   rect2: rectty;
  begin
   rect2:= intersectrect(arect,mr(amaskpos,amask.size));
-  if (rect2.cx < arect.cx) or (rect2.cy < arect.cy) then begin 
+  if (rect2.cx < arect.cx) or (rect2.cy < arect.cy) then begin
                                                  //mask not big enough
    if (rect2.cx <= 0) or (rect2.cy <= 0) then begin
     result:= true;
@@ -4680,7 +4680,7 @@ var
 var
  al1: alignmentsty;
 begin
- if (asourcerect.cx <= 0) or (asourcerect.cy <= 0) or 
+ if (asourcerect.cx <= 0) or (asourcerect.cy <= 0) or
     (adestrect.cx <= 0) or (adestrect.cy <= 0) then begin //no div 0
   exit;
  end;
@@ -4847,7 +4847,7 @@ begin
     end
     else begin
      if gc.kind = bmk_mono then begin //color or gray to monochrome
-      if atransparentcolor = cl_default then begin 
+      if atransparentcolor = cl_default then begin
        atransparentcolor:= fvaluepo^.colorbackground;
       end;
       if source.fdrawinfo.gc.kind = bmk_gray then begin
@@ -4952,7 +4952,7 @@ begin
 end;
 
 procedure tcanvas.copyarea(const asource: tcanvas; const asourcerect: rectty;
-                           const adestpoint: pointty; 
+                           const adestpoint: pointty;
                            const acopymode: rasteropty = rop_copy;
                            const atransparentcolor: colorty = cl_default;
                            const aopacity: colorty = cl_none);
@@ -5013,7 +5013,7 @@ begin
  end;
 end;
 
-procedure tcanvas.drawpoint(const point: pointty; 
+procedure tcanvas.drawpoint(const point: pointty;
                             const acolor: colorty = cl_default);
 begin
  if cs_inactive in fstate then exit;
@@ -5046,7 +5046,7 @@ begin
      count:= acount;
     end;
     int1:= count - 2;
-    if (int1 > 0) and (apoints[int1].x = apoints[int1+1].x) and 
+    if (int1 > 0) and (apoints[int1].x = apoints[int1+1].x) and
                    (apoints[int1].y = apoints[int1+1].y) then begin
                    //coincident endpoints are not drawn on x11
      dec(count);
@@ -5061,7 +5061,7 @@ end;
 
 procedure tcanvas.drawlines(const apoints: array of pointty;
                        const abreaks: array of integer; //ascending order
-                       const aclosed: boolean = false; 
+                       const aclosed: boolean = false;
                        const acolor: colorty = cl_default;
           const first: integer = 0; const acount: integer = -1);
 var
@@ -5239,14 +5239,14 @@ begin
  drawellipse(rect1,acolor);
 end;
 
-procedure tcanvas.drawellipse1(const def: rectty; 
+procedure tcanvas.drawellipse1(const def: rectty;
                                          const acolor: colorty = cl_default);
                           //def.pos = topleft, def.cx = width, def.cy = height
 begin
  drawellipse(recenterrect(def),acolor);
 end;
 
-procedure tcanvas.drawarc(const def: rectty; const startang,extentang: real; 
+procedure tcanvas.drawarc(const def: rectty; const startang,extentang: real;
                               const acolor: colorty = cl_default);
 begin
  if cs_inactive in fstate then exit;
@@ -5259,7 +5259,7 @@ begin
 end;
 
 procedure tcanvas.drawarc(const center: pointty; const radius: integer;
-                              const startang,extentang: real; 
+                              const startang,extentang: real;
                               const acolor: colorty = cl_default);
 var
  rect1: rectty;
@@ -5270,13 +5270,13 @@ begin
  drawarc(rect1,startang,extentang,acolor);
 end;
 
-procedure tcanvas.drawarc1(const def: rectty; const startang,extentang: real; 
+procedure tcanvas.drawarc1(const def: rectty; const startang,extentang: real;
                               const acolor: colorty = cl_default);
 begin
  drawarc(recenterrect(def),startang,extentang,acolor);
 end;
 
-procedure tcanvas.fillrect(const arect: rectty; 
+procedure tcanvas.fillrect(const arect: rectty;
                            const acolor: colorty = cl_default;
                            const linecolor: colorty = cl_none);
 var
@@ -5395,7 +5395,7 @@ begin
 end;
 
 procedure tcanvas.fillarcchord(const center: pointty; const radius: integer;
-                              const startang,extentang: real; 
+                              const startang,extentang: real;
                               const acolor: colorty = cl_default;
                               const linecolor: colorty = cl_none);
 var
@@ -5431,7 +5431,7 @@ begin
 end;
 
 procedure tcanvas.fillarcpieslice(const center: pointty; const radius: integer;
-                            const startang,extentang: real; 
+                            const startang,extentang: real;
                             const acolor: colorty = cl_default;
                             const linecolor: colorty = cl_none);
 var
@@ -5451,7 +5451,7 @@ begin
 end;
 
 procedure tcanvas.fillpolygon(const apoints: array of pointty;
-                              const acolor: colorty = cl_default; 
+                              const acolor: colorty = cl_default;
                               const linecolor: colorty = cl_none);
 begin
  if cs_inactive in fstate then exit;
@@ -5594,8 +5594,8 @@ begin
  end;
 end;
 
-procedure tcanvas.drawfontline(const startpoint,endpoint: pointty); 
-                           //draws line with font color 
+procedure tcanvas.drawfontline(const startpoint,endpoint: pointty);
+                           //draws line with font color
 var
  linewidthbefore: integer;
  capstylebefore: capstylety;
@@ -5606,27 +5606,27 @@ begin
  capstylebefore:= capstyle;
  linewidth:= font.linewidth;
  capstyle:= cs_butt;
- 
+
  with fvaluepo^.font do begin
   if (baseinfo.shadow_color <> cl_none) then begin
-   pt1.x:= startpoint.x + baseinfo.shadow_shiftx;     
-   pt1.y:= startpoint.y + baseinfo.shadow_shifty;     
-   pt2.x:= endpoint.x + baseinfo.shadow_shiftx;     
-   pt2.y:= endpoint.y + baseinfo.shadow_shifty;     
+   pt1.x:= startpoint.x + baseinfo.shadow_shiftx;
+   pt1.y:= startpoint.y + baseinfo.shadow_shifty;
+   pt2.x:= endpoint.x + baseinfo.shadow_shiftx;
+   pt2.y:= endpoint.y + baseinfo.shadow_shifty;
    drawline(pt1,pt2,baseinfo.shadow_color);
   end;
   if (baseinfo.gloss_color <> cl_none) then begin
-   pt1.x:= startpoint.x + baseinfo.gloss_shiftx;     
-   pt1.y:= startpoint.y + baseinfo.gloss_shifty;     
-   pt2.x:= endpoint.x + baseinfo.gloss_shiftx;     
-   pt2.y:= endpoint.y + baseinfo.gloss_shifty;     
+   pt1.x:= startpoint.x + baseinfo.gloss_shiftx;
+   pt1.y:= startpoint.y + baseinfo.gloss_shifty;
+   pt2.x:= endpoint.x + baseinfo.gloss_shiftx;
+   pt2.y:= endpoint.y + baseinfo.gloss_shifty;
    drawline(pt1,pt2,baseinfo.gloss_color);
   end;
  end;
  co1:= font.color;
  if co1 = cl_default then begin
   co1:= cl_text;
- end; 
+ end;
  drawline(startpoint,endpoint,co1);
  linewidth:= linewidthbefore;
  capstyle:= capstylebefore;
@@ -5717,7 +5717,7 @@ var
  rect1,rect2: rectty;
 begin
  if cs_inactive in fstate then exit;
- 
+
  if ispaintcolor(acolor) then begin
   if awidth <> 0 then begin
    if awidth < 0 then begin
@@ -6299,7 +6299,7 @@ end;
 
 function tcanvas.getlinewidthmm: real;
 begin
- result:= fvaluepo^.lineinfo.width / 
+ result:= fvaluepo^.lineinfo.width /
                         (fdrawinfo.gc.ppmm * (1 shl linewidthshift));
 end;
 
@@ -6834,7 +6834,7 @@ begin
  valuechanged(cs_brushorigin);
 end;
 
-procedure tcanvas.adjustbrushorigin(const arect: rectty; 
+procedure tcanvas.adjustbrushorigin(const arect: rectty;
                                             const alignment: alignmentsty);
 var
  siz1: sizety;
@@ -6910,7 +6910,7 @@ begin
  if avalue < 0.1 then begin
   avalue:= 0.1;
  end;
- fdrawinfo.gc.ppmm:= avalue; 
+ fdrawinfo.gc.ppmm:= avalue;
 end;
 
 procedure tcanvas.internaldrawtext(var info);
@@ -6923,8 +6923,8 @@ begin
  with dest do begin
   exclude(fdrawinfo.gc.drawingflags,df_highresfont);
   ffont.releasehandles;
-  gcfonthandle1:= 0; //invalid  
- end; 
+  gcfonthandle1:= 0; //invalid
+ end;
 end;
 
 function tcanvas.highresdevice: boolean;
@@ -7000,7 +7000,7 @@ end;
 procedure tcanvas.fitppmm(const asize: sizety);
 begin
  with getfitrect do begin
-  if (asize.cx <> 0) and (asize.cy <> 0) and 
+  if (asize.cx <> 0) and (asize.cy <> 0) and
           (size.cx <> 0) and (size.cy <> 0) then begin
    if asize.cx/asize.cy > size.cx/size.cy then begin
     self.ppmm:= ppmm * asize.cx/size.cx;

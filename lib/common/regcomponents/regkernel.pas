@@ -29,7 +29,7 @@ interface
 
 uses
  typinfo,msepropertyeditors;
-  
+
 implementation
 uses
  classes,mclasses,msethreadcomp,msebitmap,msetimer,msestatfile,mseact,
@@ -60,17 +60,17 @@ type
   public
    procedure updatedefaultvalue; override;  //implicit [] default
  end;
- 
+
  tactionpropertyeditor = class(tcomponentpropertyeditor)
   protected
    function getdefaultstate: propertystatesty; override;
  end;
- 
+
  tshortcutactionpropertyeditor = class(tclasselementeditor)
   public
    function getvalue: msestring; override;
  end;
- 
+
  tshortcutactionspropertyeditor = class(tpersistentarraypropertyeditor)
   protected
    function geteditorclass: propertyeditorclassty; override;
@@ -80,28 +80,28 @@ type
   protected
    function itemgetvalue(const sender: tarrayelementeditor): msestring;
                                                                     override;
- end;   
- 
+ end;
+
  tlevelarrayelementeditor = class(tarrayelementeditor)
   public
    function name: msestring; override;
  end;
- 
+
  tlevelarraypropertyeditor = class(tpersistentarraypropertyeditor)
   protected
    function getelementeditorclass: elementeditorclassty; override;
  end;
-  
+
  tneglevelarrayelementeditor = class(tarrayelementeditor)
   public
    function name: msestring; override;
  end;
- 
+
  tneglevelarraypropertyeditor = class(tpersistentarraypropertyeditor)
   protected
    function getelementeditorclass: elementeditorclassty; override;
  end;
-  
+
  tactionstatespropertyeditor = class(tsetpropertyeditor)
   protected
    function getdefaultstate: propertystatesty override;
@@ -124,14 +124,14 @@ type
   public
    procedure setvalue(const value: msestring); override;
  end;
- 
+
  tframepropertyeditor = class(toptionalclasspropertyeditor)
   protected
    function dispname: msestring; override;
   public
    procedure edit; override;
  end;
- 
+
  tactivatorclientspropertyeditor = class(tconstarraypropertyeditor)
   protected
    procedure itemmoved(const source,dest: integer); override;
@@ -150,7 +150,7 @@ type
   public
    function name: msestring; override;
  end;
- 
+
  tsysshortcutspropertyeditor = class(tconstarraypropertyeditor)
   protected
    function geteditorclass: propertyeditorclassty; override;
@@ -162,7 +162,7 @@ type
   public
    function name: msestring; override;
  end;
- 
+
  tassistiveshortcutspropertyeditor = class(tconstarraypropertyeditor)
   protected
    function geteditorclass: propertyeditorclassty; override;
@@ -184,7 +184,7 @@ type
   protected
    function dispname: msestring; override;
  end;
- 
+
  tfacelistpropertyeditor = class(tpersistentarraypropertyeditor)
   protected
    function geteditorclass: propertyeditorclassty; override;
@@ -214,9 +214,9 @@ type
   public
    procedure setvalue(const value: msestring); override;
 end;
- 
-const   
- datamoduleintf: designmoduleintfty = 
+
+const
+ datamoduleintf: designmoduleintfty =
   (createfunc: {$ifdef FPC}@{$endif}createmsedatamodule;
    initnewcomponent: nil; getscale: nil; sourcetoform: nil;
    );
@@ -255,7 +255,7 @@ begin
 
  registerpropertyeditor(typeinfo(tcustomframe),nil,'',tframepropertyeditor);
  registerpropertyeditor(typeinfo(tcustomface),nil,'',tfacepropertyeditor);
- 
+
  registerpropertyeditor(typeinfo(tfacearrayprop),nil,'',tfacelistpropertyeditor);
  registerpropertyeditor(typeinfo(tcustomaction),nil,'',tactionpropertyeditor);
  registerpropertyeditor(typeinfo(tshortcutactions),nil,'',
@@ -277,7 +277,7 @@ begin
                                     tfacetemplatefadeopacoloreditor);
  registerpropertyeditor(typeinfo(trealarrayprop),tfacetemplate,'fade_opapos',
                                     tfacetemplatefadeopaposeditor);
- 
+
  registerpropertyeditor(typeinfo(int32),timagelist,'versioncount',
                                                 timagelistversioncounteditor);
  registerpropertyeditor(typeinfo(msestring),timagelist,'cornermask_topleft',
@@ -344,7 +344,7 @@ begin
                                     tmacroseditor);
 
  registerunitgroup(['msestatfile'],['msestat']);
- 
+
  registerdesignmoduleclass(tmsedatamodule,@datamoduleintf);
 end;
 
@@ -796,7 +796,7 @@ end;
 
 procedure tindexlookupeditor.setvalue(const value: msestring);
 begin
- if (value = '') and 
+ if (value = '') and
       askyesno('Do you want to delete the lookup list?') then begin
   inherited setvalue('');
  end
@@ -842,7 +842,7 @@ end;
 
 procedure tcornermaskeditor.setvalue(const value: msestring);
 begin
- if (value = '') and 
+ if (value = '') and
       askyesno('Do you want to delete the corner mask?') then begin
   inherited setvalue('');
  end

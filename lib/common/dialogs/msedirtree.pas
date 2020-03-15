@@ -30,7 +30,7 @@ type
 
  tdirlistitem = class(ttreelistedititem)
   private
-   finfo: fileinfoty;                                           
+   finfo: fileinfoty;
    froot: filenamety;
   protected
    flistonly: boolean;
@@ -45,14 +45,14 @@ type
  end;
 
  dirlistitemarty = array of tdirlistitem;
- 
+
  dirtreeoptionty = (dto_casesensitive,dto_showhiddenfiles,
                     dto_checksubdir,dto_checkbox,
                     dto_nocollapseclear, //normally collapsed nodes are freed
                      //if dto_checkbox is not set
                     dto_expandonclick,dto_expandondblclick);
  dirtreeoptionsty = set of dirtreeoptionty;
- 
+
  tdirtreefo = class(tsizingform)
    grid: twidgetgrid;
    treeitem: ttreeitemedit;
@@ -91,21 +91,21 @@ type
    procedure doondataentered(); virtual;
   public
    destructor destroy(); override;
-   function getcheckednodes(const amode: getnodemodety = 
+   function getcheckednodes(const amode: getnodemodety =
                                     gno_nochildren): dirlistitemarty;
-   function getcheckedfilenames(const amode: getnodemodety = 
+   function getcheckedfilenames(const amode: getnodemodety =
                                     gno_nochildren): filenamearty;
    property casesensitive: boolean read getcasesensitive write setcasesensitive;
-   property showhiddenfiles: boolean read getshowhiddenfiles 
+   property showhiddenfiles: boolean read getshowhiddenfiles
                                                    write setshowhiddenfiles;
    property checksubdir: boolean read getchecksubdir write setchecksubdir;
    property path: filenamety read getpath write setpath;
    property root: filenamety read froot write setroot;
-   property optionsdir: dirtreeoptionsty read foptionsdir 
+   property optionsdir: dirtreeoptionsty read foptionsdir
                                           write foptionsdir default [];
-   property onpathchanged: notifyeventty read fonpathchanged 
+   property onpathchanged: notifyeventty read fonpathchanged
                                                    write fonpathchanged;
-   property onselectionchanged: listitemeventty read fonselctionchanged 
+   property onselectionchanged: listitemeventty read fonselctionchanged
                                                    write fonselectionchanged;
  end;
 {
@@ -188,12 +188,12 @@ begin
    ar1[int1]:= item1;
    item1.finfo:= po1^;
    item1.updateinfo;
-   if achecksubdirectories and 
+   if achecksubdirectories and
             (item1.finfo.extinfo1.filetype = ft_dir) then begin
     fna1:= filepath(getpath,item1.finfo.name,fk_file);
     if {$ifdef mswindows}
        (treelevel = 0) and (length(fna1) = 4) and (fna1[3] = ':') and
-                                                        (fna1[4] = '/')or 
+                                                        (fna1[4] = '/')or
         //'/x:/' could be a floppy disk on windows which throws an error
         //       on query
        {$endif}
@@ -304,13 +304,13 @@ begin
  updatepath();
 end;
 
-function tdirtreefo.getcheckednodes(const amode: getnodemodety = 
+function tdirtreefo.getcheckednodes(const amode: getnodemodety =
                                     gno_nochildren): dirlistitemarty;
 begin
  result:= dirlistitemarty(treeitem.itemlist.getcheckednodes(amode));
 end;
 
-function tdirtreefo.getcheckedfilenames(const amode: getnodemodety = 
+function tdirtreefo.getcheckedfilenames(const amode: getnodemodety =
                                     gno_nochildren): filenamearty;
 var
  ar1: dirlistitemarty;
@@ -346,11 +346,11 @@ var
 begin
  avalue:= fpath;
  if dto_checkbox in foptionsdir then begin
-  treeitem.itemlist.options:= treeitem.itemlist.options + 
+  treeitem.itemlist.options:= treeitem.itemlist.options +
                                          [no_checkbox,no_updatechildchecked];
  end
  else begin
-  treeitem.itemlist.options:= treeitem.itemlist.options - 
+  treeitem.itemlist.options:= treeitem.itemlist.options -
                                          [no_checkbox,no_updatechildchecked];
  end;
  treeitem.itemlist.clear;
@@ -366,7 +366,7 @@ begin
   initdirfileinfo(uncitem.finfo,'//'); //UNC
   uncitem.updateinfo;
   {$endif}
- 
+
   if (high(ar1) > 0) and (ar1[0] = '') then begin
   {$ifdef mswindows}
    initdirfileinfo(aitem.finfo,'/');
@@ -435,14 +435,14 @@ begin
     treeitem.checkvalue;
    end;
   end;
-  if iscellclick(info,[],[],keyshiftstatesmask) and 
+  if iscellclick(info,[],[],keyshiftstatesmask) and
                       (info.zone in [cz_caption,cz_image]) then begin
    if (ss_double in info.mouseeventinfopo^.shiftstate) and
                        (dto_expandondblclick in foptionsdir) then begin
     treeitem.item.expanded:= not treeitem.item.expanded;
    end
    else begin
-    if (dto_expandonclick in foptionsdir) then begin     
+    if (dto_expandonclick in foptionsdir) then begin
      treeitem.item.expanded:= true;
     end;
    end;
@@ -487,7 +487,7 @@ begin
    na_expand: begin
     include(finfo.state,fis_diropen);
     updateinfo;
-    if (count = 0) or 
+    if (count = 0) or
             (foptionsdir*[dto_checkbox,dto_nocollapseclear] = []) then begin
      adddir(tdirlistitem(sender));
     end;

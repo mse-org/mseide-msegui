@@ -27,7 +27,7 @@ uses
  mseassistiveclient;
 
 const
- defaultpopupmenuwidgetoptions = 
+ defaultpopupmenuwidgetoptions =
       defaultoptionstoplevelwidget - [ow_tabfocus,ow_arrowfocus,ow_mousefocus];
 type
  menucellinfoty = record
@@ -42,7 +42,7 @@ type
  menucellinfoarty = array of menucellinfoty;
 
  menulayoutoptionty = (mlo_horz,mlo_keymode,mlo_main,mlo_childreninactive);
-                               //used for popup close by second click); 
+                               //used for popup close by second click);
  menulayoutoptionsty = set of menulayoutoptionty;
  menulayoutstatety = (mls_valid,mls_updating,mls_assistivelocked);
  menulayoutstatesty = set of menulayoutstatety;
@@ -94,7 +94,7 @@ type
    flocalframeandface: boolean;
    procedure doafteractivate() override;
    procedure clientrectchanged; override;
-   procedure objectevent(const sender: tobject; 
+   procedure objectevent(const sender: tobject;
                         const event: objecteventty); override;
    function transientforwindoworwindow: twindow;
    function translatetoscreen(const value: pointty): pointty; virtual;
@@ -120,9 +120,9 @@ type
    procedure fontchanged; override;
    procedure internalcreateframe; override;
    function activateoptionset: boolean;
-   procedure showhint(const aid: int32; var info: hintinfoty); override;   
+   procedure showhint(const aid: int32; var info: hintinfoty); override;
    function trycancelmodal(const newactive: twindow): boolean; override;
-   
+
    procedure release1(const acancelmodal: boolean); virtual;
    class function classskininfo(): skininfoty; override;
    function getassistiveflags(): assistiveflagsty override;
@@ -182,7 +182,7 @@ type
    procedure activatemenu(
                const keymode,aclicked,nokeymodereset: boolean); override;
    procedure deactivatemenu; override;
-   procedure selectmenu(const keymode: boolean; 
+   procedure selectmenu(const keymode: boolean;
                                    const keyreturn: boolean); override;
    procedure internalcreateframe; override;
    procedure loaded; override;
@@ -215,12 +215,12 @@ type
    destructor destroy; override;
    procedure initnewcomponent(const ascale: real); override;
   published
-   property menu: twidgetmainmenu read getmenu write setmenu;   
+   property menu: twidgetmainmenu read getmenu write setmenu;
    property options: mainmenuwidgetoptionsty read foptions write setoptions default [];
-   property popupdirection: graphicdirectionty read flayout.popupdirection write 
+   property popupdirection: graphicdirectionty read flayout.popupdirection write
                                   flayout.popupdirection default gd_down;
  end;
- 
+
  mainmenupainterstatety = (mmps_layoutvalid);
  mainmenupainterstatesty = set of mainmenupainterstatety;
 
@@ -242,7 +242,7 @@ function showpopupmenu(const menu: tmenuitem; const transientfor: twidget;
 
 var
  menuexehandlerdesign: menuitemprocty;
- 
+
 implementation
 uses
  msedrawtext,mserichstring,msestockobjects,sysutils,msekeyboard,msebits,
@@ -350,7 +350,7 @@ end;
 
 procedure calcmenulayout(var layout: menulayoutinfoty; const canvas: tcanvas;
                               const maxsize: integer = bigint);
- function gettextrect(const acell: menucellinfoty; 
+ function gettextrect(const acell: menucellinfoty;
                                       const atext: richstringty): sizety;
  var
   size1: sizety;
@@ -368,7 +368,7 @@ procedure calcmenulayout(var layout: menulayoutinfoty; const canvas: tcanvas;
    end;
   end;
  end;
- 
+
 const
  shortcutdist = 5;
 var
@@ -407,10 +407,10 @@ var
  checkboxheight: integer;
  size1: sizety;
  hasnormalitem: boolean;
- 
+
 label
  suppressed;
- 
+
 begin
  ar1:= nil; //compiler warning
  with layout,tmenuitem1(menu) do begin
@@ -418,7 +418,7 @@ begin
   commonwidth:= (owner <> nil) and (mo_commonwidth in owner.options) and
                       (mlo_horz in layout.options);
 //  framehalfwidth:= 0;
-  needsmenuarrow:= not (mlo_horz in layout.options) or (owner <> nil) and 
+  needsmenuarrow:= not (mlo_horz in layout.options) or (owner <> nil) and
                         (mo_mainarrow in owner.options);
   checkboxwidth:= menucheckboxwidth;
   checkboxheight:= menucheckboxheight;
@@ -494,7 +494,7 @@ begin
    nomouseanim1:= false;
    noclickanim1:= false;
    nofocusanim1:= false;
-  end; 
+  end;
   framewidth:= frame2.left + frame2.right + extrasp;
   frameheight:= frame2.top + frame2.bottom + extrasp;
 //  framewidth1:= framehalfwidth * 2;
@@ -563,7 +563,7 @@ begin
        end
        else begin
         inc(ashortcutwidth,menuarrowwidthhorz);
-       end;       
+       end;
       end;
      end
      else begin
@@ -614,11 +614,11 @@ begin
         if hasnormalitem then begin
          for int2:= int1+1 to count - 1 do begin
           item2:= tmenuitem1(fsubmenu[int2]);
-          if item2.options * [mao_separator,mao_optional] = 
+          if item2.options * [mao_separator,mao_optional] =
                                                  [mao_separator] then begin
            break;
           end;
-          if not (mao_separator in item2.options) and 
+          if not (mao_separator in item2.options) and
                                 not (as_invisible in item2.state) then begin
            exclude(state,shs_suppressed);
            break;
@@ -633,7 +633,7 @@ begin
       end;
       if shs_suppressed in state then begin
        goto suppressed;
-      end; 
+      end;
       hassubmenu:= hassubmenu or (shs_menuarrow in state);
       if [shs_checkbox,shs_radiobutton] * state <> [] then begin
        hascheckbox:= true;
@@ -731,9 +731,9 @@ suppressed:
         ax:= ax + dim.cx + framewidth;
        end;
        dim.x:= dim.x + shift;
-       if (int1 > 0) and 
+       if (int1 > 0) and
                (dim.x + dim.cx + frame2.right > amax) then begin
-        shift:= shift - dim.x + frame2.left; 
+        shift:= shift - dim.x + frame2.left;
         dim.x:= frame2.left;
         inc(regioncount);
        end;
@@ -812,7 +812,7 @@ begin
    result:= -2;
    for int1:= 0 to high(cells) do begin
     with cells[int1].buttoninfo do begin
-     if (state * 
+     if (state *
            [shs_disabled,shs_invisible,shs_suppressed,shs_separator] = []) and
                 pointinrect(pos,ca.dim) then begin
       result:= int1;
@@ -839,13 +839,13 @@ begin
   end
   else begin
    po1:= nil;
-  end; 
+  end;
   if itemframetemplateactive <> nil then begin
    po2:= @tframetemplate1(itemframetemplateactive).fi.ba.innerframe;
   end
   else begin
    po2:= nil;
-  end; 
+  end;
   for int1:= 0 to high(cells) do begin
    with cells[int1],buttoninfo do begin
     if state * [shs_invisible,shs_suppressed] = [] then begin
@@ -991,7 +991,7 @@ function checkshortcut(const layout: menulayoutinfoty;
  function getshortcut(currentindex: integer): integer;
  var
   int1: integer;
- begin 
+ begin
   result:= -1;
   inc(currentindex);
   if currentindex >= length(layout.cells) then begin
@@ -1169,7 +1169,7 @@ begin
  setlinkedvar(source.itemfaceactive,tmsecomponent(ftemplates.itemfaceactive));
  setlinkedvar(source.separatorframe,tmsecomponent(ftemplates.separatorframe));
  setlinkedvar(source.checkboxframe,tmsecomponent(ftemplates.checkboxframe));
- updatetemplates; 
+ updatetemplates;
 end;
 
 function tpopupmenuwidget.translatetoscreen(const value: pointty): pointty;
@@ -1265,7 +1265,7 @@ begin
   //          application.screenrect(transientforwindoworwindow).cy -
             application.workarea(transientforwindoworwindow).cy -
             innerclientframewidth.cy);
-   movemenulayout(flayout,innerclientrect.pos);            
+   movemenulayout(flayout,innerclientrect.pos);
    updatepos();
    invalidate();
    include(flayout.state,mls_valid);
@@ -1280,7 +1280,7 @@ begin
  if (componentstate * [csloading,csdestroying] = []) then begin
   exclude(flayout.state,mls_valid);
   invalidate();
-  if (flayout.menu <> nil) and (flayout.menu.submenu.count > 0) and 
+  if (flayout.menu <> nil) and (flayout.menu.submenu.count > 0) and
           ((fwidgetrect.cx <= 0) or (fwidgetrect.cy <= 0)) then begin
    updatelayout(); //there will be no paint event
   end;
@@ -1375,7 +1375,7 @@ var
     with cells[fmouseitem],buttoninfo do begin
      if state * [shs_clicked,shs_mouse] <> [] then begin
       state:= state - [shs_clicked,shs_mouse];
-      invalidaterect(dimouter);      
+      invalidaterect(dimouter);
      end;
     end;
     fmouseitem:= -1;
@@ -1394,7 +1394,7 @@ var
    if activeitem >= 0 then begin
     include(cells[activeitem].buttoninfo.state,shs_mouse);
     fmouseitem:= activeitem;
-    if (itembefore <> activeitem) and 
+    if (itembefore <> activeitem) and
               tmenuitem1(menu.items[activeitem]).canshowhint then begin
      application.restarthint(self);
     end;
@@ -1415,7 +1415,7 @@ begin
  else begin
   with info,flayout do begin
    canmousemove1:= (csdesigning in componentstate) or
-            not (aso_nomenumousemove in assistiveoptions) or 
+            not (aso_nomenumousemove in assistiveoptions) or
                   (eventkind in mouseposevents - [ek_mousemove,ek_mousepark]);
    itembefore:= activeitem;
    pt1:= translatewidgetpoint(info.pos,self,nil);
@@ -1431,10 +1431,10 @@ begin
     end;
    end;
    if (fnextpopup <> nil) and
-          pointinrect(pt1,fnextpopup.fwidgetrect) and 
+          pointinrect(pt1,fnextpopup.fwidgetrect) and
                               not (mlo_childreninactive in options) then begin
-    if (eventkind = ek_mousemove) and canmousemove1 or 
-         (eventkind = ek_buttonpress) and 
+    if (eventkind = ek_mousemove) and canmousemove1 or
+         (eventkind = ek_buttonpress) and
                (aso_nomenumousemove in assistiveoptions) and
                                  not(csdesigning in componentstate) then begin
      invalidaterect(cells[activeitem].dimouter);
@@ -1487,7 +1487,7 @@ begin
        finally
         exclude(state,mls_assistivelocked);
        end;
-       if (activeitem >= 0) and 
+       if (activeitem >= 0) and
                       tmenuitem1(menu.items[activeitem]).canshowhint then begin
         application.hidehint;
        end;
@@ -1504,7 +1504,7 @@ begin
       with cells[activeitem],buttoninfo do begin
        bo1:= shs_clicked in state;
        exclude(state,shs_clicked);
-       if not (csdesigning in componentstate) or 
+       if not (csdesigning in componentstate) or
                        (aso_nomenumousemove in assistiveoptions) then begin
         exclude(state,shs_mouse);
        end;
@@ -1548,10 +1548,10 @@ begin
   value1:= avalue;
   if (value1 < 0) or (menu = nil) then begin
    value1:= -1;
-  end; 
+  end;
   if (activeitem <> value1) or force then begin
    fclickeditem:= -1;
-   if (menu <> nil) and (activeitem >= 0) and 
+   if (menu <> nil) and (activeitem >= 0) and
                     (activeitem < menu.submenu.count) then begin
     if (fnextpopup <> nil) then begin
      fnextpopup.release1(false);
@@ -1614,7 +1614,7 @@ begin
     end;
    end;
   end;
-  if (activeitem < 0) and (mlo_main in options) and 
+  if (activeitem < 0) and (mlo_main in options) and
                              not nochildreninactive then begin
    include(options,mlo_childreninactive);
    releasemouse;
@@ -1683,7 +1683,7 @@ var
  bo1: boolean;
 begin
  with flayout do begin
-  bo1:= not((menu.owner <> nil) and 
+  bo1:= not((menu.owner <> nil) and
                            (csdesigning in menu.owner.componentstate));
   i1:= activeitem;
   if mlo_childreninactive in options then begin
@@ -1723,7 +1723,7 @@ begin
    end;
   end;
   if not bo1 and assigned(menuexehandlerdesign) and (i1 >= 0) and
-          (not (mlo_main in options) or (fclickeditem = i1) or 
+          (not (mlo_main in options) or (fclickeditem = i1) or
                (menu[i1].submenu.count = 0)) then begin
    closepopupstack(menu[i1]);
    menuexehandlerdesign(menu[i1]);
@@ -1818,8 +1818,8 @@ begin
    beginkeymode;
    case key of
     key_return,{key_enter,}key_space: begin
-     if not (ss_repeat in shiftstate) and 
-             not ((aso_noreturnkeymenuexecute in assistiveoptions) and 
+     if not (ss_repeat in shiftstate) and
+             not ((aso_noreturnkeymenuexecute in assistiveoptions) and
                                                 (key = key_return)) then begin
       selectmenu(true,true);
      end;
@@ -1838,8 +1838,8 @@ begin
       exclude(options,mlo_keymode);
       if not isup(factposition) then begin
        deactivatemenu;
-       if (fprevpopup <> nil) and 
-            (fprevpopup.flayout.options * [mlo_main,mlo_horz] = 
+       if (fprevpopup <> nil) and
+            (fprevpopup.flayout.options * [mlo_main,mlo_horz] =
                                             [mlo_main,mlo_horz]) then begin
         exclude(eventstate,es_processed);
        end;
@@ -1852,7 +1852,7 @@ begin
           exclude(eventstate,es_processed);
           swapkeys;
           int1:= activeitem;
-          if canassistive and 
+          if canassistive and
                     not (mls_assistivelocked in flayout.state) then begin
                                          //for mainmenu
            intf1:= tmenuitem1(menu).getiassistiveclient();
@@ -1869,14 +1869,14 @@ begin
          end;
         end;
        end;
-       if b1 and canassistive and 
+       if b1 and canassistive and
                       not (mls_assistivelocked in flayout.state) then begin
         dir1:= gd_right;
         if mlo_horz in options then begin
          dir1:= gd_down;
         end;
         assistiveserver.donavigbordertouched(getiassistiveclient,dir1);
-       end;      
+       end;
       end;
      end;
     end;
@@ -1903,7 +1903,7 @@ begin
     end;
    end
    else begin
-    if (shiftstate = [ss_shift]) and (key = key_menu) and 
+    if (shiftstate = [ss_shift]) and (key = key_menu) and
                                        (fnextpopup = nil) then begin
      include(eventstate,es_processed);
      include(flayout.state,mls_assistivelocked);
@@ -1968,9 +1968,9 @@ begin
    frefpos:= po1;
    updatepos;
   end;
-  if (sender <> nil) and ((sender = ftemplates.frame) or 
+  if (sender <> nil) and ((sender = ftemplates.frame) or
                           (sender = ftemplates.face) or
-                          (sender = ftemplates.itemframe) or 
+                          (sender = ftemplates.itemframe) or
                           (sender = ftemplates.itemface)) then begin
    updatetemplates; //refresh
 //   if not (csloading in componentstate) then begin
@@ -1999,7 +1999,7 @@ procedure tpopupmenuwidget.assistivemenuactivated();
 var
  intf1: iassistiveclientmenu;
 begin
- with flayout do begin 
+ with flayout do begin
   intf1:= tmenuitem1(menu).getiassistiveclient();
   assistiveserver.domenuactivated(intf1);
   assistiveserver.doitementer(intf1,cells,activeitem);
@@ -2023,7 +2023,7 @@ procedure tpopupmenuwidget.showhint(const aid: int32; var info: hintinfoty);
 begin
  inherited;
  with flayout do begin
-  if (activeitem >= 0) and 
+  if (activeitem >= 0) and
                      tmenuitem1(menu.items[activeitem]).canshowhint then begin
    info.caption:= menu.items[activeitem].hint;
   end;
@@ -2056,7 +2056,7 @@ begin
 {$endif}
    closepopupstack(nil,true);
   end;
- end; 
+ end;
 end;
 
 procedure tpopupmenuwidget.release1(const acancelmodal: boolean);
@@ -2181,7 +2181,7 @@ begin
  if acancelmodal then begin
   setlinkedvar(nil,tlinkedobject(factivewindowbefore));
              //do not restore active window
- end;  
+ end;
  setactiveitem(-1);
  releasemouse;
 // activeitem:= int1;
@@ -2197,9 +2197,9 @@ procedure tcustommainmenuwidget.doshortcut(var info: keyeventinfoty;
 begin
  inherited;
  if not (csdesigning in componentstate) then begin
-  if not (es_processed in info.eventstate) and 
-         not (es_modal in info.eventstate) and 
-           ((info.shiftstate = [ss_alt]) or 
+  if not (es_processed in info.eventstate) and
+         not (es_modal in info.eventstate) and
+           ((info.shiftstate = [ss_alt]) or
             (info.shiftstate = [ss_shift]) and (info.key = key_menu)) then begin
    dokeydown1(info);
   end;
@@ -2227,7 +2227,7 @@ begin
  if mws_firstactivated in fstate then begin
   if factivewindowbefore <> fwindow then begin
    if mws_raised in fstate then begin
-    if (fstackedunderbefore <> nil) then begin 
+    if (fstackedunderbefore <> nil) then begin
      if fstackedunderbefore.visible then begin
       setlength(ar1,2);
       ar1[0]:= fstackedunderbefore.winid;
@@ -2244,7 +2244,7 @@ begin
      end;
     end
     {
-    if (fstackedoverbefore <> nil) then begin 
+    if (fstackedoverbefore <> nil) then begin
      if fstackedoverbefore.visible then begin
       setlength(ar1,2);
       ar1[0]:= fstackedoverbefore.winid;
@@ -2264,8 +2264,8 @@ begin
     end;
    end;
   end;
-  if application.active and not ((fmenucomp = nil) or 
-                 (csdesigning in fmenucomp.componentstate)) and 
+  if application.active and not ((fmenucomp = nil) or
+                 (csdesigning in fmenucomp.componentstate)) and
        (factivewindowbefore <> nil) and factivewindowbefore.visible then begin
    factivewindowbefore.reactivate();
   end;
@@ -2370,7 +2370,7 @@ end;
 
 { tframemenuwidget }
 
-constructor tframemenuwidget.create(const aparent: twidget; 
+constructor tframemenuwidget.create(const aparent: twidget;
                                            const amenu: tmenuitem);
 begin
  inherited create(nil,amenu,nil,nil,fmenucomp);
@@ -2379,7 +2379,7 @@ begin
  setlockedparentwidget(aparent);
  flayout.options:= [mlo_horz,mlo_main,mlo_childreninactive];
  flayout.popupdirection:= gd_down;
- if not (csloading in aparent.ComponentState) and 
+ if not (csloading in aparent.ComponentState) and
                              not (csloading in componentstate) then begin
 //  updatelayout();
   visible:= true;
@@ -2452,10 +2452,10 @@ begin
  if foptions <> avalue then begin
   foptions:= avalue;
   if mwo_vertical in foptions then begin
-   exclude(flayout.options,mlo_horz);   
+   exclude(flayout.options,mlo_horz);
   end
   else begin
-   include(flayout.options,mlo_horz);     
+   include(flayout.options,mlo_horz);
   end;
   if not (csloading in componentstate) then begin
 //   invalidatelayout();
@@ -2470,8 +2470,8 @@ begin
  if (event = oe_changed) and (sender = fmenucomp) and
                                   not (csloading in componentstate) then begin
   assigntemplate(fmenucomp.template);
-//  invalidatelayout();                            
- end; 
+//  invalidatelayout();
+ end;
 end;
 
 procedure tmainmenuwidget.loaded;

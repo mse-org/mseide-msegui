@@ -350,7 +350,7 @@ begin
       end;
     end
     else
-      case b1 of 
+      case b1 of
         0: break; { end of line }
         1: break; { end of file }
         2: begin  { Next pixel position. Skipped pixels should be left untouched, but we set them to zero }
@@ -364,7 +364,7 @@ begin
                inc(i,b1);
                { aligned on 2 bytes boundary: every group starts on a 2 bytes boundary, but absolute group
                  could end on odd address if there is a odd number of elements, so we pad it  }
-               if (b1 mod 2)<>0 then Stream.Seek(1,soFromCurrent); 
+               if (b1 mod 2)<>0 then Stream.Seek(1,soFromCurrent);
              end;
       end;
   end;
@@ -416,7 +416,7 @@ begin
         end;
       end
       else
-        case b1 of 
+        case b1 of
           0: break; { end of line }
           1: break; { end of file }
           2: begin  { Next pixel position. Skipped pixels should be left untouched, but we set them to zero }

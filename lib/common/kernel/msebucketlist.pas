@@ -16,7 +16,7 @@ unit msebucketlist;
 interface
 uses
  msestrings;
- 
+
 const
  defaultbucketcount = $20;
  defaultgrowstep = 8;
@@ -175,7 +175,7 @@ begin
   end;
  end;
 end;
- 
+
 { tbucketlist }
 
 constructor tbucketlist.create(recordsize: integer;

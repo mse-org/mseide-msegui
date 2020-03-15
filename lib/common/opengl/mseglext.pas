@@ -5144,7 +5144,7 @@ const
     (n: 'glTexImage3D'; d: {$ifndef FPC}@{$endif}@glTexImage3D),
     (n: 'glTexSubImage3D'; d: {$ifndef FPC}@{$endif}@glTexSubImage3D),
     (n: 'glCopyTexSubImage3D'; d: {$ifndef FPC}@{$endif}@glCopyTexSubImage3D)
-    ); 
+    );
 begin
  result:= getprocaddresses(libgl,funcs);
 end;

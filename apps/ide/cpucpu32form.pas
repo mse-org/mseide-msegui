@@ -1,5 +1,5 @@
 { MSEide Copyright (c) 1999-2013 by Martin Schreiber
-   
+
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation; either version 2 of the License, or
@@ -70,10 +70,10 @@ type
    constructor create(aowner: tcomponent); override;
    function flagedit(const aindex: integer): tcustombooleanedit; override;
  end;
- 
+
 var
  cpucpu32fo: tcpucpu32fo;
- 
+
 implementation
 uses
  cpucpu32form_mfm;
@@ -83,7 +83,7 @@ begin
  inherited create(aowner);
  fflagswidget:= ps;
 end;
- 
+
 procedure tcpucpu32fo.flagssetvalue(const sender: TObject; var avalue: Boolean;
                var accept: Boolean);
 begin

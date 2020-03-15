@@ -13,7 +13,7 @@ unit mseuniintf; //X11
 interface
 uses
  msegraphics,msetypes{msestrings};
- 
+
 {$include ../mseuniintf.inc}
 
 function uni_listfontswithglyph(achar: msechar): msestringarty;
@@ -21,7 +21,7 @@ function uni_listfontswithglyph(achar: msechar): msestringarty;
 implementation
 uses
  mseguiintf,msex11gdi,mxft,xlib,msefontconfig;
- 
+
 function uni_getfontwithglyph(var drawinfo: drawinfoty): boolean;
 var
  pat1: pfcpattern;
@@ -68,13 +68,13 @@ begin
        end;
        inc(po1);
       end;
-     end;        
+     end;
     end;
     fccharsetdestroy(charset1);
     fcpatterndestroy(pat1);
-    fcfontsetdestroy(fontset1);    
+    fcfontsetdestroy(fontset1);
    end;
-  end; 
+  end;
 {$ifdef FPC} {$checkpointer default} {$endif}
  end;
 end;
@@ -119,11 +119,11 @@ begin
      inc(po1);
     end;
     setlength(result,int2);
-   end;        
+   end;
   end;
   fccharsetdestroy(charset1);
   fcpatterndestroy(pat1);
-  fcfontsetdestroy(fontset1);    
+  fcfontsetdestroy(fontset1);
  end;
 {$ifdef FPC} {$checkpointer default} {$endif}
 end;

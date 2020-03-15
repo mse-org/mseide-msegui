@@ -20,7 +20,7 @@ interface
 implementation
 uses
  mseprinter,msepostscriptprinter,msegdiprint,msedesignintf;
- 
+
 procedure Register;
 begin
  registercomponents('Gui',[tpostscriptprinter,tgdiprinter,twmfprinter]);

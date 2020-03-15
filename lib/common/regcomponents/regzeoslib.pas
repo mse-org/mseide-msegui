@@ -24,7 +24,7 @@ uses
  ZSqlProcessor,ZSqlMonitor,ZSequence,msezeos,regzeoslib_bmp,regdb,
  msepropertyeditors,ZSqlStrings,ZAbstractRODataset,mseglob,msegui,mdb,msedb,
  msetypes{msestrings};
- 
+
 type
  tzprotocolpropertyeditor = class(tstringpropertyeditor)
   protected
@@ -32,7 +32,7 @@ type
   public
    function getvalues: msestringarty; override;
  end;
- 
+
  tzquerysqlpropertyeditor = class(tsqlpropertyeditor)
   private
    factivebefore: boolean;
@@ -43,7 +43,7 @@ type
   public
    procedure edit; override;
  end;
- 
+
  tzreadonlyquerysqlpropertyeditor = class(tsqlpropertyeditor)
   private
    factivebefore: boolean;
@@ -54,7 +54,7 @@ type
   public
    procedure edit; override;
  end;
- 
+
  tzcatalogpropertyeditor = class(tstringpropertyeditor)
   protected
    function getdefaultstate: propertystatesty; override;

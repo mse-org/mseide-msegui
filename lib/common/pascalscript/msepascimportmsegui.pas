@@ -9,14 +9,14 @@ type
    procedure CompOnUses(CompExec: TPSScript); override;
    procedure ExecOnUses(CompExec: TPSScript); override;
  end;
- 
+
 procedure registermsegui_c(s: tpspascalcompiler);
 procedure registermsegui_r(s: tpsexec);
 
 implementation
 uses
  msewidgets,upsutils,msegui;
- 
+
 procedure registermsegui_c(s: tpspascalcompiler);
 begin
  with s do begin

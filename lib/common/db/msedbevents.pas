@@ -16,12 +16,12 @@ uses
  msedatabase,mseinterfaces;
 
 const
- defaultdbeventinterval = 1000000; //us 
+ defaultdbeventinterval = 1000000; //us
 type
  tdbevent = class;
  idbevent = interface(inullinterface)[miid_idbevent]
-  procedure listen(const sender: tdbevent);  
-  procedure unlisten(const sender: tdbevent);  
+  procedure listen(const sender: tdbevent);
+  procedure unlisten(const sender: tdbevent);
   procedure fire(const sender: tdbevent);
  end;
  idbeventcontroller = interface(inullinterface)
@@ -30,7 +30,7 @@ type
   procedure dolisten(const sender: tdbevent);
   procedure dounlisten(const sender: tdbevent);
  end;
-  
+
  dbeventty = procedure(const sender: tdbevent; const aid: int64) of object;
 
  tdbevent = class(tmsecomponent)
@@ -60,7 +60,7 @@ type
  end;
 
  dbeventarty = array of tdbevent;
- 
+
  tdbeventcontroller = class
   private
    fintf: idbeventcontroller;
@@ -80,7 +80,7 @@ type
    procedure getevents;
    property eventinterval: integer read geteventinterval write seteventinterval;
  end;
- 
+
 implementation
 uses
  msearrayutils,msetypes;
@@ -265,7 +265,7 @@ begin
  end
  else begin
   ftimer.singleshot:= false;
- end; 
+ end;
 end;
 
 procedure tdbeventcontroller.getevents;

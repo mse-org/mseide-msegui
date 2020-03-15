@@ -15,7 +15,7 @@ uses
 
 const
  ificlienteditorstatname = 'ificlienteditor.sta';
- 
+
 type
  tifilinkcompeditor = class(tcomponenteditor)
   public
@@ -23,11 +23,11 @@ type
                            acomponent: tcomponent); override;
    procedure edit; override;
  end;
- 
+
 implementation
 uses
  mseificomp,mseglob;
- 
+
 { tifilinkcompeditor }
 
 constructor tifilinkcompeditor.create(const adesigner: idesigner;

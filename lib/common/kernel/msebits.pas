@@ -14,7 +14,7 @@ unit msebits;
 interface
 uses
  msetypes;
- 
+
 type
  bitnumty = 0..32;
 const
@@ -22,7 +22,7 @@ const
  bytebits: array[0..8] of byte = ($01,$02,$04,$08,$10,$20,$40,$80,$00);
  bytemask: array[0..8] of byte = ($00,$01,$03,$07,$0f,$1f,$3f,$7f,$ff);
  bytebitsreverse: array[0..8] of byte = ($80,$40,$20,$10,$08,$04,$02,$01,$00);
-         
+
  bits: array[bitnumty] of longword = (
          $00000001,$00000002,$00000004,$00000008,
          $00000010,$00000020,$00000040,$00000080,
@@ -61,9 +61,9 @@ const
              $07,$87,$47,$c7,$27,$a7,$67,$e7,$17,$97,$57,$d7,$37,$b7,$77,$f7,
              $0f,$8f,$4f,$cf,$2f,$af,$6f,$ef,$1f,$9f,$5f,$df,$3f,$bf,$7f,$ff);
 
- intexp10ar: array[0..9] of integer = 
+ intexp10ar: array[0..9] of integer =
           (1,10,100,1000,10000,100000,1000000,10000000,100000000,1000000000);
- int64exp10ar: array[0..19] of int64 = 
+ int64exp10ar: array[0..19] of int64 =
           (1,10,100,1000,10000,100000,1000000,10000000,100000000,1000000000,
            1000000000,10000000000,100000000000,1000000000000,10000000000000,
            100000000000000,1000000000000000,10000000000000000,
@@ -73,7 +73,7 @@ type
   lsw: longword;
   msw: longword;
  end;
- 
+
 function highestbit(value: longword): integer;
 //0-> first, 31-> last($80000000), -1-> none ($00000000)
 function lowestbit(value: longword): integer;

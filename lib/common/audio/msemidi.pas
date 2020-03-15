@@ -22,19 +22,19 @@ interface
 uses
  msestream,classes,mclasses,mseclasses,sysutils,msestrings,msetimer,msetypes;
 
-const 
+const
  defaultmidimaxdatasize = 1000000;
 // defaulttimescaleus = 1000000*60/(120*120);
  defaulttempo = 120; //beats per minute
  defaultticksperbeat = 120;
- 
+
  mc_endoftrack = 47;
  mc_keysig = 89;
  mc_timesig = 88;
  mc_tempo = 81;
  mc_trackname = 3;
  mc_instrumentname = 4;
- 
+
 type
  midierrorty = (em_ok,em_nostream,em_fileformat,em_notrack,em_trackdata);
 
@@ -43,7 +43,7 @@ type
  midichannelty = (mic_0,mic_1,mic_2,mic_3,mic_4,mic_5,mic_6,mic_7,
                   mic_8,mic_9,mic_10,mic_11,mic_12,mic_13,mic_14,mic_15);
  midichannelsty = set of midichannelty;
-                  
+
  idstringty = array[0..3] of char;
  midichunkheaderty = record
   id: idstringty;
@@ -55,7 +55,7 @@ type
   data: record //variable
   end;
  end;
-  
+
  midifileheaderty = record
   formattype: word;
   numberoftracks: word;
@@ -81,7 +81,7 @@ type
   event: midieventinfoty;
  end;
  ptrackeventinfoty = ^trackeventinfoty;
-   
+
  tmidistream = class(tbufstream)
   private
    ftrackcount: integer;
@@ -117,7 +117,7 @@ type
    function getmetadata(const alen: integer; out avalue: longword): boolean;
    property timedivision: longword read ftimedivision;
    property metadata: string read fmetadata;
-   property maxdatasize: longword read fmaxdatasize write fmaxdatasize 
+   property maxdatasize: longword read fmaxdatasize write fmaxdatasize
                          default defaultmidimaxdatasize;
  end;
 
@@ -130,7 +130,7 @@ type
 
 const
  loadstates = [mss_inited,mss_tracksloaded,mss_eventsmerged];
-type                          
+type
  trackinfoty = record
   disabled: boolean;
   trackname: string;
@@ -144,7 +144,7 @@ type
 
  trackbufferarty = array of trackeventinfoty;
  trackbufferararty = array of trackbufferarty;
-  
+
  tmidisource = class(tmsecomponent)
   private
    fstream: tmidistream;
@@ -191,8 +191,8 @@ type
   published
    property ontrackevent: trackeventty read fontrackevent write fontrackevent;
  end;
- 
-const  
+
+const
  midimessagetable: array[0..7] of midimessagekindty = (
   mmk_noteoff,              //8c
   mmk_noteon,               //9c
@@ -213,7 +213,7 @@ const
 
 implementation
 uses
- msesysutils,msedatalist,msearrayutils; 
+ msesysutils,msedatalist,msearrayutils;
 {$ifndef mse_allwarnings}
  {$if fpc_fullversion >= 030100}
   {$warn 5089 off}
@@ -231,7 +231,7 @@ const
   'No track found.',
   'Invalid track data.'
   );
-  
+
 function swap(const avalue: word): word; {$ifdef FPC}inline;{$endif}
                                                 overload;
 begin
@@ -254,7 +254,7 @@ procedure swap1(var avalue: longword); {$ifdef FPC}inline;{$endif} overload;
 begin
  avalue:= (swap(word(avalue)) shl 16) or swap(word(avalue shr 16));
 end;
- 
+
 { tmidistream }
 
 constructor tmidistream.create(ahandle: integer);
@@ -440,7 +440,7 @@ end;
 
 function tmidistream.readtrackvarlength(out adata: longword): boolean;
 var
- by1: byte;  
+ by1: byte;
 begin
  result:= true;
  adata:= 0;
@@ -469,7 +469,7 @@ begin
   adata.delta:= round(ftimesum);
   ftimesum:= ftimesum - adata.delta;
  end;
-   
+
  result:= readtrackbyte(stat1);
  if not result then exit;
  if (stat1 and $80) <> 0 then begin
@@ -485,7 +485,7 @@ begin
  if adata.event.kind = mmk_system then begin
   result:= readtrackvarlength(lwo1) and (lwo1 <= fmaxdatasize);
   if not result then exit;
-  setlength(fmetadata,lwo1); 
+  setlength(fmetadata,lwo1);
   if lwo1 > 0 then begin
    result:= readtrackdata(pointer(fmetadata)^,lwo1);
   end;
@@ -524,7 +524,7 @@ begin
  if adata.event.kind = mmk_system then begin
   result:= readtrackvarlength(lwo1) and (lwo1 <= fmaxdatasize);
   if not result then exit;
-  setlength(fmetadata,lwo1); 
+  setlength(fmetadata,lwo1);
   if lwo1 > 0 then begin
    result:= readtrackdata(pointer(fmetadata)^,lwo1);
   end;
@@ -713,7 +713,7 @@ begin
     end;
     setlength(ftrackbuffer[int1],int2);
    end;
-  end;  
+  end;
   if (ftracks <> nil) and (ftracks[0].tempo > 0) then begin
    tempo:= 60000000/ftracks[0].tempo;
   end;
@@ -727,7 +727,7 @@ type
   time: longword;
  end;
  trackmergeinfoarty = array of trackmergeinfoty;
- 
+
 procedure tmidisource.mergeevents;    //todo: optimize
 var
  int1,int2,int3,int4,int5,int6: integer;

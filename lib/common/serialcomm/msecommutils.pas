@@ -21,7 +21,7 @@ type
                           var accept: boolean) of object;
  getcommnreventty = procedure(const sender: tobject;
                           var avalue: commnrty) of object;
- 
+
  tcommselector = class(tcustomselector)
   private
    fongetactivecommnr: getcommnreventty;
@@ -51,14 +51,14 @@ type
    property onsetvalue: setcommnreventty read readonsetvalue write writeonsetvalue;
    property onbeforedropdown;
    property onafterclosedropdown;
-   property ongetactivecommnr: getcommnreventty read fongetactivecommnr 
+   property ongetactivecommnr: getcommnreventty read fongetactivecommnr
                                                        write fongetactivecommnr;
  end;
 
 implementation
 uses
  mseeditglob;
-  
+
 type
  comminforecty = record anzeigetext, dropdowntext: string; commnr: commnrty end;
  comminfoty = array[cnr_1..cnr_9] of comminforecty;

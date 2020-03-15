@@ -22,10 +22,10 @@ interface
 
 uses
  msesignal,classes,mclasses;
- 
+
 type
  noisekindty = (nk_white,nk_pink,nk_brown);
- 
+
  tsignoise = class(tdoublesigoutcomp)
   private
    famplitudepo: psigvaluety;
@@ -57,21 +57,21 @@ type
    function gethandler: sighandlerprocty; override;
    procedure initmodel; override;
    function getinputar: inputconnarty; override;
-   function getzcount: integer; override;   
+   function getzcount: integer; override;
   public
    constructor create(aowner: tcomponent); override;
    procedure clear; override;
   published
    property amplitude: tdoubleinputconn read famplitude write setamplitude;
    property offset: tdoubleinputconn read foffset write setoffset;
-   property samplecount: integer read fsamplecount 
+   property samplecount: integer read fsamplecount
                                      write setsamplecount default 1;
                       //1 -> uniform distribution
    property kind: noisekindty read fkind write setkind default nk_white;
    property cutofffrequ: real read fcutofffrequ write setcutofffrequ;
                                       //nk_pink only, default 0.001
  end;
- 
+
 implementation
 uses
  msenoise;
@@ -83,7 +83,7 @@ uses
   {$warn 6058 off}
  {$endif}
 {$endif}
- 
+
 type
  tdoubleinputconn1 = class(tdoubleinputconn);
 
@@ -211,15 +211,15 @@ begin
  fz:= 36969 * (fz and $ffff) + (fz shr 16); //mwc by George Marsaglia
  fw:= 18000 * (fw and $ffff) + (fw shr 16);
  white:= (integer((fz shl 16) + fw)/fscale);
- 
+
  fb0:= 0.99886 * fb0 + white * 0.0555179;   //filter by Paul Kellet
- fb1:= 0.99332 * fb1 + white * 0.0750759; 
- fb2:= 0.96900 * fb2 + white * 0.1538520; 
- fb3:= 0.86650 * fb3 + white * 0.3104856; 
- fb4:= 0.55000 * fb4 + white * 0.5329522; 
- fb5:= -0.7616 * fb5 - white * 0.0168980; 
+ fb1:= 0.99332 * fb1 + white * 0.0750759;
+ fb2:= 0.96900 * fb2 + white * 0.1538520;
+ fb3:= 0.86650 * fb3 + white * 0.3104856;
+ fb4:= 0.55000 * fb4 + white * 0.5329522;
+ fb5:= -0.7616 * fb5 - white * 0.0168980;
  foutputpo^:= (fb0+fb1+fb2+fb3+fb4+fb5+fb6+white*0.5362) *
-                             famplitudepo^.value + foffsetpo^.value; 
+                             famplitudepo^.value + foffsetpo^.value;
  fb6:= white * 0.115926;
 end;
 
@@ -235,15 +235,15 @@ begin
   white:= white + integer((fz shl 16) + fw);
  end;
 //filter by Paul Kellet
- 
- fb0:= 0.99886 * fb0 + white * 0.0555179; 
- fb1:= 0.99332 * fb1 + white * 0.0750759; 
- fb2:= 0.96900 * fb2 + white * 0.1538520; 
- fb3:= 0.86650 * fb3 + white * 0.3104856; 
- fb4:= 0.55000 * fb4 + white * 0.5329522; 
- fb5:= -0.7616 * fb5 - white * 0.0168980; 
+
+ fb0:= 0.99886 * fb0 + white * 0.0555179;
+ fb1:= 0.99332 * fb1 + white * 0.0750759;
+ fb2:= 0.96900 * fb2 + white * 0.1538520;
+ fb3:= 0.86650 * fb3 + white * 0.3104856;
+ fb4:= 0.55000 * fb4 + white * 0.5329522;
+ fb5:= -0.7616 * fb5 - white * 0.0168980;
  foutputpo^:= ((fb0+fb1+fb2+fb3+fb4+fb5+fb6+white*0.5362) *
-                             famplitudepo^.value)/fscale + foffsetpo^.value; 
+                             famplitudepo^.value)/fscale + foffsetpo^.value;
  fb6:= white * 0.115926;
 end;
 

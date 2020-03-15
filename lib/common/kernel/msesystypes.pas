@@ -37,7 +37,7 @@ type
 
  ecrashstatfile = class(exception)
  end;
- 
+
 const
  invalidprocid = -1;
  invalidprochandle = -1;

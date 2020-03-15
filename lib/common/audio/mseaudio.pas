@@ -13,7 +13,7 @@ interface
 uses
  classes,mclasses,mseclasses,msethread,msetypes,msepulseglob,msepulsesimple,
  msesys,msestrings;
- 
+
 type
 
  sampleformatty = (sfm_u8,sfm_8alaw,sfm_8ulaw,
@@ -25,12 +25,12 @@ const
  defaultsamplechannels = 1;
  defaultsamplerate = 44100;
  defaultlatency = 0.1;
- 
+
 {$ifdef endian_little}
  pulsesampleformatmatrix: array[sampleformatty] of pa_sample_format_t =
  //sfm_u8,      sfm_8alaw,     sfm_8ulaw,
   (PA_SAMPLE_U8,PA_SAMPLE_ALAW,PA_SAMPLE_ULAW,
- //sfm_s16,        sfm_s24,        sfm_s32,        
+ //sfm_s16,        sfm_s24,        sfm_s32,
    PA_SAMPLE_S16LE,PA_SAMPLE_S24LE,PA_SAMPLE_S32LE,
  //sfm_f32,            smf_s2432,
    PA_SAMPLE_FLOAT32LE,PA_SAMPLE_S24_32LE,
@@ -46,7 +46,7 @@ const
  pulsesampleformatmatrix: array[sampleformatty] of pa_sample_format_t =
  //sfm_u8,      sfm_8alaw,     sfm_8ulaw,
   (PA_SAMPLE_U8,PA_SAMPLE_ALAW,PA_SAMPLE_ULAW,
- //sfm_s16,        sfm_s24,        sfm_s32,        
+ //sfm_s16,        sfm_s24,        sfm_s32,
    PA_SAMPLE_S16BE,PA_SAMPLE_S24BE,PA_SAMPLE_S32BE,
  //sfm_f32,            smf_s2432,
    PA_SAMPLE_FLOAT32BE,PA_SAMPLE_S24_32BE,
@@ -63,7 +63,7 @@ const
  samplesizematrix: array[sampleformatty] of integer =
  //sfm_u8,      sfm_8alaw,     sfm_8ulaw,
   (1,           1,             1,
- //sfm_s16,     sfm_s24,       sfm_s32,        
+ //sfm_s16,     sfm_s24,       sfm_s32,
    2,           1,             4,
  //sfm_f32,     smf_s2432,
    4,           4,
@@ -79,7 +79,7 @@ const
  samplebuffersizematrix: array[sampleformatty] of integer =
  //sfm_u8,      sfm_8alaw,     sfm_8ulaw,
   (1,           1,             1,
- //sfm_s16,     sfm_s24,       sfm_s32,        
+ //sfm_s16,     sfm_s24,       sfm_s32,
    2,           3,             4,
  //sfm_f32,     smf_s2432,
    4,           4,
@@ -98,14 +98,14 @@ type
  end;
 
  sendeventty = procedure(var data: pointer) of object;
-                  //data = 
+                  //data =
                   //bytearty       (sfm_u8,sfm_8alaw,sfm_8ulaw,
                   //                sfm_s24,sfm_s24le,sfm_s24be)
                   //smallintarty   (sfm_s16,sfm_s16le,sfm_s16be)
                   //integerarty    (sfm_s32,smf_s2432,sfm_s32le,smf_s2432le,
                   //                sfm_s32be,smf_s2432be)
                   //or singlearty  (sfm_f32,sfm_f32le,sfm_f32be)
- 
+
  erroreventty = procedure(const sender: tobject; const errorcode: integer;
                   const errortext: msestring) of object;
 
@@ -131,7 +131,7 @@ type
    procedure loaded; override;
    procedure run; virtual;
    procedure stop; virtual;
-   function threadproc(sender: tmsethread): integer; virtual;   
+   function threadproc(sender: tmsethread): integer; virtual;
    procedure raiseerror(const aerror: integer);
    procedure doerror(const aerror: integer);
   public
@@ -141,19 +141,19 @@ type
 //   procedure unlock;
    procedure flush();
    procedure drain();
-   
+
    property active: boolean read factive write setactive default false;
    property server: msestring read fserver write fserver;
    property dev: msestring read fdev write fdev;
    property appname: msestring read fappname write fappname;
    property streamname: msestring read fstreamname write fstreamname;
-   property channels: integer read fchannels write fchannels 
+   property channels: integer read fchannels write fchannels
                                                  default defaultsamplechannels;
-   property format: sampleformatty read fformat write fformat 
+   property format: sampleformatty read fformat write fformat
                                               default defaultsampleformat;
    property rate: integer read frate write frate default defaultsamplerate;
    property stacksizekb: integer read fstacksizekb write fstacksizekb default 0;
-   property latency: real read flatency write flatency; 
+   property latency: real read flatency write flatency;
            //seconds, 0 -> server default
    property onsend: sendeventty read fonsend write fonsend;
    property onerror: erroreventty read fonerror write fonerror;
@@ -174,11 +174,11 @@ type
    property onsend;
    property onerror;
  end;
-  
+
 implementation
 uses
  sysutils,msesysintf,mseapplication,msepulse;
- 
+
 { tcustomaudioout }
 
 constructor tcustomaudioout.create(aowner: tcomponent);
@@ -251,7 +251,7 @@ begin
  fillchar(ss,sizeof(ss),0);
  fillchar(buattr,sizeof(buattr),0);
  with buattr do begin
-  maxlength:= longword(-1); 
+  maxlength:= longword(-1);
   tlength:= longword(-1);
   prebuf:= longword(-1);
   minreq:= longword(-1);
@@ -331,7 +331,7 @@ begin
                                                   @int1) <> 0 then begin
      doerror(int1);
      break;
-    end;     
+    end;
    end;
   end;
  end;

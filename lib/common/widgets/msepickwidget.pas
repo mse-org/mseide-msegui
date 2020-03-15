@@ -16,11 +16,11 @@ uses
 
 // todo:
 // select rect
- 
+
 type
  tcustompickwidget = class;
- 
- getcursorshapeeventty =  
+
+ getcursorshapeeventty =
       procedure (const sender: tcustompickwidget; const picker: tobjectpicker;
                     var shape: cursorshapety; var found: boolean) of object;
  getpickobjectseventty = procedure (const sender: tcustompickwidget;
@@ -50,7 +50,7 @@ type
    //iobjectpicker
    function getcursorshape(const sender: tobjectpicker;
                            var shape: cursorshapety): boolean;
-   procedure getpickobjects(const sender: tobjectpicker; 
+   procedure getpickobjects(const sender: tobjectpicker;
                                          var objects: integerarty);
    procedure beginpickmove(const sender: tobjectpicker);
    procedure pickthumbtrack(const sender: tobjectpicker);
@@ -60,21 +60,21 @@ type
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
-   property options: objectpickeroptionsty read getoptions 
+   property options: objectpickeroptionsty read getoptions
                                                  write setoptions default [];
    property ongetcursorshape: getcursorshapeeventty read fongetcursorshape
                                 write fongetcursorshape;
    property ongetpickobjects: getpickobjectseventty read fongetpickobjects
                                 write fongetpickobjects;
-   property onbeginpickmove: pickmoveeventty read fonbeginpickmove 
+   property onbeginpickmove: pickmoveeventty read fonbeginpickmove
                                 write fonbeginpickmove;
-   property onpickthumbtrack: pickmoveeventty read fonpickthumbtrack 
+   property onpickthumbtrack: pickmoveeventty read fonpickthumbtrack
                                 write fonpickthumbtrack;
    property onendpickmove: pickmoveeventty read fonendpickmove
                                 write fonendpickmove;
    property oncancelpickmove: pickmoveeventty read foncancelpickmove
                                 write foncancelpickmove;
-   property onpaintxorpic: paintxorpiceventty read fonpaintxorpic 
+   property onpaintxorpic: paintxorpiceventty read fonpaintxorpic
                                 write fonpaintxorpic;
  end;
 
@@ -87,7 +87,7 @@ type
    property onendpickmove;
    property onpaintxorpic;
  end;
-  
+
 implementation
 
 { tcustompickpickwidget }

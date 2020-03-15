@@ -1,6 +1,6 @@
 caseinsensitive
 
-addkeywordchars 
+addkeywordchars
  '()<>='
 styles
  default ''

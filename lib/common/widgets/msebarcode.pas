@@ -15,19 +15,19 @@ uses
  msetypes,classes,mclasses,msewidgets,msebitmap,msegraphics,mseclasses,
  msegraphutils,
  msestrings,msegui,msemenus,mseguiglob;
- 
+
 type
  barcodestatety = (bcs_bitmapvalid,bcs_layoutvalid,bcs_painting);
  barcodestatesty = set of barcodestatety;
- bitmapnumty = (bmn_1,bmn_2); 
+ bitmapnumty = (bmn_1,bmn_2);
 
  tcustombarcode = class;
- 
+
  tbarcodefont = class(tfont)
   private
    fowner: tcustombarcode;
   protected
-   procedure dochanged(const changed: canvasstatesty; 
+   procedure dochanged(const changed: canvasstatesty;
                                     const nochange: boolean); override;
   public
    constructor create(const aowner: tcustombarcode); reintroduce;
@@ -35,7 +35,7 @@ type
 
  barcodeoptionty = (bco_calcchecksum);
  barcodeoptionsty = set of barcodeoptionty;
- 
+
  tcustombarcode = class(tpublishedwidget)
   private
    fbitmap1: tbitmap;
@@ -73,9 +73,9 @@ type
    procedure dopaintforeground(const acanvas: tcanvas); override;
    procedure clientrectchanged; override;
    procedure change(const alayout: boolean);
-   procedure setcell(const anum: bitmapnumty; const aindex: integer; 
+   procedure setcell(const anum: bitmapnumty; const aindex: integer;
                                     const avalue: boolean = true); overload;
-   procedure setcell(const anum: bitmapnumty; 
+   procedure setcell(const anum: bitmapnumty;
                                     const aindex: array of integer); overload;
    procedure subcliprect(const arect: rectty);
    procedure drawtext(const acanvas: tcanvas; const atext: msestring;
@@ -83,11 +83,11 @@ type
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
-   property direction: graphicdirectionty read fdirection 
+   property direction: graphicdirectionty read fdirection
                       write setdirection default gd_right;
-   property colorbar: colorty read fcolorbar write setcolorbar 
+   property colorbar: colorty read fcolorbar write setcolorbar
                                                default cl_black;
-   property colorspace: colorty read fcolorspace write setcolorspace 
+   property colorspace: colorty read fcolorspace write setcolorspace
                                                default cl_transparent;
    property value: msestring read fvalue write setvalue;
    property fontbar: tbarcodefont read ffontbar write setfontbar;
@@ -95,7 +95,7 @@ type
  end;
 
  barcodekindty = (bk_none,bk_gtin_13,bk_gtin_8);
- 
+
  tcustombarcode1 = class(tcustombarcode)
   private
    fkind: barcodekindty;
@@ -122,7 +122,7 @@ type
    property colorspace;
    property value;
    property fontbar;
- end;  
+ end;
 
 function encodegtin13(const avalue: int64): msestring; //'' on error
 function decodegtin13(const avalue: msestring): int64; //-1 on error
@@ -187,7 +187,7 @@ const
              [tf_xcentered,tf_ycentered,tf_rotate180,tf_rotate90],
              //gd_none
              [tf_xcentered,tf_ycentered]);
-             
+
  cellcounts: array[barcodekindty] of integer =
   //bk_none,bk_gtin_13,    bk_gtin_8
   (0,       3+6*7+5+6*7+3, 3+4*7+5+4*7+3 );
@@ -216,14 +216,14 @@ const
 // 000000  001011  001101  001110  010011  011001  011100  010101  010110  011010 _13
   ($00,    $0b,    $0d,    $0e,    $13,    $19,    $1c,    $15,    $16,    $1a)
      );
-                      
- reversemask7: array[0..6] of byte = 
+
+ reversemask7: array[0..6] of byte =
  //1000000 0100000 0010000 0001000 0000100 0000010 0000001
  (  $40,    $20,    $10,    $08,    $04,    $02,    $01);
- reversemask6: array[0..5] of byte = 
+ reversemask6: array[0..5] of byte =
  //0100000 0010000 0001000 0000100 0000010 0000001
  (  $20,    $10,    $08,    $04,    $02,    $01);
-    
+
 { tcustombarcode }
 
 constructor tcustombarcode.create(aowner: tcomponent);
@@ -248,7 +248,7 @@ procedure tcustombarcode.checkbitmap;
 var
  int1: integer;
 begin
- if fstate * [bcs_bitmapvalid,bcs_layoutvalid] <> 
+ if fstate * [bcs_bitmapvalid,bcs_layoutvalid] <>
                         [bcs_bitmapvalid,bcs_layoutvalid] then begin
   checkvalue;
   if not (bcs_layoutvalid in fstate) then begin
@@ -290,7 +290,7 @@ begin
     fillchar(fcelldata1^,fcellcount*4,0);
     fillchar(fcelldata2^,fcellcount*4,0);
    end
-   else begin 
+   else begin
     fbitmap1.size:= ms(fcellcount,1);
     fbitmap2.size:= ms(fcellcount,1);
     fcelldata1:= fbitmap1.scanline[0];
@@ -301,7 +301,7 @@ begin
    calcbitmap;
   end;
   fstate:= fstate + [bcs_bitmapvalid,bcs_layoutvalid];
- end; 
+ end;
 end;
 
 procedure tcustombarcode.dopaintforeground(const acanvas: tcanvas);
@@ -385,7 +385,7 @@ begin
  end;
 end;
 
-procedure tcustombarcode.setcell(const anum: bitmapnumty; 
+procedure tcustombarcode.setcell(const anum: bitmapnumty;
                                      const aindex: array of integer);
 var
  int1: integer;
@@ -450,7 +450,7 @@ end;
 
 procedure tcustombarcode.drawtext(const acanvas: tcanvas;
                const atext: msestring; const adest: rectty;
-               const aheight: integer); 
+               const aheight: integer);
 var
  int1: integer;
 begin
@@ -474,7 +474,7 @@ procedure tcustombarcode.setdirection(const avalue: graphicdirectionty);
 begin
  if fdirection <> avalue then begin
   if not (csreading in componentstate) then begin
-   changedirection(avalue,fdirection);  
+   changedirection(avalue,fdirection);
   end
   else begin
    fdirection:= avalue;
@@ -532,7 +532,7 @@ end;
 procedure tcustombarcode1.calcbitmap;
 var
  cellindex: integer;
- 
+
  procedure putcells(const apattern: byte);
  var
   int1: integer;
@@ -544,7 +544,7 @@ var
    inc(cellindex);
   end;
  end;
- 
+
 var
  int1: integer;
  digits: array[0..11] of byte;
@@ -614,7 +614,7 @@ begin
      mch1:= (po1+int1)^;
      if (mch1 < '0') or (mch1 > '9') then begin
       (po1+int1)^:= '0';
-     end;     
+     end;
     end;
     if int2 < 13 then begin
      move(po1^,(po1+13-int2)^,int2*sizeof(msechar));
@@ -653,7 +653,7 @@ var
  int1: integer;
 begin
  fcellcount:= cellcounts[fkind];
- if fcellcount > 0 then begin 
+ if fcellcount > 0 then begin
   framesize1:= framesizes[fkind];
   cellsize1:= asize.cx / (fcellcount+framesize1);
   charwidth1:= charwidths[fkind]*cellsize1;

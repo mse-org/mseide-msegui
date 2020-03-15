@@ -13,7 +13,7 @@ unit msenoguiintf;
 interface
 uses
  msesystypes;
- 
+
 {$include ../msenoguiintf.inc}
 
 implementation
@@ -57,7 +57,7 @@ procedure nogui_waitevent;
    handlesigchld;
   end;
  end;
- 
+
 begin
  with tapplication1(application) do begin
   include(fstate,aps_waiting);
@@ -111,7 +111,7 @@ begin
  sigchldbefore:= signal(sigchld,{$ifdef FPC}@{$endif}sigchild);
  sigemptyset(sigset1);
  sigaddset(sigset1,sigchld);
- sigprocmask(sig_unblock,@sigset1,@sigset2); 
+ sigprocmask(sig_unblock,@sigset1,@sigset2);
 end;
 
 procedure nogui_deinit;
@@ -122,5 +122,5 @@ begin
  signal(sigterm,sigtermbefore);
  signal(sigchld,sigchldbefore);
 end;
- 
+
 end.

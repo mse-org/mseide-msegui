@@ -1,5 +1,5 @@
 { MSEide Copyright (c) 1999-2014 by Martin Schreiber
-   
+
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation; either version 2 of the License, or
@@ -88,7 +88,7 @@ var
  ca1,ca2: qword;
  endrow: integer;
  digits: integer;
- 
+
 begin
  int2:= grid.rowcount;
  endrow:= int2 + alinecount;
@@ -110,7 +110,7 @@ begin
      apage:= sourcefo.openfile(fname1);
      grid.rowcount:= int2 + 1 + length(ar1);
      grid[3][int2]:= inttostrmse(aline-1);
-     if (apage <> nil) and (aline > 0) and 
+     if (apage <> nil) and (aline > 0) and
                               (aline <= apage.grid.rowcount) then begin
       grid[1][int2]:= apage.edit[aline-1];
       grid[2][int2]:= fname1;
@@ -202,7 +202,7 @@ begin
   end;
  end;
 end;
- 
+
 procedure tdisassfo.scrollrows(const sender: tcustomgrid; var step: Integer);
 begin
  if (step > 0) then begin
@@ -262,7 +262,7 @@ procedure tdisassfo.deact(const sender: TObject);
 begin
  if (application.inactivewindow <> window) then begin
   resetshortcuts;
- end; 
+ end;
 end;
 
 procedure tdisassfo.act(const sender: TObject);

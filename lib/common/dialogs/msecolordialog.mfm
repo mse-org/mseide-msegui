@@ -32,7 +32,7 @@ object colordialogfo: tcolordialogfo
     anchors = [an_left, an_bottom]
     state = [as_localinvisible, as_localcaption, as_localonexecute]
     valuefaces.count = 1
-    valuefaces.items = <    
+    valuefaces.items = <
       item
         fade_pos.count = 3
         fade_pos.items = (

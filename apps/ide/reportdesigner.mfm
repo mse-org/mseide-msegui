@@ -32,7 +32,7 @@ inherited reportdesignerfo: treportdesignerfo
     dial.start = 0
     dial.range = 100
     dial.markers.count = 1
-    dial.markers.items = <    
+    dial.markers.items = <
       item
         color = -1610612729
         widthmm = 0
@@ -40,19 +40,19 @@ inherited reportdesignerfo: treportdesignerfo
         value = -Inf
       end>
     dial.ticks.count = 3
-    dial.ticks.items = <    
+    dial.ticks.items = <
       item
         widthmm = 0
         escapement = 0
         intervalcount = 10
-      end    
+      end
       item
         color = -1610612733
         widthmm = 0
         length = 6
         escapement = 0
         intervalcount = 20
-      end    
+      end
       item
         color = -1610612733
         widthmm = 0
@@ -118,7 +118,7 @@ inherited reportdesignerfo: treportdesignerfo
     dial.start = 0
     dial.range = 100
     dial.markers.count = 1
-    dial.markers.items = <    
+    dial.markers.items = <
       item
         color = -1610612729
         widthmm = 0
@@ -126,19 +126,19 @@ inherited reportdesignerfo: treportdesignerfo
         value = -Inf
       end>
     dial.ticks.count = 3
-    dial.ticks.items = <    
+    dial.ticks.items = <
       item
         widthmm = 0
         escapement = 0
         intervalcount = 10
-      end    
+      end
       item
         color = -1610612733
         widthmm = 0
         length = 6
         escapement = 0
         intervalcount = 20
-      end    
+      end
       item
         color = -1610612733
         widthmm = 0
@@ -210,75 +210,75 @@ inherited reportdesignerfo: treportdesignerfo
     dist_bottom = -5
   end
   inherited popupme: tpopupmenu[10]
-    menu.submenu.items = <    
+    menu.submenu.items = <
       item
-      end    
+      end
       item
-      end    
+      end
       item
-      end    
+      end
       item
-      end    
+      end
       item
         state = [as_localonexecute]
-      end    
+      end
       item
         state = [as_localdisabled, as_localinvisible, as_localonexecute]
-      end    
+      end
       item
         state = [as_localinvisible, as_localonexecute]
-      end    
+      end
       item
         state = [as_localinvisible, as_localonexecute]
-      end    
+      end
       item
-      end    
+      end
       item
-      end    
+      end
       item
-      end    
+      end
       item
-      end    
+      end
       item
-      end    
+      end
       item
-      end    
+      end
       item
-      end    
+      end
       item
-      end    
+      end
       item
-      end    
+      end
       item
-      end    
+      end
       item
-      end    
+      end
       item
-      end    
+      end
       item
-      end    
+      end
       item
-      end    
+      end
       item
-      end    
+      end
       item
-      end    
+      end
       item
-      end    
+      end
       item
-      end    
+      end
       item
-      end    
+      end
       item
-      end    
+      end
       item
-      end    
+      end
       item
-      end    
+      end
       item
-      end    
+      end
       item
-      end    
+      end
       item
       end>
   end
@@ -293,42 +293,42 @@ inherited reportdesignerfo: treportdesignerfo
   end
   object tpopupmenu3: tpopupmenu[15]
     menu.submenu.count = 29
-    menu.submenu.items = <    
+    menu.submenu.items = <
       item
         caption = 'Show objectinspector'
         state = [as_localcaption, as_localonexecute]
-      end    
+      end
       item
         caption = 'Show componentpalette'
         state = [as_localcaption, as_localonexecute]
-      end    
+      end
       item
         caption = 'Show as Text'
         state = [as_localcaption, as_localonexecute]
         options = [mao_shortcutcaption, mao_asyncexecute]
-      end    
+      end
       item
         action = formdesignerfo.hidecompact
         options = [mao_separator, mao_shortcutcaption]
-      end    
+      end
       item
         action = formdesignerfo.hidewidgetact
         options = [mao_checkbox, mao_shortcutcaption]
-      end    
+      end
       item
         action = hidewidgetact
         state = [as_disabled, as_invisible]
         options = [mao_checkbox, mao_shortcutcaption]
-      end    
+      end
       item
         action = togglehideact
-      end    
+      end
       item
         action = showallact
-      end    
+      end
       item
         options = [mao_separator, mao_shortcutcaption]
-      end    
+      end
       item
         caption = 'Copy Component(s)'
         name = 'copy'
@@ -337,7 +337,7 @@ inherited reportdesignerfo: treportdesignerfo
           1
           16451
         )
-      end    
+      end
       item
         caption = 'Cut Component(s)'
         name = 'cut'
@@ -347,7 +347,7 @@ inherited reportdesignerfo: treportdesignerfo
           1
           16472
         )
-      end    
+      end
       item
         caption = 'Paste Component(s)'
         name = 'paste'
@@ -356,7 +356,7 @@ inherited reportdesignerfo: treportdesignerfo
           1
           16470
         )
-      end    
+      end
       item
         caption = 'Delete Component(s)'
         name = 'delete'
@@ -366,78 +366,78 @@ inherited reportdesignerfo: treportdesignerfo
           1
           263
         )
-      end    
+      end
       item
         caption = 'Undelete Component(s)'
         name = 'undelete'
         state = [as_localcaption, as_localonexecute]
-      end    
+      end
       item
         options = [mao_separator, mao_shortcutcaption]
-      end    
+      end
       item
         caption = 'Select Childwidget'
         name = 'selectchild'
         state = [as_localcaption]
-      end    
+      end
       item
         caption = 'Edit Component'
         name = 'editcomp'
         state = [as_localcaption, as_localonexecute]
-      end    
+      end
       item
         caption = 'Bring to Front'
         name = 'bringtofro'
         state = [as_localcaption, as_localonexecute]
-      end    
+      end
       item
         caption = 'Send to Back'
         name = 'sendtoba'
         state = [as_localcaption, as_localonexecute]
-      end    
+      end
       item
         caption = 'Iconify'
         name = 'iconify'
         state = [as_localcaption, as_localonexecute]
-      end    
+      end
       item
         caption = 'Deiconify'
         name = 'deiconify'
         state = [as_localcaption, as_localonexecute]
-      end    
+      end
       item
         caption = 'Set Tab Order'
         name = 'settabord'
         state = [as_localcaption, as_localonexecute]
-      end    
+      end
       item
         caption = 'Set Creation Order'
         state = [as_localcaption, as_localonexecute]
-      end    
+      end
       item
         caption = 'Sync. to Font Height'
         name = 'synctofo'
         state = [as_localcaption, as_localonexecute]
-      end    
+      end
       item
         caption = 'Revert to inherited'
         name = 'revert'
         state = [as_localcaption, as_localonexecute]
         options = [mao_shortcutcaption, mao_asyncexecute]
-      end    
+      end
       item
         options = [mao_separator, mao_shortcutcaption]
-      end    
+      end
       item
         caption = 'Touch Form'
         state = [as_localcaption, as_localonexecute]
         options = [mao_separator, mao_shortcutcaption]
-      end    
+      end
       item
         caption = 'Add report page'
         name = 'addpage'
         state = [as_localcaption, as_localonexecute]
-      end    
+      end
       item
         caption = 'Delete report page'
         name = 'delpage'

@@ -100,28 +100,28 @@ object componentstorefo: tcomponentstorefo
     anchors = []
     optionsgrid = [og_colsizing, og_focuscellonenter, og_colchangeontabkey, og_wrapcol, og_autopopup, og_mousescrollcol]
     fixrows.count = 1
-    fixrows.items = <    
+    fixrows.items = <
       item
         height = 16
         captions.count = 4
-        captions.items = <        
+        captions.items = <
           item
             caption = 'Name'
-          end        
+          end
           item
             caption = 'Sel'
             hint = 'Select item for inserting'
-          end        
+          end
           item
             caption = 'Description'
-          end        
+          end
           item
             caption = 'File'
           end>
       end>
     datacols.count = 4
     datacols.options = [co_proportional, co_savestate, co_mousescrollrow]
-    datacols.items = <    
+    datacols.items = <
       item[node]
         width = 110
         options = [co_drawfocus, co_proportional, co_savestate, co_mousescrollrow]
@@ -134,7 +134,7 @@ object componentstorefo: tcomponentstorefo
         datalist.onstatreaditem = dostatreaditem
         datalist.ondragover = drago
         datalist.ondragdrop = dragdro
-      end    
+      end
       item[sel]
         color = -2147483646
         width = 28
@@ -142,13 +142,13 @@ object componentstorefo: tcomponentstorefo
         widthmin = 0
         widgetname = 'sel'
         dataclass = tgridintegerdatalist
-      end    
+      end
       item[compdesc]
         width = 103
         options = [co_fill, co_savestate, co_mousescrollrow]
         widgetname = 'compdesc'
         dataclass = tgridmsestringdatalist
-      end    
+      end
       item[filepath]
         width = 186
         options = [co_proportional, co_savestate, co_mousescrollrow]
@@ -193,7 +193,7 @@ object componentstorefo: tcomponentstorefo
       options = [bo_executeonclick, bo_executeonkey, bo_executeonshortcut, bo_executedefaultonenterkey, bo_radioitemcol, bo_cantoggle, bo_resetcheckedonrowexit]
       state = [as_invisible, as_localinvisible]
       valuefaces.count = 1
-      valuefaces.items = <      
+      valuefaces.items = <
         item
           fade_pos.count = 2
           fade_pos.items = (
@@ -217,7 +217,7 @@ object componentstorefo: tcomponentstorefo
       frame.localprops = [frl_levelo, frl_leveli, frl_colorclient]
       frame.localprops1 = []
       frame.buttons.count = 1
-      frame.buttons.items = <      
+      frame.buttons.items = <
         item
           color = -2147483646
           imagenr = 17
@@ -243,7 +243,7 @@ object componentstorefo: tcomponentstorefo
       frame.localprops = [frl_levelo, frl_leveli, frl_colorclient]
       frame.localprops1 = []
       frame.buttons.count = 1
-      frame.buttons.items = <      
+      frame.buttons.items = <
         item
           color = -1879048187
           imagenr = 17
@@ -294,89 +294,89 @@ object componentstorefo: tcomponentstorefo
   object tpopupmenu1: tpopupmenu
     onupdate = popupupdate
     menu.submenu.count = 18
-    menu.submenu.items = <    
+    menu.submenu.items = <
       item
         action = copycompact
         caption = '&Copy Component(s)'
         state = [as_localcaption]
-      end    
+      end
       item
         action = pastecompact
-      end    
+      end
       item
         action = addfileact
-      end    
+      end
       item
         caption = 'Update Component(s)'
         name = 'updatenode'
         state = [as_localcaption, as_localonexecute]
         onexecute = doupdatecomponent
-      end    
+      end
       item
         caption = 'Remove Component(s)'
         name = 'removecomp'
         state = [as_localcaption, as_localonexecute]
         onexecute = removecomp
-      end    
+      end
       item
         options = [mao_separator, mao_shortcutcaption]
-      end    
+      end
       item
         caption = 'New  Node'
         name = 'addnode'
         state = [as_localcaption, as_localonexecute]
         onexecute = donewnode
-      end    
+      end
       item
         caption = 'Remove Node'
         name = 'removenode'
         state = [as_localcaption, as_localonexecute]
         onexecute = delnode
-      end    
+      end
       item
         caption = 'Copy Node'
         name = 'copynode'
         state = [as_localcaption, as_localonexecute]
         onexecute = copynodeex
-      end    
+      end
       item
         caption = 'Paste Node'
         name = 'pastenode'
         state = [as_localcaption, as_localonexecute]
         onexecute = pastenodeex
-      end    
+      end
       item
         options = [mao_separator, mao_shortcutcaption]
-      end    
+      end
       item
         caption = 'New Store'
         state = [as_localcaption, as_localonexecute]
         onexecute = newstoreex
-      end    
+      end
       item
         caption = 'Add Store'
         state = [as_localcaption, as_localonexecute]
         onexecute = addstoreex
-      end    
+      end
       item
         caption = 'Remove Store'
         name = 'removestore'
         state = [as_localcaption, as_localonexecute]
         onexecute = removestoreex
-      end    
+      end
       item
         options = [mao_separator, mao_shortcutcaption]
-      end    
+      end
       item
         caption = 'Open Store Group'
         state = [as_localcaption, as_localonexecute]
         onexecute = opengroup
-      end    
+      end
       item
         caption = 'Save Store Group'
         state = [as_localcaption, as_localonexecute]
         onexecute = savegroup
-      end    
+      end
       item
         caption = 'Save Store Group as'
         state = [as_localcaption, as_localonexecute]

@@ -29,15 +29,15 @@ uses
 type
  sigeditoptionty = (sieo_exp,sieo_expzero);
  sigeditoptionsty = set of sigeditoptionty;
- 
+
 const
  defaultffttableeditoptions = [ceo_noinsert,ceo_nodelete];
  defaultkeywidth = 8;
  defaultenvsplitteroptions = defaultsplitteroptions+[spo_hmove,spo_hprop];
  defaultsigkeyboardoptions = [sieo_exp];
- 
+
 type
- 
+
  tsigslider = class(tslider,isigclient)
   private
    foutput: tdoubleoutputconn;
@@ -58,7 +58,7 @@ type
    procedure updatesigvalue;
    procedure dochange; override;
    procedure sighandler(const ainfo: psighandlerinfoty);
-    //isigclient  
+    //isigclient
    procedure initmodel;
    procedure sigtick; virtual;
    function getinputar: inputconnarty;
@@ -77,7 +77,7 @@ type
    property output: tdoubleoutputconn read foutput write setoutput;
   published
    property controller: tsigcontroller read fcontroller write setcontroller;
-   property ontransformvalue: sigineventty read fontransformvalue 
+   property ontransformvalue: sigineventty read fontransformvalue
                                                  write fontransformvalue;
    property min: real read fmin write setmin;
    property max: real read fmax write setmax;
@@ -109,7 +109,7 @@ type
    procedure updatesigvalue;
    procedure dochange; override;
    procedure sighandler(const ainfo: psighandlerinfoty);
-    //isigclient  
+    //isigclient
    procedure initmodel;
    procedure sigtick; virtual;
    function getinputar: inputconnarty;
@@ -128,14 +128,14 @@ type
    property output: tdoubleoutputconn read foutput write setoutput;
   published
    property controller: tsigcontroller read fcontroller write setcontroller;
-   property ontransformvalue: sigineventty read fontransformvalue 
+   property ontransformvalue: sigineventty read fontransformvalue
                                                  write fontransformvalue;
 //   property offset: real read foffset write setoffset;
    property outmin: real read foutmin write setoutmin;
    property outmax: real read foutmax write setoutmax;
    property options: sigeditoptionsty read foptions write setoptions default [];
  end;
- 
+
  sigkeyinfoty = record
   sigvalue: double;
   eventvalue: double;
@@ -146,7 +146,7 @@ type
   trigoutpo: pdouble;
  end;
  sigkeyinfoarty = array of sigkeyinfoty;
- 
+
  tsigkeyboard = class(trealgraphdataedit,isigclient)
   private
    foutput: tdoubleoutconnarrayprop;
@@ -182,7 +182,7 @@ type
    procedure dokeyup(var info: keyeventinfoty); override;
    procedure doexit; override;
 
-    //isigclient  
+    //isigclient
    procedure initmodel;
    procedure sigtick; virtual;
    function getinputar: inputconnarty;
@@ -205,18 +205,18 @@ type
   published
    property keywidth: integer read fkeywidth write setkeywidth default defaultkeywidth;
    property controller: tsigcontroller read fcontroller write setcontroller;
-   property ontransformvalue: sigineventty read fontransformvalue 
+   property ontransformvalue: sigineventty read fontransformvalue
                                                  write fontransformvalue;
    property min: real read fmin write setmin;
 //   property max: real read fmax write setmax;
-   property options: sigeditoptionsty read foptions write setoptions 
+   property options: sigeditoptionsty read foptions write setoptions
                                     default defaultsigkeyboardoptions;
    property outputcount: integer read foutputcount write setoutputcount default 1;
  end;
 
  optionwavetablety = (owt_rotate,owt_mirror,owt_nodc);
  optionswavetablety = set of optionwavetablety;
- 
+
  twavetableedit = class(torderedxychartedit)
   private
    fwave: tsigwavetable;
@@ -232,16 +232,16 @@ type
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
   published
-   property samplecount: integer read fsamplecount 
+   property samplecount: integer read fsamplecount
                                  write setsamplecount default defaultsamplecount;
    property wave: tsigwavetable read fwave write setwave;
-   property optionswave: optionswavetablety read foptionswave 
+   property optionswave: optionswavetablety read foptionswave
                                             write setoptionswave default [];
  end;
 
  optionfuncteditty = (ofe_rotate,ofe_mirror);
  optionsfuncteditty = set of optionfuncteditty;
- 
+
  tfuncttableedit = class(torderedxychartedit)
   private
    ffunct: tsigfuncttable;
@@ -255,16 +255,16 @@ type
    destructor destroy; override;
   published
    property funct: tsigfuncttable read ffunct write setfunct;
-   property optionsfunct: optionsfuncteditty read foptionsfunct 
+   property optionsfunct: optionsfuncteditty read foptionsfunct
                                             write setoptionsfunct default [];
  end;
- 
+
  ffteditoptionty = (feo_exp);
  ffteditoptionsty = set of ffteditoptionty;
 const
  defaultffteditoptions = [feo_exp];
- 
-type  
+
+type
  tffttableedit = class(txserieschartedit)
   private
    fwave: tsigwavetable;
@@ -288,20 +288,20 @@ type
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
   published
-   property samplecount: integer read fsamplecount 
+   property samplecount: integer read fsamplecount
                                 write setsamplecount default defaultsamplecount;
-   property fft_harmonicscount: integer read ffft_harmonicscount 
+   property fft_harmonicscount: integer read ffft_harmonicscount
                       write setfft_harmonicscount default defaultharmonicscount;
-   property fft_options: ffteditoptionsty read ffft_options 
+   property fft_options: ffteditoptionsty read ffft_options
                write setfft_options default defaultffteditoptions;
    property fft_expmin: real read ffft_expmin write setfft_expmin;
    property fft_max: real read ffft_max write setfft_max;
    property wave: tsigwavetable read fwave write setwave;
    property options default defaultffttableeditoptions;
  end;
- 
+
  tenvelopeedit = class;
- 
+
  tenvelopechartedit = class(tcustomorderedxychartedit)
   protected
    fenvelope: tenvelopeedit;
@@ -335,7 +335,7 @@ type
    property options;
    property onchange;
  end;
- 
+
  tenvelopesplitter = class(tcustomsplitter)
   public
    constructor create(aowner: tcomponent); override;
@@ -353,7 +353,7 @@ type
 //   property statvarname;
    property onupdatelayout;
  end;
- 
+
  tenvelopeedit = class(tpublishedwidget,istatfile)
   private
    fstatvarname: msestring;
@@ -391,7 +391,7 @@ type
    procedure updatevalues;
    procedure updatepopupmenu(var amenu: tpopupmenu;
                                    var mouseinfo: mouseeventinfoty); override;
-   procedure doafterpopupmenu(var amenu: tpopupmenu; 
+   procedure doafterpopupmenu(var amenu: tpopupmenu;
                                    var mouseinfo: mouseeventinfoty); override;
 
   public
@@ -407,14 +407,14 @@ type
    property splitter2: tenvelopesplitter read fsplitter2 write setsplitter2;
    property statfile: tstatfile read fstatfile write setstatfile;
    property statvarname: msestring read getstatvarname write fstatvarname;
-   property statpriority: integer read fstatpriority 
+   property statpriority: integer read fstatpriority
                                        write fstatpriority default 0;
    property envelope: tsigenvelope read fenvelope write setenvelope;
    property optionswidget default defaultoptionswidgetmousewheel;
-   property activetrace: integer read factivetrace 
+   property activetrace: integer read factivetrace
                                       write setactivetrace default 0;
  end;
-(*  
+(*
  tenvelopeedit1 = class(torderedxychartedit)
   private
    fenvelope: tsigenvelope;
@@ -438,7 +438,7 @@ type
   public
    constructor create(const aowner: tsigscope); reintroduce;
  end;
- 
+
  tsigscope = class(tchart)
   private
    fsampler: tscopesampler;
@@ -449,7 +449,7 @@ type
   published
    property sampler: tscopesampler read fsampler write setsampler;
  end;
- 
+
 implementation
 uses
  math,msekeyboard,msebits,msesysutils;
@@ -465,8 +465,8 @@ uses
 type
  tsigcontroller1 = class(tsigcontroller);
  tsigenvelope1 = class(tsigenvelope);
- tdoubleoutputconn1 = class(tdoubleoutputconn); 
- 
+ tdoubleoutputconn1 = class(tdoubleoutputconn);
+
 { tsigrealedit }
 
 constructor tsigrealedit.create(aowner: tcomponent);
@@ -547,7 +547,7 @@ begin
    end;
   end
   else begin
-   do1:= fvalue*(foutmax-foutmin)+foutmin; 
+   do1:= fvalue*(foutmax-foutmin)+foutmin;
   end;
   if canevent(tmethod(fontransformvalue)) then begin
    fontransformvalue(self,real(do1));
@@ -567,7 +567,7 @@ end;
 procedure tsigrealedit.dochange;
 begin
  inherited;
- updatesigvalue; 
+ updatesigvalue;
 end;
 
 procedure tsigrealedit.sighandler(const ainfo: psighandlerinfoty);
@@ -708,7 +708,7 @@ begin
    end;
   end
   else begin
-   do1:= fvalue*(fmax-fmin)+fmin; 
+   do1:= fvalue*(fmax-fmin)+fmin;
   end;
   if canevent(tmethod(fontransformvalue)) then begin
    fontransformvalue(self,real(do1));
@@ -728,7 +728,7 @@ end;
 procedure tsigslider.dochange;
 begin
  inherited;
- updatesigvalue; 
+ updatesigvalue;
 end;
 
 procedure tsigslider.sighandler(const ainfo: psighandlerinfoty);
@@ -842,7 +842,7 @@ begin
    else begin
     trigoutpo:= @fdummy;
    end;
-  end;   
+  end;
  end;
 end;
 
@@ -895,7 +895,7 @@ begin
  result:= fcontroller;
 end;
 
-procedure tsigkeyboard.updatesigvalue(const akey: integer; 
+procedure tsigkeyboard.updatesigvalue(const akey: integer;
                                                const apressed: boolean);
 var
  do1,do2: double;
@@ -910,7 +910,7 @@ begin
   oldest:= 0;
   lock;
   try
-   for int1:= 0 to foutputhigh do begin   
+   for int1:= 0 to foutputhigh do begin
     with fkeyinfos[int1] do begin
      int2:= ti1 - timestamp;
      if int2 > ti2 then begin
@@ -933,7 +933,7 @@ begin
      do1:= sigvalue;
      do2:= -1;
     end
-    else begin  
+    else begin
      do2:= 1;
      if (sieo_exp in foptions) then begin
       do1:= intpower(2.0,key div 12) * chromaticscale[key mod 12] * fmin;
@@ -960,7 +960,7 @@ end;
 procedure tsigkeyboard.dochange;
 begin
  inherited;
- updatesigvalue(-1,false); 
+ updatesigvalue(-1,false);
 end;
 
 procedure tsigkeyboard.sighandler(const ainfo: psighandlerinfoty);
@@ -1079,7 +1079,7 @@ var
  rect1: rectty;
 begin
  keybefore:= fkey;
- if not (csdesigning in componentstate) and 
+ if not (csdesigning in componentstate) and
                         (info.eventkind in mouseposevents) then begin
   if (ss_left in info.shiftstate) or fkeypressed then begin
    rect1:= innerclientrect;
@@ -1112,7 +1112,7 @@ begin
   end;
  end
  else begin
-  if not fkeypressed and 
+  if not fkeypressed and
            (info.eventkind in [ek_mouseleave,ek_clientmouseleave]) then begin
    fkey:= -1;
   end;
@@ -1150,7 +1150,7 @@ end;
 
 procedure tsigkeyboard.dokeyup(var info: keyeventinfoty);
 begin
- if (info.key = key_space) and 
+ if (info.key = key_space) and
            not (ss_repeat in info.shiftstate) and (fkey >= 0) then begin
   include(info.eventstate,es_processed);
   updatesigvalue(fkey,false);
@@ -1159,7 +1159,7 @@ begin
  end
  else begin
   inherited;
- end; 
+ end;
 end;
 
 procedure tsigkeyboard.doexit;
@@ -1254,7 +1254,7 @@ procedure twavetableedit.sample;
    end;
   end;
  end; //intpol
- 
+
 var
  ar1: doublearty;
  int1,int2,int3: integer;
@@ -1440,7 +1440,7 @@ procedure tffttableedit.sample;
 const
  scale1 = 1/2;
 var
- ar1: complexarty; 
+ ar1: complexarty;
  int1,int2: integer;
  rea1,rea2,rea3: real;
 begin
@@ -1457,7 +1457,7 @@ begin
    if rea2 > 0 then begin
     ar1[int1+1].im:= exp((rea2-1)*rea1)*rea3;
    end;
-  end;  
+  end;
  end
  else begin
   for int1:= 1 to int2 do begin
@@ -1580,7 +1580,7 @@ begin
      decaystart:= 1;
     end
    end;
-  end;    
+  end;
   endupdate;
  end;
 end;
@@ -1687,10 +1687,10 @@ begin
   rect2.cx:= fsplitter2.bounds_cx;
   fsplitter2.widgetrect:= rect2;
   rect2.x:= fsplitter1.bounds_x+fsplitter1.bounds_cx;
-  rect2.cx:= fdecay.bounds_cx; 
-  fdecay.widgetrect:= rect2;    
+  rect2.cx:= fdecay.bounds_cx;
+  fdecay.widgetrect:= rect2;
   rect2.x:= fsplitter2.bounds_x+fsplitter2.bounds_cx;
-  rect2.cx:= cx - rect2.x; 
+  rect2.cx:= cx - rect2.x;
   frelease.widgetrect:= rect2;
  end;
 end;
@@ -1714,23 +1714,23 @@ begin
  beginupdate;
  try
   if reader.findsection(mstr1+'.0') then begin
-   fattack.dostatread(reader);  
+   fattack.dostatread(reader);
   end;
   if reader.findsection(mstr1+'.1') then begin
-   fsplitter1.dostatread(reader);  
+   fsplitter1.dostatread(reader);
   end;
   if reader.findsection(mstr1+'.2') then begin
-   fdecay.dostatread(reader);  
+   fdecay.dostatread(reader);
   end;
   if reader.findsection(mstr1+'.3') then begin
-   fsplitter2.dostatread(reader);  
+   fsplitter2.dostatread(reader);
   end;
   if reader.findsection(mstr1+'.4') then begin
-   frelease.dostatread(reader);  
+   frelease.dostatread(reader);
   end;
  finally
   endupdate;
- end; 
+ end;
 end;
 
 procedure tenvelopeedit.dostatwrite(const writer: tstatwriter);
@@ -1739,15 +1739,15 @@ var
 begin
  mstr1:= writer.varname(istatfile(self));
  writer.writesection(mstr1+'.0');
- fattack.dostatwrite(writer);  
+ fattack.dostatwrite(writer);
  writer.writesection(mstr1+'.1');
- fsplitter1.dostatwrite(writer);  
+ fsplitter1.dostatwrite(writer);
  writer.writesection(mstr1+'.2');
- fdecay.dostatwrite(writer);  
+ fdecay.dostatwrite(writer);
  writer.writesection(mstr1+'.3');
- fsplitter2.dostatwrite(writer);  
+ fsplitter2.dostatwrite(writer);
  writer.writesection(mstr1+'.4');
- frelease.dostatwrite(writer);  
+ frelease.dostatwrite(writer);
 end;
 
 procedure tenvelopeedit.statreading;
@@ -1795,12 +1795,12 @@ procedure tenvelopeedit.updatevalues;
        loopstart[aindex]:= -1;
       end;
      end;
-    end;    
+    end;
    end;
    release_values[aindex]:= frelease.traces[aindex].xydata;
   end;
  end; //setva()
- 
+
 begin
   fenvelope.beginupdate;
   setva(0);
@@ -1897,7 +1897,7 @@ begin
   color:= cl_red;
  end;
  with frame do begin
-  optionsscroll:= optionsscroll + 
+  optionsscroll:= optionsscroll +
                [oscr_zoomheight,oscr_zoomwidth,oscr_drag,oscr_mousewheel];
   zoomwidthstep:= 1.5;
  end;
@@ -1937,7 +1937,7 @@ procedure tenvelopechartedit.drawcrosshaircursor(const canvas: tcanvas;
      makepoint(dest.paintparentpos.x-paintparentpos.x,pt1.y),clientpos),
                                           gd_right,dest.paintsize.cx);
  end; //drawyline
- 
+
 begin
  inherited;
  canvas.save;

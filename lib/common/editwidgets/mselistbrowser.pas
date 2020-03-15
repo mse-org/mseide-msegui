@@ -55,7 +55,7 @@ type
           lvo_hintclippedtext
                      );
  listviewoptionsty = set of listviewoptionty;
- 
+
  filelistviewoptionty = (flvo_maskcasesensitive,   //dso_casesensitive,
                          flvo_maskcaseinsensitive, //dso_caseinsensitive
                          flvo_nodirselect,flvo_nofileselect,flvo_checksubdir);
@@ -81,10 +81,10 @@ type
 
  tlistedititem = class(tlistitem)
  end;
- 
+
  listedititemarty = array of tlistitem;
  listedititemclassty = class of tlistedititem;
- 
+
  trichlistedititem = class(tlistedititem)
   private
    function getrichcaption: richstringty;
@@ -103,7 +103,7 @@ type
  tlisteditvalueitem = class(tlistitem)
   protected
  end;
- 
+
  ttreeitemeditlist = class;
  ttreelistedititem = class;
  treelistedititemclassty = class of ttreelistedititem;
@@ -127,18 +127,18 @@ type
    procedure add(const aitems: treelistedititemarty); overload;
    function add(const itemclass: treelistedititemclassty = nil):
                                              ttreelistedititem; overload;
-   procedure add(const acount: integer; 
+   procedure add(const acount: integer;
                const itemclass: treelistedititemclassty = nil); overload;
-   procedure add(const captions: array of msestring; 
+   procedure add(const captions: array of msestring;
                const itemclass: treelistedititemclassty = nil); overload;
    property activeindex: integer read getactiveindex;
-   function endtreerow: integer; 
+   function endtreerow: integer;
                 //returns index of last row of tree
    function editwidget: ttreeitemedit;
    procedure activate;
  end;
  ptreelistedititem = ^ttreelistedititem;
-  
+
  tdirtreenode = class(ttreelistedititem)
   protected
    procedure checkfiles(var afiles: filenamearty); virtual;
@@ -146,10 +146,10 @@ type
    procedure loaddirtree(const apath: filenamety); virtual;
    function path(const astart: integer = 0): filenamety;
  end;
- 
+
  createlistitemeventty = procedure(const sender: tcustomitemlist;
                                            var item: tlistedititem) of object;
- createtreelistitemeventty = procedure(const sender: tcustomitemlist; 
+ createtreelistitemeventty = procedure(const sender: tcustomitemlist;
                                        var item: ttreelistedititem) of object;
  nodenotificationeventty = procedure(const sender: tlistitem;
            var action: nodeactionty) of object;
@@ -157,7 +157,7 @@ type
                                        const aitem: tlistitem) of object;
 
  titemviewlist = class;
- 
+
  paintlistitemeventty = procedure(const sender: titemviewlist;
                  const canvas: tcanvas; const item: tlistedititem) of object;
 
@@ -198,9 +198,9 @@ type
    property listview: tcustomlistview read flistview;
    property layoutinfo: listitemlayoutinfoty read flayoutinfo;
   published
-   property oncreateitem: createlistitemeventty read getoncreateitem 
+   property oncreateitem: createlistitemeventty read getoncreateitem
                                           write setoncreateitem;
-   property onpaintitem: paintlistitemeventty read fonpaintitem 
+   property onpaintitem: paintlistitemeventty read fonpaintitem
                                                      write fonpaintitem;
    property options;
    property captionpos;
@@ -270,7 +270,7 @@ type
  end;
 
  listvieweventty = procedure(const sender: tcustomlistview) of object;
- 
+
  tcustomlistview = class(tcellgrid,iedit)
   private
    feditor: tinplaceedit;
@@ -382,14 +382,14 @@ type
    function getselecteditems: listitemarty;
    function getselectedindexes: integerarty;
 
-   property items[const index: integer]: tlistitem read getitems 
+   property items[const index: integer]: tlistitem read getitems
                                                   write setitems; default;
    property editing: boolean read fediting write setediting;
    property editor: tinplaceedit read feditor;
 
-   property colorselect: colorty read getcolorselect 
+   property colorselect: colorty read getcolorselect
                                     write setcolorselect default cl_default;
-   property colorglyph: colorty read fcolorglyph 
+   property colorglyph: colorty read fcolorglyph
                                     write setcolorglyph default cl_glyph;
    property colorglyphactive: colorty read fcolorglyphactive
                             write setcolorglyphactive default cl_glyphactive;
@@ -403,19 +403,19 @@ type
                    default 1;
    property cellheightmax: integer read getcellheightmax write setcellheightmax
                    default maxint;
-   property cellwidthmin: integer read fcellwidthmin 
+   property cellwidthmin: integer read fcellwidthmin
                          write setcellwidthmin default defaultcellwidthmin;
-   property cellwidthmax: integer read fcellwidthmax 
+   property cellwidthmax: integer read fcellwidthmax
                          write setcellwidthmax default 0;
    property cellsize: sizety read getcellsize write setcellsize;
    property cellframe: tcellframe read getcellframe write setcellframe;
-   property cellcursor: cursorshapety read fcellcursor write setcellcursor 
+   property cellcursor: cursorshapety read fcellcursor write setcellcursor
                                                            default cr_default;
-   
+
    property itemlist: titemviewlist read fitemlist write setitemlist;
    property options: listviewoptionsty read foptions write setoptions
                             default defaultlistviewoptions;
-   property cellfocusrectdist: integer read getcellfocusrectdist 
+   property cellfocusrectdist: integer read getcellfocusrectdist
                                         write setcellfocusrectdist default 0;
    property datacollinewidth: integer read getdatacollinewidth
                     write setdatacollinewidth default defaultgridlinewidth;
@@ -426,15 +426,15 @@ type
    property onitemsmoved: gridblockmovedeventty read fonitemsmoved
               write fonitemsmoved;
    property optionsgrid default defaultlistviewoptionsgrid;
-   property onselectionchanged: listvieweventty read getonselectionchanged 
+   property onselectionchanged: listvieweventty read getonselectionchanged
                                 write setonselectionchanged;
-   property onbeforeupdatelayout: listvieweventty read getonbeforeupdatelayout 
+   property onbeforeupdatelayout: listvieweventty read getonbeforeupdatelayout
                                 write setonbeforeupdatelayout;
-   property onlayoutchanged: listvieweventty read getonlayoutchanged 
+   property onlayoutchanged: listvieweventty read getonlayoutchanged
                                 write setonlayoutchanged;
-   property oncopytoclipboard: updatestringeventty read foncopytoclipboard 
+   property oncopytoclipboard: updatestringeventty read foncopytoclipboard
                   write foncopytoclipboard;
-   property onpastefromclipboard: updatestringeventty read fonpastefromclipboard 
+   property onpastefromclipboard: updatestringeventty read fonpastefromclipboard
                   write fonpastefromclipboard;
  end;
 
@@ -528,32 +528,32 @@ type
    procedure refreshitemvalues(aindex: integer = 0; //-1 = current grid row
                                acount: integer = -1); //-1 = all
    property owner: tcustomitemedit read fowner;
-   property colorglyph: colorty read fcolorglyph 
+   property colorglyph: colorty read fcolorglyph
                                     write setcolorglyph default cl_glyph;
                       //for monochrome imagelist
    property colorglyphactive: colorty read fcolorglyphactive
                              write setcolorglyphactive default cl_glyphactive;
                       //for monochrome imagelist
 //   property boxglyph_list: timagelist read fboxglyph_list write setboxglyp_list;
-//   property boxglyph_listactive: timagelist read fboxglyph_listactive 
+//   property boxglyph_listactive: timagelist read fboxglyph_listactive
 //                                                    write setboxglyp_listactive;
    property boxglyph_versionactive: int32 read fboxglyph_versionactive write
                                            setboxglyph_versionactive default 0;
-   property boxglyph_checkbox: stockglyphty read getboxglyph_checkbox 
+   property boxglyph_checkbox: stockglyphty read getboxglyph_checkbox
                                write setboxglyph_checkbox default stg_checkbox;
-   property boxglyph_checkboxchecked: stockglyphty 
-                         read getboxglyph_checkboxchecked 
+   property boxglyph_checkboxchecked: stockglyphty
+                         read getboxglyph_checkboxchecked
                  write setboxglyph_checkboxchecked default stg_checkboxchecked;
-   property boxglyph_checkboxparentnotchecked: stockglyphty 
+   property boxglyph_checkboxparentnotchecked: stockglyphty
              read getboxglyph_checkboxparentnotchecked
-                   write setboxglyph_checkboxparentnotchecked 
+                   write setboxglyph_checkboxparentnotchecked
                                    default stg_checkboxparentnotchecked;
-   property boxglyph_checkboxchildchecked: stockglyphty 
+   property boxglyph_checkboxchildchecked: stockglyphty
                           read getboxglyph_checkboxchildchecked
         write setboxglyph_checkboxchildchecked default stg_checkboxchildchecked;
-   property boxglyph_checkboxchildnotchecked: stockglyphty 
+   property boxglyph_checkboxchildnotchecked: stockglyphty
                           read getboxglyph_checkboxchildnotchecked
-                          write setboxglyph_checkboxchildnotchecked 
+                          write setboxglyph_checkboxchildnotchecked
                                           default stg_checkboxchildnotchecked;
    property onitemnotification: nodenotificationeventty
                  read fonitemnotification write fonitemnotification;
@@ -596,10 +596,10 @@ type
    property fonts;
    property options;
    property onitemnotification;
-   property oncreateitem: createlistitemeventty read getoncreateitem 
+   property oncreateitem: createlistitemeventty read getoncreateitem
                                                     write setoncreateitem;
    property onstatreaditem;
-   property onstatwrite;                        
+   property onstatwrite;
    property onstatread;
  end;
 
@@ -610,10 +610,10 @@ type
    procedure setvalueitem(const avalue: tlistitem); override;
   public
   end;
- 
+
  trecordfielditemeditlist = class(titemeditlist)
   protected
-   class function defaultitemclass(): listedititemclassty; override;   
+   class function defaultitemclass(): listedititemclassty; override;
  end;
 
  valueeditinfoty = record
@@ -624,7 +624,7 @@ type
   visible: boolean;
  end;
  pvalueeditinfoty = ^valueeditinfoty;
- 
+
  tvalueedititem = class(townedpersistent)
   private
    finfo: valueeditinfoty;
@@ -635,7 +635,7 @@ type
   public
    destructor destroy(); override;
   published
-   property valueindex: int32 read finfo.valueindex write 
+   property valueindex: int32 read finfo.valueindex write
                                         setvalueindex default 0;
    property editwidget: twidget read finfo.editwidget write seteditwidget;
  end;
@@ -646,7 +646,7 @@ type
    class function getitemclasstype: persistentclassty; override;
   published
  end;
- 
+
  itemindexeventty = procedure(const sender: tobject; const aindex: integer;
                      const aitem: tlistitem) of object;
  itemcanediteventty = procedure(const sender: tobject;
@@ -673,7 +673,7 @@ type
    fitemifilink: boolean;
   {$endif}
    function getframe: tbuttonsframe;
-   procedure setframe(const avalue: tbuttonsframe);                      
+   procedure setframe(const avalue: tbuttonsframe);
    function getitemlist: titemeditlist;
    procedure setitemlist(const Value: titemeditlist);
    function getitems(const index: integer): tlistitem;
@@ -703,14 +703,14 @@ type
                         //track removing of field edits
    procedure loaded(); override;
    procedure dofocus; override;
-   
+
    function valuecanedit: boolean;
-   procedure doextendimage(const cellinfopo: pcellinfoty; 
+   procedure doextendimage(const cellinfopo: pcellinfoty;
                                         var ainfo: extrainfoty); virtual;
    procedure getautopaintsize(var asize: sizety); override;
    procedure getautocellsize(const acanvas: tcanvas;
                                       var asize: sizety); override;
-   procedure calclayout(const asize: sizety; 
+   procedure calclayout(const asize: sizety;
                                        out alayout: listitemlayoutinfoty);
    function finddataedits(aitem: tlistitem; out ainfos: recvaluearty): boolean;
    function updateeditwidget(): boolean; //true if editwidgetactivated
@@ -722,7 +722,7 @@ type
    procedure updateifigriddata(const sender: tobject;
                                            const alist: tdatalist); override;
   {$endif}
-  
+
     //iedit
    function locatecount: integer; override;        //number of locate values
    function getkeystring(const index: integer): msestring; override;
@@ -789,7 +789,7 @@ type
    procedure setvaluetext(var avalue: msestring);
    function isnull: boolean; override;
    function item: tlistedititem;
-   property items[const index: integer]: tlistitem read getitems 
+   property items[const index: integer]: tlistitem read getitems
                                                     write setitems; default;
    function selecteditems: listedititemarty;
 
@@ -801,15 +801,15 @@ type
               //calls updateitemvalues for current grid row
    property activerow: integer read factiverow;
   published
-   property itemlist: titemeditlist read getitemlist 
+   property itemlist: titemeditlist read getitemlist
                                        write setitemlist stored false;
 {$ifdef mse_with_ifi}
    property ifilink: tifistringlinkcomp read getifilink write setifilink;
-//   property ifiitemlink: tifiitemlinkcomp read getifiitemlink 
+//   property ifiitemlink: tifiitemlinkcomp read getifiitemlink
 //                                                      write setifiitemlink;
 {$endif}
    property onsetvalue: setstringeventty read fonsetvalue write fonsetvalue;
-   property onclientmouseevent: mouseeventty read fonclientmouseevent 
+   property onclientmouseevent: mouseeventty read fonclientmouseevent
                            write fonclientmouseevent;
    property optionsedit1; //before optionsedit!
    property optionsedit;
@@ -825,20 +825,20 @@ type
 //   property onpaintbackground;
 //   property onpaint;
    property onpaintimage;
-   property onextendimage: extendimageeventty read fonextendimage 
+   property onextendimage: extendimageeventty read fonextendimage
                                                      write fonextendimage;
 //   property onafterpaint;
-   property onbuttonaction: buttoneventty read fonbuttonaction 
+   property onbuttonaction: buttoneventty read fonbuttonaction
                                                    write fonbuttonaction;
-   property onupdaterowvalues: itemindexeventty read fonupdaterowvalues 
+   property onupdaterowvalues: itemindexeventty read fonupdaterowvalues
                                        write fonupdaterowvalues;
    property oncellevent: celleventty read foncellevent write foncellevent;
-   property oncheckcanedit: itemcanediteventty read foncheckcanedit 
+   property oncheckcanedit: itemcanediteventty read foncheckcanedit
                                                          write foncheckcanedit;
  end;
 
  titemedit = class;
- 
+
  titemclientcontroller = class(tvalueclientcontroller)
   private
    fitemedit: tcustomitemedit;
@@ -877,11 +877,11 @@ type
   {$endif}
   published
 {$ifdef mse_with_ifi}
-   property ifiitemlink: tifiitemlinkcomp read getifiitemlink 
+   property ifiitemlink: tifiitemlinkcomp read getifiitemlink
                                                       write setifiitemlink;
 {$endif}
  end;
- 
+
  tdropdownitemedit = class(titemedit,idropdownlist)
   private
    fdropdown: tcustomdropdownlistcontroller;
@@ -904,15 +904,15 @@ type
    destructor destroy; override;
   published
    property frame: tdropdownmultibuttonframe read getframe write setframe;
-   property dropdown: tcustomdropdownlistcontroller read fdropdown 
+   property dropdown: tcustomdropdownlistcontroller read fdropdown
                                                     write setdropdown;
-   property onbeforedropdown: notifyeventty read fonbeforedropdown 
+   property onbeforedropdown: notifyeventty read fonbeforedropdown
                                                     write fonbeforedropdown;
    property onafterclosedropdown: notifyeventty read fonafterclosedropdown
                   write fonafterclosedropdown;
  end;
 
- tmbdropdownitemedit = class(tdropdownitemedit)     
+ tmbdropdownitemedit = class(tdropdownitemedit)
                 //redundant, all dropdowns are multibutton
   private
   protected
@@ -927,7 +927,7 @@ type
   protected
    function listitemclass: treelistitemclassty; override;
   public
-   function converttotreelistitem(flat: boolean = false; 
+   function converttotreelistitem(flat: boolean = false;
                 withrootnode: boolean =  false;
                 filterfunc: treenodefilterfuncty = nil): ttreelistedititem;
  end;
@@ -942,7 +942,7 @@ type
    property item: ttreelistitem read fitem;
    property destrow: integer read fdestrow;
  end;
- 
+
  treeitemdragbegineventty = procedure(const sender: ttreeitemedit;
                     const aitem: ttreelistitem;
                     var candrag: boolean; var dragobject: ttreeitemdragobject;
@@ -953,7 +953,7 @@ type
             var processed: boolean) of object;
  treeitemdragdropeventty = procedure(const sender: ttreeitemedit;
             const source,dest: ttreelistitem;
-            var dragobject: ttreeitemdragobject; 
+            var dragobject: ttreeitemdragobject;
                                           var processed: boolean) of object;
 
  expandedinfoty = record
@@ -1040,7 +1040,7 @@ type
 
                  //adds toplevel node
    procedure add(const anodes: treelistedititemarty); overload;
-   procedure add(const acount: integer; 
+   procedure add(const acount: integer;
                           aitemclass: treelistedititemclassty = nil); overload;
    procedure addchildren(const anode: ttreelistedititem);
                  //adds children as toplevel nodes
@@ -1058,23 +1058,23 @@ type
    function toplevelnodes: treelistedititemarty;
    function getnodes(const must: nodestatesty; const mustnot: nodestatesty;
                  const amode: getnodemodety = gno_matching): treelistitemarty;
-   function getselectednodes(const amode: getnodemodety = 
+   function getselectednodes(const amode: getnodemodety =
                                               gno_matching): treelistitemarty;
-   function getcheckednodes(const amode: getnodemodety = 
+   function getcheckednodes(const amode: getnodemodety =
                                               gno_matching): treelistitemarty;
    procedure updatechildcheckedtree; //slow!
    procedure updatechildnotcheckedtree; //slow!
    procedure updateparentnotcheckedtree; //slow!
-   
+
    procedure expandall;
    procedure collapseall;
    procedure moverow(const source,dest: integer);
     //source and dest must belong to the same parent, ignored otherwise
-   property itemclass: treelistedititemclassty read getitemclass 
+   property itemclass: treelistedititemclassty read getitemclass
                                                           write setitemclass;
    property items[const index: integer]: ttreelistedititem read getitems1
                                           write setitems; default;
-   property expandedstate: expandedinfoarty read getexpandedstate 
+   property expandedstate: expandedinfoarty read getexpandedstate
                                                 write setexpandedstate;
 
    property rootnode: ttreelistedititem read frootnode write setrootnode;
@@ -1110,25 +1110,25 @@ type
    property fonts;
    property options;
    property onitemnotification;
-//   property optionsdraw: itemdrawoptionsty read foptionsdraw 
+//   property optionsdraw: itemdrawoptionsty read foptionsdraw
 //                                           write setoptionsdraw default [];
-   property colorline: colorty read fcolorline write setcolorline 
+   property colorline: colorty read fcolorline write setcolorline
                                                         default cl_treeline;
-   property colorlineactive: colorty read fcolorlineactive 
+   property colorlineactive: colorty read fcolorlineactive
                           write setcolorlineactive default cl_treelineactive;
-   property boxglyph_empty: stockglyphty read getboxglyph_empty 
+   property boxglyph_empty: stockglyphty read getboxglyph_empty
                                write setboxglyph_empty default stg_box;
-   property boxglyph_expand: stockglyphty read getboxglyph_expand 
+   property boxglyph_expand: stockglyphty read getboxglyph_expand
                                write setboxglyph_expand default stg_boxexpand;
-   property boxglyph_expanded: stockglyphty read getboxglyph_expanded 
+   property boxglyph_expanded: stockglyphty read getboxglyph_expanded
                              write setboxglyph_expanded default stg_boxexpanded;
 {
-   property boxglyphactive_empty: stockglyphty read getboxglyphactive_empty 
+   property boxglyphactive_empty: stockglyphty read getboxglyphactive_empty
                                write setboxglyphactive_empty default stg_box;
-   property boxglyphactive_expand: stockglyphty read getboxglyphactive_expand 
+   property boxglyphactive_expand: stockglyphty read getboxglyphactive_expand
                            write setboxglyphactive_expand default stg_boxexpand;
-   property boxglyphactive_expanded: stockglyphty 
-                            read getboxglyphactive_expanded 
+   property boxglyphactive_expanded: stockglyphty
+                            read getboxglyphactive_expanded
                     write setboxglyphactive_expanded default stg_boxexpanded;
 }
    property oncreateitem: createtreelistitemeventty read getoncreateitem
@@ -1137,9 +1137,9 @@ type
                       write setonstatwriteitem;
    property onstatreaditem: statreadtreeitemeventty read getonstatreaditem
                       write setonstatreaditem;
-   property onstatwrite;                        
+   property onstatwrite;
    property onstatread;
-   property ondragbegin: treeitemdragbegineventty read fondragbegin 
+   property ondragbegin: treeitemdragbegineventty read fondragbegin
                                           write fondragbegin;
    property ondragover: treeitemdragovereventty read fondragover
                                           write fondragover;
@@ -1152,7 +1152,7 @@ type
                          teo_enteronimageclick,teo_enterondoubleclick);
  treeitemeditoptionsty = set of treeitemeditoptionty;
 
- checkmoveeventty = procedure(const curindex,newindex: integer; 
+ checkmoveeventty = procedure(const curindex,newindex: integer;
                                             var accept: boolean) of object;
 
  trecordfieldedit = class(tmbdropdownitemedit)
@@ -1177,7 +1177,7 @@ type
    property itemlist: ttreeitemeditlist read getitemlist;
    property itemedit: ttreeitemedit read getitemedit;
  end;
- 
+
  tifitreeitemlinkcomp = class(tifivaluelinkcomp)
   private
    function getcontroller: ttreeitemclientcontroller;
@@ -1191,7 +1191,7 @@ type
    property controller: ttreeitemclientcontroller read getcontroller
                                                          write setcontroller;
  end;
- 
+
  ttreeitemedit = class(tcustomitemedit,idragcontroller)
   private
    foptions: treeitemeditoptionsty;
@@ -1213,12 +1213,12 @@ type
    function locatecount: integer; override;        //number of locate values
    function locatecurrentindex: integer; override; //index of current row
    procedure locatesetcurrentindex(const aindex: integer); override;
-   function getkeystring(const aindex: integer): msestring; override; 
+   function getkeystring(const aindex: integer): msestring; override;
                                                    //locate text
    procedure doupdatelayout(const nocolinvalidate: boolean); override;
 //   function getitemclass: listitemclassty; override;
    procedure dokeydown(var info: keyeventinfoty); override;
-   procedure docellevent(const ownedcol: boolean; 
+   procedure docellevent(const ownedcol: boolean;
                                        var info: celleventinfoty); override;
    function checkrowmove(const curindex,newindex: integer): boolean;
    procedure beforecelldragevent(var ainfo: draginfoty; const arow: integer;
@@ -1230,7 +1230,7 @@ type
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
    function item: ttreelistedititem;
-   property items[const index: integer]: ttreelistedititem read getitems 
+   property items[const index: integer]: ttreelistedititem read getitems
                                                  write setitems; default;
    function selecteditems: treelistedititemarty;
 
@@ -1242,16 +1242,16 @@ type
    procedure updateitemvalues();
    procedure updateparentvalues(const index: integer);
   published
-   property itemlist: ttreeitemeditlist read getitemlist 
+   property itemlist: ttreeitemeditlist read getitemlist
                                         write setitemlist stored false;
    property fieldedit: trecordfieldedit read ffieldedit write setfieldedit;
-   property options: treeitemeditoptionsty read foptions 
+   property options: treeitemeditoptionsty read foptions
                                                     write foptions default [];
 {$ifdef mse_with_ifi}
-   property ifiitemlink: tifitreeitemlinkcomp read getifiitemlink 
+   property ifiitemlink: tifitreeitemlinkcomp read getifiitemlink
                                                       write setifiitemlink;
 {$endif}
-   property oncheckrowmove: checkmoveeventty read foncheckrowmove 
+   property oncheckrowmove: checkmoveeventty read foncheckrowmove
                                                         write foncheckrowmove;
  end;
 
@@ -1377,7 +1377,7 @@ end;
 
 { tlistcol }
 
-constructor tlistcol.create(const agrid: tcustomgrid; 
+constructor tlistcol.create(const agrid: tcustomgrid;
                                      const aowner: tgridarrayprop);
 begin
  inherited;
@@ -1508,8 +1508,8 @@ var
  item1: tlistitem;
 begin
  with tcustomlistview(fcellinfo.grid) do begin
-  if (lvo_hintclippedtext in foptions) and 
-         (info.eventkind = cek_firstmousepark) and application.active and 
+  if (lvo_hintclippedtext in foptions) and
+         (info.eventkind = cek_firstmousepark) and application.active and
           getshowhint and (info.cell.row >= 0) then begin
    item1:= self[info.cell.row];
    if item1 <> nil then begin
@@ -1603,7 +1603,7 @@ begin
   dec(sto1.row);
  end;
 
- if value and checkmultiselect and 
+ if value and checkmultiselect and
        not (lvo_multiselect in tcustomlistview(fgrid).foptions) then begin
   with tcustomlistview(fgrid) do begin
    if calldoselectcell then begin
@@ -1992,7 +1992,7 @@ begin
 end;
 
 procedure tcustomlistview.limitcellwidth(var avalue: integer);
-begin 
+begin
  if (avalue <> 0) and (fcellwidthmin > avalue) then begin
   avalue:= fcellwidthmin;
  end;
@@ -2129,10 +2129,10 @@ begin
    feditor.dopaint(acanvas);
    acanvas.move(pt1);
    if feditor.lasttextclipped then begin
-    include(item1.fstate1,ns1_captionclipped);   
+    include(item1.fstate1,ns1_captionclipped);
    end
    else begin
-    exclude(item1.fstate1,ns1_captionclipped);   
+    exclude(item1.fstate1,ns1_captionclipped);
    end;
   end;
   acanvas.restore;
@@ -2150,7 +2150,7 @@ begin
   optbefore:= foptions;
   foptions:= avalue;
   updatecoloptions;
-  if (longword(foptions) xor longword(optbefore)) and 
+  if (longword(foptions) xor longword(optbefore)) and
                                          longword(mask) <> 0 then begin
    layoutchanged;
   end;
@@ -2303,7 +2303,7 @@ begin
    if not (es_processed in mouseeventinfopo^.eventstate) then begin
     po1:= mouseeventinfopo^.pos;
     mouseeventinfopo^.pos:= gridmousepos;
-    if editing or (eventkind = cek_buttonrelease) or 
+    if editing or (eventkind = cek_buttonrelease) or
                 (info.mouseeventinfopo^.shiftstate * keyshiftstatesmask = []) then begin
      feditor.mouseevent(mouseeventinfopo^);
     end;
@@ -2515,8 +2515,8 @@ begin
      end;
      dek_check: begin
       accept:= (item <> focuseditem) and (info.dragobjectpo <> nil) and
-        isobjectdrag(info.dragobjectpo^,tlistitem) and 
-        (tlistitem(tobjectdragobject(info.dragobjectpo^).data).owner = 
+        isobjectdrag(info.dragobjectpo^,tlistitem) and
+        (tlistitem(tobjectdragobject(info.dragobjectpo^).data).owner =
                                                                   fitemlist);
      end;
      dek_drop: begin
@@ -2630,11 +2630,11 @@ begin
      end;
     end
     else begin
-     if not editing and (ss_ctrl in shiftstate) and (shiftstate - [ss_ctrl,ss_shift] = []) and 
+     if not editing and (ss_ctrl in shiftstate) and (shiftstate - [ss_ctrl,ss_shift] = []) and
                ((key = key_home) or (key = key_end)) and (fitemlist.count > 0) then begin
       include(eventstate,es_processed);
       if ss_shift in shiftstate then begin
-       if lvo_keyselect in foptions then begin       
+       if lvo_keyselect in foptions then begin
         action1:= fca_selectend;
        end
        else begin
@@ -2651,7 +2651,7 @@ begin
        focuscell(indextocell(fitemlist.count - 1),action1);
       end;
      end;
-     if not (es_processed in eventstate) and (shiftstate - [ss_shift] = []) and 
+     if not (es_processed in eventstate) and (shiftstate - [ss_shift] = []) and
                     (og_colchangeontabkey in foptionsgrid) and
             (fitemlist.count > 0) then begin
       int1:= celltoindex(ffocusedcell,true);
@@ -3035,7 +3035,7 @@ begin
 // adddata(anode);
 end;
 
-procedure tcustomitemeditlist.insert(const aindex: integer; 
+procedure tcustomitemeditlist.insert(const aindex: integer;
                                                const anode: tlistitem);
 begin
  checkitemclass(anode);
@@ -3105,7 +3105,7 @@ begin
   end;
  end
  else begin
-  if not (ainfo.action in [na_change,na_valuechange,na_checkedchange]) or 
+  if not (ainfo.action in [na_change,na_valuechange,na_checkedchange]) or
                                               (nochange = 0) then begin
    if fowner.canevent(tmethod(fonitemnotification)) then begin
     fonitemnotification(sender,ainfo.action);
@@ -3115,8 +3115,8 @@ begin
   if ainfo.action in [na_expand,na_collapse] then begin
    change(sender);
   end;
-  if (nochange = 0) and 
-             (ainfo.action in [na_valuechange,na_checkedchange]) and 
+  if (nochange = 0) and
+             (ainfo.action in [na_valuechange,na_checkedchange]) and
                          not (ils_updateitemvalues in fitemstate) then begin
    include(fitemstate,ils_updateitemvalues);
    try
@@ -3205,7 +3205,7 @@ procedure tvalueedititem.seteditwidget(const avalue: twidget);
 begin
  if avalue <> finfo.editwidget then begin
   if (avalue <> nil) and (not getcorbainterface(avalue,typeinfo(igridwidget),
-                                                           finfo.gridintf) or 
+                                                           finfo.gridintf) or
                                  (avalue.parentwidget <> fowner)) then begin
    raise exception.create('Invalid item field edit widget "'+avalue.name+'".');
   end;
@@ -3322,7 +3322,7 @@ function tcustomitemedit.getlayoutinfo(
 begin
  if (ws1_painting in fwidgetstate1) or (des_updatelayout in fstate) then begin
   result:= @flayoutinfofocused;                     //active
-  with result^.variable do begin 
+  with result^.variable do begin
    colorglyph:= fitemlist.fcolorglyphactive;
    colorline:= fitemlist.fcolorlineactive;
    glyphversion:= fitemlist.boxglyph_versionactive;
@@ -3331,14 +3331,14 @@ begin
  else begin
   result:= @flayoutinfocell;
   if (acellinfo <> nil) and
-          ((acellinfo^.rect.cx <> fcalcsize.cx) or 
+          ((acellinfo^.rect.cx <> fcalcsize.cx) or
            (acellinfo^.rect.cy <> fcalcsize.cy)) then begin
    fcalcsize:= acellinfo^.rect.size;
    calclayout(fcalcsize,flayoutinfocell);
   end;
  end;
- with result^.variable do begin 
-  if acellinfo <> nil then begin 
+ with result^.variable do begin
+  if acellinfo <> nil then begin
    if cds_usecoloractive in acellinfo^.drawstate then begin
     colorglyph:= fitemlist.fcolorglyphactive;
     colorline:= fitemlist.fcolorlineactive;
@@ -3406,7 +3406,7 @@ begin
  end;
 end;
 
-procedure tcustomitemedit.updateitemvalues(); 
+procedure tcustomitemedit.updateitemvalues();
         //calls updateitemvalues for current grid row
 var
  int1: integer;
@@ -3495,7 +3495,7 @@ begin
      if (po1^.valueindex >= 0) then begin
       for i2:= 0 to fvalueedits.count - 1 do begin
        with tvalueedititem(fvalueedits.fitems[i2]) do begin
-        if (finfo.datatype = po1^.datatype) and 
+        if (finfo.datatype = po1^.datatype) and
                              (finfo.valueindex = po1^.valueindex) then begin
          po1^.dummypointer:= @finfo; //check index match
          result:= true;
@@ -3521,7 +3521,7 @@ begin
  end;
 end;
 
-function tcustomitemedit.updateeditwidget(): boolean; 
+function tcustomitemedit.updateeditwidget(): boolean;
                                         //true if editwidgetactivated
 var
  infos1: recvaluearty;
@@ -3551,7 +3551,7 @@ begin
         bo1:= true;
         factiveinfo:= pvalueeditinfoty(dummypointer)^;
 {
-        if focused then begin 
+        if focused then begin
          editwidget.setfocus();
         end;
 }
@@ -3911,12 +3911,12 @@ begin
  with info do begin
   if not(es_processed in eventstate) then begin
    if not (es_child in info.eventstate) then begin
-    if (oe_locate in foptionsedit) and isenterkey(nil,key) and 
+    if (oe_locate in foptionsedit) and isenterkey(nil,key) and
                         (shiftstate = []) then begin
      if not editing then begin
       editing:= not (oe_readonly in foptionsedit) and valuecanedit() and
                       ((fvalue = nil) or tlistitem1(fvalue).cancaptionedit());
- 
+
                    ;
       if editing then begin
        include(eventstate,es_processed);
@@ -3930,10 +3930,10 @@ begin
      end;
     end
     else begin
-     if (key = key_space) and 
-        (shiftstate * shiftstatesrepeatmask = []) and 
-        not (es_processed in eventstate) and 
-        (not editing)  and valuecanedit() and 
+     if (key = key_space) and
+        (shiftstate * shiftstatesrepeatmask = []) and
+        not (es_processed in eventstate) and
+        (not editing)  and valuecanedit() and
                    (ns_checkbox in fvalue.state) and
                    (editor.filtertext = '') then begin
       fvalue.checked:= not fvalue.checked;
@@ -4129,7 +4129,7 @@ begin
     end;
    end;
    if (info.eventkind = cek_enter) then begin
-    if (widgetcount > 1) and (cellbefore.col >= 0) and 
+    if (widgetcount > 1) and (cellbefore.col >= 0) and
                                             (cellbefore.row >= 0) then begin
     fentryedge:= gd_none;
      if cellbefore.row < cell.row then begin
@@ -4158,7 +4158,7 @@ begin
     end;
    end;
   end;
-  if (info.eventkind = cek_enter) or 
+  if (info.eventkind = cek_enter) or
                             (info.eventkind = cek_exit) then begin
    if oe_locate in foptionsedit then begin
     editing:= false;
@@ -4234,14 +4234,14 @@ begin
  end;
 end;
 
-procedure tcustomitemedit.doextendimage(const cellinfopo: pcellinfoty; 
-                                               var ainfo: extrainfoty); 
+procedure tcustomitemedit.doextendimage(const cellinfopo: pcellinfoty;
+                                               var ainfo: extrainfoty);
 begin
  fillchar(ainfo,sizeof(ainfo),#0);
  if canevent(tmethod(fonextendimage)) then begin
   fonextendimage(self,cellinfopo,ainfo);
  end;
-end;                                                                      
+end;
 
 procedure tcustomitemedit.getautopaintsize(var asize: sizety);
 begin
@@ -4290,7 +4290,7 @@ begin
   end;
  end
  else begin
-  if (acellzone = cz_caption) and 
+  if (acellzone = cz_caption) and
                         ((foptionsedit * [oe_locate,oe_readonly] = []) or
                         (arow < 0) and (editing)) then begin
    result:= cursor;
@@ -4299,7 +4299,7 @@ begin
    end;
   end
   else begin
-   if (acellzone = cz_caption) and 
+   if (acellzone = cz_caption) and
                      (foptionsedit * [oe_locate,oe_readonly] <> []) then begin
     result:= cursorreadonly;
     if result = cr_default then begin
@@ -4328,7 +4328,7 @@ begin
     with ar1[i1] do begin
      if dummypointer <> nil then begin
       with pvalueeditinfoty(dummypointer)^ do begin
-       if (editwidget <> nil) and 
+       if (editwidget <> nil) and
            pointinrect(apos,editwidget.widgetrect) then begin
         result:= cz_child;
         flastzonewidget:= editwidget;
@@ -4447,7 +4447,7 @@ end;
 
 procedure tcustomitemedit.setfirstclick(var ainfo: mouseeventinfoty);
 begin
- if (factiveinfo.editwidget <> nil) and 
+ if (factiveinfo.editwidget <> nil) and
       pointinrect(ainfo.pos,factiveinfo.editwidget.paintparentrect) then begin
   factiveinfo.gridintf.setfirstclick(ainfo);
  end
@@ -4486,7 +4486,7 @@ begin
   for i1:= 0 to fvalueedits.count - 1 do begin
    with tvalueedititem(fvalueedits.fitems[i1]) do begin
     if finfo.editwidget = child then begin
-     editwidget:= nil;     
+     editwidget:= nil;
     end;
    end;
   end;
@@ -4503,7 +4503,7 @@ var
  zone1: cellzonety;
  int1: integer;
 begin
- if fgridintf <> nil then begin 
+ if fgridintf <> nil then begin
   zone1:= cz_default;
   int1:= fgridintf.grid.row;
   if int1 >= 0 then begin
@@ -4753,7 +4753,7 @@ begin
  inherited add(acount,itemclass);
 end;
 
-procedure ttreelistedititem.add(const captions: array of msestring; 
+procedure ttreelistedititem.add(const captions: array of msestring;
                const itemclass: treelistedititemclassty = nil);
 var
  countbefore: integer;
@@ -4790,7 +4790,7 @@ var
 begin
  result:= nil;
  node1:= self;
- repeat 
+ repeat
   if node1.fowner <> nil then begin
    result:= ttreeitemedit(ttreeitemeditlist(node1.fowner).fowner);
    break;
@@ -4982,7 +4982,7 @@ procedure ttreeitemeditlist.docreateobject(var instance: tobject);
 begin
  if fchangingnode = nil then begin
   inherited;
-  if (finsertparent <> nil) and 
+  if (finsertparent <> nil) and
           (ttreelistitem1(instance).parent = finsertparent) then begin
    inc(finsertparentindex);
   end;
@@ -5011,8 +5011,8 @@ end;
 
 procedure ttreeitemeditlist.change(const index: integer);
 begin
- if (index < 0) and (nochange = 0) and 
-  ((no_updatechildchecked in foptions) or 
+ if (index < 0) and (nochange = 0) and
+  ((no_updatechildchecked in foptions) or
                (no_updatechildnotchecked in foptions) or
                          (no_updateparentnotchecked in foptions)) then begin
   inherited beginupdate; //no ils_subnodecountupdating
@@ -5049,7 +5049,7 @@ begin
      int1:= int2;
      while int1 < self.fcount do begin
       po1:= ptreelistitem(getitempo(int1));
-      if (po1^ <> nil) and 
+      if (po1^ <> nil) and
                    (ttreelistitem1(po1^).ftreelevel <= ftreelevel) then begin
        break; //next same level node
       end;
@@ -5058,8 +5058,8 @@ begin
      end;
      self.fitemstate:= self.fitemstate + [ils_subnodecountupdating,
                                             ils_subnodedeleting];
-     if (fparent <> nil) and 
-           ((ttreelistitem1(fparent).fowner = self) or 
+     if (fparent <> nil) and
+           ((ttreelistitem1(fparent).fowner = self) or
                                 (fparent = frootnode)) then begin
       if dls_rowdeleting in self.fstate then begin
        inherited; //destroy node
@@ -5176,7 +5176,7 @@ begin
  end;
 end;
 
-procedure ttreeitemeditlist.readnode(const aname: msestring; 
+procedure ttreeitemeditlist.readnode(const aname: msestring;
                        const reader: tstatreader; const anode: ttreelistitem);
 begin
  if reader.beginlist(aname) then begin
@@ -5239,7 +5239,7 @@ procedure ttreeitemeditlist.assign(const aitems: treelistedititemarty);
 var
  int1,int2: integer;
  ar1: listitemarty;
- 
+
  procedure doadd(const aitem: ttreelistedititem);
  var
   int1: integer;
@@ -5251,13 +5251,13 @@ var
    end;
   end;
  end;
- 
+
 begin
  int2:= 0;
  setlength(ar1,length(aitems)); //min
  int2:= 0;
  for int1:= 0 to high(aitems) do begin
-  doadd(aitems[int1]);  
+  doadd(aitems[int1]);
  end;
  setlength(ar1,int2);
  inherited assign(listitemarty(ar1));
@@ -5408,7 +5408,7 @@ begin
  end;
 end;
 
-procedure ttreeitemeditlist.add(const acount: integer; 
+procedure ttreeitemeditlist.add(const acount: integer;
                               aitemclass: treelistedititemclassty = nil);
 var
  int1: integer;
@@ -5452,7 +5452,7 @@ procedure ttreeitemeditlist.nodenotification(const sender: tlistitem;
      grid1:= fgridintf.getcol.grid;
      incupdate;
      try
-      grid1.insertrow(finsertcount,int1);      
+      grid1.insertrow(finsertcount,int1);
      finally
       decupdate;
       exclude(fstate,des_updating);
@@ -5487,7 +5487,7 @@ var
  newrow: integer;
  ind1: integer;
  po1: ptreelistitem;
- 
+
  procedure scan(const anode: ttreelistedititem);
  var
   int1: integer;
@@ -5512,7 +5512,7 @@ var
  po2: ptreelistedititematy;
  i1: int32;
  g1: tcustomgrid;
- 
+
 begin
  if ainfo.action = na_destroying then begin
   int2:= sender.index;
@@ -5586,7 +5586,7 @@ begin
           try
            bo1:= gs1_autoappendlock in fstate1;
            include(fstate1,gs1_autoappendlock);
-           if (g1 <> nil) and 
+           if (g1 <> nil) and
                      (g1.row >= int1) and (g1.row > int1 + int2) then begin
             g1.row:= invalidaxis;
            end;
@@ -5681,11 +5681,11 @@ begin
  setlength(result,int2);
 end;
 
-function ttreeitemeditlist.getnodes(const must: nodestatesty; 
+function ttreeitemeditlist.getnodes(const must: nodestatesty;
                    const mustnot: nodestatesty;
                    const amode: getnodemodety = gno_matching): treelistitemarty;
 var
- int2: integer; 
+ int2: integer;
  po1,pe: ptreelistitem;
 begin
  result:= nil;
@@ -5924,7 +5924,7 @@ end;
 
 function istreeitemdrag(const ainfo: draginfoty): boolean;
 begin
- result:= (ainfo.dragobjectpo <> nil) and 
+ result:= (ainfo.dragobjectpo <> nil) and
                        (ainfo.dragobjectpo^ is ttreeitemdragobject);
 end;
 
@@ -6103,7 +6103,7 @@ begin
    end;
   end;
   setlength(result,int2);
- end; 
+ end;
 end;
 
 procedure ttreeitemeditlist.setexpandedstate(const avalue: expandedinfoarty);
@@ -6122,7 +6122,7 @@ var
    end;
   end;
  end; //find
- 
+
 var
  grid: tcustomgrid;
  n1: ttreelistedititem;
@@ -6130,7 +6130,7 @@ var
 begin
  grid:= fintf.getgrid;
  if grid <> nil then begin
-  grid.row:= invalidaxis; 
+  grid.row:= invalidaxis;
   if avalue <> nil then begin
    ar1:= toplevelnodes;
    for int1:= 1 to high(avalue) do begin
@@ -6158,7 +6158,7 @@ begin
       int1:= n1.findex;
      end;
      grid.row:= int1;
-    end;     
+    end;
    end;
   end;
  end;
@@ -6217,7 +6217,7 @@ begin
  finally
   finsertparent:= nil;
   finsertparentindex:= -1;
- end; 
+ end;
 end;
 
 procedure ttreeitemeditlist.delete(const aindex: integer);
@@ -6610,7 +6610,7 @@ begin
  end;
 end;
 
-procedure ttreeitemedit.updateitemvalues(const index: integer; 
+procedure ttreeitemedit.updateitemvalues(const index: integer;
                                            const count: integer);
 var
  int1: integer;
@@ -6654,14 +6654,14 @@ var
 begin
  doonkeydown(info);
  with info do begin
-  if not (es_child in eventstate) and (fgridintf <> nil) and 
+  if not (es_child in eventstate) and (fgridintf <> nil) and
                 not (es_processed in eventstate) and (fvalue <> nil) then begin
    with twidgetgrid1(fgridintf.getcol.grid),ttreelistitem1(fvalue) do begin
     if shiftstate = [] then begin
      atreelevel:= treelevel;
      equallevelindex:= -1;
      cellbefore:= ffocusedcell;
-     if (teo_treecolnavig in self.foptions) and 
+     if (teo_treecolnavig in self.foptions) and
                     not editing then begin
       include(eventstate,es_processed);
       case key of
@@ -6741,14 +6741,14 @@ begin
        if ftreelevel > 0 then begin
         int1:= parentindex;
         if key = key_up then begin
-         if (int1 > 0) and (itemlist[row].parent = itemlist[row-1].parent) and 
+         if (int1 > 0) and (itemlist[row].parent = itemlist[row-1].parent) and
                     checkrowmove(row,row-1) then begin
           ttreelistitem1(fparent).internalswap(int1,int1-1);
           moverow(row,row-1,1);
          end;
         end
         else begin //key_down
-         if (int1 < fparent.count-1) and 
+         if (int1 < fparent.count-1) and
               (itemlist[row].parent = itemlist[row+1].parent) and
                checkrowmove(row,row+1) then begin
           ttreelistitem1(fparent).internalswap(int1,int1+1);
@@ -6759,7 +6759,7 @@ begin
        else begin
         if key = key_up then begin
          if (row > 0) then begin
-          if ttreelistitem(itemlist[row-1]).issinglerootrow and 
+          if ttreelistitem(itemlist[row-1]).issinglerootrow and
                                              checkrowmove(row,row-1) then begin
            moverow(row,row-1,1);
           end;
@@ -6767,7 +6767,7 @@ begin
         end
         else begin //key_down
          if (row < rowhigh) then begin
-          if ttreelistitem(itemlist[row+1]).issinglerootrow and 
+          if ttreelistitem(itemlist[row+1]).issinglerootrow and
                                              checkrowmove(row,row+1) then begin
            moverow(row,row+1,1);
           end;
@@ -6799,7 +6799,7 @@ begin
    pa:= de.parent;
    if pa <> nil then begin
     fitemlist.beginupdate;
-    bo1:= (item.owner = fitemlist) and 
+    bo1:= (item.owner = fitemlist) and
                    not (ils_subnodecountinvalid in fitemlist.fitemstate);
     sourcer:= item.index;
     pa.insert(de.parentindex,item);
@@ -6813,7 +6813,7 @@ begin
     end;
     fitemlist.endupdate;
    end;
-  end;   
+  end;
  end;
 end;
 
@@ -6827,7 +6827,7 @@ begin
   with ttreelistedititem(fvalue) do begin
    updatecellzone(info.pos,cellzone);
    if (cellzone = cz_image) and (teo_enteronimageclick in foptions) or
-      (teo_enterondoubleclick in foptions) and 
+      (teo_enterondoubleclick in foptions) and
                    (ss_double in info.shiftstate) then begin
     expanded:= not expanded;
     include(info.eventstate,es_processed);
@@ -6919,7 +6919,7 @@ end;
 procedure ttreeitemedit.drawcell(const canvas: tcanvas);
 begin
  with cellinfoty(canvas.drawinfopo^) do begin
-  flayoutinfocell.islast:= (cell.row >= grid.rowhigh) or 
+  flayoutinfocell.islast:= (cell.row >= grid.rowhigh) or
           (fitemlist <> nil) and
           (ptreelistitem(datapo)^.treelevel = 0) or
           (ptreelistitem(datapo)^.treelevel >
@@ -6979,7 +6979,7 @@ end;
 { tdirtreenode }
 
 procedure tdirtreenode.loaddirtree(const apath: filenamety);
- 
+
  procedure doload(const anode: tdirtreenode; const apath: filenamety);
  var
   ar1: filenamearty;
@@ -6997,7 +6997,7 @@ procedure tdirtreenode.loaddirtree(const apath: filenamety);
    end;
   end;
  end;
- 
+
 begin
  beginupdate;
  clear;
@@ -7005,7 +7005,7 @@ begin
   doload(self,apath);
  finally
   endupdate;
- end;  
+ end;
 end;
 
 procedure tdirtreenode.checkfiles(var afiles: filenamearty);
@@ -7164,7 +7164,7 @@ begin
  inherited setcontroller(avalue);
 end;
 
-function tifitreeitemlinkcomp.getcontrollerclass: 
+function tifitreeitemlinkcomp.getcontrollerclass:
                                      customificlientcontrollerclassty;
 begin
  result:= ttreeitemclientcontroller;

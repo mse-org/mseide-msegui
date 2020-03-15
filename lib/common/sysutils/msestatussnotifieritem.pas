@@ -17,7 +17,7 @@ type
   protected
    function getintrospectitems(): string virtual;
  end;
- 
+
 implementation
 
 const

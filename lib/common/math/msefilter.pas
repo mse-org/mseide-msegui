@@ -30,7 +30,7 @@ uses
 type
 
  tdoublefiltercomp = class;
- 
+
  tsections = class(tintegerarrayprop)
   protected
    fowner: tdoublefiltercomp;
@@ -61,7 +61,7 @@ type
    property sections: tsections read fsections write setsections;
             //array of coeffcount
  end;
- 
+
 // >---+-->(z)---+-->(z)---+-->(z)---+
 //     b0       b1        b2        bN-1
 //     +---------+---------+---------+--->
@@ -117,7 +117,7 @@ type
                     sfk_lp2bilinear,sfk_bp2bilinear,sfk_bs2bilinear);
  sigfilteroptionty = (sfo_passgainfix,sfo_noprewarp);
  sigfilteroptionsty = set of sigfilteroptionty;
- 
+
  tsigfilter = class(tsigmultiinpout) //todo: speed optimized prewarp
   private
    ffrequencypo: psigvaluety;
@@ -151,7 +151,7 @@ type
    procedure sighandlerb2bi;
    procedure sighandlerbp2bi(const ainfo: psighandlerinfoty);
    procedure sighandlerbs2bi(const ainfo: psighandlerinfoty);
-   
+
     //isigclient
    function getinputar: inputconnarty; override;
    function gethandler: sighandlerprocty; override;
@@ -160,16 +160,16 @@ type
    constructor create(aowner: tcomponent); override;
    procedure clear; override;
   published
-   property frequency: tdoubleinputconn read ffrequency 
-                                                 write setfrequency;   
+   property frequency: tdoubleinputconn read ffrequency
+                                                 write setfrequency;
    property frequfact: tdoubleinputconn read ffrequfact write setfrequfact;
-   property qfactor: tdoubleinputconn read fqfactor 
-                                                 write setqfactor;   
-   property amplitude: tdoubleinputconn read famplitude 
-                                                 write setamplitude;   
-   property kind: sigfilterkindty read fkind write setkind 
+   property qfactor: tdoubleinputconn read fqfactor
+                                                 write setqfactor;
+   property amplitude: tdoubleinputconn read famplitude
+                                                 write setamplitude;
+   property kind: sigfilterkindty read fkind write setkind
                                                  default sfk_lp1bilinear;
-   property options: sigfilteroptionsty read foptions 
+   property options: sigfilteroptionsty read foptions
                                              write setoptions default [];
  end;
 
@@ -185,14 +185,14 @@ type
    constructor create(aowner: tobject); override;
    destructor destroy; override;
   published
-   property frequfact: tdoubleinputconn read ffrequfact 
-                                                 write setfrequfact;   
-   property qfactor: tdoubleinputconn read fqfactor 
-                                                 write setqfactor;   
-   property amplitude: tdoubleinputconn read famplitude 
-                                                 write setamplitude;   
+   property frequfact: tdoubleinputconn read ffrequfact
+                                                 write setfrequfact;
+   property qfactor: tdoubleinputconn read fqfactor
+                                                 write setqfactor;
+   property amplitude: tdoubleinputconn read famplitude
+                                                 write setamplitude;
  end;
- 
+
  tfilterbanksections = class(townedpersistentarrayprop)
   private
   protected
@@ -219,7 +219,7 @@ type
  end;
  pfilterinfoty = ^filterinfoty;
  filterinfoarty = array of filterinfoty;
-  
+
  tsigfilterbank = class(tsigmultiinpout) //todo: speed optimized prewarp
   private
    fsections: tfilterbanksections;
@@ -252,13 +252,13 @@ type
   published
    property frequency: tdoubleinputconn read ffrequency write setfrequency;
    property amplitude: tdoubleinputconn read famplitude write setamplitude;
-   property baseamplitude: tdoubleinputconn read fbaseamplitude 
+   property baseamplitude: tdoubleinputconn read fbaseamplitude
                                             write setbaseamplitude;
-   property options: sigfilteroptionsty read foptions 
+   property options: sigfilteroptionsty read foptions
                                              write setoptions default [];
    property sections: tfilterbanksections read fsections write setsections;
  end;
- 
+
 implementation
 uses
  sysutils,math,msearrayutils;
@@ -281,7 +281,7 @@ constructor tdoublefiltercomp.create(aowner: tcomponent);
 begin
  fsections:= tsections.create(self);
  createcoeff;
- inherited; 
+ inherited;
 end;
 
 destructor tdoublefiltercomp.destroy;
@@ -372,7 +372,7 @@ begin
     else begin
      endindex2:= -1;
     end;
-    
+
     fdoublez[startindex1]:= i;
     o:= 0;
     for int2:= startindex1 to endindex1 do begin
@@ -433,7 +433,7 @@ begin
   else begin
    endindex2:= -1;
   end;
-  
+
   fdoublez[startindex1]:= i;
   o:= 0;
   for int2:= startindex1 to endindex1 do begin
@@ -551,7 +551,7 @@ end;
 (*
 procedure tsigiir.processinout(const acount: integer; var ainp: pdouble;
                var aoutp: pdouble);
-var 
+var
  int1,int2,int3: integer;
  inp1,outp1: pdouble;
  i,o: double;
@@ -596,7 +596,7 @@ begin
 end;
 
 procedure tsigiir.sighandler(const ainfo: psighandlerinfoty);
-var 
+var
  {int1,}int2,int3,int4: integer;
 // inp1,outp1: pdouble;
  i,o: double;
@@ -1203,7 +1203,7 @@ begin
  end;
  fz2:= fz1;
  fz1:= i;
- foutputpo^:= (i*fbaseamplitudepo^.value+ot)*famplitudepo^.value; 
+ foutputpo^:= (i*fbaseamplitudepo^.value+ot)*famplitudepo^.value;
 end;
 
 procedure tsigfilterbank.initmodel;

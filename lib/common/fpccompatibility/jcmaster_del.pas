@@ -482,7 +482,7 @@ end;
   required. }
 
 {METHODDEF}
-procedure prepare_for_pass (cinfo : j_compress_ptr); 
+procedure prepare_for_pass (cinfo : j_compress_ptr);
 var
   master : my_master_ptr;
 var
@@ -593,7 +593,7 @@ end;
   In multi-pass processing, this routine is not used. }
 
 {METHODDEF}
-procedure pass_startup (cinfo : j_compress_ptr); 
+procedure pass_startup (cinfo : j_compress_ptr);
 begin
   cinfo^.master^.call_pass_startup := FALSE; { reset flag so call only once }
 
@@ -605,7 +605,7 @@ end;
 { Finish up at end of pass. }
 
 {METHODDEF}
-procedure finish_pass_master (cinfo : j_compress_ptr); 
+procedure finish_pass_master (cinfo : j_compress_ptr);
 var
   master : my_master_ptr;
 begin

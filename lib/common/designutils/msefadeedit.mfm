@@ -72,27 +72,27 @@ object fadeeditfo: tfadeeditfo
           anchors = [an_left, an_right, an_bottom]
           optionsgrid = [og_colsizing, og_rowinserting, og_rowdeleting, og_focuscellonenter, og_autoappend, og_sorted, og_colchangeontabkey, og_wrapcol, og_autopopup, og_mousescrollcol]
           fixcols.count = 1
-          fixcols.items = <          
+          fixcols.items = <
             item
               width = 22
               numstep = 1
             end>
           datacols.count = 3
           datacols.options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
-          datacols.items = <          
+          datacols.items = <
             item
               colorselect = -2147483642
               width = 24
               onbeforedrawcell = beforedrawev
               options = [co_nofocus, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savestate, co_mousescrollrow]
-            end          
+            end
             item[opaposed]
               width = 89
               options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_proportional, co_savevalue, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
               name = 'opapos'
               widgetname = 'opaposed'
               dataclass = tgridrealdatalist
-            end          
+            end
             item[opacolored]
               width = 290
               options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_fill, co_savevalue, co_savestate, co_nosort, co_cancopy, co_canpaste, co_mousescrollrow]
@@ -140,10 +140,10 @@ object fadeeditfo: tfadeeditfo
             frame.localprops1 = []
             frame.button.color = -1879048187
             frame.buttons.count = 2
-            frame.buttons.items = <            
+            frame.buttons.items = <
               item
                 color = -1879048187
-              end            
+              end
               item
                 color = -1879048187
                 imagenr = 17
@@ -173,51 +173,51 @@ object fadeeditfo: tfadeeditfo
           anchors = [an_left, an_top, an_right, an_bottom]
           optionsgrid = [og_colsizing, og_rowinserting, og_rowdeleting, og_focuscellonenter, og_autoappend, og_sorted, og_colchangeontabkey, og_wrapcol, og_autopopup, og_mousescrollcol]
           fixcols.count = 1
-          fixcols.items = <          
+          fixcols.items = <
             item
               width = 22
               numstep = 1
             end>
           fixrows.count = 1
-          fixrows.items = <          
+          fixrows.items = <
             item
               height = 16
               captions.count = 4
-              captions.items = <              
+              captions.items = <
                 item
-                end              
+                end
                 item
                   caption = 'Pos'
-                end              
+                end
                 item
                   caption = 'Color'
-                end              
+                end
                 item
                   caption = 'Opacity'
                 end>
             end>
           datacols.count = 4
           datacols.options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
-          datacols.items = <          
+          datacols.items = <
             item
               colorselect = -2147483642
               width = 24
               onbeforedrawcell = beforedrawev
               options = [co_nofocus, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savestate, co_mousescrollrow]
-            end          
+            end
             item[posed]
               width = 89
               options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_proportional, co_savevalue, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
               widgetname = 'posed'
               dataclass = tgridrealdatalist
-            end          
+            end
             item[colored]
               width = 151
               options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_fill, co_savevalue, co_savestate, co_nosort, co_cancopy, co_canpaste, co_mousescrollrow]
               widthmin = 63
               widgetname = 'colored'
               dataclass = tgridenumdatalist
-            end          
+            end
             item[opaed]
               width = 138
               options = [co_invisible, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_proportional, co_savevalue, co_savestate, co_nosort, co_cancopy, co_canpaste, co_mousescrollrow]
@@ -263,10 +263,10 @@ object fadeeditfo: tfadeeditfo
             frame.localprops1 = []
             frame.button.color = -1879048187
             frame.buttons.count = 2
-            frame.buttons.items = <            
+            frame.buttons.items = <
               item
                 color = -1879048187
-              end            
+              end
               item
                 color = -1879048187
                 imagenr = 17
@@ -293,10 +293,10 @@ object fadeeditfo: tfadeeditfo
             frame.localprops1 = []
             frame.button.color = -1879048187
             frame.buttons.count = 2
-            frame.buttons.items = <            
+            frame.buttons.items = <
               item
                 color = -1879048187
-              end            
+              end
               item
                 color = -1879048187
                 imagenr = 17

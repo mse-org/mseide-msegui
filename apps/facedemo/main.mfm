@@ -3339,63 +3339,63 @@ object mainfo: tmainfo
     itemframetemplateactive = mainmenuitemframe
     itemfacetemplateactive = buttonface2
     menu.submenu.count = 4
-    menu.submenu.items = <    
+    menu.submenu.items = <
       item
         submenu.count = 4
-        submenu.items = <        
+        submenu.items = <
           item
             submenu.count = 6
-            submenu.items = <            
+            submenu.items = <
               item
                 caption = 'ewrgqeg qewr '
                 state = [as_localcaption]
-              end            
+              end
               item
                 caption = 'qer qwetr'
                 state = [as_localcaption]
-              end            
+              end
               item
                 caption = 'uzkme56are'
                 state = [as_localcaption]
-              end            
+              end
               item
                 caption = 'w435 ertrh46'
                 state = [as_localcaption]
-              end            
+              end
               item
                 caption = '4w5gbsgfdbsw'
                 state = [as_localcaption]
-              end            
+              end
               item
                 caption = 'aerga aerg345 '
                 state = [as_localcaption]
               end>
             caption = '&1111111111'
             state = [as_localcaption]
-          end        
+          end
           item
             caption = '&22222222'
             state = [as_localcaption]
-          end        
+          end
           item
             caption = '&333333333'
             state = [as_localcaption]
-          end        
+          end
           item
             caption = '&4444444444'
             state = [as_localcaption]
           end>
         caption = '&Aaaaaaa'
         state = [as_localcaption]
-      end    
+      end
       item
         caption = '&Bbbbbb'
         state = [as_localcaption]
-      end    
+      end
       item
         caption = '&Cccccccc'
         state = [as_localcaption]
-      end    
+      end
       item
         caption = '&Ddddd'
         state = [as_localcaption]

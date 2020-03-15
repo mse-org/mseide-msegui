@@ -1,5 +1,5 @@
 { MSEide Copyright (c) 1999-2014 by Martin Schreiber
-   
+
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation; either version 2 of the License, or
@@ -68,7 +68,7 @@ type
   deleteall,         //3 Do you wish to delete all watchpoints?
   confirmation       //4 Confirmation
  );
- 
+
 { twatchpointsfo }
 
 procedure twatchpointsfo.refresh(const breakpoints: breakpointinfoarty);

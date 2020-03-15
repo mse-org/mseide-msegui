@@ -20,7 +20,7 @@ interface
 implementation
 uses
  mseaudio,msedesignintf,msesigaudio,msemidi,msesigmidi,msespeak;
- 
+
 procedure register;
 begin
  registercomponents('MM',[taudioout,tmidisource,tespeakng]);

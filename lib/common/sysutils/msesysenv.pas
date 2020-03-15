@@ -25,7 +25,7 @@ uses
  classes,mclasses,msestat,msestatfile,mseclasses,msetypes,
  msestrings,msedatalist,sysutils,
  mselist,msearrayutils,msemacros;
- 
+
 const
  commandlineparchar = '-';
  defaulterrorcode = 1;
@@ -66,7 +66,7 @@ type
                    arf_filenames,    // argument wird durch pathsep   //9
                                      // gesplitted
                    arf_statoverride, // wert wird durch statfile     //10
-                                     // ueberschrieben                 
+                                     // ueberschrieben
                                      // ev. auch geloescht
                    arf_stataddval,   // wert wird von statfile       //11
                                      // geschrieben falls
@@ -130,7 +130,7 @@ type
   name: msestring;
   anames: msestringarty;
   flags: argumentflagsty;
-  initvalue: msestring;  
+  initvalue: msestring;
   argument: msestring;
   before: msestring;
   help: msestring;
@@ -138,7 +138,7 @@ type
  end;
  psysenvdefty = ^sysenvdefty;
  sysenvdefarty = array of sysenvdefty;
- 
+
  tsysenvmanager = class(tmsecomponent,istatfile)
   private
    foninit: sysenvmanagereventty;
@@ -206,16 +206,16 @@ type
    procedure errormessage(const mess: msestring);
    procedure printmessage(value: msestring);
    procedure printhelp;
-   function getcommandlinemacros(const macrodef: integer; 
+   function getcommandlinemacros(const macrodef: integer;
             const firstenvvarmacro: integer = -1;
             const lastenvvarmacro: integer = -1;
                               prepend: macroinfoarty = nil): macroinfoarty;
    property errorcount: int32 read ferrorcount;
    property defined[index: integer]: boolean read getdefined
                                                   write setdefined; default;
-   property objectlinker: tobjectlinker read getobjectlinker 
+   property objectlinker: tobjectlinker read getobjectlinker
                      {$ifdef msehasimplements}implements istatfile{$endif};
-   property values[index: integer]: msestringarty 
+   property values[index: integer]: msestringarty
                                               read getvalues write setvalues;
    property value[index: integer]: msestring read getvalue write setvalue;
                //bringt letzten string in array
@@ -223,37 +223,37 @@ type
                         write setintegervalue;
                //bringt letzten string in array als integer
    function getintegervalue(var avalue: integer; const index: integer;
-                   const min: integer = minint; 
+                   const min: integer = minint;
                                         const max: integer = maxint): boolean;
                              //false if not defined or not in range
-   function findfirstfile(filename: filenamety; 
+   function findfirstfile(filename: filenamety;
                                    searchinvars: array of integer): filenamety;
                  //bringt erstes filevorkommen
-   function findlastfile(filename: filenamety; 
+   function findlastfile(filename: filenamety;
                                    searchinvars: array of integer): filenamety;
                  //bringt letztes filevorkommen
    property defs: sysenvdefarty read fdefs write setdefs;
    property defcount: int32 read getdefcount;
   published
-   property options: sysenvoptionsty read foptions write setoptions 
+   property options: sysenvoptionsty read foptions write setoptions
                                          default defaultsysenvmanageroptions;
-   property errorcode: integer read ferrorcode write ferrorcode 
+   property errorcode: integer read ferrorcode write ferrorcode
                                                    default defaulterrorcode;
    property statfile: tstatfile read fstatfile write setstatfile;
    property statvarname: msestring read getstatvarname write fstatvarname;
-   property statpriority: integer read fstatpriority 
+   property statpriority: integer read fstatpriority
                                        write fstatpriority default 0;
-   property helpheader: msestring read fhelpheader write fhelpheader; 
+   property helpheader: msestring read fhelpheader write fhelpheader;
    property helpfooter: msestring read fhelpfooter write fhelpfooter;
 
-   property onvalueread: sysenvmanagervalueeventty read fonvalueread 
+   property onvalueread: sysenvmanagervalueeventty read fonvalueread
                                                          write fonvalueread;
    property oninit: sysenvmanagereventty read foninit write setoninit;
-   property onafterinit: sysenvmanagereventty read fonafterinit 
+   property onafterinit: sysenvmanagereventty read fonafterinit
                                                            write fonafterinit;
  end;
 
-procedure defstoarguments(const defs: sysenvdefarty; 
+procedure defstoarguments(const defs: sysenvdefarty;
                  out arguments: argumentdefarty; out alias: msestringararty);
 
 implementation
@@ -269,7 +269,7 @@ uses
  {$endif}
 {$endif}
 
-procedure defstoarguments(const defs: sysenvdefarty; 
+procedure defstoarguments(const defs: sysenvdefarty;
                  out arguments: argumentdefarty; out alias: msestringararty);
 var
  int1,int2: integer;
@@ -289,7 +289,7 @@ begin
    if alias[int1] <> nil then begin
     setlength(alias[int1],high(alias[int1])+2); //end marker
    end;
-   anames:= pointer(alias[int1]); 
+   anames:= pointer(alias[int1]);
    flags:= d^.flags;
    initvalue:= d^.initvalue;
 //   argument:= d^.argument;
@@ -299,7 +299,7 @@ begin
 end;
 
 {
-procedure defstoarguments(const defs: msestring; 
+procedure defstoarguments(const defs: msestring;
                  out arguments: argumentdefarty; out alias: stringararty);
 var
  ar1,ar2: msestringarty;
@@ -318,7 +318,7 @@ begin
    if alias[int1] <> nil then begin
     setlength(alias[int1],high(alias[int1])+2);
    end;
-   anames:= pointer(alias[int1]); 
+   anames:= pointer(alias[int1]);
    flags:= argumentflagsty(stringtoset(
                           ptypeinfo(typeinfo(argumentflagsty)),ar2[3]));
    initvalue:= ar2[4];
@@ -598,10 +598,10 @@ procedure tsysenvmanager.printhelp;
    end;
   end;
  end;
- 
+
 var
  int1: integer;
- 
+
 begin
  if fhelpheader <> '' then begin
   writestderr(ansistring(fhelpheader),true);
@@ -761,7 +761,7 @@ begin
    adefined:= adefined - arf_defined;
   end;
   adefined:= adefined * arf_defined;
-  
+
   with fenvvars[index] do begin
    if flags * arf_defined = [] then begin
    {$ifdef FPC}
@@ -850,7 +850,7 @@ var
     result:= kind in typen;
     if result then begin
 //     result:= (msecomparestrlen(aname,name) = 0) or checkanames;
-     result:= (aname = '') or (msecomparestrlen(name,aname) = 0) or 
+     result:= (aname = '') or (msecomparestrlen(name,aname) = 0) or
                                                             checkanames();
     end;
    end;
@@ -1037,7 +1037,7 @@ begin            //init
   inc(index);
  end;
  for i1:= 0 to high(arguments) do begin
-  if (arf_help in arguments[i1].flags) and 
+  if (arf_help in arguments[i1].flags) and
         (fenvvars[i1].flags * arf_defined <> []) then begin
    printhelp;
    application.terminated:= true;
@@ -1084,7 +1084,7 @@ var
  ar1: msestringarty;
 begin
  ar1:= getcommandlinearguments();
- if high(ar1) > 0 then begin 
+ if high(ar1) > 0 then begin
             //FPC 2.6.4 throws an exception in copy() if out of range
   result:= init(arguments,copy(ar1,1,bigint));
  end
@@ -1191,7 +1191,7 @@ begin
 end;
 }
 procedure tsysenvmanager.defineproperties(filer: tfiler);
- 
+
  function needswritedefs: boolean;
  var
   po1: psysenvdefty;
@@ -1212,7 +1212,7 @@ procedure tsysenvmanager.defineproperties(filer: tfiler);
         end;
        end;
        if not result then begin
-        result:= 
+        result:=
                 (kind <> po1^.kind) or
                 (name <> po1^.name) or
                 (flags <> po1^.flags) or
@@ -1229,11 +1229,11 @@ procedure tsysenvmanager.defineproperties(filer: tfiler);
    end;
   end;
  end;
- 
+
 begin
  inherited;
  filer.defineproperty('defs',@readdefs,@writedefs,
-           (filer.ancestor = nil) and (fdefs <> nil) or 
+           (filer.ancestor = nil) and (fdefs <> nil) or
            (filer.ancestor <> nil) and needswritedefs);
 // filer.defineproperty('default',@readinitvalues,@writeinitvalues,fdefs <> nil);
 // filer.defineproperty('help',@readhelps,@writehelps,fdefs <> nil);
@@ -1303,7 +1303,7 @@ begin
   if ar2 <> nil then begin
    int3:= length(result);
    int4:= (high(ar2)+2) div 2; //pair count
-   setlength(result,int3+int4); 
+   setlength(result,int3+int4);
    for int2:= 0 to int4-1 do begin
     with result[int2+int3] do begin
      int4:= int2 * 2;
@@ -1330,7 +1330,7 @@ procedure tsysenvmanager.setoptions(const avalue: sysenvoptionsty);
 begin
  foptions:= sysenvoptionsty(setsinglebit(longword(avalue),longword(foptions),
         longword([seo_terminateonerror,seo_haltonerror,seo_exceptiononerror])));
- if not (csdesigning in componentstate) and 
+ if not (csdesigning in componentstate) and
                          (seo_appterminateonexception in avalue) then begin
   application.options:= application.options + [apo_terminateonexception];
  end;

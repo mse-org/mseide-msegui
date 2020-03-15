@@ -27,7 +27,7 @@ type
 
  einternalerror = class(exception)
  end;
- 
+
 {$ifdef mswindows}
 type
  timeval = record
@@ -57,7 +57,7 @@ function getlasterror: integer;
 function getlasterrortext: string;
 function syserrortext(const aerror: syserrorty): string;
            //returns getlasterortext for sye_lasterror
-           
+
 function later(ref,act: longword): boolean;
  //true if act > ref, with overflowcorrection
 function laterorsame(ref,act: longword): boolean;
@@ -96,7 +96,7 @@ end;
 constructor eoserror.create(const errno: integer; const leadingtext: string = '');
 begin
  error:= errno;
- inherited create(leadingtext + 'OSError ' + inttostr(error) + ': ' + 
+ inherited create(leadingtext + 'OSError ' + inttostr(error) + ': ' +
                                                    sys_geterrortext(error));
 end;
 

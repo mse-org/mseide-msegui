@@ -7,10 +7,10 @@
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 }
-unit msestream;   
+unit msestream;
 {$ifdef FPC}
  {$if defined(FPC) and (fpc_fullversion >= 020501)}
-  {$define mse_fpc_2_6} 
+  {$define mse_fpc_2_6}
  {$ifend}
  {$ifdef mse_fpc_2_6}
   {$define mse_hasvtunicodestring}
@@ -31,7 +31,7 @@ interface
  {$endif}
 {$endif}
 
-uses 
+uses
  classes,mclasses,sysutils,msestrings,msetypes,msethread,msesystypes,msesys,
  msereal,mseevent,mseclasses,mseglob{,mseformatstr};
 
@@ -47,7 +47,7 @@ type
  cryptoclientstatesty = set of cryptoclientstatety;
  cryptohandlerdataty = array[0..32] of pointer;
 
- tcustomcryptohandler = class; 
+ tcustomcryptohandler = class;
  cryptoclientinfoty = record
   stream: tmsefilestream;
   link: tcustomcryptohandler;
@@ -115,7 +115,7 @@ type
   published
    property chain: tcustomcryptohandler read fchain write setchain;
  end;
- 
+
    {$warnings off}
  tmsefilestream = class(thandlestream)
   private
@@ -138,7 +138,7 @@ type
    procedure setcapacity(const avalue: ptrint); virtual;
    procedure sethandle(value: integer); virtual;
    procedure closehandle(const ahandle: integer); virtual;
-   constructor internalcreate(const afilename: filenamety; 
+   constructor internalcreate(const afilename: filenamety;
                       const aopenmode: fileopenmodety;
                       const accessmode: fileaccessmodesty;
                       const rights: filerightsty;
@@ -151,18 +151,18 @@ type
                                        origin: tseekorigin): int64;
    function getmemory: pointer; override;
   public
-   constructor create(const afilename: filenamety; 
+   constructor create(const afilename: filenamety;
                       const aopenmode: fileopenmodety = fm_read;
                       const accessmode: fileaccessmodesty = [];
                       const rights: filerightsty = defaultfilerights); overload;
    constructor createtransaction(const afilename: filenamety;
                       rights: filerightsty = defaultfilerights); overload;
-   constructor createtempfile(const prefix: filenamety; 
+   constructor createtempfile(const prefix: filenamety;
                                                   out afilename: filenamety);
    constructor create(ahandle: integer); overload; virtual; //allways called
-   constructor create; overload; 
+   constructor create; overload;
                                   //memorystream
-   constructor create(const aopenmode: fileopenmodety); overload; 
+   constructor create(const aopenmode: fileopenmodety); overload;
                                   //memorystream
    constructor createstringcopy(const adata: string); //implies fm_read
    destructor destroy; override;
@@ -194,7 +194,7 @@ type
                                      //only for memorystream
 //   property memory: pointer read getmemory;     //only for memorystream
    property filerights: filerightsty read getfilerights write setfilerights;
-   property cryptohandler: tcustomcryptohandler read fcryptohandler 
+   property cryptohandler: tcustomcryptohandler read fcryptohandler
                                                    write setcryptohandler;
  end;
    {$warnings on}
@@ -248,7 +248,7 @@ type
    procedure flushbuffer; override;
 
    property buflen: integer read fbuflen write setbuflen default defaultbuflen;
-   property usewritebuffer: boolean read fusewritebuffer 
+   property usewritebuffer: boolean read fusewritebuffer
                                        write setusewritebuffer default false;
    property eof: boolean read geteof;
    property bufpo: pchar read getbufpo;
@@ -262,7 +262,7 @@ type
  eolflagty = (eolf_linefeed,eolf_returnlinefeed);
  eolflagsty = set of eolflagty;
  eolstylety = (eol_default,eol_system,eol_unix,eol_windows);
- 
+
  ttextstream = class(tcustombufstream)
   private
    fposvorher: int64;
@@ -297,7 +297,7 @@ type
              const accessmode: fileaccessmodesty = [];
              const rights: filerightsty = defaultfilerights): syserrorty;
    procedure return;    //setzt filepointer auf letzte readln position
-   
+
    procedure writestr(const value: string); //no encoding
    procedure writestrln(const value: string); //no encoding
    function readstrln(var value: string): boolean; overload; virtual;
@@ -323,9 +323,9 @@ type
    procedure writeln(const values: array of const); overload;
 
    function readln: boolean; overload;
-   function readln(var value: string): boolean; overload;      
+   function readln(var value: string): boolean; overload;
            //true wenn zeile vollstaendig, sonst eof erreicht
-   function readln(var value: msestring): boolean; overload;       
+   function readln(var value: msestring): boolean; overload;
            //true wenn zeile vollstaendig, sonst eof erreicht
    function readln(out value: integer): boolean; overload;
            //true wenn zeile vollstaendig, sonst eof erreicht
@@ -342,7 +342,7 @@ type
    procedure writemsestrings(const value: msestringarty);
    function readstrings: stringarty;
    function readmsestrings: msestringarty;
-   function readmsedatastring: msestring; //returns remainig data 
+   function readmsedatastring: msestring; //returns remainig data
    function readstring(const default: string): string;
                 //liest string, bringt defaultwert bei fehler
    function readinteger(default: integer; min: integer = minint;
@@ -364,23 +364,23 @@ type
    procedure resetsearch;
    function searchnext: boolean; //true wenn gefunden
    property nativesearchtext: string read fsearchtext write setsearchtext;
-   property msesearchtext: msestring read getmsesearchtext 
+   property msesearchtext: msestring read getmsesearchtext
                                                      write setmsesearchtext;
-   property searchoptions: searchoptionsty read fsearchoptions 
+   property searchoptions: searchoptionsty read fsearchoptions
                                                       write setsearchoptions;
    property searchpos: longword read fsearchpos write fsearchpos;
    property searchfoundpos: longword read fsearchfoundpos;
-   property searchlinestartpos: longword read fsearchlinestartpos 
+   property searchlinestartpos: longword read fsearchlinestartpos
                                                     write fsearchlinestartpos;
-   property searchlinenumber: longword read fsearchlinenumber 
+   property searchlinenumber: longword read fsearchlinenumber
                                                      write fsearchlinenumber;
    property searchabortpo: pboolean read fsearchabortpo write fsearchabortpo;
 
    property notopen: boolean read getnotopen;
-   property encoding: charencodingty read fencoding write fencoding 
+   property encoding: charencodingty read fencoding write fencoding
                                                          default ce_locale;
    function foundeolstyle: eolstylety; //found by readln
-   property eolstyle: eolstylety read feolstyle 
+   property eolstyle: eolstylety read feolstyle
                               write seteolstyle default eol_default;
                               //for writeln, eol_default -> eol_system
  end;
@@ -489,7 +489,7 @@ type
                               const aopenmode: fileopenmodety = fm_create);
    property data: string read getdata;
  end;
-  
+
 function getnextbufferline(var data: pchar; len: integer): string;
                   //data = nil -> fertig
 function getbufferline(const data: pchar; linenr,len: integer): string;
@@ -508,9 +508,9 @@ function getrecordtypechars(const fields: array of const): string;
                 // S -> msestring
                 // r -> real
 
-function encodestring(const value: msestring; 
+function encodestring(const value: msestring;
                            const encoding: charencodingty = ce_utf8): string;
-function decodestring(const value: string; 
+function decodestring(const value: string;
                    const encoding: charencodingty = ce_utf8): msestring;
 
 function encoderecord(const fields: array of const;
@@ -528,8 +528,8 @@ function decoderecord(const value: msestring;
                 // S -> msestring
                 // r -> real
 
-function readstreamdatastring(const astream: tstream): string; 
-               //reads from current pos to eof               
+function readstreamdatastring(const astream: tstream): string;
+               //reads from current pos to eof
 function readfiledatastring(const afilename: filenamety): string;
 function tryreadfiledatastring(const afilename: filenamety;
                                     out adata: string): syserrorty;
@@ -682,8 +682,8 @@ begin
  end;
 end;
 
-function readstreamdatastring(const astream: tstream): string; 
-               //reads from current pos to eof               
+function readstreamdatastring(const astream: tstream): string;
+               //reads from current pos to eof
 var
  size1: ptrint;
  pos1: ptrint;
@@ -695,14 +695,14 @@ begin
  end;
  setlength(result,size1+1);
  pos1:= 0;
- while true do begin 
+ while true do begin
   lint1:= size1-pos1;
   lint2:= astream.read((pchar(pointer(result))+pos1)^,lint1+1);
   pos1:= pos1+lint2;
   if lint2 <= lint1 then begin
    setlength(result,pos1);
    break;
-  end; 
+  end;
   size1:= size1 * 2;
   setlength(result,size1+1);
  end;
@@ -794,7 +794,7 @@ begin
  end;
 end;
 
-function encodestring(const value: msestring; 
+function encodestring(const value: msestring;
                            const encoding: charencodingty = ce_utf8): string;
 begin
  case encoding  of
@@ -813,7 +813,7 @@ begin
  end;
 end;
 
-function decodestring(const value: string; 
+function decodestring(const value: string;
                    const encoding: charencodingty = ce_utf8): msestring;
 begin
  case encoding  of
@@ -1053,7 +1053,7 @@ begin
  create(fm_read);
 end;
 
-constructor tmsefilestream.internalcreate(const afilename: filenamety; 
+constructor tmsefilestream.internalcreate(const afilename: filenamety;
                       const aopenmode: fileopenmodety;
                       const accessmode: fileaccessmodesty;
                       const rights: filerightsty;
@@ -1110,7 +1110,7 @@ end;
 constructor tmsefilestream.create(const afilename: filenamety;
             const aopenmode: fileopenmodety = fm_read;
             const accessmode: fileaccessmodesty = [];
-            const Rights: filerightsty = defaultfilerights);  
+            const Rights: filerightsty = defaultfilerights);
             //!!!!todo linux lock
 var
  mstr1: msestring;
@@ -1187,7 +1187,7 @@ procedure tmsefilestream.closehandle(const ahandle: integer);
 begin
  sys_closefile(ahandle);
 end;
- 
+
 procedure tmsefilestream.sethandle(value: integer);
 begin
  if value <> handle then begin
@@ -1397,7 +1397,7 @@ end;
 procedure tmsefilestream.clear;
 begin
  checkmemorystream;
- fmemorystream.clear; 
+ fmemorystream.clear;
 end;
 
 procedure tmsefilestream.flushbuffer;
@@ -1550,7 +1550,7 @@ begin
   if bufoffset <> nil then begin
    po1:= bufoffset;
    bufoffset:= nil;
-   internalwritebuffer(fbuffer^,po1-fbuffer);   
+   internalwritebuffer(fbuffer^,po1-fbuffer);
   end;
  end;
 end;
@@ -1701,7 +1701,7 @@ begin
   end;
  end
  else begin
-  if (origin = sobeginning) and (bufoffset <> nil) and 
+  if (origin = sobeginning) and (bufoffset <> nil) and
                                            (fcryptohandler = nil) then begin
  //  result:= inherited seek(0,socurrent);
    result:= fcachedposition;
@@ -1720,7 +1720,7 @@ begin
    else begin
     flushbuffer;
     if (origin = socurrent) and (bufoffset <> nil) then begin
-     if (offset < fbuffer - bufoffset) or 
+     if (offset < fbuffer - bufoffset) or
                                        (offset >= bufend-bufoffset) then begin
       result:= inherited seek(offset-(bufend-bufoffset),origin);
       fcachedposition:= result;
@@ -1797,7 +1797,7 @@ begin
    if not eof then begin
     result:= result + read((pchar(@buffer)+result)^,count-result);
    end;
-  end; 
+  end;
  endlab:
   if result < count then begin
    include(fstate,tss_eof);
@@ -1809,15 +1809,15 @@ procedure tcustombufstream.clear;
 begin
  inherited;
  fstate:= [];
- bufoffset:= nil; 
- bufend:= nil; 
+ bufoffset:= nil;
+ bufend:= nil;
 end;
 
 function tcustombufstream.getbufpo: pchar;
 var
  int1: integer;
 begin
- if not ismemorystream and 
+ if not ismemorystream and
             ((bufoffset = nil) or (bufoffset = bufend)) then begin
   int1:= readbytes(fbuffer^);
   if int1 > 0 then begin
@@ -2402,7 +2402,7 @@ begin
  setlength(result,int1);
 end;
 
-function ttextstream.readmsedatastring: msestring; //returns remainig data 
+function ttextstream.readmsedatastring: msestring; //returns remainig data
 begin
  result:= decode(readdatastring);
 end;
@@ -3043,7 +3043,7 @@ procedure tcustomcryptohandler.setchain(const avalue: tcustomcryptohandler);
    end;
   end;
  end;
- 
+
 var
  ha1: tcustomcryptohandler;
  int1: integer;

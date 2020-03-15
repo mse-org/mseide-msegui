@@ -1,5 +1,5 @@
 { MSEide Copyright (c) 1999-2012 by Martin Schreiber
-   
+
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation; either version 2 of the License, or
@@ -56,9 +56,9 @@ type
    editdiract: taction;
    c: tstringcontainer;
    procedure projecteditonchange(const sender: TObject);
-   procedure projecteditonstatreaditem(const sender: TObject; 
+   procedure projecteditonstatreaditem(const sender: TObject;
                 const reader: tstatreader; var aitem: ttreelistitem);
-   procedure projecteditonupdaterowvalues(const sender: TObject; 
+   procedure projecteditonupdaterowvalues(const sender: TObject;
                 const aindex: Integer; const aitem: tlistitem);
    procedure projecttreefooncreate(const sender: tobject);
    procedure projecttreefoonloaded(const sender: tobject);
@@ -71,7 +71,7 @@ type
 
    procedure projecttreeonupdatestat(const sender: tobject;
                 const filer: tstatfiler);
-   procedure projecteditoncellevent(const sender: tobject; 
+   procedure projecteditoncellevent(const sender: tobject;
                 var info: celleventinfoty);
 
    procedure itemoncheckrowmove(const curindex: Integer; const newindex: Integer;
@@ -159,10 +159,10 @@ type
    procedure dostatread(const reader: tstatreader); override;
    procedure dostatwrite(const writer: tstatwriter); override;
  end;
- 
+
  tcmodulenode = class(tfilenode)
  end;
- 
+
  tformnode = class(tfilenode,irecordfield)
   private
    fclasstype: msestring;
@@ -199,7 +199,7 @@ type
 
  tnamehashlist = class(tpointeransistringhashdatalist)
  end;
- 
+
  tfilesnode = class(tprojectrootnode)
   private
    fhashlist: tfilenodehashlist;
@@ -230,7 +230,7 @@ type
 //   fmodulefilenames: filenamearty;
 //   fstatreading: boolean;
    fnamelist: tnamehashlist;
-   fclasstypelist: tnamehashlist;   
+   fclasstypelist: tnamehashlist;
   protected
    function createsubnode: ttreelistitem; override;
    function createnode: tfilenode; override;
@@ -241,7 +241,7 @@ type
    destructor destroy; override;
    procedure clear; override;
    procedure loadlist; override;
-   function addfile(const currentnode: tprojectnode; 
+   function addfile(const currentnode: tprojectnode;
                                       const afilename: filenamety): tunitnode;
 //   function moduleclassnames: msestringarty;
 //   function modulenames: msestringarty;
@@ -256,7 +256,7 @@ type
  tcmodulesnode = class(tfilesnode)
   protected
    function createsubnode: ttreelistitem; override;
-   function createnode(const afilename: filenamety): tfilenode; 
+   function createnode(const afilename: filenamety): tfilenode;
                                                 reintroduce; virtual;
   public
    constructor create;
@@ -264,7 +264,7 @@ type
    procedure modulechanged(const aname: filenamety);
    procedure modulecompiled(const aname: filenamety);
  end;
- 
+
  tprojecttree = class
   private
    funits: tunitsnode;
@@ -278,7 +278,7 @@ type
    function units: tunitsnode;
    function cmodules: tcmodulesnode;
    function files: tfilesnode;
-   function updatestat(const filer: tstatfiler): boolean; 
+   function updatestat(const filer: tstatfiler): boolean;
                                           //true if read data found
    procedure updatelist;
  end;
@@ -312,7 +312,7 @@ const
  unitico = 2;
  formico = 4;
  dirico = 6;
- 
+
 function isformfile(const aname: filenamety): boolean;
 begin
  result:= issamefilename(aname,replacefileext(aname,formfileext));
@@ -419,7 +419,7 @@ var
 begin
  mstr1:= filename;
  if fkind = pnk_dir then begin
-  expandprmacros1(mstr1);    
+  expandprmacros1(mstr1);
  end;
  mstr2:= parentpath;
  fpath:= filepath(mstr2,mstr1);
@@ -515,7 +515,7 @@ begin
  end;
 end;
 
-procedure tformnode.setfieldtext(const fieldindex: integer; 
+procedure tformnode.setfieldtext(const fieldindex: integer;
                                                 var avalue: msestring);
 var
  n1: tfilesnode;
@@ -624,16 +624,16 @@ begin
    n1:= currentnode;
    if n1 <> nil then begin
     ind1:= n1.count;
-   end;  
+   end;
    while (n1 <> nil) and (n1.fkind <> pnk_dir) do begin
     ind1:= n1.parentindex;
     n1:= tprojectnode(n1.parent);
    end;
    if (n1 = nil) then begin
     n1:= self;
-    ind1:= count;   
+    ind1:= count;
    end;
-   result:= createnode;   
+   result:= createnode;
    n1.insert(ind1,result);
    result.filename:= afilename;
    fhashlist.add(result.fpath,result);
@@ -730,7 +730,7 @@ var
    if fkind in filenodes then begin
     mstr1:= filename;
     if fkind = pnk_dir then begin
-     li.expandmacros1(mstr1);    
+     li.expandmacros1(mstr1);
     end;
     fpath:= filepath(apath,mstr1);
     case fkind of
@@ -1079,7 +1079,7 @@ function tprojecttree.updatestat(const filer: tstatfiler): boolean;
    end;
   end;
  end;
- 
+
 begin
  result:= false;
  if not filer.candata then begin
@@ -1329,7 +1329,7 @@ begin
 end;
 
 procedure tprojecttreefo.remdirexe(const sender: TObject);
- 
+
 begin
  if askyesno(c[ord(wantremove)]+' '+lineend+
     tfilenode(projectedit.item).fpath+lineend+
@@ -1420,7 +1420,7 @@ procedure tprojecttreefo.gridcellevent(const sender: TObject;
                var info: celleventinfoty);
 begin
  if isrowenter(info) then begin
-  edit.frame.buttons[1].visible:= 
+  edit.frame.buttons[1].visible:=
                             tprojectnode(projectedit.item).fkind = pnk_dir;
  end;
  if isrowexit(info) then begin
@@ -1470,13 +1470,13 @@ end;
 
 procedure tprojecttreefo.updateremdirexe(const sender: tcustomaction);
 begin
- sender.enabled:= (projectedit.item <> nil) and 
+ sender.enabled:= (projectedit.item <> nil) and
                     (tprojectnode(projectedit.item).fkind = pnk_dir);
 end;
 
 procedure tprojecttreefo.updateadddirexe(const sender: tcustomaction);
 begin
- sender.enabled:= (projectedit.item <> nil) and 
+ sender.enabled:= (projectedit.item <> nil) and
      (tprojectnode(projectedit.item).fkind in [pnk_source,pnk_dir,pnk_files]);
 end;
 

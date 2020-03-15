@@ -9,7 +9,7 @@
 
     French translation by Fabrice Michel Bouillerot.
     UTF-8 Accented french characters
-    
+
     &#0192;  A grave
     &#0194;  A circumflex
     &#0196;  A diaresis
@@ -45,15 +45,15 @@
     &#0338;  OE ethel
     &#0339;  oe ethel
     &#0376;  Y diaresis
-    
+
     &#8217; apostrophe
-} 
+}
 unit mseconsts_fr;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 uses
  mseconsts;
- 
+
 implementation
 uses
  msetypes{msestrings},sysutils,mseformatstr;
@@ -110,7 +110,7 @@ const
   'Erreur',                               //sc_Error
   'Min.',                                 //sc_Min
   'Max.',                                 //sc_Max
-  'Erreur de rang',                       //sc_Range_error  
+  'Erreur de rang',                       //sc_Range_error
 
   '&D'#0233'faire',                        //sc_Undo        ///         ///
   '&Refaire',                             //sc_Redo          //          //
@@ -122,14 +122,14 @@ const
   '&Ajouter ligne',                       //sc_append_row   // hotkeys   //
   '&Supprimer ligne',                     //sc_delete_row  ///          ///
 
-  'R'#0233'&pertoire',                     //sc_Dir               /// 
+  'R'#0233'&pertoire',                     //sc_Dir               ///
   '&Racine',                              //sc_home              //
   '&Remonter',                            //sc_Up                //
   '&Nouveau r'#0233'pertoire',             //sc_New_dir           // hotkeys
   'N&om',                                 //sc_Name              //
   '&Afficher fichiers cach'#0233's',       //sc_Show_hidden_files //
-  '&Filtre',                              //sc_Filter            ///   
-  'Sauver',                               //sc_save 
+  '&Filtre',                              //sc_Filter            ///
+  'Sauver',                               //sc_save
   'Ouvrir',                               //sc_open
   'Nom',                                  //sc_name1
   'Cr'#0233'er un nouveau r'#0233'pertoire',//sc_create_new_directory
@@ -152,7 +152,7 @@ const
   'Erreur de format graphique',           //sc_graphic_format_error
   'Bitmap MS',                            //sc_MS_Icon
   'Icone MS',                             //sc_MS_Icon
-  'Image JPEG',                           //sc_JPEG_Image 
+  'Image JPEG',                           //sc_JPEG_Image
   'Image PNG',                            //sc_PNG_Image
   'Image XPM',                            //sc_XPM_Image
   'Image PNM',                            //sc_PNM_Image
@@ -197,7 +197,7 @@ const
   'Paysage',                              //sc_landscape print orientation
   'Supprimer ligne ?',                    //sc_Delete_row_question
   'Lignes s'#0233'lectionn'#0233'es',       //sc_selected_rows
-  'seulement un '#0233'l'#0233'ment',       //sc_Single_item_only 
+  'seulement un '#0233'l'#0233'ment',       //sc_Single_item_only
   'Copier cellules',                      //sc_Copy_Cells
   'Coller cellules',                      //sc_Paste_Cells
   'Fermer',               //sc_close
@@ -253,7 +253,7 @@ const
   'Volume plus',           //sc_volumeup
   'Annuler speech'        //sc_cancelspeech
 );
-    
+
 function delete_n_selected_rows(const params: array of const): msestring;
 begin
  with params[0] do begin

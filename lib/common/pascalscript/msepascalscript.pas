@@ -14,7 +14,7 @@ uses
  classes,mclasses,uPSComponent,uPSCompiler,uPSRuntime,msestrings,mseforms,
  mseclasses,typinfo,mselist,uPSPreProcessor;
 
-type 
+type
 
  tpasc = class(tpsscript)
   public
@@ -31,7 +31,7 @@ type
    procedure testproc1; virtual;
    property prop: string read fprop write fprop;
  end;
- 
+
  tformscript = class(tpasc)
   private
    fownercomp: tmsecomponent;
@@ -44,14 +44,14 @@ type
   public
    constructor create(aowner: tmsecomponent); reintroduce;
  end;
- 
+
  methpropinfoty = record
   propinfo: ppropinfo;
   instance: tobject;
   name: string;
  end;
  pmethpropinfoty = ^methpropinfoty;
- 
+
  tmethproplist = class(trecordlist)
   protected
    procedure finalizerecord(var item); override;
@@ -88,20 +88,20 @@ type
    property pasc_script: tstrings read getpasc_script write setpasc_script;
    property pasc_plugins: tpsplugins read getpasc_plugins write setpasc_plugins;
  end;
- 
+
  pascformclassty = class of tpascform;
- 
-function createpascform(const aclass: tclass; 
+
+function createpascform(const aclass: tclass;
                    const aclassname: pshortstring): tmsecomponent;
 function loadpascform(const filename: filenamety): tpascform;
 
 implementation
 uses
  msestream,msegui,msesys,sysutils,msetmpmodules,mseobjecttext;
- 
+
 type
  tmsecomponent1 = class(tmsecomponent);
- 
+
 function loadpascform(const filename: filenamety): tpascform;
 var
  stream1: ttextstream;
@@ -122,7 +122,7 @@ begin
   stream2.free;
  end;
 end;
-{ 
+{
 function loadpascform(const filename: filenamety): tpascform;
 var
  methlist: tmethproplist;
@@ -163,8 +163,8 @@ begin
   methlist.free;
  end;
 end;
-} 
-function createpascform(const aclass: tclass; 
+}
+function createpascform(const aclass: tclass;
                    const aclassname: pshortstring): tmsecomponent;
 begin
  result:= pascformclassty(aclass).create(nil,false);
@@ -187,7 +187,7 @@ begin
   propinfo:= apropinfo;
   instance:= ainstance;
   name:= aname;
- end;  
+ end;
  add(info);
 end;
 
@@ -207,7 +207,7 @@ end;
 procedure tmethproplist.copyrecord(var item);
 begin
  with methpropinfoty(item) do begin
-  stringaddref(name);  
+  stringaddref(name);
  end;
 end;
 
@@ -268,7 +268,7 @@ end;
 
 function tpascform.isscript: boolean;
 begin
- result:= (cs_tmpmodule in fmsecomponentstate) and 
+ result:= (cs_tmpmodule in fmsecomponentstate) and
                             not (csdesigning in componentstate);
 end;
 
@@ -329,7 +329,7 @@ end;
 
 procedure tpascform.setpasc_script(const avalue: tstrings);
 begin
- fscript.script.assign(avalue); 
+ fscript.script.assign(avalue);
 end;
 
 function tpascform.getpasc_plugins: tpsplugins;

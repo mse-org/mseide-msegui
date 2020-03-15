@@ -12,13 +12,13 @@ unit msefontconfig;
 interface
 uses
  msestrings,msectypes,msetypes;
- 
+
 const
  {$ifdef mswindows}
- fontconfiglib: array[0..1] of filenamety = 
+ fontconfiglib: array[0..1] of filenamety =
                          ('libfontconfig-1.dll','fontconfig1.dll');
  {$else}
- fontconfiglib: array[0..1] of filenamety = 
+ fontconfiglib: array[0..1] of filenamety =
                          ('libfontconfig.so.1','libfontconfig.so');
  {$endif}
  FC_FAMILY =          'family';	//* String */
@@ -52,7 +52,7 @@ const
 
  FC_MATRIX =          'matrix';
  FC_CHAR_WIDTH =      'charwidth';
- 
+
  FC_WEIGHT_BOLD = 200;
  FC_SLANT_ITALIC = 100;
  FC_PROPORTIONAL = 0;
@@ -60,7 +60,7 @@ const
 
 
 type
- TFcChar8 = byte;           
+ TFcChar8 = byte;
  PFcChar8 = ^TFcChar8;
  TFcChar16 = word;
  PFcChar16 = ^TFcChar16;
@@ -142,7 +142,7 @@ type
    fonts : PPFcPattern;
  end;
  PFcFontSet = ^TFcFontSet;
- 
+
 var
  FcInit: function: tfcbool;cdecl;
  FcFini: procedure;cdecl;
@@ -159,7 +159,7 @@ var
  FcObjectSetCreate: function: PFcObjectSet;cdecl;
  FcObjectSetAdd: function(os: PFcObjectSet; aobject:Pchar):TFcBool;cdecl;
  FcObjectSetDestroy: procedure(os: PFcObjectSet);cdecl;
- FcFontList: function(config: PFcConfig; p:PFcPattern; 
+ FcFontList: function(config: PFcConfig; p:PFcPattern;
                       os:PFcObjectSet): PFcFontSet;cdecl;
  FcCharSetCreate: function: PFcCharSet;cdecl;
  FcCharSetDestroy: procedure(fcs:PFcCharSet);cdecl;
@@ -178,7 +178,7 @@ var
                c:PPFcCharSet):TFcResult;cdecl;
  FcFontRenderPrepare: function(config:PFcConfig; pat:PFcPattern;
                     font:PFcPattern): PFcPattern;cdecl;
- FcFontMatch: function(config: PFcConfig; p: PFcPattern; 
+ FcFontMatch: function(config: PFcConfig; p: PFcPattern;
                                  result: PFcResult): PFcPattern;cdecl;
  FcMatrixRotate: procedure(m:PFcMatrix; c:cdouble; s:cdouble);cdecl;
  FcMatrixScale: procedure(m:PFcMatrix; sx:cdouble; sy:cdouble);cdecl;
@@ -189,20 +189,20 @@ var
  FcPatternAddCharSet: function(p:PFcPattern;
                        aobject:Pchar; c:PFcCharSet):TFcBool;cdecl;
  FcPatternAddBool: function(p:PFcPattern; aobject:Pchar; b:TFcBool):TFcBool; cdecl;
- FcPatternAddLangSet: function(p:PFcPattern; aobject:Pchar; 
+ FcPatternAddLangSet: function(p:PFcPattern; aobject:Pchar;
                          ls:PFcLangSet):TFcBool;cdecl;
- 
- FcPatternGetString: function(p: PFcPattern; aobject: Pchar; n: integer; 
+
+ FcPatternGetString: function(p: PFcPattern; aobject: Pchar; n: integer;
                                 s: ppchar): tfcresult; cdecl;
- FcPatternGetInteger: function(p: PFcPattern; aobject: Pchar; n: integer; 
+ FcPatternGetInteger: function(p: PFcPattern; aobject: Pchar; n: integer;
                                 i: pinteger): tfcresult; cdecl;
- FcPatternGetDouble: function(p: PFcPattern; aobject: Pchar; n: integer; 
+ FcPatternGetDouble: function(p: PFcPattern; aobject: Pchar; n: integer;
                                 i: pcdouble): tfcresult; cdecl;
  FcNameParse: function(name: pchar): PFcPattern; cdecl;
  FcStrListNext: function(list: PFcStrList): pchar; cdecl;
  FcStrListDone: procedure(list: PFcStrList); cdecl;
- 
-procedure FcMatrixInit(var m: TFcMatrix);     
+
+procedure FcMatrixInit(var m: TFcMatrix);
 
 procedure initializefontconfig(const sonames: array of filenamety);
 procedure releasefontconfig;
@@ -249,7 +249,7 @@ begin
   conf1:= fcconfiggetcurrent();
   if not fcconfigparseandload(conf1,pchar(str1),false) then begin
    raise exception.create(
-   'Fontconfig: Can not read config file:'+lineend+str1);   
+   'Fontconfig: Can not read config file:'+lineend+str1);
   end;
  end;
 {$endif}

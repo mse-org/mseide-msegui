@@ -13,7 +13,7 @@ interface
 uses
  mseforms,mseclasses,mseobjectpicker,msegui,mseguiglob,msepointer,msetypes,
  msegraphics,msegraphutils;
- 
+
 type
  tsizingform = class(tmseform,iobjectpicker)
   private
@@ -41,13 +41,13 @@ type
   public
    destructor destroy(); override;
   published
-   property optionssizing: optionssizingty read foptionssizing 
+   property optionssizing: optionssizingty read foptionssizing
                                           write setoptionssizing default [];
  end;
-   
+
  sizingformclassty = class of tsizingform;
 
-function createsizingform(const aclass: tclass; 
+function createsizingform(const aclass: tclass;
                    const aclassname: pshortstring): tmsecomponent;
 
 implementation
@@ -55,8 +55,8 @@ uses
  sysutils,mseevent;
 type
  tmsecomponent1 = class(tmsecomponent);
- 
-function createsizingform(const aclass: tclass; 
+
+function createsizingform(const aclass: tclass;
                     const aclassname: pshortstring): tmsecomponent;
 
 begin
@@ -114,14 +114,14 @@ end;
 
 const
  shapes: array[0..15] of cursorshapety = (
- cr_default,   //        ,       ,         ,          
- cr_sizehor,   //osi_left,       ,         ,          
- cr_sizever,   //        ,osi_top,         ,          
- cr_topleftcorner, //osi_left,osi_top,         ,          
- cr_sizehor,   //        ,       ,osi_right,          
- cr_default,   //osi_left,       ,osi_right,          
- cr_toprightcorner, //        ,osi_top,osi_right,          
- cr_default,   //osi_left,osi_top,osi_right,          
+ cr_default,   //        ,       ,         ,
+ cr_sizehor,   //osi_left,       ,         ,
+ cr_sizever,   //        ,osi_top,         ,
+ cr_topleftcorner, //osi_left,osi_top,         ,
+ cr_sizehor,   //        ,       ,osi_right,
+ cr_default,   //osi_left,       ,osi_right,
+ cr_toprightcorner, //        ,osi_top,osi_right,
+ cr_default,   //osi_left,osi_top,osi_right,
  cr_sizever,   //        ,       ,         ,osi_bottom
  cr_bottomleftcorner, //osi_left,       ,         ,osi_bottom
  cr_default,   //        ,osi_top,         ,osi_bottom
@@ -131,7 +131,7 @@ const
  cr_default,   //        ,osi_top,osi_right,osi_bottom
  cr_default    //osi_left,osi_top,osi_right,osi_bottom
  );
- 
+
 function tsizingform.getcursorshape(const sender: tobjectpicker;
                var ashape: cursorshapety): boolean;
 const
@@ -142,7 +142,7 @@ begin
  result:= false;
  fpickedges:= [];
  pt1:= sender.pickpos;
- if (sender.shiftstate * keyshiftstatesmask = []) and 
+ if (sender.shiftstate * keyshiftstatesmask = []) and
                          pointinrect(pt1,mr(nullpoint,size)) then begin
   if pt1.x < sitol then begin
    include(fpickedges,osi_left);

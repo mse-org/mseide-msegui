@@ -1,4 +1,4 @@
-unit main;  
+unit main;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 uses

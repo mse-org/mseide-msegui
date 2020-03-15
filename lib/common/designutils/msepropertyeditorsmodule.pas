@@ -22,7 +22,7 @@ type
   texteditor,               //13 Texteditor
   invalidcomponentname      //14 Invalid component name
  );
- 
+
  tmsepropertyeditorsmo = class(tmsedatamodule)
    c: tstringcontainer;
  end;

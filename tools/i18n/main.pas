@@ -1,5 +1,5 @@
 { MSEtools Copyright (c) 1999-2012 by Martin Schreiber
-   
+
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation; either version 2 of the License, or
@@ -34,7 +34,7 @@ const
 
 type
  resfilekindty = (rfk_module,rfk_unit,rfk_resource,rfk_resstrings);
- 
+
  tmainfo = class(tmseform)
    mainstatfile: tstatfile;
    clear: tbutton;
@@ -89,14 +89,14 @@ type
                                var accept: boolean);
    procedure variantonsetvalue(const sender: tobject; var avalue: msestring;
                                    var accept: boolean);
- 
+
 //   procedure scanonexecute(const sender: tobject);
    procedure makeonexecute(const sender: tobject);
    procedure mainupdatestat(const sender: TObject; const filer: tstatfiler);
    procedure configureonexecute(const sender: TObject);
    procedure makeexecute(const sender: tthreadcomp);
    procedure maketerminate(const sender: tthreadcomp);
-   procedure mainclosequery(const sender: tcustommseform; 
+   procedure mainclosequery(const sender: tcustommseform;
                                var amodalresult: modalresultty);
    procedure saveasexecute(const sender: TObject);
    procedure newprojectexe(const sender: TObject);
@@ -292,7 +292,7 @@ end;
 procedure tmainfo.checkitem(const sender: ttreelistitem; var delete: boolean);
 begin
  with tpropinfoitem(sender),node,info do begin
-  delete:= (sender.count = 0) and (valuetype in [vanull,valist,vacollection]) and 
+  delete:= (sender.count = 0) and (valuetype in [vanull,valist,vacollection]) and
            (stringonly.value or ntonly.value and not donottranslate);
   if not delete and flat.value then begin
    sender.caption:= msestring(node.rootstring);
@@ -358,7 +358,7 @@ begin
     edit1.frame.button.width:= 13;
     edit1.onsetvalue:= {$ifdef FPC}@{$endif}variantonsetvalue;
     edit1.Tag:= int1 - variantshift;
-    edit1.optionsedit:= (edit1.optionsedit - [oe_savevalue]) + 
+    edit1.optionsedit:= (edit1.optionsedit - [oe_savevalue]) +
                                                   [oe_hintclippedtext];
     grid.datacols[int1].editwidget:= edit1;
    end;
@@ -420,8 +420,8 @@ begin
   stream.Free;
  end;
 end;
- 
-function tmainfo.readstringresource(const stream: tmsefilestream; 
+
+function tmainfo.readstringresource(const stream: tmsefilestream;
                     const fpcformat: boolean): msestring;
 var
  scanner: tscanner;
@@ -651,7 +651,7 @@ var
  stream: ttextdatastream;
  str1: filenamety;
 begin
- if checksave and 
+ if checksave and
        projectfo.impexpfiledialog.controller.execute(str1,fdk_open) then begin
   stream:= ttextdatastream.create(str1,fm_read);
   doimport(stream,charencodingty(projectfo.impexpencoding.value));
@@ -783,13 +783,13 @@ begin
   projectfo.projectstat.filename:= projectfiledialog.controller.filename;
   projectfo.projectstat.readstat;
  end;
-end; 
+end;
 
 procedure tmainfo.onprojectsave(const sender: tobject);
 begin
  writeprojectdata;
 end;
- 
+
 procedure tmainfo.newprojectexe(const sender: TObject);
 begin
  if checksave and (projectfiledialog.controller.execute(fdk_save,
@@ -841,7 +841,7 @@ procedure tmainfo.makeexecute(const sender: tthreadcomp);
 var
  macroar: macroinfoarty;
  error: boolean;
- 
+
  function doproc(const commandstr: msestring): boolean;
  var
   mstr1: msestring;
@@ -864,7 +864,7 @@ var
    end;
   end;
  end;
- 
+
 var
  int1,int2,int3: integer;
  stream,stream1: tmsefilestream;
@@ -913,7 +913,7 @@ begin
      break;
     end;
     for int3:= 0 to rootnode.count - 1 do begin
-     if rootnode[int3].info.name = 
+     if rootnode[int3].info.name =
                        ansistring(projectfo.rootname[int2]) then begin
       node:= rootnode[int3];
       break;
@@ -1038,7 +1038,7 @@ begin
   messagesfo.messages.clear;
   messagesfo.running:= true;
   messagesfo.show; //winid must exist
-  threadcomp.run; 
+  threadcomp.run;
   messagesfo.show(true);
   loadproject;
  end;
@@ -1176,8 +1176,8 @@ begin
  if coloron.value then begin
   with cellinfo.cell do begin
    int1:= typedisp[row];
-   if ((int1 = ord(vastring)) or (int1 = ord(vawstring))) and 
-          not donottranslate[row] and 
+   if ((int1 = ord(vastring)) or (int1 = ord(vawstring))) and
+          not donottranslate[row] and
           (tstringedit(grid.datacols[col].editwidget)[row] =
                  value[row]) and (value[row] <> '') then begin
     cellinfo.color:= cl_ltred;

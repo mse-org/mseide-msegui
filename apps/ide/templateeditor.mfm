@@ -90,13 +90,13 @@ object templateeditorfo: ttemplateeditorfo
     optionsgrid = [og_colsizing, og_rowmoving, og_keyrowmoving, og_rowinserting, og_rowdeleting, og_focuscellonenter, og_autofirstrow, og_autoappend, og_colchangeontabkey, og_wrapcol, og_autopopup, og_mousescrollcol]
     datacols.count = 2
     datacols.options = [co_fill, co_savestate, co_mousescrollrow]
-    datacols.items = <    
+    datacols.items = <
       item
         width = 100
         options = [co_savestate, co_mousescrollrow]
         valuefalse = '0'
         valuetrue = '1'
-      end    
+      end
       item
         width = 336
         options = [co_fill, co_savestate, co_mousescrollrow]
@@ -104,21 +104,21 @@ object templateeditorfo: ttemplateeditorfo
         valuetrue = '1'
       end>
     fixcols.count = 1
-    fixcols.items = <    
+    fixcols.items = <
       item
         width = 30
         numstart = 1
         numstep = 1
       end>
     fixrows.count = 1
-    fixrows.items = <    
+    fixrows.items = <
       item
         height = 16
         captions.count = 2
-        captions.items = <        
+        captions.items = <
           item
             caption = 'Name'
-          end        
+          end
           item
             caption = 'Default Value'
           end>
@@ -159,7 +159,7 @@ object templateeditorfo: ttemplateeditorfo
     anchors = [an_top, an_bottom]
     optionsgrid = [og_focuscellonenter, og_autofirstrow, og_colchangeontabkey, og_wrapcol, og_autopopup, og_mousescrollcol]
     fixcols.count = 1
-    fixcols.items = <    
+    fixcols.items = <
       item
         width = 30
         numstart = 1
@@ -168,7 +168,7 @@ object templateeditorfo: ttemplateeditorfo
     rowcount = 1
     datacols.count = 1
     datacols.options = [co_leftbuttonfocusonly, co_savevalue, co_savestate, co_mousescrollrow]
-    datacols.items = <    
+    datacols.items = <
       item[templed]
         width = 1016
         options = [co_leftbuttonfocusonly, co_savevalue, co_savestate, co_mousescrollrow]

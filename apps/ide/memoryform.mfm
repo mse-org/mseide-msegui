@@ -90,7 +90,7 @@ object memoryfo: tmemoryfo
     datacols.width = 20
     datacols.textflags = [tf_xcentered, tf_ycentered, tf_noselect]
     datacols.optionsedit = [scoe_undoonesc, scoe_forcereturncheckvalue, scoe_eatreturn, scoe_autoselect, scoe_autoselectonfirstclick]
-    datacols.items = <    
+    datacols.items = <
       item
         width = 20
         textflags = [tf_xcentered, tf_ycentered, tf_noselect]
@@ -106,7 +106,7 @@ object memoryfo: tmemoryfo
         valuetrue = '1'
         onsetvalue = cellsetvalue
         ondataentered = adent
-      end    
+      end
       item
         width = 20
         textflags = [tf_xcentered, tf_ycentered, tf_noselect]
@@ -120,7 +120,7 @@ object memoryfo: tmemoryfo
         )
         valuefalse = '0'
         valuetrue = '1'
-      end    
+      end
       item
         width = 20
         textflags = [tf_xcentered, tf_ycentered, tf_noselect]
@@ -134,7 +134,7 @@ object memoryfo: tmemoryfo
         )
         valuefalse = '0'
         valuetrue = '1'
-      end    
+      end
       item
         width = 20
         textflags = [tf_xcentered, tf_ycentered, tf_noselect]
@@ -148,7 +148,7 @@ object memoryfo: tmemoryfo
         )
         valuefalse = '0'
         valuetrue = '1'
-      end    
+      end
       item
         width = 20
         textflags = [tf_xcentered, tf_ycentered, tf_noselect]
@@ -162,7 +162,7 @@ object memoryfo: tmemoryfo
         )
         valuefalse = '0'
         valuetrue = '1'
-      end    
+      end
       item
         width = 20
         textflags = [tf_xcentered, tf_ycentered, tf_noselect]
@@ -176,7 +176,7 @@ object memoryfo: tmemoryfo
         )
         valuefalse = '0'
         valuetrue = '1'
-      end    
+      end
       item
         width = 20
         textflags = [tf_xcentered, tf_ycentered, tf_noselect]
@@ -190,7 +190,7 @@ object memoryfo: tmemoryfo
         )
         valuefalse = '0'
         valuetrue = '1'
-      end    
+      end
       item
         width = 20
         textflags = [tf_xcentered, tf_ycentered, tf_noselect]
@@ -204,7 +204,7 @@ object memoryfo: tmemoryfo
         )
         valuefalse = '0'
         valuetrue = '1'
-      end    
+      end
       item
         width = 20
         textflags = [tf_xcentered, tf_ycentered, tf_noselect]
@@ -218,7 +218,7 @@ object memoryfo: tmemoryfo
         )
         valuefalse = '0'
         valuetrue = '1'
-      end    
+      end
       item
         width = 20
         textflags = [tf_xcentered, tf_ycentered, tf_noselect]
@@ -232,7 +232,7 @@ object memoryfo: tmemoryfo
         )
         valuefalse = '0'
         valuetrue = '1'
-      end    
+      end
       item
         width = 20
         textflags = [tf_xcentered, tf_ycentered, tf_noselect]
@@ -246,7 +246,7 @@ object memoryfo: tmemoryfo
         )
         valuefalse = '0'
         valuetrue = '1'
-      end    
+      end
       item
         width = 20
         textflags = [tf_xcentered, tf_ycentered, tf_noselect]
@@ -260,7 +260,7 @@ object memoryfo: tmemoryfo
         )
         valuefalse = '0'
         valuetrue = '1'
-      end    
+      end
       item
         width = 20
         textflags = [tf_xcentered, tf_ycentered, tf_noselect]
@@ -274,7 +274,7 @@ object memoryfo: tmemoryfo
         )
         valuefalse = '0'
         valuetrue = '1'
-      end    
+      end
       item
         width = 20
         textflags = [tf_xcentered, tf_ycentered, tf_noselect]
@@ -288,7 +288,7 @@ object memoryfo: tmemoryfo
         )
         valuefalse = '0'
         valuetrue = '1'
-      end    
+      end
       item
         width = 20
         textflags = [tf_xcentered, tf_ycentered, tf_noselect]
@@ -302,7 +302,7 @@ object memoryfo: tmemoryfo
         )
         valuefalse = '0'
         valuetrue = '1'
-      end    
+      end
       item
         width = 20
         textflags = [tf_xcentered, tf_ycentered, tf_noselect]
@@ -318,62 +318,62 @@ object memoryfo: tmemoryfo
         valuetrue = '1'
       end>
     fixcols.count = 1
-    fixcols.items = <    
+    fixcols.items = <
       item
         width = 71
         onafterdrawcell = drawfixcol
       end>
     fixrows.count = 1
-    fixrows.items = <    
+    fixrows.items = <
       item
         height = 18
         captions.count = 16
-        captions.items = <        
+        captions.items = <
           item
             caption = '0'
-          end        
+          end
           item
             caption = '1'
-          end        
+          end
           item
             caption = '2'
-          end        
+          end
           item
             caption = '3'
-          end        
+          end
           item
             caption = '4'
-          end        
+          end
           item
             caption = '5'
-          end        
+          end
           item
             caption = '6'
-          end        
+          end
           item
             caption = '7'
-          end        
+          end
           item
             caption = '8'
-          end        
+          end
           item
             caption = '9'
-          end        
+          end
           item
             caption = 'A'
-          end        
+          end
           item
             caption = 'B'
-          end        
+          end
           item
             caption = 'C'
-          end        
+          end
           item
             caption = 'D'
-          end        
+          end
           item
             caption = 'E'
-          end        
+          end
           item
             caption = 'F'
           end>
@@ -445,7 +445,7 @@ object memoryfo: tmemoryfo
       frame.localprops1 = []
       frame.button.color = -2147483646
       frame.buttons.count = 1
-      frame.buttons.items = <      
+      frame.buttons.items = <
         item
           color = -2147483646
         end>
@@ -464,7 +464,7 @@ object memoryfo: tmemoryfo
       textflags = [tf_xcentered, tf_ycentered, tf_noselect]
       ondataentered = updatelayoutexe
       dropdown.cols.count = 1
-      dropdown.cols.items = <      
+      dropdown.cols.items = <
         item
           data = (
             '8'

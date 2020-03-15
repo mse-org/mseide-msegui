@@ -25,19 +25,19 @@ uses
  mserichstring,classes,mclasses,msetypes,msestat,msestatfile,
  msedataedits,msedropdownlist,
  mseevent,mseglob,mseguiglob,msemenus,mseedit,msegui,sysutils;
- 
+
 const
  defaultppmm = 10;
  defaultpagewidth = 210;  //A4 mm
  defaultpageheight = 297; //A4 mm
  defaultframe = 10; //mm
- defaultfontheight = 3.527; //*ppmm -> 10 point 
- 
+ defaultfontheight = 3.527; //*ppmm -> 10 point
+
 // gcscale = 4096;
  printunit = 25.4/72;    //point
  mmtoprintscale = 1/printunit;
  nulllinewidth = 0.2*mmtoprintscale;
- 
+
 type
  stdpagesizety = (sps_user,
  sps_a0,sps_a1,sps_a2,sps_a3,sps_a4,sps_a5,sps_a6,sps_a7,sps_a8,sps_a9,
@@ -49,7 +49,7 @@ type
   name: string;
   width,height: real //mm
  end;
- 
+
 const
  stdpagesizes: array[stdpagesizety] of stdpagety = (
   (name: 'User';      width:     0; height:    0),
@@ -105,7 +105,7 @@ type
  pageorientationty = (pao_portrait,pao_landscape);
 
  exceptioneventty = procedure(const sender: tobject; var e: exception;
-                                             var again: boolean) of object; 
+                                             var again: boolean) of object;
 
  tcustomprinter = class(tmsecomponent,istatfile)
   private
@@ -160,7 +160,7 @@ type
    function getwindowsize: sizety; virtual;
    procedure defineproperties(filer: tfiler); override;
    procedure readstate(reader: treader); override;
-   
+
    //istatfile
    procedure dostatread(const reader: tstatreader); virtual;
    procedure dostatwrite(const writer: tstatwriter); virtual;
@@ -172,30 +172,30 @@ type
    property onerror: exceptioneventty read fonerror write fonerror;
                         //call abort for quiet cancel
 
-   //icanvas   
+   //icanvas
    function getsize: sizety;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
-   
+
    procedure beginprint(const adryrun: boolean = false); virtual;
    procedure endprint; virtual;
    property canvas: tprintercanvas read fcanvas write setcanvas;
    property onpagestart: printereventty read fonpagestart write fonpagestart;
    property onpageend: printereventty read fonpageend write fonpageend;
-   property pa_width: real read fpa_width write setpa_width; 
+   property pa_width: real read fpa_width write setpa_width;
    property pa_height: real read fpa_height write setpa_height;
    property pa_size: stdpagesizety read fpa_size write setpa_size nodefault;
-   property pa_orientation: pageorientationty read fpa_orientation 
+   property pa_orientation: pageorientationty read fpa_orientation
                               write setpa_orientation default pao_portrait;
-  
-   property pa_frameleft: real read fpa_frameleft 
+
+   property pa_frameleft: real read fpa_frameleft
                         write setpa_frameleft stored false;   //mm, default 10
-   property pa_frametop: real read fpa_frametop 
+   property pa_frametop: real read fpa_frametop
                         write setpa_frametop stored false;    //mm, default 10
-   property pa_frameright: real read fpa_frameright 
+   property pa_frameright: real read fpa_frameright
                         write setpa_frameright stored false;  //mm, default 10
-   property pa_framebottom: real read fpa_framebottom 
+   property pa_framebottom: real read fpa_framebottom
                         write setpa_framebottom stored false; //mm, default 10
    property clientwidth: real read getclientwidth;            //mm
    property clientheight: real read getclientheight;          //mm
@@ -205,9 +205,9 @@ type
 //   property colorspace: colorspacety read getcolorspace write setcolorspace;
    property statfile: tstatfile read fstatfile write setstatfile;
    property statvarname: msestring read fstatvarname write fstatvarname;
-   property statpriority: integer read fstatpriority 
+   property statpriority: integer read fstatpriority
                                        write fstatpriority default 0;
-   property options: printeroptionsty read foptions write foptions 
+   property options: printeroptionsty read foptions write foptions
                                              default defaultprinteroptions;
  end;
 
@@ -216,11 +216,11 @@ type
    property canvas;
    property onpagestart;
    property onpageend;
-   property pa_width; 
+   property pa_width;
    property pa_height;
    property pa_size;
    property pa_orientation;
-  
+
    property pa_frameleft; //mm, default 10
    property pa_frametop;    //mm, default 10
    property pa_frameright;  //mm, default 10
@@ -249,9 +249,9 @@ type
    procedure doupdateprintcommand(const adata: pointer);
   public
    constructor create(aowner: tcomponent); override;
-   procedure beginprint(command: msestring = ''; 
+   procedure beginprint(command: msestring = '';
                     const apreamble: string = ''); overload;
-   procedure beginprint(const astream: ttextstream; 
+   procedure beginprint(const astream: ttextstream;
                     const apreamble: string = ''); overload;
     //printer owns the stream, nil -> dummy mode
    procedure endprint; override;
@@ -259,16 +259,16 @@ type
    property printcommand: msestring read fprintcommand write fprintcommand;
    property options;
    property onerror;  //call abort for quiet cancel
-   property onupdateprintcommand: updateprinterstringeventty 
+   property onupdateprintcommand: updateprinterstringeventty
                       read fonupdateprintcommand write fonupdateprintcommand;
                       //runs in main thread
  end;
 
  tprinterfont = class(tcanvasfont)
  end;
- 
+
  pageskindty = (pk_all,pk_even,pk_odd);
- 
+
  pagerangety = record
   first,last: integer;
  end;
@@ -276,7 +276,7 @@ type
 
  printercanvasstatety = (pcs_matrixvalid,pcs_dryrun);
  printercanvasstatesty = set of printercanvasstatety;
- 
+
  tcustomprintercanvas = class(tcanvas)
   private
    fheaderheight: integer;
@@ -328,7 +328,7 @@ type
    procedure textout(const text: richstringty; const dest: rectty;
                         const flags: textflagsty;
                         const tabdist: real); virtual; abstract;
-                              //tabdist < 0 -> lastx                 
+                              //tabdist < 0 -> lastx
    procedure begintextclip(const arect: rectty); virtual; abstract;
    procedure endtextclip; virtual; abstract;
    procedure checknextpage;
@@ -340,7 +340,7 @@ type
    constructor create(const user: tcustomprinter;
                                    const intf: icanvas); reintroduce;
    procedure initflags(const dest: tcanvas); override;
-      
+
    // if cy of destrect = 0 and tf_ycentered in textflags -> place on baseline
    procedure drawtext(var info: drawtextinfoty); overload; virtual;
    procedure drawtext(const atext: richstringty;
@@ -357,7 +357,7 @@ type
    procedure writelines(const alines: array of msestring); overload;
    procedure writelines(const alines: msestringarty); overload;
    procedure writelines(const alines: richstringarty); overload;
-   
+
    property indentx: integer read findentx write findentx;
                  //pixels
    property indenty: integer read findenty write findenty;
@@ -374,9 +374,9 @@ type
    function lineheight: integer; //pixels
 
    procedure nextpage; override;
-   function active: boolean; 
+   function active: boolean;
      //checks pages
-      
+
    property title: msestring read ftitle write ftitle;
                             //used as print job lable
    property clientrect: rectty read fclientrect;
@@ -386,18 +386,18 @@ type
    property clienttop: integer read fclientrect.y;
    property clientwidth: integer read fclientrect.cx;
    property clientheight: integer read fclientrect.cy;
-   property colorspace: colorspacety read fcolorspace 
+   property colorspace: colorspacety read fcolorspace
                          write setcolorspace default cos_gray;
    property pagenumber: integer read fpagenumber;
-   property pageskind: pageskindty read fpageskind write fpageskind; 
+   property pageskind: pageskindty read fpageskind write fpageskind;
                    //null based
    property pages: pagerangearty read fpages write setpages;
                   //all if nil, null based
    property pagesstring: msestring read fpagesstring write setpagesstring;
                   //one based, example: '1-5,7,9,11-13', all if ''
-   
-   property printorientation: pageorientationty read fprintorientation 
-                write setprintorientation default pao_portrait;   
+
+   property printorientation: pageorientationty read fprintorientation
+                write setprintorientation default pao_portrait;
  end;
 
  tprintercanvas = class(tcustomprintercanvas)
@@ -414,21 +414,21 @@ type
    fdeststream: ttextstream;
    fpreamblestream: ttextstream;
    fbodystream: ttextstream;
-   procedure streamwrite(const atext: string; const apreamble: boolean = false); 
+   procedure streamwrite(const atext: string; const apreamble: boolean = false);
                       //checks fstream = nil
    procedure streamwriteln(const atext: string; const apreamble: boolean = false);
                      //checks fstream = nil
   public
 //   procedure reset; override;
  end;
-  
+
  tprintervalueselector = class(tcustomselector)
   private
    fprinter: tcustomprinter;
    procedure setprinter(const avalue: tcustomprinter);
    procedure printerchanged; virtual; abstract;
   protected
-   procedure objectevent(const sender: tobject; 
+   procedure objectevent(const sender: tobject;
                               const event: objecteventty); override;
   public
    constructor create(aowner: tcomponent); override;
@@ -440,10 +440,10 @@ type
    property ondataentered;
    property printer: tcustomprinter read fprinter write setprinter;
  end;
- 
+
  pagesizeeventty = procedure(const sender: tobject;
                  var avalue: stdpagesizety; var accept: boolean) of object;
-                         
+
  tpagesizeselector = class(tprintervalueselector)
   private
    fpagewidth: real;
@@ -476,11 +476,11 @@ type
    property pageheight: real read fpageheight write setpageheight;
   published
    property value: stdpagesizety read getvalue write setvalue default sps_a4;
-   property editwidth: tcustomrealedit read feditwidth 
+   property editwidth: tcustomrealedit read feditwidth
                                                  write seteditwidth;
              //set optionsedit1 oe1_sendchangeeventbycheckvalue in editwidget
-   property editheight: tcustomrealedit read feditheight 
-                                                 write seteditheight; 
+   property editheight: tcustomrealedit read feditheight
+                                                 write seteditheight;
              //set optionsedit1 oe1_sendchangeeventbycheckvalue in editwidget
    property onsetvalue: pagesizeeventty read getonsetvalue
                                                  write setongetvalue;
@@ -503,12 +503,12 @@ type
   public
    constructor create(aowner: tcomponent); override;
   published
-   property value: pageorientationty read getvalue 
+   property value: pageorientationty read getvalue
                    write setvalue default pao_portrait;
    property onsetvalue: pageorientationeventty read getonsetvalue
                                                     write setongetvalue;
  end;
- 
+
 function stringtopages(const avalue: msestring): pagerangearty;
                   //one based, example: '1-5,7,9,11-13'
 function checkstdpagesize(const awidth,aheight: flo64): stdpagesizety;
@@ -525,7 +525,7 @@ uses
   {$warn 6058 off}
  {$endif}
 {$endif}
- 
+
 type
  tfont1 = class(tfont);
  tcanvas1 = class(tcanvas);
@@ -547,7 +547,7 @@ begin
  end;
  result:= sps_user;
 end;
- 
+
 function stringtopages(const avalue: msestring): pagerangearty;
 var
  ar1,ar2: msestringarty;
@@ -902,23 +902,23 @@ begin
  inherited;
  filer.defineproperty('pa_frameleft',{$ifdef FPC}@{$endif}readpa_frameleft,
        {$ifdef FPC}@{$endif}writepa_frameleft,
-       (filer.ancestor = nil) and (fpa_frameleft <> defaultframe) or 
-       (filer.ancestor <> nil) and 
+       (filer.ancestor = nil) and (fpa_frameleft <> defaultframe) or
+       (filer.ancestor <> nil) and
                     (tcustomprinter(filer.ancestor).fpa_frameleft <> fpa_frameleft));
  filer.defineproperty('pa_frametop',{$ifdef FPC}@{$endif}readpa_frametop,
        {$ifdef FPC}@{$endif}writepa_frametop,
-       (filer.ancestor = nil) and (fpa_frametop <> defaultframe) or 
-       (filer.ancestor <> nil) and 
+       (filer.ancestor = nil) and (fpa_frametop <> defaultframe) or
+       (filer.ancestor <> nil) and
        (tcustomprinter(filer.ancestor).fpa_frametop <> fpa_frametop));
  filer.defineproperty('pa_frameright',{$ifdef FPC}@{$endif}readpa_frameright,
        {$ifdef FPC}@{$endif}writepa_frameright,
-       (filer.ancestor = nil) and (fpa_frameright <> defaultframe) or 
-       (filer.ancestor <> nil) and 
+       (filer.ancestor = nil) and (fpa_frameright <> defaultframe) or
+       (filer.ancestor <> nil) and
        (tcustomprinter(filer.ancestor).fpa_frameright <> fpa_frameright));
  filer.defineproperty('pa_framebottom',{$ifdef FPC}@{$endif}readpa_framebottom,
        {$ifdef FPC}@{$endif}writepa_framebottom,
-       (filer.ancestor = nil) and (fpa_framebottom <> defaultframe) or 
-       (filer.ancestor <> nil) and 
+       (filer.ancestor = nil) and (fpa_framebottom <> defaultframe) or
+       (filer.ancestor <> nil) and
        (tcustomprinter(filer.ancestor).fpa_framebottom <> fpa_framebottom));
 end;
 
@@ -939,7 +939,7 @@ end;
 
 { tcustomprintercanvas }
 
-constructor tcustomprintercanvas.create(const user: tcustomprinter; 
+constructor tcustomprintercanvas.create(const user: tcustomprinter;
                                                        const intf: icanvas);
 begin
  fprinter:= user;
@@ -972,14 +972,14 @@ begin
  result.pos:= nullpoint;
  result.size:= fdrawinfo.gc.paintdevicesize;
  with result do begin
-  if cx > cy then begin 
+  if cx > cy then begin
       //quadratic because of cliprectinit with later orientation switch
    cy:= cx;
   end
   else begin
-   cx:= cy;             
+   cx:= cy;
   end;
- end;  
+ end;
 end;
 
 procedure tcustomprintercanvas.updatescale;
@@ -1002,7 +1002,7 @@ begin
     fgcoffsetx:= mmtoprintscale * fpa_frameleft;
     fgcoffsety:= (fpa_height-fpa_frametop)*mmtoprintscale;
    end;
-   
+
    if fprintorientation = pao_landscape then begin
     fpapersize.cx:= round((fdrawinfo.gc.paintdevicesize.cy/ppmm)*mmtoprintscale);
     fpapersize.cy:= round((fdrawinfo.gc.paintdevicesize.cx/ppmm)*mmtoprintscale);
@@ -1025,7 +1025,7 @@ begin
    end;
    fclientrect.x:= round(fpa_frameleft*ppmm);
    fclientrect.y:= round(fpa_frametop*ppmm);
-   fclientrect.cx:= fdrawinfo.gc.paintdevicesize.cx - 
+   fclientrect.cx:= fdrawinfo.gc.paintdevicesize.cx -
                          round((fpa_frameleft+fpa_frameright)*ppmm);
    fclientrect.cy:= fdrawinfo.gc.paintdevicesize.cy - round(
                          (fpa_frametop+fpa_framebottom)*ppmm);
@@ -1152,7 +1152,7 @@ begin
    with layoutinfo do begin
     curflags:= flags;
     if (tf_ycentered in curflags) and (curflags*[tf_top,tf_bottom] <> []) and
-             (not xyswapped and (info.res.cy > dest.cy) or 
+             (not xyswapped and (info.res.cy > dest.cy) or
                    xyswapped and (info.res.cx > dest.cx))then begin
      exclude(curflags,tf_ycentered);
     end;
@@ -1214,8 +1214,8 @@ begin
      end;
      for int1:= 0 to high(lineinfos) do begin
       with lineinfos[int1] do begin
-       if (tf_xjustify in curflags) and (high(justifychars) >= 0) and 
-         ((int1 < high(lineinfos)) or 
+       if (tf_xjustify in curflags) and (high(justifychars) >= 0) and
+         ((int1 < high(lineinfos)) or
               (tf_wordbreak in curflags) and (int1 = high(lineinfos))) then begin
         rstr1:= richcopy(text,liindex,justifychars[0].index-liindex);
         dotextout(rstr1,rect1,flags2,0,acolorshadow); //first word
@@ -1224,11 +1224,11 @@ begin
                                       length(justifychars); //gap width
         rect2:= rect1;        //x justify text
         if xyswapped then begin
-         rect2.cy:= 0;                                    
+         rect2.cy:= 0;
          int3:= dest.y;
         end
         else begin
-         rect2.cx:= 0;                                    
+         rect2.cx:= 0;
          int3:= dest.x;
         end;
         for int2:= liindex - 1 to justifychars[0].index - 2 do begin
@@ -1258,7 +1258,7 @@ begin
        else begin
         rstr1:= richcopy(text,liindex,licount);
         flags1:= curflags;
-        if (tf_xcentered in flags1) and 
+        if (tf_xcentered in flags1) and
                             (curflags*[tf_left,tf_right] <> []) and
                                                (liwidth > dest.cx) then begin
          exclude(flags1,tf_xcentered);
@@ -1278,7 +1278,7 @@ begin
      if countchars(text.text,c_tab) = 0 then begin
       flags1:= curflags;
       if (tf_xcentered in flags1) and (curflags*[tf_left,tf_right] <> []) and
-               (not xyswapped and (info.res.cx > dest.cx) or 
+               (not xyswapped and (info.res.cx > dest.cx) or
                      xyswapped and (info.res.cy > dest.cy))then begin
        exclude(flags1,tf_xcentered);
       end;
@@ -1300,7 +1300,7 @@ begin
         ar1:= splitrichstring(text,c_tab);
         dotextout(ar1[0],dest,curflags,0,acolorshadow);
         rea1:= tab1.defaultdist*mmtoprintscale;
-        for int1:= 1 to high(ar1) do begin     
+        for int1:= 1 to high(ar1) do begin
          dotextout(ar1[int1],dest,curflags,rea1,acolorshadow);
         end;
        end;
@@ -1308,7 +1308,7 @@ begin
       else begin
        ar1:= splitrichstring(text,c_tab);
        dotextout(ar1[0],dest,curflags,0,acolorshadow);
-       for int1:= 1 to high(ar1) do begin     
+       for int1:= 1 to high(ar1) do begin
         if int1 > tab1.count then begin
          rstr1.text:= ' ';
          rstr1.format:= nil;
@@ -1317,7 +1317,7 @@ begin
           rstr1:= richconcat(rstr1,' ');
           rstr1:= richconcat(rstr1,ar1[int2]);
          end;
-         dotextout(rstr1,dest,curflags-[tf_right,tf_xcentered],-1,acolorshadow); 
+         dotextout(rstr1,dest,curflags-[tf_right,tf_xcentered],-1,acolorshadow);
                         //print rest of string
          break;
         end;
@@ -1613,7 +1613,7 @@ begin
  printerchanged;
 end;
 
-procedure tprintervalueselector.objectevent(const sender: tobject; 
+procedure tprintervalueselector.objectevent(const sender: tobject;
                const event: objecteventty);
 begin
  inherited;
@@ -1637,7 +1637,7 @@ begin
  inherited value:= integer(sps_a4);
 end;
 
-procedure tpagesizeselector.getdropdowninfo(var aenums: integerarty; 
+procedure tpagesizeselector.getdropdowninfo(var aenums: integerarty;
                               const names: tdropdowndatacols);
 var
  pa1: stdpagesizety;
@@ -1647,7 +1647,7 @@ begin
  for pa1:= stdpagesizety(1) to high(stdpagesizety) do begin
   with stdpagesizes[pa1] do begin
    names.addrow([msestring(name+' ('+formatfloat('0',width)+'*'+
-                                     formatfloat('0',height)+' mm2)')]); 
+                                     formatfloat('0',height)+' mm2)')]);
   end;
   aenums[ord(pa1)-1]:= ord(pa1);
  end;
@@ -1712,20 +1712,20 @@ procedure tpagesizeselector.checkpagedim;
 begin
  updateedits();
  value:= checkstdpagesize(fpagewidth,fpageheight);
- 
+
 end;
 
 procedure tpagesizeselector.updateedits();
 begin
- if (componentstate * [csloading,csdestroying] = []) and 
+ if (componentstate * [csloading,csdestroying] = []) and
                                           not fupdatesize then begin
   fupdatesize:= true;
   try
-   if (feditwidth <> nil) and not 
+   if (feditwidth <> nil) and not
            (csdestroying in feditwidth.componentstate) then begin
     feditwidth.value:= fpagewidth;
    end;
-   if (feditheight <> nil) and not 
+   if (feditheight <> nil) and not
            (csdestroying in feditheight.componentstate) then begin
     feditheight.value:= fpageheight;
    end;
@@ -1758,9 +1758,9 @@ var
  inst1: tobject;
 begin
  inherited;
- if (event = oe_changed) then begin 
+ if (event = oe_changed) then begin
   inst1:= sender.getinstance();
-  if (inst1 <> nil) and 
+  if (inst1 <> nil) and
        ((inst1 = feditwidth) or (inst1 = feditheight)) then begin
    updatesize();
   end;
@@ -1821,7 +1821,7 @@ begin
  end;
 end;
 
-procedure tpageorientationselector.getdropdowninfo(var aenums: integerarty; 
+procedure tpageorientationselector.getdropdowninfo(var aenums: integerarty;
                                                 const names: tdropdowndatacols);
 begin
  names.clear;
@@ -1862,7 +1862,7 @@ begin
  end;
 end;
 
-procedure tstreamprinter.beginprint(command: msestring = ''; 
+procedure tstreamprinter.beginprint(command: msestring = '';
                                             const apreamble: string = '');
 var
  pip1: tpipewriter;
@@ -1949,7 +1949,7 @@ begin
     fpreamblestream.usewritebuffer:= true;
     fbodystream.usewritebuffer:= true;
    end
-   else begin   
+   else begin
     if avalue <> nil then begin
      avalue.usewritebuffer:= true;
     end;

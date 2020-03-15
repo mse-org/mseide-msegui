@@ -15,10 +15,10 @@ interface
 uses
  mseforms,msedataedits,msesimplewidgets,msewidgetgrid,msegrids,msetextedit,
  msestat,msestatfile;
- 
+
 const
  reallisteditorstatname =  'reallisteditor.sta';
- 
+
 type
  treallisteditor = class(tmseform)
    cancel: tbutton;
@@ -37,7 +37,7 @@ type
 implementation
 uses
  msereallisteditor_mfm,mseglob;
- 
+
 { treallisteditor }
 
 constructor treallisteditor.create(const aonclosequery: closequeryeventty);

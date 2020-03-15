@@ -15,7 +15,7 @@ function soc_open(const kind: socketkindty; const nonblock: boolean;
 function soc_shutdown(const handle: integer;
                    const kind: socketshutdownkindty): syserrorty;
 function soc_close(const handle: integer): syserrorty;
-function soc_connect(const handle: integer; 
+function soc_connect(const handle: integer;
                            const addr: socketaddrty; const timeoutms: integer): syserrorty;
 function soc_bind(const handle: integer;
                                    const addr: socketaddrty): syserrorty;
@@ -41,7 +41,7 @@ function soc_setrxtimeout(const handle: integer; const ms: integer): syserrorty;
 function soc_settxtimeout(const handle: integer; const ms: integer): syserrorty;
 
 function soc_poll(const handle: integer; const kind: pollkindsty;
-                            const timeoutms: longword; 
+                            const timeoutms: longword;
                             out pollres: pollkindsty): syserrorty;
                              //0 -> no timeout
                              //for blocking mode

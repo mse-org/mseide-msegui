@@ -31,7 +31,7 @@ object findinfilepagefo: tfindinfilepagefo
     bounds_cy = 284
     anchors = [an_left, an_top, an_right, an_bottom]
     fixcols.count = 1
-    fixcols.items = <    
+    fixcols.items = <
       item
         width = 38
         textflags = [tf_right, tf_ycentered]
@@ -40,7 +40,7 @@ object findinfilepagefo: tfindinfilepagefo
       end>
     rowcount = 1
     datacols.count = 1
-    datacols.items = <    
+    datacols.items = <
       item[foundlist]
         width = 1500
         options = [co_readonly, co_fill]

@@ -59,8 +59,8 @@ type
    property running: boolean read getrunning;
    property terminated: boolean read getterminated;
    property id: threadty read finfo.id;
-   property freeonterminate: boolean read getfreeonterminate 
-                                          write setfreeonterminate; 
+   property freeonterminate: boolean read getfreeonterminate
+                                          write setfreeonterminate;
            //do not change the value if the thread is running
  end;
 
@@ -118,7 +118,7 @@ type
   public
    constructor create(const aquiet: boolean);
          //quiet -> show no exceptions
-   destructor destroy; override; 
+   destructor destroy; override;
    procedure deliver; override;
    function waitfor: boolean;
    property quiet: boolean read fquiet;
@@ -135,7 +135,7 @@ implementation
 
 uses
  msesysintf1,msesysintf,mseapplication;
- 
+
 function synchronizeevent(const aevent: tsynchronizeevent;
                              const aoptions: posteventoptionsty = []): boolean;
           //true if not aborted, does not free aevent

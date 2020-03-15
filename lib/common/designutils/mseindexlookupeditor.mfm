@@ -77,36 +77,36 @@ object mseindexlookupeditorfo: tmseindexlookupeditorfo
     anchors = [an_top]
     optionsgrid = [og_rowmoving, og_keyrowmoving, og_rowinserting, og_rowdeleting, og_selectedrowsdeleting, og_focuscellonenter, og_autofirstrow, og_autoappend, og_colchangeontabkey, og_wrapcol, og_autopopup, og_mousescrollcol]
     fixcols.count = 1
-    fixcols.items = <    
+    fixcols.items = <
       item
         numstep = 1
       end>
     fixrows.count = 1
-    fixrows.items = <    
+    fixrows.items = <
       item
         height = 16
         captions.count = 1
-        captions.items = <        
+        captions.items = <
           item
             caption = 'Index'
           end>
       end>
     datacols.count = 3
     datacols.options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savevalue, co_savestate, co_mousescrollrow]
-    datacols.items = <    
+    datacols.items = <
       item[indexed]
         width = 77
         options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savevalue, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow, co_rowdatachange]
         name = 'index'
         widgetname = 'indexed'
         dataclass = tgridintegerdatalist
-      end    
+      end
       item[icondi]
         width = 21
         options = [co_drawfocus, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savevalue, co_savestate, co_mousescrollrow]
         widgetname = 'icondi'
         dataclass = tgridintegerdatalist
-      end    
+      end
       item[tstockglyphdatabutton1]
         color = -2147483646
         width = 18

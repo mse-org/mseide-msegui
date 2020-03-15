@@ -12,13 +12,13 @@ unit mseuniintf;    //i386-win32
 interface
 uses
  msegraphics;
- 
+
 {$include ..\mseuniintf.inc}
 
 implementation
 uses
  mseguiintf;
- 
+
 function uni_getfontwithglyph(var drawinfo: drawinfoty): boolean;
 begin
  result:= false;

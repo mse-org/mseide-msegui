@@ -80,7 +80,7 @@ type
 
  dragoptionty = (do_child,do_nocursorshape,do_nearstart,do_mousewidget);
  dragoptionsty = set of dragoptionty;
- 
+
  tcustomdragcontroller = class(tlinkedpersistent,ievent)
   private
    ftimer: tsimpletimer;
@@ -135,25 +135,25 @@ type
    function afterdragevent(var info: draginfoty): boolean; override;
     //true if processed
   published
-   property onbeforedragbegin: drageventty read fonbefore.dragbegin 
+   property onbeforedragbegin: drageventty read fonbefore.dragbegin
                                   write fonbefore.dragbegin;
-   property onbeforedragover: dragovereventty read fonbefore.dragover 
+   property onbeforedragover: dragovereventty read fonbefore.dragover
                                   write fonbefore.dragover;
-   property onbeforedragdrop: drageventty read fonbefore.dragdrop 
+   property onbeforedragdrop: drageventty read fonbefore.dragdrop
                                   write fonbefore.dragdrop;
-   property onbeforedragend: dragendeventty read fonbefore.dragend 
+   property onbeforedragend: dragendeventty read fonbefore.dragend
                                   write fonbefore.dragend;
-   property onafterdragbegin: drageventty read fonafter.dragbegin 
+   property onafterdragbegin: drageventty read fonafter.dragbegin
                                   write fonafter.dragbegin;
-   property onafterdragover: dragovereventty read fonafter.dragover 
+   property onafterdragover: dragovereventty read fonafter.dragover
                                   write fonafter.dragover;
-   property onafterdragdrop: drageventty read fonafter.dragdrop 
+   property onafterdragdrop: drageventty read fonafter.dragdrop
                                   write fonafter.dragdrop;
-   property onafterdragend: dragendeventty read fonafter.dragend 
+   property onafterdragend: dragendeventty read fonafter.dragend
                                   write fonafter.dragend;
    property options;
  end;
- 
+
 function isobjectdrag(const dragobject: tdragobject;
                                                 objectclass: tclass): boolean;
 
@@ -165,7 +165,7 @@ type
 // tguiapplication1 = class(tguiapplication);
  tdragobject1 = class(tdragobject);
 
-function isobjectdrag(const dragobject: tdragobject; 
+function isobjectdrag(const dragobject: tdragobject;
                                                 objectclass: tclass): boolean;
 begin
  result:= (dragobject is tobjectdragobject) and
@@ -245,10 +245,10 @@ begin
     else begin
      ftimer.interval:= sdndexpiretime;
     end;
-   end;   
+   end;
    fdragobject:= nil;
   end
-  else begin  
+  else begin
    fdragobject.free;
   end;
  end;
@@ -483,7 +483,7 @@ begin
  if es_child in info.eventstate then begin
   widget1:= fintf.getwidget;
   if sender <> widget1 then begin
-   if (do_child in foptions) and 
+   if (do_child in foptions) and
      (info.eventkind in [ek_buttonpress,ek_buttonrelease,ek_mousewheel,
                                         ek_mousemove,ek_mousepark]) then begin
     pt1:= info.pos;
@@ -501,7 +501,7 @@ begin
  end
  else begin
   mouseevent(info);
- end; 
+ end;
 end;
 
 function tcustomdragcontroller.canbegindrag: boolean;
@@ -534,7 +534,7 @@ begin
    end;
    dek_end: begin
     if assigned(dragend) then begin
-     dragend(fintf.getwidget,pos,dragobjectpo^,(dragobjectpo^ <> nil) and 
+     dragend(fintf.getwidget,pos,dragobjectpo^,(dragobjectpo^ <> nil) and
                                   (dos_dropped in dragobjectpo^.state),result);
     end;
    end;

@@ -95,7 +95,7 @@ object richstringeditorfo: trichstringeditorfo
   end
   object tpopupmenu1: tpopupmenu
     menu.submenu.count = 1
-    menu.submenu.items = <    
+    menu.submenu.items = <
       item
         action = formatedact
       end>

@@ -37,7 +37,7 @@ type
   _isnull: boolean;
  end;
  paraminfoarty = array of paraminfoty;
- 
+
  tparamdata = class(imessagemetadataimpl)
   private
    frefcount: int32;
@@ -75,7 +75,7 @@ type
    procedure callback(status: IStatus; atext: PAnsiChar); override;
    property text: string read ftext;
  end;
- 
+
 implementation
 uses
  msefirebird,dbconst,sysutils,msedate;
@@ -87,11 +87,11 @@ uses
   {$warn 6058 off}
  {$endif}
 {$endif}
- 
+
 type
  tfbcursor1 = class(tfbcursor);
  tfbconnection1 = class(tfb3connection);
- 
+
 { tparamdata }
 
 constructor tparamdata.create(const cursor: tfbcursor;
@@ -105,7 +105,7 @@ var
  align1: int32;
  str1,str2: string;
  dt1: tdatetime;
- 
+
 begin
  inherited create();
  addref();
@@ -240,7 +240,7 @@ begin
           else begin
            pint64(po1)^:= aslargeint;
           end;
-         end;         
+         end;
         end;
         SQL_DOUBLE+1: begin
          pdouble(po1)^:= asfloat;
@@ -249,7 +249,7 @@ begin
          dt1:= asdatetime;
          pisc_timestamp(po1)^.timestamp_date:= trunc(dt1) - fbdatetimeoffset;
          dt1:= abs(frac(dt1));
-         pisc_timestamp(po1)^.timestamp_time:= 
+         pisc_timestamp(po1)^.timestamp_time:=
                    round(dt1*3600*24*ISC_TIME_SECONDS_PRECISION);
         end;
         SQL_TEXT+1: begin

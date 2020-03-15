@@ -3,9 +3,9 @@ unit mseunicode;
 interface
 uses
  msetypes{msestrings},msegraphics,msegraphutils,mseguiglob;
- 
+
 type
- 
+
  tunifont = class(tfont)
   public
    constructor create; override;
@@ -24,16 +24,16 @@ type
   public
    constructor create(const base: tunifont; const aglyph: unicharty); reintroduce;
  end;
- 
+
  unitextstatety = (uts_fontmatched);
  unitextstatesty = set of unitextstatety;
 
  segmentinfoty = record
   charindex: integer; //null based
-  fontnum: integer;   //index in ffonts 
+  fontnum: integer;   //index in ffonts
  end;
  segmentinfoarty = array of segmentinfoty;
-  
+
  tunitext = class
   private
    ffont: tunifont;
@@ -59,14 +59,14 @@ type
    property text: msestring read ftext write settext;
  end;
 
-procedure unidrawstring(const acanvas: tcanvas; const atext: msestring; 
+procedure unidrawstring(const acanvas: tcanvas; const atext: msestring;
                         const apos: pointty;
                         const afont: tfont = nil; const grayed: boolean = false);
 implementation
 uses
  mseuniintf,sysutils,msefont;
- 
-procedure unidrawstring(const acanvas: tcanvas; const atext: msestring; 
+
+procedure unidrawstring(const acanvas: tcanvas; const atext: msestring;
                         const apos: pointty;
                         const afont: tfont = nil; const grayed: boolean = false);
 var
@@ -213,7 +213,7 @@ var
  int1: integer;
  fontnum1: integer;
  first: boolean;
- 
+
  procedure addsegment;
  begin
   if not first then begin
@@ -221,16 +221,16 @@ var
   end;
   with fsegments[high(fsegments)] do begin
    charindex:= int1 - 1;
-   fontnum:= fontnum1;   
+   fontnum:= fontnum1;
   end;
  end;
- 
+
 var
- int2: integer; 
+ int2: integer;
  fontnum2: integer;
  unich1: unicharty;
  font1: tunifont;
- 
+
 begin
  fontnum1:= 0;
  int1:= 1;

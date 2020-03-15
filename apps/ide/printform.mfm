@@ -157,7 +157,7 @@ object printfo: tprintfo
     anchors = [an_top, an_right]
     dropdown.width = 180
     dropdown.cols.count = 1
-    dropdown.cols.items = <    
+    dropdown.cols.items = <
       item
       end>
     printer = printer
@@ -178,7 +178,7 @@ object printfo: tprintfo
     bounds_cy = 37
     anchors = [an_top, an_right]
     dropdown.cols.count = 1
-    dropdown.cols.items = <    
+    dropdown.cols.items = <
       item
       end>
     printer = printer

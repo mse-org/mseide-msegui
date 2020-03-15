@@ -30,9 +30,9 @@ type
   rgmo_rotafterscale, //rotate after scaling
   rgmo_sample, //use SampleImage() instead of ScaleImage()
   rgmo_resize  //use ResizeImage() with filtertype instead of ScaleImage()
- ); 
+ );
  gmoptionsty = set of gmoptionty;
- 
+
 procedure registerformats(const labels: array of string;
                            const filternames: array of msestring;
                            const filemasks: array of msestringarty);
@@ -44,7 +44,7 @@ procedure registerformats(const labels: array of string;
   //  default = cl_transparent  0 = default        default = []
   // filter: filtertypes,       blur: real]
   // default = UndefinedFilter  default = 1
-           
+
 //writegraphic parameters:
   //[compressionquality: integer, width: integer, height: integer,
       // 0..100, -1 = default        0 = default      0 = default
@@ -71,7 +71,7 @@ procedure writegmgraphic(const dest: tstream; const source: tbitmap;
              const aoptions: gmoptionsty = [];
              const afilter: filtertypes = undefinedfilter;
              const ablur: real = defaultblur);
-function pinggmgraphic(const source: tstream; 
+function pinggmgraphic(const source: tstream;
                       out ainfo: gminfoty): boolean;
 
 implementation
@@ -82,10 +82,10 @@ uses
 type
  tbitmap1 = class(tbitmap);
 const
- ppmmtoppi = 25.4; 
+ ppmmtoppi = 25.4;
 var
  inited: boolean;
- qdepth: quantumdepthty; 
+ qdepth: quantumdepthty;
 
 procedure checkinit;
 begin
@@ -122,7 +122,7 @@ begin
   opac:= 0;
  end;
  rgb:= colortorgb(acolor);
- case qdepth of 
+ case qdepth of
   qd_8: begin
    with ppixelpacket8(dest)[index] do begin
     red:= rgb.red;
@@ -368,7 +368,7 @@ var
  maskscanstep: integer;
  maskscanpo: pointer;
  rotcurrent: dpointty;
- 
+
  procedure error;
  begin
   raise tmagickexception.create(exceptinf);
@@ -389,7 +389,7 @@ var
    si1:= ms(pimage8(image)^.a.columns,pimage8(image)^.a.rows);
   end;
  end; //dorotate
- 
+
  procedure doscale(const rotafter: boolean);
  begin
   if fitscale(awidth,aheight,si1,si2,arotation,rotafter,rotcurrent) then begin
@@ -465,8 +465,8 @@ begin
     blob:= nil;
     buf:= nil;
     try
-     rotmask:= (abackgroundcolor = cl_transparent) and 
-                                       not checksnap90(arotation);                           
+     rotmask:= (abackgroundcolor = cl_transparent) and
+                                       not checksnap90(arotation);
      monomask:= false;
      hasmask:= (source is tmaskedbitmap) and (tmaskedbitmap(source).masked);
      bo1:= getimageref(imagebuffer.image);
@@ -544,7 +544,7 @@ begin
         if not bo1 then begin          //restore bit order
          swapbits(imagebuffer.image);
         end;
-        if hasmask then begin 
+        if hasmask then begin
          if monomask and not bo2 then begin
           swapbits(imagebuffer.mask);  //restore bit order
          end;
@@ -552,7 +552,7 @@ begin
           a.colors:= 0;
           a.storage_class:= directclass;
          end;
-         case qdepth of                  //GraphicMagick removes 
+         case qdepth of                  //GraphicMagick removes
           qd_8: begin                    //alpha channel for palette images
            with pimage8(image)^ do begin
             magickfree(b.colormap);
@@ -767,7 +767,7 @@ begin
  end;
 end;
 
-function pinggmgraphic(const source: tstream; 
+function pinggmgraphic(const source: tstream;
                       out ainfo: gminfoty): boolean;
 var
  imageinfo: pointer;
@@ -889,12 +889,12 @@ var
  po1: pointer;
  int1: integer;
  cx1,cy1: integer;
- 
+
 begin
  result:= '';
  monomask:= false;
  bo2:= dest is tmaskedbitmap;
- rotmask:= bo2 and (abackgroundcolor = cl_transparent) and 
+ rotmask:= bo2 and (abackgroundcolor = cl_transparent) and
                                 (abs(frac(arotation / (pi/2.0))) > 0.0000001);
  imagebuffer.image.pixels:= nil;
  imagebuffer.mask.pixels:= nil;
@@ -925,7 +925,7 @@ begin
    end;
    if (pimage8(image)^.a.columns > 0) and (pimage8(image)^.a.rows > 0) then begin
                //limit to necessary size
-    if (awidth <> 0) and (pimage8(image)^.a.columns > awidth) or 
+    if (awidth <> 0) and (pimage8(image)^.a.columns > awidth) or
                (aheight <> 0) and (pimage8(image)^.a.rows > aheight) then begin
      cx1:= awidth;
      if cx1 = 0 then begin
@@ -955,7 +955,7 @@ begin
     end;
    end;
   end;
- 
+
   image:= blobtoimage(imageinfo,datapo,datalen,@exceptinf);
   if image <> nil then begin
    with pimage8(image)^ do begin //a is identical for all depths

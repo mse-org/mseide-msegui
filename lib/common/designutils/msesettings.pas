@@ -1,5 +1,5 @@
 { MSEide Copyright (c) 2002-2013 by Martin Schreiber
-   
+
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation; either version 2 of the License, or
@@ -69,7 +69,7 @@ const
    {$endif}
   {$endif}
  {$endif}
-                
+
 type
  settingsmacroarty = array[settingsmacroty] of filenamety;
  settingsmacrosty = record
@@ -81,7 +81,7 @@ type
   macros: settingsmacrosty;
   printcommand: msestring;
  end;
-  
+
  tsettingsfo = class(tmseform)
    tstatfile1: tstatfile;
    tlayouter1: tlayouter;
@@ -130,7 +130,7 @@ function getsyssettingsmacros: macroinfoarty;
 function getprintcommand: msestring;
 function editsettings(const acaption: msestring = '';
                            const shortcuts: tshortcutcontroller = nil): boolean;
- 
+
 implementation
 uses
  msesettings_mfm,classes,mclasses,msesysintf,msefileutils,mseshortcutdialog;
@@ -142,7 +142,7 @@ uses
   {$warn 6058 off}
  {$endif}
 {$endif}
- 
+
 function getsettingsmacros1(var amacros: settingsmacrosty): macroinfoarty;
 var
  ma1: settingsmacroty;
@@ -152,12 +152,12 @@ begin
   setlength(globmacrovalues,length(globmacronames));
   setlength(result,ord(high(settingsmacroty))+1+length(globmacronames));
   for  ma1:= low(settingsmacroty) to high(settingsmacroty) do begin
-   result[ord(ma1)].name:= settingsmacronames[ma1]; 
+   result[ord(ma1)].name:= settingsmacronames[ma1];
    result[ord(ma1)].value:= macros[ma1];
   end;
   for int1:= 0 to high(globmacronames) do begin
-   result[ord(high(settingsmacroty))+1+int1].name:= globmacronames[int1]; 
-   result[ord(high(settingsmacroty))+1+int1].value:= globmacrovalues[int1]; 
+   result[ord(high(settingsmacroty))+1+int1].name:= globmacronames[int1];
+   result[ord(high(settingsmacroty))+1+int1].value:= globmacrovalues[int1];
   end;
  end;
 end;
@@ -176,7 +176,7 @@ begin
   result[int1].value:= tosysfilepath(result[int1].value);
  end;
 end;
- 
+
 function getprintcommand: msestring;
 begin
  result:= settings.printcommand;
@@ -201,8 +201,8 @@ begin
    printcommand:= sys_getprintcommand;
   end;
   filer.updatevalue('printcommand',printcommand);
-  filer.updatevalue('globmacronames',globmacronames); 
-  filer.updatevalue('globmacrovalues',globmacrovalues); 
+  filer.updatevalue('globmacronames',globmacronames);
+  filer.updatevalue('globmacrovalues',globmacrovalues);
  end;
 end;
 

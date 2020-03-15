@@ -38,12 +38,12 @@ uses
   {$warn 6058 off}
  {$endif}
 {$endif}
- 
+
 type
  datarecty = record
   //dummy
  end;
- 
+
  locsockaddrty = record
                   sa_family: sa_family_t;
                   sa_data: datarecty;
@@ -55,7 +55,7 @@ type
    0: (addr: sockaddr_in);
    1: (addr6: sockaddr_in6);
  end;
- 
+
  linuxsockaddrty = record
   ad: linuxsockadty;
   platformdata: array[7..32] of longword;
@@ -70,7 +70,7 @@ function soc_geterrortext(aerror: integer): string;
 begin
  result:= inttostr(aerror);
 end;
- 
+
 function soc_setnonblock(const handle: integer; const nonblock: boolean): syserrorty;
 var
  int1: integer;
@@ -98,7 +98,7 @@ function soc_open(const kind: socketkindty; const nonblock: boolean;
 var
  int1: integer;
 begin
- case kind of 
+ case kind of
   sok_inet: int1:= pf_inet;
   sok_inet6: int1:= pf_inet6;
   else int1:= pf_local; //sok_local
@@ -129,7 +129,7 @@ begin
   result:= sye_ok;
  end
  else begin
-  result:= syelasterror;  
+  result:= syelasterror;
  end;
 end;
 
@@ -212,7 +212,7 @@ begin
   readbytes:= __read(fd,buf^,nbytes);
   if readbytes <= 0 then begin
    if (timeoutms < 0) then begin
-    if not ((sys_getlasterror = ewouldblock) or 
+    if not ((sys_getlasterror = ewouldblock) or
              (sys_getlasterror = eagain)) then begin
      result:= syelasterror;
     end
@@ -221,7 +221,7 @@ begin
     end;
    end
    else begin
-    result:= syelasterror;    
+    result:= syelasterror;
    end;
   end;
  end
@@ -243,7 +243,7 @@ begin
  end;
 end;
 
-function soc_bind(const handle: integer; 
+function soc_bind(const handle: integer;
                                      const addr: socketaddrty): syserrorty;
 var
  str1: string;
@@ -408,11 +408,11 @@ begin
     result:= '';
    end;
   end;
- end; 
+ end;
 end;
 
 function soc_poll(const handle: integer; const kind: pollkindsty;
-                            const timeoutms: longword; 
+                            const timeoutms: longword;
                             out pollres: pollkindsty): syserrorty;
                              //0 -> no timeout
                              //for blocking mode
@@ -443,7 +443,7 @@ begin
  else begin
   int2:= -1;
  end;
- while true do begin  
+ while true do begin
   int1:= poll(@info,1,int2);
   if (int1 >= 0) or (sys_getlasterror <> eintr) then begin
    break;
@@ -495,7 +495,7 @@ begin
     result:= 0;
    end;
   end;
- end; 
+ end;
 end;
 
 end.

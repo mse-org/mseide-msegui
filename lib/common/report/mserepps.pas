@@ -20,10 +20,10 @@ type
                  la_stretchx,la_stretchy,la_fit,
                  la_mirrorx,la_mirrory,la_rotate90,la_rotate180);
  layoutflagsty = set of layoutflagty;
- 
+
 const
  defaultoptionsps = [ops_noheadercomments,ops_noshowpage];
- 
+
 type
 //
 //todo: use ps text from datafield
@@ -46,7 +46,7 @@ type
    property psfile: filenamety read fpsfile write fpsfile;
    property optionsps: optionspsty read foptionsps write foptionsps
                                                  default defaultoptionsps;
-   property layout: layoutflagsty read flayout 
+   property layout: layoutflagsty read flayout
                                     write setlayout default [];
    property scale: flo64 read fscale write fscale;
    property shifthorz: flo64 read fshifthorz write fshifthorz; //mm
@@ -77,11 +77,11 @@ type
    property onafterrender;
 //   property ongettext;
  end;
- 
+
 implementation
 uses
  msestream,msesys,mseformatstr,msebits,mseprinter;
- 
+
 { treppsdisp }
 
 constructor treppsdisp.create(aowner: tcomponent);
@@ -120,7 +120,7 @@ var
 begin
  b1:= rbs_showed in fstate;
  inherited;
- if visible and (fpsfile <> '') and not (rbs_prepass in fstate) and not b1 and 
+ if visible and (fpsfile <> '') and not (rbs_prepass in fstate) and not b1 and
                               (acanvas is tpostscriptcanvas) then begin
   stream1:= ttextstream.create(fpsfile,fm_read);
   try
@@ -130,16 +130,16 @@ begin
     hasbb:= false;
     repeat
      b1:= stream1.readstrln(as1);
-     b2:= (length(as1) >= 2) and (as1[1] = '%') and 
+     b2:= (length(as1) >= 2) and (as1[1] = '%') and
                                 ((as1[2] = '%') or (as1[2] = '!'));
      if inheader then begin
       if b2 then begin
        if startsstr(pchar('BoundingBox:'),pchar(pointer(as1))+2) then begin
         ar1:= splitstring(as1,' ',true);
         if high(ar1) >= 4 then begin
-         if trystrtodouble(ar1[1],bbll.x,'.') and 
+         if trystrtodouble(ar1[1],bbll.x,'.') and
                     trystrtodouble(ar1[2],bbll.y,'.') and
-                            trystrtodouble(ar1[3],bbur.x,'.') and 
+                            trystrtodouble(ar1[3],bbur.x,'.') and
                                   trystrtodouble(ar1[4],bbur.y,'.') then begin
           hasbb:= true;
          end;

@@ -61,7 +61,7 @@ type
 //   procedure dscontrolleroptionschanged(const aoptions: datasetoptionsty);
    function islastrecord: boolean;
    procedure begindisplaydata;
-   procedure enddisplaydata;   
+   procedure enddisplaydata;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -72,7 +72,7 @@ type
    {
    function locate(const key: integer; const field: tfield;
                    const options: locateoptionsty = []): locateresultty;
-   function locate(const key: msestring; const field: tfield; 
+   function locate(const key: msestring; const field: tfield;
                  const options: locateoptionsty = []): locateresultty;
    }
    procedure AppendRecord(const Values: array of const);
@@ -87,7 +87,7 @@ type
    property FileMustExist default true;
    property Readonly default false;
  end;
- 
+
  tmsesdfdataset = class(tsdfdataset,imselocate,idscontroller,igetdscontroller,
                                         iactivatorclient)
   private
@@ -147,7 +147,7 @@ type
 {
    function locate(const key: integer; const field: tfield;
                    const options: locateoptionsty = []): locateresultty;
-   function locate(const key: msestring; const field: tfield; 
+   function locate(const key: msestring; const field: tfield;
                  const options: locateoptionsty= []): locateresultty;
 }
    procedure AppendRecord(const Values: array of const);
@@ -163,7 +163,7 @@ type
    property Readonly default false;
    property FirstLineAsSchema default false;
  end;
- 
+
 implementation
 uses
  msefileutils;

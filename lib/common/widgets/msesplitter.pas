@@ -54,7 +54,7 @@ type
   published
    property optionswidget default defaultgroupboxoptionswidget;
  end;
- 
+
  tcustomsplitter = class(tscalingwidget,iobjectpicker,istatfile)
   private
    fobjectpicker: tobjectpicker;
@@ -102,7 +102,7 @@ type
    fstate: splitterstatesty;
    procedure postupdatepropevent;
    function clippoint(const aoffset: pointty): pointty;
-   procedure calcoffset(const refsize: sizety; 
+   procedure calcoffset(const refsize: sizety;
                       out offset,clippedoffset: pointty; out newsize: sizety);
    procedure setpropoffset(const aoffset: pointty; const asize: sizety);
 //   function getminshrinkpos: pointty; override;
@@ -131,7 +131,7 @@ type
     //iobjectpicker
    function getcursorshape(const sender: tobjectpicker;
                                         var shape: cursorshapety): boolean;
-   procedure getpickobjects(const sender: tobjectpicker; 
+   procedure getpickobjects(const sender: tobjectpicker;
                                           var objects: integerarty);
    procedure beginpickmove(const sender: tobjectpicker);
    procedure pickthumbtrack(const sender: tobjectpicker);
@@ -147,31 +147,31 @@ type
 
    procedure move(const dist: pointty);
 
-   property options: splitteroptionsty read foptions write setoptions 
+   property options: splitteroptionsty read foptions write setoptions
                  default defaultsplitteroptions;
-   property shrinkpriority: integer read getshrinkpriority 
+   property shrinkpriority: integer read getshrinkpriority
                                     write fshrinkpriority default 0;
    property linkleft: twidget read flinkleft write setlinkleft;
    property linktop: twidget read flinktop write setlinktop;
    property linkright: twidget read flinkright write setlinkright;
    property linkbottom: twidget read flinkbottom write setlinkbottom;
 
-   property dist_left: integer read fdist_left 
+   property dist_left: integer read fdist_left
                                     write setdist_left default 0;
-   property dist_top: integer read fdist_top 
+   property dist_top: integer read fdist_top
                                     write setdist_top default 0;
-   property dist_right: integer read fdist_right 
+   property dist_right: integer read fdist_right
                                     write setdist_right default 0;
-   property dist_bottom: integer read fdist_bottom 
+   property dist_bottom: integer read fdist_bottom
                                     write setdist_bottom default 0;
 
 //   property color default defaultsplittercolor;
    property grip: stockbitmapty read fgrip write setgrip default stb_default;
-   property colorgrip: colorty read fcolorgrip write setcolorgrip 
+   property colorgrip: colorty read fcolorgrip write setcolorgrip
                                                         default cl_default;
    property statfile: tstatfile read fstatfile write setstatfile;
    property statvarname: msestring read getstatvarname write fstatvarname;
-   property statpriority: integer read fstatpriority 
+   property statpriority: integer read fstatpriority
                                        write fstatpriority default 0;
    property onupdatelayout: notifyeventty read fonupdatelayout
                                                write fonupdatelayout;
@@ -201,10 +201,10 @@ type
    property statpriority;
    property onupdatelayout;
  end;
- 
+
  spaceroptionty = (spao_glueright,spao_gluebottom);
  spaceroptionsty = set of spaceroptionty;
- 
+
  tcustomspacer = class(tscalingwidget)
   private
    flinkleft: twidget;
@@ -235,20 +235,20 @@ type
    property linktop: twidget read flinktop write setlinktop;
    property linkright: twidget read flinkright write setlinkright;
    property linkbottom: twidget read flinkbottom write setlinkbottom;
-   property dist_left: integer read fdist_left 
+   property dist_left: integer read fdist_left
                                     write setdist_left default 0;
-   property dist_top: integer read fdist_top 
+   property dist_top: integer read fdist_top
                                     write setdist_top default 0;
-   property dist_right: integer read fdist_right 
+   property dist_right: integer read fdist_right
                                     write setdist_right default 0;
-   property dist_bottom: integer read fdist_bottom 
+   property dist_bottom: integer read fdist_bottom
                                     write setdist_bottom default 0;
    property options: spaceroptionsty read foptions write foptions default [];
    property optionswidget default defaultoptionswidgetnofocus;
   published
    property visible default false;
  end;
- 
+
  tspacer = class(tcustomspacer)
   published
    property linkleft;
@@ -270,11 +270,11 @@ type
                    lao_syncmaxautosize,
                    lao_synccaptiondistx,lao_synccaptiondisty,
                    lao_syncpaintwidth,lao_syncpaintheight);
- layoutoptionsty = set of layoutoptionty; 
+ layoutoptionsty = set of layoutoptionty;
 const
  defaultlayoutoptions = [];
 
-type  
+type
  placeoptionty = (plo_noinvisible,plo_scalesize,
                   plo_scalefullref, //use whole innerclientrect as size reference
                   plo_endmargin,plo_propmargin,
@@ -301,7 +301,7 @@ type
   refsize: sizety;
   scalesize: sizety;
   actscalesize: sizety;
-  refscalesize: sizety;  
+  refscalesize: sizety;
   reffontsize: sizety;
   fontheight: integer;
   actfontheight: integer;
@@ -315,7 +315,7 @@ type
                     las_scalesizerefset,las_widgetinfoloaded,
                     las_delayedupdatelayoutpending);
  layouterstatesty = set of layouterstatety;
- 
+
  tcustomlayouter = class;
  layoutereventty = procedure(const sender: tcustomlayouter) of object;
 
@@ -374,7 +374,7 @@ type
    procedure registerchildwidget(const child: twidget); override;
    procedure unregisterchildwidget(const child: twidget); override;
    function widgetinfoindex(const awidget: twidget): integer;
-   procedure updatewidgetinfo(var ainfo: widgetlayoutinfoty; 
+   procedure updatewidgetinfo(var ainfo: widgetlayoutinfoty;
                         const awidget: twidget; const force: boolean = false);
    procedure doasyncevent(var atag: integer); override;
   public
@@ -386,17 +386,17 @@ type
    property align_leader: twidget read falign_leader write setalign_leader;
    property align_glue: widgetalignmodety read falign_glue write setalign_glue
                                  default wam_none;
-   property place_mindist: integer read fplace_mindist 
+   property place_mindist: integer read fplace_mindist
                                            write setplace_mindist default 0;
    property place_maxdist: integer read fplace_maxdist write setplace_maxdist
                                      default bigint;
-   property place_mode: widgetalignmodety read fplace_mode write setplace_mode 
+   property place_mode: widgetalignmodety read fplace_mode write setplace_mode
                                      default wam_start;
-   property place_options: placeoptionsty read fplace_options 
+   property place_options: placeoptionsty read fplace_options
                                      write setplace_options default [];
-   property onbeforelayout: layoutereventty read fonbeforelayout 
+   property onbeforelayout: layoutereventty read fonbeforelayout
                                                     write fonbeforelayout;
-   property onafterlayout: layoutereventty read fonafterlayout 
+   property onafterlayout: layoutereventty read fonafterlayout
                                                     write fonafterlayout;
   published
    property visible default true;
@@ -426,7 +426,7 @@ type
    property dist_bottom;
    property options;
  end;
-  
+
 implementation
 uses
  msebits,math;
@@ -617,7 +617,7 @@ begin
  end;
 end;
 
-procedure tcustomsplitter.paintxorpic(const sender: tobjectpicker; 
+procedure tcustomsplitter.paintxorpic(const sender: tobjectpicker;
                                                          const canvas: tcanvas);
 begin
  if fparentwidget <> nil then begin
@@ -831,7 +831,7 @@ begin
   fhprop:= 0;
   int1:= fparentwidget.clientsize.cx;
   if (int1 > 0) then begin
-   fhprop:= (parentclientpos.x+int3) / 
+   fhprop:= (parentclientpos.x+int3) /
                   {$ifdef FPC} real({$endif}int1{$ifdef FPC}){$endif};
   end;
  end;
@@ -933,7 +933,7 @@ end;
 
 procedure tcustomsplitter.setpropoffset(const aoffset: pointty;
                                                       const asize: sizety);
-begin      
+begin
  inc(fpropsetting);
  try
   size:= asize;
@@ -976,7 +976,7 @@ procedure tcustomsplitter.doasyncevent(var atag: integer);
 var
  pt1,pt2: pointty;
  size2: sizety;
-   
+
 begin //doasyncevent
  inherited;
  case atag of
@@ -987,7 +987,7 @@ begin //doasyncevent
    try
     if fparentwidget <> nil then begin
      calcoffset(fparentwidget.clientsize,pt1,pt2,size2);
-     if (([spo_hmove,spo_hprop] * foptions <> []) and (pt1.x <> pt2.x) or 
+     if (([spo_hmove,spo_hprop] * foptions <> []) and (pt1.x <> pt2.x) or
          ([spo_vmove,spo_vprop] * foptions <> []) and (pt1.y <> pt2.y)) and
         (fregionchangedmark <> fregionchangedcount) then begin
       fregionchangedmark:= fregionchangedcount;
@@ -1128,7 +1128,7 @@ var
  pt1: pointty;
  rect1: rectty;
 begin
- if (componentstate * [csloading,csdestroying] = []) and 
+ if (componentstate * [csloading,csdestroying] = []) and
              (foptions * docksplitteroptions <> []) and
              (fparentwidget <> nil) and (fupdating = 0) then begin
   inc(fupdating);
@@ -1144,8 +1144,8 @@ begin
 //     fminshrinkposoffset.y:= - fwidgetrect.y;
     end;
    end;
-   if (flinkleft = flinkright) and 
-        (foptions * [spo_dockleft,spo_dockright] = 
+   if (flinkleft = flinkright) and
+        (foptions * [spo_dockleft,spo_dockright] =
                            [spo_dockleft,spo_dockright])then begin
     if flinkleft <> nil then begin
      flinkleft.widgetrect:= makerect(bounds_x+fdist_left,flinkleft.bounds_y,
@@ -1163,8 +1163,8 @@ begin
      flinkright.widgetrect:= rect1;
     end;
    end;
-   if (flinktop = flinkbottom) and 
-        (foptions * [spo_docktop,spo_dockbottom] = 
+   if (flinktop = flinkbottom) and
+        (foptions * [spo_docktop,spo_dockbottom] =
                            [spo_docktop,spo_dockbottom]) then begin
     if flinktop <> nil then begin
      flinktop.widgetrect:= makerect(flinktop.bounds_x,bounds_y+fdist_top,
@@ -1333,7 +1333,7 @@ end;
 
 function alive(const acomponent: tcomponent): boolean;
 begin
- result:= (acomponent <> nil) and 
+ result:= (acomponent <> nil) and
                        not (csdestroying in acomponent.componentstate);
 end;
 
@@ -1342,10 +1342,10 @@ var
  rect1: rectty;
  pt1: pointty;
 begin
- if (componentstate * [csloading,csdestroying] = []) and 
+ if (componentstate * [csloading,csdestroying] = []) and
     (fparentwidget <> nil) and (fupdating = 0) then begin
   inc(fupdating);
-  try  
+  try
    rect1:= fwidgetrect;
    if spao_glueright in foptions then begin
     if alive(flinkright) then begin
@@ -1542,7 +1542,7 @@ begin
      fix:= fix + minshrinksize.cx;//minscrollsize.cx;
     end
     else begin
-     if (plo_scalesize in fplace_options) and 
+     if (plo_scalesize in fplace_options) and
                            not (osk_nopropwidth in optionsskin) then begin
       variable:= variable + bounds_cx;
      end
@@ -1612,7 +1612,7 @@ begin
      fix:= fix + minshrinksize.cy; //minscrollsize.cy;
     end
     else begin
-     if (plo_scalesize in fplace_options) and 
+     if (plo_scalesize in fplace_options) and
                            not (osk_nopropwidth in optionsskin) then begin
       variable:= variable + bounds_cy;
      end
@@ -1666,8 +1666,8 @@ begin
  for int1:= 0 to high(fwidgetinfos) do begin
   with fwidgetinfos[int1],widget do begin
    if not(plo_noinvisible in fplace_options) or isvisible then begin
-    if (anchors * [an_top,an_bottom] = [an_top,an_bottom]) or 
-                     (plo_scalesize in fplace_options) and 
+    if (anchors * [an_top,an_bottom] = [an_top,an_bottom]) or
+                     (plo_scalesize in fplace_options) and
                            not(osk_nopropheight in optionsskin) then begin
 //     result:= result + minscrollsize.cy;
      result:= result + curminsize.cy;
@@ -1687,8 +1687,8 @@ begin
  result:= bigint;
  for int1:= 0 to high(fwidgets) do begin
   with twidget1(fwidgets[int1]) do begin
-   if (not(plo_noinvisible in fplace_options) or isvisible) and 
-                                   (fwidgetrect.x < result) and 
+   if (not(plo_noinvisible in fplace_options) or isvisible) and
+                                   (fwidgetrect.x < result) and
                             not (osk_noalignx in optionsskin) then begin
     result:= fwidgetrect.x;
    end;
@@ -1709,7 +1709,7 @@ begin
   with twidget1(fwidgets[int1]) do begin
    int2:= fwidgetrect.x + fwidgetrect.cx;
    if (not(plo_noinvisible in fplace_options) or isvisible) and
-                                     (int2 > result) and 
+                                     (int2 > result) and
                             not (osk_noalignx in optionsskin) then begin
     result:= int2;
    end;
@@ -1728,7 +1728,7 @@ begin
  for int1:= 0 to high(fwidgets) do begin
   with twidget1(fwidgets[int1]) do begin
    if (not(plo_noinvisible in fplace_options) or isvisible) and
-                                     (fwidgetrect.y < result) and 
+                                     (fwidgetrect.y < result) and
                             not (osk_noaligny in optionsskin) then begin
     result:= fwidgetrect.y;
    end;
@@ -1749,7 +1749,7 @@ begin
   with twidget1(fwidgets[int1]) do begin
    int2:= fwidgetrect.y + fwidgetrect.cy;
    if (not (plo_noinvisible in fplace_options) or isvisible) and
-                                     (int2 > result) and 
+                                     (int2 > result) and
                             not (osk_noaligny in optionsskin) then begin
     result:= int2;
    end;
@@ -1764,7 +1764,7 @@ procedure tcustomlayouter.checkwidgetinfo();
 var
  i1: integer;
 begin
- if not (las_widgetinfoloaded in fstate) and 
+ if not (las_widgetinfoloaded in fstate) and
                           not(csloading in componentstate) then begin
   include(fstate,las_widgetinfoloaded);
   for i1:= high(fwidgetinfos) downto 0 do begin
@@ -1777,7 +1777,7 @@ procedure tcustomlayouter.updatelayout;
 var
  ar2: integerarty;
  space,margin: integer;
- 
+
  procedure calcarray(const awidgets: widgetarty; const awidth: integer;
                                  const amin,amax: integer);
  var
@@ -1831,7 +1831,7 @@ var
  begin
   setlength(result,widgetcount);
   int2:= 0;
-  if (falign_leader <> nil) and 
+  if (falign_leader <> nil) and
               (falign_leader.parentwidget = self) then begin
    result[0]:= falign_leader;
    int2:= 1;
@@ -1847,7 +1847,7 @@ var
   end;
   setlength(result,int2);
  end; //getalignwidgets
- 
+
 var
  int1,int2,int3,int4: integer;
  ar1: widgetarty;
@@ -1856,7 +1856,7 @@ var
 // bo1: boolean;
  i1,i2: int32;
 begin
- if (componentstate * [csloading,csdestroying] = []) and 
+ if (componentstate * [csloading,csdestroying] = []) and
                             (flayoutupdating = 0) then begin
   for int1:= 0 to high(fwidgets) do begin
    if csloading in fwidgets[int1].componentstate then begin
@@ -1869,7 +1869,7 @@ begin
   end;
   checkwidgetinfo();
   inc(flayoutupdating);
-  try  
+  try
    updateoptionsscale;
    beginscaling;
    if widgetcount > 0 then begin
@@ -1886,7 +1886,7 @@ begin
      if lao_placex in foptionslayout then begin
       for int1:= high(fwidgetinfos) downto 0 do begin
        with fwidgetinfos[int1] do begin
-        if not (osk_nopropwidth in widget.optionsskin) and 
+        if not (osk_nopropwidth in widget.optionsskin) and
                                       (refscalesize.cx <> 0) then begin
          with twidget1(widget) do begin
 //          bo1:= ws1_layoutplacing in fwidgetstate1;
@@ -1912,7 +1912,7 @@ begin
      else begin
       for int1:= high(fwidgetinfos) downto 0 do begin
        with fwidgetinfos[int1] do begin
-        if not (osk_nopropheight in widget.optionsskin) and 
+        if not (osk_nopropheight in widget.optionsskin) and
                                       (refscalesize.cy <> 0) then begin
          with twidget1(widget) do begin
 //          bo1:= ws1_layoutplacing in fwidgetstate1;
@@ -1941,7 +1941,7 @@ begin
     end;
     if lao_syncpaintwidth in foptionslayout then begin
      int1:= -1;
-     if (lao_alignx in foptionslayout) and 
+     if (lao_alignx in foptionslayout) and
                               (falign_glue in [wam_start,wam_end]) then begin
       int1:= innerclientsize.cx;
      end;
@@ -2001,7 +2001,7 @@ begin
       aligny(align_mode,ar1,align_glue,int2);
      end;
     end;
-    if (fplace_mode <> wam_none) and 
+    if (fplace_mode <> wam_none) and
             (foptionslayout * [lao_placex,lao_placey] <> []) then begin
      if plo_noinvisible in fplace_options then begin
       ar1:= getvisiblewidgets;
@@ -2018,7 +2018,7 @@ begin
                                            innerclientframe.right + margin);
       end
       else begin
-       case fplace_mode of 
+       case fplace_mode of
         wam_start: begin
          int3:= innerclientpos.x + margin;
         end;
@@ -2041,7 +2041,7 @@ begin
                                            innerclientframe.bottom + margin);
       end
       else begin
-       case fplace_mode of 
+       case fplace_mode of
         wam_start: begin
          int3:= innerclientpos.y + margin;
         end;
@@ -2099,7 +2099,7 @@ begin
     for int1:= 0 to high(fwidgets) do begin
      with widgets[int1] do begin
       if (bo1 or visible) then begin
-       if osk_nopropwidth in optionsskin then begin 
+       if osk_nopropwidth in optionsskin then begin
         addsize1(sum,size);
        end
        else begin
@@ -2150,14 +2150,14 @@ begin
  if lao_placey in foptionslayout then begin
   result.cy:= childrenminheight;
  end;
- if (high(fwidgets) >= 0) and (align_glue <> wam_none) and 
+ if (high(fwidgets) >= 0) and (align_glue <> wam_none) and
                                      (align_mode <> wam_none)then begin
   int2:= -bigint;
   int3:= bigint;
   if lao_alignx in foptionslayout then begin
    for int1:= 0 to high(fwidgets) do begin
     with fwidgets[int1] do begin
-     if isvisible or 
+     if isvisible or
                (ow1_invisibleparentsizeextend in foptionswidget1) then begin
       with fwidgetrect do begin
        if x < int3 then begin
@@ -2169,7 +2169,7 @@ begin
        end;
       end;
      end;
-    end;  
+    end;
    end;
    if int2 > int3 then begin
     int2:= int2-int3;
@@ -2182,11 +2182,11 @@ begin
     int2:= bounds_cxmin;
    end;
    result.cx:= int2;
-  end;   
+  end;
   if lao_aligny in foptionslayout then begin
    for int1:= 0 to high(fwidgets) do begin
     with fwidgets[int1] do begin
-     if isvisible or 
+     if isvisible or
                (ow1_invisibleparentsizeextend in foptionswidget1) then begin
       with fwidgetrect do begin
        if y < int3 then begin
@@ -2198,7 +2198,7 @@ begin
        end;
       end;
      end;
-    end;  
+    end;
    end;
    if int2 > int3 then begin
     int2:= int2-int3;
@@ -2323,10 +2323,10 @@ procedure tcustomlayouter.setplace_options(avalue: placeoptionsty);
 var
  diff1: placeoptionsty;
 begin
- if (csreading in componentstate) and 
+ if (csreading in componentstate) and
                  (avalue * deprecatedplaceoptions <> []) then begin
-  optionslayout:= optionslayout + 
-    layoutoptionsty(card32(avalue * deprecatedplaceoptions) shl 
+  optionslayout:= optionslayout +
+    layoutoptionsty(card32(avalue * deprecatedplaceoptions) shl
                          (ord(lao_syncmaxautosize) - ord(plo_syncmaxautosize)));
  end;
  avalue:= avalue - deprecatedplaceoptions;
@@ -2356,12 +2356,12 @@ begin
   exclude(fstate,las_scalesizerefvalid);
   if componentstate * [csloading,csdestroying] = [] then begin
    if (foptionslayout * [lao_scalewidth,lao_scaleheight,lao_scalefont,
-                         lao_scalechildfont] <> []) and 
+                         lao_scalechildfont] <> []) and
          not (las_propsizing in fstate) then begin
     beginscaling;
     include(fstate,las_propsizing);
     try
-     if (lao_scalefont in foptionslayout) and (ffontsizeref.cx <> 0) and 
+     if (lao_scalefont in foptionslayout) and (ffontsizeref.cx <> 0) and
                   (ffontsizeref.cy <> 0) then begin
       font.height:= round((ffontheightref*clientheight)/ffontsizeref.cy);
       if clientheight > 0 then begin
@@ -2369,17 +2369,17 @@ begin
                      (clientheight/ffontsizeref.cy);
       end;
      end;
-     if foptionslayout * 
+     if foptionslayout *
                [lao_scalewidth,lao_scaleheight,lao_scalefont] <> [] then begin
       refsi:= innerclientsize;
       for int1:= high(fwidgetinfos) downto 0 do begin
        with fwidgetinfos[int1] do begin
-        if (lao_scalechildfont in foptionslayout) and 
+        if (lao_scalechildfont in foptionslayout) and
                     not (osk_nopropfont in widget.optionsskin) and
                     (twidget1(widget).ffont <> nil) and
                     (reffontsize.cx <> 0) and (reffontsize.cy <> 0) and
                     (refsi.cy > 0) then begin
-         twidget1(widget).ffont.height:= 
+         twidget1(widget).ffont.height:=
                               round(fontheight * refsi.cy / reffontsize.cy);
          twidget1(widget).ffont.xscale:= (fontxscale * (refsi.cx/refsi.cy))/
                       (reffontsize.cx/reffontsize.cy);
@@ -2387,21 +2387,21 @@ begin
         pt1:= widget.pos;
         size1:= widget.clientsize;
         if refsize.cx <> 0 then begin
-         if (lao_scaleleft in foptionslayout) and 
+         if (lao_scaleleft in foptionslayout) and
                     not (osk_nopropleft in widget.optionsskin) then begin
           pt1.x:= (pos.x * refsi.cx) div refsize.cx;
          end;
-         if (lao_scalewidth in foptionslayout) and 
+         if (lao_scalewidth in foptionslayout) and
                     not (osk_nopropwidth in widget.optionsskin) then begin
           size1.cx:= (size.cx * refsi.cx) div refsize.cx;
          end;
         end;
         if refsize.cy <> 0 then begin
-         if (lao_scaletop in foptionslayout) and 
+         if (lao_scaletop in foptionslayout) and
                     not (osk_noproptop in widget.optionsskin) then begin
           pt1.y:= (pos.y * refsi.cy) div refsize.cy;
          end;
-         if (lao_scaleheight in foptionslayout) and 
+         if (lao_scaleheight in foptionslayout) and
                     not (osk_nopropheight in widget.optionsskin) then begin
           size1.cy:= (size.cy * refsi.cy) div refsize.cy;
          end;
@@ -2545,7 +2545,7 @@ end;
 
 procedure tcustomlayouter.scalesizerefchanged;
 begin
- if (componentstate * [csloading,csdestroying] = []) and 
+ if (componentstate * [csloading,csdestroying] = []) and
                             (flayoutupdating = 0) then begin
   exclude(fstate,las_scalesizerefvalid);
  end;
@@ -2572,12 +2572,12 @@ end;
 
 const
  updatelayouttag = 8436026;
- 
+
 procedure tcustomlayouter.delayedupdatelayout;
 begin
  if not (las_delayedupdatelayoutpending in fstate) then begin
   include(fstate,las_delayedupdatelayoutpending);
-  asyncevent(updatelayouttag,[peo_local,peo_first]); 
+  asyncevent(updatelayouttag,[peo_local,peo_first]);
                                 //before childscaled events
  end;
 end;

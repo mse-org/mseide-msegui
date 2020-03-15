@@ -26,13 +26,13 @@ object setcreateorderfo: tsetcreateorderfo
     optionsgrid = [og_colsizing, og_rowmoving, og_keyrowmoving, og_focuscellonenter, og_colchangeontabkey, og_wrapcol, og_autopopup, og_mousescrollcol]
     datacols.count = 2
     datacols.options = [co_readonly, co_focusselect, co_rowselect, co_proportional, co_savestate, co_mousescrollrow]
-    datacols.items = <    
+    datacols.items = <
       item
         width = 165
         options = [co_readonly, co_focusselect, co_rowselect, co_proportional, co_savestate, co_mousescrollrow]
         valuefalse = '0'
         valuetrue = '1'
-      end    
+      end
       item
         width = 159
         options = [co_readonly, co_focusselect, co_rowselect, co_fill, co_savestate, co_mousescrollrow]
@@ -41,24 +41,24 @@ object setcreateorderfo: tsetcreateorderfo
         valuetrue = '1'
       end>
     fixcols.count = 1
-    fixcols.items = <    
+    fixcols.items = <
       item
         numstep = 1
       end>
     fixrows.count = 1
-    fixrows.items = <    
+    fixrows.items = <
       item
         height = 16
         captions.count = 2
-        captions.items = <        
+        captions.items = <
           item
             caption = 'Name'
-          end        
+          end
           item
             caption = 'Class'
           end>
         captionsfix.count = 1
-        captionsfix.items = <        
+        captionsfix.items = <
           item
             caption = 'Order'
           end>

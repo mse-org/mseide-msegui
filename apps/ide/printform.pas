@@ -37,7 +37,7 @@ type
    rowindex: integer;
    font1: tfont;
  end;
- 
+
 procedure print;
 
 implementation
@@ -50,7 +50,7 @@ type
   page,           //0 Page
   wishcancel      //1 Do you wish to cancel printing?
  );
- 
+
 procedure tprintfo.printidle(var again: Boolean);
 begin
  try
@@ -71,7 +71,7 @@ begin
      end
      else begin
       printorientation:= pao_portrait;
-     end;      
+     end;
      font.name:= ansistring(sourcefont.value);
      font.height:= round(fontsize.value);
      headerheight:= round(fontsize.value*5/3);

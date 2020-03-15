@@ -366,7 +366,7 @@ begin
     WriteScanLine(Img);
 
    {$ifdef FPC_Debug_Image}
-    WriteLn('TFPReaderPSD.InternalRead AAA1 ',Stream.position,' ',Stream.size); 
+    WriteLn('TFPReaderPSD.InternalRead AAA1 ',Stream.position,' ',Stream.size);
     {$endif}
   finally
     FreeAndNil(FPalette);

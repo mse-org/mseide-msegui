@@ -28,7 +28,7 @@ const
  {$define wincall}
  firebirdlib: array[0..0] of filenamety = ('fbclient.dll');
 {$else}
- firebirdlib: array[0..2] of filenamety = 
+ firebirdlib: array[0..2] of filenamety =
              ('libfbclient.so.3','libfbclient.so.2','libfbclient.so');
 {$endif}
 
@@ -58,14 +58,14 @@ const
 
 {$ifdef cpu64}
  FB_DOUBLE_ALIGN = 8;
-{$else}  
+{$else}
  FB_DOUBLE_ALIGN = 4; //check!
 {$endif}
  ISC_TIME_SECONDS_PRECISION = 10000;
  GDS_EPOCH_START = 40617;
  fbdatetimeoffset = -15018; //fpdate -> tdatetime;
  EPB_version1 = 1;
- 
+
 (*
 #define dtype_unknown	0
 #define dtype_text		1
@@ -247,12 +247,12 @@ type
  pISC_SHORT = ^ISC_SHORT;
  ISC_LONG = SLONG;
  pISC_QUAD = ^ISC_QUAD;
- 
+
  ISC_DATE = int32;
  pISC_DATE = ^ISC_DATE;
  ISC_TIME = card32;
  pISC_TIME = ^ISC_TIME;
- 
+
  ISC_TIMESTAMP = record
   timestamp_date: ISC_DATE;
   timestamp_time: ISC_TIME;
@@ -260,7 +260,7 @@ type
  pISC_TIMESTAMP = ^ISC_TIMESTAMP;
  ISC_STATUS = ptrint;
  pISC_STATUS = ^ISC_STATUS;
- 
+
  vary = record
   vary_length: ISC_USHORT;
   vary_string: record
@@ -274,7 +274,7 @@ type
   provider: iprovider;
   util: iutil;
  end;
- 
+
 procedure inifbapi(var api: fbapity);
 procedure finifbapi(var api: fbapity);
 
@@ -323,11 +323,11 @@ uses
   {$warn 6058 off}
  {$endif}
 {$endif}
-var 
+var
  libinfo: dynlibinfoty;
  master: imaster;
  util: iutil;
- 
+
 procedure initfb(const data: pointer);
 begin
  master:= fb_get_master_interface();
@@ -373,7 +373,7 @@ end;
 
 procedure initializefirebird(const sonames: array of filenamety; //[] = default
                                          const onlyonce: boolean = false);
-                                     
+
 const
  funcs: array[0..7] of funcinfoty = (
   (n: 'fb_get_master_interface'; d: @fb_get_master_interface),

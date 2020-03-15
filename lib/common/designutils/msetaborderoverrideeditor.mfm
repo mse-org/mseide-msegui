@@ -83,33 +83,33 @@ object msetaborderoverrideeditorfo: tmsetaborderoverrideeditorfo
       anchors = []
       optionsgrid = [og_colsizing, og_rowmoving, og_keyrowmoving, og_rowinserting, og_rowdeleting, og_focuscellonenter, og_autofirstrow, og_autoappend, og_colchangeontabkey, og_wrapcol, og_autopopup, og_mousescrollcol]
       fixcols.count = 1
-      fixcols.items = <      
+      fixcols.items = <
         item
           width = 27
           numstep = 1
         end>
       fixrows.count = 1
-      fixrows.items = <      
+      fixrows.items = <
         item
           height = 16
           captions.count = 2
-          captions.items = <          
+          captions.items = <
             item
               caption = 'a'
-            end          
+            end
             item
               caption = 'b'
             end>
         end>
       datacols.count = 2
       datacols.options = [co_proportional, co_savevalue, co_savestate, co_mousescrollrow]
-      datacols.items = <      
+      datacols.items = <
         item[aed]
           width = 144
           options = [co_proportional, co_savestate, co_mousescrollrow]
           widgetname = 'aed'
           dataclass = tgridmsestringdatalist
-        end      
+        end
         item[bed]
           width = 154
           options = [co_fill, co_savestate, co_mousescrollrow]
@@ -128,10 +128,10 @@ object msetaborderoverrideeditorfo: tmsetaborderoverrideeditorfo
         frame.localprops1 = []
         frame.button.color = -1879048187
         frame.buttons.count = 2
-        frame.buttons.items = <        
+        frame.buttons.items = <
           item
             color = -1879048187
-          end        
+          end
           item
             imagenr = 17
             onexecute = dialogexev
@@ -146,7 +146,7 @@ object msetaborderoverrideeditorfo: tmsetaborderoverrideeditorfo
         optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_focusrectonreadonly, oe_hintclippedtext]
         dropdown.options = [deo_selectonly, deo_autodropdown, deo_keydropdown, deo_cliphint]
         dropdown.cols.count = 1
-        dropdown.cols.items = <        
+        dropdown.cols.items = <
           item
           end>
         reffontheight = 14
@@ -160,10 +160,10 @@ object msetaborderoverrideeditorfo: tmsetaborderoverrideeditorfo
         frame.localprops1 = []
         frame.button.color = -1879048187
         frame.buttons.count = 2
-        frame.buttons.items = <        
+        frame.buttons.items = <
           item
             color = -1879048187
-          end        
+          end
           item
             imagenr = 17
             onexecute = dialogexev
@@ -178,7 +178,7 @@ object msetaborderoverrideeditorfo: tmsetaborderoverrideeditorfo
         optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_focusrectonreadonly, oe_hintclippedtext]
         dropdown.options = [deo_selectonly, deo_autodropdown, deo_keydropdown, deo_cliphint]
         dropdown.cols.count = 1
-        dropdown.cols.items = <        
+        dropdown.cols.items = <
           item
           end>
         reffontheight = 14

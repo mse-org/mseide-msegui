@@ -1,5 +1,5 @@
 { MSEide Copyright (c) 1999-2015 by Martin Schreiber
-   
+
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation; either version 2 of the License, or
@@ -67,7 +67,7 @@ type
    procedure updateshowpos(const acellpos: cellpositionty = cep_rowcenteredif);
   public
    constructor create;
-   procedure showsource(const apos: sourceposty; 
+   procedure showsource(const apos: sourceposty;
                                const asetfocus: boolean = false);
    function back: boolean;
    function forward: boolean;
@@ -91,9 +91,9 @@ type
 
    procedure navigback(const sender: TObject);
    procedure navigforward(const sender: TObject);
-   procedure onfilechanged(const sender: tfilechangenotifyer; 
+   procedure onfilechanged(const sender: tfilechangenotifyer;
                      const info: filechangeinfoty);
-   procedure sourcefoonclosequery(const sender: tcustommseform; 
+   procedure sourcefoonclosequery(const sender: tcustommseform;
                     var modalresult: modalresultty);
    procedure tabwidgetpageremoved(const sender: TObject; const awidget: twidget);
    procedure tabwidgetonactivepagechanged(const sender: tobject);
@@ -141,7 +141,7 @@ type
    procedure updatestat(const statfiler: tstatfiler);
 
    function hidesourcehint: boolean;    //false if no action;
-   procedure updatebreakpointicon(const path: filenamety; 
+   procedure updatebreakpointicon(const path: filenamety;
                  const info: bkptlineinfoty);
    procedure textmodified(const sender: tsourcepage);
    function openfile(const filename: filenamety;
@@ -189,7 +189,7 @@ type
    procedure replacefiletext(const filename: filenamety;
                 const startpos,endpos: gridcoordty; const newtext: msestring);
    property sourcepos: sourceposty read getsourcepos;
-   property sourcehintwidget: twidget read fsourcehintwidget 
+   property sourcehintwidget: twidget read fsourcehintwidget
                                                     write setsourcehintwidget;
  end;
 
@@ -238,7 +238,7 @@ begin
   if length(ar2) > 1 then begin
    splitstring(ar2[0],ar3,msechar(','));
    if (high(ar3) >= 0) then begin
-    if msestartsstr(' Error:',ar2[1]) or 
+    if msestartsstr(' Error:',ar2[1]) or
                     msestartsstr(' Fatal:',ar2[1]) then begin
      alevel:= el_error;
     end
@@ -315,7 +315,7 @@ begin
      result:= true;
     end;
    end;
-  end; 
+  end;
  end;
 end;
 
@@ -328,7 +328,7 @@ var
 begin
  apage:= nil;
  result:= false;
- if checkerrormessage(text,lev1,fna1,col1,row1) and (fna1 <> '') and 
+ if checkerrormessage(text,lev1,fna1,col1,row1) and (fna1 <> '') and
                                                 (lev1 >= minlevel) then begin
   apage:= sourcefo.showsourceline(sourcepath(fna1),row1,col1,true);
   result:= true;
@@ -430,7 +430,7 @@ begin
      result:= true;
     end;
    end;
-  end; 
+  end;
  end;
 end;
 *)
@@ -541,7 +541,7 @@ var
  po1: pmoduleinfoty;
 // ar3: msestringarty;
 // pt1: pointty;
- 
+
 begin
  with statfiler do begin
   setsection('edit');
@@ -551,11 +551,11 @@ begin
   if iswriter then begin
    intar1:= tabwidget.idents;
    sortarray(intar1,intar2);
-   setlength(filenames,count);  
-   setlength(relpaths,count);  
-   setlength(feditposar,count); 
-   setlength(fbookmarkar,count); 
-   setlength(ismod,count); 
+   setlength(filenames,count);
+   setlength(relpaths,count);
+   setlength(feditposar,count);
+   setlength(fbookmarkar,count);
+   setlength(ismod,count);
    for int1:= 0 to high(filenames) do begin
     with items[intar2[int1]] do begin
      filenames[int1]:= filepath;
@@ -670,7 +670,7 @@ begin
 }
       if (po1 <> nil) then begin
        with po1^ do begin
-        designformintf.moduleoptions:= 
+        designformintf.moduleoptions:=
              moduleoptionsty({$ifdef FPC}longword{$else}byte{$endif}
                          (moduleoptions[int1])) * [mo_hidewidgets,mo_hidecomp];
 //        if decodemoduledock(moduledock[int1],dockinfo) then begin
@@ -690,7 +690,7 @@ begin
 //    updatestat(istatfile(tabwidget));
    finally
     tabwidget.endupdate;
-   end; 
+   end;
   end;
 //  if visible and (activepage <> nil) then begin
 //   activepage.sourcefoonshow(nil);
@@ -727,7 +727,7 @@ procedure tsourcefo.formonidle(var again: boolean);
 var
  all: boolean;
  noall: boolean;
- 
+
  function ask(const filepath: filenamety; const modified: boolean): boolean;
  var
   mstr1: msestring;
@@ -776,8 +776,8 @@ var
  visible1: boolean;
  active1: boolean;
 begin
- if (application.activewindow <> nil) and not fasking and 
-               (application.modallevel = 0) and 
+ if (application.activewindow <> nil) and not fasking and
+               (application.modallevel = 0) and
                            (application.keyboardcapturewidget = nil) then begin
   fasking:= true;
   all:= false;
@@ -862,7 +862,7 @@ begin
  result:= (info.changed - [fc_force,fc_accesstime] <> []);
 end;
 
-procedure tsourcefo.onfilechanged(const sender: tfilechangenotifyer; 
+procedure tsourcefo.onfilechanged(const sender: tfilechangenotifyer;
                                           const info: filechangeinfoty);
 var
  int1: integer;
@@ -879,7 +879,7 @@ begin
  for int1:= 0 to designer.modules.count - 1 do begin
   po1:= designer.modules.itempo[int1];
   with po1^ do begin
-   if (longword(info.tag) = filetag) and 
+   if (longword(info.tag) = filetag) and
                                   modulecanchangenotify(po1,info) then begin
     filechanged:= true;
     application.wakeupmainthread();
@@ -899,7 +899,7 @@ begin
 end;
 
 function tsourcefo.findsourcepage(afilename: filenamety;
-                   wholepath: boolean = true; 
+                   wholepath: boolean = true;
                    onlyifloaded: boolean = false): tsourcepage;
 var
  int1: integer;
@@ -954,7 +954,7 @@ end;
 
 function tsourcefo.newpage: tsourcepage;
 begin
- result:= createnewpage('');               
+ result:= createnewpage('');
  result.updatecaption(false);
  result.show;
  result.setfocus(true);
@@ -1006,7 +1006,7 @@ begin
   if result = nil then begin
    if bo1 and findfile(msefileutils.filename(filename),
                        projectoptions.d.texp.sourcedirs,str1) or
-      not bo1 and 
+      not bo1 and
          findfile(filename,projectoptions.d.texp.sourcedirs,str1) then begin
     result:= findsourcepage(str1);
     if result = nil then begin
@@ -1403,27 +1403,27 @@ begin
  else begin
   popuprow:= invalidaxis;
  end;
- sender.menu.itembyname('editbreakpoint').enabled:= 
+ sender.menu.itembyname('editbreakpoint').enabled:=
         (activepage <> nil) and (popuprow >= 0) and
         (activepage.getbreakpointstate(popuprow) > bkpts_none);
- sender.menu.itembyname('showasform').enabled:= 
+ sender.menu.itembyname('showasform').enabled:=
         (activepage <> nil) and activepage.ismoduletext;
- sender.menu.itembyname('setbm').enabled:= 
+ sender.menu.itembyname('setbm').enabled:=
         (activepage <> nil) and (popuprow >= 0);
  sender.menu.itembyname('insgui').enabled:= (activepage <> nil);
  sender.menu.itembyname('insuid').enabled:= (activepage <> nil);
  sender.menu.itembynames(['modifyselection','convpas']).enabled:=
                       (activepage <> nil) and activepage.edit.hasselection;
- sender.menu.itembyname('addwatch').enabled:= (activepage <> nil) and  
+ sender.menu.itembyname('addwatch').enabled:= (activepage <> nil) and
             (sender.mouseinfopo <> nil) and
               (getpascalvarname(activepage.edit,
                 translateclientpoint(sender.mouseinfopo^.pos,
                         activepage,activepage.edit)) <> '');
 {
- sender.menu.itembyname('instempl').enabled:= (activepage <> nil) and 
+ sender.menu.itembyname('instempl').enabled:= (activepage <> nil) and
       codetemplates.hastemplate(
                 activepage.edit.wordatpos(activepage.edit.editpos,gc1,'',[],true));
-}                
+}
 end;
 
 procedure tsourcefo.completeclassexecute(const sender: TObject);
@@ -1528,7 +1528,7 @@ begin
     break;
    end;
   end;
-  
+
   with activepage.edit do begin
    inserttext(editpos,'['''+msestring(str2)+''']{'+inttostrmse(id1)+'}');
   end;
@@ -1561,7 +1561,7 @@ var
  maxlen: int32;
 const
  liend = '+lineend+';
- 
+
 begin
  with activepage.edit do begin
   maxlen:= projectoptions.e.rightmarginchars;

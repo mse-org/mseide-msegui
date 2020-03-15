@@ -13,13 +13,13 @@ interface
 uses
  classes,mclasses,mseclasses,msegui,msetypes,msegraphutils,mseguiintf,msewidgets,
  msegraphics,msesimplewidgets,mseevent,msemenus,mseguiglob,msetimer;
- 
+
 type
  tcustomwindowwidget = class;
 
- windowwidgeteventty = procedure(const sender: tcustomwindowwidget) of object; 
+ windowwidgeteventty = procedure(const sender: tcustomwindowwidget) of object;
  windowwidgetpainteventty = procedure(const sender: tcustomwindowwidget;
-                                const aupdaterect: rectty) of object; 
+                                const aupdaterect: rectty) of object;
  createwinideventty = procedure(const sender: tcustomwindowwidget;
                        const aparent: winidty;
                        const awidgetrect: rectty; var aid: winidty) of object;
@@ -27,7 +27,7 @@ type
                        const aid: winidty) of object;
  clientwindowoptionty = (cwo_trackboundsimmediate,cwo_highrestimer,cwo_noleak);
  clientwindowoptionsty = set of clientwindowoptionty;
-                        
+
  tcustomwindowwidget = class(teventwidget)
   private
    fclientwindow: windowty;
@@ -82,12 +82,12 @@ type
 
    procedure clienttoviewport(var apoint: pointty; const arect: rectty);
    procedure viewporttoclient(var apoint: pointty; const arect: rectty);
-              
+
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
    property rendertimestampus: longword read frendertimestampus; //us
-   property renderstep: real read frenderstep; 
+   property renderstep: real read frenderstep;
             //elapsed secods since last paint
    function createchildwindow: winidty;
    function hasclientwinid: boolean;
@@ -99,21 +99,21 @@ type
    property aspect: real read faspect;
    property fpsmax: real read ffpsmax write setfpsmax; //default -1 -> none
                                               //0 -> as fast as possible
-   property optionsclient: clientwindowoptionsty read foptionsclient 
+   property optionsclient: clientwindowoptionsty read foptionsclient
                                         write setoptionsclient default [];
-   property oncreatewinid: createwinideventty read foncreatewinid 
+   property oncreatewinid: createwinideventty read foncreatewinid
                                      write foncreatewinid;
-   property ondestroywinid: destroywinideventty read fondestroywinid 
+   property ondestroywinid: destroywinideventty read fondestroywinid
                                      write fondestroywinid;
    property onclientpaint: windowwidgetpainteventty read fonclientpaint
                                   write fonclientpaint;
-   property onclientrectchanged: windowwidgeteventty read fonclientrectchanged 
-                                     write fonclientrectchanged;   
-   property ondestroy: windowwidgeteventty read fondestroy write fondestroy;     
-   property ondloaded: windowwidgeteventty read fonloaded write fonloaded;    
-   property onwindowmouseevent: mouseeventty read fonwindowmouseevent 
+   property onclientrectchanged: windowwidgeteventty read fonclientrectchanged
+                                     write fonclientrectchanged;
+   property ondestroy: windowwidgeteventty read fondestroy write fondestroy;
+   property ondloaded: windowwidgeteventty read fonloaded write fonloaded;
+   property onwindowmouseevent: mouseeventty read fonwindowmouseevent
             write fonwindowmouseevent; //origin viewport.pos
-   property onwindowmousewheelevent: mousewheeleventty read 
+   property onwindowmousewheelevent: mousewheeleventty read
                 fonwindowmousewheelevent write fonwindowmousewheelevent;
  end;
 
@@ -151,7 +151,7 @@ type
    property onwindowmousewheelevent;
    property ondestroy;
  end;
- 
+
 implementation
 uses
  msesysutils;
@@ -217,7 +217,7 @@ begin
    fwindow.registeronscroll({$ifdef FPC}@{$endif}windowscrolled);
   end;
   checkclientvisible;
- end;  
+ end;
 end;
 
 procedure tcustomwindowwidget.destroyclientwindow;
@@ -265,7 +265,7 @@ begin
    fviewport:= rect1;
    updateviewport(fviewport);
   end;
-  if bo1 then begin 
+  if bo1 then begin
    doclientrectchanged;
   end;
  end;
@@ -336,7 +336,7 @@ begin
  if awinid = fclientwindow.id then begin
   fclientwindow.id:= 0;
  end;
- if (fwindow <> nil) and (fwindow.haswinid) and 
+ if (fwindow <> nil) and (fwindow.haswinid) and
                                         (fwindow.winid = awinid) then begin
   destroyclientwindow;
  end;
@@ -378,7 +378,7 @@ var
  rect1: rectty;
 begin
  if not (csdesigning in componentstate) and canclientpaint then begin
-  checkclientwinid;   
+  checkclientwinid;
   checkwindowrect;
   lwo1:= timestamp;
   if frendered then begin
@@ -391,7 +391,7 @@ begin
    rect1:= acanvas.clipbox;
    rect1.y:= rect1.y+rect1.cy;
    clienttoviewport(rect1.pos,innerclientrect);
-   doclientpaint(rect1); 
+   doclientpaint(rect1);
   end
   else begin
    doclientpaint(makerect(nullpoint,fviewport.size)); //called from timer
@@ -466,7 +466,7 @@ begin
   if info.eventkind in mouseposevents then begin
    checkwindowrect;
    rect1:= innerclientrect;
-   if pointinrect(info.pos,rect1) or 
+   if pointinrect(info.pos,rect1) or
            (ws_clientmousecaptured in fwidgetstate) then begin
     enterevent(true);
     clienttoviewport(info.pos,rect1);
@@ -561,7 +561,7 @@ end;
 procedure tcustomwindowwidget.invalidateviewpointrect(arect: rectty);
 begin //todo: test
  arect.x:= arect.x + fviewport.x;
- arect.y:= fviewport.y + fviewport.cy - (arect.y + arect.cy); 
+ arect.y:= fviewport.y + fviewport.cy - (arect.y + arect.cy);
  invalidaterect(arect,org_inner);
 end;
 

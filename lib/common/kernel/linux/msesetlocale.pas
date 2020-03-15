@@ -18,7 +18,7 @@ function getcodeset(): string;
 implementation
 uses
  cwstring,sysutils,msestrings,mseformatstr,msetypes,msesysintf;
- 
+
 function getlocstr(const id: integer; const defaultvalue: string): string;
 var
  po1: pchar;
@@ -67,7 +67,7 @@ begin
     'k': result:= result + 'H';
     'l': result:= result + 'h';
     'm': result:= result + 'mm';
-    'M': result:= result + 'nn'; 
+    'M': result:= result + 'nn';
     'n': result:= result + lineend;
 //  'O':
     'P','p': result:= result + 'ampm';
@@ -87,7 +87,7 @@ begin
     'y': result:= result + 'yy';
     'Y': result:= result + 'yyyy';
 //  'z':
-   end;   
+   end;
   end
   else begin
    result:= result + po1^;
@@ -137,10 +137,10 @@ var
 {$endif}
 {$endif}
 begin
- initdefaultformatsettings; 
+ initdefaultformatsettings;
  //msesys initialization will be called after msesetlocale initialization.
  //FPC bug?
- 
+
  with defaultformatsettingsmse do begin
  {$ifdef FPC}
   mstr1:= msestring(getlocstr(decimal_point,ansistring(decimalseparator)));
@@ -166,9 +166,9 @@ begin
    end
    else begin
     thousandseparator:= ' ';
-   end;   
+   end;
   end;
-  
+
   for int1:= 1 to 12 do begin
    shortmonthnames[int1]:= msestring(getlocstr(abmon_1 + int1 - 1,
                                 ansistring(shortmonthnames[int1])));
@@ -184,21 +184,21 @@ begin
   shortdateformat:= msestring(convertcformatstring(getlocstr(d_fmt,''),
                                    ansistring(shortdateformat)));
   str1:= getlocstr(d_t_fmt,'');
-  str2:= getlocstr(t_fmt,''); 
+  str2:= getlocstr(t_fmt,'');
   int1:= pos(str2,str1);
   if int1 > 0 then begin
    str1:= trimright(copy(str1,1,int1-1));
   end;
   longdateformat:= msestring(convertcformatstring(str1,
                                           ansistring(longdateformat)));
- // longdateformat:= convertcformatstring(getlocstr(d_t_fmt,''),longdateformat);   
+ // longdateformat:= convertcformatstring(getlocstr(d_t_fmt,''),longdateformat);
   shorttimeformat:= msestring(convertcformatstring(getlocstr(t_fmt,''),
                                           ansistring(shorttimeformat)));
   longtimeformat:= msestring(convertcformatstring(getlocstr(t_fmt_ampm,''),
                                           ansistring(longtimeformat)));
   findfirstchar(shortdateformat,'./-',dateseparator);
   findfirstchar(shorttimeformat,':.',timeseparator);
-  
+
   timeamstring:= msestring(getlocstr(am_str,ansistring(timeamstring)));
   if timeamstring = '' then begin
    timeamstring:= 'am';
@@ -217,7 +217,7 @@ begin
    currencyformat:= currfo[ord(ch1),ord(ch2)];
    ch3:= nl_langinfo(p_sign_posn)^;
    if ord(ch3) in [0..4] then begin
-    negcurrformat:= negcurrfo[ord(ch1),ord(ch2),ord(ch3)];  
+    negcurrformat:= negcurrfo[ord(ch1),ord(ch2),ord(ch3)];
    end;
   end;
   ch1:= nl_langinfo(frac_digits)^;
@@ -238,12 +238,12 @@ begin
   if bo1 then begin
    currencystring:= copy(currencystring,2,bigint);
    currencyformat:= currfo[ord(ch1),ord(ch2)];
-  end;   
+  end;
  end;
 {$endif}
   saveformatsettings;
  {$ifdef FPC}{$checkpointer default}{$endif}
- {$endif} 
+ {$endif}
  end;
 
  str1:= strlowercase(getcodeset());

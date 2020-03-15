@@ -10,7 +10,7 @@ type
  end;
 var
  s: tstringconstsmo;
- 
+
 implementation
 uses
  stringconsts_mfm;

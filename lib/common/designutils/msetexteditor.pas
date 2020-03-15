@@ -43,7 +43,7 @@ type
 
 var
  syntaxpainter: tsyntaxpainter;
- 
+
 implementation
 uses
  msetexteditor_mfm,sysutils,msewidgets,mseshapes,mseformatstr;
@@ -54,7 +54,7 @@ type
  strinconststy = (
   testok            //0 Test OK
  );
-  
+
 constructor tmsetexteditorfo.create(const aonclosequery: closequeryeventty;
             const asyntaxpainter: tsyntaxpainter; const asyntaxindex: integer;
             const testbutton: boolean);
@@ -64,7 +64,7 @@ begin
  if (asyntaxpainter <> nil) and (asyntaxindex >= 0) then begin
   textedit.syntaxpainter:= asyntaxpainter;
   textedit.setsyntaxdef(asyntaxindex);
- end;  
+ end;
  if testbutton then begin
   test.state:= test.state - [as_invisible,as_disabled];
  end;

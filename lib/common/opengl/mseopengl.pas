@@ -10,7 +10,7 @@
 unit mseopengl;
 //
 // under construction
-// 
+//
 {$ifdef FPC}{$mode objfpc}{$h+}{$INTERFACES CORBA}{$endif}
 
 interface
@@ -18,7 +18,7 @@ uses
  msegl,{$ifdef unix}mseglx,x,xlib,xutil,{$else}windows,{$endif}
  msegraphics,msetypes,mseguiglob,msegraphutils,mseopenglgdi;
 
-type  
+type
  topenglcanvas = class(tcanvas)
   private
    fviewport: rectty;
@@ -40,7 +40,7 @@ type
    procedure swapbuffers;
    property viewport: rectty read fviewport write setviewport;
  end;
- 
+
  topenglbitmapcanvas = class(topenglcanvas)
  end;
 
@@ -49,13 +49,13 @@ type
    procedure linktopaintdevice(apaintdevice: paintdevicety; const gc: gcty;
               {const size: sizety;} const cliporigin: pointty); override;
  end;
-   
+
 implementation
 uses
  mseguiintf;
 type
  tsimplebitmap1 = class(tsimplebitmap);
- 
+
 const
  defaultcontextattributes: contextattributesty =
   (buffersize: -1;
@@ -94,7 +94,7 @@ const
    accumalphasize: -1
   );
 {$ifdef unix}
-  defaultvisualattributes: array[0..8] of integer = 
+  defaultvisualattributes: array[0..8] of integer =
   (GLX_RGBA,GLX_RED_SIZE,8,GLX_GREEN_SIZE,8,GLX_BLUE_SIZE,8,
    GLX_DOUBLEBUFFER,none);
 {$endif}
@@ -180,7 +180,7 @@ begin
  result:= inherited lock;
  if fdrawinfo.gc.handle = 0 then begin
   checkgcstate([cs_gc]);
- end; 
+ end;
  if fdrawinfo.paintdevice <> 0 then begin
   gdi_makecurrent(fdrawinfo);
  end;

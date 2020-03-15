@@ -12,7 +12,7 @@ Unit jcapistd_del;
   jpeg_start_compress, it will end up linking in the entire compressor.
   We thus must separate this file from jcapimin.c to avoid linking the
   whole compression library into a transcoder. }
-  
+
 //modified 2013 by Martin Schreiber
 
 interface

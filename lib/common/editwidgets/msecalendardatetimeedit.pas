@@ -21,7 +21,7 @@ uses
  msegraphutils,
  mseguiglob,mseinplaceedit,mseedit,msestrings,msegui,mseevent,msemenus,
  mseeditglob,msegraphics;
- 
+
 type
  tcustomcalendardatetimeedit = class(tcustomdatetimeedit,idropdowncalendar)
   private
@@ -44,7 +44,7 @@ type
   published
    property frame: tdropdownmultibuttonframe read getframe write setframe;
  end;
-  
+
  tcalendardatetimeedit = class(tcustomcalendardatetimeedit)
   published
    property onsetvalue;
@@ -65,7 +65,7 @@ type
 implementation
 uses
  sysutils,mseformatstr,msesys,msedate;
- 
+
 { tcustomcalendardatetimeedit }
 
 constructor tcustomcalendardatetimeedit.create(aowner: tcomponent);

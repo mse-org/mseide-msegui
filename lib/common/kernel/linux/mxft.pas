@@ -95,12 +95,12 @@ type           //from fontconfig.h, XftCompat.h
          _XftFTlibrary : TFT_Library;cvar;external;
 }
     type
-         
+
     TXftDraw =  record
      //dummy
     end;
     PXftDraw  = ^TXftDraw;
-    
+
        TXftFont =  record
             ascent : longint;
             descent : longint;
@@ -152,7 +152,7 @@ type           //from fontconfig.h, XftCompat.h
          end;
        PXftGlyphFontSpec = ^TXftGlyphFontSpec;
 
-  
+
 {$ifdef staticxft}
     { fccharset.c  }
    function FcCharSetCreate: PFcCharSet;cdecl;
@@ -189,7 +189,7 @@ type           //from fontconfig.h, XftCompat.h
             external fclib name 'FcPatternAddCharSet';
    function FcPatternAddBool(p:PFcPattern; aobject:Pchar; b:TFcBool):TFcBool;
             cdecl;external fclib name 'FcPatternAddBool';
-   function FcPatternAddLangSet(p:PFcPattern; aobject:Pchar; 
+   function FcPatternAddLangSet(p:PFcPattern; aobject:Pchar;
                          ls:PFcLangSet):TFcBool;cdecl;
             external fclib name 'FcPatternAddLangSet';
     { fclist.c }
@@ -199,7 +199,7 @@ type           //from fontconfig.h, XftCompat.h
                    external fclib name 'FcObjectSetAdd';
    procedure FcObjectSetDestroy(os: PFcObjectSet);cdecl;
                    external fclib name 'FcObjectSetDestroy';
-   function FcFontList(config: PFcConfig; p:PFcPattern; 
+   function FcFontList(config: PFcConfig; p:PFcPattern;
              os:PFcObjectSet): PFcFontSet;cdecl;
                    external fclib name 'FcFontList';
     { fcmatch.c }
@@ -209,11 +209,11 @@ type           //from fontconfig.h, XftCompat.h
    function FcFontRenderPrepare(config:PFcConfig; pat:PFcPattern;
                     font:PFcPattern): PFcPattern;cdecl;
                    external fclib name 'FcFontRenderPrepare';
-    { fcfs.c }            
+    { fcfs.c }
    procedure FcFontSetDestroy(s:PFcFontSet);cdecl;
                     external fclib name 'FcFontSetDestroy';
 
-    { fccfg.c }                     
+    { fccfg.c }
    function FcConfigSubstitute(config:PFcConfig; p:PFcPattern;
                    kind:TFcMatchKind):TFcBool;cdecl;
                    external fclib name 'FcConfigSubstitute';

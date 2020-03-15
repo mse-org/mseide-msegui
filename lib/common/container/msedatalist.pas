@@ -31,7 +31,7 @@ uses
  mseclasses,mselist,mseglob,msearrayutils;
 
 type
- 
+
  dataprocty = procedure(var data) of object;
 {
  internallistoptionty = (ilo_needsfree,ilo_needscopy,ilo_needsinit,
@@ -49,13 +49,13 @@ type
 {
  idatalist = interface(inullinterface)
   procedure listdestroyed(const sender: idatalist);
-  getlist: tdatalist;  
+  getlist: tdatalist;
  end;
  idatalistarty = array of idatalist;
 }
  copyprocty = procedure(const source,dest:pointer);
  copy2procty = procedure(const source1,source2,dest:pointer);
- 
+
  datalistarty = array of tdatalist;
 
  listlinkinfoty = record
@@ -118,7 +118,7 @@ type
    frearanged: boolean; //set by rearange
    fgridsortdescend: boolean; //set by tdatacols before sorting
    function checkassigncompatibility(const source: tpersistent): boolean; virtual;
-   procedure checkindex1(const index: integer); 
+   procedure checkindex1(const index: integer);
    function assigndata(const source: tpersistent): boolean;
                        //false if not possible
    procedure assigntodata(const dest: tdatalist);
@@ -194,7 +194,7 @@ type
    function internallinksource(const source: tdatalist;
                  const atag: integer; var variable: tdatalist): boolean;
    function sourceischanged(const asource: listlinkinfoty): boolean;
-   function checksourcechange(var ainfo: listlinkinfoty; 
+   function checksourcechange(var ainfo: listlinkinfoty;
                         const sender: tdatalist; const aindex: integer): boolean;
    function checksourcecopy(var ainfo: listlinkinfoty;
                                      const copyproc: copyprocty): boolean;
@@ -220,14 +220,14 @@ type
 
    procedure linkclient(const aclient: idatalistclient);
    procedure unlinkclient(const aclient: idatalistclient);
-   
+
    function getsourcecount: integer; virtual;
    function getsourceinfo(const atag: integer): plistlinkinfoty; virtual;
    function getsourcename(const atag: integer): string;
    procedure linksource(const source: tdatalist; const atag: integer); virtual;
    function canlink(const asource: tdatalist;
                                         const atag: integer): boolean; virtual;
- 
+
    property size: integer read fsize;
    property state: dataliststatesty read fstate;
    function datapo: pointer; //calls normalizering,
@@ -252,7 +252,7 @@ type
                    //index -1 -> undefined
    class function datatype: listdatatypety; virtual;
    procedure checkindexrange(const aindex: integer; const acount: integer = 1);
-   procedure checkindex(var index: integer); 
+   procedure checkindex(var index: integer);
                         //bringt absolute zeilennummer in ringpuffer
    procedure beginupdate; virtual;
    procedure endupdate; virtual;
@@ -276,7 +276,7 @@ type
    procedure insertitems(index,acount: integer); virtual;
    function empty(const index: integer): boolean; virtual;         //true wenn leer
 
-   function sort(const comparefunc: sortcomparemethodty; 
+   function sort(const comparefunc: sortcomparemethodty;
                          out arangelist: integerarty;
                          const dorearange: boolean): boolean;
    function sort(out arangelist: integerarty;
@@ -286,11 +286,11 @@ type
    function sortcaseinsensitive: boolean; //true if changed
    function sortcaseinsensitive(out arangelist: integerarty;
                        const dorearange: boolean): boolean;
-   
+
    procedure clean(const start,stop: integer); virtual;
-   procedure clearmemberitem(const subitem: integer; 
+   procedure clearmemberitem(const subitem: integer;
                                     const index: integer); virtual;
-   procedure setmemberitem(const subitem: integer; 
+   procedure setmemberitem(const subitem: integer;
                          const index: integer; const avalue: integer); virtual;
 
 
@@ -302,20 +302,20 @@ type
    property maxcount: integer read fmaxcount
                      write setmaxcount default bigint; //for ring buffer
    property sorted: boolean read getsorted write setsorted;
-   property checkeditem: integer read fcheckeditem write setcheckeditem; 
+   property checkeditem: integer read fcheckeditem write setcheckeditem;
                            //-1 if none
-   property facultative: boolean read getfacultative 
+   property facultative: boolean read getfacultative
                                     write setfacultative default false;
                            //used by objecttovalues()
  end;
- 
+
  pdatalist = ^tdatalist;
- 
+
  tnonedatalist = class(tdatalist)
   public
    class function datatype: listdatatypety; override;
  end;
-    
+
  subdatainfoty = record
   list: tdatalist;
   subindex: integer; //0 = main
@@ -370,11 +370,11 @@ type
   public
    procedure fill(acount: integer; const defaultvalue: boolean); overload;
    procedure fill(const defaultvalue: boolean); overload;
-   property asarray: longboolarty read getasarray 
+   property asarray: longboolarty read getasarray
                                                   write setasarray;
    property items[const index: integer]: boolean read Getitems write Setitems; default;
  end;
- 
+
  tint64datalist = class(tdatalist)
   private
    function Getitems(index: integer): int64;
@@ -405,7 +405,7 @@ type
    property asarray: int64arty read getasarray write setasarray;
    property items[index: integer]: int64 read Getitems write Setitems; default;
  end;
- 
+
  tcurrencydatalist = class(tdatalist)
   private
    function Getitems(index: integer): currency;
@@ -436,7 +436,7 @@ type
    property asarray: currencyarty read getasarray write setasarray;
    property items[index: integer]: currency read Getitems write Setitems; default;
  end;
-  
+
  tenumdatalist = class(tintegerdatalist)
   private
    fgetdefault: getintegereventty;
@@ -505,9 +505,9 @@ type
 
    property asarray: realarty read getasarray write setasarray;
    property items[index: integer]: realty read Getitems write Setitems; default;
-   property defaultzero: boolean read fdefaultzero 
+   property defaultzero: boolean read fdefaultzero
                                        write fdefaultzero default false;
-   property acceptempty: boolean read facceptempty 
+   property acceptempty: boolean read facceptempty
                                        write facceptempty default false;
  end;
 
@@ -543,7 +543,7 @@ type
   public
    min: realty;      //for property editor
    max: realty;
-   
+
    constructor create; override;
    class function datatype: listdatatypety; override;
    procedure assign(source: tpersistent); override;
@@ -562,7 +562,7 @@ type
    property asarrayre: realarty read getasarrayre write setasarrayre;
    property asarrayim: realarty read getasarrayim write setasarrayim;
    property items[const index: integer]: complexty read Getitems write Setitems; default;
-   property defaultzero: boolean read fdefaultzero 
+   property defaultzero: boolean read fdefaultzero
                                                write fdefaultzero default false;
  end;
 
@@ -573,7 +573,7 @@ type
  prealintty = ^realintty;
  realintarty = array of realintty;
  realintaty = array[0..0] of realintty;
-                   
+
  trealintdatalist = class(trealdatalist)
   private
    fdefaultval1: realintty;
@@ -617,7 +617,7 @@ type
    property doubleitems[index: integer]: realintty read Getdoubleitems
                    write Setdoubleitems; default;
  end;
- 
+
  tpointerdatalist = class(tdatalist)
   private
    function Getitems(index: integer): pointer;
@@ -684,8 +684,8 @@ type
 
    function gettext: ansistring;
    procedure settext(const avalue: ansistring);
-   
-   property items[index: integer]: ansistring read Getitems write 
+
+   property items[index: integer]: ansistring read Getitems write
                         setitems; default;
    property asarray: stringarty read getasarray write setasarray;
    property asmsestringarray: msestringarty read getasmsestringarray
@@ -698,7 +698,7 @@ type
                     aco_multilinepara); //breaks lines by maxchars in a
                                         //single list row
  addcharoptionsty = set of addcharoptionty;
- 
+
  tpoorstringdatalist = class(tdynamicpointerdatalist)
   private
    function Getitems(index: integer): msestring;
@@ -732,9 +732,9 @@ type
    procedure insert(const index: integer; const item: msestring); virtual; abstract;
    function add(const value: tmsestringdatalist): integer; overload;
    function add(const value: msestring): integer; overload; virtual; abstract;
-   function add(const avalue: msestring; const anoparagraph: boolean): integer; 
+   function add(const avalue: msestring; const anoparagraph: boolean): integer;
                                                               overload; virtual;
-   function addchars(const value: msestring; 
+   function addchars(const value: msestring;
                   const aoptions: addcharoptionsty = [aco_processeditchars];
                   const maxchars: integer = 0): integer;
           //adds characters to last row, returns index
@@ -764,10 +764,10 @@ type
    property asstringarray:stringarty read getasstringarray write setasstringarray;
    property items[index: integer]: msestring read Getitems write Setitems; default;
  end;
- 
+
  stringdatalistoptionty = (sdo_naturalsort);
  stringdatalistoptionsty = set of stringdatalistoptionty;
- 
+
  tmsestringdatalist = class(tpoorstringdatalist)
   private
    foptions: stringdatalistoptionsty;
@@ -780,7 +780,7 @@ type
    procedure insert(const index: integer; const item: msestring); override;
    procedure fill(acount: integer; const defaultvalue: msestring);
   published
-   property options: stringdatalistoptionsty read foptions 
+   property options: stringdatalistoptionsty read foptions
                                              write foptions default [];
  end;
 
@@ -836,7 +836,7 @@ type
  msestringintarty = array of msestringintty;
  msestringintaty = array[0..0] of msestringintty;
  pmsestringintaty = ^msestringintaty;
-                   
+
  tmsestringintdatalist = class(tpoorstringdatalist)
   private
    function Getdoubleitems(index: integer): msestringintty;
@@ -920,7 +920,7 @@ type
  prowstateaty  = ^rowstateaty;
 
  colmergety = packed record
-  merged: longword; //bitset lsb = col 1, msb = col32, 
+  merged: longword; //bitset lsb = col 1, msb = col32,
                     // $ffffffff = first col fills whole row
                     //addressed by column index
  end;
@@ -953,7 +953,7 @@ type
                      rsm_hidden,rsm_merged,rsm_height);
 
 const
- rowinfosizes: array[rowinfolevelty] of integer = 
+ rowinfosizes: array[rowinfolevelty] of integer =
             (sizeof(rowstatety),sizeof(rowstatecolmergety),
             sizeof(rowstaterowheightty));
 type
@@ -1027,7 +1027,7 @@ type
    function getitempo(const index: integer): prowstatety;
    function getitempocolmerge(const index: integer): prowstatecolmergety;
    function getitemporowheight(const index: integer): prowstaterowheightty;
-   property items[const index: integer]: rowstatety read getrowstate 
+   property items[const index: integer]: rowstatety read getrowstate
                                               write setrowstate; default;
    property itemscolmerge[const index: integer]: rowstatecolmergety
             read getrowstatecolmerge write setrowstatecolmerge;
@@ -1046,25 +1046,25 @@ type
    property fontar: integerarty read getfontar write setfontar;
    property readonly[const index: integer]: boolean read getreadonly
                                                             write setreadonly;
-   property selected[const index: integer]: longword read getselected 
+   property selected[const index: integer]: longword read getselected
                                                             write setselected;
    property hidden[const index: integer]: boolean read gethidden write sethidden;
    property hiddenar: longboolarty read gethiddenar write sethiddenar;
-   property foldlevel[const index: integer]: byte read getfoldlevel 
+   property foldlevel[const index: integer]: byte read getfoldlevel
                                                  write setfoldlevel; //0..64
    property foldlevelar: integerarty read getfoldlevelar write setfoldlevelar;
-   property foldissum[const index: integer]: boolean read getfoldissum 
+   property foldissum[const index: integer]: boolean read getfoldissum
                                                  write setfoldissum;
    property foldissumar: longboolarty read getfoldissumar write setfoldissumar;
 
    property height[const index: integer]: integer read getheight;
-   property merged[const index: integer]: longword read getmerged 
+   property merged[const index: integer]: longword read getmerged
                                                             write setmerged;
-   property linewidth[const index: integer]: rowlinewidthty 
+   property linewidth[const index: integer]: rowlinewidthty
                                   read getlinewidth{ write setlineheight};
-   property linecolorfix[const index: integer]: rowstatenumty 
+   property linecolorfix[const index: integer]: rowstatenumty
                                   read getlinecolorfix write setlinecolorfix;
-   property linecolor[const index: integer]: rowstatenumty 
+   property linecolor[const index: integer]: rowstatenumty
                                   read getlinecolor write setlinecolor;
    property foldinfoar: bytearty read getfoldinfoar;
  end;
@@ -1139,7 +1139,7 @@ var
   tansistringdatalist,tmsestringdatalist,tdoublemsestringdatalist,
 //dl_msestringint
   tmsestringintdatalist,
-//dl_complex,      dl_rowstate        
+//dl_complex,      dl_rowstate
   tcomplexdatalist,tcustomrowstatelist,
 //dl_custom
   nil);
@@ -1295,7 +1295,7 @@ var
  int1: integer;
  po1: plistlinkinfoty;
 begin
- result:= asource = self; 
+ result:= asource = self;
  if not result then begin
   for int1:= 0 to getsourcecount - 1 do begin
    po1:= getsourceinfo(int1);
@@ -1312,7 +1312,7 @@ end;
 function tdatalist.canlink(const asource: tdatalist;
                                         const atag: integer): boolean;
 begin
- result:= (asource <> nil) and (asource.datatype in getlinkdatatypes(atag)) and 
+ result:= (asource <> nil) and (asource.datatype in getlinkdatatypes(atag)) and
                not asource.islinked(self);
 end;
 
@@ -1444,7 +1444,7 @@ begin
  fringpointer:= 0;
 end;
 
-function tdatalist.sort(const comparefunc: sortcomparemethodty; 
+function tdatalist.sort(const comparefunc: sortcomparemethodty;
               out arangelist: integerarty; const dorearange: boolean): boolean;
 var
  int1: integer;
@@ -1469,7 +1469,7 @@ begin
 end;
 
 (*
-function tdatalist.sort(const compareproc: compareprocty; 
+function tdatalist.sort(const compareproc: compareprocty;
               const arangelist: tintegerdatalist; dorearange: boolean): boolean;
   //true wenn bewegt, refrow erhaelt neue indexpos
 
@@ -1540,13 +1540,13 @@ begin
 end;
 *)
 
-function tdatalist.sort(out arangelist: integerarty; 
+function tdatalist.sort(out arangelist: integerarty;
                                const dorearange: boolean): boolean;
 begin
  result:= sort({$ifdef FPC}@{$endif}compare,arangelist,dorearange);
 end;
 
-function tdatalist.sortcaseinsensitive(out arangelist: integerarty; 
+function tdatalist.sortcaseinsensitive(out arangelist: integerarty;
                                        const dorearange: boolean): boolean;
 begin
  result:= sort({$ifdef FPC}@{$endif}comparecaseinsensitive,
@@ -1722,9 +1722,9 @@ begin
   exit;
  end;
  result:= checkassigncompatibility(source);
-// result:= (datatype < dl_custom) and (source is tdatalist) and 
-//                      (tdatalist(source).datatype = datatype) or 
-//                       source.inheritsfrom(classtype) or 
+// result:= (datatype < dl_custom) and (source is tdatalist) and
+//                      (tdatalist(source).datatype = datatype) or
+//                       source.inheritsfrom(classtype) or
 //                       inheritsfrom(source.classtype);
  if result then begin
   tdatalist(source).assigntodata(self);
@@ -1797,7 +1797,7 @@ begin
  end;
 end;
 
-procedure tdatalist.internalsetasarray(const source: pointer; 
+procedure tdatalist.internalsetasarray(const source: pointer;
                             const asize: integer; const acount: integer);
 var
  int1: integer;
@@ -1826,7 +1826,7 @@ begin
   end;
   internalcopyinstance(0,fcount);
  end;
- change(-1); 
+ change(-1);
 end;
 
 function tdatalist.getdatablock(const source: pointer; const destsize: integer): integer;
@@ -1861,7 +1861,7 @@ begin
  end;
  if dls_needsfree in fstate then begin
   freedata(dest);
- end;  
+ end;
  move(po1^,dest,fsize);
  if dls_needscopy in fstate then begin
   aftercopy(dest);
@@ -1953,7 +1953,7 @@ end;
 
 procedure tdatalist.readappendix(const reader; const aname: msestring);
 begin
- //dummy 
+ //dummy
 end;
 
 function tdatalist.popbottomdata(var ziel): boolean;
@@ -2200,7 +2200,7 @@ begin
  if value > fmaxcount then begin
   int1:= value-fmaxcount;        //last item to init
   if int1 > fcount then begin
-   int1:= fcount;               
+   int1:= fcount;
   end;
   fscrolled:= fscrolled+int1;
   value:= fmaxcount;
@@ -2225,7 +2225,7 @@ begin
  end
  else begin
   if value > fcapacity then begin
-   capacity:= value*2 + 32; 
+   capacity:= value*2 + 32;
 //   capacity:= ((value*12) div 10) + 5; //in 20% schritten
   end;
   if value > countvorher then begin
@@ -2369,7 +2369,7 @@ begin
 // change(-1);
 end;
 
-procedure tdatalist.blockcopymovedata(fromindex, toindex: integer; 
+procedure tdatalist.blockcopymovedata(fromindex, toindex: integer;
                             const acount: integer; const mode: blockcopymodety);
 var
  ueberlappung,freestart,freecount,initstart: integer;
@@ -3022,7 +3022,7 @@ end;
 procedure tdatalist.datamoved(const fromindex: integer; const toindex: integer;
                const acount: integer);
 begin
- if (fcheckeditem >= 0) and (fcheckeditem >= fromindex) and 
+ if (fcheckeditem >= 0) and (fcheckeditem >= fromindex) and
                         (fcheckeditem < fromindex+acount) then begin
   fcheckeditem:= fcheckeditem + toindex - fromindex;
   if (fcheckeditem < 0) or (fcheckeditem >= fcount) then begin
@@ -3194,7 +3194,7 @@ begin
   po1^:= avalue[int1];
   inc(pchar(po1),fsize);
  end;
- change(-1); 
+ change(-1);
 end;
 
 function tintegerdatalist.getstatdata(const index: integer): msestring;
@@ -3223,7 +3223,7 @@ procedure tintegerdatalist.writeappendix(const writer; const aname: msestring);
 begin
  with tstatwriter(writer) do begin
   writeinteger(aname+'_ci',fcheckeditem);
- end; 
+ end;
 end;
 
 procedure tintegerdatalist.readappendix(const reader; const aname: msestring);
@@ -4614,7 +4614,7 @@ function tansistringdatalist.textlength: integer;
 var
  int1,int2: integer;
  po1: pchar;
-begin 
+begin
  po1:= datapo;
  int2:= 0;
  for int1:= 0 to fcount - 1 do begin
@@ -4696,15 +4696,15 @@ begin
 end;
 
 function tpoorstringdatalist.add(const avalue: msestring;
-                                 const anoparagraph: boolean): integer; 
+                                 const anoparagraph: boolean): integer;
 begin
  result:= add(avalue);
-end;                                                              
+end;
 
 function tpoorstringdatalist.addchars(const value: msestring;
                   const aoptions: addcharoptionsty = [aco_processeditchars];
 //                    const processeditchars: boolean = true;
-                    const maxchars: integer = 0): integer;		
+                    const maxchars: integer = 0): integer;
 var
  int1,int2,int3,int4: integer;
  ar1,ar2: msestringarty;
@@ -4792,7 +4792,7 @@ begin
       ar2[int2]:= ar1[int1];
       inc(int2);
      end;
-    end;  
+    end;
     ar1:= ar2;
    end;
   end;
@@ -4816,12 +4816,12 @@ end;
 {
 function tpoorstringdatalist.addchars(const value: msestring;
                     const processeditchars: boolean = true;
-                    const maxchars: integer = 0): integer;		
+                    const maxchars: integer = 0): integer;
 var
  int1,int2: integer;
  ar1: msestringarty;
  first: pmsestring;
- mstr1: msestring; 
+ mstr1: msestring;
 begin
  ar1:= nil; //compilerwarning
  if value <> '' then begin
@@ -4864,7 +4864,7 @@ end;
 
 (*
 function tpoorstringdatalist.addchars(const value: msestring;
-                    const processeditchars: boolean = true): integer;		
+                    const processeditchars: boolean = true): integer;
 var
  int1,int2: integer;
  po1: pmsestring;
@@ -5118,7 +5118,7 @@ function tpoorstringdatalist.textlength: integer;
 var
  int1,int2: integer;
  po1: pchar;
-begin 
+begin
  po1:= datapo;
  int2:= 0;
  for int1:= 0 to fcount - 1 do begin
@@ -5128,7 +5128,7 @@ begin
  result:= int2;
 end;
 
-function tpoorstringdatalist.dataastextstream: ttextstream; 
+function tpoorstringdatalist.dataastextstream: ttextstream;
                        //chars truncated to 8bit
 var
  len: integer;
@@ -5730,16 +5730,16 @@ begin
  with reader do begin
   readlistbegin;
  {$ifdef fpcbug4519read}
-  doublemsestringty(value).a:= readwidestring4519(reader); 
+  doublemsestringty(value).a:= readwidestring4519(reader);
   doublemsestringty(value).b:= readwidestring4519(reader);
  {$else}
-  doublemsestringty(value).a:= treader_readmsestring(reader); 
+  doublemsestringty(value).a:= treader_readmsestring(reader);
   doublemsestringty(value).b:= treader_readmsestring(reader);
 //  {$ifdef mse_unicodestring}
-//  doublemsestringty(value).a:= readunicodestring; 
+//  doublemsestringty(value).a:= readunicodestring;
 //  doublemsestringty(value).b:= readunicodestring;
 //  {$else}
-//  doublemsestringty(value).a:= readwidestring; 
+//  doublemsestringty(value).a:= readwidestring;
 //  doublemsestringty(value).b:= readwidestring;
 //  {$endif}
  {$endif}
@@ -6025,13 +6025,13 @@ begin
  with reader do begin
   readlistbegin;
  {$ifdef fpcbug4519read}
-  msestringintty(value).mstr:= readwidestring4519(reader); 
+  msestringintty(value).mstr:= readwidestring4519(reader);
  {$else}
-  msestringintty(value).mstr:= treader_readmsestring(reader); 
+  msestringintty(value).mstr:= treader_readmsestring(reader);
 //  {$ifdef mse_unicodestring}
-//  msestringintty(value).mstr:= readunicodestring; 
+//  msestringintty(value).mstr:= readunicodestring;
 //  {$else}
-//  msestringintty(value).mstr:= readwidestring; 
+//  msestringintty(value).mstr:= readwidestring;
 //  {$endif}
  {$endif}
   msestringintty(value).int:= readinteger;
@@ -6094,7 +6094,7 @@ begin
  result:= dl_realint;
 end;
 
-function trealintdatalist.add(const valuea: realty; 
+function trealintdatalist.add(const valuea: realty;
                                      const valueb: integer = 0): integer;
 var
  d1: realintty;
@@ -6317,7 +6317,7 @@ procedure trealintdatalist.readitem(const reader: treader; var value);
 begin
  with reader do begin
   readlistbegin;
-  realintty(value).rea:= readrealty(reader); 
+  realintty(value).rea:= readrealty(reader);
   realintty(value).int:= readinteger;
   readlistend;
  end;

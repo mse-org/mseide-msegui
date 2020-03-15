@@ -17,8 +17,8 @@ uses
   Windows;
 {$else}
 {$ifdef KYLIX}
-  Libc, 
-{$endif}  
+  Libc,
+{$endif}
   Types, dbf_wtil;
 {$endif}
 

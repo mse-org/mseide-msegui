@@ -48,7 +48,7 @@ type
  iifidialoglink = interface(iifilink)[miid_iifidialoglink]
   function showdialog(out adialog: tactcomponent): modalresultty;
  end;
-   
+
  iifidatalink = interface(iifilink)[miid_iifidatalink]
   procedure updateifigriddata(const sender: tobject; const alist: tdatalist);
   function getgriddata: tdatalist;
@@ -57,7 +57,7 @@ type
   procedure setifivalue(const avalue); //for pointer property without RTTI
   procedure updatereadonlystate;
  end;
- 
+
  iifigridlink = interface(iifidatalink)[miid_iifigridlink]
   function appendrow(const checkautoappend: boolean = false): integer;
   function getrowstate: tcustomrowstatelist;
@@ -72,10 +72,10 @@ type
   procedure setvalue(const sender: iificlient;
                      var avalue; var accept: boolean; const arow: integer);
  end;
- 
+
  iifigridserver = interface(iifiserver)
-  
+
  end;
-   
+
 implementation
 end.

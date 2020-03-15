@@ -81,7 +81,7 @@ type
    procedure drawimage(const acanvas: tcanvas;
                            var alayoutinfo: listitemlayoutinfoty) override;
  end;
-  
+
 function editimagelist(aimagelist: timagelist): modalresultty;
 var
  dialog: timagelisteditorfo;
@@ -95,7 +95,7 @@ begin
    for i1:= 0 to imagelist.versioncount - 1 do begin
     versionnum.dropdown.cols.addrow([inttostrmse(i1)]);
    end;
-   if (currentversion < 0) or 
+   if (currentversion < 0) or
               (currentversion >= imagelist.versioncount) then begin
     currentversion:= 0;
    end;
@@ -206,7 +206,7 @@ var
 
 begin
  if info.eventkind = cek_keydown then begin
-  if (info.keyeventinfopo^.key = key_delete) and 
+  if (info.keyeventinfopo^.key = key_delete) and
       (info.keyeventinfopo^.shiftstate * shiftstatesrepeatmask = []) then begin
    if currentversion = 0 then begin
     fcopyitems:= nil;
@@ -318,8 +318,8 @@ begin
   copystart:= imagelist.count;
   if currentversion = 0 then begin
    for i1:= 0 to high(fcopyitems) do begin
-    imagelist.getimage(fcopyitems[i1],bmp1);  
-    imagelist.addimage(bmp1);  
+    imagelist.getimage(fcopyitems[i1],bmp1);
+    imagelist.addimage(bmp1);
    end;
    for i1:= 0 to high(fcopyitems) do begin
     imagelist.moveimage(copystart+i1,insertid+i1);

@@ -40,7 +40,7 @@ object projecttreefo: tprojecttreefo
     optionsgrid = [og_colsizing, og_focuscellonenter, og_savestate, og_colchangeontabkey, og_wrapcol, og_autopopup]
     datacols.count = 2
     datacols.options = [co_savestate, co_mousescrollrow]
-    datacols.items = <    
+    datacols.items = <
       item[projectedit]
         linecolorfix = -1610612733
         width = 141
@@ -56,7 +56,7 @@ object projecttreefo: tprojecttreefo
         datalist.ondragbegin = editdragbegin
         datalist.ondragover = editdragover
         datalist.ondragdrop = editdragrop
-      end    
+      end
       item[edit]
         linecolorfix = -1610612733
         width = 129
@@ -104,11 +104,11 @@ object projecttreefo: tprojecttreefo
       frame.button.color = -2147483646
       frame.button.options = [fbo_invisible]
       frame.buttons.count = 2
-      frame.buttons.items = <      
+      frame.buttons.items = <
         item
           color = -2147483646
           options = [fbo_invisible]
-        end      
+        end
         item
           color = -2147483646
           imagenr = 17
@@ -126,7 +126,7 @@ object projecttreefo: tprojecttreefo
       textflags = [tf_ycentered, tf_clipo, tf_noselect, tf_ellipseleft]
       oncellevent = editoncellevent
       dropdown.cols.count = 1
-      dropdown.cols.items = <      
+      dropdown.cols.items = <
         item
         end>
       reffontheight = 16
@@ -135,22 +135,22 @@ object projecttreefo: tprojecttreefo
   object unitpopup: tpopupmenu
     menu.action = addunitfileact
     menu.submenu.count = 6
-    menu.submenu.items = <    
+    menu.submenu.items = <
       item
         action = addunitfileact
-      end    
+      end
       item
         action = removeunitfileact
-      end    
+      end
       item
         options = [mao_separator, mao_shortcutcaption]
-      end    
+      end
       item
         action = adddiract
-      end    
+      end
       item
         action = removediract
-      end    
+      end
       item
         action = editdiract
       end>
@@ -178,22 +178,22 @@ object projecttreefo: tprojecttreefo
   end
   object filepopup: tpopupmenu
     menu.submenu.count = 6
-    menu.submenu.items = <    
+    menu.submenu.items = <
       item
         action = addfileact
-      end    
+      end
       item
         action = removefileact
-      end    
+      end
       item
         options = [mao_separator, mao_shortcutcaption]
-      end    
+      end
       item
         action = adddiract
-      end    
+      end
       item
         action = removediract
-      end    
+      end
       item
         action = editdiract
       end>
@@ -216,22 +216,22 @@ object projecttreefo: tprojecttreefo
   end
   object cmodulepopup: tpopupmenu
     menu.submenu.count = 6
-    menu.submenu.items = <    
+    menu.submenu.items = <
       item
         action = addcmoduleact
-      end    
+      end
       item
         action = removecmoduleact
-      end    
+      end
       item
         options = [mao_separator, mao_shortcutcaption]
-      end    
+      end
       item
         action = adddiract
-      end    
+      end
       item
         action = removediract
-      end    
+      end
       item
         action = editdiract
       end>

@@ -23,7 +23,7 @@ uses
  {$endif}
 {$endif}
 
-{ 
+{
       Type name        SQLite storage class  Field type    Data type
 +--------------------+---------------------+-------------+-------------+
 | INTEGER or INT     | INTEGER 4           | ftinteger   | integer     |
@@ -54,13 +54,13 @@ type
   protected
    fparams: ansistring;
  end;
- 
+
  sqliteoptionty = (slo_transactions,slo_designtransactions,
                    slo_negboolean, //boolean true = -1 instead of 1
-                   slo_64bitprimarykey); 
+                   slo_64bitprimarykey);
                             //use ftlargint for "integer" primarykeyfield
  sqliteoptionsty = set of sqliteoptionty;
- 
+
  tsqlite3connection = class(tcustomsqlconnection,idbcontroller,iblobconnection)
   private
    fhandle: psqlite3;
@@ -73,7 +73,7 @@ type
    procedure setcontroller(const avalue: tdbcontroller);
    function getconnected: boolean; reintroduce;
    procedure setconnected(const avalue: boolean); reintroduce;
-   
+
           //iblobconnection
    procedure writeblobdata(const atransaction: tsqltransaction;
              const tablename: string; const acursor: tsqlcursor;
@@ -91,14 +91,14 @@ type
    procedure loaded; override;
    function getfloatdate: boolean; override;
    function getint64currency: boolean; override;
-   
+
    function getassqltext(const field : tfield) : msestring; override;
    function getassqltext(const param : tparam) : msestring; override;
-   
+
    procedure resetstatement(const astatement: psqlite3_stmt);
    procedure checkerror(const aerror: integer);
    function cantransaction: boolean;
-   
+
    procedure DoInternalConnect; override;
    procedure DoInternalDisconnect; override;
    function GetHandle : pointer; override;
@@ -112,13 +112,13 @@ type
    function GetTransactionHandle(trans : TSQLHandle): pointer; override;
    function Commit(trans : TSQLHandle) : boolean; override;
    function RollBack(trans : TSQLHandle) : boolean; override;
-   function StartdbTransaction(const trans : TSQLHandle; 
+   function StartdbTransaction(const trans : TSQLHandle;
                 const aParams: tstringlist) : boolean; override;
    procedure internalCommitRetaining(trans : TSQLHandle); override;
    procedure internalRollBackRetaining(trans : TSQLHandle); override;
    function getblobdatasize: integer; override;
-    
-   function CreateBlobStream(const Field: TField; const Mode: TBlobStreamMode; 
+
+   function CreateBlobStream(const Field: TField; const Mode: TBlobStreamMode;
                        const acursor: tsqlcursor): TStream; override;
    procedure execsql(const asql: string);
    procedure UpdateIndexDefs(var IndexDefs : TIndexDefs;
@@ -135,7 +135,7 @@ type
                            const aname: ansistring) : TSQLCursor; override;
                        //aowner used as blob cache
    Procedure DeAllocateCursorHandle(var cursor : TSQLCursor); override;
-   procedure preparestatement(const cursor: tsqlcursor; 
+   procedure preparestatement(const cursor: tsqlcursor;
                   const atransaction : tsqltransaction;
                   const asql: msestring; const aparams : tmseparams); override;
    function Fetch(cursor : TSQLCursor) : boolean; override;
@@ -189,9 +189,9 @@ const
  maxprecision = 18;
 type
  tmsebufdataset1 = class(tmsebufdataset);
- 
+
  storagetypety = (st_none,st_integer,st_float,st_text,st_blob,st_null);
- 
+
  tsqlite3cursor = class(tsqlcursor)
   private
    fstatement: psqlite3_stmt;
@@ -202,7 +202,7 @@ type
    fconnection: tsqlite3connection;
    fprimarykeyfield: string;
   public
-   constructor create(const aowner: icursorclient; const aname: ansistring; 
+   constructor create(const aowner: icursorclient; const aname: ansistring;
                        const aconnection: tsqlite3connection);
    procedure close; override;
  end;
@@ -222,9 +222,9 @@ begin
  if fopen then begin
   fconnection.resetstatement(fstatement);
   fopen:= false;
- end;   
+ end;
 end;
-  
+
 { tsqlite3connection }
 
 constructor tsqlite3connection.create(aowner: tcomponent);
@@ -303,7 +303,7 @@ begin
  freeandnil(cursor);
 end;
 
-procedure tsqlite3connection.preparestatement(const cursor: tsqlcursor; 
+procedure tsqlite3connection.preparestatement(const cursor: tsqlcursor;
                   const atransaction : tsqltransaction;
                   const asql: msestring; const aparams : tmseparams);
 var
@@ -351,7 +351,7 @@ const
   //ftBoolean,       ftFloat,       ftCurrency,    ftBCD,
     sizeof(wordbool),sizeof(double),sizeof(double),sizeof(currency),
   //ftDate,           ftTime,           ftDateTime,
-    sizeof(tdatetime),sizeof(tdatetime),sizeof(tdatetime),  
+    sizeof(tdatetime),sizeof(tdatetime),sizeof(tdatetime),
   //ftBytes,ftVarBytes,ftAutoInc,ftBlob,    ftMemo,    ftGraphic,ftFmtMemo,
     -1,     -1,        -1,       blobidsize,blobidsize,-1,       -1,
   //ftParadoxOle,ftDBaseOle,ftTypedBinary,ftCursor,ftFixedChar,
@@ -361,7 +361,7 @@ const
   //ftDataSet,ftOraBlob,ftOraClob,ftVariant,ftInterface,
   -1,         -1,       -1,       -1,       -1,
   //ftIDispatch,ftGuid,ftTimeStamp,ftFMTBcd,
-  -1,           -1,    -1,         -1 
+  -1,           -1,    -1,         -1
   //                   ftFixedWideChar,ftWideMemo
                          ,-1,             -1
   );
@@ -406,8 +406,8 @@ begin
         ft1:= ftboolean;
        end
        else begin
-        if (str2 = 'REAL') or (pos('FLOAT',str2) = 1) or 
-                                       (pos('DOUBLE',str2) = 1) then begin     
+        if (str2 = 'REAL') or (pos('FLOAT',str2) = 1) or
+                                       (pos('DOUBLE',str2) = 1) then begin
          ft1:= ftfloat;
         end
         else begin
@@ -421,9 +421,9 @@ begin
           else begin
            if str2 = 'TIME' then begin
             ft1:= fttime;
-           end          
+           end
            else begin
-            if pos('NUMERIC',str2) = 1 then begin      
+            if pos('NUMERIC',str2) = 1 then begin
              ft1:= ftbcd;
             end
             else begin
@@ -611,7 +611,7 @@ begin
    fstate:= sqliteerrormax; //first row
    fopen:= true;
   end
-  else begin   
+  else begin
    resetstatement(fstatement);
   end;
   frowsaffected:= sqlite3_changes(fhandle);
@@ -652,7 +652,7 @@ begin
     end;
     ftboolean: begin
      wordbool(buffer^):= sqlite3_column_int(fstatement,fnum) <> 0;
-    end; 
+    end;
     ftlargeint,ftbcd: begin
      largeint(buffer^):= sqlite3_column_int64(fstatement,fnum);
     end;
@@ -690,7 +690,7 @@ begin
           year:= strtoint(ar2[0]);
           month:= strtoint(ar2[1]);
           day:= strtoint(ar2[2]);
-          tdatetime(buffer^):= encodedate(year,month,day); 
+          tdatetime(buffer^):= encodedate(year,month,day);
           result:= true;
          end
          else begin
@@ -699,7 +699,7 @@ begin
            hour:= strtoint(ar2[0]);
            minute:= strtoint(ar2[1]);
            second:= strtoint(ar2[2]);
-           tdatetime(buffer^):= encodetime(hour,minute,second,0); 
+           tdatetime(buffer^):= encodetime(hour,minute,second,0);
            result:= true;
           end;
          end;
@@ -711,7 +711,7 @@ begin
      else begin
       tdatetime(buffer^):= sqlite3_column_double(fstatement,fnum);
      end;
-    end; 
+    end;
     ftstring,ftfixedchar: begin
      int1:= sqlite3_column_bytes(fstatement,fnum);
      if int1 > bufsize then begin
@@ -738,7 +738,7 @@ begin
     end;
     else begin
      result:= false; // unknown
-    end; 
+    end;
    end;
   end;
  end;
@@ -816,7 +816,7 @@ end;
 
 procedure tsqlite3connection.internalCommitRetaining(trans: TSQLHandle);
 begin
- commit(trans);  
+ commit(trans);
  if cantransaction then begin
   with tsqlitetrans(trans) do begin
    execsql('BEGIN '+fparams);
@@ -864,7 +864,7 @@ begin
 //  end;
   fhandle:= nil;
   releasesqlite3;
- end; 
+ end;
 end;
 
 function tsqlite3connection.GetHandle: pointer;
@@ -1058,8 +1058,8 @@ end;
 
 function tsqlite3connection.cantransaction: boolean;
 begin
- result:= (slo_transactions in foptions) and 
-    ((slo_designtransactions in foptions) or not (csdesigning in componentstate)); 
+ result:= (slo_transactions in foptions) and
+    ((slo_designtransactions in foptions) or not (csdesigning in componentstate));
 end;
 
 procedure tsqlite3connection.setoptions(const avalue: sqliteoptionsty);

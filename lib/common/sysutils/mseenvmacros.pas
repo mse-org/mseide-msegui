@@ -28,7 +28,7 @@ begin
  result:= fenvmacros;
 end;
 
-function env_var(const sender: tmacrolist; 
+function env_var(const sender: tmacrolist;
                                       const params: msestringarty): msestring;
 begin
  result:= '';

@@ -15,17 +15,17 @@ uses
 
 const
 {$ifdef mswindows}
- pulsesimplelib: array[0..0] of filenamety = ('libpulse-0.dll');  
+ pulsesimplelib: array[0..0] of filenamety = ('libpulse-0.dll');
 {$else}
- pulsesimplelib: array[0..1] of filenamety = 
-                  ('libpulse.so.0','libpulse.so'); 
+ pulsesimplelib: array[0..1] of filenamety =
+                  ('libpulse.so.0','libpulse.so');
 {$endif}
 
 var
 //** Return a human readable error message for the specified numeric error code */
  pa_strerror: function(error: cint): pchar; cdecl;
 
-procedure initializepulse(const sonames: array of filenamety); 
+procedure initializepulse(const sonames: array of filenamety);
                                            //[] = default
 procedure releasepulse;
 

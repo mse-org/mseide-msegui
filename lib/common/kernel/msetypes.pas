@@ -6,7 +6,7 @@
     This program is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-} 
+}
 unit msetypes;
 {$ifdef FPC}{$mode objfpc}{$h+}{$interfaces corba}{$endif}
 
@@ -122,7 +122,7 @@ type
  pflo32arty = ^flo32arty;
  flo32ararty = array of flo32arty;
  pflo32ararty = ^flo32ararty;
- 
+
  flo64 = double;
  pflo64 = ^flo64;
  flo64arty = array of flo64;
@@ -142,7 +142,7 @@ type
  pfloat = ^float;
  floatarty = array of float;
  pfloatarty = ^floatarty;
-  
+
  uint8 = byte;
  puint8 = ^uint8;
  uint16 = word;
@@ -166,7 +166,7 @@ type
  pchar16 = ^char16;
  char32 = ucs4char;
  pchar32 = ^char32;
-  
+
 {$ifndef FPC} //delphi
  {$ifndef mswindows}
   uint64 = type int64; //kylix
@@ -383,7 +383,7 @@ type
  pptruintaty = ^ptruintaty;
  complexaty = array[0..0] of complexty;
  pcomplexaty = ^complexaty;
- 
+
  methodaty = array[0..0] of tmethod;
  pmethodaty = ^methodaty;
  stringaty = array[0..0] of string;
@@ -402,7 +402,7 @@ type
  objectaty = array[0..0] of tobject;
  pobjectaty = ^objectaty;
 
- procty = procedure; 
+ procty = procedure;
  proceventty = procedure of object;
  proceventarty = array of proceventty;
  tageventtyty = procedure (const tag: integer) of object;
@@ -419,7 +419,7 @@ type
  gridsizety = record
   colcount,rowcount: integer;
  end;
- 
+
  gridrectty = record
   case integer of
    0:(
@@ -441,11 +441,11 @@ type
  filehandlety = longint;
 
  procedurety = procedure;
- 
+
 const
  nullcomplex: complexty = (re: 0; im: 0);
  bigdatetime = 401768.99999; //2999-12-31
- 
+
 function mergevarrec(a,b: array of const): varrecarty;
 function issamemethod(const method1,method2: tmethod): boolean;
 function isemptydatetime(const avalue: tdatetime): boolean;

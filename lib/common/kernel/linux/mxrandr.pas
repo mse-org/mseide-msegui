@@ -58,7 +58,7 @@ const
  RRNotify_ProviderProperty = 4;
  RRNotify_ResourceChange = 5;
  rrlastnotify = RRNotify + 5;
- 
+
 //* used in the rotation field; rotation and reflection in 0.1 proto. */
  RR_Rotate_0 = 1;
  RR_Rotate_90 = 2;
@@ -76,7 +76,7 @@ type
  Connection = cushort;
  SubpixelOrder = cushort;
  SizeID = cushort;
- 
+
  RROutput = txid;
  pRROutput = ^RROutput;
  RRCrtc = txid;
@@ -85,7 +85,7 @@ type
  pRRMode = ^RRMode;
  RRProvider = txid;
  pRRProvider = ^RRProvider;
- 
+
  Time = culong;
  pTime = pculong;
 
@@ -120,7 +120,7 @@ type
   modes:  pXRRModeInfo;
  end;
  pXRRScreenResources = ^XRRScreenResources;
- 
+
  XRROutputInfo = record
   timestamp: Time;
   crtc: RRCrtc;
@@ -187,7 +187,7 @@ var
 
  XRRSelectInput: procedure(dpy: pDisplay; window: Window; mask: cint) cdecl;
  XRRUpdateConfiguration: function(event: pXEvent): cint cdecl;
- 
+
 function getxrandrlib: boolean;
 
 implementation

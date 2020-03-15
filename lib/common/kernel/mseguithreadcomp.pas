@@ -19,12 +19,12 @@ type
    fdialogcaption: msestring;
   public
    function runwithwaitdialog: boolean;
-        //true if not canceled   
+        //true if not canceled
   published
    property dialogtext: msestring read fdialogtext write fdialogtext;
    property dialogcaption: msestring read fdialogcaption write fdialogcaption;
  end;
-   
+
 implementation
 
 { tguithreadcomp }

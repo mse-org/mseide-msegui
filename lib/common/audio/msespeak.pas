@@ -77,7 +77,7 @@ type
   public
    constructor create(aowner: tobject); override;
   published
-   property identifier: msestring read fidentifier write setidentifier; 
+   property identifier: msestring read fidentifier write setidentifier;
     //voice selection 1. priority
                   // the filename for this voice within
                   //espeak-ng-data/voices
@@ -86,7 +86,7 @@ type
    property variant: msestring read fvariant write setvariant;
     //appended to identifier or voicename, example: f3
 
- 
+
     //values below used for voice selection if identifier and voicename = ''
    property language: msestring read flanguage write setlanguage;
                   //example: en-uk
@@ -107,7 +107,7 @@ type
      {espeakRANGE:   pitch range, range 0-100. 0-monotone, 50=normal}
    property punctuationlist: msestring read fpunctuationlist
                                                  write setpunctuationlist;
-   property punctuation: punctuationty read fpunctuation 
+   property punctuation: punctuationty read fpunctuation
                           write setpunctuation default pu_none;
      {espeakPUNCTUATION:  which punctuation characters to announce:
          value in espeak_PUNCT_TYPE (none, all, some),
@@ -117,7 +117,7 @@ type
          0=none,
          1=sound icon,
          2=spelling,
-         3 or higher, by raising pitch.  
+         3 or higher, by raising pitch.
            This values gives the amount in Hz by which the pitch
             of a word raised to indicate it has a capital letter.}
    property wordgap: int32 read fwordgap write setwordgap default -1;
@@ -165,14 +165,14 @@ type
    destructor destroy(); override;
    procedure clearevents() override;
  end;
-}  
+}
  speakstatety = (ss_voicevalid,ss_connected,ss_disconnected,
                  ss_connecting,ss_espeaknginitialized,
                  ss_canceled,ss_idle);
  speakstatesty = set of speakstatety;
- 
+
  espeakngeventty = procedure(const sender: tcustomespeakng) of object;
-  
+
  tcustomespeakng = class(tmsecomponent)
   private
    factive: boolean;
@@ -229,7 +229,7 @@ type
    procedure checkerror(const astate: espeak_ng_status);
    procedure voicechanged();
    procedure checkvoice(avoice: int32);
-   procedure internalspeak(const atext: msestring; 
+   procedure internalspeak(const atext: msestring;
                                const aoptions: speakoptionsty;
                                                  const avoice: int32);
    procedure internalspeakcharacter(const achar: char32;
@@ -242,7 +242,7 @@ type
    procedure unlock();
    procedure beginchange();
    procedure endchange();
-   
+
    procedure postidle();
    procedure postevent(const aevent: tspeakevent);
   public
@@ -260,13 +260,13 @@ type
    procedure cancel();
    property active: boolean read factive write setactive default false;
    property datapath: filenamety read fdatapath write fdatapath;
-   property options: espeakoptionsty read foptions write foptions 
+   property options: espeakoptionsty read foptions write foptions
                                               default defaultespeakoptions;
    property device: msestring read fdevice write fdevice;
-   property bufferlength: int32 read fbufferlength 
+   property bufferlength: int32 read fbufferlength
                                           write fbufferlength default 0;
                                            //ms, 0 -> 60ms
-   property voicedefault: int32 read fvoicedefault 
+   property voicedefault: int32 read fvoicedefault
                                    write setvoicedefault default 0;
    property voices: tvoices read fvoices write setvoices;
    property identifier: msestring read fidentifier write setidentifier;
@@ -288,7 +288,7 @@ type
    property punctuationlist: msestring read fpunctuationlist
                                                  write setpunctuationlist;
                                           //for voice.punctuation pu_some
-   property onbeforeconnect: espeakngeventty read fonbeforeconnect 
+   property onbeforeconnect: espeakngeventty read fonbeforeconnect
                                                       write fonbeforeconnect;
  end;
 
@@ -331,7 +331,7 @@ uses
 {$endif}
 const
  disconnecttag = 5936727;
- 
+
 { tspeakevent }
 
 constructor tspeakevent.create(const text: msestring;
@@ -395,7 +395,7 @@ class function tvoices.getitemclasstype: persistentclassty;
 begin
  result:= tvoice;
 end;
- 
+
 { tcustomespeakng }
 
 constructor tcustomespeakng.create(aowner: tcomponent);
@@ -663,9 +663,9 @@ begin
   s1:= stringtoutf8ansi(tosysfilepath(fdatapath));
   initializeespeakng([],s1);
   include(fstate,ss_espeaknginitialized);
-  
-  m1:= ENOUTPUT_MODE_SYNCHRONOUS; 
-//  m1:= 0;//ENOUTPUT_MODE_SYNCHRONOUS; 
+
+  m1:= ENOUTPUT_MODE_SYNCHRONOUS;
+//  m1:= 0;//ENOUTPUT_MODE_SYNCHRONOUS;
              //espeak_ng_cancel() does not work in synchronous mode
   if not (eso_nospeakaudio in foptions) then begin
    m1:= m1 or ENOUTPUT_MODE_SPEAK_AUDIO;
@@ -678,7 +678,7 @@ end;
 
 procedure tcustomespeakng.disconnect();
 begin
- if not (csdesigning in componentstate) and 
+ if not (csdesigning in componentstate) and
                            (ss_connecting in fstate) then begin
   application.unregisteronidle(@doidle);
   cancel();

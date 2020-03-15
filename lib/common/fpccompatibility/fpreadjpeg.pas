@@ -230,13 +230,13 @@ var
     FInfo.do_block_smoothing := FSmoothing;
 
     if FGrayscale then FInfo.out_color_space := JCS_GRAYSCALE;
-    if (FInfo.out_color_space = JCS_GRAYSCALE) then 
+    if (FInfo.out_color_space = JCS_GRAYSCALE) then
       begin
       FInfo.quantize_colors := True;
       FInfo.desired_number_of_colors := 236;
       end;
 
-    if FPerformance = jpBestSpeed then 
+    if FPerformance = jpBestSpeed then
       begin
       FInfo.dct_method := JDCT_IFAST;
       FInfo.two_pass_quantize := False;
@@ -244,7 +244,7 @@ var
       // FInfo.do_fancy_upsampling := False;  can create an AV inside jpeglib
       end;
 
-    if FProgressiveEncoding then 
+    if FProgressiveEncoding then
       begin
       FInfo.enable_2pass_quant := FInfo.two_pass_quantize;
       FInfo.buffered_image := True;

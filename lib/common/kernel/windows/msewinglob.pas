@@ -12,13 +12,13 @@ unit msewinglob;
 interface
 uses
  windows{$ifndef FPC},messages{$endif};
- 
+
 const
  msemessage = wm_user + $3694;
  wakeupmessage = msemessage + 1;
  destroymessage = msemessage + 2;
  traycallbackmessage = msemessage + 3;
  timermessage = msemessage + 4;
- 
+
 implementation
 end.

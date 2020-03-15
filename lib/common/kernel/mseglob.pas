@@ -10,12 +10,12 @@
 unit mseglob;
 {$ifdef FPC}{$mode objfpc}{$h+}{$interfaces corba}{$endif}
 interface
-uses 
+uses
  classes,mclasses,mseerr,msetypes;
 const
  invalidaxis = -bigint;
  defaultbase64linelength = 76; //todo: find better place
- 
+
 type
  listdatatypety = (dl_none,dl_integer,dl_int64,dl_currency,
     dl_real,dl_realint,dl_realsum,
@@ -28,7 +28,7 @@ type
  shortcutty = type word;
  shortcutarty = array of shortcutty;
  modalresultty = (mr_none,mr_canclose,mr_windowclosed,mr_windowdestroyed,
-                  mr_escape,mr_f10, 
+                  mr_escape,mr_f10,
                   mr_exception,
                   mr_cancel,mr_abort,mr_ok,mr_yes,mr_no,mr_all,
                   mr_yesall,mr_noall,
@@ -39,7 +39,7 @@ type
  inullinterface = interface
   //no referencecount, only for fpc, not available in delphi
  end;
- 
+
 // {$ifdef FPC}
 // tnullinterfacedobject = class(tobject) //not used
 // end;
@@ -50,7 +50,7 @@ type
                   {$ifdef FPC}
                     {$ifdef mswindows}stdcall{$else} cdecl{$endif};
                   {$else}stdcall;{$endif}
-                   
+
    function _release: integer;
                   {$ifdef FPC}
                    {$ifdef mswindows}stdcall{$else} cdecl{$endif};
@@ -63,7 +63,7 @@ type
                   {$else}stdcall;{$endif}
  end;
 // {$endif}
- 
+
  objecteventty = (oe_destroyed,oe_connect,oe_disconnect,
                   oe_changed,oe_designchanged,
                   oe_activate,oe_deactivate,oe_fired,oe_dataready,
@@ -98,7 +98,7 @@ implementation
 //uses
 // mseclasses;
 const
- errortexts: array[mseerrorty] of string = 
+ errortexts: array[mseerrorty] of string =
  ('',
   'Resource not found'
  );

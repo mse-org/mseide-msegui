@@ -59,10 +59,10 @@ type
  stringconststy = (
   wantdelete,      //0 Do you want to delete "
   codetemped,      //1 Code Template Editor
-  hasbeenaddedto   
+  hasbeenaddedto
           //2 has been added to 'Project'-'Options'-'Editor'-'Code Templates'.
  );
-  
+
 constructor ttemplateeditorfo.create(const aindex: integer);
 begin
  findex:= aindex;
@@ -74,7 +74,7 @@ var
  dir1: filenamety;
 begin
  if savefiledialog.controller.lastdir = '' then begin
-  if findfile('',projectoptions.e.texp.codetemplatedirs,dir1) or 
+  if findfile('',projectoptions.e.texp.codetemplatedirs,dir1) or
      findfile('',[expandprmacros('${TEMPLATEDIR}')],dir1) then begin
    savefiledialog.controller.lastdir:= dir1;
   end;

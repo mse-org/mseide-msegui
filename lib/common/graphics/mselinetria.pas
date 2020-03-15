@@ -34,7 +34,7 @@ type
   reverse: boolean;
  end;
  plineshiftinfoty = ^lineshiftinfoty;
- 
+
 function linestria(var drawinfo: drawinfoty; out apoints: ppointty;
                                    out apointcount: integer): boolean;
            //true if triangles, tristrip otherwise
@@ -129,7 +129,7 @@ begin
  with li do begin
   dax:= da.y div 256;          //with is orthogonal to vector, negative
   day:= da.x div 256;
-  dbx:= li.v.shift.y div 256;  
+  dbx:= li.v.shift.y div 256;
   dby:= li.v.shift.x div 256;
   if dax*dbx + day*dby < 0 then begin
    int1:= dbx*day - dax*dby;
@@ -210,7 +210,7 @@ begin
   isect.y:= (axby*p0^.y - aybx*p1^.y - ayby*p0^.x + ayby*p1^.x) div q;
  end;
 end;
- 
+
 function intersect(var info: intersectinfoty): boolean;
      //todo: limit overflow
 begin
@@ -245,7 +245,7 @@ begin
   pt1:= (po1)^;
   if linewidth <= arctablesize then begin
    sx1:= (li.v.shift.y) div 2;      //axial
-   sy1:= (li.v.shift.x) div 2;      
+   sy1:= (li.v.shift.x) div 2;
    po1^.x:= (pt1.x + pt2.x) div 2 - sx1;
    po1^.y:= (pt1.y + pt2.y) div 2 - sy1;
    inc(po1);
@@ -324,8 +324,8 @@ begin
   end
   else begin
    if trf_capround in triaflags then begin
-    roundcapstarttria(drawinfo,li);    
-   end;   
+    roundcapstarttria(drawinfo,li);
+   end;
   end;
  end;
 end;
@@ -346,7 +346,7 @@ begin
   pt1:= (po1)^;
   if linewidth <= arctablesize then begin
    sx1:= (li.v.shift.y) div 2;      //axial
-   sy1:= (li.v.shift.x) div 2;      
+   sy1:= (li.v.shift.x) div 2;
    po1^.x:= (pt1.x + pt2.x) div 2 - sx1;
    po1^.y:= (pt1.y + pt2.y) div 2 - sy1;
    inc(po1);
@@ -363,7 +363,7 @@ begin
     end;
     po1^.x:= pt1.x - sx1 - sx2;
     po1^.y:= pt1.y - sy1 + sy2;
-    inc(po1);      
+    inc(po1);
     po1^.x:= pt2.x - sx1 + sx2;
     po1^.y:= pt2.y - sy1 - sy2;
     inc(po1);
@@ -447,22 +447,22 @@ begin
       end;
       po1^.x:= pt1.x + sx1 - sx2;       //0
       po1^.y:= pt1.y + sy1 + sy2;
-      inc(po1);      
+      inc(po1);
       po1^:= (po1-2)^;                  //1
-      inc(po1);      
+      inc(po1);
       po1^:= (po1-2)^;                  //2
       inc(po1);
       po1^.x:= pt2.x + sx1 + sx2;       //3
       po1^.y:= pt2.y + sy1 - sy2;
       inc(po1);
       po1^:= (po1-2)^;                  //4
-      inc(po1);      
-      po1^:= (po1-2)^;                  //5      
+      inc(po1);
+      po1^:= (po1-2)^;                  //5
       inc(po1);
       inc(po2);
      end;
      sx1:= (li.v.shift.y) div 2;      //axial
-     sy1:= (li.v.shift.x) div 2;      
+     sy1:= (li.v.shift.x) div 2;
      po1^.x:= (pt1.x + pt2.x) div 2 + sx1;
      po1^.y:= (pt1.y + pt2.y) div 2 + sy1;
      inc(po1);
@@ -514,14 +514,14 @@ begin
       end;
       po1^.x:= pt1.x + sx1 - sx2;
       po1^.y:= pt1.y + sy1 + sy2;
-      inc(po1);      
+      inc(po1);
       po1^.x:= pt2.x + sx1 + sx2;
       po1^.y:= pt2.y + sy1 - sy2;
       inc(po1);
       inc(po2);
      end;
      sx1:= (li.v.shift.y) div 2;      //axial
-     sy1:= (li.v.shift.x) div 2;      
+     sy1:= (li.v.shift.x) div 2;
      po1^.x:= (pt1.x + pt2.x) div 2 + sx1;
      po1^.y:= (pt1.y + pt2.y) div 2 + sy1;
      inc(po1);
@@ -582,15 +582,15 @@ begin
   dy:= (li.v.d.y shl 16) div li.v.c;
   while dashpos < dashstop do begin
    if odd(dashind) then begin //end dash
-    x1:= pt0.x + dashpos*dx; 
-    y1:= pt0.y + dashpos*dy; 
+    x1:= pt0.x + dashpos*dx;
+    y1:= pt0.y + dashpos*dy;
     po3^.x:= x1;
-    po3^.y:= y1; 
+    po3^.y:= y1;
     inc(po3);
     po3^:= (po3-2)^;
     inc(po3);
-    po3^.x:= x1; 
-    po3^.y:= y1; 
+    po3^.x:= x1;
+    po3^.y:= y1;
     inc(po3);
     po3^.x:= x1 - li.v.shift.x;
     po3^.y:= y1 + li.v.shift.y;
@@ -602,8 +602,8 @@ begin
     end;
    end
    else begin               //start dash
-    x1:= pt0.x + dashpos*dx; 
-    y1:= pt0.y + dashpos*dy; 
+    x1:= pt0.x + dashpos*dx;
+    y1:= pt0.y + dashpos*dy;
     po3^.x:= x1;
     po3^.y:= y1;
     inc(po3);
@@ -671,7 +671,7 @@ begin
   pointsbefore:= points;
   pointcount:= count;
   if count = 1 then begin
-   singlepoint[0]:= points^;    
+   singlepoint[0]:= points^;
    singlepoint[1]:= points^; //dummy segment
    points:= @singlepoint[0];
    inc(pointcount);
@@ -709,7 +709,7 @@ begin
     if li.pointb = pend then begin
      li.pointb:= points;
     end;
-    dash(drawinfo,li,firstdash,false);    
+    dash(drawinfo,li,firstdash,false);
     firstdash:= false;
     if odd(li.dashind) then begin //dash end
      inc(li.dest);
@@ -718,7 +718,7 @@ begin
      shiftpointa(li);
      (li.dest-4)^:= (li.dest-2)^;
     end;
-    
+
     ints.da:= li.v.d;
     pt2:= li.v.shift;
     calclineshift(drawinfo,li,false);
@@ -739,7 +739,7 @@ begin
       pt3:= subpoint(ints.isect,ints.p1^); //intersection - bstart
       bo1:= ((pt3.x > 0) xor (li.v.d.x > 0)) or ((pt3.y > 0) xor (li.v.d.y > 0));
                 //outer, cw
-      bo2:= (trf_joinbevel in triaflags) or 
+      bo2:= (trf_joinbevel in triaflags) or
                (trf_joinmiter in triaflags) and isbevelang(li,pt2);
                                           ///bevel
       if not bo1 then begin
@@ -832,7 +832,7 @@ begin
    int1:= int1*pointcount+linewidth;  //for round caps
    allocbuffer(buffer,int1*(2*sizeof(pointty)));
    li.dest:= buffer.buffer;
-   calclineshift(drawinfo,li,false); 
+   calclineshift(drawinfo,li,false);
    shiftpoint(li);
    if not closed then begin
     updatestartstrip(drawinfo,li);
@@ -856,9 +856,9 @@ begin
       end
       else begin
        pt1:= subpoint(ints.isect,ints.p1^); //intersection - bstart
-       bo1:= ((pt1.x > 0) xor (li.v.d.x > 0)) or 
+       bo1:= ((pt1.x > 0) xor (li.v.d.x > 0)) or
                         ((pt1.y > 0) xor (li.v.d.y > 0));  //outer
-       bo2:= (trf_joinbevel in triaflags) or 
+       bo2:= (trf_joinbevel in triaflags) or
                 (trf_joinmiter in triaflags) and isbevelang(li,pt2);
        if bo1 and not bo2 then begin //move to intersection
         ints.p1^:= ints.isect;
@@ -899,8 +899,8 @@ procedure linesegmentstria(var drawinfo: drawinfoty;
                   out atriangles: ptrianglety; out atrianglecount: integer);
 var
  int1: integer;
- li: lineshiftinfoty; 
-begin   
+ li: lineshiftinfoty;
+begin
  with drawinfo,drawinfo.points,triagcty(gc.platformdata).d do begin
   li.pointa:= points;
   li.pointb:= li.pointa+1;

@@ -19,13 +19,13 @@ uses
  msedatalist,mseeditglob,msegrids,msetypes,msedb,msemenus,mseedit,
  msedataedits,mseevent,msestrings,msecolordialog,msegraphutils,msedialog,
  mseglob,msegraphics;
- 
+
 type
  tdbfilenameedit = class(tcustomfilenameedit,idbeditfieldlink,ireccontrol)
   private
    fdatalink: tstringeditwidgetdatalink;
    procedure setdatalink(const avalue: tstringeditwidgetdatalink);
-  protected   
+  protected
    procedure defineproperties(filer: tfiler); override;
    procedure editnotification(var info: editnotificationinfoty); override;
    function nullcheckneeded(const newfocus: twidget): boolean; override;
@@ -33,7 +33,7 @@ type
    function getgriddatasource: tdatasource;
    function createdatalist(const sender: twidgetcol): tdatalist; override;
    procedure modified; override;
-   procedure doshortcut(var info: keyeventinfoty; 
+   procedure doshortcut(var info: keyeventinfoty;
                                       const sender: twidget); override;
 //   function getoptionsedit: optionseditty; override;
 //   procedure dochange; override;
@@ -64,7 +64,7 @@ type
   private
    fdatalink: tstringeditwidgetdatalink;
    procedure setdatalink(const avalue: tstringeditwidgetdatalink);
-  protected   
+  protected
    procedure defineproperties(filer: tfiler); override;
    procedure editnotification(var info: editnotificationinfoty); override;
    function nullcheckneeded(const newfocus: twidget): boolean; override;
@@ -72,7 +72,7 @@ type
    function getgriddatasource: tdatasource;
    function createdatalist(const sender: twidgetcol): tdatalist; override;
    procedure modified; override;
-   procedure doshortcut(var info: keyeventinfoty; 
+   procedure doshortcut(var info: keyeventinfoty;
                                       const sender: twidget); override;
 //   function getoptionsedit: optionseditty; override;
 //   procedure dochange; override;
@@ -97,12 +97,12 @@ type
    property onsetvalue;
    property dialog;
  end;
- 
+
  tdbcoloredit = class(tcustomcoloredit,idbeditfieldlink,ireccontrol)
   private
    fdatalink: teditwidgetdatalink;
    procedure setdatalink(const avalue: teditwidgetdatalink);
-  protected   
+  protected
    procedure defineproperties(filer: tfiler); override;
 
    function internaldatatotext1(
@@ -112,7 +112,7 @@ type
    function getgriddatasource: tdatasource;
    function createdatalist(const sender: twidgetcol): tdatalist; override;
    procedure modified; override;
-   procedure doshortcut(var info: keyeventinfoty; 
+   procedure doshortcut(var info: keyeventinfoty;
                                       const sender: twidget); override;
 //   function getoptionsedit: optionseditty; override;
 //   procedure dochange; override;
@@ -176,7 +176,7 @@ type
    destructor destroy; override;
   published
    property frame: tellipsebuttonframe read getframe write setframe;
-   property onexecute: realdialogexeceventty read getonexecute 
+   property onexecute: realdialogexeceventty read getonexecute
                                                         write setonexecute;
  end;
 
@@ -193,7 +193,7 @@ type
    destructor destroy; override;
   published
    property frame: tellipsebuttonframe read getframe write setframe;
-   property onexecute: datetimedialogexeceventty read getonexecute 
+   property onexecute: datetimedialogexeceventty read getonexecute
                                                         write setonexecute;
  end;
 
@@ -210,18 +210,18 @@ type
    destructor destroy; override;
   published
    property frame: tellipsebuttonframe read getframe write setframe;
-   property onexecute: integerdialogexeceventty read getonexecute 
+   property onexecute: integerdialogexeceventty read getonexecute
                                                         write setonexecute;
  end;
-  
+
 implementation
 uses
- typinfo,msememodialog; 
+ typinfo,msememodialog;
 type
  teditwidgetdatalink1 = class(teditwidgetdatalink);
  tstringeditwidgetdatalink1 = class(tstringeditwidgetdatalink);
  treader1 = class(treader);
- 
+
 { tdbfilenameedit }
 
 constructor tdbfilenameedit.create(aowner: tcomponent);

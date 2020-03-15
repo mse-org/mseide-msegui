@@ -1,5 +1,5 @@
 { MSEide Copyright (c) 1999-2015 by Martin Schreiber
-   
+
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation; either version 2 of the License, or
@@ -41,7 +41,7 @@ type
 implementation
 uses
  msefaceselectorform_mfm,sysutils,mseformatstr;
- 
+
 { tfaceselectorfo }
 
 constructor tfaceselectorfo.create(const aowner: tcomponent;
@@ -102,7 +102,7 @@ end;
 
 procedure tfaceselectorfo.layoutcha(const sender: tcustomlistview);
 begin
- sender.itemlist.imagesize:= 
+ sender.itemlist.imagesize:=
     ms(sender.cellwidth,sender.cellheight-sender.font.glyphheight-2);
 end;
 

@@ -1,5 +1,5 @@
 { MSEtools Copyright (c) 1999-2006 by Martin Schreiber
-   
+
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation; either version 2 of the License, or
@@ -44,7 +44,7 @@ type
    destname: tstringedit;
    beforemake: tmemodialogedit;
    aftermake: tmemodialogedit;
-   procedure projectstatonupdatestat(const sender: TObject; 
+   procedure projectstatonupdatestat(const sender: TObject;
                       const filer: tstatfiler);
    procedure projectstatonafterreadstat(const sender: tobject);
    procedure filekindoninit(const sender: tenumtypeedit);
@@ -53,7 +53,7 @@ type
    procedure makecommandsetvalue(const sender: TObject;
                  var avalue: msestring; var accept: Boolean);
    procedure impexpencinit(const sender: tenumtypeedit);
-   procedure langdeleted(const sender: tcustomgrid; const aindex: integer; 
+   procedure langdeleted(const sender: tcustomgrid; const aindex: integer;
                  const acount: integer);
    procedure projectstatonbeforewritestat(const sender: TObject);
    procedure filenamedataentered(const sender: TObject);

@@ -270,12 +270,12 @@ type
         );
 const
  key_modpad =                    $0800; //ored for shortcut in taction
- key_modshift =                  $2000;  
+ key_modshift =                  $2000;
  key_modctrl =                   $4000;
  key_modshiftctrl =              $6000;
  key_modalt =                    $8000;
  key_modshiftalt =               $a000;
- key_modpadshift =               $2000 or key_modpad;  
+ key_modpadshift =               $2000 or key_modpad;
  key_modpadctrl =                $4000 or key_modpad;
  key_modpadshiftctrl =           $6000 or key_modpad;
  key_modpadalt =                 $8000 or key_modpad;

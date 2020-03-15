@@ -18,7 +18,7 @@ type
 
  bindnamesty = array[rowstatememberty] of string;
 // rowstatebindingty = array[rowstatememberty] of integer;
-  
+
  tifidbwidgetgridcontroller = class(tifiwidgetgridcontroller)
   private
 //   frowstatebinding: rowstatebindingty;
@@ -36,19 +36,19 @@ type
    property name_select: string read fnames[rsm_select] write fnames[rsm_select];
    property name_color: string read fnames[rsm_color] write fnames[rsm_color];
    property name_font: string read fnames[rsm_font] write fnames[rsm_font];
-   property name_readonly: string read fnames[rsm_readonly] 
+   property name_readonly: string read fnames[rsm_readonly]
                                            write fnames[rsm_readonly];
-   property name_foldlevel: string read fnames[rsm_foldlevel] 
+   property name_foldlevel: string read fnames[rsm_foldlevel]
                                            write fnames[rsm_foldlevel];
-   property name_foldissum: string read fnames[rsm_foldissum] 
+   property name_foldissum: string read fnames[rsm_foldissum]
                                            write fnames[rsm_foldissum];
-   property name_hidden: string read fnames[rsm_hidden] 
+   property name_hidden: string read fnames[rsm_hidden]
                                            write fnames[rsm_hidden];
    property name_merged: string read fnames[rsm_merged]
                                            write fnames[rsm_merged];
    property name_height: string read fnames[rsm_height] write fnames[rsm_height];
  end;
- 
+
  tdbrxwidgetgrid = class(trxwidgetgrid)
   private
    function getifi1: tifidbwidgetgridcontroller;
@@ -60,11 +60,11 @@ type
   published
    property ifi: tifidbwidgetgridcontroller read getifi1 write setifi1;
  end;
-  
+
 implementation
 uses
  mseifilink;
- 
+
 { tifidbwidgetgridcontroller }
 
 constructor tifidbwidgetgridcontroller.create(const aowner: tdbrxwidgetgrid;
@@ -111,7 +111,7 @@ begin
          fcolbinding[int1]:= datacols.colsubdatainfo(fielddefs1[int1].name);
         end;
        end;
-       if (igo_state in foptionsrx) or 
+       if (igo_state in foptionsrx) or
            (answersequence <> 0) and (answersequence = fdatasequence) then begin
         beginupdate;
         inc(fcommandlock);
@@ -131,7 +131,7 @@ begin
      end;
     finally
      fielddefs1.free;
-    end;    
+    end;
    end;
    ik_fieldrec: begin
     with pfieldrecdataty(adatapo)^.header do begin
@@ -146,7 +146,7 @@ begin
         deleterow(index1);
         exit;
        end;
-      end;      
+      end;
      end;
     end;
     adatapo:= @pfieldrecdataty(adatapo)^.data;
@@ -154,7 +154,7 @@ begin
     try
      for int1:= 0 to int2 - 1 do begin
       with pfielddataty(adatapo)^ do begin
-       inc(adatapo,decodeifidata(@data,index1,fcolbinding[header.index]) + 
+       inc(adatapo,decodeifidata(@data,index1,fcolbinding[header.index]) +
                      sizeof(fielddataheaderty));
       end;
      end;
@@ -205,7 +205,7 @@ end;
 
 procedure tdbrxwidgetgrid.rowstatechanged(const arow: integer);
 var
- rsm1: rowstatememberty; 
+ rsm1: rowstatememberty;
 begin
  with tifidbwidgetgridcontroller(fifi) do begin
   if cancommandsend(igo_coldata) then begin

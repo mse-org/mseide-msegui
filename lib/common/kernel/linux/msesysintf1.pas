@@ -43,7 +43,7 @@ type
 {$else}
  {$include msesysintf1.inc}
 {$endif}
- 
+
 function unigettimestamp(timeoutusec: integer): timespec;
 procedure initmutex(out mutex: pthread_mutex_t);
 
@@ -71,7 +71,7 @@ uses
 
 const
  unidatetimeoffset = -25569;
- 
+
 function unigettimestamp(timeoutusec: integer): timespec;
 var
  ti: timeval;
@@ -402,7 +402,7 @@ begin
  end;
  localtime_r(@ti1,@tm);
  result:= incsecond(value,tm.__tm_gmtoff);
-// result:= value + sys_localtimeoffset; 
+// result:= value + sys_localtimeoffset;
 end;
 
 function sys_localtimetoutc(const value: tdatetime): tdatetime;
@@ -426,7 +426,7 @@ begin
  end;
  timelocal(tm);
  result:= incsecond(value,-tm.__tm_gmtoff);
-// result:= value - sys_localtimeoffset; 
+// result:= value - sys_localtimeoffset;
 end;
 
 end.

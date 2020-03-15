@@ -9,7 +9,7 @@ type
  tmessagesfo = class(tmseform)
    messages: tterminal;
    twidgetgrid1: twidgetgrid;
-   procedure formclosquery(const sender: tcustommseform; 
+   procedure formclosquery(const sender: tcustommseform;
                                      var amodalresult: modalresultty);
   public
    running: boolean;

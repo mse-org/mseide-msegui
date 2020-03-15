@@ -12,7 +12,7 @@ unit mseopensslsmime;
 interface
 uses
  mseopenssl,msectypes;
- 
+
 var
 // SMIME function
  SMIME_write_PKCS7: function(bp: pBIO; p7: pPKCS7;
@@ -22,7 +22,7 @@ var
 implementation
 uses
  msedynload;
- 
+
 procedure init(const info: dynlibinfoty);
 const
  funcs: array[0..1] of funcinfoty = (

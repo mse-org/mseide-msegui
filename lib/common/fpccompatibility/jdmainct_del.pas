@@ -369,7 +369,7 @@ end;
 
 {METHODDEF}
 procedure start_pass_main (cinfo : j_decompress_ptr;
-                           pass_mode : J_BUF_MODE); 
+                           pass_mode : J_BUF_MODE);
 var
   main : my_main_ptr;
 begin

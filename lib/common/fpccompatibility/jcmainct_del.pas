@@ -85,7 +85,7 @@ procedure process_data_buffer_main(cinfo : j_compress_ptr;
 
 {METHODDEF}
 procedure start_pass_main (cinfo : j_compress_ptr;
-                           pass_mode : J_BUF_MODE); 
+                           pass_mode : J_BUF_MODE);
 var
   main : my_main_ptr;
 begin

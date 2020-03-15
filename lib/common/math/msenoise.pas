@@ -19,14 +19,14 @@ type
  mwcinfoty = record
   fw,fz: card32; //call checkmwcseed() after init
  end;
- 
+
  tmwcnoisegen = class
   private
    fw: card32;
    fz: card32;
   public
    constructor create;
-   procedure init(const w: card32 = 0; const z: card32 = 0); 
+   procedure init(const w: card32 = 0; const z: card32 = 0);
    function next: card32;
  end;
 
@@ -36,7 +36,7 @@ procedure mwcnoiseinit(const w: card32 = 0; const z: card32 = 0);
 procedure checkmwcseed(var w: card32; var z: card32);
                    //0 -> use random
 procedure checkmwcseed(var state: mwcinfoty);
- 
+
 implementation
 
 var

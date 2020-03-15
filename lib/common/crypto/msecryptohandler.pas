@@ -12,7 +12,7 @@ unit msecryptohandler;
 interface
 uses
  msestream,classes,mclasses,sysutils,msetypes{msestrings},mseformatstr,mseglob;
- 
+
 type
  cryptoerrorty = (cerr_error,cerr_ciphernotfound,cerr_notseekable,
                   cerr_cipherinit,cerr_invalidopenmode,cerr_digestnotfound,
@@ -37,7 +37,7 @@ type
                    const err: cryptoerrorty = cerr_error): pointer;
                                {$ifdef FPC} inline;{$endif}
  end;
- 
+
  tdummycryptohandler = class(tbasecryptohandler)
  end;
 
@@ -60,7 +60,7 @@ type
   state: sslhandlerstatesty;
  end;
  ppaddedhandlerdatadty = ^paddedhandlerdatadty;
- {$if sizeof(paddedhandlerdatadty) > sizeof(cryptohandlerdataty)} 
+ {$if sizeof(paddedhandlerdatadty) > sizeof(cryptohandlerdataty)}
   {$error 'buffer overflow'}
  {$ifend}
  paddedhandlerdataty = record
@@ -68,11 +68,11 @@ type
    0: (d: paddedhandlerdatadty;);
    1: (_bufferspace: cryptohandlerdataty;);
  end;
- 
+
  tpaddedcryptohandler = class(tbasecryptohandler)
   private
   protected
-   procedure cipherupdate(var aclient: cryptoclientinfoty; 
+   procedure cipherupdate(var aclient: cryptoclientinfoty;
              const source: pbyte; const sourcelen: integer;
                 const dest: pbyte; out destlen: integer); virtual; abstract;
    procedure cipherfinal(var aclient: cryptoclientinfoty;
@@ -116,7 +116,7 @@ type
   readbufferlength: integer;
  end;
  pbase64handlerdatadty = ^base64handlerdatadty;
- {$if sizeof(base64handlerdatadty) > sizeof(cryptohandlerdataty)} 
+ {$if sizeof(base64handlerdatadty) > sizeof(cryptohandlerdataty)}
   {$error 'buffer overflow'}
  {$ifend}
  base64handlerdataty = record
@@ -131,7 +131,7 @@ type
   protected
    procedure initpointers(var aclient: cryptoclientinfoty);
    function padbufsize: integer; override;
-   procedure cipherupdate(var aclient: cryptoclientinfoty; 
+   procedure cipherupdate(var aclient: cryptoclientinfoty;
              const source: pbyte; const sourcelen: integer;
                 const dest: pbyte; out destlen: integer); override;
    procedure cipherfinal(var aclient: cryptoclientinfoty;
@@ -149,7 +149,7 @@ type
    property maxlinelength: integer read fmaxlinelength write fmaxlinelength
                          default defaultbase64linelength;
  end;
-   
+
 const
  cryptoerrormessages: array[cryptoerrorty] of msestring =(
   'OpenSSL error.',
@@ -181,7 +181,7 @@ uses
  msebits,msesystypes,msesys;
 
 { tbasecryptohandler }
- 
+
 procedure tbasecryptohandler.checkerror(const err: cryptoerrorty);
 begin
  //dummy
@@ -208,7 +208,7 @@ end;
 procedure tbasecryptohandler.error(const err: cryptoerrorty);
 begin
  checkerror(err);
- raise ecryptohandler.create(ansistring(cryptoerrormessages[err])); 
+ raise ecryptohandler.create(ansistring(cryptoerrormessages[err]));
            //there was no queued error
 end;
 
@@ -244,7 +244,7 @@ var
 var
  int1,int2,int3,int4: integer;
  pb,po1: pbyte;
- 
+
 begin
  if count > 0 then begin
   with paddedhandlerdataty(aclient.handlerdata).d do begin
@@ -264,9 +264,9 @@ begin
       int1:= int1+blocksize;
       include(state,sslhs_hasfirstblock);
      end;
-     getmem(po1,int1); 
+     getmem(po1,int1);
      ps:= po1;
-     try       
+     try
       int2:= inherited read(aclient,(ps)^,int1);
       updatebit1({$ifdef FPC}longword{$else}byte{$endif}(state),
                     ord(sslhs_eofflag),int2 < int1);
@@ -275,7 +275,7 @@ begin
       pb:= pointer(padbuf);
       padindex:= 0;
       padcount:= 0;
-      int4:= (int2 div blocksize - 1) * blocksize; 
+      int4:= (int2 div blocksize - 1) * blocksize;
       if int4 > count then begin
        int4:= (count div blocksize) * blocksize;
       end;
@@ -417,7 +417,7 @@ begin
   else begin
    result:= inherited getsize(aclient);
   end;
- end; 
+ end;
 end;
 
 function tpaddedcryptohandler.internalseek(var aclient: cryptoclientinfoty;
@@ -444,7 +444,7 @@ var
  int1: integer;
 begin
  with paddedhandlerdataty(aclient.handlerdata).d do begin
-  if not (sslhs_finalized in state) and 
+  if not (sslhs_finalized in state) and
             (aclient.stream.openmode in [fm_write,fm_create])then begin
    cipherfinal(aclient,blockbuf,int1);
 //   checknullerror(evp_cipherfinal(ctx,@buffer,int1));
@@ -529,11 +529,11 @@ procedure tpaddedcryptohandler.finalizedata(var aclient: cryptoclientinfoty);
 begin
  with paddedhandlerdataty(aclient.handlerdata).d do begin
   if padbuf <> nil then begin
-   fillchar(padbuf^,bufsize,0);  
+   fillchar(padbuf^,bufsize,0);
    freemem(padbuf);
   end;
   if blockbuf <> nil then begin
-   fillchar(blockbuf^,bufsize,0);  
+   fillchar(blockbuf^,bufsize,0);
    freemem(blockbuf);
   end;
  end;
@@ -570,7 +570,7 @@ type
   pline: pchar;
   linest: integer;
  end;
- 
+
 procedure putgroup(var info: putinfoty);
 var
  by1: byte;
@@ -608,7 +608,7 @@ var
  info: putinfoty;
  int1: integer;
  scount: integer;
-  
+
 begin
  with base64handlerdataty(aclient.handlerdata).d,info do begin
   destlen:= 0;
@@ -649,7 +649,7 @@ begin
    destlen:= pc - pointer(dest);
    for int1:= 0 to bufindex - 1 do begin //store tail
     buf[int1]:= pb^;
-    inc(pb); 
+    inc(pb);
    end;
    if linestep > 0 then begin
     lineindex:= pc - pline + linestep;
@@ -684,7 +684,7 @@ begin
     if bufindex > 1 then begin
      inc(pb);                                         //s1
      pc^:= base64encoding[((by1 shl 4) or (pb^ shr 4)) and base64mask];
-     inc(pc);                                         //d2 
+     inc(pc);                                         //d2
      pc^:= base64encoding[(pb^ shl 2) and base64mask];
     end
     else begin
@@ -763,7 +763,7 @@ var
  function decode: boolean; //true by data end
  var
   by1: byte;
- begin  
+ begin
   result:= true;
   while (pchar(ps) < pchar(psend)) and (pchar(pd) < pchar(pdend)) do begin
    psgroup:= ps;
@@ -817,12 +817,12 @@ var
   if pd = pdend then begin
    result:= false;
   end;
- end; 
+ end;
 
  procedure fillbuffer(const aoffset: integer);
  begin
   with base64handlerdataty(aclient.handlerdata).d do begin
-   readbufferlength:= aoffset + 
+   readbufferlength:= aoffset +
          inherited readdata(aclient,(pchar(readbuffer)+aoffset)^,
                                     readbuffersize-aoffset);
    if readbufferlength < readbuffersize then begin
@@ -911,7 +911,7 @@ begin
     move(p.padbuf^,po1^,int1);
     result:= result + int1;
     p.padindex:= int1;
-   end;   
+   end;
   end;
   if pchar(ps) >= pchar(psend) then begin
    freemem(readbuffer);

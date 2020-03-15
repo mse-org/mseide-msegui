@@ -32,7 +32,7 @@ type
  sizingkindty = (sik_none,sik_right,sik_topright,sik_top,sik_topleft,
                      sik_left,sik_bottomleft,sik_bottom,sik_bottomright);
 const
- sizingcursors: array[sizingkindty] of cursorshapety = 
+ sizingcursors: array[sizingkindty] of cursorshapety =
    (cr_default,cr_sizehor,cr_toprightcorner,cr_sizever,cr_topleftcorner,
     cr_sizehor,cr_bottomleftcorner,cr_sizever,cr_bottomrightcorner);
 type
@@ -261,7 +261,7 @@ begin
   sik_left: adjustleft;
   sik_bottomleft: begin adjustbottom; adjustleft end;
   sik_bottom: adjustbottom;
-  sik_bottomright: begin adjustbottom; adjustright end;  
+  sik_bottomright: begin adjustbottom; adjustright end;
  end;
 end;
 
@@ -373,7 +373,7 @@ end;
 procedure tcaret.setpos(const Value: pointty);
 var
  rect1: rectty;
-begin                                 
+begin
  rect1:= getbounds;
  rect1.pos:= value;
  setbounds(rect1);

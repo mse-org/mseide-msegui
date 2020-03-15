@@ -100,7 +100,7 @@ type
 
     // - Transaction handling
     function GetTransactionHandle(trans:TSQLHandle):pointer; override;
-    function StartDBTransaction(const trans:TSQLHandle; 
+    function StartDBTransaction(const trans:TSQLHandle;
                  const AParams: tstringlist):boolean; override;
     function Commit(trans:TSQLHandle):boolean; override;
     function Rollback(trans:TSQLHandle):boolean; override;
@@ -108,7 +108,7 @@ type
     procedure internalRollbackRetaining(trans:TSQLHandle); override;
     // - Statement execution
     procedure updaterowcount(const acursor: todbccursor);
-    procedure internalExecute(const cursor:TSQLCursor; 
+    procedure internalExecute(const cursor:TSQLCursor;
              const ATransaction:TSQLTransaction; const AParams:TmseParams;
              const autf8: boolean); override;
     procedure internalexecuteunprepared(const cursor: tsqlcursor;
@@ -122,7 +122,7 @@ type
     procedure UpdateIndexDefs(var IndexDefs:TIndexDefs;
                const aTableName:string; const acursor: tsqlcursor); override;
     // - Schema info
-    function GetSchemaInfoSQL(SchemaType:TSchemaType; 
+    function GetSchemaInfoSQL(SchemaType:TSchemaType;
        SchemaObjectName, SchemaObjectPattern:msestring):msestring; override;
 
     // Internal utility functions
@@ -144,12 +144,12 @@ type
    function AllocateCursorHandle(const aowner: icursorclient;
                            const aname: ansistring): TSQLCursor; override;
    procedure DeAllocateCursorHandle(var cursor:TSQLCursor); override;
-   procedure preparestatement(const cursor: tsqlcursor; 
+   procedure preparestatement(const cursor: tsqlcursor;
                   const atransaction : tsqltransaction;
                   const asql: msestring; const aparams : tmseparams); override;
    procedure UnPrepareStatement(cursor:TSQLCursor); override;
     // - Result retrieving
-   procedure AddFieldDefs(const cursor:TSQLCursor; 
+   procedure AddFieldDefs(const cursor:TSQLCursor;
                               const FieldDefs:TFieldDefs); override;
    function Fetch(cursor:TSQLCursor):boolean; override;
    function loadfield(const cursor: tsqlcursor;
@@ -194,7 +194,7 @@ uses
   {$warn 6058 off}
  {$endif}
 {$endif}
-  
+
 {$define ODBCVER3}
 
 (* odbc type nums
@@ -306,7 +306,7 @@ var
 
 function ODBCSucces(const Res:SQLRETURN):boolean;
 begin
-  Result:=(Res=SQL_SUCCESS) or (Res=SQL_SUCCESS_WITH_INFO) or 
+  Result:=(Res=SQL_SUCCESS) or (Res=SQL_SUCCESS_WITH_INFO) or
              (res = SQL_NO_DATA);
 end;
 
@@ -365,7 +365,7 @@ begin
   if ODBCSucces(LastReturnCode) then begin
     Exit; // no error; all is ok
   end;
-  
+
   firstmessage:= '';
   // build TotalMessage for exception to throw
   TotalMessage:=Format('%s ODBC error details:',[ErrorMsg]);
@@ -388,7 +388,7 @@ begin
       // if TextLength=0 we don't need another call;
       // also our string buffer would not point to a #0, but be a nil pointer
       // allocate large enough buffer
-      SetLength(MessageText,4*TextLength); 
+      SetLength(MessageText,4*TextLength);
            //reserve for multi-byte-encodings, ODBC bug?
            // note: ansistrings of Length>0 are always terminated by a #0 character, so this is safe
       // actual call
@@ -403,10 +403,10 @@ begin
      firstmessage:= strpas(pchar(messagetext));
     end;
     // add to TotalMessage
-    TotalMessage:=TotalMessage + 
+    TotalMessage:=TotalMessage +
       Format(' Record %d: SqlState: %s; NativeError: %d; Message: %s;',
                             [RecNumber,SqlState,NativeError,
-                                strpas(pchar(MessageText))]); 
+                                strpas(pchar(MessageText))]);
        //string termination by #0, textlength seems to be unreliable
   end;
   // raise error
@@ -509,7 +509,7 @@ begin
  move(int1,newid[1],sizeof(int1));
 end;
 
-procedure TODBCConnection.setupblobdata(const afield: tfield; 
+procedure TODBCConnection.setupblobdata(const afield: tfield;
                       const acursor: tsqlcursor; const aparam: tparam);
 begin
 // acursor.blobfieldtoparam(afield,aparam,afield.datatype = ftmemo);
@@ -537,7 +537,7 @@ procedure TODBCConnection.SetParameters(ODBCCursor: TODBCCursor; AParams: TmsePa
  procedure bindnum(i: integer; valuetype: SQLSMALLINT; parametertype: SQLSMALLINT;
                    buf: pointer);
  begin
-  ODBCCursor.FParamBuf[i]:=Buf;          
+  ODBCCursor.FParamBuf[i]:=Buf;
   ODBCCheckResult(
     SQLBindParameter(ODBCCursor.FSTMTHandle, // StatementHandle
                      i+1,                    // ParameterNumber
@@ -593,7 +593,7 @@ procedure TODBCConnection.SetParameters(ODBCCursor: TODBCCursor; AParams: TmsePa
                      buf),                   // StrLen_or_IndPtr
     SQL_HANDLE_STMT, ODBCCursor.FSTMTHandle, 'Could not bind parameter %d',[i]);
  end;
-   
+
 var
   ParamIndex:integer;
   Buf:pointer;
@@ -762,7 +762,7 @@ begin
      else begin
       raise EDataBaseError.CreateFmt(
        'Parameter %d is of type %s, which not supported yet',
-       [ParamIndex, Fieldtypenames[AParams[ParamIndex].DataType]]);      
+       [ParamIndex, Fieldtypenames[AParams[ParamIndex].DataType]]);
      end;
     end;
    end;
@@ -884,7 +884,7 @@ begin
   Result:=nil; // not yet supported; will move connection handles to transaction handles later
 end;
 
-procedure todbcconnection.preparestatement(const cursor: tsqlcursor; 
+procedure todbcconnection.preparestatement(const cursor: tsqlcursor;
                   const atransaction : tsqltransaction;
                   const asql: msestring; const aparams : tmseparams);
 var
@@ -929,7 +929,7 @@ begin
   // Tranactions not implemented yet
 end;
 
-function TODBCConnection.StartDBTransaction(const trans: TSQLHandle; 
+function TODBCConnection.StartDBTransaction(const trans: TSQLHandle;
                    const AParams: tstringlist): boolean;
 begin
  result:= true;
@@ -1041,7 +1041,7 @@ function todbcconnection.loadfield(const cursor: tsqlcursor;
        const buffer: pointer; var bufsize: integer;
                                 const aisutf8: boolean): boolean;
            //if bufsize < 0 -> buffer was to small, should be -bufsize
-           
+
 //todo: optimize
 
 const
@@ -1061,14 +1061,14 @@ var
   fno: integer;
   int1: integer;
   str1: string;
-  
+
   buffer1: pointer;
   bufsize1: integer;
   memolen1: integer;
-  dummybuf: array [0..31] of byte;  
+  dummybuf: array [0..31] of byte;
   do1: double;
   cu1: currency;
-  
+
 begin
  str1:= '';
  ODBCCursor:= TODBCCursor(cursor);
@@ -1088,12 +1088,12 @@ begin
   bufsize1:= bufsize;
   buffer1:= buffer;
  end;
- 
+
  case DataType of
   ftFixedChar,ftString: begin // are both mapped to TStringField
    Res:= SQLGetData(ODBCCursor.FSTMTHandle, fno,
          SQL_C_CHAR, buffer1, bufsize1{aField.Size}, @StrLenOrInd);
-   bufsize1:= strlenorind;                         
+   bufsize1:= strlenorind;
    if bufsize1 > bufsize then begin
     bufsize1:= -bufsize1;
    end;
@@ -1101,7 +1101,7 @@ begin
   ftwidestring,ftFixedWideChar: begin
    Res:= SQLGetData(ODBCCursor.FSTMTHandle, fno,
          SQL_C_WCHAR, buffer1, bufsize1{aField.Size}, @StrLenOrInd);
-   bufsize1:= strlenorind;                         
+   bufsize1:= strlenorind;
    if bufsize1 > bufsize then begin
     bufsize1:= -bufsize1;
    end;
@@ -1122,7 +1122,7 @@ begin
     Res:=SQLGetData(ODBCCursor.FSTMTHandle, fno, SQL_C_DOUBLE, buffer1,
                  SizeOf(Double), @StrLenOrInd);
   end;
-  ftbcd: begin             
+  ftbcd: begin
     Res:=SQLGetData(ODBCCursor.FSTMTHandle, fno, SQL_C_DOUBLE, @do1,
                  SizeOf(Double), @StrLenOrInd);
     if res = 0 then begin
@@ -1167,7 +1167,7 @@ begin
     if int1 < 0 then begin
      int1:= 0;
     end;
-    Res:=SQLGetData(ODBCCursor.FSTMTHandle, fno, SQL_C_BINARY, 
+    Res:=SQLGetData(ODBCCursor.FSTMTHandle, fno, SQL_C_BINARY,
                     pchar(buffer1)+sizeof(word),
                     int1{aField.Size}, @StrLenOrInd);
     pword(buffer1)^:= strlenorind;
@@ -1176,7 +1176,7 @@ begin
     Res:=SQLGetData(ODBCCursor.FSTMTHandle, fno, SQL_C_GUID, buffer1,
                                          SizeOf(tguid), @StrLenOrInd);
   end;
-  ftBlob,ftMemo,ftwidememo: begin      // BLOBs   
+  ftBlob,ftMemo,ftwidememo: begin      // BLOBs
            // Try to discover BLOB data length
    memolen1:= maxint div sizeof(widechar);
    if odbccursor.fcurrentblobbuffer = '' then begin
@@ -1228,7 +1228,7 @@ begin
        else begin
         BytesRead:= StrLenOrInd;
        end;
-       inc(int1,bytesread);              
+       inc(int1,bytesread);
       until Res = SQL_SUCCESS;
       case datatype of
        ftmemo,ftwidestring: begin
@@ -1266,7 +1266,7 @@ begin
      odbccursor.fcurrentblobbuffer:= '';
     end;
    end;
-  end;      
+  end;
   else begin  // TODO: Loading of other field types
    raise EODBCException.CreateFmt('Tried to load field of unsupported field type %s',
    [Fieldtypenames[DataType]]);
@@ -1301,7 +1301,7 @@ var
 //  i: integer;
 begin
   ODBCCursor:=cursor as TODBCCursor;
-{  
+{
   // Free TMemoryStreams in cursor.FBlobStreams and clear it
   for i:=0 to ODBCCursor.FBlobStreams.Count-1 do
     TObject(ODBCCursor.FBlobStreams[i]).Free;
@@ -1313,7 +1313,7 @@ begin
   );
 end;
 
-procedure TODBCConnection.AddFieldDefs(const cursor: TSQLCursor; 
+procedure TODBCConnection.AddFieldDefs(const cursor: TSQLCursor;
                                     const FieldDefs: TFieldDefs);
 const
   ColNameDefaultLength  = 40; // should be > 0, because an ansistring of length 0 is a nil pointer instead of a pointer to a #0
@@ -1384,17 +1384,17 @@ begin
     case DataType of
       SQL_CHAR:          begin FieldType:=ftString;     FieldSize:=ColumnSize{+1}; end;
       SQL_VARCHAR:       begin FieldType:=ftString;     FieldSize:=ColumnSize{+1}; end;
-      SQL_LONGVARCHAR:   begin FieldType:=ftMemo;       FieldSize:= blobidsize; end; 
+      SQL_LONGVARCHAR:   begin FieldType:=ftMemo;       FieldSize:= blobidsize; end;
                                       // is a blob
       SQL_WCHAR:         begin FieldType:=ftWideString; FieldSize:=ColumnSize{+1}; end;
       SQL_WVARCHAR:      begin FieldType:=ftWideString; FieldSize:=ColumnSize{+1}; end;
-      SQL_WLONGVARCHAR:  begin 
+      SQL_WLONGVARCHAR:  begin
        FieldType:= ftwidememo; //for tmsestringfield
        FieldSize:= 0;
       end; // is a blob
       SQL_NUMERIC,SQL_DECIMAL:
-      begin 
-       if (decimaldigits > 4) and 
+      begin
+       if (decimaldigits > 4) and
                        (dbo_bcdtofloatif in controller.options) then begin
         FieldType:= ftFloat;
         FieldSize:= 0;
@@ -1417,7 +1417,7 @@ begin
       SQL_BIGINT:        begin FieldType:=ftLargeint;   FieldSize:=0; end;
       SQL_BINARY:        begin FieldType:=ftBytes;      FieldSize:=ColumnSize; end;
       SQL_VARBINARY:     begin FieldType:=ftVarBytes;   FieldSize:=ColumnSize; end;
-      SQL_LONGVARBINARY: begin FieldType:=ftBlob;       FieldSize:=blobidsize; end; 
+      SQL_LONGVARBINARY: begin FieldType:=ftBlob;       FieldSize:=blobidsize; end;
                                   // is a blob
       SQL_TYPE_DATE:     begin FieldType:=ftDate;       FieldSize:=0; end;
       SQL_TYPE_TIME:     begin FieldType:=ftTime;       FieldSize:=0; end;
@@ -1447,11 +1447,11 @@ begin
 //    begin
 //      FieldSize:=dsMaxStringSize-1;
 //    end;
-(*    
+(*
     if FieldType=ftUnknown then // if unknown field type encountered, try finding more specific information about the ODBC SQL DataType
     begin
       SetLength(TypeName,TypeNameDefaultLength); // also garantuees uniqueness
-      
+
       ODBCCheckResult(
         SQLColAttribute(ODBCCursor.FSTMTHandle,  // statement handle
                         i,                       // column number
@@ -1521,9 +1521,9 @@ const
   DEFAULT_NAME_LEN = 255;
 begin
 
-// exit; /////////// does not work with MS SQL because of one statement 
+// exit; /////////// does not work with MS SQL because of one statement
          //per connection limitation
- 
+
   // allocate statement handle
   StmtHandle := SQL_NULL_HANDLE;
   ODBCCheckResult(
@@ -1693,7 +1693,7 @@ begin
   end;
 end;
 
-function TODBCConnection.GetSchemaInfoSQL(SchemaType: TSchemaType; 
+function TODBCConnection.GetSchemaInfoSQL(SchemaType: TSchemaType;
    SchemaObjectName, SchemaObjectPattern: msestring): msestring;
 begin
   Result:=inherited GetSchemaInfoSQL(
@@ -1707,7 +1707,7 @@ procedure ODBCCheckResult(LastReturnCode:SQLRETURN; HandleType:SQLSMALLINT;
                                     AHandle: SQLHANDLE; ErrorMsg: string;
                                     const values: array of const);
 var
- conn: todbcconnection;  
+ conn: todbcconnection;
 begin
  if not odbcsucces(lastreturncode) then begin
   conn:= todbcconnection.create(nil);
@@ -1730,7 +1730,7 @@ begin
   if SQLAllocHandle(SQL_HANDLE_ENV,
                         SQL_NULL_HANDLE, FENVHandle) = SQL_Error then begin
     raise EODBCException.Create('Could not allocate ODBC Environment handle');
-     // we can't retrieve any more information, 
+     // we can't retrieve any more information,
      //because we don't have a handle for the SQLGetDiag* functions
   end;
   // set odbc version
@@ -1750,7 +1750,7 @@ begin
    if Res = SQL_ERROR then
      ODBCCheckResult(Res,SQL_HANDLE_ENV, FENVHandle,
       'Could not free ODBC Environment handle.',[]);
- 
+
    // free odbc if not used by any TODBCEnvironment object anymore
   end;
 //  Dec(ODBCLoadCount);
@@ -1773,7 +1773,7 @@ begin
     SQL_HANDLE_DBC, Connection.FDBCHandle,
      'Could not allocate ODBC Statement handle.'
   );
-  
+
   // allocate FBlobStreams
 //  FBlobStreams:=TList.Create;
 end;
@@ -1783,7 +1783,7 @@ var
   Res:SQLRETURN;
 begin
   inherited Destroy;
-  
+
 //  FBlobStreams.Free;
 
   if pointer(FSTMTHandle) <> pointer(SQL_INVALID_HANDLE) then
@@ -1800,7 +1800,7 @@ procedure TODBCCursor.close;
 begin
  sqlclosecursor(fstmthandle);
 // ODBCCheckResult(sqlclosecursor(fstmthandle),SQL_HANDLE_STMT, FSTMTHandle,
-//                         'Could not close Cursor'); 
+//                         'Could not close Cursor');
                   //there is possible no cursor -> no errorcheck
  fcurrentblobbuffer:= '';
  inherited;

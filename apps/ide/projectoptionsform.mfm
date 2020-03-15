@@ -183,13 +183,13 @@ object projectoptionsfo: tprojectoptionsfo
                   optionsgrid = [og_colsizing, og_rowmoving, og_keyrowmoving, og_rowinserting, og_rowdeleting, og_selectedrowsdeleting, og_focuscellonenter, og_autofirstrow, og_autoappend, og_colchangeontabkey, og_wrapcol, og_autopopup, og_mousescrollcol]
                   datacols.count = 2
                   datacols.options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
-                  datacols.items = <                  
+                  datacols.items = <
                     item
                       width = 112
                       options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
                       valuefalse = '0'
                       valuetrue = '1'
-                    end                  
+                    end
                     item
                       width = 684
                       options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_fill, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
@@ -197,21 +197,21 @@ object projectoptionsfo: tprojectoptionsfo
                       valuetrue = '1'
                     end>
                   fixcols.count = 1
-                  fixcols.items = <                  
+                  fixcols.items = <
                     item
                       width = 27
                       numstart = 1
                       numstep = 1
                     end>
                   fixrows.count = 1
-                  fixrows.items = <                  
+                  fixrows.items = <
                     item
                       height = 16
                       captions.count = 2
-                      captions.items = <                      
+                      captions.items = <
                         item
                           caption = 'Name'
-                        end                      
+                        end
                         item
                           caption = 'File mask'
                         end>
@@ -245,35 +245,35 @@ object projectoptionsfo: tprojectoptionsfo
                   anchors = []
                   optionsgrid = [og_colsizing, og_rowmoving, og_keyrowmoving, og_rowinserting, og_rowdeleting, og_focuscellonenter, og_autofirstrow, og_autoappend, og_colchangeontabkey, og_wrapcol, og_autopopup, og_mousescrollcol]
                   fixcols.count = 1
-                  fixcols.items = <                  
+                  fixcols.items = <
                     item
                       width = 26
                       numstart = 1
                       numstep = 1
                     end>
                   fixrows.count = 1
-                  fixrows.items = <                  
+                  fixrows.items = <
                     item
                       height = 16
                       captions.count = 2
-                      captions.items = <                      
+                      captions.items = <
                         item
                           caption = 'Syntax definition file'
-                        end                      
+                        end
                         item
                           caption = 'File mask'
                         end>
                     end>
                   datacols.count = 2
                   datacols.options = [co_proportional, co_savevalue, co_savestate, co_mousescrollrow]
-                  datacols.items = <                  
+                  datacols.items = <
                     item[syntaxdeffile]
                       width = 251
                       options = [co_proportional, co_savevalue, co_savestate, co_mousescrollrow]
                       onshowhint = colonshowhint
                       widgetname = 'syntaxdeffile'
                       dataclass = tgridmsestringdatalist
-                    end                  
+                    end
                     item[syntaxdeffilemask]
                       width = 546
                       options = [co_fill, co_savevalue, co_savestate, co_mousescrollrow]
@@ -289,7 +289,7 @@ object projectoptionsfo: tprojectoptionsfo
                     frame.localprops = [frl_levelo, frl_leveli, frl_colorclient]
                     frame.localprops1 = []
                     frame.buttons.count = 1
-                    frame.buttons.items = <                    
+                    frame.buttons.items = <
                       item
                         color = -1879048187
                         imagenr = 17
@@ -320,7 +320,7 @@ object projectoptionsfo: tprojectoptionsfo
                     frame.localprops = [frl_levelo]
                     frame.localprops1 = []
                     frame.buttons.count = 1
-                    frame.buttons.items = <                    
+                    frame.buttons.items = <
                       item
                         color = -1879048187
                         imagenr = 17
@@ -369,57 +369,57 @@ object projectoptionsfo: tprojectoptionsfo
                   anchors = [an_top, an_bottom]
                   optionsgrid = [og_keyrowmoving, og_rowinserting, og_rowdeleting, og_selectedrowsdeleting, og_focuscellonenter, og_autofirstrow, og_autoappend, og_wrapcol, og_autopopup]
                   fixcols.count = 1
-                  fixcols.items = <                  
+                  fixcols.items = <
                     item
                       width = 28
                       numstart = 1
                       numstep = 1
                     end>
                   fixrows.count = 1
-                  fixrows.items = <                  
+                  fixrows.items = <
                     item
                       height = 16
                       captions.count = 11
-                      captions.items = <                      
+                      captions.items = <
                         item
                           caption = 'Directory'
-                        end                      
+                        end
                         item
                           caption = 'O'
                           hint = 'Add to object file search path'
-                        end                      
+                        end
                         item
                           caption = 'L'
                           hint = 'Add to library search path'
-                        end                      
+                        end
                         item
                           caption = 'I'
                           hint = 'Add to include file search path'
-                        end                      
+                        end
                         item
                           caption = 'U'
                           hint = 'Add to unit file search path'
-                        end                      
+                        end
                         item
                           caption = '4'
                           hint = 'Use in Make 4'
-                        end                      
+                        end
                         item
                           caption = '3'
                           hint = 'Use in Make 3'
-                        end                      
+                        end
                         item
                           caption = '2'
                           hint = 'Use in Make 2'
-                        end                      
+                        end
                         item
                           caption = '1'
                           hint = 'Use in Make 1'
-                        end                      
+                        end
                         item
                           caption = 'B'
                           hint = 'Use in Build'
-                        end                      
+                        end
                         item
                           caption = 'M'
                           hint = 'Use in Make'
@@ -428,7 +428,7 @@ object projectoptionsfo: tprojectoptionsfo
                   datacols.count = 1
                   datacols.width = 13
                   datacols.options = [co_drawfocus, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
-                  datacols.items = <                  
+                  datacols.items = <
                     item[codetemplatedirs]
                       linecolorfix = -1610612733
                       width = 796
@@ -447,7 +447,7 @@ object projectoptionsfo: tprojectoptionsfo
                     frame.localprops = [frl_levelo, frl_colorclient]
                     frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive]
                     frame.buttons.count = 1
-                    frame.buttons.items = <                    
+                    frame.buttons.items = <
                       item
                         color = -2147483646
                         imagenr = 17
@@ -521,7 +521,7 @@ object projectoptionsfo: tprojectoptionsfo
                 datacols.count = 1
                 datacols.linewidth = 0
                 datacols.options = [co_fill, co_savestate]
-                datacols.items = <                
+                datacols.items = <
                   item[fontdisp]
                     width = 812
                     options = [co_fill, co_savestate]
@@ -656,11 +656,11 @@ object projectoptionsfo: tprojectoptionsfo
                   frame.button.color = -2147483646
                   frame.button.options = [fbo_inactiveinvisible]
                   frame.buttons.count = 2
-                  frame.buttons.items = <                  
+                  frame.buttons.items = <
                     item
                       color = -2147483646
                       options = [fbo_inactiveinvisible]
-                    end                  
+                    end
                     item
                       color = -2147483646
                       imagenr = 17
@@ -694,11 +694,11 @@ object projectoptionsfo: tprojectoptionsfo
                   frame.button.color = -2147483646
                   frame.button.options = [fbo_inactiveinvisible]
                   frame.buttons.count = 2
-                  frame.buttons.items = <                  
+                  frame.buttons.items = <
                     item
                       color = -2147483646
                       options = [fbo_inactiveinvisible]
-                    end                  
+                    end
                     item
                       color = -2147483646
                       imagenr = 17
@@ -849,11 +849,11 @@ object projectoptionsfo: tprojectoptionsfo
                     frame.button.color = -2147483646
                     frame.button.options = [fbo_inactiveinvisible]
                     frame.buttons.count = 2
-                    frame.buttons.items = <                    
+                    frame.buttons.items = <
                       item
                         color = -2147483646
                         options = [fbo_inactiveinvisible]
-                      end                    
+                      end
                       item
                         color = -2147483646
                         imagenr = 17
@@ -887,11 +887,11 @@ object projectoptionsfo: tprojectoptionsfo
                     frame.button.color = -2147483646
                     frame.button.options = [fbo_inactiveinvisible]
                     frame.buttons.count = 2
-                    frame.buttons.items = <                    
+                    frame.buttons.items = <
                       item
                         color = -2147483646
                         options = [fbo_inactiveinvisible]
-                      end                    
+                      end
                       item
                         color = -2147483646
                         imagenr = 17
@@ -1121,7 +1121,7 @@ object projectoptionsfo: tprojectoptionsfo
                   frame.localprops = []
                   frame.localprops1 = []
                   frame.buttons.count = 1
-                  frame.buttons.items = <                  
+                  frame.buttons.items = <
                     item
                     end>
                   frame.outerframe = (
@@ -1140,7 +1140,7 @@ object projectoptionsfo: tprojectoptionsfo
                   valuemin = 0
                   valuemax = 3
                   dropdown.cols.count = 1
-                  dropdown.cols.items = <                  
+                  dropdown.cols.items = <
                     item
                     end>
                   oninit = initeolstyleexe
@@ -1168,7 +1168,7 @@ object projectoptionsfo: tprojectoptionsfo
                   frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive]
                   frame.button.color = -2147483646
                   frame.buttons.count = 1
-                  frame.buttons.items = <                  
+                  frame.buttons.items = <
                     item
                       color = -2147483646
                     end>
@@ -1185,7 +1185,7 @@ object projectoptionsfo: tprojectoptionsfo
                   bounds_cy = 37
                   dropdown.options = [deo_selectonly, deo_forceselect, deo_autodropdown, deo_keydropdown]
                   dropdown.cols.count = 1
-                  dropdown.cols.items = <                  
+                  dropdown.cols.items = <
                     item
                       data = (
                         'Locale'
@@ -1398,7 +1398,7 @@ object projectoptionsfo: tprojectoptionsfo
           frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive]
           frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive]
           frame.buttons.count = 1
-          frame.buttons.items = <          
+          frame.buttons.items = <
             item
               color = -2147483646
               imagenr = 17
@@ -1431,7 +1431,7 @@ object projectoptionsfo: tprojectoptionsfo
           frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive]
           frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive]
           frame.buttons.count = 1
-          frame.buttons.items = <          
+          frame.buttons.items = <
             item
               imagenr = 17
             end>
@@ -1498,7 +1498,7 @@ object projectoptionsfo: tprojectoptionsfo
               optionsgrid = [og_rowmoving, og_keyrowmoving, og_rowinserting, og_rowdeleting, og_selectedrowsdeleting, og_focuscellonenter, og_autofirstrow, og_autoappend, og_wrapcol, og_autopopup]
               datacols.count = 1
               datacols.options = [co_drawfocus, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
-              datacols.items = <              
+              datacols.items = <
                 item[sourcedirs]
                   linecolorfix = -1610612733
                   width = 825
@@ -1517,7 +1517,7 @@ object projectoptionsfo: tprojectoptionsfo
                 frame.localprops = [frl_levelo, frl_colorclient]
                 frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive]
                 frame.buttons.count = 1
-                frame.buttons.items = <                
+                frame.buttons.items = <
                   item
                     color = -1879048187
                     imagenr = 17
@@ -1548,7 +1548,7 @@ object projectoptionsfo: tprojectoptionsfo
               frame.localprops = []
               frame.localprops1 = []
               frame.buttons.count = 1
-              frame.buttons.items = <              
+              frame.buttons.items = <
                 item
                   imagenr = 17
                 end>
@@ -1606,27 +1606,27 @@ object projectoptionsfo: tprojectoptionsfo
               anchors = []
               optionsgrid = [og_keyrowmoving, og_rowinserting, og_rowdeleting, og_focuscellonenter, og_autofirstrow, og_autoappend, og_colchangeontabkey, og_wrapcol, og_autopopup]
               fixrows.count = 1
-              fixrows.items = <              
+              fixrows.items = <
                 item
                   height = 16
                   captions.count = 2
-                  captions.items = <                  
+                  captions.items = <
                     item
                       caption = 'on'
-                    end                  
+                    end
                     item
                       caption = 'Space separated defines for {$ifdef}'
                     end>
                 end>
               datacols.count = 2
               datacols.options = [co_drawfocus, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
-              datacols.items = <              
+              datacols.items = <
                 item[defineson]
                   width = 22
                   options = [co_drawfocus, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
                   widgetname = 'defineson'
                   dataclass = tgridintegerdatalist
-                end              
+                end
                 item[defines]
                   width = 802
                   options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_fill, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
@@ -1700,23 +1700,23 @@ object projectoptionsfo: tprojectoptionsfo
               anchors = []
               optionsgrid = [og_colsizing, og_rowinserting, og_rowdeleting, og_focuscellonenter, og_autofirstrow, og_autoappend, og_sorted, og_wrapcol, og_autopopup]
               fixrows.count = 1
-              fixrows.items = <              
+              fixrows.items = <
                 item
                   height = 16
                   captions.count = 5
-                  captions.items = <                  
+                  captions.items = <
                     item
                       caption = 'Stop'
-                    end                  
+                    end
                     item
                       caption = 'Handle'
-                    end                  
+                    end
                     item
                       caption = 'Signum'
-                    end                  
+                    end
                     item
                       caption = '.. to'
-                    end                  
+                    end
                     item
                       caption = 'Name'
                       textflags = [tf_ycentered]
@@ -1724,30 +1724,30 @@ object projectoptionsfo: tprojectoptionsfo
                 end>
               datacols.count = 5
               datacols.options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savestate, co_nosort, co_cancopy, co_canpaste, co_mousescrollrow]
-              datacols.items = <              
+              datacols.items = <
                 item[sigstop]
                   width = 32
                   options = [co_drawfocus, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savestate, co_nosort, co_cancopy, co_canpaste, co_mousescrollrow]
                   widgetname = 'sigstop'
                   dataclass = tgridintegerdatalist
-                end              
+                end
                 item[sighandle]
                   width = 43
                   options = [co_drawfocus, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savestate, co_nosort, co_cancopy, co_canpaste, co_mousescrollrow]
                   widgetname = 'sighandle'
                   dataclass = tgridintegerdatalist
-                end              
+                end
                 item[signum]
                   options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savevalue, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
                   widgetname = 'signum'
                   dataclass = tgridintegerdatalist
-                end              
+                end
                 item[signumto]
                   width = 39
                   options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savevalue, co_savestate, co_nosort, co_cancopy, co_canpaste, co_mousescrollrow]
                   widgetname = 'signumto'
                   dataclass = tgridintegerdatalist
-                end              
+                end
                 item[signame]
                   width = 657
                   options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_fill, co_savevalue, co_savestate, co_nosort, co_cancopy, co_canpaste, co_mousescrollrow]
@@ -1821,7 +1821,7 @@ object projectoptionsfo: tprojectoptionsfo
                 frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive]
                 frame.button.color = -1879048187
                 frame.buttons.count = 1
-                frame.buttons.items = <                
+                frame.buttons.items = <
                   item
                     color = -1879048187
                   end>
@@ -1833,14 +1833,14 @@ object projectoptionsfo: tprojectoptionsfo
                 bounds_cy = 16
                 optionsedit1 = [oe1_savevalue]
                 dropdownitems.count = 2
-                dropdownitems.items = <                
+                dropdownitems.items = <
                   item
-                  end                
+                  end
                   item
                   end>
                 onsetvalue = signameonsetvalue
                 dropdown.cols.count = 1
-                dropdown.cols.items = <                
+                dropdown.cols.items = <
                   item
                     width = 100
                   end>
@@ -1873,27 +1873,27 @@ object projectoptionsfo: tprojectoptionsfo
               anchors = []
               optionsgrid = [og_colsizing, og_keyrowmoving, og_rowinserting, og_rowdeleting, og_focuscellonenter, og_autofirstrow, og_autoappend, og_colchangeontabkey, og_wrapcol, og_autopopup]
               fixrows.count = 1
-              fixrows.items = <              
+              fixrows.items = <
                 item
                   height = 16
                   captions.count = 2
-                  captions.items = <                  
+                  captions.items = <
                     item
                       caption = 'ignore'
-                    end                  
+                    end
                     item
                       caption = 'Exception class'
                     end>
                 end>
               datacols.count = 2
               datacols.options = [co_drawfocus, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
-              datacols.items = <              
+              datacols.items = <
                 item[exceptignore]
                   width = 47
                   options = [co_drawfocus, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savestate, co_cancopy, co_canpaste]
                   widgetname = 'exceptignore'
                   dataclass = tgridintegerdatalist
-                end              
+                end
                 item[exceptclassnames]
                   width = 777
                   options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_fill, co_savestate, co_cancopy, co_canpaste]
@@ -2004,7 +2004,7 @@ object projectoptionsfo: tprojectoptionsfo
                 frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive]
                 frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive]
                 frame.buttons.count = 1
-                frame.buttons.items = <                
+                frame.buttons.items = <
                   item
                     color = -2147483646
                     imagenr = 17
@@ -2050,7 +2050,7 @@ object projectoptionsfo: tprojectoptionsfo
                 frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive]
                 frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive]
                 frame.buttons.count = 1
-                frame.buttons.items = <                
+                frame.buttons.items = <
                   item
                     color = -2147483646
                     imagenr = 17
@@ -2097,7 +2097,7 @@ object projectoptionsfo: tprojectoptionsfo
                 frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive]
                 frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive]
                 frame.buttons.count = 1
-                frame.buttons.items = <                
+                frame.buttons.items = <
                   item
                     color = -2147483646
                     imagenr = 17
@@ -2147,7 +2147,7 @@ object projectoptionsfo: tprojectoptionsfo
                 frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive]
                 frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive]
                 frame.buttons.count = 1
-                frame.buttons.items = <                
+                frame.buttons.items = <
                   item
                     color = -2147483646
                     imagenr = 17
@@ -2193,7 +2193,7 @@ object projectoptionsfo: tprojectoptionsfo
                 frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive]
                 frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive]
                 frame.buttons.count = 1
-                frame.buttons.items = <                
+                frame.buttons.items = <
                   item
                     color = -2147483646
                     imagenr = 17
@@ -2259,7 +2259,7 @@ object projectoptionsfo: tprojectoptionsfo
                 frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive]
                 frame.button.color = -2147483646
                 frame.buttons.count = 1
-                frame.buttons.items = <                
+                frame.buttons.items = <
                   item
                     color = -2147483646
                   end>
@@ -2278,7 +2278,7 @@ object projectoptionsfo: tprojectoptionsfo
                 value = 'i386'
                 dropdown.options = [deo_autodropdown, deo_keydropdown]
                 dropdown.cols.count = 1
-                dropdown.cols.items = <                
+                dropdown.cols.items = <
                   item
                     data = (
                       'auto'
@@ -2412,7 +2412,7 @@ object projectoptionsfo: tprojectoptionsfo
                 frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive]
                 frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive]
                 frame.buttons.count = 1
-                frame.buttons.items = <                
+                frame.buttons.items = <
                   item
                     color = -2147483646
                     imagenr = 17
@@ -2446,7 +2446,7 @@ object projectoptionsfo: tprojectoptionsfo
                 frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive]
                 frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive]
                 frame.buttons.count = 1
-                frame.buttons.items = <                
+                frame.buttons.items = <
                   item
                     color = -2147483646
                     imagenr = 17
@@ -2483,7 +2483,7 @@ object projectoptionsfo: tprojectoptionsfo
                 frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive]
                 frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive]
                 frame.buttons.count = 1
-                frame.buttons.items = <                
+                frame.buttons.items = <
                   item
                     color = -2147483646
                     imagenr = 17
@@ -2853,7 +2853,7 @@ object projectoptionsfo: tprojectoptionsfo
           frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive]
           frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive]
           frame.buttons.count = 1
-          frame.buttons.items = <          
+          frame.buttons.items = <
             item
               color = -2147483646
               imagenr = 17
@@ -2896,7 +2896,7 @@ object projectoptionsfo: tprojectoptionsfo
           frame.localprops = []
           frame.localprops1 = []
           frame.buttons.count = 1
-          frame.buttons.items = <          
+          frame.buttons.items = <
             item
               imagenr = 17
             end>
@@ -2938,7 +2938,7 @@ object projectoptionsfo: tprojectoptionsfo
           frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive]
           frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive]
           frame.buttons.count = 1
-          frame.buttons.items = <          
+          frame.buttons.items = <
             item
               color = -2147483646
               imagenr = 17
@@ -2995,7 +2995,7 @@ object projectoptionsfo: tprojectoptionsfo
           frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive]
           frame.button.color = -2147483646
           frame.buttons.count = 1
-          frame.buttons.items = <          
+          frame.buttons.items = <
             item
               color = -2147483646
             end>
@@ -3015,7 +3015,7 @@ object projectoptionsfo: tprojectoptionsfo
           textflags = [tf_xcentered, tf_ycentered, tf_noselect]
           dropdown.options = [deo_selectonly, deo_forceselect, deo_autodropdown]
           dropdown.cols.count = 1
-          dropdown.cols.items = <          
+          dropdown.cols.items = <
             item
               data = (
                 'M (Make)'
@@ -3038,7 +3038,7 @@ object projectoptionsfo: tprojectoptionsfo
           frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive]
           frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive]
           frame.buttons.count = 1
-          frame.buttons.items = <          
+          frame.buttons.items = <
             item
               color = -2147483646
               imagenr = 17
@@ -3071,7 +3071,7 @@ object projectoptionsfo: tprojectoptionsfo
           frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive]
           frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive]
           frame.buttons.count = 1
-          frame.buttons.items = <          
+          frame.buttons.items = <
             item
               color = -2147483646
               imagenr = 17
@@ -3106,7 +3106,7 @@ object projectoptionsfo: tprojectoptionsfo
           frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive]
           frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive]
           frame.buttons.count = 1
-          frame.buttons.items = <          
+          frame.buttons.items = <
             item
               color = -2147483646
               imagenr = 17
@@ -3153,7 +3153,7 @@ object projectoptionsfo: tprojectoptionsfo
           frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive]
           frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive]
           frame.buttons.count = 1
-          frame.buttons.items = <          
+          frame.buttons.items = <
             item
               color = -2147483646
               imagenr = 17
@@ -3270,78 +3270,78 @@ object projectoptionsfo: tprojectoptionsfo
               anchors = []
               optionsgrid = [og_keyrowmoving, og_rowinserting, og_rowdeleting, og_selectedrowsdeleting, og_focuscellonenter, og_autofirstrow, og_autoappend, og_wrapcol, og_autopopup]
               fixrows.count = 1
-              fixrows.items = <              
+              fixrows.items = <
                 item
                   height = 16
                   captions.count = 7
-                  captions.items = <                  
+                  captions.items = <
                     item
                       caption = 'M'
                       hint = 'Use in Make'
-                    end                  
+                    end
                     item
                       caption = 'B'
                       hint = 'Use in Build'
-                    end                  
+                    end
                     item
                       caption = '1'
                       hint = 'Use in Make 1'
-                    end                  
+                    end
                     item
                       caption = '2'
                       hint = 'Use in Make 2'
-                    end                  
+                    end
                     item
                       caption = '3'
                       hint = 'Use in Make 3'
-                    end                  
+                    end
                     item
                       caption = '4'
                       hint = 'Use in Make 4'
-                    end                  
+                    end
                     item
                       caption = 'Command'
                     end>
                 end>
               datacols.count = 7
               datacols.options = [co_drawfocus, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
-              datacols.items = <              
+              datacols.items = <
                 item[befmakeon]
                   width = 13
                   options = [co_drawfocus, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
                   widgetname = 'befmakeon'
                   dataclass = tgridintegerdatalist
-                end              
+                end
                 item[befbuildon]
                   width = 13
                   options = [co_drawfocus, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
                   widgetname = 'befbuildon'
                   dataclass = tgridintegerdatalist
-                end              
+                end
                 item[befmake1on]
                   width = 13
                   options = [co_drawfocus, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
                   widgetname = 'befmake1on'
                   dataclass = tgridintegerdatalist
-                end              
+                end
                 item[befmake2on]
                   width = 13
                   options = [co_drawfocus, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
                   widgetname = 'befmake2on'
                   dataclass = tgridintegerdatalist
-                end              
+                end
                 item[befmake3on]
                   width = 13
                   options = [co_drawfocus, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
                   widgetname = 'befmake3on'
                   dataclass = tgridintegerdatalist
-                end              
+                end
                 item[befmake4on]
                   width = 13
                   options = [co_drawfocus, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
                   widgetname = 'befmake4on'
                   dataclass = tgridintegerdatalist
-                end              
+                end
                 item[befcommand]
                   width = 741
                   options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_fill, co_savevalue, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
@@ -3430,7 +3430,7 @@ object projectoptionsfo: tprojectoptionsfo
                 frame.localprops = [frl_levelo, frl_colorclient]
                 frame.localprops1 = []
                 frame.buttons.count = 1
-                frame.buttons.items = <                
+                frame.buttons.items = <
                   item
                     color = -1879048187
                     imagenr = 17
@@ -3479,100 +3479,100 @@ object projectoptionsfo: tprojectoptionsfo
               anchors = []
               optionsgrid = [og_colsizing, og_keyrowmoving, og_rowinserting, og_rowdeleting, og_selectedrowsdeleting, og_focuscellonenter, og_autofirstrow, og_autoappend, og_wrapcol, og_autopopup]
               fixrows.count = 1
-              fixrows.items = <              
+              fixrows.items = <
                 item
                   height = 16
                   captions.count = 10
-                  captions.items = <                  
+                  captions.items = <
                     item
                       caption = 'Purpose'
-                    end                  
+                    end
                     item
                       caption = 'M'
                       hint = 'Use in Make'
-                    end                  
+                    end
                     item
                       caption = 'B'
                       hint = 'Use in Build'
-                    end                  
+                    end
                     item
                       caption = '1'
                       hint = 'Use in Make 1'
-                    end                  
+                    end
                     item
                       caption = '2'
                       hint = 'Use in Make 2'
-                    end                  
+                    end
                     item
                       caption = '3'
                       hint = 'Use in Make 3'
-                    end                  
+                    end
                     item
                       caption = '4'
                       hint = 'Use in Make 4'
-                    end                  
+                    end
                     item
                       caption = 'A'
                       hint = 'After mainfile'
-                    end                  
+                    end
                     item
                       caption = 'Command line options'
-                    end                  
+                    end
                     item
                     end>
                 end>
               datacols.count = 9
               datacols.options = [co_drawfocus, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
-              datacols.items = <              
+              datacols.items = <
                 item[makeoptpurpose]
                   width = 57
                   options = [co_invisible, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savevalue, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
                   widgetname = 'makeoptpurpose'
                   dataclass = tgridmsestringdatalist
                   datalist.facultative = True
-                end              
+                end
                 item[makeon]
                   width = 13
                   options = [co_drawfocus, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_fixwidth, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
                   widgetname = 'makeon'
                   dataclass = tgridintegerdatalist
-                end              
+                end
                 item[buildon]
                   width = 13
                   options = [co_drawfocus, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_fixwidth, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
                   widgetname = 'buildon'
                   dataclass = tgridintegerdatalist
-                end              
+                end
                 item[make1on]
                   width = 13
                   options = [co_drawfocus, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_fixwidth, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
                   widgetname = 'make1on'
                   dataclass = tgridintegerdatalist
-                end              
+                end
                 item[make2on]
                   width = 13
                   options = [co_drawfocus, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_fixwidth, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
                   widgetname = 'make2on'
                   dataclass = tgridintegerdatalist
-                end              
+                end
                 item[make3on]
                   width = 13
                   options = [co_drawfocus, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_fixwidth, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
                   widgetname = 'make3on'
                   dataclass = tgridintegerdatalist
-                end              
+                end
                 item[make4on]
                   width = 13
                   options = [co_drawfocus, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_fixwidth, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
                   widgetname = 'make4on'
                   dataclass = tgridintegerdatalist
-                end              
+                end
                 item[optafter]
                   width = 13
                   options = [co_drawfocus, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_fixwidth, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
                   widgetname = 'optafter'
                   dataclass = tgridintegerdatalist
-                end              
+                end
                 item[makeoptions]
                   width = 669
                   options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_fixwidth, co_fill, co_savevalue, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
@@ -3686,7 +3686,7 @@ object projectoptionsfo: tprojectoptionsfo
                 frame.localprops = [frl_levelo, frl_colorclient]
                 frame.localprops1 = []
                 frame.buttons.count = 1
-                frame.buttons.items = <                
+                frame.buttons.items = <
                   item
                     color = -1879048187
                     imagenr = 17
@@ -3741,51 +3741,51 @@ object projectoptionsfo: tprojectoptionsfo
               anchors = [an_top, an_bottom]
               optionsgrid = [og_keyrowmoving, og_rowinserting, og_rowdeleting, og_selectedrowsdeleting, og_focuscellonenter, og_autofirstrow, og_autoappend, og_wrapcol, og_autopopup]
               fixrows.count = 1
-              fixrows.items = <              
+              fixrows.items = <
                 item
                   height = 16
                   captions.count = 11
-                  captions.items = <                  
+                  captions.items = <
                     item
                       caption = 'M'
                       hint = 'Use in Make'
-                    end                  
+                    end
                     item
                       caption = 'B'
                       hint = 'Use in Build'
-                    end                  
+                    end
                     item
                       caption = '1'
                       hint = 'Use in Make 1'
-                    end                  
+                    end
                     item
                       caption = '2'
                       hint = 'Use in Make 2'
-                    end                  
+                    end
                     item
                       caption = '3'
                       hint = 'Use in Make 3'
-                    end                  
+                    end
                     item
                       caption = '4'
                       hint = 'Use in Make 4'
-                    end                  
+                    end
                     item
                       caption = 'U'
                       hint = 'Add to unit file search path'
-                    end                  
+                    end
                     item
                       caption = 'I'
                       hint = 'Add to include file search path'
-                    end                  
+                    end
                     item
                       caption = 'L'
                       hint = 'Add to library search path'
-                    end                  
+                    end
                     item
                       caption = 'O'
                       hint = 'Add to object file search path'
-                    end                  
+                    end
                     item
                       caption = 'Directory'
                     end>
@@ -3793,37 +3793,37 @@ object projectoptionsfo: tprojectoptionsfo
               datacols.count = 11
               datacols.width = 13
               datacols.options = [co_drawfocus, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
-              datacols.items = <              
+              datacols.items = <
                 item[dmakeon]
                   width = 13
                   options = [co_drawfocus, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
                   widgetname = 'dmakeon'
                   dataclass = tgridintegerdatalist
-                end              
+                end
                 item[dbuildon]
                   width = 13
                   options = [co_drawfocus, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
                   widgetname = 'dbuildon'
                   dataclass = tgridintegerdatalist
-                end              
+                end
                 item[dmake1on]
                   width = 13
                   options = [co_drawfocus, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
                   widgetname = 'dmake1on'
                   dataclass = tgridintegerdatalist
-                end              
+                end
                 item[dmake2on]
                   width = 13
                   options = [co_drawfocus, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
                   widgetname = 'dmake2on'
                   dataclass = tgridintegerdatalist
-                end              
+                end
                 item[dmake3on]
                   width = 13
                   options = [co_drawfocus, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
                   widgetname = 'dmake3on'
                   dataclass = tgridintegerdatalist
-                end              
+                end
                 item[dmake4on]
                   linewidth = 2
                   linecolorfix = -1610612733
@@ -3831,31 +3831,31 @@ object projectoptionsfo: tprojectoptionsfo
                   options = [co_drawfocus, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
                   widgetname = 'dmake4on'
                   dataclass = tgridintegerdatalist
-                end              
+                end
                 item[duniton]
                   width = 13
                   options = [co_drawfocus, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
                   widgetname = 'duniton'
                   dataclass = tgridintegerdatalist
-                end              
+                end
                 item[dincludeon]
                   width = 13
                   options = [co_drawfocus, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
                   widgetname = 'dincludeon'
                   dataclass = tgridintegerdatalist
-                end              
+                end
                 item[dlibon]
                   width = 13
                   options = [co_drawfocus, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
                   widgetname = 'dlibon'
                   dataclass = tgridintegerdatalist
-                end              
+                end
                 item[dobjon]
                   width = 13
                   options = [co_drawfocus, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
                   widgetname = 'dobjon'
                   dataclass = tgridintegerdatalist
-                end              
+                end
                 item[unitdirs]
                   linecolorfix = -1610612733
                   width = 684
@@ -3998,7 +3998,7 @@ object projectoptionsfo: tprojectoptionsfo
                 frame.localprops = [frl_levelo, frl_colorclient]
                 frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive]
                 frame.buttons.count = 1
-                frame.buttons.items = <                
+                frame.buttons.items = <
                   item
                     color = -1879048187
                     imagenr = 17
@@ -4167,78 +4167,78 @@ object projectoptionsfo: tprojectoptionsfo
               anchors = []
               optionsgrid = [og_keyrowmoving, og_rowinserting, og_rowdeleting, og_selectedrowsdeleting, og_focuscellonenter, og_autofirstrow, og_autoappend, og_wrapcol, og_autopopup]
               fixrows.count = 1
-              fixrows.items = <              
+              fixrows.items = <
                 item
                   height = 16
                   captions.count = 7
-                  captions.items = <                  
+                  captions.items = <
                     item
                       caption = 'M'
                       hint = 'Use in Make'
-                    end                  
+                    end
                     item
                       caption = 'B'
                       hint = 'Use in Build'
-                    end                  
+                    end
                     item
                       caption = '1'
                       hint = 'Use in Make 1'
-                    end                  
+                    end
                     item
                       caption = '2'
                       hint = 'Use in Make 2'
-                    end                  
+                    end
                     item
                       caption = '3'
                       hint = 'Use in Make 3'
-                    end                  
+                    end
                     item
                       caption = '4'
                       hint = 'Use in Make 4'
-                    end                  
+                    end
                     item
                       caption = 'Command'
                     end>
                 end>
               datacols.count = 7
               datacols.options = [co_drawfocus, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
-              datacols.items = <              
+              datacols.items = <
                 item[aftmakeon]
                   width = 13
                   options = [co_drawfocus, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
                   widgetname = 'aftmakeon'
                   dataclass = tgridintegerdatalist
-                end              
+                end
                 item[aftbuildon]
                   width = 13
                   options = [co_drawfocus, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
                   widgetname = 'aftbuildon'
                   dataclass = tgridintegerdatalist
-                end              
+                end
                 item[aftmake1on]
                   width = 13
                   options = [co_drawfocus, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
                   widgetname = 'aftmake1on'
                   dataclass = tgridintegerdatalist
-                end              
+                end
                 item[aftmake2on]
                   width = 13
                   options = [co_drawfocus, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
                   widgetname = 'aftmake2on'
                   dataclass = tgridintegerdatalist
-                end              
+                end
                 item[aftmake3on]
                   width = 13
                   options = [co_drawfocus, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
                   widgetname = 'aftmake3on'
                   dataclass = tgridintegerdatalist
-                end              
+                end
                 item[aftmake4on]
                   width = 13
                   options = [co_drawfocus, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
                   widgetname = 'aftmake4on'
                   dataclass = tgridintegerdatalist
-                end              
+                end
                 item[aftcommand]
                   width = 741
                   options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_fill, co_savevalue, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
@@ -4327,7 +4327,7 @@ object projectoptionsfo: tprojectoptionsfo
                 frame.localprops = [frl_levelo, frl_colorclient]
                 frame.localprops1 = []
                 frame.buttons.count = 1
-                frame.buttons.items = <                
+                frame.buttons.items = <
                   item
                     color = -1879048187
                     imagenr = 17
@@ -4376,7 +4376,7 @@ object projectoptionsfo: tprojectoptionsfo
           frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive]
           frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive]
           frame.buttons.count = 1
-          frame.buttons.items = <          
+          frame.buttons.items = <
             item
               color = -2147483646
               imagenr = 17
@@ -4458,10 +4458,10 @@ object projectoptionsfo: tprojectoptionsfo
           frame.localprops1 = []
           frame.button.options = [fbo_inactiveinvisible]
           frame.buttons.count = 2
-          frame.buttons.items = <          
+          frame.buttons.items = <
             item
               options = [fbo_inactiveinvisible]
-            end          
+            end
             item
               imagenr = 17
               options = [fbo_inactiveinvisible]
@@ -4498,10 +4498,10 @@ object projectoptionsfo: tprojectoptionsfo
           frame.localprops1 = []
           frame.button.options = [fbo_inactiveinvisible]
           frame.buttons.count = 2
-          frame.buttons.items = <          
+          frame.buttons.items = <
             item
               options = [fbo_inactiveinvisible]
-            end          
+            end
             item
               imagenr = 17
               options = [fbo_inactiveinvisible]
@@ -4538,10 +4538,10 @@ object projectoptionsfo: tprojectoptionsfo
           frame.localprops1 = []
           frame.button.options = [fbo_inactiveinvisible]
           frame.buttons.count = 2
-          frame.buttons.items = <          
+          frame.buttons.items = <
             item
               options = [fbo_inactiveinvisible]
-            end          
+            end
             item
               imagenr = 17
               options = [fbo_inactiveinvisible]
@@ -4615,32 +4615,32 @@ object projectoptionsfo: tprojectoptionsfo
           anchors = [an_top, an_bottom]
           optionsgrid = [og_colsizing, og_keyrowmoving, og_rowinserting, og_rowdeleting, og_selectedrowsdeleting, og_focuscellonenter, og_autofirstrow, og_autoappend, og_wrapcol, og_autopopup]
           fixrows.count = 1
-          fixrows.items = <          
+          fixrows.items = <
             item
               height = 16
               captions.count = 8
-              captions.items = <              
+              captions.items = <
                 item
                   caption = '1'
-                end              
+                end
                 item
                   caption = '2'
-                end              
+                end
                 item
                   caption = '3'
-                end              
+                end
                 item
                   caption = '4'
-                end              
+                end
                 item
                   caption = '5'
-                end              
+                end
                 item
                   caption = '6'
-                end              
+                end
                 item
                   caption = 'Name'
-                end              
+                end
                 item
                   caption = 'Value'
                 end>
@@ -4648,49 +4648,49 @@ object projectoptionsfo: tprojectoptionsfo
           datacols.count = 8
           datacols.width = 13
           datacols.options = [co_drawfocus, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_fixwidth, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
-          datacols.items = <          
+          datacols.items = <
             item[e0]
               width = 13
               options = [co_drawfocus, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_fixwidth, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
               widgetname = 'e0'
               dataclass = tgridintegerdatalist
-            end          
+            end
             item[e1]
               width = 13
               options = [co_drawfocus, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_fixwidth, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
               widgetname = 'e1'
               dataclass = tgridintegerdatalist
-            end          
+            end
             item[e2]
               width = 13
               options = [co_drawfocus, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_fixwidth, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
               widgetname = 'e2'
               dataclass = tgridintegerdatalist
-            end          
+            end
             item[e3]
               width = 13
               options = [co_drawfocus, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_fixwidth, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
               widgetname = 'e3'
               dataclass = tgridintegerdatalist
-            end          
+            end
             item[e4]
               width = 13
               options = [co_drawfocus, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_fixwidth, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
               widgetname = 'e4'
               dataclass = tgridintegerdatalist
-            end          
+            end
             item[e5]
               width = 13
               options = [co_drawfocus, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_fixwidth, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
               widgetname = 'e5'
               dataclass = tgridintegerdatalist
-            end          
+            end
             item[macronames]
               width = 146
               options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
               widgetname = 'macronames'
               dataclass = tgridmsestringdatalist
-            end          
+            end
             item[macrovalues]
               width = 594
               options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_fill, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
@@ -4801,7 +4801,7 @@ object projectoptionsfo: tprojectoptionsfo
             frame.localprops = [frl_levelo, frl_colorclient]
             frame.localprops1 = []
             frame.buttons.count = 1
-            frame.buttons.items = <            
+            frame.buttons.items = <
               item
                 color = -1879048187
                 imagenr = 17
@@ -4840,7 +4840,7 @@ object projectoptionsfo: tprojectoptionsfo
           anchors = [an_top]
           optionsgrid = [og_rowmoving, og_keyrowmoving, og_focuscellonenter, og_wrapcol, og_autopopup]
           fixcols.count = 1
-          fixcols.items = <          
+          fixcols.items = <
             item
               width = 13
               numstart = 1
@@ -4849,7 +4849,7 @@ object projectoptionsfo: tprojectoptionsfo
           rowcount = 6
           datacols.count = 2
           datacols.options = [co_drawfocus, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
-          datacols.items = <          
+          datacols.items = <
             item[activemacroselect]
               width = 14
               options = [co_drawfocus, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savestate, co_cancopy, co_canpaste]
@@ -4865,7 +4865,7 @@ object projectoptionsfo: tprojectoptionsfo
                   0
                 )
               )
-            end          
+            end
             item[groupcomment]
               width = 781
               options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_fill, co_savestate, co_cancopy, co_canpaste]
@@ -4948,71 +4948,71 @@ object projectoptionsfo: tprojectoptionsfo
           anchors = []
           optionsgrid = [og_colsizing, og_keyrowmoving, og_rowinserting, og_rowdeleting, og_focuscellonenter, og_autofirstrow, og_autoappend, og_wrapcol, og_autopopup]
           fixrows.count = 1
-          fixrows.items = <          
+          fixrows.items = <
             item
               height = 15
               captions.count = 7
-              captions.items = <              
+              captions.items = <
                 item
                   caption = 'Alias'
-                end              
+                end
                 item
                   caption = 'Font name'
-                end              
+                end
                 item
                   caption = 'Height'
-                end              
+                end
                 item
                   caption = 'Width'
-                end              
+                end
                 item
                   caption = 'Options'
-                end              
+                end
                 item
                   caption = 'Xscale'
-                end              
+                end
                 item
                   caption = 'Ancestor'
                 end>
             end>
           datacols.count = 7
           datacols.options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
-          datacols.items = <          
+          datacols.items = <
             item[fontalias]
               width = 98
               options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
               onshowhint = colonshowhint
               widgetname = 'fontalias'
               dataclass = tgridmsestringdatalist
-            end          
+            end
             item[fontname]
               width = 451
               options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_fill, co_savestate, co_cancopy, co_canpaste]
               onshowhint = colonshowhint
               widgetname = 'fontname'
               dataclass = tgridmsestringdatalist
-            end          
+            end
             item[fontheight]
               options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
               widgetname = 'fontheight'
               dataclass = tgridintegerdatalist
-            end          
+            end
             item[fontwidth]
               options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
               widgetname = 'fontwidth'
               dataclass = tgridintegerdatalist
-            end          
+            end
             item[fontoptions]
               options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
               onshowhint = colonshowhint
               widgetname = 'fontoptions'
               dataclass = tgridmsestringdatalist
-            end          
+            end
             item[fontxscale]
               options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
               widgetname = 'fontxscale'
               dataclass = tgridrealdatalist
-            end          
+            end
             item[fontancestors]
               width = 70
               options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
@@ -5176,47 +5176,47 @@ object projectoptionsfo: tprojectoptionsfo
           anchors = []
           optionsgrid = [og_rowmoving, og_keyrowmoving, og_focuscellonenter, og_colchangeontabkey, og_autopopup, og_mousescrollcol]
           fixcols.count = 1
-          fixcols.items = <          
+          fixcols.items = <
             item
               color = -1879048185
               width = 80
               textflags = [tf_ycentered]
             end>
           fixrows.count = 1
-          fixrows.items = <          
+          fixrows.items = <
             item
               height = 16
               captions.count = 3
-              captions.items = <              
+              captions.items = <
                 item
-                end              
+                end
                 item
                   caption = 'Color'
-                end              
+                end
                 item
                   caption = 'Comment'
                 end>
               captionsfix.count = 1
-              captionsfix.items = <              
+              captionsfix.items = <
                 item
                   caption = 'Name'
                 end>
             end>
           datacols.count = 3
           datacols.options = [co_drawfocus, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
-          datacols.items = <          
+          datacols.items = <
             item[coldi]
               width = 22
               options = [co_readonly, co_nofocus, co_invisible, co_drawfocus, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savestate, co_mousescrollrow]
               widgetname = 'coldi'
               dataclass = tgridpointerdatalist
-            end          
+            end
             item[usercolors]
               width = 97
               options = [co_drawfocus, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
               widgetname = 'usercolors'
               dataclass = tgridenumdatalist
-            end          
+            end
             item[usercolorcomment]
               width = 623
               options = [co_drawfocus, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_fill, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
@@ -5246,10 +5246,10 @@ object projectoptionsfo: tprojectoptionsfo
             frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive]
             frame.button.color = -1879048187
             frame.buttons.count = 2
-            frame.buttons.items = <            
+            frame.buttons.items = <
               item
                 color = -1879048187
-              end            
+              end
               item
                 color = -1879048187
                 imagenr = 17
@@ -5309,28 +5309,28 @@ object projectoptionsfo: tprojectoptionsfo
           anchors = []
           optionsgrid = [og_focuscellonenter, og_autofirstrow, og_autoappend, og_savestate, og_colchangeontabkey, og_wrapcol, og_autopopup, og_mousescrollcol]
           fixrows.count = 1
-          fixrows.items = <          
+          fixrows.items = <
             item
               height = 16
               captions.count = 2
-              captions.items = <              
+              captions.items = <
                 item
                   caption = 'Name'
-                end              
+                end
                 item
                   caption = 'Value'
                 end>
             end>
           datacols.count = 2
           datacols.options = [co_savestate, co_mousescrollrow]
-          datacols.items = <          
+          datacols.items = <
             item[formatmacronames]
               width = 157
               options = [co_proportional, co_savestate, co_mousescrollrow]
               onshowhint = colonshowhint
               widgetname = 'formatmacronames'
               dataclass = tgridmsestringdatalist
-            end          
+            end
             item[formatmacrovalues]
               width = 667
               options = [co_fill, co_savestate, co_mousescrollrow]
@@ -5419,50 +5419,50 @@ object projectoptionsfo: tprojectoptionsfo
               anchors = [an_top, an_bottom]
               optionsgrid = [og_colsizing, og_keycolmoving, og_rowmoving, og_keyrowmoving, og_rowinserting, og_rowdeleting, og_focuscellonenter, og_autofirstrow, og_autoappend, og_colchangeontabkey, og_wrapcol, og_autopopup]
               fixrows.count = 1
-              fixrows.items = <              
+              fixrows.items = <
                 item
                   frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive]
                   frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive]
                   height = 16
                   captions.count = 4
-                  captions.items = <                  
+                  captions.items = <
                     item
                       caption = 'L'
                       hint = 'Load file in editor'
-                    end                  
+                    end
                     item
                       caption = 'M'
                       hint = 'Expand macros'
-                    end                  
+                    end
                     item
                       caption = 'Copied Files'
-                    end                  
+                    end
                     item
                       caption = 'Destination'
                     end>
                 end>
               datacols.count = 4
               datacols.options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savevalue, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
-              datacols.items = <              
+              datacols.items = <
                 item[loadprojectfile]
                   width = 18
                   options = [co_drawfocus, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_fixwidth, co_savestate, co_cancopy, co_canpaste]
                   widgetname = 'loadprojectfile'
                   dataclass = tgridintegerdatalist
-                end              
+                end
                 item[expandprojectfilemacros]
                   width = 18
                   options = [co_drawfocus, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_fixwidth, co_savestate, co_cancopy, co_canpaste]
                   widgetname = 'expandprojectfilemacros'
                   dataclass = tgridintegerdatalist
-                end              
+                end
                 item[newprojectfiles]
                   width = 417
                   options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_proportional, co_savevalue, co_savestate, co_cancopy, co_canpaste]
                   onshowhint = colonshowhint
                   widgetname = 'newprojectfiles'
                   dataclass = tgridmsestringdatalist
-                end              
+                end
                 item[newprojectfilesdest]
                   width = 369
                   options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_fill, co_savevalue, co_savestate, co_cancopy, co_canpaste]
@@ -5509,7 +5509,7 @@ object projectoptionsfo: tprojectoptionsfo
                 frame.localprops = [frl_levelo, frl_colorclient]
                 frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive]
                 frame.buttons.count = 1
-                frame.buttons.items = <                
+                frame.buttons.items = <
                   item
                     color = -1879048187
                     imagenr = 17
@@ -5553,7 +5553,7 @@ object projectoptionsfo: tprojectoptionsfo
               frame.localprops = [frl_levelo, frl_colorclient]
               frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive]
               frame.buttons.count = 1
-              frame.buttons.items = <              
+              frame.buttons.items = <
                 item
                   color = -2147483646
                   imagenr = 17
@@ -5583,7 +5583,7 @@ object projectoptionsfo: tprojectoptionsfo
               frame.localprops = [frl_levelo, frl_colorclient]
               frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive]
               frame.buttons.count = 1
-              frame.buttons.items = <              
+              frame.buttons.items = <
                 item
                   color = -2147483646
                   imagenr = 17
@@ -5632,55 +5632,55 @@ object projectoptionsfo: tprojectoptionsfo
               anchors = []
               optionsgrid = [og_colsizing, og_rowmoving, og_keyrowmoving, og_rowinserting, og_rowdeleting, og_focuscellonenter, og_autofirstrow, og_autoappend, og_colchangeontabkey, og_wrapcol, og_autopopup, og_mousescrollcol]
               fixcols.count = 1
-              fixcols.items = <              
+              fixcols.items = <
                 item
                   width = 27
                   numstep = 1
                 end>
               fixrows.count = 1
-              fixrows.items = <              
+              fixrows.items = <
                 item
                   height = 16
                   captions.count = 5
-                  captions.items = <                  
+                  captions.items = <
                     item
                       caption = 'Kind'
-                    end                  
+                    end
                     item
                       caption = 'Filter'
-                    end                  
+                    end
                     item
                       caption = 'Ext'
-                    end                  
+                    end
                     item
                       caption = 'Source'
-                    end                  
+                    end
                     item
                     end>
                 end>
               datacols.count = 4
               datacols.options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
-              datacols.items = <              
+              datacols.items = <
                 item[newfinames]
                   width = 124
                   options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_proportional, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
                   onshowhint = colonshowhint
                   widgetname = 'newfinames'
                   dataclass = tgridmsestringdatalist
-                end              
+                end
                 item[newfifilters]
                   width = 110
                   options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
                   onshowhint = colonshowhint
                   widgetname = 'newfifilters'
                   dataclass = tgridmsestringdatalist
-                end              
+                end
                 item[newfiexts]
                   options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
                   onshowhint = colonshowhint
                   widgetname = 'newfiexts'
                   dataclass = tgridmsestringdatalist
-                end              
+                end
                 item[newfisources]
                   width = 510
                   options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_fill, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
@@ -5739,7 +5739,7 @@ object projectoptionsfo: tprojectoptionsfo
                 frame.localprops = [frl_levelo, frl_leveli, frl_colorclient]
                 frame.localprops1 = []
                 frame.buttons.count = 1
-                frame.buttons.items = <                
+                frame.buttons.items = <
                   item
                     color = -1879048187
                     imagenr = 17
@@ -5785,40 +5785,40 @@ object projectoptionsfo: tprojectoptionsfo
               anchors = []
               optionsgrid = [og_colsizing, og_rowmoving, og_keyrowmoving, og_rowinserting, og_rowdeleting, og_focuscellonenter, og_autofirstrow, og_autoappend, og_savestate, og_colchangeontabkey, og_wrapcol, og_autopopup, og_mousescrollcol]
               fixcols.count = 1
-              fixcols.items = <              
+              fixcols.items = <
                 item
                   width = 23
                   numstep = 1
                 end>
               fixrows.count = 1
-              fixrows.items = <              
+              fixrows.items = <
                 item
                   height = 16
                   captions.count = 6
-                  captions.items = <                  
+                  captions.items = <
                     item
                       caption = 'Kind'
-                    end                  
+                    end
                     item
                       caption = 'I'
                       hint = 'Inherited'
-                    end                  
+                    end
                     item
                       caption = 'Namebase'
-                    end                  
+                    end
                     item
                       caption = 'Formsuffix'
-                    end                  
+                    end
                     item
                       caption = 'Source File'
-                    end                  
+                    end
                     item
                       caption = 'Form File'
                     end>
                 end>
               datacols.count = 6
               datacols.options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
-              datacols.items = <              
+              datacols.items = <
                 item[newfonames]
                   width = 96
                   options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
@@ -5826,14 +5826,14 @@ object projectoptionsfo: tprojectoptionsfo
                   onshowhint = colonshowhint
                   widgetname = 'newfonames'
                   dataclass = tgridmsestringdatalist
-                end              
+                end
                 item[newinheritedforms]
                   width = 13
                   options = [co_drawfocus, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_fixwidth, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
                   name = 'newinheritedforms'
                   widgetname = 'newinheritedforms'
                   dataclass = tgridintegerdatalist
-                end              
+                end
                 item[newfonamebases]
                   width = 73
                   options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
@@ -5841,14 +5841,14 @@ object projectoptionsfo: tprojectoptionsfo
                   onshowhint = colonshowhint
                   widgetname = 'newfonamebases'
                   dataclass = tgridmsestringdatalist
-                end              
+                end
                 item[newfoformsuffixes]
                   width = 69
                   options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
                   name = 'newfoformsuffix'
                   widgetname = 'newfoformsuffixes'
                   dataclass = tgridmsestringdatalist
-                end              
+                end
                 item[newfosources]
                   width = 293
                   options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_proportional, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
@@ -5856,7 +5856,7 @@ object projectoptionsfo: tprojectoptionsfo
                   onshowhint = colonshowhint
                   widgetname = 'newfosources'
                   dataclass = tgridmsestringdatalist
-                end              
+                end
                 item[newfoforms]
                   width = 252
                   options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_fill, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
@@ -5927,7 +5927,7 @@ object projectoptionsfo: tprojectoptionsfo
                 frame.localprops = [frl_levelo, frl_leveli, frl_colorclient]
                 frame.localprops1 = []
                 frame.buttons.count = 1
-                frame.buttons.items = <                
+                frame.buttons.items = <
                   item
                     color = -1879048187
                     imagenr = 17
@@ -5964,7 +5964,7 @@ object projectoptionsfo: tprojectoptionsfo
                 frame.localprops = [frl_levelo, frl_leveli, frl_colorclient]
                 frame.localprops1 = []
                 frame.buttons.count = 1
-                frame.buttons.items = <                
+                frame.buttons.items = <
                   item
                     color = -1879048187
                     imagenr = 17
@@ -6021,59 +6021,59 @@ object projectoptionsfo: tprojectoptionsfo
           anchors = []
           optionsgrid = [og_colsizing, og_rowmoving, og_keyrowmoving, og_rowinserting, og_rowdeleting, og_focuscellonenter, og_autofirstrow, og_autoappend, og_colchangeontabkey, og_wrapcol, og_autopopup, og_mousescrollcol]
           fixcols.count = 1
-          fixcols.items = <          
+          fixcols.items = <
             item
               width = 18
               numstart = 1
               numstep = 1
             end>
           fixrows.count = 1
-          fixrows.items = <          
+          fixrows.items = <
             item
               height = 16
               captions.count = 10
-              captions.items = <              
+              captions.items = <
                 item
                   caption = 'S'
                   hint = 'Save files'
-                end              
+                end
                 item
                   caption = 'P'
                   hint = 'Parse source'
-                end              
+                end
                 item
                   caption = 'H'
                   hint = 'Hide console (win32 only)'
-                end              
+                end
                 item
                   caption = 'M'
                   hint = 'Show output in messages window'
-                end              
+                end
                 item
                   caption = 'Menu'
-                end              
+                end
                 item
                   caption = 'Shortcut'
                   hint = 'Select item from ''Settings''-''Configure MSEide''-''Shortcuts'''#10'''Tool 1''..''Tool 10''.'
-                end              
+                end
                 item
                   caption = 'Sc.Key'
                   hint = 'Shortcut key'
-                end              
+                end
                 item
                   caption = 'Alt.Sc.'
                   hint = 'Alternate shortcut key'
-                end              
+                end
                 item
                   caption = 'File'
-                end              
+                end
                 item
                   caption = 'Parameters'
                 end>
             end>
           datacols.count = 10
           datacols.options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_proportional, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
-          datacols.items = <          
+          datacols.items = <
             item[toolsave]
               width = 13
               options = [co_drawfocus, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_fixwidth, co_proportional, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
@@ -6081,7 +6081,7 @@ object projectoptionsfo: tprojectoptionsfo
               widthmax = 13
               widgetname = 'toolsave'
               dataclass = tgridintegerdatalist
-            end          
+            end
             item[toolparse]
               width = 13
               options = [co_drawfocus, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_fixwidth, co_proportional, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
@@ -6089,7 +6089,7 @@ object projectoptionsfo: tprojectoptionsfo
               widthmax = 13
               widgetname = 'toolparse'
               dataclass = tgridintegerdatalist
-            end          
+            end
             item[toolhide]
               width = 13
               options = [co_drawfocus, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_fixwidth, co_proportional, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
@@ -6097,26 +6097,26 @@ object projectoptionsfo: tprojectoptionsfo
               widthmax = 13
               widgetname = 'toolhide'
               dataclass = tgridintegerdatalist
-            end          
+            end
             item[toolmessages]
               width = 13
               options = [co_drawfocus, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_fixwidth, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
               widgetname = 'toolmessages'
               dataclass = tgridintegerdatalist
-            end          
+            end
             item[toolmenus]
               width = 107
               options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_proportional, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
               onshowhint = colonshowhint
               widgetname = 'toolmenus'
               dataclass = tgridmsestringdatalist
-            end          
+            end
             item[toolshortcuts]
               width = 86
               options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_proportional, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow, co_rowdatachange]
               widgetname = 'toolshortcuts'
               dataclass = tgridenumdatalist
-            end          
+            end
             item[toolsc]
               color = -1879048185
               coloractive = -2147483647
@@ -6124,21 +6124,21 @@ object projectoptionsfo: tprojectoptionsfo
               options = [co_readonly, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_proportional, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
               widgetname = 'toolsc'
               dataclass = tgridmsestringdatalist
-            end          
+            end
             item[toolscalt]
               color = -1879048185
               width = 55
               options = [co_readonly, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_proportional, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
               widgetname = 'toolscalt'
               dataclass = tgridmsestringdatalist
-            end          
+            end
             item[toolfiles]
               width = 116
               options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_fill, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
               onshowhint = colonshowhint
               widgetname = 'toolfiles'
               dataclass = tgridmsestringdatalist
-            end          
+            end
             item[toolparams]
               width = 326
               options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_proportional, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
@@ -6229,7 +6229,7 @@ object projectoptionsfo: tprojectoptionsfo
             frame.localprops1 = []
             frame.button.color = -1879048187
             frame.buttons.count = 1
-            frame.buttons.items = <            
+            frame.buttons.items = <
               item
                 color = -1879048187
               end>
@@ -6248,7 +6248,7 @@ object projectoptionsfo: tprojectoptionsfo
             dropdown.cols.width = 70
             dropdown.cols.options = [co_readonly, co_mousemovefocus, co_focusselect, co_rowselect]
             dropdown.cols.linewidth = 1
-            dropdown.cols.items = <            
+            dropdown.cols.items = <
               item
                 options = [co_readonly, co_mousemovefocus, co_focusselect, co_rowselect]
                 width = 70
@@ -6266,7 +6266,7 @@ object projectoptionsfo: tprojectoptionsfo
                   'Tool 9'
                   'Tool 10'
                 )
-              end            
+              end
               item
                 options = [co_readonly, co_mousemovefocus, co_focusselect, co_rowselect]
                 width = 70
@@ -6284,7 +6284,7 @@ object projectoptionsfo: tprojectoptionsfo
                   ''
                   ''
                 )
-              end            
+              end
               item
                 options = [co_readonly, co_mousemovefocus, co_focusselect, co_rowselect]
                 width = 70
@@ -6341,7 +6341,7 @@ object projectoptionsfo: tprojectoptionsfo
             frame.localprops = [frl_levelo, frl_colorclient]
             frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive]
             frame.buttons.count = 1
-            frame.buttons.items = <            
+            frame.buttons.items = <
               item
                 color = -1879048187
                 imagenr = 17
@@ -6491,7 +6491,7 @@ object projectoptionsfo: tprojectoptionsfo
             frame.localprops = []
             frame.localprops1 = []
             frame.buttons.count = 1
-            frame.buttons.items = <            
+            frame.buttons.items = <
               item
                 color = -2147483646
                 imagenr = 17

@@ -8,14 +8,14 @@
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
     Chinese translation by liuzg2.
-    
-} 
+
+}
 unit mseconsts_zh;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 uses
  mseconsts;
- 
+
 implementation
 uses
  msetypes{msestrings},sysutils,mseformatstr;
@@ -72,7 +72,7 @@ const
   #38169#35823,                       //sc_Error
   #26368#23567,                       //sc_Min
   #26368#22823,                       //sc_Max
-  #28322#20986#38169#35823,           //sc_Range_error  
+  #28322#20986#38169#35823,           //sc_Range_error
 
   '&u'#21462#28040,                   //sc_Undohk       ///         ///
   '&Redo',                            //sc_Redohk        //          //
@@ -84,14 +84,14 @@ const
   '&A'#22686#21152#19968#34892,       //sc_append_rowhk  // hotkeys  //
   '&D'#21024#38500#25152#36873#34892, //sc_delete_rowhk ///         ///
 
-  '&D'#25991#20214#22841,                    //sc_Dirhk               /// 
+  '&D'#25991#20214#22841,                    //sc_Dirhk               ///
   '&Home',                                   //sc_homehk               //
   '&U'#21521#19978,                          //sc_Uphk                 //
   '&N'#26032#25991#20214#22841,              //sc_New_dirhk            // hotkeys
   '&N'#25991#20214#21517,                    //sc_Namehk               //
   '&S'#26174#31034#38544#34255#25991#20214,  //sc_Show_hidden_fileshk  //
-  '&F'#20445#23384#31867#22411,              //sc_Filterhk            /// 
-  #20445#23384,                              //sc_save 
+  '&F'#20445#23384#31867#22411,              //sc_Filterhk            ///
+  #20445#23384,                              //sc_save
   'O'#25171#24320,                           //sc_open
   #21517#31216,                              //sc_name
   #26032#24314#25991#20214#22841,            //sc_create_new_directory
@@ -115,7 +115,7 @@ const
   #22270#24418#26684#24335#38169#35823,      //sc_graphic_format_error
   'MS Bitmap',          //sc_MS_Bitmap
   'MS Icon',            //sc_MS_Icon
-  'JPEG Image',         //sc_JPEG_Image 
+  'JPEG Image',         //sc_JPEG_Image
   'PNG Image',          //sc_PNG_Image
   'XPM Image',          //sc_XPM_Image
   'PNM Image',          //sc_PNM_Image
@@ -162,7 +162,7 @@ const
                                       //sc_Delete_row_question
   #30830#23450#21024#38500#25152#36873#35760#24405#21527#65311,
                                       //sc_selected_rows
-  'Single item only',    //sc_Single_item_only 
+  'Single item only',    //sc_Single_item_only
   'Copy Cells',          //sc_Copy_Cells
   'Paste Cells',         //sc_Paste_Cells
   'Close',               //sc_close
@@ -218,7 +218,7 @@ const
   'Volume up',           //sc_volumeup
   'Cancel speech'        //sc_cancelspeech
 );
-    
+
 function delete_n_selected_rows(const params: array of const): msestring;
 begin
  with params[0] do begin

@@ -32,21 +32,21 @@ object settaborderfo: tsettaborderfo
     anchors = [an_left, an_top, an_right, an_bottom]
     optionsgrid = [og_rowmoving, og_keyrowmoving, og_focuscellonenter, og_colchangeontabkey, og_autopopup]
     fixcols.count = 1
-    fixcols.items = <    
+    fixcols.items = <
       item
         width = 32
         numstep = 1
         options = [fco_mousefocus]
       end>
     datacols.count = 2
-    datacols.items = <    
+    datacols.items = <
       item[wname]
         colorselect = -1879048185
         width = 201
         options = [co_readonly, co_focusselect, co_fill, co_savevalue, co_savestate]
         widgetname = 'wname'
         dataclass = tgridmsestringdatalist
-      end    
+      end
       item[windex]
         options = [co_invisible, co_savevalue, co_savestate]
         widgetname = 'windex'

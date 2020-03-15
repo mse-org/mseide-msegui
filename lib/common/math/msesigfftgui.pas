@@ -18,7 +18,7 @@ interface
 uses
  msesignal,msechart,classes,mclasses,msesigfft,msegui,msegraphutils,msemenus,
  msegraphics,mseguiglob,mseclasses,msetypes;
- 
+
 type
  tsigscopefft = class;
  tscopesamplerfft = class(tsigsamplerfft)
@@ -48,11 +48,11 @@ type
                                //0 -> all
    property slave: tsigscopefft read fslave write setslave;
  end;
- 
+
 implementation
 uses
  sysutils;
- 
+
 { tsigscopefft }
 
 constructor tsigscopefft.create(aowner: tcomponent);
@@ -143,7 +143,7 @@ procedure tscopesamplerfft.dobufferfull;
   end;
  end; //handleslave()
 var
- slave: tsigscopefft; 
+ slave: tsigscopefft;
 begin
  inherited;
  slave:= self.fscope;

@@ -35,13 +35,13 @@ type
  datarecty = record
   //dummy
  end;
- 
+
  win32sockadty = record
   case integer of
    0: (addr: sockaddr_in);
    1: (addr6: sockaddr_in6);
  end;
- 
+
  win32sockaddrty = record
   ad: win32sockadty;
   platformdata: array[7..32] of longword;
@@ -91,7 +91,7 @@ function soc_geterrortext(aerror: integer): string;
 begin
  result:= inttostr(aerror);
 end;
-  
+
 function soc_getaddrerrortext(aerror: integer): string;
 begin
  result:= inttostr(aerror);
@@ -103,11 +103,11 @@ var
  af1: integer;
  type1: integer;
 // protocol1: integer;
- 
+
 begin
  result:= sye_ok;
  type1:= sock_stream;
- case kind of 
+ case kind of
   sok_inet: begin
    af1:= af_inet;
   end;
@@ -222,7 +222,7 @@ begin
  writebytes:= -1;
  int2:= 0;
  repeat
-  result:= soc_poll(fd,[poka_write],timeoutms,pollres);  
+  result:= soc_poll(fd,[poka_write],timeoutms,pollres);
   if result <> sye_ok then begin
    exit;
   end;
@@ -249,7 +249,7 @@ begin
  result:= checkerror(listen(handle,maxconnections));
 end;
 
-function soc_accept(const handle: integer;  const nonblock: boolean;                 
+function soc_accept(const handle: integer;  const nonblock: boolean;
                   out conn: integer; out addr: socketaddrty;
                   const timeoutms: integer): syserrorty;
 var
@@ -303,7 +303,7 @@ begin
       sin_family:= af_inet;
       sin_port:= htons(port);
       sin_addr.s_addr:= htonl(int2);
-     end;     
+     end;
      size:= sizeof(ad.addr);
      result:= sye_ok;
     end;
@@ -418,7 +418,7 @@ end;
 
 var
  wsadata: twsadata;
- 
+
 initialization
  wsastartup((2 shl 8) or 2,wsadata);
 finalization

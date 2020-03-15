@@ -21,7 +21,7 @@ uses
  msedrawtext,msetimer;
 
 const
- defaulttaboptionswidget = defaultoptionswidgetmousewheel + 
+ defaulttaboptionswidget = defaultoptionswidgetmousewheel +
                                  [ow_subfocus{,ow_fontglyphheight}];
  defaulttaboptionsskin = defaultoptionsskin + [osk_colorcaptionframe];
  defaultcaptiondist = 1;
@@ -45,12 +45,12 @@ type
   public
    class function getinstancepo(owner: tobject): pfont; override;
  end;
- 
+
  ttabfontactive = class(tparentfont)
   public
    class function getinstancepo(owner: tobject): pfont; override;
  end;
- 
+
  ttab = class(tindexpersistent,iimagelistinfo)
   private
    frichcaption: richstringty;
@@ -124,7 +124,7 @@ type
  tabarty = array of ttab;
  tabaty = array[0..0] of ttab;
  ptabaty = ^tabaty;
- 
+
  ttabs = class;
 
  createtabeventty = procedure(const sender: tcustomtabbar; const index: integer;
@@ -145,12 +145,12 @@ type
   public
    class function getinstancepo(owner: tobject): pfont; override;
  end;
- 
+
  ttabsfontactive = class(tparentfont)
   public
    class function getinstancepo(owner: tobject): pfont; override;
  end;
-                            
+
  ttabs = class(tindexpersistentarrayprop,iframe)
   private
    fcolor: colorty;
@@ -247,7 +247,7 @@ type
    function getframestateflags: framestateflagsty; virtual;
    function getedgeshift(): int32;
   public
-   constructor create(const aowner: tcustomtabbar; 
+   constructor create(const aowner: tcustomtabbar;
                            aclasstype: indexpersistentclassty); reintroduce;
    destructor destroy; override;
    class function getitemclasstype: persistentclassty; override;
@@ -274,8 +274,8 @@ type
    property width: integer read fwidth write setwidth default 0;
    property widthmin: integer read fwidthmin write setwidthmin default 0;
    property widthmax: integer read fwidthmax write setwidthmax default 0;
-   property textflags: textflagsty read ftextflags write settextflags 
-                                                default defaultcaptiontextflags;   
+   property textflags: textflagsty read ftextflags write settextflags
+                                                default defaultcaptiontextflags;
    property imagepos: imageposty read fimagepos write
                           setimagepos default defaultimagepos;
 {
@@ -287,7 +287,7 @@ type
                           setcaptionframe_right default defaultcaptiondist;
    property captionframe_bottom: integer read fcaptionframe.bottom write
                           setcaptionframe_bottom default defaultcaptiondist;
-   property imagedist: integer read fimagedist write setimagedist 
+   property imagedist: integer read fimagedist write setimagedist
                                                        default defaultimagedist;
 }
    property shift: integer read fshift write setshift default defaulttabshift;
@@ -309,12 +309,12 @@ type
    property edge_colorhlwidth: int32 read fedge.light.effectwidth
                       write setedge_colorhlwidth default -1;
                                   //-1 = default
-   property edge_imagelist: timagelist read fedge_imagelist 
+   property edge_imagelist: timagelist read fedge_imagelist
                     write setedge_imagelist;
                    //imagenr 0 -> startpoint, 1 -> edge, imagenr 2 -> endpoint
    property edge_imageoffset: int32 read fedge_imageoffset
                     write setedge_imageoffset default 0;
-   property edge_imagepaintshift: int32 read fedge_imagepaintshift 
+   property edge_imagepaintshift: int32 read fedge_imagepaintshift
                                      write setedge_imagepaintshift default 0;
 
    property frame: ttabframe read getframe write setframe;
@@ -348,7 +348,7 @@ type
  tabbarstatety = (tbs_layoutvalid,tbs_designdrag,tbs_shrinktozero,
                   tbs_updatesizing,tbs_repeatup);
  tabbarstatesty = set of tabbarstatety;
- 
+
  tcustomtabbar = class(tcustomstepbox)
   private
    flayoutinfo: tabbarlayoutinfoty;
@@ -393,7 +393,7 @@ type
                                      const sender: twidget); override;
    procedure clientrectchanged; override;
    procedure getautopaintsize(var asize: sizety); override;
-   procedure objectevent(const sender: tobject; 
+   procedure objectevent(const sender: tobject;
                                 const event: objecteventty); override;
    procedure dokeydown(var info: keyeventinfoty); override;
    function upstep(const norotate: boolean): boolean;
@@ -430,7 +430,7 @@ type
   protected
    procedure internalcreateframe; override;
  end;
- 
+
  ttabbar = class(tcustomtabbar,istatfile)
   private
    fstatfile: tstatfile;
@@ -449,7 +449,7 @@ type
   published
    property statfile: tstatfile read fstatfile write setstatfile;
    property statvarname: msestring read getstatvarname write fstatvarname;
-   property statpriority: integer read fstatpriority 
+   property statpriority: integer read fstatpriority
                                        write fstatpriority default 0;
    property onstep;
    property tabs;
@@ -496,19 +496,19 @@ type
   public
    class function getinstancepo(owner: tobject): pfont; override;
  end;
- 
+
  ttabpagefontactivetab = class(tparentfont)
   public
    class function getinstancepo(owner: tobject): pfont; override;
  end;
- 
+
  ttabpage = class;
  getsubformeventty = procedure(const sender: ttabpage;
                           var submoduleclass: widgetclassty;
                           var instancevarpo: pwidget) of object;
  initsubformeventty = procedure(const sender: ttabpage;
                           const asubform: twidget) of object;
-                          
+
  ttabpage = class(tscrollingwidget,itabpage,iimagelistinfo)
   private
    ftabwidget: tcustomtabwidget;
@@ -598,21 +598,21 @@ type
    property isactivepage: boolean read getisactivepage write setisactivepage;
    property subform: twidget read fsubform;
   published
-   property invisible: boolean read getinvisible 
+   property invisible: boolean read getinvisible
                                        write setinvisible default false;
-   property taborderoverride: ttaborderoverride read ftaborderoverride 
+   property taborderoverride: ttaborderoverride read ftaborderoverride
                                                   write settaborderoverride;
 
    property caption: captionty read getcaption write setcaption;
    property tabhint: msestring read gettabhint write settabhint;
-   property tabnoface: boolean read gettabnoface 
+   property tabnoface: boolean read gettabnoface
                                  write settabnoface default false;
    property colortab: colorty read getcolortab
                   write setcolortab default cl_default;
    property coloractivetab: colorty read getcoloractivetab
                   write setcoloractivetab default cl_default;
    property facetab: tfacecomp read getfacetab write setfacetab;
-   property faceactivetab: tfacecomp read getfaceactivetab 
+   property faceactivetab: tfacecomp read getfaceactivetab
                                                  write setfaceactivetab;
    property fonttab: ttabpagefonttab read getfonttab1 write setfonttab1
                                                         stored isfonttabstored;
@@ -620,7 +620,7 @@ type
                           write setfontactivetab1 stored isfontactivetabstored;
    property imagelist: timagelist read getimagelist write setimagelist;
    property imagenr: imagenrty read getimagenr write setimagenr default -1;
-   property imagenrdisabled: imagenrty read getimagenrdisabled 
+   property imagenrdisabled: imagenrty read getimagenrdisabled
                                            write setimagenrdisabled default -2;
                 //-2 -> same as imagenr
    property font: twidgetfont read getfont write setfont stored isfontstored;
@@ -639,7 +639,7 @@ type
    property optionsskin default defaulttabpageskinoptions;
  end;
 
- 
+
  tpagetab = class(ttab)
   private
    fpageintf: itabpage;
@@ -654,17 +654,17 @@ type
   public
    class function getinstancepo(owner: tobject): pfont; override;
  end;
- 
+
  ttab_fonttab = class(tparentfont)
   public
    class function getinstancepo(owner: tobject): pfont; override;
  end;
- 
+
  ttab_fontactivetab = class(tparentfont)
   public
    class function getinstancepo(owner: tobject): pfont; override;
  end;
- 
+
  tcustomtabwidget = class(tactionwidget,iobjectpicker,istatfile)
   private
    fobjectpicker: tobjectpicker;
@@ -801,7 +801,7 @@ type
    procedure createpagetab(const sender: tcustomtabbar;
                                            const index: integer; var tab: ttab);
    procedure dokeydown(var info: keyeventinfoty); override;
-   procedure childmouseevent(const sender: twidget; 
+   procedure childmouseevent(const sender: twidget;
                                           var info: mouseeventinfoty); override;
    procedure dobeforepaint(const canvas: tcanvas); override;
    procedure doafterpaint(const canvas: tcanvas); override;
@@ -834,7 +834,7 @@ type
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
-   
+
    procedure createtabframe();
    procedure createtabface();
    procedure createtabfont();
@@ -843,7 +843,7 @@ type
    procedure createtabfonttab();
    procedure createtabfaceactivetab();
    procedure createtabfontactivetab();
-   
+
    procedure beginupdate;
    procedure endupdate;
    procedure synctofontheight; override;
@@ -857,47 +857,47 @@ type
    procedure add(const aitem: itabpage; const aindex: integer = bigint);
    function pagebyname(const aname: string): twidget;
                    //case sensitive!
-                           
+
    property items[const index: integer]: twidget read getitems; default;
    property itemsintf[const index: integer]: itabpage read getitemsintf;
    property activepage: twidget read getactivepage write setactivepage;
    property activepageintf: itabpage read getactivepageintf;
    property idents: integerarty read getidents;
-   property activepageindex: integer read getactivepageindex 
+   property activepageindex: integer read getactivepageindex
                       write setactivepageindex1 default -1;
-   property onactivepagechanged: notifyeventty read fonactivepagechanged 
+   property onactivepagechanged: notifyeventty read fonactivepagechanged
                                                      write fonactivepagechanged;
    property onpageadded: widgeteventty read fonpageadded write fonpageadded;
-   property onpageremoved: widgeteventty read fonpageremoved 
+   property onpageremoved: widgeteventty read fonpageremoved
                                                            write fonpageremoved;
    property optionswidget default defaulttaboptionswidget;
    property font: twidgetfont read getfont write setfont stored isfontstored;
-   property fontempty: twidgetfontempty read getfontempty 
+   property fontempty: twidgetfontempty read getfontempty
                                  write setfontempty stored isfontemptystored;
-   property tab_options: tabbaroptionsty read gettab_options write 
+   property tab_options: tabbaroptionsty read gettab_options write
                                                      settab_options default [];
    property tab_frame: tstepboxframe1 read gettab_frame write settab_frame;
    property tab_face: tface read gettab_face write settab_face;
-   property tab_color: colorty read gettab_color 
+   property tab_color: colorty read gettab_color
                                    write settab_color default cl_default;
-   property tab_colortab: colorty read gettab_colortab 
+   property tab_colortab: colorty read gettab_colortab
                                    write settab_colortab default cl_default;
-   property tab_coloractivetab: colorty read gettab_coloractivetab 
+   property tab_coloractivetab: colorty read gettab_coloractivetab
                         write settab_coloractivetab default cl_default;
-   property tab_font: ttab_font read gettab_font write settab_font 
+   property tab_font: ttab_font read gettab_font write settab_font
                                                         stored istab_fontstored;
-   property tab_fonttab: ttab_fonttab read gettab_fonttab write settab_fonttab 
+   property tab_fonttab: ttab_fonttab read gettab_fonttab write settab_fonttab
                                                     stored istab_fonttabstored;
-   property tab_fontactivetab: ttab_fontactivetab read gettab_fontactivetab 
+   property tab_fontactivetab: ttab_fontactivetab read gettab_fontactivetab
                    write set_tabfontactivetab stored istab_fontactivetabstored;
    property tab_imagepos: imageposty read gettab_imagepos write
                           settab_imagepos default defaultimagepos;
    property tab_textflags: textflagsty read gettab_textflags write
                           settab_textflags default defaultcaptiontextflags;
    property tab_width: integer read gettab_width write settab_width default 0;
-   property tab_widthmin: integer read gettab_widthmin 
+   property tab_widthmin: integer read gettab_widthmin
                                                 write settab_widthmin default 0;
-   property tab_widthmax: integer read gettab_widthmax 
+   property tab_widthmax: integer read gettab_widthmax
                                                 write settab_widthmax default 0;
 {
    property tab_captionframe_left: integer read gettab_captionframe_left write
@@ -908,7 +908,7 @@ type
                           settab_captionframe_right default defaultcaptiondist;
    property tab_captionframe_bottom: integer read gettab_captionframe_bottom write
                           settab_captionframe_bottom default defaultcaptiondist;
-   property tab_imagedist: integer read gettab_imagedist write settab_imagedist 
+   property tab_imagedist: integer read gettab_imagedist write settab_imagedist
                                                        default defaultimagedist;
 }
    property tab_shift: integer read gettab_shift write settab_shift
@@ -931,17 +931,17 @@ type
    property tab_edge_colorhlwidth: int32 read getedge_colorhlwidth
                       write setedge_colorhlwidth default -1;
                                   //-1 = default
-   property tab_edge_imagelist: timagelist read getedge_imagelist 
+   property tab_edge_imagelist: timagelist read getedge_imagelist
                     write setedge_imagelist;
                    //imagenr 0 -> startpoint, 1 -> edge, imagenr 2 -> endpoint
    property tab_edge_imageoffset: int32 read getedge_imageoffset
                     write setedge_imageoffset default 0;
-   property tab_edge_imagepaintshift: int32 read getedge_imagepaintshift 
+   property tab_edge_imagepaintshift: int32 read getedge_imagepaintshift
                                      write setedge_imagepaintshift default 0;
-                    
+
    property tab_frametab: ttabframe read gettab_frametab write settab_frametab;
    property tab_facetab: tface read gettab_facetab write settab_facetab;
-   property tab_faceactivetab: tface read gettab_faceactivetab 
+   property tab_faceactivetab: tface read gettab_faceactivetab
                                                     write settab_faceactivetab;
    property tab_size: integer read ftab_size write settab_size;
    property tab_sizemin: integer read ftab_sizemin write settab_sizemin
@@ -957,7 +957,7 @@ type
 
    property statfile: tstatfile read fstatfile write setstatfile;
    property statvarname: msestring read getstatvarname write fstatvarname;
-   property statpriority: integer read fstatpriority 
+   property statpriority: integer read fstatpriority
                                        write fstatpriority default 0;
  end;
 
@@ -987,7 +987,7 @@ type
 
    property enabled;
    property visible;
- 
+
    property activepageindex;
    property onactivepagechanged;
    property onpageadded;
@@ -1060,7 +1060,7 @@ var
  imagedi: int32;
  imagedi1: int32;
  imagedi2: int32;
- 
+
  procedure docommon(const tab: ttab; var cell: shapeinfoty; var textrect: rectty);
  begin
   with tab,cell,ca do begin
@@ -1129,7 +1129,7 @@ var
  imageinflate: int32;
  i1: int32;
  maximagesize: int32;
- 
+
 begin
  with layout do begin
   horzimage:= tabs.imagepos in horzimagepos;
@@ -1215,7 +1215,7 @@ begin
      normpos:= normpos - tabshift1;
     end;
    end;
-  end;  
+  end;
   if shs_vert in options then begin
    totsize.cx:= 0;
    aval:= dim.y;
@@ -1374,7 +1374,7 @@ begin
     totsize.cy:= twidget1(tabs.fowner).getfont1.glyphheight;
    end;
    totsize.cy:= totsize.cy + cysizeinflate;
-   maximagesize:= maximagesize + cysizeinflate - cyinflate; 
+   maximagesize:= maximagesize + cysizeinflate - cyinflate;
                                          //space for tabshift and edge
    if totsize.cy < maximagesize then begin
     totsize.cy:= maximagesize;
@@ -1383,7 +1383,7 @@ begin
   bo1:= not twidget(tabs.fowner).isenabled;
   for int1:= 0 to high(cells) do begin
    with tabs[int1],cells[int1],ca do begin
-    state:= (state + [shs_showfocusrect] + options * [shs_vert,shs_opposite]) - 
+    state:= (state + [shs_showfocusrect] + options * [shs_vert,shs_opposite]) -
                                                       [shs_focused];
     if ts_active in fstate then begin
      include(state,shs_active);
@@ -1655,7 +1655,7 @@ begin
  if fstate <> value then begin
   fstate := Value;
  {
-  if (fstate * [ts_invisible,ts_disabled] <> []) and 
+  if (fstate * [ts_invisible,ts_disabled] <> []) and
        not (csdesigning in tcustomtabbar(fowner).componentstate) then begin
    exclude(fstate,ts_active);
   end;
@@ -2134,7 +2134,7 @@ begin
  if avalue <> fimagedist then begin
   fimagedist:= avalue;
   changed;
- end;  
+ end;
 end;
 }
 procedure ttabs.setshift(const avalue: integer);
@@ -2148,7 +2148,7 @@ begin
    ftabshift:= avalue;
   end;
   changed;
- end;  
+ end;
 end;
 
 procedure ttabs.add(const item: ttab);
@@ -2316,7 +2316,7 @@ begin
   end
   else begin
    result:= fedge_imagelist.width;
-  end;  
+  end;
   result:= result + fedge_imagepaintshift;
  end
  else begin
@@ -2329,9 +2329,9 @@ end;
 procedure ttabs.dochange(const index: integer);
 begin
  inherited;
- if (index < 0) and (fskinupdating = 0) and (count > 0) and 
+ if (index < 0) and (fskinupdating = 0) and (count > 0) and
             not (csloading in tcustomtabbar(fowner).componentstate) then begin
-  tcustomtabbar(fowner).updateskin; 
+  tcustomtabbar(fowner).updateskin;
         //could be a new item which needs skin setup
  end;
 end;
@@ -2519,7 +2519,7 @@ begin
     int2:= 0;
    end;
    frame.updatebuttonstate(firsttab,stepinfo.pageup,int2);
-   include(fstate,tbs_layoutvalid); 
+   include(fstate,tbs_layoutvalid);
    checkautosize;
    if sizeisequal(dim.size,innerclientsize) then begin
     break;
@@ -2542,9 +2542,9 @@ begin
  {
  if not (csloading in componentstate) and
                         not (ws_loadedproc in fwidgetstate) and
-     not ((owner <> nil) and 
+     not ((owner <> nil) and
           ([csloading,csdestroying]*owner.ComponentState <> [])) and
-     not ((fparentwidget <> nil) and 
+     not ((fparentwidget <> nil) and
           (ws_loadedproc in twidget1(fparentwidget).fwidgetstate)) then begin
            //todo: support for cssubcomponent in fpc
 //  updatelayout;
@@ -2659,8 +2659,8 @@ end;
 procedure tcustomtabbar.tabclicked(const sender: ttab;
                                              const info: mouseeventinfoty);
 begin
- if (tabo_clickedtabfirst in foptions) or 
-    (tabo_dblclickedtabfirst in foptions) and 
+ if (tabo_clickedtabfirst in foptions) or
+    (tabo_dblclickedtabfirst in foptions) and
                           (ss_double in info.shiftstate) then begin
   movetab(sender.findex,0);
  end;
@@ -2828,18 +2828,18 @@ end;
 
 procedure tcustomtabbar.clientmouseevent(var info: mouseeventinfoty);
 begin
- if not (es_processed in info.eventstate) and 
+ if not (es_processed in info.eventstate) and
                            canevent(tmethod(fonclientmouseevent)) then begin
   fonclientmouseevent(self,info);
  end;
  inherited;
  if updatemouseshapestate(flayoutinfo.cells,info,self,
         flayoutinfo.focusedtab,flayoutinfo.tabs.fframe) and
-      (not (csdesigning in componentstate) or 
+      (not (csdesigning in componentstate) or
                         (tbs_designdrag in fstate)) then begin
   include(info.eventstate,es_processed);
  end;
- if not (csdesigning in componentstate) or 
+ if not (csdesigning in componentstate) or
                             (ws1_designactive in fwidgetstate1) then begin
   with flayoutinfo do begin
    checkbuttonhint(self,info,fhintedbutton,cells,
@@ -2999,7 +2999,7 @@ begin
    with stepinfo1 do begin  //reverst step height
     i1:= pagedown;
     pagedown:= down;
-    down:= i1; 
+    down:= i1;
     i1:= pageup;
     pageup:= up;
     up:= i1;
@@ -3043,7 +3043,7 @@ begin
   foptions:= avalue;
   delta:= avalue >< optionsbefore;
   if not (csloading in componentstate) then begin
-   if (csdesigning in componentstate) and 
+   if (csdesigning in componentstate) and
                                  (delta * [tabo_vertical] <> []) then begin
     ow1:= optionswidget1;
     if tabo_vertical in avalue then begin
@@ -3085,7 +3085,7 @@ var
   with info do begin
    if (dragobjectpo^ is ttagdragobject) and (dragobjectpo^.sender = self) and
     ((tabo_dragdest in foptions) or (csdesigning in componentstate)) then begin
-    int1:= tabatpos(pos,(tabo_dragdestenabledonly in foptions) and 
+    int1:= tabatpos(pos,(tabo_dragdestenabledonly in foptions) and
                             not(csdesigning in componentstate));
     result:= (ttagdragobject(dragobjectpo^).tag <> int1) and
                 ((int1 >= 0) {or (csdesigning in componentstate)});
@@ -3119,7 +3119,7 @@ begin
        killrepeater;
       end
       else begin
-       if (frepeater = nil) or 
+       if (frepeater = nil) or
                   (not(int1 = firsttab) xor (tbs_repeatup in fstate)) then begin
         startrepeater(int1 <> firsttab);
        end;
@@ -3170,7 +3170,7 @@ begin
    result:= hint;
   end
   else begin
-   if (ts_captionclipped in fstate) and 
+   if (ts_captionclipped in fstate) and
                   (tabo_hintclippedtext in options) then begin
     result:= caption;
    end;
@@ -3273,7 +3273,7 @@ begin
  if not (es_processed in info.eventstate) then begin
   bo1:= false;
   if shs_vert in flayoutinfo.options then begin
-   case info.key of 
+   case info.key of
     key_down: begin
      bo1:= upstep(ow_arrowfocusout in optionswidget);
     end;
@@ -3283,7 +3283,7 @@ begin
    end;
   end
   else begin
-   case info.key of 
+   case info.key of
     key_right: begin
      bo1:= upstep(ow_arrowfocusout in optionswidget);
     end;
@@ -3670,7 +3670,7 @@ begin
   end
   else begin
    tabwidget.activepageindex:= tabindex; //reactivate
-  end;  
+  end;
  end;
 end;
 
@@ -3772,7 +3772,7 @@ begin
  if ffonttab = nil then begin
   ffonttab:= ttabpagefonttab.create;
   ffonttab.onchange:= {$ifdef FPC}@{$endif}fontchanged1;
- end; 
+ end;
 end;
 
 procedure ttabpage.createfontactivetab;
@@ -3780,7 +3780,7 @@ begin
  if ffontactivetab = nil then begin
   ffontactivetab:= ttabpagefontactivetab.create;
   ffontactivetab.onchange:= {$ifdef FPC}@{$endif}fontchanged1;
- end; 
+ end;
 end;
 
 function ttabpage.getfonttab: tfont;
@@ -3935,7 +3935,7 @@ end;
 procedure tcustomtabwidget.clear;
 begin
  beginupdate();
- try  
+ try
   while count > 0 do begin
    items[count-1].Free;
   end;
@@ -3971,7 +3971,7 @@ begin
   with ftabs.tabs[int1] do begin
    updatingbefore:= ts_updating in fstate;
    include(fstate,ts_updating);
-   if not (csloading in componentstate) and 
+   if not (csloading in componentstate) and
             not (ws_loadedproc in fwidgetstate) and (fupdating <= 0) then begin
     activepageindexbefore:= factivepageindex;
     caption:= sender.getcaption;
@@ -3999,28 +3999,28 @@ begin
     end
     else begin
      state:= state - [ts_disabled];
-    end;   
+    end;
     if bo1 then begin
      state:= state + [ts_invisible]
     end
     else begin
      state:= state - [ts_invisible]
     end;
-    if (not bo1 or (activepageindexbefore <> int1)) and widget1.isvisible and 
+    if (not bo1 or (activepageindexbefore <> int1)) and widget1.isvisible and
         (widget1.enabled or (csdesigning in widget1.componentstate)) then begin
      state:= state - [ts_invisible];
      setactivepageindex(int1);
     end
     else begin
-     if (activepageindexbefore = int1) and 
+     if (activepageindexbefore = int1) and
                             not (csdestroying in componentstate) then begin
       changepage(1);
       if factivepageindex = activepageindexbefore then begin
        setactivepageindex(-1); //select none
       end
       else begin
-       if (activepage <> nil) and not activepage.entered and 
-        (entered or ((fwindow <> nil) and 
+       if (activepage <> nil) and not activepage.entered and
+        (entered or ((fwindow <> nil) and
         (fwindow.focusedwidget = nil))) and activepage.canfocus then begin
                  //probably page destroyed
         activepage.setfocus(active);
@@ -4039,7 +4039,7 @@ begin
      exclude(fstate,ts_updating);
     end;
    end;
-  end; 
+  end;
  end;
 end;
 
@@ -4074,7 +4074,7 @@ begin
   for int1:= 0 to high(fitems) do begin
    pagechanged(po1^[int1].fpageintf);
   end;
- end;  
+ end;
 // ftabs.loaded;
  dec(fdesignchangedlock);
 end;
@@ -4118,7 +4118,7 @@ var
  int1: integer;
  bo1: boolean;
 begin
- if not (csloading in componentstate) and 
+ if not (csloading in componentstate) and
                 not (tbs_updatesizing in ftabs.fstate) then begin
                      //recursion lock
   include(ftabs.fstate,tbs_updatesizing);
@@ -4129,8 +4129,8 @@ begin
    end
    else begin
     bo1:= (tabo_notabsdesign in ftabs.options) or
-             not (csdesigning in componentstate) and 
-             ((tabo_multitabsonly in ftabs.options) and (count < 2) or 
+             not (csdesigning in componentstate) and
+             ((tabo_multitabsonly in ftabs.options) and (count < 2) or
                                        (tabo_notabs in ftabs.options));
     if bo1 then begin
      include(ftabs.fstate,tbs_shrinktozero);
@@ -4207,14 +4207,14 @@ end;
 procedure tcustomtabwidget.readtab_captionframe_left(reader: treader);
 begin
  ftabs.flayoutinfo.tabs.createframe();
- ttabframe1(ftabs.flayoutinfo.tabs.fframe).fi.innerframe.left:= 
+ ttabframe1(ftabs.flayoutinfo.tabs.fframe).fi.innerframe.left:=
                                                          reader.readinteger();
 end;
 
 procedure tcustomtabwidget.readtab_captionframe_top(reader: treader);
 begin
  ftabs.flayoutinfo.tabs.createframe();
- ttabframe1(ftabs.flayoutinfo.tabs.fframe).fi.innerframe.top:= 
+ ttabframe1(ftabs.flayoutinfo.tabs.fframe).fi.innerframe.top:=
                                                          reader.readinteger();
 end;
 
@@ -4228,7 +4228,7 @@ end;
 procedure tcustomtabwidget.readtab_captionframe_bottom(reader: treader);
 begin
  ftabs.flayoutinfo.tabs.createframe();
- ttabframe1(ftabs.flayoutinfo.tabs.fframe).fi.innerframe.bottom:= 
+ ttabframe1(ftabs.flayoutinfo.tabs.fframe).fi.innerframe.bottom:=
                                                          reader.readinteger();
 end;
 
@@ -4254,7 +4254,7 @@ begin
  filer.defineproperty('tab_imagedist', @readtab_imagedist,nil,false);
 end;
 
-procedure tcustomtabwidget.internaladd(const page: itabpage; aindex: integer);	
+procedure tcustomtabwidget.internaladd(const page: itabpage; aindex: integer);
 var
  tab: tpagetab;
  widget1: twidget1;
@@ -4312,7 +4312,7 @@ var
    end;
   end;
  end; //check
- 
+
 begin
  if ftabs <> nil then begin
   widget1:= twidget1(page.getwidget);
@@ -4351,7 +4351,7 @@ begin
  end;
 end;
 
-procedure tcustomtabwidget.add(const aitem: itabpage; 
+procedure tcustomtabwidget.add(const aitem: itabpage;
                                       const aindex: integer = bigint);
 begin
  internaladd(aitem,aindex);
@@ -4399,7 +4399,7 @@ begin
  for int1:= 0 to widgetcount - 1 do begin
   widget1:= twidget1(fwidgets[int1]);
   if not (ws1_isstreamed in widget1.fwidgetstate1) and
-    (widget1.owner = root) and 
+    (widget1.owner = root) and
               (ws_iswidget in widget1.fwidgetstate) then begin
    proc(widget1);
   end;
@@ -4427,7 +4427,7 @@ begin
   if fupdating > 0 then begin
    factivepageindex1:= value;
   end
-  else begin  
+  else begin
    parenttabfocus:= ow_parenttabfocus in foptionswidget;
    exclude(foptionswidget,ow_parenttabfocus);
    try
@@ -4606,7 +4606,7 @@ begin
   end;
   int1:= newindex;
   repeat
-   if (items[int1].enabled) and not (ts_invisible in ftabs.tabs[int1].state) or 
+   if (items[int1].enabled) and not (ts_invisible in ftabs.tabs[int1].state) or
             (csdesigning in componentstate) then begin
     setactivepageindex(int1);
     break;
@@ -4673,7 +4673,7 @@ procedure tcustomtabwidget.childmouseevent(const sender: twidget;
 begin
  inherited;
  if not (es_processed in info.eventstate) and
-                     not ftabs.fdragcontroller.active and 
+                     not ftabs.fdragcontroller.active and
     ((sender = self) or (sender = ftabs) or (sender = activepage))  then begin
   translatewidgetpoint1(info.pos,sender,self);
   fobjectpicker.mouseevent(info);
@@ -4870,7 +4870,7 @@ begin
  end;
 end;
 
-procedure tcustomtabwidget.paintxorpic(const sender: tobjectpicker; 
+procedure tcustomtabwidget.paintxorpic(const sender: tobjectpicker;
                                                 const canvas: tcanvas);
 var
  offset1: pointty;
@@ -5101,7 +5101,7 @@ end;
 procedure tcustomtabwidget.widgetregionchanged(const sender: twidget);
 begin
  inherited;
- if not (csdestroying in componentstate) and (sender = ftabs) and 
+ if not (csdestroying in componentstate) and (sender = ftabs) and
         not (ws1_updateopaque in twidget1(sender).fwidgetstate1) and
                           not (tbs_shrinktozero in ftabs.fstate) then begin
   if tabo_vertical in ftabs.options then begin
@@ -5405,7 +5405,7 @@ begin
  if fupdating > 0 then begin
   result:= factivepageindex1;
  end
- else begin  
+ else begin
   result:= factivepageindex;
  end;
  if csdesigning in componentstate then begin

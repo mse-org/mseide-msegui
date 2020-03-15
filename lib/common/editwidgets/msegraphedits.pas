@@ -40,10 +40,10 @@ const
  defaultsliderwidth = 200;
  defaultsliderheight = 20;
  defaultboxsize = 13;
- defaultsliderscrollbaroptions = defaultscrollbaroptions + 
+ defaultsliderscrollbaroptions = defaultscrollbaroptions +
                                                 [sbo_valuekeys,sbo_thumbtrack];
  defaultgrapheditframeoptions = defaultcaptionframeoptions + [cfo_captionfocus];
- 
+
 type
  tgrapheditframe = class(tcustomcaptionframe)
   protected
@@ -123,7 +123,7 @@ type
   published
    property colorclient {default cl_foreground};
  end;
- 
+
  tgraphdataedit = class(tactionpublishedwidget,igridwidget,istatfile,
                          iassistiveclientgridwidget
                   {$ifdef mse_with_ifi},iifidatalink{$endif})
@@ -204,14 +204,14 @@ type
                  virtual; abstract;
    procedure dofontheightdelta(var delta: integer); override;
    procedure sizechanged; override;
-   
+
    procedure updatereadonlystate; virtual;
    procedure initeditfocus;
    procedure updatedatalist; virtual;
-   
+
     //igridwidget
    procedure setfirstclick(var ainfo: mouseeventinfoty);
-   function createdatalist(const sender: twidgetcol): tdatalist; 
+   function createdatalist(const sender: twidgetcol): tdatalist;
                                                      virtual; abstract;
    procedure datalistdestroyed; virtual;
    function getdatalistclass: datalistclassty; virtual; abstract;
@@ -293,23 +293,23 @@ type
   published
    property statfile: tstatfile read fstatfile write setstatfile;
    property statvarname: msestring read getstatvarname write fstatvarname;
-   property statpriority: integer read fstatpriority 
+   property statpriority: integer read fstatpriority
                                        write fstatpriority default 0;
    property optionsedit: optionseditty read getoptionsedit write setoptionsedit
                               default defaultoptionsedit;
    property optionsedit1: optionsedit1ty read foptionsedit1
                          write setoptionsedit1 default defaultoptionsedit1;
    property onchange: notifyeventty read fonchange write fonchange;
-   property ondataentered: notifyeventty read fondataentered 
+   property ondataentered: notifyeventty read fondataentered
                                                     write fondataentered;
  end;
 
  tpointeredit = class;
- 
+
  paintpointerglypheventty = procedure(const sender: tpointeredit;
            const acanvas: tcanvas; const avalue: pointer;
                                       const arow: integer) of object;
-                    
+
  tpointeredit = class(tgraphdataedit)
   private
    fvalue: pointer;
@@ -338,10 +338,10 @@ type
   published
    property visible;
    property enabled;
-   property onpaintglyph: paintpointerglypheventty read fonpaintglyph 
+   property onpaintglyph: paintpointerglypheventty read fonpaintglyph
                                                          write fonpaintglyph;
  end;
- 
+
  tsliderscrollbar = class(tscrollbar,iface)
   private
   protected
@@ -355,7 +355,7 @@ type
  end;
 
  tcustomrealgraphdataedit = class;
- 
+
  paintrealglypheventty = procedure(
                     const sender: tcustomrealgraphdataedit;
                     const acanvas: tcanvas; const avalue: real;
@@ -402,10 +402,10 @@ type
    property gridvalues: realarty read getgridvalues write setgridvalues;
    function griddata: tgridrealdatalist;
    property value: realty read fvalue write setvalue;
-   property direction: graphicdirectionty read fdirection write setdirection 
+   property direction: graphicdirectionty read fdirection write setdirection
                                                                default gd_right;
    property onsetvalue: setrealeventty read fonsetvalue write fonsetvalue;
-   property onpaintglyph: paintrealglypheventty read fonpaintglyph 
+   property onpaintglyph: paintrealglypheventty read fonpaintglyph
                                                          write fonpaintglyph;
   published
    property visible;
@@ -424,12 +424,12 @@ type
    property direction;
    property onpaintglyph;
  end;
- 
+
  tsliderframe = class(tgrapheditframe)
   protected
    procedure settemplateinfo(const ainfo: frameinfoty); override;
  end;
- 
+
 const
   defaultslideroptionswidget = defaultoptionswidget + [ow_mousewheel];
 type
@@ -474,10 +474,10 @@ type
    property direction;
    property onpaintglyph;
  end;
- 
+
 const
  defaultbarcolor = cl_ltblue;
- 
+
 type
  tbarface = class(tface)
   public
@@ -485,7 +485,7 @@ type
  end;
 
  tcustomprogressbar = class;
-  
+
  tbarframe = class(tframe)
   private
    fowner: tcustomprogressbar;
@@ -565,7 +565,7 @@ type
    property value;
    property onpaintglyph;
  end;
-  
+
  ttogglegraphdataedit = class(tgraphdataedit)
   private
    foptions: buttonoptionsty;
@@ -596,7 +596,7 @@ type
    procedure doshortcut(var info: keyeventinfoty;
                                            const sender: twidget) override;
    procedure statechanged; override;
-   procedure docellevent(const ownedcol: boolean; 
+   procedure docellevent(const ownedcol: boolean;
                        var info: celleventinfoty); override;
    procedure modified; override;
    procedure checkradiorow(aindex: integer);
@@ -606,7 +606,7 @@ type
   public
    constructor create(aowner: tcomponent); override;
    property group: integer read fgroup write fgroup default 0;
-   property checkedrow: integer read getcheckedrow write setcheckedrow; 
+   property checkedrow: integer read getcheckedrow write setcheckedrow;
           //needs bo_radiotemcol, -1 if none
    property checkedtag: integer read getcheckedtag write setcheckedtag;
                              //-1 if none checked
@@ -657,7 +657,7 @@ type
    procedure docheck() override;   //set value to not valuedefault
    procedure douncheck() override; //set value to valuedefault
    function ischecked(): boolean; override;
-   procedure paintglyph(const canvas: tcanvas;  const acolorglyph: colorty; 
+   procedure paintglyph(const canvas: tcanvas;  const acolorglyph: colorty;
                     const avalue; const arect: rectty); override;
    procedure internalcheckvalue(var avalue; var accept: boolean); override;
    procedure readstatvalue(const reader: tstatreader); override;
@@ -667,16 +667,16 @@ type
    function getgridvaluebitmask(const index: integer): longword;
    procedure setgridvaluebitmask(const index: integer; const avalue: longword);
    procedure dokeydown(var info: keyeventinfoty); override;
-   
+
    function getassistivetext(): msestring override;
   public
    constructor create(aowner: tcomponent); override;
    procedure fillcol(const avalue: longbool);
    function checkvalue(const quiet: boolean = false): boolean override;
    procedure togglegridvalue(const index: integer); override;
-   
+
    property value: boolean read getvalue write setvalue default false;
-   property valuedefault: boolean read getvaluedefault 
+   property valuedefault: boolean read getvaluedefault
                                        write setvaluedefault default false;
                       //streaming of longbool does not work on kylix and fpc
    property gridvalue[const index: integer]: longbool
@@ -688,18 +688,18 @@ type
                   //if value -> bits[tag] else -> 0
    property valuebitmask: longword read getvaluebitmask write setvaluebitmask;
                   //ored valuetagbit of all edits in group
-   property gridvaluebitmask[const index: integer]: longword 
+   property gridvaluebitmask[const index: integer]: longword
                            read getgridvaluebitmask write setgridvaluebitmask;
                   //ored valuetagbit of all edits in group
 
-   function gridvaluetag(const index: integer; 
+   function gridvaluetag(const index: integer;
                                          const falsevalue: integer): integer;
            //if value = true -> tag, falsevalue otherwise
    procedure updatetagvalue(const bitset: integer);
            //value -> true if bitset and tag <> 0
    procedure gridupdatetagvalue(const index: integer; const bitset: integer);
    property gridvalues: longboolarty read getgridvalues write setgridvalues;
-   property gridbooleanvalues: booleanarty read getgridbooleanvalues 
+   property gridbooleanvalues: booleanarty read getgridbooleanvalues
                                                  write setgridbooleanvalues;
    function griddata: tgridintegerdatalist;
    function groupmembers: booleaneditarty;
@@ -728,13 +728,13 @@ type
    property ifilink;
 {$endif}
  end;
- 
+
  tcustombooleaneditradio = class(tcustombooleanedit)
   private
    function getglyph: stockglyphty; override;
 //   procedure reset;
    procedure setvalue(const avalue: boolean) override;
-   procedure setgridvalue(const aindex: integer; 
+   procedure setgridvalue(const aindex: integer;
                                     const aValue: longbool) override;
   protected
    procedure togglevalue(const areadonly: boolean;
@@ -758,7 +758,7 @@ type
  end;
 
  tcustomintegergraphdataedit = class;
- 
+
  paintintegerglypheventty = procedure(
                     const sender: tcustomintegergraphdataedit;
                     const acanvas: tcanvas; const avalue: integer;
@@ -822,16 +822,16 @@ type
         read getgridvalue write setgridvalue; default;
    property gridvalues: integerarty read getgridvalues write setgridvalues;
    function griddata: tgridintegerdatalist;
-   property datalist: tintegerdatalist read getdatalist; 
+   property datalist: tintegerdatalist read getdatalist;
    property onsetvalue: setintegereventty read fonsetvalue write fonsetvalue;
    property value: integer read fvalue write setvalue default 0;
-   property valuedefault: integer read fvaluedefault 
+   property valuedefault: integer read fvaluedefault
                                        write fvaluedefault default 0;
-   property valuemin: integer read fvaluemin write setvaluemin default 0; 
+   property valuemin: integer read fvaluemin write setvaluemin default 0;
                                                //checked by togglevalue
-   property valuemax: integer read fvaluemax write setvaluemax default 0; 
+   property valuemax: integer read fvaluemax write setvaluemax default 0;
                                                //checked by togglevalue
-   property onpaintglyph: paintintegerglypheventty read fonpaintglyph 
+   property onpaintglyph: paintintegerglypheventty read fonpaintglyph
                                                          write fonpaintglyph;
   published
   {$ifdef mse_with_ifi}
@@ -840,7 +840,7 @@ type
  end;
 
  tcustomdatabutton = class;
- 
+
  tvaluefacearrayprop = class(tpersistentarrayprop)
   private
    fowner: tcustomdatabutton;
@@ -867,10 +867,10 @@ type
    constructor create(const aowner: tcustomdatabutton);
    class function getitemclasstype: persistentclassty; override;
                          //used in dumpunitgroups
-   property items[const index: integer]: tfont read getitems 
+   property items[const index: integer]: tfont read getitems
                                                    write setitems; default;
  end;
-  
+
  tcustomdatabutton = class(tcustomintegergraphdataedit,iactionlink,iimagelistinfo)
   private
 //   fonexecute: notifyeventty;
@@ -926,7 +926,7 @@ type
    procedure readcaptionpos(reader: treader);
    procedure settextflags(const avalue: textflagsty);
    procedure setshortcuts(const avalue: shortcutarty);
-   procedure setshortcuts1(const avalue: shortcutarty);  
+   procedure setshortcuts1(const avalue: shortcutarty);
    procedure readshortcut(reader: treader);
    procedure readshortcut1(reader: treader);
    procedure readsc(reader: treader);
@@ -948,10 +948,10 @@ type
    procedure setenabled(const avalue: boolean); override;
    procedure setvisible(const avalue: boolean); override;
 
-   procedure docellevent(const ownedcol: boolean; 
+   procedure docellevent(const ownedcol: boolean;
                        var info: celleventinfoty); override;
    procedure gridtovalue(arow: integer); override;
-   
+
    procedure setcolor(const avalue: colorty); override;
    procedure objectchanged(const sender: tobject); override;
    function getassistiveflags(): assistiveflagsty override;
@@ -1002,7 +1002,7 @@ type
    procedure initnewcomponent(const ascale: real); override;
    procedure togglegridvalue(const index: integer); override;
    function checkeditem: tcustomdatabutton; //nil if none
-   property valuefaces: tvaluefacearrayprop read fvaluefaces 
+   property valuefaces: tvaluefacearrayprop read fvaluefaces
                                                      write setvaluefaces;
    property valuecaptions: tmsestringarrayprop read fvaluecaptions
                                                   write setvaluecaptions;
@@ -1010,9 +1010,9 @@ type
                                                   write setvaluefonts;
    property font: twidgetfont read getfont write setfont stored isfontstored;
    property action: tcustomaction read factioninfo.action write setaction;
-   property caption: captionty read factioninfo.captiontext write setcaption 
+   property caption: captionty read factioninfo.captiontext write setcaption
                                                         stored iscaptionstored;
-   property textflags: textflagsty read finfo.ca.textflags 
+   property textflags: textflagsty read finfo.ca.textflags
                          write settextflags default defaultcaptiontextflags;
    property imagepos: imageposty read finfo.ca.imagepos write setimagepos
                               default ip_center;
@@ -1028,7 +1028,7 @@ type
                               write setimagenrdisabled
                             stored isimagenrdisabledstored default -2;
                       //-1 = none, -2 = grayed, -3 = imageoffsetdisabled
-   property imagedist: integer read finfo.ca.imagedist 
+   property imagedist: integer read finfo.ca.imagedist
                                                write setimagedist default 0;
    property imagedist1: integer read finfo.ca.imagedist1
                                                write setimagedist1 default 0;
@@ -1040,9 +1040,9 @@ type
                             stored false default 0;
    property shortcut1: shortcutty read getshortcut1 write setshortcut1
                             stored false default 0;
-   property shortcuts: shortcutarty read factioninfo.shortcut 
+   property shortcuts: shortcutarty read factioninfo.shortcut
                                               write setshortcuts;
-   property shortcuts1: shortcutarty read factioninfo.shortcut1 
+   property shortcuts1: shortcutarty read factioninfo.shortcut1
                                                        write setshortcuts1;
    property onupdate: databuttoneventty read fonupdate write fonupdate;
    property onexecute: notifyeventty read factioninfo.onexecute
@@ -1052,13 +1052,13 @@ type
    property onafterexecute: notifyeventty read factioninfo.onafterexecute
                          write setonafterexecute stored isonafterexecutestored;
 
-   property imageoffset: integer read fimageoffset 
+   property imageoffset: integer read fimageoffset
                                               write setimageoffset default 0;
    property imageoffsetdisabled: integer read fimageoffsetdisabled
                                  write setimageoffsetdisabled default 0;
-   property imageoffsetmouse: integer read fimageoffsetmouse 
+   property imageoffsetmouse: integer read fimageoffsetmouse
                                        write setimageoffsetmouse default 0;
-   property imageoffsetclicked: integer read fimageoffsetclicked 
+   property imageoffsetclicked: integer read fimageoffsetclicked
                                        write setimageoffsetclicked default 0;
    property imagenums: tintegerarrayprop read fimagenums write setimagenums;
 
@@ -1068,17 +1068,17 @@ type
    property onsetvalue;
    property value default -1;
    property valuedefault default -1;
-   property valuedisabled: integer read fvaluedisabled 
-                                      write setvaluedisabled default -2; 
+   property valuedisabled: integer read fvaluedisabled
+                                      write setvaluedisabled default -2;
                   //button.enabled:= value <> valuedisabled
                   //-2 -> not checked
-   property valuemin default -1; 
+   property valuemin default -1;
    property valuemax default 0;
    property optionswidget default defaultoptionswidget - [ow_mousefocus];
   published
    property visible stored false;
    property enabled stored false;
-   property state: actionstatesty read factioninfo.state write setstate 
+   property state: actionstatesty read factioninfo.state write setstate
                              stored isstatestored default [];
  end;
 
@@ -1124,7 +1124,7 @@ type
    property group;
    property value;
    property valuedefault;
-   property valuemin; 
+   property valuemin;
    property valuemax;
    property valuedisabled;
  end;
@@ -1137,7 +1137,7 @@ type
    constructor create(aowner: tcomponent); override;
   published
    property action;
-   
+
    property glyph: stockglyphty read fglyph write setglyph default stg_none;
    property imagenums;
    property optionswidget;
@@ -1163,11 +1163,11 @@ type
    property onclientmouseevent;
    property value;
    property valuedefault;
-   property valuemin; 
+   property valuemin;
    property valuemax;
    property valuedisabled;
- end; 
- 
+ end;
+
  tcustomdataicon = class(tcustomintegergraphdataedit)
  //if value = -1 then blank else
  // if value < 0 then imagenums[0..30] are painted if bit[0..30] is 1
@@ -1198,20 +1198,20 @@ type
    property visible;
    property enabled;
  end;
- 
+
  tdataicon = class(tcustomdataicon)
   published
    property onsetvalue;
    property onpaintglyph;
    property value default -1;
    property valuedefault default -1;
-   property valuemin; 
+   property valuemin;
    property valuemax;
    property imagelist;
    property imageoffset;
    property imagenums;
  end;
- 
+
 implementation
 uses
  SysUtils,msekeyboard,msebits,msereal,msedispwidgets,mseformatstr,mserichstring,
@@ -1385,7 +1385,7 @@ begin
  end;
 {$ifdef mse_with_ifi}
  ifisetvalue(avalue,accept);
-{$endif} 
+{$endif}
  if accept then begin
   value:= realty(avalue);
  end;
@@ -1416,7 +1416,7 @@ procedure tcustomrealgraphdataedit.setdirection(const avalue: graphicdirectionty
 begin
  if fdirection <> avalue then begin
   if not (csreading in componentstate) then begin
-   changedirection(avalue,fdirection);  
+   changedirection(avalue,fdirection);
   end
   else begin
    fdirection:= avalue;
@@ -1629,7 +1629,7 @@ end;
 
 procedure tcustomslider.dokeydown(var info: keyeventinfoty);
 begin
- if not (es_processed in info.eventstate) and 
+ if not (es_processed in info.eventstate) and
                 not (csdesigning in componentstate) and
                           not (oe_readonly in getoptionsedit) then begin
   fscrollbar.keydown(info);
@@ -1716,7 +1716,7 @@ end;
 procedure tcustomslider.initgridwidget;
 begin
  inherited;
- fscrollbar.options:= fscrollbar.options + 
+ fscrollbar.options:= fscrollbar.options +
                        [sbo_noarrowkeys,sbo_nopagekeys,sbo_noreflectedclick];
 // color:= cl_parent;
  if fgridintf <> nil then begin
@@ -1769,7 +1769,7 @@ end;
 
 procedure tgraphdataedit.paint(const canvas: tcanvas);
 begin
- if (fgridintf = nil) or 
+ if (fgridintf = nil) or
                  not (twidgetcol1(fgridintf.getcol).checkautocolwidth) then begin
   inherited;
  end;
@@ -1886,7 +1886,7 @@ begin
    if col1 = cl_font then begin
     col1:= font.color;
    end;
-   if (fgridintf = nil) and (fparentintf <> nil) and 
+   if (fgridintf = nil) and (fparentintf <> nil) and
                                   (oe1_nocellpaint in optionsedit1) then begin
     if (fwidgetrect.cx > 0) and (fwidgetrect.cy > 0) then begin
      paintbackground(canvas,widgetrect);
@@ -1970,7 +1970,7 @@ end;
 procedure tgraphdataedit.initnewwidget(const ascale: real);
 begin
  if fgridintf <> nil then begin
-  fgridintf.getcol.options:= 
+  fgridintf.getcol.options:=
                 fgridintf.getcol.grid.datacols.options + [co_drawfocus];
                           //restore default options
  end;
@@ -2002,7 +2002,7 @@ end;
 procedure tgraphdataedit.dostatread(const reader: tstatreader);
 begin
  fvalueread:= false;
- if not (des_isdb in fstate) and (fgridintf = nil) and 
+ if not (des_isdb in fstate) and (fgridintf = nil) and
                         canstatvalue(foptionsedit1,reader) then begin
   fvalueread:= true;
   readstatvalue(reader);
@@ -2017,7 +2017,7 @@ end;
 
 procedure tgraphdataedit.dostatwrite(const writer: tstatwriter);
 begin
- if not (des_isdb in fstate) and (fgridintf = nil) and 
+ if not (des_isdb in fstate) and (fgridintf = nil) and
                                  canstatvalue(foptionsedit1,writer) then begin
   writestatvalue(writer);
  end;
@@ -2099,7 +2099,7 @@ begin
      if not focused then begin
       grid.setfocus;
      end;
-    end; 
+    end;
    end;
   end;
  end;
@@ -2361,7 +2361,7 @@ end;
 procedure tgraphdataedit.griddatasourcechanged;
 begin
  //dummy
-end; 
+end;
 
 procedure tgraphdataedit.updatereadonlystate;
 begin
@@ -2386,7 +2386,7 @@ end;
 procedure tgraphdataedit.setenabled(const avalue: boolean);
 begin
  inherited;
- if (fgridintf <> nil) and not (csloading in componentstate){ and 
+ if (fgridintf <> nil) and not (csloading in componentstate){ and
                                  not (des_noenablesync in fstate)} then begin
   fgridintf.getcol.enabled:= avalue;
  end;
@@ -2404,7 +2404,7 @@ begin
  end
  else begin
   optionsedit:= optionsedit - [oe_readonly];
- end;  
+ end;
 end;
 
 procedure tgraphdataedit.beforecelldragevent(var ainfo: draginfoty;
@@ -2496,7 +2496,7 @@ begin
  end;
 end;
 }
-procedure tgraphdataedit.updateifigriddata(const sender: tobject; 
+procedure tgraphdataedit.updateifigriddata(const sender: tobject;
                                                     const alist: tdatalist);
 begin
  if fgridintf <> nil then begin
@@ -2605,7 +2605,7 @@ end;
 procedure ttogglegraphdataedit.dokeydown(var info: keyeventinfoty);
 begin
  with info do begin
-  if (aso_returntogglevalue in assistiveoptions) and 
+  if (aso_returntogglevalue in assistiveoptions) and
                        (shiftstate * keyshiftstatesmask = []) and
             (bo_executeonkey in foptions) and (isenterkey(self,key)) then begin
   include(eventstate,es_processed);
@@ -2618,7 +2618,7 @@ end;
 procedure ttogglegraphdataedit.dokeyup(var info: keyeventinfoty);
 begin
  with info do begin
-  if (key = key_space) and (shiftstate*keyshiftstatesmask = []) and 
+  if (key = key_space) and (shiftstate*keyshiftstatesmask = []) and
                                      (bo_executeonkey in foptions) then begin
    include(eventstate,es_processed);
    togglevalue(oe_readonly in getoptionsedit,false);
@@ -2646,7 +2646,7 @@ procedure ttogglegraphdataedit.mouseevent(var info: mouseeventinfoty);
 var
  bo1: boolean;
 begin
- bo1:= not (csdesigning in componentstate) and 
+ bo1:= not (csdesigning in componentstate) and
           iswidgetclick(info,fcheckcaption) and (bo_executeonclick in foptions);
  inherited;
  if bo1 and not (des_disabled in fstate) then begin
@@ -2661,11 +2661,11 @@ var
  clickedrowbefore: integer;
 begin
  inherited;
- if (bo_resetcheckedonrowexit in foptions) and isrowchange(info) and 
+ if (bo_resetcheckedonrowexit in foptions) and isrowchange(info) and
            (info.newcell.row <> checkedrow) then begin
   checkedrow:= -1;
  end;
- if ownedcol and (info.eventkind in 
+ if ownedcol and (info.eventkind in
              [cek_buttonpress,cek_buttonrelease,cek_mouseleave]) then begin
   clickedrowbefore:= fclickedrow;
   case info.eventkind of
@@ -2800,7 +2800,7 @@ begin
   if fdatalist <> nil then begin
    result:= fdatalist.checkeditem;
   end;
- end;  
+ end;
 end;
 
 procedure ttogglegraphdataedit.setcheckedrow(const avalue: integer);
@@ -2813,13 +2813,13 @@ begin
       resetgridvalue(fdatalist.checkeditem);
       fdatalist.checkeditem:= -1;
      end;
-    end    
+    end
     else begin
      checkgridvalue(avalue);
      checkradiorow(avalue);
     end;
    end;
-  end; 
+  end;
  end;
 end;
 
@@ -2950,7 +2950,7 @@ begin
  result:= stg_checked;
 end;
 
-procedure tcustombooleanedit.paintglyph(const canvas: tcanvas; 
+procedure tcustombooleanedit.paintglyph(const canvas: tcanvas;
                                const acolorglyph: colorty; const avalue;
                                const arect: rectty);
 var
@@ -3210,7 +3210,7 @@ begin
   int2:= 0;
   for int1:= 0 to high(result) do begin
    widget1:= twidget1(fparentwidget).fwidgets[int1];
-   if (widget1 is tcustombooleanedit) and 
+   if (widget1 is tcustombooleanedit) and
       (tcustombooleanedit(widget1).fgroup = self.fgroup)  then begin
     result[int2]:= tcustombooleanedit(widget1);
     inc(int2);
@@ -3229,7 +3229,7 @@ begin
  if fparentwidget <> nil then begin
   for int1:= 0 to fparentwidget.widgetcount - 1 do begin
    widget1:= twidget1(fparentwidget).fwidgets[int1];
-   if (widget1 is tcustombooleanedit) and 
+   if (widget1 is tcustombooleanedit) and
          (tcustombooleanedit(widget1).fgroup = self.fgroup) and
           (widget1.tag = atag) then begin
     result:= tbooleanedit(widget1);
@@ -3355,7 +3355,7 @@ begin
  inherited;
 end;
 
-function tcustombooleaneditradio.checkeditem: tcustombooleaneditradio; 
+function tcustombooleaneditradio.checkeditem: tcustombooleaneditradio;
                             //nil if none
 var
  bo1: boolean;
@@ -3395,7 +3395,7 @@ begin
  end;
 {$ifdef mse_with_ifi}
  ifisetvalue(avalue,accept);
-{$endif} 
+{$endif}
  if accept then begin
   value:= integer(avalue);
  end;
@@ -3446,7 +3446,7 @@ function tcustomintegergraphdataedit.doinc(var avalue: integer;
                                                 const down: boolean): boolean;
 begin
  result:= false;
- if (foptions * [bo_radioitem,bo_radioitemcol] = []) or 
+ if (foptions * [bo_radioitem,bo_radioitemcol] = []) or
          (bo_cantoggle in foptions) or (value = fvaluedefault) then begin
   if down then begin
    dec(avalue);
@@ -3464,7 +3464,7 @@ begin
  end;
 end;
 
-procedure tcustomintegergraphdataedit.paintglyph(const canvas: tcanvas; 
+procedure tcustomintegergraphdataedit.paintglyph(const canvas: tcanvas;
                         const acolorglyph: colorty;
                         const avalue; const arect: rectty);
 var
@@ -3780,7 +3780,7 @@ end;
 destructor tcustomdatabutton.destroy;
 begin
  if bo_updateonidle in foptions then begin
-  application.unregisteronidle({$ifdef FPC}@{$endif}doidle); 
+  application.unregisteronidle({$ifdef FPC}@{$endif}doidle);
  end;
  fvaluefaces.free;
  fvaluecaptions.free;
@@ -3855,7 +3855,7 @@ function tcustomdatabutton.getframestateflags: framestateflagsty;
 begin
  with finfo do begin
   result:= combineframestateflags(not isenabled,focused,
-              not (bo_nodefaultframeactive in foptions) and 
+              not (bo_nodefaultframeactive in foptions) and
                            (shs_default in finfo.state) or active,
               shs_mouse in state,shs_clicked in state);
  end;
@@ -3874,7 +3874,7 @@ end;
 
 function tcustomdatabutton.getframeactive: boolean;
 begin
- result:= not (bo_nodefaultframeactive in foptions) and 
+ result:= not (bo_nodefaultframeactive in foptions) and
                            (ss_default in finfo.state) or active;
 end;
 }
@@ -3891,7 +3891,7 @@ end;
 procedure tcustomdatabutton.mouseevent(var info: mouseeventinfoty);
 begin
  inherited;
- if not (csdesigning in componentstate) {and 
+ if not (csdesigning in componentstate) {and
         not (es_processed in info.eventstate)} then begin
   subpoint1(info.pos,paintpos);
   try
@@ -3906,7 +3906,7 @@ end;
 procedure tcustomdatabutton.dokeydown(var info: keyeventinfoty);
 begin
  inherited;
- if (info.shiftstate = []) and (bo_executeonkey in foptions) and 
+ if (info.shiftstate = []) and (bo_executeonkey in foptions) and
                                     not (des_disabled in fstate) then begin
   if (info.key = key_space) then begin
    include(finfo.state,shs_clicked);
@@ -3934,8 +3934,8 @@ procedure tcustomdatabutton.doshortcut(var info: keyeventinfoty; const sender: t
 var
  bo1,bo2: boolean;
 begin
- if not (es_processed in info.eventstate) and 
-               not (csdesigning in componentstate) and 
+ if not (es_processed in info.eventstate) and
+               not (csdesigning in componentstate) and
                             not (shs_disabled in finfo.state) then begin
   if checkfocusshortcut(info) then begin
    setfocus;
@@ -3945,13 +3945,13 @@ begin
    if not (es_preview in info.eventstate) then begin
     bo2:= es_processed in info.eventstate;
     exclude(info.eventstate,es_processed);
-    bo1:= (bo_executeonshortcut in options) and 
+    bo1:= (bo_executeonshortcut in options) and
      msegui.checkshortcut(info,factioninfo.captiontext,
                                         bo_altshortcut in options) or
     (finfo.state * [shs_invisible,shs_disabled,shs_default] = [shs_default]) and
        (info.key = key_return) and
-       ((info.shiftstate = []) or 
-        (bo_executedefaultonenterkey in options) and 
+       ((info.shiftstate = []) or
+        (bo_executedefaultonenterkey in options) and
         (info.shiftstate = [ss_second]));
     if bo1 then begin
      bo2:= true;
@@ -3993,7 +3993,7 @@ end;
 
 procedure tcustomdatabutton.setactualimagenr(const avalue: integer);
 begin
- with finfo,ca do begin 
+ with finfo,ca do begin
   if (avalue >= 0) and (avalue < fimagenums.count) then begin
    imagenr:= fimagenums[avalue];
   end
@@ -4029,7 +4029,7 @@ end;
 procedure tcustomdatabutton.paintglyph(const canvas: tcanvas;
                 const acolorglyph: colorty; const avalue;
                 const arect: rectty);
-               
+
  function actualcaption(const aindex: integer): richstringty;
  begin
   if (aindex >= 0) and (aindex < fvaluecaptions.count) then begin
@@ -4040,7 +4040,7 @@ procedure tcustomdatabutton.paintglyph(const canvas: tcanvas;
    result:= factioninfo.caption1;
   end;
  end;
- 
+
  function actualface(const aindex: integer): tface;
  begin
   if (aindex >= 0) and (aindex < fvaluefaces.count) then begin
@@ -4060,7 +4060,7 @@ procedure tcustomdatabutton.paintglyph(const canvas: tcanvas;
    result:= font;
   end;
  end;
- 
+
 var
  statebefore: shapestatesty;
  dimbefore: rectty;
@@ -4082,7 +4082,7 @@ begin
    exclude(finfo.state,shs_disabled);
   end;
   with pcellinfoty(canvas.drawinfopo)^ do begin
-   if (cds_ismousecell in drawstate) and (bo_executeonclick in foptions) and 
+   if (cds_ismousecell in drawstate) and (bo_executeonclick in foptions) and
                  not(shs_disabled in finfo.state) and not readonly then begin
     include(finfo.state,shs_mouse);
    end;
@@ -4224,7 +4224,7 @@ end;
 
 function tcustomdatabutton.checkfocusshortcut(var info: keyeventinfoty): boolean;
 begin
- result:= inherited checkfocusshortcut(info) or 
+ result:= inherited checkfocusshortcut(info) or
          msegui.checkshortcut(info,factioninfo.captiontext,true);
 end;
 
@@ -4383,12 +4383,12 @@ begin
         {$ifdef FPC}longword{$else}longword{$endif}(foptions) xor
         {$ifdef FPC}longword{$else}longword{$endif}(avalue));
   if bo_updateonidle in delta then begin
-   if (bo_updateonidle in avalue) and 
+   if (bo_updateonidle in avalue) and
                                not (csdesigning in componentstate) then begin
-    application.registeronidle({$ifdef FPC}@{$endif}doidle); 
+    application.registeronidle({$ifdef FPC}@{$endif}doidle);
    end
    else begin
-    application.unregisteronidle({$ifdef FPC}@{$endif}doidle); 
+    application.unregisteronidle({$ifdef FPC}@{$endif}doidle);
    end;
   end;
   foptions:= avalue;
@@ -4436,7 +4436,7 @@ procedure tcustomdatabutton.actionchanged;
 begin
  finfo.color:= fcolor;
  actioninfotoshapeinfo(self,factioninfo,finfo,foptions);
- inherited setcolor(finfo.color); 
+ inherited setcolor(finfo.color);
  finfo.color:= cl_transparent;
 // if csdesigning in componentstate then begin
   exclude(finfo.state,shs_invisible);
@@ -4529,14 +4529,14 @@ begin
                            {$ifdef FPC}@{$endif}writesc,
        isactionshortcutstored(factioninfo) and
        ((filer.ancestor = nil) and (factioninfo.shortcut <> nil) or
-       ((filer.ancestor <> nil) and 
+       ((filer.ancestor <> nil) and
          not issameshortcut(factioninfo.shortcut,
                   tcustombutton(filer.ancestor).shortcuts))));
  filer.defineproperty('sc1',{$ifdef FPC}@{$endif}readsc1,
                            {$ifdef FPC}@{$endif}writesc1,
        isactionshortcut1stored(factioninfo) and
        ((filer.ancestor = nil) and (factioninfo.shortcut1 <> nil) or
-       ((filer.ancestor <> nil) and 
+       ((filer.ancestor <> nil) and
          not issameshortcut(factioninfo.shortcut,
                   tcustombutton(filer.ancestor).shortcuts))));
 end;
@@ -4702,7 +4702,7 @@ procedure tcustomdatabutton.initnewwidget(const ascale: real);
 begin
  inherited;
  if fgridintf <> nil then begin
-  fgridintf.getcol.options:= 
+  fgridintf.getcol.options:=
                 fgridintf.getcol.grid.datacols.options - [co_drawfocus];
  end;
 end;
@@ -4857,7 +4857,7 @@ begin
  //do nothing
 end;
 
-procedure tpointeredit.paintglyph(const canvas: tcanvas; 
+procedure tpointeredit.paintglyph(const canvas: tcanvas;
                const acolorglyph: colorty; const avalue;
                const arect: rectty);
 var
@@ -4951,7 +4951,7 @@ begin
   try
    if avalue = 0.0 then begin
     fcancel:= false;
-   end; 
+   end;
    inherited;
   finally
    application.unlock;
@@ -5055,11 +5055,11 @@ begin
   po2:= @rect2;
   po3:= @rect3;
   rea1:= realty(avalue);
-  updatebarrect(realty(avalue),arect,rect1,rect2,rect3);  
+  updatebarrect(realty(avalue),arect,rect1,rect2,rect3);
  end;
  if not (rea1 = emptyreal) then begin
   canvas.save;
-  fbar_frame.paintbackground(canvas,po2^,true,true); 
+  fbar_frame.paintbackground(canvas,po2^,true,true);
              //moves origin to paintrect and sets cliprect
   canvas.intersectcliprect(po3^);
   fbar_face.paint(canvas,po1^);
@@ -5168,11 +5168,11 @@ end;
 procedure tsliderframe.settemplateinfo(const ainfo: frameinfoty);
 begin
  inherited;
- if not (frl1_colorglyph in flocalprops1) and 
+ if not (frl1_colorglyph in flocalprops1) and
                           (ainfo.ba.colorglyph <> cl_default) then begin
   tslider(fintf.getwidget).scrollbar.colorglyph:= ainfo.ba.colorglyph;
  end;
- if not (frl1_colorpattern in flocalprops1) and 
+ if not (frl1_colorpattern in flocalprops1) and
                           (ainfo.ba.colorpattern <> cl_default) then begin
   tslider(fintf.getwidget).scrollbar.colorpattern:= ainfo.ba.colorpattern;
  end;

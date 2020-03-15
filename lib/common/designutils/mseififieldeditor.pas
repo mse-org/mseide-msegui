@@ -1,5 +1,5 @@
 { MSEide Copyright (c) 1999-2014 by Martin Schreiber
-   
+
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation; either version 2 of the License, or
@@ -76,7 +76,7 @@ type
    ffieldintf: iifidbdataconnection;
    procedure checkfielddefs;
    function findfielddef(aname: msestring): integer;
-   function typeok(const aname: msestring; 
+   function typeok(const aname: msestring;
                             const atype: listdatatypety): boolean;
    function uniquefieldname(const aname: msestring): msestring;
   public
@@ -96,14 +96,14 @@ uses
   {$warn 6058 off}
  {$endif}
 {$endif}
- 
+
 type
  tificonnectedfields1 = class(tificonnectedfields);
  tconnectedifidatasource1 = class(tconnectedifidatasource);
  stringconststy = (
   str_connection            //0 Connection
  );
- 
+
 function editififields(const instance: tificonnectedfields): boolean;
 var
  fo: tmseififieldeditorfo;
@@ -128,7 +128,7 @@ begin
        sourcefieldname:= ansistring(fo.sourcefieldname[int1]);
        fieldname:= ansistring(fo.fieldname[int1]);
        datatype:= listdatatypety(fo.datatype[int1]);
-      end; 
+      end;
      end;
      instance.endupdate();
     (*
@@ -236,7 +236,7 @@ begin
    with ar1[int1] do begin
     fielddefli[0][int1]:= name;
     fielddefli[1][int1]:= msestring(getenumname(
-                                 typeinfo(tfieldtype),ord(datatype)));   
+                                 typeinfo(tfieldtype),ord(datatype)));
    end;
   end;
   fields.rowcount:= ffields.count;
@@ -283,7 +283,7 @@ end;
 
 procedure tmseififieldeditorfo.sourcebefdropexe(const sender: TObject);
 begin
- sourcefieldname.dropdown.cols[0].asarray:= 
+ sourcefieldname.dropdown.cols[0].asarray:=
                   ffieldintf.getfieldnames(listdatatypety(datatype.value));
 end;
 
@@ -363,7 +363,7 @@ procedure tmseififieldeditorfo.defscellevent(const sender: TObject;
          var info: celleventinfoty);
 begin
  with info do begin
-  if (eventkind = cek_select) and selected and 
+  if (eventkind = cek_select) and selected and
           (fielddefli.rowfontstate[cell.row] <> -1) then begin
    accept:= false;
   end;
@@ -389,7 +389,7 @@ begin
    break;
   end;
  end;
-end; 
+end;
 
 procedure tmseififieldeditorfo.checkfielddefs;
 var
@@ -425,7 +425,7 @@ begin
  checkfielddefs;
 end;
 
-procedure tmseififieldeditorfo.transferfields(const sender: TObject); 
+procedure tmseififieldeditorfo.transferfields(const sender: TObject);
 var
  int1,int2: integer;
  ar1,ar2: integerarty;
@@ -440,7 +440,7 @@ begin
    fields.appendrow(true);
    try
     fields.row:= fields.rowhigh;
-//    fieldpo[fields.rowhigh]:= 
+//    fieldpo[fields.rowhigh]:=
 //               ffields.dataset.fielddefs[ar1[int1]].createfield(nil);
 //    tfield(fieldpo[fields.rowhigh]).dataset:= nil;
     mstr1:= fielddefli[0][ar1[int1]];
@@ -458,7 +458,7 @@ begin
    fielddefli.datacols.clearselection;
   end;
   setlength(ar2,int2);
-  fields.datacols.selectedrows:= ar2; 
+  fields.datacols.selectedrows:= ar2;
   fields.endupdate;
  // fields.sort;
   checkfielddefs;
@@ -524,7 +524,7 @@ end;
 
 procedure tmseififieldeditorfo.fieldselectioncha(const sender: TObject);
 begin
- fieldtodef.enabled:= fields.datacols.hasselection and 
+ fieldtodef.enabled:= fields.datacols.hasselection and
                             (length(fields.datacols.selectedrows) > 0);
 end;
 

@@ -14,7 +14,7 @@ interface
 uses
  msetypes,msestrings,sysutils,classes,mclasses,mseparser;
 
-function rsjgetconsts(const astream: tstream): constinfoarty; 
+function rsjgetconsts(const astream: tstream): constinfoarty;
 procedure resourcetexttoresourcesource(const sourcefilename: filenamety;
                              const unitname: string; const fpcformat: boolean);
    //FPC resourcestringtable to resourceunit
@@ -22,7 +22,7 @@ implementation
 uses
  mseformdatatools,msefileutils,msestream,msesys,typinfo,
  mseclasses,msejson;
- 
+
 const
  destfileext = '.pas';
  dataname = 'resourcedata';
@@ -85,7 +85,7 @@ begin
   if fpcformat and (fileext(sourcefilename) = 'rsj') then begin
    ar1:= rsjgetconsts(instream);
   end
-  else begin 
+  else begin
    scanner:= nil;
    parser:= nil;
    try
@@ -159,5 +159,5 @@ begin
   outstream.free;
  end;
 end;
- 
+
 end.

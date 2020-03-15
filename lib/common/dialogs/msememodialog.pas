@@ -15,13 +15,13 @@ uses
  msegraphutils,mseevent,mseclasses,mseforms,msedataedits,mseedit,msestrings,
  msetypes,msestatfile,msesimplewidgets,msewidgets,msedialog,classes,mclasses,
  msedropdownlist,msesplitter;
- 
+
 type
  tmemodialogcontroller = class(tstringdialogcontroller)
   protected
    function execute(var avalue: msestring): boolean; override;
  end;
- 
+
  tmemodialogedit = class(tcustomdialogstringed)
   protected
    function createdialogcontroller: tstringdialogcontroller; override;
@@ -31,7 +31,7 @@ type
    property textflags default defaulttextflagsnoycentered;
    property textflagsactive default defaulttextflagsactivenoycentered;
  end;
- 
+
  tmsememodialogfo = class(tmseform)
    memo: tmemoedit;
    tstatfile1: tstatfile;
@@ -49,17 +49,17 @@ type
    procedure setbuttondialog(const avalue: tdropdownbutton);
   public
    constructor create(const aintf: icaptionframe;
-                                         const buttonintf: ibutton); override;                                                  
+                                         const buttonintf: ibutton); override;
   published
-   property buttondialog: tdropdownbutton read getbuttondialog 
+   property buttondialog: tdropdownbutton read getbuttondialog
                                        write setbuttondialog;
  end;
- 
+
  tdialoghistorycontroller = class(thistorycontroller)
   protected
    function getbuttonframeclass: dropdownbuttonframeclassty; override;
  end;
- 
+
  tmemodialoghistoryedit = class(thistoryedit,ibutton)
   private
 //   function getframe: tellipsebuttonframe;
@@ -82,13 +82,13 @@ type
    constructor create(aowner: tcomponent); override;
 //   property frame: tellipsebuttonframe read getframe write setframe;
  end;
-  
+
 function memodialog(var avalue: msestring; const readonly: boolean): modalresultty;
- 
+
 implementation
 uses
  msememodialog_mfm,mseeditglob,msekeyboard,msestockobjects;
- 
+
 function memodialog(var avalue: msestring; const readonly: boolean): modalresultty;
 var
  dia1: tmsememodialogfo;

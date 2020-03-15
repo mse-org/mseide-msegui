@@ -1,5 +1,5 @@
 { MSEide Copyright (c) 2007-2013 by Martin Schreiber
-   
+
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation; either version 2 of the License, or
@@ -19,7 +19,7 @@ unit msefadepropedit;
 interface
 uses
  msepropertyeditors;
- 
+
 type
  tfacefadecoloreditor = class(tcolorarraypropertyeditor)
   protected
@@ -32,9 +32,9 @@ type
   protected
    function getdefaultstate: propertystatesty; override;
   public
-   procedure edit; override; 
+   procedure edit; override;
  end;
- 
+
  tfacetemplatefadecoloreditor = class(tcolorarraypropertyeditor)
   protected
    function getdefaultstate: propertystatesty; override;
@@ -46,7 +46,7 @@ type
   protected
    function getdefaultstate: propertystatesty; override;
   public
-   procedure edit; override; 
+   procedure edit; override;
  end;
 
  tfacefadeopacoloreditor = class(tcolorarraypropertyeditor)
@@ -60,9 +60,9 @@ type
   protected
    function getdefaultstate: propertystatesty; override;
   public
-   procedure edit; override; 
+   procedure edit; override;
  end;
- 
+
  tfacetemplatefadeopacoloreditor = class(tcolorarraypropertyeditor)
   protected
    function getdefaultstate: propertystatesty; override;
@@ -74,13 +74,13 @@ type
   protected
    function getdefaultstate: propertystatesty; override;
   public
-   procedure edit; override; 
+   procedure edit; override;
  end;
 
 implementation
 uses
  msegraphutils,msearrayprops,msegui,msefadeedit,mseglob;
- 
+
 type
  tpropertyeditor1 = class(tpropertyeditor);
 
@@ -92,7 +92,7 @@ var
  int1: integer;
 begin
  with tcustomface(tpropertyeditor1(aproperty).instance) do begin
-  direct:= fade_direction; 
+  direct:= fade_direction;
   fadepos:= fade_pos;
   fadeopapos:= fade_opapos;
   fadecolor:= fade_color;
@@ -113,7 +113,7 @@ begin
        fade_opacolor.assign(fadecolor);
       end;
      end;
-    end;    
+    end;
     modified;
    end;
   end;
@@ -129,7 +129,7 @@ var
  int1: integer;
 begin
  with tfacetemplate(tpropertyeditor1(aproperty).instance) do begin
-  direct:= fade_direction; 
+  direct:= fade_direction;
   fadepos:= fade_pos;
   fadeopapos:= fade_opapos;
   fadecolor:= fade_color;
@@ -150,7 +150,7 @@ begin
        fade_opacolor.assign(fadecolor);
       end;
      end;
-    end;    
+    end;
     modified;
    end;
   end;

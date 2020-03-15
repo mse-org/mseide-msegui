@@ -26,7 +26,7 @@ type
                   to_autostart);//set enabled for to_single by setting interval,
                                 //disabled for ttimer
  timeroptionsty = set of timeroptionty;
- 
+
  tsimpletimer = class(tnullinterfacedobject)
   private
    fenabled: boolean;
@@ -46,7 +46,7 @@ type
   protected
    procedure dotimer; virtual;
   public
-   constructor create(const interval: longword = 0; 
+   constructor create(const interval: longword = 0;
                 const ontimer: notifyeventty = nil;
                 const active: boolean = false;
                 const aoptions: timeroptionsty = []);
@@ -78,7 +78,7 @@ type
    constructor create(const adelay: longword; const ainterval: longword;
                       const aontimer: notifyeventty);
  end;
- 
+
  ttimer = class(tmsecomponent)
   private
    ftimer: tsimpletimer;
@@ -119,7 +119,7 @@ type
 
 const
  defaultanimtick = 100000; //microseconds
- 
+
 type
  animkindty = (ank_single,ank_sawtooth,ank_triangle);
  animoptionty = (ano_enabled,
@@ -127,15 +127,15 @@ type
                                  //or ank_single terminates
                 );
  animoptionsty = set of animoptionty;
- 
+
  tanimtimer = class;
  tanimitem = class;
- 
- animtickeventty = procedure(const sender: tanimitem; 
+
+ animtickeventty = procedure(const sender: tanimitem;
                                          const avalue: flo64) of object;
  animstatety = (ans_down,ans_finished);
  animstatesty = set of animstatety;
- 
+
  tanimitem = class(tlinkedobject)
   private
    fontick: animtickeventty;
@@ -174,7 +174,7 @@ type
                     const akind: animkindty = ank_single;
                     const aoptions: animoptionsty = [ano_enabled];
                                    const atickus: int32 = 0); //0 = default
-   constructor create(const aowner: tmsecomponent; const atimer: tanimtimer; 
+   constructor create(const aowner: tmsecomponent; const atimer: tanimtimer;
                     const aontick: animtickeventty;
                     const ainterval: flo64; //seconds
                     const akind: animkindty = ank_single;
@@ -198,7 +198,7 @@ type
  end;
  panimitem = ^tanimitem;
  animitemarty = array of tanimitem;
-  
+
  tanimtimer = class(tmsecomponent)
   private
    ftouched: boolean;
@@ -227,7 +227,7 @@ type
    property highres: boolean read gethighres write sethighres default false;
    property enabled: boolean read fenabled write setenabled default false;
  end;
- 
+
  tanimitemcomp = class(tmsecomponent)
   private
    fitem: tanimitem;
@@ -274,7 +274,7 @@ type
    property onstart: notifyeventty read getonstart write setonstart;
    property onstop: notifyeventty read getonstop write setonstop;
  end;
- 
+
 procedure tick(sender: tobject);
 procedure init;
 procedure deinit;
@@ -287,7 +287,7 @@ uses
 
 const
  enabletimertag = 8346320;
- 
+
 type
  tapplication1 = class(tcustomapplication);
  ptimerinfoty = ^timerinfoty;
@@ -301,7 +301,7 @@ type
   ;checked: boolean
   {$endif}
  end;
- 
+
 var
  first: ptimerinfoty;
  mutex: mutexty;
@@ -339,7 +339,7 @@ end;
 
 var
  timeraccesscount: integer;
- 
+
 procedure extract(po: ptimerinfoty);
           //mutex has to be locked
 begin
@@ -605,7 +605,7 @@ end;
 
 { tsimpletimer }
 
-constructor tsimpletimer.create(const interval: longword; 
+constructor tsimpletimer.create(const interval: longword;
                 const ontimer: notifyeventty; const active: boolean;
                 const aoptions: timeroptionsty);
 begin
@@ -941,7 +941,7 @@ begin
  enabled:= ano_enabled in aoptions;
 end;
 
-constructor tanimitem.create(const aowner: tmsecomponent; 
+constructor tanimitem.create(const aowner: tmsecomponent;
                const atimer: tanimtimer;
                const aontick: animtickeventty;
                const ainterval: flo64;
@@ -1006,7 +1006,7 @@ begin
  end
  else begin
   result:= ftime;
- end; 
+ end;
 end;
 
 procedure tanimitem.tick();
@@ -1014,7 +1014,7 @@ var
  c1: card32;
  b1: boolean;
 begin
- if (ftickus = 0) or (ftickus = ftimer.tickus) or 
+ if (ftickus = 0) or (ftickus = ftimer.tickus) or
                           laterorsame(fnexttick,timebefore) then begin
   c1:= timebefore-fref;
 //  if int32(c1) >= 0 then begin
@@ -1193,7 +1193,7 @@ loopstart:
    while p1 <= pe do begin
     if p1^.enabled then begin
      ftouched:= false;
-     p1^.tick(); 
+     p1^.tick();
      if ftouched then begin
       goto loopstart;
      end;

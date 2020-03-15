@@ -18,5 +18,5 @@ var
 implementation
 uses
  cpuarmm3form_mfm,msedataedits;
- 
+
 end.

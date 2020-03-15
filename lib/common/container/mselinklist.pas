@@ -12,7 +12,7 @@ unit mselinklist;
 interface
 uses
  msetypes;
- 
+
 type
 
  linkheaderty = record
@@ -35,7 +35,7 @@ type
   data: record
   end;
  end;
- 
+
  tlinklist = class(tobject)
   private
    fcapacity: ptruint;
@@ -60,12 +60,12 @@ type
    property capacity: integer read getcapacity write setcapacity;
                     //grow only
  end;
- 
+
  tsinglelinklist = class(tlinklist)
   protected
   public
  end;
- 
+
  tdoublelinklist = class(tlinklist)
   protected
    function getheadersize: integer; override;
@@ -110,7 +110,7 @@ procedure deletelistchain(var alist: linklistty; var achain: listadty);
 procedure invertlist(const alist: linklistty; var achain: listadty);
 procedure resolvelist(var alist: linklistty; const handler: resolvehandlerty;
                                                          var achain: listadty);
-procedure checkresolve(var alist: linklistty; 
+procedure checkresolve(var alist: linklistty;
                    const handler: checkresolvehandlerty; var achain: listadty;
                    const data: pointer);
 procedure foralllistitems(var alist: linklistty;
@@ -118,7 +118,7 @@ procedure foralllistitems(var alist: linklistty;
 procedure foralllistitemsdata(var alist: linklistty;
                     const handler: resolvehandlerdataty; const achain: listadty;
                     const data: pointer);
- 
+
 implementation
 
 procedure clearlist(var alist: linklistty; const aitemsize: integer;
@@ -133,7 +133,7 @@ begin
   list:= nil;
   current:= 0;
   capacity:= 0;
-  deleted:= 0;  
+  deleted:= 0;
  end;
 end;
 
@@ -167,9 +167,9 @@ begin
    deleted:= plinkheaderty(result)^.next;
   end;
   plinkheaderty(result)^.next:= aitem;
-  aitem:= li1;  
- end; 
-end; 
+  aitem:= li1;
+ end;
+end;
 
 function getlistitem(const alist: linklistty; const aitem: listadty): pointer;
 begin
@@ -242,7 +242,7 @@ begin
   achain:= d;
  end;
 end;
- 
+
 procedure resolvelist(var alist: linklistty; const handler: resolvehandlerty;
                                                          var achain: listadty);
 var
@@ -264,7 +264,7 @@ begin
  end;
 end;
 
-procedure checkresolve(var alist: linklistty; 
+procedure checkresolve(var alist: linklistty;
                    const handler: checkresolvehandlerty; var achain: listadty;
                    const data: pointer);
 var

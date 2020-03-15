@@ -12,8 +12,8 @@ unit msestringident;
 interface
 uses
  {globtypes,}msehash,msestrings,msetypes;
- 
-//{$define caseinsensitive} 
+
+//{$define caseinsensitive}
 const
  firstident = 256;
  stridstart = $12345678; //not used
@@ -27,21 +27,21 @@ const
  strid7 = $345678CD;
  strid8 = $68ACF19B;
  strid9 = $D159E337;
- 
+
 type
 // keywordty = identty;
 
  identnamety = record
   offset: int32; //relative to data block
  end;
- 
+
  identheaderty = record
   ident: identty;
  end;
 
  pidentheaderty = ^identheaderty;
  identoffsetty = int32;
- 
+
  identdataty = record
   header:identheaderty;
   keyname: identoffsetty; //
@@ -59,7 +59,7 @@ type
    function checkkey(const akey; const aitem: phashdataty): boolean; override;
    function getrecordsize(): int32 override;
   public
-//   constructor create(const asize: int32); 
+//   constructor create(const asize: int32);
                     //total datasize including identheaderty
    function adduniquedata(const akey: identty;
                                    out adata: pidenthashdataty): boolean;
@@ -98,7 +98,7 @@ type
    function identname(const aident: identty; out aname: identnamety): boolean;
    function getident(const aname: lstringty): pindexidenthashdataty;
  end;
- 
+
  tstringidents = class
   protected
    fstringident: identty;
@@ -106,7 +106,7 @@ type
    fstringindex,fstringlen: identoffsetty;
    fstringdata: pointer;
    procedure nextident();
-   function storestring(const astr: lstringty): identnamety; 
+   function storestring(const astr: lstringty): identnamety;
   public
    constructor create();
    destructor destroy(); override;
@@ -133,13 +133,13 @@ type
    procedure clear();
 //   procedure init();
  end;
-       
+
 implementation
 uses
  mselfsr;
 
 const
- mindatasize = 1024; 
+ mindatasize = 1024;
 
 type
  identbufferheaderty = record
@@ -151,7 +151,7 @@ type
   end;
  end;
  pidentbufferty = ^identbufferty;
- 
+
 procedure tstringidents.nextident;
 begin
  repeat
@@ -162,9 +162,9 @@ end;
 function tstringidents.getident(): identty;
 begin
  result:= fstringident;
- nextident; 
+ nextident;
 end;
- 
+
 function tstringidents.getident(const aname: lstringty): identty;
 begin
  result:= fidentlist.getident(aname)^.data.data;
@@ -241,7 +241,7 @@ end;
 function tstringidents.getidentnamel(const aident: identty): lstringty;
 begin
 {$ifdef mse_checkinternalerror}
- if not 
+ if not
 {$endif}
  getidentname(aident,result)
 {$ifdef mse_checkinternalerror} then begin
@@ -256,7 +256,7 @@ end;
 function tstringidents.getidentnamel(const aeledata: pointer): lstringty;
 begin
 {$ifdef mse_checkinternalerror}
- if not 
+ if not
 {$endif}
  getidentname(datatoele(aeledata)^.header.name,result)
 {$ifdef mse_checkinternalerror} then begin
@@ -270,7 +270,7 @@ end;
 function tstringidents.getidentname2(const aident: identty): identnamety;
 begin
 {$ifdef mse_checkinternalerror}
- if not 
+ if not
 {$endif}
  getidentname(aident,result)
 {$ifdef mse_checkinternalerror} then begin
@@ -290,7 +290,7 @@ end;
 function tstringidents.getidentname2(const aeledata: pointer): identnamety;
 begin
 {$ifdef mse_checkinternalerror}
- if not 
+ if not
 {$endif}
  getidentname(datatoele(aeledata)^.header.name,result)
 {$ifdef mse_checkinternalerror} then begin
@@ -312,7 +312,7 @@ const
    %11100110011001100001100110011001,
    %00011001100110011110011001100110
    );
-   
+
 function hashkey1(const akey: lstringty): hashvaluety;
 var
  int1: integer;
@@ -337,7 +337,7 @@ begin
  end;
 end;
 
-function tstringidents.storestring(const astr: lstringty): identnamety; 
+function tstringidents.storestring(const astr: lstringty): identnamety;
                                                    //offset from stringdata
 var
  int1,int2: integer;
@@ -345,7 +345,7 @@ var
 begin
  int1:= fstringindex;
  int2:= astr.len;
- fstringindex:= (fstringindex + int2 + 1 + sizeof(identbufferheaderty) + 3) 
+ fstringindex:= (fstringindex + int2 + 1 + sizeof(identbufferheaderty) + 3)
                                                     and not 3;        //align 4
  if fstringindex >= fstringlen then begin
   fstringlen:= fstringindex*2+mindatasize;
@@ -490,7 +490,7 @@ begin
  end;
 end;
 
-function tindexidenthashdatalist.getident(const aname: lstringty): 
+function tindexidenthashdatalist.getident(const aname: lstringty):
                                                      pindexidenthashdataty;
 var
  po1: pindexidenthashdataty;
@@ -515,7 +515,7 @@ begin
     keyname:= key.offset;
    end;
   end;
- end;  
+ end;
  result:= po1;
 // result:= po1^.data.data;
 end;
@@ -555,7 +555,7 @@ begin
  result:= false;
  with lstringty(akey) do begin
   po1:= po;
-  po2:= fowner.fstringdata + pindexidenthashdataty(aitem)^.data.key.offset + 
+  po2:= fowner.fstringdata + pindexidenthashdataty(aitem)^.data.key.offset +
                                                   sizeof(identbufferty);
   for int1:= 0 to len-1 do begin
   {$ifdef caseinsensitive}

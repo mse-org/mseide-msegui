@@ -37,7 +37,7 @@ type
 implementation
 uses
  windows,sysutils,dateutils,msedynload;
- 
+
 type
  {$ifdef FPC}
  PCRITICAL_SECTION_DEBUG = ^CRITICAL_SECTION_DEBUG;
@@ -79,7 +79,7 @@ type
 var
  TryEnterCriticalSection: function (
                  var lpCriticalSection: TRTLCriticalSection): BOOL; stdcall;
-   
+
 function sys_getlasterror: Integer;
 begin
  result:= windows.GetLastError;
@@ -179,7 +179,7 @@ begin
    end;
    interlockeddecrement(trycount);
   end;
-  windows.leavecriticalsection(mutex); 
+  windows.leavecriticalsection(mutex);
  end;
  result:= sye_ok;
 end;
@@ -430,13 +430,13 @@ function localtimeshift(value: tdatetime; const tolocal: boolean) : integer;
    end;
    result:= encodedate(ayear,wmonth,wo3) + encodetime(whour,wminute,0,0);
   end;
- end;                 
- 
-var                                  
+ end;
+
+var
  tinfo: time_zone_information;
  year: word;
  stddate,dldate: tdatetime;
- bo1: boolean; 
+ bo1: boolean;
 begin
  {$ifdef FPC}
  if gettimezoneinformation(@tinfo) = time_zone_id_invalid then begin
@@ -478,7 +478,7 @@ begin
  end;
 end;
 
-function sys_utctolocaltime(const value: tdatetime): tdatetime;  
+function sys_utctolocaltime(const value: tdatetime): tdatetime;
 begin
  result:= incminute(value,localtimeshift(value,true));
 // result:= value + sys_localtimeoffset; //todo
@@ -543,7 +543,7 @@ procedure doinit;
 var
  info: osversioninfo;
  int1: integer;
- 
+
 begin
 {$ifdef FPC}
  {$ifdef hascompareoptions}
@@ -569,7 +569,7 @@ begin
  checkprocaddresses(['kernel32.dll'],
       ['TryEnterCriticalSection'],
       [{$ifndef FPC}@{$endif}@TryEnterCriticalSection]);
- 
+
 end;
 
 initialization

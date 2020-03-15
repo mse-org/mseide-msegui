@@ -13,7 +13,7 @@ interface
 uses
  msestrings,mclasses,mseclasses,mseificompglob,mseificomp,typinfo,msedatalist,
  msetypes;
- 
+
 type
  tifidataendpoint = class(tmsecomponent,iifidatalink)
   private
@@ -48,7 +48,7 @@ type
    property ondatachange: updateintegereventty read fondatachange
                                                       write fondatachange;
  end;
- 
+
  tifiint64endpoint = class(tifidataendpoint)
   private
    fvalue: int64;
@@ -80,7 +80,7 @@ type
    property ondatachange: updatepointereventty read fondatachange
                                                       write fondatachange;
  end;
- 
+
  tifibooleanendpoint = class(tifidataendpoint)
   private
    fvalue: boolean;
@@ -110,7 +110,7 @@ type
    property ondatachange: updaterealeventty read fondatachange
                                                       write fondatachange;
  end;
- 
+
  tifidatetimeendpoint = class(tifidataendpoint)
   private
    fvalue: tdatetime;
@@ -178,7 +178,7 @@ begin
  result:= nil;
 end;
 
-procedure tifidataendpoint.updateifigriddata(const sender: tobject; 
+procedure tifidataendpoint.updateifigriddata(const sender: tobject;
                                                 const alist: tdatalist);
 begin
  //dummy

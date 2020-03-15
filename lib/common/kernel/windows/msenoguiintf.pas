@@ -13,7 +13,7 @@ unit msenoguiintf;
 interface
 uses
  msesystypes;
- 
+
 {$include ..\msenoguiintf.inc}
 
 implementation
@@ -40,12 +40,12 @@ begin
  end;
 end;
 
-procedure nogui_settimer(us: cardinal); 
+procedure nogui_settimer(us: cardinal);
 begin
  killtimer;
  timer:= windows.settimer(applicationwindow,0,us div 1000,nil);
 end;
- 
+
 function WindowProc(ahWnd: HWND; Msg: UINT; wParam: WPARAM; lParam: LPARAM): LRESULT; stdcall;
 begin
  if ahwnd = applicationwindow then begin
@@ -89,8 +89,8 @@ procedure nogui_waitevent;
  end;
 
 var
- msg1: {$ifdef FPC}msg{$else}tmsg{$endif}; 
- 
+ msg1: {$ifdef FPC}msg{$else}tmsg{$endif};
+
 begin
  with tapplication1(application) do begin
   include(fstate,aps_waiting);

@@ -1,5 +1,5 @@
 { MSEide Copyright (c) 2010 by Martin Schreiber
-   
+
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation; either version 2 of the License, or
@@ -64,10 +64,10 @@ interface
 {$endif}
 uses
  msestrings,msehash,msemacros,msetypes,mseforms;
- 
+
 type
  templateinfoty = record
-  name: msestring;  
+  name: msestring;
   path: filenamety;
   comment: msestring;
   select: boolean;
@@ -81,7 +81,7 @@ type
  end;
  ptemplateinfoty = ^templateinfoty;
  templateinfoarty = array of templateinfoty;
- 
+
  tcodetemplates = class(tobject)
   private
    finfos: templateinfoarty;
@@ -100,11 +100,11 @@ type
    procedure clear;
    procedure scan(const adirectories: filenamearty);
    function hastemplate(const aname: msestring): boolean;
-   function gettemplate(const aname: msestring; out templatetext: msestring;                     
+   function gettemplate(const aname: msestring; out templatetext: msestring;
                         const amacrolist: tmacrolist = nil): ptemplateinfoty;
    property templates: templateinfoarty read finfos;
  end;
- 
+
 implementation
 uses
  msefileutils,msesys,msestat,msestream,mseparamentryform,mseglob,msearrayutils,
@@ -117,7 +117,7 @@ uses
   {$warn 6058 off}
  {$endif}
 {$endif}
- 
+
 { tcodetemplates }
 
 constructor tcodetemplates.create;
@@ -165,7 +165,7 @@ begin
  sortarray(finfos,sizeof(templateinfoty),@compitems);
  for int1:= 0 to high(finfos) do begin
   flist.add(finfos[int1].name,pointer(ptruint(int1)));
- end; 
+ end;
 end;
 
 procedure tcodetemplates.initinfo(out ainfo: templateinfoty);
@@ -177,7 +177,7 @@ end;
 function tcodetemplates.loadfile(const afilename: filenamety;
                out ainfo: templateinfoty): boolean;
 var
- stat: tstatreader; 
+ stat: tstatreader;
 begin
  result:= false;
  initinfo(ainfo);
@@ -205,7 +205,7 @@ end;
 
 procedure tcodetemplates.savefile(const ainfo: templateinfoty);
 var
- stat: tstatwriter; 
+ stat: tstatwriter;
 begin
  stat:= tstatwriter.create(ainfo.path,ce_utf8,true);
  with stat,ainfo do begin
@@ -259,7 +259,7 @@ begin
  else begin
   setlength(ar1,1);
  end;
- if (ar1[0] = '') or not flist.find(ar1[0],pointer(puint1),int1) or 
+ if (ar1[0] = '') or not flist.find(ar1[0],pointer(puint1),int1) or
                                                          (int1 > 1) then begin
   se:= tmsetemplateselectfo.create(self);
   try
@@ -267,7 +267,7 @@ begin
    se.show;
    se.grid.setfocus;
    se.templatename.editor.filtertext:= ar1[0];
-   if (se.show(true) <> mr_ok) or (se.grid.row < 0) or 
+   if (se.show(true) <> mr_ok) or (se.grid.row < 0) or
                                       (se.grid.row > high(finfos)) then begin
     exit;
    end;
@@ -299,7 +299,7 @@ begin
      fo.grid.row:= high(ar1);
      bo1:= fo.show(true) = mr_ok;
     end;
-    mac1.add(params,fo.macrovalue.gridvalues,[]);         
+    mac1.add(params,fo.macrovalue.gridvalues,[]);
    finally
     fo.free;
    end;

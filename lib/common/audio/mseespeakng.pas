@@ -22,15 +22,15 @@ interface
 uses
  msectypes,msetypes,sysutils,msestrings;
  {$packrecords c}
- 
+
 const
 {$ifdef mswindows}
 // {$define wincall}
  espeaknglib: array[0..0] of filenamety = (
    'libespeak-ngwo.dll');
 {$else}
- espeaknglib: array[0..1] of filenamety = 
-    ('libespeak-ngsync.so.1','libespeak-ngsync.so'); 
+ espeaknglib: array[0..1] of filenamety =
+    ('libespeak-ngsync.so.1','libespeak-ngsync.so');
 {$endif}
 
  ENS_GROUP_MASK = $70000000;
@@ -107,13 +107,13 @@ type
 
  espeak_VOICE = record
   name: pcchar;      // a given name for this voice. UTF8 string.
-  languages: pcchar;  // list of pairs of (byte) priority + 
+  languages: pcchar;  // list of pairs of (byte) priority +
                       //(string) language (and dialect qualifier)
   identifier: pcchar; // the filename for this voice within
                       //espeak-ng-data/voices
   gender: cuchar;  // 0=none 1=male, 2=female,
   age: cuchar;     // 0=not specified, or age in years
-  variant: cuchar; // only used when passed as a parameter to 
+  variant: cuchar; // only used when passed as a parameter to
                    //espeak_SetVoiceByProperties
   xx1: cuchar;     // for internal use
   score: cint;       // for internal use
@@ -146,10 +146,10 @@ type
   public
    constructor create(const err: espeak_ng_STATUS; const atext: string='');
  end;
- 
+
 var
  espeak_ng_ClearErrorContext:
-  procedure(context: espeak_ng_ERROR_CONTEXT) 
+  procedure(context: espeak_ng_ERROR_CONTEXT)
                                 {$ifdef wincall}stdcall{$else}cdecl{$endif};
  espeak_ng_GetStatusCodeMessage:
   procedure(status: espeak_ng_STATUS; buffer: pcchar; length: size_t)
@@ -235,17 +235,17 @@ espeak_ng_PrintStatusCodeMessage(espeak_ng_STATUS status,
                      user_data: pointer): espeak_ng_STATUS
                                {$ifdef wincall}stdcall{$else}cdecl{$endif};
 {from espeak_Synthesize():
-/* Synthesize speech for the specified text.  
+/* Synthesize speech for the specified text.
  The speech sound data is passed to the calling
- program in buffers by means of the callback function specified by 
- espeak_SetSynthCallback(). The command is asynchronous: 
+ program in buffers by means of the callback function specified by
+ espeak_SetSynthCallback(). The command is asynchronous:
  it is internally buffered and returns as soon as possible.
  If espeak_Initialize was previously called with AUDIO_OUTPUT_PLAYBACK
  as argument, the sound data are played by eSpeak.
 
 text: The text to be spoken, terminated by a zero character.
    It may be either 8-bit characters,
-   wide characters (wchar_t), or UTF8 encoding.  Which of these is determined 
+   wide characters (wchar_t), or UTF8 encoding.  Which of these is determined
    by the "flags" parameter.
 
 size: Equal to (or greatrer than) the size of the text data, in bytes.
@@ -253,7 +253,7 @@ size: Equal to (or greatrer than) the size of the text data, in bytes.
    to allocate internal storage space for the text.  This value is not used for
    AUDIO_OUTPUT_SYNCHRONOUS mode.
 
-position:  The position in the text where speaking starts. Zero indicates 
+position:  The position in the text where speaking starts. Zero indicates
    speak from the
    start of the text.
 
@@ -267,19 +267,19 @@ end_position:  If set, this gives a character position at which speaking
 flags:  These may be OR'd together:
    Type of character codes, one of:
       espeakCHARS_UTF8     UTF8 encoding
-      espeakCHARS_8BIT     The 8 bit ISO-8859 character set for 
+      espeakCHARS_8BIT     The 8 bit ISO-8859 character set for
                            the particular language.
       espeakCHARS_AUTO     8 bit or UTF8  (this is the default)
       espeakCHARS_WCHAR    Wide characters (wchar_t)
       espeakCHARS_16BIT    16 bit characters.
 
-   espeakSSML   Elements within < > are treated as SSML elements, 
+   espeakSSML   Elements within < > are treated as SSML elements,
                 or if not recognised are ignored.
 
-   espeakPHONEMES  Text within [[ ]] is treated as phonemes codes 
+   espeakPHONEMES  Text within [[ ]] is treated as phonemes codes
                    (in espeak's Hirshenbaum encoding).
 
-   espeakENDPAUSE  If set then a sentence pause is added at the end of the 
+   espeakENDPAUSE  If set then a sentence pause is added at the end of the
                    text.  If not set then this pause is suppressed.
 
 unique_identifier: This must be either NULL, or point to an integer variable to
@@ -304,7 +304,7 @@ Return: EE_OK: operation achieved
                          user_data: pointer): espeak_ng_STATUS
                                {$ifdef wincall}stdcall{$else}cdecl{$endif};
 {from espeak_SynthesizeMark():
-/* Synthesize speech for the specified text. 
+/* Synthesize speech for the specified text.
    Similar to espeak_Synth() but the start position is
    specified by the name of a <mark> element in the text.
 
@@ -331,7 +331,7 @@ Return: EE_OK: operation achieved
 
  espeak_ng_Cancel:
   function(): espeak_ng_STATUS {$ifdef wincall}stdcall{$else}cdecl{$endif};
- espeak_ng_SetCancelState: 
+ espeak_ng_SetCancelState:
   function(canceled: cint): espeak_ng_STATUS
                                {$ifdef wincall}stdcall{$else}cdecl{$endif};
  espeak_ng_Synchronize:

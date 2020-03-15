@@ -41,13 +41,13 @@ type
 var
  DSA_new: function: pDSA; cdecl;
  DSA_free: procedure(r: pDSA); cdecl;
- DSA_generate_parameters: function(bits: cint; seed: pointer; 
+ DSA_generate_parameters: function(bits: cint; seed: pointer;
            seed_len: cint;var counter_ret: cint; var h_ret: culong;
             progress: TProgressCallbackFunction; cb_arg: Pointer): pDSA; cdecl;
  DSA_generate_key: function(a: pDSA): cint; cdecl;
  d2i_DSAPrivateKey_bio: function(bp: pBIO; dsa: pDSA): pDSA; cdecl;
  i2d_DSAPrivateKey_bio: function(bp: pBIO; dsa: pDSA): cint; cdecl;
- 
+
 implementation
 uses
  msedynload;

@@ -12,13 +12,13 @@ unit msetmpmodules;
 interface
 uses
  classes,mclasses,mseclasses;
- 
+
 procedure beginloadtmpmodule;
 procedure endloadtmpmodule;
 procedure addtmpmodule(const amodule: tmsecomponent);
 
 function createtmpmodule(const aclassname: string;
-                         const aobjdata: tstream; 
+                         const aobjdata: tstream;
                          const onloaded: msecomponenteventty = nil): tmsecomponent;
 
 implementation
@@ -26,7 +26,7 @@ uses
  sysutils,mseapplication;
 type
  tmsecomponent1 = class(tmsecomponent);
- 
+
 var
  ftmpmodules: tmodulelist;
 
@@ -63,7 +63,7 @@ begin
   end;
  end;
 end;
- 
+
 function findtmpmodulebyname(const name: string): tcomponent;
 begin
  result:= ftmpmodules.findmodulebyname(name);

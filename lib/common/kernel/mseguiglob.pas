@@ -16,12 +16,12 @@ uses
  classes,mclasses,msegraphutils,msetypes,msekeyboard,mseerr,mseevent,msestrings,
  mseglob;
 {$ifdef FPC}
- 
+
 {$endif}
 
 type
  unicharty = longword;
- 
+
  originty = (org_screen,org_widget,org_paint,org_client,org_inner);
  captionposty = (cp_center,cp_rightbottom,cp_right,{cp_rightcenter,}cp_righttop,
                  cp_topright,cp_top,{cp_topcenter,}cp_topleft,
@@ -45,7 +45,7 @@ const
                  ip_bottomleft,ip_bottom,{ip_bottomcenter,}ip_bottomright];
  rightimagepos = [ip_rightbottom,ip_right,ip_righttop];
  bottomimagepos = [ip_bottomleft,ip_bottom,ip_bottomright];
-type                 
+type
  mousebuttonty = (mb_none,mb_left,mb_right,mb_middle);
  mousewheelty = (mw_none,mw_up,mw_down);
 
@@ -73,7 +73,7 @@ type
   button: mousebuttonty;
  end;
  pmouseeventinfoty = ^mouseeventinfoty;
- 
+
  mousewheeleventinfoty = record //same layout as mouseeventinfoty!
   eventkind: eventkindty;
   shiftstate: shiftstatesty;
@@ -85,7 +85,7 @@ type
   delta: real;
  end;
  pmousewheeleventinfoty = ^mousewheeleventinfoty;
- 
+
  moeventinfoty = record
   case integer of
    0: (mouse: mouseeventinfoty);
@@ -116,7 +116,7 @@ type
                 stf_roman,       //10
                 stf_courier);    //11
  defaultfontnamesty = array[stockfontty] of string;
- 
+
 type
  windowoptionty = (wo_popup,wo_message,
                    wo_desktop,wo_dock,wo_toolbar,wo_menu,
@@ -128,13 +128,13 @@ type
                    wo_embedded,
                    wo_buttonendmodal,wo_groupleader,
                    wo_taskbar,    //win32 only
-                   wo_notaskbar,  
+                   wo_notaskbar,
                    wo_windowcentermessage, //showmessage centered in window
                    wo_sysdnd //activate system drag and drop (xdnd on Linux)
-                   ); 
+                   );
  windowoptionsty = set of windowoptionty;
  windowtypeoptionty = wo_popup..wo_dnd;
- 
+
 const
  windowtypeoptions = [wo_popup,wo_message,
                       wo_desktop,wo_dock,wo_toolbar,wo_menu,
@@ -152,10 +152,10 @@ type
                  wsi_fullscreen,wsi_fullscreenvirt);
 const
  windowmaximizedstates = [wp_maximized,wp_fullscreen,wp_fullscreenvirt];
- 
+
 type
  syswindowty = (sywi_none,sywi_tray);
- 
+
  paintdevicety = ptruint;
  fontty = ptruint;
  regionty = ptruint;
@@ -168,7 +168,7 @@ type
  pwindowty = ^windowty;
 
  internalwindowoptionspty = array[0..3] of pointer; //buffer
-  
+
  internalwindowoptionsty = record
   parent: winidty;
   options: windowoptionsty;
@@ -184,12 +184,12 @@ type
 const
  defaultppmm = 3;      //3 pixel per mm
  sizingtol = 2; //+- pixel
- sizingwidth = 2*sizingtol;                                        
+ sizingwidth = 2*sizingtol;
 
 const
  captiontoimagepos: array[captionposty] of imageposty = (
                //cp_center,cp_rightbottom,cp_right,
-                 ip_center,ip_lefttop,    ip_left, 
+                 ip_center,ip_lefttop,    ip_left,
                //{cp_rightcenter,}cp_righttop,
                  {ip_leftcenter,} ip_leftbottom,
                //cp_topright,  cp_top,   cp_topcenter,   cp_topleft,
@@ -201,7 +201,7 @@ const
                  );
  imagetocaptionpos: array[imageposty] of captionposty = (
                //ip_center,ip_centervert,ip_rightbottom,ip_right,
-                 cp_center,cp_center,    cp_lefttop,    cp_left, 
+                 cp_center,cp_center,    cp_lefttop,    cp_left,
                //{ip_rightcenter,}ip_righttop,
                  {cp_leftcenter,} cp_leftbottom,
                //ip_topright,  ip_top,   ip_topcenter,   ip_topleft,
@@ -271,7 +271,7 @@ type
   function convertmimedata(const atypeindex: integer): string;
   function convertmimetext(const atypeindex: integer): msestring;
  end;
- 
+
 type
  guierrorty = (gue_ok,gue_error,
                gue_alreadyregistered,gue_notregistered,
@@ -330,7 +330,7 @@ implementation
 
 uses
  mseclasses,msestreaming{,mseapplication,msegui,mseguiintf};
- 
+
 const
  errortexts: array[guierrorty] of string =
   ('','Error',
@@ -364,7 +364,7 @@ const
    'Invalid rootwidget',
    'Invalid inputmanager',
    'Invalid inputcontext',
-   'Corrupted timerlist',   
+   'Corrupted timerlist',
 {   'Resource not found',}
    'Can not capture mouse',
    'Can not set mouse pos',

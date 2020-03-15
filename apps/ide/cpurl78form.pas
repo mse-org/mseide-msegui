@@ -1,5 +1,5 @@
 { MSEide Copyright (c) 1999-2013 by Martin Schreiber
-   
+
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation; either version 2 of the License, or
@@ -110,20 +110,20 @@ type
   public
    constructor create(aowner: tcomponent); override;
  end;
- 
+
 var
  cpurl78fo: tcpurl78fo;
 implementation
 uses
  cpurl78form_mfm;
- 
+
 constructor tcpurl78fo.create(aowner: tcomponent);
 begin
  fneedsrefresh:= true;
  inherited;
  fflagswidget:= psw;
 end;
- 
+
 procedure tcpurl78fo.regsetvalue(const sender: TObject; var avalue: Integer;
                var accept: Boolean);
 begin

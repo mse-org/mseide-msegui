@@ -9,7 +9,7 @@
 }
 unit msedropdownlist;
 {$ifdef FPC}{$mode objfpc}{$h+}{$interfaces corba}{$endif}
- 
+
 interface
 {$ifndef mse_allwarnings}
  {$if fpc_fullversion >= 030100}
@@ -45,7 +45,7 @@ type
  dropdowneditoptionty = (deo_selectonly,deo_forceselect,
                         deo_autodropdown,
                         deo_keydropdown,//shift down starts dropdown
-                        deo_modifiedbeforedropdown, 
+                        deo_modifiedbeforedropdown,
                         //edit.modified called before dropdown
                         deo_casesensitive,deo_posinsensitive,
                         deo_livefilter,
@@ -64,7 +64,7 @@ type
   public
    class function getinstancepo(owner: tobject): pfont; override;
  end;
- 
+
  tdropdowncolfontselect = class(tparentfont)
   public
    class function getinstancepo(owner: tobject): pfont; override;
@@ -92,7 +92,7 @@ type
    procedure beginupdate;
    procedure endupdate;
    procedure clear;
-   function addrow(const aitems: array of msestring): integer; 
+   function addrow(const aitems: array of msestring): integer;
                                                    //returns itemindex
    procedure insertrow(const aindex: integer; const aitems: array of msestring);
    procedure deleterow(const aindex: integer);
@@ -100,7 +100,7 @@ type
    property rowcount: integer read maxrowcount write setrowcount;
    property items[const index: integer]: tdropdowndata read getitems; default;
  end;
- 
+
  tdropdowncol = class(tdropdowndata)
   private
    fwidth: integer;
@@ -138,23 +138,23 @@ type
    property width: integer read fwidth write fwidth default griddefaultcolwidth;
    property options: coloptionsty read foptions write setoptions
                    default defaultdropdowncoloptions;
-   property textflags: textflagsty read ftextflags write ftextflags 
+   property textflags: textflagsty read ftextflags write ftextflags
                                            default defaultdropdowncoltextflags;
-   property passwordchar: msechar read fpasswordchar write fpasswordchar 
+   property passwordchar: msechar read fpasswordchar write fpasswordchar
                                            default #0;
    property linewidth: integer read flinewidth write flinewidth default 0;
    property linecolor: colorty read flinecolor write flinecolor default cl_gray;
    property color: colorty read fcolor write fcolor default cl_default;
-   property colorselect: colorty read fcolorselect write fcolorselect 
+   property colorselect: colorty read fcolorselect write fcolorselect
                                            default cl_default;
-//   property fontcolorselect: colorty read ffontcolorselect 
+//   property fontcolorselect: colorty read ffontcolorselect
 //                                      write ffontcolorselect default cl_default;
    property font: tdropdowncolfont read getfont write setfont;
-   property fontselect: tdropdowncolfontselect read getfontselect 
+   property fontselect: tdropdowncolfontselect read getfontselect
                                                        write setfontselect;
-   property frametemplate: tframecomp read fframetemplate 
+   property frametemplate: tframecomp read fframetemplate
                                                   write setframetemplate;
-   property facetemplate: tfacecomp read ffacetemplate 
+   property facetemplate: tfacecomp read ffacetemplate
                                                   write setfacetemplate;
    property caption: msestring read fcaption write fcaption;
  end;
@@ -219,7 +219,7 @@ type
    class function getitemclasstype: persistentclassty; override;
    procedure createfont();
    procedure createfontselect();
-   property nostreaming: boolean read fnostreaming 
+   property nostreaming: boolean read fnostreaming
                                           write setnostreaming;
    property onitemchange: indexeventty read fonitemchange write fonitemchange;
    property items[const index: integer]: tdropdowncol read getitems; default;
@@ -227,26 +227,26 @@ type
    property width: integer read fwidth write setwidth default griddefaultcolwidth;
    property options: coloptionsty read foptions write setoptions
                    default defaultdropdowncoloptions;
-   property textflags: textflagsty read ftextflags write settextflags 
+   property textflags: textflagsty read ftextflags write settextflags
                                            default defaultdropdowncoltextflags;
    property linewidth: integer read flinewidth write setlinewidth default 0;
    property linecolor: colorty read flinecolor write setlinecolor default cl_gray;
    property color: colorty read fcolor write setcolor default cl_default;
-   property colorselect: colorty read fcolorselect write setcolorselect 
+   property colorselect: colorty read fcolorselect write setcolorselect
                                            default cl_default;
-//   property fontcolorselect: colorty read ffontcolorselect 
+//   property fontcolorselect: colorty read ffontcolorselect
 //                           write setfontcolorselect default cl_default;
    property font: tdropdownfont read getfont write setfont;
-   property fontselect: tdropdownfontselect read getfontselect 
+   property fontselect: tdropdownfontselect read getfontselect
                                                        write setfontselect;
-   property frametemplate: tframecomp read fframetemplate 
+   property frametemplate: tframecomp read fframetemplate
                                                   write setframetemplate;
-   property facetemplate: tfacecomp read ffacetemplate 
+   property facetemplate: tfacecomp read ffacetemplate
                                                   write setfacetemplate;
  end;
 
  dropdowncolsclassty = class of tdropdowncols;
- 
+
  idropdown = interface(inullinterface)
   function getvalueempty: integer;
   function getwidget: twidget;
@@ -288,17 +288,17 @@ type
    function createdatalist: tdatalist; override;
   public
    destructor destroy; override;
-   constructor create(const agrid: tcustomgrid; 
+   constructor create(const agrid: tcustomgrid;
                              const aowner: tgridarrayprop); override;
  end;
 
  titemselectedevent = class(tcomponentevent)
   private
    frow: integer;
-  public 
+  public
    constructor create(const dest: tmsecomponent; const arow: integer);
  end;
- 
+
  tdropdownfixcol = class(tfixcol)
   protected
    fcontroller: tcustomdropdownlistcontroller;
@@ -364,7 +364,7 @@ type
   published
    property imagenr default ord(stg_arrowdownsmall);
  end;
- 
+
  tcustomdropdownbuttonframe = class(tcustombuttonframe)
   private
    freadonly: boolean;
@@ -376,7 +376,7 @@ type
    procedure setbutton(const avalue: tdropdownbutton);
   public
    constructor create(const aintf: icaptionframe;
-                                         const buttonintf: ibutton); override;                                                  
+                                         const buttonintf: ibutton); override;
    procedure updatedropdownoptions(const avalue: dropdowneditoptionsty);
    property readonly: boolean read freadonly write setreadonly default false;
    property button: tdropdownbutton read getbutton write setbutton;
@@ -440,7 +440,7 @@ type
     //ibutton
    procedure buttonaction(var action: buttonactionty;
                                                 const buttonindex: integer);
-   
+
     //idataeditcontroller
    procedure mouseevent(var info: mouseeventinfoty);
    procedure dokeydown(var info: keyeventinfoty);
@@ -466,9 +466,9 @@ type
    property color: colorty read fcolor write fcolor default cl_default;
    property colorclient: colorty read fcolorclient write fcolorclient
                                                        default cl_default;
-   property frametemplate: tframecomp read fframetemplate 
+   property frametemplate: tframecomp read fframetemplate
                                                   write setframetemplate;
-   property facetemplate: tfacecomp read ffacetemplate 
+   property facetemplate: tfacecomp read ffacetemplate
                                                   write setfacetemplate;
  end;
 
@@ -503,7 +503,7 @@ type
                    //0 -> ownerwidget.bounds_cx
    property bounds_cy: integer read fbounds_cy write fbounds_cy default 0;
                    //0 -> dropdownwidget.bounds_cy
-   property ondropdown: dropdownwidgeteventty read fondropdown 
+   property ondropdown: dropdownwidgeteventty read fondropdown
                                                       write fondropdown;
  end;
 
@@ -555,12 +555,12 @@ type
    function getremoterowcount: integer; virtual;
    procedure dobeforedropdown; override;
    procedure doafterclosedropdown; override;
-   
+
     //idropdownlist
    procedure itemselected(const index: integer; const akey: keyty); virtual;
              //-2 -> no selection, -1 -> cancel
    procedure dropdownkeydown(var info: keyeventinfoty);
- 
+
    function getautowidth: integer;
    procedure updatedropdownbounds(var arect: rectty); override;
    procedure receiveevent(const event: tobjectevent); override;
@@ -579,30 +579,30 @@ type
    property itemindex: integer read getitemindex write setitemindex default -1;
    property delay: integer read getdelay write setdelay default 0;
                      //ms, -1 = idle
-   property dropdownrowcount: integer read fdropdownrowcount 
+   property dropdownrowcount: integer read fdropdownrowcount
                           write fdropdownrowcount default 8;
    property width: integer read fwidth write fwidth default 0;
-   property datarowlinewidth: integer read fdatarowlinewidth 
+   property datarowlinewidth: integer read fdatarowlinewidth
                           write fdatarowlinewidth default 0;
-   property datarowlinecolor: colorty read fdatarowlinecolor 
+   property datarowlinecolor: colorty read fdatarowlinecolor
                           write fdatarowlinecolor default defaultdatalinecolor;
-   property buttonlength: integer read fbuttonlength 
+   property buttonlength: integer read fbuttonlength
                                       write fbuttonlength default 0;
-   property buttonendlength: integer read fbuttonendlength 
+   property buttonendlength: integer read fbuttonendlength
                                       write fbuttonendlength default 0;
-   property buttonminlength: integer read fbuttonminlength 
+   property buttonminlength: integer read fbuttonminlength
                     write fbuttonminlength default defaultbuttonminlength;
    property imagelist: timagelist read fimagelist write setimagelist;
    property imageframe: framety read fimageframe write setimageframe;
-   property imageframe_left: integer read fimageframe.left 
+   property imageframe_left: integer read fimageframe.left
                                          write setimageframe_left default 0;
    property imageframe_top: integer read fimageframe.top
                                          write setimageframe_top default 0;
-   property imageframe_right: integer read fimageframe.right 
+   property imageframe_right: integer read fimageframe.right
                                          write setimageframe_right default 0;
-   property imageframe_bottom: integer read fimageframe.bottom 
+   property imageframe_bottom: integer read fimageframe.bottom
                                          write setimageframe_bottom default 0;
-   property ondropdown: dropdownlisteventty read fondropdown 
+   property ondropdown: dropdownlisteventty read fondropdown
                                                       write fondropdown;
  end;
 
@@ -637,7 +637,7 @@ type
    property valuecol;
    property itemindex;
  end;
- 
+
  dropdownlistcontrollerclassty = class of tcustomdropdownlistcontroller;
 
  tmbdropdownlistcontroller = class(tdropdownlistcontroller)
@@ -667,7 +667,7 @@ type
  tframebutton1 = class(tframebutton);
  tframebuttons1 = class(tframebuttons);
  tinplaceedit1 = class(tinplaceedit);
- 
+
  timagefixcol = class(tdropdownfixcol)
   private
    fimagelist: timagelist;
@@ -679,11 +679,11 @@ type
              const acontroller: tcustomdropdownlistcontroller); override;
  end;
 
- 
+
 const
- defaultdropdowncellinnerframe: framety = 
+ defaultdropdowncellinnerframe: framety =
                       (left: 1; top: 0; right: 1; bottom: 0);
- 
+
 { tdropdowncolfont }
 
 class function tdropdowncolfont.getinstancepo(owner: tobject): pfont;
@@ -850,7 +850,7 @@ begin
  end;
  if (aindex < 0) or (aindex >= maxrowcount) then begin
   tlist.error(slistindexerror,aindex);
- end; 
+ end;
 end;
 
 procedure tdropdowndatacols.setrowcount(const avalue: integer);
@@ -939,7 +939,7 @@ begin
  for int1:= 0 to high(fitems) do begin
   result[int1]:= pmsestring(tdropdowndata(fitems[int1]).fdatapo +
                                           aindex * sizeof(msestring))^;
- end; 
+ end;
 end;
 
 function tdropdowndatacols.addrow(const aitems: array of msestring): integer;
@@ -970,7 +970,7 @@ begin
   addrow(aitems);
  end
  else begin
-  checkrowindex(aindex);  
+  checkrowindex(aindex);
   beginupdate;
   try
    for int1:= 0 to count - 1 do begin
@@ -1172,7 +1172,7 @@ begin
   foptions:= avalue;
   if not tcustomdropdownlistcontroller(fowner).isloading then begin
    for int1:= 0 to count - 1 do begin
-    tdropdowncol(fitems[int1]).options:= 
+    tdropdowncol(fitems[int1]).options:=
                      coloptionsty(replacebits(longword(foptions),
                         longword(tdropdowncol(fitems[int1]).options),mask));
    end;
@@ -1190,7 +1190,7 @@ begin
   ftextflags:= avalue;
   if not tcustomdropdownlistcontroller(fowner).isloading then begin
    for int1:= 0 to count - 1 do begin
-    tdropdowncol(fitems[int1]).textflags:= 
+    tdropdowncol(fitems[int1]).textflags:=
                      textflagsty(replacebits(longword(ftextflags),
                         longword(tdropdowncol(fitems[int1]).textflags),mask));
    end;
@@ -1388,7 +1388,7 @@ begin
  //dummy
 end;
 
-function tcustomdropdowncontroller.getbuttonframeclass: 
+function tcustomdropdowncontroller.getbuttonframeclass:
                                                   dropdownbuttonframeclassty;
 begin
  result:= tcustomdropdownbuttonframe;
@@ -1444,7 +1444,7 @@ end;
 
 procedure tcustomdropdowncontroller.dropdown;
 begin
- if not (deo_disabled in foptions) and candropdown and 
+ if not (deo_disabled in foptions) and candropdown and
                    (fdropdowncount = 0) then begin
   dobeforedropdown;
   internaldropdown;
@@ -1485,7 +1485,7 @@ begin
    end;
   end;
  end;
-end;                                    
+end;
 
 procedure tcustomdropdowncontroller.mouseevent(var info: mouseeventinfoty);
 begin
@@ -1537,9 +1537,9 @@ begin
    fdataselected:= false;
   end;
   ea_textentered: begin
-   if (deo_selectonly in foptions) and not fdataselected and 
+   if (deo_selectonly in foptions) and not fdataselected and
            fintf.getedited then begin
-    if not (deo_forceselect in foptions) and 
+    if not (deo_forceselect in foptions) and
                                      (fintf.geteditor.text = '') then begin
      info.action:= ea_none;
      selectnone(key_return);
@@ -1584,7 +1584,7 @@ begin
            {$ifdef FPC}@{$endif}applicationactivechanged);
  end;
  inherited;
- if (event = oe_changed) and (sender = fintf.getwidget.window) and 
+ if (event = oe_changed) and (sender = fintf.getwidget.window) and
          (getdropdownwidget <> nil) then begin
   updatedropdownpos(getdropdownwidget.widgetrect);
  end;
@@ -1764,7 +1764,7 @@ begin
  case info.action of
   ea_textedited: begin
    if fdropdownwidget = nil then begin
-    if (deo_autodropdown in foptions) and 
+    if (deo_autodropdown in foptions) and
       ((fintf.geteditor.text <> '') or (deo_forceselect in foptions)) then begin
      dropdown;
     end;
@@ -1822,7 +1822,7 @@ begin
  end
  else begin
   if (deo_autodropdown in foptions) then begin
-   if candropdown and ((fintf.geteditor.text <> '') or 
+   if candropdown and ((fintf.geteditor.text <> '') or
                          (deo_forceselect in foptions)) then begin
     dropdown;
    end;
@@ -1857,7 +1857,7 @@ end;
 procedure tcustomdropdownlistcontroller.itemchanged(
                const sender: tdatalist; const index: integer);
 begin
- if (deo_selectonly in foptions) and (index = fcols.fitemindex) and 
+ if (deo_selectonly in foptions) and (index = fcols.fitemindex) and
                            (index >= 0) then begin
   setdropdowntext(valuelist[index],false,false,key_none);
  end;
@@ -1977,8 +1977,8 @@ begin
       end;
       int2:= fcols.fitemindex;
       if (int2 >= 0) and
-           ((fcols.fdatacols.count = 0) or (int2 >= fcols.fdatacols[0].count) or 
-                   (str1 <> fcols.fdatacols[0][int2]) and 
+           ((fcols.fdatacols.count = 0) or (int2 >= fcols.fdatacols[0].count) or
+                   (str1 <> fcols.fdatacols[0][int2]) and
                                 (bo1 or (fcols.fdatacols = fcols))) then begin
                                        //no tselector
        int2:= -1;
@@ -2216,7 +2216,7 @@ end;
 procedure tcustomdropdownlistcontroller.setimageframe(const avalue: framety);
 begin
  fimageframe:= avalue;
- imagelistchanged; 
+ imagelistchanged;
 end;
 
 procedure tcustomdropdownlistcontroller.setimageframe_left(const avalue: integer);
@@ -2407,14 +2407,14 @@ begin
   initcols(acols);
   if afixcolclass <> nil then begin
    tcustomframe1(fframe).updatestate();
-   synctofontheight(); 
+   synctofontheight();
    ffixcols.add(afixcolclass.create(self,ffixcols,fcontroller));
   end;
   tcustomframe1(fframe).updatestate();
   synctofontheight();
   if acontroller.imagelist <> nil then begin
    ffixcols.add(timagefixcol.create(self,ffixcols,fcontroller));
-   int1:= fcontroller.imagelist.height + fcontroller.fimageframe.top + 
+   int1:= fcontroller.imagelist.height + fcontroller.fimageframe.top +
                 fcontroller.fimageframe.bottom;
    if datarowheight < int1 then begin
     datarowheight:= int1;
@@ -2453,7 +2453,7 @@ begin
   int2:= acols.fdatacols.maxrowcount;
   rowcount:= int2;
   fdatacols.count:= acols.count;
-  for int1:= 0 to acols.count - 1 do begin  
+  for int1:= 0 to acols.count - 1 do begin
    col1:= acols[int1];
    with tstringcol1(fdatacols[int1]) do begin
     if acols.fdatacols.count > int1 then begin
@@ -2513,7 +2513,7 @@ begin
      captions.count:= int1 + 1;
      captions[int1].caption:= col1.caption;
     end;
-   end;    
+   end;
   end;
  end;
 end;
@@ -2613,7 +2613,7 @@ begin
  else begin
   int1:= fdropdownrowcount;
  end;
- if (int1 > int2){ and not 
+ if (int1 > int2){ and not
                       (deo_livefilter in fcontroller.foptions)} then begin
   int1:= int2;
  end;
@@ -2710,7 +2710,7 @@ begin
    itemselected(cell.row,key_none);
   end
   else begin
-   if (deo_cliphint in fcontroller.foptions) and 
+   if (deo_cliphint in fcontroller.foptions) and
            (eventkind = cek_firstmousepark) and
             textclipped(cell) then begin
     application.inithintinfo(hintinfo,self);
@@ -2739,7 +2739,7 @@ begin
    end
    else begin
     with fdatarecty do begin
-     if (info.pos.y < y + mouseautoscrollheight) and 
+     if (info.pos.y < y + mouseautoscrollheight) and
                                                (info.pos.y >= y) then begin
       startrepeater(false);
      end
@@ -2992,7 +2992,7 @@ begin
  with cellinfoty(canvas.drawinfopo^) do begin
   fimagelist.paint(canvas,cell.row,deflaterect(rect,fimageframe),
                                                         [al_ycentered]);
- end; 
+ end;
 end;
 
 end.

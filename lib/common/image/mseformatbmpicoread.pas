@@ -41,7 +41,7 @@ uses
 
 type
  tbitmap1 = class(tbitmap);
- 
+
 const
  RT_BITMAP = PChar(2);
 
@@ -445,7 +445,7 @@ begin
  end
  else begin
   if dest is timagelist then begin
-   result:= readimagebmp(asource,timagelist(dest).bitmap);   
+   result:= readimagebmp(asource,timagelist(dest).bitmap);
    if result then begin
     timagelist(dest).bitmap.change;
    end;

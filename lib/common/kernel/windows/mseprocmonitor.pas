@@ -19,7 +19,7 @@ uses
 {$endif}
 
 implementation
-uses 
+uses
  msethread,msetypes,windows,sysutils,msearrayutils,mseapplication;
 type
  handlearty = array of thandle;
@@ -154,7 +154,7 @@ begin
  unlock;
 end;
 
-procedure tprocmonitor.unlistentoprocess(const prochandle: prochandlety; 
+procedure tprocmonitor.unlistentoprocess(const prochandle: prochandlety;
                      const dest: iprocmonitor);
 var
  int1: integer;

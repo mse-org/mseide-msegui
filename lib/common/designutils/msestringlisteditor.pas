@@ -15,10 +15,10 @@ interface
 uses
  mseforms,msedataedits,msesimplewidgets,msewidgetgrid,msegrids,msetextedit,
  msestat,msestatfile;
- 
+
 const
  stringlisteditorstatname =  'stringlisteditor.sta';
- 
+
 type
  tstringlisteditor = class(tmseform)
    cancel: tbutton;
@@ -37,7 +37,7 @@ type
 implementation
 uses
  msestringlisteditor_mfm,mseeditglob,msetypes;
- 
+
 { tstringlisteditor }
 
 constructor tstringlisteditor.create(const aonclosequery: closequeryeventty);

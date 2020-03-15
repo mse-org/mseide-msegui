@@ -215,32 +215,32 @@ procedure ObjectBinaryToText1(Input, Output: TStream;
       begin
       NewInString := InString;
       w := CharToOrdfunc(P);
-      if w = ord('''') then 
+      if w = ord('''') then
         begin //quote char
         if not InString then
           NewInString := True;
         NewStr := '''''';
-        end 
+        end
       else if (Ord(w) >= 32) and ((Ord(w) < 127) or (UseBytes and (Ord(w)<256))) then
         begin //printable ascii or bytes
         if not InString then
           NewInString := True;
         NewStr := char(w);
-        end 
-      else 
+        end
+      else
         begin //ascii control chars, non ascii
         if InString then
           NewInString := False;
         NewStr := '#' + IntToStr(w);
         end;
-      if NewInString <> InString then 
+      if NewInString <> InString then
         begin
         NewStr := '''' + NewStr;
         InString := NewInString;
         end;
       res := res + NewStr;
       end;
-    if InString then 
+    if InString then
       res := res + '''';
     end;
    OutStr(res);
@@ -466,7 +466,7 @@ procedure ObjectBinaryToText1(Input, Output: TStream;
     end;
    end;
   end; //processstring
-  
+
   procedure ReadPropList(indent: String);
 
     procedure ProcessValue(ValueType: TValueType; Indent: String);
@@ -582,7 +582,7 @@ procedure ObjectBinaryToText1(Input, Output: TStream;
               Input.Seek(-1, soFromCurrent);
               OutStr(indent + '  item');
               ValueType:= TValueType({$ifdef FPC}Input.{$endif}ReadByte);
-              case valuetype of               
+              case valuetype of
                vaInt8,vaInt16,vaInt32: begin
                 OutStr('[' + IntToStr(ReadInt(ValueType)) + ']');
                 valuetype:= tvaluetype({$ifdef fpc}input.{$endif}readbyte);
@@ -880,7 +880,7 @@ var
     WriteString(s);
    end;
   end;
-  
+
   procedure ProcessProperty; forward;
 
   procedure ProcessValue;
@@ -1448,7 +1448,7 @@ begin
  else begin
   if isalpha then begin
    str1:= getalphanum;
-   ftoken:= toemptyfloat;  
+   ftoken:= toemptyfloat;
    flasttokenstr:= '-'+str1;
    if stringicompupper(str1,'INF') <> 0 then begin
     ErrorFmt(SParInvalidFloat,[fLastTokenStr+fBuf[fPos]]);

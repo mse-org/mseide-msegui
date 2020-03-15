@@ -147,7 +147,7 @@ object filedialogfo: Tfiledialogfo
         frame.localprops = []
         frame.localprops1 = []
         frame.buttons.count = 1
-        frame.buttons.items = <        
+        frame.buttons.items = <
           item
           end>
         frame.outerframe = (
@@ -164,9 +164,9 @@ object filedialogfo: Tfiledialogfo
         onsetvalue = filteronsetvalue
         dropdown.options = [deo_keydropdown, deo_cliphint]
         dropdown.cols.count = 2
-        dropdown.cols.items = <        
+        dropdown.cols.items = <
           item
-          end        
+          end
           item
             options = [co_readonly, co_invisible, co_focusselect, co_fill]
           end>
@@ -180,7 +180,7 @@ object filedialogfo: Tfiledialogfo
         frame.localprops = []
         frame.localprops1 = []
         frame.buttons.count = 1
-        frame.buttons.items = <        
+        frame.buttons.items = <
           item
           end>
         frame.outerframe = (
@@ -200,7 +200,7 @@ object filedialogfo: Tfiledialogfo
         dropdown.options = [deo_keydropdown, deo_cliphint]
         dropdown.dropdownrowcount = 10
         dropdown.cols.count = 1
-        dropdown.cols.items = <        
+        dropdown.cols.items = <
           item
             textflags = [tf_ycentered, tf_noselect, tf_ellipseleft]
           end>
@@ -323,7 +323,7 @@ object filedialogfo: Tfiledialogfo
       frame.localprops = []
       frame.localprops1 = []
       frame.buttons.count = 1
-      frame.buttons.items = <      
+      frame.buttons.items = <
         item
         end>
       frame.outerframe = (

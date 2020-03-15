@@ -86,10 +86,10 @@ uses
 {$endif}
 type
  tcomponent1 = class(tcomponent);
-  
+
 {
 function findexistingcomponent(const aname: string;
-                  const aclassname: string; 
+                  const aclassname: string;
                         const areader: tasinheritedreader): boolean;
 var
  comp1: tcomponent;
@@ -127,7 +127,7 @@ end;
 
 procedure tasinheritedobjectreader.findexistingcomponent(child: tcomponent);
 begin
- if (tasinheritedreader(freader).fexistingcomp = nil) and 
+ if (tasinheritedreader(freader).fexistingcomp = nil) and
      (stringicompupper(child.name,
               tasinheritedreader(freader).fexistingcompname) = 0) then begin
   tasinheritedreader(freader).fexistingcomp:= child;
@@ -141,7 +141,7 @@ var
 begin
  inherited;
  tasinheritedreader(freader).fexistingcomp:= nil;
- if (tasinheritedreader(freader).lookuproot = nil) or 
+ if (tasinheritedreader(freader).lookuproot = nil) or
           tasinheritedreader(freader).fforceinherited then begin
   include(flags,ffinherited);
  end

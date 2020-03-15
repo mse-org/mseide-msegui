@@ -22,7 +22,7 @@ type
 implementation
 uses
  mseiircoeffeditor_mfm;
- 
+
 procedure tiircoeffeditorfo.datentexe(const sender: TObject);
 var
  int1: integer;

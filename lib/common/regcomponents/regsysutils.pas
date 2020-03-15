@@ -28,7 +28,7 @@ uses
  sysutils,mclasses,msesysenvmanagereditor,mseglob,msepropertyeditors;
 type
  tarrayelementeditor1 = class(tarrayelementeditor);
- 
+
  tsysenvmanagereditor = class(tcomponenteditor)
   public
    constructor create(const adesigner: idesigner;
@@ -63,7 +63,7 @@ type
   public
 //   procedure edit; override;
  end;
-    
+
 procedure Register;
 begin
  registercomponents('NoGui',[tsysenvmanager,tfilechangenotifyer,tmseprocess,
@@ -114,7 +114,7 @@ end;
 { tpythonpropertyeditor }
 
 const
- pythonsyntax = 
+ pythonsyntax =
 'styles'+lineend+
 ' default '''''+lineend+
 ' words ''b'''+lineend+

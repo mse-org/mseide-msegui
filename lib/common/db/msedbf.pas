@@ -15,7 +15,7 @@ uses
  classes,mclasses,mdb,mdbf,msedb,msetypes{msestrings},dbf_idxfile,
  mseapplication;
 {$warnings on}
- 
+
 type
  tmsedbf = class(tdbf,imselocate,idscontroller,igetdscontroller,
             iactivatorclient)
@@ -76,7 +76,7 @@ type
    {
    function locate(const key: integer; const field: tfield;
                    const options: locateoptionsty = []): locateresultty;
-   function locate(const key: msestring; const field: tfield; 
+   function locate(const key: msestring; const field: tfield;
                  const options: locateoptionsty = []): locateresultty;
    }
    procedure AppendRecord(const Values: array of const);
@@ -90,11 +90,11 @@ type
    property AutocalcFields default false;
    property FilterOptions default [];
  end;
- 
+
 implementation
 uses
  msefileutils;
- 
+
 { tmsedbf }
 
 constructor tmsedbf.create(aowner: tcomponent);

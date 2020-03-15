@@ -14,7 +14,7 @@ unit msefftw;
 
    Note that the FFTW library itself carries the GPL license
    and can therefore not be used in non-GPL software.
-   
+
    Modified 2010 by Martin Schreiber
 }
 
@@ -26,7 +26,7 @@ interface
 {$endif}
 uses
  msetypes,msestrings;
- 
+
 const
 {$ifdef mswindows}
  fftwlib: array[0..1] of filenamety = ('fftw3.dll','libfftw3-3.dll');
@@ -35,7 +35,7 @@ const
 {$endif}
 
 {$IFDEF Unix}
-//const   
+//const
 //    fftwlib = 'fftw3f';
 {$ELSE}
 //const
@@ -60,7 +60,7 @@ type  //  complex_single=record
               fftw_patient,            {generate highly optimized alg.}
               fftw_estimate);          {don't optimize, just use an alg.}
  fftw_flagset = set of fftw_flag;
-                   
+
 var
 {Complex to complex transformations.}
 fftw_plan_dft_1d: function(n: cardinal; i,o: Pcomplexty;
@@ -101,15 +101,15 @@ fftw_execute: procedure(plan: fftw_plan); cdecl;
 procedure fftw_getmem(var p: pointer; size: sizeint);
 procedure fftw_freemem(var p: pointer);{$ifdef FPC}inline;{$endif}
 
-procedure initializefftw(const sonames: array of filenamety); 
+procedure initializefftw(const sonames: array of filenamety);
                                      //[] = default
 procedure releasefftw;
 
 implementation
 uses
  msedynload,msesys,sysutils;
- 
-var 
+
+var
  libinfo: dynlibinfoty;
 
 //{$ifndef Windows}

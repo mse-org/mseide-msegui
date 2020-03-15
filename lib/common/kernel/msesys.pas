@@ -32,13 +32,13 @@ type
   stacksize: ptruint;
   platformdata: array[0..3] of pointer;
  end;
- 
+
  socketkindty = (sok_local,sok_inet,sok_inet6);
  socketshutdownkindty = (ssk_rx,ssk_tx,ssk_both);
  pollkindty = (poka_read,poka_write,poka_except);
  pollkindsty = set of pollkindty;
 
- 
+
  socketaddrty = record
   kind: socketkindty;
   url: filenamety;
@@ -81,8 +81,8 @@ type
  ppollflagsty = ^pollflagsty;
  pollcallbackty = procedure(const aflags: pollflagsty;
                                     const adata: pointer) of object;
- 
- 
+
+
 const
  filerightattributes = [fa_rusr,fa_wusr,fa_xusr,
                         fa_rgrp,fa_wgrp,fa_xgrp,
@@ -146,15 +146,15 @@ type
    constructor create(aerror: syserrorty; atext: string);
    property error: syserrorty read geterror;
  end;
- 
+
 var
  defaultprintcommand: msestring;
- 
+
 function fileattributestofilerights(
                    const attributes: fileattributesty): filerightsty;
 
 procedure checkdirstreamdata(var adata: dirstreamty);
- 
+
 procedure syserror(const error: syserrorty; const text: msestring = ''); overload;
 procedure syserror(const error: syserrorty;
                   const sender: tobject; text: msestring = ''); overload;
@@ -164,7 +164,7 @@ function syeseterror(aerror: integer): syserrorty;
           //if aerror <> 0 -> returns sye_lasterror, sets mselasterror,
           //                  returns sye_ok otherwise
 function syesetextendederror(const aerrormessage: msestring): syserrorty;
-function buildsyserrormessage(const error: syserrorty; 
+function buildsyserrormessage(const error: syserrorty;
                                       const text: msestring = ''): msestring;
 function buildsyserrormessage(const error: syserrorty; const sender: tobject;
                        text: msestring = ''): msestring;
@@ -303,7 +303,7 @@ begin
  mselasterror:= sys_getlasterror;
 end;
 
-function buildsyserrormessage(const error: syserrorty; 
+function buildsyserrormessage(const error: syserrorty;
                                       const text: msestring = ''): msestring;
 begin
  result:= '';
@@ -375,22 +375,22 @@ end;
 
 var
  defaultformatset: boolean = false;
- 
+
 procedure initdefaultformatsettings;
 var
  int1: integer;
 begin
  if not defaultformatset then begin
   defaultformatset:= true;
-  defaultformatsettingsmse.CurrencyFormat:= 
+  defaultformatsettingsmse.CurrencyFormat:=
      {$ifdef FPC}defaultformatsettings.{$endif}CurrencyFormat;
-  defaultformatsettingsmse.NegCurrFormat:= 
+  defaultformatsettingsmse.NegCurrFormat:=
      {$ifdef FPC}defaultformatsettings.{$endif}NegCurrFormat;
   defaultformatsettingsmse.ThousandSeparator:= widechar(
      {$ifdef FPC}defaultformatsettings.{$endif}ThousandSeparator);
   defaultformatsettingsmse.DecimalSeparator:= widechar(
      {$ifdef FPC}defaultformatsettings.{$endif}DecimalSeparator);
-  defaultformatsettingsmse.CurrencyDecimals:= 
+  defaultformatsettingsmse.CurrencyDecimals:=
      {$ifdef FPC}defaultformatsettings.{$endif}CurrencyDecimals;
   defaultformatsettingsmse.DateSeparator:= widechar(
      {$ifdef FPC}defaultformatsettings.{$endif}DateSeparator);
@@ -398,37 +398,37 @@ begin
      {$ifdef FPC}defaultformatsettings.{$endif}TimeSeparator);
   defaultformatsettingsmse.ListSeparator:= widechar(
      {$ifdef FPC}defaultformatsettings.{$endif}ListSeparator);
-  defaultformatsettingsmse.CurrencyString:= 
+  defaultformatsettingsmse.CurrencyString:=
      msestring({$ifdef FPC}defaultformatsettings.{$endif}CurrencyString);
-  defaultformatsettingsmse.ShortDateFormat:= 
+  defaultformatsettingsmse.ShortDateFormat:=
      msestring({$ifdef FPC}defaultformatsettings.{$endif}ShortDateFormat);
-  defaultformatsettingsmse.LongDateFormat:= 
+  defaultformatsettingsmse.LongDateFormat:=
      msestring({$ifdef FPC}defaultformatsettings.{$endif}LongDateFormat);
-  defaultformatsettingsmse.TimeAMString:= 
+  defaultformatsettingsmse.TimeAMString:=
      msestring({$ifdef FPC}defaultformatsettings.{$endif}TimeAMString);
-  defaultformatsettingsmse.TimePMString:= 
+  defaultformatsettingsmse.TimePMString:=
      msestring({$ifdef FPC}defaultformatsettings.{$endif}TimePMString);
-  defaultformatsettingsmse.ShortTimeFormat:= 
+  defaultformatsettingsmse.ShortTimeFormat:=
      msestring({$ifdef FPC}defaultformatsettings.{$endif}ShortTimeFormat);
-  defaultformatsettingsmse.LongTimeFormat:= 
+  defaultformatsettingsmse.LongTimeFormat:=
      msestring({$ifdef FPC}defaultformatsettings.{$endif}LongTimeFormat);
   for int1:= low(tmonthnamearraymse) to high(tmonthnamearraymse) do begin
-   defaultformatsettingsmse.ShortMonthNames[int1]:= 
+   defaultformatsettingsmse.ShortMonthNames[int1]:=
      msestring({$ifdef FPC}defaultformatsettings.{$endif}ShortMonthNames[int1]);
   end;
   for int1:= low(tmonthnamearraymse) to high(tmonthnamearraymse) do begin
-   defaultformatsettingsmse.LongMonthNames[int1]:= 
+   defaultformatsettingsmse.LongMonthNames[int1]:=
      msestring({$ifdef FPC}defaultformatsettings.{$endif}LongMonthNames[int1]);
   end;
   for int1:= low(tweeknamearraymse) to high(tweeknamearraymse) do begin
-   defaultformatsettingsmse.ShortDayNames[int1]:= 
+   defaultformatsettingsmse.ShortDayNames[int1]:=
      msestring({$ifdef FPC}defaultformatsettings.{$endif}ShortDayNames[int1]);
   end;
   for int1:= low(tweeknamearraymse) to high(tweeknamearraymse) do begin
-   defaultformatsettingsmse.LongDayNames[int1]:= 
+   defaultformatsettingsmse.LongDayNames[int1]:=
      msestring({$ifdef FPC}defaultformatsettings.{$endif}LongDayNames[int1]);
   end;
-  defaultformatsettingsmse.TwoDigitYearCenturyWindow:= 
+  defaultformatsettingsmse.TwoDigitYearCenturyWindow:=
      {$ifdef FPC}defaultformatsettings.{$endif}TwoDigitYearCenturyWindow;
  end;
 end;
@@ -439,33 +439,33 @@ var
 begin
  {$ifdef FPC}defaultformatsettings.{$endif}CurrencyFormat:=
                       defaultformatsettingsmse.CurrencyFormat;
- {$ifdef FPC}defaultformatsettings.{$endif}NegCurrFormat:= 
+ {$ifdef FPC}defaultformatsettings.{$endif}NegCurrFormat:=
                       defaultformatsettingsmse.NegCurrFormat;
  {$ifdef FPC}defaultformatsettings.{$endif}ThousandSeparator:=
                       char(defaultformatsettingsmse.ThousandSeparator);
- {$ifdef FPC}defaultformatsettings.{$endif}DecimalSeparator:= 
+ {$ifdef FPC}defaultformatsettings.{$endif}DecimalSeparator:=
                       char(defaultformatsettingsmse.DecimalSeparator);
- {$ifdef FPC}defaultformatsettings.{$endif}CurrencyDecimals:= 
+ {$ifdef FPC}defaultformatsettings.{$endif}CurrencyDecimals:=
                       defaultformatsettingsmse.CurrencyDecimals;
- {$ifdef FPC}defaultformatsettings.{$endif}DateSeparator:= 
+ {$ifdef FPC}defaultformatsettings.{$endif}DateSeparator:=
                       char(defaultformatsettingsmse.DateSeparator);
- {$ifdef FPC}defaultformatsettings.{$endif}TimeSeparator:= 
+ {$ifdef FPC}defaultformatsettings.{$endif}TimeSeparator:=
                       char(defaultformatsettingsmse.TimeSeparator);
- {$ifdef FPC}defaultformatsettings.{$endif}ListSeparator:= 
+ {$ifdef FPC}defaultformatsettings.{$endif}ListSeparator:=
                       char(defaultformatsettingsmse.ListSeparator);
- {$ifdef FPC}defaultformatsettings.{$endif}CurrencyString:= 
+ {$ifdef FPC}defaultformatsettings.{$endif}CurrencyString:=
                       ansistring(defaultformatsettingsmse.CurrencyString);
- {$ifdef FPC}defaultformatsettings.{$endif}ShortDateFormat:= 
+ {$ifdef FPC}defaultformatsettings.{$endif}ShortDateFormat:=
                       ansistring(defaultformatsettingsmse.ShortDateFormat);
- {$ifdef FPC}defaultformatsettings.{$endif}LongDateFormat:= 
+ {$ifdef FPC}defaultformatsettings.{$endif}LongDateFormat:=
                       ansistring(defaultformatsettingsmse.LongDateFormat);
- {$ifdef FPC}defaultformatsettings.{$endif}TimeAMString:= 
+ {$ifdef FPC}defaultformatsettings.{$endif}TimeAMString:=
                       ansistring(defaultformatsettingsmse.TimeAMString);
- {$ifdef FPC}defaultformatsettings.{$endif}TimePMString:= 
+ {$ifdef FPC}defaultformatsettings.{$endif}TimePMString:=
                       ansistring(defaultformatsettingsmse.TimePMString);
- {$ifdef FPC}defaultformatsettings.{$endif}ShortTimeFormat:= 
+ {$ifdef FPC}defaultformatsettings.{$endif}ShortTimeFormat:=
                       ansistring(defaultformatsettingsmse.ShortTimeFormat);
- {$ifdef FPC}defaultformatsettings.{$endif}LongTimeFormat:= 
+ {$ifdef FPC}defaultformatsettings.{$endif}LongTimeFormat:=
                       ansistring(defaultformatsettingsmse.LongTimeFormat);
  for int1:= low(tmonthnamearraymse) to high(tmonthnamearraymse) do begin
   {$ifdef FPC}defaultformatsettings.{$endif}ShortMonthNames[int1]:=
@@ -520,7 +520,7 @@ function getexceptiontext(obj: tobject; addr: pointer; framecount: longint;
 begin
  result:= 'An exception occurred at $'+
                hextostrmse(Addr)+' :' + lineend;
- result:= result + getexceptionstack(obj,addr,framecount,frames); 
+ result:= result + getexceptionstack(obj,addr,framecount,frames);
 end;
 
 procedure listexceptionstack(Obj: TObject; Addr:Pointer; FrameCount: Longint;

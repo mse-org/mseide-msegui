@@ -27,12 +27,12 @@ const
  mmtoinch = 1/25.4;
  defaultgdiprintppmm = mseguiglob.defaultppmm;
  screenrefprintername = 'ScreeN';
-  
+
 type
  {$ifndef mswindows}
  henhmetafile = longword;
  {$endif}
- 
+
  tgdiprintcanvas = class(tprintercanvas)
   protected
    procedure beginpage; override;
@@ -41,7 +41,7 @@ type
    function didprint: boolean; virtual;
   public
    constructor create(const user: tcustomprinter; const intf: icanvas);
-   procedure drawtext(var info: drawtextinfoty); override;  
+   procedure drawtext(var info: drawtextinfoty); override;
  end;
 
  tcustomgdiprinter = class(tprinter,icanvas)
@@ -71,7 +71,7 @@ type
    property printername: msestring read fprintername write fprintername;
                   //'' -> default printer
  end;
- 
+
 //{$ifdef mswindows}
 
  twmfprintcanvas = class(tgdiprintcanvas)
@@ -87,7 +87,7 @@ type
    procedure linktopaintdevice(apaintdevice: paintdevicety; const gc: gcty;
                 {const size: sizety;} const cliporigin: pointty); override;
    property metafilehandle: henhmetafile read getenhmetafile;
- end;  
+ end;
 
  twmfprinter = class(tcustomgdiprinter)
   private
@@ -108,17 +108,17 @@ type
    property refprintername: msestring read frefprintername write frefprintername;
                   //'' -> defaultprinter, 'ScreeN' -> default dc
  end;
- 
+
 //{$endif}
- 
+
 function defaultprinter: msestring;
- 
+
 implementation
 uses
  mseguiintf,msedynload,sysutils,msesysintf1,msesys;
 var
  hasgdiprint: boolean;
- 
+
 {$ifdef mswindows}
 type
  WINBOOL = longbool;
@@ -131,13 +131,13 @@ type
  end;
  TDOCINFOW = DOCINFOW;
  PDOCINFOW = ^DOCINFOW;
-var     
+var
  SetWorldTransform: function(_para1:HDC; var _para2:XFORM):WINBOOL; stdcall;
  StartDocW: function(_para1:HDC; _para2:PDOCINFOW):longint; stdcall;
  GetDefaultPrinterW: function(pszBuffer: pwidechar;
                               pcchBuffer: pdword): WINBOOL; stdcall;
 {$endif}
-  
+
 {$ifdef mswindows}
 procedure checkprinterror(const aresult: integer; const atext: msestring = '');
 begin
@@ -146,7 +146,7 @@ begin
  end;
 end;
 
-procedure checkprintboolerror(const aresult: boolean; 
+procedure checkprintboolerror(const aresult: boolean;
                                                   const atext: msestring = '');
 begin
  if not aresult then begin
@@ -184,12 +184,12 @@ begin
  include(fstate,cs_inactive);
  if not (pcs_dryrun in fpstate) and active then begin
   exclude(fstate,cs_inactive);
- end;   
+ end;
  if not (cs_inactive in fstate) then begin
   include(fstate,cs_pagestarted);
   {$ifdef mswindows}
   if not (cs_metafile in fstate) then begin
-   checkprinterror(startpage(gchandle)); 
+   checkprinterror(startpage(gchandle));
   end;
   {$endif}
  end;
@@ -203,7 +203,7 @@ begin
   exclude(fstate,cs_pagestarted);
   {$ifdef mswindows}
   if not (cs_metafile in fstate) then begin
-   checkprinterror(windows.endpage(gchandle)); 
+   checkprinterror(windows.endpage(gchandle));
   end;
   {$endif}
  end;
@@ -310,7 +310,7 @@ begin
   fillchar(gc1,sizeof(gc1),0);
   gc1.paintdevicesize:= getwindowsize;
   gc1.kind:= bmk_rgb;
-  gc1.ppmm:= ppmm; 
+  gc1.ppmm:= ppmm;
   include(gc1.drawingflags,df_highresfont);
   self.creategc(gc1,mstr1);
   checkprinterror(setgraphicsmode(gc1.handle,gm_advanced));
@@ -597,7 +597,7 @@ begin
   end;
  end;
  agc.refgc:= createdc('WINSPOOL',pansichar(str1),nil,nil);
-// agc.refgc:= getdc(0);        
+// agc.refgc:= getdc(0);
  try
 //  guierror(gui_creategc(0,gck_metafile,agc,aname),'for "'+aname+'"');
   gdierror(fcanvas.creategc(0,gck_metafile,agc,aname),'for "'+aname+'"');

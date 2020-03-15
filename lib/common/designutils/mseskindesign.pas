@@ -1,5 +1,5 @@
 { MSEide Copyright (c) 2010 by Martin Schreiber
-   
+
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation; either version 2 of the License, or
@@ -19,7 +19,7 @@ unit mseskindesign;
 interface
 uses
  mseskin,mseclasses,classes;
- 
+
 type
  tskinhandlerdesign = class(tskinhandler)
   protected
@@ -30,11 +30,11 @@ type
 //   procedure doactivate(const sender: tcustomskincontroller); override;
 //   procedure dodeactivate(const sender: tcustomskincontroller); override;
  end;
- 
+
 implementation
 uses
  msedesigner;
- 
+
 { tskinhandlerdesign }
 {
 procedure tskinhandlerdesign.updateskindesign(const ainfo: skininfoty);

@@ -41,12 +41,12 @@ uses
 {$ifdef FPC}
  {$define xbooleanresult}
  {$if defined(FPC) and (fpc_fullversion < 020300)}
-  {$define xboolean} 
+  {$define xboolean}
  {$ifend}
  {$ifdef UNIX}
   {$ifdef msedebug}
 var
- _IO_stdin: P_IO_FILE; cvar;       
+ _IO_stdin: P_IO_FILE; cvar;
   //avoid link errors if rtl is compiled with stabs info
  _IO_stdout: P_IO_FILE; cvar;
  _IO_stderr: P_IO_FILE; cvar;
@@ -75,15 +75,15 @@ type
   visual: pvisual;
   colormap: tcolormap;
  end;
- {$if sizeof(x11internalwindowoptionsdty) > sizeof(internalwindowoptionspty)} 
+ {$if sizeof(x11internalwindowoptionsdty) > sizeof(internalwindowoptionspty)}
   {$error 'buffer overflow'}
- {$ifend} 
+ {$ifend}
  x11internalwindowoptionsty =  record
   case integer of
    0: (d: x11internalwindowoptionsdty;);
    1: (_bufferspace: internalwindowoptionspty;);
  end;
-  
+
  {$if sizeof(x11internalwindowoptionsdty) > sizeof(internalwindowoptionspty)}
   {$error 'buffer overflow'}
  {$ifend}
@@ -363,7 +363,7 @@ type
  XIC = ^_XIC;
  ppucs4char = ^pucs4char;
  dword = longword;
-  
+
  VisualID = culong;
  Visual = record
   ext_data: PXExtData;  { hook for extension to hang data  }
@@ -377,7 +377,7 @@ type
  end;
  msepvisual = ^visual;
 
-(* 
+(*
  VisualID = dword;
  Visual = record
    ext_data: PXExtData;  { hook for extension to hang data  }
@@ -390,7 +390,7 @@ type
    map_entries: Longint;
  end;
  msepvisual = ^visual;
-*)  
+*)
   PXWMHints = ^XWMHints;
   XWMHints = record
     flags: clong;  { marks which fields in this structure are defined  }
@@ -525,13 +525,13 @@ uses
 {$endif}
 
 const
- xdndprotocolversion = 4; 
+ xdndprotocolversion = 4;
 var
  pixmapcount: integer;
- 
+
 type
  pwinid = ^TXID;
- 
+
  twindow1 = class(msegui.twindow);
  tguiapplication1 = class(tguiapplication);
  tcanvas1 = class(tcanvas);
@@ -640,7 +640,7 @@ type
    0: (d: x11windowdty;);
    1: (_bufferspace: windowpty;);
  end;
- 
+
 const
  atombits = sizeof(atom)*8;
  mouseeventmask = buttonpressmask or buttonreleasemask or pointermotionmask;
@@ -676,7 +676,7 @@ type
  wmstatety = (wms_none,wms_withdrawn,wms_normal,wms_invalid,wms_iconic);
 
 var
- xlockerror: integer = 0; 
+ xlockerror: integer = 0;
  appdisp: pdisplay;
  appid: winidty;
 // defscreenid: cint;
@@ -728,14 +728,14 @@ type
 var
  sminfo: sminfoty;
  {$endif}
- 
+
  {$ifdef with_saveyourself}
  wmcommandatom: atom;
  saveyourselfwindow: integer;
  {$endif}
- 
+
 type
- netatomty = 
+ netatomty =
       (net_supported,
        //suports checked below
        net_workarea,
@@ -781,7 +781,7 @@ const
  firstcheckedatom = net_workarea;
  lastcheckedatom = net_active_window;
  firstonlyifexistatom = net_wm_window_opacity;
- netatomnames: array[netatomty] of string = 
+ netatomnames: array[netatomty] of string =
       ('_NET_SUPPORTED','_NET_WORKAREA',
        '_NET_WM_STATE',
        '_NET_WM_STATE_MAXIMIZED_VERT','_NET_WM_STATE_MAXIMIZED_HORZ',
@@ -809,7 +809,7 @@ const
        '_NET_WM_ICON',
        '_NET_WM_NAME',
 
-       '_NET_FRAME_EXTENTS', 
+       '_NET_FRAME_EXTENTS',
        '_NET_REQUEST_FRAME_EXTENTS',
        '_NET_SYSTEM_TRAY_S0','_NET_SYSTEM_TRAY_OPCODE',
        '_NET_SYSTEM_TRAY_MESSAGE_DATA',
@@ -838,16 +838,16 @@ type
  clipboardinfoty = record
   name: atom;
   buffer: msestring;
-  timestamp: ttime; 
+  timestamp: ttime;
  end;
 const
  clipboardnames: array[clipboardbufferty] of string = ('CLIPBOARD','PRIMARY');
-   
+
 var
  netatoms: array[netatomty] of atom;
  xdndatoms: array[xdndatomty] of atom;
  xdndactionatoms: array[dndactionty] of atom;
- 
+
  netsupported: boolean;
  canfullscreen: boolean;
  canframeextents: boolean;
@@ -856,7 +856,7 @@ var
  sigtimerbefore: sighandler_t;
  sigtermbefore: sighandler_t;
  sigchldbefore: sighandler_t;
- 
+
  timerevent: boolean;
  terminated: boolean;
  childevent: boolean;
@@ -939,7 +939,7 @@ procedure setstringproperty(id: winidty; prop: atom; value: string);
 begin
 {$ifdef mse_debuggdisync}
  checkgdilock;
-{$endif} 
+{$endif}
  xchangeproperty(appdisp,id,prop,stringatom,8,propmodereplace,
                                         pbyte(pchar(value)),length(value)+1);
 end;
@@ -960,7 +960,7 @@ procedure setwinidproperty(id: winidty; prop: atom; value: winidty);
 begin
 {$ifdef mse_debuggdisync}
  checkgdilock;
-{$endif} 
+{$endif}
  xchangeproperty(appdisp,id,prop,windowatom,32,propmodereplace,@value,1);
 end;
 
@@ -968,12 +968,12 @@ procedure setlongproperty(id: winidty; prop: atom; value: culong); overload;
 begin
 {$ifdef mse_debuggdisync}
  checkgdilock;
-{$endif} 
+{$endif}
  xchangeproperty(appdisp,id,prop,cardinalatom,32,propmodereplace,@value,1);
 end;
 
 procedure setlongproperty(const id: winidty; const prop: atom;
-                            const value: array of culong; 
+                            const value: array of culong;
                               const datatype: atom); overload;
 begin
 {$ifdef mse_debuggdisync}
@@ -995,7 +995,7 @@ var
 begin
 {$ifdef mse_debuggdisync}
  checkgdilock;
-{$endif} 
+{$endif}
  result:= false;
  if xgetwindowproperty(appdisp,id,name,0,10000,{$ifdef xboolean}false{$else}0{$endif},
    atomatom,@actualtype,@actualformat,@nitems,@bytesafter,@prop) = success then begin
@@ -1016,7 +1016,7 @@ procedure setatomproperty(id: winidty; prop: atom; value: atom);
 begin
 {$ifdef mse_debuggdisync}
  checkgdilock;
-{$endif} 
+{$endif}
  xchangeproperty(appdisp,id,prop,atomatom,32,propmodereplace,@value,1);
 end;
 
@@ -1027,7 +1027,7 @@ var
 begin
 {$ifdef mse_debuggdisync}
  checkgdilock;
-{$endif} 
+{$endif}
  readatomproperty(id,prop,ar1);
  for int1:= 0 to high(ar1) do begin
   if ar1[int1] = value then begin
@@ -1079,7 +1079,7 @@ var
 begin
 {$ifdef mse_debuggdisync}
  checkgdilock;
-{$endif} 
+{$endif}
  result:= false;
  if xgetwindowproperty(appdisp,id,name,0,count,{$ifdef xboolean}false{$else}0{$endif},
         anypropertytype,@actualtype,@actualformat,@nitems,@bytesafter,@prop) = success then begin
@@ -1119,7 +1119,7 @@ var
 begin
 {$ifdef mse_debuggdisync}
  checkgdilock;
-{$endif} 
+{$endif}
  result:= false;
  if xgetwindowproperty(appdisp,id,name,0,bigint,{$ifdef xboolean}false{$else}0{$endif},
         anypropertytype,@actualtype,@actualformat,
@@ -1145,7 +1145,7 @@ begin
  end;
 end;
 
-function stringtotextproperty(const value: msestring; 
+function stringtotextproperty(const value: msestring;
                                  const style: txiccencodingstyle;
                                      out textproperty: xtextproperty): boolean;
 var
@@ -1155,7 +1155,7 @@ var
 begin
 {$ifdef mse_debuggdisync}
  checkgdilock;
-{$endif} 
+{$endif}
  if style = xstdicctextstyle then begin
   listxwctext[0]:= msestringtoucs4string(value);
   result:= xwctextlisttotextproperty(appdisp,@listxwctext,1,style,
@@ -1178,7 +1178,7 @@ function setnetstring(const id: winidty; const aproperty: netatomty;
 begin
 {$ifdef mse_debuggdisync}
  checkgdilock;
-{$endif} 
+{$endif}
  result:= false;
  if netatoms[aproperty] <> 0 then begin
   setmsestringproperty(id,netatoms[aproperty],avalue);
@@ -1191,7 +1191,7 @@ function setnetcardinal(const id: winidty; const aproperty: netatomty;
 begin
 {$ifdef mse_debuggdisync}
  checkgdilock;
-{$endif} 
+{$endif}
  result:= false;
  if netatoms[aproperty] <> 0 then begin
   setlongproperty(id,netatoms[aproperty],avalue);
@@ -1204,7 +1204,7 @@ function getnetcardinal(const id: winidty; const aproperty: netatomty;
 begin
 {$ifdef mse_debuggdisync}
  checkgdilock;
-{$endif} 
+{$endif}
  result:= false;
  if netatoms[aproperty] <> 0 then begin
   result:= readcardinalproperty(id,netatoms[aproperty],1,avalue);
@@ -1216,7 +1216,7 @@ function setnetatom(const id: winidty; const aproperty: netatomty;
 begin
 {$ifdef mse_debuggdisync}
  checkgdilock;
-{$endif} 
+{$endif}
  result:= false;
  if (netatoms[aproperty] <> 0) and (netatoms[avalue] <> 0) then begin
   setatomproperty(id,netatoms[aproperty],netatoms[avalue]);
@@ -1229,7 +1229,7 @@ function setnetatomarrayitem(const id: winidty; const aproperty: netatomty;
 begin
 {$ifdef mse_debuggdisync}
  checkgdilock;
-{$endif} 
+{$endif}
  result:= false;
  if (netatoms[aproperty] <> 0) and (netatoms[avalue] <> 0) then begin
   setatomarrayitemproperty(id,netatoms[aproperty],netatoms[avalue]);
@@ -1242,7 +1242,7 @@ function resetnetatomarrayitem(const id: winidty; const aproperty: netatomty;
 begin
 {$ifdef mse_debuggdisync}
  checkgdilock;
-{$endif} 
+{$endif}
  result:= false;
  if (netatoms[aproperty] <> 0) and (netatoms[avalue] <> 0) then begin
   resetatomarrayitemproperty(id,netatoms[aproperty],netatoms[avalue]);
@@ -1302,13 +1302,13 @@ function pastefromclipboard(out value: string; const selection: atom;
                        out nitems1: integer): guierrorty;
 const
  transferbuffersize = 1024 div 4; //1kb
-var 
+var
  clipboardowner: longword;
  value1: string;
 // nitems1: integer;
 // acttype: atom;
 // actformat: cint;
-  
+
  function getdata(const target: atom; const resulttarget: atom): guierrorty;
  var
   event: xevent;
@@ -1419,7 +1419,7 @@ var
  end; //getdata
 
 var
- int1,int2: integer; 
+ int1,int2: integer;
  po1: patomaty;
 // atoms1: array[0..4] of atom;
  atom1: atom;
@@ -1542,7 +1542,7 @@ begin
  xgetwindowattributes(appdisp,id,@attributes);
  result:= attributes.map_state = isviewable;
 end;
- 
+
 function getwmstate(id: winidty): wmstatety;
 type
  wmstatety = record
@@ -1561,7 +1561,7 @@ var
 begin
 {$ifdef mse_debuggdisync}
  checkgdilock;
-{$endif} 
+{$endif}
  result:= wms_none;
  if xgetwindowproperty(appdisp,id,wmstateatom,0,2,
       {$ifdef xboolean}false{$else}0{$endif},wmstateatom,@typeatom,@format,
@@ -1582,7 +1582,7 @@ var
 begin
 {$ifdef mse_debuggdisync}
  checkgdilock;
-{$endif} 
+{$endif}
  if id <> 0 then begin
   if xgetgeometry(appdisp,id,@result,@x,@y,
                             @width,@height,@border,@depth) <> 0 then begin
@@ -1650,7 +1650,7 @@ var
 begin
 {$ifdef mse_debuggdisync}
  checkgdilock;
-{$endif} 
+{$endif}
  result:= false;
  if netsupported then begin
   fillchar(xevent,sizeof(xevent),0);
@@ -1665,7 +1665,7 @@ begin
    data.l[2]:= netatoms[value2];
    if xsendevent(appdisp,gui_getrootwindow(id),
                         {$ifdef xboolean}false{$else}0{$endif},
-            substructurenotifymask or 
+            substructurenotifymask or
                            substructureredirectmask,@xevent) <> 0 then begin
     result:= true;
    end;
@@ -1683,7 +1683,7 @@ var
 begin
 {$ifdef mse_debuggdisync}
  checkgdilock;
-{$endif} 
+{$endif}
  result:= netsupported and (messagetype <> 0) and (high(adata) <= 4);
  if result then begin
   fillchar(xevent,sizeof(xevent),0);
@@ -1708,7 +1708,7 @@ function sendnetrootcardinalmessage(const messagetype: atom;
 begin
 {$ifdef mse_debuggdisync}
  checkgdilock;
-{$endif} 
+{$endif}
  result:= sendnetcardinalmessage(rootid,messagetype,aid,adata,
                substructurenotifymask or substructureredirectmask);
 end;
@@ -1719,7 +1719,7 @@ var
 begin
 {$ifdef mse_debuggdisync}
  checkgdilock;
-{$endif} 
+{$endif}
  int1:= 0;
  result:= false;
  repeat
@@ -1758,7 +1758,7 @@ begin
 {$ifdef mse_debugshow}
   debugwindow('*gui_setwindowstate xmapwindow ',id);
 {$endif}
-  if (getwmstate(id) = wms_iconic) and windowmapped(id) and 
+  if (getwmstate(id) = wms_iconic) and windowmapped(id) and
                                   (netatoms[net_active_window] <> 0)then begin
                     //probably gnome mutter
    sendnetrootcardinalmessage(netatoms[net_active_window],id,
@@ -1769,7 +1769,7 @@ begin
   end;
  end;
  if size in [wsi_fullscreen,wsi_fullscreenvirt] then begin
-  if not canfullscreen or 
+  if not canfullscreen or
            not changenetwmstate(id,nso_add,net_wm_state_fullscreen) then begin
    fullscreen; //no windowmanager
   end;
@@ -1803,7 +1803,7 @@ procedure freetextproperty(const value: xtextproperty);
 begin
 {$ifdef mse_debuggdisync}
  checkgdilock;
-{$endif} 
+{$endif}
  xfree(value.value);
 end;
 
@@ -1815,7 +1815,7 @@ begin
  gdi_lock;
  if stringtotextproperty(caption,
                   xstdicctextstyle{xutf8stringstyle},textprop) then begin
-                                  //jwm can not handle xutf8stringstyle 
+                                  //jwm can not handle xutf8stringstyle
   xsetwmname(appdisp,id,@textprop);
   freetextproperty(textprop);
   result:= gue_ok;
@@ -1845,7 +1845,7 @@ var
 begin
 {$ifdef mse_debuggdisync}
  checkgdilock;
-{$endif} 
+{$endif}
  hints:= pxwmhints(xgetwmhints(appdisp,id));
  if hints = nil then begin
   hints:= pxwmhints(xallocwmhints);
@@ -1931,7 +1931,7 @@ begin
     end;
     else begin
      ar1:= nil; //not supported
-    end; 
+    end;
    end;
    if maskima.pixels <> nil then begin
     pd:= @ar1[2];
@@ -1955,7 +1955,7 @@ begin
         inc(pd);
         inc(ps1);
        until ps1 >= pe;
-       ps:= ps+maskima.linebytes; 
+       ps:= ps+maskima.linebytes;
       end;
      end;
      bmk_mono: begin
@@ -2052,9 +2052,9 @@ function gui_pidtowinid(const pids: procidarty): winidty;
 
 var
  level: integer;
- 
+
  function scanchildren(const aparent: winidty): boolean;
- 
+
   function checkpid(const apid: integer): boolean;
   var
    int1: integer;
@@ -2067,7 +2067,7 @@ var
     end;
    end;
   end;
-  
+
  var
   parent,root: winidty;
   ca1: longword;
@@ -2083,11 +2083,11 @@ var
    result:= true;
    gui_pidtowinid:= aparent;
   end
-  else begin 
-   if not netsupported or 
+  else begin
+   if not netsupported or
             not readatomproperty(aparent,netatoms[net_wm_state],ar1) then begin
      //no wm toplevel window
-    if (xquerytree(appdisp,aparent,@root,@parent,@children,@ca1) <> 0) and 
+    if (xquerytree(appdisp,aparent,@root,@parent,@children,@ca1) <> 0) and
         (children <> nil) then begin
      inc(level);
      for int1:= integer(ca1)-1 downto 0 do begin
@@ -2102,7 +2102,7 @@ var
    end;
   end;
  end;
-  
+
 begin
  gdi_lock;
  result:= 0;
@@ -2117,7 +2117,7 @@ function XDestroyImage(Image: PXImage): Longint;
 begin
 {$ifdef mse_debuggdisync}
  checkgdilock;
-{$endif} 
+{$endif}
 {$ifdef FPC} {$checkpointer off} {$endif}
   Result := Image^.f.destroy_image(Image);
 {$ifdef FPC} {$checkpointer default} {$endif}
@@ -2132,7 +2132,7 @@ var
 begin
 {$ifdef mse_debuggdisync}
  checkgdilock;
-{$endif} 
+{$endif}
  result:= nil;
  count:= 0;
  additem(result,id,count);
@@ -2157,7 +2157,7 @@ var
 begin
 {$ifdef mse_debuggdisync}
  checkgdilock;
-{$endif} 
+{$endif}
  if id = rootid then begin
   result:= rootid;
  end
@@ -2223,7 +2223,7 @@ begin
  gdi_unlock;
 end;
 
-function gui_raisewindow(id: winidty; 
+function gui_raisewindow(id: winidty;
                              const topmost: boolean = false): guierrorty;
 begin
  gdi_lock;
@@ -2267,7 +2267,7 @@ var
 begin
 {$ifdef mse_debuggdisync}
  checkgdilock;
-{$endif} 
+{$endif}
 {$ifdef mse_debugzorder}
  if stackmode = above then begin
   debugwindow('*stackwindow above'+' ',id);
@@ -2292,7 +2292,7 @@ begin
     if {not bo1 and} (stackmode = below) and stackmodebelowworkaround then begin
  //     xflush(appdisp);
  //      xsync(appdisp,false);
-     //many WM place stack_mode below windows 
+     //many WM place stack_mode below windows
      //below all other windows so we need this ugly workaround
      //??? OK ???
      application.sortzorder;
@@ -2484,7 +2484,7 @@ type
   ppmmwidth,ppmmheight: flo64;
  end;
  screeninfoarty = array of screeninfoty;
- 
+
 var
  screenrects: screeninfoarty;
  screenrectsvalid: boolean;
@@ -2693,7 +2693,7 @@ var
 begin
 {$ifdef mse_debuggdisync}
  checkgdilock;
-{$endif} 
+{$endif}
  bo1:= false;
  if canframeextents then begin
   bo1:= readcardinalproperty(id,netatoms[net_frame_extents],4,ar1);
@@ -2708,13 +2708,13 @@ begin
  end
  else begin
   result:= nullframe;
-  if (gui_getwindowrect(id,rect1) = gue_ok) and 
+  if (gui_getwindowrect(id,rect1) = gue_ok) and
               (gui_getwindowrect(toplevelwindow(id),rect2) = gue_ok) then begin
    result.left:= rect1.x - rect2.x;
-   result.top:= rect1.y - rect2.y;                                              
+   result.top:= rect1.y - rect2.y;
    result.right:= rect2.x + rect2.cx - rect1.x - rect1.cx;
    result.bottom:= rect2.y + rect2.cy - rect1.y - rect1.cy;
-  end;  
+  end;
  end;
 end;
 
@@ -2752,7 +2752,7 @@ end;
 var
  pointergrabbed: boolean;
  grabwinid: winidty;
- 
+
 function gui_grabpointer(id: winidty): guierrorty;
 begin
  gdi_lock;
@@ -2776,7 +2776,7 @@ begin
  gdi_lock;
  xungrabpointer(appdisp,currenttime);
  result:= gue_ok;
- pointergrabbed:= false; 
+ pointergrabbed:= false;
  xflush(appdisp);
  gdi_unlock;
 end;
@@ -2900,9 +2900,9 @@ begin
     end;
     allocimage(image,info.size,bmk_rgb);
  //   image.pixels:= gui_allocimagemem(image.length);
- 
+
   //todo: optimize
- 
+
     po1:= @image.pixels[0];
     for int1:= 0 to info.size.cy - 1 do begin
      for int2:= 0 to info.size.cx - 1 do begin
@@ -2921,7 +2921,7 @@ function gui_getpixel(const id: winidty; const pos: pointty;
                                              out pixel: pixelty): guierrorty;
 var
  ximage1: pximage;
-begin 
+begin
  gdi_lock();
  result:= gue_error;
  ximage1:= xgetimage(appdisp,id,pos.x,pos.y,1,1,$ffffffff,zpixmap);
@@ -3029,7 +3029,7 @@ begin
  if winid = 0 then begin
   winid:= rootid;
  end;
- case kind of 
+ case kind of
   bmk_mono: begin
    result:= xcreatepixmap(appdisp,winid,size.cx,size.cy,1);
   end;
@@ -3151,7 +3151,7 @@ var
 begin
  gdi_lock;
  xgetwindowattributes(appdisp,id,@attributes);
- result:= (attributes.map_state = isviewable) and 
+ result:= (attributes.map_state = isviewable) and
                                           (getwmstate(id) = wms_normal);
                                           //gnome does not unmap iconic windows
  gdi_unlock;
@@ -3163,7 +3163,7 @@ var
 begin
 {$ifdef mse_debuggdisync}
  checkgdilock;
-{$endif} 
+{$endif}
  xgetwindowattributes(appdisp,id,@attributes);
  result:= (attributes.override_redirect {$ifndef xboolean}<> 0{$endif});
 end;
@@ -3208,7 +3208,7 @@ begin
   else begin
    waitfordecoration(transientfor);
    gui_raisewindow(transientfor);
-   gui_raisewindow(id);   
+   gui_raisewindow(id);
 //   gui_stackunderwindow(transientfor,id);
   end;
  end;
@@ -3230,7 +3230,7 @@ var
 begin
 {$ifdef mse_debuggdisync}
  checkgdilock;
-{$endif} 
+{$endif}
  result:= appic;
  {$ifdef FPC}
  if application.findwindow(awindow,twindow(window1)) then begin
@@ -3288,7 +3288,7 @@ procedure unsetime(const awindow: winidty);
 begin
 {$ifdef mse_debuggdisync}
  checkgdilock;
-{$endif} 
+{$endif}
  if awindow = imewinid then begin
   xunseticfocus(appic);
   xseticvalues(appic,pchar(xnfocuswindow),appid,nil);
@@ -3326,7 +3326,7 @@ var
  cursor1: cursor;
  bmp: pixmapty;
  color: xcolor;
-begin 
+begin
  result:= gue_ok;
  if winid = 0 then begin
   exit; //do not modify root window cursor
@@ -3356,7 +3356,7 @@ var
  mainthreadid: threadty;
  connectpipe: tpipedescriptors;
  dummybyte: byte;
- 
+
 procedure sigtimer(SigNum: Integer); cdecl;
 begin
  timerevent:= true;
@@ -3472,7 +3472,7 @@ end;
 function gui_graytopixel(gray: byte): pixelty;
 var
  lwo1: longword;
-begin           
+begin
  lwo1:= gray;                                //todo: speedup
  result:= (lwo1 shl xredshiftbase) and xredmask or
           (lwo1 shl xgreenshiftbase) and xgreenmask or
@@ -3568,7 +3568,7 @@ var
 begin
 {$ifdef mse_debuggdisync}
  checkgdilock;
-{$endif} 
+{$endif}
  while xpending(appdisp) > 0 do begin
   xnextevent(appdisp,@xev);
   with xev.xclient do begin
@@ -3811,7 +3811,7 @@ end;
 
 var
  getrootpathlevel: integer;
- 
+
 function getrootpath(const id: winidty; out rootpath: longwordarty): boolean;
 var
  root,parent: winidty;//{$ifdef FPC}dword{$else}xlib.twindow{$endif};
@@ -3823,7 +3823,7 @@ var
 begin
 {$ifdef mse_debuggdisync}
  checkgdilock;
-{$endif} 
+{$endif}
  result:= false;
  id1:= id;
  setlength(rootpath,5);
@@ -3895,7 +3895,7 @@ var
 begin
 {$ifdef mse_debuggdisync}
  checkgdilock;
-{$endif} 
+{$endif}
  result:= getrootpath(id,rootpath);
  if result then begin
   result:= false;
@@ -3920,7 +3920,7 @@ function settransientforhint(id,transientfor: winidty): guierrorty;
 begin
 {$ifdef mse_debuggdisync}
  checkgdilock;
-{$endif} 
+{$endif}
  if transientfor = 0 then begin
   if wmtransientforatom <> 0 then begin
    xdeleteproperty(appdisp,id,wmtransientforatom);
@@ -4024,14 +4024,14 @@ net_wm_window_type_dropdown_menu,net_wm_window_type_dialog,
 net_wm_window_type_desktop,net_wm_window_type_dock,net_wm_window_type_toolbar,
 //wo_menu,              wo_utility,               wo_splash,
 net_wm_window_type_menu,net_wm_window_type_utility,net_wm_window_type_splash,
-//wo_dialog,              wo_dropdownmenu,                 
+//wo_dialog,              wo_dropdownmenu,
 net_wm_window_type_dialog,net_wm_window_type_dropdown_menu,
 //wo_popupmenu,               wo_tooltip,
 net_wm_window_type_popup_menu,net_wm_window_type_tooltip,
 //wo_notification,              wo_combo,                wo_dnd
 net_wm_window_type_notification,net_wm_window_type_combo,net_wm_window_type_dnd
- );                 
- 
+ );
+
 function gui_createwindow(const rect: rectty;
      var options: internalwindowoptionsty; var awindow: windowty): guierrorty;
 var
@@ -4093,7 +4093,7 @@ begin
 //   end;
    attributes.bit_gravity:= northwestgravity;
    valuemask:= valuemask or cwwingravity or cwbitgravity;
-   
+
    id:= xcreatewindow(appdisp,id1,rect.x,rect.y,width,height,0,
       depth,copyfromparent,visual,
       valuemask,@attributes);
@@ -4111,7 +4111,7 @@ begin
   if options.parent <> 0 then begin //embedded window
    xselectinput(appdisp,id,exposuremask); //will be mapped to parent
    gdi_unlock;
-   exit;          
+   exit;
   end;
   if (options.transientfor <> 0) or
           (options.options * [wo_popup,wo_message] <> []) then begin
@@ -4172,7 +4172,7 @@ begin
   else begin
    setnetatomarrayitem(id,net_wm_window_type,net_wm_window_type_normal);
   end;
-  if (options.options * noframewindowtypes <> []) and 
+  if (options.options * noframewindowtypes <> []) and
                            (netatoms[motif_wm_hints] <> 0) then begin
    setlongproperty(id,netatoms[motif_wm_hints],[mwm_hints_decorations,0,0,0,0],
                                                      netatoms[motif_wm_hints]);
@@ -4336,7 +4336,7 @@ begin
 (*
  if nostaticgravity and gui_windowvisible(id) then begin
   wmwait;
-  if (gui_getwindowrect(id,rect1) = gue_ok) and 
+  if (gui_getwindowrect(id,rect1) = gue_ok) and
                 not rectisequal(rect1,rect) then begin
                                         //simulate staticgravity
    with changes do begin
@@ -4373,7 +4373,7 @@ begin
  gdi_unlock;
 end;
 
-function gui_setdecoratedwindowrect(id: winidty; const rect: rectty; 
+function gui_setdecoratedwindowrect(id: winidty; const rect: rectty;
                                     out clientrect: rectty): guierrorty;
 var
  frame1: framety;
@@ -4527,7 +4527,7 @@ var
 begin
 {$ifdef mse_debuggdisync}
  checkgdilock;
-{$endif} 
+{$endif}
  result:= 0;
  case akind of
   sywi_tray: begin
@@ -4548,7 +4548,7 @@ procedure initxembed(const id: winidty; const flags: int32);
 begin
 {$ifdef mse_debuggdisync}
  checkgdilock;
-{$endif} 
+{$endif}
  setlongproperty(id,netatoms[xembed_info],[xembedversion,flags],
                                    netatoms[xembed_info]{cardinalatom});
 end;
@@ -4557,7 +4557,7 @@ procedure finalizexembed(const id: winidty);
 begin
 {$ifdef mse_debuggdisync}
  checkgdilock;
-{$endif} 
+{$endif}
  xdeleteproperty(appdisp,id,netatoms[xembed_info]);
 end;
 
@@ -4587,7 +4587,7 @@ const
  system_tray_begin_message = 1;
  system_tray_cancel_message = 2;
 
-function sendtraymessage(const dest: winidty; const awindow: winidty; 
+function sendtraymessage(const dest: winidty; const awindow: winidty;
          const opcode: integer;
          const data1: longword = 0; const data2: longword = 0;
          const data3: longword = 0): guierrorty;
@@ -4596,7 +4596,7 @@ var
 begin
 {$ifdef mse_debuggdisync}
  checkgdilock;
-{$endif} 
+{$endif}
  result:= gue_notraywindow;
  if dest <> 0 then begin
   at1:= netatoms[net_system_tray_opcode];
@@ -4634,7 +4634,7 @@ begin
  gdi_lock;
  gui_hidewindow(child.id);       //window must be unmapped for some WM's
  xsync(appdisp,0);
- if akind = sywi_none then begin 
+ if akind = sywi_none then begin
          //does not work with newer WM's,
          //window must be destroyed
   result:= getwindowrect(child.id,rect1,pt1);
@@ -4647,7 +4647,7 @@ begin
   result:= gue_windownotfound;
   syswin:= getsyswin(akind);
   if syswin <> 0 then begin
-   removesizehints(child.id);   
+   removesizehints(child.id);
    initxembed(child.id,xembedflagsunmapped);
 //   xdeleteproperty(appdisp,child.id,netatoms[wm_normal_hints]);
 //   xdeleteproperty(appdisp,child.id,wmclassatom);
@@ -4808,7 +4808,7 @@ procedure gui_beep;
 begin
  gdi_lock;
  xbell(appdisp,0);
- xflush(appdisp); 
+ xflush(appdisp);
  gdi_unlock;
 end;
 
@@ -4878,7 +4878,7 @@ begin
    smcsaveyourselfdone(_smcconn,1);
   end;
  end;
-end; 
+end;
 
 procedure SmcDie(_smcConn: SmcConn; clientData: pointer); cdecl;
 begin
@@ -4936,7 +4936,7 @@ end;
 
 var
  escapepressed: boolean;
- 
+
 function gui_escapepressed: boolean;
 begin
  result:= escapepressed;
@@ -4950,7 +4950,7 @@ end;
 function getkeynomod(var xev: {$ifdef FPC}txkeyevent{$else}
                                                   xkeyevent{$endif}): keyty;
 const
- modimask = not (shiftmask or lockmask or controlmask or 
+ modimask = not (shiftmask or lockmask or controlmask or
                  mod1mask or mod2mask or mod3mask or
                  mod4mask or mod5mask);
 var
@@ -4963,7 +4963,7 @@ var
 begin
 {$ifdef mse_debuggdisync}
  checkgdilock;
-{$endif} 
+{$endif}
  result:= key_none;
  statebefore:= xev.state;
  xev.state:= xev.state and modimask or numlockstate;
@@ -5030,7 +5030,7 @@ type
 
  sysdndwriterstatety = (sdws_destroying);
  sysdndwriterstatesty = set of sysdndwriterstatety;
- 
+
  tsysdndwriter = class(tlinkedobject)
   private
    frepeater: tsimpletimer;
@@ -5042,8 +5042,8 @@ type
    fdest: winidty;
    fdestaccepts: boolean;
    fpos: pointty;
-   fentervalues: array[0..4] of longword;   
-   fpositionvalues: array[0..4] of longword;   
+   fentervalues: array[0..4] of longword;
+   fpositionvalues: array[0..4] of longword;
   protected
    procedure startcheckrepeater;
    procedure docheckrepeat(const sender: tobject);
@@ -5053,7 +5053,7 @@ type
    function handleevent(var aevent: xclientmessageevent): tmseevent;
    function drop: boolean;
    function getdata(var aevent: xselectionrequestevent;
-                   var adata: string; var aproperty: atom): boolean; 
+                   var adata: string; var aproperty: atom): boolean;
                                         //false if no data
    procedure objevent(const sender: iobjectlink;
                                  const event: objecteventty); override;
@@ -5061,7 +5061,7 @@ type
    constructor create(const aintf: isysdnd; const asource: winidty);
    destructor destroy; override;
  end;
- 
+
 var
  sysdndreader: tsysdndreader;
  sysdndwriter: tsysdndwriter;
@@ -5081,7 +5081,7 @@ begin
   lwo1:= data.l[1];
   fprotocolversion:= lwo1 shr 24;
   faction:= data.l[4];
-  if lwo1 and 1 <> 0 then begin //more than 3 types 
+  if lwo1 and 1 <> 0 then begin //more than 3 types
    //todo: suport for inc protocol
    readatomproperty(fsource,xdndatoms[xdnd_typelist],ar1);
   end
@@ -5160,7 +5160,7 @@ function tsysdndreader.handleevent(var aevent: xclientmessageevent): tmseevent;
  begin
   result:= false;
   if sysdndreader <> nil then begin
-   if (sysdndreader.winid <> aevent.xwindow) or 
+   if (sysdndreader.winid <> aevent.xwindow) or
                         (aevent.data.l[0] <> sysdndreader.fsource) then begin
     freeandnil(sysdndreader); //there is something wrong
    end
@@ -5195,7 +5195,7 @@ function tsysdndreader.handleevent(var aevent: xclientmessageevent): tmseevent;
                            fscroll,fdataformats,fformatistext,act2);
   end;
  end; //createevent
- 
+
 begin
  result:= nil;
  with aevent do begin
@@ -5329,7 +5329,7 @@ begin
  result:= false;
  ar2:= windowsatpos(apos);
  for int1:= high(ar2) downto 0 do begin
-  if readatomproperty(ar2[int1],xdndatoms[xdnd_aware],ar1) and 
+  if readatomproperty(ar2[int1],xdndatoms[xdnd_aware],ar1) and
                                              (high(ar1) = 0) then begin
    if ar2[int1] <> fdest then begin
     if fdest <> 0 then begin
@@ -5355,7 +5355,7 @@ begin
    fpos:= apos;
    fpositionvalues[2]:= (fpos.x shl 16) or (fpos.y and $ffff);
    fpositionvalues[4]:= getactionatom(fintf.getactions);
-   sendnetcardinalmessage(fdest,xdndatoms[xdnd_position],fdest,fpositionvalues);   
+   sendnetcardinalmessage(fdest,xdndatoms[xdnd_position],fdest,fpositionvalues);
    result:= true;
    startcheckrepeater;
    exit;
@@ -5369,12 +5369,12 @@ end;
 
 procedure tsysdndwriter.docheckrepeat(const sender: tobject);
 begin
- sendnetcardinalmessage(fdest,xdndatoms[xdnd_position],fdest,fpositionvalues);   
+ sendnetcardinalmessage(fdest,xdndatoms[xdnd_position],fdest,fpositionvalues);
 end;
 
 const
  checkrepeatinterval = 200000;
- 
+
 procedure tsysdndwriter.startcheckrepeater;
 begin
  if frepeater = nil then begin
@@ -5449,7 +5449,7 @@ begin
    sdnda_finished: begin
     if sysdndwriter <> nil then begin
      if not sysdndwriter.fdestaccepts then begin    //todo: timeout
-      freeandnil(sysdndwriter);       
+      freeandnil(sysdndwriter);
      end;
     end;
    end;
@@ -5529,7 +5529,7 @@ begin
   result:= sysdndreader.readtext(atext,typeindex);
  end;
 end;
- 
+
 function handlexdnd(var aevent: xclientmessageevent): tmseevent;
 
 begin
@@ -5554,7 +5554,7 @@ end;
 
 function getclipboarddata(var aevent: xselectionrequestevent;
                    const buffer: clipboardbufferty;
-                   var adata: string; var aproperty: atom): boolean; 
+                   var adata: string; var aproperty: atom): boolean;
                                         //false if no data
 var
  atomar: array[0..7] of atom;
@@ -5651,16 +5651,16 @@ begin
    {$ifdef FPC}_property{$else}xproperty{$endif}:= target;
   end;
   event1.target:= target;
-  event1.{$ifdef FPC}_property{$else}xproperty{$endif}:= 
+  event1.{$ifdef FPC}_property{$else}xproperty{$endif}:=
                            {$ifdef FPC}_property{$else}xproperty{$endif};
   event1.time:= time;
-  bo1:= false;  
+  bo1:= false;
   if isclipboard(selection,buffer) then begin
    bo1:= getclipboarddata(aevent,buffer,str1,
               event1.{$ifdef FPC}_property{$else}xproperty{$endif});
   end
   else begin
-   if (selection = xdndatoms[xdnd_selection]) and 
+   if (selection = xdndatoms[xdnd_selection]) and
                               (sysdndwriter <> nil) then begin
     bo1:= sysdndwriter.getdata(aevent,str1,
                       {$ifdef FPC}_property{$else}xproperty{$endif});
@@ -5710,12 +5710,12 @@ type
   pollinfodest: pollinfodestarty;
  end;
  ppollinfty = ^pollinfty;
- 
+
 var
 // pollinfo: array[0..2] of pollfd;
              //0 connection, 1 sessionmanagement
  pollinf: ppollinfty;
- 
+
 function gui_addpollfd(var id: int32; const afd: int32;
                            const aflags: pollflagsty;
                                 const acallback: pollcallbackty = nil;
@@ -5867,7 +5867,7 @@ function gui_getevent: tmseevent;
 
  function checkrepeatkey(const aevent: xevent): boolean;
  begin
-  if (repeatkey = aevent.xkey.keycode) and 
+  if (repeatkey = aevent.xkey.keycode) and
                      (repeatkeytime = aevent.xkey.time) then begin
   {$ifdef mse_debugkey}
    debugwriteln('is repeatkey key:'+inttostr(repeatkey)+
@@ -5909,10 +5909,10 @@ var
  timeout1: timespec;
  b1: boolean;
  win1: twindow;
- 
+
 type
  char_0_19 = array[0..19] of char;
- 
+
 label
  eventrestart;
 begin
@@ -5944,21 +5944,21 @@ begin
     if not application.unlock() then begin
      guierror(gue_notlocked);
     end;
-    
+
     sys_mutexlock(connectmutex1);
-//    int1:= poll(@pollinfo[0],length(pollinfo),1000); 
+//    int1:= poll(@pollinfo[0],length(pollinfo),1000);
 //                              //todo: use ppoll? no timeout?
     with pollinf^ do begin
      i1:= ppoll(@pollinfo[0],length(pollinfo),@timeout1,@sig1);
      if pollinfo[1].revents <> 0 then begin
       repeat                                     //empty pipe
-      until (__read(connectpipe.readdes,dummybyte,1) < 0) and 
+      until (__read(connectpipe.readdes,dummybyte,1) < 0) and
                                       (sys_getlasterror() = ewouldblock);
      end;
      sys_mutexunlock(connectmutex1);
      sys_mutexlock(connectmutex2);
      sys_mutexunlock(connectmutex2);
-  
+
      if i1 > 0 then begin
       for i2:= 0 to high(pollinfo) do begin
        with pollinfo[i2] do begin
@@ -5978,7 +5978,7 @@ begin
     if i1 = 0 then begin  //timeout
      inc(timeoutcount);
      if timeoutcount mod 1 = 0 then begin
-      timerevent:= true; //every 10 seconds without messages 
+      timerevent:= true; //every 10 seconds without messages
                          //in case of lost timer alarm
      end;
     end;
@@ -5994,7 +5994,7 @@ begin
        if not shutdownpending then begin
         interactgranted:= false;
         shutdownpending:= true;
-        if (interactstyle = sminteractstyleerrors) or 
+        if (interactstyle = sminteractstyleerrors) or
              (interactstyle = sminteractstyleany) then begin
          if SmcInteractRequest(smconnection,smdialognormal,
                   {$ifdef FPC}@{$endif}interact,@sminfo) = 0 then begin
@@ -6048,7 +6048,7 @@ eventrestart:
     end;
     if i1 > 1 then begin
      xpeekevent(appdisp,@xev2);
-     if (xev2.xtype = keypress) and 
+     if (xev2.xtype = keypress) and
                   (xev.xkey.keycode = xev2.xkey.keycode) and
                                      (xev.xkey.time = xev2.xkey.time) then begin
       repeatkey:= xev.xkey.keycode;
@@ -6132,7 +6132,7 @@ eventrestart:
       end
       else begin
       {$ifdef mse_debugxembed}
-       if (netatoms[xembed] <> 0) and 
+       if (netatoms[xembed] <> 0) and
                (message_type = netatoms[xembed]) then begin
         debugwindow('*xembed ',window);
         writeln(' ',inttohex(data.l[0],8),' ',
@@ -6141,13 +6141,13 @@ eventrestart:
                     inttohex(data.l[3],8),' ',
                     inttohex(data.l[4],8));
        end;
-       if (netatoms[net_system_tray_message_data] <> 0) and 
+       if (netatoms[net_system_tray_message_data] <> 0) and
             (message_type = netatoms[net_system_tray_message_data]) then begin
         debugwindow(
          '*net_system_tray_message_data format:'+inttostr(format)+' ',window);
         writeln(' ',char_0_19(data.b));
        end;
-       if (netatoms[net_system_tray_opcode] <> 0) and 
+       if (netatoms[net_system_tray_opcode] <> 0) and
             (message_type = netatoms[net_system_tray_opcode]) then begin
         debugwindow(
          '*net_system_tray_opcode format:'+inttostr(format)+' ',window);
@@ -6181,17 +6181,17 @@ eventrestart:
          {$ifdef mse_debugsysevent}
           debugwriteln(' synthetic ek_hide');
          {$endif}
-         end; 
+         end;
         end;
         wms_normal: begin
-         if hasminimizeunmapworkaround and 
+         if hasminimizeunmapworkaround and
                                  (lastmapwindow <> xwindow) then begin
           lastmapwindow:= 0;
           result:= twindowevent.create(ek_show,xwindow);
          {$ifdef mse_debugsysevent}
           debugwriteln(' synthetic ek_show');
          {$endif}
-         end; 
+         end;
         end;
        end;
       end;
@@ -6289,7 +6289,7 @@ eventrestart:
   (* does not work anymore because of intermediate messages by IM
     if xpending(appdisp) > 0 then begin
      xpeekevent(appdisp,@xev);
-     if (xev.xtype = keypress) and (time - lasteventtime < 10) and 
+     if (xev.xtype = keypress) and (time - lasteventtime < 10) and
                                                    (keycode = int1) then begin
       repeatkey:= int1;
       repeatkeytime:= time;
@@ -6346,7 +6346,7 @@ eventrestart:
    with xev.xmap do begin
     lastmapwindow:= xwindow;
     result:= twindowevent.create(ek_show,xwindow);
-    if application.findwindow(xwindow,window1) and 
+    if application.findwindow(xwindow,window1) and
              (wo_notaskbar in window1.options) then begin
      setnetatomarrayitem(xwindow,net_wm_state,net_wm_state_skip_taskbar);
     end;
@@ -6412,10 +6412,10 @@ eventrestart:
                  ' above:',above,xwindow);
     {$endif}
       result:= twindowrectevent.create(ek_configure,xwindow,rect1,pt1);
-     end; 
+     end;
 
 (* gnome bug workaround
-     if not application.deinitializing and 
+     if not application.deinitializing and
        (getwindowrect(w,rect1,pt1) = gue_ok) then begin
                          //there can be an Xerror?
      //gnome returns a different pos on window resizing than on window moving!
@@ -6447,7 +6447,7 @@ eventrestart:
     if xwindow = lastmapwindow then begin
      lastmapwindow:= 0;
     end;
-    if (sysdndreader <> nil) and 
+    if (sysdndreader <> nil) and
                 (sysdndreader.winid = xwindow) then begin
      freeandnil(sysdndreader);
     end;
@@ -6561,7 +6561,7 @@ end;
 {$warnings on}
 {
 function createappic: boolean; forward;
-function icdestroyed(ic: txic; client_data: txpointer; 
+function icdestroyed(ic: txic; client_data: txpointer;
                                call_data: txpointer): longbool; cdecl;
 begin
  result:= false;
@@ -6598,11 +6598,11 @@ begin
  result:= setlocale(lc_all,'');
  if xsupportslocale() = 0 then begin
   setlocale(lc_all,'en_US.UTF-8');
-  if xsupportslocale() = 0 then begin  
+  if xsupportslocale() = 0 then begin
    setlocale(lc_all,'en_US.utf8');
-   if xsupportslocale() = 0 then begin  
+   if xsupportslocale() = 0 then begin
     setlocale(lc_all,'POSIX');
-    if xsupportslocale() = 0 then begin  
+    if xsupportslocale() = 0 then begin
      setlocale(lc_all,'C');
      xsupportslocale();
     end;
@@ -6690,7 +6690,7 @@ begin
   {$ifdef mse_flushgdi}
   xinitthreads;
   {$endif}
-  {$ifdef with_sm} 
+  {$ifdef with_sm}
   if hassm then begin
    if sminfo.smconnection = nil then begin
     if iceaddconnectionwatch(@icewatch,@sminfo) <> 0 then begin
@@ -6704,7 +6704,7 @@ begin
       shutdown_cancelled.callback:= @SmcShutdownCancelled;
       shutdown_cancelled.client_data:= @sminfo;
      end;
-     
+
      sminfo.smconnection:= smcopenconnection(nil,nil,SmProtoMajor,SmProtoMinor,
          SmcSaveYourselfProcMask or SmcDieProcMask or SmcSaveCompleteProcMask or
          SmcShutdownCancelledProcMask,smcb,nil,clientid,sizeof(smerror),@smerror);
@@ -6733,8 +6733,8 @@ begin
   sigchldbefore:= signal(sigchld,{$ifdef FPC}@{$endif}sigchild);
   sigemptyset(sigset1);
   sigaddset(sigset1,sigchld);
-  pthread_sigmask(sig_unblock,@sigset1,@sigset2); 
-  
+  pthread_sigmask(sig_unblock,@sigset1,@sigset2);
+
   appdisp:= xopendisplay(nil);
   if appdisp = nil then begin
    goto error;
@@ -6743,7 +6743,7 @@ begin
   if not createim then begin
    result:= gue_inputmanager;
    goto error;
-  end; 
+  end;
   setlocale(lc_all,po1); //restore original
 
 //  defscreenid:= xdefaultscreen(appdisp);
@@ -6771,11 +6771,11 @@ begin
   else begin
    hasxrandr:= false;
   end;
-  
+
   if not createappic then begin
    result:= gue_inputcontext;
    goto error;
-  end;  
+  end;
   {$ifdef FPC}
   is8bitcolor:= defaultdepthofscreen(defscreen) = 8;
   {$else}
@@ -6790,7 +6790,7 @@ begin
    end;
   end
   else begin
-   istruecolor:= (defvisual^._class = truecolor) or 
+   istruecolor:= (defvisual^._class = truecolor) or
                                             (defvisual^._class = directcolor);
    if istruecolor then begin
     xredmask:= defvisual^.red_mask;
@@ -6829,9 +6829,9 @@ begin
     goto error;
    end;
   end;
-  
+
   defcolormap:= xdefaultcolormapofscreen(defscreen);
-  
+
   atomatom:= xinternatom(appdisp,'ATOM',
            {$ifdef xboolean}true{$else}1{$endif});
   mseclientmessageatom:= xinternatom(appdisp,'mseclientmessage',
@@ -6882,7 +6882,7 @@ begin
             {$ifdef xboolean}false{$else}0{$endif});
   convertselectionpropertyatom:= xinternatom(appdisp,'mseconvselprop',
             {$ifdef xboolean}false{$else}0{$endif});
- 
+
   netsupportedatom:= xinternatom(appdisp,'_NET_SUPPORTED',
             {$ifdef xboolean}false{$else}0{$endif});
 
@@ -6894,7 +6894,7 @@ begin
   xinternatoms(appdisp,@xdndactionatomnames[firstdndaction],
            integer(high(dndactionty)),{$ifdef xboolean}false{$else}0{$endif},
            @xdndactionatoms[firstdndaction]); //first = 0
- 
+
   fillchar(netatoms,sizeof(netatoms),0);               //check _net_
   xinternatoms(appdisp,@netatomnames[low(netatomty)],
               integer(firstonlyifexistatom),false,@netatoms[low(netatomty)]);
@@ -6912,7 +6912,7 @@ begin
      if atomar[int1] = atom1 then begin
       netatoms[netnum]:= atom1;
       break;
-     end;     
+     end;
     end;
    end;
   end;
@@ -6922,7 +6922,7 @@ begin
     break;
    end;
   end;
-  
+
   netsupported:= netsupported and
                    readcardinalproperty(rootid,netatoms[net_workarea],4,rect1);
   canframeextents:= netatoms[net_frame_extents] <> 0;
@@ -6931,8 +6931,8 @@ begin
    netatoms[net_wm_state_fullscreen]:= xinternatom(appdisp,
            @netatomnames[net_wm_state_fullscreen],
             {$ifdef xboolean}false{$else}0{$endif});      //fake
-  end; 
- 
+  end;
+
   numlockstate:= 0;
   numlockcode:= xkeysymtokeycode(appdisp,xk_num_lock);
   if numlockcode <> nosymbol then begin  //return numlock state
@@ -6954,7 +6954,7 @@ begin
    xfreemodifiermap(modmap);
  {$ifdef FPC} {$checkpointer default} {$endif}
   end;
- 
+
 //  fillchar(pollinfo,sizeof(pollinfo),0);
 //  pollcount:= 2;
   pollinf^.pollinfo:= nil;
@@ -7093,14 +7093,14 @@ end;
 procedure gui_gdifunc(const func: gdifuncty; var drawinfo: drawinfoty);
 begin
  gdifunctions[func](drawinfo);
-end; 
+end;
 }
 
 function gui_getgdifuncs: pgdifunctionaty;
 begin
  result:= x11getgdifuncs;
 end;
- 
+
 var
  debugungrabbed: boolean;
 

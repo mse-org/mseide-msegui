@@ -86,7 +86,7 @@ function decode_mcu_AC_refine (cinfo : j_decompress_ptr;
 { Initialize for a Huffman-compressed scan. }
 
 {METHODDEF}
-procedure start_pass_phuff_decoder (cinfo : j_decompress_ptr); 
+procedure start_pass_phuff_decoder (cinfo : j_decompress_ptr);
 var
   entropy : phuff_entropy_ptr;
   is_DC_band, bad : boolean;

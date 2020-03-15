@@ -12,11 +12,11 @@ unit mseopensslpkcs;
 interface
 uses
  mseopenssl,msectypes;
- 
+
 type
- 
+
   pSTACK_OFPKCS7_SIGNER_INFO = pointer;
-  
+
   pPKCS7_signed = ^PKCS7_signed;
   PKCS7_signed = record
     version: pASN1_cint;
@@ -62,7 +62,7 @@ type
     mac: pointer;
     authsafes: pPKCS7;
   end;
-  
+
   pPKCS8_Priv_Key_Info = ^PKCS8_Priv_Key_Info;
   PKCS8_Priv_Key_Info = record
     broken: cint; // Flag for various broken formats */
@@ -130,7 +130,7 @@ function PKCS7_get_detached(p7: pPKCS7): pointer;
 implementation
 uses
  msedynload;
- 
+
 function PKCS7_get_detached(p7: pPKCS7): pointer;
 begin
   result := pointer(PKCS7_ctrl(p7, 2, 0, nil));

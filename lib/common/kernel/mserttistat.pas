@@ -28,14 +28,14 @@ interface
 uses
  classes,mclasses,mseclasses,msestat,msestatfile,msestrings,typinfo,msetypes,
  msehash,msemacros;
- 
+
 type
  objectinfoty = record
   obj: tobject;
   prefix: string;
  end;
  objectinfoarty = array of objectinfoty;
- 
+
  getobjecteventty = procedure(const sender: tobject;
                                    var aobject: tobject) of object;
  getobjectseventty = procedure(const sender: tobject;
@@ -63,10 +63,10 @@ type
   {$endif}
    procedure expandmacros(const amacrolist: tmacrolist); overload;
    procedure expandmacros(const macros: macroinfoarty;
-                      const options: macrooptionsty = 
+                      const options: macrooptionsty =
                                [mao_caseinsensitive]); overload;
    procedure expandmacros(const anames,avalues: array of msestring;
-                              const options: macrooptionsty = 
+                              const options: macrooptionsty =
                                         [mao_caseinsensitive]); overload;
  end;
 
@@ -81,7 +81,7 @@ type
    fonstatwrite: statwriteeventty;
    fonstatbeforeread: notifyeventty;
    fonstatafterread: notifyeventty;
-  {$ifdef mse_with_ifi}   
+  {$ifdef mse_with_ifi}
    ftargets: tpointeransistringhashdatalist;
   {$endif}
    fstatpriority: integer;
@@ -109,24 +109,24 @@ type
    procedure objtovalues(const destroot: tcomponent);
      //writes values to components with matching property-component names
      //or statvarnames
-  {$endif}   
+  {$endif}
    property statfile: tstatfile read fstatfile write setstatfile;
    property statvarname: msestring read fstatvarname write fstatvarname;
-   property statpriority: integer read fstatpriority 
+   property statpriority: integer read fstatpriority
                                        write fstatpriority default 0;
    property ongetobject: getobjecteventty read fongetobject write fongetobject;
-   property ongetobjects: getobjectseventty read fongetobjects 
+   property ongetobjects: getobjectseventty read fongetobjects
                                                         write fongetobjects;
-   property onstatupdate: statupdateeventty read fonstatupdate 
+   property onstatupdate: statupdateeventty read fonstatupdate
                                                         write fonstatupdate;
-   property onstatread: statreadeventty read fonstatread 
+   property onstatread: statreadeventty read fonstatread
                                                         write fonstatread;
-   property onstatwrite: statwriteeventty read fonstatwrite 
+   property onstatwrite: statwriteeventty read fonstatwrite
                                                         write fonstatwrite;
    property onstatbeforeread: notifyeventty read fonstatbeforeread
                                                         write fonstatbeforeread;
-   property onstatafterread: notifyeventty read fonstatafterread 
-                                                        write fonstatafterread;   
+   property onstatafterread: notifyeventty read fonstatafterread
+                                                        write fonstatafterread;
  end;
 
  trttistat = class(tcustomrttistat)
@@ -141,7 +141,7 @@ type
    property onstatread;
    property onstatwrite;
    property onstatbeforeread;
-   property onstatafterread;   
+   property onstatafterread;
  end;
 
 function opentodynarray(const objs: array of tobject;
@@ -158,7 +158,7 @@ procedure objecttovalues(const source: tobject; const dest: tmsecomponent;
                                                    const prefix: string = '');
 procedure valuestoobject(const source: tmsecomponent; const dest: tobject;
                                                    const prefix: string = '');
-{$endif}                     
+{$endif}
 function dupplicateobject(const source: tobject): tobject;
 function dupplicateobjects(const source: objectarty): objectarty;
 
@@ -423,7 +423,7 @@ end;
 
 procedure readobjectstat(const reader: tstatreader; const aobj: objectinfoty);
 var
- ar1: propinfopoarty; 
+ ar1: propinfopoarty;
  po1: ppropinfo;
  po2: ptypeinfo;
  po3: ptypedata;
@@ -625,7 +625,7 @@ procedure valuestoobject(const dest: objectinfoty;
                                         const findtarget: findtargetty);
 var
  comp1: tobject;
- ar1: propinfopoarty; 
+ ar1: propinfopoarty;
  po1,po4: ppropinfo;
  po2: ptypeinfo;
  int1: integer;
@@ -652,14 +652,14 @@ begin
    end;
    if bo1 then begin
     comp1:= findtarget(dest.prefix+name);
-    if (comp1 <> nil) and 
+    if (comp1 <> nil) and
       mseclasses.getcorbainterface(comp1,typeinfo(iifidatalink),
                                                        intf1)  then begin
      po4:= intf1.getvalueprop;
      if po4 <> nil then begin
       case proptype^.kind of
        tkInteger,tkChar,tkEnumeration,tkWChar,tkSet: begin
-        if po4^.proptype^.kind in 
+        if po4^.proptype^.kind in
               [tkInteger,tkChar,tkEnumeration,tkWChar,tkSet] then begin
          setordprop(dest.obj,po1,getordprop(comp1,po4));
         end
@@ -681,7 +681,7 @@ begin
         end;
        end;
        tkfloat: begin
-        if po4^.proptype^.kind in 
+        if po4^.proptype^.kind in
               [tkfloat] then begin
          setfloatprop(dest.obj,po1,getfloatprop(comp1,po4));
         end;
@@ -777,11 +777,11 @@ begin
  end;
 end;
 
-procedure objecttovalues(const source: objectinfoty; 
+procedure objecttovalues(const source: objectinfoty;
                                   const findtarget: findtargetty);
 var
  comp1: tobject;
- ar1: propinfopoarty; 
+ ar1: propinfopoarty;
  po1,po4: ppropinfo;
  po2: ptypeinfo;
  po3: ptypedata;
@@ -817,7 +817,7 @@ begin
      if po4 <> nil then begin
       case proptype^.kind of
        tkInteger,tkChar,tkEnumeration,tkWChar,tkSet: begin
-        if po4^.proptype^.kind in 
+        if po4^.proptype^.kind in
               [tkInteger,tkChar,tkEnumeration,tkWChar,tkSet] then begin
          setordprop(comp1,po4,getordprop(source.obj,po1));
         end
@@ -949,7 +949,7 @@ end;
 
 function dupplicateobject(const source: tobject): tobject;
 var
- ar1: propinfopoarty; 
+ ar1: propinfopoarty;
  po1: ppropinfo;
  po2: ptypeinfo;
  int1: integer;
@@ -1028,7 +1028,7 @@ type
    fowner: tmsecomponent;
    function findcomponenttarget(const aname: string): tobject;
   end;
-  
+
 function tfindtarg.findcomponenttarget(const aname: string): tobject;
 begin
  result:= fowner.findcomponent(aname);
@@ -1128,7 +1128,7 @@ begin
  if assigned(fongetobjects) then begin
   fongetobjects(self,aobj);
  end;
- result:= (obj1 <> nil) or (aobj <> nil); 
+ result:= (obj1 <> nil) or (aobj <> nil);
  if obj1 <> nil then begin
   for int1:= 0 to high(aobj) do begin
    if aobj[int1].obj = obj1 then begin
@@ -1239,7 +1239,7 @@ procedure tcustomrttistat.scantargets(const aroot: tcomponent);
    str1:= ansistring(intf1.getstatvarname);
    if str1 = '' then begin
     str1:= prefix;
-   end;    
+   end;
    ftargets.add(str1,acomp);
   end;
  end; //addcomps
@@ -1412,7 +1412,7 @@ begin
 end;
 
 procedure toptions.expandmacros(const macros: macroinfoarty;
-                      const options: macrooptionsty = 
+                      const options: macrooptionsty =
                                [mao_caseinsensitive]);
 var
  list: tmacrolist;
@@ -1427,7 +1427,7 @@ begin
 end;
 
 procedure toptions.expandmacros(const anames,avalues: array of msestring;
-                      const options: macrooptionsty = 
+                      const options: macrooptionsty =
                                [mao_caseinsensitive]);
 begin
  expandmacros(initmacros(anames,avalues,[]),options);

@@ -15,7 +15,7 @@ uses
 
 const
  expochar = msechar('E');
- 
+
 type
  floatstringmodety = (fsm_default,fsm_fix,fsm_sci,fsm_engfix,fsm_engflo,
                       fsm_engsymfix,fsm_engsymflo);
@@ -36,34 +36,34 @@ function doubletostring(const value: double; const precision: integer = 0;
       const thousandsep: msechar = #0): msestring;
                //precision <= 0 -> remove trailing 0
                //precision = 0 in fsm_default mode = maximal precision
-               
+
 function tryintexp10(aexp: integer; out value: double): boolean;
 function intexp10(aexp: integer): double;
 
 implementation
 uses
  sysutils;
- 
+
 const
  binexps: array[0..8] of double = (1e1,1e2,1e4,1e8,1e16,1e32,1e64,1e128,1e256);
- binnegexps: array[0..8] of double = 
+ binnegexps: array[0..8] of double =
                          (1e-1,1e-2,1e-4,1e-8,1e-16,1e-32,1e-64,1e-128,1e-256);
 
 type
- expsymty = 
+ expsymty =
  //    -8         -7         -6         -5      -4       -3        -2        -1        0
   (exs_yocto=-8,exs_zepto,exs_atto,exs_femto,exs_pico,exs_nano,exs_micro,exs_milli,
 //    0
    exs_none,
 //    1        2       3        4        5        6       7           8
    exs_kilo,exs_mega,exs_giga,exs_tera,exs_peta,exs_exa,exs_zetta,exs_yotta);
-   
+
 const
- expsyms: array[expsymty] of msechar = 
+ expsyms: array[expsymty] of msechar =
        ('y','z','a','f','p','n','u','m',
         ' ',
         'k','M','G','T','P','E','Z','Y');
-        
+
 function tryintexp10(aexp: integer; out value: double): boolean;
 var
  do1: double;
@@ -113,7 +113,7 @@ function doubletostring1(value: double; out msbcarry: boolean;
       decimalsep: msechar = '.'; thousandsep: msechar = #0): msestring;
   //format double:
   // 1  11  52
-  //|s| e | f | 
+  //|s| e | f |
 
 const
  maxdigits = 17;
@@ -137,7 +137,7 @@ type
 //  end;
   result:= doubletostring(value,int1,fsm_sci,decimalsep,thousandsep);
  end;
-  
+
  procedure checkcarry(start: byte; var dest: bufferty);
  var
   int1: integer;
@@ -193,7 +193,7 @@ var
  po1: pmsechar;
  mode1: floatstringmodety;
  preci: integer;
- 
+
 begin
  msbcarry:= false;
  preci:= abs(precision);
@@ -280,7 +280,7 @@ begin
     pmsecharaty(result)^[1]:= decimalsep;
     exit;
    end;
-   
+
    exp:= exp - 1023;              //value <> 0
    do1:= exp*exp2to10;
    intdigits:= trunc(do1);
@@ -292,7 +292,7 @@ begin
      mode:= fsm_sci;
     end;
    end;
-   
+
    if mode >= fsm_sci then begin                 //exp format
     if intdigits < 0 then begin
      dec(intdigits);      //trunk -> floor
@@ -305,7 +305,7 @@ begin
      end;
     end;
 
-    if mode >= fsm_engfix then begin              
+    if mode >= fsm_engfix then begin
      if int3 < 0 then begin
       int3:= int3 + ((-int3) mod 3) - 3;
      end
@@ -347,7 +347,7 @@ begin
     end;
 //    if neg then begin
 //     do1:= -do1;
-//    end;      
+//    end;
     if mode in [fsm_engflo,fsm_engsymflo] then begin
      if (intdigits = 0) and (int3 < 0)then begin
       dec(intdigits);   //trunc -> floor
@@ -368,9 +368,9 @@ begin
      int1:= -int1;
     end;
     result:= doubletostring1(do1,msbcarry,int1,mode1,decimalsep); //get mantissa digits
-    if msbcarry then begin 
+    if msbcarry then begin
      if mode1 = fsm_fix then begin
-      if (int1 <= 0) then begin    //999.99-> 1000.00 -> 1000 (trimmed trailing 0) 
+      if (int1 <= 0) then begin    //999.99-> 1000.00 -> 1000 (trimmed trailing 0)
        if (mode >= fsm_engfix) then begin
 //        int4:= 3;
 //        if result[1] = '-' then begin
@@ -405,7 +405,7 @@ begin
          else begin
           setlength(result,length(result)-1); //correct carry, 999.999-> 1000.000 -> 1.00000
          end;
-         int3:= int3+3;   
+         int3:= int3+3;
         end
         else begin
          if (mode = fsm_engflo) or (mode = fsm_engsymflo) then begin
@@ -430,11 +430,11 @@ begin
      result:= '-'+result;
     end;
     int1:= int3 div 3;
-    if (mode >= fsm_engsymfix) and (int1 >= ord(low(expsymty))) and 
+    if (mode >= fsm_engsymfix) and (int1 >= ord(low(expsymty))) and
                                         (int1 <= ord(high(expsymty))) then begin
      int2:= length(result)+1;
      setlength(result,int2);
-     (pmsechar(pointer(result))+int2-1)^:= expsyms[expsymty(int1)]; 
+     (pmsechar(pointer(result))+int2-1)^:= expsyms[expsymty(int1)];
                                                   //exponent symbol
     end
     else begin
@@ -452,7 +452,7 @@ begin
       dec(po1);
       po1^:= msechar(ord('0')+(int3 mod 10));
       int3:= int3 div 10;
-     end;      
+     end;
      (po1-2)^:= expochar;
     end;
     exit;
@@ -476,14 +476,14 @@ begin
     lastindex:= int1;
    end;
    inc(lastindex);
-   buffer[0]:= '0';    //for carry  
+   buffer[0]:= '0';    //for carry
    if intdigits < 0 then begin
     do1:= value*exps[-intdigits];
    end
    else begin
     do1:= value/exps[intdigits];        //value 0.1..10
    end;
-   
+
    if (exp = -1) and (do1 >= expo0max) then begin
     exp:= 0;                            //fix for no int test
    end;
@@ -493,7 +493,7 @@ begin
      int2:= trunc(do1);
      buffer[int1]:= msechar(int2+ord('0'));
      checkcarry(int1,buffer);
-     do1:= frac(do1)*10;       
+     do1:= frac(do1)*10;
     end;
     msbcarry:= buffer[0] = '0';
     if do1 > 0 then begin
@@ -532,7 +532,7 @@ begin
    end;
 
    if exp < 0 then begin             //<1, no int
-    space:= space + preci;        
+    space:= space + preci;
     setlength(result,space+1);       //add space for leading zero
     po1:= pmsechar(pointer(result))+space;
     if lastindex > space then begin
@@ -587,8 +587,8 @@ begin
      int3:= space-lastindex+leadingzeros; //first int char
      int4:= space - preci;            //last int char
      if preci > 0 then begin
-      dec(int3);                          //thousand separator 
-      dec(int4);              
+      dec(int3);                          //thousand separator
+      dec(int4);
      end;
      po1:= pmsechar(pointer(result)) + int3 - thousandsepcount;
      for int3:= int3 to space - preci - 3 do begin
@@ -615,7 +615,7 @@ function doubletostring(const value: double; const precision: integer = 0;
 var
  bo1: boolean;
 begin
- result:= doubletostring1(value,bo1,precision,mode,decimalsep,thousandsep); 
+ result:= doubletostring1(value,bo1,precision,mode,decimalsep,thousandsep);
 end;
 
 end.

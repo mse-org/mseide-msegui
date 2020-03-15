@@ -112,23 +112,23 @@ unit msepulsesimple;
 interface
 uses
  msetypes{msestrings},msepulseglob,msectypes;
- 
+
 const
 {$ifdef mswindows}
- pulsesimplelib: array[0..0] of filenamety = ('libpulse-simple-0.dll');  
+ pulsesimplelib: array[0..0] of filenamety = ('libpulse-simple-0.dll');
 {$else}
- pulsesimplelib: array[0..1] of filenamety = 
-                  ('libpulse-simple.so.0','libpulse-simple.so'); 
+ pulsesimplelib: array[0..1] of filenamety =
+                  ('libpulse-simple.so.0','libpulse-simple.so');
 {$endif}
 type
  pa_simple = record //opaque connection object
  end;
  ppa_simple = ^pa_simple;
- 
+
 var
  pa_simple_new: function(
   const server: pchar;        //**< Server name, or NULL for default */
-  const name: pchar;          //**< A descriptive name for this client 
+  const name: pchar;          //**< A descriptive name for this client
                               //(application name, ...) */
   dir: pa_stream_direction_t; //**< Open this stream for recording or playback? */
   const dev: pchar;           //**< Sink (resp. source) name, or NULL for default */
@@ -136,13 +136,13 @@ var
   const ss: ppa_sample_spec;   //**< The sample type to use */
   const map: ppa_channel_map;  //**< The channel map to use, or NULL for default */
   const attr: ppa_buffer_attr; //**< Buffering attributes, or NULL for default */
-  error: pcint                //**< A pointer where the error code is stored 
-                              //when the routine returns NULL. 
+  error: pcint                //**< A pointer where the error code is stored
+                              //when the routine returns NULL.
                               //It is OK to pass NULL here. */
                       ): ppa_simple; cdecl;
 //** Close and free the connection to the server. The connection objects becomes invalid when this is called. */
  pa_simple_free: procedure(s: ppa_simple); cdecl;
- 
+
 //** Write some data to the server */
  pa_simple_write: function(s: ppa_simple; const data: pointer;
                      bytes: size_t; error: pcint): cint; cdecl;
@@ -160,7 +160,7 @@ var
 //** Flush the playback buffer. */
  pa_simple_flush: function(s: ppa_simple; error: pcint): cint; cdecl;
 
-procedure initializepulsesimple(const sonames: array of filenamety); 
+procedure initializepulsesimple(const sonames: array of filenamety);
                                            //[] = default
 procedure releasepulsesimple;
 

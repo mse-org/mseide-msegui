@@ -21,7 +21,7 @@ uses
 
 const
  defaultinfotimeout = 60; //seconds
- 
+
 type
  fbserverinfoty = record
   version: card32;
@@ -66,7 +66,7 @@ type
  reservespacety = (rsp_full,rsp_res);
  propertyoptionty = (pro_activate,pro_dbonline);
  propertyoptionsty = set of propertyoptionty;
- 
+
  fbpropertyinfoty = record
   pagebuffers: card32;
   sweepinterval: card32;
@@ -84,7 +84,7 @@ type
   shutdownmode: runmodety;
   onlinemode: runmodety;
  end;
- 
+
  fbpropertyitemty = (fbp_pagebuffers,fbp_sweepinterval,fbp_shutdowndb,
                      fbp_denynewattachments,fbp_denynewtransactions,
                      fbp_reservespace,fbp_writemode,fbp_accessmode,
@@ -92,7 +92,7 @@ type
                      fbp_attachmentsshutdown,fbp_transactionsshutdown,
                      fbp_shutdownmode,fbp_onlinemode);
  fbpropertyitemsty = set of fbpropertyitemty;
- 
+
 const
  allfbpropertyitems = [fbp_pagebuffers,fbp_sweepinterval,fbp_shutdowndb,
                      fbp_denynewattachments,fbp_denynewtransactions,
@@ -122,7 +122,7 @@ type
 
  nbakoptionty = (nbo_notriggers);
  nbakoptionsty = set of nbakoptionty;
-  
+
  tfb3service = class;
 
  efbserviceerror3 = class(edatabaseerror)
@@ -147,7 +147,7 @@ type
 
  fbservicetexteventty = procedure (const sender: tfb3service;
                                            const atext: msestring) of object;
- fbserviceerroreventty = procedure (const sender: tfb3service; 
+ fbserviceerroreventty = procedure (const sender: tfb3service;
                             var e: exception; var handled: boolean) of object;
  fbserviceendeventty = procedure (const sender: tfb3service;
                                             const aborted: boolean) of object;
@@ -161,7 +161,7 @@ type
    constructor create(const aowner: tfb3service; const procname: msestring);
    destructor destroy(); override;
  end;
-  
+
  tfb3service = class(tmsecomponent)
   private
    fhostname: ansistring;
@@ -215,7 +215,7 @@ type
    function getmsestringitem(var buffer: pointer; const id: int32;
                                                 var value: msestring): boolean;
    procedure addmseparam(var params: string; const id: int32;
-                                              const value: msestring); 
+                                              const value: msestring);
                                                 //value limited to 65535 chars
    function internalusers(const ausername: string): fbuserinfoarty;
    procedure gettext(const procname: msestring; const params: string;
@@ -223,14 +223,14 @@ type
                                  //ring buffer
    procedure startmonitor(const procname: msestring; const aparams: string);
    function serviceisrunning: boolean;
-   procedure tagaction(const aprocname: msestring; const aaction: int32; 
+   procedure tagaction(const aprocname: msestring; const aaction: int32;
                               var res: msestringarty;
                               const maxrowcount: int32);
    procedure tagaction(const aprocname: msestring; const aaction: int32);
    procedure traceaction(const aprocname: msestring; const aaction: int32;
                          const aid: card32; var res: msestringarty;
                          const maxrowcount: int32);
-   procedure adduserparams(var params1: string; 
+   procedure adduserparams(var params1: string;
                       const ainfo: fbuserinfoty; const aitems: fbuseritemsty);
   public
    constructor create(aowner: tcomponent); override;
@@ -247,7 +247,7 @@ type
    procedure adduser(const ainfo: fbuserinfoty; const items: fbuseritemsty);
    procedure modifyuser(const ainfo: fbuserinfoty; const items: fbuseritemsty);
                                                      //fbu_username must be set
-   procedure deleteuser(const ausername: msestring; 
+   procedure deleteuser(const ausername: msestring;
                                            const arolename: msestring = '');
    procedure getlog(var res: msestringarty; const maxrowcount: int32 = -1);
                              //ring buffer, -1 -> unlimited
@@ -268,14 +268,14 @@ type
    procedure dropmapping();
 
    procedure dbstats(const adbname: msestring;
-               const aoptions: dbstatoptionsty; const acommandline: msestring; 
+               const aoptions: dbstatoptionsty; const acommandline: msestring;
                var res: msestringarty; const maxrowcount: int32 = -1);
                             //ring buffer, -1 -> unlimited
    procedure properties(const adbname: msestring;
                 const ainfo: fbpropertyinfoty; const aitems: fbpropertyitemsty;
                 var res:  msestringarty; const maxrowcount: integer= -1);
-                           //ring buffer, -1 -> unlimited                
-                    
+                           //ring buffer, -1 -> unlimited
+
    procedure validatestart(const dbname: msestring;
              const tabincl: msestring = ''; const tabexcl: msestring = '';
              const idxincl: msestring = ''; const idxexcl: msestring = '';
@@ -295,7 +295,7 @@ type
            const accessmode: accessmodety = amo_readwrite;
            const buffers: card32 = 0; const pagesize: card32 = 0;
            const fixfssdata: string = ''; const fixfssmetadata: string = '');
-                              //CHARACTER SET                 CHARACTER SET   
+                              //CHARACTER SET                 CHARACTER SET
    procedure nbakstart(const dbname: msestring; const _file: msestring;
                         const level: card32; const options: nbakoptionsty;
                         const direct: string = '');
@@ -309,27 +309,27 @@ type
    property lasterrormessage: msestring read flasterrormessage;
    property asynctext: msestringarty read fasynctext write fasynctext;
   published
-   property asyncmaxrowcount: int32 read fasyncmaxrowcount 
+   property asyncmaxrowcount: int32 read fasyncmaxrowcount
                             write fasyncmaxrowcount default 0; //-1 = unlimited
    property hostname : ansistring read fhostname write fhostname;
    property username : ansistring read fusername write fusername;
    property password : ansistring read fpassword write fpassword;
-   property connected: boolean read getconnected 
+   property connected: boolean read getconnected
                                     write setconnected default false;
                                  //connected will be reset by a server error
    property options: fbserviceoptionsty read foptions write foptions default [];
-   property infotimeout: int32 read finfotimeout write finfotimeout 
+   property infotimeout: int32 read finfotimeout write finfotimeout
                        default defaultinfotimeout; //seconds, -1 -> none
-   property onasynctext: fbservicetexteventty read fonasynctext 
+   property onasynctext: fbservicetexteventty read fonasynctext
                                                    write fonasynctext;
-   property onasyncend: fbserviceendeventty read fonasyncend 
+   property onasyncend: fbserviceendeventty read fonasyncend
                                    write fonasyncend; //runs in service thread
-   property onasyncendmain: fbserviceendeventty read fonasyncendmain 
+   property onasyncendmain: fbserviceendeventty read fonasyncendmain
                                write fonasyncendmain; //runs in main thread
-                                                    
+
    property onerror: fbserviceerroreventty read fonerror write fonerror;
  end;
- 
+
 implementation
 uses
  msebits,msearrayutils,mseapplication,msesysintf,msefileutils;
@@ -355,8 +355,8 @@ const
  reservespaceconsts: array[reservespacety] of card32 = (isc_spb_prp_res_use_full,
                                                        isc_spb_prp_res);
 const
- asyncendtag = 5790432; //not aborted, +1 -> aborted                            
- 
+ asyncendtag = 5790432; //not aborted, +1 -> aborted
+
 function readvalue16(var buffer: pbyte): card16;
 begin
  result:= buffer^;
@@ -382,7 +382,7 @@ begin
  buffer^:= value;
  inc(buffer);
  buffer^:= value shr 8;
- inc(buffer); 
+ inc(buffer);
 end;
 
 procedure storevalue(var buffer: pbyte; const value: card32);
@@ -390,15 +390,15 @@ begin
  buffer^:= value;
  inc(buffer);
  buffer^:= value shr 8;
- inc(buffer); 
+ inc(buffer);
  buffer^:= value shr 16;
- inc(buffer); 
+ inc(buffer);
  buffer^:= value shr 24;
- inc(buffer); 
+ inc(buffer);
 end;
 
 procedure addshortparam(var params: string; const id: int32;
-                                              const value: string); 
+                                              const value: string);
                                                 //value limited to 255 chars
 var
  i1,i2: int32;
@@ -419,7 +419,7 @@ begin
 end;
 
 procedure addparam(var params: string; const id: int32;
-                                              const value: string); 
+                                              const value: string);
                                                 //value limited to 65535 chars
 var
  i1,i2: int32;
@@ -439,7 +439,7 @@ begin
 end;
 
 procedure addparam(var params: string; const id: int32;
-                                              const value: card32); 
+                                              const value: card32);
 var
  i2: int32;
  po1: pbyte;
@@ -452,7 +452,7 @@ begin
  storevalue(po1,value);
 end;
 
-procedure addparam(var params: string; const id: int32); 
+procedure addparam(var params: string; const id: int32);
 var
  i2: int32;
  po1: pbyte;
@@ -464,7 +464,7 @@ begin
 end;
 
 procedure addparam(var params: string; const id: int32;
-                                              const value: card8); 
+                                              const value: card8);
 var
  i2: int32;
  po1: pbyte;
@@ -533,7 +533,7 @@ var
  po1: nativeintptr;
  err1: integer;
 begin
- str1:= formatstatus(astatus); 
+ str1:= formatstatus(astatus);
  msg1:= aerrormessage;
  if str1 <> '' then begin
   msg1:= msg1 + lineend + msestring(str1);
@@ -607,7 +607,7 @@ var
   end;
   remainder:= '';
  end; //add
- 
+
  procedure endtext(const canceled: boolean);
  var
   i1: int32;
@@ -636,7 +636,7 @@ var
    end;
   end;
  end;
- 
+
 const
  buffersize = 4096;
 begin
@@ -663,7 +663,7 @@ begin
     break;
    end;
    case pbyte(pointer(buffer1))^ of
-    isc_info_svc_to_eof: begin            
+    isc_info_svc_to_eof: begin
      po1:= pointer(buffer1)+1;
      i1:= readvalue16(po1);
      if i1 > 0 then begin
@@ -671,7 +671,7 @@ begin
       setlength(str1,i1+i2);
       move(po1^,(pointer(str1)+i2)^,i1);
      end;
-     if i1 < buffersize-10 then begin 
+     if i1 < buffersize-10 then begin
                   //not truncated, firebird seems not to fill buffer completely
       if str1 <> '' then begin
        application.lock();
@@ -739,7 +739,7 @@ begin
    end;
   end;
  finally
-  if not ok then begin 
+  if not ok then begin
    application.lock();
    try
     add();
@@ -901,7 +901,7 @@ end;
 
 procedure tfb3service.disconnect();
 begin
- if (fmonitor <> nil) and 
+ if (fmonitor <> nil) and
               (sys_getcurrentthread() <> fmonitor.id) then begin
   freeandnil(fmonitor);
  end;
@@ -1030,7 +1030,7 @@ begin
  include(fstate,fbss_busy);
 end;
 
-function tfb3service.getinfo(const procname: msestring; 
+function tfb3service.getinfo(const procname: msestring;
                    const items: array of byte; const async: boolean): string;
 var
  params1: string;
@@ -1101,7 +1101,7 @@ begin
  addparam(params,id,todbstring(value));
 end;
 {
-function tfb3service.getline(const procname: string; 
+function tfb3service.getline(const procname: string;
                            var res: msestring; out eof: boolean): boolean;
 var
  params1: string;
@@ -1181,12 +1181,12 @@ begin
   invalidresponse('users');
  end;
  inc(po1,3); //additional bytes 50 0 ???
- while (po1^ <> isc_info_flag_end) and (po1^ <> isc_info_end) and 
+ while (po1^ <> isc_info_flag_end) and (po1^ <> isc_info_end) and
                                                         (po1^ <> 0) do begin
   if po1^ = isc_spb_sec_username then begin //must be first field
    additem(result,typeinfo(result),count);
    po2:= @result[count-1];
-   getmsestringitem(po1,isc_spb_sec_username,po2^.username)   
+   getmsestringitem(po1,isc_spb_sec_username,po2^.username)
   end
   else begin
    if result = nil then begin
@@ -1194,7 +1194,7 @@ begin
    end;
   end;
   with po2^ do begin
-   while (po1^ <> isc_spb_sec_username) and (po1^ <> isc_info_flag_end) and 
+   while (po1^ <> isc_spb_sec_username) and (po1^ <> isc_info_flag_end) and
                                  (po1^ <> isc_info_end) and (po1^ <> 0) do begin
     if not (getmsestringitem(po1,isc_spb_sec_firstname,firstname) or
             getmsestringitem(po1,isc_spb_sec_middlename,middlename) or
@@ -1229,7 +1229,7 @@ begin
  end;
 end;
 
-procedure tfb3service.adduserparams(var params1: string; 
+procedure tfb3service.adduserparams(var params1: string;
                       const ainfo: fbuserinfoty; const aitems: fbuseritemsty);
 begin
  with ainfo do begin
@@ -1304,7 +1304,7 @@ procedure tfb3service.gettext(const procname: msestring; const params: string;
 
 var
  circindex: int32;
- 
+
  procedure add(const atext: pchar; const len: int32);
  var
   mstr1: msestring;
@@ -1327,7 +1327,7 @@ var
    additem(res,mstr1);
   end;
  end;
- 
+
 var
  params1,items1,buffer1: string;
  po1: pointer;
@@ -1354,7 +1354,7 @@ begin
 //                    pointer(params1),length(items1),pointer(items1),
 //                                             length(buffer1),pointer(buffer1)));
   case pbyte(pointer(buffer1))^ of
-   isc_info_svc_to_eof: begin         
+   isc_info_svc_to_eof: begin
     po1:= pointer(buffer1)+1;
     i1:= readvalue16(po1);
     if i1 <= 0 then begin
@@ -1414,7 +1414,7 @@ begin
  exclude(fstate,fbss_busy);
 end;
 
-procedure tfb3service.startmonitor(const procname: msestring; 
+procedure tfb3service.startmonitor(const procname: msestring;
                                                   const aparams: string);
 begin
 // checkbusy();
@@ -1436,7 +1436,7 @@ begin
   if getvalueitem(po1,isc_info_svc_running,ca1) then begin
    result:= ca1 <> 0;
   end;
- end; 
+ end;
 end;
 
 procedure tfb3service.getlog(var res: msestringarty;
@@ -1458,14 +1458,14 @@ begin
  startmonitor('tracestart',params1);
 end;
 
-procedure tfb3service.tagaction(const aprocname: msestring; 
+procedure tfb3service.tagaction(const aprocname: msestring;
                     const aaction: int32; var res: msestringarty;
                                                const maxrowcount: int32);
 begin
  gettext(aprocname,char(aaction),res,maxrowcount);
 end;
 
-procedure tfb3service.tagaction(const aprocname: msestring; 
+procedure tfb3service.tagaction(const aprocname: msestring;
                                                  const aaction: int32);
 var
  ar1: msestringarty;
@@ -1519,7 +1519,7 @@ begin
 end;
 
 procedure tfb3service.dbstats(const adbname: msestring;
-               const aoptions: dbstatoptionsty; const acommandline: msestring; 
+               const aoptions: dbstatoptionsty; const acommandline: msestring;
                var res: msestringarty; const maxrowcount: int32 = -1);
 var
  params1: string;
@@ -1726,7 +1726,7 @@ begin
  addparam(params1,isc_spb_options,card32(options));
  if direct <> '' then begin
   addparam(params1,isc_spb_nbk_direct,direct);
- end; 
+ end;
  startmonitor('nbak',params1);
 end;
 

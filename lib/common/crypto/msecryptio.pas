@@ -12,17 +12,17 @@ unit msecryptio;
 interface
 uses
  mseclasses,sysutils;
- 
+
 type
- 
+
  ecryptoio = class(exception)
  end;
 
- tcryptoio = class; 
+ tcryptoio = class;
  cryptoioclassty = class of tcryptoio;
  cryptoiokindty = (cyk_none,cyk_server,cyk_client);
 
- cryptodataty = array[0..17] of pointer;  
+ cryptodataty = array[0..17] of pointer;
  cryptoioinfoty = record
 //  handler: tcryptio;
   kind: cryptoiokindty;
@@ -33,25 +33,25 @@ type
  end;
  pcryptoioinfoty = ^cryptoioinfoty;
 
- connectionkindty = (cok_server,cok_client); 
- 
+ connectionkindty = (cok_server,cok_client);
+
  tcryptoio = class(tmsecomponent)
   protected
    class procedure internalunlink(var ainfo: cryptoioinfoty); virtual;
    class procedure internalthreadterminate; virtual;
-   class procedure connect(var ainfo: cryptoioinfoty; 
+   class procedure connect(var ainfo: cryptoioinfoty;
                           const atimeoutms: integer);  virtual; abstract;
-   class procedure accept(var ainfo: cryptoioinfoty; 
+   class procedure accept(var ainfo: cryptoioinfoty;
                           const atimeoutms: integer);  virtual; abstract;
-   class function write(var ainfo: cryptoioinfoty; const buffer: pointer; 
-                  const count: integer; 
+   class function write(var ainfo: cryptoioinfoty; const buffer: pointer;
+                  const count: integer;
                   const atimeoutms: integer): integer; virtual; abstract;
    class function read(var ainfo: cryptoioinfoty; const buffer: pointer;
-                  const count: integer; 
+                  const count: integer;
                   const atimeoutms: integer): integer; virtual; abstract;
                     //atimeoutms < 0 -> nonblocked
  public
-   procedure link(const atxfd,arxfd: integer; 
+   procedure link(const atxfd,arxfd: integer;
                           out ainfo: cryptoioinfoty); virtual;
    {
    class procedure unlink(var ainfo: cryptioinfoty);
@@ -72,7 +72,7 @@ procedure cryptothreadterminate(var ainfo: cryptoioinfoty);
 implementation
 uses
  msesystypes;
- 
+
 procedure cryptoconnect(var ainfo: cryptoioinfoty; const atimeoutms: integer);
 begin
  if ainfo.classtype <> nil then begin
@@ -136,7 +136,7 @@ begin
  //dummy
 end;
 
-procedure tcryptoio.link(const atxfd,arxfd: integer; 
+procedure tcryptoio.link(const atxfd,arxfd: integer;
                           out ainfo: cryptoioinfoty);
 begin
 // ainfo.handler:= self;

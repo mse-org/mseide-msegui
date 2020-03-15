@@ -1,5 +1,5 @@
 { MSEide Copyright (c) 2012 by Martin Schreiber
-   
+
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation; either version 2 of the License, or
@@ -19,7 +19,7 @@ unit cdesignparser;
 interface
 uses
  msetypes,mseparser,msedesignparser,mselist,msestrings,msehash;
- 
+
 type
 
  tcdesignparser = class(tcparser,idesignparser)
@@ -42,18 +42,18 @@ type
               const afilelist: tmseindexednamelist;
               const getincludefile: getincludefileeventty;
               const ainterfaceonly: boolean); overload;
-   constructor create(const afilelist: tmseindexednamelist; 
+   constructor create(const afilelist: tmseindexednamelist;
                  const atext: string); overload;
    procedure initidents; override;
    function dogetincludefile(const afilename: filenamety;
            const astatementstart,astatementend: sourceposty): tscanner; override;
-   procedure parse; override;  
+   procedure parse; override;
    procedure clear; override;
  end;
 
  tcfunctions = class(tfunctions)
  end;
- 
+
  tcunitinfo = class(tunitinfo)
   public
    constructor create;
@@ -64,7 +64,7 @@ type
   protected
    procedure finalizerecord(var item); override;
  end;
-  
+
  cglobfuncinfoty = record
   list: tcrootdeflist;
   id: integer;
@@ -75,7 +75,7 @@ type
   data: cglobfuncinfoty;
  end;
  pcglobfunchashdataty = ^cglobfunchashdataty;
- 
+
  tcglobals = class(thashdatalist)
   private
    fclosing: boolean;
@@ -101,7 +101,7 @@ type
 
  tcprocdeflist = class(tdeflist)
  end;
-   
+
 procedure parsecdef(const adef: pdefinfoty; out atext: string; out scope: tdeflist);
 function cglobals: tcglobals;
 procedure beginfinalizecglobals;
@@ -152,7 +152,7 @@ var
    scope.addidentpath(parser,'.');
   end;
  end;
- 
+
  procedure dofunctionparameters;
  begin
   with parser do begin
@@ -167,7 +167,7 @@ var
    end;
   end;
  end;
- 
+
 begin
  scope:= tdeflist.create(adef^.kind,true);
  atext:= sourceupdater.getdefinfotext(adef);
@@ -202,7 +202,7 @@ begin
   end;
  end;
 end;
- 
+
 { tcdesignparser }
 
 constructor tcdesignparser.create(unitinfopo: punitinfoty;
@@ -218,7 +218,7 @@ begin
  ongetincludefile:= getincludefile;
 end;
 
-constructor tcdesignparser.create(const afilelist: tmseindexednamelist; 
+constructor tcdesignparser.create(const afilelist: tmseindexednamelist;
                  const atext: string);
 begin
  fnoautoparse:= true;
@@ -357,7 +357,7 @@ begin
         if ffunctionlevel = 1 then begin
          include(symbolflags,syf_global);
          c.functions.add(str1,pos1,sourcepos);
-        end;      
+        end;
        end;
        parseblock;
        deflist.endnode(sourcepos);
@@ -365,7 +365,7 @@ begin
         cglobals.add(tcrootdeflist(deflist),deflist.infocount-1);
        end;
       end;
-     end;    
+     end;
     end;
    end;
   end;

@@ -29,7 +29,7 @@ uses
 const
  bmpfiledialogstatname = 'bmpfile.sta';
  numcharchar = msechar('[');
-  
+
 type
 
  defaultenumerationty = (null);
@@ -154,7 +154,7 @@ type
                                        const raw: boolean = false); virtual;
    function getvariantvalue(const index: integer = 0): variant; virtual;
    procedure setvariantvalue(const value: variant); virtual;
-   
+
    function decodemsestring(const avalue: msestring): msestring;
    function encodemsestring(const avalue: msestring): msestring;
 
@@ -238,11 +238,11 @@ type
   protected
    function getdefaultstate: propertystatesty; override;
  end;
- 
+
  tnamepropertyeditor = class(tstringpropertyeditor)
   procedure setvalue(const value: msestring); override;
  end;
- 
+
  tfontnamepropertyeditor = class(tstringpropertyeditor)
   protected
    function getdefaultstate: propertystatesty; override;
@@ -264,7 +264,7 @@ type
   public
    procedure edit; override;
  end;
-   
+
  tordinalpropertyeditor = class(tpropertyeditor)
   protected
    function getdefaultstate: propertystatesty; override;
@@ -278,7 +278,7 @@ type
   protected
    function getdefaultstate: propertystatesty; override;
  end;
-  
+
  tint64propertyeditor = class(tpropertyeditor)
   protected
    function getdefaultstate: propertystatesty; override;
@@ -293,13 +293,13 @@ type
    procedure setvalue(const value: msestring); override;
    function getvalue: msestring; override;
  end;
- 
+
  twidecharpropertyeditor = class(tordinalpropertyeditor)
   public
    procedure setvalue(const value: msestring); override;
    function getvalue: msestring; override;
  end;
- 
+
  tbooleanpropertyeditor = class(tordinalpropertyeditor)
   protected
    function getdefaultstate: propertystatesty; override;
@@ -308,7 +308,7 @@ type
    function getvalue: msestring; override;
    function getvalues: msestringarty; override;
  end;
- 
+
  tvolatilebooleanpropertyeditor = class(tbooleanpropertyeditor)
   protected
    function getdefaultstate: propertystatesty; override;
@@ -325,7 +325,7 @@ type
    procedure setvalue(const value: msestring); override;
    function getvalue: msestring; override;
  end;
- 
+
  trealtypropertyeditor = class(tpropertyeditor)
   public
    function allequal: boolean; override;
@@ -339,7 +339,7 @@ type
    procedure setvalue(const value: msestring); override;
    function getvalue: msestring; override;
  end;
- 
+
  tdatetimepropertyeditor = class(tpropertyeditor)
   public
    function allequal: boolean; override;
@@ -354,7 +354,7 @@ type
    procedure setvalue(const value: msestring); override;
    function getvalue: msestring; override;
  end;
- 
+
  tenumpropertyeditor = class(tordinalpropertyeditor)
   protected
    function getdefaultstate: propertystatesty; override;
@@ -380,7 +380,7 @@ type
    function getvalue: msestring; override;
    function getvalues: msestringarty; override;
  end;
- 
+
  tshortcutarpropertyeditor = class(tshortcutpropertyeditor)
   public
    constructor create(const adesigner: idesigner;
@@ -388,7 +388,7 @@ type
             const aobjectinspector: iobjectinspector;
             const aprops: propinstancearty; atypeinfo: ptypeinfo); override;
  end;
- 
+
  tcolorpropertyeditor = class(tenumpropertyeditor)
   protected
    function getdefaultstate: propertystatesty; override;
@@ -474,7 +474,7 @@ type
   protected
    function issubcomponent(const index: integer = 0): boolean; override;
  end;
- 
+
  tcomponentinterfacepropertyeditor = class(tcomponentpropertyeditor)
   private
    fintfinfo: ptypeinfo;
@@ -484,7 +484,7 @@ type
   public
    procedure updatedefaultvalue; override;
  end;
- 
+
  tsisterwidgetpropertyeditor = class(tcomponentpropertyeditor)
   protected
    function filtercomponent(const acomponent: tcomponent): boolean; override;
@@ -500,14 +500,14 @@ type
   public
 //   function getvalues: msestringarty; override;
  end;
-  
+
  tchildwidgetpropertyeditor = class(tcomponentpropertyeditor)
   protected
    function getdefaultstate: propertystatesty; override;
   public
    function getvalues: msestringarty; override;
  end;
- 
+
  tlocalcomponentpropertyeditor = class(tcomponentpropertyeditor)
   protected
    function getdefaultstate: propertystatesty; override;
@@ -522,7 +522,7 @@ type
   protected
    function getdefaultstate: propertystatesty; override;
  end;
-  
+
  tsetpropertyeditor = class;
  tsetelementeditor = class(tpropertyeditor)
   protected
@@ -547,7 +547,7 @@ type
  end;
 
  setelementeditorclassty = class of tsetelementeditor;
- 
+
  tsetpropertyeditor = class(tordinalpropertyeditor)
   protected
    finvisibleitems: tintegerset;
@@ -572,7 +572,7 @@ type
         const amodule: tmsecomponent; const acomponent: tcomponent;
             const aobjectinspector: iobjectinspector;
             const aprops: propinstancearty; atypeinfo: ptypeinfo); override;
-   
+
  end;
 
  tmethodpropertyeditor = class(tpropertyeditor)
@@ -617,7 +617,7 @@ type
    forigtext: msestringarty;
    procedure closequery(const sender: tcustommseform;
                        var amodalresult: modalresultty);
-   procedure doafterclosequery(var amodalresult: modalresultty); virtual;                    
+   procedure doafterclosequery(var amodalresult: modalresultty); virtual;
    function getsyntaxindex: integer; virtual;
    function gettestbutton: boolean; virtual;
    function getutf8: boolean; virtual;
@@ -632,7 +632,7 @@ type
 
  listeditformkindty = (lfk_none,lfk_msestring,lfk_real,lfk_integer,
                        lfk_msestringint,lfk_complex);
- 
+
  tdatalistpropertyeditor = class(tdialogclasspropertyeditor)
   protected
    formkind: listeditformkindty;
@@ -657,7 +657,7 @@ type
    function getvalue: msestring; override;
    procedure edit; override;
  end;
-  
+
  tmsestringdatalistpropertyeditor = class(tdialogclasspropertyeditor)
    procedure edit; override;
    function getvalue: msestring; override;
@@ -698,7 +698,7 @@ type
   protected
    findex: integer;
    function gettypinfo: ptypeinfo; override;
-   
+
    procedure doinsert(const sender: tobject);
    procedure doappend(const sender: tobject);
    procedure dodelete(const sender: tobject);
@@ -726,7 +726,7 @@ type
                            const raw: boolean = false): msestring; override;
    procedure setmsestringvalue(const value: msestring;
                            const raw: boolean = false); override;
-   
+
    function getselectedpropinstances: objectarty; virtual;
 
    function getdefaultstate: propertystatesty; override;
@@ -759,7 +759,7 @@ type
 
  elementeditorclassty = class of tarrayelementeditor;
  elementeditorarty = array of tarrayelementeditor;
-  
+
  tarraypropertyeditor = class(tclasspropertyeditor)
   private
    fsubprops: elementeditorarty;
@@ -801,7 +801,7 @@ type
                           var mouseinfo: mouseeventinfoty); override;
    procedure dokeydown(var ainfo: keyeventinfoty); override;
  end;
- 
+
  tconstelementeditor = class(tarrayelementeditor)
   protected
    fvalue: msestring;
@@ -827,7 +827,7 @@ type
  end;
 
  tcollectionpropertyeditor = class;
- 
+
  tcollectionitemeditor = class(tpropertyeditor,iremotepropertyeditor)
   private
    findex: integer;
@@ -858,7 +858,7 @@ type
    procedure edit; override;
    function subproperties: propertyeditorarty; override;
    function name: msestring; override;
-   
+
    procedure dragbegin(var accept: boolean); override;
    procedure dragover(const sender: tpropertyeditor; var accept: boolean); override;
    procedure dragdrop(const sender: tpropertyeditor); override;
@@ -866,9 +866,9 @@ type
                           var mouseinfo: mouseeventinfoty); override;
    procedure dokeydown(var ainfo: keyeventinfoty); override;
  end;
- 
+
  collectionitemeditorclassty = class of tcollectionitemeditor;
-  
+
  tcollectionpropertyeditor = class(tclasspropertyeditor)
   private
    procedure doinsert(const sender: tobject);
@@ -885,7 +885,7 @@ type
                           var mouseinfo: mouseeventinfoty); override;
    procedure dokeydown(var ainfo: keyeventinfoty); override;
  end;
- 
+
  tpersistentarraypropertyeditor = class(tarraypropertyeditor)
   protected
    function geteditorclass: propertyeditorclassty; override;
@@ -926,7 +926,7 @@ type
   public
    function getvalue: msestring; override;
  end;
- 
+
  tintegerarraypropertyeditor = class(tarraypropertyeditor)
   protected
    function geteditorclass: propertyeditorclassty; override;
@@ -962,17 +962,17 @@ type
   protected
    function geteditorclass: propertyeditorclassty; override;
  end;
-   
+
  tmsestringarraypropertyeditor = class(tarraypropertyeditor)
   protected
    function geteditorclass: propertyeditorclassty; override;
  end;
- 
+
  trealarraypropertyeditor = class(tarraypropertyeditor)
   protected
    function geteditorclass: propertyeditorclassty; override;
  end;
- 
+
  trecordpropertyeditor = class(tpropertyeditor)
   private
    fsubproperties: propertyeditorarty;
@@ -1020,7 +1020,7 @@ type
 var
  fontaliasnames: msestringarty;
 
-function textpropertyfont: tfont; 
+function textpropertyfont: tfont;
 function propertyeditors: tpropertyeditors;
 procedure registerpropertyeditor(propertytype: ptypeinfo;
   propertyownerclass: tclass; const propertyname: string;
@@ -1029,7 +1029,7 @@ function imagefilepropedit(out afilename: filenamety;
                                          out aformat: string): modalresultty;
 function getcomponentpropname(const acomp: tcomponent): msestring;
 function wantpropertydelete(const fromval,toval: int32): boolean;
-  
+
 implementation
 uses
  mseformatstr,msebits,msearrayprops,msebitmap,
@@ -1073,7 +1073,7 @@ var
 
 function wantpropertydelete(const fromval,toval: int32): boolean;
 begin
- result:= (toval < fromval) or 
+ result:= (toval < fromval) or
           askok(mo.c[ord(wishdelete)]+' '+inttostrmse(fromval) +
          ' '+mo.c[ord(str_to)]+' '+ inttostrmse(toval) + '?',
          stockobjects.captions[sc_confirmation]);
@@ -1134,7 +1134,7 @@ var
  datalist1: tdatalist1;
 begin
  datalist1:= tdatalist1(sender.getpointervalue);
- if (datalist1 = nil) {or 
+ if (datalist1 = nil) {or
            (ilo_nostreaming in datalist1.finternaloptions)} then begin
   exclude(defaultstate,ps_dialog);
  end;
@@ -1282,7 +1282,7 @@ end;
 function tpropertyeditors.geteditorclass(apropertytype: ptypeinfo;
                apropertyownerclass: tclass;
                apropertyname: string): propertyeditorclassty;
-               
+
                //todo: optimize
 var
  int1: integer;
@@ -1377,11 +1377,11 @@ begin
     end
     else begin
      atypeclasslevel:= 1;
-     if (kind = tkset) and 
+     if (kind = tkset) and
                     (po1^.propertytype <> typeinfo(defaultsetty)) then begin
       atypeclasslevel:= 2;
      end;
-     if (kind = tkenumeration) and 
+     if (kind = tkenumeration) and
             (po1^.propertytype <> typeinfo(defaultenumerationty)) then begin
       atypeclasslevel:= 2;
      end;
@@ -1389,13 +1389,13 @@ begin
    end;
 
    if kind = tkclass then begin
-    if (typeclasslevel > atypeclasslevel) and (anamelevel = 1) and 
+    if (typeclasslevel > atypeclasslevel) and (anamelevel = 1) and
                (apropertyownerclasslevel = bigint-1) then begin
      savelevel;
     end
     else begin
      if typeclasslevel >= atypeclasslevel then begin
-      if (propertyownerclasslevel > apropertyownerclasslevel) and 
+      if (propertyownerclasslevel > apropertyownerclasslevel) and
               (anamelevel = 1) then begin
        savelevel;
       end
@@ -1422,7 +1422,7 @@ begin
     else begin
      if typeclasslevel >= atypeclasslevel then begin
               //do not overwrite exact type match
-      if (propertyownerclasslevel > apropertyownerclasslevel) and 
+      if (propertyownerclasslevel > apropertyownerclasslevel) and
                                            (anamelevel = 1) then begin
        savelevel;
       end
@@ -1515,12 +1515,12 @@ end;
 
 function tpropertyeditor.canrevert: boolean;
 begin
- result:= (ftypeinfo <> nil) and (fremote = nil) and 
+ result:= (ftypeinfo <> nil) and (fremote = nil) and
   (csancestor in component.componentstate) and (fprops[0].instance = component);
 end;
 
 procedure tpropertyeditor.copyproperty(const asource: tobject);
-begin 
+begin
  case ftypeinfo^.kind of
   tkInteger,tkChar,tkEnumeration,tkSet,tkWChar,
                          {$ifdef FPC}tkBool,{$endif}tkClass: begin
@@ -1596,7 +1596,7 @@ begin
  result:= nil;
  ed1:= getparenteditor;
  while ed1 <> nil do begin
-  if (ed1 is tcomponentpropertyeditor) and not 
+  if (ed1 is tcomponentpropertyeditor) and not
                tcomponentpropertyeditor(ed1).issubcomponent then begin
    setlength(result,count);
    for int1:= 0 to high(result) do begin
@@ -1633,7 +1633,7 @@ begin
    break;
   end;
   editor1:= editor1.fparenteditor;
- end;  
+ end;
  if result <> nil then begin
   include(fstate,ps_refreshall);
  end;
@@ -2028,7 +2028,7 @@ begin
     else begin
      if avalue[int1] < widechar(32) then begin
       mstr1:= numcharchar+inttostrmse(ord(avalue[int1]));
-      if (avalue[int1+1] >= '0') and (avalue[int1+1] <= '9') or 
+      if (avalue[int1+1] >= '0') and (avalue[int1+1] <= '9') or
                      (avalue[int1+1] = ' ') then begin
        mstr1:= mstr1 + ' ';
       end;
@@ -2105,9 +2105,9 @@ begin
     result:= decodemsestring(getmsestringprop(instance,propinfo));
    end;
 //  {$ifdef mse_unicodestring}
-//   result:= decodemsestring(GetunicodestrProp(instance,propinfo));     
+//   result:= decodemsestring(GetunicodestrProp(instance,propinfo));
 //  {$else}
-//   result:= decodemsestring(GetwidestrProp(instance,propinfo));     
+//   result:= decodemsestring(GetwidestrProp(instance,propinfo));
 //  {$endif}
   end;
  end;
@@ -2136,23 +2136,23 @@ begin
     with fprops[int1] do begin
      setmsestringprop(instance,propinfo,mstr1);
 //    {$ifdef mse_unicodestring}
-//     setunicodestrprop(instance,propinfo,mstr1);  
+//     setunicodestrprop(instance,propinfo,mstr1);
 //    {$else}
-//     setwidestrprop(instance,propinfo,mstr1);  
+//     setwidestrprop(instance,propinfo,mstr1);
 //    {$endif}
     end;
    end;
   end
   else begin
    for int1:= 0 to high(ar1) do begin
-    setmsestringprop(ar1[int1],fprops[0].propinfo,mstr1);  
+    setmsestringprop(ar1[int1],fprops[0].propinfo,mstr1);
 //   {$ifdef mse_unicodestring}
-//    setunicodestrprop(ar1[int1],fprops[0].propinfo,mstr1);  
+//    setunicodestrprop(ar1[int1],fprops[0].propinfo,mstr1);
 //   {$else}
-//    setwidestrprop(ar1[int1],fprops[0].propinfo,mstr1);  
+//    setwidestrprop(ar1[int1],fprops[0].propinfo,mstr1);
 //   {$endif}
    end;
-  end;    
+  end;
   modified;
  end;
 end;
@@ -2188,9 +2188,9 @@ begin
   end
   else begin
    for int1:= 0 to high(ar1) do begin
-    setvariantprop(ar1[int1],fprops[0].propinfo,value);  
+    setvariantprop(ar1[int1],fprops[0].propinfo,value);
    end;
-  end;    
+  end;
   modified;
  end;
 end;
@@ -2322,7 +2322,7 @@ begin
  //dummy
 end;
 
-procedure tpropertyeditor.dopopup(var amenu: tpopupmenu; 
+procedure tpropertyeditor.dopopup(var amenu: tpopupmenu;
           const atransientfor: twidget; var mouseinfo: mouseeventinfoty);
 begin
  //dummy
@@ -2335,7 +2335,7 @@ end;
 
 procedure tpropertyeditor.updatedefaultvalue;
 begin
- if (fstate * [ps_isordprop,ps_candefault] = [ps_isordprop,ps_candefault]) and 
+ if (fstate * [ps_isordprop,ps_candefault] = [ps_isordprop,ps_candefault]) and
         (getordvalue <> fprops[0].propinfo^.default) then begin
   include(fstate,ps_modified);
  end
@@ -2612,7 +2612,7 @@ begin
   method1:= fdesigner.getmethod(ansistring(value),fmodule,
                   fprops[0].propinfo^.proptype{$ifndef FPC}^{$endif},true);
   if method1.data = nil then begin //method not found
-   if (method2.data <> nil) and not isselected and 
+   if (method2.data <> nil) and not isselected and
                          fdesigner.isownedmethod(fmodule,method2)then begin
     fdesigner.changemethodname(method2,ansistring(value),
          fprops[0].propinfo^.proptype{$ifndef FPC}^{$endif});
@@ -2734,10 +2734,10 @@ end;
 
 { tsetelementeditor }
 
-constructor tsetelementeditor.create(const adesigner: idesigner; 
-      const amodule: tmsecomponent; const acomponent: tcomponent; 
-      const aobjectinspector: iobjectinspector; 
-      const aprops: propinstancearty; atypeinfo: ptypeinfo; 
+constructor tsetelementeditor.create(const adesigner: idesigner;
+      const amodule: tmsecomponent; const acomponent: tcomponent;
+      const aobjectinspector: iobjectinspector;
+      const aprops: propinstancearty; atypeinfo: ptypeinfo;
       const aparent: tsetpropertyeditor; const aindex: integer);
 begin
  findex:= aindex;
@@ -2831,7 +2831,7 @@ end;
 
 function tclasspropertyeditor.getdefaultstate: propertystatesty;
 begin
- result:= inherited getdefaultstate + 
+ result:= inherited getdefaultstate +
                         [ps_subproperties,ps_isordprop,ps_refresh];
 end;
 
@@ -2922,7 +2922,7 @@ end;
 
 function tlinkedobjectpropertyeditor.getvalue: msestring;
 var
- obj1: tobject; 
+ obj1: tobject;
 begin
  obj1:= tobject(getpointervalue);
  if obj1 = nil then begin
@@ -2969,9 +2969,9 @@ begin
   result:= false;
  end
  else begin
-  result:= (cssubcomponent in comp.ComponentStyle) and 
+  result:= (cssubcomponent in comp.ComponentStyle) and
    ((comp.owner = nil) or ownscomponent(component,comp) and
-    (comp is tmsecomponent) and 
+    (comp is tmsecomponent) and
               not (cs_subcompref in tmsecomponent1(comp).fmsecomponentstate));
  end;
 end;
@@ -3085,7 +3085,7 @@ end;
 
 var
  fcomppath: msestring;
- 
+
 procedure tcomponentpropertyeditor.edit;
 var
  tree1: tcompnameitem;
@@ -3193,7 +3193,7 @@ begin
   if widget1 <> nil then begin
    ar1:= fdesigner.getcomponentlist(tcomponentclass(typedata^.classtype));
    for int1:= 0 to high(ar1) do begin
-    if (twidget(ar1[int1]).parentwidget <> widget1) or 
+    if (twidget(ar1[int1]).parentwidget <> widget1) or
                   (ar1[int1] = fcomponent) then begin
      ar1[int1]:= nil;
     end;
@@ -3839,7 +3839,7 @@ begin
  modified;
 end;
 
-procedure tarrayelementeditor.setordvalue(const index: integer; 
+procedure tarrayelementeditor.setordvalue(const index: integer;
                          const value: longword);
 begin
  with fprops[index] do begin
@@ -3867,7 +3867,7 @@ begin
  modified;
 end;
 
-procedure tarrayelementeditor.setint64value(const index: integer; 
+procedure tarrayelementeditor.setint64value(const index: integer;
                          const value: int64);
 begin
  with fprops[index] do begin
@@ -3895,7 +3895,7 @@ begin
  modified;
 end;
 
-procedure tarrayelementeditor.setpointervalue(const index: integer; 
+procedure tarrayelementeditor.setpointervalue(const index: integer;
                          const value: pointer);
 begin
  with fprops[index] do begin
@@ -4158,7 +4158,7 @@ end;
 
 function tconstarraypropertyeditor.getdefaultstate: propertystatesty;
 begin
- result:= inherited getdefaultstate + 
+ result:= inherited getdefaultstate +
          [ps_subproperties,ps_noadditems,ps_nodeleteitems{,ps_volatile}];
 end;
 
@@ -4386,7 +4386,7 @@ end;
 
 { tcllectionitemeditor }
 
-constructor tcollectionitemeditor.create(aindex: integer; 
+constructor tcollectionitemeditor.create(aindex: integer;
             aparenteditor: tcollectionpropertyeditor;
             aeditorclass: propertyeditorclassty;
             const adesigner: idesigner;
@@ -4399,7 +4399,7 @@ begin
  setlength(props1,length(aprops));
  for int1:= 0 to high(props1) do begin
   props1[int1].propinfo:= aprops[int1].propinfo;
-  props1[int1].instance:= 
+  props1[int1].instance:=
      tcollection(aparenteditor.getpointervalue(int1)).items[aindex];
  end;
  findex:= aindex;
@@ -4457,7 +4457,7 @@ begin
  //dummy
 end;
 
-procedure tcollectionitemeditor.setordvalue(const index: integer; 
+procedure tcollectionitemeditor.setordvalue(const index: integer;
                                const value: longword);
 begin
  //dummy
@@ -4473,7 +4473,7 @@ begin
  //dummy
 end;
 
-procedure tcollectionitemeditor.setpointervalue(const index: integer; 
+procedure tcollectionitemeditor.setpointervalue(const index: integer;
                                const value: pointer);
 begin
  //dummy
@@ -4509,7 +4509,7 @@ begin
  accept:= true;
 end;
 
-procedure tcollectionitemeditor.dragover(const sender: tpropertyeditor; 
+procedure tcollectionitemeditor.dragover(const sender: tpropertyeditor;
                                      var accept: boolean);
 begin
  accept:= (sender is tcollectionitemeditor) and
@@ -4641,7 +4641,7 @@ function tcollectionpropertyeditor.subproperties: propertyeditorarty;
 var
  col1: tcollection;
  itemtypeinfo: ptypeinfo;
- edtype: propertyeditorclassty; 
+ edtype: propertyeditorclassty;
  int1: integer;
 begin
  col1:= tcollection(getpointervalue);
@@ -4775,7 +4775,7 @@ end;
 
 procedure tbooleanpropertyeditor.setvalue(const value: msestring);
 begin
- setordvalue(longword(uppercase(trim(value)) = 
+ setordvalue(longword(uppercase(trim(value)) =
                                    uppercase(msestring(truename))));
 end;
 
@@ -5047,11 +5047,11 @@ procedure tdatetimepropertyeditor.setvalue(const value: msestring);
    raise exception.create(ansistring(mo.c[ord(emptytime)]+'.'));
   end;
  end;
- 
+
 var
  rea1,rea2: real;
  ar1: msestringarty;
-  
+
 begin
  if value = '' then begin
   rea1:= emptydatetime;
@@ -5071,7 +5071,7 @@ begin
    else begin
     try
      rea1:= encdate(ar1[0]);
-    except       
+    except
      rea1:= enctime(ar1[0]);
     end;
    end;
@@ -5393,7 +5393,7 @@ end;
 
 { ttextstringspropertyeditor }
 
-procedure ttextstringspropertyeditor.closequery(const sender: tcustommseform; 
+procedure ttextstringspropertyeditor.closequery(const sender: tcustommseform;
              var amodalresult: modalresultty);
 var
  int1: integer;
@@ -6002,8 +6002,8 @@ end;
 { tconstelementeditor }
 
 constructor tconstelementeditor.create(const avalue: msestring; aindex: integer;
-     aparenteditor: tarraypropertyeditor; aeditorclass: propertyeditorclassty; 
-     const adesigner: idesigner; const aobjectinspector: iobjectinspector; 
+     aparenteditor: tarraypropertyeditor; aeditorclass: propertyeditorclassty;
+     const adesigner: idesigner; const aobjectinspector: iobjectinspector;
      const aprops: propinstancearty; atypinfo: ptypeinfo);
 begin
  fvalue:= avalue;

@@ -1,4 +1,4 @@
-program facedemo;    
+program facedemo;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 {$ifdef FPC}
  {$ifdef mswindows}{$apptype gui}{$endif}

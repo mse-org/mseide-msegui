@@ -28,7 +28,7 @@ object dirtreefo: tdirtreefo
     bounds_cy = 203
     anchors = []
     datacols.count = 1
-    datacols.items = <    
+    datacols.items = <
       item[treeitem]
         linewidth = 0
         colorfocused = -1879048185

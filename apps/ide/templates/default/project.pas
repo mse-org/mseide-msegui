@@ -4,7 +4,7 @@ program ${%PROJECTNAME%};
  {$ifdef mswindows}{$apptype gui}{$endif}
 {$endif}
 uses
- {$ifdef FPC}{$ifdef unix}cthreads,{$endif}{$endif} 
+ {$ifdef FPC}{$ifdef unix}cthreads,{$endif}{$endif}
  msegui,main;
 begin
  application.createform(tmainfo,mainfo);

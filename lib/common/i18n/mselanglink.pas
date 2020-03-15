@@ -12,7 +12,7 @@ type
 var
  registermodulehook: registermodulehookty;
  registerresourcehook: registerresourcehookty;
- 
+
 procedure registerlang(const registermoduleproc: registermodulety;
                           const registerresourceproc: registerresourcety);
 procedure unregisterlang(const unregistermoduleproc: registermodulety;
@@ -23,7 +23,7 @@ implementation
 var
  lastmodulehook: registermodulehookty;
  lastresourcehook: registerresourcehookty;
- 
+
 procedure registerlang(const registermoduleproc: registermodulety;
                           const registerresourceproc: registerresourcety);
 begin

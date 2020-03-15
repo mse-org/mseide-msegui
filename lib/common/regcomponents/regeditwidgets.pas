@@ -42,12 +42,12 @@ type
   protected
    function getdefaultstate: propertystatesty; override;
  end;
-                        
+
  twidgetcolelementeditor = class(tdatacoleditor)
   public
    function getvalue: msestring; override;
  end;
- 
+
  twidgetcolspropertyeditor = class(tdatacolseditor)
   protected
    function geteditorclass: propertyeditorclassty; override;
@@ -60,42 +60,42 @@ type
    procedure edit; override;
    function getvalue: msestring; override;
  end;
- 
+
  tdatalistsourcepropertyeditor = class(tstringpropertyeditor)
   protected
    function gettag: integer; virtual;
    function getdefaultstate: propertystatesty; override;
   public
-   function getvalues: msestringarty; override;  
+   function getvalues: msestringarty; override;
  end;
 
- tsumlistsourcelevelpropertyeditor = 
+ tsumlistsourcelevelpropertyeditor =
                    class(tdatalistsourcepropertyeditor)
   protected
    function gettag: integer; override;
   public
-   function getvalues: msestringarty; override;  
+   function getvalues: msestringarty; override;
  end;
 
- tsumlistsourceissumpropertyeditor = 
+ tsumlistsourceissumpropertyeditor =
                    class(tdatalistsourcepropertyeditor)
   protected
    function gettag: integer; override;
  end;
 
- trowstatelistsourcefoldlevelpropertyeditor = 
-                   class(tdatalistsourcepropertyeditor)
-  protected
-   function gettag: integer; override;
- end;
- 
- trowstatelistsourcefoldhiddenpropertyeditor = 
+ trowstatelistsourcefoldlevelpropertyeditor =
                    class(tdatalistsourcepropertyeditor)
   protected
    function gettag: integer; override;
  end;
 
- trowstatelistsourceissumpropertyeditor = 
+ trowstatelistsourcefoldhiddenpropertyeditor =
+                   class(tdatalistsourcepropertyeditor)
+  protected
+   function gettag: integer; override;
+ end;
+
+ trowstatelistsourceissumpropertyeditor =
                    class(tdatalistsourcepropertyeditor)
   protected
    function gettag: integer; override;
@@ -105,7 +105,7 @@ type
   protected
    function getinvisibleitems: tintegerset; override;
  end;
-  
+
  toptionseditpropertyeditor = class(tsetpropertyeditor)
   protected
    function getinvisibleitems: tintegerset; override;
@@ -115,7 +115,7 @@ type
   public
    procedure navigevent(); override;
  end;
- 
+
  tvalueeditspropertyeditor = class(tpersistentarraypropertyeditor)
   protected
    function geteditorclass: propertyeditorclassty; override;
@@ -128,7 +128,7 @@ type
   protected
    function filtercomponent(const acomponent: tcomponent): boolean; override;
  end;
-   
+
 procedure Register;
 begin
  registercomponents('Edit',[twidgetgrid,
@@ -285,7 +285,7 @@ begin
   with tcustomgrid(fcomponent).datacols do begin
    for int1:= 0 to count -1 do begin
     with cols[int1] do begin
-     if (name <> '') and 
+     if (name <> '') and
                (tdatalist(fprops[0].instance).canlink(datalist,gettag)) then begin
       additem(result,msestring(name));
      end;
@@ -362,9 +362,9 @@ function titemvalueeditpropertyeditor.filtercomponent(
 var
  intf1: igridwidget;
 begin
- result:= (acomponent is twidget) and 
+ result:= (acomponent is twidget) and
   ((twidget(acomponent).parentwidget) =
-    tvalueedititem(tpropertyeditor1(parenteditor).getpointervalue()).owner) and 
+    tvalueedititem(tpropertyeditor1(parenteditor).getpointervalue()).owner) and
                getcorbainterface(acomponent,typeinfo(igridwidget),intf1);
 end;
 

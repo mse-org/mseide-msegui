@@ -338,7 +338,7 @@ begin
   case FNativeFieldType of
 // OH 2000-11-15 dBase7 support.
 // Add the new fieldtypes
-    '+' : 
+    '+' :
       if DbfVersion = xBaseVII then
         FFieldType := ftAutoInc;
     'I' : FFieldType := ftInteger;
@@ -370,7 +370,7 @@ begin
       end;
     'D' : FFieldType := ftDate;
     'M' : FFieldType := ftMemo;
-    'B' : 
+    'B' :
       if DbfVersion = xFoxPro then
         FFieldType := ftFloat
       else
@@ -421,7 +421,7 @@ begin
         FNativeFieldType := 'I'
       else
         FNativeFieldType := 'N';
-    ftBCD, ftCurrency: 
+    ftBCD, ftCurrency:
       if DbfVersion = xFoxPro then
         FNativeFieldType := 'Y';
   end;
@@ -479,14 +479,14 @@ begin
   case FNativeFieldType of
     'C':
       begin
-        if FSize < 0 then 
+        if FSize < 0 then
           FSize := 0;
         if DbfVersion = xFoxPro then
         begin
-          if FSize >= $FFFF then 
+          if FSize >= $FFFF then
             FSize := $FFFF;
         end else begin
-          if FSize >= $FF then 
+          if FSize >= $FF then
             FSize := $FF;
         end;
         FPrecision := 0;

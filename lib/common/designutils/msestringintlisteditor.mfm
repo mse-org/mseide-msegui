@@ -41,37 +41,37 @@ object msestringintlisteditor: tmsestringintlisteditor
     anchors = [an_left, an_top, an_right, an_bottom]
     optionsgrid = [og_colsizing, og_rowmoving, og_keyrowmoving, og_rowinserting, og_rowdeleting, og_focuscellonenter, og_autofirstrow, og_autoappend, og_wrapcol]
     fixcols.count = 1
-    fixcols.items = <    
+    fixcols.items = <
       item
         width = 31
         numstep = 1
       end>
     fixrows.count = 1
-    fixrows.items = <    
+    fixrows.items = <
       item
         height = 16
         captions.count = 3
-        captions.items = <        
+        captions.items = <
           item
             caption = 'a'
             textflags = []
-          end        
+          end
           item
             caption = 'b'
-          end        
+          end
           item
             caption = 'b'
             textflags = []
           end>
       end>
     datacols.count = 2
-    datacols.items = <    
+    datacols.items = <
       item[texta]
         width = 232
         options = [co_fill, co_savevalue, co_savestate, co_mousescrollrow]
         widgetname = 'texta'
         dataclass = tgridmsestringdatalist
-      end    
+      end
       item[textb]
         widgetname = 'textb'
         dataclass = tgridintegerdatalist

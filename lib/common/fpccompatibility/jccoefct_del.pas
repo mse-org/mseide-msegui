@@ -115,7 +115,7 @@ end;
 
 {METHODDEF}
 procedure start_pass_coef (cinfo : j_compress_ptr;
-                           pass_mode : J_BUF_MODE); 
+                           pass_mode : J_BUF_MODE);
 var
   coef : my_coef_ptr;
 begin

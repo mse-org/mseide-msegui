@@ -86,7 +86,7 @@ type
   SQLINTEGER   = clong;
   SQLUINTEGER  = culong;
   SQLLEN       = ptrint;
-  SQLULEN      = ptruint; 
+  SQLULEN      = ptruint;
  {$ifdef CPU64}
   SQLSETPOSIROW = ptruint;
  {$else}
@@ -101,7 +101,7 @@ type
   PSQLINTEGER   = ^SQLINTEGER;
   PSQLUINTEGER  = ^SQLUINTEGER;
   PSQLLEN       = ^SQLLEN;
-  PSQLULEN      = ^SQLULEN; 
+  PSQLULEN      = ^SQLULEN;
   PSQLSMALLINT  = ^SQLSMALLINT;
   PSQLUSMALLINT = ^SQLUSMALLINT;
   PSQLREAL      = ^SQLREAL;
@@ -152,7 +152,7 @@ const
   {$ifdef ODBCVER35}
   SQL_GUID       = -11;
   {$endif}
-  
+
   { interval codes}
   {$ifdef ODBCVER3}
   SQL_CODE_YEAR             = 1;
@@ -197,7 +197,7 @@ const
   SQL_INTERVAL_HOUR_TO_SECOND   = -91;
   SQL_INTERVAL_MINUTE_TO_SECOND = -92;
   {$endif}
-  
+
   { Unicode data type codes }
   {$ifndef ODBCVER3}
   SQL_UNICODE             = -95;
@@ -262,7 +262,7 @@ const
   SQL_C_USHORT   =  SQL_C_SHORT+SQL_UNSIGNED_OFFSET; // UNSIGNED SMALLINT
   SQL_C_UTINYINT =  SQL_TINYINT+SQL_UNSIGNED_OFFSET; // UNSIGNED TINYINT
   SQL_C_BOOKMARK = SQL_C_ULONG; // BOOKMARK
-  
+
 {$ifdef ODBCVER35}
   SQL_C_GUID    = SQL_GUID;
 {$endif}
@@ -536,7 +536,7 @@ const
   SQL_USE_BOOKMARKS           =12;
   SQL_GET_BOOKMARK            =13;      //      GetStmtOption Only */
   SQL_ROW_NUMBER              = 14;     //      GetStmtOption Only */
-  
+
   SQL_ATTR_CURSOR_TYPE        = SQL_CURSOR_TYPE;
   SQL_ATTR_CONCURRENCY        = SQL_CONCURRENCY;
   SQL_ATTR_FETCH_BOOKMARK_PTR = 16;
@@ -1079,7 +1079,7 @@ var
            Sqlstate:PSQLCHAR;var NativeError:SQLINTEGER;
            MessageText:PSQLCHAR;BufferLength:SQLSMALLINT;
            var TextLength:SQLSMALLINT ):SQLRETURN;{$ifdef fpc} extdecl {$else} stdcall {$endif};
-           
+
  SQLGetDiagField: function (HandleType:SQLSMALLINT;
            Handle:SQLHANDLE;RecNumber:SQLSMALLINT;
            DiagIdentifier:SQLSMALLINT;DiagInfoPtr:SQLPOINTER;
@@ -1520,10 +1520,10 @@ implementation
 {$IFDEF DYNLOADINGODBC}
 uses
  msedynload,msesys;
- 
+
 var
  libinfo: dynlibinfoty;
- 
+
 //var RefCount : integer;
 (*
 Procedure InitialiseODBC(OverrideName : string ='');
@@ -1534,7 +1534,7 @@ begin
   inc(RefCount);
   if RefCount = 1 then
     begin
-    if OverrideName='' then 
+    if OverrideName='' then
        libname:=odbclib
      else
        libname:=OverrideName;

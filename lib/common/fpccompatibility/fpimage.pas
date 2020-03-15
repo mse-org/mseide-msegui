@@ -19,7 +19,7 @@ unit fpimage;
 
 interface
 
-uses 
+uses
  sysutils,classes,mclasses,msetypes{$ifndef FPC},classes_del,types{$endif};
 
 type
@@ -395,7 +395,7 @@ Type
     g,a: word;
   end;
   PFPCompactImgGrayAlpha16BitValue = ^TFPCompactImgGrayAlpha16BitValue;
-  FPCompactImgGrayAlpha16BitValueaty = 
+  FPCompactImgGrayAlpha16BitValueaty =
                               array[0..0] of TFPCompactImgGrayAlpha16BitValue;
   pFPCompactImgGrayAlpha16BitValueaty = ^FPCompactImgGrayAlpha16BitValueaty;
 
@@ -433,7 +433,7 @@ Type
     g,a: byte;
   end;
   PFPCompactImgGrayAlpha8BitValue = ^TFPCompactImgGrayAlpha8BitValue;
-  FPCompactImgGrayAlpha8BitValueaty = 
+  FPCompactImgGrayAlpha8BitValueaty =
                               array[0..0] of TFPCompactImgGrayAlpha8BitValue;
   pFPCompactImgGrayAlpha8BitValueaty = ^FPCompactImgGrayAlpha8BitValueaty;
 

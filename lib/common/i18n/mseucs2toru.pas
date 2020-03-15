@@ -13,7 +13,7 @@ unit mseucs2toru;
 interface
 uses
  msestrings;
- 
+
 function ucs2to866(const avalue: msechar): char;
 function ucs2to866(const avalue: msestring): ansistring;
 
@@ -22,7 +22,7 @@ function cp866toUCS2(const avalue: ansistring): msestring;
 
 implementation
 
-const 
+const
 
  cp866_2: array[$2550..$256C] of byte = (
   $cd,$ba,$d5,$d6,$c9,$b8,$b7,$bb,$d4,$d3,$c8,$be,$bd,$bc,$c6,

@@ -23,16 +23,16 @@ const
 {$else}
  boolprops = [tkinteger,tkenumeration];
 {$endif}
- 
+
 type
  ifiwidgetstatety = ({iws_closed,}iws_loaded,iws_releasing,iws_destroying,
-                     iws_visible,iws_enabled,iws_entered,iws_focused,iws_active); 
+                     iws_visible,iws_enabled,iws_entered,iws_focused,iws_active);
  ifiwidgetstatesty = set of ifiwidgetstatety;
 const
  ifidatatypes = [dl_integer,dl_int64,dl_currency,dl_real,
                  dl_msestring,dl_ansistring,dl_msestringint,
                  dl_realint,dl_realsum];
- 
+
 type
  iificlient = interface;
 
@@ -42,13 +42,13 @@ type
   procedure statechanged(const sender: iificlient;
                            const astate: ifiwidgetstatesty);
   procedure dataentered(const sender: iificlient; const arow: integer);
-  procedure closequery(const sender: iificlient; 
+  procedure closequery(const sender: iificlient;
                                          var amodalresult: modalresultty);
-  procedure sendmodalresult(const sender: iificlient; 
+  procedure sendmodalresult(const sender: iificlient;
                                          const amodalresult: modalresultty);
   procedure updateoptionsedit(var avalue: optionseditty);
  end;
- 
+
  iificlient = interface(iobjectlink)[miid_iificlient]
   procedure setifiserverintf(const aintf: iifiserver);
   function getdefaultifilink: iificlient;

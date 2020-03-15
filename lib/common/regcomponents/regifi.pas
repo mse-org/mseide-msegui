@@ -25,7 +25,7 @@ uses
  {$ifndef mse_no_db}{$ifdef FPC}mseifidbcomp,{$endif}{$endif}
  mseifidialogcomp,mseifigui,mseifiendpoint,
  typinfo,mseififieldeditor;
-    
+
 type
  tificonnectedfields1 = class(tificonnectedfields);
 {
@@ -43,7 +43,7 @@ type
   public
    function getvalue: msestring; override;
  end;
- 
+
  tifilinkcomparraypropertyeditor = class(tpersistentarraypropertyeditor)
   protected
    function geteditorclass: propertyeditorclassty; override;
@@ -55,7 +55,7 @@ type
   public
    function getvalues: msestringarty; override;
  end;
-  
+
  tifisourcefieldnamepropertyeditor = class(tstringpropertyeditor)
   protected
    function getdefaultstate: propertystatesty; override;
@@ -73,7 +73,7 @@ type
   public
    function getvalue: msestring; override;
  end;
- 
+
  tificonnectedfieldspropertyeditor = class(tpersistentarraypropertyeditor)
   protected
    function geteditorclass: propertyeditorclassty; override;
@@ -81,7 +81,7 @@ type
   public
    procedure edit; override;
  end;
- 
+
 procedure register;
 begin
  registercomponents('ifi',[tifiintegerendpoint,tifiint64endpoint,

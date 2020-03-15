@@ -28,25 +28,25 @@ type
  tintegeravlnode = class(tavlnode)
   private
    fkey: integer;
-  public 
+  public
    constructor create(const akey: integer);
    property key: integer read fkey;
  end;
- 
+
  tint64avlnode = class(tavlnode)
   protected
    fkey: int64;
-  public 
+  public
    constructor create(const akey: int64); overload;
    property key: int64 read fkey;
  end;
- 
- avlnodeclassty = class of tavlnode; 
+
+ avlnodeclassty = class of tavlnode;
  pavlnode = ^tavlnode;
 
  nodecomparefuncty = function(const left,right: tavlnode): integer;
  nodeprocty = procedure(const anode: tavlnode) of object;
- 
+
  tavltree = class
   private
    froot: tavlnode;
@@ -70,7 +70,7 @@ type
  end;
 
  integernodeprocty = procedure(const anode: tintegeravlnode) of object;
-  
+
  tintegeravltree = class(tavltree)
   public
    constructor create;
@@ -81,7 +81,7 @@ type
  end;
 
  int64nodeprocty = procedure(const anode: tint64avlnode) of object;
- 
+
  tint64avltree = class(tavltree)
   public
    constructor create;
@@ -97,7 +97,7 @@ type
   protected
    fsize: integer;
  end;
- 
+
  tdatacachenode = class(tcachenode)
   private
    fdata: pointer;
@@ -117,7 +117,7 @@ type
    procedure setmaxsize(const avalue: integer);
    procedure checkbuffersize;
   protected
-   procedure addnode(const anode: tcachenode);   
+   procedure addnode(const anode: tcachenode);
    function find(const akey: tcachenode; out anode: tcachenode): boolean; overload;
   public
    procedure clear; overload; override;
@@ -131,7 +131,7 @@ type
    function addnode(const akey: int64; const adata: pointer;
                            const asize: integer): tdatacachenode;
  end;
- 
+
  tstringcachenode = class(tcachenode)
   private
    fdata: string;
@@ -139,17 +139,17 @@ type
    constructor create(const akey: int64; const adata: string); overload;
    property data: string read fdata;
  end;
- 
+
  tstringcacheavltree = class(tcacheavltree)
   public
    function addnode(const akey: int64;
                         const adata: string): tstringcachenode; overload;
  end;
- 
+
 implementation
 uses
  sysutils;
- 
+
 { tavlnode }
 
 destructor tavlnode.destroy;
@@ -187,7 +187,7 @@ var
  int1: integer;
 begin
  anode:= nil;
- result:= false; 
+ result:= false;
  if froot <> nil then begin
   n1:= froot;
   while true do begin
@@ -202,7 +202,7 @@ begin
      anode:= n1;
      break;
     end;
-    n1:= n1.fleft;        
+    n1:= n1.fleft;
    end
    else begin             //too small
     if n1.fright = nil then begin
@@ -222,7 +222,7 @@ function tavltree.parentpo(const anode: tavlnode): pavlnode;
 var
  n1: tavlnode;
 begin
- n1:= anode.fup; 
+ n1:= anode.fup;
  if n1 = nil then begin
   result:= @froot;
  end
@@ -240,13 +240,13 @@ procedure tavltree.dobalance(const anode: tavlnode; const deleted: boolean);
 var
  n3,n4,n5: tavlnode;
  po1: pavlnode;
- 
+
  procedure initpointer;
- begin     
+ begin
   n5:= n4.fup;
   po1:= parentpo(n4);
  end;
- 
+
 begin            //balance
  n3:= anode;
  n5:= nil; //compiler warning
@@ -282,9 +282,9 @@ begin            //balance
      end;
      po1^.fright:= n4;                 //A -> B.right
      n4.fup:= po1^;                    //B -> A.up
-     
+
                                        //before A  B  C  after A  B  C
-                                       //      -2 +1 +1        0  0 -1 
+                                       //      -2 +1 +1        0  0 -1
                                        //      -2  0 +1        0  0  0
                                        //      -2 -1 +1       +1  0  0
      if po1^.fbalance = 0 then begin   //B
@@ -300,23 +300,23 @@ begin            //balance
        n4.fbalance:= 0;                //A
        po1^.fleft.fbalance:= -1;       //C
       end;
-     end; 
+     end;
      po1^.fbalance:= 0;
      if not deleted then begin
       exit;         //new height compensated
      end;
     end
     else begin
-                    //rotate right          A=n4         B 
+                    //rotate right          A=n4         B
                     //                     / \          / \
                     //                    B   a        c   A=n4
                     //                   / \              / \
                     //                  c  b             b  a
-     po1^:= n4.fleft;                 //B -> top 
+     po1^:= n4.fleft;                 //B -> top
      po1^.fup:= n4.fup;               //A.up -> B.up
      n4.fleft:= po1^.fright;          //b -> A.left
      po1^.fright:= n4;                //A -> B.right
-     
+
                                       //before A   B  after A   B
                                       //      -2  -1        0   0
                                       //      -2   0       -1  +1
@@ -328,7 +328,7 @@ begin            //balance
       n4.fbalance:= 0;
       po1^.fbalance:= 0;
      end;
-    end;            
+    end;
     po1^.fup:= n5;                   //up -> B.up
     n4.fup:= po1^;                   //B -> A.up
     if n4.fleft <> nil then begin
@@ -372,9 +372,9 @@ begin            //balance
      end;
      po1^.fleft:= n4;                   //A -> B.left
      n4.fup:= po1^;                     //B -> A.up
-     
+
                                        //before A  B  C  after A  B  C
-                                       //      +2 +1 -1       -1  0  0 
+                                       //      +2 +1 -1       -1  0  0
                                        //      +2  0 -1        0  0  0
                                        //      +2 -1 -1        0  0  1
      if po1^.fbalance = 0 then begin   //B
@@ -390,23 +390,23 @@ begin            //balance
        n4.fbalance:= -1;               //A
        po1^.fright.fbalance:= 0;       //C
       end;
-     end; 
+     end;
      po1^.fbalance:= 0;
      if not deleted then begin
       exit;         //new height compensated
      end;
     end
     else begin
-                    //rotate left           A=n4          B 
+                    //rotate left           A=n4          B
                     //                     / \          /  \
                     //                    a   B        A=n4 c
                     //                      / \       / \
                     //                     b  c      a  b
-     po1^:= n4.fright;                //B -> top 
+     po1^:= n4.fright;                //B -> top
      po1^.fup:= n4.fup;               //A.up -> B.up
      n4.fright:= po1^.fleft;          //b -> A.right
      po1^.fleft:= n4;                 //A -> B.left
-     
+
                                       //before A   B  after A   B
                                       //      +2  +1        0   0
                                       //      +2   0       +1  -1
@@ -448,7 +448,7 @@ end;
 procedure tavltree.addnode(const anode: tavlnode);
 var
  n1{,n2}: tavlnode;
- 
+
 begin
  inc(fcount);
  if froot = nil then begin
@@ -518,7 +518,7 @@ procedure tavltree.removenode(const anode: tavlnode);
    end;
   end;
  end;
- 
+
 var
  n1,n2: tavlnode;
  int1: integer;
@@ -540,7 +540,7 @@ begin
   if n2 <> nil then begin
    n2.fup:= n1;
   end;
-  if n1.fup = anode then begin         
+  if n1.fup = anode then begin
    anode.fright:= n1.fright;
    n1.fright:= anode;
    n1.fup:= anode.fup;
@@ -566,7 +566,7 @@ begin
    if (anode.fup <> nil) then begin      //leaf
     with anode.fup do begin
      if fleft = anode then begin
-      if (fright = nil) or (fright.fright <> nil) or (fright.fleft <> nil) or 
+      if (fright = nil) or (fright.fright <> nil) or (fright.fleft <> nil) or
                                       (fbalance > 0) then begin
        dobalance(anode,true);
       end
@@ -575,7 +575,7 @@ begin
       end;
      end
      else  begin
-      if (fleft = nil) or (fleft.fright <> nil) or (fleft.fleft <> nil) or 
+      if (fleft = nil) or (fleft.fright <> nil) or (fleft.fleft <> nil) or
                                       (fbalance < 0) then begin
        dobalance(anode,true);
       end
@@ -627,7 +627,7 @@ down:
     n1:= n1.fup;
    end;
   end;
- end; 
+ end;
 end;
 
 { tintegeravlnode }
@@ -825,7 +825,7 @@ begin
  end
  else begin
   ffirst:= nil;
-  flast:= nil;  
+  flast:= nil;
  end;
  anode.fprev:= nil;
  anode.fnext:= nil;

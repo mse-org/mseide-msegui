@@ -22,14 +22,14 @@ uses
  classes,mclasses,msecryptio,mseopenssl,mseopensslevp,mseopensslrand,
  msestrings,msesystypes,msecryptohandler,msetypes,msesys,
  msestream;
- 
+
 type
  essl = class(ecryptoio)
  end;
-  
+
  ssldataty = record
   ssl: pssl;
-  mutex: mutexty;  
+  mutex: mutexty;
  end;
 
  sslinfoty = record
@@ -40,14 +40,14 @@ type
  {$if sizeof(ssldataty) > sizeof(cryptodataty)}
   {$error 'buffer overflow'}
  {$ifend}
- 
+
  sslprotocolty = (ssp_sslv2,ssp_sslv3,ssp_tlsv1);
  sslprotocolsty = set of sslprotocolty;
 const
  defaultsslprotocols = [ssp_sslv2,ssp_sslv3,ssp_tlsv1];
  defaultcipherlist = 'DEFAULT';
  defaultkeygeniterationcount = 1{5}; //same as openssl enc
- 
+
 type
 
  tssl = class(tcryptoio)
@@ -84,7 +84,7 @@ type
 
  digeststatety = (ds_inited{,ds_final});
  digeststatesty = set of digeststatety;
- 
+
  digesthandlerdatadty = record
   ctx: pevp_md_ctx;
   md: pevp_md;
@@ -92,7 +92,7 @@ type
 //  digest: pointer; //string
  end;
  pdigesthandlerdatadty = ^digesthandlerdatadty;
- {$if sizeof(digesthandlerdatadty) > sizeof(cryptohandlerdataty)} 
+ {$if sizeof(digesthandlerdatadty) > sizeof(cryptohandlerdataty)}
   {$error 'buffer overflow'}
  {$ifend}
  digesthandlerdataty = record
@@ -100,9 +100,9 @@ type
    0: (d: digesthandlerdatadty;);
    1: (_bufferspace: cryptohandlerdataty;);
  end;
- 
+
  tdigesthandler = class;
- 
+
 // digesteventty = procedure(const sender: tdigesthandler;
 //           const astream: tmsefilestream; const adigest: string) of object;
 
@@ -129,8 +129,8 @@ type
    property digestname: string read fdigestname write fdigestname;
 //   property ondigest: digesteventty read fondigest write fondigest;
  end;
- 
- cipherkindty = (ckt_stream, 
+
+ cipherkindty = (ckt_stream,
                  ckt_ecb, //electronic codebook
                  ctk_cbc, //cipher-block chaining
                  ctk_cfb, //cipher feedback
@@ -150,7 +150,7 @@ type
   ivbuf: ^ivbufty;
  end;
  psslhandlerdatadty = ^sslhandlerdatadty;
- {$if sizeof(sslhandlerdatadty) > sizeof(cryptohandlerdataty)} 
+ {$if sizeof(sslhandlerdatadty) > sizeof(cryptohandlerdataty)}
   {$error 'buffer overflow'}
  {$ifend}
  sslhandlerdataty = record
@@ -162,13 +162,13 @@ type
  getkeyeventty = procedure(const sender: tobject;
                                 var akey,asalt: string) of object;
 
- opensslcryptooptionty = (sslco_salt,sslco_canrestart); 
+ opensslcryptooptionty = (sslco_salt,sslco_canrestart);
                                      //stores key and iv for seek(0)
  opensslcryptooptionsty = set of opensslcryptooptionty;
 const
  defaultopensslcryptooptions = [sslco_salt];
- 
-type 
+
+type
  tcustomopensslcryptohandler = class(tpaddedcryptohandler)
   private
    fciphername: string;
@@ -196,7 +196,7 @@ type
   public
    constructor create(aowner: tcomponent); override;
    property key: string read fkey write fkey;
-   property options: opensslcryptooptionsty read foptions 
+   property options: opensslcryptooptionsty read foptions
                              write foptions default defaultopensslcryptooptions;
    property ciphername: string read fciphername write fciphername;
    property keyphrase: msestring read fkeyphrase write setkeyphrase;
@@ -222,7 +222,7 @@ type
    property salt: string read fsalt write fsalt;
    property keydigestname: string read fkeydigestname write fkeydigestname;
                          //default md5
-   property keygeniterationcount: integer read fkeygeniterationcount 
+   property keygeniterationcount: integer read fkeygeniterationcount
                  write fkeygeniterationcount default defaultkeygeniterationcount;
    property options;
    property ciphername;
@@ -253,8 +253,8 @@ type
  end;
 
 getkeydataeventty = procedure(out akey: string; out asalt: string) of object;
- 
-function waitforio(const aerror: integer; var ainfo: cryptoioinfoty; 
+
+function waitforio(const aerror: integer; var ainfo: cryptoioinfoty;
               const atimeoutms: integer;
                                 const resultpo: pinteger = nil): boolean;
 function filebio(const aname: filenamety;
@@ -265,7 +265,7 @@ function readprivkey(const aname: filenamety;
                           const getkey: getkeydataeventty): pevp_pkey;
 procedure freekey(const akey: pevp_pkey);
 function messagedigest(const adata: string; const digestname: string): string;
- 
+
 implementation
 uses
  sysutils,msesysintf1,msefileutils,msesocketintf,mseopensslbio,mseopensslpem,
@@ -513,7 +513,7 @@ end;
 procedure tssl.ctxchanged;
 begin
  if fctx <> nil then begin
-  
+
  end;
 end;
 
@@ -566,7 +566,7 @@ begin
   end;
   sslerror(ssl_set_rfd(ssl,rxfd));
   sslerror(ssl_set_wfd(ssl,txfd));
- end; 
+ end;
 end;
 
 class procedure tssl.internalunlink(var ainfo: cryptoioinfoty);
@@ -586,7 +586,7 @@ begin
  inherited;
 end;
 
-function {tssl.}waitforio(const aerror: integer; var ainfo: cryptoioinfoty; 
+function {tssl.}waitforio(const aerror: integer; var ainfo: cryptoioinfoty;
        const atimeoutms: integer; const resultpo: pinteger = nil): boolean;
 var
  int1: integer;
@@ -687,11 +687,11 @@ begin
  result:= 0;
  with ainfo,sslinfoty(cryptodata).d do begin
   try
-   if (atimeoutms < 0) or 
+   if (atimeoutms < 0) or
     (soc_poll(ainfo.rxfd,[poka_read],atimeoutms,pollres) = sye_ok) then begin
     repeat
      sys_mutexlock(mutex);
-    until waitforio(ssl_read(ssl,buffer,count),ainfo,atimeoutms,@result) or 
+    until waitforio(ssl_read(ssl,buffer,count),ainfo,atimeoutms,@result) or
             (atimeoutms < 0);
    end;
   except
@@ -772,11 +772,11 @@ begin
    freemem(ctx);
   end;
   if keybuf <> nil then begin
-   fillchar(keybuf^,sizeof(keybuf^),0);  
+   fillchar(keybuf^,sizeof(keybuf^),0);
    freemem(keybuf);
   end;
   if ivbuf <> nil then begin
-   fillchar(ivbuf^,sizeof(ivbuf^),0);  
+   fillchar(ivbuf^,sizeof(ivbuf^),0);
    freemem(ivbuf);
   end;
  end;
@@ -870,7 +870,7 @@ begin
   if sslco_salt in foptions then begin
    if p.mode = 0 then begin
     setlength(salt1,headerlength);
-    if (internalread(aclient,pointer(salt1)^,headerlength) <> headerlength) or 
+    if (internalread(aclient,pointer(salt1)^,headerlength) <> headerlength) or
                     (pos(salttag,salt1) <> 1) then begin
      error(cerr_readheader);
     end;
@@ -881,7 +881,7 @@ begin
      checknullerror(rand_bytes(pbyte(pointer(salt1)),saltlength));
     end;
     salt1:= salttag+salt1;
-    if internalwrite(aclient,pointer(salt1)^,length(salt1)) <> 
+    if internalwrite(aclient,pointer(salt1)^,length(salt1)) <>
                                                  length(salt1) then begin
      error(cerr_writeheader);
     end;
@@ -935,7 +935,7 @@ begin
      error(cerr_writeheader);
     end;
     if cipher^.iv_len > 0 then begin
-     if internalwrite(aclient,ivbuf^,cipher^.iv_len) <> 
+     if internalwrite(aclient,ivbuf^,cipher^.iv_len) <>
                                                cipher^.iv_len then begin
       error(cerr_writeheader);
      end;
@@ -963,7 +963,7 @@ begin
     checknullerror(evp_cipher_ctx_set_key_length(ctx,int2));
     move(pointer(keydata)^,keybuf^,int2);
     if cipher^.iv_len > 0 then begin
-     if internalread(aclient,ivbuf^,cipher^.iv_len) <> 
+     if internalread(aclient,ivbuf^,cipher^.iv_len) <>
                                                cipher^.iv_len then begin
       error(cerr_readheader);
      end;
@@ -1001,7 +1001,7 @@ begin
    ctx:= nil;
    state:= [];
   end;
- end; 
+ end;
 end;
 
 function tdigesthandler.read(var aclient: cryptoclientinfoty; var buffer;

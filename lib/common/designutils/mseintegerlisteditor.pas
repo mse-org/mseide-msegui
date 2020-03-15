@@ -15,10 +15,10 @@ interface
 uses
  mseforms,msedataedits,msesimplewidgets,msewidgetgrid,msegrids,msetextedit,
  msestat,msestatfile;
- 
+
 const
  integerlisteditorstatname =  'integerlisteditor.sta';
- 
+
 type
  tintegerlisteditor = class(tmseform)
    cancel: tbutton;
@@ -37,7 +37,7 @@ type
 implementation
 uses
  mseintegerlisteditor_mfm;
- 
+
 { tintegerlisteditor }
 
 constructor tintegerlisteditor.create(const aonclosequery: closequeryeventty);

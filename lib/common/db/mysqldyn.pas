@@ -63,7 +63,7 @@ const
          'libmysqlclient.so.16','libmysqlclient.so.15','libmysqlclient.so');
 {$endif}
 
-procedure initializemysql(const sonames: array of filenamety); 
+procedure initializemysql(const sonames: array of filenamety);
                                             //[] = default
 procedure releasemysql;
 
@@ -100,7 +100,7 @@ procedure releasemysql;
 {$endif}
 
   { Copyright (C) 2000-2003 MySQL AB
-  
+
      This program is free software; you can redistribute it and/or modify
      it under the terms of the GNU General Public License as published by
      the Free Software Foundation; either version 2 of the License, or
@@ -110,7 +110,7 @@ procedure releasemysql;
      but WITHOUT ANY WARRANTY; without even the implied warranty of
      MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
      GNU General Public License for more details.
-  
+
      You should have received a copy of the GNU General Public License
      along with this program; if not, write to the Free Software
      Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA  }
@@ -127,12 +127,12 @@ procedure releasemysql;
 
        Pmy_socket = ^my_socket;
        my_socket = cint;
-       
+
        pppchar = ^ppchar;
        PPByte     = ^PByte;
-       
+
        pculong = ^culong;
-       
+
 {  ------------ Start of declaration in "my_list.h"   ---------------------  }
 
  pst_list = ^st_list;
@@ -710,7 +710,7 @@ type
       const
          CLIENT_NET_READ_TIMEOUT = 365*24*3600;     // Timeout on read
          CLIENT_NET_WRITE_TIMEOUT = 365*24*3600;    // Timeout on write
-      
+
 {$ifdef NETWARE}
 (** unsupported pragma#pragma pack(push, 8)		/* 8 byte alignment */*)
 {$endif}
@@ -853,7 +853,7 @@ type
             prev_ptr : ^PMYSQL_ROWS;
 {$ENDIF}
          end;
-{$endif}       
+{$endif}
        MYSQL_DATA = st_mysql_data;
        PMYSQL_DATA = ^MYSQL_DATA;
        mysql_option = (MYSQL_OPT_CONNECT_TIMEOUT,MYSQL_OPT_COMPRESS,
@@ -1222,7 +1222,7 @@ type
 
     {
       Note: this info is from the mysql-5.0 version:
-    
+
       This structure is used to define bind information, and
       internally by the client library.
       Public members with their descriptions are listed below
@@ -1308,7 +1308,7 @@ type
             is_null_value : my_bool;        // Used if is_null is 0
             extension: pointer;
          end;
-         
+
        MYSQL_BIND_51 = st_mysql_bind_51;
        PMYSQL_BIND_51 = ^MYSQL_BIND_51;
 
@@ -1694,7 +1694,7 @@ type
 {$endif}
 {$endif}
 
-{$define HAVE_MYSQL_REAL_CONNECT}    
+{$define HAVE_MYSQL_REAL_CONNECT}
     { The following functions are mainly exported because of mysqlbinlog;
       They are not for general usage     }
 
@@ -1840,7 +1840,7 @@ implementation
 uses
  msesys,msesysintf{,msesonames}
                 {$IFDEF LinkDynamically},msedynload{$endif};
- 
+
 {$IFDEF LinkDynamically}
 
 ResourceString
@@ -1906,7 +1906,7 @@ var
       result := -1;
     end;
 
-(*  
+(*
 function tryinitialisemysql(const alibnames: array of filenamety): boolean;
 var
  mstr1: filenamety;
@@ -1961,7 +1961,7 @@ begin
      'mysql_server_init',                  //35
      'mysql_list_dbs',                     //36
      'mysql_list_fields',                  //37
-     'mysql_list_processes',               //38 
+     'mysql_list_processes',               //38
      'mysql_list_tables',                  //39
      'mysql_more_results',                 //40
      'mysql_next_result',                  //41
@@ -2056,7 +2056,7 @@ begin
      @mysql_server_init,                   //35
      @mysql_list_dbs,                      //36
      @mysql_list_fields,                   //37
-     @mysql_list_processes,                //38 
+     @mysql_list_processes,                //38
      @mysql_list_tables,                   //39
      @mysql_more_results,                  //40
      @mysql_next_result,                   //41
@@ -2167,7 +2167,7 @@ Procedure ReleaseMysql;
 begin
   if RefCount> 1 then
     Dec(RefCount)
-  else if UnloadLibrary(MysqlLibraryHandle) then 
+  else if UnloadLibrary(MysqlLibraryHandle) then
     begin
     Dec(RefCount);
     MysqlLibraryHandle := NilHandle;
@@ -2175,14 +2175,14 @@ begin
     end;
 end;
 }
- 
+
 procedure releasemysql;
 begin
  releasedynlib(libinfo);
 end;
 
 procedure initializemysql(const sonames: array of filenamety);
-const 
+const
  funcs: array[0..92] of funcinfoty = (
   (n: 'mysql_affected_rows'; d: {$ifndef FPC}@{$endif}@mysql_affected_rows),
   (n: 'mysql_autocommit'; d: {$ifndef FPC}@{$endif}@mysql_autocommit),

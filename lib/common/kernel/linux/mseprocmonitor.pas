@@ -12,7 +12,7 @@ unit mseprocmonitor;
 interface
 uses
  msesystypes,mseglob,msetypes,mselibc;
- 
+
  {$include ../mseprocmonitor.inc}
 
 procedure sigchildcallback;
@@ -24,7 +24,7 @@ function timedwaitpid(__pid: __pid_t; __stat_loc: plongint;
 implementation
 uses
  mseapplication,msedatalist,msearrayutils,msesysintf1,msesysutils,sysutils;
- 
+
 type
  procinfoty = record
   prochandle: prochandlety;
@@ -34,7 +34,7 @@ type
  procinfoarty = array of procinfoty;
 var
  infos: procinfoarty;
-  
+
 function pro_listentoprocess(const aprochandle: prochandlety;
                     const adest: iprocmonitor; const adata: pointer): boolean;
 begin
@@ -87,7 +87,7 @@ begin
   if execresult >= -1 then begin
    for int2:= int1 downto 0 do begin
     with infos[int2] do begin
-     if prochandle = infos[int1].prochandle then begin     
+     if prochandle = infos[int1].prochandle then begin
       if dest <> nil then begin
        dest.processdied(prochandle,execresult,data);
       end;
@@ -116,7 +116,7 @@ type
   next: psemelety;
   sem: semty;
  end;
- 
+
 var
  semaphorelock: mutexty;
  semaphores: psemelety;
@@ -141,7 +141,7 @@ begin
 end;
 
 {$endif}
-  
+
 procedure sigchildcallback();
 var
  po1: psemelety;
@@ -153,7 +153,7 @@ begin
  while po1 <> nil do begin
   sys_sempost(po1^.sem);
   po1:= po1^.next;
- end; 
+ end;
 end;
 
 function timedwaitpid(__pid: __pid_t; __stat_loc: plongint;
@@ -207,7 +207,7 @@ begin
     break;
    end;
   end;
-  
+
   sys_mutexlock(semaphorelock);
 {$ifdef mse_debugprocmonitor}
   checksemaphores();
@@ -232,7 +232,7 @@ end;
 initialization
  onhandlesigchld:= @checkchildproc;
  sys_mutexcreate(semaphorelock);
- 
+
 finalization
  onhandlesigchld:= nil;
  sys_mutexdestroy(semaphorelock);

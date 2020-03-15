@@ -26,19 +26,19 @@ uses
  mseglob;
 
 const
- 
- defaulttexteditoptions =  (defaultoptionsedit + 
+
+ defaulttexteditoptions =  (defaultoptionsedit +
               [oe_linebreak,oe_nofirstarrownavig]) -
               [oe_autoselect,oe_autoselectonfirstclick,oe_endonenter,
                oe_resetselectonexit,oe_undoonesc,oe_shiftreturn,
                oe_trimleft,oe_trimright,oe_uppercase,oe_lowercase];
 
  texteditminimalframe: framety = (left: 1; top: 0; right: 1; bottom: 0);
- defaulttexteditwidgetoptions = 
+ defaulttexteditwidgetoptions =
          (defaulteditwidgetoptions
                      { - [ow_fontglyphheight]}){ + [ow_fontlineheight]};
- defaulttexteditwidgetoptions1 = 
-         (defaulteditwidgetoptions1 - [ow1_fontglyphheight]) + 
+ defaulttexteditwidgetoptions1 =
+         (defaulteditwidgetoptions1 - [ow1_fontglyphheight]) +
                                                    [ow1_fontlineheight];
 
 type
@@ -72,7 +72,7 @@ type
 
  texteditoptionty = (teeo_bom,teeo_nobom); //[] -> use loaded
  texteditoptionsty = set of texteditoptionty;
- 
+
  tcustomtextedit = class(tcustomedit,igridwidget,istatfile,
                                       iassistiveclientgridwidget)
   private
@@ -195,7 +195,7 @@ type
    procedure gridtovalue(row: integer);
    procedure setvaluedata(const source); virtual;
    procedure getvaluedata(out dest); virtual;
-   procedure docellevent(const ownedcol: boolean; 
+   procedure docellevent(const ownedcol: boolean;
                                          var info: celleventinfoty); virtual;
    function sortfunc(const l,r): integer;
    procedure gridvaluechanged(const index: integer); virtual;
@@ -228,9 +228,9 @@ type
                                                       const userinput: boolean);
     //iassistiveclient
    function getassistivetext(): msestring; override;
-   function getassistiveflags: assistiveflagsty; override;   
+   function getassistiveflags: assistiveflagsty; override;
     //iassistiveclientgrid
-   function getassistivecelltext(const arow: int32): msestring;    
+   function getassistivecelltext(const arow: int32): msestring;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -238,7 +238,7 @@ type
    function actualcolor: colorty; override;
    procedure synctofontheight; override;
    procedure reloadfile(restorestate: boolean = true);
-   procedure loadfromstream(const stream: ttextstream; 
+   procedure loadfromstream(const stream: ttextstream;
                                   restorestate: boolean = false);
    procedure loadfromfile(afilename: filenamety; //no const!
                                   restorestate: boolean = false); virtual;
@@ -294,7 +294,7 @@ type
    procedure selectall;
 
    function find(const atext: msestring; options: searchoptionsty;
-              var textpos: gridcoordty; const endpos: gridcoordty; 
+              var textpos: gridcoordty; const endpos: gridcoordty;
               selectfound: boolean = false;
               const ashowcell: cellpositionty = cep_nearest): boolean;
 
@@ -305,14 +305,14 @@ type
    function getrichtext(const start, stop: gridcoordty): richstringty;
 
    function getcellframe: framety; virtual;
-   
+
    function linecount: integer;
-   property gridvalue[const index: integer]: msestring 
+   property gridvalue[const index: integer]: msestring
                  read getgridvalue write setgridvalue; default;
    property gridvalues: msestringarty read getgridvalues write setgridvalues;
-   property richlines[const index: integer]: richstringty 
+   property richlines[const index: integer]: richstringty
                  read getrichlines write setrichlines;
-   property richformats[const index: integer]: formatinfoarty 
+   property richformats[const index: integer]: formatinfoarty
                  read getrichformats write setrichformats;
    property datalist: tgridrichstringdatalist read flines write setdatalist;
 
@@ -331,9 +331,9 @@ type
    property col: integer read getcol write setcol;
    property modified: boolean read fmodified write setmodified;
 
-   property encoding: charencodingty read fencoding write fencoding 
+   property encoding: charencodingty read fencoding write fencoding
                                                         default ce_locale;
-   property eolstyle: eolstylety read feolstyle write feolstyle 
+   property eolstyle: eolstylety read feolstyle write feolstyle
                                                         default eol_default;
            //applied to write stream if stream.eolstyle = ce_default
            //ce_default -> use foundeolstyle of last read stream
@@ -343,21 +343,21 @@ type
    property textflags default defaulttextflags - [tf_noselect];
    property statfile: tstatfile read fstatfile write setstatfile;
    property statvarname: msestring read getstatvarname write fstatvarname;
-   property statpriority: integer read fstatpriority 
+   property statpriority: integer read fstatpriority
                                        write fstatpriority default 0;
    property tabulators: ttabulators read gettabulators write settabulators;
-   property marginlinepos: integer read fmarginlinepos 
+   property marginlinepos: integer read fmarginlinepos
                                              write setmarginlinepos default 0;
                      //offset to innerclientrect.x
-   property marginlinecolor: colorty read fmarginlinecolor 
+   property marginlinecolor: colorty read fmarginlinecolor
                                      write setmarginlinecolor default cl_none;
-   property onfontchanged: notifyeventty read fonfontchanged 
+   property onfontchanged: notifyeventty read fonfontchanged
                                                  write fonfontchanged;
    property onmodifiedchanged: booleanchangedeventty read fonmodifiedchanged
                                                      write fonmodifiedchanged;
-   property ontextmouseevent: textmouseeventty read fontextmouseevent 
+   property ontextmouseevent: textmouseeventty read fontextmouseevent
                                                    write fontextmouseevent;
-   property oneditnotifcation: editnotificationeventty read foneditnotification 
+   property oneditnotifcation: editnotificationeventty read foneditnotification
                                                       write foneditnotification;
    property ondrawtext: textdraweventty read fondrawtext write fondrawtext;
    property onsetupeditor: setupeditoreventty read fonsetupeditor
@@ -378,7 +378,7 @@ type
    property textflags;
    property textflagsactive;
 
-   property statfile;   
+   property statfile;
    property statvarname;
    property statpriority;
    property encoding;
@@ -437,7 +437,7 @@ type
                   setmaxundosize default defaultundobuffermaxsize;
  end;
 
-procedure normalizetextrect(const po1,po2: gridcoordty; 
+procedure normalizetextrect(const po1,po2: gridcoordty;
                                               out start,stop: gridcoordty);
 function istextdblclick(const ainfo: textmouseeventinfoty): boolean;
 
@@ -484,7 +484,7 @@ begin
  result:= (ainfo.eventkind = cek_buttonpress) and
              (ss_double in ainfo.mouseeventinfopo^.shiftstate);
 end;
- 
+
 function createtgridrichstringdatalist(const aowner:twidgetcol): tdatalist;
 begin
  result:= tgridrichstringdatalist.create(aowner);
@@ -611,7 +611,7 @@ begin
  result:= actualcursor(nullpoint);
 end;
 
-procedure tcustomtextedit.updatecellzone(const row: integer; 
+procedure tcustomtextedit.updatecellzone(const row: integer;
                              const apos: pointty;  var result: cellzonety);
 begin
  //dummy
@@ -859,7 +859,7 @@ var
 begin
  with info do begin
   shiftstate1:= shiftstate * shiftstatesmask;
-  if (tf_wordbreak in textflagsactive) and 
+  if (tf_wordbreak in textflagsactive) and
                            (shiftstate1 - [ss_shift] = []) then begin
    include(info.eventstate,es_processed);
    with feditor do begin
@@ -870,7 +870,7 @@ begin
       int1:= - self.font.lineheight;
      end;
      key_down: begin
-      int1:= self.font.lineheight; 
+      int1:= self.font.lineheight;
      end;
      else begin
       exclude(info.eventstate,es_processed);
@@ -924,12 +924,12 @@ begin
    end;
   end;
   if flines <> nil then begin
-   if not (es_processed in eventstate) and 
+   if not (es_processed in eventstate) and
                    issysshortcut(sho_rowdelete,info) then begin
     int1:= col;
     feditor.begingroup;
     try
-     if (fgridintf <> nil) and 
+     if (fgridintf <> nil) and
                tcustomwidgetgrid1(fgridintf.getcol.grid).
                                        deleterowconfirmation() then begin
 
@@ -1056,11 +1056,11 @@ begin
    stream.eolstyle:= ffoundeolstyle;
   end
   else begin
-   stream.eolstyle:= feolstyle; 
+   stream.eolstyle:= feolstyle;
   end;
  end;
 // stream.filerights:= ffilerights;
- if (fencoding = ce_utf8) and (fhasbom or (teeo_bom in foptions)) and 
+ if (fencoding = ce_utf8) and (fhasbom or (teeo_bom in foptions)) and
                                      not(teeo_nobom in foptions) then begin
   stream.writebuffer(bom,length(bom));
  end;
@@ -1070,7 +1070,7 @@ begin
  end;
 end;
 
-procedure tcustomtextedit.savetofile(const afilename: filenamety = ''); 
+procedure tcustomtextedit.savetofile(const afilename: filenamety = '');
                                         //afilename = '' -> current filename
 var
  stream: ttextstream;
@@ -1485,7 +1485,7 @@ var
  int1: integer;
 
 begin
- if (start.col < 0) or (start.row < 0) or (stop.col < 0) or 
+ if (start.col < 0) or (start.row < 0) or (stop.col < 0) or
                                    (stop.row < 0) then begin
   exit;
  end;
@@ -1591,7 +1591,7 @@ begin
   if int1 = b.row then begin
    int2:= b.col - a.col;
   end;
-  bo1:= (astyle <> fs_force) and 
+  bo1:= (astyle <> fs_force) and
                            updatefontstyle1(po1^.format,a.col,int2,astyle,aset);
   if afontcolor <> cl_default then begin
    bo1:= setfontcolor1(po1^.format,a.col,int2,afontcolor) or bo1;
@@ -1703,7 +1703,7 @@ begin
         end;
        end;
       end
-      else begin 
+      else begin
        deleteselection;
        action:= ea_none;
       end;
@@ -1745,7 +1745,7 @@ begin
       if editpos.row > 0 then begin
        int1:= length(flines[editpos.row-1]);
        if (eas_delete in state) then begin
-        if hasselection then begin 
+        if hasselection then begin
          deleteselection
         end
         else begin
@@ -1875,7 +1875,7 @@ begin
  textinfo.tabulators:= ftabulators;
  po1:= textindextopos(getcanvas,textinfo,textpos.col);
  po2:= fgridintf.getcol.cellorigin;
- result.y:= po1.y + {po2.y +} 
+ result.y:= po1.y + {po2.y +}
  tcustomwidgetgrid1(fgridintf.getcol.grid).cellrect(mgc(0,textpos.row)).y;
 //              textpos.row * tcustomwidgetgrid1(fgridintf.getcol.grid).ystep;
  result.x:= po1.x + po2.x;
@@ -1948,7 +1948,7 @@ begin
  end;
 end;
 
-procedure tcustomtextedit.docellevent(const ownedcol: boolean; 
+procedure tcustomtextedit.docellevent(const ownedcol: boolean;
                                                 var info: celleventinfoty);
 var
  textinfo: textmouseeventinfoty;
@@ -2008,12 +2008,12 @@ begin
     cek_mousemove,cek_mousepark,cek_buttonpress,cek_buttonrelease: begin
      if cell.row >= 0 then begin
       mousepostotextpos1(cell.row,mouseeventinfopo^.pos,textinfo.pos,bo1);
-      if (eventkind = cek_mousemove) and 
+      if (eventkind = cek_mousemove) and
                  (cell.row <> fgridintf.getcol.grid.row) and
-       (info.mouseeventinfopo^.shiftstate = [ss_left]) and 
+       (info.mouseeventinfopo^.shiftstate = [ss_left]) and
                                                 grid.cellclicked then begin
        fxpos:= textpostomousepos(textinfo.pos).x;
-       
+
        with fgridintf.getcol.grid do begin
         focuscell(cell,fca_focusinshift);
         setcellclientclick(self);
@@ -2042,21 +2042,21 @@ begin
      end;
     end;
     cek_firstmousepark: begin
-     if (oe_hintclippedtext in foptionsedit) and application.active and 
-            textclipped(info.cell.row) and 
-            ((info.grid.row <> info.cell.row) or 
+     if (oe_hintclippedtext in foptionsedit) and application.active and
+            textclipped(info.cell.row) and
+            ((info.grid.row <> info.cell.row) or
             (info.grid.col <> info.cell.col)) and
      {$warnings off}
             twidget1(info.grid).getshowhint then begin
      {$warnings on}
       application.inithintinfo(hintinfo,info.grid);
      {$warnings off}
-      hintinfo.caption:= 
+      hintinfo.caption:=
          richstringty(
                  twidgetcol1(fgridintf.getcol).getdatapo(info.cell.row)^).text;
      {$warnings on}
       application.showhint(info.grid,hintinfo);
-     end; 
+     end;
     end;
     cek_mouseleave: begin
      fmousetextpos:= invalidcell;
@@ -2130,7 +2130,7 @@ begin
  updateindex(select);
 end;
 
-procedure tcustomtextedit.seteditpos(const Value: gridcoordty; 
+procedure tcustomtextedit.seteditpos(const Value: gridcoordty;
                       const select: boolean = false;
                       const ashowcell: cellpositionty = cep_nearest);
 begin
@@ -2339,7 +2339,7 @@ var
 
  function checkresult: boolean;
  begin
-  if (int1 > 0) and ((int2 < endrow) or 
+  if (int1 > 0) and ((int2 < endrow) or
      (int2 = endrow) and (int1 - 1 + length(atext) <= endpos.col)) then begin
    textpos.row:= int2;
    textpos.col:= int1-1;
@@ -2356,7 +2356,7 @@ var
 
  function checkresultback: boolean;
  begin
-  if (int1 > 0) and ((int2 > endpos.row) or 
+  if (int1 > 0) and ((int2 > endpos.row) or
      (int2 = textpos.row) and (int1 <= textpos.col)) then begin
    textpos.row:= int2;
    textpos.col:= int1-length(atext);
@@ -2500,7 +2500,7 @@ begin
  result:= flines.formats[index];
 end;
 
-procedure tcustomtextedit.setrichformats(const index: integer; 
+procedure tcustomtextedit.setrichformats(const index: integer;
               const avalue: formatinfoarty);
 begin
  flines.formats[index]:= avalue;
@@ -2644,7 +2644,7 @@ begin
  end
  else begin
   optionsedit:= optionsedit - [oe_readonly];
- end;  
+ end;
 end;
 }
 function tcustomtextedit.getinnerframe: framety;

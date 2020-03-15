@@ -27,7 +27,7 @@ uses
 const
  defaultimagelistwidth = 16;
  defaultimagelistheight = 16;
- defaultimagelistsize: sizety = (cx: defaultimagelistwidth; 
+ defaultimagelistsize: sizety = (cx: defaultimagelistwidth;
                                             cy: defaultimagelistheight);
 
 type
@@ -76,11 +76,11 @@ type
    procedure destroyhandle; override;
    procedure createhandle(copyfrom: pixmapty); override;
    function getsource: tbitmapcomp; virtual;
-   procedure assign1(const source: tsimplebitmap; const docopy: boolean); override; 
+   procedure assign1(const source: tsimplebitmap; const docopy: boolean); override;
                     //calls change
    procedure dochange; virtual;
    procedure defineproperties(filer: tfiler); override;
-   function getimageref(out aimage: imagety): boolean; 
+   function getimageref(out aimage: imagety): boolean;
                                   //true if buffer must be destroyed
    procedure setkind(const avalue: bitmapkindty); override;
   public
@@ -141,7 +141,7 @@ type
    property pixel[const index: pointty]: colorty read getpixel write setpixel;
    property pixels[const x,y: integer]: colorty read getpixels write setpixels;
    property scanline[index: integer]: pointer read getscanline;
-   property scanhigh: integer read fscanhigh; 
+   property scanhigh: integer read fscanhigh;
                           //max index in scanline[0] ???
    property scanlinestep: integer read fscanlinestep; //bytes
    property colorforeground: colorty read fcolorforeground write setcolorforeground default cl_black;
@@ -195,7 +195,7 @@ type
    constructor create(const aowner: tbitmap; const akind: bitmapkindty;
                               const agdifuncs: pgdifunctionaty = nil);
  end;
- 
+
  tmaskedbitmap = class(tbitmap,iobjectlink)
   private
    ftransparentcolor: colorty;
@@ -278,38 +278,38 @@ type
 //   procedure loadfromimagebuffer(const abuffer: maskedimagety);
 //   procedure savetoimagebuffer(out abuffer: maskedimagety);
    function bitmap: tmaskedbitmap; //self if source = nil
-   
+
    procedure releasehandle; override;
    procedure acquirehandle; override;
    procedure initmask;
    procedure stretch(const dest: tmaskedbitmap;
-                           const aalignment: alignmentsty = 
+                           const aalignment: alignmentsty =
                                 [al_stretchx,al_stretchy,al_intpol]); overload;
    procedure stretch(const source: rectty; const dest: tmaskedbitmap;
-                     const aalignment: alignmentsty = 
+                     const aalignment: alignmentsty =
                                [al_stretchx,al_stretchy,al_intpol]); overload;
    procedure remask; //recalc mask
    procedure automask; //transparentcolor is bottomright pixel
 
-   
+
    function loadfromstring(const avalue: string; const format: string;
                                                          //'' = any
                                         const params: array of const): string;
                                          //returns format name
-   function loadfromstring(const avalue: string): string;  
+   function loadfromstring(const avalue: string): string;
                                          //returns format name
    function loadfromstream(const stream: tstream; const format: string;
                                                          //'' = any
                                        const params: array of const): string;
                                          //returns format name
-   function loadfromstream(const stream: tstream): string; 
+   function loadfromstream(const stream: tstream): string;
                                          //returns format name
 
-   function loadfromfile(const filename: filenamety; const format: string; 
+   function loadfromfile(const filename: filenamety; const format: string;
                                                          //'' = any
                                        const params: array of const): string;
                                          //returns format name
-   function loadfromfile(const filename: filenamety): string; 
+   function loadfromfile(const filename: filenamety): string;
                                          //returns format name
 
    function tryloadfromstring(const avalue: string; const format: string;
@@ -328,15 +328,15 @@ type
    function tryloadfromstream(const stream: tstream): string;
            //returns format name, '' = unknown/not supported
            //exception in case of read error
-   function tryloadfromfile(const filename: filenamety; const format: string; 
+   function tryloadfromfile(const filename: filenamety; const format: string;
                                                          //'' = any
                                        const params: array of const): string;
            //returns format name, '' = unknown/not supported
            //exception in case of read error
-   function tryloadfromfile(const filename: filenamety): string; 
+   function tryloadfromfile(const filename: filenamety): string;
            //returns format name, '' = unknown/not supported
            //exception in case of read error
-   
+
    procedure writetostring(out avalue: string; const format: string;
                                   const params: array of const); overload;
    function writetostring(const format: string;
@@ -346,21 +346,21 @@ type
    procedure writetofile(const filename: filenamety; const format: string;
                                const params: array of const);
    property mask: tbitmap read getmask1 write setmask;
-   property maskkind: bitmapkindty read getmaskkind 
+   property maskkind: bitmapkindty read getmaskkind
                                  write setmaskkind default bmk_mono;
    property masked: boolean read getmasked write setmasked default false;
    property graymask: boolean read getgraymask write setgraymask default false;
    property colormask: boolean read getcolormask write setcolormask default false;
-   property maskcolorforeground: colorty read fmaskcolorforeground 
+   property maskcolorforeground: colorty read fmaskcolorforeground
                     write fmaskcolorforeground default $ffffff;
                     //used to init colormask
-   property maskcolorbackground: colorty read fmaskcolorbackground 
+   property maskcolorbackground: colorty read fmaskcolorbackground
                     write fmaskcolorbackground default $000000; //max transparent
                      //used to convert monchrome mask to colormask
    property mask_pos: pointty read fmask_pos write setmaskpos;
    property origformatdata: string read forigformatdata write setorigformatdata;
   published
-   property transparentcolor: colorty read ftransparentcolor 
+   property transparentcolor: colorty read ftransparentcolor
                               write settransparentcolor default cl_default;
                      //cl_default ->bottom left pixel
    property options: bitmapoptionsty read getoptions write setoptions default [];
@@ -382,7 +382,7 @@ type
   published
    property alignment default [al_xcentered,al_ycentered];
  end;
- 
+
  tbitmapcomp = class(tmsecomponent)
   private
    fbitmap: tmaskedbitmap;
@@ -453,7 +453,7 @@ type
    procedure setversiondefault(avalue: int32);
    function getbitmaps(aindex: int32): tmaskedbitmap;
   protected
-   fversionhigh: int32; //versioncount - 1 
+   fversionhigh: int32; //versioncount - 1
    fversiondefault: int32; //use for painting
    fcornermaskmaxtopleft: int32; //biggest value of cornermask
    fcornermaskmaxbottomleft: int32; //biggest value of cornermask
@@ -476,15 +476,15 @@ type
 
    procedure clear;
    procedure deleteimage(const index: integer);
-   
+
     //aimage-1 -> use versiondefault
-    
+
    procedure moveimage(const fromindex: integer; const toindex: integer;
                                                        aversion: int32 = -1);
    procedure setimage(index: integer; image: tmaskedbitmap;
          const source: rectty; aalignment: alignmentsty = [];
                                                        aversion: int32 = -1);
-   procedure setimage(index: integer; image: tmaskedbitmap; 
+   procedure setimage(index: integer; image: tmaskedbitmap;
                                       //nil -> empty item
                   const aalignment: alignmentsty = []; aversion: int32 = -1);
    procedure getimage(const index: integer; const dest: tmaskedbitmap;
@@ -535,7 +535,7 @@ type
    property bitmaps[const aindex: int32]: tmaskedbitmap read getbitmaps;
 
    property kind: bitmapkindty read getkind write setkind default bmk_rgb;
-   property maskkind: bitmapkindty read getmaskkind 
+   property maskkind: bitmapkindty read getmaskkind
                                     write setmaskkind default bmk_mono;
 {
    property monochrome: boolean read getmonochrome
@@ -543,19 +543,19 @@ type
 }
    property masked: boolean read getmasked write setmasked default true;
    property graymask: boolean read getgraymask write setgraymask default false;
-   property colormask: boolean read getcolormask 
+   property colormask: boolean read getcolormask
                                               write setcolormask default false;
    property hascornermask: boolean read fhascornermask;
   published
-   property versioncount: int32 read getversioncount 
+   property versioncount: int32 read getversioncount
                                 write setversioncount default 1; //first!
-   property versiondefault: int32 read fversiondefault 
+   property versiondefault: int32 read fversiondefault
                                 write setversiondefault default 0;
    property width: integer read fsize.cx
                  write setwidth default defaultimagelistwidth;
    property height: integer read fsize.cy
                    write setheight default defaultimagelistheight;
-   property options: bitmapoptionsty read getoptions 
+   property options: bitmapoptionsty read getoptions
                                       write setoptions default [bmo_masked];
    property transparentcolor: colorty read gettransparentcolor
                          write settransparentcolor default cl_none;
@@ -563,13 +563,13 @@ type
                  //last!
    property indexlookup: msestring read findexlookup write setindexlookup;
         //array of int16
-   property cornermask_topleft: msestring read fcornermask_topleft 
+   property cornermask_topleft: msestring read fcornermask_topleft
                                                  write setcornermask_topleft;
-   property cornermask_bottomleft: msestring read fcornermask_bottomleft 
+   property cornermask_bottomleft: msestring read fcornermask_bottomleft
                                                  write setcornermask_bottomleft;
    property cornermask_bottomright: msestring read fcornermask_bottomright
                                                 write setcornermask_bottomright;
-   property cornermask_topright: msestring read fcornermask_topright 
+   property cornermask_topright: msestring read fcornermask_topright
                                                  write setcornermask_topright;
         //array of int16, used in tframe for clipping corners of client area
         //cornermask[n] = number of clipped pixels from edge of row n.
@@ -578,7 +578,7 @@ type
 
  iimagelistinfo = interface(inullinterface)[miid_iimagelistinfo]
   function getimagelist: timagelist;
- end; 
+ end;
 
  tformatstream = class
   private
@@ -636,7 +636,7 @@ constructor tformatstream.create(stream: tstream; formatname: string);
 begin
  fstream:= stream;
  fformatname:= formatname;
-end;                                  
+end;
 
 procedure tformatstream.formaterror;
 begin
@@ -772,7 +772,7 @@ begin
      inc(pbyte(ps),sourcerowstep);
      inc(pbyte(pd),rowstep);
     end;
-   end;   
+   end;
   end;
  end;
 // creategc;
@@ -832,7 +832,7 @@ begin
   bmp:= sourcebmp.fbitmap;
 //  if amask = nil then begin
 //   amask:= sourcebmp.fbitmap.getmask(maskpos1);
-//  end; 
+//  end;
  end
  else begin
   bmp:= self;
@@ -842,7 +842,7 @@ begin
    updatealignment(dest,asource,aalignment,rect1,rect2,po1);
 //   amask:= getmask(maskpos1);
 //   maskpx:= getmaskhandle(maskgchandle);
-   if (al_grayed in aalignment) and ((amask <> nil) or 
+   if (al_grayed in aalignment) and ((amask <> nil) or
                                            (fkind = bmk_mono)) then begin
     if (amask <> nil) and not (amask.kind = bmk_mono) then begin
                      //reduced contrast grayscale
@@ -864,7 +864,7 @@ begin
      tcanvas1(acanvas).internalcopyarea(bmp1.canvas,rect2,
                rect1,acanvas.rasterop,cl_default,bmp1.mask,maskpos1,
                                                        aalignment,po1,opa);
-     bmp1.free;     
+     bmp1.free;
     end
     else begin //shaddowed mask
      if kind = bmk_mono then begin
@@ -1054,7 +1054,7 @@ begin
     pixmap:= fhandle;
     gdi_call(gdf_pixmaptoimage,info1,getgdiintf);
     fimage:= image;
-   end;    
+   end;
   end;
   {
   gdi_lock;
@@ -1103,7 +1103,7 @@ begin
    }
    include(fstate,pms_ownshandle);
   end;
- end;    
+ end;
 end;
 
 function tbitmap.checkindex(const index: pointty): integer;
@@ -1153,7 +1153,7 @@ begin
   result:= @pbyte(fimage.pixels)[checkindex(makepoint(0,index))]; //bytes
  end
  else begin
-  result:= @fimage.pixels[checkindex(makepoint(0,index))]; 
+  result:= @fimage.pixels[checkindex(makepoint(0,index))];
  end;
 end;
 
@@ -1339,7 +1339,7 @@ var
 begin
  newdest:= dest;
  newsource:= source;
- if (al_fit in alignment) or (al_thumbnail in alignment) and 
+ if (al_fit in alignment) or (al_thumbnail in alignment) and
                      ((dest.cx < source.cx) or (dest.cy < source.cy)) then begin
   exit;
  end;
@@ -1562,7 +1562,7 @@ begin
  end;
 end;
 
-function tbitmap.getimageref(out aimage: imagety): boolean; 
+function tbitmap.getimageref(out aimage: imagety): boolean;
                                   //true if buffer must be destroyed
 begin
  result:= fimage.pixels = nil;
@@ -1741,7 +1741,7 @@ begin
 end;
 
 function tmaskedbitmap.gettranspcolor(): colorty;
-begin 
+begin
  if (ftransparentcolor = cl_default) and not isempty then begin
   result:= pixel[makepoint(0,fsize.cy-1)];
  end
@@ -1961,7 +1961,7 @@ begin
     end;
     kind:= ki1;
    end;
-   if (opt2 * bmomaskkindoptions <> []) and 
+   if (opt2 * bmomaskkindoptions <> []) and
                        (bmo_masked in foptions) and masked then begin
     checkmask;
    end;
@@ -2009,7 +2009,7 @@ begin
    include(opt1,bmo_graymask);
   end;
   bmk_rgb: begin
-   include(opt1,bmo_colormask);   
+   include(opt1,bmo_colormask);
   end;
  end;
  options:= opt1;
@@ -2079,12 +2079,12 @@ begin
    end;
    createmask(ki1);
    fmask.size:= fsize;
-   if sizeisequal(fsize,value.fsize) and 
+   if sizeisequal(fsize,value.fsize) and
                                          (value.kind = kind) then begin
     fmask.handle:= value.handle;
    end
    else begin
-    case ki1 of 
+    case ki1 of
      bmk_gray,bmk_rgb: begin
       fmask.init(fmaskcolorbackground);
      end;
@@ -2231,7 +2231,7 @@ begin
     raise exception.create('Recursive bitmap source.');
    end;
    bmpcomp1:= bmpcomp1.bitmap.source;
-  end; 
+  end;
   beginupdate;
   try
    clear;
@@ -2286,7 +2286,7 @@ end;
 
 procedure tmaskedbitmap.stretch(const source: rectty;
                              const dest: tmaskedbitmap;
-                           const aalignment: alignmentsty = 
+                           const aalignment: alignmentsty =
                                 [al_stretchx,al_stretchy,al_intpol]);
 const
  tfo = bmokindoptions+bmomaskkindoptions+[bmo_masked];
@@ -2306,9 +2306,9 @@ begin
   dest.masked:= masked;
   }
   dest.size:= size1;
-  bo1:= (aalignment * [al_stretchx,al_stretchy] <> 
+  bo1:= (aalignment * [al_stretchx,al_stretchy] <>
                                    [al_stretchx,al_stretchy]) and
-           not (al_tiled in aalignment) and 
+           not (al_tiled in aalignment) and
                  ((source.cx <> size1.cx) or (source.cy <> size1.cy));
   if bo1 then begin
    dest.init(dest.colorbackground);
@@ -2317,7 +2317,7 @@ begin
   tcanvas1(dest.canvas).internalcopyarea(canvas,source,destrect,
                         rop_copy,cl_none,nil,nullpoint,aalignment,
                                                        nullpoint,cl_none);
-       
+
   if masked then begin
    if bo1 then begin
     dest.mask.init(dest.mask.colorbackground);
@@ -2345,7 +2345,7 @@ begin
             (bmokindoptions+bmomaskkindoptions+[bmo_masked]) <> []) or
            (size.cx <> ancestor.size.cx) or
            (size.cy <> ancestor.size.cy) or
-           (bmo_storeorigformat in options) and 
+           (bmo_storeorigformat in options) and
                (origformatdata <> ancestor.origformatdata);
   if not result then begin
    if masked then begin
@@ -2353,7 +2353,7 @@ begin
     ancestor.fmask.checkimage(false);
     zeropad(fmask.fimage);
     zeropad(ancestor.fmask.fimage);
-    result:= (fmask.fimage.length <> ancestor.fmask.fimage.length) or 
+    result:= (fmask.fimage.length <> ancestor.fmask.fimage.length) or
               not comparemem(fmask.fimage.pixels,ancestor.fmask.fimage.pixels,
                          fmask.fimage.length * sizeof(longword));
    end;
@@ -2380,7 +2380,7 @@ begin
  filer.DefineBinaryProperty('imagedata',{$ifdef FPC}@{$endif}readimagedata,
                                      {$ifdef FPC}@{$endif}writeimagedata,
                            bo1 and writedata(tmaskedbitmap(filer.ancestor)));
- if (filer is treader) and not(csdesigning in filer.root.componentstate) and 
+ if (filer is treader) and not(csdesigning in filer.root.componentstate) and
                 not(bmo_runtimeformatdata in options) then begin
   forigformatdata:= '';
  end;
@@ -2437,7 +2437,7 @@ var
  int1: integer;
  ar1: longwordarty;
  ki1: bitmapkindty;
- 
+
 begin
  beginupdate;
  try
@@ -2518,9 +2518,9 @@ var
 begin
  lint1:= length(forigformatdata);
 {$ifdef FPC}
- stream.writebuffer(lint1,sizeof(ntole(lint1))); 
+ stream.writebuffer(lint1,sizeof(ntole(lint1)));
 {$else}
- stream.writebuffer(lint1,sizeof(lint1)); 
+ stream.writebuffer(lint1,sizeof(lint1));
 {$endif}
  stream.writebuffer(pchar(pointer(forigformatdata))^,lint1);
 end;
@@ -2709,7 +2709,7 @@ begin
    exclude(foptions,bmo_colormask);
   end
   else begin
-   include(foptions,bmo_colormask);   
+   include(foptions,bmo_colormask);
   end;
 }
   include(fstate,pms_maskvalid);
@@ -2718,7 +2718,7 @@ begin
   freemask;
   exclude(foptions,bmo_masked);
   exclude(fstate,pms_maskvalid);
- end;  
+ end;
 end;
 
 procedure tmaskedbitmap.savetomaskedimage(out aimage: maskedimagety);
@@ -3055,7 +3055,7 @@ begin
  end;
 end;
 }
-procedure timagelist.paint(const acanvas: tcanvas; const index: integer; 
+procedure timagelist.paint(const acanvas: tcanvas; const index: integer;
          const dest: rectty;  const alignment: alignmentsty = [];
          const acolor: colorty = cl_default;
          const acolorbackground: colorty = cl_default;
@@ -3070,7 +3070,7 @@ begin
  end;
 end;
 
-procedure timagelist.paint(const acanvas: tcanvas; const index: integer; 
+procedure timagelist.paint(const acanvas: tcanvas; const index: integer;
          const dest: rectty; source: rectty;
          const alignment: alignmentsty = [];
          const acolor: colorty = cl_default;
@@ -3218,7 +3218,7 @@ var
  ima1: tmaskedbitmap;
  bmp1: tmaskedbitmap;
 begin
- if (al_thumbnail in aalignment) and 
+ if (al_thumbnail in aalignment) and
            ((source.cx > fsize.cx) or (source.cy > fsize.cy)) then begin
   include(aalignment,al_fit);
   exclude(aalignment,al_thumbnail);
@@ -3245,9 +3245,9 @@ begin
   ima1:= image;
   destrect:= calcrectalignment(rect2,source,aalignment);
   with rect1 do begin
-   bo1:= (al_fit in aalignment) or 
-               (x < 0) or (y < 0) or (x + cx > ima1.fsize.cx) or 
-                  (y + cy > ima1.fsize.cy) or 
+   bo1:= (al_fit in aalignment) or
+               (x < 0) or (y < 0) or (x + cx > ima1.fsize.cx) or
+                  (y + cy > ima1.fsize.cy) or
                   not(al_stretchx in aalignment) and (cx < fsize.cx) or
                   not(al_stretchy in aalignment) and (cy < fsize.cy);
    if not (al_fit in aalignment) then begin
@@ -3352,7 +3352,7 @@ begin
  end;
 end;
 
-procedure timagelist.copyimages(const image: tmaskedbitmap; 
+procedure timagelist.copyimages(const image: tmaskedbitmap;
                                                  const destindex: integer;
                                                  const aversion: int32);
 var
@@ -3472,7 +3472,7 @@ begin
     end
     else begin
      bmp1:= image;
-    end;     
+    end;
     newcolcount:= (bmp1.size.cx + fsize.cx-1) div fsize.cx;
     newrowcount:= (bmp1.size.cy + fsize.cy-1) div fsize.cy;
     newcount:= newcolcount * newrowcount;

@@ -37,7 +37,7 @@ object findinfileadialogfo: tfindinfiledialogfo
     anchors = [an_left, an_top, an_right]
     statfile = statfile1
     dropdown.cols.count = 1
-    dropdown.cols.items = <    
+    dropdown.cols.items = <
       item
       end>
     reffontheight = 14
@@ -47,7 +47,7 @@ object findinfileadialogfo: tfindinfiledialogfo
     frame.localprops = []
     frame.localprops1 = []
     frame.buttons.count = 1
-    frame.buttons.items = <    
+    frame.buttons.items = <
       item
         color = -2147483646
         imagenr = 17
@@ -95,7 +95,7 @@ object findinfileadialogfo: tfindinfiledialogfo
     statfile = statfile1
     value = '"*.pas" "*.pp" "*.inc"'
     dropdown.cols.count = 1
-    dropdown.cols.items = <    
+    dropdown.cols.items = <
       item
       end>
     reffontheight = 14

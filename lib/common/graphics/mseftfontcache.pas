@@ -27,7 +27,7 @@ interface
 
 uses
  msefontcache,msegraphics,msestrings,msetypes,mseguiglob,msegraphutils,msehash;
- 
+
 type
  bitmapdataty = record
   width: smallint;
@@ -38,7 +38,7 @@ type
   end;
  end;
  pbitmapdataty= ^bitmapdataty;
- 
+
  tftfontcache = class(tfontcache)
   protected
    procedure internalfreefont(const afont: ptruint); override;
@@ -60,7 +60,7 @@ type
    procedure drawstring16(var drawinfo: drawinfoty;
                                     const afont: fontty); override;
  end;
- 
+
 implementation
 uses
  msefreetype,msefontconfig,msefcfontselect,math;
@@ -87,11 +87,11 @@ type
   rightbearing: smallint;
   bitmap: longword; //buffer offset to bitmapdatatyty 0->not rendered yet
  end;
- 
+
  pglyphinfoty = ^glyphinfoty;
  charrowty = array[0..charrowlength-1] of longword; //offset in buffer
- pcharrowty = ^charrowty; 
- charbucketty = array[0..charbucketcount-1] of longword; 
+ pcharrowty = ^charrowty;
+ charbucketty = array[0..charbucketcount-1] of longword;
                               //offset to charrowty in buffer
  tftface = class
   private
@@ -247,7 +247,7 @@ end;
 
 function tftfontcache.textbackgroundrect(const drawinfo: drawinfoty;
                                const afont: fontty; out arect: rectty): boolean;
-                          
+
 var
  face: tftface;
  po1: pglyphinfoty;
@@ -329,7 +329,7 @@ begin
  fface:= aface;
  fsize:= sizeof(longword); //dummy
  fcapacity:= 1024;
- getmem(fbuffer,fcapacity); 
+ getmem(fbuffer,fcapacity);
 end;
 
 destructor tftface.destroy;
@@ -353,7 +353,7 @@ begin
  end;
 end;
 
-procedure tftface.renderglyph(var ainfo: pglyphinfoty); 
+procedure tftface.renderglyph(var ainfo: pglyphinfoty);
            //must be called after getglyph
 var
  po1: pchar;
@@ -366,7 +366,7 @@ begin
 //todo: check bitmap format
    po1:= fbuffer;
    int3:= getbuffer(sizeof(bitmapdataty) + width * rows,false);
-   ainfo:= pointer(pchar(ainfo) + 
+   ainfo:= pointer(pchar(ainfo) +
                      (pchar(fbuffer) - pchar(po1)));
    ainfo^.bitmap:= int3;
    bm1:= pointer(pchar(fbuffer)+int3);
@@ -392,7 +392,7 @@ begin
  end
 end;
                          //todo: 32bit
-function tftface.getglyph(const achar: msechar; out ainfo: pglyphinfoty; 
+function tftface.getglyph(const achar: msechar; out ainfo: pglyphinfoty;
                         const forceload: boolean): boolean;
 var
  int1,int2,int3: integer;
@@ -429,7 +429,7 @@ begin
    if ft_load_glyph(fface,ft_get_char_index(fface,ord(achar)),
                                               ft_load_default) <> 0 then begin
     result:= false;
-   end;                                   
+   end;
   end;
   ainfo:= pglyphinfoty(pchar(fbuffer)+int3);
  end;

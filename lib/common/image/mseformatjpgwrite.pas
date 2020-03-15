@@ -13,7 +13,7 @@ interface
 const
  jpglabel = 'jpeg';
 procedure registerformat;
- 
+
 implementation
 uses
  classes,mclasses,msegraphics,msebitmap,fpreadjpeg,msegraphicstream,
@@ -39,7 +39,7 @@ begin
   ima.free;
  end;
 end;
- 
+
 procedure registerformat;
 begin
  registergraphicformat(jpglabel,nil,{$ifdef FPC}@{$endif}writegraphic,

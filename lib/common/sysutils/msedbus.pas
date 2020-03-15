@@ -186,8 +186,8 @@ const
                                  //*   state passed to
                                  //*   dbus_watch_handle()).
                                  //*/
-  //* Internal to libdbus, there is also _DBUS_WATCH_NVAL in dbus-watch.h */ 
-  
+  //* Internal to libdbus, there is also _DBUS_WATCH_NVAL in dbus-watch.h */
+
 type
  DBusError = record
   name: pcchar;    //**< public error name field */
@@ -236,12 +236,12 @@ type
 //* Results that a message handler can return.
 //*/
 DBusHandlerResult = (
- DBUS_HANDLER_RESULT_HANDLED,         
-   //**< Message has had its effect - no need to run more handlers. */ 
- DBUS_HANDLER_RESULT_NOT_YET_HANDLED, 
+ DBUS_HANDLER_RESULT_HANDLED,
+   //**< Message has had its effect - no need to run more handlers. */
+ DBUS_HANDLER_RESULT_NOT_YET_HANDLED,
    //**< Message has not had any effect - see if other handlers want it. */
- DBUS_HANDLER_RESULT_NEED_MEMORY      
-   //**< Need more memory in order to return #DBUS_HANDLER_RESULT_HANDLED or 
+ DBUS_HANDLER_RESULT_NEED_MEMORY
+   //**< Need more memory in order to return #DBUS_HANDLER_RESULT_HANDLED or
    //#DBUS_HANDLER_RESULT_NOT_YET_HANDLED.
    // Please try again later with more memory. */
 );
@@ -250,7 +250,7 @@ DBusHandlerResult = (
 // * Called when a message needs to be handled. The result indicates whether or
 // * not more handlers should be run. Set with dbus_connection_add_filter().
 // */
- DBusHandleMessageFunction = 
+ DBusHandleMessageFunction =
    function(connection: pDBusConnection; message: pDBusMessage;
                                          user_data: pointer): DBusHandlerResult
                                     {$ifdef wincall}stdcall{$else}cdecl{$endif};
@@ -259,7 +259,7 @@ DBusHandlerResult = (
 //* #DBusObjectPathVTable which is registered with dbus_connection_register_object_path()
 //* or dbus_connection_register_fallback().
 //*/
- DBusObjectPathMessageFunction = 
+ DBusObjectPathMessageFunction =
    function(connection: pDBusConnection; message: pDBusMessage;
                                  user_data: pointer): DBusHandlerResult
                                     {$ifdef wincall}stdcall{$else}cdecl{$endif};
@@ -272,18 +272,18 @@ DBusHandlerResult = (
                                     {$ifdef wincall}stdcall{$else}cdecl{$endif};
 
  DBusObjectPathVTable = record
-  unregister_function: DBusObjectPathUnregisterFunction; 
+  unregister_function: DBusObjectPathUnregisterFunction;
                           //**< Function to unregister this handler */
-  message_function: DBusObjectPathMessageFunction; 
+  message_function: DBusObjectPathMessageFunction;
                           //**< Function to handle messages */
-  
+
   dbus_internal_pad1: pointer; //**< Reserved for future expansion */
   dbus_internal_pad2: pointer; //**< Reserved for future expansion */
   dbus_internal_pad3: pointer; //**< Reserved for future expansion */
   dbus_internal_pad4: pointer; //**< Reserved for future expansion */
  end;
  pDBusObjectPathVTable = ^DBusObjectPathVTable;
- 
+
  DBusBusType = (
   DBUS_BUS_SESSION,    //**< The login session bus */
   DBUS_BUS_SYSTEM,     //**< The systemwide bus */
@@ -301,7 +301,7 @@ DBusHandlerResult = (
  DBusAddWatchFunction = function(watch: pDBusWatch;
                                            data: pointer): dbus_bool_t
                                     {$ifdef wincall}stdcall{$else}cdecl{$endif};
-                                                  
+
 //** Called when dbus_watch_get_enabled() may return a different value
 //*  than it did before.  Set by dbus_connection_set_watch_functions()
 //*  or dbus_server_set_watch_functions().
@@ -343,15 +343,15 @@ DBusHandlerResult = (
 //* Called when a pending call now has a reply available. Set with
 //* dbus_pending_call_set_notify().
 //*/
- DBusPendingCallNotifyFunction =  procedure(pending: pDBusPendingCall; 
+ DBusPendingCallNotifyFunction =  procedure(pending: pDBusPendingCall;
                                                      user_data: pointer)
                                     {$ifdef wincall}stdcall{$else}cdecl{$endif};
- 
+
 var
  dbus_bus_get:
    function(type_: DBusBusType; error: PDBusError): PDBusConnection
                                     {$ifdef wincall}stdcall{$else}cdecl{$endif};
- dbus_bus_get_private: 
+ dbus_bus_get_private:
    function(type_: DBusBusType; error: PDBusError): PDBusConnection
                                     {$ifdef wincall}stdcall{$else}cdecl{$endif};
  dbus_connection_close: procedure(connection: pDBusConnection)
@@ -383,7 +383,7 @@ var
               function_: DBusHandleMessageFunction; user_data: pointer);
                                     {$ifdef wincall}stdcall{$else}cdecl{$endif};
  dbus_connection_try_register_object_path:
-   function(cionnection: pDBusConnection; path: pchar; 
+   function(cionnection: pDBusConnection; path: pchar;
                         vtable: pDBusObjectPathVTable;
                        user_data: pointer; error: pDBusError): dbus_bool_t
                                     {$ifdef wincall}stdcall{$else}cdecl{$endif};
@@ -434,12 +434,12 @@ var
                                     {$ifdef wincall}stdcall{$else}cdecl{$endif};
  dbus_error_is_set: function(error: pDBusError): dbus_bool_t
                                     {$ifdef wincall}stdcall{$else}cdecl{$endif};
- dbus_connection_set_exit_on_disconnect: 
-   procedure(connection: pDBusConnection; exit_on_disconnect: dbus_bool_t) 
+ dbus_connection_set_exit_on_disconnect:
+   procedure(connection: pDBusConnection; exit_on_disconnect: dbus_bool_t)
                                     {$ifdef wincall}stdcall{$else}cdecl{$endif};
  dbus_bus_get_unique_name: function(connection: pDBusConnection): pcchar
                                     {$ifdef wincall}stdcall{$else}cdecl{$endif};
- dbus_bus_request_name: 
+ dbus_bus_request_name:
    function(connection: PDBusConnection; name: pcchar; flags: cuint;
                                            error: pDBusError): cint
                                     {$ifdef wincall}stdcall{$else}cdecl{$endif};
@@ -467,12 +467,12 @@ var
                                     {$ifdef wincall}stdcall{$else}cdecl{$endif};
  dbus_message_get_path: function(message: pDBusMessage): pcchar
                                     {$ifdef wincall}stdcall{$else}cdecl{$endif};
- dbus_message_set_interface: 
+ dbus_message_set_interface:
    function(message: pDBusMessage; iface: pcchar): dbus_bool_t
                                     {$ifdef wincall}stdcall{$else}cdecl{$endif};
  dbus_message_get_interface: function(message: pDBusMessage): pcchar
                                     {$ifdef wincall}stdcall{$else}cdecl{$endif};
- dbus_message_set_member: 
+ dbus_message_set_member:
    function(message: pDBusMessage; member: pcchar): dbus_bool_t
                                     {$ifdef wincall}stdcall{$else}cdecl{$endif};
  dbus_message_get_member: function(message: pDBusMessage): pcchar;
@@ -480,7 +480,7 @@ var
  dbus_message_set_error_name:
    function(message: pDBusMessage; name: pcchar): dbus_bool_t
                                     {$ifdef wincall}stdcall{$else}cdecl{$endif};
- dbus_message_get_error_name: 
+ dbus_message_get_error_name:
    function(message: pDBusMessage): pcchar;
                                     {$ifdef wincall}stdcall{$else}cdecl{$endif};
  dbus_message_set_destination:
@@ -495,16 +495,16 @@ var
                                     {$ifdef wincall}stdcall{$else}cdecl{$endif};
  dbus_message_get_signature: function(message: pDBusMessage): pchar
                                     {$ifdef wincall}stdcall{$else}cdecl{$endif};
- dbus_message_set_no_reply: 
+ dbus_message_set_no_reply:
    procedure(message: pDBusMessage; no_reply: dbus_bool_t)
                                     {$ifdef wincall}stdcall{$else}cdecl{$endif};
  dbus_message_get_no_reply: function(message: pDBusMessage): dbus_bool_t
                                     {$ifdef wincall}stdcall{$else}cdecl{$endif};
 
- dbus_message_iter_init_append: 
+ dbus_message_iter_init_append:
    procedure(message: pDBusMessage; iter: pDBusMessageIter)
                                     {$ifdef wincall}stdcall{$else}cdecl{$endif};
- dbus_message_iter_init: 
+ dbus_message_iter_init:
    function(message: pDBusMessage; iter: pDBusMessageIter): dbus_bool_t
                                     {$ifdef wincall}stdcall{$else}cdecl{$endif};
  dbus_message_append_args_valist:
@@ -527,17 +527,17 @@ var
                                     {$ifdef wincall}stdcall{$else}cdecl{$endif};
  dbus_message_iter_open_container:
    function(iter: pDBusMessageIter; type_: cint;
-                       const contained_signature: pcchar; 
+                       const contained_signature: pcchar;
                                  sub: pDBusMessageIter): dbus_bool_t
                                     {$ifdef wincall}stdcall{$else}cdecl{$endif};
  dbus_message_iter_close_container:
    function(iter: pDBusMessageIter; sub: pDBusMessageIter): dbus_bool_t
                                     {$ifdef wincall}stdcall{$else}cdecl{$endif};
- dbus_message_iter_abandon_container: 
+ dbus_message_iter_abandon_container:
    procedure(iter: pDBusMessageIter; sub: pDBusMessageIter);
                                     {$ifdef wincall}stdcall{$else}cdecl{$endif};
 
- dbus_message_iter_recurse: 
+ dbus_message_iter_recurse:
    procedure (iter: pDBusMessageIter; sub: pDBusMessageIter)
                                     {$ifdef wincall}stdcall{$else}cdecl{$endif};
  dbus_message_iter_get_element_type: function (iter: pDBusMessageIter): cint
@@ -552,7 +552,7 @@ var
                                     {$ifdef wincall}stdcall{$else}cdecl{$endif};
  dbus_connection_send_with_reply:
    function(connection: pDBusConnection; message: pDBusMessage;
-                           pending_return:  ppDBusPendingCall; 
+                           pending_return:  ppDBusPendingCall;
                                    timeout_milliseconds: cint): dbus_bool_t
                                     {$ifdef wincall}stdcall{$else}cdecl{$endif};
  dbus_connection_send:
@@ -572,14 +572,14 @@ var
              function_: DBusPendingCallNotifyFunction;
              user_data: pointer; free_user_data: DBusFreeFunction): dbus_bool_t
                                     {$ifdef wincall}stdcall{$else}cdecl{$endif};
- dbus_pending_call_steal_reply: 
+ dbus_pending_call_steal_reply:
    function(pending: pDBusPendingCall): pDBusMessage
                                     {$ifdef wincall}stdcall{$else}cdecl{$endif};
 
- dbus_bus_add_match: 
+ dbus_bus_add_match:
    procedure(connection: pDBusConnection; rule: pcchar; error: pDBusError)
                                     {$ifdef wincall}stdcall{$else}cdecl{$endif};
- dbus_bus_remove_match: 
+ dbus_bus_remove_match:
    procedure(connection: pDBusConnection; rule: pcchar; error: pDBusError)
                                     {$ifdef wincall}stdcall{$else}cdecl{$endif};
 
@@ -591,7 +591,7 @@ procedure releasedbus();
 implementation
 uses
  msedynload,sysutils;
-var 
+var
  libinfo: dynlibinfoty;
 
 procedure inidbus(const data: pointer);
@@ -618,7 +618,7 @@ const
            d: @dbus_connection_add_filter),                      // 6
   (n: 'dbus_connection_remove_filter';
            d: @dbus_connection_remove_filter),                   // 7
-  (n: 'dbus_connection_try_register_object_path'; 
+  (n: 'dbus_connection_try_register_object_path';
            d: @dbus_connection_try_register_object_path),        // 8
   (n: 'dbus_connection_try_register_fallback';
            d: @dbus_connection_try_register_fallback),           // 9
@@ -632,7 +632,7 @@ const
   (n: 'dbus_watch_handle'; d: @dbus_watch_handle),               //16
   (n: 'dbus_watch_get_enabled'; d: @dbus_watch_get_enabled),     //17
 
-  (n: 'dbus_timeout_get_interval'; 
+  (n: 'dbus_timeout_get_interval';
            d: @dbus_timeout_get_interval),                       //18
   (n: 'dbus_timeout_get_data'; d: @dbus_timeout_get_data),       //19
   (n: 'dbus_timeout_set_data'; d: @dbus_timeout_set_data),       //20
@@ -649,7 +649,7 @@ const
            d: @dbus_connection_set_exit_on_disconnect),          //28
   (n: 'dbus_bus_get_unique_name'; d: @dbus_bus_get_unique_name), //29
   (n: 'dbus_bus_request_name'; d: @dbus_bus_request_name),       //30
-  (n: 'dbus_message_new_method_call'; 
+  (n: 'dbus_message_new_method_call';
            d: @dbus_message_new_method_call),                    //31
   (n: 'dbus_message_new_method_return';
            d: @dbus_message_new_method_return),                  //32
@@ -658,7 +658,7 @@ const
   (n: 'dbus_message_get_type'; d: @dbus_message_get_type),       //35
   (n: 'dbus_message_set_path'; d: @dbus_message_set_path),       //36
   (n: 'dbus_message_get_path'; d: @dbus_message_get_path),       //37
-  (n: 'dbus_message_set_interface'; 
+  (n: 'dbus_message_set_interface';
            d: @dbus_message_set_interface),                      //38
   (n: 'dbus_message_get_interface';
            d: @dbus_message_get_interface),                      //39
@@ -686,7 +686,7 @@ const
   (n: 'dbus_message_iter_init_append';
            d: @dbus_message_iter_init_append),                   //53
   (n: 'dbus_message_iter_init'; d: @dbus_message_iter_init),     //54
-  (n: 'dbus_message_append_args_valist'; 
+  (n: 'dbus_message_append_args_valist';
            d: @dbus_message_append_args_valist),                 //55
   (n: 'dbus_message_iter_append_basic';
            d: @dbus_message_iter_append_basic),                  //56
@@ -697,13 +697,13 @@ const
            d: @dbus_message_iter_get_arg_type),                  //59
   (n: 'dbus_message_iter_get_basic';
            d: @dbus_message_iter_get_basic),                     //60
-  (n: 'dbus_message_iter_open_container'; 
+  (n: 'dbus_message_iter_open_container';
            d: @dbus_message_iter_open_container),                //61
-  (n: 'dbus_message_iter_close_container'; 
+  (n: 'dbus_message_iter_close_container';
            d: @dbus_message_iter_close_container),               //62
-  (n: 'dbus_message_iter_abandon_container'; 
+  (n: 'dbus_message_iter_abandon_container';
            d: @dbus_message_iter_abandon_container),             //63
-  (n: 'dbus_message_iter_recurse'; 
+  (n: 'dbus_message_iter_recurse';
            d: @dbus_message_iter_recurse),                       //64
   (n: 'dbus_message_iter_get_element_type';
            d: @dbus_message_iter_get_element_type),              //65
@@ -711,7 +711,7 @@ const
            d: @dbus_message_iter_get_fixed_array),               //66
   (n: 'dbus_connection_send_with_reply_and_block';
            d: @dbus_connection_send_with_reply_and_block),       //67
-  (n: 'dbus_connection_send_with_reply'; 
+  (n: 'dbus_connection_send_with_reply';
            d: @dbus_connection_send_with_reply),                 //68
   (n: 'dbus_connection_send'; d: @dbus_connection_send),         //69
   (n: 'dbus_connection_flush'; d: @dbus_connection_flush),       //70
@@ -719,7 +719,7 @@ const
   (n: 'dbus_pending_call_unref'; d: @dbus_pending_call_unref),   //72
   (n: 'dbus_pending_call_set_notify';
            d: @dbus_pending_call_set_notify),                    //73
-  (n: 'dbus_pending_call_steal_reply'; 
+  (n: 'dbus_pending_call_steal_reply';
            d: @dbus_pending_call_steal_reply),                   //74
   (n: 'dbus_bus_add_match'; d: @dbus_bus_add_match),             //75
   (n: 'dbus_bus_remove_match'; d: @dbus_bus_remove_match)        //76

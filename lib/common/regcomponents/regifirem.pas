@@ -23,7 +23,7 @@ uses
  msetypes{msestrings},msedesigner,
  mseclasses,mseifids,mseifiglob,msegui,typinfo,msesockets,mseifigui,
  mseifilink,msessl,mdb,regifirem_bmp,mseifidbgui,msecryptohandler;
- 
+
 type
  tmodulelinkitemeditor = class(tclasselementeditor)
   protected
@@ -31,17 +31,17 @@ type
   public
    function getvalue: msestring; override;
  end;
- 
+
  tmodulelinkeditor = class(tpersistentarraypropertyeditor)
   protected
    function geteditorclass: propertyeditorclassty; override;
  end;
- 
+
  tmodulelinkactionitemeditor = class(tmodulelinkitemeditor)
   public
    function getvalue: msestring; override;
  end;
- 
+
  tmodulelinkactionseditor = class(tpersistentarraypropertyeditor)
   protected
    function geteditorclass: propertyeditorclassty; override;
@@ -58,7 +58,7 @@ type
   public
    function getvalue: msestring; override;
  end;
- 
+
  tvaluewidgetlinkseditor = class(tpersistentarraypropertyeditor)
   protected
    function geteditorclass: propertyeditorclassty; override;
@@ -68,19 +68,19 @@ type
   public
    function name: msestring; override;
  end;
- 
+
  tififieldoptionseditor = class(tsetarraypropertyeditor)
   protected
-   function getelementeditorclass: elementeditorclassty; override;   
-  public 
+   function getelementeditorclass: elementeditorclassty; override;
+  public
    procedure setvalue(const value: msestring); override;
  end;
- 
+
  tifitxactioncompeditor = class(tcomponentpropertyeditor)
   protected
    function filtercomponent(const acomponent: tcomponent): boolean; override;
  end;
- 
+
  tlocalconncompeditor = class(tcomponentpropertyeditor)
   protected
    function filtercomponent(const acomponent: tcomponent): boolean; override;
@@ -90,12 +90,12 @@ type
   public
    function getvalue: msestring; override;
  end;
- 
+
  tifidatacolseditor = class(tpersistentarraypropertyeditor)
   protected
    function geteditorclass: propertyeditorclassty; override;
  end;
-    
+
 procedure register;
 begin
  registercomponents('ifi',[tmodulelink,tformlink,
@@ -107,7 +107,7 @@ begin
                      tsocketclientiochannel,tsocketserveriochannel,
                      tsocketstdio,tsocketclient,
                      tsocketserver,tsocketserverstdio,
-                     tssl]); 
+                     tssl]);
  registerpropertyeditor(typeinfo(tmodulelinkarrayprop),nil,'',tmodulelinkeditor);
  registerpropertyeditor(typeinfo(tlinkactions),nil,'',tmodulelinkactionseditor);
  registerpropertyeditor(typeinfo(tvaluewidgetlinks),nil,'',tvaluewidgetlinkseditor);
@@ -176,7 +176,7 @@ end;
 
 function tifidatawidgeteditor.filtercomponent(const acomponent: tcomponent): boolean;
 var
- intf1: iificlient; 
+ intf1: iificlient;
 begin
  result:= getcorbainterface(acomponent,typeinfo(iificlient),intf1);
 end;
@@ -218,7 +218,7 @@ begin
   if name = '' then begin
    name:= avalue.name;
   end;
- end; 
+ end;
 end;
 
 { tififieldoptionseditor }

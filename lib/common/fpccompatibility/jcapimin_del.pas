@@ -11,7 +11,7 @@ Unit jcapimin_del;
   compression and decompression, and jctrans.c for the transcoding case. }
 
 { jcapimin.c ;  Copyright (C) 1994-1998, Thomas G. Lane. }
-  
+
 //modified 2013 by Martin Schreiber
 
 interface

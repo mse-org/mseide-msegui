@@ -28,7 +28,7 @@ uses
 {$ifdef mswindows}{$define hasqword}{$endif}
 type
  dateconvertty = (dc_none,dc_tolocal,dc_toutc);
- 
+
   TMonthNameArraymse = array[1..12] of msestring;
   TWeekNameArraymse = array[1..7] of msestring;
 
@@ -78,7 +78,7 @@ var
    TimePMString: 'PM';
    ShortTimeFormat: 'hh:nn';
    LongTimeFormat: 'hh:nn:ss';
-   ShortMonthNames: ('Jan','Feb','Mar','Apr','May','Jun', 
+   ShortMonthNames: ('Jan','Feb','Mar','Apr','May','Jun',
                      'Jul','Aug','Sep','Oct','Nov','Dec');
    LongMonthNames: ('January','February','March','April','May','June',
                     'July','August','September','October','November',
@@ -96,7 +96,7 @@ const
  nullen = '000000000000000000000000000000';
  msenullen = msestring('000000000000000000000000000000');
  msespace = msestring('                              ');
- 
+
 type
  numbasety = (nb_bin,nb_oct,nb_dec,nb_hex);
 
@@ -106,7 +106,7 @@ function rstring(const s: string; const minwidth: integer): string;
 {$warnings off}
        // ${THEMACRO} checks formatmacros, macro name case sensitive
 {$warnings on}
-      
+
 function formatdatetimemse(const formatstr: msestring; const datetime: tdatetime;
             const formatsettings: tformatsettingsmse): msestring;
 //            'I' = ISO date, 'II' ISO datetime, 'III' ISO datetime + ms
@@ -118,7 +118,7 @@ function formatdatetimemse(const datetime: tdatetime; formatstr: msestring;
 function formatdatetimemse(const datetime: tdatetime;
                                         const formatstr: msestring): msestring;
 
-function formatfloatmse(value: double; format: msestring; 
+function formatfloatmse(value: double; format: msestring;
                          const formatsettings: tformatsettingsmse;
                          const dot: boolean = false): msestring; overload;
    //dot = true -> always '.' as decimal separator
@@ -163,7 +163,7 @@ function formatfloatmse(value: double; format: msestring;
    //
    //    + engeneering notation with metric system prefixes, exponent = n*3
    //    | no space for 10^0
-   // 0.0g   
+   // 0.0g
    //
    //    + engeneering notation with metric system prefixes, exponent = n*3
    //    | space for 10^0
@@ -176,7 +176,7 @@ function formatfloatmse(value: double; format: msestring;
    // '0.000g   ->  '12.346k'
    // '0.###f   ->  '12.35e3'
 
-function formatfloatmse(const value: double; const format: msestring; 
+function formatfloatmse(const value: double; const format: msestring;
                          const dot: boolean = false): msestring; overload;
 function realtostrmse(const value: double;
                                 const dot: boolean = false): msestring;
@@ -193,13 +193,13 @@ function inttostrmse(const value: longword): msestring; overload;
 function inttostrmse(const value: int64): msestring; overload;
 function inttostrmse(const value: qword): msestring; overload;
 
-function trystrtodouble(const s: lstringty; out value: double; 
+function trystrtodouble(const s: lstringty; out value: double;
                              const decimalseparator: char): boolean; overload;
-function trystrtodouble(const s: lmsestringty; out value: double; 
+function trystrtodouble(const s: lmsestringty; out value: double;
                              const decimalseparator: msechar): boolean; overload;
-function trystrtodouble(const s: string; out value: double; 
+function trystrtodouble(const s: string; out value: double;
                              const decimalseparator: char): boolean; overload;
-function trystrtodouble(const s: msestring; out value: double; 
+function trystrtodouble(const s: msestring; out value: double;
                              const decimalseparator: msechar): boolean; overload;
 function strtodouble(const s: string;
                              const decimalseparator: char): double;
@@ -209,7 +209,7 @@ function trystrtodouble(const s: string; out value: double): boolean; overload;
 function trystrtodouble(const s: msestring; out value: double): boolean; overload;
 function strtodouble(const s: string): double;
 function strtodouble(const s: msestring): double;
-                                
+
 function realtostr(const value: double): string;     //immer'.' als separator
 function strtoreal(const s: string): double;   //immer'.' als separator
 function trystrtoreal(const s: string; out value: real): boolean;
@@ -217,7 +217,7 @@ function trystrtoreal(const s: string; out value: real): boolean;
 function strtoreal(const s: msestring): double;   //immer'.' als separator
 function trystrtoreal(const s: msestring; out value: real): boolean;
                                                //immer'.' als separator
-function currencytostr(const avalue: currency): string; 
+function currencytostr(const avalue: currency): string;
                          //always '.' as as decimal separator
 function currencytostrmse(const avalue: currency): msestring;
                          //always '.' as as decimal separator
@@ -232,7 +232,7 @@ function trystrtorealtydot(const ein: string; out value: realty): boolean;
 function trystrtorealtydot(const ein: msestring; out value: realty): boolean;
 //function realtytostr(const val: realty; const format: msestring = ''): msestring;
 function realtytostr(const val: realty; const format: msestring = '';
-                                const scale: real = 1): msestring; 
+                                const scale: real = 1): msestring;
                                      deprecated 'use realtytostring() instead';
                                 //use realtytostring() instead
 function realtytostring(const val: realty; const format: msestring = '';
@@ -249,7 +249,7 @@ function bytetohex(const inp: byte): string;
  //wandelt byte in zwei ascii hexzeichen
 function wordtohex(const inp: word; lsbfirst: boolean = false): string;
  //wandelt word in vier ascii hexzeichen
- 
+
 function valtohex(const avalue: byte): string; overload;
 function valtohex(const avalue: word): string; overload;
 function valtohex(const avalue: longword): string; overload;
@@ -325,7 +325,7 @@ function trystrtohex64(const inp: string; out value: qword): boolean;
 function strtohex64(const inp: string): qword;
 
 
-function trystrtoint(const text: pchar; const len: int32; 
+function trystrtoint(const text: pchar; const len: int32;
                                           out value: integer): boolean;
 function trystrtoint(const text: lstringty; out value: integer): boolean;
 function trystrtoint(const text: string; out value: integer): boolean;
@@ -407,7 +407,7 @@ function trystringtotime(const text: msestring;
                    const aformat: msestring; out value: tdatetime;
                    const convert: dateconvertty = dc_none): boolean;  overload;
 
-function timetostring(const avalue: tdatetime; 
+function timetostring(const avalue: tdatetime;
                           const format: msestring = 't'): msestring;
 function datetostring(const avalue: tdatetime;
                           const format: msestring = 'c'): msestring;
@@ -603,7 +603,7 @@ var
    pde:= pde+i1;
   end;
  end; //checkgrow
- 
+
 type
  char4ty = array[0..3] of msechar;
  pchar4ty = ^char4ty;
@@ -839,7 +839,7 @@ var
                                 StoreInt(Minute, 0)
                               else
                                 StoreInt(Minute, 2);
- 
+
                             end
                           else
                             begin
@@ -926,7 +926,7 @@ begin
  if datetime = emptydatetime then begin
   exit;
  end;
- 
+
  checkformatmacros(formatstr);
  DecodeDateFully(DateTime, Year, Month, Day, DayOfWeek);
  DecodeTime(DateTime, Hour, Minute, Second, MilliSecond);
@@ -937,7 +937,7 @@ begin
 //  result := StrPas(@ResultBuffer[0]);
  setlength(result,resultlen);
  move(resultbuffer,pointer(result)^,resultlen*sizeof(msechar));
- 
+
 end ;
 
 function formatdatetimemse(const datetime: tdatetime;
@@ -958,7 +958,7 @@ begin
  result:= formatdatetimemse(datetime,formatstr,defaultformatsettingsmse);
 end;
 
-(* 
+(*
 //copied from FPC sysstr.inc
 //todo: optimize, use threadsave formatsettings
 
@@ -1157,7 +1157,7 @@ Var
             Inc(Fmt);
           End; { Case }
           End { Begin }
-        Else 
+        Else
           Begin
           Inc(Fmt)
           End;
@@ -1637,7 +1637,7 @@ begin
  else begin
   ln:= lineend;
   asciimode:= false;
-//  setlength(result,2+6*length(value)); 
+//  setlength(result,2+6*length(value));
 //              // maxlength for single char: '#65535' = 2 + 6
   setlength(result,length(value)+reserve);
   pe:= pointer(result)+length(result)-reserve;
@@ -1727,7 +1727,7 @@ begin
  result:= false;
  source1:= msestring(value);    //assume locale encoding
  setlength(res,length(source1)); //max length
- po1:= pmsechar(pointer(res)); 
+ po1:= pmsechar(pointer(res));
  po2:= pmsechar(source1);
  while po2^ <> #0 do begin
   case po2^ of
@@ -1752,13 +1752,13 @@ begin
     end;
     inc(po1);
    end;
-   '''': begin               
+   '''': begin
     inc(po2);                  //'.....
     po3:= po2;
     while (po2^ <> '''') and (po2^ <> #0) do begin
      inc(po2)
     end;
-    if po2^ <> #0 then begin   
+    if po2^ <> #0 then begin
      for int1:= 0 to po2 - po3 - 1 do begin //'abcd'......
       po1^:= msechar((po3+int1)^);
       inc(po1);
@@ -1766,7 +1766,7 @@ begin
      inc(po2);
      if po2^ = '''' then begin //'abcd'?
       po1^:= '''';             //'abcd''
-      inc(po1);                
+      inc(po1);
      end;
     end
     else begin
@@ -1814,7 +1814,7 @@ var
   end;
   move(pointer(astr)^,(pmsechar(pointer(result))+int2)^,int1*sizeof(msechar));
  end;
- 
+
 begin
  result:= '';
  charcount:= 0;
@@ -1841,13 +1841,13 @@ begin
      addstring(msechar(strtoint(str1)));
     end;
    end;
-   '''': begin               
+   '''': begin
     inc(po2);                  //'.....
     po3:= po2;
     while (po2^ <> '''') and (po2^ <> #0) do begin
      inc(po2)
     end;
-    if po2^ <> #0 then begin   
+    if po2^ <> #0 then begin
      setstring(str1,po3,po2-po3);
      addstring(msestring(str1));
      inc(po2);
@@ -1941,7 +1941,7 @@ begin
    if tail > 1 then begin
     inc(ps);                                         //s1
     pd^:= base64encoding[((by1 shl 4) or (ps^ shr 4)) and base64mask];
-    inc(pd);                                         //d2 
+    inc(pd);                                         //d2
     pd^:= base64encoding[(ps^ shl 2) and base64mask];
    end
    else begin
@@ -2130,7 +2130,7 @@ begin
  end;
 end;
 
-function datetostring(const avalue: tdatetime; 
+function datetostring(const avalue: tdatetime;
                                   const format: msestring = 'c'): msestring;
 begin
  if avalue = emptydatetime then begin
@@ -2175,10 +2175,10 @@ type
   dtft_secondzero,     // ss       second (leading zero)
   dtft_shorttime,      // t        shorttimeformat
   dtft_longtime,       // tt       longtimeformat
-  dtft_ampm,           // ampm     
+  dtft_ampm,           // ampm
   dtft_amspm,          // am/pm    use 12 hour clock and
                        //          display am and pm accordingly
-  dtft_ap,             // a/p      use 12 hour clock and display 
+  dtft_ap,             // a/p      use 12 hour clock and display
                        //          a and p accordingly
   dtft_datesep,        // /        insert date seperator
   dtft_timesep,        // :        insert time seperator
@@ -2206,11 +2206,11 @@ const
    (token: dtft_timesep;     group: dttg_none;     chars: ':'),        //6
 
    (token: dtft_amspm;        group: dttg_none;     chars: 'AM/PM'),    //7
-   (token: dtft_ampm;        group: dttg_none;     chars: 'AMPM'),     
-   (token: dtft_dayfull;     group: dttg_day;      chars: 'DDDD'),     
+   (token: dtft_ampm;        group: dttg_none;     chars: 'AMPM'),
+   (token: dtft_dayfull;     group: dttg_day;      chars: 'DDDD'),
    (token: dtft_monthfull;   group: dttg_mon;      chars: 'MMMM'),
    (token: dtft_yearcentury; group: dttg_year;     chars: 'YYYY'),
-   (token: dtft_ap;          group: dttg_none;     chars: 'A/P'),      
+   (token: dtft_ap;          group: dttg_none;     chars: 'A/P'),
    (token: dtft_dayabbr;     group: dttg_day;      chars: 'DDD'),
    (token: dtft_monthabbr;   group: dttg_mon;      chars: 'MMM'),
    (token: dtft_dayzero;     group: dttg_day;      chars: 'DD'),
@@ -2229,7 +2229,7 @@ const
   );
 
  startscan = 7;
- 
+
 //todo: use format cache
 
 type
@@ -2253,7 +2253,7 @@ function trystringtodatetime(const text: msestring;
   uniquestring(astring);
   po1:= pmsechar(astring);
   while po1^ <> #0 do begin
-   case po1^ of 
+   case po1^ of
     '"': begin
      repeat
       po1^:= ' ';
@@ -2264,7 +2264,7 @@ function trystringtodatetime(const text: msestring;
      end;
     end;
    end;
-   case po1^ of 
+   case po1^ of
     '''': begin
      repeat
       po1^:= ' ';
@@ -2283,7 +2283,7 @@ function trystringtodatetime(const text: msestring;
    end;
   end;
  end; //removequotes
- 
+
  procedure expand(var astring: msestring; const ainfo: dttokeninfoty;
                       const substitute: msestring);
  var
@@ -2305,11 +2305,11 @@ function trystringtodatetime(const text: msestring;
   end;
   astring:= mstr1;
  end; //expand
- 
+
 var
  scanar: array of scaninfoty;
  scanindex: integer;
- 
+
  procedure scan(var astring: msestring; const ainfo: dttokeninfoty);
  var
   po1: pmsecharaty;
@@ -2351,7 +2351,7 @@ var
    end;
   end;
  end;
-  
+
 var
  mstr1: msestring;
  int1,int2,int3,int4,int5: integer;
@@ -2397,7 +2397,7 @@ begin
    mstr1:= aformat;
   end;
   removequotes(mstr1);
-  expand(mstr1,tokeninfos[0],defaultformatsettingsmse.shortdateformat + ' ' + 
+  expand(mstr1,tokeninfos[0],defaultformatsettingsmse.shortdateformat + ' ' +
                              defaultformatsettingsmse.longtimeformat); //c
   expand(mstr1,tokeninfos[1],defaultformatsettingsmse.longdateformat); //dddddd
   expand(mstr1,tokeninfos[2],defaultformatsettingsmse.shortdateformat);//ddddd
@@ -2465,7 +2465,7 @@ begin
     end;
    end;
   end;
-  
+
   int2:= length(text);
   if (int2 > 2) and isnumber(text) then begin
    mstr1:= '';
@@ -2515,7 +2515,7 @@ begin
    inc(po1);
   end;
   setlength(ar1,int2);
-  
+
   month:= 0;                       //check month names
   hasmonthname:= false;
   for int1:= 1 to 12 do begin
@@ -2548,7 +2548,7 @@ begin
      ispm:= true;
     end;
     '0'..'9': begin
-     if (int1 > 0) and (ar1[int1-1][1] = ':') or 
+     if (int1 > 0) and (ar1[int1-1][1] = ':') or
         (int1 < high(ar1)) and (ar1[int1+1][1] = ':') then begin
       timear[int3]:= int1;
       inc(int3);
@@ -2624,7 +2624,7 @@ begin
     end;
    end;
   end;
-  if month = 0 then begin 
+  if month = 0 then begin
    month:= defmonth;         //use current month
   end;
   int1:= high(timear);
@@ -2678,7 +2678,7 @@ begin
    else begin
     if text = ' ' then begin
      result:= true;
-     if hasdateformat and hastimeformat or 
+     if hasdateformat and hastimeformat or
         not(hasdateformat or hastimeformat) then begin
       value:= refdate;
      end
@@ -2841,7 +2841,7 @@ function stringtotime(const avalue: msestring;
 begin
  if not trystringtotime(avalue,aformat,result,convert) then begin
   formaterror(avalue);
- end; 
+ end;
 end;
 
 function trystringtotime(const text: msestring; out value: tdatetime;
@@ -2911,7 +2911,7 @@ var
      po1^:= po2^;
      inc(po1);
      inc(po2);
-    end; 
+    end;
    end;
    '"': begin                    //"quoted string
     inc(po2);
@@ -2925,11 +2925,11 @@ var
      po1^:= po2^;
      inc(po1);
      inc(po2);
-    end; 
+    end;
    end;
   end;
  end;
- 
+
  procedure checkexp;
  begin
   if (po2+1)^ = '+' then begin
@@ -2942,7 +2942,7 @@ var
    end;
   end;
  end;
-   
+
 var
  int1,int2,int3: integer;
  decimalsep,thousandsep: msechar;
@@ -3091,7 +3091,7 @@ begin
  end;
  if int1 < 3 then begin
   ar1[int1]:= length(format);
- end;  
+ end;
  if (value = 0) and (int1 >= 2) then begin
   setlength(format1,ar1[2]-ar1[1]-1);
   move((pmsechar(pointer(format))+ar1[1]+1)^,pmsechar(pointer(format1))^,
@@ -3103,19 +3103,19 @@ begin
    setlength(format1,ar1[1]-ar1[0]-1);
    move((pmsechar(pointer(format))+ar1[0]+1)^,pmsechar(pointer(format1))^,
                               (ar1[1]-ar1[0]-1)*sizeof(msechar));
-   po2:= pmsechar(format1);     
+   po2:= pmsechar(format1);
   end
   else begin
    setlength(format1,ar1[0]);
    move((pmsechar(pointer(format)))^,pmsechar(pointer(format1))^,
                               (ar1[0])*sizeof(msechar));
-   po2:= pmsechar(format1);     
+   po2:= pmsechar(format1);
   end;
  end;
  if format1 = '' then begin
   result:= doubletostring(value,0,fsm_default,decimalsep);
  end
- else begin 
+ else begin
   if int1 > 0 then begin
    value:= abs(value); //no sign
   end;
@@ -3259,11 +3259,11 @@ begin
          mstr1:= doubletostring(value,fracmust+fracopt,fsm_fix,
                                                         decimalsep,thousandsep);
         end;
-       end;       
+       end;
       end;
       if expofound or engfound then begin     //format exponent
        if (length(mstr1) > 5) and (mstr1[length(mstr1)-4] = expochar) then begin
-        if {noexpsign or} not expsign then begin   
+        if {noexpsign or} not expsign then begin
          int1:= length(mstr1)-3;
          if mstr1[int1] = '+' then begin
           delete(mstr1,int1,1);                //remove exp sign
@@ -3281,7 +3281,7 @@ begin
           break;
          end;
         end;
-        delete(mstr1,int3,int2-int3); //remove leading zeros      end;      
+        delete(mstr1,int3,int2-int3); //remove leading zeros      end;
        end;
       end;
 
@@ -3326,15 +3326,15 @@ begin
        mantissaend:= length(mstr1);
       end;
       for int3:= mantissaend downto int2 do begin
-       if (mstr1[int3] <> '0') then begin      //remove traling zeros   
+       if (mstr1[int3] <> '0') then begin      //remove traling zeros
         int2:= int3;
         break;
        end;
       end;
-      if engsymnospacefound and (mstr1 <> '') and 
+      if engsymnospacefound and (mstr1 <> '') and
                                      (mstr1[length(mstr1)] = ' ') then begin
        setlength(mstr1,length(mstr1)-1);
-      end;      
+      end;
       if int2 < length(mstr1) then begin
        if mstr1[int2] = decimalsep then begin
         dec(int2);
@@ -3356,7 +3356,7 @@ begin
  end;
 end;
 
-function formatfloatmse(const value: double; const format: msestring; 
+function formatfloatmse(const value: double; const format: msestring;
                          const dot: boolean = false): msestring; overload;
 begin
  result:= formatfloatmse(value,format,defaultformatsettingsmse,dot);
@@ -3600,7 +3600,7 @@ begin
  end;
 end;
 }
-function trystrtodouble(const s: lstringty; out value: double; 
+function trystrtodouble(const s: lstringty; out value: double;
                              const decimalseparator: char): boolean; overload;
 var
  po1,decisep,mantstart,mantend: pchar;
@@ -3651,7 +3651,7 @@ begin
      exit;
     end;
     while true do begin
-     case po1^ of 
+     case po1^ of
       '0'..'9': begin
        exp:= exp * 10 + (byte(po1^)-byte('0'));
       end;
@@ -3688,7 +3688,7 @@ begin
    break;
   end;
  end;
- if (mantstart = mantend) or (decisep = mantstart) and 
+ if (mantstart = mantend) or (decisep = mantstart) and
                                        (mantend-mantstart = 1) then begin
   exit; //empty
  end;
@@ -3712,7 +3712,7 @@ begin
  result:= true;
 end;
 
-function trystrtodouble(const s: lmsestringty; out value: double; 
+function trystrtodouble(const s: lmsestringty; out value: double;
                              const decimalseparator: msechar): boolean; overload;
 var
  po1,decisep,mantstart,mantend: pmsechar;
@@ -3763,7 +3763,7 @@ begin
      exit;
     end;
     while true do begin
-     case po1^ of 
+     case po1^ of
       '0'..'9': begin
        exp:= exp * 10 + (byte(po1^)-byte('0'));
       end;
@@ -3800,7 +3800,7 @@ begin
    break;
   end;
  end;
- if (mantstart = mantend) or (decisep = mantstart) and 
+ if (mantstart = mantend) or (decisep = mantstart) and
                                        (mantend-mantstart = 1) then begin
   exit; //empty
  end;
@@ -3824,7 +3824,7 @@ begin
  result:= true;
 end;
 
-function trystrtodouble(const s: string; out value: double; 
+function trystrtodouble(const s: string; out value: double;
                              const decimalseparator: char): boolean; overload;
 var
  lstr1: lstringty;
@@ -3834,7 +3834,7 @@ begin
  result:= trystrtodouble(lstr1,value,decimalseparator);
 end;
 
-function trystrtodouble(const s: msestring; out value: double; 
+function trystrtodouble(const s: msestring; out value: double;
                              const decimalseparator: msechar): boolean; overload;
 var
  lstr1: lmsestringty;
@@ -3934,7 +3934,7 @@ begin
  result:= realtytostring(val,format,scale);
 end;
 
-function currencytostr(const avalue: currency): string; 
+function currencytostr(const avalue: currency): string;
                          //always '.' as as decimal separator
 var
  buffer: array[0..23] of char;
@@ -3942,7 +3942,7 @@ var
  lwo1,lwo2: qword;
 const
  dotpos = high(buffer)-4;
- 
+
 begin
  lwo1:= abs(int64(avalue));
  if lwo1 = 0 then begin
@@ -3983,7 +3983,7 @@ var
  lwo1,lwo2: qword;
 const
  dotpos = high(buffer)-4;
- 
+
 begin
  lwo1:= abs(int64(avalue));
  if lwo1 = 0 then begin
@@ -4037,17 +4037,17 @@ end;
 
 const
  expos: array[ord('A')..ord('z')] of shortint =
- //    A    B    C    D    E    F    G    H    I    J    K    L    M  
+ //    A    B    C    D    E    F    G    H    I    J    K    L    M
   (    0,   0,   0,   0, 6*3,   0, 3*3,   0,   0,   0,   0,   0, 2*3,
- //    N    O    P    Q    R    S    T    U    V    W    X    Y    Z  
+ //    N    O    P    Q    R    S    T    U    V    W    X    Y    Z
        0,   0, 5*3,   0,   0,   0, 4*3,   0,   0,   0,   0, 8*3, 7*3,
  //[ \ ] ^ _ '
    0,0,0,0,0,0,
- //   a    b    c    d    e    f    g    h    i    j    k    l    m  
+ //   a    b    c    d    e    f    g    h    i    j    k    l    m
    -6*3,   0,   0,   0,   0,-5*3,   0,   0,   0,   0, 1*3,   0,-1*3,
- //   n    o    p    q    r    s    t    u    v    w    x    y    z  
+ //   n    o    p    q    r    s    t    u    v    w    x    y    z
    -3*3,   0,-4*3,   0,   0,   0,   0,-2*3,   0,   0,   0,-8*3,-7*3);
- 
+
 function trystrtorealty(const ein: string; out value: realty;
                              forcevalue: boolean = false): boolean;
 var
@@ -4683,7 +4683,7 @@ begin
  end;
 end;
 
-function trystrtoint(const text: pchar; const len: int32; 
+function trystrtoint(const text: pchar; const len: int32;
                                           out value: integer): boolean;
 const
  max = maxint div 10;
@@ -4729,7 +4729,7 @@ begin
  if neg then begin
   if (value < 0) and (value <> minint) then begin
    exit;
-  end;  
+  end;
   value:= -value;
  end
  else begin
@@ -4801,7 +4801,7 @@ begin
  if neg then begin
   if (value < 0) and (value <> minint) then begin
    exit;
-  end;  
+  end;
   value:= -value;
  end
  else begin
@@ -4895,7 +4895,7 @@ begin
 // if neg then begin
 //  if (value < 0) and (value <> minint) then begin
 //   exit;
-//  end;  
+//  end;
 //  value:= -value;
 // end
 // else begin
@@ -4951,7 +4951,7 @@ begin
  if neg then begin
   if (value < 0) and (value <> $8000000000000000) then begin
    exit;
-  end;  
+  end;
   value:= -value;
  end
  else begin
@@ -5025,7 +5025,7 @@ begin
  if neg then begin
   if (value < 0) and (value <> $8000000000000000) then begin
    exit;
-  end;  
+  end;
   value:= -value;
  end
  else begin
@@ -5276,7 +5276,7 @@ begin
  if not trystrtobin(inp,result) then begin
   formaterror(inp);
  end;
-end; 
+end;
 
 function strtobin64(const inp: string): qword;
    //wandelt 0..1-string in longword)
@@ -5284,7 +5284,7 @@ begin
  if not trystrtobin64(inp,result) then begin
   formaterror(inp);
  end;
-end; 
+end;
 
 function strtooct1(const inp: string; out value: longword): boolean;
 var
@@ -5377,7 +5377,7 @@ begin
  result:= strtodec1(inp,value);
  if not result then begin
   result:= trystrtointvalue(inp,value);
- end; 
+ end;
 end;
 
 function trystrtodec64(const inp: string; out value: qword): boolean;
@@ -5385,7 +5385,7 @@ begin
  result:= strtodec164(inp,value);
  if not result then begin
   result:= trystrtointvalue64(inp,value);
- end; 
+ end;
 end;
 
 function strtodec(const inp: string): longword;

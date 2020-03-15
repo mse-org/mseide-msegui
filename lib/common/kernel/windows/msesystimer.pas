@@ -12,7 +12,7 @@ unit msesystimer;
 interface
 uses
  mseguiglob,mselist,msetypes,windows;
- 
+
 function setsystimer(us: longword): guierrorty;
                //send et_timer event after delay or us (micro seconds)
 procedure systimerinit(const aeventlist: tobjectqueue; const apphandle: hwnd);
@@ -33,7 +33,7 @@ const
   TIME_CALLBACK_EVENT_SET   = $0010;  { callback is event - use SetEvent }
   TIME_CALLBACK_EVENT_PULSE = $0020;  { callback is event - use PulseEvent }
 
-type 
+type
   MMRESULT = Longint;
   PTimeCaps = ^TTimeCaps;
   timecaps_tag = record
@@ -86,7 +86,7 @@ begin
     {$ifndef FPC}@{$endif}@timeEndPeriod,
     {$ifndef FPC}@{$endif}@timeSetEvent,
     {$ifndef FPC}@{$endif}@timeGetTime]);
-  result:= hasmmtimer and 
+  result:= hasmmtimer and
               (timegetdevcaps(@ticaps,sizeof(timecaps)) = MMSYSERR_NOERROR);
  end;
 end;

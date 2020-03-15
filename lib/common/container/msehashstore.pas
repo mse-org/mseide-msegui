@@ -15,14 +15,14 @@ uses
 
 const
  maxidentvector = 200;
- 
+
 type
  identarty = card32arty;
  identvecty = record
   high: integer;
   d: array[0..maxidentvector] of identty;
  end;
- 
+
  elementheaderty = record
   path: identty; //key, sum of names to root
   name: identty;
@@ -30,7 +30,7 @@ type
   parentlevel: int32;      //max = maxidentvector-1
   refcount: int32;
  end;
- 
+
  elementdataty = record
   header: elementheaderty;
  // data: record
@@ -71,7 +71,7 @@ type
   prevsibling: hashoffsetty; //offset in data array
   nextsibling: hashoffsetty; //offset in data array
  end;
- 
+
  treeelementdataty = record
   header: treeelementheaderty;
 //  data: record
@@ -91,10 +91,10 @@ type
    function add(const idents: identvecty;
                             out aelement: ptreeelementhashdataty): hashoffsetty;
    function find(const idents: identvecty): ptreeelementhashdataty;
-   function find(const idents: identvecty; 
+   function find(const idents: identvecty;
                                out aoffs: hashoffsetty): ptreeelementhashdataty;
 //   function find(const aele: elementdataty): ptreeelementhashdataty;
-//   function add(const idents: identvecty; 
+//   function add(const idents: identvecty;
 //                        out aelement: pointer): hashoffsetty;
 //   function find(const idents: identvecty): pointer;
    function getrecordsize(): int32 override;
@@ -119,7 +119,7 @@ begin
  inherited;
 end;
 }
-function thashstore.add(const idents: identvecty; 
+function thashstore.add(const idents: identvecty;
                         out aelement: pelementhashdataty): hashoffsetty;
 var
  p1,pe: pidentty;
@@ -179,7 +179,7 @@ begin
   while uint1 <> 0 do begin
    p1:= pelementhashdataty(fdata + uint1);
    with p1^ do begin
-    if (data.header.path = aele.header.path) and 
+    if (data.header.path = aele.header.path) and
                    (data.header.parent = aele.header.parent) then begin
      result:= p1;
      break;
@@ -224,7 +224,7 @@ begin
   while uint1 <> 0 do begin
    ph1:= pelementhashdataty(fdata + uint1);
    with ph1^ do begin
-    if (data.header.path = c1) and 
+    if (data.header.path = c1) and
                    (data.header.parentlevel = idents.high) then begin
      ph2:= ph1;
      p2:= pe;

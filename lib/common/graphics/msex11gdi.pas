@@ -22,7 +22,7 @@ function hasxft: boolean;
 function fontdatatoxftpat(const fontdata: fontdataty;
                                        const highres: boolean): pfcpattern;
 procedure getxftfontdata(po: pxftfont; var drawinfo: drawinfoty);
- 
+
 function x11getgdifuncs: pgdifunctionaty;
 //function x11getgdinum: integer;
 
@@ -33,7 +33,7 @@ function x11getdefaultfontnames: defaultfontnamesty;
 
 type
  createcolorpicfuncty = function(const acolor: txrendercolor): tpicture;
-var 
+var
  createcolorpic: createcolorpicfuncty;
 // pictformats: array[bitmapkindty] of pxrenderpictformat;
  screenrenderpictformat,bitmaprenderpictformat,
@@ -42,8 +42,8 @@ var
 
 function createalphapicture(const size: sizety;
                                const arepeat: boolean = false): tpicture;
-function creatergbpicture(const size: sizety; 
-          const arepeat: boolean = false; 
+function creatergbpicture(const size: sizety;
+          const arepeat: boolean = false;
                             const alphamap: tpicture = 0): tpicture;
 function createargbpicture(const size: sizety;
                                const arepeat: boolean = false): tpicture;
@@ -102,7 +102,7 @@ type
    0: (d: x11fontdatadty;);
    1: (_bufferspace: fontdatapty;);
  end;
- 
+
 
 {$ifndef staticxft}
 var //xft functions
@@ -122,7 +122,7 @@ var //xft functions
  XftFontOpenName: function(dpy:PDisplay; screen:longint;name:Pchar):PXftFont;
                                                                           cdecl;
  XftFontClose: procedure(dpy:PDisplay; pub:PXftFont); cdecl;
- XftDrawString16: procedure(draw:PXftDraw; color:PXftColor; pub:PXftFont; 
+ XftDrawString16: procedure(draw:PXftDraw; color:PXftColor; pub:PXftFont;
            x:longint; y:longint; _string:pwidechar; len:longint); cdecl;
  XftDrawStringUtf16: procedure(draw: pXftDraw; color: pXftColor; pub: pXftFont;
             x: cint; y: cint; _string: pFcChar8; endian: tFcEndian; len: cint);
@@ -220,12 +220,12 @@ const
  xrenderop = pictopover;
  xrendercolorsourcesize = 1;
  xrendernullcolor: txrendercolor = (red: 0; green: 0; blue: 0; alpha: 0);
- 
+
  capstyles: array[capstylety] of integer = (capbutt,capround,capprojecting);
  joinstyles: array[joinstylety] of integer = (joinmiter,joinround,joinbevel);
  defaultfontnames: defaultfontnamesty =
   //stf_default  stf_empty stf_unicode stf_menu stf_message stf_hint stf_report
-   ('Helvetica',   '',        '',       '',       '',          '',    'Arial',    
+   ('Helvetica',   '',        '',       '',       '',          '',    'Arial',
   //stf_proportional  stf_fixed,
    'Helvetica',       'Courier',
   //stf_helvetica stf_roman          stf_courier
@@ -332,7 +332,7 @@ type
   picture: tpicture;
   pixel: pixelty;
  end;
- 
+
 const
  xftcolorcachemask = $1f;
 type
@@ -369,11 +369,11 @@ type
    0: (d: x11gcdty;);
    1: (_bufferspace: gcpty;);
  end;
- 
+
 var
 // xftcolorcache: array[0..xftcolorcachemask] of xftcolorcacheinfoty;
  fontpropertyatoms: array[fontpropertiesty] of atom;
- 
+
 procedure init(const adisp: pdisplay; const avisual: msepvisual;
                const adepth: integer);
 var
@@ -384,12 +384,12 @@ begin
  appdisp:= adisp;
  defvisual:= avisual;
  defdepth:= adepth;
- 
- hasxrender:= hasxrender and 
+
+ hasxrender:= hasxrender and
                   (xrenderqueryextension(appdisp,@int1,@int2) <> 0);
  if hasxrender then begin
 //  pictformats[bmk_mono]:= xrenderfindstandardformat(appdisp,pictstandarda1);
-//  pictformats[bmk_gray]:= xrenderfindstandardformat(appdisp,pictstandarda8);  
+//  pictformats[bmk_gray]:= xrenderfindstandardformat(appdisp,pictstandarda8);
 //  pictformats[bmk_rgb]:= xrenderfindvisualformat(appdisp,pvisual(defvisual));
   screenrenderpictformat:= xrenderfindvisualformat(appdisp,pvisual(defvisual));
   bitmaprenderpictformat:= xrenderfindstandardformat(appdisp,pictstandarda1);
@@ -415,11 +415,11 @@ begin
   for propnum:= low(fontpropertiesty) to high(fontpropertiesty) do begin
    fontpropnames[propnum]:= fontpropertynames[propnum].name;
   end;
- 
+
   xinternatoms(appdisp,@fontpropnames[low(fontpropertiesty)],
            integer(high(fontpropertiesty)),{$ifdef xboolean}true{$else}1{$endif},
            @fontpropertyatoms[low(fontpropertiesty)]);
- 
+
 end;
 
 function fontinfotoxlfdname(const info: fontinfoty): string;
@@ -436,7 +436,7 @@ procedure getxftfontdata(po: pxftfont; var drawinfo: drawinfoty);
 begin
 {$ifdef mse_debuggdisync}
  checkgdilock;
-{$endif} 
+{$endif}
  if po <> nil then begin
  {$ifdef FPC} {$checkpointer off} {$endif}
   with drawinfo.getfont.fontdata^,x11fontdataty(platformdata) do begin
@@ -457,7 +457,7 @@ begin
 end;
 
 (*
-function buildxftname(const fontdata: fontdataty; 
+function buildxftname(const fontdata: fontdataty;
                                       const fontinfo: fontinfoty): ansistring;
 var
  str1: ansistring;
@@ -553,7 +553,7 @@ var
 begin
 {$ifdef mse_debuggdisync}
  checkgdilock;
-{$endif} 
+{$endif}
  setupfontinfo(fontdata,fontinfo);
  result:= buildxftpat(fontdata,fontinfo,highres);
 end;
@@ -715,7 +715,7 @@ begin
   result:= defaultfontnames;
  end;
 end;
- 
+
 procedure freexftbrush(var drawinfo: drawinfoty);
 begin
  with x11gcty(drawinfo.gc.platformdata).d do begin
@@ -807,7 +807,7 @@ var
 begin
 {$ifdef mse_debuggdisync}
  checkgdilock;
-{$endif} 
+{$endif}
  {$ifdef FPC} {$checkpointer off} {$endif}
  with pxregion(aregion)^ do begin
   if numrects > 0 then begin
@@ -858,8 +858,8 @@ const
                                 (0,65536,0),
                                 (0,0,65536));
 
-function creatergbpicture(const size: sizety; 
-          const arepeat: boolean = false; 
+function creatergbpicture(const size: sizety;
+          const arepeat: boolean = false;
                             const alphamap: tpicture = 0): tpicture;
 var
  attributes: txrenderpictureattributes;
@@ -868,7 +868,7 @@ var
 begin
 {$ifdef mse_debuggdisync}
  checkgdilock;
-{$endif} 
+{$endif}
  pixmap:= xcreatepixmap(appdisp,gui_getrootwindow(),size.cx,size.cy,24);
  attributes._repeat:= repeatnormal;
  attributes.alpha_map:= alphamap;
@@ -884,7 +884,7 @@ begin
  xfreepixmap(appdisp,pixmap);
 end;
 
-function createalphapicture(const size: sizety; 
+function createalphapicture(const size: sizety;
                                 const arepeat: boolean = false): tpicture;
 var
  attributes: txrenderpictureattributes;
@@ -893,7 +893,7 @@ var
 begin
 {$ifdef mse_debuggdisync}
  checkgdilock;
-{$endif} 
+{$endif}
  pixmap:= xcreatepixmap(appdisp,gui_getrootwindow(),size.cx,size.cy,8);
  attributes._repeat:= repeatnormal;
  int1:= cpcomponentalpha;
@@ -914,7 +914,7 @@ var
 begin
 {$ifdef mse_debuggdisync}
  checkgdilock;
-{$endif} 
+{$endif}
  pixmap:= xcreatepixmap(appdisp,gui_getrootwindow(),size.cx,size.cy,32);
  attributes._repeat:= repeatnormal;
  int1:= 0;
@@ -935,7 +935,7 @@ var
 begin
 {$ifdef mse_debuggdisync}
  checkgdilock;
-{$endif} 
+{$endif}
  pixmap:= gui_createpixmap(
                    makesize(xrendercolorsourcesize,xrendercolorsourcesize));
  attributes._repeat:= repeatnormal;
@@ -958,7 +958,7 @@ function createcolorpic2(const acolor: txrendercolor): tpicture;
 begin
 {$ifdef mse_debuggdisync}
  checkgdilock;
-{$endif} 
+{$endif}
 // col:= colortorendercolor(acolor);
  result:= xrendercreatesolidfill(appdisp,@acolor);
 end;
@@ -1000,7 +1000,7 @@ var
 begin
 {$ifdef mse_debuggdisync}
  checkgdilock;
-{$endif} 
+{$endif}
  pixmap:= gui_createpixmap(makesize(1,1),0,akind);
  attributes._repeat:= repeatnormal;
  col:= colortorendercolor(acolor);
@@ -1021,7 +1021,7 @@ var
 begin
 {$ifdef mse_debuggdisync}
  checkgdilock;
-{$endif} 
+{$endif}
  result:= 0;
  if ahandle <> 0 then begin
   attributes.component_alpha:= 0;
@@ -1046,7 +1046,7 @@ var
 begin
 {$ifdef mse_debuggdisync}
  checkgdilock;
-{$endif} 
+{$endif}
  with x11gcty(drawinfo.gc.platformdata).d do begin
   if xftdraw = nil then begin
    xftdraw:= xftdrawcreate(appdisp,drawinfo.paintdevice,
@@ -1089,7 +1089,7 @@ procedure checkxftstate(var drawinfo: drawinfoty; const aflags: xftstatesty);
                                0,0,xftbrushsize.cx,xftbrushsize.cy);
   end;
  end; //updatemonocolor
- 
+
 var
  flags1: xftstatesty;
  attributes: txrenderpictureattributes;
@@ -1139,7 +1139,7 @@ begin
 end;
 const
  posroundval = $0;//7fff;
- 
+
 procedure compositetriangles(var drawinfo: drawinfoty;
                     const triangles: ptrianglety; const trianglecount: integer);
 begin
@@ -1190,7 +1190,7 @@ var
 begin
 {$ifdef mse_debuggdisync}
  checkgdilock;
-{$endif} 
+{$endif}
  xmask:= 0;
  with drawinfo.gcvalues^,drawinfo.gc,x11gcty(platformdata).d do begin
   agc:= tgc(handle);
@@ -1250,7 +1250,7 @@ begin
   if gvm_linewidth in mask then begin
    needslinecheck:= true;
    xmask:= xmask or gclinewidth;
-   xvalues.line_width:= 
+   xvalues.line_width:=
                    (lineinfo.width + linewidthroundvalue) shr linewidthshift;
    triainfo.linewidth:= xvalues.line_width;
    if triainfo.linewidth = 0 then begin
@@ -1270,7 +1270,7 @@ begin
     end
     else begin
      include(xftstate,xfts_hasdashes);
-    end;    
+    end;
     triainfo.xftdashes:= dashes;
     int1:= length(dashes);
     if int1 <> 0 then begin
@@ -1291,7 +1291,7 @@ begin
   if gvm_capstyle in mask then begin
    needslinecheck:= true;
 //   triainfo.capstyle:= lineinfo.capstyle;
-   triainfo.triaflags:= triainfo.triaflags - triacapmask + 
+   triainfo.triaflags:= triainfo.triaflags - triacapmask +
                        triacapflags[lineinfo.capstyle];
    xvalues.cap_style:= capstyles[lineinfo.capstyle];
    gccapstyle_:= xvalues.cap_style;
@@ -1299,7 +1299,7 @@ begin
   end;
   if gvm_joinstyle in mask then begin
 //   triainfo.joinstyle:= lineinfo.joinstyle;
-   triainfo.triaflags:= triainfo.triaflags - triajoinmask + 
+   triainfo.triaflags:= triainfo.triaflags - triajoinmask +
                        triajoinflags[lineinfo.joinstyle];
    xvalues.join_style:= joinstyles[lineinfo.joinstyle];
    xmask:= xmask or gcjoinstyle;
@@ -1359,7 +1359,7 @@ begin
     xmask:= xmask or gctile;
    end;
   end;
- 
+
   if needslinecheck and zerolineworkaround then begin
    if (gclinewidth_ = 0) and not (xfts_smooth in xftstate) then begin
     xvalues.line_width:= 1;
@@ -1376,7 +1376,7 @@ begin
    end;
    xmask:= xmask or (gclinewidth or gccapstyle);
   end;
- 
+
   if xmask <> 0 then begin
    xchangegc(appdisp,agc,xmask,@xvalues);
   end;
@@ -1412,7 +1412,7 @@ end;
 procedure gdi_movewindowrect(var drawinfo: drawinfoty); //gdifunc
 begin
  with drawinfo.moverect do begin
-  gui_movewindowrect(drawinfo.paintdevice,dist^,rect^);  
+  gui_movewindowrect(drawinfo.paintdevice,dist^,rect^);
  end;
 end;
 
@@ -1461,7 +1461,7 @@ begin
 {$ifdef FPC} {$checkpointer off} {$endif}
   with fontdata^,x11fontdataty(platformdata),d.infopo^ do begin
    if fhasxft then begin
-    bo1:= (df_highresfont in drawinfo.gc.drawingflags) and 
+    bo1:= (df_highresfont in drawinfo.gc.drawingflags) and
            (fonthighres <> 0);
     if bo1 then begin
      po3:= pxftfont(fonthighres);
@@ -1494,7 +1494,7 @@ begin
      inc(po1);
      inc(po2);
     end;
-    
+
     if bo1 then begin
      po2:= resultpo;
      int2:= highresfontfakt div 2; //round up
@@ -1677,7 +1677,7 @@ begin
  with fontdata,x11fontdataty(platformdata),d.infopo^ do begin
   case d.matrixmode of
    fmm_linear: begin
-    if (word(char) >= min_char_or_byte2) and 
+    if (word(char) >= min_char_or_byte2) and
                                   (word(char) <= max_char_or_byte2) then begin
      result:= pxcharstruct(pchar(per_char) +
                  (word(char) - min_char_or_byte2)*sizeof(xcharstruct));
@@ -1791,7 +1791,7 @@ var
 begin //getfontproperties
 {$ifdef mse_debuggdisync}
  checkgdilock;
-{$endif} 
+{$endif}
  with fontstruct do begin
   po:= properties;
   for int1:= 0 to n_properties - 1 do begin
@@ -1888,7 +1888,7 @@ begin
      writeln('Font found. Name: "'+h.name+'" Height: '+
        inttostr(h.d.height)+' Realheight: '+inttostr(int1)+' File:');
      writeln('"'+string(po5)+'"');
-    end;     
+    end;
    {$endif}
     po2:= xftfontopenpattern(appdisp,po4); //font owns the pattern
     if po2 <> nil then begin
@@ -1902,7 +1902,7 @@ begin
        if int1 < 0 then begin
         int1:= int1 + 4;
        end;
-       x11fontdataty(platformdata).d.xftdirection:= graphicdirectionty(int1); 
+       x11fontdataty(platformdata).d.xftdirection:= graphicdirectionty(int1);
                                           //for xft colorbackground
       end;
       h.d.rotation:= 0;
@@ -1933,7 +1933,7 @@ begin
      fontinfo[fn_slant]:= 'i';
     end;
     if po1 = nil then begin
-     if (h.name <> '') and (h.d.style * [fs_italic,fs_bold] = []) and 
+     if (h.name <> '') and (h.d.style * [fs_italic,fs_bold] = []) and
                                (h.charset <> '') and (h.d.height = 0) then begin
       po1:= xloadqueryfont(appdisp,pchar(h.name));
      end;
@@ -1992,7 +1992,7 @@ procedure graytorgb(const sdev: paintdevicety; const srect: rectty;
                const ddev: paintdevicety; const dpos: pointty; const gc: pgcty);
 var
  putpixelfunc: function (para1:PXImage; para2:cint;
-                                para3:cint; para4:culong):cint; cdecl; 
+                                para3:cint; para4:culong):cint; cdecl;
  dimage,simage: pximage;
  ps,ps1,pse,pd,pd1,pde: pointer;
  int1,int2: integer;
@@ -2002,7 +2002,7 @@ begin
   simage:= xgetimage(appdisp,sdev,x,y,cx,cy,$ff,zpixmap);
   if simage <> nil then begin
    dimage:= xcreateimage(appdisp,defvisual,defdepth,zpixmap,0,nil,
-                                                              cx,cy,32,0);                              
+                                                              cx,cy,32,0);
    if dimage <> nil then begin
     try
      int1:= cy*dimage^.bytes_per_line;
@@ -2045,13 +2045,13 @@ begin
     end
     else begin
      gc1:= creategc(ddev);
-    end;     
+    end;
     xputimage(appdisp,ddev,gc1,dimage,0,0,dpos.x,dpos.y,cx,cy);
     if gc = nil then begin
      xfreegc(appdisp,gc1);
     end;
     if dimage^.data <> nil then begin
-     freemem(dimage^.data);       
+     freemem(dimage^.data);
      dimage^.data:= nil;
     end;
     xdestroyimage(dimage);
@@ -2075,7 +2075,7 @@ begin
  with srect do begin
   simage:= xgetimage(appdisp,sdev,x,y,cx,cy,$ffffff,zpixmap);
   if simage <> nil then begin
-   dimage:= xcreateimage(appdisp,defvisual,8,zpixmap,0,nil,cx,cy,32,0);                              
+   dimage:= xcreateimage(appdisp,defvisual,8,zpixmap,0,nil,cx,cy,32,0);
    if dimage <> nil then begin
     try
      int1:= cy*dimage^.bytes_per_line;
@@ -2109,7 +2109,7 @@ begin
         lwo1:= getpixelfunc(simage,int2,int1);
         pbyte(pd1)[int2]:= (lwo1 and $ff + ((lwo1 and $ff00) shr 8) +
                                        ((lwo1 and $ff0000) shr 16)) div 3;
- 
+
        end;
        pd:= pd+dimage^.bytes_per_line;
       end;
@@ -2127,7 +2127,7 @@ begin
      xfreegc(appdisp,gc1);
     end;
     if dimage^.data <> nil then begin
-     freemem(dimage^.data);       
+     freemem(dimage^.data);
      dimage^.data:= nil;
     end;
     xdestroyimage(dimage);
@@ -2141,7 +2141,7 @@ procedure gdi_copyarea(var drawinfo: drawinfoty); //gdifunc
 var
  needstransform: boolean;
  transform: txtransform;
-  
+
  procedure updatetransform(const apic: tpicture);
  begin
   if needstransform then begin
@@ -2164,7 +2164,7 @@ var
     if sourcesize * $10000 div result < destsize then begin
      dec(result);
     end;
-    destpos:= (sourcepos * $10000 + result div 2) div result; 
+    destpos:= (sourcepos * $10000 + result div 2) div result;
    end
    else begin
     destpos:= sourcepos * $10000; //very big
@@ -2228,7 +2228,7 @@ label
 begin
 {$ifdef mse_debuggdisync}
  checkgdilock;
-{$endif} 
+{$endif}
  xvalues.graphics_exposures:= {$ifdef xboolean}false{$else}0{$endif};
  with drawinfo,copyarea,sourcerect^,gc,x11gcty(platformdata).d do begin
   dkind:= kind;
@@ -2258,7 +2258,7 @@ begin
    pictop:= pictopsrc;
    maskpic:= 0;
    if (longword(opacity) <> maxopacity) and (mask = nil){monomask} then begin
-    maskpic:= createmaskpicture(opacity,bmk_rgb); 
+    maskpic:= createmaskpicture(opacity,bmk_rgb);
               //clip_mask ignored by xrender
     pictop:= pictopover;
    end
@@ -2359,7 +2359,7 @@ begin
      dx:= destrect^.x;
      dy:= destrect^.y;
      ddev:= paintdevice;
-     if (maskpic <> 0) or (dkind = bmk_gray) then begin 
+     if (maskpic <> 0) or (dkind = bmk_gray) then begin
               //bmk_gray is alpha only -> needs rgb copy
       dx:= 0;
       dy:= 0;
@@ -2435,7 +2435,7 @@ begin
        xrendercomposite(appdisp,pictop,dpic,maskpic,dpic2,0,0,ax,ay,x,y,cx,cy);
       end;
       xrenderfreepicture(appdisp,dpic2);
-      xfreepixmap(appdisp,ddev);      
+      xfreepixmap(appdisp,ddev);
       if dkind = bmk_gray then begin
        ddev:= ddev2;
       end
@@ -2449,7 +2449,7 @@ endlab2:
      if maskpic <> 0 then begin
       xrenderfreepicture(appdisp,maskpic);
      end;
-     if bitmapgc2 <> nil then begin 
+     if bitmapgc2 <> nil then begin
       xfreegc(appdisp,bitmapgc2);
      end;
      if bitmap <> 0 then begin
@@ -2535,7 +2535,7 @@ endlab2:
                       gcclipmask,@xvalues);
     end;
    end;
-   if skind = dkind then begin     
+   if skind = dkind then begin
     xcopyarea(appdisp,tcanvas1(source).fdrawinfo.paintdevice,paintdevice,
                    tgc(gc.handle),x,y,cx,cy,destrect^.x,destrect^.y);
    end
@@ -2549,7 +2549,7 @@ endlab2:
       rgbtogray(tcanvas1(source).fdrawinfo.paintdevice,sourcerect^,
                paintdevice,destrect^.pos,@gc);
      end
-     else begin  
+     else begin
       if dkind = bmk_mono then begin //convert to monochrome
        pixmap:= gui_createpixmap(size,0,skind);
        if pixmap = 0 then begin
@@ -2648,7 +2648,7 @@ procedure gdi_fonthasglyph(var drawinfo: drawinfoty); //gdifunc
 begin
 {$ifdef mse_debuggdisync}
  checkgdilock;
-{$endif} 
+{$endif}
  with drawinfo,fonthasglyph do begin
   if fhasxft then begin
    hasglyph:= xftcharexists(appdisp,pxftfont(font),unichar);
@@ -2666,7 +2666,7 @@ var
 begin
 {$ifdef mse_debuggdisync}
  checkgdilock;
-{$endif} 
+{$endif}
  with drawinfo,points,x11gcty(gc.platformdata).d do begin
   if xfts_smooth in xftstate then begin
    if linestria(drawinfo,po1,pointcount) then begin
@@ -2674,7 +2674,7 @@ begin
    end
    else begin
     compositetristrip(drawinfo,po1,pointcount);
-   end;      
+   end;
   end
   else begin
    transformpoints(drawinfo,closed);
@@ -2696,7 +2696,7 @@ var
 begin
 {$ifdef mse_debuggdisync}
  checkgdilock;
-{$endif} 
+{$endif}
  with drawinfo,drawinfo.points,x11gcty(gc.platformdata).d do begin
   if xfts_smooth in xftstate then begin
    linesegmentstria(drawinfo,po1,triacount);
@@ -2716,13 +2716,13 @@ var
 begin
 {$ifdef mse_debuggdisync}
  checkgdilock;
-{$endif} 
+{$endif}
  with drawinfo,drawinfo.rect.rect^ do begin
   if xfts_smooth in x11gcty(gc.platformdata).d.xftstate then begin
    fillellipsetria(drawinfo,po1,pointcount);
    with x11gcty(gc.platformdata).d do begin
     compositetrifan(drawinfo,po1,pointcount);
-   end;  
+   end;
   end
   else begin
    xfillarc(appdisp,paintdevice,tgc(gc.handle),
@@ -2733,7 +2733,7 @@ end;
 
 const
  angscale = 64*360/(2*pi);
- 
+
 procedure gdi_fillarc(var drawinfo: drawinfoty); //gdifunc
 var
  xvalues: xgcvalues;
@@ -2742,7 +2742,7 @@ var
 begin
 {$ifdef mse_debuggdisync}
  checkgdilock;
-{$endif} 
+{$endif}
  with drawinfo,x11gcty(gc.platformdata).d,drawinfo.arc,rect^ do begin
   if xfts_smooth in xftstate then begin
    fillarctria(drawinfo,po1,pointcount);
@@ -2770,7 +2770,7 @@ var
 begin
 {$ifdef mse_debuggdisync}
  checkgdilock;
-{$endif} 
+{$endif}
  with drawinfo,x11gcty(gc.platformdata).d,drawinfo.arc,rect^,
                                      triagcty(gc.platformdata).d do begin
   if xfts_smooth in xftstate then begin
@@ -2779,7 +2779,7 @@ begin
    end
    else begin
     compositetristrip(drawinfo,po1,pointcount);
-   end;      
+   end;
   end
   else begin
    xdrawarc(appdisp,paintdevice,tgc(gc.handle),
@@ -2796,7 +2796,7 @@ var
 begin
 {$ifdef mse_debuggdisync}
  checkgdilock;
-{$endif} 
+{$endif}
  with drawinfo,x11gcty(gc.platformdata).d,rect.rect^ do begin
   if xfts_smooth in xftstate then begin
    with x11gcty(gc.platformdata).d do begin
@@ -2806,7 +2806,7 @@ begin
     else begin
      compositetristrip(drawinfo,po1,pointcount);
     end;
-   end;  
+   end;
   end
   else begin
    xdrawarc(appdisp,paintdevice,tgc(gc.handle),
@@ -2823,7 +2823,7 @@ var
 begin
 {$ifdef mse_debuggdisync}
  checkgdilock;
-{$endif} 
+{$endif}
  with drawinfo,drawinfo.text16pos do begin
   if fhasxft then begin
  {$ifdef FPC}{$checkpointer off}{$endif}
@@ -2839,7 +2839,7 @@ begin
       xchangegc(appdisp,tgc(gc.handle),gcforeground,@xvalues);
       with x11gcty(gc.platformdata).d.xftfontdata^ do begin
        case xftdirection of
-        gd_right: begin      
+        gd_right: begin
          xfillrectangle(appdisp,paintdevice,tgc(gc.handle),
                                            x{-glyphinfo.x},y-xftascent,
                 glyphinfo.xoff,xftascent+xftdescent);
@@ -2888,7 +2888,7 @@ procedure gdi_setcliporigin(var drawinfo: drawinfoty); //gdifunc
 begin
 {$ifdef mse_debuggdisync}
  checkgdilock;
-{$endif} 
+{$endif}
  with drawinfo,gc do begin
   xsetcliporigin(appdisp,tgc(handle),cliporigin.x,cliporigin.y);
  end;
@@ -2901,7 +2901,7 @@ var
 begin
 {$ifdef mse_debuggdisync}
  checkgdilock;
-{$endif} 
+{$endif}
  with drawinfo,drawinfo.rect.rect^ do begin
   x1:= x+origin.x;
   y1:= y+origin.y;
@@ -2915,7 +2915,7 @@ begin
   points1[2].x:= x1;
   points1[2].y:= y1;
   points1[3].y:= y1;
-  
+
   xfillpolygon(appdisp,paintdevice,tgc(gc.handle),@points1[0],4,
                                                      complex,coordmodeorigin);
  end;
@@ -2962,7 +2962,7 @@ function createregion: regionty; overload;
 begin
 {$ifdef mse_debuggdisync}
  checkgdilock;
-{$endif} 
+{$endif}
  result:= regionty(xcreateregion());
 end;
 
@@ -2982,7 +2982,7 @@ var
 begin
 {$ifdef mse_debuggdisync}
  checkgdilock;
-{$endif} 
+{$endif}
  result:= regionty(xcreateregion);
  rect1:= recttoxrect(rect);
  xunionrectwithregion(@rect1,region(result),region(result));
@@ -2992,7 +2992,7 @@ procedure gdi_createemptyregion(var drawinfo: drawinfoty); //gdifunc
 begin
 {$ifdef mse_debuggdisync}
  checkgdilock;
-{$endif} 
+{$endif}
  with drawinfo.regionoperation do begin
   dest:= createregion;
  end;
@@ -3002,7 +3002,7 @@ procedure gdi_createrectregion(var drawinfo: drawinfoty); //gdifunc
 begin
 {$ifdef mse_debuggdisync}
  checkgdilock;
-{$endif} 
+{$endif}
  with drawinfo.regionoperation do begin
   dest:= createregion(rect);
  end;
@@ -3015,7 +3015,7 @@ var
 begin
 {$ifdef mse_debuggdisync}
  checkgdilock;
-{$endif} 
+{$endif}
  with drawinfo.regionoperation do begin
   dest:= createregion;
   for int1:= 0 to rectscount - 1 do begin
@@ -3023,13 +3023,13 @@ begin
    xunionrectwithregion(@rect1,region(dest),region(dest));
   end;
  end;
-end;                           
+end;
 
 procedure gdi_destroyregion(var drawinfo: drawinfoty); //gdifunc
 begin
 {$ifdef mse_debuggdisync}
  checkgdilock;
-{$endif} 
+{$endif}
  with drawinfo.regionoperation do begin
   if source <> 0 then begin
    xdestroyregion(region(source));
@@ -3041,7 +3041,7 @@ procedure gdi_regionisempty(var drawinfo: drawinfoty); //gdifunc
 begin
 {$ifdef mse_debuggdisync}
  checkgdilock;
-{$endif} 
+{$endif}
  with drawinfo.regionoperation do begin
   dest:= xemptyregion(region(source));
   if dest <> 0 then begin
@@ -3056,7 +3056,7 @@ var
 begin
 {$ifdef mse_debuggdisync}
  checkgdilock;
-{$endif} 
+{$endif}
  with drawinfo.regionoperation do begin
   xclipbox(region(source),@rect1);
   rect.x:= rect1.x;
@@ -3070,7 +3070,7 @@ procedure gdi_copyregion(var drawinfo: drawinfoty); //gdifunc
 begin
 {$ifdef mse_debuggdisync}
  checkgdilock;
-{$endif} 
+{$endif}
  with drawinfo.regionoperation do begin
   if source = 0 then begin
    dest:= 0;
@@ -3086,7 +3086,7 @@ procedure gdi_moveregion(var drawinfo: drawinfoty); //gdifunc
 begin
 {$ifdef mse_debuggdisync}
  checkgdilock;
-{$endif} 
+{$endif}
  with drawinfo.regionoperation do begin
   xoffsetregion(region(source),rect.x,rect.y);
  end;
@@ -3098,7 +3098,7 @@ var
 begin
 {$ifdef mse_debuggdisync}
  checkgdilock;
-{$endif} 
+{$endif}
  with drawinfo.regionoperation do begin
   reg1:= region(createregion(rect));
   xsubtractregion(region(dest),reg1,region(dest));
@@ -3112,7 +3112,7 @@ var
 begin
 {$ifdef mse_debuggdisync}
  checkgdilock;
-{$endif} 
+{$endif}
  with drawinfo.regionoperation do begin
   reg1:= region(createregion(rect));
   xintersectregion(region(dest),reg1,region(dest));
@@ -3124,7 +3124,7 @@ procedure gdi_regintersectregion(var drawinfo: drawinfoty); //gdifunc
 begin
 {$ifdef mse_debuggdisync}
  checkgdilock;
-{$endif} 
+{$endif}
  with drawinfo.regionoperation do begin
   xintersectregion(region(dest),region(source),region(dest));
  end;
@@ -3136,7 +3136,7 @@ var
 begin
 {$ifdef mse_debuggdisync}
  checkgdilock;
-{$endif} 
+{$endif}
  with drawinfo.regionoperation do begin
   rect1:= recttoxrect(rect);
   xunionrectwithregion(@rect1,region(dest),region(dest));
@@ -3147,7 +3147,7 @@ procedure gdi_regaddregion(var drawinfo: drawinfoty); //gdifunc
 begin
 {$ifdef mse_debuggdisync}
  checkgdilock;
-{$endif} 
+{$endif}
  with drawinfo.regionoperation do begin
   xunionregion(region(dest),region(source),region(dest));
  end;
@@ -3157,7 +3157,7 @@ procedure gdi_regsubregion(var drawinfo: drawinfoty); //gdifunc
 begin
 {$ifdef mse_debuggdisync}
  checkgdilock;
-{$endif} 
+{$endif}
  with drawinfo.regionoperation do begin
   xsubtractregion(region(dest),region(source),region(dest));
  end;
@@ -3170,7 +3170,7 @@ end;
 
 var
  fhasfontconfig: boolean;
- 
+
 function getxftlib: boolean;
 const
  funcs: array[0..21] of funcinfoty = (
@@ -3212,38 +3212,38 @@ end;
 function getxrenderlib: boolean;
 const
  funcs: array[0..14] of funcinfoty = (
-  (n: 'XRenderSetPictureClipRectangles'; 
+  (n: 'XRenderSetPictureClipRectangles';
                    d: {$ifndef FPC}@{$endif}@XRenderSetPictureClipRectangles),
   (n: 'XRenderCreatePicture'; d: {$ifndef FPC}@{$endif}@XRenderCreatePicture),
   (n: 'XRenderFillRectangle'; d: {$ifndef FPC}@{$endif}@XRenderFillRectangle),
-  (n: 'XRenderSetPictureTransform'; 
+  (n: 'XRenderSetPictureTransform';
                          d: {$ifndef FPC}@{$endif}@XRenderSetPictureTransform),
   (n: 'XRenderSetPictureFilter';
                             d: {$ifndef FPC}@{$endif}@XRenderSetPictureFilter),
   (n: 'XRenderFreePicture'; d: {$ifndef FPC}@{$endif}@XRenderFreePicture),
   (n: 'XRenderComposite'; d: {$ifndef FPC}@{$endif}@XRenderComposite),
-  (n: 'XRenderQueryExtension'; 
+  (n: 'XRenderQueryExtension';
                               d: {$ifndef FPC}@{$endif}@XRenderQueryExtension),
-  (n: 'XRenderFindVisualFormat'; 
+  (n: 'XRenderFindVisualFormat';
                             d: {$ifndef FPC}@{$endif}@XRenderFindVisualFormat),
-  (n: 'XRenderFindStandardFormat'; 
+  (n: 'XRenderFindStandardFormat';
                            d: {$ifndef FPC}@{$endif}@XRenderFindStandardFormat),
-  (n: 'XRenderCompositeTriStrip'; 
+  (n: 'XRenderCompositeTriStrip';
                            d: {$ifndef FPC}@{$endif}@XRenderCompositeTriStrip),
-  (n: 'XRenderCompositeTriFan'; 
+  (n: 'XRenderCompositeTriFan';
                            d: {$ifndef FPC}@{$endif}@XRenderCompositeTriFan),
-  (n: 'XRenderCompositeTriangles'; 
+  (n: 'XRenderCompositeTriangles';
                            d: {$ifndef FPC}@{$endif}@XRenderCompositeTriangles),
-  (n: 'XRenderChangePicture'; 
+  (n: 'XRenderChangePicture';
                            d: {$ifndef FPC}@{$endif}@XRenderChangePicture),
-  (n: 'XRenderFindFormat'; 
+  (n: 'XRenderFindFormat';
                            d: {$ifndef FPC}@{$endif}@XRenderFindFormat)
   );
-  
+
  funcsopt: array[0..1] of funcinfoty = (
-  (n: 'XRenderCreateSolidFill'; 
+  (n: 'XRenderCreateSolidFill';
                      d: {$ifndef FPC}@{$endif}@XRenderCreateSolidFill),
-  (n: 'XRenderSetPictureClipRegion'; 
+  (n: 'XRenderSetPictureClipRegion';
                      d: {$ifndef FPC}@{$endif}@XRenderSetPictureClipRegion)
   );
 

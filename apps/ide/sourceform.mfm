@@ -304,95 +304,95 @@ object sourcefo: tsourcefo
   object formpopup: tpopupmenu
     onupdate = popupmonupdate
     menu.submenu.count = 30
-    menu.submenu.items = <    
+    menu.submenu.items = <
       item
         action = actionsmo.selecteditpage
         caption = 'Select Page'
         state = [as_localcaption, as_localonexecute]
         onexecute = doselectpage
-      end    
+      end
       item
         action = actionsmo.opensource
         caption = '&Open File'
         state = [as_localcaption]
-      end    
+      end
       item
         action = actionsmo.close
         caption = '&Close File'
         state = [as_localcaption]
         options = [mao_shortcutcaption, mao_asyncexecute]
-      end    
+      end
       item
         action = actionsmo.save
         caption = '&Save File'
         state = [as_localcaption]
-      end    
+      end
       item
         action = actionsmo.saveas
-      end    
+      end
       item
         caption = 'Show as Form'
         name = 'showasform'
         state = [as_localcaption, as_localonexecute]
         onexecute = showasformexe
-      end    
+      end
       item
         options = [mao_separator, mao_shortcutcaption]
-      end    
+      end
       item
         action = actionsmo.delete
-      end    
+      end
       item
         action = actionsmo.cut
-      end    
+      end
       item
         action = actionsmo.copy
-      end    
+      end
       item
         action = actionsmo.copylatexact
-      end    
+      end
       item
         action = actionsmo.paste
-      end    
+      end
       item
         action = actionsmo.selectall
-      end    
+      end
       item
         options = [mao_separator, mao_shortcutcaption]
-      end    
+      end
       item
         action = actionsmo.undo
-      end    
+      end
       item
         action = actionsmo.redo
-      end    
+      end
       item
         options = [mao_separator, mao_shortcutcaption]
-      end    
+      end
       item
         submenu.count = 8
-        submenu.items = <        
+        submenu.items = <
           item
             action = actionsmo.indent
-          end        
+          end
           item
             action = actionsmo.unindent
-          end        
+          end
           item
             action = actionsmo.comment
-          end        
+          end
           item
             action = actionsmo.uncomment
-          end        
+          end
           item
             action = actionsmo.lowercase
-          end        
+          end
           item
             action = actionsmo.uppercase
-          end        
+          end
           item
             action = actionsmo.tabtospace
-          end        
+          end
           item
             caption = 'Convert to &Pascal string'
             name = 'convpas'
@@ -402,62 +402,62 @@ object sourcefo: tsourcefo
         caption = '&Modify Selection'
         name = 'modifyselection'
         state = [as_localcaption]
-      end    
+      end
       item
         options = [mao_separator, mao_shortcutcaption]
-      end    
+      end
       item
         action = actionsmo.togglebkpt
-      end    
+      end
       item
         action = actionsmo.togglebkptenable
-      end    
+      end
       item
         caption = '&Edit breakpoint'
         name = 'editbreakpoint'
         state = [as_localcaption, as_localonexecute]
         options = [mao_shortcutcaption, mao_asyncexecute]
         onexecute = editbreakpointexec
-      end    
+      end
       item
         caption = 'Add &Watch at Cursor'
         name = 'addwatch'
         state = [as_localcaption, as_localonexecute]
         onexecute = addwatchactonexecute
-      end    
+      end
       item
         submenu.count = 11
-        submenu.items = <        
+        submenu.items = <
           item
             action = actionsmo.setbm0
-          end        
+          end
           item
             action = actionsmo.setbm1
-          end        
+          end
           item
             action = actionsmo.setbm2
-          end        
+          end
           item
             action = actionsmo.setbm3
-          end        
+          end
           item
             action = actionsmo.setbm4
-          end        
+          end
           item
             action = actionsmo.setbm5
-          end        
+          end
           item
             action = actionsmo.setbm6
-          end        
+          end
           item
             action = actionsmo.setbm7
-          end        
+          end
           item
             action = actionsmo.setbm8
-          end        
+          end
           item
             action = actionsmo.setbm9
-          end        
+          end
           item
             action = actionsmo.setbmnone
             caption = 'None'
@@ -470,64 +470,64 @@ object sourcefo: tsourcefo
         caption = 'Set Bookmark'
         name = 'setbm'
         state = [as_localcaption]
-      end    
+      end
       item
         submenu.count = 10
-        submenu.items = <        
+        submenu.items = <
           item
             action = actionsmo.findbm0
-          end        
+          end
           item
             action = actionsmo.findbm1
-          end        
+          end
           item
             action = actionsmo.findbm2
-          end        
+          end
           item
             action = actionsmo.findbm3
-          end        
+          end
           item
             action = actionsmo.findbm4
-          end        
+          end
           item
             action = actionsmo.findbm5
-          end        
+          end
           item
             action = actionsmo.findbm6
-          end        
+          end
           item
             action = actionsmo.findbm7
-          end        
+          end
           item
             action = actionsmo.findbm8
-          end        
+          end
           item
             action = actionsmo.findbm9
           end>
         caption = 'Find Bookmark'
         state = [as_localcaption]
-      end    
+      end
       item
         options = [mao_separator, mao_shortcutcaption]
-      end    
+      end
       item
         caption = 'Insert GUID'
         name = 'insgui'
         state = [as_localcaption, as_localonexecute]
         onexecute = insguiexec
-      end    
+      end
       item
         caption = 'Insert UID'
         name = 'insuid'
         state = [as_localcaption, as_localonexecute]
         onexecute = insuidexec
-      end    
+      end
       item
         action = actionsmo.instemplate
         caption = 'Insert Template'
         name = 'instempl'
         state = [as_localcaption]
-      end    
+      end
       item
         action = completeclassact
         caption = 'Complete Class at Cursor'
