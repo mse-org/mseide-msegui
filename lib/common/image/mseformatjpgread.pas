@@ -13,19 +13,19 @@ interface
 const
  jpglabel = 'jpeg';
 procedure registerformat;
-
+ 
 implementation
 uses
  classes,mclasses,msegraphics,msebitmap,fpreadjpeg,msegraphicstream,
  msestockobjects,msestream;
-
+ 
 type
  tmsefpreaderjpeg = class(tfpreaderjpeg)
   protected
    function  InternalCheck(Str: TStream): boolean; override;
  end;
-
-function readgraphic(const source: tstream;
+ 
+function readgraphic(const source: tstream; 
                 const dest: tobject; var format: string;
                 const params: array of const): boolean;
 begin

@@ -13,18 +13,18 @@ interface
 const
  pnglabel = 'png';
 procedure registerformat;
-
+ 
 implementation
 uses
  classes,mclasses,msegraphics,msebitmap,fpreadpng,msegraphicstream,
  msestockobjects;
-
+ 
 type
  tmsefpreaderpng = class(tfpreaderpng)
   protected
 //   function  InternalCheck(Str: TStream): boolean; override;
  end;
-
+ 
 function readgraphic(const source: tstream;
                 const dest: tobject; var format: string;
                 const params: array of const): boolean;

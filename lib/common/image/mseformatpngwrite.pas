@@ -13,7 +13,7 @@ interface
 const
  pnglabel = 'png';
 procedure registerformat;
-
+ 
 implementation
 uses
  classes,mclasses,msegraphics,msebitmap,fpwritepng,msegraphicstream,msestockobjects,
@@ -75,7 +75,7 @@ begin
   ima.free;
  end;
 end;
-
+  
 procedure registerformat;
 begin
  registergraphicformat(pnglabel,nil,{$ifdef FPC}@{$endif}writegraphic,

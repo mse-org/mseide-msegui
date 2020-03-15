@@ -13,7 +13,7 @@ interface
 const
  tgalabel = 'tga';
 procedure registerformat;
-
+ 
 implementation
 uses
  classes,mclasses,msegraphics,msebitmap,fpreadtga,msegraphicstream,
@@ -24,7 +24,7 @@ type
   protected
    function  InternalCheck(Str: TStream): boolean; override;
  end;
-
+ 
 function readgraphic(const source: tstream;
                 const dest: tobject; var format: string;
                 const params: array of const): boolean;
@@ -51,7 +51,7 @@ begin
  int1:= str.position;
  try
   str.readbuffer(ar1,sizeof(ar1));
-  if ((ar1[1] = $00) or (ar1[1] = $01)) and
+  if ((ar1[1] = $00) or (ar1[1] = $01)) and 
       (ar1[2] > 0) and (ar1[2] <= 11) then begin
    result:= true;
   end;
@@ -65,7 +65,7 @@ begin
  registergraphicformat(tgalabel,{$ifdef FPC}@{$endif}readgraphic,nil,
          stockobjects.captions[sc_TARGA_Image],['*.tga']);
 end;
-
+ 
 initialization
  registerformat();
 end.

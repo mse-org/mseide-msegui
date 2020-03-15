@@ -809,7 +809,7 @@ findhistory=20
 findoptions=1
 editpos=29
  0,-1073741823
- 42,85
+ 26,73
  0,-1073741823
  0,-1073741823
  0,-1073741823
@@ -1032,7 +1032,7 @@ windowlayout=626
  rcy=0
  wsize=0
  active=0
- visible=0
+ visible=1
  [threadsfo]
  splitdir=0
  useroptions=268451945
@@ -1218,7 +1218,7 @@ windowlayout=626
  [objectinspectorfo]
  splitdir=0
  useroptions=268451947
- stackedunder=targetconsolefo
+ stackedunder=
  parent=
  mdistate=0
  nx=0
@@ -1444,8 +1444,8 @@ windowlayout=626
  mdistate=0
  nx=0
  ny=0
- ncx=1111
- ncy=52
+ ncx=1147
+ ncy=53
  x=0
  y=0
  cx=1147
@@ -1492,7 +1492,7 @@ windowlayout=626
  irqoff=0
  splitdir=0
  useroptions=268451947
- stackedunder=objectinspectorfo
+ stackedunder=_mse_sourcepage_mse_
  parent=
  mdistate=0
  nx=0
@@ -1603,7 +1603,7 @@ windowlayout=626
  [_mse_findinfileadialogfo_mse_]
  splitdir=0
  useroptions=268451963
- stackedunder=mainfo
+ stackedunder=targetconsolefo
  parent=
  mdistate=3
  nx=0

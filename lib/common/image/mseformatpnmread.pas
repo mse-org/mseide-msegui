@@ -13,7 +13,7 @@ interface
 const
  pnmlabel = 'pnm';
 procedure registerformat;
-
+ 
 implementation
 uses
  classes,mclasses,msegraphics,msebitmap,fpreadpnm,msegraphicstream,
@@ -24,7 +24,7 @@ type
   protected
    function  InternalCheck(Str: TStream): boolean; override;
  end;
-
+ 
 { tmsefpreaderpnm }
 
 function tmsefpreaderpnm.InternalCheck(Str: TStream): boolean;
@@ -43,8 +43,8 @@ begin
   str.position:= int1;
  end;
 end;
-
-function readgraphic(const source: tstream;
+ 
+function readgraphic(const source: tstream; 
                 const dest: tobject; var format: string;
                 const params: array of const): boolean;
 begin
