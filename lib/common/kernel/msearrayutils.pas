@@ -20,7 +20,7 @@ interface
 {$endif}
 
 uses
- msetypes,msestrings;
+ msetypes,msestrings, typinfo;
 const
  arrayminlenghtstep = 32;
 
@@ -36,7 +36,7 @@ type
 
  tvarrecarty = array of tvarrec;
 
-procedure deleteitem(var value; const typeinfo: pdynarraytypeinfo;
+procedure deleteitem(var value; const typeinfo: PTypeInfo;
                           const aindex: integer); overload;
   //value = array of type which needs no finalize
 procedure arrayaddref(var dynamicarray);
@@ -50,23 +50,25 @@ procedure freeuninitedarray(var dynamicarray);
                  //does not finalize items, dynamicarray must be unique!
 function arrayrefcount(var dynamicarray): sizeint;
 function arrayminhigh(arrays: array of pointer): integer;
-                       //array of dynamicarray
-function dynarrayelesize(const typinfo: pdynarraytypeinfo): sizeint; inline;
+
+                     //array of dynamicarray
+function DynArrayEleSize(const TypInfo: PTypeInfo): SizeInt; inline;
+
 function dynarrayhigh(const value: pointer): sizeint; inline;
 function dynarraylength(const value: pointer): sizeint; inline;
-function incrementarraylength(var value: pointer; typeinfo: pdynarraytypeinfo;
+function incrementarraylength(var value: pointer; typeinfo: PTypeInfo;
                              increment: integer = 1): sizeint; overload;
   //returns new length
 
-function additem(var value; const typeinfo: pdynarraytypeinfo;
+function additem(var value; const typeinfo: PTypeInfo;
                                   //typeinfo of dynarray
                 var count: integer): boolean; overload;
   //value = array of type, returns true if extended
-function additemindex(var value; const typeinfo: pdynarraytypeinfo;
+function additemindex(var value; const typeinfo: PTypeInfo;
                                   //typeinfo of dynarray
                 var count: integer): integer; overload;
   //value = array of type, returns true if extended
-function additempo(var value; const typeinfo: pdynarraytypeinfo;
+function additempo(var value; const typeinfo: PTypeInfo;
                                   //typeinfo of dynarray
                 var count: integer): pointer; overload;
                //returns adress of new item
@@ -419,7 +421,7 @@ asm
 end;
 {$endif}
 
-function incrementarraylength(var value: pointer; typeinfo: pdynarraytypeinfo;
+function incrementarraylength(var value: pointer; typeinfo: PTypeInfo;
                   increment: integer = 1): sizeint;
   //returns new length
 begin
@@ -427,21 +429,9 @@ begin
  dynarraysetlength(value,typeinfo,1,@result);
 end;
 
-function dynarrayelesize(const typinfo: pdynarraytypeinfo): sizeint; inline;
-var
- ti: pdynarraytypeinfo;
+function DynArrayEleSize(const TypInfo: PTypeInfo): SizeInt; inline;
 begin
- ti:= typinfo;
-{$ifdef FPC}
- inc(pointer(ti),ord(pdynarraytypeinfo(ti)^.namelen)+2);
- ti:= aligntoptr(ti);
- result:= psizeint(ti)^;
-// inc(pchar(ti),ord(ti^.namelen));
-// result:= ti^.elesize;
-{$else}
- inc(pchar(ti),length(ti^.name));
- result:= ti^.elsize;
-{$endif}
+   Result := GetTypeData(TypInfo)^.elSize;
 end;
 
 function dynarrayhigh(const value: pointer): sizeint; inline;
@@ -464,7 +454,7 @@ begin
  end;
 end;
 
-function decrementarraylength(var value: pointer; const typeinfo: pdynarraytypeinfo;
+function decrementarraylength(var value: pointer; const typeinfo: PTypeInfo;
                       decrement: integer = 1): sizeint;
   //returns new length
 begin
@@ -472,7 +462,7 @@ begin
  dynarraysetlength(value,typeinfo,1,@result);
 end;
 
-function additem(var value; const typeinfo: pdynarraytypeinfo;
+function additem(var value; const typeinfo: PTypeInfo;
                                            var count: integer): boolean;
 var
  int1: integer;
@@ -487,7 +477,7 @@ begin
  inc(count);
 end;
 
-function additemindex(var value; const typeinfo: pdynarraytypeinfo;
+function additemindex(var value; const typeinfo: PTypeInfo;
                                            var count: integer): integer;
 var
  int1: integer;
@@ -501,7 +491,7 @@ begin
  inc(count);
 end;
 
-function additempo(var value; const typeinfo: pdynarraytypeinfo;
+function additempo(var value; const typeinfo: PTypeInfo;
                                   //typeinfo of dynarray
                                  var count: integer): pointer; overload;
                //returns adress of new item
@@ -513,16 +503,17 @@ begin
   incrementarraylength(pointer(value),typeinfo,2*count+arrayminlenghtstep);
  end;
  result:= pointer(value) + count*dynarrayelesize(typeinfo);
+ // writeln('dynarrayelesize = ' + inttostr(dynarrayelesize(typeinfo)) + ' count = ' + inttostr(count));
  inc(count);
 end;
 
-procedure deleteitem(var value; const typeinfo: pdynarraytypeinfo;
+procedure deleteitem(var value; const typeinfo: PTypeInfo;
                          const aindex: integer);
   //value = array of type which needs no finalize
 var
  int1: integer;
 begin
- int1:= dynarrayelesize(pdynarraytypeinfo(typeinfo));
+ int1:= dynarrayelesize(PTypeInfo(typeinfo));
  move((pchar(value)+int1*(aindex+1))^,(pchar(value)+int1*aindex)^,
              int1*(high(bytearty(value))-aindex));
  decrementarraylength(pointer(value),typeinfo);

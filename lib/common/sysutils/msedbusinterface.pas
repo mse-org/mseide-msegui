@@ -135,7 +135,7 @@ const
  separatorid = strid3;
 
 var
- arraytypes: array[dbusdataty] of pdynarraytypeinfo;
+ arraytypes: array[dbusdataty] of PTypeInfo;
 const
  dbusdatacodes: array[dbusdataty] of cint = (
   DBUS_TYPE_INVALID,
@@ -2870,7 +2870,7 @@ var
   bool1: dbus_bool_t;
   pc1: pcchar;
   isstring: boolean;
-  typ1: pdynarraytypeinfo;
+  typ1: PTypeInfo;
   t1: dbusdataty;
   iter2,iter3: dbusmessageiter;
   iterpo: pdbusmessageiter;
@@ -2952,7 +2952,7 @@ var
     i3:= 0;
     dbus_message_iter_recurse(iterpo,@iter2);
     while dbus_message_iter_get_arg_type(@iter2) <> DBUS_TYPE_INVALID do begin
-     msearrayutils.additem(p1^,typ1,i3);
+     msearrayutils.additem(p1^,typ1, i3);
      p2:= ppointer(p1)^ + i1*(i3-1); //data pointer in array
      p4:= @p2;
      p3:= @t1;

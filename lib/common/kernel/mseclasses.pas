@@ -962,9 +962,9 @@ procedure readintar(const reader: treader; out ar: int16arty);
 procedure writeintar(const writer: twriter; const ar: int32arty);
 procedure writeintar(const writer: twriter; const ar: int16arty);
 procedure readrecordar(const reader: treader; out ar; //array of type
-          const typeinfo: pdynarraytypeinfo; const readproc: readrecordprocty);
+          const typeinfo: PTypeInfo; const readproc: readrecordprocty);
 procedure writerecordar(const writer: twriter; const ar; //array of type
-            const typeinfo: pdynarraytypeinfo; const writeproc: writerecordprocty);
+            const typeinfo: PTypeInfo; const writeproc: writerecordprocty);
 
 function valuescaletorange(const reader: treader): real;
 
@@ -1755,7 +1755,7 @@ begin
 end;
 
 procedure readrecordar(const reader: treader; out ar;
-     const typeinfo: pdynarraytypeinfo; const readproc: readrecordprocty);
+     const typeinfo: PTypeInfo; const readproc: readrecordprocty);
 var
  int1: integer;
  lint1: sizeint;
@@ -1773,7 +1773,7 @@ begin
 end;
 
 procedure writerecordar(const writer: twriter; const ar;
-       const typeinfo: pdynarraytypeinfo; const writeproc: writerecordprocty);
+       const typeinfo: PTypeInfo; const writeproc: writerecordprocty);
 var
  int1,int2: integer;
 begin
