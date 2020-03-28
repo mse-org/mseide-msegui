@@ -24,8 +24,11 @@ uses
   {$warn 5093 off}
   {$warn 6058 off}
  {$endif}
+ {$if fpc_fullversion >= 030300}
+  {$warn 6060 off}
+  {$warn 6018 off}
+  {$endif}
 {$endif}
-
 const
  bmpfiledialogstatname = 'bmpfile.sta';
  numcharchar = msechar('[');
@@ -1052,6 +1055,10 @@ uses
   {$warn 5093 off}
   {$warn 6058 off}
  {$endif}
+ {$if fpc_fullversion >= 030300}
+  {$warn 6060 off}
+  {$warn 6018 off}
+  {$endif}
 {$endif}
 
 const

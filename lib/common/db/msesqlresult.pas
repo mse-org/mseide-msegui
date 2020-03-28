@@ -17,6 +17,10 @@ interface
   {$warn 5093 off}
   {$warn 6058 off}
  {$endif}
+ {$if fpc_fullversion >= 030300}
+  {$warn 6060 off}
+  {$warn 6018 off}
+  {$endif}
 {$endif}
 
 {$ifdef VER2_1_5} {$define mse_FPC_2_2} {$endif}
@@ -527,6 +531,10 @@ uses
   {$warn 5093 off}
   {$warn 6058 off}
  {$endif}
+ {$if fpc_fullversion >= 030300}
+  {$warn 6060 off}
+  {$warn 6018 off}
+  {$endif}
 {$endif}
 const
  msedbcoltypeclasses: array[fieldclasstypety] of dbcolclassty =

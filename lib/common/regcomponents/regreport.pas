@@ -19,10 +19,34 @@ unit regreport;
 interface
 
 implementation
+{$ifndef mse_allwarnings}
+ {$if fpc_fullversion >= 030100}
+  {$warn 5089 off}
+  {$warn 5090 off}
+  {$warn 5093 off}
+  {$warn 6058 off}
+ {$endif}
+ {$if fpc_fullversion >= 030300}
+  {$warn 6060 off}
+  {$warn 6018 off}
+  {$endif}
+{$endif}
 uses
  classes,mclasses,msereport,msedesignintf,formdesigner,reportdesigner,
  msepropertyeditors,mseformatstr,mserepps,msedrawtext,
  sysutils,msetypes{msestrings},regreport_bmp,regdb,mselookupbuffer;
+{$ifndef mse_allwarnings}
+ {$if fpc_fullversion >= 030100}
+  {$warn 5089 off}
+  {$warn 5090 off}
+  {$warn 5093 off}
+  {$warn 6058 off}
+ {$endif}
+ {$if fpc_fullversion >= 030300}
+  {$warn 6060 off}
+  {$warn 6018 off}
+  {$endif}
+{$endif}
 const
  reportintf: designmoduleintfty =
   (createfunc: {$ifdef FPC}@{$endif}createreport;

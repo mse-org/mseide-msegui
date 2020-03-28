@@ -15,6 +15,17 @@ interface
 uses
  msegraphutils,mseevent,classes,mseclasses,mseglob,mseguiglob,msedragglob,
  msegui,msetimer;
+{$ifndef mse_allwarnings}
+ {$if fpc_fullversion >= 030100}
+  {$warn 5089 off}
+  {$warn 5090 off}
+  {$warn 5093 off}
+  {$warn 6058 off}
+  {$endif}
+ {$if fpc_fullversion >= 030300}
+  {$warn 6060 off}
+  {$endif}
+{$endif}
 type
  idragcontroller = interface(inullinterface)
   function getwidget: twidget;
@@ -161,6 +172,18 @@ implementation
 uses
  msebits,msepointer,msekeyboard,msesysdnd,sysutils,msesysutils,
  mseguiintf;
+
+{$ifndef mse_allwarnings}
+ {$if fpc_fullversion >= 030100}
+  {$warn 5089 off}
+  {$warn 5090 off}
+  {$warn 5093 off}
+  {$warn 6058 off}
+  {$endif}
+ {$if fpc_fullversion >= 030300}
+  {$warn 6060 off}
+  {$endif}
+{$endif}
 type
 // tguiapplication1 = class(tguiapplication);
  tdragobject1 = class(tdragobject);

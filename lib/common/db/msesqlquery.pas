@@ -11,6 +11,18 @@ unit msesqlquery;
 {$ifdef FPC}{$mode objfpc}{$h+}{$goto on}{$endif}
 
 interface
+{$ifndef mse_allwarnings}
+ {$if fpc_fullversion >= 030100}
+  {$warn 5089 off}
+  {$warn 5090 off}
+  {$warn 5093 off}
+  {$warn 6058 off}
+ {$endif}
+ {$if fpc_fullversion >= 030300}
+  {$warn 6060 off}
+  {$warn 6018 off}
+  {$endif}
+{$endif}
 uses
  classes,mclasses,mdb,msetimer,msebufdataset,msqldb,msedb,msestrings,
  msedatabase,mseclasses,msetypes,msesqlresult;
@@ -272,7 +284,18 @@ function SkipComments(var p: PmseChar) : boolean;
 implementation
 uses
  sysutils,{$ifdef FPC}dbconst{$else}dbconst_del,classes_del{$endif},msearrayutils,typinfo;
-
+{$ifndef mse_allwarnings}
+ {$if fpc_fullversion >= 030100}
+  {$warn 5089 off}
+  {$warn 5090 off}
+  {$warn 5093 off}
+  {$warn 6058 off}
+ {$endif}
+ {$if fpc_fullversion >= 030300}
+  {$warn 6060 off}
+  {$warn 6018 off}
+  {$endif}
+{$endif}
 type
  tcustomsqlconnection1 = class(tcustomsqlconnection);
  tcustomsqlstatement1 = class(tcustomsqlstatement);

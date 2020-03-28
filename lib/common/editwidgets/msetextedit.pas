@@ -24,6 +24,17 @@ uses
  mseevent,mseguiglob,msegui,msegraphutils,msestrings,msedrawtext,msearrayprops,
  msemenus,msepointer,msegridsglob{$ifdef mse_with_ifi},mseificomp{$endif},
  mseglob;
+{$ifndef mse_allwarnings}
+ {$if fpc_fullversion >= 030100}
+  {$warn 5089 off}
+  {$warn 5090 off}
+  {$warn 5093 off}
+  {$warn 6058 off}
+  {$endif}
+ {$if fpc_fullversion >= 030300}
+  {$warn 6060 off}
+  {$endif}
+{$endif}
 
 const
 
@@ -445,6 +456,19 @@ implementation
 uses
  msefileutils,sysutils,msesysutils,msewidgets,msebits,
  msekeyboard,mseactions;
+
+ {$ifndef mse_allwarnings}
+ {$if fpc_fullversion >= 030100}
+  {$warn 5089 off}
+  {$warn 5090 off}
+  {$warn 5093 off}
+  {$warn 6058 off}
+  {$endif}
+ {$if fpc_fullversion >= 030300}
+  {$warn 6060 off}
+  {$endif}
+{$endif}
+
 
 const
  valuevarname = 'value';

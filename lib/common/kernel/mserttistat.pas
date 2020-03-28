@@ -22,7 +22,10 @@ interface
   {$warn 5090 off}
   {$warn 5093 off}
   {$warn 6058 off}
- {$endif}
+  {$endif}
+ {$if fpc_fullversion >= 030300}
+  {$warn 6060 off}
+  {$endif}
 {$endif}
 
 uses
@@ -165,14 +168,19 @@ function dupplicateobjects(const source: objectarty): objectarty;
 implementation
 uses
  {$ifdef mse_with_ifi}mseificompglob,{$endif}msedatalist,sysutils,msearrayutils;
+
 {$ifndef mse_allwarnings}
  {$if fpc_fullversion >= 030100}
   {$warn 5089 off}
   {$warn 5090 off}
   {$warn 5093 off}
   {$warn 6058 off}
- {$endif}
+  {$endif}
+ {$if fpc_fullversion >= 030300}
+  {$warn 6060 off}
+  {$endif}
 {$endif}
+
 
 type
  dynarraysetter = procedure(const avalue: pointerarty) of object;

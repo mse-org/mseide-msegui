@@ -26,8 +26,12 @@ interface
   {$warn 5090 off}
   {$warn 5093 off}
   {$warn 6058 off}
- {$endif}
+  {$endif}
+ {$if fpc_fullversion >= 030300}
+  {$warn 6060 off}
+  {$endif}
 {$endif}
+
 
 uses
  classes,mclasses,sysutils,variants,fmtbcd,maskutils,msetypes,mseifiglob,
@@ -2358,8 +2362,12 @@ uses
   {$warn 5090 off}
   {$warn 5093 off}
   {$warn 6058 off}
- {$endif}
+  {$endif}
+ {$if fpc_fullversion >= 030300}
+  {$warn 6060 off}
+  {$endif}
 {$endif}
+
 resourcestring
  sassigndate = 'Can not assign a date value to field "%s"';
  sassigntime = 'Can not assign a time value to field "%s"';

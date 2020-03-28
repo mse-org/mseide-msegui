@@ -12,11 +12,24 @@ unit mseterminal;
 {$ifdef FPC}{$mode objfpc}{$h+}{$goto on}{$endif}
 
 interface
+{$ifndef mse_allwarnings}
+ {$if fpc_fullversion >= 030100}
+  {$warn 5089 off}
+  {$warn 5090 off}
+  {$warn 5093 off}
+  {$warn 6058 off}
+  {$endif}
+ {$if fpc_fullversion >= 030300}
+  {$warn 6060 off}
+  {$endif}
+{$endif}
+
 uses
  msetypes,msegrids,classes,mclasses,msestream,mseclasses,msepipestream,mseevent,
  mseinplaceedit,mserichstring,
  msetextedit,msestrings,msesys,mseeditglob,msemenus,msegui,mseguiglob,
  mseprocess,msegridsglob,mseedit,mseglob,msewidgetgrid,msegraphics;
+
 type
  sendtexteventty = procedure(const sender: tobject;
                        var atext: msestring; var donotsend: boolean) of object;
@@ -181,6 +194,19 @@ uses
  msekeyboard,sysutils,msesysintf,rtlconsts,msegraphutils,msearrayutils,
  msesysintf1,msedatalist
  {$ifdef unix},mselibc{$endif};
+
+{$ifndef mse_allwarnings}
+ {$if fpc_fullversion >= 030100}
+  {$warn 5089 off}
+  {$warn 5090 off}
+  {$warn 5093 off}
+  {$warn 6058 off}
+  {$endif}
+ {$if fpc_fullversion >= 030300}
+  {$warn 6060 off}
+  {$endif}
+{$endif}
+
 type
  tinplaceedit1 = class(tinplaceedit);
 

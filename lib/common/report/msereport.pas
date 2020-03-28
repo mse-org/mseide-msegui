@@ -16,7 +16,10 @@ interface
   {$warn 5090 off}
   {$warn 5093 off}
   {$warn 6058 off}
- {$endif}
+  {$endif}
+ {$if fpc_fullversion >= 030300}
+  {$warn 6060 off}
+  {$endif}
 {$endif}
 uses
  classes,mclasses,mseapplication,msegui,msegraphics,msetypes,msewidgets,
@@ -1848,7 +1851,10 @@ uses
   {$warn 5090 off}
   {$warn 5093 off}
   {$warn 6058 off}
- {$endif}
+  {$endif}
+ {$if fpc_fullversion >= 030300}
+  {$warn 6060 off}
+  {$endif}
 {$endif}
 
 type

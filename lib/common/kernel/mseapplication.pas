@@ -28,7 +28,10 @@ interface
   {$warn 5090 off}
   {$warn 5093 off}
   {$warn 6058 off}
- {$endif}
+  {$endif}
+ {$if fpc_fullversion >= 030300}
+  {$warn 6060 off}
+  {$endif}
 {$endif}
 
 uses
@@ -453,13 +456,17 @@ uses
  msebits,msesysintf1,msesysintf,msesysutils,msefileutils,msedatalist,
  msearrayutils{$ifndef FPC},classes_del{$endif}
  {$ifdef mse_debuggdisync},msegraphics{$endif};
+
 {$ifndef mse_allwarnings}
  {$if fpc_fullversion >= 030100}
   {$warn 5089 off}
   {$warn 5090 off}
   {$warn 5093 off}
   {$warn 6058 off}
- {$endif}
+  {$endif}
+ {$if fpc_fullversion >= 030300}
+  {$warn 6060 off}
+  {$endif}
 {$endif}
 
 type
