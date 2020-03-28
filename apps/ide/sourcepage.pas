@@ -715,6 +715,7 @@ begin
     end;
    end;
   end;
+  else; // Case statment added to make compiler happy...
  end;
 end;
 
@@ -1268,6 +1269,7 @@ begin
      end;
     end;
    end;
+   else; // Case statment added to make compiler happy...
   end;
  end;
 end;

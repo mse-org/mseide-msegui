@@ -1546,6 +1546,7 @@ begin
   tkInt64{$ifdef FPC},tkQWord{$endif}: begin
    setint64value(getint64prop(asource,fprops[0].propinfo));
   end;
+   else; // For case statment added to make compiler happy.
  end;
 end;
 
@@ -5686,6 +5687,7 @@ begin
       valb.valuemax:= vala.valuemax;
      end;
     end;
+     else; // For case statment added to make compiler happy.
    end;
    editform.show(true,nil);
   end;
@@ -5747,6 +5749,7 @@ begin
        tcomplexdatalist(datalist1).assignb(valb.griddata);
       end;
      end;
+      else; // For case statment added to make compiler happy.
     end;
     modified;
    end;

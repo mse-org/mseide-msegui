@@ -2051,6 +2051,7 @@ begin
   msestringtypekind: begin
    getmsestringval(iificlient(alink),fapropname,pmsestring(fapropvalue)^);
   end;
+  else ;
  end;
 end;
 
@@ -2081,6 +2082,7 @@ begin
   msestringtypekind: begin
    setmsestringval(iificlient(alink),fapropname,pmsestring(fapropvalue)^);
   end;
+  else ;
  end;
 end;
 

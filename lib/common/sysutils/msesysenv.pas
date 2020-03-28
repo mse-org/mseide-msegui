@@ -932,6 +932,7 @@ var
       findswitch(str1);
      end;
     end;
+    else; // Case statment added to make compiler happy...
    end;
   end;
 
@@ -963,6 +964,7 @@ var
          setoptargument;
         end;
        end;
+       else; // Case statment added to make compiler happy...
       end;
      end;
     end

@@ -2280,6 +2280,7 @@ begin
       accept:= false;
      end;
     end;
+    else; // Case statment added to make compiler happy...
    end;
   end;
   inherited;
@@ -2522,6 +2523,7 @@ begin
      dek_drop: begin
       moveitem(tlistitemdragobject(dragobjectpo^).item,item,true);
      end;
+     else; // Case statment added to make compiler happy...
     end;
    end;
   end;
@@ -2610,6 +2612,7 @@ begin
        item:= celltoitem(makegridcoord(ffocusedcell.col + 1,ffocusedcell.row));
       end;
      end;
+     else; // Case statment added to make compiler happy...
     end;
     if item <> nil then begin
      moveitem(focuseditem,item,true);
@@ -5652,7 +5655,7 @@ begin
      fintf.updateitemvalues(int2,ind1-int2);
      if newrow >= 0 then begin
 {$warnings off}
-      with tcustomgrid1(fowner.fgridintf.getcol.grid) do begin
+     with tcustomgrid1(fowner.fgridintf.getcol.grid) do begin
 {$warnings on}
        ffocusedcell.row:= newrow;
        layoutchanged;
@@ -5661,6 +5664,7 @@ begin
      change(-1);
     end;
    end;
+   else; // Case statment added to make compiler happy...
   end;
  end;
 end;
@@ -5986,6 +5990,7 @@ begin
     end;
    end;
   end;
+  else; // Case statment added to make compiler happy...
  end;
 end;
 
@@ -6694,6 +6699,7 @@ begin
 //         end;
         end;
        end;
+       else; // Case statment added to make compiler happy...
       end;
      end;
      if teo_treerownavig in self.foptions then begin
@@ -6726,6 +6732,7 @@ begin
          row:= equallevelindex;
         end;
        end;
+       else; // Case statment added to make compiler happy...
       end;
      end;
      if (ffocusedcell.row = cellbefore.row) and

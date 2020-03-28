@@ -1988,6 +1988,7 @@ begin
     sok_user: begin
      handleuserobject(ainfo);
     end;
+     else; // For case statment added to make compiler happy.
    end;
    if (sko_container in ainfo.options) and
                               (ainfo.instance is twidget) then begin

@@ -1807,6 +1807,7 @@ begin
       inherited;
      end;
     end;
+    else; // Case statment added to make compiler happy...
    end;
   end;
  end;

@@ -962,6 +962,7 @@ begin
                 ftInteger  : F1.AsInteger:=F2.AsInteger;
                 ftDate     : F1.AsDateTime:=F2.AsDateTime;
                 ftTime     : F1.AsDateTime:=F2.AsDateTime;
+                 else; // For case statment added to make compiler happy.
               end;
               end;
             Try

@@ -1639,6 +1639,7 @@ begin
   bmk_gray: begin
    include(foptions,bmo_gray);
   end;
+  else;
  end;
  inherited;
 end;
@@ -2011,6 +2012,7 @@ begin
   bmk_rgb: begin
    include(opt1,bmo_colormask);
   end;
+  else;
  end;
  options:= opt1;
 end;
@@ -2248,6 +2250,7 @@ begin
   case event of
 //   oe_destroyed: source:= nil;
    oe_changed: change;
+   else;
   end;
  end;
 end;
@@ -2403,6 +2406,7 @@ begin
    bmk_gray: begin
     setbit1(info,ord(iminf_gray));
    end;
+   else;
   end;
   if masked then begin
    setbit1(info,ord(iminf_masked));
@@ -2413,6 +2417,7 @@ begin
     bmk_rgb: begin
      setbit1(info,ord(iminf_colormask));
     end;
+    else;
    end;
   end;
   ar1:= compressdata;
@@ -2703,6 +2708,7 @@ begin
    bmk_gray: begin
     include(foptions,bmo_graymask);
    end;
+   else;
   end;
 {
   if abuffer.mask.monochrome then begin
@@ -2770,6 +2776,7 @@ begin
   bmk_mono: begin
    include(foptions,bmo_monochrome);
   end;
+  else;
  end;
  inherited;
 end;

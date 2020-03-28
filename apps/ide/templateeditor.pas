@@ -114,6 +114,7 @@ begin
     cursordisp.value:= inttostrmse(row+1) + ':'+inttostrmse(col+1);
    end;
   end;
+  else; // Case statment added to make compiler happy...
  end;
 end;
 

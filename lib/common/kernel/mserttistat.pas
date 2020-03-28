@@ -507,6 +507,7 @@ begin
        {$ifdef FPC}tkbool{$else}tkenumeration{$endif}: begin
         setbooleanar(obj,po1,reader.readarray(mstr1,getbooleanar(obj,po1)));
        end;
+       else; // Added to make compiler happy
       end;
      end;
      tkclass: begin
@@ -520,6 +521,7 @@ begin
        readobjectstat(reader,info1);
       end;
      end;
+     else; // Added to make compiler happy
     end;
    end;
   end;
@@ -598,6 +600,7 @@ begin
        {$ifdef FPC}tkbool{$else}tkenumeration{$endif}: begin
         writer.writearray(mstr1,getbooleanar(obj,po1));
        end;
+       else; // Added to make compiler happy
       end;
      end;
      tkclass: begin
@@ -611,6 +614,7 @@ begin
        writeobjectstat(writer,info1);
       end;
      end;
+     else; // Added to make compiler happy
     end;
    end;
   end;
@@ -766,9 +770,11 @@ begin
             setbooleanar(dest.obj,po1,tintegerdatalist(list1).asbooleanarray);
            end;
           end;
+          else; // Added to make compiler happy
          end;
         end;
        end;
+       else; // Added to make compiler happy
       end;
      end;
     end;
@@ -924,6 +930,7 @@ begin
              tintegerdatalist(list1).asbooleanarray:= getbooleanar(source.obj,po1);
             end;
            end;
+           else; // Added to make compiler happy
           end;
           if (i2 > list1.count) and list1.facultative then begin
            list1.count:= i2;
@@ -939,6 +946,7 @@ begin
          list1.assign(tdatalist(obj1));
         end;
        end;
+       else; // Added to make compiler happy
       end;
      end;
     end;
@@ -1005,8 +1013,10 @@ begin
       tkbool: begin
        setbooleanar(result,po1,getbooleanar(source,po1));
       end;
+      else; // Added to make compiler happy
      end;
     end;
+    else; // Added to make compiler happy
    end;
   end;
  end;
@@ -1397,7 +1407,7 @@ begin
      if ptypeinfo(pointer(po1^.eltype2))^.kind = tkustring then begin
                            //wrong define in ttypedata
     {$else}
-     if po1^.eltype2^^.kind = tkwstring then begin
+    if po1^.eltype2^^.kind = tkwstring then begin
     {$endif}
       ar2:= copy(getmsestringar(t,ar1[int1]));
       for int2:= 0 to high(ar2) do begin
@@ -1406,9 +1416,10 @@ begin
       setmsestringar(texp,ar1[int1],ar2);
      end;
     end;
+    else; // Added to make compiler happy
+   end;
    end;
   end;
- end;
 end;
 
 procedure toptions.expandmacros(const macros: macroinfoarty;

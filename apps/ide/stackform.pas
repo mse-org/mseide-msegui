@@ -123,6 +123,7 @@ begin
      end;
     end;
    end;
+   else; // Case statment added to make compiler happy...
   end;
   if iscellclick(info,[ccr_dblclick]) then begin
    showsource(cell.row);

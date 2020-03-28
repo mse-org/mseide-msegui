@@ -1298,6 +1298,7 @@ begin
   ek_execute: begin
    execute();
   end;
+  else ;
  end;
 end;
 

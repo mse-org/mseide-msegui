@@ -1158,6 +1158,7 @@ begin
        trealintdatalist(list).doubleitems[aindex]:= realint1;
       end;
      end;
+     else; // Added to make compiler happy
     end;
    end
    else begin
@@ -1169,6 +1170,7 @@ begin
       result:= decodeifidata(source,int1);
       list.setmemberitem(subindex,aindex,int1);
      end;
+     else; // Added to make compiler happy
     end;
    end;
   end;

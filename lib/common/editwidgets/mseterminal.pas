@@ -256,6 +256,7 @@ begin
     optionsedit:= optionsedit + [oe_readonly];
    end;
   end;
+  else; // Added to make compiler happy
  end;
  inherited;
 end;
@@ -427,6 +428,7 @@ begin
      end;
      info.action:= ea_none;
     end;
+    else; // Added to make compiler happy
    end;
    if info.action <> ea_none then begin
     inherited;

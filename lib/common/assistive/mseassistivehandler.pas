@@ -13,6 +13,17 @@
 unit mseassistivehandler;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
+{$ifndef mse_allwarnings}
+ {$if fpc_fullversion >= 030100}
+  {$warn 5089 off}
+  {$warn 5090 off}
+  {$warn 5093 off}
+  {$warn 6058 off}
+ {$endif}
+ {$if fpc_fullversion >= 030300}
+  {$warn 6018 off}
+ {$endif}
+{$endif}
 uses
  classes,mclasses,mseclasses,mseassistiveserver,mseevent,mselist,
  mseguiglob,mseglob,msestrings,mseinterfaces,mseact,mseshapes,
@@ -668,7 +679,17 @@ implementation
 uses
  msekeyboard,sysutils,msesysutils,mserichstring,msemenus,mseactions,
  msegridsglob,mseeditglob,typinfo;
-
+ {$ifndef mse_allwarnings}
+ {$if fpc_fullversion >= 030100}
+  {$warn 5089 off}
+  {$warn 5090 off}
+  {$warn 5093 off}
+  {$warn 6058 off}
+ {$endif}
+ {$if fpc_fullversion >= 030300}
+  {$warn 6018 off}
+ {$endif}
+{$endif}
 type
  twidget1 = class(twidget);
  tpopupmenuwidget1 = class(tpopupmenuwidget);
@@ -2021,6 +2042,7 @@ begin
       end;
       resetstate([ahs_locatepending]);
      end;
+      else; // For case statment added to make compiler happy.
     end;
    end;
   end;

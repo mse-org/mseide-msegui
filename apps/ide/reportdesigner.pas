@@ -554,6 +554,7 @@ begin
      include(eventstate,es_processed);
     end;
    end;
+   else; // Case statment added to make compiler happy...
   end;
   if (eventkind in mouseposevents) and (rds_mouseinclient in fstate) then begin
    setmousemarkers(pos,sender);

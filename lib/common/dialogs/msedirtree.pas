@@ -428,6 +428,7 @@ begin
     fonpathchanged(self);
    end;
   end;
+  else; // For case statment added to make compiler happy.
  end;
  if treeitem.item <> nil then begin
   if (info.zone = cz_caption)  then begin
@@ -507,6 +508,7 @@ begin
     exclude(finfo.state,fis_diropen);
     updateinfo;
    end;
+   else; // For case statment added to make compiler happy.
   end;
  end;
 end;

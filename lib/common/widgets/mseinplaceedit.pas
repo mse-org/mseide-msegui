@@ -1719,6 +1719,7 @@ begin
       end;
      end;
     end;
+    else;
    end;
   end;
  end;
@@ -2791,6 +2792,7 @@ begin
       fintf.inserttext(endpos,text,uf_selected in flags,
                                        not(uf_backwards in flags));
      end;
+     else;
     end;
     if utype <> ut_setpos then begin
      fintf.setedpos(startpos,uf_selected in flags,false,cep_nearest);
@@ -2829,6 +2831,7 @@ begin
       ut_deletetext: begin
        fintf.deletetext(endpos,gridcoordty(textendpoint(pointty(endpos),text)));
       end;
+      else;
      end;
      if utype <> ut_setpos then begin
       fintf.setedpos(endpos,uf_selected in flags,false,cep_nearest);

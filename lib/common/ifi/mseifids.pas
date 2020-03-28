@@ -1009,6 +1009,7 @@ begin
    end;
    }
   end;
+  else; // Case statment added to make compiler happy...
  end;
 end;
 
@@ -1182,12 +1183,14 @@ begin
         fdscontroller.recnozerobased:= dest1;
         delete;
        end;
+       else; // Case statment added to make compiler happy...
       end;
      end;
     finally
      exclude(fistate,ids_remotedata);
     end;
    end;
+   else; // Case statment added to make compiler happy...
   end;
  end;
 end;
@@ -2617,6 +2620,7 @@ begin
       inc(pchar(adata),decodeifidata(pifidataty(adata),mstr1));
       pmsestring(pchar(pointer(dest))+offset)^:= mstr1;
      end;
+     else; // Case statment added to make compiler happy...
     end;
    end;
   end

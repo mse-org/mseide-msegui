@@ -985,6 +985,7 @@ begin
        start1:= (rect2.y - rect1.y) / rect1.cy;
        stop1:= (rect2.y + rect2.cy - rect1.y {- 1}) / rect1.cy;
       end;
+       else; // For case statment added to make compiler happy.
      end;
      if rea1 < start1 then begin
       rea1:= start1;
@@ -1023,6 +1024,7 @@ begin
      a.x:= linestart;
      b.x:= lineend;
     end;
+     else; // For case statment added to make compiler happy.
    end;
    if dmo_bar in options then begin
     case fdirection of
@@ -1050,6 +1052,7 @@ begin
       barrect.x:= rect1.x + (rect1.cx - bar_width) div 2 - bar_shift;
       barrect.cx:= bar_width;
      end;
+      else; // For case statment added to make compiler happy.
     end;
    end
    else begin
@@ -1634,6 +1637,7 @@ begin
      lineend:= linestart + length;
     end;
    end;
+    else; // For case statment added to make compiler happy.
   end;
   if linedirection in [gd_up,gd_down] then begin
    adim.left:= linestart;
@@ -1756,6 +1760,7 @@ begin
      y:= y + round((afont.ascent - afont.glyphheight div 2)*adjustscale(x));
     end;
    end;
+    else; // For case statment added to make compiler happy.
   end;
  end;
  if arotatetext then begin
@@ -2012,6 +2017,7 @@ begin
        cy:= cx;
       end;
      end;
+      else; // For case statment added to make compiler happy.
     end;
     fstartang:= pi*(rea1-fangle);
     farcang:= 2*pi*fangle;
@@ -2302,6 +2308,7 @@ begin
             end;
            end;
           end;
+           else; // For case statment added to make compiler happy.
          end;
         end
         else begin
@@ -2323,6 +2330,7 @@ begin
              end;
             end;
            end;
+            else; // For case statment added to make compiler happy.
           end;
          end
          else begin

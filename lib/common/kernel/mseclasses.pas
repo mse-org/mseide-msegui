@@ -4633,7 +4633,9 @@ begin
   ek_component: begin
    sendcomponentevent(event as tcomponentevent,false);
   end;
+  else ;
  end;
+
 end;
 
 procedure tmsecomponent.asyncevent(atag: integer = 0;

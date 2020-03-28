@@ -2988,6 +2988,7 @@ begin
       dscontroller.copyrecord(dno_append in options1);
      end;
     end;
+     else; // For case statment added to make compiler happy.
    end;
    if fdscontroller <> nil then begin
     if state = dsfilter then begin
@@ -3005,6 +3006,7 @@ begin
       dbnb_filtermax: fdscontroller.beginfilteredit(fek_filtermax);
       dbnb_filterclear: fdscontroller.clearfilter();
       dbnb_find: fdscontroller.beginfilteredit(fek_find);
+       else; // For case statment added to make compiler happy.
      end;
     end;
    end;
@@ -6851,6 +6853,7 @@ begin
     ffirstrecord:= fcurrentrecord - int1 div 2;
    end;
   end;
+   else; // For case statment added to make compiler happy.
  end;
  int2:= dataset.recordcount;
  if ffirstrecord + int1 > int2 then begin
@@ -8885,6 +8888,7 @@ begin
     end;
    end;
   end;
+   else; // For case statment added to make compiler happy.
  end;
 end;
 
@@ -10599,6 +10603,7 @@ begin
          tarightjustify: begin
           textflags:= textflags + [tf_right];
          end;
+          else; // For case statment added to make compiler happy.
         end;
         if (ffieldnamedisplayfixrow < 0) and
                       (-ffieldnamedisplayfixrow <= ffixrows.count) then begin

@@ -497,6 +497,7 @@ begin
        updateshapemoveclick(infoarpo,true);
       end;
      end;
+     else;
     end;
    end
    else begin
@@ -1040,6 +1041,7 @@ begin
      ip_rightbottom: begin
       result.y:= arect.cy - imagedist2 - imagelist.height;
      end;
+     else; // Added to make compiler happy
     end;
     dec(result.cx,imagedist);
    end;
@@ -1052,6 +1054,7 @@ begin
      ip_leftbottom: begin
       result.y:= arect.cy - imagedist2 - imagelist.height;
      end;
+     else;
     end;
     inc(result.x,imagedist);
     dec(result.cx,imagedist);
@@ -1065,6 +1068,7 @@ begin
      ip_bottomright: begin
       result.x:= arect.cx - imagedist2 - imagelist.width;
      end;
+     else;
     end;
     dec(result.cy,imagedist);
    end;
@@ -1077,6 +1081,7 @@ begin
      ip_topright: begin
       result.x:= arect.cx - imagedist2 - imagelist.width;
      end;
+     else;
     end;
     inc(result.y,imagedist);
     dec(result.cy,imagedist);
@@ -1089,6 +1094,7 @@ begin
     aalign:= [al_xcentered,al_ycentered];
     inc(result.y,imagedist);
    end;
+   else;
   end;
   i1:= imagelist.width + imagedist;
   i2:= imagelist.height + imagedist;
@@ -1107,6 +1113,7 @@ begin
    ip_bottom: begin
     dec(arect.cy,i2);
    end;
+   else;
   end;
   if (tf_glueimage in info.textflags) and
                           not (pos in [ip_center,ip_centervert]) then begin
@@ -1272,6 +1279,7 @@ begin
      end;
      dec(rect1.cy,ca.captiondist);
     end;
+    else;
    end;
    if shs_disabled in state then begin
     include(textflags,tf_grayed);
@@ -1360,6 +1368,7 @@ begin
    ip_bottom{,ip_bottomcenter}: begin
     dec(rect2.cy,captiondist);
    end;
+   else; // Added to make compiler happy
   end;
   info1.text:= caption;
   info1.dest:= rect2;

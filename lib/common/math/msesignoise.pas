@@ -162,6 +162,7 @@ begin
    nk_brown: begin
     fscale:= fscale/sqrt(do1);
    end;
+    else; // For case statment added to make compiler happy.
   end;
  end;
  fsumfact:= exp(-do1);

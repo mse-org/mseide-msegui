@@ -706,8 +706,10 @@ begin
          mc_endoftrack: begin
           break;
          end;
+          else; // For case statment added to make compiler happy.
         end;
        end;
+        else; // For case statment added to make compiler happy.
       end;
      end;
     end;

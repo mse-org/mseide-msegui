@@ -1017,6 +1017,7 @@ begin
        end;
       end;
      end;
+      else; // For case statment added to make compiler happy.
     end;
     if not(transtype in varsizefields) then begin
      translen:= 0;

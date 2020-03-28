@@ -256,6 +256,7 @@ begin
          scope.addidents(parser,#0,'.');
         end;
        end;
+        else; // Case statment added to make compiler happy...
       end;
      end;
     end;
@@ -477,6 +478,7 @@ begin
      mk_method: begin
       akind:= mk_methodfunc;
      end;
+      else; // Case statment added to make compiler happy...
     end;
    end
    else begin
@@ -867,6 +869,7 @@ begin
    pid_begin,pid_record: begin
     inc(blocklevel)
    end;
+    else; // Case statment added to make compiler happy...
   end;
   nexttoken;
  end;
@@ -1143,6 +1146,7 @@ begin
     pid_end: begin
      dec(blocklevel);
     end;
+     else; // Case statment added to make compiler happy...
    end;
   end
   else begin
@@ -1408,6 +1412,7 @@ begin
       break;
      end;
     end;
+     else; // Case statment added to make compiler happy...
    end;
   end
   else begin

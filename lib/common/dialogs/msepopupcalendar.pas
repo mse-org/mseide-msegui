@@ -151,6 +151,7 @@ begin
      tpopupcalendarfo(fdropdownwidget).value:= dt1;
     end;
    end
+   else; // Added to make compiler happy
   end;
  end;
 end;
@@ -332,6 +333,7 @@ begin
       end;
      end;
     end;
+    else; // Added to make compiler happy
    end;
   end;
  end;
@@ -369,6 +371,7 @@ begin
       modown(nil);
      end;
     end;
+    else; // For case statment added to make compiler happy.
    end;
   end;
  end;

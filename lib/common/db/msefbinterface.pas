@@ -188,6 +188,7 @@ begin
         sqllen:= length(data[i1]);
        end;
       end;
+       else; // For case statment added to make compiler happy.
      end;
      if sqltype = 0 then begin
       databaseerrorfmt(sunsupportedparameter,[fieldtypenames[datatype]],

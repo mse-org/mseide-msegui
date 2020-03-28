@@ -1326,6 +1326,7 @@ begin
          case kind of
           tak_right,tak_decimal: flags1:= flags1 + [tf_right];
           tak_centered: flags1:= flags1 + [tf_xcentered];
+         else; // Added to make compiler happy
          end;
          if kind = tak_decimal then begin
           int2:= msestrrscan(ar1[int1].text,

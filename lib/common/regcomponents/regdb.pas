@@ -1424,6 +1424,7 @@ begin
     lbdk_text: begin
      ar1:= lb1.fieldnamestext;
     end;
+     else; // For case statment added to make compiler happy.
    end;
   end;
  end;

@@ -122,6 +122,7 @@ begin
       el_note: begin
        setrowcolor(2);
       end;
+      else; // Case statment added to make compiler happy...
      end;
     end;
    end;

@@ -713,6 +713,7 @@ begin
    oe_deactivate: begin
     dodeactivated;
    end;
+   else ;
   end;
  end;
 end;
@@ -747,6 +748,7 @@ begin
   ek_release: begin
    free;
   end;
+  else ;
  end;
 end;
 
@@ -791,6 +793,7 @@ begin
   icc_release: begin
    release;
   end;
+  else ;
  end;
 end;
 
@@ -1042,6 +1045,7 @@ begin
         aaa_abortexception: begin
          abort;
         end;
+        else ;
        end;
        break;
       end;
@@ -2036,7 +2040,9 @@ begin
     factive:= false;
     setowneractive(factive);
    end;
+   else ;
   end;
+
  end;
 end;
 

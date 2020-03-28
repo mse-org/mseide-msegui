@@ -2859,6 +2859,7 @@ begin
                                            x-xftdescent,y,
                 xftascent+xftdescent,glyphinfo.yoff);
         end;
+        else; // Added to make compiler happy
        end;
       end;
       xvalues.foreground:= xftcolor.pixel;

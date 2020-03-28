@@ -1482,6 +1482,7 @@ begin
       dropdown;
      end;
     end;
+    else;
    end;
   end;
  end;
@@ -1552,6 +1553,7 @@ begin
     end;
    end;
   end;
+  else;
  end;
 end;
 
@@ -1770,6 +1772,7 @@ begin
     end;
    end;
   end;
+  else;
  end;
 end;
 
@@ -1846,6 +1849,7 @@ begin
     ftimer.restart;
    end;
   end;
+  else;
  end;
 end;
 
@@ -2064,6 +2068,7 @@ begin
       end;
      end;
     end;
+    else;
    end;
   end;
  end;
@@ -2136,6 +2141,7 @@ begin
    oe_changed: begin
     imagelistchanged;
    end;
+   else;
   end;
  end;
 end;

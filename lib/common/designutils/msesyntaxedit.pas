@@ -1132,6 +1132,7 @@ begin
      seteditpos(co1,ss_shift in shiftstate1);
      include(eventstate,es_processed);
     end;
+    else; // Added to make compiler happy
 (*
     key_left: begin
      repeat

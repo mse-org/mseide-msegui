@@ -1683,11 +1683,13 @@ begin
         end;
       ftString:
         StrLCopy(Dst, Src, FieldSize);
+      else; // For case statment added to make compiler happy.
     end else begin
       case DataType of
       ftString:
         if Dst <> nil then
           PChar(Dst)[0] := #0;
+        else; // For case statment added to make compiler happy.
       end;
     end;
   end;
@@ -1844,6 +1846,7 @@ begin
               PInt64(Dst)^ := Trunc(PDouble(Src)^ * 10000);
             ftBCD:
               PCurrency(Dst)^ := PCurrency(Src)^;
+            else; // For case statment added to make compiler happy.
           end;
           SwapInt64LE(Dst, Dst);
         end;
@@ -1928,6 +1931,7 @@ begin
             // fill remaining space with spaces
             FillChar((PChar(Dst)+Len)^, FieldSize - Len, ' ');
           end;
+         else; // For case statment added to make compiler happy.
       end;  // case datatype
     end;
   end;
@@ -2415,6 +2419,7 @@ var
       ecInsert: begin TIndexFile(FIndexFiles.Items[Count]).InsertError; exit; end;
       ecWriteIndex: errorMsg := STRING_WRITE_INDEX_ERROR;
       ecWriteDbf: errorMsg := STRING_WRITE_ERROR;
+       else; // For case statment added to make compiler happy.
     end;
     raise EDbfWriteError.Create(errorMsg);
   end;

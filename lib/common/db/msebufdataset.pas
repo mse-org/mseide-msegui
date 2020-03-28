@@ -3162,6 +3162,7 @@ begin
     fkinternalcalc: begin
      clearfieldflag(@buffer.fielddata.nullmask,fno);
     end;
+    else; // For case statment added to make compiler happy.
    end;
   end;
  end;
@@ -6053,6 +6054,7 @@ begin
     fek_filtermax: begin
      result:= b1 or (i1 <= 0);
     end;
+    else; // For case statment added to make compiler happy.
    end;
   end
   else begin
@@ -6066,6 +6068,7 @@ begin
     fek_filtermax: begin
      result:= b1 or (afield.value <= v1);
     end;
+    else; // For case statment added to make compiler happy.
    end;
   end;
  end;
@@ -6403,6 +6406,7 @@ begin
      end;
     end;
    end;
+   else; // For case statment added to make compiler happy.
   end;
  finally
   restorestate(state1);
@@ -6471,6 +6475,7 @@ begin
      end;
     end;
    end;
+   else; // For case statment added to make compiler happy.
   end;
  finally
   restorestate(state1);
@@ -6541,6 +6546,7 @@ begin
      end;
     end;
    end;
+   else; // For case statment added to make compiler happy.
   end;
  finally
   restorestate(state1);
@@ -8519,6 +8525,7 @@ begin
     inc(pchar(po2),step);
    end;
   end;
+  else; // For case statment added to make compiler happy.
  end;
 end;
 
@@ -8549,6 +8556,7 @@ begin
    dl_msestring,dl_doublemsestring,dl_msestringint: begin
     type1:= ftwidestring;
    end;
+   else; // For case statment added to make compiler happy.
   end;
   if type1 <> ftunknown then begin
    beginupdate;
@@ -10730,6 +10738,7 @@ begin
       vtype:= vtint64;
       vint64:= @lint1;
      end;
+     else; // For case statment added to make compiler happy.
     end;
    end;
   end;

@@ -588,6 +588,7 @@ begin
       end;
      end;
     end;
+     else; // For case statment added to make compiler happy.
    end;
    if not (es_processed in info.eventstate) then begin
     inherited;

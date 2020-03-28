@@ -365,6 +365,7 @@ procedure ObjectBinaryToText1(Input, Output: TStream;
       vaInt16: Result := SmallInt(ReadWord);
       vaInt32: Result := LongInt(ReadDWord);
       vaInt64: Result := Int64(ReadQWord);
+      else; // Added to make compiler happy
     end;
   end;
 
@@ -464,6 +465,7 @@ procedure ObjectBinaryToText1(Input, Output: TStream;
     vaustring: begin
      outustring(readustr);
     end;
+    else; // Added to make compiler happy
    end;
   end; //processstring
 
@@ -591,6 +593,7 @@ procedure ObjectBinaryToText1(Input, Output: TStream;
                 outstr('['+readsstr+']');
                 valuetype:= tvaluetype({$ifdef fpc}input.{$endif}readbyte);
                end;
+               else; // Added to make compiler happy
               end;
               if valuetype <> valist then begin
                raise ereaderror.createfmt(serrinvalidpropertytype,

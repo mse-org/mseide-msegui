@@ -492,6 +492,7 @@ begin
       st_float: ft1:= ftfloat;
       st_text: ft1:= ftstring;
       st_blob: ft1:= ftblob;
+       else; // For case statment added to make compiler happy.
      end;
     end;
    end;

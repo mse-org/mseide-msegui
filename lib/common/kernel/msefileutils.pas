@@ -1468,6 +1468,7 @@ begin
      setlength(dest,length(dest) - 1);
     end;
    end;
+   else ;
   end;
  end;
 end;

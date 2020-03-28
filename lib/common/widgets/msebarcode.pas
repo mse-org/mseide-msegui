@@ -585,6 +585,7 @@ begin
     putcells(patterngtin13[pgt13_r,digits[int1]]);
    end;
   end;
+   else; // For case statment added to make compiler happy.
  end;
 end;
 
@@ -641,6 +642,7 @@ begin
      (po1+12)^:= msechar(by1+ord('0'));
     end;
    end;
+    else; // For case statment added to make compiler happy.
   end;
  end;
 end;
@@ -697,6 +699,7 @@ begin
     adjustrect(frect2);
     adjustrect(frect3);
    end;
+    else; // For case statment added to make compiler happy.
   end;
  end;
 end;
@@ -715,6 +718,7 @@ begin
     drawtext(acanvas,copy(fcode,6,4),frect2,ffontheight);
     drawtext(acanvas,copy(fcode,10,4),frect3,ffontheight);
    end;
+    else; // For case statment added to make compiler happy.
   end;
  end;
 end;

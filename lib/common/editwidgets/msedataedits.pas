@@ -2915,6 +2915,7 @@ begin
     fgridintf.showcaretrect(info.caretrect,fframe);
    end;
   end;
+  else;
  end;
 end;
 
@@ -3428,6 +3429,7 @@ begin
   sbe_valuechanged: begin
    feditor.setscrollvalue(sender.value,sender = frame.sbhorz);
   end;
+  else;
  end;
  if int1 <> 0 then begin
   size1:= feditor.textrect.size;
@@ -3518,6 +3520,7 @@ begin
    ea_indexmoved: begin
     fxpos:= feditor.caretpos.x;
    end;
+   else;
   end;
  end;
 end;

@@ -1659,6 +1659,7 @@ begin
       ansistring(dest):= pansistring(po1)^;
      end;
     end;
+    else;
    end;
   end;
  end;

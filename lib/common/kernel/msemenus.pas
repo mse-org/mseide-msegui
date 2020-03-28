@@ -813,6 +813,7 @@ begin
     sendchangeevent;
    end;
   end;
+  else;
  end;
 end;
 

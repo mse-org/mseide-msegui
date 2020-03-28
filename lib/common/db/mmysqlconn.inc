@@ -955,6 +955,7 @@ begin
      move(int1,dest^,sizeof(int1));
       //save id
     end;
+    else; // For case statment added to make compiler happy.
    end;
   end;
  end;

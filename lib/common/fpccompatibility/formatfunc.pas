@@ -83,6 +83,7 @@ begin
    m1:= fsm_fix;
    sep1:= formatsettings.thousandseparator;
   end;
+   else ;
  end;
  result:= doubletostring(value,precision,m1,formatsettings.decimalseparator,
                                                                          sep1);

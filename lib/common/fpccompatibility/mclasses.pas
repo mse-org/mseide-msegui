@@ -3341,6 +3341,7 @@ begin
       Case DUplicates of
         DupIgnore : Exit;
         DupError : Error(SDuplicateString,0)
+        else ;
       end;
    InsertItem (Result,S);
 end;
@@ -4551,6 +4552,7 @@ begin
       Result := 'True';
     vaNull:
       Result := 'Null';
+    else ;
   end;
 end;
 
@@ -4802,6 +4804,7 @@ begin
       SkipBytes(SizeOf(Currency));}
     vaDate, vaInt64:
       SkipBytes(8);
+   else ;
   end;
 end;
 
@@ -7037,6 +7040,7 @@ begin
 {$endif}
     vaInt64:
       Writer.WriteInteger(ReadInt64);
+   else ;
   end;
 end;
 
@@ -7577,6 +7581,7 @@ begin
               Driver.WriteSet(Value, GetTypeData(PropType)^.CompType);
             tkEnumeration:
               WriteIdent(GetEnumName(PropType, Value));
+            else ;
           end;
           Driver.EndProperty;
         end;
@@ -7849,6 +7854,7 @@ begin
           end;
       end;
 {$endif}
+    else ;
   end;
 end;
 

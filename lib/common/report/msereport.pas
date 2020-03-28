@@ -2176,6 +2176,7 @@ function treptabulatoritem.getdisptext: richstringty;
    lk_datetime: begin
     result.text:= mseformatstr.datetimetostring(avalue,fformat);
    end;
+   else; // For case statment added to make compiler happy.
   end;
  end;
 
@@ -2300,6 +2301,7 @@ begin
           ftbcd: begin
            result.text:= realtytostring(sumascurrency/int1,fformat);
           end;
+          else; // For case statment added to make compiler happy.
          end;
         end;
        end
@@ -2317,6 +2319,7 @@ begin
          ftbcd: begin
           result.text:= realtytostring(sumascurrency,fformat);
          end;
+         else; // For case statment added to make compiler happy.
         end;
        end;
       end;
@@ -2632,6 +2635,7 @@ begin
        ftbcd: begin
         bcdvalue:= bcdvalue + ascurrency;
        end;
+       else; // For case statment added to make compiler happy.
       end;
      end;
     end;
@@ -2986,6 +2990,7 @@ begin
         flags:= (flags - [tf_xcentered]) + [tf_right];
         dec(dest.x,dest.cx);
        end;
+       else; // For case statment added to make compiler happy.
       end;
      end;
      if isdecimal then begin

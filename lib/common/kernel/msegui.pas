@@ -11351,6 +11351,7 @@ begin
      po1:= @fframe.fpaintrect;
     end;
    end;
+   else;
   end;
   if not noclip then begin
    msegraphutils.intersectrect(rect1,po1^,rect1);
@@ -11629,6 +11630,7 @@ begin
    ek_mousewheel: begin
     childstate:= [ws_enabled,ws_isvisible{,ws_wantmousewheel}];
    end;
+   else;
   end;
  end;
  result:= widgetatpos(findinfo);
@@ -11834,6 +11836,7 @@ begin
       clientoffset:= getclientoffset;
      end;
     end;
+    else;
    end;
    addpoint1(pos,clientoffset);
   end;
@@ -11877,6 +11880,7 @@ begin
      end;
     end;
    end;
+   else; // Added to make compiler happy
   end;
  end;
 end;
@@ -13262,6 +13266,7 @@ begin
       nearest:= wi3; //restore
      end;
     end;
+    else;
    end;
   end;
  end;
@@ -13410,6 +13415,7 @@ begin
            gd_down: begin
             b1:= pt1.y >= pt2.y;
            end;
+           else;
           end;
           if b1 and (canassistive()) then begin
            assistiveserver.donavigbordertouched(getiassistiveclient(),
@@ -14478,6 +14484,7 @@ begin
     inc(po1);
    end;
   end;
+  else;
  end;
 end;
 
@@ -14750,6 +14757,7 @@ begin
   ek_resize: begin
    clientsize:= addsize(clientsize,tresizeevent(event).size);
   end;
+  else;
  end;
 end;
 
@@ -17182,6 +17190,7 @@ begin
   case eventkind of
    ek_keypress: widget1.internalkeydown(info);
    ek_keyrelease: widget1.dokeyup(info);
+   else;
   end;
  end
  else begin
@@ -18909,6 +18918,7 @@ begin
        mb_left: shift:= [ss_left];
        mb_middle: shift:= [ss_middle];
        mb_right: shift:= [ss_right];
+       else;
       end;
      end;
      if eventkind = ek_buttonpress then begin

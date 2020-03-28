@@ -442,6 +442,7 @@ begin
   pnk_source,pnk_form: begin
    caption:= msefileutils.filename(fpath);
   end;
+   else; // Case statment added to make compiler happy...
  end;
 end;
 
@@ -761,6 +762,7 @@ var
        end;
       end;
      end;
+      else; // Case statment added to make compiler happy...
     end;
    end;
   end;
@@ -1127,6 +1129,7 @@ begin
       pnk_source: begin
        sourcefo.openfile(fpath,true);
       end;
+       else; // Case statment added to make compiler happy...
      end;
     end;
    end
@@ -1167,6 +1170,7 @@ begin
   pnk_dir: begin
    aitem:= tdirnode.create;
   end;
+   else; // Case statment added to make compiler happy...
  end;
 end;
 
@@ -1461,6 +1465,7 @@ begin
    pnk_source: begin
     result:= tfilenode(n1).parentpath;
    end;
+    else; // Case statment added to make compiler happy...
   end;
  end;
  if result = '' then begin

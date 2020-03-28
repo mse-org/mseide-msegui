@@ -26,11 +26,25 @@ interface
   {$warn 5093 off}
   {$warn 6058 off}
  {$endif}
+ {$if fpc_fullversion >= 030300}
+  {$warn 6018 off}
+ {$endif}
 {$endif}
 uses
  msedesigner,mseclasses,msedesignintf,classes,mclasses,typinfo,
  msetypes,msestrings,pascaldesignparser,cdesignparser,mseglob,
  msestream,mseparser,msesyntaxedit,mselist,msehash,msedesignparser;
+ {$ifndef mse_allwarnings}
+ {$if fpc_fullversion >= 030100}
+  {$warn 5089 off}
+  {$warn 5090 off}
+  {$warn 5093 off}
+  {$warn 6058 off}
+ {$endif}
+ {$if fpc_fullversion >= 030300}
+  {$warn 6018 off}
+ {$endif}
+{$endif}
 
 const
  procheaderbreakchars = '(;';
@@ -901,6 +915,7 @@ begin
      list1.Free;
     end;
    end;
+    else; // Case statment added to make compiler happy...
   end;
  end;
 end;
@@ -973,6 +988,7 @@ begin
        result[high(result)]:= trootdeflist(scopes[int1]).rootlist.unitinfopo^.
           p.procedurelist[defs[int1]^.procindex];
       end;
+       else; // Case statment added to make compiler happy...
      end;
     end;
    end;

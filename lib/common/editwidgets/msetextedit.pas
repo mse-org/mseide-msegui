@@ -1780,6 +1780,7 @@ begin
       fgridintf.showcaretrect(info.caretrect,fframe);
      end;
     end;
+    else; // Added to make compiler happy
    end;
   end;
  end;
@@ -2064,6 +2065,7 @@ begin
      textinfo.mouseeventinfopo:= mouseeventinfopo;
      dotextmouseevent(textinfo);
     end;
+    else; // Added to make compiler happy
    end;
   end;
  end;

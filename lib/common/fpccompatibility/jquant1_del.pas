@@ -8,6 +8,17 @@ unit jquant1_del;
 //modified 2013 by Martin Schreiber
 
 interface
+{$ifndef mse_allwarnings}
+ {$if fpc_fullversion >= 030100}
+  {$warn 5089 off}
+  {$warn 5090 off}
+  {$warn 5093 off}
+  {$warn 6058 off}
+ {$endif}
+ {$if fpc_fullversion >= 030300}
+  {$warn 6018 off}
+ {$endif}
+{$endif}
 
 {$I jconfig_del.inc}
 
@@ -25,6 +36,18 @@ uses
   jdeferr_del,
   jerror_del,
   jutils_del;
+
+ {$ifndef mse_allwarnings}
+ {$if fpc_fullversion >= 030100}
+  {$warn 5089 off}
+  {$warn 5090 off}
+  {$warn 5093 off}
+  {$warn 6058 off}
+ {$endif}
+ {$if fpc_fullversion >= 030300}
+  {$warn 6018 off}
+ {$endif}
+{$endif}
 
 { The main purpose of 1-pass quantization is to provide a fast, if not very
   high quality, colormapped output capability.  A 2-pass quantizer usually

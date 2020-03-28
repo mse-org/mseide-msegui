@@ -3048,6 +3048,7 @@ begin
     deDataSetChange,
     deDataSetScroll : HandleScrollOrChange;
     deLayoutChange  : FEnableControlsEvent:=deLayoutChange;
+    else; // Added to make compiler happy
   end;
   if not ControlsDisabled and (FState <> dsBlockRead) then begin
     for i := 0 to FDataSources.Count - 1 do
@@ -3386,6 +3387,7 @@ begin
   //    ftBytes                   : ;
   //    ftVarBytes                : ;
       ftWideString              : WStrCopy(PWideChar(aDest), PWideChar(aSource));
+      else; // Added to make compiler happy
       end
     end
   else
@@ -3398,8 +3400,9 @@ begin
   //    ftBytes                   : ;
   //    ftVarBytes                : ;
       ftWideString              : WStrCopy(PWideChar(aDest), PWideChar(aSource));
-      end
-    end
+      else; // Added to make compiler happy
+      end;
+     end;
 end;
 
 function TDataSet.GetFieldData(Field: TField; Buffer: Pointer;
@@ -4097,6 +4100,7 @@ begin
       bfCurrent : InternalSetToRecord(pbufferaty(FBuffers)^[Index]);
       bfBOF : InternalFirst;
       bfEOF : InternalLast;
+      else; // Added to make compiler happy
       end;
     FCurrentRecord:=index;
     end;
@@ -4326,6 +4330,7 @@ begin
        If Modified then Post else Cancel;
      end;
      dsSetKey: Post;
+     else; // For case statment added to make compiler happy.
    end;
   finally
    exclude(finternalstate,dsis_checkingbrowsemode);
@@ -5062,6 +5067,7 @@ begin
         Case Retry of
           daFail : Raise;
           daAbort : Result:=False;
+          else; // For case statment added to make compiler happy.
         end;
         end;
     else
@@ -7046,6 +7052,7 @@ begin
       ftInteger,ftautoinc  : AValue:=Plongint(P)^;
       ftword               : Avalue:=Pword(P)^;
       ftsmallint           : AValue:=PSmallint(P)^;
+      else; // Added to make compiler happy
     end;
 end;
 
@@ -9154,6 +9161,7 @@ begin
     deUpdateState: CheckActiveAndEditing;
     deCheckBrowseMode: CheckBrowseMode;
     deFocusControl: FocusControl(TFieldRef(Info));
+    else; // For case statment added to make compiler happy...
   end;
 end;
 

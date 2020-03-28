@@ -428,6 +428,7 @@ begin
     enddrag;
    end;
   end;
+  else;
  end;
  if fdragobject = nil then begin
   exclude(info.eventstate,es_drag);
@@ -538,6 +539,7 @@ begin
                                   (dos_dropped in dragobjectpo^.state),result);
     end;
    end;
+   else;
   end;
  end;
 end;

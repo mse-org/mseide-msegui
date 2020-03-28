@@ -608,6 +608,7 @@ begin
     tcioSmart:
       if NewEntryTag<30000 then
         TiffError('Tags must be in ascending order: Last='+IntToStr(EntryTag)+' Next='+IntToStr(NewEntryTag));
+    else; // Added to make compiler happy
     end;
   end;
   EntryTag:=NewEntryTag;

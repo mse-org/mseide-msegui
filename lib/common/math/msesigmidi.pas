@@ -455,6 +455,7 @@ begin
      tdoubleoutputconn1(freleaseoutlin).fvalue:= frelease.value;
      tdoubleoutputconn1(freleaseout).fvalue:= scalevalue(frelease);
     end;
+     else; // For case statment added to make compiler happy.
    end;
   end;
   if fcontroller <> nil then begin

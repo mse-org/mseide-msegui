@@ -1312,6 +1312,7 @@ begin
     ifinametostring(pifinamety(@data),str1);
     fmsestringvalue:= utf8tostringansi(str1);
    end;
+   else; // Added to make compiler happy
   end;
  end;
 end;
@@ -1611,6 +1612,7 @@ begin
       apk_boolean: begin
        tbooleanarrayprop(instance)[index1]:= asinteger <> 0;;
       end;
+      else; // Added to make compiler happy
      end;
     end
     else begin
@@ -1625,7 +1627,6 @@ begin
        setwidestrprop(instance,aproperty,asmsestring);
       end;
      {$if defined(FPC) and (FPC_FULLVERSION >= 20300)}
-//     {$ifdef mse_unicodestring}
       tkUString: begin
        setunicodestrprop(instance,aproperty,asmsestring);
       end;
@@ -1637,6 +1638,7 @@ begin
      {$endif}
        setstrprop(instance,aproperty,asstring);
       end;
+       else; // Added to make compiler happy
      end;
     end;
    finally
@@ -1676,6 +1678,7 @@ begin
   {$endif}
     sendvalue(aproperty^.name,getstrprop(fcomponent,aproperty));
    end;
+    else; // Added to make compiler happy
   end;
  end;
 end;
@@ -1904,6 +1907,7 @@ begin
    ik_modulecommand: begin
     result:= modulecommandreceived(atag,aname,pmodulecommanddataty(adatapo));
    end;
+   else; // Added to make compiler happy
   end;
  end;
 end;
@@ -3538,6 +3542,7 @@ begin
      end;
     end;
    end;
+   else; // Added to make compiler happy
   end;
  end;
 end;

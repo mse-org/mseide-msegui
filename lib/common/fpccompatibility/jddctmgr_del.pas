@@ -13,6 +13,17 @@ unit jddctmgr_del;
   dequantization multiplier table needed by the IDCT routine. }
 
 interface
+{$ifndef mse_allwarnings}
+ {$if fpc_fullversion >= 030100}
+  {$warn 5089 off}
+  {$warn 5090 off}
+  {$warn 5093 off}
+  {$warn 6058 off}
+ {$endif}
+ {$if fpc_fullversion >= 030300}
+  {$warn 6018 off}
+ {$endif}
+{$endif}
 
 {$I jconfig_del.inc}
 
@@ -59,6 +70,18 @@ implementation
 
 
 { Private subobject for this module }
+
+{$ifndef mse_allwarnings}
+ {$if fpc_fullversion >= 030100}
+  {$warn 5089 off}
+  {$warn 5090 off}
+  {$warn 5093 off}
+  {$warn 6058 off}
+ {$endif}
+ {$if fpc_fullversion >= 030300}
+  {$warn 6018 off}
+ {$endif}
+{$endif}
 
 type
   my_idct_ptr = ^my_idct_controller;

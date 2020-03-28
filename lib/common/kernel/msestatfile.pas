@@ -719,6 +719,7 @@ begin
      writestat;
     end;
    end;
+   else ;
   end;
  end;
 end;

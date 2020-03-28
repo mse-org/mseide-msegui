@@ -3469,6 +3469,7 @@ begin
      end;
     end;
    end;
+    else; // Case statment added to make compiler happy...
   end;
  end;
  if (ainstance is tcomponent) then begin
@@ -3679,6 +3680,7 @@ begin
       mr_cancel: begin
        abort;
       end;
+       else; // Case statment added to make compiler happy...
      end;
     end;
    end;
@@ -4569,6 +4571,7 @@ var
       end;
      end;
     end;
+     else; // Case statment added to make compiler happy...
    end;
    if not result then begin
     break;
@@ -5197,6 +5200,7 @@ begin
     mr_noall: begin
      break;
     end;
+     else; // Case statment added to make compiler happy...
    end;
   end;
  end;

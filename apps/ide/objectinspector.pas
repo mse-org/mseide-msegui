@@ -1445,6 +1445,7 @@ begin
    na_collapse: begin
     feditor.expanded:= false;
    end;
+   else; // Case statment added to make compiler happy...
   end;
  end;
 end;

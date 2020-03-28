@@ -819,6 +819,7 @@ begin
       fillrect(po1^.markers[mt_bottomright],cl_dkgray);
       canvas.restore;
      end;
+     else; // Case statment added to make compiler happy...
     end;
     inc(po1);
    end;
@@ -839,6 +840,7 @@ begin
       fillrect(po1^.handles[ht_bottom],cl_black);
       canvas.restore();
      end;
+     else; // Case statment added to make compiler happy...
     end;
     inc(po1);
    end;
@@ -1297,6 +1299,7 @@ begin
      drawxorframe(fpickpos,fxorpicoffset,1,stockobjects.bitmaps[stb_block3]);
     end;
    end;
+   else; // Case statment added to make compiler happy...
   end;
   canvas.restore;
  end;
@@ -2520,6 +2523,7 @@ begin
   fde_showastext: begin
    fdesigner.showastext(fdesigner.modules.findmodule(fmodule));
   end;
+  else; // Case statment added to make compiler happy...
  end;
 end;
 
@@ -3428,6 +3432,7 @@ begin
    ht_bottomleft: shape:= cr_bottomleftcorner;
    ht_top,ht_bottom: shape:= cr_sizever;
    ht_left,ht_right: shape:= cr_sizehor;
+   else; // Case statment added to make compiler happy...
   end;
  end;
  application.widgetcursorshape:= shape;
@@ -3465,6 +3470,7 @@ var
      end;
      factsizerect.size.cx:= size.cx + x;
     end;
+    else; // Case statment added to make compiler happy...
    end;
    case actarea of
     ht_topleft,ht_top,ht_topright: begin
@@ -3480,6 +3486,7 @@ var
      end;
      factsizerect.size.cy:= size.cy + y;
     end;
+    else; // Case statment added to make compiler happy...
    end;
   end;
   case actarea of
@@ -3489,6 +3496,7 @@ var
    ht_left,ht_right: begin
     mousepos1.y:= fpickpos.y;
    end;
+   else; // Case statment added to make compiler happy...
   end;
   application.mouse.move(subpoint(pos1,posbefore));
  end;
@@ -3797,6 +3805,7 @@ begin
         end;
        end;
       end;
+      else; // Case statment added to make compiler happy...
      end;
      fpickwidget:= nil;
      actarea:= ar_none;

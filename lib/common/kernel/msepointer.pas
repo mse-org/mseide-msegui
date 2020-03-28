@@ -262,6 +262,7 @@ begin
   sik_bottomleft: begin adjustbottom; adjustleft end;
   sik_bottom: adjustbottom;
   sik_bottomright: begin adjustbottom; adjustright end;
+  else; // Added to make compiler happy
  end;
 end;
 

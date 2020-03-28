@@ -2779,7 +2779,7 @@ begin
  //    ftADT, ftArray, ftReference,
  //    ftDataSet, ftOraBlob, ftOraClob, ftVariant, ftInterface,
  //    ftIDispatch, ftGuid, ftTimeStamp, ftFMTBcd);
-
+   else; // For case statment added to make compiler happy.
    end;
   end;
   ds1.restorestate(statebefore);
@@ -6948,6 +6948,7 @@ begin
    dl_ansistring: begin
     tfield1(ffield).dosetvalue(sender.getinstance,ansistring(avalue),accept);
    end;
+   else; // For case statment added to make compiler happy.
   end;
  end;
 end;
@@ -7505,6 +7506,7 @@ begin
     cancel;
    end;
   end;
+  else; // For case statment added to make compiler happy.
  end;
  if not fmovebylock or (event <> dedatasetchange) then begin
   with tdataset(fowner) do begin
@@ -7897,6 +7899,7 @@ begin
       fonbeforedelete(tdataset(fowner));
      end;
     end;
+    else; // For case statment added to make compiler happy.
    end;
    try
     savepointoptions:= idscontroller(fintf).getsavepointoptions;
@@ -7910,7 +7913,7 @@ begin
      else begin
       bo1:= false;
      end;
-    end;
+      end;
     try
      if bo1 then begin
       int1:= savepointbegin;
@@ -7992,6 +7995,7 @@ begin
        fonafterdelete(tdataset(fowner),result);
       end;
      end;
+      else; // For case statment added to make compiler happy.
     end;
    end;
   finally

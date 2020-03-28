@@ -1284,6 +1284,7 @@ begin
   icc_close: begin
    application.postevent(tobjectevent.create(ek_closeform,ievent(self)));
   end;
+  else; // Added to make compiler happy
  end;
 end;
 
@@ -1497,6 +1498,7 @@ begin
     end;
    end;
   end;
+  else; // Added to make compiler happy
  end;
 end;
 
@@ -1560,6 +1562,7 @@ begin
      end;
     end;
    end;
+   else; // Added to make compiler happy
   end;
  end;
  inherited;

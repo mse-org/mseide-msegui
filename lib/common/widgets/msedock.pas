@@ -1584,6 +1584,7 @@ begin
      mds_normal: begin
       fnormalrect:= widget2.widgetrect;
      end;
+     else; // Added to make compiler happy
     end;
    end;
   end;
@@ -2497,6 +2498,7 @@ var
                {idockcontroller(fintf).getplacementrect},-int1);
        translatewidgetpoint1(rect1.pos,container1,nil);
       end;
+      else; // Added to make compiler happy
      end;
      if fasplitdir = sd_none then begin
 //      subpoint1(rect1.pos,widget.paintpos);
@@ -2622,6 +2624,7 @@ begin
       dockwidget;
      end;
     end;
+    else; // Added to make compiler happy
    end;
   end;
  end;
@@ -3860,10 +3863,12 @@ begin
          widget1.invalidatewidget;
         end;
        end;
+       else; // Added to make compiler happy
       end;
      end;
      endmouseop2();
     end;
+    else; // Added to make compiler happy
    end;
   end;
  end;
@@ -4075,6 +4080,7 @@ begin
         case pos1 of
          cp_right: inc(x,fnormalrect.cx - cx);
          cp_bottom: inc(y,fnormalrect.cy - cy);
+         else; // Added to make compiler happy
         end;
        end;
        anchors:= [an_left,an_top];
@@ -4088,6 +4094,7 @@ begin
       fmdistate:= mds_maximized;
       anchors:= [];
      end;
+     else; // Added to make compiler happy
     end;
     if (fframe <> nil) then begin
      tcustomframe1(fframe).updatestate;
@@ -4151,9 +4158,11 @@ begin
        fnormalrect.x:= bounds_x;
        fnormalrect.y:= bounds_y + bounds_cy - fnormalrect.cy;
       end;
+      else; // Added to make compiler happy
      end;
     end;
    end;
+   else; // Added to make compiler happy
   end;
  end;
 end;
@@ -4654,6 +4663,7 @@ begin
   dbr_nolock: begin
    info.caption:= sc(sc_no_lock);
   end;
+  else; // Added to make compiler happy
  end;
 end;
 
@@ -4783,6 +4793,7 @@ begin
     drawellipse1(makerect(arect.x+2,arect.y+2,arect.cx-5,arect.cy-5),
                                                                acolorglyph);
    end;
+   else; // Added to make compiler happy
   end;
  end;
 end;
@@ -4969,6 +4980,7 @@ begin
         clip.cx:= 2000;
        end;
       end;
+      else; // Added to make compiler happy
      end;
      drawtext(canvas,info1);
      canvas.subcliprect(inflaterect(info1.res,1));
@@ -5418,6 +5430,7 @@ begin
      sik_right,sik_left: kind1:= sik_none;
      sik_topright,sik_topleft: kind1:= sik_top;
      sik_bottomright,sik_bottomleft: kind1:= sik_bottom;
+     else; // Added to make compiler happy
     end;
    end;
    if anchors * [an_top,an_bottom] = [] then begin
@@ -5425,6 +5438,7 @@ begin
      sik_top,sik_bottom: kind1:= sik_none;
      sik_topleft,sik_bottomleft: kind1:= sik_left;
      sik_topright,sik_bottomright: kind1:= sik_right;
+     else; // Added to make compiler happy
     end;
    end;
   end;
@@ -5753,6 +5767,7 @@ begin
      inc(int1,4);
     end;
    end;
+   else; // Added to make compiler happy
   end;
  end;
 end;

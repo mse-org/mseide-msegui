@@ -3138,6 +3138,7 @@ begin
     dek_leavewidget: begin
      killrepeater();
     end;
+    else; // Added to make compiler happy
    end;
   end;
  end;
@@ -3280,6 +3281,7 @@ begin
     key_up: begin
      bo1:= downstep(ow_arrowfocusout in optionswidget);
     end;
+    else; // Added to make compiler happy
    end;
   end
   else begin
@@ -3290,6 +3292,7 @@ begin
     key_left: begin
      bo1:= downstep(ow_arrowfocusout in optionswidget);
     end;
+    else; // Added to make compiler happy
    end;
   end;
   if bo1 then begin

@@ -1498,6 +1498,7 @@ begin
       end;
      end;
     end;
+     else; // For case statment added to make compiler happy.
    end;
    try
     if assigned(fonevent) and
@@ -1559,6 +1560,7 @@ begin
    gek_error: begin
     exclude(fstate,gs_downloading);
    end;
+   else; // For case statment added to make compiler happy.
   end;
   if (eventkind = gek_error) and (token <> 0) and (token = frunsequence) then begin
    doevent(token,gek_stopped,values);
@@ -1737,6 +1739,7 @@ begin
        end;
        doevent(token,gek_error,resultar);
       end;
+      else; // For case statment added to make compiler happy.
      end;
     end
     else begin
@@ -1761,6 +1764,7 @@ begin
       rec_threadgroupstarted: begin
        getinteger64value(resultar,'pid',fcurrentprocid);
       end;
+      else; // For case statment added to make compiler happy.
      end;
     end
     else begin

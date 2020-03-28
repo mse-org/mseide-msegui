@@ -123,6 +123,7 @@ begin
         mstr1:= mstr1+'><'+msestring(floatfields[lookupvaluefieldno]);
        end;
       end;
+       else; // For case statment added to make compiler happy.
      end;
     end;
    end;

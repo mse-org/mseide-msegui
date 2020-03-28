@@ -591,6 +591,7 @@ begin
   tk_operator: begin
    fscto^.op:= fpo^;
   end;
+  else; // Case statment added to make compiler happy...
  end;
 end;
 
@@ -1765,6 +1766,7 @@ begin
     back;
    end;
   end;
+  else; // Case statment added to make compiler happy...
  end;
 end;
 
@@ -2017,6 +2019,7 @@ begin
        end;
        skiprest;
       end;
+      else; // Case statment added to make compiler happy...
      end;
     end;
    end;
@@ -2419,6 +2422,7 @@ begin
        fdefines.delete(lstr1);
       end;
      end;
+     else; // Case statment added to make compiler happy...
     end;
    end;
   end;

@@ -842,6 +842,7 @@ begin
      else textflags:= [tf_ycentered,tf_xcentered];
     end;
    end;
+   else; // Case statment added to make compiler happy...
   end;
   captioninnerrect:= deflaterect(captionrect,ainnerframe);
   checkboxrect.y:= imagerect.y + (imagerect.cy - checkboxrect.cy) div 2;
@@ -1334,6 +1335,7 @@ begin
    oe_changed: begin
     change;
    end;
+   else; // Case statment added to make compiler happy...
   end;
  end;
 end;
@@ -1517,6 +1519,7 @@ begin
    case event of
  //   oe_destroyed: imagelist:= nil;
     oe_changed: invalidate;
+    else; // Case statment added to make compiler happy...
    end;
   end;
  end;
@@ -2559,6 +2562,7 @@ var
       exit;
      end;
     end;
+    else; // Case statment added to make compiler happy...
    end;
    for int1:= 0 to fcount - 1 do begin
     check(fitems[int1]);

@@ -146,6 +146,7 @@ begin
         deleterow(index1);
         exit;
        end;
+       else; // Case statment added to make compiler happy...
       end;
      end;
     end;

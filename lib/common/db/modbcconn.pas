@@ -1204,6 +1204,7 @@ begin
        ftwidememo: begin
         blobbuffersize:= (blobbuffersize+1)*sizeof(widechar); //terminating 0
        end;
+        else; // For case statment added to make compiler happy.
       end;
      end
      else begin
@@ -1236,6 +1237,7 @@ begin
          int1:= memolen1; //remove terminating 0
         end;
        end;
+        else; // For case statment added to make compiler happy.
       end;
       setlength(str1,int1);
      end;

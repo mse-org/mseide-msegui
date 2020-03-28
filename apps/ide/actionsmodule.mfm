@@ -1370,10 +1370,10 @@ object actionsmo: tactionsmo
   end
   object shortcuts: tshortcutcontroller
     actions.count = 99
-    actions.items = <
+    actions.items = <    
       item
         dispname = 'File'
-      end
+      end    
       item
         action = opensource
         dispname = 'Open'
@@ -1381,7 +1381,7 @@ object actionsmo: tactionsmo
           1
           16463
         )
-      end
+      end    
       item
         action = save
         dispname = 'Save'
@@ -1389,15 +1389,15 @@ object actionsmo: tactionsmo
           1
           16467
         )
-      end
+      end    
       item
         action = saveall
         dispname = 'Save all'
-      end
+      end    
       item
         action = saveas
         dispname = 'Save as'
-      end
+      end    
       item
         action = close
         dispname = 'Close'
@@ -1405,18 +1405,18 @@ object actionsmo: tactionsmo
           1
           16691
         )
-      end
+      end    
       item
         action = closeall
         dispname = 'Close all'
-      end
+      end    
       item
         action = print
         dispname = 'Print'
-      end
+      end    
       item
         dispname = 'Search'
-      end
+      end    
       item
         action = line
         dispname = 'Line'
@@ -1424,7 +1424,7 @@ object actionsmo: tactionsmo
           1
           16460
         )
-      end
+      end    
       item
         action = find
         dispname = 'Find'
@@ -1432,7 +1432,7 @@ object actionsmo: tactionsmo
           1
           16454
         )
-      end
+      end    
       item
         action = repeatfind
         dispname = 'Search again'
@@ -1440,7 +1440,7 @@ object actionsmo: tactionsmo
           1
           306
         )
-      end
+      end    
       item
         action = findback
         dispname = 'Search back'
@@ -1448,7 +1448,7 @@ object actionsmo: tactionsmo
           1
           8498
         )
-      end
+      end    
       item
         action = replace
         dispname = 'Find and replace'
@@ -1456,7 +1456,7 @@ object actionsmo: tactionsmo
           1
           16466
         )
-      end
+      end    
       item
         action = findinfile
         dispname = 'Find in File'
@@ -1464,7 +1464,7 @@ object actionsmo: tactionsmo
           1
           24646
         )
-      end
+      end    
       item
         action = procedurelist
         dispname = 'Proceduce List'
@@ -1472,10 +1472,10 @@ object actionsmo: tactionsmo
           1
           16455
         )
-      end
+      end    
       item
         dispname = 'Edit'
-      end
+      end    
       item
         action = selecteditpage
         dispname = 'Select Editpage'
@@ -1483,7 +1483,7 @@ object actionsmo: tactionsmo
           1
           16453
         )
-      end
+      end    
       item
         action = copyword
         dispname = 'Copy Word at Cursor'
@@ -1491,7 +1491,7 @@ object actionsmo: tactionsmo
           1
           24663
         )
-      end
+      end    
       item
         action = indent
         dispname = 'Indent'
@@ -1499,7 +1499,7 @@ object actionsmo: tactionsmo
           1
           16457
         )
-      end
+      end    
       item
         action = unindent
         dispname = 'Unindent'
@@ -1507,7 +1507,7 @@ object actionsmo: tactionsmo
           1
           16469
         )
-      end
+      end    
       item
         action = comment
         dispname = 'Comment Selection'
@@ -1516,7 +1516,7 @@ object actionsmo: tactionsmo
           16459
           67
         )
-      end
+      end    
       item
         action = uncomment
         dispname = 'Uncomment Selection'
@@ -1525,15 +1525,15 @@ object actionsmo: tactionsmo
           16459
           85
         )
-      end
+      end    
       item
         action = lowercase
         dispname = 'Lowercase'
-      end
+      end    
       item
         action = uppercase
         dispname = 'Uppercase'
-      end
+      end    
       item
         action = copylatexact
         dispname = 'Copy LaTeX'
@@ -1542,7 +1542,7 @@ object actionsmo: tactionsmo
           16459
           76
         )
-      end
+      end    
       item
         action = sourcefo.completeclassact
         dispname = 'Complete Class'
@@ -1550,7 +1550,7 @@ object actionsmo: tactionsmo
           1
           24641
         )
-      end
+      end    
       item
         action = instemplate
         dispname = 'Insert Template'
@@ -1558,7 +1558,7 @@ object actionsmo: tactionsmo
           1
           16468
         )
-      end
+      end    
       item
         action = sourcefo.navigbackact
         dispname = 'Navigate Back'
@@ -1566,7 +1566,7 @@ object actionsmo: tactionsmo
           1
           16456
         )
-      end
+      end    
       item
         action = sourcefo.navigforwardact
         dispname = 'Navigate Forward'
@@ -1574,10 +1574,10 @@ object actionsmo: tactionsmo
           1
           24648
         )
-      end
+      end    
       item
         dispname = 'Set Bookmark'
-      end
+      end    
       item
         action = setbm0
         dispname = 'Set Bookmark 0'
@@ -1585,7 +1585,7 @@ object actionsmo: tactionsmo
           1
           24624
         )
-      end
+      end    
       item
         action = setbm1
         dispname = 'Set Bookmark 1'
@@ -1593,7 +1593,7 @@ object actionsmo: tactionsmo
           1
           24625
         )
-      end
+      end    
       item
         action = setbm2
         dispname = 'Set Bookmark 2'
@@ -1601,7 +1601,7 @@ object actionsmo: tactionsmo
           1
           24626
         )
-      end
+      end    
       item
         action = setbm3
         dispname = 'Set Bookmark 3'
@@ -1609,7 +1609,7 @@ object actionsmo: tactionsmo
           1
           24627
         )
-      end
+      end    
       item
         action = setbm4
         dispname = 'Set Bookmark 4'
@@ -1617,7 +1617,7 @@ object actionsmo: tactionsmo
           1
           24628
         )
-      end
+      end    
       item
         action = setbm5
         dispname = 'Set Bookmark 5'
@@ -1625,7 +1625,7 @@ object actionsmo: tactionsmo
           1
           24629
         )
-      end
+      end    
       item
         action = setbm6
         dispname = 'Set Bookmark 6'
@@ -1633,7 +1633,7 @@ object actionsmo: tactionsmo
           1
           24630
         )
-      end
+      end    
       item
         action = setbm7
         dispname = 'Set Bookmark 7'
@@ -1641,7 +1641,7 @@ object actionsmo: tactionsmo
           1
           24631
         )
-      end
+      end    
       item
         action = setbm8
         dispname = 'Set Bookmark 8'
@@ -1649,7 +1649,7 @@ object actionsmo: tactionsmo
           1
           24632
         )
-      end
+      end    
       item
         action = setbm9
         dispname = 'Set Bookmark 9'
@@ -1657,14 +1657,14 @@ object actionsmo: tactionsmo
           1
           24633
         )
-      end
+      end    
       item
         action = setbmnone
         dispname = 'Clear Bookmark'
-      end
+      end    
       item
         dispname = 'Find Bookmark'
-      end
+      end    
       item
         action = findbm0
         dispname = 'Find Bookmark 0'
@@ -1672,7 +1672,7 @@ object actionsmo: tactionsmo
           1
           16432
         )
-      end
+      end    
       item
         action = findbm1
         dispname = 'Find Bookmark 1'
@@ -1680,7 +1680,7 @@ object actionsmo: tactionsmo
           1
           16433
         )
-      end
+      end    
       item
         action = findbm2
         dispname = 'Find Bookmark 2'
@@ -1688,7 +1688,7 @@ object actionsmo: tactionsmo
           1
           16434
         )
-      end
+      end    
       item
         action = findbm3
         dispname = 'Find Bookmark 3'
@@ -1696,7 +1696,7 @@ object actionsmo: tactionsmo
           1
           16435
         )
-      end
+      end    
       item
         action = findbm4
         dispname = 'Find Bookmark 4'
@@ -1704,7 +1704,7 @@ object actionsmo: tactionsmo
           1
           16436
         )
-      end
+      end    
       item
         action = findbm5
         dispname = 'Find Bookmark 5'
@@ -1712,7 +1712,7 @@ object actionsmo: tactionsmo
           1
           16437
         )
-      end
+      end    
       item
         action = findbm6
         dispname = 'Find Bookmark 6'
@@ -1720,7 +1720,7 @@ object actionsmo: tactionsmo
           1
           16438
         )
-      end
+      end    
       item
         action = findbm7
         dispname = 'Find Bookmark 7'
@@ -1728,7 +1728,7 @@ object actionsmo: tactionsmo
           1
           16439
         )
-      end
+      end    
       item
         action = findbm8
         dispname = 'Find Bookmark 8'
@@ -1736,7 +1736,7 @@ object actionsmo: tactionsmo
           1
           16440
         )
-      end
+      end    
       item
         action = findbm9
         dispname = 'Find Bookmark 9'
@@ -1744,18 +1744,18 @@ object actionsmo: tactionsmo
           1
           16441
         )
-      end
+      end    
       item
         dispname = 'Target'
-      end
+      end    
       item
         action = attachprocess
         dispname = 'Attach Process'
-      end
+      end    
       item
         action = detachtarget
         dispname = 'Detach Target'
-      end
+      end    
       item
         action = continue
         dispname = 'Continue'
@@ -1763,15 +1763,15 @@ object actionsmo: tactionsmo
           1
           312
         )
-      end
+      end    
       item
         action = reset
         dispname = 'Reset'
-      end
+      end    
       item
         action = interrupt
         dispname = 'Interrupt'
-      end
+      end    
       item
         action = next
         dispname = 'Next'
@@ -1779,7 +1779,7 @@ object actionsmo: tactionsmo
           1
           311
         )
-      end
+      end    
       item
         action = nexti
         dispname = 'Next Instruction'
@@ -1787,7 +1787,7 @@ object actionsmo: tactionsmo
           1
           24887
         )
-      end
+      end    
       item
         action = step
         dispname = 'Step'
@@ -1795,7 +1795,7 @@ object actionsmo: tactionsmo
           1
           310
         )
-      end
+      end    
       item
         action = stepi
         dispname = 'Step Instruction'
@@ -1803,7 +1803,7 @@ object actionsmo: tactionsmo
           1
           24886
         )
-      end
+      end    
       item
         action = finish
         dispname = 'Finish'
@@ -1811,7 +1811,7 @@ object actionsmo: tactionsmo
           1
           8502
         )
-      end
+      end    
       item
         action = bkptsonact
         dispname = 'Breakpoints on/off'
@@ -1819,7 +1819,7 @@ object actionsmo: tactionsmo
           1
           16450
         )
-      end
+      end    
       item
         action = togglebkpt
         dispname = 'Toggle Breakpoint'
@@ -1827,7 +1827,7 @@ object actionsmo: tactionsmo
           1
           308
         )
-      end
+      end    
       item
         action = togglebkptenable
         dispname = 'Toggle Breakpoint enabled'
@@ -1835,7 +1835,7 @@ object actionsmo: tactionsmo
           1
           8500
         )
-      end
+      end    
       item
         action = watchesonact
         dispname = 'Watches on/off'
@@ -1843,14 +1843,14 @@ object actionsmo: tactionsmo
           1
           16471
         )
-      end
+      end    
       item
         action = bluedotsonact
         dispname = 'Exec Line Hints on/off'
-      end
+      end    
       item
         dispname = 'View'
-      end
+      end    
       item
         action = toggleinspector
         dispname = 'Toggle Form/Object Inspector'
@@ -1858,7 +1858,7 @@ object actionsmo: tactionsmo
           1
           314
         )
-      end
+      end    
       item
         action = toggleformunit
         dispname = 'Toggle Form/Unit'
@@ -1866,65 +1866,65 @@ object actionsmo: tactionsmo
           1
           315
         )
-      end
+      end    
       item
         dispname = 'Project'
-      end
+      end    
       item
         action = makeact
         dispname = 'Make'
-      end
+      end    
       item
         action = buildact
         dispname = 'Build'
-      end
+      end    
       item
         action = make1act
         dispname = 'Make 1'
-      end
+      end    
       item
         action = make2act
         dispname = 'Make 2'
-      end
+      end    
       item
         action = make3act
         dispname = 'Make 3'
-      end
+      end    
       item
         action = make4act
         dispname = 'Make 4'
-      end
+      end    
       item
         action = abortmakeact
         dispname = 'Abort Make'
-      end
+      end    
       item
         action = projectoptionsact
         dispname = 'Options'
-      end
+      end    
       item
         action = projectopenact
         dispname = 'Open'
-      end
+      end    
       item
         action = projectsaveact
         dispname = 'Save'
-      end
+      end    
       item
         action = projecttreeact
         dispname = 'Tree'
-      end
+      end    
       item
         action = projectsourceact
         dispname = 'Source'
-      end
+      end    
       item
         action = projectcloseact
         dispname = 'Close'
-      end
+      end    
       item
         dispname = 'Help'
-      end
+      end    
       item
         action = helpact
         dispname = 'Help'
@@ -1932,46 +1932,46 @@ object actionsmo: tactionsmo
           1
           304
         )
-      end
+      end    
       item
         dispname = 'Tools'
-      end
+      end    
       item
         action = tool0
         dispname = 'Tool 1'
-      end
+      end    
       item
         action = tool1
         dispname = 'Tool 2'
-      end
+      end    
       item
         action = tool2
         dispname = 'Tool 3'
-      end
+      end    
       item
         action = tool3
         dispname = 'Tool 4'
-      end
+      end    
       item
         action = tool4
         dispname = 'Tool 5'
-      end
+      end    
       item
         action = tool5
         dispname = 'Tool 6'
-      end
+      end    
       item
         action = tool6
         dispname = 'Tool 7'
-      end
+      end    
       item
         action = tool7
         dispname = 'Tool 8'
-      end
+      end    
       item
         action = tool8
         dispname = 'Tool 9'
-      end
+      end    
       item
         action = tool9
         dispname = 'Tool 10'

@@ -629,6 +629,7 @@ begin
     ft_reg,ft_lnk: begin
      filedialogres.getfileicon(fdi_file,imagelist,imagenr);
     end;
+    else; // Case statment added to make compiler happy...
    end;
   end;
  end;

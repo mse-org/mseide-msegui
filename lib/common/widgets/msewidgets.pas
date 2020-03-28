@@ -2854,6 +2854,7 @@ begin
        end;
       end;
      end;
+     else;
     end;
     case fcaptionpos of
      cp_topleft,cp_top,cp_topright: begin
@@ -2885,6 +2886,7 @@ begin
        end;
       end;
      end;
+     else;
     end;
    end;
    fouterframe.left:= rect1.x - x;
@@ -3333,6 +3335,7 @@ begin
       inc(rect1.cy,int1);
      end;
     end;
+    else; // Added to make compiler happy
    end;
   end;
   result:= pointinrect(point,rect1);
@@ -4961,6 +4964,7 @@ begin
                              fclientrect.size),false);
       include(eventstate,es_processed);
     end;
+    else;
     end;
    end
    else begin

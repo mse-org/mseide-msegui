@@ -344,6 +344,7 @@ var
           tkProcedure: Result := 'Procedure';
           tkConstructor: Result := 'Constructor';
           tkDestructor: Result := 'Destructor';
+          else; // Case statment added to make compiler happy...
         end;
       end;
     end;
@@ -488,6 +489,7 @@ begin
   case Language of
     ltPas: Parser := TmwPasLex.Create;
 //    ltCpp: CParser := TBCBTokenList.Create;
+    else; // Case statment added to make compiler happy...
   end;
   if not Assigned(Parser) then
     raise Exception.Create('No parser instance was created - maybe an unknown language?');
@@ -507,6 +509,7 @@ begin
       case Language of
         ltPas: Parser.Origin := MemStream.Memory;
 //        ltCpp: CParser.SetOrigin(MemStream.Memory, MemStream.Size);
+        else; // Case statment added to make compiler happy...
       end;
       Caption := Caption + ' - ' + UTF8Decode(ExtractFileName(FFileName));
 
@@ -526,6 +529,7 @@ begin
     case Language of
       ltPas: Parser.Free;
 //      ltCpp: CParser.Free;
+      else; // Case statment added to make compiler happy...
     end;
   end;
   {$ifdef gTrace}

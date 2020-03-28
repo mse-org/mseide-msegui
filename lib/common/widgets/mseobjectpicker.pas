@@ -470,6 +470,7 @@ begin
     end;
     fmouseoverobjects:= nil;
    end;
+   else;
   end;
  finally
   fmouseeventinfopo:= infopobefore;
@@ -561,6 +562,7 @@ begin
     end;
    end;
   end;
+  else;
  end
 end;
 
@@ -575,6 +577,7 @@ begin
     include(ainfo.eventstate,es_processed);
    end;
   end;
+  else;
  end;
 end;
 

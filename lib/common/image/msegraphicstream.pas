@@ -16,12 +16,12 @@ uses
  msestrings,msetypes;
 
 const
- graphicformatdelimiter = ';'; 
+ graphicformatdelimiter = ';';
 type
  egraphicformat = class(exception);
- 
+
  fpreaderclassty = class of tfpcustomimagereader;
- 
+
  tmsefpmemoryimage = class(tfpmemoryimage)
   private
    fhasalpha: boolean;
@@ -29,12 +29,12 @@ type
   public
    procedure assign(source: tpersistent); override;
    procedure assignto(dest: tpersistent); override;
-   procedure writetostream(const dest: tstream; 
+   procedure writetostream(const dest: tstream;
                    const awriter: tfpcustomimagewriter);
                              //owns the writer
    property hasalpha: boolean read fhasalpha;
    property monoalpha: boolean read fmonoalpha;
- end;  
+ end;
 
  readgraphicprocty = function(const source: tstream;
                          const dest: tobject; var format: string;
@@ -68,7 +68,7 @@ function tryreadgraphic(const source: tstream;
                                  const dest: timagelist): string; overload;
            //returns format name, '' = unknown/not supported
            //exception in case of read error
-                           
+
 procedure writegraphic(const dest: tstream; const source: tbitmap;
                            const aformatname: string;
                            const params: array of const); overload;
@@ -95,10 +95,10 @@ function readfpgraphic(const source: tstream; const readerclass: fpreaderclassty
 implementation
 uses
  msestockobjects,msegraphutils,msearrayutils;
- 
+
 type
  tmaskedbitmap1 = class(tmaskedbitmap);
- 
+
  graphicformatinfoty = record
   formatlabel: string;
   readproc: readgraphicprocty;
@@ -107,7 +107,7 @@ type
   filemask: msestringarty;
  end;
  graphicformatinfoarty = array of graphicformatinfoty;
- 
+
 var
  formats: graphicformatinfoarty;
 
@@ -128,6 +128,7 @@ var
  ar1: stringarty;
  int1: integer;
 begin
+ result := nil;
  setlength(ar1,length(formats));
  for int1:= 0 to high(ar1) do begin
   ar1[int1]:= formats[int1].formatlabel;
@@ -156,6 +157,7 @@ var
  ar1: msestringarty;
  int1: integer;
 begin
+ result := nil;
  setlength(ar1,length(formats));
  for int1:= 0 to high(ar1) do begin
   ar1[int1]:= formats[int1].filtername;
@@ -172,6 +174,7 @@ var
  int1,int2: integer;
  ar2: msestringarty;
 begin
+  result := nil;
  setlength(ar1,length(formats));
  for int1:= 0 to high(ar1) do begin
   ar1[int1]:= formats[int1].filemask;
@@ -211,6 +214,7 @@ var
  co: integer;
  int1,int2: integer;
 begin
+  result := nil;
  co:= 0;
  for int1:= 0 to high(formats) do begin
   for int2:= 0 to high(formats[int1].filemask) do begin
@@ -231,7 +235,7 @@ begin
  str1:= str1 + '.';
  raise egraphicformat.create(str1);
 end;
-  
+
 procedure registergraphicformat(const aformatlabel: string;
                     const areadproc: readgraphicprocty;
                     const awriteproc: writegraphicprocty;
@@ -299,7 +303,7 @@ begin
   ar1:= splitstring(aformatlabel,graphicformatdelimiter);
   for int3:= 0 to high(ar1) do begin
    for int1:= 0 to high(formats) do begin
-    with formats[int1] do begin 
+    with formats[int1] do begin
      if (formatlabel = ar1[int3]) then begin
       found:= true;
       if assigned(readproc) then begin
@@ -335,7 +339,7 @@ var
 begin
  int2:= -1;
  for int1:= 0 to high(formats) do begin
-  with formats[int1] do begin 
+  with formats[int1] do begin
    if (formatlabel = aformatlabel) then begin
     if assigned(writeproc) then begin
      int2:= int1;
@@ -395,7 +399,7 @@ function tryreadgraphic(const source: tstream;
 begin
  result:= readgraphic1(true,source,dest,'ico',[-1]);
 end;
-                           
+
 procedure writegraphic(const dest: tstream; const source: tbitmap;
                            const aformatname: string;
                            const params: array of const); overload;
@@ -406,7 +410,7 @@ end;
 procedure writegraphic(const dest: tstream; const source: tmaskedbitmap;
                            const aformatname: string;
                            const params: array of const); overload;
-                           
+
 begin
  writegraphic1(dest,source,aformatname,params);
 end;
@@ -434,11 +438,11 @@ begin
    try
     source.position:= int1;
     reader.imageread(source,img);
-    dest.assign(img);    
+    dest.assign(img);
     result:= true;
    finally
     img.free;
-   end;   
+   end;
   end
   else begin
    source.position:= int1;
@@ -450,7 +454,7 @@ end;
 
 { tmsefpmemoryimage }
 
-procedure tmsefpmemoryimage.writetostream(const dest: tstream; 
+procedure tmsefpmemoryimage.writetostream(const dest: tstream;
                    const awriter: tfpcustomimagewriter);
                              //owns the writer
 begin
@@ -575,7 +579,7 @@ begin
          inc(pmaskline,maskstep);
         end;
        end;
-       else begin                          //mono rgbmask        
+       else begin                          //mono rgbmask
         for int1:= 0 to height - 1 do begin
          pi:= pimageline;
          pm:= pmaskline;
@@ -604,7 +608,7 @@ begin
          end;
          inc(pimageline,imagestep);
          inc(pmaskline,maskstep);
-        end;        
+        end;
        end;
       end;
      end
@@ -659,7 +663,7 @@ begin
          end;
          inc(pimageline,imagestep);
          inc(pmaskline,maskstep);
-        end;      
+        end;
        end;
        bmk_gray: begin            //gray graymask
         for int1:= 0 to height - 1 do begin
@@ -691,7 +695,7 @@ begin
           col3.red:= wo1;
           col3.green:= wo1;
           col3.blue:= wo1;
-          wo1:= (prgbtriplety(pm)^.red + prgbtriplety(pm)^.green + 
+          wo1:= (prgbtriplety(pm)^.red + prgbtriplety(pm)^.green +
                                 prgbtriplety(pm)^.blue) div 3;
           col3.alpha:= wo1 or (wo1 shl 8);
           colors[int2,int1]:= col3;
@@ -751,7 +755,7 @@ begin
          end;
          inc(pimageline,imagestep);
          inc(pmaskline,maskstep);
-        end;      
+        end;
        end;
        bmk_gray: begin            //color graymask
         for int1:= 0 to height - 1 do begin
@@ -785,7 +789,7 @@ begin
           col3.green:= wo1 or (wo1 shl 8);
           wo1:= (prgbtriplety(pi)^.blue);
           col3.blue:= wo1 or (wo1 shl 8);
-          wo1:= (prgbtriplety(pm)^.red + prgbtriplety(pm)^.green + 
+          wo1:= (prgbtriplety(pm)^.red + prgbtriplety(pm)^.green +
                                 prgbtriplety(pm)^.blue) div 3;
           col3.alpha:= wo1 or (wo1 shl 8);
           colors[int2,int1]:= col3;
@@ -827,7 +831,7 @@ procedure tmsefpmemoryimage.assignto(dest: tpersistent);
 
 var
  grayalpha1: boolean;
- 
+
  function getmaskdata(ashift: word): boolean;
  var
   int1,int2,int3: integer;
@@ -851,9 +855,9 @@ var
      po1[int2]:= by1;
     {
      with po1^[int2] do begin
-      red:= by1;      
-      green:= by1;      
-      blue:= by1;      
+      red:= by1;
+      green:= by1;
+      blue:= by1;
       res:= 0;
      end;
     }
@@ -864,7 +868,7 @@ var
   grayalpha1:= bo1;
   result:= bo2;
  end;
-  
+
 var
  int1,int2,int3: integer;
  po1: prgbtripleaty;
@@ -891,9 +895,9 @@ begin
      for int2:= 0 to width - 1 do begin
       col1:= colors[int2,int1];
       with po1^[int2] do begin
-       red:= col1.red shr 8;      
-       green:= col1.green shr 8;      
-       blue:= col1.blue shr 8;      
+       red:= col1.red shr 8;
+       green:= col1.green shr 8;
+       blue:= col1.blue shr 8;
        res:= 0;
        bo1:= bo1 or (col1.alpha < $ff00);
       end;

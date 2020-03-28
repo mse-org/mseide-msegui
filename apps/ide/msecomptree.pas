@@ -116,6 +116,7 @@ begin
 //    fonpathchanged(self);
 //   end;
   end;
+  else; // Case statment added to make compiler happy...
  end;
  if iscellclick(info) and (info.zone = cz_caption) then begin
   treeitem.checkvalue;

@@ -1378,8 +1378,9 @@ begin
     b.x:= start.x;
     b.y:= start.y + length;
    end;
+   else ;
   end;
- end;
+  end;
 end;
 
 function deflaterect(const rect: rectty; const frame: framety): rectty;

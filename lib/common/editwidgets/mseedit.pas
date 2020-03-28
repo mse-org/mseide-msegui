@@ -1614,6 +1614,7 @@ begin
     updateemptytext();
    end;
   end;
+  else; // Added to make compiler happy
  end;
 end;
 
@@ -2347,6 +2348,7 @@ begin
   ea_undone: begin
    updateedittext(false);
   end;
+  else;
  end;
 end;
 

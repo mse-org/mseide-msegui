@@ -1528,6 +1528,7 @@ begin
       setactiveitem(-1);
      end;
     end;
+    else;
    end;
   end;
   if not (es_processed in info.eventstate) then begin
@@ -1790,6 +1791,7 @@ procedure tpopupmenuwidget.dokeydown(var info: keyeventinfoty);
      key_up: key:= key_left;
      key_left: key:= key_up;
      key_down: key:= key_right;
+     else;
     end;
    end;
   end;

@@ -19,6 +19,17 @@ unit cpuform;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 
 interface
+{$ifndef mse_allwarnings}
+ {$if fpc_fullversion >= 030100}
+  {$warn 5089 off}
+  {$warn 5090 off}
+  {$warn 5093 off}
+  {$warn 6058 off}
+ {$endif}
+ {$if fpc_fullversion >= 030300}
+  {$warn 6018 off}
+ {$endif}
+{$endif}
 
 uses
  classes,mclasses,msegui,mseclasses,mseforms,msegdbutils,msetypes,msedataedits,
@@ -70,6 +81,17 @@ uses
  cpui386form,cpux86_64form,cpuarmform,cpuarmm3form,
  cpucpu32form,cpuavr32form,cpurl78form,
  projectoptionsform;
+ {$ifndef mse_allwarnings}
+ {$if fpc_fullversion >= 030100}
+  {$warn 5089 off}
+  {$warn 5090 off}
+  {$warn 5093 off}
+  {$warn 6058 off}
+ {$endif}
+ {$if fpc_fullversion >= 030300}
+  {$warn 6018 off}
+ {$endif}
+{$endif}
 const
  refreshtag = 738952;
 var

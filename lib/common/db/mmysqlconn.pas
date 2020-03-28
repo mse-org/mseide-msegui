@@ -1096,6 +1096,7 @@ begin
                                   inputparambindings,pointer(strings[int1]),
                                   length(strings[int1]));
         end;
+         else; // For case statment added to make compiler happy.
        end;
       end;
      end;
@@ -1716,6 +1717,7 @@ begin
      move(int1,dest^,sizeof(int1));
       //save id
     end;
+     else; // For case statment added to make compiler happy.
    end;
   end;
  end;

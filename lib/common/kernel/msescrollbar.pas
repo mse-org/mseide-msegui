@@ -632,6 +632,7 @@ begin
     areas[sba_end].ca.dim.cy:= areas[sbbu_move].ca.dim.y -
                                                     areas[sba_end].ca.dim.y;
    end;
+   else ;
   end;
  end;
 end;
@@ -1107,6 +1108,7 @@ begin
                                                                     cx div 2;
           gd_down: fpickoffset:= -fdrawinfo.areas[sba_start].ca.dim.y -
                                                                     cy div 2 ;
+          else ;
          end;
         end;
        end
@@ -1121,6 +1123,7 @@ begin
                                                                info.pos.x;
           gd_down: fpickoffset:= y - info.pos.y -
                                          fdrawinfo.areas[sba_start].ca.dim.y;
+         else ;
          end;
         end;
        end;
@@ -1136,6 +1139,7 @@ begin
      releasebutton(false);
     end;
    end;
+   else ;
   end;
  end;
 end;
@@ -1306,6 +1310,7 @@ begin
         end;
        end;
       end;
+      else ;
      end;
     end;
     if bo1 then begin

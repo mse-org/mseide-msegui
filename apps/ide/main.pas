@@ -536,14 +536,10 @@ begin
 //    openform.controller.captionopen:= c[ord(formfile)]+' '+ aname;
     if openform.controller.execute(wstr2,fdk_open,
                             c[ord(formfile)]+' '+ msestring(aname)) then begin
-//    action:= filedialog(wstr2,[fdo_checkexist],c[ord(formfile)]+' '+ aname,
-//                 [c[ord(formfiles)]],['*.mfm'],'',nil,nil,nil,[fa_all],[fa_hidden]);
-//                 //defaultvalues don't work on kylix
-//    if action = mr_ok then begin
-//     openformfile(openform.controller.filename,false,false,true,true,false);
      openformfile(wstr2,false,false,true,true,false);
     end;
    end;
+    else; // Case statment added to make compiler happy...
   end;
  end;
 end;
@@ -1052,6 +1048,7 @@ begin
   gek_loaded: begin
    symbolfo.updatesymbols;
   end;
+  else; // Case statment added to make compiler happy...
  end;
 end;
 

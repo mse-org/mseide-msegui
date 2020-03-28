@@ -3242,8 +3242,11 @@ begin
   sms_up: sortarray(pointerarty(dest),
                                   {$ifdef FPC}@{$endif}comparemsestring);
   sms_upi: sortarray(pointerarty(dest),
-                                  {$ifdef FPC}@{$endif}compareimsestring);
+
+                                 {$ifdef FPC}@{$endif}compareimsestring);
+ else ;
  end;
+
 end;
 
 procedure sortarray(var dest: msestringarty; const sortmode: stringsortmodety;
@@ -3255,7 +3258,9 @@ begin
                           {$ifdef FPC}@{$endif}comparemsestring,indexlist);
   sms_upi: sortarray(pointerarty(dest),
                           {$ifdef FPC}@{$endif}compareimsestring,indexlist);
+ else ;
  end;
+
 end;
 
 procedure sortarray(var dest: stringarty;
@@ -3269,7 +3274,9 @@ begin
                               {$ifdef FPC}@{$endif}compareasciistring);
   sms_upiascii: sortarray(pointerarty(dest),
                               {$ifdef FPC}@{$endif}compareiasciistring);
+   else ;
  end;
+
 end;
 
 procedure sortarray(var dest: stringarty; const sortmode: stringsortmodety;
@@ -3285,6 +3292,7 @@ begin
                         {$ifdef FPC}@{$endif}compareasciistring,indexlist);
   sms_upiascii: sortarray(pointerarty(dest),
                         {$ifdef FPC}@{$endif}compareiasciistring,indexlist);
+ else ;
  end;
 end;
 

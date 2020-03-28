@@ -761,6 +761,7 @@ var
       mr_noall: begin
        noall:= true;
       end;
+      else; // Case statment added to make compiler happy...
      end;
     end;
    end;
@@ -1106,6 +1107,7 @@ begin
     end;
     break;
    end;
+   else; // Case statment added to make compiler happy...
   end;
  end;
  fallsaved:= fallsaved or not noconfirm;

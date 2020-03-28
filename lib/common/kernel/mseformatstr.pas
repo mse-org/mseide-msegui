@@ -2620,6 +2620,7 @@ begin
       dttg_day: begin
        day:= int2;
       end;
+       else ;
      end;
     end;
    end;

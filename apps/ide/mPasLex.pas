@@ -1391,6 +1391,7 @@ begin
     Case fComment of
       csBor: BorProc;
       csAnsi: AnsiProc;
+      else; // Case statment added to make compiler happy...
     end;
   end;
 end;

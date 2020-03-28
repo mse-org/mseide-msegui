@@ -2978,6 +2978,7 @@ begin
       end;
      end;
     end;
+    else;
    end;
   end;
  end;
@@ -10706,6 +10707,7 @@ begin
    sbe_pagedown: scrollrows(rowsperpage-1);
    sbe_wheelup: scrollrows(-wheelheight);
    sbe_wheeldown: scrollrows(wheelheight);
+   else;
   end;
  end
  else begin
@@ -10714,6 +10716,7 @@ begin
    sbe_stepdown: scrollright;
    sbe_pageup,sbe_wheelup: scrollpageleft;
    sbe_pagedown,sbe_wheeldown: scrollpageright;
+   else;
   end;
  end;
 end;
@@ -11344,6 +11347,7 @@ var
      fdatacols.selected[fmousecell]:= not fdatacols.selected[fmousecell];
     end;
    end;
+   else;
   end;
   addpoint1(info.pos,subpoint(tgridframe(fframe).scrollpos,po1));
                //shift mouse with grid;
@@ -11561,6 +11565,7 @@ begin
       end;
       checkrepeater(false);
      end;
+     else;
     end;
     if cellkind = ck_data then begin
      if fmousecell.col <> fmouseeventcol then begin
@@ -11653,6 +11658,7 @@ begin
     ek_mousepark: eventkind:= cek_mousepark;
     ek_buttonpress: eventkind:= cek_buttonpress;
     ek_buttonrelease: eventkind:= cek_buttonrelease;
+    else;
    end;
   end;
   if (acellinfopo = nil) and (eventkind <> cek_none) then begin
@@ -11950,11 +11956,12 @@ function tcustomgrid.focuscell(cell: gridcoordty;
        scm_row: begin
         cells.col:= 0;
         celle.col:= fdatacols.count - 1;
-       end;
+         end;
        scm_col: begin
         cells.row:= 0;
         celle.row:= rowhigh;
        end;
+       else;
       end;
       if fendanchor.col >= 0 then begin
        case selectmode of
@@ -11964,6 +11971,7 @@ function tcustomgrid.focuscell(cell: gridcoordty;
         scm_col: begin
          celle.row:= cells.row;
         end;
+        else;
        end;
        if gs_islist in fstate then begin
         fdatacols.changeselectedrange(fstartanchor,fendanchor,cell,true);
@@ -11995,6 +12003,7 @@ function tcustomgrid.focuscell(cell: gridcoordty;
            end;
            endupdate;
           end;
+          else; // Added to make compiler happy
          end;
         end
         else begin
@@ -12022,6 +12031,7 @@ function tcustomgrid.focuscell(cell: gridcoordty;
      end;
      fendanchor:= cell;
     end;
+    else;
    end;
   finally
    ffocusedcell:= cell;
@@ -12757,6 +12767,7 @@ begin
      po1.y:= 0;
     end;
    end;
+   else; // Added to make compiler happy
   end;
   po2.y:= fdatarect.y - y;             //rangestart-startpos
   case position of
@@ -12942,6 +12953,7 @@ function tcustomgrid.cellrect(const cell: gridcoordty;
      inc(x,fcellinfo.innerrect.x);
      cx:= fcellinfo.innerrect.cx;
     end;
+    else;
    end;
   end;
  end;
@@ -12961,6 +12973,7 @@ function tcustomgrid.cellrect(const cell: gridcoordty;
      dec(cy,fdatarowheight-fcellinfo.innerrect.cy);
 //     cy:= fcellinfo.innerrect.cy;
     end;
+    else;
    end;
   end;
  end;
@@ -14192,6 +14205,7 @@ begin
      checkfixrow(true);
     end;
    end;
+   else;
   end;
  end;
  if objects[0] < 0 then begin
@@ -14384,6 +14398,7 @@ begin
     else begin
     end;
    end;
+   else;
   end;
   designchanged;
  end;
@@ -14547,6 +14562,7 @@ begin
     end;
     }
    end;
+   else; // Added to make compiler happy
   end;
  end;
 end;
@@ -17046,6 +17062,7 @@ begin
    cek_exit: begin
     feditor.dodefocus;
    end;
+   else;
   end;
  end;
 end;
@@ -17275,6 +17292,7 @@ begin
            showcaretrect(info.caretrect,frame1));
      end;
     end;
+    else; // Added to make compiler happy
    end;
   end;
  end;

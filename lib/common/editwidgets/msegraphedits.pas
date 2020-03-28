@@ -1656,6 +1656,7 @@ begin
     dec(fupdating);
    end;
   end;
+  else;
  end;
 end;
 
@@ -2687,6 +2688,7 @@ begin
     end;
     fclickedrow:= -1;
    end;
+   else;
   end;
   if fclickedrow <> clickedrowbefore then begin
    fgridintf.getcol.grid.invalidatecell(info.cell);

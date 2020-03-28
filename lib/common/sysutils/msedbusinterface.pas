@@ -1341,6 +1341,7 @@ begin
 //   vvk_string: begin
 //    string(vstring):= '';
 //   end;
+    else; // For case statment added to make compiler happy.
   end;
  end;
 end;
@@ -3469,6 +3470,7 @@ begin
          goto oklab;
         end;
        end;
+        else; // For case statment added to make compiler happy.
       end;
       fservice.dbuserror(amessage,
                    'org.freedesktop.DBus.Error.InvalidArgs',
@@ -3810,6 +3812,7 @@ begin
      internaldelete(data.handler.signal.match);
     end;
    end;
+    else; // For case statment added to make compiler happy.
   end;
  end;
  inherited;

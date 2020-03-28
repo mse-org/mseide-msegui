@@ -2028,6 +2028,7 @@ begin
         wam_end: begin
          int3:= innerclientpos.x + innerclientsize.cx - int4 - space - margin;
         end;
+        else; // Added to make compiler happy
        end;
        placexorder(int3,ar2,ar1);
       end;
@@ -2051,6 +2052,7 @@ begin
         wam_end: begin
          int3:= innerclientpos.y + innerclientsize.cy - int4 - space - margin;
         end;
+        else; // Added to make compiler happy
        end;
        placeyorder(int3,ar2,ar1);
       end;

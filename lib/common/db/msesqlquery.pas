@@ -1108,6 +1108,7 @@ begin
 			        FWhereStopPos := CurrentP-PSQL+1;
 			    end;
 			end;
+			 else; // For case statment added to make compiler happy.
 		    end; {ppWhere}
 
 		end; {case}
@@ -2402,6 +2403,7 @@ begin
     end;
    end;
   end;
+   else; // For case statment added to make compiler happy.
  end;
  inherited;
 end;

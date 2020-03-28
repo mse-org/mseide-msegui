@@ -20,6 +20,9 @@ interface
   {$warn 5093 off}
   {$warn 6058 off}
  {$endif}
+ {$if fpc_fullversion >= 030300}
+  {$warn 6018 off}
+ {$endif}
 {$endif}
 
 {$ifdef mse_debugwindowfocus}
@@ -521,6 +524,9 @@ uses
   {$warn 5090 off}
   {$warn 5093 off}
   {$warn 6058 off}
+ {$endif}
+ {$if fpc_fullversion >= 030300}
+  {$warn 6018 off}
  {$endif}
 {$endif}
 
@@ -3551,11 +3557,13 @@ begin
   key_shift: if up then exclude(result,ss_shift) else include(result,ss_shift);
   key_control: if up then exclude(result,ss_ctrl) else include(result,ss_ctrl);
   key_alt: if up then exclude(result,ss_alt) else include(result,ss_alt);
+  else; // For case statment added to make compiler happy.
  end;
  case button of
   mb_left: if up then exclude(result,ss_left) else include(result,ss_left);
   mb_middle: if up then exclude(result,ss_middle) else include(result,ss_middle);
   mb_right: if up then exclude(result,ss_right) else include(result,ss_right);
+  else; // For case statment added to make compiler happy.
  end;
 end;
 
@@ -4536,6 +4544,7 @@ begin
     result:= xgetselectionowner(appdisp,at1);
    end;
   end;
+  else; // For case statment added to make compiler happy.
  end;
 end;
 
@@ -4659,6 +4668,7 @@ begin
      result:= sendtraymessage(syswin,syswin,
                          system_tray_request_dock,child.id);
     end;
+    else; // For case statment added to make compiler happy.
    end;
    repeat
    {
@@ -6193,6 +6203,7 @@ eventrestart:
          {$endif}
          end;
         end;
+        else; // For case statment added to make compiler happy.
        end;
       end;
      end;
