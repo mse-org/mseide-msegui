@@ -20,10 +20,6 @@ interface
   {$warn 5093 off}
   {$warn 6058 off}
  {$endif}
- {$if fpc_fullversion >= 030300}
-  {$warn 6060 off}
-  {$warn 6018 off}
-  {$endif}
 {$endif}
 uses
  msestream,mseclasses,classes,mclasses,msetypes,mseevent,msehash,msepipestream,
@@ -710,10 +706,6 @@ uses
   {$warn 5093 off}
   {$warn 6058 off}
  {$endif}
- {$if fpc_fullversion >= 030300}
-  {$warn 6060 off}
-  {$warn 6018 off}
-  {$endif}
 {$endif}
 
 {$ifdef mswindows}

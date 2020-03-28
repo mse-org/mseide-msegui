@@ -25,10 +25,7 @@ interface
   {$warn 5090 off}
   {$warn 5093 off}
   {$warn 6058 off}
-  {$endif}
- {$if fpc_fullversion >= 030300}
-  {$warn 6060 off}
-  {$endif}
+ {$endif}
 {$endif}
 
 uses
@@ -1045,10 +1042,7 @@ uses
   {$warn 5090 off}
   {$warn 5093 off}
   {$warn 6058 off}
-  {$endif}
- {$if fpc_fullversion >= 030300}
-  {$warn 6060 off}
-  {$endif}
+ {$endif}
 {$endif}
 
 type

@@ -12,24 +12,10 @@ unit mseguiintf; //i386-win32
 {$ifdef FPC}{$mode objfpc}{$h+}{$goto on}{$endif}
 
 interface
-
 uses
  windows,messages,mseapplication,msetypes,msegraphutils,msesys,
  mseevent,msepointer,mseguiglob,msegraphics,
  msethread,mseformatstr,{msesysintf,}msestrings,msesystypes,msewinglob;
-
-{$ifndef mse_allwarnings}
- {$if fpc_fullversion >= 030100}
-  {$warn 5089 off}
-  {$warn 5090 off}
-  {$warn 5093 off}
-  {$warn 6058 off}
- {$endif}
- {$if fpc_fullversion >= 030300}
-  {$warn 6060 off}
-  {$warn 6018 off}
-  {$endif}
-{$endif}
 
 type
  syseventty = record
@@ -80,19 +66,6 @@ uses
  sysutils,mselist,msekeyboard,msebits,msearrayutils,msesysutils,msegui,
  msesystimer,msegdi32gdi,msesysintf1,msedynload,msewindnd,msebitmap
  {$ifdef mse_debugzorder},typinfo{$endif} ;
-
-{$ifndef mse_allwarnings}
- {$if fpc_fullversion >= 030100}
-  {$warn 5089 off}
-  {$warn 5090 off}
-  {$warn 5093 off}
-  {$warn 6058 off}
- {$endif}
- {$if fpc_fullversion >= 030300}
-  {$warn 6060 off}
-  {$warn 6018 off}
-  {$endif}
-{$endif}
 
 type
 
@@ -1878,8 +1851,7 @@ begin
 end;
 
 function winkeytokey(key: longword; lparam: longword;
-
-{$push}{$warn off}                                       var shift: shiftstatesty): keyty;
+                                       var shift: shiftstatesty): keyty;
 var
  second: boolean;
 begin

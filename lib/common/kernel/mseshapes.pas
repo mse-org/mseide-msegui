@@ -163,17 +163,6 @@ function calccaptionsize(const acanvas: tcanvas; const ainfo: captioninfoty;
 implementation
 uses
  classes,msestockobjects,msebits,sysutils,mseassistiveserver;
- {$ifndef mse_allwarnings}
- {$if fpc_fullversion >= 030100}
-  {$warn 5089 off}
-  {$warn 5090 off}
-  {$warn 5093 off}
-  {$warn 6058 off}
-  {$endif}
- {$if fpc_fullversion >= 030300}
-  {$warn 6060 off}
-  {$endif}
-{$endif}
 type
  twidget1 = class(twidget);
  tframe1 = class(tcustomframe);

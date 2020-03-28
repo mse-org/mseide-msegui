@@ -17,7 +17,14 @@ unit msegrids;
 {$endif}
 
 interface
-
+{$ifndef mse_allwarnings}
+ {$if fpc_fullversion >= 030100}
+  {$warn 5089 off}
+  {$warn 5090 off}
+  {$warn 5093 off}
+  {$warn 6058 off}
+ {$endif}
+{$endif}
 uses
  classes,mclasses,sysutils,mseclasses,msegui,msedragglob,
  msegraphics,msetypes,msestrings,msegraphutils,msebitmap,mseassistiveclient,
@@ -26,18 +33,6 @@ uses
  mseobjectpicker,msepointer,msetimer,msebits,msestat,msestatfile,msekeyboard,
  msestream,msedrag,msemenus,msepipestream,mseshapes,msegridsglob,mselist
  {$ifdef mse_with_ifi},mseificomp,mseifiglob,mseificompglob{$endif};
-
-{$ifndef mse_allwarnings}
- {$if fpc_fullversion >= 030100}
-  {$warn 5089 off}
-  {$warn 5090 off}
-  {$warn 5093 off}
-  {$warn 6058 off}
-  {$endif}
- {$if fpc_fullversion >= 030300}
-  {$warn 6060 off}
-  {$endif}
-{$endif}
 
 type
          //     listvievoptionty from mselistbrowser
@@ -2890,10 +2885,7 @@ uses
   {$warn 5090 off}
   {$warn 5093 off}
   {$warn 6058 off}
-  {$endif}
- {$if fpc_fullversion >= 030300}
-  {$warn 6060 off}
-  {$endif}
+ {$endif}
 {$endif}
 
 type

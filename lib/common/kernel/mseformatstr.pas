@@ -9,6 +9,15 @@
 }
 unit mseformatstr;     //stringwandelroutinen 31.5.99 mse
 
+{$ifndef mse_allwarnings}
+ {$if fpc_fullversion >= 030100}
+  {$warn 5089 off}
+  {$warn 5090 off}
+  {$warn 5093 off}
+  {$warn 6058 off}
+ {$endif}
+{$endif}
+
 {$ifdef FPC}{$mode objfpc}{$h+}{$interfaces corba}{$goto on}{$endif}
 
 interface
@@ -17,18 +26,6 @@ uses
  {$ifndef FPC},classes_del{$endif};
 {$ifdef FPC}{$define hasqword}{$endif}
 {$ifdef mswindows}{$define hasqword}{$endif}
-
-{$ifndef mse_allwarnings}
- {$if fpc_fullversion >= 030100}
-  {$warn 5089 off}
-  {$warn 5090 off}
-  {$warn 5093 off}
-  {$warn 6058 off}
-  {$endif}
- {$if fpc_fullversion >= 030300}
-  {$warn 6060 off}
-  {$endif}
-{$endif}
 type
  dateconvertty = (dc_none,dc_tolocal,dc_toutc);
 
@@ -559,10 +556,7 @@ uses
   {$warn 5090 off}
   {$warn 5093 off}
   {$warn 6058 off}
-  {$endif}
- {$if fpc_fullversion >= 030300}
-  {$warn 6060 off}
-  {$endif}
+ {$endif}
 {$endif}
 
 function lstring(const s: string; const minwidth: integer): string;

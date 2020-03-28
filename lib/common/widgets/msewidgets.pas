@@ -18,10 +18,7 @@ interface
   {$warn 5090 off}
   {$warn 5093 off}
   {$warn 6058 off}
-  {$endif}
- {$if fpc_fullversion >= 030300}
-  {$warn 6060 off}
-  {$endif}
+ {$endif}
 {$endif}
 uses
  classes,mclasses,msegui,mseguiglob,msetypes,msestrings,msegraphutils,
@@ -1490,10 +1487,7 @@ uses
   {$warn 5090 off}
   {$warn 5093 off}
   {$warn 6058 off}
-  {$endif}
- {$if fpc_fullversion >= 030300}
-  {$warn 6060 off}
-  {$endif}
+ {$endif}
 {$endif}
 
 const

@@ -12,19 +12,6 @@ unit jddctmgr_del;
   dequantization as well as the IDCT proper.  This module sets up the
   dequantization multiplier table needed by the IDCT routine. }
 
-{$ifndef mse_allwarnings}
- {$if fpc_fullversion >= 030100}
-  {$warn 5089 off}
-  {$warn 5090 off}
-  {$warn 5093 off}
-  {$warn 6058 off}
- {$endif}
- {$if fpc_fullversion >= 030300}
-  {$warn 6060 off}
-  {$warn 6018 off}
-  {$endif}
-{$endif}
-
 interface
 
 {$I jconfig_del.inc}
@@ -47,19 +34,6 @@ uses
   jidctflt_del, jidctred_del;
 
 
-{$ifndef mse_allwarnings}
- {$if fpc_fullversion >= 030100}
-  {$warn 5089 off}
-  {$warn 5090 off}
-  {$warn 5093 off}
-  {$warn 6058 off}
- {$endif}
- {$if fpc_fullversion >= 030300}
-  {$warn 6060 off}
-  {$warn 6018 off}
-  {$endif}
-{$endif}
-
 
 { Initialize IDCT manager. }
 
@@ -68,19 +42,6 @@ procedure jinit_inverse_dct (cinfo : j_decompress_ptr);
 
 
 implementation
-
-{$ifndef mse_allwarnings}
- {$if fpc_fullversion >= 030100}
-  {$warn 5089 off}
-  {$warn 5090 off}
-  {$warn 5093 off}
-  {$warn 6058 off}
- {$endif}
- {$if fpc_fullversion >= 030300}
-  {$warn 6060 off}
-  {$warn 6018 off}
-  {$endif}
-{$endif}
 
 { The decompressor input side (jdinput.c) saves away the appropriate
   quantization table for each component at the start of the first scan

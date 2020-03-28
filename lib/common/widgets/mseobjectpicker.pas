@@ -16,18 +16,6 @@ uses
  mseevent,mseglob,mseguiglob,mseclasses,msegui,msegraphics,msegraphutils,
  msepointer,msetypes;
 
-{$ifndef mse_allwarnings}
- {$if fpc_fullversion >= 030100}
-  {$warn 5089 off}
-  {$warn 5090 off}
-  {$warn 5093 off}
-  {$warn 6058 off}
-  {$endif}
- {$if fpc_fullversion >= 030300}
-  {$warn 6060 off}
-  {$endif}
-{$endif}
-
 type
  ihintcontroller = interface(inullinterface)
   function getwidget: twidget;
@@ -132,18 +120,6 @@ type
 implementation
 uses
  msekeyboard,msearrayutils;
-
-{$ifndef mse_allwarnings}
- {$if fpc_fullversion >= 030100}
-  {$warn 5089 off}
-  {$warn 5090 off}
-  {$warn 5093 off}
-  {$warn 6058 off}
-  {$endif}
- {$if fpc_fullversion >= 030300}
-  {$warn 6060 off}
-  {$endif}
-{$endif}
 
 type
  twidget1 = class(twidget);

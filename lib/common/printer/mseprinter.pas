@@ -17,12 +17,8 @@ interface
   {$warn 5090 off}
   {$warn 5093 off}
   {$warn 6058 off}
-  {$endif}
- {$if fpc_fullversion >= 030300}
-  {$warn 6060 off}
-  {$endif}
+ {$endif}
 {$endif}
-
 
 uses
  mseclasses,msegraphics,msegraphutils,msestrings,msestream,msedrawtext,
@@ -527,12 +523,8 @@ uses
   {$warn 5090 off}
   {$warn 5093 off}
   {$warn 6058 off}
-  {$endif}
- {$if fpc_fullversion >= 030300}
-  {$warn 6060 off}
-  {$endif}
+ {$endif}
 {$endif}
-
 
 type
  tfont1 = class(tfont);

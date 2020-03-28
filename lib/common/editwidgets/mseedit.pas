@@ -25,17 +25,6 @@ uses
  msebitmap,msemenus,msetimer,mseactions,msekeyboard,
  msesimplewidgets,msepointer,msestrings,msescrollbar,mseassistiveclient
          {$ifdef mse_with_ifi},mseifiglob{$endif};
-{$ifndef mse_allwarnings}
- {$if fpc_fullversion >= 030100}
-  {$warn 5089 off}
-  {$warn 5090 off}
-  {$warn 5093 off}
-  {$warn 6058 off}
-  {$endif}
- {$if fpc_fullversion >= 030300}
-  {$warn 6060 off}
-  {$endif}
-{$endif}
 
 const
  defaulteditwidgetoptions = defaultoptionswidget
@@ -693,18 +682,6 @@ implementation
 uses
  sysutils,msebits,msedataedits,msestockobjects,mseact,
  mseassistiveserver;
-
-{$ifndef mse_allwarnings}
- {$if fpc_fullversion >= 030100}
-  {$warn 5089 off}
-  {$warn 5090 off}
-  {$warn 5093 off}
-  {$warn 6058 off}
-  {$endif}
- {$if fpc_fullversion >= 030300}
-  {$warn 6060 off}
-  {$endif}
-{$endif}
 
 type
  twidget1 = class(twidget);

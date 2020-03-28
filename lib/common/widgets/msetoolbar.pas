@@ -12,18 +12,6 @@ unit msetoolbar;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 
 interface
-{$ifndef mse_allwarnings}
- {$if fpc_fullversion >= 030100}
-  {$warn 5089 off}
-  {$warn 5090 off}
-  {$warn 5093 off}
-  {$warn 6058 off}
-  {$endif}
- {$if fpc_fullversion >= 030300}
-  {$warn 6060 off}
-  {$endif}
-{$endif}
-
 uses
  msetypes,classes,mclasses,msewidgets,msearrayprops,mseclasses,msebitmap,
  mseact,mseshapes,msemenus,msedragglob,
@@ -424,19 +412,6 @@ type
 implementation
 uses
  sysutils,msebits,mseactions,msestockobjects;
-
- {$ifndef mse_allwarnings}
- {$if fpc_fullversion >= 030100}
-  {$warn 5089 off}
-  {$warn 5090 off}
-  {$warn 5093 off}
-  {$warn 6058 off}
-  {$endif}
- {$if fpc_fullversion >= 030300}
-  {$warn 6060 off}
-  {$endif}
-{$endif}
-
 
 const
  separatorwidth = 3;

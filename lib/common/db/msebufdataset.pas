@@ -24,24 +24,20 @@ unit msebufdataset;
 {$endif}
 
 interface
+{$ifndef mse_allwarnings}
+ {$if fpc_fullversion >= 030100}
+  {$warn 5089 off}
+  {$warn 5090 off}
+  {$warn 5093 off}
+  {$warn 6058 off}
+ {$endif}
+{$endif}
 
 uses
  mdb,classes,mclasses,variants,msetypes,msearrayprops,mseclasses,mselist,
  msestrings,
  msedb,msedatabase,mseglob,msearrayutils,msedatalist,msevariants,
  msestream;
-
- {$ifndef mse_allwarnings}
- {$if fpc_fullversion >= 030100}
-  {$warn 5089 off}
-  {$warn 5090 off}
-  {$warn 5093 off}
-  {$warn 6058 off}
-  {$endif}
- {$if fpc_fullversion >= 030300}
-  {$warn 6060 off}
-  {$endif}
-{$endif}
 
 const
  defaultpacketrecords = -1;
@@ -1466,12 +1462,8 @@ uses
   {$warn 5090 off}
   {$warn 5093 off}
   {$warn 6058 off}
-  {$endif}
- {$if fpc_fullversion >= 030300}
-  {$warn 6060 off}
-  {$endif}
+ {$endif}
 {$endif}
-
 
 type
  tmsestringfield1 = class(tmsestringfield);
