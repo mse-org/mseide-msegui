@@ -19,6 +19,19 @@ unit watchform;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 
 interface
+{$ifndef mse_allwarnings}
+ {$if fpc_fullversion >= 030100}
+  {$warn 5089 off}
+  {$warn 5090 off}
+  {$warn 5093 off}
+  {$warn 6058 off}
+ {$endif}
+ {$if fpc_fullversion >= 030300}
+  {$warn 6060 off}
+  {$warn 6018 off}
+  {$warn 6058 off}
+  {$endif}
+{$endif}
 
 uses
  mseforms,msedataedits,msewidgetgrid,msegdbutils,msegraphedits,msedock,msegrids,
@@ -67,6 +80,21 @@ implementation
 uses
  watchform_mfm,main,msewidgets,projectoptionsform,actionsmodule,msegraphutils,
  mseguiglob,mseformatstr,msebits,sysutils,watchpointsform,memoryform;
+
+{$ifndef mse_allwarnings}
+ {$if fpc_fullversion >= 030100}
+  {$warn 5089 off}
+  {$warn 5090 off}
+  {$warn 5093 off}
+  {$warn 6058 off}
+ {$endif}
+ {$if fpc_fullversion >= 030300}
+  {$warn 6060 off}
+  {$warn 6018 off}
+  {$warn 6058 off}
+  {$endif}
+{$endif}
+
 type
  stringconstants = (
   deleteall,        //0 Do you wish to delete all watches?

@@ -19,6 +19,18 @@ unit pascaldesignparser;
 {$ifdef FPC}{$mode objfpc}{$h+}{$GOTO ON}{$endif}
 
 interface
+{$ifndef mse_allwarnings}
+ {$if fpc_fullversion >= 030100}
+  {$warn 5089 off}
+  {$warn 5090 off}
+  {$warn 5093 off}
+  {$warn 6058 off}
+ {$endif}
+ {$if fpc_fullversion >= 030300}
+  {$warn 6060 off}
+  {$warn 6018 off}
+  {$endif}
+{$endif}
 uses
  classes,mseparser,typinfo,msetypes,mselist,msestrings,mseclasses,
  msedesignparser;
@@ -74,6 +86,18 @@ procedure parsepascaldef(const adef: pdefinfoty; out atext: string;
 implementation
 uses
  sysutils,msedatalist,msefileutils,msedesigner,sourceupdate,msestream;
+ {$ifndef mse_allwarnings}
+ {$if fpc_fullversion >= 030100}
+  {$warn 5089 off}
+  {$warn 5090 off}
+  {$warn 5093 off}
+  {$warn 6058 off}
+ {$endif}
+ {$if fpc_fullversion >= 030300}
+  {$warn 6060 off}
+  {$warn 6018 off}
+  {$endif}
+{$endif}
 type
  tdeflist1 = class(tdeflist);
  tusesinfolist1 = class(tusesinfolist);

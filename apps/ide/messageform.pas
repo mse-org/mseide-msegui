@@ -19,6 +19,19 @@ unit messageform;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 
 interface
+{$ifndef mse_allwarnings}
+ {$if fpc_fullversion >= 030100}
+  {$warn 5089 off}
+  {$warn 5090 off}
+  {$warn 5093 off}
+  {$warn 6058 off}
+ {$endif}
+ {$if fpc_fullversion >= 030300}
+  {$warn 6060 off}
+  {$warn 6018 off}
+  {$warn 6058 off}
+  {$endif}
+{$endif}
 uses
  msetypes,msegui,mseclasses,mseforms,msegrids,msemenus,msedataedits,
  msesimplewidgets,classes,mclasses,projectoptionsform;
@@ -44,6 +57,20 @@ var
 implementation
 uses
  messageform_mfm,sourcepage,sourceform,msewidgets,msestrings,msedatalist;
+
+{$ifndef mse_allwarnings}
+ {$if fpc_fullversion >= 030100}
+  {$warn 5089 off}
+  {$warn 5090 off}
+  {$warn 5093 off}
+  {$warn 6058 off}
+ {$endif}
+ {$if fpc_fullversion >= 030300}
+  {$warn 6060 off}
+  {$warn 6018 off}
+  {$warn 6058 off}
+  {$endif}
+{$endif}
 
 constructor tmessagefo.create(aowner: tcomponent);
 begin

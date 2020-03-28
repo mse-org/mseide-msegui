@@ -19,6 +19,11 @@ interface
   {$warn 5093 off}
   {$warn 6058 off}
  {$endif}
+ {$if fpc_fullversion >= 030300}
+  {$warn 6060 off}
+  {$warn 6018 off}
+  {$warn 6058 off}
+  {$endif}
 {$endif}
 uses
  mseglob,mseguiglob,mseforms,classes,mclasses,mseclasses,msewidgets,msegrids,
@@ -599,6 +604,10 @@ uses
   {$warn 5093 off}
   {$warn 6058 off}
  {$endif}
+ {$if fpc_fullversion >= 030300}
+  {$warn 6060 off}
+  {$warn 6018 off}
+  {$endif}
 {$endif}
 
 type

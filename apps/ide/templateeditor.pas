@@ -1,6 +1,19 @@
 unit templateeditor;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
+{$ifndef mse_allwarnings}
+ {$if fpc_fullversion >= 030100}
+  {$warn 5089 off}
+  {$warn 5090 off}
+  {$warn 5093 off}
+  {$warn 6058 off}
+ {$endif}
+ {$if fpc_fullversion >= 030300}
+  {$warn 6060 off}
+  {$warn 6018 off}
+  {$warn 6058 off}
+  {$endif}
+{$endif}
 uses
  mseglob,mseguiglob,mseguiintf,mseapplication,msestat,msemenus,msegui,
  msegraphics,msegraphutils,mseevent,mseclasses,mseforms,msestatfile,
@@ -55,6 +68,19 @@ implementation
 uses
  templateeditor_mfm,msecodetemplates,projectoptionsform,sysutils,msefileutils,
  msedatalist,msesysintf,msearrayutils,mseformatstr;
+ {$ifndef mse_allwarnings}
+ {$if fpc_fullversion >= 030100}
+  {$warn 5089 off}
+  {$warn 5090 off}
+  {$warn 5093 off}
+  {$warn 6058 off}
+ {$endif}
+ {$if fpc_fullversion >= 030300}
+  {$warn 6060 off}
+  {$warn 6018 off}
+  {$warn 6058 off}
+  {$endif}
+{$endif}
 type
  stringconststy = (
   wantdelete,      //0 Do you want to delete "
