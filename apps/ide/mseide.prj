@@ -829,22 +829,17 @@ moduleoptions=3
  0
 visiblemodules=3
  -1
- -1
+ 0
  -1
 nomenumodules=3
  0
  0
  0
 [sourcefo.files_tab]
-order=4
- 1
- 0
- 2
- 3
 firsttab=0
 index=3
 [layout]
-windowlayout=554
+windowlayout=549
  [mainfo.basedock]
  splitdir=2
  useroptions=268450944
@@ -1335,11 +1330,6 @@ windowlayout=554
  rcx=0
  rcy=0
  [sourcefo.files_tab]
- order=4
-  1
-  0
-  2
-  3
  firsttab=0
  index=3
  [confideufo.usedefaulteditoroptions]
@@ -1348,7 +1338,7 @@ windowlayout=554
  irqoff=0
  splitdir=0
  useroptions=268451947
- stackedunder=targetconsolefo
+ stackedunder=_mse_actionsmo_mse_
  parent=
  mdistate=0
  nx=0
@@ -1367,7 +1357,7 @@ windowlayout=554
  [_mse_mainfo_mse_]
  splitdir=0
  useroptions=268451963
- stackedunder=_mse_actionsmo_mse_
+ stackedunder=_mse_sourcefo_mse_
  parent=
  mdistate=3
  nx=0
