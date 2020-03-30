@@ -758,9 +758,9 @@ var
  key: word;
 begin
  key:= ashortcut and not modmask;
-//{$warnings off}
+{$warnings off}
  result:= (key <> 0) and (key <> word(not modmask));
-//{$warnings on}
+{$warnings on}
  if result then begin
   if ashortcut and (modmask and not pad) = 0 then begin
    result:= not isnormalkey(key);

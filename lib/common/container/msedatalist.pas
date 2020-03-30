@@ -888,7 +888,9 @@ const
  foldhiddenmask = 1 shl foldhiddenbit;
  currentfoldhiddenbit = 6;
  currentfoldhiddenmask = 1 shl currentfoldhiddenbit;
+ {$warnings off}
  foldlevelmask = byte(not (foldhiddenmask or currentfoldhiddenmask));
+ {$warnings on}
  foldissumbit = 0;
  foldissummask = $01;
  rowstatemask = $7f;
