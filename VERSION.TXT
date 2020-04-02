@@ -1,5 +1,10 @@
 MSEide+MSEgui breaking changes version history
 **********************************************
+Version 5.0.0
+2020-04-02
+ Compatible with fpc 3.2.0 too.
+ Graeme's proceduresq list.
+
 Version 4.6.2
 2018-11-03
 2018-10-15

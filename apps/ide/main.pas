@@ -46,7 +46,7 @@ uses
  mselistbrowser,projecttreeform,msepipestream,msestringcontainer,msesys,
  msewidgets;
 const
- versiontext = '4.6.3';
+ versiontext = '5.0.0';
  idecaption = 'MSEide';
  statname = 'mseide';
 
@@ -2849,11 +2849,11 @@ end;
 procedure tmainfo.aboutonexecute(const sender: TObject);
 begin
  showmessage('MSEide version: '+versiontext+c_linefeed+
-             'MSEgui version: '+mseguiversiontext+c_linefeed+
-             'Host: '+ platformtext+ c_linefeed+
+             'MSEgui version: '+mseguiversiontext+c_linefeed+c_linefeed+
+             ' Host: '+ platformtext+ c_linefeed+
              c_linefeed+
              copyrighttext+c_linefeed+
-             'by Martin Schreiber'
+             ' by Martin Schreiber' + c_linefeed+ '      and friends.'
              ,actionsmo.c[ord(ac_about)]+' MSEide');
 end;
 
