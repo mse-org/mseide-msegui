@@ -21,6 +21,7 @@ IDE:
 - Source code highlighting.
 - Source code navigation with support for include files.
 - Code completion for classes.
+- Procedures list.
 - Integrated visual form designer with source code update for components and
   events.
 - Flexible and handy build system with switchable macros.
