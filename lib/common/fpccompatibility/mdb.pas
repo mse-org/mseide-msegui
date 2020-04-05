@@ -58,7 +58,7 @@ type
 
   TDataSetState = (dsInactive, dsBrowse, dsEdit, dsInsert, dsSetKey,
     dsCalcFields, dsFilter, dsNewValue, dsOldValue, dsCurValue, dsBlockRead,
-    dsInternalCalc, dsOpening, dscheckfilter);
+    dsInternalCalc, dsOpening, dsCheckFilter);
 
   TDataEvent = (deFieldChange, deRecordChange, deDataSetChange,
     deDataSetScroll, deLayoutChange, deUpdateRecord, deUpdateState,

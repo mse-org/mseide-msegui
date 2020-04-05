@@ -221,6 +221,34 @@ settings=14
  wsize=0
  active=1
  visible=1
+imagelisteditor=27
+ [imagelisteditorfo.statfile1]
+ currentversion=0
+ [imagelisteditorfo.filedialog]
+ filenames=1
+  /home/fred/Pictures/imagesideu/bluepoint2.png
+ filecolwidth=174
+ x=365
+ y=390
+ cx=554
+ cy=316
+ lastdir=/home/fred/Pictures/imagesideu/
+ filehistory=1
+  /home/fred/Pictures/imagesideu/bluepoint2.png
+ filefilterindex=0
+ filefilter="*.jpg" "*.jpeg" "*.bmp" "*.ico" "*.png" "*.pnm" "*.pgm" "*.pbm" "*.tga" "*.tif" "*.tiff" "*.xpm"
+ [imagelisteditorfo.transparentcolor]
+ value=-2147483647
+ [imagelisteditorfo.stretch]
+ value=1
+ [imagelisteditorfo]
+ x=584
+ y=250
+ cx=508
+ cy=355
+ wsize=0
+ active=1
+ visible=1
 colordialog=5
  [colordialogfo]
  x=140
@@ -471,18 +499,21 @@ settingsstorage=0
 settingsprojecttree=0
 settingsautoload=0
 settingsautosave=0
-modulenames=3
+modulenames=4
  ACTIONSMO
  PROJECTOPTIONSFO
  SOURCEFO
-moduletypes=3
+ SOURCEPAGE
+moduletypes=4
  TACTIONSMO
  TPROJECTOPTIONSFO
  TSOURCEFO
-modulefiles=3
+ TSOURCEPAGE
+modulefiles=4
  /home/fred/mseide-msegui/apps/ide/actionsmodule.mfm
  /home/fred/mseide-msegui/apps/ide/projectoptionsform.mfm
  /home/fred/mseide-msegui/apps/ide/sourceform.mfm
+ /home/fred/mseide-msegui/apps/ide/sourcepage.mfm
 befcommandon=0
 makeoptionson=6
  63
@@ -749,13 +780,27 @@ sigsettings=27
  30,30,T,F
 defaultmake=1
 [breakpoints]
-on=0
-path=0
-line=0
-address=0
-addbkpt=0
-ignore=0
-condition=0
+on=2
+ -1
+ -1
+path=2
+ /home/fred/mseide-msegui/apps/ide/sourceform.pas
+ /home/fred/mseide-msegui/apps/ide/sourceform.pas
+line=2
+ 1620
+ 1628
+address=2
+ 0
+ 0
+addbkpt=2
+ 0
+ 0
+ignore=2
+ 0
+ 0
+condition=2
+ 
+ 
 panels=1
  panel1
 units=
@@ -810,60 +855,70 @@ findhistory=20
  ptypinf
  paramlist
 findoptions=1
-editpos=4
- 0,0
+editpos=5
+ 25,1621
  0,-1073741823
+ 0,74
  0,-1073741823
- 18,26
+ 0,2
 bookmarks0=0
 bookmarks1=0
 bookmarks2=0
 bookmarks3=0
-sourcefiles=4
+bookmarks4=0
+sourcefiles=5
  ${PROJECTDIR}/sourceform.pas
  ${PROJECTDIR}/actionsmodule.pas
  ${PROJECTDIR}/mseide.pas
  ${PROJECTDIR}/projectoptionsform.pas
-relpaths=4
+ ${PROJECTDIR}/sourcepage.pas
+relpaths=5
  sourceform.pas
  actionsmodule.pas
  mseide.pas
  projectoptionsform.pas
-ismoduletexts=4
+ sourcepage.pas
+ismoduletexts=5
  0
  0
  0
  0
-modules=4
+ 0
+modules=5
  /home/fred/mseide-msegui/apps/ide/main.mfm
  /home/fred/mseide-msegui/apps/ide/actionsmodule.mfm
  /home/fred/mseide-msegui/apps/ide/sourceform.mfm
  /home/fred/mseide-msegui/apps/ide/projectoptionsform.mfm
-moduleoptions=4
+ /home/fred/mseide-msegui/apps/ide/sourcepage.mfm
+moduleoptions=5
  0
  0
  0
  0
-visiblemodules=4
+ 0
+visiblemodules=5
  0
  -1
  -1
  -1
-nomenumodules=4
  -1
+nomenumodules=5
+ -1
+ 0
  0
  0
  0
 [sourcefo.files_tab]
-order=4
+order=5
  0
+ 2
+ 4
  3
  1
- 2
 firsttab=0
-index=1
+index=0
 [layout]
-windowlayout=578
+windowlayout=599
  [mainfo.basedock]
  splitdir=2
  useroptions=268450944
@@ -877,8 +932,8 @@ windowlayout=578
  ny=0
  ncx=0
  ncy=0
- x=69
- y=65
+ x=137
+ y=80
  cx=1178
  cy=621
  rcx=0
@@ -1092,7 +1147,7 @@ windowlayout=578
  [objectinspectorfo]
  splitdir=0
  useroptions=268451947
- stackedunder=targetconsolefo
+ stackedunder=_mse_sourcefo_mse_
  parent=
  mdistate=0
  nx=0
@@ -1318,8 +1373,8 @@ windowlayout=578
  mdistate=0
  nx=0
  ny=0
- ncx=1147
- ncy=54
+ ncx=1168
+ ncy=56
  x=0
  y=0
  cx=1168
@@ -1333,15 +1388,16 @@ windowlayout=578
  [debuggerfo.edit_compiler]
  value=Pascal
  [debuggerfo.file_history]
- value=/home/fred/mseide-msegui/apps/ide/projectoptionsform.pas
- history=3
+ value=/home/fred/mseide-msegui/apps/ide/sourceform.pas
+ history=4
+  /home/fred/mseide-msegui/apps/ide/projectoptionsform.pas
   /home/fred/svnfpctrunk/trunk/compiler/link.pas
   /home/fred/ideu/src/finddialogform.pas
   /home/fred/mseide-msegui/apps/ide/mseide.pas
  [debuggerfo.project_options]
  value=1
  [debuggerfo.hints]
- value=0
+ value=1
  [sourcefo]
  splitdir=0
  useroptions=16489
@@ -1359,13 +1415,14 @@ windowlayout=578
  rcx=0
  rcy=0
  [sourcefo.files_tab]
- order=4
+ order=5
   0
+  2
+  4
   3
   1
-  2
  firsttab=0
- index=1
+ index=0
  [confideufo.usedefaulteditoroptions]
  value=0
  [cpuc86_64fo]
@@ -1426,7 +1483,7 @@ windowlayout=578
  [_mse_projectoptionsfo_mse_]
  splitdir=0
  useroptions=268451963
- stackedunder=objectinspectorfo
+ stackedunder=_mse_sourcepage_mse_
  parent=
  mdistate=3
  nx=0
@@ -1437,6 +1494,25 @@ windowlayout=578
  y=177
  cx=842
  cy=581
+ rcx=0
+ rcy=0
+ wsize=0
+ active=0
+ visible=1
+ [_mse_sourcepage_mse_]
+ splitdir=0
+ useroptions=268451963
+ stackedunder=targetconsolefo
+ parent=
+ mdistate=3
+ nx=0
+ ny=0
+ ncx=0
+ ncy=0
+ x=192
+ y=245
+ cx=321
+ cy=228
  rcx=0
  rcy=0
  wsize=0
