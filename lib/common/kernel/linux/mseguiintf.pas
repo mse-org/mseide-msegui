@@ -321,7 +321,7 @@ const
 
  {$ifdef FPC}
 // threadslib = 'pthread';
- Xlibmodulename = 'X11';
+ Xlibmodulename = 'libX11.so.6';
  {$endif}
  sXlib = Xlibmodulename;
  pixel0 = $000000;
