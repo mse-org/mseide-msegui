@@ -16,7 +16,17 @@ type
  {$ifndef FPC}
  tlibhandle = thandle;
  {$endif}
- threadty = ptruint;
+
+ {$if defined(FPC) and (fpc_fullversion >= 030200)}
+ {$if defined(cpu64) and defined(mswindows)}
+   threadty = Longword;
+ {$else}
+   threadty = ptruint;
+ {$endif}
+ {$else}
+  threadty = ptruint;
+ {$endif}
+
  procidty = ptrint;
  pprocidty = ^procidty;
  procidarty = array of procidty; //same item size as winidarty!
