@@ -22,7 +22,7 @@ unit FPReadPSD;
 interface
 
 uses
-  Classes, SysUtils, FPimage;
+  Classes, mclasses, SysUtils, FPimage;
 
 type
   TRGB = packed record

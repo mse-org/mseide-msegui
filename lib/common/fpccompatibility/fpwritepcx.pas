@@ -23,7 +23,7 @@ unit FPWritePCX;
 
 interface
 
-uses FPImage, Classes, SysUtils;
+uses FPImage, Classes, mclasses, SysUtils;
 
 type
 

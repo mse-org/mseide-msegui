@@ -27,7 +27,7 @@ unit FPReadXWD;
 
 interface
 
-uses FPImage, classes, sysutils, xwdfile;
+uses FPImage, classes, mclasses, sysutils, xwdfile;
 
 type
   TXWDColors = array of TXWDColor;

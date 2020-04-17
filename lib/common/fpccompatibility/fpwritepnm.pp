@@ -22,7 +22,7 @@ unit FPWritePNM;
 
 interface
 
-uses FPImage, classes, sysutils;
+uses FPImage, classes, mclasses, sysutils;
 
 type
   TPNMColorDepth = (pcdAuto,pcdBlackWhite, pcdGrayscale, pcdRGB);

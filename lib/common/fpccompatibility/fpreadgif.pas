@@ -22,7 +22,7 @@ unit FPReadGif;
 interface
 
 uses
-  Classes, SysUtils, FPimage;
+  Classes, mclasses, SysUtils, FPimage;
 
 type
   TGifRGB = packed record

@@ -23,7 +23,7 @@ unit FPReadPCX;
 
 interface
 
-uses FPImage, Classes, SysUtils, pcxcomn;
+uses FPImage, Classes, mclasses, SysUtils, pcxcomn;
 
 type
 

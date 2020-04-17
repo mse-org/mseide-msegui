@@ -24,7 +24,7 @@ unit FPWriteBMP;
 
 interface
 
-uses FPImage, classes, sysutils, BMPComn;
+uses FPImage, classes, mclasses, sysutils, BMPComn;
 
 type
 

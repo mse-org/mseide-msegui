@@ -18,7 +18,7 @@ unit FPWriteTGA;
 
 interface
 
-uses FPImage, classes, sysutils;
+uses FPImage, classes, mclasses, sysutils;
 
 type
 

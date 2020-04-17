@@ -14,14 +14,14 @@
  **********************************************************************
 }
 //modified 2013 by Martin Schreiber
-unit fptiffcmn;
+unit msefptiffcmn;
 
 {$ifdef FPC}{$mode objfpc}{$H+}{$endif}
 
 interface
 
 uses
-  classes, mclasses, sysutils, fpimage,msetypes;
+  classes, mclasses, sysutils, msefpimage,msetypes;
 
 type
   TTiffRational = packed record
