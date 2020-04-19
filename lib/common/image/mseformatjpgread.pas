@@ -22,7 +22,7 @@ uses
 type
  tmsefpreaderjpeg = class(tfpreaderjpeg)
   protected
-   function  InternalCheck(Str: TStream): boolean; override;
+   function  InternalCheck(Str: Classes.TStream): boolean; override;
  end;
  
 function readgraphic(const source: tstream; 
@@ -42,7 +42,7 @@ end;
 
 { tmsefpreaderjpeg }
 
-function tmsefpreaderjpeg.InternalCheck(Str: TStream): boolean;
+function tmsefpreaderjpeg.InternalCheck(Str: Classes.TStream): boolean;
 var
  int1: integer;
  ar1: array[0..1] of byte;
