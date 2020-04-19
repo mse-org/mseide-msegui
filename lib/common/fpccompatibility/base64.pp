@@ -26,7 +26,7 @@ unit base64;
 
 interface
 
-uses classes, mclasses, sysutils;
+uses classes, cmclasses, sysutils;
 
 type
 
