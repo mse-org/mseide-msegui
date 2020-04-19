@@ -27,8 +27,8 @@ type
    fhasalpha: boolean;
    fmonoalpha: boolean;
   public
-   procedure assign(source: tpersistent); override;
-   procedure assignto(dest: tpersistent); override;
+   procedure assign(source: classes.tpersistent); override;
+   procedure assignto(dest: classes.tpersistent); override;
    procedure writetostream(const dest: tstream;
                    const awriter: tfpcustomimagewriter);
                              //owns the writer
@@ -465,7 +465,7 @@ begin
  end;
 end;
 
-procedure tmsefpmemoryimage.assign(source: tpersistent);
+procedure tmsefpmemoryimage.assign(source: classes.tpersistent);
  function to16(const acolor: colorty): tfpcolor;
  var
   rgb1: rgbtriplety;
@@ -827,7 +827,7 @@ begin
  end;
 end;
 
-procedure tmsefpmemoryimage.assignto(dest: tpersistent);
+procedure tmsefpmemoryimage.assignto(dest: classes.tpersistent);
 
 var
  grayalpha1: boolean;
