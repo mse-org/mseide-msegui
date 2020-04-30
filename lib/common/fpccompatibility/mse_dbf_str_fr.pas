@@ -1,8 +1,8 @@
-unit dbf_str;
+unit mse_dbf_str;
 
 interface
 
-{$I dbf_common.inc}
+{$I mse_dbf_common.inc}
 
 var
   STRING_FILE_NOT_FOUND: string;

@@ -1,11 +1,11 @@
-unit dbf_str;
+unit mse_dbf_str;
 
 { note this is Brazilian Portuguese }
 
 interface
 
-{$I dbf_common.inc}
-{$I dbf_str.inc}
+{$I mse_dbf_common.inc}
+{$I mse_dbf_str.inc}
 
 implementation
 

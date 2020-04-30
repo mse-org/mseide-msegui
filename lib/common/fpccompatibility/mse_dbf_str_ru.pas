@@ -1,4 +1,4 @@
-unit dbf_str_ru;
+unit mse_dbf_str_ru;
 
 // file is encoded in Windows-1251 encoding
 // for using with Linux/Kylix must be re-coded to KOI8-R
@@ -7,8 +7,8 @@ unit dbf_str_ru;
 
 interface
 
-{$I dbf_common.inc}
-{$I dbf_str.inc}
+{$I mse_dbf_common.inc}
+{$I mse_dbf_str.inc}
 
 implementation
 
