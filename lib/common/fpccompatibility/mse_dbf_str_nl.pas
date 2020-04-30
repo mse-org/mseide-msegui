@@ -1,9 +1,9 @@
-unit mse_dbf_str;
+unit dbf_str;
 
 interface
 
-{$I mse_dbf_common.inc}
-{$I mse_dbf_str.inc}
+{$I dbf_common.inc}
+{$I dbf_str.inc}
 
 implementation
 
