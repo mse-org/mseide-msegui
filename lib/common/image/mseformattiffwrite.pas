@@ -17,7 +17,7 @@ procedure registerformat;
 implementation
 uses
  classes,mclasses,msegraphics,msebitmap,fpwritetiff,msegraphicstream,msestockobjects,
- fpimage;
+ msefpimage;
 
 //
 // todo: -TFPWriterTiff writes a black image, maybe it needs initialization

@@ -16,8 +16,8 @@ procedure registerformat;
  
 implementation
 uses
- classes,mclasses,msegraphics,msebitmap,fpwritepng,msegraphicstream,msestockobjects,
- fpimage;
+ classes,mclasses,msegraphics,msebitmap,msefpwritepng,msegraphicstream,msestockobjects,
+ msefpimage;
 
 procedure writegraphic(const dest: tstream;
                                const source: tobject; const format: string;

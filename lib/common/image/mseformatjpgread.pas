@@ -9,6 +9,7 @@
 }
 unit mseformatjpgread;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
+
 interface
 const
  jpglabel = 'jpeg';
@@ -16,13 +17,13 @@ procedure registerformat;
  
 implementation
 uses
- classes,mclasses,msegraphics,msebitmap,fpreadjpeg,msegraphicstream,
+ classes,mclasses,msegraphics,msebitmap,msefpreadjpeg,msegraphicstream,
  msestockobjects,msestream;
  
 type
  tmsefpreaderjpeg = class(tfpreaderjpeg)
   protected
-   function  InternalCheck(Str: Classes.TStream): boolean; override;
+   function  InternalCheck(Str:Tstream): boolean; override;
  end;
  
 function readgraphic(const source: tstream; 
@@ -42,7 +43,7 @@ end;
 
 { tmsefpreaderjpeg }
 
-function tmsefpreaderjpeg.InternalCheck(Str: Classes.TStream): boolean;
+function tmsefpreaderjpeg.InternalCheck(Str: Tstream): boolean;
 var
  int1: integer;
  ar1: array[0..1] of byte;

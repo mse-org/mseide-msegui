@@ -10,9 +10,11 @@
 unit msegraphicstream;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 
+{$define no_class_bridge}
+
 interface
 uses
- sysutils,classes,mclasses,msebitmap,msegraphics,fpimage,
+ sysutils,classes,mclasses,msebitmap,msegraphics,msefpimage,
  msestrings,msetypes;
 
 const
@@ -27,8 +29,8 @@ type
    fhasalpha: boolean;
    fmonoalpha: boolean;
   public
-   procedure assign(source: classes.tpersistent); override;
-   procedure assignto(dest: classes.tpersistent); override;
+   procedure assign(source: {$ifndef no_class_bridge}classes.{$endif}tpersistent); override;
+   procedure assignto(dest: {$ifndef no_class_bridge}classes.{$endif}tpersistent); override;
    procedure writetostream(const dest: tstream;
                    const awriter: tfpcustomimagewriter);
                              //owns the writer
@@ -465,7 +467,7 @@ begin
  end;
 end;
 
-procedure tmsefpmemoryimage.assign(source: classes.tpersistent);
+procedure tmsefpmemoryimage.assign(source: {$ifndef no_class_bridge}classes.{$endif}tpersistent);
  function to16(const acolor: colorty): tfpcolor;
  var
   rgb1: rgbtriplety;
@@ -827,7 +829,7 @@ begin
  end;
 end;
 
-procedure tmsefpmemoryimage.assignto(dest: classes.tpersistent);
+procedure tmsefpmemoryimage.assignto(dest: {$ifndef no_class_bridge}classes.{$endif}tpersistent);
 
 var
  grayalpha1: boolean;

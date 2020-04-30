@@ -16,7 +16,7 @@ procedure registerformat;
  
 implementation
 uses
- classes,mclasses,msegraphics,msebitmap,fpreadtiff,msegraphicstream,
+ classes,mclasses,msegraphics,msebitmap,msefpreadtiff,msegraphicstream,
  msestockobjects;
  
 type

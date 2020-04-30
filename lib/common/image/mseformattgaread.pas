@@ -9,6 +9,7 @@
 }
 unit mseformattgaread;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
+
 interface
 const
  tgalabel = 'tga';
@@ -16,13 +17,13 @@ procedure registerformat;
  
 implementation
 uses
- classes,mclasses,msegraphics,msebitmap,fpreadtga,msegraphicstream,
+ classes,mclasses,msegraphics,msebitmap,msefpreadtga,msegraphicstream,
  msestockobjects;
 
 type
  tmsefpreadertarga = class(tfpreadertarga)
   protected
-   function  InternalCheck(Str: Classes.TStream): boolean; override;
+   function  InternalCheck(Str: TStream): boolean; override;
  end;
  
 function readgraphic(const source: tstream;
@@ -42,7 +43,7 @@ end;
 
 { tmsefpreadertarga }
 
-function tmsefpreadertarga.InternalCheck(Str: Classes.TStream): boolean;
+function tmsefpreadertarga.InternalCheck(Str: TStream): boolean;
 var
  int1: integer;
  ar1: array[0..2] of byte;

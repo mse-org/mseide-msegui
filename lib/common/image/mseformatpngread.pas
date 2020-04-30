@@ -9,6 +9,7 @@
 }
 unit mseformatpngread;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
+
 interface
 const
  pnglabel = 'png';
@@ -16,7 +17,7 @@ procedure registerformat;
  
 implementation
 uses
- classes,mclasses,msegraphics,msebitmap,fpreadpng,msegraphicstream,
+ classes,mclasses,msegraphics,msebitmap,msefpreadpng,msegraphicstream,
  msestockobjects;
  
 type

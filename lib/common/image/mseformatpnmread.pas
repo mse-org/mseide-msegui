@@ -9,6 +9,8 @@
 }
 unit mseformatpnmread;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
+
+
 interface
 const
  pnmlabel = 'pnm';
@@ -16,18 +18,18 @@ procedure registerformat;
  
 implementation
 uses
- classes,mclasses,msegraphics,msebitmap,fpreadpnm,msegraphicstream,
+ classes,mclasses,msegraphics,msebitmap,msefpreadpnm,msegraphicstream,
  msestockobjects;
 
 type
  tmsefpreaderpnm = class(tfpreaderpnm)
   protected
-   function  InternalCheck(Str: Classes.TStream): boolean; override;
+   function  InternalCheck(Str: TStream): boolean; override;
  end;
  
 { tmsefpreaderpnm }
 
-function tmsefpreaderpnm.InternalCheck(Str: Classes.TStream): boolean;
+function tmsefpreaderpnm.InternalCheck(Str: TStream): boolean;
 var
  int1: integer;
  ar1: array[0..1] of char;

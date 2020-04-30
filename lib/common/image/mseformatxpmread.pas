@@ -16,13 +16,13 @@ procedure registerformat;
  
 implementation
 uses
- classes,mclasses,msegraphics,msebitmap,fpreadxpm,msegraphicstream,
- msestockobjects,fpimage;
+ classes,mclasses,msegraphics,msebitmap,msefpreadxpm,msegraphicstream,
+ msestockobjects,msefpimage;
  
 type
  tmsefpreaderxpm = class(tfpreaderxpm)
   protected
-   procedure InternalRead  (Str:Classes.TStream; Img:TFPCustomImage); override;
+   procedure InternalRead  (Str: TStream; Img:TFPCustomImage); override;
  end;
  
 function readgraphic(const source: tstream; 
@@ -42,7 +42,7 @@ end;
 
 { tmsefpreadertaxpm }
 
-procedure tmsefpreaderxpm.InternalRead(Str: Classes.TStream; Img: TFPCustomImage);
+procedure tmsefpreaderxpm.InternalRead(Str: TStream; Img: TFPCustomImage);
 begin
  img.usepalette:= true;
  inherited;

@@ -26,6 +26,8 @@ unit mclasses;
  {$INLINE ON}
 {$endif}
 
+{$define no_class_bridge}
+
 {$if defined(FPC) and (fpc_fullversion >= 020601)}
  {$define mse_fpc_2_6_2}
 {$ifend}
@@ -80,18 +82,37 @@ type
 
 {$M+}
 
-  TClassesPersistent = Classes.TPersistent;
-  
-  // write tpersistent instead of tpersistentbridge
+{$if defined(no_class_bridge)}
+ tpersistent = class(TObject{,IFPObserved})
+  private
+   procedure AssignError(Source: tpersistent);
+{$else}
+ TClassesPersistent = Classes.TPersistent;
+   // write tpersistent instead of tpersistentbridge
   tpersistentbridge = class(TClassesPersistent)
-  protected
+{$ifend}
+   protected
   {$ifndef FPC}
     function Equals(Obj: TObject) : boolean;virtual;
+    { IUnknown }
+    function QueryInterface(const IID: TGUID;out Obj): Hresult; stdcall;
+    function _AddRef: Integer; stdcall;
+    function _Release: Integer; stdcall;
   {$endif}
+  {$if defined(no_class_bridge)}
+    procedure AssignTo(Dest: tpersistent); virtual;
+    procedure DefineProperties(Filer: tfiler); virtual;
+    function  GetOwner: tpersistent; dynamic;
+  public
+    Destructor Destroy; override;
+    procedure Assign(Source: tpersistent); virtual;
+    function  GetNamePath: string; virtual; {dynamic;}
+  end;
+  {$else}
     procedure AssignTo(Dest: TClassesPersistent); overload; override;
     procedure AssignTo(Dest: tpersistentbridge); overload; virtual;
     procedure DefineProperties(Filer: tfiler); overload; virtual; 
-    function  GetOwner: tpersistentbridge; dynamic; //shadows
+    function  GetOwner: tpersistentbridge; overload; override; //shadows
     Procedure FPOAttachObserver(AObserver : TObject); //shadows
     Procedure FPODetachObserver(AObserver : TObject); //shadows
     Procedure FPONotifyObservers(ASender : TObject; AOperation : TFPObservedOperation; Data : Pointer); //shadows
@@ -101,6 +122,8 @@ type
   end;
   
   tpersistent = tpersistentbridge;
+
+  {$ifend}
 
 {$M-}
 
@@ -1261,10 +1284,99 @@ begin
       Item.Free;
     end;
 end;
-
+{$if defined(no_class_bridge)}
 
 {****************************************************************************}
 {*                             TPersistent                                  *}
+{****************************************************************************}
+
+{$ifndef FPC}
+function tpersistent.Equals(Obj: TObject) : boolean;
+begin
+ result:= Obj = Self;
+end;
+
+function tpersistent.QueryInterface(const IID: TGUID;
+                            out Obj): HResult; stdcall;
+begin
+  if GetInterface(IID, Obj) then
+    Result := S_OK
+  else
+    Result := E_NOINTERFACE;
+end;
+
+function tpersistent._AddRef: Integer; stdcall;
+begin
+ Result := -1;
+end;
+
+function tpersistent._Release: Integer; stdcall;
+begin
+ Result := -1;
+end;
+{$endif}
+
+procedure TPersistent.AssignError(Source: TPersistent);
+
+Var SourceName : String;
+
+begin
+  If Source<>Nil then
+    SourceName:=Source.ClassName
+  else
+    SourceName:='Nil';
+  raise EConvertError.CreateFmt (SAssignError,[SourceName,ClassName]);
+end;
+
+procedure TPersistent.AssignTo(Dest: TPersistent);
+begin
+  Dest.AssignError(Self);
+end;
+
+procedure TPersistent.DefineProperties(Filer: TFiler);
+
+begin
+end;
+
+function  TPersistent.GetOwner: TPersistent;
+
+begin
+  Result:=Nil;
+end;
+
+destructor TPersistent.Destroy;
+begin
+  inherited Destroy;
+end;
+
+procedure TPersistent.Assign(Source: TPersistent);
+
+begin
+  If Source<>Nil then
+    Source.AssignTo(Self)
+  else
+    AssignError(Nil);
+end;
+
+function  TPersistent.GetNamePath: string;
+
+Var OwnerName :String;
+    TheOwner: TPersistent;
+
+begin
+ Result:=ClassName;
+ TheOwner:=GetOwner;
+ If TheOwner<>Nil then
+   begin
+   OwnerName:=TheOwner.GetNamePath;
+   If OwnerName<>'' then Result:=OwnerName+'.'+Result;
+   end;
+end;
+
+{$else}
+
+{****************************************************************************}
+{*                             TPersistent with bridge                      *}
 {****************************************************************************}
 
 {$ifndef FPC}
@@ -1332,6 +1444,8 @@ begin
   else
     inherited Assign(Nil);  
 end;
+
+{$ifend}
 
 {****************************************************************************}
 {*                             TComponent                                   *}
