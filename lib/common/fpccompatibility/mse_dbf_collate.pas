@@ -1,4 +1,4 @@
-unit dbf_collate;
+unit mse_dbf_collate;
 
 {$i dbf_common.inc}
 
@@ -38,7 +38,7 @@ var
 
 
 implementation
-uses dbf_lang, math;
+uses mse_dbf_lang, math;
 
 
 procedure InitialiseCollationTables;

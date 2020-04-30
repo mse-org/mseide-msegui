@@ -1,4 +1,4 @@
-unit dbf_cursor;
+unit mse_dbf_cursor;
 
 interface
 
@@ -7,8 +7,8 @@ interface
 uses
   SysUtils,
   classes,mclasses,
-  dbf_pgfile,
-  dbf_common;
+  mse_dbf_pgfile,
+  mse_dbf_common;
 
 type
 

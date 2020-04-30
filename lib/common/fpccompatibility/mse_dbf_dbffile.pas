@@ -1,4 +1,4 @@
-unit dbf_dbffile;
+unit mse_dbf_dbffile;
 
 // Modified 2013 by Martin Schreiber
 
@@ -22,15 +22,15 @@ uses
 {$ifdef KYLIX}
   Libc,
 {$endif}
-  Types, dbf_wtil,
+  Types, mse_dbf_wtil,
 {$endif}
   mdb,
-  dbf_common,
-  dbf_cursor,
-  dbf_pgfile,
-  dbf_fields,
-  dbf_memo,
-  dbf_idxfile;
+  mse_dbf_common,
+  mse_dbf_cursor,
+  mse_dbf_pgfile,
+  mse_dbf_fields,
+  mse_dbf_memo,
+  mse_dbf_idxfile;
 
 //====================================================================
 //=== Dbf support (first part)
@@ -209,7 +209,7 @@ uses
 {$ifdef SUPPORT_MATH_UNIT}
   Math,
 {$endif}
-  dbf_str, dbf_lang, mdbf_prssupp, mdbf_prsdef;
+  mse_dbf_str, mse_dbf_lang, mdbf_prssupp, mdbf_prsdef;
 {$ifndef mse_allwarnings}
  {$if fpc_fullversion >= 030100}
   {$warn 5089 off}

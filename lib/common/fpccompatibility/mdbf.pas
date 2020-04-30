@@ -19,14 +19,14 @@ interface
 uses
   classes,mclasses,
   mdb,
-  dbf_common,
-  dbf_dbffile,
-  dbf_parser,
+  mse_dbf_common,
+  mse_dbf_dbffile,
+  mse_dbf_parser,
   mdbf_prsdef,
-  dbf_cursor,
-  dbf_fields,
-  dbf_pgfile,
-  dbf_idxfile;
+  mse_dbf_cursor,
+  mse_dbf_fields,
+  mse_dbf_pgfile,
+  mse_dbf_idxfile;
 // If you got a compilation error here or asking for dsgnintf.pas, then just add
 // this file in your project:
 // dsgnintf.pas in 'C: \Program Files\Borland\Delphi5\Source\Toolsapi\dsgnintf.pas'
@@ -483,14 +483,14 @@ uses
   Libc,
 {$endif}
   Types,
-  dbf_wtil,
+  mse_dbf_wtil,
 {$endif}
 {$ifdef SUPPORT_SEPARATE_VARIANTS_UNIT}
   Variants,
 {$endif}
-  dbf_idxcur,
-  dbf_memo,
-  dbf_str;
+  mse_dbf_idxcur,
+  mse_dbf_memo,
+  mse_dbf_str;
 {$ifndef mse_allwarnings}
  {$if fpc_fullversion >= 030100}
   {$warn 5089 off}

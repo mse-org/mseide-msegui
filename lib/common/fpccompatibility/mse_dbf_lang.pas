@@ -1,25 +1,17 @@
-unit dbf_lang;
+unit mse_dbf_lang;
 
 {$I dbf_common.inc}
 
 interface
-{$ifndef mse_allwarnings}
- {$if fpc_fullversion >= 030100}
-  {$warn 5089 off}
-  {$warn 5090 off}
-  {$warn 5093 off}
-  {$warn 6058 off}
- {$endif}
-{$endif}
 
 uses
-{$ifdef msWINDOWS}
+{$ifdef WINDOWS}
   Windows;
 {$else}
 {$ifdef KYLIX}
-  Libc,
-{$endif}
-  Types, dbf_wtil;
+  Libc, 
+{$endif}  
+  Types, mse_dbf_wtil;
 {$endif}
 
 const
@@ -29,10 +21,10 @@ const
 //*************************************************************************//
 
 // ...
-  FoxLangId_ENU_437       = $01;
-  FoxLangId_Intl_850      = $02;
-  FoxLangId_Windows_1252  = $03;
-  FoxLangId_Mac_10000     = $04;
+  FoxLangId_ENU_437       = $01; // DOS USA
+  FoxLangId_Intl_850      = $02; // DOS multilingual
+  FoxLangId_Windows_1252  = $03; // Windows ANSI
+  FoxLangId_Mac_10000     = $04; // Standard Macintosh
 // ...
   DbfLangId_DAN_865       = $08;
   DbfLangId_NLD_437       = $09;
@@ -78,58 +70,62 @@ const
   DbfLangId_WEurope_1252  = $58;
   DbfLangId_Spanish_1252  = $59;
 // ...
+// Additional FoxPro references:
+// http://msdn.microsoft.com/en-us/library/8t45x02s%28v=VS.80%29.aspx
+// http://www.clicketyclick.dk/databases/xbase/format/dbf.html#DBF_STRUCT
   FoxLangId_German_437    = $5E;
   FoxLangId_Nordic_437    = $5F;
   FoxLangId_Nordic_850    = $60;
   FoxLangId_German_1252   = $61;
   FoxLangId_Nordic_1252   = $62;
 // ...
-  FoxLangId_EEurope_852   = $64;
-  FoxLangId_Russia_866    = $65;
-  FoxLangId_Nordic_865    = $66;
-  FoxLangId_Iceland_861   = $67;
-  FoxLangId_Czech_895     = $68;
+  FoxLangId_EEurope_852   = $64; // DOS
+  FoxLangId_Russia_866    = $65; // DOS //todo: verify, MS docs say this is $66
+  FoxLangId_Nordic_865    = $66; // DOS //todo: verify, MS docs say this is $65
+  FoxLangId_Iceland_861   = $67; // DOS
+  FoxLangId_Czech_895     = $68; // DOS Kamenicky
 // ...
-  DbfLangId_POL_620       = $69;
+  DbfLangId_POL_620       = $69; // DOS Polish Mazovia
 // ...
-  FoxLangId_Greek_737     = $6A;
-  FoxLangId_Turkish_857   = $6B;
+  FoxLangId_Greek_737     = $6A; // DOS (437G)
+  FoxLangId_Turkish_857   = $6B; // DOS
 // ...
-  FoxLangId_Taiwan_950    = $78;
-  FoxLangId_Korean_949    = $79;
-  FoxLangId_Chinese_936   = $7A;
-  FoxLangId_Japan_932     = $7B;
-  FoxLangId_Thai_874      = $7C;
-  FoxLangId_Hebrew_1255   = $7D;
-  FoxLangId_Arabic_1256   = $7E;
+  FoxLangId_Taiwan_950    = $78; // Windows
+  FoxLangId_Korean_949    = $79; // Windows
+  FoxLangId_Chinese_936   = $7A; // Windows Chinese simplified
+  FoxLangId_Japan_932     = $7B; // Windows
+  FoxLangId_Thai_874      = $7C; // Windows
+  FoxLangId_Hebrew_1255   = $7D; // Windows
+  FoxLangId_Arabic_1256   = $7E; // Windows
 // ...
   DbfLangId_Hebrew        = $85;
-  DbfLangId_ELL_437       = $86;    // greek, code page 737 (?)
+  DbfLangId_ELL_437       = $86; // greek, code page 737 (?)
   DbfLangId_SLO_852       = $87;
   DbfLangId_TRK_857       = $88;
 // ...
   DbfLangId_BUL_868       = $8E;
 // ...
-  FoxLangId_Russia_10007  = $96;
-  FoxLangId_EEurope_10029 = $97;
-  FoxLangId_Greek_10006   = $98;
+  FoxLangId_Russia_10007  = $96; // Macintosh
+  FoxLangId_EEurope_10029 = $97; // Macintosh
+  FoxLangId_Greek_10006   = $98; // Macintosh
 // ...
   FoxLangId_Czech_1250    = $9B;
-  FoxLangId_Czech_850     = $9C;    // DOS
+  FoxLangId_Czech_850     = $9C; // DOS
 // ...
-  FoxLangId_EEurope_1250  = $C8;
-  FoxLangId_Russia_1251   = $C9;
-  FoxLangId_Turkish_1254  = $CA;
-  FoxLangId_Greek_1253    = $CB;
+  FoxLangId_EEurope_1250  = $C8; // Windows
+  FoxLangId_Russia_1251   = $C9; // Windows
+  FoxLangId_Turkish_1254  = $CA; // Windows
+  FoxLangId_Greek_1253    = $CB; // Windows
 
 
 // special constants
-
   DbfLocale_NotFound   = $010000;
   DbfLocale_Bul868     = $020000;
 
 //*************************************************************************//
-// DB3/DB4/FoxPro Language ID to CodePage convert table
+// DB3/DB4/FoxPro Language ID to CodePage conversion table
+// Visual FoxPro docs call language ID "code page mark"
+// or "code page identifier"
 //*************************************************************************//
 
   LangId_To_CodePage: array[Byte] of Word =
@@ -169,6 +165,7 @@ const
 {F0}       0,    0,    0,    0,    0,    0,    0,    0,
 {F8}       0,    0,    0,    0,    0,    0,    0,    0);
 
+
 {$ifdef FPC_VERSION}
 {$ifdef VER1_0}
   LANG_ARABIC                          = $01;
@@ -184,7 +181,6 @@ const
 //*************************************************************************//
 
 // table
-
   LangId_To_Locale: array[Byte] of LCID =
       (
       DbfLocale_NotFound,
@@ -217,7 +213,7 @@ const
       LANG_FRENCH     or (SUBLANG_FRENCH_CANADIAN      shl 10) or (SORT_DEFAULT shl 16),
 {1E}  0,
 {1F}  LANG_CZECH      or (SUBLANG_DEFAULT              shl 10) or (SORT_DEFAULT shl 16),
-      LANG_CZECH      or (SUBLANG_DEFAULT              shl 10) or (SORT_DEFAULT shl 16),
+      0 {Used to be LANG_CZECH in previous versions but DBase IV tables show no support here.},
 {21}  0,
 {22}  LANG_HUNGARIAN  or (SUBLANG_DEFAULT              shl 10) or (SORT_DEFAULT shl 16),
       LANG_POLISH     or (SUBLANG_DEFAULT              shl 10) or (SORT_DEFAULT shl 16),
@@ -235,7 +231,7 @@ const
       LANG_THAI       or (SUBLANG_DEFAULT              shl 10) or (SORT_DEFAULT shl 16),
 {51}  0,0,0,0,0,
 {56}  LANG_JAPANESE   or (SUBLANG_DEFAULT              shl 10) or (SORT_DEFAULT shl 16),    // JPN: Dic932 ??
-      0,                                                                                    // Ascii: Binary
+{57}  0, // ANSI/ASCII binary (interpret e.g. as ISO 8859_1 depending on client}
       LANG_ENGLISH    or (SUBLANG_ENGLISH_UK           shl 10) or (SORT_DEFAULT shl 16),    // Western Europe ??
       LANG_SPANISH    or (SUBLANG_SPANISH              shl 10) or (SORT_DEFAULT shl 16),
 {5A}  0,0,0,0,
@@ -293,6 +289,41 @@ const
 {E0}  0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 {F0}  0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
       );
+
+  //*************************************************************************//
+  // Visual FoxPro CodePage<>Language ID conversion table
+  //*************************************************************************//
+  // table: note layout is different:
+    VFPCodePage_LangID: array[0..51] of integer =
+//        Code page|Codepage identifier/LangID
+        (
+        437,$01,// U.S. MS-DOS
+        620,$69,// Mazovia (Polish) MS-DOS
+        737,$6A,// Greek MS-DOS (437G)
+        850,$02,// International MS-DOS
+        852,$64,// Eastern European MS-DOS
+        857,$6B,// Turkish MS-DOS
+        861,$67,// Icelandic MS-DOS
+        865,$66,// Nordic MS-DOS //todo: verify this. not 65?
+        866,$64,// Russian MS-DOS //todo: verify this. not 66?
+        874,$7C,// Thai Windows
+        895,$68,// Kamenicky (Czech) MS-DOS
+        932,$7B,// Japanese Windows
+        936,$7A,// Chinese Simplified (PRC, Singapore) Windows
+        949,$79,// Korean Windows
+        950,$78,// Traditional Chinese (Hong Kong SAR, Taiwan) Windows
+        1250,$C8,// Eastern European Windows
+        1251,$C9,// Russian Windows
+        1252,$03,// Windows ANSI
+        1253,$CB,// Greek Windows
+        1254,$CA,// Turkish Windows
+        1255,$7D,// Hebrew Windows
+        1256,$7E,// Arabic Windows
+        10000,$04,// Standard Macintosh
+        10006,$98,// Greek Macintosh
+        10007,$96,// Russian Macintosh
+        10029,$97// Macintosh EE (=Eastern European?)
+        );
 
 //*************************************************************************//
 // DB7 LangID Locale substrings
@@ -473,24 +504,18 @@ const
 // reverse convert routines
 //*************************************************************************//
 
+// Visual DBaseVII specific; the IsFoxPro means a FoxPro codepage, which DB7 supports
 function ConstructLangName(CodePage: Integer; Locale: LCID; IsFoxPro: Boolean): string;
 
 function ConstructLangId(CodePage: Integer; Locale: LCID; IsFoxPro: Boolean): Byte;
 
+// Visual DBaseVII specific
 function GetLangId_From_LangName(LocaleStr: string): Byte;
 
 implementation
 
 uses
   SysUtils;
-{$ifndef mse_allwarnings}
- {$if fpc_fullversion >= 030100}
-  {$warn 5089 off}
-  {$warn 5090 off}
-  {$warn 5093 off}
-  {$warn 6058 off}
- {$endif}
-{$endif}
 
 type
   PCardinal = ^Cardinal;
@@ -533,8 +558,7 @@ begin
 end;
 
 const
-  // range of Dbase / FoxPro locale; these are INCLUSIVE
-
+  // range of Dbase locales; these are INCLUSIVE (the rest are FoxPro)
   dBase_RegionCount = 4;
   dBase_Regions: array[0..dBase_RegionCount*2-1] of Byte =
    ($00, $00,
@@ -542,85 +566,68 @@ const
     $69, $69, // a lonely dbf entry :-)
     $80, $90);
 
-function FindLangId(CodePage, Info2: Cardinal; Info2Table: PCardinal; IsFoxPro: Boolean): Byte;
+function FindLangId(CodePage, DesiredLocale: Cardinal; LanguageIDToLocaleTable: PCardinal; IsFoxPro: Boolean): Byte;
+// DesiredLocale: pointer to lookup array: language ID=>locale
 var
-  I, Region, FoxRes, DbfRes: Integer;
+  i, LangID, Region: Integer;
 begin
   Region := 0;
-  DbfRes := 0;
-  FoxRes := 0;
-  // scan
-  for I := 0 to $FF do
+  if IsFoxPro then
   begin
-    // check if need to advance to next region
-    if Region + 2 < dBase_RegionCount then
-      if I >= dBase_Regions[Region + 2] then
-        Inc(Region, 2);
-    // it seems delphi does not properly understand pointers?
-    // what a mess :-(
-    if ((LangId_To_CodePage[I] = CodePage) or (CodePage = 0)) and (PCardinal(PChar(Info2Table)+(I*4))^ = Info2) then
-      if I <= dBase_Regions[Region+1] then
-        DbfRes := Byte(I)
-      else
-        FoxRes := Byte(I);
-  end;
-  // if we can find langid in other set, use it
-  if (DbfRes <> 0) and (not IsFoxPro or (FoxRes = 0)) then
-    Result := DbfRes
-  else  {(DbfRes = 0) or (IsFoxPro and (FoxRes <> 0)}
-  if (FoxRes <> 0) {and (IsFoxPro or (DbfRes = 0)} then
-    Result := FoxRes
-  else
-    Result := 0;
-end;
-
-{
-function FindLangId(CodePage, Info2: Cardinal; Info2Table: PCardinal; IsFoxPro: Boolean): Byte;
-var
-  I, Region, lEnd: Integer;
-  EndReached: Boolean;
-begin
-  Region := 0;
-  Result := 0;
-  repeat
-    // determine region to scan
-    if IsFoxPro then
+    // scan for a language ID matching the given codepage;
+    // default to Win1252 Western European codepage
+    result:=$03;
+    for i := 0 to high(VFPCodePage_LangID) div 2 do
     begin
-      // foxpro, in between dbase regions
-      I := dBase_Regions[Region+1] + 1;
-      lEnd := dBase_Regions[Region+2] - 1;
-      EndReached := Region = dBase_RegionCount*2-4;
-    end else begin
-      // dBase, select regions
-      I := dBase_Regions[Region];
-      lEnd := dBase_Regions[Region+1];
-      EndReached := Region = dBase_RegionCount*2-2;
+      if CodePage=VFPCodePage_LangID[i*2] then
+      begin
+        result := Byte(VFPCodePage_LangID[1+i*2]);
+        break;
+      end;
     end;
-    // scan
-    repeat
+  end
+  else
+  begin
+    // DBase
+    // scan for a language ID matching the given codepage
+    result:=0;
+    for LangID := 0 to $FF do
+    begin
+      // check if need to advance to next region
+      if Region + 2 < dBase_RegionCount then
+        if LangID >= dBase_Regions[Region + 2] then
+          Inc(Region, 2);
       // it seems delphi does not properly understand pointers?
       // what a mess :-(
-      if (LangId_To_CodePage[I] = CodePage) and (PCardinal(PChar(Info2Table)+(I*4))^ = Info2) then
-        Result := Byte(I);
-      Inc(I);
-      // lEnd is included in range
-    until (Result <> 0) or (I > lEnd);
-    // goto next region
-    if (Result = 0) then
-      Inc(Region, 2);
-    // found or end?
-  until (Result <> 0) or EndReached;
+      if ((LangId_To_CodePage[LangID] = CodePage) or (CodePage = 0)) and
+        (PCardinal(PChar(LanguageIDToLocaleTable)+(LangID*4))^ = DesiredLocale) then
+        // Ignore (V)FP results
+        if LangID <= dBase_Regions[Region+1] then
+          result := Byte(LangID);
+    end;
+  end;
 end;
-}
 
 function ConstructLangId(CodePage: Integer; Locale: LCID; IsFoxPro: Boolean): Byte;
 begin
-  // locale: lower 16bits only
+  // locale: lower 16bits only, with default sorting
   Locale := (Locale and $FFFF) or (SORT_DEFAULT shl 16);
-  Result := FindLangId(CodePage, Locale, @LangId_To_Locale[0], IsFoxPro);
+  if IsFoxPro then
+    Result := FindLangID(CodePage, Locale, @VFPCodePage_LangID[0], true)
+  else
+    Result := FindLangId(CodePage, Locale, @LangId_To_Locale[0], false);
   // not found? try any codepage
   if Result = 0 then
-    Result := FindLangId(0, Locale, @LangId_To_Locale[0], IsFoxPro);
+    if IsFoxPro then
+      Result := FindLangID(0, Locale, @VFPCodePage_LangID[0], true)
+    else
+    begin
+      Result := FindLangId(0, Locale, @LangId_To_Locale[0], false);
+      // Dbase: last resort; include foxpro codepages;
+      // compatible with older tdbf but unknow whether this actually works
+      if Result = 0 then
+        Result := FindLangID(0, Locale, @VFPCodePage_LangID[0], true)
+    end;
 end;
 
 function GetLangId_From_LangName(LocaleStr: string): Byte;
@@ -643,10 +650,10 @@ begin
   // convert codepage string to codepage id
   if CodePageStr = 'WIN' then
     CodePage := 1252
-  else if CodePageStr = 'REW' then    // hebrew
+  else if CodePageStr = 'REW' then    // Hebrew
     CodePage := 1255
   else
-    CodePage := StrToInt(CodePageStr);
+    CodePage := StrToIntDef(CodePageStr,0); //fail to codepage 0
   // find lang id
   Result := FindLangId(CodePage, SubType, @LangId_To_LocaleStr[0], IsFoxPro);
 end;

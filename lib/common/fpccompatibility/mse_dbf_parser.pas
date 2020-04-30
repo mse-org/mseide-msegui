@@ -1,4 +1,4 @@
-unit dbf_parser;
+unit mse_dbf_parser;
 
 // Modified 2013 by Martin Schreiber
 
@@ -13,12 +13,12 @@ uses
   Libc,
 {$endif}
 {$ifndef WINDOWS}
-  dbf_wtil,
+  mse_dbf_wtil,
 {$endif}
   mdb,
   mdbf_prscore,
-  dbf_common,
-  dbf_fields,
+  mse_dbf_common,
+  mse_dbf_fields,
   mdbf_prsdef,
   mdbf_prssupp;
 
@@ -72,8 +72,8 @@ implementation
 
 uses
   mdbf,
-  dbf_dbffile,
-  dbf_str
+  mse_dbf_dbffile,
+  mse_dbf_str
 {$ifdef WINDOWS}
   ,Windows
 {$endif}

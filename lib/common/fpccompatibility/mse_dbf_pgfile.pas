@@ -1,13 +1,13 @@
-unit dbf_pgfile;
+unit mse_dbf_pgfile;
 
 interface
 
 {$I dbf_common.inc}
 
 uses
-  classes,mclasses,
+  Classes, mclasses,
   SysUtils,
-  dbf_common;
+  mse_dbf_common;
 
 //const
 //  MaxHeaders = 256;
@@ -15,7 +15,7 @@ uses
 type
   EPagedFile = Exception;
 
-  TPagedFileMode = (pfNone, pfMemoryCreate, pfMemoryOpen, pfExclusiveCreate,
+  TPagedFileMode = (pfNone, pfMemoryCreate, pfMemoryOpen, pfExclusiveCreate, 
     pfExclusiveOpen, pfReadWriteCreate, pfReadWriteOpen, pfReadOnly);
 
   // access levels:
@@ -80,10 +80,12 @@ type
     procedure UpdateBufferSize;
     procedure RecalcPagesPerRecord;
     procedure ReadHeader;
+    // Write header to stream
     procedure FlushHeader;
     procedure FlushBuffer;
     function  ReadChar: Byte;
     procedure WriteChar(c: Byte);
+    // Check if position in cache. If not, enlarge cache.
     procedure CheckCachedSize(const APosition: Integer);
     procedure SynchronizeBuffer(IntRecNum: Integer);
     function  Read(Buffer: Pointer; ASize: Integer): Integer;
@@ -123,8 +125,11 @@ type
     procedure Flush; virtual;
 
     property Active: Boolean read FActive;
-    property AutoCreate: Boolean read FAutoCreate write FAutoCreate;   // only write when closed!
-    property Mode: TPagedFileMode read FMode write FMode;              // only write when closed!
+    // If yes, create file if it doesn't exist.
+    // Only write this property when closed!
+    property AutoCreate: Boolean read FAutoCreate write FAutoCreate;
+    // only write this property when closed!
+    property Mode: TPagedFileMode read FMode write FMode;
     property TempMode: TPagedFileMode read FTempMode;
     property NeedLocks: Boolean read FNeedLocks;
     property HeaderOffset: Integer read FHeaderOffset write SetHeaderOffset;
@@ -150,11 +155,11 @@ uses
   Windows,
 {$else}
 {$ifdef KYLIX}
-  Libc,
+  Libc, 
+{$endif}  
+  Types, mse_dbf_wtil,
 {$endif}
-  Types, dbf_wtil,
-{$endif}
-  dbf_str;
+  mse_dbf_str;
 
 //====================================================================
 // TPagedFile
@@ -207,7 +212,7 @@ procedure TPagedFile.OpenFile;
 var
   fileOpenMode: Word;
 begin
-  if FActive then exit;
+  if FActive then exit;  
 
   // store user specified mode
   FUserMode := FMode;
@@ -316,6 +321,9 @@ end;
 
 function TPagedFile.CalcPageOffset(const PageNo: Integer): Integer;
 begin
+  //todo: verify: this looks suspicious: check if we should uniformly use
+  // either FPageSize*PageNo as in the case without header offset
+  // or (FPageSize*(PageNo-1))
   if not FPageOffsetByHeader then
     Result := FPageSize * PageNo
   else if PageNo = 0 then
@@ -555,7 +563,7 @@ begin
   begin
     // get size left in file for header
     size := FStream.Size - FHeaderOffset;
-    // header start before EOF?
+    // does header start before EOF?
     if size >= 0 then
     begin
       // go to header start
@@ -571,7 +579,7 @@ begin
         Read(FHeader, size);
       end;
     end else begin
-      // header start before EOF, clear header
+      // clear header
       size := 0;
     end;
     FillChar(FHeader[size], FHeaderSize-size, 0);

@@ -1,30 +1,21 @@
-unit dbf_idxcur;
-
-// Modified 2013 by Martin Schreiber
+unit mse_dbf_idxcur;
 
 interface
-{$ifndef mse_allwarnings}
- {$if fpc_fullversion >= 030100}
-  {$warn 5089 off}
-  {$warn 5090 off}
-  {$warn 5093 off}
-  {$warn 6058 off}
- {$endif}
-{$endif}
 
 {$I dbf_common.inc}
 
 uses
   SysUtils,
-  classes,mclasses,
-  mdb,
-  dbf_cursor,
-  dbf_idxfile,
+  Classes,
+  mclasses,
+  db,
+  mse_dbf_cursor,
+  mse_dbf_idxfile,
   mdbf_prsdef,
 {$ifndef WINDOWS}
-  dbf_wtil,
+  mse_dbf_wtil,
 {$endif}
-  dbf_common;
+  mse_dbf_common;
 
 type
 
@@ -70,17 +61,9 @@ type
 //====================================================================
 implementation
 
-{$ifdef msWINDOWS}
+{$ifdef WINDOWS}
 uses
   Windows;
-{$endif}
-{$ifndef mse_allwarnings}
- {$if fpc_fullversion >= 030100}
-  {$warn 5089 off}
-  {$warn 5090 off}
-  {$warn 5093 off}
-  {$warn 6058 off}
- {$endif}
 {$endif}
 
 //==========================================================

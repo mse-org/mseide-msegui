@@ -1,4 +1,4 @@
-unit dbf_fields;
+unit mse_dbf_fields;
 
 // Modified 2013 by Martin Schreiber
 
@@ -10,8 +10,8 @@ uses
   classes,mclasses,
   SysUtils,
   mdb,
-  dbf_common,
-  dbf_str;
+  mse_dbf_common,
+  mse_dbf_str;
 
 type
   PDbfFieldDef = ^TDbfFieldDef;
@@ -107,7 +107,7 @@ type
 implementation
 
 uses
-  dbf_dbffile;      // for dbf header structures
+  mse_dbf_dbffile;      // for dbf header structures
 
 {$I dbf_struct.inc}
 

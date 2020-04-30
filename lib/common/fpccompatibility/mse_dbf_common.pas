@@ -1,4 +1,4 @@
-unit dbf_common;
+unit mse_dbf_common;
 
 // Modified 2013 by Martin Schreiber
 
@@ -7,22 +7,23 @@ interface
 {$I dbf_common.inc}
 
 uses
-  SysUtils, classes,mclasses,mdb
+  SysUtils, Classes, mclasses, DB
 {$ifndef WINDOWS}
-  , Types, dbf_wtil
+  , Types, mse_dbf_wtil
 {$ifdef KYLIX}
   , Libc
-{$endif}
+{$endif}  
 {$endif}
   ;
 
 
 const
-  TDBF_MAJOR_VERSION      = 6;
-  TDBF_MINOR_VERSION      = 9;
-  TDBF_SUB_MINOR_VERSION  = 2;
+  TDBF_MAJOR_VERSION      = 7;
+  TDBF_MINOR_VERSION      = 0;
+  TDBF_SUB_MINOR_VERSION  = 0;
 
   TDBF_TABLELEVEL_FOXPRO = 25;
+  TDBF_TABLELEVEL_VISUALFOXPRO = 30; {Source: http://www.codebase.com/support/kb/?article=C01059}
 
   JulianDateDelta = 1721425; { number of days between 1.1.4714 BC and "0" }
 
@@ -32,7 +33,7 @@ type
 
   TDbfFieldType = char;
 
-  TXBaseVersion   = (xUnknown, xClipper, xBaseIII, xBaseIV, xBaseV, xFoxPro, xBaseVII);
+  TXBaseVersion   = (xUnknown, xClipper, xBaseIII, xBaseIV, xBaseV, xFoxPro, xBaseVII, xVisualFoxPro);
   TSearchKeyType = (stEqual, stGreaterEqual, stGreater);
 
   TDateTimeHandling       = (dtDateTime, dtBDETimeStamp);
@@ -65,10 +66,14 @@ procedure FreeMemAndNil(var P: Pointer);
 
 {$ifndef SUPPORT_PATHDELIM}
 const
-{$ifdef msWINDOWS}
+{$ifdef WINDOWS}
   PathDelim = '\';
 {$else}
+ {$IFDEF UNIX}
   PathDelim = '/';
+ {$ELSE UNIX}
+  PathDelim = '\';
+ {$ENDIF UNIX}
 {$endif}
 {$endif}
 
@@ -88,15 +93,22 @@ procedure FindNextName(BaseName: string; var OutName: string; var Modifier: Inte
 function GetFreeMemory: Integer;
 {$endif}
 
+// Convert word to big endian
 function SwapWordBE(const Value: word): word;
+// Convert word to little endian
 function SwapWordLE(const Value: word): word;
+// Convert integer to big endian
 function SwapIntBE(const Value: dword): dword;
+// Convert integer to little endian
 function SwapIntLE(const Value: dword): dword;
 {$ifdef SUPPORT_INT64}
+// Convert int64 to big endian
 procedure SwapInt64BE(Value, Result: Pointer); register;
+// Convert int64 to little endian
 procedure SwapInt64LE(Value, Result: Pointer); register;
 {$endif}
 
+// Translate string between codepages
 function TranslateString(FromCP, ToCP: Cardinal; Src, Dest: PChar; Length: Integer): Integer;
 
 // Returns a pointer to the first occurence of Chr in Str within the first Length characters
@@ -113,7 +125,7 @@ function Max(x, y: integer): integer;
 
 implementation
 
-{$ifdef msWINDOWS}
+{$ifdef WINDOWS}
 uses
   Windows;
 {$endif}
@@ -139,13 +151,13 @@ end;
 
 function IsFullFilePath(const Path: string): Boolean; // full means not relative
 begin
-{$ifdef msWINDOWS}
+{$ifdef SUPPORT_DRIVES_AND_UNC}
   Result := Length(Path) > 1;
   if Result then
     // check for 'x:' or '\\' at start of path
     Result := ((Path[2]=':') and (upcase(Path[1]) in ['A'..'Z']))
       or ((Path[1]='\') and (Path[2]='\'));
-{$else}  // Linux
+{$else}  // Linux / Unix
   Result := Length(Path) > 0;
   if Result then
     Result := Path[1]='/';
@@ -227,10 +239,14 @@ end;
 
 function IncludeTrailingPathDelimiter(const Path: string): string;
 begin
-{$ifdef msWINDOWS}
+{$ifdef WINDOWS}
   Result := IncludeTrailingBackslash(Path);
 {$else}
+ {$IFDEF UNIX}
   Result := IncludeTrailingSlash(Path);
+ {$ELSE UNIX}
+  Result := IncludeTrailingBackslash(Path);
+ {$ENDIF UNIX}
 {$endif}
 end;
 
@@ -303,12 +319,12 @@ end;
 
 procedure SwapInt64BE(Value {EAX}, Result {EDX}: Pointer); register; assembler;
 asm
-  MOV ECX, dword ptr [EAX]
-  MOV EAX, dword ptr [EAX + 4]
-  BSWAP ECX
-  BSWAP EAX
-  MOV dword ptr [EDX+4], ECX
-  MOV dword ptr [EDX], EAX
+  MOV ECX, dword ptr [EAX] 
+  MOV EAX, dword ptr [EAX + 4] 
+  BSWAP ECX 
+  BSWAP EAX 
+  MOV dword ptr [EDX+4], ECX 
+  MOV dword ptr [EDX], EAX 
 end;
 
 {$else}
@@ -367,10 +383,10 @@ begin
   Result := Length;
 {$ifndef WINCE}
   if (FromCP = GetOEMCP) and (ToCP = GetACP) then
-    OemToCharBuff(Src, Dest, Length)
+    OemToCharBuffA(Src, Dest, Length)
   else
   if (FromCP = GetACP) and (ToCP = GetOEMCP) then
-    CharToOemBuff(Src, Dest, Length)
+    CharToOemBuffA(Src, Dest, Length)
   else
 {$endif}
   if FromCP = ToCP then
@@ -402,7 +418,9 @@ function MemScan(const Buffer: Pointer; Chr: Byte; Length: Integer): Pointer;
 var
   I: Integer;
 begin
-  I := System.IndexByte(Buffer, Length, Chr);
+  // Make sure we pass a buffer of bytes instead of a pchar otherwise
+  // the call will always fail
+  I := System.IndexByte(PByte(Buffer)^, Length, Chr);
   if I = -1 then
     Result := nil
   else

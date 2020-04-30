@@ -1,4 +1,4 @@
-unit dbf_idxfile;
+unit mse_dbf_idxfile;
 
 // Modified 2013 by Martin Schreiber
 
@@ -21,20 +21,20 @@ uses
 {$ifdef KYLIX}
   Libc,
 {$endif}
-  Types, dbf_wtil,
+  Types, mse_dbf_wtil,
 {$endif}
   SysUtils,
   classes,mclasses,
   mdb,
-  dbf_pgfile,
+  mse_dbf_pgfile,
 {$ifdef USE_CACHE}
-  dbf_pgcfile,
+  mse_dbf_pgcfile,
 {$endif}
-  dbf_parser,
+  mse_dbf_parser,
   mdbf_prsdef,
-  dbf_cursor,
-  dbf_collate,
-  dbf_common;
+  mse_dbf_cursor,
+  mse_dbf_collate,
+  mse_dbf_common;
 
 {$ifdef _DEBUG}
 {$define TDBF_INDEX_CHECK}
@@ -415,12 +415,12 @@ type
 implementation
 
 uses
-  dbf_dbffile,
-  dbf_fields,
-  dbf_str,
+  mse_dbf_dbffile,
+  mse_dbf_fields,
+  mse_dbf_str,
   mdbf_prssupp,
   mdbf_prscore,
-  dbf_lang;
+  mse_dbf_lang;
 {$ifndef mse_allwarnings}
  {$if fpc_fullversion >= 030100}
   {$warn 5089 off}
