@@ -26,7 +26,7 @@ unit mclasses;
  {$INLINE ON}
 {$endif}
 
-{$define no_class_bridge}
+{.$define no_class_bridge}
 
 {$if defined(FPC) and (fpc_fullversion >= 020601)}
  {$define mse_fpc_2_6_2}

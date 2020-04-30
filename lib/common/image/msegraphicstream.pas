@@ -10,7 +10,7 @@
 unit msegraphicstream;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 
-{$define no_class_bridge}
+{.$define no_class_bridge}
 
 interface
 uses
