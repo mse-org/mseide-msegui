@@ -12,7 +12,7 @@ interface
  {$endif}
 {$endif}
 
-{$I dbf_common.inc}
+{$I mse_dbf_common.inc}
 
 uses
   classes,mclasses,SysUtils,
@@ -222,7 +222,7 @@ uses
 const
   sDBF_DEC_SEP = '.';
 
-{$I dbf_struct.inc}
+{$I mse_dbf_struct.inc}
 
 //====================================================================
 // International separator

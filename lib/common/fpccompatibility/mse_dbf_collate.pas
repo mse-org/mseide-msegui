@@ -1,7 +1,6 @@
 unit mse_dbf_collate;
 
-{$i dbf_common.inc}
-
+{$I mse_dbf_common.inc}
 
 interface
 

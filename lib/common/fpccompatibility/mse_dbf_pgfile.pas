@@ -2,7 +2,7 @@ unit mse_dbf_pgfile;
 
 interface
 
-{$I dbf_common.inc}
+{$I mse_dbf_common.inc}
 
 uses
   Classes, mclasses,

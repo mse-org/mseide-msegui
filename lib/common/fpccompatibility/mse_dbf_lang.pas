@@ -1,6 +1,6 @@
 unit mse_dbf_lang;
 
-{$I dbf_common.inc}
+{$I mse_dbf_common.inc}
 
 interface
 

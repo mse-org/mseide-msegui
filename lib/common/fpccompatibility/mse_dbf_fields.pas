@@ -4,7 +4,7 @@ unit mse_dbf_fields;
 
 interface
 
-{$I dbf_common.inc}
+{$I mse_dbf_common.inc}
 
 uses
   classes,mclasses,
@@ -109,7 +109,7 @@ implementation
 uses
   mse_dbf_dbffile;      // for dbf header structures
 
-{$I dbf_struct.inc}
+{$I mse_dbf_struct.inc}
 
 // I keep changing that fields...
 // Last time has been asked by Venelin Georgiev

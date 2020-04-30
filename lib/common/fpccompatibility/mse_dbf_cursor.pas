@@ -2,7 +2,7 @@ unit mse_dbf_cursor;
 
 interface
 
-{$I dbf_common.inc}
+{$I mse_dbf_common.inc}
 
 uses
   SysUtils,

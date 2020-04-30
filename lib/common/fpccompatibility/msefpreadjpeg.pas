@@ -38,7 +38,7 @@ uses
 //   {$ifdef FPC}
 //    jpeglib, jdapimin,jdatasrc, jdapistd, jmorecfg
 //   {$else}
-    jpeglib_del, jdapimin_del,jdatasrc_del, jdapistd_del, jmorecfg_del
+    mse_jpeglib_del, mse_jdapimin_del,mse_jdatasrc_del, mse_jdapistd_del, mse_jmorecfg_del
 //   {$endif};
 ;
 type

@@ -2,7 +2,7 @@ unit mse_dbf_prssupp;
 
 // parse support
 
-{$I dbf_common.inc}
+{$I mse_dbf_common.inc}
 
 interface
 
@@ -223,7 +223,7 @@ var
   I, J: Integer;
   NegSign: boolean;
 begin
-  {$I getstrfromint.inc}
+  {$I mse_getstrfromint.inc}
 end;
 
 {$ifdef SUPPORT_INT64}
@@ -234,7 +234,7 @@ var
   I, J: Integer;
   NegSign: boolean;
 begin
-  {$I getstrfromint.inc}
+  {$I mse_getstrfromint.inc}
 end;
 
 function GetStrFromInt64(Val: Int64; const Dst: PChar): Integer;

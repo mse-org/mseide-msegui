@@ -1,6 +1,6 @@
 unit mse_dbf_wtil;
 
-{$I dbf_common.inc}
+{$I mse_dbf_common.inc}
 
 interface
 
@@ -280,9 +280,9 @@ implementation
 
 {$ifndef WINDOWS}
  {$IFDEF OS2}
-  {$I dbf_wos2.inc}
+  {$I mse_dbf_wos2.inc}
  {$ELSE OS2}
-  {$I dbf_wnix.inc}
+  {$I mse_dbf_wnix.inc}
  {$ENDIF OS2}
 
 procedure DateTimeToSystemTime(const DateTime: System.TDateTime; var SystemTime: TSystemTime);

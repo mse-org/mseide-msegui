@@ -549,7 +549,7 @@ const
 implementation
 uses
  sysconst,msedate,msereal,Math,msefloattostr,msearrayutils,msesys,msebits,
- formatfunc;
+ mse_formatfunc;
 {$ifndef mse_allwarnings}
  {$if fpc_fullversion >= 030100}
   {$warn 5089 off}
@@ -665,7 +665,7 @@ var
 function formatmse(const fmt: msestring; const args: array of const;
                            const formatsettings: tformatsettingsmse): msestring;
 begin
- result:= formatfunc.unicodeformat(fmt,args,formatsettings);
+ result:= mse_formatfunc.unicodeformat(fmt,args,formatsettings);
 end;
 
 function formatmse(const fmt: msestring; const args: array of const): msestring;

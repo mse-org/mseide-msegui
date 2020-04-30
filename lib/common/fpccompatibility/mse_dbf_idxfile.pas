@@ -12,7 +12,7 @@ interface
  {$endif}
 {$endif}
 
-{$I dbf_common.inc}
+{$I mse_dbf_common.inc}
 
 uses
 {$ifdef msWINDOWS}
