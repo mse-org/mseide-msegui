@@ -1843,6 +1843,10 @@ procedure tobjectinspectorfo.col0onshowhint(const sender: tdatacol;
 begin
  if (props[arow] <> nil) and props[arow].captionclipped then begin
   info.caption:= props[arow].caption;
+ end else
+ begin
+  if copy(props[arow].caption,1,2) = 'on' then  info.caption:= 
+  'Type in the name of the method you want and Press Enter.' ;
  end;
 end;
 
@@ -1851,6 +1855,10 @@ procedure tobjectinspectorfo.col1onshowhint(const sender: tdatacol;
 begin
  if (values[arow] <> nil) and values[arow].captionclipped then begin
   info.caption:= values[arow].caption;
+ end else
+ begin
+  if copy(props[arow].caption,1,2) = 'on' then  info.caption:= 
+  'Type in the name of the method you want and Press Enter.' ;
  end;
 end;
 
