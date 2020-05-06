@@ -64,7 +64,7 @@ object procedurelistfo: tprocedurelistfo
     datacols.colorfocused = 8758271
     datacols.fontactivenum = 0
     datacols.options = [co_nofocus, co_rowselect, co_savevalue, co_savestate, co_mousescrollrow]
-    datacols.items = <
+    datacols.items = <    
       item
         coloractive = 158
         colorfocused = 8758271
@@ -80,7 +80,7 @@ object procedurelistfo: tprocedurelistfo
         )
         valuefalse = '0'
         valuetrue = '1'
-      end
+      end    
       item
         coloractive = 158
         colorfocused = 8758271
@@ -96,7 +96,7 @@ object procedurelistfo: tprocedurelistfo
         )
         valuefalse = '0'
         valuetrue = '1'
-      end
+      end    
       item
         coloractive = 158
         colorfocused = 8758271
@@ -112,7 +112,7 @@ object procedurelistfo: tprocedurelistfo
         )
         valuefalse = '0'
         valuetrue = '1'
-      end
+      end    
       item
         coloractive = 158
         colorfocused = 8758271
@@ -130,28 +130,29 @@ object procedurelistfo: tprocedurelistfo
         valuetrue = '1'
       end>
     fixrows.count = 1
-    fixrows.items = <
+    fixrows.items = <    
       item
         height = 17
         captions.count = 4
-        captions.items = <
+        captions.items = <        
           item
-          end
+          end        
           item
             caption = 'Procedure'
-          end
+          end        
           item
             caption = 'Type'
-          end
+          end        
           item
             caption = 'Line'
           end>
       end>
     rowcount = 5
     rowfonts.count = 1
-    rowfonts.items = <
+    rowfonts.items = <    
       item
         color = -1610612730
+        height = 12
         name = 'stf_default'
         localprops = [flp_color]
       end>
@@ -176,7 +177,7 @@ object procedurelistfo: tprocedurelistfo
     frame.localprops = []
     frame.localprops1 = []
     frame.buttons.count = 1
-    frame.buttons.items = <
+    frame.buttons.items = <    
       item
       end>
     frame.outerframe = (
@@ -190,8 +191,9 @@ object procedurelistfo: tprocedurelistfo
     bounds_y = 37
     bounds_cx = 228
     bounds_cy = 21
+    onchange = onchangeev
     dropdown.cols.count = 1
-    dropdown.cols.items = <
+    dropdown.cols.items = <    
       item
       end>
     reffontheight = 15

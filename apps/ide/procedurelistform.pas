@@ -82,6 +82,7 @@ type
    procedure JumpToSelectedLine;
    procedure DoubleClickedSelection(const sender: TObject;
                    var info: celleventinfoty);
+   procedure onchangeev(const sender: TObject);
  private
     FFilename: string;
     FLanguage: TSourceLanguage;
@@ -821,6 +822,11 @@ begin
       JumpToSelectedLine;
       Close;
     end;
+end;
+
+procedure tprocedurelistfo.onchangeev(const sender: TObject);
+begin
+FillGrid;
 end;
 
 { TSimpleEngine }
