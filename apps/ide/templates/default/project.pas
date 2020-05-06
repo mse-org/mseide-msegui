@@ -5,7 +5,7 @@ program ${%PROJECTNAME%};
 {$endif}
 uses
  {$ifdef FPC}{$ifdef unix}cthreads,{$endif}{$endif}
- msegui,main;
+ msegui,msegraphics,msegraphutils,main;
 begin
  application.createform(tmainfo,mainfo);
  application.run;
