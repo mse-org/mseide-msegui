@@ -1190,7 +1190,7 @@ var
 
 var
  int1,int2,int3,int4: integer;
- xo,xs,yo,ys,lxo,lxs: real;
+ xo,xs,yo,yo2,ys,lxo,lxs: real;
  rea1: real;
  ar1: datapointarty;
  dpcountx,dpcounty,dpcountxy: integer;
@@ -1249,7 +1249,8 @@ begin
   end;
   if islogy then begin
    yo:= -(chartln(finfo.ystart + finfo.yrange));
-   ys:= -tcustomchart(fowner).traces.fscaley / (-chartln(finfo.ystart) - yo);
+   yo2 := -chartln(finfo.ystart);
+   ys:= -tcustomchart(fowner).traces.fscaley / (yo2 - yo);
   end
   else begin
    yo:= -finfo.ystart - finfo.yrange;
