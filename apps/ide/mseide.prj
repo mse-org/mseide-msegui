@@ -273,14 +273,16 @@ objpref=-Fo
 targpref=-o
 befcommand=0
 aftcommand=0
-makeoptions=6
+makeoptions=7
  -Xg -l -Mobjfpc -Sh -Fcutf8
  -gl -O-
  -B
  -O2 -XX -Xs -CX
  -vq
  -FUunits
-makeoptpurpose=6
+ -dno_class_bridge
+makeoptpurpose=7
+ 
  
  
  
@@ -499,15 +501,22 @@ settingsstorage=0
 settingsprojecttree=0
 settingsautoload=0
 settingsautosave=0
-modulenames=0
-moduletypes=0
-modulefiles=0
+modulenames=2
+ ACTIONSMO
+ SOURCEFO
+moduletypes=2
+ TACTIONSMO
+ TSOURCEFO
+modulefiles=2
+ /home/fred/mseide-msegui/apps/ide/actionsmodule.mfm
+ /home/fred/mseide-msegui/apps/ide/sourceform.mfm
 befcommandon=0
-makeoptionson=6
+makeoptionson=7
  63
  1
  62
  60
+ 4095
  4095
  4095
 compilerusedon=29
@@ -843,10 +852,20 @@ findhistory=20
  ptypinf
  paramlist
 findoptions=1
-editpos=0
-sourcefiles=0
-relpaths=0
-ismoduletexts=0
+editpos=2
+ 0,-1073741823
+ 0,-1073741823
+bookmarks0=0
+bookmarks1=0
+sourcefiles=2
+ ${PROJECTDIR}/sourceform.pas
+ ${PROJECTDIR}/actionsmodule.pas
+relpaths=2
+ sourceform.pas
+ actionsmodule.pas
+ismoduletexts=2
+ 0
+ 0
 modules=3
  /home/fred/mseide-msegui/apps/ide/main.mfm
  /home/fred/mseide-msegui/apps/ide/actionsmodule.mfm
@@ -857,17 +876,17 @@ moduleoptions=3
  0
 visiblemodules=3
  0
- 0
- 0
+ -1
+ -1
 nomenumodules=3
  -1
- -1
- -1
+ 0
+ 0
 [sourcefo.files_tab]
 firsttab=0
-index=-1
+index=0
 [layout]
-windowlayout=584
+windowlayout=554
  [mainfo.basedock]
  splitdir=2
  useroptions=268450944
@@ -991,7 +1010,7 @@ windowlayout=584
  [projecttreefo]
  splitdir=0
  useroptions=268484715
- stackedunder=memoryfo
+ stackedunder=_mse_mainfo_mse_
  parent=
  mdistate=3
  nx=0
@@ -1075,7 +1094,7 @@ windowlayout=584
  [breakpointsfo]
  splitdir=0
  useroptions=268451947
- stackedunder=projecttreefo
+ stackedunder=memoryfo
  parent=
  mdistate=0
  nx=0
@@ -1261,7 +1280,7 @@ windowlayout=584
  [componentpalettefo]
  splitdir=0
  useroptions=268460139
- stackedunder=
+ stackedunder=_mse_sourcefo_mse_
  parent=
  mdistate=0
  nx=0
@@ -1292,7 +1311,7 @@ windowlayout=584
  x=0
  y=0
  cx=1166
- cy=88
+ cy=54
  rcx=0
  rcy=0
  [debuggerfo.basedock]
@@ -1305,10 +1324,10 @@ windowlayout=584
  ny=0
  ncx=1166
  ncy=56
- x=-41
+ x=0
  y=0
  cx=1207
- cy=76
+ cy=53
  rcx=0
  rcy=0
  [debuggerfo.edit_options]
@@ -1319,7 +1338,8 @@ windowlayout=584
  value=Pascal
  [debuggerfo.file_history]
  value=/home/fred/mseide-msegui/apps/ide/templates/default/mainform.mfm
- history=50
+ history=20
+  /home/fred/mseide-msegui/apps/ide/templates/default/mainform.mfm
   /home/fred/mseide-msegui/apps/ide/templates/default/pascform.pas
   /home/fred/mseide-msegui/apps/ide/templates/default/program.pas
   /home/fred/mseide-msegui/apps/ide/templates/default/simpleform.pas
@@ -1339,37 +1359,6 @@ windowlayout=584
   /home/fred/mseide-msegui/lib/common/fpccompatibility/dbf_str_pl.pas
   /home/fred/mseide-msegui/lib/common/fpccompatibility/mse_dbf_str_nl.pas
   /home/fred/mseide-msegui/lib/common/fpccompatibility/dbf_str_nl.pas
-  /home/fred/mseide-msegui/lib/common/fpccompatibility/mse_dbf_str_ita.pas
-  /home/fred/mseide-msegui/lib/common/fpccompatibility/dbf_str_ita.pas
-  /home/fred/mseide-msegui/lib/common/fpccompatibility/mse_dbf_str_es.pas
-  /home/fred/mseide-msegui/lib/common/fpccompatibility/dbf_str_es.pas
-  /home/fred/mseide-msegui/lib/common/fpccompatibility/mse_dbf_str_fr.pas
-  /home/fred/mseide-msegui/lib/common/fpccompatibility/dbf_str_fr.pas
-  /home/fred/mseide-msegui/lib/common/fpccompatibility/mse_dbf_str.pas
-  /home/fred/mseide-msegui/lib/common/fpccompatibility/mse_jdcoefct_del.pas
-  /home/fred/mseide-msegui/lib/common/fpccompatibility/mse_jidctred_del.pas
-  /home/fred/mseide-msegui/lib/common/fpccompatibility/mse_jidctflt_del.pas
-  /home/fred/mseide-msegui/lib/common/fpccompatibility/mse_jidctint_del.pas
-  /home/fred/mseide-msegui/lib/common/fpccompatibility/mse_jidctasm_del.pas
-  /home/fred/mseide-msegui/lib/common/fpccompatibility/mse_jidctfst_del.pas
-  /home/fred/mseide-msegui/lib/common/fpccompatibility/mse_jdct_del.pas
-  /home/fred/mseide-msegui/lib/common/fpccompatibility/mse_jdmerge_del.pas
-  /home/fred/mseide-msegui/lib/common/fpccompatibility/mse_jquant2_del.pas
-  /home/fred/mseide-msegui/lib/common/fpccompatibility/mse_jquant1_del.pas
-  /home/fred/mseide-msegui/lib/common/fpccompatibility/mse_jdmainct_del.pas
-  /home/fred/mseide-msegui/lib/common/fpccompatibility/mse_jdcolor_del.pas
-  /home/fred/mseide-msegui/lib/common/fpccompatibility/mse_jdhuff_del.pas
-  /home/fred/mseide-msegui/lib/common/fpccompatibility/mse_jdphuff_del.pas
-  /home/fred/mseide-msegui/lib/common/fpccompatibility/mse_jddctmgr_del.pas
-  /home/fred/mseide-msegui/lib/common/fpccompatibility/mse_jdpostct_del.pas
-  /home/fred/mseide-msegui/lib/common/fpccompatibility/mse_jdsample_del.pas
-  /home/fred/mseide-msegui/lib/common/fpccompatibility/mse_jdapistd_del.pas
-  /home/fred/mseide-msegui/lib/common/fpccompatibility/mse_jdmaster_del.pas
-  /home/fred/mseide-msegui/lib/common/fpccompatibility/mse_jdatasrc_del.pas
-  /home/fred/mseide-msegui/lib/common/fpccompatibility/mse_jdinput_del.pas
-  /home/fred/mseide-msegui/lib/common/fpccompatibility/mse_jmemnobs_del.pas
-  /home/fred/mseide-msegui/lib/common/fpccompatibility/mse_jutils_del.pas
-  /home/fred/mseide-msegui/lib/common/fpccompatibility/mse_jcomapi_del.pas
  [debuggerfo.project_options]
  value=1
  [debuggerfo.hints]
@@ -1387,7 +1376,7 @@ windowlayout=584
  x=0
  y=0
  cx=1166
- cy=418
+ cy=452
  rcx=0
  rcy=0
  [sourcefo.files_tab]
@@ -1401,7 +1390,7 @@ windowlayout=584
  irqoff=0
  splitdir=0
  useroptions=268451947
- stackedunder=_mse_mainfo_mse_
+ stackedunder=confdebuggerfo
  parent=
  mdistate=0
  nx=0
@@ -1428,15 +1417,15 @@ windowlayout=584
  ncx=0
  ncy=0
  x=0
- y=91
+ y=57
  cx=1166
- cy=418
+ cy=452
  rcx=0
  rcy=0
  [_mse_mainfo_mse_]
  splitdir=0
  useroptions=268451963
- stackedunder=confdebuggerfo
+ stackedunder=componentpalettefo
  parent=
  mdistate=3
  nx=0
