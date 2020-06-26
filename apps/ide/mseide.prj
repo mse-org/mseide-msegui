@@ -280,7 +280,7 @@ makeoptions=7
  -O2 -XX -Xs -CX
  -vq
  -FUunits
- -dno_class_bridge
+ -dclass_bridge
 makeoptpurpose=7
  
  
@@ -518,7 +518,7 @@ makeoptionson=7
  60
  4095
  4095
- 4095
+ 0
 compilerusedon=29
  4095
  0
@@ -853,7 +853,7 @@ findhistory=20
  paramlist
 findoptions=1
 editpos=2
- 0,-1073741823
+ 0,0
  0,-1073741823
 bookmarks0=0
 bookmarks1=0
@@ -902,7 +902,7 @@ windowlayout=554
  ncy=0
  x=137
  y=80
- cx=1178
+ cx=1233
  cy=621
  rcx=0
  rcy=0
@@ -994,7 +994,7 @@ windowlayout=554
  [findinfilefo]
  splitdir=0
  useroptions=268451947
- stackedunder=
+ stackedunder=objectinspectorfo
  parent=
  mdistate=0
  nx=0
@@ -1210,7 +1210,7 @@ windowlayout=554
  ncy=0
  x=0
  y=512
- cx=1166
+ cx=1221
  cy=88
  rcx=0
  rcy=0
@@ -1280,7 +1280,7 @@ windowlayout=554
  [componentpalettefo]
  splitdir=0
  useroptions=268460139
- stackedunder=_mse_sourcefo_mse_
+ stackedunder=projecttreefo
  parent=
  mdistate=0
  nx=0
@@ -1310,8 +1310,8 @@ windowlayout=554
  ncy=0
  x=0
  y=0
- cx=1166
- cy=54
+ cx=1221
+ cy=50
  rcx=0
  rcy=0
  [debuggerfo.basedock]
@@ -1323,11 +1323,11 @@ windowlayout=554
  nx=0
  ny=0
  ncx=1166
- ncy=56
+ ncy=49
  x=0
  y=0
- cx=1207
- cy=53
+ cx=1221
+ cy=45
  rcx=0
  rcy=0
  [debuggerfo.edit_options]
@@ -1337,8 +1337,9 @@ windowlayout=554
  [debuggerfo.edit_compiler]
  value=Pascal
  [debuggerfo.file_history]
- value=/home/fred/mseide-msegui/apps/ide/templates/default/mainform.mfm
+ value=/home/fred/mseide-msegui/apps/ide/sourceform.pas
  history=20
+  /home/fred/mseide-msegui/apps/ide/sourceform.pas
   /home/fred/mseide-msegui/apps/ide/templates/default/mainform.mfm
   /home/fred/mseide-msegui/apps/ide/templates/default/pascform.pas
   /home/fred/mseide-msegui/apps/ide/templates/default/program.pas
@@ -1358,7 +1359,6 @@ windowlayout=554
   /home/fred/mseide-msegui/lib/common/fpccompatibility/mse_dbf_str_pl.pas
   /home/fred/mseide-msegui/lib/common/fpccompatibility/dbf_str_pl.pas
   /home/fred/mseide-msegui/lib/common/fpccompatibility/mse_dbf_str_nl.pas
-  /home/fred/mseide-msegui/lib/common/fpccompatibility/dbf_str_nl.pas
  [debuggerfo.project_options]
  value=1
  [debuggerfo.hints]
@@ -1375,8 +1375,8 @@ windowlayout=554
  ncy=0
  x=0
  y=0
- cx=1166
- cy=452
+ cx=1221
+ cy=456
  rcx=0
  rcy=0
  [sourcefo.files_tab]
@@ -1417,15 +1417,15 @@ windowlayout=554
  ncx=0
  ncy=0
  x=0
- y=57
- cx=1166
- cy=452
+ y=53
+ cx=1221
+ cy=456
  rcx=0
  rcy=0
  [_mse_mainfo_mse_]
  splitdir=0
  useroptions=268451963
- stackedunder=componentpalettefo
+ stackedunder=findinfilefo
  parent=
  mdistate=3
  nx=0

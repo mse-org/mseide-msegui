@@ -26,7 +26,7 @@ unit mclasses;
  {$INLINE ON}
 {$endif}
 
- {.$define no_class_bridge}
+ {.$define class_bridge} // uncomment to use bridge for BGRABitmap
 
 {$if defined(FPC) and (fpc_fullversion >= 020601)}
  {$define mse_fpc_2_6_2}
@@ -82,15 +82,17 @@ type
 
 {$M+}
 
-{$if defined(no_class_bridge)}
- tpersistent = class(TObject{,IFPObserved})
-  private
-   procedure AssignError(Source: tpersistent);
-{$else}
+{$if defined(class_bridge)}
  TClassesPersistent = Classes.TPersistent;
    // write tpersistent instead of tpersistentbridge
   tpersistentbridge = class(TClassesPersistent)
+{$else}
+tpersistent = class(TObject{,IFPObserved})
+  private
+   procedure AssignError(Source: tpersistent);  
 {$ifend}
+
+
    protected
   {$ifndef FPC}
     function Equals(Obj: TObject) : boolean;virtual;
@@ -99,16 +101,7 @@ type
     function _AddRef: Integer; stdcall;
     function _Release: Integer; stdcall;
   {$endif}
-  {$if defined(no_class_bridge)}
-    procedure AssignTo(Dest: tpersistent); virtual;
-    procedure DefineProperties(Filer: tfiler); virtual;
-    function  GetOwner: tpersistent; dynamic;
-  public
-    Destructor Destroy; override;
-    procedure Assign(Source: tpersistent); virtual;
-    function  GetNamePath: string; virtual; {dynamic;}
-  end;
-  {$else}
+  {$if defined(class_bridge)}
     procedure AssignTo(Dest: TClassesPersistent); overload; override;
     procedure AssignTo(Dest: tpersistentbridge); overload; virtual;
     procedure DefineProperties(Filer: tfiler); overload; virtual; 
@@ -123,6 +116,15 @@ type
   
   tpersistent = tpersistentbridge;
 
+   {$else}
+     procedure AssignTo(Dest: tpersistent); virtual;
+    procedure DefineProperties(Filer: tfiler); virtual;
+    function  GetOwner: tpersistent; dynamic;
+  public
+    Destructor Destroy; override;
+    procedure Assign(Source: tpersistent); virtual;
+    function  GetNamePath: string; virtual; {dynamic;}
+  end;
   {$ifend}
 
 {$M-}
@@ -1284,7 +1286,79 @@ begin
       Item.Free;
     end;
 end;
-{$if defined(no_class_bridge)}
+
+{$if defined(class_bridge)}
+{****************************************************************************}
+{*                             TPersistent with bridge                      *}
+{****************************************************************************}
+
+{$ifndef FPC}
+function tpersistentbridge.Equals(Obj: TObject) : boolean;
+begin
+ result:= Obj = Self;
+end;
+{$endif}
+
+procedure tpersistentbridge.AssignTo(Dest: TClassesPersistent);
+begin
+  if Dest is tpersistentbridge then
+    AssignTo(tpersistentbridge(Dest))
+  else
+    inherited AssignTo(Dest);
+end;
+
+procedure tpersistentbridge.AssignTo(Dest: tpersistentbridge);
+begin
+  inherited AssignTo(Dest);  
+end;
+
+procedure tpersistentbridge.DefineProperties(Filer: tfiler);
+begin
+end;
+
+function  tpersistentbridge.GetOwner: tpersistentbridge;
+var otherOwner: TClassesPersistent;
+begin
+  otherOwner := inherited GetOwner;	
+  if otherOwner is tpersistentbridge then
+    result := tpersistentbridge(otherOwner)
+  else
+    result:=Nil;
+end;
+
+procedure tpersistentbridge.FPOAttachObserver(AObserver: TObject);
+begin
+   raise EObserver.Create('Not allowed within MSEgui');
+end;
+
+procedure tpersistentbridge.FPODetachObserver(AObserver: TObject);
+begin
+   raise EObserver.Create('Not allowed within MSEgui');
+end;
+
+procedure tpersistentbridge.FPONotifyObservers(ASender: TObject;
+  AOperation: TFPObservedOperation; Data : Pointer);
+begin
+   raise EObserver.Create('Not allowed within MSEgui');
+end;
+
+procedure tpersistentbridge.Assign(Source: TClassesPersistent);
+begin
+  if Source is tpersistentbridge then
+    Assign(tpersistentbridge(Source))
+  else
+    inherited Assign(Source);  
+end;
+
+procedure tpersistentbridge.Assign(Source: tpersistentbridge);
+begin
+  If Source<>Nil then
+    Source.AssignTo(Self)
+  else
+    inherited Assign(Nil);  
+end;
+
+{$else}
 
 {****************************************************************************}
 {*                             TPersistent                                  *}
@@ -1371,78 +1445,6 @@ begin
    OwnerName:=TheOwner.GetNamePath;
    If OwnerName<>'' then Result:=OwnerName+'.'+Result;
    end;
-end;
-
-{$else}
-
-{****************************************************************************}
-{*                             TPersistent with bridge                      *}
-{****************************************************************************}
-
-{$ifndef FPC}
-function tpersistentbridge.Equals(Obj: TObject) : boolean;
-begin
- result:= Obj = Self;
-end;
-{$endif}
-
-procedure tpersistentbridge.AssignTo(Dest: TClassesPersistent);
-begin
-  if Dest is tpersistentbridge then
-    AssignTo(tpersistentbridge(Dest))
-  else
-    inherited AssignTo(Dest);
-end;
-
-procedure tpersistentbridge.AssignTo(Dest: tpersistentbridge);
-begin
-  inherited AssignTo(Dest);  
-end;
-
-procedure tpersistentbridge.DefineProperties(Filer: tfiler);
-begin
-end;
-
-function  tpersistentbridge.GetOwner: tpersistentbridge;
-var otherOwner: TClassesPersistent;
-begin
-  otherOwner := inherited GetOwner;	
-  if otherOwner is tpersistentbridge then
-    result := tpersistentbridge(otherOwner)
-  else
-    result:=Nil;
-end;
-
-procedure tpersistentbridge.FPOAttachObserver(AObserver: TObject);
-begin
-   raise EObserver.Create('Not allowed within MSEgui');
-end;
-
-procedure tpersistentbridge.FPODetachObserver(AObserver: TObject);
-begin
-   raise EObserver.Create('Not allowed within MSEgui');
-end;
-
-procedure tpersistentbridge.FPONotifyObservers(ASender: TObject;
-  AOperation: TFPObservedOperation; Data : Pointer);
-begin
-   raise EObserver.Create('Not allowed within MSEgui');
-end;
-
-procedure tpersistentbridge.Assign(Source: TClassesPersistent);
-begin
-  if Source is tpersistentbridge then
-    Assign(tpersistentbridge(Source))
-  else
-    inherited Assign(Source);  
-end;
-
-procedure tpersistentbridge.Assign(Source: tpersistentbridge);
-begin
-  If Source<>Nil then
-    Source.AssignTo(Self)
-  else
-    inherited Assign(Nil);  
 end;
 
 {$ifend}

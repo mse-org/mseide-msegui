@@ -10,7 +10,7 @@
 unit msegraphicstream;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 
-{.$define no_class_bridge}
+{.$define class_bridge} // uncomment to use bridge for BGRABitmap
 
 interface
 uses
@@ -29,8 +29,8 @@ type
    fhasalpha: boolean;
    fmonoalpha: boolean;
   public
-   procedure assign(source: {$ifndef no_class_bridge}classes.{$endif}tpersistent); override;
-   procedure assignto(dest: {$ifndef no_class_bridge}classes.{$endif}tpersistent); override;
+   procedure assign(source: {$ifdef class_bridge}classes.{$endif}tpersistent); override;
+   procedure assignto(dest: {$ifdef class_bridge}classes.{$endif}tpersistent); override;
    procedure writetostream(const dest: tstream;
                    const awriter: tfpcustomimagewriter);
                              //owns the writer
@@ -467,7 +467,7 @@ begin
  end;
 end;
 
-procedure tmsefpmemoryimage.assign(source: {$ifndef no_class_bridge}classes.{$endif}tpersistent);
+procedure tmsefpmemoryimage.assign(source: {$ifdef class_bridge}classes.{$endif}tpersistent);
  function to16(const acolor: colorty): tfpcolor;
  var
   rgb1: rgbtriplety;
@@ -829,7 +829,7 @@ begin
  end;
 end;
 
-procedure tmsefpmemoryimage.assignto(dest: {$ifndef no_class_bridge}classes.{$endif}tpersistent);
+procedure tmsefpmemoryimage.assignto(dest: {$ifdef class_bridge}classes.{$endif}tpersistent);
 
 var
  grayalpha1: boolean;
