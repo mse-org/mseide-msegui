@@ -92,7 +92,7 @@ function graphicfilefiltermasks: msestringarty;
 function graphicfilefilterlabel(const index: integer): string;
 
 function readfpgraphic(const source: tstream; const readerclass: fpreaderclassty;
-                             const dest: tpersistent): boolean;
+                             const dest: {$ifdef class_bridge}classes.{$endif}tpersistent): boolean;
 
 implementation
 uses
@@ -424,7 +424,7 @@ begin
 end;
 
 function readfpgraphic(const source: tstream; const readerclass: fpreaderclassty;
-                               const dest: tpersistent): boolean;
+                               const dest: {$ifdef class_bridge}classes.{$endif}tpersistent): boolean;
 var
  reader: tfpcustomimagereader;
  img: tmsefpmemoryimage;
