@@ -1356,8 +1356,6 @@ begin
     Source.AssignTo(Self)
   else
     inherited Assign(Nil);  
-    
-  inherited Assign(Source);    
 end;
 
 {$else}
