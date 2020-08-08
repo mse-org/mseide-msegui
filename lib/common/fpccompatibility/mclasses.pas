@@ -1344,9 +1344,9 @@ end;
 
 procedure tpersistentbridge.Assign(Source: TClassesPersistent);
 begin
-  if Source is tpersistentbridge then
-    Assign(tpersistentbridge(Source))
-  else
+ // if Source is tpersistentbridge then
+ //   Assign(tpersistentbridge(Source))
+ // else
     inherited Assign(Source);  
 end;
 
