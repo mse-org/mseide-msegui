@@ -1352,10 +1352,12 @@ end;
 
 procedure tpersistentbridge.Assign(Source: tpersistentbridge);
 begin
-  If Source<>Nil then
-    Source.AssignTo(Self)
-  else
-    inherited Assign(Nil);  
+ // If Source<>Nil then
+ //   Source.AssignTo(Self)
+ // else
+ //   inherited Assign(Nil);  
+    
+  inherited Assign(Source);    
 end;
 
 {$else}
