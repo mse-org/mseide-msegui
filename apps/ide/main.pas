@@ -360,7 +360,7 @@ var
 procedure handleerror(const e: exception; const text: string);
 implementation
 uses
- regwidgets,regeditwidgets,regdialogs,regkernel,regprinter,msearrayutils,
+ regwidgets,regeditwidgets,regdialogs, regfiledialogx,regkernel,regprinter,msearrayutils,
  toolhandlermodule,
 {$ifndef mse_no_math}
  regmath,regmm,
