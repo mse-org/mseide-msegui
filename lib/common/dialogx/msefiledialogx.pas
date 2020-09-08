@@ -208,6 +208,7 @@ type
     ffilterlist: tdoublemsestringdatalist;
     ffilter: filenamety;
     fnopanel: Boolean;
+    ficon : tmaskedbitmap;
     fcompact: Boolean;
     ffilenamescust: filenamearty;
     fshowhidden: Boolean;
@@ -232,6 +233,7 @@ type
     foncheckfile: checkfileeventty;
     fimagelist: timagelist;
     fparams: msestring;
+    procedure seticon(const avalue: tmaskedbitmap);
     procedure setfilterlist(const Value: tdoublemsestringdatalist);
     procedure sethistorymaxcount(const Value: integer);
     function getfilename: filenamety;
@@ -297,6 +299,7 @@ type
     property backcolor: colorty read fbackcolor write fbackcolor;
     property filter: filenamety read ffilter write ffilter;
     property nopanel: Boolean read fnopanel write fnopanel;
+    property icon : tmaskedbitmap read ficon write seticon;
     property compact: Boolean read fcompact write fcompact;
     property showhidden: Boolean read fshowhidden write fshowhidden;
     property filterlist: tdoublemsestringdatalist read ffilterlist write setfilterlist;
@@ -2344,7 +2347,8 @@ end;
 { tfiledialogcontroller }
 
 constructor tfiledialogcontroller.Create(const aowner: tmsecomponent = nil; const onchange: proceventty = nil);
-begin
+begin 
+  ficon:= tmaskedbitmap.create(bmk_rgb);
   foptions         := defaultfiledialogoptions;
   fhistorymaxcount := defaulthistorymaxcount;
   fowner           := aowner;
@@ -2358,6 +2362,7 @@ end;
 destructor tfiledialogcontroller.Destroy;
 begin
   inherited;
+  ficon.free;
   ffilterlist.Free;
 end;
 
@@ -2495,6 +2500,9 @@ begin
     end;
 
     fo.blateral.Value := fnopanel;
+    
+    if ficon <> nil then
+    fo.icon := ficon;
    
     fo.bcompact.Value   := fcompact;
     fo.showhidden.Value := fshowhidden;
@@ -2589,7 +2597,7 @@ begin
     end;
 
   finally
-    fo.Free;
+     fo.Free;
   end;
 end;
 
@@ -2700,6 +2708,11 @@ end;
 
 const
   quotechar = msechar('"');
+  
+procedure tfiledialogcontroller.seticon(const avalue: tmaskedbitmap);
+begin
+ ficon.assign(avalue);
+end;  
 
 procedure tfiledialogcontroller.setfilename(const avalue: filenamety);
 var

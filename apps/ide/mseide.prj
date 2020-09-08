@@ -16,6 +16,7 @@ order13=0
 order14=0
 order15=0
 order16=0
+order17=0
 [projectoptions]
 projectdir=/home/fred/mseide-msegui/apps/ide
 projectfilename=/home/fred/mseide-msegui/apps/ide/mseide.prj
@@ -853,12 +854,12 @@ findhistory=20
  paramlist
 findoptions=1
 editpos=2
- 0,0
+ 0,4
  0,-1073741823
 bookmarks0=0
 bookmarks1=0
 sourcefiles=2
- ${PROJECTDIR}/sourceform.pas
+ /home/fred/mseide-msegui/apps/ide/sourceform.pas
  ${PROJECTDIR}/actionsmodule.pas
 relpaths=2
  sourceform.pas
@@ -886,7 +887,7 @@ nomenumodules=3
 firsttab=0
 index=0
 [layout]
-windowlayout=554
+windowlayout=578
  [mainfo.basedock]
  splitdir=2
  useroptions=268450944
@@ -900,7 +901,7 @@ windowlayout=554
  ny=0
  ncx=0
  ncy=0
- x=137
+ x=127
  y=80
  cx=1233
  cy=621
@@ -994,7 +995,7 @@ windowlayout=554
  [findinfilefo]
  splitdir=0
  useroptions=268451947
- stackedunder=objectinspectorfo
+ stackedunder=
  parent=
  mdistate=0
  nx=0
@@ -1010,7 +1011,7 @@ windowlayout=554
  [projecttreefo]
  splitdir=0
  useroptions=268484715
- stackedunder=_mse_mainfo_mse_
+ stackedunder=memoryfo
  parent=
  mdistate=3
  nx=0
@@ -1094,7 +1095,7 @@ windowlayout=554
  [breakpointsfo]
  splitdir=0
  useroptions=268451947
- stackedunder=memoryfo
+ stackedunder=projecttreefo
  parent=
  mdistate=0
  nx=0
@@ -1113,10 +1114,10 @@ windowlayout=554
  [breakpointsfo.bkptson]
  value=1
  [objectinspectorfo.grid]
- propcolwidthref=480
- width0=115
+ propcolwidthref=547
+ width0=131
  sortdescend0=0
- width1=359
+ width1=410
  sortdescend1=0
  [symbolfo]
  splitdir=0
@@ -1243,6 +1244,7 @@ windowlayout=554
  width3=185
  sortdescend3=0
  [componentstorefo.storefiledialog]
+ filenamescust=0
  filenames=1
   /home/fred/mseide-msegui/apps/ide/compstore/
  filecolwidth=0
@@ -1250,11 +1252,19 @@ windowlayout=554
  y=0
  cx=0
  cy=0
+ panel=0
+ compact=0
+ showhidden=0
+ colsizewidth=0
+ colextwidth=0
+ coldatewidth=0
+ splitterplaces=0
  lastdir=/home/fred/mseide-msegui/apps/ide/compstore/
  filehistory=0
  filefilterindex=0
  filefilter=
  [componentstorefo.groupfiledialog]
+ filenamescust=0
  filenames=1
   /home/fred/mseide-msegui/apps/ide/compstore/
  filecolwidth=0
@@ -1262,17 +1272,32 @@ windowlayout=554
  y=0
  cx=0
  cy=0
+ panel=0
+ compact=0
+ showhidden=0
+ colsizewidth=0
+ colextwidth=0
+ coldatewidth=0
+ splitterplaces=0
  lastdir=/home/fred/mseide-msegui/apps/ide/compstore/
  filehistory=0
  filefilterindex=0
  filefilter=
  [componentstorefo.compfiledialog]
+ filenamescust=0
  filenames=0
  filecolwidth=0
  x=0
  y=0
  cx=0
  cy=0
+ panel=0
+ compact=0
+ showhidden=0
+ colsizewidth=0
+ colextwidth=0
+ coldatewidth=0
+ splitterplaces=0
  lastdir=
  filehistory=0
  filefilterindex=0
@@ -1280,7 +1305,7 @@ windowlayout=554
  [componentpalettefo]
  splitdir=0
  useroptions=268460139
- stackedunder=projecttreefo
+ stackedunder=
  parent=
  mdistate=0
  nx=0
@@ -1297,7 +1322,7 @@ windowlayout=554
  active=0
  visible=0
  [componentpalettefo.componentpages]
- activetab=1
+ activetab=3
  [debuggerfo]
  splitdir=0
  useroptions=24683
@@ -1322,12 +1347,12 @@ windowlayout=554
  mdistate=0
  nx=0
  ny=0
- ncx=1166
- ncy=49
+ ncx=1206
+ ncy=41
  x=0
  y=0
  cx=1221
- cy=45
+ cy=39
  rcx=0
  rcy=0
  [debuggerfo.edit_options]
@@ -1390,7 +1415,7 @@ windowlayout=554
  irqoff=0
  splitdir=0
  useroptions=268451947
- stackedunder=confdebuggerfo
+ stackedunder=_mse_mainfo_mse_
  parent=
  mdistate=0
  nx=0
@@ -1425,7 +1450,7 @@ windowlayout=554
  [_mse_mainfo_mse_]
  splitdir=0
  useroptions=268451963
- stackedunder=findinfilefo
+ stackedunder=confdebuggerfo
  parent=
  mdistate=3
  nx=0
