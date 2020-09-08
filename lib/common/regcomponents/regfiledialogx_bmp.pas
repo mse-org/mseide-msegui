@@ -1,4 +1,4 @@
-unit ideu24_bmp;
+unit regfiledialogx_bmp;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 
 interface

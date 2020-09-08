@@ -460,7 +460,7 @@ type
     property dialog: tfiledialogx read fdialog write setfiledialog;
   end;
 
-  tfilenameedit = class(tcustomfilenameedit)
+  tfilenameeditx = class(tcustomfilenameedit)
   published
     property frame;
     property passwordchar;
@@ -470,7 +470,7 @@ type
     property controller;
   end;
 
-  tremotefilenameedit = class(tcustomremotefilenameedit)
+  tremotefilenameeditx = class(tcustomremotefilenameedit)
   published
     property frame;
     property passwordchar;

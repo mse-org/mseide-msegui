@@ -5,12 +5,12 @@ interface
 
 implementation
 uses
- ideu24_bmp,msedesignintf,msefiledialogx;
+ msedesignintf,msefiledialogx,regfiledialogx_bmp;
 
 procedure register;
 begin
- registercomponents('DialogX',[tfiledialogx]);
- registercomponenttabhints(['DialogX'],['User extended dialogs']);
+ registercomponents('FileDialogX',[tfiledialogx,tfilenameeditx,tremotefilenameeditx]);
+ registercomponenttabhints(['FileDialogX'],['User extended file dialogs']);
 end;
 
 initialization
