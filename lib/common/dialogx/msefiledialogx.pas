@@ -2640,7 +2640,7 @@ begin
       setlength(ffilenamescust, fo.placescust.rowcount - 1);
       for x := 0 to length(ffilenamescust) - 1 do
         ffilenamescust[x] := fo.placescust[1][x];
-    end;
+    end else setlength(ffilenamescust,0);
 
   finally
     fo.Free;
