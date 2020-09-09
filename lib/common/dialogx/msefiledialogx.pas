@@ -2522,14 +2522,14 @@ begin
     end;
     if directoryexists(tosysfilepath(sys_getuserhomedir + directoryseparator + 'Music')) then
     begin
-      fo.places[0][2] := tmp + 'Music';
-      fo.places[1][2] := msestring(tosysfilepath(sys_getuserhomedir + directoryseparator + 'Music'));
+      fo.places[0][x] := tmp + 'Music';
+      fo.places[1][x] := msestring(tosysfilepath(sys_getuserhomedir + directoryseparator + 'Music'));
       Inc(x);
     end;
     if directoryexists(tosysfilepath(sys_getuserhomedir + directoryseparator + 'Pictures')) then
     begin
-      fo.places[0][3] := tmp + 'Pictures';
-      fo.places[1][3] := msestring(tosysfilepath(sys_getuserhomedir + directoryseparator + 'Pictures'));
+      fo.places[0][x] := tmp + 'Pictures';
+      fo.places[1][x] := msestring(tosysfilepath(sys_getuserhomedir + directoryseparator + 'Pictures'));
       Inc(x);
     end;
     if directoryexists(tosysfilepath(sys_getuserhomedir + directoryseparator + 'Videos')) then
