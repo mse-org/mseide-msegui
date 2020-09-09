@@ -891,6 +891,16 @@ object filedialogfo: Tfiledialogfo
       reffontheight = 15
     end
   end
+  object labtest: tlabel
+    taborder = 19
+    visible = False
+    bounds_x = 98
+    bounds_y = 35
+    bounds_cx = 41
+    bounds_cy = 15
+    caption = 'tlabel1'
+    reffontheight = 15
+  end
   object iconslist: timagelist
     width = 18
     height = 18

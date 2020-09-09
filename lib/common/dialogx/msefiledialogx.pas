@@ -31,55 +31,14 @@ interface
 {$endif}
 
 uses
-  Math,
-  mseglob,
-  mseguiglob,
-  mseforms,
-  Classes,
-  mclasses,
-  mseclasses,
-  msewidgets,
-  msegrids,
-  mselistbrowser,
-  mseedit,
-  msesimplewidgets,
-  msedataedits,
-  msedialog,
-  msetypes,
-  msestrings,
-  msesystypes,
-  msesys,
-  msedispwidgets,
-  msedatalist,
-  msestat,
-  msestatfile,
-  msebitmap,
-  msedatanodes,
-  msefileutils,
-  msedropdownlist,
-  mseevent,
-  msegraphedits,
-  mseeditglob,
-  msesplitter,
-  msemenus,
-  msegridsglob,
-  msegraphics,
-  msegraphutils,
-  msedirtree,
-  msewidgetgrid,
-  mseact,
-  mseapplication,
-  msegui,
-  mseificomp,
-  mseificompglob,
-  mseifiglob,
-  msestream,
-  SysUtils,
-  msemenuwidgets,
-  msescrollbar,
-  msedragglob,
-  msefiledialog,
-  mserichstring;
+ Math,mseglob,mseguiglob,mseforms,Classes,mclasses,mseclasses,msewidgets,
+ msegrids,mselistbrowser,mseedit,msesimplewidgets,msedataedits,msedialog,
+ msetypes,msestrings,msesystypes,msesys,msedispwidgets,msedatalist,msestat,
+ msestatfile,msebitmap,msedatanodes,msefileutils,msedropdownlist,mseevent,
+ msegraphedits,mseeditglob,msesplitter,msemenus,msegridsglob,msegraphics,
+ msegraphutils,msedirtree,msewidgetgrid,mseact,mseapplication,msegui,mseificomp,
+ mseificompglob,mseifiglob,msestream,SysUtils,msemenuwidgets,msescrollbar,
+ msedragglob,msefiledialog,mserichstring;
 
 const
   defaultlistviewoptionsfile = defaultlistviewoptions + [lvo_readonly, lvo_horz];
@@ -612,6 +571,7 @@ type
     places: tstringgrid;
     tsplitter3: tsplitter;
     placescust: tstringgrid;
+   labtest: tlabel;
     procedure createdironexecute(const Sender: TObject);
     procedure listviewselectionchanged(const Sender: tcustomlistview);
     procedure listviewitemevent(const Sender: tcustomlistview; const index: integer; var info: celleventinfoty);
@@ -1550,7 +1510,28 @@ begin
 
   listview.Width := 40;
   listview.invalidate;
+  
+  labtest.caption := '';
+  
+  while labtest.width < 30 do
+  begin
+   labtest.caption := labtest.caption + ' ';
+   labtest.invalidate;
+   end;
+  
+  tmp := labtest.caption;
+  
+  
+  labtest.caption := ' .';
+  
+  while labtest.width < 30 do
+  begin
+   labtest.caption := labtest.caption + ' ';
+   labtest.invalidate;
+   end;  
 
+  tmp2 := labtest.caption;
+   
   with listview do
   begin
     dir.Value        := tosysfilepath(directory);
@@ -1580,12 +1561,12 @@ begin
       if listview.filelist.isdir(x) then
       begin
         Inc(x2);
-        list_log[0][x] := '       ' + msestring(listview.itemlist[x].Caption);
+        list_log[0][x] := tmp + msestring(listview.itemlist[x].Caption);
         list_log[1][x] := '';
       end
       else
       begin
-        list_log[0][x] := '  .    ' + msestring(filenamebase(listview.itemlist[x].Caption));
+        list_log[0][x] := tmp2 + msestring(filenamebase(listview.itemlist[x].Caption));
         tmp := fileext(listview.itemlist[x].Caption);
         if tmp <> '' then
           tmp := '.' + tmp;
@@ -2134,9 +2115,20 @@ end;
 procedure tfiledialogfo.onformcreated(const Sender: TObject);
 var
   x: integer = 0;
+  tmp : string;
 begin
   fcourseid := -1;
-
+  
+   labtest.caption := '';
+  
+while labtest.width < 30 do
+  begin
+   labtest.caption := labtest.caption + ' ';
+   labtest.invalidate;
+   end;
+  
+  tmp := labtest.caption;
+  
   with stockobjects do
   begin
     // dir.frame.caption:= captions[sc_dirhk];
@@ -2155,50 +2147,6 @@ begin
   back.tag    := Ord(sc_back);
   forward.tag := Ord(sc_forward);
   up.tag      := Ord(sc_up);
-
-  if directoryexists(tosysfilepath(sys_getuserhomedir)) then
-  begin
-    places[0][x] := '       Home';
-    places[1][x] := msestring(tosysfilepath(sys_getuserhomedir));
-    Inc(x);
-  end;
-  if directoryexists(tosysfilepath(sys_getuserhomedir + directoryseparator + 'Desktop')) then
-  begin
-    places[0][x] := '       Desktop';
-    places[1][x] := msestring(tosysfilepath(sys_getuserhomedir + directoryseparator + 'Desktop'));
-    Inc(x);
-  end;
-  if directoryexists(tosysfilepath(sys_getuserhomedir + directoryseparator + 'Music')) then
-  begin
-    places[0][2] := '       Music';
-    places[1][2] := msestring(tosysfilepath(sys_getuserhomedir + directoryseparator + 'Music'));
-    Inc(x);
-  end;
-  if directoryexists(tosysfilepath(sys_getuserhomedir + directoryseparator + 'Pictures')) then
-  begin
-    places[0][3] := '       Pictures';
-    places[1][3] := msestring(tosysfilepath(sys_getuserhomedir + directoryseparator + 'Pictures'));
-    Inc(x);
-  end;
-  if directoryexists(tosysfilepath(sys_getuserhomedir + directoryseparator + 'Videos')) then
-  begin
-    places[0][x] := '       Videos';
-    places[1][x] := msestring(tosysfilepath(sys_getuserhomedir + directoryseparator + 'Videos'));
-    Inc(x);
-  end;
-  if directoryexists(tosysfilepath(sys_getuserhomedir + directoryseparator + 'Documents')) then
-  begin
-    places[0][x] := '       Documents';
-    places[1][x] := msestring(tosysfilepath(sys_getuserhomedir + directoryseparator + 'Documents'));
-    Inc(x);
-  end;
-  if directoryexists(tosysfilepath(sys_getuserhomedir + directoryseparator + 'Downloads')) then
-  begin
-    places[0][x] := '       Downloads';
-    places[1][x] := msestring(tosysfilepath(sys_getuserhomedir + directoryseparator + 'Downloads'));
-  end;
-
-  places.rowcount := x + 1;
 
   application.ProcessMessages;
 
@@ -2287,8 +2235,17 @@ end;
 procedure tfiledialogfo.oncellevcustplaces(const Sender: TObject; var info: celleventinfoty);
 var
   theint: integer;
-  thestr: msestring;
+  thestr, tmp: msestring;
 begin
+ labtest.caption := '';
+  
+  while labtest.width < 30 do
+  begin
+   labtest.caption := labtest.caption + ' ';
+   labtest.invalidate;
+   end;
+  
+  tmp := labtest.caption;
 
   if (info.eventkind = cek_buttonrelease) or (info.eventkind = cek_keyup) then
     if (info.eventkind = cek_keyup) then
@@ -2303,7 +2260,7 @@ begin
       begin
         thestr := copy(dir.Value, 1, length(dir.Value) - 1);
         theint := lastdelimiter(directoryseparator, thestr);
-        placescust[0][placescust.rowcount - 1] := '       ' + copy(thestr, theint + 1, 14);
+        placescust[0][placescust.rowcount - 1] := tmp + copy(thestr, theint + 1, 14);
         placescust[1][placescust.rowcount - 1] := dir.Value;
         placescust.rowcount := placescust.rowcount + 1;
         places.defocuscell;
@@ -2467,7 +2424,7 @@ var
   rectbefore: rectty;
   x : integer;
   theint: integer;
-  thestr: msestring;
+  thestr, tmp: msestring;
   
 begin
   //acaption2 := acaption;
@@ -2476,6 +2433,7 @@ begin
   arb    := nil;
   //compiler warning
   Result := mr_ok;
+  
   if Assigned(fonbeforeexecute) then
   begin
     fonbeforeexecute(self, dialogkind, Result);
@@ -2494,6 +2452,75 @@ begin
     ara := ffilterlist.asarraya;
     arb := ffilterlist.asarrayb;
     
+  if fontheight > 0 then
+      if fontheight < 21 then
+        fo.font.Height := fontheight
+      else
+        fo.font.Height := 20;
+
+    fo.font.color := fontcolor;
+
+    fo.container.color := backcolor;
+
+    if fontname <> '' then
+      fo.font.Name := ansistring(fontname);   
+    
+     fo.labtest.caption := '';
+  
+  while fo.labtest.width < 30 do
+  begin
+   fo.labtest.caption := fo.labtest.caption + ' ';
+   fo.labtest.invalidate;
+   end;
+  
+  tmp := fo.labtest.caption;
+    
+    x := 0;
+    
+      if directoryexists(tosysfilepath(sys_getuserhomedir)) then
+  begin
+    fo.places[0][x] := tmp + 'Home';
+    fo.places[1][x] := msestring(tosysfilepath(sys_getuserhomedir));
+    Inc(x);
+  end;
+  if directoryexists(tosysfilepath(sys_getuserhomedir + directoryseparator + 'Desktop')) then
+  begin
+    fo.places[0][x] := tmp + 'Desktop';
+    fo.places[1][x] := msestring(tosysfilepath(sys_getuserhomedir + directoryseparator + 'Desktop'));
+    Inc(x);
+  end;
+  if directoryexists(tosysfilepath(sys_getuserhomedir + directoryseparator + 'Music')) then
+  begin
+    fo.places[0][2] := tmp + 'Music';
+    fo.places[1][2] := msestring(tosysfilepath(sys_getuserhomedir + directoryseparator + 'Music'));
+    Inc(x);
+  end;
+  if directoryexists(tosysfilepath(sys_getuserhomedir + directoryseparator + 'Pictures')) then
+  begin
+    fo.places[0][3] := tmp + 'Pictures';
+    fo.places[1][3] := msestring(tosysfilepath(sys_getuserhomedir + directoryseparator + 'Pictures'));
+    Inc(x);
+  end;
+  if directoryexists(tosysfilepath(sys_getuserhomedir + directoryseparator + 'Videos')) then
+  begin
+    fo.places[0][x] := tmp + 'Videos';
+    fo.places[1][x] := msestring(tosysfilepath(sys_getuserhomedir + directoryseparator + 'Videos'));
+    Inc(x);
+  end;
+  if directoryexists(tosysfilepath(sys_getuserhomedir + directoryseparator + 'Documents')) then
+  begin
+    fo.places[0][x] := tmp + 'Documents';
+    fo.places[1][x] := msestring(tosysfilepath(sys_getuserhomedir + directoryseparator + 'Documents'));
+    Inc(x);
+  end;
+  if directoryexists(tosysfilepath(sys_getuserhomedir + directoryseparator + 'Downloads')) then
+  begin
+    fo.places[0][x] := tmp + 'Downloads';
+    fo.places[1][x] := msestring(tosysfilepath(sys_getuserhomedir + directoryseparator + 'Downloads'));
+  end;
+
+  fo.places.rowcount := x + 1;
+
     if length(ffilenamescust) > 0 then
     begin
     fo.placescust.rowcount := length(ffilenamescust) + 1;
@@ -2502,7 +2529,7 @@ begin
     thestr := copy(ffilenamescust[x], 1, length(ffilenamescust[x]) - 1);
     theint := lastdelimiter(directoryseparator, thestr);
     fo.placescust[1][x] := ffilenamescust[x];
-    fo.placescust[0][x] :=  '       ' + copy(thestr, theint + 1, 14);
+    fo.placescust[0][x] :=  tmp + copy(thestr, theint + 1, 14);
     end;
     end;
 
@@ -2525,20 +2552,7 @@ begin
       fo.list_log.datacols[1].Width - fo.list_log.datacols[2].Width -
       fo.list_log.datacols[3].Width - 20;
 
-    if fontheight > 0 then
-      if fontheight < 21 then
-        fo.font.Height := fontheight
-      else
-        fo.font.Height := 20;
-
-    fo.font.color := fontcolor;
-
-    fo.container.color := backcolor;
-
-    if fontname <> '' then
-      fo.font.Name := ansistring(fontname);
-      
-       if (dialogkind in [fdk_dir]) or (fdo_directory in aoptions) then
+    if (dialogkind in [fdk_dir]) or (fdo_directory in aoptions) then
     begin
       fo.filename.tag           := 1;
       fo.filename.Value         := fo.dir.Value;
