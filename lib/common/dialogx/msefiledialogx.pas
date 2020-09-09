@@ -2985,6 +2985,13 @@ end;
 constructor tfilenameeditcontroller.Create(const aowner: tcustomfilenameedit1);
 begin
   inherited Create(aowner);
+  aowner.controller.fbackcolor       := cl_default;
+  aowner.controller.ffontname        := 'stf_default';
+  aowner.controller.ffontheight      := 0;
+  aowner.controller.ffontcolor       := cl_black;
+  aowner.controller.fnopanel         := false;
+  aowner.controller.fcompact         := false;
+  aowner.controller.fshowhidden      := false;
 end;
 
 function tfilenameeditcontroller.Execute(var avalue: msestring): Boolean;
