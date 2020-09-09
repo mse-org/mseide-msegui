@@ -8,7 +8,6 @@ object filedialogfo: Tfiledialogfo
   bounds_cxmin = 608
   bounds_cymin = 50
   container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_mousetransparent, ow_destroywidgets]
-  container.color = 13224393
   container.frame.localprops = []
   container.frame.localprops1 = []
   container.onlayout = layoutev

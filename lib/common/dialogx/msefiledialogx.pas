@@ -2349,6 +2349,13 @@ end;
 constructor tfiledialogcontroller.Create(const aowner: tmsecomponent = nil; const onchange: proceventty = nil);
 begin 
   ficon:= tmaskedbitmap.create(bmk_rgb);
+  fbackcolor       := cl_default;
+  ffontname        := 'stf_default';
+  ffontheight      := 0;
+  ffontcolor       := cl_black;
+  fnopanel         := false;
+  fcompact         := false;
+  fshowhidden      := false;
   foptions         := defaultfiledialogoptions;
   fhistorymaxcount := defaulthistorymaxcount;
   fowner           := aowner;
@@ -2524,11 +2531,9 @@ begin
       else
         fo.font.Height := 20;
 
-    if fontcolor > 0 then
-      fo.font.color := fontcolor;
+    fo.font.color := fontcolor;
 
-    if backcolor > 0 then
-      fo.container.color := backcolor;
+    fo.container.color := backcolor;
 
     if fontname <> '' then
       fo.font.Name := ansistring(fontname);
