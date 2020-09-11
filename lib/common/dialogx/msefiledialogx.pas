@@ -2506,51 +2506,52 @@ begin
 
     tmp := fo.labtest.Caption;
 
-    x := 0;
-
-    if directoryexists(tosysfilepath(sys_getuserhomedir)) then
+    x := -1;
+   
+     if directoryexists(tosysfilepath(sys_getuserhomedir)) then
     begin
+      Inc(x);
       fo.places[0][x] := tmp + 'Home';
       fo.places[1][x] := msestring(tosysfilepath(sys_getuserhomedir));
-      Inc(x);
     end;
     if directoryexists(tosysfilepath(sys_getuserhomedir + directoryseparator + 'Desktop')) then
     begin
+      Inc(x);
       fo.places[0][x] := tmp + 'Desktop';
       fo.places[1][x] := msestring(tosysfilepath(sys_getuserhomedir + directoryseparator + 'Desktop'));
-      Inc(x);
     end;
     if directoryexists(tosysfilepath(sys_getuserhomedir + directoryseparator + 'Music')) then
     begin
+      Inc(x);    
       fo.places[0][x] := tmp + 'Music';
       fo.places[1][x] := msestring(tosysfilepath(sys_getuserhomedir + directoryseparator + 'Music'));
-      Inc(x);
     end;
     if directoryexists(tosysfilepath(sys_getuserhomedir + directoryseparator + 'Pictures')) then
     begin
+      Inc(x);
       fo.places[0][x] := tmp + 'Pictures';
       fo.places[1][x] := msestring(tosysfilepath(sys_getuserhomedir + directoryseparator + 'Pictures'));
-      Inc(x);
     end;
     if directoryexists(tosysfilepath(sys_getuserhomedir + directoryseparator + 'Videos')) then
     begin
+      Inc(x);
       fo.places[0][x] := tmp + 'Videos';
       fo.places[1][x] := msestring(tosysfilepath(sys_getuserhomedir + directoryseparator + 'Videos'));
-      Inc(x);
     end;
     if directoryexists(tosysfilepath(sys_getuserhomedir + directoryseparator + 'Documents')) then
     begin
+      Inc(x);
       fo.places[0][x] := tmp + 'Documents';
       fo.places[1][x] := msestring(tosysfilepath(sys_getuserhomedir + directoryseparator + 'Documents'));
-      Inc(x);
     end;
     if directoryexists(tosysfilepath(sys_getuserhomedir + directoryseparator + 'Downloads')) then
     begin
+      Inc(x);
       fo.places[0][x] := tmp + 'Downloads';
       fo.places[1][x] := msestring(tosysfilepath(sys_getuserhomedir + directoryseparator + 'Downloads'));
     end;
-
-    fo.places.rowcount := x + 1;
+    
+     fo.places.rowcount := x + 1;
 
     if length(ffilenamescust) > 0 then
     begin
