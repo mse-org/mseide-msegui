@@ -2647,10 +2647,12 @@ begin
     fnopanel        := fo.blateral.Value;
     fcompact        := fo.bcompact.Value;
     fshowhidden     := fo.showhidden.Value;
+    fcolnamewidth   := fo.list_log.datacols[0].Width;
     fcolextwidth    := fo.list_log.datacols[1].Width;
     fcolsizewidth   := fo.list_log.datacols[2].Width;
     fcoldatewidth   := fo.list_log.datacols[3].Width;
     fsplitterplaces := fo.tsplitter3.top;
+  
      if fo.tsplitter1.left > 0 then
       fsplitterlateral := fo.tsplitter1.left;
  
