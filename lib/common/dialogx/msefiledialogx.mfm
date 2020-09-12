@@ -322,9 +322,9 @@ object filedialogfo: Tfiledialogfo
     face.fade_direction = gd_down
     face.localprops = [fal_fadirection]
     taborder = 8
-    bounds_x = 112
+    bounds_x = 128
     bounds_y = 94
-    bounds_cx = 493
+    bounds_cx = 477
     bounds_cy = 235
     anchors = [an_left, an_top, an_right, an_bottom]
     optionsgrid = [og_colsizing, og_colchangeontabkey, og_wrapcol, og_autopopup, og_mousescrollcol]
@@ -343,7 +343,7 @@ object filedialogfo: Tfiledialogfo
         colorselect = 16770239
         coloractive = 16770239
         colorfocused = 16770239
-        width = 223
+        width = 211
         options = [co_readonly, co_nofocus, co_focusselect, co_mouseselect, co_keyselect, co_rowselect, co_savevalue, co_savestate, co_mousescrollrow]
         datalist.options = [sdo_naturalsort]
         valuefalse = '0'
@@ -382,7 +382,7 @@ object filedialogfo: Tfiledialogfo
         colorselect = 16770239
         coloractive = 16770239
         colorfocused = 16770239
-        width = 123
+        width = 119
         options = [co_readonly, co_nofocus, co_focusselect, co_mouseselect, co_keyselect, co_rowselect, co_savevalue, co_savestate, co_mousescrollrow]
         textflags = [tf_xcentered, tf_ycentered, tf_noselect]
         optionsedit1 = [oe1_noselectall, oe1_autopopupmenu, oe1_keyexecute, oe1_readonlydialog, oe1_savevalue, oe1_savestate, oe1_checkvalueafterstatread]
@@ -575,14 +575,14 @@ object filedialogfo: Tfiledialogfo
   end
   object tsplitter1: tsplitter
     taborder = 14
-    bounds_x = 110
+    bounds_x = 126
     bounds_y = 94
     bounds_cx = 2
     bounds_cy = 234
-    onmove = onmovesplit
     options = [spo_hmove, spo_dockleft, spo_docktop, spo_dockright, spo_dockbottom]
     linkleft = placespan
     linkright = list_log
+    onupdatelayout = onmovesplit
   end
   object blateral: tbooleanedit
     frame.levelo = 0
@@ -611,7 +611,7 @@ object filedialogfo: Tfiledialogfo
     taborder = 17
     bounds_x = 0
     bounds_y = 94
-    bounds_cx = 110
+    bounds_cx = 126
     bounds_cy = 236
     anchors = [an_left, an_top, an_bottom]
     reffontheight = 15
@@ -642,10 +642,10 @@ object filedialogfo: Tfiledialogfo
       face.localprops = [fal_fadirection]
       bounds_x = 0
       bounds_y = 0
-      bounds_cx = 110
+      bounds_cx = 126
       bounds_cy = 192
       anchors = [an_left, an_top, an_right, an_bottom]
-      optionsgrid = [og_colsizing, og_colchangeontabkey, og_wrapcol, og_autopopup, og_mousescrollcol]
+      optionsgrid = [og_colchangeontabkey, og_wrapcol, og_autopopup, og_mousescrollcol]
       datacols.count = 2
       datacols.linecolor = -1610612731
       datacols.linecolorfix = -1610612733
@@ -661,7 +661,7 @@ object filedialogfo: Tfiledialogfo
           colorselect = 16763002
           coloractive = 16763002
           colorfocused = 16763002
-          width = 105
+          width = 108
           options = [co_readonly, co_nofocus, co_rowselect, co_savevalue, co_savestate, co_mousescrollrow]
           datalist.options = [sdo_naturalsort]
           datalist.data = (
@@ -748,10 +748,10 @@ object filedialogfo: Tfiledialogfo
       hint = 'Double click on the empty row to add the selected directory, Delete-key to delete a row.'
       bounds_x = 0
       bounds_y = 194
-      bounds_cx = 110
+      bounds_cx = 126
       bounds_cy = 42
       anchors = [an_left, an_top, an_right, an_bottom]
-      optionsgrid = [og_colsizing, og_rowdeleting, og_colchangeontabkey, og_wrapcol, og_autopopup, og_mousescrollcol]
+      optionsgrid = [og_rowdeleting, og_colchangeontabkey, og_wrapcol, og_autopopup, og_mousescrollcol]
       datacols.count = 2
       datacols.linecolor = -1610612731
       datacols.linecolorfix = -1610612733
@@ -767,7 +767,7 @@ object filedialogfo: Tfiledialogfo
           colorselect = 16763002
           coloractive = 16763002
           colorfocused = 16763002
-          width = 105
+          width = 108
           options = [co_readonly, co_nofocus, co_rowselect, co_savevalue, co_savestate, co_mousescrollrow]
           datalist.options = [sdo_naturalsort]
           datalist.data = (

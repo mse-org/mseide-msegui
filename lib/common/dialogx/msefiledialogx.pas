@@ -1949,7 +1949,13 @@ begin
 
       end
       else
+      begin
+          listview.defocuscell;
+          listview.datacols.clearselection;
+          list_log.defocuscell;
+          list_log.datacols.clearselection; 
         fisfixedrow := False;
+      end;  
     end
     else
       fisfixedrow   := True;
@@ -2339,7 +2345,12 @@ end;
 procedure tfiledialogfo.onmovesplit(const Sender: TObject);
 begin
   if tsplitter1.left > 0 then
-    fsplitterpanpos := tsplitter1.left;
+      fsplitterpanpos := tsplitter1.left;
+      if places.width > 126 then begin
+   places.datacols[0].width := places.width - 18;
+ placescust.datacols[0].width := places.width - 18;    
+   end;  
+    
 end;
 
 { tfiledialogcontroller }
@@ -2625,7 +2636,7 @@ begin
       fo.widgetrect         := clipinrect(fwindowrect, application.screenrect(fo.window));
     rectbefore := fo.widgetrect;
 
-    if fsplitterplaces > 2 then
+    if fsplitterplaces > 0 then
       fo.tsplitter3.top := fsplitterplaces;
 
     if fnopanel = True then
