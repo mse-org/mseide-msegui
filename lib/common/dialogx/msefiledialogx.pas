@@ -652,7 +652,6 @@ type
     procedure ondrawcellplacescust(const Sender: tcol; const Canvas: tcanvas; var cellinfo: cellinfoty);
     procedure oncellevcustplaces(const Sender: TObject; var info: celleventinfoty);
     procedure onmovesplit(const Sender: TObject);
-    procedure ontimer(const Sender: TObject);
   private
     fselectednames: filenamearty;
     finit: Boolean;
@@ -1892,18 +1891,13 @@ begin
     (info.eventkind = cek_keyup)) then
     if (info.cell.row > -1) then
     begin
-
       if (fisfixedrow = False) then
       begin
-
         cellpos := info.cell;
-
         cellpos.col  := 0;
         cellpos2.col := 0;
-
         places.defocuscell;
         places.datacols.clearselection;
-
         y := StrToInt(list_log[4][cellpos.row]);
         cellpos2.row := y;
 
@@ -1949,10 +1943,8 @@ begin
         end;
 
         dir.Value := tosysfilepath(dir.Value);
-
         if filename.tag = 1 then
           filename.Value := dir.Value;
-
         filename.Value := tosysfilepath(filename.Value);
 
       end
@@ -3545,11 +3537,6 @@ end;
 procedure tdirtreeview.internalcreateframe;
 begin
   timpressedcaptionframe.Create(icaptionframe(self));
-end;
-
-procedure tfiledialogfo.ontimer(const Sender: TObject);
-begin
-  fisfixedrow := False;
 end;
 
 procedure tdirtreeview.loaded();
