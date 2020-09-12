@@ -2403,7 +2403,7 @@ begin
   fshowhidden      := reader.readboolean('showhidden', fshowhidden);
   fcompact         := reader.readboolean('compact', fcompact);
   fnopanel         := reader.readboolean('nopanel', fnopanel);
-  fcolnamewidth    := reader.readinteger('colnamewidth', fcolsizewidth);
+  fcolnamewidth    := reader.readinteger('colnamewidth', fcolnamewidth);
   fcolsizewidth    := reader.readinteger('colsizewidth', fcolsizewidth);
   fcolextwidth     := reader.readinteger('colextwidth', fcolextwidth);
   fcoldatewidth    := reader.readinteger('coldatewidth', fcoldatewidth);
