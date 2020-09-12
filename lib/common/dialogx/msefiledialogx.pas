@@ -1718,8 +1718,26 @@ begin
 end;
 
 procedure tfiledialogfo.filteronsetvalue(const Sender: TObject; var avalue: msestring; var accept: Boolean);
+var
+rootdir : msestring;
+bool : boolean;
 begin
-  listview.mask := avalue;
+
+listview.mask := avalue;
+rootdir := dir.value;
+
+bool := true;
+
+list_log.defocuscell;
+list_log.datacols.clearselection;
+
+dironsetvalue(sender,rootdir,bool);
+
+fisfixedrow := true;
+
+list_log.defocuscell;
+list_log.datacols.clearselection;
+  
 end;
 
 procedure tfiledialogfo.okonexecute(const Sender: TObject);
