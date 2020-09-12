@@ -79,7 +79,8 @@ uses
   msescrollbar,
   msedragglob,
   msefiledialog,
-  mserichstring;
+  mserichstring,
+  msetimer;
 
 const
   defaultlistviewoptionsfile = defaultlistviewoptions + [lvo_readonly, lvo_horz];
@@ -650,10 +651,12 @@ type
     procedure onchangdir(const Sender: TObject);
     procedure ondrawcellplacescust(const Sender: tcol; const Canvas: tcanvas; var cellinfo: cellinfoty);
     procedure oncellevcustplaces(const Sender: TObject; var info: celleventinfoty);
-   procedure onmovesplit(const sender: TObject);
+    procedure onmovesplit(const Sender: TObject);
+    procedure ontimer(const Sender: TObject);
   private
     fselectednames: filenamearty;
     finit: Boolean;
+    fisfixedrow: Boolean;
     fsplitterpanpos: integer;
     fcourse: filenamearty;
     fcourseid: int32;
@@ -1710,8 +1713,8 @@ procedure tfiledialogfo.filteronafterclosedropdown(const Sender: TObject);
 begin
   updatefiltertext;
   filter.initfocus;
-  filter.left      := 422;
-  filter.width      := 182;
+  filter.left  := 422;
+  filter.Width := 182;
   //filter.frame.Caption := '&Filter';
 end;
 
@@ -1885,70 +1888,79 @@ var
   str1: string;
 begin
 
-  if (list_log.rowcount > 0) and ((info.eventkind = cek_buttonrelease) or (info.eventkind = cek_keyup)) then
+  if (list_log.rowcount > 0) and ((info.eventkind = cek_buttonrelease) or
+    (info.eventkind = cek_keyup)) then
     if (info.cell.row > -1) then
     begin
 
-      cellpos := info.cell;
-
-      cellpos.col  := 0;
-      cellpos2.col := 0;
-
-      places.defocuscell;
-      places.datacols.clearselection;
-
-      y := StrToInt(list_log[4][cellpos.row]);
-      cellpos2.row := y;
-
-      if listview.filelist.isdir(y) then
+      if (fisfixedrow = False) then
       begin
-        listview.defocuscell;
-        listview.datacols.clearselection;
-        str1 := tosysfilepath(filepath(dir.Value + listview.filelist[y].Name));
 
-        if (info.eventkind = cek_buttonrelease) then
+        cellpos := info.cell;
+
+        cellpos.col  := 0;
+        cellpos2.col := 0;
+
+        places.defocuscell;
+        places.datacols.clearselection;
+
+        y := StrToInt(list_log[4][cellpos.row]);
+        cellpos2.row := y;
+
+        if listview.filelist.isdir(y) then
         begin
-          if (ss_double in info
-            .mouseeventinfopo^.shiftstate) then
-            okonexecute(Sender)
-          else
+          listview.defocuscell;
+          listview.datacols.clearselection;
+          str1 := tosysfilepath(filepath(dir.Value + listview.filelist[y].Name));
+
+          if (info.eventkind = cek_buttonrelease) then
+          begin
+            if (ss_double in info
+              .mouseeventinfopo^.shiftstate) then
+              okonexecute(Sender)
+            else
+            begin
+              changedir(str1);
+              filename.Value := '';
+            end;
+          end
+          else if info.keyeventinfopo^.key = key_return then
           begin
             changedir(str1);
             filename.Value := '';
           end;
         end
-        else if info.keyeventinfopo^.key = key_return then
+        else
         begin
-          changedir(str1);
-          filename.Value := '';
+          listview.defocuscell;
+          listview.datacols.clearselection;
+          listview.selectcell(cellpos2, csm_select, False);
+          if (info.eventkind = cek_buttonrelease) then
+          begin
+            if (listview.rowcount > 0) and (list_log.rowcount > 0) and
+              (not listview.filelist.isdir(y)) and
+              (ss_double in info.mouseeventinfopo^.shiftstate) then
+              okonexecute(Sender);
+          end
+          else if (listview.rowcount > 0) and (list_log.rowcount > 0) and
+            (not listview.filelist.isdir(y)) and
+            (info.keyeventinfopo^.key = key_return) then
+            okonexecute(Sender);
         end;
+
+        dir.Value := tosysfilepath(dir.Value);
+
+        if filename.tag = 1 then
+          filename.Value := dir.Value;
+
+        filename.Value := tosysfilepath(filename.Value);
+
       end
       else
-      begin
-        listview.defocuscell;
-        listview.datacols.clearselection;
-        listview.selectcell(cellpos2, csm_select, False);
-        if (info.eventkind = cek_buttonrelease) then
-        begin
-          if (listview.rowcount > 0) and (list_log.rowcount > 0) and
-            (not listview.filelist.isdir(y)) and
-            (ss_double in info.mouseeventinfopo^.shiftstate) then
-            okonexecute(Sender);
-        end
-        else if (listview.rowcount > 0) and (list_log.rowcount > 0) and
-          (not listview.filelist.isdir(y)) and
-          (info.keyeventinfopo^.key = key_return) then
-          okonexecute(Sender);
-      end;
-
-      dir.Value := tosysfilepath(dir.Value);
-
-      if filename.tag = 1 then
-        filename.Value := dir.Value;
-
-      filename.Value := tosysfilepath(filename.Value);
-
-    end;
+        fisfixedrow := False;
+    end
+    else
+      fisfixedrow   := True;
 end;
 
 procedure tfiledialogfo.ondrawcell(const Sender: tcol; const Canvas: tcanvas; var cellinfo: cellinfoty);
@@ -2058,14 +2070,15 @@ end;
 
 procedure tfiledialogfo.oncreat(const Sender: TObject);
 begin
-  theimagelist := iconslist;
+  theimagelist    := iconslist;
   fsplitterpanpos := tsplitter1.left;
+  fisfixedrow     := False;
 end;
 
 procedure tfiledialogfo.onbefdrop(const Sender: TObject);
 begin
-  filter.left      := 190;
-  filter.width      := 414;
+  filter.left  := 190;
+  filter.Width := 414;
   //filter.frame.Caption := '';
 end;
 
@@ -2331,10 +2344,10 @@ begin
 
 end;
 
-procedure tfiledialogfo.onmovesplit(const sender: TObject);
+procedure tfiledialogfo.onmovesplit(const Sender: TObject);
 begin
-if tsplitter1.left > 0 then
-fsplitterpanpos := tsplitter1.left;
+  if tsplitter1.left > 0 then
+    fsplitterpanpos := tsplitter1.left;
 end;
 
 { tfiledialogcontroller }
@@ -2376,21 +2389,21 @@ end;
 
 procedure tfiledialogcontroller.readstatstate(const reader: tstatreader);
 begin
-  ffilterindex    := reader.readinteger('filefilterindex', ffilterindex);
-  ffilter         := reader.readmsestring('filefilter', ffilter);
-  fwindowrect.x   := reader.readinteger('x', fwindowrect.x);
-  fwindowrect.y   := reader.readinteger('y', fwindowrect.y);
-  fwindowrect.cx  := reader.readinteger('cx', fwindowrect.cx);
-  fwindowrect.cy  := reader.readinteger('cy', fwindowrect.cy);
-  fcolwidth       := reader.readinteger('filecolwidth', fcolwidth);
-  fshowhidden     := reader.readboolean('showhidden', fshowhidden);
-  fcompact        := reader.readboolean('compact', fcompact);
-  fnopanel        := reader.readboolean('nopanel', fnopanel);
-  fcolnamewidth   := reader.readinteger('colnamewidth', fcolsizewidth);
-  fcolsizewidth   := reader.readinteger('colsizewidth', fcolsizewidth);
-  fcolextwidth    := reader.readinteger('colextwidth', fcolextwidth);
-  fcoldatewidth   := reader.readinteger('coldatewidth', fcoldatewidth);
-  fsplitterplaces := reader.readinteger('splitterplaces', fsplitterplaces);
+  ffilterindex     := reader.readinteger('filefilterindex', ffilterindex);
+  ffilter          := reader.readmsestring('filefilter', ffilter);
+  fwindowrect.x    := reader.readinteger('x', fwindowrect.x);
+  fwindowrect.y    := reader.readinteger('y', fwindowrect.y);
+  fwindowrect.cx   := reader.readinteger('cx', fwindowrect.cx);
+  fwindowrect.cy   := reader.readinteger('cy', fwindowrect.cy);
+  fcolwidth        := reader.readinteger('filecolwidth', fcolwidth);
+  fshowhidden      := reader.readboolean('showhidden', fshowhidden);
+  fcompact         := reader.readboolean('compact', fcompact);
+  fnopanel         := reader.readboolean('nopanel', fnopanel);
+  fcolnamewidth    := reader.readinteger('colnamewidth', fcolsizewidth);
+  fcolsizewidth    := reader.readinteger('colsizewidth', fcolsizewidth);
+  fcolextwidth     := reader.readinteger('colextwidth', fcolextwidth);
+  fcoldatewidth    := reader.readinteger('coldatewidth', fcoldatewidth);
+  fsplitterplaces  := reader.readinteger('splitterplaces', fsplitterplaces);
   fsplitterlateral := reader.readinteger('splitterlateral', fsplitterlateral);
   if fdo_chdir in foptions then
     trysetcurrentdirmse(flastdir);
@@ -2515,8 +2528,8 @@ begin
     tmp := fo.labtest.Caption;
 
     x := -1;
-   
-     if directoryexists(tosysfilepath(sys_getuserhomedir)) then
+
+    if directoryexists(tosysfilepath(sys_getuserhomedir)) then
     begin
       Inc(x);
       fo.places[0][x] := tmp + 'Home';
@@ -2530,7 +2543,7 @@ begin
     end;
     if directoryexists(tosysfilepath(sys_getuserhomedir + directoryseparator + 'Music')) then
     begin
-      Inc(x);    
+      Inc(x);
       fo.places[0][x] := tmp + 'Music';
       fo.places[1][x] := msestring(tosysfilepath(sys_getuserhomedir + directoryseparator + 'Music'));
     end;
@@ -2558,8 +2571,8 @@ begin
       fo.places[0][x] := tmp + 'Downloads';
       fo.places[1][x] := msestring(tosysfilepath(sys_getuserhomedir + directoryseparator + 'Downloads'));
     end;
-    
-     fo.places.rowcount := x + 1;
+
+    fo.places.rowcount := x + 1;
 
     if length(ffilenamescust) > 0 then
     begin
@@ -2583,16 +2596,16 @@ begin
 
     if fcolnamewidth > 0 then
       fo.list_log.datacols[0].Width := fcolnamewidth;
-     if fcolextwidth > 0 then
+    if fcolextwidth > 0 then
       fo.list_log.datacols[1].Width := fcolextwidth;
     if fcolsizewidth > 0 then
       fo.list_log.datacols[2].Width := fcolsizewidth;
     if fcoldatewidth > 0 then
       fo.list_log.datacols[3].Width := fcoldatewidth;
 
-   // fo.list_log.datacols[0].Width := fo.list_log.Width -
-   //   fo.list_log.datacols[1].Width - fo.list_log.datacols[2].Width -
-   //   fo.list_log.datacols[3].Width - 20;
+    // fo.list_log.datacols[0].Width := fo.list_log.Width -
+    //   fo.list_log.datacols[1].Width - fo.list_log.datacols[2].Width -
+    //   fo.list_log.datacols[3].Width - 20;
 
     if (dialogkind in [fdk_dir]) or (fdo_directory in aoptions) then
     begin
@@ -2622,14 +2635,13 @@ begin
 
     if fsplitterplaces > 2 then
       fo.tsplitter3.top := fsplitterplaces;
-      
-     if fnopanel = true then
-       fo.tsplitter1.left := 0 else if 
-      fsplitterlateral > 0 then
+
+    if fnopanel = True then
+      fo.tsplitter1.left := 0
+    else if fsplitterlateral > 0 then
       fo.tsplitter1.left := fsplitterlateral;
 
-    Result        := filedialog1(fo, ffilenames, ara, arb, @ffilterindex, @ffilter,
-     @fcolwidth, finclude,
+    Result        := filedialog1(fo, ffilenames, ara, arb, @ffilterindex, @ffilter, @fcolwidth, finclude,
       fexclude, po1, fhistorymaxcount, acaption, aoptions, fdefaultext,
       fimagelist, fongetfileicon, foncheckfile);
     if not rectisequal(fo.widgetrect, rectbefore) then
@@ -2652,16 +2664,18 @@ begin
     fcolsizewidth   := fo.list_log.datacols[2].Width;
     fcoldatewidth   := fo.list_log.datacols[3].Width;
     fsplitterplaces := fo.tsplitter3.top;
-  
-     if fo.tsplitter1.left > 0 then
+
+    if fo.tsplitter1.left > 0 then
       fsplitterlateral := fo.tsplitter1.left;
- 
+
     if fo.placescust.rowcount > 1 then
     begin
       setlength(ffilenamescust, fo.placescust.rowcount - 1);
       for x := 0 to length(ffilenamescust) - 1 do
         ffilenamescust[x] := fo.placescust[1][x];
-    end else setlength(ffilenamescust,0);
+    end
+    else
+      setlength(ffilenamescust, 0);
 
   finally
     fo.Free;
@@ -3531,6 +3545,11 @@ end;
 procedure tdirtreeview.internalcreateframe;
 begin
   timpressedcaptionframe.Create(icaptionframe(self));
+end;
+
+procedure tfiledialogfo.ontimer(const Sender: TObject);
+begin
+  fisfixedrow := False;
 end;
 
 procedure tdirtreeview.loaded();
