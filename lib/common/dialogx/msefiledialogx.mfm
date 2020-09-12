@@ -4,7 +4,7 @@ object filedialogfo: Tfiledialogfo
   bounds_x = 326
   bounds_y = 209
   bounds_cx = 608
-  bounds_cy = 384
+  bounds_cy = 434
   bounds_cxmin = 30
   bounds_cymin = 30
   container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_mousetransparent, ow_destroywidgets]
@@ -15,7 +15,7 @@ object filedialogfo: Tfiledialogfo
     0
     0
     608
-    384
+    434
   )
   options = [fo_screencentered, fo_closeonesc, fo_localshortcuts, fo_autoreadstat, fo_autowritestat, fo_savepos]
   caption = 'Select a file'
@@ -56,10 +56,10 @@ object filedialogfo: Tfiledialogfo
     frame.localprops = []
     frame.localprops1 = []
     taborder = 15
-    bounds_x = 106
+    bounds_x = 128
     bounds_y = 94
-    bounds_cx = 499
-    bounds_cy = 235
+    bounds_cx = 40
+    bounds_cy = 285
     anchors = [an_left, an_top, an_right, an_bottom]
     onkeydown = listviewonkeydown
     datarowlinecolor = -1610612731
@@ -114,7 +114,7 @@ object filedialogfo: Tfiledialogfo
     taborder = 5
     hint = 'Click button on right corner to show the history of files.'
     bounds_x = 4
-    bounds_y = 341
+    bounds_y = 391
     bounds_cx = 600
     bounds_cy = 38
     anchors = [an_left, an_right, an_bottom]
@@ -136,7 +136,7 @@ object filedialogfo: Tfiledialogfo
   end
   object tlayouter2: tlayouter
     bounds_x = 1
-    bounds_y = 384
+    bounds_y = 434
     bounds_cx = 605
     bounds_cy = 0
     anchors = [an_left, an_right, an_bottom]
@@ -324,8 +324,8 @@ object filedialogfo: Tfiledialogfo
     taborder = 8
     bounds_x = 128
     bounds_y = 94
-    bounds_cx = 477
-    bounds_cy = 235
+    bounds_cx = 476
+    bounds_cy = 285
     anchors = [an_left, an_top, an_right, an_bottom]
     optionsgrid = [og_colsizing, og_colchangeontabkey, og_wrapcol, og_autopopup, og_mousescrollcol]
     datacols.count = 5
@@ -612,7 +612,7 @@ object filedialogfo: Tfiledialogfo
     bounds_x = 0
     bounds_y = 94
     bounds_cx = 126
-    bounds_cy = 236
+    bounds_cy = 286
     anchors = [an_left, an_top, an_bottom]
     reffontheight = 15
     object places: tstringgrid
@@ -643,7 +643,7 @@ object filedialogfo: Tfiledialogfo
       bounds_x = 0
       bounds_y = 0
       bounds_cx = 126
-      bounds_cy = 192
+      bounds_cy = 242
       anchors = [an_left, an_top, an_right, an_bottom]
       optionsgrid = [og_colchangeontabkey, og_wrapcol, og_autopopup, og_mousescrollcol]
       datacols.count = 2
@@ -665,6 +665,8 @@ object filedialogfo: Tfiledialogfo
           options = [co_readonly, co_nofocus, co_rowselect, co_savevalue, co_savestate, co_mousescrollrow]
           datalist.options = [sdo_naturalsort]
           datalist.data = (
+            ''
+            ''
             ''
             ''
             ''
@@ -695,13 +697,15 @@ object filedialogfo: Tfiledialogfo
             ''
             ''
             ''
+            ''
+            ''
           )
           valuefalse = '0'
           valuetrue = '1'
         end>
       fixrows.linecolor = 7895160
       fixrows.linecolorfix = 7895160
-      rowcount = 7
+      rowcount = 9
       datarowlinecolorfix = -1610612731
       datarowlinecolor = -1610612731
       datarowheight = 24
@@ -712,7 +716,7 @@ object filedialogfo: Tfiledialogfo
     object tsplitter3: tsplitter
       taborder = 1
       bounds_x = 0
-      bounds_y = 192
+      bounds_y = 242
       bounds_cx = 110
       bounds_cy = 2
       options = [spo_vmove, spo_vprop, spo_dockleft, spo_docktop, spo_dockright, spo_dockbottom]
@@ -747,7 +751,7 @@ object filedialogfo: Tfiledialogfo
       taborder = 2
       hint = 'Double click on the empty row to add the selected directory, Delete-key to delete a row.'
       bounds_x = 0
-      bounds_y = 194
+      bounds_y = 244
       bounds_cx = 126
       bounds_cy = 42
       anchors = [an_left, an_top, an_right, an_bottom]

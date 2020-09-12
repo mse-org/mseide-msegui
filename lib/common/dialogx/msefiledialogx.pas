@@ -2134,8 +2134,9 @@ begin
 
   astr := trim(places[0][cellinfo.cell.row]);
 
-
-  if astr = 'Home' then
+  if (astr = 'C:\') or (astr = 'D:\') or (astr = '/') or (astr = '/usr') then
+    aicon := 0
+  else if astr = 'Home' then
     aicon := 13
   else if astr = 'Desktop' then
     aicon := 14
@@ -2531,14 +2532,42 @@ begin
     tmp := fo.labtest.Caption;
 
     x := -1;
-
-    if directoryexists(tosysfilepath(sys_getuserhomedir)) then
+    
+    {$ifdef windows}
+    if directoryexists('C:\') then
+    begin
+      Inc(x);
+      fo.places[0][x] := tmp + 'C:\';
+      fo.places[1][x] := msestring('C:\');
+    end;  
+    if directoryexists('D:\') then
+    begin
+      Inc(x);
+      fo.places[0][x] := tmp + 'D:\';
+      fo.places[1][x] := msestring('D:\');  
+    end; 
+    {$else}
+     if directoryexists('/') then
+    begin
+      Inc(x);
+      fo.places[0][x] := tmp + '/';
+      fo.places[1][x] := msestring('/'); 
+    end;  
+    if directoryexists('/usr') then
+    begin
+      Inc(x);
+      fo.places[0][x] := tmp + '/usr';
+      fo.places[1][x] := msestring('/usr');  
+    end; 
+    {$endif}
+   
+     if directoryexists(tosysfilepath(sys_getuserhomedir)) then
     begin
       Inc(x);
       fo.places[0][x] := tmp + 'Home';
       fo.places[1][x] := msestring(tosysfilepath(sys_getuserhomedir));
     end;
-    if directoryexists(tosysfilepath(sys_getuserhomedir + directoryseparator + 'Desktop')) then
+     if directoryexists(tosysfilepath(sys_getuserhomedir + directoryseparator + 'Desktop')) then
     begin
       Inc(x);
       fo.places[0][x] := tmp + 'Desktop';
