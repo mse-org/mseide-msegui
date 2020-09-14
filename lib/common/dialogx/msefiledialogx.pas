@@ -31,56 +31,14 @@ interface
 {$endif}
 
 uses
-  Math,
-  mseglob,
-  mseguiglob,
-  mseforms,
-  Classes,
-  mclasses,
-  mseclasses,
-  msewidgets,
-  msegrids,
-  mselistbrowser,
-  mseedit,
-  msesimplewidgets,
-  msedataedits,
-  msedialog,
-  msetypes,
-  msestrings,
-  msesystypes,
-  msesys,
-  msedispwidgets,
-  msedatalist,
-  msestat,
-  msestatfile,
-  msebitmap,
-  msedatanodes,
-  msefileutils,
-  msedropdownlist,
-  mseevent,
-  msegraphedits,
-  mseeditglob,
-  msesplitter,
-  msemenus,
-  msegridsglob,
-  msegraphics,
-  msegraphutils,
-  msedirtree,
-  msewidgetgrid,
-  mseact,
-  mseapplication,
-  msegui,
-  mseificomp,
-  mseificompglob,
-  mseifiglob,
-  msestream,
-  SysUtils,
-  msemenuwidgets,
-  msescrollbar,
-  msedragglob,
-  msefiledialog,
-  mserichstring,
-  msetimer;
+ Math,mseglob,mseguiglob,mseforms,Classes,mclasses,mseclasses,msewidgets,
+ msegrids,mselistbrowser,mseedit,msesimplewidgets,msedataedits,msedialog,
+ msetypes,msestrings,msesystypes,msesys,msedispwidgets,msedatalist,msestat,
+ msestatfile,msebitmap,msedatanodes,msefileutils,msedropdownlist,mseevent,
+ msegraphedits,mseeditglob,msesplitter,msemenus,msegridsglob,msegraphics,
+ msegraphutils,msedirtree,msewidgetgrid,mseact,mseapplication,msegui,mseificomp,
+ mseificompglob,mseifiglob,msestream,SysUtils,msemenuwidgets,msescrollbar,
+ msedragglob,msefiledialog,mserichstring,msetimer;
 
 const
   defaultlistviewoptionsfile = defaultlistviewoptions + [lvo_readonly, lvo_horz];
@@ -610,13 +568,13 @@ type
     tsplitter1: tsplitter;
     listview: tfilelistview;
     blateral: tbooleanedit;
-    iconslist: timagelist;
     placespan: tstringdisp;
     places: tstringgrid;
     tsplitter3: tsplitter;
     placescust: tstringgrid;
     labtest: tlabel;
     bnoicon: tbooleanedit;
+   iconslist: timagelist;
     procedure createdironexecute(const Sender: TObject);
     procedure listviewselectionchanged(const Sender: tcustomlistview);
     procedure listviewitemevent(const Sender: tcustomlistview; const index: integer; var info: celleventinfoty);
@@ -1633,7 +1591,7 @@ begin
         if bnoicon.Value = True then
           tmp3 := 'D |'
         else
-          tmp3 := '!';
+          tmp3 := '.';
         list_log[0][x] := tmp3 + tmp2 + msestring(listview.itemlist[x].Caption);
         list_log[1][x] := '';
       end
@@ -1642,7 +1600,7 @@ begin
         if bnoicon.Value = True then
           tmp3 := 'F |'
         else
-          tmp3 := '-';
+          tmp3 := ':';
         list_log[0][x] := tmp3 + tmp2 + msestring(filenamebase(listview.itemlist[x].Caption));
         tmp := fileext(listview.itemlist[x].Caption);
         if tmp <> '' then
