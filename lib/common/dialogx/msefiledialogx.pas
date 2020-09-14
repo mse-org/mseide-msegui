@@ -1685,7 +1685,7 @@ begin
         begin
           y2        := 0;
           y         := info.extinfo1.size;
-          thestrx   := ' ';
+          thestrx   := '!';
           thestrext := ' B ';
         end;
 
@@ -1703,10 +1703,14 @@ begin
           thestrfract := '';
 
         list_log[2][x] := thestrx + thestrnum + thestrfract + thestrext;
-      end;
+      end
+      else
+        list_log[2][x] := ' ';
 
       list_log[3][x] := formatdatetime('YY-MM-DD hh:mm:ss', info.extinfo1.modtime);
 
+      if listview.filelist.isdir(x) then
+        list_log[3][x] := ' ' + list_log[3][x];
     end; // else dir.frame.caption := 'Directory with 0 files';
 
   if bcompact.Value then
@@ -2260,7 +2264,7 @@ begin
     tsplitter1.left    := fsplitterpanpos;
     tsplitter1.Visible := True;
     list_log.left      := tsplitter1.left + tsplitter1.Width;
-    list_log.Width     := Width - list_log.left;
+    list_log.Width     := Width - list_log.left - 2;
   end
   else
   begin
@@ -2268,7 +2272,7 @@ begin
     tsplitter1.left    := 0;
     list_log.Width     := Width - 2;
     tsplitter1.Visible := False;
-    list_log.left      := tsplitter1.width;
+    list_log.left      := tsplitter1.Width;
   end;
 
   listview.left := list_log.left;
@@ -2333,10 +2337,10 @@ end;
 
 procedure tfiledialogfo.oncellevcustplaces(const Sender: TObject; var info: celleventinfoty);
 var
-  theint, theexist : integer;
+  theint, theexist: integer;
   thestr, tmp: msestring;
   doexist: Boolean = False;
-  sel : gridcoordty;
+  sel: gridcoordty;
 begin
 
   if (info.eventkind = cek_buttonrelease) or (info.eventkind = cek_keyup) then
@@ -2354,9 +2358,9 @@ begin
         for theint := 0 to placescust.rowcount - 2 do
           if placescust[1][theint] = dir.Value then
           begin
-            doexist := True;
+            doexist  := True;
             theexist := theint;
-          end;  
+          end;
 
         if doexist = False then
         begin
@@ -2383,14 +2387,14 @@ begin
           placescust.rowcount := placescust.rowcount + 1;
           places.defocuscell;
           places.datacols.clearselection;
-        end 
+        end
         else
         begin
           sel.col := 0;
           sel.row := theexist;
           placescust.defocuscell;
           placescust.datacols.clearselection;
-          placescust.selectcell(sel,csm_select);
+          placescust.selectcell(sel, csm_select);
         end;
       end
       else if (info.cell.row < placescust.rowcount - 1) then
@@ -2432,8 +2436,8 @@ begin
     fsplitterpanpos := tsplitter1.left;
   if places.Width > 10 then
   begin
-    places.datacols[0].Width     := places.Width-4;
-    placescust.datacols[0].Width := places.Width-4;
+    places.datacols[0].Width     := places.Width - 4;
+    placescust.datacols[0].Width := places.Width - 4;
   end;
 
 end;
@@ -2638,7 +2642,6 @@ begin
         fo.font.Height := 20;
 
     fo.list_log.datacols[2].widthmax := fo.font.Height * 7;
-
 
     fo.font.color := fontcolor;
 

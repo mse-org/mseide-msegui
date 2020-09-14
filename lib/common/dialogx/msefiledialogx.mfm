@@ -386,7 +386,7 @@ object filedialogfo: Tfiledialogfo
         colorfocused = 16770239
         width = 119
         options = [co_readonly, co_nofocus, co_focusselect, co_mouseselect, co_keyselect, co_rowselect, co_savevalue, co_savestate, co_mousescrollrow]
-        textflags = [tf_xcentered, tf_ycentered, tf_noselect]
+        textflags = [tf_right, tf_ycentered, tf_noselect]
         optionsedit1 = [oe1_noselectall, oe1_autopopupmenu, oe1_keyexecute, oe1_readonlydialog, oe1_savevalue, oe1_savestate, oe1_checkvalueafterstatread]
         valuefalse = '0'
         valuetrue = '1'
