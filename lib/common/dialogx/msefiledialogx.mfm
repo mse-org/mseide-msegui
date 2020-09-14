@@ -78,7 +78,7 @@ object filedialogfo: Tfiledialogfo
   end
   object filename: thistoryedit
     frame.levelo = 0
-    frame.caption = '&Name (history of files in drop list)'
+    frame.caption = '&Name'
     frame.captiontextflags = [tf_xcentered, tf_bottom]
     frame.localprops = [frl_levelo]
     frame.localprops1 = []
@@ -113,7 +113,6 @@ object filedialogfo: Tfiledialogfo
     face.fade_direction = gd_down
     face.localprops = [fal_fadirection]
     taborder = 5
-    hint = 'Click button on right corner to show the history of files.'
     bounds_x = 4
     bounds_y = 438
     bounds_cx = 600
@@ -495,11 +494,12 @@ object filedialogfo: Tfiledialogfo
     face.fade_direction = gd_down
     face.localprops = [fal_fadirection]
     taborder = 10
+    hint = 'Create a new directory'
     bounds_x = 340
     bounds_y = 1
     bounds_cx = 98
     bounds_cy = 30
-    state = [as_localcaption, as_localonexecute]
+    state = [as_localcaption, as_localhint, as_localonexecute]
     caption = '&New dir'
     onexecute = createdironexecute
   end
@@ -895,20 +895,20 @@ object filedialogfo: Tfiledialogfo
   end
   object bnoicon: tbooleanedit
     frame.levelo = 0
-    frame.caption = 'No &Icon'
+    frame.caption = 'No &Icons'
     frame.localprops = [frl_levelo]
     frame.localprops1 = []
     frame.outerframe = (
       0
       2
-      49
+      55
       3
     )
     taborder = 19
-    hint = 'Hide / Show Lateral panel '
+    hint = 'Hide / Show Icons'
     bounds_x = 40
     bounds_y = 40
-    bounds_cx = 62
+    bounds_cx = 68
     bounds_cy = 17
     onsetvalue = onsetvalnoicon
   end
