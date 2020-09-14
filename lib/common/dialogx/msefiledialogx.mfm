@@ -448,7 +448,6 @@ object filedialogfo: Tfiledialogfo
     datarowlinecolorfix = -1610612731
     datarowlinecolor = -1610612731
     statpriority = 1
-    onlayoutchanged = onlayout
     oncellevent = oncellev
     reffontheight = 15
   end

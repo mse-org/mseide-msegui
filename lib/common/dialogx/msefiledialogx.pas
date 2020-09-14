@@ -1633,7 +1633,7 @@ begin
         if bnoicon.Value = True then
           tmp3 := 'D |'
         else
-          tmp3 := '';
+          tmp3 := '!';
         list_log[0][x] := tmp3 + tmp2 + msestring(listview.itemlist[x].Caption);
         list_log[1][x] := '';
       end
@@ -1642,7 +1642,7 @@ begin
         if bnoicon.Value = True then
           tmp3 := 'F |'
         else
-          tmp3 := '';
+          tmp3 := '-';
         list_log[0][x] := tmp3 + tmp2 + msestring(filenamebase(listview.itemlist[x].Caption));
         tmp := fileext(listview.itemlist[x].Caption);
         if tmp <> '' then
@@ -2021,7 +2021,7 @@ var
 begin
   if bnoicon.Value = False then
   begin
-    if (list_log[1][cellinfo.cell.row] = '') and (list_log[2][cellinfo.cell.row] = '') then
+    if (trim(list_log[1][cellinfo.cell.row]) = '') and (trim(list_log[2][cellinfo.cell.row]) = '') then
       aicon := 0
     else if (lowercase(list_log[1][cellinfo.cell.row]) = '.txt') or
       (lowercase(list_log[1][cellinfo.cell.row]) = '.pdf') or
@@ -2270,10 +2270,12 @@ begin
   begin
     placespan.Visible  := False;
     tsplitter1.left    := 0;
-    list_log.Width     := Width - 2;
+    list_log.Width     := Width - 4;
     tsplitter1.Visible := False;
     list_log.left      := tsplitter1.Width;
   end;
+  
+  list_log.invalidate;
 
   listview.left := list_log.left;
 
