@@ -52,7 +52,7 @@ object filedialogfo: Tfiledialogfo
   left = 239
   top = 138
   moduleclassname = 'tmseform'
-  object listview: tfilelistview
+  object listview: tfilelistviewx
     optionswidget = [ow_mousefocus, ow_arrowfocus, ow_focusbackonesc, ow_mousewheel, ow_destroywidgets]
     frame.localprops = []
     frame.localprops1 = []
@@ -70,6 +70,9 @@ object filedialogfo: Tfiledialogfo
     cellheight = 15
     optionsgrid = [og_colsizing, og_focuscellonenter, og_mousescrollcol]
     options = [lvo_readonly, lvo_horz, lvo_drawfocus, lvo_mouseselect, lvo_keyselect, lvo_multiselect, lvo_locate, lvo_hintclippedtext]
+    itemlist.imagelist = iconslist
+    itemlist.imagewidth = 18
+    itemlist.imageheight = 18
     onselectionchanged = listviewselectionchanged
     onitemevent = listviewitemevent
     filelist.options = [flo_sortname, flo_sorttype]

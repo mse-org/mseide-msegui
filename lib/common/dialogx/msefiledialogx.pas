@@ -63,7 +63,7 @@ type
 
   getfileiconeventty = procedure(const Sender: TObject; const ainfo: fileinfoty; var imagelist: timagelist; var imagenr: integer) of object;
 
-  tfilelistview = class(tlistview)
+  tfilelistviewx = class(tlistview)
   private
     ffilelist: tfiledatalist;
     foptionsfile: filelistviewoptionsty;
@@ -566,7 +566,7 @@ type
     ok: TButton;
     bcompact: tbooleanedit;
     tsplitter1: tsplitter;
-    listview: tfilelistview;
+    listview: tfilelistviewx;
     blateral: tbooleanedit;
     placespan: tstringdisp;
     places: tstringgrid;
@@ -655,7 +655,7 @@ procedure getfileicon(const info: fileinfoty; var imagelist: timagelist; out ima
 procedure updatefileinfo(const item: tlistitem; const info: fileinfoty; const withicon: Boolean);
 
 var
-  theimagelist: timagelist;
+  theimagelist: timagelist = nil;
   theboolicon: Boolean = False;
 
 implementation
@@ -690,6 +690,8 @@ type
 // not needed anymore
 procedure getfileicon(const info: fileinfoty; var imagelist: timagelist; out imagenr: integer);
 begin
+  if assigned(theimagelist) then
+  begin
   imagelist := theimagelist;
   with info do
   begin
@@ -708,6 +710,11 @@ begin
           else
             imagenr := 18;
       end;
+  end;
+  end else
+  begin
+  imagenr := -1;
+  imagelist := nil;
   end;
 end;
 
@@ -894,9 +901,9 @@ begin
       afilename := '';
 end;
 
-{ tfilelistview }
+{ tfilelistviewx }
 
-constructor tfilelistview.Create(aowner: TComponent);
+constructor tfilelistviewx.Create(aowner: TComponent);
 begin
   fcaseinsensitive := filesystemiscaseinsensitive;
   fincludeattrib   := [fa_all];
@@ -916,13 +923,13 @@ begin
   checkcasesensitive;
 end;
 
-destructor tfilelistview.Destroy;
+destructor tfilelistviewx.Destroy;
 begin
   inherited;
   ffilelist.Free;
 end;
 
-procedure tfilelistview.checkcasesensitive;
+procedure tfilelistviewx.checkcasesensitive;
 begin
   fcaseinsensitive   := filesystemiscaseinsensitive;
   if flvo_maskcasesensitive in foptionsfile then
@@ -933,7 +940,7 @@ begin
 end;
 
 {
-procedure tfilelistview.setoptions(const Value: listviewoptionsty);
+procedure tfilelistviewx.setoptions(const Value: listviewoptionsty);
 begin
  if fcaseinsensitive then begin
   inherited setoptions(value - [lvo_casesensitive]);
@@ -943,7 +950,7 @@ begin
  end;
 end;
 }
-procedure tfilelistview.docellevent(var info: celleventinfoty);
+procedure tfilelistviewx.docellevent(var info: celleventinfoty);
 var
   index: integer;
 begin
@@ -985,7 +992,7 @@ begin
   end;
 end;
 
-procedure tfilelistview.filelistchanged(const Sender: TObject);
+procedure tfilelistviewx.filelistchanged(const Sender: TObject);
 var
   int1: integer;
   po1: pfilelistitem;
@@ -1032,7 +1039,7 @@ begin
   end;
 end;
 
-function tfilelistview.getselectednames: msestringarty;
+function tfilelistviewx.getselectednames: msestringarty;
 var
   int1, int2: integer;
 begin
@@ -1044,7 +1051,7 @@ begin
   setlength(Result, int2);
 end;
 
-procedure tfilelistview.setselectednames(const avalue: filenamearty);
+procedure tfilelistviewx.setselectednames(const avalue: filenamearty);
 var
   int1: integer;
   item1: tlistitem;
@@ -1076,13 +1083,13 @@ begin
   // focuscell(cell1);
 end;
 
-procedure tfilelistview.setfilelist(const Value: tfiledatalist);
+procedure tfilelistviewx.setfilelist(const Value: tfiledatalist);
 begin
   if ffilelist <> Value then
     ffilelist.Assign(Value);
 end;
 
-procedure tfilelistview.readlist;
+procedure tfilelistviewx.readlist;
 var
   int1: integer;
   po1: pfileinfoty;
@@ -1137,7 +1144,7 @@ begin
     fonlistread(self);
 end;
 
-procedure tfilelistview.updir;
+procedure tfilelistviewx.updir;
 var
   str1: msestring;
   int1: integer;
@@ -1152,12 +1159,12 @@ begin
   end;
 end;
 
-procedure tfilelistview.setdirectory(const Value: msestring);
+procedure tfilelistviewx.setdirectory(const Value: msestring);
 begin
   fdirectory := filepath(Value, fk_dir);
 end;
 
-function tfilelistview.getpath: msestring;
+function tfilelistviewx.getpath: msestring;
 begin
   if fmaskar = nil then
     Result := filepath(fdirectory)
@@ -1165,7 +1172,7 @@ begin
     Result := filepath(fdirectory, fmaskar[0]);
 end;
 
-procedure tfilelistview.setpath(const Value: filenamety);
+procedure tfilelistviewx.setpath(const Value: filenamety);
 var
   str1: msestring;
 begin
@@ -1174,29 +1181,29 @@ begin
   readlist;
 end;
 
-procedure tfilelistview.setmask(const Value: filenamety);
+procedure tfilelistviewx.setmask(const Value: filenamety);
 begin
   unquotefilename(Value, fmaskar);
 end;
 
-function tfilelistview.getmask: filenamety;
+function tfilelistviewx.getmask: filenamety;
 begin
   Result := quotefilename(fmaskar);
 end;
 
-function tfilelistview.filecount: integer;
+function tfilelistviewx.filecount: integer;
 begin
   if ffilelist.Count < ffilecount then
     ffilecount := 0;
   Result       := ffilecount;
 end;
 
-function tfilelistview.getchecksubdir: Boolean;
+function tfilelistviewx.getchecksubdir: Boolean;
 begin
   Result := flvo_checksubdir in foptionsfile;
 end;
 
-procedure tfilelistview.setchecksubdir(const avalue: Boolean);
+procedure tfilelistviewx.setchecksubdir(const avalue: Boolean);
 begin
   if avalue then
     include(foptionsfile, flvo_checksubdir)
@@ -1204,7 +1211,7 @@ begin
     exclude(foptionsfile, flvo_checksubdir);
 end;
 
-procedure tfilelistview.setoptionsfile(const avalue: filelistviewoptionsty);
+procedure tfilelistviewx.setoptionsfile(const avalue: filelistviewoptionsty);
 const
   mask1: filelistviewoptionsty = [flvo_maskcasesensitive, flvo_maskcaseinsensitive];
 begin
@@ -1308,7 +1315,7 @@ procedure tfiledialogfo.listviewitemevent(const Sender: tcustomlistview; const i
 var
   str1: filenamety;
 begin
-  with tfilelistview(Sender) do
+  with tfilelistviewx(Sender) do
     if iscellclick(info) then
       if filelist.isdir(index) then
       begin
@@ -1428,6 +1435,8 @@ var
   // ar1: msestringarty;
   bo1: Boolean;
   newdir: filenamety;
+  theint, theexist : integer;
+  sel : gridcoordty;
 begin
   newdir := '';
   avalue := trim(avalue);
@@ -1492,6 +1501,27 @@ begin
       avalue := listview.directory;
   end;
   listview.selectednames := fselectednames;
+  theexist := -1; 
+  
+  for theint := 0 to list_log.rowcount - 1 do
+         if trim(copy(list_log[0][theint], 2, length(list_log[0][theint])))  = str2 then
+                 theexist := theint;
+  
+    if theexist > 0 then
+      begin
+          sel.col := 0;
+          sel.row := theexist;
+          fisfixedrow := true;
+          list_log.defocuscell;
+          list_log.datacols.clearselection;
+          list_log.selectcell(sel,csm_select);
+          list_log.frame.sbvert.value := theexist/ (list_log.rowcount-1);
+        end; 
+         places.defocuscell;
+         places.datacols.clearselection;
+         placescust.defocuscell;
+         placescust.datacols.clearselection;
+                        
 end;
 
 procedure tfiledialogfo.filepathentered(const Sender: TObject);
@@ -1534,7 +1564,7 @@ begin
 
     while labtest.Width < x do
     begin
-      labtest.Caption := labtest.Caption + ' ';
+      labtest.Caption := labtest.caption + ' ';
       labtest.invalidate;
     end;
 
@@ -2065,6 +2095,9 @@ begin
 end;
 
 procedure tfiledialogfo.onsetcomp(const Sender: TObject; var avalue: Boolean; var accept: Boolean);
+var
+ theint, theexist : integer;
+  sel : gridcoordty;
 begin
   if avalue then
   begin
@@ -2077,6 +2110,22 @@ begin
     listview.Width   := 40;
     listview.invalidate;
     list_log.Visible := True;
+     theexist := -1; 
+  
+  for theint := 0 to list_log.rowcount - 1 do
+         if trim(copy(list_log[0][theint], 2,
+          length(list_log[0][theint]))) = filename.value then
+                 theexist := theint;
+  
+    if theexist > 0 then
+      begin
+          sel.col := 0;
+          sel.row := theexist;
+          list_log.defocuscell;
+          list_log.datacols.clearselection;
+          list_log.selectcell(sel,csm_select);
+          list_log.frame.sbvert.value := theexist/ (list_log.rowcount-1);
+      end; 
   end;
 end;
 
