@@ -9,7 +9,7 @@ uses
 
 procedure register;
 begin
- registercomponents('FileDialogX',[tfiledialogx,tfilenameeditx,tremotefilenameeditx,tfilelistviewx]);
+ registercomponents('FileDialogX',[tfiledialogx,tfilenameeditx,tfilelistviewx]);
  registercomponenttabhints(['FileDialogX'],['User extended file dialogs']);
 end;
 

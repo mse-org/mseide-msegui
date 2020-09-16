@@ -687,7 +687,6 @@ type
   tdirtreefo1 = class(tdirtreefo);
   tcomponent1 = class(TComponent);
 
-// not needed anymore
 procedure getfileicon(const info: fileinfoty; var imagelist: timagelist; out imagenr: integer);
 begin
   if assigned(theimagelist) then
@@ -2104,9 +2103,11 @@ begin
     listview.Width   := list_log.Width;
     listview.invalidate;
     list_log.Visible := False;
+    listview.Visible := true;
   end
   else
   begin
+    listview.Visible := False;
     listview.Width   := 40;
     listview.invalidate;
     list_log.Visible := True;
@@ -2448,7 +2449,9 @@ begin
     places.datacols[0].Width     := places.Width - 4;
     placescust.datacols[0].Width := places.Width - 4;
   end;
-
+  tsplitter3.width := placespan.width;
+  listview.left := list_log.left;
+  
 end;
 
 procedure tfiledialogfo.onsetvalnoicon(const Sender: TObject; var avalue: Boolean; var accept: Boolean);
