@@ -900,8 +900,8 @@ begin
      else if hextostrmse(key,4) = '402B' then result := 'Ctrl+*'
      else if hextostrmse(key,4) = '202B' then result := 'Shift+*'
      else if hextostrmse(key,4) = '002F' then result := '/'
-     else if hextostrmse(key,4) = '402F' then result := 'Ctrl+*'
-     else if hextostrmse(key,4) = '202F' then result := 'Shift+*'
+     else if hextostrmse(key,4) = '402F' then result := 'Ctrl+/'
+     else if hextostrmse(key,4) = '202F' then result := 'Shift+/'
      else result:= '$'+hextostrmse(key,4);
   end;
  end

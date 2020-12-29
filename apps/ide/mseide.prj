@@ -851,12 +851,12 @@ findhistory=20
  Kind
 findoptions=1
 editpos=6
- 0,4
  0,-1073741823
  0,-1073741823
+ 0,0
  0,-1073741823
- 59,871
- 0,37
+ 64,903
+ 0,-1073741823
 bookmarks0=0
 bookmarks1=0
 bookmarks2=0
@@ -876,7 +876,7 @@ relpaths=6
  main.pas
  lib/common/kernel/msegui.pas
  ../lib/common/kernel/mseactions.pas
- ../../mseide-msegui-master/lib/common/kernel/msekeyboard.pas
+ ../mseide-msegui-master/lib/common/kernel/msekeyboard.pas
 ismoduletexts=6
  0
  0
@@ -903,15 +903,15 @@ nomenumodules=3
 [sourcefo.files_tab]
 order=6
  0
+ 2
+ 3
  4
  5
  1
- 2
- 3
 firsttab=0
-index=1
+index=3
 [layout]
-windowlayout=624
+windowlayout=594
  [mainfo.basedock]
  splitdir=2
  useroptions=268450944
@@ -1035,7 +1035,7 @@ windowlayout=624
  [projecttreefo]
  splitdir=0
  useroptions=268484715
- stackedunder=componentpalettefo
+ stackedunder=memoryfo
  parent=
  mdistate=3
  nx=0
@@ -1119,7 +1119,7 @@ windowlayout=624
  [breakpointsfo]
  splitdir=0
  useroptions=268451947
- stackedunder=memoryfo
+ stackedunder=projecttreefo
  parent=
  mdistate=0
  nx=0
@@ -1338,7 +1338,7 @@ windowlayout=624
  [componentpalettefo]
  splitdir=0
  useroptions=268460139
- stackedunder=objectinspectorfo
+ stackedunder=
  parent=
  mdistate=0
  nx=0
@@ -1380,12 +1380,12 @@ windowlayout=624
  mdistate=0
  nx=0
  ny=0
- ncx=1197
- ncy=54
+ ncx=1206
+ ncy=52
  x=0
  y=0
  cx=1221
- cy=52
+ cy=50
  rcx=0
  rcy=0
  [debuggerfo.edit_options]
@@ -1396,7 +1396,8 @@ windowlayout=624
  value=Pascal
  [debuggerfo.file_history]
  value=/home/fred/mseide-msegui/lib/common/kernel/mseactions.pas
- history=50
+ history=20
+  /home/fred/mseide-msegui/apps/ide/main.pas
   /home/fred/mseide-msegui-master/apps/ide/main.pas
   /home/fred/uos/src/uos.pas
   /home/fred/uos/src/uos.lpk
@@ -1416,37 +1417,6 @@ windowlayout=624
   /home/fred/mseide-msegui/lib/common/kernel/linux/mseguiintf.pas
   /home/fred/mseide-msegui/lib/common/graphics/msegraphics.pas
   /home/fred/mseide-msegui-master/lib/common/graphics/msegraphics.pas
-  /home/fred/mseide-msegui-master/lib/common/graphics/msegraphutils.pas
-  /home/fred/mseide-msegui-master/lib/common/graphics/mseftglyphs.pas
-  /home/fred/ideu/src/dialogfiles.pas
-  /home/fred/mseide-msegui/lib/common/kernel/linux/msesysintf.pas
-  /home/fred/mseide-msegui/lib/common/kernel/linux/cwstring.pas
-  /home/fred/mseide-msegui/lib/common/graphics/mseftglyphs.pas
-  /home/fred/ideu/src/plugmanager.pas
-  /home/fred/strumpract/src/uos.pas
-  /home/fred/uos/examples/consoleplaymemorybuffer.prj
-  /home/fred/strumpract/src/uos_flat.pas
-  /home/fred/uos/examples/SimplePlayer_MSE.prj
-  /home/fred/strumpract/src/config.pas
-  /home/fred/uos/examples/simpleplayer_fpGUI.pas
-  /home/fred/strumpract/src/equalizer.pas
-  /home/fred/uos/examples/main_fp.pas
-  /home/fred/Downloads/acs-3.0.1/src/filters/acs_filters.pas
-  /home/fred/uos_squarewaveharmonics/src/uos.pas
-  /home/fred/uos_squarewaveharmonics/license.txt
-  /home/fred/strumpract/src/uos_new.pas
-  /home/fred/uos/examples/uos.pas
-  /home/fred/uos_blaazwave/src/uos.pas
-  /home/fred/strumpract/src/dockpanel1.pas
-  /home/fred/alsa_sound/src/alsa_sound.pas
-  /home/fred/alsa_sound/README.md
-  /home/fred/mseide-msegui/apps/ide/main.pas
-  /home/fred/mseide-msegui/msegui.svg
-  /home/fred/strumpract/src/guitars.pas
-  /home/fred/uos/examples/deviceinfos_fpGUI.pas
-  /home/fred/uos/readme_examples.txt
-  /home/fred/freepascal-ootb_320test/rtl/unix/sysutils.pp
-  /home/fred/alsa_soundnew/src/alsa_sound.pas
  [debuggerfo.project_options]
  value=1
  [debuggerfo.hints]
@@ -1470,13 +1440,13 @@ windowlayout=624
  [sourcefo.files_tab]
  order=6
   0
+  2
+  3
   4
   5
   1
-  2
-  3
  firsttab=0
- index=1
+ index=3
  [confideufo.fontname]
  value=stf_default
  [confideufo.usedefaulteditoroptions]
