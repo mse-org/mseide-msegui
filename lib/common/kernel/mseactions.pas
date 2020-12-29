@@ -860,7 +860,25 @@ begin
    result:= '';
   end
   else begin
-   result:= '$'+hextostrmse(key,4);
+     if hextostrmse(key,4) = '0028' then result := '('
+     else if hextostrmse(key,4) = '4028' then result := 'Ctrl+('
+     else if hextostrmse(key,4) = '0029' then result := ')'
+     else if hextostrmse(key,4) = '4029' then result := 'Ctrl+)'
+     else if hextostrmse(key,4) = '005b' then result := '['
+     else if hextostrmse(key,4) = '405b' then result := 'Ctrl+['
+     else if hextostrmse(key,4) = '005d' then result := ']'
+     else if hextostrmse(key,4) = '405d' then result := 'Ctrl+]'
+     else if hextostrmse(key,4) = '0024' then result := '$'
+     else if hextostrmse(key,4) = '4024' then result := 'Ctrl+$'
+     else if hextostrmse(key,4) = '0026' then result := '&'
+     else if hextostrmse(key,4) = '4026' then result := 'Ctrl+&'
+     else if hextostrmse(key,4) = '005f' then result := '_'
+     else if hextostrmse(key,4) = '405f' then result := 'Ctrl+_'
+     else if hextostrmse(key,4) = '003a' then result := ':'
+     else if hextostrmse(key,4) = '403a' then result := 'Ctrl+:'
+     else if hextostrmse(key,4) = '0021' then result := '!'
+     else if hextostrmse(key,4) = '4021' then result := 'Ctrl+!'
+     else result:= '$'+hextostrmse(key,4);
   end;
  end
  else begin
