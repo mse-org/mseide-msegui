@@ -75,7 +75,6 @@ type
  tfilestream = class;
  tmemorystream = class;
 
-
   TReaderProc = procedure(Reader: treader) of object;
   TWriterProc = procedure(Writer: twriter) of object;
   TStreamProc = procedure(Stream: TStream) of object;
@@ -117,7 +116,7 @@ tpersistent = class(TObject{,IFPObserved})
   tpersistent = tpersistentbridge;
 
    {$else}
-     procedure AssignTo(Dest: tpersistent); virtual;
+    procedure AssignTo(Dest: tpersistent); virtual;
     procedure DefineProperties(Filer: tfiler); virtual;
     function  GetOwner: tpersistent; dynamic;
   public
@@ -933,21 +932,67 @@ TStringsEnumerator = class
     property OwnsObjects : boolean read FOwnsObjects write FOwnsObjects;
   end;
 
-  TStream = class(Classes.TStream)
+  {$if defined(class_bridge)}
+   TStream = class(Classes.TStream)
+  {$else}
+   TStream = class(TObject)
+  {$endif}
+    
   protected
-    procedure InvalidSeek; override;
+    procedure InvalidSeek; {$if defined(class_bridge)} override; {$else} virtual;{$endif}
+    
+    {$if not defined(class_bridge)}
+    function  GetPosition: Int64; virtual;
+    procedure SetPosition(const Pos: Int64); virtual;
+    function  GetSize: Int64; virtual;
+    procedure SetSize64(const NewSize: Int64); virtual;
+    procedure SetSize(NewSize: Longint); overload; virtual;
+    procedure SetSize(const NewSize: Int64); overload; virtual;
+    {$endif}
+    
     procedure ReadNotImplemented; //shadows
     procedure WriteNotImplemented; //shadows
     function getmemory: pointer; virtual;
   public
-    function Read(var Buffer; Count: Longint): Longint; overload; override; 
-    function Write(const Buffer; Count: Longint): Longint; overload; override; 
+    function Read(var Buffer; Count: Longint): Longint; overload;
+     {$if defined(class_bridge)} override; {$else} virtual;{$endif}
+   
     function read(var buffer; const count: longint;
                           out acount: longint): syserrorty; virtual; overload;
+      
+    function Write(const Buffer; Count: Longint): Longint; overload; 
+     {$if defined(class_bridge)} override; {$else} virtual;{$endif}
+   
+    
     function write(const buffer; const count: longint;
                           out acount: longint): syserrorty; virtual; overload;
+     
     function seek(const offset: int64; const origin: tseekorigin;
                             out newpos: int64): syserrorty; overload; virtual;
+    
+    {$if not defined(class_bridge)}
+    function Seek(const Offset: Int64; Origin: TSeekOrigin): Int64; overload; virtual; 
+    function Seek(Offset: Longint; Origin: Word): Longint; overload; virtual; 
+    procedure ReadBuffer(var Buffer; Count: Longint);   
+    function CopyFrom(Source: TStream; Count: Int64): Int64;
+    procedure ReadResHeader;
+    function ReadByte : Byte;
+    function ReadWord : Word;
+    function ReadDWord : Cardinal;
+    function ReadQWord : QWord;
+    function ReadAnsiString : String;
+    procedure WriteByte(b : Byte);
+    procedure WriteWord(w : Word);
+    procedure WriteDWord(d : Cardinal);
+    procedure WriteQWord(q : QWord);
+    Procedure WriteAnsiString (const S : String);
+    property Position: Int64 read GetPosition write SetPosition;
+    property Size: Int64 read GetSize write SetSize64;
+    procedure WriteBuffer(const Buffer; Count: Longint);
+    procedure WriteResourceHeader(const ResName: string; {!!!:out} var FixupInfo: Integer);
+    procedure FixupResourceHeader(FixupInfo: Integer);
+    {$endif}                     
+    
     function tryreadbuffer(var buffer; count: longint): syserrorty;
     function trywritebuffer(const buffer; count: longint): syserrorty;
     function readdatastring: string; virtual;
@@ -973,6 +1018,7 @@ TStringsEnumerator = class
     function Read(var Buffer; Count: Longint): Longint; override;
     function Write(const Buffer; Count: Longint): Longint; override;
     function Seek(const Offset: Int64; Origin: TSeekOrigin): Int64; override;
+    
     property Handle: filehandlety read FHandle;
     function releasehandle(): filehandlety virtual;
   end;
@@ -3502,6 +3548,314 @@ end;
 {*                             TStream                                      *}
 {****************************************************************************}
 
+ {$if not defined(class_bridge)}                        
+   
+  function TStream.GetPosition: Int64;
+
+    begin
+       Result:=Seek(0,soCurrent);
+    end;
+
+  procedure TStream.SetPosition(const Pos: Int64);
+
+    begin
+       Seek(pos,soBeginning);
+    end;
+
+  procedure TStream.SetSize64(const NewSize: Int64);
+
+    begin
+      // Required because can't use overloaded functions in properties
+      SetSize(NewSize);
+    end;
+
+  function TStream.GetSize: Int64;
+
+    var
+       p : int64;
+
+    begin
+       p:=Seek(0,soCurrent);
+       GetSize:=Seek(0,soEnd);
+       Seek(p,soBeginning);
+    end;
+
+  procedure TStream.SetSize(NewSize: Longint);
+
+    begin
+    // We do nothing. Pipe streams don't support this
+    // As wel as possible read-ony streams !!
+    end;
+
+  procedure TStream.SetSize(const NewSize: Int64);
+
+    begin
+      // Backwards compatibility that calls the longint SetSize
+      if (NewSize<Low(longint)) or
+         (NewSize>High(longint)) then
+        raise ERangeError.Create(SRangeError);
+      SetSize(longint(NewSize));
+    end;
+
+  function TStream.Seek(Offset: Longint; Origin: Word): Longint;
+
+    type
+      TSeek64 = function(const offset:Int64;Origin:TSeekorigin):Int64 of object;
+    var
+      CurrSeek,
+      TStreamSeek : TSeek64;
+      CurrClass   : TClass;
+    begin
+      // Redirect calls to 64bit Seek, but we can't call the 64bit Seek
+      // from TStream, because then we end up in an infinite loop
+      CurrSeek:=nil;
+      CurrClass:=Classtype;
+      while (CurrClass<>nil) and
+            (CurrClass<>TStream) do
+       CurrClass:=CurrClass.Classparent;
+      if CurrClass<>nil then
+       begin
+         CurrSeek:= {$ifdef FPC}@{$endif}Self.Seek;
+         TStreamSeek:={$ifdef FPC}@{$endif}TStream(@CurrClass).Seek;
+         if TMethod(TStreamSeek).Code=TMethod(CurrSeek).Code then
+          CurrSeek:=nil;
+       end;
+      if {$ifndef FPC}@{$endif}CurrSeek <> nil then
+       Result:=Seek(Int64(offset),TSeekOrigin(origin))
+      else
+       raise EStreamError.CreateFmt(SSeekNotImplemented,[ClassName]);
+    end;
+
+ function TStream.Seek(const Offset: Int64; Origin: TSeekorigin): Int64;
+
+    begin
+      // Backwards compatibility that calls the longint Seek
+      if (Offset<Low(longint)) or
+         (Offset>High(longint)) then
+        raise ERangeError.Create(SRangeError);
+      Result:=Seek(longint(Offset),ord(Origin));
+    end;
+
+procedure TStream.ReadBuffer(var Buffer; Count: Longint);
+begin
+ if tryreadbuffer(buffer,count) <> sye_ok then begin 
+  Raise EReadError.Create(SReadError);
+ end;
+end;
+
+ function TStream.CopyFrom(Source: TStream; Count: Int64): Int64;
+
+    var
+       Buffer: Pointer;
+       BufferSize, i: LongInt;
+
+    const
+       MaxSize = $20000;
+    begin
+
+       Result:=0;
+       if Count=0 then
+         Source.Position:=0;   // This WILL fail for non-seekable streams...
+       BufferSize:=MaxSize;
+       if (Count>0) and (Count<BufferSize) then
+         BufferSize:=Count;    // do not allocate more than needed
+
+       GetMem(Buffer,BufferSize);
+       try
+         if Count=0 then
+         repeat
+           i:=Source.Read(buffer^,BufferSize);
+           if i>0 then
+             WriteBuffer(buffer^,i);
+           Inc(Result,i);
+         until i<BufferSize
+         else
+         while Count>0 do
+         begin
+           if Count>BufferSize then
+             i:=BufferSize
+           else
+             i:=Count;
+           Source.ReadBuffer(buffer^,i);
+           WriteBuffer(buffer^,i);
+           Dec(count,i);
+           Inc(Result,i);
+         end;
+       finally
+         FreeMem(Buffer);
+       end;
+
+    end;
+    
+      procedure TStream.ReadResHeader;
+    var
+      ResType, Flags : word;
+    begin
+       try
+         { Note: This is a Windows 16 bit resource }
+         { application specific resource ? }
+         if ReadByte<>$ff then
+           raise EInvalidImage.Create(SInvalidImage);
+         ResType:=LEtoN(ReadWord);
+         if ResType<>$000a then
+           raise EInvalidImage.Create(SInvalidImage);
+         { read name }
+         while ReadByte<>0 do
+           ;
+         { check the access specifier }
+         Flags:=LEtoN(ReadWord);
+         if Flags<>$1030 then
+           raise EInvalidImage.Create(SInvalidImage);
+         { ignore the size }
+         ReadDWord;
+       except
+         on EInvalidImage do
+           raise;
+         else
+           raise EInvalidImage.create(SInvalidImage);
+       end;
+    end;
+
+  function TStream.ReadByte : Byte;
+
+    var
+       b : Byte;
+
+    begin
+       ReadBuffer(b,1);
+       ReadByte:=b;
+    end;
+
+  function TStream.ReadWord : Word;
+
+    var
+       w : Word;
+
+    begin
+       ReadBuffer(w,2);
+       ReadWord:=w;
+    end;
+
+  function TStream.ReadDWord : Cardinal;
+
+    var
+       d : Cardinal;
+
+    begin
+       ReadBuffer(d,4);
+       ReadDWord:=d;
+    end;
+
+  function TStream.ReadQWord: QWord;
+    var
+       q: QWord;
+    begin
+      ReadBuffer(q,8);
+      ReadQWord:=q;
+
+    end;
+
+  Function TStream.ReadAnsiString : String;
+
+  Var
+    TheSize : Longint;
+    P : PByte ;
+  begin
+    ReadBuffer (TheSize,SizeOf(TheSize));
+    SetLength(Result,TheSize);
+    // Illegal typecast if no AnsiStrings defined.
+    if TheSize>0 then
+     begin
+       ReadBuffer (Pointer(Result)^,TheSize);
+       P:= pointer(pchar(Pointer(Result))+TheSize);
+       p^:=0;
+     end;
+   end;
+
+  Procedure TStream.WriteAnsiString (const S : String);
+
+  Var L : Longint;
+
+  begin
+    L:=Length(S);
+    WriteBuffer (L,SizeOf(L));
+    WriteBuffer (Pointer(S)^,L);
+  end;
+
+  procedure TStream.WriteByte(b : Byte);
+
+    begin
+       WriteBuffer(b,1);
+    end;
+
+  procedure TStream.WriteWord(w : Word);
+
+    begin
+       WriteBuffer(w,2);
+    end;
+
+  procedure TStream.WriteDWord(d : Cardinal);
+
+    begin
+       WriteBuffer(d,4);
+    end;
+
+  procedure TStream.WriteQWord(q: QWord);
+    begin
+      WriteBuffer(q,8);
+    end;
+
+procedure TStream.WriteBuffer(const Buffer; Count: Longint);
+begin
+ if trywritebuffer(buffer,count) <> sye_ok then begin
+  Raise EWriteError.Create(SWriteError);
+ end;
+end;    
+    
+ procedure TStream.WriteResourceHeader(const ResName: string; {!!!: out} var FixupInfo: Integer);
+    var
+      ResType, Flags : word;
+    begin
+       ResType:=NtoLE(word($000A));
+       Flags:=NtoLE(word($1030));
+       { Note: This is a Windows 16 bit resource }
+       { Numeric resource type }
+       WriteByte($ff);
+       { Application defined data }
+       WriteWord(ResType);
+       { write the name as asciiz }
+       WriteBuffer(ResName[1],length(ResName));
+       WriteByte(0);
+       { Movable, Pure and Discardable }
+       WriteWord(Flags);
+       { Placeholder for the resource size }
+       WriteDWord(0);
+       { Return current stream position so that the resource size can be
+         inserted later }
+       FixupInfo := Position;
+    end;
+
+  procedure TStream.FixupResourceHeader(FixupInfo: Integer);
+
+    var
+       ResSize,TmpResSize : Integer;
+
+    begin
+
+      ResSize := Position - FixupInfo;
+      TmpResSize := NtoLE(longword(ResSize));
+
+      { Insert the correct resource size into the placeholder written by
+        WriteResourceHeader }
+      Position := FixupInfo - 4;
+      WriteDWord(TmpResSize);
+      { Seek back to the end of the resource }
+      Position := FixupInfo + ResSize;
+
+    end;   
+ {$endif}                        
+   
+
 procedure TStream.ReadNotImplemented;
 begin
   raise EStreamError.CreateFmt(SStreamNoReading, [ClassName])
@@ -3542,6 +3896,7 @@ begin
  end;
 end;
 
+
 function TStream.read(var buffer; const count: longint;
                out acount: longint): syserrorty;
 var
@@ -3579,6 +3934,7 @@ end;
 
 function TStream.write(const buffer; const count: longint;
                                    out acount: longint): syserrorty;
+                                   
 var
  po1: pbyte;
  int1,int2: integer;

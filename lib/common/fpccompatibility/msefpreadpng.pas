@@ -37,7 +37,7 @@ Type
     private
 
       FHeader : THeaderChunk;
-      ZData : TMemoryStream;  // holds compressed data until all blocks are read
+      ZData : classes.TMemoryStream;  // holds compressed data until all blocks are read
       Decompress : TDeCompressionStream; // decompresses the data
       FPltte : boolean;     // if palette is used
       FCountScanlines : EightLong; //Number of scanlines to process for each pass
@@ -808,7 +808,7 @@ begin
   {$endif}
   with Header do
     Img.SetSize (Width, Height);
-  ZData := TMemoryStream.Create;
+  ZData := classes.TMemoryStream.Create;
   try
     EndOfFile := false;
     while not EndOfFile do
