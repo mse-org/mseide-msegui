@@ -50,8 +50,12 @@ const
 
 const
 {$ifdef linux}
- {$ifdef CPU64}
-  platformtext = 'x86_64-linux';
+ {$ifdef CPU64} 
+  {$ifdef CPUAARCH64}
+   platformtext = 'aarch64-linux';
+  {$else}
+   platformtext = 'x86_64-linux';
+  {$endif}
  {$else}
   {$ifdef CPUARM}
    platformtext = 'arm-linux';

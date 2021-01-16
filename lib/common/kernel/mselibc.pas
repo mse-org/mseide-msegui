@@ -1,5 +1,5 @@
 unit mselibc;
-{$ifdef FPC}{$mode objfpc}{$h+}{$endif}
+{$ifdef FPC}{$mode objfpc}{$h+}{$interfaces corba}{$endif}
 interface
 uses
  {$ifdef FPC}initc,{$endif}msectypes{$ifndef FPC},msetypes{$endif};
@@ -815,6 +815,7 @@ type
  PStat = ^_stat;
 
  {$ifdef linux}
+ {$ifndef CPUAARCH64}
  _stat = packed record
   st_dev: culong;
   st_ino: culong;
@@ -837,6 +838,30 @@ type
   st_ctime_nsec: culong;
   __unused: array[0..2] of clong;
  end;
+ {$else} // arm
+ _stat = packed record
+  st_dev: culong;     //* Device.  */
+ st_ino: culong;     //* File serial number.  */
+ st_mode: cuint;         //* File mode.  */
+ st_nlink: cuint;        //* Link count.  */
+ st_uid: cuint;          //* User ID of the file's owner.  */
+ st_gid: cuint;          //* Group ID of the file's group. */
+ st_rdev: culong;    //* Device number, if device.  */
+ __pad1: culong;
+ st_size: clong;     //* Size of file, in bytes.  */
+ st_blksize: cint;       //* Optimal block size for I/O.  */
+  __pad2: cint;
+ st_blocks: clong;   //* Number 512-byte blocks allocated. */
+ st_atime: clong;         //* Time of last access.  */
+ st_atime_nsec: culong;
+ st_mtime: clong;         //* Time of last modification.  */
+ st_mtime_nsec: culong;
+ st_ctime: clong;         //* Time of last status change.  */
+ st_ctime_nsec: culong;
+ __unused4a: cuint;
+ __unused5a: cuint;
+ end;
+ {$endif} // arm64
 
  {$else} //bsd
  ino_t = cuint32;
@@ -872,7 +897,7 @@ type
   st_birthtim: timespec;    //* time of file creation */
  {$ifndef cpu64}
   pad: array[0..15-sizeof(timespec)] of byte;
- {$endif}
+ {$endif} //bsd
   (*
         /*
          * Explicitly pad st_birthtim to 16 bytes so that the size of
@@ -886,7 +911,7 @@ type
         unsigned int :(8 / 2) * (16 - (int)sizeof(struct timespec));
   *)
  end;
-{$endif} //bsd
+{$endif} 
 
 
  P_stat64 = ^_stat64;
@@ -924,7 +949,7 @@ type
  {$endif}
    P_stat64 = ^_stat64;
    Pstat64 = ^_stat64;
-{$ifndef cpuarm}
+{$ifndef CPUARM}
  {$ifdef linux}
    _stat64 = packed record
     st_dev: culonglong;                 // 0
@@ -1761,14 +1786,14 @@ const
 type
 //semaphore
    Psem_t = ^sem_t;
-  
-  // sem_t = array[0..__SIZEOF_SEM_T-1] of byte;
-     sem_t = record
+   //sem_t = array[0..__SIZEOF_SEM_T-1] of byte;
+   //{
+   sem_t = record
         __sem_lock : _pthread_fastlock;
         __sem_value : longint;
         __sem_waiting : _pthread_descr;
      end;
-   
+ //    }
   TSemaphore = sem_t;
   PSemaphore = ^TSemaphore;
 
@@ -2097,6 +2122,8 @@ function fcntl(__fd: cint; __cmd: cint): cint;
                    cdecl; varargs; external clib name 'fcntl'; overload;
 function open(__file:Pchar; __oflag: cint; args:array of const): cint;
                                 cdecl; external clib name 'open'; overload;
+function open64(__file:Pchar; __oflag: cint; args:array of const): cint;
+                                cdecl; external clib name 'open64'; overload;
 function open(__file:Pchar; __oflag: cint): cint;
                     cdecl; varargs; external clib name 'open'; overload;
 function __close(Handle: cint): cint; cdecl;external clib name 'close';

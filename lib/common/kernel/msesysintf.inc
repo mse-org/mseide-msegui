@@ -49,7 +49,7 @@ function sys_createdir(const path: msestring;
 
 function sys_openfile(const path: filenamety; const openmode: fileopenmodety;
           const accessmode: fileaccessmodesty;
-          const rights: filerightsty; out handle: integer): syserrorty;
+          const rights: filerightsty; out handle: longint): syserrorty;
 function sys_closefile(const handle: integer): syserrorty;
 function sys_flushfile(const handle: integer): syserrorty;
 function sys_dup(const source: integer; out dest: integer): syserrorty;

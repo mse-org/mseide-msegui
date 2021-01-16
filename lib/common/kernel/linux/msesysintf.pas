@@ -27,9 +27,13 @@ interface
 {$endif}
 
 uses
+baseunix,
  msesys,msesystypes,msesetlocale,{$ifdef FPC}cthreads,cwstring,{$endif}msetypes,
  mselibc,msectypes,
  msestrings,msestream;
+ 
+ {$packrecords c}
+ 
 
 var
  thread1: threadty;
@@ -58,6 +62,7 @@ procedure setcloexec(const fd: integer);
 
 implementation
 uses
+
  msesysintf1,sysutils,msesysutils,msefileutils,msearrayutils
  {$ifdef FPC},dateutils{$else},DateUtils,classes_del{$endif},msedate
  {$ifdef mse_debugmutex},mseapplication{$endif}
@@ -77,6 +82,7 @@ begin
  action.sa_flags:= action.sa_flags or SA_SIGINFO;
  result:= sigaction(signum,@action,oldaction);
 end;
+
 
 
 (*
@@ -666,19 +672,31 @@ end;
 
 function sys_openfile(const path: filenamety; const openmode: fileopenmodety;
           const accessmode: fileaccessmodesty;
-          const rights: filerightsty; out handle: integer): syserrorty;
+          const rights: filerightsty; out handle: longint): syserrorty;
 var
  str1: string;
  str2: msestring;
- stat1: _stat;
+ stat1: baseunix.stat;
 const
  defaultopenflags = o_cloexec;
 begin
  str2:= path;
  sys_tosysfilepath(str2);
  str1:= tosys(str2);
- handle:= Integer(mselibc.open(PChar(str1), openmodes[openmode] or
-                            defaultopenflags,[getfilerights(rights)]));
+// writeln('sys_openfile str1 =' + str1);
+ 
+ handle:= longint(mselibc.open(PChar(str1), openmodes[openmode] or defaultopenflags,[getfilerights(rights)]));
+ //writeln('handle =' + inttostr(handle));
+ 
+ // wrteln('fstat ' + inttostr(fpfstat(handle,stat1)));
+ 
+ fpfstat(handle,stat1);
+  
+ setcloexec(handle);
+ 
+ result:= sye_ok;
+
+{
  if handle >= 0 then begin
   if fstat(handle,@stat1) = 0 then begin
    if s_isdir(stat1.st_mode) then begin
@@ -700,6 +718,7 @@ begin
  else begin
   result:= syelasterror;
  end;
+}
 end;
 
 function sys_closefile(const handle: integer): syserrorty;

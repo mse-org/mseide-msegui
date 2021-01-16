@@ -1,11 +1,11 @@
 unit msedynload;
-{$ifdef FPC}{$mode objfpc}{$h+}{$endif}
+{$ifdef FPC}{$mode objfpc}{$h+}{$interfaces corba}{$endif}
 interface
 uses
  msesystypes,{$ifdef FPC}dynlibs,{$endif}{msestrings,}sysutils,msetypes{,msesys};
 
-{$ifndef cpuarm}{$define set8087cw}{$endif}
-
+{$if (not defined(cpuaarch64)) and (not defined(cpuarm))}{$define set8087cw}{$endif}
+{$packrecords c}
 type
  funcinfoty = record
                n: string;      //name

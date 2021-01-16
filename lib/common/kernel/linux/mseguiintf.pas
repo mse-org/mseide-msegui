@@ -9,7 +9,7 @@
 }
 unit mseguiintf; //X11
 
-{$ifdef FPC}{$mode objfpc}{$h+}{$GOTO ON}{$endif}
+{$ifdef FPC}{$mode objfpc}{$h+}{$GOTO ON}{$interfaces corba}{$endif}
 {$ifndef FPC}{$ifdef linux} {$define UNIX} {$endif}{$endif}
 
 interface
@@ -48,6 +48,8 @@ uses
  {$ifend}
  {$ifdef UNIX}
   {$ifdef msedebug}
+  
+  {$packrecords c}
 var
  _IO_stdin: P_IO_FILE; cvar;
   //avoid link errors if rtl is compiled with stabs info
@@ -365,8 +367,9 @@ type
  _XIC = record end;
  XIC = ^_XIC;
  ppucs4char = ^pucs4char;
- dword = longword;
 
+ dword= longword;
+  
  VisualID = culong;
  Visual = record
   ext_data: PXExtData;  { hook for extension to hang data  }
@@ -902,6 +905,8 @@ begin
  if (multipleatom = 0) and (wmnameatom = 0) and (defcolormap = 0) then begin
  end;
 end;
+
+
 
 function getidnum: longword;
 begin
@@ -3136,18 +3141,23 @@ end;
 
 function gui_getpixmapinfo(var info: pixmapinfoty): gdierrorty;
 var
- ca1: longword;
+{$ifdef CPUAARCH64}
+ ca1: culonglong;
+ {$else} 
+  ca1: longword;
+  {$endif}  
 begin
  gdi_lock;
- with info do begin
-  if xgetgeometry(appdisp,handle,@ca1,@ca1,@ca1,@size.cx,@size.cy,@ca1,
-                                                         @depth) = 0 then begin
+
+  if xgetgeometry(appdisp,info.handle,@ca1,@ca1,@ca1,@info.size.cx,
+  @info.size.cy,@ca1,@info.depth) = 0 then begin
    result:= gde_pixmap;
   end
   else begin
    result:= gde_ok;
   end;
- end;
+  
+
  gdi_unlock;
 end;
 
@@ -4229,20 +4239,24 @@ end;
 
 function getwindowrect(id: winidty; out rect: rectty; out origin: pointty): guierrorty;
 var
+ {$ifdef CPUAARCH64}
+ int1: int64;
+ {$else} 
  int1: integer;
+ {$endif}  
 begin
+
  result:= gue_error;
- with rect do begin
+ 
   if getrootoffset(id,origin) and
-   (xgetgeometry(appdisp,id,@int1,@x,@y,@cx,@cy,@int1,@int1) <> 0) then begin
+     (xgetgeometry(appdisp,id,@int1,@rect.x,@rect.y,@rect.cx,@rect.cy,@int1,@int1) <> 0) then begin
    result:= gue_ok;
   end;
- end;
+
 end;
 
 function gui_getwindowrect(id: winidty; out rect: rectty): guierrorty;
 var
-// int1: integer;
  po1: pointty;
 begin
  gdi_lock;

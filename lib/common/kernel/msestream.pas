@@ -9,6 +9,7 @@
 }
 unit msestream;
 {$ifdef FPC}
+{$interfaces corba}
  {$if defined(FPC) and (fpc_fullversion >= 020501)}
   {$define mse_fpc_2_6}
  {$ifend}
@@ -32,7 +33,7 @@ interface
 {$endif}
 
 uses
- classes,mclasses,sysutils,msestrings,msetypes,msethread,msesystypes,msesys,
+ classes,mclasses,sysutils,msestrings,msetypes,msethread,msesystypes,msesys,ctypes,
  msereal,mseevent,mseclasses,mseglob{,mseformatstr};
 
 const
@@ -1061,7 +1062,9 @@ constructor tmsefilestream.internalcreate(const afilename: filenamety;
 var
  ahandle: integer;
 begin
+//writeln('internalcreate');
  ffilename:= filepath(afilename);
+// writeln('ffilename = ' + ffilename);
  fopenmode:= aopenmode;
  if openmode = fm_append then begin
   error:= sys_openfile(ffilename,fm_readwrite,accessmode,rights,ahandle);
@@ -1079,7 +1082,9 @@ begin
   end;
  end
  else begin
+//  writeln('error');
  end;
+ // writeln('end internalcreate');
 end;
 
 class function tmsefilestream.trycreate(out ainstance: tmsefilestream;
