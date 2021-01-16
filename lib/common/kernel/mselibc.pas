@@ -1761,14 +1761,14 @@ const
 type
 //semaphore
    Psem_t = ^sem_t;
-   sem_t = array[0..__SIZEOF_SEM_T-1] of byte;
-   {
-   sem_t = record
+  
+  // sem_t = array[0..__SIZEOF_SEM_T-1] of byte;
+     sem_t = record
         __sem_lock : _pthread_fastlock;
         __sem_value : longint;
         __sem_waiting : _pthread_descr;
      end;
-     }
+   
   TSemaphore = sem_t;
   PSemaphore = ^TSemaphore;
 
