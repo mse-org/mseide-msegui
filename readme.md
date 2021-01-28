@@ -59,7 +59,9 @@ https://bugs.freepascal.org/view.php?id=32367
 2. 'Target'-'Continue'.
 
 ## Compiling MSEide from commandline on Linux and FreeBSD
+On Unix:
 fpc -Fulib/common/* -Fulib/common/kernel/linux apps/ide/mseide.pas
+
 On Windows:
 fpc -Fulib\common\* -Fulib\common\kernel\windows apps\ide\mseide.pas
 
