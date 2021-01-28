@@ -55,7 +55,7 @@ https://bugs.freepascal.org/view.php?id=32367
 
 # If you wish to to compile the IDE
 
-1. In 'Project'-'Open' select 'yourdirectory/msegui/apps/ide/mseide.prj'.
+1. In 'Project'-'Open' select 'sourcedirectory/apps/ide/mseide.prj'.
 2. 'Target'-'Continue'.
 
 ## Compiling MSEide from commandline on Linux and FreeBSD
