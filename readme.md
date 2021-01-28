@@ -36,7 +36,7 @@ Package maintainers may delete the files "apps/ide/COPYING.GPL",
 # Installation
 1. Download and install FPC, you can get it from 
    http://www.freepascal.org/download.var
-2. Download mseide_msegui source from 
+2. Download mseide-msegui source from 
    https://github.com/mse-org/mseide-msegui/archive/master.zip
 3. Extract them to a directory of your choice. (sourcedirectory)
 4. Download and unzip mseide binary according your OS from here:
@@ -44,7 +44,7 @@ Package maintainers may delete the files "apps/ide/COPYING.GPL",
 5. Run 'yourdirectory/mseide_linxx/mseide' on Linux or FreeBSD
    or 'yourdirectory\mseide_winxx\mseide.exe' on Windows.
 6. In 'Settings'-'Configure MSEide'-'${MSEDIR}' select 'sourcedirectory'.
-7. In 'Project'-'Open' select 'yourdirectory/msegui/apps/demo/demo.prj'.
+7. In 'Project'-'Open' select 'sourcedirectory/apps/demo/demo.prj'.
 8. 'Target'-'Continue'.
 
 If you get the error "/usr/bin/ld: cannot find -lX11" install the
