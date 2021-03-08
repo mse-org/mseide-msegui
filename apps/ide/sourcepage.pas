@@ -1785,8 +1785,10 @@ var
  mstr1: msestring;
  i1: int32;
  start,stop: int32;
+ gc1: gridcoordty;
 begin
- if cancomment() then begin
+ if cancomment() then // must have lines selected
+ begin
   edit.getselectedrows(start,stop);
   edit.editor.begingroup();
   mstr1:= edit.selectedtext;
@@ -1811,6 +1813,13 @@ begin
   grid.endupdate();
   edit.editor.endgroup();
   edit.refreshsyntax(start,stop-start);
+ end
+ else
+ begin // comment line - no selection needed
+   gc1 := edit.editpos;
+   mstr1 := edit.datalist.items[gc1.row];
+   edit.datalist.items[gc1.row] := '//' + mstr1;
+   edit.col := edit.col + 2; // advance edit cursor due to inserted text
  end;
 end;
 

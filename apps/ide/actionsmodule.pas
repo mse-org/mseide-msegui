@@ -302,7 +302,6 @@ type
    procedure forcezorderexe(const sender: TObject);
    procedure commentonexecute(const sender: TObject);
    procedure uncommentonexecute(const sender: TObject);
-   procedure enablecomment(const sender: tcustomaction);
    procedure enableuncomment(const sender: tcustomaction);
    procedure selectwordactiononexecute(const sender: TObject);
    procedure procedurelistonexecute(const sender: TObject);
@@ -554,12 +553,6 @@ procedure tactionsmo.enableonselect(const sender: tcustomaction);
 begin
  sender.enabled:= (sourcefo.activepage <> nil) and
                                       sourcefo.activepage.edit.hasselection;
-end;
-
-procedure tactionsmo.enablecomment(const sender: tcustomaction);
-begin
- enableonselect(sender);
- sender.enabled:= sender.enabled and  sourcefo.activepage.cancomment();
 end;
 
 procedure tactionsmo.enableuncomment(const sender: tcustomaction);
