@@ -2551,7 +2551,6 @@ object actionsmo: tactionsmo
   object comment: taction
     caption = '&Comment'
     onexecute = commentonexecute
-    onupdate = enablecomment
     left = 280
     top = 168
     sc = (
