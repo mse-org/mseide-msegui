@@ -169,11 +169,11 @@ type
     ffilterlist: tdoublemsestringdatalist;
     ffilter: filenamety;
     fnopanel: Boolean;
-    fnoicon: Boolean;
     ficon: tmaskedbitmap;
     fcompact: Boolean;
     fshowoptions: Boolean;
     fhidehistory: Boolean;
+    fhideicons: Boolean;
     ffilenamescust: filenamearty;
     fshowhidden: Boolean;
     ffilterindex: integer;
@@ -268,6 +268,7 @@ type
     property compact: Boolean read fcompact write fcompact;
     property showoptions: Boolean read fshowoptions write fshowoptions;
     property hidehistory: Boolean read fhidehistory write fhidehistory;
+    property hideicons: Boolean read fhideicons write fhideicons;
     property showhidden: Boolean read fshowhidden write fshowhidden;
     property filterlist: tdoublemsestringdatalist read ffilterlist write setfilterlist;
     property filterindex: integer read ffilterindex write ffilterindex default 0;
@@ -2596,8 +2597,8 @@ begin
   fcompact    := False;
   fshowoptions:= false;
   fhidehistory:= false;
+  fhideicons  := false;
   fshowhidden := False;
-  fnoicon     := False;
   foptions    := defaultfiledialogoptions;
   fhistorymaxcount := defaulthistorymaxcount;
   fowner      := aowner;
@@ -2636,8 +2637,8 @@ begin
   fcompact         := reader.readboolean('compact', fcompact);
   fshowoptions     := reader.readboolean('showoptions', fshowoptions);
   fhidehistory     := reader.readboolean('hidehistory', fhidehistory);
+  fhideicons     := reader.readboolean('hideicons', fhideicons);
   fnopanel         := reader.readboolean('nopanel', fnopanel);
-  fnoicon          := reader.readboolean('noicon', fnoicon);
   fcolnamewidth    := reader.readinteger('colnamewidth', fcolnamewidth);
   fcolsizewidth    := reader.readinteger('colsizewidth', fcolsizewidth);
   fcolextwidth     := reader.readinteger('colextwidth', fcolextwidth);
@@ -2672,10 +2673,10 @@ begin
   writer.writeinteger('cx', fwindowrect.cx);
   writer.writeinteger('cy', fwindowrect.cy);
   writer.writeboolean('nopanel', fnopanel);
-  writer.writeboolean('noicon', fnoicon);
   writer.writeboolean('compact', fcompact);
   writer.writeboolean('showoptions', fshowoptions);
   writer.writeboolean('hidehistory', fhidehistory);
+  writer.writeboolean('hideicons', fhideicons);
   writer.writeboolean('showhidden', fshowhidden);
   writer.writeinteger('colnamewidth', fcolnamewidth);
   writer.writeinteger('colsizewidth', fcolsizewidth);
@@ -2764,11 +2765,11 @@ begin
     if fontname <> '' then
       fo.font.Name := ansistring(fontname);
 
-    fo.bnoicon.Value := fnoicon;
+    fo.bnoicon.Value := fhideicons;
 
-    theboolicon := fnoicon;
+    theboolicon := fhideicons;
 
-    if fnoicon = False then
+    if fhideicons = False then
     begin
       fo.labtest.Caption := '';
 
@@ -2880,6 +2881,7 @@ begin
     fo.showhidden.Value := fshowhidden;
     fo.bshowoptions.Value := fshowoptions;
     fo.bhidehistory.Value := fhidehistory;    
+    fo.bnoicon.Value := fhideicons;
   
     if fcolnamewidth > 0 then
       fo.list_log.datacols[0].Width := fcolnamewidth;
@@ -2947,11 +2949,11 @@ begin
         flastdir := fo.dir.Value;
 
     fnopanel        := fo.blateral.Value;
-    fnoicon         := fo.bnoicon.Value;
     fcompact        := fo.bcompact.Value;
     fshowoptions    := fo.bshowoptions.Value;
     fshowhidden     := fo.showhidden.Value;
     fhidehistory    := fo.bhidehistory.Value ;    
+    fhideicons       := fo.bnoicon.Value ;    
   
     fcolnamewidth   := fo.list_log.datacols[0].Width;
     fcolextwidth    := fo.list_log.datacols[1].Width;
@@ -3364,8 +3366,8 @@ begin
   aowner.controller.fshowoptions    := False;
   aowner.controller.fshowhidden := False;
   aowner.controller.fhidehistory := False;
-  
-end;
+  aowner.controller.fhideicons := False;
+ end;
 
 function tfilenameeditcontroller.Execute(var avalue: msestring): Boolean;
 begin
