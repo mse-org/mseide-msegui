@@ -34,8 +34,8 @@ uses
                    {$ifdef mse_with_ifi},mseifiglob,mseificompglob{$endif};
 
 const
- mseguiversiontext = '5.2.0';
- copyrighttext = 'Copyright 1999-2020';
+ mseguiversiontext = '5.2.2';
+ copyrighttext = 'Copyright 1999-2021';
 
  defaultwidgetcolor = cl_default;
  defaulttoplevelwidgetcolor = cl_background;
@@ -17012,6 +17012,7 @@ begin
      bmp.canvas.origin:= nullpoint;
      fupdateregion.region:= 0;
      result:= true;
+     fownerwidget.paint(bmp.canvas);
      fownerwidget.paint(bmp.canvas);
      bmp.paint(fcanvas,rect1);
     end
