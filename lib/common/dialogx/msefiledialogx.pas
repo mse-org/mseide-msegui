@@ -31,15 +31,15 @@ interface
 {$endif}
 
 uses
- {$ifdef unix}baseunix,{$endif}
- Math,mseglob,mseguiglob,mseforms,Classes,mclasses,mseclasses,msewidgets,
- msegrids,mselistbrowser,mseedit,msesimplewidgets,msedataedits,msedialog,
- msetypes,msestrings,msesystypes,msesys,msedispwidgets,msedatalist,msestat,
- msestatfile,msebitmap,msedatanodes,msefileutils,msedropdownlist,mseevent,
- msegraphedits,mseeditglob,msesplitter,msemenus,msegridsglob,msegraphics,
- msegraphutils,msedirtree,msewidgetgrid,mseact,mseapplication,msegui,mseificomp,
- mseificompglob,mseifiglob,msestream,SysUtils,msemenuwidgets,msescrollbar,
- msedragglob,msefiledialog,mserichstring,msetimer;
+ {$ifdef unix}baseunix,{$endif}Math,mseglob,mseguiglob,mseforms,Classes,
+ mclasses,mseclasses,msewidgets,msegrids,mselistbrowser,mseedit,
+ msesimplewidgets,msedataedits,msedialog,msetypes,msestrings,msesystypes,msesys,
+ msedispwidgets,msedatalist,msestat,msestatfile,msebitmap,msedatanodes,
+ msefileutils,msedropdownlist,mseevent,msegraphedits,mseeditglob,msesplitter,
+ msemenus,msegridsglob,msegraphics,msegraphutils,msedirtree,msewidgetgrid,
+ mseact,mseapplication,msegui,mseificomp,mseificompglob,mseifiglob,msestream,
+ SysUtils,msemenuwidgets,msescrollbar,msedragglob,msefiledialog,mserichstring,
+ msetimer;
 
 const
   defaultlistviewoptionsfile = defaultlistviewoptions + [lvo_readonly, lvo_horz];
@@ -172,6 +172,8 @@ type
     fnoicon: Boolean;
     ficon: tmaskedbitmap;
     fcompact: Boolean;
+    fshowoptions: Boolean;
+    fhidehistory: Boolean;
     ffilenamescust: filenamearty;
     fshowhidden: Boolean;
     ffilterindex: integer;
@@ -264,6 +266,8 @@ type
     property nopanel: Boolean read fnopanel write fnopanel;
     property icon: tmaskedbitmap read ficon write seticon;
     property compact: Boolean read fcompact write fcompact;
+    property showoptions: Boolean read fshowoptions write fshowoptions;
+    property hidehistory: Boolean read fhidehistory write fhidehistory;
     property showhidden: Boolean read fshowhidden write fshowhidden;
     property filterlist: tdoublemsestringdatalist read ffilterlist write setfilterlist;
     property filterindex: integer read ffilterindex write ffilterindex default 0;
@@ -576,6 +580,9 @@ type
     labtest: tlabel;
     bnoicon: tbooleanedit;
    iconslist: timagelist;
+   bshowoptions: tbooleanedit;
+   tsplitter2: tsplitter;
+   bhidehistory: tbooleanedit;
     procedure createdironexecute(const Sender: TObject);
     procedure listviewselectionchanged(const Sender: tcustomlistview);
     procedure listviewitemevent(const Sender: tcustomlistview; const index: integer; var info: celleventinfoty);
@@ -734,10 +741,22 @@ begin
   end;
 end;
 
-function filedialog1(dialog: tfiledialogfo; var afilenames: filenamearty; const filterdesc: array of msestring; const filtermask: array of msestring; const filterindex: pinteger; const afilter: pfilenamety;      //nil -> unused
+function filedialog1(dialog: tfiledialogfo; var afilenames: filenamearty;
+ const filterdesc: array of msestring;
+  const filtermask: 
+ array of msestring; const filterindex: pinteger; 
+  const afilter: pfilenamety;      //nil -> unused
   const colwidth: pinteger;        //nil -> default
-  const includeattrib: fileattributesty; const excludeattrib: fileattributesty; const history: pmsestringarty; const historymaxcount: integer; const acaption: msestring; const aoptions: filedialogoptionsty;
-  const adefaultext: filenamety; const imagelist: timagelist; const ongetfileicon: getfileiconeventty; const oncheckfile: checkfileeventty): modalresultty;
+  const includeattrib: fileattributesty; 
+  const excludeattrib: fileattributesty; 
+  const history: pmsestringarty;
+   const historymaxcount: integer;
+    const acaption: msestring;
+     const aoptions: filedialogoptionsty;
+  const adefaultext: filenamety;
+   const imagelist: timagelist;
+    const ongetfileicon: getfileiconeventty;
+     const oncheckfile: checkfileeventty): modalresultty;
 var
   int1: integer;
   abool: Boolean;
@@ -810,7 +829,10 @@ begin
       filename.Value := ExtractFilePath(filename.Value);
 
     abool := True;
-
+    
+    if bhidehistory.Value then filename.visible := false
+    else filename.visible := true;  
+   
     if blateral.Value then
       onlateral(nil, abool, abool);
     if bcompact.Value then
@@ -818,7 +840,42 @@ begin
     if showhidden.Value then
       showhiddenonsetvalue(nil, abool, abool);
     //  showhidden.Value := not (fa_hidden in excludeattrib);
-
+    
+    if bshowoptions.value then
+    begin
+    bnoicon.visible := true;
+    bcompact.visible := true;
+    showhidden.visible := true;
+    blateral.visible := true;
+    filename.top := list_log.bottom + 8;
+    
+    end else
+    begin
+    dir.top := back.bottom + 8;
+    filter.top := dir.top;
+    tsplitter2.top := dir.top;
+    placespan.top := filter.bottom + 8;
+    tsplitter1.top := placespan.top;
+    list_log.top := placespan.top;
+    listview.top := list_log.top;
+    filename.top := list_log.bottom + 8;
+    tsplitter1.height := list_log.height;
+    filename.top := list_log.bottom + 8;
+    bnoicon.visible := false;
+    bcompact.visible := false;
+    showhidden.visible := false;
+    blateral.visible := false;
+    end;
+    
+    if filename.visible = false then
+    height := list_log.bottom + 8
+    else
+    height := filename.bottom + 8;
+        
+    placespan.anchors := [an_left,an_top, an_bottom];
+    list_log.anchors := [an_left,an_top, an_bottom];
+    listview.anchors := [an_left,an_top, an_bottom];
+    
     Show(True);
     Result      := window.modalresult;
     if Result <> mr_ok then
@@ -1541,10 +1598,13 @@ begin
   if accept then
     course(avalue);
   listview.directory := avalue;
+  
+ if filename.tag <> 2 then begin // save file
   if filename.tag = 1 then
     filename.Value   := dir.Value
   else
     filename.Value   := '';
+    end;
 end;
 
 procedure tfiledialogfo.listviewonlistread(const Sender: TObject);
@@ -1732,10 +1792,12 @@ begin
 
   dir.frame.Caption := 'Directory with ' + IntToStr(list_log.rowcount - x2) + ' files';
 
+ if filename.tag <> 2 then begin // save file
   if filename.tag = 1 then
     filename.Value := (dir.Value)
   else
     filename.Value := '';
+    end;
 
   filename.Value := tosysfilepath(filename.Value);
 
@@ -1755,8 +1817,8 @@ procedure tfiledialogfo.filteronafterclosedropdown(const Sender: TObject);
 begin
   updatefiltertext;
   filter.initfocus;
-  filter.left  := 422;
-  filter.Width := 182;
+//  filter.left  := 422;
+//  filter.Width := 182;
   //filter.frame.Caption := '&Filter';
 end;
 
@@ -1976,12 +2038,15 @@ begin
             else
             begin
               changedir(str1);
+              
+               if filename.tag <> 2 then  // save file
               filename.Value := '';
             end;
           end
           else if info.keyeventinfopo^.key = key_return then
           begin
             changedir(str1);
+            if filename.tag <> 2 then  // save file
             filename.Value := '';
           end;
         end
@@ -2187,10 +2252,13 @@ begin
         course(listview.directory);
       end;
 
+       if filename.tag <> 2 then begin // save file
+
       if filename.tag = 1 then
         filename.Value := dir.Value
       else
         filename.Value := '';
+        end;
 
       filename.Value := tosysfilepath(filename.Value);
 
@@ -2321,7 +2389,7 @@ end;
 
 procedure tfiledialogfo.afterclosedrop(const Sender: TObject);
 begin
-  if filename.tag = 1 then
+   if filename.tag = 1 then
     filename.Value := dir.Value;
   filename.Value   := tosysfilepath(filename.Value);
 end;
@@ -2340,6 +2408,10 @@ begin
   list_log.Width := Width - list_log.left - 2;
   if list_log.Visible = False then
     listview.Width := list_log.Width;
+    tsplitter1.height := list_log.height;
+ 
+   filename.top := height - filename.height - 8; ;
+   
 end;
 
 procedure tfiledialogfo.onchangdir(const Sender: TObject);
@@ -2439,11 +2511,14 @@ begin
             dir.Value := tosysfilepath(listview.directory);
             course(listview.directory);
           end;
+          
+           if filename.tag <> 2 then begin // save file
 
           if filename.tag = 1 then
             filename.Value := dir.Value
           else
             filename.Value := '';
+            end;
 
           filename.Value := tosysfilepath(filename.Value);
 
@@ -2519,6 +2594,8 @@ begin
   ffontcolor  := cl_black;
   fnopanel    := False;
   fcompact    := False;
+  fshowoptions:= false;
+  fhidehistory:= false;
   fshowhidden := False;
   fnoicon     := False;
   foptions    := defaultfiledialogoptions;
@@ -2557,6 +2634,8 @@ begin
   fcolwidth        := reader.readinteger('filecolwidth', fcolwidth);
   fshowhidden      := reader.readboolean('showhidden', fshowhidden);
   fcompact         := reader.readboolean('compact', fcompact);
+  fshowoptions     := reader.readboolean('showoptions', fshowoptions);
+  fhidehistory     := reader.readboolean('hidehistory', fhidehistory);
   fnopanel         := reader.readboolean('nopanel', fnopanel);
   fnoicon          := reader.readboolean('noicon', fnoicon);
   fcolnamewidth    := reader.readinteger('colnamewidth', fcolnamewidth);
@@ -2595,6 +2674,8 @@ begin
   writer.writeboolean('nopanel', fnopanel);
   writer.writeboolean('noicon', fnoicon);
   writer.writeboolean('compact', fcompact);
+  writer.writeboolean('showoptions', fshowoptions);
+  writer.writeboolean('hidehistory', fhidehistory);
   writer.writeboolean('showhidden', fshowhidden);
   writer.writeinteger('colnamewidth', fcolnamewidth);
   writer.writeinteger('colsizewidth', fcolsizewidth);
@@ -2797,7 +2878,9 @@ begin
 
     fo.bcompact.Value   := fcompact;
     fo.showhidden.Value := fshowhidden;
-
+    fo.bshowoptions.Value := fshowoptions;
+    fo.bhidehistory.Value := fhidehistory;    
+  
     if fcolnamewidth > 0 then
       fo.list_log.datacols[0].Width := fcolnamewidth;
     if fcolextwidth > 0 then
@@ -2818,7 +2901,10 @@ begin
       fo.filename.frame.Caption := 'Selected Directory';
     end
     else if (dialogkind in [fdk_save]) then
-      fo.filename.frame.Caption := 'Save File as'
+    begin
+      fo.filename.frame.Caption := 'Save File as';
+      fo.filename.tag           := 2;
+    end  
     else if (dialogkind in [fdk_new]) then
       fo.filename.frame.Caption := 'New File Name'
     else
@@ -2863,7 +2949,10 @@ begin
     fnopanel        := fo.blateral.Value;
     fnoicon         := fo.bnoicon.Value;
     fcompact        := fo.bcompact.Value;
+    fshowoptions    := fo.bshowoptions.Value;
     fshowhidden     := fo.showhidden.Value;
+    fhidehistory    := fo.bhidehistory.Value ;    
+  
     fcolnamewidth   := fo.list_log.datacols[0].Width;
     fcolextwidth    := fo.list_log.datacols[1].Width;
     fcolsizewidth   := fo.list_log.datacols[2].Width;
@@ -3272,7 +3361,10 @@ begin
   aowner.controller.ffontcolor  := cl_black;
   aowner.controller.fnopanel    := False;
   aowner.controller.fcompact    := False;
+  aowner.controller.fshowoptions    := False;
   aowner.controller.fshowhidden := False;
+  aowner.controller.fhidehistory := False;
+  
 end;
 
 function tfilenameeditcontroller.Execute(var avalue: msestring): Boolean;

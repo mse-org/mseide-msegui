@@ -1,8 +1,8 @@
 object filedialogfo: Tfiledialogfo
   optionswidget = [ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_destroywidgets, ow_hinton]
   visible = False
-  bounds_x = 326
-  bounds_y = 209
+  bounds_x = 323
+  bounds_y = 164
   bounds_cx = 608
   bounds_cy = 484
   bounds_cxmin = 30
@@ -61,7 +61,6 @@ object filedialogfo: Tfiledialogfo
     bounds_y = 126
     bounds_cx = 40
     bounds_cy = 290
-    anchors = [an_left, an_top, an_bottom]
     onkeydown = listviewonkeydown
     datarowlinecolor = -1610612731
     datacollinecolor = -1610612731
@@ -120,7 +119,6 @@ object filedialogfo: Tfiledialogfo
     bounds_y = 438
     bounds_cx = 600
     bounds_cy = 38
-    anchors = [an_left, an_bottom]
     optionsedit1 = [oe1_autopopupmenu, oe1_keyexecute, oe1_savevalue, oe1_savestate]
     optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_resetselectonexit, oe_exitoncursor, oe_autoselect, oe_autoselectonfirstclick]
     textflags = [tf_xcentered, tf_ycentered, tf_noselect]
@@ -188,7 +186,7 @@ object filedialogfo: Tfiledialogfo
     onshowhint = dirshowhint
     bounds_x = 4
     bounds_y = 70
-    bounds_cx = 416
+    bounds_cx = 412
     bounds_cy = 40
     textflags = [tf_ycentered, tf_noselect, tf_ellipseleft]
     onchange = onchangdir
@@ -329,7 +327,6 @@ object filedialogfo: Tfiledialogfo
     bounds_y = 126
     bounds_cx = 476
     bounds_cy = 290
-    anchors = [an_left, an_top, an_bottom]
     optionsgrid = [og_colsizing, og_colchangeontabkey, og_wrapcol, og_autopopup, og_mousescrollcol]
     datacols.count = 5
     datacols.linecolor = -1610612731
@@ -617,7 +614,6 @@ object filedialogfo: Tfiledialogfo
     bounds_y = 126
     bounds_cx = 126
     bounds_cy = 291
-    anchors = [an_left, an_top, an_bottom]
     reffontheight = 15
     object places: tstringgrid
       optionswidget1 = [ow1_fontglyphheight, ow1_autoscale, ow1_noclampinview]
@@ -859,9 +855,9 @@ object filedialogfo: Tfiledialogfo
     face.fade_direction = gd_down
     face.localprops = [fal_fadirection]
     taborder = 6
-    bounds_x = 422
+    bounds_x = 420
     bounds_y = 70
-    bounds_cx = 182
+    bounds_cx = 184
     bounds_cy = 40
     onsetvalue = filteronsetvalue
     dropdown.options = [deo_keydropdown, deo_cliphint]
@@ -873,7 +869,6 @@ object filedialogfo: Tfiledialogfo
         options = [co_readonly, co_invisible, co_focusselect, co_fill]
       end>
     dropdown.valuecol = 1
-    onbeforedropdown = onbefdrop
     onafterclosedropdown = filteronafterclosedropdown
     reffontheight = 15
   end
@@ -913,7 +908,59 @@ object filedialogfo: Tfiledialogfo
     bounds_y = 40
     bounds_cx = 68
     bounds_cy = 17
+    visible = False
     onsetvalue = onsetvalnoicon
+  end
+  object bshowoptions: tbooleanedit
+    frame.levelo = 0
+    frame.caption = 'Show options'
+    frame.localprops = [frl_levelo]
+    frame.localprops1 = []
+    frame.outerframe = (
+      0
+      2
+      84
+      3
+    )
+    taborder = 20
+    hint = 'Show hidden files'
+    bounds_x = 240
+    bounds_y = 48
+    bounds_cx = 97
+    bounds_cy = 17
+    visible = False
+    onsetvalue = showhiddenonsetvalue
+  end
+  object tsplitter2: tsplitter
+    taborder = 21
+    bounds_x = 416
+    bounds_y = 70
+    bounds_cx = 4
+    bounds_cy = 40
+    options = [spo_hmove, spo_dockleft, spo_docktop, spo_dockright, spo_dockbottom]
+    linkleft = dir
+    linkright = filter
+    onupdatelayout = onmovesplit
+  end
+  object bhidehistory: tbooleanedit
+    frame.levelo = 0
+    frame.caption = 'hide history'
+    frame.localprops = [frl_levelo]
+    frame.localprops1 = []
+    frame.outerframe = (
+      0
+      2
+      74
+      3
+    )
+    taborder = 22
+    hint = 'Show hidden files'
+    bounds_x = 344
+    bounds_y = 48
+    bounds_cx = 87
+    bounds_cy = 17
+    visible = False
+    onsetvalue = showhiddenonsetvalue
   end
   object iconslist: timagelist
     width = 18
