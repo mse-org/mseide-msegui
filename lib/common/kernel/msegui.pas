@@ -17013,7 +17013,9 @@ begin
      fupdateregion.region:= 0;
      result:= true;
      fownerwidget.paint(bmp.canvas);
+     {$ifdef linux}
      fownerwidget.paint(bmp.canvas);
+     {$endif}
      bmp.paint(fcanvas,rect1);
     end
     else begin
