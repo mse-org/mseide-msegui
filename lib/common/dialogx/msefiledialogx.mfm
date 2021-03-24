@@ -932,6 +932,7 @@ object filedialogfo: Tfiledialogfo
     onsetvalue = showhiddenonsetvalue
   end
   object tsplitter2: tsplitter
+    color = -2147483645
     taborder = 21
     bounds_x = 416
     bounds_y = 70
@@ -940,6 +941,7 @@ object filedialogfo: Tfiledialogfo
     options = [spo_hmove, spo_dockleft, spo_docktop, spo_dockright, spo_dockbottom]
     linkleft = dir
     linkright = filter
+    colorgrip = -2147483645
     onupdatelayout = onmovesplit
   end
   object bhidehistory: tbooleanedit
