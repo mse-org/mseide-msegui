@@ -3318,7 +3318,7 @@ function debugwidgetname(const awidget: twidget; const atext: string): string;
 {$endif}
 
 var
-repaintcanvas : boolean = false;
+mse_repaintcanvas : boolean = false;
 
 implementation
 uses
@@ -17017,7 +17017,7 @@ begin
      result:= true;
      fownerwidget.paint(bmp.canvas);
      {$ifdef linux} // fixes problems on some graphic cards.
-     if repaintcanvas then fownerwidget.paint(bmp.canvas);
+     if mse_repaintcanvas then fownerwidget.paint(bmp.canvas);
      {$endif}
      bmp.paint(fcanvas,rect1);
     end
@@ -22391,8 +22391,8 @@ end;
 
 initialization
  registerapplicationclass(tinternalapplication);
- {$ifdef repaintcanvas}
- repaintcanvas := true;
+ {$ifdef mse_repaintcanvas}
+ mse_repaintcanvas := true;
  {$endif}
 
 end.
