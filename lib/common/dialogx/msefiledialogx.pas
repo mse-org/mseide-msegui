@@ -9,7 +9,7 @@
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 }
 
-{ msefiledialogx by fredvs 2020 }
+{ msefiledialogx by fredvs 2021 }
 
 unit msefiledialogx;
 
