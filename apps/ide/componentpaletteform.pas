@@ -20,7 +20,7 @@ unit componentpaletteform;
 
 interface
 uses
- msegui,mseclasses,mseforms,msetabs,msetoolbar,msegraphutils,msestat,mseguiglob,
+ msegui,mseclasses,mseforms,msetabs,msetoolbar,msegraphutils,msestat,mseguiglob,msebitmap,
  msedragglob,msetypes{msestrings};
 
 type
@@ -124,6 +124,7 @@ begin
       with componentpalette.buttons.add do begin
        options:= [mao_checkbox,mao_radiobutton];
        imagelist:= registeredcomponents.imagelist;
+       imagelist.options := [bmo_masked, bmo_graymask];
        imagenr:= icon;
        hint:= msestring(classtyp.classname);
        tagpo:= classtyp;
