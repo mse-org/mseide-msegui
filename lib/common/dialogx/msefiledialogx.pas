@@ -149,12 +149,12 @@ const
 type
   filedialogkindty = (fdk_none, fdk_open, fdk_save, fdk_new, fdk_dir);
 
-  tfiledialogcontroller = class;
+  tfiledialogxcontroller = class;
 
-  filedialogbeforeexecuteeventty = procedure(const Sender: tfiledialogcontroller; var dialogkind: filedialogkindty; var aresult: modalresultty) of object;
-  filedialogafterexecuteeventty  = procedure(const Sender: tfiledialogcontroller; var aresult: modalresultty) of object;
+  filedialogbeforeexecuteeventty = procedure(const Sender: tfiledialogxcontroller; var dialogkind: filedialogkindty; var aresult: modalresultty) of object;
+  filedialogafterexecuteeventty  = procedure(const Sender: tfiledialogxcontroller; var aresult: modalresultty) of object;
 
-  tfiledialogcontroller = class(tlinkedpersistent)
+  tfiledialogxcontroller = class(tlinkedpersistent)
   private
     fowner: tmsecomponent;
     fgroup: integer;
@@ -298,14 +298,14 @@ const
 type
   tfiledialogx = class(tdialog, istatfile)
   private
-    fcontroller: tfiledialogcontroller;
+    fcontroller: tfiledialogxcontroller;
     fstatvarname: msestring;
     fstatfile: tstatfile;
     fdialogkind: filedialogkindty;
     //   foptionsedit: optionseditty;
     foptionsedit1: optionsedit1ty;
     fstatpriority: integer;
-    procedure setcontroller(const Value: tfiledialogcontroller);
+    procedure setcontroller(const Value: tfiledialogxcontroller);
     procedure setstatfile(const Value: tstatfile);
     procedure readoptionsedit(reader: treader);
   protected
@@ -340,7 +340,7 @@ type
     property statfile: tstatfile read fstatfile write setstatfile;
     property statvarname: msestring read getstatvarname write fstatvarname;
     property statpriority: integer read fstatpriority write fstatpriority default 0;
-    property controller: tfiledialogcontroller read fcontroller write setcontroller;
+    property controller: tfiledialogxcontroller read fcontroller write setcontroller;
     property dialogkind: filedialogkindty read fdialogkind write fdialogkind default fdk_none;
     property optionsedit1: optionsedit1ty read foptionsedit1 write foptionsedit1 default defaultfiledialogoptionsedit1;
 
@@ -359,8 +359,8 @@ type
 
   tcustomfilenameedit1 = class(tcustomdialogstringed)
   private
-    fcontroller: tfiledialogcontroller;
-    procedure setcontroller(const avalue: tfiledialogcontroller);
+    fcontroller: tfiledialogxcontroller;
+    procedure setcontroller(const avalue: tfiledialogxcontroller);
     function getsysvalue: filenamety;
     procedure setsysvalue(const avalue: filenamety);
     function getsysvaluequoted: filenamety;
@@ -400,7 +400,7 @@ type
       override;
     procedure componentevent(const event: tcomponentevent);
       override;
-    property controller: tfiledialogcontroller read fcontroller write setcontroller;
+    property controller: tfiledialogxcontroller read fcontroller write setcontroller;
     property sysvalue: filenamety read getsysvalue write setsysvalue;
     property sysvaluequoted: filenamety read getsysvaluequoted write setsysvalue;
   published
@@ -2584,9 +2584,9 @@ begin
   listview.readlist;
 end;
 
-{ tfiledialogcontroller }
+{ tfiledialogxcontroller }
 
-constructor tfiledialogcontroller.Create(const aowner: tmsecomponent = nil; const onchange: proceventty = nil);
+constructor tfiledialogxcontroller.Create(const aowner: tmsecomponent = nil; const onchange: proceventty = nil);
 begin
   ficon       := tmaskedbitmap.Create(bmk_rgb);
   fbackcolor  := cl_default;
@@ -2609,14 +2609,14 @@ begin
   inherited Create;
 end;
 
-destructor tfiledialogcontroller.Destroy;
+destructor tfiledialogxcontroller.Destroy;
 begin
   inherited;
   ficon.Free;
   ffilterlist.Free;
 end;
 
-procedure tfiledialogcontroller.readstatvalue(const reader: tstatreader);
+procedure tfiledialogxcontroller.readstatvalue(const reader: tstatreader);
 begin
   ffilenames     := reader.readarray('filenames', ffilenames);
   ffilenamescust := reader.readarray('filenamescust', ffilenamescust);
@@ -2624,7 +2624,7 @@ begin
     fparams := reader.readmsestring('params', fparams);
 end;
 
-procedure tfiledialogcontroller.readstatstate(const reader: tstatreader);
+procedure tfiledialogxcontroller.readstatstate(const reader: tstatreader);
 begin
   ffilterindex     := reader.readinteger('filefilterindex', ffilterindex);
   ffilter          := reader.readmsestring('filefilter', ffilter);
@@ -2649,7 +2649,7 @@ begin
     trysetcurrentdirmse(flastdir);
 end;
 
-procedure tfiledialogcontroller.readstatoptions(const reader: tstatreader);
+procedure tfiledialogxcontroller.readstatoptions(const reader: tstatreader);
 begin
   if fdo_savelastdir in foptions then
     flastdir := reader.readmsestring('lastdir', flastdir);
@@ -2657,7 +2657,7 @@ begin
     fhistory := reader.readarray('filehistory', fhistory);
 end;
 
-procedure tfiledialogcontroller.writestatvalue(const writer: tstatwriter);
+procedure tfiledialogxcontroller.writestatvalue(const writer: tstatwriter);
 begin
   writer.writearray('filenames', ffilenames);
   writer.writearray('filenamescust', ffilenamescust);
@@ -2665,7 +2665,7 @@ begin
     writer.writemsestring('params', fparams);
 end;
 
-procedure tfiledialogcontroller.writestatstate(const writer: tstatwriter);
+procedure tfiledialogxcontroller.writestatstate(const writer: tstatwriter);
 begin
   writer.writeinteger('filecolwidth', fcolwidth);
   writer.writeinteger('x', fwindowrect.x);
@@ -2686,7 +2686,7 @@ begin
   writer.writeinteger('splitterlateral', fsplitterlateral);
 end;
 
-procedure tfiledialogcontroller.writestatoptions(const writer: tstatwriter);
+procedure tfiledialogxcontroller.writestatoptions(const writer: tstatwriter);
 begin
   if fdo_savelastdir in foptions then
     writer.writemsestring('lastdir', flastdir);
@@ -2696,22 +2696,22 @@ begin
   writer.writemsestring('filefilter', ffilter);
 end;
 
-procedure tfiledialogcontroller.componentevent(const event: tcomponentevent);
+procedure tfiledialogxcontroller.componentevent(const event: tcomponentevent);
 begin
   if (fdo_link in foptions) and (event.Sender <> self) and
-    (event.Sender is tfiledialogcontroller) then
-    with tfiledialogcontroller(event.Sender) do
+    (event.Sender is tfiledialogxcontroller) then
+    with tfiledialogxcontroller(event.Sender) do
       if fgroup = self.fgroup then
         self.flastdir := flastdir;
 end;
 
-procedure tfiledialogcontroller.checklink;
+procedure tfiledialogxcontroller.checklink;
 begin
   if (fdo_link in foptions) and (fowner <> nil) then
     fowner.sendrootcomponentevent(tcomponentevent.Create(self), True);
 end;
 
-function tfiledialogcontroller.Execute(dialogkind: filedialogkindty; const acaption: msestring; aoptions: filedialogoptionsty): modalresultty;
+function tfiledialogxcontroller.Execute(dialogkind: filedialogkindty; const acaption: msestring; aoptions: filedialogoptionsty): modalresultty;
 var
   po1: pmsestringarty;
   fo: tfiledialogfo;
@@ -2978,12 +2978,12 @@ begin
   end;
 end;
 
-function tfiledialogcontroller.Execute(const dialogkind: filedialogkindty; const acaption: msestring): modalresultty;
+function tfiledialogxcontroller.Execute(const dialogkind: filedialogkindty; const acaption: msestring): modalresultty;
 begin
   Result := Execute(dialogkind, acaption, foptions);
 end;
 
-function tfiledialogcontroller.actcaption(const dialogkind: filedialogkindty): msestring;
+function tfiledialogxcontroller.actcaption(const dialogkind: filedialogkindty): msestring;
 begin
   case dialogkind of
     fdk_save:
@@ -3001,12 +3001,12 @@ begin
   end;
 end;
 
-function tfiledialogcontroller.Execute(const dialogkind: filedialogkindty; const aoptions: filedialogoptionsty): modalresultty;
+function tfiledialogxcontroller.Execute(const dialogkind: filedialogkindty; const aoptions: filedialogoptionsty): modalresultty;
 begin
   Result := Execute(dialogkind, actcaption(dialogkind), aoptions);
 end;
 
-function tfiledialogcontroller.Execute(dialogkind: filedialogkindty = fdk_none): modalresultty;
+function tfiledialogxcontroller.Execute(dialogkind: filedialogkindty = fdk_none): modalresultty;
 begin
   if dialogkind = fdk_none then
     if fdo_save in foptions then
@@ -3016,7 +3016,7 @@ begin
   Result := Execute(dialogkind, actcaption(dialogkind));
 end;
 
-function tfiledialogcontroller.Execute(var avalue: filenamety; dialogkind: filedialogkindty = fdk_none): Boolean;
+function tfiledialogxcontroller.Execute(var avalue: filenamety; dialogkind: filedialogkindty = fdk_none): Boolean;
 begin
   if dialogkind = fdk_none then
     if fdo_save in foptions then
@@ -3026,7 +3026,7 @@ begin
   Result := Execute(avalue, dialogkind, actcaption(dialogkind));
 end;
 
-function tfiledialogcontroller.Execute(var avalue: filenamety; const dialogkind: filedialogkindty; const acaption: msestring; aoptions: filedialogoptionsty): Boolean;
+function tfiledialogxcontroller.Execute(var avalue: filenamety; const dialogkind: filedialogkindty; const acaption: msestring; aoptions: filedialogoptionsty): Boolean;
 var
   wstr1: filenamety;
 begin
@@ -3049,7 +3049,7 @@ begin
     filename := wstr1;
 end;
 
-function tfiledialogcontroller.canoverwrite(): Boolean;
+function tfiledialogxcontroller.canoverwrite(): Boolean;
 begin
   with stockobjects do
     Result := not findfile(filename) or
@@ -3058,12 +3058,12 @@ begin
       captions[sc_warningupper]);
 end;
 
-function tfiledialogcontroller.Execute(var avalue: filenamety; const dialogkind: filedialogkindty; const acaption: msestring): Boolean;
+function tfiledialogxcontroller.Execute(var avalue: filenamety; const dialogkind: filedialogkindty; const acaption: msestring): Boolean;
 begin
   Result := Execute(avalue, dialogkind, acaption, foptions);
 end;
 
-function tfiledialogcontroller.getfilename: filenamety;
+function tfiledialogxcontroller.getfilename: filenamety;
 begin
   if (high(ffilenames) > 0) or (fdo_quotesingle in foptions) or
     (fdo_params in foptions) and (high(ffilenames) = 0) and
@@ -3086,12 +3086,12 @@ end;
 const
   quotechar = msechar('"');
 
-procedure tfiledialogcontroller.seticon(const avalue: tmaskedbitmap);
+procedure tfiledialogxcontroller.seticon(const avalue: tmaskedbitmap);
 begin
   ficon.Assign(avalue);
 end;
 
-procedure tfiledialogcontroller.setfilename(const avalue: filenamety);
+procedure tfiledialogxcontroller.setfilename(const avalue: filenamety);
 var
   int1: integer;
   akind: filekindty;
@@ -3153,25 +3153,25 @@ begin
   end;
 end;
 
-procedure tfiledialogcontroller.setfilterlist(const Value: tdoublemsestringdatalist);
+procedure tfiledialogxcontroller.setfilterlist(const Value: tdoublemsestringdatalist);
 begin
   ffilterlist.Assign(Value);
 end;
 
-procedure tfiledialogcontroller.sethistorymaxcount(const Value: integer);
+procedure tfiledialogxcontroller.sethistorymaxcount(const Value: integer);
 begin
   fhistorymaxcount := Value;
   if length(fhistory) > fhistorymaxcount then
     setlength(fhistory, fhistorymaxcount);
 end;
 
-procedure tfiledialogcontroller.dochange;
+procedure tfiledialogxcontroller.dochange;
 begin
   if Assigned(fonchange) then
     fonchange;
 end;
 
-procedure tfiledialogcontroller.setdefaultext(const avalue: filenamety);
+procedure tfiledialogxcontroller.setdefaultext(const avalue: filenamety);
 begin
   if fdefaultext <> avalue then
   begin
@@ -3180,7 +3180,7 @@ begin
   end;
 end;
 
-procedure tfiledialogcontroller.setoptions(Value: filedialogoptionsty);
+procedure tfiledialogxcontroller.setoptions(Value: filedialogoptionsty);
 
 (*
 const
@@ -3217,7 +3217,7 @@ begin
   end;
 end;
 
-procedure tfiledialogcontroller.Clear;
+procedure tfiledialogxcontroller.Clear;
 begin
   ffilenames     := nil;
   flastdir       := '';
@@ -3225,18 +3225,18 @@ begin
   ffilenamescust := nil;
 end;
 
-procedure tfiledialogcontroller.setlastdir(const avalue: filenamety);
+procedure tfiledialogxcontroller.setlastdir(const avalue: filenamety);
 begin
   flastdir := avalue;
   checklink;
 end;
 
-procedure tfiledialogcontroller.setimagelist(const avalue: timagelist);
+procedure tfiledialogxcontroller.setimagelist(const avalue: timagelist);
 begin
   setlinkedvar(avalue, tmsecomponent(fimagelist));
 end;
 
-function tfiledialogcontroller.getsysfilename: filenamety;
+function tfiledialogxcontroller.getsysfilename: filenamety;
 var
   bo1: Boolean;
 begin
@@ -3253,7 +3253,7 @@ constructor tfiledialogx.Create(aowner: TComponent);
 begin
   // foptionsedit:= defaultfiledialogoptionsedit;
   foptionsedit1 := defaultfiledialogoptionsedit1;
-  fcontroller   := tfiledialogcontroller.Create(nil);
+  fcontroller   := tfiledialogxcontroller.Create(nil);
   inherited;
 end;
 
@@ -3278,7 +3278,7 @@ begin
   Result := fcontroller.Execute(akind, aoptions);
 end;
 
-procedure tfiledialogx.setcontroller(const Value: tfiledialogcontroller);
+procedure tfiledialogx.setcontroller(const Value: tfiledialogxcontroller);
 begin
   fcontroller.Assign(Value);
 end;
@@ -3382,7 +3382,7 @@ end;
 
 constructor tcustomfilenameedit1.Create(aowner: TComponent);
 begin
-  // fcontroller:= tfiledialogcontroller.create(self,{$ifdef FPC}@{$endif}formatchanged);
+  // fcontroller:= tfiledialogxcontroller.create(self,{$ifdef FPC}@{$endif}formatchanged);
   inherited;
   optionsedit1 := defaultfiledialogoptionsedit1;
 end;
@@ -3399,7 +3399,7 @@ begin
  result:= fcontroller.execute(avalue);
 end;
 }
-procedure tcustomfilenameedit1.setcontroller(const avalue: tfiledialogcontroller);
+procedure tcustomfilenameedit1.setcontroller(const avalue: tfiledialogxcontroller);
 begin
   if fcontroller <> nil then
     fcontroller.Assign(avalue);
@@ -3542,7 +3542,7 @@ end;
 
 constructor tcustomfilenameedit.Create(aowner: TComponent);
 begin
-  fcontroller := tfiledialogcontroller.Create(self,
+  fcontroller := tfiledialogxcontroller.Create(self,
                                 {$ifdef FPC}
     @
 {$endif}
