@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<fpdoc-descriptions>
+<package name="msegui">
+<module name="mseedit">
+
+<element name="tedit">
+<short>A basic text edit widget</short>
+<descr><p><printshort id="tedit"/>.</p>
+<p><b>Hint:</b> In MSEgui, you would seldom use the <var>TEdit</var> component
+directly. Instead, in is recommended that you rather use one of the <var>TDataEdit</var>
+descendants, like <var>TStringEdit</var>, <var>TIntegerEdit</var> etc. They have
+the event properties <var>OnSetValue</var> and <var>OnDataEntered</var> which
+can be used in order to react on input changes.</p>
+</descr>
+<seealso>
+  <link id="#msegui.msedataedits.TDataEdit">TDataEdit</link>
+  <link id="#msegui.msedataedits.TStringEdit">TStringEdit</link>
+  <link id="#msegui.msedataedits.TIntegerEdit">TIntegerEdit</link>
+</seealso>
+</element>
+
+<element name="tedit.onchange">
+<short>Event handler for when the TEdit text changes</short>
+<descr><p><printshort id="tedit.onchange"/>.</p>
+<p><b>Note:</b> The <var>OnChange</var> event also fires when the form that contains the
+TEdit, is displayed for the first time. This is due to how MSEgui synchronises
+the streamed values from the *.mfm file.</p>
+</descr>
+</element>
+
+
+</module>
+</package>
+</fpdoc-descriptions>
