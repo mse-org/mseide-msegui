@@ -1,16 +1,15 @@
 
-         MSEgui+MSEide API Documentation
+         MSEide+MSEgui API Documentation
          ═══════════════════════════════
 
 This directory contains a fpdoc project file [msegui-docs-project.xml]
 for all of MSEgui. Currently their is very little actual documentation
-content written, but hopefully this will change in the future.
+content written, but hopefully this will change over time.
 
-API documentation is a vital part of any framework's success. So I
+API documentation is a vital part of any framework's success. So we
 welcome others to contribute to this effort so that MSEgui can finally
 have some real API documentation. The idea is to keep adding little bits
-at a time (especially if Martin shares some knowledge via the mailing
-list), and eventually it will become more and more useful to new comers.
+at a time, and eventually it will become more and more useful to newcomers.
 
 Saying than, the usage of fpdoc will generate skeleton [empty]
 documentation entries, which in itself is still very useful to browse or
@@ -21,27 +20,21 @@ Usage
 ─────
 To generate new documentation, there are two requirements:
 
- 1. You need the Free Pascal fpdoc tool available.
+ 1. You need the Free Pascal `fpdoc` tool available. It is easier if
+    you add its location to your PATH environment variable, or create
+    a symlink [Unix systems] to it in the `help/fpdoc/` directory.
 
  2. When building the documentation, fpdoc needs to be able to find the
     MSEgui source code.
-     Windows:
-        Copy the <msegui>/lib/ directory  into the
-        <mseuniverse>/docs/msegui/ directory.
 
-     Linux, FreeBSD:
-        Simply create a symlink of your <msegui> directory pointing to
-        <mseuniverse>/docs/msegui/
+    The standard directory hierarchy should already be as follows:
 
-    You should end up with a directory hierarchy as follows:
+    <mseide+msegui>
+      ├─ help/
+      │  └─ fpdoc/
+      └─ lib/
 
-    <mseuniverse>
-      └─ docs/
-         ├─ fpdoc/
-         └─ msegui/
-            └─ lib/
-
-Then from within the docs/fpdoc/ directory you run the following
+Then from within the `help/fpdoc/` directory you run the following
 command:
 
   $> fpdoc --project=msegui-docs-project.xml
@@ -54,14 +47,13 @@ annotations - very useful indeed.
 
 Documenation Releases
 ─────────────────────
-There are two documentation releases which was create as samples and made
-available on Graeme's Github account (before all this got moved to
-MSEUniverse). These pre-built INF help files are downloadable form the
-following URL, and viewable with the DocView Help Viewer.
+There are documentation releases which was create as samples and made
+available on Github. These pre-built INF help files are downloadable from
+the following URL, and viewable with the Docview Help Viewer.
 
-   https://github.com/graemeg/msegui/releases
+   https://github.com/mse-org/mseide-msegui/releases/
 
-To view INF help files, use fpGUI's DocView - binaries downloadable from
+To view INF help files, use fpGUI's Docview binaries downloadable from
 
    http://sourceforge.net/projects/fpgui/files/fpGUI/1.4/
 
