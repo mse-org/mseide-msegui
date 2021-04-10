@@ -4,7 +4,7 @@
 <module name="mselistbrowser">
 
 <element name="listviewoptionty.lvo_mousemoving">
-<short>Activate this option for moving items by mouse drag in the same tlistview</short>
+<short>Activate this option for moving items by mouse drag in the same TListview</short>
 <descr><printshort id="tspacer"/>.</descr>
 </element>
 

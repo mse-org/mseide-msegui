@@ -3,10 +3,12 @@
 <package name="msegui">
 <short>MSE GUI Component Library</short>
 <descr><p>The MSEgui is a set of visual components to create GUI applications for
-Window and Linux. No huge toolkits (Qt, Gtk etc.) are required. The OS
-included GDI (Windows) and XLib (X Windows on Unix-like systems) are used
-to draw widgets. It is tightly bound with FPC, not a Delphi clone but more likely a Delphi redesign and an extention for particular people needs.
-</p></descr>
+Window, Linux and FreeBSD. No huge toolkits (Qt, Gtk etc.) are required. The OS
+included GDI (Windows) and XLib (X Windows on Unix-like systems) libraries are
+used to draw widgets. It is tightly bound with Free Pascal. It's not a Delphi
+clone but more like a Delphi redesign, and an extention for particular peoples
+needs.</p>
+</descr>
 
 <module name="msegui">
 
