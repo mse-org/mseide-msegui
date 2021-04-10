@@ -2454,10 +2454,10 @@ type
       revents : smallint;
    end;
 function poll(__fds: Ppollfd; __nfds:nfds_t; __timeout:longint): cint
-                                              cdecl external clib name 'poll';
+                                              cdecl; external clib name 'poll';
 function ppoll (__fds: ppollfd;__nfds: nfds_t; __timeout: ptimespec;
                                                 __ss: p__sigset_t): cint
-                                              cdecl external clib name 'ppoll';
+                                              cdecl; external clib name 'ppoll';
 const
 {$ifdef linux}
    SIG_BLOCK = 0;
