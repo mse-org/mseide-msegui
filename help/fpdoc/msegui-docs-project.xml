@@ -1,0 +1,366 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<docproject>
+  
+<options>
+<!-- All command-line options can be specified here with the same name
+and value as on the actual command-line. Boolean options must have
+a value of 'true', '1' or 'yes' -->
+
+<!-- 
+
+	======  HTML  ======
+	<option name="format" value="html"/>
+	<option name="hide-protected" value="true"/>
+	<option name="footer-date" value="yyyy-mm-dd"/>
+	
+	======  IPF (INF)  ======
+	<option name="format" value="ipf"/>
+	<option name="hide-protected" value="true"/>
+
+	======  CHM  ======
+	<option name="format" value="chm"/>
+	<option name="hide-protected" value="true"/>
+	<option name="footer-date" value="yyyy-mm-dd"/>
+
+-->
+	<option name="format" value="ipf"/>
+	<option name="hide-protected" value="true"/>
+
+</options>
+  
+<packages>
+<!-- Multiple packages can be entered.
+If only one is specified, it is selected.
+"name" is a mandatory attribute
+a "units" tag is required, and a "descriptions" tag as well
+-->
+
+
+<!--
+
+	======  HTML  ======
+	<package name="msegui" output="html/" >
+	
+	======  IPF (INF)  ======
+	<package name="msegui" output="msegui.ipf" >
+
+	======  CHM)  ======
+	<package name="msegui" output="msegui.chm" >
+
+-->
+	<package name="msegui" output="msegui.ipf" >
+
+
+<!-- All input files, one "unit" tag per unit -->
+<units>
+<!-- "file" is a mandatory attribute, "options" is not mandatory -->
+
+<!-- lib/comon/audio  -->
+<unit file="../msegui/lib/common/audio/mseaudio.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/audio/msemidi.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/audio/msepulseglob.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/audio/msepulse.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/audio/msepulsesimple.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+
+<!-- lib/comon/crypto  -->
+<unit file="../msegui/lib/common/crypto/msecrc.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/crypto/msecryptio.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/crypto/msecryptohandler.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/crypto/msecryptstream.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/crypto/mseopensslaes.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/crypto/mseopensslasn.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/crypto/mseopensslbignum.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/crypto/mseopensslbio.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/crypto/mseopenssldes.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/crypto/mseopenssldsa.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/crypto/mseopensslevp.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/crypto/mseopenssl.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/crypto/mseopensslpem.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/crypto/mseopensslpkcs.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/crypto/mseopensslrand.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/crypto/mseopensslrsa.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/crypto/mseopensslsmime.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/crypto/mseopensslx509.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/crypto/msessl.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/crypto/msezlib.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/crypto/msezstream.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+
+<!-- lib/comon/db  -->
+<unit file="../msegui/lib/common/db/msebufdataset.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/db/msedatabase.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/db/msedbcalendardatetimeedit.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/db/msedbdialog.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/db/msedbdispwidgets.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/db/msedbedit.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/db/msedbevents.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/db/msedbf.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/db/msedbgraphics.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/db/msedblookup.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/db/msedb.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/db/mseibconnection.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/db/mselocaldataset.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/db/mselookupbuffer.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/db/msememds.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/db/msemysql40conn.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/db/msemysql41conn.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/db/msemysql50conn.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/db/msemysqlconn.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/db/mseodbcconn.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/db/msepqconnection.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/db/msesdfdata.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/db/msesqldb.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/db/msesqlite3conn.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/db/msesqlquery.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/db/msesqlresult.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/db/msezeos.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+
+<!-- lib/comon/designutils  -->
+<unit file="../msegui/lib/common/designutils/msecomponenteditors.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/designutils/msedbfieldeditor.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/designutils/msedesignintf.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/designutils/msedoublereallisteditor.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/designutils/msedoublestringlisteditor.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/designutils/msefadeedit.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/designutils/msefadepropedit.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/designutils/msefircoeffeditor.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/designutils/mseformdatatools.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/designutils/msegdbutils.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/designutils/mseificlienteditor.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/designutils/mseificomponenteditors.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/designutils/mseififieldeditor.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/designutils/mseiircoeffeditor.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/designutils/mseimagelisteditor.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/designutils/mseintegerlisteditor.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/designutils/mseparser.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/designutils/msepropertyeditorsmodule.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/designutils/msepropertyeditors.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/designutils/msereallisteditor.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/designutils/mseresourcetools.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/designutils/msesettings.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/designutils/mseskindesign.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/designutils/msestringintlisteditor.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/designutils/msestringlisteditor.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/designutils/msesyntaxedit.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/designutils/msesyntaxpainter.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/designutils/msesysenvmanagereditor.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/designutils/msetexteditor.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+
+<!-- lib/comon/dialogs  -->
+<unit file="../msegui/lib/common/dialogs/msecolordialog.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/dialogs/msedialog.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/dialogs/msedirtree.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/dialogs/msefiledialog.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/dialogs/msefiledialogres.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/dialogs/mseintegerenter.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/dialogs/msememodialog.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/dialogs/msepopupcalendar.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/dialogs/mserealenter.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/dialogs/mseshortcutdialog.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/dialogs/msestringenter.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+
+<!-- lib/comon/editwidgets  -->
+<unit file="../msegui/lib/common/editwidgets/msecalendardatetimeedit.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/editwidgets/msedataedits.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/editwidgets/msedataimage.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/editwidgets/msedatanodes.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/editwidgets/msedropdownlist.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/editwidgets/mseedit.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/editwidgets/msefoldedit.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/editwidgets/msegraphedits.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/editwidgets/mselistbrowser.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/editwidgets/mserealsumedit.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/editwidgets/msestringlistedit.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/editwidgets/mseterminal.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/editwidgets/msetextedit.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/editwidgets/msewidgetgrid.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+
+
+<!-- lib/comon/graphics  -->
+<unit file="../msegui/lib/common/graphics/msebitmap.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/graphics/msedrawtext.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/graphics/mseellipsetria.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/graphics/msefcfontselect.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/graphics/msefontcache.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/graphics/msefontconfig.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/graphics/msefont.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/graphics/msefreetype.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/graphics/mseftfontcache.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/graphics/msegdi32gdi.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/graphics/msegdiplus.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/graphics/msegenericgdi.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/graphics/msegraphics.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/graphics/msegraphutils.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/graphics/mselinetria.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/graphics/msepolytria.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/graphics/msetriaglob.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/graphics/msex11gdi.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+
+<!-- lib/comon/sysutils  -->
+<unit file="../msegui/lib/common/image/mseformatbmpicoread.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/image/mseformatjpgread.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/image/mseformatjpgwrite.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/image/mseformatpngread.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/image/mseformatpngwrite.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/image/mseformatpnmread.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/image/mseformattgaread.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/image/mseformattiffread.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/image/mseformattiffwrite.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/image/mseformatxpmread.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/image/msegraphicsmagick.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/image/msegraphicstream.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/image/msemagickstream.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+
+<!-- lib/comon/kernel  -->
+<unit file="../msegui/lib/common/kernel/mseactions.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/kernel/mseact.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/kernel/mseapplication.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/kernel/msearrayprops.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/kernel/msearrayutils.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/kernel/msebintree.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/kernel/msebits.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/kernel/msebucketlist.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/kernel/mseclasses.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/kernel/mseconsts.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/kernel/msectypes.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/kernel/msedatalist.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/kernel/msedatamodules.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/kernel/msedate.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/kernel/msedrag.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/kernel/msedynload.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/kernel/mseerr.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/kernel/mseevent.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/kernel/msefileutils.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/kernel/msefloattostr.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/kernel/mseformatstr.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/kernel/mseglob.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/kernel/mseguiglob.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/kernel/mseguiinifini.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/kernel/msegui.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/kernel/mseguithreadcomp.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/kernel/msehash.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/kernel/mseinterfaces.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/kernel/msekeyboard.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/kernel/mselibc.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/kernel/mselinklist.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/kernel/mselist.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/kernel/msemacros.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/kernel/msemenus.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/kernel/msenogui.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/kernel/mseobjecttext.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/kernel/msepipestream.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/kernel/msepointer.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/kernel/msereal.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/kernel/mserichstring.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/kernel/mserttistat.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/kernel/msescrollbar.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/kernel/mseshapes.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/kernel/mseskin.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/kernel/msesonames.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/kernel/msestatfile.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/kernel/msestat.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/kernel/msestockobjects.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/kernel/msestreaming.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/kernel/msestream.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/kernel/msestrings.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/kernel/msesumlist.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/kernel/msesys.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/kernel/msesystypes.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/kernel/msesysutils.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/kernel/msethreadcomp.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/kernel/msethread.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/kernel/msetimer.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/kernel/msetmpmodules.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/kernel/msetypes.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/kernel/mseunicodeps.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/kernel/msevariants.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+
+<!-- lib/comon/math  -->
+<unit file="../msegui/lib/common/math/msefft.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/math/msefftw.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/math/msefilter.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/math/mselfsr.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/math/msenoise.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/math/msesigaudio.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/math/msesigfftgui.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/math/msesigfft.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/math/msesiggui.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/math/msesigmidi.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/math/msesignal.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/math/msesignoise.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+
+<!-- lib/comon/opengl  -->
+<unit file="../msegui/lib/common/opengl/mseftgl.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/opengl/mseglextglob.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/opengl/mseglext.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/opengl/msegl.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/opengl/mseglu.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/opengl/mseglx.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/opengl/mseopenglcanvaswidget.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/opengl/mseopenglgdiinit.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/opengl/mseopenglgdi.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/opengl/mseopengl.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/opengl/mseopenglwidget.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+
+<!-- lib/comon/sysutils  -->
+<unit file="../msegui/lib/common/sysutils/msefilechange.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/sysutils/mseinputcontroller.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/sysutils/msemime.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/sysutils/mseprocess.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/sysutils/mseprocmonitorcomp.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/sysutils/mseprocutils.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/sysutils/msesysdnd.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/sysutils/msesysenv.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+
+<!-- lib/comon/unicode  -->
+<!--<unit file="../msegui/lib/common/unicode/mseunicode.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>-->
+
+<!-- lib/comon/widgets  -->
+<unit file="../msegui/lib/common/widgets/msebarcode.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/widgets/msechartedit.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/widgets/msechart.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/widgets/msedial.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/widgets/msedispwidgets.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/widgets/msedockpanelform.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/widgets/msedock.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/widgets/msedragglob.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/widgets/mseeditglob.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/widgets/mseforms.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/widgets/msegridsglob.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/widgets/msegrids.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/widgets/mseguirttistat.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/widgets/mseimage.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/widgets/mseinplaceedit.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/widgets/msemenuwidgets.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/widgets/mseobjectpicker.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/widgets/msepickwidget.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/widgets/msepolygon.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/widgets/msesimplewidgets.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/widgets/msesplitter.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/widgets/msetabsglob.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/widgets/msetabs.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/widgets/msetoolbar.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/widgets/msetraywidget.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/widgets/msewidgets.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../msegui/lib/common/widgets/msewindowwidget.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+
+
+</units>
+<descriptions>
+<!-- 
+  Description files here. One "description" tag per file. "file" is the only
+  mandatory attribute.
+-->
+	<description file="xml/msesplitter.xml"/>
+	<description file="xml/mselistbrowser.xml"/>
+	<description file="xml/msegui.xml"/>
+	<description file="xml/msegrids.xml"/>
+	<description file="xml/mseedit.xml"/>
+	<description file="xml/mseeditglob.xml"/>
+
+
+</descriptions>
+
+</package>
+</packages>
+
+</docproject>

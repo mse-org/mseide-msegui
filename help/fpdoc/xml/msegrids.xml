@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<fpdoc-descriptions>
+<package name="msegui">
+<module name="msegrids">
+
+
+<element name="TCustomGrid">
+<short>A grid widget</short>
+<descr><p><printshort id="TCustomGrid"/>.</p><p>
+The coordinate system in MSEgui grids has its origin in the first datarow of
+the first datacolumn. Fixed rows and columns have negative indices:
+</p>
+<pre>.
+   -2 -1 0 1 2 column-index
+-2  F  F F F F
+-1  F  F F F F
+0   F  F D D D
+1   F  F D D D
+2   F  F D D D
+|
++ row index
+</pre>
+<p>
+The big negative numbers mean "none" or "whole column/row", it is the number
+constant "invalidaxis" = "-bigint" = -"maxint div 2".
+</p>
+</descr>
+</element>
+
+
+</module>
+</package>
+</fpdoc-descriptions>

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<fpdoc-descriptions>
+<package name="msegui">
+<module name="mselistbrowser">
+
+<element name="listviewoptionty.lvo_mousemoving">
+<short>Activate this option for moving items by mouse drag in the same tlistview</short>
+<descr><printshort id="tspacer"/>.</descr>
+</element>
+
+
+</module>
+</package>
+</fpdoc-descriptions>

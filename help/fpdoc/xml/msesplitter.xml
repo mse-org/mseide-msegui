@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<fpdoc-descriptions>
+<package name="msegui">
+<module name="msesplitter">
+
+<element name="tspacer">
+<short>TSpacer connects widgets by the link* properties</short>
+<descr><p><printshort id="tspacer"/>. Its position is defined by
+the size and position of the leading linked widgets, normally the
+linkleft/linktop widget if options spao_glueright/spao_gluebottom are not
+set.</p>
+<p>TExpandingWidget, tspacer, tsplitter and tlayouter adjust their size according
+to the settings of optionsscale and the size and position of embedded
+widgets.</p>
+</descr>
+<seealso>
+  <link id="TSplitter"/>
+  <link id="TExpandingWidget"/>
+</seealso>
+</element>
+
+<element name="tsplitter">
+<short>TSplitter connects widgets by the link* properties</short>
+<descr><p><printshort id="tsplitter"/>. There size/position is
+defined by the position of tsplitter.</p>
+<p>TExpandingWidget, tspacer, tsplitter and tlayouter adjust their size according
+to the settings of optionsscale and the size and position of embedded
+widgets.</p>
+</descr>
+<seealso>
+  <link id="TSpacer"/>
+  <link id="TExpandingWidget"/>
+</seealso>
+</element>
+
+<element name="tlayouter">
+<short>TLayouter arranges embedded widgets</short>
+<descr><p><printshort id="tlayouter"/> according to the settings of
+optionslayout, align_* and place_* properties.</p>
+<p>TExpandingWidget, tspacer, tsplitter and tlayouter adjust their size according
+to the settings of optionsscale and the size and position of embedded
+widgets.</p>
+</descr>
+<seealso>
+  <link id="TSplitter"/>
+  <link id="TSpacer"/>
+  <link id="TExpandingWidget"/>
+</seealso>
+</element>
+
+</module>
+</package>
+</fpdoc-descriptions>

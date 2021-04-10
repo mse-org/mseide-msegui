@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<fpdoc-descriptions>
+<package name="msegui">
+<short>MSE GUI Component Library</short>
+<descr><p>The MSEgui is a set of visual components to create GUI applications for
+Window and Linux. No huge toolkits (Qt, Gtk etc.) are required. The OS
+included GDI (Windows) and XLib (X Windows on Unix-like systems) are used
+to draw widgets. It is tightly bound with FPC, not a Delphi clone but more likely a Delphi redesign and an extention for particular people needs.
+</p></descr>
+
+<module name="msegui">
+
+<element name="tcustomframe.frameimage_list">
+<short>Defines a group of 8 images in a TImageList used for theming</short>
+<descr><p><printshort id="tcustomframe.frameimage_list"/>. 4 for the corners
+and 4 stretched images for the edges. Images are numbered 0 to 7, and used
+in a counter-clockwise order, starting from the top-left.</p>
+<pre>
+0 = topleft, 1 = left, 2 = bottomleft, 3 = bottom,
+4 = bottomright, 5 = right, 6 = topright, 7 = top
+
+0 - 7 - 6
+|       |
+1       5
+|       |
+2 - 3 - 4
+</pre>
+<p>Please see apps/facedomo tstringedit8 for an example.</p></descr>
+</element>
+
+
+</module>
+</package>
+</fpdoc-descriptions>

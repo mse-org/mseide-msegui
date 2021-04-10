@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<fpdoc-descriptions>
+<package name="msegui">
+<module name="mseeditglob">
+
+<element name="optioneditty.oe_exitoncursor">
+<short>go to the next widget if the caret goes behind or before the last
+or first character
+</short>
+</element>
+
+</module>
+</package>
+</fpdoc-descriptions>
