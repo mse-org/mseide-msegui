@@ -564,7 +564,6 @@ type
     forward: tstockglyphbutton;
     filename: thistoryedit;
     filter: tdropdownlistedit;
-    showhidden: tbooleanedit;
     list_log: tstringgrid;
     home: TButton;
     createdir: TButton;
@@ -584,6 +583,7 @@ type
    bshowoptions: tbooleanedit;
    tsplitter2: tsplitter;
    bhidehistory: tbooleanedit;
+   showhidden: tbooleanedit;
     procedure createdironexecute(const Sender: TObject);
     procedure listviewselectionchanged(const Sender: tcustomlistview);
     procedure listviewitemevent(const Sender: tcustomlistview; const index: integer; var info: celleventinfoty);
@@ -846,7 +846,7 @@ begin
     begin
     bnoicon.visible := true;
     bcompact.visible := true;
-    showhidden.visible := true;
+    //showhidden.visible := true;
     blateral.visible := true;
     filename.top := list_log.bottom + 8;
     
@@ -864,10 +864,13 @@ begin
     filename.top := list_log.bottom + 8;
     bnoicon.visible := false;
     bcompact.visible := false;
-    showhidden.visible := false;
+   // showhidden.visible := false;
     blateral.visible := false;
     end;
     
+   showhidden.top := filter.top;
+   showhidden.left := filter.left + 44;
+       
     if filename.visible = false then
     height := list_log.bottom + 8
     else
@@ -2349,6 +2352,9 @@ begin
   back.tag    := Ord(sc_back);
   forward.tag := Ord(sc_forward);
   up.tag      := Ord(sc_up);
+  
+  showhidden.top := filter.top;
+  showhidden.left := filter.left + 44;
 
   application.ProcessMessages;
 
@@ -2547,8 +2553,10 @@ begin
     placescust.datacols[0].Width := places.Width - 4;
   end;
   tsplitter3.width := placespan.width;
-  listview.left := list_log.left;
-  
+  listview.left := list_log.left;showhidden.top := filter.top;
+
+  showhidden.left := filter.left + 44;
+    
 end;
 
 procedure tfiledialogfo.onsetvalnoicon(const Sender: TObject; var avalue: Boolean; var accept: Boolean);
@@ -2598,7 +2606,7 @@ begin
   fshowoptions:= false;
   fhidehistory:= false;
   fhideicons  := false;
-  fshowhidden := False;
+  fshowhidden := false;
   foptions    := defaultfiledialogoptions;
   fhistorymaxcount := defaulthistorymaxcount;
   fowner      := aowner;
@@ -3364,7 +3372,7 @@ begin
   aowner.controller.fnopanel    := False;
   aowner.controller.fcompact    := False;
   aowner.controller.fshowoptions    := False;
-  aowner.controller.fshowhidden := False;
+  aowner.controller.fshowhidden := false;
   aowner.controller.fhidehistory := False;
   aowner.controller.fhideicons := False;
  end;
