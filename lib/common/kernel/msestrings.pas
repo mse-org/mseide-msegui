@@ -279,16 +279,16 @@ function comparestrlen(const S1,S2: string): integer;
 function msecomparestrlen(const S1,S2: msestring): integer;
                 //case sensitiv, beruecksichtigt nur s1 laenge
 
-function msecomparestr(const S1, S2: msestring): Integer
+function msecomparestr(const S1, S2: msestring): Integer;
                                                {$ifdef FPC} inline; {$endif}
                 //case sensitive
-function msecomparetext(const S1, S2: msestring): Integer
+function msecomparetext(const S1, S2: msestring): Integer;
                                                {$ifdef FPC} inline; {$endif}
                 //case insensitive
-function msecomparestrnatural(const S1, S2: msestring): Integer
+function msecomparestrnatural(const S1, S2: msestring): Integer;
                                                {$ifdef FPC} inline; {$endif}
                 //case sensitive
-function msecomparetextnatural(const S1, S2: msestring): Integer
+function msecomparetextnatural(const S1, S2: msestring): Integer;
                                                {$ifdef FPC} inline; {$endif}
                 //case insensitive
 function mseCompareTextlen(const S1, S2: msestring): Integer;
