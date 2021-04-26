@@ -92,41 +92,43 @@ finddialog=8
  y=149
  cx=300
  cy=269
-options=114
+options=137
  [projectoptionsfo.toolshortcuts]
  dropdowncolwidths=3
   70
   70
   70
  [projectoptionsfo.twidgetgrid3]
- propcolwidthref=788
+ propcolwidthref=806
  sortdescend0=0
  sortdescend1=0
  sortdescend2=0
  sortdescend3=0
- width4=107
+ width4=108
  sortdescend4=0
- width5=85
+ width5=87
  sortdescend5=0
- width6=56
+ width6=57
  sortdescend6=0
- width7=56
+ width7=57
  sortdescend7=0
- width8=81
+ width8=114
  sortdescend8=0
- width9=322
+ width9=329
  sortdescend9=0
  [projectoptionsfo.twidgetgrid4]
- propcolwidthref=623
- width0=96
- sortdescend0=0
- sortdescend1=0
- width2=73
- sortdescend2=0
- width3=299
- sortdescend3=0
- width4=314
- sortdescend4=0
+ propcolwidthref=563
+ width_newfonames=96
+ sortdescend_newfonames=0
+ sortdescend_newinheritedforms=0
+ width_newfonamebases=73
+ sortdescend_newfonamebases=0
+ width_newfoformsuffix=69
+ sortdescend_newfoformsuffix=0
+ width_newfosources=297
+ sortdescend_newfosources=0
+ width_mewfoforms=255
+ sortdescend_mewfoforms=0
  sorted=0
  col=-1073741823
  row=-1073741823
@@ -152,11 +154,32 @@ options=114
  sortdescend6=0
  [projectoptionsfo.macrosplitter]
  x=0
- y=199
+ y=201
  xprop=1
- yprop=0.35130434782609
+ yprop=0.35111876075732
  [projectoptionsfo.macrogrid]
- propcolwidthref=561
+ propcolwidthref=613
+ sortdescend0=0
+ sortdescend1=0
+ sortdescend2=0
+ sortdescend3=0
+ sortdescend4=0
+ sortdescend5=0
+ width6=146
+ sortdescend6=0
+ width7=601
+ sortdescend7=0
+ [projectoptionsfo.makeoptionsgrid]
+ propcolwidthref=746
+ values0=7
+  
+  
+  
+  
+  
+  
+  
+ width0=57
  sortdescend0=0
  sortdescend1=0
  sortdescend2=0
@@ -165,40 +188,40 @@ options=114
  sortdescend5=0
  sortdescend6=0
  sortdescend7=0
+ values8=7
+  -Xg -l -Mobjfpc -Sh -Fcutf8
+  -gl -O-
+  -B
+  -O2 -XX -Xs -CX
+  -vq
+  -FUunits
+  -dclass_bridge
  sortdescend8=0
- sortdescend9=0
- width10=146
- sortdescend10=0
- width11=545
- sortdescend11=0
- [projectoptionsfo.comment_1]
- value=
- [projectoptionsfo.comment_B]
- value=
- [projectoptionsfo.comment_M]
- value=
  [projectoptionsfo.makegroupbox]
  firsttab=0
- index=2
+ index=1
  [projectoptionsfo.exceptionsgrid]
- propcolwidthref=779
+ propcolwidthref=790
  width0=47
  sortdescend0=0
- width1=773
+ width1=784
  sortdescend1=0
  [projectoptionsfo.ttabwidget1]
  firsttab=0
  index=0
  [projectoptionsfo.filefiltergrid]
- propcolwidthref=734
+ propcolwidthref=698
  width0=112
  sortdescend0=0
- width1=727
+ width1=691
  sortdescend1=0
  [projectoptionsfo.ttabwidget2]
  firsttab=0
  index=1
- [projectoptionsfo.setting_tab]
+ [projectoptionsfo.ttabwidget3]
+ firsttab=0
+ index=0
+ [projectoptionsfo.tabwidget]
  firsttab=0
  index=2
  [projectoptionsfo]
@@ -391,8 +414,8 @@ makeoptionson=7
  1
  58
  60
- 4095
- 4095
+ 63
+ 63
  0
 aftcommandon=0
 unitdirson=5
@@ -405,11 +428,7 @@ uid=0
 macroon=0
 macronames=0
 macrovalues=0
-groupcomments=10
- 
- 
- 
- 
+groupcomments=6
  
  
  
@@ -618,18 +637,18 @@ settingslayout=0
 messageoutputfile=
 modulenames=4
  ACTIONSMO
- FINDMESSAGEFO
  MAINFO
+ MESSAGEFO
  SOURCEFO
 moduletypes=4
  TACTIONSMO
- TFINDMESSAGEFO
  TMAINFO
+ TMESSAGEFO
  TSOURCEFO
 modulefiles=4
  /home/fred/mseide-msegui/apps/ide/actionsmodule.mfm
- /home/fred/mseide-msegui/apps/ide/findmessage.mfm
  /home/fred/mseide-msegui/apps/ide/main.mfm
+ /home/fred/mseide-msegui/apps/ide/messageform.mfm
  /home/fred/mseide-msegui/apps/ide/sourceform.mfm
 macrogroup=0
 forcezorder=0
@@ -745,19 +764,18 @@ findhistory=20
  tkmethod
  typeinfo
 findoptions=1
-editpos=12
- 0,4
+editpos=11
+ 0,5
  0,-1073741823
  0,-1073741823
  0,-1073741823
  0,-1073741823
  0,-1073741823
+ 0,3
  0,-1073741823
- 0,-1073741823
- 0,-1073741823
- 0,-1073741823
- 0,-1073741823
- 0,-1073741823
+ 60,7
+ 0,0
+ 0,0
 bookmarks0=0
 bookmarks1=0
 bookmarks2=0
@@ -769,21 +787,19 @@ bookmarks7=0
 bookmarks8=0
 bookmarks9=0
 bookmarks10=0
-bookmarks11=0
-sourcefiles=12
+sourcefiles=11
  /home/fred/mseide-msegui/apps/ide/sourceform.pas
  ${PROJECTDIR}/actionsmodule.pas
  ${PROJECTDIR}/main.pas
  /home/fred/mseide-msegui/lib/common/kernel/msegui.pas
  /home/fred/mseide-msegui/lib/common/kernel/mseactions.pas
  /home/fred/mseide-msegui-master/lib/common/kernel/msekeyboard.pas
- ${PROJECTDIR}/messageform.pas
+ /home/fred/mseide-msegui/apps/ide/messageform.pas
  ${PROJECTDIR}/mseide.pas
- ${PROJECTDIR}/findmessage.pas
  /home/fred/mseide-msegui/apps/ide/sourceform.pas
  /home/fred/mseide-msegui/apps/ide/actionsmodule.pas
  /home/fred/mseide-msegui/apps/ide/main.pas
-relpaths=12
+relpaths=11
  sourceform.pas
  actionsmodule.pas
  main.pas
@@ -792,12 +808,10 @@ relpaths=12
  ../mseide-msegui-master/lib/common/kernel/msekeyboard.pas
  messageform.pas
  mseide.pas
- findmessage.pas
  sourceform.pas
  actionsmodule.pas
  main.pas
-ismoduletexts=12
- 0
+ismoduletexts=11
  0
  0
  0
@@ -810,10 +824,10 @@ ismoduletexts=12
  0
  0
 modules=4
- /home/fred/mseide-msegui/apps/ide/findmessage.mfm
  /home/fred/mseide-msegui/apps/ide/main.mfm
  /home/fred/mseide-msegui/apps/ide/actionsmodule.mfm
  /home/fred/mseide-msegui/apps/ide/sourceform.mfm
+ /home/fred/mseide-msegui/apps/ide/messageform.mfm
 moduleoptions=4
  0
  0
@@ -823,7 +837,7 @@ visiblemodules=4
  -1
  -1
  -1
- -1
+ 0
 nomenumodules=4
  0
  0
@@ -832,9 +846,9 @@ nomenumodules=4
 [sourcefo.tabwidget]
 tabsize=125
 firsttab=0
-index=0
+index=8
 [layout]
-windowlayout=557
+windowlayout=577
  [mainfo.openform]
  filenames=1
   /home/fred/mseide-msegui/apps/ide/sourceform.mfm
@@ -953,7 +967,7 @@ windowlayout=557
  [disassfo]
  splitdir=0
  useroptions=268451947
- stackedunder=_mse_sourcefo_mse_
+ stackedunder=_mse_mainfo_mse_
  parent=
  mdistate=0
  nx=0
@@ -970,8 +984,9 @@ windowlayout=557
  active=0
  visible=0
  [findmessagefo.findtext]
- value=linux
- history=1
+ value=issue
+ history=2
+  issue
   linux
  [findmessagefo.casesensitive]
  value=0
@@ -994,7 +1009,7 @@ windowlayout=557
  [projecttreefo]
  splitdir=0
  useroptions=268484715
- stackedunder=targetconsolefo
+ stackedunder=objectinspectorfo
  parent=
  mdistate=3
  nx=0
@@ -1099,7 +1114,7 @@ windowlayout=557
  [objectinspectorfo]
  splitdir=0
  useroptions=268451947
- stackedunder=cpuc86_64fo
+ stackedunder=mainfo
  parent=
  mdistate=3
  nx=0
@@ -1114,12 +1129,12 @@ windowlayout=557
  rcy=0
  wsize=0
  active=0
- visible=0
+ visible=1
  [objectinspectorfo.grid]
- propcolwidthref=472
- width0=185
+ propcolwidthref=244
+ width0=90
  sortdescend0=0
- width1=281
+ width1=148
  sortdescend1=0
  [symbolfo]
  splitdir=0
@@ -1373,25 +1388,44 @@ windowlayout=557
  cy=388
  rcx=0
  rcy=0
- [_mse_findmessagefo_mse_]
+ [_mse_mainfo_mse_]
  splitdir=0
  useroptions=268451963
- stackedunder=projecttreefo
+ stackedunder=_mse_actionsmo_mse_
  parent=
  mdistate=3
  nx=0
  ny=0
  ncx=0
  ncy=0
- x=459
- y=298
- cx=362
- cy=111
+ x=441
+ y=200
+ cx=469
+ cy=149
  rcx=0
  rcy=0
  wsize=0
  active=0
  visible=1
+ [_mse_messagefo_mse_]
+ splitdir=0
+ useroptions=268451963
+ stackedunder=
+ parent=
+ mdistate=3
+ nx=0
+ ny=0
+ ncx=0
+ ncy=0
+ x=100
+ y=100
+ cx=501
+ cy=317
+ rcx=0
+ rcy=0
+ wsize=0
+ active=0
+ visible=0
 [targetconsole]
 finddtext=
 findhistory=0
