@@ -644,18 +644,21 @@ settingscomponentstore=0
 settingsprojecttree=0
 settingslayout=0
 messageoutputfile=
-modulenames=4
+modulenames=5
  ACTIONSMO
+ FINDMESSAGEFO
  MAINFO
  MESSAGEFO
  SOURCEFO
-moduletypes=4
+moduletypes=5
  TACTIONSMO
+ TFINDMESSAGEFO
  TMAINFO
  TMESSAGEFO
  TSOURCEFO
-modulefiles=4
+modulefiles=5
  /home/fred/mseide-msegui/apps/ide/actionsmodule.mfm
+ /home/fred/mseide-msegui/apps/ide/findmessage.mfm
  /home/fred/mseide-msegui/apps/ide/main.mfm
  /home/fred/mseide-msegui/apps/ide/messageform.mfm
  /home/fred/mseide-msegui/apps/ide/sourceform.mfm
@@ -773,18 +776,19 @@ findhistory=20
  tkmethod
  typeinfo
 findoptions=1
-editpos=11
+editpos=12
  0,5
  0,-1073741823
  0,-1073741823
  0,-1073741823
  0,-1073741823
  0,-1073741823
- 0,12
+ 0,7
  0,-1073741823
  0,-1073741823
  0,0
  0,0
+ 0,124
 bookmarks0=0
 bookmarks1=0
 bookmarks2=0
@@ -796,7 +800,8 @@ bookmarks7=0
 bookmarks8=0
 bookmarks9=0
 bookmarks10=0
-sourcefiles=11
+bookmarks11=0
+sourcefiles=12
  /home/fred/mseide-msegui/apps/ide/sourceform.pas
  ${PROJECTDIR}/actionsmodule.pas
  ${PROJECTDIR}/main.pas
@@ -808,7 +813,8 @@ sourcefiles=11
  /home/fred/mseide-msegui/apps/ide/sourceform.pas
  /home/fred/mseide-msegui/apps/ide/actionsmodule.pas
  /home/fred/mseide-msegui/apps/ide/main.pas
-relpaths=11
+ /home/fred/mseide-msegui/apps/ide/findmessage.pas
+relpaths=12
  sourceform.pas
  actionsmodule.pas
  main.pas
@@ -820,7 +826,8 @@ relpaths=11
  sourceform.pas
  actionsmodule.pas
  main.pas
-ismoduletexts=11
+ findmessage.pas
+ismoduletexts=12
  0
  0
  0
@@ -832,29 +839,35 @@ ismoduletexts=11
  0
  0
  0
-modules=4
+ 0
+modules=5
  /home/fred/mseide-msegui/apps/ide/main.mfm
  /home/fred/mseide-msegui/apps/ide/actionsmodule.mfm
  /home/fred/mseide-msegui/apps/ide/sourceform.mfm
  /home/fred/mseide-msegui/apps/ide/messageform.mfm
-moduleoptions=4
+ /home/fred/mseide-msegui/apps/ide/findmessage.mfm
+moduleoptions=5
  0
  0
  0
  0
-visiblemodules=4
+ 0
+visiblemodules=5
  -1
  -1
  -1
  -1
-nomenumodules=4
+ -1
+nomenumodules=5
+ 0
  0
  0
  0
  0
 [sourcefo.tabwidget]
-order=11
+order=12
  6
+ 11
  0
  1
  2
@@ -867,9 +880,9 @@ order=11
  10
 tabsize=125
 firsttab=0
-index=0
+index=1
 [layout]
-windowlayout=577
+windowlayout=598
  [mainfo.openform]
  filenames=1
   /home/fred/mseide-msegui/apps/ide/sourceform.mfm
@@ -891,15 +904,17 @@ windowlayout=577
  cx=0
  cy=0
  [mainfo.openfile]
- filenames=0
- filecolwidth=0
+ filenames=1
+  /home/fred/mseide-msegui/apps/ide/findmessage.pas
+ filecolwidth=174
  x=0
  y=0
  cx=0
  cy=0
- filehistory=0
+ filehistory=1
+  /home/fred/mseide-msegui/apps/ide/findmessage.pas
  filefilterindex=0
- filefilter=
+ filefilter="*.pp" "*.pas" "*.inc" "*.dpr" "*.lpr"
  [mainfo.basedock]
  splitdir=2
  useroptions=268450944
@@ -988,7 +1003,7 @@ windowlayout=577
  [disassfo]
  splitdir=0
  useroptions=268451947
- stackedunder=
+ stackedunder=projecttreefo
  parent=
  mdistate=0
  nx=0
@@ -1014,7 +1029,7 @@ windowlayout=577
  [findinfilefo]
  splitdir=0
  useroptions=268451947
- stackedunder=_mse_mainfo_mse_
+ stackedunder=
  parent=
  mdistate=0
  nx=0
@@ -1030,7 +1045,7 @@ windowlayout=577
  [projecttreefo]
  splitdir=0
  useroptions=268484715
- stackedunder=_mse_messagefo_mse_
+ stackedunder=_mse_mainfo_mse_
  parent=
  mdistate=3
  nx=0
@@ -1045,7 +1060,7 @@ windowlayout=577
  rcy=0
  wsize=0
  active=0
- visible=1
+ visible=0
  [projecttreefo.grid]
  propcolwidthref=30
  width0=141
@@ -1160,7 +1175,7 @@ windowlayout=577
  [symbolfo]
  splitdir=0
  useroptions=268451963
- stackedunder=findinfilefo
+ stackedunder=disassfo
  parent=
  mdistate=0
  nx=0
@@ -1431,7 +1446,7 @@ windowlayout=577
  [_mse_messagefo_mse_]
  splitdir=0
  useroptions=268451963
- stackedunder=objectinspectorfo
+ stackedunder=_mse_findmessagefo_mse_
  parent=
  mdistate=3
  nx=0
@@ -1442,6 +1457,25 @@ windowlayout=577
  y=100
  cx=501
  cy=317
+ rcx=0
+ rcy=0
+ wsize=0
+ active=0
+ visible=1
+ [_mse_findmessagefo_mse_]
+ splitdir=0
+ useroptions=268451963
+ stackedunder=objectinspectorfo
+ parent=
+ mdistate=3
+ nx=0
+ ny=0
+ ncx=0
+ ncy=0
+ x=459
+ y=298
+ cx=362
+ cy=111
  rcx=0
  rcy=0
  wsize=0

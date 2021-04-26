@@ -4,34 +4,11 @@ unit findmessage;
 interface
 
 uses
-  msetypes,
-  msegrids,
-  mseglob,
-  mseguiglob,
-  mseguiintf,
-  mseapplication,
-  msestat,
-  msemenus,
-  msegui,
-  msegraphics,
-  msegraphutils,
-  mseevent,
-  mseclasses,
-  msewidgets,
-  mseforms,
-  msesimplewidgets,
-  mseact,
-  msedataedits,
-  msedropdownlist,
-  mseedit,
-  mseificomp,
-  mseificompglob,
-  mseifiglob,
-  msestatfile,
-  msestream,
-  SysUtils,
-  msegraphedits,
-  msescrollbar;
+ msetypes,msegrids,mseglob,mseguiglob,mseguiintf,mseapplication,msestat,
+ msemenus,msegui,msegraphics,msegraphutils,mseevent,mseclasses,msewidgets,
+ mseforms,msesimplewidgets,mseact,msedataedits,msedropdownlist,mseedit,
+ mseificomp,mseificompglob,mseifiglob,msestatfile,msestream,SysUtils,
+ msegraphedits,msescrollbar;
 
 type
   tfindmessagefo = class(tmseform)
@@ -41,10 +18,12 @@ type
     casesensitive: tbooleanedit;
     tbutton4: TButton;
     tbutton5: TButton;
+   copytoclip: tbooleanedit;
     procedure onfindnext(const Sender: TObject);
-    procedure onclose(const Sender: TObject);
+    procedure onexit(const Sender: TObject);
     procedure onreset(const Sender: TObject);
     procedure onfindall(const Sender: TObject);
+   procedure onclose(const sender: TObject);
   end;
 
 var
@@ -95,10 +74,9 @@ begin
   //close;
 end;
 
-procedure tfindmessagefo.onclose(const Sender: TObject);
+procedure tfindmessagefo.onexit(const Sender: TObject);
 begin
-  imessages := 0;
-  Close;
+   Close;
 end;
 
 procedure tfindmessagefo.onreset(const Sender: TObject);
@@ -145,6 +123,12 @@ begin
       showerror('        ' + findtext.Value + ' not found.' + '        ', 'Warning');
   end;
 
+end;
+
+procedure tfindmessagefo.onclose(const sender: TObject);
+begin
+  imessages := 0;
+ if copytoclip.value then messagefo.messages.copyselection;
 end;
 
 end.
