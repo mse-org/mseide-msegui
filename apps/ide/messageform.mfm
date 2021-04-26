@@ -19,7 +19,7 @@ object messagefo: tmessagefo
     317
   )
   dragdock.caption = 'Messages'
-  dragdock.optionsdock = [od_savepos, od_savezorder, od_canmove, od_canfloat, od_candock, od_propsize, od_captionhint, od_childicons]
+  dragdock.optionsdock = [od_savepos, od_savezorder, od_canmove, od_canfloat, od_candock, od_propsize, od_captionhint]
   options = [fo_savepos, fo_savezorder, fo_savestate]
   statfile = mainfo.projectstatfile
   icon.image = {
@@ -51,6 +51,7 @@ object messagefo: tmessagefo
     FFFFFF017C7C7C01EAEAEA16FFFFFF017C7C7C01EAEAEA16FFFFFF017C7C7C01
     EAEAEA16FFFFFF017C7C7C01FFFFFF17
   }
+  oncreated = oncreated
   moduleclassname = 'tdockform'
   object messages: tstringgrid
     frame.localprops = []
@@ -65,18 +66,23 @@ object messagefo: tmessagefo
     font.options = [foo_antialiased]
     font.xscale = 1
     font.localprops = [flp_xscale]
+    optionsgrid = [og_focuscellonenter, og_colchangeontabkey, og_wrapcol, og_mousescrollcol]
     datacols.count = 1
     datacols.linewidth = 0
-    datacols.items = <
+    datacols.colorselect = 16772832
+    datacols.optionsedit1 = [oe1_keyexecute, oe1_savevalue, oe1_savestate, oe1_checkvalueafterstatread]
+    datacols.items = <    
       item
         linecolorfix = -1610612733
+        colorselect = 16772832
         width = 3000
         options = [co_readonly, co_drawfocus, co_leftbuttonfocusonly, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_cancopy, co_mousescrollrow]
+        optionsedit1 = [oe1_keyexecute, oe1_savevalue, oe1_savestate, oe1_checkvalueafterstatread]
         optionsedit = []
         valuefalse = '0'
         valuetrue = '1'
       end>
-    rowcountmax = 5000
+    rowcountmax = 10000
     rowcolors.count = 3
     rowcolors.items = (
       -1610612712
@@ -84,19 +90,47 @@ object messagefo: tmessagefo
       -1610612716
     )
     datarowlinewidth = 0
-    datarowheight = 16
+    datarowheight = 17
+    onrowcountchanged = onrowcountchanged
     oncellevent = messagesoncellevent
-    reffontheight = 14
+    reffontheight = 15
   end
   object tpopupmenu1: tpopupmenu
-    menu.submenu.count = 1
-    menu.submenu.items = <
+    menu.submenu.count = 5
+    menu.submenu.items = <    
       item
-        caption = 'Copy to clipboard'
-        state = [as_localcaption, as_localonexecute]
+        caption = ' Copy All to clipboard '
+        state = [as_localcaption, as_localcolor, as_localonexecute]
+        color = 16776951
+        coloractive = 16771025
         onexecute = copyexe
+      end    
+      item
+        caption = ' Copy Selected to clipboard '
+        hint = 'Use Shift+Click to select'
+        state = [as_localcaption, as_localcolor, as_localhint, as_localonexecute]
+        color = 16776951
+        coloractive = 16771025
+        onexecute = copyselected
+      end    
+      item
+        caption = ' Copy Line to clipboard '
+        state = [as_localcaption, as_localcolor, as_localonexecute]
+        color = 16776951
+        coloractive = 16771025
+        onexecute = copyline
+      end    
+      item
+        options = [mao_separator, mao_shortcutcaption]
+      end    
+      item
+        caption = ' Find in messages '
+        state = [as_localcaption, as_localcolor, as_localonexecute]
+        color = 16776951
+        coloractive = 16771025
+        onexecute = findmessage
       end>
     left = 88
-    top = 72
+    top = 136
   end
 end

@@ -1,0 +1,117 @@
+object findmessagefo: tfindmessagefo
+  visible = False
+  bounds_x = 459
+  bounds_y = 298
+  bounds_cx = 352
+  bounds_cy = 111
+  container.frame.localprops = []
+  container.frame.localprops1 = []
+  container.bounds = (
+    0
+    0
+    352
+    111
+  )
+  caption = 'Find in messages'
+  icon.options = [bmo_masked]
+  icon.origformat = 'png'
+  windowopacity = -Inf
+  moduleclassname = 'tmseform'
+  object tbutton3: tbutton
+    Tag = 1
+    face.localprops = []
+    bounds_x = 281
+    bounds_y = 2
+    bounds_cx = 66
+    bounds_cy = 30
+    state = [as_default, as_localdefault, as_localcaption, as_localonexecute]
+    caption = 'Close'
+    onexecute = onclose
+  end
+  object tbutton2: tbutton
+    face.localprops = []
+    taborder = 1
+    bounds_x = 6
+    bounds_y = 2
+    bounds_cx = 94
+    bounds_cy = 30
+    state = [as_default, as_localdefault, as_localcaption, as_localonexecute]
+    caption = 'Find Next'
+    onexecute = onfindnext
+  end
+  object findtext: thistoryedit
+    frame.caption = 'Text to &find'
+    frame.captiontextflags = [tf_bottom]
+    frame.localprops = []
+    frame.localprops1 = []
+    frame.button.frame.localprops = []
+    frame.button.frame.localprops1 = []
+    frame.buttons.count = 1
+    frame.buttons.items = <    
+      item
+        frame.localprops = []
+        frame.localprops1 = []
+      end>
+    frame.outerframe = (
+      0
+      18
+      0
+      0
+    )
+    taborder = 2
+    bounds_x = 11
+    bounds_y = 52
+    bounds_cx = 332
+    bounds_cy = 40
+    anchors = [an_left, an_top, an_right]
+    statfile = mainfo.projectstatfile
+    optionsedit1 = [oe1_autopopupmenu, oe1_savevalue, oe1_savestate]
+    optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_resetselectonexit, oe_exitoncursor, oe_autoselect, oe_autoselectonfirstclick]
+    dropdown.cols.count = 1
+    dropdown.cols.items = <    
+      item
+      end>
+    reffontheight = 15
+  end
+  object tbutton4: tbutton
+    face.localprops = []
+    taborder = 4
+    hint = 'Reset index to 0'
+    bounds_x = 206
+    bounds_y = 2
+    bounds_cx = 68
+    bounds_cy = 30
+    state = [as_default, as_localdefault, as_localcaption, as_localhint, as_localonexecute]
+    caption = 'Reset'
+    onexecute = onreset
+  end
+  object tbutton5: tbutton
+    Tag = 1
+    face.localprops = []
+    taborder = 5
+    bounds_x = 106
+    bounds_y = 2
+    bounds_cx = 94
+    bounds_cy = 30
+    state = [as_default, as_localdefault, as_localcaption, as_localonexecute]
+    caption = 'Find All'
+    onexecute = onfindall
+  end
+  object casesensitive: tbooleanedit
+    frame.caption = 'Case &Sensitive'
+    frame.localprops = []
+    frame.localprops1 = []
+    frame.outerframe = (
+      0
+      2
+      89
+      2
+    )
+    taborder = 3
+    bounds_x = 124
+    bounds_y = 42
+    bounds_cx = 102
+    bounds_cy = 17
+    statfile = mainfo.projectstatfile
+  end
+end

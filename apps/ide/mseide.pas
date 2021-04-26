@@ -35,7 +35,7 @@ program mseide;
 uses
 {$ifdef FPC}{$ifdef unix}cthreads,{$endif}{$endif}
 //  mseopenglgdiinit,
-  mseskindesign,menusdesign,
+  mseskindesign,menusdesign,findmessage,
   msegui,msegraphics,actionsmodule,sourceform,debuggerform,
   componentpaletteform,componentstore,
   messageform,watchform,objectinspector,breakpointsform,watchpointsform,
@@ -65,6 +65,7 @@ begin
  application.createform(tstackfo, stackfo);
  application.createform(tprojecttreefo, projecttreefo);
  application.createform(tfindinfilefo, findinfilefo);
+ application.createform(tfindmessagefo, findmessagefo);
 // application.createform(tcpufo, cpufo);
  application.createform(tdisassfo, disassfo);
  application.createform(tmemoryfo, memoryfo);

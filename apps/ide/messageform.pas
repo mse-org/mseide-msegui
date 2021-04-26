@@ -30,6 +30,12 @@ type
    procedure messagesoncellevent(const sender: tobject;
                                                    var info: celleventinfoty);
    procedure copyexe(const sender: TObject);
+   procedure copyline(const sender: TObject);
+   procedure copyselected(const sender: TObject);
+   procedure findmessage(const sender: TObject);
+   procedure oncreated(const sender: TObject);
+   procedure onrowcountchanged(const sender: tcustomgrid);
+
   private
    fcolorrow: integer;
   public
@@ -43,7 +49,7 @@ var
 
 implementation
 uses
- messageform_mfm,sourcepage,sourceform,msewidgets,msestrings,msedatalist;
+findmessage, messageform_mfm,sourcepage,sourceform,msewidgets,msestrings,msedatalist;
 
 constructor tmessagefo.create(aowner: tcomponent);
 begin
@@ -139,6 +145,51 @@ begin
   rowcolors[2]:= colornote;
   invalidate;
  end;
+end;
+
+procedure tmessagefo.copyline(const sender: TObject);
+begin
+copytoclipboard(messages[0][messages.focusedcell.row]);
+end;
+
+procedure tmessagefo.copyselected(const sender: TObject);
+begin
+messages.copyselection;
+end;
+
+procedure tmessagefo.findmessage(const sender: TObject);
+begin
+messages.defocuscell;
+messages.datacols.clearselection;
+findmessagefo.show(true);
+end;
+
+procedure tmessagefo.oncreated(const sender: TObject);
+begin
+tpopupmenu1.menu.submenu[0].visible := false;
+tpopupmenu1.menu.submenu[1].visible := false;
+tpopupmenu1.menu.submenu[2].visible := false;
+tpopupmenu1.menu.submenu[3].visible := false;
+tpopupmenu1.menu.submenu[4].visible := false;
+end;
+
+procedure tmessagefo.onrowcountchanged(const sender: tcustomgrid);
+begin
+if messages.rowcount = 0 then 
+begin
+tpopupmenu1.menu.submenu[0].visible := false;
+tpopupmenu1.menu.submenu[1].visible := false;
+tpopupmenu1.menu.submenu[2].visible := false;
+tpopupmenu1.menu.submenu[3].visible := false;
+tpopupmenu1.menu.submenu[4].visible := false;
+end else
+begin
+tpopupmenu1.menu.submenu[0].visible := true;
+tpopupmenu1.menu.submenu[1].visible := true;
+tpopupmenu1.menu.submenu[2].visible := true;
+tpopupmenu1.menu.submenu[3].visible := true;
+tpopupmenu1.menu.submenu[4].visible := true;
+end;
 end;
 
 end.
