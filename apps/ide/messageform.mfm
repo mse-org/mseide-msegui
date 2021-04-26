@@ -99,38 +99,54 @@ object messagefo: tmessagefo
     menu.submenu.count = 5
     menu.submenu.items = <    
       item
-        caption = ' Copy All to clipboard '
-        state = [as_localcaption, as_localcolor, as_localonexecute]
+        caption = ' Copy &All to clipboard '
+        state = [as_localcaption, as_localcolor, as_localshortcut, as_localonexecute]
         color = 14277081
         coloractive = 15263976
         font.name = 'stf_menu'
         font.localprops = []
         onexecute = copyexe
+        sc = (
+          1
+          16449
+        )
       end    
       item
-        caption = ' Copy Selected to clipboard '
+        caption = ' Copy &Selected to clipboard '
         hint = 'Use Shift+Click to select'
-        state = [as_localcaption, as_localcolor, as_localhint, as_localonexecute]
+        state = [as_localcaption, as_localcolor, as_localhint, as_localshortcut, as_localonexecute]
         color = 14277081
         coloractive = 15263976
         onexecute = copyselected
+        sc = (
+          1
+          16467
+        )
       end    
       item
         caption = ' Copy Line to clipboard '
-        state = [as_localcaption, as_localcolor, as_localonexecute]
+        state = [as_localcaption, as_localcolor, as_localshortcut, as_localonexecute]
         color = 14277081
         coloractive = 15263976
         onexecute = copyline
+        sc = (
+          1
+          16460
+        )
       end    
       item
         options = [mao_separator, mao_shortcutcaption]
       end    
       item
-        caption = ' Find in messages '
-        state = [as_localcaption, as_localcolor, as_localonexecute]
+        caption = ' &Find in messages '
+        state = [as_localcaption, as_localcolor, as_localshortcut, as_localonexecute]
         color = 14277081
         coloractive = 15263976
         onexecute = findmessage
+        sc = (
+          1
+          16454
+        )
       end>
     left = 88
     top = 136

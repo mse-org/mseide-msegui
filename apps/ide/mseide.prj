@@ -273,6 +273,15 @@ colordialog=5
  y=234
  cx=338
  cy=298
+memodialog=8
+ [msememodialogfo]
+ x=479
+ y=221
+ cx=409
+ cy=297
+ wsize=0
+ active=1
+ visible=1
 sourcefilemasks=3
  "*.pas" "*.dpr" "*.lpr" "*.pp" "*.inc"
  "*.c" "*.cc" "*.h"
@@ -771,9 +780,9 @@ editpos=11
  0,-1073741823
  0,-1073741823
  0,-1073741823
- 0,3
+ 0,9
  0,-1073741823
- 60,7
+ 0,-1073741823
  0,0
  0,0
 bookmarks0=0
@@ -837,16 +846,28 @@ visiblemodules=4
  -1
  -1
  -1
- 0
+ -1
 nomenumodules=4
  0
  0
  0
  0
 [sourcefo.tabwidget]
+order=11
+ 6
+ 0
+ 1
+ 2
+ 3
+ 4
+ 5
+ 7
+ 8
+ 9
+ 10
 tabsize=125
 firsttab=0
-index=8
+index=0
 [layout]
 windowlayout=577
  [mainfo.openform]
@@ -993,7 +1014,7 @@ windowlayout=577
  [findinfilefo]
  splitdir=0
  useroptions=268451947
- stackedunder=disassfo
+ stackedunder=
  parent=
  mdistate=0
  nx=0
@@ -1009,7 +1030,7 @@ windowlayout=577
  [projecttreefo]
  splitdir=0
  useroptions=268484715
- stackedunder=objectinspectorfo
+ stackedunder=_mse_messagefo_mse_
  parent=
  mdistate=3
  nx=0
@@ -1114,7 +1135,7 @@ windowlayout=577
  [objectinspectorfo]
  splitdir=0
  useroptions=268451947
- stackedunder=mainfo
+ stackedunder=targetconsolefo
  parent=
  mdistate=3
  nx=0
@@ -1122,9 +1143,9 @@ windowlayout=577
  ncx=0
  ncy=0
  x=185
- y=360
+ y=278
  cx=254
- cy=248
+ cy=330
  rcx=0
  rcy=0
  wsize=0
@@ -1132,14 +1153,14 @@ windowlayout=577
  visible=1
  [objectinspectorfo.grid]
  propcolwidthref=244
- width0=90
+ width0=147
  sortdescend0=0
- width1=148
+ width1=91
  sortdescend1=0
  [symbolfo]
  splitdir=0
  useroptions=268451963
- stackedunder=findinfilefo
+ stackedunder=disassfo
  parent=
  mdistate=0
  nx=0
@@ -1410,7 +1431,7 @@ windowlayout=577
  [_mse_messagefo_mse_]
  splitdir=0
  useroptions=268451963
- stackedunder=
+ stackedunder=objectinspectorfo
  parent=
  mdistate=3
  nx=0
@@ -1425,7 +1446,7 @@ windowlayout=577
  rcy=0
  wsize=0
  active=0
- visible=0
+ visible=1
 [targetconsole]
 finddtext=
 findhistory=0
