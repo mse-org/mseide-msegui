@@ -780,7 +780,7 @@ editpos=11
  0,-1073741823
  0,-1073741823
  0,-1073741823
- 0,9
+ 0,12
  0,-1073741823
  0,-1073741823
  0,0
@@ -988,7 +988,7 @@ windowlayout=577
  [disassfo]
  splitdir=0
  useroptions=268451947
- stackedunder=_mse_mainfo_mse_
+ stackedunder=
  parent=
  mdistate=0
  nx=0
@@ -1014,7 +1014,7 @@ windowlayout=577
  [findinfilefo]
  splitdir=0
  useroptions=268451947
- stackedunder=
+ stackedunder=_mse_mainfo_mse_
  parent=
  mdistate=0
  nx=0
@@ -1160,7 +1160,7 @@ windowlayout=577
  [symbolfo]
  splitdir=0
  useroptions=268451963
- stackedunder=disassfo
+ stackedunder=findinfilefo
  parent=
  mdistate=0
  nx=0
