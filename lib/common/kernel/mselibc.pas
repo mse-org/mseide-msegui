@@ -2,7 +2,7 @@ unit mselibc;
 {$ifdef FPC}{$mode objfpc}{$h+}{$interfaces corba}{$endif}
 interface
 uses
- {$ifdef FPC}initc,{$endif}msectypes{$ifndef FPC},msetypes{$endif};
+ {$ifndef win64}initc,{$endif}msectypes{$ifndef FPC},msetypes{$endif};
 
 //todo: remove not used definitions, use msectypes
 

@@ -1,5 +1,13 @@
 MSEide+MSEgui breaking changes version history
 **********************************************
+Version 5.4.0
+2021-05-09
+ Fixed database for fpc >= 3.2.0
+
+Version 5.2.0
+2020-08-21
+ Classes bridge from Circular.
+
 Version 5.0.0
 2020-04-02
  Compatible with fpc 3.2.0 too.
