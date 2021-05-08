@@ -281,7 +281,7 @@ procedure finifbapi(var api: fbapity);
 procedure initializefirebird(const sonames: array of filenamety;
                                           const onlyonce: boolean = false);
                                      //[] = default
-procedure releasefirebird();
+procedure releasefirebird(); // not used in finalization any more
 
 function formatstatus(status: istatus): string;
 function event_block(out eventbuffer: pbyte;
@@ -396,6 +396,7 @@ end;
 
 procedure releasefirebird();
 begin
+if libinfo.libhandle > 0 then
  releasedynlib(libinfo,@releasefb);
 end;
 
@@ -463,7 +464,7 @@ initialization
 finalization
  if libinfo.refcount > 0 then begin
   libinfo.refcount:= 1;
-  releasefirebird();
+ // releasefirebird();
  end;
  finalizelibinfo(libinfo);
 end.
