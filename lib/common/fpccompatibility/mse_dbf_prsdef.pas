@@ -8,7 +8,7 @@ uses
   SysUtils,
   Classes,
   mclasses,
-  Db,
+  mDb,
   mse_dbf_prssupp;
 
 const

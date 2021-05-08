@@ -69,12 +69,12 @@ type
  end;
 
  tmsesqlquery = class;
-
- applyrecupdateeventty =
+ 
+ applyrecupdateeventty = 
      procedure(const sender: tmsesqlquery; const updatekind: tupdatekind;
                         var asql: msestring; var done: boolean) of object;
- afterapplyrecupdateeventty =
-     procedure(const sender: tmsesqlquery;
+ afterapplyrecupdateeventty = 
+     procedure(const sender: tmsesqlquery; 
                            const updatekind: tupdatekind) of object;
  updateerroreventty = procedure(const sender: tmsesqlquery;
                           const aupdatekind: tupdatekind;
@@ -142,7 +142,7 @@ type
    procedure inheritedpost;
    procedure inheriteddelete();
    procedure inheritedinsert();
-   function inheritedmoveby(const distance: integer): integer;
+   function inheritedmoveby(const distance: integer): integer;  
    procedure inheritedinternalinsert; virtual;
    procedure inheritedinternaldelete; virtual;
    procedure inheritedinternalopen;
@@ -154,7 +154,7 @@ type
    procedure afterpost(const sender: tdataset; var ok: boolean);
 //   function cantransactionrefresh: boolean; override;
 //,   function refreshtransdatasets: boolean; override;
-
+      
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -169,7 +169,7 @@ type
    function delete1(): boolean; //true if ok
    procedure delete override;
 //   procedure insert; override;
-   procedure applyupdates(const maxerrors: integer;
+   procedure applyupdates(const maxerrors: integer; 
                 const cancelonerror: boolean;
                 const cancelondeleteerror: boolean = false;
                 const editonerror: boolean = false); overload; override;
@@ -184,17 +184,17 @@ type
    property onapplyrecupdate: applyrecupdateeventty read fonapplyrecupdate
                                   write setonapplyrecupdate;
              //raise eupdateerror in order to skip update of the record
-   property onapplyrecupdate2: afterapplyrecupdateeventty
+   property onapplyrecupdate2: afterapplyrecupdateeventty 
                                   read fonapplyrecupdate2
                                   write setonapplyrecupdate2;
              //called after inherited
-   property afterapplyrecupdate: afterapplyrecupdateeventty
+   property afterapplyrecupdate: afterapplyrecupdateeventty 
                           read fafterapplyrecupdate write fafterapplyrecupdate;
    property UpdateMode default upWhereKeyOnly;
    property UsePrimaryKeyAsKey default true;
    property IndexDefs : TIndexDefs read getindexdefs write setindexdefs;
                //must be writable because it is streamed
-//   property StatementType : TStatementType read getetstatementtype
+//   property StatementType : TStatementType read getetstatementtype 
 //                                  write setstatementtype default stnone;
                //must be writable because it was streamed in FPC 2.0.4
  end;
@@ -202,11 +202,11 @@ type
  idbparaminfo = interface(inullinterface)[miid_idbparaminfo]
   function getdestdataset: tsqlquery;
  end;
-
+ 
  tfieldparamlink = class;
 
  setparameventty = procedure(const sender: tfieldparamlink;
-                        var done: boolean) of object;
+                        var done: boolean) of object;  
 
  tparamsourcedatalink = class(tfielddatalink)
   private
@@ -276,7 +276,7 @@ type
 
  destfieldoptionty = (dfo_onlyifnull,dfo_notifunmodifiedinsert);
  destfieldoptionsty = set of destfieldoptionty;
-
+ 
  tdestfield = class(tdestvalue)
   private
    fdestfieldname: string;
@@ -290,14 +290,14 @@ type
    property destfieldname: string read fdestfieldname write fdestfieldname;
    property options: destfieldoptionsty read foptions write foptions default [];
  end;
-
+  
  tdestfields = class(townedpersistentarrayprop)
   public
    constructor create(const aowner: tfieldparamlink); reintroduce;
    class function getitemclasstype: persistentclassty; override;
-               //used in dumpunitgroups
+               //used in dumpunitgroups   
  end;
-
+ 
  tfieldparamlink = class(tmsecomponent,idbeditinfo,idbparaminfo)
   private
    fsourcedatalink: tparamsourcedatalink;
@@ -371,37 +371,37 @@ type
                 //-1 -> off, 0 -> on idle
    property options: fieldparamlinkoptionsty read foptions write setoptions
                       default defaultfieldparamlinkoptions;
-   property destparams: tdestparams read fdestparams
+   property destparams: tdestparams read fdestparams 
                                             write setdestparams;
-   property destfields: tdestfields read fdestfields
+   property destfields: tdestfields read fdestfields 
                                             write setdestfields;
    property onsetparam: setparameventty read fonsetparam write fonsetparam;
    property onaftersetparam: notifyeventty read fonaftersetparam
                                   write fonaftersetparam;
    property onrefresh: notifyeventty read fonrefresh
                                   write fonrefresh;
-   property onupdatemasteredit: masterdataseteventty read fonupdatemasteredit
+   property onupdatemasteredit: masterdataseteventty read fonupdatemasteredit 
                      write fonupdatemasteredit;
-   property onupdatemasterinsert: masterdataseteventty read fonupdatemasterinsert
+   property onupdatemasterinsert: masterdataseteventty read fonupdatemasterinsert 
                      write fonupdatemasterinsert;
    property onupdateslaveedit: slavedataseteventty read fonupdateslaveedit
                      write fonupdateslaveedit;
    property onupdateslaveinsert: slavedataseteventty read fonupdateslaveinsert
                      write fonupdateslaveinsert;
-   property onmasterdelete: masterdataseteventty read fonmasterdelete
+   property onmasterdelete: masterdataseteventty read fonmasterdelete 
                                                      write fonmasterdelete;
-   property onslavedelete: slavedataseteventty read fonslavedelete
+   property onslavedelete: slavedataseteventty read fonslavedelete 
                                                      write fonslavedelete;
-   property onmasterpost: masterdataseteventty read fonmasterpost
+   property onmasterpost: masterdataseteventty read fonmasterpost 
                                                      write fonmasterpost;
    property onslavepost: slavedataseteventty read fonslavepost
                                                      write fonslavepost;
-   property onmasterapplyupdate: masterdataseteventty read fonmasterapplyupdate
+   property onmasterapplyupdate: masterdataseteventty read fonmasterapplyupdate 
                                                      write fonmasterapplyupdate;
  end;
 
  tsequencelink = class;
-
+ 
  tsequencedatalink = class(tfielddatalink)
   private
    fownerlink: tsequencelink;
@@ -410,7 +410,7 @@ type
   public
    constructor create(const aowner: tsequencelink);
  end;
-
+  
  tsequencelink = class(tmsecomponent,idbeditinfo)
   private
    fsequencename: string;
@@ -452,7 +452,7 @@ type
 
    property onupdatevalue: updateint64eventty read fonupdatevalue write fonupdatevalue;
  end;
-
+ 
 implementation
 uses
  {$ifdef FPC}dbconst{$else}dbconst_del{$endif},msesysutils,typinfo,msedatalist,
@@ -465,7 +465,7 @@ uses
   {$warn 6058 off}
  {$endif}
 {$endif}
-
+ 
 { tmsesqltransaction }
 
 constructor tmsesqltransaction.create(aowner: tcomponent);
@@ -603,7 +603,7 @@ begin
  else begin
   exclude(fbstate,bs_initinternalcalc);
  end;
- if (database <> nil) and
+ if (database <> nil) and 
           getcorbainterface(database,typeinfo(idbcontroller),intf1) then begin
   bo1:= dso_utf8 in fcontroller.options;
   intf1.updateutf8(bo1);
@@ -655,8 +655,8 @@ end;
 
 function tmsesqlquery.getcanmodify: Boolean;
 begin
- result:= fcontroller.getcanmodify and
-              (inherited getcanmodify or not readonly and
+ result:= fcontroller.getcanmodify and 
+              (inherited getcanmodify or not readonly and 
                                     (sqs_userapplyrecupdate in fmstate));
 end;
 
@@ -675,9 +675,9 @@ begin
       inherited;
      end
      else begin
-  {$ifdef debugsqlquery}
+  {$ifdef debugsqlquery}  
       debugwriteln(getenumname(typeinfo(tupdatekind),ord(updatekind))+' '+str1);
-  {$endif}
+  {$endif}  
       tsqlconnection(database).executedirect(str1,writetransaction);
      end;
     end;
@@ -708,7 +708,7 @@ end;
 
 procedure tmsesqlquery.afterpost(const sender: tdataset; var ok: boolean);
 begin
- if (bdo_autoapply in foptions) and
+ if (bdo_autoapply in foptions) and 
                        not(bs_noautoapply in fbstate) then begin
   if bdo_autoapplyexceptions in foptions then begin
    applyupdate();
@@ -809,7 +809,7 @@ begin
   fmstate:= fmstate - [sqs_updateabort,sqs_updateerror];
   inherited;
  finally
-  if (sqs_updateerror in fmstate) and
+  if (sqs_updateerror in fmstate) and 
               (bdo_cancelupdatesonerror in foptions) then begin
    cancelupdates;
   end;
@@ -820,7 +820,7 @@ procedure tmsesqlquery.doidleapplyupdates;
 var
  bo1: boolean;
 begin
- if not (bs_idle in fbstate) and (changecount > 0) and
+ if not (bs_idle in fbstate) and (changecount > 0) and 
            (changecount >= delayedapplycount) then begin
   application.beginwait;
   include(fbstate,bs_idle);
@@ -841,7 +841,7 @@ end;
 
 procedure tmsesqlquery.checkpendingupdates;
 begin
- if (state <> dsinactive) and (delayedapplycount > 0) and
+ if (state <> dsinactive) and (delayedapplycount > 0) and 
                                   (changecount > 0) then begin
 //  (dso_applyonidle in fcontroller.options) and (changecount > 0) then begin
   applyupdates;
@@ -937,7 +937,7 @@ end;
 procedure tmsesqlquery.DoAfterDelete;
 begin
  inherited;
- if (bdo_autoapply in foptions) and
+ if (bdo_autoapply in foptions) and 
                    not(bs_noautoapply in fbstate) then begin
   applyupdates;
  end;
@@ -1062,7 +1062,7 @@ begin
       if not (csdesigning in componentstate) then begin
        fparamset:= true;
        bo1:= false;
-       bo2:= not (fplo_refreshifchangedonly in foptions) or
+       bo2:= not (fplo_refreshifchangedonly in foptions) or 
                                 (fdestdataset = nil) or not fdestdataset.active;
        if not bo2 then begin
         var1:= param.value;
@@ -1089,15 +1089,15 @@ begin
        end;
        bo2:= bo2 or (var1 <> param.value);
        if (frefreshlock = 0) and bo2 then begin
-        if (fplo_autorefresh in foptions) and
+        if (fplo_autorefresh in foptions) and 
            (destdataset <> nil) and
-           (fdestdataset.active or
+           (fdestdataset.active or 
                      not (fplo_refreshifactiveonly in foptions)) and
-           not((fdestdataset.state = dsinsert) and
+           not((fdestdataset.state = dsinsert) and 
                    (dataset.state = dsinsert) and
                            (fplo_syncmasterinsert in foptions)) and
            not ((fplo_delayedsyncmasterpost in foptions) and
-                  (self.fdscontroller <> nil) and
+                  (self.fdscontroller <> nil) and 
                                       self.fdscontroller.posting1) then begin
          if fdestdataset.active then begin
           if fplo_checkbrowsemodeonrefresh in foptions then begin
@@ -1151,7 +1151,7 @@ begin
     case ord(event) of
      ord(deupdatestate): begin
       if b1 then begin
-       if (fplo_syncmasteredit in foptions) and (dataset.state = dsedit) and
+       if (fplo_syncmasteredit in foptions) and (dataset.state = dsedit) and 
                        not (fownerlink.destdataset.state = dsedit) then begin
         destdataset.edit;
        end;
@@ -1161,8 +1161,8 @@ begin
        end;
       end;
      end;
-     ord(de_afterdelete): begin
-      if b1 and (fplo_syncmasterdelete in foptions) and
+     de_afterdelete: begin
+      if b1 and (fplo_syncmasterdelete in foptions) and 
                                    not destdataset.isempty then begin
        destdataset.delete();
       end;
@@ -1170,7 +1170,7 @@ begin
        fonmasterdelete(destdataset,dataset);
       end;
      end;
-     ord(de_afterpost): begin
+     de_afterpost: begin
       if b1 and (fplo_delayedsyncmasterpost in foptions) and
                            (destdataset.state in [dsinsert,dsedit]) then begin
        destdataset.post();
@@ -1179,7 +1179,7 @@ begin
        fonmasterpost(destdataset,dataset);
       end;
      end;
-     ord(de_afterapplyupdate): begin
+     de_afterapplyupdate: begin
       if b1 and (fplo_syncmasterapplyupdates in foptions) then begin
        destdataset.applyupdates();
       end;
@@ -1203,7 +1203,7 @@ var
  posted1: boolean;
 begin
  with fownerlink do begin
-  if not (fplo_disabled in foptions) and
+  if not (fplo_disabled in foptions) and 
                     (destdataset <> nil) and destdataset.active then begin
    inc(frefreshlock);
    try
@@ -1220,8 +1220,8 @@ begin
       exit;
      end
      else begin
-      if (destdataset.state = dsinsert) and
-                           (fplo_syncmasterpost in foptions) and
+      if (destdataset.state = dsinsert) and 
+                           (fplo_syncmasterpost in foptions) and 
                            (dataset.state in [dsedit,dsinsert]) then begin
        if fplo_delayedsyncmasterpost in foptions then begin
         exit;
@@ -1244,15 +1244,15 @@ begin
 //     destdataset.checkbrowsemode;
     end
     else begin
-     if (fplo_syncmastercheckbrowsemode in foptions) and
+     if (fplo_syncmastercheckbrowsemode in foptions) and 
                                      (fcheckbrowsemodelock = 0) then begin
       destdataset.checkbrowsemode();
      end;
     end;
     inherited;
    endlab:
-    if (dataset.state in [dsedit,dsinsert]) and
-      (foptions * [fplo_syncmasteredit,fplo_syncmasterinsert] <> []) and
+    if (dataset.state in [dsedit,dsinsert]) and 
+      (foptions * [fplo_syncmasteredit,fplo_syncmasterinsert] <> []) and 
                                                             posted1 then begin
      dataset.updaterecord; //synchronize fields
     end;
@@ -1303,7 +1303,7 @@ begin
    case ord(event) of
     ord(deupdatestate): begin
      if b1 then begin
-      if (fplo_syncslaveedit in foptions) and (dataset.state = dsedit) and
+      if (fplo_syncslaveedit in foptions) and (dataset.state = dsedit) and 
                       not (sourceds.state = dsedit) then begin
        sourceds.edit;
       end;
@@ -1327,7 +1327,7 @@ begin
       end;
      end;
     end;
-    ord(de_afterdelete): begin
+    de_afterdelete: begin
      if b1 then begin
       if (fplo_syncslavedelete in foptions) and
                                       not sourceds.isempty then begin
@@ -1341,8 +1341,8 @@ begin
       fonslavedelete(destdataset,dataset);
      end;
     end;
-    ord(de_afterpost): begin
-     if b1 and (fplo_delayedsyncslavepost in foptions) and
+    de_afterpost: begin
+     if b1 and (fplo_delayedsyncslavepost in foptions) and 
                            (sourceds.state in [dsinsert,dsedit]) then begin
       sourceds.checkbrowsemode();
      end;
@@ -1364,7 +1364,7 @@ var
  canceling: boolean;
 begin
  with fownerlink do begin
-  if not (fplo_disabled in foptions) and
+  if not (fplo_disabled in foptions) and 
                                   cansync(sourceds) then begin
    inc(fsourcedatalink.frefreshlock);
    try
@@ -1379,7 +1379,7 @@ begin
       exit;
      end
      else begin
-      if (sourceds.state = dsinsert) and (dataset.state <> dsbrowse) and
+      if (sourceds.state = dsinsert) and (dataset.state <> dsbrowse) and 
                            (fplo_syncslavepost in foptions) then begin
        dataset.updaterecord;
        if dataset.modified then begin
@@ -1390,7 +1390,7 @@ begin
       end;
      end;
     end;
-    if (fplo_syncslavepost in foptions) and
+    if (fplo_syncslavepost in foptions) and 
                       (dataset.state <> dsbrowse) and not canceling then begin
      if fplo_delayedsyncslavepost in foptions then begin
       exit;
@@ -1432,8 +1432,8 @@ begin
      with tdestfield(fitems[int1]) do begin
       if (fdatalink.field <> nil) and (fdestfieldname <> '') then begin
        field1:= field(fdestfieldname);
-       if (not (dfo_onlyifnull in foptions) or (field1.isnull)) and
-          (not (dfo_notifunmodifiedinsert in foptions) or
+       if (not (dfo_onlyifnull in foptions) or (field1.isnull)) and 
+          (not (dfo_notifunmodifiedinsert in foptions) or 
                             dataset.modified) then begin
         field1.value:= fdatalink.field.value;
        end;
@@ -1579,7 +1579,7 @@ begin
  result:= fsourcedatalink.field;
 end;
 
-procedure tfieldparamlink.getfieldtypes(out propertynames: stringarty;
+procedure tfieldparamlink.getfieldtypes(out propertynames: stringarty; 
                     out fieldtypes: fieldtypesarty);
 begin
  propertynames:= nil;
@@ -1695,8 +1695,8 @@ end;
 procedure tsequencedatalink.updatedata;
 begin
  inherited;
- if (field <> nil) and field.isnull and (dataset <> nil) and
-      ((dataset.modified) or
+ if (field <> nil) and field.isnull and (dataset <> nil) and 
+      ((dataset.modified) or 
                (fdscontroller <> nil) and fdscontroller.posting) then begin
   if field.datatype in [ftlargeint,ftfloat,ftcurrency,ftbcd] then begin
    field.aslargeint:= fownerlink.aslargeint;
@@ -1813,7 +1813,7 @@ end;
 
 procedure tsequencelink.setasinteger(const avalue: integer);
 begin
- setaslargeint(avalue);
+ setaslargeint(avalue); 
 end;
 
 function tsequencelink.getdatasource: tdatasource;
@@ -1824,7 +1824,7 @@ end;
 procedure tsequencelink.setdatasource(const avalue: tdatasource);
 begin
  fdatalink.datasource:= avalue;
- if (csdesigning in componentstate) and (fdatabase = nil) and
+ if (csdesigning in componentstate) and (fdatabase = nil) and 
       (fdatalink.dataset is tsqlquery) then begin
   database:= tsqlconnection(tsqlquery(fdatalink.dataset).database);
  end;

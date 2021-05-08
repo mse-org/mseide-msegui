@@ -38,7 +38,7 @@ uses
  msestrings,
  msedb,msedatabase,mseglob,msearrayutils,msedatalist,msevariants,
  msestream;
-
+  
 const
  defaultpacketrecords = -1;
  integerindexfields = [ftsmallint,ftinteger,ftword,ftboolean];
@@ -51,12 +51,12 @@ const
                     currencyindexfields+stringindexfields+guidindexfields;
  dsbuffieldkinds = [fkcalculated,fklookup];
  bufferfieldkinds = [fkdata];
-
- //dscheckfilter = ord(high(tdatasetstate)) + 1;
-
+ 
+ dscheckfilter = ord(high(tdatasetstate)) + 1; 
+ 
 const
- bufstreambuffersize = 4096;
-
+ bufstreambuffersize = 4096; 
+  
 type
 
  fieldinfo_0ty = record      //version 0
@@ -78,7 +78,7 @@ type
   dbfieldsize: integer; //maxsize of dbfield   ////
  end;
  pfieldinfobasety = ^fieldinfobasety;
-
+ 
  fieldinfoextty = record
   basetype: tfieldtype;
   field: tfield;
@@ -88,27 +88,27 @@ type
   base: fieldinfobasety;
   ext: fieldinfoextty;
  end;
-
+ 
  fieldinfoarty = array of fieldinfoty;
-
+ 
  fielddataty = record
   nullmask: array[0..0] of byte; //variable length
                                  //fielddata following
  end;
-
+ 
  blobcacheinfoty = record
   id: int64;
   data: string;
  end;
  blobcacheinfoarty = array of blobcacheinfoty;
-
+   
  blobinfoty = record
   field: tfield;
   data: pointer;
   datalength: integer;
   new: boolean;
  end;
-
+ 
  pblobinfoty = ^blobinfoty;
  blobinfoarty = array of blobinfoty;
  pblobinfoarty = ^blobinfoarty;
@@ -122,20 +122,20 @@ type
   info: blobstreamfixinfoty;
   data: string;
  end;
-
+ 
  recheaderty = record
   blobinfo: blobinfoarty;
-  fielddata: fielddataty;
+  fielddata: fielddataty;   
  end;
  precheaderty = ^recheaderty;
  pprecheaderty = ^precheaderty;
-
+   
  intheaderty = record
  end;
 
- intrecordty = record
+ intrecordty = record              
   intheader: intheaderty;
-  header: recheaderty;
+  header: recheaderty;      
  end;
  pintrecordty = ^intrecordty;
  ppintrecordty = ^pintrecordty;
@@ -145,7 +145,7 @@ type
   recordpo: pintrecordty;
  end;
  pbookmarkdataty = ^bookmarkdataty;
-
+ 
  bufbookmarkty = record
   data: bookmarkdataty;
   flag : tbookmarkflag;
@@ -160,11 +160,11 @@ type
   header: recheaderty;
  end;
  pdsrecordty = ^dsrecordty;
-
+ 
 const
  intheadersize = sizeof(intheaderty);
  dsheadersize = sizeof(dsheaderty);
-
+     
 // structure of internal recordbuffer:
 //                 +---------<frecordsize>---------+
 // intrecheaderty, |recheaderty,nullflags,fielddata|
@@ -175,7 +175,7 @@ const
 //                 +----------------------<fcalcrecordsize>-------------+
 //                 +---------<frecordsize>---------+                    |
 // dsrecheaderty,  |recheaderty,nullflags,fielddata|nullflags,calcfields|
-//                 |moved to internal buffer header|                    |
+//                 |moved to internal buffer header|                    | 
 //                 |<-field offsets are in ffieldinfos[].offset         |
 //                 |<-calcfield offsets are in fcalcfieldbufpositions   |
 
@@ -186,7 +186,7 @@ type
  pindexty = ^indexty;
 
  tmsebufdataset = class;
-
+ 
  logflagty = (lf_end,lf_rec,lf_update,lf_cancel,lf_apply,lf_drop);
  reclogheader32ty = record
   kind: tupdatekind;
@@ -234,7 +234,7 @@ type
    );
  end;
 {$packrecords default}
-
+ 
  tbufstreamwriter = class
   private
    fstream: tstream;
@@ -253,7 +253,7 @@ type
    procedure writeinteger(const avalue: integer);
    procedure writepointer(const avalue: pointer);
    procedure writevariant(const avalue: variant);
-
+   
    procedure writefielddef(const afielddef: tfielddef);
    procedure writelogbufferheader(const aheader: logbufferheaderty);
    procedure writeendmarker;
@@ -292,7 +292,7 @@ type
       const sender: tmsebufdataset;
       var e: edatabaseerror; const updatekind: tupdatekind;
          var response: resolverresponsesty) of object;
-
+  
  tblobbuffer = class(tmemorystream)
   private
    fowner: tmsebufdataset;
@@ -310,7 +310,7 @@ type
 
  indexfieldoptionty = (ifo_desc,ifo_caseinsensitive,ifo_natural);
  indexfieldoptionsty = set of indexfieldoptionty;
-
+ 
  tindexfield = class(townedpersistent)
   private
    ffieldname: string;
@@ -320,17 +320,17 @@ type
    procedure setoptions(const avalue: indexfieldoptionsty);
   published
    property fieldname: string read ffieldname write setfieldname;
-   property options: indexfieldoptionsty read foptions
+   property options: indexfieldoptionsty read foptions 
                                     write setoptions default [];
  end;
 
  localindexoptionty = (lio_desc,lio_default,
                            lio_quicksort); //default is mergesort
-
+ 
  localindexoptionsty = set of localindexoptionty;
 
- tlocalindex = class;
-
+ tlocalindex = class;  
+ 
  tindexfields = class(townedpersistentarrayprop)
   private
    function getitems(const index: integer): tindexfield;
@@ -341,7 +341,7 @@ type
   published
    property count default 1;
  end;
-
+ 
  intrecordpoaty = array[0..0] of pintrecordty;
  pintrecordpoaty = ^intrecordpoaty;
  indexfieldinfoty = record
@@ -494,7 +494,7 @@ type
    property default: boolean read getdefault write setdefault;
   published
    property fields: tindexfields read ffields write setfields;
-   property options: localindexoptionsty read foptions
+   property options: localindexoptionsty read foptions 
                               write setoptions default [];
    property active: boolean read getactive write setactive default false;
    property name: string read fname write fname;
@@ -502,7 +502,7 @@ type
  end;
 
  bufdataseteventty = procedure(const sender: tmsebufdataset) of object;
-
+  
  tlocalindexes = class(townedpersistentarrayprop)
   private
    fonindexchanged: bufdataseteventty;
@@ -522,9 +522,9 @@ type
    procedure move(const curindex,newindex: integer); override;
    property items[const index: integer]: tlocalindex read getitems; default;
    function indexbyname(const aname: string): tlocalindex; //case sensitive
-   property activeindex: integer read getactiveindex
+   property activeindex: integer read getactiveindex 
                                         write setactiveindex;    //-1 > none
-   property defaultindex: integer read getdefaultindex
+   property defaultindex: integer read getdefaultindex 
                                         write setdefaultindex;   //-1 > none
    function fieldactive(const afield: tfield): boolean;
                    //true if field in active index
@@ -546,7 +546,7 @@ type
   bookmark: bookmarkdataty;
  end;
  recupdateinfoarty = array of recupdateinfoty;
-
+ 
  recupdatebufferty = record
   info: recupdateinfoty;
   oldvalues: pintrecordty;
@@ -554,8 +554,8 @@ type
  precupdatebufferty = ^recupdatebufferty;
 
  recupdatebufferarty = array of recupdatebufferty;
-
-
+ 
+ 
  bufdatasetstatety = (bs_opening,bs_loading,bs_fetching,
                       bs_displaydata,bs_applying,bs_recapplying,
                       bs_curvaluemodified,
@@ -581,7 +581,7 @@ type
                           bs1_deferdeleterecupdatebuffer,bs1_restoreupdate,
                           bs1_onidleregistered);
  bufdatasetstates1ty = set of bufdatasetstate1ty;
-
+ 
  internalcalcfieldseventty = procedure(const sender: tmsebufdataset;
                                               const fetching: boolean) of object;
  iblobchache = interface(inullinterface)
@@ -597,7 +597,7 @@ type
    constructor create(const adataset: tdataset; const afield: tfield;
                 const msg: string);
  end;
-
+ 
  eapplyerror = class(edatabaseerror)
   private
    fresponse: resolverresponsesty;
@@ -619,7 +619,7 @@ type
   dt: tdatetime;
   guid: tguid;
  end;
-
+  
  getbmvalueeventty = procedure (const afield: tfield; const bm: bookmarkdataty;
                                           var adata: lookupdataty) of object;
  lookupfieldinfoty = record
@@ -632,7 +632,7 @@ type
   hasindex: boolean;
  end;
  lookupfieldinfoarty = array of lookupfieldinfoty;
-
+  
  filterediteventty = procedure(const sender: tmsebufdataset;
                              const akind: filtereditkindty) of object;
  bufdatasetarty = array of tmsebufdataset;
@@ -653,7 +653,7 @@ type
                        bdo_cacheblobs,
                        bdo_offline, //disconnect database after open
                        bdo_local    //do not connect database on open
-                       );
+                       );   
  bufdatasetoptionsty = set of bufdatasetoptionty;
 const
  defaultbufdatasetoptions = [];
@@ -674,7 +674,7 @@ const
                          bdo_local   //do not connect database on open
                          ];
 
-type
+type 
  tmsebufdataset = class(tmdbdataset,iblobchache,idatasetsum,imasterlink,
                         idbdata,iobjectlink)
   private
@@ -691,7 +691,7 @@ type
    finternalcalcfieldcount: integer;
    fstringpositions: integerarty;
    fvarpositions: integerarty;
-
+   
    fcalcrecordsize: integer;
    fcalcnullmasksize: integer;
    fcalcfieldbufpositions: integerarty;
@@ -703,7 +703,7 @@ type
    flookupmasters: bufdatasetarty;
    fnotifylookupclientcount: integer;
    flookupupdate: integer;
-
+   
    fbuffercountbefore: integer;
    fonupdateerror: updateerroreventty;
 
@@ -715,13 +715,13 @@ type
    flookuppo: pintrecordty;
    flookupresult: lookupdataty;
    fcalcbuffer1: pchar;
-
+   
    findexlocal: tlocalindexes;
    factindex: integer;
    foninternalcalcfields: internalcalcfieldseventty;
    fvisiblerecordcount: integer;
    floadingstream: tstream;
-
+   
    flogfilename: filenamety;
    flogger: tbufstreamwriter;
    fbeforeapplyupdate: tdatasetnotifyevent;
@@ -731,8 +731,8 @@ type
    fbeforeendfilteredit: filterediteventty;
    fafterendfilteredit: filterediteventty;
    ffiltereditkind: filtereditkindty;
-
-   fobjectlinker: tobjectlinker;
+   
+   fobjectlinker: tobjectlinker;   
    fcryptohandler: tcustomcryptohandler;
    fdelayedapplycount: integer;
    fbeforefilterchanged: bufdataseteventty;
@@ -743,7 +743,7 @@ type
                          out basetype: tfieldtype) : longint;
    function getrecordupdatebuffer: boolean;
    procedure setpacketrecords(avalue: integer);
-   function  intallocrecord: pintrecordty;
+   function  intallocrecord: pintrecordty;    
    procedure finalizevalues(var header: recheaderty);
    procedure finalizecalcvalues(var header: recheaderty);
    procedure addrefvalues(var header: recheaderty);
@@ -752,7 +752,7 @@ type
    procedure freeblobcache(const arec: precheaderty; const afield: tfield);
 
    procedure clearindex;
-   procedure checkindexsize;
+   procedure checkindexsize;    
    function appendrecord(const arecord: pintrecordty): integer;
              //returns new recno
    function insertrecord(arecno: integer; const arecord: pintrecordty): integer;
@@ -770,8 +770,8 @@ type
    procedure internalsetrecno(const avalue: integer);
    procedure setactindex(const avalue: integer);
    procedure checkindex(const aid: integer{; const force: boolean});
-
-   function getmsestringdata(const sender: tmsestringfield;
+   
+   function getmsestringdata(const sender: tmsestringfield; 
                                out avalue: msestring): boolean;
    procedure setmsestringdata(const sender: tmsestringfield; avalue: msestring);
    function getvardata(const sender: tmsevariantfield;
@@ -784,10 +784,10 @@ type
    procedure dointernalopen;
    procedure doloadfromstream;
    procedure dointernalclose;
-   procedure logupdatebuffer(const awriter: tbufstreamwriter;
+   procedure logupdatebuffer(const awriter: tbufstreamwriter; 
             const abuffer: recupdatebufferty; const adeletedrecord: pintrecordty;
             const alogging: boolean; const alogmode: logflagty);
-   procedure logrecbuffer(const awriter: tbufstreamwriter;
+   procedure logrecbuffer(const awriter: tbufstreamwriter; 
                          const akind: tupdatekind; const abuffer: pintrecordty);
    function getlogging: boolean;
    procedure checksumfield(const afield: tfield; const fieldtypes: fieldtypesty);
@@ -897,7 +897,7 @@ type
    fbrecordcount: integer;
    ffieldinfos: fieldinfoarty;
    ffieldorder: integerarty;
-   factindexpo: pindexty;
+   factindexpo: pindexty;    
    fbstate: bufdatasetstatesty;
    fbstate1: bufdatasetstates1ty;
    fallpacketsfetched : boolean;
@@ -964,9 +964,9 @@ type
                                           var adata: lookupdataty);
    procedure getbmguid(const afield: tfield; const bm: bookmarkdataty;
                                           var adata: lookupdataty);
-
+   
    function getfieldbuffer(const afield: tfield;
-             out buffer: pointer; out datasize: integer): boolean; overload;
+             out buffer: pointer; out datasize: integer): boolean; overload; 
              //read, true if not null
    function getfieldbuffer(const afield: tfield;
              const aisnull: boolean; out datasize: integer): pointer;
@@ -977,7 +977,7 @@ type
    function blobsarefetched: boolean;
    function getblobcache: blobcacheinfoarty;
    function findcachedblob(var info: blobcacheinfoty): boolean; overload;
-   function findcachedblob(const id: int64;
+   function findcachedblob(const id: int64; 
                            out info: blobcacheinfoty): boolean; overload;
    function addblobcache(const adata: pointer;
                     const alength: integer): integer; overload;
@@ -990,7 +990,7 @@ type
    procedure setdatastringvalue(const afield: tfield; const avalue: string);
 //   function getdsoptions: datasetoptionsty; virtual;
    procedure resetblobcache;
-   procedure sortblobcache;
+   procedure sortblobcache;   
    procedure fetchblobs;
    procedure fetchallblobs;
    procedure getofflineblob(const data: precheaderty; const aindex: integer;
@@ -1020,7 +1020,7 @@ type
    procedure deleteblob(var ablobs: blobinfoarty; const afield: tfield;
                                const adeleteitem: boolean); overload;
    procedure addblob(const ablob: tblobbuffer);
-
+   
    procedure setrecno1(value: longint; const nocheck: boolean);
    procedure setrecno(value: longint); override;
    function  getrecno: longint; override;
@@ -1047,7 +1047,7 @@ type
    procedure CalculateFields(Buffer: PChar); override;
    procedure notification(acomponent: tcomponent;
                                    operation: toperation) override;
-   procedure loaded override;
+   procedure loaded override;                              
    procedure defineproperties(filer: tfiler) override;
    procedure readstate(reader: treader) override;
    procedure OpenCursor(InfoQuery: Boolean); override;
@@ -1061,7 +1061,7 @@ type
    procedure startlogger;
    procedure closelogger;
    procedure savestate(const awriter: tbufstreamwriter);
-
+ 
    function  getfieldclass(fieldtype: tfieldtype): tfieldclass; override;
    function getnextpacket(const all: boolean) : integer;
    function getrecordsize: word; override;
@@ -1093,7 +1093,7 @@ type
    procedure dobeforeapplyupdate; virtual;
    procedure doafterapplyupdate; virtual;
    procedure dointernalcalcfields(const fetching: boolean);
-
+   
    function islocal: boolean; virtual;
    function updatesortfield(const afield: tfield; const adescend: boolean): boolean;
    function getobjectlinker: tobjectlinker;
@@ -1131,17 +1131,17 @@ type
                            const afield: tfield): integer;
   function getrowlargeint(const indexnum: integer; const arecord: integer;
                            const afield: tfield): int64;
-
+   
  {abstracts, must be overidden by descendents}
    function fetch : boolean; virtual; abstract;
    function getblobdatasize: integer; virtual; abstract;
    function blobscached: boolean; virtual; abstract;
-   function loadfield(const afieldno: integer; const afieldtype: tfieldtype{const afield: tfield};
+   function loadfield(const afieldno: integer; const afieldtype: tfieldtype{const afield: tfield}; 
                 const buffer: pointer;
                     var bufsize: integer): boolean; virtual; abstract;
            //if bufsize < 0 -> buffer was to small, should be -bufsize
    property nullmasksize: integer read fnullmasksize;
-   function islastrecord: boolean;
+   function islastrecord: boolean;   
    procedure checkfreebuffer(const afield: tfield);
    function callvalidate(const afield: tfield; const avalue: pointer): boolean;
    procedure checkvaluebuffer(const afield: tfield; const asize: integer);
@@ -1167,7 +1167,7 @@ type
    property bookmarkdata: bookmarkdataty read getbookmarkdata1
                                              write setbookmarkdata1;
    function recnobookmark(const arecnozerobased: int32): bookmarkdataty;
-
+   
    function createblobstream(field: tfield;
                                      mode: tblobstreammode): tstream; override;
    function getfielddata(field: tfield; buffer: pointer;
@@ -1190,7 +1190,7 @@ type
    procedure loadfromstream(const astream: tstream);
    procedure savetofile(afilename: filenamety = ''; //''-> uselogfilename
                       const acryptohandler: tcustomcryptohandler = nil);
-   procedure loadfromfile(afilename: filenamety = '';
+   procedure loadfromfile(afilename: filenamety = ''; 
                                                    //''-> uselogfilename
                       const acryptohandler: tcustomcryptohandler = nil);
    function streamloading: boolean;
@@ -1237,7 +1237,7 @@ type
               const restorerecno: boolean = true;
               const noinsert: boolean = false): bookmarkdataty; overload;
           //keyindex must be unique, copies equally named visible fields,
-          //inserts record if key not found.
+          //inserts record if key not found.   
 
    procedure copyfieldvalues(const bm: bookmarkdataty;
                                const dest: tdataset); overload;
@@ -1260,7 +1260,7 @@ type
    function recordisnull(): boolean; //all fields null
    procedure clearrecord();
    procedure clearfilter();
-   property filtereditkind: filtereditkindty read ffiltereditkind
+   property filtereditkind: filtereditkindty read ffiltereditkind 
                                                     write ffiltereditkind;
    procedure beginfilteredit(const akind: filtereditkindty);
    procedure endfilteredit;
@@ -1287,7 +1287,7 @@ type
        const aoptions: locaterecordoptionsty = []): locateresultty; reintroduce;
    function locaterecno(const arecno: integer): boolean;
         //moves to next valid recno, //returns true if resulting recno = arecno
-
+   
    function countvisiblerecords: integer;
    procedure fetchall;
    procedure resetindex; //deactivates all indexes
@@ -1299,7 +1299,7 @@ type
    property applyerrorrecords: recupdateinfoarty read getapplyerrorrecords;
    property appliedcount: card32 read fappliedcount;
                   //total successfully applied records since last open
-
+   
    procedure applyupdates(const maxerrors: integer = 0); overload; virtual;
    procedure applyupdates(const maxerrors: integer;
                          const cancelonerror: boolean;
@@ -1313,19 +1313,19 @@ type
    function recapplying: boolean;
    procedure dropupdates();          //delete update info
    procedure cancelupdates; virtual; //revert changes
-   procedure cancelupdate(const norecordcancel: boolean = false); virtual;
+   procedure cancelupdate(const norecordcancel: boolean = false); virtual; 
                    //cancels current record,
                    //if norecordcancel no restoring of old values
    function updatestatus: tupdatestatus; overload; override;
    function updatestatus(out aflags: recupdateflagsty): tupdatestatus; overload;
-
+   
    procedure currentbeginupdate; virtual;
    procedure currentendupdate; virtual;
    function currentrecordhigh: integer; //calls checkbrowsemode
-   property recnozerobased: int32 read getrecnozerobased
+   property recnozerobased: int32 read getrecnozerobased 
                                         write setrecnozerobased;
 
-       //calls checkbrowsemode, writing for fkInternalCalc only,
+       //calls checkbrowsemode, writing for fkInternalCalc only, 
        //aindex = -1 -> current record
    procedure currentclear(const afield: tfield; aindex: integer);
    procedure currentassign(const source: tfield; const dest: tfield;
@@ -1398,7 +1398,7 @@ type
    procedure asarray(const afield: tfield; out avalue: realarty); overload;
    procedure asarray(const afield: tfield; out avalue: datetimearty); overload;
    procedure asarray(const afield: tfield; out avalue: booleanarty); overload;
-
+   
    function getdata(const afields: array of tfield): variantararty;
                              //[] -> all
    procedure sumfield(const afield: tfield; out asum: double); overload;
@@ -1409,26 +1409,26 @@ type
    function sumfieldcurrency(const afield: tfield): currency;
    function sumfieldinteger(const afield: tfield): integer;
    function sumfieldint64(const afield: tfield): int64;
-   property delayedapplycount: integer read fdelayedapplycount
+   property delayedapplycount: integer read fdelayedapplycount 
                                        write setdelayedapplycount default 0;
                //0 -> no autoapply
   published
-   property options: bufdatasetoptionsty read foptions
+   property options: bufdatasetoptionsty read foptions 
                                             write setoptions default [];
    property logfilename: filenamety read flogfilename write flogfilename;
    property cryptohandler: tcustomcryptohandler read fcryptohandler
                                                   write setcryptohandler;
-   property packetrecords : integer read fpacketrecords write setpacketrecords
+   property packetrecords : integer read fpacketrecords write setpacketrecords 
                                  default defaultpacketrecords;
    property indexlocal: tlocalindexes read findexlocal write setindexlocal;
-
-   property onupdateerror: updateerroreventty read fonupdateerror
+   
+   property onupdateerror: updateerroreventty read fonupdateerror 
                                  write setonupdateerror;
-   property oninternalcalcfields: internalcalcfieldseventty
+   property oninternalcalcfields: internalcalcfieldseventty 
                       read foninternalcalcfields write setoninternalcalcfields;
    property beforeapplyupdate: tdatasetnotifyevent read fbeforeapplyupdate
                        write  fbeforeapplyupdate;
-   property afterapplyupdate: tdatasetnotifyevent read fafterapplyupdate
+   property afterapplyupdate: tdatasetnotifyevent read fafterapplyupdate 
                        write  fafterapplyupdate;
    property beforebeginfilteredit: filterediteventty
                        read fbeforebeginfilteredit write fbeforebeginfilteredit;
@@ -1445,7 +1445,7 @@ type
    property Active default false;
 //   property AutocalcFields default false;
   end;
-
+   
 function getfieldflag(nullmask: pbyte; const x: integer): boolean;
 procedure setfieldflag(nullmask: pbyte; const x: integer);
 procedure clearfieldflag(nullmask: pbyte; const x: integer);
@@ -1464,15 +1464,15 @@ uses
   {$warn 6058 off}
  {$endif}
 {$endif}
-
+ 
 type
- tmsestringfield1 = class(tmsestringfield);
+ tmsestringfield1 = class(tmsestringfield); 
  tmseblobfield1 = class(tmseblobfield);
  tmsevariantfield1 = class(tmsevariantfield);
  tmsebooleanfield1 = class(tmsebooleanfield);
  tmsedatetimefield1 = class(tmsedatetimefield);
  tfield1 = class(tfield);
-
+ 
 const
  fielddatacompatibility: array[tfieldtype] of fieldtypesty = (
     //ftUnknown, ftString,    ftSmallint,    ftInteger,     ftWord,
@@ -1494,7 +1494,7 @@ const
     //ftIDispatch, ftGuid, ftTimeStamp, ftFMTBcd);
       [ftIDispatch],[ftGuid],[ftTimeStamp],[ftFMTBcd],
     //ftFixedWideChar,ftWideMemo
-      stringfcomp,   stringfcomp
+      stringfcomp,   stringfcomp   
       );
 
 function compblobcache(const a,b): integer;
@@ -1602,9 +1602,9 @@ type
   compfuncn: arraysortcomparety;
   compfuncin: arraysortcomparety;
  end;
-
+ 
 const
- comparefuncs: array[fieldcomparekindty] of fieldcompareinfoty =
+ comparefuncs: array[fieldcomparekindty] of fieldcompareinfoty = 
   ((datatypes: integerindexfields; cvtype: vtinteger;
                 compfunc: @compinteger;
                 compfunci: @compinteger;
@@ -1682,7 +1682,7 @@ end;
 
 { tbufstreamwriter }
 
-constructor tbufstreamwriter.create(const aowner: tmsebufdataset;
+constructor tbufstreamwriter.create(const aowner: tmsebufdataset; 
                                             const astream: tstream);
 begin
  fowner:= aowner;
@@ -1722,7 +1722,7 @@ begin
  end;
 end;
 
-procedure tbufstreamwriter.writefielddata(const data: precheaderty;
+procedure tbufstreamwriter.writefielddata(const data: precheaderty; 
                                                     const aindex: integer);
 var
  fielddata: pointer;
@@ -1748,7 +1748,7 @@ begin
     write(fielddata^,size);
    end;
   end;
- end;
+ end; 
 end;
 
 procedure tbufstreamwriter.writestring(const avalue: string);
@@ -1772,7 +1772,7 @@ procedure tbufstreamwriter.writefielddef(const afielddef: tfielddef);
 begin
  with afielddef do begin
   writestring(name);
-  writeinteger(ord(datatype));
+  writeinteger(ord(datatype));  
   writeinteger(size);
   writeinteger(integer(required));
   writeinteger(fieldno);
@@ -1821,7 +1821,7 @@ procedure tbufstreamwriter.writelogbufferheader(
                                 const aheader: logbufferheaderty);
 begin
 {$ifdef mse_debuglogger}
- dumplogbufferheader(aheader);
+ dumplogbufferheader(aheader); 
 {$endif}
  write(aheader,sizeof(aheader));
 end;
@@ -1892,7 +1892,7 @@ end;
 
 { tbufstreamreader }
 
-constructor tbufstreamreader.create(const aowner: tmsebufdataset;
+constructor tbufstreamreader.create(const aowner: tmsebufdataset; 
                                                const astream: tstream);
 begin
  fowner:= aowner;
@@ -1922,7 +1922,7 @@ begin
    if fbuflen = 0 then begin
     exit;        //eof
    end;
-  end;
+  end; 
  end;
 end;
 
@@ -1933,7 +1933,7 @@ begin
  end;
 end;
 
-procedure tbufstreamreader.readfielddata(const data: precheaderty;
+procedure tbufstreamreader.readfielddata(const data: precheaderty; 
                          const aindex: integer);
 var
  fielddata: pointer;
@@ -1992,11 +1992,11 @@ var
  size: integer;
  required: boolean;
  fieldno: integer;
- precision: integer;
+ precision: integer; 
  def1: tfielddef;
 begin
  name:= readstring;
- datatype:= tfieldtype(readinteger);
+ datatype:= tfieldtype(readinteger);  
  size:= readinteger;
  if datatype in blobfields then begin
 //  size:= fowner.getblobdatasize;
@@ -2015,7 +2015,7 @@ var
  rec1: logbufferheader32ty;
 begin
  if f32to64 then begin
-  result:= (read(rec1,sizeof(rec1)) = sizeof(rec1)) and
+  result:= (read(rec1,sizeof(rec1)) = sizeof(rec1)) and 
                                             (rec1.logflag <> lf_end);
   if result then begin
    aheader.logflag:= rec1.logflag;
@@ -2036,7 +2036,7 @@ begin
   end;
  end
  else begin
-  result:= (read(aheader,sizeof(aheader)) = sizeof(aheader)) and
+  result:= (read(aheader,sizeof(aheader)) = sizeof(aheader)) and 
            (aheader.logflag <> lf_end);
  end;
 {$ifdef mse_debuglogger}
@@ -2070,7 +2070,7 @@ type
   fielddefcount: integer;
   recordcount: integer;
  end;
-
+ 
 procedure tbufstreamreader.readrecord(const arecord: pintrecordty);
 var
  int1: integer;
@@ -2170,7 +2170,7 @@ end;
 
 { eapplyerror }
 
-constructor eapplyerror.create(const msg: string = '';
+constructor eapplyerror.create(const msg: string = ''; 
                          const aresponse: resolverresponsesty = []);
 begin
  fresponse:= aresponse;
@@ -2283,7 +2283,7 @@ begin
  end;
 end;
 {
-procedure tmsebufdataset.finalizechangedvalues(const tocompare: recheaderty;
+procedure tmsebufdataset.finalizechangedvalues(const tocompare: recheaderty; 
                                       var tofinalize: recheaderty);
 var
  int1: integer;
@@ -2323,7 +2323,7 @@ end;
 procedure tmsebufdataset.intfreerecord(var buffer: pintrecordty);
 begin
  if buffer <> nil then begin
-  intfinalizerecord(buffer);
+  intfinalizerecord(buffer);  
   freemem(buffer);
   buffer:= nil;
  end;
@@ -2453,7 +2453,7 @@ begin
  end
  else begin
   po1:= @pdsrecordty(activebuffer)^.header;
-  blobfree:= false;
+  blobfree:= false; 
  end;
  with po1^{pdsrecordty(activebuffer)^.header} do begin
   for int1:= high(blobinfo) downto 0 do begin
@@ -2475,9 +2475,9 @@ begin
    deleteblob(blobinfo,int2,blobfree);
   end
   else begin
-   if blobfree then begin                //else necessary for //done in post
+   if blobfree then begin                //else necessary for //done in post 
                                          //cancelupdate
-    freeblobcache(po1,ablob.ffield);
+    freeblobcache(po1,ablob.ffield); 
    end;
   end;
   setlength(blobinfo,high(blobinfo)+2);
@@ -2516,10 +2516,10 @@ begin
  if afreeblob then begin
   freeblob(ablobs[aindex]);
  end;
- deleteitem(ablobs,typeinfo(blobinfoarty),aindex);
+ deleteitem(ablobs,typeinfo(blobinfoarty),aindex); 
 end;
 
-procedure tmsebufdataset.deleteblob(var ablobs: blobinfoarty;
+procedure tmsebufdataset.deleteblob(var ablobs: blobinfoarty; 
                      const afield: tfield; const adeleteitem: boolean);
 var
  int1: integer;
@@ -2528,7 +2528,7 @@ begin
   if ablobs[int1].field = afield then begin
    freeblob(ablobs[int1]);
    if adeleteitem then begin
-    deleteitem(ablobs,typeinfo(blobinfoarty),int1);
+    deleteitem(ablobs,typeinfo(blobinfoarty),int1); 
    end
    else begin
     ablobs[int1].field:= nil;
@@ -2537,8 +2537,8 @@ begin
   end;
  end;
  if not adeleteitem then begin //called from post
-  freeblobcache(@fcurrentbuf^.header,afield);
- end;
+  freeblobcache(@fcurrentbuf^.header,afield); 
+ end; 
 end;
 
 procedure tmsebufdataset.initsavepoint;
@@ -2564,7 +2564,7 @@ begin
  if bdo_cacheblobs in foptions then begin
   include(fbstate,bs_blobsfetched);
  end
- else begin
+ else begin 
   exclude(fbstate,bs_blobsfetched);
  end;
  if isutf8 then begin
@@ -2616,7 +2616,7 @@ begin
  if defaultfields then begin
   createfields;
  end;
- if (floadingstream = nil) and
+ if (floadingstream = nil) and 
                    (flogfilename <> '') and findfile(flogfilename) then begin
   floadingstream:= tmsefilestream.create(flogfilename,fm_read);
   tmsefilestream(floadingstream).cryptohandler:= fcryptohandler;
@@ -2642,7 +2642,7 @@ begin
 end;
 
 procedure tmsebufdataset.dointernalclose;
-var
+var 
  int1: integer;
  kind1: filtereditkindty;
 begin
@@ -2676,7 +2676,7 @@ begin
  end;
  clearindex;
  fbrecordcount:= 0;
-
+ 
  ffieldinfos:= nil;
  fstringpositions:= nil;
  fvarpositions:= nil;
@@ -2690,7 +2690,7 @@ begin
  fcalcstringpositions:= nil;
  fcalcvarpositions:= nil;
  flookupupdate:= 0;
-
+ 
  bindfields(false);
 end;
 
@@ -2747,7 +2747,7 @@ function tmsebufdataset.getrecord(buffer: pchar; getmode: tgetmode;
                                             docheck: boolean): tgetresult;
 var
  acceptable: boolean;
- state1: tdatasetstate;
+ state1: tdatasetstate; 
 begin
  result:= grok;
  acceptable:= true;
@@ -2763,7 +2763,7 @@ begin
     end;
    end;
    gmcurrent: begin
-    if (frecno < 0) or (frecno >= fbrecordcount) or
+    if (frecno < 0) or (frecno >= fbrecordcount) or 
                                    (fcurrentbuf = nil) then begin
      result := grerror;
     end;
@@ -2812,7 +2812,7 @@ begin
 end;
 
 function tmsebufdataset.getrecordupdatebuffer : boolean;
-var
+var 
  int1: integer;
 begin
  if bs_recapplying in fbstate then begin
@@ -2820,12 +2820,12 @@ begin
  end
  else begin
   with pdsrecordty(activebuffer)^.dsheader.bookmark.data do begin
-   if (fcurrentupdatebuffer >= length(fupdatebuffer)) or
-        (fupdatebuffer[fcurrentupdatebuffer].info.bookmark.recordpo <>
+   if (fcurrentupdatebuffer >= length(fupdatebuffer)) or 
+        (fupdatebuffer[fcurrentupdatebuffer].info.bookmark.recordpo <> 
                                                          recordpo) then begin
     for int1:= 0 to high(fupdatebuffer) do begin
      with fupdatebuffer[int1] do begin
-      if (info.bookmark.recordpo = recordpo) and
+      if (info.bookmark.recordpo = recordpo) and 
                              not (ruf_applied in info.flags) then begin
        fcurrentupdatebuffer:= int1;
        break;
@@ -2833,8 +2833,8 @@ begin
      end;
     end;
    end;
-   result:= (fcurrentupdatebuffer <= high(fupdatebuffer))  and
-   (fupdatebuffer[fcurrentupdatebuffer].info.bookmark.recordpo = recordpo) and
+   result:= (fcurrentupdatebuffer <= high(fupdatebuffer))  and 
+   (fupdatebuffer[fcurrentupdatebuffer].info.bookmark.recordpo = recordpo) and 
           (recordpo <> nil);
   end;
  end;
@@ -2896,7 +2896,7 @@ function tmsebufdataset.findbookmarkindex(
 begin
  with abookmark do begin
   if (recno >= fbrecordcount) or (recno < 0) then begin
-   databaseerror('Invalid bookmark recno: '+inttostr(recno)+'.');
+   databaseerror('Invalid bookmark recno: '+inttostr(recno)+'.'); 
   end;
 //  checkindex(false);
   checkindex(factindex);
@@ -2928,7 +2928,7 @@ begin
  with abookmark do begin
 //  checkindex(false);
   checkindex(factindex);
-  if (recno < 0) or (recno >= fbrecordcount) or
+  if (recno < 0) or (recno >= fbrecordcount) or 
           (factindexpo^.ind[recno] <> recordpo) and (recordpo <> nil) then begin
    int1:= findrecord(recordpo);
   end
@@ -2961,7 +2961,7 @@ var
  {$ifdef mse_debugdataset}
  ts: longword;
  {$endif}
-
+ 
 begin
  result:= 0;
  if fallpacketsfetched then  begin
@@ -2978,7 +2978,7 @@ begin
    debugoutstart(ts,self,'getnextpacket');
   end;
 {$endif}
-  while ((result < fpacketrecords) or all) and
+  while ((result < fpacketrecords) or all) and 
                               (loadbuffer(femptybuffer^.header) = grok) do begin
    appendrecord(femptybuffer);
    femptybuffer:= intallocrecord;
@@ -3088,7 +3088,7 @@ begin
    result:= sizeof(variant);
    basetype:= ftvariant;
   end;
-  else begin
+  else begin 
    result:= 0;
    basetype:= ftunknown;
   end;
@@ -3119,7 +3119,7 @@ begin
      int2:= dbfieldsize;
      if field1.datatype in charfields then begin
       int2:= int2*4+4; //room for multibyte encodings
-      setlength(str1,int2);
+      setlength(str1,int2); 
       if not loadfield(fno,fieldtype,pointer(str1),int2) then begin
        clearfieldflag(@buffer.fielddata.nullmask,fno);
       end
@@ -3162,7 +3162,6 @@ begin
     fkinternalcalc: begin
      clearfieldflag(@buffer.fielddata.nullmask,fno);
     end;
-    else; // For case statment added to make compiler happy.
    end;
   end;
  end;
@@ -3198,7 +3197,7 @@ begin
   ord(dscalcfields): begin
    buffer:= @pdsrecordty(fcalcbuffer1)^.header;
   end;
-  ord(dscheckfilter): begin
+  dscheckfilter: begin
    buffer:= @fcheckfilterbuffer^.header;
   end;
   ord(dsfilter): begin
@@ -3246,7 +3245,7 @@ begin
    else begin //there is no old value available
     if pdsrecordty(activebuffer)^.dsheader.bookmark.data.recordpo <> nil
                                  then begin //dsinsert otherwise
-     buffer:= @fcurrentbuf^.header
+     buffer:= @fcurrentbuf^.header   
     end;
    end;
   end;
@@ -3259,7 +3258,7 @@ begin
    datasize:= 0;
   end;
  end
- else begin
+ else begin   
   int1:= -2 - int1;
   if int1 >= 0 then begin //calc field
    result:= getfieldflag(pointer(pchar(buffer)+frecordsize),int1);
@@ -3279,19 +3278,19 @@ function tmsebufdataset.getfieldbuffer(const afield: tfield;
 var
  int1: integer;
  state1: tdatasetstate;
-begin
+begin 
  if (bs_recapplying in fbstate) and (state = dsbrowse) then begin
   state1:= dsedit; //dummy
   include(fbstate,bs_curvaluemodified);
  end
  else begin
-  if not ((state in dswritemodes - [dsinternalcalc,dscalcfields]) or
-        (afield.fieldkind = fkinternalcalc) and
+  if not ((state in dswritemodes - [dsinternalcalc,dscalcfields]) or 
+        (afield.fieldkind = fkinternalcalc) and 
                                  (state = dsinternalcalc) or
-        (afield.fieldkind = fkcalculated) and
+        (afield.fieldkind = fkcalculated) and 
                                  (state = dscalcfields) or
         (afield.fieldkind = fklookup)
-                                 {or
+                                 {or 
         (bs_curvaluesetting in fbstate) and (state = dscurvalue)}) then begin
    databaseerrorfmt(snotediting,[name],self);
   end;
@@ -3302,7 +3301,7 @@ begin
   dscalcfields: begin
    result:= @pdsrecordty(fcalcbuffer1)^.header;
   end;
-  dsfilter:  begin
+  dsfilter:  begin 
    result:= @ffilterbuffer[ffiltereditkind]^.header;
   end;
   dscurvalue: begin
@@ -3363,7 +3362,7 @@ end;
 
 procedure tmsebufdataset.fieldchanged(const field: tfield);
 begin
- if {(field.fieldno > 0) and} not
+ if {(field.fieldno > 0) and} not 
        (state in [dscalcfields,dsinternalcalc,{dsfilter,}dsnewvalue]) and
                  not (bs_recapplying in fbstate) then begin
   dataevent(defieldchange, ptrint(field));
@@ -3371,12 +3370,12 @@ begin
 end;
 
 function tmsebufdataset.getfielddata(field: tfield; buffer: pointer): boolean;
-var
+var 
  po1: pointer;
  datasize: integer;
 begin
  result:= getfieldbuffer(field,po1,datasize);
- if (buffer <> nil) and result then begin
+ if (buffer <> nil) and result then begin 
   move(po1^,buffer^,datasize);
  end;
 end;
@@ -3480,7 +3479,7 @@ end;
 
 procedure tmsebufdataset.setfielddata(field: tfield; buffer: pointer);
 
-var
+var 
  po1: pointer;
  datasize1: integer;
 begin
@@ -3549,7 +3548,7 @@ begin
     if callvalidate(sender,@avalue) then begin
      po1:= getfieldbuffer(sender,false,int1);
      po1^:= pmsestring(fvaluebuffer)^;
-     if (sender.characterlength > 0) and
+     if (sender.characterlength > 0) and 
                          (length(avalue) > sender.characterlength) then begin
       setlength(msestring(po1^),sender.characterlength);
      end;
@@ -3560,7 +3559,7 @@ begin
     end;
    finally
     pmsestring(fvaluebuffer)^:= '';
-    checkfreebuffer(sender);
+    checkfreebuffer(sender);    
    end;
    fieldchanged(sender);
   end;
@@ -3593,7 +3592,7 @@ begin
     end;
    finally
     finalize(pvariant(fvaluebuffer)^);
-    checkfreebuffer(sender);
+    checkfreebuffer(sender);    
    end;
    fieldchanged(sender);
   end;
@@ -3686,7 +3685,7 @@ begin
 end;
 
 procedure tmsebufdataset.cancelupdate(const norecordcancel: boolean = false);
-var
+var 
  int1: integer;
 begin
  cancel;
@@ -3826,10 +3825,10 @@ begin
 end;
 
 procedure tmsebufdataset.internalapplyupdate(const maxerrors: integer;
-               const cancelonerror: boolean;
+               const cancelonerror: boolean; 
                const cancelondeleteerror: boolean;
                out response: resolverresponsesty);
-
+               
  procedure checkrevert;
  var
   po1: precupdatebufferty;
@@ -3844,7 +3843,7 @@ procedure tmsebufdataset.internalapplyupdate(const maxerrors: integer;
    end;
   end
   else begin
-   if (cancelonerror or
+   if (cancelonerror or 
        cancelondeleteerror and (po1^.info.updatekind = ukdelete)) or
                                          (rr_revert in response) then begin
     cancelrecupdate(po1^);
@@ -3853,14 +3852,14 @@ procedure tmsebufdataset.internalapplyupdate(const maxerrors: integer;
    end;
   end;
  end; //checkrevert
-
+ 
 var
  by1,by2: boolean;
  e1: exception;
  ar1,ar2,ar3: integerarty;
 // int1: integer;
  origpo: pintrecordty;
-
+ 
 begin
  include(fbstate,bs_recapplying);
  by1:= not islocal;
@@ -3932,13 +3931,13 @@ begin
       if bs_curvaluemodified in fbstate then begin
        by2:= true;
        dointernalcalcfields(false);
- //      if (updatekind = ukmodify) and
+ //      if (updatekind = ukmodify) and 
  //                          (bs_refreshupdateindex in fbstate) or
- //      (updatekind = ukinsert) and
+ //      (updatekind = ukinsert) and 
  //                          (bs_refreshinsertindex in fbstate) then begin
  //       int1:= factindex;
   //      factindex:= -1; //do not use recno
-
+ 
        saveindex(origpo,@fnewvaluebuffer^.header,ar1,ar2,ar3);
        relocateindex(origpo,ar1,ar2,ar3);
   //      factindex:= int1;
@@ -4014,7 +4013,7 @@ begin
        freemem(po1);
        setmodified(true);
        getcalcfields(activebuffer);
-      end;
+      end; 
      end;
     except
      if po1 <> nil then begin
@@ -4082,7 +4081,7 @@ begin
  end;
 end;
 
-procedure tmsebufdataset.ApplyUpdates(const MaxErrors: Integer;
+procedure tmsebufdataset.ApplyUpdates(const MaxErrors: Integer; 
                              const cancelonerror: boolean;
                              const cancelondeleteerror: boolean = false;
                              const editonerror: boolean = false);
@@ -4128,7 +4127,7 @@ begin
  //     end;
                 //win98 is not idle after applyupdate ???
     end;
-   finally
+   finally 
     fcurrentupdatebuffer:= bigint; //invalid
     if not (bs1_deferdeleterecupdatebuffer in fbstate1) then begin
      if (ffailedcount = 0) and (fapplyindex > high(fupdatebuffer)) then begin
@@ -4250,7 +4249,7 @@ var
  ar1,ar2,ar3: integerarty;
  newupdatebuffer: boolean;
  canapply: boolean;
-
+ 
 begin
  checkindex(factindex);
  with pdsrecordty(activebuffer)^ do begin
@@ -4309,13 +4308,13 @@ begin
     end;
    end;
   end;
-
+  
   with header do begin
    for int1:= high(blobinfo) downto 0 do begin
     with blobinfo[int1] do begin
      if new then begin
 //      deleteblob(fcurrentbuf^.header.blobinfo,field,false);
-      deleteblob(fcurrentbuf^.header.blobinfo,field,true);
+      deleteblob(fcurrentbuf^.header.blobinfo,field,true); 
                 //no reassign of blobinfo
                 //blobcache data needed for possible cancelupdate
       new:= false;
@@ -4327,7 +4326,7 @@ begin
 
   if (state = dsedit) then begin
    saveindex(fcurrentbuf,@header,ar1,ar2,ar3);
-  end;
+  end;   
   if bo1 then begin
    fcurrentbuf^.header.blobinfo:= nil; //free old array
   end;
@@ -4343,7 +4342,7 @@ begin
    end;
    flogger.flushbuffer;
   end;
-
+  
   if state = dsinsert then begin
    with dsheader.bookmark do  begin
     frecno:= insertrecord(frecno,fcurrentbuf);
@@ -4354,7 +4353,7 @@ begin
     data.recordpo:= fcurrentbuf;
     data.recno:= frecno;
     flag := bfinserted;
-   end;
+   end;      
   end
   else begin
    if (state = dsedit) then begin
@@ -4425,7 +4424,7 @@ procedure tmsebufdataset.calcrecordsize;
 
 var
  lookuprecursion: integer;
-
+ 
  function getbasetype(const afield: tfield): tfieldtype;
  var
   field1: tfield;
@@ -4436,8 +4435,8 @@ var
   end;
   result:= ftunknown;
   if afield.dataset is tmsebufdataset then begin
-   if (afield.fieldkind = fklookup) and
-                 (afield.lookupdataset <> nil) and
+   if (afield.fieldkind = fklookup) and 
+                 (afield.lookupdataset <> nil) and 
                           (afield.lookupresultfield <> '') then begin
     field1:= afield.lookupdataset.findfield(afield.lookupresultfield);
     if field1 <> nil then begin
@@ -4449,8 +4448,8 @@ var
    end;
   end;
  end; //getbasetype
-
-var
+ 
+var 
  int1,int2,int3,int4: integer;
  field1: tfield;
  ar1: fieldarty;
@@ -4474,7 +4473,7 @@ begin
  fnullmasksize:= (int1+7) div 8;
  inc(frecordsize,fnullmasksize);
  alignfieldpos(frecordsize);
-
+ 
  setlength(ffieldinfos,int1);
  fstringpositions:= nil;
  fvarpositions:= nil;
@@ -4535,9 +4534,9 @@ begin
     with flookupfieldinfos[int2] do begin
      valuefield:= field1;
      indexnum:= -1;
-     if (fieldkind = fklookup) and not lookupcache and
+     if (fieldkind = fklookup) and not lookupcache and 
                              (lookupdataset is tmsebufdataset) then begin
-      if findfields(field1.keyfields,keyfieldar) and
+      if findfields(field1.keyfields,keyfieldar) and 
                                       (keyfieldar <> nil) then begin
        with tmsebufdataset(lookupdataset) do begin
         lookupvaluefield:= findfield(field1.lookupresultfield);
@@ -4617,7 +4616,7 @@ begin
     inc(int2);
    end;
   end;
- end;
+ end; 
  mergesortarray(ar1,sizeof(ar1[0]),length(ar1),@comparefieldnum,
                                                           ffieldorder,false);
    //MS SQL ODBC needs ordered load field
@@ -4652,7 +4651,7 @@ begin
  checkbrowsemode;
  if value > recordcount then begin
   repeat
-  until (getnextpacket(bs_fetchall in fbstate) < fpacketrecords) or
+  until (getnextpacket(bs_fetchall in fbstate) < fpacketrecords) or 
                        (value <= recordcount) or (bs_fetchall in fbstate);
  end;
  if nocheck then begin
@@ -4695,7 +4694,7 @@ begin
    include(fbstate1,bs1_restoreupdate);
   end
   else begin
-   if (bs1_restoreupdate in fbstate1) and active and
+   if (bs1_restoreupdate in fbstate1) and active and 
                            not (csloading in componentstate) then begin
     postrecupdatebuffer;
    end;
@@ -4939,10 +4938,10 @@ var
  int1: integer;
  buffer: pointer;
 begin
- if (mode <> bmread) and not ((state in dseditmodes) or
+ if (mode <> bmread) and not ((state in dseditmodes) or 
                               (bs_recapplying in fbstate)) then begin
   databaseerrorfmt(snotediting,[name],self);
- end;
+ end;  
  result:= nil;
  if mode = bmread then begin
   buffer:= getblobrecpo;
@@ -4981,7 +4980,7 @@ begin
      result:= aid.id <> 0;
      exit;
     end;
-   end;
+   end;   
    aid.local:= false;
    aid.id:= 0;
    move(po2^,aid.id,getblobdatasize);
@@ -5099,7 +5098,7 @@ begin
  include(fbstate,bs_blobsfetched);
 end;
 
-function tmsebufdataset.findcachedblob(const id: int64;
+function tmsebufdataset.findcachedblob(const id: int64; 
                            out info: blobcacheinfoty): boolean;
 begin
  info.id:= id;
@@ -5190,7 +5189,7 @@ begin
  else begin
   clearfieldflag(@precheaderty(po1)^.fielddata.nullmask,int1);
  end;
-end;
+end; 
 
 procedure tmsebufdataset.checkindexsize;
 var
@@ -5267,7 +5266,7 @@ begin
  inc(fbrecordcount);
 end;
 
-function tmsebufdataset.insertrecord(arecno: integer;
+function tmsebufdataset.insertrecord(arecno: integer; 
                        const arecord: pintrecordty): integer;
 begin
  if arecno < 0 then begin
@@ -5282,7 +5281,7 @@ begin
   result:= arecno;
   move(findexes[0].ind[arecno],findexes[0].ind[arecno+1],
              (fbrecordcount-arecno)*sizeof(pointer));
-  findexes[0].ind[arecno]:= arecord;
+  findexes[0].ind[arecno]:= arecord;           
  end;
  if (frecno > arecno) then begin
   inc(frecno);
@@ -5297,7 +5296,7 @@ var
  po1: pintrecordty;
  po2: ppointer;
  int1: integer;
-begin
+begin  
  result:= -1;
  dec(fbrecordcount);
  po1:= arecord;
@@ -5630,7 +5629,7 @@ begin
   afields[int1]:= findfield(ar1[int1]);
   if afields[int1] = nil then begin
    result:= false;
-  end;
+  end;  
  end;
 end;
 {
@@ -5672,10 +5671,10 @@ begin
     if hasindex and (lookupvaluefield.dataset = sender) then begin
      findexlocal.fieldmodified(valuefield,false);
      bo1:= true;
-    end;
+    end; 
    end;
   end;
-  if (state in [dsbrowse]) or (state in [dsedit,dsinsert]) and
+  if (state in [dsbrowse]) or (state in [dsedit,dsinsert]) and 
                (bdo_checkbrowsemodebylookupchange in foptions) then begin
                    //stop recursion triggered by dscalcfields
    if bo1 then begin
@@ -5684,7 +5683,7 @@ begin
     end
     else begin
      if bm1.recordpo <> nil then begin
-      bookmarkdata:= bm1;
+      bookmarkdata:= bm1;   
      end;
     end;
    end
@@ -5740,7 +5739,7 @@ end;
 procedure tmsebufdataset.enablecontrols();
 begin
  inherited;
- if (bs1_lookupnotifypending in fbstate1) and (fdisablecontrolscount = 0) and
+ if (bs1_lookupnotifypending in fbstate1) and (fdisablecontrolscount = 0) and 
                                                  (flookupupdate = 0) then begin
   notifylookupclients();
  end;
@@ -5784,7 +5783,7 @@ begin
   ord(deupdaterecord): begin
    dointernalcalcfields(false);
   end;
-  ord(de_modified): begin
+  de_modified: begin
    notifylookupclients();
   end;
  end;
@@ -5848,7 +5847,7 @@ end;
 procedure tmsebufdataset.setfiltered(value: boolean);
 begin
  inherited;
- filterchanged;
+ filterchanged; 
 end;
 
 procedure tmsebufdataset.setactive(value: boolean);
@@ -5900,8 +5899,8 @@ function tmsebufdataset.locate(const key: integer; const field: tfield;
 begin
  result:= locaterecord(self,key,field,options);
 end;
-
-function tmsebufdataset.locate(const key: msestring; const field: tfield;
+                     
+function tmsebufdataset.locate(const key: msestring; const field: tfield; 
                       const options: locateoptionsty = []): locateresultty;
 begin
  result:= locaterecord(self,isutf8,key,field,options);
@@ -5915,7 +5914,7 @@ begin
  result:= false;
  int1:= arecno-1;
  if int1 <> frecno then begin
-  if int1 < 0 then begin
+  if int1 < 0 then begin 
    int1:= 0;
   end;
   if int1 >= recordcount then begin
@@ -6054,7 +6053,6 @@ begin
     fek_filtermax: begin
      result:= b1 or (i1 <= 0);
     end;
-    else; // For case statment added to make compiler happy.
    end;
   end
   else begin
@@ -6068,7 +6066,6 @@ begin
     fek_filtermax: begin
      result:= b1 or (afield.value <= v1);
     end;
-    else; // For case statment added to make compiler happy.
    end;
   end;
  end;
@@ -6148,7 +6145,7 @@ begin
   else begin
    fdelayedapplycount:= avalue;
   end;
- end;
+ end;   
 end;
 
 procedure tmsebufdataset.registeronidle;
@@ -6188,7 +6185,7 @@ procedure tmsebufdataset.readstate(reader: treader);
 begin
  inherited;
  if card32(foldopts) <> $ffffffff then begin
-  options:= (options -
+  options:= (options - 
              (bufdatasetoptionsty(not(card32(foldopts)))*oldbdsoptions)
             ) + (foldopts * oldbdsoptions)
  end;
@@ -6296,7 +6293,7 @@ procedure tmsebufdataset.checksumfield(const afield: tfield;
 begin
  checkbrowsemode;
  if (afield.fieldno <= 0) or (afield.dataset <> self) or
-         not (ffieldinfos[afield.fieldno-1].base.fieldtype in
+         not (ffieldinfos[afield.fieldno-1].base.fieldtype in 
                                              fieldtypes) then begin
   raise edatabaseerror.create('Invalid sum field '+'"'+afield.fieldname+'".');
  end;
@@ -6341,7 +6338,7 @@ begin
   end;
  finally
   restorestate(state1);
- end;
+ end; 
 end;
 
 procedure tmsebufdataset.sumfield(const afield: tfield; out asum: currency);
@@ -6406,11 +6403,10 @@ begin
      end;
     end;
    end;
-   else; // For case statment added to make compiler happy.
   end;
  finally
   restorestate(state1);
- end;
+ end; 
 end;
 
 procedure tmsebufdataset.sumfield(const afield: tfield; out asum: int64);
@@ -6452,7 +6448,7 @@ begin
       end;
      end;
     end;
-   end;
+   end;  
    ftinteger,ftsmallint,ftword: begin
     if bo1 then begin
      for int1:= 0 to fbrecordcount - 1 do begin
@@ -6474,12 +6470,11 @@ begin
       end;
      end;
     end;
-   end;
-   else; // For case statment added to make compiler happy.
+   end;  
   end;
  finally
   restorestate(state1);
- end;
+ end; 
 end;
 
 procedure tmsebufdataset.sumfield(const afield: tfield; out asum: integer);
@@ -6546,7 +6541,6 @@ begin
      end;
     end;
    end;
-   else; // For case statment added to make compiler happy.
   end;
  finally
   restorestate(state1);
@@ -6592,12 +6586,12 @@ begin
     try
      fvisiblerecordcount:= 0;
      internalsetrecno(0);
-     if (getrecord(activebuffer,gmcurrent,false) = grok) or
+     if (getrecord(activebuffer,gmcurrent,false) = grok) or 
         (getrecord(activebuffer,gmnext,false) = grok) then begin
       repeat
        inc(fvisiblerecordcount);
       until getrecord(activebuffer,gmnext,false) <> grok;
-     end;
+     end;   
     finally
      internalsetrecno(int1);
      getrecord(activebuffer,gmcurrent,false);
@@ -6605,7 +6599,7 @@ begin
     end;
    end;
    include(fbstate,bs_visiblerecordcountvalid);
-  end;
+  end;    
   result:= fvisiblerecordcount;
  end
  else begin
@@ -6615,7 +6609,7 @@ end;
 
 const
  bufdattag: bufdattagty = 'MSEBUFDAT'#0#0#0#0#0#0;
-
+   
 // data format:
 //
 // header: bdsfheaderty
@@ -6625,9 +6619,9 @@ const
 // updatebufferitem: updatebufferheader,old nullmask,fielddata if not insert
 // post log
 // endmarker
-
-procedure tmsebufdataset.logupdatebuffer(const awriter: tbufstreamwriter;
-                const abuffer: recupdatebufferty;
+ 
+procedure tmsebufdataset.logupdatebuffer(const awriter: tbufstreamwriter; 
+                const abuffer: recupdatebufferty; 
                 const adeletedrecord: pintrecordty;
                 const alogging: boolean; const alogmode: logflagty);
 var
@@ -6648,8 +6642,8 @@ begin
    end;
    po:= ptruint(info.bookmark.recordpo);
    awriter.writelogbufferheader(header1);
-   if (alogmode = lf_update) and
-       ((kind in [uk_modify,uk_modifyinupdate]) or
+   if (alogmode = lf_update) and 
+       ((kind in [uk_modify,uk_modifyinupdate]) or 
               not logging and (kind = uk_delete) and (po <> 0{nil})) then begin
     datapo:= @(oldvalues^.header);
     awriter.write(datapo^.fielddata,fnullmasksize);
@@ -6696,7 +6690,7 @@ begin
   byteorder:= 0;
  {$ifdef cpu64}
   byteorder:= byteorder + 2;
- {$endif}
+ {$endif} 
   version:= 2;
   fieldcount:= fieldco;
   fielddefcount:= fielddefs.count;
@@ -6722,7 +6716,7 @@ begin
      if updatekind = ukinsert then begin
       logrecbuffer(awriter,updatekind,
                       bookmark.recordpo);
-     end;
+     end;    
     }
      logupdatebuffer(awriter,fupdatebuffer[int1],nil,false,lf_update);
     end;
@@ -6752,7 +6746,7 @@ procedure tmsebufdataset.doloadfromstream;
  begin
   databaseerror('Invalid data stream.',self);
  end;
-
+ 
 var
  header: tbsfheaderty;
  reader: tbufstreamreader;
@@ -6761,7 +6755,7 @@ var
  ar3: integerarty;
  appended: card64arty; //pointerarty;
  po1: pointer;
-
+ 
  function findrec(const oldpo: card64{pointer}; out newpo: pointer;
                                 out aindex: integer;
                                 const delete: boolean = false): boolean;
@@ -6801,14 +6795,14 @@ var
  end;
 
 var
- actindexbefore: integer;
+ actindexbefore: integer; 
  oldupdatepointers: card64arty; //pointerarty;
 // bo1: boolean;
  int1,int2,int3: integer;
  header1: logbufferheaderty;
  updabuf: recupdatebufferarty;
  p2: pfieldinfobasety;
-
+ 
 begin
  initsavepoint;
  updabuf:= nil; //compilerwarning
@@ -6845,19 +6839,19 @@ begin
     end
     else begin
      int1:= sizeof(fieldinfobasety);
-    end;
+    end;    
     getmem(p2,int1*fieldco);
     po1:= p2;
     try
      reader.readbuffer(p2^,int1*fieldco);
      for int2:= 0 to fieldco-1 do begin
       with ffieldinfos[int2].base do begin
-       if (p2^.fieldtype <> fieldtype) or
+       if (p2^.fieldtype <> fieldtype) or 
                         (p2^.dbfieldsize <> dbfieldsize) then begin
         formaterror();
        end;
       {$ifdef cpu64}
-       if (header.version < 2) or
+       if (header.version < 2) or 
                         ((p2^.offset < offset) or (p2^.size < size)) then begin
         reader.f32to64:= true;
        end;
@@ -6884,7 +6878,7 @@ begin
     debugwriteln('**log read '+inttostr(header.recordcount)+' records');
    {$endif}
     for int1:= 0 to high(ar2) do begin
-     if not reader.readlogbufferheader(header1) or
+     if not reader.readlogbufferheader(header1) or 
                                    (header1.logflag <> lf_rec) then begin
       formaterror;
      end;
@@ -6932,13 +6926,13 @@ begin
         {$endif}
          reader.readrecord(po1);
         end;
-       end;
+       end;        
       end;
       lf_update: begin
        if high(updabuf) < int2 then begin
         setlength(updabuf,2*high(updabuf)+258);
         setlength(oldupdatepointers,length(updabuf));
-       end;
+       end;     
        with updabuf[int2],header1.update do begin
         if kind = uk_modifyinupdate then begin
          info.updatekind:= ukmodify;
@@ -6961,7 +6955,7 @@ begin
        {$ifdef mse_debuglogger}
         debugwrite(' '+inttostr(int3)+' '+getenumname(typeinfo(kind),ord(kind)));
        {$endif}
-        if kind = uk_delete then begin
+        if kind = uk_delete then begin 
          if logging and (po <> deletedrecord) then begin
           if (int3 < 0) or not findrec(deletedrecord,po1,int1,true) then begin
            formaterror;
@@ -7089,9 +7083,9 @@ begin
     {$ifdef mse_debuglogger}
      debugwriteln('');
     {$endif}
-    end;
+    end; 
     setlength(updabuf,int2);
-    setlength(fupdatebuffer,int2);
+    setlength(fupdatebuffer,int2);   
     int2:= 0;     //pack updatebuffer
     for int1:= 0 to high(updabuf) do begin
      if updabuf[int1].info.bookmark.recordpo <> nil then begin
@@ -7288,7 +7282,7 @@ begin
  end;
 end;
 
-procedure tmsebufdataset.startlogging;
+procedure tmsebufdataset.startlogging; 
   //close logfile, save state with truncated log, open logfile
 begin
  checklogfile;
@@ -7297,10 +7291,10 @@ begin
  startlogger;
 end;
 
-procedure tmsebufdataset.stoplogging;
+procedure tmsebufdataset.stoplogging; 
   //close logfile
 begin
- closelogger;
+ closelogger; 
 end;
 
 function tmsebufdataset.getlogging: boolean;
@@ -7391,7 +7385,7 @@ function tmsebufdataset.islastrecord: boolean;
 begin
  result:= eof;
  if not result then begin
-  fetchall;
+  fetchall;  
   result:= recno = recordcount;
  end;
 end;
@@ -7439,7 +7433,7 @@ end;
 
 procedure tmsebufdataset.currentcheckbrowsemode;
 begin
- if (state <> dsbrowse) and (fcurrentupdating = 0) and
+ if (state <> dsbrowse) and (fcurrentupdating = 0) and 
               ([bs1_recordupdating,bs1_posting] * fbstate1 = []) then begin
   checkbrowsemode;
  end;
@@ -7456,10 +7450,10 @@ begin
  end
  else begin
   with ffieldinfos[int1] do begin
-   if (afieldtype <> ftunknown) and
+   if (afieldtype <> ftunknown) and 
         not (ext.basetype in fielddatacompatibility[afieldtype]) then begin
-    raise ecurrentvalueaccess.create(self,afield,'Invalid fieldtype.');
-   end;
+    raise ecurrentvalueaccess.create(self,afield,'Invalid fieldtype.');  
+   end;   
    result:= pchar(pointer(arecord)) + base.offset;
   end;
  end;
@@ -7474,20 +7468,20 @@ begin
  result:= nil;
  with flookupfieldinfos[-1-afield.fieldno] do begin
   if indexnum < 0 then begin
-   raise ecurrentvalueaccess.create(self,afield,'No lookup index.');
+   raise ecurrentvalueaccess.create(self,afield,'No lookup index.');  
   end;
-  if (afieldtype <> ftunknown) and
+  if (afieldtype <> ftunknown) and 
        not (basedatatype in fielddatacompatibility[afieldtype]) then begin
-   raise ecurrentvalueaccess.create(self,afield,'Invalid fieldtype.');
-  end;
+   raise ecurrentvalueaccess.create(self,afield,'Invalid fieldtype.');  
+  end;   
   po1:= flookuppo;
   flookuppo:= arecord;
-  try
-   if afield.lookupdataset.active and
+  try   
+   if afield.lookupdataset.active and 
       tmsebufdataset(afield.lookupdataset).indexlocal[indexnum].find(
                                     keyfieldar,bm1,false,false,true) then begin
     if lookupvaluefield.fieldno > 0 then begin
-     getvalue(lookupvaluefield,bm1,flookupresult);
+     getvalue(lookupvaluefield,bm1,flookupresult);     
      result:= flookupresult.po;
     end
     else begin
@@ -7518,8 +7512,8 @@ begin
  end;
  if (aindex < 0) or (aindex > high(factindexpo^.ind)) then begin
   raise ecurrentvalueaccess.create(self,afield,
-                             'Invalid index '+inttostr(aindex)+'.');
- end;
+                             'Invalid index '+inttostr(aindex)+'.');  
+ end; 
  if afield.fieldkind = fkcalculated then begin
   raise ecurrentvalueaccess.create(self,afield,
                'Field can not be be fkCalculated.');
@@ -7565,10 +7559,10 @@ begin
  po1:= @arecord^.fielddata.nullmask;
  int1:= afield.fieldno-1;
  with ffieldinfos[int1] do begin
-  if (afieldtype <> ftunknown) and
+  if (afieldtype <> ftunknown) and 
            not (ext.basetype in fielddatacompatibility[afieldtype]) then begin
-   raise ecurrentvalueaccess.create(self,afield,'Invalid fieldtype.');
-  end;
+   raise ecurrentvalueaccess.create(self,afield,'Invalid fieldtype.');  
+  end;   
   changed:= not getfieldflag(po1,int1) xor aisnull;
   if changed then begin
    if aisnull then begin
@@ -7599,8 +7593,8 @@ begin
  end;
  if (aindex < 0) or (aindex > high(factindexpo^.ind)) then begin
   raise ecurrentvalueaccess.create(self,afield,
-                             'Invalid index '+inttostr(aindex)+'.');
- end;
+                             'Invalid index '+inttostr(aindex)+'.');  
+ end; 
  flastcurrentindex:= aindex;
  result:= setcurrentpo(afield,afieldtype,factindexpo^.ind[aindex],
                                                       aisnull,changed);
@@ -7682,7 +7676,7 @@ begin
    docurrentassign(po1,ffieldinfos[source.fieldno-1].ext.basetype,dest);
   end
   else begin
-   docurrentassign(po1,flookupfieldinfos[-1-source.fieldno].basedatatype,dest);
+   docurrentassign(po1,flookupfieldinfos[-1-source.fieldno].basedatatype,dest);   
   end;
  end;
 end;
@@ -7701,7 +7695,7 @@ begin
    docurrentassign(po1,ffieldinfos[source.fieldno-1].ext.basetype,dest);
   end
   else begin
-   docurrentassign(po1,flookupfieldinfos[-1-source.fieldno].basedatatype,dest);
+   docurrentassign(po1,flookupfieldinfos[-1-source.fieldno].basedatatype,dest);   
   end;
  end;
 end;
@@ -7737,10 +7731,10 @@ begin
    end;
    else begin
     raise ecurrentvalueaccess.create(self,afield,
-                             'Invalid fieldtype field "'+afield.fieldname+'".');
+                             'Invalid fieldtype field "'+afield.fieldname+'".');  
    end;
   end;
- end;
+ end; 
 end;
 
 procedure tmsebufdataset.setcurrentasvariant(const afield: tfield;
@@ -7771,13 +7765,13 @@ begin
    end;
    ftstring: begin
     setcurrentasmsestring(afield,aindex,avalue);
-   end;
+   end;  
    else begin
     raise ecurrentvalueaccess.create(self,afield,
-                             'Invalid fieldtype field "'+afield.fieldname+'".');
+                             'Invalid fieldtype field "'+afield.fieldname+'".');  
    end;
   end;
- end;
+ end; 
 end;
 
 function tmsebufdataset.getcurrentbmasvariant(const afield: tfield;
@@ -7811,10 +7805,10 @@ begin
    end;
    else begin
     raise ecurrentvalueaccess.create(self,afield,
-                             'Invalid fieldtype field "'+afield.fieldname+'".');
+                             'Invalid fieldtype field "'+afield.fieldname+'".');  
    end;
   end;
- end;
+ end; 
 end;
 
 procedure tmsebufdataset.setcurrentbmasvariant(const afield: tfield;
@@ -7845,13 +7839,13 @@ begin
    end;
    ftstring: begin
     setcurrentbmasmsestring(afield,abm,avalue);
-   end;
+   end;  
    else begin
     raise ecurrentvalueaccess.create(self,afield,
-                             'Invalid fieldtype field "'+afield.fieldname+'".');
+                             'Invalid fieldtype field "'+afield.fieldname+'".');  
    end;
   end;
- end;
+ end; 
 end;
 
 function tmsebufdataset.getcurrentasguid(const afield: tfield;
@@ -8458,7 +8452,7 @@ var
  indexpo: ppointer;
  int1: integer;
  ft1: tfieldtype;
-
+ 
 begin
  if afield.dataset <> self then begin
   raise ecurrentvalueaccess.create(self,afield,'Wrong dataset.');
@@ -8468,15 +8462,15 @@ begin
                  'Field can not be be fkCalculated or fkLookup.');
  end;
  ft1:= afieldtype;
- if ft1 = ftwidestring then begin
+ if ft1 = ftwidestring then begin 
   ft1:= ftstring
  end;
  checkindex(factindex);
  int1:= afield.fieldno-1;
  with ffieldinfos[int1] do begin
   if not (ext.basetype in fielddatacompatibility[ft1]) then begin
-   raise ecurrentvalueaccess.create(self,afield,'Invalid fieldtype.');
-  end;
+   raise ecurrentvalueaccess.create(self,afield,'Invalid fieldtype.');  
+  end;   
   offs:= base.offset;
  end;
  po2:= data;
@@ -8514,7 +8508,7 @@ begin
   end;
   ftstring: begin
    for int1:= 0 to fbrecordcount-1 do begin
-    pansistring(po2)^:=
+    pansistring(po2)^:= 
         ansistring(pmsestring(pchar(ppointeraty(indexpo)^[int1])+offs)^);
     inc(pchar(po2),step);
    end;
@@ -8525,7 +8519,6 @@ begin
     inc(pchar(po2),step);
    end;
   end;
-  else; // For case statment added to make compiler happy.
  end;
 end;
 
@@ -8556,7 +8549,6 @@ begin
    dl_msestring,dl_doublemsestring,dl_msestringint: begin
     type1:= ftwidestring;
    end;
-   else; // For case statment added to make compiler happy.
   end;
   if type1 <> ftunknown then begin
    beginupdate;
@@ -8580,21 +8572,21 @@ procedure tmsebufdataset.asarray(const afield: tfield;
 begin
  currentcheckbrowsemode;
  setlength(avalue,fbrecordcount);
- dogetcoldata(afield,ftlargeint,sizeof(avalue[0]),pointer(avalue));
+ dogetcoldata(afield,ftlargeint,sizeof(avalue[0]),pointer(avalue)); 
 end;
 
 procedure tmsebufdataset.asarray(const afield: tfield; out avalue: integerarty);
 begin
  currentcheckbrowsemode;
  setlength(avalue,fbrecordcount);
- dogetcoldata(afield,ftinteger,sizeof(avalue[0]),pointer(avalue));
+ dogetcoldata(afield,ftinteger,sizeof(avalue[0]),pointer(avalue)); 
 end;
 
 procedure tmsebufdataset.asarray(const afield: tfield; out avalue: stringarty);
 begin
  currentcheckbrowsemode;
  setlength(avalue,fbrecordcount);
- dogetcoldata(afield,ftstring,sizeof(avalue[0]),pointer(avalue));
+ dogetcoldata(afield,ftstring,sizeof(avalue[0]),pointer(avalue)); 
 end;
 
 procedure tmsebufdataset.asarray(const afield: tfield;
@@ -8602,7 +8594,7 @@ procedure tmsebufdataset.asarray(const afield: tfield;
 begin
  currentcheckbrowsemode;
  setlength(avalue,fbrecordcount);
- dogetcoldata(afield,ftwidestring,sizeof(avalue[0]),pointer(avalue));
+ dogetcoldata(afield,ftwidestring,sizeof(avalue[0]),pointer(avalue)); 
 end;
 
 procedure tmsebufdataset.asarray(const afield: tfield;
@@ -8610,14 +8602,14 @@ procedure tmsebufdataset.asarray(const afield: tfield;
 begin
  currentcheckbrowsemode;
  setlength(avalue,fbrecordcount);
- dogetcoldata(afield,ftcurrency,sizeof(avalue[0]),pointer(avalue));
+ dogetcoldata(afield,ftcurrency,sizeof(avalue[0]),pointer(avalue)); 
 end;
 
 procedure tmsebufdataset.asarray(const afield: tfield; out avalue: realarty);
 begin
  currentcheckbrowsemode;
  setlength(avalue,fbrecordcount);
- dogetcoldata(afield,ftfloat,sizeof(avalue[0]),pointer(avalue));
+ dogetcoldata(afield,ftfloat,sizeof(avalue[0]),pointer(avalue)); 
 end;
 
 procedure tmsebufdataset.asarray(const afield: tfield;
@@ -8625,7 +8617,7 @@ procedure tmsebufdataset.asarray(const afield: tfield;
 begin
  currentcheckbrowsemode;
  setlength(avalue,fbrecordcount);
- dogetcoldata(afield,ftdatetime,sizeof(avalue[0]),pointer(avalue));
+ dogetcoldata(afield,ftdatetime,sizeof(avalue[0]),pointer(avalue)); 
 end;
 
 procedure tmsebufdataset.asarray(const afield: tfield;
@@ -8633,7 +8625,7 @@ procedure tmsebufdataset.asarray(const afield: tfield;
 begin
  currentcheckbrowsemode;
  setlength(avalue,fbrecordcount);
- dogetcoldata(afield,ftboolean,sizeof(avalue[0]),pointer(avalue));
+ dogetcoldata(afield,ftboolean,sizeof(avalue[0]),pointer(avalue)); 
 end;
 
 function tmsebufdataset.currentrecordhigh: integer;
@@ -8701,11 +8693,11 @@ begin
    str1:= uppercase(df.fieldname);
    for int2:= 0 to high(ffieldinfos)do begin
     with ffieldinfos[int2] do begin
-     if (ext.uppername = str1) and (ext.basetype <> ftblob) and
-                      ext.field.visible and
+     if (ext.uppername = str1) and (ext.basetype <> ftblob) and 
+                      ext.field.visible and 
                      (ext.field.fieldkind <> fkcalculated) and
                      (ext.field.fieldkind <> fklookup) then begin
-      if not getfieldflag(@bm.recordpo^.header.fielddata.nullmask,int2) then begin
+      if not getfieldflag(@bm.recordpo^.header.fielddata.nullmask,int2) then begin 
        df.clear;
       end
       else begin
@@ -9009,7 +9001,7 @@ begin
   with tlocalindex(findexlocal.fitems[int1]) do begin
    if (fields.count > 0) and (high(findexfieldinfos) >= 0) and
            (findexfieldinfos[0].fieldinstance = afield) and
-                     not (findexfieldinfos[0].caseinsensitive xor
+                     not (findexfieldinfos[0].caseinsensitive xor 
                                          acaseinsensitive) then begin
     result:= int1;
     break;
@@ -9140,7 +9132,7 @@ begin
    else begin
     result:= '';
    end;
-  end;
+  end;  
  end;
 end;
 
@@ -9181,7 +9173,7 @@ begin
     Value:= LookupDataSet.Lookup(LookupKeyfields,
                  DataSet.FieldValues[KeyFields], LookupresultField);
    end;
-  end;
+  end;  
  end;
 end;
 
@@ -9192,22 +9184,22 @@ var
  bm1: bookmarkdataty;
  state1: tdatasetstate;
 begin
- FCalcBuffer1:= Buffer;
+ FCalcBuffer1:= Buffer;  
  if not IsUniDirectional and (State <> dsInternalCalc) then begin
   state1:= settempstate(dscalcfields);
   try
    ClearCalcFields(FCalcBuffer1);
    for i := 0 to Fields.Count - 1 do begin
     field1:= fields[i];
-    if (field1.FieldKind = fkLookup) and
+    if (field1.FieldKind = fkLookup) and 
                       (field1.lookupdataset <> nil) then begin
      with flookupfieldinfos[-1-field1.fieldno] do begin
       if indexnum >= 0 then begin
        with tmsebufdataset(field1.lookupdataset) do begin
-        if active and
+        if active and 
            indexlocal[indexnum].find(keyfieldar,bm1,false,false,true) then begin
                                                //no checkbrowsemode
-         currentbmassign(lookupvaluefield,field1,bm1);
+         currentbmassign(lookupvaluefield,field1,bm1); 
         end
         else begin
          field1.clear;
@@ -9311,8 +9303,8 @@ end;
 procedure tmsebufdataset.savepointevent(const sender: tmdbtransaction;
                const akind: savepointeventkindty; const alevel: integer);
 begin
- if (bs1_restoreupdate in fbstate1) and active and
-          ((sender = ftransactionwrite) or
+ if (bs1_restoreupdate in fbstate1) and active and 
+          ((sender = ftransactionwrite) or 
               (ftransactionwrite = nil) and (sender = ftransaction)) then begin
   case akind of
    spek_begin: begin
@@ -9345,7 +9337,7 @@ begin
  int2:= 0;
  for int1:= 0 to high(result) do begin
   with fupdatebuffer[int1] do begin
-   if (info.bookmark.recordpo <> nil) and
+   if (info.bookmark.recordpo <> nil) and 
                      not (ruf_applied in info.flags) then begin
     result[int2]:= info;
     inc(int2);
@@ -9363,7 +9355,7 @@ begin
  int2:= 0;
  for int1:= 0 to high(result) do begin
   with fupdatebuffer[int1] do begin
-   if (info.bookmark.recordpo <> nil) and
+   if (info.bookmark.recordpo <> nil) and 
               (info.flags*[ruf_applied,ruf_error] = [ruf_error]) then begin
     result[int2]:= info;
     inc(int2);
@@ -9541,7 +9533,7 @@ begin
  for int1:= 0 to count-1 do begin
   with tlocalindex(fitems[int1]) do begin
    for int2:= 0 to high(findexfieldinfos) do begin
-    if (afield = nil) or
+    if (afield = nil) or 
            (findexfieldinfos[int2].fieldinstance = afield) then begin
      result:= true;
      if delayed then begin
@@ -9552,7 +9544,7 @@ begin
        findexes[int1+1].ind:= nil;
 //       exclude(tmsebufdataset(fowner).fbstate,bs_indexvalid);
       end;
-     end;
+     end;      
     end;
     break;
    end;
@@ -9732,7 +9724,7 @@ function tlocalindex.dolookupcompare(const l,r: pintrecordty;
 
 var
  ldata,rdata: lookupdataty;
-
+  
 begin
  result:= 0;
  with tmsebufdataset(ainfo.fieldinstance.lookupdataset) do begin
@@ -9766,7 +9758,7 @@ begin
       end;
      end;
     end;
-   end;
+   end;    
   end;
  end;
 end;
@@ -9776,7 +9768,7 @@ function tlocalindex.dolookupcomparea(const lvalue: pointer; r: pintrecordty;
                      //l is compare value, r can be lookup
 var
  {ldata,}rdata: lookupdataty;
-
+  
 begin
  result:= 0;
  with tmsebufdataset(ainfo.fieldinstance.lookupdataset) do begin
@@ -9810,7 +9802,7 @@ begin
       end;
      end;
     end;
-   end;
+   end;    
   end;
  end;
 end;
@@ -9846,7 +9838,7 @@ begin
      if not getfieldflag(@r^.header.fielddata.nullmask,fieldindex) then begin
       inc(result);
      end
-     else begin
+     else begin    
       result:= comparefunc((pchar(l)+recoffset)^,(pchar(r)+recoffset)^);
      end;
     end;
@@ -9912,7 +9904,7 @@ begin
      if not getfieldflag(@r^.header.fielddata.nullmask,fieldindex) then begin
       inc(result);
      end
-     else begin
+     else begin    
       result:= comparefunc((pchar(l)+recoffset)^,(pchar(r)+recoffset)^);
      end;
     end;
@@ -9948,7 +9940,7 @@ begin
  for int1:= 0 to high(findexfieldinfos) do begin
   with findexfieldinfos[int1] do begin
    if islookup then begin
-    result:= dolookupcompare(l,r,findexfieldinfos[int1],false);
+    result:= dolookupcompare(l,r,findexfieldinfos[int1],false);    
     if desc then begin
      result:= -result;
     end;
@@ -10130,7 +10122,7 @@ begin
   po1:= pointer(findexes[findexlocal.indexof(self) + 1].ind);
  end;
  for int1:= int1 downto 0 do begin
-  if po1^[int1] = arecord then begin
+  if po1^[int1] = arecord then begin 
    result:= int1;
    break;
   end;
@@ -10162,7 +10154,7 @@ begin
     tmsebufdataset(fowner).findexlocal.doindexchanged;
    end;
   end;
- end;
+ end;   
 end;
 
 procedure tlocalindex.bindfields;
@@ -10183,9 +10175,9 @@ begin
     end;
     fieldinstance:= field1;
     with field1 do begin
-     if not((fieldkind in [fkdata,fkinternalcalc]) or
-            (fieldkind = fklookup) and
-            (flookupfieldinfos[-1-fieldno].indexnum >= 0)) or
+     if not((fieldkind in [fkdata,fkinternalcalc]) or 
+            (fieldkind = fklookup) and 
+            (flookupfieldinfos[-1-fieldno].indexnum >= 0)) or 
                       not (datatype in indexfieldtypes) then begin
       databaseerror('Invalid index field "'+fieldname+'".',
                                                    tmsebufdataset(self.fowner));
@@ -10261,7 +10253,7 @@ var
  calcfieldpo: pointer;
  b1,b2: boolean;
  state1: tdatasetstate;
-
+ 
 label
  endlab;
 begin
@@ -10274,7 +10266,7 @@ begin
   paramerror;
  end;
  for int1:= lastind downto 0 do begin
-  if (avalues[int1].vtype <> vtpointer) and
+  if (avalues[int1].vtype <> vtpointer) and 
               (avalues[int1].vtype <> findexfieldinfos[int1].vtype) then begin
    paramerror(msestring(tmsebufdataset(fowner).name)+
     'field '+ msestring(findexfieldinfos[int1].fieldinstance.fieldname)+
@@ -10436,7 +10428,7 @@ begin
       if not result then begin
        goto endlab;
       end;
-     end;
+     end;     
      if not result then begin
       if compare1a(po1,ind[int1+1],lastind,false) = 0 then begin
        result:= true;
@@ -10452,13 +10444,13 @@ begin
        end;
        if not result then begin
         inc(int1);
-        if (int1 >= fbrecordcount) or
+        if (int1 >= fbrecordcount) or 
                        (compare1a(po1,ind[int1],lastind,true) <> 0) then begin
          dec(int1,2);         //for reversed order
-         if (int1 < 0) or
+         if (int1 < 0) or 
                        (compare1a(po1,ind[int1],lastind,true) <> 0) then begin
           dec(int1);
-          if (int1 < 0) or
+          if (int1 < 0) or 
                        (compare1a(po1,ind[int1],lastind,true) <> 0) then begin
            inc(int1,2);
           end
@@ -10473,7 +10465,7 @@ begin
         else begin
          result:= true;
         end;
-       end;
+       end;         
       end
       else begin
        if int1 < 0 then begin
@@ -10669,7 +10661,7 @@ function tlocalindex.find(const avalues: array of tfield;
                 //true if found else nearest lower or bigger,
                 //abookmark = '' if no lower or bigger found
 var
- mstr1: msestring;
+ mstr1: msestring; 
  str1: string;
  consts1: array of tvarrec;
  isnull1: array of boolean;
@@ -10679,7 +10671,7 @@ var
  cur1: currency;
  lint1: int64;
  id1: tguid;
-
+  
 begin
  setlength(consts1,length(avalues));
  setlength(isnull1,length(avalues));
@@ -10710,7 +10702,7 @@ begin
      ftBoolean: begin
       vboolean:= asboolean;
       vtype:= vtboolean
-     end;
+     end; 
      ftFloat,ftcurrency,ftDate,ftTime,ftDateTime,ftTimeStamp,ftFMTBcd: begin
       rea1:= asfloat;
       vtype:= vtextended;
@@ -10738,11 +10730,10 @@ begin
       vtype:= vtint64;
       vint64:= @lint1;
      end;
-     else; // For case statment added to make compiler happy.
     end;
    end;
   end;
- end;
+ end; 
  result:= find(consts1,isnull1,abookmark,abigger,partialstring,
                                              nocheckbrowsemode,filtered);
 end;
@@ -10766,7 +10757,7 @@ function tlocalindex.unique(const avalues: array of const): boolean;
 var
  bm1: bookmarkdataty;
 begin
- result:= not find(avalues,[],bm1,false,false,true) or
+ result:= not find(avalues,[],bm1,false,false,true) or 
       (bm1.recordpo = tmsebufdataset(fowner).bookmarkdata.recordpo);
 end;
 

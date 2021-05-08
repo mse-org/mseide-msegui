@@ -198,7 +198,7 @@ const
                                  %00010000,%00100000,%01000000,%10000000);
  andmask: array[0..7] of byte = (%11111110,%11111101,%11111011,%11110111,
                                  %11101111,%11011111,%10111111,%01111111);
-
+          
 procedure unsetfieldisnull(nullmask: pbyte; const x: integer);
 //var
 // int1: integer;
@@ -716,7 +716,7 @@ var
  int1: integer;
 begin
  int1:= Field.FieldNo - 1;
- result:= (int1 >= 0) and MDSGetActiveBuffer(SrcBuffer) and
+ result:= (int1 >= 0) and MDSGetActiveBuffer(SrcBuffer) and 
           not getfieldisnull(pointer(srcbuffer),int1);
  if result and (buffer <> nil) then begin
   Move((SrcBuffer+ffieldoffsets[int1])^, Buffer^,freadfieldsizes[int1]);
@@ -734,7 +734,7 @@ begin
   if buffer = nil then begin
    setfieldisnull(pointer(destbuffer),int1);
   end
-  else begin
+  else begin 
    unsetfieldisnull(pointer(destbuffer),int1);
    Move(Buffer^,(DestBuffer+ffieldoffsets[int1])^,fwritefieldsizes[int1]);
    dataevent(defieldchange,ptrint(field));
@@ -962,7 +962,6 @@ begin
                 ftInteger  : F1.AsInteger:=F2.AsInteger;
                 ftDate     : F1.AsDateTime:=F2.AsDateTime;
                 ftTime     : F1.AsDateTime:=F2.AsDateTime;
-                 else; // For case statment added to make compiler happy.
               end;
               end;
             Try

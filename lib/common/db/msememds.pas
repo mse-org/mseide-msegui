@@ -70,7 +70,7 @@ type
 {
    function locate(const key: integer; const field: tfield;
                    const options: locateoptionsty = []): locateresultty;
-   function locate(const key: msestring; const field: tfield;
+   function locate(const key: msestring; const field: tfield; 
                  const options: locateoptionsty = []): locateresultty;
 }
    procedure AppendRecord(const Values: array of const);
@@ -81,7 +81,7 @@ type
    property controller: tdscontroller read fcontroller write setcontroller;
    property Active: boolean read getactive write setactive default false;
  end;
-
+ 
 implementation
 
 { tmsememdataset }

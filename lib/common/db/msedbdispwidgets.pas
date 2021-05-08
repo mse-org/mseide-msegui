@@ -15,10 +15,10 @@ uses
  mseglob,mseinterfaces,msegraphics,
  msedispwidgets,msestrings,mselookupbuffer,msegui,msemenus,mseevent,
  msebarcode;
-
-type
- tdispfielddatalink = class;
-
+ 
+type 
+ tdispfielddatalink = class; 
+ 
  idbdispfieldlink = interface(inullinterface)[miid_idbdispfieldlink]
   procedure fieldtovalue;
   procedure setnullvalue;
@@ -35,7 +35,7 @@ type
    fintf: idbdispfieldlink;
    procedure activechanged; override;
    function getdataset(const aindex: integer): tdataset; virtual;
-   procedure getfieldtypes(out apropertynames: stringarty;
+   procedure getfieldtypes(out apropertynames: stringarty; 
                                      out afieldtypes: fieldtypesarty); virtual;
   public
    constructor create(const intf: idbdispfieldlink);
@@ -45,7 +45,7 @@ type
    property datasource;
    property fieldname;
  end;
-
+ 
  tdblabel = class(tcustomlabel,idbdispfieldlink,ireccontrol)
   private
    fdatalink: tdispfielddatalink;
@@ -57,7 +57,7 @@ type
     //ireccontrol
    procedure recchanged;
    procedure setdatalink(const avalue: tdispfielddatalink);
-  protected
+  protected   
    procedure defineproperties(filer: tfiler); override;
   public
    constructor create(aowner: tcomponent); override;
@@ -83,7 +83,7 @@ type
     //ireccontrol
    procedure recchanged;
    procedure setdatalink(const avalue: tdispfielddatalink);
-  protected
+  protected   
    procedure defineproperties(filer: tfiler); override;
   public
    constructor create(aowner: tcomponent); override;
@@ -91,13 +91,13 @@ type
   published
    property datalink: tdispfielddatalink read fdatalink write setdatalink;
  end;
-
+  
  tdbstringdisplb = class(tdbstringdisp,idbdispfieldlink,ireccontrol,
                                ilookupbufferfieldinfo)
   private
    flookupbuffer: tcustomlookupbuffer;
    flookupkeyfieldno: lookupbufferfieldnoty;
-   flookupvaluefieldno: lookupbufferfieldnoty;
+   flookupvaluefieldno: lookupbufferfieldnoty;   
    fkeyvalue: integer;
    procedure setlookupbuffer(const avalue: tcustomlookupbuffer);
      //idbdispfieldlink
@@ -115,12 +115,12 @@ type
   published
    property lookupbuffer: tcustomlookupbuffer read flookupbuffer
                                             write setlookupbuffer;
-   property lookupkeyfieldno: lookupbufferfieldnoty read flookupkeyfieldno
+   property lookupkeyfieldno: lookupbufferfieldnoty read flookupkeyfieldno 
                                             write flookupkeyfieldno default 0;
    property lookupvaluefieldno: lookupbufferfieldnoty read flookupvaluefieldno
                                             write flookupvaluefieldno default 0;
  end;
-
+ 
  tdbintegerdisp = class(tcustomintegerdisp,idbdispfieldlink,ireccontrol)
   private
    fdatalink: tdispfielddatalink;
@@ -133,7 +133,7 @@ type
     //ireccontrol
    procedure recchanged;
    procedure setdatalink(const avalue: tdispfielddatalink);
-  protected
+  protected   
    procedure defineproperties(filer: tfiler); override;
    function getvaluetext: msestring; override;
   public
@@ -142,20 +142,20 @@ type
   published
    property datalink: tdispfielddatalink read fdatalink write setdatalink;
  end;
-
+ 
  tdbintegerdisplb = class(tdbintegerdisp,idbdispfieldlink,ireccontrol,
                             ilookupbufferfieldinfo)
   private
    flookupbuffer: tcustomlookupbuffer;
    flookupkeyfieldno: lookupbufferfieldnoty;
-   flookupvaluefieldno: lookupbufferfieldnoty;
+   flookupvaluefieldno: lookupbufferfieldnoty;   
    fkeyvalue: integer;
    procedure setlookupbuffer(const avalue: tcustomlookupbuffer);
      //idbdispfieldlink
    procedure fieldtovalue; override;
    procedure setkeyvalue(const avalue: integer);
   protected
-   procedure objectevent(const sender: tobject;
+   procedure objectevent(const sender: tobject; 
                            const event: objecteventty); override;
   //ilookupbufferfieldinfo
    function getlbdatakind(const apropname: string): lbdatakindty;
@@ -163,14 +163,14 @@ type
   public
    property keyvalue: integer read fkeyvalue write setkeyvalue;
   published
-   property lookupbuffer: tcustomlookupbuffer read flookupbuffer
+   property lookupbuffer: tcustomlookupbuffer read flookupbuffer 
                                           write setlookupbuffer;
-   property lookupkeyfieldno: lookupbufferfieldnoty read flookupkeyfieldno
+   property lookupkeyfieldno: lookupbufferfieldnoty read flookupkeyfieldno 
                                           write flookupkeyfieldno default 0;
    property lookupvaluefieldno: lookupbufferfieldnoty read flookupvaluefieldno
                                           write flookupvaluefieldno default 0;
  end;
-
+ 
  tdbbooleandisp = class(tcustombooleandisp,idbdispfieldlink,ireccontrol)
   private
    fisnotnull: boolean;
@@ -183,7 +183,7 @@ type
     //ireccontrol
    procedure recchanged;
    procedure setdatalink(const avalue: tdispfielddatalink);
-  protected
+  protected   
    procedure defineproperties(filer: tfiler); override;
    function getvaluetext: msestring; override;
   public
@@ -192,7 +192,7 @@ type
   published
    property datalink: tdispfielddatalink read fdatalink write setdatalink;
  end;
-
+ 
  tdbrealdisp = class(tcustomrealdisp,idbdispfieldlink,ireccontrol)
   private
    fdatalink: tdispfielddatalink;
@@ -204,7 +204,7 @@ type
     //ireccontrol
    procedure recchanged;
    procedure setdatalink(const avalue: tdispfielddatalink);
-  protected
+  protected   
    procedure defineproperties(filer: tfiler); override;
   public
    constructor create(aowner: tcomponent); override;
@@ -212,13 +212,13 @@ type
   published
    property datalink: tdispfielddatalink read fdatalink write setdatalink;
  end;
-
+  
  tdbrealdisplb = class(tdbrealdisp,idbdispfieldlink,ireccontrol,
                          ilookupbufferfieldinfo)
   private
    flookupbuffer: tcustomlookupbuffer;
    flookupkeyfieldno: lookupbufferfieldnoty;
-   flookupvaluefieldno: lookupbufferfieldnoty;
+   flookupvaluefieldno: lookupbufferfieldnoty;   
    fkeyvalue: integer;
    procedure setlookupbuffer(const avalue: tcustomlookupbuffer);
      //idbdispfieldlink
@@ -237,7 +237,7 @@ type
    property lookupkeyfieldno: lookupbufferfieldnoty read flookupkeyfieldno write flookupkeyfieldno default 0;
    property lookupvaluefieldno: lookupbufferfieldnoty read flookupvaluefieldno write flookupvaluefieldno default 0;
  end;
-
+ 
  tdbdatetimedisp = class(tcustomdatetimedisp,idbdispfieldlink,ireccontrol)
   private
    fdatalink: tdispfielddatalink;
@@ -249,7 +249,7 @@ type
     //ireccontrol
    procedure recchanged;
    procedure setdatalink(const avalue: tdispfielddatalink);
-  protected
+  protected   
    procedure defineproperties(filer: tfiler); override;
   public
    constructor create(aowner: tcomponent); override;
@@ -257,13 +257,13 @@ type
   published
    property datalink: tdispfielddatalink read fdatalink write setdatalink;
  end;
-
+ 
  tdbdatetimedisplb = class(tdbdatetimedisp,idbdispfieldlink,ireccontrol,
                                          ilookupbufferfieldinfo)
   private
    flookupbuffer: tcustomlookupbuffer;
    flookupkeyfieldno: lookupbufferfieldnoty;
-   flookupvaluefieldno: lookupbufferfieldnoty;
+   flookupvaluefieldno: lookupbufferfieldnoty;   
    fkeyvalue: integer;
    procedure setlookupbuffer(const avalue: tcustomlookupbuffer);
      //idbdispfieldlink
@@ -294,7 +294,7 @@ type
     //ireccontrol
    procedure recchanged;
    procedure setdatalink(const avalue: tdispfielddatalink);
-  protected
+  protected   
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -308,13 +308,13 @@ type
    property colorspace;
    property fontbar;
  end;
-
+ 
 implementation
 uses
  msereal,sysutils,typinfo;
 type
- treader1 = class(treader);
-
+ treader1 = class(treader); 
+ 
 { tdispfielddatalink }
 
 constructor tdispfielddatalink.create(const intf: idbdispfieldlink);
@@ -363,13 +363,13 @@ end;
 procedure tdispfielddatalink.recordchanged(afield: tfield);
 begin
  if (afield = nil) or (afield = field) then begin
-  if active and (field <> nil) and
-         not (dataset.eof and dataset.bof and
+  if active and (field <> nil) and 
+         not (dataset.eof and dataset.bof and 
                              (dataset.state <> dsinsert)) then begin
    if field.isnull then begin
     fintf.setnullvalue;
    end
-   else begin
+   else begin 
     fintf.fieldtovalue;
    end;
   end

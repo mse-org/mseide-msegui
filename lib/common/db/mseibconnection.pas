@@ -29,14 +29,14 @@ type
    function sequencecurrvalue(const sequencename: string): msestring; override;
    function writesequence(const sequencename: string;
                     const avalue: largeint): msestring; override;
-   function CreateBlobStream(const Field: TField; const Mode: TBlobStreamMode;
+   function CreateBlobStream(const Field: TField; const Mode: TBlobStreamMode; 
                        const acursor: tsqlcursor): TStream; override;
   public
   published
    property DatabaseName: filenamety read getdatabasename write setdatabasename;
    property Connected: boolean read getconnected write setconnected default false;
  end;
-
+ 
 implementation
 uses
  msefileutils,sysutils,mseformatstr;

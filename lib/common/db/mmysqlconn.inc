@@ -70,7 +70,7 @@ uses
 Type
 
  tcursorname = class;
-
+ 
  eerrorname = class(econnectionerror)
   private
    fsqlcode: string;
@@ -79,7 +79,7 @@ Type
               const aerrormessage: msestring; const aerror: integer; const asqlcode: string);
    property sqlcode: string read fsqlcode;
  end;
-
+  
   TTransactionName = Class(TSQLHandle)
   protected
   end;
@@ -169,19 +169,19 @@ Type
                                    const aparam: tparam);
 //   function blobscached: boolean;
    function identquotechar: msestring; override;
-
+   
   Public
    constructor create(aowner: tcomponent); override;
     Function AllocateTransactionHandle : TSQLHandle; override;
     Function AllocateCursorHandle(const aowner: icursorclient;
                            const aname: ansistring): TSQLCursor; override;
     Procedure DeAllocateCursorHandle(var cursor : TSQLCursor); override;
-    procedure preparestatement(const cursor: tsqlcursor;
+    procedure preparestatement(const cursor: tsqlcursor; 
                   const atransaction : tsqltransaction;
                   const asql: msestring; const aparams : tmseparams); override;
     procedure UnPrepareStatement(cursor:TSQLCursor); override;
     procedure FreeFldBuffers(cursor : TSQLCursor); override;
-    procedure AddFieldDefs(const cursor: TSQLCursor;
+    procedure AddFieldDefs(const cursor: TSQLCursor; 
                    const FieldDefs : TfieldDefs); override;
     function Fetch(cursor : TSQLCursor) : boolean; override;
     function loadfield(const cursor: tsqlcursor;
@@ -214,7 +214,7 @@ Type
 //  EMySQLError = Class(Exception);
 
 implementation
-uses
+uses 
  msestrings,dbconst,msebufdataset,msesqlresult;
 {$ifndef mse_allwarnings}
  {$if fpc_fullversion >= 030100}
@@ -227,7 +227,7 @@ uses
 
 type
  tmsebufdataset1 = class(tmsebufdataset);
-
+ 
 { TConnectionName }
 
 Resourcestring
@@ -283,22 +283,22 @@ begin
 {$if fpc_fullversion >= 20401}
   // To make it possible to call this if there's no connection yet
   InitialiseMysql;
-  Try
+  Try  
     Result:=strpas(mysql_get_client_info());
-  Finally
+  Finally  
     ReleaseMysql;
-  end;
+  end;  
 {$else}
   // To make it possible to call this if there's no connection yet
   B:=(MysqlLibraryHandle=Nilhandle);
   If B then
     InitialiseMysql;
-  Try
+  Try  
     Result:=strpas(mysql_get_client_info());
-  Finally
+  Finally  
     if B then
       ReleaseMysql;
-  end;
+  end;  
 {$endif}
 end;
 
@@ -319,7 +319,7 @@ end;
 {
 function tconnectionname.stringtosqltext(const afieldtype: tfieldtype;
                                                 const avalue: string): string;
-var
+var 
  esc_str : pchar;
 begin
  Getmem(esc_str,length(avalue)*2+1);
@@ -329,7 +329,7 @@ begin
 end;
 
 function TConnectionName.GetAsSQLText(Field : TField) : string;
-var
+var 
  esc_str : pchar;
  str1: string;
 begin
@@ -347,7 +347,7 @@ begin
 end;
 
 function TConnectionName.GetAsSQLText(Param: TParam) : string;
-var
+var 
  esc_str : pchar;
  str1: string;
 begin
@@ -449,7 +449,7 @@ begin
   Result := nil;
 end;
 
-procedure tconnectionname.preparestatement(const cursor: tsqlcursor;
+procedure tconnectionname.preparestatement(const cursor: tsqlcursor; 
                   const atransaction : tsqltransaction;
                   const asql: msestring; const aparams : tmseparams);
 begin
@@ -523,7 +523,7 @@ begin
   else begin
    str1:= ansistring(mstr1);
   end;
-
+  
   if mysql_query(FMySQL,Pchar(str1))<>0 then begin
    checkerror(Format(SErrExecuting,[
         ansistring(connectionmessage(mysql_error(FMySQL)))]))
@@ -555,7 +555,7 @@ begin
     end;
     FIELD_TYPE_LONGLONG,FIELD_TYPE_INT24: begin
      newtype:= ftlargeint;
-    end;
+    end;     
  {$ifdef mysql50}
     FIELD_TYPE_NEWDECIMAL,
  {$endif}
@@ -584,13 +584,13 @@ begin
      NewType:= ftString;
      NewSize:= length;
     end;
-    {$ifdef mysql41}
+    {$ifdef mysql41}     
     field_type_blob: begin
      newsize:= sizeof(integer);
      if charsetnr = 63 then begin //binary
       newtype:= ftblob;
      end
-     else begin
+     else begin 
       newtype:= ftmemo;
      end;
     end;
@@ -626,7 +626,7 @@ begin
   For I:= 0 to FC-1 do begin
    field := mysql_fetch_field_direct(C.FRES, I);
    with field^ do begin
-    if (flags and (pri_key_flag or auto_increment_flag) =
+    if (flags and (pri_key_flag or auto_increment_flag) = 
               (pri_key_flag or auto_increment_flag)) then begin
      c.fprimarykeyfieldname:= name;
     end;
@@ -642,7 +642,7 @@ begin
     end;
     fd:= TFieldDef.Create(nil,str1,DFT,DFS,False,TF);
     fd.collection:= fielddefs;
-
+    
     c.MapDSRowToMSQLRow[TF-1] := I;
     inc(TF);
    end
@@ -683,7 +683,7 @@ begin
     checkerror(SErrFetchingData);
     end;
  Row:=C.Row;
-
+ 
  inc(Row,c.MapDSRowToMSQLRow[fno]);
  if row^ <> nil then begin
   if buffer = nil then begin
@@ -693,7 +693,7 @@ begin
   if datatype = ftstring then begin
 //   alen:= strlen(row^);
    alen:= mysql_fetch_lengths(c.fres)[c.MapDSRowToMSQLRow[fno]];
-   if bufsize < alen then begin
+   if bufsize < alen then begin 
     bufsize:= -alen;
     result:= true;
     exit;
@@ -847,7 +847,7 @@ begin
   Result := Result + EncodeTime(EH, EN, ES, 0);;
 end;
 
-function TConnectionName.MySQLWriteData(const acursor: tsqlcursor;
+function TConnectionName.MySQLWriteData(const acursor: tsqlcursor; 
                      AType: enum_field_types;ASize: Integer;
                      AFieldType: TFieldType;Source, Dest: PChar): Boolean;
 
@@ -896,7 +896,7 @@ begin
       end;
 {$ifdef mysql50}
     FIELD_TYPE_NEWDECIMAL,
-{$endif}
+{$endif}      
     FIELD_TYPE_DECIMAL, FIELD_TYPE_FLOAT, FIELD_TYPE_DOUBLE:
       if AFieldType = ftBCD then
         begin
@@ -954,8 +954,7 @@ begin
      int1:= acursor.addblobdata(source,asize);
      move(int1,dest^,sizeof(int1));
       //save id
-    end;
-    else; // For case statment added to make compiler happy.
+    end;     
    end;
   end;
  end;
@@ -963,7 +962,7 @@ end;
 
 procedure TConnectionName.UpdateIndexDefs(var IndexDefs : TIndexDefs;
                      const aTableName : string; const acursor: tsqlcursor);
-var
+var 
  qry: tsqlresult;
  keynamef,{filednamef,}columnnamef,nonuniquef: tdbcol;
  str1: string;
@@ -990,7 +989,7 @@ begin
       options:= options + [ixUnique];
      end;
      str1:= '';
-     repeat
+     repeat 
       str1:= str1 + trim(columnnamef.asstring) + ';';
       next;
      until eof or (name <> keynamef.asstring);
@@ -1126,7 +1125,7 @@ end;
 
 { eerrorname }
 
-constructor eerrorname.create(const asender: tcustomsqlconnection;
+constructor eerrorname.create(const asender: tcustomsqlconnection; 
          const amessage: ansistring; const aerrormessage: msestring;
          const aerror: integer; const asqlcode: string);
 begin

@@ -43,7 +43,7 @@ type
            dbnb_delete,dbnb_copyrecord,dbnb_edit,
  //             8          9          10
            dbnb_post,dbnb_cancel,dbnb_refresh,
- //            11           12             13              14
+ //            11           12             13              14   
            dbnb_filter,dbnb_filtermin,dbnb_filtermax,dbnb_filterclear,
  //          15             16
            dbnb_filteronoff,dbnb_find,
@@ -131,7 +131,7 @@ type
 
  navigdatalinkstatety = (nds_prior,nds_next,nds_datasetscrolled);
  navigdatalinkstatesty = set of navigdatalinkstatety;
-
+ 
  tnavigdatalink = class(tmsedatalink)
   private
   protected
@@ -178,7 +178,7 @@ type
   protected
    class function getbuttonclass: toolbuttonclassty; override;
  end;
-
+  
  tdbnavigator = class(tcustomtoolbar,idbnaviglink)
   private
    fdatalink: tnavigdatalink;
@@ -216,7 +216,7 @@ type
    procedure doasyncevent(var atag: integer); override;
    procedure dostatread(const reader: tstatreader); override;
    procedure dostatwrite(const writer: tstatwriter); override;
-
+   
     //idbnaviglink
    procedure setactivebuttons(const abuttons: dbnavigbuttonsty;
                              const afiltered: boolean);
@@ -226,7 +226,7 @@ type
    procedure dodialogexecute;
   public
    constructor create(aowner: tcomponent); override;
-   destructor destroy; override;
+   destructor destroy; override; 
    function canclose(const newfocus: twidget = nil): boolean; override;
    procedure edit();
    function canautoedit(): boolean;
@@ -236,7 +236,7 @@ type
   published
    property statfile;
    property datasource: tdatasource read getdatasource write setdatasource;
-   property visiblebuttons: dbnavigbuttonsty read fvisiblebuttons
+   property visiblebuttons: dbnavigbuttonsty read fvisiblebuttons 
                  write setvisiblebuttons default defaultvisibledbnavigbuttons;
    property colorglyph: colorty read getcolorglyph write setcolorglyph
                                                              default cl_default;
@@ -247,25 +247,25 @@ type
                                                                      default 0;
    property bounds_cx default defaultdbnavigatorwidth;
    property bounds_cy default defaultdbnavigatorheight;
-   property shortcut_first: shortcutty read fshortcuts[dbnb_first]
+   property shortcut_first: shortcutty read fshortcuts[dbnb_first] 
                   write fshortcuts[dbnb_first] default key_modctrl + ord(key_pageup);
-   property shortcut_prior: shortcutty read fshortcuts[dbnb_prior]
+   property shortcut_prior: shortcutty read fshortcuts[dbnb_prior] 
                   write fshortcuts[dbnb_prior] default ord(key_pageup);
-   property shortcut_next: shortcutty read fshortcuts[dbnb_next]
+   property shortcut_next: shortcutty read fshortcuts[dbnb_next] 
                   write fshortcuts[dbnb_next] default ord(key_pagedown);
-   property shortcut_last: shortcutty read fshortcuts[dbnb_last]
+   property shortcut_last: shortcutty read fshortcuts[dbnb_last] 
                   write fshortcuts[dbnb_last] default key_modctrl + ord(key_pagedown);
-   property shortcut_insert: shortcutty read fshortcuts[dbnb_insert]
+   property shortcut_insert: shortcutty read fshortcuts[dbnb_insert] 
                   write fshortcuts[dbnb_insert] default ord(key_none);
-   property shortcut_delete: shortcutty read fshortcuts[dbnb_delete]
+   property shortcut_delete: shortcutty read fshortcuts[dbnb_delete] 
                   write fshortcuts[dbnb_delete] default ord(key_none);
-   property shortcut_copyrecord: shortcutty read fshortcuts[dbnb_copyrecord]
+   property shortcut_copyrecord: shortcutty read fshortcuts[dbnb_copyrecord] 
                   write fshortcuts[dbnb_copyrecord] default ord(key_none);
    property shortcut_edit: shortcutty read fshortcuts[dbnb_edit]
                   write fshortcuts[dbnb_edit] default ord(key_f2);
-   property shortcut_post: shortcutty read fshortcuts[dbnb_post]
+   property shortcut_post: shortcutty read fshortcuts[dbnb_post] 
                   write fshortcuts[dbnb_post] default ord(key_f2);
-   property shortcut_cancel: shortcutty read fshortcuts[dbnb_cancel]
+   property shortcut_cancel: shortcutty read fshortcuts[dbnb_cancel] 
                   write fshortcuts[dbnb_cancel] default ord(key_none);
    property shortcut_refresh: shortcutty read fshortcuts[dbnb_refresh]
                   write fshortcuts[dbnb_refresh] default ord(key_none);
@@ -284,20 +284,20 @@ type
 //   property shortcut_dialog: shortcutty read fshortcuts[dbnb_dialog]
 //                  write fshortcuts[dbnb_dialog] default ord(key_f3);
               //use dialogbutton property!
-   property options: dbnavigatoroptionsty read foptions write setoptions
+   property options: dbnavigatoroptionsty read foptions write setoptions 
                   default defaultdbnavigatoroptions;
    property autoedit: boolean read getautoedit write setautoedit default false;
 //   property dialoghint: msestring read getdialoghint write setdialoghint;
-//
+//   
    property dialogbutton: tdbnavigbutton read gettoolbutton write settoolbutton;
-   property ondialogexecute: notifyeventty read fondialogexecute
+   property ondialogexecute: notifyeventty read fondialogexecute 
                            write fondialogexecute;
-   property onreadonlychange: booleanchangedeventty read fonreadonlychange
+   property onreadonlychange: booleanchangedeventty read fonreadonlychange 
                                                       write fonreadonlychange;
  end;
-
+ 
  tcustomeditwidgetdatalink = class;
-
+ 
  idbeditfieldlink = interface(inullinterface)[miid_idbeditfieldlink]
   function getwidget: twidget;
   function getenabled: boolean;
@@ -324,11 +324,11 @@ type
  end;
 
  tgriddatalink = class;
-
+ 
 // editwidgetdatalinkstatety = (ewds_editing,ewds_modified,ewds_filterediting,
 //                              ewds_filtereditdisabled);
 // editwidgetdatalinkstatesty = set of editwidgetdatalinkstatety;
-
+ 
  tcustomeditwidgetdatalink = class(tfielddatalink,idbeditinfo,iobjectlink)
   private
 //   fstate: editwidgetdatalinkstatesty;
@@ -350,7 +350,7 @@ type
    function getownerwidget: twidget;
    procedure setnavigator(const avalue: tdbnavigator);
    procedure setoptions(const avalue: optionseditdbty);
-  protected
+  protected   
    fintf: idbeditfieldlink;
    foptions: optionseditdbty;
    fobjectlinker: tobjectlinker;
@@ -374,7 +374,7 @@ type
    function getinstance: tobject;
     //idbeditinfo
    function getdataset(const aindex: integer): tdataset;
-   procedure getfieldtypes(out apropertynames: stringarty;
+   procedure getfieldtypes(out apropertynames: stringarty; 
                                      out afieldtypes: fieldtypesarty); virtual;
     //iifiserver
    procedure updateoptionsedit(var avalue: optionseditty); override;
@@ -394,17 +394,17 @@ type
 
 //   procedure datachanged;
 //   procedure updateoptionsedit(var aoptions: optionseditty);
-   function cuttext(const atext: msestring; out maxlength: integer): boolean;
+   function cuttext(const atext: msestring; out maxlength: integer): boolean; 
              //true if text too long
-   property options: optionseditdbty read foptions write setoptions
+   property options: optionseditdbty read foptions write setoptions 
                          default defaulteditwidgetdatalinkoptions;
-   property asnullmsestring: msestring read getasnullmsestring
+   property asnullmsestring: msestring read getasnullmsestring 
                                               write setasnullmsestring;
                    //uses nulltext
    property navigator: tdbnavigator read fnavigator write setnavigator;
    property onbeginedit: notifyeventty read fonbeginedit write fonbeginedit;
    property onendedit: notifyeventty read fonendedit write fonendedit;
-   property ondataentered: notifyeventty read fondataentered
+   property ondataentered: notifyeventty read fondataentered 
                                      write fondataentered;
    property owner: twidget read getownerwidget;
  end;
@@ -412,7 +412,7 @@ type
  teditwidgetdatalink = class(tcustomeditwidgetdatalink)
   private
   published
-   property datasource: tdatasource read getdatasource1
+   property datasource: tdatasource read getdatasource1 
                                          write setwidgetdatasource;
    property navigator;
    property fieldname;
@@ -433,7 +433,7 @@ type
    procedure updatefields; override;
    function getsortfield: tfield; override;
    property fieldtext: tfield read ffieldtext;
-   procedure getfieldtypes(out apropertynames: stringarty;
+   procedure getfieldtypes(out apropertynames: stringarty; 
                                      out afieldtypes: fieldtypesarty); override;
   public
    constructor create(const aowner: tcustomdataedit;
@@ -444,7 +444,7 @@ type
   published
    property fieldnametext: string read ffieldnametext write setfieldnametext;
  end;
-
+ 
  tstringeditwidgetdatalink = class(teditwidgetdatalink)
   published
    property nullsymbol;
@@ -454,12 +454,12 @@ type
   published
    property nullsymbol;
  end;
-
+  
  tdbstringedit = class(tcustomstringedit,idbeditfieldlink,ireccontrol)
   private
    fdatalink: tstringeditwidgetdatalink;
    procedure setdatalink(const adatalink: tstringeditwidgetdatalink);
-  protected
+  protected   
    procedure defineproperties(filer: tfiler); override;
 //   procedure editnotification(var info: editnotificationinfoty); override;
    function nullcheckneeded(const newfocus: twidget): boolean; override;
@@ -467,7 +467,7 @@ type
    function getgriddatasource: tdatasource;
    function createdatalist(const sender: twidgetcol): tdatalist; override;
    procedure modified; override;
-   procedure doshortcut(var info: keyeventinfoty;
+   procedure doshortcut(var info: keyeventinfoty; 
                                       const sender: twidget); override;
 //   function getoptionsedit: optionseditty; override;
 //   procedure dochange; override;
@@ -493,13 +493,13 @@ type
    property onsetvalue;
  end;
 
-
+ 
 {
  tdbdialogstringedit = class(tcustomdialogstringedit,idbeditfieldlink,ireccontrol)
   private
    fdatalink: tstringeditwidgetdatalink;
    procedure setdatalink(const avalue: tstringeditwidgetdatalink);
-  protected
+  protected   
    procedure defineproperties(filer: tfiler); override;
 
    function nullcheckneeded(const newfocus: twidget): boolean; override;
@@ -532,7 +532,7 @@ type
 }
  idbifidropdownlistdatalink = interface(iifidropdownlistdatalink)
  end;
-
+ 
  tcustomdbdropdownlistedit = class(tcustomdropdownlistedit,idbeditfieldlink,
                                       ireccontrol,idbifidropdownlistdatalink)
   private
@@ -543,11 +543,11 @@ type
    function getdropdownifilink: tifidropdownlistlinkcomp;
    procedure setdropdownifilink(const avalue: tifidropdownlistlinkcomp);
    procedure dropdownsetifiserverintf(const aintf: iifiserver);
-   procedure idbifidropdownlistdatalink.setifiserverintf =
+   procedure idbifidropdownlistdatalink.setifiserverintf = 
                                            dropdownsetifiserverintf;
    procedure dropdownifisetvalue(var avalue; var accept: boolean);
    procedure idbifidropdownlistdatalink.ifisetvalue = dropdownifisetvalue;
-  protected
+  protected   
    procedure defineproperties(filer: tfiler); override;
 
    function nullcheckneeded(const newfocus: twidget): boolean; override;
@@ -555,7 +555,7 @@ type
    function getgriddatasource: tdatasource;
    function createdatalist(const sender: twidgetcol): tdatalist; override;
    procedure modified; override;
-   procedure doshortcut(var info: keyeventinfoty;
+   procedure doshortcut(var info: keyeventinfoty; 
                                       const sender: twidget); override;
 //   function getoptionsedit: optionseditty; override;
 //   procedure dochange; override;
@@ -574,7 +574,7 @@ type
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
    property datalink: tstringeditwidgetdatalink read fdatalink write setdatalink;
-   property dropdownifilink: tifidropdownlistlinkcomp read getdropdownifilink
+   property dropdownifilink: tifidropdownlistlinkcomp read getdropdownifilink 
                                write setdropdownifilink;  //for dropdownlist
  end;
 
@@ -582,13 +582,13 @@ type
   procedure recordselected(const arecordnum: integer; const akey: keyty);
                      //-2 = empty row, -1 = none
  end;
-
+ 
  ilbdropdownlist = interface(idropdownlist)
   procedure recordselected(const arecordnum: integer; const akey: keyty);
                      //-2 = empty row, -1 = none
-  function getlbkeydatakind: lbdatakindty;
+  function getlbkeydatakind: lbdatakindty;                     
  end;
-
+ 
  tdbdropdownlistedit = class(tcustomdbdropdownlistedit)
   published
    property datalink;
@@ -598,13 +598,13 @@ type
    property onbeforedropdown;
    property onafterclosedropdown;
  end;
-
+ 
  tcustomdbdropdownlistcontroller = class;
 // tdbdropdownlistcontroller = class;
  tdropdownlistcontrollerdb = class;
  tcustomlbdropdownlistcontroller = class;
  tdropdownlistcontrollerlb = class;
-
+ 
  tdbdropdownlisteditdb = class(tdbdropdownlistedit,idbdropdownlist)
   private
    function getdropdown: tdropdownlistcontrollerdb;
@@ -613,10 +613,10 @@ type
    function createdropdowncontroller: tcustomdropdowncontroller; override;
    procedure recordselected(const arecordnum: integer; const akey: keyty);
   published
-   property dropdown: tdropdownlistcontrollerdb read getdropdown
+   property dropdown: tdropdownlistcontrollerdb read getdropdown 
                                                         write setdropdown;
  end;
-
+ 
  tdbdropdownlisteditlb = class(tdbdropdownlistedit,ilbdropdownlist)
   private
    function getdropdown: tdropdownlistcontrollerlb;
@@ -630,7 +630,7 @@ type
    property dropdown: tdropdownlistcontrollerlb read getdropdown
                                                        write setdropdown;
  end;
-
+ 
  tdropdownlisteditdb = class(tdropdownlistedit,idbdropdownlist)
   private
    function getdropdown: tdropdownlistcontrollerdb;
@@ -641,7 +641,7 @@ type
   published
    property dropdown: tdropdownlistcontrollerdb read getdropdown write setdropdown;
  end;
-
+ 
  tdropdownlisteditlb = class(tdropdownlistedit,ilbdropdownlist)
   private
    function getdropdown: tdropdownlistcontrollerlb;
@@ -650,17 +650,17 @@ type
    function createdropdowncontroller: tcustomdropdowncontroller; override;
    procedure recordselected(const arecordnum: integer; const akey: keyty);
     //ilbdropdownlist
-   function getlbkeydatakind: lbdatakindty;
+   function getlbkeydatakind: lbdatakindty;                     
   published
    property dropdown: tdropdownlistcontrollerlb read getdropdown
                                                        write setdropdown;
  end;
-
+ 
  tdbkeystringedit = class(tcustomkeystringedit,idbeditfieldlink,ireccontrol)
   private
    fdatalink: tstringlookupeditdatalink;
    procedure setdatalink(const avalue: tstringlookupeditdatalink);
-  protected
+  protected   
    procedure defineproperties(filer: tfiler); override;
    function nullcheckneeded(const newfocus: twidget): boolean; override;
    procedure griddatasourcechanged; override;
@@ -698,7 +698,7 @@ type
   private
    fdatalink: tstringeditwidgetdatalink;
    procedure setdatalink(const avalue: tstringeditwidgetdatalink);
-  protected
+  protected   
    procedure defineproperties(filer: tfiler); override;
 
    function nullcheckneeded(const newfocus: twidget): boolean; override;
@@ -706,7 +706,7 @@ type
    function getgriddatasource: tdatasource;
    function createdatalist(const sender: twidgetcol): tdatalist; override;
    procedure modified; override;
-   procedure doshortcut(var info: keyeventinfoty;
+   procedure doshortcut(var info: keyeventinfoty; 
                                       const sender: twidget); override;
 //   function getoptionsedit: optionseditty; override;
 //   procedure dochange; override;
@@ -734,7 +734,7 @@ type
   private
    fdatalink: teditwidgetdatalink;
    procedure setdatalink(const avalue: teditwidgetdatalink);
-  protected
+  protected   
    procedure defineproperties(filer: tfiler); override;
 
    function nullcheckneeded(const newfocus: twidget): boolean; override;
@@ -742,7 +742,7 @@ type
    function getgriddatasource: tdatasource;
    function createdatalist(const sender: twidgetcol): tdatalist; override;
    procedure modified; override;
-   procedure doshortcut(var info: keyeventinfoty;
+   procedure doshortcut(var info: keyeventinfoty; 
                                       const sender: twidget); override;
 //   function getoptionsedit: optionseditty; override;
 //   procedure dochange; override;
@@ -776,7 +776,7 @@ type
   private
    fdatalink: teditwidgetdatalink;
    procedure setdatalink(const avalue: teditwidgetdatalink);
-  protected
+  protected   
    procedure defineproperties(filer: tfiler); override;
    procedure griddatasourcechanged; override;
    function getgriddatasource: tdatasource;
@@ -786,7 +786,7 @@ type
 //   procedure doenter; override;
 //   procedure doexit; override;
    procedure modified; override;
-   procedure doshortcut(var info: keyeventinfoty;
+   procedure doshortcut(var info: keyeventinfoty; 
                                       const sender: twidget); override;
 //   function getoptionsedit: optionseditty; override;
    function getrowdatapo(const arow: integer): pointer; override;
@@ -797,7 +797,7 @@ type
    procedure setmaxlength(const avalue: integer);
    function getfieldlink: tcustomeditwidgetdatalink;
     //ireccontrol
-   procedure recchanged;
+   procedure recchanged;                          
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -813,14 +813,14 @@ type
   private
    fdatalink: teditwidgetdatalink;
    procedure setdatalink(const avalue: teditwidgetdatalink);
-  protected
+  protected   
    procedure defineproperties(filer: tfiler); override;
    procedure griddatasourcechanged; override;
    function getgriddatasource: tdatasource;
    function createdatalist(const sender: twidgetcol): tdatalist; override;
    function checkvalue(const quiet: boolean = false): boolean; reintroduce;
    procedure modified; override;
-   procedure doshortcut(var info: keyeventinfoty;
+   procedure doshortcut(var info: keyeventinfoty; 
                                       const sender: twidget); override;
 //   procedure dochange; override;
 //   procedure doenter; override;
@@ -839,10 +839,10 @@ type
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
   published
-   property datalink: teditwidgetdatalink read fdatalink write setdatalink;
+   property datalink: teditwidgetdatalink read fdatalink write setdatalink; 
    property onsetvalue;
    property onpaintglyph;
-   property valuemin;
+   property valuemin; 
    property valuemax;
    property imagelist;
    property imageoffset;
@@ -853,7 +853,7 @@ type
   private
    fdatalink: teditwidgetdatalink;
    procedure setdatalink(const avalue: teditwidgetdatalink);
-  protected
+  protected   
    procedure defineproperties(filer: tfiler); override;
    procedure griddatasourcechanged; override;
    function getgriddatasource: tdatasource;
@@ -863,7 +863,7 @@ type
 //   procedure doenter; override;
 //   procedure doexit; override;
    procedure modified; override;
-   procedure doshortcut(var info: keyeventinfoty;
+   procedure doshortcut(var info: keyeventinfoty; 
                                       const sender: twidget); override;
 //   function getoptionsedit: optionseditty; override;
    function getrowdatapo(const arow: integer): pointer; override;
@@ -917,7 +917,7 @@ type
    property onsetvalue;
    property onpaintglyph;
    property valuedefault;
-   property valuemin;
+   property valuemin; 
    property valuemax;
    property valuedisabled;
  end;
@@ -926,7 +926,7 @@ type
   private
    fdatalink: teditwidgetdatalink;
    procedure setdatalink(const avalue: teditwidgetdatalink);
-  protected
+  protected   
    procedure defineproperties(filer: tfiler); override;
    procedure griddatasourcechanged; override;
    function getgriddatasource: tdatasource;
@@ -937,7 +937,7 @@ type
 //   procedure doenter; override;
 //   procedure doexit; override;
    procedure modified; override;
-   procedure doshortcut(var info: keyeventinfoty;
+   procedure doshortcut(var info: keyeventinfoty; 
                                       const sender: twidget); override;
 //   function getoptionsedit: optionseditty; override;
    function getrowdatapo(const arow: integer): pointer; override;
@@ -964,14 +964,14 @@ type
   private
    fdatalink: teditwidgetdatalink;
    procedure setdatalink(const avalue: teditwidgetdatalink);
-  protected
+  protected   
    procedure defineproperties(filer: tfiler); override;
    function nullcheckneeded(const newfocus: twidget): boolean; override;
    procedure griddatasourcechanged; override;
    function getgriddatasource: tdatasource;
    function createdatalist(const sender: twidgetcol): tdatalist; override;
    procedure modified; override;
-   procedure doshortcut(var info: keyeventinfoty;
+   procedure doshortcut(var info: keyeventinfoty; 
                                       const sender: twidget); override;
 //   function getoptionsedit: optionseditty; override;
 //   procedure dochange; override;
@@ -1004,14 +1004,14 @@ type
   private
    fdatalink: teditwidgetdatalink;
    procedure setdatalink(const avalue: teditwidgetdatalink);
-  protected
+  protected   
    procedure defineproperties(filer: tfiler); override;
    function nullcheckneeded(const newfocus: twidget): boolean; override;
    procedure griddatasourcechanged; override;
    function getgriddatasource: tdatasource;
    function createdatalist(const sender: twidgetcol): tdatalist; override;
    procedure modified; override;
-   procedure doshortcut(var info: keyeventinfoty;
+   procedure doshortcut(var info: keyeventinfoty; 
                                       const sender: twidget); override;
 //   function getoptionsedit: optionseditty; override;
 //   procedure dochange; override;
@@ -1048,7 +1048,7 @@ type
    fvaluestart: real;
    procedure setdatalink(const avalue: teditwidgetdatalink);
    procedure readvaluescale(reader: treader);
-  protected
+  protected   
    procedure defineproperties(filer: tfiler); override;
    procedure griddatasourcechanged; override;
    function getgriddatasource: tdatasource;
@@ -1058,7 +1058,7 @@ type
 //   procedure doenter; override;
 //   procedure doexit; override;
    procedure modified; override;
-   procedure doshortcut(var info: keyeventinfoty;
+   procedure doshortcut(var info: keyeventinfoty; 
                                       const sender: twidget); override;
    function getrowdatapo(const arow: integer): pointer; override;
     //idbeditfieldlink
@@ -1087,7 +1087,7 @@ type
   private
    fdatalink: teditwidgetdatalink;
    procedure setdatalink(const avalue: teditwidgetdatalink);
-  protected
+  protected   
    procedure defineproperties(filer: tfiler); override;
    function getrowdatapo(const arow: integer): pointer; override;
    procedure griddatasourcechanged; override;
@@ -1109,12 +1109,12 @@ type
    property datalink: teditwidgetdatalink read fdatalink write setdatalink;
    property onpaintglyph;
  end;
-
+ 
  tdbdatetimeedit = class(tcustomdatetimeedit,idbeditfieldlink,ireccontrol)
   private
    fdatalink: teditwidgetdatalink;
    procedure setdatalink(const avalue: teditwidgetdatalink);
-  protected
+  protected   
    procedure defineproperties(filer: tfiler); override;
    function nullcheckneeded(const newfocus: twidget): boolean; override;
    procedure griddatasourcechanged; override;
@@ -1157,18 +1157,18 @@ type
    function getdropdownifilink: tifienumlinkcomp;
    procedure setdropdownifilink(const avalue: tifienumlinkcomp);
    procedure dropdownsetifiserverintf(const aintf: iifiserver);
-   procedure idbifidropdownlistdatalink.setifiserverintf =
+   procedure idbifidropdownlistdatalink.setifiserverintf = 
                                            dropdownsetifiserverintf;
    procedure dropdownifisetvalue(var avalue; var accept: boolean);
    procedure idbifidropdownlistdatalink.ifisetvalue = dropdownifisetvalue;
-  protected
+  protected   
    procedure defineproperties(filer: tfiler); override;
    function nullcheckneeded(const newfocus: twidget): boolean; override;
    procedure griddatasourcechanged; override;
    function getgriddatasource: tdatasource;
    function createdatalist(const sender: twidgetcol): tdatalist; override;
    procedure modified; override;
-   procedure doshortcut(var info: keyeventinfoty;
+   procedure doshortcut(var info: keyeventinfoty; 
                                       const sender: twidget); override;
 //   function getoptionsedit: optionseditty; override;
 //   procedure dochange; override;
@@ -1186,10 +1186,10 @@ type
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
    property datalink: tlookupeditdatalink read fdatalink write setdatalink;
-   property dropdownifilink: tifienumlinkcomp read getdropdownifilink
+   property dropdownifilink: tifienumlinkcomp read getdropdownifilink 
                                  write setdropdownifilink;  //for dropdownlist
  end;
-
+ 
  tdbenumedit = class(tcustomdbenumedit)
   published
    property valueoffset; //before value
@@ -1252,7 +1252,7 @@ type
   published
    property datafield: string read fdatafield write setdatafield;
  end;
-
+ 
  tdbdropdowncols = class(tnolistdropdowncols)
   private
    function getitems(const index: integer): tdbdropdowncol;
@@ -1266,7 +1266,7 @@ type
 
  dropdowndatalinkstatety = (ddlnks_lookupvalid);
  dropdowndatalinkstatesty = set of dropdowndatalinkstatety;
-
+ 
  tdropdowndatalink = class(tmsedatalink)
   private
    fowner: tcustomdbdropdownlistcontroller;
@@ -1314,7 +1314,7 @@ type
   protected
    function getrowtext(const arow: integer): msestring; override;
   public
-   constructor create(const agrid: tcustomgrid;
+   constructor create(const agrid: tcustomgrid; 
                                   const aowner: tgridarrayprop); override;
    destructor destroy; override;
  end;
@@ -1328,10 +1328,10 @@ type
  gridrowinfoty = record
   row: integer;
  end;
-
+  
  griddatalinkstatety = (gdls_hasrowstatefield,gdls_booleanmerged,
-                        gdls_booleanselected);
- griddatalinkstatesty = set of griddatalinkstatety;
+                        gdls_booleanselected); 
+ griddatalinkstatesty = set of griddatalinkstatety; 
 
  tgriddatalink = class(tfieldsdatalink,ievent,idbeditinfo,iobjectlink)
   private
@@ -1495,24 +1495,24 @@ type
    property field_merged: tfield read ffield_merged;
    property field_selected: tfield read ffield_selected;
   published
-   property options: griddatalinkoptionsty read foptions write foptions
+   property options: griddatalinkoptionsty read foptions write foptions 
                    default defaultgriddatalinkoptions;
-   property onupdaterowdata: updaterowdataeventty read fonupdaterowdata
+   property onupdaterowdata: updaterowdataeventty read fonupdaterowdata 
                                 write fonupdaterowdata;
    property datasource: tdatasource read getdatasource1 write settadasource1;
-   property fieldname_state: string read ffieldname_state
+   property fieldname_state: string read ffieldname_state 
                                        write setfieldname_state;
              //integer field, selects grid rowcolor (field value and $7f),
              //readonlystate (field value and $80) and
-             //grid rowfont ((fieldvalue shr 8) and $7f).
+             //grid rowfont ((fieldvalue shr 8) and $7f). 
              // $xx7f = default color, $7fxx = default font.
-   property fieldname_color: string read ffieldname_color
+   property fieldname_color: string read ffieldname_color 
                                        write setfieldname_color;
    property fieldname_font: string read ffieldname_font
                                        write setfieldname_font;
-   property fieldname_readonly: string read ffieldname_readonly
+   property fieldname_readonly: string read ffieldname_readonly 
                                        write setfieldname_readonly;
-   property fieldname_merged: string read ffieldname_merged
+   property fieldname_merged: string read ffieldname_merged 
                                        write setfieldname_merged;
    property fieldname_selected: string read ffieldname_selected
                                        write setfieldname_selected;
@@ -1540,7 +1540,7 @@ type
    function getaslargeint(const afield: tfield): int64;
 
    procedure cellevent(var info: celleventinfoty); override;
-   function getrecordcount: integer; override;
+   function getrecordcount: integer; override; 
            //workaround FPC bug 19290
 //   function  GetBufferCount: Integer; override;
    procedure SetBufferCount(Value: Integer); override;
@@ -1560,7 +1560,7 @@ type
                   const adatalink: tdropdowndatalink);
    function domoveby(const distance: integer): integer; override;
  end;
-
+ 
  tdbdropdownlist = class(tdropdownlist,igriddatalink)
   private
    fdatalink: tdropdownlistdatalink;
@@ -1621,11 +1621,11 @@ type
    function candropdown: boolean; override;
    procedure itemselected(const index: integer; const akey: keyty); override;
    procedure doafterclosedropdown; override;
-
+   
    function getasmsestring(const afield: tfield; const utf8: boolean): msestring;
    function getasinteger(const afield: tfield): integer;
    function getaslargeint(const afield: tfield): int64;
-
+   
     //idbeditinfo
    function getdataset(const aindex: integer): tdataset;
    procedure getfieldtypes(out propertynames: stringarty;
@@ -1638,10 +1638,10 @@ type
    property datasource: tdatasource read getdatasource write setdatasource;
    property keyfield: string read getkeyfield write setkeyfield;
    property options default defaultdbdropdownoptions;
-   property optionsdatalink: griddatalinkoptionsty read foptionsdatalink
+   property optionsdatalink: griddatalinkoptionsty read foptionsdatalink 
            write foptionsdatalink default defaultdropdowndatalinkoptions;
    property optionsdb: optionsdbty read foptionsdb write setoptionsdb default [];
-
+   
    property cols: tdbdropdowncols read getcols write setcols;
   end;
 
@@ -1651,7 +1651,7 @@ type
    property keyfield;
    property options;
    property optionsdatalink;
-   property optionsdb;
+   property optionsdb;   
    property cols;
    property dropdownrowcount;
    property delay;
@@ -1663,14 +1663,14 @@ type
    property buttonminlength;
    property buttonendlength;
  end;
-
+ 
  tdropdownlistcontrollerdb = class(tcustomdbdropdownlistcontroller)
   published
    property datasource;
 //   property keyfield;
    property options;
    property optionsdatalink;
-   property optionsdb;
+   property optionsdb;   
    property cols;
    property dropdownrowcount;
    property delay;
@@ -1682,7 +1682,7 @@ type
    property buttonminlength;
    property buttonendlength;
  end;
-
+ 
  tdbenumeditdb = class(tdbenumedit,idbdropdownlist,ireccontrol)
   private
    function getdropdown: tdbdropdownlistcontroller;
@@ -1694,7 +1694,7 @@ type
   published
    property dropdown: tdbdropdownlistcontroller read getdropdown write setdropdown;
  end;
-
+ 
  tenumeditdb = class(tenumedit,idbdropdownlist)
   private
    function getdropdown: tdbdropdownlistcontroller;
@@ -1706,7 +1706,7 @@ type
   published
    property dropdown: tdbdropdownlistcontroller read getdropdown write setdropdown;
  end;
-
+ 
  tdbkeystringeditdb = class(tdbkeystringedit,idbdropdownlist,ireccontrol)
   private
 //   fkeyvalue: msestring;
@@ -1719,7 +1719,7 @@ type
   published
    property dropdown: tdbdropdownlistcontroller read getdropdown write setdropdown;
  end;
-
+ 
  tkeystringeditdb = class(tkeystringedit,idbdropdownlist)
   private
    function getdropdown: tdbdropdownlistcontroller;
@@ -1742,7 +1742,7 @@ type
    constructor create(const agrid: tcustomgrid;
                        const aowner: tgridarrayprop); override;
   published
-   property colorindicator: colorty read fcolorindicator
+   property colorindicator: colorty read fcolorindicator 
                    write setcolorindicator default cl_glyph;
    property options default defaultindicatorcoloptions;
  end;
@@ -1760,7 +1760,7 @@ type
    constructor create(const aowner: tcustomwidgetgrid;
                        const adatalink: tgriddatalink);
   published
-   property dbindicatorcol: integer read getdbindicatorcol
+   property dbindicatorcol: integer read getdbindicatorcol 
                     write setdbindicatorcol default -1;
  end;
 
@@ -1774,7 +1774,7 @@ type
    property options default defaultdbscrollbaroptions;
    property buttonlength default -1;
  end;
-
+ 
  tdbgridframe = class(tgridframe)
   protected
    procedure scrollpostoclientpos(var aclientrect: rectty); override;
@@ -1789,14 +1789,14 @@ type
   protected
    fdatalink: tfielddatalink;
 
-   procedure dobeforedrawcell(const acanvas: tcanvas;
+   procedure dobeforedrawcell(const acanvas: tcanvas; 
                           var processed: boolean); override;
    procedure doafterdrawcell(const acanvas: tcanvas); override;
    procedure setwidget(const awidget: twidget); override;
   public
    property datalink: tfielddatalink read fdatalink;
  end;
-
+ 
  tdbwidgetcols = class(twidgetcols)
   private
    function getcols(const index: integer): tdbwidgetcol;
@@ -1836,7 +1836,7 @@ type
    procedure dopaint(const acanvas: tcanvas); override;
    procedure dohide; override;
    procedure loaded; override;
-   procedure doshortcut(var info: keyeventinfoty;
+   procedure doshortcut(var info: keyeventinfoty; 
                                       const sender: twidget); override;
 
    procedure setselected(const cell: gridcoordty;
@@ -1974,7 +1974,7 @@ type
    function getitems(aindex: integer): msestring; override;
    procedure setitems(aindex: integer; const Value: msestring); override;
    procedure modified; override;
-   procedure dobeforedrawcell(const acanvas: tcanvas;
+   procedure dobeforedrawcell(const acanvas: tcanvas; 
                           var processed: boolean); override;
    procedure doafterdrawcell(const acanvas: tcanvas); override;
    function getrowtext(const arow: integer): msestring; override;
@@ -1999,7 +1999,7 @@ type
    procedure setmaxlength(const avalue: integer);
    function getfieldlink: tcustomeditwidgetdatalink;
   public
-   constructor create(const agrid: tcustomgrid;
+   constructor create(const agrid: tcustomgrid; 
                          const aowner: tgridarrayprop); override;
    destructor destroy; override;
    property datalink: tstringcoldatalink read fdatalink;
@@ -2037,7 +2037,7 @@ type
   published
    property optionsdb: optionseditdbty read foptionsdb write setoptionsdb default [];
  end;
-
+ 
  tdbstringindicatorcol = class(tfixcol)
   private
    fcolorindicator: colorty;
@@ -2048,7 +2048,7 @@ type
    constructor create(const agrid: tcustomgrid;
                        const aowner: tgridarrayprop); override;
   published
-   property colorindicator: colorty read fcolorindicator
+   property colorindicator: colorty read fcolorindicator 
                 write setcolorindicator default cl_glyph;
    property options default defaultindicatorcoloptions;
  end;
@@ -2111,7 +2111,7 @@ type
    function getrowdatapo: pointer;
   {$ifdef mse_with_ifi}
    procedure updateifigriddata(const alist: tdatalist);
-  {$endif}
+  {$endif}   
    procedure setoptions(const avalue: dbstringgridoptionsty);
    procedure checkautofields;
    procedure setfieldnamedisplayfixrow(const avalue: integer);
@@ -2149,7 +2149,7 @@ type
    procedure dopaint(const acanvas: tcanvas); override;
    procedure dohide; override;
    procedure loaded; override;
-   procedure doshortcut(var info: keyeventinfoty;
+   procedure doshortcut(var info: keyeventinfoty; 
                                       const sender: twidget); override;
    function cangridcopy: boolean;
 
@@ -2162,7 +2162,7 @@ type
    procedure dodeleterow(const sender: tobject); override;
    procedure beforefocuscell(const cell: gridcoordty;
                              const selectaction: focuscellactionty); override;
-   procedure coloptionstoeditoptions(var dest: optionseditty;
+   procedure coloptionstoeditoptions(var dest: optionseditty; 
                                                   var dest1: optionsedit1ty);
    function isfirstrow: boolean; override;
    function islastrow: boolean; override;
@@ -2190,21 +2190,21 @@ type
 //   property datasource: tdatasource read getdatasource write setdatasource;
    property datacols: tdbstringcols read getdatacols write setdatacols;
    property datalink: tstringgriddatalink read fdatalink write setdatalink;
-   property options: dbstringgridoptionsty read foptions
+   property options: dbstringgridoptionsty read foptions 
                            write setoptions default [];
    property fieldnamedisplayfixrow: integer read ffieldnamedisplayfixrow write
-                    setfieldnamedisplayfixrow default -1;
+                    setfieldnamedisplayfixrow default -1; 
                     //negative rowindex, 0-> none
    property zebra_step default 0;
    property fixcols: tdbstringfixcols read getfixcols write setfixcols;
  end;
-
+ 
  tdbstringgrid = class(tcustomdbstringgrid)
   published
 //   property datasource;
    property options;
    property fieldnamedisplayfixrow;
-
+   
    property optionsgrid;
    property optionsgrid1;
    property datacols;
@@ -2270,12 +2270,12 @@ type
   protected
    function locate(const filter: msestring): boolean; override;
  end;
-
+ 
  eddstatety = (edds_filtered,edds_bof,edds_eof);
  eddstatesty = set of eddstatety;
 
  texterndatadropdownlistcontroller = class;
-
+  
  texterndatadropdownlist = class(tdropdownlist)
   private
    ffirstrecord: integer;
@@ -2321,7 +2321,7 @@ type
    constructor create(const acontroller: tcustomlbdropdownlistcontroller;
                              acols: tdropdowncols);
  end;
-
+      
  tlbdropdowncol = class(tdropdowncol,ilookupbufferfieldinfo)
   private
    ffieldno: lookupbufferfieldnoty;
@@ -2335,7 +2335,7 @@ type
                                                          default 0;
                     //colindex in lookupbuffer
  end;
-
+ 
  tlbdropdowncols = class(tnolistdropdowncols)
   private
    function getitems(const index: integer): tlbdropdowncol;
@@ -2347,7 +2347,7 @@ type
 
  optionlbty = (olb_copyitems,olb_unsorted);
  optionslbty = set of optionlbty;
-
+                                   
  texterndatadropdownlistcontroller = class(tcustomdropdownlistcontroller)
   private
    fedrecnums: integerarty;
@@ -2391,10 +2391,10 @@ type
    property lookupbuffer: tcustomlookupbuffer read flookupbuffer write setlookupbuffer;
    property keyfieldno: lookupbufferfieldnoty read fkeyfieldno write fkeyfieldno default 0;
    property onfilter: lbfiltereventty read fonfilter write fonfilter;
-   property onbeforefilter: dataediteventty read fonbeforefilter
+   property onbeforefilter: dataediteventty read fonbeforefilter 
                                                         write fonbeforefilter;
  end;
-
+ 
  tlbdropdownlistcontroller = class(tcustomlbdropdownlistcontroller)
   published
    property lookupbuffer;
@@ -2414,7 +2414,7 @@ type
    property buttonminlength;
    property buttonendlength;
  end;
-
+ 
  tdropdownlistcontrollerlb = class(tcustomlbdropdownlistcontroller)
   published
    property lookupbuffer;
@@ -2434,7 +2434,7 @@ type
    property buttonminlength;
    property buttonendlength;
  end;
-
+ 
  tdbenumeditlb = class(tdbenumedit,ilbdropdownlist)
   private
    function getdropdown: tlbdropdownlistcontroller;
@@ -2444,7 +2444,7 @@ type
    function internaldatatotext(const data): msestring; override;
           //ilbdropdownlist
    procedure recordselected(const arecordnum: integer; const akey: keyty);
-   function getlbkeydatakind: lbdatakindty;
+   function getlbkeydatakind: lbdatakindty;                     
   published
    property dropdown: tlbdropdownlistcontroller read getdropdown write setdropdown;
  end;
@@ -2462,7 +2462,7 @@ type
    function internaldatatotext(const data): msestring; override;
   //ilbdropdownlist
    procedure recordselected(const arecordnum: integer; const akey: keyty);
-   function getlbkeydatakind: lbdatakindty;
+   function getlbkeydatakind: lbdatakindty;                     
   public
   published
    property dropdown: tlbdropdownlistcontroller read getdropdown write setdropdown;
@@ -2486,7 +2486,7 @@ type
   protected
    fvalue1: int64;
    fvaluedefault1: int64;
-
+   
    function getdefaultvalue: pointer; override;
    procedure texttovalue(var accept: boolean; const quiet: boolean); override;
    procedure texttodata(const atext: msestring; var data); override;
@@ -2526,7 +2526,7 @@ type
    function internaldatatotext(const data): msestring; override;
   //ilbdropdownlist
    procedure recordselected(const arecordnum: integer; const akey: keyty);
-   function getlbkeydatakind: lbdatakindty;
+   function getlbkeydatakind: lbdatakindty;                     
   public
    property dropdown: tlbdropdownlistcontroller read getdropdown write setdropdown;
  end;
@@ -2541,12 +2541,12 @@ type
    property valuedefault;
    property onsetvalue;
  end;
-
+ 
  tdbenum64editlb = class(tcustomenum64editlb,idbeditfieldlink,ireccontrol)
   private
    fdatalink: tlookupeditdatalink;
    procedure setdatalink(const avalue: tlookupeditdatalink);
-  protected
+  protected   
    procedure defineproperties(filer: tfiler); override;
 
    function nullcheckneeded(const newfocus: twidget): boolean; override;
@@ -2554,7 +2554,7 @@ type
    function getgriddatasource: tdatasource;
    function createdatalist(const sender: twidgetcol): tdatalist; override;
    procedure modified; override;
-   procedure doshortcut(var info: keyeventinfoty;
+   procedure doshortcut(var info: keyeventinfoty; 
                                       const sender: twidget); override;
 //   function getoptionsedit: optionseditty; override;
 //   procedure dochange; override;
@@ -2577,7 +2577,7 @@ type
    property dropdown;
    property onsetvalue;
  end;
-
+ 
  tcustomenum64editdb = class(tcustomenum64edit,idbdropdownlist)
   private
    function getdropdown: tdbdropdownlistcontroller;
@@ -2601,19 +2601,19 @@ type
    property valuedefault;
    property onsetvalue;
  end;
-
+ 
  tdbenum64editdb = class(tcustomenum64editdb,idbeditfieldlink,ireccontrol)
   private
    fdatalink: tlookupeditdatalink;
    procedure setdatalink(const avalue: tlookupeditdatalink);
-  protected
+  protected   
    procedure defineproperties(filer: tfiler); override;
    function nullcheckneeded(const newfocus: twidget): boolean; override;
    procedure griddatasourcechanged; override;
    function getgriddatasource: tdatasource;
    function createdatalist(const sender: twidgetcol): tdatalist; override;
    procedure modified; override;
-   procedure doshortcut(var info: keyeventinfoty;
+   procedure doshortcut(var info: keyeventinfoty; 
                                       const sender: twidget); override;
 //   function getoptionsedit: optionseditty; override;
 //   procedure dochange; override;
@@ -2635,7 +2635,7 @@ type
    property dropdown;
    property onsetvalue;
  end;
-
+ 
  tdbkeystringeditlb = class(tdbkeystringedit,ilbdropdownlist)
   private
    function getdropdown: tlbdropdownlistcontroller;
@@ -2645,11 +2645,11 @@ type
    function internaldatatotext(const data): msestring; override;
   //ilbdropdownlist
    procedure recordselected(const arecordnum: integer; const akey: keyty);
-   function getlbkeydatakind: lbdatakindty;
+   function getlbkeydatakind: lbdatakindty;                     
   published
    property dropdown: tlbdropdownlistcontroller read getdropdown write setdropdown;
  end;
-
+ 
  tkeystringeditlb = class(tkeystringedit,ilbdropdownlist)
   private
    function getdropdown: tlbdropdownlistcontroller;
@@ -2659,14 +2659,14 @@ type
    function internaldatatotext(const data): msestring; override;
     //ilbdropdownlist
    procedure recordselected(const arecordnum: integer; const akey: keyty);
-   function getlbkeydatakind: lbdatakindty;
+   function getlbkeydatakind: lbdatakindty;                     
   published
    property dropdown: tlbdropdownlistcontroller read getdropdown write setdropdown;
  end;
 
 function encoderowstate(const color: integer = -1; const font: integer = -1;
                             const readonly: boolean = false): integer;
-
+                            
 implementation
 uses
  msestockobjects,mseshapes,msereal,msebits,
@@ -2701,7 +2701,7 @@ type
   hasedit: boolean;
  end;
  phasactiveeditinfoty = ^hasactiveeditinfoty;
-
+ 
 function encoderowstate(const color: integer = -1; const font: integer = -1;
                             const readonly: boolean = false): integer;
 begin
@@ -2722,7 +2722,7 @@ begin
     dsbrowse: glyph:= stg_dbindbrowse;
     dsedit: glyph:= stg_dbindedit;
     dsinsert: glyph:= stg_dbindinsert;
-    else glyph:= stockglyphty(stg_none);
+    else glyph:= stockglyphty(-1);
    end;
    if ord(glyph) >= 0 then begin
     stockobjects.glyphs.paint(canvas,ord(glyph),innerrect,
@@ -2780,7 +2780,7 @@ begin
   if (dno_dialogifinactive in options1) and bof and eof then begin
    bu1:= bu1 - [dbnb_dialog];
   end;
-  if (dno_nodialogifnoeditmode in options1) and
+  if (dno_nodialogifnoeditmode in options1) and 
          not (datasource.state in dseditmodes) then begin
    bu1:= bu1 - [dbnb_dialog];
   end;
@@ -2800,7 +2800,7 @@ begin
    end;
    dsedit,dsinsert: begin
     bu1:= bu1 + [dbnb_post,dbnb_cancel,dbnb_refresh,dbnb_insert,dbnb_delete];
-    if (datasource.state = dsinsert) and
+    if (datasource.state = dsinsert) and 
                           (dno_nomultiinsert in options1) then begin
      exclude(bu1,dbnb_insert);
     end;
@@ -2858,7 +2858,7 @@ begin
  end;
  fintf.setactivebuttons(bu1,bo1);
 end;
-
+ 
 procedure tnavigdatalink.activechanged;
 var
  intf1: igetdscontroller;
@@ -2988,7 +2988,6 @@ begin
       dscontroller.copyrecord(dno_append in options1);
      end;
     end;
-     else; // For case statment added to make compiler happy.
    end;
    if fdscontroller <> nil then begin
     if state = dsfilter then begin
@@ -3006,7 +3005,6 @@ begin
       dbnb_filtermax: fdscontroller.beginfilteredit(fek_filtermax);
       dbnb_filterclear: fdscontroller.clearfilter();
       dbnb_find: fdscontroller.beginfilteredit(fek_find);
-       else; // For case statment added to make compiler happy.
      end;
     end;
    end;
@@ -3028,7 +3026,7 @@ begin
  if (assistiveserver <> nil) and active then begin
   wi1:= twidget1(fintf.getwidget());
   result:= wi1.window.active;
-  if result then begin
+  if result then begin 
    aintf:= wi1.getiassistiveclient();
   end;
  end;
@@ -3060,7 +3058,7 @@ const
  dbnavigimages: array[dbnavigbuttonty] of stockglyphty =
   //dbnb_first,dbnb_prior,dbnb_next,dbnb_last,dbnb_insert,
   (stg_dbfirst,stg_dbprior,stg_dbnext,stg_dblast,stg_dbinsert,
-
+  
 // dbnb_delete,dbnb_copyrecord,dbnb_edit,
    stg_dbdelete,stg_doublesquare,stg_dbedit,
 // dbnb_post,dbnb_cancel,dbnb_refresh,
@@ -3076,7 +3074,7 @@ const
  dbnavighints: array[dbnavigbuttonty] of stockcaptionty =
   //dbnb_first,dbnb_prior,dbnb_next,dbnb_last,dbnb_insert,
   (sc_first,sc_prior,sc_next,sc_last,sc_append,
-
+  
 // dbnb_delete,dbnb_copyrecord,dbnb_edit,
    sc_delete,sc_copy,sc_edit,
 // dbnb_post,dbnb_cancel,dbnb_refresh,
@@ -3088,7 +3086,7 @@ const
 // dbnb_autoedit,dbnb_dialog
    sc_auto_edit,sc_dialog
 );
-
+  
 { tdbnavigbuttons }
 
 class function tdbnavigbuttons.getbuttonclass: toolbuttonclassty;
@@ -3142,7 +3140,7 @@ begin
  with buttons[ord(dbnb_filteronoff)] do begin
   options:= options + [mao_checkbox];
  end;
-
+  
  fdatalink:= tnavigdatalink.Create(idbnaviglink(self));
  visiblebuttons:= defaultvisibledbnavigbuttons;
 end;
@@ -3183,9 +3181,9 @@ begin
   else begin
    hint:= stockobjects.captions[sc_insert];
   end;
-  if (dno_shortcuthint in foptions) and
+  if (dno_shortcuthint in foptions) and 
             (fshortcuts[dbnb_insert] <> 0) then begin
-   hint:= hint + ' (' +
+   hint:= hint + ' (' + 
                  encodeshortcutname(fshortcuts[dbnb_insert])+')';
   end;
  end;
@@ -3219,9 +3217,9 @@ begin
     imagenr:= ord(stg_dbfilteron);
     hint:= stockobjects.captions[sc_filter_on];
    end;
-   if (dno_shortcuthint in foptions) and
+   if (dno_shortcuthint in foptions) and 
              (fshortcuts[dbnb_filteronoff] <> 0) then begin
-    hint:= hint + ' (' +
+    hint:= hint + ' (' + 
                   encodeshortcutname(fshortcuts[dbnb_filteronoff])+')';
    end;
   }
@@ -3288,7 +3286,7 @@ begin
   end;
   fvisiblebuttons:= avalue;
   endupdate;
- end;
+ end; 
 end;
 
 function tdbnavigator.getcolorglyph: colorty;
@@ -3327,7 +3325,7 @@ begin
  if not (csdesigning in componentstate) then begin
   for bu1:= low(dbnavigbuttonty) to dbnb_autoedit do begin
    if checkshortcutcode(fshortcuts[bu1],info) then begin
-    if buttons[ord(bu1)].enabled or
+    if buttons[ord(bu1)].enabled or 
          (assistiveserver <> nil) and (bu1 in [dbnb_prior,dbnb_next]) then begin
      fdatalink.execbutton(bu1);
      include(info.eventstate,es_processed);
@@ -3461,13 +3459,13 @@ end;
 
 function tdbnavigator.canautoedit(): boolean;
 begin
- result:= autoedit or fdatalink.active and
+ result:= autoedit or fdatalink.active and 
                              (fdatalink.dataset.state in [dsedit,dsinsert])
 end;
 
 function tdbnavigator.canclose(const newfocus: twidget = nil): boolean;
 begin
- if (dno_postoncanclose in foptions) and fdatalink.active and
+ if (dno_postoncanclose in foptions) and fdatalink.active and 
                                                (newfocus = nil) then begin
   fdatalink.dataset.checkbrowsemode;
  end;
@@ -3572,7 +3570,7 @@ end;
 procedure tcustomeditwidgetdatalink.setasnullmsestring(const avalue: msestring);
 begin
  if avalue = nullsymbol then begin
-  if oed_nonullset in foptions then begin
+  if oed_nonullset in foptions then begin   
    asmsestring:= msedefaultexpression;
   end
   else begin
@@ -3600,7 +3598,7 @@ end;
 function tcustomeditwidgetdatalink.edit: Boolean;
 begin
  if canmodify then begin
-  if (dataset.state = dsbrowse) and
+  if (dataset.state = dsbrowse) and 
        ((oed_autoedit in foptions) or
          (fnavigator <> nil) and fnavigator.canautoedit()
        ) then begin
@@ -3615,14 +3613,14 @@ end;
 
 function tcustomeditwidgetdatalink.canmodify: Boolean;
 begin
- result:= (field <> nil) and
-           ((fds_filterediting in fstate) or
+ result:= (field <> nil) and 
+           ((fds_filterediting in fstate) or 
               canupdate and not field.readonly);
 end;
 
 procedure tcustomeditwidgetdatalink.modified;
 begin
- if not editing and (frecordchange = 0) and
+ if not editing and (frecordchange = 0) and 
                 not (fds_filterediting in fstate) then begin
   inc(fbeginedit);
   try
@@ -3637,7 +3635,7 @@ end;
 procedure tcustomeditwidgetdatalink.doshortcut(var info: keyeventinfoty;
                const sender: twidget);
 begin
- if (info.eventstate * [es_preview,es_processed] = []) and
+ if (info.eventstate * [es_preview,es_processed] = []) and 
                      (fnavigator <> nil) and fnavigator.showing and
                                                fnavigator.isenabled then begin
   fnavigator.internalshortcut(info,sender);
@@ -3650,13 +3648,13 @@ var
 begin
  state1:= fintf.getwidget.ComponentState;
  if state1 * [cswriting,csdesigning] = [] then begin
-  if not (fds_filterediting in fstate) and
-         (not canmodify or
-           not editing and
+  if not (fds_filterediting in fstate) and 
+         (not canmodify or 
+           not editing and 
             not (canmodify and
                     not (oed_noautoedit in foptions) and
                     ((oed_autoedit in foptions) or
-                     (datasource <> nil) and datasource.AutoEdit or
+                     (datasource <> nil) and datasource.AutoEdit or 
                      (fnavigator <> nil) and fnavigator.canautoedit
                     )
                 )
@@ -3675,7 +3673,7 @@ var
 begin
  inherited;
  widget1:= fintf.getwidget;
- if not editing and assigned(fonendedit) and
+ if not editing and assigned(fonendedit) and 
          widget1.canevent(tmethod(fonendedit)) then begin
   fonendedit(self);
  end;
@@ -3686,10 +3684,10 @@ begin
                                            (dataset.state = dsedit) then begin
    fnavigator.edit();
   end;
-  if (oed_focusoninsert in foptions) and (dataset.state = dsinsert) then begin
+  if (oed_focusoninsert in foptions) and (dataset.state = dsinsert) then begin 
    fintf.seteditfocus();
   end;
-  if assigned(fonbeginedit) and
+  if assigned(fonbeginedit) and 
          fintf.getwidget.canevent(tmethod(fonbeginedit)) then begin
    fonbeginedit(self);
   end;
@@ -3711,7 +3709,7 @@ begin
     exclude(fstate,fds_filterediting);
    end;
   end;
-  ord(de_hasactiveedit): begin
+  de_hasactiveedit: begin
    with phasactiveeditinfoty(info)^ do begin
     hasedit:= hasedit or (field = self.field) and
                   fintf.getwidget.window.active;
@@ -3727,7 +3725,7 @@ begin
    end;
   end
   else begin
-   case filtereditkind of
+   case filtereditkind of 
     fek_filtermin: bo2:= oed_nofilterminedit in foptions;
     fek_filtermax: bo2:= oed_nofiltermaxedit in foptions;
     fek_find: bo2:= oed_nofindedit in foptions;
@@ -3798,7 +3796,7 @@ begin
  result:= dataset;
 end;
 
-procedure tcustomeditwidgetdatalink.getfieldtypes(out apropertynames: stringarty;
+procedure tcustomeditwidgetdatalink.getfieldtypes(out apropertynames: stringarty; 
                                      out afieldtypes: fieldtypesarty);
 begin
  apropertynames:= nil;
@@ -3827,13 +3825,13 @@ begin
   if (fbeginedit = 0) and (frecordchange = 0) then begin
    inc(frecordchange);
    try
-    if (field <> nil) and active and
-      not (dataset.eof and dataset.bof and
+    if (field <> nil) and active and 
+      not (dataset.eof and dataset.bof and 
               not (dataset.state in [dsinsert,dsfilter])) then begin
      if field.isnull then begin
       fintf.setnullvalue;
      end
-     else begin
+     else begin 
       fintf.fieldtovalue;
      end;
     end
@@ -3844,7 +3842,7 @@ begin
     if wi1.focused then begin
      fintf.initeditfocus;
     end;
-    if (assistiveserver <> nil) and wi1.active and
+    if (assistiveserver <> nil) and wi1.active and 
         wi1.getcorbainterface(typeinfo(iassistiveclientdata),intf1) then begin
      assistiveserver.dodbvaluechanged(intf1);
     end;
@@ -3885,8 +3883,8 @@ begin
   if not (oed_nullset in foptions) and (field <> nil) then begin
    if ismsestring then begin
     with tmsestringfield(field) do begin
-     if (defaultexpression <> '') and isnull and
-          (dataset.modified or
+     if (defaultexpression <> '') and isnull and 
+          (dataset.modified or 
             (fdscontroller <> nil) and fdscontroller.posting) then begin
       asmsestring:= self.msedefaultexpression;
      end;
@@ -3894,8 +3892,8 @@ begin
    end
    else begin
     with field do begin
-     if (defaultexpression <> '') and isnull and
-          (dataset.modified or
+     if (defaultexpression <> '') and isnull and 
+          (dataset.modified or 
             (fdscontroller <> nil) and fdscontroller.posting) then begin
       asstring:= defaultexpression;
      end;
@@ -3918,7 +3916,7 @@ end;
 
 procedure tcustomeditwidgetdatalink.setwidgetdatasource(const avalue: tdatasource);
 begin
- if not ((csloading in fintf.getwidget.componentstate) and datasourcefixed or
+ if not ((csloading in fintf.getwidget.componentstate) and datasourcefixed or 
                   (fintf.getgridintf <> nil)) then begin
   inherited datasource:= avalue;
  end;
@@ -3946,17 +3944,17 @@ procedure tcustomeditwidgetdatalink.nullcheckneeded(var avalue: boolean);
    result:= hasedit;
   end;
  end; //findactivedatalink
-
+ 
 begin
- avalue:= active and
+ avalue:= active and 
           (
            (avalue or fintf.getedited and (oed_autopost in foptions) or
             (fcanclosing > 0)
-           ) and
+           ) and 
            ((dataset.state in [dsinsert,dsedit]) and
-            (dataset.modified or
+            (dataset.modified or 
              avalue and (oed_nullcheckifunmodified in foptions) or
-             (dataset.state <> dsinsert) or
+             (dataset.state <> dsinsert) or 
              (fdscontroller <> nil) and fdscontroller.posting
             )
            )
@@ -4052,7 +4050,7 @@ var
 begin
  if (frecordchange = 0) and (fposting = 0) then begin
   widget1:= fintf.getwidget;
-  if not (ws_loadedproc in widget1.widgetstate) and (field <> nil) and
+  if not (ws_loadedproc in widget1.widgetstate) and (field <> nil) and 
                not ((oe_checkmrcancel in fintf.getoptionsedit) and
              (widget1.window.modalresult = mr_cancel)) then begin
    if fds_filterediting in fstate then begin
@@ -4061,7 +4059,7 @@ begin
    else begin
     if editing then begin
      fintf.valuetofield;
-     if assigned(fondataentered) and
+     if assigned(fondataentered) and 
             fintf.getwidget.canevent(tmethod(fondataentered)) then begin
       fondataentered(self);
      end;
@@ -5338,7 +5336,7 @@ begin
  result:= true;//dummy
 end;
 
-function tdbbooleaneditradio.docheckvalue(var avalue;
+function tdbbooleaneditradio.docheckvalue(var avalue; 
                                                const quiet: boolean): boolean;
 var
  widget: twidget;
@@ -6019,7 +6017,7 @@ begin
   value:= da1;
  end;
 end;
-
+ 
 function tdbdatetimeedit.getrowdatapo(const arow: integer): pointer;
 begin
  if fgriddatalink <> nil then begin
@@ -6359,7 +6357,7 @@ begin
  end;
 end;
 
-procedure tdbdropdowncol.getfieldtypes(out propertynames: stringarty;
+procedure tdbdropdowncol.getfieldtypes(out propertynames: stringarty; 
                   out fieldtypes: fieldtypesarty);
 begin
  propertynames:= nil;
@@ -6511,7 +6509,7 @@ begin
  end
  else begin
   result:= '';
-  if active and (fdscontroller <> nil) and
+  if active and (fdscontroller <> nil) and 
          (fvaluefield <> nil) and (ftextfield <> nil) then begin
    flastintegerkey:= key;
    if fkeyindex >= 0 then begin
@@ -6548,7 +6546,7 @@ begin
  end
  else begin
   result:= '';
-  if active and (fdscontroller <> nil) and
+  if active and (fdscontroller <> nil) and 
          (fvaluefield <> nil) and (ftextfield <> nil) then begin
    flastint64key:= key;
    if fkeyindex >= 0 then begin
@@ -6585,7 +6583,7 @@ begin
  end
  else begin
   result:= '';
-  if active and (fdscontroller <> nil) and
+  if active and (fdscontroller <> nil) and 
          (fvaluefield <> nil) and (ftextfield <> nil) then begin
    flaststringkey:= key;
    if fkeyindex >= 0 then begin
@@ -6651,7 +6649,7 @@ end;
 
 { tdbdropdownstringcol }
 
-constructor tdbdropdownstringcol.create(const agrid: tcustomgrid;
+constructor tdbdropdownstringcol.create(const agrid: tcustomgrid; 
                              const aowner: tgridarrayprop);
 begin
  fdatalink:= tfielddatalink.create;
@@ -6778,7 +6776,7 @@ function tdropdownlistdatalink.scrollevent(sender: tcustomscrollbar;
 //var
 // int1: integer;
 begin
- if (fdataintf = nil) or (sender.tag <> 1) or
+ if (fdataintf = nil) or (sender.tag <> 1) or 
              not (event in [sbe_thumbtrack,sbe_thumbposition]) then begin
   result:= inherited scrollevent(sender,event);
  end
@@ -6787,7 +6785,7 @@ begin
   if (event <> sbe_thumbtrack) or (gdo_thumbtrack in foptions) then begin
    if self.active then begin
     setcurrentrecord(round(
-                 fgrid.frame.sbvert.value * dataset.recordcount),ropo_nearest);
+                 fgrid.frame.sbvert.value * dataset.recordcount),ropo_nearest);      
     result:= true;
    end;
   end;
@@ -6802,7 +6800,7 @@ begin
  else begin
   if (cell.row >= 0) and (cell.row <> fgrid.row) then begin
    moveby(cell.row-fgrid.row);
-  end;
+  end;   
  end;
 end;
 
@@ -6847,13 +6845,12 @@ begin
    ffirstrecord:= fcurrentrecord-int1+1;
   end;
   ropo_centered,ropo_centeredif: begin
-   if (arowpos = ropo_centered) or
-           (fcurrentrecord < ffirstrecord) or
+   if (arowpos = ropo_centered) or 
+           (fcurrentrecord < ffirstrecord) or 
            (fcurrentrecord >= ffirstrecord + int1) then begin
     ffirstrecord:= fcurrentrecord - int1 div 2;
    end;
   end;
-   else; // For case statment added to make compiler happy.
  end;
  int2:= dataset.recordcount;
  if ffirstrecord + int1 > int2 then begin
@@ -6877,7 +6874,7 @@ begin
  end
  else begin
   result:= fmaxrowcount;
- end;
+ end;   
 end;
 }
 procedure tdropdownlistdatalink.SetBufferCount(Value: Integer);
@@ -6887,7 +6884,7 @@ begin
  end
  else begin
   fmaxrowcount:= value;
- end;
+ end;   
 end;
 
 function tdropdownlistdatalink.getfirstrecord: integer;
@@ -7155,7 +7152,7 @@ end;
 procedure tcustomdbdropdownlistcontroller.dropdown;
 begin
  tdropdowncols1(fcols).fitemindex:= -1;
- inherited;
+ inherited; 
 end;
 
 function tcustomdbdropdownlistcontroller.getdatasource: tdatasource;
@@ -7243,7 +7240,7 @@ begin
       fbookmarks[int2]:= datas.bookmark;
       for int1:= 0 to high(ar1) do begin
        ar2[int1]^[int2]:= msedb.getasmsestring(ar1[int1],fdatalink.utf8);
-      end;
+      end; 
       inc(int2);
       datas.next;
      end;
@@ -7253,7 +7250,7 @@ begin
      setlength(fbookmarks,int2);
     finally
      datas.bookmark:= bm;
-    end;
+    end;   
    finally
     datas.enablecontrols;
    end;
@@ -7275,8 +7272,8 @@ end;
 
 function tcustomdbdropdownlistcontroller.candropdown: boolean;
 begin
- result:= inherited candropdown and
-           (fdatalink.active or
+ result:= inherited candropdown and 
+           (fdatalink.active or 
            (odb_opendataset in foptionsdb) and (fdatalink.dataset <> nil));
 end;
 
@@ -7309,7 +7306,7 @@ begin
  idbdropdownlist(fintf).recordselected(index,akey);
 end;
 
-procedure tcustomdbdropdownlistcontroller.getfieldtypes(out propertynames: stringarty;
+procedure tcustomdbdropdownlistcontroller.getfieldtypes(out propertynames: stringarty; 
                     out fieldtypes: fieldtypesarty);
 begin
  setlength(propertynames,1);
@@ -7320,7 +7317,7 @@ begin
  end
  else begin
   fieldtypes[0]:= integerfields;
- end;
+ end; 
 end;
 
 function tcustomdbdropdownlistcontroller.getdataset(const aindex: integer): tdataset;
@@ -7335,7 +7332,7 @@ begin
  if avalue <> foptionsdb then begin
   foptionsdb:= avalue;
   updatereadonlystate;
- end;
+ end; 
 end;
 
 function tcustomdbdropdownlistcontroller.getasmsestring(const afield: tfield;
@@ -7415,12 +7412,12 @@ begin
 //   tdropdowncols1(fcols).fitemindex:= fdatalink.valuefield.asinteger
    text:= getasmsestring(fdatalink.textfield,fdatalink.utf8);
    tdropdowncols1(fcols).fitemindex:= getasinteger(fdatalink.valuefield);
-  end;
+  end; 
   bo1:= checkvalue;
  end
  else begin
   if arecordnum = -2 then begin
-   bo1:= checkvalue;
+   bo1:= checkvalue; 
   end
   else begin
    feditor.undo;
@@ -7436,7 +7433,7 @@ var
  int1: integer;
 begin
  if @data = nil then begin
-  int1:= value;
+  int1:= value;  
  end
  else begin
   int1:= integer(data);
@@ -7458,7 +7455,7 @@ begin
  inherited dropdown.assign(avalue);
 end;
 
-function tdbdropdownlisteditdb.createdropdowncontroller:
+function tdbdropdownlisteditdb.createdropdowncontroller: 
                                                     tcustomdropdowncontroller;
 begin
  result:= tdropdownlistcontrollerdb.create(idbdropdownlist(self),false);
@@ -7474,12 +7471,12 @@ begin
   with tdropdownlistcontrollerdb(fdropdown) do begin
    setdropdowntext(getasmsestring(fdatalink.textfield,fdatalink.utf8),true,
                                               false,akey);
-  end;
+  end; 
   exit;
  end
  else begin
   if arecordnum = -2 then begin
-   bo1:= checkvalue;
+   bo1:= checkvalue; 
   end
   else begin
    if deo_selectonly in dropdown.options then begin
@@ -7506,7 +7503,7 @@ begin
  inherited dropdown.assign(avalue);
 end;
 
-function tdropdownlisteditdb.createdropdowncontroller:
+function tdropdownlisteditdb.createdropdowncontroller: 
                                                     tcustomdropdowncontroller;
 begin
  result:= tdropdownlistcontrollerdb.create(idbdropdownlist(self),false);
@@ -7522,12 +7519,12 @@ begin
   with tdropdownlistcontrollerdb(fdropdown) do begin
    setdropdowntext(getasmsestring(fdatalink.textfield,fdatalink.utf8),true,
                                               false,akey);
-  end;
+  end; 
   exit;
  end
  else begin
   if arecordnum = -2 then begin
-   bo1:= checkvalue;
+   bo1:= checkvalue; 
   end
   else begin
    if deo_selectonly in dropdown.options then begin
@@ -7555,7 +7552,7 @@ begin
  inherited dropdown.assign(avalue);
 end;
 
-function tdbdropdownlisteditlb.createdropdowncontroller:
+function tdbdropdownlisteditlb.createdropdowncontroller: 
                                                     tcustomdropdowncontroller;
 begin
  result:= tdropdownlistcontrollerlb.create(ilbdropdownlist(self));
@@ -7571,12 +7568,12 @@ begin
   with tdropdownlistcontrollerlb(fdropdown) do begin
    setdropdowntext(flookupbuffer.textvaluephys(cols[0].ffieldno,arecordnum),
                                               true,false,akey);
-  end;
+  end; 
   exit;
  end
  else begin
   if arecordnum = -2 then begin
-   bo1:= checkvalue;
+   bo1:= checkvalue; 
   end
   else begin
    if deo_selectonly in dropdown.options then begin
@@ -7609,7 +7606,7 @@ begin
  inherited dropdown.assign(avalue);
 end;
 
-function tdropdownlisteditlb.createdropdowncontroller:
+function tdropdownlisteditlb.createdropdowncontroller: 
                                                     tcustomdropdowncontroller;
 begin
  result:= tdropdownlistcontrollerlb.create(ilbdropdownlist(self));
@@ -7625,12 +7622,12 @@ begin
   with tdropdownlistcontrollerlb(fdropdown) do begin
    setdropdowntext(flookupbuffer.textvaluephys(cols[0].ffieldno,arecordnum),
                                               true,false,akey);
-  end;
+  end; 
   exit;
  end
  else begin
   if arecordnum = -2 then begin
-   bo1:= checkvalue;
+   bo1:= checkvalue; 
   end
   else begin
    if deo_selectonly in dropdown.options then begin
@@ -7676,12 +7673,12 @@ begin
   with tdbdropdownlistcontroller(fdropdown) do begin
    text:= getasmsestring(fdatalink.textfield,fdatalink.utf8);
    tdropdowncols1(fcols).fitemindex:= getasinteger(fdatalink.valuefield);
-  end;
+  end; 
   bo1:= checkvalue;
  end
  else begin
   if arecordnum = -2 then begin
-   bo1:= checkvalue;
+   bo1:= checkvalue; 
   end
   else begin
    feditor.undo;
@@ -7697,7 +7694,7 @@ var
  int1: integer;
 begin
  if @data = nil then begin
-  int1:= value;
+  int1:= value;  
  end
  else begin
   int1:= integer(data);
@@ -7735,12 +7732,12 @@ begin
    text:= getasmsestring(fdatalink.textfield,fdatalink.utf8);
    tdropdowncols1(fcols).fkeyvalue:= getasmsestring(fdatalink.valuefield,
                                                          fdatalink.utf8);
-  end;
+  end; 
   bo1:= checkvalue;
  end
  else begin
   if arecordnum = -2 then begin
-   bo1:= checkvalue;
+   bo1:= checkvalue; 
   end
   else begin
    feditor.undo;
@@ -7756,7 +7753,7 @@ var
  mstr1: msestring;
 begin
  if @data = nil then begin
-  mstr1:= value;
+  mstr1:= value;  
  end
  else begin
   mstr1:= msestring(data);
@@ -7794,12 +7791,12 @@ begin
    text:= getasmsestring(fdatalink.textfield,fdatalink.utf8);
    tdropdowncols1(fcols).fkeyvalue:= getasmsestring(fdatalink.valuefield,
                                                       fdatalink.utf8);
-  end;
+  end; 
   bo1:= checkvalue;
  end
  else begin
   if arecordnum = -2 then begin
-   bo1:= checkvalue;
+   bo1:= checkvalue; 
   end
   else begin
    feditor.undo;
@@ -7815,7 +7812,7 @@ var
  mstr1: msestring;
 begin
  if @data = nil then begin
-  mstr1:= value;
+  mstr1:= value;  
  end
  else begin
   mstr1:= msestring(data);
@@ -7834,7 +7831,7 @@ begin
  iificlient(aowner).setifiserverintf(iifidataserver(self));
  inherited create;
  options:= defaultgriddatalinkoptions;
-// visualcontrol:= true;
+// visualcontrol:= true; 
 end;
 
 destructor tgriddatalink.destroy;
@@ -7975,13 +7972,13 @@ procedure tgriddatalink.doupdaterowdata(const row: integer);
    end;
   end;
  end;
-
+ 
 var
  int1,int2: integer;
  dataset1: tdataset;
  buffercount1: int32;
 begin
- if (fgrid.componentstate * [csloading,csdesigning,csdestroying] = []) and
+ if (fgrid.componentstate * [csloading,csdesigning,csdestroying] = []) and 
                  (row < fgrid.rowcount) then begin
   dataset1:= dataset;
   if dataset1 <> nil then begin
@@ -8025,7 +8022,7 @@ begin
       activerecord:= int2;
      end;
     end;
-   end;
+   end;   
    tdatacols1(fgrid.datacols).invalidatemaxsize(-1);
   end;
  end;
@@ -8062,7 +8059,7 @@ begin
  filer.defineproperty('datafield',{$ifdef FPC}@{$endif}readdatafield,nil,false);
 end;
 
-function tgriddatalink.getrowfieldisnull(const afield: tfield;
+function tgriddatalink.getrowfieldisnull(const afield: tfield; 
                              const row: integer): boolean;
 var
  rowinfo: gridrowinfoty;
@@ -8144,7 +8141,7 @@ begin
  end;
 end;
 
-function tgriddatalink.getbooleanbuffer(const afield: tfield;
+function tgriddatalink.getbooleanbuffer(const afield: tfield; 
                                              const row: integer): pointer;
 var
  rowinfo: gridrowinfoty;
@@ -8189,7 +8186,7 @@ begin
  end;
 end;
 
-function tgriddatalink.getrealtybuffer(const afield: tfield;
+function tgriddatalink.getrealtybuffer(const afield: tfield; 
                                              const row: integer): pointer;
 var
  rowinfo: gridrowinfoty;
@@ -8348,14 +8345,14 @@ begin
   fzebraoffset:= 0;
  end;
 end;
-
+ 
 procedure tgriddatalink.checkscroll;
 var
  rect1,rect2: rectty;
  distance: integer;
 // rowbefore: integer;
  int1: integer;
-
+ 
 begin
  checkzebraoffset;
  distance:= firstrecord - ffirstrecordbefore;
@@ -8388,11 +8385,11 @@ begin
       end;
       if (rect2.cy > 0) and testintersectrect(rect2,updaterect) then begin
        ffirstrecordshift:= distance;
-       inc(fzebraoffset,distance);
+       inc(fzebraoffset,distance);       
        try
         update; //draw old position
        finally
-        dec(fzebraoffset,distance);
+        dec(fzebraoffset,distance);       
         ffirstrecordshift:= 0;
        end;
       end;
@@ -8420,7 +8417,7 @@ begin
     end;
    end;
   end;
-  if (activerecord < rowcount) and
+  if (activerecord < rowcount) and 
                  not (csdestroying in componentstate) then begin
    inc(fnocheckvalue);
    try
@@ -8437,7 +8434,7 @@ var
  int1: integer;
 begin
  int1:= activerecord;
- if (int1 < fgrid.rowcount) and active and
+ if (int1 < fgrid.rowcount) and active and  
                (tcustomgrid1(fgrid).fcellvaluechecking = 0) then begin
   with tcustomgrid1(fgrid) do begin
    inc(fnocheckvalue);
@@ -8479,7 +8476,7 @@ begin
 //   if row <> i2 then begin
 //    include(fstate1,gs1_nocellassistive);
 //   end;
-   if (row = i2) and (afield = nil) and (frowexited = int1) and
+   if (row = i2) and (afield = nil) and (frowexited = int1) and 
                                       (feditingbefore = editing) then begin
     fgrid.row:= invalidaxis;
    end;
@@ -8536,7 +8533,7 @@ procedure tgriddatalink.checkscrollbar;
 var
  rea1: real;
  int1: integer;
-begin
+begin 
  rea1:= 0.5;
  if active then begin
   int1:= dataset.recordcount - 1;
@@ -8622,7 +8619,7 @@ begin
          end;
         end
         else begin
-         if (not dataset.filtered or (dscontroller <> nil)) and
+         if (not dataset.filtered or (dscontroller <> nil)) and 
                                      (gdo_propscrollbar in foptions) then begin
           int1:= dataset.recordcount;
           if int1 >= 0 then begin
@@ -8718,7 +8715,7 @@ begin
  if checkvalue then begin
   moveby(1);
   if (og_autoappend in tcustomgrid1(fgrid).foptionsgrid) and canappend and eof and
-                         (datasource.autoedit or
+                         (datasource.autoedit or 
                            (navigator <> nil) and navigator.autoedit) then begin
    dataset.append;
    with fgrid,datacols do begin
@@ -8776,7 +8773,7 @@ end;
 procedure tgriddatalink.doshortcut(var info: keyeventinfoty;
                const sender: twidget);
 begin
- if (info.eventstate * [es_preview,es_processed] = []) and
+ if (info.eventstate * [es_preview,es_processed] = []) and 
                      (fnavigator <> nil) and fnavigator.showing and
                                                fnavigator.isenabled then begin
   fnavigator.internalshortcut(info,sender);
@@ -8888,7 +8885,6 @@ begin
     end;
    end;
   end;
-   else; // For case statment added to make compiler happy.
  end;
 end;
 
@@ -8896,9 +8892,9 @@ procedure tgriddatalink.updatedata;
 begin
  beginnullchecking;
  tcustomgrid1(fgrid).beginnonullcheck;
- try
+ try 
   if checkvalue then begin
-   if (og_appendempty in fgrid.optionsgrid) and
+   if (og_appendempty in fgrid.optionsgrid) and 
                      (dataset.state = dsinsert) then begin
     tdataset1(dataset).setmodified(true); //FPC fixes_2_6 compatibility
                  //force append empty row
@@ -8930,10 +8926,10 @@ end;
 
 function tgriddatalink.canautoinsert: boolean;
 begin
-// result:= fgrid.focused and active and (recordcount = 0) and
- result:= fgrid.entered and active and (recordcount = 0) and
-                 (og_autofirstrow in fgrid.optionsgrid) and
-                 (datasource.autoedit or
+// result:= fgrid.focused and active and (recordcount = 0) and 
+ result:= fgrid.entered and active and (recordcount = 0) and 
+                 (og_autofirstrow in fgrid.optionsgrid) and 
+                 (datasource.autoedit or 
                   (navigator <> nil) and navigator.autoedit);
 end;
 
@@ -8948,12 +8944,12 @@ end;
 procedure tgriddatalink.beforefocuscell(const cell: gridcoordty;
                              const selectaction: focuscellactionty);
 begin
- if (selectaction = fca_entergrid) and canautoinsert and
+ if (selectaction = fca_entergrid) and canautoinsert and 
                                         not fautoinserting then begin
   fautoinserting:= true;
   try
    dataset.insert;
-   fgrid.focuscell(fgrid.focusedcell,selectaction);
+   fgrid.focuscell(fgrid.focusedcell,selectaction); 
                               //focus col if necessary
   finally
    fautoinserting:= false;
@@ -8969,7 +8965,7 @@ end;
 
 function tgriddatalink.canclose(const newfocus: twidget): boolean;
 begin
- result:= not (gdo_checkbrowsemodeonexit in foptions) or
+ result:= not (gdo_checkbrowsemodeonexit in foptions) or 
            (fgrid.widgetstate * [ws_entered,ws_exiting] = [])  or
            fgrid.checkdescendent(newfocus) or inherited canclose;
 end;
@@ -8985,7 +8981,7 @@ begin
    int1:= rowtorecnozerobased(cell.row);
    if not (finserting and not finsertingbefore) then begin
     int3:= recnozerobased;
-    if (ds1.state <> dsfilter) and not fautoinserting and
+    if (ds1.state <> dsfilter) and not fautoinserting and 
                         (tcustomgrid1(fgrid).fnocheckvalue = 0) then begin
      ds1.checkbrowsemode;
     end;
@@ -9008,7 +9004,7 @@ begin
     end;
    end;
    cell.row:= activerecord;
-  end;
+  end;   
  end;
 end;
 
@@ -9149,7 +9145,7 @@ end;
 procedure tgriddatalink.fieldchanged;
 begin
  if (ffield_state <> nil) or (ffield_color <> nil) or (ffield_font <> nil) or
-     (ffield_readonly <> nil) or (ffield_merged <> nil) or
+     (ffield_readonly <> nil) or (ffield_merged <> nil) or 
      (ffield_selected <> nil) then begin
   include(fstate,gdls_hasrowstatefield);
  end
@@ -9164,7 +9160,7 @@ procedure tgriddatalink.setselected(const cell: gridcoordty;
 var
  bo1: boolean;
 begin
- if (ffield_selected <> nil) and (cell.row >= 0) and
+ if (ffield_selected <> nil) and (cell.row >= 0) and 
                 (cell.row = activerecord) then begin
   bo1:= editing;
   dataset.edit;
@@ -9186,7 +9182,7 @@ begin
       ffield_selected.asinteger:= ffield_selected.asinteger or bits[cell.col];
      end
      else begin
-      ffield_selected.asinteger:= ffield_selected.asinteger and
+      ffield_selected.asinteger:= ffield_selected.asinteger and 
                                                       not bits[cell.col];
      end;
     end;
@@ -9244,7 +9240,7 @@ begin
  if result then begin
   ainfo.row:= activerecord;
   {
-  if ainfo.row <> fgrid.row then begin
+  if ainfo.row <> fgrid.row then begin 
       //probably changed by tdatalink.destroy -> dataset.recalcbuflistsize
    result:= false;
    checkzebraoffset;
@@ -9321,7 +9317,7 @@ end;
 
 { tdbwidgetfixcols }
 
-constructor tdbwidgetfixcols.create(const aowner: tcustomwidgetgrid;
+constructor tdbwidgetfixcols.create(const aowner: tcustomwidgetgrid; 
                        const adatalink: tgriddatalink);
 begin
  fdatalink:= adatalink;
@@ -9676,7 +9672,7 @@ begin
  result:= nil;
  if (acol >= 0) and (acol < fdatacols.count) then begin
   widget1:= twidgetcol(tdatacols1(fdatacols).fitems[acol]).editwidget;
-  if (widget1 <> nil) and
+  if (widget1 <> nil) and 
       widget1.getcorbainterface(typeinfo(idbeditfieldlink),intf1) then begin
    result:= intf1.getfieldlink;
   end;
@@ -9779,7 +9775,7 @@ end;
 
 { tdbstringcol }
 
-constructor tdbstringcol.create(const agrid: tcustomgrid;
+constructor tdbstringcol.create(const agrid: tcustomgrid; 
                          const aowner: tgridarrayprop);
 begin
  fdatalink:= tstringcoldatalink.create(idbeditfieldlink(self));
@@ -9954,7 +9950,7 @@ begin
  afieldtypes:= stringfields;
 end;
 
-procedure tdbstringcol.getfieldtypes(out propertynames: stringarty;
+procedure tdbstringcol.getfieldtypes(out propertynames: stringarty; 
                                      out fieldtypes: fieldtypesarty);
 begin
  propertynames:= nil;
@@ -10004,7 +10000,7 @@ end;
 
 procedure tdbstringcol.setifiserverintf(const aintf: iifiserver);
 begin
- fifiserverintf:= aintf;
+ fifiserverintf:= aintf; 
 end;
 
 procedure tdbstringcol.docellfocuschanged(enter: boolean;
@@ -10120,7 +10116,7 @@ begin
      fdatalink.doexit(self);
     end;
    end;
-  end;
+  end;  
  end;
  inherited;
 end;
@@ -10208,7 +10204,7 @@ end;
 
 { tdbstringfixcols }
 
-constructor tdbstringfixcols.create(const aowner: tcustomgrid;
+constructor tdbstringfixcols.create(const aowner: tcustomgrid; 
                        const adatalink: tgriddatalink);
 begin
  fdatalink:= adatalink;
@@ -10603,9 +10599,8 @@ begin
          tarightjustify: begin
           textflags:= textflags + [tf_right];
          end;
-          else; // For case statment added to make compiler happy.
         end;
-        if (ffieldnamedisplayfixrow < 0) and
+        if (ffieldnamedisplayfixrow < 0) and 
                       (-ffieldnamedisplayfixrow <= ffixrows.count) then begin
          with ffixrows[ffieldnamedisplayfixrow] do begin
           captions.count:= datacols.count;
@@ -10627,7 +10622,7 @@ end;
 procedure tcustomdbstringgrid.checkautofields;
 var
  int1: integer;
-begin
+begin           
  if dsgo_autofields in foptions then begin
   for int1:= 0 to datacols.count - 1 do begin
    datacols[int1].datafield:= '';
@@ -10892,7 +10887,7 @@ end;
 procedure texterndatadropdownlistcontroller.dropdown;
 begin
  tdropdowncols1(fcols).fitemindex:= -1;
- inherited;
+ inherited; 
 end;
 
 { tdbenumeditlb }
@@ -10920,14 +10915,14 @@ begin
  if arecordnum >= 0 then begin
   with tlbdropdownlistcontroller(fdropdown) do begin
    text:= flookupbuffer.textvaluephys(cols[0].ffieldno,arecordnum);
-   tdropdowncols1(fcols).fitemindex:=
+   tdropdowncols1(fcols).fitemindex:= 
             flookupbuffer.integervaluephys(fkeyfieldno,arecordnum);
-  end;
+  end; 
   bo1:= checkvalue;
  end
  else begin
   if arecordnum = -2 then begin
-   bo1:= checkvalue;
+   bo1:= checkvalue; 
   end
   else begin
    feditor.undo;
@@ -10943,7 +10938,7 @@ var
  int1,int2,int3,int4: integer;
 begin
  if @data = nil then begin
-  int1:= value;
+  int1:= value;  
  end
  else begin
   int1:= integer(data);
@@ -10995,14 +10990,14 @@ begin
  if arecordnum >= 0 then begin
   with tlbdropdownlistcontroller(fdropdown) do begin
    text:= flookupbuffer.textvaluephys(cols[0].ffieldno,arecordnum);
-   tdropdowncols1(fcols).fitemindex:=
+   tdropdowncols1(fcols).fitemindex:= 
             flookupbuffer.integervaluephys(fkeyfieldno,arecordnum);
-  end;
+  end; 
   bo1:= checkvalue;
  end
  else begin
   if arecordnum = -2 then begin //empty row selected
-   bo1:= checkvalue;
+   bo1:= checkvalue; 
   end
   else begin
    feditor.undo;
@@ -11018,7 +11013,7 @@ var
  int1,int2,int3,int4: integer;
 begin
  if @data = nil then begin
-  int1:= value;
+  int1:= value;  
  end
  else begin
   int1:= integer(data);
@@ -11099,7 +11094,7 @@ end;
 procedure tcustomenum64edit.setvalue(const avalue: int64);
 begin
 {$warnings off}
- tdropdowncols1(tlbdropdownlistcontroller(fdropdown).cols).fkeyvalue64:=
+ tdropdowncols1(tlbdropdownlistcontroller(fdropdown).cols).fkeyvalue64:= 
                          avalue;
 {$warnings on}
  fvalue1:= avalue;
@@ -11115,7 +11110,7 @@ procedure tcustomenum64edit.texttovalue(var accept: boolean; const quiet: boolea
 var
  lint1: int64;
 begin
- if (tdropdownlistcontroller(fdropdown).itemindex < 0) and
+ if (tdropdownlistcontroller(fdropdown).itemindex < 0) and 
                                            (trim(text) = '') then begin
   lint1:= valuedefault;
  end
@@ -11132,7 +11127,7 @@ begin
    end;
 {$ifdef mse_with_ifi}
    ifisetvalue(lint1,accept);
-{$endif}
+{$endif}  
   end;
   if accept then begin
    value:= lint1;
@@ -11184,7 +11179,7 @@ end;
 
 function tcustomenum64edit.getifidatalinkintf: iifidatalink;
 begin
- result:= iifidatalink(self);
+ result:= iifidatalink(self); 
 end;
 
 function tcustomenum64edit.getifilinkkind: ptypeinfo;
@@ -11200,7 +11195,7 @@ begin
  nullvalueset();
 end;
  { tcustomenum64editlb }
-
+ 
 function tcustomenum64editlb.getdropdown: tlbdropdownlistcontroller;
 begin
  result:= tlbdropdownlistcontroller(fdropdown);
@@ -11224,14 +11219,14 @@ begin
  if arecordnum >= 0 then begin
   with tlbdropdownlistcontroller(fdropdown) do begin
    text:= flookupbuffer.textvaluephys(cols[0].ffieldno,arecordnum);
-   tdropdowncols1(fcols).fkeyvalue64:=
+   tdropdowncols1(fcols).fkeyvalue64:= 
             flookupbuffer.int64valuephys(fkeyfieldno,arecordnum);
-  end;
+  end; 
   bo1:= checkvalue;
  end
  else begin
   if arecordnum = -2 then begin //empty row selected
-   bo1:= checkvalue;
+   bo1:= checkvalue; 
   end
   else begin
    feditor.undo;
@@ -11248,7 +11243,7 @@ var
  int2,int3,int4: integer;
 begin
  if @data = nil then begin
-  lint1:= value;
+  lint1:= value;  
  end
  else begin
   lint1:= int64(data);
@@ -11274,7 +11269,7 @@ begin
 end;
 
  { tcustomenum64editdb }
-
+ 
 function tcustomenum64editdb.getdropdown: tdbdropdownlistcontroller;
 begin
  result:= tdbdropdownlistcontroller(fdropdown);
@@ -11300,13 +11295,13 @@ begin
   with tdbdropdownlistcontroller(fdropdown) do begin
    text:= getasmsestring(fdatalink.textfield,fdatalink.utf8);
    tdropdowncols1(fcols).fkeyvalue64:= getaslargeint(fdatalink.valuefield)
-  end;
+  end; 
   bo1:= checkvalue;
  end
  else begin
   if arecordnum = -2 then begin
    text:= '';
-   bo1:= checkvalue;
+   bo1:= checkvalue; 
   end
   else begin
    feditor.undo;
@@ -11322,7 +11317,7 @@ var
  lint1: int64;
 begin
  if @data = nil then begin
-  lint1:= value;
+  lint1:= value;  
  end
  else begin
   lint1:= int64(data);
@@ -11635,14 +11630,14 @@ begin
   with tlbdropdownlistcontroller(fdropdown) do begin
    text:= flookupbuffer.textvaluephys(cols[0].ffieldno,arecordnum);
    tdropdowncols1(fcols).fitemindex:= arecordnum;
-   tdropdowncols1(fcols).fkeyvalue:=
+   tdropdowncols1(fcols).fkeyvalue:= 
                            flookupbuffer.textvaluephys(fkeyfieldno,arecordnum);
-  end;
+  end; 
   bo1:= checkvalue;
  end
  else begin
   if arecordnum = -2 then begin
-   bo1:= checkvalue;
+   bo1:= checkvalue; 
   end
   else begin
    feditor.undo;
@@ -11659,7 +11654,7 @@ var
  int2,int3,int4: integer;
 begin
  if @data = nil then begin
-  mstr1:= value;
+  mstr1:= value;  
  end
  else begin
   mstr1:= msestring(data);
@@ -11703,7 +11698,7 @@ begin
  result:= tlbdropdownlistcontroller.create(ilbdropdownlist(self));
 end;
 
-procedure tkeystringeditlb.recordselected(const arecordnum: integer;
+procedure tkeystringeditlb.recordselected(const arecordnum: integer; 
                        const akey: keyty);
 var
  bo1: boolean;
@@ -11713,14 +11708,14 @@ begin
   with tlbdropdownlistcontroller(fdropdown) do begin
    text:= flookupbuffer.textvaluephys(cols[0].ffieldno,arecordnum);
    tdropdowncols1(fcols).fitemindex:= arecordnum;
-   tdropdowncols1(fcols).fkeyvalue:=
+   tdropdowncols1(fcols).fkeyvalue:= 
             flookupbuffer.textvaluephys(fkeyfieldno,arecordnum);
-  end;
+  end; 
   bo1:= checkvalue;
  end
  else begin
   if arecordnum = -2 then begin
-   bo1:= checkvalue;
+   bo1:= checkvalue; 
   end
   else begin
    feditor.undo;
@@ -11737,7 +11732,7 @@ var
  int2,int3,int4: integer;
 begin
  if @data = nil then begin
-  mstr1:= value;
+  mstr1:= value;  
  end
  else begin
   mstr1:= msestring(data);
@@ -11810,7 +11805,7 @@ begin
  end
  else begin
   result:= '';
- end;
+ end; 
 end;
 
 { texterndatadropdownlist }
@@ -11875,7 +11870,7 @@ begin
   resyncfilter;
  end;
 end;
-
+ 
 procedure texterndatadropdownlist.dbscrolled(distance: integer);
 var
  rect1: rectty;
@@ -11934,7 +11929,7 @@ begin
       break;
      end;
      frecnums[int3]:= int2;
-    end;
+    end; 
    end
    else begin
     exclude(feddstate,edds_bof);
@@ -12008,7 +12003,7 @@ begin
    end
    else begin
     ffirstrecord:= ffirstrecord + int1;
-    int2:= ffirstrecord + rowcount -
+    int2:= ffirstrecord + rowcount - 
              texterndatadropdownlistcontroller(fcontroller).getremoterowcount;
     if int2 > 0 then begin
      int1:= int1 - int2;
@@ -12109,10 +12104,10 @@ begin
      if frecnums[int1] = avalue then begin
       if int1 > 0 then begin
        exclude(feddstate,edds_bof);
-      end;
+      end; 
       if int1 < rowhigh then begin
        exclude(feddstate,edds_eof);
-      end;
+      end; 
       moveby(int1-row);
       exit;
      end;
@@ -12142,7 +12137,7 @@ begin
   end
   else begin
    if ffirstrecord < 0 then begin
-    ffirstrecord:= avalue;
+    ffirstrecord:= avalue;   
     int1:= texterndatadropdownlistcontroller(fcontroller).getremoterowcount;
     if ffirstrecord + rowcount > int1 then begin
      ffirstrecord:= int1 - rowcount;
@@ -12221,7 +12216,7 @@ begin
        end;
       end;
      end
-     else begin
+     else begin 
       activerecord:= round(int1 * sender.value);
      end;
     end
@@ -12332,7 +12327,7 @@ begin
    flookupbuffer:= lookupbuffer1;
    fsortfieldno:= tcustomlbdropdownlistcontroller(fcontroller).fsortfieldno;
    ffieldno:= tlbdropdowncol(acols[int1]).ffieldno;
-   funsorted:= olb_unsorted in
+   funsorted:= olb_unsorted in 
                            tlbdropdownlistcontroller(fcontroller).foptionslb;
   end;
  end;
@@ -12349,7 +12344,7 @@ begin
    result:= flookupbuffer.find(ffieldno,filter,int1,true,
               tcustomlbdropdownlistcontroller(fcontroller).fonfilter);
    if not result then begin
-    result:= (int1 < flookupbuffer.count) and
+    result:= (int1 < flookupbuffer.count) and 
             (msepartialcomparetext(filter,
              flookupbuffer.textvaluelog(ffieldno,int1,true)) = 0);
    end;
@@ -12534,7 +12529,7 @@ procedure tcustomlbdropdownlistcontroller.objectevent(const sender: tobject;
              const event: objecteventty);
 begin
  inherited;
- if (event in [oe_changed,oe_connect]) and (sender = flookupbuffer)
+ if (event in [oe_changed,oe_connect]) and (sender = flookupbuffer) 
            and not (csloading in flookupbuffer.componentstate) then begin
   with tdataedit1(fintf.getwidget) do begin
    if fgridintf <> nil then begin
@@ -12570,7 +12565,7 @@ constructor tlookupeditdatalink.create(const aowner: tcustomdataedit;
 begin
  inherited create(intf);
  fowner:= aowner;
- fdatatype:= adatatype;
+ fdatatype:= adatatype; 
 end;
 
 function tlookupeditdatalink.msedisplaytext(const aformat: msestring = '';
@@ -12678,11 +12673,11 @@ var
  intf2: idbdispfieldlink;
 begin
  inherited;
- if (awidget <> nil) then begin
+ if (awidget <> nil) then begin 
   if awidget.getcorbainterface(typeinfo(idbeditfieldlink),intf1) then begin
    fdatalink:= intf1.getfieldlink();
    if fdatalink <> nil then begin
-    tcustomeditwidgetdatalink(fdatalink).navigator:=
+    tcustomeditwidgetdatalink(fdatalink).navigator:= 
                             tdbwidgetgrid(fcellinfo.grid).fdatalink.navigator;
    end;
   end

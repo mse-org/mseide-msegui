@@ -12,7 +12,7 @@ unit msefbutils;
 interface
 uses
  mdb,msqldb,msetypes{msestrings};
-
+ 
 procedure fbupdateindexdefs(const sender: tcustomsqlconnection;
                             var indexdefs : tindexdefs;
                                const atablename : string);
@@ -23,11 +23,11 @@ function fbgetschemainfosql(const sender: tcustomsqlconnection;
 implementation
 uses
  msesqlresult,dbconst,sysutils;
-
+ 
 procedure fbupdateindexdefs(const sender: tcustomsqlconnection;
                             var indexdefs : tindexdefs;
                                const atablename : string);
-var
+var 
  res: tsqlresult;
  str1: ansistring;
 begin
@@ -54,7 +54,7 @@ begin
                'rel_con.rdb$index_name = ind.rdb$index_name '+
              'where '+
                '(ind_seg.rdb$index_name = ind.rdb$index_name) and '+
-               '(ind.rdb$relation_name=''' +
+               '(ind.rdb$relation_name=''' +  
                          msestring(uppercase(atablename)) +''') '+
              'order by '+
                'ind.rdb$index_name;';
@@ -87,7 +87,7 @@ end;
 function fbgetschemainfosql(const sender: tcustomsqlconnection;
                 schematype: tschematype;
                 schemaobjectname,schemapattern: msestring): msestring;
-var
+var 
  s : msestring;
 
 begin
@@ -109,7 +109,7 @@ begin
 
     stSysTables  : s := 'select '+
                           'rdb$relation_id          as recno, '+
-                          '''' + msestring(DatabaseName) +
+                          '''' + msestring(DatabaseName) + 
                           ''' as catalog_name, '+
                           '''''                     as schema_name, '+
                           'rdb$relation_name        as table_name, '+

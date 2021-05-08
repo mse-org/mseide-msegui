@@ -9,7 +9,7 @@ type
   public
    constructor create(aowner: tcomponent); override;
  end;
-
+ 
  tmsezreadonlyquery = class(tzreadonlyquery,imselocate,idscontroller,
                       igetdscontroller,isqlpropertyeditor,iactivatorclient)
    private
@@ -70,7 +70,7 @@ type
 {
    function locate(const key: integer; const field: tfield;
                    const aoptions: locateoptionsty = []): locateresultty;
-   function locate(const key: msestring; const field: tfield;
+   function locate(const key: msestring; const field: tfield; 
                  const aoptions: locateoptionsty = []): locateresultty;
 }
    procedure AppendRecord(const Values: array of const);
@@ -82,7 +82,7 @@ type
    property Active: boolean read getactive write setactive default false;
    property AutocalcFields default false;
  end;
-
+ 
  tmsezquery = class(tzquery,imselocate,idscontroller,igetdscontroller,
                           isqlpropertyeditor,iactivatorclient)
    private
@@ -143,7 +143,7 @@ type
 {
    function locate(const key: integer; const field: tfield;
                    const aoptions: locateoptionsty = []): locateresultty;
-   function locate(const key: msestring; const field: tfield;
+   function locate(const key: msestring; const field: tfield; 
                  const aoptions: locateoptionsty = []): locateresultty;
 }
    procedure AppendRecord(const Values: array of const);
@@ -155,7 +155,7 @@ type
    property Active: boolean read getactive write setactive default false;
    property AutocalcFields default false;
  end;
-
+ 
  tmseztable = class(tztable,imselocate,idscontroller,
                           igetdscontroller,iactivatorclient)
    private
@@ -213,7 +213,7 @@ type
 {
    function locate(const key: integer; const field: tfield;
                    const aoptions: locateoptionsty = []): locateresultty;
-   function locate(const key: msestring; const field: tfield;
+   function locate(const key: msestring; const field: tfield; 
                  const aoptions: locateoptionsty = []): locateresultty;
 }
    procedure AppendRecord(const Values: array of const);
@@ -283,7 +283,7 @@ type
 {
    function locate(const key: integer; const field: tfield;
                    const aoptions: locateoptionsty = []): locateresultty;
-   function locate(const key: msestring; const field: tfield;
+   function locate(const key: msestring; const field: tfield; 
                  const aoptions: locateoptionsty = []): locateresultty;
 }
    procedure AppendRecord(const Values: array of const);
@@ -295,7 +295,7 @@ type
    property Active: boolean read getactive write setactive default false;
    property AutocalcFields default false;
  end;
-
+ 
 implementation
 
 { tmsezreadonlyquery }

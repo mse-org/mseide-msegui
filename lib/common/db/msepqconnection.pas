@@ -17,11 +17,11 @@ uses
 type
  pqconnectionoptionty = (pqco_usesavepoint,pqco_closetransactiononfail);
  pqconnectionoptionsty = set of pqconnectionoptionty;
-
+ 
 const
  defaultpqconnectionoptionsty = [pqco_usesavepoint];
-
-type
+ 
+type 
  tmsepqconnection = class(tpqconnection,idbcontroller)
   private
    foptions: pqconnectionoptionsty;
@@ -48,17 +48,17 @@ type
    constructor create(aowner: tcomponent); override;
   published
    property DatabaseName: filenamety read getdatabasename write setdatabasename;
-   property Connected: boolean read getconnected write setconnected
+   property Connected: boolean read getconnected write setconnected 
                                                                default false;
-   property options: pqconnectionoptionsty read foptions write setoptions
+   property options: pqconnectionoptionsty read foptions write setoptions 
                                  default defaultpqconnectionoptionsty;
 end;
-
+ 
 implementation
 uses
  msefileutils,msebits,sysutils,msedatalist,msesqldb,msebufdataset,postgres3dyn,
  mseformatstr;
-
+ 
 { tmsepqconnection }
 
 constructor tmsepqconnection.create(aowner: tcomponent);
@@ -100,7 +100,7 @@ begin
  end;
 end;
 
-procedure tmsepqconnection.internalexecute(const cursor: tsqlcursor;
+procedure tmsepqconnection.internalexecute(const cursor: tsqlcursor; 
                const atransaction: tsqltransaction;
                const aparams: tmseparams; const autf8: boolean);
 const

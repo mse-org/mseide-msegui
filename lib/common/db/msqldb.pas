@@ -30,7 +30,7 @@ interface
  {$endif}
 {$endif}
 
-uses
+uses 
  sysutils,classes,mclasses,mdb,msebufdataset,msetypes,msedb,mseclasses,
  msedatabase,msestrings,msearrayutils,msedatalist,mseinterfaces,
  mseapplication,mseglob,msetimer,msearrayprops,msemacros;
@@ -65,16 +65,16 @@ const
 type
  tcustomsqlconnection = class;
  TSQLTransaction = class;
-
+ 
  tsqlstringlist = class(tmacrostringlist)
  end;
-
+   
   TSQLHandle = Class(TObject)
   end;
-
+  
   icursorclient = interface(iblobchache)
    function stringmemo: boolean; //memo fields are text(0) fields
-  end;
+  end; 
 
   TSQLCursor = Class(TSQLHandle)
    private
@@ -117,14 +117,14 @@ type
    property error: integer read ferror;
    property errormessage: msestring read ferrormessage;
  end;
-
+ 
  tdbcontroller = class(tactivatorcontroller)
   private
    fdatabasename: filenamety;
 //   fintf: idbcontroller;
    foptions: databaseoptionsty;
 //   factioncount: integer;
-//   factionwait: boolean;
+//   factionwait: boolean;   
    procedure setoptions(const avalue: databaseoptionsty);
   protected
    procedure setowneractive(const avalue: boolean); override;
@@ -137,7 +137,7 @@ type
  end;
 
  getcredentialseventty = procedure(const sender: tcustomsqlconnection;
-                            var ausername: msestring; var apassword: msestring)
+                            var ausername: msestring; var apassword: msestring) 
                                                                      of object;
  tmsesqlscript = class;
  tcustomsqlconnection = class(TmDatabase,idbcontroller,iactivatorclient)
@@ -159,7 +159,7 @@ type
    procedure settransaction(const avalue : tsqltransaction);
    procedure settransactionwrite(const avalue: tsqltransaction);
    procedure GetDBInfo(const SchemaType : TSchemaType;
-             const SchemaObjectName, ReturnField : string;
+             const SchemaObjectName, ReturnField : string;             
              out list: msestringarty);
 //   function getconnected: boolean;
    procedure setafteconnect(const avalue: tmsesqlscript);
@@ -170,10 +170,10 @@ type
    FConnOptions: sqlconnoptionsty;
    fcontroller: tdbcontroller;
    function connectionmessage(atext: pchar): msestring;
-   procedure finalizetransaction(const atransaction: tsqlhandle); virtual;
+   procedure finalizetransaction(const atransaction: tsqlhandle); virtual; 
 //   procedure setconnected(const avalue: boolean);
    procedure notification(acomponent: tcomponent; operation: toperation); override;
-
+   
     function StrToStatementType(s : msestring) : TStatementType; virtual;
     procedure getcredentials(var ausername: msestring; var apassword: msestring);
     procedure freecredentials(var ausername: msestring; var apassword: msestring);
@@ -210,7 +210,7 @@ type
                      const aParams: tstringlist) : boolean; virtual; abstract;
     procedure internalcommitretaining(trans : tsqlhandle); virtual; abstract;
     procedure internalrollbackretaining(trans : tsqlhandle); virtual; abstract;
-
+    
     procedure CommitRetaining(trans : TSQLHandle); virtual;
     procedure RollBackRetaining(trans : TSQLHandle); virtual;
     function getblobdatasize: integer; virtual; abstract;
@@ -226,7 +226,7 @@ type
               SchemaObjectName, SchemaPattern : msestring) : msestring; virtual;
     function CreateBlobStream(const Field: TField; const Mode: TBlobStreamMode;
                  const acursor: tsqlcursor): TStream; virtual;
-
+    
     procedure closeds(out activeds: integerarty);
     procedure reopends(const activeds: integerarty);
     function identquotechar: msestring; virtual;
@@ -252,20 +252,20 @@ type
    function todbstring(const avalue: msestring): string;
    function tomsestring(const avalue: string): msestring;
    procedure FreeFldBuffers(cursor : TSQLCursor); virtual; abstract;
-   Function AllocateCursorHandle(const aowner: icursorclient;
+   Function AllocateCursorHandle(const aowner: icursorclient; 
                const aname: ansistring): TSQLCursor; virtual; abstract;
                //aowner can be nil
                        //aowner used as blob cache
    Procedure DeAllocateCursorHandle(var cursor : TSQLCursor); virtual; abstract;
-   procedure preparestatement(const cursor: tsqlcursor;
+   procedure preparestatement(const cursor: tsqlcursor; 
                  const atransaction : tsqltransaction;
-                 const asql: msestring; const aparams : tmseparams);
+                 const asql: msestring; const aparams : tmseparams); 
                                  overload; virtual; abstract;
    procedure UnPrepareStatement(cursor : TSQLCursor); virtual; abstract;
    procedure AddFieldDefs(const cursor: TSQLCursor;
                        const FieldDefs: TfieldDefs); virtual; abstract;
    function Fetch(cursor : TSQLCursor) : boolean; virtual; abstract;
-   function loadfield(const cursor: tsqlcursor;
+   function loadfield(const cursor: tsqlcursor; 
             const datatype: tfieldtype; const fieldnum: integer; //null based
      const buffer: pointer; var bufsize: integer;
                                 const aisutf8: boolean): boolean; virtual; abstract;
@@ -275,7 +275,7 @@ type
    function fetchblob(const cursor: tsqlcursor;
                              const fieldnum: integer): ansistring; virtual;
                              //null based
-
+   
    procedure Close;
    procedure Open;
    property Handle: Pointer read GetHandle;
@@ -304,10 +304,10 @@ type
    function fieldtosql(const afield: tfield): msestring;
    function fieldtooldsql(const afield: tfield): msestring;
    function paramtosql(const aparam: tparam): msestring;
-
+   
    property Password : msestring read FPassword write FPassword;
    property Transaction : TSQLTransaction read FTransaction write SetTransaction;
-   property transactionwrite : tsqltransaction read ftransactionwrite
+   property transactionwrite : tsqltransaction read ftransactionwrite 
                                                   write settransactionwrite;
    property UserName : msestring read FUserName write FUserName;
    property CharSet : msestring read FCharSet write FCharSet;
@@ -318,7 +318,7 @@ type
    property afterconnect: tmsesqlscript read fafterconnect write setafteconnect;
    property beforedisconnect: tmsesqlscript read fbeforedisconnect write setbeforedisconnect;
    property controller: tdbcontroller read fcontroller write setcontroller;
-   property ongetcredentials: getcredentialseventty read fongetcredentials
+   property ongetcredentials: getcredentialseventty read fongetcredentials 
                                                         write fongetcredentials;
   end;
 
@@ -343,7 +343,7 @@ type
     property beforedisconnect;
 //    property OnLogin;
  end;
-
+ 
   TCommitRollbackAction = (caNone, caCommit, caCommitRetaining, caRollback,
     caRollbackRetaining);
   transactionoptionty = (tao_fake,tao_fakeretaining,
@@ -353,7 +353,7 @@ type
   sqltransactioneventty = procedure(const sender: tsqltransaction) of object;
   commiterroreventty = procedure(const sender: tsqltransaction;
                const aexception: exception; var handled: boolean) of object;
-
+  
   TSQLTransaction = class (TmDBTransaction)
    private
     FTrans: TSQLHandle;
@@ -386,7 +386,7 @@ type
     procedure CloseTrans; override;
     function GetHandle : Pointer; virtual;
     Procedure SetDatabase (Value : tmdatabase); override;
-    procedure disconnect(const sender: itransactionclient;
+    procedure disconnect(const sender: itransactionclient; 
                                               const auxclients: integer);
     procedure finalizetransaction; override;
     procedure doendtransaction(const aaction: tcommitrollbackaction);
@@ -415,48 +415,48 @@ type
     procedure savepointrelease;
     property savepointlevel: integer read fsavepointlevel;
     property trans: tsqlhandle read ftrans;
-    property pendingaction: tcommitrollbackaction read fpendingaction
+    property pendingaction: tcommitrollbackaction read fpendingaction 
                                                       write setpendingaction;
               //will be executed on savepointlevel 0
-    property pendingrefresh: boolean read fpendingrefresh
+    property pendingrefresh: boolean read fpendingrefresh 
                                            write fpendingrefresh;
    published
     property options: transactionoptionsty read foptions write foptions default [];
     property Action : TCommitRollbackAction read FAction write FAction default canone;
     property Database: tcustomsqlconnection read getdatabase write setdatabase1;
     property Params : TStringList read FParams write setparams;
-    property oncommiterror: commiterroreventty read foncommiterror
+    property oncommiterror: commiterroreventty read foncommiterror 
                                write foncommiterror;
-    property onbeforestart: sqltransactioneventty read fonbeforestart
+    property onbeforestart: sqltransactioneventty read fonbeforestart 
                                      write fonbeforestart;
-    property onafterstart: sqltransactioneventty read fonafterstart
+    property onafterstart: sqltransactioneventty read fonafterstart 
                                      write fonafterstart;
-    property onbeforestop: sqltransactioneventty read fonbeforestop
+    property onbeforestop: sqltransactioneventty read fonbeforestop 
                                      write fonbeforestop;
-    property onafterstop: sqltransactioneventty read fonafterstop
+    property onafterstop: sqltransactioneventty read fonafterstop 
                                      write fonafterstop;
     property onbeforecommit: sqltransactioneventty read fonbeforecommit
                                      write fonbeforecommit;
-    property onaftercommit: sqltransactioneventty read fonaftercommit
+    property onaftercommit: sqltransactioneventty read fonaftercommit 
                                      write fonaftercommit;
-    property onbeforecommitretaining: sqltransactioneventty
+    property onbeforecommitretaining: sqltransactioneventty 
               read fonbeforecommitretaining write fonbeforecommitretaining;
     property onaftercommitretaining: sqltransactioneventty
                    read fonaftercommitretaining write fonaftercommitretaining;
-    property onbeforerollback: sqltransactioneventty read fonbeforerollback
+    property onbeforerollback: sqltransactioneventty read fonbeforerollback 
                                      write fonbeforerollback;
-    property onafterrollback: sqltransactioneventty read fonafterrollback
+    property onafterrollback: sqltransactioneventty read fonafterrollback 
                                      write fonafterrollback;
-    property onbeforerollbackretaining: sqltransactioneventty
+    property onbeforerollbackretaining: sqltransactioneventty 
                             read fonbeforerollbackretaining
                             write fonbeforerollbackretaining;
-    property onafterrollbackretaining: sqltransactioneventty
+    property onafterrollbackretaining: sqltransactioneventty 
                             read fonafterrollbackretaining
                             write fonafterrollbackretaining;
   end;
 
  tcustomsqlstatement = class;
-
+ 
  sqlstatementeventty = procedure(const sender: tcustomsqlstatement;
                                 const adatabase: tcustomsqlconnection;
                                 const atransaction: tsqltransaction) of object;
@@ -519,9 +519,9 @@ type
               const atransaction: tsqltransaction; const e: exception;
               var handled: boolean);
    procedure dosqlchange(const sender: tobject); virtual;
-   property onbeforeexecute: sqlstatementeventty read fonbeforeexecute
+   property onbeforeexecute: sqlstatementeventty read fonbeforeexecute 
                                                      write fonbeforeexecute;
-   property onafterexecute: sqlstatementeventty read fonafterexecute
+   property onafterexecute: sqlstatementeventty read fonafterexecute 
                                                      write fonafterexecute;
    property onerror: sqlstatementerroreventty read fonerror write fonerror;
   public
@@ -533,12 +533,12 @@ type
    property database: tcustomsqlconnection read fdatabase write setdatabase1;
    property transaction: tsqltransaction read ftransaction write settransaction1;
                   //can be nil
-   property options: sqlstatementoptionsty read foptions
+   property options: sqlstatementoptionsty read foptions 
                                  write setoptions {stored false} default [] ;
  end;
 
  msesqlscripteventty = procedure(const sender: tmsesqlscript) of object;
-
+   
  tmsesqlscript = class(tcustomsqlstatement)
   private
    fstatementnr: integer;
@@ -559,7 +559,7 @@ type
 //   property fstatements: msestringarty read fstatements;
   published
    property term: msechar read fterm write fterm default ';';
-   property charescapement: boolean read fcharescapement
+   property charescapement: boolean read fcharescapement 
                                       write fcharescapement default false;
    property onbeforestatement: msesqlscripteventty read fonbeforestatement
                                                        write fonbeforestatement;
@@ -596,7 +596,7 @@ type
    procedure execute(const aparams: array of variant); overload;
    function rowsaffected: integer;
                   //-1 if not supported
-   property statementtype : tstatementtype read fstatementtype
+   property statementtype : tstatementtype read fstatementtype 
                  write fstatementtype default stnone;
  end;
 
@@ -613,7 +613,7 @@ type
    property onafterexecute;
    property onerror;
  end;
-
+   
 const
  blobidsize = sizeof(integer);
 type
@@ -628,7 +628,7 @@ type
                               const aparam: tparam);
   function blobscached: boolean;
  end;
-
+ 
  isqlclient = interface(idatabaseclient)
   function getsqltransaction: tsqltransaction;
   procedure setsqltransaction(const avalue: tsqltransaction);
@@ -636,7 +636,7 @@ type
   procedure setsqltransactionwrite(const avalue: tsqltransaction);
   procedure unprepare;
  end;
-
+ 
 procedure updateparams(const aparams: tmseparams; const autf8: boolean);
 procedure doexecute(const aparams: tmseparams; const atransaction: tmdbtransaction;
                     const acursor: tsqlcursor; adatabase: tmdatabase;
@@ -652,7 +652,7 @@ function splitsql(const asql: msestring; const term: msechar = ';';
 //function splitsqlstatements(const asqltext: msestring): msestringarty;
 
 implementation
-uses
+uses 
  {$ifdef FPC}dbconst{$else}dbconst_del{$endif},strutils,msereal,msestream,
  msebits,msefileutils,mseformatstr,typinfo,msesysutils,msesqlresult;
 {$ifndef mse_allwarnings}
@@ -717,7 +717,7 @@ begin
   sender.unprepare;
   if acursor <> nil then begin
    tcustomsqlconnection(dest).deallocatecursorhandle(acursor);
-  end;
+  end;  
   dosetdatabase(sender,avalue,dest);
   if (avalue <> nil) then begin
    if (sender.getsqltransaction = nil) then begin
@@ -735,14 +735,14 @@ function splitsql(const asql: msestring;
                   const charescapement: boolean = false): msestringarty;
 var
  po1,po2: pmsechar;
-
+ 
  procedure addstatement;
  begin
   setlength(result,high(result)+2);
   setlength(result[high(result)],po1-po2);
   move(po2^,result[high(result)][1],length(result[high(result)])*sizeof(msechar));
  end;
-
+ 
  procedure checkescape(var apo: pmsechar);
  begin
   if charescapement and (apo^ = '\') then begin
@@ -762,7 +762,7 @@ begin
  result:= nil;
  po1:= pmsechar(asql);
  po2:= po1;
- while po1^ <> #0 do begin
+ while po1^ <> #0 do begin          
   if po1^ = term then begin
    po1^:= ';';
    inc(po1);
@@ -805,17 +805,17 @@ begin
        inc(po1);
        if po1^ = '*' then begin// possible end of comment
         inc(po1);
-        if po1^ = '/' then begin
+        if po1^ = '/' then begin 
          break;  // end of comment
         end;
        end;
       until po1^ = #0;
-      if po1^ = '/' then begin
+      if po1^ = '/' then begin 
        inc(po1);             // skip final /
       end;
      end;
     end;
-    else begin
+    else begin 
      inc(po1);
     end;
    end;           //case
@@ -892,14 +892,14 @@ var
  str1: filenamety;
 begin
  str1:= trim(avalue);
- if (str1 <> '') and (str1[1] = '''') and
+ if (str1 <> '') and (str1[1] = '''') and 
                     (str1[length(str1)] = '''') then begin
   fdatabasename:= str1;
   tmdatabase(fowner).databasename:= copy(str1,2,length(str1)-2);
  end
  else begin
   fdatabasename:= tomsefilepath(str1);
-  tmdatabase(fowner).databasename:=
+  tmdatabase(fowner).databasename:= 
                    tosysfilepath(filepath(str1,fk_default,true));
  end;
 end;
@@ -1099,10 +1099,10 @@ function tcustomsqlconnection.internalExecuteDirect(const aSQL: mseString;
           ATransaction: TSQLTransaction;
           const aparams: tmseparams; aparamvars: array of variant;
           aisutf8: boolean; const noprepare: boolean): integer;
-var
+var 
  Cursor: TSQLCursor;
  params1: tmseparams;
- bo1,bo2: boolean;
+ bo1,bo2: boolean; 
  int1: integer;
 // str1: ansistring;
 begin
@@ -1133,7 +1133,7 @@ begin
    cursor.ftrans:= atransaction.handle;
    if trimright(asql) = '' then begin
     DatabaseError(SErrNoStatement);
-   end;
+   end;   
    Cursor.FStatementType := stNone;
    if not noprepare then begin
     PrepareStatement(cursor,ATransaction,aSQL,params1);
@@ -1193,10 +1193,10 @@ begin
                anoprepare and not (sco_nounprepared in fconnoptions));
 end;
 
-procedure tcustomsqlconnection.GetDBInfo(const SchemaType: TSchemaType;
+procedure tcustomsqlconnection.GetDBInfo(const SchemaType: TSchemaType; 
             const SchemaObjectName, ReturnField : string;
             out list: msestringarty);
-var
+var 
  res: tsqlresult;
  col1: tdbcol;
  int1: integer;
@@ -1234,10 +1234,10 @@ begin
 end;
 
 (*
-procedure tcustomsqlconnection.GetDBInfo(const SchemaType : TSchemaType;
+procedure tcustomsqlconnection.GetDBInfo(const SchemaType : TSchemaType; 
             const SchemaObjectName, ReturnField : string; List: TStrings);
 
-var
+var 
  qry: TSQLQuery;
 
 begin
@@ -1319,7 +1319,7 @@ end;
 
 procedure tcustomsqlconnection.internalexecuteunprepared(
             const cursor: tsqlcursor; const atransaction: tsqltransaction;
-                     const asql: string; const origsql: msestring;
+                     const asql: string; const origsql: msestring; 
                                                     const aparams: tmseparams);
 begin
  raise edatabaseerror.create(name+': executeunprepared not supported.');
@@ -1370,7 +1370,7 @@ begin
   afteraction;
  end;
 end;
-
+     
 function tcustomsqlconnection.GetSchemaInfoSQL( SchemaType : TSchemaType;
             SchemaObjectName, SchemaPattern : msestring) : msestring;
 
@@ -1635,7 +1635,7 @@ begin
   end;
  end;
  for int1:= high(fdatasets1) downto 0 do begin
-  if (fdatasets1[int1] <> nil) and
+  if (fdatasets1[int1] <> nil) and 
                  (tmdbdataset(fdatasets1[int1]).database = self) then begin
    with fdatasets1[int1] do begin
     active:= false;
@@ -1811,7 +1811,7 @@ begin
 end;
 
 procedure TSQLTransaction.StartTransaction;
-var
+var 
  db: tcustomsqlconnection;
  int1: integer;
 begin
@@ -1836,7 +1836,7 @@ begin
  if not assigned(FTrans) then begin
   FTrans:= Db.AllocateTransactionHandle;
  end;
- if (tao_fake in foptions) or
+ if (tao_fake in foptions) or 
                  Db.StartdbTransaction(FTrans,FParams) then begin
   OpenTrans;
  end;
@@ -1939,7 +1939,7 @@ begin
        fwritedatasets[int1].setactive(true);
       end;
       dec(int1);
-     end;
+     end;     
     end
     else begin
      if (tao_refreshdatasets in foptions) or (aaction <> cacommit) then begin
@@ -1978,7 +1978,7 @@ function tsqltransaction.docommit(const retaining: boolean): boolean;
    closedatasets;
   end;
  end;
-
+ 
 var
  bo1: boolean;
 begin
@@ -2145,7 +2145,7 @@ begin
   end;
   }
 // end;
- if high(fdatasets) > auxclients then begin
+ if high(fdatasets) > auxclients then begin 
   databaseerror('Offline mode needs exclusive transaction.',
                                        sender.getcomponentinstance);
  end;
@@ -2177,13 +2177,13 @@ begin
   If Assigned(Database) then begin
    finalizetransaction;
    with tcustomsqlconnection(database) do begin
-    if Transaction = self then begin
+    if Transaction = self then begin 
      Transaction:= nil;
     end;
-    if Transactionwrite = self then begin
+    if Transactionwrite = self then begin 
      Transactionwrite:= nil;
     end;
-   end;
+   end; 
   end;
   inherited SetDatabase(Value);
  end;
@@ -2208,7 +2208,7 @@ procedure TSQLTransaction.finalizetransaction;
 begin
  if (database <> nil) and (ftrans <> nil) then begin
   tsqlconnection(database).finalizetransaction(ftrans);
- end;
+ end; 
 end;
 
 function TSQLTransaction.savepointbegin: integer;
@@ -2250,7 +2250,7 @@ begin
  end;
  if alevel >= 0 then begin
   database.executedirect('ROLLBACK TO '+'sp'+inttostrmse(alevel)+';',
-                                                     self,nil,false,true);
+                                                     self,nil,false,true); 
   fsavepointlevel:= alevel-1;
   savepointevent(spek_rollback,alevel);
   checkpendingaction;
@@ -2262,7 +2262,7 @@ begin
  checkactive;
  if fsavepointlevel >= 0 then begin
   database.executedirect('RELEASE SAVEPOINT '+'sp'+
-             inttostrmse(fsavepointlevel)+';',self,nil,false,true);
+             inttostrmse(fsavepointlevel)+';',self,nil,false,true); 
   dec(fsavepointlevel);
   savepointevent(spek_release,fsavepointlevel+1);
   checkpendingaction;
@@ -2336,7 +2336,7 @@ begin
   try
    rollback();
   except //no secondary exceptions
-  end;
+  end; 
  end;
 end;
 
@@ -2348,7 +2348,7 @@ begin
  fowner:= aowner;
  fname:= aname;
  frowsaffected:= -1;
- frowsreturned:= -1;
+ frowsreturned:= -1; 
  inherited create;
 end;
 
@@ -2516,7 +2516,7 @@ begin
  result:= false;
 end;
 
-function tcustomsqlstatement.getdatabase: tcustomconnection;
+function tcustomsqlstatement.getdatabase: tcustomconnection; 
                                          //for isqlpropertyeditor
 begin
  result:= fdatabase;
@@ -2651,7 +2651,7 @@ begin
  end;
  if atransaction = nil then begin
   atransaction:= ftransaction;
- end;
+ end; 
  if adatabase = nil then begin
   databaseerror(serrdatabasenassigned,self);
  end;
@@ -2676,7 +2676,7 @@ begin
     adatabase.executedirect(ar1[int1],atransaction,fparams,isutf8,
                            sso_noprepare in foptions);
    except
-    on e: exception do begin
+    on e: exception do begin  
      bo1:= false;
      doerror(adatabase,atransaction,e,bo1);
      if not bo1 then begin
@@ -2818,7 +2818,7 @@ begin
   checkautocommit;
   doafterexecute(fdatabase,ftransaction);
  except
-  on e: exception do begin
+  on e: exception do begin  
    bo1:= false;
    doerror(fdatabase,ftransaction,e,bo1);
    if not bo1 then begin
@@ -2862,7 +2862,7 @@ end;
 
 { econnectionerror }
 
-constructor econnectionerror.create(const asender: tcustomsqlconnection;
+constructor econnectionerror.create(const asender: tcustomsqlconnection; 
    const amessage: ansistring; const aerrormessage: msestring;
     const aerror: integer);
 begin

@@ -1,6 +1,6 @@
 {
     Copyright (c) 2004 by Joost van der Sluis
-
+    
     See the file COPYING.FPC, included in this distribution,
     for details about the copyright.
 
@@ -11,7 +11,7 @@
   Modified 2006-2013 by Martin Schreiber
 
  **********************************************************************}
-
+ 
 unit mpqconnection;
 {$ifdef FPC}{$mode objfpc}{$H+}{$endif}
 
@@ -46,7 +46,7 @@ type
    public
     property sqlcode: string read fsqlcode;
  end;
-
+ 
   TPQTrans = Class(TSQLHandle)
    protected
     fconn: PPGConn;
@@ -61,7 +61,7 @@ type
    vartype: word;
   end;
   dbarrayinfoarty = array of dbarrayinfoty;
-
+  
   TPQCursor = Class(TSQLCursor)
    protected
     Statementm : msestring;
@@ -78,7 +78,7 @@ type
   end;
 
  dbeventarty = array of tdbevent;
-
+ 
  TPQConnection = class (TSQLConnection,iblobconnection,idbevent,idbeventcontroller)
   private
    FCursorCount         : integer;
@@ -103,7 +103,7 @@ type
                 const amessage: ansistring);
    procedure checkexec(const aconnection: ppgconn; const asql: ansistring;
                 const amessage: ansistring);
-   procedure finalizetransaction(const atransaction: tsqlhandle); override;
+   procedure finalizetransaction(const atransaction: tsqlhandle); override; 
    procedure DoInternalConnect; override;
    procedure DoInternalDisconnect; override;
    function GetHandle : pointer; override;
@@ -127,7 +127,7 @@ type
    function GetSchemaInfoSQL(SchemaType : TSchemaType;
          SchemaObjectName, SchemaPattern : msestring) : msestring; override;
    procedure dopqexec(const asql: ansistring); overload;
-   procedure dopqexec(const asql: ansistring;
+   procedure dopqexec(const asql: ansistring; 
                                     const aconnection: ppgconn); overload;
 
    function CreateBlobStream(const Field: TField; const Mode: TBlobStreamMode;
@@ -161,7 +161,7 @@ type
    Function AllocateCursorHandle(const aowner: icursorclient;
                            const aname: ansistring) : TSQLCursor; override;
    Procedure DeAllocateCursorHandle(var cursor : TSQLCursor); override;
-   procedure preparestatement(const cursor: tsqlcursor;
+   procedure preparestatement(const cursor: tsqlcursor; 
                   const atransaction : tsqltransaction;
                   const asql: msestring; const aparams : tmseparams); override;
    procedure FreeFldBuffers(cursor : TSQLCursor); override;
@@ -180,7 +180,7 @@ type
    function backendpid: int64; //0 if not connected
    procedure createdatabase(const asql: ansistring);
    property eventcontroller: tdbeventcontroller read feventcontroller;
-   property lasterrormessage: msestring read flasterrormessage;
+   property lasterrormessage: msestring read flasterrormessage;   
    property lastsqlcode: string read flastsqlcode;
   published
     property DatabaseName;
@@ -189,7 +189,7 @@ type
     property Params;
 //    property OnLogin;
     property ongetcredentials;
-    property eventinterval: integer read geteventinterval
+    property eventinterval: integer read geteventinterval 
                      write seteventinterval default defaultdbeventinterval;
   end;
 
@@ -217,7 +217,7 @@ ResourceString
   SErrFetchFailed = 'Fetch of data failed';
   SErrPrepareFailed = 'Preparation of query failed.';
 
-const
+const 
  Oid_Bool         = 16;
  Oid_Bool_ar      = 1000;
  Oid_Text         = 25;
@@ -255,7 +255,7 @@ const
  oid_uuid         = 2950;
  oid_uuid_ar      = 2951;
  pg_diag_sqlstate = 'C';
-
+ 
  inv_read =  $40000;
  inv_write = $20000;
  invalidoid = 0;
@@ -280,9 +280,9 @@ begin
   end;
  end;
 end;
-
+  
 { tpqconnection }
-
+  
 constructor tpqconnection.create(aowner: tcomponent);
 begin
  feventcontroller:= tdbeventcontroller.create(idbeventcontroller(self));
@@ -354,9 +354,9 @@ begin
    end
    else begin
     openconnection(fconnectstring,fconn);
-   end;
+   end;  
   end;
-  fparams:= '';
+  fparams:= '';  
   if aparams <> nil then begin
    for int1:= 0 to aparams.count - 1 do begin
     fparams:= fparams + aparams[int1] + ','
@@ -418,7 +418,7 @@ var
  u1,p1: string;
 begin
  result:= '';
- getcredentials(u,p);
+ getcredentials(u,p);          
  if (U <> '') then begin
   u1:= ansistring(u);
   result := result + ' user=''' + U1 + '''';
@@ -445,7 +445,7 @@ begin
 end;
 
 procedure TPQConnection.DoInternalConnect;
-var
+var 
 // msg: string;
  bo1: boolean;
 // int1: integer;
@@ -494,10 +494,10 @@ begin
  {$IfDef LinkDynamically}
   ReleasePostgres3;
  {$EndIf}
- end;
+ end; 
 end;
 
-function TPQConnection.TranslateFldType(Type_Oid : integer;
+function TPQConnection.TranslateFldType(Type_Oid : integer; 
                  out isarray: boolean; out vartype: word) : TFieldType;
 
 begin
@@ -644,14 +644,14 @@ begin
  result:= TPQTrans.create;
 end;
 
-procedure tpqconnection.preparestatement(const cursor: tsqlcursor;
+procedure tpqconnection.preparestatement(const cursor: tsqlcursor; 
                   const atransaction : tsqltransaction;
                   const asql: msestring; const aparams : tmseparams);
 
 const TypeStrings : array[TFieldType] of string =
     (
       'Unknown',  //ftUnknown
-      'varchar',  //ftString
+      'varchar',  //ftString 
       'int',      //ftSmallint
       'int',      //ftInteger
       'int',      //ftWord
@@ -694,7 +694,7 @@ const TypeStrings : array[TFieldType] of string =
 
 const
  savepoint = 'mseinternal$prep;';
-var
+var 
  s: string;
  i: integer;
  str1: string;
@@ -756,7 +756,7 @@ begin
     else begin
      pqexec(tr.fconn,'RELEASE SAVEPOINT '+savepoint);
     end;
-   until bo1 or
+   until bo1 or 
           (strpas(pqresulterrorfield(res,ord(pg_diag_sqlstate))) <> '42P05');
            //no   duplicate_prepared_statement
    if (PQresultStatus(res) <> PGRES_COMMAND_OK) then begin
@@ -788,7 +788,7 @@ begin
     rollback(tr);
     res := pqexec(tr.fconn,pchar('deallocate prepst'+nr));
     {
-       DatabaseError(SErrPrepareFailed + ' (PostgreSQL: ' +
+       DatabaseError(SErrPrepareFailed + ' (PostgreSQL: ' + 
             PQerrorMessage(tr.fconn) + ')',self)
      }
    end;
@@ -806,7 +806,7 @@ begin
 // Do nothing
 end;
 
-procedure TPQConnection.internalExecute(const cursor: TSQLCursor;
+procedure TPQConnection.internalExecute(const cursor: TSQLCursor; 
            const atransaction: tsqltransaction; const AParams : TmseParams;
            const autf8: boolean);
 
@@ -901,7 +901,7 @@ begin
   curtuple:= -1;
 //  res:= pqexec(tr.fconn,pchar(asql));
   res:= pqexecparams(tr.fconn,pchar(asql),0,nil,nil,nil,nil,1);
-
+  
   frowsaffected:= strtointdef(pqcmdtuples(res),-1);
   checkerror(tr.fconn,res,'Execution of query failed');
   frowsreturned:= pqntuples(res);
@@ -972,7 +972,6 @@ begin
        end;
       end;
      end;
-      else; // For case statment added to make compiler happy.
     end;
    end;
    str1:= PQfname(Res,i);
@@ -1021,7 +1020,7 @@ type
   data: record
  //dim: array[ndim] of cint;
                          // size of each array axis (C array of int)
- //dim_lower: array[ndim] of cint;
+ //dim_lower: array[ndim] of cint; 
                          // lower boundary of each dimension (C array of int)
  //<actual data>         // whatever is the stored data
   end;
@@ -1038,20 +1037,20 @@ type
   Scale  : Smallint;
  end;
  pnumericrecord = ^tnumericrecord;
-
+  
 function tpqconnection.loadfield(const cursor: tsqlcursor;
       const datatype: tfieldtype; const fieldnum: integer; //zero based
       const buffer: pointer; var bufsize: integer;
                              const aisutf8: boolean): boolean;
            //if bufsize < 0 -> buffer was to small, should be -bufsize
 
-
+ 
 const
  numericpos = $0000;
  numericneg = $4000;
  numericnan = $8000;
  numericsigmask = $c000;
-
+ 
 var
 //  x{,i}           : integer;
   CurrBuff      : pchar;
@@ -1064,11 +1063,11 @@ var
   numericrecord.sign:= beton(pnumericrecord(currbuff)^.sign);
   inc(currbuff,sizeof(TNumericRecord));
   result:= numericrecord.sign and numericnan = 0;
-//          if (NumericRecord^.Digits = 0) and (NumericRecord^.Scale = 0) then
-// = NaN, which is not supported by Currency-type, so we return NULL
+//          if (NumericRecord^.Digits = 0) and (NumericRecord^.Scale = 0) then 
+// = NaN, which is not supported by Currency-type, so we return NULL 
         //???? 0 in database seems to return digits and scale 0. mse
  end;
-
+ 
  function getfloat4: single;
  var
   si1: single;
@@ -1080,7 +1079,7 @@ var
  {$endif}
   result:= si1;
  end;
-
+ 
  function getfloat8: double;
  begin
  {$ifdef FPC}
@@ -1089,7 +1088,7 @@ var
   int64(ar8ty(result)):= beton8(pint64(currbuff)^);
  {$endif}
  end;
-
+ 
   procedure handleitem(const adatatype: tfieldtype;{ const currbuff: pointer;}
                const asize: integer; const atype: integer; var buffer: pchar);
   var
@@ -1222,7 +1221,7 @@ var
       inc(currbuff,asize);
      end;
      ftBCD: begin
-
+      
       case atype of
        oid_float4: begin
         cur:= getfloat4;
@@ -1292,12 +1291,12 @@ var
   end;
 
 var
- int1,int2,int3,eltype: integer;
+ int1,int2,int3,eltype: integer;   
  typ1: tfieldtype;
  ar1: vararrayboundarty;
  po1: pcint;
  po2: pointer;
-
+ 
 begin
 {$ifdef FPC}{$checkpointer off}{$endif}
  with TPQCursor(cursor) do begin
@@ -1371,8 +1370,8 @@ begin
  if not assigned(transaction) then
    databaseerror(serrconntransactionnset);
 
- qry:= tsqlresult.create(nil);
- try
+ qry:= tsqlresult.create(nil);  
+ try 
   with qry do begin
    database:= self;
    sql.text:= 'select '+
@@ -1393,12 +1392,12 @@ begin
               '(ia.attrelid = i.indexrelid) and '+
               '(ic.oid = i.indexrelid) and '+
               '(ta.attnum = i.indkey[ia.attnum-1]) and '+
-              '(upper(tc.relname)=''' +
+              '(upper(tc.relname)=''' +  
                       msestring(UpperCase(aTableName)) +''') '+
             'order by '+
               'ic.relname;';
    active:= true;
-   while not eof do begin
+   while not eof do begin 
     with IndexDefs.AddIndexDef do begin
      Name:= trim(qry.cols[0].asstring);
      Fields:= trim(qry.cols[2].asstring);
@@ -1431,7 +1430,7 @@ begin
   case SchemaType of
     stTables     : s := 'select '+
                           'relfilenode              as recno, '+
-                          '''' + msestring(DatabaseName) +
+                          '''' + msestring(DatabaseName) + 
                           ''' as catalog_name, '+
                           '''''                     as schema_name, '+
                           'relname                  as table_name, '+
@@ -1444,7 +1443,7 @@ begin
 
     stSysTables  : s := 'select '+
                           'relfilenode              as recno, '+
-                          '''' + msestring(DatabaseName) +
+                          '''' + msestring(DatabaseName) + 
                           ''' as catalog_name, '+
                           '''''                     as schema_name, '+
                           'relname                  as table_name, '+
@@ -1498,7 +1497,7 @@ begin
  move(int1,newid[1],sizeof(int1));
 end;
 
-procedure TPQConnection.setupblobdata(const afield: tfield;
+procedure TPQConnection.setupblobdata(const afield: tfield; 
                       const acursor: tsqlcursor; const aparam: tparam);
 begin
  acursor.blobfieldtoparam(afield,aparam,false);
@@ -1581,7 +1580,7 @@ begin
  res:= pqexec(aconnection,pchar(asql));
  if pqresultstatus(res) <> pgres_command_ok then begin
   pqclear(res);
-  databaseerror('PQExecerror'+ ' (postgresql: ' +
+  databaseerror('PQExecerror'+ ' (postgresql: ' + 
             ansistring(connectionmessage(pqerrormessage(aconnection)))
                                                                 + ')',self);
  end
@@ -1615,7 +1614,7 @@ begin
  if aconnection <> nil then begin
   PQfinish(aconnection);
   aconnection:= nil;
- end;
+ end;  
 end;
 
 procedure TPQConnection.finalizetransaction(const atransaction: tsqlhandle);
@@ -1632,10 +1631,10 @@ end;
 procedure TPQConnection.writeblobdata(const atransaction: tsqltransaction;
                const tablename: string; const adata: pointer;
                const alength: integer; const aparam: tparam);
-
+               
 var
  started: boolean;
-
+ 
  procedure endtrans;
  var
   res: ppgresult;
@@ -1643,7 +1642,7 @@ var
   res:= pqexec(fsqldatabasehandle,'END');
   pqclear(res);
  end;
-
+ 
  procedure doerror;
  begin
   if started then begin
@@ -1657,10 +1656,10 @@ var
   if PQresultStatus(aresult) <> PGRES_COMMAND_OK then begin
    pqclear(aresult);
    doerror;
-  end;
+  end; 
   pqclear(aresult);
  end;
-
+  
 var
  blobid: oid;
  fd: integer;
@@ -1688,7 +1687,7 @@ begin
     doerror;
    end;
    dec(int1,int2);
-  end;
+  end; 
   lo_close(fsqldatabasehandle,fd);
   endtrans;
   aparam.asinteger:= blobid;

@@ -25,7 +25,7 @@ const
 var
  useembeddedfirebird : boolean = false;
 
-procedure initializeibase60(const sonames: array of filenamety);
+procedure initializeibase60(const sonames: array of filenamety); 
                                      //[] = default
 procedure releaseibase60;
 
@@ -378,7 +378,7 @@ type
      isc_tr_handle = FB_API_HANDLE;
      isc_win_handle = FB_API_HANDLE;
      isc_callback = procedure; {$ifdef wincall}cdecl{stdcall}{$else}cdecl{$endif};
-     isc_versioncallback = procedure(user_arg: pointer; atext: pchar);
+     isc_versioncallback = procedure(user_arg: pointer; atext: pchar); 
                                 {$ifdef wincall}cdecl{stdcall}{$else}cdecl{$endif};
      isc_resv_handle = ISC_LONG;
      tisc_att_handle = isc_att_handle;
@@ -813,7 +813,7 @@ type
      isc_tpb_restart_requests = 19;
      isc_tpb_no_auto_undo = 20;
      isc_tpb_lock_timeout = 21; //TPB = #21,#4,<int32 seconds, -1 = infinite>
-
+     
   { Blob Parameter Block  }
   {                       }
      isc_bpb_version1 = 1;
@@ -825,7 +825,7 @@ type
      isc_bpb_filter_parameter = 6;
      isc_bpb_type_segmented = 0;
      isc_bpb_type_stream = 1;
-
+     
   {                                }
   { Service parameter block stuff  }
   {                                }
@@ -877,7 +877,7 @@ type
      isc_action_svc_db_stats = 11;
   { Retrieves the InterBase log file from the server  }
      isc_action_svc_get_ib_log = 12;
-     isc_action_svc_get_fb_log = 12;
+     isc_action_svc_get_fb_log = 12; 
          //* Retrieves the Firebird log file from the server */
      isc_action_svc_nbak = 20; //* Incremental nbackup */
      isc_action_svc_nrest = 21; //* Incremental database restore */
@@ -886,11 +886,11 @@ type
      isc_action_svc_trace_suspend = 24; // Suspend trace session
      isc_action_svc_trace_resume = 25; // Resume trace session
      isc_action_svc_trace_list = 26; // List existing sessions
-     isc_action_svc_set_mapping = 27;
+     isc_action_svc_set_mapping = 27; 
              // Set auto admins mapping in security database
-     isc_action_svc_drop_mapping = 28;
+     isc_action_svc_drop_mapping = 28; 
              // Drop auto admins mapping in security database
-     isc_action_svc_display_user_adm = 29;
+     isc_action_svc_display_user_adm = 29; 
              // Displays user(s) from security database with admin info
      isc_action_svc_validate = 30; // Starts database online validation
      isc_action_svc_last = 31; // keep it last !
@@ -921,7 +921,7 @@ type
      isc_info_svc_get_env_lock = 60;                    //string
   { Retrieves the setting of $INTERBASE_MSG  }
      isc_info_svc_get_env_msg = 61;                     //string
-  { Retrieves 1 line of service output per call
+  { Retrieves 1 line of service output per call 
        mse: up to the size of buffer, remaining text of line in next call
             adds a ' ' at end if line, string length 0 -> eof}
      isc_info_svc_line = 62;
@@ -2124,7 +2124,7 @@ type
   procedure isc_get_client_version(aversion: pchar); {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
   function isc_get_client_major_version: integer; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
   function isc_get_client_minor_version: integer; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
-
+  
 {$IFDEF Unix}
   function isc_reset_fpe(_para1:word):ISC_LONG; {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 {$ENDIF}
@@ -2138,17 +2138,17 @@ type
                                      spb_length: word; spb: Pchar): ISC_STATUS;
                   {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
   function isc_service_detach(status_vector: PISC_STATUS;
-                                        svc_handle: Pisc_svc_handle):ISC_STATUS;
+                                        svc_handle: Pisc_svc_handle):ISC_STATUS; 
                   {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
   function isc_service_query(status_vector: PISC_STATUS;
                         svc_handle: Pisc_svc_handle;
                         reserved: Pisc_resv_handle;
                          send_spb_length: word; send_sbp: Pchar;
                          request_spb_length: word; request_spb:Pchar;
-                         buffer_length: word; buffer: Pchar):ISC_STATUS;
+                         buffer_length: word; buffer: Pchar):ISC_STATUS; 
                   {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
   function isc_service_start(status_vector: PISC_STATUS;
-               svc_handle: Pisc_svc_handle; reserved: Pisc_resv_handle;
+               svc_handle: Pisc_svc_handle; reserved: Pisc_resv_handle; 
                spp_length: word; spb: Pchar):ISC_STATUS;
                  {$ifdef wincall}stdcall{$else}cdecl{$endif}; external gdslib;
 
@@ -2380,7 +2380,7 @@ var
 {                          }
 { OSRI database functions  }
 {                          }
-  isc_attach_database : function (_para1:PISC_STATUS; _para2:smallint; _para3:Pchar; _para4:Pisc_db_handle; _para5:smallint;_para6:Pchar):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif};
+  isc_attach_database : function (_para1:PISC_STATUS; _para2:smallint; _para3:Pchar; _para4:Pisc_db_handle; _para5:smallint;_para6:Pchar):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif}; 
   isc_array_gen_sdl : function (_para1:PISC_STATUS; _para2:PISC_ARRAY_DESC; _para3:Psmallint; _para4:Pchar; _para5:Psmallint):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif};
   isc_array_get_slice : function (_para1:PISC_STATUS; _para2:Pisc_db_handle; _para3:Pisc_tr_handle; _para4:PISC_QUAD; _para5:PISC_ARRAY_DESC;_para6:pointer; _para7:PISC_LONG):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif};
   isc_array_lookup_bounds : function (_para1:PISC_STATUS; _para2:Pisc_db_handle; _para3:Pisc_tr_handle; _para4:Pchar; _para5:Pchar;_para6:PISC_ARRAY_DESC):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif};
@@ -2456,7 +2456,7 @@ var
   isc_start_multiple : function (_para1:PISC_STATUS; _para2:Pisc_tr_handle; _para3:smallint; _para4:pointer):ISC_STATUS; {$ifdef wincall}stdcall{$else}cdecl{$endif};
 {$warnings off}
   isc_start_transaction : function (_para1:PISC_STATUS; _para2:Pisc_tr_handle;
-         _para3:smallint; args:array of const):ISC_STATUS;
+         _para3:smallint; args:array of const):ISC_STATUS; 
                                      {$ifdef cvcall}cdecl{$else}error{$endif};
 {$warnings on}
   isc_sqlcode : function (_para1:PISC_STATUS):ISC_LONG; {$ifdef wincall}stdcall{$else}cdecl{$endif};
@@ -2566,17 +2566,17 @@ var
                                      spb_length: word; spb: Pchar): ISC_STATUS;
                                    {$ifdef wincall}stdcall{$else}cdecl{$endif};
   isc_service_detach: function (status_vector: PISC_STATUS;
-                                        svc_handle: Pisc_svc_handle):ISC_STATUS;
+                                        svc_handle: Pisc_svc_handle):ISC_STATUS; 
                                    {$ifdef wincall}stdcall{$else}cdecl{$endif};
   isc_service_query: function (status_vector: PISC_STATUS;
                         svc_handle: Pisc_svc_handle;
                         reserved: Pisc_resv_handle;
                          send_spb_length: word; send_sbp: Pchar;
                          request_spb_length: word; request_spb:Pchar;
-                         buffer_length: word; buffer: Pchar):ISC_STATUS;
+                         buffer_length: word; buffer: Pchar):ISC_STATUS; 
                                     {$ifdef wincall}stdcall{$else}cdecl{$endif};
   isc_service_start: function (status_vector: PISC_STATUS;
-               svc_handle: Pisc_svc_handle; reserved: Pisc_resv_handle;
+               svc_handle: Pisc_svc_handle; reserved: Pisc_resv_handle; 
                spp_length: word; spb: Pchar):ISC_STATUS;
                                     {$ifdef wincall}stdcall{$else}cdecl{$endif};
 {                              }
@@ -2621,7 +2621,7 @@ function XSQLDA_LENGTH(n: Integer): Integer;
 begin
   Result := SizeOf(XSQLDA) + (n - 1) * SizeOf(XSQLVAR);
 end;
-
+ 
 {$IFDEF LinkDynamically}
 
 ResourceString
@@ -2629,8 +2629,8 @@ ResourceString
   SErrDefaultsFailed = 'Can not load default Firebird clients ("%s" or "%s"). Check your installation.';
   SErrLoadFailed     = 'Can not load Firebird client library "%s". Check your installation.';
   SErrAlreadyLoaded  = 'Firebird interface already initialized from library %s.';
-
-var
+  
+var 
  libinfo: dynlibinfoty;
 //  RefCount : integer;
 //  LoadedLibrary : String;
@@ -2659,7 +2659,7 @@ begin
   'isc_array_gen_sdl',            //2
   'isc_array_get_slice',          //3
   'isc_array_lookup_bounds',      //4
-  'isc_array_lookup_desc',        //5
+  'isc_array_lookup_desc',        //5 
   'isc_array_set_desc',           //6
   'isc_array_put_slice',          //7
   'isc_blob_default_desc',        //8
@@ -2682,7 +2682,7 @@ begin
   'isc_decode_timestamp',         //25
   'isc_detach_database',          //26
   'isc_drop_database',            //27
-  'isc_dsql_allocate_statement',  //28
+  'isc_dsql_allocate_statement',  //28    
   'isc_dsql_alloc_statement2',    //29
   'isc_dsql_describe',            //30
   'isc_dsql_describe_bind',       //31
@@ -2692,7 +2692,7 @@ begin
   'isc_dsql_execute_immediate',   //35
   'isc_dsql_fetch',               //36
   'isc_dsql_finish',              //37
-  'isc_dsql_free_statement',      //38
+  'isc_dsql_free_statement',      //38  
   'isc_dsql_insert',              //39
   'isc_dsql_prepare',             //40
   'isc_dsql_set_cursor_name',     //41
@@ -2747,7 +2747,7 @@ begin
   'isc_close',                    //90
   'isc_declare',                  //91
   'isc_describe',                 //92
-  'isc_describe_bind',            //93
+  'isc_describe_bind',            //93 
   'isc_execute',                  //94
   'isc_execute_immediate',        //95
   'isc_fetch',                    //96
@@ -2755,12 +2755,12 @@ begin
   'isc_prepare',                  //98
   'isc_dsql_execute_m',           //99
   'isc_dsql_execute2_m',          //100
-  'isc_dsql_execute_immediate_m', //101
+  'isc_dsql_execute_immediate_m', //101  
   'isc_dsql_exec_immed3_m',       //102
   'isc_dsql_fetch_m',             //103
   'isc_dsql_insert_m',            //104
   'isc_dsql_prepare_m',           //105
-  'isc_dsql_release',             //106
+  'isc_dsql_release',             //106 
   'isc_embed_dsql_close',         //107
   'isc_embed_dsql_declare',       //108
   'isc_embed_dsql_describe',      //109
@@ -2785,9 +2785,9 @@ begin
   'BLOB_text_dump',               //128
   'BLOB_text_load',               //129
   'Bopen',                        //130
-{$IFDEF Unix}
+{$IFDEF Unix}              
   'Bopen2',                       //131
-{$ENDIF}
+{$ENDIF}                       
   'isc_ftof',                     //132
   'isc_print_blr',                //133
   'isc_set_debug',                //134
@@ -2806,7 +2806,7 @@ begin
   'isc_service_query',            //145
   'isc_service_start'             //146
 {$IFDEF Unix}
-  ,
+  ,           
   'isc_compile_map',              //147
   'isc_compile_menu',             //148
   'isc_compile_sub_map',          //149
@@ -2825,7 +2825,7 @@ begin
   'isc_put_entree',               //162
   'isc_reset_form',               //163
   'isc_suspend_window'            //164
-{$ENDIF}
+{$ENDIF} 
   ],
   [
   @isc_attach_database,           //1
@@ -2958,7 +2958,7 @@ begin
   @BLOB_text_dump,                //128
   @BLOB_text_load,                //129
   @Bopen,                         //130
-{$IFDEF Unix}
+{$IFDEF Unix}            
   @Bopen2,                        //131
 {$ENDIF}
   @isc_ftof,                      //132
@@ -2971,7 +2971,7 @@ begin
   @isc_get_client_version,        //139
   @isc_get_client_major_version,  //140
   @isc_get_client_minor_version,  //141
-{$IFDEF Unix}
+{$IFDEF Unix}  
   @isc_reset_fpe,                 //142
 {$ENDIF}
   @isc_service_attach,            //143
@@ -2998,7 +2998,7 @@ begin
   @isc_put_entree,                //162
   @isc_reset_form,                //163
   @isc_suspend_window             //164
-{$ENDIF}
+{$ENDIF}          
   ],true);  //accept missing entries
  end
  else begin
@@ -3007,7 +3007,7 @@ begin
   if (loadedlibrary = mstr1) then begin
    inc(RefCount);     //mse 2006-11-23
   end;
- end;
+ end;  
 end;
 
 procedure checkloaded;
@@ -3167,7 +3167,7 @@ const
   (n: 'isc_service_start'; d: {$ifndef FPC}@{$endif}@isc_service_start)
 
 {$IFDEF Unix}
-  ,
+  ,           
   (n: 'Bopen2'; d: {$ifndef FPC}@{$endif}@Bopen2),
   (n: 'isc_reset_fpe'; d: {$ifndef FPC}@{$endif}@isc_reset_fpe),
   (n: 'isc_compile_map'; d: {$ifndef FPC}@{$endif}@isc_compile_map),
@@ -3188,7 +3188,7 @@ const
   (n: 'isc_put_entree'; d: {$ifndef FPC}@{$endif}@isc_put_entree),
   (n: 'isc_reset_form'; d: {$ifndef FPC}@{$endif}@isc_reset_form),
   (n: 'isc_suspend_window'; d: {$ifndef FPC}@{$endif}@isc_suspend_window)
-{$ENDIF}
+{$ENDIF} 
   ,
   (n: 'fb_shutdown'; d: @fb_shutdown)
   );
@@ -3215,9 +3215,9 @@ procedure shutdown(const data: pointer);
 begin
  //FB-embedded crash on Linux exit, probably atexit() call in FB-lib,
  //fb_shutdown() call does not help
- //workarond: call
+ //workarond: call 
  //  initializeibase60(fbembedlib);
- //at program start in order to prevent unloading of FB-lib
+ //at program start in order to prevent unloading of FB-lib 
  if fb_shutdown <> nil then begin
   fb_shutdown(100,-fb_shutrsn_app_stopped);
  end;

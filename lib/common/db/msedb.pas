@@ -38,14 +38,12 @@ const
  mse_vtguid = $ff;
  guidbuffersize = 36; //aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee
 
-{
  de_modified = ord(high(tdataevent))+1;
  de_afterdelete = ord(high(tdataevent))+2;
  de_afterinsert = ord(high(tdataevent))+3;
  de_afterpost = ord(high(tdataevent))+4;
  de_hasactiveedit = ord(high(tdataevent))+5;
  de_afterapplyupdate = ord(high(tdataevent))+6;
- }
 
  defaultdscontrolleroptions = [{dso_cancelupdateondeleteerror}];
  allfieldkinds = [fkData,fkCalculated,fkLookup,fkInternalCalc];
@@ -71,7 +69,7 @@ type
  end;
  pfielddefty = ^fielddefty;
  fielddefarty = array of fielddefty;
-
+ 
 const
  int32fields = [ftsmallint,ftinteger,ftword];
  int64fields = [ftlargeint];
@@ -93,12 +91,12 @@ const
 
  varsizefields = [ftstring,ftfixedchar,ftwidestring,ftfixedwidechar,
                   ftbytes,ftvarbytes,ftbcd,ftfmtbcd];
-
+ 
  converrorstring = '?';
-
+ 
 type
  filtereditkindty = (fek_filter,fek_filtermin,fek_filtermax,fek_find);
- locateresultty = (loc_timeout,loc_notfound,loc_ok);
+ locateresultty = (loc_timeout,loc_notfound,loc_ok); 
  recnosearchoptionty = (rso_backward);
  recnosearchoptionsty = set of recnosearchoptionty;
 
@@ -106,20 +104,20 @@ type
  locatekeyoptionsty = set of locatekeyoptionty;
  locaterecordoptionty = (lro_noforward,lro_nobackward,lro_nocurrent,lro_utf8);
  locaterecordoptionsty = set of locaterecordoptionty;
-
+ 
  fieldarty = array of tfield;
 
  optionmasterlinkty = (mdlo_syncedit,mdlo_syncinsert,mdlo_syncdelete,
                        mdlo_delayeddetailpost,mdlo_syncfields,
-                       mdlo_inserttoupdate,mdlo_norefresh);
+                       mdlo_inserttoupdate,mdlo_norefresh); 
  optionsmasterlinkty = set of optionmasterlinkty;
 
  imasterlink = interface(inullinterface)[miid_imasterlink]
   function refreshing: boolean;
  end;
-
+ 
  imselocate = interface(inullinterface)[miid_imselocate]
-   function locate(const afields: array of tfield;
+   function locate(const afields: array of tfield; 
                    const akeys: array of const; const aisnull: array of boolean;
                    const akeyoptions: array of locatekeyoptionsty;
                    const aoptions: locaterecordoptionsty = []): locateresultty;
@@ -148,7 +146,7 @@ type
   function getrowlargeint(const indexnum: integer; const arecord: integer;
                            const afield: tfield): int64;
  end;
-
+   
  idbeditinfo = interface(inullinterface)[miid_idbeditinfo]
   function getdataset(const aindex: integer): tdataset;
   procedure getfieldtypes(out apropertynames: stringarty;
@@ -159,18 +157,18 @@ type
  ireccontrol = interface(inullinterface)[miid_ireccontrol]
   procedure recchanged;
  end;
-
+ 
  ipersistentfieldsinfo = interface(inullinterface)[miid_ipersistentfieldsinfo]
   function getfieldnames: stringarty;
  end;
-
+ 
  idatasetsum = interface(inullinterface)[miid_idatasetsum]
   procedure sumfield(const afield: tfield; out asum: integer); overload;
   procedure sumfield(const afield: tfield; out asum: int64); overload;
   procedure sumfield(const afield: tfield; out asum: currency); overload;
   procedure sumfield(const afield: tfield; out asum: double); overload;
  end;
-
+ 
  getdatasourcefuncty = function: tdatasource of object;
 
  tdbfieldnamearrayprop = class(tstringarrayprop,idbeditinfo)
@@ -208,7 +206,7 @@ type
 
 // providerflag1ty = (pf1_refreshinsert,pf1_refreshupdate,pf1_nocopyrecord);
 // providerflags1ty = set of providerflag1ty;
-
+ 
  imsefield = interface(inullinterface)[miid_imsefield]
 //  function getproviderflags1: providerflags1ty;
 //  function getlookupinfo: plookupfieldinfoty;
@@ -216,7 +214,7 @@ type
 
  fieldstatety = (fis_changing);
  fieldstatesty = set of fieldstatety;
-
+    
  tmsefield = class(tfield,imsefield)
   private
 //   fproviderflags1: providerflags1ty;
@@ -228,7 +226,7 @@ type
 //m   function getproviderflags1: providerflags1ty;
 //   function getlookupinfo: plookupfieldinfoty;
   protected
-   procedure readlookup(reader: treader);
+   procedure readlookup(reader: treader); 
          //workaround for breaking fix of FPC Mantis 12809
    procedure defineproperties(filer: tfiler); override;
 //   function getaswidestring: widestring; override;
@@ -242,7 +240,7 @@ type
    function asoldsql: msestring;
 //   property asmsestring: msestring read getasmsestring write setasmsestring;
   published
-//   property providerflags1: providerflags1ty read fproviderflags1
+//   property providerflags1: providerflags1ty read fproviderflags1 
 //                        write fproviderflags1 default [];
    property DataSet stored false;
 //   property ProviderFlags default defaultproviderflags;
@@ -250,9 +248,9 @@ type
    property HasConstraints default false;
    property LookupCache default false;
 //   property ReadOnly default false;
-//   property Required default false;
+//   property Required default false; 
  end;
-
+ 
  getmsestringdataty = function(const sender: tmsestringfield;
                      out avalue: msestring): boolean of object; //false if null
  setmsestringdataty = procedure(const sender: tmsestringfield;
@@ -269,7 +267,7 @@ type
 //   fvalidating: boolean;
    fisftwidestring: boolean;
    fdefaultexpressionstr: msestring;
-   fdefaultexpressionbefore: string;
+   fdefaultexpressionbefore: string; 
                   //synchronize with TField.DefaultExpression
 //   fproviderflags1: providerflags1ty;
 //   flookupinfo: lookupfieldinfoty;
@@ -311,7 +309,7 @@ type
    function assql: msestring;
    function asoldsql: msestring;
 //   property asmsestring: msestring read getasmsestring write setasmsestring;
-   property asnullmsestring: msestring read getasunicodestring
+   property asnullmsestring: msestring read getasunicodestring 
                                           write setasnullmsestring;
                         //'' -> NULL
    function oldmsestring(out aisnull: boolean): msestring; overload;
@@ -322,9 +320,9 @@ type
    property characterlength: integer read fcharacterlength;
    property isftwidestring: boolean read fisftwidestring;
   published
-   property defaultexpression: msestring read getdefaultexpression
+   property defaultexpression: msestring read getdefaultexpression 
                                                 write setdefaultexpression;
-//   property providerflags1: providerflags1ty read fproviderflags1
+//   property providerflags1: providerflags1ty read fproviderflags1 
 //                        write fproviderflags1 default [];
    property DataSet stored false;
 //   property ProviderFlags default defaultproviderflags;
@@ -334,7 +332,7 @@ type
 //   property ReadOnly default false;
 //   property Required default false;
    property Transliterate default false;
-   property onsetvalue: msestringfieldsetvalueeventty
+   property onsetvalue: msestringfieldsetvalueeventty 
                                      read fonsetvalue write fonsetvalue;
  end;
 
@@ -382,7 +380,7 @@ type
    function asoldsql: msestring;
 //   property asmsestring: msestring read getasmsestring write setasmsestring;
   published
-//   property providerflags1: providerflags1ty read fproviderflags1
+//   property providerflags1: providerflags1ty read fproviderflags1 
 //                        write fproviderflags1 default [];
    property DataSet stored false;
 //   property ProviderFlags default defaultproviderflags;
@@ -428,7 +426,7 @@ type
 //   property asid: integer read getasid write setasid; //-1 -> NULL
    property asenum: integer read getaslongint write setasenum;
   published
-//   property providerflags1: providerflags1ty read fproviderflags1
+//   property providerflags1: providerflags1ty read fproviderflags1 
 //                        write fproviderflags1 default [];
    property DataSet stored false;
 //   property ProviderFlags default defaultproviderflags;
@@ -473,7 +471,7 @@ type
 //   property asid: int64 read getasid write setasid; //-1 -> NULL
    property Value: Largeint read GetAsLargeint write SetAsLargeint;
   published
-//   property providerflags1: providerflags1ty read fproviderflags1
+//   property providerflags1: providerflags1ty read fproviderflags1 
 //                        write fproviderflags1 default [];
    property DataSet stored false;
 //   property ProviderFlags default defaultproviderflags;
@@ -516,7 +514,7 @@ type
 //   property asmsestring: msestring read getasmsestring write setasmsestring;
    property asid: integer read getasid write setasid; //-1 -> NULL
   published
-//   property providerflags1: providerflags1ty read fproviderflags1
+//   property providerflags1: providerflags1ty read fproviderflags1 
 //                        write fproviderflags1 default [];
    property DataSet stored false;
 //   property ProviderFlags default defaultproviderflags;
@@ -556,7 +554,7 @@ type
    function asoldsql: msestring;
 //   property asmsestring: msestring read getasmsestring write setasmsestring;
   published
-//   property providerflags1: providerflags1ty read fproviderflags1
+//   property providerflags1: providerflags1ty read fproviderflags1 
 //                        write fproviderflags1 default [];
    property DataSet stored false;
 //   property ProviderFlags default defaultproviderflags;
@@ -592,7 +590,7 @@ type
    function asoldsql: msestring;
 //   property asmsestring: msestring read getasmsestring write setasmsestring;
   published
-//   property providerflags1: providerflags1ty read fproviderflags1
+//   property providerflags1: providerflags1ty read fproviderflags1 
 //                        write fproviderflags1 default [];
    property DataSet stored false;
 //   property ProviderFlags default defaultproviderflags;
@@ -635,7 +633,7 @@ type
    function sum: double;
 //   property asmsestring: msestring read getasmsestring write setasmsestring;
   published
-//   property providerflags1: providerflags1ty read fproviderflags1
+//   property providerflags1: providerflags1ty read fproviderflags1 
 //                        write fproviderflags1 default [];
    property DataSet stored false;
 //   property ProviderFlags default defaultproviderflags;
@@ -689,7 +687,7 @@ type
    function sum: integer; //counts true values
 //   property asmsestring: msestring read getasmsestring write setasmsestring;
   published
-//   property providerflags1: providerflags1ty read fproviderflags1
+//   property providerflags1: providerflags1ty read fproviderflags1 
 //                        write fproviderflags1 default [];
    property DataSet stored false;
 //   property ProviderFlags default defaultproviderflags;
@@ -702,10 +700,10 @@ type
 //   property Required default false;
 //   property DisplayWidth default 5; variable!
  end;
-
+ 
  datetimefieldoptionty = (dtfo_utc,dtfo_local); //DB time format
  datetimefieldoptionsty = set of datetimefieldoptionty;
-
+                       
  tmsedatetimefield = class(tdatetimefield,imsefield)
   private
    fstate: fieldstatesty;
@@ -738,11 +736,11 @@ type
    function asoldsql: msestring;
 //   property asmsestring: msestring read getasmsestring write setasmsestring;
   published
-//   property providerflags1: providerflags1ty read fproviderflags1
+//   property providerflags1: providerflags1ty read fproviderflags1 
 //                        write fproviderflags1 default [];
    property DataSet stored false;
 //   property ProviderFlags default defaultproviderflags;
-   property options: datetimefieldoptionsty read foptions
+   property options: datetimefieldoptionsty read foptions 
                                            write setoptions default [];
    property FieldKind default fkData;
    property HasConstraints default false;
@@ -750,7 +748,7 @@ type
 //   property ReadOnly default false;
 //   property Required default false;
    property DisplayWidth default 10;
- end;
+ end; 
  tmsedatefield = class(tmsedatetimefield)
   public
    constructor create(aowner: tcomponent); override;
@@ -759,7 +757,7 @@ type
   public
    constructor create(aowner: tcomponent); override;
  end;
-
+ 
  tmsebinaryfield = class(tbinaryfield,imsefield)
   private
    fstate: fieldstatesty;
@@ -785,7 +783,7 @@ type
    function asoldsql: msestring;
 //   property asmsestring: msestring read getasmsestring write setasmsestring;
   published
-//   property providerflags1: providerflags1ty read fproviderflags1
+//   property providerflags1: providerflags1ty read fproviderflags1 
 //                        write fproviderflags1 default [];
    property DataSet stored false;
 //   property ProviderFlags default defaultproviderflags;
@@ -823,7 +821,7 @@ type
    function asoldsql: msestring;
 //   property asmsestring: msestring read getasmsestring write setasmsestring;
   published
-//   property providerflags1: providerflags1ty read fproviderflags1
+//   property providerflags1: providerflags1ty read fproviderflags1 
 //                        write fproviderflags1 default [];
    property DataSet stored false;
 //   property ProviderFlags default defaultproviderflags;
@@ -861,7 +859,7 @@ type
    function asoldsql: msestring;
 //   property asmsestring: msestring read getasmsestring write setasmsestring;
   published
-//   property providerflags1: providerflags1ty read fproviderflags1
+//   property providerflags1: providerflags1ty read fproviderflags1 
 //                        write fproviderflags1 default [];
    property DataSet stored false;
 //   property ProviderFlags default defaultproviderflags;
@@ -901,7 +899,7 @@ type
 //   property asmsestring: msestring read getasmsestring write setasmsestring;
    property Value: Currency read GetAsCurrency write SetAsCurrency;
   published
-//   property providerflags1: providerflags1ty read fproviderflags1
+//   property providerflags1: providerflags1ty read fproviderflags1 
 //                        write fproviderflags1 default [];
    property DataSet stored false;
 //   property ProviderFlags default defaultproviderflags;
@@ -914,12 +912,12 @@ type
 //   property displaywidth default 15; variable!
    property currency default false;
  end;
-
+ 
  blobidty = record
              id: int64;
              local: boolean;
             end;
-
+            
  getblobidfuncty = function(const afield: tfield; out aid: blobidty): boolean
                                                 of object;
 
@@ -929,19 +927,19 @@ type
   public
    constructor create(const akey: blobidty; const adata: string); overload;
  end;
-
+ 
  tblobcache = class(tstringcacheavltree)
   private
    ffindnode: tblobcachenode;
   public
    constructor create;
    destructor destroy; override;
-   function addnode(const akey: blobidty;
+   function addnode(const akey: blobidty; 
                            const adata: string): tblobcachenode; overload;
-   function find(const akey: blobidty;
+   function find(const akey: blobidty; 
                            out anode: tblobcachenode): boolean; overload;
  end;
-
+ 
  tmseblobfield = class(tblobfield,imsefield)
   private
    fcache: tblobcache;
@@ -980,7 +978,7 @@ type
    procedure LoadFromFile(const FileName: filenamety);
    procedure SaveToFile(const FileName: filenamety);
   published
-//   property providerflags1: providerflags1ty read fproviderflags1
+//   property providerflags1: providerflags1ty read fproviderflags1 
 //                        write fproviderflags1 default [];
    property DataSet stored false;
 //   property ProviderFlags default defaultproviderflags;
@@ -1066,7 +1064,7 @@ type
    function asoldsql: msestring;
 //   property asmsestring: msestring read getasmsestring write setasmsestring;
   published
-//   property providerflags1: providerflags1ty read fproviderflags1
+//   property providerflags1: providerflags1ty read fproviderflags1 
 //                        write fproviderflags1 default [];
    property DataSet stored false;
 //   property ProviderFlags default defaultproviderflags;
@@ -1108,7 +1106,7 @@ type
    property utf8: boolean read getutf8;
    property filtereditkind: filtereditkindty read getfiltereditkind;
    function canclose: boolean;
-   property recnozerobased: integer read getrecnozerobased
+   property recnozerobased: integer read getrecnozerobased 
                                           write setrecnozerobased;
  end;
 
@@ -1130,15 +1128,15 @@ type
                             const astate: ifiwidgetstatesty); virtual;
    procedure setvalue(const sender: iificlient;
                 var avalue; var accept: boolean; const arow: integer); virtual;
-   procedure dataentered(const sender: iificlient;
+   procedure dataentered(const sender: iificlient; 
                                                  const arow: integer); virtual;
-   procedure closequery(const sender: iificlient;
+   procedure closequery(const sender: iificlient; 
                              var amodalresult: modalresultty); virtual;
-   procedure sendmodalresult(const sender: iificlient;
+   procedure sendmodalresult(const sender: iificlient; 
                              const amodalresult: modalresultty); virtual;
    procedure updateoptionsedit(var avalue: optionseditty); virtual;
  end;
-
+  
  tfielddatalink = class(tfieldsdatalink)
   private
    ffield: tfield;
@@ -1148,7 +1146,7 @@ type
    function getasmsestring: msestring;
    procedure setasmsestring(const avalue: msestring);
    function getmsedefaultexpression: msestring;
-   procedure checkfield;
+   procedure checkfield; 
    function GetAsBoolean: Boolean;
    procedure SetAsBoolean(const avalue: Boolean);
    function GetAsCurrency: Currency;
@@ -1177,7 +1175,7 @@ type
    function getsortfield: tfield; virtual;
    procedure setvalue(const sender: iificlient;
                 var avalue; var accept: boolean; const arow: integer); override;
-   procedure dataentered(const sender: iificlient;
+   procedure dataentered(const sender: iificlient; 
                                                  const arow: integer); override;
   public
    function assql: msestring;
@@ -1190,7 +1188,7 @@ type
    property islargeint: boolean read getislargeint;
    property ismsestring: boolean read getismsestring;
    property isstringfield: boolean read getisstringfield;
-
+   
    property AsBoolean: Boolean read GetAsBoolean write SetAsBoolean;
    property AsCurrency: Currency read GetAsCurrency write SetAsCurrency;
    property AsDateTime: TDateTime read GetAsDateTime write SetAsDateTime;
@@ -1206,24 +1204,24 @@ type
                           const aedit: boolean = false): msestring; virtual;
    property nullsymbol: msestring read fnullsymbol write fnullsymbol;
  end;
-
+ 
 // fieldarrayty = array of tfield;
-
+ 
  fieldclassty = class of tfield;
-
+ 
  fieldclasstypety = (ft_unknown,ft_string,ft_guid,ft_numeric,
                      ft_longint,ft_largeint,ft_smallint,
                      ft_word,ft_autoinc,ft_float,ft_currency,ft_boolean,
                      ft_datetime,ft_date,ft_time,
                      ft_binary,ft_bytes,ft_varbytes,
                      ft_bcd,ft_blob,ft_memo,ft_graphic,ft_variant);
- fieldclasstypearty = array of fieldclasstypety;
-
+ fieldclasstypearty = array of fieldclasstypety; 
+        
  tmsedatasource = class(tdatasource)
   public
    procedure bringtofront; //called first by dataset
  end;
-
+ 
  tpersistentfields = class(tpersistentarrayprop,ipersistentfieldsinfo)
   private
    fdataset: tdataset;
@@ -1250,7 +1248,7 @@ type
                          dso_waitcursor,
                          dso_initinternalcalc,
 
-                            //flags below have been moved to
+                            //flags below have been moved to 
                             //tsqlquery.options
                          dso_postsavepoint,dso_deletesavepoint,
                          dso_cancelupdateonerror,dso_cancelupdatesonerror,
@@ -1266,16 +1264,16 @@ type
                          dso_cacheblobs,
                          dso_offline, //disconnect database after open
                          dso_local,   //do not connect database on open
-
+                        
                          dso_refreshwaitcursor, //deprecated
                          dso_noedit,dso_noinsert,dso_noappend,dso_noupdate,
                          dso_nodelete,
                          dso_canceloncheckbrowsemode
                          {,
-                         dso_syncmasteredit,dso_syncmasterinsert,
+                         dso_syncmasteredit,dso_syncmasterinsert, 
                                                      -> optionsmasterlink
                          dso_syncmasterdelete,dso_delayeddetailpost,
-                         dso_inserttoupdate,dso_syncinsertfields});
+                         dso_inserttoupdate,dso_syncinsertfields}); 
  datasetoptionsty = set of datasetoptionty;
 const
  deprecatedbdsoptions = [
@@ -1297,7 +1295,7 @@ const
 type
  savepointoptionty = (spo_postsavepoint,spo_deletesavepoint);
  savepointoptionsty = set of savepointoptionty;
-
+ 
  idscontroller = interface(iactivatorclient)
   procedure inheriteddataevent(const event: tdataevent; const info: ptrint);
   procedure inheritedcancel;
@@ -1353,7 +1351,7 @@ type
  epostcancel = class(eabort);
 
  opkindty = (opk_post,opk_delete,opk_insert);
-
+ 
  tdscontroller = class(tactivatorcontroller,idsfieldcontroller)
   private
    ffields: tpersistentfields;
@@ -1420,7 +1418,7 @@ type
    procedure savepointrelease; virtual;
    function execoperation(const akind: opkindty;
                               const aafterop: afterdbopeventty): boolean;
-   procedure defineproperties(filer: tfiler) override;
+   procedure defineproperties(filer: tfiler) override;      
   public
    constructor create(const aowner: tdataset; const aintf: idscontroller;
                       const arecnooffset: integer = -1;
@@ -1443,7 +1441,7 @@ type
    procedure appendrecord1(const values: array of const;
                const aisnull: array of boolean; const afields: array of tfield);
    procedure appendrecord(const values: variantarty);
-   procedure appenddata(const adata: variantararty;
+   procedure appenddata(const adata: variantararty; 
                                            const afields: array of tfield);
                                                      //[] -> all
    procedure getfieldclass(const fieldtype: tfieldtype; out result: tfieldclass);
@@ -1463,11 +1461,11 @@ type
    property recnozerobased: integer read getrecnozerobased
                                        write setrecnozerobased;
    property recnooffset: integer read frecnooffset;
-   function findrecno(const arecno: integer;
+   function findrecno(const arecno: integer; 
                             const options: recnosearchoptionsty = []): integer;
-   function findrecnozerobased(const arecno: integer;
+   function findrecnozerobased(const arecno: integer; 
                             const options: recnosearchoptionsty = []): integer;
-
+   
    function moveby(const distance: integer): integer;
    function islastrecord: boolean;
    procedure internalinsert;
@@ -1506,27 +1504,27 @@ type
    function assql(const avalue: tdatetime): msestring; overload;
    function assqldate(const avalue: tdatetime): msestring;
    function assqltime(const avalue: tdatetime): msestring;
-
+   
    property noedit: boolean read getnoedit write setnoedit;
    property noinsert: boolean read getnoinsert write setnoinsert;
    property noappend: boolean read getnoappend write setnoappend;
    property noupdate: boolean read getnoupdate write setnoupdate;
    property nodelete: boolean read getnodelete write setnodelete;
-   property asmsestring[const afieldname: string]: msestring
+   property asmsestring[const afieldname: string]: msestring 
                                      read getasmsestring write setasmsestring;
-
+   
   published
    property fields: tpersistentfields read ffields write setfields;
-   property options: datasetoptionsty read foptions write setoptions
+   property options: datasetoptionsty read foptions write setoptions 
                    default defaultdscontrolleroptions;
-//   property delayedapplycount: integer read fdelayedapplycount
+//   property delayedapplycount: integer read fdelayedapplycount 
 //                                       write setdelayedapplycount default 0;
                //0 -> no autoapply
-   property onstatechanged: datasetstatechangedeventty read fonstatechanged
+   property onstatechanged: datasetstatechangedeventty read fonstatechanged 
                                                 write fonstatechanged;
-   property onupdatemasteredit: masterdataseteventty read fonupdatemasteredit
+   property onupdatemasteredit: masterdataseteventty read fonupdatemasteredit 
                      write fonupdatemasteredit;
-   property onupdatemasterinsert: masterdataseteventty
+   property onupdatemasterinsert: masterdataseteventty 
                    read fonupdatemasterinsert write fonupdatemasterinsert;
    property onbeforepost: tdatasetnotifyevent read fonbeforepost
                                                        write fonbeforepost;
@@ -1542,7 +1540,7 @@ type
    property onaftercopyrecord: tdatasetnotifyevent read fonaftercopyrecord
                                                      write fonaftercopyrecord;
  end;
-
+ 
  idbcontroller = interface(iactivatorclient)[miid_idbcontroller]
   procedure setinheritedconnected(const avalue: boolean);
   function readsequence(const sequencename: string): msestring;
@@ -1553,9 +1551,9 @@ type
                const aisutf8: boolean): integer;
   procedure updateutf8(var autf8: boolean);
  end;
-
+   
  tfieldlink = class;
-
+ 
  tfieldlinkdatalink = class(tfielddatalink)
   private
    fdatasource: tdatasource;
@@ -1568,11 +1566,11 @@ type
  end;
 
  fieldeventty = procedure(const afield: tfield) of object;
-
+ 
  fieldlinkoptionty = (flo_disabled,flo_onlyifnull,flo_notifunmodifiedinsert,
                       flo_utc);
  fieldlinkoptionsty = set of fieldlinkoptionty;
-
+  
  tfieldlink = class(tmsecomponent,idbeditinfo)
   private
    fdestdatalink: tfieldlinkdatalink;
@@ -1601,7 +1599,7 @@ type
    property options: fieldlinkoptionsty read foptions write foptions default [];
    property onupdatedata: fieldeventty read fonupdatedata write fonupdatedata;
  end;
-
+ 
  ttimestampfieldlink = class(tfieldlink)
   protected
    procedure updatedata(const afield: tfield); override;
@@ -1628,11 +1626,11 @@ type
    destructor destroy; override;
    function sourcefield: tfield;
   published
-   property fieldname: string read getfieldname
+   property fieldname: string read getfieldname 
                              write setfieldname;
    property datasource: tdatasource read getdatasource write setdatasource;
  end;
-
+ 
  tparamconnector = class;
 
  tmseparam = class(tparam,idbeditinfo)
@@ -1663,7 +1661,7 @@ type
    property connector: tparamconnector read fconnector write setconnector;
    property datasource: tdatasource read getdatasource write setdatasource;
    property fieldname: string read getfieldname write setfieldname;
-   property value : variant read getasvariant write setasvariant
+   property value : variant read getasvariant write setasvariant 
                                                   stored isparamstored;
  end;
 
@@ -1675,7 +1673,7 @@ type
    destructor destroy; override;
    property param: tmseparam read getparam;
  end;
-
+    
  tmseparams = class(tparams)
   private
    fisutf8: boolean;
@@ -1713,7 +1711,7 @@ type
  end;
 
 const
- fieldtypeclasses: array[fieldclasstypety] of fieldclassty =
+ fieldtypeclasses: array[fieldclasstypety] of fieldclassty = 
           (tfield,tstringfield,tguidfield,tnumericfield,
            tlongintfield,tlargeintfield,tsmallintfield,
            twordfield,tautoincfield,tfloatfield,tcurrencyfield,
@@ -1751,7 +1749,7 @@ const
  stringfcomp = [ftstring,ftguid,ftfixedchar,ftwidestring,ftfixedwidechar,
                 ftwidememo];
  booleanfcomp = [ftboolean,ftsmallint,ftinteger,ftword];
-
+      
  fieldcompatibility: array[tfieldtype] of fieldtypesty = (
     //ftUnknown, ftString,    ftSmallint,    ftInteger,     ftWord,
       [ftunknown],stringfcomp,longintfcomp,longintfcomp,longintfcomp,
@@ -1800,7 +1798,7 @@ function checkfieldcompatibility(const afield: tfield;
            //true if ok
 function vartorealty(const avalue: variant): realty;
 {
-function locaterecord(const adataset: tdataset; const autf8: boolean;
+function locaterecord(const adataset: tdataset; const autf8: boolean; 
                          const key: msestring; const field: tfield;
                          const options: locateoptionsty = []): locateresultty;
 function locaterecord(const adataset: tdataset; const key: integer;
@@ -1812,7 +1810,7 @@ function locaterecord(const adataset: tdataset; const fields: array of tfield;
                      const isnull: array of boolean;
                      const keyoptions: array of locatekeyoptionsty;
                      const options: locaterecordoptionsty): locateresultty;
-
+                             
 function encodesqlstring(const avalue: msestring): msestring;
 function encodesqlcstring(const avalue: msestring): msestring;
 function encodesqlblob(const avalue: string): msestring;
@@ -1864,7 +1862,7 @@ uses
 const
  fieldnamedummy = ';%)(mse';
 var
- msefieldtypeclasses: array[fieldclasstypety] of fieldclassty =
+ msefieldtypeclasses: array[fieldclasstypety] of fieldclassty = 
          // ft_unknown, ft_string,   ft_guid,      ft_numeric,
           (tmsefield,tmsestringfield,tmseguidfield,tmsenumericfield,
          //  ft_longint,         ft_largeint,    ft_smallint,
@@ -1881,8 +1879,8 @@ var
            tmsebcdfield,tmseblobfield,tmsememofield,nil{tmsegraphicfield},
          //   ft_variant
            tmsevariantfield);
-
-type
+           
+type 
  tdataset1 = class(tdataset);
  tfielddef1 = class(tfielddef);
  tcollection1 = class(tcollection);
@@ -1895,9 +1893,9 @@ function dbtrystringtoguid(const value: string; out guid: tguid): boolean;
 var
  int1: integer;
  po1: pchar;
-
+ 
  function readbyte: byte;
- var
+ var 
   by1: byte;
  begin
   by1:= hexchars[po1^];
@@ -1966,7 +1964,7 @@ begin
  with {$ifndef FPC}tguid_fpc({$endif}avalue{$ifndef FPC}){$endif}do begin
   result:= valtohex(time_low)+'-'+valtohex(time_mid)+'-'+
            valtohex(time_hi_and_version)+'-'+
-           valtohex(clock_seq_hi_and_reserved)+valtohex(clock_seq_low)+'-';
+           valtohex(clock_seq_hi_and_reserved)+valtohex(clock_seq_low)+'-';  
   for int1:= 0 to high(node) do begin
    result:= result+valtohex(node[int1]);
   end;
@@ -2141,7 +2139,7 @@ procedure regfieldclass(const atype: fieldclasstypety;
 begin
  msefieldtypeclasses[atype]:= aclass;
 end;
-
+ 
 function getmsefieldclass(const afieldtype: tfieldtype): tfieldclass;
 begin
  result:= msefieldtypeclasses[tfieldtypetotypety[afieldtype]];
@@ -2407,7 +2405,7 @@ end;
 
 function encodesqldatetime(const avalue: tdatetime): msestring;
 begin
- result := '''' +
+ result := '''' + 
           msestring(formatdatetime('yyyy-mm-dd hh:mm:ss',avalue)) + '''';
 end;
 
@@ -2466,7 +2464,7 @@ function encodesqlvariant(const avalue: variant;
 {$endif}
    varcurrency: result:= encodesqlcurrency(pcurrency(abase)^);
    varolestr: begin
-    if cstyle then begin
+    if cstyle then begin 
      result:= encodesqlcstring(pwidestring(abase)^);
     end
     else begin
@@ -2503,7 +2501,7 @@ function encodesqlvariant(const avalue: variant;
 
 //   varstrarg = $48;
    varstring: begin
-    if cstyle then begin
+    if cstyle then begin 
      result:= encodesqlstring(msestring(pansistring(abase)^));
     end
     else begin
@@ -2513,7 +2511,7 @@ function encodesqlvariant(const avalue: variant;
   end;
  end; //encode
 
- procedure handlearray(const bounds: tvararrayboundarray;
+ procedure handlearray(const bounds: tvararrayboundarray; 
             const boundsindex: integer;
             var data: pointer; const atype: word; const elementsize: integer);
  var
@@ -2551,7 +2549,7 @@ function encodesqlvariant(const avalue: variant;
  end;
 
 var
- po1: pointer;
+ po1: pointer; 
 begin
  with tvardata(avalue) do begin
   if vtype and vararray <> 0 then begin
@@ -2581,7 +2579,7 @@ begin
  else begin
   case field.datatype of
    ftstring,ftguid: begin
-    if not (field is tmsestringfield) {or
+    if not (field is tmsestringfield) {or 
          (tmsestringfield(field).fdsintf = nil)} then begin
      result:= encodesqlstring(msestring(field.asstring));
 //     result:= tmsestringfield(field).assql;
@@ -2589,7 +2587,7 @@ begin
     else begin
      with tmsestringfield(field) do begin
       result:= encodesqlstring(asmsestring);
-//      result:= fdsintf.getcontroller.assql(asmsestring);
+//      result:= fdsintf.getcontroller.assql(asmsestring);     
      end;
     end;
    end;
@@ -2641,7 +2639,7 @@ begin
  result:= fieldtosql(field);
  tdataset1(field.dataset).restorestate(statebefore);
 end;
-
+ 
 function paramtosql(const aparam: tparam): msestring;
 begin
  with aparam do begin
@@ -2652,7 +2650,7 @@ begin
    case datatype of
    {
     ftstring,ftwidestring: begin
-     if (aparam.collection is tmseparams) and
+     if (aparam.collection is tmseparams) and 
                          tmseparams(aparam.collection).isutf8 then begin
       result:= encodesqlstring(stringtoutf8ansi(aswidestring));
      end
@@ -2729,60 +2727,60 @@ begin
   isnull:= field.isnull;
   if field is tmsestringfield then begin
    mstr1:= tmsestringfield(field).asmsestring;
-   ds1.settempstate(astate);
-   result:= (field.isnull xor isnull) or
+   ds1.settempstate(astate); 
+   result:= (field.isnull xor isnull) or 
                  (mstr1 <> tmsestringfield(field).asmsestring);
   end
   else begin
    case field.datatype of
     ftString,ftFixedChar,ftmemo,ftblob,ftguid: begin
      str1:= field.asstring;
-     ds1.settempstate(astate);
+     ds1.settempstate(astate); 
      result:= (field.isnull xor isnull) or (str1 <> field.asstring);
     end;
     ftSmallint,ftInteger,ftWord: begin
      int1:= field.asinteger;
-     ds1.settempstate(astate);
+     ds1.settempstate(astate); 
      result:= (field.isnull xor isnull) or (int1 <> field.asinteger);
     end;
     ftBoolean: begin
      bo1:= field.asboolean;
-     ds1.settempstate(astate);
+     ds1.settempstate(astate); 
      result:= (field.isnull xor isnull) or (bo1 <> field.asboolean);
-    end;
+    end; 
     ftFloat,ftcurrency,ftDate,ftTime,ftDateTime,ftTimeStamp,ftFMTBcd: begin
      rea1:= field.asfloat;
-     ds1.settempstate(astate);
+     ds1.settempstate(astate); 
      result:= (field.isnull xor isnull) or (rea1 <> field.asfloat);
     end;
     {ftCurrency,}ftBCD: begin
      cur1:= field.ascurrency;
-     ds1.settempstate(astate);
+     ds1.settempstate(astate); 
      result:= (field.isnull xor isnull) or (cur1 <> field.ascurrency);
     end;
  //    ftBytes, ftVarBytes, ftAutoInc, ftBlob, ftMemo, ftGraphic, ftFmtMemo,
- //    ftParadoxOle, ftDBaseOle, ftTypedBinary, ftCursor,
+ //    ftParadoxOle, ftDBaseOle, ftTypedBinary, ftCursor, 
     ftWideString: begin
  //    wstr1:= field.aswidestring;
      wstr1:= widestring(field.asstring);
-     ds1.settempstate(astate);
+     ds1.settempstate(astate); 
  //    result:= (field.isnull xor isnull) or (wstr1 <> field.aswidestring);
-     result:= (field.isnull xor isnull) or
+     result:= (field.isnull xor isnull) or 
                               (wstr1 <> widestring(field.asstring));
     end;
     ftLargeint: begin
      int641:= tlargeintfield(field).aslargeint;
-     ds1.settempstate(astate);
-     result:= (field.isnull xor isnull) or
+     ds1.settempstate(astate); 
+     result:= (field.isnull xor isnull) or 
                  (int641 <> tlargeintfield(field).aslargeint);
     end;
  //    ftADT, ftArray, ftReference,
  //    ftDataSet, ftOraBlob, ftOraClob, ftVariant, ftInterface,
  //    ftIDispatch, ftGuid, ftTimeStamp, ftFMTBcd);
-   else; // For case statment added to make compiler happy.
+ 
    end;
   end;
-  ds1.restorestate(statebefore);
+  ds1.restorestate(statebefore); 
  end;
 end;
 
@@ -2800,7 +2798,7 @@ function fieldclasstoclasstyp(const fieldclass: fieldclassty): fieldclasstypety;
 var
  type1: fieldclasstypety;
 begin
- result:= fieldclasstypety(ft_unknown);
+ result:= fieldclasstypety(-1);
  for type1:= low(fieldclasstypety) to high(fieldclasstypety) do begin
   if fieldclass = fieldtypeclasses[type1]  then begin
    result:= type1;
@@ -2845,7 +2843,7 @@ begin
  end
  else begin
   sender.asstring:= ansistring(avalue); //locale conversion
- end;
+ end; 
 end;
 
 function fieldgetmsestring(const sender: tfield;
@@ -2964,7 +2962,7 @@ begin
  end;
 end;
 
-function locaterecord(const adataset: tdataset; const autf8: boolean;
+function locaterecord(const adataset: tdataset; const autf8: boolean; 
                          const key: msestring; const field: tfield;
                          const options: locateoptionsty = []): locateresultty;
 var
@@ -2973,7 +2971,7 @@ var
  mstr1,mstr2: msestring;
  caseinsensitive: boolean;
  ismsestringfield: boolean;
-
+ 
  function checkmsestring: boolean;
  var
   int1: integer;
@@ -3011,7 +3009,7 @@ var
    end;
   end;
  end;
-
+ 
  function checkcasesensitive: boolean;
  var
   int1: integer;
@@ -3033,7 +3031,7 @@ var
    end;
   end;
  end;
-
+ 
 begin
  ismsestringfield:= field is tmsestringfield;
  with adataset do begin
@@ -3041,13 +3039,13 @@ begin
   result:= loc_notfound;
   bm:= bookmark;
   caseinsensitive:= loo_caseinsensitive in options;
-  if caseinsensitive or ismsestringfield then begin
+  if caseinsensitive or ismsestringfield then begin 
    if caseinsensitive then begin
     mstr1:= mseuppercase(key);
    end
    else begin
     mstr1:= key;
-   end;
+   end;     
    if loo_partialkey in options then begin
     int2:= length(mstr1);
    end
@@ -3175,7 +3173,7 @@ end;
 
 function locatemsestring(const key; const afield: tfield): boolean;
 begin
- result:= msestring(tvarrec(key).vwidestring) =
+ result:= msestring(tvarrec(key).vwidestring) = 
                                 tmsestringfield(afield).asmsestring;
 end;
 
@@ -3186,7 +3184,7 @@ end;
 
 function locatemsestringupper(const key; const afield: tfield): boolean;
 begin
- result:= msestring(tvarrec(key).vwidestring) =
+ result:= msestring(tvarrec(key).vwidestring) = 
                                 mseuppercase(tmsestringfield(afield).asmsestring);
 end;
 
@@ -3198,7 +3196,7 @@ end;
 
 function locatemsestringpartial(const key; const afield: tfield): boolean;
 begin
- result:= msestring(tvarrec(key).vwidestring) =
+ result:= msestring(tvarrec(key).vwidestring) = 
                      copy(tmsestringfield(afield).asmsestring,1,
                                   length(msestring(tvarrec(key).vwidestring)));
 end;
@@ -3211,11 +3209,11 @@ end;
 
 function locatemsestringupperpartial(const key; const afield: tfield): boolean;
 begin
- result:= msestring(tvarrec(key).vwidestring) =
+ result:= msestring(tvarrec(key).vwidestring) = 
                  mseuppercase(copy(tmsestringfield(afield).asmsestring,1,
                                   length(msestring(tvarrec(key).vwidestring))));
 end;
-
+                              
 function locateansistringposins(const key; const afield: tfield): boolean;
 begin
  result:= pos(ansistring(tvarrec(key).vansistring),afield.asstring) > 0;
@@ -3267,9 +3265,9 @@ function locaterecord(const adataset: tdataset;
                       const options: locaterecordoptionsty): locateresultty;
 var
  comparefuncar: array of locatefuncty;
-
+ 
  function check: boolean;
- var
+ var 
   int1: integer;
  begin
   result:= true;
@@ -3280,9 +3278,9 @@ var
    end;
   end;
  end;
-
+ 
 var
- keymsestrings: msestringarty;
+ keymsestrings: msestringarty; 
  keyansistrings: stringarty;
  int1: integer;
  bm: bookmarkty;
@@ -3296,7 +3294,7 @@ begin
  setlength(comparefuncar,int1);
  setlength(keymsestrings,int1);
  setlength(keyansistrings,int1);
-
+ 
  for int1:= 0 to high(comparefuncar) do begin
   opt1:= [];
   if int1 <= high(keyoptions) then begin
@@ -3346,7 +3344,7 @@ begin
         end
         else begin
     {$endif}
-         keymsestrings[int1]:=
+         keymsestrings[int1]:= 
                   mseuppercase(msestring(tvarrec(keys[int1]).vwidestring));
          pvarrec(@keys[int1])^.vwidestring:= pointer(keymsestrings[int1]);
     {$ifdef mse_hasvtunicodestring}
@@ -3373,12 +3371,12 @@ begin
         else begin
     {$ifdef mse_hasvtunicodestring}
          if vtype = vtunicodestring then begin
-          keyansistrings[int1]:=
+          keyansistrings[int1]:= 
            stringtoutf8ansi(msestring(tvarrec(keys[int1]).vunicodestring));
          end
          else begin
     {$endif}
-          keyansistrings[int1]:=
+          keyansistrings[int1]:= 
            stringtoutf8ansi(msestring(tvarrec(keys[int1]).vwidestring));
     {$ifdef mse_hasvtunicodestring}
          end;
@@ -3427,14 +3425,14 @@ begin
       end
       else begin
        if lko_caseinsensitive in opt1 then begin
-        keyansistrings[int1]:=
+        keyansistrings[int1]:= 
                       ansiuppercase(ansistring(tvarrec(keys[int1]).vansistring));
         pvarrec(@keys[int1])^.vansistring:= pointer(keyansistrings[int1]);
        end
        else begin
-        keyansistrings[int1]:=
+        keyansistrings[int1]:= 
                       ansistring(tvarrec(keys[int1]).vansistring);
-//        keyansistrings[int1]:=
+//        keyansistrings[int1]:= 
 //                      msestring(tvarrec(keys[int1]).vwidestring);
        end;
        comparefuncar[int1]:=
@@ -4205,7 +4203,7 @@ var
 begin
  result:= 0;
  if (dataset <> nil) and dataset.active then begin
-  if (fieldkind in [fkdata,fkinternalcalc]) and
+  if (fieldkind in [fkdata,fkinternalcalc]) and 
           getcorbainterface(dataset,typeinfo(idatasetsum),intf1) then begin
    intf1.sumfield(tfield(self),result);
   end
@@ -4213,7 +4211,7 @@ begin
    with dataset do begin
     disablecontrols;
     try
-     bm:= bookmark;
+     bm:= bookmark;  
      first;
      while not eof do begin
       if getdata(@int1) then begin
@@ -4402,7 +4400,7 @@ var
 begin
  result:= 0;
  if (dataset <> nil) and dataset.active then begin
-  if (fieldkind in [fkdata,fkinternalcalc]) and
+  if (fieldkind in [fkdata,fkinternalcalc]) and 
           getcorbainterface(dataset,typeinfo(idatasetsum),intf1) then begin
    intf1.sumfield(tfield(self),result);
   end
@@ -4410,7 +4408,7 @@ begin
    with dataset do begin
     disablecontrols;
     try
-     bm:= bookmark;
+     bm:= bookmark;  
      first;
      while not eof do begin
       if getdata(@lint1) then begin
@@ -4934,7 +4932,7 @@ var
 begin
  result:= 0;
  if (dataset <> nil) and dataset.active then begin
-  if (fieldkind in [fkdata,fkinternalcalc]) and
+  if (fieldkind in [fkdata,fkinternalcalc]) and 
           getcorbainterface(dataset,typeinfo(idatasetsum),intf1) then begin
    intf1.sumfield(self,result);
   end
@@ -4942,7 +4940,7 @@ begin
    with dataset do begin
     disablecontrols;
     try
-     bm:= bookmark;
+     bm:= bookmark;  
      first;
      while not eof do begin
       if getdata(@do1) then begin
@@ -5047,7 +5045,7 @@ begin
 end;
 
 function tmsebooleanfield.getasunicodestring: unicodestring;
-var
+var 
  int1: integer;
 begin
  int1:= 0;
@@ -5202,7 +5200,7 @@ var
 begin
  result:= 0;
  if (dataset <> nil) and dataset.active then begin
-  if (fieldkind in [fkdata,fkinternalcalc]) and
+  if (fieldkind in [fkdata,fkinternalcalc]) and 
           getcorbainterface(dataset,typeinfo(idatasetsum),intf1) then begin
    intf1.sumfield(tfield(self),result);
   end
@@ -5210,7 +5208,7 @@ begin
    with dataset do begin
     disablecontrols;
     try
-     bm:= bookmark;
+     bm:= bookmark;  
      first;
      while not eof do begin
       if getdata(@bo1) and bo1 then begin
@@ -5436,7 +5434,7 @@ end;
 constructor tmsedatefield.create(aowner: tcomponent);
 begin
  inherited;
- setdatatype(ftdate);
+ setdatatype(ftdate); 
 end;
 
 { tmsetimefield }
@@ -5444,7 +5442,7 @@ end;
 constructor tmsetimefield.create(aowner: tcomponent);
 begin
  inherited;
- setdatatype(fttime);
+ setdatatype(fttime); 
 end;
 
 { tmsebinaryfield }
@@ -5861,7 +5859,7 @@ class procedure tmsebcdfield.checktypesize(avalue: longint);
 begin
  if (avalue < 0) or (avalue > 8) then begin
   databaseerrorfmt(sinvalidfieldsize,[avalue]);
- end;
+ end; 
 end;
 
 procedure tmsebcdfield.gettext(var thetext: string; adisplaytext: boolean);
@@ -5882,7 +5880,7 @@ var
 begin
  result:= 0;
  if (dataset <> nil) and dataset.active then begin
-  if (fieldkind in [fkdata,fkinternalcalc]) and
+  if (fieldkind in [fkdata,fkinternalcalc]) and 
           getcorbainterface(dataset,typeinfo(idatasetsum),intf1) then begin
    intf1.sumfield(tfield(self),result);
   end
@@ -5890,7 +5888,7 @@ begin
    with dataset do begin
     disablecontrols;
     try
-     bm:= bookmark;
+     bm:= bookmark;  
      first;
      while not eof do begin
       if getdata(@curr1) then begin
@@ -6044,7 +6042,7 @@ begin
  case size of
   4,8: begin
    result:= getdata(@aid);
-  end;
+  end;  
   else begin
    if size > 0 then begin
     databaseerror('Invalid cache field: '''+fieldname+'''.',self);
@@ -6057,7 +6055,7 @@ end;
 function tmseblobfield.getasstring: string;
 var
  id1: blobidty;
- n1: tblobcachenode;
+ n1: tblobcachenode; 
 begin
  if (fcache <> nil) and assigned(fgetblobid) then begin
   result:= '';
@@ -6089,7 +6087,7 @@ end;
 
 procedure tmseblobfield.removecache(const aid: blobidty);
 var
- n1: tblobcachenode;
+ n1: tblobcachenode; 
 begin
  if fcache <> nil then begin
   if fcache.find(aid,n1) then begin
@@ -6376,7 +6374,7 @@ begin
  if dataset <> nil then begin
   if getcorbainterface(dataset,typeinfo(igetdscontroller),intf1) then begin
    fdscontroller:= intf1.getcontroller;
-  end;
+  end;   
  end;
 end;
 
@@ -6410,7 +6408,7 @@ begin
 end;
 
 function tmsedatalink.moveby(distance: integer): integer;
-
+ 
 begin
  result:= 0;
  if (distance <> 0) and active then begin
@@ -6569,7 +6567,7 @@ end;
 
 procedure tfieldsdatalink.fieldchanged;
 begin
- updateactive(); //active flag must be valid
+ updateactive(); //active flag must be valid 
  recordchanged(nil);
 end;
 
@@ -6627,7 +6625,7 @@ begin
   ffieldname :=  value;
   updatefields;
  end;
-end;
+end; 
 
 procedure tfielddatalink.setfield(const value: tfield);
 const
@@ -6660,7 +6658,7 @@ end;
 
 procedure tfielddatalink.updatefields;
 begin
- if (datasource <> nil) and (datasource.dataset <> nil) and
+ if (datasource <> nil) and (datasource.dataset <> nil) and 
                  datasource.dataset.active and (ffieldname <> '') then begin
 // if active and (ffieldname <> '') then begin
   setfield(datasource.dataset.fieldbyname(ffieldname));
@@ -6733,7 +6731,7 @@ function tfielddatalink.msedisplaytext(const aformat: msestring = '';
    end;
   end;
  end;
-
+ 
 begin
  result:= '';
  if ffield <> nil then begin
@@ -6745,10 +6743,10 @@ begin
     if aformat <> '' then begin
      case ffield.datatype of
       ftsmallint,ftinteger,ftword,ftlargeint,ftbcd,ftfloat,ftcurrency: begin
-       result:= formatfloatmse(field.asfloat,aformat);
+       result:= formatfloatmse(field.asfloat,aformat);       
       end;
       ftboolean: begin
-       result:= formatfloatmse(ord(field.asboolean),aformat);
+       result:= formatfloatmse(ord(field.asboolean),aformat);       
       end;
       ftdate,fttime,ftdatetime: begin
        result:= formatdatetimemse(aformat,field.asdatetime);
@@ -6948,7 +6946,6 @@ begin
    dl_ansistring: begin
     tfield1(ffield).dosetvalue(sender.getinstance,ansistring(avalue),accept);
    end;
-   else; // For case statment added to make compiler happy.
   end;
  end;
 end;
@@ -6975,7 +6972,7 @@ begin
  result:= tfield;
 end;
 
-procedure tpersistentfields.createitem(const index: integer;
+procedure tpersistentfields.createitem(const index: integer; 
                                                      var item: tpersistent);
 begin
  if csloading in fdataset.componentstate then begin
@@ -6989,7 +6986,7 @@ end;
 
 procedure tpersistentfields.readfields(reader: treader);
 var
- int1: integer;
+ int1: integer; 
  fieldtypes: fieldclasstypearty;
  wantedclass: fieldclassty;
  str1: string;
@@ -7005,7 +7002,7 @@ begin
   end
   else begin
    fieldtypes[int1]:= fieldclasstypety(getenumvalue(typeinfo(fieldclasstypety),
-                                reader.readident));
+                                reader.readident));    
    inc(int1);
   end;
  end;
@@ -7051,7 +7048,7 @@ end;
 procedure tpersistentfields.writefields(writer: twriter);
 var
  int1: integer;
- class1: fieldclassty;
+ class1: fieldclassty; 
 begin
  writer.writelistbegin;
  writer.writelistbegin;
@@ -7085,7 +7082,7 @@ end;
 
 procedure tpersistentfields.defineproperties(filer: tfiler);
 //var
-// int1: integer;
+// int1: integer; 
 begin
  filer.defineproperty('fields',{$ifdef FPC}@{$endif}readfields,
                                    {$ifdef FPC}@{$endif}writefields,count > 0);
@@ -7143,7 +7140,7 @@ constructor tdscontroller.create(const aowner: tdataset;
                                    const arecnooffset: integer = -1;
                                    const acancelresync: boolean = true);
 begin
- ffields:= tpersistentfields.create(aowner);
+ ffields:= tpersistentfields.create(aowner); 
 // fintf:= aintf;
  frecnooffset:= arecnooffset;
  fcancelresync:= acancelresync;
@@ -7170,7 +7167,7 @@ begin
  with tdataset(fowner).fields do begin
   for int1:= count-1 downto 0 do begin
    field1:= fields[int1];
-   if (field1.owner <> nil) and not
+   if (field1.owner <> nil) and not 
          (csdestroying in field1.componentstate) then begin
     field1.dataset:= nil;
    end;
@@ -7186,7 +7183,7 @@ begin
  removeitem(pointerarty(flinkedfields),pointer(sender));
 end;
 
-procedure tdscontroller.setowneractive(const avalue: boolean);
+procedure tdscontroller.setowneractive(const avalue: boolean); 
 begin
  tdataset(fowner).active:= avalue;
 end;
@@ -7260,7 +7257,7 @@ begin
        if (field1 is tmsestringfield) then begin
         tmsestringfield(field1).asmsestring:= msestring(vunicodestring);
        end
-       else begin
+       else begin 
         if (field1 is tmsememofield) then begin
          tmsememofield(field1).asmsestring:= msestring(vunicodestring);
         end
@@ -7274,7 +7271,7 @@ begin
        if (field1 is tmsestringfield) then begin
         tmsestringfield(field1).asmsestring:= msestring(vwidestring);
        end
-       else begin
+       else begin 
         if (field1 is tmsememofield) then begin
          tmsememofield(field1).asmsestring:= msestring(vwidestring);
         end
@@ -7288,7 +7285,7 @@ begin
      end;
     end;
    end;
-  end;
+  end; 
  end;
 end;
 
@@ -7298,7 +7295,7 @@ begin
  appendrecord1(values,[],afields);
 end;
 
-procedure tdscontroller.appendrecord1(const values: array of const;
+procedure tdscontroller.appendrecord1(const values: array of const; 
                                             const aisnull: array of boolean);
 var
  ar1: fieldarty;
@@ -7374,7 +7371,7 @@ begin
    result:= -1;
   end
   else begin
-   if not frecnovalid or tdataset(fowner).filtered or
+   if not frecnovalid or tdataset(fowner).filtered or 
              (fbuffercountbefore <> tdataset1(fowner).buffercount) then begin
     fbuffercountbefore:= tdataset1(fowner).buffercount;
     if bof then begin
@@ -7469,7 +7466,7 @@ begin
  with tdataset(fowner) do begin
   for int1:= 0 to fields.count - 1 do begin
    field1:= fields[int1];
-   if getcorbainterface(field1,typeinfo(ifieldcomponent),intf1) and
+   if getcorbainterface(field1,typeinfo(ifieldcomponent),intf1) and 
        (finditem(pointerarty(flinkedfields),pointer(intf1)) < 0) then begin
     additem(pointerarty(flinkedfields),pointer(intf1));
     intf1.setdsintf(idsfieldcontroller(self));
@@ -7480,7 +7477,7 @@ begin
     flinkedfields[int1].setdsintf(nil);
     deleteitem(pointerarty(flinkedfields),int1);
    end;
-  end;
+  end;       
  end;
 end;
 
@@ -7501,12 +7498,11 @@ begin
    updatelinkedfields;
   end;
   decheckbrowsemode: begin
-   if (dso_canceloncheckbrowsemode in foptions) and
+   if (dso_canceloncheckbrowsemode in foptions) and 
                     ([dscs_posting,dscs_canceling]*fstate = []) then begin
     cancel;
    end;
   end;
-  else; // For case statment added to make compiler happy.
  end;
  if not fmovebylock or (event <> dedatasetchange) then begin
   with tdataset(fowner) do begin
@@ -7542,7 +7538,7 @@ begin
     try
      if finsertbm <> '' then begin
       bookmark:= finsertbm;
-     end;
+     end;  
     except
     end;
     finsertbm:= '';
@@ -7732,7 +7728,7 @@ begin
    result:= '0';
   end;
  end
- else begin
+ else begin   
   result:= encodesqlboolean(avalue);
  end;
 end;
@@ -7899,7 +7895,6 @@ begin
       fonbeforedelete(tdataset(fowner));
      end;
     end;
-    else; // For case statment added to make compiler happy.
    end;
    try
     savepointoptions:= idscontroller(fintf).getsavepointoptions;
@@ -7913,14 +7908,14 @@ begin
      else begin
       bo1:= false;
      end;
-      end;
+    end;
     try
      if bo1 then begin
       int1:= savepointbegin;
      end;
      result:= true;
      include(fstate,dscs_posting);
-     try
+     try    
       try
        case akind of
         opk_post: begin
@@ -7938,7 +7933,7 @@ begin
         if bo1 then begin
          bo1:= false;
          savepointrollback(int1);
-        end;
+        end;     
         result:= false;
         tdataset(fowner).cancel;
        end
@@ -7946,10 +7941,10 @@ begin
         if bo1 then begin
          bo1:= false;
          savepointrollback(int1);
-        end;
+        end;     
         raise;
        end;
-      end;
+      end;      
      finally
       exclude(fstate,dscs_posting);
      end;
@@ -7976,11 +7971,11 @@ begin
       else begin
        savepointrollback(int1);
       end;
-     end;
+     end;     
     except
      if bo1 then begin
       savepointrollback(int1);
-     end;
+     end;     
      raise;
     end;
    finally
@@ -7995,8 +7990,7 @@ begin
        fonafterdelete(tdataset(fowner),result);
       end;
      end;
-      else; // For case statment added to make compiler happy.
-    end;
+    end;    
    end;
   finally
   if not b3 then begin
@@ -8096,7 +8090,7 @@ var
  opt,options1{,optionsbefore}: datasetoptionsty;
  bdopt: bufdatasetoptionsty;
 begin
- if (csreading in fowner.componentstate) and
+ if (csreading in fowner.componentstate) and 
                                       (fowner is tmsebufdataset) then begin
   with tmsebufdataset1(fowner) do begin
    if card32(foldopts) <> card32($ffffffff) then begin //old streaming version
@@ -8147,7 +8141,7 @@ begin
 *)
  if [dso_noedit,dso_noinsert,dso_noappend,dso_noupdate,dso_nodelete] *
                                                     options1 <> [] then begin
-  if ([dso_noedit,dso_noupdate] * opt <> []) and
+  if ([dso_noedit,dso_noupdate] * opt <> []) and 
                                       tdataset(fowner).active then begin
    tdataset(fowner).checkbrowsemode;
   end;
@@ -8244,7 +8238,7 @@ begin
   else begin
    fdelayedapplycount:= avalue;
   end;
- end;
+ end;   
 end;
 }
 function tdscontroller.getnoedit: boolean;
@@ -8259,7 +8253,7 @@ begin
  end
  else begin
   options:= options - [dso_noedit];
- end;
+ end;  
 end;
 
 function tdscontroller.getnoinsert: boolean;
@@ -8274,7 +8268,7 @@ begin
  end
  else begin
   options:= options - [dso_noinsert];
- end;
+ end;  
 end;
 
 function tdscontroller.getnoappend: boolean;
@@ -8289,7 +8283,7 @@ begin
  end
  else begin
   options:= options - [dso_noappend];
- end;
+ end;  
 end;
 
 function tdscontroller.getnoupdate: boolean;
@@ -8304,7 +8298,7 @@ begin
  end
  else begin
   options:= options - [dso_noupdate];
- end;
+ end;  
 end;
 
 function tdscontroller.getnodelete: boolean;
@@ -8319,7 +8313,7 @@ begin
  end
  else begin
   options:= options - [dso_nodelete];
- end;
+ end;  
 end;
 
 function tdscontroller.getcanmodify: boolean;
@@ -8362,7 +8356,7 @@ begin
   finally
    if bo2 then begin
     application.endwait;
-   end;
+   end; 
    if not bo3 then begin
     exclude(fstate,dscs_refreshing);
    end;
@@ -8587,8 +8581,8 @@ procedure tfieldlinkdatalink.updatedata;
 begin
  if field <> nil then begin
   if not (flo_disabled in fowner.options) and
-     (not (flo_onlyifnull in fowner.foptions) or (field.isnull)) and
-     (not (flo_notifunmodifiedinsert in fowner.foptions) or
+     (not (flo_onlyifnull in fowner.foptions) or (field.isnull)) and 
+     (not (flo_notifunmodifiedinsert in fowner.foptions) or 
                        (datasource.dataset.modified)) then begin
    fowner.updatedata(field);
   end;
@@ -8705,7 +8699,7 @@ begin
  end
  else begin
   result:= fdestdatalink.datasource;
- end;
+ end;  
 end;
 
 procedure tfieldfieldlink.setdatasource(const avalue: tdatasource);
@@ -8974,7 +8968,7 @@ begin
  SetLength(ParamBinding,ParamCount);
 
  if ParamCount>0 then begin
-  //replace :ParamName by '?' for interbase,
+  //replace :ParamName by '?' for interbase, 
   //by '$x ' for postgresql and psSimulated
   //(using ParamPart array and NewQueryLength)
   SetLength(NewQuery,length(sql)+paramcount*(length(ReplaceString)+8));
@@ -9010,7 +9004,7 @@ begin
  end
  else begin
   NewQuery:=SQL;
- end;
+ end;    
  Result:= NewQuery;
 end;
 
@@ -9059,7 +9053,7 @@ begin
    for int4:= int2 to int2+length(aparamreplacestring)-1 do begin
     (po1+int4)^:= ' '; //remove marker
    end;
-   result:= result + copy(sql,int3,int2-int3) +
+   result:= result + copy(sql,int3,int2-int3) + 
                           paramtosql(items[aparambindings[int1]]);
    int3:= int2 + length(aparamreplacestring);
    while (sql[int3] >= '0') and (sql[int3] <= '9') do begin
@@ -9069,7 +9063,7 @@ begin
   result:= result + copy(sql,int3,bigint); //tail
  end
  else begin
-  result:= sql;
+  result:= sql;   
  end;
 end;
 
@@ -9178,7 +9172,7 @@ function compareblobid(const left,right: tavlnode): integer;
 var
  lint1: int64;
 begin
- result:= integer(tblobcachenode(left).flocal) -
+ result:= integer(tblobcachenode(left).flocal) - 
                  integer(tblobcachenode(right).flocal);
  if result = 0 then begin
   lint1:= tblobcachenode(left).fkey - tblobcachenode(right).fkey;

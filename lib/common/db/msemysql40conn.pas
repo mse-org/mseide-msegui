@@ -12,7 +12,7 @@ unit msemysql40conn;
 interface
 uses
  mdb,classes,mmysql40conn,msetypes{msestrings},msedb,msedatabase,msqldb;
-
+ 
 type
  tmsemysql40connection = class(tmysql40connection,idbcontroller)
   private
@@ -27,11 +27,11 @@ type
    property DatabaseName: filenamety read getdatabasename write setdatabasename;
    property Connected: boolean read getconnected write setconnected default false;
  end;
-
+ 
 implementation
 uses
  msefileutils;
-
+ 
 { tmsemysql40connection }
 
 procedure tmsemysql40connection.setdatabasename(const avalue: filenamety);

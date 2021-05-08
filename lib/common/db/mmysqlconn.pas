@@ -44,7 +44,7 @@ uses
 Type
 
  tmysqlcursor = class;
-
+ 
  emysqlerror = class(econnectionerror)
   private
    fsqlcode: string;
@@ -54,14 +54,14 @@ Type
                const aerror: integer; const asqlcode: string);
    property sqlcode: string read fsqlcode;
  end;
-
+  
   tmysqltrans = class(TSQLHandle)
    protected
     fconn: pmysql;
    public
     property conn: pmysql read fconn;
   end;
-
+ 
  bindinginfoty = record
   length: culong;
   buffer: pointer;
@@ -70,7 +70,7 @@ Type
  end;
  pbindinginfoty = ^bindinginfoty;
  bindinginfoarty = array of bindinginfoty;
-
+ 
   tmysqlcursor = class(TSQLCursor)
    protected
 //    FQMySQL : PMySQL;
@@ -98,7 +98,7 @@ Type
 
   mysqloptionty = (myo_nopreparedstatements,myo_storeresult,myo_ssl);
   mysqloptionsty = set of mysqloptionty;
-
+  
   tmysqlconnection = class (TSQLConnection,iblobconnection)
   private
    FDialect: integer;
@@ -149,7 +149,7 @@ Type
 //    function GetAsSQLText(Param : TParam) : string; overload; override;
 
     Function AllocateTransactionHandle : TSQLHandle; override;
-    procedure finalizetransaction(const atransaction: tsqlhandle); override;
+    procedure finalizetransaction(const atransaction: tsqlhandle); override; 
 
     procedure doexecuteunprepared(const c: tmysqlcursor;
                    const atransaction: tsqltransaction; const asql: string);
@@ -188,18 +188,18 @@ Type
                                    const aparam: tparam);
 //   function blobscached: boolean;
    function identquotechar: msestring; override;
-
+   
   Public
    constructor create(aowner: tcomponent); override;
    Function AllocateCursorHandle(const aowner: icursorclient;
                            const aname: ansistring): TSQLCursor; override;
    Procedure DeAllocateCursorHandle(var cursor : TSQLCursor); override;
-   procedure preparestatement(const cursor: tsqlcursor;
+   procedure preparestatement(const cursor: tsqlcursor; 
                   const atransaction : tsqltransaction;
                   const asql: msestring; const aparams : tmseparams); override;
    procedure UnPrepareStatement(cursor:TSQLCursor); override;
    procedure FreeFldBuffers(cursor : TSQLCursor); override;
-   procedure AddFieldDefs(const cursor: TSQLCursor;
+   procedure AddFieldDefs(const cursor: TSQLCursor; 
                    const FieldDefs : TfieldDefs); override;
    function Fetch(cursor : TSQLCursor) : boolean; override;
    function loadfield(const cursor: tsqlcursor;
@@ -259,7 +259,7 @@ var
  is51: boolean;
 const
  maxprecision = 18;
-
+   
 Resourcestring
   SErrServerConnectFailed = 'Server connect failed: %s';
   SErrDatabaseSelectFailed = 'failed to select database: %s';
@@ -279,7 +279,7 @@ Resourcestring
   SErrNotversion41 = 'TMySQL41Connection can not work with the installed MySQL client version (%s).';
   SErrNotversion40 = 'TMySQL40Connection can not work with the installed MySQL client version (%s).';
 
-function datetimetomysql_time(const datatype: tfieldtype;
+function datetimetomysql_time(const datatype: tfieldtype; 
                             const avalue: tdatetime): mysql_time;
 var
  year1,month1,day1,hour1,minute1,second1,millisecond1: word;
@@ -556,7 +556,7 @@ begin
  end;
 end;
 
-procedure setbindingbuffer(const bindings: pointer; const index: integer;
+procedure setbindingbuffer(const bindings: pointer; const index: integer; 
                           const abuffer: pointer; const alength: integer);
 begin
  if is51 then begin
@@ -612,7 +612,7 @@ begin
                       flasterror,flastsqlcode);
 end;
 
-Procedure tmysqlconnection.checkstmterror(const Msg: String;
+Procedure tmysqlconnection.checkstmterror(const Msg: String; 
                                                     const astmt: pmysql_stmt);
 var
  str1: msestring;
@@ -646,12 +646,12 @@ begin
 //  B:=(MysqlLibraryHandle=Nilhandle);
 //  If B then
     InitializeMysql([]);
-  Try
+  Try  
     Result:=strpas(mysql_get_client_info());
-  Finally
+  Finally  
 //    if B then
       ReleaseMysql;
-  end;
+  end;  
 end;
 
 function tmysqlconnection.GetServerStatus: String;
@@ -694,7 +694,7 @@ end;
 {
 function tmysqlconnection.stringtosqltext(const afieldtype: tfieldtype;
                                                 const avalue: string): string;
-var
+var 
  esc_str : pchar;
 begin
  Getmem(esc_str,length(avalue)*2+1);
@@ -704,7 +704,7 @@ begin
 end;
 
 function tmysqlconnection.GetAsSQLText(Field : TField) : string;
-var
+var 
  esc_str : pchar;
  str1: string;
 begin
@@ -722,7 +722,7 @@ begin
 end;
 
 function tmysqlconnection.GetAsSQLText(Param: TParam) : string;
-var
+var 
  esc_str : pchar;
  str1: string;
 begin
@@ -868,7 +868,7 @@ begin
  end;
 end;
 
-procedure tmysqlconnection.preparestatement(const cursor: tsqlcursor;
+procedure tmysqlconnection.preparestatement(const cursor: tsqlcursor; 
                   const atransaction : tsqltransaction;
                   const asql: msestring; const aparams : tmseparams);
 var
@@ -882,8 +882,8 @@ begin
    fconn:= fmysql1; // dummy transaction
    tmysqltrans(atransaction.trans).fconn:= fmysql1;
   end;
-
-  if not (myo_nopreparedstatements in foptions) and
+  
+  if not (myo_nopreparedstatements in foptions) and 
              (FStatementType in [stInsert,stUpdate,stDelete,stSelect]) then begin
    fprepstatement:= mysql_stmt_init(fconn);
    if fprepstatement = nil then begin
@@ -988,7 +988,7 @@ begin
      C.FRes:= mysql_store_result(fconn);
     end
     else begin
-     C.FRes:= mysql_use_result(fconn);
+     C.FRes:= mysql_use_result(fconn); 
       //needs to call mysql_fetch_row() until all data has been fetched
     end;
     if myo_storeresult in foptions then begin
@@ -1060,7 +1060,7 @@ begin
         databaseerror('Paramtype '+
           getenumname(typeinfo(tfieldtype),ord(datatype))+' not supported.',self);
        end;
-      end;
+      end; 
      end;
     end;
    end;
@@ -1083,7 +1083,7 @@ begin
          pdouble(inputparambindings[int1].buffer)^:= asfloat;
         end;
         ftdate,ftdatetime,fttime: begin
-         pmysql_time(inputparambindings[int1].buffer)^:=
+         pmysql_time(inputparambindings[int1].buffer)^:= 
                  datetimetomysql_time(datatype,asdatetime);
         end;
         ftstring,ftwidestring,ftblob,ftmemo,ftfixedchar,ftfixedwidechar: begin
@@ -1096,7 +1096,6 @@ begin
                                   inputparambindings,pointer(strings[int1]),
                                   length(strings[int1]));
         end;
-         else; // For case statment added to make compiler happy.
        end;
       end;
      end;
@@ -1180,7 +1179,7 @@ begin
     end;
     FIELD_TYPE_LONGLONG,FIELD_TYPE_INT24: begin
      newtype:= ftlargeint;
-    end;
+    end;     
  {$ifdef mysql50}
     FIELD_TYPE_NEWDECIMAL,
  {$endif}
@@ -1220,13 +1219,13 @@ begin
       newsize:= newsize div charsetinfo.mbmaxlen;
      end;
     end;
-    {$ifdef mysql41}
+    {$ifdef mysql41}     
     field_type_blob: begin
      newsize:= sizeof(integer);
      if charsetnr = 63 then begin //binary
       newtype:= ftblob;
      end
-     else begin
+     else begin 
       newtype:= ftmemo;
      end;
     end;
@@ -1268,13 +1267,13 @@ begin
   res1:= c.fres;
   FC:= mysql_num_fields(res1);
  end;
-
+ 
  SetLength(c.MapDSRowToMSQLRow,FC);
  TF := 1;
  For I:= 0 to FC-1 do begin
   field := mysql_fetch_field_direct(res1, I);
   with field^ do begin
-   if (flags and (pri_key_flag or auto_increment_flag) =
+   if (flags and (pri_key_flag or auto_increment_flag) = 
              (pri_key_flag or auto_increment_flag)) then begin
     c.fprimarykeyfieldname:= name;
    end;
@@ -1297,7 +1296,7 @@ begin
    fd.collection:= fielddefs;
    if dft = ftbcd then begin
     fd.precision:= precision;
-   end;
+   end;   
    inc(TF);
   end
  end;
@@ -1430,7 +1429,7 @@ begin
      checkerror(SErrFetchingData,c.fconn);
      end;
   Row:=C.Row;
-
+  
   inc(Row,c.MapDSRowToMSQLRow[fno]);
 //  inc(row,fno);
   if row^ <> nil then begin
@@ -1609,7 +1608,7 @@ begin
   Result := Result + EncodeTime(EH, EN, ES, 0);;
 end;
 
-function tmysqlconnection.MySQLWriteData(const acursor: tsqlcursor;
+function tmysqlconnection.MySQLWriteData(const acursor: tsqlcursor; 
                      AType: enum_field_types;ASize: Integer;
                      AFieldType: TFieldType;Source, Dest: PChar): Boolean;
 
@@ -1658,7 +1657,7 @@ begin
       end;
 {$ifdef mysql50}
     FIELD_TYPE_NEWDECIMAL,
-{$endif}
+{$endif}      
     FIELD_TYPE_DECIMAL, FIELD_TYPE_FLOAT, FIELD_TYPE_DOUBLE:
       if AFieldType = ftBCD then
         begin
@@ -1716,8 +1715,7 @@ begin
      int1:= acursor.addblobdata(source,asize);
      move(int1,dest^,sizeof(int1));
       //save id
-    end;
-     else; // For case statment added to make compiler happy.
+    end;     
    end;
   end;
  end;
@@ -1725,7 +1723,7 @@ end;
 
 procedure tmysqlconnection.UpdateIndexDefs(var IndexDefs : TIndexDefs;
                      const aTableName : string; const acursor: tsqlcursor);
-var
+var 
  qry: tsqlresult;
  keynamef,{filednamef,}columnnamef,nonuniquef: tdbcol;
  str1: string;
@@ -1752,7 +1750,7 @@ begin
       options:= options + [ixUnique];
      end;
      str1:= '';
-     repeat
+     repeat 
       str1:= str1 + trim(columnnamef.asstring) + ';';
       qry.next;
      until qry.eof or (name <> keynamef.asstring);
@@ -1831,7 +1829,7 @@ begin
    end
    else begin
     openconnection(fconn);
-   end;
+   end;  
   end;
   begintrans(fconn,aparams.text);
  end;
@@ -1931,7 +1929,7 @@ var
  po1: pmysql_res;
 begin
  initializemysql([]);
- try
+ try  
   bo1:= fmysql1 = nil;
   if bo1 then begin
    ConnectMySQL(fmysql1,pchar(hostname),pchar(username),pchar(password));
@@ -1949,14 +1947,14 @@ begin
     closeconnection(fmysql1);
    end;
   end;
- finally
+ finally  
   releasemysql;
- end;
+ end;  
 end;
 
 { emysqlerror }
 
-constructor emysqlerror.create(const asender: tcustomsqlconnection;
+constructor emysqlerror.create(const asender: tcustomsqlconnection; 
          const amessage: ansistring; const aerrormessage: msestring;
          const aerror: integer; const asqlcode: string);
 begin

@@ -562,7 +562,7 @@ const
 
  funcsopt: array[0..13] of funcinfoty = (
   (n: 'PQgetssl'; d: {$ifndef FPC}@{$endif}@PQgetssl),
-
+  
   (n: 'DLNewList'; d: {$ifndef FPC}@{$endif}@DLNewList),  //these functions seem not to be exported by
   (n: 'DLFreeList'; d: {$ifndef FPC}@{$endif}@DLFreeList),//pqlib??
   (n: 'DLNewElem'; d: {$ifndef FPC}@{$endif}@DLNewElem),

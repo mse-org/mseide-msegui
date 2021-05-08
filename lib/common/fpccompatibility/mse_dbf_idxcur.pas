@@ -8,7 +8,7 @@ uses
   SysUtils,
   Classes,
   mclasses,
-  db,
+  mdb,
   mse_dbf_cursor,
   mse_dbf_idxfile,
   mdbf_prsdef,

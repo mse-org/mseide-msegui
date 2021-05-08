@@ -21,15 +21,12 @@ interface
   {$warn 5093 off}
   {$warn 6058 off}
  {$endif}
- {$if fpc_fullversion >= 030300}
-  {$warn 6018 off}
- {$endif}
 {$endif}
 
 uses
  classes,mclasses,firebird,msqldb,msestrings,msetypes,mdb,msedb,msedatabase,
  sysutils,msefirebird,msedbevents,msesystypes;
-
+ 
 const
  SQL_DIALECT_V6 = 3;
 
@@ -38,9 +35,9 @@ type
 
  fbconnectionoptionty = (fbo_sqlinfo);
  fbconnectionoptionsty = set of fbconnectionoptionty;
-
+ 
  tfb3connection = class;
-
+ 
  tfbtrans = class(tsqlhandle)
   protected
    fconnection: tfb3connection;
@@ -57,7 +54,7 @@ type
  fetchfuncty = procedure(const info: pfbfieldinfoty; const dest: pointer);
 
  tfbcursor = class;
-
+ 
  fbfieldinfoty = record
   buffer: pointer;
   name: string;
@@ -72,9 +69,9 @@ type
 //  precision: int32;
   buffersizead: pint32; //temp
  end;
-
+ 
  fbfieldinfoarty = array of fbfieldinfoty;
-
+  
  tfbcursor = class(tsqlcursor)
   protected
    fconnection: tfb3connection;
@@ -93,7 +90,7 @@ type
    destructor destroy(); override;
    procedure close() override;
  end;
-
+  
  fbeventinfoty = record
   event: tdbevent;
   name: string;
@@ -129,7 +126,7 @@ type
   valuekind: paramblockvaluekindty;
  end;
  pparaminfoty = ^paraminfoty;
-
+ 
  tfb3connection = class(tcustomsqlconnection,iblobconnection,
                                          idbevent,idbeventcontroller)
   private
@@ -200,7 +197,7 @@ type
    function createblobstream(const field: tfield; const mode: tblobstreammode;
                           const acursor: tsqlcursor): tstream; override;
    function getblobdatasize: integer; override;
-
+   
    procedure updateevents(const aerrormessage: msestring);
    procedure clearevents();
    procedure loaded() override;
@@ -235,7 +232,7 @@ type
                       const aname: ansistring): tsqlcursor override;
    procedure deallocatecursorhandle(var cursor : tsqlcursor) override;
    procedure freefldbuffers(cursor : tsqlcursor); override;
-   procedure preparestatement(const cursor: tsqlcursor;
+   procedure preparestatement(const cursor: tsqlcursor; 
                  const atransaction : tsqltransaction;
                  const asql: msestring; const aparams : tmseparams) override;
    procedure unpreparestatement(cursor : tsqlcursor) override;
@@ -254,9 +251,9 @@ type
    property lasterrormessage: msestring read flasterrormessage;
    property lastsqlcode: int32 read flastsqlcode;
   published
-   property dialect: integer read fdialect write fdialect
+   property dialect: integer read fdialect write fdialect 
                                         default sql_dialect_v6;
-   property options: fbconnectionoptionsty read foptions
+   property options: fbconnectionoptionsty read foptions 
                                            write foptions default [];
    property Transaction;
    property transactionwrite;
@@ -272,7 +269,7 @@ type
    property afterconnect;
    property beforedisconnect;
  end;
-
+ 
  efberror = class(econnectionerror)
   private
    fgdscode: ptrint;
@@ -293,14 +290,11 @@ uses
   {$warn 5093 off}
   {$warn 6058 off}
  {$endif}
- {$if fpc_fullversion >= 030300}
-  {$warn 6018 off}
- {$endif}
 {$endif}
 
 const
- textblobtypes = [ftmemo,ftwidememo];
-
+ textblobtypes = [ftmemo,ftwidememo]; 
+ 
 { tfbeventcallback }
 
 constructor tfbeventcallback.create(const aowner: tfb3connection);
@@ -342,7 +336,7 @@ var
 begin
  sys_mutexlock(fmutex);
  if not freleased and (fowner <> nil) and //owner alive
-                                            (length > 0) then begin
+                                            (length > 0) then begin 
                                               //no call from queevents()
   with fowner do begin
    i3:= feventcount;
@@ -392,7 +386,7 @@ end;
 
 type
  countbufferty = array[0..3] of byte;
-
+ 
 procedure tfbeventcallback.storestate();
                            //copy current event counts to feventitems
 var
@@ -456,7 +450,7 @@ var
  po1: nativeintptr;
  err1: integer;
 begin
- str1:= formatstatus(astatus);
+ str1:= formatstatus(astatus); 
  msg1:= aerrormessage;
  if str1 <> '' then begin
   msg1:= msg1 + lineend + msestring(str1);
@@ -486,7 +480,7 @@ begin
  inherited;
  FConnOptions := FConnOptions + [sco_SupportParams,sco_forceparams,
                                                        sco_nounprepared];
-    //unprepared not yet possible because FB3 provides
+    //unprepared not yet possible because FB3 provides 
     //no output messagemetadata for execute()
 end;
 
@@ -588,7 +582,7 @@ const
  paramblockkindnames: array[paramblockkindty] of string = (
 // pbk_database,pbk_transaction
        'database',  'transaction');
-
+       
 function tfb3connection.buildpb(const akind: paramblockkindty;
                const ainfo: pparaminfoty; const acount: int32;
                const aparams: tstringlist; const force: boolean): ixpbbuilder;
@@ -608,7 +602,7 @@ label
  next;
 
 begin
- result:= nil;
+ result:= nil; 
  if (aparams.count > 0) or force then begin
   result:= getpb(akind);
   for i1:= 0 to aparams.count - 1 do begin
@@ -676,7 +670,7 @@ var
 begin
  flistencount:= 0;
  inifbapi(fapi);
- try
+ try 
   inherited dointernalconnect;
   pb:= buildpb(pbk_database,@paramconsts,length(paramconsts),params,true);
   pb.inserttag(fapi.status,isc_dpb_utf8_filename);
@@ -751,7 +745,7 @@ end;
 
 function tfb3connection.startdbtransaction(const trans: tsqlhandle;
                const aparams: tstringlist): boolean;
-
+               
 const
  paramconsts: array[0..20] of paraminfoty =
   ((id: isc_tpb_write; name: 'isc_tpb_write';
@@ -901,7 +895,7 @@ begin
    clearstatus();
    fstatement:= fattachment.prepare(fapi.status,ftransaction,length(str1),
             pointer(str1),dialect,
-                        IStatement.PREPARE_PREFETCH_FLAGS or
+                        IStatement.PREPARE_PREFETCH_FLAGS or 
                         IStatement.PREPARE_PREFETCH_OUTPUT_PARAMETERS);
    if fstatement <> nil then begin
     fstatementflags:= fstatement.getflags(fapi.status);
@@ -989,7 +983,7 @@ end;
 
 procedure fetchbcdtofloat(const ainfo: pfbfieldinfoty; const dest: pointer);
 begin
- pdouble(dest)^:= pint64(ainfo^.buffer + ainfo^.offset)^ *
+ pdouble(dest)^:= pint64(ainfo^.buffer + ainfo^.offset)^ * 
                                           intexp10(ainfo^.scale);
 end;
 
@@ -1028,7 +1022,7 @@ begin
  po1:= ainfo^.buffer + ainfo^.offset;
  da:= po1^.timestamp_date + fbdatetimeoffset;
  ti:= po1^.timestamp_time / (3600*24*ISC_TIME_SECONDS_PRECISION);
- if da < 0 then begin
+ if da < 0 then begin 
   pdatetime(dest)^:= da - ti;
  end
  else begin
@@ -1313,12 +1307,12 @@ var
  updatecount: int32;
  deletecount: int32;
  insertcount: int32;
-
+ 
 begin
  with tfbcursor(cursor) do begin
   frowsaffected:= -1;
   frowsreturned:= -1;
-  if assigned(aparams) and (aparams.count > 0) and
+  if assigned(aparams) and (aparams.count > 0) and 
                                            (fparambinding <> nil) then begin
    paramdata:= tparamdata.create(tfbcursor(cursor),aparams);
    parambuffer:= paramdata.parambuffer;
@@ -1366,7 +1360,7 @@ begin
        i1:= 3;
        while true do begin
         by1:= buf1[i1];
-        if (by1 in [isc_info_end,isc_info_truncated]) or
+        if (by1 in [isc_info_end,isc_info_truncated]) or 
                                           (i1 >= i2-1) then begin
          break;
         end;
@@ -1520,8 +1514,8 @@ var
 begin
  with tfbcursor(cursor) do begin
   po1:= @ffieldinfos[fieldnum];
-  if (po1^.nulloffset >= 0) and
-              (pisc_short(po1^.buffer + po1^.nulloffset)^ <> 0) or
+  if (po1^.nulloffset >= 0) and 
+              (pisc_short(po1^.buffer + po1^.nulloffset)^ <> 0) or 
                                             (po1^.fetchfunc = nil) then begin
    result:= false;
   end
@@ -1569,7 +1563,7 @@ begin
 end;
 
 const
- infotags: array[0..1] of byte =
+ infotags: array[0..1] of byte = 
                      (isc_info_blob_max_segment,isc_info_blob_total_length);
 
 function tfb3connection.getblobstream(const acursor: tsqlcursor;
@@ -1613,7 +1607,7 @@ begin
     end;
    end;
   end;
-  if (maxsegment < 0) or (totallength < 0) or
+  if (maxsegment < 0) or (totallength < 0) or 
                      (maxsegment = 0) and (totallength <> 0)then begin
    databaseerror('Invalid blob info result',self);
   end;
@@ -1892,7 +1886,7 @@ begin
    feventcallback.destroylocked();
    clearevents();
   end;
-  checkstatus(aerrormessage);
+  checkstatus(aerrormessage); 
          //eventcallback allready destroyed in case of error
  end
  else begin

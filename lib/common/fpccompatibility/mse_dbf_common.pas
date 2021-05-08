@@ -7,7 +7,7 @@ interface
 {$I mse_dbf_common.inc}
 
 uses
-  SysUtils, Classes, mclasses, DB
+  SysUtils, Classes, mclasses, mDB
 {$ifndef WINDOWS}
   , Types, mse_dbf_wtil
 {$ifdef KYLIX}

@@ -18,21 +18,21 @@ uses
  msewidgetgrid,mseevent,msegraphics,
  msedatalist,mseeditglob,msegrids,msemenus,mseguiglob,mseedit,msedataedits,
  msestrings,msetypes;
-
+ 
 type
  tdbcalendardatetimeedit = class(tcustomcalendardatetimeedit,idbeditfieldlink,
                                       ireccontrol)
   private
    fdatalink: teditwidgetdatalink;
    procedure setdatalink(const avalue: teditwidgetdatalink);
-  protected
+  protected   
    procedure defineproperties(filer: tfiler); override;
    function nullcheckneeded(const newfocus: twidget): boolean; override;
    procedure griddatasourcechanged; override;
    function getgriddatasource: tdatasource;
    function createdatalist(const sender: twidgetcol): tdatalist; override;
    procedure modified; override;
-   procedure doshortcut(var info: keyeventinfoty;
+   procedure doshortcut(var info: keyeventinfoty; 
                                       const sender: twidget); override;
 //   function getoptionsedit: optionseditty; override;
 //   procedure dochange; override;
@@ -60,11 +60,11 @@ type
    property options;
    property onsetvalue;
  end;
-
+ 
 implementation
 type
  teditwidgetdatalink1 = class(teditwidgetdatalink);
-
+  
 { tdbcalendardatetimeedit }
 
 constructor tdbcalendardatetimeedit.create(aowner: tcomponent);
@@ -122,7 +122,7 @@ begin
   value:= da1;
  end;
 end;
-
+ 
 function tdbcalendardatetimeedit.getrowdatapo(const arow: integer): pointer;
 begin
  if fgriddatalink <> nil then begin

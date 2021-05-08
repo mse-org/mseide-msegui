@@ -61,7 +61,7 @@ type
    property status: statusvectorty read fstatus;
    property sqlcode: integer read fsqlcode;
  end;
-
+ 
   TIBCursor = Class(TSQLCursor)
    protected
     fconnection: tibconnection;
@@ -102,12 +102,12 @@ type
 
   ibconnectionoptionty = (ibo_embedded,ibo_sqlinfo);
   ibconnectionoptionsty = set of ibconnectionoptionty;
-
+  
   fbversionty = record
    imp: stringarty;
    ods: string;
   end;
-
+  
   TIBConnection = class (TSQLConnection,iblobconnection,
                                                idbevent,idbeventcontroller)
   private
@@ -129,7 +129,7 @@ type
    //conversion methods
    procedure GetDateTime(CurrBuff, Buffer : pointer; AType : integer);
    procedure SetDateTime(CurrBuff: pointer; PTime : TDateTime; AType : integer);
-   procedure GetFloat(const CurrBuff,Buffer: pointer;
+   procedure GetFloat(const CurrBuff,Buffer: pointer; 
                                     const datalength: integer);
    procedure SetFloat(CurrBuff: pointer; Dbl: Double; Size: integer);
    procedure CheckError(const ProcName : string;
@@ -145,7 +145,7 @@ type
                                       const blobid: isc_quad): string;
   protected
    procedure freeeventbuffer(var abuffer: pfbeventbufferty);
-
+   
    procedure DoInternalConnect; override;
    procedure DoInternalDisconnect; override;
    function GetHandle : pointer; override;
@@ -200,7 +200,7 @@ type
    Function AllocateCursorHandle(const aowner: icursorclient;
                       const aname: ansistring): TSQLCursor; override;
    Procedure DeAllocateCursorHandle(var cursor : TSQLCursor); override;
-   procedure preparestatement(const cursor: tsqlcursor;
+   procedure preparestatement(const cursor: tsqlcursor; 
                  const atransaction : tsqltransaction;
                  const asql: msestring; const aparams : tmseparams); override;
    procedure UnPrepareStatement(cursor : TSQLCursor); override;
@@ -223,7 +223,7 @@ type
     property lastsqlcode: integer read flastsqlcode;
   published
     property Dialect  : integer read FDialect write FDialect default 0;
-    property options: ibconnectionoptionsty read foptions
+    property options: ibconnectionoptionsty read foptions 
                                            write foptions default [];
     property DatabaseName;
     property KeepConnection;
@@ -301,7 +301,7 @@ procedure TIBCursor.close;
 begin
  inherited;
  if fopen and (fibstatementtype = isc_info_sql_stmt_select) then begin
-  if isc_dsql_free_statement(@status, @statement, dsql_close) <> 0 then begin
+  if isc_dsql_free_statement(@status, @statement, dsql_close) <> 0 then begin 
    fconnection.checkerror('close cursor', status{,fname});
   end;
  end;
@@ -317,12 +317,12 @@ end;
 
 { tibconnection }
 
-procedure TIBConnection.CheckError(const ProcName : string;
+procedure TIBConnection.CheckError(const ProcName : string; 
                          const Status: statusvectorty);
 var
   buf: array [0..1024] of char;
   p: pointer;
-  Msg: msestring;
+  Msg: msestring;  
 begin
  if ((Status[0] = 1) and (Status[1] <> 0)) then begin
   p:= @Status;
@@ -491,7 +491,7 @@ begin
 {$IfDef LinkDynamically}
  useembeddedfirebird:= ibo_embedded in foptions;
  InitializeIBase60([]);
- try
+ try 
 {$EndIf}
   inherited dointernalconnect;
   getcredentials(u,p);
@@ -711,7 +711,7 @@ begin
   result := TIBTrans.create;
 end;
 
-procedure tibconnection.preparestatement(const cursor: tsqlcursor;
+procedure tibconnection.preparestatement(const cursor: tsqlcursor; 
                   const atransaction : tsqltransaction;
                   const asql: msestring; const aparams : tmseparams);
 
@@ -814,7 +814,7 @@ end;
 procedure tibconnection.unpreparestatement(cursor: tsqlcursor);
 begin
  with tibcursor(cursor) do begin
-  if statement <> nil then begin
+  if statement <> nil then begin 
    if isc_dsql_free_statement(@status, @statement, dsql_drop) <> 0 then begin
     checkerror('freestatement', status);
    end;
@@ -839,7 +839,7 @@ begin
         Dispose(aSQLDA^.SQLVar[x].sqlind);
         aSQLDA^.SQLVar[x].sqlind := nil;
         end
-
+        
       end;
 end;
 
@@ -898,7 +898,7 @@ begin
      int1:= 3;
      while true do begin
       by1:= buf1[int1];
-      if (by1 in [isc_info_end,isc_info_truncated]) or
+      if (by1 in [isc_info_end,isc_info_truncated]) or 
                                         (int1 >= int2-1) then begin
        break;
       end;
@@ -956,7 +956,7 @@ begin
   move(name,result[1],length);
  end;
 end;
-
+  
 function sqlsubtypetocharlen(const subtype: smallint; const len: integer): integer;
 var
  int1: integer;
@@ -1017,7 +1017,6 @@ begin
        end;
       end;
      end;
-      else; // For case statment added to make compiler happy.
     end;
     if not(transtype in varsizefields) then begin
      translen:= 0;
@@ -1235,7 +1234,7 @@ var
  VarcharLen: word;
  CurrBuff: pchar;
  po1: pxsqlvar;
-
+ 
  function getint64: int64;
  begin
   case po1^.sqllen of
@@ -1376,7 +1375,7 @@ begin
   CTime.tm_hour := STime.Hour;
   CTime.tm_min  := STime.Minute;
   CTime.tm_sec  := STime.Second;
-{$else}
+{$else}  
   CTime.tm_year := STime.wYear - 1900;
   CTime.tm_mon  := STime.wMonth -1;
   CTime.tm_mday := STime.wDay;
@@ -1423,7 +1422,7 @@ begin
  end;
 end;
 
-procedure tibconnection.GetFloat(const CurrBuff,Buffer: pointer;
+procedure tibconnection.GetFloat(const CurrBuff,Buffer: pointer; 
                                      const datalength: integer);
 begin
  case datalength of
@@ -1468,7 +1467,7 @@ var
  blobHandle : Isc_blob_Handle;
  blobSegment : pointer;
  blobSegLen : word;
- maxBlobSize : longInt;
+ maxBlobSize : longInt; 
 begin
  blobseglen:= 0;
  blobHandle:= FB_API_NULLHANDLE;
@@ -1500,7 +1499,7 @@ begin
  end;
 end;
 
-function tibconnection.getblobstring(const acursor: tsqlcursor;
+function tibconnection.getblobstring(const acursor: tsqlcursor; 
                                             const blobid: isc_quad): string;
 begin
  tmemorystringstream(getblobstream(acursor,blobid,true)).destroyasstring(result);
@@ -1540,7 +1539,7 @@ procedure TIBConnection.writeblobdata(const atransactionhandle: pointer;
                const tablename: string; const acursor: tsqlcursor;
                const adata: pointer; const alength: integer;
                const afield: tfield; const aparam: tparam; out newid: string);
-
+     
  procedure check(const ares: isc_status);
  begin
   if ares <> 0 then begin
@@ -1548,7 +1547,7 @@ procedure TIBConnection.writeblobdata(const atransactionhandle: pointer;
   end;
  end;
 const
- defsegsize = $ffff;
+ defsegsize = $ffff; 
 var
 // transactionhandle: pointer;
  blobhandle: isc_blob_handle;
@@ -1615,7 +1614,7 @@ begin
  }
   afield.getdata(@blobid);
   aparam.aslargeint:= int64(blobid);
-// end;
+// end; 
 end;
 
 function TIBConnection.getblobdatasize: integer;
@@ -1638,7 +1637,7 @@ begin
 {$endif}
   bo1:= isc_dsql_execute_immediate(@fstatus,@dbha,@trha,length(asql),
                               pchar(asql),fdialect,nil) <> 0;
-  if bo1 then begin
+  if bo1 then begin 
    checkerror('createdatabase',fstatus);
   end
   else begin
@@ -1679,10 +1678,10 @@ begin
  databaseerror('Event fire not implemented.',self);
 end;
 
-procedure eventcallback(adata: pointer; alength: smallint; aupdated: pchar);
+procedure eventcallback(adata: pointer; alength: smallint; aupdated: pchar); 
                                                          cdecl;
 //var
-// status: statusvectorty;
+// status: statusvectorty; 
 begin
  with pfbeventbufferty(adata)^,tibconnection(event.database) do begin
    sys_mutexlock(fmutex);
@@ -1697,7 +1696,7 @@ end;
 function TIBConnection.getdbevent(var aname: string; var aid: int64): boolean;
 var
  int1: integer;
- status: statusvectorty;
+ status: statusvectorty; 
 begin
  result:= false;
  if feventcount > 0 then begin
@@ -1760,7 +1759,7 @@ var
  int1: integer;
 begin
  for int1:= 0 to high(feventbuffers) do begin
-  if (feventbuffers[int1] <> nil) and
+  if (feventbuffers[int1] <> nil) and 
                  (feventbuffers[int1]^.event = sender) then begin
    sys_mutexlock(fmutex); //not save! there can be an event in queue
    isc_cancel_events(@fstatus,@fsqldatabasehandle,@feventbuffers[int1]^.id);
@@ -1782,7 +1781,7 @@ begin
  abuffer:= nil;
 end;
 
-procedure versioncallback(user_arg: pointer; atext: pchar);
+procedure versioncallback(user_arg: pointer; atext: pchar); 
 //                             {$ifdef mswindows}stdcall{$else}cdecl{$endif};
                              {$ifdef mswindows}cdecl{$else}cdecl{$endif};
 begin

@@ -13,7 +13,7 @@ interface
 uses
  mdb,classes,mclasses,mmysql50conn,msetypes{msestrings},msedb,
  msqldb,msedatabase;
-
+ 
 type
  tmsemysql50connection = class(tmysql50connection,idbcontroller)
   private
@@ -31,11 +31,11 @@ type
    property DatabaseName: filenamety read getdatabasename write setdatabasename;
    property Connected: boolean read getconnected write setconnected default false;
  end;
-
+ 
 implementation
 uses
  msefileutils,msesqldb,msebufdataset;
-
+ 
 { tmsemysql50connection }
 
 procedure tmsemysql50connection.setdatabasename(const avalue: filenamety);

@@ -14,12 +14,12 @@ uses
  classes,mclasses,mdb,msestrings,msebufdataset,msedb,mseapplication,msetypes;
 
 const
- defaultlocaldsoptions = defaultdscontrolleroptions + [dso_utf8];
+ defaultlocaldsoptions = defaultdscontrolleroptions + [dso_utf8]; 
  defaultlocalbdsoptions = defaultbufdatasetoptions + [bdo_local,bdo_noapply];
 type
  tlocaldscontroller = class(tdscontroller)
   protected
-//   procedure setoptions(const avalue: datasetoptionsty); override;
+//   procedure setoptions(const avalue: datasetoptionsty); override;   
   public
    constructor create(const aowner: tdataset; const aintf: idscontroller;
                       const arecnooffset: integer = 0;
@@ -27,7 +27,7 @@ type
   published
    property options default defaultlocaldsoptions;
  end;
-
+ 
  tlocaldataset = class(tmsebufdataset,imselocate,idscontroller,igetdscontroller,
                                iactivatorclient)
   private
@@ -74,11 +74,11 @@ type
    function fetch : boolean; override;
    function getblobdatasize: integer; override;
    function blobscached: boolean; override;
-   function loadfield(const afieldno: integer; const afieldtype: tfieldtype{const afield: tfield};
+   function loadfield(const afieldno: integer; const afieldtype: tfieldtype{const afield: tfield}; 
                 const buffer: pointer;
                     var bufsize: integer): boolean; override;
            //if bufsize < 0 -> buffer was to small, should be -bufsize
-
+   
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -91,7 +91,7 @@ type
 {
    function locate(const key: integer; const field: tfield;
                    const options: locateoptionsty = []): locateresultty;
-   function locate(const key: msestring; const field: tfield;
+   function locate(const key: msestring; const field: tfield; 
                  const options: locateoptionsty = []): locateresultty;
 }
    function CreateBlobStream(Field: TField; Mode: TBlobStreamMode): TStream; override;
@@ -129,7 +129,7 @@ type
     property onmodified;
    property AutoCalcFields;
  end;
-
+ 
 implementation
 
 { tlocaldscontroller }
@@ -386,7 +386,7 @@ end;
 function tlocaldataset.CreateBlobStream(Field: TField;
                Mode: TBlobStreamMode): TStream;
 var
- info: blobcacheinfoty;
+ info: blobcacheinfoty; 
 // int1: integer;
  blob1: blobinfoty;
 begin
