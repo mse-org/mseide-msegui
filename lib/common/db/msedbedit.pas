@@ -2722,7 +2722,7 @@ begin
     dsbrowse: glyph:= stg_dbindbrowse;
     dsedit: glyph:= stg_dbindedit;
     dsinsert: glyph:= stg_dbindinsert;
-    else glyph:= stockglyphty(stg_none);
+    else glyph:= stockglyphty(-1);
    end;
    if ord(glyph) >= 0 then begin
     stockobjects.glyphs.paint(canvas,ord(glyph),innerrect,
@@ -3709,7 +3709,7 @@ begin
     exclude(fstate,fds_filterediting);
    end;
   end;
-  ord(de_hasactiveedit): begin
+  de_hasactiveedit: begin
    with phasactiveeditinfoty(info)^ do begin
     hasedit:= hasedit or (field = self.field) and
                   fintf.getwidget.window.active;

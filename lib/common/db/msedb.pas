@@ -38,14 +38,12 @@ const
  mse_vtguid = $ff;
  guidbuffersize = 36; //aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee
 
-{
  de_modified = ord(high(tdataevent))+1;
  de_afterdelete = ord(high(tdataevent))+2;
  de_afterinsert = ord(high(tdataevent))+3;
  de_afterpost = ord(high(tdataevent))+4;
  de_hasactiveedit = ord(high(tdataevent))+5;
  de_afterapplyupdate = ord(high(tdataevent))+6;
-}
 
  defaultdscontrolleroptions = [{dso_cancelupdateondeleteerror}];
  allfieldkinds = [fkData,fkCalculated,fkLookup,fkInternalCalc];
@@ -2800,7 +2798,7 @@ function fieldclasstoclasstyp(const fieldclass: fieldclassty): fieldclasstypety;
 var
  type1: fieldclasstypety;
 begin
- result:= fieldclasstypety(ft_unknown);
+ result:= fieldclasstypety(-1);
  for type1:= low(fieldclasstypety) to high(fieldclasstypety) do begin
   if fieldclass = fieldtypeclasses[type1]  then begin
    result:= type1;
