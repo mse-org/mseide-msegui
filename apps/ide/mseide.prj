@@ -179,7 +179,7 @@ options=114
  value=
  [projectoptionsfo.makegroupbox]
  firsttab=0
- index=3
+ index=2
  [projectoptionsfo.exceptionsgrid]
  propcolwidthref=779
  width0=47
@@ -207,12 +207,18 @@ options=114
  y=82
  cx=839
  cy=634
-settings=8
- [settings_form]
- x=595
- y=187
- cx=446
- cy=578
+settings=14
+ [settingsfo.macrogrid]
+ propcolwidthref=302
+ width0=151
+ sortdescend0=0
+ width1=144
+ sortdescend1=0
+ [settingsfo]
+ x=100
+ y=106
+ cx=348
+ cy=570
  wsize=0
  active=1
  visible=1
@@ -674,15 +680,15 @@ sigsettings=27
 defaultmake=1
 units=
  (
- a=0,8229,6,Pascal Units
+ a=0,8228,6,Pascal Units
  )
 cmodules=
  (
- a=0,8229,6,C Modules
+ a=0,8228,6,C Modules
  )
 files=
  (
- a=0,8229,6,Text Files
+ a=0,8228,6,Text Files
  )
 [breakpoints]
 on=2
@@ -748,14 +754,15 @@ findhistory=20
  tkmethod
  typeinfo
 findoptions=1
-editpos=14
- 0,0
+editpos=15
+ 0,6
  0,-1073741823
  0,-1073741823
  0,-1073741823
  0,-1073741823
  0,-1073741823
- 0,0
+ 0,-1073741823
+ 0,-1073741823
  0,-1073741823
  0,-1073741823
  0,-1073741823
@@ -777,22 +784,24 @@ bookmarks10=0
 bookmarks11=0
 bookmarks12=0
 bookmarks13=0
-sourcefiles=14
+bookmarks14=0
+sourcefiles=15
  /home/fred/mseide-msegui/apps/ide/sourceform.pas
  ${PROJECTDIR}/actionsmodule.pas
  ${PROJECTDIR}/main.pas
  /home/fred/mseide-msegui/lib/common/kernel/msegui.pas
  /home/fred/mseide-msegui/lib/common/kernel/mseactions.pas
  /home/fred/mseide-msegui-master/lib/common/kernel/msekeyboard.pas
- /home/fred/mseide-msegui/apps/ide/messageform.pas
- /home/fred/mseide-msegui/apps/ide/mseide.pas
+ ${PROJECTDIR}/messageform.pas
+ ${PROJECTDIR}/mseide.pas
  ${PROJECTDIR}/sourceform.pas
  ${PROJECTDIR}/actionsmodule.pas
  ${PROJECTDIR}/main.pas
  ${PROJECTDIR}/findmessage.pas
  /home/fred/mseide-msegui/lib/common/db/mmysqlconn.pas
  /home/fred/mseide-msegui/lib/common/db/msedbf.pas
-relpaths=14
+ /home/fred/mseide-msegui/lib/common/graphics/msedrawtext.pas
+relpaths=15
  sourceform.pas
  actionsmodule.pas
  main.pas
@@ -806,8 +815,10 @@ relpaths=14
  main.pas
  findmessage.pas
  lib/common/db/mmysqlconn.pas
- ../lib/common/db/msedbf.pas
-ismoduletexts=14
+ lib/common/db/msedbf.pas
+ ../lib/common/graphics/msedrawtext.pas
+ismoduletexts=15
+ 0
  0
  0
  0
@@ -851,7 +862,7 @@ tabsize=60
 firsttab=0
 index=0
 [layout]
-windowlayout=595
+windowlayout=592
  [mainfo.openform]
  filenames=0
  filecolwidth=0
@@ -863,7 +874,7 @@ windowlayout=595
  filefilterindex=0
  filefilter=
  [mainfo.projectfiledia]
- filecolwidth=174
+ filecolwidth=0
  x=0
  y=0
  cx=0
@@ -884,7 +895,7 @@ windowlayout=595
  [mainfo]
  splitdir=0
  useroptions=301990011
- stackedunder=targetconsolefo
+ stackedunder=
  parent=
  mdistate=0
  nx=0
@@ -983,11 +994,8 @@ windowlayout=595
  active=0
  visible=0
  [findmessagefo.findtext]
- value=mysqldyn
- history=3
-  mysqldyn
-  issue
-  linux
+ value=
+ history=0
  [findmessagefo.casesensitive]
  value=0
  [findmessagefo.copytoclip]
@@ -1011,7 +1019,7 @@ windowlayout=595
  [projecttreefo]
  splitdir=0
  useroptions=268484715
- stackedunder=componentpalettefo
+ stackedunder=componentstorefo
  parent=
  mdistate=3
  nx=0
@@ -1116,7 +1124,7 @@ windowlayout=595
  [objectinspectorfo]
  splitdir=0
  useroptions=268451947
- stackedunder=breakpointsfo
+ stackedunder=findinfilefo
  parent=
  mdistate=3
  nx=0
@@ -1141,7 +1149,7 @@ windowlayout=595
  [symbolfo]
  splitdir=0
  useroptions=268451963
- stackedunder=findinfilefo
+ stackedunder=objectinspectorfo
  parent=
  mdistate=0
  nx=0
@@ -1300,7 +1308,7 @@ windowlayout=595
  [componentpalettefo]
  splitdir=0
  useroptions=268460139
- stackedunder=componentstorefo
+ stackedunder=breakpointsfo
  parent=
  mdistate=0
  nx=0
@@ -1331,7 +1339,7 @@ windowlayout=595
  x=0
  y=0
  cx=1221
- cy=49
+ cy=48
  rcx=0
  rcy=0
  [sourcefo]
@@ -1347,7 +1355,7 @@ windowlayout=595
  x=0
  y=0
  cx=1221
- cy=392
+ cy=393
  rcx=0
  rcy=0
  [actionsmo.watchesonact]
@@ -1358,9 +1366,9 @@ windowlayout=595
  irqoff=0
  splitdir=0
  useroptions=268451947
- stackedunder=objectinspectorfo
+ stackedunder=componentpalettefo
  parent=
- mdistate=0
+ mdistate=3
  nx=0
  ny=0
  ncx=0
@@ -1385,9 +1393,9 @@ windowlayout=595
  ncx=0
  ncy=0
  x=0
- y=52
+ y=51
  cx=1221
- cy=392
+ cy=393
  rcx=0
  rcy=0
  [_mse_mainfo_mse_]
@@ -1412,7 +1420,7 @@ windowlayout=595
  [_mse_messagefo_mse_]
  splitdir=0
  useroptions=268451963
- stackedunder=_mse_findmessagefo_mse_
+ stackedunder=mainfo
  parent=
  mdistate=3
  nx=0
@@ -1431,7 +1439,7 @@ windowlayout=595
  [_mse_findmessagefo_mse_]
  splitdir=0
  useroptions=268451963
- stackedunder=mainfo
+ stackedunder=_mse_messagefo_mse_
  parent=
  mdistate=3
  nx=0
