@@ -2722,7 +2722,10 @@ begin
     dsbrowse: glyph:= stg_dbindbrowse;
     dsedit: glyph:= stg_dbindedit;
     dsinsert: glyph:= stg_dbindinsert;
-    else glyph:= stockglyphty(stg_none);
+    else
+    {$warnings off}
+     glyph:= stockglyphty(-1);
+    {$warnings on}
    end;
    if ord(glyph) >= 0 then begin
     stockobjects.glyphs.paint(canvas,ord(glyph),innerrect,
