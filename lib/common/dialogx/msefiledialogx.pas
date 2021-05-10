@@ -2010,7 +2010,7 @@ end;
 procedure tfiledialogfo.oncellev(const Sender: TObject; var info: celleventinfoty);
 var
   cellpos, cellpos2: gridcoordty;
-  x, y: integer;
+   y: integer;
   str1: string;
 begin
 
@@ -2236,10 +2236,8 @@ end;
 
 procedure tfiledialogfo.oncellevplaces(const Sender: TObject; var info: celleventinfoty);
 var
-  cellpos, cellpos2: gridcoordty;
-  x, y: integer;
-  str1: string;
-begin
+  cellpos: gridcoordty;
+ begin
 
   if (info.eventkind = cek_buttonrelease) or (info.eventkind = cek_keyup) then
   begin
@@ -2430,7 +2428,7 @@ procedure tfiledialogfo.ondrawcellplacescust(const Sender: tcol; const Canvas: t
 var
   aicon: integer;
   apoint: pointty;
-  astr: msestring;
+  
 begin
   if bnoicon.Value = False then
     if cellinfo.cell.row < placescust.rowcount - 1 then

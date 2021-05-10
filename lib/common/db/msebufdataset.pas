@@ -52,7 +52,7 @@ const
  dsbuffieldkinds = [fkcalculated,fklookup];
  bufferfieldkinds = [fkdata];
  
- dscheckfilter = ord(high(tdatasetstate)) + 1; 
+// dscheckfilter = ord(high(tdatasetstate)) + 1; 
  
 const
  bufstreambuffersize = 4096; 
@@ -3197,7 +3197,7 @@ begin
   ord(dscalcfields): begin
    buffer:= @pdsrecordty(fcalcbuffer1)^.header;
   end;
-  dscheckfilter: begin
+  ord(dscheckfilter): begin
    buffer:= @fcheckfilterbuffer^.header;
   end;
   ord(dsfilter): begin
@@ -5783,7 +5783,7 @@ begin
   ord(deupdaterecord): begin
    dointernalcalcfields(false);
   end;
-  de_modified: begin
+  ord(de_modified): begin
    notifylookupclients();
   end;
  end;

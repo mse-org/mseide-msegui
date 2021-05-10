@@ -502,23 +502,26 @@ settingsstorage=0
 settingsprojecttree=0
 settingsautoload=0
 settingsautosave=0
-modulenames=5
+modulenames=6
  ACTIONSMO
  FINDMESSAGEFO
  MAINFO
  MESSAGEFO
+ FILEDIALOGFO
  SOURCEFO
-moduletypes=5
+moduletypes=6
  TACTIONSMO
  TFINDMESSAGEFO
  TMAINFO
  TMESSAGEFO
+ TFILEDIALOGFO
  TSOURCEFO
-modulefiles=5
+modulefiles=6
  /home/fred/mseide-msegui/apps/ide/actionsmodule.mfm
  /home/fred/mseide-msegui/apps/ide/findmessage.mfm
  /home/fred/mseide-msegui/apps/ide/main.mfm
  /home/fred/mseide-msegui/apps/ide/messageform.mfm
+ /home/fred/mseide-msegui/lib/common/dialogx/msefiledialogx.mfm
  /home/fred/mseide-msegui/apps/ide/sourceform.mfm
 befcommandon=0
 makeoptionson=7
@@ -862,7 +865,7 @@ findhistory=20
  tkmethod
  typeinfo
 findoptions=1
-editpos=15
+editpos=16
  52,2
  0,-1073741823
  0,-1073741823
@@ -878,6 +881,7 @@ editpos=15
  0,-1073741823
  0,-1073741823
  0,-1073741823
+ 17,2428
 bookmarks0=0
 bookmarks1=0
 bookmarks2=0
@@ -893,7 +897,8 @@ bookmarks11=0
 bookmarks12=0
 bookmarks13=0
 bookmarks14=0
-sourcefiles=15
+bookmarks15=0
+sourcefiles=16
  ${PROJECTDIR}/sourceform.pas
  ${PROJECTDIR}/actionsmodule.pas
  ${PROJECTDIR}/main.pas
@@ -909,7 +914,8 @@ sourcefiles=15
  /home/fred/mseide-msegui/lib/common/db/mmysqlconn.pas
  /home/fred/mseide-msegui/lib/common/db/msedbf.pas
  /home/fred/mseide-msegui/lib/common/graphics/msedrawtext.pas
-relpaths=15
+ /home/fred/mseide-msegui/lib/common/dialogx/msefiledialogx.pas
+relpaths=16
  sourceform.pas
  actionsmodule.pas
  main.pas
@@ -925,7 +931,8 @@ relpaths=15
  lib/common/db/mmysqlconn.pas
  lib/common/db/msedbf.pas
  lib/common/graphics/msedrawtext.pas
-ismoduletexts=15
+ ../lib/common/dialogx/msefiledialogx.pas
+ismoduletexts=16
  0
  0
  0
@@ -941,35 +948,57 @@ ismoduletexts=15
  0
  0
  0
-modules=5
+ 0
+modules=6
  /home/fred/mseide-msegui/apps/ide/main.mfm
  /home/fred/mseide-msegui/apps/ide/actionsmodule.mfm
  /home/fred/mseide-msegui/apps/ide/sourceform.mfm
  /home/fred/mseide-msegui/apps/ide/messageform.mfm
  /home/fred/mseide-msegui/apps/ide/findmessage.mfm
-moduleoptions=5
+ /home/fred/mseide-msegui/lib/common/dialogx/msefiledialogx.mfm
+moduleoptions=6
  0
  0
  0
  0
  0
-visiblemodules=5
+ 0
+visiblemodules=6
  -1
  -1
  -1
  -1
  -1
-nomenumodules=5
+ -1
+nomenumodules=6
+ 0
  0
  0
  0
  0
  0
 [sourcefo.files_tab]
+order=16
+ 0
+ 15
+ 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+ 10
+ 11
+ 12
+ 13
+ 14
 firsttab=0
-index=0
+index=1
 [layout]
-windowlayout=615
+windowlayout=651
  [mainfo.basedock]
  splitdir=2
  useroptions=268450944
@@ -1016,7 +1045,7 @@ windowlayout=615
  rcy=0
  wsize=0
  active=0
- visible=0
+ visible=1
  [threadsfo]
  splitdir=0
  useroptions=268451945
@@ -1084,7 +1113,7 @@ windowlayout=615
  [findinfilefo]
  splitdir=0
  useroptions=268451947
- stackedunder=
+ stackedunder=_mse_mainfo_mse_
  parent=
  mdistate=0
  nx=0
@@ -1100,7 +1129,7 @@ windowlayout=615
  [projecttreefo]
  splitdir=0
  useroptions=268484715
- stackedunder=_mse_mainfo_mse_
+ stackedunder=componentpalettefo
  parent=
  mdistate=3
  nx=0
@@ -1403,7 +1432,7 @@ windowlayout=615
  [componentpalettefo]
  splitdir=0
  useroptions=268460139
- stackedunder=
+ stackedunder=objectinspectorfo
  parent=
  mdistate=0
  nx=0
@@ -1446,11 +1475,11 @@ windowlayout=615
  nx=0
  ny=0
  ncx=1219
- ncy=60
+ ncy=56
  x=0
  y=0
  cx=1219
- cy=58
+ cy=56
  rcx=0
  rcy=0
  [debuggerfo.edit_options]
@@ -1460,7 +1489,7 @@ windowlayout=615
  [debuggerfo.edit_compiler]
  value=Pascal
  [debuggerfo.file_history]
- value=/home/fred/mseide-msegui/apps/ide/sourceform.pas
+ value=/home/fred/mseide-msegui/lib/common/dialogx/msefiledialogx.pas
  history=3
   /home/fred/mseide-msegui/apps/ide/sourceform.pas
   /home/fred/demo_mse/mse_fb3_new/main.pas
@@ -1486,8 +1515,25 @@ windowlayout=615
  rcx=0
  rcy=0
  [sourcefo.files_tab]
+ order=16
+  0
+  15
+  1
+  2
+  3
+  4
+  5
+  6
+  7
+  8
+  9
+  10
+  11
+  12
+  13
+  14
  firsttab=0
- index=0
+ index=1
  [confideufo.fontname]
  value=stf_default
  [confideufo.usedefaulteditoroptions]
@@ -1569,7 +1615,7 @@ windowlayout=615
  [_mse_findmessagefo_mse_]
  splitdir=0
  useroptions=268451963
- stackedunder=mainfo
+ stackedunder=_mse_filedialogfo_mse_
  parent=
  mdistate=3
  nx=0
@@ -1580,6 +1626,25 @@ windowlayout=615
  y=298
  cx=362
  cy=111
+ rcx=0
+ rcy=0
+ wsize=0
+ active=0
+ visible=1
+ [_mse_filedialogfo_mse_]
+ splitdir=0
+ useroptions=268451963
+ stackedunder=targetconsolefo
+ parent=
+ mdistate=3
+ nx=0
+ ny=0
+ ncx=0
+ ncy=0
+ x=323
+ y=164
+ cx=618
+ cy=484
  rcx=0
  rcy=0
  wsize=0

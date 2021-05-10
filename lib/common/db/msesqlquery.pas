@@ -471,12 +471,12 @@ begin
       insert;
      end;
     end;
-    de_afterdelete: begin
+    ord(de_afterdelete): begin
      if (mdlo_syncdelete in foptionsmasterlink) then begin
       delete;
      end;
     end;
-    de_afterpost: begin
+    ord(de_afterpost): begin
      if (mdlo_delayeddetailpost in foptionsmasterlink) then begin
       if (mdlo_inserttoupdate in foptionsmasterlink) and
              (state = dsinsert) then begin

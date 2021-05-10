@@ -1161,7 +1161,7 @@ begin
        end;
       end;
      end;
-     de_afterdelete: begin
+     ord(de_afterdelete): begin
       if b1 and (fplo_syncmasterdelete in foptions) and 
                                    not destdataset.isempty then begin
        destdataset.delete();
@@ -1170,7 +1170,7 @@ begin
        fonmasterdelete(destdataset,dataset);
       end;
      end;
-     de_afterpost: begin
+     ord(de_afterpost): begin
       if b1 and (fplo_delayedsyncmasterpost in foptions) and
                            (destdataset.state in [dsinsert,dsedit]) then begin
        destdataset.post();
@@ -1179,7 +1179,7 @@ begin
        fonmasterpost(destdataset,dataset);
       end;
      end;
-     de_afterapplyupdate: begin
+     ord(de_afterapplyupdate): begin
       if b1 and (fplo_syncmasterapplyupdates in foptions) then begin
        destdataset.applyupdates();
       end;
@@ -1327,7 +1327,7 @@ begin
       end;
      end;
     end;
-    de_afterdelete: begin
+    ord(de_afterdelete): begin
      if b1 then begin
       if (fplo_syncslavedelete in foptions) and
                                       not sourceds.isempty then begin
@@ -1341,7 +1341,7 @@ begin
       fonslavedelete(destdataset,dataset);
      end;
     end;
-    de_afterpost: begin
+    ord(de_afterpost): begin
      if b1 and (fplo_delayedsyncslavepost in foptions) and 
                            (sourceds.state in [dsinsert,dsedit]) then begin
       sourceds.checkbrowsemode();
