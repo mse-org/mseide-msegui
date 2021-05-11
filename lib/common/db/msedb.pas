@@ -1214,7 +1214,7 @@ type
                      ft_word,ft_autoinc,ft_float,ft_currency,ft_boolean,
                      ft_datetime,ft_date,ft_time,
                      ft_binary,ft_bytes,ft_varbytes,
-                     ft_bcd,ft_blob,ft_memo,ft_graphic,ft_variant);
+                     ft_bcd,ft_blob,ft_memo,ft_graphic,ft_variant,ft_nil);
  fieldclasstypearty = array of fieldclasstypety; 
         
  tmsedatasource = class(tdatasource)
@@ -1719,7 +1719,7 @@ const
            tdatetimefield,tdatefield,ttimefield,
            tbinaryfield,tbytesfield,tvarbytesfield,
            tbcdfield,tblobfield,tmemofield,tgraphicfield,
-           tvariantfield);
+           tvariantfield,nil);
 
  tfieldtypetotypety: array[tfieldtype] of fieldclasstypety = (
     //ftUnknown, ftString, ftSmallint, ftInteger, ftWord,
@@ -1877,8 +1877,8 @@ var
            tmsebinaryfield,tmsebytesfield,tmsevarbytesfield,
          //   ft_bcd,     ft_blob,      ft_memo,       ft_graphic,
            tmsebcdfield,tmseblobfield,tmsememofield,nil{tmsegraphicfield},
-         //   ft_variant
-           tmsevariantfield);
+         //   ft_variant    //ft_nil
+           tmsevariantfield,nil);
            
 type 
  tdataset1 = class(tdataset);
@@ -2798,18 +2798,20 @@ function fieldclasstoclasstyp(const fieldclass: fieldclassty): fieldclasstypety;
 var
  type1: fieldclasstypety;
 begin
-  {$warnings off}
- result:= fieldclasstypety(-1);
-  {$warnings on}
+// result:= fieldclasstypety(-1);
+ result:= fieldclasstypety(ft_nil);
   
- for type1:= low(fieldclasstypety) to high(fieldclasstypety) do begin
+// for type1:= low(fieldclasstypety) to high(fieldclasstypety) do begin
+   for type1:= low(fieldclasstypety) to high(fieldclasstypety) do begin
   if fieldclass = fieldtypeclasses[type1]  then begin
    result:= type1;
    break;
   end;
  end;
- if ord(result) = -1 then begin
+ // if ord(result) = -1 then begin
+ if result = ft_nil then begin
   result:= ft_unknown;
+//  for type1:= low(fieldclasstypety) to high(fieldclasstypety) do begin
   for type1:= low(fieldclasstypety) to high(fieldclasstypety) do begin
    if fieldclass = msefieldtypeclasses[type1]  then begin
     result:= type1;

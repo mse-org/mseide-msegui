@@ -2723,11 +2723,13 @@ begin
     dsedit: glyph:= stg_dbindedit;
     dsinsert: glyph:= stg_dbindinsert;
     else
-    {$warnings off}
-     glyph:= stockglyphty(-1);
-    {$warnings on}
+    //{$warnings off}
+    // glyph:= stockglyphty(-1);
+     glyph:= stockglyphty(stg_nil);
+    // {$warnings on}
    end;
-   if ord(glyph) >= 0 then begin
+  // if ord(glyph) >= 0 then begin
+   if ord(glyph) < ord(stg_nil) then begin
     stockobjects.glyphs.paint(canvas,ord(glyph),innerrect,
            [al_xcentered,al_ycentered],acolor);
    end;

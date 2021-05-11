@@ -87,7 +87,7 @@ type
  //    80          81                82
   stg_doublesquare,stg_dbfilterclear,stg_checkboxparentnotchecked,
  //    83
-  stg_checkboxchildnotchecked
+  stg_checkboxchildnotchecked, stg_nil
                  );
 
 const

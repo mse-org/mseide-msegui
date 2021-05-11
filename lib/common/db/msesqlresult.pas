@@ -541,7 +541,7 @@ const
 //         ft_binary,ft_bytes,     ft_varbytes,
            tdbcol,   tstringdbcol, tstringdbcol,
 //         ft_bcd,        ft_blob,   ft_memo,   ft_graphic, ft_variant);
-           tcurrencydbcol,tblobdbcol,tmemodbcol,tblobdbcol,tvariantdbcol);
+           tcurrencydbcol,tblobdbcol,tmemodbcol,tblobdbcol,tvariantdbcol,nil);
  SBoolean = 'Boolean';
  SDateTime = 'TDateTime';
  SFloat = 'Float';
