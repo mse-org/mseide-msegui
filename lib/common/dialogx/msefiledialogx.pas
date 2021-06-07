@@ -2994,8 +2994,8 @@ begin
       Result := fcaptionopen;
     fdk_dir:
       Result := fcaptiondir;
-    fdk_none:
-      Result := '';
+  //  fdk_none:
+  //    Result := '';
     else
       Result := fcaptionopen;
   end;
