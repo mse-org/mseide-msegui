@@ -6308,7 +6308,7 @@ var
  bo1,bo2: boolean;
  state1: tdatasetstate;
 begin
- checksumfield(afield,[ftfloat,ftcurrency]);
+ checksumfield(afield,[ftinteger,ftsmallint,ftword,ftlargeint,ftfloat,ftcurrency]);
  index1:= afield.fieldno - 1;
  asum:= 0;
  bo1:= filtered and assigned(onfilterrecord);
@@ -6316,23 +6316,71 @@ begin
  try
   int2:= ffieldinfos[index1].base.offset;
   po2:= pointer(findexes[0]);
-  if bo1 then begin
-   for int1:= 0 to fbrecordcount - 1 do begin
-    fcheckfilterbuffer:= pdsrecordty(pchar(ppointeraty(po2)^[int1])-
-                                                           sizeof(dsheaderty));
-    bo2:= true;
-    onfilterrecord(self,bo2);
-    if bo2 and getfieldflag(@fcheckfilterbuffer^.header.fielddata.nullmask,
-                                                             index1) then begin
-     asum:= asum + pdouble(pchar(@fcheckfilterbuffer^.header)+int2)^;
+  case ffieldinfos[afield.fieldno-1].base.fieldtype of
+   ftinteger,ftsmallint,ftword: begin
+    if bo1 then begin
+     for int1:= 0 to fbrecordcount - 1 do begin
+      fcheckfilterbuffer:= pdsrecordty(pchar(ppointeraty(po2)[int1])-
+                                                          sizeof(dsheaderty));
+      bo2:= true;
+      onfilterrecord(self,bo2);
+      if bo2 and getfieldflag(
+              @fcheckfilterbuffer^.header.fielddata.nullmask,index1) then begin
+       asum:= asum + pinteger(pchar(@fcheckfilterbuffer^.header)+int2)^;
+      end;
+     end;
+    end
+    else begin
+     for int1:= 0 to fbrecordcount - 1 do begin
+      po1:= ppointeraty(po2)^[int1];
+      if getfieldflag(@po1^.fielddata.nullmask,index1) then begin
+       asum:= asum + pinteger(pchar(po1)+int2)^;
+      end;
+     end;
     end;
    end;
-  end
-  else begin
-   for int1:= 0 to fbrecordcount - 1 do begin
-    po1:= ppointeraty(po2)^[int1];
-    if getfieldflag(@po1^.fielddata.nullmask,index1) then begin
-     asum:= asum + pdouble(pchar(po1)+int2)^;
+   ftlargeint: begin
+    if bo1 then begin
+     for int1:= 0 to fbrecordcount - 1 do begin
+      fcheckfilterbuffer:= pdsrecordty(pchar(ppointeraty(po2)^[int1])-
+                                                           sizeof(dsheaderty));
+      bo2:= true;
+      onfilterrecord(self,bo2);
+      if bo2 and getfieldflag(
+            @fcheckfilterbuffer^.header.fielddata.nullmask,index1) then begin
+       asum:= asum + pint64(pchar(@fcheckfilterbuffer^.header)+int2)^;
+      end;
+     end;
+    end
+    else begin
+     for int1:= 0 to fbrecordcount - 1 do begin
+      po1:= ppointeraty(po2)^[int1];
+      if getfieldflag(@po1^.fielddata.nullmask,index1) then begin
+       asum:= asum + pint64(pchar(po1)+int2)^;
+      end;
+     end;
+    end;
+   end;  
+   ftfloat,ftcurrency: begin
+    if bo1 then begin
+     for int1:= 0 to fbrecordcount - 1 do begin
+      fcheckfilterbuffer:= pdsrecordty(
+                           pchar(ppointeraty(po2)^[int1])-sizeof(dsheaderty));
+      bo2:= true;
+      onfilterrecord(self,bo2);
+      if bo2 and getfieldflag(
+            @fcheckfilterbuffer^.header.fielddata.nullmask,index1) then begin
+       asum:= asum + pdouble(pchar(@fcheckfilterbuffer^.header)+int2)^;
+      end;
+     end;
+    end
+    else begin
+     for int1:= 0 to fbrecordcount - 1 do begin
+      po1:= ppointeraty(po2)^[int1];
+      if getfieldflag(@po1^.fielddata.nullmask,index1) then begin
+       asum:= asum + pdouble(pchar(po1)+int2)^;
+      end;
+     end;
     end;
    end;
   end;
@@ -6350,7 +6398,7 @@ var
  bo1,bo2: boolean;
  state1: tdatasetstate;
 begin
- checksumfield(afield,[ftbcd,ftfloat]);
+ checksumfield(afield,[ftinteger,ftsmallint,ftword,ftlargeint,ftbcd,ftcurrency,ftfloat]);
  index1:= afield.fieldno - 1;
  asum:= 0;
  bo1:= filtered and assigned(onfilterrecord);
@@ -6359,7 +6407,51 @@ begin
   int2:= ffieldinfos[index1].base.offset;
   po2:= pointer(findexes[0]);
   case ffieldinfos[afield.fieldno-1].base.fieldtype of
-   ftbcd: begin
+   ftinteger,ftsmallint,ftword: begin
+    if bo1 then begin
+     for int1:= 0 to fbrecordcount - 1 do begin
+      fcheckfilterbuffer:= pdsrecordty(pchar(ppointeraty(po2)[int1])-
+                                                          sizeof(dsheaderty));
+      bo2:= true;
+      onfilterrecord(self,bo2);
+      if bo2 and getfieldflag(
+              @fcheckfilterbuffer^.header.fielddata.nullmask,index1) then begin
+       asum:= asum + pinteger(pchar(@fcheckfilterbuffer^.header)+int2)^;
+      end;
+     end;
+    end
+    else begin
+     for int1:= 0 to fbrecordcount - 1 do begin
+      po1:= ppointeraty(po2)^[int1];
+      if getfieldflag(@po1^.fielddata.nullmask,index1) then begin
+       asum:= asum + pinteger(pchar(po1)+int2)^;
+      end;
+     end;
+    end;
+   end;
+   ftlargeint: begin
+    if bo1 then begin
+     for int1:= 0 to fbrecordcount - 1 do begin
+      fcheckfilterbuffer:= pdsrecordty(pchar(ppointeraty(po2)^[int1])-
+                                                           sizeof(dsheaderty));
+      bo2:= true;
+      onfilterrecord(self,bo2);
+      if bo2 and getfieldflag(
+            @fcheckfilterbuffer^.header.fielddata.nullmask,index1) then begin
+       asum:= asum + pint64(pchar(@fcheckfilterbuffer^.header)+int2)^;
+      end;
+     end;
+    end
+    else begin
+     for int1:= 0 to fbrecordcount - 1 do begin
+      po1:= ppointeraty(po2)^[int1];
+      if getfieldflag(@po1^.fielddata.nullmask,index1) then begin
+       asum:= asum + pint64(pchar(po1)+int2)^;
+      end;
+     end;
+    end;
+   end;  
+   ftcurrency,ftbcd: begin
     if bo1 then begin
      for int1:= 0 to fbrecordcount - 1 do begin
       fcheckfilterbuffer:= pdsrecordty(pchar(ppointeraty(po2)[int1])-
