@@ -1,8 +1,8 @@
 object settingsfo: tsettingsfo
   optionswidget = [ow_arrowfocus, ow_subfocus, ow_mousewheel, ow_destroywidgets, ow_hinton]
   visible = False
-  bounds_x = 100
-  bounds_y = 106
+  bounds_x = 323
+  bounds_y = 143
   bounds_cx = 348
   bounds_cy = 570
   container.frame.localprops = []
@@ -24,9 +24,9 @@ object settingsfo: tsettingsfo
     color = -2147483645
     taborder = 2
     bounds_x = 0
-    bounds_y = 520
+    bounds_y = 519
     bounds_cx = 348
-    bounds_cy = 38
+    bounds_cy = 39
     anchors = [an_bottom]
     optionsscale = [osc_expandy, osc_shrinky]
     linktop = macrogrid
@@ -34,16 +34,16 @@ object settingsfo: tsettingsfo
     object tbutton2: tbutton
       optionswidget1 = [ow1_fontglyphheight, ow1_autoscale, ow1_autowidth]
       taborder = 2
-      bounds_x = 283
+      bounds_x = 285
       bounds_y = 16
-      bounds_cx = 52
-      bounds_cy = 22
+      bounds_cx = 50
+      bounds_cy = 23
       bounds_cxmin = 50
       anchors = [an_top, an_right]
       state = [as_localcaption]
       caption = '&Cancel'
       modalresult = mr_cancel
-      reffontheight = 14
+      reffontheight = 15
     end
     object tbutton1: tbutton
       optionswidget1 = [ow1_fontglyphheight, ow1_autoscale, ow1_autowidth]
@@ -51,31 +51,31 @@ object settingsfo: tsettingsfo
       bounds_x = 225
       bounds_y = 16
       bounds_cx = 50
-      bounds_cy = 22
+      bounds_cy = 23
       bounds_cxmin = 50
       anchors = [an_top, an_right]
       state = [as_default, as_localdefault, as_localcaption]
       caption = '&OK'
       modalresult = mr_ok
-      reffontheight = 14
+      reffontheight = 15
     end
     object shortcutbu: tbutton
       optionswidget1 = [ow1_fontglyphheight, ow1_autoscale, ow1_autowidth]
       bounds_x = 9
       bounds_y = 16
       bounds_cx = 78
-      bounds_cy = 22
+      bounds_cy = 23
       bounds_cxmin = 78
       state = [as_localcaption, as_localonexecute]
       caption = '&Shortcuts'
       onexecute = editshortcuts
-      reffontheight = 14
+      reffontheight = 15
     end
     object tspacer2: tspacer
       taborder = 3
       bounds_x = 275
       bounds_y = 16
-      bounds_cx = 8
+      bounds_cx = 10
       bounds_cy = 20
       linkleft = tbutton1
       linkright = tbutton2
@@ -86,7 +86,7 @@ object settingsfo: tsettingsfo
     bounds_x = 0
     bounds_y = 0
     bounds_cx = 348
-    bounds_cy = 407
+    bounds_cy = 429
     anchors = [an_left, an_top, an_right]
     optionsscale = [osc_expandy, osc_shrinky, osc_expandshrinkx, osc_expandshrinky]
     optionslayout = [lao_placey]
@@ -94,9 +94,9 @@ object settingsfo: tsettingsfo
     object tspacer1: tlayouter
       taborder = 9
       bounds_x = 8
-      bounds_y = 333
+      bounds_y = 351
       bounds_cx = 330
-      bounds_cy = 37
+      bounds_cy = 39
       anchors = [an_left, an_top, an_right]
       optionsscale = [osc_expandy, osc_shrinky, osc_expandshrinkx, osc_expandshrinky]
       optionslayout = [lao_placex, lao_aligny]
@@ -111,7 +111,7 @@ object settingsfo: tsettingsfo
         frame.localprops1 = []
         frame.outerframe = (
           0
-          17
+          18
           0
           0
         )
@@ -119,10 +119,10 @@ object settingsfo: tsettingsfo
         bounds_x = 178
         bounds_y = 0
         bounds_cx = 152
-        bounds_cy = 37
+        bounds_cy = 39
         anchors = [an_left, an_top, an_right]
         onsetvalue = setvalue
-        reffontheight = 14
+        reffontheight = 15
       end
       object target: tstringedit
         Tag = 10
@@ -131,7 +131,7 @@ object settingsfo: tsettingsfo
         frame.localprops1 = []
         frame.outerframe = (
           0
-          17
+          18
           0
           0
         )
@@ -139,9 +139,9 @@ object settingsfo: tsettingsfo
         bounds_x = 82
         bounds_y = 0
         bounds_cx = 92
-        bounds_cy = 37
+        bounds_cy = 39
         onsetvalue = setvalue
-        reffontheight = 14
+        reffontheight = 15
       end
       object exeext: tstringedit
         Tag = 9
@@ -150,16 +150,16 @@ object settingsfo: tsettingsfo
         frame.localprops1 = []
         frame.outerframe = (
           0
-          17
+          18
           0
           0
         )
         bounds_x = 0
         bounds_y = 0
         bounds_cx = 78
-        bounds_cy = 37
+        bounds_cy = 39
         onsetvalue = setvalue
-        reffontheight = 14
+        reffontheight = 15
       end
     end
     object printcomm: tstringedit
@@ -168,102 +168,132 @@ object settingsfo: tsettingsfo
       frame.localprops1 = []
       frame.outerframe = (
         0
-        17
+        18
         0
         0
       )
       taborder = 10
       bounds_x = 8
-      bounds_y = 370
+      bounds_y = 390
       bounds_cx = 330
-      bounds_cy = 37
+      bounds_cy = 39
       anchors = [an_left, an_top, an_right]
       onsetvalue = setprintcomm
-      reffontheight = 14
+      reffontheight = 15
     end
-    object debugger: tfilenameedit
+    object debugger: tfilenameeditx
       Tag = 8
       frame.caption = '${DEBUGGER}'
       frame.localprops = []
       frame.localprops1 = []
       frame.buttons.count = 1
-      frame.buttons.items = <
+      frame.buttons.items = <      
         item
           imagenr = 17
         end>
       frame.button.imagenr = 17
       frame.outerframe = (
         0
-        17
+        18
         0
         0
       )
       taborder = 8
       hint = 'Path to debugger (gdb).'
       bounds_x = 8
-      bounds_y = 296
+      bounds_y = 312
       bounds_cx = 330
-      bounds_cy = 37
+      bounds_cy = 39
       anchors = [an_left, an_top, an_right]
       onsetvalue = setvalue
+      controller.fontheight = 0
+      controller.fontname = 'stf_default'
+      controller.fontcolor = -1610612734
+      controller.backcolor = -2147483647
+      controller.nopanel = False
+      controller.compact = False
+      controller.showoptions = False
+      controller.hidehistory = False
+      controller.hideicons = False
+      controller.showhidden = False
       controller.captionopen = 'Debugger path'
       controller.ongetfilename = epandfilenamemacro
-      reffontheight = 14
+      reffontheight = 15
     end
-    object compiler: tfilenameedit
+    object compiler: tfilenameeditx
       Tag = 7
       frame.caption = '${COMPILER}'
       frame.localprops = []
       frame.localprops1 = []
       frame.buttons.count = 1
-      frame.buttons.items = <
+      frame.buttons.items = <      
         item
           imagenr = 17
         end>
       frame.button.imagenr = 17
       frame.outerframe = (
         0
-        17
+        18
         0
         0
       )
       taborder = 7
       hint = 'Path to compiler (ppc386).'
       bounds_x = 8
-      bounds_y = 259
+      bounds_y = 273
       bounds_cx = 330
-      bounds_cy = 37
+      bounds_cy = 39
       anchors = [an_left, an_top, an_right]
       onsetvalue = setvalue
+      controller.fontheight = 0
+      controller.fontname = 'stf_default'
+      controller.fontcolor = -1610612734
+      controller.backcolor = -2147483647
+      controller.nopanel = False
+      controller.compact = False
+      controller.showoptions = False
+      controller.hidehistory = False
+      controller.hideicons = False
+      controller.showhidden = False
       controller.captionopen = 'Compiler path'
       controller.ongetfilename = epandfilenamemacro
-      reffontheight = 14
+      reffontheight = 15
     end
-    object compstoredir: tfilenameedit
+    object compstoredir: tfilenameeditx
       Tag = 6
       frame.caption = '${COMPSTOREDIR}'
       frame.localprops = []
       frame.localprops1 = []
       frame.buttons.count = 1
-      frame.buttons.items = <
+      frame.buttons.items = <      
         item
           imagenr = 17
         end>
       frame.button.imagenr = 17
       frame.outerframe = (
         0
-        17
+        18
         0
         0
       )
       taborder = 6
       hint = 'Directory for component store files.'
       bounds_x = 8
-      bounds_y = 222
+      bounds_y = 234
       bounds_cx = 330
-      bounds_cy = 37
+      bounds_cy = 39
       anchors = [an_left, an_top, an_right]
       onsetvalue = setvalue
+      controller.fontheight = 0
+      controller.fontname = 'stf_default'
+      controller.fontcolor = -1610612734
+      controller.backcolor = -2147483647
+      controller.nopanel = False
+      controller.compact = False
+      controller.showoptions = False
+      controller.hidehistory = False
+      controller.hideicons = False
+      controller.showhidden = False
       controller.filterlist.data = (
         (
           'Project files'
@@ -273,33 +303,43 @@ object settingsfo: tsettingsfo
       controller.options = [fdo_directory]
       controller.captionopen = 'Directory for component stores'
       controller.ongetfilename = epandfilenamemacro
-      reffontheight = 14
+      reffontheight = 15
     end
-    object templatedir: tfilenameedit
+    object templatedir: tfilenameeditx
       Tag = 5
       frame.caption = '${TEMPLATEDIR}'
       frame.localprops = []
       frame.localprops1 = []
       frame.buttons.count = 1
-      frame.buttons.items = <
+      frame.buttons.items = <      
         item
           imagenr = 17
         end>
       frame.button.imagenr = 17
       frame.outerframe = (
         0
-        17
+        18
         0
         0
       )
       taborder = 5
       hint = 'Directory for project template files.'
       bounds_x = 8
-      bounds_y = 185
+      bounds_y = 195
       bounds_cx = 330
-      bounds_cy = 37
+      bounds_cy = 39
       anchors = [an_left, an_top, an_right]
       onsetvalue = setvalue
+      controller.fontheight = 0
+      controller.fontname = 'stf_default'
+      controller.fontcolor = -1610612734
+      controller.backcolor = -2147483647
+      controller.nopanel = False
+      controller.compact = False
+      controller.showoptions = False
+      controller.hidehistory = False
+      controller.hideicons = False
+      controller.showhidden = False
       controller.filterlist.data = (
         (
           'Project files'
@@ -309,33 +349,43 @@ object settingsfo: tsettingsfo
       controller.options = [fdo_directory]
       controller.captionopen = 'Project template directory'
       controller.ongetfilename = epandfilenamemacro
-      reffontheight = 14
+      reffontheight = 15
     end
-    object syntaxdefdir: tfilenameedit
+    object syntaxdefdir: tfilenameeditx
       Tag = 4
       frame.caption = '${SYNTAXDEFDIR}'
       frame.localprops = []
       frame.localprops1 = []
       frame.buttons.count = 1
-      frame.buttons.items = <
+      frame.buttons.items = <      
         item
           imagenr = 17
         end>
       frame.button.imagenr = 17
       frame.outerframe = (
         0
-        17
+        18
         0
         0
       )
       taborder = 4
       hint = 'Directory for syntax definition files.'
       bounds_x = 8
-      bounds_y = 148
+      bounds_y = 156
       bounds_cx = 330
-      bounds_cy = 37
+      bounds_cy = 39
       anchors = [an_left, an_top, an_right]
       onsetvalue = setvalue
+      controller.fontheight = 0
+      controller.fontname = 'stf_default'
+      controller.fontcolor = -1610612734
+      controller.backcolor = -2147483647
+      controller.nopanel = False
+      controller.compact = False
+      controller.showoptions = False
+      controller.hidehistory = False
+      controller.hideicons = False
+      controller.showhidden = False
       controller.filterlist.data = (
         (
           'Syntax definitions'
@@ -345,109 +395,139 @@ object settingsfo: tsettingsfo
       controller.options = [fdo_directory]
       controller.captionopen = 'Directory for syntax definition files'
       controller.ongetfilename = epandfilenamemacro
-      reffontheight = 14
+      reffontheight = 15
     end
-    object mselibdir: tfilenameedit
+    object mselibdir: tfilenameeditx
       Tag = 3
       frame.caption = '${MSELIBDIR}'
       frame.localprops = []
       frame.localprops1 = []
       frame.buttons.count = 1
-      frame.buttons.items = <
+      frame.buttons.items = <      
         item
           imagenr = 17
         end>
       frame.button.imagenr = 17
       frame.outerframe = (
         0
-        17
+        18
         0
         0
       )
       taborder = 3
       hint = 'Root directory of MSEgui library.'
       bounds_x = 8
-      bounds_y = 111
+      bounds_y = 117
       bounds_cx = 330
-      bounds_cy = 37
+      bounds_cy = 39
       anchors = [an_left, an_top, an_right]
       onsetvalue = setvalue
+      controller.fontheight = 0
+      controller.fontname = 'stf_default'
+      controller.fontcolor = -1610612734
+      controller.backcolor = -2147483647
+      controller.nopanel = False
+      controller.compact = False
+      controller.showoptions = False
+      controller.hidehistory = False
+      controller.hideicons = False
+      controller.showhidden = False
       controller.options = [fdo_directory]
       controller.captionopen = 'MSEgui library directory'
       controller.ongetfilename = epandfilenamemacro
-      reffontheight = 14
+      reffontheight = 15
     end
-    object msedir: tfilenameedit
+    object msedir: tfilenameeditx
       Tag = 2
       frame.caption = '${MSEDIR}'
       frame.localprops = []
       frame.localprops1 = []
       frame.buttons.count = 1
-      frame.buttons.items = <
+      frame.buttons.items = <      
         item
           imagenr = 17
         end>
       frame.button.imagenr = 17
       frame.outerframe = (
         0
-        17
+        18
         0
         0
       )
       taborder = 2
       hint = 'Root directory of MSEgui.'
       bounds_x = 8
-      bounds_y = 74
+      bounds_y = 78
       bounds_cx = 330
-      bounds_cy = 37
+      bounds_cy = 39
       anchors = [an_left, an_top, an_right]
       onsetvalue = setvalue
+      controller.fontheight = 0
+      controller.fontname = 'stf_default'
+      controller.fontcolor = -1610612734
+      controller.backcolor = -2147483647
+      controller.nopanel = False
+      controller.compact = False
+      controller.showoptions = False
+      controller.hidehistory = False
+      controller.hideicons = False
+      controller.showhidden = False
       controller.options = [fdo_directory]
       controller.captionopen = 'MSEgui root directory'
       controller.ongetfilename = epandfilenamemacro
-      reffontheight = 14
+      reffontheight = 15
     end
-    object fpclibdir: tfilenameedit
+    object fpclibdir: tfilenameeditx
       Tag = 1
       frame.caption = '${FPCLIBDIR}'
       frame.localprops = []
       frame.localprops1 = []
       frame.buttons.count = 1
-      frame.buttons.items = <
+      frame.buttons.items = <      
         item
           imagenr = 17
         end>
       frame.button.imagenr = 17
       frame.outerframe = (
         0
-        17
+        18
         0
         0
       )
       taborder = 1
       hint = 'Root directory of FPC library (not used by the default project templates).'
       bounds_x = 8
-      bounds_y = 37
+      bounds_y = 39
       bounds_cx = 330
-      bounds_cy = 37
+      bounds_cy = 39
       anchors = [an_left, an_top, an_right]
+      controller.fontheight = 0
+      controller.fontname = 'stf_default'
+      controller.fontcolor = -1610612734
+      controller.backcolor = -2147483647
+      controller.nopanel = False
+      controller.compact = False
+      controller.showoptions = False
+      controller.hidehistory = False
+      controller.hideicons = False
+      controller.showhidden = False
       controller.options = [fdo_directory]
       controller.captionopen = 'FPC library directory'
-      reffontheight = 14
+      reffontheight = 15
     end
-    object fpcdir: tfilenameedit
+    object fpcdir: tfilenameeditx
       frame.caption = '${FPCDIR}'
       frame.localprops = []
       frame.localprops1 = []
       frame.buttons.count = 1
-      frame.buttons.items = <
+      frame.buttons.items = <      
         item
           imagenr = 17
         end>
       frame.button.imagenr = 17
       frame.outerframe = (
         0
-        17
+        18
         0
         0
       )
@@ -455,13 +535,23 @@ object settingsfo: tsettingsfo
       bounds_x = 8
       bounds_y = 0
       bounds_cx = 330
-      bounds_cy = 37
+      bounds_cy = 39
       anchors = [an_left, an_top, an_right]
       onsetvalue = setvalue
+      controller.fontheight = 0
+      controller.fontname = 'stf_default'
+      controller.fontcolor = -1610612734
+      controller.backcolor = -2147483647
+      controller.nopanel = False
+      controller.compact = False
+      controller.showoptions = False
+      controller.hidehistory = False
+      controller.hideicons = False
+      controller.showhidden = False
       controller.options = [fdo_directory]
       controller.captionopen = 'FPC root directory'
       controller.ongetfilename = epandfilenamemacro
-      reffontheight = 14
+      reffontheight = 15
     end
   end
   object macrogrid: twidgetgrid
@@ -470,60 +560,60 @@ object settingsfo: tsettingsfo
     frame.localprops1 = []
     frame.outerframe = (
       0
-      17
+      18
       0
       0
     )
     taborder = 1
     bounds_x = 8
-    bounds_y = 407
+    bounds_y = 429
     bounds_cx = 330
-    bounds_cy = 113
+    bounds_cy = 90
     bounds_cymin = 80
     anchors = [an_left, an_top, an_right, an_bottom]
     optionsgrid = [og_colsizing, og_rowmoving, og_keyrowmoving, og_rowinserting, og_rowdeleting, og_focuscellonenter, og_autofirstrow, og_autoappend, og_noinsertempty, og_colchangeontabkey, og_wrapcol, og_autopopup, og_mousescrollcol]
     fixcols.count = 1
-    fixcols.items = <
+    fixcols.items = <    
       item
         width = 28
         numstart = 1
         numstep = 1
       end>
     fixrows.count = 1
-    fixrows.items = <
+    fixrows.items = <    
       item
-        height = 16
+        height = 17
         captions.count = 4
-        captions.items = <
+        captions.items = <        
           item
             caption = 'Name'
-          end
+          end        
           item
             caption = 'Value'
-          end
+          end        
           item
-          end
+          end        
           item
           end>
       end>
     datacols.count = 2
     datacols.options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
-    datacols.items = <
+    datacols.items = <    
       item[macroname]
         width = 151
         options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_proportional, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
         widgetname = 'macroname'
         dataclass = tgridmsestringdatalist
-      end
+      end    
       item[macrovalue]
         width = 144
         options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_fill, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
         widgetname = 'macrovalue'
         dataclass = tgridmsestringdatalist
       end>
-    datarowheight = 16
+    datarowheight = 17
     statfile = tstatfile1
-    reffontheight = 14
+    reffontheight = 15
     object macroname: tstringedit
       optionsskin = [osk_framebuttononly]
       taborder = 1
@@ -531,10 +621,10 @@ object settingsfo: tsettingsfo
       bounds_x = 0
       bounds_y = 0
       bounds_cx = 151
-      bounds_cy = 16
+      bounds_cy = 17
       optionsedit1 = []
       optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_focusrectonreadonly, oe_hintclippedtext]
-      reffontheight = 14
+      reffontheight = 15
     end
     object macrovalue: tmemodialogedit
       optionswidget1 = [ow1_fontglyphheight]
@@ -544,7 +634,7 @@ object settingsfo: tsettingsfo
       frame.localprops = [frl_levelo, frl_leveli, frl_colorclient]
       frame.localprops1 = []
       frame.buttons.count = 1
-      frame.buttons.items = <
+      frame.buttons.items = <      
         item
           color = -1879048187
           imagenr = 17
@@ -556,10 +646,10 @@ object settingsfo: tsettingsfo
       bounds_x = 152
       bounds_y = 0
       bounds_cx = 144
-      bounds_cy = 16
+      bounds_cy = 17
       optionsedit1 = []
       optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_focusrectonreadonly, oe_hintclippedtext]
-      reffontheight = 14
+      reffontheight = 15
     end
   end
   object tstatfile1: tstatfile

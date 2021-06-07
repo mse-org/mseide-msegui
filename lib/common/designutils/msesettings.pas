@@ -28,7 +28,7 @@ interface
 
 uses
  mseglob,mseguiglob,msegui,mseclasses,mseforms,msestat,msestatfile,
- msesimplewidgets,msefiledialog,msestrings,msemacros,msedataedits,msebitmap,
+ msesimplewidgets,msefiledialogx,msestrings,msemacros,msedataedits,msebitmap,
  msedatanodes,mseedit,mseevent,msegraphutils,msegrids,mselistbrowser,msemenus,
  msesys,msetypes,msegraphics,msewidgets,mseactions,mseifiglob,msesplitter,
  mseificomp,mseificompglob,msememodialog,msewidgetgrid;
@@ -86,15 +86,15 @@ type
    tstatfile1: tstatfile;
    tlayouter1: tlayouter;
    printcomm: tstringedit;
-   debugger: tfilenameedit;
-   compiler: tfilenameedit;
-   compstoredir: tfilenameedit;
-   templatedir: tfilenameedit;
-   syntaxdefdir: tfilenameedit;
-   mselibdir: tfilenameedit;
-   msedir: tfilenameedit;
-   fpclibdir: tfilenameedit;
-   fpcdir: tfilenameedit;
+   debugger: tfilenameeditx;
+   compiler: tfilenameeditx;
+   compstoredir: tfilenameeditX;
+   templatedir: tfilenameeditx;
+   syntaxdefdir: tfilenameeditx;
+   mselibdir: tfilenameeditx;
+   msedir: tfilenameeditx;
+   fpclibdir: tfilenameeditx;
+   fpcdir: tfilenameeditx;
    tspacer1: tlayouter;
    targetosdir: tstringedit;
    target: tstringedit;
