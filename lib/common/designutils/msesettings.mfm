@@ -71,16 +71,6 @@ object settingsfo: tsettingsfo
       onexecute = editshortcuts
       reffontheight = 15
     end
-    object tspacer2: tspacer
-      taborder = 3
-      bounds_x = 275
-      bounds_y = 16
-      bounds_cx = 10
-      bounds_cy = 20
-      linkleft = tbutton1
-      linkright = tbutton2
-      options = [spao_glueright]
-    end
   end
   object tlayouter1: tlayouter
     bounds_x = 0

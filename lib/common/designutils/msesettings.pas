@@ -106,7 +106,6 @@ type
    macrogrid: twidgetgrid;
    macroname: tstringedit;
    macrovalue: tmemodialogedit;
-   tspacer2: tspacer;
    procedure epandfilenamemacro(const sender: TObject; var avalue: msestring;
                      var accept: Boolean);
    procedure formoncreate(const sender: TObject);
