@@ -9,7 +9,7 @@
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 }
 
-{ msefiledialogx by fredvs 2021 }
+{ msefiledialogx by fredvs 2020 }
 
 unit msefiledialogx;
 
@@ -39,7 +39,7 @@ uses
  msemenus,msegridsglob,msegraphics,msegraphutils,msedirtree,msewidgetgrid,
  mseact,mseapplication,msegui,mseificomp,mseificompglob,mseifiglob,msestream,
  SysUtils,msemenuwidgets,msescrollbar,msedragglob,mserichstring,
- msetimer;
+ msetimer, mseimage;
 
 const
   defaultlistviewoptionsfile = defaultlistviewoptions + [lvo_readonly, lvo_horz];
@@ -129,7 +129,7 @@ const
   defaulthistorymaxcount = 50;
 
 type
-  filedialogoptionty  = (fdo_filtercasesensitive,    //flvo_maskcasesensitive
+  filedialogxoptionty  = (fdo_filtercasesensitive,    //flvo_maskcasesensitive
     fdo_filtercaseinsensitive,  //flvo_maskcaseinsensitive
     fdo_save,
     fdo_dispname, fdo_dispnoext, fdo_sysfilename, fdo_params,
@@ -141,13 +141,13 @@ type
     fdo_checkexist, fdo_acceptempty, fdo_single,
     fdo_chdir, fdo_savelastdir,
     fdo_checksubdir);
-  filedialogoptionsty = set of filedialogoptionty;
+  filedialogoptionsty = set of filedialogxoptionty;
 
 const
   defaultfiledialogoptions = [fdo_savelastdir];
 
 type
-  filedialogkindty = (fdk_none, fdk_open, fdk_save, fdk_new, fdk_dir);
+  filedialogkindty = (fdk_none,fdk_open,fdk_save,fdk_new);
 
   tfiledialogxcontroller = class;
 
@@ -564,6 +564,7 @@ type
     forward: tstockglyphbutton;
     filename: thistoryedit;
     filter: tdropdownlistedit;
+    showhidden: tbooleanedit;
     list_log: tstringgrid;
     home: TButton;
     createdir: TButton;
@@ -583,7 +584,9 @@ type
    bshowoptions: tbooleanedit;
    tsplitter2: tsplitter;
    bhidehistory: tbooleanedit;
-   showhidden: tbooleanedit;
+   tbitmapcomp1: tbitmapcomp;
+   imImage: timage;
+    procedure LoadImage(const AFileName: string);
     procedure createdironexecute(const Sender: TObject);
     procedure listviewselectionchanged(const Sender: tcustomlistview);
     procedure listviewitemevent(const Sender: tcustomlistview; const index: integer; var info: celleventinfoty);
@@ -846,10 +849,12 @@ begin
     begin
     bnoicon.visible := true;
     bcompact.visible := true;
-    //showhidden.visible := true;
+    showhidden.visible := true;
     blateral.visible := true;
     filename.top := list_log.bottom + 8;
-    
+    imimage.top := filename.top - 4;
+    imimage.height := filename.height + 8;
+
     end else
     begin
     dir.top := back.bottom + 8;
@@ -862,15 +867,14 @@ begin
     filename.top := list_log.bottom + 8;
     tsplitter1.height := list_log.height;
     filename.top := list_log.bottom + 8;
+    imimage.top := filename.top - 4;
+    imimage.height := filename.height + 8;
     bnoicon.visible := false;
     bcompact.visible := false;
-   // showhidden.visible := false;
+    showhidden.visible := false;
     blateral.visible := false;
     end;
     
-   showhidden.top := filter.top;
-   showhidden.left := filter.left + 44;
-       
     if filename.visible = false then
     height := list_log.bottom + 8
     else
@@ -1052,6 +1056,8 @@ begin
     end;
   end;
 end;
+
+
 
 procedure tfilelistviewx.filelistchanged(const Sender: TObject);
 var
@@ -1312,9 +1318,18 @@ begin
   item := tfilelistitem.Create(self);
 end;
 
-{ Tfiledialogxfo }
+{ tfiledialogxfo }
 
-procedure Tfiledialogxfo.createdironexecute(const Sender: TObject);
+procedure tfiledialogxfo.LoadImage(const AFileName: string);
+var
+  LSize: sizety;
+  LXRatio, LYRatio, LRatio: double;
+begin
+  tbitmapcomp1.bitmap.LoadFromFile(tosysfilepath(AFileName));
+  imImage.Bitmap := tbitmapcomp1.bitmap;
+end;
+
+procedure tfiledialogxfo.createdironexecute(const Sender: TObject);
 var
   mstr1: msestring;
 begin
@@ -1332,7 +1347,7 @@ begin
     end;
 end;
 
-procedure Tfiledialogxfo.listviewselectionchanged(const Sender: tcustomlistview);
+procedure tfiledialogxfo.listviewselectionchanged(const Sender: tcustomlistview);
 var
   ar1: msestringarty;
 begin
@@ -1357,14 +1372,36 @@ begin
 
   if filename.tag = 1 then
     filename.Value := dir.Value;
-end;
 
-function Tfiledialogxfo.changedir(const adir: filenamety): Boolean;
+  //  writeln(dir.Value + filename.Value);
+
+  //    writeln(fileext(filename.Value));
+
+ if (lowercase(fileext(filename.Value)) = 'xpm') or
+    (lowercase(fileext(filename.Value)) = 'jpeg') or
+     (lowercase(fileext(filename.Value)) = 'ico') or
+      (lowercase(fileext(filename.Value)) = 'bmp') or
+      (lowercase(fileext(filename.Value)) ='png') or
+      (lowercase(fileext(filename.Value)) = 'jpg') then
+ begin
+  if fileexists(dir.Value + filename.Value) then
+   loadimage(dir.Value + filename.Value);
+   imImage.visible := true;
+   filename.left := imImage.right + 2 ;
+   filename.width := width - imImage.right - 6 ;
+  end else
+  begin
+   imImage.visible := false;
+   filename.left := 4 ;
+   filename.width := width - 8 ;
+  end;  
+ end;
+
+function tfiledialogxfo.changedir(const adir: filenamety): Boolean;
 begin
   Result := tryreadlist(filepath(adir), True);
   if Result then
     course(adir);
-
 
   with listview do
     if filelist.Count > 0 then
@@ -1372,7 +1409,7 @@ begin
 
 end;
 
-procedure Tfiledialogxfo.listviewitemevent(const Sender: tcustomlistview; const index: integer; var info: celleventinfoty);
+procedure tfiledialogxfo.listviewitemevent(const Sender: tcustomlistview; const index: integer; var info: celleventinfoty);
 var
   str1: filenamety;
 begin
@@ -1394,13 +1431,13 @@ begin
       end;
 end;
 
-procedure Tfiledialogxfo.doup();
+procedure tfiledialogxfo.doup();
 begin
   listview.updir();
   course(listview.directory);
 end;
 
-procedure Tfiledialogxfo.listviewonkeydown(const Sender: twidget; var info: keyeventinfoty);
+procedure tfiledialogxfo.listviewonkeydown(const Sender: twidget; var info: keyeventinfoty);
 begin
   with info do
     if (key = key_pageup) and (shiftstate = [ss_ctrl]) then
@@ -1410,7 +1447,7 @@ begin
     end;
 end;
 
-procedure Tfiledialogxfo.upaction(const Sender: TObject);
+procedure tfiledialogxfo.upaction(const Sender: TObject);
 begin
   places.defocuscell;
   places.datacols.clearselection;
@@ -1418,7 +1455,7 @@ begin
 end;
 
 {
-function Tfiledialogxfo.readlist: boolean;
+function tfiledialogxfo.readlist: boolean;
 begin
  result:= true;
  try
@@ -1452,7 +1489,7 @@ begin
  end;
 end;
 }
-function Tfiledialogxfo.tryreadlist(const adir: filenamety; const errormessage: Boolean): Boolean;
+function tfiledialogxfo.tryreadlist(const adir: filenamety; const errormessage: Boolean): Boolean;
   //restores old dir on error
 var
   dirbefore: filenamety;
@@ -1490,7 +1527,7 @@ begin
   end;
 end;
 
-procedure Tfiledialogxfo.filenamesetvalue(const Sender: TObject; var avalue: msestring; var accept: Boolean);
+procedure tfiledialogxfo.filenamesetvalue(const Sender: TObject; var avalue: msestring; var accept: Boolean);
 var
   str1, str2, str3: filenamety;
   // ar1: msestringarty;
@@ -1585,7 +1622,7 @@ begin
                         
 end;
 
-procedure Tfiledialogxfo.filepathentered(const Sender: TObject);
+procedure tfiledialogxfo.filepathentered(const Sender: TObject);
 begin
   tryreadlist(listview.directory, True);
   // readlist;
@@ -1593,7 +1630,7 @@ begin
     filename.Value := dir.Value;
 end;
 
-procedure Tfiledialogxfo.dironsetvalue(const Sender: TObject; var avalue: mseString; var accept: Boolean);
+procedure tfiledialogxfo.dironsetvalue(const Sender: TObject; var avalue: mseString; var accept: Boolean);
 begin
   places.defocuscell;
   places.datacols.clearselection;
@@ -1611,7 +1648,7 @@ begin
     end;
 end;
 
-procedure Tfiledialogxfo.listviewonlistread(const Sender: TObject);
+procedure tfiledialogxfo.listviewonlistread(const Sender: TObject);
 var
   x, x2, y, y2, z: integer;
   fsize : longint;
@@ -1807,7 +1844,7 @@ begin
 
 end;
 
-procedure Tfiledialogxfo.updatefiltertext;
+procedure tfiledialogxfo.updatefiltertext;
 begin
   with filter, dropdown do
     if ItemIndex >= 0 then
@@ -1817,7 +1854,7 @@ begin
     end;
 end;
 
-procedure Tfiledialogxfo.filteronafterclosedropdown(const Sender: TObject);
+procedure tfiledialogxfo.filteronafterclosedropdown(const Sender: TObject);
 begin
   updatefiltertext;
   filter.initfocus;
@@ -1826,7 +1863,7 @@ begin
   //filter.frame.Caption := '&Filter';
 end;
 
-procedure Tfiledialogxfo.filteronsetvalue(const Sender: TObject; var avalue: msestring; var accept: Boolean);
+procedure tfiledialogxfo.filteronsetvalue(const Sender: TObject; var avalue: msestring; var accept: Boolean);
 var
   rootdir: msestring;
   bool: Boolean;
@@ -1849,7 +1886,7 @@ begin
 
 end;
 
-procedure Tfiledialogxfo.okonexecute(const Sender: TObject);
+procedure tfiledialogxfo.okonexecute(const Sender: TObject);
 var
   bo1: Boolean;
   int1: integer;
@@ -1907,12 +1944,12 @@ begin
   // end;
 end;
 
-procedure Tfiledialogxfo.layoutev(const Sender: TObject);
+procedure tfiledialogxfo.layoutev(const Sender: TObject);
 begin
   listview.synctofontheight;
 end;
 
-procedure Tfiledialogxfo.showhiddenonsetvalue(const Sender: TObject; var avalue: Boolean; var accept: Boolean);
+procedure tfiledialogxfo.showhiddenonsetvalue(const Sender: TObject; var avalue: Boolean; var accept: Boolean);
 begin
   dir.showhiddenfiles      := avalue;
   if avalue then
@@ -1922,23 +1959,23 @@ begin
   listview.readlist;
 end;
 
-procedure Tfiledialogxfo.dirshowhint(const Sender: TObject; var info: hintinfoty);
+procedure tfiledialogxfo.dirshowhint(const Sender: TObject; var info: hintinfoty);
 begin
   if dir.editor.textclipped then
     info.Caption := dir.Value;
 end;
 
-procedure Tfiledialogxfo.copytoclip(const Sender: TObject; var avalue: msestring);
+procedure tfiledialogxfo.copytoclip(const Sender: TObject; var avalue: msestring);
 begin
   tosysfilepath1(avalue);
 end;
 
-procedure Tfiledialogxfo.pastefromclip(const Sender: TObject; var avalue: msestring);
+procedure tfiledialogxfo.pastefromclip(const Sender: TObject; var avalue: msestring);
 begin
   tomsefilepath1(avalue);
 end;
 
-procedure Tfiledialogxfo.homeaction(const Sender: TObject);
+procedure tfiledialogxfo.homeaction(const Sender: TObject);
 begin
   places.defocuscell;
   places.datacols.clearselection;
@@ -1949,13 +1986,13 @@ begin
   end;
 end;
 
-procedure Tfiledialogxfo.checkcoursebuttons();
+procedure tfiledialogxfo.checkcoursebuttons();
 begin
   back.Enabled    := fcourseid > 0;
   forward.Enabled := fcourseid < high(fcourse);
 end;
 
-procedure Tfiledialogxfo.course(const adir: filenamety);
+procedure tfiledialogxfo.course(const adir: filenamety);
 begin
   if not fcourselock then
   begin
@@ -1966,7 +2003,7 @@ begin
   end;
 end;
 
-procedure Tfiledialogxfo.backexe(const Sender: TObject);
+procedure tfiledialogxfo.backexe(const Sender: TObject);
 begin
   places.defocuscell;
   places.datacols.clearselection;
@@ -1983,7 +2020,7 @@ begin
   end;
 end;
 
-procedure Tfiledialogxfo.forwardexe(const Sender: TObject);
+procedure tfiledialogxfo.forwardexe(const Sender: TObject);
 begin
   places.defocuscell;
   places.datacols.clearselection;
@@ -2000,17 +2037,17 @@ begin
   end;
 end;
 
-procedure Tfiledialogxfo.buttonshowhint(const Sender: TObject; var ainfo: hintinfoty);
+procedure tfiledialogxfo.buttonshowhint(const Sender: TObject; var ainfo: hintinfoty);
 begin
   with tcustombutton(Sender) do
     ainfo.Caption := sc(stockcaptionty(tag)) + ' ' +
       '(' + encodeshortcutname(shortcut) + ')';
 end;
 
-procedure Tfiledialogxfo.oncellev(const Sender: TObject; var info: celleventinfoty);
+procedure tfiledialogxfo.oncellev(const Sender: TObject; var info: celleventinfoty);
 var
   cellpos, cellpos2: gridcoordty;
-   y: integer;
+  x, y: integer;
   str1: string;
 begin
 
@@ -2091,7 +2128,7 @@ begin
       fisfixedrow := True;
 end;
 
-procedure Tfiledialogxfo.ondrawcell(const Sender: tcol; const Canvas: tcanvas; var cellinfo: cellinfoty);
+procedure tfiledialogxfo.ondrawcell(const Sender: tcol; const Canvas: tcanvas; var cellinfo: cellinfoty);
 var
   aicon: integer;
   apoint: pointty;
@@ -2183,7 +2220,7 @@ begin
 
 end;
 
-procedure Tfiledialogxfo.onsetcomp(const Sender: TObject; var avalue: Boolean; var accept: Boolean);
+procedure tfiledialogxfo.onsetcomp(const Sender: TObject; var avalue: Boolean; var accept: Boolean);
 var
  theint, theexist : integer;
   sel : gridcoordty;
@@ -2220,24 +2257,26 @@ begin
   end;
 end;
 
-procedure Tfiledialogxfo.oncreat(const Sender: TObject);
+procedure tfiledialogxfo.oncreat(const Sender: TObject);
 begin
   theimagelist    := iconslist;
   fsplitterpanpos := tsplitter1.left;
   fisfixedrow     := False;
 end;
 
-procedure Tfiledialogxfo.onbefdrop(const Sender: TObject);
+procedure tfiledialogxfo.onbefdrop(const Sender: TObject);
 begin
   filter.left  := 190;
   filter.Width := 414;
   //filter.frame.Caption := '';
 end;
 
-procedure Tfiledialogxfo.oncellevplaces(const Sender: TObject; var info: celleventinfoty);
+procedure tfiledialogxfo.oncellevplaces(const Sender: TObject; var info: celleventinfoty);
 var
-  cellpos: gridcoordty;
- begin
+  cellpos, cellpos2: gridcoordty;
+  x, y: integer;
+  str1: string;
+begin
 
   if (info.eventkind = cek_buttonrelease) or (info.eventkind = cek_keyup) then
   begin
@@ -2280,7 +2319,7 @@ var
   end;
 end;
 
-procedure Tfiledialogxfo.ondrawcellplace(const Sender: tcol; const Canvas: tcanvas; var cellinfo: cellinfoty);
+procedure tfiledialogxfo.ondrawcellplace(const Sender: tcol; const Canvas: tcanvas; var cellinfo: cellinfoty);
 var
   aicon: integer;
   apoint: pointty;
@@ -2315,7 +2354,7 @@ begin
   end;
 end;
 
-procedure Tfiledialogxfo.onlayout(const Sender: tcustomgrid);
+procedure tfiledialogxfo.onlayout(const Sender: tcustomgrid);
 begin
   list_log.left     := tsplitter1.left;
   listview.left     := list_log.left;
@@ -2323,7 +2362,7 @@ begin
   tsplitter3.Width  := placespan.Width;
 end;
 
-procedure Tfiledialogxfo.onformcreated(const Sender: TObject);
+procedure tfiledialogxfo.onformcreated(const Sender: TObject);
 var
   x: integer = 0;
   tmp: string;
@@ -2350,15 +2389,12 @@ begin
   back.tag    := Ord(sc_back);
   forward.tag := Ord(sc_forward);
   up.tag      := Ord(sc_up);
-  
-  showhidden.top := filter.top;
-  showhidden.left := filter.left + 44;
 
   application.ProcessMessages;
 
 end;
 
-procedure Tfiledialogxfo.onlateral(const Sender: TObject; var avalue: Boolean; var accept: Boolean);
+procedure tfiledialogxfo.onlateral(const Sender: TObject; var avalue: Boolean; var accept: Boolean);
 begin
   if not avalue then
   begin
@@ -2392,14 +2428,14 @@ begin
   list_log.invalidate;
 end;
 
-procedure Tfiledialogxfo.afterclosedrop(const Sender: TObject);
+procedure tfiledialogxfo.afterclosedrop(const Sender: TObject);
 begin
    if filename.tag = 1 then
     filename.Value := dir.Value;
   filename.Value   := tosysfilepath(filename.Value);
 end;
 
-procedure Tfiledialogxfo.onresize(const Sender: TObject);
+procedure tfiledialogxfo.onresize(const Sender: TObject);
 begin
 {
   list_log.datacols[0].Width := list_log.Width -
@@ -2414,21 +2450,22 @@ begin
   if list_log.Visible = False then
     listview.Width := list_log.Width;
     tsplitter1.height := list_log.height;
- 
-   filename.top := height - filename.height - 8; ;
-   
+
+   filename.top := height - filename.height - 8;
+   imimage.top := filename.top - 4;
+
 end;
 
-procedure Tfiledialogxfo.onchangdir(const Sender: TObject);
+procedure tfiledialogxfo.onchangdir(const Sender: TObject);
 begin
   //dir.value := tosysfilepath(dir.value);
 end;
 
-procedure Tfiledialogxfo.ondrawcellplacescust(const Sender: tcol; const Canvas: tcanvas; var cellinfo: cellinfoty);
+procedure tfiledialogxfo.ondrawcellplacescust(const Sender: tcol; const Canvas: tcanvas; var cellinfo: cellinfoty);
 var
   aicon: integer;
   apoint: pointty;
-  
+  astr: msestring;
 begin
   if bnoicon.Value = False then
     if cellinfo.cell.row < placescust.rowcount - 1 then
@@ -2443,7 +2480,7 @@ begin
     end;
 end;
 
-procedure Tfiledialogxfo.oncellevcustplaces(const Sender: TObject; var info: celleventinfoty);
+procedure tfiledialogxfo.oncellevcustplaces(const Sender: TObject; var info: celleventinfoty);
 var
   theint, theexist: integer;
   thestr, tmp: msestring;
@@ -2541,7 +2578,7 @@ begin
         end;
 end;
 
-procedure Tfiledialogxfo.onmovesplit(const Sender: TObject);
+procedure tfiledialogxfo.onmovesplit(const Sender: TObject);
 begin
   if tsplitter1.left > 0 then
     fsplitterpanpos := tsplitter1.left;
@@ -2551,13 +2588,11 @@ begin
     placescust.datacols[0].Width := places.Width - 4;
   end;
   tsplitter3.width := placespan.width;
-  listview.left := list_log.left;showhidden.top := filter.top;
-
-  showhidden.left := filter.left + 44;
-    
+  listview.left := list_log.left;
+  
 end;
 
-procedure Tfiledialogxfo.onsetvalnoicon(const Sender: TObject; var avalue: Boolean; var accept: Boolean);
+procedure tfiledialogxfo.onsetvalnoicon(const Sender: TObject; var avalue: Boolean; var accept: Boolean);
 var
   tmp: msestring;
   x: integer;
@@ -2714,7 +2749,7 @@ end;
 function tfiledialogxcontroller.Execute(dialogkind: filedialogkindty; const acaption: msestring; aoptions: filedialogoptionsty): modalresultty;
 var
   po1: pmsestringarty;
-  fo: Tfiledialogxfo;
+  fo: tfiledialogxfo;
   ara, arb: msestringarty;
   //acaption2: msestring;
   rectbefore: rectty;
@@ -2739,7 +2774,7 @@ begin
     po1 := @fhistory
   else
     po1 := nil;
-  fo := Tfiledialogxfo.Create(nil);
+  fo := tfiledialogxfo.Create(nil);
 
   try
  {$ifdef FPC} {$checkpointer off} {$endif}
@@ -2896,7 +2931,7 @@ begin
     //   fo.list_log.datacols[1].Width - fo.list_log.datacols[2].Width -
     //   fo.list_log.datacols[3].Width - 20;
 
-    if (dialogkind in [fdk_dir]) or (fdo_directory in aoptions) then
+    if (fdo_directory in aoptions) then
     begin
       fo.filename.tag           := 1;
       fo.filename.Value         := fo.dir.Value;
@@ -2992,10 +3027,10 @@ begin
       Result := fcaptionnew;
     fdk_open:
       Result := fcaptionopen;
-    fdk_dir:
-      Result := fcaptiondir;
-  //  fdk_none:
-  //    Result := '';
+    //fdk_dir:
+    //  Result := fcaptiondir;
+   // fdk_none:
+   //   Result := '';
     else
       Result := fcaptionopen;
   end;
@@ -3003,6 +3038,8 @@ end;
 
 function tfiledialogxcontroller.Execute(const dialogkind: filedialogkindty; const aoptions: filedialogoptionsty): modalresultty;
 begin
+ if fdo_directory in aoptions then
+ Result := Execute(dialogkind, fcaptiondir, aoptions) else
   Result := Execute(dialogkind, actcaption(dialogkind), aoptions);
 end;
 
@@ -3013,6 +3050,8 @@ begin
       dialogkind := fdk_save
     else
       dialogkind := fdk_none;
+   if fdo_directory in foptions then   
+   Result := Execute(dialogkind, fcaptiondir) else
   Result := Execute(dialogkind, actcaption(dialogkind));
 end;
 
@@ -3023,6 +3062,9 @@ begin
       dialogkind := fdk_save
     else
       dialogkind := fdk_none;
+      
+    if fdo_directory in foptions then   
+   Result := Execute(avalue, dialogkind, fcaptiondir) else
   Result := Execute(avalue, dialogkind, actcaption(dialogkind));
 end;
 
@@ -3361,12 +3403,6 @@ begin
   aowner.controller.ffontname   := 'stf_default';
   aowner.controller.ffontheight := 0;
   aowner.controller.ffontcolor  := cl_black;
-  aowner.controller.fnopanel    := False;
-  aowner.controller.fcompact    := False;
-  aowner.controller.fshowoptions    := False;
-  aowner.controller.fshowhidden := false;
-  aowner.controller.fhidehistory := False;
-  aowner.controller.fhideicons := False;
  end;
 
 function tfilenameeditcontroller.Execute(var avalue: msestring): Boolean;

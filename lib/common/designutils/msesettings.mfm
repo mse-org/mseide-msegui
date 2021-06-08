@@ -1,8 +1,8 @@
 object settingsfo: tsettingsfo
   optionswidget = [ow_arrowfocus, ow_subfocus, ow_mousewheel, ow_destroywidgets, ow_hinton]
   visible = False
-  bounds_x = 323
-  bounds_y = 143
+  bounds_x = 528
+  bounds_y = 128
   bounds_cx = 348
   bounds_cy = 570
   container.frame.localprops = []
@@ -292,6 +292,7 @@ object settingsfo: tsettingsfo
       )
       controller.options = [fdo_directory]
       controller.captionopen = 'Directory for component stores'
+      controller.captiondir = 'Directory for component stores'
       controller.ongetfilename = epandfilenamemacro
       reffontheight = 15
     end
@@ -338,6 +339,7 @@ object settingsfo: tsettingsfo
       )
       controller.options = [fdo_directory]
       controller.captionopen = 'Project template directory'
+      controller.captiondir = 'Project template directory'
       controller.ongetfilename = epandfilenamemacro
       reffontheight = 15
     end
@@ -384,6 +386,7 @@ object settingsfo: tsettingsfo
       )
       controller.options = [fdo_directory]
       controller.captionopen = 'Directory for syntax definition files'
+      controller.captiondir = 'Directory for syntax definition files'
       controller.ongetfilename = epandfilenamemacro
       reffontheight = 15
     end
@@ -424,6 +427,7 @@ object settingsfo: tsettingsfo
       controller.showhidden = False
       controller.options = [fdo_directory]
       controller.captionopen = 'MSEgui library directory'
+      controller.captiondir = 'MSEgui library directory'
       controller.ongetfilename = epandfilenamemacro
       reffontheight = 15
     end
@@ -464,6 +468,7 @@ object settingsfo: tsettingsfo
       controller.showhidden = False
       controller.options = [fdo_directory]
       controller.captionopen = 'MSEgui root directory'
+      controller.captiondir = 'MSEgui root directory'
       controller.ongetfilename = epandfilenamemacro
       reffontheight = 15
     end
@@ -503,6 +508,7 @@ object settingsfo: tsettingsfo
       controller.showhidden = False
       controller.options = [fdo_directory]
       controller.captionopen = 'FPC library directory'
+      controller.captiondir = 'FPC library directory'
       reffontheight = 15
     end
     object fpcdir: tfilenameeditx
@@ -539,7 +545,7 @@ object settingsfo: tsettingsfo
       controller.hideicons = False
       controller.showhidden = False
       controller.options = [fdo_directory]
-      controller.captionopen = 'FPC root directory'
+      controller.captiondir = 'FPC root directory'
       controller.ongetfilename = epandfilenamemacro
       reffontheight = 15
     end

@@ -754,31 +754,26 @@ findhistory=20
  mse_fpc_32
  mse_fpc_3_2
 findoptions=1
-editpos=5
- 0,6
- 0,-1073741823
- 0,-1073741823
- 0,-1073741823
- 0,108
+editpos=4
+ 0,5
+ 25,5
+ 0,0
+ 0,93
 bookmarks0=0
 bookmarks1=0
 bookmarks2=0
 bookmarks3=0
-bookmarks4=0
-sourcefiles=5
+sourcefiles=4
  /home/fred/mseide-msegui/apps/ide/sourceform.pas
  /home/fred/mseide-msegui/lib/common/dialogs/msefiledialog.pas
- /home/fred/mseide-msegui/lib/common/graphics/msedrawtext.pas
  /home/fred/mseide-msegui/lib/common/designutils/msedesignintf.pas
  /home/fred/mseide-msegui/lib/common/designutils/msesettings.pas
-relpaths=5
+relpaths=4
  sourceform.pas
- lib/common/dialogs/msefiledialog.pas
- lib/common/graphics/msedrawtext.pas
- lib/common/designutils/msedesignintf.pas
+ ../../lib/common/dialogs/msefiledialog.pas
+ ../../lib/common/designutils/msedesignintf.pas
  ../../lib/common/designutils/msesettings.pas
-ismoduletexts=5
- 0
+ismoduletexts=4
  0
  0
  0
@@ -794,7 +789,7 @@ nomenumodules=1
 [sourcefo.tabwidget]
 tabsize=60
 firsttab=0
-index=0
+index=1
 [layout]
 windowlayout=551
  [mainfo.openform]
@@ -808,7 +803,7 @@ windowlayout=551
  filefilterindex=0
  filefilter=
  [mainfo.projectfiledia]
- filecolwidth=0
+ filecolwidth=174
  x=0
  y=0
  cx=0
@@ -911,7 +906,7 @@ windowlayout=551
  [disassfo]
  splitdir=0
  useroptions=268451947
- stackedunder=
+ stackedunder=objectinspectorfo
  parent=
  mdistate=0
  nx=0
@@ -937,7 +932,7 @@ windowlayout=551
  [findinfilefo]
  splitdir=0
  useroptions=268451947
- stackedunder=targetconsolefo
+ stackedunder=disassfo
  parent=
  mdistate=0
  nx=0
@@ -1055,7 +1050,7 @@ windowlayout=551
  [objectinspectorfo]
  splitdir=0
  useroptions=268451947
- stackedunder=mainfo
+ stackedunder=_mse_settingsfo_mse_
  parent=
  mdistate=3
  nx=0
@@ -1197,7 +1192,7 @@ windowlayout=551
  width0=111
  sortdescend0=0
  sortdescend1=0
- width2=160
+ width2=103
  sortdescend2=0
  width3=185
  sortdescend3=0
@@ -1332,15 +1327,15 @@ windowlayout=551
  [_mse_settingsfo_mse_]
  splitdir=0
  useroptions=268451963
- stackedunder=objectinspectorfo
+ stackedunder=targetconsolefo
  parent=
  mdistate=3
  nx=0
  ny=0
  ncx=0
  ncy=0
- x=323
- y=143
+ x=528
+ y=128
  cx=358
  cy=570
  rcx=0

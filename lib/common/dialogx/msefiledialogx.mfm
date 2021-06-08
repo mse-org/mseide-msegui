@@ -1,8 +1,8 @@
 object filedialogxfo: Tfiledialogxfo
   optionswidget = [ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_destroywidgets, ow_hinton]
   visible = False
-  bounds_x = 323
-  bounds_y = 164
+  bounds_x = 656
+  bounds_y = 61
   bounds_cx = 608
   bounds_cy = 484
   bounds_cxmin = 30
@@ -56,7 +56,7 @@ object filedialogxfo: Tfiledialogxfo
     optionswidget = [ow_mousefocus, ow_arrowfocus, ow_focusbackonesc, ow_mousewheel, ow_destroywidgets]
     frame.localprops = []
     frame.localprops1 = []
-    taborder = 14
+    taborder = 15
     bounds_x = 128
     bounds_y = 126
     bounds_cx = 40
@@ -322,7 +322,7 @@ object filedialogxfo: Tfiledialogxfo
     )
     face.fade_direction = gd_down
     face.localprops = [fal_fadirection]
-    taborder = 7
+    taborder = 8
     bounds_x = 128
     bounds_y = 126
     bounds_cx = 476
@@ -467,7 +467,7 @@ object filedialogxfo: Tfiledialogxfo
     )
     face.fade_direction = gd_down
     face.localprops = [fal_fadirection]
-    taborder = 8
+    taborder = 9
     bounds_x = 239
     bounds_y = 1
     bounds_cx = 99
@@ -493,7 +493,7 @@ object filedialogxfo: Tfiledialogxfo
     )
     face.fade_direction = gd_down
     face.localprops = [fal_fadirection]
-    taborder = 9
+    taborder = 10
     hint = 'Create a new directory'
     bounds_x = 340
     bounds_y = 1
@@ -520,7 +520,7 @@ object filedialogxfo: Tfiledialogxfo
     )
     face.fade_direction = gd_down
     face.localprops = [fal_fadirection]
-    taborder = 10
+    taborder = 11
     bounds_x = 440
     bounds_y = 1
     bounds_cx = 98
@@ -546,7 +546,7 @@ object filedialogxfo: Tfiledialogxfo
     )
     face.fade_direction = gd_down
     face.localprops = [fal_fadirection]
-    taborder = 11
+    taborder = 12
     bounds_x = 540
     bounds_y = 1
     bounds_cx = 64
@@ -566,16 +566,16 @@ object filedialogxfo: Tfiledialogxfo
       57
       3
     )
-    taborder = 12
+    taborder = 13
     hint = 'Switch to compact layout'
-    bounds_x = 488
+    bounds_x = 312
     bounds_y = 40
     bounds_cx = 70
     bounds_cy = 17
     onsetvalue = onsetcomp
   end
   object tsplitter1: tsplitter
-    taborder = 13
+    taborder = 14
     bounds_x = 126
     bounds_y = 126
     bounds_cx = 2
@@ -596,9 +596,9 @@ object filedialogxfo: Tfiledialogxfo
       64
       3
     )
-    taborder = 15
+    taborder = 16
     hint = 'Hide / Show Lateral panel '
-    bounds_x = 256
+    bounds_x = 168
     bounds_y = 40
     bounds_cx = 77
     bounds_cy = 17
@@ -609,7 +609,7 @@ object filedialogxfo: Tfiledialogxfo
     frame.optionsskin = [fso_flat]
     frame.localprops = [frl_levelo, frl_optionsskin]
     frame.localprops1 = []
-    taborder = 16
+    taborder = 17
     bounds_x = 0
     bounds_y = 126
     bounds_cx = 126
@@ -809,7 +809,7 @@ object filedialogxfo: Tfiledialogxfo
     end
   end
   object labtest: tlabel
-    taborder = 17
+    taborder = 18
     visible = False
     bounds_x = 74
     bounds_y = 83
@@ -872,6 +872,25 @@ object filedialogxfo: Tfiledialogxfo
     onafterclosedropdown = filteronafterclosedropdown
     reffontheight = 15
   end
+  object showhidden: tbooleanedit
+    frame.levelo = 0
+    frame.caption = '&Show hidden'
+    frame.localprops = [frl_levelo]
+    frame.localprops1 = []
+    frame.outerframe = (
+      0
+      2
+      82
+      3
+    )
+    taborder = 7
+    hint = 'Show hidden files'
+    bounds_x = 448
+    bounds_y = 40
+    bounds_cx = 95
+    bounds_cy = 17
+    onsetvalue = showhiddenonsetvalue
+  end
   object bnoicon: tbooleanedit
     frame.levelo = 0
     frame.caption = 'No &Icons'
@@ -883,7 +902,7 @@ object filedialogxfo: Tfiledialogxfo
       55
       3
     )
-    taborder = 18
+    taborder = 19
     hint = 'Hide / Show Icons'
     bounds_x = 40
     bounds_y = 40
@@ -903,18 +922,17 @@ object filedialogxfo: Tfiledialogxfo
       84
       3
     )
-    taborder = 19
+    taborder = 20
     hint = 'Show hidden files'
     bounds_x = 240
-    bounds_y = 56
+    bounds_y = 48
     bounds_cx = 97
     bounds_cy = 17
     visible = False
     onsetvalue = showhiddenonsetvalue
   end
   object tsplitter2: tsplitter
-    color = -2147483645
-    taborder = 20
+    taborder = 21
     bounds_x = 416
     bounds_y = 70
     bounds_cx = 4
@@ -922,7 +940,6 @@ object filedialogxfo: Tfiledialogxfo
     options = [spo_hmove, spo_dockleft, spo_docktop, spo_dockright, spo_dockbottom]
     linkleft = dir
     linkright = filter
-    colorgrip = -2147483645
     onupdatelayout = onmovesplit
   end
   object bhidehistory: tbooleanedit
@@ -936,33 +953,25 @@ object filedialogxfo: Tfiledialogxfo
       74
       3
     )
-    taborder = 21
+    taborder = 22
     hint = 'Show hidden files'
     bounds_x = 344
-    bounds_y = 56
+    bounds_y = 48
     bounds_cx = 87
     bounds_cy = 17
     visible = False
     onsetvalue = showhiddenonsetvalue
   end
-  object showhidden: tbooleanedit
-    frame.levelo = 0
-    frame.caption = '&Show hidden'
-    frame.localprops = [frl_levelo]
+  object imImage: timage
+    color = 14606046
+    frame.localprops = []
     frame.localprops1 = []
-    frame.outerframe = (
-      0
-      2
-      82
-      3
-    )
-    taborder = 22
-    hint = 'Show hidden files'
-    bounds_x = 460
-    bounds_y = 70
-    bounds_cx = 95
-    bounds_cy = 17
-    onsetvalue = showhiddenonsetvalue
+    taborder = 23
+    visible = False
+    bounds_x = 2
+    bounds_y = 432
+    bounds_cx = 40
+    bounds_cy = 48
   end
   object iconslist: timagelist
     width = 18
@@ -1736,5 +1745,11 @@ object filedialogxfo: Tfiledialogxfo
       FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
       FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF0000
     }
+  end
+  object tbitmapcomp1: tbitmapcomp
+    bitmap.options = [bmo_graymask]
+    bitmap.alignment = [al_stretchx, al_stretchy]
+    left = 248
+    top = 256
   end
 end
