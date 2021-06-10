@@ -434,6 +434,7 @@ object filedialogxfo: Tfiledialogxfo
           end        
           item
             caption = 'Date'
+            face.localprops = []
             options = [dco_colsort, dco_wholecellsortclick, dco_hintclippedtext]
           end>
       end>
