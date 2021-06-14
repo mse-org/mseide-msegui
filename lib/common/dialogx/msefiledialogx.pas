@@ -697,8 +697,7 @@ uses
 
 type
   tdirtreefo1 = class(tdirtreefo);
-  tcomponent1 = class(TComponent);
-
+  
 procedure getfileicon(const info: fileinfoty; var imagelist: timagelist; out imagenr: integer);
 begin
   if assigned(theimagelist) then
