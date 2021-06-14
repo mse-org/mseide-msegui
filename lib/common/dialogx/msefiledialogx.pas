@@ -9,7 +9,7 @@
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 }
 
-{ msefiledialogx by fredvs 2020 }
+{ msefiledialogx by fredvs 2019 2021 }
 
 unit msefiledialogx;
 
@@ -38,8 +38,8 @@ uses
  msefileutils,msedropdownlist,mseevent,msegraphedits,mseeditglob,msesplitter,
  msemenus,msegridsglob,msegraphics,msegraphutils,msedirtree,msewidgetgrid,
  mseact,mseapplication,msegui,mseificomp,mseificompglob,mseifiglob,msestream,
- SysUtils,msemenuwidgets,msescrollbar,msedragglob,mserichstring,
- msetimer, mseimage;
+ SysUtils,msemenuwidgets,msescrollbar,msedragglob,mserichstring,msetimer,
+ mseimage;
 
 const
   defaultlistviewoptionsfile = defaultlistviewoptions + [lvo_readonly, lvo_horz];
@@ -580,12 +580,14 @@ type
     placescust: tstringgrid;
     labtest: tlabel;
     bnoicon: tbooleanedit;
-   iconslist: timagelist;
    bshowoptions: tbooleanedit;
    tsplitter2: tsplitter;
    bhidehistory: tbooleanedit;
    tbitmapcomp1: tbitmapcomp;
    imImage: timage;
+   tbitmapcomp2: tbitmapcomp;
+   timagelist2: timagelist;
+   iconslist: timagelist;
     procedure LoadImage(const AFileName: string);
     procedure createdironexecute(const Sender: TObject);
     procedure listviewselectionchanged(const Sender: tcustomlistview);
@@ -1374,13 +1376,13 @@ begin
     filename.Value := dir.Value;
 
   //  writeln(dir.Value + filename.Value);
-
   //    writeln(fileext(filename.Value));
 
  if (lowercase(fileext(filename.Value)) = 'xpm') or
     (lowercase(fileext(filename.Value)) = 'jpeg') or
-     (lowercase(fileext(filename.Value)) = 'ico') or
+  //   (lowercase(fileext(filename.Value)) = 'ico') or
       (lowercase(fileext(filename.Value)) = 'bmp') or
+  //    (lowercase(fileext(filename.Value)) = 'gif') or
       (lowercase(fileext(filename.Value)) ='png') or
       (lowercase(fileext(filename.Value)) = 'jpg') then
  begin
@@ -1715,6 +1717,8 @@ begin
 
   y  := 0;
   x2 := 0;
+  
+  timagelist2.count := 0;
 
   if listview.rowcount > 0 then
     for x := 0 to listview.rowcount - 1 do
@@ -1743,7 +1747,19 @@ begin
           tmp          := '.' + tmp;
         list_log[1][x] := msestring(tmp);
         list_log[0][x] := list_log[0][x] + list_log[1][x];
-      end;
+       { 
+        if (lowercase(list_log[1][x]) = '.png')   
+            or (lowercase(list_log[1][x]) = '.jpg')
+            or (lowercase(list_log[1][x]) = '.jpeg')
+            or (lowercase(list_log[1][x]) = '.bmp') then
+            begin
+            writeln(dir.Value + listview.itemlist[x].Caption);
+            // tbitmapcomp2.bitmap.LoadFromFile(dir.Value + listview.itemlist[x].Caption);
+             timagelist2.addimage(tbitmapcomp2.bitmap);
+             list_log[5][x] := inttostr(x); 
+            end;  
+        }
+         end;
 
       dir.Value := tosysfilepath(dir.Value);
 
@@ -2132,9 +2148,13 @@ procedure tfiledialogxfo.ondrawcell(const Sender: tcol; const Canvas: tcanvas; v
 var
   aicon: integer;
   apoint: pointty;
+  recti: rectty;
+  // tbitmapcompico: tbitmapcomp;
+   thefilename : msestring;
 begin
   if bnoicon.Value = False then
-  begin
+  begin 
+  
     if (trim(list_log[1][cellinfo.cell.row]) = '') and (trim(list_log[2][cellinfo.cell.row]) = '') then
       aicon := 0
     else if (lowercase(list_log[1][cellinfo.cell.row]) = '.txt') or
@@ -2175,17 +2195,19 @@ begin
     else if (lowercase(list_log[1][cellinfo.cell.row]) = '.avi') or
       (lowercase(list_log[1][cellinfo.cell.row]) = '.mp4') then
       aicon := 4
-    else if (lowercase(list_log[1][cellinfo.cell.row]) = '.png') or
-      (lowercase(list_log[1][cellinfo.cell.row]) = '.jpeg') or
+    else if
       (lowercase(list_log[1][cellinfo.cell.row]) = '.ico') or
       (lowercase(list_log[1][cellinfo.cell.row]) = '.webp') or
-      (lowercase(list_log[1][cellinfo.cell.row]) = '.bmp') or
       (lowercase(list_log[1][cellinfo.cell.row]) = '.tiff') or
-      (lowercase(list_log[1][cellinfo.cell.row]) = '.gif') or
       (lowercase(list_log[1][cellinfo.cell.row]) = '.svg') or
-      (lowercase(list_log[1][cellinfo.cell.row]) = '.jpg') then
+      (lowercase(list_log[1][cellinfo.cell.row]) = '.gif') then
       aicon := 7
-    else if (lowercase(list_log[1][cellinfo.cell.row]) = '') or
+      else if (lowercase(list_log[1][cellinfo.cell.row]) = '.png') or
+      (lowercase(list_log[1][cellinfo.cell.row]) = '.jpeg') or
+      (lowercase(list_log[1][cellinfo.cell.row]) = '.bmp') or
+      (lowercase(list_log[1][cellinfo.cell.row]) = '.jpg') then
+      aicon := 7 // 13 for icons in grid
+      else if (lowercase(list_log[1][cellinfo.cell.row]) = '') or
       (lowercase(list_log[1][cellinfo.cell.row]) = '.exe') or
       (lowercase(list_log[1][cellinfo.cell.row]) = '.dbg') or
       (lowercase(list_log[1][cellinfo.cell.row]) = '.com') or
@@ -2212,9 +2234,34 @@ begin
 
     apoint.x := 2;
     apoint.y := 1;
-
+ 
+  if aicon <> 13 then 
     iconslist.paint(Canvas, aicon, apoint, cl_default,
-      cl_default, cl_default, 0);
+      cl_default, cl_default, 0)
+     
+   else
+    begin
+    
+    thefilename := list_log[0][cellinfo.cell.row];
+    thefilename := dir.value + trim(copy(thefilename,2,length(thefilename)));
+ 
+//    writeln(thefilename);
+    tbitmapcomp2.bitmap.LoadFromFile(tosysfilepath(theFileName));
+   
+   //timagelist2.count := 1;
+   //timagelist2.addimage(tbitmapcomp2.bitmap);
+ 
+    recti.x := 0;
+     recti.y := 0;
+     
+      recti.cx := list_log.datarowheight;
+     recti.cy := recti.cx;
+    
+   tbitmapcomp2.bitmap.paint(Canvas, Recti);
+   
+    end;  
+    
+ 
 
   end;
 

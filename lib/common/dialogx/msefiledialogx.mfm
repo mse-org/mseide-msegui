@@ -69,7 +69,6 @@ object filedialogxfo: Tfiledialogxfo
     cellheight = 15
     optionsgrid = [og_colsizing, og_focuscellonenter, og_mousescrollcol]
     options = [lvo_readonly, lvo_horz, lvo_drawfocus, lvo_mouseselect, lvo_keyselect, lvo_multiselect, lvo_locate, lvo_hintclippedtext]
-    itemlist.imagelist = iconslist
     itemlist.imagewidth = 18
     itemlist.imageheight = 18
     onselectionchanged = listviewselectionchanged
@@ -328,7 +327,7 @@ object filedialogxfo: Tfiledialogxfo
     bounds_cx = 476
     bounds_cy = 290
     optionsgrid = [og_colsizing, og_colchangeontabkey, og_wrapcol, og_autopopup, og_mousescrollcol]
-    datacols.count = 5
+    datacols.count = 6
     datacols.linecolor = -1610612731
     datacols.linecolorfix = -1610612733
     datacols.colorselect = 16770239
@@ -397,6 +396,18 @@ object filedialogxfo: Tfiledialogxfo
         coloractive = 16770239
         colorfocused = 16770239
         width = 14
+        options = [co_readonly, co_invisible, co_focusselect, co_mouseselect, co_keyselect, co_rowselect, co_savevalue, co_savestate, co_mousescrollrow]
+        optionsedit1 = [oe1_noselectall, oe1_autopopupmenu, oe1_keyexecute, oe1_readonlydialog, oe1_savevalue, oe1_savestate, oe1_checkvalueafterstatread]
+        valuefalse = '0'
+        valuetrue = '1'
+      end    
+      item
+        linecolor = -1610612731
+        linecolorfix = -1610612733
+        colorselect = 16770239
+        coloractive = 16770239
+        colorfocused = 16770239
+        width = 21
         options = [co_readonly, co_invisible, co_focusselect, co_mouseselect, co_keyselect, co_rowselect, co_savevalue, co_savestate, co_mousescrollrow]
         optionsedit1 = [oe1_noselectall, oe1_autopopupmenu, oe1_keyexecute, oe1_readonlydialog, oe1_savevalue, oe1_savestate, oe1_checkvalueafterstatread]
         valuefalse = '0'
@@ -974,14 +985,34 @@ object filedialogxfo: Tfiledialogxfo
     bounds_cx = 40
     bounds_cy = 48
   end
+  object tbitmapcomp1: tbitmapcomp
+    bitmap.options = [bmo_graymask]
+    bitmap.alignment = [al_stretchx, al_stretchy]
+    left = 248
+    top = 256
+  end
+  object tbitmapcomp2: tbitmapcomp
+    bitmap.options = [bmo_graymask]
+    bitmap.alignment = [al_stretchx, al_stretchy]
+    left = 248
+    top = 296
+  end
+  object timagelist2: timagelist
+    width = 18
+    height = 18
+    options = [bmo_masked, bmo_graymask]
+    transparentcolor = -2147483647
+    left = 238
+    top = 201
+  end
   object iconslist: timagelist
     width = 18
     height = 18
     options = [bmo_masked, bmo_graymask]
     transparentcolor = -2147483647
     count = 20
-    left = 238
-    top = 169
+    left = 240
+    top = 162
     image = {
       00000000120000005A0000005A000000AC3E0000000000000000000000000000
       0000000000000000000000000000000000000000FFFFFF24E4E4E40191959301
@@ -1746,11 +1777,5 @@ object filedialogxfo: Tfiledialogxfo
       FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
       FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF0000
     }
-  end
-  object tbitmapcomp1: tbitmapcomp
-    bitmap.options = [bmo_graymask]
-    bitmap.alignment = [al_stretchx, al_stretchy]
-    left = 248
-    top = 256
   end
 end
