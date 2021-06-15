@@ -104,41 +104,43 @@ finddialog=8
  y=149
  cx=300
  cy=269
-options=114
+options=137
  [projectoptionsfo.toolshortcuts]
  dropdowncolwidths=3
   70
   70
   70
  [projectoptionsfo.twidgetgrid3]
- propcolwidthref=788
+ propcolwidthref=806
  sortdescend0=0
  sortdescend1=0
  sortdescend2=0
  sortdescend3=0
- width4=106
+ width4=108
  sortdescend4=0
- width5=85
+ width5=87
  sortdescend5=0
- width6=56
+ width6=57
  sortdescend6=0
- width7=56
+ width7=57
  sortdescend7=0
- width8=82
+ width8=114
  sortdescend8=0
- width9=322
+ width9=329
  sortdescend9=0
  [projectoptionsfo.twidgetgrid4]
- propcolwidthref=596
- width0=96
- sortdescend0=0
- sortdescend1=0
- width2=100
- sortdescend2=0
- width3=287
- sortdescend3=0
- width4=299
- sortdescend4=0
+ propcolwidthref=563
+ width_newfonames=96
+ sortdescend_newfonames=0
+ sortdescend_newinheritedforms=0
+ width_newfonamebases=73
+ sortdescend_newfonamebases=0
+ width_newfoformsuffix=69
+ sortdescend_newfoformsuffix=0
+ width_newfosources=297
+ sortdescend_newfosources=0
+ width_mewfoforms=255
+ sortdescend_mewfoforms=0
  sorted=0
  col=-1073741823
  row=-1073741823
@@ -164,11 +166,32 @@ options=114
  sortdescend6=0
  [projectoptionsfo.macrosplitter]
  x=0
- y=199
+ y=201
  xprop=1
- yprop=0.35130434782609
+ yprop=0.35111876075732
  [projectoptionsfo.macrogrid]
- propcolwidthref=561
+ propcolwidthref=613
+ sortdescend0=0
+ sortdescend1=0
+ sortdescend2=0
+ sortdescend3=0
+ sortdescend4=0
+ sortdescend5=0
+ width6=146
+ sortdescend6=0
+ width7=601
+ sortdescend7=0
+ [projectoptionsfo.makeoptionsgrid]
+ propcolwidthref=746
+ values0=7
+  
+  
+  
+  
+  
+  
+  
+ width0=57
  sortdescend0=0
  sortdescend1=0
  sortdescend2=0
@@ -177,40 +200,40 @@ options=114
  sortdescend5=0
  sortdescend6=0
  sortdescend7=0
+ values8=7
+  -Xg -l -Mobjfpc -Sh -Fcutf8
+  -gl -O-
+  -B
+  -O2 -XX -Xs -CX
+  -vq
+  -FUunits
+  -dclass_bridge
  sortdescend8=0
- sortdescend9=0
- width10=146
- sortdescend10=0
- width11=545
- sortdescend11=0
- [projectoptionsfo.comment_1]
- value=
- [projectoptionsfo.comment_B]
- value=
- [projectoptionsfo.comment_M]
- value=
  [projectoptionsfo.makegroupbox]
  firsttab=0
- index=2
+ index=1
  [projectoptionsfo.exceptionsgrid]
- propcolwidthref=779
+ propcolwidthref=790
  width0=47
  sortdescend0=0
- width1=773
+ width1=784
  sortdescend1=0
  [projectoptionsfo.ttabwidget1]
  firsttab=0
  index=0
  [projectoptionsfo.filefiltergrid]
- propcolwidthref=734
+ propcolwidthref=698
  width0=112
  sortdescend0=0
- width1=727
+ width1=691
  sortdescend1=0
  [projectoptionsfo.ttabwidget2]
  firsttab=0
  index=1
- [projectoptionsfo.setting_tab]
+ [projectoptionsfo.ttabwidget3]
+ firsttab=0
+ index=0
+ [projectoptionsfo.tabwidget]
  firsttab=0
  index=2
  [projectoptionsfo]
@@ -423,11 +446,7 @@ uid=0
 macroon=0
 macronames=0
 macrovalues=0
-groupcomments=10
- 
- 
- 
- 
+groupcomments=6
  
  
  
@@ -755,9 +774,9 @@ findhistory=20
  mse_fpc_3_2
 findoptions=1
 editpos=4
- 0,5
- 25,5
- 0,0
+ 0,-1073741823
+ 64,5
+ 0,-1073741823
  0,93
 bookmarks0=0
 bookmarks1=0
@@ -857,7 +876,7 @@ windowlayout=551
  rcy=0
  wsize=0
  active=0
- visible=1
+ visible=0
  [threadsfo]
  splitdir=0
  useroptions=268451945
@@ -1327,7 +1346,7 @@ windowlayout=551
  [_mse_settingsfo_mse_]
  splitdir=0
  useroptions=268451963
- stackedunder=targetconsolefo
+ stackedunder=mainfo
  parent=
  mdistate=3
  nx=0
