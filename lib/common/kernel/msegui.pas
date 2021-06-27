@@ -34,8 +34,8 @@ uses
                    {$ifdef mse_with_ifi},mseifiglob,mseificompglob{$endif};
 
 const
- mseguiversiontext = '5.4.0';
- copyrighttext = 'Copyright 1999-2021';
+ mseguiversiontext = '5.2.0';
+ copyrighttext = 'Copyright 1999-2020';
 
  defaultwidgetcolor = cl_default;
  defaulttoplevelwidgetcolor = cl_background;
@@ -3316,9 +3316,6 @@ procedure debugwindow(const atext: string; const aid1,aid2: winidty);
 function checkwindowname(const aid: winidty; const aname: string): boolean;
 function debugwidgetname(const awidget: twidget; const atext: string): string;
 {$endif}
-
-var
-mse_repaintcanvas : boolean = false;
 
 implementation
 uses
@@ -17016,9 +17013,6 @@ begin
      fupdateregion.region:= 0;
      result:= true;
      fownerwidget.paint(bmp.canvas);
-     {$ifdef linux} // fixes problems on some graphic cards.
-     if mse_repaintcanvas then fownerwidget.paint(bmp.canvas);
-     {$endif}
      bmp.paint(fcanvas,rect1);
     end
     else begin
@@ -22391,8 +22385,4 @@ end;
 
 initialization
  registerapplicationclass(tinternalapplication);
- {$ifdef mse_repaintcanvas}
- mse_repaintcanvas := true;
- {$endif}
-
 end.
