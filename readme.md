@@ -3,6 +3,16 @@
 2021-07-01 Version 5.6.0.
 Copyright (c) 1999-2021 by Martin Schreiber and friends.
 
+MSEgui is a complete independent Free Pascal widgetset.
+It does not use any other widgetsets like GTK2/GTK3/Qt4/Qt5.
+MSEgui interacts on Unix directly with X11 server (like other widgetsets do).
+On Windows, it deals with the low level Windows GDI interface.
+
+In fact, MSEgui is a GTK2/GTK3/Qt5 widgetset but much better and totally with same look-and-feel on each OS (Linux, Windows and FreeBSD).
+And because it is developed in Pascal, you have full control on the widgetset.
+MSEgui is not yet compatible with macOS.
+
+# Features
 - Compiles with FPC 2.6.4, 3.0.0, 3.0.2, 3.2.0, 3.2.2 or 3.3.1.
 - For FreeBSD-x86_64, Linux-i386, Linux-x86_64, Linux-arm(Raspberry Pi),
   Windows-i386, Windows-x86_64.
