@@ -34,8 +34,8 @@ uses
                    {$ifdef mse_with_ifi},mseifiglob,mseificompglob{$endif};
 
 const
- mseguiversiontext = '5.2.0';
- copyrighttext = 'Copyright 1999-2020';
+ mseguiversiontext = '5.6.0';
+ copyrighttext = 'Copyright 1999-2021';
 
  defaultwidgetcolor = cl_default;
  defaulttoplevelwidgetcolor = cl_background;

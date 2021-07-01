@@ -1,5 +1,9 @@
-MSEide+MSEgui breaking changes version history
+MSEide+MSEgui changes version history
 **********************************************
+Version 5.6.0
+2021-07-01
+ Extended database properties, graphic fixes and compatible fpc 3.3.1.
+
 Version 5.4.0
 2021-05-09
  Fixed database for fpc >= 3.2.0
