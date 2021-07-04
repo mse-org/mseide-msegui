@@ -130,7 +130,8 @@ type
                    wo_taskbar,    //win32 only
                    wo_notaskbar,
                    wo_windowcentermessage, //showmessage centered in window
-                   wo_sysdnd //activate system drag and drop (xdnd on Linux)
+                   wo_sysdnd, //activate system drag and drop (xdnd on Linux)
+                   wo_alwaysontop
                    );
  windowoptionsty = set of windowoptionty;
  windowtypeoptionty = wo_popup..wo_dnd;

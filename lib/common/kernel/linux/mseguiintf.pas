@@ -781,6 +781,7 @@ type
        xembed,xembed_info,motif_wm_hints,wm_normal_hints,
        //onlyifexist below
        net_wm_window_opacity,
+       net_wm_alwaystofront,
 
        net_none //dummy
 );
@@ -825,6 +826,7 @@ const
        '_XEMBED','_XEMBED_INFO',
        '_MOTIF_WM_HINTS','WM_NORMAL_HINTS',
        '_NET_WM_WINDOW_OPACITY',
+       '_NET_WM_STATE_ABOVE',
        '');
 // needednetatom = netatomty(ord(high(netatomty))-4);
 type
@@ -4179,17 +4181,24 @@ begin
    gui_raisewindow(options.transientfor);
      //transientforhint not used by overrideredirect
   end;
+ 
+   // added thanks to Alexander
+  if (wo_alwaysontop in options.options)  then 
+    setnetatomarrayitem(id,net_wm_state,net_wm_alwaystofront);
+ 
   if options.options * windowtypeoptions <> [] then begin
    for opt1:= low(windowtypeoptionty) to high(windowtypeoptionty) do begin
     if opt1 in options.options then begin
      setnetatomarrayitem(id,net_wm_window_type,windowtypes[opt1]);
 //     break;
     end;
+  
    end;
   end
   else begin
    setnetatomarrayitem(id,net_wm_window_type,net_wm_window_type_normal);
   end;
+  
   if (options.options * noframewindowtypes <> []) and
                            (netatoms[motif_wm_hints] <> 0) then begin
    setlongproperty(id,netatoms[motif_wm_hints],[mwm_hints_decorations,0,0,0,0],
@@ -4204,7 +4213,7 @@ begin
     setnetatomarrayitem(id,net_wm_state,net_wm_state_skip_taskbar);
    end;
   end;
-  if wo_sysdnd in options.options then begin
+   if wo_sysdnd in options.options then begin
    setatomproperty(id,xdndatoms[xdnd_aware],xdndprotocolversion);
   end
   else begin
