@@ -4113,8 +4113,9 @@ begin
 //   end;
    attributes.bit_gravity:= northwestgravity;
    valuemask:= valuemask or cwwingravity or cwbitgravity;
-
-   id:= xcreatewindow(appdisp,id1,rect.x,rect.y,width,height,0,
+   
+    id:= xcreatewindow(appdisp,id1,rect.x,rect.y,
+   width,height,0,
       depth,copyfromparent,visual,
       valuemask,@attributes);
    if colormap <> 0 then begin

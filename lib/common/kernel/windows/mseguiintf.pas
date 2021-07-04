@@ -2942,6 +2942,7 @@ var
  rect1: rectty;
  classname: string;
  ownerwindow: winidty;
+ region : THandle;
 begin
  fillchar(awindow,sizeof(awindow),0);
  with awindow,win32windowty(awindow.platformdata).d,options do begin
@@ -3018,10 +3019,14 @@ begin
    end;
    id:= windows.CreateWindowex(windowstyleex,pchar(classname),nil,
          windowstyle,rect1.x,rect1.y,rect1.cx,rect1.cy,ca2,0,hinstance,nil);
+  
    if setgroup and (groupleader = 0) or (wo_groupleader in options) then begin
     groupleaderwindow:= id;
    end;
   end;
+  
+  
+  
   if id = 0 then begin
    result:= gue_createwindow;
   end
@@ -3032,6 +3037,14 @@ begin
 {$ifdef mse_debuggdi}
    inc(windowcount);
 {$endif}
+
+  // Rounded
+  if wo_rounded in options then
+  begin
+  region := CreateRoundRectRgn(0,0, rect1.cx, rect1.cy - 1, mse_radiuscorner, mse_radiuscorner);
+  SetWindowRgn(id, region, True);
+  end;
+  
    if not (pos = wp_default) and (parent = 0) then begin
     result:= gui_reposwindow(id,rect);
    end

@@ -131,7 +131,8 @@ type
                    wo_notaskbar,
                    wo_windowcentermessage, //showmessage centered in window
                    wo_sysdnd, //activate system drag and drop (xdnd on Linux)
-                   wo_alwaysontop
+                   wo_alwaysontop,
+                   wo_rounded
                    );
  windowoptionsty = set of windowoptionty;
  windowtypeoptionty = wo_popup..wo_dnd;
@@ -320,6 +321,7 @@ var
  noreconfigurewmwindow: boolean;
  toplevelraise: boolean;
  nostaticgravity: boolean;
+ mse_radiuscorner : integer = 22;
 // exabug: boolean;
 // nocreatestaticgravity: boolean;
 
