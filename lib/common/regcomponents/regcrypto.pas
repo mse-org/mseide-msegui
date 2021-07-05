@@ -19,7 +19,7 @@ unit regcrypto;
 interface
 implementation
 uses
- msedesignintf,msecryptohandler,msessl,msepropertyeditors,msestream,msezstream,
+ msedesignintf,msecryptohandler,msessl,msepropertyeditors,msestream, msezstream,
  regcrypto_bmp;
 
 procedure Register;

@@ -1,4 +1,4 @@
-unit msezstream;
+unit mse_zstream;
 
 {**********************************************************************
     This file is part of the Free Pascal free component library.

@@ -17,7 +17,7 @@ unit mseFPWritePNG;
 
 interface
 
-uses sysutils, classes, mclasses, mseFPImage, mseFPImgCmn, msePNGComn, mseZStream;
+uses sysutils, classes, mclasses, mseFPImage, mseFPImgCmn, msePNGComn, mse_ZStream;
 
 type
 

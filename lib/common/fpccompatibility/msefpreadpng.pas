@@ -21,7 +21,7 @@ unit msefpreadpng;
 interface
 
 uses
-  sysutils,classes,mclasses, msefpimage, msezstream,
+  sysutils,classes,mclasses, msefpimage, mse_zstream,
       {$ifdef FPC}
        msefpimgcmn, msepngcomn
       {$else}
