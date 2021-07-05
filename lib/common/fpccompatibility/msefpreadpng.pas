@@ -21,7 +21,7 @@ unit msefpreadpng;
 interface
 
 uses
-  sysutils,classes,mclasses, msefpimage,msezstream,
+  sysutils,classes,mclasses, msefpimage, msezstream,
       {$ifdef FPC}
        msefpimgcmn, msepngcomn
       {$else}
@@ -37,7 +37,7 @@ Type
     private
 
       FHeader : THeaderChunk;
-      ZData : classes.TMemoryStream;  // holds compressed data until all blocks are read
+      ZData : TMemoryStream;  // holds compressed data until all blocks are read
       Decompress : TDeCompressionStream; // decompresses the data
       FPltte : boolean;     // if palette is used
       FCountScanlines : EightLong; //Number of scanlines to process for each pass
@@ -808,7 +808,7 @@ begin
   {$endif}
   with Header do
     Img.SetSize (Width, Height);
-  ZData := classes.TMemoryStream.Create;
+  ZData := TMemoryStream.Create;
   try
     EndOfFile := false;
     while not EndOfFile do
@@ -817,7 +817,7 @@ begin
       HandleChunk;
       end;
     ZData.position:=0;
-    Decompress := TDecompressionStream.Create (ZData);
+    Decompress := TDecompressionStream.Create(ZData);
     try
       DoDecompress;
     finally
