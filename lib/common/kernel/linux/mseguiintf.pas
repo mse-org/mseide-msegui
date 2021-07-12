@@ -4153,10 +4153,36 @@ XFillRectangle(appdisp, pmap, shape_gc, 0, 0, width,height);
 
 XSetForeground(appdisp, shape_gc, 1);
 
-XDrawarc(appdisp, pmap, shape_gc, 0, 0, width , height,  0, 360*64);
+//XDrawarc(appdisp, pmap, shape_gc, 0, 0, width , height,  0, 360*64);
 
-XFillarc(appdisp, pmap, shape_gc, 0, 0, width , height,  0, 360*64);
+//XFillarc(appdisp, pmap, shape_gc, 0, 0, width , height,  0, 360*64);
 
+XDrawarc(appdisp, pmap, shape_gc, 0, 0, mse_radiuscorner , mse_radiuscorner,  0, 360*64);
+XFillarc(appdisp, pmap, shape_gc, 0, 0, mse_radiuscorner , mse_radiuscorner,  0, 360*64);
+XDrawarc(appdisp, pmap, shape_gc, width - mse_radiuscorner, 0, mse_radiuscorner , mse_radiuscorner,  0, 360*64);
+XFillarc(appdisp, pmap, shape_gc, width - mse_radiuscorner, 0, mse_radiuscorner , mse_radiuscorner,  0, 360*64);
+
+XDrawarc(appdisp, pmap, shape_gc, 0, height- mse_radiuscorner -1, mse_radiuscorner-1 , mse_radiuscorner,  0, 360*64);
+XFillarc(appdisp, pmap, shape_gc, 0, height- mse_radiuscorner -1, mse_radiuscorner -1, mse_radiuscorner,  0, 360*64);
+XDrawarc(appdisp, pmap, shape_gc, width - mse_radiuscorner, height- mse_radiuscorner -1, mse_radiuscorner , mse_radiuscorner,  0, 360*64);
+XFillarc(appdisp, pmap, shape_gc, width - mse_radiuscorner, height- mse_radiuscorner -1, mse_radiuscorner , mse_radiuscorner,  0, 360*64);
+
+XDrawRectangle(appdisp, pmap, shape_gc,
+                 mse_radiuscorner div 2, 0,
+  width - (mse_radiuscorner) , height);
+  
+XFillRectangle(appdisp, pmap, shape_gc,
+                 mse_radiuscorner div 2, 0,
+  width - (mse_radiuscorner) , height);
+  
+XDrawRectangle(appdisp, pmap, shape_gc,
+                 0, mse_radiuscorner div 2,
+  width , height - (mse_radiuscorner));
+  
+XFillRectangle(appdisp, pmap, shape_gc,
+                 0, mse_radiuscorner div 2,
+  width , height - (mse_radiuscorner));
+ 
 XShapeCombineMask(appdisp, id, ShapeBounding, 0, 0, pmap, ShapeSet);
 
 XFreePixmap(appdisp, pmap);
