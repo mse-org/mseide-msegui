@@ -3038,13 +3038,19 @@ begin
    inc(windowcount);
 {$endif}
 
-  // Rounded
+  // ellipse or rounded
+  if wo_ellipse in options then
+  begin
+  region := CreateEllipticRgn(0,0, rect1.cx, rect1.cy);
+  SetWindowRgn(id, region, True);
+  end else
   if wo_rounded in options then
   begin
   region := CreateRoundRectRgn(0,0, rect1.cx, rect1.cy - 1, mse_radiuscorner, mse_radiuscorner);
   SetWindowRgn(id, region, True);
   end;
-  
+
+    
    if not (pos = wp_default) and (parent = 0) then begin
     result:= gui_reposwindow(id,rect);
    end

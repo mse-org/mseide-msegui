@@ -132,6 +132,7 @@ type
                    wo_windowcentermessage, //showmessage centered in window
                    wo_sysdnd, //activate system drag and drop (xdnd on Linux)
                    wo_alwaysontop,
+                   wo_ellipse,
                    wo_rounded
                    );
  windowoptionsty = set of windowoptionty;
