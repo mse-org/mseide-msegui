@@ -4123,10 +4123,13 @@ var
    width,height,0,
     depth,  copyfromparent,visual,
       valuemask,@attributes);
+      
+  // added thanks to Alexander
+  if (wo_alwaysontop in options.options)  then
+    setnetatomarrayitem(id,net_wm_state,net_wm_alwaystofront);
 
- if (wo_rounded in options.options)  then
+  if (wo_rounded in options.options) then
  begin
- 
  // shape
   //* create a graphics context for drawing on the window */
 
@@ -4167,8 +4170,6 @@ XMapWindow(appdisp, id);
 XSync(appdisp, False);
 
 //   end shape  
- //   }
- 
 end;
             
    if colormap <> 0 then begin
@@ -4236,10 +4237,6 @@ end;
      //transientforhint not used by overrideredirect
   end;
  
-   // added thanks to Alexander
-  if (wo_alwaysontop in options.options)  then
-    setnetatomarrayitem(id,net_wm_state,net_wm_alwaystofront);
-   
  if options.options * windowtypeoptions <> [] then begin
    for opt1:= low(windowtypeoptionty) to high(windowtypeoptionty) do begin
     if opt1 in options.options then begin
