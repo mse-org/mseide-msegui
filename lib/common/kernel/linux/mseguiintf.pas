@@ -39,7 +39,7 @@ uses
  msegraphutils,mseevent,msepointer,mseguiglob,msesystypes,{msestockobjects,}
  msethread{$ifdef FPC},x,xutil,dynlibs{$endif},
  mselibc,msectypes,msesysintf,msegraphics,
- msestrings,mxft,mxrender,mxrandr;
+ msestrings,mxft,mxrender,mxrandr, mxext, mshape;
 
 {$ifdef FPC}
  {$define xbooleanresult}
@@ -4062,7 +4062,12 @@ var
  icmask: longword;
  colormap1: tcolormap;
  opt1: windowtypeoptionty;
-begin
+ // shape from Xext
+ xgcv :TXGCValues;
+ pmap : pixmapty;
+ shape_gc : TGC;
+ win_gc : TGC;
+ begin
  gdi_lock;
  with awindow,x11windowty(platformdata).d do begin
   valuemask:= 0;
@@ -4116,8 +4121,56 @@ begin
    
     id:= xcreatewindow(appdisp,id1,rect.x,rect.y,
    width,height,0,
-      depth,copyfromparent,visual,
+    depth,  copyfromparent,visual,
       valuemask,@attributes);
+
+ if (wo_rounded in options.options)  then
+ begin
+ 
+ // shape
+  //* create a graphics context for drawing on the window */
+
+  xgcv.foreground := WhitePixel(appdisp, DefaultScreen(appdisp));
+  xgcv.line_width := 1;
+  xgcv.line_style := LineSolid;
+
+  win_gc := XCreateGC(appdisp, id, GCForeground or GCLineWidth or GCLineStyle, @xgcv);
+
+ //* create the pixmap that we'll use for shaping the window */
+  pmap := XCreatePixmap(appdisp, id, width, height, 1);
+
+//* create a graphics context for drawing on the pixmap */
+  shape_gc := XCreateGC(appdisp, pmap, 0, @xgcv);
+
+//* shape the window: first blank everything */
+XSetForeground(appdisp, shape_gc, 0);
+XFillRectangle(appdisp, pmap, shape_gc, 0, 0, width,height);
+
+//* shape the window: now "unblank" everything where we want to draw */
+
+XSetForeground(appdisp, shape_gc, 1);
+
+XDrawarc(appdisp, pmap, shape_gc, 0, 0, width , height,  0, 360*64);
+
+XFillarc(appdisp, pmap, shape_gc, 0, 0, width , height,  0, 360*64);
+
+XShapeCombineMask(appdisp, id, ShapeBounding, 0, 0, pmap, ShapeSet);
+
+XFreePixmap(appdisp, pmap);
+
+//* register events: ExposureMask for re-drawing, ButtonPressMask
+// to capture mouse button press events */
+
+XSelectInput(appdisp, id, ButtonPressMask or ExposureMask);
+
+XMapWindow(appdisp, id);
+XSync(appdisp, False);
+
+//   end shape  
+ //   }
+ 
+end;
+            
    if colormap <> 0 then begin
     xfreecolormap(appdisp,colormap);
     colormap:= 0;
@@ -4184,22 +4237,22 @@ begin
   end;
  
    // added thanks to Alexander
-  if (wo_alwaysontop in options.options)  then 
+  if (wo_alwaysontop in options.options)  then
     setnetatomarrayitem(id,net_wm_state,net_wm_alwaystofront);
- 
-  if options.options * windowtypeoptions <> [] then begin
+   
+ if options.options * windowtypeoptions <> [] then begin
    for opt1:= low(windowtypeoptionty) to high(windowtypeoptionty) do begin
     if opt1 in options.options then begin
      setnetatomarrayitem(id,net_wm_window_type,windowtypes[opt1]);
 //     break;
     end;
-  
+   
    end;
   end
   else begin
    setnetatomarrayitem(id,net_wm_window_type,net_wm_window_type_normal);
   end;
-  
+ 
   if (options.options * noframewindowtypes <> []) and
                            (netatoms[motif_wm_hints] <> 0) then begin
    setlongproperty(id,netatoms[motif_wm_hints],[mwm_hints_decorations,0,0,0,0],
@@ -4221,8 +4274,10 @@ begin
    xdeleteproperty(appdisp,id,xdndatoms[xdnd_aware]);
   end;
  end;
+ 
  gdi_unlock;
 end;
+
 
 function gui_destroywindow(var awindow: windowty): guierrorty;
 begin
