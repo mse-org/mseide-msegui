@@ -33,7 +33,7 @@ uses
   ctypes, xlib;
 
 const
-  libXext = 'Xext';
+  libXext = 'libXext.so.6';
   X_EXTENSION_UNKNOWN = 'unknown';
   X_EXTENSION_MISSING = 'missing';
 

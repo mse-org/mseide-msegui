@@ -24,6 +24,9 @@ in this Software without prior written authorization from The Open Group.
 
 ********************************************************)
 
+// Translated into Pascal by Nikolay Nikolov 2021
+// Dynamic loading by Fred vS 2021
+
 unit mshape;
 
 {$PACKRECORDS C}
@@ -31,10 +34,14 @@ unit mshape;
 interface
 
 uses
-  ctypes, x, xlib, xutil;
+  dynlibs, ctypes, x, xlib, xutil;
+
 
 const
-  libXext = 'Xext';
+  libXext = 'libXext.so.6';
+  
+var
+  mse_hasxext : boolean = false;  
 
 {$I mshapeconst.inc}
 
@@ -55,19 +62,19 @@ type
     shaped: TBool;             { true if the region exists }
   end;
 
-function XShapeQueryExtension(
+var XShapeQueryExtension: function(
     display: PDisplay;
     event_base,
     error_base: Pcint
-): TBoolResult; cdecl; external libXext;
+): TBoolResult; cdecl; 
 
-function XShapeQueryVersion(
+var XShapeQueryVersion: function(
     display: PDisplay;
     major_version,
     minor_version: Pcint
-): TStatus; cdecl; external libXext;
+): TStatus; cdecl; 
 
-procedure XShapeCombineRegion(
+var XShapeCombineRegion: procedure(
     display: PDisplay;
     dest: TWindow;
     dest_kind: cint;
@@ -75,9 +82,9 @@ procedure XShapeCombineRegion(
     y_off: cint;
     region: TRegion;
     op: cint
-); cdecl; external libXext;
+); cdecl; 
 
-procedure XShapeCombineRectangles(
+var XShapeCombineRectangles: procedure (
     display: PDisplay;
     dest: TWindow;
     dest_kind: cint;
@@ -87,9 +94,9 @@ procedure XShapeCombineRectangles(
     n_rects: cint;
     op: cint;
     ordering: cint
-); cdecl; external libXext;
+); cdecl; 
 
-procedure XShapeCombineMask(
+var XShapeCombineMask: procedure(
     display: PDisplay;
     dest: TWindow;
     dest_kind: cint;
@@ -97,9 +104,9 @@ procedure XShapeCombineMask(
     y_off: cint;
     src: TPixmap;
     op: cint
-); cdecl; external libXext;
+); cdecl;
 
-procedure XShapeCombineShape(
+var XShapeCombineShape: procedure(
     display: PDisplay;
     dest: TWindow;
     dest_kind: cint;
@@ -108,17 +115,17 @@ procedure XShapeCombineShape(
     src: TWindow;
     src_kind: cint;
     op: cint
-); cdecl; external libXext;
+); cdecl;
 
-procedure XShapeOffsetShape(
+var XShapeOffsetShape: procedure(
     display: PDisplay;
     dest: TWindow;
     dest_kind: cint;
     x_off,
     y_off: cint
-); cdecl; external libXext;
+); cdecl;
 
-function XShapeQueryExtents(
+var XShapeQueryExtents: function(
     display: PDisplay;
     window: TWindow;
     bounding_shaped: PBool;
@@ -131,27 +138,99 @@ function XShapeQueryExtents(
     y_clip: Pcint;
     w_clip,
     h_clip: Pcuint
-): TStatus; cdecl; external libXext;
+): TStatus; cdecl; 
 
-procedure XShapeSelectInput(
+var XShapeSelectInput: procedure(
     display: PDisplay;
     window: TWindow;
     mask: culong
-); cdecl; external libXext;
+); cdecl; 
 
-function XShapeInputSelected(
+var XShapeInputSelected: function(
     display: PDisplay;
     window: TWindow
-): culong; cdecl; external libXext;
+): culong; cdecl;
 
-function XShapeGetRectangles(
+var XShapeGetRectangles: function(
     display: PDisplay;
     window: TWindow;
     kind: cint;
     count,
     ordering: Pcint
-): PXRectangle; cdecl; external libXext;
+): PXRectangle; cdecl;
+
+    {Special function for dynamic loading of lib ...}
+
+    var sh_Handle:TLibHandle=dynlibs.NilHandle; // this will hold our handle for the lib; it functions nicely as a mutli-lib prevention unit as well...
+
+    var ReferenceCounter : cardinal = 0;  // Reference counter
+         
+    function sh_IsLoaded : boolean; inline; 
+
+    Function sh_Load(const libfilename:string) :boolean; // load the lib
+
+    Procedure sh_Unload(); // unload and frees the lib from memory : do not forget to call it before close application.
+
 
 implementation
+
+function sh_IsLoaded: boolean;
+begin
+ Result := (sh_Handle <> dynlibs.NilHandle);
+end;
+
+Function sh_Load(const libfilename:string) :boolean;
+var
+thelib: string; 
+begin
+  Result := False;
+  if sh_Handle<>0 then 
+begin
+ Inc(ReferenceCounter);
+ result:=true {is it already there ?}
+end  else 
+begin {go & load the library}
+   if Length(libfilename) = 0 then thelib := libXext else thelib := libfilename;
+    sh_Handle:=DynLibs.SafeLoadLibrary(thelib); // obtain the handle we want
+  	if sh_Handle <> DynLibs.NilHandle then
+begin {now we tie the functions to the VARs from above}
+mse_hasxext := true;
+Pointer(XShapeQueryExtension):=DynLibs.GetProcedureAddress(sh_Handle,PChar('XShapeQueryExtension'));
+Pointer(XShapeQueryVersion):=DynLibs.GetProcedureAddress(sh_Handle,PChar('XShapeQueryVersion'));
+Pointer(XShapeCombineRegion):=DynLibs.GetProcedureAddress(sh_Handle,PChar('XShapeCombineRegion'));
+Pointer(XShapeCombineRectangles):=DynLibs.GetProcedureAddress(sh_Handle,PChar('XShapeCombineRectangles'));
+Pointer(XShapeCombineMask):=DynLibs.GetProcedureAddress(sh_Handle,PChar('XShapeCombineMask'));
+Pointer(XShapeCombineShape):=DynLibs.GetProcedureAddress(sh_Handle,PChar('XShapeCombineShape'));
+Pointer(XShapeOffsetShape):=DynLibs.GetProcedureAddress(sh_Handle,PChar('XShapeOffsetShape'));
+Pointer(XShapeQueryExtents):=DynLibs.GetProcedureAddress(sh_Handle,PChar('XShapeQueryExtents'));
+Pointer(XShapeSelectInput):=DynLibs.GetProcedureAddress(sh_Handle,PChar('XShapeSelectInput'));
+Pointer(XShapeInputSelected):=DynLibs.GetProcedureAddress(sh_Handle,PChar('XShapeInputSelected'));
+Pointer(XShapeGetRectangles):=DynLibs.GetProcedureAddress(sh_Handle,PChar('XShapeGetRectangles'));
+ Result := sh_IsLoaded;
+ ReferenceCounter:=1;   
+end;
+end;
+end;
+
+Procedure sh_Unload;
+begin
+// < Reference counting
+  if ReferenceCounter > 0 then
+    dec(ReferenceCounter);
+  if ReferenceCounter > 0 then
+    exit;
+  // >
+  if sh_IsLoaded then
+  begin
+    DynLibs.UnloadLibrary(sh_Handle);
+    sh_Handle:=DynLibs.NilHandle;
+  end;
+end;
+
+initialization
+sh_Load('');
+
+finalization
+sh_unLoad;
 
 end.

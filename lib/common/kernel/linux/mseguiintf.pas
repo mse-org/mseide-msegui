@@ -39,7 +39,7 @@ uses
  msegraphutils,mseevent,msepointer,mseguiglob,msesystypes,{msestockobjects,}
  msethread{$ifdef FPC},x,xutil,dynlibs{$endif},
  mselibc,msectypes,msesysintf,msegraphics,
- msestrings,mxft,mxrender,mxrandr, mxext, mshape;
+ msestrings,mxft,mxrender,mxrandr,mshape;
 
 {$ifdef FPC}
  {$define xbooleanresult}
@@ -4128,7 +4128,7 @@ var
   if (wo_alwaysontop in options.options)  then
     setnetatomarrayitem(id,net_wm_state,net_wm_alwaystofront);
 
-  if (wo_rounded in options.options) or (wo_ellipse in options.options) then
+  if (mse_hasxext = true) and  ((wo_rounded in options.options) or (wo_ellipse in options.options)) then
  begin
  // shape
   //* create a graphics context for drawing on the window */
@@ -4200,7 +4200,7 @@ XSelectInput(appdisp, id, ButtonPressMask or ExposureMask);
 XMapWindow(appdisp, id);
 XSync(appdisp, False);
 
-//   end shape  
+//   fin shape  
 end;
             
    if colormap <> 0 then begin
