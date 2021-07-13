@@ -3041,7 +3041,7 @@ begin
   // ellipse or rounded
   if wo_ellipse in options then
   begin
-  region := CreateEllipticRgn(0,0, rect1.cx, rect1.cy);
+  region := CreateEllipticRgn(0,0, rect1.cx, rect1.cy -1);
   SetWindowRgn(id, region, True);
   end else
   if wo_rounded in options then
