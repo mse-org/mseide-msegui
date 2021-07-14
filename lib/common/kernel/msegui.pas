@@ -36,7 +36,6 @@ uses
 const
  mseguiversiontext = '5.6.2';
  copyrighttext = 'Copyright 1999-2021';
-
  defaultwidgetcolor = cl_default;
  defaulttoplevelwidgetcolor = cl_background;
  defaultfadecolor = cl_ltgray;

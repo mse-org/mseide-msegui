@@ -873,8 +873,8 @@ editpos=7
  0,-1073741823
  0,-1073741823
  0,93
+ 0,0
  0,-1073741823
- 41,4
  0,-1073741823
 bookmarks0=0
 bookmarks1=0
@@ -888,7 +888,7 @@ sourcefiles=7
  /home/fred/mseide-msegui/lib/common/dialogs/msefiledialog.pas
  /home/fred/mseide-msegui/lib/common/designutils/msedesignintf.pas
  /home/fred/mseide-msegui/lib/common/designutils/msesettings.pas
- ${PROJECTDIR}/main.pas
+ /home/fred/mseide-msegui/apps/ide/main.pas
  ${PROJECTDIR}/actionsmodule.pas
  /home/fred/mseide-msegui/lib/common/kernel/msegui.pas
 relpaths=7
@@ -931,10 +931,10 @@ nomenumodules=4
 order=7
  0
  1
- 5
- 3
- 2
  4
+ 3
+ 5
+ 2
  6
 firsttab=0
 index=2
@@ -1170,10 +1170,10 @@ windowlayout=585
  [breakpointsfo.bkptson]
  value=1
  [objectinspectorfo.grid]
- propcolwidthref=448
- width0=198
+ propcolwidthref=412
+ width0=182
  sortdescend0=0
- width1=244
+ width1=224
  sortdescend1=0
  [symbolfo]
  splitdir=0
@@ -1384,7 +1384,7 @@ windowlayout=585
  x=0
  y=0
  cx=1212
- cy=-1
+ cy=0
  rcx=0
  rcy=0
  [debuggerfo.edit_options]
@@ -1394,8 +1394,9 @@ windowlayout=585
  [debuggerfo.edit_compiler]
  value=Pascal
  [debuggerfo.file_history]
- value=/home/fred/mseide-msegui/apps/ide/actionsmodule.pas
+ value=/home/fred/mseide-msegui/apps/ide/main.pas
  history=20
+  /home/fred/mseide-msegui/apps/ide/main.pas
   /home/fred/mseide-msegui/apps/ide/actionsmodule.pas
   /home/fred/strumpract/src/define.inc
   /home/fred/strumpract/src/findmessage.pas
@@ -1415,9 +1416,8 @@ windowlayout=585
   /home/fred/ovotag/mse_ovotag/tag_id3v2.pas
   /home/fred/ovotag/main.pas
   /home/fred/ovotag/test/imageviewer.pas
-  /home/fred/ovotag/test/imageviewer.mfm
  [debuggerfo.project_options]
- value=1
+ value=6
  [debuggerfo.hints]
  value=1
  [sourcefo]
@@ -1440,10 +1440,10 @@ windowlayout=585
  order=7
   0
   1
-  5
-  3
-  2
   4
+  3
+  5
+  2
   6
  firsttab=0
  index=2
@@ -1455,7 +1455,7 @@ windowlayout=585
  irqoff=0
  splitdir=0
  useroptions=268451947
- stackedunder=_mse_sourcefo_mse_
+ stackedunder=confdebuggerfo
  parent=
  mdistate=0
  nx=0
