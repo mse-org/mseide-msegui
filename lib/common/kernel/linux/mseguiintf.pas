@@ -4155,8 +4155,8 @@ XSetForeground(appdisp, shape_gc, 1);
 
   if (wo_ellipse in options.options) then
  begin
-  XDrawarc(appdisp, pmap, shape_gc, 0, 0, width , height,  0, 360*64);
-  XFillarc(appdisp, pmap, shape_gc, 0, 0, width , height,  0, 360*64);
+  XDrawarc(appdisp, pmap, shape_gc, 0, 0, width-1 , height-1,  0, 360*64);
+  XFillarc(appdisp, pmap, shape_gc, 0, 0, width-1 , height-1,  0, 360*64);
  end else
 
  begin
