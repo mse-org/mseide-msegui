@@ -44,6 +44,8 @@ type
    function updatesortfield(const afield: tfield; const adescend: boolean): boolean;
   protected
    procedure setactive (const value : boolean); reintroduce;
+   procedure setactive2 (avalue : boolean);
+   procedure isqlpropertyeditor.setactive = setactive2;
    function getactive: boolean;
    procedure loaded; override;
    function  getfieldclass(fieldtype: tfieldtype): tfieldclass; override;
@@ -117,6 +119,8 @@ type
    function updatesortfield(const afield: tfield; const adescend: boolean): boolean;
   protected
    procedure setactive (const value : boolean); reintroduce;
+   procedure setactive2 (avalue: boolean);
+   procedure isqlpropertyeditor.setactive = setactive2;
    function getactive: boolean;
    procedure loaded; override;
    function  getfieldclass(fieldtype: tfieldtype): tfieldclass; override;
@@ -352,6 +356,11 @@ begin
  if fcontroller.setactive(value) then begin
   inherited setactive(value);
  end;
+end;
+
+procedure tmsezreadonlyquery.setactive2 (avalue : boolean);
+begin
+  setactive(avalue);
 end;
 
 procedure tmsezreadonlyquery.loaded;
@@ -626,6 +635,11 @@ begin
  if fcontroller.setactive(value) then begin
   inherited setactive(value);
  end;
+end;
+
+procedure tmsezquery.setactive2(avalue: boolean);
+begin
+  setactive(avalue);
 end;
 
 procedure tmsezquery.loaded;
