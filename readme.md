@@ -346,9 +346,13 @@ tsqlite3connection field type mapping:
 ```
 
 # ZeosLib
-In order to install the Zeos components add the path to the Zeos source to
-'Project'-'Options'-'Make'-'Directories' and compile the IDE with
--dmse_with_zeoslib -dMSEgui.
+Since msegui commit fbbaa979b, ZeosLib components are included in mseide by default.
+Also last stable source are included in /mseide-msegui/lib/common/mzeoslib/.
+
+If you want to use other ZeosLib source, you need to delete directory /mseide-msegui/lib/common/mzeoslib/.
+Then add the path to the ZeosLib source to 'Project'-'Options'-'Make'-'Directories' and compile your applicatio with '-dMSEgui'.
+
+If you want to recompile the IDE with new ZeosLib source, add parameter '-dmse_with_zeoslib -dMSEgui'.
 There is a predefined IDE project apps/ide/mseide_zeos.prj, update 'Project'-
 'Options'-'Macros' according to your installation.
 
