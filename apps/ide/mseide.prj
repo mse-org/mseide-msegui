@@ -21,7 +21,7 @@ order18=0
 [projectoptions]
 projectdir=/home/fred/mseide-msegui/apps/ide
 projectfilename=/home/fred/mseide-msegui/apps/ide/mseide.prj
-findinfiledialog=74
+findinfiledialog=63
  [findinfileadialogfo.subdirs]
  value=1
  [findinfileadialogfo.incurrentfile]
@@ -43,7 +43,6 @@ findinfiledialog=74
   "*.pas" "*.pp" "*.inc" "*.*"
   "*.pas" "*.pp" "*.inc"
  [findinfileadialogfo.dir]
- filenamescust=0
  filenames=1
   /home/fred/mseide-msegui/
  filecolwidth=150
@@ -51,16 +50,6 @@ findinfiledialog=74
  y=0
  cx=0
  cy=0
- panel=0
- noicon=0
- compact=0
- showhidden=0
- colnamewidth=203
- colsizewidth=81
- colextwidth=45
- coldatewidth=126
- splitterplaces=243
- splitterlateral=126
  filehistory=3
   /home/fred/mseide-msegui/
   /home/fred/svnfpc32/
@@ -68,8 +57,9 @@ findinfiledialog=74
  filefilterindex=0
  filefilter="*.pas" "*.pp" "*.inc"
  [findinfileadialogfo.findtext]
- value=filedialogfo
+ value=statname
  history=20
+  statname
   filedialogfo
   controller.panel
   dialogx
@@ -89,7 +79,6 @@ findinfiledialog=74
   030100
   FPC_FULLVERSION
   parametersmatch
-  ptypeinfo
  [findinfileadialogfo]
  stackedunder=
  x=268
@@ -849,8 +838,9 @@ envvarons=0
 [edit]
 hintwidth=0
 hintheight=0
-finddtext=controller
+finddtext=onloaded
 findhistory=20
+ onloaded
  panel
  tfilenameedit
  filedialog
@@ -870,16 +860,17 @@ findhistory=20
  FPC_FULLVERSION
  parametersmatch
  mse_fpc_32
- mse_fpc_3_2
 findoptions=1
-editpos=7
+editpos=9
  0,-1073741823
  0,-1073741823
  0,-1073741823
  0,93
- 0,5
- 39,5
  0,-1073741823
+ 0,-1073741823
+ 0,-1073741823
+ 0,-1073741823
+ 0,0
 bookmarks0=0
 bookmarks1=0
 bookmarks2=0
@@ -887,7 +878,9 @@ bookmarks3=0
 bookmarks4=0
 bookmarks5=0
 bookmarks6=0
-sourcefiles=7
+bookmarks7=0
+bookmarks8=0
+sourcefiles=9
  ${PROJECTDIR}/sourceform.pas
  /home/fred/mseide-msegui/lib/common/dialogs/msefiledialog.pas
  /home/fred/mseide-msegui/lib/common/designutils/msedesignintf.pas
@@ -895,7 +888,9 @@ sourcefiles=7
  ${PROJECTDIR}/main.pas
  ${PROJECTDIR}/actionsmodule.pas
  /home/fred/mseide-msegui/lib/common/kernel/msegui.pas
-relpaths=7
+ ${PROJECTDIR}/mseide.pas
+ /home/fred/mseide-msegui/apps/ide/mseide.pas
+relpaths=9
  sourceform.pas
  lib/common/dialogs/msefiledialog.pas
  lib/common/designutils/msedesignintf.pas
@@ -903,7 +898,11 @@ relpaths=7
  main.pas
  actionsmodule.pas
  lib/common/kernel/msegui.pas
-ismoduletexts=7
+ mseide.pas
+ mseide.pas
+ismoduletexts=9
+ 0
+ 0
  0
  0
  0
@@ -932,18 +931,20 @@ nomenumodules=4
  0
  0
 [sourcefo.files_tab]
-order=7
+order=9
  0
  1
- 5
  3
- 2
- 4
+ 8
  6
+ 7
+ 5
+ 4
+ 2
 firsttab=0
-index=2
+index=3
 [layout]
-windowlayout=585
+windowlayout=587
  [mainfo.basedock]
  splitdir=2
  useroptions=268450944
@@ -957,8 +958,8 @@ windowlayout=585
  ny=0
  ncx=0
  ncy=0
- x=34
- y=53
+ x=73
+ y=109
  cx=1224
  cy=621
  rcx=0
@@ -1155,7 +1156,7 @@ windowlayout=585
  [breakpointsfo]
  splitdir=0
  useroptions=268451947
- stackedunder=memoryfo
+ stackedunder=conflangfo
  parent=
  mdistate=0
  nx=0
@@ -1174,10 +1175,10 @@ windowlayout=585
  [breakpointsfo.bkptson]
  value=1
  [objectinspectorfo.grid]
- propcolwidthref=332
- width0=147
+ propcolwidthref=242
+ width0=107
  sortdescend0=0
- width1=179
+ width1=129
  sortdescend1=0
  [symbolfo]
  splitdir=0
@@ -1341,7 +1342,7 @@ windowlayout=585
  [componentpalettefo]
  splitdir=0
  useroptions=268460139
- stackedunder=_mse_sourcefo_mse_
+ stackedunder=
  parent=
  mdistate=3
  nx=0
@@ -1388,7 +1389,7 @@ windowlayout=585
  x=0
  y=0
  cx=1212
- cy=0
+ cy=-2
  rcx=0
  rcy=0
  [debuggerfo.edit_options]
@@ -1398,10 +1399,11 @@ windowlayout=585
  [debuggerfo.edit_compiler]
  value=Pascal
  [debuggerfo.file_history]
- value=/home/fred/mseide-msegui/apps/ide/actionsmodule.pas
+ value=/home/fred/mseide-msegui/apps/ide/mseide.pas
  history=20
-  /home/fred/mseide-msegui/apps/ide/actionsmodule.pas
+  /home/fred/mseide-msegui/lib/common/designutils/msesettings.pas
   /home/fred/mseide-msegui/apps/ide/main.pas
+  /home/fred/mseide-msegui/apps/ide/actionsmodule.pas
   /home/fred/strumpract/src/define.inc
   /home/fred/strumpract/src/findmessage.pas
   /home/fred/strumpract/src/aboutform.pas
@@ -1419,7 +1421,6 @@ windowlayout=585
   /home/fred/ovotag/mse_ovotag/id3v1genres.pas
   /home/fred/ovotag/mse_ovotag/tag_id3v2.pas
   /home/fred/ovotag/main.pas
-  /home/fred/ovotag/test/imageviewer.pas
  [debuggerfo.project_options]
  value=1
  [debuggerfo.hints]
@@ -1441,16 +1442,18 @@ windowlayout=585
  rcx=0
  rcy=0
  [sourcefo.files_tab]
- order=7
+ order=9
   0
   1
-  5
   3
-  2
-  4
+  8
   6
+  7
+  5
+  4
+  2
  firsttab=0
- index=2
+ index=3
  [confideufo.fontname]
  value=stf_default
  [confideufo.usedefaulteditoroptions]
@@ -1459,7 +1462,7 @@ windowlayout=585
  irqoff=0
  splitdir=0
  useroptions=268451947
- stackedunder=confdebuggerfo
+ stackedunder=_mse_sourcefo_mse_
  parent=
  mdistate=0
  nx=0

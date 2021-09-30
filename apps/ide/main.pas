@@ -1827,6 +1827,13 @@ begin
   if not finddir(wstr1) then begin
    createdir(wstr1);
   end;
+  
+    {$ifdef linux}
+           if not fileexists(wstr1 + '/mseideli.sta') then
+           Filecreate(wstr1 + '/mseideli.sta') ;
+    {$endif}
+  
+  
   {$ifdef mswindows}
   mainstatfile.filename:= statname+'wi.sta';
   {$endif}
