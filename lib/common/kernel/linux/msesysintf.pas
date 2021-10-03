@@ -677,48 +677,37 @@ var
  str1: string;
  str2: msestring;
  stat1: baseunix.stat;
+ aMode: Integer = -1;
 const
  defaultopenflags = o_cloexec;
 begin
  str2:= path;
  sys_tosysfilepath(str2);
  str1:= tosys(str2);
-// writeln('sys_openfile str1 =' + str1);
  
- handle:= longint(mselibc.open(PChar(str1), openmodes[openmode] or defaultopenflags,[getfilerights(rights)]));
- //writeln('handle =' + inttostr(handle));
- 
- // wrteln('fstat ' + inttostr(fpfstat(handle,stat1)));
+//writeln('sys_openfile str1 =' + str1);
+//if openmode = fm_create then
+//writeln('openmode = fm_create');
+
+case openmode of
+  fm_read: aMode := fmOpenRead;
+  fm_write: aMode := fmOpenWrite;
+  fm_readwrite: aMode := fmOpenReadWrite;
+  fm_append: aMode := fmOpenReadWrite;
+end;
+
+if openmode = fm_create then
+handle:= Filecreate(str1) else
+handle:= Fileopen(str1,aMode);
+
+//handle:= longint(mselibc.open(PChar(str1), openmodes[openmode] or defaultopenflags,[getfilerights(rights)]));
+//writeln('handle =' + inttostr(handle));
+//writeln('fstat ' + inttostr(fpfstat(handle,stat1)));
  
  fpfstat(handle,stat1);
-  
  setcloexec(handle);
- 
  result:= sye_ok;
 
-{
- if handle >= 0 then begin
-  if fstat(handle,@stat1) = 0 then begin
-   if s_isdir(stat1.st_mode) then begin
-    mselibc.__close(handle);
-    handle:= -1;
-    result:= sye_isdir;
-   end
-   else begin
-    setcloexec(handle);
-    result:= sye_ok;
-   end;
-  end
-  else begin
-   mselibc.__close(handle);
-   handle:= -1;
-   result:= syelasterror;
-  end;
- end
- else begin
-  result:= syelasterror;
- end;
-}
 end;
 
 function sys_closefile(const handle: integer): syserrorty;
@@ -1342,17 +1331,47 @@ begin
  end;
 end;
 
+procedure fpstattofileinfo(const statbuffer: stat; var info: fileinfoty);
+begin
+ with info,extinfo1,extinfo2,statbuffer do begin
+  filetype:= getfiletype(st_mode);
+  attributes:= getfileattributes(st_mode);
+  if (length(name) > 0) and (info.name[1] = '.') then begin
+   system.include(attributes,fa_hidden);
+  end;
+  if filetype = ft_dir then begin
+   system.include(attributes,fa_dir);
+  end;
+  state:= state + [fis_typevalid,fis_extinfo1valid,fis_extinfo2valid];
+  size:= st_size;
+  modtime:= filetimetodatetime(st_mtime,st_mtime_nsec);
+  accesstime:= filetimetodatetime(st_atime,st_atime_nsec);
+  ctime:= filetimetodatetime(st_ctime,st_ctime_nsec);
+  id:= st_ino;
+  owner:= st_uid;
+  group:= st_gid;
+ end;
+end;
+
 function sys_getfileinfo(const path: filenamety; var info: fileinfoty): boolean;
 var
  str1: filenamety;
- statbuffer: _stat64;
+// statbuffer: _stat64;
+ fpstatbuffer : stat;
+
 begin
  clearfileinfo(info);
  str1:= tosysfilepath(path);
- fillchar(statbuffer,sizeof(statbuffer),0);
- result:= stat64(pchar(tosys(str1)),@statbuffer) = 0;
+ 
+ //fillchar(statbuffer,sizeof(statbuffer),0);
+ //result := stat64(pchar(tosys(str1)),@statbuffer) = 0;
+ fillchar(fpstatbuffer,sizeof(fpstatbuffer),0);
+ result := fpstat(pchar(tosys(str1)),fpstatbuffer) = 0;
+ 
  if result then begin
-  stattofileinfo(statbuffer,info);
+   //stattofileinfo(statbuffer,info);
+   fpstattofileinfo(fpstatbuffer,info);
+
   splitfilepath(filepath(path),str1,info.name);
  end;
 end;
