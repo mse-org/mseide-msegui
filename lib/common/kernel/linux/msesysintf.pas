@@ -1309,28 +1309,7 @@ begin
  end;
 end;
 
-procedure stattofileinfo(const statbuffer: _stat64; var info: fileinfoty);
-begin
- with info,extinfo1,extinfo2,statbuffer do begin
-  filetype:= getfiletype(st_mode);
-  attributes:= getfileattributes(st_mode);
-  if (length(name) > 0) and (info.name[1] = '.') then begin
-   system.include(attributes,fa_hidden);
-  end;
-  if filetype = ft_dir then begin
-   system.include(attributes,fa_dir);
-  end;
-  state:= state + [fis_typevalid,fis_extinfo1valid,fis_extinfo2valid];
-  size:= st_size;
-  modtime:= filetimetodatetime(st_mtime,st_mtime_nsec);
-  accesstime:= filetimetodatetime(st_atime,st_atime_nsec);
-  ctime:= filetimetodatetime(st_ctime,st_ctime_nsec);
-  id:= st_ino;
-  owner:= st_uid;
-  group:= st_gid;
- end;
-end;
-
+{$ifdef linux}
 procedure fpstattofileinfo(const statbuffer: stat; var info: fileinfoty);
 begin
  with info,extinfo1,extinfo2,statbuffer do begin
@@ -1352,25 +1331,57 @@ begin
   group:= st_gid;
  end;
 end;
+{$else} 
+ procedure stattofileinfo(const statbuffer: _stat64; var info: fileinfoty);
+begin
+ with info,extinfo1,extinfo2,statbuffer do begin
+  filetype:= getfiletype(st_mode);
+  attributes:= getfileattributes(st_mode);
+  if (length(name) > 0) and (info.name[1] = '.') then begin
+   system.include(attributes,fa_hidden);
+  end;
+  if filetype = ft_dir then begin
+   system.include(attributes,fa_dir);
+  end;
+  state:= state + [fis_typevalid,fis_extinfo1valid,fis_extinfo2valid];
+  size:= st_size;
+  modtime:= filetimetodatetime(st_mtime,st_mtime_nsec);
+  accesstime:= filetimetodatetime(st_atime,st_atime_nsec);
+  ctime:= filetimetodatetime(st_ctime,st_ctime_nsec);
+  id:= st_ino;
+  owner:= st_uid;
+  group:= st_gid;
+ end;
+end;
+{$endif}
 
 function sys_getfileinfo(const path: filenamety; var info: fileinfoty): boolean;
 var
  str1: filenamety;
-// statbuffer: _stat64;
- fpstatbuffer : stat;
+ {$ifdef linux}
+  fpstatbuffer : baseunix.stat;
+ {$else} // for freebsd
+  statbuffer: _stat64;
+ {$endif}
 
 begin
  clearfileinfo(info);
  str1:= tosysfilepath(path);
  
- //fillchar(statbuffer,sizeof(statbuffer),0);
- //result := stat64(pchar(tosys(str1)),@statbuffer) = 0;
+ {$ifdef linux} 
  fillchar(fpstatbuffer,sizeof(fpstatbuffer),0);
  result := fpstat(pchar(tosys(str1)),fpstatbuffer) = 0;
- 
+ {$else} 
+ fillchar(statbuffer,sizeof(statbuffer),0);
+ result := stat64(pchar(tosys(str1)),@statbuffer) = 0;
+ {$endif}
+  
  if result then begin
-   //stattofileinfo(statbuffer,info);
+   {$ifdef linux} 
    fpstattofileinfo(fpstatbuffer,info);
+   {$else} 
+   stattofileinfo(statbuffer,info);
+   {$endif}
 
   splitfilepath(filepath(path),str1,info.name);
  end;
@@ -1378,13 +1389,28 @@ end;
 
 function sys_getfdinfo(const fd: longint; var info: fileinfoty): boolean;
 var
- statbuffer: _stat64;
+ {$ifdef linux}
+  fpstatbuffer : baseunix.stat;
+ {$else} // for freebsd
+  statbuffer: _stat64;
+  {$endif}
 begin
  clearfileinfo(info);
+
+ {$ifdef linux} 
+ fillchar(fpstatbuffer,sizeof(fpstatbuffer),0);
+ result := fpfstat(fd,fpstatbuffer) = 0;
+ {$else} 
  fillchar(statbuffer,sizeof(statbuffer),0);
  result:= fstat64(fd,@statbuffer) = 0;
+ {$endif}
+
  if result then begin
-  stattofileinfo(statbuffer,info);
+   {$ifdef linux} 
+   fpstattofileinfo(fpstatbuffer,info);
+   {$else} 
+   stattofileinfo(statbuffer,info);
+   {$endif}
  end;
 end;
 
