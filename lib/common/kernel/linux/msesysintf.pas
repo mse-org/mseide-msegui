@@ -1336,7 +1336,7 @@ begin
  end;
 end;
 {$else} 
- procedure stattofileinfo(const statbuffer: _stat64; var info: fileinfoty);
+ procedure stattofileinfo(statbuffer: _stat64; var info: fileinfoty);
 begin
  with info,extinfo1,extinfo2,statbuffer do begin
   filetype:= getfiletype(st_mode);
