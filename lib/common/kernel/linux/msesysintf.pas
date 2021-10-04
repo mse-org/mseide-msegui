@@ -1310,7 +1310,7 @@ begin
 end;
 
 {$ifdef linux}
-procedure fpstattofileinfo(const statbuffer: stat; var info: fileinfoty);
+procedure fpstattofileinfo(statbuffer: stat; var info: fileinfoty);
 begin
  with info,extinfo1,extinfo2,statbuffer do begin
   filetype:= getfiletype(st_mode);
@@ -1325,7 +1325,11 @@ begin
   size:= st_size;
   modtime:= filetimetodatetime(st_mtime,st_mtime_nsec);
   accesstime:= filetimetodatetime(st_atime,st_atime_nsec);
+  {$if fpc_fullversion >= 030100}
   ctime:= filetimetodatetime(st_ctime,st_ctime_nsec);
+  {$else}  
+  ctime:= st_ctime;
+  {$endif}
   id:= st_ino;
   owner:= st_uid;
   group:= st_gid;

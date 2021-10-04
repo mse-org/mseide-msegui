@@ -57,8 +57,10 @@ findinfiledialog=63
  filefilterindex=0
  filefilter="*.pas" "*.pp" "*.inc"
  [findinfileadialogfo.findtext]
- value=statname
+ value=mse_with_zeoslib
  history=20
+  mse_with_zeoslib
+  -dmse_with_zeoslib
   statname
   filedialogfo
   controller.panel
@@ -77,8 +79,6 @@ findinfiledialog=63
   tdbgridwidget
   cfo_captionfocus
   030100
-  FPC_FULLVERSION
-  parametersmatch
  [findinfileadialogfo]
  stackedunder=
  x=268
@@ -90,8 +90,8 @@ finddialog=8
  value=0
  [finddialogfo]
  stackedunder=
- x=678
- y=149
+ x=1019
+ y=318
  cx=300
  cy=269
 options=114
@@ -181,7 +181,7 @@ options=114
  value=
  [projectoptionsfo.makegroupbox]
  firsttab=0
- index=0
+ index=3
  [projectoptionsfo.exceptionsgrid]
  propcolwidthref=779
  width0=47
@@ -502,34 +502,31 @@ settingsstorage=0
 settingsprojecttree=0
 settingsautoload=0
 settingsautosave=0
-modulenames=3
+modulenames=2
  ACTIONSMO
- MAINFO
  SOURCEFO
-moduletypes=3
+moduletypes=2
  TACTIONSMO
- TMAINFO
  TSOURCEFO
-modulefiles=3
+modulefiles=2
  /home/fred/mseide-msegui/apps/ide/actionsmodule.mfm
- /home/fred/mseide-msegui/apps/ide/main.mfm
  /home/fred/mseide-msegui/apps/ide/sourceform.mfm
 befcommandon=0
 makeoptionson=9
  255
  3
  4095
- 250
+ 254
  255
  252
  255
  255
  0
 compilerusedon=29
- 3895
+ 3879
  0
  8
- 0
+ 16
  0
  64
  128
@@ -835,8 +832,9 @@ envvarons=0
 [edit]
 hintwidth=0
 hintheight=0
-finddtext=editprojectoptions
+finddtext=fpstattofileinfo
 findhistory=20
+ fpstattofileinfo
  editprojectoptions
  onloaded
  panel
@@ -856,39 +854,23 @@ findhistory=20
  030200
  $self
  FPC_FULLVERSION
- parametersmatch
 findoptions=1
-editpos=6
+editpos=3
  0,-1073741823
  0,-1073741823
  0,0
- 0,0
- 0,-1073741823
- 0,46
 bookmarks0=0
 bookmarks1=0
 bookmarks2=0
-bookmarks3=0
-bookmarks4=0
-bookmarks5=0
-sourcefiles=6
- ${PROJECTDIR}/mseide.pas
+sourcefiles=3
  ${PROJECTDIR}/sourceform.pas
  ${PROJECTDIR}/actionsmodule.pas
  ${PROJECTDIR}/mseide.pas
- ${PROJECTDIR}/mseide.pas
- ${PROJECTDIR}/main.pas
-relpaths=6
- mseide.pas
+relpaths=3
  sourceform.pas
  actionsmodule.pas
  mseide.pas
- mseide.pas
- main.pas
-ismoduletexts=6
- 0
- 0
- 0
+ismoduletexts=3
  0
  0
  0
@@ -901,25 +883,22 @@ moduleoptions=3
  0
  0
 visiblemodules=3
- -1
+ 0
  -1
  -1
 nomenumodules=3
- 0
+ -1
  0
  0
 [sourcefo.files_tab]
-order=6
+order=3
+ 2
  0
  1
- 2
- 3
- 5
- 4
 firsttab=0
-index=4
+index=0
 [layout]
-windowlayout=558
+windowlayout=555
  [mainfo.basedock]
  splitdir=2
  useroptions=268450944
@@ -1317,7 +1296,7 @@ windowlayout=558
  [componentpalettefo]
  splitdir=0
  useroptions=268460139
- stackedunder=
+ stackedunder=_mse_sourcefo_mse_
  parent=
  mdistate=3
  nx=0
@@ -1359,7 +1338,7 @@ windowlayout=558
  mdistate=0
  nx=0
  ny=0
- ncx=1197
+ ncx=1212
  ncy=0
  x=0
  y=0
@@ -1374,23 +1353,23 @@ windowlayout=558
  [debuggerfo.edit_compiler]
  value=Pascal
  [debuggerfo.file_history]
- value=/home/fred/mseide-msegui/apps/ide/main.pas
+ value=/home/fred/mseide-msegui/apps/ide/mseide.pas
  history=13
   /home/fred/mseide-msegui/apps/ide/main.pas
+  /home/fred/mseide-msegui/apps/ide/mseide.pas
   /home/fred/mseide-msegui/lib/common/kernel/msegui.pas
   /home/fred/ideu/src/mseconsts_ide_pt.pas
   /home/fred/ideu/src/mseconsts_ide_ru.pas
   /home/fred/ideu/src/mseconsts_ide_de.pas
   /home/fred/ideu/src/mseconsts_ide_es.pas
   /home/fred/ideu/src/mseconsts_ide_fr.pas
-  /home/fred/mseide-msegui/apps/ide/mseide.pas
   /home/fred/ideu/src/ideU.pas
   /home/fred/ideu/src/projectoptionsform.pas
   /home/fred/mseide-msegui/apps/ide/sourcepage.pas
   /home/fred/mseide-msegui/lib/common/kernel/linux/msesysintf.pas
   /home/fred/ideu/src/msefiledialogx.pas
  [debuggerfo.project_options]
- value=6
+ value=1
  [debuggerfo.hints]
  value=1
  [sourcefo]
@@ -1410,15 +1389,12 @@ windowlayout=558
  rcx=0
  rcy=0
  [sourcefo.files_tab]
- order=6
+ order=3
+  2
   0
   1
-  2
-  3
-  5
-  4
  firsttab=0
- index=4
+ index=0
  [confideufo.fontname]
  value=stf_default
  [confideufo.usedefaulteditoroptions]
@@ -1462,7 +1438,7 @@ windowlayout=558
  [_mse_mainfo_mse_]
  splitdir=0
  useroptions=268451963
- stackedunder=targetconsolefo
+ stackedunder=componentpalettefo
  parent=
  mdistate=3
  nx=0
@@ -1477,7 +1453,7 @@ windowlayout=558
  rcy=0
  wsize=0
  active=0
- visible=1
+ visible=0
 [targetconsole]
 finddtext=
 findhistory=0

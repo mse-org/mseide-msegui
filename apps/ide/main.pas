@@ -375,7 +375,9 @@ uses
  regpascalscript,
 {$endif}
 {$ifdef mse_with_zeoslib}
- regzeoslib,
+  {$if fpc_fullversion >= 030100}
+  regzeoslib,
+  {$endif}
 {$endif}
  regdesignutils,regsysutils,regcrypto,regserialcomm,regexperimental,
 {$ifndef mse_no_deprecated}
