@@ -46,7 +46,7 @@ uses
  mselistbrowser,projecttreeform,msepipestream,msestringcontainer,msesys,
  msewidgets;
 const
- versiontext = '5.6.2';
+ versiontext = '5.6.4';
  idecaption = 'MSEide';
  statname = 'mseide';
 

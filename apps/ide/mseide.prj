@@ -181,7 +181,7 @@ options=114
  value=
  [projectoptionsfo.makegroupbox]
  firsttab=0
- index=2
+ index=0
  [projectoptionsfo.exceptionsgrid]
  propcolwidthref=779
  width0=47
@@ -275,7 +275,7 @@ makeoptions=9
  -ghl -O-
  -dmse_with_zeoslib
  -B
- -O2
+ -O1
  -XX -Xs -CX
  -vq
  -FUunits
@@ -502,14 +502,17 @@ settingsstorage=0
 settingsprojecttree=0
 settingsautoload=0
 settingsautosave=0
-modulenames=2
+modulenames=3
  ACTIONSMO
+ MAINFO
  SOURCEFO
-moduletypes=2
+moduletypes=3
  TACTIONSMO
+ TMAINFO
  TSOURCEFO
-modulefiles=2
+modulefiles=3
  /home/fred/mseide-msegui/apps/ide/actionsmodule.mfm
+ /home/fred/mseide-msegui/apps/ide/main.mfm
  /home/fred/mseide-msegui/apps/ide/sourceform.mfm
 befcommandon=0
 makeoptionson=9
@@ -517,7 +520,7 @@ makeoptionson=9
  3
  4095
  250
- 0
+ 255
  252
  255
  255
@@ -525,8 +528,8 @@ makeoptionson=9
 compilerusedon=29
  3895
  0
- 0
  8
+ 0
  0
  64
  128
@@ -855,30 +858,35 @@ findhistory=20
  FPC_FULLVERSION
  parametersmatch
 findoptions=1
-editpos=5
+editpos=6
  0,-1073741823
  0,-1073741823
  0,0
+ 0,0
  0,-1073741823
- 0,9
+ 0,46
 bookmarks0=0
 bookmarks1=0
 bookmarks2=0
 bookmarks3=0
 bookmarks4=0
-sourcefiles=5
+bookmarks5=0
+sourcefiles=6
  ${PROJECTDIR}/mseide.pas
  ${PROJECTDIR}/sourceform.pas
- /home/fred/mseide-msegui/apps/ide/actionsmodule.pas
+ ${PROJECTDIR}/actionsmodule.pas
  ${PROJECTDIR}/mseide.pas
- /home/fred/mseide-msegui/apps/ide/mseide.pas
-relpaths=5
+ ${PROJECTDIR}/mseide.pas
+ ${PROJECTDIR}/main.pas
+relpaths=6
  mseide.pas
  sourceform.pas
  actionsmodule.pas
  mseide.pas
  mseide.pas
-ismoduletexts=5
+ main.pas
+ismoduletexts=6
+ 0
  0
  0
  0
@@ -893,24 +901,25 @@ moduleoptions=3
  0
  0
 visiblemodules=3
- 0
+ -1
  -1
  -1
 nomenumodules=3
- -1
+ 0
  0
  0
 [sourcefo.files_tab]
-order=5
+order=6
  0
  1
  2
- 4
  3
+ 5
+ 4
 firsttab=0
-index=3
+index=4
 [layout]
-windowlayout=553
+windowlayout=558
  [mainfo.basedock]
  splitdir=2
  useroptions=268450944
@@ -924,7 +933,7 @@ windowlayout=553
  ny=0
  ncx=0
  ncy=0
- x=84
+ x=107
  y=70
  cx=1224
  cy=621
@@ -1062,7 +1071,7 @@ windowlayout=553
  sortdescend1=0
  sorted=0
  col=1
- row=-1073741823
+ row=0
  rowheight=16
  [stackfo]
  splitdir=0
@@ -1355,7 +1364,7 @@ windowlayout=553
  x=0
  y=0
  cx=1212
- cy=-2
+ cy=0
  rcx=0
  rcy=0
  [debuggerfo.edit_options]
@@ -1365,19 +1374,23 @@ windowlayout=553
  [debuggerfo.edit_compiler]
  value=Pascal
  [debuggerfo.file_history]
- value=/home/fred/mseide-msegui/apps/ide/mseide.pas
- history=9
-  /home/fred/mseide-msegui/apps/ide/actionsmodule.pas
-  /home/fred/mseide-msegui/apps/ide/sourceform.pas
+ value=/home/fred/mseide-msegui/apps/ide/main.pas
+ history=13
+  /home/fred/mseide-msegui/apps/ide/main.pas
+  /home/fred/mseide-msegui/lib/common/kernel/msegui.pas
+  /home/fred/ideu/src/mseconsts_ide_pt.pas
+  /home/fred/ideu/src/mseconsts_ide_ru.pas
+  /home/fred/ideu/src/mseconsts_ide_de.pas
+  /home/fred/ideu/src/mseconsts_ide_es.pas
+  /home/fred/ideu/src/mseconsts_ide_fr.pas
   /home/fred/mseide-msegui/apps/ide/mseide.pas
   /home/fred/ideu/src/ideU.pas
   /home/fred/ideu/src/projectoptionsform.pas
-  /home/fred/mseide-msegui/apps/ide/main.pas
   /home/fred/mseide-msegui/apps/ide/sourcepage.pas
   /home/fred/mseide-msegui/lib/common/kernel/linux/msesysintf.pas
   /home/fred/ideu/src/msefiledialogx.pas
  [debuggerfo.project_options]
- value=1
+ value=6
  [debuggerfo.hints]
  value=1
  [sourcefo]
@@ -1397,14 +1410,15 @@ windowlayout=553
  rcx=0
  rcy=0
  [sourcefo.files_tab]
- order=5
+ order=6
   0
   1
   2
-  4
   3
+  5
+  4
  firsttab=0
- index=3
+ index=4
  [confideufo.fontname]
  value=stf_default
  [confideufo.usedefaulteditoroptions]
@@ -1413,7 +1427,7 @@ windowlayout=553
  irqoff=0
  splitdir=0
  useroptions=268451947
- stackedunder=_mse_mainfo_mse_
+ stackedunder=confdebuggerfo
  parent=
  mdistate=0
  nx=0
@@ -1448,7 +1462,7 @@ windowlayout=553
  [_mse_mainfo_mse_]
  splitdir=0
  useroptions=268451963
- stackedunder=confdebuggerfo
+ stackedunder=targetconsolefo
  parent=
  mdistate=3
  nx=0
@@ -1463,7 +1477,7 @@ windowlayout=553
  rcy=0
  wsize=0
  active=0
- visible=0
+ visible=1
 [targetconsole]
 finddtext=
 findhistory=0
