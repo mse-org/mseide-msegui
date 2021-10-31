@@ -13,7 +13,7 @@ And because it is developed in Pascal, you have full control on the widgetset.
 MSEgui is not yet compatible with macOS.
 
 # Features
-- Compiles with FPC 2.6.4, 3.0.0, 3.0.2, 3.2.0, 3.2.2.
+- Compiles with FPC 2.6.4, 3.0.0, 3.0.2, 3.2.0, 3.2.2. and 3.3.1.
 - For FreeBSD-x86_64, Linux-i386, Linux-x86_64,
   Linux-arm32 and aarch64(Raspberry Pi),
   Windows-i386, Windows-x86_64.
