@@ -17,7 +17,7 @@ function getcodeset(): string;
 
 implementation
 uses
- cwstring,sysutils,msestrings,mseformatstr,msetypes,msesysintf;
+ msecwstring,sysutils,msestrings,mseformatstr,msetypes,msesysintf;
 
 function getlocstr(const id: integer; const defaultvalue: string): string;
 var

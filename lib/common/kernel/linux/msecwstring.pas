@@ -21,7 +21,7 @@
 {$if fpc_fullversion >= 30001}
  {$define hascompareoptions}
 {$endif}
-unit cwstring;
+unit msecwstring;
 {$ifndef FPC}
 interface          //dummy
 implementation
@@ -177,11 +177,19 @@ Type
   TAnsiRec = Record
     CodePage    : TSystemCodePage;
     ElementSize : Word;
-{$ifdef CPU64}
+{$if not defined(VER3_0) and not defined(VER3_2)}
+  {$ifdef CPU64}	
+    Ref         : Longint;
+  {$else}
+    Ref         : SizeInt;
+  {$endif}
+{$else}
+  {$ifdef CPU64}	
     { align fields  }
 	Dummy       : DWord;
-{$endif CPU64}
+  {$endif CPU64}
     Ref         : SizeInt;
+{$endif}
     Len         : SizeInt;
   end;
 
