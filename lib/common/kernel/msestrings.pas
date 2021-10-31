@@ -875,6 +875,7 @@ begin
  ps:= pointer(value);
  pe:= ps + count;
  while ps < pe do begin
+ // writeln(inttostr(ps^));
   ca1:= ps^;
   inc(ps);
   if ca1 < $80 then begin //1 byte
@@ -1410,7 +1411,7 @@ begin
   end;
  end;
 end;
-
+{
 procedure stringaddref(var str: ansistring);
 var
  po1: psizeint;
@@ -1422,7 +1423,19 @@ begin
   end;
  end;
 end;
+}
 
+ procedure stringaddref(var str: ansistring);
+    var
+     temp: ansistring;
+    begin
+     { increase refcount if it was > 0}
+     temp:=str;
+     { prevent the compiler from finalising temp, so it won't decrease the refcount again }
+     pointer(temp):=nil;
+    end;
+
+{
 procedure stringaddref(var str: msestring);
 {$ifndef msestringsarenotrefcounted}
 var
@@ -1441,14 +1454,37 @@ begin
 {$endif}
  end;
 end;
+}
+
+procedure stringaddref(var str: msestring);
+var
+{$ifndef msestringsarenotrefcounted}
+ po1: psizeint;
+{$endif}
+ temp: msestring;
+begin
+ if pointer(str) <> nil then begin
+{$ifndef msestringsarenotrefcounted}
+  { increase refcount if it was > 0}
+     temp:=str;
+     { prevent the compiler from finalising temp, so it won't decrease the refcount again }
+     pointer(temp):=nil;
+  end;
+{$else}
+  reallocstring(str); //delphi and FPC 2.2
+                      //widestrings are not refcounted on win32
+{$endif}
+ end;
 
 procedure stringsafefree(var str: string; const onlyifunique: boolean);
 var
- po1: psizeint;
+ //po1: psizeint;
+ po1: longint;
 begin
  if pointer(str) <> nil then begin
-  po1:= pointer(str)-2*sizeof(sizeint);
-  if (po1^ >= 0) and (not onlyifunique or (po1^ = 1)) then begin
+ // po1:= pointer(str)-2*sizeof(sizeint);
+ po1:= StringRefCount(str);
+  if (po1 >= 0) and (not onlyifunique or (po1 = 1)) then begin
    fillchar(pointer(str)^,length(str)*sizeof(str[1]),0);
    str:= '';
   end;
@@ -1457,11 +1493,13 @@ end;
 
 procedure stringsafefree(var str: msestring; const onlyifunique: boolean);
 var
- po1: psizeint;
+ //po1: psizeint;
+ po1: longint;
 begin
  if pointer(str) <> nil then begin
-  po1:= pointer(str)-2*sizeof(sizeint);
-  if (po1^ >= 0) and (not onlyifunique or (po1^ = 1)) then begin
+   // po1:= pointer(str)-2*sizeof(sizeint);
+ po1:= StringRefCount(str);
+  if (po1 >= 0) and (not onlyifunique or (po1 = 1)) then begin
    fillchar(pointer(str)^,length(str)*sizeof(str[1]),0);
    str:= '';
   end;
