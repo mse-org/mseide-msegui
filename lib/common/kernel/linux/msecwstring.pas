@@ -21,6 +21,10 @@
 {$if fpc_fullversion >= 30001}
  {$define hascompareoptions}
 {$endif}
+{$if fpc_fullversion >= 030300}
+ {$define mse_fpc_3_3}
+ {$endif}
+
 unit msecwstring;
 {$ifndef FPC}
 interface          //dummy
@@ -177,7 +181,7 @@ Type
   TAnsiRec = Record
     CodePage    : TSystemCodePage;
     ElementSize : Word;
-{$if not defined(VER3_0) and not defined(VER3_2)}
+  {$if defined(mse_fpc_3_3)}
   {$ifdef CPU64}	
     Ref         : Longint;
   {$else}
@@ -189,7 +193,7 @@ Type
 	Dummy       : DWord;
   {$endif CPU64}
     Ref         : SizeInt;
-{$endif}
+ {$endif}
     Len         : SizeInt;
   end;
 
