@@ -25,6 +25,9 @@ unit msestrings;
  {$if fpc_fullversion >= 030000}
   {$define hascodepage}
  {$endif}
+ {$if fpc_fullversion >= 030300}
+  {$define mse_fpc_3_3}
+ {$endif}
 {$endif}
 
 {$ifdef FPC}{$mode objfpc}{$h+}{$interfaces corba}{$goto on}{$endif}
@@ -152,15 +155,24 @@ type
 {$ifdef hascodepage}
   CodePage: TSystemCodePage;
   ElementSize: Word;
- {$ifdef CPU64}    { align fields  }
-  Dummy: DWord;
- {$endif CPU64}
+ {$if defined(mse_fpc_3_3)}
+  {$ifdef CPU64}	
+    Ref         : Longint;
+  {$else}
+    Ref         : SizeInt;
+  {$endif}
+{$else}
+  {$ifdef CPU64}	
+    { align fields  }
+	Dummy       : DWord;
+  {$endif CPU64}
+    Ref         : SizeInt;
 {$endif}
-  ref: sizeint;
-  len: sizeint;
+{$endif}
+   len: sizeint;
  end;
-
- pstringheaderty = ^stringheaderty;
+ 
+  pstringheaderty = ^stringheaderty;
 
 const
  emptylstring: lstringty = (po: nil; len: 0);
@@ -6270,8 +6282,10 @@ begin
  {$ifdef hascodepage}
    codepage:= cp_acp;
    elementsize:= 1;
+  {$if not defined(mse_fpc_3_3)}
   {$ifdef cpu64}
    dummy:= 0;
+  {$endif}
   {$endif}
  {$endif}
    ref:= 1;
