@@ -1490,14 +1490,22 @@ begin
 
 procedure stringsafefree(var str: string; const onlyifunique: boolean);
 var
- //po1: psizeint;
- po1: longint;
+ {$if fpc_fullversion < 030000}
+ po1: psizeint;
+ {$else}
+  po1: longint;
+ {$endif}
 begin
  if pointer(str) <> nil then begin
- // po1:= pointer(str)-2*sizeof(sizeint);
- po1:= StringRefCount(str);
+ {$if fpc_fullversion < 030000}
+  po1:= pointer(str)-2*sizeof(sizeint);
+  if (po1^ >= 0) and (not onlyifunique or (po1^ = 1)) then begin
+  {$else}
+  po1:= StringRefCount(str);
   if (po1 >= 0) and (not onlyifunique or (po1 = 1)) then begin
-   fillchar(pointer(str)^,length(str)*sizeof(str[1]),0);
+ {$endif}
+
+  fillchar(pointer(str)^,length(str)*sizeof(str[1]),0);
    str:= '';
   end;
  end;
@@ -1505,13 +1513,21 @@ end;
 
 procedure stringsafefree(var str: msestring; const onlyifunique: boolean);
 var
- //po1: psizeint;
- po1: longint;
+{$if fpc_fullversion < 030000}
+ po1: psizeint;
+ {$else}
+  po1: longint;
+ {$endif}
 begin
  if pointer(str) <> nil then begin
-   // po1:= pointer(str)-2*sizeof(sizeint);
- po1:= StringRefCount(str);
+{$if fpc_fullversion < 030000}
+  po1:= pointer(str)-2*sizeof(sizeint);
+  if (po1^ >= 0) and (not onlyifunique or (po1^ = 1)) then begin
+  {$else}
+  po1:= StringRefCount(str);
   if (po1 >= 0) and (not onlyifunique or (po1 = 1)) then begin
+ {$endif}
+
    fillchar(pointer(str)^,length(str)*sizeof(str[1]),0);
    str:= '';
   end;
@@ -6288,7 +6304,10 @@ begin
   {$endif}
   {$endif}
  {$endif}
+ 
+ {$if fpc_fullversion >= 030000}
    ref:= 1;
+ {$endif} 
    len:= size;
   end;
   ch1:= #0;
